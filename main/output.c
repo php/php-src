@@ -134,7 +134,7 @@ PHPAPI void php_end_ob_buffer(zend_bool send_buffer, zend_bool just_flush TSRMLS
 	char *final_buffer=NULL;
 	unsigned int final_buffer_length=0;
 	zval *alternate_buffer=NULL;
-	char *to_be_destroyed_buffer, *to_be_destoryed_handler_name;
+	char *to_be_destroyed_buffer, *to_be_destroyed_handler_name;
 	char *to_be_destroyed_handled_output[2] = { 0, 0 };
 	int status;
 	php_ob_buffer *prev_ob_buffer_p=NULL;
@@ -213,7 +213,7 @@ PHPAPI void php_end_ob_buffer(zend_bool send_buffer, zend_bool just_flush TSRMLS
 	}
 
 	to_be_destroyed_buffer = OG(active_ob_buffer).buffer;
-	to_be_destoryed_handler_name = OG(active_ob_buffer).handler_name;
+	to_be_destroyed_handler_name = OG(active_ob_buffer).handler_name;
 	if (OG(active_ob_buffer).internal_output_handler
 		&& (final_buffer != OG(active_ob_buffer).internal_output_handler_buffer)
 		&& (final_buffer != OG(active_ob_buffer).buffer)) {
@@ -253,7 +253,7 @@ PHPAPI void php_end_ob_buffer(zend_bool send_buffer, zend_bool just_flush TSRMLS
 	}
 
 	if (status & PHP_OUTPUT_HANDLER_END) {
-		efree(to_be_destoryed_handler_name);
+		efree(to_be_destroyed_handler_name);
 	}
 	if (!just_flush) {
 		efree(to_be_destroyed_buffer);
@@ -308,9 +308,9 @@ PHPAPI void php_ob_set_internal_handler(php_output_handler_func_t internal_outpu
 	OG(active_ob_buffer).internal_output_handler = internal_output_handler;
 	OG(active_ob_buffer).internal_output_handler_buffer = (char *) emalloc(buffer_size);
 	OG(active_ob_buffer).internal_output_handler_buffer_size = buffer_size;
-	if (OG(active_ob_buffer).handler_name)
+ 	if (OG(active_ob_buffer).handler_name)
 		efree(OG(active_ob_buffer).handler_name);
-	OG(active_ob_buffer).handler_name = handler_name;
+	OG(active_ob_buffer).handler_name = estrdup(handler_name);
 	OG(active_ob_buffer).erase = erase;
 }
 /* }}} */
