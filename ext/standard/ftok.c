@@ -21,7 +21,10 @@
 #include "php.h"
 
 #include <sys/types.h>                                                                                                        
+
+#ifdef HAVE_SYS_IPC_H
 #include <sys/ipc.h>
+#endif
 
 #if HAVE_FTOK
 /* {{{ proto int ftok(string pathname, string proj)
