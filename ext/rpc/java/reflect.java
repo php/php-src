@@ -208,7 +208,7 @@ public class reflect {
             if (c== Character.TYPE || ((String)args[i]).length()>0)
               weight+=((String)args[i]).length();
             else
-              weight+=9999;
+              weight+=64;
           } else {
 	    weight+=9999;
           }
@@ -237,7 +237,21 @@ public class reflect {
     Object result[] = args;
     for (int i=0; i<args.length; i++) {
       if (args[i] instanceof byte[] && !parms[i].isArray()) {
-        result[i] = new String((byte[])args[i]);
+        Class c = parms[i];
+        String s = new String((byte[])args[i]);
+        result[i] = s;
+        try {
+          if (c == Boolean.TYPE) result[i]=new Boolean(s);
+          if (c == Byte.TYPE)    result[i]=new Byte(s);
+          if (c == Short.TYPE)   result[i]=new Short(s);
+          if (c == Integer.TYPE) result[i]=new Integer(s);
+          if (c == Float.TYPE)   result[i]=new Float(s);
+          if (c == Long.TYPE)    result[i]=new Long(s);
+          if (c == Character.TYPE && s.length()>0) 
+            result[i]=new Character(s.charAt(0));
+        } catch (NumberFormatException n) {
+          // oh well, we tried!
+        }
       } else if (args[i] instanceof Number && parms[i].isPrimitive()) {
         if (result==args) result=(Object[])result.clone();
         Class c = parms[i];
