@@ -52,11 +52,15 @@ peardir=$(PEAR_INSTALLDIR)
 
 #PEARCMD=$(top_builddir)/sapi/cli/php -d include_path=$(top_srcdir)/pear pear/scripts/pear.in
 
+PEAR_INSTALL_FLAGS = \
+	-d 'safe_mode=0' \
+	-d 'open_basedir=' \
+
 install-pear-installer: $(top_builddir)/sapi/cli/php
-	@$(top_builddir)/sapi/cli/php $(srcdir)/install-pear.php $(srcdir)/package-*.xml
+	@$(top_builddir)/sapi/cli/php $(PEAR_INSTALL_FLAGS) $(srcdir)/install-pear.php $(srcdir)/package-*.xml
 
 install-pear-packages: $(top_builddir)/sapi/cli/php
-	@$(top_builddir)/sapi/cli/php $(srcdir)/install-pear.php $(srcdir)/packages/*.tar
+	@$(top_builddir)/sapi/cli/php $(PEAR_INSTALL_FLAGS) $(srcdir)/install-pear.php $(srcdir)/packages/*.tar
 
 install-pear:
 	@echo "Installing PEAR environment:      $(INSTALL_ROOT)$(peardir)/"
