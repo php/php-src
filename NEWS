@@ -2,6 +2,9 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.1
+- Fixed problem when using uninitialized values in comparisons with strings.
+  They behave as empty strings again just like in PHP 3.
+  (Andi & Zeev, Zend Engine)
 - Fixed 'Z' flag in date() to adjust for daylight savings time. (Andrei)
 - Fixed var_dump() not to modify the internal order of array elements (Zeev)
 - Fixed stripcslashes() to remove to strip \ in unknown escapes instead of
