@@ -302,7 +302,8 @@ dnl These are always available with bundled library
   AC_DEFINE(HAVE_GD_PNG,              1, [ ])
   AC_DEFINE(HAVE_GD_XBM,              1, [ ])
   AC_DEFINE(HAVE_GD_BUNDLED,          1, [ ])
-  AC_DEFINE(HAVE_GD_GIF_READ,          1, [ ])
+  AC_DEFINE(HAVE_GD_GIF_READ,         1, [ ])
+  AC_DEFINE(HAVE_GD_IMAGEELLIPSE,     1, [ ])
 
 dnl Make sure the libgd/ is first in the include path
   GDLIB_CFLAGS="-DHAVE_LIBPNG"
