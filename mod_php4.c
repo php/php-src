@@ -67,6 +67,7 @@ PHPAPI int apache_php_module_main(request_rec *r, int fd, int display_source_mod
 module MODULE_VAR_EXPORT php4_module;
 
 int saved_umask;
+static int php_initialized;
 
 
 #if WIN32|WINNT
@@ -345,6 +346,12 @@ static void *php_create_dir(pool * p, char *dummy)
 
 CONST_PREFIX char *php_apache_value_handler(cmd_parms *cmd, php_apache_info_struct *conf, char *arg1, char *arg2)
 {
+	if (!php_initialized) {
+		sapi_startup(&sapi_module);
+		php_module_startup(&sapi_module);
+		php_initialized = 1;
+	}
+	printf("Altering '%s' -> '%s'\n", arg1, arg2);
 	php_alter_ini_entry(arg1, strlen(arg1)+1, arg2, strlen(arg2)+1, PHP_INI_PERDIR);
 	return NULL;
 }
@@ -353,6 +360,12 @@ CONST_PREFIX char *php_apache_value_handler(cmd_parms *cmd, php_apache_info_stru
 CONST_PREFIX char *php_apache_flag_handler(cmd_parms *cmd, php_apache_info_struct *conf, char *arg1, char *arg2)
 {
 	char bool_val[2];
+
+	if (!php_initialized) {
+		sapi_startup(&sapi_module);
+		php_module_startup(&sapi_module);
+		php_initialized = 1;
+	}
 
 	if (!strcmp(arg2, "On")) {
 		bool_val[0] = '1';
@@ -382,12 +395,21 @@ int php_xbithack_handler(request_rec * r)
 	return send_parsed_php(r);
 }
 
+static void apache_php_module_shutdown_wrapper()
+{
+	php_initialized = 0;
+	sapi_module.shutdown(&sapi_module);
+}
+
 
 void php_init_handler(server_rec *s, pool *p)
 {
-	register_cleanup(p, NULL, php_module_shutdown, php_module_shutdown_for_exec);
-	sapi_startup(&sapi_module);
-	php_module_startup(&sapi_module);
+	register_cleanup(p, NULL, apache_php_module_shutdown_wrapper, php_module_shutdown_for_exec);
+	if (!php_initialized) {
+		sapi_startup(&sapi_module);
+		php_module_startup(&sapi_module);
+		php_initialized = 1;
+	}
 #if MODULE_MAGIC_NUMBER >= 19980527
 	ap_add_version_component("PHP/" PHP_VERSION);
 #endif
@@ -437,8 +459,8 @@ static int php_type_checker(request_rec *r)
 
 handler_rec php_handlers[] =
 {
-	{"application/x-httpd-php3", send_parsed_php},
-	{"application/x-httpd-php3-source", send_parsed_php_source},
+	{"application/x-httpd-php", send_parsed_php},
+	{"application/x-httpd-php-source", send_parsed_php_source},
 	{"text/html", php_xbithack_handler},
 	{NULL}
 };
