@@ -390,8 +390,10 @@ SAPI_API void sapi_deactivate(TSRMLS_D)
 		if(sapi_module.read_post) { 
 			/* make sure we've consumed all request input data */
 			char dummy[SAPI_POST_BLOCK_SIZE];
-			while(sapi_module.read_post(dummy, sizeof(dummy)-1 TSRMLS_CC) > 0) {
-				/* empty loop body */
+			int read_bytes;
+
+			while((read_bytes = sapi_module.read_post(dummy, sizeof(dummy)-1 TSRMLS_CC)) > 0) {
+				SG(read_post_bytes) += read_bytes;
 			}
 		}
 	}
