@@ -30,6 +30,12 @@
 # define FETCH_PANEL(r, z)  ZEND_FETCH_RESOURCE(r, PANEL **, z, -1, "ncurses_panel", le_ncurses_panels)
 #endif
 
+#define IS_NCURSES_INITIALIZED() \
+		if (!NCURSES_G(registered_constants)) { \
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "You must initialize ncruses via ncurses_init(), before calling any ncurses functions."); \
+			RETURN_FALSE; \
+		}
+
 /* {{{ proto int ncurses_addch(int ch)
    Adds character at current position and advance cursor */
 PHP_FUNCTION(ncurses_addch)
@@ -37,9 +43,10 @@ PHP_FUNCTION(ncurses_addch)
 	long ch;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l",&ch)==FAILURE) {
-        return;
+	        return;
 	}
 
+	IS_NCURSES_INITIALIZED();
 	RETURN_LONG(addch(ch));
 }
 /* }}} */
@@ -53,7 +60,7 @@ PHP_FUNCTION(ncurses_waddch)
 	WINDOW **win;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &handle, &ch)==FAILURE) {
-        return;
+	        return;
 	}
 
 	FETCH_WINRES(win, &handle);
@@ -73,6 +80,7 @@ PHP_FUNCTION(ncurses_color_set)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l",&pair)==FAILURE) {
 		return;
 	}
+	IS_NCURSES_INITIALIZED();
 	RETURN_LONG(color_set(pair,NULL));
 #else
 	php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s not supported in this build");
@@ -102,6 +110,7 @@ PHP_FUNCTION(ncurses_delwin)
    Stops using ncurses, clean up the screen */
 PHP_FUNCTION(ncurses_end)
 {
+	IS_NCURSES_INITIALIZED();
 	RETURN_LONG(endwin());             /* endialize the curses library */
 }
 /* }}} */
@@ -110,6 +119,7 @@ PHP_FUNCTION(ncurses_end)
    Reads a character from keyboard */
 PHP_FUNCTION(ncurses_getch)
 {
+	IS_NCURSES_INITIALIZED();
 	RETURN_LONG(getch());
 }
 /* }}} */
@@ -118,6 +128,7 @@ PHP_FUNCTION(ncurses_getch)
    Checks if terminal has colors */
 PHP_FUNCTION(ncurses_has_colors)
 {
+	IS_NCURSES_INITIALIZED();
 	RETURN_BOOL(has_colors());
 }
 /* }}} */
@@ -130,8 +141,6 @@ PHP_FUNCTION(ncurses_init)
 	keypad(stdscr, TRUE);  /* enable keyboard mapping */
 	(void) nonl();         /* tell curses not to do NL->CR/NL on output */
 	(void) cbreak();       /* take input chars one at a time, no wait for \n */
-
-	NCURSES_G(is_initialised) = 1;
 
 	if (!NCURSES_G(registered_constants)) {
 		zend_constant c;
@@ -203,7 +212,7 @@ PHP_FUNCTION(ncurses_init_pair)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lll",&pair,&fg,&bg)==FAILURE) {
 		return;
 	}
-	
+	IS_NCURSES_INITIALIZED();
 	RETURN_LONG(init_pair(pair,fg,bg));
 }
 /* }}} */
@@ -216,6 +225,7 @@ PHP_FUNCTION(ncurses_move)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ll",&y,&x)==FAILURE) {
 		return;
 	}
+	IS_NCURSES_INITIALIZED();
 	RETURN_LONG(move(y,x));
 }
 /* }}} */
@@ -230,7 +240,7 @@ PHP_FUNCTION(ncurses_newpad)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ll",&rows,&cols)==FAILURE) {
 		return;
 	}
-
+	IS_NCURSES_INITIALIZED();
 	*pwin = newpad(rows,cols);
 
 	if(!*pwin) {
@@ -294,6 +304,7 @@ PHP_FUNCTION(ncurses_newwin)
 		return;
 	}
 
+	IS_NCURSES_INITIALIZED();
 	*pwin=newwin(rows,cols,y,x);
 
 	if(!*pwin) {
@@ -309,6 +320,7 @@ PHP_FUNCTION(ncurses_newwin)
    Refresh screen */
 PHP_FUNCTION(ncurses_refresh)
 {
+	IS_NCURSES_INITIALIZED();
 	RETURN_LONG(refresh());
 }
 /* }}} */
@@ -317,12 +329,8 @@ PHP_FUNCTION(ncurses_refresh)
    Starts using colors */
 PHP_FUNCTION(ncurses_start_color)
 {
-	if (NCURSES_G(is_initialised)) {
-		RETURN_LONG(start_color());
-	} else {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "ncurses library is not initialised by ncurses_init().");
-		RETURN_FALSE;
-	}
+	IS_NCURSES_INITIALIZED();
+	RETURN_LONG(start_color());
 }
 /* }}} */
 
@@ -330,6 +338,7 @@ PHP_FUNCTION(ncurses_start_color)
    Starts using 'standout' attribute */
 PHP_FUNCTION(ncurses_standout)
 {
+	IS_NCURSES_INITIALIZED();
 	RETURN_LONG(standout());
 }
 /* }}} */
@@ -338,6 +347,7 @@ PHP_FUNCTION(ncurses_standout)
    Stops using 'standout' attribute */
 PHP_FUNCTION(ncurses_standend)
 {
+	IS_NCURSES_INITIALIZED();
 	RETURN_LONG(standend());
 }
 /* }}} */
@@ -346,6 +356,7 @@ PHP_FUNCTION(ncurses_standend)
    Returns baudrate of terminal */
 PHP_FUNCTION(ncurses_baudrate)
 {
+	IS_NCURSES_INITIALIZED();
 	RETURN_LONG(baudrate());
 }
 /* }}} */
@@ -354,6 +365,7 @@ PHP_FUNCTION(ncurses_baudrate)
    Let the terminal beep */
 PHP_FUNCTION(ncurses_beep)
 {
+	IS_NCURSES_INITIALIZED();
 	RETURN_LONG(beep());
 }
 /* }}} */
@@ -362,6 +374,7 @@ PHP_FUNCTION(ncurses_beep)
    Checks if we can change terminals colors */
 PHP_FUNCTION(ncurses_can_change_color)
 {
+	IS_NCURSES_INITIALIZED();
 	RETURN_LONG(can_change_color());
 }
 /* }}} */
@@ -370,6 +383,7 @@ PHP_FUNCTION(ncurses_can_change_color)
    Switches of input buffering */
 PHP_FUNCTION(ncurses_cbreak)
 {
+	IS_NCURSES_INITIALIZED();
 	RETURN_LONG(cbreak());
 }
 /* }}} */
@@ -378,6 +392,7 @@ PHP_FUNCTION(ncurses_cbreak)
    Clears screen */
 PHP_FUNCTION(ncurses_clear)
 {
+	IS_NCURSES_INITIALIZED();
 	RETURN_LONG(clear());
 }
 /* }}} */
@@ -386,6 +401,7 @@ PHP_FUNCTION(ncurses_clear)
    Clears screen from current position to bottom */
 PHP_FUNCTION(ncurses_clrtobot)
 {
+	IS_NCURSES_INITIALIZED();
 	RETURN_LONG(clrtobot());
 }
 /* }}} */
@@ -394,6 +410,7 @@ PHP_FUNCTION(ncurses_clrtobot)
    Clears screen from current position to end of line */
 PHP_FUNCTION(ncurses_clrtoeol)
 {
+	IS_NCURSES_INITIALIZED();
 	RETURN_LONG(clrtoeol());
 }
 /* }}} */
@@ -405,6 +422,7 @@ PHP_FUNCTION(ncurses_reset_prog_mode)
 	if (ZEND_NUM_ARGS() != 0) {
 		WRONG_PARAM_COUNT;
 	}
+	IS_NCURSES_INITIALIZED();
 	RETURN_LONG(reset_prog_mode());
 }
 /* }}} */
@@ -416,6 +434,7 @@ PHP_FUNCTION(ncurses_reset_shell_mode)
 	if (ZEND_NUM_ARGS() != 0) {
 		WRONG_PARAM_COUNT;
 	}
+	IS_NCURSES_INITIALIZED();
 	RETURN_LONG(reset_shell_mode());
 }
 /* }}} */
@@ -424,6 +443,7 @@ PHP_FUNCTION(ncurses_reset_shell_mode)
    Saves terminals (program) mode */
 PHP_FUNCTION(ncurses_def_prog_mode)
 {
+	IS_NCURSES_INITIALIZED();
 	RETURN_LONG(def_prog_mode());
 }
 /* }}} */
@@ -432,6 +452,7 @@ PHP_FUNCTION(ncurses_def_prog_mode)
    Saves terminal (shell) mode*/
 PHP_FUNCTION(ncurses_def_shell_mode)
 {
+	IS_NCURSES_INITIALIZED();
 	RETURN_LONG(def_shell_mode());
 }
 /* }}} */
@@ -440,6 +461,7 @@ PHP_FUNCTION(ncurses_def_shell_mode)
    Deletes character at current position, move rest of line left */
 PHP_FUNCTION(ncurses_delch)
 {
+	IS_NCURSES_INITIALIZED();
 	RETURN_LONG(delch());
 }
 /* }}} */
@@ -448,6 +470,7 @@ PHP_FUNCTION(ncurses_delch)
    Deletes line at current position, move rest of screen up */
 PHP_FUNCTION(ncurses_deleteln)
 {
+	IS_NCURSES_INITIALIZED();
 	RETURN_LONG(deleteln());
 }
 /* }}} */
@@ -456,6 +479,7 @@ PHP_FUNCTION(ncurses_deleteln)
    Writes all prepared refreshes to terminal */
 PHP_FUNCTION(ncurses_doupdate)
 {
+	IS_NCURSES_INITIALIZED();
 	RETURN_LONG(doupdate());
 }
 /* }}} */
@@ -464,6 +488,7 @@ PHP_FUNCTION(ncurses_doupdate)
    Activates keyboard input echo */
 PHP_FUNCTION(ncurses_echo)
 {
+	IS_NCURSES_INITIALIZED();
 	RETURN_LONG(echo());
 }
 /* }}} */
@@ -472,6 +497,7 @@ PHP_FUNCTION(ncurses_echo)
    Erases terminal screen */
 PHP_FUNCTION(ncurses_erase)
 {
+	IS_NCURSES_INITIALIZED();
 	RETURN_LONG(erase());
 }
 /* }}} */
@@ -482,6 +508,7 @@ PHP_FUNCTION(ncurses_erasechar)
 {
 	char temp[2];
 
+	IS_NCURSES_INITIALIZED();
 	temp[0] = erasechar();
 	temp[1] = '\0';
 
@@ -493,6 +520,7 @@ PHP_FUNCTION(ncurses_erasechar)
    Flashes terminal screen (visual bell) */
 PHP_FUNCTION(ncurses_flash)
 {
+	IS_NCURSES_INITIALIZED();
 	RETURN_LONG(flash());
 }
 /* }}} */
@@ -501,6 +529,7 @@ PHP_FUNCTION(ncurses_flash)
    Flushes keyboard input buffer */
 PHP_FUNCTION(ncurses_flushinp)
 {
+	IS_NCURSES_INITIALIZED();
 	RETURN_LONG(flushinp());
 }
 /* }}} */
@@ -509,6 +538,7 @@ PHP_FUNCTION(ncurses_flushinp)
    Checks for insert- and delete-capabilities */
 PHP_FUNCTION(ncurses_has_ic)
 {
+	IS_NCURSES_INITIALIZED();
 	RETURN_LONG(has_ic());
 }
 /* }}} */
@@ -518,6 +548,7 @@ PHP_FUNCTION(ncurses_has_ic)
    Checks for line insert- and delete-capabilities */
 PHP_FUNCTION(ncurses_has_il)
 {
+	IS_NCURSES_INITIALIZED();
 	RETURN_LONG(has_il());
 }
 /* }}} */
@@ -528,6 +559,7 @@ PHP_FUNCTION(ncurses_inch)
 {
 	char temp[2];
 
+	IS_NCURSES_INITIALIZED();
 	temp[0] = inch();
 	temp[1] = '\0';
 
@@ -539,6 +571,7 @@ PHP_FUNCTION(ncurses_inch)
    Inserts a line, move rest of screen down */
 PHP_FUNCTION(ncurses_insertln)
 {
+	IS_NCURSES_INITIALIZED();
 	RETURN_LONG(insertln());
 }
 /* }}} */
@@ -547,6 +580,7 @@ PHP_FUNCTION(ncurses_insertln)
    Ncurses is in endwin mode, normal screen output may be performed */
 PHP_FUNCTION(ncurses_isendwin)
 {
+	IS_NCURSES_INITIALIZED();
 	RETURN_LONG(isendwin());
 }
 /* }}} */
@@ -557,6 +591,7 @@ PHP_FUNCTION(ncurses_killchar)
 {
 	char temp[2];
 
+	IS_NCURSES_INITIALIZED();
 	temp[0] = killchar();
 	temp[1] = '\0';
 
@@ -568,6 +603,7 @@ PHP_FUNCTION(ncurses_killchar)
    Translates newline and carriage return / line feed */
 PHP_FUNCTION(ncurses_nl)
 {
+	IS_NCURSES_INITIALIZED();
 	RETURN_LONG(nl());
 }
 /* }}} */
@@ -576,6 +612,7 @@ PHP_FUNCTION(ncurses_nl)
    Switches terminal to cooked mode */
 PHP_FUNCTION(ncurses_nocbreak)
 {
+	IS_NCURSES_INITIALIZED();
 	RETURN_LONG(nocbreak());
 }
 /* }}} */
@@ -584,6 +621,7 @@ PHP_FUNCTION(ncurses_nocbreak)
    Switches off keyboard input echo */
 PHP_FUNCTION(ncurses_noecho)
 {
+	IS_NCURSES_INITIALIZED();
 	RETURN_LONG(noecho());
 }
 /* }}} */
@@ -600,6 +638,7 @@ PHP_FUNCTION(ncurses_nonl)
    Switches terminal out of raw mode */
 PHP_FUNCTION(ncurses_noraw)
 {
+	IS_NCURSES_INITIALIZED();
 	RETURN_LONG(noraw());
 }
 /* }}} */
@@ -608,6 +647,7 @@ PHP_FUNCTION(ncurses_noraw)
    Switches terminal into raw mode */
 PHP_FUNCTION(ncurses_raw)
 {
+	IS_NCURSES_INITIALIZED();
 	RETURN_LONG(raw());
 }
 /* }}} */
@@ -621,7 +661,7 @@ PHP_FUNCTION(ncurses_meta)
 	WINDOW **win;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rb", &handle, &enable)==FAILURE) {
-        return;
+        	return;
 	}
 
 	FETCH_WINRES(win, &handle);
@@ -638,7 +678,7 @@ PHP_FUNCTION(ncurses_werase)
 	WINDOW **win;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &handle)==FAILURE) {
-        return;
+	        return;
 	}
 
 	FETCH_WINRES(win, &handle);
@@ -652,6 +692,7 @@ PHP_FUNCTION(ncurses_werase)
    Restores saved terminal state */
 PHP_FUNCTION(ncurses_resetty)
 {
+	IS_NCURSES_INITIALIZED();
 	RETURN_LONG(resetty());
 }
 /* }}} */
@@ -660,6 +701,7 @@ PHP_FUNCTION(ncurses_resetty)
    Saves terminal state */
 PHP_FUNCTION(ncurses_savetty)
 {
+	IS_NCURSES_INITIALIZED();
 	RETURN_LONG(savetty());
 }
 /* }}} */
@@ -668,6 +710,7 @@ PHP_FUNCTION(ncurses_savetty)
    Returns a logical OR of all attribute flags supported by terminal */
 PHP_FUNCTION(ncurses_termattrs)
 {
+	IS_NCURSES_INITIALIZED();
 	RETURN_LONG(termattrs());
 }
 /* }}} */
@@ -676,6 +719,7 @@ PHP_FUNCTION(ncurses_termattrs)
    Assigns terminal default colors to color id -1 */
 PHP_FUNCTION(ncurses_use_default_colors)
 {
+	IS_NCURSES_INITIALIZED();
 	RETURN_LONG(use_default_colors());
 }
 /* }}} */
@@ -684,6 +728,7 @@ PHP_FUNCTION(ncurses_use_default_colors)
    Returns current soft label keys attribute */
 PHP_FUNCTION(ncurses_slk_attr)
 {
+	IS_NCURSES_INITIALIZED();
 	RETURN_LONG(slk_attr());
 }
 /* }}} */
@@ -692,6 +737,7 @@ PHP_FUNCTION(ncurses_slk_attr)
    Clears soft label keys from screen */
 PHP_FUNCTION(ncurses_slk_clear)
 {
+	IS_NCURSES_INITIALIZED();
 	RETURN_LONG(slk_clear());
 }
 /* }}} */
@@ -700,6 +746,7 @@ PHP_FUNCTION(ncurses_slk_clear)
    Copies soft label keys to virtual screen */
 PHP_FUNCTION(ncurses_slk_noutrefresh)
 {
+	IS_NCURSES_INITIALIZED();
 	RETURN_LONG(slk_noutrefresh());
 }
 /* }}} */
@@ -708,6 +755,7 @@ PHP_FUNCTION(ncurses_slk_noutrefresh)
    Copies soft label keys to screen */
 PHP_FUNCTION(ncurses_slk_refresh)
 {
+	IS_NCURSES_INITIALIZED();
 	RETURN_LONG(slk_refresh());
 }
 /* }}} */
@@ -716,6 +764,7 @@ PHP_FUNCTION(ncurses_slk_refresh)
    Restores soft label keys */
 PHP_FUNCTION(ncurses_slk_restore)
 {
+	IS_NCURSES_INITIALIZED();
 	RETURN_LONG(slk_restore());
 }
 /* }}} */
@@ -724,6 +773,7 @@ PHP_FUNCTION(ncurses_slk_restore)
    Forces output when ncurses_slk_noutrefresh is performed */
 PHP_FUNCTION(ncurses_slk_touch)
 {
+	IS_NCURSES_INITIALIZED();
 	RETURN_LONG(slk_touch());
 }
 /* }}} */
@@ -740,6 +790,7 @@ PHP_FUNCTION(ncurses_slk_set)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lsl",&labelnr, &str, &len, &format)==FAILURE) {
 		return;
 	}
+	IS_NCURSES_INITIALIZED();
 	RETURN_BOOL(slk_set(labelnr, str, format));
 }
 /* }}} */
@@ -754,7 +805,7 @@ PHP_FUNCTION(ncurses_attroff)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l",&intarg)==FAILURE) {
 		return;
 	}
-
+	IS_NCURSES_INITIALIZED();
 	RETURN_LONG(attroff(intarg));
 }
 /* }}} */
@@ -768,7 +819,7 @@ PHP_FUNCTION(ncurses_attron)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l",&intarg)==FAILURE) {
 		return;
 	}
-
+	IS_NCURSES_INITIALIZED();
 	RETURN_LONG(attron(intarg));
 }
 /* }}} */
@@ -782,7 +833,7 @@ PHP_FUNCTION(ncurses_attrset)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l",&intarg)==FAILURE) {
 		return;
 	}
-
+	IS_NCURSES_INITIALIZED();
 	RETURN_LONG(attrset(intarg));
 }
 /* }}} */
@@ -796,7 +847,7 @@ PHP_FUNCTION(ncurses_bkgd)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l",&intarg)==FAILURE) {
 		return;
 	}
-
+	IS_NCURSES_INITIALIZED();
 	RETURN_LONG(bkgd(intarg));
 }
 /* }}} */
@@ -810,7 +861,7 @@ PHP_FUNCTION(ncurses_curs_set)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l",&intarg)==FAILURE) {
 		return;
 	}
-
+	IS_NCURSES_INITIALIZED();
 	RETURN_LONG(curs_set(intarg));
 }
 /* }}} */
@@ -824,7 +875,7 @@ PHP_FUNCTION(ncurses_delay_output)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l",&intarg)==FAILURE) {
 		return;
 	}
-
+	IS_NCURSES_INITIALIZED();
 	RETURN_LONG(delay_output(intarg));
 }
 /* }}} */
@@ -838,7 +889,7 @@ PHP_FUNCTION(ncurses_echochar)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l",&intarg)==FAILURE) {
 		return;
 	}
-	
+	IS_NCURSES_INITIALIZED();	
 	RETURN_LONG(echochar(intarg));
 }
 /* }}} */
@@ -852,7 +903,7 @@ PHP_FUNCTION(ncurses_halfdelay)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l",&intarg)==FAILURE) {
 		return;
 	}
-
+	IS_NCURSES_INITIALIZED();
 	RETURN_LONG(halfdelay(intarg));
 }
 /* }}} */
@@ -866,7 +917,7 @@ PHP_FUNCTION(ncurses_has_key)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l",&intarg)==FAILURE) {
 		return;
 	}
-	
+	IS_NCURSES_INITIALIZED();	
 	RETURN_LONG(has_key(intarg));
 }
 /* }}} */
@@ -880,7 +931,7 @@ PHP_FUNCTION(ncurses_insch)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l",&intarg)==FAILURE) {
 		return;
 	}
-	
+	IS_NCURSES_INITIALIZED();	
 	RETURN_LONG(insch(intarg));
 }
 /* }}} */
@@ -894,7 +945,7 @@ PHP_FUNCTION(ncurses_insdelln)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l",&intarg)==FAILURE) {
 		return;
 	}
-	
+	IS_NCURSES_INITIALIZED();	
 	RETURN_LONG(insdelln(intarg));
 }
 /* }}} */
@@ -908,7 +959,7 @@ PHP_FUNCTION(ncurses_mouseinterval)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l",&intarg)==FAILURE) {
 		return;
 	}
-
+	IS_NCURSES_INITIALIZED();
 	RETURN_LONG(mouseinterval(intarg));
 }
 /* }}} */
@@ -922,7 +973,7 @@ PHP_FUNCTION(ncurses_napms)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l",&intarg)==FAILURE) {
 		return;
 	}
-	
+	IS_NCURSES_INITIALIZED();	
 	RETURN_LONG(napms(intarg));
 }
 /* }}} */
@@ -936,7 +987,7 @@ PHP_FUNCTION(ncurses_scrl)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l",&intarg)==FAILURE) {
 		return;
 	}
-	
+	IS_NCURSES_INITIALIZED();	
 	RETURN_LONG(scrl(intarg));
 }
 /* }}} */
@@ -950,7 +1001,7 @@ PHP_FUNCTION(ncurses_slk_attroff)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l",&intarg)==FAILURE) {
 		return;
 	}
-	
+	IS_NCURSES_INITIALIZED();	
 	RETURN_LONG(slk_attroff(intarg));
 }
 /* }}} */
@@ -964,7 +1015,7 @@ PHP_FUNCTION(ncurses_slk_attron)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l",&intarg)==FAILURE) {
 		return;
 	}
-
+	IS_NCURSES_INITIALIZED();
 	RETURN_LONG(slk_attron(intarg));
 }
 /* }}} */
@@ -978,7 +1029,7 @@ PHP_FUNCTION(ncurses_slk_attrset)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l",&intarg)==FAILURE) {
 		return;
 	}
-
+	IS_NCURSES_INITIALIZED();
 	RETURN_LONG(slk_attrset(intarg));
 }
 /* }}} */
@@ -993,7 +1044,7 @@ PHP_FUNCTION(ncurses_slk_color)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l",&intarg)==FAILURE) {
 		return;
 	}
-
+	IS_NCURSES_INITIALIZED();
 	RETURN_LONG(slk_color(intarg));
 #else
 	php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s not supported in this build");
@@ -1011,7 +1062,7 @@ PHP_FUNCTION(ncurses_slk_init)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l",&intarg)==FAILURE) {
 		return;
 	}
-
+	IS_NCURSES_INITIALIZED();
 	RETURN_LONG(slk_init(intarg));
 }
 /* }}} */
@@ -1025,7 +1076,7 @@ PHP_FUNCTION(ncurses_typeahead)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l",&intarg)==FAILURE) {
 		return;
 	}
-
+	IS_NCURSES_INITIALIZED();
 	RETURN_LONG(typeahead(intarg));
 }
 /* }}} */
@@ -1039,7 +1090,7 @@ PHP_FUNCTION(ncurses_ungetch)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l",&intarg)==FAILURE) {
 		return;
 	}
-
+	IS_NCURSES_INITIALIZED();
 	RETURN_LONG(ungetch(intarg));
 }
 /* }}} */
@@ -1053,7 +1104,7 @@ PHP_FUNCTION(ncurses_vidattr)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l",&intarg)==FAILURE) {
 		return;
 	}
-
+	IS_NCURSES_INITIALIZED();
 	RETURN_LONG(vidattr(intarg));
 }
 /* }}} */
@@ -1068,7 +1119,7 @@ PHP_FUNCTION(ncurses_use_extended_names)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l",&intarg)==FAILURE) {
 		return;
 	}
-
+	IS_NCURSES_INITIALIZED();
 	RETURN_LONG(use_extended_names(intarg));
 #else
 	php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s not supported in this build");
@@ -1086,7 +1137,7 @@ PHP_FUNCTION(ncurses_bkgdset)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l",&intarg)==FAILURE) {
 		return;
 	}
-
+	IS_NCURSES_INITIALIZED();
 	bkgdset(intarg);
 }
 /* }}} */
@@ -1095,6 +1146,7 @@ PHP_FUNCTION(ncurses_bkgdset)
  */
 PHP_FUNCTION(ncurses_filter)
 {
+	IS_NCURSES_INITIALIZED();
 	filter();
 }
 /* }}} */
@@ -1103,6 +1155,7 @@ PHP_FUNCTION(ncurses_filter)
    Do not flush on signal characters*/
 PHP_FUNCTION(ncurses_noqiflush)
 {
+	IS_NCURSES_INITIALIZED();
 	noqiflush();
 }
 /* }}} */
@@ -1111,6 +1164,7 @@ PHP_FUNCTION(ncurses_noqiflush)
    Flushes on signal characters */
 PHP_FUNCTION(ncurses_qiflush)
 {
+	IS_NCURSES_INITIALIZED();
 	qiflush();
 }
 /* }}} */
@@ -1124,7 +1178,7 @@ PHP_FUNCTION(ncurses_timeout)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l",&intarg)==FAILURE) {
 		return;
 	}
-
+	IS_NCURSES_INITIALIZED();
 	timeout(intarg);
 }
 /* }}} */
@@ -1138,7 +1192,7 @@ PHP_FUNCTION(ncurses_use_env)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l",&intarg)==FAILURE) {
 		return;
 	}
-
+	IS_NCURSES_INITIALIZED();
 	use_env(intarg);
 }
 /* }}} */
@@ -1153,7 +1207,7 @@ PHP_FUNCTION(ncurses_addstr)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s",&str,&str_len)==FAILURE) {
 		return;
 	}
-
+	IS_NCURSES_INITIALIZED();
 	RETURN_LONG(addstr(str));
 }
 /* }}} */
@@ -1168,7 +1222,7 @@ PHP_FUNCTION(ncurses_putp)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s",&str,&str_len)==FAILURE) {
 		return;
 	}
-
+	IS_NCURSES_INITIALIZED();
 	RETURN_LONG(putp(str));
 }
 /* }}} */
@@ -1183,7 +1237,7 @@ PHP_FUNCTION(ncurses_scr_dump)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s",&str,&str_len)==FAILURE) {
 		return;
 	}
-
+	IS_NCURSES_INITIALIZED();
 	RETURN_LONG(scr_dump(str));
 }
 /* }}} */
@@ -1198,7 +1252,7 @@ PHP_FUNCTION(ncurses_scr_init)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s",&str,&str_len)==FAILURE) {
 		return;
 	}
-
+	IS_NCURSES_INITIALIZED();
 	RETURN_LONG(scr_init(str));
 }
 /* }}} */
@@ -1213,7 +1267,7 @@ PHP_FUNCTION(ncurses_scr_restore)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s",&str,&str_len)==FAILURE) {
 		return;
 	}
-
+	IS_NCURSES_INITIALIZED();
 	RETURN_LONG(scr_restore(str));
 }
 /* }}} */
@@ -1228,7 +1282,7 @@ PHP_FUNCTION(ncurses_scr_set)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s",&str,&str_len)==FAILURE) {
 		return;
 	}
-
+	IS_NCURSES_INITIALIZED();
 	RETURN_LONG(scr_set(str));
 }
 /* }}} */
@@ -1240,9 +1294,9 @@ PHP_FUNCTION(ncurses_mvaddch)
 	long y,x,c;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lll",&y,&x,&c)==FAILURE) {
-        return;
+	        return;
 	}
-	
+	IS_NCURSES_INITIALIZED();	
 	RETURN_LONG(mvaddch(y,x,c));
 }
 /* }}} */
@@ -1256,9 +1310,9 @@ PHP_FUNCTION(ncurses_mvaddchnstr)
 	int str_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "llsl",&y,&x,&str,&str_len,&n)==FAILURE) {
-        return;
+	        return;
 	}
-	
+	IS_NCURSES_INITIALIZED();	
 	RETURN_LONG(mvaddchnstr(y,x,(chtype *)str,n));
 }
 /* }}} */
@@ -1272,9 +1326,9 @@ PHP_FUNCTION(ncurses_addchnstr)
 	int str_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sl",&str,&str_len,&n)==FAILURE) {
-        return;
+	        return;
 	}
-	
+	IS_NCURSES_INITIALIZED();	
 	RETURN_LONG(addchnstr((chtype *)str,n));
 }
 /* }}} */
@@ -1288,9 +1342,9 @@ PHP_FUNCTION(ncurses_mvaddchstr)
 	int str_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lls",&y,&x,&str,&str_len)==FAILURE) {
-        return;
+	        return;
 	}
-	
+	IS_NCURSES_INITIALIZED();	
 	RETURN_LONG(mvaddchstr(y,x,(chtype *)str));
 }
 /* }}} */
@@ -1305,7 +1359,7 @@ PHP_FUNCTION(ncurses_addchstr)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s",&str,&str_len)==FAILURE) {
 		return;
 	}
-	
+	IS_NCURSES_INITIALIZED();	
 	RETURN_LONG(addchstr((chtype *)str));
 }
 /* }}} */
@@ -1319,9 +1373,9 @@ PHP_FUNCTION(ncurses_mvaddnstr)
 	int str_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "llsl",&y,&x,&str,&str_len,&n)==FAILURE) {
-        return;
+	        return;
 	}
-	
+	IS_NCURSES_INITIALIZED();	
 	RETURN_LONG(mvaddnstr(y,x,str,n));
 }
 /* }}} */
@@ -1335,9 +1389,9 @@ PHP_FUNCTION(ncurses_addnstr)
 	int str_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sl",&str,&str_len,&n)==FAILURE) {
-        return;
+	        return;
 	}
-	
+	IS_NCURSES_INITIALIZED();	
 	RETURN_LONG(addnstr(str,n));
 }
 /* }}} */
@@ -1351,9 +1405,9 @@ PHP_FUNCTION(ncurses_mvaddstr)
 	int str_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lls",&y,&x,&str,&str_len)==FAILURE) {
-        return;
+	        return;
 	}
-
+	IS_NCURSES_INITIALIZED();
 	RETURN_LONG(mvaddstr(y,x,str));
 }
 /* }}} */
@@ -1365,9 +1419,9 @@ PHP_FUNCTION(ncurses_mvdelch)
 	long y,x;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lls",&y,&x)==FAILURE) {
-        return;
+	        return;
 	}
-	
+	IS_NCURSES_INITIALIZED();	
 	RETURN_LONG(mvdelch(y,x));
 }
 /* }}} */
@@ -1380,9 +1434,9 @@ PHP_FUNCTION(ncurses_mvgetch)
 	long y,x;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lls",&y,&x)==FAILURE) {
-        return;
+	        return;
 	}
-	
+	IS_NCURSES_INITIALIZED();	
 	RETURN_LONG(mvgetch(y,x));
 }
 /* }}} */
@@ -1394,9 +1448,9 @@ PHP_FUNCTION(ncurses_mvinch)
 	long y,x;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lls",&y,&x)==FAILURE) {
-        return;
+	        return;
 	}
-
+	IS_NCURSES_INITIALIZED();
 	RETURN_LONG(mvinch(y,x));
 }
 /* }}} */
@@ -1411,7 +1465,7 @@ PHP_FUNCTION(ncurses_insstr)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s",&str,&str_len)==FAILURE) {
 		return;
 	}
-
+	IS_NCURSES_INITIALIZED();
 	RETURN_LONG(insstr(str));
 }
 /* }}} */
@@ -1428,7 +1482,7 @@ PHP_FUNCTION(ncurses_instr)
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &param) == FAILURE ){
 		WRONG_PARAM_COUNT;
 	}
-
+	IS_NCURSES_INITIALIZED();
 	convert_to_string_ex(param);
 
 	str = (char *)emalloc(COLS + 1);
@@ -1449,9 +1503,9 @@ PHP_FUNCTION(ncurses_mvhline)
 	long i1,i2,i3,i4;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "llll",&i1,&i2,&i3,&i4)==FAILURE) {
-        return;
+	        return;
 	}
-
+	IS_NCURSES_INITIALIZED();
 	RETURN_LONG(mvhline(i1,i2,i3,i4));
 }
 /* }}} */
@@ -1463,9 +1517,9 @@ PHP_FUNCTION(ncurses_mvvline)
 	long i1,i2,i3,i4;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "llll",&i1,&i2,&i3,&i4)==FAILURE) {
-        return;
+	        return;
 	}
-	
+	IS_NCURSES_INITIALIZED();	
 	RETURN_LONG(mvvline(i1,i2,i3,i4));
 }
 /* }}} */
@@ -1477,9 +1531,9 @@ PHP_FUNCTION(ncurses_mvcur)
 	long i1,i2,i3,i4;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "llll",&i1,&i2,&i3,&i4)==FAILURE) {
-        return;
+	        return;
 	}
-	
+	IS_NCURSES_INITIALIZED();	
 	RETURN_LONG(mvcur(i1,i2,i3,i4));
 }
 /* }}} */
@@ -1491,9 +1545,9 @@ PHP_FUNCTION(ncurses_init_color)
 	long i1,i2,i3,i4;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "llll",&i1,&i2,&i3,&i4)==FAILURE) {
-        return;
+	        return;
 	}
-	
+	IS_NCURSES_INITIALIZED();	
 	RETURN_LONG(init_color(i1,i2,i3,i4));
 }
 /* }}} */
@@ -1509,7 +1563,7 @@ PHP_FUNCTION(ncurses_color_content)
 	if (ZEND_NUM_ARGS() != 4 || zend_get_parameters_ex(4, &c, &r, &g, &b) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-
+	IS_NCURSES_INITIALIZED();
 	convert_to_long_ex(c);
 	convert_to_long_ex(r);
 	convert_to_long_ex(g);
@@ -1540,7 +1594,7 @@ PHP_FUNCTION(ncurses_pair_content)
 	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &p, &f, &b) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-
+	IS_NCURSES_INITIALIZED();
 	convert_to_long_ex(p);
 	convert_to_long_ex(f);
 	convert_to_long_ex(b);
@@ -1566,9 +1620,9 @@ PHP_FUNCTION(ncurses_border)
 	long i1,i2,i3,i4,i5,i6,i7,i8;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "llllllll",&i1,&i2,&i3,&i4,&i5,&i6,&i7,&i8)==FAILURE) {
-        return;
+	        return;
 	}
-	
+	IS_NCURSES_INITIALIZED();	
 	RETURN_LONG(border(i1,i2,i3,i4,i5,i6,i7,i8));
 }
 /* }}} */
@@ -1582,7 +1636,7 @@ PHP_FUNCTION(ncurses_wborder)
 	WINDOW **win;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rllllllll",&handle,&i1,&i2,&i3,&i4,&i5,&i6,&i7,&i8)==FAILURE) {
-        return;
+	        return;
 	}
 
 	FETCH_WINRES(win,&handle);
@@ -1601,9 +1655,9 @@ PHP_FUNCTION(ncurses_assume_default_colors)
 	long i1,i2;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ll",&i1,&i2)==FAILURE) {
-        return;
+	        return;
 	}
-	
+	IS_NCURSES_INITIALIZED();
 	RETURN_LONG(assume_default_colors(i1,i2));
 #else
 	php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s not supported in this build");
@@ -1621,9 +1675,9 @@ PHP_FUNCTION(ncurses_define_key)
 	int str_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sl",&str,&str_len,&n)==FAILURE) {
-        return;
+	        return;
 	}
-	
+	IS_NCURSES_INITIALIZED();	
 	RETURN_LONG(define_key(str,n));
 }
 /* }}} */
@@ -1635,9 +1689,9 @@ PHP_FUNCTION(ncurses_hline)
 	long i1,i2;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ll",&i1,&i2)==FAILURE) {
-        return;
+	        return;
 	}
-	
+	IS_NCURSES_INITIALIZED();	
 	RETURN_LONG(hline(i1,i2));
 }
 /* }}} */
@@ -1649,9 +1703,9 @@ PHP_FUNCTION(ncurses_vline)
 	long i1,i2;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ll",&i1,&i2)==FAILURE) {
-        return;
+	        return;
 	}
-
+	IS_NCURSES_INITIALIZED();
 	RETURN_LONG(vline(i1,i2));
 }
 /* }}} */
@@ -1665,7 +1719,7 @@ PHP_FUNCTION(ncurses_whline)
 	WINDOW **win;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rll",&handle,&i1,&i2)==FAILURE) {
-        return;
+	        return;
 	}
 
 	FETCH_WINRES(win,&handle);
@@ -1683,7 +1737,7 @@ PHP_FUNCTION(ncurses_wvline)
 	WINDOW **win;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rll",&handle,&i1,&i2)==FAILURE) {
-        return;
+	        return;
 	}
 	FETCH_WINRES(win,&handle);
 
@@ -1700,9 +1754,9 @@ PHP_FUNCTION(ncurses_keyok)
 	long i,b;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ll",&i,&b)==FAILURE) {
-        return;
+	        return;
 	}
-	
+	IS_NCURSES_INITIALIZED();	
 	RETURN_LONG(hline(i,b));
 }
 /* }}} */
@@ -1751,7 +1805,7 @@ PHP_FUNCTION(ncurses_wrefresh)
 PHP_FUNCTION(ncurses_termname)
 {
 	char temp[15];
-
+	IS_NCURSES_INITIALIZED();
 	strcpy (temp, termname());
 	RETURN_STRINGL (temp, strlen(temp), 1);
 }
@@ -1762,7 +1816,7 @@ PHP_FUNCTION(ncurses_termname)
 PHP_FUNCTION(ncurses_longname)
 {
 	char temp[128];
-
+	IS_NCURSES_INITIALIZED();
 	strcpy (temp, longname());
 	RETURN_STRINGL (temp, strlen(temp), 1);
 }
@@ -1779,7 +1833,7 @@ PHP_FUNCTION(ncurses_mousemask)
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &newmask, &param) == FAILURE ){
 		WRONG_PARAM_COUNT;
 	}
-
+	IS_NCURSES_INITIALIZED();
 	convert_to_long_ex(newmask);
 
 	retval = mousemask(Z_LVAL_PP(newmask), &oldmask);
@@ -1802,7 +1856,7 @@ PHP_FUNCTION(ncurses_getmouse)
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg) == FAILURE){
 		WRONG_PARAM_COUNT;
 	}
-
+	IS_NCURSES_INITIALIZED();
 	pval_destructor(*arg);
 	array_init(*arg);
 
@@ -1829,7 +1883,7 @@ PHP_FUNCTION(ncurses_ungetmouse)
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg) == FAILURE){
 		WRONG_PARAM_COUNT;
   }
-
+	IS_NCURSES_INITIALIZED();
 	if (Z_TYPE_PP(arg) != IS_ARRAY){
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Expected mevent as array");
 		RETURN_FALSE;
@@ -1876,7 +1930,7 @@ PHP_FUNCTION(ncurses_mouse_trafo)
 	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &y, &x, &toscreen) == FAILURE){
 		WRONG_PARAM_COUNT;
   }
-
+	IS_NCURSES_INITIALIZED();
 	convert_to_long_ex(x);
 	convert_to_long_ex(y);
 	convert_to_boolean_ex(toscreen);
@@ -2425,6 +2479,7 @@ PHP_FUNCTION(ncurses_update_panels)
 	if (ZEND_NUM_ARGS() != 0) {
 		WRONG_PARAM_COUNT;
 	}
+	IS_NCURSES_INITIALIZED();
 	update_panels();
 }
 /* }}} */

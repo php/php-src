@@ -48,7 +48,6 @@ PHP_RSHUTDOWN_FUNCTION(ncurses);
 PHP_MINFO_FUNCTION(ncurses);
 
 ZEND_BEGIN_MODULE_GLOBALS(ncurses)
-	int   is_initialised;
 	int	  registered_constants;
 ZEND_END_MODULE_GLOBALS(ncurses)
 

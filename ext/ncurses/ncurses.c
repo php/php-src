@@ -84,19 +84,15 @@ PHP_INI_END()
 #define PHP_NCURSES_CONST(x)  REGISTER_LONG_CONSTANT("NCURSES_"#x, x, CONST_CS | CONST_PERSISTENT)
 #define PHP_NCURSES_FKEY_CONST(x)  REGISTER_LONG_CONSTANT("NCURSES_KEY_F"#x, KEY_F0 + x, CONST_CS | CONST_PERSISTENT)
 
-/* {{{ php_ncurses_globals_ctor */
-static void php_ncurses_globals_ctor(zend_ncurses_globals *pglobals)
+static void php_ncurses_init_globals(zend_ncurses_globals *ncurses_globals)
 {
-	pglobals->registered_constants = 0;
-	pglobals->is_initialised = 0;
+	memset(ncurses_globals, 0, sizeof(*ncurses_globals));
 }
-/* }}} */
 
 /* {{{ PHP_MINIT_FUNCTION
  */
 PHP_MINIT_FUNCTION(ncurses)
 {
-	ZEND_INIT_MODULE_GLOBALS(ncurses, php_ncurses_globals_ctor, NULL);
 	/* color constants */
 	PHP_NCURSES_CONST(COLOR_BLACK);
 	PHP_NCURSES_CONST(COLOR_RED);
@@ -254,6 +250,8 @@ PHP_MINIT_FUNCTION(ncurses)
 	PHP_NCURSES_CONST(BUTTON_ALT);
 	PHP_NCURSES_CONST(ALL_MOUSE_EVENTS);
 	PHP_NCURSES_CONST(REPORT_MOUSE_POSITION);
+
+	ZEND_INIT_MODULE_GLOBALS(ncurses, php_ncurses_init_globals, NULL);
 
 	le_ncurses_windows = zend_register_list_destructors_ex(ncurses_destruct_window, NULL, "ncurses_window", module_number);
 #if HAVE_NCURSES_PANEL
