@@ -312,6 +312,7 @@ PHPAPI pcre* pcre_get_compiled_regex(char *regex, pcre_extra **extra, int *preg_
 }
 /* }}} */
 
+/* {{{ add_offset_pair */
 static inline void add_offset_pair(zval *result, char *str, int len, int offset)
 {
 	zval *match_pair;
@@ -326,6 +327,7 @@ static inline void add_offset_pair(zval *result, char *str, int len, int offset)
 	
 	zend_hash_next_index_insert(Z_ARRVAL_P(result), &match_pair, sizeof(zval *), NULL);
 }
+/* }}} */
 
 /* {{{ php_pcre_match
  */
@@ -568,16 +570,39 @@ PHP_FUNCTION(preg_match_all)
 
 /* {{{ preg_get_backref
  */
-static inline int preg_get_backref(const char *walk, int *backref)
+static int preg_get_backref(char **str, int *backref)
 {
-	if (*walk && *walk >= '0' && *walk <= '9')
+	register char in_brace = 0;
+	register char *walk = *str;
+
+	if (walk[1] == 0)
+		return 0;
+
+	if (*walk == '$' && walk[1] == '{') {
+		in_brace = 1;
+		walk++;
+	}
+	walk++;
+
+	if (*walk >= '0' && *walk <= '9') {
 		*backref = *walk - '0';
-	else
+		walk++;
+	} else
 		return 0;
 	
-	if (walk[1] && walk[1] >= '0' && walk[1] <= '9')
-		*backref = *backref * 10 + walk[1] - '0';
+	if (*walk && *walk >= '0' && *walk <= '9') {
+		*backref = *backref * 10 + *walk - '0';
+		walk++;
+	}
+
+	if (in_brace) {
+		if (*walk == 0 || *walk != '}')
+			return 0;
+		else
+			walk++;
+	}
 	
+	*str = walk;
 	return 1;	
 }
 /* }}} */
@@ -650,7 +675,7 @@ static int preg_do_eval(char *eval_str, int eval_str_len, char *subject,
 				continue;
 			}
 			segment = walk;
-			if (preg_get_backref(walk+1, &backref)) {
+			if (preg_get_backref(&walk, &backref)) {
 				if (backref < count) {
 					/* Find the corresponding string match and substitute it
 					   in instead of the backref */
@@ -669,8 +694,6 @@ static int preg_do_eval(char *eval_str, int eval_str_len, char *subject,
 				}
 				smart_str_appendl(&code, esc_match, esc_match_len);
 
-				/* Adjust the walk pointer */
-				walk += (backref > 9 ? 3 : 2);
 				segment = walk;
 
 				/* Clean up and reassign */
@@ -810,10 +833,9 @@ PHPAPI char *php_pcre_replace(char *regex,   int regex_len,
 							walk_last = 0;
 							continue;
 						}
-						if (preg_get_backref(walk+1, &backref)) {
+						if (preg_get_backref(&walk, &backref)) {
 							if (backref < count)
 								new_len += offsets[(backref<<1)+1] - offsets[backref<<1];
-							walk += (backref > 9) ? 3 : 2;
 							continue;
 						}
 					}
@@ -853,13 +875,12 @@ PHPAPI char *php_pcre_replace(char *regex,   int regex_len,
 							walk_last = 0;
 							continue;
 						}
-						if (preg_get_backref(walk+1, &backref)) {
+						if (preg_get_backref(&walk, &backref)) {
 							if (backref < count) {
 								match_len = offsets[(backref<<1)+1] - offsets[backref<<1];
 								memcpy(walkbuf, subject + offsets[backref<<1], match_len);
 								walkbuf += match_len;
 							}
-							walk += (backref > 9) ? 3 : 2;
 							continue;
 						}
 					}
