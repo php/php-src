@@ -1,3 +1,38 @@
+2003-10-25  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_API.c
+      zend_API.h:
+      Add zend_make_callable() which allows to make zval's callable zval's.
+      At the moment this function only converts strings of the form
+      class::method
+      to an array(class,method).
+
+    * zend_default_classes.c
+      zend_reflection_api.c:
+      This forces a better error message for non working clone calls.
+
+    * zend_default_classes.c:
+      And use things to throw an exception here
+
+    * zend_default_classes.c:
+      You shall not clone Exception instances
+
+    * zend_reflection_api.c:
+      You shall not clone reflection_xx instances
+
+    * ZEND_CHANGES
+      ZEND_CHANGES:
+      Update
+
+2003-10-25  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ZEND_CHANGES:
+      Fugbix typo.
+
+    * ZEND_CHANGES:
+      s/Throwable/Printable: Exception has become an internal class since I
+      initially documented interfaces.
+
 2003-10-24  Andi Gutmans  <andi@zend.com>
 
     * ZEND_CHANGES:
