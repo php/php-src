@@ -1,11 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 200?, Version 4.3.0-dev
-- Empty entry. Enjoy.
-
 ?? ??? 2002, Version 4.2.0
-- added sybase_ct support to dbx module (Marc)
-- fixed error message handling with PostgreSQL 7.2 (Rui)
+- Added sybase_ct support to dbx module (Marc)
+- Fixed error message handling with PostgreSQL 7.2 (Rui)
 - Added object aggregation capability, see aggregation_*() functions. (Andrei)
 - Added debug_zval_dump(), which works similar to var_dump, yet displays extra
   internal information such as refcounts and true type names. (Jason)
@@ -31,12 +28,12 @@ PHP 4                                                                      NEWS
   server always. When PostgreSQL is rebooted, web server reboot is not needed
   to avoid errors. (Yasuo)
 - Fix --enable-safe-mode. This configure option was not working. (Yasuo)
-- added function domxml_dump_node($doc,$node). Dumps a node plus all
+- Added function domxml_dump_node($doc,$node). Dumps a node plus all
   children into a string. (chregu)
 - Added function domxml_node_get_content() (chregu)
-- added function domxml_dump_file($filename,[$compression]). Dumps XML to
+- Added function domxml_dump_file($filename,[$compression]). Dumps XML to
   a file and uses compression, if specified (chregu)
-- added exslt integration (see http://exslt.org for details). To be
+- Added exslt integration (see http://exslt.org for details). To be
   configured with --with-dom-exslt[=DIR] (and --with-dom-xslt) (chregu, jaroslaw)
 - Don't touch any globals in session_unset() if register_globals is set
   to off. (Thies)
@@ -44,7 +41,7 @@ PHP 4                                                                      NEWS
   the number of rows to skip at the beginning of the cursor, the
   maximun numer of rows that should be fetched and the format of the
   returned array. (Thies)
-- Update the XSLT extension to support Sablotron 0.8 (Petr Cimprich)
+- Updated the XSLT extension to support Sablotron 0.8 (Petr Cimprich)
 - Fixed a bug in preg_match()/preg_match_all() when matching strings containing
   null bytes. (Andrei)
 - Added xpath_register_ns() function. This makes it possible to issue XPath 
@@ -63,23 +60,23 @@ PHP 4                                                                      NEWS
   error messages, does not change working directory, etc. "make install"
   will install CLI SAPI version of php in {PREFIX}/bin/php while
   CGI is renamed and installed as {PREFIX}/bin/php-cgi. (Edin)
-- Improve the speed of wordwrap() significantly. (Jim)
+- Improved the speed of wordwrap() significantly. (Jim)
 - Fixed pow()'s incorrect behaviour when dealing with powers of 0. (Jim)
 - Added is_finite(), is_infinite(), and is_nan(). (Jim)
 - Fixed segfault in wordwrap() when wrapping to zero width and using
   multi-character break or trying to force cut (bug #12768). (Jim)
 - Fixed several bugs in dbase extension (dbase_pack() truncate file to right
   size, fix 6852 #1 and 6852 #2). (Vlad)
-- Fix bug in krsort() where an extra character was being compared (Andi)
-- fixed bug that made pspell include pspell.h from a wrong location. (Vlad)
-- added function overload in mbstring to add multibyte support for 
+- Fixed bug in krsort() where an extra character was being compared. (Andi)
+- Fixed bug that made pspell include pspell.h from a wrong location. (Vlad)
+- Added function overload in mbstring to add multibyte support for 
   string and mail functions. (Rui)
 - Added flags parameter to preg_grep(). The only flag currently is
   PREG_GREP_INVERT that will make the function return entries that
   did not match. (Andrei)
 - Fixed several crash bugs in the xslt extension (Markus, Derick)
 - Fixed problem with dbase not returning very large (larger than long)
-- integers properly. (Vlad)
+  integers properly. (Vlad)
 - Added concepts to IRCG: bailout-on-trivial issue, write output to
   files, fetch a ressource upon connection end. (Sascha)
 - Fixed POST-related bugs in thttpd, added QUERY_STRING, HTTP_HOST,
@@ -130,8 +127,10 @@ PHP 4                                                                      NEWS
   array entries to string. (Andrei)
 - Added user-space object overloading extension. (Andrei)
 - Added ldap_start_tls() function. (Stig Venaas, patch by kuenne@rentec.com)
-- Have rand() and mt_rand() seed automatically if srand() or mt_srand() has
-  not been called. (Sterling)
+- Changed rand() and mt_rand() to be seed automatically if srand() or mt_srand() 
+  has not been called. (Sterling)
+- Changed the seed options to srand() and mt_srand() to be optional. If the 
+  seed is not specified the most random seed possible is generated. (Sterling)
 - Added array_change_key_case() function that returns array with
   with all string keys lowercased or uppercased. (Edin)
 - Added parameter to ircg_pconnect to suppress treating non-fatal errors
@@ -147,15 +146,13 @@ PHP 4                                                                      NEWS
 - Added support for 'int', 'bool', 'float' and 'null' for settype(). (Jeroen)
 - Added IPv6 support to gethostbyaddr().
   (Patch by Matthias Wimmer <matthias@charente.de> and venaas)
-- Made the seed options to srand() and mt_srand() optional. If the seed is
-  not specified generate the most random seed possible. (Sterling)
 - Fixed LONG_VARCHAR type crashing in ODBC extension. Patch by Walter Franzini.
   (kalowsky)
-- Made in_array() and search_array() allow the needle to be an array in itself.
-  (Andrei)
+- Changed in_array() and search_array() to allow the needle to be an array 
+  in itself. (Andrei)
 - Added ini_get_all() function which returns all registered ini entries
   or entries for the specified extension. (Jani)
-- Added mailparse_uudecode_all() which extracts all uuencoded attachments
+- Added mailparse_uudecode_all() which extracts all uuencoded attachments. (Wez)
 - Added support for chinese encodings to htmlentities() and htmlspecialchars().
   (Patch by Alan Knowles <alan_k@hklc.com> and Wez)
 - Improved support for autoconf-2.50+/libtool 1.4b+. (Jan Kneschke, Sascha)
