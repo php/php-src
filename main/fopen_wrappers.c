@@ -408,7 +408,7 @@ PHPAPI FILE *php_fopen_with_path(char *filename, char *mode, char *path, char **
 		}
 		snprintf(trypath, MAXPATHLEN, "%s/%s", ptr, filename);
 		if (PG(safe_mode)) {
-			if (stat(trypath, &sb) == 0 && (!php_checkuid(trypath, cm))) {
+			if (V_STAT(trypath, &sb) == 0 && (!php_checkuid(trypath, cm))) {
 				efree(pathbuf);
 				return NULL;
 			}

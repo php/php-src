@@ -251,7 +251,7 @@ char *php_realpath(char *path, char resolved_path []) {
 	}
 
 	/* Check if the resolved path is a directory */
-	if (stat(path_construction, &filestat) != 0) return NULL;
+	if (V_STAT(path_construction, &filestat) != 0) return NULL;
 	if (S_ISDIR(filestat.st_mode)) {
 		/* It's a directory, append a / if needed */
 		if (*(writepos-1) != '/') {

@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 
+
 #include "php_virtual_cwd.h"
 
 #ifdef ZTS
@@ -364,6 +365,21 @@ CWD_API FILE *virtual_fopen(const char *path, const char *mode)
 	f = fopen(new_state.cwd, mode);
 	CWD_STATE_FREE(&new_state);
 	return f;
+}
+
+CWD_API int virtual_stat(const char *path, struct stat *buf)
+{
+	cwd_state new_state;
+	int retval;
+	CWDLS_FETCH();
+
+	CWD_STATE_COPY(&new_state, &CWDG(cwd));
+
+	virtual_file_ex(&new_state, path, NULL);
+
+	retval = stat(new_state.cwd, buf);
+	CWD_STATE_FREE(&new_state);
+	return retval;
 }
 
 #if 0
