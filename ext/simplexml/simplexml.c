@@ -113,7 +113,14 @@ sxe_property_read(zval *object, zval *member TSRMLS_DC)
 	node = node->xmlChildrenNode;
 
 	while (node) {
-		if (!xmlStrcmp(node->name, name)) {
+		if (node->ns && !xmlStrcmp(node->ns->prefix, name)) {
+			APPEND_PREV_ELEMENT(counter, value);
+
+			MAKE_STD_ZVAL(value);
+			_node_as_zval(sxe, node->parent, value);
+
+			APPEND_CUR_ELEMENT(counter, value);
+		} else if (!xmlStrcmp(node->name, name)) {
 			APPEND_PREV_ELEMENT(counter, value);
 
 			MAKE_STD_ZVAL(value);
