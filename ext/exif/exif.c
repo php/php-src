@@ -1123,10 +1123,6 @@ PHP_FUNCTION(read_exif_data)
 	ImageInfoType ImageInfo;
 	char tmp[64];
 
-	/*ImageInfo.Thumbnail = NULL;
-	ImageInfo.ThumbnailSize = 0;
-	*/
-
     if ((ac < 1 || ac > 2) || zend_get_parameters_ex(ac, &p_name, &p_readall) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
@@ -1217,7 +1213,7 @@ PHP_FUNCTION(read_exif_data)
 	if(ImageInfo.Comments[0]) {
 		add_assoc_string(return_value,"Comments",ImageInfo.Comments,1);
 	}
-	if(ImageInfo.ThumbnailSize) {
+	if(ImageInfo.ThumbnailSize && ImageInfo.Thumbnail) {
 		add_assoc_stringl(return_value,"Thumbnail",ImageInfo.Thumbnail,ImageInfo.ThumbnailSize,1);
 		add_assoc_long(return_value,"ThumbnailSize",ImageInfo.ThumbnailSize);
 		efree(ImageInfo.Thumbnail);
