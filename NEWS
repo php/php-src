@@ -1,6 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 200?, Version 5.0.0
+- Moved extensions to PECL (http://pear.php.net/): (James, Tal)
+  . ext/fribidi
 - Added man page for CLI version of PHP. (marcus)
 - Added array_walk_recursive() function that can apply user function 
   recursively to an array. (Ilia)
