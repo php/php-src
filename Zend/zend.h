@@ -291,6 +291,7 @@ struct _zend_class_entry {
 	zend_function_entry *builtin_functions;
 
 	union _zend_function *constructor;
+	union _zend_function *destructor;
 	union _zend_function *clone;
 
 	/* handlers */

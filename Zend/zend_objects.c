@@ -27,6 +27,43 @@ void zend_objects_destroy(zend_objects *objects)
 	efree(objects->object_buckets);
 }
 
+static inline void zend_objects_destroy_object(zend_object *object, zend_object_handle handle TSRMLS_DC)
+{
+	if (object->ce->destructor) {
+		zval *obj;
+		zval *destructor_func_name;
+		zval *retval_ptr;
+		HashTable symbol_table;
+		
+		MAKE_STD_ZVAL(obj);
+		obj->type = IS_OBJECT;
+		obj->value.obj.handle = handle;
+		obj->value.obj.handlers = &zoh;
+		zval_copy_ctor(obj);
+
+
+		/* FIXME: Optimize this so that we use the old_object->ce->destructor function pointer instead of the name */
+		MAKE_STD_ZVAL(destructor_func_name);
+		destructor_func_name->type = IS_STRING;
+		destructor_func_name->value.str.val = estrndup("_destruct", sizeof("_destruct")-1);
+		destructor_func_name->value.str.len = sizeof("_destruct")-1;
+
+		ZEND_INIT_SYMTABLE(&symbol_table);
+		
+		call_user_function_ex(NULL, &obj, destructor_func_name, &retval_ptr, 0, NULL, 0, &symbol_table TSRMLS_CC);
+
+		zend_hash_destroy(&symbol_table);
+		zval_ptr_dtor(&obj);
+		zval_ptr_dtor(&destructor_func_name);
+		zval_ptr_dtor(&retval_ptr);
+	}
+
+	/* Nuke the object */
+	zend_hash_destroy(object->properties);
+	efree(object->properties);
+	
+}
+
 zend_object_value zend_objects_new(zend_object **object, zend_class_entry *class_type)
 {
 	zend_object_handle handle;
@@ -45,6 +82,7 @@ zend_object_value zend_objects_new(zend_object **object, zend_class_entry *class
 		handle = EG(objects).top++;
 	}
 	EG(objects).object_buckets[handle].valid = 1;
+	EG(objects).object_buckets[handle].constructor_called = 0;
 	EG(objects).object_buckets[handle].bucket.obj.refcount = 1;
 	
 	*object = &EG(objects).object_buckets[handle].bucket.obj.object;
@@ -93,9 +131,14 @@ void zend_objects_delete_obj(zend_object_handle handle)
 	}
 
 	object = &EG(objects).object_buckets[handle].bucket.obj.object;
-	zend_hash_destroy(object->properties);
-	efree(object->properties);
+
+	if (!EG(objects).object_buckets[handle].constructor_called) {
+		EG(objects).object_buckets[handle].constructor_called = 1;
+		zend_objects_destroy_object(object, handle TSRMLS_CC);
+	}
+	
 	EG(objects).object_buckets[handle].valid = 0;
+	
 #if ZEND_DEBUG_OBJECTS
 	fprintf(stderr, "Deleted object id #%d\n", handle);
 #endif
@@ -110,13 +153,18 @@ void zend_objects_del_ref(zend_object_handle handle)
 		zend_object *object;
 
 		if (EG(objects).object_buckets[handle].valid) {
-			object = &EG(objects).object_buckets[handle].bucket.obj.object;
-			zend_hash_destroy(object->properties);
-			efree(object->properties);
+			if (!EG(objects).object_buckets[handle].constructor_called) {
+				object = &EG(objects).object_buckets[handle].bucket.obj.object;
+				EG(objects).object_buckets[handle].constructor_called = 1;
+				zend_objects_destroy_object(object, handle TSRMLS_CC);
+			}
 		}
-		EG(objects).object_buckets[handle].bucket.free_list.next = EG(objects).free_list_head;
-		EG(objects).free_list_head = handle;
-		EG(objects).object_buckets[handle].valid = 0;
+		/* FIXME: Optimizer this so that only if the constructor was called we recheck the refcount */
+		if (EG(objects).object_buckets[handle].bucket.obj.refcount == 0) {
+			EG(objects).object_buckets[handle].bucket.free_list.next = EG(objects).free_list_head;
+			EG(objects).free_list_head = handle;
+			EG(objects).object_buckets[handle].valid = 0;
+		}
 #if ZEND_DEBUG_OBJECTS
 		fprintf(stderr, "Deallocated object id #%d\n", handle);
 #endif
