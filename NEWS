@@ -2,6 +2,9 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 200?, Version 4.0.5
+- Added mysql_get_client_info(), mysql_get_server_info(),
+  mysql_get_proto_info(), and mysql_get_host_info() functions. (Sean)
+- Added search cache and track query features.
 - Major change of the php pdf api. It could break some functions though
   backwards compatibility was tried to maintain. Adding some still
   missing functions as well. (Uwe)
