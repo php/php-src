@@ -66,7 +66,6 @@ void php_free_stmt_bind_buffer(BIND_BUFFER bbuf, int type)
 	for (i=0; i < bbuf.var_cnt; i++) {
 		if (type == FETCH_RESULT) {
 			if (bbuf.buf[i].type == IS_STRING) {
-				printf ("--free--\n");
 				efree(bbuf.buf[i].buffer);
 			}
 		}
