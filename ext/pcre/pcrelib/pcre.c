@@ -4125,7 +4125,7 @@ Returns:          > 0 => success; value is the number of elements filled in
 
 int
 pcre_exec(const pcre *external_re, const pcre_extra *external_extra,
-  const char *subject, int length, int options, int *offsets, int offsetcount)
+  const char *subject, int length, int options, int *offsets, int offsetcount, int minlen)
 {
 int resetcount, ocount;
 int first_char = -1;
@@ -4285,6 +4285,10 @@ do
   if certain parts of the pattern were not used. */
 
   if (!match(start_match, re->code, 2, &match_block, ims, FALSE, start_match))
+    continue;
+
+  /* Check that the match is not closer than minlen (Andrey Zmievski) */
+  if (start_match - match_block.start_subject < minlen)
     continue;
 
   /* Copy the offset information from temporary store if necessary */

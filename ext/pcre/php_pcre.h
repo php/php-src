@@ -34,11 +34,7 @@
 
 #if HAVE_PCRE
 
-#if HAVE_BUNDLED_PCRE
 #include "pcrelib/pcre.h"
-#else
-#include "pcre.h"
-#endif
 
 extern void php_info_pcre(ZEND_MODULE_INFO_FUNC_ARGS);
 extern int php_minit_pcre(INIT_FUNC_ARGS);
