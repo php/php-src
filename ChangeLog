@@ -1,3 +1,77 @@
+2003-01-27  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * configure.in
+      main/php_ini.c
+      main/php_scandir.c
+      main/php_scandir.h
+      win32/readdir.c
+      win32/readdir.h:
+      Moved the scandir code into it's own files so that it can be used by other
+      OSes where libc does not have a native scandir() implementation.
+
+2003-01-27  Maxim Maletsky  <maxim@maxim.cx>
+
+    * ext/oci8/oci8.c:
+      This fixes "warning C4101: 'charsetid' : unreferenced local variable" on
+      VC6
+
+    * ext/oci8/oci8.c:
+      (Maxim)
+
+2003-01-27  Sara Golemon  <php@alphaweb.net>
+
+    * ext/ftp/ftp.c
+      ext/ftp/ftp.h
+      ext/ftp/php_ftp.c:
+      Fix potential buffer overflow.
+
+2003-01-27  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * main/output.c:
+      Removed pointless checks.
+
+2003-01-27  Edin Kadribasic  <edink@proventum.net>
+
+    * (PHP_4_3)
+      NEWS
+      ext/standard/dir.c
+      win32/glob.c:
+      MFH: Fixed bug #21597 (made glob() understand Windows paths).
+
+    * ext/standard/dir.c
+      win32/glob.c:
+      Fixed bug #21597 (made glob() understand windows paths)
+
+2003-01-27  Jani Taskinen  <sniper@iki.fi>
+
+    * (PHP_4_3)
+      configure.in:
+      revert previous commit
+
+    * (PHP_4_3)
+      configure.in:
+      MFH: use grep -E instead of egrep. the latter is not defined by POSIX
+      anymore
+
+2003-01-27  Uwe Steinmann  <uwe@steinmann.cx>
+
+    * ext/hyperwave/hw.c:
+      - fixed several bugs in hw_document_xx() functions. The macro to access
+        the document was the same as for a link to the sever.
+
+2003-01-27  Sara Golemon  <php@alphaweb.net>
+
+    * ext/ftp/ftp.c
+      ext/ftp/ftp.h
+      ext/ftp/php_ftp.c
+      ext/ftp/php_ftp.h:
+      Feature Request #21748.  Added function ftp_chmod().
+
+2003-01-27  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * tests/lang/bug21600.phpt:
+      Updated test so it describes the problem more clearly.
+
 2003-01-26  Stig Bakken  <ssb@fast.no>
 
     * pear/PEAR.php:
