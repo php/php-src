@@ -59,6 +59,11 @@
 #include <syslog.h>
 #endif
 
+#if PHP_SIGCHILD
+#include <sys/types.h>
+#include <sys/wait.h>
+#endif
+
 #include "zend_compile.h"
 #include "zend_execute.h"
 #include "zend_highlight.h"
@@ -638,7 +643,7 @@ static void php_message_handler_for_zend(long message, void *data)
 
 
 #if PHP_SIGCHILD
-static int sigchld_handler(int apar)
+static void sigchld_handler(int apar)
 {
     while (waitpid(-1, NULL, WNOHANG) > 0)
 		;
