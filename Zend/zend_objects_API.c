@@ -49,9 +49,9 @@ ZEND_API void zend_objects_store_call_destructors(zend_objects_store *objects TS
 			struct _store_object *obj = &objects->object_buckets[i].bucket.obj;
 
 			if (obj->dtor && !objects->object_buckets[i].destructor_called) {
-				objects->object_buckets[i].destructor_called = 1;
 				obj->dtor(obj->object, i TSRMLS_CC);
 			}
+			objects->object_buckets[i].destructor_called = 1;
 		}
 	}
 }
@@ -133,13 +133,11 @@ ZEND_API void zend_objects_store_del_ref(zval *zobject TSRMLS_DC)
 			if (obj->dtor) {
 				obj->dtor(obj->object, handle TSRMLS_CC);
 			}
-			if (obj->refcount == 0) {
-				if (obj->free_storage) {
-					obj->free_storage(obj->object TSRMLS_CC);
-				}
-				ZEND_OBJECTS_STORE_ADD_TO_FREE_LIST();
-			}
 		}
+		if (obj->free_storage) {
+			obj->free_storage(obj->object TSRMLS_CC);
+		}
+		ZEND_OBJECTS_STORE_ADD_TO_FREE_LIST();
 #if ZEND_DEBUG_OBJECTS
 		fprintf(stderr, "Deallocated object id #%d\n", handle);
 #endif
