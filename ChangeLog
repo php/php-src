@@ -1,3 +1,86 @@
+2001-08-02  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/DB/pgsql.php:
+    fix Postgres 7.x error msg in non existant sequence. Thanks to "Troels Arvin" <troels@arvin.dk>
+
+2001-08-02  Rasmus Lerdorf  <rasmus@php.net>
+
+    * configure.in:
+    Revert this change - if you want to do this, do it in a 'make clean'
+
+2001-08-02  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/curl/curl.c:
+    Larger transfer buffer before realloc() this should speed things up a bit
+
+    * ext/curl/curl.c: ws fix
+
+2001-08-02  Jani Taskinen  <sniper@iki.fi>
+
+    * configure.in:
+    Delete config.cache always. This makes config.nice a bit more useful.
+
+2001-08-02  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/DB/odbc.php:
+    fix fetchInto and added the fetch row by number feature
+
+2001-08-02  Alexander Merz  <alexander.merz@t-online.de>
+
+    * pear/Crypt/CBC.php
+      pear/Crypt/HCEMD5.php:
+    fix PHPDoc
+
+2001-08-02  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * sapi/apache2filter/sapi_apache2.c: Whitespace fixes.
+
+    * sapi/apache2filter/sapi_apache2.c: Fix Apache2Filter build.
+
+2001-08-02  Thies C. Arntzen  <thies@thieso.net>
+
+    * ext/imap/config.m4: not too sure about this:
+    the uw-imap lib is usually called libc-client.a - kde comes with a libimap.a
+    which (when used instead of libc-client.a) will break the build. so
+    i have reversed the detection for the imap-libs - 1st look for the variations
+    of libc-client and (if 'em are not found) try -limap. i hope this breaks
+    nobodies setup!
+
+    we should really add a AC_TRY_COMPILE for all extensions that get added thru
+    configure!
+
+    * ext/xslt/config.m4:
+    adding -lsablot later makes it appear _before_ -lexpat in config_vars - and
+    that fixes a link problem (atleast) for me.
+    sterling?
+
+2001-08-02  Zeev Suraski  <zeev@zend.com>
+
+    * NEWS: Optimize the NEWS file :)
+
+    * NEWS: Update NEWS
+
+2001-08-02  Stig Bakken  <ssb@fast.no>
+
+    * pear/DB/storage.php: * some more quoting fixes and an E_ALL fix
+
+2001-08-02  Zeev Suraski  <zeev@zend.com>
+
+    * ext/skeleton/php_skeleton.h: Fix the .h file (untested)
+
+    * ext/skeleton/create_stubs
+      README.EXT_SKEL: We no longer need any FETCH's for internal functions
+
+2001-08-02  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/skeleton/create_stubs
+      README.EXT_SKEL: TSRM fix for ext_skel - probably more needed
+
+2001-08-02  Zeev Suraski  <zeev@zend.com>
+
+    * ext/skeleton/create_stubs
+      ext/skeleton/skeleton.c: Beautify
+
 2001-08-01  Zeev Suraski  <zeev@zend.com>
 
     * sapi/apache/mod_php4.c
