@@ -63,6 +63,8 @@
 # include "mod_dav.h"
 #endif
 
+#undef shutdown
+
 int apache_php_module_main(request_rec *r, int display_source_mode CLS_DC ELS_DC PLS_DC SLS_DC);
 void php_save_umask(void);
 void php_restore_umask(void);
