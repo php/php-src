@@ -3,6 +3,8 @@ parenthesis means that person has taken on this project.
 
 global
 ------
+    * make sure that all ZTS globals get destructed. Most ts_allocate_id()
+      calls should have a dtor entry.
     * activate all extensions by default that don't rely on external
       dependices. (eg ftp)
     * --enable-all in configure. (--enable-shared=max ...)
