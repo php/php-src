@@ -42,33 +42,34 @@
 
 #define CTLIB_VERSION CS_VERSION_100
 
-extern php3_module_entry sybct_module_entry;
-#define sybct_module_ptr &sybct_module_entry
+extern zend_module_entry sybase_module_entry;
+#define sybase_module_ptr &sybase_module_entry
 
-extern int php3_minit_sybct(INIT_FUNC_ARGS);
-extern int php3_rinit_sybct(INIT_FUNC_ARGS);
-extern int php3_mshutdown_sybct(SHUTDOWN_FUNC_ARGS);
-extern int php3_rshutdown_sybct(SHUTDOWN_FUNC_ARGS);
-void php3_info_sybct(ZEND_MODULE_INFO_FUNC_ARGS);
-PHP_FUNCTION(sybct_connect);
-PHP_FUNCTION(sybct_pconnect);
-PHP_FUNCTION(sybct_close);
-PHP_FUNCTION(sybct_select_db);
-PHP_FUNCTION(sybct_query);
-PHP_FUNCTION(sybct_free_result);
-PHP_FUNCTION(sybct_get_last_message);
-PHP_FUNCTION(sybct_num_rows);
-PHP_FUNCTION(sybct_num_fields);
-PHP_FUNCTION(sybct_fetch_row);
-PHP_FUNCTION(sybct_fetch_array);
-PHP_FUNCTION(sybct_fetch_object);
-PHP_FUNCTION(sybct_data_seek);
-PHP_FUNCTION(sybct_result);
-PHP_FUNCTION(sybct_affected_rows);
-PHP_FUNCTION(sybct_field_seek);
-PHP_FUNCTION(sybct_min_client_severity);
-PHP_FUNCTION(sybct_min_server_severity);
-PHP_FUNCTION(sybct_fetch_field);
+PHP_MINIT_FUNCTION(sybase);
+PHP_MSHUTDOWN_FUNCTION(sybase);
+PHP_RINIT_FUNCTION(sybase);
+PHP_RSHUTDOWN_FUNCTION(sybase);
+PHP_MINFO_FUNCTION(sybase);
+
+PHP_FUNCTION(sybase_connect);
+PHP_FUNCTION(sybase_pconnect);
+PHP_FUNCTION(sybase_close);
+PHP_FUNCTION(sybase_select_db);
+PHP_FUNCTION(sybase_query);
+PHP_FUNCTION(sybase_free_result);
+PHP_FUNCTION(sybase_get_last_message);
+PHP_FUNCTION(sybase_num_rows);
+PHP_FUNCTION(sybase_num_fields);
+PHP_FUNCTION(sybase_fetch_row);
+PHP_FUNCTION(sybase_fetch_array);
+PHP_FUNCTION(sybase_fetch_object);
+PHP_FUNCTION(sybase_data_seek);
+PHP_FUNCTION(sybase_result);
+PHP_FUNCTION(sybase_affected_rows);
+PHP_FUNCTION(sybase_field_seek);
+PHP_FUNCTION(sybase_min_client_severity);
+PHP_FUNCTION(sybase_min_server_severity);
+PHP_FUNCTION(sybase_fetch_field);
 
 
 #include <ctpublic.h>
@@ -84,7 +85,7 @@ typedef struct {
 	int le_link,le_plink,le_result;
 	long min_server_severity, min_client_severity;
 	long cfg_min_server_severity, cfg_min_client_severity;
-} sybct_module;
+} php_sybase_globals;
 
 typedef struct {
 	CS_CONNECTION *connection;
@@ -93,7 +94,7 @@ typedef struct {
 	int deadlock;
 	int dead;
 	long affected_rows;
-} sybct_link;
+} sybase_link;
 
 #define SYBASE_ROWS_BLOCK 128
 
@@ -101,25 +102,23 @@ typedef struct {
 	char *name,*column_source;
 	int max_length, numeric;
 	CS_INT type;
-} sybct_field;
+} sybase_field;
 
 typedef struct {
 	pval **data;
-	sybct_field *fields;
-	sybct_link *sybct_ptr;
+	sybase_field *fields;
+	sybase_link *sybase_ptr;
 	int cur_row,cur_field;
 	int num_rows,num_fields;
-} sybct_result;
+} sybase_result;
 
-
-extern sybct_module php3_sybct_module;
 
 #else
 
-#define sybct_module_ptr NULL
+#define sybase_module_ptr NULL
 
 #endif
 
-#define phpext_sybase_ct_ptr sybct_module_ptr
+#define phpext_sybase_ct_ptr sybase_module_ptr
 
 #endif /* _PHP3_SYBASE_CT_H */
