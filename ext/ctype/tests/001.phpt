@@ -15,27 +15,27 @@ ctype on integers
     }
 	  echo "$function $n\n";
   }
-ctype_test_001("islower");
-ctype_test_001("isupper");
-ctype_test_001("isalpha");	
-ctype_test_001("isdigit");	
-ctype_test_001("isalnum");		
-ctype_test_001("iscntrl");	
-ctype_test_001("isgraph");
-ctype_test_001("isprint");
-ctype_test_001("ispunct");
-ctype_test_001("isspace");
-ctype_test_001("isxdigit");
+ctype_test_001("ctype_lower");
+ctype_test_001("ctype_upper");
+ctype_test_001("ctype_alpha");	
+ctype_test_001("ctype_digit");	
+ctype_test_001("ctype_alnum");		
+ctype_test_001("ctype_cntrl");	
+ctype_test_001("ctype_graph");
+ctype_test_001("ctype_print");
+ctype_test_001("ctype_punct");
+ctype_test_001("ctype_space");
+ctype_test_001("ctype_xdigit");
 ?>
 --EXPECT--
-islower 26
-isupper 26
-isalpha 52
-isdigit 10
-isalnum 62
-iscntrl 33
-isgraph 94
-isprint 95
-ispunct 32
-isspace 6
-isxdigit 22
+ctype_lower 26
+ctype_upper 26
+ctype_alpha 52
+ctype_digit 10
+ctype_alnum 62
+ctype_cntrl 33
+ctype_graph 94
+ctype_print 95
+ctype_punct 32
+ctype_space 6
+ctype_xdigit 22
