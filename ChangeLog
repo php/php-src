@@ -1,3 +1,199 @@
+2000-12-03  Ulf Wendel  <ulf.wendel@phpdoc.de>
+
+    * pear/PHPDoc/xmlwriter/PhpdocXMLWriter.php
+      pear/PHPDoc/warning/PhpdocWarning.php
+      pear/PHPDoc/xmlexporter/PhpdocXMLClassExporter.php
+      pear/PHPDoc/xmlexporter/PhpdocXMLDocumentExporter.php
+      pear/PHPDoc/xmlexporter/PhpdocXMLExporter.php
+      pear/PHPDoc/xmlexporter/PhpdocXMLIndexExporter.php
+      pear/PHPDoc/xmlreader/PhpdocXMLReader.php
+      pear/PHPDoc/indexer/PhpdocIndexer.php
+      pear/PHPDoc/parser/PhpdocClassParser.php
+      pear/PHPDoc/parser/PhpdocConstantParser.php
+      pear/PHPDoc/parser/PhpdocFunctionParser.php
+      pear/PHPDoc/parser/PhpdocParser.php
+      pear/PHPDoc/parser/PhpdocParserCore.php
+      pear/PHPDoc/parser/PhpdocParserRegExp.php
+      pear/PHPDoc/parser/PhpdocParserTags.php
+      pear/PHPDoc/parser/PhpdocVariableParser.php
+      pear/PHPDoc/renderer/html/PhpdocHTMLClassRenderer.php
+      pear/PHPDoc/renderer/html/PhpdocHTMLDocumentRenderer.php
+      pear/PHPDoc/renderer/html/PhpdocHTMLIndexRenderer.php
+      pear/PHPDoc/renderer/html/PhpdocHTMLModuleRenderer.php
+      pear/PHPDoc/renderer/html/PhpdocHTMLWarningRenderer.php
+      pear/PHPDoc/analyser/PhpdocAnalyser.php
+      pear/PHPDoc/analyser/PhpdocClassAnalyser.php
+      pear/PHPDoc/analyser/PhpdocModuleAnalyser.php
+      pear/PHPDoc/exceptions/PhpdocError.php
+      pear/PHPDoc/filehandler/PhpdocFileHandler.php: - doc comments refined
+
+    PHPDocs own Reportfile looks better now...
+
+2000-12-03  Zeev Suraski  <zeev@zend.com>
+
+    * ext/mysql/php_mysql.c: Import the MySQL updates from the main branch
+
+2000-12-03  Ulf Wendel  <ulf.wendel@phpdoc.de>
+
+    * pear/PHPDoc/accessor/PhpdocDocumentAccessor.php
+      pear/PHPDoc/accessor/PhpdocIndexAccessor.php: - refined the doc comments
+
+    * pear/PHPDoc/core/Phpdoc.php
+      pear/PHPDoc/core/PhpdocArgvHandler.php
+      pear/PHPDoc/core/PhpdocObject.php
+      pear/PHPDoc/core/PhpdocSetupHandler.php
+      pear/PHPDoc/index.php
+      pear/PHPDoc/redist/IT.php
+      pear/PHPDoc/redist/ITX.php
+      pear/PHPDoc/xmlwriter/PhpdocXMLWriter.php: - refined doc comments.
+
+    core/* does no longer cause warnings.
+
+    - added @package to the it/itx doc comment
+
+    * pear/PHPDoc/parser/PhpdocConstantParser.php
+      pear/PHPDoc/parser/PhpdocParserRegExp.php
+      pear/PHPDoc/parser/PhpdocParserTags.php
+      pear/PHPDoc/parser/PhpdocVariableParser.php
+      pear/PHPDoc/renderer/html/templates/class.html: - fixed a @var bug
+
+2000-12-03  Sterling Hughes  <Sterling.Hughes@pentap.net>
+
+    * ext/sockets/php_sockets.h
+      ext/sockets/sockets.c: - Fix the handling of resource entries
+    - Fix the fd_dealloc() function
+
+    * ext/sablot/php_sablot.h
+      ext/sablot/sablot.c: Another attempt at fixing 8036
+
+2000-12-03  Ulf Wendel  <ulf.wendel@phpdoc.de>
+
+    * pear/PHPDoc/parser/PhpdocConstantParser.php
+      pear/PHPDoc/parser/PhpdocParserRegExp.php: - fixed a @const bug
+
+
+    * pear/PHPDoc/parser/PhpdocParserTags.php
+      pear/PHPDoc/analyser/PhpdocAnalyser.php
+      pear/PHPDoc/analyser/PhpdocClassAnalyser.php
+      pear/PHPDoc/analyser/PhpdocModuleAnalyser.php:
+    - fixed a @see bug and improved @see
+
+    "@see element" now causes a warning. To referr to functions or variables within
+    a class/module use "@see $variable" and "@see function()". Note the $ and the "()".
+    If the referenced element is unknow, the reference will be dropped and a warning is generated.
+
+    - added @version $Id$ to some class doc comments
+
+    This is an eays way to add a version tag to inline docs if you use a CVS.
+
+    - added spaces around operators
+
+2000-12-03  Sterling Hughes  <Sterling.Hughes@pentap.net>
+
+    * ext/sablot/sablot.c: Windows ist ser schlecht
+
+2000-12-03  Ulf Wendel  <ulf.wendel@phpdoc.de>
+
+    * pear/PHPDoc/renderer/html/PhpdocHTMLClassRenderer.php
+      pear/PHPDoc/renderer/html/PhpdocHTMLDocumentRenderer.php
+      pear/PHPDoc/renderer/html/PhpdocHTMLIndexRenderer.php
+      pear/PHPDoc/renderer/html/PhpdocHTMLModuleRenderer.php
+      pear/PHPDoc/renderer/html/PhpdocHTMLRenderer.php
+      pear/PHPDoc/renderer/html/PhpdocHTMLRendererManager.php
+      pear/PHPDoc/renderer/html/PhpdocHTMLWarningRenderer.php
+      pear/PHPDoc/renderer/html/templates/class.html
+      pear/PHPDoc/renderer/html/templates/classtree.html
+      pear/PHPDoc/renderer/html/templates/module.html
+      pear/PHPDoc/renderer/PhpdocRendererObject.php:
+    - fixed a @see function() bug
+
+    Addes a pair of braches "()" to the function details anchor name in the class and module template.
+
+    - reformatted source
+
+    Sorry for this huge commit. Please make sure that you use "unix format" when saving files.
+    Added spaces around most operators. Replaced some spaces with tabs. The tabsize in PHPDoc is 2 spaces.
+    Do not replace tabs with spaces.
+
+2000-12-03  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/standard/filestat.c: Fix #8079 - filetype now knows about sockets
+
+2000-12-03  Sascha Schumann  <sascha@schumann.cx>
+
+    * acinclude.m4: Workaround for these two symptoms:
+
+    Some sed tools don't match strings which are not terminated with LF.
+
+    Some shells still support the ^ as a synonym for the pipe character.
+
+    Submitted by: Stanislav Malyshev
+
+2000-12-03  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * build/rules.mk
+      run-tests.php
+      tests/README: changed run-tests.php to use 'php -q' instead of 'php -f'
+
+2000-12-03  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/cgi/cgi_main.c: Merge with php_4_0_4
+
+2000-12-03  Zeev Suraski  <zeev@zend.com>
+
+    * sapi/cgi/cgi_main.c:
+    Fix the bug with -f not filling in the $argv[] arguments.
+    I'm not sure what used to be the behavior - but the new code puts the -f
+    argument as $argv[0], which is the Right Thing to do IMHO...  Comments
+    welcome
+
+    * README.BCMATH: Don't mislead people...
+
+2000-12-03  Ulf Wendel  <ulf.wendel@phpdoc.de>
+
+    * pear/PHPDoc/parser/PhpdocParserCore.php
+      pear/PHPDoc/analyser/PhpdocAnalyser.php
+      pear/PHPDoc/analyser/PhpdocClassAnalyser.php
+      pear/PHPDoc/analyser/PhpdocModuleAnalyser.php
+      pear/PHPDoc/core/Phpdoc.php
+      pear/PHPDoc/core/PhpdocSetupHandler.php: - reformatted some files
+
+    Please use tabs (size: 2 spaces) to indent the source.
+     Do not replace tabs with spaces when you apply changed to PHPDoc.
+
+    - renamed add_number_suffix to addNumberSuffix
+
+    - changed the meaning of the placeholder {DESCRIPTION} in the templates
+
+    The internal array index "desc", the XML container <description> and
+    the template placeholder {DESCRIPTION} contained the "short description"
+    (first sentence of a doc comment) and the "long description" (everything from the first
+    sentence to the first doc tag) before the change. Now they do not contain
+    the short description as well but only the long description.
+
+    - fixed @brother/@sister
+
+    Elements that use @brother/@sister now inherit all fields from the specified
+    brother/sister that are not defined (or empty) in their own doc comment.
+    I hope this was the last "### PANIK ###" (panic, fixme) in the code.
+
+2000-12-03  Zeev Suraski  <zeev@zend.com>
+
+    * ext/db/php_db.h: Commit the fix to the 4.0.4 branch
+
+2000-12-03  Ulf Wendel  <ulf.wendel@phpdoc.de>
+
+    * pear/PHPDoc/renderer/html/templates/class.html
+      pear/PHPDoc/renderer/html/templates/module.html:
+    - class variables, includes and constants are now shown with the description from the doc comment
+
+    ... well I forgot to add {SHORTDESCRIPTION}/{DESCRIPTION} so it looked as if PHPDoc would be buggy
+    because the description where not in the generated HTML apidoc files.
+
+2000-12-03  Zeev Suraski  <zeev@zend.com>
+
+    * ext/db/php_db.h: Fix DB build (hopefully, untested)
+
 2000-12-02  Zeev Suraski  <zeev@zend.com>
 
     * ext/mysql/php_mysql.c: - Get the MySQL module a bit uptodate.
