@@ -181,7 +181,7 @@ SAPI_API int sapi_register_post_entry(sapi_post_entry *post_entry);
 SAPI_API void sapi_unregister_post_entry(sapi_post_entry *post_entry);
 SAPI_API int sapi_register_default_post_reader(void (*default_post_reader)(TSRMLS_D));
 SAPI_API int sapi_register_treat_data(void (*treat_data)(int arg, char *str, zval *destArray TSRMLS_DC));
-SAPI_API int sapi_register_input_filter(unsigned int (*input_filter)(int arg, char *var, char **val, unsigned int val_len TSRMLS_DC));
+SAPI_API int sapi_register_input_filter(unsigned int (*input_filter)(int arg, char *var, char **val, unsigned int val_len, unsigned int *new_val_len TSRMLS_DC));
 
 SAPI_API int sapi_flush(TSRMLS_D);
 SAPI_API struct stat *sapi_get_stat(TSRMLS_D);
@@ -244,7 +244,7 @@ struct _sapi_module_struct {
 	int (*get_target_uid)(uid_t * TSRMLS_DC);
 	int (*get_target_gid)(gid_t * TSRMLS_DC);
 
-	unsigned int (*input_filter)(int arg, char *var, char **val, unsigned int val_len TSRMLS_DC);
+	unsigned int (*input_filter)(int arg, char *var, char **val, unsigned int val_len, unsigned int *new_val_len TSRMLS_DC);
 	
 	void (*ini_defaults)(HashTable *configuration_hash);
 	int phpinfo_as_text;

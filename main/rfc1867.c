@@ -881,14 +881,13 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 			if (!filename && param) {
 
 				char *value = multipart_buffer_read_body(mbuff TSRMLS_CC);
-				int   val_len;
+				unsigned int new_val_len;
 
 				if (!value) {
 					value = estrdup("");
 				}
 
-				val_len = sapi_module.input_filter(PARSE_POST, param, &value, strlen(value) TSRMLS_CC);
-				if (val_len) {
+				if (sapi_module.input_filter(PARSE_POST, param, &value, strlen(value), &new_val_len TSRMLS_CC)) {
 #if HAVE_MBSTRING && !defined(COMPILE_DL_MBSTRING)
 					if (php_mb_encoding_translation(TSRMLS_C)) {
 						php_mb_gpc_stack_variable(param, value, &val_list, &len_list, 
