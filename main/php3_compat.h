@@ -109,16 +109,16 @@ typedef zval pval;
 #define PHP_FALIAS(name, alias, arg_types)		ZEND_FALIAS(name, alias, arg_types)
 #define PHP_STATIC_FE(php_name, func_name, arg_types) ZEND_STATIC_FE(php_name, func_name, arg_types)
 
-#define PHP_MINIT(module)		ZEND_MINIT(module)
-#define PHP_MSHUTDOWN(module)	ZEND_MSHUTDOWN(module)
-#define PHP_RINIT(module)		ZEND_RINIT(module)
-#define PHP_RSHUTDOWN(module)	ZEND_RSHUTDOWN(module)
-#define PHP_MINFO(module)		ZEND_MINFO(module)
+#define PHP_MINIT(module)		ZEND_MODULE_STARTUP_N(module)
+#define PHP_MSHUTDOWN(module)	ZEND_MODULE_SHUTDOWN_N(module)
+#define PHP_RINIT(module)		ZEND_MODULE_ACTIVATE_N(module)
+#define PHP_RSHUTDOWN(module)	ZEND_MODULE_DEACTIVATE_N(module)
+#define PHP_MINFO(module)		ZEND_MODULE_INFO_N(module)
 
-#define PHP_MINIT_FUNCTION(module)		ZEND_MINIT_FUNCTION(module)
-#define PHP_MSHUTDOWN_FUNCTION(module)	ZEND_MSHUTDOWN_FUNCTION(module)
-#define PHP_RINIT_FUNCTION(module)		ZEND_RINIT_FUNCTION(module)
-#define PHP_RSHUTDOWN_FUNCTION(module)	ZEND_RSHUTDOWN_FUNCTION(module)
-#define PHP_MINFO_FUNCTION(module)		ZEND_MINFO_FUNCTION(module)
+#define PHP_MINIT_FUNCTION(module)		ZEND_MODULE_STARTUP_D(module)
+#define PHP_MSHUTDOWN_FUNCTION(module)	ZEND_MODULE_SHUTDOWN_D(module)
+#define PHP_RINIT_FUNCTION(module)		ZEND_MODULE_ACTIVATE_D(module)
+#define PHP_RSHUTDOWN_FUNCTION(module)	ZEND_MODULE_DEACTIVATE_D(module)
+#define PHP_MINFO_FUNCTION(module)		ZEND_MODULE_INFO_D(module)
 
 #endif							/* PHP3_COMPAT_H */
