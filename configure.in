@@ -372,19 +372,6 @@ abs_builddir=`pwd`
 AC_SUBST(abs_srcdir)
 AC_SUBST(abs_builddir)
 
-RESULT=no
-AC_MSG_CHECKING(whether to enable versioning)
-AC_ARG_ENABLE(versioning,
-[  --enable-versioning     Take advantage of versioning and scoping.
-                          See INSTALL for more information],
-[
-  if test "$enableval" = "yes" ; then
-    EXTRA_LDFLAGS="-export-symbols \$(srcdir)/php.sym"
-    RESULT="yes"
-  fi
-])
-AC_MSG_RESULT($RESULT)
-
 AC_MSG_CHECKING(whether to use a configuration file)
 AC_ARG_WITH(config-file-path,
 [  --with-config-file-path=PATH  
@@ -598,6 +585,20 @@ AC_SUBST(EXTRA_LDFLAGS)
 esyscmd(./scripts/config-stubs ext)
 
 PHP_OUTPUT(sapi/$PHP_SAPI/Makefile)
+
+RESULT=no
+AC_MSG_CHECKING(whether to enable versioning)
+AC_ARG_ENABLE(versioning,
+[  --enable-versioning     Export only required symbols.
+                          See INSTALL for more information],
+[
+  test -z "$PHP_SYM_FILE" && PHP_SYM_FILE="$abs_srcdir/sapi/$PHP_SAPI/php.sym"
+  if test "$enableval" = "yes" && test -f "$PHP_SYM_FILE"; then
+    EXTRA_LDFLAGS="-export-symbols $PHP_SYM_FILE"
+    RESULT="yes"
+  fi
+])
+AC_MSG_RESULT($RESULT)
 
 divert(4)
 

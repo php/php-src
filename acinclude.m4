@@ -3,6 +3,16 @@ dnl
 dnl This file contains local autoconf functions.
 
 dnl
+dnl PHP_SET_SYM_FILE(path)
+dnl
+dnl set the path of the file which contains the symbol export list
+dnl
+AC_DEFUN(PHP_SET_SYM_FILE,
+[
+  PHP_SYM_FILE="$1"
+])
+
+dnl
 dnl PHP_BUILD_SHARED
 dnl
 AC_DEFUN(PHP_BUILD_SHARED,[
