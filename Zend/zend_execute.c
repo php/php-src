@@ -1764,10 +1764,10 @@ static inline int zend_binary_assign_op_helper(int (*binary_op)(zval *result, zv
 	if(Z_TYPE_PP(var_ptr) == IS_OBJECT && Z_OBJ_HANDLER_PP(var_ptr, get)
 	   && Z_OBJ_HANDLER_PP(var_ptr, set)) {
 		/* proxy object */
-		zval *objval = Z_OBJ_HANDLER_PP(var_ptr, get)(*var_ptr);
+		zval *objval = Z_OBJ_HANDLER_PP(var_ptr, get)(*var_ptr TSRMLS_CC);
 		objval->refcount++;
 		binary_op(objval, objval, value TSRMLS_CC);
-		Z_OBJ_HANDLER_PP(var_ptr, set)(var_ptr, objval);
+		Z_OBJ_HANDLER_PP(var_ptr, set)(var_ptr, objval TSRMLS_CC);
 		zval_ptr_dtor(&objval);
 	} else {
 		binary_op(*var_ptr, *var_ptr, value TSRMLS_CC);
@@ -1908,10 +1908,10 @@ static inline int zend_incdec_op_helper(incdec_t incdec_op_arg, ZEND_OPCODE_HAND
 	if(Z_TYPE_PP(var_ptr) == IS_OBJECT && Z_OBJ_HANDLER_PP(var_ptr, get)
 	   && Z_OBJ_HANDLER_PP(var_ptr, set)) {
 		/* proxy object */
-		zval *val = Z_OBJ_HANDLER_PP(var_ptr, get)(*var_ptr);
+		zval *val = Z_OBJ_HANDLER_PP(var_ptr, get)(*var_ptr TSRMLS_CC);
 		val->refcount++;
 		incdec_op(val);
-		Z_OBJ_HANDLER_PP(var_ptr, set)(var_ptr, val);
+		Z_OBJ_HANDLER_PP(var_ptr, set)(var_ptr, val TSRMLS_CC);
 		zval_ptr_dtor(&val);
 	} else {
 		incdec_op(*var_ptr);
