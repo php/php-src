@@ -31,15 +31,21 @@ PHP_MINFO_FUNCTION(openssl);
 PHP_FUNCTION(openssl_get_privatekey);
 PHP_FUNCTION(openssl_get_publickey);
 PHP_FUNCTION(openssl_free_key);
-#if 0
-PHP_FUNCTION(openssl_read_publickey);
-PHP_FUNCTION(openssl_read_x509);
-PHP_FUNCTION(openssl_free_x509);
-#endif
+PHP_FUNCTION(openssl_x509_read);
+PHP_FUNCTION(openssl_x509_free);
 PHP_FUNCTION(openssl_sign);
 PHP_FUNCTION(openssl_verify);
 PHP_FUNCTION(openssl_seal);
 PHP_FUNCTION(openssl_open);
+
+PHP_FUNCTION(openssl_pkcs7_verify);
+PHP_FUNCTION(openssl_pkcs7_decrypt);
+PHP_FUNCTION(openssl_pkcs7_sign);
+PHP_FUNCTION(openssl_pkcs7_encrypt);
+
+PHP_FUNCTION(openssl_error_string);
+PHP_FUNCTION(openssl_x509_parse);
+PHP_FUNCTION(openssl_x509_checkpurpose);
 
 #else
 
