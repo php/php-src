@@ -2523,7 +2523,7 @@ PHP_FUNCTION(pdf_close_image) {
 }
 /* }}} */
 
-/* {{{ proto void pdf_place_image(int pdf, int pdfimage, int x, int y, int scale)
+/* {{{ proto void pdf_place_image(int pdf, int pdfimage, double x, double y, double scale)
    Places image in the pdf document */
 PHP_FUNCTION(pdf_place_image) {
 	pval *arg1, *arg2, *arg3, *arg4, *arg5;
