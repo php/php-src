@@ -122,6 +122,19 @@ Exceptions:
      existing.  End users should use function_exists() to test for the
      existence of a function
 
+[11] Prefer emalloc(), efree(), estrdup(), etc. to their standard C library
+     counterparts.  These functions implement an internal "safety-net"
+     mechanism that ensures the deallocation of any unfreed memory at the
+     end of a request.  They also provide useful allocation and overflow
+     information while running in debug mode.
+
+     In almost all cases, memory returned to the engine must be allocated
+     using emalloc().
+
+     The use of malloc() should be limited to cases where a third-party
+     library may need to control or free the memory, or when the memory in
+     question needs to survive between multiple requests.
+
 Naming Conventions
 ------------------
 
