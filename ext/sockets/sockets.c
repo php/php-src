@@ -77,23 +77,9 @@ typedef struct {
 	unsigned char info[128];
 } php_sockaddr_storage;
 
-/* Perform convert_to_long_ex on a list of items */
-static void v_convert_to_long_ex(int items,...)
-{
-	va_list ap;
-	zval **arg;
-	int i;
 
-	va_start(ap, items);
-
-	for (i = 0; i < items; i++) {
-		arg = va_arg(ap, zval **);
-		convert_to_long_ex(arg);
-	}
-	va_end(ap);
-
-}
-
+static int le_iov;
+static int le_destroy;
 
 static unsigned char second_and_third_args_force_ref[] =
 {3, BYREF_NONE, BYREF_FORCE, BYREF_FORCE};
@@ -202,9 +188,8 @@ static void destroy_iovec(zend_rsrc_list_entry *rsrc)
 
 PHP_MINIT_FUNCTION(sockets)
 {
-	SOCKETSLS_FETCH();
-	SOCKETSG(le_destroy) = zend_register_list_destructors_ex(destroy_fd_sets, NULL, "sockets file descriptor set", module_number);
-	SOCKETSG(le_iov)     = zend_register_list_destructors_ex(destroy_iovec,   NULL, "sockets i/o vector", module_number);
+	le_destroy = zend_register_list_destructors_ex(destroy_fd_sets, NULL, "sockets file descriptor set", module_number);
+	le_iov     = zend_register_list_destructors_ex(destroy_iovec,   NULL, "sockets i/o vector", module_number);
 
 	REGISTER_LONG_CONSTANT("AF_UNIX", AF_UNIX, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("AF_INET", AF_INET, CONST_CS | CONST_PERSISTENT);
@@ -265,24 +250,34 @@ PHP_MINFO_FUNCTION(sockets)
 PHP_FUNCTION(fd_alloc)
 {
 	fd_set *set;
-	SOCKETSLS_FETCH();
 
-	set = (fd_set *)emalloc(sizeof(fd_set));
+	set = (fd_set *) emalloc(sizeof(fd_set));
 	if (!set) {
 		php_error(E_WARNING, "Can't allocate memory for fd_set");
 		RETURN_FALSE;
 	}
 	
-	ZEND_REGISTER_RESOURCE(return_value, set, SOCKETSG(le_destroy));
+	ZEND_REGISTER_RESOURCE(return_value, set, le_destroy);
 }
 /* }}} */
 
-/* {{{ proto void fd_dealloc(void)
+/* {{{ proto bool fd_dealloc(void)
    De-allocates a file descriptor set */
-/*   ** BUG: This is currently a no-op! */
 PHP_FUNCTION(fd_dealloc)
 {
-	RETURN_NULL();
+	zval **set;
+	fd_set *the_set;
+	
+	if (ZEND_NUM_ARGS() != 1 ||
+	    zend_get_parameters_ex(1, &set) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	
+	ZEND_FETCH_RESOURCE(the_set, fd_set *, set, -1, "File descriptor set", le_destroy);
+	
+	zend_list_delete(Z_LVAL_PP(set));
+	
+	RETURN_TRUE;
 }
 /* }}} */
 
@@ -292,7 +287,6 @@ PHP_FUNCTION(fd_set)
 {
 	zval **set, **fd;
 	fd_set *the_set;
-	SOCKETSLS_FETCH();
 
 	if (ZEND_NUM_ARGS() != 2 || 
 	    zend_get_parameters_ex(2, &fd, &set) == FAILURE) {
@@ -300,7 +294,7 @@ PHP_FUNCTION(fd_set)
 	}
 	convert_to_long_ex(fd);
 
-	ZEND_FETCH_RESOURCE(the_set, fd_set *, set, -1, "File descriptor set", SOCKETSG(le_destroy));
+	ZEND_FETCH_RESOURCE(the_set, fd_set *, set, -1, "File descriptor set", le_destroy);
 
 	if (Z_LVAL_PP(fd) < 0) {
 		php_error(E_WARNING, "Can't set negative fd falues in a set");
@@ -319,7 +313,6 @@ PHP_FUNCTION(fd_clear)
 {
 	zval **set, **fd;
 	fd_set *the_set;
-	SOCKETSLS_FETCH();
 
 	if (ZEND_NUM_ARGS() != 2 || 
 	    zend_get_parameters_ex(2, &fd, &set) == FAILURE) {
@@ -327,7 +320,7 @@ PHP_FUNCTION(fd_clear)
 	}
 	convert_to_long_ex(fd);
 
-	ZEND_FETCH_RESOURCE(the_set, fd_set *, set, -1, "File descriptor set", SOCKETSG(le_destroy));
+	ZEND_FETCH_RESOURCE(the_set, fd_set *, set, -1, "File descriptor set", le_destroy);
 
 	if (Z_LVAL_PP(fd) < 0) {
 		php_error(E_WARNING, "Can't clear negative fd values in a set");
@@ -346,7 +339,6 @@ PHP_FUNCTION(fd_isset)
 {
 	zval **set, **fd;
 	fd_set *the_set;
-	SOCKETSLS_FETCH();
 
 	if (ZEND_NUM_ARGS() != 2 || 
 	    zend_get_parameters_ex(2, &fd, &set) == FAILURE) {
@@ -354,7 +346,7 @@ PHP_FUNCTION(fd_isset)
 	}
 	convert_to_long_ex(fd);
 
-	ZEND_FETCH_RESOURCE(the_set, fd_set *, set, -1, "File descriptor set", SOCKETSG(le_destroy));
+	ZEND_FETCH_RESOURCE(the_set, fd_set *, set, -1, "File descriptor set", le_destroy);
 
 	if (Z_LVAL_PP(fd) < 0) {
 		php_error(E_WARNING, "Can't check for negative fd values in a set");
@@ -375,14 +367,13 @@ PHP_FUNCTION(fd_zero)
 {
 	zval **set;
 	fd_set *the_set;
-	SOCKETSLS_FETCH();
 
 	if (ZEND_NUM_ARGS() != 1 || 
 	    zend_get_parameters_ex(1, &set) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	ZEND_FETCH_RESOURCE(the_set, fd_set *, set, -1, "File descriptor set", SOCKETSG(le_destroy));
+	ZEND_FETCH_RESOURCE(the_set, fd_set *, set, -1, "File descriptor set", le_destroy);
 
 	FD_ZERO(the_set);
 
@@ -416,31 +407,30 @@ PHP_FUNCTION(select)
 	struct timeval tv;
 	fd_set *rfds, *wfds, *xfds;
 	int ret = 0;
-	SOCKETSLS_FETCH();
 
 	if (ZEND_NUM_ARGS() != 6 || 
 	    zend_get_parameters_ex(6, &max_fd, &readfds, &writefds, &exceptfds, &tv_sec, &tv_usec) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	v_convert_to_long_ex(3, max_fd, tv_sec, tv_usec);
+	multi_convert_to_long_ex(3, max_fd, tv_sec, tv_usec);
 
 	tv.tv_sec  = Z_LVAL_PP(tv_sec);
 	tv.tv_usec = Z_LVAL_PP(tv_usec);
 
 	if (Z_LVAL_PP(readfds) != 0) {
-		ZEND_FETCH_RESOURCE(rfds, fd_set *, readfds, -1, "File descriptor set", SOCKETSG(le_destroy));
+		ZEND_FETCH_RESOURCE(rfds, fd_set *, readfds, -1, "File descriptor set", le_destroy);
 	} else {
 		rfds = NULL;
 	}
 	
 	if (Z_LVAL_PP(writefds) != 0) {
-		ZEND_FETCH_RESOURCE(wfds, fd_set *, writefds, -1, "File descriptor set", SOCKETSG(le_destroy));
+		ZEND_FETCH_RESOURCE(wfds, fd_set *, writefds, -1, "File descriptor set", le_destroy);
 	} else {
 		wfds = NULL;
 	}
 	
 	if (Z_LVAL_PP(exceptfds) != 0) {
-		ZEND_FETCH_RESOURCE(xfds, fd_set *, exceptfds, -1, "File descriptor set", SOCKETSG(le_destroy));
+		ZEND_FETCH_RESOURCE(xfds, fd_set *, exceptfds, -1, "File descriptor set", le_destroy);
 	} else {
 		xfds = NULL;
 	}
@@ -554,7 +544,7 @@ PHP_FUNCTION(listen)
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &fd, &backlog) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	v_convert_to_long_ex(2, fd, backlog);
+	multi_convert_to_long_ex(2, fd, backlog);
 
 	ret = listen(Z_LVAL_PP(fd), Z_LVAL_PP(backlog));
 	
@@ -596,7 +586,7 @@ PHP_FUNCTION(write)
 		WRONG_PARAM_COUNT;
 	}
 	
-	v_convert_to_long_ex(2, fd, length);
+	multi_convert_to_long_ex(2, fd, length);
 	convert_to_string_ex(buf);
 
 	if (Z_STRLEN_PP(buf) < Z_LVAL_PP(length)) {
@@ -675,7 +665,7 @@ PHP_FUNCTION(read)
 		WRONG_PARAM_COUNT;
 	}
 
-	v_convert_to_long_ex(ZEND_NUM_ARGS() - 1, fd, length, binary);
+	multi_convert_to_long_ex(ZEND_NUM_ARGS() - 1, fd, length, binary);
 	convert_to_string_ex(buf);
 
 	if (ZEND_NUM_ARGS() == 4) {
@@ -745,7 +735,7 @@ PHP_FUNCTION(getsockname)
 	    zend_get_parameters_ex(ZEND_NUM_ARGS(), &fd, &addr, &port) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	v_convert_to_long_ex(ZEND_NUM_ARGS() - 1, fd, port);
+	multi_convert_to_long_ex(ZEND_NUM_ARGS() - 1, fd, port);
 	convert_to_string_ex(addr);
 
 	sa = (struct sockaddr *) &sa_storage;
@@ -866,7 +856,7 @@ PHP_FUNCTION(getpeername)
 	    zend_get_parameters_ex(ZEND_NUM_ARGS(), &fd, &addr, &port) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	v_convert_to_long_ex(ZEND_NUM_ARGS() - 1, fd, port);
+	multi_convert_to_long_ex(ZEND_NUM_ARGS() - 1, fd, port);
 	convert_to_string_ex(addr);
 
 	sa = (struct sockaddr *) &sa_storage;
@@ -982,7 +972,7 @@ PHP_FUNCTION(socket)
 	    zend_get_parameters_ex(3, &domain, &type, &protocol) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	v_convert_to_long_ex(3, domain, type, protocol);
+	multi_convert_to_long_ex(3, domain, type, protocol);
 
 	if (Z_LVAL_PP(domain) != AF_INET && Z_LVAL_PP(domain) != AF_UNIX) {
 		php_error(E_WARNING, "invalid socket domain specified - assuming AF_INET");
@@ -1182,7 +1172,6 @@ PHP_FUNCTION(build_iovec)
 	php_iovec_t *vector;
 	struct iovec *vector_array;
 	int i, j, num_vectors, argcount = ZEND_NUM_ARGS();
-	SOCKETSLS_FETCH();
 	
 	args = emalloc(argcount * sizeof(zval *));
 
@@ -1209,7 +1198,7 @@ PHP_FUNCTION(build_iovec)
 	vector->iov_array = vector_array;
 	vector->count = num_vectors;
 
-	ZEND_REGISTER_RESOURCE(return_value, vector, SOCKETSG(le_iov));
+	ZEND_REGISTER_RESOURCE(return_value, vector, le_iov);
 }
 /* }}} */
 
@@ -1219,14 +1208,13 @@ PHP_FUNCTION(fetch_iovec)
 {
 	zval **iovec_id, **iovec_position;
 	php_iovec_t *vector;
-	SOCKETSLS_FETCH();
-
+	
 	if (ZEND_NUM_ARGS() != 2 || 
 	    zend_get_parameters_ex(2, &iovec_id, &iovec_position) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
-	ZEND_FETCH_RESOURCE(vector, php_iovec_t *, iovec_id, -1, "IO vector table", SOCKETSG(le_iov));
+	ZEND_FETCH_RESOURCE(vector, php_iovec_t *, iovec_id, -1, "IO vector table", le_iov);
 
 	if (Z_LVAL_PP(iovec_position) > vector->count) {
 		php_error(E_WARNING, "Can't access a vector position past the amount of vectors set in the array");
@@ -1243,14 +1231,13 @@ PHP_FUNCTION(set_iovec)
 {
 	zval **iovec_id, **iovec_position, **new_val;
 	php_iovec_t *vector;
-	SOCKETSLS_FETCH();
-
+	
 	if (ZEND_NUM_ARGS() != 3 || 
 	    zend_get_parameters_ex(3, &iovec_id, &iovec_position, &new_val) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
-	ZEND_FETCH_RESOURCE(vector, php_iovec_t *, iovec_id, -1, "IO vector table", SOCKETSG(le_iov));
+	ZEND_FETCH_RESOURCE(vector, php_iovec_t *, iovec_id, -1, "IO vector table", le_iov);
 
 	if (Z_LVAL_PP(iovec_position) > vector->count) {
 		php_error(E_WARNING, "Can't access a vector position outside of the vector array bounds");
@@ -1275,14 +1262,13 @@ PHP_FUNCTION(add_iovec)
 	zval **iovec_id, **iov_len;
 	php_iovec_t *vector;
 	struct iovec *vector_array;
-	SOCKETSLS_FETCH();
-
+	
 	if (ZEND_NUM_ARGS() != 2 || 
 	    zend_get_parameters_ex(2, &iovec_id, &iov_len) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	ZEND_FETCH_RESOURCE(vector, php_iovec_t *, iovec_id, -1, "IO vector table", SOCKETSG(le_iov));
+	ZEND_FETCH_RESOURCE(vector, php_iovec_t *, iovec_id, -1, "IO vector table", le_iov);
 
 	vector_array = emalloc(sizeof(struct iovec) * (vector->count + 2));
 	memcpy(vector_array, vector->iov_array, sizeof(struct iovec) * vector->count);
@@ -1306,14 +1292,13 @@ PHP_FUNCTION(delete_iovec)
 	php_iovec_t *vector;
 	struct iovec *vector_array;
 	int i;
-	SOCKETSLS_FETCH();
-
+	
 	if (ZEND_NUM_ARGS() != 2 || 
 	    zend_get_parameters_ex(2, &iovec_id, &iov_pos) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	ZEND_FETCH_RESOURCE(vector, php_iovec_t *, iovec_id, -1, "IO vector table", SOCKETSG(le_iov));
+	ZEND_FETCH_RESOURCE(vector, php_iovec_t *, iovec_id, -1, "IO vector table", le_iov);
 
 	if (Z_LVAL_PP(iov_pos) > vector->count) {
 		php_error(E_WARNING, "Can't delete an IO vector that is out of array bounds");
@@ -1344,13 +1329,12 @@ PHP_FUNCTION(free_iovec)
 	zval **iovec_id;
 	php_iovec_t *vector;
 	int pos;
-	SOCKETSLS_FETCH();
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &iovec_id) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
-	ZEND_FETCH_RESOURCE(vector, php_iovec_t *, iovec_id, -1, "IO vector table", SOCKETSG(le_iov));
+	ZEND_FETCH_RESOURCE(vector, php_iovec_t *, iovec_id, -1, "IO vector table", le_iov);
 
 	zend_list_delete(Z_LVAL_PP(iovec_id));
 
@@ -1365,14 +1349,13 @@ PHP_FUNCTION(readv)
 	zval **fd, **iovec_id;
 	php_iovec_t *vector;
 	int ret;
-	SOCKETSLS_FETCH();
 
 	if (ZEND_NUM_ARGS() != 2 || 
 	    zend_get_parameters_ex(2, &fd, &iovec_id) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	ZEND_FETCH_RESOURCE(vector, php_iovec_t *, iovec_id, -1, "IO vector table", SOCKETSG(le_iov));
+	ZEND_FETCH_RESOURCE(vector, php_iovec_t *, iovec_id, -1, "IO vector table", le_iov);
 
 	ret = readv(Z_LVAL_PP(fd), vector->iov_array, vector->count);
 	
@@ -1387,14 +1370,13 @@ PHP_FUNCTION(writev)
 	zval **fd, **iovec_id;
 	php_iovec_t *vector;
 	int ret;
-	SOCKETSLS_FETCH();
 
 	if (ZEND_NUM_ARGS() != 2 || 
 	    zend_get_parameters_ex(2, &fd, &iovec_id) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
-	ZEND_FETCH_RESOURCE(vector, php_iovec_t *, iovec_id, -1, "IO vector table", SOCKETSG(le_iov));
+	ZEND_FETCH_RESOURCE(vector, php_iovec_t *, iovec_id, -1, "IO vector table", le_iov);
 
 	ret = writev(Z_LVAL_PP(fd), vector->iov_array, vector->count);
 	
@@ -1415,7 +1397,7 @@ PHP_FUNCTION(recv)
 	    zend_get_parameters_ex(4, &fd, &buf, &len, &flags) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	v_convert_to_long_ex(3, fd, len, flags);
+	multi_convert_to_long_ex(3, fd, len, flags);
 	convert_to_string_ex(buf);
 
 	recv_buf = emalloc(Z_LVAL_PP(len) + 2);
@@ -1452,7 +1434,7 @@ PHP_FUNCTION(send)
 	    zend_get_parameters_ex(4, &fd, &buf, &len, &flags) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	v_convert_to_long_ex(3, fd, len, flags);
+	multi_convert_to_long_ex(3, fd, len, flags);
 	convert_to_string_ex(buf);
 
 	ret = send(Z_LVAL_PP(fd), Z_STRVAL_PP(buf),
@@ -1614,7 +1596,7 @@ PHP_FUNCTION(sendto)
 	if (ret == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	v_convert_to_long_ex(3, fd, len, flags);
+	multi_convert_to_long_ex(3, fd, len, flags);
 	convert_to_string_ex(buf);
 
 	if (ZEND_NUM_ARGS() == 6) {
@@ -1697,7 +1679,6 @@ PHP_FUNCTION(recvmsg)
 	struct cmsghdr *ctl_buf;
 	socklen_t salen = sizeof(sa_storage);
 	int ret;
-	SOCKETSLS_FETCH();
 
 	switch (ZEND_NUM_ARGS())
 	{
@@ -1715,14 +1696,14 @@ PHP_FUNCTION(recvmsg)
 		WRONG_PARAM_COUNT;
 	}
 
-	v_convert_to_long_ex(3, fd, controllen, flags);
+	multi_convert_to_long_ex(3, fd, controllen, flags);
 	convert_to_string_ex(control);
 	convert_to_string_ex(addr);
 	if (ZEND_NUM_ARGS() == 7) {
 		convert_to_long_ex(port);
 	}
 
-	ZEND_FETCH_RESOURCE(iov, php_iovec_t *, iovec, -1, "IO vector table", SOCKETSG(le_iov));
+	ZEND_FETCH_RESOURCE(iov, php_iovec_t *, iovec, -1, "IO vector table", le_iov);
 
 	ret = getsockname(Z_LVAL_PP(fd), sa, &salen);
 	if (ret < 0) {
@@ -1860,7 +1841,6 @@ PHP_FUNCTION(sendmsg)
 	int ret, argc = ZEND_NUM_ARGS();
 	struct sockaddr sa;
 	int salen;
-	SOCKETSLS_FETCH();
 
 	if (argc < 4 || argc > 5 ||
 	    zend_get_parameters_ex(argc, &fd, &iovec, &flags, &addr, &port) == FAILURE) {
@@ -1873,7 +1853,7 @@ PHP_FUNCTION(sendmsg)
 		RETURN_LONG(-errno);
 	}
 
-	ZEND_FETCH_RESOURCE(iov, php_iovec_t *, iovec, -1, "IO vector table", SOCKETSG(le_iov));
+	ZEND_FETCH_RESOURCE(iov, php_iovec_t *, iovec, -1, "IO vector table", le_iov);
 
 	switch(sa.sa_family)
 	{
@@ -1947,7 +1927,7 @@ PHP_FUNCTION(getsockopt)
 		WRONG_PARAM_COUNT;
 	}
 
-	v_convert_to_long_ex(3, fd, level, optname);
+	multi_convert_to_long_ex(3, fd, level, optname);
 	/* optname is set on the way out .. */
 
 	if (Z_LVAL_PP(level) == SO_LINGER) {
@@ -1992,7 +1972,6 @@ PHP_FUNCTION(setsockopt)
 	struct linger lv;
 	int ov;
 	int optlen;
-
 	errno = 0;
 
 	if (ZEND_NUM_ARGS() != 4 || 
@@ -2000,7 +1979,7 @@ PHP_FUNCTION(setsockopt)
 		WRONG_PARAM_COUNT;
 	}
 
-	v_convert_to_long_ex(3, fd, level, optname);
+	multi_convert_to_long_ex(3, fd, level, optname);
 
 	if (Z_LVAL_PP(optname) == SO_LINGER) {
 		HashTable *ht;
@@ -2052,8 +2031,7 @@ PHP_FUNCTION(socketpair)
 	    zend_get_parameters_ex(4, &domain, &type, &protocol, &fds) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-
-	v_convert_to_long_ex(3, domain, type, protocol);
+	multi_convert_to_long_ex(3, domain, type, protocol);
 
 	if (Z_LVAL_PP(domain) != AF_INET && Z_LVAL_PP(domain) != AF_UNIX) {
 		php_error(E_WARNING, "invalid socket domain specified -- assuming AF_INET");
@@ -2089,7 +2067,6 @@ PHP_FUNCTION(socketpair)
 
 /* {{{ proto int shutdown(int fd, int how)
    Shuts down a socket for receiving, sending, or both. */
-
 PHP_FUNCTION(shutdown)
 {
 	zval **fd, **how;
