@@ -1,5 +1,5 @@
 --TEST--
-Bug #27278 (sprintf(): global variable changing type when passed to function by value)
+Bug #27278 (*printf() functions treat arguments as if passed by reference)
 --FILE--
 <?php
 
