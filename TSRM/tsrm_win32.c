@@ -67,11 +67,10 @@ TSRM_API void tsrm_win32_shutdown(void)
 #endif
 }
 
-static ProcessPair* process_get(FILE *stream)
+static ProcessPair* process_get(FILE *stream TSRMLS_DC)
 {
 	ProcessPair* ptr;
 	ProcessPair* newptr;
-	TSRMLS_FETCH();
 	
 	for (ptr = TWG(process); ptr < (TWG(process) + TWG(process_size)); ptr++) {
 		if (ptr->stream == stream) {
@@ -102,7 +101,7 @@ static HANDLE dupHandle(HANDLE fh, BOOL inherit) {
 	return copy;
 }
 
-TSRM_API FILE* popen(const char *command, const char *type)
+TSRM_API FILE *popen(const char *command, const char *type)
 {
 	FILE *stream = NULL;
 	int fno, str_len = strlen(type), read, mode;
@@ -151,7 +150,7 @@ TSRM_API FILE* popen(const char *command, const char *type)
 	free(cmd);
 
 	CloseHandle(process.hThread);
-	proc = process_get(NULL);
+	proc = process_get(NULL TSRMLS_CC);
 
 	if (read) {
 		fno = _open_osfhandle((long)in, _O_RDONLY | mode);
@@ -167,12 +166,13 @@ TSRM_API FILE* popen(const char *command, const char *type)
 	return stream;
 }
 
-TSRM_API int pclose(FILE* stream)
+TSRM_API int pclose(FILE *stream)
 {
 	DWORD termstat = 0;
 	ProcessPair* process;
+	TSRMLS_FETCH();
 
-	if ((process = process_get(stream)) == NULL) {
+	if ((process = process_get(stream TSRMLS_CC)) == NULL) {
 		return 0;
 	}
 
