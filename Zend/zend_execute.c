@@ -35,28 +35,6 @@
 #define get_zval_ptr(node, Ts, should_free, type) _get_zval_ptr(node, Ts, should_free TSRMLS_CC)
 #define get_zval_ptr_ptr(node, Ts, type) _get_zval_ptr_ptr(node, Ts TSRMLS_CC)
 
-#define get_incdec_op(op, opcode) \
-	switch (opcode) { \
-		case ZEND_PRE_INC: \
-		case ZEND_POST_INC: \
-		case ZEND_PRE_INC_OBJ: \
-		case ZEND_POST_INC_OBJ: \
-			(op) = increment_function; \
-			break; \
-		case ZEND_PRE_DEC: \
-		case ZEND_POST_DEC: \
-		case ZEND_PRE_DEC_OBJ: \
-		case ZEND_POST_DEC_OBJ: \
-			(op) = decrement_function; \
-			break; \
-		default: \
-			(op) = NULL; \
-			break; \
-	} \
-
-/* These globals don't have to be thread safe since they're never modified */
-
-
 /* Prototypes */
 static void zend_fetch_var_address(zend_op *opline, temp_variable *Ts, int type TSRMLS_DC);
 static void zend_fetch_dimension_address(znode *result, znode *op1, znode *op2, temp_variable *Ts, int type TSRMLS_DC);
