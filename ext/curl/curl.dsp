@@ -158,8 +158,17 @@ LINK32=link.exe
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 # Begin Source File
 
-SOURCE=.\curl.c
+SOURCE=.\interface.c
 # End Source File
+
+# Begin Source File
+SOURCE=.\multi.c
+# End Source File
+
+# Begin Source File
+SOURCE=.\streams.c
+# End Source File
+
 # End Group
 # Begin Group "Header Files"
 
