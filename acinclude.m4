@@ -1067,6 +1067,7 @@ AC_DEFUN([PHP_CHECK_CC_OPTION],[
 	  AC_MSG_RESULT([no])
     fi
   fi
+  rm -rf conftest*
 ])
 
 AC_DEFUN([PHP_REGEX],[
