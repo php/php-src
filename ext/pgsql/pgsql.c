@@ -2886,7 +2886,7 @@ PHPAPI int php_pgsql_metadata(PGconn *pg_link, const char *table_name, zval *met
 	
 	pg_result = PQexec(pg_link, querystr.c);
 	if (PQresultStatus(pg_result) != PGRES_TUPLES_OK || (num_rows = PQntuples(pg_result)) == 0) {
-		php_error(E_NOTICE, "%s(): Dailed to query metadata for '%s' table %s",
+		php_error(E_NOTICE, "%s(): Failed to query metadata for '%s' table %s",
 				  get_active_function_name(TSRMLS_C), table_name, querystr.c);
 		smart_str_free(&querystr);
 		PQclear(pg_result);
