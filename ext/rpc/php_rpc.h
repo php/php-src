@@ -16,9 +16,9 @@ extern zend_module_entry rpc_module_entry;
 #include "TSRM.h"
 #endif
 
-PHP_MINIT_FUNCTION(rpc);
-PHP_MSHUTDOWN_FUNCTION(rpc);
-PHP_MINFO_FUNCTION(rpc);
+ZEND_MINIT_FUNCTION(rpc);
+ZEND_MSHUTDOWN_FUNCTION(rpc);
+ZEND_MINFO_FUNCTION(rpc);
 
 ZEND_FUNCTION(rpc_load);
 ZEND_FUNCTION(rpc_call);
