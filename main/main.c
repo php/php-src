@@ -103,10 +103,6 @@ static void php_build_argv(char *s, zval *track_vars_array ELS_DC PLS_DC);
 
 void *gLock;					/*mutex variable */
 
-
-/* True globals (no need for thread safety) */
-HashTable configuration_hash;
-
 #define SAFE_FILENAME(f) ((f)?(f):"-")
 
 static PHP_INI_MH(OnSetPrecision)

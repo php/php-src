@@ -136,8 +136,7 @@ static void php_config_ini_parser_cb(zval *arg1, zval *arg2, int callback_type, 
 				} else {
 					zend_hash_update(&configuration_hash, Z_STRVAL_P(arg1), Z_STRLEN_P(arg1)+1, arg2, sizeof(zval), (void **) &entry);
 					Z_STRVAL_P(entry) = zend_strndup(Z_STRVAL_P(entry), Z_STRLEN_P(entry));
-					php_alter_ini_entry(Z_STRVAL_P(arg1), Z_STRLEN_P(arg1)+1, Z_STRVAL_P(arg2), Z_STRLEN_P(arg2)+1, PHP_INI_SYSTEM, PHP_INI_STAGE_STARTUP);
-				}
+					}
 			}
 			break;
 		case ZEND_INI_PARSER_SECTION:
