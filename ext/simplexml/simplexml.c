@@ -189,7 +189,6 @@ sxe_property_write(zval *object, zval *member, zval *value TSRMLS_DC)
 	sxe = php_sxe_fetch_object(object TSRMLS_CC);
 
 	GET_NODE(sxe, node);
-	node = node->xmlChildrenNode;
 
 	while (node) {
 		if (!xmlStrcmp(node->name, name)) {
