@@ -174,3 +174,6 @@
 
 /* Win32 supports strcoll */
 #define HAVE_STRCOLL 1
+
+#undef HAVE_ATOF_ACCEPTS_NAN
+#undef HAVE_ATOF_ACCEPTS_INF
