@@ -20,8 +20,21 @@ AC_ARG_WITH(gd,
         AC_MSG_RESULT(yes (static))
         AC_ADD_LIBRARY(gd)
       fi
-      AC_CHECK_LIB(gd, gdImageString16, [ AC_DEFINE(HAVE_LIBGD13) ])
-      ac_cv_lib_gd_gdImageLine=yes
+        old_LDFLAGS=$LDFLAGS
+        LDFLAGS="$LDFLAGS -L$GD_LIB"
+		old_LIBS=$LIBS
+        AC_CHECK_LIB(gd, gdImageString16, [ AC_DEFINE(HAVE_LIBGD13) ])
+		LIBS="$LIBS -lpng -lz"
+        AC_CHECK_LIB(gd, gdImageColorResolve, [AC_DEFINE(HAVE_GDIMAGECOLORRESOLVE,1)])
+        AC_CHECK_LIB(gd, gdImageCreateFromPng, [AC_DEFINE(HAVE_GD_PNG, 1)])
+        
+        LIBS=$old_LIBS
+        LDFLAGS=$old_LDFLAGS
+        if test "$ac_cv_lib_gd_gdImageCreateFromPng" = "yes"; then
+          AC_ADD_LIBRARY(png)
+          AC_ADD_LIBRARY(z)
+        fi
+        ac_cv_lib_gd_gdImageLine=yes
       ;;
     *)
 dnl A whole whack of possible places where this might be
@@ -45,7 +58,6 @@ dnl A whole whack of possible places where this might be
       test -f $withval/libgd.a && GD_LIB="$withval"
       test -f $withval/gd/libgd.a && GD_LIB="$withval/gd"
       test -f $withval/gd1.3/libgd.a && GD_LIB="$withval/gd1.3"
-
       if test -n "$GD_INCLUDE" && test -n "$GD_LIB" ; then
         AC_DEFINE(HAVE_LIBGD)
         if test "$shared" = "yes"; then
