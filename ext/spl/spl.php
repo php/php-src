@@ -315,7 +315,7 @@ class spl_dir implements spl_sequence {
 	 *
 	 * \param $path directory to iterate.
 	 */
-	private function __construct($path);
+	function __construct($path);
 
 	/*! \copydoc spl_sequence::rewind
 	 */
