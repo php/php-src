@@ -1138,6 +1138,7 @@ void zend_do_receive_arg(zend_uchar op, znode *var, znode *offset, znode *initia
 	if (class_type->op_type != IS_UNUSED) {
 		cur_arg_info->class_name = class_type->u.constant.value.str.val;
 		cur_arg_info->class_name_len = class_type->u.constant.value.str.len;
+		cur_arg_info->allow_null = 0;
 	} else {
 		cur_arg_info->class_name = NULL;
 		cur_arg_info->class_name_len = 0;
