@@ -569,6 +569,7 @@ static int preg_do_repl_func(zval *function, char *subject, int *offsets, int co
 	int			 result_len;		/* Return value length */
 	int			 i;
 	CLS_FETCH();
+	ELS_FETCH();
 
 	MAKE_STD_ZVAL(subpats);
 	array_init(subpats);
