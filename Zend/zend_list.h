@@ -62,8 +62,8 @@ ZEND_API int zend_list_delete(int id);
 ZEND_API int zend_plist_delete(int id);
 ZEND_API void *zend_list_find(int id, int *type);
 ZEND_API void *zend_plist_find(int id, int *type);
-ZEND_API void *zend_fetch_resource(zval *passed_id, int default_id, char *resource_type_name, int resource_type);
-ZEND_API void *zend_fetch_resource_ex(zval *passed_id, int default_id, char *resource_type_name, int num_resource_types, ...);
+ZEND_API void *zend_fetch_resource(zval **passed_id, int default_id, char *resource_type_name, int resource_type);
+ZEND_API void *zend_fetch_resource_ex(zval **passed_id, int default_id, char *resource_type_name, int num_resource_types, ...);
 
 extern ZEND_API int le_index_ptr;  /* list entry type for index pointers */
 

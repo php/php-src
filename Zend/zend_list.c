@@ -138,13 +138,13 @@ ZEND_API void *zend_plist_find(int id, int *type)
 }
 
 
-ZEND_API void *zend_fetch_resource(zval *passed_id, int default_id, char *resource_type_name, int resource_type)
+ZEND_API void *zend_fetch_resource(zval **passed_id, int default_id, char *resource_type_name, int resource_type)
 {
 	return zend_fetch_resource_ex(passed_id, default_id, resource_type_name, 1, resource_type);
 }
 
 
-ZEND_API void *zend_fetch_resource_ex(zval *passed_id, int default_id, char *resource_type_name, int num_resource_types, ...)
+ZEND_API void *zend_fetch_resource_ex(zval **passed_id, int default_id, char *resource_type_name, int num_resource_types, ...)
 {
 	int id;
 	int actual_resource_type;
@@ -154,15 +154,17 @@ ZEND_API void *zend_fetch_resource_ex(zval *passed_id, int default_id, char *res
 
 	if (default_id==-1) { /* use id */
 		if (!passed_id) {
-			if (resource_type_name)
+			if (resource_type_name) {
 				zend_error(E_WARNING, "No %s resource supplied", resource_type_name);
+			}
 			return NULL;
-		} else if (passed_id->type != IS_RESOURCE) {
-			if (resource_type_name)
+		} else if ((*passed_id)->type != IS_RESOURCE) {
+			if (resource_type_name) {
 				zend_error(E_WARNING, "Supplied argument is not a valid %s resource", resource_type_name);
+			}
 			return NULL;
 		}
-		id = passed_id->value.lval;
+		id = (*passed_id)->value.lval;
 	} else {
 		id = default_id;
 	}
