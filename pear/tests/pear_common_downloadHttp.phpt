@@ -77,6 +77,9 @@ function myCallback($message, $payload)
     echo "Callback Payload: $stuff\n";
 }
 
+echo "Callback fail:\n";
+PEAR_Common::downloadHttp('http://test.poop.php.net/stuff.tgz', $ui, $temp_path, 'myCallback');
+
 cleanall($temp_path);
 
 // ------------------------------------------------------------------------- //
@@ -200,3 +203,12 @@ Callback Payload: i:41655;
 Callback Message: done
 Callback Payload: i:41655;
 Working Callback: passed
+Callback fail:
+Callback Message: setup
+Callback Payload: a:1:{i:0;s:5:"My UI";}
+Callback Message: message
+Callback Payload: s:35:"Using HTTP proxy test.poop.php.net:";
+Callback Message: connfailed
+Callback Payload: a:4:{i:0;s:17:"test.poop.php.net";i:1;i:80;i:2;i:0;i:3;s:39:"The operation completed successfully.
+";}
+Caught error: Connection to `test.poop.php.net:80' failed: The operation completed successfully.
