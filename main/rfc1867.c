@@ -164,9 +164,10 @@ static void php_mime_split(char *buf, int cnt, char *boundary, zval *array_ptr S
 					}
 					/* some other headerfield found, skip it */
 					loc = (char *) memchr(ptr, '\n', rem)+1;
-					while (*loc == ' ' || *loc == '\t')
+					while (*loc == ' ' || *loc == '\t') {
 						/* other field is folded, skip it */
-                                        	loc = (char *) memchr(loc, '\n', rem-(loc-ptr))+1;
+						loc = (char *) memchr(loc, '\n', rem-(loc-ptr))+1;
+					}
 					rem -= (loc - ptr);
 					ptr = loc;
 				}
