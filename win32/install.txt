@@ -1,7 +1,7 @@
 PHP/Windows Installation Notes
 ==============================
 
-Installation on Windows 9x/Me/NT/2000 systems
+Installation on Windows 9x/Me/NT/2000/XP systems
 =============================================
 
 There are two main ways to install PHP for Windows: either
@@ -40,7 +40,7 @@ Windows Manual installation from zip binary distribution
 ========================================================
 
  This install guide will help you manually install and configure
- PHP on your Windows 9x/Me/NT/2000 webservers. This guide was compiled by
+ PHP on your Windows 9x/Me/NT/2000/XP webservers. This guide was compiled by
  Bob Silva. The original version can be found at
  http://www.umesd.k12.or.us/php/win32install.html
 
@@ -99,11 +99,11 @@ Windows Manual installation from zip binary distribution
   php4apache.dll).
 
   Copy the file, php.ini-dist to your %WINDOWS% directory on
-  Windows 95/98 or to your %SYSTEMROOT% directory under Windows NT
-  or Windows 2000 and rename it to php.ini. Your %WINDOWS% or
+  Windows 95/98 or to your %SYSTEMROOT% directory under Windows NT,
+  Windows 2000 or Windows XP and rename it to php.ini. Your %WINDOWS% or
   %SYSTEMROOT% directory is typically:
    c:\windows for Windows 95/98
-   c:\winnt or c:\winnt40 for NT/2000 servers
+   c:\winnt or c:\winnt40 for NT/2000/XP servers
 
   Edit your php.ini file:
 
@@ -129,7 +129,7 @@ Windows Manual installation from zip binary distribution
    On PWS and IIS, you can set the browscap.ini
    to point to: 'c:\windows\system\inetsrv\browscap.ini' on
    Windows 9x/Me and 'c:\winnt\system32\inetsrv\browscap.ini'
-   on NT/2000 Server. 
+   on NT/2000/XP Server. 
 
    More information on the capabilities of browscap can be found here:
 
@@ -154,7 +154,7 @@ Installation of Windows extensions
  ATTENTION! ATTENTION! ATTENTION!
    Some extra DLLs are required for some PHP extensions. Please copy the
    bundled dlls from the 'dlls/' directory in distribution package to your
-   windows/system (Win9.x) or winnt/system32 (WinNT, Win2000) directory.
+   windows/system (Win9.x) or winnt/system32 (WinNT, Win2000, XP) directory.
    If you already have these DLLs installed on your system,
    overwrite them only if something is not working correctly.
    Before overwriting them, it is a good idea to backup them or move them to
@@ -215,7 +215,7 @@ Web server configuration
   that you configure PHP as a module in Apache.
 
   To do this, you should move php4ts.dll to the windows/system (for Windows 9x/Me)
-  or winnt/system32 (for Windows NT/2000) directory, overwriting any
+  or winnt/system32 (for Windows NT/2000/XP) directory, overwriting any
   older file. Then you should add the following three lines to your Apache
   conf file: (swap c:/php/ for your PHP install path)
 
@@ -329,9 +329,9 @@ Web server configuration
    http://www.genusa.com/iis/iiscfg.html
    from Steven Genusa to configure their script maps.
 
-  Windows NT/2000 and IIS 4 or newer and PWS 4 on NT Workstation or W2K non server editions
+  Windows NT/2000/XP and IIS 4 or newer and PWS 4 on NT Workstation or W2K non server editions
 
-   To install PHP on an NT/2000 Server running IIS 4 or newer,
+   To install PHP on an NT/2000/XP Server running IIS 4 or newer,
    follow these instructions. You have two options to set up
    PHP, using the CGI binary (php.exe) or with the ISAPI module.
 
