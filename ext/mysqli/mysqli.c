@@ -269,6 +269,27 @@ void mysqli_add_property(HashTable *h, char *pname, mysqli_read_t r_func, mysqli
 }
 /* }}} */
 
+static union _zend_function *php_mysqli_constructor_get(zval *object TSRMLS_DC)
+{
+	mysqli_object *obj = (mysqli_object *)zend_objects_get_address(object TSRMLS_CC);
+
+	if (obj->zo.ce != mysqli_link_class_entry) {
+		return obj->zo.ce->constructor;
+	} else {
+		static zend_internal_function f;
+
+		f.function_name = mysqli_link_class_entry->name;
+		f.scope = mysqli_link_class_entry;
+		f.arg_info = NULL;
+		f.num_args = 0;
+		f.fn_flags = 0;
+
+		f.type = ZEND_INTERNAL_FUNCTION;
+		f.handler = ZEND_FN(mysqli_connect);
+	
+		return (union _zend_function*)&f;
+	}
+}
 /* {{{ mysqli_objects_new
  */
 PHP_MYSQLI_EXPORT(zend_object_value) mysqli_objects_new(zend_class_entry *class_type TSRMLS_DC)
@@ -374,6 +395,7 @@ PHP_MINIT_FUNCTION(mysqli)
 	mysqli_object_handlers.read_property = mysqli_read_property;
 	mysqli_object_handlers.write_property = mysqli_write_property;
 	mysqli_object_handlers.get_property_ptr_ptr = NULL;
+	mysqli_object_handlers.get_constructor = php_mysqli_constructor_get;
 
 	zend_hash_init(&classes, 0, NULL, NULL, 1);
 
