@@ -150,7 +150,7 @@ typedef union _date_ll {
 
 %}
 
-/* This grammar has 14 shift/reduce conflicts. */
+/* This grammar has 17 shift/reduce conflicts. */
 %expect 17
 %pure_parser
 
