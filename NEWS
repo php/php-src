@@ -51,6 +51,7 @@ PHP                                                                        NEWS
 - Fixed bug #30175 (SOAP results aren't parsed correctly). (Dmitry)
 - Fixed bug #30147 (OO sqlite_fetch_object did not reset error handler). (Wez)
 - Fixed bug #30133 (get_current_user() crashes on Windows). (Edin)
+- Fixed bug #30061 (xml_set_start_namespace_decl_handler not called). (Rob)
 - Fixed bug #30057 (did not detect IPV6 on FreeBSD 4.1). (Wez)
 - Fixed bug #30042 (strtotime does not use second param). (Derick)
 - Fixed bug #30027 (Possible crash inside ftp_get()).
