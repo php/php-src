@@ -149,7 +149,7 @@ specified at once.
     function doInstall($command, $options, $params)
     {
         if (empty($this->installer)) {
-            $this->installer = &new PEAR_Installer($ui);
+            $this->installer = &new PEAR_Installer($this->ui);
         }
         if ($command == 'upgrade') {
             $options[$command] = true;
@@ -166,12 +166,13 @@ specified at once.
                 return $this->raiseError("$command failed");
             }
         }
+        return true;
     }
 
     function doUninstall($command, $options, $params)
     {
         if (empty($this->installer)) {
-            $this->installer = &new PEAR_Installer($ui);
+            $this->installer = &new PEAR_Installer($this->ui);
         }
         foreach ($params as $pkg) {
             if ($this->installer->uninstall($pkg, $options)) {

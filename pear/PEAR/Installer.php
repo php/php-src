@@ -531,6 +531,8 @@ class PEAR_Installer extends PEAR_Common
                 $this->log(1, '...done: ' . number_format($params, 0, '', ',') . ' bytes');
                 break;
         }
+        if (method_exists($this->ui, '_downloadCallback'))
+            $this->ui->_downloadCallback($msg, $params);
     }
 
     // }}}
