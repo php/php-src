@@ -735,12 +735,6 @@ void module_destructor(zend_module_entry *module)
 		clean_module_constants(module->module_number);
 	}
 
-	if (module->request_shutdown_func) {
-#if 0
-		zend_printf("%s:  Request shutdown\n",module->name);
-#endif
-		module->request_shutdown_func(module->type, module->module_number);
-	}
 	if (module->module_started && module->module_shutdown_func) {
 #if 0
 		zend_printf("%s:  Module shutdown\n",module->name);
