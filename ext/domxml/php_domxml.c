@@ -2426,9 +2426,40 @@ PHP_FUNCTION(domxml_node_insert_before)
 
 	DOMXML_GET_OBJ(child, node, le_domxmlnodep);
 
+	new_child = NULL;
+
 	if (ref != NULL) {
 		DOMXML_GET_OBJ(refp, ref, le_domxmlnodep);
-		new_child = xmlAddPrevSibling(refp, child);
+		
+   		 /* 
+   		  * The following code is from libxml2/tree.c 
+   		  * libxml does free textnodes, if there are adjacent TEXT nodes
+   		  * This is bad behaviour for domxml, since then we have have reference
+   		  * to undefined nodes. The idea here is, that we do this text comparison
+   		  * by ourself and not free the nodes. and only if libxml2 won't do any harm
+   		  * call the function from libxml2.
+   		  * The code is exactly the same as in libxml2, only xmlFreeNode was taken away.
+   		  */
+
+		if (child->type == XML_TEXT_NODE) {
+			if (refp->type == XML_TEXT_NODE) {
+				xmlChar *tmp;
+
+				tmp = xmlStrdup(child->content);
+				tmp = xmlStrcat(tmp, refp->content);
+				xmlNodeSetContent(refp, tmp);
+				xmlFree(tmp);
+				new_child = refp;
+			}
+			if ((refp->prev != NULL) && (refp->prev->type == XML_TEXT_NODE)
+				&& (refp->name == refp->prev->name)) {
+				xmlNodeAddContent(refp->prev, child->content);
+				new_child = refp->prev;
+			}
+		}
+
+		if (new_child == NULL)
+			new_child = xmlAddPrevSibling(refp, child);
 	} else {
 		/* first unlink node, if child is already a child of parent
 			for some strange reason, this is needed
