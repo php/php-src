@@ -190,6 +190,7 @@ static void _close_sybase_link(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 		}
 	}
 
+	ct_cmd_drop(sybase_ptr->cmd);
 	ct_con_drop(sybase_ptr->connection);
 	efree(sybase_ptr);
 	SybCtG(num_links)--;
@@ -399,14 +400,6 @@ static void php_sybase_init_globals(zend_sybase_globals *sybase_globals)
 		}
 	}
 
-	/* Set the packet size, which is also per context */
-	if (cfg_get_long("sybct.packet_size", &opt)==SUCCESS) {
-		CS_INT cs_packet_size = opt;
-		if (ct_config(sybase_globals->context, CS_SET, CS_PACKETSIZE, &cs_packet_size, CS_UNUSED, NULL)!=CS_SUCCEED) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Sybase:  Unable to update the packet size");
-		}
-	}
-
 	sybase_globals->num_persistent=0;
 	sybase_globals->callback_name = NULL;
 }
@@ -473,6 +466,7 @@ static int php_sybase_do_connect_internal(sybase_link *sybase, char *host, char 
 {
 	CS_LOCALE *tmp_locale;
 	TSRMLS_FETCH();
+	long packetsize;
 
 	/* set a CS_CONNECTION record */
 	if (ct_con_alloc(SybCtG(context), &sybase->connection)!=CS_SUCCEED) {
@@ -518,6 +512,12 @@ static int php_sybase_do_connect_internal(sybase_link *sybase, char *host, char 
 					}
 				}
 			}
+		}
+	}
+	
+	if (cfg_get_long("sybct.packet_size", &packetsize) == SUCCESS) {
+		if (ct_con_props(sybase->connection, CS_SET, CS_PACKETSIZE, (CS_VOID *)&packetsize, CS_UNUSED, NULL) != CS_SUCCEED) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Sybase: Unable to update connection packetsize.");
 		}
 	}
 
