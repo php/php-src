@@ -157,11 +157,13 @@ static entity_table_t ent_uni_punct[] = {
 	"ensp", "emsp", NULL, NULL, NULL, NULL, NULL,
 	"thinsp", NULL, NULL, "zwnj", "zwj", "lrm", "rlm",
 	NULL, NULL, NULL, "ndash", "mdash", NULL, NULL, NULL,
-	"lsquo", "rsquo", "sbquo", NULL, "ldquo", "rdquo", "bdquo",
+	/* 8216 */
+	"lsquo", "rsquo", "sbquo", NULL, "ldquo", "rdquo", "bdquo", NULL,
 	"dagger", "Dagger",	"bull", NULL, NULL, NULL, "hellip",
 	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, "permil", NULL,
-	"prime", "Prime", NULL, NULL, NULL, NULL, NULL, "lsaquo", "rsaquo",
-	NULL, NULL, NULL, "oline", NULL, NULL, NULL, NULL, NULL,
+	/* 8242 */
+	"prime", "Prime", NULL, NULL, NULL, NULL, NULL, "lsaquo", "rsaquo", NULL,
+	NULL, NULL, "oline", NULL, NULL, NULL, NULL, NULL,
 	"frasl"
 };
 
@@ -899,8 +901,7 @@ PHPAPI char *php_unescape_html_entities(unsigned char *old, int oldlen, int *new
 
 				if (entity_map[j].table[k - entity_map[j].basechar] == NULL)
 					continue;
-			
-				
+
 				entity[0] = '&';
 				entity_length = strlen(entity_map[j].table[k - entity_map[j].basechar]);
 				strncpy(&entity[1], entity_map[j].table[k - entity_map[j].basechar], sizeof(entity) - 2);
