@@ -39,9 +39,6 @@
 #undef ERROR
 #endif
 
-#if !(WIN32|WINNT)
-#include "config.h"
-#endif
 #include "php.h"
 
 #if COMPILE_DL
