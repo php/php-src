@@ -14,11 +14,16 @@ class t
 
 class s
 {
+	public $a;
+	public $b;
+	public $c;
+
 	function s()
 	{
 		$this->a = "hallo";
 		$this->b = "php";
 		$this->c = "world";
+		$this->d = "!";
 	}
 
 	function __sleep()
