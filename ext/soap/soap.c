@@ -3161,13 +3161,12 @@ static int serialize_response_call2(xmlNodePtr body, sdlFunctionPtr function, ch
 
 		zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(ret), &pos);
 		while (zend_hash_get_current_data_ex(Z_ARRVAL_P(ret), (void **)&data, &pos) != FAILURE) {
-			char *param_name;
+			char *param_name = NULL;
 			int   param_name_len;
-			long  param_index;
+			long  param_index = i;
 
 			zend_hash_get_current_key_ex(Z_ARRVAL_P(ret), &param_name, &param_name_len, &param_index, 0, &pos);
 			parameter = get_param(function, param_name, param_index, TRUE);
-
 			if (style == SOAP_RPC) {
 				param = serialize_parameter(parameter, *data, i, param_name, use, method TSRMLS_CC);
 			} else {
@@ -3788,6 +3787,16 @@ static sdlParamPtr get_param(sdlFunctionPtr function, char *param_name, int inde
 	if (param_name != NULL) {
 		if (zend_hash_find(ht, param_name, strlen(param_name), (void **)&tmp) != FAILURE) {
 			return *tmp;
+		} else {
+			HashPosition pos;
+		
+			zend_hash_internal_pointer_reset_ex(ht, &pos);
+			while (zend_hash_get_current_data_ex(ht, (void **)&tmp, &pos) != FAILURE) {
+				if ((*tmp)->paramName && strcmp(param_name, (*tmp)->paramName) == 0) {
+					return *tmp;
+				}
+				zend_hash_move_forward_ex(ht, &pos);
+			}
 		}
 	} else {
 		if (zend_hash_index_find(ht, index, (void **)&tmp) != FAILURE) {
