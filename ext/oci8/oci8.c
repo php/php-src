@@ -140,7 +140,7 @@ static void _oci_server_list_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC);
 static void _oci_session_list_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC);
 static void php_oci_free_conn_list(zend_rsrc_list_entry *rsrc TSRMLS_DC);
 
-static void _oci_column_hash_dtor(void *data TSRMLS_DC);
+static void _oci_column_hash_dtor(void *data);
 static void _oci_define_hash_dtor(void *data);
 static void _oci_bind_hash_dtor(void *data);
 
@@ -658,9 +658,10 @@ _oci_bind_post_exec(void *data TSRMLS_DC)
 /* {{{ _oci_column_hash_dtor() */
 
 static void
-_oci_column_hash_dtor(void *data TSRMLS_DC)
+_oci_column_hash_dtor(void *data)
 {	
 	oci_out_column *column = (oci_out_column *) data;
+	TSRMLS_FETCH();
 
 	oci_debug("START _oci_column_hash_dtor: %s",column->name);
 
