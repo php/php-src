@@ -1,3 +1,97 @@
+2003-08-30  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_default_classes.c:
+      Actually fetch the parameter
+
+    * ZendEngine2/zend_default_classes.c
+      ZendEngine2/zend_default_classes.h
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_reflection_api.c:
+      - Calling abstract methods should be a error for consistency reason.
+      - So in reflection_api we use the reflection_exception again.
+
+2003-08-30  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * ext/mbstring/config.m4:
+      No need to enable by default. Derick got confused. :)
+
+    * (PHP_4_3)
+      NEWS:
+      BFN
+
+    * ext/mbstring/config.m4:
+      libmbfl is required always
+
+    * ext/mbstring/config.m4:
+      ws
+
+2003-08-30  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend_default_classes.c:
+      - PLEASE stop commiting ^M's
+
+2003-08-30  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_default_classes.c:
+      Even though it is ignored this should be correct
+
+    * ZendEngine2/zend_default_classes.c:
+      Add frame numer and finally display stack trace in the message.
+
+    * ZendEngine2/zend_default_classes.c:
+      Add exception::traceAsString() and exception::toString()
+
+2003-08-30  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/PEAR/Dependency.php:
+      CS fix
+
+2003-08-30  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_reflection_api.c:
+      fci.function_table & fci.function_name are not needed since we use
+      zend_fcall_info_cache
+
+    * ZendEngine2/zend_reflection_api.c:
+      Be precise
+
+    * ZendEngine2/zend_reflection_api.c:
+      Actually using fcc would be a good idea
+
+    * ZendEngine2/zend_default_classes.c
+      ZendEngine2/zend_default_classes.h
+      ZendEngine2/zend_execute.c:
+      - The compiler can't detect all abstract function calls so we need to
+      check.
+
+    * ZendEngine2/zend_default_classes.c:
+      Make those final (see comment)
+
+2003-08-30  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * ext/mcve/config.m4:
+      Add note about version requirement
+
+    * ext/mcve/config.m4:
+      Added version checking and --with-openssl-dir option
+
+    * ext/mcve/.cvsignore:
+      stupid windows
+
+    * (PHP_4_3)
+      ext/mcve/.cvsignore:
+      stupid winblows
+
+2003-08-30  Sascha Schumann  <sascha@schumann.cx>
+
+    * configure.in
+      configure.in
+      ext/ircg/Makefile.frag
+      ext/ircg/Makefile.frag
+      ext/standard/Makefile.frag
+      ext/standard/Makefile.frag:
+      Never overwrite .c files when re2c does not exist.
+
 2003-08-29  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ext/sqlite/sqlite.c:

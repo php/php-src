@@ -1,3 +1,50 @@
+2003-08-30  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_default_classes.c:
+      Actually fetch the parameter
+
+    * zend_default_classes.c
+      zend_default_classes.h
+      zend_execute.c
+      zend_reflection_api.c:
+      - Calling abstract methods should be a error for consistency reason.
+      - So in reflection_api we use the reflection_exception again.
+
+2003-08-30  Andi Gutmans  <andi@zend.com>
+
+    * zend_default_classes.c:
+      - PLEASE stop commiting ^M's
+
+2003-08-30  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_default_classes.c:
+      Even though it is ignored this should be correct
+
+    * zend_default_classes.c:
+      Add frame numer and finally display stack trace in the message.
+
+    * zend_default_classes.c:
+      Add exception::traceAsString() and exception::toString()
+
+    * zend_reflection_api.c:
+      fci.function_table & fci.function_name are not needed since we use
+      zend_fcall_info_cache
+
+    * zend_reflection_api.c:
+      Be precise
+
+    * zend_reflection_api.c:
+      Actually using fcc would be a good idea
+
+    * zend_default_classes.c
+      zend_default_classes.h
+      zend_execute.c:
+      - The compiler can't detect all abstract function calls so we need to
+      check.
+
+    * zend_default_classes.c:
+      Make those final (see comment)
+
 2003-08-29  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_API.c
