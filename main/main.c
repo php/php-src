@@ -103,9 +103,9 @@ static MUTEX_T global_lock;
 #endif
  
 
-void _php3_build_argv(char * ELS_DC);
-static void php3_timeout(int dummy);
-static void php3_set_timeout(long seconds);
+void _php_build_argv(char * ELS_DC);
+static void php_timeout(int dummy);
+static void php_set_timeout(long seconds);
 
 void *gLock;					/*mutex variable */
 
@@ -135,7 +135,7 @@ static PHP_INI_MH(OnChangeMaxExecutionTime)
 	} else {
 		new_timeout = 0;
 	}
-	php3_set_timeout(new_timeout);
+	php_set_timeout(new_timeout);
 	return SUCCESS;
 }
 
@@ -497,7 +497,7 @@ PHPAPI void php_error(int type, const char *format,...)
 static long php_timeout_seconds;
 
 #ifdef HAVE_SETITIMER
-static void php3_timeout(int dummy)
+static void php_timeout(int dummy)
 {
 	PLS_FETCH();
 
@@ -512,7 +512,7 @@ static void php3_timeout(int dummy)
 #define SIGPROF 27
 #endif
 
-static void php3_set_timeout(long seconds)
+static void php_set_timeout(long seconds)
 {
 #if WIN32|WINNT
 #else
@@ -524,13 +524,13 @@ static void php3_set_timeout(long seconds)
 
 	php_timeout_seconds = seconds;
 	setitimer(ITIMER_PROF, &t_r, NULL);
-	signal(SIGPROF, php3_timeout);
+	signal(SIGPROF, php_timeout);
 #	endif
 #endif
 }
 
 
-static void php3_unset_timeout()
+static void php_unset_timeout()
 {
 #if WIN32|WINNT
 #else
@@ -568,8 +568,8 @@ PHP_FUNCTION(set_time_limit)
 	   should work fine.  Is this FIXME a WIN32 problem?  Is
 	   there no way to do per-thread timers on WIN32?
 	 */
-	php3_unset_timeout();
-	php3_set_timeout(new_timeout->value.lval);
+	php_unset_timeout();
+	php_set_timeout(new_timeout->value.lval);
 }
 
 
@@ -803,7 +803,7 @@ void php_request_shutdown(void *dummy)
 
 	php3_destroy_request_info(NULL);
 	shutdown_memory_manager(CG(unclean_shutdown), 0);
-	php3_unset_timeout();
+	php_unset_timeout();
 
 
 #if CGI_BINARY
@@ -1113,12 +1113,12 @@ static int zend_hash_environment(PLS_D ELS_DC SLS_DC)
 
 
 	/* need argc/argv support as well */
-	_php3_build_argv(SG(request_info).query_string ELS_CC);
+	_php_build_argv(SG(request_info).query_string ELS_CC);
 
 	return SUCCESS;
 }
 
-void _php3_build_argv(char *s ELS_DC)
+void _php_build_argv(char *s ELS_DC)
 {
 	pval *arr, *tmp;
 	int count = 0;
