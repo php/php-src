@@ -37,6 +37,7 @@
 #include "php_dba.h"
 #include "ext/standard/info.h"
 #include "ext/standard/php_string.h"
+#include "ext/standard/flock_compat.h"
 
 #include "php_gdbm.h"
 #include "php_ndbm.h"
