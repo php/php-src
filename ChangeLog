@@ -1,3 +1,70 @@
+2001-12-15  Zeev Suraski  <zeev@zend.com>
+
+    * ext/mysql/php_mysql.c: Fix bug #13456 - I'm unable to actually test it
+
+2001-12-15  Martin Jansen  <mail@martin-jansen.de>
+
+    * pear/PEAR.php:
+    * Destructors seem to work like a charm. -> No need to keep this line.
+
+2001-12-15  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/var.c:
+    - TSRMLS here and there, it's all about the Windows flair
+
+2001-12-15  Martin Jansen  <mail@martin-jansen.de>
+
+    * pear/README: * Add links to the new documentation.
+
+2001-12-15  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/var.c:
+    - Added a second parameter to var_export which makes the function return
+      the variable representation in a string.
+
+2001-12-15  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/ftp/php_ftp.c: proto fix
+
+    * ext/gettext/gettext.c: proto fixes
+
+    * ext/gmp/gmp.c: proto fix
+
+    * ext/ircg/ircg.c: guessed some protos
+
+    * ext/ming/ming.c: proto fixes
+
+    * ext/ncurses/ncurses.c
+      ext/ncurses/ncurses_fe.c
+      ext/ncurses/php_ncurses.h
+      ext/ncurses/php_ncurses_fe.h: cleanup
+
+    * ext/notes/php_notes.c: removed a stray proto comment
+
+    * ext/skeleton/create_stubs: improved xml generatioimproved xml generation
+
+    * sapi/apache/php_apache.c
+      ext/cpdf/cpdf.c: proto fix
+
+2001-12-15  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/mcrypt/mcrypt.c: - MFH for bug 14162
+
+    * ext/mcrypt/TODO: - Added TODO file
+
+    * ext/mcrypt/mcrypt.c:
+    - Fix for bug 14162, invalidate the resource then mcrypt_generic_init fails
+
+2001-12-15  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * ext/xslt/sablot.c:
+    - MFH fix for possible crash in xslt_set_scheme_handlers() with
+      invalid handler names.
+
+2001-12-15  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/xslt/sablot.c: - MFH crash bug fix in xslt_error
+
 2001-12-14  Markus Fischer  <mfischer@guru.josefine.at>
 
     * ext/domxml/php_domxml.c: - Damn Typo.
