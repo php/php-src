@@ -27,6 +27,8 @@ libZend_la_DEPENDENCIES = $(ZEND_SCANNER)
 
 $(libZend_la_OBJECTS) zend_language_scanner.lo zend_language_scanner_cc.lo: zend_language_parser.h
 
+zend_ini_scanner.lo zend_ini_scanner_cc.lo: zend_ini_parser.h
+
 # Language parser/scanner rules
 
 zend_language_scanner.c: $(srcdir)/zend_language_scanner.l
@@ -49,6 +51,7 @@ zend_ini_scanner.c: $(srcdir)/zend_ini_scanner.l
 
 zend_ini_scanner_cc.cc: $(srcdir)/zend_ini_scanner.l
 	$(LEX) -+ -B -i -S$(srcdir)/flex.skl -Pini_ -o$@ $(srcdir)/zend_ini_scanner.l
+zend_init_parser.h: zend_ini_parser.c
 
 depend:
 
