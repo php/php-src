@@ -1,3 +1,62 @@
+2002-03-25  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/xmlrpc/php_config.h.in: Why was this here??
+
+    * ext/standard/dl.c: MFH dl() error message fix
+
+2002-03-25  Sterling Hughes  <sterling@bumblebury.com>
+
+    * ext/xslt/sablot.c: Whitespace fixes
+
+2002-03-25  Edin Kadribasic  <edink@proventum.net>
+
+    * sapi/cli/EXPERIMENTAL
+      sapi/cli/README
+      sapi/cli/config.m4
+      sapi/cli/php_cli.c: Hidden the existance of CLI SAPI by:
+    - removing the NEWS entry
+    - removing cli from make install chain
+    - marking it EXPERIMENTAL
+    - reverting installed name of cgi from php-cgi to php
+
+    Marged max_execution_time override from head.
+
+    * sapi/cli/EXPERIMENTAL: New file.
+
+    * sapi/cgi/config.m4
+      NEWS: Hidden the existance of CLI SAPI by:
+    - removing the NEWS entry
+    - removing cli from make install chain
+    - marking it EXPERIMENTAL
+    - reverting installed name of cgi from php-cgi to php
+
+    Marged max_execution_time override from head.
+
+2002-03-25  Georg Richter  <georg.richter@phpev.de>
+
+    * ext/mysql/php_mysql.c:
+    fixed prototype for mysql_ping
+
+2002-03-25  Sterling Hughes  <sterling@bumblebury.com>
+
+    * ext/mysql/php_mysql.c: more zend_parse_parameters fixup
+
+    * ext/mysql/php_mysql.c: Fix-up the last fix a bit
+    Clean up mysql_list_processes
+
+2002-03-25  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/exif/exif.c: pproto fix
+
+2002-03-25  Sterling Hughes  <sterling@bumblebury.com>
+
+    * ext/mysql/php_mysql.c: clean up mysql_real_escape_string() a bit
+
+
+2002-03-25  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/mime_magic/TODO: initial checkin
+
 2002-03-24  Zak Greant  <zak@mysql.com>
 
     * ext/mysql/php_mysql.c:

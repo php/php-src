@@ -1,3 +1,7 @@
+2002-03-25  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * zend_compile.c: - MFZE1
+
 2002-03-23  Andi Gutmans  <andi@zend.com>
 
     * zend_ts_hash.c
