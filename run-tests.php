@@ -483,7 +483,8 @@ TEST $file
 		"-d 'open_basedir='",
 		"-d 'disable_functions='",
 		"-d 'error_reporting=2047'",
-		"-d 'display_errors=1'",
+		"-d 'display_errors=0'",
+		"-d 'log_errors=1'",
 		"-d 'html_errors=0'",
 		"-d 'docref_root=/phpmanual/'",
 		"-d 'docref_ext=.html'",
@@ -564,10 +565,11 @@ COMMAND $cmd
 		$wanted_re = preg_quote($wanted_re, '/');
 		// Stick to basics
 		$wanted_re = str_replace("%s", ".+?", $wanted_re); //not greedy
-		$wanted_re = str_replace("%i", "[0-9]+", $wanted_re);
+		$wanted_re = str_replace("%i", "[+\-]?[0-9]+", $wanted_re);
 		$wanted_re = str_replace("%d", "[0-9]+", $wanted_re);
 		$wanted_re = str_replace("%x", "[0-9a-fA-F]+", $wanted_re);
-		$wanted_re = str_replace("%f", "[0-9\.+\-]+", $wanted_re);
+		$wanted_re = str_replace("%f", "[+\-]?\.?[0-9]+\.?[0-9]*", $wanted_re);
+		// %f allows two points "-.0.0" but that is the best *simple* expression
 /* DEBUG YOUR REGEX HERE
 		var_dump($wanted);
 		print(str_repeat('=', 80) . "\n");
