@@ -84,13 +84,27 @@ define_option with-velocis 'Velocis support?' yesnodir \
      More information about Velocis can be found at http://www.raima.com/.'
 fi
 
-# Custom ODBC
+# DBMaker
 if test "$option_value_with_solid" = "no" -a \
         "$option_value_with_empress" = "no" -a \
         "$option_value_with_iodbc" = "no" -a \
         "$option_value_with_openlink" = "no" -a \
         "$option_value_with_adabas" = "no" -a \
         "$option_value_with_velocis" = "no"; then
+define_option with-dbmaker 'DBMaker support?' yesnodir \
+    'no /home/dbmaker DBMaker install' \
+'    Whether to build PHP with DBMaker support. \n
+     More information about DBMaker can be found at http://www.casemaker.com/.'
+fi
+
+# Custom ODBC
+if test "$option_value_with_solid" = "no" -a \
+        "$option_value_with_empress" = "no" -a \
+        "$option_value_with_iodbc" = "no" -a \
+        "$option_value_with_openlink" = "no" -a \
+        "$option_value_with_adabas" = "no" -a \
+        "$option_value_with_velocis" = "no"; -a \
+        "$option_value_with_dbmaker" = "no"; then
 define_option with-custom-odbc 'custom ODBC support?' yesnodir \
     'no /usr/local CODBC install' \
 '    Whether to build PHP with CODBC support.  This feature was first

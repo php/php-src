@@ -50,6 +50,27 @@ AC_DEFUN(AC_FIND_EMPRESS_LIBS,[
   AC_MSG_RESULT(`echo $ODBC_LIBS | sed -e 's!.*/!!'`)
 ])
 
+dnl
+dnl Figure out the path where the newest DBMaker is installed.
+dnl
+AC_DEFUN(AC_FIND_DBMAKER_PATH,[
+  AC_MSG_CHECKING([DBMaker version])
+  if [ test -d "$1/4.0" ]; then
+    DBMAKER_PATH=$1/4.0
+  elif [ test -d "$1/3.6" ]; then
+    DBMAKER_PATH=$1/3.6
+  elif [ test -d "$1/3.5" ]; then
+    DBMAKER_PATH=$1/3.5
+  elif [ test -d "$1/3.01" ]; then
+    DBMAKER_PATH=$1/3.01
+  elif [ test -d "$1/3.0" ]; then
+    DBMAKER_PATH=$1/3.0
+  else
+    DBMAKER_PATH=$1
+  fi
+  AC_MSG_RESULT(`echo $DBMAKER_PATH | sed -e 's!.*/!!'`)
+])
+
 if test -z "$ODBC_TYPE"; then
 AC_MSG_CHECKING(for Adabas support)
 AC_ARG_WITH(adabas,
@@ -322,6 +343,39 @@ AC_ARG_WITH(openlink,
     ODBC_LIBS=-liodbc
     ODBC_TYPE=openlink
     AC_DEFINE(HAVE_OPENLINK)
+    AC_MSG_RESULT(yes)
+  else
+    AC_MSG_RESULT(no)
+  fi
+],[
+  AC_MSG_RESULT(no)
+])
+fi
+
+if test -z "$ODBC_TYPE"; then
+AC_MSG_CHECKING(for DBMaker support)
+AC_ARG_WITH(dbmaker,
+[  --with-dbmaker[=DIR]    Include DBMaker support.  DIR is the DBMaker base
+                          install directory, defaults to where the latest 
+                          version of DBMaker is installed (such as
+                          /home/dbmaker/3.6).
+],
+[
+  if test "$withval" = "yes"; then
+    # find dbmaker's home directory
+    DBMAKER_HOME=`grep "^dbmaker:" /etc/passwd | awk -F: '{print $6}'`
+    AC_FIND_DBMAKER_PATH($DBMAKER_HOME)
+    withval=$DBMAKER_PATH
+  fi
+  if test "$withval" != "no"; then
+    ODBC_INCDIR=$withval/include
+    ODBC_LIBDIR=$withval/lib
+    ODBC_INCLUDE=-I$ODBC_INCDIR
+    ODBC_LFLAGS=-L$ODBC_LIBDIR
+    ODBC_INCLUDE=-I$ODBC_INCDIR
+    ODBC_LIBS="-ldmapic -lc"
+    ODBC_TYPE=dbmaker
+    AC_DEFINE(HAVE_DBMAKER)
     AC_MSG_RESULT(yes)
   else
     AC_MSG_RESULT(no)
