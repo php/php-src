@@ -162,6 +162,7 @@ HEADER_DIRS = \
 	ext/xml/expat/xmltok \
 	main \
 	ext/mbstring \
+	ext/pgsql \
 	regex
 
 install-headers:
