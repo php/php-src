@@ -52,11 +52,21 @@ static unsigned char arg2_force_ref[] =
 static unsigned char arg2and3_force_ref[] =
                        { 3, BYREF_NONE, BYREF_FORCE, BYREF_FORCE };
 
-enum php_openssl_key_type	{
+enum php_openssl_key_type {
 	OPENSSL_KEYTYPE_RSA,
 	OPENSSL_KEYTYPE_DSA,
 	OPENSSL_KEYTYPE_DH,
 	OPENSSL_KEYTYPE_DEFAULT = OPENSSL_KEYTYPE_RSA
+};
+
+enum php_openssl_cipher_type {
+ 	PHP_OPENSSL_CIPHER_RC2_40,
+ 	PHP_OPENSSL_CIPHER_RC2_128,
+ 	PHP_OPENSSL_CIPHER_RC2_64,
+ 	PHP_OPENSSL_CIPHER_DES,
+ 	PHP_OPENSSL_CIPHER_3DES,
+
+	PHP_OPENSSL_CIPHER_DEFAULT = PHP_OPENSSL_CIPHER_RC2_40
 };
 
 /* {{{ openssl_functions[]
@@ -570,6 +580,13 @@ PHP_MINIT_FUNCTION(openssl)
  	REGISTER_LONG_CONSTANT("OPENSSL_NO_PADDING", RSA_NO_PADDING, CONST_CS|CONST_PERSISTENT);
  	REGISTER_LONG_CONSTANT("OPENSSL_PKCS1_OAEP_PADDING", RSA_PKCS1_OAEP_PADDING, CONST_CS|CONST_PERSISTENT);
 
+	/* Ciphers */
+ 	REGISTER_LONG_CONSTANT("OPENSSL_CIPHER_RC2_40", PHP_OPENSSL_CIPHER_RC2_40, CONST_CS|CONST_PERSISTENT);
+ 	REGISTER_LONG_CONSTANT("OPENSSL_CIPHER_RC2_128", PHP_OPENSSL_CIPHER_RC2_128, CONST_CS|CONST_PERSISTENT);
+ 	REGISTER_LONG_CONSTANT("OPENSSL_CIPHER_RC2_64", PHP_OPENSSL_CIPHER_RC2_64, CONST_CS|CONST_PERSISTENT);
+ 	REGISTER_LONG_CONSTANT("OPENSSL_CIPHER_DES", PHP_OPENSSL_CIPHER_DES, CONST_CS|CONST_PERSISTENT);
+ 	REGISTER_LONG_CONSTANT("OPENSSL_CIPHER_3DES", PHP_OPENSSL_CIPHER_3DES, CONST_CS|CONST_PERSISTENT);
+	
 	/* Values for key types */
 	REGISTER_LONG_CONSTANT("OPENSSL_KEYTYPE_RSA", OPENSSL_KEYTYPE_RSA, CONST_CS|CONST_PERSISTENT);
 #ifndef NO_DSA
@@ -2141,7 +2158,7 @@ clean_exit:
 }
 /* }}} */
 
-/* {{{ proto bool openssl_pkcs7_encrypt(string infile, string outfile, mixed recipcerts, array headers [, long flags])
+/* {{{ proto bool openssl_pkcs7_encrypt(string infile, string outfile, mixed recipcerts, array headers [, long flags [, long cipher]])
    Encrypts the message in the file named infile with the certificates in recipcerts and output the result to the file named outfile */
 PHP_FUNCTION(openssl_pkcs7_encrypt)
 {
@@ -2154,6 +2171,7 @@ PHP_FUNCTION(openssl_pkcs7_encrypt)
 	zval ** zcertval;
 	X509 * cert;
 	EVP_CIPHER *cipher = NULL;
+	long cipherid = PHP_OPENSSL_CIPHER_DEFAULT;
 	uint strindexlen;
 	ulong intindex;
 	char * strindex;
@@ -2162,10 +2180,11 @@ PHP_FUNCTION(openssl_pkcs7_encrypt)
 	
 	RETVAL_FALSE;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ssza!|l", &infilename, &infilename_len,
-				&outfilename, &outfilename_len, &zrecipcerts, &zheaders, &flags) == FAILURE)
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ssza!|ll", &infilename, &infilename_len,
+				&outfilename, &outfilename_len, &zrecipcerts, &zheaders, &flags, &cipherid) == FAILURE)
 		return;
 
+	
 	if (php_openssl_safe_mode_chk(infilename TSRMLS_CC) || php_openssl_safe_mode_chk(outfilename TSRMLS_CC)) {
 		return;
 	}
@@ -2225,9 +2244,30 @@ PHP_FUNCTION(openssl_pkcs7_encrypt)
 		sk_X509_push(recipcerts, cert);
 	}
 
-	/* TODO: allow user to choose a different cipher */
-	cipher = EVP_rc2_40_cbc();
+	/* sanity check the cipher */
+	switch (cipherid) {
+		case PHP_OPENSSL_CIPHER_RC2_40:
+			cipher = EVP_rc2_40_cbc();
+			break;
+		case PHP_OPENSSL_CIPHER_RC2_64:
+			cipher = EVP_rc2_64_cbc();
+			break;
+		case PHP_OPENSSL_CIPHER_RC2_128:
+			cipher = EVP_rc2_cbc();
+			break;
+		case PHP_OPENSSL_CIPHER_DES:
+			cipher = EVP_des_cbc();
+			break;
+		case PHP_OPENSSL_CIPHER_3DES:
+			cipher = EVP_des_ede3_cbc();
+			break;
+		default:
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid cipher type `%d'", cipherid);
+			goto clean_exit;
+	}
 	if (cipher == NULL) {
+		/* shouldn't happen */
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to get cipher");
 		goto clean_exit;
 	}
 
