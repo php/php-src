@@ -1,3 +1,44 @@
+2000-09-10  Sterling Hughes  <stirling@bestweb.net>
+
+    * ext/sockets/sockets.c: Fix compile warning.
+    Fix proto.
+    Change PHP_MINFO output to be consistent.
+
+    * CODING_STANDARDS: php4ize a bit.
+    fix a little bit of grammar.
+
+    * NEWS: Fix attribution.
+
+2000-09-10  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/standard/pack.c: Make unpack("H") work like in Perl
+
+    * ext/standard/pack.c: Fix pack() function reading string beyond the end
+
+    * ext/standard/pack.c: Fix double unpack bug
+
+2000-09-10  Stig Venaas  <venaas@uninett.no>
+
+    * configure.in: A tiny fix to the getaddrinfo check
+
+    * configure.in:
+    refining getaddrinfo check further, checking that struct addrinfo is there
+
+2000-09-10  Sterling Hughes  <stirling@bestweb.net>
+
+    * ext/standard/basic_functions.c
+      ext/standard/php_string.h
+      ext/standard/string.c: - Added the pathinfo() function. 
+
+2000-09-10  Joey Smith  <joey@joeysmith.com>
+
+    * ext/sybase_ct/php_sybase_ct.c: Fix compile warnings.
+
+    * ext/sybase_ct/php_sybase_ct.c:    (sybase_query) Use high performance API in sybase_query. Will work on the others later.
+
+    * ext/sybase_ct/php_sybase_ct.c
+      ext/sybase_ct/php_sybase_ct.h: Use new Zend API stuff.
+
 2000-09-09  Derick Rethans  <d.rethans@jdimedia.nl>
 
     * main/main.c: - Fixed missing parameter in php_atoi
