@@ -533,6 +533,22 @@ PHP_FUNCTION(ob_start)
 }
 /* }}} */
 
+/* {{{ proto void ob_flush(void)
+   Flush (send) the output buffer */
+PHP_FUNCTION(ob_flush)
+{
+	php_end_ob_buffer(1, 1 TSRMLS_CC);
+}
+/* }}} */
+
+/* {{{ proto void ob_clean(void)
+   Clean (erase) the output buffer */
+PHP_FUNCTION(ob_clean)
+{
+	php_end_ob_buffer(0, 1 TSRMLS_CC);
+}
+/* }}} */
+
 /* {{{ proto void ob_end_flush(void)
    Flush (send) the output buffer, and turn off output buffering */
 PHP_FUNCTION(ob_end_flush)

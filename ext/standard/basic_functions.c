@@ -720,6 +720,8 @@ function_entry basic_functions[] = {
 
 	/* functions from output.c */
 	PHP_FE(ob_start,														NULL)
+	PHP_FE(ob_flush,														NULL)
+	PHP_FE(ob_clean,														NULL)
 	PHP_FE(ob_end_flush,													NULL)
 	PHP_FE(ob_end_clean,													NULL)
 	PHP_FE(ob_get_length,													NULL)
