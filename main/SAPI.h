@@ -190,6 +190,9 @@ SAPI_API void sapi_activate_headers_only(TSRMLS_D);
 SAPI_API int sapi_get_fd(int *fd TSRMLS_DC);
 SAPI_API int sapi_force_http_10(TSRMLS_D);
 
+SAPI_API int sapi_get_target_uid(uid_t * TSRMLS_DC);
+SAPI_API int sapi_get_target_gid(gid_t * TSRMLS_DC);
+
 struct _sapi_module_struct {
 	char *name;
 	char *pretty_name;
@@ -231,6 +234,9 @@ struct _sapi_module_struct {
 	int (*get_fd)(int *fd TSRMLS_DC);
 
 	int (*force_http_10)(TSRMLS_D);
+
+	int (*get_target_uid)(uid_t * TSRMLS_DC);
+	int (*get_target_gid)(gid_t * TSRMLS_DC);
 };
 
 

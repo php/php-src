@@ -349,7 +349,7 @@ static int php_thttpd_startup(sapi_module_struct *sapi_module)
 static int sapi_thttpd_get_fd(int *nfd TSRMLS_DC)
 {
 	if (nfd) *nfd = TG(hc)->conn_fd;
-	return 0;
+	return SUCCESS;
 }
 
 static sapi_module_struct thttpd_sapi_module = {
