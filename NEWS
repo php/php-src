@@ -1,5 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? ??? 2004, PHP 5.0.1
+
 13 Jul 2004, PHP 5.0.0
 - Updated PCRE to provide better error handling in certain cases. (Andrei)
 - Changed doc comments to require a single white space after '/**'. (Marcus)
