@@ -277,7 +277,8 @@ void zend_assign_to_variable_reference(znode *result, zval **variable_ptr_ptr, z
 	}
 }
 
-static inline void make_real_object(zval **object_ptr) {
+static inline void make_real_object(zval **object_ptr TSRMLS_DC)
+{
 	if ((*object_ptr)->type == IS_NULL
 		|| ((*object_ptr)->type == IS_BOOL && (*object_ptr)->value.lval==0)
 		|| ((*object_ptr)->type == IS_STRING && (*object_ptr)->value.str.len == 0)) {
@@ -297,7 +298,7 @@ static inline void zend_assign_to_object(znode *result, znode *op1, znode *op2, 
 	zval tmp;
 	zval **retval = &Ts[result->u.var].var.ptr;
 
-	make_real_object(object_ptr);
+	make_real_object(object_ptr TSRMLS_CC);
 	object = *object_ptr;
 	
 	if (object->type != IS_OBJECT) {
@@ -341,7 +342,8 @@ static inline void zend_assign_to_object(znode *result, znode *op1, znode *op2, 
 	}
 }
 
-static inline void zend_assign_to_object_op(znode *result, znode *op1, znode *op2, zval *value, temp_variable *Ts, int (*binary_op)(zval *result, zval *op1, zval *op2 TSRMLS_DC) TSRMLS_DC) {
+static inline void zend_assign_to_object_op(znode *result, znode *op1, znode *op2, zval *value, temp_variable *Ts, int (*binary_op)(zval *result, zval *op1, zval *op2 TSRMLS_DC) TSRMLS_DC)
+{
 	zval **object_ptr = get_zval_ptr_ptr(op1, Ts, BP_VAR_W);
 	zval *object;
 	zval *property = get_zval_ptr(op2, Ts, &EG(free_op2), BP_VAR_R);
@@ -349,7 +351,7 @@ static inline void zend_assign_to_object_op(znode *result, znode *op1, znode *op
 	zval **retval = &Ts[result->u.var].var.ptr;
 
 	Ts[result->u.var].var.ptr_ptr = NULL;
-	make_real_object(object_ptr);
+	make_real_object(object_ptr TSRMLS_CC);
 	object = *object_ptr;
 	
 	if (object->type != IS_OBJECT) {
@@ -384,13 +386,13 @@ static inline void zend_assign_to_object_op(znode *result, znode *op1, znode *op
 		zval **zptr = Z_OBJ_HT_P(object)->get_property_zval_ptr(object, property TSRMLS_CC);
 		SEPARATE_ZVAL_IF_NOT_REF(zptr);
 
-		binary_op(*zptr, *zptr, value);
+		binary_op(*zptr, *zptr, value TSRMLS_CC);
 		*retval = *zptr;
 		SELECTIVE_PZVAL_LOCK(*retval, result);
 	} else {
 		zval *z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_RW TSRMLS_CC);
 		SEPARATE_ZVAL_IF_NOT_REF(&z);
-		binary_op(z, z, value);
+		binary_op(z, z, value TSRMLS_CC);
 		Z_OBJ_HT_P(object)->write_property(object, property, z TSRMLS_CC);
 		*retval = z;
 		SELECTIVE_PZVAL_LOCK(*retval, result);
@@ -1028,7 +1030,7 @@ static void zend_pre_incdec_property(znode *result, znode *op1, znode *op2, temp
 	zval *property = get_zval_ptr(op2, Ts, &EG(free_op2), BP_VAR_R);
 	zval **retval = &Ts[result->u.var].var.ptr;
 
-	make_real_object(object_ptr);
+	make_real_object(object_ptr TSRMLS_CC);
 	object = *object_ptr;
 	
 	if (object->type != IS_OBJECT) {
@@ -1069,7 +1071,7 @@ static void zend_post_incdec_property(znode *result, znode *op1, znode *op2, tem
 	zval *property = get_zval_ptr(op2, Ts, &EG(free_op2), BP_VAR_R);
 	zval *retval = &Ts[result->u.var].tmp_var;
 
-	make_real_object(object_ptr);
+	make_real_object(object_ptr TSRMLS_CC);
 	object = *object_ptr;
 	
 	if (object->type != IS_OBJECT) {
