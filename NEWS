@@ -115,7 +115,6 @@ PHP 4.0                                                                    NEWS
 - Made fstat() and stat() provide identical output by returning a numerical and
   string indexed array. (Jason)
 - Fixed memory leak upon re-registering constants. (Sascha, Zend Engine)
-- Upgraded expat to version 1.95.1. (Thies)
 
 23 Jun 2001, Version 4.0.6
 - Fixed memory fragmention problem which could lead to web server processes
