@@ -80,13 +80,21 @@ set TEST_PHP_EXECUTABLE=$(BUILD_DIR)\php.exe
 $(BUILD_DIR)\php.exe -d open_basedir= -d safe_mode=0 -d output_buffering=0 run-tests.php $(TESTS)
 <<NOKEEP
 
-dist: all
+build-snap:
+	@$(MAKE) "$(BUILD_DIR)\$(PHPDLL)"
+	for %T in ($(SAPI_TARGETS)) do $(MAKE) /nologo "%T"
+	for %T in ($(EXT_TARGETS)) do $(MAKE) /nologo "%T"
+
+build-dist:
 	-rmdir /s /q $(BUILD_DIR)\php-$(PHP_VERSION_STRING)
 	-del /f /q $(BUILD_DIR)\php-$(PHP_VERSION_STRING).zip
 	$(BUILD_DIR)\php.exe win32/build/mkdist.php "$(BUILD_DIR)" "$(PHPDLL)" "$(SAPI_TARGETS)" "$(EXT_TARGETS)" "$(SNAPSHOT_TEMPLATE)"
 	cd $(BUILD_DIR)\php-$(PHP_VERSION_STRING)
 	-$(ZIP) -9 -r ..\php-$(PHP_VERSION_STRING).zip .
 	cd ..\..
+
+dist: all build-dist
+snap: build-snap build-dist
 
 msi-installer: dist
 	$(BUILD_DIR)\php.exe ..\php-installer\build-installer.php "$(BUILD_DIR)" "$(PHPDLL)" "$(SAPI_TARGETS)" "$(EXT_TARGETS)"

@@ -17,7 +17,7 @@
   +----------------------------------------------------------------------+
 */
 
-// $Id: confutils.js,v 1.23 2003-12-19 23:19:18 wez Exp $
+// $Id: confutils.js,v 1.24 2003-12-22 13:13:39 wez Exp $
 
 var STDOUT = WScript.StdOut;
 var STDERR = WScript.StdErr;
@@ -318,6 +318,10 @@ can be built that way. \
 		WScript.Quit(1);
 	}
 
+	var snapshot_build_exclusions = new Array(
+		'debug', 'crt-debug', 'lzf-better-compression', 'php-build', 'snapshot-template'
+		);
+
 	// Now set any defaults we might have missed out earlier
 	for (i = 0; i < configure_args.length; i++) {
 		arg = configure_args[i];
@@ -326,6 +330,22 @@ can be built that way. \
 		analyzed = analyze_arg(arg.defval);
 		shared = analyzed[0];
 		argval = analyzed[1];
+		if (PHP_SNAPSHOT_BUILD != "no" && argval == "no") {
+			var force;
+
+			force = true;
+			for (j = 0; j < snapshot_build_exclusions.length; j++) {
+				if (snapshot_build_exclusions[j] == arg.optname) {
+					force = false;
+					break;
+				}
+			}
+			if (force) {
+				STDOUT.WriteLine("snapshot: forcing " + arg.arg + " on");
+				argval = "yes";
+				shared = true;
+			}
+		}
 		eval("PHP_" + arg.symval + " = argval;");
 		eval("PHP_" + arg.symval + "_SHARED = shared;");
 	}
@@ -611,7 +631,7 @@ function SAPI(sapiname, file_list, makefiletarget, cflags)
 	} else {
 		ldflags = "$(LDFLAGS)";
 	}
-	
+
 	MFO.WriteLine("\t" + ld + " /nologo /out:$(BUILD_DIR)\\" + makefiletarget + " " + ldflags + " $(" + SAPI + "_GLOBAL_OBJS) $(BUILD_DIR)\\$(PHPLIB) $(LDFLAGS_" + SAPI + ") $(LIBS_" + SAPI + ") $(BUILD_DIR)\\" + resname);
 
 	DEFINE('CFLAGS_' + SAPI + '_OBJ', '$(CFLAGS_' + SAPI + ')');
@@ -626,6 +646,26 @@ function file_get_contents(filename)
 	c = f.ReadAll();
 	f.Close();
 	return c;
+}
+
+// Add a dependency on another extension, so that
+// the dependencies are built before extname
+function ADD_EXTENSION_DEP(extname, dependson)
+{
+	var EXT = extname.toUpperCase();
+	var DEP = dependson.toUpperCase();
+
+	var dep_shared = eval("PHP_" + DEP + "_SHARED");
+	var ext_shared = eval("PHP_" + EXT + "_SHARED");
+
+	if (dep_shared) {
+		if (!ext_shared) {
+			ERROR("static " + extname + " cannot depend on shared " + dependson);
+		}
+		ADD_FLAG("LDFLAGS_" + EXT, "/libpath:$(BUILD_DIR)");
+		ADD_FLAG("LIBS_" + EXT, "php_" + dependson + ".lib");
+		ADD_FLAG("DEPS_" + EXT, "$(BUILD_DIR)\\php_" + dependson + ".lib");
+	}
 }
 
 function EXTENSION(extname, file_list, shared, cflags)
@@ -661,9 +701,11 @@ function EXTENSION(extname, file_list, shared, cflags)
 	if (shared) {
 		dllname = "php_" + extname + ".dll";
 		var resname = generate_version_info_resource(dllname, configure_module_dirname);
-	
-		MFO.WriteLine("$(BUILD_DIR)\\" + dllname + ": $(" + EXT + "_GLOBAL_OBJS) $(BUILD_DIR)\\$(PHPLIB) $(BUILD_DIR)\\" + resname);
-		MFO.WriteLine("\t$(LD) /out:$(BUILD_DIR)\\" + dllname + " $(DLL_LDFLAGS) $(LDFLAGS) $(LDFLAGS_" + EXT + ") $(" + EXT + "_GLOBAL_OBJS) $(BUILD_DIR)\\$(PHPLIB) $(LIBS_" + EXT + ") $(LIBS) $(BUILD_DIR)\\" + resname);
+		var ld = "$(LD)";
+		var libname = "php_" + extname + ".lib";
+
+		MFO.WriteLine("$(BUILD_DIR)\\" + dllname + " $(BUILD_DIR)\\" + libname + ": $(DEPS_" + EXT + ") $(" + EXT + "_GLOBAL_OBJS) $(BUILD_DIR)\\$(PHPLIB) $(BUILD_DIR)\\" + resname);
+		MFO.WriteLine("\t" + ld + " /out:$(BUILD_DIR)\\" + dllname + " $(DLL_LDFLAGS) $(LDFLAGS) $(LDFLAGS_" + EXT + ") $(" + EXT + "_GLOBAL_OBJS) $(BUILD_DIR)\\$(PHPLIB) $(LIBS_" + EXT + ") $(LIBS) $(BUILD_DIR)\\" + resname);
 		MFO.WriteBlankLines(1);
 
 		ADD_FLAG("EXT_TARGETS", dllname);
@@ -844,7 +886,11 @@ function generate_files()
 
 	STDOUT.WriteLine("Done.");
 	STDOUT.WriteBlankLines(1);
-	STDOUT.WriteLine("Type 'nmake' to build PHP");
+	if (PHP_SNAPSHOT_BUILD != "no") {
+		STDOUT.WriteLine("Type 'nmake snap' to build a PHP snapshot");
+	} else {
+		STDOUT.WriteLine("Type 'nmake' to build PHP");
+	}
 }
 
 function generate_config_h()
@@ -1007,4 +1053,16 @@ function copy_and_subst(srcname, destname, subst_array)
 	f.Write(content);
 	f.Close();
 }
+
+// for snapshot builders, this option will attempt to enable everything
+// and you can then build everything, ignoring fatal errors within a module
+// by running "nmake snap"
+PHP_SNAPSHOT_BUILD = "no";
+ARG_ENABLE('snapshot-build', 'Build a snapshot; turns on everything it can and ignores build errors', 'no');
+
+// one-shot build optimizes build by asking compiler to build
+// several objects at once, reducing overhead of starting new
+// compiler processes.
+ARG_ENABLE('one-shot', 'Optimize for fast build - best for release and snapshot builders, not so hot for edit-and-rebuild hacking', 'no');
+
 

@@ -17,11 +17,6 @@ PATH_PROG('re2c');
 PATH_PROG('zip');
 PATH_PROG('lemon');
 
-// one-shot build optimizes build by asking compiler to build
-// several objects at once, reducing overhead of starting new
-// compiler processes.
-ARG_ENABLE('one-shot', 'Optimize for fast build - best for release and snapshot builders, not so hot for edit-and-rebuild hacking', 'no');
-
 ARG_ENABLE('debug', 'Compile with debugging symbols', "no");
 ARG_ENABLE('zts', 'Thread safety', 'yes');
 
