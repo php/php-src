@@ -256,6 +256,7 @@ ZEND_API int zend_set_hash_symbol(zval *symbol, char *name, int name_length,
 
 ZEND_API ZEND_FUNCTION(display_disabled_function);
 ZEND_API ZEND_FUNCTION(display_disabled_class);
+ZEND_API void zend_declare_property(zend_class_entry *ce, char *name, int namelen, zval *property, int access_type);
 
 #if ZEND_DEBUG
 #define CHECK_ZVAL_STRING(z) \
@@ -410,6 +411,27 @@ ZEND_API ZEND_FUNCTION(display_disabled_class);
 
 #define ZEND_SET_GLOBAL_VAR_WITH_LENGTH(name, name_length, var, _refcount, _is_ref)		\
 	ZEND_SET_SYMBOL_WITH_LENGTH(&EG(symbol_table), name, name_length, var, _refcount, _is_ref)
+
+#define ZEND_PRIVATE_PROPERTY(class_ptr, name, value) \
+{ \
+	char *_name = (name); \
+	int namelen = strlen(_name); \
+	zend_declare_property(class_ptr, _name, namelen, value, ZEND_ACC_PRIVATE); \
+}
+
+#define ZEND_PROTECTED_PROPERTY(class_ptr, name, value) \
+{ \
+	char *_name = (name); \
+	int namelen = strlen(_name); \
+	zend_declare_property(class_ptr, _name, namelen, value, ZEND_ACC_PROTECTED); \
+}
+
+#define ZEND_PUBLIC_PROPERTY(class_ptr, name, value) \
+{ \
+	char *_name = (name); \
+	int namelen = strlen(_name); \
+	zend_declare_property(class_ptr, _name, namelen, value, ZEND_ACC_PUBLIC); \
+}
 
 #define HASH_OF(p) ((p)->type==IS_ARRAY ? (p)->value.ht : (((p)->type==IS_OBJECT ? Z_OBJ_HT_P(p)->get_properties((p) TSRMLS_CC) : NULL)))
 #define ZVAL_IS_NULL(z) ((z)->type==IS_NULL)
