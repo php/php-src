@@ -829,7 +829,7 @@ if true; then
   echo "creating internal_functions.c"
   extensions=\`grep '^s.@EXT_STATIC@' \$0|sed -e 's/^.*@% *//' -e 's/%.*$//'\`
   mv -f internal_functions.c internal_functions.c.old 2>/dev/null
-  sh $srcdir/genif.sh $srcdir/internal_functions.c.in $srcdir \$extensions > internal_functions.c
+  sh $srcdir/genif.sh $srcdir/internal_functions.c.in $srcdir $EXTRA_MODULE_PTRS \$extensions > internal_functions.c
   if cmp internal_functions.c.old internal_functions.c > /dev/null 2>&1; then
       echo "internal_functions.c is unchanged"
       mv internal_functions.c.old internal_functions.c

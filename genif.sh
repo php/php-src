@@ -1,11 +1,13 @@
 #! /bin/sh
 
-# $Id: genif.sh,v 1.7 1999-09-03 17:46:39 sas Exp $
+# $Id: genif.sh,v 1.8 2000-03-26 02:46:59 sas Exp $
 # replacement for genif.pl
 
 infile="$1"
 shift
 srcdir="$1"
+shift
+extra_module_ptrs="$1"
 shift
 
 if test "$infile" = "" -o "$srcdir" = ""; then
@@ -13,7 +15,7 @@ if test "$infile" = "" -o "$srcdir" = ""; then
 	exit 1
 fi
 
-module_ptrs=""
+module_ptrs="$extra_module_ptrs"
 includes=""
 
 olddir=`pwd`
