@@ -52,6 +52,10 @@ typedef struct bc_struct
 			   in the case of leading zeros generated. */
     } bc_struct;
 
+#ifdef HAVE_CONFIG_H
+#include "../../config.h"
+#endif
+
 #include "php.h"
 #include "../../php_bcmath.h"
 
