@@ -670,6 +670,10 @@ static int format_converter(register buffy * odp, const char *fmt,
 			 * Modifier check
 			 */
 			switch (*fmt) {
+				case 'L':
+					fmt++;
+					modifier = LM_LONG_DOUBLE;
+					break;
 				case 'l':
 					fmt++;
 #if SIZEOF_LONG_LONG
@@ -681,9 +685,11 @@ static int format_converter(register buffy * odp, const char *fmt,
 						modifier = LM_LONG;
 					break;
 				case 'z':
+					fmt++;
 					modifier = LM_SIZE_T;
 					break;
 				case 'j':
+					fmt++;
 #if SIZEOF_INTMAX_T
 					modifier = LM_INTMAX_T;
 #else
@@ -691,6 +697,7 @@ static int format_converter(register buffy * odp, const char *fmt,
 #endif
 					break;
 				case 't':
+					fmt++;
 #if SIZEOF_PTRDIFF_T
 					modifier = LM_PTRDIFF_T;
 #else
@@ -725,6 +732,8 @@ static int format_converter(register buffy * odp, const char *fmt,
 						default:
 							i_num = (wide_int) va_arg(ap, unsigned int);
 							break;
+						case LM_LONG_DOUBLE:
+							goto fmt_error;
 						case LM_LONG:
 							i_num = (wide_int) va_arg(ap, unsigned long int);
 							break;
@@ -761,6 +770,8 @@ static int format_converter(register buffy * odp, const char *fmt,
 							default:
 								i_num = (wide_int) va_arg(ap, int);
 								break;
+							case LM_LONG_DOUBLE:
+								goto fmt_error;
 							case LM_LONG:
 								i_num = (wide_int) va_arg(ap, long int);
 								break;
@@ -808,6 +819,8 @@ static int format_converter(register buffy * odp, const char *fmt,
 						default:
 							ui_num = (u_wide_int) va_arg(ap, unsigned int);
 							break;
+						case LM_LONG_DOUBLE:
+							goto fmt_error;
 						case LM_LONG:
 							ui_num = (u_wide_int) va_arg(ap, unsigned long int);
 							break;
@@ -846,6 +859,8 @@ static int format_converter(register buffy * odp, const char *fmt,
 						default:
 							ui_num = (u_wide_int) va_arg(ap, unsigned int);
 							break;
+						case LM_LONG_DOUBLE:
+							goto fmt_error;
 						case LM_LONG:
 							ui_num = (u_wide_int) va_arg(ap, unsigned long int);
 							break;
@@ -896,7 +911,16 @@ static int format_converter(register buffy * odp, const char *fmt,
 				case 'f':
 				case 'e':
 				case 'E':
-					fp_num = va_arg(ap, double);
+					switch(modifier) {
+						case LM_LONG_DOUBLE:
+							fp_num = (double) va_arg(ap, long double);
+							break;
+						case LM_STD:
+							fp_num = va_arg(ap, double);
+							break;
+						default:
+							goto fmt_error;
+					}
 
 					if (zend_isnan(fp_num)) {
 						s = "nan";
@@ -920,6 +944,16 @@ static int format_converter(register buffy * odp, const char *fmt,
 
 				case 'g':
 				case 'G':
+					switch(modifier) {
+						case LM_LONG_DOUBLE:
+							fp_num = (double) va_arg(ap, long double);
+							break;
+						case LM_STD:
+							fp_num = va_arg(ap, double);
+							break;
+						default:
+							goto fmt_error;
+					}
 					if (adjust_precision == NO)
 						precision = FLOAT_DIGITS;
 					else if (precision == 0)
@@ -927,7 +961,7 @@ static int format_converter(register buffy * odp, const char *fmt,
 					/*
 					 * * We use &num_buf[ 1 ], so that we have room for the sign
 					 */
-					s = ap_php_gcvt(va_arg(ap, double), precision, &num_buf[1],
+					s = ap_php_gcvt(fp_num, precision, &num_buf[1],
 							alternate_form);
 					if (*s == '-')
 						prefix_char = *s++;
@@ -999,6 +1033,8 @@ static int format_converter(register buffy * odp, const char *fmt,
 					continue;
 
 
+fmt_error:
+				php_error(E_ERROR, "Illegal length modifier specified '%c' in s[np]printf call", *fmt);
 					/*
 					 * The default case is for unrecognized %'s.
 					 * We print %<char> to help the user identify what
