@@ -62,6 +62,7 @@ struct Yaz_AssociationInfo {
 	int persistent;
 	int in_use;
 	int order;
+	int zval_resource;
 };
 
 static Yaz_Association yaz_association_mk()
@@ -204,12 +205,6 @@ static long *array_lookup_bool(HashTable *ht, const char *idx)
 	}
 	return 0;
 }
-
-#if iliaa_0 /* compile warning fix */
-static int send_present(Yaz_Association t);
-static int send_sort_present(Yaz_Association t);
-static int send_sort(Yaz_Association t);
-#endif
 
 static const char *option_get(Yaz_Association as, const char *name)
 {
@@ -388,6 +383,7 @@ PHP_FUNCTION(yaz_connect)
 #endif
 
 	ZEND_REGISTER_RESOURCE(return_value, &shared_associations[i], le_link);
+    as->zval_resource = Z_LVAL_P(return_value);
 }
 /* }}} */
 
@@ -509,13 +505,15 @@ PHP_FUNCTION(yaz_present)
    Process events. */
 PHP_FUNCTION(yaz_wait)
 {
+	pval **pval_options = 0;
+	int event_mode = 0;
 	int no = 0;
 	ZOOM_connection conn_ar[MAX_ASSOC];
 	int i, timeout = 15;
 
 	if (ZEND_NUM_ARGS() == 1) {
 		long *val = 0;
-		pval **pval_options = 0;
+        long *event_bool = 0;
 		HashTable *options_ht = 0;
 		if (zend_get_parameters_ex(1, &pval_options) == FAILURE) {
 			WRONG_PARAM_COUNT;
@@ -529,6 +527,9 @@ PHP_FUNCTION(yaz_wait)
 		if (val) {
 			timeout = *val;
 		}
+		event_bool = array_lookup_bool(options_ht, "event");
+		if (event_bool && *event_bool)
+			event_mode = 1;
 	}
 #ifdef ZTS
 	tsrm_mutex_lock(yaz_mutex);
@@ -546,8 +547,26 @@ PHP_FUNCTION(yaz_wait)
 #ifdef ZTS
 	tsrm_mutex_unlock(yaz_mutex);
 #endif
+    if (event_mode) {
+        long ev = ZOOM_event(no, conn_ar);
+		if (ev <= 0) {
+			RETURN_FALSE;
+		} else {
+			Yaz_Association p = shared_associations[ev-1];
+			int event_code = ZOOM_connection_last_event(p->zoom_conn);
+
+			add_assoc_long(*pval_options, "eventcode", event_code);
+
+			zend_list_addref(p->zval_resource);
+			Z_LVAL_P(return_value) = p->zval_resource;
+			Z_TYPE_P(return_value) = IS_RESOURCE;
+			return;
+        }
+    }
+
 	if (no) {
-		while (ZOOM_event (no, conn_ar));
+        while (ZOOM_event (no, conn_ar))
+            ;
 	}
 	RETURN_TRUE;
 }
@@ -1455,7 +1474,11 @@ static void yaz_close_link (zend_rsrc_list_entry *rsrc TSRMLS_DC)
 /* {{{ PHP_INI_BEGIN
  */
 PHP_INI_BEGIN()
+#if PHP_MAJOR_VERSION >= 5
 	STD_PHP_INI_ENTRY("yaz.max_links", "100", PHP_INI_ALL, OnUpdateLong, max_links, zend_yaz_globals, yaz_globals)
+#else
+	STD_PHP_INI_ENTRY("yaz.max_links", "100", PHP_INI_ALL, OnUpdateInt, max_links, zend_yaz_globals, yaz_globals)
+#endif
 	STD_PHP_INI_ENTRY("yaz.log_file", NULL, PHP_INI_ALL, OnUpdateString, log_file, zend_yaz_globals, yaz_globals)
 PHP_INI_END()
 /* }}} */
