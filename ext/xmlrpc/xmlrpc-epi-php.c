@@ -1336,7 +1336,7 @@ int set_zval_xmlrpc_type(zval* value, XMLRPC_VALUE_TYPE newtype)
             XMLRPC_VALUE v = XMLRPC_CreateValueDateTime_ISO8601(NULL, value->value.str.val);
             if(v) {
                time_t timestamp = XMLRPC_GetValueDateTime(v);
-               if(time) {
+               if(timestamp) {
                   pval* ztimestamp;
 
                   MAKE_STD_ZVAL(ztimestamp);

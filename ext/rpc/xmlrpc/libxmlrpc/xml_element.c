@@ -44,6 +44,9 @@ static const char rcsid[] = "#(@) $Id$";
  *   06/2000
  * HISTORY
  *   $Log$
+ *   Revision 1.3  2002/07/05 04:43:53  danda
+ *   merged in updates from SF project.  bring php repository up to date with xmlrpc-epi version 0.51
+ *
  *   Revision 1.9  2002/07/03 20:54:30  danda
  *   root element should not have a parent. patch from anon SF user
  *
@@ -558,7 +561,6 @@ typedef struct _xml_elem_data {
 /* expat start of element handler */
 static void startElement(void *userData, const char *name, const char **attrs)
 {
-   int i;
    xml_element *c;
    xml_elem_data* mydata = (xml_elem_data*)userData;
    const char** p = attrs;

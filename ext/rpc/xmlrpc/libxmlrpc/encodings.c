@@ -38,6 +38,7 @@
 #include <php_config.h>
 #else
 #include <config.w32.h>
+#include <stdlib.h>
 #endif
 
 static const char rcsid[] = "#(@) $Id$";
