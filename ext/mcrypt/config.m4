@@ -27,11 +27,11 @@ if test "$PHP_MCRYPT" != "no"; then
   AC_CHECK_LIB(mcrypt, mcrypt_module_open, [LIBS="$LIBS -lltdl"],[ ],)
   LIBS=$old_LIBS
   LDFLAGS="$old_LDFLAGS"
-  if test "$ac_cv_lib_mcrypt_init_mcrypt" = "yes"; then
-	AC_DEFINE(HAVE_LIBMCRYPT22,1,[ ])
-  elif test "$ac_cv_lib_mcrypt_mcrypt_module_open" = "yes"; then
+  if test "$ac_cv_lib_mcrypt_mcrypt_module_open" = "yes"; then
     AC_ADD_LIBRARY(ltdl)
-	AC_DEFINE(HAVE_LIBMCRYPT24,1,[ ])
+    AC_DEFINE(HAVE_LIBMCRYPT24,1,[ ])
+  elif test "$ac_cv_lib_mcrypt_init_mcrypt" = "yes"; then
+    AC_DEFINE(HAVE_LIBMCRYPT22,1,[ ])
   else
     AC_MSG_ERROR(Sorry, I was not able to diagnose which libmcrypt version you have installed.)
   fi
