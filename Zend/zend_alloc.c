@@ -228,7 +228,7 @@ ZEND_API void *_safe_emalloc(size_t nmemb, size_t size, size_t offset ZEND_FILE_
 		ZEND_SIGNED_MULTIPLY_LONG(nmemb, size, lval, dval, use_dval);
 
 		if (!use_dval
-				&& lval < LONG_MAX - offset) {
+				&& lval < (long) (LONG_MAX - offset)) {
 			return emalloc_rel(lval + offset);
 		}
 	}
