@@ -653,7 +653,7 @@ Changes in the Zend Engine 2.0
 
       Each class whose instances can be iterated with foreach should 
       implement the empty interface 'Traversable'. Hence any object
-      that says it implements 'Traversable' can be used with forach.
+      that says it implements 'Traversable' can be used with foreach.
 
       The interfaces 'IteratorAggregate' and 'Iterator' allow to specify
       how class objects are iterated in PHP code. The first of them simply
