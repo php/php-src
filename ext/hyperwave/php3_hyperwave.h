@@ -67,6 +67,7 @@ PHP_FUNCTION(hw_mv);
 PHP_FUNCTION(hw_cp);
 PHP_FUNCTION(hw_deleteobject);
 PHP_FUNCTION(hw_changeobject);
+PHP_FUNCTION(hw_modifyobject);
 PHP_FUNCTION(hw_getparents);
 PHP_FUNCTION(hw_getparentsobj);
 PHP_FUNCTION(hw_children);
@@ -108,6 +109,7 @@ PHP_FUNCTION(hw_document_size);
 PHP_FUNCTION(hw_document_attributes);
 PHP_FUNCTION(hw_document_bodytag);
 PHP_FUNCTION(hw_document_content);
+PHP_FUNCTION(hw_document_setcontent);
 PHP_FUNCTION(hw_objrec2array);
 PHP_FUNCTION(hw_array2objrec);
 PHP_FUNCTION(hw_connection_info);
@@ -116,8 +118,10 @@ PHP_FUNCTION(hw_getrellink);
 PHP_FUNCTION(hw_dummy);
 PHP_FUNCTION(hw_who);
 PHP_FUNCTION(hw_stat);
+
 #else
 #define hw_module_ptr NULL
 #endif /* HYPERWAVE */
+#define phpext_hyperwave_ptr hw_module_ptr
 #endif /* _HW_H */
 
