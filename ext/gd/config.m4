@@ -7,7 +7,7 @@ AC_ARG_WITH(gd,
     no)
       AC_MSG_RESULT(no) ;;
     yes)
-      AC_ADD_LIBRARY(-lgd)
+      AC_ADD_LIBRARY(gd)
       AC_DEFINE(HAVE_LIBGD)
       AC_MSG_RESULT(yes)
       AC_CHECK_LIB(gd, gdImageString16, [ AC_DEFINE(HAVE_LIBGD13) ])
@@ -37,7 +37,7 @@ dnl A whole whack of possible places where this might be
       test -f $withval/gd1.3/libgd.a && GD_LIB="$withval/gd1.3"
 
       if test -n "$GD_INCLUDE" && test -n "$GD_LIB" ; then
-        AC_ADD_LIBRARY_WITH_PATH(-lgd, $GD_LIB)
+        AC_ADD_LIBRARY_WITH_PATH(gd, $GD_LIB)
         AC_DEFINE(HAVE_LIBGD)
         AC_MSG_RESULT(yes)
         AC_CHECK_LIB(gd, gdImageString16, [ AC_DEFINE(HAVE_LIBGD13) ])
