@@ -34,8 +34,6 @@ makefile_files    = $(makefile_am_files:e.am=e)
 
 config_h_in = php_config.h.in
 
-acconfig_h_SOURCES = acconfig.h.in $(config_h_files)
-
 targets = $(TOUCH_FILES) $(makefile_in_files) configure $(config_h_in)
 
 
@@ -53,10 +51,6 @@ Zend/Makefile.am:
 
 TSRM/Makefile.am:
 	test -d TSRM || (test -d ../TSRM && ln -s ../TSRM TSRM)
-
-acconfig.h: $(acconfig_h_SOURCES)
-	@echo rebuilding $@
-	@cat $(acconfig_h_SOURCES) > $@
 
 $(makefile_in_files): $(makefile_am_files) aclocal.m4 configure.in $(config_m4_files)
 	@echo rebuilding Makefile.in\'s
