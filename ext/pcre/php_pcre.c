@@ -18,12 +18,6 @@
 
 /* $Id$ */
 
-/*
-	TODO:
-	- Allow user to set PCRE_NOTEMPTY, PCRE_ANCHORED at execution time
-	- add option to preg_grep() to return entries that _don't_ match
-*/
-
 #include "php.h"
 #include "php_globals.h"
 #include "php_pcre.h"

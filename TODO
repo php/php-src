@@ -79,7 +79,8 @@ ext/oci8
 
 ext/pcre
 --------
-    * update the online docs from version 3.1 man page
+    * Allow user to set PCRE_NOTEMPTY, PCRE_ANCHORED at execution time, maybe
+    * add option to preg_grep() to return entries that _don't_ match
 
 ext/sablot
 ----------
