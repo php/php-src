@@ -127,7 +127,7 @@ function initialize()
         $term_bold = $term_norm = "";
     }
 
-    $windows_p = (substr(php_uname(), 0, 7) == "Windows");
+    $windows_p = (substr(PHP_OS, 0, 3) == "WIN");
     if ($windows_p) {
         if (file_exists('Release_TS_inline\\php.exe')) {
             $php = 'Release_TS_inline\\php.exe';
@@ -137,8 +137,11 @@ function initialize()
             $php=trim($windows_p ? `cd`:`pwd`).'\\php';
         }
     } else {
-        // $php = $GLOBALS["TOP_BUILDDIR"]."/php"; // where should be the origin of this variable
-        $php=trim(`pwd`).'/php';
+        if (isset($GLOBALS["TOP_BUILDDIR"])) {
+            $php = $GLOBALS["TOP_BUILDDIR"]."/php";
+        } else {
+            $php = getcwd() . '/php';
+        }
     }
 
     create_compiled_in_modules_list();
