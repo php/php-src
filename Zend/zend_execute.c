@@ -688,6 +688,8 @@ static inline void zend_fetch_dimension_address(znode *result, znode *op1, znode
 						convert_to_long(&tmp);
 						offset = &tmp;
 					}
+					SEPARATE_ZVAL(container_ptr);
+					container = *container_ptr;
 					Ts[result->u.var].EA.str = container;
 					PZVAL_LOCK(container);
 					Ts[result->u.var].EA.offset = offset->value.lval;
