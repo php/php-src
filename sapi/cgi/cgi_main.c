@@ -86,7 +86,7 @@ extern int ap_php_optind;
 
 static int sapi_cgibin_ub_write(const char *str, uint str_length)
 {
-	int ret;
+	size_t ret;
 
 	ret = fwrite(str, 1, str_length, stdout);
 	if (ret != str_length) {

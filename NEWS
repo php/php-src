@@ -2,6 +2,9 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.1
+- Fixed sessions on Win32. When setting the directory depth parameter in
+  save_path you need to now delimit it with a ';' instead of ':', e.g
+  "5;/tmp" instead of "5:/tmp" (Andi)
 - Changed the Apache handler's return status to 'Declined' when a requested
   PHP file could not be found.  Returning 'Not Found' caused problems
   in the ErrorDocument handler stage in that $REDIRECT_REDIRECT_ERROR_NOTES
