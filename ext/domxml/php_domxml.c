@@ -1439,6 +1439,10 @@ PHP_FUNCTION(domxml_node_name)
 			str = "#text";
 			break;
 
+		case XML_ATTRIBUTE_NODE:
+			str = n->name;
+			break;
+
 		case XML_CDATA_SECTION_NODE:
 			str = "#cdata-section";
 			break;
