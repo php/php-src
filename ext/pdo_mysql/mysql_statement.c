@@ -48,6 +48,7 @@ static int pdo_mysql_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 {
 	pdo_mysql_stmt *S = (pdo_mysql_stmt*)stmt->driver_data;
 	pdo_mysql_db_handle *H = S->H;
+	my_ulonglong row_count;
 
 	/* ensure that we free any previous unfetched results */
 	if (S->result) {
@@ -59,17 +60,27 @@ static int pdo_mysql_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 		pdo_mysql_error_stmt(stmt);
 		return 0;
 	}
-	if ((S->result = mysql_use_result(H->server)) == NULL) {
-		/* could've been INSERT/UPDATE/DELETE query */
-		if (!mysql_affected_rows(H->server)) {
+
+	row_count = mysql_affected_rows(H->server);
+	if (row_count == (my_ulonglong)-1) {
+		// we either have a query that returned a result set or an error occured
+		// lets see if we have access to a result set
+		S->result = mysql_use_result(H->server);
+		if (NULL == S->result) {
 			pdo_mysql_error_stmt(stmt);
 			return 0;
 		}
-		return 1;
+
+		stmt->row_count = 0;
+
+		if (!stmt->executed) {
+			stmt->column_count = (int) mysql_num_fields(S->result);
+		}
+	} else {
+		// this was a DML or DDL query (INSERT, UPDATE, DELETE, ...
+		stmt->row_count = row_count;
 	}
-	if (!stmt->executed) { 
-		stmt->column_count = (int) mysql_num_fields(S->result);
-	}
+
 	return 1;
 }
 
