@@ -3,7 +3,7 @@ dnl $Id$
 dnl
 
 PHP_ARG_ENABLE(exif, whether to enable EXIF (digital camera) support,
-[  --disable-exif          Disable EXIF (digital camera) support], yes)
+[  --enable-exif          Enable EXIF (digital camera) support])
 
 if test "$PHP_EXIF" != "no"; then
   AC_DEFINE(HAVE_EXIF, 1, [Whether you want EXIF (digital camera) support])
