@@ -2,6 +2,8 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.1
+- Added pg_trace() and pg_untrace (Dominic J. Eidson & Zeev)
+- ignore_user_abort=Off is now default. (Thies)
 - Added array_merge_recursive() that will recursively merge values
   under the same keys. (Andrei)
 - fixed crash in OCIParse when parsing invalid SQL. (Thies)
