@@ -38,10 +38,10 @@ install-sapi: $(OVERALL_TARGET)
 
 install-modules: build-modules
 	@test -d modules && \
-	$(mkinstalldirs) $(INSTALL_ROOT)$(EXTENSION_DIR) && \
-	echo "Installing shared extensions:     $(INSTALL_ROOT)$(EXTENSION_DIR)/" && \
-	rm -f modules/*.la && \
-	$(INSTALL) modules/* $(INSTALL_ROOT)$(EXTENSION_DIR) >/dev/null 2>&1 || true
+	$(mkinstalldirs) $(INSTALL_ROOT)$(EXTENSION_DIR)
+	@echo "Installing shared extensions:     $(INSTALL_ROOT)$(EXTENSION_DIR)/"
+	@rm -f modules/*.la >/dev/null 2>&1
+	@$(INSTALL) modules/* $(INSTALL_ROOT)$(EXTENSION_DIR)
 
 install-tester:
 	@echo "Installing regression tester:     $(INSTALL_ROOT)$(PEAR_INSTALLDIR)/"

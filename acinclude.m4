@@ -1153,6 +1153,7 @@ dnl Basically sets up the link-stage for building module-name
 dnl from object_var in build-dir.
 dnl
 AC_DEFUN([PHP_SHARED_MODULE],[
+  install_modules="install-modules"
   PHP_MODULES="$PHP_MODULES \$(phplibdir)/$1.la"
   PHP_SUBST($2)
   cat >>Makefile.objects<<EOF
