@@ -50,7 +50,7 @@ static IBindCtx *pBindCtx;
 static unsigned char arg1and2_force_ref[] = { 2, BYREF_FORCE, BYREF_FORCE };
 
 /* register rpc callback function */
-RPC_REGISTER_HANDLERS_START(com)
+RPC_REGISTER_HANDLERS_BEGIN(com)
 TRUE,							/* poolable */
 HASH_AS_INT_WITH_SIGNATURE,
 com_hash,
@@ -68,16 +68,16 @@ com_get_properties
 RPC_REGISTER_HANDLERS_END()
 
 /* register ini settings */
-RPC_INI_START(com)
+PHP_INI_BEGIN()
 PHP_INI_ENTRY_EX("com.allow_dcom", "0", PHP_INI_SYSTEM, NULL, php_ini_boolean_displayer_cb)
 PHP_INI_ENTRY_EX("com.autoregister_typelib", "0", PHP_INI_SYSTEM, NULL, php_ini_boolean_displayer_cb)
 PHP_INI_ENTRY_EX("com.autoregister_verbose", "0", PHP_INI_SYSTEM, NULL, php_ini_boolean_displayer_cb)
 PHP_INI_ENTRY_EX("com.autoregister_casesensitive", "1", PHP_INI_SYSTEM, NULL, php_ini_boolean_displayer_cb)
 PHP_INI_ENTRY("com.typelib_file", "", PHP_INI_SYSTEM, com_typelib_file_change)
-RPC_INI_END()
+PHP_INI_END()
 
 /* register userspace functions */
-RPC_FUNCTION_ENTRY_START(com)
+RPC_FUNCTION_ENTRY_BEGIN(com)
 	ZEND_FALIAS(com_invoke,	rpc_call,		NULL)
 	ZEND_FE(com_addref,			NULL)
 	ZEND_FE(com_release,		NULL)
@@ -90,8 +90,21 @@ RPC_FUNCTION_ENTRY_START(com)
 	ZEND_FE(com_print_typeinfo,	NULL)
 RPC_FUNCTION_ENTRY_END()
 
+zend_module_entry com_module_entry = {
+	ZE2_STANDARD_MODULE_HEADER,
+	"com",
+	RPC_FUNCTION_ENTRY(com),
+	ZEND_MINIT(com),
+	ZEND_MSHUTDOWN(com),
+	NULL,
+	NULL,
+	ZEND_MINFO(com),
+	"0.1a",
+	STANDARD_MODULE_PROPERTIES
+};
+
 /* register class methods */
-RPC_METHOD_ENTRY_START(com)
+RPC_METHOD_ENTRY_BEGIN(com)
 	ZEND_FALIAS(addref,		com_addref,		NULL)
 	ZEND_FALIAS(release,	com_release,	NULL)
 	ZEND_FALIAS(next,		com_next,		NULL)
@@ -101,20 +114,35 @@ RPC_METHOD_ENTRY_START(com)
 RPC_METHOD_ENTRY_END()
 
 
-/* init function that is called before the class is registered
- * so you can do any tricky stuff in here
- */
-RPC_INIT_FUNCTION(com)
+ZEND_MINIT_FUNCTION(com)
 {
 	CreateBindCtx(0, &pBindCtx);
 	php_variant_init(module_number TSRMLS_CC);
+
+	RPC_REGISTER_LAYER(com);
+	REGISTER_INI_ENTRIES();
+
+	return SUCCESS;
 }
 
-RPC_SHUTDOWN_FUNCTION(com)
+ZEND_MSHUTDOWN_FUNCTION(com)
 {
 	php_variant_shutdown(TSRMLS_C);
 	pBindCtx->lpVtbl->Release(pBindCtx);
+
+	UNREGISTER_INI_ENTRIES();
+
+	return SUCCESS;
 }
+
+ZEND_MINFO_FUNCTION(com)
+{
+	DISPLAY_INI_ENTRIES();
+}
+
+#ifdef COMPILE_DL_COM
+ZEND_GET_MODULE(com);
+#endif
 
 /* rpc handler functions */
 

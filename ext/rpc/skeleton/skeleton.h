@@ -16,10 +16,6 @@
    +----------------------------------------------------------------------+
  */
 
-/* TODO: include this file in ext/rpc/layer.h and add your handlers to
- * the handler_entries[] array.
- */
-
 #ifndef SKELETON_H
 #define SKELETON_H
 

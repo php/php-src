@@ -34,16 +34,14 @@ ZEND_RINIT_FUNCTION(rpc);
 ZEND_RSHUTDOWN_FUNCTION(rpc);
 ZEND_MINFO_FUNCTION(rpc);
 
-ZEND_FUNCTION(rpc_load);
-ZEND_FUNCTION(rpc_call);
-ZEND_FUNCTION(rpc_set);
-ZEND_FUNCTION(rpc_get);
-ZEND_FUNCTION(rpc_singleton);
-ZEND_FUNCTION(rpc_poolable);
+ZEND_API ZEND_FUNCTION(rpc_load);
+ZEND_API ZEND_FUNCTION(rpc_call);
+ZEND_API ZEND_FUNCTION(rpc_set);
+ZEND_API ZEND_FUNCTION(rpc_get);
+ZEND_API ZEND_FUNCTION(rpc_singleton);
+ZEND_API ZEND_FUNCTION(rpc_poolable);
 
 ZEND_API void rpc_error(int type, const char *format, ...);
 ZEND_API zend_object_value rpc_objects_new(zend_class_entry * TSRMLS_DC);
-
-#define phpext_rpc_ptr &rpc_module_entry
 
 #endif	/* PHP_RPC_H */

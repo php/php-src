@@ -19,10 +19,6 @@
 #ifndef RPC_H
 #define RPC_H
 
-#define FOREACH_HANDLER for (__handler_counter=0; __handler_counter < HANDLER_COUNT; __handler_counter++)
-#define HANDLER handler_entries[__handler_counter]
-#define HANDLER_COUNT (sizeof(handler_entries) / sizeof(rpc_handler_entry))
-
 #define RPC_HT(intern) (*((intern)->handlers))
 #define RPC_CLASS(intern) ((intern)->hash)
 
@@ -126,7 +122,5 @@
 #define FREE_SIGNATURE(hash_val, arg_types)																			\
 						efree(arg_types);																			\
 						efree(hash_val.str);
-
-static int __handler_counter;
 
 #endif

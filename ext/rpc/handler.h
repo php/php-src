@@ -22,31 +22,22 @@
 #include "php.h"
 #include "php_ini.h"
 
-#define RPC_HANDLER(layer)				{#layer, layer##_handler_init, layer##_handler_shutdown,	\
-										&layer##_object_handlers, &layer##_class_entry,				\
-										layer##_function_entry, layer##_method_entry,				\
-										layer##_ini_entry}
-
-#define RPC_DECLARE_HANDLER(layer)		void layer##_handler_init(int module_number TSRMLS_DC);		\
-										void layer##_handler_shutdown(TSRMLS_D);					\
-										rpc_object_handlers layer##_object_handlers;				\
+#define RPC_REGISTER_LAYER(layer)		rpc_register_layer(&layer##_handler_entry TSRMLS_CC);
+#define RPC_DECLARE_HANDLER(layer)		rpc_object_handlers layer##_object_handlers;				\
 										zend_class_entry *layer##_class_entry;						\
 										function_entry layer##_function_entry[];					\
 										function_entry layer##_method_entry[];						\
-										zend_ini_entry layer##_ini_entry[];
+										static rpc_handler_entry layer##_handler_entry =			\
+											{#layer, &layer##_object_handlers, &layer##_class_entry,\
+											layer##_function_entry, layer##_method_entry}
 
-#define RPC_INIT_FUNCTION(layer)		void layer##_handler_init(int module_number TSRMLS_DC)
-#define RPC_SHUTDOWN_FUNCTION(layer)	void layer##_handler_shutdown(TSRMLS_D)
-
-#define RPC_REGISTER_HANDLERS_START(layer)		zend_class_entry *layer##_class_entry;				\
+#define RPC_REGISTER_HANDLERS_BEGIN(layer)		zend_class_entry *layer##_class_entry;				\
 												rpc_object_handlers layer##_object_handlers = {
 
 #define RPC_REGISTER_HANDLERS_END()				};
 
-#define RPC_INI_START(layer)			zend_ini_entry layer##_ini_entry[] = {
-#define RPC_INI_END()					{ 0, 0, NULL, 0, NULL, NULL, NULL, NULL, NULL, 0, NULL, 0, 0, NULL } };
-  
-#define RPC_FUNCTION_ENTRY_START(layer)	function_entry layer##_function_entry[] = {				\
+#define RPC_FUNCTION_ENTRY(layer)		layer##_function_entry
+#define RPC_FUNCTION_ENTRY_BEGIN(layer)	function_entry layer##_function_entry[] = {				\
 											ZEND_FALIAS(layer##_load, rpc_load, NULL)			\
 											ZEND_FALIAS(layer##_call, rpc_call, NULL)			\
 											ZEND_FALIAS(layer##_get, rpc_get, NULL)				\
@@ -57,7 +48,7 @@
 #define RPC_FUNCTION_ENTRY_END()			{NULL, NULL, NULL}							\
 										};
 
-#define RPC_METHOD_ENTRY_START(layer)	function_entry layer##_method_entry[] = {
+#define RPC_METHOD_ENTRY_BEGIN(layer)	function_entry layer##_method_entry[] = {
 
 #define RPC_METHOD_ENTRY_END()				{NULL, NULL, NULL}							\
 										};
@@ -103,13 +94,10 @@ typedef struct _rpc_object_handlers {
 /* handler entry */
 typedef struct _rpc_handler_entry {
 	char					*name;
-	void (*rpc_handler_init)();
-	void (*rpc_handler_shutdown)();
 	rpc_object_handlers		*handlers;
 	zend_class_entry		**ce;
 	function_entry			*functions;
 	function_entry			*methods;
-	zend_ini_entry			*ini;
 } rpc_handler_entry;
 
 /* class/method/function hash */
@@ -139,5 +127,6 @@ typedef struct _rpc_proxy {
 	zend_uint				dummy;
 } rpc_proxy;
 
+ZEND_API rpc_register_layer(rpc_handler_entry *entry TSRMLS_DC);
 
 #endif /* HANDLER_H */

@@ -36,7 +36,7 @@ static int skeleton_unset_property(rpc_string, void **);
 static int skeleton_get_properties(HashTable **, void **);
 
 /* register rpc callback function */
-RPC_REGISTER_HANDLERS_START(skeleton)
+RPC_REGISTER_HANDLERS_BEGIN(skeleton)
 FALSE,						/* poolable TRUE|FALSE*/
 DONT_HASH,					/* hash function name lookups to avoid reflection of the object for each
 				             * method call. hashing is done either by mapping only the function name
