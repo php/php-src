@@ -246,7 +246,7 @@ AC_ARG_WITH(flatfile,
   if test "$withval" = "yes"; then
     PHP_ADD_BUILD_DIR($ext_builddir/libflatfile)
     AC_DEFINE(DBA_FLATFILE, 1, [ ])
-    flat_sources="php_flatfile.c libflatfile/flatfile.c"
+    flat_sources="dba_flatfile.c libflatfile/flatfile.c"
     THIS_RESULT="builtin"
   fi
 ])

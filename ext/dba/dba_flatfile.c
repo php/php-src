@@ -44,11 +44,7 @@
 #endif
 #endif
 
-typedef struct {
-	datum nextkey;
-} dba_dbm_data;
-
-#define DBM_DATA dba_dbm_data *dba = info->dbf
+#define DBM_DATA flatfile *dba = info->dbf
 #define DBM_GKEY datum gkey; gkey.dptr = (char *) key; gkey.dsize = keylen
 
 #define TRUNC_IT(extension, mode) \
@@ -59,7 +55,7 @@ typedef struct {
 	close(fd);
 
 
-DBA_OPEN_FUNC(dbm)
+DBA_OPEN_FUNC(flatfile)
 {
 	char *fmode;
 	php_stream *fp;
@@ -72,7 +68,7 @@ DBA_OPEN_FUNC(dbm)
 	int retries = 0;
 #endif
 
-	info->dbf = ecalloc(sizeof(dba_dbm_data), 1);
+	info->dbf = ecalloc(sizeof(flatfile), 1);
 	if (!info->dbf) {
 		*error = "Out of memory";
 		return FAILURE;
@@ -150,14 +146,14 @@ DBA_OPEN_FUNC(dbm)
 		return FAILURE;
 	}
 
-	((dba_dbm_data*)info->dbf)->fp = fp;
-	((dba_dbm_data*)info->dbf)->lockfn = lockfn;
-	((dba_dbm_data*)info->dbf)->lockfd = lockfd;
+	((flatfile*)info->dbf)->fp = fp;
+	((flatfile*)info->dbf)->lockfn = lockfn;
+	((flatfile*)info->dbf)->lockfd = lockfd;
 
 	return SUCCESS;
 }
 
-DBA_CLOSE_FUNC(dbm)
+DBA_CLOSE_FUNC(flatfile)
 {
 	DBM_DATA;
 
@@ -178,13 +174,13 @@ DBA_CLOSE_FUNC(dbm)
 	efree(dba);
 }
 
-#define DBM_FETCH(gkey)       dbm_file_fetch((dba_dbm_data*)info->dbf, gkey TSRMLS_CC)
-#define DBM_STORE(gkey, gval) dbm_file_store((dba_dbm_data*)info->dbf, gkey, gval, DBM_REPLACE TSRMLS_CC)
-#define DBM_DELETE(gkey)      dbm_file_delete((dba_dbm_data*)info->dbf, gkey TSRMLS_CC)
-#define DBM_FIRSTKEY()        dbm_file_firstkey((dba_dbm_data*)info->dbf TSRMLS_CC)
-#define DBM_NEXTKEY(gkey)     dbm_file_nextkey((dba_dbm_data*)info->dbf TSRMLS_CC)
+#define DBM_FETCH(gkey)       dbm_file_fetch((flatfile*)info->dbf, gkey TSRMLS_CC)
+#define DBM_STORE(gkey, gval) dbm_file_store((flatfile*)info->dbf, gkey, gval, DBM_REPLACE TSRMLS_CC)
+#define DBM_DELETE(gkey)      dbm_file_delete((flatfile*)info->dbf, gkey TSRMLS_CC)
+#define DBM_FIRSTKEY()        dbm_file_firstkey((flatfile*)info->dbf TSRMLS_CC)
+#define DBM_NEXTKEY(gkey)     dbm_file_nextkey((flatfile*)info->dbf TSRMLS_CC)
 
-DBA_FETCH_FUNC(dbm)
+DBA_FETCH_FUNC(flatfile)
 {
 	datum gval;
 	char *new = NULL;
@@ -199,7 +195,7 @@ DBA_FETCH_FUNC(dbm)
 	return new;
 }
 
-DBA_UPDATE_FUNC(dbm)
+DBA_UPDATE_FUNC(flatfile)
 {
 	datum gval;
 
@@ -210,7 +206,7 @@ DBA_UPDATE_FUNC(dbm)
 	return (DBM_STORE(gkey, gval) == -1 ? FAILURE : SUCCESS);
 }
 
-DBA_EXISTS_FUNC(dbm)
+DBA_EXISTS_FUNC(flatfile)
 {
 	datum gval;
 	DBM_GKEY;
@@ -223,13 +219,13 @@ DBA_EXISTS_FUNC(dbm)
 	return FAILURE;
 }
 
-DBA_DELETE_FUNC(dbm)
+DBA_DELETE_FUNC(flatfile)
 {
 	DBM_GKEY;
 	return(DBM_DELETE(gkey) == -1 ? FAILURE : SUCCESS);
 }
 
-DBA_FIRSTKEY_FUNC(dbm)
+DBA_FIRSTKEY_FUNC(flatfile)
 {
 	DBM_DATA;
 
@@ -244,7 +240,7 @@ DBA_FIRSTKEY_FUNC(dbm)
 	return NULL;
 }
 
-DBA_NEXTKEY_FUNC(dbm)
+DBA_NEXTKEY_FUNC(flatfile)
 {
 	DBM_DATA;
 	datum lkey;
@@ -264,13 +260,13 @@ DBA_NEXTKEY_FUNC(dbm)
 	return NULL;
 }
 
-DBA_OPTIMIZE_FUNC(dbm)
+DBA_OPTIMIZE_FUNC(flatfile)
 {
 	/* dummy */
 	return SUCCESS;
 }
 
-DBA_SYNC_FUNC(dbm)
+DBA_SYNC_FUNC(flatfile)
 {
 	/* dummy */
 	return SUCCESS;

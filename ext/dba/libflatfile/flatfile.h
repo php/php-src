@@ -32,16 +32,16 @@ typedef struct {
 	php_stream *fp;
 	long CurrentFlatFilePos;
 	datum nextkey;
-} dba_dbm_data;
+} flatfile;
 
 #define DBM_INSERT 0
 #define DBM_REPLACE 1
 
-PHPAPI int dbm_file_store(dba_dbm_data *dba, datum key_datum, datum value_datum, int mode TSRMLS_DC);
-PHPAPI datum dbm_file_fetch(dba_dbm_data *dba, datum key_datum TSRMLS_DC);
-PHPAPI int dbm_file_delete(dba_dbm_data *dba, datum key_datum TSRMLS_DC);
-PHPAPI int dbm_file_findkey(dba_dbm_data *dba, datum key_datum TSRMLS_DC);
-PHPAPI datum dbm_file_firstkey(dba_dbm_data *dba TSRMLS_DC);
-PHPAPI datum dbm_file_nextkey(dba_dbm_data *dba TSRMLS_DC);
+PHPAPI int dbm_file_store(flatfile *dba, datum key_datum, datum value_datum, int mode TSRMLS_DC);
+PHPAPI datum dbm_file_fetch(flatfile *dba, datum key_datum TSRMLS_DC);
+PHPAPI int dbm_file_delete(flatfile *dba, datum key_datum TSRMLS_DC);
+PHPAPI int dbm_file_findkey(flatfile *dba, datum key_datum TSRMLS_DC);
+PHPAPI datum dbm_file_firstkey(flatfile *dba TSRMLS_DC);
+PHPAPI datum dbm_file_nextkey(flatfile *dba TSRMLS_DC);
 
 #endif
