@@ -101,7 +101,7 @@ if test "$ac_cv_lib_gd_gdImageLine" = "yes"; then
     else
       if test -n "$TTF_DIR" ; then
         AC_DEFINE(HAVE_LIBTTF)
-        if test "$shared" != "yes"; then
+        if test "$shared" = "yes"; then
           GD_LIBS="$GD_LIBS -lttf"
           GD_LFLAGS="$GD_LFLAGS -L$TTF_DIR/lib"
           GD_INCLUDES="$GD_INCLUDES -I$TTF_DIR/include"
