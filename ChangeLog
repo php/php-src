@@ -1,3 +1,61 @@
+2004-03-07  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/dba/config.m4:
+      Search for db-4.2.x
+
+2004-03-07  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/sqlite/sess_sqlite.c:
+      Avoid using floating point arithmetic and rely on safe_emalloc
+      for the multiplication.
+      
+      The actual size requirement is spelled out as:
+      
+      ** The result is written into a preallocated output buffer "out".
+      ** "out" must be able to hold at least 2 +(257*n)/254 bytes.
+      ** In other words, the output will be expanded by as much as 3
+      ** bytes for every 254 bytes of input plus 2 bytes of fixed overhead.
+      ** (This is approximately 2 + 1.0118*n or about a 1.2% size increase.)
+
+2004-03-07  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * main/streams/streams.c:
+      add cast for qsort compare function.
+      Kinda ugly, but helps assert that we are doing the right thing as well as
+      kill the warning there.
+
+    * main/streams/userspace.c:
+      Connect feof() call to user-space stream feof() method.
+      Fixes Bug #27417 and #27508
+
+2004-03-07  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PECL_4_3)
+      ext/sqlite/sqlite.c:
+      MFH: Corrected string escape calculation.
+
+    * ext/sqlite/sess_sqlite.c
+      ext/sqlite/sqlite.c:
+      Corrected string escape calculation.
+
+2004-03-07  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * main/streams/streams.c:
+      Less magic please
+
+2004-03-07  Ard Biesheuvel  <a.k.biesheuvel@ewi.tudelft.nl>
+
+    * ext/interbase/interbase.c:
+      Simplify / fix
+
+    * ext/interbase/interbase.c:
+      Added missing support for binding timestamps
+
+2004-03-07  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/wddx/tests/wddx.xml:
+      - Forgot to commit this one.
+
 2004-03-06  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
 
     * ext/wddx/tests/001.phpt:
