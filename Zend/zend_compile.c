@@ -762,6 +762,8 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 	op_array.arg_types = NULL;
 	op_array.return_reference = return_reference;
 
+	op_array.scope = CG(active_class_entry);
+
 	if (is_method) {
 		zend_hash_update(&CG(active_class_entry)->function_table, name, name_len+1, &op_array, sizeof(zend_op_array), (void **) &CG(active_op_array));
 		if ((CG(active_class_entry)->name_length == (uint) name_len) && (!memcmp(CG(active_class_entry)->name, name, name_len))) {

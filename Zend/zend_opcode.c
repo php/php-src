@@ -76,6 +76,8 @@ void init_op_array(zend_op_array *op_array, int type, int initial_ops_size TSRML
 
 	op_array->arg_types = NULL;
 
+	op_array->scope = NULL;
+
 	op_array->brk_cont_array = NULL;
 	op_array->last_brk_cont = 0;
 	op_array->current_brk_cont = -1;
