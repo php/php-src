@@ -881,30 +881,35 @@ exit_success:
 
 } /* }}} */
 
-int php_init_stream_wrappers(void)
+int php_init_stream_wrappers(TSRMLS_D)
 {
-	if (PG(allow_url_fopen))
+	if (PG(allow_url_fopen)) {
 		return zend_hash_init(&url_stream_wrappers_hash, 0, NULL, NULL, 1);
+	}
 	return SUCCESS;
 }
 
-int php_shutdown_stream_wrappers(void)
+int php_shutdown_stream_wrappers(TSRMLS_D)
 {
-	if (PG(allow_url_fopen))
+	if (PG(allow_url_fopen)) {
 		zend_hash_destroy(&url_stream_wrappers_hash);
+	}
 	return SUCCESS;
 }
 
-PHPAPI int php_register_url_stream_wrapper(char *protocol, php_stream_wrapper *wrapper)
+PHPAPI int php_register_url_stream_wrapper(char *protocol, php_stream_wrapper *wrapper TSRMLS_DC)
 {
-	if (PG(allow_url_fopen))
+	if (PG(allow_url_fopen)) {
 		return zend_hash_add(&url_stream_wrappers_hash, protocol, strlen(protocol), wrapper, sizeof(*wrapper), NULL);
+	}
 	return FAILURE;
 }
-PHPAPI int php_unregister_url_stream_wrapper(char *protocol)
+
+PHPAPI int php_unregister_url_stream_wrapper(char *protocol TSRMLS_DC)
 {
-	if (PG(allow_url_fopen))
+	if (PG(allow_url_fopen)) {
 		return zend_hash_del(&url_stream_wrappers_hash, protocol, strlen(protocol));
+	}
 	return SUCCESS;
 }
 
@@ -953,7 +958,6 @@ static php_stream *php_stream_open_url(char *path, char *mode, int options, char
 PHPAPI php_stream *_php_stream_open_wrapper(char *path, char *mode, int options, char **opened_path STREAMS_DC)
 {
 	php_stream *stream = NULL;
-	TSRMLS_FETCH();
 
 	if (opened_path)
 		*opened_path = NULL;

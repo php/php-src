@@ -227,10 +227,10 @@ PHPAPI int php_stream_cast(php_stream *stream, int castas, void **ret, int show_
 # define IGNORE_URL_WIN 0
 #endif
 
-int php_init_stream_wrappers(void);
-int php_shutdown_stream_wrappers(void);
-PHPAPI int php_register_url_stream_wrapper(char *protocol, php_stream_wrapper *wrapper);
-PHPAPI int php_unregister_url_stream_wrapper(char *protocol);
+int php_init_stream_wrappers(TSRMLS_D);
+int php_shutdown_stream_wrappers(TSRMLS_D);
+PHPAPI int php_register_url_stream_wrapper(char *protocol, php_stream_wrapper *wrapper TSRMLS_DC);
+PHPAPI int php_unregister_url_stream_wrapper(char *protocol TSRMLS_DC);
 PHPAPI php_stream *_php_stream_open_wrapper(char *path, char *mode, int options, char **opened_path STREAMS_DC);
 #define php_stream_open_wrapper(path, mode, options, opened)	_php_stream_open_wrapper((path), (mode), (options), (opened) STREAMS_CC)
 
