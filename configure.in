@@ -308,15 +308,18 @@ dnl Some systems (OpenServer 5) dislike -lsocket -lnsl, so we try
 dnl to avoid -lnsl checks, if we already have the functions which
 dnl are usually in libnsl
 dnl Also, uClibc will bark at linking with glibc's libnsl.
-
 unset ac_cv_func_gethostname
 unset ac_cv_func_yp_get_default_domain
-AC_CHECK_FUNC(gethostname, [
+case $host_alias in
+  *unixware* | *sco*)
+    AC_CHECK_FUNC(gethostname, [
+      php_no_nsl_checks=yes
+    ])
+    ;;
+esac
+
+AC_CHECK_FUNC(yp_get_default_domain, [
   php_no_nsl_checks=yes
-],[
-  AC_CHECK_FUNC(yp_get_default_domain, [
-    php_no_nsl_checks=yes
-  ])
 ])
 unset ac_cv_func_gethostname
 unset ac_cv_func_yp_get_default_domain
