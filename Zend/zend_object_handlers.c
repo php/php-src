@@ -108,7 +108,7 @@ static int zend_std_call_setter(zval *object, zval *member, zval *value TSRMLS_D
 	zval *retval = NULL;
 	zval __set_name;
 	int call_result;
-	int ret;
+	int result;
 	
 	/* __set handler is called with two arguments:
 	   property name
@@ -146,17 +146,13 @@ static int zend_std_call_setter(zval *object, zval *member, zval *value TSRMLS_D
 	zval_ptr_dtor(&member);
 	zval_ptr_dtor(&value);
 
-	if (retval && zend_is_true(retval)) {
-		ret = SUCCESS;
-	} else {
-		ret = FAILURE;
-	}
-
 	if (retval) {
+		result = i_zend_is_true(retval) ? SUCCESS : FAILURE;
 		zval_ptr_dtor(&retval);
+		return result;
+	} else {
+		return FAILURE;
 	}
-	
-	return ret;
 }
 
 
@@ -442,9 +438,13 @@ static int zend_std_has_dimension(zval *object, zval *offset, int check_empty TS
 		SEPARATE_ARG_IF_REF(offset);
 		zend_call_method_with_1_params(&object, ce, NULL, "offsetexists", &retval, offset);
 		zval_ptr_dtor(&offset);
-		result = i_zend_is_true(retval);
-		zval_ptr_dtor(&retval);
-		return result;
+		if (retval) {
+			result = i_zend_is_true(retval);
+			zval_ptr_dtor(&retval);
+			return result;
+		} else {
+			return 0;
+		}
 	} else {
 		zend_error(E_ERROR, "Cannot use object of type %s as array", ce->name);
 		return 0;
@@ -798,7 +798,10 @@ ZEND_API zval **zend_std_get_static_property(zend_class_entry *ce, char *propert
 #endif
 
 	if (!zend_verify_property_access(property_info, ce TSRMLS_CC)) {
-		zend_error(E_ERROR, "Cannot access %s property %s::$%s", zend_visibility_string(property_info->flags), ce->name, property_name);
+		if (!silent) {
+			zend_error(E_ERROR, "Cannot access %s property %s::$%s", zend_visibility_string(property_info->flags), ce->name, property_name);
+		}
+		return NULL;
 	}
 
 	zend_hash_quick_find(tmp_ce->static_members, property_info->name, property_info->name_length+1, property_info->h, (void **) &retval);
