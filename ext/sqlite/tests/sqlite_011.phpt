@@ -17,11 +17,17 @@ $r = sqlite_query("SELECT * from foo, bar", $db, SQLITE_ASSOC);
 var_dump(sqlite_fetch_array($r));
 ?>
 --EXPECT--
-array(3) {
-  ["c1"]=>
+array(6) {
+  ["foo.c1"]=>
+  string(1) "1"
+  ["foo.c2"]=>
+  string(1) "2"
+  ["foo.c3"]=>
+  string(1) "3"
+  ["bar.c1"]=>
   string(1) "4"
-  ["c2"]=>
+  ["bar.c2"]=>
   string(1) "5"
-  ["c3"]=>
+  ["bar.c3"]=>
   string(1) "6"
 }

@@ -904,10 +904,8 @@ next_row:
 		/* first row - lets copy the column names */
 		rres->col_names = safe_emalloc(rres->ncolumns, sizeof(char *), 0);
 		for (i = 0; i < rres->ncolumns; i++) {
-			colname = strchr(colnames[i], '.');
-			if (!colname++) {
-				colname = (char*)colnames[i];
-			}
+			colname = (char*)colnames[i];
+
 			if (SQLITE_G(assoc_case) == 1) {
 				php_sqlite_strtoupper(colname);
 			} else if (SQLITE_G(assoc_case) == 2) {
