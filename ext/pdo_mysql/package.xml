@@ -36,7 +36,7 @@
   </filelist>
   <deps>
    <dep type="php" rel="ge" version="5.0.0"/>
-   <dep type="ext" rel="ge" version="0.1"/>
+   <dep type="ext" name="pdo" rel="ge" version="0.1"/>
   </deps>
  </release>
 </package>
