@@ -390,11 +390,11 @@ function present_array(&$arr, $keys = null)
         if (is_array($arr[$k])) {
             foreach ($arr[$k] as $i => $value) {
                 $x = "$k #$i";
+                $cont = array();
                 foreach(array_keys($value) as $val) {
                     $cont[] = "$val=" . $value[$val];
                 }
                 $v = implode(", ", $cont);
-                $cont = array();
                 printf($format_string, $x, $v);
             }
             continue;
