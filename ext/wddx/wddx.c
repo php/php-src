@@ -431,6 +431,7 @@ static void php_wddx_serialize_unset(wddx_packet *packet)
  */
 static void php_wddx_serialize_object(wddx_packet *packet, zval *obj)
 {
+/* OBJECTS_FIXME */
 	zval **ent, *fname, **varname;
 	zval *retval = NULL;
 	char *key;
@@ -512,8 +513,9 @@ static void php_wddx_serialize_object(wddx_packet *packet, zval *obj)
 	zval_dtor(fname);
 	FREE_ZVAL(fname);
 
-	if (retval)
+	if (retval) {
 		zval_ptr_dtor(&retval);
+	}
 }
 /* }}} */
 
@@ -784,6 +786,7 @@ static void php_wddx_pop_element(void *user_data, const char *name)
 	zval				*tmp;
 	TSRMLS_FETCH();
 
+/* OBJECTS_FIXME */
 	if (stack->top == 0)
 		return;
 
@@ -842,13 +845,14 @@ static void php_wddx_pop_element(void *user_data, const char *name)
 						object_init_ex(obj, ce);
 						
 						/* Merge current hashtable with object's default properties */
-						zend_hash_merge(obj->value.obj.properties,
+						zend_hash_merge(Z_OBJPROP_P(obj),
 										Z_ARRVAL_P(ent2->data),
 										(void (*)(void *)) zval_add_ref,
 										(void *) &tmp, sizeof(zval *), 0);
 
-						if (incomplete_class)
+						if (incomplete_class) {
 							php_store_class_name(obj, Z_STRVAL_P(ent1->data), Z_STRLEN_P(ent1->data));
+						}
 
 						/* Clean up old array entry */
 						zval_dtor(ent2->data);
@@ -874,9 +878,9 @@ static void php_wddx_pop_element(void *user_data, const char *name)
 			}
 			efree(ent1);
 		}
-	}
-	else if (!strcmp(name, EL_VAR) && stack->varname)
+	} else if (!strcmp(name, EL_VAR) && stack->varname) {
 		efree(stack->varname);
+	}
 }
 /* }}} */
 
