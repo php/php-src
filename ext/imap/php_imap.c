@@ -3162,7 +3162,7 @@ PHP_FUNCTION(imap_mail_compose)
 		goto done;
 	}
 
-	RETVAL_STRINGL(tempstring, 0);  
+	RETVAL_STRING(tempstring, 0);
 done:
 	mail_free_body(&topbod);
 	mail_free_envelope(&env);
