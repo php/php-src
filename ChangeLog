@@ -1,3 +1,48 @@
+2003-01-20  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/imap/php_imap.c
+      ext/imap/php_imap.h:
+      quota function fixes. Thanks Wez.
+
+    * ext/imap/php_imap.c:
+      Changed php_error to php_error_docref.
+      Removed pointless memory allocation checks.
+      Memory leak fix inside quota functions.
+
+2003-01-20  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/pcre/php_pcre.c:
+      Fixed bug #21758
+
+2003-01-20  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/msession/msession.c:
+      Restore php_error -> php_error_docref patch.
+
+2003-01-20  Sascha Schumann  <sascha@schumann.cx>
+
+    * README.TESTING:
+      test commit
+
+2003-01-20  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/credits.c:
+      - Add credits for Magnus
+
+2003-01-20  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/gd/config.m4:
+      Add test for png.h
+
+2003-01-20  Mark L. Woodward  <mlwmohawk@mohawksoft.com>
+
+    * ext/msession/README
+      ext/msession/msession.c
+      ext/msession/php_msession.h
+      ext/msession/reqclient.h:
+      Updated for Msession 1.2.
+      Includes new APIs
+
 2003-01-19  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/oracle/oracle.c:
