@@ -792,6 +792,13 @@ function_entry basic_functions[] = {
     /* functions from versioning.c */
     PHP_FE(version_compare,													NULL)
 
+	/* functions from ftok.c*/
+#if HAVE_SYSVSEM || HAVE_SYSVSHM  || HAVE_SHMOP
+	PHP_FE(ftok,	NULL)
+#else
+	PHP_FALIAS(ftok  , warn_not_available,      NULL)
+#endif	
+
 	{NULL, NULL, NULL}
 };
 

@@ -9,7 +9,7 @@ LTLIBRARY_SOURCES=\
 	syslog.c type.c uniqid.c url.c url_scanner.c var.c versioning.c assert.c \
 	strnatcmp.c levenshtein.c incomplete_class.c url_scanner_ex.c \
 	ftp_fopen_wrapper.c http_fopen_wrapper.c php_fopen_wrapper.c credits.c \
-	var_unserializer.c
+	var_unserializer.c ftok.c
 
 include $(top_srcdir)/build/dynlib.mk
 
