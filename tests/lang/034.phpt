@@ -2,25 +2,16 @@
 Locale settings affecting float parsing
 --SKIPIF--
 <?php  # try to activate a german locale
-$status = false;
-foreach(array("de_DE", "de", "german", "ge") as $lang) {
-  if($lang == setlocale(LC_NUMERIC, $lang)) {
-	  $status = true; 
-	continue;
-  }
+if (setlocale(LC_NUMERIC, "de_DE", "de", "german", "ge") === FALSE) {
+	print "skip";
 }
-if(!$status) print "skip";
 ?>
 --POST--
 --GET--
 --FILE--
 <?php 
-# try to activate a german locale
-foreach(array("de_DE", "de", "german", "ge") as $lang) {
-  if($lang == setlocale(LC_NUMERIC, $lang)) {
-	  continue;
-  }
-}
+# activate the german locale
+setlocale(LC_NUMERIC, "de_DE", "de", "german", "ge");
 
 echo (float)"3.14", "\n";
 
