@@ -15,7 +15,7 @@
    | Authors: Jim Winstead (jimw@php.net)                                 |
    +----------------------------------------------------------------------+
  */
-#if defined(COMPILE_DL) || defined(COMPILE_DL_DBASE)
+#ifdef COMPILE_DL_DBASE
 #include "dl/phpdl.h"
 #endif
 
@@ -69,7 +69,7 @@ PHP_MINIT_FUNCTION(dbase)
 {
 #if defined(THREAD_SAFE)
 	dbase_global_struct *dbase_globals;
-#if defined(COMPILE_DL) || defined(COMPILE_DL_DBASE)
+#ifdef COMPILE_DL_DBASE
 	CREATE_MUTEX(dbase_mutex,"DBase_TLS");
 	SET_MUTEX(dbase_mutex);
 	numthreads++;
@@ -94,7 +94,7 @@ static PHP_MSHUTDOWN_FUNCTION(dbase)
 	dbase_globals = TlsGetValue(DbaseTls); 
 	if (dbase_globals != 0) 
 		LocalFree((HLOCAL) dbase_globals); 
-#if defined(COMPILE_DL) || defined(COMPILE_DL_DBASE)
+#ifdef COMPILE_DL_DBASE
 	SET_MUTEX(dbase_mutex);
 	numthreads--;
 	if (!numthreads){
@@ -730,7 +730,7 @@ zend_module_entry dbase_module_entry = {
 };
 
 
-#if defined(COMPILE_DL) || defined(COMPILE_DL_DBASE)
+#ifdef COMPILE_DL_DBASE
 ZEND_GET_MODULE(dbase)
 
 #if (WIN32|WINNT) && defined(THREAD_SAFE)

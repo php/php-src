@@ -108,7 +108,7 @@ zend_module_entry swf_module_entry = {
 	STANDARD_MODULE_PROPERTIES
 };
 
-#if defined(COMPILE_DL) || defined(COMPILE_DL_SWF)
+#ifdef COMPILE_DL_SWF
 ZEND_GET_MODULE(swf)
 #endif
 

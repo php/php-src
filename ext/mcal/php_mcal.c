@@ -36,7 +36,7 @@
 
 #include "php.h"
 
-#if defined(COMPILE_DL) || defined(COMPILE_DL_MCAL)
+#ifdef COMPILE_DL_MCAL
 #include "dl/phpdl.h"
 #endif
 
@@ -127,7 +127,7 @@ zend_module_entry php_mcal_module_entry = {
 	"mcal", mcal_functions, PHP_MINIT(mcal), NULL, NULL, NULL, PHP_MINFO(mcal), STANDARD_MODULE_PROPERTIES
 };
 
-#if defined(COMPILE_DL) || defined(COMPILE_DL_MCAL)
+#ifdef COMPILE_DL_MCAL
 ZEND_GET_MODULE(php_mcal)
 #endif
 

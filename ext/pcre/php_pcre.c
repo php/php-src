@@ -1213,7 +1213,7 @@ zend_module_entry pcre_module_entry = {
 		   STANDARD_MODULE_PROPERTIES
 };
 
-#if defined(COMPILE_DL) || defined(COMPILE_DL_PCRE)
+#ifdef COMPILE_DL_PCRE
 ZEND_GET_MODULE(pcre)
 #endif
 

@@ -60,7 +60,7 @@ zend_module_entry sysvsem_module_entry = {
 	"sysvsem", sysvsem_functions, PHP_MINIT(sysvsem), NULL, NULL, NULL, NULL, STANDARD_MODULE_PROPERTIES
 };
 
-#if defined(COMPILE_DL) || defined(COMPILE_DL_SYSVSEM)
+#ifdef COMPILE_DL_SYSVSEM
 ZEND_GET_MODULE(sysvsem)
 #endif
 
