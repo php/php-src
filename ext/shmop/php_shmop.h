@@ -36,12 +36,12 @@ PHP_RINIT_FUNCTION(shmop);
 PHP_RSHUTDOWN_FUNCTION(shmop);
 PHP_MINFO_FUNCTION(shmop);
 
-PHP_FUNCTION(shm_open);
-PHP_FUNCTION(shm_read);
-PHP_FUNCTION(shm_close);
-PHP_FUNCTION(shm_size);
-PHP_FUNCTION(shm_write);
-PHP_FUNCTION(shm_delete);
+PHP_FUNCTION(shmop_open);
+PHP_FUNCTION(shmop_read);
+PHP_FUNCTION(shmop_close);
+PHP_FUNCTION(shmop_size);
+PHP_FUNCTION(shmop_write);
+PHP_FUNCTION(shmop_delete);
 
 struct php_shmop
 {
