@@ -5,5 +5,5 @@ Bug #26077  	Memory leaks when creating an instance of an object
 class foo {} new foo();
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 ===DONE===
