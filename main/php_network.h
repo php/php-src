@@ -81,6 +81,12 @@ PHPAPI char *php_socket_strerror(long err, char *buf, size_t bufsize);
 #endif
 
 #ifdef PHP_WIN32
+typedef SOCKET php_socket_t;
+#else
+typedef int php_socket_t;
+#endif
+
+#ifdef PHP_WIN32
 # define SOCK_ERR INVALID_SOCKET
 # define SOCK_CONN_ERR SOCKET_ERROR
 # define SOCK_RECV_ERR SOCKET_ERROR
@@ -106,12 +112,12 @@ typedef struct {
 } php_sockaddr_storage;
 #endif
 
-PHPAPI int php_network_connect_socket_to_host(const char *host, unsigned short port,
+PHPAPI php_socket_t php_network_connect_socket_to_host(const char *host, unsigned short port,
 		int socktype, int asynchronous, struct timeval *timeout, char **error_string,
 		int *error_code
 		TSRMLS_DC);
 
-PHPAPI int php_network_connect_socket(int sockfd,
+PHPAPI int php_network_connect_socket(php_socket_t sockfd,
 		const struct sockaddr *addr,
 		socklen_t addrlen,
 		int asynchronous,
@@ -122,11 +128,11 @@ PHPAPI int php_network_connect_socket(int sockfd,
 #define php_connect_nonb(sock, addr, addrlen, timeout) \
 	php_network_connect_socket((sock), (addr), (addrlen), 0, (timeout), NULL, NULL)
 
-PHPAPI int php_network_bind_socket_to_local_addr(const char *host, unsigned port,
+PHPAPI php_socket_t php_network_bind_socket_to_local_addr(const char *host, unsigned port,
 		int socktype, char **error_string, int *error_code
 		TSRMLS_DC);
 
-PHPAPI int php_network_accept_incoming(int srvsock,
+PHPAPI php_socket_t php_network_accept_incoming(php_socket_t srvsock,
 		char **textaddr, long *textaddrlen,
 		struct sockaddr **addr,
 		socklen_t *addrlen,
@@ -135,13 +141,13 @@ PHPAPI int php_network_accept_incoming(int srvsock,
 		int *error_code
 		TSRMLS_DC);
 
-PHPAPI int php_network_get_sock_name(int sock, 
+PHPAPI int php_network_get_sock_name(php_socket_t sock, 
 		char **textaddr, long *textaddrlen,
 		struct sockaddr **addr,
 		socklen_t *addrlen
 		TSRMLS_DC);
 	
-PHPAPI int php_network_get_peer_name(int sock, 
+PHPAPI int php_network_get_peer_name(php_socket_t sock, 
 		char **textaddr, long *textaddrlen,
 		struct sockaddr **addr,
 		socklen_t *addrlen
@@ -150,8 +156,9 @@ PHPAPI int php_network_get_peer_name(int sock,
 void php_any_addr(int family, php_sockaddr_storage *addr, unsigned short port);
 int php_sockaddr_size(php_sockaddr_storage *addr);
 
+
 struct _php_netstream_data_t	{
-	int socket;
+	php_socket_t socket;
 	char is_blocked;
 	struct timeval timeout;
 	char timeout_event;
@@ -162,7 +169,7 @@ extern php_stream_ops php_stream_socket_ops;
 extern php_stream_ops php_stream_generic_socket_ops;
 #define PHP_STREAM_IS_SOCKET	(&php_stream_socket_ops)
 
-PHPAPI php_stream *_php_stream_sock_open_from_socket(int socket, const char *persistent_id STREAMS_DC TSRMLS_DC );
+PHPAPI php_stream *_php_stream_sock_open_from_socket(php_socket_t socket, const char *persistent_id STREAMS_DC TSRMLS_DC );
 /* open a connection to a host using php_hostconnect and return a stream */
 PHPAPI php_stream *_php_stream_sock_open_host(const char *host, unsigned short port,
 		int socktype, struct timeval *timeout, const char *persistent_id STREAMS_DC TSRMLS_DC);
