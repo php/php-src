@@ -41,6 +41,7 @@ function_entry w32api_functions[] = {
 	PHP_FE(w32api_deftype,							NULL)
 	PHP_FE(w32api_init_dtype,						NULL)
 	PHP_FE(w32api_set_call_method,					NULL)
+	PHP_FE(w32api_invoke_function,					NULL)
     {NULL, NULL, NULL}
 };
 /* }}} */
