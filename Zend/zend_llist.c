@@ -189,7 +189,7 @@ ZEND_API void zend_llist_apply(zend_llist *l, llist_apply_func_t func TSRMLS_DC)
 
 ZEND_API void zend_llist_sort(zend_llist *l, llist_compare_func_t comp_func)
 {
-	int i;
+	size_t i;
 
 	zend_llist_element **elements;
 	zend_llist_element *element, **ptr;
