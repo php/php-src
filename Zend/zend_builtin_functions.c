@@ -460,19 +460,30 @@ ZEND_FUNCTION(get_class)
 }
 /* }}} */
 
-/* {{{ proto string get_parent_class(object object)
-   Retrieves the parent class name */
+/* {{{ proto string get_parent_class(mixed object)
+   Retrieves the parent class name for object or class. */
 ZEND_FUNCTION(get_parent_class)
 {
 	zval **arg;
+	zend_class_entry *ce = NULL;
 	
 	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &arg)==FAILURE) {
 		ZEND_WRONG_PARAM_COUNT();
 	}
-	if (((*arg)->type != IS_OBJECT) || !(*arg)->value.obj.ce->parent) {
+
+	if (Z_TYPE_PP(arg) == IS_OBJECT)
+	   ce = Z_OBJCE_PP(arg);
+	else if (Z_TYPE_PP(arg) == IS_STRING) {
+		SEPARATE_ZVAL(arg);
+		zend_str_tolower(Z_STRVAL_PP(arg), Z_STRLEN_PP(arg));
+		zend_hash_find(EG(class_table), Z_STRVAL_PP(arg), Z_STRLEN_PP(arg)+1, (void **)&ce);
+	}
+
+	if (ce && ce->parent) {
+		RETURN_STRINGL(ce->parent->name, ce->parent->name_length, 1);
+	} else {
 		RETURN_FALSE;
 	}
-	RETURN_STRINGL((*arg)->value.obj.ce->parent->name,	(*arg)->value.obj.ce->parent->name_length, 1);
 }
 /* }}} */
 
