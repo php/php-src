@@ -865,7 +865,8 @@ PHP_FUNCTION(implode)
 		convert_to_string_ex(arg1);
 		delim = *arg1;
 	} else {
-		php_error(E_WARNING, "Bad arguments to implode()");
+		php_error(E_WARNING, "Bad arguments to %s()",
+			get_active_function_name(TSRMLS_C));
 		return;
 	}
 
