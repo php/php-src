@@ -56,6 +56,7 @@
 #include "php_output.h"
 #include "php_array.h"
 #include "php_assert.h"
+#include "php_versioning.h"
 
 #define phpext_standard_ptr basic_functions_module_ptr
 
