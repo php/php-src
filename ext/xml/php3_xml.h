@@ -66,7 +66,7 @@ typedef struct {
 	int level;
 	int toffset;
 	int curtag;
-	pval *ctag;
+	pval **ctag;
 	char **ltags;
 	int lastwasopen;
 	int skipwhite;
