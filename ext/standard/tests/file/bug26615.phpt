@@ -6,7 +6,7 @@ Bug #26615 (exec crash on long input lines)
 <?php
 $out = array();
 $status = -1;
-exec('/usr/bin/seq 5000 | tr \'\n\' \' \'', $out, $status);
+exec($_ENV['TEST_PHP_EXECUTABLE'].' -r \'for($i=1;$i<=5000;$i++) print "$i\n";\' | tr \'\n\' \' \'', $out, $status);
 print_r($out);
 ?>
 --EXPECT--
