@@ -771,6 +771,7 @@ PHP_FUNCTION(mysql_query)
 			}
 			id = -1;
 			break;
+#if 0 /* need to work more on the mysql_store_result() approach */
 	    case 3:
 			if(zend_get_parameters_ex(3, &query, &mysql_link, &store_result)==FAILURE) {
 				RETURN_FALSE;
@@ -781,6 +782,7 @@ PHP_FUNCTION(mysql_query)
 			}
 			id = -1;
 			break;
+#endif
 		default:
 			WRONG_PARAM_COUNT;
 			break;
@@ -804,7 +806,7 @@ PHP_FUNCTION(mysql_query)
 	} else {
 		mysql_result=mysql_store_result(mysql);
 	}
-	if (mysql_result==NULL) {
+	if (!mysql_result) {
 		if (PHP_MYSQL_VALID_RESULT(mysql)) { /* query should have returned rows */
 			php_error(E_WARNING, "MySQL:  Unable to save result set");
 			RETURN_FALSE;
@@ -841,6 +843,7 @@ PHP_FUNCTION(mysql_db_query)
 			}
 			id = -1;
 			break;
+#if 0
 	    case 4:
 			if(zend_get_parameters_ex(4, &db, &query, &mysql_link, &store_result)==FAILURE) {
 				RETURN_FALSE;
@@ -851,6 +854,7 @@ PHP_FUNCTION(mysql_db_query)
 			}
 			id = -1;
 			break;
+#endif
 		default:
 			WRONG_PARAM_COUNT;
 			break;
@@ -879,7 +883,7 @@ PHP_FUNCTION(mysql_db_query)
 	} else {
 		mysql_result=mysql_store_result(mysql);
 	}
-	if (mysql_result==NULL) {
+	if (!mysql_result) {
 		if (PHP_MYSQL_VALID_RESULT(mysql)) { /* query should have returned rows */
 			php_error(E_WARNING, "MySQL:  Unable to save result set");
 			RETURN_FALSE;
