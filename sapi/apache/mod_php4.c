@@ -360,6 +360,17 @@ static int sapi_apache_get_fd(int *nfd TSRMLS_DC)
 }
 /* }}} */
 
+/* {{{ sapi_apache_force_http_10
+ */
+static int sapi_apache_force_http_10(TSRMLS_D)
+{
+	request_rec *r = SG(server_context);
+	
+	r->proto_num = HTTP_VERSION(1,0);
+	
+	return 0;
+}
+
 /* {{{ sapi_module_struct apache_sapi_module
  */
 static sapi_module_struct apache_sapi_module = {
@@ -403,7 +414,8 @@ static sapi_module_struct apache_sapi_module = {
 	NULL,							/* treat data */
 	NULL,							/* exe location */
 	0,								/* ini ignore */
-	sapi_apache_get_fd
+	sapi_apache_get_fd,
+	sapi_apache_force_http_10
 };
 /* }}} */
 

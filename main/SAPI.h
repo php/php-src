@@ -187,6 +187,7 @@ SAPI_API size_t sapi_apply_default_charset(char **mimetype, size_t len TSRMLS_DC
 SAPI_API void sapi_activate_headers_only(TSRMLS_D);
 
 SAPI_API int sapi_get_fd(int *fd TSRMLS_DC);
+SAPI_API int sapi_force_http_10(TSRMLS_D);
 
 struct _sapi_module_struct {
 	char *name;
@@ -228,7 +229,8 @@ struct _sapi_module_struct {
 	int php_ini_ignore;
 	
 	int (*get_fd)(int *fd TSRMLS_DC);
-
+	
+	int (*force_http_10)(TSRMLS_D);
 };
 
 
