@@ -272,8 +272,18 @@ void plist_entry_destructor(void *ptr)
 	zend_rsrc_list_dtors_entry *ld;
 
 	if (zend_hash_index_find(&list_destructors, le->type,(void **) &ld)==SUCCESS) {
-		if (ld->plist_dtor) {
-			(ld->plist_dtor)(le->ptr);
+		switch (ld->type) {
+			case ZEND_RESOURCE_LIST_TYPE_STD:
+				if (ld->list_dtor) {
+					(ld->list_dtor)(le->ptr);
+				}
+				break;
+			case ZEND_RESOURCE_LIST_TYPE_EX:
+				if (ld->list_dtor_ex) {
+					ld->list_dtor_ex(le);
+				}
+				break;
+				EMPTY_SWITCH_DEFAULT_CASE()
 		}
 	} else {
 		zend_error(E_WARNING,"Unknown persistent list entry type in module shutdown (%d)",le->type);
