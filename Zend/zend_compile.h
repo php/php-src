@@ -394,117 +394,117 @@ int zendlex(znode *zendlval CLS_DC);
 #define ZEND_BW_NOT					12
 #define ZEND_BOOL_NOT				13
 #define ZEND_BOOL_XOR				14
-#define ZEND_IS_EQUAL				15
-#define ZEND_IS_NOT_EQUAL			16
-#define ZEND_IS_SMALLER				17
-#define ZEND_IS_SMALLER_OR_EQUAL	18
-#define ZEND_CAST					19
-#define ZEND_QM_ASSIGN				20
+#define ZEND_IS_IDENTICAL			15
+#define ZEND_IS_EQUAL				16
+#define ZEND_IS_NOT_EQUAL			17
+#define ZEND_IS_SMALLER				18
+#define ZEND_IS_SMALLER_OR_EQUAL	19
+#define ZEND_CAST					20
+#define ZEND_QM_ASSIGN				21
 
-#define ZEND_ASSIGN_ADD				21
-#define ZEND_ASSIGN_SUB				22
-#define ZEND_ASSIGN_MUL				23
-#define ZEND_ASSIGN_DIV				24
-#define ZEND_ASSIGN_MOD				25
-#define ZEND_ASSIGN_SL				26
-#define ZEND_ASSIGN_SR				27
-#define ZEND_ASSIGN_CONCAT			28
-#define ZEND_ASSIGN_BW_OR			29
-#define ZEND_ASSIGN_BW_AND			30
-#define ZEND_ASSIGN_BW_XOR			31
+#define ZEND_ASSIGN_ADD				22
+#define ZEND_ASSIGN_SUB				23
+#define ZEND_ASSIGN_MUL				24
+#define ZEND_ASSIGN_DIV				25
+#define ZEND_ASSIGN_MOD				26
+#define ZEND_ASSIGN_SL				27
+#define ZEND_ASSIGN_SR				28
+#define ZEND_ASSIGN_CONCAT			29
+#define ZEND_ASSIGN_BW_OR			30
+#define ZEND_ASSIGN_BW_AND			31
+#define ZEND_ASSIGN_BW_XOR			32
 									
-#define ZEND_PRE_INC				32
-#define ZEND_PRE_DEC				33
-#define ZEND_POST_INC				34
-#define ZEND_POST_DEC				35
+#define ZEND_PRE_INC				33
+#define ZEND_PRE_DEC				34
+#define ZEND_POST_INC				35
+#define ZEND_POST_DEC				36
 									
-#define ZEND_ASSIGN					36
-#define ZEND_ASSIGN_REF				37
+#define ZEND_ASSIGN					37
+#define ZEND_ASSIGN_REF				38
 
-#define ZEND_ECHO					38
-#define ZEND_PRINT					39
+#define ZEND_ECHO					39
+#define ZEND_PRINT					40
 
-#define ZEND_JMP					40
-#define ZEND_JMPZ					41
-#define ZEND_JMPNZ					42
-#define ZEND_JMPZNZ					43
-#define ZEND_JMPZ_EX				44
-#define ZEND_JMPNZ_EX				45
-#define ZEND_CASE					46
-#define ZEND_SWITCH_FREE			47
-#define ZEND_BRK					48
-#define ZEND_CONT					49
-#define ZEND_BOOL					50
+#define ZEND_JMP					41
+#define ZEND_JMPZ					42
+#define ZEND_JMPNZ					43
+#define ZEND_JMPZNZ					44
+#define ZEND_JMPZ_EX				45
+#define ZEND_JMPNZ_EX				46
+#define ZEND_CASE					47
+#define ZEND_SWITCH_FREE			48
+#define ZEND_BRK					49
+#define ZEND_CONT					50
+#define ZEND_BOOL					51
 
-#define ZEND_INIT_STRING			51
-#define ZEND_ADD_CHAR				52
-#define ZEND_ADD_STRING				53
-#define ZEND_ADD_VAR				54
+#define ZEND_INIT_STRING			52
+#define ZEND_ADD_CHAR				53
+#define ZEND_ADD_STRING				54
+#define ZEND_ADD_VAR				55
 
-#define ZEND_BEGIN_SILENCE			55
-#define ZEND_END_SILENCE			56
+#define ZEND_BEGIN_SILENCE			56
+#define ZEND_END_SILENCE			57
 
-#define ZEND_INIT_FCALL_BY_NAME		57
-#define ZEND_DO_FCALL				58
-#define ZEND_DO_FCALL_BY_NAME		59
-#define ZEND_RETURN					60
+#define ZEND_INIT_FCALL_BY_NAME		58
+#define ZEND_DO_FCALL				59
+#define ZEND_DO_FCALL_BY_NAME		60
+#define ZEND_RETURN					61
 
-#define ZEND_RECV					61
-#define ZEND_RECV_INIT				62
+#define ZEND_RECV					62
+#define ZEND_RECV_INIT				63
 									
-#define ZEND_SEND_VAL				63
-#define ZEND_SEND_VAR				64
-#define ZEND_SEND_REF				65
+#define ZEND_SEND_VAL				64
+#define ZEND_SEND_VAR				65
+#define ZEND_SEND_REF				66
 
-#define ZEND_NEW 					66
-#define ZEND_JMP_NO_CTOR			67
-#define ZEND_FREE					68
+#define ZEND_NEW 					67
+#define ZEND_JMP_NO_CTOR			68
+#define ZEND_FREE					69
 									
-#define ZEND_INIT_ARRAY				69
-#define ZEND_ADD_ARRAY_ELEMENT		70
+#define ZEND_INIT_ARRAY				70
+#define ZEND_ADD_ARRAY_ELEMENT		71
 									
-#define ZEND_INCLUDE_OR_EVAL		71
+#define ZEND_INCLUDE_OR_EVAL		72
 									
-#define ZEND_UNSET_VAR				72
-#define ZEND_UNSET_DIM_OBJ			73
-#define ZEND_ISSET_ISEMPTY			74
+#define ZEND_UNSET_VAR				73
+#define ZEND_UNSET_DIM_OBJ			74
+#define ZEND_ISSET_ISEMPTY			75
 									
-#define ZEND_FE_RESET				75
-#define ZEND_FE_FETCH				76
+#define ZEND_FE_RESET				76
+#define ZEND_FE_FETCH				77
 									
-#define ZEND_EXIT					77
+#define ZEND_EXIT					78
 
 
 /* the following 12 opcodes are 5 groups of 3 opcodes each, and must
  * remain in that order!
  */
-#define ZEND_FETCH_R				78
-#define ZEND_FETCH_DIM_R			79
-#define ZEND_FETCH_OBJ_R			80
-#define ZEND_FETCH_W				81
-#define ZEND_FETCH_DIM_W			82
-#define ZEND_FETCH_OBJ_W			83
-#define ZEND_FETCH_RW				84
-#define ZEND_FETCH_DIM_RW			85
-#define ZEND_FETCH_OBJ_RW			86
-#define ZEND_FETCH_IS				87
-#define ZEND_FETCH_DIM_IS			88
-#define ZEND_FETCH_OBJ_IS			89
-#define ZEND_FETCH_FUNC_ARG			90
-#define ZEND_FETCH_DIM_FUNC_ARG		91
-#define ZEND_FETCH_OBJ_FUNC_ARG		92
+#define ZEND_FETCH_R				79
+#define ZEND_FETCH_DIM_R			80
+#define ZEND_FETCH_OBJ_R			81
+#define ZEND_FETCH_W				82
+#define ZEND_FETCH_DIM_W			83
+#define ZEND_FETCH_OBJ_W			84
+#define ZEND_FETCH_RW				85
+#define ZEND_FETCH_DIM_RW			86
+#define ZEND_FETCH_OBJ_RW			87
+#define ZEND_FETCH_IS				88
+#define ZEND_FETCH_DIM_IS			89
+#define ZEND_FETCH_OBJ_IS			90
+#define ZEND_FETCH_FUNC_ARG			91
+#define ZEND_FETCH_DIM_FUNC_ARG		92
+#define ZEND_FETCH_OBJ_FUNC_ARG		93
 
-#define ZEND_FETCH_DIM_TMP_VAR		93
-#define ZEND_FETCH_CONSTANT			94
+#define ZEND_FETCH_DIM_TMP_VAR		94
+#define ZEND_FETCH_CONSTANT			95
 
-#define ZEND_DECLARE_FUNCTION_OR_CLASS	95
+#define ZEND_DECLARE_FUNCTION_OR_CLASS	96
 
-#define ZEND_EXT_STMT				96
-#define ZEND_EXT_FCALL_BEGIN		97
-#define ZEND_EXT_FCALL_END			98
-#define ZEND_EXT_NOP				99
+#define ZEND_EXT_STMT				97
+#define ZEND_EXT_FCALL_BEGIN		98
+#define ZEND_EXT_FCALL_END			99
+#define ZEND_EXT_NOP				100
 
-#define ZEND_IS_IDENTICAL				100
 /* end of block */
 
 
