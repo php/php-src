@@ -395,7 +395,7 @@ static int sapi_find_matching_header(void *element1, void *element2)
  */
 SAPI_API int sapi_add_header_ex(char *header_line, uint header_line_len, zend_bool duplicate, zend_bool replace TSRMLS_DC)
 {
-	int retval, free_header = 0;
+	int retval;
 	sapi_header_struct sapi_header;
 	char *colon_offset;
 	long myuid = 0L;
@@ -441,7 +441,7 @@ SAPI_API int sapi_add_header_ex(char *header_line, uint header_line_len, zend_bo
 		if (colon_offset) {
 			*colon_offset = 0;
 			if (!STRCASECMP(header_line, "Content-Type")) {
-				char *ptr = colon_offset, *mimetype = NULL, *newheader;
+				char *ptr = colon_offset+1, *mimetype = NULL, *newheader;
 				size_t len = header_line_len - (ptr - header_line), newlen;
 				while (*ptr == ' ' && *ptr != '\0') {
 					ptr++;
@@ -457,7 +457,7 @@ SAPI_API int sapi_add_header_ex(char *header_line, uint header_line_len, zend_bo
 					sapi_header.header_len = newlen - 1;
 					colon_offset = strchr(newheader, ':');
 					*colon_offset = '\0';
-					free_header = 1;
+					efree(header_line);
 				}
 				efree(mimetype);
 				SG(sapi_headers).send_default_content_type = 0;
@@ -570,9 +570,6 @@ SAPI_API int sapi_add_header_ex(char *header_line, uint header_line_len, zend_bo
 		}
 
 		zend_llist_add_element(&SG(sapi_headers).headers, (void *) &sapi_header);
-	}
-	if (free_header) {
-		efree(sapi_header.header);
 	}
 	return SUCCESS;
 }
