@@ -1,3 +1,48 @@
+2000-03-15  Joey Smith  <joey@samaritan.com>
+
+    * ext/recode/.cvsignore: Adding .cvsignore to ext/recode
+
+2000-03-15  Andi Gutmans  <andi@php.net>
+
+    * fopen-wrappers.c: - WIN32 -> PHP_WIN32
+
+2000-03-15  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * NEWS
+      ext/domxml/config.m4
+      ext/domxml/domxml.c: - support for libxml 2.0 beta
+
+2000-03-15  Sam Ruby  <rubys@us.ibm.com>
+
+    * ext/java/README:
+    Update README to indicate improvements in overload resolution and
+    easier configuration.
+
+    Add an entry for the Blackdown JDK on Linux, and a note as to why the Sun
+    JDK on Linux can't be supported at this time.
+
+    * ext/standard/filestat.c: Emulate user/group/other on Windows
+
+    * ext/java/java.c: Cleanup, better error recovery, easier configuration
+
+2000-03-15  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/domxml/config.m4: - changed libgz to libz (Bug #3614)
+
+2000-03-15  Thies C. Arntzen  <thies@digicol.de>
+
+    * NEWS: .
+
+2000-03-15  Sam Ruby  <rubys@us.ibm.com>
+
+    * ext/java/config.m4:
+    Get Blackdown support to compile.  Doesn't seem to be able to find
+    classes yet...
+
+    It looks like the current Sun JDK 1.2.2 won't be able to be supported.
+    Green_threads don't work with JVM Initialization, and Sun doesn't support
+    native_threads yet...
+
 2000-03-14  Egon Schmid  <eschmid@s.netic.de>
 
     * ext/oci8/oci8.c: One space character is enough.
