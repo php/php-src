@@ -337,7 +337,8 @@ PHPAPI int cfg_get_string(char *varname, char **result);
 #ifndef PHP_WIN32
 #define V_CHOWN(path,owner,group) virtual_chown(path,owner,group)
 #endif
-#else
+
+#else /* !defined(VIRTUAL_DIR) */
 
 #define V_GETCWD(buff, size) getcwd(buff,size)
 #define V_FOPEN(path, mode)  fopen(path, mode)
@@ -361,7 +362,8 @@ PHPAPI int cfg_get_string(char *varname, char **result);
 #ifndef PHP_WIN32
 #define V_CHOWN(path,owner,group) chown(path,owner,group)
 #endif
-#endif
+
+#endif /* VIRTUAL_DIR */
 
 #include "zend_constants.h"
 
