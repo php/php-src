@@ -945,7 +945,7 @@ int main(int argc, char *argv[])
 #endif
 		case PHP_MODE_CLI_DIRECT:
 			cli_register_file_handles(TSRMLS_C);
-			if (zend_eval_string(exec_direct, NULL, "Command line code" TSRMLS_CC) == FAILURE) {
+			if (zend_eval_string_ex(exec_direct, NULL, "Command line code", 1 TSRMLS_CC) == FAILURE) {
 				exit_status=254;
 			}
 			break;
@@ -958,7 +958,7 @@ int main(int argc, char *argv[])
 
 				cli_register_file_handles(TSRMLS_C);
 	
-				if (exec_begin && zend_eval_string(exec_begin, NULL, "Command line begin code" TSRMLS_CC) == FAILURE) {
+				if (exec_begin && zend_eval_string_ex(exec_begin, NULL, "Command line begin code", 1 TSRMLS_CC) == FAILURE) {
 					exit_status=254;
 				}
 				ALLOC_ZVAL(argi);
@@ -979,7 +979,7 @@ int main(int argc, char *argv[])
 					zend_hash_update(&EG(symbol_table), "argn", sizeof("argn"), &argn, sizeof(pval *), NULL);
 					Z_LVAL_P(argi) = ++index;
 					if (exec_run) {
-						if (zend_eval_string(exec_run, NULL, "Command line run code" TSRMLS_CC) == FAILURE) {
+						if (zend_eval_string_ex(exec_run, NULL, "Command line run code", 1 TSRMLS_CC) == FAILURE) {
 							exit_status=254;
 						}
 					} else {
@@ -995,7 +995,7 @@ int main(int argc, char *argv[])
 					}
 					efree(input);
 				}
-				if (exec_end && zend_eval_string(exec_end, NULL, "Command line end code" TSRMLS_CC) == FAILURE) {
+				if (exec_end && zend_eval_string_ex(exec_end, NULL, "Command line end code", 1 TSRMLS_CC) == FAILURE) {
 					exit_status=254;
 				}
 	
