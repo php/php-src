@@ -24,6 +24,8 @@ PHP 4                                                                      NEWS
   (Adam Dickmeiss)
 - Fixed a bug in bundled libmysql (mysql bug #564). (Georg)
 - Fixed ext/exif to honor "magic_quotes_runtime" php.ini option. (Marcus)
+- Fixed bug #24155 (gdImageRotate270 incorrectly use x parameter for y axis).
+  (tom@gksystems.com, Ilia)
 - Fixed bug #24060 (ncurses_del_panel() causes segfault). (Georg)
 - Fixed bug #24054 (Integer overflow failure with GCC/x86 for *=). (Sascha)
 - Fixed bug #23951 (constants in static initializers clobbered by inheritance).
