@@ -1,5 +1,5 @@
 --TEST--
-Bug #25565 (var_dump () hangs on Nan and INF)
+Bug #25665 (var_dump () hangs on Nan and INF)
 --FILE--
 <?php
 set_time_limit(5);
