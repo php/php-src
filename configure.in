@@ -159,7 +159,7 @@ if test "$ac_cv_c_const" = "yes" ; then
 fi
 
 AC_MSG_CHECKING([flex version])
-set `$LEX -V | grep 'version' | cut -d ' ' -f 3 | sed -e 's/\./ /g' | sed -e 's/[^0-9 ]//g'`
+set `echo "" | $LEX -V -v --version 2>/dev/null | grep 'version' | cut -d ' ' -f 3 | sed -e 's/\./ /g' | sed -e 's/[^0-9 ]//g'`
 if test "${1}" != "2" -o "${2}" != "5" -o "${3}" -lt "4"; then
 	 AC_MSG_WARN(You will need flex 2.5.4 or later if you want to regenerate Zend/PHP lexical parsers.)
 fi
