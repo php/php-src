@@ -614,6 +614,48 @@ int dom_document_preserve_whitespace_write(dom_object *obj, zval *newval TSRMLS_
 }
 /* }}} */
 
+/* {{{ proto recover	boolean	
+readonly=no
+*/
+int dom_document_recover_read(dom_object *obj, zval **retval TSRMLS_DC)
+{
+	dom_doc_props *doc_prop;
+
+	ALLOC_ZVAL(*retval);
+	if (obj->document) {
+		doc_prop = dom_get_doc_props(obj->document);
+		ZVAL_BOOL(*retval, doc_prop->recover);
+	} else {
+		ZVAL_FALSE(*retval);
+	}
+	return SUCCESS;
+}
+
+int dom_document_recover_write(dom_object *obj, zval *newval TSRMLS_DC)
+{
+	zval value_copy;
+	dom_doc_props *doc_prop;
+
+	if(newval->refcount > 1) {
+		value_copy = *newval;
+		zval_copy_ctor(&value_copy);
+		newval = &value_copy;
+	}
+	convert_to_boolean(newval);
+
+	if (obj->document) {
+		doc_prop = dom_get_doc_props(obj->document);
+		doc_prop->recover = Z_LVAL_P(newval);
+	}
+
+	if (newval == &value_copy) {
+		zval_dtor(newval);
+	}
+
+	return SUCCESS;
+}
+/* }}} */
+
 
 /* {{{ proto substituteEntities	boolean	
 readonly=no
@@ -1392,7 +1434,7 @@ static xmlDocPtr dom_document_parser(zval *id, int mode, char *source TSRMLS_DC)
 	dom_doc_props *doc_props;
 	dom_object *intern;
 	php_libxml_ref_obj *document = NULL;
-	int validate, resolve_externals, keep_blanks, substitute_ent;
+	int validate, recover, resolve_externals, keep_blanks, substitute_ent;
 	int resolved_path_len;
 	char *directory=NULL, resolved_path[MAXPATHLEN];
 
@@ -1406,6 +1448,7 @@ static xmlDocPtr dom_document_parser(zval *id, int mode, char *source TSRMLS_DC)
 	resolve_externals = doc_props->resolveexternals;
 	keep_blanks = doc_props->preservewhitespace;
 	substitute_ent = doc_props->substituteentities;
+	recover = doc_props->recover;
 
 	if (document == NULL) {
 		efree(doc_props);
@@ -1455,7 +1498,7 @@ static xmlDocPtr dom_document_parser(zval *id, int mode, char *source TSRMLS_DC)
 		}
 	}
 
-	ctxt->recovery = 0;
+	ctxt->recovery = recover;
 	ctxt->validate = validate;
     ctxt->loadsubset = (resolve_externals * XML_COMPLETE_ATTRS);
 	ctxt->replaceEntities = substitute_ent;
@@ -1470,7 +1513,7 @@ static xmlDocPtr dom_document_parser(zval *id, int mode, char *source TSRMLS_DC)
 
 	xmlParseDocument(ctxt);
 
-	if (ctxt->wellFormed) {
+	if (ctxt->wellFormed || recover) {
 		ret = ctxt->myDoc;
 		/* If loading from memory, set the base reference uri for the document */
 		if (ret->URL == NULL && ctxt->directory != NULL) {

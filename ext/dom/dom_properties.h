@@ -59,6 +59,8 @@ int dom_document_resolve_externals_read(dom_object *obj, zval **retval TSRMLS_DC
 int dom_document_resolve_externals_write(dom_object *obj, zval *newval TSRMLS_DC);
 int dom_document_preserve_whitespace_read(dom_object *obj, zval **retval TSRMLS_DC);
 int dom_document_preserve_whitespace_write(dom_object *obj, zval *newval TSRMLS_DC);
+int dom_document_recover_read(dom_object *obj, zval **retval TSRMLS_DC);
+int dom_document_recover_write(dom_object *obj, zval *newval TSRMLS_DC);
 int dom_document_substitue_entities_read(dom_object *obj, zval **retval TSRMLS_DC);
 int dom_document_substitue_entities_write(dom_object *obj, zval *newval TSRMLS_DC);
 
