@@ -623,7 +623,7 @@ function_entry basic_functions[] = {
 	PHP_FE(set_socket_blocking,												NULL)
 	PHP_FE(socket_set_blocking,												NULL)
 
-#if PHP_HAVE_STREAMS
+#ifdef PHP_HAVE_STREAMS
 	PHP_FE(fgetwrapperdata,													NULL)
 #endif
 
