@@ -41,7 +41,7 @@
 #include "tsrm_nw.h"
 #endif
 
-#ifdef __BEOS__
+#ifndef HAVE_REALPATH
 #define realpath(x,y) strcpy(y,x)
 #endif
 
