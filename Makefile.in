@@ -61,6 +61,7 @@ MAINT = @MAINT@
 APXS = @APXS@
 APXS_LDFLAGS = $(EXTRA_LIBS) $(LIBS)
 WARNING_LEVEL = @WARNING_LEVEL@
+LEX_CFLAGS = -w$(WARNING_LEVEL) @LEX_CFLAGS@
 
 SOURCE = main.c internal_functions.c snprintf.c php3_sprintf.c \
        configuration-parser.c configuration-scanner.c request_info.c \
@@ -115,7 +116,7 @@ configuration-parser.h configuration-parser.c:	$(srcdir)/configuration-parser.y
 	bison -p cfg -v -d $(srcdir)/configuration-parser.y -o configuration-parser.c
 
 configuration-scanner.o:	configuration-scanner.c
-	$(CC) $(CFLAGS) -w$(WARNING_LEVEL) -c configuration-scanner.c
+	$(CC) $(CFLAGS) $(LEX_CFLAGS) -c configuration-scanner.c
 
 configuration-scanner.c:	$(srcdir)/configuration-scanner.l
 	flex -Pcfg -oconfiguration-scanner.c -i $(srcdir)/configuration-scanner.l

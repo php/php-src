@@ -86,6 +86,16 @@ AC_PROG_CC_C_O
 AC_PROG_LN_S
 AC_PATH_PROG(PERL_PATH, perl)
 
+
+dnl Make flex scanners use const if they can, even if __STDC__ is not
+dnl true, for compilers like Sun's that only set __STDC__ true in
+dnl "limit-to-ANSI-standard" mode, not in "ANSI-compatible" mode
+AC_C_CONST
+if test "$ac_cv_c_const" = "yes" ; then
+  LEX_CFLAGS="-DYY_USE_CONST"
+fi
+AC_SUBST(LEX_CFLAGS)
+
 dnl Ugly hack to get around a problem with gcc on AIX.
 if test "$CC" = "gcc" -a "$ac_cv_prog_cc_g" = "yes" -a \
    "`uname -sv`" = "AIX 4"; then
