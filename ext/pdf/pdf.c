@@ -268,27 +268,27 @@ PHP_MSHUTDOWN_FUNCTION(pdf){
 /* {{{ proto bool pdf_set_info(int pdfdoc, string fieldname, string value)
    Fills an info field of the document */
 PHP_FUNCTION(pdf_set_info) {
-	pval *arg1, *arg2, *arg3;
+	pval **arg1, **arg2, **arg3;
 	int id, type;
 	PDF *pdf;
 	PDF_TLS_VARS;
 
 
-	if (ZEND_NUM_ARGS() != 3 || getParameters(ht, 3, &arg1, &arg2, &arg3) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &arg1, &arg2, &arg3) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	convert_to_string(arg2);
-	convert_to_string(arg3);
-	id=arg1->value.lval;
+	convert_to_long_ex(arg1);
+	convert_to_string_ex(arg2);
+	convert_to_string_ex(arg3);
+	id=(*arg1)->value.lval;
 	pdf = zend_list_find(id,&type);
 	if (!pdf || type!=PDF_GLOBAL(le_pdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d (type=%d)",id, type);
 		RETURN_FALSE;
 	}
 
-	PDF_set_info(pdf, arg2->value.str.val, arg3->value.str.val);
+	PDF_set_info(pdf, (*arg2)->value.str.val, (*arg3)->value.str.val);
 
 	RETURN_TRUE;
 }
@@ -297,26 +297,26 @@ PHP_FUNCTION(pdf_set_info) {
 /* {{{ proto bool pdf_set_info_creator(int pdfdoc, string creator)
    Fills the creator field of the document */
 PHP_FUNCTION(pdf_set_info_creator) {
-	pval *arg1, *arg2;
+	pval **arg1, **arg2;
 	int id, type;
 	PDF *pdf;
 	PDF_TLS_VARS;
 
 
-	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	convert_to_string(arg2);
-	id=arg1->value.lval;
+	convert_to_long_ex(arg1);
+	convert_to_string_ex(arg2);
+	id=(*arg1)->value.lval;
 	pdf = zend_list_find(id,&type);
 	if (!pdf || type!=PDF_GLOBAL(le_pdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d (type=%d)",id, type);
 		RETURN_FALSE;
 	}
 
-	PDF_set_info(pdf, "Creator", arg2->value.str.val);
+	PDF_set_info(pdf, "Creator", (*arg2)->value.str.val);
 
 	RETURN_TRUE;
 }
@@ -325,26 +325,26 @@ PHP_FUNCTION(pdf_set_info_creator) {
 /* {{{ proto bool pdf_set_info_title(int pdfdoc, string title)
    Fills the title field of the document */
 PHP_FUNCTION(pdf_set_info_title) {
-	pval *arg1, *arg2;
+	pval **arg1, **arg2;
 	int id, type;
 	PDF *pdf;
 	PDF_TLS_VARS;
 
 
-	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	convert_to_string(arg2);
-	id=arg1->value.lval;
+	convert_to_long_ex(arg1);
+	convert_to_string_ex(arg2);
+	id=(*arg1)->value.lval;
 	pdf = zend_list_find(id,&type);
 	if (!pdf || type!=PDF_GLOBAL(le_pdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d (type=%d)",id, type);
 		RETURN_FALSE;
 	}
 
-	PDF_set_info(pdf, "Title", arg2->value.str.val);
+	PDF_set_info(pdf, "Title", (*arg2)->value.str.val);
 
 	RETURN_TRUE;
 }
@@ -354,26 +354,26 @@ PHP_FUNCTION(pdf_set_info_title) {
 /* {{{ proto bool pdf_set_info_subject(int pdfdoc, string subject)
    Fills the subject field of the document */
 PHP_FUNCTION(pdf_set_info_subject) {
-	pval *arg1, *arg2;
+	pval **arg1, **arg2;
 	int id, type;
 	PDF *pdf;
 	PDF_TLS_VARS;
 
 
-	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	convert_to_string(arg2);
-	id=arg1->value.lval;
+	convert_to_long_ex(arg1);
+	convert_to_string_ex(arg2);
+	id=(*arg1)->value.lval;
 	pdf = zend_list_find(id,&type);
 	if (!pdf || type!=PDF_GLOBAL(le_pdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d (type=%d)",id, type);
 		RETURN_FALSE;
 	}
 
-	PDF_set_info(pdf, "Subject", arg2->value.str.val);
+	PDF_set_info(pdf, "Subject", (*arg2)->value.str.val);
 
 	RETURN_TRUE;
 }
@@ -383,26 +383,26 @@ PHP_FUNCTION(pdf_set_info_subject) {
 /* {{{ proto bool pdf_set_info_author(int pdfdoc, string author)
    Fills the author field of the document */
 PHP_FUNCTION(pdf_set_info_author) {
-	pval *arg1, *arg2;
+	pval **arg1, **arg2;
 	int id, type;
 	PDF *pdf;
 	PDF_TLS_VARS;
 
 
-	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	convert_to_string(arg2);
-	id=arg1->value.lval;
+	convert_to_long_ex(arg1);
+	convert_to_string_ex(arg2);
+	id=(*arg1)->value.lval;
 	pdf = zend_list_find(id,&type);
 	if (!pdf || type!=PDF_GLOBAL(le_pdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d (type=%d)",id, type);
 		RETURN_FALSE;
 	}
 
-	PDF_set_info(pdf, "Author", arg2->value.str.val);
+	PDF_set_info(pdf, "Author", (*arg2)->value.str.val);
 
 	RETURN_TRUE;
 }
@@ -412,26 +412,26 @@ PHP_FUNCTION(pdf_set_info_author) {
 /* {{{ proto bool pdf_set_info_keywords(int pdfdoc, string keywords)
    Fills the keywords field of the document */
 PHP_FUNCTION(pdf_set_info_keywords) {
-	pval *arg1, *arg2;
+	pval **arg1, **arg2;
 	int id, type;
 	PDF *pdf;
 	PDF_TLS_VARS;
 
 
-	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	convert_to_string(arg2);
-	id=arg1->value.lval;
+	convert_to_long_ex(arg1);
+	convert_to_string_ex(arg2);
+	id=(*arg1)->value.lval;
 	pdf = zend_list_find(id,&type);
 	if (!pdf || type!=PDF_GLOBAL(le_pdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d (type=%d)",id, type);
 		RETURN_FALSE;
 	}
 
-	PDF_set_info(pdf, "Keywords", arg2->value.str.val);
+	PDF_set_info(pdf, "Keywords", (*arg2)->value.str.val);
 
 	RETURN_TRUE;
 }
@@ -483,17 +483,17 @@ PHP_FUNCTION(pdf_open) {
 
    Closes the pdf document */
 PHP_FUNCTION(pdf_close) {
-	pval *arg1;
+	pval **arg1;
 	int id, type;
 	PDF *pdf;
 	PDF_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	id=arg1->value.lval;
+	convert_to_long_ex(arg1);
+	id=(*arg1)->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
@@ -510,22 +510,22 @@ PHP_FUNCTION(pdf_close) {
 /* {{{ proto void pdf_begin_page(int pdfdoc, double width, double height)
    Starts page */
 PHP_FUNCTION(pdf_begin_page) {
-	pval *arg1, *arg2, *arg3;
+	pval **arg1, **arg2, **arg3;
 	int id, type;
 	double height, width;
 	PDF *pdf;
 	PDF_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 3 || getParameters(ht, 3, &arg1, &arg2, &arg3) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &arg1, &arg2, &arg3) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	convert_to_double(arg2);
-	convert_to_double(arg3);
-	id=arg1->value.lval;
-	width = arg2->value.dval;
-	height = arg3->value.dval;
+	convert_to_long_ex(arg1);
+	convert_to_double_ex(arg2);
+	convert_to_double_ex(arg3);
+	id=(*arg1)->value.lval;
+	width = (*arg2)->value.dval;
+	height = (*arg3)->value.dval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
@@ -541,17 +541,17 @@ PHP_FUNCTION(pdf_begin_page) {
 /* {{{ proto void pdf_end_page(int pdfdoc)
    Ends page */
 PHP_FUNCTION(pdf_end_page) {
-	pval *arg1;
+	pval **arg1;
 	int id, type;
 	PDF *pdf;
 	PDF_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	id=arg1->value.lval;
+	convert_to_long_ex(arg1);
+	id=(*arg1)->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
@@ -567,25 +567,25 @@ PHP_FUNCTION(pdf_end_page) {
 /* {{{ proto void pdf_show(int pdfdoc, string text)
    Output text at current position */
 PHP_FUNCTION(pdf_show) {
-	pval *arg1, *arg2;
+	pval **arg1, **arg2;
 	int id, type;
 	PDF *pdf;
 	PDF_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	convert_to_string(arg2);
-	id=arg1->value.lval;
+	convert_to_long_ex(arg1);
+	convert_to_string_ex(arg2);
+	id=(*arg1)->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
-	PDF_show(pdf, arg2->value.str.val);
+	PDF_show(pdf, (*arg2)->value.str.val);
 
 	RETURN_TRUE;
 }
@@ -594,27 +594,27 @@ PHP_FUNCTION(pdf_show) {
 /* {{{ proto void pdf_show_xy(int pdfdoc, string text, double x-koor, double y-koor)
    Output text at position */
 PHP_FUNCTION(pdf_show_xy) {
-	pval *arg1, *arg2, *arg3, *arg4;
+	pval **arg1, **arg2, **arg3, **arg4;
 	int id, type;
 	PDF *pdf;
 	PDF_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 4 || getParameters(ht, 4, &arg1, &arg2, &arg3, &arg4) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 4 || zend_get_parameters_ex(4, &arg1, &arg2, &arg3, &arg4) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	convert_to_string(arg2);
-	convert_to_double(arg3);
-	convert_to_double(arg4);
-	id=arg1->value.lval;
+	convert_to_long_ex(arg1);
+	convert_to_string_ex(arg2);
+	convert_to_double_ex(arg3);
+	convert_to_double_ex(arg4);
+	id=(*arg1)->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
-	PDF_show_xy(pdf, arg2->value.str.val, (float) arg3->value.dval, (float) arg4->value.dval);
+	PDF_show_xy(pdf, (*arg2)->value.str.val, (float) (*arg3)->value.dval, (float) (*arg4)->value.dval);
 
 	RETURN_TRUE;
 }
@@ -623,30 +623,30 @@ PHP_FUNCTION(pdf_show_xy) {
 /* {{{ proto int pdf_show_boxed(int pdfdoc, string text, double x-koor, double y-koor, double width, double height, string mode)
    Output text formated in a boxed */
 PHP_FUNCTION(pdf_show_boxed) {
-	pval *arg1, *arg2, *arg3, *arg4, *arg5, *arg6, *arg7;
+	pval **arg1, **arg2, **arg3, **arg4, **arg5, **arg6, **arg7;
 	int id, type;
 	int nr;
 	PDF *pdf;
 	PDF_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 7 || getParameters(ht, 7, &arg1, &arg2, &arg3, &arg4, &arg5, &arg6, &arg7) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 7 || zend_get_parameters_ex(7, &arg1, &arg2, &arg3, &arg4, &arg5, &arg6, &arg7) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	convert_to_string(arg2);
-	convert_to_double(arg3);
-	convert_to_double(arg4);
-	convert_to_double(arg5);
-	convert_to_double(arg6);
-	id=arg1->value.lval;
+	convert_to_long_ex(arg1);
+	convert_to_string_ex(arg2);
+	convert_to_double_ex(arg3);
+	convert_to_double_ex(arg4);
+	convert_to_double_ex(arg5);
+	convert_to_double_ex(arg6);
+	id=(*arg1)->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
-	nr = PDF_show_boxed(pdf, arg2->value.str.val, (float) arg3->value.dval, (float) arg4->value.dval, (float) arg5->value.dval, (float) arg6->value.dval, arg7->value.str.val, NULL);
+	nr = PDF_show_boxed(pdf, (*arg2)->value.str.val, (float) (*arg3)->value.dval, (float) (*arg4)->value.dval, (float) (*arg5)->value.dval, (float) (*arg6)->value.dval, (*arg7)->value.str.val, NULL);
 
 	RETURN_LONG(nr);
 }
@@ -656,48 +656,48 @@ PHP_FUNCTION(pdf_show_boxed) {
 /* {{{ proto void pdf_set_font(int pdfdoc, string font, double size, string encoding [, int embed])
    Select the current font face, size and encoding */
 PHP_FUNCTION(pdf_set_font) {
-	pval *arg1, *arg2, *arg3, *arg4, *arg5;
+	pval **arg1, **arg2, **arg3, **arg4, **arg5;
 	int id, type, font, embed;
 	PDF *pdf;
 	PDF_TLS_VARS;
 
 	switch (ZEND_NUM_ARGS()) {
 	case 4:
-		if (getParameters(ht, 4, &arg1, &arg2, &arg3, &arg4) == FAILURE) {
+		if (zend_get_parameters_ex(4, &arg1, &arg2, &arg3, &arg4) == FAILURE) {
 			WRONG_PARAM_COUNT;
 		}
 		embed = 0;
 		break;
 	case 5:
-		if (getParameters(ht, 5, &arg1, &arg2, &arg3, &arg4, &arg5) == FAILURE) {
+		if (zend_get_parameters_ex(5, &arg1, &arg2, &arg3, &arg4, &arg5) == FAILURE) {
 			WRONG_PARAM_COUNT;
 		}
-		convert_to_long(arg5);
-		embed = arg5->value.lval;
+		convert_to_long_ex(arg5);
+		embed = (*arg5)->value.lval;
 		break;
 	default:
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	convert_to_string(arg2);
-	convert_to_double(arg3);
-	convert_to_string(arg4);
+	convert_to_long_ex(arg1);
+	convert_to_string_ex(arg2);
+	convert_to_double_ex(arg3);
+	convert_to_string_ex(arg4);
 
-	id=arg1->value.lval;
+	id=(*arg1)->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
-	font = PDF_findfont(pdf, arg2->value.str.val, arg4->value.str.val, embed);
+	font = PDF_findfont(pdf, (*arg2)->value.str.val, (*arg4)->value.str.val, embed);
 	if (font < 0) {
-		php_error(E_WARNING,"Font %s not found", arg2->value.str.val);
+		php_error(E_WARNING,"Font %s not found", (*arg2)->value.str.val);
 		RETURN_FALSE;
 	}
 
-	PDF_setfont(pdf, font, (float) arg3->value.dval);
+	PDF_setfont(pdf, font, (float) (*arg3)->value.dval);
 
 	RETURN_TRUE;
 }
@@ -706,17 +706,17 @@ PHP_FUNCTION(pdf_set_font) {
 /* {{{ proto int pdf_get_font(int pdfdoc)
    Gets the current font */
 PHP_FUNCTION(pdf_get_font) {
-	pval *arg1;
+	pval **arg1;
 	int id, type, font;
 	PDF *pdf;
 	PDF_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	id=arg1->value.lval;
+	convert_to_long_ex(arg1);
+	id=(*arg1)->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
@@ -732,18 +732,18 @@ PHP_FUNCTION(pdf_get_font) {
 /* {{{ proto string pdf_get_fontname(int pdfdoc)
    Gets the current font name */
 PHP_FUNCTION(pdf_get_fontname) {
-	pval *arg1;
+	pval **arg1;
 	int id, type;
 	char *fontname;
 	PDF *pdf;
 	PDF_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	id=arg1->value.lval;
+	convert_to_long_ex(arg1);
+	id=(*arg1)->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
@@ -759,18 +759,18 @@ PHP_FUNCTION(pdf_get_fontname) {
 /* {{{ proto double pdf_get_fontsize(int pdfdoc)
    Gets the current font size */
 PHP_FUNCTION(pdf_get_fontsize) {
-	pval *arg1;
+	pval **arg1;
 	int id, type;
 	float fontsize;
 	PDF *pdf;
 	PDF_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	id=arg1->value.lval;
+	convert_to_long_ex(arg1);
+	id=(*arg1)->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
@@ -786,25 +786,25 @@ PHP_FUNCTION(pdf_get_fontsize) {
 /* {{{ proto void pdf_set_leading(int pdfdoc, double distance)
    Sets distance between text lines */
 PHP_FUNCTION(pdf_set_leading) {
-	pval *arg1, *arg2;
+	pval **arg1, **arg2;
 	int id, type;
 	PDF *pdf;
 	PDF_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	convert_to_double(arg2);
-	id=arg1->value.lval;
+	convert_to_long_ex(arg1);
+	convert_to_double_ex(arg2);
+	id=(*arg1)->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 	
-	PDF_set_value(pdf, "leading", (float) arg2->value.dval);
+	PDF_set_value(pdf, "leading", (float) (*arg2)->value.dval);
 
 	RETURN_TRUE;
 }
@@ -813,25 +813,25 @@ PHP_FUNCTION(pdf_set_leading) {
 /* {{{ proto void pdf_set_text_rendering(int pdfdoc, int mode)
    Determines how text is rendered */
 PHP_FUNCTION(pdf_set_text_rendering) {
-	pval *arg1, *arg2;
+	pval **arg1, **arg2;
 	int id, type;
 	PDF *pdf;
 	PDF_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	convert_to_long(arg2);
-	id=arg1->value.lval;
+	convert_to_long_ex(arg1);
+	convert_to_long_ex(arg2);
+	id=(*arg1)->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 	
-	PDF_set_value(pdf, "textrendering", (float) arg2->value.lval);
+	PDF_set_value(pdf, "textrendering", (float) (*arg2)->value.lval);
 
 	RETURN_TRUE;
 }
@@ -840,25 +840,25 @@ PHP_FUNCTION(pdf_set_text_rendering) {
 /* {{{ proto void pdf_set_horiz_scaling(int pdfdoc, double scale)
    Sets horizontal scaling of text */
 PHP_FUNCTION(pdf_set_horiz_scaling) {
-	pval *arg1, *arg2;
+	pval **arg1, **arg2;
 	int id, type;
 	PDF *pdf;
 	PDF_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	convert_to_double(arg2);
-	id=arg1->value.lval;
+	convert_to_long_ex(arg1);
+	convert_to_double_ex(arg2);
+	id=(*arg1)->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 	
-	PDF_set_value(pdf, "horizscaling", (float) arg2->value.dval);
+	PDF_set_value(pdf, "horizscaling", (float) (*arg2)->value.dval);
 
 	RETURN_TRUE;
 }
@@ -867,25 +867,25 @@ PHP_FUNCTION(pdf_set_horiz_scaling) {
 /* {{{ proto void pdf_set_text_rise(int pdfdoc, double value)
    Sets the text rise */
 PHP_FUNCTION(pdf_set_text_rise) {
-	pval *arg1, *arg2;
+	pval **arg1, **arg2;
 	int id, type;
 	PDF *pdf;
 	PDF_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	convert_to_double(arg2);
-	id=arg1->value.lval;
+	convert_to_long_ex(arg1);
+	convert_to_double_ex(arg2);
+	id=(*arg1)->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 	
-	PDF_set_value(pdf, "textrise", (float) arg2->value.dval);
+	PDF_set_value(pdf, "textrise", (float) (*arg2)->value.dval);
 
 	RETURN_TRUE;
 }
@@ -895,7 +895,7 @@ PHP_FUNCTION(pdf_set_text_rise) {
 /* {{{ proto void pdf_set_text_matrix(int pdfdoc, arry matrix)
    Sets the text matrix */
 PHP_FUNCTION(pdf_set_text_matrix) {
-	pval *arg1, *arg2, *data;
+	pval **arg1, **arg2, *data;
 	int id, type, i;
 	HashTable *matrix;
 	PDF *pdf;
@@ -903,14 +903,14 @@ PHP_FUNCTION(pdf_set_text_matrix) {
 	float *pdfmatrixptr;
 	PDF_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	convert_to_array(arg2);
-	id=arg1->value.lval;
-	matrix=arg2->value.ht;
+	convert_to_long_ex(arg1);
+	convert_to_array_ex(arg2);
+	id=(*arg1)->value.lval;
+	matrix=(*arg2)->value.ht;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
@@ -948,26 +948,26 @@ PHP_FUNCTION(pdf_set_text_matrix) {
 /* {{{ proto void pdf_set_text_pos(int pdfdoc, double x, double y)
    Set the position of text for the next pdf_show call */
 PHP_FUNCTION(pdf_set_text_pos) {
-	pval *arg1, *arg2, *arg3;
+	pval **arg1, **arg2, **arg3;
 	int id, type;
 	PDF *pdf;
 	PDF_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 3 || getParameters(ht, 3, &arg1, &arg2, &arg3) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &arg1, &arg2, &arg3) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	convert_to_double(arg2);
-	convert_to_double(arg3);
-	id=arg1->value.lval;
+	convert_to_long_ex(arg1);
+	convert_to_double_ex(arg2);
+	convert_to_double_ex(arg3);
+	id=(*arg1)->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
-	PDF_set_text_pos(pdf, (float) arg2->value.dval, (float) arg3->value.dval);
+	PDF_set_text_pos(pdf, (float) (*arg2)->value.dval, (float) (*arg3)->value.dval);
 
 	RETURN_TRUE;
 }
@@ -976,25 +976,25 @@ PHP_FUNCTION(pdf_set_text_pos) {
 /* {{{ proto void pdf_set_char_spacing(int pdfdoc, double space)
    Sets character spacing */
 PHP_FUNCTION(pdf_set_char_spacing) {
-	pval *arg1, *arg2;
+	pval **arg1, **arg2;
 	int id, type;
 	PDF *pdf;
 	PDF_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	convert_to_double(arg2);
-	id=arg1->value.lval;
+	convert_to_long_ex(arg1);
+	convert_to_double_ex(arg2);
+	id=(*arg1)->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
-	PDF_set_value(pdf, "charspacing", (float) arg2->value.dval);
+	PDF_set_value(pdf, "charspacing", (float) (*arg2)->value.dval);
 
 	RETURN_TRUE;
 }
@@ -1003,25 +1003,25 @@ PHP_FUNCTION(pdf_set_char_spacing) {
 /* {{{ proto void pdf_set_word_spacing(int pdfdoc, double space)
    Sets spacing between words */
 PHP_FUNCTION(pdf_set_word_spacing) {
-	pval *arg1, *arg2;
+	pval **arg1, **arg2;
 	int id, type;
 	PDF *pdf;
 	PDF_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	convert_to_double(arg2);
-	id=arg1->value.lval;
+	convert_to_long_ex(arg1);
+	convert_to_double_ex(arg2);
+	id=(*arg1)->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
-	PDF_set_value(pdf, "wordspacing", (float) arg2->value.dval);
+	PDF_set_value(pdf, "wordspacing", (float) (*arg2)->value.dval);
 
 	RETURN_TRUE;
 }
@@ -1030,25 +1030,25 @@ PHP_FUNCTION(pdf_set_word_spacing) {
 /* {{{ proto void pdf_continue_text(int pdfdoc, string text)
    Output text in next line */
 PHP_FUNCTION(pdf_continue_text) {
-	pval *arg1, *arg2;
+	pval **arg1, **arg2;
 	int id, type;
 	PDF *pdf;
 	PDF_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	convert_to_string(arg2);
-	id=arg1->value.lval;
+	convert_to_long_ex(arg1);
+	convert_to_string_ex(arg2);
+	id=(*arg1)->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
-	PDF_continue_text(pdf, arg2->value.str.val);
+	PDF_continue_text(pdf, (*arg2)->value.str.val);
 
 	RETURN_TRUE;
 }
@@ -1057,26 +1057,26 @@ PHP_FUNCTION(pdf_continue_text) {
 /* {{{ proto double pdf_stringwidth(int pdfdoc, string text)
    Returns width of text in current font*/
 PHP_FUNCTION(pdf_stringwidth) {
-	pval *arg1, *arg2;
+	pval **arg1, **arg2;
 	int id, type;
 	double width;
 	PDF *pdf;
 	PDF_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	convert_to_string(arg2);
-	id=arg1->value.lval;
+	convert_to_long_ex(arg1);
+	convert_to_string_ex(arg2);
+	id=(*arg1)->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
-	width = (double) PDF_stringwidth(pdf, arg2->value.str.val, PDF_get_value(pdf, "font", 0), PDF_get_value(pdf, "fontsize", 0));
+	width = (double) PDF_stringwidth(pdf, (*arg2)->value.str.val, PDF_get_value(pdf, "font", 0), PDF_get_value(pdf, "fontsize", 0));
 
 	RETURN_DOUBLE((double)width);
 }
@@ -1085,17 +1085,17 @@ PHP_FUNCTION(pdf_stringwidth) {
 /* {{{ proto void pdf_save(int pdfdoc)
    Saves current enviroment */
 PHP_FUNCTION(pdf_save) {
-	pval *arg1;
+	pval **arg1;
 	int id, type;
 	PDF *pdf;
 	PDF_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	id=arg1->value.lval;
+	convert_to_long_ex(arg1);
+	id=(*arg1)->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
@@ -1111,17 +1111,17 @@ PHP_FUNCTION(pdf_save) {
 /* {{{ proto void pdf_restore(int pdfdoc)
    Restores formerly saved enviroment */
 PHP_FUNCTION(pdf_restore) {
-	pval *arg1;
+	pval **arg1;
 	int id, type;
 	PDF *pdf;
 	PDF_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	id=arg1->value.lval;
+	convert_to_long_ex(arg1);
+	id=(*arg1)->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
@@ -1137,26 +1137,26 @@ PHP_FUNCTION(pdf_restore) {
 /* {{{ proto void pdf_translate(int pdfdoc, double x, double y)
    Sets origin of coordinate system */
 PHP_FUNCTION(pdf_translate) {
-	pval *arg1, *arg2, *arg3;
+	pval **arg1, **arg2, **arg3;
 	int id, type;
 	PDF *pdf;
 	PDF_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 3 || getParameters(ht, 3, &arg1, &arg2, &arg3) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &arg1, &arg2, &arg3) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	convert_to_double(arg2);
-	convert_to_double(arg3);
-	id=arg1->value.lval;
+	convert_to_long_ex(arg1);
+	convert_to_double_ex(arg2);
+	convert_to_double_ex(arg3);
+	id=(*arg1)->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
-	PDF_translate(pdf, (float) arg2->value.dval, (float) arg3->value.dval);
+	PDF_translate(pdf, (float) (*arg2)->value.dval, (float) (*arg3)->value.dval);
 
 	RETURN_TRUE;
 }
@@ -1165,26 +1165,26 @@ PHP_FUNCTION(pdf_translate) {
 /* {{{ proto void pdf_scale(int pdfdoc, double x-scale, double y-scale)
    Sets scaling */
 PHP_FUNCTION(pdf_scale) {
-	pval *arg1, *arg2, *arg3;
+	pval **arg1, **arg2, **arg3;
 	int id, type;
 	PDF *pdf;
 	PDF_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 3 || getParameters(ht, 3, &arg1, &arg2, &arg3) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &arg1, &arg2, &arg3) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	convert_to_double(arg2);
-	convert_to_double(arg3);
-	id=arg1->value.lval;
+	convert_to_long_ex(arg1);
+	convert_to_double_ex(arg2);
+	convert_to_double_ex(arg3);
+	id=(*arg1)->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
-	PDF_scale(pdf, (float) arg2->value.dval, (float) arg3->value.dval);
+	PDF_scale(pdf, (float) (*arg2)->value.dval, (float) (*arg3)->value.dval);
 
 	RETURN_TRUE;
 }
@@ -1193,25 +1193,25 @@ PHP_FUNCTION(pdf_scale) {
 /* {{{ proto void pdf_rotate(int pdfdoc, double angle)
    Sets rotation */
 PHP_FUNCTION(pdf_rotate) {
-	pval *arg1, *arg2;
+	pval **arg1, **arg2;
 	int id, type;
 	PDF *pdf;
 	PDF_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	convert_to_double(arg2);
-	id=arg1->value.lval;
+	convert_to_long_ex(arg1);
+	convert_to_double_ex(arg2);
+	id=(*arg1)->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
-	PDF_rotate(pdf, (float) arg2->value.dval);
+	PDF_rotate(pdf, (float) (*arg2)->value.dval);
 
 	RETURN_TRUE;
 }
@@ -1220,26 +1220,26 @@ PHP_FUNCTION(pdf_rotate) {
 /* {{{ proto void pdf_skew(int pdfdoc, double xangle, double yangle)
    Skew the coordinate system */
 PHP_FUNCTION(pdf_skew) {
-	pval *arg1, *arg2, *arg3;
+	pval **arg1, **arg2, **arg3;
 	int id, type;
 	PDF *pdf;
 	PDF_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 3 || getParameters(ht, 3, &arg1, &arg2, &arg3) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &arg1, &arg2, &arg3) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	convert_to_double(arg2);
-	convert_to_double(arg3);
-	id=arg1->value.lval;
+	convert_to_long_ex(arg1);
+	convert_to_double_ex(arg2);
+	convert_to_double_ex(arg3);
+	id=(*arg1)->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
-	PDF_skew(pdf, (float) arg2->value.dval, (float) arg3->value.dval);
+	PDF_skew(pdf, (float) (*arg2)->value.dval, (float) (*arg3)->value.dval);
 
 	RETURN_TRUE;
 }
@@ -1248,30 +1248,30 @@ PHP_FUNCTION(pdf_skew) {
 /* {{{ proto void pdf_setflat(int pdfdoc, double value)
    Sets flatness */
 PHP_FUNCTION(pdf_setflat) {
-	pval *arg1, *arg2;
+	pval **arg1, **arg2;
 	int id, type;
 	PDF *pdf;
 	PDF_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	convert_to_double(arg2);
-	id=arg1->value.lval;
+	convert_to_long_ex(arg1);
+	convert_to_double_ex(arg2);
+	id=(*arg1)->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
-	if((arg2->value.lval > 100) && (arg2->value.lval < 0)) {
+	if(((*arg2)->value.lval > 100) && ((*arg2)->value.lval < 0)) {
 		php_error(E_WARNING,"Parameter of pdf_setflat() has to between 0 and 100");
 		RETURN_FALSE;
 	}
 
-	PDF_setflat(pdf, (float) arg2->value.dval);
+	PDF_setflat(pdf, (float) (*arg2)->value.dval);
 
 	RETURN_TRUE;
 }
@@ -1280,30 +1280,30 @@ PHP_FUNCTION(pdf_setflat) {
 /* {{{ proto void pdf_setlinejoin(int pdfdoc, int value)
    Sets linejoin parameter */
 PHP_FUNCTION(pdf_setlinejoin) {
-	pval *arg1, *arg2;
+	pval **arg1, **arg2;
 	int id, type;
 	PDF *pdf;
 	PDF_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	convert_to_long(arg2);
-	id=arg1->value.lval;
+	convert_to_long_ex(arg1);
+	convert_to_long_ex(arg2);
+	id=(*arg1)->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
-	if((arg2->value.lval > 2) && (arg2->value.lval < 0)) {
+	if(((*arg2)->value.lval > 2) && ((*arg2)->value.lval < 0)) {
 		php_error(E_WARNING,"Parameter of pdf_setlinejoin() has to between 0 and 2");
 		RETURN_FALSE;
 	}
 
-	PDF_setlinejoin(pdf, arg2->value.lval);
+	PDF_setlinejoin(pdf, (*arg2)->value.lval);
 
 	RETURN_TRUE;
 }
@@ -1312,30 +1312,30 @@ PHP_FUNCTION(pdf_setlinejoin) {
 /* {{{ proto void pdf_setlinecap(int pdfdoc, int value)
    Sets linecap parameter */
 PHP_FUNCTION(pdf_setlinecap) {
-	pval *arg1, *arg2;
+	pval **arg1, **arg2;
 	int id, type;
 	PDF *pdf;
 	PDF_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	convert_to_long(arg2);
-	id=arg1->value.lval;
+	convert_to_long_ex(arg1);
+	convert_to_long_ex(arg2);
+	id=(*arg1)->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
-	if((arg2->value.lval > 2) && (arg2->value.lval < 0)) {
+	if(((*arg2)->value.lval > 2) && ((*arg2)->value.lval < 0)) {
 		php_error(E_WARNING,"Parameter of pdf_setlinecap() has to be > 0 and =< 2");
 		RETURN_FALSE;
 	}
 
-	PDF_setlinecap(pdf, arg2->value.lval);
+	PDF_setlinecap(pdf, (*arg2)->value.lval);
 
 	RETURN_TRUE;
 }
@@ -1344,30 +1344,30 @@ PHP_FUNCTION(pdf_setlinecap) {
 /* {{{ proto void pdf_setmiterlimit(int pdfdoc, double value)
    Sets miter limit */
 PHP_FUNCTION(pdf_setmiterlimit) {
-	pval *arg1, *arg2;
+	pval **arg1, **arg2;
 	int id, type;
 	PDF *pdf;
 	PDF_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	convert_to_double(arg2);
-	id=arg1->value.lval;
+	convert_to_long_ex(arg1);
+	convert_to_double_ex(arg2);
+	id=(*arg1)->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
-	if(arg2->value.dval < 1) {
+	if((*arg2)->value.dval < 1) {
 		php_error(E_WARNING,"Parameter of pdf_setmiterlimit() has to be >= 1");
 		RETURN_FALSE;
 	}
 
-	PDF_setmiterlimit(pdf, (float) arg2->value.dval);
+	PDF_setmiterlimit(pdf, (float) (*arg2)->value.dval);
 
 	RETURN_TRUE;
 }
@@ -1376,25 +1376,25 @@ PHP_FUNCTION(pdf_setmiterlimit) {
 /* {{{ proto void pdf_setlinewidth(int pdfdoc, double width)
    Sets line width */
 PHP_FUNCTION(pdf_setlinewidth) {
-	pval *arg1, *arg2;
+	pval **arg1, **arg2;
 	int id, type;
 	PDF *pdf;
 	PDF_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	convert_to_double(arg2);
-	id=arg1->value.lval;
+	convert_to_long_ex(arg1);
+	convert_to_double_ex(arg2);
+	id=(*arg1)->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
-	PDF_setlinewidth(pdf, (float) arg2->value.dval);
+	PDF_setlinewidth(pdf, (float) (*arg2)->value.dval);
 
 	RETURN_TRUE;
 }
@@ -1403,26 +1403,26 @@ PHP_FUNCTION(pdf_setlinewidth) {
 /* {{{ proto void pdf_setdash(int pdfdoc, double white, double black)
    Sets dash pattern */
 PHP_FUNCTION(pdf_setdash) {
-	pval *arg1, *arg2, *arg3;
+	pval **arg1, **arg2, **arg3;
 	int id, type;
 	PDF *pdf;
 	PDF_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 3 || getParameters(ht, 3, &arg1, &arg2, &arg3) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &arg1, &arg2, &arg3) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	convert_to_double(arg2);
-	convert_to_double(arg3);
-	id=arg1->value.lval;
+	convert_to_long_ex(arg1);
+	convert_to_double_ex(arg2);
+	convert_to_double_ex(arg3);
+	id=(*arg1)->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
-	PDF_setdash(pdf, (float) arg2->value.dval, (float) arg3->value.dval);
+	PDF_setdash(pdf, (float) (*arg2)->value.dval, (float) (*arg3)->value.dval);
 
 	RETURN_TRUE;
 }
@@ -1431,26 +1431,26 @@ PHP_FUNCTION(pdf_setdash) {
 /* {{{ proto void pdf_moveto(int pdfdoc, double x, double y)
    Sets current point */
 PHP_FUNCTION(pdf_moveto) {
-	pval *arg1, *arg2, *arg3;
+	pval **arg1, **arg2, **arg3;
 	int id, type;
 	PDF *pdf;
 	PDF_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 3 || getParameters(ht, 3, &arg1, &arg2, &arg3) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &arg1, &arg2, &arg3) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	convert_to_double(arg2);
-	convert_to_double(arg3);
-	id=arg1->value.lval;
+	convert_to_long_ex(arg1);
+	convert_to_double_ex(arg2);
+	convert_to_double_ex(arg3);
+	id=(*arg1)->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
-	PDF_moveto(pdf, (float) arg2->value.dval, (float) arg3->value.dval);
+	PDF_moveto(pdf, (float) (*arg2)->value.dval, (float) (*arg3)->value.dval);
 
 	RETURN_TRUE;
 }
@@ -1459,35 +1459,35 @@ PHP_FUNCTION(pdf_moveto) {
 /* {{{ proto void pdf_curveto(int pdfdoc, double x1, double y1, double x2, double y2, double x3, double y3)
    Draws a curve */
 PHP_FUNCTION(pdf_curveto) {
-	pval *arg1, *arg2, *arg3, *arg4, *arg5, *arg6, *arg7;
+	pval **arg1, **arg2, **arg3, **arg4, **arg5, **arg6, **arg7;
 	int id, type;
 	PDF *pdf;
 	PDF_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 7 || getParameters(ht, 7, &arg1, &arg2, &arg3, &arg4, &arg5, &arg6, &arg7) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 7 || zend_get_parameters_ex(7, &arg1, &arg2, &arg3, &arg4, &arg5, &arg6, &arg7) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	convert_to_double(arg2);
-	convert_to_double(arg3);
-	convert_to_double(arg4);
-	convert_to_double(arg5);
-	convert_to_double(arg6);
-	convert_to_double(arg7);
-	id=arg1->value.lval;
+	convert_to_long_ex(arg1);
+	convert_to_double_ex(arg2);
+	convert_to_double_ex(arg3);
+	convert_to_double_ex(arg4);
+	convert_to_double_ex(arg5);
+	convert_to_double_ex(arg6);
+	convert_to_double_ex(arg7);
+	id=(*arg1)->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
-	PDF_curveto(pdf, (float) arg2->value.dval,
-	                (float) arg3->value.dval,
-	                (float) arg4->value.dval,
-	                (float) arg5->value.dval,
-	                (float) arg6->value.dval,
-	                (float) arg7->value.dval);
+	PDF_curveto(pdf, (float) (*arg2)->value.dval,
+	                (float) (*arg3)->value.dval,
+	                (float) (*arg4)->value.dval,
+	                (float) (*arg5)->value.dval,
+	                (float) (*arg6)->value.dval,
+	                (float) (*arg7)->value.dval);
 
 	RETURN_TRUE;
 }
@@ -1496,26 +1496,26 @@ PHP_FUNCTION(pdf_curveto) {
 /* {{{ proto void pdf_lineto(int pdfdoc, double x, double y)
    Draws a line */
 PHP_FUNCTION(pdf_lineto) {
-	pval *arg1, *arg2, *arg3;
+	pval **arg1, **arg2, **arg3;
 	int id, type;
 	PDF *pdf;
 	PDF_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 3 || getParameters(ht, 3, &arg1, &arg2, &arg3) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &arg1, &arg2, &arg3) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	convert_to_double(arg2);
-	convert_to_double(arg3);
-	id=arg1->value.lval;
+	convert_to_long_ex(arg1);
+	convert_to_double_ex(arg2);
+	convert_to_double_ex(arg3);
+	id=(*arg1)->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
-	PDF_lineto(pdf, (float) arg2->value.dval, (float) arg3->value.dval);
+	PDF_lineto(pdf, (float) (*arg2)->value.dval, (float) (*arg3)->value.dval);
 
 	RETURN_TRUE;
 }
@@ -1524,27 +1524,27 @@ PHP_FUNCTION(pdf_lineto) {
 /* {{{ proto void pdf_circle(int pdfdoc, double x, double y, double radius)
    Draws a circle */
 PHP_FUNCTION(pdf_circle) {
-	pval *arg1, *arg2, *arg3, *arg4;
+	pval **arg1, **arg2, **arg3, **arg4;
 	int id, type;
 	PDF *pdf;
 	PDF_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 4 || getParameters(ht, 4, &arg1, &arg2, &arg3, &arg4) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 4 || zend_get_parameters_ex(4, &arg1, &arg2, &arg3, &arg4) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	convert_to_double(arg2);
-	convert_to_double(arg3);
-	convert_to_double(arg4);
-	id=arg1->value.lval;
+	convert_to_long_ex(arg1);
+	convert_to_double_ex(arg2);
+	convert_to_double_ex(arg3);
+	convert_to_double_ex(arg4);
+	id=(*arg1)->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
-	PDF_circle(pdf, (float) arg2->value.dval, (float) arg3->value.dval, (float) arg4->value.dval);
+	PDF_circle(pdf, (float) (*arg2)->value.dval, (float) (*arg3)->value.dval, (float) (*arg4)->value.dval);
 
 	RETURN_TRUE;
 }
@@ -1553,29 +1553,29 @@ PHP_FUNCTION(pdf_circle) {
 /* {{{ proto void pdf_arc(int pdfdoc, double x, double y, double radius, double start, double end)
    Draws an arc */
 PHP_FUNCTION(pdf_arc) {
-	pval *arg1, *arg2, *arg3, *arg4, *arg5, *arg6;
+	pval **arg1, **arg2, **arg3, **arg4, **arg5, **arg6;
 	int id, type;
 	PDF *pdf;
 	PDF_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 6 || getParameters(ht, 6, &arg1, &arg2, &arg3, &arg4, &arg5, &arg6) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 6 || zend_get_parameters_ex(6, &arg1, &arg2, &arg3, &arg4, &arg5, &arg6) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	convert_to_double(arg2);
-	convert_to_double(arg3);
-	convert_to_double(arg4);
-	convert_to_double(arg5);
-	convert_to_double(arg6);
-	id=arg1->value.lval;
+	convert_to_long_ex(arg1);
+	convert_to_double_ex(arg2);
+	convert_to_double_ex(arg3);
+	convert_to_double_ex(arg4);
+	convert_to_double_ex(arg5);
+	convert_to_double_ex(arg6);
+	id=(*arg1)->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
-	PDF_arc(pdf, (float) arg2->value.dval, (float) arg3->value.dval, (float) arg4->value.dval, (float) arg5->value.dval, (float) arg6->value.dval);
+	PDF_arc(pdf, (float) (*arg2)->value.dval, (float) (*arg3)->value.dval, (float) (*arg4)->value.dval, (float) (*arg5)->value.dval, (float) (*arg6)->value.dval);
 
 	RETURN_TRUE;
 }
@@ -1584,31 +1584,31 @@ PHP_FUNCTION(pdf_arc) {
 /* {{{ proto void pdf_rect(int pdfdoc, double x, double y, double width, double height)
    Draws a rectangle */
 PHP_FUNCTION(pdf_rect) {
-	pval *arg1, *arg2, *arg3, *arg4, *arg5;
+	pval **arg1, **arg2, **arg3, **arg4, **arg5;
 	int id, type;
 	PDF *pdf;
 	PDF_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 5 || getParameters(ht, 5, &arg1, &arg2, &arg3, &arg4, &arg5) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 5 || zend_get_parameters_ex(5, &arg1, &arg2, &arg3, &arg4, &arg5) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	convert_to_double(arg2);
-	convert_to_double(arg3);
-	convert_to_double(arg4);
-	convert_to_double(arg5);
-	id=arg1->value.lval;
+	convert_to_long_ex(arg1);
+	convert_to_double_ex(arg2);
+	convert_to_double_ex(arg3);
+	convert_to_double_ex(arg4);
+	convert_to_double_ex(arg5);
+	id=(*arg1)->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
-	PDF_rect(pdf, (float) arg2->value.dval,
-	                (float) arg3->value.dval,
-	                (float) arg4->value.dval,
-	                (float) arg5->value.dval);
+	PDF_rect(pdf, (float) (*arg2)->value.dval,
+	                (float) (*arg3)->value.dval,
+	                (float) (*arg4)->value.dval,
+	                (float) (*arg5)->value.dval);
 
 	RETURN_TRUE;
 }
@@ -1617,17 +1617,17 @@ PHP_FUNCTION(pdf_rect) {
 /* {{{ proto void pdf_closepath(int pdfdoc)
    Close path */
 PHP_FUNCTION(pdf_closepath) {
-	pval *arg1;
+	pval **arg1;
 	int id, type;
 	PDF *pdf;
 	PDF_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	id=arg1->value.lval;
+	convert_to_long_ex(arg1);
+	id=(*arg1)->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
@@ -1643,17 +1643,17 @@ PHP_FUNCTION(pdf_closepath) {
 /* {{{ proto void pdf_closepath_stroke(int pdfdoc)
    Close path and draw line along path */
 PHP_FUNCTION(pdf_closepath_stroke) {
-	pval *arg1;
+	pval **arg1;
 	int id, type;
 	PDF *pdf;
 	PDF_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	id=arg1->value.lval;
+	convert_to_long_ex(arg1);
+	id=(*arg1)->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
@@ -1669,17 +1669,17 @@ PHP_FUNCTION(pdf_closepath_stroke) {
 /* {{{ proto void pdf_stroke(int pdfdoc)
    Draw line along path path */
 PHP_FUNCTION(pdf_stroke) {
-	pval *arg1;
+	pval **arg1;
 	int id, type;
 	PDF *pdf;
 	PDF_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	id=arg1->value.lval;
+	convert_to_long_ex(arg1);
+	id=(*arg1)->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
@@ -1695,17 +1695,17 @@ PHP_FUNCTION(pdf_stroke) {
 /* {{{ proto void pdf_fill(int pdfdoc)
    Fill current path */
 PHP_FUNCTION(pdf_fill) {
-	pval *arg1;
+	pval **arg1;
 	int id, type;
 	PDF *pdf;
 	PDF_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	id=arg1->value.lval;
+	convert_to_long_ex(arg1);
+	id=(*arg1)->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
@@ -1721,17 +1721,17 @@ PHP_FUNCTION(pdf_fill) {
 /* {{{ proto void pdf_fill_stroke(int pdfdoc)
    Fill and stroke current path */
 PHP_FUNCTION(pdf_fill_stroke) {
-	pval *arg1;
+	pval **arg1;
 	int id, type;
 	PDF *pdf;
 	PDF_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	id=arg1->value.lval;
+	convert_to_long_ex(arg1);
+	id=(*arg1)->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
@@ -1747,17 +1747,17 @@ PHP_FUNCTION(pdf_fill_stroke) {
 /* {{{ proto void pdf_closepath_fill_stroke(int pdfdoc)
    Close, fill and stroke current path */
 PHP_FUNCTION(pdf_closepath_fill_stroke) {
-	pval *arg1;
+	pval **arg1;
 	int id, type;
 	PDF *pdf;
 	PDF_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	id=arg1->value.lval;
+	convert_to_long_ex(arg1);
+	id=(*arg1)->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
@@ -1773,17 +1773,17 @@ PHP_FUNCTION(pdf_closepath_fill_stroke) {
 /* {{{ proto void pdf_endpath(int pdfdoc)
    Ends current path */
 PHP_FUNCTION(pdf_endpath) {
-	pval *arg1;
+	pval **arg1;
 	int id, type;
 	PDF *pdf;
 	PDF_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	id=arg1->value.lval;
+	convert_to_long_ex(arg1);
+	id=(*arg1)->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
@@ -1799,17 +1799,17 @@ PHP_FUNCTION(pdf_endpath) {
 /* {{{ proto void pdf_clip(int pdfdoc)
    Clips to current path */
 PHP_FUNCTION(pdf_clip) {
-	pval *arg1;
+	pval **arg1;
 	int id, type;
 	PDF *pdf;
 	PDF_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	id=arg1->value.lval;
+	convert_to_long_ex(arg1);
+	id=(*arg1)->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
@@ -1825,31 +1825,31 @@ PHP_FUNCTION(pdf_clip) {
 /* {{{ proto void pdf_set_parameter(int pdfdoc, string key, string value)
    Sets arbitrary parameters */
 PHP_FUNCTION(pdf_set_parameter) {
-	pval *arg1, *arg2, *arg3;
+	pval **arg1, **arg2, **arg3;
 	int id, type;
 	PDF *pdf;
 	PDF_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 3 || getParameters(ht, 3, &arg1, &arg2, &arg3) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &arg1, &arg2, &arg3) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	convert_to_string(arg2);
-	convert_to_string(arg3);
-	id=arg1->value.lval;
+	convert_to_long_ex(arg1);
+	convert_to_string_ex(arg2);
+	convert_to_string_ex(arg3);
+	id=(*arg1)->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
-    if (arg2->value.str.val == "compatibility") {
+    if ((*arg2)->value.str.val == "compatibility") {
 		php_error(E_ERROR,"Compatibility modes not supported at this time");
 		RETURN_FALSE;
 	}
 	
-	PDF_set_parameter(pdf, arg2->value.str.val, arg3->value.str.val);
+	PDF_set_parameter(pdf, (*arg2)->value.str.val, (*arg3)->value.str.val);
 
 	RETURN_TRUE;
 }
@@ -1858,27 +1858,27 @@ PHP_FUNCTION(pdf_set_parameter) {
 /* {{{ proto string pdf_get_parameter(int pdfdoc, string key, double modifier)
    Gets arbitrary parameters */
 PHP_FUNCTION(pdf_get_parameter) {
-	pval *arg1, *arg2, *arg3;
+	pval **arg1, **arg2, **arg3;
 	int id, type;
 	PDF *pdf;
 	char *value;
 	PDF_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 3 || getParameters(ht, 3, &arg1, &arg2, &arg3) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &arg1, &arg2, &arg3) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	convert_to_string(arg2);
-	convert_to_double(arg3);
-	id=arg1->value.lval;
+	convert_to_long_ex(arg1);
+	convert_to_string_ex(arg2);
+	convert_to_double_ex(arg3);
+	id=(*arg1)->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
-	value = PDF_get_parameter(pdf, arg2->value.str.val, (float) (arg3->value.dval));
+	value = PDF_get_parameter(pdf, (*arg2)->value.str.val, (float) ((*arg3)->value.dval));
 
 	RETURN_STRING(value, 1);
 }
@@ -1887,26 +1887,26 @@ PHP_FUNCTION(pdf_get_parameter) {
 /* {{{ proto void pdf_set_value(int pdfdoc, string key, double value)
    Sets arbitrary value */
 PHP_FUNCTION(pdf_set_value) {
-	pval *arg1, *arg2, *arg3;
+	pval **arg1, **arg2, **arg3;
 	int id, type;
 	PDF *pdf;
 	PDF_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 3 || getParameters(ht, 3, &arg1, &arg2, &arg3) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &arg1, &arg2, &arg3) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	convert_to_string(arg2);
-	convert_to_double(arg3);
-	id=arg1->value.lval;
+	convert_to_long_ex(arg1);
+	convert_to_string_ex(arg2);
+	convert_to_double_ex(arg3);
+	id=(*arg1)->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
-	PDF_set_value(pdf, arg2->value.str.val, arg3->value.dval);
+	PDF_set_value(pdf, (*arg2)->value.str.val, (*arg3)->value.dval);
 
 	RETURN_TRUE;
 }
@@ -1915,27 +1915,27 @@ PHP_FUNCTION(pdf_set_value) {
 /* {{{ proto double pdf_get_value(int pdfdoc, string key, double modifier)
    Gets arbitrary value */
 PHP_FUNCTION(pdf_get_value) {
-	pval *arg1, *arg2, *arg3;
+	pval **arg1, **arg2, **arg3;
 	int id, type;
 	PDF *pdf;
 	double value;
 	PDF_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 3 || getParameters(ht, 3, &arg1, &arg2, &arg3) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &arg1, &arg2, &arg3) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	convert_to_string(arg2);
-	convert_to_double(arg3);
-	id=arg1->value.lval;
+	convert_to_long_ex(arg1);
+	convert_to_string_ex(arg2);
+	convert_to_double_ex(arg3);
+	id=(*arg1)->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
-	value = PDF_get_value(pdf, arg2->value.str.val, arg3->value.dval);
+	value = PDF_get_value(pdf, (*arg2)->value.str.val, (*arg3)->value.dval);
 
 	RETURN_DOUBLE(value);
 }
@@ -1944,25 +1944,25 @@ PHP_FUNCTION(pdf_get_value) {
 /* {{{ proto void pdf_setgray_fill(int pdfdoc, double value)
    Sets filling color to gray value */
 PHP_FUNCTION(pdf_setgray_fill) {
-	pval *arg1, *arg2;
+	pval **arg1, **arg2;
 	int id, type;
 	PDF *pdf;
 	PDF_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	convert_to_double(arg2);
-	id=arg1->value.lval;
+	convert_to_long_ex(arg1);
+	convert_to_double_ex(arg2);
+	id=(*arg1)->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
-	PDF_setgray_fill(pdf, (float) arg2->value.dval);
+	PDF_setgray_fill(pdf, (float) (*arg2)->value.dval);
 
 	RETURN_TRUE;
 }
@@ -1971,25 +1971,25 @@ PHP_FUNCTION(pdf_setgray_fill) {
 /* {{{ proto void pdf_setgray_stroke(int pdfdoc, double value)
    Sets drawing color to gray value */
 PHP_FUNCTION(pdf_setgray_stroke) {
-	pval *arg1, *arg2;
+	pval **arg1, **arg2;
 	int id, type;
 	PDF *pdf;
 	PDF_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	convert_to_double(arg2);
-	id=arg1->value.lval;
+	convert_to_long_ex(arg1);
+	convert_to_double_ex(arg2);
+	id=(*arg1)->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
-	PDF_setgray_stroke(pdf, (float) arg2->value.dval);
+	PDF_setgray_stroke(pdf, (float) (*arg2)->value.dval);
 
 	RETURN_TRUE;
 }
@@ -1998,25 +1998,25 @@ PHP_FUNCTION(pdf_setgray_stroke) {
 /* {{{ proto void pdf_setgray(int pdfdoc, double value)
    Sets drawing and filling color to gray value */
 PHP_FUNCTION(pdf_setgray) {
-	pval *arg1, *arg2;
+	pval **arg1, **arg2;
 	int id, type;
 	PDF *pdf;
 	PDF_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	convert_to_double(arg2);
-	id=arg1->value.lval;
+	convert_to_long_ex(arg1);
+	convert_to_double_ex(arg2);
+	id=(*arg1)->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
-	PDF_setgray(pdf, (float) arg2->value.dval);
+	PDF_setgray(pdf, (float) (*arg2)->value.dval);
 
 	RETURN_TRUE;
 }
@@ -2025,27 +2025,27 @@ PHP_FUNCTION(pdf_setgray) {
 /* {{{ proto void pdf_setrgbcolor_fill(int pdfdoc, double red, double green, double blue)
    Sets filling color to rgb color value */
 PHP_FUNCTION(pdf_setrgbcolor_fill) {
-	pval *arg1, *arg2, *arg3, *arg4;
+	pval **arg1, **arg2, **arg3, **arg4;
 	int id, type;
 	PDF *pdf;
 	PDF_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 4 || getParameters(ht, 4, &arg1, &arg2, &arg3, &arg4) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 4 || zend_get_parameters_ex(4, &arg1, &arg2, &arg3, &arg4) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	convert_to_double(arg2);
-	convert_to_double(arg3);
-	convert_to_double(arg4);
-	id=arg1->value.lval;
+	convert_to_long_ex(arg1);
+	convert_to_double_ex(arg2);
+	convert_to_double_ex(arg3);
+	convert_to_double_ex(arg4);
+	id=(*arg1)->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
-	PDF_setrgbcolor_fill(pdf, (float) arg2->value.dval, (float) arg3->value.dval, (float) arg4->value.dval);
+	PDF_setrgbcolor_fill(pdf, (float) (*arg2)->value.dval, (float) (*arg3)->value.dval, (float) (*arg4)->value.dval);
 
 	RETURN_TRUE;
 }
@@ -2054,27 +2054,27 @@ PHP_FUNCTION(pdf_setrgbcolor_fill) {
 /* {{{ proto void pdf_setrgbcolor_stroke(int pdfdoc, double red, double green, double blue)
    Sets drawing color to rgb color value */
 PHP_FUNCTION(pdf_setrgbcolor_stroke) {
-	pval *arg1, *arg2, *arg3, *arg4;
+	pval **arg1, **arg2, **arg3, **arg4;
 	int id, type;
 	PDF *pdf;
 	PDF_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 4 || getParameters(ht, 4, &arg1, &arg2, &arg3, &arg4) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 4 || zend_get_parameters_ex(4, &arg1, &arg2, &arg3, &arg4) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	convert_to_double(arg2);
-	convert_to_double(arg3);
-	convert_to_double(arg4);
-	id=arg1->value.lval;
+	convert_to_long_ex(arg1);
+	convert_to_double_ex(arg2);
+	convert_to_double_ex(arg3);
+	convert_to_double_ex(arg4);
+	id=(*arg1)->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
-	PDF_setrgbcolor_stroke(pdf, (float) arg2->value.dval, (float) arg3->value.dval, (float) arg4->value.dval);
+	PDF_setrgbcolor_stroke(pdf, (float) (*arg2)->value.dval, (float) (*arg3)->value.dval, (float) (*arg4)->value.dval);
 
 	RETURN_TRUE;
 }
@@ -2083,27 +2083,27 @@ PHP_FUNCTION(pdf_setrgbcolor_stroke) {
 /* {{{ proto void pdf_setrgbcolor(int pdfdoc, double red, double green, double blue)
    Sets drawing and filling color to rgb color value */
 PHP_FUNCTION(pdf_setrgbcolor) {
-	pval *arg1, *arg2, *arg3, *arg4;
+	pval **arg1, **arg2, **arg3, **arg4;
 	int id, type;
 	PDF *pdf;
 	PDF_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 4 || getParameters(ht, 4, &arg1, &arg2, &arg3, &arg4) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 4 || zend_get_parameters_ex(4, &arg1, &arg2, &arg3, &arg4) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	convert_to_double(arg2);
-	convert_to_double(arg3);
-	convert_to_double(arg4);
-	id=arg1->value.lval;
+	convert_to_long_ex(arg1);
+	convert_to_double_ex(arg2);
+	convert_to_double_ex(arg3);
+	convert_to_double_ex(arg4);
+	id=(*arg1)->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
-	PDF_setrgbcolor(pdf, (float) arg2->value.dval, (float) arg3->value.dval, (float) arg4->value.dval);
+	PDF_setrgbcolor(pdf, (float) (*arg2)->value.dval, (float) (*arg3)->value.dval, (float) (*arg4)->value.dval);
 
 	RETURN_TRUE;
 }
@@ -2112,7 +2112,7 @@ PHP_FUNCTION(pdf_setrgbcolor) {
 /* {{{ proto int pdf_add_outline(int pdfdoc, string text [, int parent, int open]);
    Add bookmark for current page */
 PHP_FUNCTION(pdf_add_outline) {
-	pval *arg1, *arg2, *arg3, *arg4;
+	pval **arg1, **arg2, **arg3, **arg4;
 	int id, type;
 	int *outline, *parent, parentid, open;
 	PDF *pdf;
@@ -2120,27 +2120,27 @@ PHP_FUNCTION(pdf_add_outline) {
 
 	switch (ZEND_NUM_ARGS()) {
 	case 2:
-		if (getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
+		if (zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
 			WRONG_PARAM_COUNT;
 		}
 		break;
 	case 3:
-		if (getParameters(ht, 3, &arg1, &arg2, &arg3) == FAILURE) {
+		if (zend_get_parameters_ex(3, &arg1, &arg2, &arg3) == FAILURE) {
 			WRONG_PARAM_COUNT;
 		}
 		break;
 	case 4:
-		if (getParameters(ht, 4, &arg1, &arg2, &arg3, &arg4) == FAILURE) {
+		if (zend_get_parameters_ex(4, &arg1, &arg2, &arg3, &arg4) == FAILURE) {
 			WRONG_PARAM_COUNT;
 		}
 	break;
 	default:
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(arg1);
-	convert_to_string(arg2);
+	convert_to_long_ex(arg1);
+	convert_to_string_ex(arg2);
 
-	id=arg1->value.lval;
+	id=(*arg1)->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
 		php_error(E_WARNING,"Unable to find document identifier %d",id);
@@ -2148,8 +2148,8 @@ PHP_FUNCTION(pdf_add_outline) {
 	}
 
 	if (ZEND_NUM_ARGS() > 2) {
-		convert_to_long(arg3);
-		id = arg3->value.lval;
+		convert_to_long_ex(arg3);
+		id = (*arg3)->value.lval;
 
 		if (id > 0) {
 			parent = zend_list_find(id, &type);
@@ -2164,8 +2164,8 @@ PHP_FUNCTION(pdf_add_outline) {
 		}
 
 		if (ZEND_NUM_ARGS() > 3) {
-			convert_to_long(arg4);
-			open = arg4->value.lval;
+			convert_to_long_ex(arg4);
+			open = (*arg4)->value.lval;
 		} else {
 			open = 0;
 		}
@@ -2175,7 +2175,7 @@ PHP_FUNCTION(pdf_add_outline) {
 	}
 
 	outline=emalloc(sizeof(int));
-	*outline = PDF_add_bookmark(pdf, arg2->value.str.val, parentid, open);
+	*outline = PDF_add_bookmark(pdf, (*arg2)->value.str.val, parentid, open);
 	id = zend_list_insert(outline,PDF_GLOBAL(le_outline));
 	RETURN_LONG(id);
 }
@@ -2184,25 +2184,25 @@ PHP_FUNCTION(pdf_add_outline) {
 /* {{{ proto void pdf_set_transition(int pdfdoc, int transition)
    Sets transition between pages */
 PHP_FUNCTION(pdf_set_transition) {
-	pval *arg1, *arg2;
+	pval **arg1, **arg2;
 	int id, type;
 	PDF *pdf;
 	PDF_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	convert_to_long(arg2);
-	id=arg1->value.lval;
+	convert_to_long_ex(arg1);
+	convert_to_long_ex(arg2);
+	id=(*arg1)->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
-	switch(arg2->value.lval) {
+	switch((*arg2)->value.lval) {
 		case 0:
 			PDF_set_parameter(pdf, "transition", "none");
 			break;
@@ -2239,25 +2239,25 @@ PHP_FUNCTION(pdf_set_transition) {
 /* {{{ proto void pdf_set_duration(int pdfdoc, double duration)
    Sets duration between pages */
 PHP_FUNCTION(pdf_set_duration) {
-	pval *arg1, *arg2;
+	pval **arg1, **arg2;
 	int id, type;
 	PDF *pdf;
 	PDF_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	convert_to_double(arg2);
-	id=arg1->value.lval;
+	convert_to_long_ex(arg1);
+	convert_to_double_ex(arg2);
+	id=(*arg1)->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
-	PDF_set_value(pdf, "duration", (float) arg2->value.dval);
+	PDF_set_value(pdf, "duration", (float) (*arg2)->value.dval);
 
 	RETURN_TRUE;
 }
@@ -2266,26 +2266,26 @@ PHP_FUNCTION(pdf_set_duration) {
 /* {{{ proto int pdf_open_gif(int pdf, string giffile)
    Opens a gif file and returns an image for placement in a pdf document */
 PHP_FUNCTION(pdf_open_gif) {
-	pval *arg1, *arg2;
+	pval **arg1, **arg2;
 	int id, type;
 	int pdf_image;
 	PDF *pdf;
 	PDF_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	convert_to_string(arg2);
-	id=arg1->value.lval;
+	convert_to_long_ex(arg1);
+	convert_to_string_ex(arg2);
+	id=(*arg1)->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
-	pdf_image = PDF_open_image_file(pdf, "gif", arg2->value.str.val, "", 0);
+	pdf_image = PDF_open_image_file(pdf, "gif", (*arg2)->value.str.val, "", 0);
 
 	if(pdf_image < 0) {
 		php_error(E_WARNING, "Could not open image");
@@ -2300,26 +2300,26 @@ PHP_FUNCTION(pdf_open_gif) {
 /* {{{ proto int pdf_open_jpeg(int pdf, string jpegfile)
    Opens a jpeg file and returns an image for placement in a pdf document */
 PHP_FUNCTION(pdf_open_jpeg) {
-	pval *arg1, *arg2;
+	pval **arg1, **arg2;
 	int id, type;
 	int pdf_image;
 	PDF *pdf;
 	PDF_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	convert_to_string(arg2);
-	id=arg1->value.lval;
+	convert_to_long_ex(arg1);
+	convert_to_string_ex(arg2);
+	id=(*arg1)->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
-	pdf_image = PDF_open_image_file(pdf, "jpeg", arg2->value.str.val, "", 0);
+	pdf_image = PDF_open_image_file(pdf, "jpeg", (*arg2)->value.str.val, "", 0);
 
 	if(pdf_image < 0) {
 		php_error(E_WARNING, "Could not open image");
@@ -2334,26 +2334,26 @@ PHP_FUNCTION(pdf_open_jpeg) {
 /* {{{ proto int pdf_open_png(int pdf, string pngfile)
    Opens a png file and returns an image for placement in a pdf document */
 PHP_FUNCTION(pdf_open_png) {
-	pval *arg1, *arg2;
+	pval **arg1, **arg2;
 	int id, type;
 	int pdf_image;
 	PDF *pdf;
 	PDF_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	convert_to_string(arg2);
-	id=arg1->value.lval;
+	convert_to_long_ex(arg1);
+	convert_to_string_ex(arg2);
+	id=(*arg1)->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
-	pdf_image = PDF_open_image_file(pdf, "png", arg2->value.str.val, "", 0);
+	pdf_image = PDF_open_image_file(pdf, "png", (*arg2)->value.str.val, "", 0);
 
 	if(pdf_image < 0) {
 		php_error(E_WARNING, "Could not open image");
@@ -2368,26 +2368,26 @@ PHP_FUNCTION(pdf_open_png) {
 /* {{{ proto int pdf_open_tiff(int pdf, string tifffile)
    Opens a tiff file and returns an image for placement in a pdf document */
 PHP_FUNCTION(pdf_open_tiff) {
-	pval *arg1, *arg2;
+	pval **arg1, **arg2;
 	int id, type;
 	int pdf_image;
 	PDF *pdf;
 	PDF_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	convert_to_string(arg2);
-	id=arg1->value.lval;
+	convert_to_long_ex(arg1);
+	convert_to_string_ex(arg2);
+	id=(*arg1)->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
-	pdf_image = PDF_open_image_file(pdf, "tiff", arg2->value.str.val, "", 0);
+	pdf_image = PDF_open_image_file(pdf, "tiff", (*arg2)->value.str.val, "", 0);
 
 	if(pdf_image < 0) {
 		php_error(E_WARNING, "Could not open image");
@@ -2402,27 +2402,27 @@ PHP_FUNCTION(pdf_open_tiff) {
 /* {{{ proto int pdf_open_image_file(int pdf, string type, string file)
    Opens an image file of the given type and returns an image for placement in a pdf document */
 PHP_FUNCTION(pdf_open_image_file) {
-	pval *arg1, *arg2, *arg3;
+	pval **arg1, **arg2, **arg3;
 	int id, type;
 	int pdf_image;
 	PDF *pdf;
 	PDF_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 3 || getParameters(ht, 3, &arg1, &arg2, &arg3) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &arg1, &arg2, &arg3) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	convert_to_string(arg2);
-	convert_to_string(arg3);
-	id=arg1->value.lval;
+	convert_to_long_ex(arg1);
+	convert_to_string_ex(arg2);
+	convert_to_string_ex(arg3);
+	id=(*arg1)->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
-	pdf_image = PDF_open_image_file(pdf, arg2->value.str.val, arg3->value.str.val, "", 0);
+	pdf_image = PDF_open_image_file(pdf, (*arg2)->value.str.val, (*arg3)->value.str.val, "", 0);
 
 	if(pdf_image < 0) {
 		php_error(E_WARNING, "Could not open image");
@@ -2438,7 +2438,7 @@ PHP_FUNCTION(pdf_open_image_file) {
 /* {{{ proto int pdf_open_memory_image(int pdf, int image)
    Takes an gd image and returns an image for placement in a pdf document */
 PHP_FUNCTION(pdf_open_memory_image) {
-	pval *argv[2];
+	pval **argv[2];
 	int argc;
 	int i, j, id, gid, type, color, count;
 	int pdf_image;
@@ -2448,19 +2448,19 @@ PHP_FUNCTION(pdf_open_memory_image) {
 	PDF_TLS_VARS;
 
 	argc = ZEND_NUM_ARGS();
-	if (getParametersArray(ht, argc, argv) == FAILURE)
+	if (zend_get_parameters_array_ex(argc, argv) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-	convert_to_long(argv[0]);
-	id=argv[0]->value.lval;
+	convert_to_long_ex(argv[0]);
+	id=(*argv[0])->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
-	convert_to_long(argv[1]);
-	gid=argv[1]->value.lval;
+	convert_to_long_ex(argv[1]);
+	gid=(*argv[1])->value.lval;
 	im = zend_list_find(gid, &type);
 	if (!im || type != phpi_get_le_gd()) {
 		php_error(E_WARNING, "pdf: Unable to find image pointer");
@@ -2499,26 +2499,26 @@ PHP_FUNCTION(pdf_open_memory_image) {
 /* {{{ proto void pdf_close_image(int pdfimage)
    Closes the pdf image */
 PHP_FUNCTION(pdf_close_image) {
-	pval *arg1, *arg2;
+	pval **arg1, **arg2;
 	int id, type;
 	int pdf_image;
 	PDF *pdf;
 	PDF_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	id=arg1->value.lval;
+	convert_to_long_ex(arg1);
+	id=(*arg1)->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
-	convert_to_long(arg2);
-	id=arg2->value.lval;
+	convert_to_long_ex(arg2);
+	id=(*arg2)->value.lval;
 	pdf_image = (int) zend_list_find(id,&type);
 	if(pdf_image < 0 || type!=PDF_GLOBAL(le_pdf_image)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
@@ -2534,37 +2534,37 @@ PHP_FUNCTION(pdf_close_image) {
 /* {{{ proto void pdf_place_image(int pdf, int pdfimage, double x, double y, double scale)
    Places image in the pdf document */
 PHP_FUNCTION(pdf_place_image) {
-	pval *arg1, *arg2, *arg3, *arg4, *arg5;
+	pval **arg1, **arg2, **arg3, **arg4, **arg5;
 	int id, type;
 	int pdf_image;
 	PDF *pdf;
 	PDF_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 5 || getParameters(ht, 5, &arg1, &arg2, &arg3, &arg4, &arg5) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 5 || zend_get_parameters_ex(5, &arg1, &arg2, &arg3, &arg4, &arg5) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	id=arg1->value.lval;
+	convert_to_long_ex(arg1);
+	id=(*arg1)->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
-	convert_to_long(arg2);
-	id=arg2->value.lval;
+	convert_to_long_ex(arg2);
+	id=(*arg2)->value.lval;
 	pdf_image = (int) zend_list_find(id,&type);
 	if(pdf_image < 0 || type!=PDF_GLOBAL(le_pdf_image)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
-	convert_to_double(arg3);
-	convert_to_double(arg4);
-	convert_to_double(arg5);
+	convert_to_double_ex(arg3);
+	convert_to_double_ex(arg4);
+	convert_to_double_ex(arg5);
 
-	PDF_place_image(pdf, pdf_image, (float) arg3->value.dval, (float) arg4->value.dval, arg5->value.dval);
+	PDF_place_image(pdf, pdf_image, (float) (*arg3)->value.dval, (float) (*arg4)->value.dval, (*arg5)->value.dval);
 
 	RETURN_TRUE;
 }
@@ -2573,27 +2573,27 @@ PHP_FUNCTION(pdf_place_image) {
 /* {{{ proto void pdf_get_image_width(int pdf, int pdfimage)
    Returns the width of an image */
 PHP_FUNCTION(pdf_get_image_width) {
-	pval *arg1, *arg2;
+	pval **arg1, **arg2;
 	int id, type;
 	int width;
 	int pdf_image;
 	PDF *pdf;
 	PDF_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	id=arg1->value.lval;
+	convert_to_long_ex(arg1);
+	id=(*arg1)->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
 		php_error(E_WARNING,"Unable to find identifier %d",id);
 		RETURN_FALSE;
 	}
 
-	convert_to_long(arg2);
-	id=arg2->value.lval;
+	convert_to_long_ex(arg2);
+	id=(*arg2)->value.lval;
 	pdf_image = (int) zend_list_find(id,&type);
 	if(pdf_image < 0 || type!=PDF_GLOBAL(le_pdf_image)) {
 		php_error(E_WARNING,"Unable to find identifier %d",id);
@@ -2609,27 +2609,27 @@ PHP_FUNCTION(pdf_get_image_width) {
 /* {{{ proto void pdf_get_image_height(int pdf, int pdfimage)
    Returns the height of an image */
 PHP_FUNCTION(pdf_get_image_height) {
-	pval *arg1, *arg2;
+	pval **arg1, **arg2;
 	int id, type;
 	int height;
 	int pdf_image;
 	PDF *pdf;
 	PDF_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	id=arg1->value.lval;
+	convert_to_long_ex(arg1);
+	id=(*arg1)->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
 		php_error(E_WARNING,"Unable to find identifier %d",id);
 		RETURN_FALSE;
 	}
 
-	convert_to_long(arg2);
-	id=arg2->value.lval;
+	convert_to_long_ex(arg2);
+	id=(*arg2)->value.lval;
 	pdf_image = (int) zend_list_find(id,&type);
 	if(pdf_image < 0 || type!=PDF_GLOBAL(le_pdf_image)) {
 		php_error(E_WARNING,"Unable to find identifier %d",id);
@@ -2645,29 +2645,29 @@ PHP_FUNCTION(pdf_get_image_height) {
 /* {{{ proto void pdf_add_weblink(int pdfdoc, double llx, double lly, double urx, double ury, string url)
    Adds link to web resource */
 PHP_FUNCTION(pdf_add_weblink) {
-	pval *arg1, *arg2, *arg3, *arg4, *arg5, *arg6;
+	pval **arg1, **arg2, **arg3, **arg4, **arg5, **arg6;
 	int id, type;
 	PDF *pdf;
 	PDF_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 6 || getParameters(ht, 6, &arg1, &arg2, &arg3, &arg4, &arg5, &arg6) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 6 || zend_get_parameters_ex(6, &arg1, &arg2, &arg3, &arg4, &arg5, &arg6) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	convert_to_double(arg2);
-	convert_to_double(arg3);
-	convert_to_double(arg4);
-	convert_to_double(arg5);
-	convert_to_string(arg6);
-	id=arg1->value.lval;
+	convert_to_long_ex(arg1);
+	convert_to_double_ex(arg2);
+	convert_to_double_ex(arg3);
+	convert_to_double_ex(arg4);
+	convert_to_double_ex(arg5);
+	convert_to_string_ex(arg6);
+	id=(*arg1)->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
-	PDF_add_weblink(pdf, (float) arg2->value.dval, (float) arg3->value.dval, (float) arg4->value.dval, (float) arg5->value.dval, arg6->value.str.val);
+	PDF_add_weblink(pdf, (float) (*arg2)->value.dval, (float) (*arg3)->value.dval, (float) (*arg4)->value.dval, (float) (*arg5)->value.dval, (*arg6)->value.str.val);
 
 	RETURN_TRUE;
 }
@@ -2676,31 +2676,31 @@ PHP_FUNCTION(pdf_add_weblink) {
 /* {{{ proto void pdf_add_pdflink(int pdfdoc, double llx, double lly, double urx, double ury, string filename, int page, string dest)
    Adds link to pdf document */
 PHP_FUNCTION(pdf_add_pdflink) {
-	pval *arg1, *arg2, *arg3, *arg4, *arg5, *arg6, *arg7, *arg8;
+	pval **arg1, **arg2, **arg3, **arg4, **arg5, **arg6, **arg7, **arg8;
 	int id, type;
 	PDF *pdf;
 	PDF_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 8 || getParameters(ht, 8, &arg1, &arg2, &arg3, &arg4, &arg5, &arg6, &arg7, &arg8) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 8 || zend_get_parameters_ex(8, &arg1, &arg2, &arg3, &arg4, &arg5, &arg6, &arg7, &arg8) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	convert_to_double(arg2);
-	convert_to_double(arg3);
-	convert_to_double(arg4);
-	convert_to_double(arg5);
-	convert_to_string(arg6);
-	convert_to_long(arg7);
-	convert_to_string(arg8);
-	id=arg1->value.lval;
+	convert_to_long_ex(arg1);
+	convert_to_double_ex(arg2);
+	convert_to_double_ex(arg3);
+	convert_to_double_ex(arg4);
+	convert_to_double_ex(arg5);
+	convert_to_string_ex(arg6);
+	convert_to_long_ex(arg7);
+	convert_to_string_ex(arg8);
+	id=(*arg1)->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
-	PDF_add_pdflink(pdf, (float) arg2->value.dval, (float) arg3->value.dval, (float) arg4->value.dval, (float) arg5->value.dval, arg6->value.str.val, arg7->value.lval, arg8->value.str.val);
+	PDF_add_pdflink(pdf, (float) (*arg2)->value.dval, (float) (*arg3)->value.dval, (float) (*arg4)->value.dval, (float) (*arg5)->value.dval, (*arg6)->value.str.val, (*arg7)->value.lval, (*arg8)->value.str.val);
 
 	RETURN_TRUE;
 }
@@ -2709,26 +2709,26 @@ PHP_FUNCTION(pdf_add_pdflink) {
 /* {{{ proto void pdf_set_border_style(int pdfdoc, string style, double width)
    Set style of box surounding all kinds of annotations and link */
 PHP_FUNCTION(pdf_set_border_style) {
-	pval *arg1, *arg2, *arg3;
+	pval **arg1, **arg2, **arg3;
 	int id, type;
 	PDF *pdf;
 	PDF_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 3 || getParameters(ht, 3, &arg1, &arg2, &arg3) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &arg1, &arg2, &arg3) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	convert_to_string(arg2);
-	convert_to_double(arg3);
-	id=arg1->value.lval;
+	convert_to_long_ex(arg1);
+	convert_to_string_ex(arg2);
+	convert_to_double_ex(arg3);
+	id=(*arg1)->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
-	PDF_set_border_style(pdf, arg2->value.str.val, (float) arg3->value.dval);
+	PDF_set_border_style(pdf, (*arg2)->value.str.val, (float) (*arg3)->value.dval);
 
 	RETURN_TRUE;
 }
@@ -2737,27 +2737,27 @@ PHP_FUNCTION(pdf_set_border_style) {
 /* {{{ proto void pdf_set_border_color(int pdfdoc, double red, double green, double blue)
    Set color of box surounded all kinds of annotations and links */
 PHP_FUNCTION(pdf_set_border_color) {
-	pval *arg1, *arg2, *arg3, *arg4;
+	pval **arg1, **arg2, **arg3, **arg4;
 	int id, type;
 	PDF *pdf;
 	PDF_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 4 || getParameters(ht, 4, &arg1, &arg2, &arg3, &arg4) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 4 || zend_get_parameters_ex(4, &arg1, &arg2, &arg3, &arg4) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	convert_to_double(arg2);
-	convert_to_double(arg3);
-	convert_to_double(arg4);
-	id=arg1->value.lval;
+	convert_to_long_ex(arg1);
+	convert_to_double_ex(arg2);
+	convert_to_double_ex(arg3);
+	convert_to_double_ex(arg4);
+	id=(*arg1)->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
-	PDF_set_border_color(pdf, (float) arg2->value.dval, (float) arg3->value.dval, (float) arg4->value.dval);
+	PDF_set_border_color(pdf, (float) (*arg2)->value.dval, (float) (*arg3)->value.dval, (float) (*arg4)->value.dval);
 
 	RETURN_TRUE;
 }
@@ -2766,26 +2766,26 @@ PHP_FUNCTION(pdf_set_border_color) {
 /* {{{ proto void pdf_set_border_dash(int pdfdoc, double black, double white)
    Set the border dash style of all kinds of annotations and links */
 PHP_FUNCTION(pdf_set_border_dash) {
-	pval *arg1, *arg2, *arg3;
+	pval **arg1, **arg2, **arg3;
 	int id, type;
 	PDF *pdf;
 	PDF_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 3 || getParameters(ht, 3, &arg1, &arg2, &arg3) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &arg1, &arg2, &arg3) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	convert_to_double(arg2);
-	convert_to_double(arg3);
-	id=arg1->value.lval;
+	convert_to_long_ex(arg1);
+	convert_to_double_ex(arg2);
+	convert_to_double_ex(arg3);
+	id=(*arg1)->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
-	PDF_set_border_dash(pdf, (float) arg2->value.dval, (float) arg3->value.dval);
+	PDF_set_border_dash(pdf, (float) (*arg2)->value.dval, (float) (*arg3)->value.dval);
 
 	RETURN_TRUE;
 }
@@ -2794,7 +2794,7 @@ PHP_FUNCTION(pdf_set_border_dash) {
 /* {{{ proto void pdf_add_annotation(int pdfdoc, double xll, double yll, double xur, double xur, string title, string text)
    Sets annotation */
 PHP_FUNCTION(pdf_add_annotation) {
-	pval *argv[11];
+	pval **argv[11];
 	int id, type, argc;
 	PDF *pdf;
 	PDF_TLS_VARS;
@@ -2802,17 +2802,17 @@ PHP_FUNCTION(pdf_add_annotation) {
 	argc = ZEND_NUM_ARGS();
 	if(argc != 7)
 		WRONG_PARAM_COUNT;
-	if (getParametersArray(ht, argc, argv) == FAILURE)
+	if (zend_get_parameters_array_ex(argc, argv) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-	convert_to_long(argv[0]);
-	convert_to_double(argv[1]);
-	convert_to_double(argv[2]);
-	convert_to_double(argv[3]);
-	convert_to_double(argv[4]);
-	convert_to_string(argv[5]);
-	convert_to_string(argv[6]);
-	id=argv[0]->value.lval;
+	convert_to_long_ex(argv[0]);
+	convert_to_double_ex(argv[1]);
+	convert_to_double_ex(argv[2]);
+	convert_to_double_ex(argv[3]);
+	convert_to_double_ex(argv[4]);
+	convert_to_string_ex(argv[5]);
+	convert_to_string_ex(argv[6]);
+	id=(*argv[0])->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
 		php_error(E_WARNING,"Unable to find identifier %d",id);
@@ -2820,12 +2820,12 @@ PHP_FUNCTION(pdf_add_annotation) {
 	}
 
 	PDF_add_note(pdf,
-	             (float) argv[1]->value.dval,
-	             (float) argv[2]->value.dval,
-	             (float) argv[3]->value.dval,
-	             (float) argv[4]->value.dval,
-	             argv[6]->value.str.val,
-	             argv[5]->value.str.val,
+	             (float) (*argv[1])->value.dval,
+	             (float) (*argv[2])->value.dval,
+	             (float) (*argv[3])->value.dval,
+	             (float) (*argv[4])->value.dval,
+	             (*argv[6])->value.str.val,
+	             (*argv[5])->value.str.val,
 	             "note", 1);
 
 	RETURN_TRUE;
