@@ -27,7 +27,7 @@ require_once 'PEAR/Common.php';
  *
  * TODO:
  *  - add an extra param the dir where to place the created package
- *  - preserve file permissions (solve umask in copy problem)
+ *  - finish and test Windows support
  *
  * @since PHP 4.0.2
  * @author Stig Bakken <ssb@fast.no>
@@ -104,7 +104,7 @@ class PEAR_Packager extends PEAR_Common
                $file = array_shift($this->_tempfiles))
         {
             if (is_dir($file)) {
-                system("rm -rf $file"); // XXX FIXME Windows
+                System::rm("-rf $file"); // XXX FIXME Windows
             } else {
                 unlink($file);
             }
