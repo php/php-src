@@ -807,7 +807,7 @@ PHPAPI int php_getimagetype(php_stream * stream, char *filetype TSRMLS_DC)
 
 	if ( !filetype) filetype = tmp;
 	if((php_stream_read(stream, filetype, 3)) <= 0) {
-		php_error(E_WARNING, "getimagesize: Read error!");
+		php_error(E_WARNING, "%s(): Read error!", get_active_function_name(TSRMLS_C));
 		return IMAGE_FILETYPE_UNKNOWN;
 	}
 
@@ -820,7 +820,7 @@ PHPAPI int php_getimagetype(php_stream * stream, char *filetype TSRMLS_DC)
 		if (!memcmp(filetype, php_sig_png, 8)) {
 			return IMAGE_FILETYPE_PNG;
 		} else {
-			php_error(E_WARNING, "PNG file corrupted by ASCII conversion");
+			php_error(E_WARNING, "%s(): PNG file corrupted by ASCII conversion", get_active_function_name(TSRMLS_C));
 			return IMAGE_FILETYPE_UNKNOWN;
 		}
 	} else if (!memcmp(filetype, php_sig_swf, 3)) {
@@ -941,7 +941,7 @@ PHP_FUNCTION(getimagesize)
 
 	if (result) {
 		if (array_init(return_value) == FAILURE) {
-			php_error(E_ERROR, "Unable to initialize array");
+			php_error(E_ERROR, "%s(): Unable to initialize array", get_active_function_name(TSRMLS_C));
 			efree(result);
 			return;
 		}

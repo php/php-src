@@ -158,7 +158,7 @@ PHP_FUNCTION(setcookie)
 PHP_FUNCTION(headers_sent)
 {
 	if (ZEND_NUM_ARGS() != 0) {
-		php_error(E_WARNING, "%s() expects no parameters, %d given",
+		php_error(E_WARNING, "%s(): No parameters expected, %d given",
 				  get_active_function_name(TSRMLS_C), ZEND_NUM_ARGS());
 		return;
 	}
