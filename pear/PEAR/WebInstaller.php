@@ -353,7 +353,7 @@ class PEAR_WebInstaller extends PEAR
             $time = filemtime($this->installdir."/$PackageFile");
 
             if ($time < (time () - $this->cachetime )) {
-                $this->logger("$PackageFile to old. Get new one.");
+                $this->logger("$PackageFile too old. Get new one.");
                 $fp =  @fopen($this->remotedir."/$PackageFile","r");
                 if (!$fp) {
                     if ($useGz)
