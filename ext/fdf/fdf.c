@@ -32,6 +32,8 @@
 #include "SAPI.h"
 #include "ext/standard/head.h"
 #include "php_open_temporary_file.h"
+#include "php_variables.h"
+
 #include <math.h>
 #include "php_fdf.h"
 
