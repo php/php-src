@@ -30,6 +30,7 @@
 #include "php_ini.h"
 #include "php_typedef_VARIANT.h"
 #include "conversion.h"
+#include "ext/standard/info.h"
 
 #include <unknwn.h> 
 
@@ -48,6 +49,7 @@ function_entry VARIANT_functions[] = {
 	{NULL, NULL, NULL}
 };
 
+
 static PHP_MINFO_FUNCTION(VARIANT)
 {
 	php_info_print_table_start();
@@ -55,9 +57,11 @@ static PHP_MINFO_FUNCTION(VARIANT)
 	php_info_print_table_end();
 }
 
+
 zend_module_entry VARIANT_module_entry = {
 	"variant", VARIANT_functions, PHP_MINIT(VARIANT), PHP_MSHUTDOWN(VARIANT), NULL, NULL, PHP_MINFO(VARIANT), STANDARD_MODULE_PROPERTIES
 };
+
 
 PHP_MINIT_FUNCTION(VARIANT)
 {
