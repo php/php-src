@@ -189,22 +189,22 @@ PHP_FUNCTION(version_compare)
 		RETURN_LONG(compare);
 	}
 	if (!strcmp(op, "<") || !strcmp(op, "lt")) {
-		RETURN_LONG(compare == -1);
+		RETURN_BOOL(compare == -1);
 	}
 	if (!strcmp(op, "<=") || !strcmp(op, "le")) {
-		RETURN_LONG(compare != 1);
+		RETURN_BOOL(compare != 1);
 	}
 	if (!strcmp(op, ">") || !strcmp(op, "gt")) {
-		RETURN_LONG(compare == 1);
+		RETURN_BOOL(compare == 1);
 	}
 	if (!strcmp(op, ">=") || !strcmp(op, "ge")) {
-		RETURN_LONG(compare != -1);
+		RETURN_BOOL(compare != -1);
 	}
 	if (!strcmp(op, "==") || !strcmp(op, "=") || !strcmp(op, "eq")) {
-		RETURN_LONG(compare == 0);
+		RETURN_BOOL(compare == 0);
 	}
 	if (!strcmp(op, "!=") || !strcmp(op, "<>") || !strcmp(op, "ne")) {
-		RETURN_LONG(compare != 0);
+		RETURN_BOOL(compare != 0);
 	}
 	RETURN_NULL();
 }
