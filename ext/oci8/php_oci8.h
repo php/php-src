@@ -60,7 +60,7 @@ typedef struct {
 	int persistent;
 	int is_open;
 	char *dbname;
-    OCIServer *pServer;
+	OCIServer *pServer;
 #if 0
 	OCIFocbkStruct failover;
 #endif
@@ -87,11 +87,11 @@ typedef struct {
 	int id;
 	int is_open;
 	oci_session *session;
-    OCISvcCtx *pServiceContext;
+	OCISvcCtx *pServiceContext;
 	sword error;
-    OCIError *pError;
+	OCIError *pError;
 	int needs_commit;
-    HashTable *descriptors;
+	HashTable *descriptors;
 } oci_connection;
 
 typedef struct {
@@ -105,20 +105,20 @@ typedef struct {
 } oci_descriptor;
 
 typedef struct {
-    int id;
-    oci_connection *conn;
-    OCIType     *tdo;
-    OCITypeCode coll_typecode;
-    OCIRef      *elem_ref;
-    OCIType     *element_type;
-    OCITypeCode element_typecode;
-    OCIColl     *coll;
+	int id;
+	oci_connection *conn;
+	OCIType     *tdo;
+	OCITypeCode coll_typecode;
+	OCIRef      *elem_ref;
+	OCIType     *element_type;
+	OCITypeCode element_typecode;
+	OCIColl     *coll;
 } oci_collection;
 
 typedef struct {
-    zval *zval;
-    text *name;
-    ub4 name_len;
+	zval *zval;
+	text *name;
+	ub4 name_len;
 	ub4 type;
 } oci_define;
 
@@ -126,8 +126,8 @@ typedef struct {
 	int id;
 	oci_connection *conn;
 	sword error;
-    OCIError *pError;
-    OCIStmt *pStmt;
+	OCIError *pError;
+	OCIStmt *pStmt;
 	char *last_query;
 	HashTable *columns;
 	HashTable *binds;
@@ -142,7 +142,7 @@ typedef struct {
 	OCIBind *pBind;
 	zval *zval;
 	dvoid *descr;		/* used for binding of LOBS etc */
-    OCIStmt *pStmt;     /* used for binding REFCURSORs */
+	OCIStmt *pStmt;     /* used for binding REFCURSORs */
 	sb2 indicator;
 	ub2 retcode;
 } oci_bind;
@@ -150,19 +150,19 @@ typedef struct {
 typedef struct {
 	oci_statement *statement;
 	OCIDefine *pDefine;
-    char *name;
-    ub4 name_len;
-    ub2 data_type;
-    ub2 data_size;
-    ub4 storage_size4;
+	char *name;
+	ub4 name_len;
+	ub2 data_type;
+	ub2 data_size;
+	ub4 storage_size4;
 	sb2 indicator;
 	ub2 retcode;
 	ub2 retlen;
 	ub4 retlen4;
 	ub2 is_descr;
 	ub2 is_cursor;
-    int descr;
-    oci_statement *pstmt;
+	int descr;
+	oci_statement *pstmt;
 	int stmtid;
 	int descid;
 	void *data;
@@ -175,25 +175,25 @@ typedef struct {
 
 typedef struct {
 	sword error;
-    OCIError *pError;
+	OCIError *pError;
 		
 	/*
-    char *default_username;
-    char *default_password;
-    char *default_dbname;
+	char *default_username;
+	char *default_password;
+	char *default_dbname;
 	*/
 
-    long debug_mode;
+	long debug_mode;
 
 	int shutdown;
 
 	/* XXX NYI
-    long allow_persistent;
-    long max_persistent;
-    long max_links;
+	long allow_persistent;
+	long max_persistent;
+	long max_links;
 	*/
 
-    OCIEnv *pEnv;
+	OCIEnv *pEnv;
 
 	int in_call;
 } php_oci_globals;
