@@ -846,6 +846,88 @@ PHP_FUNCTION(substr)
 }
 /* }}} */
 
+
+/* {{{ proto string substr_replace(string str, int start [, int length [, string repl]])
+   Replace part of a string with another string */
+PHP_FUNCTION(substr_replace)
+{
+    zval**      string;
+    zval**      from;
+    zval**      len;
+    zval**      repl;
+    char*       result;
+	int         result_len;
+    int         argc;
+    int         l;
+    int         f;
+	
+	argc = ARG_COUNT(ht);
+
+	if ((argc == 2 && getParametersEx(2, &string, &from) == FAILURE) ||
+		(argc == 3 && getParametersEx(3, &string, &from, &len) == FAILURE) ||
+		(argc == 4 && getParametersEx(4, &string, &from, &len, &repl) == FAILURE) ||
+		argc < 2 || argc > 4) {
+		WRONG_PARAM_COUNT;
+	}
+	
+	convert_to_string_ex(string);
+	convert_to_long_ex(from);
+	f = (*from)->value.lval;
+
+	if (argc == 2) {
+		l = (*string)->value.str.len;
+	} else {
+		convert_to_long_ex(len);
+		l = (*len)->value.lval;
+		
+		if (argc == 4)
+			convert_to_string_ex(repl);
+	}
+
+	/* if "from" position is negative, count start position from the end
+	 * of the string
+	 */
+	if (f < 0) {
+		f = (*string)->value.str.len + f;
+		if (f < 0) {
+			f = 0;
+		}
+	}
+
+	/* if "length" position is negative, set it to the length
+	 * needed to stop that many chars from the end of the string
+	 */
+	if (l < 0) {
+		l = ((*string)->value.str.len - f) + l;
+		if (l < 0) {
+			l = 0;
+		}
+	}
+
+	if (f >= (int)(*string)->value.str.len) {
+		RETURN_STRINGL((*string)->value.str.val, (*string)->value.str.len, 1);
+	}
+
+	if((f+l) > (int)(*string)->value.str.len) {
+		l = (int)(*string)->value.str.len - f;
+	}
+
+	if (argc == 4)
+		result_len = (*string)->value.str.len - l + (*repl)->value.str.len;
+	else
+		result_len = (*string)->value.str.len - l;
+	result = (char *)ecalloc(result_len + 1, sizeof(char *));
+
+	strncat(result, (*string)->value.str.val, f);
+	if (argc == 4)
+		strcat(result, (*repl)->value.str.val);
+	strcat(result, (*string)->value.str.val + f + l);
+
+	RETVAL_STRING(result, 0);
+}
+/* }}} */
+
+
 /* {{{ proto string quotemeta(string str)
    Quote meta characters */
 PHP_FUNCTION(quotemeta)
