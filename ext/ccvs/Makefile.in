@@ -2,5 +2,7 @@
 
 LTLIBRARY_NAME    = libccvs.la
 LTLIBRARY_SOURCES = ccvs.c
+LTLIBRARY_SHARED_NAME = ccvs.la
+LTLIBRARY_SHARED_LIBADD = $(CCVS_SHARED_LIBADD)
 
 include $(top_srcdir)/build/dynlib.mk

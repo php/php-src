@@ -104,6 +104,9 @@ static char const cvsid[] = "$Id$";
 		STANDARD_MODULE_PROPERTIES
 	};
 
+#ifdef COMPILE_DL_LDAP
+ZEND_GET_MODULE(ldap)
+#endif
 
 /* Full Functions (The actual CCVS functions and any internal php hooked functions such as MINFO) */
 
