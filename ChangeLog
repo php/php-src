@@ -1,3 +1,68 @@
+2001-10-26  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/standard/crc32.c
+      ext/standard/crypt.c
+      ext/standard/html.c: Convert to use new parameter parsing API.
+
+2001-10-26  Stig Bakken  <ssb@fast.no>
+
+    * pear/tests/PEAR.r
+      pear/tests/PEAR.t
+      pear/tests/PEAR_Error.r
+      pear/tests/PEAR_Error.t: removed
+
+2001-10-26  Frank M. Kromann  <frank@frontbase.com>
+
+    * ext/fbsql/php_fbsql.c: Typo in constant naming.
+
+2001-10-26  Harald Radi  <h.radi@nme.at>
+
+    * ext/iisfunc/iisfunc.cpp
+      ext/dotnet/dotnet.cpp: fix visual studio .net warning
+
+2001-10-26  Frank M. Kromann  <frank@frontbase.com>
+
+    * ext/fbsql/php_fbsql.c: Removed unused code
+
+2001-10-26  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ext/overload/.cvsignore: Add Win32 generated files.
+
+2001-10-26  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/standard/base64.c: Convert to use new parameter parsing API.
+
+2001-10-26  Thies C. Arntzen  <thies@thieso.net>
+
+    * ext/xmlrpc/libxmlrpc/base64.c
+      ext/xmlrpc/php_xmlrpc.h
+      ext/xmlrpc/xmlrpc-epi-php.c: ZTS fixes
+
+2001-10-26  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Remote.php
+      pear/scripts/pear.in
+      pear/Makefile.in:
+    * implemented "pear list-packages", the first sub-command using xmlrpc
+
+2001-10-26  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * sapi/servlet/servlet.c: no need to free these it seems
+
+2001-10-26  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Config.php
+      pear/PEAR/Remote.php
+      pear/scripts/pear.in
+      pear/scripts/pearwin.php
+      pear/Makefile.in:
+    * PEAR_Config class to maintain system and per-user configuration for
+      PEAR installations
+    * PEAR_Remote class to communicate with the backend server (xmlrpc)
+    * change pear script's option parsing to "-d foo=bar" style
+    * added -c/-C (user/system config file) and -s/-S (store user/system config)
+      options
+
 2001-10-25  Martin Jansen  <mail@martin-jansen.de>
 
     * pear/HTML/Form.php:
