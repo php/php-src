@@ -31,8 +31,8 @@
 
 /* $Id$ */
 
-#ifndef _DNS_H
-#define _DNS_H
+#ifndef DNS_H
+#define DNS_H
 
 PHP_FUNCTION(gethostbyaddr);
 PHP_FUNCTION(gethostbyname);
@@ -50,4 +50,4 @@ PHP_FUNCTION(getmxrr);
 #define INT32SZ		4
 #endif
 
-#endif /* _DNS_H */
+#endif /* DNS_H */

@@ -19,8 +19,8 @@
 
 /* $Id$ */
 
-#ifndef _PHP_XML_H
-#define _PHP_XML_H
+#ifndef PHP_XML_H
+#define PHP_XML_H
 
 #ifdef HAVE_LIBEXPAT
 
@@ -151,7 +151,7 @@ PHPAPI char *xml_utf8_decode(const XML_Char *, int, int *, const XML_Char *);
 #define XMLLS_FETCH()
 #endif
 
-#endif /* _PHP_XML_H */
+#endif /* PHP_XML_H */
 
 /*
  * Local variables:

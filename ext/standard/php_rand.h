@@ -21,8 +21,8 @@
  */
 /* $Id$ */
 
-#ifndef _PHP_RAND_H
-#define	_PHP_RAND_H
+#ifndef PHP_RAND_H
+#define	PHP_RAND_H
 
 #include <stdlib.h>
 
@@ -36,4 +36,4 @@
 #define PHP_RAND_MAX RAND_MAX
 #endif
 
-#endif	/* _PHP_RAND_H */
+#endif	/* PHP_RAND_H */

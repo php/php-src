@@ -19,8 +19,8 @@
 
 /* $Id$ */
 
-#ifndef _PHP_MYSQL_H
-#define _PHP_MYSQL_H
+#ifndef PHP_MYSQL_H
+#define PHP_MYSQL_H
 
 #ifdef PHP_WIN32
 #define PHP_MYSQL_API __declspec(dllexport)
@@ -110,4 +110,4 @@ ZEND_END_MODULE_GLOBALS(mysql)
 
 #define phpext_mysql_ptr mysql_module_ptr
 
-#endif /* _PHP_MYSQL_H */
+#endif /* PHP_MYSQL_H */

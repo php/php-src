@@ -29,11 +29,11 @@
 
 /* $Id$ */
 
-#ifndef _MICROTIME_H
-#define _MICROTIME_H
+#ifndef MICROTIME_H
+#define MICROTIME_H
 
 PHP_FUNCTION(microtime);
 PHP_FUNCTION(gettimeofday);
 PHP_FUNCTION(getrusage);
 
-#endif /* _MICROTIME_H */
+#endif /* MICROTIME_H */

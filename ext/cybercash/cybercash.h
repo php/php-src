@@ -27,8 +27,8 @@
    +----------------------------------------------------------------------+
  */
 
-#ifndef _CYBERCASH_H
-#define _CYBERCASH_H
+#ifndef CYBERCASH_H
+#define CYBERCASH_H
 
 
 #if HAVE_MCK

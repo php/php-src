@@ -31,8 +31,8 @@
 
 /* Synced with php 3.0 revision 1.24 1999-06-18 [ssb] */
 
-#ifndef _FSOCK_H
-#define _FSOCK_H
+#ifndef FSOCK_H
+#define FSOCK_H
 
 #ifdef PHP_WIN32
 # ifndef WINNT
@@ -119,4 +119,4 @@ typedef struct {
 #define FLS_FETCH()
 #endif
 
-#endif /* _FSOCK_H */
+#endif /* FSOCK_H */

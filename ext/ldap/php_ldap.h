@@ -31,8 +31,8 @@
 
 /* $Id$ */
 
-#ifndef _PHP_LDAP_H
-#define _PHP_LDAP_H
+#ifndef PHP_LDAP_H
+#define PHP_LDAP_H
 
 #include <lber.h>
 #include <ldap.h>
@@ -113,4 +113,4 @@ ZEND_END_MODULE_GLOBALS(ldap)
 
 #define phpext_ldap_ptr ldap_module_ptr
 
-#endif /* _PHP_LDAP_H */
+#endif /* PHP_LDAP_H */

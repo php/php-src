@@ -16,8 +16,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef _PHP_INI_H
-#define _PHP_INI_H
+#ifndef PHP_INI_H
+#define PHP_INI_H
 
 #define PHP_INI_USER	(1<<0)
 #define PHP_INI_PERDIR	(1<<1)
@@ -155,4 +155,4 @@ PHPAPI PHP_INI_MH(OnUpdateStringUnempty);
 #define PHP_INI_STAGE_DEACTIVATE	(1<<3)
 #define PHP_INI_STAGE_RUNTIME		(1<<4)
 
-#endif /* _PHP_INI_H */
+#endif /* PHP_INI_H */

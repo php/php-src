@@ -17,8 +17,8 @@
    +----------------------------------------------------------------------+
  */
 
-#ifndef _PHP_TICKS_H
-#define _PHP_TICKS_H
+#ifndef PHP_TICKS_H
+#define PHP_TICKS_H
 
 struct _php_tick_function_entry {
 	void (*func)(int count);

@@ -28,8 +28,8 @@
  */
 /* $Id$ */
 
-#ifndef _PHP_PDF_H
-#define _PHP_PDF_H
+#ifndef PHP_PDF_H
+#define PHP_PDF_H
 
 #if HAVE_PDFLIB
 
@@ -141,4 +141,4 @@ PHP_FUNCTION(pdf_get_image_height);
 #define pdf_module_ptr NULL
 #endif
 #define phpext_pdf_ptr pdf_module_ptr
-#endif /* _PHP_PDF_H */
+#endif /* PHP_PDF_H */

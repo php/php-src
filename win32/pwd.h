@@ -26,8 +26,8 @@
    #define WIN32_LEAN_AND_MEAN
    #include <windows.h>
  */
-#ifndef _PWD_H_
-#define _PWD_H_
+#ifndef PWD_H
+#define PWD_H
 #if 0
 /* This is taken care of in Windows-NT/config.h.  */
 typedef int uid_t;

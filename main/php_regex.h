@@ -1,5 +1,5 @@
-#ifndef _PHP_REGEX_H
-#define _PHP_REGEX_H
+#ifndef PHP_REGEX_H
+#define PHP_REGEX_H
 
 /*
  * REGEX means:
@@ -39,4 +39,4 @@
 #endif
 #endif
 
-#endif /* _PHP_REGEX_H */
+#endif /* PHP_REGEX_H */

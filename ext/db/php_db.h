@@ -31,8 +31,8 @@
 /* $Id$ */
 
 
-#ifndef _PHP_DB_H
-#define _PHP_DB_H
+#ifndef PHP_DB_H
+#define PHP_DB_H
 
 
 #ifndef DLEXPORT
@@ -89,4 +89,4 @@ PHP_FUNCTION(dbmdelete);
 PHP_FUNCTION(dbmfirstkey);
 PHP_FUNCTION(dbmnextkey);
 
-#endif /* _PHP_DB_H */
+#endif /* PHP_DB_H */

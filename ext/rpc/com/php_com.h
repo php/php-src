@@ -1,5 +1,5 @@
-#ifndef _PHP_COM_H
-#define _PHP_COM_H
+#ifndef PHP_COM_H
+#define PHP_COM_H
 
 #if WIN32|WINNT
 
@@ -21,4 +21,4 @@ extern zend_module_entry COM_module_entry;
 
 #define phpext_COM_ptr COM_module_ptr
 
-#endif  /* _PHP_COM_H */
+#endif  /* PHP_COM_H */

@@ -31,8 +31,8 @@
 /* $Id */
 
 #if HAVE_OCI8
-# ifndef _PHP_OCI8_H
-#  define _PHP_OCI8_H
+# ifndef PHP_OCI8_H
+#  define PHP_OCI8_H
 # endif
 
 # if (defined(__osf__) && defined(__alpha))

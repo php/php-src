@@ -25,8 +25,8 @@
 
 /* $Id$ */
 
-#ifndef _PHP_ZLIB_H
-#define _PHP_ZLIB_H
+#ifndef PHP_ZLIB_H
+#define PHP_ZLIB_H
 
 #if HAVE_ZLIB
 
@@ -73,4 +73,4 @@ PHP_FUNCTION(gzuncompress);
 
 #define phpext_zlib_ptr zlib_module_ptr
 
-#endif /* _PHP_ZLIB_H */
+#endif /* PHP_ZLIB_H */

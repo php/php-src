@@ -18,8 +18,8 @@
 
 /* $Id$ */
 
-#ifndef _PHP_SWF_H
-#define _PHP_SWF_H
+#ifndef PHP_SWF_H
+#define PHP_SWF_H
 
 #if HAVE_SWF
 

@@ -30,8 +30,8 @@
 
 /* $Id$ */
 
-#ifndef _PHP_SYSVSEM_H
-#define _PHP_SYSVSEM_H
+#ifndef PHP_SYSVSEM_H
+#define PHP_SYSVSEM_H
 
 #if HAVE_SYSVSEM
 
@@ -64,4 +64,4 @@ extern sysvsem_module php_sysvsem_module;
 
 #define phpext_sysvsem_ptr sysvsem_module_ptr
 
-#endif /* _PHP_SYSVSEM_H */
+#endif /* PHP_SYSVSEM_H */

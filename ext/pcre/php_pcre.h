@@ -18,8 +18,8 @@
  
 /* $Id$ */
 
-#ifndef _PHP_PCRE_H
-#define _PHP_PCRE_H
+#ifndef PHP_PCRE_H
+#define PHP_PCRE_H
 
 #if HAVE_PCRE || HAVE_BUNDLED_PCRE
 
@@ -87,4 +87,4 @@ extern ZEND_API php_pcre_globals pcre_globals;
 
 #define phpext_pcre_ptr pcre_module_ptr
 
-#endif /* _PHP_PCRE_H */
+#endif /* PHP_PCRE_H */

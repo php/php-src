@@ -1,5 +1,5 @@
-#ifndef _RFC1867_H
-#define _RFC1867_H
+#ifndef RFC1867_H
+#define RFC1867_H
 
 #include "SAPI.h"
 
@@ -10,4 +10,4 @@ SAPI_POST_HANDLER_FUNC(rfc1867_post_handler);
 
 #define FILE_UPLOAD_INPUT_BUFFER_SIZE 8192
 
-#endif /* _RFC1867_H */
+#endif /* RFC1867_H */

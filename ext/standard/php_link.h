@@ -29,8 +29,8 @@
  */
 
 /* $Id$ */
-#ifndef _PHP_LINK_H
-#define _PHP_LINK_H
+#ifndef PHP_LINK_H
+#define PHP_LINK_H
 
 #ifdef HAVE_SYMLINK
 
@@ -41,4 +41,4 @@ PHP_FUNCTION(symlink);
 
 #endif
 
-#endif /* _PHP_LINK_H */
+#endif /* PHP_LINK_H */

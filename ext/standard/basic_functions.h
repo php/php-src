@@ -31,8 +31,8 @@
 
 /* $Id$ */
 
-#ifndef _BASIC_FUNCTIONS_H
-#define _BASIC_FUNCTIONS_H
+#ifndef BASIC_FUNCTIONS_H
+#define BASIC_FUNCTIONS_H
 
 #include <sys/stat.h>
 
@@ -207,4 +207,4 @@ typedef struct {
 #define SAFE_MODE_PROTECTED_ENV_VARS	"LD_LIBRARY_PATH"
 #define SAFE_MODE_ALLOWED_ENV_VARS		"PHP_"
 
-#endif /* _BASIC_FUNCTIONS_H */
+#endif /* BASIC_FUNCTIONS_H */

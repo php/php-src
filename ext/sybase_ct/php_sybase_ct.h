@@ -30,8 +30,8 @@
 
 /* $Id$ */
 
-#ifndef _PHP_SYBASE_CT_H
-#define _PHP_SYBASE_CT_H
+#ifndef PHP_SYBASE_CT_H
+#define PHP_SYBASE_CT_H
 
 #if HAVE_SYBASE_CT
 
@@ -116,4 +116,4 @@ typedef struct {
 
 #define phpext_sybase_ct_ptr sybase_module_ptr
 
-#endif /* _PHP_SYBASE_CT_H */
+#endif /* PHP_SYBASE_CT_H */

@@ -19,8 +19,8 @@
 
 /* $Id$ */
 
-#ifndef _PHP_MSSQL_H
-#define _PHP_MSSQL_H
+#ifndef PHP_MSSQL_H
+#define PHP_MSSQL_H
 
 
 #if HAVE_MSSQL
@@ -154,4 +154,4 @@ extern PHP_MSSQL_API php_mssql_globals mssql_globals;
 
 #define phpext_mssql_ptr mssql_module_ptr
 
-#endif /* _PHP_MSSQL_H */
+#endif /* PHP_MSSQL_H */

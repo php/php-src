@@ -12,8 +12,8 @@
  *	by Rick Spence
  */
 
-#ifndef _DBF_NDX_H_
-#define	 _DBF_NDX_H_
+#ifndef DBF_NDX_H_
+#define	 DBF_NDX_H_
 
 #include "dbf.h"
 
@@ -95,4 +95,4 @@ extern ndx_header_t *ndx_get_header(int);
 extern ndx_record_t *ndx_get_first_rec(ndx_header_t *);
 extern ndx_record_t *ndx_get_next_rec(ndx_header_t *, ndx_record_t *);
 
-#endif /* _DBF_NDX_H_ */
+#endif /* DBF_NDX_H_ */

@@ -1,5 +1,5 @@
-#ifndef _READDIR_H
-#define _READDIR_H
+#ifndef READDIR_H
+#define READDIR_H
 
 
 /*
@@ -41,4 +41,4 @@ int closedir(DIR *);
 void rewinddir(DIR *);
 
 
-#endif /* _READDIR_H */
+#endif /* READDIR_H */

@@ -31,8 +31,8 @@
 
 /* Synced with php 3.0 revision 1.30 1999-06-16 [ssb] */
 
-#ifndef _FILE_H
-#define _FILE_H
+#ifndef FILE_H
+#define FILE_H
 
 extern PHP_MINIT_FUNCTION(file);
 
@@ -83,4 +83,4 @@ PHPAPI int php_file_le_popen(void);
 PHPAPI int php_file_le_socket(void);
 PHPAPI int php_file_le_uploads(void);
 
-#endif /* _FILE_H */
+#endif /* FILE_H */

@@ -28,12 +28,12 @@
  */
 
 
-#ifndef _PHP_BROWSCAP_H
-#define _PHP_BROWSCAP_H
+#ifndef PHP_BROWSCAP_H
+#define PHP_BROWSCAP_H
 
 extern PHP_MINIT_FUNCTION(browscap);
 extern PHP_MSHUTDOWN_FUNCTION(browscap);
 
 PHP_FUNCTION(get_browser);
 
-#endif /* _PHP_BROWSCAP_H */
+#endif /* PHP_BROWSCAP_H */

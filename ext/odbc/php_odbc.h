@@ -30,8 +30,8 @@
 
 /* $Id$ */
 
-#ifndef _PHP_ODBC_H
-#define _PHP_ODBC_H
+#ifndef PHP_ODBC_H
+#define PHP_ODBC_H
 
 #if HAVE_UODBC
 #define ODBCVER 0x0250
@@ -320,7 +320,7 @@ extern ZEND_API php_odbc_globals odbc_globals;
 
 #define phpext_odbc_ptr odbc_module_ptr
 
-#endif /* _PHP_ODBC_H */
+#endif /* PHP_ODBC_H */
 
 /*
  * Local variables:

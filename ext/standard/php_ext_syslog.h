@@ -27,8 +27,8 @@
    +----------------------------------------------------------------------+
  */
 
-#ifndef _PHP_EXT_SYSLOG_H
-#define _PHP_EXT_SYSLOG_H
+#ifndef PHP_EXT_SYSLOG_H
+#define PHP_EXT_SYSLOG_H
 
 #ifdef HAVE_SYSLOG_H
 
@@ -45,4 +45,4 @@ PHP_FUNCTION(define_syslog_variables);
 
 #endif
 
-#endif /* _PHP_EXT_SYSLOG_H */
+#endif /* PHP_EXT_SYSLOG_H */

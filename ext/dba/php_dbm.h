@@ -1,5 +1,5 @@
-#ifndef _PHP_DBM_H
-#define _PHP_DBM_H
+#ifndef PHP_DBM_H
+#define PHP_DBM_H
 
 #if DBA_DBM
 

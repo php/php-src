@@ -29,11 +29,11 @@
 
 /* $Id$ */
 
-#ifndef _PACK_H
-#define _PACK_H
+#ifndef PACK_H
+#define PACK_H
 
 extern PHP_MINIT_FUNCTION(pack);
 PHP_FUNCTION(pack);
 PHP_FUNCTION(unpack);
 
-#endif /* _PACK_H */
+#endif /* PACK_H */
