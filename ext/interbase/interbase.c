@@ -56,7 +56,7 @@ A lot... */
 #endif
 
 /*
-#define IBDEBUG(a) printf("::: %s (%d)\n", a, __LINE__);
+#define IBDEBUG(a) php_printf("::: %s (%d)\n", a, __LINE__);
 */
 #define IBDEBUG(a)
 
@@ -123,11 +123,7 @@ ZEND_GET_MODULE(ibase)
 
 #endif
 
-#ifdef ZTS
-int ibase_globals_id;
-#else
-PHP_IBASE_API php_ibase_globals ibase_globals;
-#endif
+ZEND_DECLARE_MODULE_GLOBALS(ibase)
 
 /* }}} */
 
@@ -223,11 +219,10 @@ typedef struct {
    Return error message */
 PHP_FUNCTION(ibase_errmsg)
 {
-	char *errmsg = IBG(errmsg);
 	IBLS_FETCH();
 	
-	if (errmsg[0]) {
-		RETURN_STRING(errmsg,1);
+	if (IBG(errmsg[0])) {
+		RETURN_STRING(IBG(errmsg),1);
 	}
 	RETURN_FALSE;
 }
@@ -238,15 +233,17 @@ PHP_FUNCTION(ibase_errmsg)
     print interbase error and save it for ibase_errmsg() */
 static void _php_ibase_error(void)
 {
-	char *s, *errmsg = IBG(errmsg);
-	ISC_STATUS *statusp = IB_STATUS;
+	char *s;
+	ISC_STATUS *statusp;
+	IBLS_FETCH();
 
-	s = errmsg;
-	while ((s - errmsg) < MAX_ERRMSG - (IBASE_MSGSIZE + 2) && isc_interprete(s, &statusp)) {
-		strcat(errmsg, " ");
-		s = errmsg + strlen(errmsg);
+	s = IBG(errmsg);
+	statusp = IB_STATUS;
+	while ((s - IBG(errmsg)) < MAX_ERRMSG - (IBASE_MSGSIZE + 2) && isc_interprete(s, &statusp)) {
+		strcat(IBG(errmsg), " ");
+		s = IBG(errmsg) + strlen(IBG(errmsg));
 	}
-	php_error(E_WARNING, "InterBase: %s", errmsg);
+	php_error(E_WARNING, "InterBase: %s", IBG(errmsg));
 }
 /* }}} */
 
@@ -255,16 +252,16 @@ static void _php_ibase_error(void)
 	print php interbase module error and save it for ibase_errmsg() */
 static void _php_ibase_module_error(char *msg, ...)
 {
-	char *errmsg = IBG(errmsg);
 	va_list ap;
 	int len;
+	IBLS_FETCH();
 
 	va_start(ap, msg);
-	len = vsnprintf(errmsg, MAX_ERRMSG - 1, msg, ap);
+	len = vsnprintf(IBG(errmsg), MAX_ERRMSG - 1, msg, ap);
 	va_end(ap);
-	errmsg[len] = '\0';
+	IBG(errmsg[len]) = '\0';
 	
-	php_error(E_WARNING, "InterBase module: %s",errmsg);
+	php_error(E_WARNING, "InterBase module: %s", IBG(errmsg));
 }
 /* }}} */
 
@@ -298,7 +295,9 @@ static void _php_ibase_free_xsqlda(XSQLDA *sqlda)
 static void _php_ibase_commit_link(ibase_db_link *link)
 {
 	int i;
+	IBLS_FETCH();
 
+	IBDEBUG("Checking transactions to close...");
 	if (link->trans[0] != NULL) { /* commit default */
 		IBDEBUG("Committing default transaction...");
 		if (isc_commit_transaction(IB_STATUS, &link->trans[0])) {
@@ -322,6 +321,8 @@ static void _php_ibase_commit_link(ibase_db_link *link)
 /* {{{ _php_ibase_close_link() */
 static void _php_ibase_close_link(ibase_db_link *link)
 {
+	IBLS_FETCH();
+
 	_php_ibase_commit_link(link);
 	IBDEBUG("Closing normal link...");
 	isc_detach_database(IB_STATUS, &link->link);
@@ -334,6 +335,8 @@ static void _php_ibase_close_link(ibase_db_link *link)
 /* {{{ _php_ibase_close_plink() */
 static void _php_ibase_close_plink(ibase_db_link *link)
 {
+	IBLS_FETCH();
+
 	_php_ibase_commit_link(link);
 	IBDEBUG("Closing permanent link...");
 	isc_detach_database(IB_STATUS, &link->link);
@@ -347,6 +350,8 @@ static void _php_ibase_close_plink(ibase_db_link *link)
 /* {{{ _php_ibase_free_result() */
 static void _php_ibase_free_result(ibase_result *ib_result)
 {
+	IBLS_FETCH();
+
 	IBDEBUG("Freeing result...");
 	if (ib_result){
 		_php_ibase_free_xsqlda(ib_result->out_sqlda);
@@ -378,6 +383,8 @@ static void _php_ibase_free_result(ibase_result *ib_result)
 /* {{{ _php_ibase_free_query() */
 static void _php_ibase_free_query(ibase_query *ib_query)
 {
+	IBLS_FETCH();
+
 	IBDEBUG("Freeing query...");
 	if (ib_query) {
 		if (ib_query->in_sqlda) {
@@ -407,7 +414,8 @@ static void _php_ibase_free_query(ibase_query *ib_query)
 /* {{{ _php_ibase_free_blob()	*/
 static void _php_ibase_free_blob(ibase_blob_handle *ib_blob)
 {
-	
+	IBLS_FETCH();
+
 	if (ib_blob->bl_handle != NULL) { /* blob open*/
 		if (isc_cancel_blob(IB_STATUS, &ib_blob->bl_handle)) {
 			_php_ibase_error();
@@ -420,26 +428,30 @@ static void _php_ibase_free_blob(ibase_blob_handle *ib_blob)
 
 /* {{{ startup, shutdown and info functions */
 PHP_INI_BEGIN()
-	 STD_PHP_INI_BOOLEAN("ibase.allow_persistent", "1", PHP_INI_SYSTEM, OnUpdateInt, allow_persistent, php_ibase_globals, ibase_globals)
-	 STD_PHP_INI_ENTRY_EX("ibase.max_persistent", "-1", PHP_INI_SYSTEM, OnUpdateInt, max_persistent, php_ibase_globals, ibase_globals, display_link_numbers)
-	 STD_PHP_INI_ENTRY_EX("ibase.max_links", "-1", PHP_INI_SYSTEM, OnUpdateInt, max_links, php_ibase_globals, ibase_globals, display_link_numbers)
-	 STD_PHP_INI_ENTRY("ibase.default_user", NULL, PHP_INI_ALL, OnUpdateString, default_user, php_ibase_globals, ibase_globals)
-	 STD_PHP_INI_ENTRY("ibase.default_password", NULL, PHP_INI_ALL, OnUpdateString, default_password, php_ibase_globals, ibase_globals)
-	 STD_PHP_INI_ENTRY("ibase.timestampformat", "%m/%d/%Y %H:%M:%S", PHP_INI_ALL, OnUpdateString, cfg_timestampformat, php_ibase_globals, ibase_globals)
-	 STD_PHP_INI_ENTRY("ibase.dateformat", "%m/%d/%Y", PHP_INI_ALL, OnUpdateString, cfg_dateformat, php_ibase_globals, ibase_globals)
-	 STD_PHP_INI_ENTRY("ibase.timeformat", "%H:%M:%S", PHP_INI_ALL, OnUpdateString, cfg_timeformat, php_ibase_globals, ibase_globals)
+	 STD_PHP_INI_BOOLEAN("ibase.allow_persistent", "1", PHP_INI_SYSTEM, OnUpdateInt, allow_persistent, zend_ibase_globals, ibase_globals)
+	 STD_PHP_INI_ENTRY_EX("ibase.max_persistent", "-1", PHP_INI_SYSTEM, OnUpdateInt, max_persistent, zend_ibase_globals, ibase_globals, display_link_numbers)
+	 STD_PHP_INI_ENTRY_EX("ibase.max_links", "-1", PHP_INI_SYSTEM, OnUpdateInt, max_links, zend_ibase_globals, ibase_globals, display_link_numbers)
+	 STD_PHP_INI_ENTRY("ibase.default_user", NULL, PHP_INI_ALL, OnUpdateString, default_user, zend_ibase_globals, ibase_globals)
+	 STD_PHP_INI_ENTRY("ibase.default_password", NULL, PHP_INI_ALL, OnUpdateString, default_password, zend_ibase_globals, ibase_globals)
+	 STD_PHP_INI_ENTRY("ibase.timestampformat", "%m/%d/%Y %H:%M:%S", PHP_INI_ALL, OnUpdateString, cfg_timestampformat, zend_ibase_globals, ibase_globals)
+	 STD_PHP_INI_ENTRY("ibase.dateformat", "%m/%d/%Y", PHP_INI_ALL, OnUpdateString, cfg_dateformat, zend_ibase_globals, ibase_globals)
+	 STD_PHP_INI_ENTRY("ibase.timeformat", "%H:%M:%S", PHP_INI_ALL, OnUpdateString, cfg_timeformat, zend_ibase_globals, ibase_globals)
 PHP_INI_END()
+
+static void php_ibase_init_globals(IBLS_D)
+{
+	IBG(timestampformat) = NULL;
+	IBG(dateformat) = NULL;
+	IBG(timeformat) = NULL;
+	IBG(errmsg) = NULL;
+	IBG(num_persistent) = 0;
+}
 
 PHP_MINIT_FUNCTION(ibase)
 {
 	IBLS_FETCH();
 
-	IBG(timestampformat) = NULL;
-	IBG(dateformat) = NULL;
-	IBG(timeformat) = NULL;
-	IBG(errmsg) = NULL;
-
-	IBG(num_persistent) = 0;
+	ZEND_INIT_MODULE_GLOBALS(ibase, php_ibase_init_globals, NULL);
 
 	REGISTER_INI_ENTRIES();
 
@@ -565,6 +577,7 @@ static int _php_ibase_attach_db(char *server, char *uname, char *passwd, char *c
 {
 	char dpb_buffer[256], *dpb, *p;
 	int dpb_length, len;
+	IBLS_FETCH();
 
 	dpb = dpb_buffer;
 
@@ -854,7 +867,6 @@ PHP_FUNCTION(ibase_close)
 	int link_id, trans_n;
 	IBLS_FETCH();
 	
-	
 	RESET_ERRMSG;
 	
 	switch (ZEND_NUM_ARGS()) {
@@ -887,7 +899,7 @@ static int _php_ibase_alloc_array(ibase_array **ib_arrayp, int *array_cntp,
 	
 	int i, dim, ar_cnt, ar_length;
 	XSQLVAR *var;
-	
+	IBLS_FETCH();	
 
 	IB_ARRAY = NULL;
 	
@@ -981,6 +993,7 @@ static int _php_ibase_alloc_array(ibase_array **ib_arrayp, int *array_cntp,
 static int _php_ibase_alloc_query(ibase_query **ib_queryp, isc_db_handle link, isc_tr_handle trans, char *query, int dialect)
 {
 #define IB_QUERY (*ib_queryp)
+	IBLS_FETCH();
 	
 	IB_QUERY = emalloc(sizeof(ibase_query));
 	IB_QUERY->link = link;
@@ -1315,6 +1328,7 @@ static int _php_ibase_exec(ibase_result **ib_resultp, ibase_query *ib_query, int
 	XSQLDA *in_sqlda = NULL, *out_sqlda = NULL;
 	BIND_BUF *bind_buf = NULL;
 	int rv = FAILURE;
+	IBLS_FETCH();
 	
 	IB_RESULT = NULL;
 	
@@ -1391,7 +1405,6 @@ PHP_FUNCTION(ibase_trans)
 	int tpb_len = 0, argn, link_id, trans_n;
 	ibase_db_link *ib_link;
 	IBLS_FETCH();
-	
 	
 	RESET_ERRMSG;
 
@@ -1479,6 +1492,7 @@ PHP_FUNCTION(ibase_trans)
 /* open default transaction */
 static int _php_ibase_def_trans(ibase_db_link * ib_link, int trans_n)
 {
+	IBLS_FETCH();
 	
 	if (trans_n == 0 && ib_link->trans[0] == NULL) { 
 		if (isc_start_transaction(IB_STATUS, &ib_link->trans[0], 1, &ib_link->link, 0, NULL)) {
@@ -1500,7 +1514,6 @@ static void _php_ibase_trans_end(INTERNAL_FUNCTION_PARAMETERS, int commit)
 	int link_id = 0, trans_n = 0;
 	ibase_db_link *ib_link;
 	IBLS_FETCH();
-	
 
 	RESET_ERRMSG;
 
@@ -1569,7 +1582,6 @@ PHP_FUNCTION(ibase_query)
 	ibase_query *ib_query;
 	ibase_result *ib_result;
 	IBLS_FETCH();
-	
 
 	RESET_ERRMSG;
 
@@ -1648,6 +1660,8 @@ PHP_FUNCTION(ibase_query)
 static int _php_ibase_var_pval(pval *val, void *data, int type, int len, int scale, int flag)
 {
 	char string_data[255];
+	IBLS_FETCH();
+	PLS_FETCH();
 	
 	switch(type & ~1) {
 		case SQL_VARYING:
@@ -2097,7 +2111,6 @@ PHP_FUNCTION(ibase_prepare)
 	ibase_query *ib_query;
 	char *query;
 	IBLS_FETCH();
-	
 
 	RESET_ERRMSG;
 
@@ -2151,7 +2164,6 @@ PHP_FUNCTION(ibase_execute)
 	ibase_query *ib_query;
 	ibase_result *ib_result;
 	IBLS_FETCH();
-	
 
 	RESET_ERRMSG;
 
@@ -2205,7 +2217,6 @@ PHP_FUNCTION(ibase_free_query)
 	pval **query_arg;
 	ibase_query *ib_query;
 	IBLS_FETCH();
-	
 
 	RESET_ERRMSG;
 
@@ -2286,7 +2297,7 @@ PHP_FUNCTION(ibase_num_fields)
 {
 	pval **result;
 	ibase_result *ib_result;
-	
+	IBLS_FETCH();	
 
 	RESET_ERRMSG;
 
@@ -2317,7 +2328,6 @@ PHP_FUNCTION(ibase_field_info)
 	int len;
 	XSQLVAR *var;
 	IBLS_FETCH();
-	
 
 	RESET_ERRMSG;
 
@@ -2402,7 +2412,7 @@ static int _php_ibase_blob_info(isc_blob_handle bl_handle,IBASE_BLOBINFO *bl_inf
 	};
 	
 	char bl_inf[sizeof(long)*8], *p;
-	
+	IBLS_FETCH();
 
 	bl_info->max_segment = 0;
 	bl_info->num_segments = 0;
@@ -2454,7 +2464,6 @@ PHP_FUNCTION(ibase_blob_create)
 	ibase_db_link *ib_link;
 	ibase_blob_handle *ib_blob;
 	IBLS_FETCH();
-	
 
 	RESET_ERRMSG;
 
@@ -2504,7 +2513,6 @@ PHP_FUNCTION(ibase_blob_open)
 	pval *blob_arg;
 	ibase_blob_handle *ib_blob, *ib_blob_id;
 	IBLS_FETCH();
-	
 
 	RESET_ERRMSG;
 
@@ -2544,7 +2552,6 @@ PHP_FUNCTION(ibase_blob_add)
 	ibase_blob_handle *ib_blob;
 	IBLS_FETCH();
 
-
 	RESET_ERRMSG;
 
 	if (ZEND_NUM_ARGS()!=2 || getParameters(ht, 2, &blob_arg, &string_arg)==FAILURE) {
@@ -2574,7 +2581,6 @@ PHP_FUNCTION(ibase_blob_get)
 	unsigned short max_len = 0, cur_len, seg_len;
 	ibase_blob_handle *ib_blob;
 	IBLS_FETCH();
-
 
 	RESET_ERRMSG;
 
@@ -2625,7 +2631,6 @@ static void _php_ibase_blob_end(INTERNAL_FUNCTION_PARAMETERS, int bl_end)
 	pval *blob_arg;
 	ibase_blob_handle *ib_blob;
 	IBLS_FETCH();
-
 
 	RESET_ERRMSG;
 	
@@ -2684,7 +2689,6 @@ PHP_FUNCTION(ibase_blob_info)
 	ibase_blob_handle *ib_blob_id;
 	IBASE_BLOBINFO bl_info;
 	IBLS_FETCH();
-
 
 	RESET_ERRMSG;
 
@@ -2760,8 +2764,6 @@ PHP_FUNCTION(ibase_blob_echo)
 	char bl_data[IBASE_BLOB_SEG];
 	unsigned short seg_len;
 	ibase_blob_handle *ib_blob_id;
-	
-
 	IBLS_FETCH();
 
 	RESET_ERRMSG;
@@ -2824,7 +2826,6 @@ PHP_FUNCTION(ibase_blob_import)
 	char bl_data[IBASE_BLOB_SEG]; /* FIXME? blob_seg_size parameter?	 */
 	FILE *fp;
 	IBLS_FETCH();
-
 
 	RESET_ERRMSG;
 
