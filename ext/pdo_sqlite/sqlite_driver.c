@@ -166,8 +166,7 @@ static long pdo_sqlite_last_insert_id(pdo_dbh_t *dbh TSRMLS_DC)
 /* NB: doesn't handle binary strings... use prepared stmts for that */
 static int sqlite_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, int unquotedlen, char **quoted, int *quotedlen, enum pdo_param_type paramtype  TSRMLS_DC)
 {
-	pdo_sqlite_db_handle *H = (pdo_sqlite_db_handle *)dbh->driver_data;
-	*quoted = emalloc(2*unquotedlen + 3);
+	*quoted = safe_emalloc(2, unquotedlen, 3);
 	sqlite3_snprintf(2*unquotedlen + 3, *quoted, "'%q'", unquoted);
 	*quotedlen = strlen(*quoted);
 	return 1;
@@ -217,8 +216,6 @@ static int sqlite_handle_rollback(pdo_dbh_t *dbh TSRMLS_DC)
 
 static int pdo_sqlite_get_attribute(pdo_dbh_t *dbh, long attr, zval *return_value TSRMLS_DC)
 {
-	pdo_sqlite_db_handle *H = (pdo_sqlite_db_handle *)dbh->driver_data;
-
 	switch (attr) {
 		case PDO_ATTR_CLIENT_VERSION:
 		case PDO_ATTR_SERVER_VERSION:
@@ -242,6 +239,7 @@ static int pdo_sqlite_set_attr(pdo_dbh_t *dbh, long attr, zval *val TSRMLS_DC)
 			sqlite3_busy_timeout(H->db, Z_LVAL_P(val) * 1000);
 			return 1;
 	}
+	return 0;
 }
 
 static PHP_FUNCTION(sqlite_create_function)
