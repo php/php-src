@@ -261,7 +261,6 @@ PHP_MSHUTDOWN_FUNCTION(pdf){
 }
 
 /* {{{ proto bool pdf_set_info_creator(int info, string creator)
-
    Fills the creator field of the info structure */
 PHP_FUNCTION(pdf_set_info_creator) {
 	pval *arg1, *arg2;
@@ -291,7 +290,6 @@ PHP_FUNCTION(pdf_set_info_creator) {
 /* }}} */
 
 /* {{{ proto bool pdf_set_info_title(int info, string title)
-
    Fills the title field of the info structure */
 PHP_FUNCTION(pdf_set_info_title) {
 	pval *arg1, *arg2;
@@ -321,7 +319,6 @@ PHP_FUNCTION(pdf_set_info_title) {
 /* }}} */
 
 /* {{{ proto bool pdf_set_info_subject(int info, string subject)
-
    Fills the subject field of the info structure */
 PHP_FUNCTION(pdf_set_info_subject) {
 	pval *arg1, *arg2;
@@ -351,7 +348,6 @@ PHP_FUNCTION(pdf_set_info_subject) {
 /* }}} */
 
 /* {{{ proto bool pdf_set_info_author(int info, string author)
-
    Fills the author field of the info structure */
 PHP_FUNCTION(pdf_set_info_author) {
 	pval *arg1, *arg2;
@@ -381,7 +377,6 @@ PHP_FUNCTION(pdf_set_info_author) {
 /* }}} */
 
 /* {{{ proto bool pdf_set_info_keywords(int info, string keywords)
-
    Fills the keywords field of the info structure */
 PHP_FUNCTION(pdf_set_info_keywords) {
 	pval *arg1, *arg2;
@@ -607,7 +602,7 @@ PHP_FUNCTION(pdf_show_xy) {
 }
 /* }}} */
 
-/* {{{ proto void pdf_set_font(int pdfdoc, string font, double size, string encoding, [int embed])
+/* {{{ proto void pdf_set_font(int pdfdoc, string font, double size, string encoding [, int embed])
    Select the current font face, size and encoding */
 PHP_FUNCTION(pdf_set_font) {
 	pval *arg1, *arg2, *arg3, *arg4, *arg5;
