@@ -1197,7 +1197,7 @@ PHP_METHOD(soapserver, handle)
 			php_error(E_ERROR, "PHP-SOAP requires 'always_populate_raw_post_data' to be on please check your php.ini file");
 		}
 
-		php_error(E_ERROR, "Couln't find HTTP_RAW_POST_DATA");
+		php_error(E_ERROR, "Can't find HTTP_RAW_POST_DATA");
 	}
 
 	zval_dtor(&retval);
@@ -1431,29 +1431,35 @@ zend_try {
 				}
 			}
  		} else {
-			php_error(E_WARNING,"Function (\"%s\") not is not a valid method for this service", function);
+ 			smart_str error = {0};
+ 			smart_str_appends(&error,"Function (\"");
+ 			smart_str_appends(&error,function);
+ 			smart_str_appends(&error,"\") is not a valid method for this service");
+ 			smart_str_0(&error);
+			add_soap_fault(thisObj, "SOAP-ENV:Client", error.c, NULL, NULL TSRMLS_CC);
+			smart_str_free(&error);
 		}
 	} else {
 		zval **uri;
 		smart_str *action;
 
 		if (zend_hash_find(Z_OBJPROP_P(thisObj), "uri", sizeof("uri"), (void *)&uri) == FAILURE) {
-			php_error(E_ERROR, "Error finding uri in soap_call_function_handler");
-		}
+			add_soap_fault(thisObj, "SOAP-ENV:Client", "Error finding uri in soap_call_function_handler", NULL, NULL TSRMLS_CC);
+		} else {
+	 		request = seralize_function_call(thisObj, NULL, function, Z_STRVAL_PP(uri), real_args, arg_count, soap_version TSRMLS_CC);
+			action = build_soap_action(thisObj, function);
+			ret = send_http_soap_request(thisObj, request, action->c TSRMLS_CC);
 
- 		request = seralize_function_call(thisObj, NULL, function, Z_STRVAL_PP(uri), real_args, arg_count, soap_version TSRMLS_CC);
-		action = build_soap_action(thisObj, function);
-		ret = send_http_soap_request(thisObj, request, action->c TSRMLS_CC);
+	 		smart_str_free(action);
+			efree(action);
+			xmlFreeDoc(request);
 
- 		smart_str_free(action);
-		efree(action);
-		xmlFreeDoc(request);
-
-		if (ret) {
- 			ret = get_http_soap_response(thisObj, &buffer, &len TSRMLS_CC);
- 			if (ret) {
-				ret = parse_packet_soap(thisObj, buffer, len, NULL, function, return_value TSRMLS_CC);
-				efree(buffer);
+			if (ret) {
+ 				ret = get_http_soap_response(thisObj, &buffer, &len TSRMLS_CC);
+ 				if (ret) {
+					ret = parse_packet_soap(thisObj, buffer, len, NULL, function, return_value TSRMLS_CC);
+					efree(buffer);
+				}
 			}
 		}
  	}
