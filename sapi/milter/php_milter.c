@@ -139,7 +139,7 @@ static sfsistat mlfi_helo(SMFICTX *ctx, char *helohost)
 
 	params[0] = &host;
 	
-	call_user_function(CG(function_table), NULL, function_name, retval, 1, param TSRMLS_CC);
+	call_user_function(CG(function_table), NULL, function_name, retval, 1, params TSRMLS_CC);
 
 	if (Z_TYPE_P(retval) == IS_LONG) {
 		return Z_LONG_P(retval);
@@ -151,7 +151,7 @@ static sfsistat mlfi_helo(SMFICTX *ctx, char *helohost)
 /* envelope sender filter */
 static sfsistat mlfi_envfrom(SMFICTX *ctx, char **argv)
 {
-	zval *function_name, *retval;
+	zval *function_name, *retval, *v, **params[1];
 	TSRMLS_FETCH();
 
 	/* set the milter context for possible use in API functions */
@@ -159,8 +159,19 @@ static sfsistat mlfi_envfrom(SMFICTX *ctx, char **argv)
 	
 	/* call userland */
 	ZVAL_INIT(function_name);
+	ZVAL_INIT(v);
+
 	ZVAL_STRING(function_name, "milter_envelope_from", 1);
-	call_user_function(CG(function_table), NULL, function_name, retval, 0, NULL TSRMLS_CC);
+	array_init(v);
+
+	while (*argv) {
+		add_next_index_string(v, *argv, 1);
+		argv++;
+	}
+
+	params[0] = v;
+
+	call_user_function(CG(function_table), NULL, function_name, retval, 1, params TSRMLS_CC);
 
 	if (Z_TYPE_P(retval) == IS_LONG) {
 		return Z_LONG_P(retval);
@@ -172,7 +183,7 @@ static sfsistat mlfi_envfrom(SMFICTX *ctx, char **argv)
 /* envelope recipient filter */
 static sfsistat mlfi_envrcpt(SMFICTX *ctx, char **argv)
 {
-	zval *function_name, *retval;
+	zval *function_name, *retval, *v, **params[1];
 	TSRMLS_FETCH();
 
 	/* set the milter context for possible use in API functions */
@@ -180,8 +191,19 @@ static sfsistat mlfi_envrcpt(SMFICTX *ctx, char **argv)
 	
 	/* call userland */
 	ZVAL_INIT(function_name);
+	ZVAL_INIT(v);
+
 	ZVAL_STRING(function_name, "milter_envelope_recipient", 1);
-	call_user_function(CG(function_table), NULL, function_name, retval, 0, NULL TSRMLS_CC);
+	array_init(v);
+
+	while (*argv) {
+		add_next_index_string(v, *argv, 1);
+		argv++;
+	}
+
+	params[0] = v;
+	
+	call_user_function(CG(function_table), NULL, function_name, retval, 1, params TSRMLS_CC);
 
 	if (Z_TYPE_P(retval) == IS_LONG) {
 		return Z_LONG_P(retval);
@@ -193,7 +215,7 @@ static sfsistat mlfi_envrcpt(SMFICTX *ctx, char **argv)
 /* header filter */
 static sfsistat mlfi_header(SMFICTX *ctx, char *headerf, char *headerv)
 {
-	zval *function_name, *retval;
+	zval *function_name, *retval, *f, *v, **params[2];
 	TSRMLS_FETCH();
 
 	/* set the milter context for possible use in API functions */
@@ -201,8 +223,17 @@ static sfsistat mlfi_header(SMFICTX *ctx, char *headerf, char *headerv)
 	
 	/* call userland */
 	ZVAL_INIT(function_name);
+	ZVAL_INIT(f);
+	ZVAL_INIT(v);
+	
 	ZVAL_STRING(function_name, "milter_header", 1);
-	call_user_function(CG(function_table), NULL, function_name, retval, 0, NULL TSRMLS_CC);
+	ZVAL_STRING(f, headerf, 1);
+	ZVAL_STRING(v, headerv, 1);
+
+	params[0] = f;
+	params[1] = v;
+	
+	call_user_function(CG(function_table), NULL, function_name, retval, 2, params TSRMLS_CC);
 
 	if (Z_TYPE_P(retval) == IS_LONG) {
 		return Z_LONG_P(retval);
@@ -235,7 +266,7 @@ static sfsistat mlfi_eoh(SMFICTX *ctx)
 /* body block */
 static sfsistat mlfi_body(SMFICTX *ctx, u_char *bodyp, size_t len)
 {
-	zval *function_name, *retval;
+	zval *function_name, *retval, *p, **params[1];;
 	TSRMLS_FETCH();
 
 	/* set the milter context for possible use in API functions */
@@ -243,7 +274,13 @@ static sfsistat mlfi_body(SMFICTX *ctx, u_char *bodyp, size_t len)
 	
 	/* call userland */
 	ZVAL_INIT(function_name);
+	ZVAL_INIT(p);
+
 	ZVAL_STRING(function_name, "milter_body", 1);
+	ZVAL_STRINGL(p, bodyp, len, 1);
+	
+	params[0] = p;
+	
 	call_user_function(CG(function_table), NULL, function_name, retval, 0, NULL TSRMLS_CC);
 
 	if (Z_TYPE_P(retval) == IS_LONG) {
@@ -342,37 +379,101 @@ struct smfiDesc smfilter = {
  */
 PHP_FUNCTION(smfi_getsymval)
 {
-	// smfi_getsymval();
+	char *symname, *ret;
+	int len;
+
+    if (zend_parse_parameters(1 TSRMLS_CC, "s", &symname, &len) == SUCCESS) {
+		if ((ret = smfi_getsymval(MG(ctx), symname)) != NULL) {
+			RETVAL_STRING(ret);
+		}
+	}
+
+	RETVAL_NULL();
 }
 
 PHP_FUNCTION(smfi_setreply)
 {
-	// smfi_setreply();
+	char *rcode, *xcode, *message;
+	int len;
+	
+	if (zend_parse_parameters(3 TSRMLS_CC, "sss", &rcode, &len, &xcode, &len, &message, &len) == SUCCESS) {
+		if (smfi_setreply(MG(ctx), rcode, xcode, message) == MI_SUCCESS) {
+			RETVAL_TRUE();
+		}
+	}
+	
+	RETVAL_FALSE();
 }
 
 PHP_FUNCTION(smfi_addheader)
 {
-	// smfi_addheader();
+	char *f, *v;
+	int len;
+	
+	if (zend_parse_parameters(2 TSRMLS_CC, "ss", &f, &len, &v, &len) == SUCCESS) {
+		if (smfi_addheader(MG(ctx), f, v) == MI_SUCCESS) {
+			RETVAL_TRUE();
+		}
+	}
+	
+	RETVAL_FALSE();
 }
 
 PHP_FUNCTION(smfi_chgheader)
 {
-	// smfi_chgheader();
+	char *f, *v;
+	long idx;
+	int len;
+	
+	if (zend_parse_parameters(3 TSRMLS_CC, "sls", &f, &len, &idx, &v, &len) == SUCCESS) {
+		if (smfi_chgheader(MG(ctx), f, idx, v) == MI_SUCCESS) {
+			RETVAL_TRUE();
+		}
+	}
+	
+	RETVAL_FALSE();
 }
 
 PHP_FUNCTION(smfi_addrcpt)
 {
-	// smfi_addrcpt();
+	char *rcpt;
+	int len;
+	
+	if (zend_parse_parameters(1 TSRMLS_CC, "s", &rcpt, &len) == SUCCESS) {
+		if (smfi_addrcpt(MG(ctx), rcpt) == MI_SUCCESS) {
+			RETVAL_TRUE();
+		}
+	}
+	
+	RETVAL_FALSE();
 }
 
 PHP_FUNCTION(smfi_delrcpt)
 {
-	// smfi_delrcpt();
+	char *rcpt;
+	int len;
+	
+	if (zend_parse_parameters(1 TSRMLS_CC, "s", &rcpt, &len) == SUCCESS) {
+		if (smfi_delrcpt(MG(ctx), rcpt) == MI_SUCCESS) {
+			RETVAL_TRUE();
+		}
+	}
+	
+	RETVAL_FALSE();
 }
 
 PHP_FUNCTION(smfi_replacebody)
 {
-	// smfi_replacebody();
+	char *body;
+	int len;
+	
+	if (zend_parse_parameters(1 TSRMLS_CC, "s", &rcpt, &len) == SUCCESS) {
+		if (smfi_replacebody(MG(ctx), body, len) == MI_SUCCESS) {
+			RETVAL_TRUE();
+		}
+	}
+	
+	RETVAL_FALSE();
 }
 
 PHP_MINIT_FUNCTION(milter)
