@@ -21,6 +21,7 @@
 
 #include "php.h"
 #include "php_main.h"
+#include "php_globals.h"
 #include "php_ini.h"
 #include "internal_functions_registry.h"
 #include "php_standard.h"
@@ -736,6 +737,7 @@ PHP_MINIT_FUNCTION(basic)
 
 PHP_MSHUTDOWN_FUNCTION(basic)
 {
+	PLS_FETCH();
 	BLS_FETCH();
 
 	basic_globals_dtor(BLS_C);
