@@ -2,6 +2,8 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? ????, Version 4.0 Beta 4
+- Increased PHP's performance by 5-15% using a new memory cache (Andi & Zeev,
+  Zend library)
 - Improved the php.ini reader to support constants and bitwise operators (Zeev)
 - strrev() no longer modifies arg1. (Thies)
 - Fixed buffer overruns in iptcembed(). (Thies)
