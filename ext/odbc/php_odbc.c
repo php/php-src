@@ -1007,6 +1007,7 @@ PHP_FUNCTION(odbc_execute)
             odbc_sql_error(result->conn_ptr, result->stmt, "SQLExecute");
             break;
         default:
+			odbc_sql_error(result->conn_ptr, result->stmt, "SQLExecute");
             RETVAL_FALSE;
         }
 	}	
