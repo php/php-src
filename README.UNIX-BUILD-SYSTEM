@@ -90,7 +90,7 @@ replaced by the values which are correct for your extension
 and which are again determined by the PHP_NEW_EXTENSION macro.
 
 Make sure to prefix *all* relative paths correctly with either
-$(builddir) or $(subdir).  Because the build system does not
+$(builddir) or $(srcdir).  Because the build system does not
 change the working directory anymore, we must use either
 absolute paths or relative ones to the top build-directory.
 Correct prefixing ensures that.
