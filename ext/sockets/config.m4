@@ -28,7 +28,7 @@ if test "$PHP_SOCKETS" != "no"; then
   dnl ---------------------------------
 
   AC_HEADER_STDC
-  AC_UNISTD_H
+  AC_CHECK_HEADERS(unistd.h)
   AC_CHECK_HEADERS(sys/types.h sys/socket.h netdb.h netinet/in.h netinet/tcp.h sys/un.h arpa/inet.h)
   AC_CHECK_HEADERS(sys/time.h errno.h fcntl.h)
 
