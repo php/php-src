@@ -1486,7 +1486,7 @@ static inline int zend_binary_assign_op_obj_helper(int (*binary_op)(zval *result
 					z = Z_OBJ_HT_P(object)->read_property(object, property, 0 TSRMLS_CC);
 					break;
 				case ZEND_ASSIGN_DIM:
-					z = Z_OBJ_HT_P(object)->read_dimension(object, property, 0 TSRMLS_CC);
+					z = Z_OBJ_HT_P(object)->read_dimension(object, property TSRMLS_CC);
 					break;
 			}
 			SEPARATE_ZVAL_IF_NOT_REF(&z);

@@ -100,19 +100,22 @@ ZEND_API ulong zend_hash_func(char *arKey, uint nKeyLength)
 }
 
 
-#define UPDATE_DATA(ht, p, pData, nDataSize)								\
-	if (nDataSize == sizeof(void*)) {										\
-		if (!(p)->pDataPtr) {												\
-			pefree((p)->pData, (ht)->persistent);							\
-		}																	\
-		memcpy(&(p)->pDataPtr, pData, sizeof(void *));						\
-		(p)->pData = &(p)->pDataPtr;										\
-	} else {																\
-		if ((p)->pDataPtr) {												\
-			(p)->pData = (void *) pemalloc(nDataSize, (ht)->persistent);	\
-			(p)->pDataPtr=NULL;												\
-		}																	\
-		memcpy((p)->pData, pData, nDataSize);								\
+#define UPDATE_DATA(ht, p, pData, nDataSize)											\
+	if (nDataSize == sizeof(void*)) {													\
+		if (!(p)->pDataPtr) {															\
+			pefree((p)->pData, (ht)->persistent);										\
+		}																				\
+		memcpy(&(p)->pDataPtr, pData, sizeof(void *));									\
+		(p)->pData = &(p)->pDataPtr;													\
+	} else {																			\
+		if (!(p)->pDataPtr) {															\
+			(p)->pData = (void *) pemalloc(nDataSize, (ht)->persistent);				\
+			(p)->pDataPtr=NULL;															\
+		} else {																		\
+			(p)->pData = (void *) perealloc((p)->pData, nDataSize, (ht)->persistent);	\
+			/* (p)->pDataPtr is already NULL so no need to initialize it */				\
+		}																				\
+		memcpy((p)->pData, pData, nDataSize);											\
 	}
 
 #define INIT_DATA(ht, p, pData, nDataSize);								\
