@@ -46,6 +46,10 @@
 #include <gnu/libc-version.h>
 #endif
 
+#ifdef HAVE_LIBICONV
+#undef iconv
+#endif
+
 /* {{{ iconv_functions[]
  */
 function_entry iconv_functions[] = {
@@ -90,6 +94,10 @@ typedef enum _php_iconv_err_t {
 	PHP_ICONV_ERR_UNKNOWN           = 6
 } php_iconv_err_t;
 /* }}} */
+
+#ifdef HAVE_LIBICONV
+#define iconv libiconv
+#endif
 
 /* {{{ prototypes */ 
 static php_iconv_err_t php_iconv_string(const char * in_p, size_t in_len, char **out, size_t *out_len, const char *in_charset, const char *out_charset);
