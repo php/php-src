@@ -29,6 +29,7 @@ set_time_limit(0);
 ob_implicit_flush(true);
 ini_set('track_errors', true);
 ini_set('html_errors', false);
+ini_set('magic_quotes_runtime', false);
 
 require_once 'PEAR.php';
 require_once 'PEAR/Config.php';
