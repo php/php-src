@@ -1164,7 +1164,7 @@ SPL_METHOD(CachingRecursiveIterator, getChildren)
 }
 
 static
-ZEND_BEGIN_ARG_INFO(arginfo_caching_rec_it___construct, 0) 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_caching_rec_it___construct, 0, ZEND_RETURN_REFERENCE_AGNOSTIC, 2) 
 	ZEND_ARG_INFO(0, iterator)
 	ZEND_ARG_INFO(0, getStrVal)
 	ZEND_ARG_INFO(0, catch_getChildren)
