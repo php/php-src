@@ -598,14 +598,9 @@ fully_qualified_class_name:
 ;
 
 dynamic_class_name:
-		static_or_variable_string { zend_do_fetch_class(&$$, &$1 TSRMLS_CC); }
+		T_STRING							{ zend_do_fetch_class(&$$, &$1 TSRMLS_CC); }
+	|	r_variable_without_static_member	{ zend_do_fetch_class(&$$, &$1 TSRMLS_CC); }
 ;
-
-static_or_variable_string:
-		T_STRING	{ $$ = $1; }
-	|	r_variable_without_static_member	{ $$ = $1; }
-;
-
 
 exit_expr:
 		/* empty */	{ memset(&$$, 0, sizeof(znode)); $$.op_type = IS_UNUSED; }	
