@@ -219,9 +219,6 @@ extern void xslt_call_function(char *name,
 	int       idx;    /* Idx, when looping through and free'ing the arguments */
 	TSRMLS_FETCH();      /* For TS mode, fetch the executor globals */
 
-	/* Allocate and initialize return value from the function */
-	MAKE_STD_ZVAL(*retval);
-
 	argv = emalloc(argc * sizeof(zval **));
 	for (idx = 0; idx < argc; idx++) {
 		argv[idx] = &user_args[idx];
@@ -241,10 +238,10 @@ extern void xslt_call_function(char *name,
 		/* Decrease refcount and free if refcount is <= 0 */
 		zval_ptr_dtor(argv[idx]);
 	}
-
 	efree(argv);
 }
 /* }}} */
+
 #endif
 
 /*
