@@ -29,7 +29,7 @@ static ZEND_FUNCTION(zend_version);
 static ZEND_FUNCTION(func_num_args);
 static ZEND_FUNCTION(func_get_arg);
 static ZEND_FUNCTION(func_get_args);
-static ZEND_FUNCTION(strlen);
+static ZEND_NAMED_FUNCTION(zend_if_strlen);
 static ZEND_FUNCTION(strcmp);
 static ZEND_FUNCTION(strncmp);
 static ZEND_FUNCTION(strcasecmp);
@@ -74,7 +74,7 @@ static zend_function_entry builtin_functions[] = {
 	ZEND_FE(func_num_args,		NULL)
 	ZEND_FE(func_get_arg,		NULL)
 	ZEND_FE(func_get_args,		NULL)
-	ZEND_FE(strlen,				NULL)
+	{ "strlen", zend_if_strlen, NULL },
 	ZEND_FE(strcmp,				NULL)
 	ZEND_FE(strncmp,			NULL)
 	ZEND_FE(strcasecmp,			NULL)
@@ -221,7 +221,7 @@ ZEND_FUNCTION(func_get_args)
 
 /* {{{ proto int strlen(string str)
    Get string length */
-ZEND_FUNCTION(strlen)
+ZEND_NAMED_FUNCTION(zend_if_strlen)
 {
 	zval **str;
 	
