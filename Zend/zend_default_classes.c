@@ -144,6 +144,53 @@ ZEND_API zend_class_entry *zend_exception_get_default(void)
 	return default_exception_ptr;
 }
 
+ZEND_API void zend_throw_exception_ex(zend_class_entry *exception_ce, long code TSRMLS_DC, char *format, ...)
+{
+	zval *ex;
+	va_list arg;
+
+#ifdef _GNU_SOURCE
+	char *message;
+	va_start(arg, format); 
+	vasprintf(message, format, arg);
+	va_end(arg);
+#else
+	char message[1024];
+	va_start(arg, format); 
+	vsnprintf(message, sizeof(message), format, arg);
+	va_end(arg);
+#endif
+
+	MAKE_STD_ZVAL(ex);
+	if (exception_ce) {
+		if (!instanceof_function(exception_ce, default_exception_ptr TSRMLS_CC)) {
+			zend_error(E_NOTICE, "Exceptions must be derived from exception");
+			exception_ce = default_exception_ptr;
+		}
+	} else {
+		exception_ce = default_exception_ptr;
+	}
+	object_init_ex(ex, exception_ce);
+	
+
+	if (message) {
+		zend_update_property_string(exception_ce, ex, "message", sizeof("message")-1, message TSRMLS_CC);
+	}
+	if (code) {
+		zend_update_property_long(exception_ce, ex, "code", sizeof("code")-1, code TSRMLS_CC);
+	}
+
+#ifdef _GNU_SOURCE
+	free(message);
+#endif
+
+	EG(exception) = ex;
+}
+
+/* at the moment we can't use zend_throw_exception_ex because we don't have a protable
+ * vsnprintf that tells us the number of characters needed nor do we have spprintf from
+ * php or asprintf from glibc always.
+ */
 ZEND_API void zend_throw_exception(zend_class_entry *exception_ce, char *message, long code TSRMLS_DC)
 {
 	zval *ex;
