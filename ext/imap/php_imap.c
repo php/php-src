@@ -1583,10 +1583,9 @@ PHP_FUNCTION(imap_headerinfo)
 {
 	zval **streamind, **msgno, **fromlength, **subjectlength, **defaulthost;
 	pils *imap_le_struct;
-	unsigned long length;
 	MESSAGECACHE *cache;
 	ENVELOPE *en;
-	char *mystring, dummy[2000], fulladdress[MAILTMPLEN];
+	char dummy[2000], fulladdress[MAILTMPLEN];
 	int myargc = ZEND_NUM_ARGS();
 	
 	if (myargc < 2 || myargc > 5 || zend_get_parameters_ex(myargc, &streamind, &msgno, &fromlength, &subjectlength, &defaulthost) == FAILURE) {
@@ -1621,13 +1620,8 @@ PHP_FUNCTION(imap_headerinfo)
 		RETURN_FALSE;
 	}
 	
-	mystring = mail_fetchheader_full(imap_le_struct->imap_stream, Z_LVAL_PP(msgno), NIL, &length, NIL);
-	if (myargc == 5) {
-		rfc822_parse_msg(&en, NULL, mystring, length, NULL, Z_STRVAL_PP(defaulthost), NIL);
-	} else {
-		rfc822_parse_msg(&en, NULL, mystring, length, NULL, "UNKNOWN", NIL);
-	}
-	
+	en = mail_fetchenvelope(imap_le_struct->imap_stream, Z_LVAL_PP(msgno));
+
 	/* call a function to parse all the text, so that we can use the
 	   same function to parse text from other sources */
 	_php_make_header_object(return_value, en TSRMLS_CC);
@@ -1662,7 +1656,6 @@ PHP_FUNCTION(imap_headerinfo)
 		mail_fetchsubject(fulladdress, imap_le_struct->imap_stream, Z_LVAL_PP(msgno), Z_LVAL_PP(subjectlength));
 		add_property_string(return_value, "fetchsubject", fulladdress, 1);
 	}
-	mail_free_envelope(&en);
 }
 /* }}} */
 
