@@ -72,6 +72,10 @@ PHP_FUNCTION(mail)
 	char *to=NULL, *message=NULL, *headers=NULL, *subject=NULL, *extra_cmd=NULL;
 	int to_len,message_len,headers_len,subject_len,extra_cmd_len,i;
 	
+	if (PG(safe_mode) && (ZEND_NUM_ARGS() == 5)) {
+		php_error(E_WARNING, "%s(): SAFE MODE Restriction in effect.  The fifth parameter is disabled in SAFE MODE.", get_active_function_name(TSRMLS_C));
+		RETURN_FALSE;
+	}
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sss|ss",
 							  &to, &to_len,
