@@ -94,6 +94,7 @@ php_apache_sapi_read_cookies(SLS_D)
 
 	http_cookie = apr_table_get(ctx->f->r->headers_in, "cookie");
 
+	/* The SAPI interface should use 'const char *' */
 	return (char *) http_cookie;
 }
 
@@ -123,12 +124,25 @@ php_apache_sapi_flush(void *server_context)
 	ap_bucket_brigade *bb;
 	ap_bucket *b;
 
+	/* Send a flush bucket down the filter chain. The current default
+	 * handler seems to act on the first flush bucket, but ignores
+	 * all further flush buckets.
+	 */
+	
 	bb = ap_brigade_create(ctx->f->r->pool);
 	b = ap_bucket_create_flush();
 	AP_BRIGADE_INSERT_TAIL(bb, b);
 	ap_pass_brigade(ctx->f->next, bb);
-	
-	return;
+}
+
+static void php_apache_sapi_log_message(char *msg)
+{
+	php_struct *ctx;
+	SLS_FETCH();
+
+	ctx = SG(server_context);
+
+	apr_fprintf(ctx->f->r->server->error_log, "%s", msg);
 }
 
 static sapi_module_struct sapi_module = {
@@ -156,7 +170,7 @@ static sapi_module_struct sapi_module = {
 	php_apache_sapi_read_cookies,				/* read Cookies */
 
 	php_apache_sapi_register_variables,
-	NULL,									/* Log message */
+	php_apache_sapi_log_message,			/* Log message */
 
 	NULL,									/* Block interruptions */
 	NULL,									/* Unblock interruptions */
@@ -193,7 +207,7 @@ static int php_filter(ap_filter_t *f, ap_bucket_brigade *bb)
 	 */
 	if (ctx->state == 0) {
 		char *content_type;
-		char *auth;
+		const char *auth;
 		CLS_FETCH();
 		ELS_FETCH();
 		PLS_FETCH();
@@ -208,11 +222,12 @@ static int php_filter(ap_filter_t *f, ap_bucket_brigade *bb)
 		PG(during_request_startup) = 0;
 		SG(sapi_headers).http_response_code = 200;
 		SG(request_info).query_string = f->r->args;
+		SG(request_info).request_method = f->r->method;
+		SG(request_info).request_uri = f->r->uri;
 		f->r->no_cache = f->r->no_local_copy = 1;
 		content_type = sapi_get_default_content_type(SLS_C);
 		f->r->content_type = apr_pstrdup(f->r->pool, content_type);
 		efree(content_type);
-		apr_table_unset(f->r->headers_in, "Connection");
 		apr_table_unset(f->r->headers_out, "Content-Length");
 		apr_table_unset(f->r->headers_out, "Last-Modified");
 		apr_table_unset(f->r->headers_out, "Expires");
@@ -244,7 +259,7 @@ static int php_filter(ap_filter_t *f, ap_bucket_brigade *bb)
 
 		/* Handle phpinfo/phpcredits/built-in images */
 		if (php_handle_special_queries(SLS_C PLS_CC)) 
-			goto skip_execution;
+			goto ok;
 	
 		/* Loop over all buckets and put them into the buffer */	
 		AP_BRIGADE_FOREACH(b, ctx->bb) {
@@ -293,6 +308,8 @@ ok:
 		php_request_shutdown(NULL);
 
 		/* Pass EOS bucket to next filter to signal end of request */
+		eos = ap_bucket_create_flush();
+		AP_BRIGADE_INSERT_TAIL(bb, eos);
 		eos = ap_bucket_create_eos();
 		AP_BRIGADE_INSERT_TAIL(bb, eos);
 		ap_pass_brigade(f->next, bb);
