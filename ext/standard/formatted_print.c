@@ -232,6 +232,33 @@ php_sprintf_appendint(char **buffer, int *pos, int *size, int number,
 							 neg, 0);
 }
 
+inline static void
+php_sprintf_appenduint(char **buffer, int *pos, int *size, int number,
+						int width, char padding, int alignment)
+{
+	char numbuf[NUM_BUF_SIZE];
+	register unsigned int magn, nmagn, i = NUM_BUF_SIZE - 1;
+
+	PRINTF_DEBUG(("sprintf: appenduint(%x, %x, %x, %d, %d, '%c', %d)\n",
+				  *buffer, pos, size, number, width, padding, alignment));
+	magn = (unsigned int) number;
+
+	/* Can't right-pad 0's on integers */
+	if (alignment == 0 && padding == '0') padding = ' ';
+
+	numbuf[i] = '\0';
+
+	do {
+		nmagn = magn / 10;
+
+		numbuf[--i] = (magn - (nmagn * 10)) + '0';
+		magn = nmagn;
+	}
+	while (magn > 0 && i > 0);
+	PRINTF_DEBUG(("sprintf: appending %d as \"%s\", i=%d\n", number, &numbuf[i], i));
+	php_sprintf_appendstring(buffer, pos, size, &numbuf[i], width, 0,
+							 padding, alignment, (NUM_BUF_SIZE - 1) - i, 0, 0);
+}
 
 inline static void
 php_sprintf_appenddouble(char **buffer, int *pos,
@@ -524,6 +551,13 @@ php_formatted_print(int ht, int *len)
 				case 'd':
 					convert_to_long_ex(args[argnum]);
 					php_sprintf_appendint(&result, &outpos, &size,
+										  (*args[argnum])->value.lval,
+										  width, padding, alignment);
+					break;
+
+				case 'u':
+					convert_to_long_ex(args[argnum]);
+					php_sprintf_appenduint(&result, &outpos, &size,
 										  (*args[argnum])->value.lval,
 										  width, padding, alignment);
 					break;
