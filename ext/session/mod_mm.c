@@ -176,8 +176,15 @@ ps_module ps_mod_mm = {
 static int ps_mm_initialize(ps_mm *data, const char *path)
 {
 	data->mm = mm_create(0, path);
+	if (!data->mm) {
+		return FAILURE;
+	}
 
 	data->hash = mm_calloc(data->mm, HASH_SIZE, sizeof(*data->hash));
+	if (!data->hash) {
+		mm_destroy(data->mm);
+		return FAILURE;
+	}
 
 	return SUCCESS;
 }
@@ -200,15 +207,21 @@ static void ps_mm_destroy(ps_mm *data)
 PHP_GINIT_FUNCTION(ps_mm)
 {
 	ps_mm_instance = calloc(sizeof(*ps_mm_instance), 1);
-	ps_mm_initialize(ps_mm_instance, PS_MM_PATH);
+	if (ps_mm_initialize(ps_mm_instance, PS_MM_PATH) != SUCCESS) {
+		ps_mm_instance = NULL;
+		return FAILURE;
+	}
 	return SUCCESS;
 }
 
 PHP_GSHUTDOWN_FUNCTION(ps_mm)
 {
-	ps_mm_destroy(ps_mm_instance);
-	free(ps_mm_instance);
-	return SUCCESS;
+	if (ps_mm_instance) {
+		ps_mm_destroy(ps_mm_instance);
+		free(ps_mm_instance);
+		return SUCCESS;
+	}
+	return FAILURE;
 }
 
 PS_OPEN_FUNC(mm)
