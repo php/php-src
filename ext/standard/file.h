@@ -100,21 +100,21 @@ typedef enum _php_meta_tags_token {
 } php_meta_tags_token;
 
 typedef struct _php_meta_tags_data {
-  php_stream *stream;
-  int ulc;
-  int lc;
-  char *input_buffer;
-  char *token_data;
-  int token_len;
-  int in_meta;
+	php_stream *stream;
+	int ulc;
+	int lc;
+	char *input_buffer;
+	char *token_data;
+	int token_len;
+	int in_meta;
 } php_meta_tags_data;
 
 php_meta_tags_token php_next_meta_token(php_meta_tags_data * TSRMLS_DC);
 
 typedef struct {
-  int pclose_ret;
-  HashTable ht_persistent_socks;
-  size_t def_chunk_size;
+  	int pclose_ret;
+	HashTable ht_persistent_socks;
+	size_t def_chunk_size;
 	int auto_detect_line_endings;
 	int default_socket_timeout;
 	char *user_agent;
