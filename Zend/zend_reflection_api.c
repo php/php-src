@@ -1659,6 +1659,21 @@ ZEND_METHOD(reflection_class, __construct)
 }
 /* }}} */
 
+/* {{{ proto public array Reflection_Class::getStaticProperties()
+   Returns an associative array containing all static property values of the class */
+ZEND_METHOD(reflection_class, getstaticproperties)
+{
+	zval *tmp_copy;
+	reflection_object *intern;
+	zend_class_entry *ce;
+	
+	METHOD_NOTSTATIC_NUMPARAMS(0);	
+	GET_REFLECTION_OBJECT_PTR(ce);
+	array_init(return_value);
+	zend_hash_copy(Z_ARRVAL_P(return_value), ce->static_members, (copy_ctor_func_t) zval_add_ref, (void *) &tmp_copy, sizeof(zval *));
+}
+/* }}} */
+
 /* {{{ proto public string Reflection_Class::toString()
    Returns a string representation */
 ZEND_METHOD(reflection_class, tostring)
@@ -2698,6 +2713,7 @@ static zend_function_entry reflection_class_functions[] = {
 	ZEND_ME(reflection_class, newinstance, NULL, 0)
 	ZEND_ME(reflection_class, getparentclass, NULL, 0)
 	ZEND_ME(reflection_class, issubclassof, NULL, 0)
+	ZEND_ME(reflection_class, getstaticproperties, NULL, 0)
 	{NULL, NULL, NULL}
 };
 
