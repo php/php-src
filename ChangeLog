@@ -1,3 +1,51 @@
+2000-07-22  Sam Ruby  <rubys@us.ibm.com>
+
+    * ext/java/README
+      ext/java/java.c
+      ext/java/reflect.java: Complete the work mapping arrays and hashtables
+
+    * ext/java/java.c: Fix regression in passing strings as parameters
+
+2000-07-22  Sterling Hughes  <stirling@bestweb.net>
+
+    * ext/msql/php_msql.c: fix bug 5322.
+
+2000-07-22  Sam Ruby  <rubys@us.ibm.com>
+
+    * ext/java/java.c
+      ext/java/reflect.java:
+    Allow java.lang.Hashtables to be passed into PHP as arrays.
+
+    * ext/java/java.c:
+    Verify that a classname is actually passed on a new Java() call.
+
+    * ext/java/reflect.java:
+    Respect the object type the user specified (i.e., never automatically
+    convert the result of "new Java()" to a primitive type)
+
+    * ext/java/java.c: Don't assume that Java byte arrays are null terminated.
+
+2000-07-22  David Croft  <david@infotrek.co.uk>
+
+    * ext/standard/file.c:
+    * ext/standard/file.c: fixed socket_set blocking in windows
+    (bug 3845)
+
+    * ext/standard/basic_functions.c
+      ext/standard/php_string.h
+      ext/standard/string.c:
+    wordwrap function from Chris Russel <russel@yorku.ca>
+    differences from his patch:
+     - wordwrap width and wrap-string now optional parameters
+       (default to 75 and "\n" respectively)
+     - wordwrap_byte is now just an automatic special case of wordwrap
+     - Zend API compliant
+
+
+2000-07-22  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/ldap/ldap.c: Forgot those constants.
+
 2000-07-21  Sam Ruby  <rubys@us.ibm.com>
 
     * ext/java/java.c
