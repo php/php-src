@@ -19,6 +19,8 @@
 /* $Id$ */
 
 #include "php.h"
+#include "ext/standard/php_smart_str.h"
+#include "ext/standard/info.h"
 #include "SAPI.h"
 
 #include "apr_strings.h"
@@ -36,6 +38,8 @@
 #include "http_core.h"
 
 #include "php_apache.h"
+
+extern module **ap_loaded_modules;
 
 static request_rec *php_apache_lookup_uri(char *filename TSRMLS_DC)
 {
@@ -286,8 +290,57 @@ PHP_FUNCTION(apache_getenv)
 }
 /* }}} */
 
+static char *php_apache_get_version()
+{
+	return (char *) ap_get_server_version();
+}
+
+/* {{{ proto string apache_get_version(void)
+   Fetch Apache version */
+PHP_FUNCTION(apache_get_version)
+{
+	char *apv = php_apache_get_version();
+
+	if (apv && *apv) {
+		RETURN_STRING(apv, 1);
+	} else {
+		RETURN_FALSE;
+	}
+}
+/* }}} */
+
+/* {{{ proto array apache_get_modules(void)
+   Get a list of loaded Apache modules */
+PHP_FUNCTION(apache_get_modules)
+{
+	int n;
+	
+	array_init(return_value);
+	
+	for (n = 0; ap_loaded_modules[n]; ++n) {
+		add_next_index_string(return_value, (char *) ap_loaded_modules[n]->name, 1);
+	}
+}
+/* }}} */
+
 PHP_MINFO_FUNCTION(apache)
 {
+	char *apv = php_apache_get_version();
+	smart_str tmp1 = {0};
+	int n;
+	
+	for (n = 0; ap_loaded_modules[n]; ++n) {
+		smart_str_appends(&tmp1, ap_loaded_modules[n]->name);
+		smart_str_appendc(&tmp1, ' ');
+	}
+            
+	php_info_print_table_start();
+	if (apv && *apv) {
+		php_info_print_table_row(2, "Apache Version", apv);
+	}
+	php_info_print_table_row(2, "Loaded Apache Modules", tmp1.c);
+	smart_str_free(&tmp1);
+	php_info_print_table_end();
 }
 
 static function_entry apache_functions[] = {
@@ -298,6 +351,8 @@ static function_entry apache_functions[] = {
 	PHP_FE(apache_setenv, NULL)
 	PHP_FE(apache_getenv, NULL)
 	PHP_FE(apache_note, NULL)
+	PHP_FE(apache_get_version, NULL)
+	PHP_FE(apache_get_modules, NULL)
 	PHP_FALIAS(getallheaders, apache_request_headers, NULL)
 	{NULL, NULL, NULL}
 };
