@@ -19,7 +19,7 @@ Table of Contents
 
    All functions look like this:
 
-       void php3_foo(INTERNAL_FUNCTION_PARAMETERS) {
+       PHP_FUNCTION(foo) {
 
        }
 
