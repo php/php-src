@@ -1313,7 +1313,7 @@ static char *exif_get_sectionname(int section)
 	return "";
 }
 
-static const tag_table_type exif_get_tag_table(int section)
+static tag_table_type exif_get_tag_table(int section)
 {
 	switch(section) {
 		case SECTION_FILE:      return &tag_table_IFD[0];
@@ -1547,7 +1547,7 @@ static int exif_file_sections_free(image_info_type *ImageInfo)
 /* {{{ exif_iif_add_value
  Add a value to image_info
 */
-static void exif_iif_add_value(image_info_type *image_info, int section_index, char *name, int tag, int format, size_t length, void* value, int motorola_intel TSRMLS_DC)
+static void exif_iif_add_value(image_info_type *image_info, int section_index, char *name, int tag, int format, int length, void* value, int motorola_intel TSRMLS_DC)
 {
 	size_t idex;
 	void *vptr;
@@ -1574,7 +1574,7 @@ static void exif_iif_add_value(image_info_type *image_info, int section_index, c
 			if (value) {
 				length = php_strnlen(value, length);
 				if (PG(magic_quotes_runtime)) {
-					info_value->s = php_addslashes(value, length, (int *) &length, 0 TSRMLS_CC);
+					info_value->s = php_addslashes(value, length, &length, 0 TSRMLS_CC);
 				} else {
 					info_value->s = estrndup(value, length);
 				}
@@ -1601,7 +1601,7 @@ static void exif_iif_add_value(image_info_type *image_info, int section_index, c
 			if (value) {
 				/* do not recompute length here */
 				if (PG(magic_quotes_runtime)) {
-					info_value->s = php_addslashes(value, length, (int *) &length, 0 TSRMLS_CC);
+					info_value->s = php_addslashes(value, length, &length, 0 TSRMLS_CC);
 				} else {
 					info_value->s = estrndup(value, length);
 				}
@@ -1684,7 +1684,7 @@ static void exif_iif_add_value(image_info_type *image_info, int section_index, c
 */
 static void exif_iif_add_tag(image_info_type *image_info, int section_index, char *name, int tag, int format, size_t length, void* value TSRMLS_DC)
 {
-	exif_iif_add_value(image_info, section_index, name, tag, format, length, value, image_info->motorola_intel TSRMLS_CC);
+	exif_iif_add_value(image_info, section_index, name, tag, format, (int)length, value, image_info->motorola_intel TSRMLS_CC);
 }
 /* }}} */
 
@@ -3004,7 +3004,7 @@ static int exif_process_IFD_in_JPEG(image_info_type *ImageInfo, char *dir_start,
 	NumDirEntries = php_ifd_get16u(dir_start, ImageInfo->motorola_intel);
 
 	if ((dir_start+2+NumDirEntries*12) > (offset_base+IFDlength)) {
-		exif_error_docref("exif_read_data#error_ifd" EXIFERR_CC, ImageInfo, E_WARNING, "Illegal IFD size: x%04X + 2 + x%04X*12 = x%04X > x%04X", (int)dir_start+2-(int)offset_base, NumDirEntries, (int)dir_start+2+NumDirEntries*12-(int)offset_base, IFDlength);
+		exif_error_docref("exif_read_data#error_ifd" EXIFERR_CC, ImageInfo, E_WARNING, "Illegal IFD size: x%04X + 2 + x%04X*12 = x%04X > x%04X", (int)((size_t)dir_start+2-(size_t)offset_base), NumDirEntries, (int)((size_t)dir_start+2+NumDirEntries*12-(size_t)offset_base), IFDlength);
 		return FALSE;
 	}
 
@@ -3201,7 +3201,7 @@ static int exif_scan_JPEG_header(image_info_type *ImageInfo TSRMLS_DC)
 		Data[0] = (uchar)lh;
 		Data[1] = (uchar)ll;
 
-		got = php_stream_read(ImageInfo->infile, Data+2, itemlen-2); /* Read the whole section. */
+		got = php_stream_read(ImageInfo->infile, (char*)(Data+2), itemlen-2); /* Read the whole section. */
 		if (got != itemlen-2) {
 			exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "Error reading from file: got=x%04X(=%d) != itemlen-2=x%04X(=%d)", got, got, itemlen-2, itemlen-2);
 			return FALSE;
@@ -3219,7 +3219,7 @@ static int exif_scan_JPEG_header(image_info_type *ImageInfo TSRMLS_DC)
 					size = ImageInfo->FileSize - fpos;
 					sn = exif_file_sections_add(ImageInfo, M_PSEUDO, size, NULL);
 					Data = ImageInfo->file.list[sn].data;
-					got = php_stream_read(ImageInfo->infile, Data, size);
+					got = php_stream_read(ImageInfo->infile, (char*)Data, size);
 					if (got != size) {
 						EXIF_ERRLOG_FILEEOF(ImageInfo)
 						return FALSE;
@@ -3290,7 +3290,7 @@ static int exif_scan_JPEG_header(image_info_type *ImageInfo TSRMLS_DC)
  * scan JPEG in thumbnail (memory) */
 static int exif_scan_thumbnail(image_info_type *ImageInfo TSRMLS_DC)
 {
-	uchar           c, *data = ImageInfo->Thumbnail.data;
+	uchar           c, *data = (uchar*)ImageInfo->Thumbnail.data;
 	int             n, marker;
 	size_t          length=2, pos=0;
 	jpeg_sof_info   sof_info;
@@ -3387,7 +3387,7 @@ static int exif_process_IFD_in_TIFF(image_info_type *ImageInfo, size_t dir_offse
 		exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "Read from TIFF: filesize(x%04X), IFD dir(x%04X + x%04X)", ImageInfo->FileSize, dir_offset, 2);
 #endif
 		php_stream_seek(ImageInfo->infile, dir_offset, SEEK_SET); /* we do not know the order of sections */
-		php_stream_read(ImageInfo->infile, ImageInfo->file.list[sn].data, 2);
+		php_stream_read(ImageInfo->infile, (char*)ImageInfo->file.list[sn].data, 2);
 		num_entries = php_ifd_get16u(ImageInfo->file.list[sn].data, ImageInfo->motorola_intel);
 		dir_size = 2/*num dir entries*/ +12/*length of entry*/*num_entries +4/* offset to next ifd (points to thumbnail or NULL)*/;
 		if (ImageInfo->FileSize >= dir_offset+dir_size) {
@@ -3397,7 +3397,7 @@ static int exif_process_IFD_in_TIFF(image_info_type *ImageInfo, size_t dir_offse
 			if (exif_file_sections_realloc(ImageInfo, sn, dir_size TSRMLS_CC)) {
 				return FALSE;
 			}
-			php_stream_read(ImageInfo->infile, ImageInfo->file.list[sn].data+2, dir_size-2);
+			php_stream_read(ImageInfo->infile, (char*)(ImageInfo->file.list[sn].data+2), dir_size-2);
 			/*exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "Dump: %s", exif_char_dump(ImageInfo->file.list[sn].data, dir_size, 0));*/
 			next_offset = php_ifd_get32u(ImageInfo->file.list[sn].data + dir_size - 4, ImageInfo->motorola_intel);
 #ifdef EXIF_DEBUG
@@ -3486,7 +3486,7 @@ static int exif_process_IFD_in_TIFF(image_info_type *ImageInfo, size_t dir_offse
 #ifdef EXIF_DEBUG
 					exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "Read from TIFF: filesize(x%04X), IFD(x%04X + x%04X)", ImageInfo->FileSize, dir_offset, ifd_size);
 #endif
-					php_stream_read(ImageInfo->infile, ImageInfo->file.list[sn].data+dir_size, ifd_size-dir_size);
+					php_stream_read(ImageInfo->infile, (char*)(ImageInfo->file.list[sn].data+dir_size), ifd_size-dir_size);
 #ifdef EXIF_DEBUG
 					exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "Read from TIFF, done");
 #endif
@@ -3549,8 +3549,8 @@ static int exif_process_IFD_in_TIFF(image_info_type *ImageInfo, size_t dir_offse
 						exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "Next IFD: %s done", exif_get_sectionname(sub_section_index));
 #endif
 					} else {
-						if (!exif_process_IFD_TAG(ImageInfo, dir_entry,
-												  ImageInfo->file.list[sn].data-dir_offset,
+						if (!exif_process_IFD_TAG(ImageInfo, (char*)dir_entry,
+												  (char*)(ImageInfo->file.list[sn].data-dir_offset),
 												  ifd_size, 0, section_index, 0, tag_table TSRMLS_CC)) {
 							return FALSE;
 						}
@@ -3607,7 +3607,7 @@ static int exif_scan_FILE_header(image_info_type *ImageInfo TSRMLS_DC)
 
 	if (ImageInfo->FileSize >= 2) {
 		php_stream_seek(ImageInfo->infile, 0, SEEK_SET);
-		php_stream_read(ImageInfo->infile, file_header, 2);
+		php_stream_read(ImageInfo->infile, (char*)file_header, 2);
 		if ((file_header[0]==0xff) && (file_header[1]==M_SOI)) {
 			ImageInfo->FileType = IMAGE_FILETYPE_JPEG;
 			if (exif_scan_JPEG_header(ImageInfo TSRMLS_CC)) {
@@ -3616,7 +3616,7 @@ static int exif_scan_FILE_header(image_info_type *ImageInfo TSRMLS_DC)
 				exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "Invalid JPEG file");
 			}
 		} else if (ImageInfo->FileSize >= 8) {
-			php_stream_read(ImageInfo->infile, file_header+2, 6);
+			php_stream_read(ImageInfo->infile, (char*)(file_header+2), 6);
 			if (!memcmp(file_header, "II\x2A\x00", 4)) {
 				ImageInfo->FileType = IMAGE_FILETYPE_TIFF_II;
 				ImageInfo->motorola_intel = 0;
