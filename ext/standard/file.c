@@ -732,6 +732,7 @@ PHP_FUNCTION(stream_context_get_options)
 	array_init(return_value);
 	*return_value = *context->options;
 	zval_copy_ctor(return_value);
+		
 }
 /* }}} */
 
@@ -766,7 +767,6 @@ PHP_FUNCTION(stream_context_set_option)
 		php_stream_context_set_option(context, wrappername, optionname, zvalue);
 		RETVAL_TRUE;
 	}
-	
 }
 /* }}} */
 
@@ -867,8 +867,7 @@ PHP_NAMED_FUNCTION(php_if_fopen)
 		RETURN_FALSE;
 	}
 	if (zcontext) {
-		context = (php_stream_context*)zend_fetch_resource(&zcontext TSRMLS_CC, -1, "Stream-Context", NULL, 1, le_stream_context);
-		ZEND_VERIFY_RESOURCE(context);
+		ZEND_FETCH_RESOURCE(context, php_stream_context*, &zcontext, -1, "stream-context", le_stream_context);
 	}
 	
 	stream = php_stream_open_wrapper_ex(filename, mode,

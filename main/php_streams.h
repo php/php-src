@@ -490,7 +490,7 @@ PHPAPI extern php_stream_ops php_stream_userspace_ops;
 PHPAPI void php_stream_context_free(php_stream_context *context);
 PHPAPI php_stream_context *php_stream_context_alloc(void);
 PHPAPI int php_stream_context_get_option(php_stream_context *context,
-		const char *wrappername, const char *optionname, zval **optionvalue);
+		const char *wrappername, const char *optionname, zval ***optionvalue);
 PHPAPI int php_stream_context_set_option(php_stream_context *context,
 		const char *wrappername, const char *optionname, zval *optionvalue);
 
