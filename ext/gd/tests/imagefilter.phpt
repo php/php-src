@@ -3,7 +3,7 @@ imagefilter() function test
 --SKIPIF--
 <?php 
 	if (!extension_loaded('gd')) {
-		die("skip gd extension not avaliable.");
+		die("skip gd extension not available.");
 	}
 	if (!GD_BUNDLED) {
 		die("skip this test requires bundled gd library.");

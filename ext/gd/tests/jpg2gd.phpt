@@ -3,7 +3,7 @@ jpeg <--> gd1/gd2 conversion test
 --SKIPIF--
 <?php 
 	if (!extension_loaded('gd')) {
-		die("skip gd extension not avaliable.");
+		die("skip gd extension not available.");
 	}
 	if (!GD_BUNDLED) {
 		die("skip external GD libraries always fail");

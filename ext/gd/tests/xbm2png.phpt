@@ -3,7 +3,7 @@ xbm --> png conversion test
 --SKIPIF--
 <?php 
 	if (!extension_loaded('gd')) {
-		die("skip gd extension not avaliable.");
+		die("skip gd extension not available.");
 	}
 	if (!function_exists("imagepng")) {
 		die("skip png support unavailable");
