@@ -1,3 +1,94 @@
+2003-12-14  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/session/tests/014.phpt:
+      Update test to reflect new functionality.
+
+    * NEWS
+      ext/session/session.c:
+      Fixed bug #24693 (Allow session.use_trans_sid to be enabled/disabled from
+      inside the script).
+
+2003-12-14  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_4_3)
+      NEWS:
+      BFN
+
+    * (PHP_4_3)
+      ext/dba/dba.c
+      ext/dba/dba_flatfile.c
+      ext/dba/tests/dba_handler.inc:
+      MFH: Synch (as far as possible) and fix #26304
+
+    * ext/dba/tests/dba_handler.inc:
+      Change to more complicated 'c' more
+
+    * ext/dba/dba.c
+      ext/dba/dba_flatfile.c:
+      - Fix Bug #26304 Unexpected data loss when opening dba file
+      - Correct handling for flatfile handler
+
+    * ext/dba/libinifile/inifile.c
+      ext/dba/libinifile/inifile.h:
+      Not needed
+
+2003-12-14  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * README.PHP4-TO-PHP5-THIN-CHANGES:
+      Reorganization.
+
+    * README.PHP4-TO-PHP5-THIN-CHANGES:
+      Note about Apache2 SAPI change.
+
+2003-12-14  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/sqlite/sqlite.c
+      ext/sqlite/tests/sqlite_011.phpt
+      ext/sqlite/tests/sqlite_oo_011.phpt:
+      Do not mangle column names.
+
+    * tests/lang/bug22367.phpt:
+      Fixed test.
+
+    * ext/standard/file.h
+      main/streams/userspace.c:
+      Fixed compiler warnings.
+
+2003-12-14  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * tests/classes/array_access_003.phpt:
+      Fix test
+
+2003-12-14  Zeev Suraski  <zeev@zend.com>
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute.h:
+      Fix behavior of return-by-reference functions.  Remove erroneous warnings,
+      add E_STRICT warnings in case you return something by reference that
+      you're
+      not supposed to (anything that's not a variable, or a return-value of a
+      function that returned by reference).
+
+2003-12-14  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * TSRM/TSRM.c:
+      Removed doubled loop from wrongly applied patch
+
+2003-12-14  Zeev Suraski  <zeev@zend.com>
+
+    * ext/standard/basic_functions.c:
+      Cleanup
+
+    * ZendEngine2/zend.h
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute.h:
+      Some cleanup
+
+    * TSRM/TSRM.c:
+      Fix from Michael Sisolak (destructors weren't always properly called)
+
 2003-12-13  Sara Golemon  <php@alphaweb.net>
 
     * main/streams/userspace.c:
