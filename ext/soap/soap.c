@@ -1728,7 +1728,7 @@ static void set_soap_fault(zval *obj, char *fault_code, char *fault_string, char
 			if (strcmp(fault_code,"Client") == 0) {
 				smart_str_appendl(&code, SOAP_1_2_ENV_NS_PREFIX, sizeof(SOAP_1_2_ENV_NS_PREFIX)-1);
 				smart_str_appendc(&code, ':');
-				smart_str_appendl(&code,"Sencer",sizeof("Sender")-1);
+				smart_str_appendl(&code,"Sender",sizeof("Sender")-1);
 			} else if (strcmp(fault_code,"Server") == 0) {
 				smart_str_appendl(&code, SOAP_1_2_ENV_NS_PREFIX, sizeof(SOAP_1_2_ENV_NS_PREFIX)-1);
 				smart_str_appendc(&code, ':');
@@ -1988,6 +1988,11 @@ static xmlDocPtr seralize_response_call(sdlFunctionPtr function, char *function_
 
 			param = seralize_parameter(parameter, ret, 0, "return", use TSRMLS_CC);
 			if (style == SOAP_RPC) {
+				if (version == SOAP_1_2) {
+					xmlNs *rpc_ns = xmlNewNs(body, "http://www.w3.org/2003/05/soap-rpc", "rpc");
+					xmlNode *rpc_result = xmlNewChild(method, rpc_ns, "result", NULL);
+					xmlNodeSetContent(rpc_result,param->name);
+				}
 				xmlAddChild(method,param);
 			} else {
 				if (function && function->binding->bindingType == BINDING_SOAP) {
@@ -2037,9 +2042,6 @@ static xmlDocPtr seralize_response_call(sdlFunctionPtr function, char *function_
 		}
 	}
 
-/* FIXME: if use="literal" SOAP-ENV:encodingStyle is not need.
-          What about arrayType?
-*/
 	if (use == SOAP_ENCODED) {
 		xmlSetProp(envelope, "xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
 		xmlSetProp(envelope, "xmlns:xsd", "http://www.w3.org/2001/XMLSchema");
@@ -2127,9 +2129,6 @@ static xmlDocPtr seralize_function_call(zval *this_ptr, sdlFunctionPtr function,
 		}
 	}
 
-/* FIXME: if use="literal" SOAP-ENV:encodingStyle is not need.
-          What about arrayType?
-*/
 	if (use == SOAP_ENCODED) {
 		xmlSetProp(envelope, "xmlns:xsd", "http://www.w3.org/2001/XMLSchema");
 		xmlSetProp(envelope, "xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");

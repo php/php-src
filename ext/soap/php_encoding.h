@@ -129,9 +129,8 @@
 #define WSDL_NS_PREFIX "wsdl"
 
 #define WSDL_SOAP11_NAMESPACE "http://schemas.xmlsoap.org/wsdl/soap/"
-#define WSDL_SOAP12_NAMESPACE "http://www.w3.org/2003/05/soap-rpc"
-#define WSDL_SOAP12OLD_NAMESPACE "http://schemas.xmlsoap.org/wsdl/soap12/"
-#define WSDL_SOAP_NS_PREFIX "wsdlSoap"
+#define WSDL_SOAP12_NAMESPACE "http://schemas.xmlsoap.org/wsdl/soap12/"
+#define RPC_SOAP12_NAMESPACE  "http://www.w3.org/2003/05/soap-rpc"
 
 #define WSDL_HTTP11_NAMESPACE "http://schemas.xmlsoap.org/wsdl/http/"
 #define WSDL_HTTP12_NAMESPACE	"http://www.w3.org/2003/05/soap/bindings/HTTP/"
