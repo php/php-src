@@ -1,6 +1,6 @@
 
 If you downloaded this separately, you can place the dbx folder 
-in the php-source-folders under the ext/folder. Be sure to 
+in the php-source-folders under the ext/ folder. Be sure to 
 use buildconf to rebuild the configure script.
 
 Linux:
