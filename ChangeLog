@@ -1,3 +1,32 @@
+2001-12-28  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/PEAR/Common.php:
+    - Rewrote infoFromTgzFile() (Stig, no more "pedantic" :-)
+    - Added <description> tag for package.xml
+    - Temporal fix arround php bug #14744 and temp files cleaning
+
+2001-12-28  Richard Heyes  <richard.heyes@heyes-computing.net>
+
+    * pear/Cache/Application.php:
+    Implements "application level" variables (or an application session). Uses
+    Cache/Container/* for storing the data. Usage examples in the file.
+
+2001-12-28  Martin Jansen  <mail@martin-jansen.de>
+
+    * pear/HTML/Menu.php: * E_ALL fix.
+
+2001-12-28  Georg Richter  <georg.richter@phpev.de>
+
+    * ext/ncurses/ncurses_fe.c
+      ext/ncurses/ncurses_functions.c
+      ext/ncurses/php_ncurses_fe.h:
+    mouse support for ncurses added:
+      ncurses_getmouse, ncurses_ungetmouse, ncurses_mouse_trafo, ncurses_wmouse_trafo
+
+2001-12-28  Stig Bakken  <ssb@fast.no>
+
+    * pear/package.dtd: * added <description> element in <package>
+
 2001-12-27  Dan Kalowsky  <dank@deadmime.org>
 
     * ext/standard/dns.c: Making PHP compile again on MacOSX 10.1
