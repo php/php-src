@@ -42,7 +42,7 @@ ZEND_API inline void zend_ptr_stack_push(zend_ptr_stack *stack, void *ptr)
 	*(stack->top_element++) = ptr;
 }
 
-ZEND_API inline void zend_ptr_stack_n_push(zend_ptr_stack *stack, int count,...)
+ZEND_API void zend_ptr_stack_n_push(zend_ptr_stack *stack, int count, ...)
 {
 	va_list ptr;
 	void *elem;
@@ -64,7 +64,7 @@ ZEND_API inline void zend_ptr_stack_n_push(zend_ptr_stack *stack, int count,...)
 }
 
 
-ZEND_API inline void zend_ptr_stack_n_pop(zend_ptr_stack *stack, int count,...)
+ZEND_API void zend_ptr_stack_n_pop(zend_ptr_stack *stack, int count, ...)
 {
 	va_list ptr;
 	void **elem;
