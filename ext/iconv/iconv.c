@@ -193,11 +193,10 @@ php_iconv_err_t php_iconv_string(const char *in_p, size_t in_len,
 							const char *in_charset, const char *out_charset)
 {
 #if !ICONV_SUPPORTS_ERRNO
-	unsigned int in_size, out_size, out_left;
+	size_t in_size, out_size, out_left;
 	char *out_buffer, *out_p;
 	iconv_t cd;
 	size_t result;
-	typedef unsigned int ucs4_t;
 
 	*out = NULL;
 	*out_len = 0;
@@ -209,7 +208,7 @@ php_iconv_err_t php_iconv_string(const char *in_p, size_t in_len,
 	  a single char can be more than 4 bytes.
 	  I added 15 extra bytes for safety. <yohgaki@php.net>
 	*/
-	out_size = in_len * sizeof(ucs4_t) + 15;
+	out_size = in_len * sizeof(int) + 15;
 	out_left = out_size;
 
 	in_size = in_len;
@@ -427,7 +426,7 @@ PHP_FUNCTION(ob_iconv_handler)
 {
 	char *out_buffer, *content_type, *mimetype = NULL, *s;
 	zval *zv_string;
-	unsigned int out_len;
+	size_t out_len;
 	int mimetype_alloced  = 0;
 	long status;
 
