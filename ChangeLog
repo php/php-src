@@ -1,3 +1,48 @@
+2001-03-04  Zeev Suraski  <zeev@zend.com>
+
+    * ext/standard/info.c:
+    I don't know German, but I imagine that was the problem :)
+
+2001-03-04  Emiliano Heyns  <emile@iris-advies.com>
+
+    * ext/midgard/oop.c: Fetch sitegroup field if available
+
+2001-03-04  Zeev Suraski  <zeev@zend.com>
+
+    * ext/standard/info.c: Fix phpinfo() bug that crept in
+
+    * ext/standard/output.c:
+    Improve memory consumption on chunked output buffering
+
+    * ext/zlib/php_zlib.h
+      ext/zlib/zlib.c
+      NEWS: Implemented chunked output buffering support - it's quite cool!
+
+2001-03-04  Martin Jansen  <mail@martin-jansen.de>
+
+    * pear/Cache.php: fixed typo
+
+2001-03-04  Frank M. Kromann  <frank@frontbase.com>
+
+    * ext/standard/info.c:
+    Changed code layout to remove PHP warning when running php as a CGI.
+
+2001-03-04  Zeev Suraski  <zeev@zend.com>
+
+    * ext/standard/output.c
+      ext/standard/php_output.h
+      main/main.c: Fix non-thread safe mode
+
+    * ext/standard/basic_functions.c
+      ext/standard/basic_functions.h: this function will never return true...
+
+    * ext/sablot/sablot.c
+      ext/standard/output.c
+      ext/standard/php_output.h:
+    Improve chunked output buffering - the output handler now knows at which stage it is
+
+    * sapi/cgi/cgi_main.c: whitespace fix
+
 2001-03-03  Chuck Hagenbuch  <chuck@horde.org>
 
     * pear/Mail/RFC822.php: documentation/whitespace
