@@ -845,13 +845,19 @@ int zend_do_begin_function_call(znode *function_name TSRMLS_DC)
 
 void zend_do_begin_method_call(znode *object, znode *function_name TSRMLS_DC)
 {
-	zend_op *opline;
+	zend_op *last_op;
+	int last_op_number;
 	unsigned char *ptr = NULL;
 
 	zend_do_end_variable_parse(BP_VAR_R, 0 TSRMLS_CC);
 	zend_do_begin_variable_parse(TSRMLS_C);
  
-	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+	last_op_number = get_next_op_number(CG(active_op_array))-1;
+	last_op = &CG(active_op_array)->opcodes[last_op_number];
+	last_op->opcode = ZEND_INIT_FCALL_BY_NAME;
+	last_op->extended_value = ZEND_MEMBER_FUNC_CALL;
+
+	/*opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 	opline->opcode = ZEND_INIT_FCALL_BY_NAME;
 	opline->extended_value = ZEND_MEMBER_FUNC_CALL;
 	opline->op1 = *object;
@@ -861,6 +867,7 @@ void zend_do_begin_method_call(znode *object, znode *function_name TSRMLS_DC)
  
 
 	*function_name = opline->result;
+*/
 /*
 	if (function_name->op_type == IS_CONST) {
 		zval_copy_ctor(&function_name->u.constant);
