@@ -77,6 +77,8 @@ static zend_class_entry *oci_lob_class_entry_ptr;
 #include "build-defs.h"
 #endif
 
+#include <fcntl.h>
+
 #include "snprintf.h"
 
 /* }}} */
@@ -172,6 +174,7 @@ PHP_FUNCTION(ociplogon);
 PHP_FUNCTION(ocierror);
 PHP_FUNCTION(ocifreedesc);
 PHP_FUNCTION(ocisavelob);
+PHP_FUNCTION(ocisavelobfile);
 PHP_FUNCTION(ociloadlob);
 PHP_FUNCTION(ocicommit);
 PHP_FUNCTION(ocirollback);
@@ -224,9 +227,10 @@ static zend_function_entry php_oci_functions[] = {
     PHP_FE(ocinlogon,        NULL)
     PHP_FE(ociplogon,        NULL)
     PHP_FE(ocierror,         NULL)
-    PHP_FE(ocifreedesc,NULL)
-    PHP_FE(ocisavelob,      NULL)
-    PHP_FE(ociloadlob,      NULL)
+    PHP_FE(ocifreedesc,		 NULL)
+    PHP_FE(ocisavelob,       NULL)
+    PHP_FE(ocisavelobfile,   NULL)
+    PHP_FE(ociloadlob,       NULL)
     PHP_FE(ocicommit,        NULL)
     PHP_FE(ocirollback,      NULL)
     PHP_FE(ocinewdescriptor, NULL)
@@ -235,8 +239,9 @@ static zend_function_entry php_oci_functions[] = {
 };
 
 static zend_function_entry php_oci_lob_class_functions[] = {
-    PHP_FALIAS(load,	ociloadlob,      NULL)
-    PHP_FALIAS(save,	ocisavelob,      NULL)
+    PHP_FALIAS(load,	ociloadlob,       NULL)
+    PHP_FALIAS(save,	ocisavelob,       NULL)
+    PHP_FALIAS(savefile,ocisavelobfile,   NULL)
     PHP_FALIAS(free,	ocifreedesc,      NULL)
     {NULL,NULL,NULL}
 };
@@ -2524,6 +2529,99 @@ PHP_FUNCTION(ocisavelob)
 			oci_error(connection->pError, "OCILobWrite", connection->error);
 			RETURN_FALSE;
 		}
+
+	 	RETURN_TRUE;
+	}
+
+  RETURN_FALSE;
+}
+
+/* }}} */
+/* {{{ proto string ocisavelobfile(object lob)
+ */
+
+PHP_FUNCTION(ocisavelobfile)
+{
+	pval *id, **tmp, **conn, *arg;
+	OCILobLocator *mylob;
+	oci_connection *connection;
+	oci_descriptor *descr;
+	char *filename;
+	int fp;
+	char buf[8192];
+	ub4 offset = 1;
+	ub4 loblen;
+
+	if ((id = getThis()) != 0) {
+   		if (zend_hash_find(id->value.obj.properties, "connection", sizeof("connection"), (void **)&conn) == FAILURE) {
+			php_error(E_WARNING, "unable to find my statement property");
+			RETURN_FALSE;
+		}
+
+		connection = oci_get_conn((*conn)->value.lval, "OCIsavelob", list); 
+		if (connection == NULL) {
+			RETURN_FALSE;
+		}
+
+   		if (zend_hash_find(id->value.obj.properties, "descriptor", sizeof("descriptor"), (void **)&tmp) == FAILURE) {
+			php_error(E_WARNING, "unable to find my locator property");
+			RETURN_FALSE;
+		}
+
+        if (zend_hash_index_find(connection->descriptors, (*tmp)->value.lval, (void **)&descr) == FAILURE) {
+        	php_error(E_WARNING, "unable to find my descriptor %d",(*tmp)->value.lval);
+            RETURN_FALSE;
+        }
+
+		mylob = (OCILobLocator *) descr->ocidescr;
+
+		if (! mylob) {
+			RETURN_FALSE;
+		}
+
+	    if (getParameters(ht, 1, &arg) == FAILURE) {
+        	WRONG_PARAM_COUNT;
+    	}
+
+		convert_to_string(arg);
+
+		if (_php3_check_open_basedir(arg->value.str.val)) {
+			RETURN_FALSE;
+		}
+
+		filename = arg->value.str.val;
+
+		if ((fp = open(filename, O_RDONLY)) == -1) {
+			php_error(E_WARNING, "Can't open file %s", filename);
+			RETURN_FALSE;
+        } 
+
+		while ((loblen = read(fp, &buf, sizeof(buf))) > 0) {	
+			connection->error = 
+				OCILobWrite(connection->pServiceContext,
+							connection->pError,
+							mylob,
+							&loblen,
+							(ub4) offset,
+							(dvoid *) &buf,
+							(ub4) loblen,
+							OCI_ONE_PIECE,
+							(dvoid *)0,
+							(OCICallbackLobWrite) 0,
+							(ub2) 0,
+							(ub1) SQLCS_IMPLICIT);
+
+			oci_debug("OCIsavelob: size=%d",loblen);
+
+			if (connection->error) {
+				oci_error(connection->pError, "OCILobWrite", connection->error);
+				close(fp);
+				RETURN_FALSE;
+			}
+
+			offset += loblen;
+		}
+		close(fp);
 
 	 	RETURN_TRUE;
 	}
