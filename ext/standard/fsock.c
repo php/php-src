@@ -178,7 +178,7 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	}
 	if (zerrstr) {
 		zval_dtor(zerrstr);
-		ZVAL_STRING(zerrno, "", 1);
+		ZVAL_STRING(zerrstr, "", 1);
 	}
 
 	if (port > 0)	{ /* connect to a host */
@@ -261,6 +261,7 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			char *buf = php_socket_strerror(err, NULL, 0);
 
 			/* no need to dup; we would only need to efree buf anyway */
+			zval_dtor(zerrstr);
 			ZVAL_STRING(zerrstr, buf, 0);
 		}
 		RETURN_FALSE;
