@@ -1,5 +1,5 @@
 --TEST--
-Bug #24399: get_parent_class() returns the current class when passed an object
+Bug #24445: get_parent_class() returns the current class when passed an object
 --FILE--
 <?php
 class Test { }
