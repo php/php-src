@@ -122,4 +122,4 @@
 #define BROKEN_SPRINTF 0
 
 /* Define to compile PHP/Zend thread safe */
-/* #undef ZTS */
+#undef ZTS

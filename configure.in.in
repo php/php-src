@@ -868,9 +868,9 @@ AC_DEFINE_UNQUOTED(PHP_OS,"$PHP_OS")
 AC_OUTPUT(Makefile libphp3.module
           scripts/mkextlib regex/Makefile ext/Makefile
           @@EXT_MAKEFILES@@ build-defs.h, [
-chmod +x scripts/mkextlib
 ], [
 
+chmod +x scripts/mkextlib
 # Hacking while airborne considered harmful.
 #
 echo "creating internal_functions.c"
