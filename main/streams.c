@@ -1493,7 +1493,7 @@ PHPAPI php_stream_ops	php_stream_stdio_ops = {
 /* }}} */
 
 /* {{{ php_stream_fopen_with_path */
-PHPAPI php_stream *_php_stream_fopen_with_path(char *filename, char *mode, char *path, char **opened_path STREAMS_DC TSRMLS_DC)
+PHPAPI php_stream *_php_stream_fopen_with_path(char *filename, char *mode, char *path, char **opened_path, int options STREAMS_DC TSRMLS_DC)
 {
 	/* code ripped off from fopen_wrappers.c */
 	char *pathbuf, *ptr, *end;
@@ -1534,7 +1534,7 @@ PHPAPI php_stream *_php_stream_fopen_with_path(char *filename, char *mode, char 
 		if (PG(safe_mode) && (!php_checkuid(filename, mode, CHECKUID_CHECK_MODE_PARAM))) {
 			return NULL;
 		}
-		return php_stream_fopen_rel(filename, mode, opened_path);
+		return php_stream_fopen_rel(filename, mode, opened_path, options);
 	}
 
 	/*
@@ -1553,12 +1553,12 @@ PHPAPI php_stream *_php_stream_fopen_with_path(char *filename, char *mode, char 
 
 		if ((php_check_safe_mode_include_dir(filename TSRMLS_CC)) == 0)
 			/* filename is in safe_mode_include_dir (or subdir) */
-			return php_stream_fopen_rel(filename, mode, opened_path);
+			return php_stream_fopen_rel(filename, mode, opened_path, options);
 
 		if (PG(safe_mode) && (!php_checkuid(filename, mode, CHECKUID_CHECK_MODE_PARAM)))
 			return NULL;
 
-		return php_stream_fopen_rel(filename, mode, opened_path);
+		return php_stream_fopen_rel(filename, mode, opened_path, options);
 	}
 
 	if (!path || (path && !*path)) {
@@ -1570,7 +1570,7 @@ PHPAPI php_stream *_php_stream_fopen_with_path(char *filename, char *mode, char 
 		if (PG(safe_mode) && (!php_checkuid(filename, mode, CHECKUID_CHECK_MODE_PARAM))) {
 			return NULL;
 		}
-		return php_stream_fopen_rel(filename, mode, opened_path);
+		return php_stream_fopen_rel(filename, mode, opened_path, options);
 	}
 
 	/* check in provided path */
@@ -1616,7 +1616,7 @@ PHPAPI php_stream *_php_stream_fopen_with_path(char *filename, char *mode, char 
 				} else if ((php_check_safe_mode_include_dir(trypath TSRMLS_CC) == 0) ||
 						php_checkuid(trypath, mode, CHECKUID_CHECK_MODE_PARAM)) {
 					/* UID ok, or trypath is in safe_mode_include_dir */
-					stream = php_stream_fopen_rel(trypath, mode, opened_path);
+					stream = php_stream_fopen_rel(trypath, mode, opened_path, options);
 				} else {
 					stream = NULL;
 				}
@@ -1625,7 +1625,7 @@ PHPAPI php_stream *_php_stream_fopen_with_path(char *filename, char *mode, char 
 				return stream;
 			}
 		}
-		stream = php_stream_fopen_rel(trypath, mode, opened_path);
+		stream = php_stream_fopen_rel(trypath, mode, opened_path, options);
 		if (stream) {
 			efree(pathbuf);
 			return stream;
@@ -1640,7 +1640,7 @@ PHPAPI php_stream *_php_stream_fopen_with_path(char *filename, char *mode, char 
 /* }}} */
 
 /* {{{ php_stream_fopen */
-PHPAPI php_stream *_php_stream_fopen(const char *filename, const char *mode, char **opened_path STREAMS_DC TSRMLS_DC)
+PHPAPI php_stream *_php_stream_fopen(const char *filename, const char *mode, char **opened_path, int options STREAMS_DC TSRMLS_DC)
 {
 	FILE *fp;
 	char *realpath = NULL;
@@ -1652,10 +1652,10 @@ PHPAPI php_stream *_php_stream_fopen(const char *filename, const char *mode, cha
 	fp = fopen(realpath, mode);
 
 	if (fp)	{
-		/* this is done to prevent opening of anything other then regular files */
-		if (fstat(fileno(fp), &st) == -1 || !S_ISREG(st.st_mode)) {
+		/* sanity checks for include/require */
+		if (options & STREAM_OPEN_FOR_INCLUDE && (fstat(fileno(fp), &st) == -1 || !S_ISREG(st.st_mode))) {
 			goto err;
-		}
+		} 
 	
 		ret = php_stream_fopen_from_file_rel(fp, mode);
 
@@ -1981,7 +1981,7 @@ static php_stream *php_plain_files_stream_opener(php_stream_wrapper *wrapper, ch
 		int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC)
 {
 	if ((options & USE_PATH) && PG(include_path) != NULL) {
-		return php_stream_fopen_with_path_rel(path, mode, PG(include_path), opened_path);
+		return php_stream_fopen_with_path_rel(path, mode, PG(include_path), opened_path, options);
 	}
 
 	if (php_check_open_basedir(path TSRMLS_CC)) {
@@ -1991,7 +1991,7 @@ static php_stream *php_plain_files_stream_opener(php_stream_wrapper *wrapper, ch
 	if ((options & ENFORCE_SAFE_MODE) && PG(safe_mode) && (!php_checkuid(path, mode, CHECKUID_CHECK_MODE_PARAM)))
 		return NULL;
 
-	return php_stream_fopen_rel(path, mode, opened_path);
+	return php_stream_fopen_rel(path, mode, opened_path, options);
 }
 
 static int php_plain_files_url_stater(php_stream_wrapper *wrapper, char *url, php_stream_statbuf *ssb TSRMLS_DC)

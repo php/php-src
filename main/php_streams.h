@@ -58,9 +58,9 @@ PHPAPI int php_file_le_pstream(void);
 
 #define php_stream_copy_to_mem_rel(src, buf, maxlen, persistent) _php_stream_copy_to_mem((src), (buf), (maxlen), (persistent) STREAMS_REL_CC TSRMLS_CC)
 	
-#define php_stream_fopen_rel(filename, mode, opened) _php_stream_fopen((filename), (mode), (opened) STREAMS_REL_CC TSRMLS_CC)
+#define php_stream_fopen_rel(filename, mode, opened, options) _php_stream_fopen((filename), (mode), (opened), (options) STREAMS_REL_CC TSRMLS_CC)
 
-#define php_stream_fopen_with_path_rel(filename, mode, path, opened) _php_stream_fopen_with_path((filename), (mode), (path), (opened) STREAMS_REL_CC TSRMLS_CC)
+#define php_stream_fopen_with_path_rel(filename, mode, path, opened, options) _php_stream_fopen_with_path((filename), (mode), (path), (opened), (options) STREAMS_REL_CC TSRMLS_CC)
 
 #define php_stream_fopen_from_file_rel(file, mode)	 _php_stream_fopen_from_file((file), (mode) STREAMS_REL_CC TSRMLS_CC)
 	
@@ -426,10 +426,10 @@ PHPAPI size_t _php_stream_passthru(php_stream * src STREAMS_DC TSRMLS_DC);
 /* operations for a stdio FILE; use the php_stream_fopen_XXX funcs below */
 PHPAPI extern php_stream_ops php_stream_stdio_ops;
 /* like fopen, but returns a stream */
-PHPAPI php_stream *_php_stream_fopen(const char *filename, const char *mode, char **opened_path STREAMS_DC TSRMLS_DC);
-#define php_stream_fopen(filename, mode, opened)	_php_stream_fopen((filename), (mode), (opened) STREAMS_CC TSRMLS_CC)
+PHPAPI php_stream *_php_stream_fopen(const char *filename, const char *mode, char **opened_path, int options STREAMS_DC TSRMLS_DC);
+#define php_stream_fopen(filename, mode, opened)	_php_stream_fopen((filename), (mode), (opened), 0 STREAMS_CC TSRMLS_CC)
 
-PHPAPI php_stream *_php_stream_fopen_with_path(char *filename, char *mode, char *path, char **opened_path STREAMS_DC TSRMLS_DC);
+PHPAPI php_stream *_php_stream_fopen_with_path(char *filename, char *mode, char *path, char **opened_path, int options STREAMS_DC TSRMLS_DC);
 #define php_stream_fopen_with_path(filename, mode, path, opened)	_php_stream_fopen_with_path((filename), (mode), (path), (opened) STREAMS_CC TSRMLS_CC)
 
 PHPAPI php_stream *_php_stream_fopen_from_file(FILE *file, const char *mode STREAMS_DC TSRMLS_DC);
@@ -491,6 +491,9 @@ PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show
 
 /* this flag applies to php_stream_locate_url_wrapper */
 #define STREAM_LOCATE_WRAPPERS_ONLY	64
+
+/* this flag is only used by include/require functions */
+#define STREAM_OPEN_FOR_INCLUDE		128
 
 #ifdef PHP_WIN32
 # define IGNORE_URL_WIN STREAM_MUST_SEEK
