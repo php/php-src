@@ -294,8 +294,7 @@ static int php_foreach_cat (int instatus, char *inkey, int inkeylen, char *inval
 		if (inkeylen) {
 			char *key = emalloc(inkeylen+1);
 			if(key) {
-				strncpy(key, inkey, inkeylen);
-				key[inkeylen] = '\0';
+				strlcpy(key, inkey, inkeylen+1);
 				add_assoc_stringl_ex((zval *) indata, key, inkeylen+1, inval, invallen, 1);
 				efree(key);
 			} else {
