@@ -3,7 +3,7 @@ mysqli autocommit/commit/rollback with myisam
 --SKIPIF--
 <?php	
 	include "connect.inc";
-	$link = mysqli_connect("localhost", $user, $passwd);
+	$link = mysqli_connect($host, $user, $passwd);
 	$result = mysqli_query($link, "SHOW VARIABLES LIKE 'have_innodb'");
 	$row = mysqli_fetch_row($result);
 	mysqli_free_result($result);
@@ -17,7 +17,7 @@ mysqli autocommit/commit/rollback with myisam
 <?php
 	include "connect.inc";
 	
-	$link = mysqli_connect("localhost", $user, $passwd);
+	$link = mysqli_connect($host, $user, $passwd);
 
 	mysqli_select_db($link, "test");
 

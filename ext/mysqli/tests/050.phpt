@@ -7,7 +7,7 @@ non freed statement test
 	/************************
 	 * non freed stamement
 	 ************************/
-	$link = mysqli_connect("localhost", $user, $passwd);
+	$link = mysqli_connect($host, $user, $passwd);
 
 	$stmt = mysqli_prepare($link, "SELECT CURRENT_USER()");
 	mysqli_execute($stmt);

@@ -2,12 +2,10 @@
 function test: mysqli_character_set_name
 --FILE--
 <?php
-	$user = "root";
-	$passwd = "";
-
+	include "connect.inc";
 	
 	/*** test mysqli_connect 127.0.0.1 ***/
-	$link = mysqli_connect("localhost", $user, $passwd);
+	$link = mysqli_connect($host, $user, $passwd);
 
 	$cset = substr(mysqli_character_set_name($link),0,6);
 

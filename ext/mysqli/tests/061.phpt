@@ -10,7 +10,7 @@ local infile handler
 	}
 	
 	/*** test mysqli_connect 127.0.0.1 ***/
-	$link = mysqli_connect("localhost", $user, $passwd, "test");
+	$link = mysqli_connect($host, $user, $passwd, "test");
 
 	/* create temporary file */
 	$fp = fopen("061.csv", "w");

@@ -29,6 +29,13 @@
 #include "ext/standard/info.h"
 #include "php_mysqli.h"
 
+#define CHECK_OBJECT() \
+	if (!obj->valid) { \
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Property access is not allowed yet. Call the default constructor of the object first"); \
+		ZVAL_NULL(*retval); \
+		return SUCCESS; \
+	} \
+
 #define MYSQLI_GET_MYSQL() \
 MYSQL *p = (MYSQL *)((MY_MYSQL *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr)->mysql;
 
@@ -41,9 +48,10 @@ MYSQL_STMT *p = (MYSQL_STMT *)((MY_STMT *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr)-
 #define MYSQLI_MAP_PROPERTY_FUNC_LONG( __func, __int_func, __get_type, __ret_type)\
 int __func(mysqli_object *obj, zval **retval TSRMLS_DC) \
 {\
+	ALLOC_ZVAL(*retval); \
+	CHECK_OBJECT(); \
 	__ret_type l;\
 	__get_type;\
-	ALLOC_ZVAL(*retval);\
 	if (!p) {\
 		ZVAL_NULL(*retval);\
 	} else {\
@@ -63,8 +71,9 @@ int __func(mysqli_object *obj, zval **retval TSRMLS_DC) \
 int __func(mysqli_object *obj, zval **retval TSRMLS_DC)\
 {\
 	char *c;\
+	ALLOC_ZVAL(*retval); \
+	CHECK_OBJECT(); \
 	__get_type;\
-	ALLOC_ZVAL(*retval);\
 	if (!p) {\
 		ZVAL_NULL(*retval);\
 	} else {\
@@ -95,18 +104,6 @@ int link_client_info_read(mysqli_object *obj, zval **retval TSRMLS_DC)
 	return SUCCESS;
 }
 /* }}} */
-/* {{{ property link_test_read */
-int link_test_read(mysqli_object *obj, zval **retval TSRMLS_DC)
-{
-	long	i;
-	ALLOC_ZVAL(*retval);
-	array_init(*retval);
-
-	for (i=0; i < 10; i++)
-		add_index_long(*retval, i, i + 10);
-	return SUCCESS;
-}
-/*i }}} */
 
 /* {{{ property link_connect_errno_read */
 int link_connect_errno_read(mysqli_object *obj, zval **retval TSRMLS_DC)
@@ -146,9 +143,11 @@ MYSQLI_MAP_PROPERTY_FUNC_LONG(link_warning_count_read, mysql_warning_count, MYSQ
 /* {{{ property result_type_read */
 int result_type_read(mysqli_object *obj, zval **retval TSRMLS_DC)
 {
+	ALLOC_ZVAL(*retval);
+	CHECK_OBJECT();
+
 	MYSQL_RES *p = (MYSQL_RES *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr;
 
-	ALLOC_ZVAL(*retval);
 	if (!p) {
 		ZVAL_NULL(*retval);
 	} else {
@@ -161,9 +160,11 @@ int result_type_read(mysqli_object *obj, zval **retval TSRMLS_DC)
 /* {{{ property result_lengths_read */
 int result_lengths_read(mysqli_object *obj, zval **retval TSRMLS_DC)
 {
+	ALLOC_ZVAL(*retval);
+	CHECK_OBJECT();
+
 	MYSQL_RES *p = (MYSQL_RES *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr;
 
-	ALLOC_ZVAL(*retval);
 	if (!p || !p->field_count) {
 		ZVAL_NULL(*retval);
 	} else {
@@ -201,7 +202,6 @@ mysqli_property_entry mysqli_link_property_entries[] = {
 	{"affected_rows", link_affected_rows_read, NULL},
 	{"client_info", link_client_info_read, NULL},
 	{"client_version", link_client_version_read, NULL},
-	{"test", link_test_read, NULL},
 	{"connect_errno", link_connect_errno_read, NULL},
 	{"connect_error", link_connect_error_read, NULL},
 	{"errno", link_errno_read, NULL},

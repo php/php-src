@@ -11,7 +11,7 @@ extend mysqli
 	}
 
 	$foo = new foobar();
-	$foo->connect("localhost", $user, $passwd);
+	$foo->connect($host, $user, $passwd);
 	$foo->close();
 	printf("%s\n", $foo->test());
 ?>

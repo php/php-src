@@ -7,7 +7,8 @@ constructor test
 	/* class 1 calls parent constructor */
 	class mysql1 extends mysqli {
 		function __construct() {
-			parent::__construct("localhost", "root", "", "test");
+			global $host, $user, $passwd;
+			parent::__construct($host, $user, $passwd, "test");
 		}
 	}
 
@@ -15,7 +16,8 @@ constructor test
 	class mysql2 extends mysqli {
 		
 		function __construct() {
-			$this->connect("localhost", "root", "", "test");
+			global $host, $user, $passwd;
+			$this->connect($host, $user, $passwd, "test");
 		}
 	}
 
@@ -26,7 +28,7 @@ constructor test
 
 	$foo[0] = new mysql1();	
 	$foo[1] = new mysql2();	
-	$foo[2] = new mysql3("localhost", "root", "", "test");
+	$foo[2] = new mysql3($host, $user, $passwd, "test");
 
 
 	for ($i=0; $i < 3; $i++) {

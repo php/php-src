@@ -11,7 +11,7 @@ mysqli_fetch_object with classes
 	}
 	
 	/*** test mysqli_connect 127.0.0.1 ***/
-	$link = mysqli_connect("localhost", $user, $passwd);
+	$link = mysqli_connect($host, $user, $passwd);
 
 	mysqli_select_db($link, "test");
 

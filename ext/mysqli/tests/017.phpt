@@ -5,7 +5,7 @@ mysqli fetch functions
 	include "connect.inc";
 	
 	/*** test mysqli_connect 127.0.0.1 ***/
-	$link = mysqli_connect("localhost", $user, $passwd);
+	$link = mysqli_connect($host, $user, $passwd);
 
 	mysqli_select_db($link, "test");
 
@@ -14,7 +14,9 @@ mysqli fetch functions
 	mysqli_execute($stmt);
 
 	mysqli_fetch($stmt);
-//	mysqli_stmt_close($stmt);
+	mysqli_stmt_close($stmt);
+
+	$c0 = ($c0 == $user . "@" . $host) ? 1 : 0;
 
 	$test = array($c0, $c1, $c2);
 
@@ -24,7 +26,7 @@ mysqli fetch functions
 --EXPECT--
 array(3) {
   [0]=>
-  string(14) "root@localhost"
+  int(1)
   [1]=>
   string(4) "test"
   [2]=>

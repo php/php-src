@@ -7,7 +7,7 @@ free resultset after close
 	/************************
 	 * free resultset after close 
 	 ************************/
-	$link = mysqli_connect("localhost", $user, $passwd);
+	$link = mysqli_connect($host, $user, $passwd);
 
 	$result1 = mysqli_query($link, "SELECT CURRENT_USER()");
 	mysqli_close($link);
