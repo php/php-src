@@ -58,10 +58,7 @@
 #include "mbfilter.h"
 #include "SAPI.h"
 
-#define PHP_MBSTRING_API 20020405
-
-PHPAPI char * php_mb_convert_encoding(char *input, size_t length, char *_to_encoding, char *_from_encodings, size_t *output_len TSRMLS_DC);
-PHPAPI int php_mb_check_encoding_list(const char *encoding_list TSRMLS_DC);
+#define PHP_MBSTRING_API 20021024
 
 #if HAVE_MBREGEX
 #include "php_mbregex.h"
@@ -109,9 +106,24 @@ PHP_FUNCTION(mb_decode_numericentity);
 PHP_FUNCTION(mb_send_mail);
 PHP_FUNCTION(mb_get_info);
 
-PHPAPI char *php_mb_strrchr(const char *s, char c TSRMLS_DC);
-PHPAPI int php_mb_is_leadbyte(const char *s TSRMLS_DC);
 PHPAPI int php_mb_encoding_translation(TSRMLS_D);
+
+PHPAPI char *php_mb_safe_strrchr_ex(const char *s, unsigned int c,
+                                    size_t nbytes, const mbfl_encoding *enc);
+PHPAPI char *php_mb_safe_strrchr(const char *s, unsigned int c,
+                                 size_t nbytes TSRMLS_DC);
+PHPAPI char *php_mb_strrchr(const char *s, char c TSRMLS_DC);
+
+PHPAPI char * php_mb_convert_encoding(char *input, size_t length,
+                                      char *_to_encoding,
+                                      char *_from_encodings,
+                                      size_t *output_len TSRMLS_DC);
+
+PHPAPI int php_mb_check_encoding_list(const char *encoding_list TSRMLS_DC);
+
+PHPAPI size_t php_mb_mbchar_bytes_ex(const char *s, const mbfl_encoding *enc);
+PHPAPI size_t php_mb_mbchar_bytes(const char *s TSRMLS_DC);
+
 
 ZEND_BEGIN_MODULE_GLOBALS(mbstring)
 	int language;
@@ -184,8 +196,6 @@ SAPI_API SAPI_TREAT_DATA_FUNC(mbstr_treat_data);
 #endif	/* HAVE_MBSTRING */
 
 #define phpext_mbstring_ptr mbstring_module_ptr
-
-PHPAPI int php_mb_is_mb_leadbyte(const char *s TSRMLS_DC);
 
 #endif		/* _MBSTRING_H */
 
