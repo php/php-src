@@ -87,7 +87,7 @@ void *merge_php_config(apr_pool_t *p, void *base_conf, void *new_conf)
 
 	fprintf(stderr, "Merge dir (%p) (%p)\n", base_conf, new_conf);
 	for (zend_hash_internal_pointer_reset(&d->config);
-			zend_hash_get_current_key_ex(&d->config, &str, &str_len, &num_index, NULL) == HASH_KEY_IS_STRING;
+			zend_hash_get_current_key_ex(&d->config, &str, &str_len, &num_index, 0, NULL) == HASH_KEY_IS_STRING;
 			zend_hash_move_forward(&d->config)) {
 		pe = NULL;
 		zend_hash_get_current_data(&d->config, (void **) &data);
@@ -108,7 +108,7 @@ void apply_config(void *dummy)
 	php_dir_entry *data;
 	
 	for (zend_hash_internal_pointer_reset(&d->config);
-			zend_hash_get_current_key_ex(&d->config, &str, &str_len, NULL, NULL) == HASH_KEY_IS_STRING;
+			zend_hash_get_current_key_ex(&d->config, &str, &str_len, NULL, 0, NULL) == HASH_KEY_IS_STRING;
 			zend_hash_move_forward(&d->config)) {
 		zend_hash_get_current_data(&d->config, (void **) &data);
 		fprintf(stderr, "APPLYING (%s)(%s)\n", str, data->value);

@@ -3109,7 +3109,7 @@ PHP_FUNCTION(imap_mail_compose)
 
 	zend_hash_internal_pointer_reset(Z_ARRVAL_PP(body));
 	zend_hash_get_current_data(Z_ARRVAL_PP(body), (void **) &data);
-	zend_hash_get_current_key(Z_ARRVAL_PP(body), &key, &ind);
+	zend_hash_get_current_key(Z_ARRVAL_PP(body), &key, &ind, 0); /* FIXME: is this necessary?  we're not using key/ind */
 
 	if (Z_TYPE_PP(data) == IS_ARRAY) {
 		bod=mail_newbody();
@@ -3154,7 +3154,7 @@ PHP_FUNCTION(imap_mail_compose)
  	zend_hash_move_forward(Z_ARRVAL_PP(body));
 
 	while(zend_hash_get_current_data(Z_ARRVAL_PP(body), (void **) &data) == SUCCESS) { 
-		zend_hash_get_current_key(Z_ARRVAL_PP(body), &key, &ind); 
+		zend_hash_get_current_key(Z_ARRVAL_PP(body), &key, &ind, 0);  /* FIXME: Is this necessary?  We're not using key/ind */
 		if (Z_TYPE_PP(data) == IS_ARRAY) {
 			if (!toppart) {
 				bod->nested.part=mail_newbody_part();

@@ -259,7 +259,7 @@ void php_var_serialize(pval *buf, pval **struc, HashTable *var_hash)
 							
 							zend_hash_internal_pointer_reset_ex(HASH_OF(retval_ptr),&pos);
 							for (;; zend_hash_move_forward_ex(HASH_OF(retval_ptr),&pos)) {
-								if ((i = zend_hash_get_current_key_ex(HASH_OF(retval_ptr), &key, NULL, &index, &pos)) == HASH_KEY_NON_EXISTANT) {
+								if ((i = zend_hash_get_current_key_ex(HASH_OF(retval_ptr), &key, NULL, &index, 0, &pos)) == HASH_KEY_NON_EXISTANT) {
 									break;
 								}
 
@@ -319,12 +319,10 @@ void php_var_serialize(pval *buf, pval **struc, HashTable *var_hash)
 				
 				zend_hash_internal_pointer_reset_ex(myht, &pos);
 				for (;; zend_hash_move_forward_ex(myht, &pos)) {
-					if ((i = zend_hash_get_current_key_ex(myht, &key, NULL, &index, &pos)) == HASH_KEY_NON_EXISTANT) {
+					if ((i = zend_hash_get_current_key_ex(myht, &key, NULL, &index, 0, &pos)) == HASH_KEY_NON_EXISTANT) {
 						break;
 					}
 					if (zend_hash_get_current_data_ex(myht, (void **) (&data), &pos) != SUCCESS || !data /* || ((*data) == (*struc)) */) {
-						if (i == HASH_KEY_IS_STRING)
-							efree(key);
 						continue;
 					}
 

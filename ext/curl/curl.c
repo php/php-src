@@ -433,7 +433,7 @@ PHP_FUNCTION(curl_setopt)
 					SEPARATE_ZVAL(current);
 					convert_to_string_ex(current);
 					
-					if (zend_hash_get_current_key(u_post, &string_key, &num_key) == HASH_KEY_IS_LONG) {
+					if (zend_hash_get_current_key(u_post, &string_key, &num_key, 0) == HASH_KEY_IS_LONG) {
 						php_error(E_WARNING, "Array passed to %s() must be an associative array", get_active_function_name());
 						RETURN_FALSE;
 					}
@@ -448,8 +448,7 @@ PHP_FUNCTION(curl_setopt)
 					sprintf(str, "%s=%s", string_key, val_str);
 
 					ret = curl_formparse(str, &first, &last);
-					
-					efree(string_key);
+
 					efree(val_str);
 				}
 				
