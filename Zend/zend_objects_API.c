@@ -45,11 +45,14 @@ ZEND_API void zend_objects_store_call_destructors(zend_objects_store *objects TS
 	zend_uint i = 1;
 
 	for (i = 1; i < objects->top ; i++) {
-		struct _store_object *obj = &objects->object_buckets[i].bucket.obj;
-		if (obj->dtor && !objects->object_buckets[i].destructor_called) {
-			objects->object_buckets[i].destructor_called = 1;
-			if (obj->dtor) {
-				obj->dtor(obj->object, i TSRMLS_CC);
+		if (objects->object_buckets[i].valid) {
+			struct _store_object *obj = &objects->object_buckets[i].bucket.obj;
+
+			if (obj->dtor && !objects->object_buckets[i].destructor_called) {
+				objects->object_buckets[i].destructor_called = 1;
+				if (obj->dtor) {
+					obj->dtor(obj->object, i TSRMLS_CC);
+				}
 			}
 		}
 	}
@@ -61,9 +64,12 @@ ZEND_API void zend_objects_store_free_object_storage(zend_objects_store *objects
 	zend_uint i = 1;
 
 	for (i = 1; i < objects->top ; i++) {
-		struct _store_object *obj = &objects->object_buckets[i].bucket.obj;
-		if (obj->free_storage) {
-			obj->free_storage(obj->object TSRMLS_CC);
+		if (objects->object_buckets[i].valid) {
+			struct _store_object *obj = &objects->object_buckets[i].bucket.obj;
+
+			if (obj->free_storage) {
+				obj->free_storage(obj->object TSRMLS_CC);
+			}
 		}
 	}
 }
@@ -88,11 +94,13 @@ ZEND_API zend_object_handle zend_objects_store_put(void *object, zend_objects_st
 	}
 	obj = &EG(objects_store).object_buckets[handle].bucket.obj;
 	EG(objects_store).object_buckets[handle].destructor_called = 0;
+	EG(objects_store).object_buckets[handle].valid = 1;
 
 	obj->refcount = 1;
 	obj->object = object;
 	obj->dtor = dtor;
 	obj->free_storage = free_storage;
+
 	obj->clone = clone;
 
 #if ZEND_DEBUG_OBJECTS
@@ -111,9 +119,10 @@ ZEND_API void zend_objects_store_add_ref(zval *object TSRMLS_DC)
 #endif
 }
 
-#define ZEND_OBJECTS_STORE_ADD_TO_FREE_LIST()																\
+#define ZEND_OBJECTS_STORE_ADD_TO_FREE_LIST()																	\
 			EG(objects_store).object_buckets[handle].bucket.free_list.next = EG(objects_store).free_list_head;	\
-			EG(objects_store).free_list_head = handle;													\
+			EG(objects_store).free_list_head = handle;															\
+			EG(objects_store).object_buckets[handle].valid = 0;
 
 ZEND_API void zend_objects_store_del_ref(zval *zobject TSRMLS_DC)
 {
