@@ -461,7 +461,7 @@ PHP_FUNCTION(var_export)
 
 static void php_var_serialize_intern(smart_str *buf, zval **struc, HashTable *var_hash TSRMLS_DC);
 
-static inline int php_add_var_hash(HashTable *var_hash, zval *var, void *var_old)
+static inline int php_add_var_hash(HashTable *var_hash, zval *var, void *var_old TSRMLS_DC)
 {
 	ulong var_no;
 	char id[32], *p;
@@ -600,7 +600,7 @@ static void php_var_serialize_intern(smart_str *buf, zval **struc, HashTable *va
 	HashTable *myht;
 
 	if (var_hash 
-	    && php_add_var_hash(var_hash, *struc, (void *) &var_already) == FAILURE) {
+	    && php_add_var_hash(var_hash, *struc, (void *) &var_already TSRMLS_CC) == FAILURE) {
 		if((*struc)->is_ref) {
 			smart_str_appendl(buf, "R:", 2);
 			smart_str_append_long(buf, *var_already);
