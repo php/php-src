@@ -514,7 +514,7 @@ PHP_FUNCTION(pg_dbname)
 
 /* {{{ proto string pg_errormessage([int connection])
    Get the error message string */
-PHP_FUNCTION(pg_error_message)
+PHP_FUNCTION(pg_errormessage)
 {
 	php_pgsql_get_link_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP_PG_ERROR_MESSAGE);
 }
@@ -671,7 +671,7 @@ void php_pgsql_get_result_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 
 /* {{{ proto int pg_numrows(int result)
    Return the number of rows in the result */
-PHP_FUNCTION(pg_num_rows)
+PHP_FUNCTION(pg_numrows)
 {
 	php_pgsql_get_result_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP_PG_NUM_ROWS);
 }
@@ -679,7 +679,7 @@ PHP_FUNCTION(pg_num_rows)
 
 /* {{{ proto int pg_numfields(int result)
    Return the number of fields in the result */
-PHP_FUNCTION(pg_num_fields)
+PHP_FUNCTION(pg_numfields)
 {
 	php_pgsql_get_result_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP_PG_NUM_FIELDS);
 }
@@ -694,7 +694,7 @@ PHP_FUNCTION(pg_cmdtuples)
 /* }}} */
 
 
-char *get_field_name(PGconn *pgsql, Oid oid, HashTable *list)
+char *get_fieldname(PGconn *pgsql, Oid oid, HashTable *list)
 {
 	PGresult *result;
 	char hashed_oid_key[32];
@@ -802,7 +802,7 @@ PHP_FUNCTION(pg_field_name)
 
 /* {{{ proto int pg_fieldsize(int result, int field_number)
    Returns the internal size of the field */ 
-PHP_FUNCTION(pg_field_size)
+PHP_FUNCTION(pg_fieldsize)
 {
 	php_pgsql_get_field_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP_PG_FIELD_SIZE);
 }
@@ -810,7 +810,7 @@ PHP_FUNCTION(pg_field_size)
 
 /* {{{ proto string pg_fieldtype(int result, int field_number)
    Returns the type name for the given field */
-PHP_FUNCTION(pg_field_type)
+PHP_FUNCTION(pg_fieldtype)
 {
 	php_pgsql_get_field_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP_PG_FIELD_TYPE);
 }
@@ -818,7 +818,7 @@ PHP_FUNCTION(pg_field_type)
 
 /* {{{ proto int pg_fieldnum(int result, string field_name)
    Returns the field number of the named field */
-PHP_FUNCTION(pg_field_number)
+PHP_FUNCTION(pg_fieldnum)
 {
 	pval *result,*field;
 	PGresult *pgsql_result;
@@ -1057,7 +1057,7 @@ void php_pgsql_data_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 
 /* {{{ proto int pg_fieldprtlen(int result, int row, mixed field_name_or_number)
    Returns the printed length */
-PHP_FUNCTION(pg_data_length)
+PHP_FUNCTION(pg_fieldprtlen)
 {
 	php_pgsql_data_info(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_PG_DATA_LENGTH);
 }
@@ -1065,7 +1065,7 @@ PHP_FUNCTION(pg_data_length)
 
 /* {{{ proto int pg_fieldisnull(int result, int row, mixed field_name_or_number)
    Test if a field is NULL */
-PHP_FUNCTION(pg_data_isnull)
+PHP_FUNCTION(pg_fieldisnull)
 {
 	php_pgsql_data_info(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_PG_DATA_ISNULL);
 }
@@ -1073,7 +1073,7 @@ PHP_FUNCTION(pg_data_isnull)
 
 /* {{{ proto int pg_freeresult(int result)
    Free result memory */
-PHP_FUNCTION(pg_free_result)
+PHP_FUNCTION(pg_freeresult)
 {
 	pval *result;
 	pgsql_result_handle *pg_result;
@@ -1100,7 +1100,7 @@ PHP_FUNCTION(pg_free_result)
 
 /* {{{ proto int pg_getlastoid(int result)
    Returns the last object identifier */
-PHP_FUNCTION(pg_last_oid)
+PHP_FUNCTION(pg_getlastoid)
 {
 	pval *result;
 	PGresult *pgsql_result;
@@ -1132,7 +1132,7 @@ PHP_FUNCTION(pg_last_oid)
 
 /* {{{ proto int pg_locreate(int connection)
    Create a large object */
-PHP_FUNCTION(pg_lo_create)
+PHP_FUNCTION(pg_locreate)
 {
   	pval *pgsql_link;
 	PGconn *pgsql;
@@ -1182,7 +1182,7 @@ PHP_FUNCTION(pg_lo_create)
 
 /* {{{ proto void pg_lounlink([int connection, ] int large_obj_id)
    Delete a large object */
-PHP_FUNCTION(pg_lo_unlink)
+PHP_FUNCTION(pg_lounlink)
 {
 	pval *pgsql_link, *oid;
 	PGconn *pgsql;
@@ -1229,7 +1229,7 @@ PHP_FUNCTION(pg_lo_unlink)
 
 /* {{{ proto int pg_loopen([int connection,] int objoid, string mode)
    Open a large object and return fd */
-PHP_FUNCTION(pg_lo_open)
+PHP_FUNCTION(pg_loopen)
 {
 	pval *pgsql_link, *oid, *mode;
 	PGconn *pgsql;
@@ -1334,7 +1334,7 @@ PHP_FUNCTION(pg_lo_open)
 
 /* {{{ proto void pg_loclose(int fd)
    Close a large object */
-PHP_FUNCTION(pg_lo_close)
+PHP_FUNCTION(pg_loclose)
 {
 	pval *pgsql_lofp;
 	int id, type;
@@ -1372,7 +1372,7 @@ PHP_FUNCTION(pg_lo_close)
 
 /* {{{ proto string pg_loread(int fd, int len)
    Read a large object */
-PHP_FUNCTION(pg_lo_read)
+PHP_FUNCTION(pg_loread)
 {
   	pval *pgsql_id, *len;
 	int id, buf_len, type, nbytes;
@@ -1414,7 +1414,7 @@ PHP_FUNCTION(pg_lo_read)
 
 /* {{{ proto int pg_lowrite(int fd, string buf)
    Write a large object */
-PHP_FUNCTION(pg_lo_write)
+PHP_FUNCTION(pg_lowrite)
 {
   	pval *pgsql_id, *str;
 	int id, buf_len, nbytes, type;
@@ -1453,7 +1453,7 @@ PHP_FUNCTION(pg_lo_write)
 
 /* {{{ proto void pg_loreadall(int fd)
    Read a large object and send straight to browser */
-PHP_FUNCTION(pg_lo_readall)
+PHP_FUNCTION(pg_loreadall)
 {
   	pval *pgsql_id;
 	int i, id, tbytes, type;
