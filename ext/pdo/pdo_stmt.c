@@ -967,7 +967,8 @@ static int pdo_stmt_verify_mode(pdo_stmt_t *stmt, int mode, int fetch_all TSRMLS
 	mode = mode & ~PDO_FETCH_FLAGS;
 
 	if (mode == PDO_FETCH_USE_DEFAULT) {
-		mode = stmt->default_fetch_type;
+		flags = stmt->default_fetch_type & PDO_FETCH_FLAGS;
+		mode = stmt->default_fetch_type & ~PDO_FETCH_FLAGS;
 	}
 
 	switch(mode) {
