@@ -44,6 +44,7 @@ PHP_FUNCTION(ncurses_addch)
     */
 PHP_FUNCTION(ncurses_color_set)
 {
+#ifdef HAVE_NCURSES_COLOR_SET
 	zval **pair;
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &pair) == FAILURE){
 		WRONG_PARAM_COUNT;
@@ -52,6 +53,10 @@ PHP_FUNCTION(ncurses_color_set)
 	convert_to_long_ex(pair);
 
 	RETURN_LONG(color_set(_INT(pair),NULL));
+#else
+	php_error(E_WARNING,"%s not supported in this build");
+	RETURN_FALSE;
+#endif	
 }
 /* }}} */
 
@@ -772,6 +777,7 @@ PHP_FUNCTION(ncurses_slk_attrset)
     */
 PHP_FUNCTION(ncurses_slk_color)
 {
+#ifdef HAVE_NCURSES_SLK_COLOR
 	zval **intarg;
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &intarg) == FAILURE){
 		WRONG_PARAM_COUNT;
@@ -780,6 +786,10 @@ PHP_FUNCTION(ncurses_slk_color)
 	convert_to_long_ex(intarg);
 
 	RETURN_LONG(slk_color(_INT(intarg)));
+#else
+	php_error(E_WARNING,"%s not supported in this build");
+	RETURN_FALSE;
+#endif	
 }
 /* }}} */
 
@@ -847,6 +857,7 @@ PHP_FUNCTION(ncurses_vidattr)
     */
 PHP_FUNCTION(ncurses_use_extended_names)
 {
+#ifdef HAVE_NCURSES_USE_EXTENDED_NAMES
 	zval **intarg;
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &intarg) == FAILURE){
 		WRONG_PARAM_COUNT;
@@ -855,6 +866,10 @@ PHP_FUNCTION(ncurses_use_extended_names)
 	convert_to_long_ex(intarg);
 
 	RETURN_LONG(use_extended_names(_INT(intarg)));
+#else
+	php_error(E_WARNING,"%s not supported in this build");
+	RETURN_FALSE;
+#endif	
 }
 /* }}} */
 
