@@ -74,6 +74,48 @@ class userstream {
 				return false;
 		}
 	}
+	
+	function stream_write($data)
+	{
+	    return false;
+	}
+	
+	function stream_close()
+	{
+	}
+	
+	function stream_flush()
+	{
+	    return false;
+	}
+	
+	function stream_stat()
+	{
+	    return NULL;
+	}
+
+	function url_stat($url)
+	{
+	    return NULL;
+	}
+
+	function dir_opendir($url, $options)
+	{
+	    return false;
+	}
+
+	function dir_readdir()
+	{
+	    return NULL;
+	}
+
+	function dir_closedir()
+	{
+	}
+
+	function dir_rewinddir()
+	{
+	}
 
 }
 
