@@ -59,9 +59,6 @@ PHP_MINFO_FUNCTION(gd);
 PHP_MINIT_FUNCTION(gd);
 PHP_MSHUTDOWN_FUNCTION(gd);
 
-#ifndef HAVE_GDIMAGECOLORRESOLVE
-extern int gdImageColorResolve(gdImagePtr, int, int, int);
-#endif
 PHP_FUNCTION(imagearc);
 PHP_FUNCTION(imagechar);
 PHP_FUNCTION(imagecharup);
@@ -159,11 +156,6 @@ PHP_FUNCTION(png2wbmp);
 PHP_FUNCTION(image2wbmp);
 
 PHP_GD_API int phpi_get_le_gd(void);
-
-/* This is missing from gd.h */
-#if HAVE_COLORCLOSESTHWB
-int gdImageColorClosestHWB(gdImagePtr im, int r, int g, int b);
-#endif
 
 #else
 
