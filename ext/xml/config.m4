@@ -5,8 +5,10 @@ dnl
 PHP_ARG_ENABLE(xml,whether to enable XML support,
 [  --disable-xml           Disable XML support.], yes)
 
-PHP_ARG_WITH(libxml-dir, libxml install dir,
-[  --with-libxml-dir=DIR     XML: libxml install prefix], no, no)
+if test -z "$PHP_LIBXML_DIR"; then
+  PHP_ARG_WITH(libxml-dir, libxml2 install dir,
+  [  --with-libxml-dir=DIR     XML: libxml2 install prefix], no, no)
+fi
 
 PHP_ARG_WITH(libexpat-dir, libexpat install dir,
 [  --with-libexpat-dir=DIR   XML: libexpat install prefix (deprecated)], no, no)
@@ -18,8 +20,8 @@ if test "$PHP_XML" != "no"; then
   PHP_SETUP_LIBXML(XML_SHARED_LIBADD, [
     xml_extra_sources="compat.c"
   ], [
-    if test "$PHP_EXPAT_DIR" = "no"; then
-      AC_MSG_ERROR(xml2-config not found. Use --with-libxml-dir=<DIR>)
+    if test "$PHP_LIBEXPAT_DIR" = "no"; then
+      AC_MSG_ERROR([xml2-config not found. Use --with-libxml-dir=<DIR>])
     fi
   ])
 
@@ -30,6 +32,7 @@ if test "$PHP_XML" != "no"; then
     for i in $PHP_XML $PHP_LIBEXPAT_DIR; do
       if test -f "$i/lib/libexpat.a" -o -f "$i/lib/libexpat.$SHLIB_SUFFIX_NAME"; then
         EXPAT_DIR=$i
+        break
       fi
     done
 
