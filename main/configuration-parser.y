@@ -348,6 +348,8 @@ static void convert_browscap_pattern(pval *pattern)
 %token EXTENSION
 %token T_ZEND_EXTENSION
 %token T_ZEND_EXTENSION_TS
+%token T_ZEND_EXTENSION_DEBUG
+%token T_ZEND_EXTENSION_DEBUG_TS
 
 %%
 
@@ -380,13 +382,25 @@ statement:
 			php3_dl(&$3,MODULE_PERSISTENT,&dummy);
 		}
 	|	T_ZEND_EXTENSION '=' string {
-#ifndef ZTS
+#if !defined(ZTS) && !defined(ZEND_DEBUG)
 			zend_load_extension($3.value.str.val);
 #endif
 			free($3.value.str.val);
 		}
 	|	T_ZEND_EXTENSION_TS '=' string { 
-#ifdef ZTS
+#if defined(ZTS) && !defined(ZEND_DEBUG)
+			zend_load_extension($3.value.str.val);
+#endif
+			free($3.value.str.val);
+		}
+	|	T_ZEND_EXTENSION_DEBUG '=' string { 
+#if !defined(ZTS) && defined(ZEND_DEBUG)
+			zend_load_extension($3.value.str.val);
+#endif
+			free($3.value.str.val);
+		}
+	|	T_ZEND_EXTENSION_DEBUG_TS '=' string { 
+#if defined(ZTS) && defined(ZEND_DEBUG)
 			zend_load_extension($3.value.str.val);
 #endif
 			free($3.value.str.val);
