@@ -121,6 +121,8 @@ PHP_MINFO_FUNCTION(swf)
 
 PHP_MINIT_FUNCTION(swf)
 {
+	REGISTER_LONG_CONSTANT("MOD_COLOR", MOD_COLOR, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("MOD_MATRIX", MOD_MATRIX, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("TYPE_PUSHBUTTON", TYPE_PUSHBUTTON, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("TYPE_MENUBUTTON", TYPE_MENUBUTTON, CONST_CS | CONST_PERSISTENT);
 	REGISTER_DOUBLE_CONSTANT("BSHitTest", BSHitTest, CONST_CS | CONST_PERSISTENT);
@@ -458,6 +460,7 @@ void php_swf_define(INTERNAL_FUNCTION_PARAMETERS, int opt)
 	if (opt) {
 		swf_defineline((*objid)->value.lval, (float)(*x1)->value.dval, (float)(*y1)->value.dval,
 	 	               (float)(*x2)->value.dval, (float)(*y2)->value.dval, (float)(*width)->value.dval);
+                   (float)(*x2)->value.dval, (float)(*y2)->value.dval, (float)(*width)->value.dval);
 	} else {
 		swf_definerect((*objid)->value.lval, (float)(*x1)->value.dval, (float)(*y1)->value.dval,
 	 	               (float)(*x2)->value.dval, (float)(*y2)->value.dval, (float)(*width)->value.dval);
@@ -1092,8 +1095,8 @@ PHP_FUNCTION(swf_rotate)
 	}
 	convert_to_double_ex(angle);
 	convert_to_string_ex(axis);
-	
-	swf_rotate((*angle)->value.dval, (*axis)->value.str.val);
+
+	swf_rotate((*angle)->value.dval, (char)((*axis)->value.str.val)[0]);
 }
 /* }}} */
 
