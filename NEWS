@@ -2,6 +2,19 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 200?, Version 4.0.6
+- Modify the cURL extension to compile only with the latest cURL release.  
+  Backwards compatibility with regards to the extension api, has not been 
+  broken. (Sterling)
+- Added the ability to handle user-defined callbacks with cURL, support now for
+  the CURLOPT_WRITEFUNCTION, CURLOPT_PASSWDFUNCTION, CURLOPT_READFUNCTION, and
+  the CURLOPT_HEADERFUNCTION callbacks. (Sterling)
+- Added the CURLOPT_SSL_VERIFYPEER, CURLOPT_CAINFO, CURLOPT_MAXREDIRS, 
+  CURLOPT_FILETIME (and therefore CURLINFO_FILETIME), CURLOPT_RANDOM_FILE, 
+  CURLOPT_EGDSOCKET and CURLOPT_CONNECTTIMEOUT options to curl_setopt(). 
+  (Sterling)
+- Added support for persistent connections with cURL. (Sterling)
+- Fixed a problem in cURL with file descriptors being allocated, but never 
+  closed. (Sterling)
 - Fixed interactive mode (-a). It works again with the same limitations it
   has always had (Andi, Zend Engine)
 - Improved memory manager to use less memory and provide better memory overflow
