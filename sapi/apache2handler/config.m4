@@ -23,7 +23,7 @@ AC_ARG_WITH(apxs2,
     AC_MSG_RESULT([Sorry, I cannot run apxs.  Possible reasons follow:]) 
     AC_MSG_RESULT()
     AC_MSG_RESULT([1. Perl is not installed])
-    AC_MSG_RESULT([2. apxs was not found. Try to pass the path using --with-apxs2handler=/path/to/apxs])
+    AC_MSG_RESULT([2. apxs was not found. Try to pass the path using --with-apxs2=/path/to/apxs])
     AC_MSG_RESULT([3. Apache was not built using --enable-so (the apxs usage page is displayed)])
     AC_MSG_RESULT()
     AC_MSG_RESULT([The output of $APXS follows:])
