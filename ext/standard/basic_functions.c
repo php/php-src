@@ -64,7 +64,7 @@ static pval *user_compare_func_name;
 static HashTable *user_shutdown_function_names;
 
 /* some prototypes for local functions */
-void user_shutdown_function_dtor(pval *user_shutdown_function_name);
+int user_shutdown_function_dtor(pval *user_shutdown_function_name);
 int user_shutdown_function_executor(pval *user_shutdown_function_name);
 void php3_call_shutdown_functions(void);
 
@@ -332,7 +332,7 @@ php3_module_entry basic_functions_module = {
 #ifdef HAVE_PUTENV
 static HashTable putenv_ht;
 
-static void _php3_putenv_destructor(putenv_entry *pe)
+static int _php3_putenv_destructor(putenv_entry *pe)
 {
 	if (pe->previous_value) {
 		putenv(pe->previous_value);
@@ -352,6 +352,7 @@ static void _php3_putenv_destructor(putenv_entry *pe)
 	}
 	efree(pe->putenv_string);
 	efree(pe->key);
+	return 1;
 }
 #endif
 
@@ -395,7 +396,7 @@ int php3_rinit_basic(INIT_FUNC_ARGS)
 {
 	strtok_string = NULL;
 #ifdef HAVE_PUTENV
-	if (_php3_hash_init(&putenv_ht, 1, NULL, (void (*)(void *)) _php3_putenv_destructor, 0) == FAILURE) {
+	if (_php3_hash_init(&putenv_ht, 1, NULL, (int (*)(void *)) _php3_putenv_destructor, 0) == FAILURE) {
 		return FAILURE;
 	}
 #endif
@@ -1776,7 +1777,7 @@ PHP_FUNCTION(call_user_method)
 }
 
 
-void user_shutdown_function_dtor(pval *user_shutdown_function_name)
+int user_shutdown_function_dtor(pval *user_shutdown_function_name)
 {
 	pval retval;
 	CLS_FETCH();
@@ -1785,6 +1786,7 @@ void user_shutdown_function_dtor(pval *user_shutdown_function_name)
 		pval_destructor(&retval);
 	}
 	pval_destructor(user_shutdown_function_name);
+	return 1;
 }
 
 
@@ -1809,7 +1811,7 @@ PHP_FUNCTION(register_shutdown_function)
 	convert_to_string(arg);
 	if (!user_shutdown_function_names) {
 		user_shutdown_function_names = (HashTable *) emalloc(sizeof(HashTable));
-		_php3_hash_init(user_shutdown_function_names, 0, NULL, (void (*)(void *))user_shutdown_function_dtor, 0);
+		_php3_hash_init(user_shutdown_function_names, 0, NULL, (int (*)(void *))user_shutdown_function_dtor, 0);
 	}
 	
 	shutdown_function_name = *arg;
