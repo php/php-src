@@ -1543,6 +1543,8 @@ PHP_METHOD(soapobject, __useproxy)
 	if (proxy_pass) {
 		add_property_stringl(this_ptr,"_proxy_password",proxy_pass,proxy_pass_len, 1);
 	}
+	zend_hash_del(Z_OBJPROP_P(this_ptr), "httpsocket", sizeof("httpsocket"));
+	zend_hash_del(Z_OBJPROP_P(this_ptr), "_use_proxy", sizeof("_use_proxy"));
 }
 
 PHP_METHOD(soapobject, __call)
