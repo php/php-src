@@ -335,8 +335,12 @@ static zval *to_zval_string(encodeType type, xmlNodePtr data)
 	zval *ret;
 	MAKE_STD_ZVAL(ret);
 	FIND_XML_NULL(data, ret);
-	if (data && data->children && data->children->content) {
-		ZVAL_STRING(ret, data->children->content, 1);
+	if (data && data->children) {
+		if (data->children->type == XML_TEXT_NODE && data->children->next == NULL) {
+			ZVAL_STRING(ret, data->children->content, 1);
+		} else {
+			php_error(E_ERROR,"Violation of encoding rules");
+		}
 	} else {
 		ZVAL_EMPTY_STRING(ret);
 	}
@@ -348,9 +352,13 @@ static zval *to_zval_stringr(encodeType type, xmlNodePtr data)
 	zval *ret;
 	MAKE_STD_ZVAL(ret);
 	FIND_XML_NULL(data, ret);
-	if (data && data->children && data->children->content) {
-	    whiteSpace_replace(data->children->content);
-		ZVAL_STRING(ret, data->children->content, 1);
+	if (data && data->children) {
+		if (data->children->type == XML_TEXT_NODE && data->children->next == NULL) {
+			whiteSpace_replace(data->children->content);
+			ZVAL_STRING(ret, data->children->content, 1);
+		} else {
+			php_error(E_ERROR,"Violation of encoding rules");
+		}
 	} else {
 		ZVAL_EMPTY_STRING(ret);
 	}
@@ -362,9 +370,13 @@ static zval *to_zval_stringc(encodeType type, xmlNodePtr data)
 	zval *ret;
 	MAKE_STD_ZVAL(ret);
 	FIND_XML_NULL(data, ret);
-	if (data && data->children && data->children->content) {
-		whiteSpace_collapse(data->children->content);
-		ZVAL_STRING(ret, data->children->content, 1);
+	if (data && data->children) {
+		if (data->children->type == XML_TEXT_NODE && data->children->next == NULL) {
+			whiteSpace_collapse(data->children->content);
+			ZVAL_STRING(ret, data->children->content, 1);
+		} else {
+			php_error(E_ERROR,"Violation of encoding rules");
+		}
 	} else {
 		ZVAL_EMPTY_STRING(ret);
 	}
@@ -435,9 +447,13 @@ static zval *to_zval_double(encodeType type, xmlNodePtr data)
 	MAKE_STD_ZVAL(ret);
 	FIND_XML_NULL(data, ret);
 
-	if (data && data->children && data->children->content) {
-		whiteSpace_collapse(data->children->content);
-		ZVAL_DOUBLE(ret, atof(data->children->content));
+	if (data && data->children) {
+		if (data->children->type == XML_TEXT_NODE && data->children->next == NULL) {
+			whiteSpace_collapse(data->children->content);
+			ZVAL_DOUBLE(ret, atof(data->children->content));
+		} else {
+			php_error(E_ERROR,"Violation of encoding rules");
+		}
 	} else {
 		ZVAL_NULL(ret);
 	}
@@ -450,9 +466,13 @@ static zval *to_zval_long(encodeType type, xmlNodePtr data)
 	MAKE_STD_ZVAL(ret);
 	FIND_XML_NULL(data, ret);
 
-	if (data && data->children && data->children->content) {
-		whiteSpace_collapse(data->children->content);
-		ZVAL_LONG(ret, atol(data->children->content));
+	if (data && data->children) {
+		if (data->children->type == XML_TEXT_NODE && data->children->next == NULL) {
+			whiteSpace_collapse(data->children->content);
+			ZVAL_LONG(ret, atol(data->children->content));
+		} else {
+			php_error(E_ERROR,"Violation of encoding rules");
+		}
 	} else {
 		ZVAL_NULL(ret);
 	}
@@ -465,19 +485,23 @@ static zval *to_zval_ulong(encodeType type, xmlNodePtr data)
 	MAKE_STD_ZVAL(ret);
 	FIND_XML_NULL(data, ret);
 
-	if (data && data->children && data->children->content) {
-		unsigned long val = 0;
-		char *s;
-		whiteSpace_collapse(data->children->content);
-		s = data->children->content;
-		while (*s >= '0' && *s <= '9') {
-			val = (val*10)+(*s-'0');
-			s++;
-		}
-		if ((long)val >= 0) {
-			ZVAL_LONG(ret, val);
+	if (data && data->children) {
+		if (data->children->type == XML_TEXT_NODE && data->children->next == NULL) {
+			unsigned long val = 0;
+			char *s;
+			whiteSpace_collapse(data->children->content);
+			s = data->children->content;
+			while (*s >= '0' && *s <= '9') {
+				val = (val*10)+(*s-'0');
+				s++;
+			}
+			if ((long)val >= 0) {
+				ZVAL_LONG(ret, val);
+			} else {
+				ZVAL_STRING(ret, data->children->content, 1);
+			}
 		} else {
-			ZVAL_STRING(ret, data->children->content, 1);
+			php_error(E_ERROR,"Violation of encoding rules");
 		}
 	} else {
 		ZVAL_NULL(ret);
@@ -561,14 +585,18 @@ static zval *to_zval_bool(encodeType type, xmlNodePtr data)
 	MAKE_STD_ZVAL(ret);
 	FIND_XML_NULL(data, ret);
 
-	if (data && data->children && data->children->content) {
-		whiteSpace_collapse(data->children->content);
-		if (stricmp(data->children->content,"true") == 0 ||
-			stricmp(data->children->content,"t") == 0 ||
-			strcmp(data->children->content,"1") == 0) {
-			ZVAL_BOOL(ret, 1);
+	if (data && data->children) {
+		if (data->children->type == XML_TEXT_NODE && data->children->next == NULL) {
+			whiteSpace_collapse(data->children->content);
+			if (stricmp(data->children->content,"true") == 0 ||
+				stricmp(data->children->content,"t") == 0 ||
+				strcmp(data->children->content,"1") == 0) {
+				ZVAL_BOOL(ret, 1);
+			} else {
+				ZVAL_BOOL(ret, 0);
+			}
 		} else {
-			ZVAL_BOOL(ret, 0);
+			php_error(E_ERROR,"Violation of encoding rules");
 		}
 	} else {
 		ZVAL_NULL(ret);
@@ -800,6 +828,10 @@ static int calc_dimension_12(const char* str)
 	   		i++;
 	   		flag = 1;
 	   	}
+	  } else if (*str == '*') {
+	  	if (i > 0) {
+				php_error(E_ERROR,"* may only be first arraySize value in list");
+			}
 		} else {
 		  flag = 0;
 		}
@@ -825,6 +857,10 @@ static int* get_position_12(int dimension, const char* str)
 	   		flag = 1;
 	   	}
 	   	pos[i] = (pos[i]*10)+(*str-'0');
+	  } else if (*str == '*') {
+	  	if (i > 0) {
+				php_error(E_ERROR,"* may only be first arraySize value in list");
+			}
 		} else {
 		  flag = 0;
 		}
