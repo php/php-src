@@ -668,12 +668,20 @@ static char *php_stream_locate_eol(php_stream *stream TSRMLS_DC)
 	return eol;
 }
 
+/* If buf == NULL, the buffer will be allocated automatically and will be of an
+ * appropriate length to hold the line, regardless of the line length, memory
+ * permitting */
 PHPAPI char *_php_stream_gets(php_stream *stream, char *buf, size_t maxlen TSRMLS_DC)
 {
 	size_t avail = 0;
 	int did_copy = 0;
+	size_t current_buf_size = 0;
+	int grow_mode = 0;
+	char *bufstart = buf;
 
-	if (maxlen == 0)
+	if (buf == NULL)
+		grow_mode = 1;
+	else if (maxlen == 0)
 		return NULL;
 
 	/*
@@ -708,9 +716,21 @@ PHPAPI char *_php_stream_gets(php_stream *stream, char *buf, size_t maxlen TSRML
 				cpysz = avail;
 			}
 
-			if (cpysz >= maxlen - 1) {
-				cpysz = maxlen - 1;
-				done = 1;
+			if (grow_mode) {
+				/* allow room for a NUL. If this realloc is really a realloc
+				 * (ie: second time around), we get an extra byte. In most
+				 * cases, with the default chunk size of 8K, we will only
+				 * incur that overhead once.  When people have lines longer
+				 * than 8K, we waste 1 byte per additional 8K or so.
+				 * That seems acceptable to me, to avoid making this code
+				 * hard to follow */
+				bufstart = erealloc(bufstart, current_buf_size + cpysz + 1);
+				current_buf_size += cpysz + 1;
+			} else {
+				if (cpysz >= maxlen - 1) {
+					cpysz = maxlen - 1;
+					done = 1;
+				}
 			}
 
 			memcpy(buf, readptr, cpysz);
@@ -728,9 +748,15 @@ PHPAPI char *_php_stream_gets(php_stream *stream, char *buf, size_t maxlen TSRML
 			break;
 		} else {
 			/* XXX: Should be fine to always read chunk_size */
-			size_t toread = maxlen - 1;
-			if (toread > stream->chunk_size)
+			size_t toread;
+			
+			if (grow_mode) {
 				toread = stream->chunk_size;
+			} else {
+				toread = maxlen - 1;
+				if (toread > stream->chunk_size)
+					toread = stream->chunk_size;
+			}
 
 			php_stream_fill_read_buffer(stream, toread TSRMLS_CC);
 
@@ -745,7 +771,7 @@ PHPAPI char *_php_stream_gets(php_stream *stream, char *buf, size_t maxlen TSRML
 	
 	buf[0] = '\0';
 
-	return buf;
+	return bufstart;
 }
 
 PHPAPI int _php_stream_flush(php_stream *stream, int closing TSRMLS_DC)
