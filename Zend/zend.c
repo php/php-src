@@ -233,8 +233,8 @@ static void register_standard_class(void)
 	zend_standard_class_def.name_length = sizeof("stdClass") - 1;
 	zend_standard_class_def.name = zend_strndup("stdClass", zend_standard_class_def.name_length);
 	zend_standard_class_def.parent = NULL;
-	zend_hash_init(&zend_standard_class_def.default_properties, 0, NULL, ZVAL_PTR_DTOR, 1);
-	zend_hash_init(&zend_standard_class_def.function_table, 0, NULL, ZEND_FUNCTION_DTOR, 1);
+	zend_hash_init_ex(&zend_standard_class_def.default_properties, 0, NULL, ZVAL_PTR_DTOR, 1, 0);
+	zend_hash_init_ex(&zend_standard_class_def.function_table, 0, NULL, ZEND_FUNCTION_DTOR, 1, 0);
 	zend_standard_class_def.handle_function_call = NULL;
 	zend_standard_class_def.handle_property_get = NULL;
 	zend_standard_class_def.handle_property_set = NULL;
@@ -261,11 +261,11 @@ static void compiler_globals_ctor(zend_compiler_globals *compiler_globals)
 	zend_class_entry tmp_class;
 
 	compiler_globals->function_table = (HashTable *) malloc(sizeof(HashTable));
-	zend_hash_init(compiler_globals->function_table, 100, NULL, ZEND_FUNCTION_DTOR, 1);
+	zend_hash_init_ex(compiler_globals->function_table, 100, NULL, ZEND_FUNCTION_DTOR, 1, 0);
 	zend_hash_copy(compiler_globals->function_table, global_function_table, NULL, &tmp_func, sizeof(zend_function));
 
 	compiler_globals->class_table = (HashTable *) malloc(sizeof(HashTable));
-	zend_hash_init(compiler_globals->class_table, 10, NULL, ZEND_CLASS_DTOR, 1);
+	zend_hash_init_ex(compiler_globals->class_table, 10, NULL, ZEND_CLASS_DTOR, 1, 0);
 	zend_hash_copy(compiler_globals->class_table, global_class_table, (copy_ctor_func_t) zend_class_add_ref, &tmp_class, sizeof(zend_class_entry));
 
 	zend_set_default_compile_time_values(CLS_C);
@@ -366,10 +366,10 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions, i
 
 	GLOBAL_FUNCTION_TABLE = (HashTable *) malloc(sizeof(HashTable));
 	GLOBAL_CLASS_TABLE = (HashTable *) malloc(sizeof(HashTable));
-	zend_hash_init(GLOBAL_FUNCTION_TABLE, 100, NULL, ZEND_FUNCTION_DTOR, 1);
-	zend_hash_init(GLOBAL_CLASS_TABLE, 10, NULL, ZEND_CLASS_DTOR, 1);
+	zend_hash_init_ex(GLOBAL_FUNCTION_TABLE, 100, NULL, ZEND_FUNCTION_DTOR, 1, 0);
+	zend_hash_init_ex(GLOBAL_CLASS_TABLE, 10, NULL, ZEND_CLASS_DTOR, 1, 0);
 	register_standard_class();
-	zend_hash_init(&module_registry, 50, NULL, ZEND_MODULE_DTOR, 1);
+	zend_hash_init_ex(&module_registry, 50, NULL, ZEND_MODULE_DTOR, 1, 0);
 	zend_init_rsrc_list_dtors();
 
 	/* This zval can be used to initialize allocate zval's to an uninit'ed value */

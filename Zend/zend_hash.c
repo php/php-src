@@ -108,14 +108,16 @@ static void _zend_is_inconsistent(HashTable *ht, char *file, int line)
 #define SET_INCONSISTENT(n)
 #endif
 
-#define HASH_APPLY_BEGIN(ht)														\
-	if ((ht)->nApplyCount>=3) {														\
-		zend_error(E_WARNING, "Nesting level too deep - recursive dependency?");	\
-		return;																		\
-	}																				\
-	(ht)->nApplyCount++;
+#define HASH_APPLY_BEGIN(ht)															\
+	if ((ht)->bApplyProtection) {														\
+		if ((ht)->nApplyCount>=3) {														\
+			zend_error(E_WARNING, "Nesting level too deep - recursive dependency?");	\
+			return;																		\
+		}																				\
+		(ht)->nApplyCount++;															\
+	}
 
-#define HASH_APPLY_END(ht)															\
+#define HASH_APPLY_END(ht)																\
 	(ht)->nApplyCount--;
 
 
@@ -216,8 +218,26 @@ ZEND_API int zend_hash_init(HashTable *ht, uint nSize, hash_func_t pHashFunction
 	ht->pInternalPointer = NULL;
 	ht->persistent = persistent;
 	ht->nApplyCount = 0;
+	ht->bApplyProtection = 1;
 	return SUCCESS;
 }
+
+
+ZEND_API int zend_hash_init_ex(HashTable *ht, uint nSize, hash_func_t pHashFunction, dtor_func_t pDestructor, int persistent, zend_bool bApplyProtection)
+{
+	int retval = zend_hash_init(ht, nSize, pHashFunction, pDestructor, persistent);
+
+	ht->bApplyProtection = bApplyProtection;
+	return retval;
+}
+
+
+ZEND_API void zend_hash_set_apply_protection(HashTable *ht, zend_bool bApplyProtection)
+{
+	ht->bApplyProtection = bApplyProtection;
+}
+
+
 
 ZEND_API int zend_hash_add_or_update(HashTable *ht, char *arKey, uint nKeyLength, void *pData, uint nDataSize, void **pDest, int flag)
 {
