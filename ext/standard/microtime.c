@@ -18,6 +18,8 @@
 
 /* $Id$ */
 
+#include "php.h"
+
 #include <stdlib.h>
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
@@ -28,7 +30,6 @@
 #include <sys/resource.h>
 #endif
 
-#include "php.h"
 #include "microtime.h"
 #include "snprintf.h"
 
