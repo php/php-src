@@ -1997,42 +1997,54 @@ PHP_FUNCTION(array_count_values)
    Return input as a new array with the order of the entries reversed */
 PHP_FUNCTION(array_reverse)
 {
-	zval	   **input,			/* Input array */
-			   **entry;			/* An entry in the input array */
+	zval	   **input,			  /* Input array */
+			   **z_preserve_keys, /* Flag: whether to preserve keys */
+			   **entry;			  /* An entry in the input array */
 	char		*string_key;
 	ulong		 num_key;
+	zend_bool	 preserve_keys = 0;
 	
 	/* Get arguments and do error-checking */
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &input) == FAILURE) {
+	if (ZEND_NUM_ARGS() < 1 || ZEND_NUM_ARGS() > 2 ||
+		zend_get_parameters_ex(ZEND_NUM_ARGS(), &input, &z_preserve_keys) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
-	if ((*input)->type != IS_ARRAY) {
+	if (Z_TYPE_PP(input) != IS_ARRAY) {
 		php_error(E_WARNING, "Argument to array_reverse() should be an array");
 		return;
+	}
+
+	if (ZEND_NUM_ARGS() > 1) {
+		convert_to_boolean_ex(z_preserve_keys);
+		preserve_keys = Z_LVAL_PP(z_preserve_keys);
 	}
 	
 	/* Initialize return array */
 	array_init(return_value);
 	
-	zend_hash_internal_pointer_end((*input)->value.ht);
-	while(zend_hash_get_current_data((*input)->value.ht, (void **)&entry) == SUCCESS) {
+	zend_hash_internal_pointer_end(Z_ARRVAL_PP(input));
+	while(zend_hash_get_current_data(Z_ARRVAL_PP(input), (void **)&entry) == SUCCESS) {
 		(*entry)->refcount++;
 		
-		switch (zend_hash_get_current_key((*input)->value.ht, &string_key, &num_key)) {
+		switch (zend_hash_get_current_key(Z_ARRVAL_PP(input), &string_key, &num_key)) {
 			case HASH_KEY_IS_STRING:
-				zend_hash_update(return_value->value.ht, string_key, strlen(string_key)+1,
+				zend_hash_update(Z_ARRVAL_P(return_value), string_key, strlen(string_key)+1,
 								 entry, sizeof(zval *), NULL);
 				efree(string_key);
 				break;
 
 			case HASH_KEY_IS_LONG:
-				zend_hash_next_index_insert(return_value->value.ht,
-											entry, sizeof(zval *), NULL);
+				if (preserve_keys)
+					zend_hash_index_update(Z_ARRVAL_P(return_value), num_key,
+										   entry, sizeof(zval *), NULL);
+				else
+					zend_hash_next_index_insert(Z_ARRVAL_P(return_value),
+												entry, sizeof(zval *), NULL);
 				break;
 		}
 		
-		zend_hash_move_backwards((*input)->value.ht);
+		zend_hash_move_backwards(Z_ARRVAL_PP(input));
 	}
 }
 /* }}} */
