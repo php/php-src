@@ -13,9 +13,9 @@ class PEAR_Command_Registry extends PEAR_Command_Common
      *
      * @access public
      */
-    function PEAR_Command_Registry(&$ui)
+    function PEAR_Command_Registry(&$ui, &$config)
     {
-        parent::PEAR_Command_Common($ui);
+        parent::PEAR_Command_Common($ui, $config);
     }
 
     // }}}
@@ -58,19 +58,30 @@ class PEAR_Command_Registry extends PEAR_Command_Common
                 $reg = new PEAR_Registry($cf->get('php_dir'));
                 $installed = $reg->packageInfo();
                 $i = $j = 0;
-                heading("Installed packages:");
+                $this->ui->startTable(
+                    array('caption' => 'Installed packages:',
+                          'border' => true));
                 foreach ($installed as $package) {
                     if ($i++ % 20 == 0) {
+                        $this->ui->tableRow(array('Package', 'Version', 'State'),
+                                        array('bold' => true));
+/*
                         if ($j++ > 0) {
                             print "\n";
                         }
                         printf("%-20s %-10s %s\n",
                                "Package", "Version", "State");
                         print str_repeat("-", 75)."\n";
+*/
                     }
+                    $this->ui->tableRow(array($package['package'], $package['version'], $pacage['release_state']));
+
+/*
                     printf("%-20s %-10s %s\n", $package['package'],
                            $package['version'], $package['release_state']);
+*/
                 }
+                $this->ui->endTable();
                 break;
             }
             default: {
