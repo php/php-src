@@ -3324,7 +3324,7 @@ int php_tag_find(char *tag, int len, char *set) {
 PHPAPI void php_strip_tags(char *rbuf, int len, int *stateptr, char *allow, int allow_len)
 {
 	char *tbuf, *buf, *p, *tp, *rp, c, lc;
-	int br, i=0;
+	int br, i=0, depth=0;
 	int state = 0;
 
 	if (stateptr)
@@ -3353,6 +3353,8 @@ PHPAPI void php_strip_tags(char *rbuf, int len, int *stateptr, char *allow, int 
 					if(allow) {
 						*(tp++) = '<';
 					}
+				} else if (state) {
+					depth++;
 				}
 				break;
 
@@ -3383,6 +3385,11 @@ PHPAPI void php_strip_tags(char *rbuf, int len, int *stateptr, char *allow, int 
 				break;	
 
 			case '>':
+				if (depth) {
+					depth--;
+					break;
+				}
+			
 				if (state == 1) {
 					lc = '>';
 					state = 0;
