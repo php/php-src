@@ -213,7 +213,6 @@ struct _zend_executor_globals {
 
 struct _zend_alloc_globals {
 	zend_mem_header *head;		/* standard list */
-	zend_mem_header *phead;		/* persistent list */
 	void *cache[MAX_CACHED_MEMORY][MAX_CACHED_ENTRIES];
 	unsigned int cache_count[MAX_CACHED_MEMORY];
 	void *fast_cache_list_head[MAX_FAST_CACHE_TYPES];
