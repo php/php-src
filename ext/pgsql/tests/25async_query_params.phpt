@@ -62,7 +62,7 @@ if ($version['protocol'] >= 3) {
 	pg_last_oid($result);
 	pg_free_result($result);
 }
-pg_close($db)
+pg_close($db);
 
 echo "OK";
 ?>

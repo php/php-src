@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2004, PHP 5.1.0
+- Changed pg_unescape_bytea() to use the libpq version of PQunescapeBytea if
+  it is available.
 - Moved extensions to PECL:
   . ext/cpdf        (Tony, Derick)
   . ext/dio         (Jani, Derick)

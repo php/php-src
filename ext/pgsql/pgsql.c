@@ -3414,6 +3414,7 @@ PHP_FUNCTION(pg_escape_bytea)
 }
 /* }}} */
 
+#if !HAVE_PQUNESCAPEBYTEA
 /* PQunescapeBytea() from PostgreSQL 7.3 to provide bytea unescape feature to 7.2 users.
    Renamed to php_pgsql_unescape_bytea() */
 /*
@@ -3517,12 +3518,13 @@ static unsigned char * php_pgsql_unescape_bytea(unsigned char *strtext, size_t *
 	*retbuflen = buflen;
 	return buffer;
 }
+#endif
 
 /* {{{ proto string pg_unescape_bytea(string data)
    Unescape binary for bytea type  */
 PHP_FUNCTION(pg_unescape_bytea)
 {
-	char *from = NULL, *to = NULL;
+	char *from = NULL, *to = NULL, *tmp = NULL;
 	size_t to_len;
 	int from_len;
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s",
@@ -3530,7 +3532,13 @@ PHP_FUNCTION(pg_unescape_bytea)
 		return;
 	}
 
+#if HAVE_PQUNESCAPEBYTEA
+	tmp = (char *)PQunescapeBytea((unsigned char*)from, &to_len);
+	to = estrndup(tmp, to_len);
+	PQfreemem(tmp);
+#else
 	to = (char *)php_pgsql_unescape_bytea((unsigned char*)from, &to_len);
+#endif
 	if (!to) {
 		RETURN_FALSE;
 	}
