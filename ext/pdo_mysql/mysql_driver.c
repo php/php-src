@@ -179,6 +179,45 @@ static int mysql_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, int unquote
 	return 1;
 }
 
+static int mysql_handle_begin(pdo_dbh_t *dbh TSRMLS_DC)
+{
+	return 0 <= mysql_handle_doer(dbh, ZEND_STRL("START TRANSACTION") TSRMLS_CC);
+}
+
+static int mysql_handle_commit(pdo_dbh_t *dbh TSRMLS_DC)
+{
+	return 0 <= mysql_handle_doer(dbh, ZEND_STRL("COMMIT") TSRMLS_CC);
+}
+
+static int mysql_handle_rollback(pdo_dbh_t *dbh TSRMLS_DC)
+{
+	return 0 <= mysql_handle_doer(dbh, ZEND_STRL("ROLLBACK") TSRMLS_CC);
+}
+
+static int mysql_handle_autocommit(pdo_dbh_t *dbh TSRMLS_DC)
+{
+	return 0 <= mysql_handle_doer(dbh, ZEND_STRL("SET SESSION AUTOCOMMIT=0") TSRMLS_CC);
+}
+
+static int pdo_mysql_set_attribute(pdo_dbh_t *dbh, long attr, zval *val TSRMLS_DC)
+{
+	switch (attr) {
+	case PDO_ATTR_AUTOCOMMIT:
+		
+		convert_to_boolean(val);
+	
+		/* ignore if the new value equals the old one */			
+		if (dbh->auto_commit ^ Z_BVAL_P(val)) {
+			dbh->auto_commit = Z_BVAL_P(val);
+			mysql_handle_autocommit(dbh);
+		}
+		return 1;
+		
+	default:
+		return 0;
+	}
+}
+
 static int pdo_mysql_get_attribute(pdo_dbh_t *dbh, long attr, zval *return_value TSRMLS_DC)
 {
 	pdo_mysql_db_handle *H = (pdo_mysql_db_handle *)dbh->driver_data;
@@ -208,6 +247,10 @@ static int pdo_mysql_get_attribute(pdo_dbh_t *dbh, long attr, zval *return_value
 		}
 			break;
 
+		case PDO_ATTR_AUTOCOMMIT:
+			ZVAL_LONG(return_value, dbh->auto_commit);
+			return 1;
+
 		default:
 			return 0;	
 	}
@@ -215,15 +258,16 @@ static int pdo_mysql_get_attribute(pdo_dbh_t *dbh, long attr, zval *return_value
 	return 1;
 }
 
+
 static struct pdo_dbh_methods mysql_methods = {
 	mysql_handle_closer,
 	mysql_handle_preparer,
 	mysql_handle_doer,
 	mysql_handle_quoter,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
+	mysql_handle_begin,
+	mysql_handle_commit,
+	mysql_handle_rollback,
+	pdo_mysql_set_attribute,
 	pdo_mysql_last_insert_id,
 	pdo_mysql_fetch_error_func,
 	pdo_mysql_get_attribute,
@@ -270,6 +314,8 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 			pdo_mysql_error(dbh);
 			goto cleanup;
 		}
+
+		mysql_handle_autocommit(dbh);
 	}
 
 #ifndef PHP_WIN32
