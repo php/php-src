@@ -26,14 +26,14 @@
 #define USE_PATH	1
 #define IGNORE_URL	2
 /* There's no USE_URL. */
-#if WIN32|WINNT
+#if PHP_WIN32
 # define IGNORE_URL_WIN 2
 #else
 # define IGNORE_URL_WIN 0
 #endif
 #define ENFORCE_SAFE_MODE 4
 
-#if WIN32|WINNT
+#if PHP_WIN32
 # define SOCK_ERR INVALID_SOCKET
 # define SOCK_CONN_ERR SOCKET_ERROR
 # define SOCK_RECV_ERR SOCKET_ERROR
