@@ -203,7 +203,10 @@ static void real_result_dtor(struct php_sqlite_result *res)
 	if (res->vm) {
 		sqlite_finalize(res->vm, NULL);
 	}
-	
+
+	if (!res->buffered) {
+		res->nrows = 1; /* only one row is stored */
+	}
 	for (i = 0; i < res->nrows; i++) {
 		base = i * res->ncolumns;
 		for (j = 0; j < res->ncolumns; j++) {
@@ -262,7 +265,7 @@ PHP_RSHUTDOWN_FUNCTION(sqlite)
 static void php_sqlite_generic_function_callback(sqlite_func *func, int argc, const char **argv)
 {
 	zval *retval = NULL;
-	zval ***zargs;
+	zval ***zargs = NULL;
 	zval funcname;
 	int i, res;
 	char *callable = NULL, *errbuf=NULL;
@@ -345,7 +348,7 @@ static void php_sqlite_generic_function_callback(sqlite_func *func, int argc, co
 static void php_sqlite_function_callback(sqlite_func *func, int argc, const char **argv)
 {
 	zval *retval = NULL;
-	zval ***zargs;
+	zval ***zargs = NULL;
 	int i, res;
 	struct php_sqlite_agg_functions *funcs = sqlite_user_data(func);
 	TSRMLS_FETCH();
@@ -801,6 +804,87 @@ PHP_FUNCTION(sqlite_close)
 }
 /* }}} */
 
+/* {{{ */
+int php_sqlite_fetch(struct php_sqlite_result *rres TSRMLS_DC)
+{
+	const char **rowdata, **colnames;
+	int ret, i, base;
+	char *errtext = NULL;
+
+next_row:
+	ret = sqlite_step(rres->vm, &rres->ncolumns, &rowdata, &colnames);
+	if (!rres->nrows) {
+		/* first row - lets copy the column names */
+		rres->col_names = safe_emalloc(rres->ncolumns, sizeof(char *), 0);
+		for (i = 0; i < rres->ncolumns; i++) {
+			rres->col_names[i] = estrdup(colnames[i]);
+		}
+		if (!rres->buffered) {
+			/* non buffered mode - also fetch memory for on single row */
+			rres->table = safe_emalloc(rres->ncolumns, sizeof(char *), 0);
+		}
+	}
+
+	switch (ret) {
+		case SQLITE_ROW:
+			if (rres->buffered) {
+				/* add the row to our collection */
+				if (rres->nrows + 1 >= rres->alloc_rows) {
+					rres->alloc_rows = rres->alloc_rows ? rres->alloc_rows * 2 : 16;
+					rres->table = erealloc(rres->table, rres->alloc_rows * rres->ncolumns * sizeof(char *));
+				}
+				base = rres->nrows * rres->ncolumns;
+				for (i = 0; i < rres->ncolumns; i++) {
+					if (rowdata[i]) {
+						rres->table[base + i] = estrdup(rowdata[i]);
+					} else {
+						rres->table[base + i] = NULL;
+					}
+				}
+				rres->nrows++;
+				goto next_row;
+			} else {
+				/* non buffered: only fetch one row but first free data if not first row */
+				if (rres->nrows++) {
+					for (i = 0; i < rres->ncolumns; i++) {
+						if (rres->table[i]) {
+							efree(rres->table[i]);
+						}
+					}
+				}
+				for (i = 0; i < rres->ncolumns; i++) {
+					if (rowdata[i]) {
+						rres->table[i] = estrdup(rowdata[i]);
+					} else {
+						rres->table[i] = NULL;
+					}
+				}
+			}
+			ret = SQLITE_OK;
+			break;
+
+		case SQLITE_BUSY:
+		case SQLITE_ERROR:
+		case SQLITE_MISUSE:
+		default:
+			/* fall through to finalize */
+			;
+
+		case SQLITE_DONE:
+			if (rres->vm) {
+				ret = sqlite_finalize(rres->vm, &errtext);
+			}
+			rres->vm = NULL;
+			if (ret != SQLITE_OK) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", errtext);
+				sqlite_freemem(errtext);
+			}
+			break;
+	}
+	return ret;
+}
+/* }}} */
+
 /* {{{ proto resource sqlite_unbuffered_query(string query, resource db)
    Execute a query that does not prefetch and buffer all data */
 PHP_FUNCTION(sqlite_unbuffered_query)
@@ -846,7 +930,16 @@ PHP_FUNCTION(sqlite_unbuffered_query)
 	rres = (struct php_sqlite_result*)emalloc(sizeof(*rres));
 	memcpy(rres, &res, sizeof(*rres));
 
-	/* now the result set is ready for stepping */
+	/* now the result set is ready for stepping: get first row */
+	ret = php_sqlite_fetch(rres TSRMLS_CC);
+
+	db->last_err_code = ret;
+
+	if (ret != SQLITE_OK) {
+		real_result_dtor(rres);
+		RETURN_FALSE;
+	}
+	
 	rres->curr_row = 0;
 
 	ZEND_REGISTER_RESOURCE(return_value, rres, le_sqlite_result);
@@ -862,10 +955,9 @@ PHP_FUNCTION(sqlite_query)
 	char *sql;
 	long sql_len;
 	struct php_sqlite_result res, *rres;
-	int ret, i, base;
+	int ret;
 	char *errtext = NULL;
 	const char *tail;
-	const char **rowdata, **colnames;
 
 	if (FAILURE == zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET,
 				ZEND_NUM_ARGS() TSRMLS_CC, "sr", &sql, &sql_len, &zdb) && 
@@ -902,56 +994,12 @@ PHP_FUNCTION(sqlite_query)
 	rres = (struct php_sqlite_result*)emalloc(sizeof(*rres));
 	memcpy(rres, &res, sizeof(*rres));
 
-next_row:
-	ret = sqlite_step(rres->vm, &rres->ncolumns, &rowdata, &colnames);
+	ret = php_sqlite_fetch(rres TSRMLS_CC);
+
 	db->last_err_code = ret;
-
-	switch (ret) {
-		case SQLITE_ROW:
-			/* add the row to our collection */
-			if (rres->nrows + 1 >= rres->alloc_rows) {
-				rres->alloc_rows = rres->alloc_rows ? rres->alloc_rows * 2 : 16;
-				rres->table = erealloc(rres->table, rres->alloc_rows * rres->ncolumns * sizeof(char *));
-			}
-
-			base = rres->nrows * rres->ncolumns;
-			for (i = 0; i < rres->ncolumns; i++) {
-				if (rowdata[i]) {
-					rres->table[base + i] = estrdup(rowdata[i]);
-				} else {
-					rres->table[base + i] = NULL;
-				}
-			}
-
-			rres->nrows++;
-			goto next_row;
-
-		case SQLITE_DONE:
-			/* no more rows - lets copy the column names */
-			rres->col_names = emalloc(rres->ncolumns * sizeof(char *));
-			for (i = 0; i < rres->ncolumns; i++) {
-				rres->col_names[i] = estrdup(colnames[i]);
-			}
-			break;
-
-		case SQLITE_BUSY:
-		case SQLITE_ERROR:
-		case SQLITE_MISUSE:
-		default:
-			/* fall through to finalize */
-			;
-	}
-
-	ret = sqlite_finalize(rres->vm, &errtext);
-	db->last_err_code = ret;
-	rres->vm = NULL;
 
 	if (ret != SQLITE_OK) {
-
 		real_result_dtor(rres);
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", errtext);
-		sqlite_freemem(errtext);
-		
 		RETURN_FALSE;
 	}
 	
@@ -968,9 +1016,8 @@ PHP_FUNCTION(sqlite_fetch_array)
 	zval *zres;
 	struct php_sqlite_result *res;
 	int mode = PHPSQLITE_BOTH;
-	int j, ret;
+	int j;
 	const char **rowdata, **colnames;
-	char *errtext = NULL;
 	zend_bool decode_binary = 1;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|lb", &zres, &mode, &decode_binary)) {
@@ -979,47 +1026,16 @@ PHP_FUNCTION(sqlite_fetch_array)
 
 	ZEND_FETCH_RESOURCE(res, struct php_sqlite_result *, &zres, -1, "sqlite result", le_sqlite_result);
 	
+	/* check range of the row */
+	if (res->curr_row >= res->nrows) {
+		/* no more */
+		RETURN_FALSE;
+	}
+	colnames = (const char**)res->col_names;
 	if (res->buffered) {
-		/* check range of the row */
-		if (res->curr_row >= res->nrows) {
-			/* no more */
-			RETURN_FALSE;
-		}
-
 		rowdata = (const char**)&res->table[res->curr_row * res->ncolumns];
-		colnames = (const char**)res->col_names;
-		
 	} else {
-		/* unbuffered; we need to manually fetch the row now */
-
-		if (res->vm == NULL) {
-			/* sanity check */
-			RETURN_FALSE;
-		}
-		
-		ret = sqlite_step(res->vm, &res->ncolumns, &rowdata, &colnames);
-		switch (ret) {
-			case SQLITE_ROW:
-				/* safe to fall through */
-				break;
-				
-			case SQLITE_DONE:
-				/* no more rows */
-				RETURN_FALSE;
-				
-			case SQLITE_ERROR:
-			case SQLITE_MISUSE:
-			case SQLITE_BUSY:
-			default:
-				/* error; lets raise the error now */
-				ret = sqlite_finalize(res->vm, &errtext);
-				res->vm = NULL;
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", errtext);
-				sqlite_freemem(errtext);
-				RETURN_FALSE;
-		}
-
-		/* we got another row */
+		rowdata = (const char**)res->table;
 	}
 
 	/* now populate the result */
@@ -1037,6 +1053,8 @@ PHP_FUNCTION(sqlite_fetch_array)
 			decoded = (char*)rowdata[j];
 			if (decoded) {
 				decoded_len = strlen(decoded);
+			} else {
+				decoded_len = 0;
 			}
 		}
 		
@@ -1066,6 +1084,10 @@ PHP_FUNCTION(sqlite_fetch_array)
 		}
 	}
 
+	if (!res->buffered) {
+		/* non buffered: fetch next row */
+		php_sqlite_fetch(res TSRMLS_CC);
+	}
 	/* advance the row pointer */
 	res->curr_row++;
 }
@@ -1162,13 +1184,7 @@ PHP_FUNCTION(sqlite_num_fields)
 
 	ZEND_FETCH_RESOURCE(res, struct php_sqlite_result *, &zres, -1, "sqlite result", le_sqlite_result);
 
-	if (res->buffered) {
-		RETURN_LONG(res->ncolumns);
-	} else {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Number of fields not available for unbuffered queries");
-		RETURN_FALSE;
-	}
-	
+	RETURN_LONG(res->ncolumns);
 }
 /* }}} */
 
@@ -1186,17 +1202,12 @@ PHP_FUNCTION(sqlite_field_name)
 
 	ZEND_FETCH_RESOURCE(res, struct php_sqlite_result *, &zres, -1, "sqlite result", le_sqlite_result);
 
-	if (res->buffered) {
-		if (field < 0 || field >= res->ncolumns) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "field %d out of range", field);
-			RETURN_FALSE;
-		}
-
-		RETURN_STRING(res->col_names[field], 1);
-	} else {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Field name not available for unbuffered queries");
+	if (field < 0 || field >= res->ncolumns) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "field %d out of range", field);
 		RETURN_FALSE;
 	}
+
+	RETURN_STRING(res->col_names[field], 1);
 }
 /* }}} */
 
