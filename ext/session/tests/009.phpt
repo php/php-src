@@ -3,6 +3,7 @@ unset($_SESSION["name"]); should work with register_globals=off
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --INI--
+register_long_arrays=1
 session.use_cookies=0
 session.cache_limiter=
 register_globals=0

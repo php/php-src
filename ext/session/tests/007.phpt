@@ -3,6 +3,7 @@ bug compatibility: unset($c) with enabled register_globals
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --INI--
+register_long_arrays=1
 session.use_cookies=0
 session.cache_limiter=
 register_globals=1
