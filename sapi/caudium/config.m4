@@ -37,12 +37,12 @@ AC_ARG_WITH(caudium,
 	*** Pike include dir:      $PIKE_INCLUDE_DIR
 	*** Pike version:          $PIKE_VERSION"
     PIKE_INCLUDE_DIR=" -I$PIKE_INCLUDE_DIR "
+	
+    dnl Always use threads since thread-free support really blows.
+    PHP_BUILD_THREAD_SAFE
+
 ])
 AC_MSG_RESULT($RESULT)
-
-dnl Always use threads since thread-free support really blows.
-
-PHP_BUILD_THREAD_SAFE
 
 dnl ## Local Variables:
 dnl ## tab-width: 4
