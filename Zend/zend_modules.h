@@ -23,6 +23,7 @@
 #define MODULES_H
 
 #include "zend.h"
+#include "zend_compile.h"
 
 #define INIT_FUNC_ARGS		int type, int module_number TSRMLS_DC
 #define INIT_FUNC_ARGS_PASSTHRU	type, module_number TSRMLS_CC
