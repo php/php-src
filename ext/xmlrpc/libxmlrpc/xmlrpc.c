@@ -43,6 +43,9 @@ static const char rcsid[] = "#(@) $Id$";
  *   9/1999 - 10/2000
  * HISTORY
  *   $Log$
+ *   Revision 1.4  2002/07/05 04:43:53  danda
+ *   merged in updates from SF project.  bring php repository up to date with xmlrpc-epi version 0.51
+ *
  *   Revision 1.22  2002/03/09 23:15:44  danda
  *   add fault interrogation funcs
  *
@@ -119,6 +122,7 @@ static const char rcsid[] = "#(@) $Id$";
 #include <string.h>
 #include <stdarg.h>
 #include <time.h>
+#include <ctype.h>
 
 #include "queue.h"
 #include "xmlrpc.h"
@@ -701,7 +705,7 @@ static XMLRPC_VALUE map_expat_errors(XML_ELEM_ERROR error) {
       XMLRPC_ERROR_CODE code;
       char buf[1024];
       snprintf(buf, sizeof(buf), 
-               "error occurred at line %i, column %i, byte index %i", 
+               "error occurred at line %ld, column %ld, byte index %ld", 
 					 error->line, error->column, error->byte_index);
 
       /* expat specific errors */
@@ -810,13 +814,6 @@ XMLRPC_VALUE XMLRPC_CreateValueEmpty() {
       simplestring_init(&v->str);
    }
    return v;
-}
-
-static const char* get_string(const char* buf, int bDup) {
-   if(bDup) {
-      return strdup(buf);
-   }
-   return buf;
 }
 
 /*******/
@@ -1044,8 +1041,6 @@ XMLRPC_VALUE XMLRPC_CreateVector(const char* id, XMLRPC_VECTOR_TYPE type) {
 
    val = XMLRPC_CreateValueEmpty();
    if(val) {
-      XMLRPC_VECTOR *pSIV = NULL;
-
       if(XMLRPC_SetIsVector(val, type)) {
          if(id) {
             const char *pSVI = NULL;
@@ -1605,6 +1600,8 @@ XMLRPC_VALUE XMLRPC_DupValueNew (XMLRPC_VALUE xSource) {
 					qi = Q_Iter_Next_F (qi);
 				}
 			}
+			break;
+		default:
 			break;
 		}
 	}
@@ -2444,6 +2441,7 @@ const char* type_to_str(XMLRPC_VALUE_TYPE type, XMLRPC_VECTOR_TYPE vtype) {
                 return "struct";
           }
     }
+    return "unknown";
 }
 
 /****f* VALUE/XMLRPC_ServerFindMethod
