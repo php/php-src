@@ -58,6 +58,7 @@ typedef struct _znode {
 			zend_uint var;	/* dummy */
 			zend_uint type;
 		} EA;
+		zend_namespace *previously_active_namespace;
 	} u;
 } znode;
 
@@ -645,7 +646,7 @@ int zendlex(znode *zendlval TSRMLS_DC);
 
 #define ZEND_RAISE_ABSTRACT_ERROR	142
 
-#define ZEND_DECLARE_NAMESPACE  143
+#define ZEND_START_NAMESPACE		143
 
 /* end of block */
 

@@ -3927,55 +3927,27 @@ int zend_nop_handler(ZEND_OPCODE_HANDLER_ARGS)
 	NEXT_OPCODE();
 }
 
-int zend_declare_namespace_handler(ZEND_OPCODE_HANDLER_ARGS)
+int zend_start_namespace_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
-	zend_op_array *new_op_array=NULL;
-	zval **original_return_value = EG(return_value_ptr_ptr);
-	zval *namespace_name = get_zval_ptr(&EX(opline)->op1, EX(Ts), &EG(free_op1), BP_VAR_R);
+	zval *namespace_name;
 	zend_namespace **pns;
-	zval *saved_object;
-	zend_function *saved_function;
-	zend_namespace *active_namespace = EG(active_namespace);
 
-	if (Z_TYPE_P(namespace_name) != IS_STRING) {
-		zend_error(E_ERROR, "Internal error: Invalid type in namespace definition - %d", Z_TYPE_P(namespace_name));
+	if(EX(opline)->op1.op_type != IS_UNUSED) {
+		namespace_name= get_zval_ptr(&EX(opline)->op1, EX(Ts), &EG(free_op1), BP_VAR_R);
+		if (Z_TYPE_P(namespace_name) != IS_STRING) {
+			zend_error(E_ERROR, "Internal error: Invalid type in namespace definition - %d", Z_TYPE_P(namespace_name));
+		}
+
+		if(zend_hash_find(&EG(global_namespace_ptr)->class_table, Z_STRVAL_P(namespace_name), Z_STRLEN_P(namespace_name)+1, (void **)&pns) != SUCCESS || (*pns)->type != ZEND_NAMESPACE) {
+			zend_error(E_ERROR, "Internal error: Cannot locate namespace '%s'", Z_STRVAL_P(namespace_name));
+		}
+	} else {
+		pns = &EG(global_namespace_ptr);
 	}
 
-	if(zend_hash_find(&EG(global_namespace_ptr)->class_table, Z_STRVAL_P(namespace_name), Z_STRLEN_P(namespace_name)+1, (void **)&pns) != SUCCESS || (*pns)->type != ZEND_NAMESPACE) {
-		zend_error(E_ERROR, "Internal error: Cannot locate namespace '%s'", Z_STRVAL_P(namespace_name));
+	if(EG(active_namespace) != *pns) {
+		zend_switch_namespace(*pns TSRMLS_CC);
 	}
-
-	new_op_array = (zend_op_array *)(*pns)->constructor;
-	
-	FREE_OP(EX(Ts), &EX(opline)->op1, EG(free_op1));
-	EX_T(EX(opline)->result.u.var).var.ptr_ptr = &EX_T(EX(opline)->result.u.var).var.ptr;
-
-	EG(return_value_ptr_ptr) = EX_T(EX(opline)->result.u.var).var.ptr_ptr;
-	EG(active_op_array) = new_op_array;
-	EX_T(EX(opline)->result.u.var).var.ptr = NULL;
-
-	saved_object = EX(object);
-	saved_function = EX(function_state).function;
-
-	EX(function_state).function = (zend_function *) new_op_array;
-	EX(object) = NULL;
-		
-	zend_execute(new_op_array TSRMLS_CC);
-		
-	if(EG(active_namespace) != active_namespace) {
-		zend_switch_namespace(active_namespace TSRMLS_CC);
-	}
-	EX(function_state).function = saved_function;
-	EX(object) = saved_object;
-	
-	if (EX_T(EX(opline)->result.u.var).var.ptr) {
-		zval_ptr_dtor(&EX_T(EX(opline)->result.u.var).var.ptr);
-	} 
-	
-	EG(opline_ptr) = &EX(opline);
-	EG(active_op_array) = op_array;
-	EG(function_state_ptr) = &EX(function_state);
-	EG(return_value_ptr_ptr) = original_return_value;
 	NEXT_OPCODE();
 }
 
@@ -4153,7 +4125,7 @@ void zend_init_opcodes_handlers()
 	zend_opcode_handlers[ZEND_DECLARE_FUNCTION] = zend_declare_function_handler;
 
 	zend_opcode_handlers[ZEND_RAISE_ABSTRACT_ERROR] = zend_raise_abstract_error_handler;
-	zend_opcode_handlers[ZEND_DECLARE_NAMESPACE] = zend_declare_namespace_handler;
+	zend_opcode_handlers[ZEND_START_NAMESPACE] = zend_start_namespace_handler;
 }
 
 /*
