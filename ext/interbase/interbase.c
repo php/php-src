@@ -1856,7 +1856,7 @@ static int _php_ibase_var_zval(zval *val, void *data, int type, int len, int sca
 				if (n >= 0) {
 					Z_STRLEN_P(val) = sprintf (string_data, 
 						"%" ISC_INT64_FORMAT "d.%0*" ISC_INT64_FORMAT "d", n / f, -scale, n % f);
-				} else if (n < -f) {
+				} else if (n <= -f) {
 					Z_STRLEN_P(val) = sprintf (string_data,
 						"%" ISC_INT64_FORMAT "d.%0*" ISC_INT64_FORMAT "d", n / f, -scale, -n % f);
 				} else {
