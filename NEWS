@@ -2,6 +2,7 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2004, PHP 5 RC 1
 - Preserve class name casing for userspace classes. (Marcus)
+- Fixed bug #26723 (domNode::appendChild() changes child node namespace) (Rob)
 - Fixed bug #26697 (calling class_exists on a nonexistent class in __autoload 
   results in segfault). (Marcus)
 - Fixed bug #26695 (Reflection API does not recognize mixed-case class hints).
