@@ -190,3 +190,24 @@ AC_DEFUN(PHP_SOLARIS_PIC_WEIRDNESS,[
     AC_MSG_RESULT(no)
   fi
 ])
+
+dnl
+dnl Checks whether $withval is "shared" or starts with "shared,XXX"
+dnl and sets $shared to "yes" or "no", and removes "shared,?" stuff
+dnl from $withval.
+dnl
+AC_DEFUN(PHP_WITH_SHARED,[
+    case $withval in
+	shared)
+	    shared=yes
+	    withval=yes
+	    ;;
+	shared,*)
+	    shared=yes
+	    withval=`echo $withval | sed -e 's/^shared,//'`      
+	    ;;
+	*)
+	    shared=no
+	    ;;
+    esac
+])

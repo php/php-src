@@ -2,7 +2,7 @@ dnl $Id$
 
 AC_MSG_CHECKING(for ICAP support)
 AC_ARG_WITH(icap,
-[  --with-icap[=DIR]     Include ICAP support.],
+[  --with-icap[=DIR]       Include ICAP support.],
 [
   if test "$withval" != "no"; then
     if test "$withval" = "yes"; then

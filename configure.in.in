@@ -77,7 +77,7 @@ if test -n "$auto_cflags" && test "`uname -s 2>/dev/null`" = "HP-UX"; then
 fi
 
 dnl Checks for programs.
-AM_PROG_LIBTOOL
+AC_PROG_LIBTOOL
 AC_PROG_YACC
 if test "$YACC" != "bison -y"; then
     AC_MSG_WARN(You will need bison if you want to regenerate the PHP parsers.)
@@ -863,7 +863,7 @@ AC_ARG_ENABLE(url-fopen-wrapper,
 DMALLOC_RESULT=no
 AC_MSG_CHECKING(whether to enable dmalloc)
 AC_ARG_ENABLE(dmalloc,
-[  --enable-dmalloc         Enable dmalloc],
+[  --enable-dmalloc        Enable dmalloc],
 [
   if test "$enableval" = "yes" ; then
     AC_DEFINE(HAVE_DMALLOC, 1)

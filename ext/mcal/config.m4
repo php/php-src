@@ -2,7 +2,7 @@ dnl $Id$
 
 AC_MSG_CHECKING(for MCAL support)
 AC_ARG_WITH(mcal,
-[  --with-mcal[=DIR]     Include MCAL support.],
+[  --with-mcal[=DIR]       Include MCAL support.],
 [
   if test "$withval" != "no"; then
     if test "$withval" = "yes"; then
