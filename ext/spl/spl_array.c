@@ -408,7 +408,7 @@ SPL_METHOD(Array, rewind)
 }
 /* }}} */
 
-/* {{{ proto mixed|false ArrayIterator::current()
+/* {{{ proto mixed|NULL ArrayIterator::current()
    Return current array entry */
 SPL_METHOD(Array, current)
 {
@@ -424,18 +424,18 @@ SPL_METHOD(Array, current)
 
 	if (intern->array->is_ref && spl_hash_pos_exists(intern TSRMLS_CC) == FAILURE) {
 		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Array was modified outside object and internal position is no longer valid");
-		RETURN_FALSE;
+		return;
 	}
 
 	if (zend_hash_get_current_data_ex(aht, (void **) &entry, &intern->pos) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 	*return_value = **entry;
 	zval_copy_ctor(return_value);
 }
 /* }}} */
 
-/* {{{ proto mixed|false ArrayIterator::key()
+/* {{{ proto mixed|NULL ArrayIterator::key()
    Return current array key */
 SPL_METHOD(Array, key)
 {
@@ -453,7 +453,7 @@ SPL_METHOD(Array, key)
 
 	if (intern->array->is_ref && spl_hash_pos_exists(intern TSRMLS_CC) == FAILURE) {
 		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Array was modified outside object and internal position is no longer valid");
-		RETURN_FALSE;
+		return;
 	}
 
 	switch (zend_hash_get_current_key_ex(aht, &string_key, &string_length, &num_key, 0, &intern->pos)) {
