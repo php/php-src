@@ -1,3 +1,140 @@
+2002-03-01  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/odbc/config.m4: In case we do a 4.1.3, add this trivial fix
+
+2002-03-01  Edin Kadribasic  <edink@proventum.net>
+
+    * main/main.c:
+    Added PHP_SAPI constant which contains the name of running SAPI.
+
+2002-03-01  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/url_scanner_ex.re
+      ext/standard/url_scanner_ex.c:
+    - Fix for Sun WorkShop 6 update 2 compiler (Bug #15812)
+
+2002-03-01  Andrei Zmievski  <andrei@ispi.net>
+
+    * TODO: *** empty log message ***
+
+2002-03-01  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/interbase/interbase.c:
+    - Add support for returning NULL values from Interbase resultsets (Patch by
+      Daniela Mariaschi <mariaschi@libero.it>)
+
+2002-03-01  Jani Taskinen  <sniper@iki.fi>
+
+    * NEWS: - We haven't got the branch yet..
+    - Some typo fixes and correct grammar.
+
+2002-03-01  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * ext/msession/msession.c: Fix compiler warnings and header file path.
+
+2002-03-01  Zeev Suraski  <zeev@zend.com>
+
+    * ext/standard/array.c: Fix php_splice() to work with large values
+
+2002-03-01  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * ext/pgsql/README: Update doc
+
+    * TODO: Added todo item for Java extention documentation.
+
+    * TODO-4.2.txt
+      TODO: Merge TODO-4.2.txt into TODO.
+
+2002-03-01  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Command.php
+      pear/PEAR/Command/Common.php
+      pear/PEAR/Command/Install.php:
+    * code for install/uninstall/upgrade complete, not yet tested
+
+2002-03-01  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * main/output.c: Do explicit test againt to FAILURE.
+
+2002-03-01  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Packager.php:
+    * output a reminder to set CVS tags after packaging
+
+    * build/rules.mk: * use cli sapi to run tests
+
+2002-03-01  Shane Caraveo  <shane@caraveo.com>
+
+    * php.ini-dist: add stuff here also.
+
+    * sapi/cgi/cgi_main.c: add comment for IIS users
+    fix some whitespace
+
+2002-03-01  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/exif/php_exif.h
+      ext/exif/test.txt
+      ext/exif/.cvsignore
+      ext/exif/exif.c:
+    +Support for Photographer/Editor Copyright as associative array as this is a new feature the change (optionally being an array) has to be mentioned in documentation.
+    +New function exif_headername can be used to read the internal Tag namelist (was mainly created for debugging purpose but maybe somone writes code to create/update exif headers here).
+    +An internal version number is present.
+    +A testpage is supplied test.txt describes how the test works.
+    +The oldfunction read_exif_data has got an alias exif_read_data
+
+    As the old version of this module is very buggy i decided to implement the testpage (test.txt) and to create the alias. The test script only works with the alias as the old version does not pass tests. By the way it seems a good way to prepend 'exif_' to all functions in the module.
+
+2002-03-01  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * ext/snmp/snmp.c: Fix compiler warnings
+
+    * ext/standard/var.c
+      ext/zlib/zlib.c
+      main/main.c
+      main/output.c
+      main/php_output.h
+      ext/standard/basic_functions.c
+      ext/session/session.c:
+    Added ob_get_status() to get array of buffers and it's status.
+    (DO NOT document this function yet)
+
+    Fixed crash bug with ob_end_*() function. ob_end_*() will not delete
+    buffers that may not be deleted.
+
+    php_start_ob_buffer() and php_ob_set_internal_handler() takes parameter for
+    if the buffer created may be deleted or not.
+
+    Added 3rd parameter "bool erase" to ob_start(). If FALSE, buffer may not be
+    deleted until script finshes.
+
+    Changed ob_*() function that have void return type to bool. All ob_*()
+    functions return TRUE for success, FALSE for failure.
+
+
+2002-03-01  Shane Caraveo  <shane@caraveo.com>
+
+    * php.ini-recommended: document force-redirect in php.ini
+
+    * sapi/cgi/cgi_main.c:
+    This is much better.  With FORCE_CGI_REDIRECT turned on by default for compilation,
+    we can now define this in the ini file.  So it can be turned on for apache, turned
+    off for IIS which does not have a redirect issue.  Alternately, a different 'REDIRECT_STATUS'
+    environment var can be defined in case some web server out there needs it.
+
+    new ini vars
+    cgi.force_redirect 0|1
+    cgi.redirect_status_env ENV_VAR_NAME
+
+    * sapi/cgi/cgi_main.c:
+    fix force redirect crash under multithreaded compile
+
+    should be discused: fix redirect detection to only work with apache or netscape,
+    where we know they set an environment variable regarding redirect.  IIS has
+    no security issue here.  Don't know about other windows web servers.
+
+    * main/config.w32.h
+      main/php.h: turn on force redirect for windows
+
 2002-02-28  Jani Taskinen  <sniper@iki.fi>
 
     * ext/crack/config.m4: - Fixed a typo. (caught by jtate@php.net)
