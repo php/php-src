@@ -46,6 +46,7 @@
 #elif defined(NETWARE)
 # include "zend_config.nw.h"
 # include "acconfig.h"
+# define ZEND_PATHS_SEPARATOR		';'
 #elif defined(__riscos__)
 # include "zend_config.h"
 # define ZEND_PATHS_SEPARATOR		';'
