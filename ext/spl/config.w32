@@ -1,9 +1,0 @@
-// $Id$
-// vim:ft=javascript
-
-ARG_ENABLE("spl", "SPL (Standard PHP Library) support", "yes");
-
-if (PHP_SPL != "no") {
-	EXTENSION("spl", "php_spl.c spl_functions.c spl_engine.c spl_iterators.c spl_array.c spl_directory.c");
-	AC_DEFINE('HAVE_SPL', 1);
-}
