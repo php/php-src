@@ -1,3 +1,16 @@
+2004-07-28  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * zend_ini.c:
+      Fix: ini entries for dl()'d modules now work under ZTS
+      Side-effect: avoid possible crashes when multiple threads load/unload
+      modules and mess with the global hash table.
+
+2004-07-28  Andi Gutmans  <andi@zend.com>
+
+    * zend.h
+      zend.h:
+      - Fix MAC OSX to always use native DSO loading
+
 2004-07-27  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_exceptions.c:

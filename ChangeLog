@@ -1,3 +1,122 @@
+2004-07-28  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * (PHP_5_0)
+      ext/com_dotnet/com_extension.c
+      ext/com_dotnet/com_handlers.c
+      ext/com_dotnet/com_variant.c
+      ext/com_dotnet/com_wrapper.c:
+      MFH:
+
+    * (PHP_5_0)
+      sapi/activescript/CREDITS
+      sapi/activescript/EXPERIMENTAL
+      sapi/activescript/README
+      sapi/activescript/classfactory.cpp
+      sapi/activescript/config.w32
+      sapi/activescript/php5activescript.c
+      sapi/activescript/php5activescript.def
+      sapi/activescript/php5activescript.dsp
+      sapi/activescript/php5activescript.h
+      sapi/activescript/php5as_classfactory.h
+      sapi/activescript/php5as_scriptengine.h
+      sapi/activescript/scriptengine.cpp:
+      Moved to PECL
+
+2004-07-28  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/streamsfuncs.c:
+      Better address availability check.
+
+2004-07-28  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * main/network.c:
+      Ensure that port numbers get set in the peer/socket name functions.
+      (duh!)
+
+2004-07-28  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_0)
+      ext/standard/streamsfuncs.c:
+      MFH: Fixed possible crash in stream_socket_recvfrom() when length
+      parameter has a negative value.
+
+    * ext/standard/streamsfuncs.c:
+      Fixed possible crash in stream_socket_recvfrom() when length parameter has
+      a negative value.
+
+2004-07-28  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * main/network.c:
+      Fix #29431: crash when parsing an invalid network address
+
+    * ZendEngine2/zend_ini.c:
+      Fix: ini entries for dl()'d modules now work under ZTS
+      Side-effect: avoid possible crashes when multiple threads load/unload
+      modules and mess with the global hash table.
+
+2004-07-28  Andi Gutmans  <andi@zend.com>
+
+    * (PHP_4)
+      Zend/zend.h:
+      - Use native MAC OS X DSO
+
+    * (PHP_4_3)
+      Zend/zend.h
+      ZendEngine2/zend.h
+      ZendEngine2/zend.h:
+      - Fix MAC OSX to always use native DSO loading
+
+2004-07-28  Christian Stocker  <chregu@phant.ch>
+
+    * (PHP_5_0)
+      NEWS
+      ext/xsl/php_xsl.c
+      ext/xsl/php_xsl.h
+      ext/xsl/xsltprocessor.c:
+      MFH
+      Fixed bug #29409 (Segfault in PHP functions called from XSLT). (Rob)
+
+    * NEWS
+      ext/xsl/php_xsl.c
+      ext/xsl/php_xsl.h
+      ext/xsl/xsltprocessor.c:
+      Fix for bug #29409 (Segfault in PHP functions called from XSLT). (by Rob)
+
+2004-07-28  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * sapi/activescript/CREDITS
+      sapi/activescript/EXPERIMENTAL
+      sapi/activescript/README
+      sapi/activescript/classfactory.cpp
+      sapi/activescript/config.w32
+      sapi/activescript/marshal.cpp
+      sapi/activescript/php5activescript.c
+      sapi/activescript/php5activescript.def
+      sapi/activescript/php5activescript.dsp
+      sapi/activescript/php5activescript.h
+      sapi/activescript/php5as_classfactory.h
+      sapi/activescript/php5as_scriptengine.h
+      sapi/activescript/scriptengine.cpp:
+      Move activescript sapi to PECL
+
+    * sapi/activescript/README
+      sapi/activescript/classfactory.cpp
+      sapi/activescript/scriptengine.cpp:
+      - Rename ProgID from ActivePHP (tm) to PHPScript (bah)
+      - Convert line-endings for error messages to CRLF
+      - Misc other tweaks
+
+2004-07-28  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_0)
+      NEWS
+      ext/standard/datetime.c:
+      MFH: Fixed bug #29342 (strtotime() does not handle empty date string
+      properly).
+
+    * ext/standard/datetime.c:
+      Fixed bug #29342 (strtotime() does not handle empty date string properly).
+
 2004-07-27  Wez Furlong  <wez.php@thebrainroom.net>
 
     * sapi/activescript/README
