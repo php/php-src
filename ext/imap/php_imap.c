@@ -27,7 +27,7 @@
 
 #define IMAP41
 
-#define OP_RELOGIN
+#undef OP_RELOGIN
 
 #include "php.h"
 #include "php_ini.h"
@@ -631,7 +631,7 @@ void imap_do_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	 * out the server's hostname.
 	 */
 	if (persistent
-		&& !mail_valid_net_parse(ZSTRVAL_PP(mailbox), &netmbx)) {
+		&& !mail_valid_net_parse(Z_STRVAL_PP(mailbox), &netmbx)) {
 		persistent = 0;
 	}
 
@@ -670,10 +670,7 @@ void imap_do_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 
 		/* If we found a node, do a relogin.  */
 		if (node) {
-			imap_stream = mail_open(
-				node->imap_stream,
-				ZSTRVAL_PP(mailbox),
-				flags | OP_RELOGIN);
+			imap_stream = mail_open(node->imap_stream, Z_STRVAL_PP(mailbox), flags | OP_RELOGIN);
 			if (imap_stream) {
 				/* Ping the stream to see if it is
 				 * still good. 
@@ -688,10 +685,7 @@ void imap_do_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		/* Get a fresh stream if we don't have one yet. */
 		if (imap_stream == NIL) {
 			/* Open a new connection. */
-			imap_stream = mail_open(
-				NIL,
-				ZSTRVAL_PP(mailbox),
-				flags | OP_RELOGIN);
+			imap_stream = mail_open(NIL, Z_STRVAL_PP(mailbox), flags | OP_RELOGIN);
 		}
 
 		/* Do we have a stream yet?  If not, bail. */
@@ -760,7 +754,7 @@ void imap_do_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		imap_le_struct = node;
 	} else {
 #endif
-		imap_stream = mail_open(NIL, (*mailbox)->value.str.val, flags);
+		imap_stream = mail_open(NIL, Z_STRVAL_PP(mailbox), flags);
 		if (imap_stream == NIL) {
 			php_error(E_WARNING, "Couldn't open stream %s\n", (*mailbox)->value.str.val);
 			RETURN_FALSE;
@@ -795,7 +789,8 @@ PHP_FUNCTION(imap_open)
 PHP_FUNCTION(imap_popen)
 {
 #ifdef OP_RELOGIN
-	return imap_do_open(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
+	imap_do_open(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
+	RETURN_TRUE;
 #else
 	php_error(E_WARNING, "Persistent IMAP connections are not yet supported.\n");
 	RETURN_FALSE;
