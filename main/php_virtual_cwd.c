@@ -18,7 +18,7 @@ cwd_globals_struct cwd_globals;
 
 cwd_state true_global_cwd_state;
 
-#ifndef PHP_WIN32
+#ifndef ZEND_WIN32
 #include <unistd.h>
 #endif
 
@@ -30,7 +30,7 @@ cwd_state true_global_cwd_state;
 #define S_ISREG(mode) ((mode) & _S_IFREG)
 #endif
 
-#ifdef PHP_WIN32
+#ifdef ZEND_WIN32
 #define strtok_r(a,b,c) strtok((a),(b))
 #define IS_SLASH(c)	((c) == '/' || (c) == '\\')
 #define DEFAULT_SLASH '\\'
@@ -152,7 +152,7 @@ char *virtual_getcwd_ex(int *length)
 		return retval;
 	}
 
-#ifdef PHP_WIN32
+#ifdef ZEND_WIN32
 	/* If we have something like C: */
 	if (state->cwd_length == 2 && state->cwd[state->cwd_length-1] == ':') {
 		char *retval;
@@ -212,7 +212,7 @@ int virtual_file_ex(cwd_state *state, char *path, verify_path_func verify_path)
 
 	if (IS_ABSOLUTE_PATH(path, path_length)) {
 		copy_amount = COPY_WHEN_ABSOLUTE;
-#ifdef PHP_WIN32
+#ifdef ZEND_WIN32
 	} else if(IS_SLASH(path[0])) {
 		copy_amount = 2;
 #endif
@@ -325,7 +325,7 @@ main(void)
 	cwd_state state;
 	int length;
 
-#ifndef PHP_WIN32
+#ifndef ZEND_WIN32
 	state.cwd = malloc(PATH_MAX + 1);
 	state.cwd_length = PATH_MAX;
 
