@@ -1,3 +1,6 @@
+2000-01-06  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/standard/file.c:
 2000-01-05  Sascha Schumann  <sascha@schumann.cx>
 
     * ext/session/mod_user.c: Fix namespace pollution
