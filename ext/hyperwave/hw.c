@@ -912,15 +912,15 @@ PHP_FUNCTION(hw_pconnect)
 /* {{{ proto void hw_close(int link)
    Close connection to Hyperwave server */
 PHP_FUNCTION(hw_close) {
-	pval *arg1;
+	pval **arg1;
 	int id, type;
 	hw_connection *ptr;
 
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(arg1);
-	id=arg1->value.lval;
+	convert_to_long_ex(arg1);
+	id=(*arg1)->value.lval;
 	ptr = php3_list_find(id,&type);
 	if(!ptr || (type!=HwSG(le_socketp) && type!=HwSG(le_psocketp))) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
@@ -935,16 +935,16 @@ PHP_FUNCTION(hw_close) {
    Outputs info string */
 PHP_FUNCTION(hw_info)
 {
-	pval *arg1;
+	pval **arg1;
 	int id, type;
 	hw_connection *ptr;
 	char *str;
 
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(arg1);
-	id=arg1->value.lval;
+	convert_to_long_ex(arg1);
+	id=(*arg1)->value.lval;
 	ptr = php3_list_find(id,&type);
 	if(!ptr || (type!=HwSG(le_socketp) && type!=HwSG(le_psocketp))) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
@@ -968,15 +968,15 @@ PHP_FUNCTION(hw_info)
    Returns last error number */
 PHP_FUNCTION(hw_error)
 {
-	pval *arg1;
+	pval **arg1;
 	int id, type;
 	hw_connection *ptr;
 
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(arg1);
-	id=arg1->value.lval;
+	convert_to_long_ex(arg1);
+	id=(*arg1)->value.lval;
 	ptr = php3_list_find(id,&type);
 	if(!ptr || (type!=HwSG(le_socketp) && type!=HwSG(le_psocketp))) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
@@ -990,16 +990,16 @@ PHP_FUNCTION(hw_error)
    Returns last error message */
 PHP_FUNCTION(hw_errormsg)
 {
-	pval *arg1;
+	pval **arg1;
 	int id, type;
 	hw_connection *ptr;
 	char errstr[100];
 
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(arg1);
-	id=arg1->value.lval;
+	convert_to_long_ex(arg1);
+	id=(*arg1)->value.lval;
 	ptr = php3_list_find(id,&type);
 	if(!ptr || (type!=HwSG(le_socketp) && type!=HwSG(le_psocketp))) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
@@ -1096,15 +1096,15 @@ PHP_FUNCTION(hw_root)
 /* }}} */
 
 char *php3_hw_command(INTERNAL_FUNCTION_PARAMETERS, int comm) {
-	pval *arg1;
+	pval **arg1;
 	int link, type;
 	hw_connection *ptr;
 
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &arg1) == FAILURE) {
 		return NULL;
 	}
-	convert_to_long(arg1);
-	link=arg1->value.lval;
+	convert_to_long_ex(arg1);
+	link=(*arg1)->value.lval;
 	ptr = php3_list_find(link,&type);
 	if(!ptr || (type!=HwSG(le_socketp) && type!=HwSG(le_psocketp))) {
 		php_error(E_WARNING,"Unable to find file identifier %d",link);
@@ -1255,19 +1255,19 @@ php_printf("%s\n", ptr);
 /* {{{ proto string hw_dummy(int link, int id, int msgid)
    ??? */
 PHP_FUNCTION(hw_dummy) {
-	pval *arg1, *arg2, *arg3;
+	pval **arg1, **arg2, **arg3;
 	int link, id, type, msgid;
 	hw_connection *ptr;
 
-	if (ARG_COUNT(ht) != 3 || getParameters(ht, 3, &arg1, &arg2, &arg3) == FAILURE) {
+	if (ARG_COUNT(ht) != 3 || getParametersEx(3, &arg1, &arg2, &arg3) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(arg1);
-	convert_to_long(arg2);
-	convert_to_long(arg3);
-	link=arg1->value.lval;
-	id=arg2->value.lval;
-	msgid=arg3->value.lval;
+	convert_to_long_ex(arg1);
+	convert_to_long_ex(arg2);
+	convert_to_long_ex(arg3);
+	link=(*arg1)->value.lval;
+	id=(*arg2)->value.lval;
+	msgid=(*arg3)->value.lval;
 	ptr = php3_list_find(link,&type);
 	if(!ptr || (type!=HwSG(le_socketp) && type!=HwSG(le_psocketp))) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
@@ -1291,30 +1291,30 @@ php_printf("%s", object);
 /* {{{ proto string hw_getobject(int link, int objid)
    Returns object record  */
 PHP_FUNCTION(hw_getobject) {
-	pval *argv[3];
+	pval **argv[3];
 	int argc, link, id, type, multi;
 	hw_connection *ptr;
 
 	argc = ARG_COUNT(ht);
 	if(argc < 2 || argc > 3)
 		WRONG_PARAM_COUNT;
-	if (getParametersArray(ht, argc, argv) == FAILURE)
+	if (getParametersArrayEx(argc, argv) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-	convert_to_long(argv[0]);
-	if(argv[1]->type == IS_ARRAY) {
+	convert_to_long_ex(argv[0]);
+	if((*argv[1])->type == IS_ARRAY) {
 		multi = 1;
-		convert_to_array(argv[1]);
+		convert_to_array_ex(argv[1]);
 	} else {
 		multi = 0;
-		convert_to_long(argv[1]);
+		convert_to_long_ex(argv[1]);
 	}
 
 	if(argc == 3) {
-		convert_to_string(argv[2]);
+		convert_to_string_ex(argv[2]);
 	}
 
-	link=argv[0]->value.lval;
+	link=(*argv[0])->value.lval;
 	ptr = php3_list_find(link,&type);
 	if(!ptr || (type!=HwSG(le_socketp) && type!=HwSG(le_psocketp))) {
 		php_error(E_WARNING,"Unable to find file identifier %d", link);
@@ -1328,7 +1328,7 @@ PHP_FUNCTION(hw_getobject) {
 		HashTable *lht;
 		zval **keydata;
 
-		lht = argv[1]->value.ht;
+		lht = (*argv[1])->value.ht;
         	if(0 == (count = zend_hash_num_elements(lht)))
 			RETURN_FALSE;
 		ids = emalloc(count * sizeof(hw_objectID));
@@ -1346,7 +1346,7 @@ PHP_FUNCTION(hw_getobject) {
 			zend_hash_move_forward(lht);
 		}
 
-		if (0 != (ptr->lasterror = send_objectbyidquery(ptr->socket, ids, &count, argv[2]->value.str.val, &objects))) {
+		if (0 != (ptr->lasterror = send_objectbyidquery(ptr->socket, ids, &count, (*argv[2])->value.str.val, &objects))) {
 			efree(ids);
 			RETURN_FALSE;
 			}
@@ -1363,7 +1363,7 @@ PHP_FUNCTION(hw_getobject) {
 		
 	} else {
 		char *object = NULL;
-		id=argv[1]->value.lval;
+		id=(*argv[1])->value.lval;
 		if (0 != (ptr->lasterror = send_getobject(ptr->socket, id, &object)))
 			RETURN_FALSE;
 
@@ -2762,18 +2762,18 @@ PHP_FUNCTION(hw_getparents) {
 /* {{{ proto array hw_children(int link, int objid)
    Returns array of children object ids */
 PHP_FUNCTION(hw_children) {
-	pval *arg1, *arg2;
+	pval **arg1, **arg2;
 	int link, id, type;
 	int count;
 	hw_connection *ptr;
 
-	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
+	if (ARG_COUNT(ht) != 2 || getParametersEx(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(arg1);
-	convert_to_long(arg2);
-	link=arg1->value.lval;
-	id=arg2->value.lval;
+	convert_to_long_ex(arg1);
+	convert_to_long_ex(arg2);
+	link=(*arg1)->value.lval;
+	id=(*arg2)->value.lval;
 	ptr = php3_list_find(link,&type);
 	if(!ptr || (type!=HwSG(le_socketp) && type!=HwSG(le_psocketp))) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
@@ -2807,19 +2807,19 @@ PHP_FUNCTION(hw_children) {
 /* {{{ proto array hw_childrenobj(int link, int objid)
    Returns array of children object records */
 PHP_FUNCTION(hw_childrenobj) {
-	pval *arg1, *arg2;
+	pval **arg1, **arg2;
 	int link, id, type;
 	int count;
 	char  **childObjRecs = NULL;
 	hw_connection *ptr;
 
-	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
+	if (ARG_COUNT(ht) != 2 || getParametersEx(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(arg1);
-	convert_to_long(arg2);
-	link=arg1->value.lval;
-	id=arg2->value.lval;
+	convert_to_long_ex(arg1);
+	convert_to_long_ex(arg2);
+	link=(*arg1)->value.lval;
+	id=(*arg2)->value.lval;
 	ptr = php3_list_find(link,&type);
 	if(!ptr || (type!=HwSG(le_socketp) && type!=HwSG(le_psocketp))) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
@@ -2842,18 +2842,18 @@ PHP_FUNCTION(hw_childrenobj) {
 /* {{{ proto array hw_getchildcoll(int link, int objid)
    Returns array of child collection object ids */
 PHP_FUNCTION(hw_getchildcoll) {
-	pval *arg1, *arg2;
+	pval **arg1, **arg2;
 	int link, id, type;
 	int count;
 	hw_connection *ptr;
 
-	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
+	if (ARG_COUNT(ht) != 2 || getParametersEx(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(arg1);
-	convert_to_long(arg2);
-	link=arg1->value.lval;
-	id=arg2->value.lval;
+	convert_to_long_ex(arg1);
+	convert_to_long_ex(arg2);
+	link=(*arg1)->value.lval;
+	id=(*arg2)->value.lval;
 	ptr = php3_list_find(link,&type);
 	if(!ptr || (type!=HwSG(le_socketp) && type!=HwSG(le_psocketp))) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
@@ -2887,19 +2887,19 @@ PHP_FUNCTION(hw_getchildcoll) {
 /* {{{ proto array hw_getchildcollobj(int link, int objid)
    Returns array of child collection object records */
 PHP_FUNCTION(hw_getchildcollobj) {
-	pval *arg1, *arg2;
+	pval **arg1, **arg2;
 	int link, id, type;
 	int count;
 	char  **childObjRecs = NULL;
 	hw_connection *ptr;
 
-	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
+	if (ARG_COUNT(ht) != 2 || getParametersEx(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(arg1);
-	convert_to_long(arg2);
-	link=arg1->value.lval;
-	id=arg2->value.lval;
+	convert_to_long_ex(arg1);
+	convert_to_long_ex(arg2);
+	link=(*arg1)->value.lval;
+	id=(*arg2)->value.lval;
 	ptr = php3_list_find(link,&type);
 	if(!ptr || (type!=HwSG(le_socketp) && type!=HwSG(le_psocketp))) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
@@ -2922,17 +2922,17 @@ PHP_FUNCTION(hw_getchildcollobj) {
 /* {{{ proto int hw_docbyanchor(int link, int anchorid)
    Returns objid of document belonging to anchorid */
 PHP_FUNCTION(hw_docbyanchor) {
-	pval *arg1, *arg2;
+	pval **arg1, **arg2;
 	int link, id, type;
 	hw_connection *ptr;
 
-	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
+	if (ARG_COUNT(ht) != 2 || getParameters(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(arg1);
-	convert_to_long(arg2);
-	link=arg1->value.lval;
-	id=arg2->value.lval;
+	convert_to_long_ex(arg1);
+	convert_to_long_ex(arg2);
+	link=(*arg1)->value.lval;
+	id=(*arg2)->value.lval;
 	ptr = php3_list_find(link,&type);
 	if(!ptr || (type!=HwSG(le_socketp) && type!=HwSG(le_psocketp))) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
@@ -2953,17 +2953,17 @@ PHP_FUNCTION(hw_docbyanchor) {
 /* {{{ proto array hw_docbyanchorobj(int link, int anchorid)
    Returns object record of document belonging to anchorid */
 PHP_FUNCTION(hw_docbyanchorobj) {
-	pval *arg1, *arg2;
+	pval **arg1, **arg2;
 	int link, id, type;
 	hw_connection *ptr;
 
-	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
+	if (ARG_COUNT(ht) != 2 || getParametersEx(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(arg1);
-	convert_to_long(arg2);
-	link=arg1->value.lval;
-	id=arg2->value.lval;
+	convert_to_long_ex(arg1);
+	convert_to_long_ex(arg2);
+	link=(*arg1)->value.lval;
+	id=(*arg2)->value.lval;
 	ptr = php3_list_find(link,&type);
 	if(!ptr || (type!=HwSG(le_socketp) && type!=HwSG(le_psocketp))) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
@@ -2988,22 +2988,22 @@ PHP_FUNCTION(hw_docbyanchorobj) {
 /* {{{ proto array hw_getobjectbyquery(int link, string query, int maxhits)
    Search for query and return maxhits objids */
 PHP_FUNCTION(hw_getobjectbyquery) {
-	pval *arg1, *arg2, *arg3;
+	pval **arg1, **arg2, **arg3;
 	int link, type, maxhits;
 	char *query;
 	int count, i;
 	int  *childIDs = NULL;
 	hw_connection *ptr;
 
-	if (ARG_COUNT(ht) != 3 || getParameters(ht, 3, &arg1, &arg2, &arg3) == FAILURE) {
+	if (ARG_COUNT(ht) != 3 || getParametersEx(3, &arg1, &arg2, &arg3) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(arg1);
-	convert_to_string(arg2);
-	convert_to_long(arg3);
-	link=arg1->value.lval;
-	query=arg2->value.str.val;
-	maxhits=arg3->value.lval;
+	convert_to_long_ex(arg1);
+	convert_to_string_ex(arg2);
+	convert_to_long_ex(arg3);
+	link=(*arg1)->value.lval;
+	query=(*arg2)->value.str.val;
+	maxhits=(*arg3)->value.lval;
 	if (maxhits < 0) maxhits=0x7FFFFFFF;
 	ptr = php3_list_find(link,&type);
 	if(!ptr || (type!=HwSG(le_socketp) && type!=HwSG(le_psocketp))) {
@@ -3031,22 +3031,22 @@ PHP_FUNCTION(hw_getobjectbyquery) {
 /* {{{ proto array hw_getobjectbyqueryobj(int link, string query, int maxhits)
    Search for query and return maxhits object records */
 PHP_FUNCTION(hw_getobjectbyqueryobj) {
-	pval *arg1, *arg2, *arg3;
+	pval **arg1, **arg2, **arg3;
 	int link, type, maxhits;
 	char *query;
 	int count;
 	char  **childObjRecs = NULL;
 	hw_connection *ptr;
 
-	if (ARG_COUNT(ht) != 3 || getParameters(ht, 3, &arg1, &arg2, &arg3) == FAILURE) {
+	if (ARG_COUNT(ht) != 3 || getParametersEx(3, &arg1, &arg2, &arg3) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(arg1);
-	convert_to_string(arg2);
-	convert_to_long(arg3);
-	link=arg1->value.lval;
-	query=arg2->value.str.val;
-	maxhits=arg3->value.lval;
+	convert_to_long_ex(arg1);
+	convert_to_string_ex(arg2);
+	convert_to_long_ex(arg3);
+	link=(*arg1)->value.lval;
+	query=(*arg2)->value.str.val;
+	maxhits=(*arg3)->value.lval;
 	if (maxhits < 0) maxhits=0x7FFFFFFF;
 	ptr = php3_list_find(link,&type);
 	if(!ptr || (type!=HwSG(le_socketp) && type!=HwSG(le_psocketp))) {
@@ -3069,24 +3069,24 @@ PHP_FUNCTION(hw_getobjectbyqueryobj) {
 /* {{{ proto array hw_getobjectbyquerycoll(int link, int collid, string query, int maxhits)
    Search for query in collection and return maxhits objids */
 PHP_FUNCTION(hw_getobjectbyquerycoll) {
-	pval *arg1, *arg2, *arg3, *arg4;
+	pval **arg1, **arg2, **arg3, **arg4;
 	int link, id, type, maxhits;
 	char *query;
 	int count, i;
 	hw_connection *ptr;
 	int  *childIDs = NULL;
 
-	if (ARG_COUNT(ht) != 4 || getParameters(ht, 4, &arg1, &arg2, &arg3, &arg4) == FAILURE) {
+	if (ARG_COUNT(ht) != 4 || getParametersEx(4, &arg1, &arg2, &arg3, &arg4) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(arg1);
-	convert_to_long(arg2);
-	convert_to_string(arg3);
-	convert_to_long(arg4);
-	link=arg1->value.lval;
-	id=arg2->value.lval;
-	query=arg3->value.str.val;
-	maxhits=arg4->value.lval;
+	convert_to_long_ex(arg1);
+	convert_to_long_ex(arg2);
+	convert_to_string_ex(arg3);
+	convert_to_long_ex(arg4);
+	link=(*arg1)->value.lval;
+	id=(*arg2)->value.lval;
+	query=(*arg3)->value.str.val;
+	maxhits=(*arg4)->value.lval;
 	if (maxhits < 0) maxhits=0x7FFFFFFF;
 	ptr = php3_list_find(link,&type);
 	if(!ptr || (type!=HwSG(le_socketp) && type!=HwSG(le_psocketp))) {
@@ -3114,24 +3114,24 @@ PHP_FUNCTION(hw_getobjectbyquerycoll) {
 /* {{{ proto array hw_getobjectbyquerycollobj(int link, int collid, string query, int maxhits)
    Search for query in collection and return maxhits object records */
 PHP_FUNCTION(hw_getobjectbyquerycollobj) {
-	pval *arg1, *arg2, *arg3, *arg4;
+	pval **arg1, **arg2, **arg3, **arg4;
 	int link, id, type, maxhits;
 	char *query;
 	int count;
 	hw_connection *ptr;
 	char  **childObjRecs = NULL;
 
-	if (ARG_COUNT(ht) != 4 || getParameters(ht, 4, &arg1, &arg2, &arg3, &arg4) == FAILURE) {
+	if (ARG_COUNT(ht) != 4 || getParametersEx(4, &arg1, &arg2, &arg3, &arg4) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(arg1);
-	convert_to_long(arg2);
-	convert_to_string(arg3);
-	convert_to_long(arg4);
-	link=arg1->value.lval;
-	id=arg2->value.lval;
-	query=arg3->value.str.val;
-	maxhits=arg4->value.lval;
+	convert_to_long_ex(arg1);
+	convert_to_long_ex(arg2);
+	convert_to_string_ex(arg3);
+	convert_to_long_ex(arg4);
+	link=(*arg1)->value.lval;
+	id=(*arg2)->value.lval;
+	query=(*arg3)->value.str.val;
+	maxhits=(*arg4)->value.lval;
 	if (maxhits < 0) maxhits=0x7FFFFFFF;
 	ptr = php3_list_find(link,&type);
 	if(!ptr || (type!=HwSG(le_socketp) && type!=HwSG(le_psocketp))) {
@@ -3154,19 +3154,19 @@ PHP_FUNCTION(hw_getobjectbyquerycollobj) {
 /* {{{ proto array hw_getchilddoccoll(int link, int objid)
    Returns all children ids which are documents */
 PHP_FUNCTION(hw_getchilddoccoll) {
-	pval *arg1, *arg2;
+	pval **arg1, **arg2;
 	int link, id, type;
 	int count, i;
 	int  *childIDs = NULL;
 	hw_connection *ptr;
 
-	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
+	if (ARG_COUNT(ht) != 2 || getParametersEx(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(arg1);
-	convert_to_long(arg2);
-	link=arg1->value.lval;
-	id=arg2->value.lval;
+	convert_to_long_ex(arg1);
+	convert_to_long_ex(arg2);
+	link=(*arg1)->value.lval;
+	id=(*arg2)->value.lval;
 	ptr = php3_list_find(link,&type);
 	if(!ptr || (type!=HwSG(le_socketp) && type!=HwSG(le_psocketp))) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
@@ -3193,19 +3193,19 @@ PHP_FUNCTION(hw_getchilddoccoll) {
 /* {{{ proto array hw_getchilddoccollobj(int link, int objid)
    Returns all children object records which are documents */
 PHP_FUNCTION(hw_getchilddoccollobj) {
-	pval *arg1, *arg2;
+	pval **arg1, **arg2;
 	int link, id, type;
 	int count;
 	char  **childObjRecs = NULL;
 	hw_connection *ptr;
 
-	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
+	if (ARG_COUNT(ht) != 2 || getParametersEx(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(arg1);
-	convert_to_long(arg2);
-	link=arg1->value.lval;
-	id=arg2->value.lval;
+	convert_to_long_ex(arg1);
+	convert_to_long_ex(arg2);
+	link=(*arg1)->value.lval;
+	id=(*arg2)->value.lval;
 	ptr = php3_list_find(link,&type);
 	if(!ptr || (type!=HwSG(le_socketp) && type!=HwSG(le_psocketp))) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
@@ -3228,19 +3228,19 @@ PHP_FUNCTION(hw_getchilddoccollobj) {
 /* {{{ proto array hw_getanchors(int link, int objid)
    Return all anchors of object */
 PHP_FUNCTION(hw_getanchors) {
-	pval *arg1, *arg2;
+	pval **arg1, **arg2;
 	int link, id, type;
 	int count, i;
 	int  *anchorIDs = NULL;
 	hw_connection *ptr;
 
-	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
+	if (ARG_COUNT(ht) != 2 || getParametersEx(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(arg1);
-	convert_to_long(arg2);
-	link=arg1->value.lval;
-	id=arg2->value.lval;
+	convert_to_long_ex(arg1);
+	convert_to_long_ex(arg2);
+	link=(*arg1)->value.lval;
+	id=(*arg2)->value.lval;
 	ptr = php3_list_find(link,&type);
 	if(!ptr || (type!=HwSG(le_socketp) && type!=HwSG(le_psocketp))) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
@@ -3267,19 +3267,19 @@ PHP_FUNCTION(hw_getanchors) {
 /* {{{ proto array hw_getanchorsobj(int link, int objid)
    Return all object records of anchors of object */
 PHP_FUNCTION(hw_getanchorsobj) {
-	pval *arg1, *arg2;
+	pval **arg1, **arg2;
 	int link, id, type;
 	int count;
 	char  **anchorObjRecs = NULL;
 	hw_connection *ptr;
 
-	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
+	if (ARG_COUNT(ht) != 2 || getParametersEx(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(arg1);
-	convert_to_long(arg2);
-	link=arg1->value.lval;
-	id=arg2->value.lval;
+	convert_to_long_ex(arg1);
+	convert_to_long_ex(arg2);
+	link=(*arg1)->value.lval;
+	id=(*arg2)->value.lval;
 	ptr = (hw_connection *) php3_list_find(link,&type);
 	if(!ptr || (type!=HwSG(le_socketp) && type!=HwSG(le_psocketp))) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
@@ -3301,15 +3301,15 @@ PHP_FUNCTION(hw_getanchorsobj) {
 /* {{{ proto string hw_getusername(int link)
    Returns the current user name */
 PHP_FUNCTION(hw_getusername) {
-	pval *arg1;
+	pval **arg1;
 	int link, type;
 	hw_connection *ptr;
 
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(arg1);
-	link = arg1->value.lval;
+	convert_to_long_ex(arg1);
+	link = (*arg1)->value.lval;
 	ptr = php3_list_find(link,&type);
 	if(!ptr || (type!=HwSG(le_socketp) && type!=HwSG(le_psocketp))) {
 		php_error(E_WARNING,"Unable to find file identifier %d",link);
@@ -3325,20 +3325,20 @@ PHP_FUNCTION(hw_getusername) {
 /* {{{ proto void hw_identify(int link, string username, string password)
    Identifies at Hyperwave server */
 PHP_FUNCTION(hw_identify) {
-	pval *arg1, *arg2, *arg3;
+	pval **arg1, **arg2, **arg3;
 	int link, type;
 	char *name, *passwd, *userdata;
 	hw_connection *ptr;
 
-	if (ARG_COUNT(ht) != 3 || getParameters(ht, 3, &arg1, &arg2, &arg3) == FAILURE) {
+	if (ARG_COUNT(ht) != 3 || getParametersEx(3, &arg1, &arg2, &arg3) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(arg1);
-	convert_to_string(arg2);
-	convert_to_string(arg3);
-	link = arg1->value.lval;
-	name=arg2->value.str.val;
-	passwd=arg3->value.str.val;
+	convert_to_long_ex(arg1);
+	convert_to_string_ex(arg2);
+	convert_to_string_ex(arg3);
+	link = (*arg1)->value.lval;
+	name=(*arg2)->value.str.val;
+	passwd=(*arg3)->value.str.val;
 	ptr = php3_list_find(link,&type);
 	if(!ptr || (type!=HwSG(le_socketp) && type!=HwSG(le_psocketp))) {
 		php_error(E_WARNING,"Unable to find file identifier %d",link);
@@ -3374,38 +3374,39 @@ PHP_FUNCTION(hw_identify) {
 /* {{{ proto array hw_objrec2array(string objrec)
    Returns object array of object record*/
 PHP_FUNCTION(hw_objrec2array) {
-	zval *arg1, *arg2;
+	zval **arg1, **arg2;
 
 	switch(ARG_COUNT(ht)) {
 		case 1:
-			if(getParameters(ht, 1, &arg1) == FAILURE)
+			if(getParametersEx(1, &arg1) == FAILURE)
 				WRONG_PARAM_COUNT;
-			arg2 = NULL;
+			convert_to_string_ex(arg1);
+			make2_return_array_from_objrec(&return_value, (*arg1)->value.str.val, NULL);
 			break;
 		case 2:
-			if(getParameters(ht, 2, &arg1, &arg2) == FAILURE)
+			if(getParametersEx(2, &arg1, &arg2) == FAILURE)
 				WRONG_PARAM_COUNT;
-			convert_to_array(arg2);
+			convert_to_array_ex(arg2);
+			convert_to_string_ex(arg1);
+			make2_return_array_from_objrec(&return_value, (*arg1)->value.str.val, *arg2);
 			break;
 		default:
 			WRONG_PARAM_COUNT;
 	}
-	convert_to_string(arg1);
-	make2_return_array_from_objrec(&return_value, arg1->value.str.val, arg2);
 }
 /* }}} */
 
 /* {{{ proto string hw_array2objrec(array objarr)
    Returns object record of object array */
 PHP_FUNCTION(hw_array2objrec) {
-	pval *arg1;
+	pval **arg1;
 	char *objrec, *retobj;
 
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_array(arg1);
-	objrec = make_objrec_from_array(arg1->value.ht);
+	convert_to_array_ex(arg1);
+	objrec = make_objrec_from_array((*arg1)->value.ht);
 	if(objrec) {
 		retobj = estrdup(objrec);
 		free(objrec);
@@ -3418,34 +3419,34 @@ PHP_FUNCTION(hw_array2objrec) {
 /* {{{ proto array hw_incollections(int link, array objids, array collids, int para)
    Returns object ids which are in collections */
 PHP_FUNCTION(hw_incollections) {
-	pval *arg1, *arg2, *arg3, *arg4;
+	pval **arg1, **arg2, **arg3, **arg4;
 	int type, link, i;
 	hw_connection *ptr;
 	int cobjids, ccollids, *objectIDs, *collIDs, cretids, *retIDs, retcoll;
 
-	if (ARG_COUNT(ht) != 4 || getParameters(ht, 4, &arg1, &arg2, &arg3, &arg4) == FAILURE) {
+	if (ARG_COUNT(ht) != 4 || getParametersEx(4, &arg1, &arg2, &arg3, &arg4) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(arg1);
-	convert_to_array(arg2);
-	convert_to_array(arg3);
-	convert_to_long(arg4);
-	link = arg1->value.lval;
-	retcoll=arg4->value.lval;
+	convert_to_long_ex(arg1);
+	convert_to_array_ex(arg2);
+	convert_to_array_ex(arg3);
+	convert_to_long_ex(arg4);
+	link = (*arg1)->value.lval;
+	retcoll=(*arg4)->value.lval;
 	ptr = php3_list_find(link,&type);
 	if(!ptr || (type!=HwSG(le_socketp) && type!=HwSG(le_psocketp))) {
 		php_error(E_WARNING,"Unable to find file identifier %d",link);
 		RETURN_FALSE;
 	}
 
-	cobjids = zend_hash_num_elements(arg2->value.ht);
-	if(NULL == (objectIDs = make_ints_from_array(arg2->value.ht))) {
+	cobjids = zend_hash_num_elements((*arg2)->value.ht);
+	if(NULL == (objectIDs = make_ints_from_array((*arg2)->value.ht))) {
 		php_error(E_WARNING, "Could not create Int Array from Array\n");
 		RETURN_FALSE;
 	}
 
-	ccollids = zend_hash_num_elements(arg3->value.ht);
-	if(NULL == (collIDs = make_ints_from_array(arg3->value.ht))) {
+	ccollids = zend_hash_num_elements((*arg3)->value.ht);
+	if(NULL == (collIDs = make_ints_from_array((*arg3)->value.ht))) {
 		php_error(E_WARNING, "Could not create Int Array from Array\n");
 		efree(objectIDs);
 		RETURN_FALSE;
@@ -3479,26 +3480,26 @@ PHP_FUNCTION(hw_incollections) {
 /* {{{ proto void hw_inscoll(int link, int parentid, array objarr)
    Inserts collection */
 PHP_FUNCTION(hw_inscoll) {
-	pval *arg1, *arg2, *arg3;
+	pval **arg1, **arg2, **arg3;
 	char *objrec;
 	int id, newid, type, link;
 	hw_connection *ptr;
 
-	if (ARG_COUNT(ht) != 3 || getParameters(ht, 3, &arg1, &arg2, &arg3) == FAILURE) {
+	if (ARG_COUNT(ht) != 3 || getParametersEx(3, &arg1, &arg2, &arg3) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(arg1);
-	convert_to_long(arg2);
-	convert_to_array(arg3);
-	link = arg1->value.lval;
-	id=arg2->value.lval;
+	convert_to_long_ex(arg1);
+	convert_to_long_ex(arg2);
+	convert_to_array_ex(arg3);
+	link = (*arg1)->value.lval;
+	id=(*arg2)->value.lval;
 	ptr = php3_list_find(link,&type);
 	if(!ptr || (type!=HwSG(le_socketp) && type!=HwSG(le_psocketp))) {
 		php_error(E_WARNING,"Unable to find file identifier %d",link);
 		RETURN_FALSE;
 	}
 
-	if(NULL == (objrec = make_objrec_from_array(arg3->value.ht))) {
+	if(NULL == (objrec = make_objrec_from_array((*arg3)->value.ht))) {
 		php_error(E_WARNING, "Could not create Object Record from Array\n");
 		RETURN_FALSE;
 	}
@@ -3517,7 +3518,7 @@ PHP_FUNCTION(hw_inscoll) {
 /* {{{ proto void hw_insdoc(int link, int parentid, string objrec [, string text])
    Inserts document */
 PHP_FUNCTION(hw_insdoc) {
-	pval *argv[4];
+	pval **argv[4];
 	char *objrec, *text;
 	int id, newid, type, link, argc;
 	hw_connection *ptr;
@@ -3526,20 +3527,20 @@ PHP_FUNCTION(hw_insdoc) {
 	if((argc < 3) || (argc > 4))
 		WRONG_PARAM_COUNT;
 
-	if (getParametersArray(ht, argc, argv) == FAILURE)
+	if (getParametersArrayEx(argc, argv) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-	convert_to_long(argv[0]);
-	convert_to_long(argv[1]);
-	convert_to_string(argv[2]);
+	convert_to_long_ex(argv[0]);
+	convert_to_long_ex(argv[1]);
+	convert_to_string_ex(argv[2]);
 	if(argc == 4) {
-		convert_to_string(argv[3]);
-		text = argv[3]->value.str.val;
+		convert_to_string_ex(argv[3]);
+		text = (*argv[3])->value.str.val;
 	} else {
 		text = NULL;
 	}
-	link = argv[0]->value.lval;
-	id = argv[1]->value.lval;
+	link = (*argv[0])->value.lval;
+	id = (*argv[1])->value.lval;
 	ptr = php3_list_find(link,&type);
 	if(!ptr || (type!=HwSG(le_socketp) && type!=HwSG(le_psocketp))) {
 		php_error(E_WARNING,"Unable to find file identifier %d",link);
@@ -3547,7 +3548,7 @@ PHP_FUNCTION(hw_insdoc) {
 	}
 
 	set_swap(ptr->swap_on);
-        objrec = argv[2]->value.str.val;
+        objrec = (*argv[2])->value.str.val;
 	if (0 != (ptr->lasterror = send_insdoc(ptr->socket, id, objrec, text, &newid))) {
 		RETURN_FALSE;
 	}
@@ -3559,19 +3560,19 @@ PHP_FUNCTION(hw_insdoc) {
 /* {{{ proto int hw_getsrcbydestobj(int link, int destid)
    Returns object id of source docuent by destination anchor */
 PHP_FUNCTION(hw_getsrcbydestobj) {
-	pval *arg1, *arg2;
+	pval **arg1, **arg2;
 	int link, type, id;
 	int count;
 	char  **childObjRecs = NULL;
 	hw_connection *ptr;
 
-	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
+	if (ARG_COUNT(ht) != 2 || getParametersEx(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(arg1);
-	convert_to_long(arg2);
-	link=arg1->value.lval;
-	id=arg2->value.lval;
+	convert_to_long_ex(arg1);
+	convert_to_long_ex(arg2);
+	link=(*arg1)->value.lval;
+	id=(*arg2)->value.lval;
 	ptr = php3_list_find(link,&type);
 	if(!ptr || (type!=HwSG(le_socketp) && type!=HwSG(le_psocketp))) {
 		php_error(E_WARNING,"Unable to find file identifier %d",link);
@@ -3593,19 +3594,19 @@ PHP_FUNCTION(hw_getsrcbydestobj) {
 /* {{{ proto int hw_mapid(int link, int serverid, int destid)
    Returns virtual object id of document on remote hw server */
 PHP_FUNCTION(hw_mapid) {
-	pval *arg1, *arg2, *arg3;
+	pval **arg1, **arg2, **arg3;
 	int link, type, servid, id, virtid;
 	hw_connection *ptr;
 
-	if (ARG_COUNT(ht) != 3 || getParameters(ht, 3, &arg1, &arg2, &arg3) == FAILURE) {
+	if (ARG_COUNT(ht) != 3 || getParametersEx(3, &arg1, &arg2, &arg3) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(arg1);
-	convert_to_long(arg2);
-	convert_to_long(arg3);
-	link=arg1->value.lval;
-	servid=arg2->value.lval;
-	id=arg3->value.lval;
+	convert_to_long_ex(arg1);
+	convert_to_long_ex(arg2);
+	convert_to_long_ex(arg3);
+	link=(*arg1)->value.lval;
+	servid=(*arg2)->value.lval;
+	id=(*arg3)->value.lval;
 	ptr = php3_list_find(link,&type);
 	if(!ptr || (type!=HwSG(le_socketp) && type!=HwSG(le_psocketp))) {
 		php3_error(E_WARNING,"Unable to find file identifier %d",link);
@@ -3624,23 +3625,23 @@ PHP_FUNCTION(hw_mapid) {
 /* {{{ proto string hw_getrellink(int link, int rootid, int sourceid, int destid)
    Get link form source to dest relative to rootid */
 PHP_FUNCTION(hw_getrellink) {
-	pval *arg1, *arg2, *arg3, *arg4;
+	pval **arg1, **arg2, **arg3, **arg4;
 	int link, type;
 	int rootid, destid, sourceid;
 	char *anchorstr;
 	hw_connection *ptr;
 
-	if (ARG_COUNT(ht) != 4 || getParameters(ht, 4, &arg1, &arg2, &arg3, &arg4) == FAILURE) {
+	if (ARG_COUNT(ht) != 4 || getParametersEx(4, &arg1, &arg2, &arg3, &arg4) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(arg1);
-	convert_to_long(arg2);
-	convert_to_long(arg3);
-	convert_to_long(arg4);
-	link=arg1->value.lval;
-	rootid=arg2->value.lval;
-	sourceid=arg3->value.lval;
-	destid=arg4->value.lval;
+	convert_to_long_ex(arg1);
+	convert_to_long_ex(arg2);
+	convert_to_long_ex(arg3);
+	convert_to_long_ex(arg4);
+	link=(*arg1)->value.lval;
+	rootid=(*arg2)->value.lval;
+	sourceid=(*arg3)->value.lval;
+	destid=(*arg4)->value.lval;
 	ptr = php3_list_find(link,&type);
 	if(!ptr || (type!=HwSG(le_socketp) && type!=HwSG(le_psocketp))) {
 		php_error(E_WARNING,"Unable to find file identifier %d",link);
@@ -3668,15 +3669,15 @@ PHP_MINFO_FUNCTION(hw)
    Prints information about the connection to Hyperwave server */
 PHP_FUNCTION(hw_connection_info)
 {
-	pval *arg1;
+	pval **arg1;
 	hw_connection *ptr;
 	int link, type;
 
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(arg1);
-	link=arg1->value.lval;
+	convert_to_long_ex(arg1);
+	link=(*arg1)->value.lval;
 	ptr = php3_list_find(link,&type);
 	if(!ptr || (type!=HwSG(le_socketp) && type!=HwSG(le_psocketp))) {
 		php_error(E_WARNING,"Unable to find file identifier %d",link);
