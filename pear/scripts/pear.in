@@ -24,7 +24,7 @@ require_once "PEAR/Config.php";
 require_once "PEAR/Command.php";
 require_once "Console/Getopt.php";
 
-error_reporting(E_ALL & ~E_NOTICE);
+error_reporting(E_ALL);
 
 PEAR_Command::setUIType('CLI');
 $all_commands = PEAR_Command::getCommands();
@@ -81,10 +81,10 @@ foreach ($opts as $opt) {
             $config->remove($param, 'user');
             break;
         case 'v':
-            $verbose++;
+            $config->set('verbose', $verbose + 1);
             break;
         case 'q':
-            $verbose--;
+            $config->set('verbose', $verbose - 1);
             break;
     }
 }
@@ -107,11 +107,13 @@ if (empty($all_commands[$command]) || $command == 'help') {
     usage(null, @$options[1][2]);
 }
 
-$cmd = PEAR_Command::factory($command);
+$cmd = PEAR_Command::factory($command, $config);
 if (PEAR::isError($cmd)) {
     die($cmd->getMessage());
 }
-$ok = $cmd->run($command, $cmdopts, $cmdargs);
+
+$cmdargs = array_slice($options[1], 2);
+$ok = $cmd->run($command, $cmdargs);
 if ($ok === false) {
     PEAR::raiseError("unknown command `$command'");
 }
@@ -147,7 +149,7 @@ function usage($error = null, $helpsubject = null)
     } else {
         fputs($stderr,
               "Type \"$progname help options\" to list all options.\n");
-    }        
+    }
     fputs($stderr,
           "Commands:\n   " . implode("\n   ", array_keys($all_commands)) .
           "\n");
