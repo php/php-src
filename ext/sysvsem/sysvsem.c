@@ -35,7 +35,7 @@
 
 #include "php_sysvsem.h"
 
-#if !HAVE_SEMUN && defined(__GNU_LIBRARY__) && __GNU_LIBRARY__ == 6
+#if !HAVE_SEMUN
 
 union semun {
 	int val;                    /* value for SETVAL */
