@@ -1,3 +1,65 @@
+2003-02-06  James Cox  <james@imajes.info>
+
+    * NEWS:
+      adding news about moved ext
+
+2003-02-06  Tal Peer  <tal@twisthost.com>
+
+    * ext/fribidi/.cvsignore
+      ext/fribidi/CREDITS
+      ext/fribidi/EXPERIMENTAL
+      ext/fribidi/README
+      ext/fribidi/config.m4
+      ext/fribidi/fribidi.c
+      ext/fribidi/fribidi.dsp
+      ext/fribidi/php_fribidi.h:
+      Moving fribidi to PECL
+
+2003-02-06  Sara Golemon  <php@alphaweb.net>
+
+    * ext/bcmath/bcmath.c:
+      bc_raise() can return a scale lower than that passed into it.  While most
+      other bcmath calls won't, it's safest to do a quick check that we're only
+      reducing n_scale, not increasing it.
+
+2003-02-06  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * sapi/cli/php.1:
+      Rewrite/add some stuff
+
+2003-02-06  Jani Taskinen  <sniper@iki.fi>
+
+    * (PHP_4_3)
+      NEWS:
+      fugbix news
+
+    * (PHP_4_3)
+      ext/standard/array.c:
+      MFH: - Fixed bug #22088 (array_shift() leaves next index to be +1 too much)
+
+    * ext/standard/array.c:
+      - Fixed bug #22088 (array_shift() leaves next index to be +1 too much)
+
+    * ext/standard/tests/array/bug22088.phpt:
+      fix the test
+
+    * ext/standard/tests/array/bug22088.phpt:
+      
+      Added testcase for bug #22088
+
+2003-02-06  Andrey Hristov  <andrey@webgate.bg>
+
+    * (PHP_4_3)
+      NEWS:
+      added entry for memory_get_usage().
+
+    * (PHP_4_3)
+      ext/standard/basic_functions.c
+      ext/standard/php_var.h
+      ext/standard/var.c:
+      Backporting memory_get_usage() from HEAD.
+      As far as the code is small there won't be any problems.
+
 2003-02-05  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * tests/classes/private_001.phpt
