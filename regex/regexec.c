@@ -16,7 +16,7 @@
 #include "utils.h"
 #include "regex2.h"
 
-static int nope = 0;		/* for use in asserts; shuts lint up */
+#define PHP_REGEX_NOPE 0;		/* for use in asserts; shuts lint up */
 
 /* macros for manipulating states, small version */
 #define	states	unsigned
