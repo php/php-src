@@ -438,9 +438,9 @@ void java_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_property_refe
 
   int arg_count = ZEND_NUM_ARGS();
   jlong result = 0;
-  pval **arguments = (pval **) emalloc(sizeof(pval *)*arg_count);
+	zval **arguments = (zval **) emalloc(sizeof(zval *)*arg_count);
 
-  getParametersArray(ht, arg_count, arguments);
+	zend_get_parameters_ex(arg_count, arguments);
 
   if (!JG(jenv)) jvm_create(TSRMLS_C);
   if (!JG(jenv)) return;
@@ -462,9 +462,9 @@ void java_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_property_refe
       return;
     }
 
-    className=(*jenv)->NewStringUTF(jenv, Z_STRVAL_P(arguments[0]));
+    className=(*jenv)->NewStringUTF(jenv, Z_STRVAL_PP(arguments[0]));
     (*jenv)->CallVoidMethod(jenv, JG(php_reflect), co,
-      className, _java_makeArray(arg_count-1, arguments+1 TSRMLS_CC), result);
+      className, _java_makeArray(arg_count-1, *(arguments+1) TSRMLS_CC), result);
 
     (*jenv)->DeleteLocalRef(jenv, className);
 
@@ -485,7 +485,7 @@ void java_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_property_refe
     result = (jlong)(long)return_value;
 
     (*jenv)->CallVoidMethod(jenv, JG(php_reflect), invoke,
-      obj, method, _java_makeArray(arg_count, arguments TSRMLS_CC), result);
+      obj, method, _java_makeArray(arg_count, *arguments TSRMLS_CC), result);
 
     (*jenv)->DeleteLocalRef(jenv, method);
 

@@ -209,7 +209,7 @@ static int qdom_find_children( zval **children, struct qdom_node *orig_node TSRM
    creates a tree of an xml string */
 PHP_FUNCTION(qdom_tree)
 {
-	zval *arg;
+	zval **arg;
     char qt_ver1[200];
     char *qt_ver = qt_ver1;
     char *qdom_type_name;
@@ -217,11 +217,10 @@ PHP_FUNCTION(qdom_tree)
     struct qdom_node *node;
     zval *children;
 
-	if (ZEND_NUM_ARGS() != 1 || getParameters(ht, 1, &arg) == FAILURE)
-    {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_string(arg);
+	convert_to_string_ex(arg);
 
     qdom_do_install_message_handler();
 
@@ -230,7 +229,7 @@ PHP_FUNCTION(qdom_tree)
     object_init_ex(return_value, qdomdoc_class_entry_ptr);
 	add_property_stringl(return_value, "version", (char *) qt_ver, strlen(qt_ver), 1);
 
-    doc = qdom_do_init( Z_STRVAL_P(arg) );
+    doc = qdom_do_init( Z_STRVAL_PP(arg) );
 
     qdom_do_doc_type( doc, &qdom_type_name );
 
