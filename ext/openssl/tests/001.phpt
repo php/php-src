@@ -42,9 +42,7 @@ openssl_pkey_free($loaded_key);
 
 echo "Load key manually and use string syntax\n";
 
-$fp = fopen($key_file_name, "r");
-$key_content = fread($fp, filesize($key_file_name));
-fclose($fp);
+$key_content = file_get_contents($key_file_name);
 $loaded_key = openssl_pkey_get_private($key_content, $passphrase);
 
 if ($loaded_key === false)
@@ -53,6 +51,8 @@ if ($loaded_key === false)
 openssl_pkey_free($loaded_key);
 
 echo "OK!\n";
+
+@unlink($key_file_name);
 
 ?>
 --EXPECT--

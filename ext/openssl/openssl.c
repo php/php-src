@@ -819,6 +819,13 @@ PHP_FUNCTION(openssl_x509_parse)
 /*	add_assoc_bool(return_value, "valid", cert->valid); */
 
 	add_assoc_name_entry(return_value, "subject", 		X509_get_subject_name(cert), useshortnames);
+	/* hash as used in CA directories to lookup cert by subject name */
+	{
+		char buf[32];
+		snprintf(buf, sizeof(buf), "%08lx", X509_subject_name_hash(cert));
+		add_assoc_string(return_value, "hash", buf, 1);
+	}
+	
 	add_assoc_name_entry(return_value, "issuer", 		X509_get_issuer_name(cert), useshortnames);
 	add_assoc_long(return_value, "version", 			X509_get_version(cert));
 	add_assoc_long(return_value, "serialNumber", 		ASN1_INTEGER_get(X509_get_serialNumber(cert)));
