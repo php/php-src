@@ -1,3 +1,27 @@
+2002-02-25  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * ext/pspell/pspell.c: Fix pspell function entry
+
+2002-02-25  jim winstead  <jimw@apache.org>
+
+    * sapi/apache/config.m4:
+    make it more clear that --with-apache and --with-apxs only work with apache 1.x.
+
+2002-02-25  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/DB/ibase.php:
+    Experimental support for handling all the parameters accepted by
+    ibase_connect().
+
+2002-02-25  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * NEWS:
+    Add news for mm save handler and multiple SAPI start up problem fix
+
+    * ext/session/mod_mm.c
+      ext/session/session.c: MFH
+     - Fixed CGI (or other SAPI) start up failure when mm save handler is used
+
 2002-02-24  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
 
     * pear/DB/pgsql.php:
