@@ -1376,15 +1376,12 @@ PHP_FUNCTION(range)
 /* }}} */
 
 
-static int array_data_shuffle(const void *a, const void*b)
-{
-	TSRMLS_FETCH();
-
-	return php_rand_range(0,1 TSRMLS_CC) ? 1 : -1;
+static int array_data_shuffle(const void *a, const void*b) {
+	return (php_rand() % 2) ? 1 : -1;
 }
 
 
-/* {{{ proto bool shuffle(array array_arg)
+/* {{{ proto int shuffle(array array_arg)
    Randomly shuffle the contents of an array */
 PHP_FUNCTION(shuffle)
 {
@@ -2719,12 +2716,10 @@ PHP_FUNCTION(array_multisort)
 
 /* {{{ proto mixed array_rand(array input [, int num_req])
    Return key/keys for random entry/entries in the array */
-
-/* FIXME:The algorithm used is bogus! */
 PHP_FUNCTION(array_rand)
 {
 	zval **input, **num_req;
-	double randval;
+	long randval;
 	int num_req_val, num_avail, key_type;
 	char *string_key;
 	uint string_key_len;
@@ -2763,10 +2758,17 @@ PHP_FUNCTION(array_rand)
 	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_PP(input), &pos);
 	while (num_req_val && (key_type = zend_hash_get_current_key_ex(Z_ARRVAL_PP(input), &string_key, &string_key_len, &num_key, 0, &pos)) != HASH_KEY_NON_EXISTANT) {
 
-	
+#ifdef HAVE_RANDOM
+		randval = random();
+#else
+#ifdef HAVE_LRAND48
+		randval = lrand48();
+#else
+		randval = rand();
+#endif
+#endif
 
-	randval = php_drand(TSRMLS_C);
-		if (randval < (double)num_req_val/(double)num_avail) {
+		if ((double)(randval/(PHP_RAND_MAX+1.0)) < (double)num_req_val/(double)num_avail) {
 			/* If we are returning a single result, just do it. */
 			if (Z_TYPE_P(return_value) != IS_ARRAY) {
 				if (key_type == HASH_KEY_IS_STRING) {

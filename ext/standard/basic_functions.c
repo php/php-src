@@ -25,6 +25,7 @@
 #include "php_ini.h"
 #include "internal_functions_registry.h"
 #include "php_standard.h"
+#include "php_math.h"
 #include "php_incomplete_class.h"
 #include "ext/standard/info.h"
 #include "ext/session/php_session.h"
@@ -950,7 +951,6 @@ PHP_MINIT_FUNCTION(basic)
 	PHP_MINIT(crypt) (INIT_FUNC_ARGS_PASSTHRU);
 #endif
 
-	PHP_MINIT(rand)(INIT_FUNC_ARGS_PASSTHRU);
 #ifdef ZTS
 	PHP_MINIT(lcg) (INIT_FUNC_ARGS_PASSTHRU);
 #endif
@@ -1030,6 +1030,10 @@ PHP_RINIT_FUNCTION(basic)
 #endif
 	BG(user_shutdown_function_names) = NULL;
 
+#if HAVE_CRYPT
+	PHP_RINIT(crypt) (INIT_FUNC_ARGS_PASSTHRU);
+#endif
+
 #ifndef ZTS
 	PHP_RINIT(lcg) (INIT_FUNC_ARGS_PASSTHRU);
 #endif
@@ -1037,7 +1041,6 @@ PHP_RINIT_FUNCTION(basic)
 	PHP_RINIT(filestat) (INIT_FUNC_ARGS_PASSTHRU);
 	PHP_RINIT(syslog) (INIT_FUNC_ARGS_PASSTHRU);
 	PHP_RINIT(dir) (INIT_FUNC_ARGS_PASSTHRU);
-	PHP_RINIT(rand) (INIT_FUNC_ARGS_PASSTHRU);
 
 	return SUCCESS;
 }
