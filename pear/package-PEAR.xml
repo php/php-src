@@ -55,6 +55,7 @@ PEAR Installer:
 
 * Bug #171 --alldeps with a rel=&quot;eq&quot; should install the required version, if possible
 * Bug #249 installing from an url doesnt work
+* Bug #248 --force command does not work as expected
 
     </notes>
     <provides type="class" name="OS_Guess" />
