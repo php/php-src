@@ -934,7 +934,7 @@ PHP_FUNCTION(curl_setopt)
 
 #ifdef CURLOPT_FTPSSLAUTH
 		case CURLOPT_FTPSSLAUTH:
-#edif
+#endif
 		case CURLOPT_UNRESTRICTED_AUTH:
 		case CURLOPT_PORT:
 			convert_to_long_ex(zvalue);
