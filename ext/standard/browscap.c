@@ -27,7 +27,7 @@
 
 HashTable browser_hash;
 
-#define DEFAULT_SECTION_NAME "default browser capability settings"
+#define DEFAULT_SECTION_NAME "Default Browser Capability Settings"
 
 static int browser_reg_compare(zval **browser,int num_args, va_list args, zend_hash_key *key)
 {
