@@ -1,3 +1,9 @@
+2002-12-26  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * zend_compile.c:
+      do_inherit_method_check() is supposed to return 0 or 1, not SUCCESS or
+      FAILURE.
+
 2002-12-14  Ilia Alshanetsky  <ilia@prohost.org>
 
     * zend_language_scanner.l:

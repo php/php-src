@@ -1,3 +1,72 @@
+2002-12-26  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/ftp/CREDITS
+      ext/ncurses/CREDITS
+      ext/standard/credits.c
+      ext/standard/credits_ext.h:
+      - MFB
+
+    * ext/ncurses/CREDITS:
+      All on one line
+
+    * ext/ftp/CREDITS
+      ext/standard/credits.c
+      ext/standard/credits_ext.h:
+      - update credits
+
+2002-12-26  Georg Richter  <georg.richter@phpev.de>
+
+    * ext/ncurses/CREDITS:
+      added Wez, Ilia & myself
+
+    * ext/ncurses/CREDITS:
+      added Wez, Ilia and myself
+
+2002-12-26  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/standard/file.c:
+      MFH: get_meta_tags() stream leak
+
+    * ext/standard/file.c:
+      Remove cruft that opened a stream that was never closed in get_meta_tags().
+      (probably my fault).
+      Noticed by Philip Olson
+
+2002-12-26  Sterling Hughes  <sterling@bumblebury.com>
+
+    * ext/standard/string.c:
+      if needle is empty free allocated memory
+
+    * ext/standard/string.c:
+      remove memleak
+
+2002-12-26  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/dba/tests/dba_db4.phpt:
+      Add missing test for db4 handler
+
+2002-12-26  Georg Richter  <georg.richter@phpev.de>
+
+    * ext/mysql/php_mysql.c:
+      fixed some compiler warnings when using external libmysqlclient 4.x
+
+2002-12-26  Edin Kadribasic  <edink@proventum.net>
+
+    * php.ini-dist
+      php.ini-recommended
+      main/config.w32.h.in
+      main/internal_functions_win32.c
+      win32/php4dllts.dsp:
+      MFB:
+      Made ZLIB extension built in on Windows. Fixes #21139.
+
+    * php.ini-dist
+      php.ini-recommended
+      main/config.w32.h.in
+      main/internal_functions_win32.c
+      win32/php4dllts.dsp:
+      Made ZLIB extension built in on Windows. Fixes #21139.
+
 2002-12-25  George Schlossnagle  <george@omniti.com>
 
     * sapi/cgi/cgi_main.c:
