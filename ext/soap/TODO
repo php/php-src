@@ -7,11 +7,8 @@ General
 
 SOAP
 ----
-+ support for SOAP headers
-  ? actor attribute
-  + mustUnderstend attribute
 - SOAP routing
-- root attribute
+- root attribute (it is defined by SOAP 1.1, but not SOAP 1.2)
 - make sure soap 1.1 and 1.2 are supported fully
 
 Encoding
@@ -92,7 +89,7 @@ Transport
 
 Interop Testing
 ---------------
-- more introp rounds/groups
+- more interop rounds/groups
 
 UDDI
 ----

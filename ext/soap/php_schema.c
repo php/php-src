@@ -90,17 +90,13 @@ static encodePtr get_create_encoder(sdlPtr sdl, sdlTypePtr cur_type, const char 
 {
 	encodePtr enc = NULL;
 	smart_str nscat = {0};
-	TSRMLS_FETCH();
 
 	smart_str_appends(&nscat, ns);
 	smart_str_appendc(&nscat, ':');
 	smart_str_appends(&nscat, type);
 	smart_str_0(&nscat);
 
-	enc = get_conversion_from_href_type(nscat.c);
-	if (enc == NULL) {
-		enc = get_conversion_from_href_type_ex(sdl->encoders, nscat.c, nscat.len);
-	}
+	enc = get_encoder_ex(sdl, nscat.c, nscat.len);
 	if (enc == NULL) {
 		enc = create_encoder(sdl, cur_type, ns, type);
 	}
@@ -201,7 +197,7 @@ int load_schema(sdlCtx *ctx,xmlNodePtr schema)
 			if (location == NULL) {
 				php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: include has no 'schemaLocation' attribute");
 			} else {
-			  xmlChar *uri;
+				xmlChar *uri;
 				xmlChar *base = xmlNodeGetBase(trav->doc, trav);
 
 				if (base == NULL) {
@@ -211,7 +207,7 @@ int load_schema(sdlCtx *ctx,xmlNodePtr schema)
 			    xmlFree(base);
 				}
 				schema_load_file(ctx,NULL,uri,tns,0);
-		    xmlFree(uri);
+				xmlFree(uri);
 			}
 
 		} else if (node_is_equal(trav,"redefine")) {
@@ -231,13 +227,13 @@ int load_schema(sdlCtx *ctx,xmlNodePtr schema)
 			    xmlFree(base);
 				}
 				schema_load_file(ctx,NULL,uri,tns,0);
-		    xmlFree(uri);
+				xmlFree(uri);
 				/* TODO: <redefine> support */
 			}
 
 		} else if (node_is_equal(trav,"import")) {
 			xmlAttrPtr ns, location;
-		  xmlChar *uri = NULL;
+			xmlChar *uri = NULL;
 
 			ns = get_attribute(trav->properties, "namespace");
 			location = get_attribute(trav->properties, "schemaLocation");
@@ -256,7 +252,7 @@ int load_schema(sdlCtx *ctx,xmlNodePtr schema)
 				}
 			}
 			schema_load_file(ctx,ns,uri,tns,1);
-		  if (uri != NULL) {xmlFree(uri);}
+			if (uri != NULL) {xmlFree(uri);}
 		} else if (node_is_equal(trav,"annotation")) {
 			/* TODO: <annotation> support */
 /* annotation cleanup
@@ -267,7 +263,7 @@ int load_schema(sdlCtx *ctx,xmlNodePtr schema)
 			continue;
 */
 		} else {
-		  break;
+			break;
 		}
 		trav = trav->next;
 	}
@@ -470,7 +466,7 @@ static int schema_list(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr listType, sdlTypeP
 		zend_hash_next_index_insert(cur_type->elements, &newType, sizeof(sdlTypePtr), (void **)&tmp);
 
 		schema_simpleType(sdl, tsn, trav, newType);
-	  trav = trav->next;
+		trav = trav->next;
 	}
 	if (trav != NULL) {
 		php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: unexpected <%s> in list",trav->name);
@@ -503,10 +499,10 @@ static int schema_union(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr unionType, sdlTyp
 		while (start != NULL && *start != '\0') {
 			end = strchr(start,' ');
 			if (end == NULL) {
-			  next = NULL;
+				next = NULL;
 			} else {
-			  *end = '\0';
-			  next = end+1;
+				*end = '\0';
+				next = end+1;
 			}
 
 			parse_namespace(start, &type, &ns);
@@ -696,7 +692,7 @@ static int schema_restriction_simpleContent(sdlPtr sdl, xmlAttrPtr tsn, xmlNodeP
 		} else {
 			break;
 		}
-	  trav = trav->next;
+		trav = trav->next;
 	}
 	if (!simpleType) {
 		while (trav != NULL) {

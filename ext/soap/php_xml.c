@@ -78,7 +78,7 @@ static void soap_Comment(void *ctx, const xmlChar *value)
 
 xmlDocPtr soap_xmlParseFile(const char *filename)
 {
-  xmlParserCtxtPtr ctxt = NULL;
+	xmlParserCtxtPtr ctxt = NULL;
 	xmlDocPtr ret;
 
 /*
@@ -105,7 +105,7 @@ xmlDocPtr soap_xmlParseFile(const char *filename)
 		}
 		xmlFreeParserCtxt(ctxt);
 	} else {
-	  ret = NULL;
+		ret = NULL;
 	}
 
 /*
@@ -120,7 +120,7 @@ xmlDocPtr soap_xmlParseFile(const char *filename)
 
 xmlDocPtr soap_xmlParseMemory(const void *buf, size_t buf_size)
 {
-  xmlParserCtxtPtr ctxt = NULL;
+	xmlParserCtxtPtr ctxt = NULL;
 	xmlDocPtr ret;
 
 /*
@@ -146,7 +146,7 @@ xmlDocPtr soap_xmlParseMemory(const void *buf, size_t buf_size)
 		}
 		xmlFreeParserCtxt(ctxt);
 	} else {
-	  ret = NULL;
+		ret = NULL;
 	}
 
 /*
