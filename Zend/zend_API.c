@@ -45,7 +45,7 @@ int getParameters(int ht, int param_count,...)
 
 	va_start(ptr, param_count);
 
-	do {
+	while (param_count>0) {
 		param = va_arg(ptr, zval **);
 		param_ptr = *(p-param_count);
 		if (!param_ptr->is_ref && param_ptr->refcount>1) {
@@ -60,7 +60,8 @@ int getParameters(int ht, int param_count,...)
 			*(p-param_count) = param_ptr;
 		}
 		*param = param_ptr;
-	} while (--param_count);
+		param_count--;
+	}
 	va_end(ptr);
 
 	return SUCCESS;
@@ -79,7 +80,7 @@ int getParametersArray(int ht, int param_count, zval **argument_array)
 	}
 
 
-	do {
+	while (param_count>0) {
 		param_ptr = *(p-param_count);
 		if (!param_ptr->is_ref && param_ptr->refcount>1) {
 			zval *new_tmp;
@@ -93,7 +94,8 @@ int getParametersArray(int ht, int param_count, zval **argument_array)
 			*(p-param_count) = param_ptr;
 		}
 		*(argument_array++) = param_ptr;
-	} while (--param_count);
+		param_count--;
+	}
 
 	return SUCCESS;
 }
