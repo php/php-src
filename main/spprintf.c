@@ -177,6 +177,20 @@ static char * xbuf_init(xbuffy *xbuf, size_t max_len)
 		cc++;                           \
 	}
 
+#define INS_STRING(xbuf, s, slen, cc)   \
+	xbuf_resize(xbuf, s_len);           \
+	if (xbuf->nextb+slen < xbuf->buf_end) { \
+		memcpy(xbuf->nextb, s, slen);   \
+		xbuf->nextb += slen;            \
+		cc += slen;                     \
+		s += slen;                      \
+	} else {                            \
+		for (i = s_len; i != 0; i--) {  \
+			INS_CHAR_NR(xbuf, *s, cc);  \
+			s++;                        \
+		}                               \
+	}
+
 #define INS_CHAR(xbuf, ch, cc)          \
 	xbuf_resize(xbuf, 1);               \
 	INS_CHAR_NR(xbuf, ch, cc)
@@ -185,14 +199,21 @@ static char * xbuf_init(xbuffy *xbuf, size_t max_len)
  * Macro that does padding. The padding is done by printing
  * the character ch.
  */
-#define PAD(xbuf, width, len, ch)       \
+#define PAD(xbuf, width, len, ch, cc)   \
 	if (width > len) {                  \
-		xbuf_resize(xbuf, width-len);   \
-		do {                            \
-			INS_CHAR_NR(xbuf, ch, cc);  \
-			width--;                    \
+		int slen = width-len;           \
+		xbuf_resize(xbuf, slen);        \
+		if (xbuf->nextb+slen < xbuf->buf_end) { \
+			memset(xbuf->nextb, ch, slen);\
+			xbuf->nextb += slen;        \
+			cc += slen;                 \
+		} else {                        \
+			do {                        \
+				INS_CHAR_NR(xbuf, ch, cc);  \
+				width--;                \
+			}                           \
+			while (width > len);        \
 		}                               \
-		while (width > len);\
 	}
 
 #define NUM(c) (c - '0')
@@ -577,19 +598,15 @@ static int xbuf_format_converter(register xbuffy * xbuf, const char *fmt, va_lis
 					s_len--;
 					min_width--;
 				}
-				PAD(xbuf, min_width, s_len, pad_char);
+				PAD(xbuf, min_width, s_len, pad_char, cc);
 			}
 			/*
 			 * Print the string s. 
 			 */
-			xbuf_resize(xbuf, s_len);
-			for (i = s_len; i != 0; i--) {
-				INS_CHAR_NR(xbuf, *s, cc);
-				s++;
-			}
+			INS_STRING(xbuf, s, s_len, cc);
 
 			if (adjust_width && adjust == LEFT && min_width > s_len)
-				PAD(xbuf, min_width, s_len, pad_char);
+				PAD(xbuf, min_width, s_len, pad_char, cc);
 		}
 		fmt++;
 	}
