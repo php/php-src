@@ -24,6 +24,10 @@
 #include "config.h"
 #endif
 
+#ifdef __GNUC__
+#define _GNU_SOURCE
+#endif
+
 #include "php.h"
 
 #define FILE_REVISION "$Revision$"
@@ -727,21 +731,50 @@ PHP_RSHUTDOWN_FUNCTION(ibase)
  
 PHP_MINFO_FUNCTION(ibase)
 {
-	char tmp[64];
+	char tmp[64], *s;
 
 	php_info_print_table_start();
 	php_info_print_table_row(2, "Interbase Support", "enabled");
 
-#if (SQLDA_CURRENT_VERSION > 1) || defined(FB_SQLDA)
-	isc_get_client_version(tmp);
-	php_info_print_table_row(2, "Client Library", tmp);
+#ifdef FB_API_VER
+	sprintf( (s = tmp), "Firebird API version %d", FB_API_VER);
+#elif (SQLDA_CURRENT_VERSION > 1)
+	s =  "Interbase 7.0 and up";
 #elif (SQL_DIALECT_CURRENT == 1)
-	php_info_print_table_row(2, "Client Library", "Interbase 5.6 or earlier");
+	s =  "Interbase 5.6 or earlier";
 #elif !defined(DSC_null)
-	php_info_print_table_row(2, "Client Library", "Interbase 6");
+	s = "Interbase 6";
 #else
-	php_info_print_table_row(2, "Client Library", "Firebird 1.0");
+	s = "Firebird 1.0";
 #endif
+	php_info_print_table_row(2, "Compile-time Client Library Version", s);
+
+#if defined(__GNUC__) || defined(PHP_WIN32)
+	do {
+#ifdef __GNUC__
+		void (*info_func)(char*) = dlsym(RTLD_DEFAULT, "isc_get_client_version");
+#else
+		void (__stdcall *info_func)(char*) = NULL;
+
+		HMODULE l = GetModuleHandle("fbclient");
+
+		if (!l && !(l = GetModuleHandle("gds32"))) {
+			break;
+		}
+		info_func = (void (__stdcall *)(char*))GetProcAddress(l, "isc_get_client_version");
+#endif		
+		if (info_func) {
+			info_func(s = tmp);
+		} else {
+#if HAVE_IBASE6_API
+			s = "Firebird 1.0/Interbase 6";
+#else
+			s = "Firebird 1.0/Interbase 6 or earlier";
+#endif
+		}
+		php_info_print_table_row(2, "Run-time Client Library Version", s);
+	} while (0);
+#endif			
 
 	php_info_print_table_row(2, "Revision", FILE_REVISION);
 #ifdef COMPILE_DL_INTERBASE
