@@ -1,3 +1,39 @@
+2002-02-08  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ext/tokenizer/.cvsignore
+      ext/tokenizer/tokenizer.dsp
+      win32/php_modules.dsw
+      php.ini-dist
+      php.ini-recommended:
+    Add MSVC workspace for tokenizer extension. Add php_tokenizer.dll entries to php.ini-*.
+
+2002-02-08  Thies C. Arntzen  <thies@thieso.net>
+
+    * ext/oci8/oci8.c
+      ext/oci8/php_oci8.h:
+    - got rid of unneded calls to OCIAttrGet when reexecuting the same query
+    - only invalidate the define list after all rows from a REFCORSOR are read,
+      "normal" corsors will now remember their column defines. this means that
+      ocigetcolumn[name|type|..] will from now on work even after the result set
+      has been read.
+
+2002-02-08  Stig Bakken  <ssb@fast.no>
+
+    * ext/tokenizer/.cvsignore
+      ext/tokenizer/CREDITS
+      ext/tokenizer/EXPERIMENTAL
+      ext/tokenizer/Makefile.in
+      ext/tokenizer/config.m4
+      ext/tokenizer/php_tokenizer.h
+      ext/tokenizer/tokenizer.c
+      ext/tokenizer/tokenizer.php: Added Andrei's tokenizer extension 
+
+2002-02-08  Mark L. Woodward  <mlwmohawk@mohawksoft.com>
+
+    * ext/msession/msession.c:
+    Backward compatibility to 4.0.6 does not have "HAVE_PHP_SESSION" define
+    Renamed PHP_4_x_API to PHP_4_x
+
 2002-02-07  Sterling Hughes  <sterling@bumblebury.com>
 
     * ext/session/php_session.h
