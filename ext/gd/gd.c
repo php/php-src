@@ -260,6 +260,10 @@ function_entry gd_functions[] = {
 #ifdef HAVE_GD_WBMP
 	PHP_FE(image2wbmp,								NULL)
 #endif	
+#if HAVE_GD_BUNDLED
+	PHP_FE(imagelayereffect,						NULL)
+	PHP_FE(imagecolormatch,							NULL)
+#endif
 	{NULL, NULL, NULL}
 };
 /* }}} */
@@ -336,6 +340,12 @@ PHP_MINIT_FUNCTION(gd)
 	REGISTER_LONG_CONSTANT("IMG_ARC_CHORD", gdChord, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMG_ARC_NOFILL", gdNoFill, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMG_ARC_EDGED", gdEdged, CONST_CS | CONST_PERSISTENT);
+#endif
+#if HAVE_GD_BUNDLED
+	REGISTER_LONG_CONSTANT("IMG_EFFECT_REPLACE", gdEffectReplace, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IMG_EFFECT_ALPHABLEND", gdEffectAlphaBlend, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IMG_EFFECT_NORMAL", gdEffectNormal, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IMG_EFFECT_OVERLAY", gdEffectOverlay, CONST_CS | CONST_PERSISTENT);
 #endif
 	return SUCCESS;
 }
@@ -639,6 +649,44 @@ PHP_FUNCTION(imagetruecolortopalette)
 }
 /* }}} */
 
+#if HAVE_GD_BUNDLED
+/* {{{ proto void imagecolormatch(resource im1, resource im2)
+	Makes the colors of the palette version of an image more closely match the true color version */
+PHP_FUNCTION(imagecolormatch)
+{
+	zval **IM1, **IM2;
+	gdImagePtr im1, im2;
+	int result;
+
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &IM1, &IM2 ) == FAILURE)  {
+		ZEND_WRONG_PARAM_COUNT();
+	}
+
+	ZEND_FETCH_RESOURCE(im1, gdImagePtr, IM1, -1, "Image", le_gd);
+	ZEND_FETCH_RESOURCE(im2, gdImagePtr, IM2, -1, "Image", le_gd);
+
+	result = gdImageColorMatch(im1, im2);
+	switch( result )
+	{
+	case -1:
+		php_error_docref(NULL, E_ERROR, "Image1 must be TrueColor" );
+		RETURN_FALSE;
+		break;
+	case -2:
+		php_error_docref(NULL, E_ERROR, "Image2 must be Palette" );
+		RETURN_FALSE;
+		break;
+	case -3:
+		php_error_docref(NULL, E_ERROR, "Image1 and Image2 must be the same size" );
+		RETURN_FALSE;
+		break;
+	}
+
+	RETURN_TRUE;
+}
+/* }}} */
+#endif
+
 /* {{{ proto void imagesetthickness(resource im, int thickness)
    Set line thickness for drawing lines, ellipses, rectangles, polygons etc. */
 PHP_FUNCTION(imagesetthickness)
@@ -737,6 +785,28 @@ PHP_FUNCTION(imagealphablending)
 	RETURN_TRUE;
 }
 /* }}} */
+
+#if HAVE_GD_BUNDLED
+/* {{{ proto void imagelayereffect(resource im, int effect)
+   Set the alpha blending flag to use the bundled libgd layering effects */
+PHP_FUNCTION(imagelayereffect)
+{
+	zval **IM, **effect;
+	gdImagePtr im;
+
+	if (ZEND_NUM_ARGS() != 2 ||	zend_get_parameters_ex(2, &IM, &effect) == FAILURE) {
+		ZEND_WRONG_PARAM_COUNT();
+	}
+
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
+	convert_to_long_ex(effect);
+
+	gdImageAlphaBlending(im, Z_LVAL_PP(effect) );
+
+	RETURN_TRUE;
+}
+/* }}} */
+#endif
 
 /* {{{ proto int imagecolorresolvealpha(resource im, int red, int green, int blue, int alpha)
    Resolve/Allocate a colour with an alpha level.  Works for true colour and palette based images */
@@ -2975,7 +3045,7 @@ PHP_FUNCTION(imagepstext)
 	int space;
 	int *f_ind;
 	int h_lines, v_lines, c_ind;
-	int rd, gr, bl, fg_rd, fg_gr, fg_bl, bg_rd, bg_gr, bg_bl, _fg, _bg;
+	int rd, gr, bl, al, fg_rd, fg_gr, fg_bl, fg_al, bg_rd, bg_gr, bg_bl, bg_al, _fg, _bg;
 	int aa[16], aa_steps;
 	int width, amount_kern, add_width;
 	double angle, extend;
@@ -3024,16 +3094,19 @@ PHP_FUNCTION(imagepstext)
 	fg_rd = gdImageRed  (bg_img, _fg);
 	fg_gr = gdImageGreen(bg_img, _fg);
 	fg_bl = gdImageBlue (bg_img, _fg);
+	fg_al = gdImageAlpha(bg_img, _fg);
 
 	bg_rd = gdImageRed  (bg_img, _bg);
 	bg_gr = gdImageGreen(bg_img, _bg);
 	bg_bl = gdImageBlue (bg_img, _bg);
+	bg_al = gdImageAlpha(bg_img, _bg);
 
 	for (i = 0; i < aa_steps; i++) {
 		rd = bg_rd+(double)(fg_rd-bg_rd)/aa_steps*(i+1);
 		gr = bg_gr+(double)(fg_gr-bg_gr)/aa_steps*(i+1);
 		bl = bg_bl+(double)(fg_bl-bg_bl)/aa_steps*(i+1);
-		aa[i] = gdImageColorResolve(bg_img, rd, gr, bl);
+		al = bg_al+(double)(fg_al-bg_al)/aa_steps*(i+1);
+		aa[i] = gdImageColorResolveAlpha(bg_img, rd, gr, bl, al);
 	}
 
 	T1_AASetBitsPerPixel(8);
@@ -3058,7 +3131,7 @@ PHP_FUNCTION(imagepstext)
 
 	_str = Z_STRVAL_PP(str);
 
-	if (width) {
+	{
 		extend = T1_GetExtend(*f_ind);
 		str_path = T1_GetCharOutline(*f_ind, _str[0], Z_LVAL_PP(sz), transform);
 
@@ -3074,8 +3147,6 @@ PHP_FUNCTION(imagepstext)
 			str_path = T1_ConcatOutlines(str_path, char_path);
 		}
 		str_img = T1_AAFillOutline(str_path, 0);
-	} else {
-		str_img = T1_AASetString(*f_ind, _str,  Z_STRLEN_PP(str), space, T1_KERNING, Z_LVAL_PP(sz), transform);
 	}
 
 	if (T1_errno) {

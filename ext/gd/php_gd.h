@@ -155,6 +155,11 @@ PHP_FUNCTION(jpeg2wbmp);
 PHP_FUNCTION(png2wbmp);
 PHP_FUNCTION(image2wbmp);
 
+#if HAVE_GD_BUNDLED
+PHP_FUNCTION(imagelayereffect);
+PHP_FUNCTION(imagecolormatch);
+#endif
+
 PHP_GD_API int phpi_get_le_gd(void);
 
 #else

@@ -665,26 +665,28 @@ gdImageSetPixel (gdImagePtr im, int x, int y, int color)
       gdImageTileApply (im, x, y);
       break;
     default:
-      if (gdImageBoundsSafe (im, x, y))
-	{
-	  if (im->trueColor)
-	    {
-	      if (im->alphaBlendingFlag)
-		{
-		  im->tpixels[y][x] =
-		    gdAlphaBlend (im->tpixels[y][x],
-				  color);
+      if (gdImageBoundsSafe (im, x, y)) {
+		if (im->trueColor) {
+			switch( im->alphaBlendingFlag )
+			{
+			default:
+			case gdEffectReplace :
+				im->tpixels[y][x] = color;
+				break;
+			case gdEffectAlphaBlend :
+				im->tpixels[y][x] = gdAlphaBlend(im->tpixels[y][x], color);
+				break;
+			case gdEffectNormal :
+				im->tpixels[y][x] = gdFullAlphaBlend(im->tpixels[y][x], color);
+				break;
+			case gdEffectOverlay :
+				im->tpixels[y][x] = gdLayerOverlay(im->tpixels[y][x], color);
+				break;
+			}
+		} else {
+			im->pixels[y][x] = color;
 		}
-	      else
-		{
-		  im->tpixels[y][x] = color;
-		}
-	    }
-	  else
-	    {
-	      im->pixels[y][x] = color;
-	    }
-	}
+	  }
       break;
     }
 }
@@ -2573,4 +2575,79 @@ void
 gdImageSaveAlpha (gdImagePtr im, int saveAlphaArg)
 {
   im->saveAlphaFlag = saveAlphaArg;
+}
+
+int
+gdFullAlphaBlend (int dst, int src)
+{
+	int a1, a2;
+	a1 = gdAlphaTransparent - gdTrueColorGetAlpha(src);
+	a2 = gdAlphaTransparent - gdTrueColorGetAlpha(dst);
+
+	return ( ((gdAlphaTransparent - ((a1+a2)-(a1*a2/gdAlphaMax))) << 24) +
+		(gdAlphaBlendColor( gdTrueColorGetRed(src), gdTrueColorGetRed(dst), a1, a2 ) << 16) +
+		(gdAlphaBlendColor( gdTrueColorGetGreen(src), gdTrueColorGetGreen(dst), a1, a2 ) << 8) +
+		(gdAlphaBlendColor( gdTrueColorGetBlue(src), gdTrueColorGetBlue(dst), a1, a2 ))
+		);
+}
+
+int
+gdAlphaBlendColor( int b1, int b2, int a1, int a2 )
+{
+	int c;
+	int w;
+
+	/* deal with special cases */
+
+	if( (gdAlphaMax == a1) || (0 == a2) ) {
+		/* the back pixel can't be seen */
+		return b1;
+	} else if(0 == a1) {
+		/* the front pixel can't be seen */
+		return b2;
+	} else if(gdAlphaMax == a2) {
+		/* the back pixel is opaque */
+		return ( a1 * b1 + ( gdAlphaMax - a1 ) * b2 ) / gdAlphaMax;
+	}
+
+	/* the general case */
+	w = ( a1 * ( gdAlphaMax - a2 ) / ( gdAlphaMax - a1 * a2 / gdAlphaMax ) * b1 + \
+	 	  a2 * ( gdAlphaMax - a1 ) / ( gdAlphaMax - a1 * a2 / gdAlphaMax ) * b2 ) / gdAlphaMax;
+	c = (a2 * b2  +  ( gdAlphaMax - a2 ) * w ) / gdAlphaMax;
+	return ( a1 * b1 + ( gdAlphaMax - a1 ) * c ) / gdAlphaMax;
+}
+
+int
+gdLayerOverlay (int dst, int src)
+{
+	int a1, a2;
+	a1 = gdAlphaMax - gdTrueColorGetAlpha(dst);
+	a2 = gdAlphaMax - gdTrueColorGetAlpha(src);
+	return ( ((gdAlphaMax - a1*a2/gdAlphaMax) << 24) +
+		(gdAlphaOverlayColor( gdTrueColorGetRed(src), gdTrueColorGetRed(dst), gdRedMax ) << 16) +
+		(gdAlphaOverlayColor( gdTrueColorGetGreen(src), gdTrueColorGetGreen(dst), gdGreenMax ) << 8) +
+		(gdAlphaOverlayColor( gdTrueColorGetBlue(src), gdTrueColorGetBlue(dst), gdBlueMax ))
+		);
+}
+
+int
+gdAlphaOverlayColor( int src, int dst, int max )
+{
+	/* this function implements the algorithm
+	 * 
+	 * for dst[rgb] < 0.5,
+	 *   c[rgb] = 2.src[rgb].dst[rgb]
+	 * and for dst[rgb] > 0.5,
+	 *   c[rgb] = -2.src[rgb].dst[rgb] + 2.dst[rgb] + 2.src[rgb] - 1
+	 *   
+	 */
+
+	dst = dst << 1;
+	if( dst > max ) {
+		/* in the "light" zone */
+		return dst + (src << 1) - (dst * src / max) - max;
+	} else {
+		/* in the "dark" zone */
+		return dst * src / max;
+	}
 }
