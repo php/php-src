@@ -344,6 +344,19 @@ static PHP_METHOD(PDO, setAttribute)
 					zend_throw_exception_ex(php_pdo_get_exception(), PDO_ERR_SYNTAX TSRMLS_CC, "Error mode %d is invalid", Z_LVAL_P(value));
 			}
 			RETURN_FALSE;
+
+		case PDO_ATTR_CASE:
+			convert_to_long(value);
+			switch (Z_LVAL_P(value)) {
+				case PDO_CASE_NATURAL:
+				case PDO_CASE_UPPER:
+				case PDO_CASE_LOWER:
+					dbh->desired_case = Z_LVAL_P(value);
+					RETURN_TRUE;
+				default:
+					zend_throw_exception_ex(php_pdo_get_exception(), PDO_ERR_SYNTAX TSRMLS_CC, "Case folding mode %d is invalid", Z_LVAL_P(value));
+			}
+			RETURN_FALSE;
 			
 		default:
 			;

@@ -119,7 +119,27 @@ static int describe_columns(pdo_stmt_t *stmt TSRMLS_DC)
 			return 0;
 		}
 
-		/* XXX: if we are applying case conversions on column names, do so now */
+		/* if we are applying case conversions on column names, do so now */
+		if (stmt->dbh->native_case != stmt->dbh->desired_case && stmt->dbh->desired_case != PDO_CASE_NATURAL) {
+			char *s = stmt->columns[col].name;
+
+			switch (stmt->dbh->desired_case) {
+				case PDO_CASE_UPPER:
+					while (*s != '\0') {
+						*s = toupper(*s);
+						s++;
+					}
+					break;
+				case PDO_CASE_LOWER:
+					while (*s != '\0') {
+						*s = tolower(*s);
+						s++;
+					}
+					break;
+				default:
+					;
+			}
+		}
 
 		/* update the column index on named bound parameters */
 		if (stmt->dbh->placeholders_can_be_strings && stmt->bound_params) {

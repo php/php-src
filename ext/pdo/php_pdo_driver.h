@@ -64,6 +64,7 @@ enum pdo_attribute_type {
 	PDO_ATTR_CLIENT_VERSION,	/* client library version */
 	PDO_ATTR_SERVER_INFO,		/* server information */
 	PDO_ATTR_CONNECTION_STATUS,	/* connection status */
+	PDO_ATTR_CASE,				/* control case folding for portability */
 };
 
 /* generic error code values.
@@ -86,6 +87,12 @@ enum pdo_error_mode {
 	PDO_ERRMODE_SILENT,		/* just set error codes */
 	PDO_ERRMODE_WARNING,	/* raise E_WARNING */
 	PDO_ERRMODE_EXCEPTION,	/* throw exceptions */
+};
+
+enum pdo_case_conversion {
+	PDO_CASE_NATURAL,
+	PDO_CASE_UPPER,
+	PDO_CASE_LOWER
 };
 
 /* {{{ utils for reading attributes set as driver_options */
@@ -266,6 +273,8 @@ struct _pdo_dbh_t {
 	enum pdo_error_type error_code;
 
 	enum pdo_error_mode error_mode;
+
+	enum pdo_case_conversion native_case, desired_case;
 #if 0
 	/* persistent hash key associated with this handle */
 	const char *persistent_id;
