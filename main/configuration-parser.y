@@ -60,7 +60,7 @@
 static HashTable configuration_hash;
 #ifndef THREAD_SAFE
 extern HashTable browser_hash;
-extern char *php3_ini_path;
+PHPAPI extern char *php3_ini_path;
 #endif
 static HashTable *active__php3_hash_table;
 static pval *current_section;

@@ -393,7 +393,7 @@ void php3_treat_data(int arg, char *str)
 }
 
 
-void php3_TreatHeaders(void)
+PHPAPI void php3_TreatHeaders(void)
 {
 #if APACHE
 #if MODULE_MAGIC_NUMBER > 19961007

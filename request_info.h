@@ -47,7 +47,7 @@ typedef struct {
 } php3_request_info;
 
 #ifndef THREAD_SAFE
-extern php3_request_info request_info;
+PHPAPI extern php3_request_info request_info;
 #endif
 
 extern int php3_init_request_info(void *conf);

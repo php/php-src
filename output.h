@@ -3,7 +3,7 @@
 
 #include "php.h"
 
-void zend_output_startup();
+PHPAPI void zend_output_startup();
 
 /* exported output functions */
 int (*zend_body_write)(const char *str, uint str_length);		/* string output */

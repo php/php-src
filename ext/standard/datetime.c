@@ -61,10 +61,8 @@ char *day_short_names[] =
 	"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"
 };
 
-#ifndef HAVE_TM_ZONE
-#ifndef _TIMEZONE
+#if !defined(HAVE_TM_ZONE) && !defined(_TIMEZONE) && !(WIN32||WINNT)
 extern time_t timezone;
-#endif
 #endif
 
 static int phpday_tab[2][12] =

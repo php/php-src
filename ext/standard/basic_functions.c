@@ -1752,7 +1752,7 @@ PHP_FUNCTION(register_shutdown_function)
 /* }}} */
 
 
-void php_get_highlight_struct(zend_syntax_highlighter_ini *syntax_highlighter_ini)
+ZEND_API void php_get_highlight_struct(zend_syntax_highlighter_ini *syntax_highlighter_ini)
 {
 	syntax_highlighter_ini->highlight_comment = INI_STR("highlight_comment");
 	syntax_highlighter_ini->highlight_default = INI_STR("highlight_default");

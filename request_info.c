@@ -30,7 +30,7 @@
 #include "php.h"
 
 #ifndef THREAD_SAFE
-php3_request_info request_info;
+PHPAPI php3_request_info request_info;
 #endif
 
 #if CGI_BINARY

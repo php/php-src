@@ -35,6 +35,6 @@
 extern void php3_version(INTERNAL_FUNCTION_PARAMETERS);
 extern void php3_info(INTERNAL_FUNCTION_PARAMETERS);
 
-extern void _php3_info(void);
+PHPAPI void _php3_info(void);
 
 #endif /* _INFO_H */

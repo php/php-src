@@ -58,9 +58,8 @@ extern void php3_SetCookie(INTERNAL_FUNCTION_PARAMETERS);
 
 void php4i_add_header_information(char *header_information);
 
-extern void php3_noheader(void);
-extern PHPAPI int php3_header(void);
-extern void php3_noheader(void);
-extern int php3_headers_unsent(void);
+PHPAPI void php3_noheader(void);
+PHPAPI int php3_header(void);
+int php3_headers_unsent(void);
 
 #endif

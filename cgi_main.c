@@ -45,6 +45,7 @@
 #include "zend_highlight.h"
 #include "zend_indent.h"
 
+
 #if USE_SAPI
 #include "serverapi/sapi.h"
 void *gLock;
@@ -57,12 +58,14 @@ struct sapi_request_info *sapi_rqst;
 #include "getopt.h"
 #endif
 
-extern char *php3_ini_path;
+PHPAPI extern char *php3_ini_path;
 
 #define PHP_MODE_STANDARD	1
 #define PHP_MODE_HIGHLIGHT	2
 #define PHP_MODE_INDENT		3
 
+PHPAPI extern char *optarg;
+PHPAPI extern int optind;
 
 
 static int zend_cgibin_ub_write(const char *str, uint str_length)
@@ -71,9 +74,38 @@ static int zend_cgibin_ub_write(const char *str, uint str_length)
 }
 
 
-sapi_functions_struct sapi_functions = {
+static sapi_functions_struct sapi_functions = {
 	zend_cgibin_ub_write
 };
+
+
+static void php_cgi_usage(char *argv0)
+{
+	char *prog;
+
+	prog = strrchr(argv0, '/');
+	if (prog) {
+		prog++;
+	} else {
+		prog = "php";
+	}
+
+	php3_printf("Usage: %s [-q] [-h]"
+				" [-s]"
+				" [-v] [-i] [-f <file>] | "
+				"{<file> [args...]}\n"
+				"  -q       Quiet-mode.  Suppress HTTP Header output.\n"
+				"  -s       Display colour syntax highlighted source.\n"
+				"  -f<file> Parse <file>.  Implies `-q'\n"
+				"  -v       Version number\n"
+				"  -c<path> Look for php3.ini file in this directory\n"
+#if SUPPORT_INTERACTIVE
+				"  -a		Run interactively\n"
+#endif
+				"  -e		Generate extended information for debugger/profiler\n"
+				"  -i       PHP information\n"
+				"  -h       This help\n", prog);
+}
 
 
 int main(int argc, char *argv[])
@@ -144,7 +176,7 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 #endif							/* FORCE_CGI_REDIRECT */
 	}
 
-	if (php3_module_startup()==FAILURE) {
+	if (php_module_startup(&sapi_functions)==FAILURE) {
 		return FAILURE;
 	}
 #ifdef ZTS
@@ -161,8 +193,8 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 			switch (c) {
 				case 'f':
 					if (!_cgi_started){ 
-						if (php3_request_startup(CLS_C ELS_CC PLS_CC)==FAILURE) {
-							php3_module_shutdown();
+						if (php_request_startup(CLS_C ELS_CC PLS_CC)==FAILURE) {
+							php_module_shutdown();
 							return FAILURE;
 						}
 					}
@@ -174,8 +206,8 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 					break;
 				case 'v':
 					if (!_cgi_started) {
-						if (php3_request_startup(CLS_C ELS_CC PLS_CC)==FAILURE) {
-							php3_module_shutdown();
+						if (php_request_startup(CLS_C ELS_CC PLS_CC)==FAILURE) {
+							php_module_shutdown();
 							return FAILURE;
 						}
 					}
@@ -184,8 +216,8 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 					break;
 				case 'i':
 					if (!_cgi_started) {
-						if (php3_request_startup(CLS_C ELS_CC PLS_CC)==FAILURE) {
-							php3_module_shutdown();
+						if (php_request_startup(CLS_C ELS_CC PLS_CC)==FAILURE) {
+							php_module_shutdown();
 							return FAILURE;
 						}
 					}
@@ -218,7 +250,7 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 				case '?':
 					php3_noheader();
 					zend_output_startup();
-					_php3_usage(argv[0]);
+					php_cgi_usage(argv[0]);
 					exit(1);
 					break;
 				default:
@@ -232,8 +264,8 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 #endif
 
 	if (!_cgi_started) {
-		if (php3_request_startup(CLS_C ELS_CC PLS_CC)==FAILURE) {
-			php3_module_shutdown();
+		if (php_request_startup(CLS_C ELS_CC PLS_CC)==FAILURE) {
+			php_module_shutdown();
 			return FAILURE;
 		}
 	}
@@ -286,8 +318,8 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 			}
 		}
 #endif
-		php3_request_shutdown((void *) 0);
-		php3_module_shutdown();
+		php_request_shutdown((void *) 0);
+		php_module_shutdown();
 		return FAILURE;
 	} else if (file_handle.handle.fp && file_handle.handle.fp!=stdin) {
 		/* #!php support */
@@ -304,7 +336,7 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 
 	switch (behavior) {
 		case PHP_MODE_STANDARD:
-			php3_parse(&file_handle CLS_CC ELS_CC PLS_CC);
+			php_execute_script(&file_handle CLS_CC ELS_CC PLS_CC);
 			break;
 		case PHP_MODE_HIGHLIGHT: {
 				zend_syntax_highlighter_ini syntax_highlighter_ini;
@@ -326,7 +358,7 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 	}
 
 	php3_header();			/* Make sure headers have been sent */
-	php3_request_shutdown((void *) 0);
-	php3_module_shutdown();
+	php_request_shutdown((void *) 0);
+	php_module_shutdown();
 	return SUCCESS;
 }

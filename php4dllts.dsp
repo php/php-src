@@ -1,24 +1,24 @@
-# Microsoft Developer Studio Project File - Name="php4libts" - Package Owner=<4>
+# Microsoft Developer Studio Project File - Name="php4dllts" - Package Owner=<4>
 # Microsoft Developer Studio Generated Build File, Format Version 6.00
 # ** DO NOT EDIT **
 
-# TARGTYPE "Win32 (x86) Static Library" 0x0104
+# TARGTYPE "Win32 (x86) Dynamic-Link Library" 0x0102
 
-CFG=php4libts - Win32 Debug_TS
+CFG=php4dllts - Win32 Debug_TS
 !MESSAGE This is not a valid makefile. To build this project using NMAKE,
 !MESSAGE use the Export Makefile command and run
 !MESSAGE 
-!MESSAGE NMAKE /f "php4libts.mak".
+!MESSAGE NMAKE /f "php4dllts.mak".
 !MESSAGE 
 !MESSAGE You can specify a configuration when running NMAKE
 !MESSAGE by defining the macro CFG on the command line. For example:
 !MESSAGE 
-!MESSAGE NMAKE /f "php4libts.mak" CFG="php4libts - Win32 Debug_TS"
+!MESSAGE NMAKE /f "php4dllts.mak" CFG="php4dllts - Win32 Debug_TS"
 !MESSAGE 
 !MESSAGE Possible choices for configuration are:
 !MESSAGE 
-!MESSAGE "php4libts - Win32 Debug_TS" (based on "Win32 (x86) Static Library")
-!MESSAGE "php4libts - Win32 Release_TS" (based on "Win32 (x86) Static Library")
+!MESSAGE "php4dllts - Win32 Debug_TS" (based on "Win32 (x86) Dynamic-Link Library")
+!MESSAGE "php4dllts - Win32 Release_TS" (based on "Win32 (x86) Dynamic-Link Library")
 !MESSAGE 
 
 # Begin Project
@@ -26,9 +26,10 @@ CFG=php4libts - Win32 Debug_TS
 # PROP Scc_ProjName ""
 # PROP Scc_LocalPath ""
 CPP=cl.exe
+MTL=midl.exe
 RSC=rc.exe
 
-!IF  "$(CFG)" == "php4libts - Win32 Debug_TS"
+!IF  "$(CFG)" == "php4dllts - Win32 Debug_TS"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 1
@@ -39,19 +40,22 @@ RSC=rc.exe
 # PROP Use_Debug_Libraries 1
 # PROP Output_Dir "Debug_TS"
 # PROP Intermediate_Dir "Debug_TS"
+# PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /YX /FD /GZ  /c
-# ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /I "include" /I "..\libzend" /I "." /I "regex\\" /I "..\tsrm" /D "_DEBUG" /D "WIN32" /D "_MBCS" /D "_LIB" /D "COMPILE_LIBZEND" /D "MSVC5" /D "ZTS" /D "NEW_SAPI" /FR /YX /FD /GZ  /c
+# ADD BASE CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "PHP4DLLTS_EXPORTS" /YX /FD /GZ /c
+# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "include" /I "..\libzend" /I "." /I "regex\\" /I "..\tsrm" /D "_DEBUG" /D "_WINDOWS" /D "_USRDLL" /D "PHP4DLLTS_EXPORTS" /D "MSVC5" /D "PHP_EXPORTS" /D "WIN32" /D "_MBCS" /D "LIBZEND_EXPORTS" /D "ZTS" /D "TSRM_EXPORTS" /D "SAPI_EXPORTS" /FR /YX /FD /GZ /c
+# ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
+# ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x40d /d "_DEBUG"
 # ADD RSC /l 0x40d /d "_DEBUG"
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
-LIB32=link.exe -lib
-# ADD BASE LIB32 /nologo
-# ADD LIB32 /nologo
+LINK32=link.exe
+# ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /debug /machine:I386 /pdbtype:sept
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib wsock32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib libzendts.lib TSRM.lib resolv.lib /nologo /dll /debug /machine:I386 /nodefaultlib:"libcmt" /nodefaultlib:"libc" /out:"Debug_TS/php4ts.dll" /pdbtype:sept /libpath:"..\TSRM\Debug_TS" /libpath:"..\libzend\Debug_TS" /libpath:"..\bindlib\Debug"
 
-!ELSEIF  "$(CFG)" == "php4libts - Win32 Release_TS"
+!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 0
@@ -62,24 +66,27 @@ LIB32=link.exe -lib
 # PROP Use_Debug_Libraries 0
 # PROP Output_Dir "Release_TS"
 # PROP Intermediate_Dir "Release_TS"
+# PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /YX /FD /c
-# ADD CPP /nologo /MT /W3 /GX /O2 /I "include" /I "..\libzend" /I "." /I "regex\\" /I "..\tsrm" /D "NDEBUG" /D "WIN32" /D "_MBCS" /D "_LIB" /D "COMPILE_LIBZEND" /D "MSVC5" /D "ZTS" /D "NEW_SAPI" /YX /FD /c
+# ADD BASE CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "PHP4DLLTS_EXPORTS" /YX /FD /c
+# ADD CPP /nologo /MD /W3 /GX /O2 /I "include" /I "..\libzend" /I "." /I "regex\\" /I "..\tsrm" /D "NDEBUG" /D "_WINDOWS" /D "_USRDLL" /D "PHP4DLLTS_EXPORTS" /D "MSVC5" /D "PHP_EXPORTS" /D "LIBZEND_EXPORTS" /D "ZTS" /D "TSRM_EXPORTS" /D "SAPI_EXPORTS" /D "WIN32" /D "_MBCS" /YX /FD /c
+# ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
+# ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x40d /d "NDEBUG"
 # ADD RSC /l 0x40d /d "NDEBUG"
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
-LIB32=link.exe -lib
-# ADD BASE LIB32 /nologo
-# ADD LIB32 /nologo
+LINK32=link.exe
+# ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /machine:I386
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib wsock32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib libzendts.lib TSRM.lib resolv.lib /nologo /dll /machine:I386 /nodefaultlib:"libc.lib" /nodefaultlib:"libcmt.lib" /out:"Release_TS/php4ts.dll" /libpath:"..\TSRM\Release_TS" /libpath:"..\libzend\Release_TS" /libpath:"..\bindlib\Release"
 
 !ENDIF 
 
 # Begin Target
 
-# Name "php4libts - Win32 Debug_TS"
-# Name "php4libts - Win32 Release_TS"
+# Name "php4dllts - Win32 Debug_TS"
+# Name "php4dllts - Win32 Release_TS"
 # Begin Group "Core"
 
 # PROP Default_Filter ""
@@ -646,41 +653,6 @@ SOURCE=.\win32\wfile.h
 # Begin Source File
 
 SOURCE=".\configuration-parser.y"
-
-!IF  "$(CFG)" == "php4libts - Win32 Debug_TS"
-
-# Begin Custom Build
-InputDir=.
-InputPath=.\configuration-parser.y
-
-BuildCmds= \
-	bison --output=configuration-parser.c -v -d -S "C:\Program Files\Cygnus\share\bison.simple" -p cfg configuration-parser.y
-
-"$(InputDir)\configuration-parser.c" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-   $(BuildCmds)
-
-"$(InputDir)\configuration-parser.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-   $(BuildCmds)
-# End Custom Build
-
-!ELSEIF  "$(CFG)" == "php4libts - Win32 Release_TS"
-
-# Begin Custom Build
-InputDir=.
-InputPath=.\configuration-parser.y
-
-BuildCmds= \
-	bison --output=configuration-parser.c -v -d -S "C:\Program Files\Cygnus\share\bison.simple" -p cfg configuration-parser.y
-
-"$(InputDir)\configuration-parser.c" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-   $(BuildCmds)
-
-"$(InputDir)\configuration-parser.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-   $(BuildCmds)
-# End Custom Build
-
-!ENDIF 
-
 # End Source File
 # End Group
 # Begin Group "Scanners"
@@ -689,29 +661,6 @@ BuildCmds= \
 # Begin Source File
 
 SOURCE=".\configuration-scanner.l"
-
-!IF  "$(CFG)" == "php4libts - Win32 Debug_TS"
-
-# Begin Custom Build
-InputPath=.\configuration-scanner.l
-
-"configuration-scanner.c" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	flex -i -Pcfg -oconfiguration-scanner.c configuration-scanner.l
-
-# End Custom Build
-
-!ELSEIF  "$(CFG)" == "php4libts - Win32 Release_TS"
-
-# Begin Custom Build
-InputPath=.\configuration-scanner.l
-
-"configuration-scanner.c" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	flex -i -Pcfg -oconfiguration-scanner.c configuration-scanner.l
-
-# End Custom Build
-
-!ENDIF 
-
 # End Source File
 # End Group
 # End Target

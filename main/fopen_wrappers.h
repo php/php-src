@@ -69,7 +69,7 @@ extern int wsa_fp; /* a list for open sockets */
 
 extern PHPAPI FILE *php3_fopen_wrapper(char *filename, char *mode, int options, int *issock, int *socketd);
 
-extern FILE *php3_fopen_for_parser(void);
+PHPAPI FILE *php3_fopen_for_parser(void);
 
 extern PHPAPI int _php3_check_open_basedir(char *path);
 
