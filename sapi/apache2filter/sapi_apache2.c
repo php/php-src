@@ -182,13 +182,13 @@ static void php_apache_sapi_log_message(char *msg)
 	TSRMLS_FETCH();
 
 	ctx = SG(server_context);
-    
-    /* We use APLOG_STARTUP because it keeps us from printing the
-     * data and time information at the beginning of the error log
-     * line.  Not sure if this is correct, but it mirrors what happens
-     * with Apache 1.3 -- rbb
-     */
-    ap_log_error(NULL, APLOG_ERR | APLOG_NOERRNO | APLOG_STARTUP, 0, ctx->f->r->server, "%s", msg);
+   
+	/* We use APLOG_STARTUP because it keeps us from printing the
+	 * data and time information at the beginning of the error log
+	 * line.  Not sure if this is correct, but it mirrors what happens
+	 * with Apache 1.3 -- rbb
+	 */
+	ap_log_error(NULL, APLOG_ERR | APLOG_NOERRNO | APLOG_STARTUP, 0, ctx->f->r->server, "%s", msg);
 }
 
 static sapi_module_struct apache2_sapi_module = {
