@@ -30,6 +30,7 @@ typedef struct {
     long engine;
     long last_modified;
 	long xbithack;
+	long terminate_child;
 } php_apache_info_struct;
 
 extern zend_module_entry apache_module_entry;

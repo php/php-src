@@ -67,6 +67,7 @@ PHP_FUNCTION(getallheaders);
 PHP_FUNCTION(apachelog);
 PHP_FUNCTION(apache_note);
 PHP_FUNCTION(apache_lookup_uri);
+PHP_FUNCTION(apache_child_terminate);
 
 PHP_MINFO_FUNCTION(apache);
 
@@ -75,6 +76,7 @@ function_entry apache_functions[] = {
 	PHP_FE(getallheaders,							NULL)
 	PHP_FE(apache_note,								NULL)
 	PHP_FE(apache_lookup_uri,						NULL)
+	PHP_FE(apache_child_terminate,					NULL)
 	{NULL, NULL, NULL}
 };
 
@@ -83,6 +85,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("xbithack",			"0",				PHP_INI_ALL,		OnUpdateInt,		xbithack, php_apache_info_struct, php_apache_info)
 	STD_PHP_INI_ENTRY("engine",				"1",				PHP_INI_ALL,		OnUpdateInt,		engine, php_apache_info_struct, php_apache_info)
 	STD_PHP_INI_ENTRY("last_modified",		"0",				PHP_INI_ALL,		OnUpdateInt,		last_modified, php_apache_info_struct, php_apache_info)
+	STD_PHP_INI_ENTRY("child_terminate",	"0",				PHP_INI_ALL,		OnUpdateInt,		terminate_child, php_apache_info_struct, php_apache_info)
 PHP_INI_END()
 
 
@@ -106,6 +109,20 @@ static PHP_MSHUTDOWN_FUNCTION(apache)
 zend_module_entry apache_module_entry = {
 	"apache", apache_functions, PHP_MINIT(apache), PHP_MSHUTDOWN(apache), NULL, NULL, PHP_MINFO(apache), STANDARD_MODULE_PROPERTIES
 };
+
+/* {{{ proto string child_terminate()
+   Get and set Apache request notes */
+PHP_FUNCTION(apache_child_terminate)
+{
+	APLS_FETCH();
+
+	if (AP(terminate_child)) {
+		ap_child_terminate( ((request_rec *)SG(server_context)) );
+	} else { /* tell them to get lost! */
+		php_error(E_WARNING, "apache.child_terminate is disabled");
+	}
+}
+/* }}} */
 
 /* {{{ proto string apache_note(string note_name [, string note_value])
    Get and set Apache request notes */
