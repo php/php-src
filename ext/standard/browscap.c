@@ -200,10 +200,6 @@ static int browser_reg_compare(zval **browser, int num_args, va_list args, zend_
 	if(zend_hash_find(Z_OBJPROP_PP(browser), "browser_name_pattern", sizeof("browser_name_pattern"), (void **) &browser_name) == FAILURE) {
 		return 0;
 	}
-
-	if (!strchr(Z_STRVAL_PP(browser_name),'*')) {
-		return 0;
-	}
 	if (regcomp(&r, Z_STRVAL_PP(browser_name), REG_NOSUB)!=0) {
 		return 0;
 	}
