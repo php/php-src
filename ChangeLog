@@ -1,3 +1,125 @@
+2003-08-14  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * EXTENSIONS:
+      update for com_dotnet
+
+    * ext/com_dotnet/CREDITS:
+      add credits
+
+    * NEWS:
+      add news about COM
+
+    * ext/com_dotnet/com_dotnet.c:
+      fix .net build
+
+2003-08-14  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * pear/install-pear.php
+      pear/PEAR/Config.php:
+      MFB: - Fix library path problems
+
+    * (PHP_4_3)
+      pear/install-pear.php
+      pear/PEAR/Config.php:
+      - Fix library path problems
+
+2003-08-14  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * win32/php4dllts.dsp:
+      Might help to have the COM stuff actually build...
+
+2003-08-14  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      ext/pgsql/pgsql.c:
+      MFH: Fixed bug #25093 (Various leaks due to non-freed queries)
+
+    * ext/pgsql/pgsql.c:
+      Fixed bug #25093 (Various leaks due to non-freed queries)
+
+2003-08-14  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_4_3)
+      ext/wddx/tests/001.phpt
+      ext/wddx/tests/wddx.xml:
+      MFH: Don't test other functionality than wddx here.
+
+    * ext/wddx/tests/001.phpt
+      ext/wddx/tests/wddx.xml:
+      Don't test other functionality than wddx here.
+
+2003-08-14  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * main/internal_functions_win32.c:
+      fix this stuff
+
+    * ext/com_dotnet/README
+      ext/com_dotnet/com_com.c
+      ext/com_dotnet/com_dotnet.c
+      ext/com_dotnet/com_extension.c
+      ext/com_dotnet/com_handlers.c
+      ext/com_dotnet/com_misc.c
+      ext/com_dotnet/com_olechar.c
+      ext/com_dotnet/com_typeinfo.c
+      ext/com_dotnet/com_variant.c
+      ext/com_dotnet/php_com_dotnet.h
+      ext/com_dotnet/php_com_dotnet_internal.h
+      ext/com_dotnet/tests/variants.phpt
+      main/config.w32.h
+      main/internal_functions_win32.c:
+      Add new COM (and .Net) extension for php5.
+      Not yet complete, but should work for most people.
+
+2003-08-14  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS:
+      Set RC4 date
+
+    * (PHP_4_3)
+      NEWS
+      ext/odbc/php_odbc.c:
+      MFH: Fixed bug #25081 (odbc_fetch_array() may mangle numeric fields).
+
+    * ext/odbc/php_odbc.c:
+      Fixed bug #25081 (odbc_fetch_array() may mangle numeric fields).
+
+2003-08-14  Ard Biesheuvel  <a.k.biesheuvel@its.tudelft.nl>
+
+    * ext/interbase/interbase.c
+      ext/interbase/php_interbase.h:
+      Added ibase_wait_event()
+
+2003-08-14  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      ext/session/session.c:
+      MFH: Fixed bug #25084 (Make refer check not dependant on register_globals)
+
+    * ext/session/session.c:
+      Fixed bug #25084 (Make refer check not dependant on register_globals)
+
+    * ext/session/tests/bug24592.phpt:
+      Added missing skip condition
+
+    * (PHP_4_3)
+      ext/standard/assert.c:
+      MFH: Fixed a possible crash due to invalid handling of assert ini options.
+
+    * ext/standard/assert.c:
+      Fixed a possible crash due to invalid handling of assert ini options.
+
+2003-08-14  Brian France  <list@firehawksystems.com>
+
+    * (PHP_4_3)
+      acinclude.m4:
+      
+      	Reverted part of the last patch.  It changed -prefer-pic to
+      -prefer-non-pic.
+      	Now back to -prefer-pic
+
 2003-08-13  Jani Taskinen  <sniper@iki.fi>
 
     * acinclude.m4:
