@@ -211,22 +211,6 @@ PHP_ARG_WITH(libmbfl, [for external libmbfl],
 if test "$PHP_MBSTRING" != "no"; then  
   AC_DEFINE([HAVE_MBSTRING],1,[whether to have multibyte string support])
 
-  if test "$PHP_MBSTRING" = "all" -o "$PHP_MBSTRING" = "ja"; then
-    AC_DEFINE([HAVE_MBSTR_JA],1,[whether to have japanese support])
-  fi
-  if test "$PHP_MBSTRING" = "all" -o "$PHP_MBSTRING" = "cn"; then
-    AC_DEFINE([HAVE_MBSTR_CN],1,[whether to have simplified chinese support])
-  fi
-  if test "$PHP_MBSTRING" = "all" -o "$PHP_MBSTRING" = "tw"; then
-    AC_DEFINE([HAVE_MBSTR_TW],1,[whether to have traditional chinese support])
-  fi
-  if test "$PHP_MBSTRING" = "all" -o "$PHP_MBSTIRNG" = "kr"; then
-    AC_DEFINE([HAVE_MBSTR_KR],1,[whether to have korean support])
-  fi
-  if test "$PHP_MBSTRING" = "all" -o "$PHP_MBSTRING" = "ru"; then
-    AC_DEFINE([HAVE_MBSTR_RU],1,[whether to have russian support])
-  fi
-    	
   PHP_MBSTRING_ADD_SOURCES([mbstring.c php_unicode.c mb_gpc.c])
 
   if test "$PHP_MBREGEX" != "no"; then
