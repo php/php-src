@@ -1756,6 +1756,7 @@ static void soap_server_fault_ex(sdlFunctionPtr function, zval* fault, soapHeade
 
 	xmlFreeDoc(doc_return);
 	xmlFree(buf);
+	zend_clear_exception(TSRMLS_C);
 	zend_bailout();
 }
 
