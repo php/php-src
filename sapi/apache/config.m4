@@ -24,10 +24,10 @@ AC_ARG_WITH(apxs,
 	APXS_INCLUDEDIR=`$APXS -q INCLUDEDIR`
 	APXS_CFLAGS=`$APXS -q CFLAGS`
 	AC_ADD_INCLUDE($APXS_INCLUDEDIR)
-	if test -n "`echo $APXS_CFLAGS | grep USE_HSREGEX >/dev/null`"; then
+	if `echo $APXS_CFLAGS|grep USE_HSREGEX>/dev/null`; then
 		APACHE_HAS_REGEX=yes
 	fi
-	if test -n "`echo $APXS_CFLAGS | grep EAPI >/dev/null`"; then
+	if `echo $APXS_CFLAGS|grep EAPI>/dev/null`; then
 	   CPPFLAGS="$CPPFLAGS -DUSE_EAPI"
 	fi
 	PHP_SAPI=apache
