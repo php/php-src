@@ -292,7 +292,6 @@ ZEND_API zend_op_array *compile_file(zend_file_handle *file_handle, int type TSR
 		init_op_array(op_array, ZEND_USER_FUNCTION, INITIAL_OP_ARRAY_SIZE TSRMLS_CC);
 		CG(in_compilation) = 1;
 		CG(active_op_array) = op_array;
-		op_array->ns = CG(active_namespace);
 		compiler_result = zendparse(TSRMLS_C);
 		zend_do_return(&retval_znode, 0 TSRMLS_CC);
 		CG(in_compilation) = original_in_compilation;
@@ -406,7 +405,6 @@ zend_op_array *compile_string(zval *source_string, char *filename TSRMLS_DC)
 	} else {
 		init_op_array(op_array, ZEND_EVAL_CODE, INITIAL_OP_ARRAY_SIZE TSRMLS_CC);
 		CG(active_op_array) = op_array;
-		op_array->ns = CG(active_namespace);
 		BEGIN(ST_IN_SCRIPTING);
 		compiler_result = zendparse(TSRMLS_C);
 
@@ -481,7 +479,6 @@ ENCAPSED_TOKENS [\[\]{}$]
 ESCAPED_AND_WHITESPACE [\n\t\r #'.:;,()|^&+-/*=%!~<>?@]+
 ANY_CHAR (.|[\n])
 NEWLINE ("\r"|"\n"|"\r\n")
-NAMESPACE_NAME ({LABEL}":")+{LABEL}
 
 %option noyylineno
 %option noyywrap
@@ -627,10 +624,6 @@ NAMESPACE_NAME ({LABEL}":")+{LABEL}
 	return T_IMPLEMENTS;
 }
 
-<ST_IN_SCRIPTING>"namespace" {
-	return T_NAMESPACE;
-}
-
 <ST_IN_SCRIPTING,ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>"->" {
 	yy_push_state(ST_LOOKING_FOR_PROPERTY TSRMLS_CC);
 	return T_OBJECT_OPERATOR;
@@ -695,14 +688,6 @@ NAMESPACE_NAME ({LABEL}":")+{LABEL}
 
 <ST_IN_SCRIPTING>"include" {
 	return T_INCLUDE;
-}
-
-<ST_IN_SCRIPTING>"import" {
-	return T_IMPORT;
-}
-
-<ST_IN_SCRIPTING>"from" {
-	return T_FROM;
 }
 
 <ST_IN_SCRIPTING>"include_once" {
@@ -999,14 +984,10 @@ NAMESPACE_NAME ({LABEL}":")+{LABEL}
 }
 
 <ST_IN_SCRIPTING>"__METHOD__" {
-	char *namespace_name = CG(active_namespace)->name;
 	char *class_name = CG(active_class_entry) ? CG(active_class_entry)->name : NULL;
 	char *func_name = CG(active_op_array)->function_name;
 	size_t len = 0;
 
-	if (namespace_name) {
-		len += strlen(namespace_name) + 2;
-	}
 	if (class_name) {
 		len += strlen(class_name) + 2;
 	}
@@ -1014,10 +995,8 @@ NAMESPACE_NAME ({LABEL}":")+{LABEL}
 		len += strlen(func_name);
 	}
 
-	zendlval->value.str.val = emalloc(len + 1);
-	zendlval->value.str.len = sprintf(zendlval->value.str.val, "%s%s%s%s%s", 
-		namespace_name ? namespace_name : "",
-		namespace_name && (class_name || func_name) ? "::" : "",
+	zendlval->value.str.val = emalloc(len+1);
+	zendlval->value.str.len = sprintf(zendlval->value.str.val, "%s%s%s", 
 		class_name ? class_name : "",
 		class_name && func_name ? "::" : "",
 		func_name ? func_name : ""
@@ -1043,20 +1022,6 @@ NAMESPACE_NAME ({LABEL}":")+{LABEL}
 	zendlval->value.str.val = estrndup(filename, zendlval->value.str.len);
 	zendlval->type = IS_STRING;
 	return T_FILE;
-}
-
-<ST_IN_SCRIPTING>"__NAMESPACE__" {
-	char *ns_name;
-	if(CG(active_namespace) == &CG(global_namespace)) {
-		ns_name = "";
-	} else {
-		ns_name = CG(active_namespace)->name;
-	}
-
-	zendlval->value.str.len = strlen(ns_name);
-	zendlval->value.str.val = estrndup(ns_name, zendlval->value.str.len);
-	zendlval->type = IS_STRING;
-	return T_NAMESPACE_C;
 }
 
 <INITIAL>(([^<]|"<"[^?%s<]){1,400})|"<s"|"<" {
@@ -1147,13 +1112,6 @@ NAMESPACE_NAME ({LABEL}":")+{LABEL}
 	zendlval->value.str.len = yyleng;
 	zendlval->type = IS_STRING;
 	return T_STRING;
-}
-
-<ST_IN_SCRIPTING>{NAMESPACE_NAME} {
-	zendlval->value.str.val = (char *)estrndup(yytext, yyleng);
-	zendlval->value.str.len = yyleng;
-	zendlval->type = IS_STRING;
-	return T_NAMESPACE_NAME;
 }
 
 <ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>{LABEL} {

@@ -64,7 +64,6 @@ typedef struct _znode {
 			zend_uint var;	/* dummy */
 			zend_uint type;
 		} EA;
-		zend_namespace *previously_active_namespace;
 	} u;
 } znode;
 
@@ -128,7 +127,6 @@ struct _zend_op_array {
 	char *function_name;		
 	zend_class_entry *scope;
 	zend_uint fn_flags;
-	zend_namespace *ns;
 	union _zend_function *prototype;
 	/* END of common elements */
 
@@ -170,7 +168,6 @@ typedef struct _zend_internal_function {
 	char *function_name;		
 	zend_class_entry *scope;
 	zend_uint fn_flags;	
-	zend_namespace *ns;
 	union _zend_function *prototype;
 	/* END of common elements */
 
@@ -188,7 +185,6 @@ typedef union _zend_function {
 		char *function_name;
 		zend_class_entry *scope;
 		zend_uint fn_flags;
-		zend_namespace *ns;
 		union _zend_function *prototype;
 	} common;
 	
@@ -333,7 +329,7 @@ void zend_do_receive_arg(zend_uchar op, znode *var, znode *offset, znode *initia
 int zend_do_begin_function_call(znode *function_name TSRMLS_DC);
 void zend_do_begin_method_call(znode *left_bracket TSRMLS_DC);
 void zend_do_begin_dynamic_function_call(znode *function_name TSRMLS_DC);
-void zend_do_fetch_class(znode *result, znode *namespace_name, znode *class_name, zend_bool global_namespace TSRMLS_DC);
+void zend_do_fetch_class(znode *result, znode *class_name TSRMLS_DC);
 void zend_do_fetch_class_name(znode *result, znode *class_entry, znode *class_name, zend_bool case_sensitive TSRMLS_DC);
 void zend_do_begin_class_member_function_call(TSRMLS_D);
 void zend_do_end_function_call(znode *function_name, znode *result, znode *argument_list, int is_method, int is_dynamic_fcall TSRMLS_DC);
@@ -459,19 +455,11 @@ ZEND_API void destroy_zend_function(zend_function *function TSRMLS_DC);
 ZEND_API void destroy_zend_class(zend_class_entry **pce);
 void zend_class_add_ref(zend_class_entry **ce);
 
-void zend_do_begin_namespace(znode *ns_token, znode *ns_name TSRMLS_DC);
-void zend_do_end_namespace(znode *ns_token TSRMLS_DC);
-void zend_init_namespace(zend_namespace *ns TSRMLS_DC);
-void zend_do_declare_namespace_var(znode *name, znode *value TSRMLS_DC);
-void zend_do_declare_namespace_constant(znode *name, znode *value TSRMLS_DC);
-ZEND_API void destroy_zend_namespace(zend_namespace **pns);
-
 void zend_duplicate_property_info(zend_property_info *property_info);
 void zend_destroy_property_info(zend_property_info *property_info);
 
 #define ZEND_FUNCTION_DTOR (void (*)(void *)) destroy_zend_function
 #define ZEND_CLASS_DTOR (void (*)(void *)) destroy_zend_class
-#define ZEND_NAMESPACE_DTOR (void (*)(void *)) destroy_zend_namespace
 
 zend_op *get_next_op(zend_op_array *op_array TSRMLS_DC);
 void init_op(zend_op *op TSRMLS_DC);
@@ -679,7 +667,7 @@ int zendlex(znode *zendlval TSRMLS_DC);
 
 #define ZEND_RAISE_ABSTRACT_ERROR	142
 
-#define ZEND_START_NAMESPACE		143
+
 
 #define ZEND_ADD_INTERFACE			144
 #define ZEND_VERIFY_INSTANCEOF		145
@@ -733,8 +721,6 @@ int zendlex(znode *zendlval TSRMLS_DC);
 
 #define ZEND_INTERNAL_CLASS         1
 #define ZEND_USER_CLASS             2
-#define ZEND_INTERNAL_NAMESPACE     3
-#define ZEND_USER_NAMESPACE         4
 
 #define ZEND_EVAL				(1<<0)
 #define ZEND_INCLUDE			(1<<1)
@@ -763,8 +749,6 @@ int zendlex(znode *zendlval TSRMLS_DC);
 
 #define ZEND_ARG_SEND_BY_REF (1<<0)
 #define ZEND_ARG_COMPILE_TIME_BOUND (1<<1)
-
-#define CLASS_IS_NAMESPACE(c) ((c)->type == ZEND_INTERNAL_NAMESPACE || (c)->type == ZEND_USER_NAMESPACE)
 
 #define AI_USE_PTR(ai) \
 	if ((ai).ptr_ptr) { \

@@ -80,7 +80,6 @@ void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_siz
 	op_array->arg_types = NULL;
 
 	op_array->scope = NULL;
-	op_array->ns = NULL;
 
 	op_array->brk_cont_array = NULL;
 	op_array->last_brk_cont = 0;
@@ -180,39 +179,6 @@ ZEND_API void destroy_zend_class(zend_class_entry **pce)
 				free(ce->doc_comment);
 			}
 			free(ce);
-			break;
-		case ZEND_USER_NAMESPACE:
-		case ZEND_INTERNAL_NAMESPACE:
-			destroy_zend_namespace(pce);
-			break;
-	}
-}
-
-ZEND_API void destroy_zend_namespace(zend_namespace **pns)
-{
-	zend_namespace *ns = *pns;
-	switch (ns->type) {
-		case ZEND_USER_NAMESPACE:
-			zend_hash_destroy(&ns->function_table);
-			zend_hash_destroy(&ns->class_table);
-			zend_hash_destroy(&ns->constants_table);
-			zend_hash_destroy(ns->static_members);
-			FREE_HASHTABLE(ns->static_members);
-			if (ns->doc_comment) {
-				efree(ns->doc_comment);
-			}
-			efree(ns->name);
-			efree(ns);
-			break;
-
-		case ZEND_INTERNAL_NAMESPACE:
-			zend_hash_destroy(&ns->function_table);
-			zend_hash_destroy(&ns->class_table);
-			zend_hash_destroy(&ns->constants_table);
-			zend_hash_destroy(ns->static_members);
-			free(ns->static_members);
-			free(ns->name);
-			free(ns);
 			break;
 	}
 }

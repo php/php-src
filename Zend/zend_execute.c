@@ -1232,9 +1232,6 @@ ZEND_API void execute(zend_op_array *op_array TSRMLS_DC)
 	 */
 	EX(function_state).function_symbol_table = NULL;
 #endif
-	if(EG(active_namespace) != op_array->ns) {
-		zend_switch_namespace(op_array->ns TSRMLS_CC);
-	}
 	
 	while (1) {
 #ifdef ZEND_WIN32
@@ -2342,9 +2339,6 @@ int zend_fetch_class_handler(ZEND_OPCODE_HANDLER_ARGS)
 			}
 			EX_T(EX(opline)->result.u.var).EA.class_entry = EG(scope);
 			NEXT_OPCODE();
-		} else if (EX(opline)->extended_value == ZEND_FETCH_CLASS_MAIN) {
-			EX_T(EX(opline)->result.u.var).EA.class_entry = EG(global_namespace_ptr);
-			NEXT_OPCODE();
 		} else if (EX(opline)->extended_value == ZEND_FETCH_CLASS_PARENT) {
 			if (!EG(scope)) {
 				zend_error(E_ERROR, "Cannot access parent:: when no class scope is active");
@@ -2376,28 +2370,8 @@ int zend_fetch_class_handler(ZEND_OPCODE_HANDLER_ARGS)
 	if (!ce) {
 		int retval;
 
-		if (EX(opline)->op1.op_type == IS_UNUSED && EX(opline)->extended_value != ZEND_FETCH_CLASS_GLOBAL) {
+		if (EX(opline)->op1.op_type == IS_UNUSED) {
 			retval = zend_lookup_class(class_name_strval, class_name_strlen, &pce TSRMLS_CC);
-
-			if(retval == FAILURE) {
-				/* try namespace */
-				if(zend_hash_find(&EG(global_namespace_ptr)->class_table, class_name_strval, class_name_strlen+1, (void **)&pce) == SUCCESS && CLASS_IS_NAMESPACE((*pce))) {
-					retval = SUCCESS;
-				}
-			}
-		} else {
-			zend_namespace *ns;
-
-			/* Looking for namespace */
-			if(EX(opline)->extended_value == ZEND_FETCH_CLASS_GLOBAL) {
-				ns = EG(global_namespace_ptr);
-			} else {
-				if (zend_hash_find(&EG(global_namespace_ptr)->class_table, EX(opline)->op1.u.constant.value.str.val, EX(opline)->op1.u.constant.value.str.len+1, (void **)&pce) == FAILURE || !CLASS_IS_NAMESPACE((*pce))) {
-					zend_error(E_ERROR, "Namespace '%s' not found", EX(opline)->op1.u.constant.value.str.val);
-				}
-				ns = *pce;
-			}
-			retval = zend_hash_find(&ns->class_table, class_name_strval, class_name_strlen+1, (void **)&pce);
 		}
 		if (retval==SUCCESS) {
 			ce = *pce;
@@ -2526,7 +2500,7 @@ int zend_init_static_method_call_handler(ZEND_OPCODE_HANDLER_ARGS)
 	}
 
 	if (EX(opline)->op1.op_type == IS_UNUSED) {
-		ce = EG(global_namespace_ptr);
+		ce = EG(class_table);
 	} else {
 		ce = EX_T(EX(opline)->op1.u.var).EA.class_entry;
 	}
@@ -2573,10 +2547,7 @@ int zend_init_fcall_by_name_handler(ZEND_OPCODE_HANDLER_ARGS)
 	}
 
 	if (zend_hash_find(EG(function_table), function_name_strval, function_name_strlen+1, (void **) &function)==FAILURE) {
-		/* try global space also */
-		if(zend_hash_find(&EG(global_namespace_ptr)->function_table, function_name_strval, function_name_strlen+1, (void **) &function)==FAILURE) {
-			zend_error(E_ERROR, "Call to undefined function:  %s()", function_name_strval);
-		}
+		zend_error(E_ERROR, "Call to undefined function:  %s()", function_name_strval);
 	}
 
 	if (!is_const) {
@@ -2598,7 +2569,6 @@ int zend_do_fcall_common_helper(ZEND_OPCODE_HANDLER_ARGS)
 	zend_class_entry *current_scope;
 	zval *current_this;
 	int return_value_used = RETURN_VALUE_USED(EX(opline));
-	zend_namespace *active_namespace = EG(active_namespace);
 	
 	zend_ptr_stack_n_push(&EG(argument_stack), 2, (void *) EX(opline)->extended_value, NULL);
 
@@ -2689,9 +2659,6 @@ int zend_do_fcall_common_helper(ZEND_OPCODE_HANDLER_ARGS)
 	EG(scope) = current_scope;
 	zend_ptr_stack_n_pop(&EG(arg_types_stack), 3, &EX(calling_scope), &EX(object), &EX(fbc));
 	
-	if(EG(active_namespace) != active_namespace) {
-		zend_switch_namespace(active_namespace TSRMLS_CC);
-	}
 	EX(function_state).function = (zend_function *) op_array;
 	EG(function_state_ptr) = &EX(function_state);
 	zend_ptr_stack_clear_multiple(TSRMLS_C);
@@ -3179,16 +3146,7 @@ int zend_fetch_constant_handler(ZEND_OPCODE_HANDLER_ARGS)
 				NEXT_OPCODE();
 			}
 		}
-		if(EG(active_namespace) != EG(global_namespace_ptr)) {
-			/* if we are not global, go find in local constant table */
-			if (zend_hash_find(&EG(active_namespace)->constants_table, EX(opline)->op2.u.constant.value.str.val, EX(opline)->op2.u.constant.value.str.len+1, (void **) &value) == SUCCESS) {
-				zval_update_constant(value, (void *) 1 TSRMLS_CC);
-				EX_T(EX(opline)->result.u.var).tmp_var = **value;
-				zval_copy_ctor(&EX_T(EX(opline)->result.u.var).tmp_var);
-				NEXT_OPCODE();
-			}
-		}
-		
+
 		if (!zend_get_constant(EX(opline)->op2.u.constant.value.str.val, EX(opline)->op2.u.constant.value.str.len, &EX_T(EX(opline)->result.u.var).tmp_var TSRMLS_CC)) {
 			zend_error(E_NOTICE, "Use of undefined constant %s - assumed '%s'",
 						EX(opline)->op2.u.constant.value.str.val,
@@ -3201,16 +3159,6 @@ int zend_fetch_constant_handler(ZEND_OPCODE_HANDLER_ARGS)
 	
 	ce = EX_T(EX(opline)->op1.u.var).EA.class_entry;
 	
-	if (&ce->constants_table == &EG(global_namespace_ptr)->constants_table) {
-		if (!zend_get_constant(EX(opline)->op2.u.constant.value.str.val, EX(opline)->op2.u.constant.value.str.len, &EX_T(EX(opline)->result.u.var).tmp_var TSRMLS_CC)) {
-			zend_error(E_NOTICE, "Use of undefined constant %s - assumed '%s'",
-						EX(opline)->op2.u.constant.value.str.val,
-						EX(opline)->op2.u.constant.value.str.val);
-			EX_T(EX(opline)->result.u.var).tmp_var = EX(opline)->op2.u.constant;
-			zval_copy_ctor(&EX_T(EX(opline)->result.u.var).tmp_var);
-		}
-		NEXT_OPCODE();
-	}
 	if (zend_hash_find(&ce->constants_table, EX(opline)->op2.u.constant.value.str.val, EX(opline)->op2.u.constant.value.str.len+1, (void **) &value) == SUCCESS) {
 		zval_update_constant(value, (void *) 1 TSRMLS_CC);
 		EX_T(EX(opline)->result.u.var).tmp_var = **value;
@@ -3380,7 +3328,6 @@ int zend_include_or_eval_handler(ZEND_OPCODE_HANDLER_ARGS)
 					}	
 				
 					if (zend_hash_add(&EG(included_files), file_handle.opened_path, strlen(file_handle.opened_path)+1, (void *)&dummy, sizeof(int), NULL)==SUCCESS) {
-						CG(active_namespace) = EG(global_namespace_ptr);
 						new_op_array = zend_compile_file(&file_handle, (EX(opline)->op2.u.constant.value.lval==ZEND_INCLUDE_ONCE?ZEND_INCLUDE:ZEND_REQUIRE) TSRMLS_CC);
 						zend_destroy_file_handle(&file_handle TSRMLS_CC);
 					} else {
@@ -3399,13 +3346,11 @@ int zend_include_or_eval_handler(ZEND_OPCODE_HANDLER_ARGS)
 			break;
 		case ZEND_INCLUDE:
 		case ZEND_REQUIRE:
-			CG(active_namespace) = EG(global_namespace_ptr);
 			new_op_array = compile_filename(EX(opline)->op2.u.constant.value.lval, inc_filename TSRMLS_CC);
 			break;
 		case ZEND_EVAL: {
 				char *eval_desc = zend_make_compiled_string_description("eval()'d code" TSRMLS_CC);
 
-				CG(active_namespace) = EG(global_namespace_ptr);
 				new_op_array = compile_string(inc_filename, eval_desc TSRMLS_CC);
 				efree(eval_desc);
 			}
@@ -3420,7 +3365,6 @@ int zend_include_or_eval_handler(ZEND_OPCODE_HANDLER_ARGS)
 	if (new_op_array) {
 		zval *saved_object;
 		zend_function *saved_function;
-		zend_namespace *active_namespace = EG(active_namespace);
 
 		EG(return_value_ptr_ptr) = EX_T(EX(opline)->result.u.var).var.ptr_ptr;
 		EG(active_op_array) = new_op_array;
@@ -3431,12 +3375,9 @@ int zend_include_or_eval_handler(ZEND_OPCODE_HANDLER_ARGS)
 
 		EX(function_state).function = (zend_function *) new_op_array;
 		EX(object) = NULL;
-		zend_switch_namespace(EG(global_namespace_ptr) TSRMLS_CC);
 		
 		zend_execute(new_op_array TSRMLS_CC);
 		
-		zend_switch_namespace(active_namespace TSRMLS_CC);
-
 		EX(function_state).function = saved_function;
 		EX(object) = saved_object;
 		
@@ -3967,31 +3908,6 @@ int zend_nop_handler(ZEND_OPCODE_HANDLER_ARGS)
 	NEXT_OPCODE();
 }
 
-int zend_start_namespace_handler(ZEND_OPCODE_HANDLER_ARGS)
-{
-	zval *namespace_name;
-	zend_namespace **pns;
-
-	if(EX(opline)->op1.op_type != IS_UNUSED) {
-		namespace_name= get_zval_ptr(&EX(opline)->op1, EX(Ts), &EG(free_op1), BP_VAR_R);
-		if (Z_TYPE_P(namespace_name) != IS_STRING) {
-			zend_error(E_ERROR, "Internal error: Invalid type in namespace definition - %d", Z_TYPE_P(namespace_name));
-		}
-
-		if(zend_hash_find(&EG(global_namespace_ptr)->class_table, Z_STRVAL_P(namespace_name), Z_STRLEN_P(namespace_name)+1, (void **)&pns) != SUCCESS || (*pns)->type != ZEND_USER_NAMESPACE) {
-			zend_error(E_ERROR, "Internal error: Cannot locate namespace '%s'", Z_STRVAL_P(namespace_name));
-		}
-	} else {
-		pns = &EG(global_namespace_ptr);
-	}
-
-	if(EG(active_namespace) != *pns) {
-		zend_switch_namespace(*pns TSRMLS_CC);
-	}
-	NEXT_OPCODE();
-}
-
-
 int zend_add_interface_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_class_entry *ce = EX_T(EX(opline)->op1.u.var).EA.class_entry;
@@ -4251,7 +4167,6 @@ void zend_init_opcodes_handlers()
 	zend_opcode_handlers[ZEND_DECLARE_FUNCTION] = zend_declare_function_handler;
 
 	zend_opcode_handlers[ZEND_RAISE_ABSTRACT_ERROR] = zend_raise_abstract_error_handler;
-	zend_opcode_handlers[ZEND_START_NAMESPACE] = zend_start_namespace_handler;
 
 	zend_opcode_handlers[ZEND_ADD_INTERFACE] = zend_add_interface_handler;
 	zend_opcode_handlers[ZEND_VERIFY_INSTANCEOF] = zend_verify_instanceof_handler;

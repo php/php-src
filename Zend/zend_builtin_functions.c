@@ -577,7 +577,7 @@ ZEND_FUNCTION(get_parent_class)
 		
 		SEPARATE_ZVAL(arg);
 		zend_str_tolower(Z_STRVAL_PP(arg), Z_STRLEN_PP(arg));
-		if (zend_lookup_ns_class(Z_STRVAL_PP(arg), Z_STRLEN_PP(arg), &pce TSRMLS_CC) == SUCCESS) {
+		if (zend_lookup_class(Z_STRVAL_PP(arg), Z_STRLEN_PP(arg), &pce TSRMLS_CC) == SUCCESS) {
 			ce = *pce;
 		}
 	}
@@ -617,7 +617,7 @@ static void is_a_impl(INTERNAL_FUNCTION_PARAMETERS, zend_bool only_subclass)
 
 	lcname = zend_str_tolower_dup(Z_STRVAL_PP(class_name), Z_STRLEN_PP(class_name));
 
-	if (zend_lookup_ns_class(lcname, Z_STRLEN_PP(class_name), &ce TSRMLS_CC) == FAILURE) {
+	if (zend_lookup_class(lcname, Z_STRLEN_PP(class_name), &ce TSRMLS_CC) == FAILURE) {
 		efree(lcname);
 		retval = 0;
 	} else {
@@ -674,7 +674,7 @@ ZEND_FUNCTION(get_class_vars)
 	convert_to_string_ex(class_name);
 	lcname = zend_str_tolower_dup((*class_name)->value.str.val, (*class_name)->value.str.len);
 
-	if (zend_lookup_ns_class(lcname, Z_STRLEN_PP(class_name), &pce TSRMLS_CC) == FAILURE) {
+	if (zend_lookup_class(lcname, Z_STRLEN_PP(class_name), &pce TSRMLS_CC) == FAILURE) {
 		efree(lcname);
 		RETURN_FALSE;
 	} else {
@@ -741,7 +741,7 @@ ZEND_FUNCTION(get_class_methods)
 		SEPARATE_ZVAL(class);
 		zend_str_tolower(Z_STRVAL_PP(class), Z_STRLEN_PP(class));
 
-		if (zend_lookup_ns_class(Z_STRVAL_PP(class), Z_STRLEN_PP(class), &pce TSRMLS_CC) == SUCCESS) {
+		if (zend_lookup_class(Z_STRVAL_PP(class), Z_STRLEN_PP(class), &pce TSRMLS_CC) == SUCCESS) {
 			ce = *pce;
 		}
 	}
@@ -795,27 +795,6 @@ ZEND_FUNCTION(method_exists)
 }
 /* }}} */
 
-static inline zend_namespace *get_namespace_from_zval(zval **namespace_name TSRMLS_DC)
-{
-	zend_namespace **pns;
-	char *str_ns_name;
-	
-	convert_to_string_ex(namespace_name);
-	if(!Z_STRVAL_PP(namespace_name) || !Z_STRLEN_PP(namespace_name)) {
-		return EG(global_namespace_ptr);
-	}
-
-	str_ns_name = zend_str_tolower_dup(Z_STRVAL_PP(namespace_name), Z_STRLEN_PP(namespace_name));
-	if(zend_hash_find(&EG(global_namespace_ptr)->class_table, str_ns_name, Z_STRLEN_PP(namespace_name)+1, (void **)&pns) == FAILURE || !CLASS_IS_NAMESPACE((*pns))) {
-		zend_error(E_WARNING, "Namespace '%s' is not defined!", Z_STRVAL_PP(namespace_name));
-		efree(str_ns_name);
-		return NULL;
-	}
-
-	efree(str_ns_name);
-	return *pns;
-}
-
 /* {{{ proto bool class_exists(string classname)
    Checks if the class exists */
 ZEND_FUNCTION(class_exists)
@@ -830,7 +809,7 @@ ZEND_FUNCTION(class_exists)
 
 	convert_to_string_ex(class_name);
 	lcname = zend_str_tolower_dup((*class_name)->value.str.val, (*class_name)->value.str.len);
-	if (zend_lookup_ns_class(lcname, Z_STRLEN_PP(class_name), &ce TSRMLS_CC) == SUCCESS) {
+	if (zend_lookup_class(lcname, Z_STRLEN_PP(class_name), &ce TSRMLS_CC) == SUCCESS) {
 		efree(lcname);
 		RETURN_TRUE;
 	} else {
@@ -847,7 +826,7 @@ ZEND_FUNCTION(function_exists)
 {
 	zval **function_name;
 	zend_function *func;
-	char *lcname, *func_name, *func_name_end;
+	char *lcname, *func_name_end;
 	zend_bool retval;
 	
 	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &function_name)==FAILURE) {
@@ -857,37 +836,8 @@ ZEND_FUNCTION(function_exists)
 	lcname = zend_str_tolower_dup((*function_name)->value.str.val, (*function_name)->value.str.len);
 
 	func_name_end = lcname + (*function_name)->value.str.len;
-	if((func_name = zend_memnstr(lcname, "::", sizeof("::")-1, func_name_end)) == NULL) {
-		retval = (zend_hash_find(EG(function_table), lcname, (*function_name)->value.str.len+1, (void **)&func) == SUCCESS);
-	} else {
-		/* handle ::f case */
-		if (func_name == lcname) {
-			retval = (zend_hash_find(EG(function_table), lcname+sizeof("::")-1, (*function_name)->value.str.len-(sizeof("::")-1)+1, (void **)&func) == SUCCESS);
-		} else {
-			/* handle ns::f case */
-			int ns_name_length = func_name - lcname;
-			char *ns_name;
-			zend_namespace **ns;
-			
-			func_name += sizeof("::")-1;
-
-			if(func_name >= func_name_end) {
-				/* ns:: case */
-				retval = 0;
-			} else {
-				ns_name = estrndup(lcname, ns_name_length);
-
-				if (zend_hash_find(&EG(global_namespace_ptr)->class_table, ns_name, ns_name_length+1, (void **)&ns) == SUCCESS &&
-					CLASS_IS_NAMESPACE(*ns) && 
-					zend_hash_find(&(*ns)->function_table, func_name, func_name_end - func_name + 1, (void **)&func) == SUCCESS) {
-					retval = 1;
-				} else {
-					retval = 0;
-				}
-				efree(ns_name);
-			}
-		}
-	}
+	retval = (zend_hash_find(EG(function_table), lcname, (*function_name)->value.str.len+1, (void **)&func) == SUCCESS);
+	
 	efree(lcname);
 
 	/*
@@ -1119,44 +1069,21 @@ static int copy_class_name(zend_class_entry **pce, int num_args, va_list args, z
 	zend_class_entry *ce  = *pce;
 
 	if (hash_key->nKeyLength==0 || hash_key->arKey[0]!=0) {
-		if (ce->type == ZEND_USER_NAMESPACE || ce->type == ZEND_INTERNAL_NAMESPACE) {
-			zval *subarray;
-
-			MAKE_STD_ZVAL(subarray);
-			array_init(subarray);
-			zend_hash_apply_with_arguments(&ce->class_table, (apply_func_args_t) copy_class_name, 1, subarray);
-			add_assoc_zval(array, ce->name, subarray);
-		} else {
-			add_next_index_stringl(array, ce->name, ce->name_length, 1);
-		}
+		add_next_index_stringl(array, ce->name, ce->name_length, 1);
 	}
 	return 0;
 }
 
 
-/* {{{ proto array get_declared_classes([string namespace])
+/* {{{ proto array get_declared_classes()
    Returns an array of all declared classes. */
 ZEND_FUNCTION(get_declared_classes)
 {
-	zval **namespace_name;
-	zend_namespace *ns;
-
-	if (ZEND_NUM_ARGS() != 0) {
-		if(ZEND_NUM_ARGS() > 1 || zend_get_parameters_ex(1, &namespace_name)==FAILURE) {
-			ZEND_WRONG_PARAM_COUNT();
-		} 
-
-		ns = get_namespace_from_zval(namespace_name TSRMLS_CC);
-		
-		if(!ns) {
-			RETURN_FALSE;
-		}
-	} else {
-		ns = EG(global_namespace_ptr);
-	}
-
+    if (ZEND_NUM_ARGS() != 0) {
+        ZEND_WRONG_PARAM_COUNT();
+    }
 	array_init(return_value);
-	zend_hash_apply_with_arguments(&ns->class_table, (apply_func_args_t) copy_class_name, 1, return_value);
+	zend_hash_apply_with_arguments(EG(class_table), (apply_func_args_t) copy_class_name, 1, return_value);
 }
 /* }}} */
 

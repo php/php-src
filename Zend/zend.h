@@ -264,17 +264,6 @@ struct _zval_struct {
 
 struct _zend_op_array;
 
-/* typedef struct _zend_namespace {
-	char *name;
-	zend_uint name_length;
-	HashTable function_table;
-	HashTable class_table;
-	HashTable constants_table;
-	HashTable *global_variables;
-	struct _zend_op_array *op_array;
-} zend_namespace;
-*/
-
 typedef struct _zend_function_entry {
 	char *fname;
 	void (*handler)(INTERNAL_FUNCTION_PARAMETERS);
@@ -348,8 +337,6 @@ struct _zend_class_entry {
 	int (*handle_property_set)(zend_property_reference *property_reference, zval *value);
 #endif
 };
-
-typedef struct _zend_class_entry zend_namespace; /* namespace is the same as class */
 
 #include "zend_stream.h"
 typedef struct _zend_utility_functions {
