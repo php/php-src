@@ -1,3 +1,26 @@
+2003-12-17  Zeev Suraski  <zeev@zend.com>
+
+    * (php_5_0_0b3RC1)
+      zend_execute.c:
+      This part of the if was necessary after all.
+      Refix bug #22510
+
+2003-12-17  Dmitry Stogov  <dmitry@zend.com>
+
+    * (php_5_0_0b3RC1)
+      zend_execute_API.c:
+      -** empty log message ***
+
+    * (php_5_0_0b3RC1)
+      zend_compile.c:
+      Dynamic function call from object's property was fixed
+      (See "tests/lang/bug24926.phpt" and "tests/lang/bug25652.phpt")
+
+    * zend_execute_API.c:
+      Access to globals/autoglobals from class __destructor was fixed.
+      (see "tests/lang/bug24908.phpt" and
+      "tests/classes/destructor_and_globals.phpt")
+
 2003-12-16  Sebastian Bergmann  <sb@sebastian-bergmann.de>
 
     * zend_compile.h

@@ -1,3 +1,115 @@
+2003-12-17  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * ext/gd/libgd/gdft.c:
+      MFB compile fix
+
+2003-12-17  Andrey Hristov  <php@hristov.com>
+
+    * ext/standard/microtime.c:
+      proto fix
+
+    * NEWS:
+      entry for microtime()'s new clothes
+
+2003-12-17  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * tests/classes/array_access_005.phpt:
+      Add new test
+
+2003-12-17  Andi Gutmans  <andi@zend.com>
+
+    * NEWS:
+      - Update NEWS for tomorrow morning so that I don't forget when I'm sleepy
+
+2003-12-17  Andrey Hristov  <php@hristov.com>
+
+    * ext/standard/microtime.c:
+      Added optional parameter to microtime so now it can return float if it
+      the user wants. This prevents from getting string representation exploding
+      it and then creating a float.
+
+2003-12-17  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      NEWS:
+      wet
+
+2003-12-17  Andi Gutmans  <andi@zend.com>
+
+    * (php_5_0_0b3RC1)
+      configure.in
+      main/php_version.h:
+      Roll RC1 of B3
+
+2003-12-17  Rob Richards  <rrichards@ctindustries.net>
+
+    * (php_5_0_0b3RC1)
+      ext/dom/php_dom.c:
+      no longer need to cleanup temp var
+
+2003-12-17  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (php_5_0_0b3RC1)
+      tests/lang/bug22510.phpt:
+      Update test.
+
+2003-12-17  Zeev Suraski  <zeev@zend.com>
+
+    * (php_5_0_0b3RC1)
+      ZendEngine2/zend_execute.c:
+      This part of the if was necessary after all.
+      Refix bug #22510
+
+2003-12-17  Dmitry Stogov  <dmitry@zend.com>
+
+    * (php_5_0_0b3RC1)
+      ZendEngine2/zend_execute_API.c
+      ext/simplexml/tests/014.phpt
+      ext/simplexml/tests/015.phpt
+      ext/simplexml/tests/016.phpt:
+      -** empty log message ***
+
+    * (php_5_0_0b3RC1)
+      ext/simplexml/simplexml.c
+      ext/simplexml/tests/015.phpt:
+      accessing singular subnode as array
+
+    * (php_5_0_0b3RC1)
+      ZendEngine2/zend_compile.c:
+      Dynamic function call from object's property was fixed
+      (See "tests/lang/bug24926.phpt" and "tests/lang/bug25652.phpt")
+
+    * ZendEngine2/zend_execute_API.c:
+      Access to globals/autoglobals from class __destructor was fixed.
+      (see "tests/lang/bug24908.phpt" and
+      "tests/classes/destructor_and_globals.phpt")
+
+2003-12-17  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (php_5_0_0b3RC1)
+      ext/standard/dl.c
+      win32/winutil.c:
+      Fix a memleak: A second call to *nix version of dlerror() frees the error
+      string. This behavior is also adapted to the win build so that the buffer
+      returned by FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER) can be freed
+      too.
+
+2003-12-17  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/simplexml/simplexml.c:
+      free nodes correctly to clear node proxies
+
+2003-12-17  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (php_5_0_0b3RC1)
+      ext/exif/exif.c:
+      Fix warning
+
+    * (php_5_0_0b3RC1)
+      ext/dba/dba_flatfile.c
+      ext/dba/libinifile/inifile.c:
+      Fix warnings
+
 2003-12-16  Derick Rethans  <php@derickrethans.nl>
 
     * NEWS
