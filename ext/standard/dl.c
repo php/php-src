@@ -87,9 +87,6 @@ PHP_FUNCTION(dl)
 #define USING_ZTS 0
 #endif
 
-#define IS_SLASH(c)	\
-	(((c)=='/') || ((c)=='\\'))
-
 void php_dl(pval *file, int type, pval *return_value)
 {
 	void *handle;
