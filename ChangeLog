@@ -1,3 +1,44 @@
+2002-07-01  Marko Karppinen  <karppinen@pobox.com>
+
+    * Makefile.global
+      sapi/cli/config.m4:
+    - You don't need libtool to build sapi/cli on Darwin.
+    - We don't need libtool to build sapi/cli on Darwin.
+    - You want the sapi/cli build line to be in sapi/cli, not Makefile.global.
+    - We want the sapi/cli build line to be in sapi/cli, not Makefile.global.
+    - He can go about his business.
+    - You can go about your business.
+    - Move along.
+    - Move along. Move along.
+
+2002-07-01  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/image.c
+      ext/standard/info.c
+      main/memory_streams.c: - No C++ comments
+
+2002-07-01  Marko Karppinen  <karppinen@pobox.com>
+
+    * configure.in: In Darwin we have this thing called two-level namespace
+
+2002-07-01  Christian Stocker  <chregu@phant.ch>
+
+    * ext/domxml/php_domxml.h
+      ext/domxml/php_domxml.c:
+    outcomment everything related to domxml_elem_set_attribute_node(). This
+    function is not implemented and shouldn't show up at all for the time
+    being
+
+2002-07-01  Jani Taskinen  <sniper@iki.fi>
+
+    * main/main.c: Fix win32 build.
+
+2002-07-01  James Cox  <james@blog.at>
+
+    * acinclude.m4:
+    "-" is not acceptable in a #define (i have since discovered). converting all - to _ is the right thing to do.
+
+
 2002-06-30  Sander Roobol  <phy@wanadoo.nl>
 
     * main/main.c:

@@ -1,3 +1,10 @@
+2002-07-01  Andi Gutmans  <andi@zend.com>
+
+    * zend_compile.c: - Fix bug when acccessing $this not in class scope.
+
+    * zend_objects.h
+      zend_objects.c: - Export zend_object_get_address()
+
 2002-06-30  Andi Gutmans  <andi@zend.com>
 
     * ZEND_CHANGES: - Remember to document autoload when I have time.
