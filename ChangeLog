@@ -1,3 +1,14 @@
+2004-10-31  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_reflection_api.c:
+      - Add ReflectionFunction::invokeArgs(array)
+      - Add ReflectionMethod::invokeArgs(obj, array)
+
+2004-10-31  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ZendEngine2/zend_reflection_api.c:
+      Invokation -> Invocation
+
 2004-10-30  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ZendEngine2/zend.h:
