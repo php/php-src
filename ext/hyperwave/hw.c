@@ -285,6 +285,7 @@ int make2_return_array_from_objrec(pval **return_value, char *objrec, zval *sarr
 	char *attrname, *str, *temp, language[3];
 	int i, count;
 	zval *spec_arr;
+	char *strtok_buf = NULL;
 	
 	/* Create an array with an entry containing specs for each attribute
 	   and fill in the specs for Title, Description, Keyword, Group.
@@ -314,7 +315,7 @@ int make2_return_array_from_objrec(pval **return_value, char *objrec, zval *sarr
 	   to the return_value array.
 	*/
 	temp = estrdup(objrec);
-	attrname = strtok(temp, "\n");
+	attrname = strtok_r(temp, "\n", &strtok_buf);
 	while(attrname != NULL) {
 		zval *data, **dataptr;
 		long spec;
@@ -370,7 +371,7 @@ int make2_return_array_from_objrec(pval **return_value, char *objrec, zval *sarr
 			}
 		}
 
-		attrname = strtok(NULL, "\n");
+		attrname = strtok_r(NULL, "\n", &strtok_buf);
 	}
 	if(NULL == sarr){
 //		spec_arr->refcount--;
@@ -395,6 +396,7 @@ int make_return_array_from_objrec(pval **return_value, char *objrec) {
 	int hasDescription = 0;
 	int hasKeyword = 0;
 	int hasGroup = 0;
+	char *strtok_buf;
 
 	MAKE_STD_ZVAL(title_arr);
 	MAKE_STD_ZVAL(desc_arr);
@@ -410,7 +412,7 @@ int make_return_array_from_objrec(pval **return_value, char *objrec) {
 
 	/* Fill Array of titles, descriptions and keywords */
 	temp = estrdup(objrec);
-	attrname = strtok(temp, "\n");
+	attrname = strtok_r(temp, "\n", &strtok_buf);
 	while(attrname != NULL) {
 		str = attrname;
 		iTitle = 0;
@@ -465,7 +467,7 @@ int make_return_array_from_objrec(pval **return_value, char *objrec) {
 			if(iGroup)
 				add_next_index_string(group_arr, str, 1);
 		}
-		attrname = strtok(NULL, "\n");
+		attrname = strtok_r(NULL, "\n", &strtok_buf);
 	}
 	efree(temp);
 
@@ -504,7 +506,7 @@ int make_return_array_from_objrec(pval **return_value, char *objrec) {
 
 	/* All other attributes. Make a another copy first */
 	temp = estrdup(objrec);
-	attrname = strtok(temp, "\n");
+	attrname = strtok_r(temp, "\n", &strtok_buf);
 	while(attrname != NULL) {
 		str = attrname;
 		/* We don't want to insert titles, descr., keywords a second time */
@@ -518,7 +520,7 @@ int make_return_array_from_objrec(pval **return_value, char *objrec) {
 			str++;
 			add_assoc_string(*return_value, attrname, str, 1);
 		}
-		attrname = strtok(NULL, "\n");
+		attrname = strtok_r(NULL, "\n", &strtok_buf);
 	}
 	efree(temp);
 
@@ -1140,6 +1142,7 @@ PHP_FUNCTION(hw_who) {
 	zval *user_arr;
         char *object, *ptr, *temp, *attrname;
 	int i;
+	char *strtok_buf;
 
 	object = php3_hw_command(INTERNAL_FUNCTION_PARAM_PASSTHRU, WHO_COMMAND);
 	if(object == NULL)
@@ -1167,7 +1170,7 @@ php_printf("%s\n", ptr);
 	}
 
 	temp = estrdup(ptr);
-	attrname = strtok(temp, "\n");
+	attrname = strtok_r(temp, "\n", &strtok_buf);
 	i = 0;
 	while(attrname != NULL) {
 		char *name;
@@ -1241,7 +1244,7 @@ php_printf("%s\n", ptr);
 		/* Add the user array */
 		zend_hash_index_update(return_value->value.ht, i++, &user_arr, sizeof(pval), NULL);
 
-		attrname = strtok(NULL, "\n");
+		attrname = strtok_r(NULL, "\n", &strtok_buf);
 	}
 	efree(temp);
 	efree(object);

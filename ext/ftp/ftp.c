@@ -609,7 +609,7 @@ time_t
 ftp_mdtm(ftpbuf_t *ftp, const char *path)
 {
 	time_t		stamp;
-	struct tm	*gmt;
+	struct tm	*gmt, tmbuf;
 	struct tm	tm;
 	char		*ptr;
 	int		n;
@@ -635,7 +635,7 @@ ftp_mdtm(ftpbuf_t *ftp, const char *path)
 
 	/* figure out the GMT offset */
 	stamp = time(NULL);
-	gmt = gmtime(&stamp);
+	gmt = gmtime_r(&stamp, &tmbuf);
 	gmt->tm_isdst = -1;
 
 	/* apply the GMT offset */

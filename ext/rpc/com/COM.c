@@ -150,6 +150,7 @@ static PHP_INI_MH(OnTypelibFileChange)
 {
 	FILE *typelib_file;
 	char *typelib_name_buffer;
+	char *strtok_buf = NULL;
 #if SUPPORT_INTERACTIVE
 	int interactive;
 	ELS_FETCH();
@@ -179,9 +180,9 @@ static PHP_INI_MH(OnTypelibFileChange)
 		if (typelib_name_buffer[0]==';') {
 			continue;
 		}
-		typelib_name = strtok(typelib_name_buffer, "\r\n"); /* get rid of newlines */
-		typelib_name = strtok(typelib_name, "#");
-		modifier = strtok(NULL, "#");
+		typelib_name = strtok_r(typelib_name_buffer, "\r\n", &strtok_buf); /* get rid of newlines */
+		typelib_name = strtok_r(typelib_name, "#", &strtok_buf);
+		modifier = strtok_r(NULL, "#", &strtok_buf);
 		if (modifier) {
 			if (!strcmp(modifier, "cis") || !strcmp(modifier, "case_insensitive")) {
 				mode &= ~CONST_CS;
