@@ -250,9 +250,6 @@ PHPAPI int php3_header(void)
 		return 1;
 	}
 	if ((GLOBAL(php3_PrintHeader) && !GLOBAL(php3_HeaderPrinted)) || (GLOBAL(php3_PrintHeader) && GLOBAL(php3_HeaderPrinted) == 2)) {
-		if (!(GLOBAL(initialized) & INIT_ENVIRONMENT) && GLOBAL(request_info).request_method && !strcasecmp(GLOBAL(request_info).request_method, "post")) {
-			php3_treat_data(PARSE_POST, NULL);	/* POST Data */
-		}
 		cookie = php3_PopCookieList();
 		while (cookie) {
 			if (cookie->name)
@@ -330,9 +327,6 @@ PHPAPI int php3_header(void)
 	}
 #else
 	if (GLOBAL(php3_PrintHeader) && !GLOBAL(php3_HeaderPrinted)) {
-		if (!(GLOBAL(initialized) & INIT_ENVIRONMENT) && GLOBAL(request_info).request_method && !strcasecmp(GLOBAL(request_info).request_method, "post")) {
-			php3_treat_data(PARSE_POST, NULL);	/* POST Data */
-		}
 		if (!GLOBAL(cont_type)) {
 #if USE_SAPI
 			GLOBAL(sapi_rqst)->header(GLOBAL(sapi_rqst)->scid,"Content-type: text/html\015\012\015\012");

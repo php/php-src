@@ -32,10 +32,6 @@
 /* $Id$ */
 
 
-#define SHUTDOWN_DEBUG(resource) fprintf(stderr, "*** Shutting down " resource "\n" )
-#undef SHUTDOWN_DEBUG
-#define SHUTDOWN_DEBUG(resource)
-
 #include <stdio.h>
 #include "php.h"
 #ifdef MSVC5
@@ -244,12 +240,14 @@ PHP_INI_END()
 
 
 
-#ifndef THREAD_SAFE
+/* True global (no need for thread safety */
+static int module_initialized = 0;
+
+#ifndef ZTS
+
 /*
  * Globals yet to be protected
  */
-int initialized;				/* keep track of which resources were successfully initialized */
-static int module_initialized = 0;
 
 #if WIN32|WINNT
 unsigned int wintimer;
@@ -375,7 +373,7 @@ PHPAPI void php3_error(int type, const char *format,...)
 	PLS_FETCH();
 
 	if (!(type & E_CORE)) {
-		if (!GLOBAL(initialized)) {	/* don't display further errors after php3_request_shutdown() */
+		if (!PG(initialized)) {	/* don't display further errors after php3_request_shutdown() */
 			return;
 		}
 	}
@@ -629,8 +627,6 @@ int php3_request_startup(CLS_D ELS_DC PLS_DC)
 
 	php3_set_timeout(PG(max_execution_time) _INLINE_TLS);
 
-	GLOBAL(initialized) = 0;
-
 #if APACHE
 	/*
 	 * For the Apache module version, this bit of code registers a cleanup
@@ -654,7 +650,6 @@ int php3_request_startup(CLS_D ELS_DC PLS_DC)
 		php3_printf("Unable to initialize request info.\n");
 		return FAILURE;
 	}
-	GLOBAL(initialized) |= INIT_REQUEST_INFO;
 	
 	init_compiler(CLS_C ELS_CC);
 	init_executor(CLS_C ELS_CC);
@@ -697,29 +692,15 @@ void php3_request_shutdown(void *dummy INLINE_TLS)
 
 	php3_call_shutdown_functions();
 	
-	GLOBAL(initialized) &= ~INIT_ENVIRONMENT;	/* does not require any special shutdown */
-
 	php_ini_rshutdown();
 
 	shutdown_scanner(CLS_C);
-
 	shutdown_compiler(CLS_C);
 	shutdown_executor(ELS_C);
 
-	if (GLOBAL(initialized) & INIT_REQUEST_INFO) {
-		SHUTDOWN_DEBUG("Request info");
-		php3_destroy_request_info(NULL);
-		GLOBAL(initialized) &= ~INIT_REQUEST_INFO;
-	}
-	if (GLOBAL(initialized) & INIT_SCANNER) {
-		SHUTDOWN_DEBUG("Scanner");
-		GLOBAL(initialized) &= ~INIT_SCANNER;
-	}
-	SHUTDOWN_DEBUG("Memory manager");
+	php3_destroy_request_info(NULL);
 	shutdown_memory_manager(0, 0);
-	if (GLOBAL(initialized)) {
-		php3_error(E_WARNING, "Unknown resources in request shutdown function");
-	}
+	php3_error(E_WARNING, "Unknown resources in request shutdown function");
 	php3_unset_timeout(_INLINE_TLS_VOID);
 
 
@@ -785,14 +766,7 @@ static int php3_config_ini_startup()
 
 static void php3_config_ini_shutdown(INLINE_TLS_VOID)
 {
-#if USE_SAPI
 	php3_shutdown_config();
-#else
-	if (GLOBAL(module_initialized) & INIT_CONFIG) {
-		php3_shutdown_config();
-		GLOBAL(module_initialized) &= ~INIT_CONFIG;
-	}
-#endif
 }
 
 
@@ -804,17 +778,17 @@ int php3_module_startup()
 #ifdef ZTS
 	php_core_globals *core_globals;
 #endif
-
 #if (WIN32|WINNT) && !(USE_SAPI)
 	WORD wVersionRequested;
 	WSADATA wsaData;
 
 	wVersionRequested = MAKEWORD(2, 0);
-#else
-	if (GLOBAL(module_initialized)) {
+#endif
+
+
+	if (module_initialized) {
 		return SUCCESS;
 	}
-#endif
 
 	zend_output_startup();
 
@@ -843,7 +817,6 @@ int php3_module_startup()
 		php3_printf("\nwinsock.dll unusable. %d\n", WSAGetLastError());
 		return FAILURE;
 	}
-	GLOBAL(module_initialized) |= INIT_WINSOCK;
 #endif
 
 	SET_MUTEX(gLock);
@@ -865,6 +838,7 @@ int php3_module_startup()
 		php3_printf("Unable to start modules\n");
 		return FAILURE;
 	}
+	module_initialized = 1;
 	return SUCCESS;
 }
 
@@ -888,10 +862,7 @@ void php3_module_shutdown()
 
 #if (WIN32|WINNT) && !(USE_SAPI)
 	/*close winsock */
-	if (GLOBAL(module_initialized) & INIT_WINSOCK) {
-		WSACleanup();
-		GLOBAL(module_initialized) &= ~INIT_WINSOCK;
-	}
+	WSACleanup();
 #endif
 
 	if (GLOBAL(module_initialized)) {
@@ -908,6 +879,7 @@ void php3_module_shutdown()
 	UNREGISTER_INI_ENTRIES();
 	php_ini_mshutdown();
 	shutdown_memory_manager(0, 1);
+	module_initialized = 0;
 }
 
 
@@ -1088,8 +1060,6 @@ int _php3_hash_environment(PLS_D)
 
 	/* need argc/argv support as well */
 	_php3_build_argv(GLOBAL(request_info).query_string ELS_CC);
-
-	GLOBAL(initialized) |= INIT_ENVIRONMENT;
 
 	return SUCCESS;
 }
@@ -1466,10 +1436,6 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 		} else {
 			rewind(file_handle.handle.fp);
 		}
-		GLOBAL(initialized) |= INIT_SCANNER;
-		/* This shouldn't be necessary - if it is - it should move to Zend
-		 * phprestart(GLOBAL(phpin));
-		 */
 	}
 
 	switch (behavior) {
@@ -1495,19 +1461,10 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 			break;
 	}
 
-	if (GLOBAL(initialized)) {
-		php3_header();			/* Make sure headers have been sent */
-		php3_request_shutdown((void *) 0 _INLINE_TLS);
-		php3_module_shutdown(_INLINE_TLS_VOID);
-#ifdef THREAD_SAFE
-		yy_destroy_tls();
-		tls_shutdown();
-		tls_destroy();
-#endif
-		return SUCCESS;
-	} else {
-		return FAILURE;
-	}
+	php3_header();			/* Make sure headers have been sent */
+	php3_request_shutdown((void *) 0 _INLINE_TLS);
+	php3_module_shutdown(_INLINE_TLS_VOID);
+	return SUCCESS;
 }
 #endif							/* CGI_BINARY */
 
@@ -1534,13 +1491,10 @@ PHPAPI int apache_php3_module_main(request_rec * r, int fd, int display_source_m
 	file_handle.type = ZEND_HANDLE_FD;
 	file_handle.handle.fd = fd;
 	file_handle.filename = request_info.filename;
-	GLOBAL(initialized) |= INIT_SCANNER;
 	(void) php3_parse(&file_handle CLS_CC ELS_CC);
 	
-	if (GLOBAL(initialized)) {
-		php3_header();			/* Make sure headers have been sent */
-		zend_end_ob_buffering(1);
-	}
+	php3_header();			/* Make sure headers have been sent */
+	zend_end_ob_buffering(1);
 	return (OK);
 }
 #endif							/* APACHE */
@@ -1819,7 +1773,6 @@ int main(int argc, char **argv)
 					}
 				}
 				GLOBAL(phpin) = in;
-				GLOBAL(initialized) |= INIT_SCANNER;
 				phprestart(GLOBAL(phpin));
 
 				if (!processing_error) {
@@ -1842,18 +1795,14 @@ int main(int argc, char **argv)
 				}
 			}
 		}
-		if (GLOBAL(initialized)) {
-			php3_header();		/* Make sure headers have been sent */
-			php3_request_shutdown((void *) 0 _INLINE_TLS);
-		}
+		php3_header();		/* Make sure headers have been sent */
+		php3_request_shutdown((void *) 0 _INLINE_TLS);
 	}
 	php3_module_shutdown(_INLINE_TLS_VOID);
 #ifdef THREAD_SAFE
-	if (GLOBAL(initialized)) {
-		yy_destroy_tls();
-		tls_shutdown();
-		tls_destroy();
-	}
+	yy_destroy_tls();
+	tls_shutdown();
+	tls_destroy();
 #endif
 	return 0;
 }
@@ -1950,7 +1899,6 @@ PHPAPI int php3_sapi_main(struct sapi_request_info *sapi_info)
 	if (in) {
 		GLOBAL(phpin) = in;
 		phprestart(GLOBAL(phpin));
-		GLOBAL(initialized) |= INIT_SCANNER;
 	}
 	if (sapi_info->display_source_mode) {
 		GLOBAL(php3_display_source) = 1;
