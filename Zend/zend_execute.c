@@ -1411,8 +1411,8 @@ binary_assign_op_addr: {
 					if (opline->extended_value & ZEND_CTOR_CALL) {
 						/* constructor call */
 
-						if (opline->op1.op_type == IS_VAR && !(opline->op1.u.EA.type & EXT_TYPE_UNUSED)) {
-							PZVAL_LOCK(*Ts[opline->op1.u.var].var.ptr_ptr);
+						if (opline->op1.op_type == IS_VAR) {
+							SELECTIVE_PZVAL_LOCK(*Ts[opline->op1.u.var].var.ptr_ptr, &opline->op1);
 						}
 						if (opline->op2.op_type==IS_VAR) {
 							PZVAL_LOCK(*Ts[opline->op2.u.var].var.ptr_ptr);
