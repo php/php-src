@@ -2,6 +2,7 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.2
+- Apache module would sometimes close a wrong file-descriptor. (Sascha)
 - Fixed use of alternative storage handlers in the session module. (Sascha)
 - Updated str_pad() to be able to pad on left/right/both sides. (Andrei)
 - Fixed crash in gzopen(). (Thies)
