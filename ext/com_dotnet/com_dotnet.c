@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 4                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2003 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -109,7 +109,7 @@ PHP_FUNCTION(com_dotnet_create_instance)
 
 	if (COMG(dotnet_runtime_stuff) == NULL) {
 		if (FAILURE == dotnet_init(TSRMLS_C)) {
-			php_com_throw_exception("Failed to initialize .Net runtime" TSRMLS_CC);
+			php_com_throw_exception(E_ERROR, "Failed to initialize .Net runtime" TSRMLS_CC);
 			ZVAL_NULL(object);
 			return;
 		}
@@ -123,7 +123,7 @@ PHP_FUNCTION(com_dotnet_create_instance)
 			&assembly_name, &assembly_name_len,
 			&datatype_name, &datatype_name_len,
 			&obj->code_page)) {
-		php_com_throw_exception("Could not create .Net object - invalid arguments!" TSRMLS_CC);
+		php_com_throw_exception(E_INVALIDARG, "Could not create .Net object - invalid arguments!" TSRMLS_CC);
 		ZVAL_NULL(object);
 		return;
 	}
@@ -171,7 +171,7 @@ PHP_FUNCTION(com_dotnet_create_instance)
 	VariantClear(&vargs[1]);
 
 	if (ret == FAILURE) {
-		php_com_throw_exception("Failed to instantiate .Net object" TSRMLS_CC);
+		php_com_throw_exception(hr, "Failed to instantiate .Net object" TSRMLS_CC);
 		ZVAL_NULL(object);
 		return;
 	}

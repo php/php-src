@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 4                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2003 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -59,8 +59,9 @@ PHPAPI void php_com_variant_from_zval(VARIANT *v, zval *z, int codepage TSRMLS_D
 					V_VARIANTREF(v) = &obj->v;
 				}
 			} else {
-				/* TODO: export the object using our COM wrapper */
-				V_VT(v) = VT_NULL;
+				/* export the PHP object using our COM wrapper */
+				V_VT(v) = VT_DISPATCH;
+				V_DISPATCH(v) = php_com_wrapper_export(z TSRMLS_CC);
 			}
 			break;
 			
@@ -168,6 +169,9 @@ PHPAPI int php_com_zval_from_variant(zval *z, VARIANT *v, int codepage TSRMLS_DC
 			break;
 
 		case VT_VARIANT:
+			/* points to another variant */
+			return php_com_zval_from_variant(z, V_VARIANTREF(v), codepage TSRMLS_CC);
+			
 		default:
 			php_com_wrap_variant(z, v, codepage TSRMLS_CC);
 	}
@@ -202,7 +206,7 @@ PHP_FUNCTION(com_variant_create_instance)
 	
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
 		"z!|ll", &zvalue, &vt, &codepage)) {
-			php_com_throw_exception("Invalid arguments" TSRMLS_CC);
+			php_com_throw_exception(E_INVALIDARG, "Invalid arguments" TSRMLS_CC);
 			return;
 	}
 
@@ -223,7 +227,7 @@ PHP_FUNCTION(com_variant_create_instance)
 			spprintf(&msg, 0, "Variant type conversion failed: %s", werr);
 			LocalFree(werr);
 
-			php_com_throw_exception(msg TSRMLS_CC);
+			php_com_throw_exception(res, msg TSRMLS_CC);
 			efree(msg);
 		}
 	}
@@ -253,6 +257,11 @@ PHP_FUNCTION(variant_set)
 	if (obj->typeinfo) {
 		ITypeInfo_Release(obj->typeinfo);
 		obj->typeinfo = NULL;
+	}
+	if (obj->sink_dispatch) {
+		php_com_object_enable_event_sink(obj, FALSE TSRMLS_CC);
+		IDispatch_Release(obj->sink_dispatch);
+		obj->sink_dispatch = NULL;
 	}
 
 	VariantClear(&obj->v);
@@ -779,7 +788,7 @@ PHP_FUNCTION(variant_set_type)
 		spprintf(&msg, 0, "Variant type conversion failed: %s", werr);
 		LocalFree(werr);
 
-		php_com_throw_exception(msg TSRMLS_CC);
+		php_com_throw_exception(res, msg TSRMLS_CC);
 		efree(msg);
 	}
 }
@@ -813,7 +822,7 @@ PHP_FUNCTION(variant_cast)
 		spprintf(&msg, 0, "Variant type conversion failed: %s", werr);
 		LocalFree(werr);
 
-		php_com_throw_exception(msg TSRMLS_CC);
+		php_com_throw_exception(res, msg TSRMLS_CC);
 		efree(msg);
 	}
 
