@@ -77,20 +77,21 @@ AC_DEFUN(PHP_GD_FREETYPE,[
 			for i in /usr /usr/local "$CHECK_FREETYPE" ; do
 			if test -f "$i/include/freetype2/freetype/freetype.h"; then
 				FREETYPE2_DIR="$i"
-				FREETYPE2_INC_DIR="$i/include/freetype/freetype2"
+				FREETYPE2_INC_DIR="$i/include/freetype2/freetype"
 			fi
 			done
 			if test -n "$FREETYPE2_DIR" ; then
 				AC_DEFINE(HAVE_LIBFREETYPE,1,[ ])
 				PHP_ADD_LIBRARY_WITH_PATH(freetype, $FREETYPE2_DIR/lib)
 				PHP_ADD_INCLUDE($FREETYPE2_INC_DIR)
+    			AC_DEFINE(USE_GD_IMGSTRTTF, 1, [ ])
 				AC_MSG_RESULT(yes)
 			else
 				AC_MSG_RESULT(no (freetype2 not found))
 			fi
 		],[
 			AC_MSG_RESULT(no)
-			AC_MSG_RESULT(If configure fails, try --with-freetype2-dir=<DIR>)
+			AC_MSG_RESULT(If configure fails, try --with-freetype-dir=<DIR>)
 	   ])
 ])
  
@@ -246,7 +247,13 @@ if test "$with_gd" != "no" && test "$ac_cv_lib_gd_gdImageLine" = "yes"; then
       CHECK_TTF="$withval"
     fi
   ])
- 
+
+  if test "$with_freetype_dir" != "no" ; then
+  	 CHECK_TTF=""
+  else
+    CHECK_TTF="$withval"
+  fi
+  
   AC_MSG_CHECKING(whether to include FreeType 1.x support)
   if test -n "$CHECK_TTF" ; then
     for i in /usr /usr/local "$CHECK_TTF" ; do
