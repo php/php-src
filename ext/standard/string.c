@@ -4027,7 +4027,7 @@ PHP_FUNCTION(str_shuffle)
 }
 /* }}} */
 
-/* {{{ proto void word_count(string str, [int format])
+/* {{{ proto void str_word_count(string str, [int format])
    	Counts the number of words inside a string. If format of 1 is specified,
    	then the function will return an array containing all the words
    	found inside the string. If format of 2 is specified, then the function
@@ -4038,7 +4038,7 @@ PHP_FUNCTION(str_shuffle)
    	string containing alphabetic characters, which also may contain, but not start
    	with "'" and "-" characters.
 */
-PHP_FUNCTION(word_count)
+PHP_FUNCTION(str_word_count)
 {
 	zval **str, **o_format;
 	char *s, *e, *p, *buf;
