@@ -652,6 +652,7 @@ program)
 shared)
 	enable_static=no
     passthru="$passthru --disable-static"
+    EXTRA_LDFLAGS="$EXTRA_LDFLAGS -avoid-version"
 ;;
 static)
 	enable_shared=no
@@ -784,6 +785,8 @@ if true; then
   echo "+--------------------------------------------------------------------+"
 
 fi
+
+PHP_SHOW_LD_LIBRARY_PATH
 
 ])
 
