@@ -940,7 +940,11 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 <ST_IN_SCRIPTING>"__CLASS__" {
-	char *class_name = CG(active_class_entry)->name;
+	char *class_name = NULL;
+
+	if (CG(active_class_entry)) {
+		class_name = CG(active_class_entry)->name;
+	}
 	
 	if (!class_name) {
 		class_name = "";
