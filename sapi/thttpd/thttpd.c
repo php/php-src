@@ -50,6 +50,8 @@ typedef struct {
 	int seen_cn;
 } php_thttpd_globals;
 
+#define PHP_SYS_CALL(x) do { x } while (n == -1 && errno == EINTR)
+
 #ifdef PREMIUM_THTTPD
 # define do_keep_alive persistent
 #endif
@@ -73,7 +75,7 @@ static int sapi_thttpd_ub_write(const char *str, uint str_length TSRMLS_DC)
 	}
 	
 	while (str_length > 0) {
-		n = send(TG(hc)->conn_fd, str, str_length, 0);
+		PHP_SYS_CALL(n = send(TG(hc)->conn_fd, str, str_length, 0););
 
 		if (n == -1) {
 			if (errno == EAGAIN) {
@@ -108,7 +110,7 @@ static int do_writev(struct iovec *vec, int nvec, int len TSRMLS_DC)
 	assert(nvec <= IOV_MAX);
 
 	if (TG(sbuf).c == 0) {
-		n = writev(TG(hc)->conn_fd, vec, nvec);
+		PHP_SYS_CALL(n = writev(TG(hc)->conn_fd, vec, nvec););
 
 		if (n == -1) {
 			if (errno == EAGAIN) {
@@ -120,8 +122,9 @@ static int do_writev(struct iovec *vec, int nvec, int len TSRMLS_DC)
 
 
 		TG(hc)->bytes_sent += n;
-	} else
+	} else {
 		n = 0;
+	}
 
 	if (n < len) {
 		int i;
