@@ -249,7 +249,7 @@ PS_SERIALIZER_DECODE_FUNC(php)
 	int has_value;
 
 	current = (zval *) ecalloc(sizeof(zval), 1);
-	for (p = q = val; (p < endptr) && (q = strchr(p, '|')); p = q) {
+	for (p = q = val; (p < endptr) && (q = memchr(p, '|', endptr - p)); p = q) {
 		if (p[0] == '!') {
 			p++;
 			has_value = 0;
