@@ -2620,7 +2620,7 @@ PHP_FUNCTION(mb_send_mail)
 #define PHP_MBSTR_MAIL_MIME_HEADER1 "Mime-Version: 1.0\nContent-Type: text/plain"
 #define PHP_MBSTR_MAIL_MIME_HEADER2 "; charset="
 #define PHP_MBSTR_MAIL_MIME_HEADER3 "\nContent-Transfer-Encoding: "
-	if (argc == 4) {
+	if (argc >= 4) {
 		convert_to_string_ex(argv[3]);
 		p = Z_STRVAL_PP(argv[3]);
 		n = Z_STRLEN_PP(argv[3]);
