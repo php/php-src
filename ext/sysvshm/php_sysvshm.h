@@ -23,7 +23,7 @@
    | If you did not, or have any questions about PHP licensing, please    |
    | contact core@php.net.                                                |
    +----------------------------------------------------------------------+
-   | Authors: Christian Cartus <chc@idgruppe.de>                          |
+   | Authors: Christian Cartus <cartus@atrior.de>                         |
    +----------------------------------------------------------------------+
  */
 
