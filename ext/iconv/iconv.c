@@ -25,6 +25,11 @@
 
 #include "php.h"
 
+#ifdef PHP_ATOM_INC
+#include "php_have_iconv.h"
+#include "php_have_libiconv.h"
+#endif
+
 #if HAVE_ICONV
 
 #include <iconv.h>
