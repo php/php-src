@@ -31,9 +31,9 @@
     </maintainer>
   </maintainers>
   <release>
-    <version>0.91</version>
-    <state>beta</state>
-    <date>2002-09-10</date>
+    <version>1.0RC1</version>
+    <state>stable</state>
+    <date>2002-10-03</date>
     <notes>
 New Features, Installer:
 * new command: "pear search"
@@ -45,6 +45,7 @@ New Features, Installer:
 * new dependency type: "zend"
 * XML-RPC results may now be cached (see
   cache_dir and cache_ttl config)
+* HTTP proxy authorization support
 
 Bugfixes, Installer:
 * fix for XML-RPC bug that made some remote
