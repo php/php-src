@@ -41,7 +41,7 @@ require_once 'Console/Getopt.php';
 *
 * @package  System
 * @author   Tomas V.V.Cox <cox@idecnet.com>
-* @version  $Version$
+* @version  $Revision$
 * @access   public
 */
 class System extends PEAR
