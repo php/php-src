@@ -22,7 +22,8 @@
 #include "php.h"
 
 #if HAVE_SWF
-#include "swf.h"
+#include <stdio.h>
+#include <swf.h>
 #include "ext/standard/info.h"
 #include "php_swf.h"
 
@@ -168,7 +169,7 @@ PHP_FUNCTION(swf_openfile)
 	
 	na = Z_STRVAL_PP(name);
 	
-	swf_openfile((strcasecmp("php://stdout", na)==0) ? stdout : na,
+	swf_openfile((strcasecmp("php://stdout", na)==0) ? fileno(stdout) : na,
 			 (float)Z_DVAL_PP(sizeX), (float)Z_DVAL_PP(sizeY),
       		 	 (float)Z_DVAL_PP(frameRate), (float)Z_DVAL_PP(r), (float)Z_DVAL_PP(g), (float)Z_DVAL_PP(b));
 }
@@ -463,10 +464,10 @@ void php_swf_define(INTERNAL_FUNCTION_PARAMETERS, int opt)
 	
 	if (opt) {
 		swf_defineline(Z_LVAL_PP(objid), (float)Z_DVAL_PP(x1), (float)Z_DVAL_PP(y1),
-	 	               (float)Z_DVAL_PP(x2), (float)Z_DVAL_PP(y2), (float)(Z_DVAL_PP(width));
+	 	               (float)Z_DVAL_PP(x2), (float)Z_DVAL_PP(y2), (float)Z_DVAL_PP(width));
 	} else {
 		swf_definerect(Z_LVAL_PP(objid), (float)Z_DVAL_PP(x1), (float)Z_DVAL_PP(y1),
-	 	               (float)Z_DVAL_PP(x2), (float)Z_DVAL_PP(y2), (float)(Z_DVAL_PP(width));
+	 	               (float)Z_DVAL_PP(x2), (float)Z_DVAL_PP(y2), (float)Z_DVAL_PP(width));
 	}
 }
 
