@@ -1,7 +1,7 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2002, Version 4.2.3
-- Enable strcoll() on win32. (Markus)
+06 Sep 2002, Version 4.2.3
+- Enabled strcoll() on win32. (Markus)
 - Fixed possible ASCII control char injection in mail(). (Stefan Esser)
 - Fixed a potential crash bug in import_request_variables() (Zeev)
 - Fixed several problems with directory functions on Windows. (Steph)
