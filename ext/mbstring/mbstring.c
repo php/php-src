@@ -916,11 +916,12 @@ PHP_RINIT_FUNCTION(mbstring)
 				if (zend_hash_find(EG(function_table), p->orig_func, 
 								   strlen(p->orig_func)+1, (void **)&orig) != SUCCESS) {
 					php_error_docref("ref.mbstring" TSRMLS_CC, E_ERROR, "mbstring couldn't find function %s.", p->orig_func);
-				}
-				zend_hash_add(EG(function_table), p->save_func, strlen(p->save_func)+1, orig, sizeof(zend_function), NULL);
-				if (zend_hash_update(EG(function_table), p->orig_func, strlen(p->orig_func)+1,
+				} else {
+					zend_hash_add(EG(function_table), p->save_func, strlen(p->save_func)+1, orig, sizeof(zend_function), NULL);
+					if (zend_hash_update(EG(function_table), p->orig_func, strlen(p->orig_func)+1,
 									 func, sizeof(zend_function), NULL) == FAILURE){
-					php_error_docref("ref.mbstring" TSRMLS_CC, E_ERROR, "mbstring couldn't replace function %s.", p->orig_func);
+						php_error_docref("ref.mbstring" TSRMLS_CC, E_ERROR, "mbstring couldn't replace function %s.", p->orig_func);
+					}
 				}
 			}
 			p++;
