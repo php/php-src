@@ -2,6 +2,7 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? 1999, Version 4.0 Beta 3
+- Add connection handling support (Rasmus)
 - Improved the Sybase-CT module to make use of resources (Zeev)
 - Improved the mSQL module to make use of resources (Zeev)
 - Changed mysql_query() and mysql_db_query() to return false in case of saving
