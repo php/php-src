@@ -27,10 +27,6 @@
 # include <stdarg.h>
 #endif
 
-#ifdef __cplusplus
-#include <iostream.h>
-#endif
-
 #include "zend_llist.h"
 
 #define DEBUG_ZEND 0
@@ -176,9 +172,6 @@ typedef struct _zend_file_handle {
 	union {
 		int fd;
 		FILE *fp;
-#ifdef __cplusplus
-		istream *is;
-#endif
 	} handle;
 	zend_bool free_filename;
 } zend_file_handle;

@@ -21,27 +21,10 @@
 #ifndef ZEND_SCANNER_H
 #define ZEND_SCANNER_H
 
-#ifdef __cplusplus
-class ZendFlexLexer : public yyFlexLexer
-{
-public:
-	virtual ~ZendFlexLexer();
-	int lex_scan(zval *zendlval TSRMLS_DC);
-	void BeginState(int state);
-};
-
-#endif	/* ZTS */
-
-
 typedef struct _zend_lex_state {
-#ifndef __cplusplus
 	YY_BUFFER_STATE buffer_state;
 	int state;
 	FILE *in;
-#else
-	ZendFlexLexer *ZFL;
-	istream *input_file;
-#endif
 	uint lineno;
 	char *filename;
 } zend_lex_state;

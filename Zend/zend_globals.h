@@ -36,10 +36,6 @@
 /*#undef ZTS*/
 
 #ifdef ZTS
-#ifdef __cplusplus
-class ZendFlexLexer;
-class ZendIniFlexLexer;
-#endif
 
 BEGIN_EXTERN_C()
 ZEND_API extern int compiler_globals_id;
@@ -112,14 +108,6 @@ struct _zend_compiler_globals {
 	zend_bool ini_parser_unbuffered_errors;
 
 	zend_llist open_files;
-
-#if defined(ZTS) && defined(__cplusplus)
-	ZendFlexLexer *ZFL;
-	ZendIniFlexLexer *ini_scanner;
-#else
-	void *ZFL;
-	void *ini_parser;
-#endif
 
 	zend_llist *throw_list;
 
