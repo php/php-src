@@ -1,0 +1,15 @@
+/* tsrm_config.h.in.  Generated automatically from configure.in by autoheader.  */
+
+/* Define if your C compiler doesn't accept -c and -o together.  */
+#undef NO_MINUS_C_MINUS_O
+
+#undef PTHREADS
+
+/* Define if you have the <stdarg.h> header file.  */
+#undef HAVE_STDARG_H
+
+#ifdef DEFINE_TSRM_VERSION
+# undef PACKAGE
+# undef VERSION
+#endif
+
