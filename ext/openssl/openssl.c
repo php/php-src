@@ -1532,7 +1532,7 @@ PHP_FUNCTION(openssl_csr_sign)
 		goto cleanup;
 	}
 	/* Version 3 cert */
-	if (!X509_set_version(new_cert, 3))
+	if (!X509_set_version(new_cert, 2))
 		goto cleanup;
 
 	/* TODO: Allow specifying */
