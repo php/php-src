@@ -158,12 +158,12 @@ static void php_mime_split(char *buf, int cnt, char *boundary, zval *array_ptr S
 						SAFE_RETURN;
 					}
 					if (ptr[1] == '\n') {
-                                                /* empty line as end of header found */
+						/* empty line as end of header found */
 						php_error(E_WARNING, "File Upload Mime headers garbled ptr: [%c%c%c%c%c]", *ptr, *(ptr + 1), *(ptr + 2), *(ptr + 3), *(ptr + 4));
 						SAFE_RETURN;
-                                        }
+					}
 					/* some other headerfield found, skip it */
-                                        loc = (char *) memchr(ptr, '\n', rem)+1;
+					loc = (char *) memchr(ptr, '\n', rem)+1;
 					while (*loc == ' ' || *loc == '\t')
 						/* other field is folded, skip it */
                                         	loc = (char *) memchr(loc, '\n', rem-(loc-ptr))+1;
@@ -171,9 +171,10 @@ static void php_mime_split(char *buf, int cnt, char *boundary, zval *array_ptr S
 					ptr = loc;
 				}
 				loc = memchr(ptr, '\n', rem);
-				while (loc[1] == ' ' || loc[1] == '\t')
+				while (loc[1] == ' ' || loc[1] == '\t') {
 					/* field is folded, look for end */
 					loc = memchr(loc+1, '\n', rem-(loc-ptr)-1);
+				}
 				name = strstr(ptr, " name=");
 				if (name && name < loc) {
 					name += 6;
