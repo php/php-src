@@ -1366,6 +1366,34 @@ ZEND_METHOD(reflection_function, returnsReference)
 }
 /* }}} */
 
+/* {{{ proto public bool ReflectionFunction::getNumberOfParameters()
+   Gets the number of required parameters */
+ZEND_METHOD(reflection_function, getNumberOfParameters)
+{
+	reflection_object *intern;
+	zend_function *fptr;
+
+	METHOD_NOTSTATIC;
+	GET_REFLECTION_OBJECT_PTR(fptr);
+
+	RETURN_LONG(fptr->common.num_args);
+}
+/* }}} */
+
+/* {{{ proto public bool ReflectionFunction::getNumberOfRequiredParameters()
+   Gets the number of required parameters */
+ZEND_METHOD(reflection_function, getNumberOfRequiredParameters)
+{
+	reflection_object *intern;
+	zend_function *fptr;
+
+	METHOD_NOTSTATIC;
+	GET_REFLECTION_OBJECT_PTR(fptr);
+
+	RETURN_LONG(fptr->common.required_num_args);
+}
+/* }}} */
+
 /* {{{ proto public ReflectionParameter[] Reflection_Function::getParameters()
    Returns an array of parameter objects for this function */
 ZEND_METHOD(reflection_function, getParameters)
@@ -3264,6 +3292,8 @@ static zend_function_entry reflection_function_functions[] = {
 	ZEND_ME(reflection_function, invoke, NULL, 0)
 	ZEND_ME(reflection_function, returnsReference, NULL, 0)
 	ZEND_ME(reflection_function, getParameters, NULL, 0)
+	ZEND_ME(reflection_function, getNumberOfParameters, NULL, 0)
+	ZEND_ME(reflection_function, getNumberOfRequiredParameters, NULL, 0)
 	{NULL, NULL, NULL}
 };
 
