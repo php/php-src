@@ -100,10 +100,10 @@ foreach ($opts as $opt) {
             $config->remove($param, 'user');
             break;
         case 'v':
-            $config->set('verbose', $verbose + 1);
+            $config->set('verbose', $config->get('verbose') + 1);
             break;
         case 'q':
-            $config->set('verbose', $verbose - 1);
+            $config->set('verbose', $config->get('verbose') - 1);
             break;
         default:
             // all non pear params goes to the command
