@@ -1,3 +1,7 @@
+2002-06-04  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * zend_ini_scanner.l: - Fix for bug #17462 (Patch by Edin Kadribasic)
+
 2002-05-31  Andi Gutmans  <andi@zend.com>
 
     * ZendTS.dsp: - Add zend_objects_API.* to dsp

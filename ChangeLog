@@ -1,3 +1,51 @@
+2002-06-04  Edin Kadribasic  <edink@proventum.net>
+
+    * win32/glob.c: Sync with openbsd glob.c 1.19
+
+    * win32/glob.c: Removed some leftover debugging code.
+
+2002-06-04  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/gd/config.m4:
+    - Fixed the include paths for the needed libraries for bundled libgd.
+    - Removed files which are not needed with libgd2 from the PHP_NEW_EXTENSION.
+
+2002-06-04  Edin Kadribasic  <edink@proventum.net>
+
+    * ext/pcntl/php_pcntl.h
+      ext/pcntl/pcntl.c: Added function pcntl_alarm().
+
+2002-06-04  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Command/Registry.php: * sort package names in "pear list"
+
+2002-06-04  Joseph Tate  <jtate@mi-corporation.com>
+
+    * ext/domxml/php_domxml.c:
+    * ext/domxml/php_domxml.c: Bug fix to #17560 submitted by Rob Richards
+
+2002-06-04  Mark L. Woodward  <mlwmohawk@mohawksoft.com>
+
+    * ext/msession/reqclient.h
+      ext/msession/msession.c:
+    Added persistent connections, and automattic reconnect on
+    lost connections. Requires Phoenix 1.0
+
+2002-06-04  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * ext/posix/posix.c: - Fix ZTS built.
+
+2002-06-04  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/gd/gd.c: MFH: fix bug #17535
+
+    * ext/gd/gd.c: Fixed bug: #17535
+
+    * NEWS: fine tuning
+
+    * ext/gd/config.m4:
+    - Made the bundled libgd actually work. Fixed bug: #17244
+
 2002-06-03  Markus Fischer  <mfischer@guru.josefine.at>
 
     * ext/posix/posix.c:
