@@ -1,3 +1,17 @@
+2004-10-16  Andi Gutmans  <andi@zend.com>
+
+    * zend_compile.c:
+      - One more test (WS)
+
+    * zend_compile.c:
+      - WS fix to test commit
+
+2004-10-16  Anantha Kesari H Y  <hyanantha@novell.com>
+
+    * zend_compile.c
+      zend_compile.c:
+      Fix for 30457
+
 2004-10-14  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_builtin_functions.c:

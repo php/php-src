@@ -1,3 +1,21 @@
+2004-10-16  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend_compile.c:
+      - One more test (WS)
+
+    * ZendEngine2/zend_compile.c:
+      - WS fix to test commit
+
+2004-10-16  Anantha Kesari H Y  <hyanantha@novell.com>
+
+    * main/main.c
+      main/main.c:
+      Fix for Bug #30397
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.c:
+      Fix for 30457
+
 2004-10-14  Ilia Alshanetsky  <ilia@prohost.org>
 
     * NEWS
