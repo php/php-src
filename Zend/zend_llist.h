@@ -55,6 +55,7 @@ ZEND_API void zend_llist_clean(zend_llist *l);
 ZEND_API void zend_llist_remove_tail(zend_llist *l);
 ZEND_API void zend_llist_copy(zend_llist *dst, zend_llist *src);
 ZEND_API void zend_llist_apply(zend_llist *l, llist_apply_func_t);
+ZEND_API void zend_llist_apply_with_del(zend_llist *l, int (*func)(void *data));
 ZEND_API void zend_llist_apply_with_argument(zend_llist *l, llist_apply_with_arg_func_t, void *arg);
 ZEND_API void zend_llist_apply_with_arguments(zend_llist *l, llist_apply_with_args_func_t func, int num_args, ...);
 ZEND_API int zend_llist_count(zend_llist *l);
