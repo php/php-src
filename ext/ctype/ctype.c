@@ -235,7 +235,7 @@ PHP_FUNCTION(ctype_print)
 /* }}} */
 
 /* {{{ proto bool ispunct(mixed c)
-    Check for any printable character which is not a space or an alphanumeric character */
+    Check for any printable character which is not whitespace or an alphanumeric character */
 PHP_FUNCTION(ctype_punct)
 {
 	PHP_EXPERIMENTAL("4.0.4dev",NULL)
