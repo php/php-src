@@ -1,3 +1,97 @@
+2004-03-02  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/mbstring/config.w32:
+      - proper DLL linkage specifier.
+      
+
+2004-03-02  Derick Rethans  <php@derickrethans.nl>
+
+    * NEWS
+      ext/gd/libgd/gd.c:
+      - Fixed bug in gdImageFilledRectangle in the bundled GD library, that
+      required
+        x1 < x2 and y1 < y2 for coordinates.
+
+    * tests/classes/bug27468.phpt:
+      - Fixed timing issues in test
+
+    * tests/classes/bug27468.phpt:
+      - Added testcase for bug #27468
+
+2004-03-02  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/mbstring/config.w32:
+      - Fix typo.
+
+2004-03-02  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/tokenizer/tokenizer.c:
+      - CLONE, not CLOSE
+
+    * ext/tokenizer/tokenizer.c:
+      - Added "clone" to the list of tokens. (Patch by Greg Beaver)
+
+2004-03-02  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h:
+      Fix zend_parse_method_parameters_ex() and make it consistant with
+      zend_parse_method_parameters().
+
+2004-03-02  Derick Rethans  <php@derickrethans.nl>
+
+    * tests/lang/bug27439.phpt:
+      - Consistent naming
+
+2004-03-02  Pierre-Alain Joye  <paj@pearfr.org>
+
+    * tests/lang/bug27439.phpt:
+      - initial test for #27439, covers more cases we got during
+        foreach($this->foo as $bar) bug
+
+2004-03-02  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/mbstring/config.w32:
+      - Really fix the build.
+
+2004-03-02  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/standard/parsedate.y:
+      - Fixed yacc file
+
+2004-03-02  Edin Kadribasic  <edink@emini.dk>
+
+    * ext/mbstring/config.w32:
+      Temporary fix for win32 build
+
+2004-03-02  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend_compile.c:
+      - Fix leaks (although there might be still a problem here).
+
+    * ZendEngine2/zend_execute.c:
+      - Fix leak (Dmitry)
+
+    * ZendEngine2/zend_compile.c:
+      - Fix crash in:
+      <?php
+        class Foo {
+          public $attributes=  array();
+      
+          function export() {
+            foreach ($this->attributes as $name => $attr) {
+            }
+          }
+        }
+      
+        $f= new Foo();
+        $f->export();
+      ?>
+
+    * ZendEngine2/zend_objects.c:
+      - Improve fix for protecting destructor's from exceptions.
+      - I was killing the current exception completely which was wrong.
+
 2004-03-01  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
 
     * ext/mbstring/config.w32:
