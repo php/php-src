@@ -307,6 +307,8 @@ static int _php_ibase_alloc_query(ibase_query *ib_query, ibase_db_link *link, /*
 	ib_query->dialect = dialect;
 	ib_query->query = estrdup(query);
 	ib_query->trans_res_id = trans_res_id;
+	ib_query->out_sqlda = NULL;
+	ib_query->in_sqlda = NULL;
 
 	if (isc_dsql_allocate_statement(IB_STATUS, &link->handle, &ib_query->stmt)) {
 		_php_ibase_error(TSRMLS_C);
@@ -989,10 +991,16 @@ static int _php_ibase_exec(INTERNAL_FUNCTION_PARAMETERS, ibase_result **ib_resul
 					i += len+3;
 				}
 			}
-			if (affected_rows > 0) {
-				ib_query->trans->affected_rows = affected_rows;
-				RETVAL_LONG(affected_rows);
-				break;
+
+			ib_query->trans->affected_rows = affected_rows;
+
+			if (!ib_query->out_sqlda) { /* no result set is being returned */
+				if (affected_rows) {
+					RETVAL_LONG(affected_rows);
+				} else {
+					/* this return value evaluates to bool(true) and to int(0) */
+					RETVAL_STRINGL("0 ",2,1);
+				}
 			}
 			
 		default:
