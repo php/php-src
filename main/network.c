@@ -22,6 +22,8 @@
 
 #include "php.h"
 
+#include <stddef.h>
+
 #ifdef PHP_WIN32
 #include <windows.h>
 #include <winsock.h>
