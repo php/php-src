@@ -572,8 +572,8 @@ static int php_mssql_get_default_link(INTERNAL_FUNCTION_PARAMETERS)
 	return MS_SQL_G(default_link);
 }
 
-/* {{{ proto int mssql_connect([string servername[, string [username[, string [password]]])
-   Establishes a connection to a mssql server. */
+/* {{{ proto int mssql_connect([string servername [, string username [, string password]]])
+   Establishes a connection to a MS-SQL server */
 PHP_FUNCTION(mssql_connect)
 {
 	php_mssql_do_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU,0);
@@ -581,8 +581,8 @@ PHP_FUNCTION(mssql_connect)
 
 /* }}} */
 
-/* {{{ proto int mssql_pconnect([string servername[, string [username[, string [password]]])
-   Establishes a persistant connection to a mssql server. */
+/* {{{ proto int mssql_pconnect([string servername [, string username [, string password]]])
+   Establishes a persistent connection to a MS-SQL server */
 PHP_FUNCTION(mssql_pconnect)
 {
 	php_mssql_do_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU,1);
@@ -590,8 +590,8 @@ PHP_FUNCTION(mssql_pconnect)
 
 /* }}} */
 
-/* {{{ proto int mssql_close([int connectionId])
-   Closes a connection to a mssql server */
+/* {{{ proto int mssql_close([int connectionid])
+   Closes a connection to a MS-SQL server */
 PHP_FUNCTION(mssql_close)
 {
 	zval **mssql_link_index=NULL;
@@ -623,8 +623,8 @@ PHP_FUNCTION(mssql_close)
 
 /* }}} */
 
-/* {{{ proto bool mssql_select_db(string database_name[, int conn_id])
-   Select a mssql database */
+/* {{{ proto bool mssql_select_db(string database_name [, int conn_id])
+   Select a MS-SQL database */
 PHP_FUNCTION(mssql_select_db)
 {
 	zval **db, **mssql_link_index;
@@ -748,8 +748,8 @@ static void php_mssql_get_column_content_without_type(mssql_link *mssql_ptr,int 
 	}
 }
 
-/* {{{ proto int mssql_query(string query[, int conn_id])
-   Perform an SQL query on a MSSQL server database */
+/* {{{ proto int mssql_query(string query [, int conn_id])
+   Perform an SQL query on a MS-SQL server database */
 PHP_FUNCTION(mssql_query)
 {
 	zval **query, **mssql_link_index;
@@ -888,7 +888,7 @@ PHP_FUNCTION(mssql_query)
 /* }}} */
 
 /* {{{ proto int mssql_free_result(string result_index)
-   Free a MSSQL result index */
+   Free a MS-SQL result index */
 PHP_FUNCTION(mssql_free_result)
 {
 	zval **mssql_result_index;
@@ -907,8 +907,8 @@ PHP_FUNCTION(mssql_free_result)
 
 /* }}} */
 
-/* {{{ proto string mssql_get_last_message()
-   Gets the last message from the MSSQL server */
+/* {{{ proto string mssql_get_last_message(void)
+   Gets the last message from the MS-SQL server */
 PHP_FUNCTION(mssql_get_last_message)
 {
 	MSSQLLS_FETCH();
@@ -961,8 +961,7 @@ PHP_FUNCTION(mssql_num_fields)
 /* }}} */
 
 /* {{{ proto array mssql_fetch_row(int result_id)
-   Returns an array of the current row in the result set specified by
-   result_id */
+   Returns an array of the current row in the result set specified by result_id */
 PHP_FUNCTION(mssql_fetch_row)
 {
 	zval **mssql_result_index;
@@ -1032,8 +1031,7 @@ static void php_mssql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS)
 }
 
 /* {{{ object mssql_fetch_object(int result_id)
-   Returns a psuedo-object of the current row in the result set specified by
-   result_id */
+   Returns a psuedo-object of the current row in the result set specified by result_id */
 PHP_FUNCTION(mssql_fetch_object)
 {
 	php_mssql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU);
@@ -1045,8 +1043,7 @@ PHP_FUNCTION(mssql_fetch_object)
 /* }}} */
 
 /* {{{ array mssql_fetch_array(int result_id)
-   Returns an associative array of the current row in the result set specified by
-   result_id */
+   Returns an associative array of the current row in the result set specified by result_id */
 PHP_FUNCTION(mssql_fetch_array)
 {
 	php_mssql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU);
@@ -1056,8 +1053,7 @@ PHP_FUNCTION(mssql_fetch_array)
 
 
 /* {{{ proto int mssql_data_seek(int result_id, int offset)
-   Mssql_data_seek() moves the internal row pointer of the MS SQL result associated
-   with the specified result identifier to pointer to the specifyed row number. */
+   Moves the internal row pointer of the MS-SQL result associated with the specified result identifier to pointer to the specified row number */
 PHP_FUNCTION(mssql_data_seek)
 {
 	zval **mssql_result_index, **offset;
@@ -1141,7 +1137,7 @@ static char *php_mssql_get_field_name(int type)
 	}
 }
 
-/* {{{ proto object mssql_fetch_field(int result_id[, int offset])
+/* {{{ proto object mssql_fetch_field(int result_id [, int offset])
    Gets information about certain fields in a query result */
 PHP_FUNCTION(mssql_fetch_field)
 {
@@ -1203,9 +1199,8 @@ PHP_FUNCTION(mssql_fetch_field)
 
 /* }}} */
 
-/* {{{ proto int mssql_field_length(int result_id[, int offset])
-   Gets the length of a mssql field with offset, offset and a result set specified
-   by result_id */
+/* {{{ proto int mssql_field_length(int result_id [, int offset])
+   Get the length of a MS-SQL field */
 PHP_FUNCTION(mssql_field_length)
 {
 	zval **mssql_result_index, **offset;
@@ -1260,9 +1255,8 @@ PHP_FUNCTION(mssql_field_length)
 
 /* }}} */
 
-/* {{{ proto string mssql_field_name(int result_id[, int offset])
-   Returns the name of the field given by offset in the result set given by
-   result_id */
+/* {{{ proto string mssql_field_name(int result_id [, int offset])
+   Returns the name of the field given by offset in the result set given by result_id */
 PHP_FUNCTION(mssql_field_name)
 {
 	zval **mssql_result_index, **offset;
@@ -1318,8 +1312,8 @@ PHP_FUNCTION(mssql_field_name)
 
 /* }}} */
 
-/* {{{ proto string mssql_field_type(int result_id[, int offset])
-   Returns the type of field at offset, offset in the result set result_id */
+/* {{{ proto string mssql_field_type(int result_id [, int offset])
+   Returns the type of a field */
 PHP_FUNCTION(mssql_field_type)
 {
 	zval **mssql_result_index, **offset;
@@ -1375,7 +1369,7 @@ PHP_FUNCTION(mssql_field_type)
 
 /* }}} */
 
-/* {{{ proto mssql_field_seek(int result_id[, int offset])
+/* {{{ proto bool mssql_field_seek(int result_id, int offset)
    Seeks to the specified field offset */
 PHP_FUNCTION(mssql_field_seek)
 {
@@ -1413,7 +1407,7 @@ PHP_FUNCTION(mssql_field_seek)
 /* }}} */
 
 /* {{{ proto string mssql_result(int result_id, int row, mixed field)
-   Mssql_result() returns the contents of one cell from a MS SQL result set. */
+   Returns the contents of one cell from a MS-SQL result set */
 PHP_FUNCTION(mssql_result)
 {
 	zval **row, **field, **mssql_result_index;
@@ -1474,7 +1468,7 @@ PHP_FUNCTION(mssql_result)
 /* }}} */
 
 /* {{{ proto void mssql_min_error_severity(int severity)
-   Set the minimum error severity */
+   Sets the lower error severity */
 PHP_FUNCTION(mssql_min_error_severity)
 {
 	zval **severity;
@@ -1491,7 +1485,7 @@ PHP_FUNCTION(mssql_min_error_severity)
 /* }}} */
 
 /* {{{ proto void mssql_min_message_severity(int severity)
-   Set the minimum message severity */
+   Sets the lower message severity */
 PHP_FUNCTION(mssql_min_message_severity)
 {
 	zval **severity;
