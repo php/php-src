@@ -189,7 +189,7 @@ static PHP_INI_MH(odbc_param_int)
 	long *p;
 	ODBC_TLS_VARS;
 
-	p = (long *) (globals + (size_t)mh_arg);
+	p = (long *) (globals + (size_t)mh_arg1);
 	*p = atoi(new_value);
 
 	return SUCCESS;	
@@ -201,7 +201,7 @@ static PHP_INI_MH(odbc_param_str)
 	char **p;
 	ODBC_TLS_VARS;
 
-	p = (char **) (globals + (size_t)mh_arg);
+	p = (char **) (globals + (size_t)mh_arg1);
 	*p = new_value;
 
 	return SUCCESS;
@@ -209,14 +209,14 @@ static PHP_INI_MH(odbc_param_str)
 
 
 PHP_INI_BEGIN()
-	PHP_INI_ENTRY("odbc.allow_persistent", "1", PHP_INI_SYSTEM, odbc_param_int, (void *)XtOffsetOf(php_odbc_globals, allow_persistent))
-	PHP_INI_ENTRY("odbc.max_persistent",  "-1", PHP_INI_SYSTEM, odbc_param_int, (void *)XtOffsetOf(php_odbc_globals, max_persistent))
-	PHP_INI_ENTRY("odbc.max_links",       "-1", PHP_INI_SYSTEM, odbc_param_int, (void *)XtOffsetOf(php_odbc_globals, max_links))
-	PHP_INI_ENTRY("odbc.default_db",      NULL, PHP_INI_ALL,    odbc_param_str, (void *)XtOffsetOf(php_odbc_globals, defDB))
-	PHP_INI_ENTRY("odbc.default_user",    NULL, PHP_INI_ALL,    odbc_param_str, (void *)XtOffsetOf(php_odbc_globals, defUser))
-	PHP_INI_ENTRY("odbc.default_pw",      NULL, PHP_INI_ALL,    odbc_param_str, (void *)XtOffsetOf(php_odbc_globals, defPW))
-	PHP_INI_ENTRY("odbc.defaultlrl",    "4096", PHP_INI_ALL,    odbc_param_int, (void *)XtOffsetOf(php_odbc_globals, defaultlrl))
-	PHP_INI_ENTRY("odbc.defaultbinmode",   "1", PHP_INI_ALL,    odbc_param_str, (void *)XtOffsetOf(php_odbc_globals, defPW))
+	PHP_INI_ENTRY1("odbc.allow_persistent", "1", PHP_INI_SYSTEM, odbc_param_int, (void *)XtOffsetOf(php_odbc_globals, allow_persistent))
+	PHP_INI_ENTRY1("odbc.max_persistent",  "-1", PHP_INI_SYSTEM, odbc_param_int, (void *)XtOffsetOf(php_odbc_globals, max_persistent))
+	PHP_INI_ENTRY1("odbc.max_links",       "-1", PHP_INI_SYSTEM, odbc_param_int, (void *)XtOffsetOf(php_odbc_globals, max_links))
+	PHP_INI_ENTRY1("odbc.default_db",      NULL, PHP_INI_ALL,    odbc_param_str, (void *)XtOffsetOf(php_odbc_globals, defDB))
+	PHP_INI_ENTRY1("odbc.default_user",    NULL, PHP_INI_ALL,    odbc_param_str, (void *)XtOffsetOf(php_odbc_globals, defUser))
+	PHP_INI_ENTRY1("odbc.default_pw",      NULL, PHP_INI_ALL,    odbc_param_str, (void *)XtOffsetOf(php_odbc_globals, defPW))
+	PHP_INI_ENTRY1("odbc.defaultlrl",    "4096", PHP_INI_ALL,    odbc_param_int, (void *)XtOffsetOf(php_odbc_globals, defaultlrl))
+	PHP_INI_ENTRY1("odbc.defaultbinmode",   "1", PHP_INI_ALL,    odbc_param_str, (void *)XtOffsetOf(php_odbc_globals, defPW))
 PHP_INI_END()
 
 

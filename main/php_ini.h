@@ -10,7 +10,7 @@
 
 typedef struct _php_ini_entry php_ini_entry;
 
-#define PHP_INI_MH(name) int name(php_ini_entry *entry, char *new_value, uint new_value_length, void *mh_arg)
+#define PHP_INI_MH(name) int name(php_ini_entry *entry, char *new_value, uint new_value_length, void *mh_arg1, void *mh_arg2, void *mh_arg3)
 
 struct _php_ini_entry {
 	int module_number;
@@ -18,7 +18,9 @@ struct _php_ini_entry {
 	char *name;
 	uint name_length;
 	PHP_INI_MH((*on_modify));
-	void *mh_arg;
+	void *mh_arg1;
+	void *mh_arg2;
+	void *mh_arg3;
 
 	char *value;
 	uint value_length;
@@ -44,8 +46,17 @@ char *php_ini_string(char *name, uint name_length, int orig);
 
 #define PHP_INI_BEGIN()								static php_ini_entry ini_entries[] = {
 
-#define PHP_INI_ENTRY(name, default_value, modifyable, on_modify, ptr) \
-	{ 0, modifyable, name, sizeof(name), on_modify, ptr, default_value, sizeof(default_value)-1, NULL, 0, 0 },
+#define PHP_INI_ENTRY3(name, default_value, modifyable, on_modify, arg1, arg2, arg3) \
+	{ 0, modifyable, name, sizeof(name), on_modify, arg1, arg2, arg3, default_value, sizeof(default_value)-1, NULL, 0, 0 },
+
+#define PHP_INI_ENTRY2(name, default_value, modifyable, on_modify, arg1, arg2) \
+	PHP_INI_ENTRY3(name, default_value, modifyable, on_modify, arg1, arg2, NULL)
+
+#define PHP_INI_ENTRY1(name, default_value, modifyable, on_modify, arg1) \
+	PHP_INI_ENTRY3(name, default_value, modifyable, on_modify, arg1, NULL, NULL)
+	
+#define PHP_INI_ENTRY(name, default_value, modifyable, on_modify) \
+	PHP_INI_ENTRY3(name, default_value, modifyable, on_modify, NULL, NULL, NULL)
 
 #define PHP_INI_END() \
 	{ 0, 0, NULL, 0, NULL, NULL, NULL, 0, NULL, 0, 0 } };
