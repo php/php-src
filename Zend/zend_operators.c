@@ -1088,6 +1088,12 @@ ZEND_API int concat_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 	zend_make_printable_zval(op2, &op2_copy, &use_copy2);
 
 	if (use_copy1) {
+		/* We have created a converted copy of op1. Therefore, op1 won't become the result so
+		 * we have to free it.
+		 */
+		if (result == op1) {
+			zval_dtor(op1);
+		}
 		op1 = &op1_copy;
 	}
 	if (use_copy2) {
