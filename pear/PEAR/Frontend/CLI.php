@@ -355,6 +355,18 @@ class PEAR_Frontend_CLI extends PEAR
     {
         switch ($command)
         {
+            case 'search':
+                $this->_startTable($data);
+                if (isset($data['headline']) && is_array($data['headline']))
+                    $this->_tableRow($data['headline'], array('bold' => true), array(1 => array('wrap' => 55)));
+                
+                foreach($data['data'] as $category) {
+                    foreach($category as $pkg) {
+                        $this->_tableRow($pkg, null, array(1 => array('wrap' => 55)));
+                    }
+                };
+                $this->_endTable();
+                break;
             case 'list-all':
                 $this->_startTable($data);
                 if (isset($data['headline']) && is_array($data['headline']))
