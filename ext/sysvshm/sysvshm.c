@@ -54,6 +54,7 @@ zend_module_entry sysvshm_module_entry = {
 zend_module_entry *get_module() { return &sysvshm_module_entry; }
 #endif
 
+#undef shm_ptr					/* undefine AIX-specific macro */
 
 THREAD_LS sysvshm_module php_sysvshm;
 
