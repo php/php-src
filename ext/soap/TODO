@@ -52,20 +52,16 @@ Encoding
 
 WSDL
 ----
-- support for portType operation parameterOrder attribute
-- support for binding operation input/output name attribute (part of overloading)
-- support for <opperation> <fault>
 ? server part support for "document" style encoding
-- function/method overloading/redeclaration (test(int); test(string))
-+ wsdl caching
-- wsdl auto generation
-? SOAP binding
-  - <soap:body> parts attribute
-  - <soap:fault>
-  - <soap:headerfault>
-- HTTP GET/POST binding
+- <soap:body> parts attribute (with MIME/DIME binding)
 - MIME binding
-- SOAP 1.2 bindings???
+- DIME binding
+- support for portType/operation parameterOrder attribute
+- support for <fault>, <soap:fault>, <soap:headerfault>
+- support for binding operation input/output name attribute (part of overloading)
+- function/method overloading/redeclaration (test(int); test(string))
+- wsdl auto generation
+- HTTP GET/POST binding
 
 Schema
 ------

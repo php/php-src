@@ -149,6 +149,21 @@ sdlBindingPtr get_binding_from_name(sdlPtr sdl, char *name, char *ns)
 	return binding;
 }
 
+static int is_wsdl_element(xmlNodePtr node)
+{
+	if (node->ns && strcmp(node->ns->href,WSDL_NAMESPACE) != 0) {
+		xmlAttrPtr attr;
+		if ((attr = get_attribute_ex(node->properties, "required", WSDL_NAMESPACE)) != NULL &&
+		     attr->children && attr->children->content &&
+		     (strcmp(attr->children->content,"1") == 0 ||
+		      strcmp(attr->children->content,"true") == 0)) {
+			php_error(E_ERROR, "SOAP-ERROR: Parsing WSDL: Unknown required WSDL extension '%s'", node->ns->href);
+		}
+		return 0;
+	}
+	return 1;
+}
+
 static void load_wsdl_ex(char *struri, sdlCtx *ctx, int include)
 {
 	sdlPtr tmpsdl = ctx->sdl;
@@ -169,10 +184,10 @@ static void load_wsdl_ex(char *struri, sdlCtx *ctx, int include)
 	zend_hash_add(&ctx->docs, struri, strlen(struri)+1, (void**)&wsdl, sizeof(xmlDocPtr), NULL);
 
 	root = wsdl->children;
-	definitions = get_node(root, "definitions");
+	definitions = get_node_ex(root, "definitions", WSDL_NAMESPACE);
 	if (!definitions) {
 		if (include) {
-			xmlNodePtr schema = get_node(root, "schema");
+			xmlNodePtr schema = get_node_ex(root, "schema", XSD_NAMESPACE);
 			if (schema) {
 				load_schema(ctx, schema);
 				return;
@@ -190,16 +205,22 @@ static void load_wsdl_ex(char *struri, sdlCtx *ctx, int include)
 
 	trav = definitions->children;
 	while (trav != NULL) {
+		if (!is_wsdl_element(trav)) {
+			trav = trav->next;
+			continue;
+		}
 		if (node_is_equal(trav,"types")) {
 			/* TODO: Only one "types" is allowed */
 			xmlNodePtr trav2 = trav->children;
-			xmlNodePtr schema;
 
-			FOREACHNODE(trav2, "schema", schema) {
-				load_schema(ctx, schema);
+			while (trav2 != NULL) {
+				if (node_is_equal_ex(trav2, "schema", XSD_NAMESPACE)) {
+					load_schema(ctx, trav2);
+				} else if (is_wsdl_element(trav2) && !node_is_equal(trav2,"documentation")) {
+					php_error(E_ERROR,"SOAP-ERROR: Parsing WSDL: Unexpected WSDL element <%s>",trav2->name);
+				}
+				trav2 = trav2->next;
 			}
-			ENDFOREACH(trav2);
-
 		} else if (node_is_equal(trav,"import")) {
 			/* TODO: namespace ??? */
 			xmlAttrPtr tmp = get_attribute(trav->properties, "location");
@@ -256,142 +277,147 @@ static void load_wsdl_ex(char *struri, sdlCtx *ctx, int include)
 			} else {
 				php_error(E_ERROR,"SOAP-ERROR: Parsing WSDL: <service> hasn't name attribute");
 			}
+		} else if (!node_is_equal(trav,"documentation")) {
+			php_error(E_ERROR,"SOAP-ERROR: Parsing WSDL: Unexpected WSDL element <%s>",trav->name);
 		}
 		trav = trav->next;
 	}
 }
 
-static void wsdl_soap_binding_body(sdlCtx* ctx, xmlNodePtr node, char* wsdl_soap_namespace, sdlSoapBindingFunctionBody *binding)
+static void wsdl_soap_binding_body(sdlCtx* ctx, xmlNodePtr node, char* wsdl_soap_namespace, sdlSoapBindingFunctionBody *binding, HashTable* params)
 {
 	xmlNodePtr body, trav, header;
 	xmlAttrPtr tmp;
 
-	body = get_node_ex(node->children, "body", wsdl_soap_namespace);
-	if (body) {
-		tmp = get_attribute(body->properties, "use");
-		if (tmp && !strncmp(tmp->children->content, "literal", sizeof("literal"))) {
-			binding->use = SOAP_LITERAL;
-		} else {
-			binding->use = SOAP_ENCODED;
-		}
-
-		tmp = get_attribute(body->properties, "namespace");
-		if (tmp) {
-			binding->ns = sdl_strdup(tmp->children->content);
-		}
-
-		tmp = get_attribute(body->properties, "parts");
-		if (tmp) {
-			binding->parts = sdl_strdup(tmp->children->content);
-		}
-
-		if (binding->use == SOAP_ENCODED) {
-			tmp = get_attribute(body->properties, "encodingStyle");
-			if (tmp &&
-			    strncmp(tmp->children->content,SOAP_1_1_ENC_NAMESPACE,sizeof(SOAP_1_1_ENC_NAMESPACE)) != 0 &&
-		  	  strncmp(tmp->children->content,SOAP_1_2_ENC_NAMESPACE,sizeof(SOAP_1_2_ENC_NAMESPACE)) != 0) {
-				php_error(E_ERROR, "SOAP-ERROR: Parsing WSDL: Unknown encodingStyle '%s'",tmp->children->content);
-			} else if (tmp == NULL) {
-				php_error(E_ERROR, "SOAP-ERROR: Parsing WSDL: Unspecified encodingStyle");
-			} else {
-				binding->encodingStyle = sdl_strdup(tmp->children->content);
-			}
-		}
-	}
-
-	/* Process <soap:header> elements */
 	trav = node->children;
-	FOREACHNODEEX(trav, "header", wsdl_soap_namespace, header) {
-		xmlAttrPtr tmp;
-		xmlNodePtr *message, part;
-		char *ctype;
-		sdlSoapBindingFunctionHeaderPtr h;
-		smart_str key = {0};
+	while (trav != NULL) {
+		if (node_is_equal_ex(trav, "body", wsdl_soap_namespace)) {
+			body = trav;
 
-		tmp = get_attribute(header->properties, "message");
-		if (!tmp) {
-			php_error(E_ERROR, "SOAP-ERROR: Parsing WSDL: Missing message attribute for <header>");
-		}
+			tmp = get_attribute(body->properties, "use");
+			if (tmp && !strncmp(tmp->children->content, "literal", sizeof("literal"))) {
+				binding->use = SOAP_LITERAL;
+			} else {
+				binding->use = SOAP_ENCODED;
+			}
 
-		ctype = strrchr(tmp->children->content,':');
-		if (ctype == NULL) {
-			ctype = tmp->children->content;
-		} else {
-		  ++ctype;
-		}
-		if (zend_hash_find(&ctx->messages, ctype, strlen(ctype)+1, (void**)&message) != SUCCESS) {
-			php_error(E_ERROR, "SOAP-ERROR: Parsing WSDL: Missing <message> with name '%s'", tmp->children->content);
-		}
+			tmp = get_attribute(body->properties, "namespace");
+			if (tmp) {
+				binding->ns = sdl_strdup(tmp->children->content);
+			}
 
-		tmp = get_attribute(header->properties, "part");
-		if (!tmp) {
-			php_error(E_ERROR, "SOAP-ERROR: Parsing WSDL: Missing part attribute for <header>");
-		}
-		part = get_node_with_attribute((*message)->children, "part", "name", tmp->children->content);
-		if (!part) {
-			php_error(E_ERROR, "SOAP-ERROR: Parsing WSDL: Missing part '%s' in <message>",tmp->children->content);
-		}
+			tmp = get_attribute(body->properties, "parts");
+			if (tmp) {
+				whiteSpace_collapse(tmp->children->content);
+				binding->parts = sdl_strdup(tmp->children->content);
+			}
 
-		h = sdl_malloc(sizeof(sdlSoapBindingFunctionHeader));
-		memset(h, 0, sizeof(sdlSoapBindingFunctionHeader));
-		h->name = sdl_strdup(tmp->children->content);
-
-		tmp = get_attribute(part->properties, "type");
-		if (tmp != NULL) {
-			h->encode = get_encoder_from_prefix(ctx->sdl, part, tmp->children->content);
-		} else {
-			tmp = get_attribute(part->properties, "element");
-			if (tmp != NULL) {
-				h->element = get_element(ctx->sdl, part, tmp->children->content);
-				if (h->element) {
-					h->encode = h->element->encode;
+			if (binding->use == SOAP_ENCODED) {
+				tmp = get_attribute(body->properties, "encodingStyle");
+				if (tmp &&
+				    strncmp(tmp->children->content,SOAP_1_1_ENC_NAMESPACE,sizeof(SOAP_1_1_ENC_NAMESPACE)) != 0 &&
+			  	  strncmp(tmp->children->content,SOAP_1_2_ENC_NAMESPACE,sizeof(SOAP_1_2_ENC_NAMESPACE)) != 0) {
+					php_error(E_ERROR, "SOAP-ERROR: Parsing WSDL: Unknown encodingStyle '%s'",tmp->children->content);
+				} else if (tmp == NULL) {
+					php_error(E_ERROR, "SOAP-ERROR: Parsing WSDL: Unspecified encodingStyle");
+				} else {
+					binding->encodingStyle = sdl_strdup(tmp->children->content);
 				}
 			}
-		}
+		} else if (node_is_equal_ex(trav, "header", wsdl_soap_namespace)) {
+			xmlAttrPtr tmp;
+			xmlNodePtr *message, part;
+			char *ctype;
+			sdlSoapBindingFunctionHeaderPtr h;
+			smart_str key = {0};
 
-		tmp = get_attribute(header->properties, "use");
-		if (tmp && !strncmp(tmp->children->content, "encoded", sizeof("encoded"))) {
-			h->use = SOAP_ENCODED;
-		} else {
-			h->use = SOAP_LITERAL;
-		}
-
-		tmp = get_attribute(header->properties, "namespace");
-		if (tmp) {
-			h->ns = sdl_strdup(tmp->children->content);
-		}
-
-		if (h->use == SOAP_ENCODED) {
-			tmp = get_attribute(header->properties, "encodingStyle");
-			if (tmp &&
-			    strncmp(tmp->children->content,SOAP_1_1_ENC_NAMESPACE,sizeof(SOAP_1_1_ENC_NAMESPACE)) != 0 &&
-			    strncmp(tmp->children->content,SOAP_1_2_ENC_NAMESPACE,sizeof(SOAP_1_2_ENC_NAMESPACE)) != 0) {
-				php_error(E_ERROR, "SOAP-ERROR: Parsing WSDL: Unknown encodingStyle '%s'",tmp->children->content);
-			} else if (tmp == NULL) {
-				php_error(E_ERROR, "SOAP-ERROR: Parsing WSDL: Unspecified encodingStyle");
-			} else {
-				h->encodingStyle = sdl_strdup(tmp->children->content);
+			header = trav;
+			tmp = get_attribute(header->properties, "message");
+			if (!tmp) {
+				php_error(E_ERROR, "SOAP-ERROR: Parsing WSDL: Missing message attribute for <header>");
 			}
-		}
 
-		if (binding->headers == NULL) {
-			binding->headers = sdl_malloc(sizeof(HashTable));
-			zend_hash_init(binding->headers, 0, NULL, delete_header, SDL_PERSISTENT);
-		}
+			ctype = strrchr(tmp->children->content,':');
+			if (ctype == NULL) {
+				ctype = tmp->children->content;
+			} else {
+			  ++ctype;
+			}
+			if (zend_hash_find(&ctx->messages, ctype, strlen(ctype)+1, (void**)&message) != SUCCESS) {
+				php_error(E_ERROR, "SOAP-ERROR: Parsing WSDL: Missing <message> with name '%s'", tmp->children->content);
+			}
 
-		if (h->ns) {
-			smart_str_appends(&key,h->ns);
-			smart_str_appendc(&key,':');
-		}
-		smart_str_appends(&key,h->name);
-		smart_str_0(&key);
-		if (zend_hash_add(binding->headers, key.c, key.len+1, (void**)&h, sizeof(sdlSoapBindingFunctionHeaderPtr), NULL) != SUCCESS) {
-			delete_header((void**)&h);
-		}
-		smart_str_free(&key);
+			tmp = get_attribute(header->properties, "part");
+			if (!tmp) {
+				php_error(E_ERROR, "SOAP-ERROR: Parsing WSDL: Missing part attribute for <header>");
+			}
+			part = get_node_with_attribute_ex((*message)->children, "part", WSDL_NAMESPACE, "name", tmp->children->content, NULL);
+			if (!part) {
+				php_error(E_ERROR, "SOAP-ERROR: Parsing WSDL: Missing part '%s' in <message>",tmp->children->content);
+			}
 
+			h = sdl_malloc(sizeof(sdlSoapBindingFunctionHeader));
+			memset(h, 0, sizeof(sdlSoapBindingFunctionHeader));
+			h->name = sdl_strdup(tmp->children->content);
+
+			tmp = get_attribute(part->properties, "type");
+			if (tmp != NULL) {
+				h->encode = get_encoder_from_prefix(ctx->sdl, part, tmp->children->content);
+			} else {
+				tmp = get_attribute(part->properties, "element");
+				if (tmp != NULL) {
+					h->element = get_element(ctx->sdl, part, tmp->children->content);
+					if (h->element) {
+						h->encode = h->element->encode;
+					}
+				}
+			}
+
+			tmp = get_attribute(header->properties, "use");
+			if (tmp && !strncmp(tmp->children->content, "encoded", sizeof("encoded"))) {
+				h->use = SOAP_ENCODED;
+			} else {
+				h->use = SOAP_LITERAL;
+			}
+
+			tmp = get_attribute(header->properties, "namespace");
+			if (tmp) {
+				h->ns = sdl_strdup(tmp->children->content);
+			}
+
+			if (h->use == SOAP_ENCODED) {
+				tmp = get_attribute(header->properties, "encodingStyle");
+				if (tmp &&
+				    strncmp(tmp->children->content,SOAP_1_1_ENC_NAMESPACE,sizeof(SOAP_1_1_ENC_NAMESPACE)) != 0 &&
+				    strncmp(tmp->children->content,SOAP_1_2_ENC_NAMESPACE,sizeof(SOAP_1_2_ENC_NAMESPACE)) != 0) {
+					php_error(E_ERROR, "SOAP-ERROR: Parsing WSDL: Unknown encodingStyle '%s'",tmp->children->content);
+				} else if (tmp == NULL) {
+					php_error(E_ERROR, "SOAP-ERROR: Parsing WSDL: Unspecified encodingStyle");
+				} else {
+					h->encodingStyle = sdl_strdup(tmp->children->content);
+				}
+			}
+
+			if (binding->headers == NULL) {
+				binding->headers = sdl_malloc(sizeof(HashTable));
+				zend_hash_init(binding->headers, 0, NULL, delete_header, SDL_PERSISTENT);
+			}
+
+			if (h->ns) {
+				smart_str_appends(&key,h->ns);
+				smart_str_appendc(&key,':');
+			}
+			smart_str_appends(&key,h->name);
+			smart_str_0(&key);
+			if (zend_hash_add(binding->headers, key.c, key.len+1, (void**)&h, sizeof(sdlSoapBindingFunctionHeaderPtr), NULL) != SUCCESS) {
+				delete_header((void**)&h);
+			}
+			smart_str_free(&key);
+		} else if (is_wsdl_element(trav) && !node_is_equal(trav,"documentation")) {
+			php_error(E_ERROR,"SOAP-ERROR: Parsing WSDL: Unexpected WSDL element <%s>",trav->name);
+		}
+		trav = trav->next;
 	}
-	ENDFOREACH(trav);
 }
 
 static HashTable* wsdl_message(sdlCtx *ctx, char* message_name)
@@ -415,10 +441,21 @@ static HashTable* wsdl_message(sdlCtx *ctx, char* message_name)
 	zend_hash_init(parameters, 0, NULL, delete_parameter, SDL_PERSISTENT);
 
 	trav = message->children;
-	FOREACHNODE(trav, "part", part) {
+	while (trav != NULL) {
 		xmlAttrPtr element, type, name;
 		sdlParamPtr param;
 
+		if (trav->ns != NULL && strcmp(trav->ns->href,WSDL_NAMESPACE) != 0) {
+			php_error(E_ERROR,"SOAP-ERROR: Parsing WSDL: Unexpected extensibility element <%s>",trav->name);
+		}
+		if (node_is_equal(trav,"documentation")) {
+			trav = trav->next;
+			continue;
+		}
+		if (!node_is_equal(trav,"part")) {
+			php_error(E_ERROR,"SOAP-ERROR: Parsing WSDL: Unexpected WSDL element <%s>",trav->name);
+		}
+		part = trav;
 		param = sdl_malloc(sizeof(sdlParam));
 		memset(param,0,sizeof(sdlParam));
 		param->order = 0;
@@ -444,8 +481,9 @@ static HashTable* wsdl_message(sdlCtx *ctx, char* message_name)
 		}
 
 		zend_hash_next_index_insert(parameters, &param, sizeof(sdlParamPtr), NULL);
+
+		trav = trav->next;
 	}
-	ENDFOREACH(trav);
 	return parameters;
 }
 
@@ -480,13 +518,23 @@ static sdlPtr load_wsdl(char *struri)
 			service = *tmp;
 
 			trav = service->children;
-			FOREACHNODE(trav, "port", port) {
+			while (trav != NULL) {
 				xmlAttrPtr type, name, bindingAttr, location;
 				xmlNodePtr portType, operation;
 				xmlNodePtr address, binding, trav2;
 				char *ctype;
 				sdlBindingPtr tmpbinding;
 				char *wsdl_soap_namespace = NULL;
+
+				if (!is_wsdl_element(trav) || node_is_equal(trav,"documentation")) {
+					trav = trav->next;
+					continue;
+				}
+				if (!node_is_equal(trav,"port")) {
+					php_error(E_ERROR,"SOAP-ERROR: Parsing WSDL: Unexpected WSDL element <%s>",trav->name);
+				}
+
+				port = trav;
 
 				tmpbinding = sdl_malloc(sizeof(sdlBinding));
 				memset(tmpbinding, 0, sizeof(sdlBinding));
@@ -497,7 +545,35 @@ static sdlPtr load_wsdl(char *struri)
 				}
 
 				/* find address and figure out binding type */
-				address = get_node(port->children, "address");
+				address = NULL;
+				trav2 = port->children;
+				while (trav2 != NULL) {
+					if (node_is_equal(trav2,"address") && trav2->ns) {
+						if (!strncmp(trav2->ns->href, WSDL_SOAP11_NAMESPACE, sizeof(WSDL_SOAP11_NAMESPACE))) {
+							address = trav2;
+							wsdl_soap_namespace = WSDL_SOAP11_NAMESPACE;
+							tmpbinding->bindingType = BINDING_SOAP;
+						} else if (!strncmp(trav2->ns->href, WSDL_SOAP12_NAMESPACE, sizeof(WSDL_SOAP12_NAMESPACE))) {
+							address = trav2;
+							wsdl_soap_namespace = WSDL_SOAP12_NAMESPACE;
+							tmpbinding->bindingType = BINDING_SOAP;
+						} else if (!strncmp(trav2->ns->href, RPC_SOAP12_NAMESPACE, sizeof(RPC_SOAP12_NAMESPACE))) {
+							address = trav2;
+							wsdl_soap_namespace = RPC_SOAP12_NAMESPACE;
+							tmpbinding->bindingType = BINDING_SOAP;
+						} else if (!strncmp(trav2->ns->href, WSDL_HTTP11_NAMESPACE, sizeof(WSDL_HTTP11_NAMESPACE))) {
+							address = trav2;
+							tmpbinding->bindingType = BINDING_HTTP;
+						} else if (!strncmp(trav2->ns->href, WSDL_HTTP12_NAMESPACE, sizeof(WSDL_HTTP12_NAMESPACE))) {
+							address = trav2;
+							tmpbinding->bindingType = BINDING_HTTP;
+						}
+					}
+					if (trav2 != address && is_wsdl_element(trav2) && !node_is_equal(trav2,"documentation")) {
+						php_error(E_ERROR,"SOAP-ERROR: Parsing WSDL: Unexpected WSDL element <%s>",trav2->name);
+					}
+				  trav2 = trav2->next;
+				}
 				if (!address) {
 					php_error(E_ERROR, "SOAP-ERROR: Parsing WSDL: No address associated with <port>");
 				}
@@ -508,27 +584,6 @@ static sdlPtr load_wsdl(char *struri)
 				}
 
 				tmpbinding->location = sdl_strdup(location->children->content);
-
-				if (address->ns) {
-					if (!strncmp(address->ns->href, WSDL_SOAP11_NAMESPACE, sizeof(WSDL_SOAP11_NAMESPACE))) {
-						wsdl_soap_namespace = WSDL_SOAP11_NAMESPACE;
-						tmpbinding->bindingType = BINDING_SOAP;
-					} else if (!strncmp(address->ns->href, WSDL_SOAP12_NAMESPACE, sizeof(WSDL_SOAP12_NAMESPACE))) {
-						wsdl_soap_namespace = WSDL_SOAP12_NAMESPACE;
-						tmpbinding->bindingType = BINDING_SOAP;
-					} else if (!strncmp(address->ns->href, RPC_SOAP12_NAMESPACE, sizeof(RPC_SOAP12_NAMESPACE))) {
-						wsdl_soap_namespace = RPC_SOAP12_NAMESPACE;
-						tmpbinding->bindingType = BINDING_SOAP;
-					} else if (!strncmp(address->ns->href, WSDL_HTTP11_NAMESPACE, sizeof(WSDL_HTTP11_NAMESPACE))) {
-						tmpbinding->bindingType = BINDING_HTTP;
-					} else if (!strncmp(address->ns->href, WSDL_HTTP12_NAMESPACE, sizeof(WSDL_HTTP12_NAMESPACE))) {
-						tmpbinding->bindingType = BINDING_HTTP;
-					} else {
-						php_error(E_ERROR, "SOAP-ERROR: Parsing WSDL: PHP-SOAP doesn't support binding '%s'",address->ns->href);
-					}
-				} else {
-					php_error(E_ERROR, "SOAP-ERROR: Parsing WSDL: Unknown binding type");
-				}
 
 				ctype = strrchr(bindingAttr->children->content,':');
 				if (ctype == NULL) {
@@ -591,17 +646,44 @@ static sdlPtr load_wsdl(char *struri)
 				portType = *tmp;
 
 				trav2 = binding->children;
-				FOREACHNODE(trav2, "operation", operation) {
+				while (trav2 != NULL) {
 					sdlFunctionPtr function;
-					xmlNodePtr input, output, fault, portTypeOperation;
+					xmlNodePtr input, output, fault, portTypeOperation, trav3;
 					xmlAttrPtr op_name, paramOrder;
+
+					if ((tmpbinding->bindingType == BINDING_SOAP &&
+					    node_is_equal_ex(trav2, "binding", wsdl_soap_namespace)) ||
+					    !is_wsdl_element(trav2) ||
+					    node_is_equal(trav2,"documentation")) {
+						trav2 = trav2->next;
+						continue;
+					}
+					if (!node_is_equal(trav2,"operation")) {
+						php_error(E_ERROR,"SOAP-ERROR: Parsing WSDL: Unexpected WSDL element <%s>",trav2->name);
+					}
+
+					operation = trav2;
 
 					op_name = get_attribute(operation->properties, "name");
 					if (op_name == NULL) {
 						php_error(E_ERROR, "SOAP-ERROR: Parsing WSDL: Missing 'name' attribute for <operation>");
 					}
 
-					portTypeOperation = get_node_with_attribute(portType->children, "operation", "name", op_name->children->content);
+					trav3 = operation->children;
+					while  (trav3 != NULL) {
+						if (tmpbinding->bindingType == BINDING_SOAP &&
+						    node_is_equal_ex(trav3, "operation", wsdl_soap_namespace)) {
+						} else if (is_wsdl_element(trav3) &&
+						           !node_is_equal(trav3,"input") &&
+						           !node_is_equal(trav3,"output") &&
+						           !node_is_equal(trav3,"fault") &&
+						           !node_is_equal(trav3,"documentation")) {
+							php_error(E_ERROR,"SOAP-ERROR: Parsing WSDL: Unexpected WSDL element <%s>",trav3->name);
+						}
+						trav3 = trav3->next;
+					}
+
+					portTypeOperation = get_node_with_attribute_ex(portType->children, "operation", WSDL_NAMESPACE, "name", op_name->children->content, NULL);
 					if (portTypeOperation == NULL) {
 						php_error(E_ERROR, "SOAP-ERROR: Parsing WSDL: Missing <portType>/<operation> with name '%s'", op_name->children->content);
 					}
@@ -647,7 +729,7 @@ static sdlPtr load_wsdl(char *struri)
 						function->bindingAttributes = (void *)soapFunctionBinding;
 					}
 
-					input = get_node(portTypeOperation->children, "input");
+					input = get_node_ex(portTypeOperation->children, "input", WSDL_NAMESPACE);
 					if (input != NULL) {
 						xmlAttrPtr message, name;
 
@@ -665,15 +747,15 @@ static sdlPtr load_wsdl(char *struri)
 						}
 
 						if (tmpbinding->bindingType == BINDING_SOAP) {
-							input = get_node(operation->children, "input");
+							input = get_node_ex(operation->children, "input", WSDL_NAMESPACE);
 							if (input != NULL) {
 								sdlSoapBindingFunctionPtr soapFunctionBinding = function->bindingAttributes;
-								wsdl_soap_binding_body(&ctx, input, wsdl_soap_namespace,&soapFunctionBinding->input);
+								wsdl_soap_binding_body(&ctx, input, wsdl_soap_namespace, &soapFunctionBinding->input, function->requestParameters);
 							}
 						}
 					}
 
-					output = get_node(portTypeOperation->children, "output");
+					output = get_node_ex(portTypeOperation->children, "output", WSDL_NAMESPACE);
 					if (output != NULL) {
 						xmlAttrPtr message, name;
 
@@ -696,10 +778,10 @@ static sdlPtr load_wsdl(char *struri)
 						}
 
 						if (tmpbinding->bindingType == BINDING_SOAP) {
-							output = get_node(operation->children, "output");
+							output = get_node_ex(operation->children, "output", WSDL_NAMESPACE);
 							if (output != NULL) {
 								sdlSoapBindingFunctionPtr soapFunctionBinding = function->bindingAttributes;
-								wsdl_soap_binding_body(&ctx, output, wsdl_soap_namespace, &soapFunctionBinding->output);
+								wsdl_soap_binding_body(&ctx, output, wsdl_soap_namespace, &soapFunctionBinding->output, function->responseParameters);
 							}
 						}
 					}
@@ -709,7 +791,7 @@ static sdlPtr load_wsdl(char *struri)
 						/* FIXME: */
 					}
 
-					fault = get_node(operation->children, "fault");
+					fault = get_node_ex(operation->children, "fault", WSDL_NAMESPACE);
 					if (!fault) {
 						/* FIXME: */
 					}
@@ -720,7 +802,9 @@ static sdlPtr load_wsdl(char *struri)
 						char *tmp = estrdup(function->functionName);
 						int  len = strlen(tmp);
 
-						zend_hash_add(&ctx.sdl->functions, php_strtolower(tmp, len), len+1, &function, sizeof(sdlFunctionPtr), NULL);
+						if (zend_hash_add(&ctx.sdl->functions, php_strtolower(tmp, len), len+1, &function, sizeof(sdlFunctionPtr), NULL) != SUCCESS) {
+							zend_hash_next_index_insert(&ctx.sdl->functions, &function, sizeof(sdlFunctionPtr), NULL);
+						}
 						efree(tmp);
 						if (function->requestName != NULL && strcmp(function->requestName,function->functionName) != 0) {
 							if (ctx.sdl->requests == NULL) {
@@ -733,8 +817,8 @@ static sdlPtr load_wsdl(char *struri)
 							efree(tmp);
 						}
 					}
+					trav2 = trav2->next;
 				}
-				ENDFOREACH(trav2);
 
 				if (!ctx.sdl->bindings) {
 					ctx.sdl->bindings = sdl_malloc(sizeof(HashTable));
@@ -742,8 +826,8 @@ static sdlPtr load_wsdl(char *struri)
 				}
 
 				zend_hash_add(ctx.sdl->bindings, tmpbinding->name, strlen(tmpbinding->name), &tmpbinding, sizeof(sdlBindingPtr), NULL);
+				trav= trav->next;
 			}
-			ENDFOREACH(trav);
 
 			zend_hash_move_forward(&ctx.services);
 		}
@@ -1235,7 +1319,6 @@ static sdlPtr get_sdl_from_cache(const char *fn, const char *uri, time_t t)
 				binding->soapAction = sdl_deserialize_string(&in);
 				sdl_deserialize_soap_body(&binding->input, encoders, types, &in);
 				sdl_deserialize_soap_body(&binding->output, encoders, types, &in);
-				/*sdl_deserialize_soap_body(&binding->fault, encoders, types, &in);*/
 			} else {
 				WSDL_CACHE_SKIP(1, &in);
 			}
@@ -1772,7 +1855,6 @@ static void add_sdl_to_cache(const char *fn, const char *uri, time_t t, sdlPtr s
 					sdl_serialize_string(binding->soapAction, out);
 					sdl_serialize_soap_body(&binding->input, &tmp_encoders, &tmp_types, out);
 					sdl_serialize_soap_body(&binding->output, &tmp_encoders, &tmp_types, out);
-					/*sdl_serialize_soap_body(&binding->fault, &tmp_encoders, &tmp_types, out);*/
 				} else {
 					WSDL_CACHE_PUT_1(0,out);
 				}
@@ -1986,7 +2068,6 @@ static void delete_function(void *data)
 		}
 		delete_sdl_soap_binding_function_body(soapFunction->input);
 		delete_sdl_soap_binding_function_body(soapFunction->output);
-		delete_sdl_soap_binding_function_body(soapFunction->fault);
 		sdl_free(soapFunction);
 	}
 	sdl_free(function);
