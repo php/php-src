@@ -442,7 +442,7 @@ CWD_API char *virtual_realpath(const char *path, char *real_path)
 	CWD_STATE_COPY(&new_state, &CWDG(cwd));
 	retval = virtual_file_ex(&new_state, path, NULL);
 	
-	if(retval) {
+	if (!retval) {
 		int len = new_state.cwd_length>MAXPATHLEN-1?MAXPATHLEN-1:new_state.cwd_length;
 		memcpy(real_path, new_state.cwd, len);
 		real_path[len] = '\0';
@@ -452,18 +452,24 @@ CWD_API char *virtual_realpath(const char *path, char *real_path)
 	return NULL;
 }
 
-CWD_API int virtual_filepath(const char *path, char **filepath)
+CWD_API int virtual_filepath_ex(const char *path, char **filepath, verify_path_func verify_path)
 {
 	cwd_state new_state;
 	int retval;
 	CWDLS_FETCH();
 
 	CWD_STATE_COPY(&new_state, &CWDG(cwd));
-	retval = virtual_file_ex(&new_state, path, php_is_file_ok);
+	retval = virtual_file_ex(&new_state, path, verify_path);
 
 	*filepath = new_state.cwd;
 
 	return retval;
+
+}
+
+CWD_API int virtual_filepath(const char *path, char **filepath)
+{
+	return virtual_filepath_ex(path, filepath, php_is_file_ok);
 }
 
 CWD_API FILE *virtual_fopen(const char *path, const char *mode)
