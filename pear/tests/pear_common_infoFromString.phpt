@@ -1,5 +1,5 @@
 --TEST--
-PEAR_Common::analyzeSourceCode test
+PEAR_Common::infoFromString test
 --SKIPIF--
 <?php
 if (!getenv('PHP_PEAR_RUNTESTS')) {
