@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2004, PHP 5.0.1
+- Fixed bug #29409 (Segfault in PHP functions called from XSLT). (Rob)
 - Fixed unloading of dynamically loaded extensions. 
   (Marcus, kameshj at fastmail dot fm)
 - Fixed bug 29395 (sqlite_escape_string() returns bogus data on empty
