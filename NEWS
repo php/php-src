@@ -2,6 +2,8 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? ????, Version 4.0 Beta 4
+- Made strtoupper(), strtolower(), substr_replace() binary-safe. (Andrei)
+- Fix a crash in the Apache syntax highlighting mode (Zeev)
 - Report all ODBC error's not just the one on the top of the stack (lurcher)
 - OCI8 now returns NULL values in LONG columns correct. (Thies)
 - Added support for a C-like assert() function. (Thies)
