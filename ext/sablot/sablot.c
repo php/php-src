@@ -32,7 +32,7 @@
 
 /* PHP Includes */
 #include "ext/standard/info.h"
-#include "ext/standard/php_output.h"
+#include "main/php_output.h"
 #include "php_sablot.h"
 
 static int          le_sablot;
