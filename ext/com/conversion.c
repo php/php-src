@@ -317,7 +317,7 @@ PHPAPI void php_pval_to_variant_ex(pval *pval_arg, VARIANT *var_arg, pval *pval_
 
          case VT_UINT:
             convert_to_long_ex(&pval_arg);
-            var_arg->intVal = (unsigned int)pval_arg->value.lval;
+            var_arg->uintVal = (unsigned int)pval_arg->value.lval;
             break;
 
          case VT_I1|VT_BYREF:
@@ -342,7 +342,7 @@ PHPAPI void php_pval_to_variant_ex(pval *pval_arg, VARIANT *var_arg, pval *pval_
 
          case VT_UINT|VT_BYREF:
             convert_to_long(pval_arg);
-            var_arg->pintVal = (unsigned int FAR*) &pval_arg->value.lval;
+            var_arg->puintVal = (unsigned int FAR*) &pval_arg->value.lval;
             break;
 
          default:
@@ -419,6 +419,15 @@ PHPAPI void php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int persistent
                   break;
             }
          }
+         break;
+
+      case VT_CY:
+         if(var_arg->vt & VT_BYREF)
+		    VarR8FromCy(var_arg->cyVal, &(pval_arg->value.dval));
+         else
+		    VarR8FromCy(*(var_arg->pcyVal), &(pval_arg->value.dval));
+
+         pval_arg->type = IS_DOUBLE;
          break;
 
       case VT_BOOL:
@@ -498,6 +507,52 @@ PHPAPI void php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int persistent
       case VT_UNKNOWN:
          var_arg->pdispVal->lpVtbl->Release(var_arg->pdispVal);
          /* break missing intentionally */
+
+      case VT_I1:
+         if(var_arg->vt & VT_BYREF)
+            pval_arg->value.lval = (long)*(var_arg->pcVal);
+         else
+            pval_arg->value.lval = (long) var_arg->cVal;
+
+         pval_arg->type = IS_LONG;
+         break;
+
+      case VT_UI2:
+         if(var_arg->vt & VT_BYREF)
+            pval_arg->value.lval = (long)*(var_arg->puiVal);
+         else
+            pval_arg->value.lval = (long) var_arg->uiVal;
+
+         pval_arg->type = IS_LONG;
+         break;
+
+      case VT_UI4:
+         if(var_arg->vt & VT_BYREF)
+            pval_arg->value.lval = (long)*(var_arg->pulVal);
+         else
+            pval_arg->value.lval = (long) var_arg->ulVal;
+
+         pval_arg->type = IS_LONG;
+         break;
+
+      case VT_INT:
+         if(var_arg->vt & VT_BYREF)
+            pval_arg->value.lval = (long)*(var_arg->pintVal);
+         else
+            pval_arg->value.lval = (long) var_arg->intVal;
+
+         pval_arg->type = IS_LONG;
+         break;
+
+      case VT_UINT:
+         if(var_arg->vt & VT_BYREF)
+            pval_arg->value.lval = (long)*(var_arg->puintVal);
+         else
+            pval_arg->value.lval = (long) var_arg->uintVal;
+
+         pval_arg->type = IS_LONG;
+         break;
+
       default:
          php_error(E_WARNING,"Unsupported variant type: %d (0x%X)", var_arg->vt, var_arg->vt);
          var_reset(pval_arg);
