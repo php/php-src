@@ -169,6 +169,7 @@ AC_DEFUN(PHP_GD_FREETYPE1,[
       fi
       PHP_ADD_INCLUDE($TTF_INC_DIR)
     else
+      AC_MSG_CHECKING(for FreeType 1 support)
       AC_MSG_RESULT([no - FreeType 2.x is to be used instead])
     fi
   fi
