@@ -48,7 +48,7 @@ dnl
 dnl builds RPATH from PHP_RPATHS
 dnl
 AC_DEFUN(AC_BUILD_RPATH,[
-  if test "$enable_rpath" = "yes"; then
+  if test "$enable_rpath" = "yes" && test -n "$PHP_RPATHS"; then
     if test -n "$AXPS"; then
       for i in $PHP_RPATHS; do
         RPATHS="$RPATHS ${apxs_runpath_switch}$i'"
