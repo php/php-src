@@ -52,6 +52,16 @@ documentation
 -------------
     * add remarks in the documentation which functions are not implemented on win32.
     * add remarks in the documentation which functions are not binary-safe.
+	* improve documentation for the sablotron extension
+	* update curl documentation
+	* write documentation for the bzip2 extension
+	* write documentation for the zziplib extension
+
+ext/curl
+--------
+	* Use the cURL write handler to save data for use when returning data or outputting
+	  data.
+	* Have a warning scheme for when people use unsupported features.
 
 ext/dav
 --------
@@ -61,20 +71,30 @@ ext/oci8
 --------
     * all OCIFetch*() functions should return 0 for no more data and false on error.
     * have a flag that trims trailing spaces from CHAR fields on retrieval.
-	* make allow_call_time_pass_reference=Off working.
+	* m<empty clipboard>ake allow_call_time_pass_reference=Off working.
+	* for additional todo information, see oci8.c, in ext/oci8
 
 ext/pcre
 --------
     * update the online docs from version 3.1 man page
 
+ext/sablot
+----------
+	* Re-write the error handling and reporting interface
+	* Cleanup the underlying code a bit
+	* Add proper support for the message handlers
+
 ext/session
 -----------
-    * implement a call to set a session read-only to overcome 
-      the need to serialize frame-loads.
     * maybe implement finer-grained session variables that could be 
       locked individually.
     * write a network-transparent storage back-end with fallover
       facilities
+
+ext/sockets
+-----------
+	* Make the extension work on windows
+	* Make the extension work with Solaris and the Sun GCC
 
 ext/standard
 ------------
@@ -94,6 +114,10 @@ ext/standard
         strip_tags()
     * rewrite win32 SMTP code to be useable for *ix to, maybe as a (default)
       module of its own (Hartmut)
+
+ext/zziplib
+------------
+	* more fully support the zziplib api
 
 ext/wddx
 --------
