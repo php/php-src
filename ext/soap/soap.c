@@ -186,6 +186,9 @@ PHP_MINIT_FUNCTION(soap)
 	ZEND_INIT_MODULE_GLOBALS(soap, php_soap_init_globals, php_soap_del_globals);
 
 	/* Register SoapObject class */
+	/* BIG NOTE : THIS EMITS AN COMPILATION WARNING UNDER ZE2 - handle_function_call deprecated. 
+		soap_call_function_handler should be of type struct _zend_function, not (*handle_function_call).
+	*/
 	INIT_OVERLOADED_CLASS_ENTRY(soap_class_entry, PHP_SOAP_CLASSNAME, soap_client_functions, soap_call_function_handler, NULL, NULL);
 	zend_register_internal_class(&soap_class_entry TSRMLS_CC);
 
