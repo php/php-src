@@ -138,7 +138,7 @@ static int php_stream_memory_flush(php_stream *stream TSRMLS_DC) {
 
 
 /* {{{ */
-static int php_stream_memory_seek(php_stream *stream, off_t offset, int whence TSRMLS_DC)
+static int php_stream_memory_seek(php_stream *stream, off_t offset, int whence, off_t *newoffs TSRMLS_DC)
 {
 	php_stream_memory_data *ms;
 
@@ -146,8 +146,6 @@ static int php_stream_memory_seek(php_stream *stream, off_t offset, int whence T
 	ms = stream->abstract;
 	assert(ms != NULL);
 
-	if (offset == 0 && whence == SEEK_CUR)
-		return ms->fpos;
 	switch(whence) {
 		case SEEK_CUR:
 			if (offset < 0) {
@@ -165,6 +163,7 @@ static int php_stream_memory_seek(php_stream *stream, off_t offset, int whence T
 					ms->fpos = ms->fpos + offset;
 				}
 			}
+			*newoffs = ms->fpos;
 			return 0;
 		case SEEK_SET:
 			if (ms->fsize < (size_t)(offset)) {
@@ -173,6 +172,7 @@ static int php_stream_memory_seek(php_stream *stream, off_t offset, int whence T
 			} else {
 				ms->fpos = offset;
 			}
+			*newoffs = ms->fpos;
 			return 0;
 		case SEEK_END:
 			if (offset > 0) {
@@ -184,6 +184,7 @@ static int php_stream_memory_seek(php_stream *stream, off_t offset, int whence T
 			} else {
 				ms->fpos = ms->fsize + offset;
 			}
+			*newoffs = ms->fpos;
 			return 0;
 		default:
 			return 0;
@@ -191,35 +192,6 @@ static int php_stream_memory_seek(php_stream *stream, off_t offset, int whence T
 	}
 }
 /* }}} */
-
-
-/* {{{ */
-static char *php_stream_memory_gets(php_stream *stream, char *buf, size_t maxlen TSRMLS_DC)
-{
-	size_t n = 1;
-	char *c = buf;
-
-	php_stream_memory_data *ms;
-
-	assert(stream != NULL);
-	ms = stream->abstract;
-	assert(ms != NULL);
-	assert(buf!= NULL);
-	assert(ms->data!= NULL);
-
-	while(n < maxlen && ms->fpos<ms->fsize) {
-		n++;
-		if ((*c = ms->data[ms->fpos++]) == '\n') {
-			c++;
-			break;
-		}
-		c++;
-	}
-	*c = 0;
-	return buf;
-}
-/* }}} */
-
 
 /* {{{ */
 static int php_stream_memory_cast(php_stream *stream, int castas, void **ret TSRMLS_DC)
@@ -234,9 +206,9 @@ php_stream_ops	php_stream_memory_ops = {
 	php_stream_memory_close, php_stream_memory_flush,
 	"MEMORY",
 	php_stream_memory_seek,
-	php_stream_memory_gets,
 	php_stream_memory_cast,
-	NULL
+	NULL, /* stat */
+	NULL  /* set_option */
 };
 
 
@@ -380,32 +352,21 @@ static int php_stream_temp_flush(php_stream *stream TSRMLS_DC)
 
 
 /* {{{ */
-static int php_stream_temp_seek(php_stream *stream, off_t offset, int whence TSRMLS_DC)
+static int php_stream_temp_seek(php_stream *stream, off_t offset, int whence, off_t *newoffs TSRMLS_DC)
 {
 	php_stream_temp_data *ts;
+	int ret;
 
 	assert(stream != NULL);
 	ts = stream->abstract;
 	assert(ts != NULL);
 
-	return php_stream_seek(ts->innerstream, offset, whence);
+	ret = php_stream_seek(ts->innerstream, offset, whence);
+	*newoffs = php_stream_tell(ts->innerstream);
+	
+	return ret;
 }
 /* }}} */
-
-
-/* {{{ */
-char *php_stream_temp_gets(php_stream *stream, char *buf, size_t maxlen TSRMLS_DC)
-{
-	php_stream_temp_data *ts;
-
-	assert(stream != NULL);
-	ts = stream->abstract;
-	assert(ts != NULL);
-
-	return php_stream_gets(ts->innerstream, buf, maxlen);
-}
-/* }}} */
-
 
 /* {{{ */
 static int php_stream_temp_cast(php_stream *stream, int castas, void **ret TSRMLS_DC)
@@ -457,9 +418,9 @@ php_stream_ops	php_stream_temp_ops = {
 	php_stream_temp_close, php_stream_temp_flush,
 	"TEMP",
 	php_stream_temp_seek,
-	php_stream_temp_gets,
 	php_stream_temp_cast,
-	NULL
+	NULL, /* stat */
+	NULL /* set_option */
 };
 
 

@@ -80,7 +80,6 @@ typedef struct _php_userstream_data php_userstream_data_t;
 #define USERSTREAM_WRITE	"stream_write"
 #define USERSTREAM_FLUSH	"stream_flush"
 #define USERSTREAM_SEEK		"stream_seek"
-#define USERSTREAM_GETS		"stream_gets"
 #define USERSTREAM_TELL		"stream_tell"
 #define USERSTREAM_EOF		"stream_eof"
 
@@ -109,13 +108,8 @@ function stream_open($path, $mode, $options, &$opened_path)
    function stream_seek($offset, $whence)
    {
    }
-   function stream_gets($size)
-   {
-      return false on error;
-      else return string;
-   }
-   
- * */
+  
+ **/
 
 static php_stream *user_wrapper_opener(php_stream_wrapper *wrapper, char *filename, char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC)
 {
@@ -405,108 +399,56 @@ static int php_userstreamop_flush(php_stream *stream TSRMLS_DC)
 	return call_result;
 }
 
-static int php_userstreamop_seek(php_stream *stream, off_t offset, int whence TSRMLS_DC)
+static int php_userstreamop_seek(php_stream *stream, off_t offset, int whence, off_t *newoffs TSRMLS_DC)
 {
 	zval func_name;
 	zval *retval = NULL;
-	int call_result;
+	int call_result, ret;
 	php_userstream_data_t *us = (php_userstream_data_t *)stream->abstract;
-
-	assert(us != NULL);
-
-	if (offset == 0 && whence == SEEK_CUR) {
-		ZVAL_STRINGL(&func_name, USERSTREAM_TELL, sizeof(USERSTREAM_TELL)-1, 0);
-
-		call_result = call_user_function_ex(NULL,
-			&us->object,
-			&func_name,
-			&retval,
-			0, NULL, 0, NULL TSRMLS_CC);
-
-
-	} else {
-		zval **args[2];
-		zval *zoffs, *zwhence;
-
-		ZVAL_STRINGL(&func_name, USERSTREAM_SEEK, sizeof(USERSTREAM_SEEK)-1, 0);
-
-		MAKE_STD_ZVAL(zoffs);
-		ZVAL_LONG(zoffs, offset);
-		args[0] = &zoffs;
-
-		MAKE_STD_ZVAL(zwhence);
-		ZVAL_LONG(zwhence, whence);
-		args[1] = &zwhence;
-
-		call_result = call_user_function_ex(NULL,
-				&us->object,
-				&func_name,
-				&retval,
-				2, args,
-				0, NULL TSRMLS_CC);
-
-		zval_ptr_dtor(&zoffs);
-		zval_ptr_dtor(&zwhence);
-
-	}
-
-	if (call_result == SUCCESS && retval != NULL && Z_TYPE_P(retval) == IS_LONG)
-		call_result = Z_LVAL_P(retval);
-	else
-		call_result = -1;
-	
-	if (retval)
-		zval_ptr_dtor(&retval);
-
-	return 0;
-}
-
-static char *php_userstreamop_gets(php_stream *stream, char *buf, size_t size TSRMLS_DC)
-{
-	zval func_name;
-	zval *retval = NULL;
-	zval *zcount;
 	zval **args[2];
-	size_t didread = 0;
-	php_userstream_data_t *us = (php_userstream_data_t *)stream->abstract;
-	int call_result;
+	zval *zoffs, *zwhence;
 
 	assert(us != NULL);
 
-	/* TODO: when the gets method is not available, fall back on emulated version using read */
-	
-	ZVAL_STRINGL(&func_name, USERSTREAM_GETS, sizeof(USERSTREAM_GETS)-1, 0);
+	ZVAL_STRINGL(&func_name, USERSTREAM_SEEK, sizeof(USERSTREAM_SEEK)-1, 0);
 
-	MAKE_STD_ZVAL(zcount);
-	ZVAL_LONG(zcount, size);
-	args[0] = &zcount;
+	MAKE_STD_ZVAL(zoffs);
+	ZVAL_LONG(zoffs, offset);
+	args[0] = &zoffs;
+
+	MAKE_STD_ZVAL(zwhence);
+	ZVAL_LONG(zwhence, whence);
+	args[1] = &zwhence;
 
 	call_result = call_user_function_ex(NULL,
 			&us->object,
 			&func_name,
 			&retval,
-			1, args,
+			2, args,
 			0, NULL TSRMLS_CC);
 
-	if (retval && call_result == SUCCESS) {
-		convert_to_string_ex(&retval);
-		didread = Z_STRLEN_P(retval);
-		if (didread > size) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s::" USERSTREAM_GETS " - read more data than requested; some data will be lost",
-					us->wrapper->classname);
-			didread = size;
-		}
-		if (didread > 0)
-			memcpy(buf, Z_STRVAL_P(retval), didread);
+	zval_ptr_dtor(&zoffs);
+	zval_ptr_dtor(&zwhence);
 
-		zval_ptr_dtor(&retval);
-	}
+	if (call_result == SUCCESS && retval != NULL && Z_TYPE_P(retval) == IS_LONG)
+		ret = Z_LVAL_P(retval);
+	else
+		ret = -1;
 
+	/* now determine where we are */
+	ZVAL_STRINGL(&func_name, USERSTREAM_TELL, sizeof(USERSTREAM_TELL)-1, 0);
+
+	call_result = call_user_function_ex(NULL,
+		&us->object,
+		&func_name,
+		&retval,
+		0, NULL, 0, NULL TSRMLS_CC);
+
+	if (call_result == SUCCESS && retval != NULL && Z_TYPE_P(retval) == IS_LONG)
+		*newoffs = Z_LVAL_P(retval);
+	
 	if (retval)
-		zval_ptr_dtor(&zcount);
-
-	if (didread)
-		return buf;
+		zval_ptr_dtor(&retval);
 
 	return 0;
 }
@@ -515,9 +457,10 @@ php_stream_ops php_stream_userspace_ops = {
 	php_userstreamop_write, php_userstreamop_read,
 	php_userstreamop_close, php_userstreamop_flush,
 	"user-space",
-	php_userstreamop_seek, php_userstreamop_gets,
+	php_userstreamop_seek,
 	NULL, /* cast */
-	NULL /* stat */
+	NULL, /* stat */
+	NULL  /* set_option */
 };
 
 

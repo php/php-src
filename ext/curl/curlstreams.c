@@ -145,7 +145,8 @@ static size_t php_curl_stream_read(php_stream *stream, char *buf, size_t count T
 		/* check for EOF */
 
 		/* if we have buffered data, then we are not at EOF */
-		if (curlstream->readbuffer.writepos > 0 && curlstream->readbuffer.readpos < curlstream->readbuffer.writepos)
+		if (curlstream->readbuffer.writepos > 0
+				&& curlstream->readbuffer.readpos < curlstream->readbuffer.writepos)
 			return 0;
 		
 
@@ -172,7 +173,8 @@ static size_t php_curl_stream_read(php_stream *stream, char *buf, size_t count T
 			tv.tv_sec = 15; /* TODO: allow this to be configured from the script */
 
 			/* wait for data */
-			switch (select(curlstream->maxfd+1, &curlstream->readfds, &curlstream->writefds, &curlstream->excfds, &tv)) {
+			switch (select(curlstream->maxfd+1, &curlstream->readfds,
+						&curlstream->writefds, &curlstream->excfds, &tv)) {
 				case -1:
 					/* error */
 					return 0;
@@ -233,21 +235,6 @@ static int php_curl_stream_stat(php_stream *stream, php_stream_statbuf *ssb TSRM
 	return -1;
 }
 
-static char *php_curl_stream_gets(php_stream *stream, char *buf, size_t size TSRMLS_DC)
-{
-	php_curl_stream *curlstream = (php_curl_stream*)stream->abstract;
-	char *ret;
-	
-	php_stream_seek(curlstream->readbuffer.buf, curlstream->readbuffer.readpos, SEEK_SET);
-	ret = php_stream_gets(curlstream->readbuffer.buf, buf, size);
-	curlstream->readbuffer.readpos = php_stream_tell(curlstream->readbuffer.buf);
-
-	if (ret > 0)
-		return buf;
-
-	return NULL;
-}
-
 static int php_curl_stream_cast(php_stream *stream, int castas, void **ret TSRMLS_DC)
 {
 	php_curl_stream *curlstream = (php_curl_stream*)stream->abstract;
@@ -262,7 +249,6 @@ PHPAPI php_stream_ops php_curl_stream_ops = {
 	php_curl_stream_flush,
 	"cURL",
 	NULL, /* seek */
-	php_curl_stream_gets, /* gets */
 	php_curl_stream_cast, /* cast */
 	php_curl_stream_stat  /* stat */
 };
@@ -357,7 +343,24 @@ PHPAPI php_stream *php_curl_stream_opener(php_stream_wrapper *wrapper, char *fil
 		
 		curl_easy_perform(curlstream->curl);
 	}
+	else
 #endif
+	{
+		/* fire up the connection; we need to detect a connection error here,
+		 * otherwise the curlstream we return ends up doing nothing useful. */
+		CURLMcode m;
+
+		while (CURLM_CALL_MULTI_PERFORM == 
+				(m = curl_multi_perform(curlstream->multi, &curlstream->pending))
+			  ) {
+			; /* spin */
+		}
+
+		if (m != CURLM_OK) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "There was an error mcode=%d", m);
+		}
+
+	}
 	
 	return stream;
 }

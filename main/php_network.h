@@ -103,13 +103,8 @@ int php_sockaddr_size(php_sockaddr_storage *addr);
 
 struct _php_netstream_data_t	{
 	int socket;
-	unsigned char *readbuf;
-	size_t readbuflen;
-	size_t readpos;
-	size_t writepos;
 	char eof;
 	char is_blocked;
-	size_t chunk_size;
 	struct timeval timeout;
 	char timeout_event;
 #if HAVE_OPENSSL_EXT
