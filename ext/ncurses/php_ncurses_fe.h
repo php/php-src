@@ -81,7 +81,6 @@ PHP_FUNCTION(ncurses_attrset);
 PHP_FUNCTION(ncurses_bkgd);
 PHP_FUNCTION(ncurses_curs_set);
 PHP_FUNCTION(ncurses_delay_output);
-PHP_FUNCTION(ncurses_echochar);
 PHP_FUNCTION(ncurses_halfdelay);
 PHP_FUNCTION(ncurses_has_key);
 PHP_FUNCTION(ncurses_insch);
