@@ -1,3 +1,133 @@
+2005-01-09  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      configure.in:
+      Forgot this from the outside-source-dir patch
+
+    * (PHP_4_3)
+      Zend/zend.h:
+      This was not supposed to be committed..
+
+    * (PHP_5_0)
+      configure.in
+      TSRM/TSRM.h
+      TSRM/TSRM.h
+      TSRM/tsrm_config_common.h
+      TSRM/tsrm_config_common.h
+      Zend/zend.h
+      ZendEngine2/zend.h
+      ext/bcmath/libbcmath/src/config.h
+      ext/bcmath/libbcmath/src/config.h
+      ext/gd/gdcache.c
+      ext/gd/gdcache.c
+      ext/gd/gdttf.c
+      ext/gd/gdttf.c
+      ext/mcve/mcve.c
+      ext/mcve/mcve.c
+      ext/odbc/birdstep.c
+      ext/odbc/birdstep.c
+      ext/pcre/pcrelib/internal.h
+      ext/pcre/pcrelib/internal.h
+      ext/sqlite/config.m4
+      ext/standard/html.c
+      ext/standard/html.c
+      main/alloca.c
+      main/alloca.c
+      main/php_compat.h
+      main/php_compat.h
+      main/php_scandir.c
+      main/php_scandir.c
+      main/php_scandir.h
+      main/php_scandir.h
+      main/php_sprintf.c
+      main/php_syslog.h
+      main/php_syslog.h
+      sapi/cgi/libfcgi/include/fcgi_config.h
+      sapi/cgi/libfcgi/include/fcgi_config.h:
+      MFH: - Fix outside-source-tree builds. Always include generated header
+      files
+             with #include <some_header.h> to make sure the correct file is
+      used.
+
+    * configure.in
+      TSRM/TSRM.h
+      TSRM/tsrm_config_common.h
+      ZendEngine2/zend.h
+      ext/bcmath/libbcmath/src/config.h
+      ext/gd/gdcache.c
+      ext/gd/gdttf.c
+      ext/mcve/mcve.c
+      ext/odbc/birdstep.c
+      ext/pcre/pcrelib/internal.h
+      ext/sqlite/config.m4
+      ext/standard/html.c
+      main/alloca.c
+      main/php_compat.h
+      main/php_scandir.h
+      main/php_sprintf.c
+      main/php_syslog.h
+      sapi/cgi/libfcgi/include/fcgi_config.h:
+      - Fix outside-source-tree builds. Always include generated header files
+        with #include <some_header.h> to make sure the correct file is used.
+
+2005-01-09  Antony Dovgal  <tony2001@phpclub.net>
+
+    * (PHP_4_3)
+      NEWS:
+      BFN & end of cvs spam
+
+    * (PHP_5_0)
+      NEWS:
+      BFN
+
+    * ext/session/tests/bug31454.phpt
+      ext/session/tests/bug31454.phpt
+      ext/session/tests/bug31454.phpt:
+      add skipif section
+
+    * ext/session/tests/bug31454.phpt:
+        1.1.4;
+      add test for bug #31454
+
+    * ext/session/session.c:
+      efree(name)
+
+    * ext/session/session.c:
+      fix bug #31454 (session_set_save_handler crashes PHP when supplied
+      non-existent object ref)
+
+2005-01-09  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      Zend/zend_ini.c
+      Zend/zend_ini.h:
+      MFH: - Fix leak. (forgot from previous commit)
+
+    * (PHP_4_3)
+      ext/standard/basic_functions.c
+      ext/standard/basic_functions.c
+      main/main.c
+      main/main.c
+      main/php_main.h
+      main/php_main.h:
+      MFH: - Fix leaks with registered shutdown functions.
+
+    * ext/standard/basic_functions.c
+      main/main.c
+      main/php_main.h:
+      - Fix leaks with registered shutdown functions.
+
+    * ZendEngine2/zend.c:
+      MFB: - Rationalize code a bit
+
+    * (PHP_4_3)
+      Zend/zend.h:
+      MFZE2: Some cleanups
+
+    * TODO
+      TODO:
+      Remove done stuff
+
 2005-01-08  Jani Taskinen  <jani.taskinen@kolumbus.fi>
 
     * (PHP_4_3)
