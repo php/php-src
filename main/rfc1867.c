@@ -440,8 +440,7 @@ static char *php_ap_getword(char **line, char stop)
 	return res;
 }
 
-
-static char *substring_conf(char *start, int len, char quote)
+static char *substring_conf(char *start, int len, char quote  TSRMLS_DC)
 {
 	char *result = emalloc(len + 2);
 	char *resp = result;
@@ -452,6 +451,11 @@ static char *substring_conf(char *start, int len, char quote)
 			*resp++ = start[++i];
 		} else {
 			*resp++ = start[i];
+#if HAVE_MBSTRING
+			if (mbstr_is_mb_leadbyte(start+i) TSRMLS_CC){
+				*resp++ = start[++i];
+			}
+#endif
 		}
 	}
 
@@ -460,7 +464,7 @@ static char *substring_conf(char *start, int len, char quote)
 }
 
 
-static char *php_ap_getword_conf(char **line)
+static char *php_ap_getword_conf(char **line TSRMLS_DC)
 {
 	char *str = *line, *strend, *res, quote;
 
@@ -482,7 +486,7 @@ static char *php_ap_getword_conf(char **line)
 				++strend;
 			}
 		}
-		res = substring_conf(str + 1, strend - str - 1, quote);
+		res = substring_conf(str + 1, strend - str - 1, quote TSRMLS_CC);
 
 		if (*strend == quote) {
 			++strend;
@@ -494,7 +498,7 @@ static char *php_ap_getword_conf(char **line)
 		while (*strend && !isspace(*strend)) {
 			++strend;
 		}
-		res = substring_conf(str, strend - str, 0);
+		res = substring_conf(str, strend - str, 0  TSRMLS_CC);
 	}
 
 	while (*strend && isspace(*strend)) {
@@ -691,12 +695,12 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 						if (param) {
 							efree(param);
 						}
-						param = php_ap_getword_conf(&pair);
+						param = php_ap_getword_conf(&pair TSRMLS_CC);
 					} else if (!strcmp(key, "filename")) {
 						if (filename) {
 							efree(filename);
 						}
-						filename = php_ap_getword_conf(&pair);
+						filename = php_ap_getword_conf(&pair TSRMLS_CC);
 					}
 				}
 				if (key) {
