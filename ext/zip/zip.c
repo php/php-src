@@ -35,16 +35,16 @@ static int le_zip_entry;
 #define le_zip_entry_name "Zip Entry"
 
 function_entry zip_functions[] = {
-	PHP_FE(zip_opendir,                 NULL)
-	PHP_FE(zip_readdir,                 NULL)
-	PHP_FE(zip_closedir,                NULL)
+	PHP_FE(zip_open,                    NULL)
+	PHP_FE(zip_read,                    NULL)
+	PHP_FE(zip_close,                   NULL)
 	PHP_FE(zip_entry_name,              NULL)
 	PHP_FE(zip_entry_compressedsize,    NULL)
 	PHP_FE(zip_entry_filesize,          NULL)
 	PHP_FE(zip_entry_compressionmethod, NULL)
-	PHP_FE(zip_open,                    NULL)
-	PHP_FE(zip_read,                    NULL)
-	PHP_FE(zip_close,                   NULL)
+	PHP_FE(zip_entry_open,              NULL)
+	PHP_FE(zip_entry_read,              NULL)
+	PHP_FE(zip_entry_close,             NULL)
 	{NULL, NULL, NULL}
 };
 
@@ -98,7 +98,7 @@ PHP_MINFO_FUNCTION(zip)
 
 /* {{{ proto resource zip_opendir(string filename)
    Open a new zip archive for reading */
-PHP_FUNCTION(zip_opendir)
+PHP_FUNCTION(zip_open)
 {
 	zval **filename;
 	ZZIP_DIR *archive_p = NULL;
@@ -120,7 +120,7 @@ PHP_FUNCTION(zip_opendir)
 
 /* {{{ proto resource zip_readdir(resource zip)
    Returns the next file in the archive */
-PHP_FUNCTION(zip_readdir)
+PHP_FUNCTION(zip_read)
 {
 	zval **zzip_dp;
 	ZZIP_DIR *archive_p = NULL;
@@ -148,7 +148,7 @@ PHP_FUNCTION(zip_readdir)
 
 /* {{{ proto void zip_closedir(resource zip)
    Close a Zip archive */
-PHP_FUNCTION(zip_closedir)
+PHP_FUNCTION(zip_close)
 {
 	zval **zzip_dp;
 	ZZIP_DIR *archive_p = NULL;
@@ -226,7 +226,7 @@ PHP_FUNCTION(zip_entry_compressionmethod)
 
 /* {{{ proto bool zip_open(resource zip_dp, resource zip_entry, string mode)
    Open a Zip File, pointed by the resource entry */
-PHP_FUNCTION(zip_open)
+PHP_FUNCTION(zip_entry_open)
 {
 	zval **zzip_dp, **zzip_ent, **mode;
 	ZZIP_DIR *archive_p = NULL;
@@ -252,7 +252,7 @@ PHP_FUNCTION(zip_open)
 
 /* {{{ proto string zip_read(resource zip_ent)
    Read X bytes from an opened zip entry */
-PHP_FUNCTION(zip_read)
+PHP_FUNCTION(zip_entry_read)
 {
 	zval **zzip_ent, **length;
 	php_zzip_dirent *entry = NULL;
@@ -285,7 +285,7 @@ PHP_FUNCTION(zip_read)
 
 /* {{{ proto void zip_close(resource zip_ent)
    Close a zip entry */
-PHP_FUNCTION(zip_close)
+PHP_FUNCTION(zip_entry_close)
 {
 	zval **zzip_ent;
 	php_zzip_dirent *entry = NULL;

@@ -35,16 +35,16 @@ extern zend_module_entry zip_module_entry;
 PHP_MINIT_FUNCTION(zip);
 PHP_MINFO_FUNCTION(zip);
 
-PHP_FUNCTION(zip_opendir);
-PHP_FUNCTION(zip_readdir);
-PHP_FUNCTION(zip_closedir);
+PHP_FUNCTION(zip_open);
+PHP_FUNCTION(zip_read);
+PHP_FUNCTION(zip_close);
 PHP_FUNCTION(zip_entry_name);
 PHP_FUNCTION(zip_entry_compressedsize);
 PHP_FUNCTION(zip_entry_filesize);
 PHP_FUNCTION(zip_entry_compressionmethod);
-PHP_FUNCTION(zip_open);
-PHP_FUNCTION(zip_read);
-PHP_FUNCTION(zip_close);
+PHP_FUNCTION(zip_entry_open);
+PHP_FUNCTION(zip_entry_read);
+PHP_FUNCTION(zip_entry_close);
 
 typedef struct {
 	ZZIP_FILE *fp;
