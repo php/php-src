@@ -179,7 +179,7 @@ int php3_mshutdown_zlib(SHUTDOWN_FUNC_ARGS){
 	return SUCCESS;
 }
 
-void php3_info_zlib(void)
+void php3_info_zlib(ZEND_MODULE_INFO_FUNC_ARGS)
 {
 		PUTS("Zlib support active (compiled with ");
 		PUTS(ZLIB_VERSION);

@@ -42,6 +42,7 @@
  * This reads the post form data into a string.
  * Remember to free this pointer when done with it.
  */
+#if APACHE
 static char *php3_getpost(pval *http_post_vars PLS_DC)
 {
 	char *buf = NULL;
@@ -149,6 +150,14 @@ static char *php3_getpost(pval *http_post_vars PLS_DC)
 #endif
 	return (buf);
 }
+#else
+static char *php3_getpost(pval *http_post_vars PLS_DC)
+{
+	SLS_FETCH();
+
+	return SG(request_info).post_data;
+}
+#endif
 
 
 /*
@@ -352,7 +361,7 @@ void php3_treat_data(int arg, char *str)
 			res = (char *) estrdup(var);
 		}
 	} else if (arg == PARSE_COOKIE) {		/* Cookie data */
-		var = (char *)request_info.cookies;
+		var = SG(request_info).cookie_data;
 		if (var && *var) {
 			res = (char *) estrdup(var);
 		}

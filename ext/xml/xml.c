@@ -102,7 +102,7 @@ int php3_minit_xml(INIT_FUNC_ARGS);
 int php3_rinit_xml(INIT_FUNC_ARGS);
 int php3_mshutdown_xml(SHUTDOWN_FUNC_ARGS);
 int php3_rshutdown_xml(SHUTDOWN_FUNC_ARGS);
-void php3_info_xml(void);
+void php3_info_xml(ZEND_MODULE_INFO_FUNC_ARGS);
 
 static xml_parser *xml_get_parser(int, const char *, HashTable *);
 static void xml_destroy_parser(xml_parser *);
@@ -273,7 +273,7 @@ int php3_rshutdown_xml(SHUTDOWN_FUNC_ARGS)
 /* }}} */
     /* {{{ php3_info_xml() */
 
-void php3_info_xml()
+void php3_info_xml(ZEND_MODULE_INFO_FUNC_ARGS)
 {
 		PUTS("XML support active");
 }

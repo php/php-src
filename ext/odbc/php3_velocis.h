@@ -76,8 +76,8 @@ extern php3_module_entry velocis_module_entry;
 /* velocis.c functions */
 extern int php3_minit_velocis(INIT_FUNC_ARGS);
 extern int php3_rinit_velocis(INIT_FUNC_ARGS);
-extern void php3_info_velocis(void);
-extern int php3_shutdown_velocis(void);
+extern void php3_info_velocis(ZEND_MODULE_INFO_FUNC_ARGS);
+extern int php3_shutdown_velocis(SHUTDOWN_FUNC_ARGS);
 extern void php3_velocis_connect(INTERNAL_FUNCTION_PARAMETERS);
 extern void php3_velocis_close(INTERNAL_FUNCTION_PARAMETERS);
 extern void php3_velocis_exec(INTERNAL_FUNCTION_PARAMETERS);

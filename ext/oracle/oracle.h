@@ -136,7 +136,7 @@ extern void php3_Ora_Rollback(INTERNAL_FUNCTION_PARAMETERS);
 extern int php3_minit_oracle(INIT_FUNC_ARGS);
 extern int php3_mshutdown_oracle(SHUTDOWN_FUNC_ARGS);
 extern int php3_rshutdown_oracle(SHUTDOWN_FUNC_ARGS);
-extern void php3_info_oracle(void);
+extern void php3_info_oracle(ZEND_MODULE_INFO_FUNC_ARGS);
 extern int php3_rinit_oracle(INIT_FUNC_ARGS);
 
 #else

@@ -309,7 +309,7 @@ int php3_rinit_mysql(INIT_FUNC_ARGS)
 }
 
 
-void php3_info_mysql(void)
+void php3_info_mysql(ZEND_MODULE_INFO_FUNC_ARGS)
 {
 	char maxp[16],maxl[16];
 	MySLS_FETCH();

@@ -251,7 +251,7 @@ static char *php3_get_info_db(void)
 }
 
 
-void php3_info_db(void)
+void php3_info_db(ZEND_MODULE_INFO_FUNC_ARGS)
 {
 	php3_printf(php3_get_info_db());
 }

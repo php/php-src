@@ -47,7 +47,7 @@ extern php3_module_entry ibase_module_entry;
 extern int php3_minit_ibase(INIT_FUNC_ARGS);
 extern int php3_rinit_ibase(INIT_FUNC_ARGS);
 extern int php3_mfinish_ibase(void);
-extern void php3_info_ibase(void);
+extern void php3_info_ibase(ZEND_MODULE_INFO_FUNC_ARGS);
 extern void php3_ibase_connect(INTERNAL_FUNCTION_PARAMETERS);
 extern void php3_ibase_pconnect(INTERNAL_FUNCTION_PARAMETERS);
 extern void php3_ibase_close(INTERNAL_FUNCTION_PARAMETERS);

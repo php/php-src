@@ -24,8 +24,8 @@ typedef struct {
 
 typedef struct {
 	zend_llist headers;
-	sapi_header_struct content_type;
 	int http_response_code;
+	unsigned char send_default_content_type;
 } sapi_headers_struct;
 
 
@@ -36,10 +36,16 @@ extern sapi_module_struct sapi_module;  /* true global */
 
 
 typedef struct {
+	char *request_method;
 	char *query_string;
+	char *post_data;
+	char *cookie_data;
+	uint content_length;
 
 	char *path_translated;
 	char *request_uri;
+
+	char *content_type;
 
 	unsigned char headers_only;
 } sapi_request_info;
@@ -89,9 +95,12 @@ struct _sapi_module_struct {
 
 	void (*sapi_error)(int type, const char *error_msg, ...);
 
-	int (*header_handler)(sapi_header_struct *sapi_header, sapi_headers_struct *sapi_headers);
+	int (*header_handler)(sapi_header_struct *sapi_header, sapi_headers_struct *sapi_headers SLS_DC);
 	int (*send_headers)(sapi_headers_struct *sapi_headers SLS_DC);
 	void (*send_header)(sapi_header_struct *sapi_header, void *server_context);
+
+	char *(*read_post)(SLS_D);
+	char *(*read_cookies)(SLS_D);
 };
 
 

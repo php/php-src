@@ -287,7 +287,7 @@ int php3_mshutdown_odbc(SHUTDOWN_FUNC_ARGS)
 }
 
 
-void php3_info_odbc(void)
+void php3_info_odbc(ZEND_MODULE_INFO_FUNC_ARGS)
 {
 	ODBC_TLS_VARS;
 

@@ -49,7 +49,7 @@ extern int php3_minit_sybct(INIT_FUNC_ARGS);
 extern int php3_rinit_sybct(INIT_FUNC_ARGS);
 extern int php3_mshutdown_sybct(SHUTDOWN_FUNC_ARGS);
 extern int php3_rshutdown_sybct(SHUTDOWN_FUNC_ARGS);
-extern void php3_info_sybct(void);
+extern void php3_info_sybct(ZEND_MODULE_INFO_FUNC_ARGS);
 extern void php3_sybct_connect(INTERNAL_FUNCTION_PARAMETERS);
 extern void php3_sybct_pconnect(INTERNAL_FUNCTION_PARAMETERS);
 extern void php3_sybct_close(INTERNAL_FUNCTION_PARAMETERS);

@@ -52,7 +52,7 @@ php3_module_entry php3_gettext_module_entry = {
 	"gettext", php3_gettext_functions, NULL, NULL, NULL, NULL, php3_info_gettext, STANDARD_MODULE_PROPERTIES
 };
 
-void php3_info_gettext(void)
+void php3_info_gettext(ZEND_MODULE_INFO_FUNC_ARGS)
 {
 	php3_printf("GNU gettext support active.");
 }

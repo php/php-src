@@ -1531,7 +1531,7 @@ void php3_hw_getcgi(INTERNAL_FUNCTION_PARAMETERS) {
 	                     getenv("QUERY_STRING"));
 #else
 	sprintf(cgi_env_str, "CGI_REQUEST_METHOD=%s\nCGI_PATH_INFO=%s\nCGI_QUERY_STRING=%s",
-	                     request_info.request_method,
+	                     SG(request_info).request_method,
 	                     SG(request_info).request_uri,
 	                     SG(request_info).query_string);
 #endif
@@ -1783,7 +1783,7 @@ void php3_hw_pipecgi(INTERNAL_FUNCTION_PARAMETERS) {
 	                     getenv("QUERY_STRING"));
 #else
 	sprintf(cgi_env_str, "CGI_REQUEST_METHOD=%s\nCGI_PATH_INFO=%s\nCGI_QUERY_STRING=%s",
-	                     request_info.request_method,
+	                     SG(request_info).request_method,
 	                     SG(request_info).request_uri,
 	                     SG(request_info).query_string);
 #endif
@@ -2959,7 +2959,7 @@ void php3_hw_getrellink(INTERNAL_FUNCTION_PARAMETERS) {
 /* }}} */
 	
 
-void php3_info_hw()
+void php3_info_hw(ZEND_MODULE_INFO_FUNC_ARGS)
 {
 	php3_printf("HG-CSP Version: 7.17");
 }

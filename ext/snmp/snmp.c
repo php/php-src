@@ -104,7 +104,7 @@ int php3i_snmp_init(INIT_FUNC_ARGS) {
 	return SUCCESS;
 }
 
-void php3_info_snmp(void) {
+void php3_info_snmp(ZEND_MODULE_INFO_FUNC_ARGS) {
 	php3_printf("ucd-snmp");
 }
 

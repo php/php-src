@@ -109,7 +109,7 @@ int php3_minit_fdf(INIT_FUNC_ARGS)
 	return SUCCESS;
 }
 
-void php3_info_fdf(void) {
+void php3_info_fdf(ZEND_MODULE_INFO_FUNC_ARGS) {
 	/* need to use a PHPAPI function here because it is external module in windows */
 	php3_printf("FdfTk Version %s", FDFGetVersion());
 }

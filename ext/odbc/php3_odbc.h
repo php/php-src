@@ -120,7 +120,7 @@ extern php3_module_entry odbc_module_entry;
 extern int php3_minit_odbc(INIT_FUNC_ARGS);
 extern int php3_mshutdown_odbc(SHUTDOWN_FUNC_ARGS);
 extern int php3_rinit_odbc(INIT_FUNC_ARGS);
-extern void php3_info_odbc(void);
+extern void php3_info_odbc(ZEND_MODULE_INFO_FUNC_ARGS);
 extern PHP_FUNCTION(odbc_setoption);
 extern PHP_FUNCTION(odbc_autocommit);
 extern PHP_FUNCTION(odbc_close);

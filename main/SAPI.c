@@ -2,10 +2,12 @@
    +----------------------------------------------------------------------+
    | Server API Abstraction Layer                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1999 SAPI Development Team                             |
+   | Copyright (c) 1998, 1999 SAPI Development Team                       |
    +----------------------------------------------------------------------+
-   | This source file is subject to the GNU public license, that is       |
-   | bundled with this package in the file LICENSE.                       |
+   | This source file is subject to the Zend license, that is bundled     |
+   | with this package in the file LICENSE.  If you did not receive a     |
+   | copy of the Zend license, please mail us at zend@zend.com so we can  |
+   | send you a copy immediately.                                         |
    +----------------------------------------------------------------------+
    | Design:  Shane Caraveo <shane@caraveo.com>                           |
    | Authors: Andi Gutmans <andi@zend.com>                                |
@@ -59,17 +61,21 @@ static void sapi_free_header(sapi_header_struct *sapi_header)
 SAPI_API void sapi_activate(SLS_D)
 {
 	zend_llist_init(&SG(sapi_headers).headers, sizeof(sapi_header_struct), (void (*)(void *)) sapi_free_header, 0);
-	SG(sapi_headers).content_type.header = NULL;
+	SG(sapi_headers).send_default_content_type = 1;
 	SG(sapi_headers).http_response_code = 200;
 	SG(headers_sent) = 0;
+	if (SG(server_context)) {
+		SG(request_info).post_data = sapi_module.read_post(SLS_C);
+		SG(request_info).cookie_data = sapi_module.read_cookies(SLS_C);
+	}
 }
 
 
 SAPI_API void sapi_deactivate(SLS_D)
 {
 	zend_llist_destroy(&SG(sapi_headers).headers);
-	if (SG(sapi_headers).content_type.header) {
-		efree(SG(sapi_headers).content_type.header);
+	if (SG(server_context) && SG(request_info).post_data) {
+		efree(SG(request_info).post_data);
 	}
 }
 
@@ -93,7 +99,7 @@ SAPI_API int sapi_add_header(char *header_line, uint header_line_len)
 	sapi_header.header_len = header_line_len;
 
 	if (sapi_module.header_handler) {
-		retval = sapi_module.header_handler(&sapi_header, &SG(sapi_headers));
+		retval = sapi_module.header_handler(&sapi_header, &SG(sapi_headers) SLS_CC);
 	} else {
 		retval = SAPI_HEADER_ADD;
 	}
@@ -107,13 +113,7 @@ SAPI_API int sapi_add_header(char *header_line, uint header_line_len)
 		if (colon_offset) {
 			*colon_offset = 0;
 			if (!STRCASECMP(header_line, "Content-Type")) {
-				if (SG(sapi_headers).content_type.header) {
-					efree(SG(sapi_headers).content_type.header);
-				}
-				*colon_offset = ':';
-				SG(sapi_headers).content_type.header = (char *) header_line;
-				SG(sapi_headers).content_type.header_len = header_line_len;
-				return SUCCESS;
+				SG(sapi_headers).send_default_content_type = 0;
 			}
 			*colon_offset = ':';
 		}
@@ -145,9 +145,7 @@ SAPI_API int sapi_send_headers()
 			return SUCCESS;
 			break;
 		case SAPI_HEADER_DO_SEND:
-			if (SG(sapi_headers).content_type.header) {
-				sapi_module.send_header(&SG(sapi_headers).content_type, SG(server_context));
-			} else {
+			if (SG(sapi_headers).send_default_content_type) {
 				sapi_module.send_header(&default_header, SG(server_context));
 			}
 			zend_llist_apply_with_argument(&SG(sapi_headers).headers, (void (*)(void *, void *)) sapi_module.send_header, SG(server_context));
