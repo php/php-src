@@ -390,15 +390,20 @@ PHPAPI int php_printf(const char *format, ...)
 /* {{{ php_verror */
 PHPAPI void php_verror(const char *docref, const char *params, int type, const char *format, va_list args TSRMLS_DC)
 {
-	char *buffer = NULL, *docref_buf = NULL, *p;
+	char *buffer = NULL, *docref_buf = NULL, *function, *p;
 	
 	vspprintf(&buffer, 0, format, args);
 	if (buffer) {
 		if (!docref) {
-			spprintf(&docref_buf, 0, "function.%s%s", get_active_function_name(TSRMLS_C), PG(docref_ext));
-			if (docref_buf) {
-				while((p=strchr(docref_buf, '_'))!=NULL) *p = '-';
-				docref = docref_buf;
+			function = get_active_function_name(TSRMLS_C);
+			if (function) {
+				spprintf(&docref_buf, 0, "function.%s%s", function, PG(docref_ext));
+				if (docref_buf) {
+					while((p=strchr(docref_buf, '_'))!=NULL) *p = '-';
+					docref = docref_buf;
+				}
+			} else {
+				/* FIXME: need to handle non function calls and non TSRM builds here */
 			}
 		}
 		if (docref) {
