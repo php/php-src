@@ -82,6 +82,9 @@ struct sapi_request_info *sapi_rqst;
 #endif
 #endif
 
+
+#include "SAPI.h"
+
 #if MSVC5 || !defined(HAVE_GETOPT)
 #include "getopt.h"
 #endif
@@ -107,6 +110,9 @@ void *gLock;					/*mutex variable */
 /* True globals (no need for thread safety) */
 HashTable configuration_hash;
 char *php3_ini_path = NULL;
+#ifdef ZTS
+php_core_globals *main_core_globals;
+#endif
 
 
 static PHP_INI_MH(OnSetPrecision)
@@ -599,6 +605,36 @@ static void php_message_handler_for_zend(long message, void *data)
 }
 
 
+
+#ifndef NEW_SAPI
+#	if APACHE
+static int zend_apache_ub_write(const char *str, uint str_length)
+{
+	if (php3_rqst) {
+		return rwrite(str, str_length, php3_rqst);
+	} else {
+		return fwrite(str, 1, str_length, stdout);
+	}
+}
+
+sapi_functions_struct sapi_functions = {
+	zend_apache_ub_write
+};
+
+#	elif CGI_BINARY
+
+static int zend_cgibin_ub_write(const char *str, uint str_length)
+{
+	return fwrite(str, 1, str_length, stdout);
+}
+
+sapi_functions_struct sapi_functions = {
+	zend_cgibin_ub_write
+};
+#	endif
+#endif
+
+
 int php3_request_startup(CLS_D ELS_DC PLS_DC)
 {
 	zend_output_startup();
@@ -745,6 +781,14 @@ static void php3_config_ini_shutdown()
 }
 
 
+#ifdef ZTS
+static core_globals_ctor(php_core_globals *core_globals)
+{
+		*core_globals = *main_core_globals;
+}
+#endif
+
+
 int php3_module_startup()
 {
 	zend_utility_functions zuf;
@@ -778,8 +822,13 @@ int php3_module_startup()
 	zend_startup(&zuf, NULL);
 
 #ifdef ZTS
-	core_globals_id = ts_allocate_id(sizeof(php_core_globals), NULL, NULL);
+	core_globals_id = ts_allocate_id(sizeof(php_core_globals), core_globals_ctor, NULL);
 	core_globals = ts_resource(core_globals_id);
+	main_core_globals = core_globals;
+#endif
+
+#ifdef NEW_SAPI
+	sapi_startup();
 #endif
 
 #if HAVE_SETLOCALE
@@ -1093,7 +1142,7 @@ void _php3_build_argv(char *s ELS_DC)
 
 #include "logos.h"
 
-static void php3_parse(zend_file_handle *primary_file CLS_DC ELS_DC PLS_DC)
+void php3_parse(zend_file_handle *primary_file CLS_DC ELS_DC PLS_DC)
 {
 	zend_file_handle *prepend_file_p, *append_file_p;
 	zend_file_handle prepend_file, append_file;
@@ -1150,7 +1199,7 @@ static void php3_parse(zend_file_handle *primary_file CLS_DC ELS_DC PLS_DC)
 
 #if CGI_BINARY
 
-static void _php3_usage(char *argv0)
+void _php3_usage(char *argv0)
 {
 	char *prog;
 
@@ -1187,6 +1236,7 @@ extern flex_globals *yy_init_tls(void);
 extern void yy_destroy_tls(void);
 #endif
 
+#ifndef ZTS
 int main(int argc, char *argv[])
 {
 	int cgi = 0, c, i, len;
@@ -1442,6 +1492,8 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 	return SUCCESS;
 }
 #endif							/* CGI_BINARY */
+
+#endif /* ZTS */
 
 
 #if APACHE
