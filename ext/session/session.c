@@ -83,12 +83,17 @@ static const ps_serializer *_php_find_ps_serializer(char *name TSRMLS_DC);
 static PHP_INI_MH(OnUpdateSaveHandler)
 {
 	PS(mod) = _php_find_ps_module(new_value TSRMLS_CC);
-/* Following lines are commented out to prevent bogus error message at
-   start up. i.e. Save handler modules are not initilzied before Session
-   module. */
-/*  	if(!PS(mod)) { */
-/*  		php_error(E_ERROR,"Cannot find save handler %s",new_value); */
-/*  	} */
+/*
+ * Following lines are commented out to prevent bogus error message at
+ * start up. i.e. Save handler modules are not initilzied before Session
+ * module.
+ */
+
+#if 0
+	if(!PS(mod)) {
+		php_error(E_ERROR,"Cannot find save handler %s",new_value);
+	}
+#endif
 	return SUCCESS;
 }
 
@@ -96,12 +101,17 @@ static PHP_INI_MH(OnUpdateSaveHandler)
 static PHP_INI_MH(OnUpdateSerializer)
 {
 	PS(serializer) = _php_find_ps_serializer(new_value TSRMLS_CC);
-/* Following lines are commented out to prevent bogus error message at
-   start up. i.e. Serializer modules are not initilzied before Session
-   module. */
-/* 	if(!PS(serializer)) { */
-/* 	  php_error(E_ERROR,"Cannot find serialization handler %s",new_value); */
-/* 	}	   */
+/*
+ * Following lines are commented out to prevent bogus error message at
+ * start up. i.e. Serializer modules are not initilzied before Session
+ * module.
+ */
+
+#if 0
+	if(!PS(serializer)) {
+		php_error(E_ERROR,"Cannot find serialization handler %s",new_value);
+	}
+#endif
 	return SUCCESS;
 }
 
@@ -216,20 +226,11 @@ typedef struct {
 	void (*func)(TSRMLS_D);
 } php_session_cache_limiter_t;
 
-#define CACHE_LIMITER_FUNC(name) static void _php_cache_limiter_##name(TSRMLS_D)
-#define CACHE_LIMITER(name) { #name, _php_cache_limiter_##name },
+#define CACHE_LIMITER(name) _php_cache_limiter_##name
+#define CACHE_LIMITER_FUNC(name) static void CACHE_LIMITER(name)(TSRMLS_D)
+#define CACHE_LIMITER_ENTRY(name) { #name, CACHE_LIMITER(name) },
 
 #define ADD_COOKIE(a) sapi_add_header(a, strlen(a), 1);
-
-#define STR_CAT(P,S,I) {\
-	zval *__p = (P);\
-	size_t __l = (I);\
-	ulong __i = Z_STRLEN_P(__p);\
-	Z_STRLEN_P(__p) += __l;\
-	Z_STRVAL_P(__p) = (char *)erealloc(Z_STRVAL_P(__p), Z_STRLEN_P(__p) + 1);\
-	memcpy(Z_STRVAL_P(__p) + __i, (S), __l); \
-	Z_STRVAL_P(__p)[Z_STRLEN_P(__p)] = '\0'; \
-}
 
 #define MAX_STR 512
 
@@ -358,13 +359,11 @@ PS_SERIALIZER_ENCODE_FUNC(php)
 	PHP_VAR_SERIALIZE_INIT(var_hash);
 
 	PS_ENCODE_LOOP(
-			if (key_length + 1 > MAX_STR) continue;
 			smart_str_appendl(&buf, key, (unsigned char) key_length);
 			smart_str_appendc(&buf, PS_DELIMITER);
 			
 			php_var_serialize(&buf, struc, &var_hash TSRMLS_CC);
 		} else {
-			if (key_length + 2 > MAX_STR) continue;
 			smart_str_appendc(&buf, PS_UNDEF_MARKER);
 			smart_str_appendl(&buf, key, key_length);
 			smart_str_appendc(&buf, PS_DELIMITER);
@@ -605,8 +604,7 @@ static void strcpy_gmt(char *ubuf, time_t *when)
 	
 	php_gmtime_r(when, &tm);
 	
-	/* we know all components, thus it is safe to use sprintf */
-	n = sprintf(buf, "%s, %d %s %d %02d:%02d:%02d GMT", 
+	n = sprintf(buf, "%s, %d %s %d %02d:%02d:%02d GMT", /* SAFE */
 				week_days[tm.tm_wday], tm.tm_mday, 
 				month_names[tm.tm_mon], tm.tm_year + 1900, 
 				tm.tm_hour, tm.tm_min, 
@@ -647,20 +645,9 @@ CACHE_LIMITER_FUNC(public)
 	strcpy_gmt(buf + sizeof(EXPIRES) - 1, &now);
 	ADD_COOKIE(buf);
 	
-	sprintf(buf, "Cache-Control: public, max-age=%ld", PS(cache_expire) * 60);
+	sprintf(buf, "Cache-Control: public, max-age=%ld", PS(cache_expire) * 60); /* SAFE */
 	ADD_COOKIE(buf);
 	
-	last_modified(TSRMLS_C);
-}
-
-CACHE_LIMITER_FUNC(private)
-{
-	char buf[MAX_STR + 1];
-	
-	ADD_COOKIE("Expires: Thu, 19 Nov 1981 08:52:00 GMT");
-	sprintf(buf, "Cache-Control: private, max-age=%ld, pre-check=%ld", PS(cache_expire) * 60, PS(cache_expire) * 60);
-	ADD_COOKIE(buf);
-
 	last_modified(TSRMLS_C);
 }
 
@@ -668,10 +655,16 @@ CACHE_LIMITER_FUNC(private_no_expire)
 {
 	char buf[MAX_STR + 1];
 	
-	sprintf(buf, "Cache-Control: private, max-age=%ld, pre-check=%ld", PS(cache_expire) * 60, PS(cache_expire) * 60);
+	sprintf(buf, "Cache-Control: private, max-age=%ld, pre-check=%ld", PS(cache_expire) * 60, PS(cache_expire) * 60); /* SAFE */
 	ADD_COOKIE(buf);
 
 	last_modified(TSRMLS_C);
+}
+
+CACHE_LIMITER_FUNC(private)
+{
+	ADD_COOKIE("Expires: Thu, 19 Nov 1981 08:52:00 GMT");
+	CACHE_LIMITER(private_no_expire)(TSRMLS_C);
 }
 
 CACHE_LIMITER_FUNC(nocache)
@@ -684,10 +677,10 @@ CACHE_LIMITER_FUNC(nocache)
 }
 
 static php_session_cache_limiter_t php_session_cache_limiters[] = {
-	CACHE_LIMITER(public)
-	CACHE_LIMITER(private)
-	CACHE_LIMITER(private_no_expire)
-	CACHE_LIMITER(nocache)
+	CACHE_LIMITER_ENTRY(public)
+	CACHE_LIMITER_ENTRY(private)
+	CACHE_LIMITER_ENTRY(private_no_expire)
+	CACHE_LIMITER_ENTRY(nocache)
 	{0}
 };
 
