@@ -285,13 +285,12 @@ static void _php_ibase_error(void)
 static void _php_ibase_module_error(char *msg, ...)
 {
 	va_list ap;
-	int len;
 	TSRMLS_FETCH();
 
 	va_start(ap, msg);
-	len = vsnprintf(IBG(errmsg), MAX_ERRMSG - 1, msg, ap);
+	/* vsnprintf NUL terminates the buf and writes at most n-1 chars+NUL */
+	vsnprintf(IBG(errmsg), MAX_ERRMSG, msg, ap);
 	va_end(ap);
-	IBG(errmsg[len]) = '\0';
 	
 	php_error(E_WARNING, "InterBase module: %s", IBG(errmsg));
 }
