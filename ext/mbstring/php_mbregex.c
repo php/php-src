@@ -34,7 +34,7 @@
 ZEND_EXTERN_MODULE_GLOBALS(mbstring)
 
 #ifdef ZTS
-static MUTEX_T mbregex_locale_mutex = NULL;
+MUTEX_T mbregex_locale_mutex = NULL;
 #endif
 
 /*
