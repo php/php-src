@@ -263,15 +263,15 @@ char* php_wddx_gather(wddx_packet *packet)
 /* {{{ void php_wddx_packet_start */
 void php_wddx_packet_start(wddx_packet *packet, char *comment)
 {
-	char tmp_buf[WDDX_BUF_LEN];
-	
 	php_wddx_add_chunk(packet, WDDX_PACKET_S);
 	if (comment)
 	{
-		sprintf(tmp_buf, WDDX_HEADER_COMMENT, comment);
-		php_wddx_add_chunk(packet, tmp_buf);
-	}
-	else
+		php_wddx_add_chunk(packet, WDDX_HEADER_S);
+		php_wddx_add_chunk(packet, WDDX_COMMENT_S);
+		php_wddx_add_chunk(packet, comment);
+		php_wddx_add_chunk(packet, WDDX_COMMENT_E);
+		php_wddx_add_chunk(packet, WDDX_HEADER_E);
+	} else
 		php_wddx_add_chunk(packet, WDDX_HEADER);
 	php_wddx_add_chunk(packet, WDDX_DATA_S);
 }
