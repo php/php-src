@@ -418,7 +418,7 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 			char *error_format;
 
 			error_format = PG(html_errors) ?
-				"<br>\n<b>%s</b>:  %s in <b>%s</b> on line <b>%d</b><br>\n"
+				"<br />\n<b>%s</b>:  %s in <b>%s</b> on line <b>%d</b><br />\n"
 				: "\n%s: %s in %s on line %d\n";
 			if (PG(xmlrpc_errors)) {
 				error_format = do_alloca(1024);

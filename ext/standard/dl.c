@@ -215,7 +215,7 @@ void php_dl(pval *file, int type, pval *return_value)
 
 PHP_MINFO_FUNCTION(dl)
 {
-	PUTS("Dynamic Library support not available<br>.\n");
+	PUTS("Dynamic Library support not available<br />.\n");
 }
 
 #endif

@@ -225,7 +225,7 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 			}
 			PUTS("?="ZEND_LOGO_GUID"\" border=\"0\" align=\"right\" alt=\"Zend logo\"></a>\n");
 		}
-		php_printf("This program makes use of the Zend Scripting Language Engine:<br>");
+		php_printf("This program makes use of the Zend Scripting Language Engine:<br />");
 		zend_html_puts(zend_version, strlen(zend_version));
 		php_info_print_box_end();
 		efree(php_uname);
@@ -343,7 +343,7 @@ PHPAPI void php_info_print_table_start()
 
 PHPAPI void php_info_print_table_end()
 {
-	php_printf("</table><br>\n");
+	php_printf("</table><br />\n");
 
 }
 

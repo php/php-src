@@ -36,7 +36,7 @@
 
 PHP_MINFO_FUNCTION(ovrimos)
 {
-	php_printf("&quot;Ovrimos&quot; module<br>\n");
+	php_printf("&quot;Ovrimos&quot; module<br />\n");
 }
 
 /* Main User Functions 
