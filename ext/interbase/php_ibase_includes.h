@@ -145,12 +145,6 @@ typedef struct event {
 	enum event_state { NEW, ACTIVE, DEAD } state;
 } ibase_event;
 
-typedef struct {
-	isc_svc_handle handle;
-	char *hostname;
-	char *username;
-} ibase_service;
-
 enum php_interbase_option {
 	PHP_IBASE_DEFAULT 			= 0,
 	/* fetch flags */
