@@ -507,7 +507,8 @@ static void alloc_curl_handle(php_curl **ch)
 	(*ch)->handlers->write = ecalloc(1, sizeof(php_curl_write));
 	(*ch)->handlers->write_header = ecalloc(1, sizeof(php_curl_write));
 	(*ch)->handlers->read  = ecalloc(1, sizeof(php_curl_read));
-
+	memset(&(*ch)->err, 0, sizeof((*ch)->err));
+	
 	zend_llist_init(&(*ch)->to_free.str, sizeof(char *), 
 	                (void(*)(void *)) curl_free_string, 0);
 	zend_llist_init(&(*ch)->to_free.slist, sizeof(struct curl_slist),
@@ -943,6 +944,7 @@ PHP_FUNCTION(curl_error)
 	}
 	ZEND_FETCH_RESOURCE(ch, php_curl *, zid, -1, le_curl_name, le_curl);
 
+	ch->err.str[CURL_ERROR_SIZE] = 0;
 	RETURN_STRING(ch->err.str, 1);
 }
 /* }}} */
