@@ -16,22 +16,15 @@
    +----------------------------------------------------------------------+
 */
 
-#include "php.h"
-
 #ifndef _PHP_MING_H
 #define _PHP_MING_H
 
-#ifdef COMPILE_DL_MING
-#undef HAVE_MING
-#define HAVE_MING 1
-#endif
-
 #if HAVE_MING
-
-#include "ming.h"
 
 extern zend_module_entry ming_module_entry;
 #define ming_module_ptr &ming_module_entry
+
+#include <ming.h>
 
 PHP_RINIT_FUNCTION(ming);
 PHP_MINIT_FUNCTION(ming);
