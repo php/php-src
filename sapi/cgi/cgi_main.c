@@ -47,6 +47,7 @@
 #include <locale.h>
 #endif
 #include "zend.h"
+#include "zend_extensions.h"
 #include "php_ini.h"
 #include "php_globals.h"
 #include "main.h"
@@ -317,13 +318,15 @@ static void define_command_line_ini_entry(char *arg)
 void php_register_command_line_global_vars(char **arg)
 {
 	char *var, *val;
+	ELS_FETCH();
+	PLS_FETCH();
 
 	var = *arg;
 	val = strchr(var, '=');
 	if (!val) {
 		printf("No value specified for variable '%s'\n", var);
 	} else {
-		*val++ = NULL;
+		*val++ = '\0';
 		php_register_variable(var, val, NULL ELS_CC PLS_CC);
 	}
 	efree(*arg);
