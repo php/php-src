@@ -20,8 +20,8 @@
 
 /* TODO: A lot... */
 
-#include "php_config.h"
 #include "php.h"
+#include "php_config.h"
 #include "php3_interbase.h"
 
 #if HAVE_IBASE
@@ -32,17 +32,17 @@
 
 /* {{{ extension definition structures */
 function_entry ibase_functions[] = {
-	{"ibase_connect",		php3_ibase_connect,		NULL},
-	{"ibase_pconnect",		php3_ibase_pconnect,	NULL},
-	{"ibase_close",			php3_ibase_close,		NULL},
-	{"ibase_query",			php3_ibase_query,		NULL},
-	{"ibase_fetch_row",		php3_ibase_fetch_row,	NULL},
-	{"ibase_free_result",	php3_ibase_free_result,	NULL},
-	{"ibase_prepare",		php3_ibase_prepare,		NULL},
-	{"ibase_bind",			php3_ibase_bind,		NULL},
-	{"ibase_execute",		php3_ibase_execute,		NULL},
-	{"ibase_free_query",	php3_ibase_free_query,	NULL},
-	{"ibase_timefmt",		php3_ibase_timefmt,		NULL},
+	PHP_FE(ibase_connect,							NULL)
+	PHP_FE(ibase_pconnect,							NULL)
+	PHP_FE(ibase_close,								NULL)
+	PHP_FE(ibase_query,								NULL)
+	PHP_FE(ibase_fetch_row,							NULL)
+	PHP_FE(ibase_free_result,						NULL)
+	PHP_FE(ibase_prepare,							NULL)
+	PHP_FE(ibase_bind,								NULL)
+	PHP_FE(ibase_execute,							NULL)
+	PHP_FE(ibase_free_query,						NULL)
+	PHP_FE(ibase_timefmt,							NULL)
 	{NULL, NULL, NULL}
 };
 
@@ -50,11 +50,11 @@ php3_module_entry ibase_module_entry =
 {
 	"InterBase",
 	ibase_functions,
-	php3_minit_ibase,
+	PHP_MINIT(ibase),
 	NULL,
-	php3_rinit_ibase,
+	PHP_RINIT(ibase),
 	NULL,
-	php3_info_ibase,
+	PHP_MINFO(ibase),
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */
@@ -144,7 +144,7 @@ static void _php3_ibase_free_query(ibase_query_handle *query)
 /* }}} */
 
 /* {{{ startup, shutdown and info functions */
-int php3_minit_ibase(INIT_FUNC_ARGS)
+PHP_MINIT_FUNCTION(ibase)
 {
 	IBASE_TLS_VARS;
 
@@ -182,7 +182,7 @@ int php3_minit_ibase(INIT_FUNC_ARGS)
 	return SUCCESS;
 }
 
-int php3_rinit_ibase(INIT_FUNC_ARGS)
+PHP_RINIT_FUNCTION(ibase)
 {
 	IBASE_TLS_VARS;
 
@@ -202,7 +202,7 @@ int php3_rfinish_ibase(void)
 }
 */
 
-void php3_info_ibase(ZEND_MODULE_INFO_FUNC_ARGS)
+PHP_MINFO_FUNCTION(ibase)
 {
 	/* TODO */
 }
