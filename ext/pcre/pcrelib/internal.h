@@ -9,7 +9,7 @@ the file Tech.Notes for some information on the internals.
 
 Written by: Philip Hazel <ph10@cam.ac.uk>
 
-           Copyright (c) 1997-2000 University of Cambridge
+           Copyright (c) 1997-2001 University of Cambridge
 
 -----------------------------------------------------------------------------
 Permission is granted to anyone to use this software for any purpose on any
@@ -38,13 +38,21 @@ modules, but which are not relevant to the outside. */
 /* Get the definitions provided by running "configure" */
 
 #ifdef PHP_WIN32
-#include "config.w32.h"
+# include "config.w32.h"
 #elif defined(NETWARE)
-#include "config.nw.h"
+# include "config.nw.h"
 #else
-#include "php_config.h"
+# include "php_config.h"
 #endif
 
+/* The value of NEWLINE determines the newline character. The default is to
+leave it up to the compiler, but some sites want to force a particular value.
+On Unix systems, "configure" can be used to override this default. */
+
+#ifndef NEWLINE
+#define NEWLINE '\n'
+#endif
+	
 /* To cope with SunOS4 and other systems that lack memmove() but have bcopy(),
 define a macro for memmove() if HAVE_MEMMOVE is false, provided that HAVE_BCOPY
 is set. Otherwise, include an emulating function for those systems that have
@@ -129,12 +137,36 @@ typedef int BOOL;
 #define FALSE   0
 #define TRUE    1
 
+/* Escape items that are just an encoding of a particular data value. Note that
+ESC_N is defined as yet another macro, which is set in config.h to either \n
+(the default) or \r (which some people want). */
+
+#ifndef ESC_E
+#define ESC_E 27
+#endif
+
+#ifndef ESC_F
+#define ESC_F '\f'
+#endif
+
+#ifndef ESC_N
+#define ESC_N NEWLINE
+#endif
+
+#ifndef ESC_R
+#define ESC_R '\r'
+#endif
+
+#ifndef ESC_T
+#define ESC_T '\t'
+#endif
+
 /* These are escaped items that aren't just an encoding of a particular data
 value such as \n. They must have non-zero values, as check_escape() returns
 their negation. Also, they must appear in the same order as in the opcode
 definitions below, up to ESC_z. The final one must be ESC_REF as subsequent
 values are used for \1, \2, \3, etc. There is a test in the code for an escape
-greater than ESC_b and less than ESC_X to detect the types that may be
+greater than ESC_b and less than ESC_Z to detect the types that may be
 repeated. If any new escapes are put in-between that don't consume a character,
 that code will have to change. */
 
@@ -230,19 +262,26 @@ enum {
 
   OP_ONCE,           /* Once matched, don't back up into the subpattern */
   OP_COND,           /* Conditional group */
-  OP_CREF,           /* Used to hold an extraction string number */
+  OP_CREF,           /* Used to hold an extraction string number (cond ref) */
 
   OP_BRAZERO,        /* These two must remain together and in this */
   OP_BRAMINZERO,     /* order. */
 
+  OP_BRANUMBER,      /* Used for extracting brackets whose number is greater
+                        than can fit into an opcode. */
+
   OP_BRA             /* This and greater values are used for brackets that
-                        extract substrings. */
+                        extract substrings up to a basic limit. After that,
+                        use is made of OP_BRANUMBER. */
 };
 
-/* The highest extraction number. This is limited by the number of opcodes
-left after OP_BRA, i.e. 255 - OP_BRA. We actually set it somewhat lower. */
+/* The highest extraction number before we have to start using additional
+bytes. (Originally PCRE didn't have support for extraction counts highter than
+this number.) The value is limited by the number of opcodes left after OP_BRA,
+i.e. 255 - OP_BRA. We actually set it a bit lower to leave room for additional
+opcodes. */
 
-#define EXTRACT_MAX  99
+#define EXTRACT_BASIC_MAX  150
 
 /* The texts of compile-time error messages are defined as macros here so that
 they can be accessed by the POSIX wrapper and converted into error codes.  Yes,
@@ -261,13 +300,13 @@ just to accommodate the POSIX wrapper. */
 #define ERR10 "operand of unlimited repeat could match the empty string"
 #define ERR11 "internal error: unexpected repeat"
 #define ERR12 "unrecognized character after (?"
-#define ERR13 "too many capturing parenthesized sub-patterns"
+#define ERR13 "unused error"
 #define ERR14 "missing )"
 #define ERR15 "back reference to non-existent subpattern"
 #define ERR16 "erroffset passed as NULL"
 #define ERR17 "unknown option bit(s) set"
 #define ERR18 "missing ) after comment"
-#define ERR19 "too many sets of parentheses"
+#define ERR19 "parentheses nested too deeply"
 #define ERR20 "regular expression too large"
 #define ERR21 "failed to get memory"
 #define ERR22 "unmatched parentheses"
@@ -302,8 +341,8 @@ typedef struct real_pcre {
   size_t size;
   const unsigned char *tables;
   unsigned long int options;
-  uschar top_bracket;
-  uschar top_backref;
+  unsigned short int top_bracket;
+  unsigned short int top_backref;
   uschar first_char;
   uschar req_char;
   uschar code[1];

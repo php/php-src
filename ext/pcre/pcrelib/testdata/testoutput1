@@ -1,4 +1,4 @@
-PCRE version 3.4 22-Aug-2000
+PCRE version 3.9 02-Jan-2002
 
 /the quick brown fox/
     the quick brown fox
@@ -2080,15 +2080,6 @@ No match
  0: abcABC
  1: abc
 
-/(main(O)?)+/
-    mainmain
- 0: mainmain
- 1: main
-    mainOmain
- 0: mainOmain
- 1: main
- 2: O
-
 /ab{3cd/
     ab{3cd
  0: ab{3cd
@@ -2962,5 +2953,67 @@ No match
     a\nb  
  0: a\x0ab
 
+/^(b+?|a){1,2}?c/
+    bac
+ 0: bac
+ 1: a
+    bbac
+ 0: bbac
+ 1: a
+    bbbac
+ 0: bbbac
+ 1: a
+    bbbbac
+ 0: bbbbac
+ 1: a
+    bbbbbac 
+ 0: bbbbbac
+ 1: a
+
+/^(b+|a){1,2}?c/
+    bac
+ 0: bac
+ 1: a
+    bbac
+ 0: bbac
+ 1: a
+    bbbac
+ 0: bbbac
+ 1: a
+    bbbbac
+ 0: bbbbac
+ 1: a
+    bbbbbac 
+ 0: bbbbbac
+ 1: a
+    
+/(?!\A)x/m
+    x\nb\n
+No match
+    a\bx\n  
+ 0: x
+    
+/\x0{ab}/
+    \0{ab} 
+ 0: \x00{ab}
+
+/(A|B)*?CD/
+    CD 
+ 0: CD
+    
+/(A|B)*CD/
+    CD 
+ 0: CD
+
+/(AB)*?\1/
+    ABABAB
+ 0: ABAB
+ 1: AB
+
+/(AB)*\1/
+    ABABAB
+ 0: ABABAB
+ 1: AB
+    
 / End of testinput1 /
 

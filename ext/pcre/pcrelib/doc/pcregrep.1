@@ -2,7 +2,7 @@
 .SH NAME
 pcregrep - a grep with Perl-compatible regular expressions.
 .SH SYNOPSIS
-.B pcregrep [-Vchilnsvx] pattern [file] ...
+.B pcregrep [-Vcfhilnrsvx] pattern [file] ...
 
 
 .SH DESCRIPTION
@@ -32,6 +32,12 @@ Do not print individual lines; instead just print a count of the number of
 lines that would otherwise have been printed. If several files are given, a
 count is printed for each of them.
 .TP
+\fB-f\fIfilename\fR
+Read patterns from the file, one per line, and match all patterns against each
+line. There is a maximum of 100 patterns. Trailing white space is removed, and
+blank lines are ignored. An empty file contains no patterns and therefore
+matches nothing.
+.TP
 \fB-h\fR
 Suppress printing of filenames when searching multiple files.
 .TP
@@ -45,6 +51,10 @@ once, on a separate line.
 .TP
 \fB-n\fR
 Precede each line by its line number in the file.
+.TP
+\fB-r\fR
+If any file is a directory, recursively scan the files it contains. Without
+\fB-r\fR a directory is scanned as a normal file.
 .TP
 \fB-s\fR
 Work silently, that is, display nothing except error messages.
@@ -72,5 +82,7 @@ for syntax errors or inacessible files (even if matches were found).
 
 .SH AUTHOR
 Philip Hazel <ph10@cam.ac.uk>
+
+Last updated: 15 August 2001
 .br
-Copyright (c) 1997-2000 University of Cambridge.
+Copyright (c) 1997-2001 University of Cambridge.

@@ -17,14 +17,30 @@ that name by distributing it that way. To use it with an existing program that
 uses the POSIX API, it will have to be renamed or pointed at by a link.
 
 
+Contributions by users of PCRE
+------------------------------
+
+You can find contributions from PCRE users in the directory
+
+  ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/Contrib
+
+where there is also a README file giving brief descriptions of what they are.
+Several of them provide support for compiling PCRE on various flavours of
+Windows systems (I myself do not use Windows). Some are complete in themselves;
+others are pointers to URLs containing relevant files.
+
+
 Building PCRE on a Unix system
 ------------------------------
 
-To build PCRE on a Unix system, run the "configure" command in the PCRE
-distribution directory. This is a standard GNU "autoconf" configuration script,
-for which generic instructions are supplied in INSTALL. On many systems just
-running "./configure" is sufficient, but the usual methods of changing standard
-defaults are available. For example,
+To build PCRE on a Unix system, first run the "configure" command from the PCRE
+distribution directory, with your current directory set to the directory where
+you want the files to be created. This command is a standard GNU "autoconf"
+configuration script, for which generic instructions are supplied in INSTALL.
+
+Most commonly, people build PCRE within its own distribution directory, and in
+this case, on many systems, just running "./configure" is sufficient, but the
+usual methods of changing standard defaults are available. For example,
 
 CFLAGS='-O2 -Wall' ./configure --prefix=/opt/local
 
@@ -32,14 +48,22 @@ specifies that the C compiler should be run with the flags '-O2 -Wall' instead
 of the default, and that "make install" should install PCRE under /opt/local
 instead of the default /usr/local.
 
+If you want to build in a different directory, just run "configure" with that
+directory as current. For example, suppose you have unpacked the PCRE source
+into /source/pcre/pcre-xxx, but you want to build it in /build/pcre/pcre-xxx:
+
+cd /build/pcre/pcre-xxx
+/source/pcre/pcre-xxx/configure
+
 If you want to make use of the experimential, incomplete support for UTF-8
 character strings in PCRE, you must add --enable-utf8 to the "configure"
 command. Without it, the code for handling UTF-8 is not included in the
 library. (Even when included, it still has to be enabled by an option at run
 time.)
 
-The "configure" script builds four files:
+The "configure" script builds five files:
 
+. libtool is a script that builds shared and/or static libraries
 . Makefile is built by copying Makefile.in and making substitutions.
 . config.h is built by copying config.in and making substitutions.
 . pcre-config is built by copying pcre-config.in and making substitutions.
@@ -47,8 +71,9 @@ The "configure" script builds four files:
 
 Once "configure" has run, you can run "make". It builds two libraries called
 libpcre and libpcreposix, a test program called pcretest, and the pcregrep
-command. You can use "make install" to copy these, and the public header file
-pcre.h, to appropriate live directories on your system, in the normal way.
+command. You can use "make install" to copy these, the public header files
+pcre.h and pcreposix.h, and the man pages to appropriate live directories on
+your system, in the normal way.
 
 Running "make install" also installs the command pcre-config, which can be used
 to recall information about the PCRE configuration and installation. For
@@ -64,26 +89,38 @@ outputs information about where the library is installed. This command can be
 included in makefiles for programs that use PCRE, saving the programmer from
 having to remember too many details.
 
+There is one esoteric feature that is controlled by "configure". It concerns
+the character value used for "newline", and is something that you probably do
+not want to change on a Unix system. The default is to use whatever value your
+compiler gives to '\n'. By using --enable-newline-is-cr or
+--enable-newline-is-lf you can force the value to be CR (13) or LF (10) if you
+really want to.
+
 
 Shared libraries on Unix systems
 --------------------------------
 
-The default distribution builds PCRE as two shared libraries. This support is
-new and experimental and may not work on all systems. It relies on the
-"libtool" scripts - these are distributed with PCRE. It should build a
-"libtool" script and use this to compile and link shared libraries, which are
-placed in a subdirectory called .libs. The programs pcretest and pcregrep are
-built to use these uninstalled libraries by means of wrapper scripts. When you
-use "make install" to install shared libraries, pcregrep and pcretest are
-automatically re-built to use the newly installed libraries. However, only
-pcregrep is installed, as pcretest is really just a test program.
+The default distribution builds PCRE as two shared libraries and two static
+libraries, as long as the operating system supports shared libraries. Shared
+library support relies on the "libtool" script which is built as part of the
+"configure" process.
 
-To build PCRE using static libraries you must use --disable-shared when
+The libtool script is used to compile and link both shared and static
+libraries. They are placed in a subdirectory called .libs when they are newly
+built. The programs pcretest and pcregrep are built to use these uninstalled
+libraries (by means of wrapper scripts in the case of shared libraries). When
+you use "make install" to install shared libraries, pcregrep and pcretest are
+automatically re-built to use the newly installed shared libraries before being
+installed themselves. However, the versions left in the source directory still
+use the uninstalled libraries.
+
+To build PCRE using static libraries only you must use --disable-shared when
 configuring it. For example
 
 ./configure --prefix=/usr/gnu --disable-shared
 
-Then run "make" in the usual way.
+Then run "make" in the usual way. Similarly, you can use --disable-static to
+build only shared libraries.
 
 
 Building on non-Unix systems
@@ -99,16 +136,16 @@ Standard C functions.
 Testing PCRE
 ------------
 
-To test PCRE on a Unix system, run the RunTest script in the pcre directory.
-(This can also be run by "make runtest", "make check", or "make test".) For
-other systems, see the instruction in NON-UNIX-USE.
+To test PCRE on a Unix system, run the RunTest script that is created by the
+configuring process. (This can also be run by "make runtest", "make check", or
+"make test".) For other systems, see the instruction in NON-UNIX-USE.
 
-The script runs the pcretest test program (which is documented in
-doc/pcretest.txt) on each of the testinput files (in the testdata directory) in
-turn, and compares the output with the contents of the corresponding testoutput
-file. A file called testtry is used to hold the output from pcretest. To run
-pcretest on just one of the test files, give its number as an argument to
-RunTest, for example:
+The script runs the pcretest test program (which is documented in the doc
+directory) on each of the testinput files (in the testdata directory) in turn,
+and compares the output with the contents of the corresponding testoutput file.
+A file called testtry is used to hold the output from pcretest. To run pcretest
+on just one of the test files, give its number as an argument to RunTest, for
+example:
 
   RunTest 3
 
@@ -241,9 +278,9 @@ The distribution should contain the following files:
   doc/pcregrep.html     HTML version
   doc/pcregrep.txt      plain text version
   install-sh            a shell script for installing files
-  ltconfig              ) files used to build "libtool",
-  ltmain.sh             )   used only when building a shared library
-  pcretest.c            test program
+  ltmain.sh             file used to build a libtool script
+  pcretest.c            comprehensive test program
+  pcredemo.c            simple demonstration of coding calls to PCRE
   perltest              Perl test program
   perltest8             Perl test program for UTF-8 tests
   pcregrep.c            source of a grep utility that uses PCRE
@@ -267,4 +304,4 @@ The distribution should contain the following files:
   pcre.def
 
 Philip Hazel <ph10@cam.ac.uk>
-August 2000
+August 2001

@@ -1,6 +1,102 @@
 ChangeLog for PCRE
 ------------------
 
+Version 3.0 02-Jan-02
+---------------------
+
+1. A bit of extraneous text had somehow crept into the pcregrep documentation.
+
+2. If --disable-static was given, the building process failed when trying to
+build pcretest and pcregrep. (For some reason it was using libtool to compile
+them, which is not right, as they aren't part of the library.)
+
+
+Version 3.8 18-Dec-01
+---------------------
+
+1. The experimental UTF-8 code was completely screwed up. It was packing the
+bytes in the wrong order. How dumb can you get?
+
+
+Version 3.7 29-Oct-01
+---------------------
+
+1. In updating pcretest to check change 1 of version 3.6, I screwed up.
+This caused pcretest, when used on the test data, to segfault. Unfortunately,
+this didn't happen under Solaris 8, where I normally test things.
+
+2. The Makefile had to be changed to make it work on BSD systems, where 'make'
+doesn't seem to recognize that ./xxx and xxx are the same file. (This entry
+isn't in ChangeLog distributed with 3.7 because I forgot when I hastily made
+this fix an hour or so after the initial 3.7 release.)
+
+
+Version 3.6 23-Oct-01
+---------------------
+
+1. Crashed with /(sens|respons)e and \1ibility/ and "sense and sensibility" if
+offsets passed as NULL with zero offset count.
+
+2. The config.guess and config.sub files had not been updated when I moved to
+the latest autoconf.
+
+
+Version 3.5 15-Aug-01
+---------------------
+
+1. Added some missing #if !defined NOPOSIX conditionals in pcretest.c that
+had been forgotten.
+
+2. By using declared but undefined structures, we can avoid using "void"
+definitions in pcre.h while keeping the internal definitions of the structures
+private.
+
+3. The distribution is now built using autoconf 2.50 and libtool 1.4. From a
+user point of view, this means that both static and shared libraries are built
+by default, but this can be individually controlled. More of the work of
+handling this static/shared cases is now inside libtool instead of PCRE's make
+file.
+
+4. The pcretest utility is now installed along with pcregrep because it is
+useful for users (to test regexs) and by doing this, it automatically gets
+relinked by libtool. The documentation has been turned into a man page, so
+there are now .1, .txt, and .html versions in /doc.
+
+5. Upgrades to pcregrep:
+   (i)   Added long-form option names like gnu grep.
+   (ii)  Added --help to list all options with an explanatory phrase.
+   (iii) Added -r, --recursive to recurse into sub-directories.
+   (iv)  Added -f, --file to read patterns from a file.
+
+6. pcre_exec() was referring to its "code" argument before testing that
+argument for NULL (and giving an error if it was NULL).
+
+7. Upgraded Makefile.in to allow for compiling in a different directory from
+the source directory.
+
+8. Tiny buglet in pcretest: when pcre_fullinfo() was called to retrieve the
+options bits, the pointer it was passed was to an int instead of to an unsigned
+long int. This mattered only on 64-bit systems.
+
+9. Fixed typo (3.4/1) in pcre.h again. Sigh. I had changed pcre.h (which is
+generated) instead of pcre.in, which it its source. Also made the same change
+in several of the .c files.
+
+10. A new release of gcc defines printf() as a macro, which broke pcretest
+because it had an ifdef in the middle of a string argument for printf(). Fixed
+by using separate calls to printf().
+
+11. Added --enable-newline-is-cr and --enable-newline-is-lf to the configure
+script, to force use of CR or LF instead of \n in the source. On non-Unix
+systems, the value can be set in config.h.
+
+12. The limit of 200 on non-capturing parentheses is a _nesting_ limit, not an
+absolute limit. Changed the text of the error message to make this clear, and
+likewise updated the man page.
+
+13. The limit of 99 on the number of capturing subpatterns has been removed.
+The new limit is 65535, which I hope will not be a "real" limit.
+
 
 Version 3.4 22-Aug-00
 ---------------------
