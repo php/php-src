@@ -158,3 +158,27 @@ AC_SUBST(EXT_LIBS)
 AC_SUBST(EXTINFO_DEPS)
 dnl AC_SUBST(EXT_INCLUDE_CODE)
 dnl AC_SUBST(EXT_MODULES_PTRS)
+
+dnl
+dnl Solaris requires main code to be position independent in order
+dnl to let shared objects find symbols.  Weird.  Ugly.
+dnl
+dnl Must be run after all --with-NN options that let the user
+dnl choose dynamic extensions, and after the gcc test.
+dnl
+AC_DEFUN(PHP_SOLARIS_PIC_WEIRDNESS,[
+  AC_MSG_CHECKING(whether -fPIC is required)
+  if test "$EXT_SHARED" != ""; then
+    os=`uname -sr 2>/dev/null`
+    case "$os" in
+        "SunOS 5"*)
+          case "$CC" in
+	    gcc*|egcs*) CFLAGS="$CFLAGS -fPIC";;
+	    *) CFLAGS="$CFLAGS -fpic";;
+	  esac
+	  AC_MSG_RESULT(yes);;
+	*)
+	  AC_MSG_RESULT(no);;
+    esac
+  fi
+])

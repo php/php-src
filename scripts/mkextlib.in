@@ -14,3 +14,4 @@ for dir in $extensions; do
 done
 
 (set -x; $top_srcdir/scripts/armerge $outfile $ext_libs)
+exit 0
