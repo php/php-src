@@ -499,15 +499,21 @@ static zval *dom_object_get_data(void *obj)
 static inline void node_wrapper_dtor(xmlNodePtr node)
 {
 	zval *wrapper;
-
+	int refcount = 0;
 	/* FIXME: type check probably unnecessary here? */
 	if (!node || Z_TYPE_P(node) == XML_DTD_NODE)
 		return;
 
 	wrapper = dom_object_get_data(node);
-
-	if (wrapper)
+	
+	if (wrapper != NULL) {
+		refcount = wrapper->refcount;
 		zval_ptr_dtor(&wrapper);
+        /*only set it to null, if refcount was 1 before, otherwise it has still needed references */
+		if (refcount == 1) {
+			dom_object_set_data(node, NULL);	
+		}
+	}
 
 }
 
@@ -567,7 +573,6 @@ static void php_free_xml_doc(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 
 	if (doc) {
 		node_list_wrapper_dtor(doc->children);
-
 		node_wrapper_dtor((xmlNodePtr) doc);
 		xmlFreeDoc(doc);
 	}
@@ -578,11 +583,16 @@ static void php_free_xml_node(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	xmlNodePtr node = (xmlNodePtr) rsrc->ptr;
 
-	if (node) {
-		zval *wrapper = dom_object_get_data(node);
-		if (wrapper)
-			zval_ptr_dtor(&wrapper);
+	/* if node has no parent, it will not be freed by php_free_xml_doc, so do it here 
+	and for all children as well. */
+	if (node->parent == NULL) {
+		node_list_wrapper_dtor(node->children);
+		node_wrapper_dtor(node);        
+		xmlFreeNode(node);
+	} else {
+		node_wrapper_dtor(node);
 	}
+
 }
 
 
@@ -2040,7 +2050,7 @@ PHP_FUNCTION(domxml_node_append_child)
 	 * Uwe: must have been a temporary problem. It works for me with both
 	 * xmlAddChildList and xmlAddChild
 	 */
-//	child = xmlAddSibling(nodep, new_child);
+
 	child = xmlAddChild(nodep, new_child);
 
 	if (NULL == child) {
