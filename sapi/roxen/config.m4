@@ -41,18 +41,11 @@ if test "$RESULT" != "no" ; then
  RESULT=no
  AC_MSG_CHECKING(if Roxen should use ZTS)
  AC_ARG_ENABLE(roxen-zts, 
- [  --enable-roxen-zts      Build the Roxen module using Zend Thread Safety.
-                          This is not required to run the module in a threaded
-                          Roxen and it doesn't improve performance. PHP calls
-                          are normally made in a serialized mode.],
+ [  --enable-roxen-zts      Build the Roxen module using Zend Thread Safety.],
  [
  	PHP_BUILD_THREAD_SAFE
 	AC_DEFINE(ROXEN_USE_ZTS,1,[Whether to use Roxen in ZTS mode])
-	RESULT="yes
-	***   You have choosen to compile with PHP thread safety
-	***   enabled. This is not a requirement for the Roxen
-	***   PHP module, even if Roxen runs in multi-threaded mode.
-	***   It will as a matter of fact make performance worse."
+	RESULT="yes"
 
  ])
  AC_MSG_RESULT($RESULT)
