@@ -201,6 +201,9 @@ static void php_var_serialize_class(smart_str *buf, zval **struc, zval *retval_p
 
 	php_var_serialize_class_name(buf, struc TSRMLS_CC);
 
+	smart_str_append_long(buf, count);
+	smart_str_appendl(buf, ":{", 2);
+
 	if (count > 0) {
 		char *key;
 		zval **d, **name;
@@ -284,15 +287,13 @@ static void php_var_serialize_intern(smart_str *buf, zval **struc, HashTable *va
 
 		case IS_OBJECT: {
 				zval *retval_ptr = NULL;
-				zval *fname;
+				zval fname;
 				int res;
 
-				MAKE_STD_ZVAL(fname);
-				ZVAL_STRINGL(fname, "__sleep", sizeof("__sleep") - 1, 0);
-
-				res = call_user_function_ex(CG(function_table), struc, fname, 
+				INIT_PZVAL(&fname);
+				ZVAL_STRINGL(&fname, "__sleep", sizeof("__sleep") - 1, 0);
+				res = call_user_function_ex(CG(function_table), struc, &fname, 
 						&retval_ptr, 0, 0, 1, NULL TSRMLS_CC);
-				FREE_ZVAL(fname);
 
 				if (res == SUCCESS) {
 					if (retval_ptr) {
@@ -342,7 +343,7 @@ static void php_var_serialize_intern(smart_str *buf, zval **struc, HashTable *va
 							php_var_serialize_long(buf, index);
 							break;
 						case HASH_KEY_IS_STRING:
-							php_var_serialize_string(buf, key, key_len);
+							php_var_serialize_string(buf, key, key_len - 1);
 							break;
 					}
 					php_var_serialize_intern(buf, data, var_hash TSRMLS_CC);
@@ -592,13 +593,11 @@ PHPAPI int php_var_unserialize(zval **rval, const char **p, const char *max, Has
 
 			if ((*rval)->type == IS_OBJECT) {
 				zval *retval_ptr = NULL;
-				zval *fname;
+				zval fname;
 
-				MAKE_STD_ZVAL(fname);
-				ZVAL_STRINGL(fname, "__wakeup", sizeof("__wakeup") - 1, 1);
-
-				call_user_function_ex(CG(function_table), rval, fname, &retval_ptr, 0, 0, 1, NULL TSRMLS_CC);
-				FREE_ZVAL(fname);
+				INIT_PZVAL(&fname);
+				ZVAL_STRINGL(&fname, "__wakeup", sizeof("__wakeup") - 1, 0);
+				call_user_function_ex(CG(function_table), rval, &fname, &retval_ptr, 0, 0, 1, NULL TSRMLS_CC);
 
 				if (retval_ptr)
 					zval_ptr_dtor(&retval_ptr);
