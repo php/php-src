@@ -2,14 +2,15 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 05 Oct 2000, Version 4.0.3
+- Fixed PostgreSQL module to work when the link handle is omitted (Zeev)
 - Fixed returning of empty LOB fields in OCI8. (Thies)
-- Add Calendar module to default Win32 build (Andi)
-- Add FTP module to default Win32 build (Andi)
+- Added Calendar module to default Win32 build (Andi)
+- Added FTP module to default Win32 build (Andi)
 - Fixed crash in the POSIX getrlimit() function (alex@zend.com)
 - Fixed dirname() under certain conditions (Andi)
-- Add --with-imap-ssl to support SSL'ized imap library in RH7 and others
+- Added --with-imap-ssl to support SSL'ized imap library in RH7 and others
   (Rasmus)
-- Fix possible crash bug in parse_url() (Andi)
+- Fixed possible crash bug in parse_url() (Andi)
 - Added support for trans sid under Win32 (Daniel)
 - IPv6 support in fopen (Stig Venaas)
 - Added the shmop extension. It allows more general ways of shared memory
@@ -18,7 +19,7 @@ PHP 4.0                                                                    NEWS
 - Added the ability for CURLOPT_POSTFIELDS to accept an associative array of 
   HTTP POST variables and values. (Sterling)
 - Added the CURLOPT_HTTPHEADER option to curl_setopt(). (Sterling)
-- Add the curl_error() and curl_errno() functions. (Sterling)
+- Added the curl_error() and curl_errno() functions. (Sterling)
 - Changed ext/db not to be enabled by default (Jani)
 - Fixed building Apache SAPI module on SCO UnixWare (Sascha)
 - Fixed writing empty session sets to shared memory (tcarroll@chc-chimes.com)
@@ -43,7 +44,7 @@ PHP 4.0                                                                    NEWS
   word is longer than the maximum allowed. (Derick)
 - Added functions pg_put_line and pg_end_copy (Dirk Elmendorf)
 - Added second parameter for parse_str to save result (John Bafford)
-- Fix bug with curl places extra data in the output. (medvitz@medvitz.net)
+- Fixed bug with curl places extra data in the output. (medvitz@medvitz.net)
 - Added the pathinfo() function. (Sterling)
 - Updated sybase_ct module and its sybase_query to use high performance API.
   (Joey)
@@ -53,11 +54,11 @@ PHP 4.0                                                                    NEWS
   display_startup_errors - see php.ini-dist for further information (Zeev)
 - Worked around a bug in the libc5 implementation of readdir() (Stas)
 - Fixed some potential OpenBSD and NetBSD crash bugs when opening files. (Andi)
-- Add EscapeShellArg() function (Rasmus)
-- Add a php.ini option session.use_trans_sid to enable/disable trans-sid.
+- Added EscapeShellArg() function (Rasmus)
+- Added a php.ini option session.use_trans_sid to enable/disable trans-sid.
   (Sterling)
 - Quick-fix for the file upload security alert (Rasmus)
-- Add the Sablotron extension for XSL parsing. (Sterling)
+- Added the Sablotron extension for XSL parsing. (Sterling)
 - Fixed a bug in checkdate() which caused < 1 years to be valid (Jani)
 - Added support for an optional output handler function for output
   buffering.  This enables transparent rendering of XML through XSL,
@@ -88,7 +89,7 @@ PHP 4.0                                                                    NEWS
   syntax for the walk function. (Andrei)
 - Fixed segfault with fgets(), fgetcsv(), fgetss(), and fread() when
   called with negative length argument. (Torben)
-- Fix by-reference parameters passing for xml_ functions and for scanf
+- Fixed by-reference parameters passing for xml_ functions and for scanf
   functions (Stas)
 - Added experimental Oracle LDAP SDK support. 8.1.6 or later needed. Configure
   with something like --with-ldap=/usr/local/oracle/product/8.1.6 (Stig Venaas)
