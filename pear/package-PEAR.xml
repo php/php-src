@@ -65,7 +65,7 @@
         <file baseinstalldir="/" role="script" install-as="pear" name="pear.in">
           <replace from="@prefix@/bin" to="PHP_BINDIR" type="php-const"/>
         </file>
-        <file baseinstalldir="/" role="script" name="pear.bat"></file>
+        <file baseinstalldir="/" role="script" platform="windows" name="pear.bat"></file>
       </dir>
     </filelist>
     <deps>
