@@ -12,8 +12,6 @@ PHP 4                                                                      NEWS
 - Removed support for libmcrypt 2.2.x to allow cleaner code. Another reason
   to upgrade libmcrypt to a 2.5.x series as the older ones have too many bugs
   to be safely used with PHP. (Derick)
-- Fixed bug #17098 (make Apache2 aware that PHP scripts represent dynamic data
-  and should not be cached). (Ilia)
 - Fixed bug #20442 (upgraded bundled expat to 1.95.5). (Ilia)
 - Made uniqid() parameters to be optional and allow any prefix length. (Marcus)
 - Improved array_search() so that it can accept objects as a needle under
