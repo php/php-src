@@ -59,6 +59,8 @@ PHP_RINIT_FUNCTION(head)
 
 
 /* Implementation of the language Header() function */
+/* {{{ proto void header(string header)
+   Send a raw HTTP header */
 PHP_FUNCTION(Header)
 {
 	pval **arg1;
@@ -69,7 +71,7 @@ PHP_FUNCTION(Header)
 	convert_to_string_ex(arg1);
 	sapi_add_header(Z_STRVAL_PP(arg1), Z_STRLEN_PP(arg1), 1);
 }
-
+/* }}} */
 
 PHPAPI int php_header()
 {
@@ -109,6 +111,8 @@ CookieList *php_pop_cookie_list(void)
 }
 
 /* php_set_cookie(name,value,expires,path,domain,secure) */
+/* {{{ proto void setcookie(string name [, string value [, int expires [, string path [, string domain [, string secure]]]]])
+   Send a cookie */
 PHP_FUNCTION(setcookie)
 {
 	char *cookie, *encoded_value = NULL;
@@ -237,7 +241,7 @@ PHP_FUNCTION(setcookie)
 	}
 #endif
 }
-
+/* }}} */
 
 int php_headers_unsent(void)
 {
@@ -248,6 +252,8 @@ int php_headers_unsent(void)
 	}
 }
 
+/* {{{ proto int headers_sent(void)
+   Return true if headers have already been sent, false otherwise */
 PHP_FUNCTION(headers_sent)
 {
 	SLS_FETCH();
@@ -258,6 +264,7 @@ PHP_FUNCTION(headers_sent)
 		RETURN_FALSE;
 	}
 }
+/* }}} */
 
 /*
  * Local variables:
