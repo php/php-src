@@ -761,6 +761,8 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 		zend_hash_update(&CG(active_class_entry)->function_table, name, name_len+1, &op_array, sizeof(zend_op_array), (void **) &CG(active_op_array));
 		if ((CG(active_class_entry)->name_length == (uint) name_len) && (!memcmp(CG(active_class_entry)->name, name, name_len))) {
 			CG(active_class_entry)->constructor = (zend_function *) CG(active_op_array);
+		} else if ((function_name->u.constant.value.str.len == sizeof("_construct")-1) && (!memcmp(function_name->u.constant.value.str.val, "_construct", sizeof("_clone")))) {
+			CG(active_class_entry)->constructor = (zend_function *) CG(active_op_array);
 		} else if ((function_name->u.constant.value.str.len == sizeof("_clone")-1) && (!memcmp(function_name->u.constant.value.str.val, "_clone", sizeof("_clone")))) {
 			CG(active_class_entry)->clone = (zend_function *) CG(active_op_array);
 		}
