@@ -919,7 +919,7 @@ PHP_FUNCTION(constant)
 /* }}} */
 
 
-/* {{{ proto int ip2long(string ip_address)
+/* {{{ proto string ip2long(string ip_address)
    Converts a string containing an (IPv4) Internet Protocol dotted address into a proper address */
 PHP_FUNCTION(ip2long)
 {
