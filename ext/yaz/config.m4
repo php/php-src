@@ -28,6 +28,11 @@ if test "$PHP_YAZ" != "no"; then
        -L*)
          dir=`echo $c|cut -c 3-|sed 's%/\.libs%%g'`
         ;;
+       -lyaz*)
+        ;;
+       *)
+       PHP_EVAL_LIBLINE($c, YAZ_SHARED_LIBADD)
+        ;;
       esac
     done
     if test -n "$dir"; then
