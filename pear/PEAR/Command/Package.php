@@ -63,7 +63,24 @@ called package.xml).
         'cvstag' => array(
             'summary' => 'Set CVS Release Tag',
             'function' => 'doCvsTag',
-            'options' => array(),
+            'options' => array(
+                'quiet' => array(
+                    'shortopt' => 'q',
+                    'doc' => 'Be quiet',
+                    ),
+                'reallyquiet' => array(
+                    'shortopt' => 'Q',
+                    'doc' => 'Be really quiet',
+                    ),
+                'slide' => array(
+                    'shortopt' => 'F',
+                    'doc' => 'Move tag if it exists',
+                    ),
+                'delete' => array(
+                    'shortopt' => 'd',
+                    'doc' => 'Remote tag',
+                    ),
+                ),
             'doc' => '',
             ),
         'run-tests' => array(
@@ -99,21 +116,6 @@ called package.xml).
             return false;
         }
         return true;
-    }
-
-    /**
-     * Return a list of all the commands defined by this class.
-     * @return array list of commands
-     * @access public
-     */
-    function getCommands()
-    {
-        return array('package' => 'Build Package',
-                     'package-info' => 'Show Package Info',
-                     'package-list' => 'List Files in Package',
-                     'package-validate' => 'Validate Package',
-                     'cvstag' => 'Set CVS Release Tag',
-                     'run-tests' => 'Run Regression Tests');
     }
 
     function doPackage($command, $options, $params)
@@ -330,17 +332,17 @@ called package.xml).
         $cvstag = "RELEASE_$cvsversion";
         $files = array_keys($info['filelist']);
         $command = "cvs";
-        if (isset($options['q'])) {
+        if (isset($options['quiet'])) {
             $command .= ' -q';
         }
-        if (isset($options['Q'])) {
+        if (isset($options['reallyquiet'])) {
             $command .= ' -Q';
         }
         $command .= ' tag';
-        if (isset($options['F'])) {
+        if (isset($options['slide'])) {
             $command .= ' -F';
         }
-        if (isset($options['d'])) {
+        if (isset($options['delete'])) {
             $command .= ' -d';
         }
         $command .= ' ' . $cvstag . ' ' . escapeshellarg($params[0]);
