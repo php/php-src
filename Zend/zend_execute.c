@@ -157,6 +157,41 @@ static inline void zend_get_cv_address(zend_compiled_variable *cv, zval ***ptr, 
    zend_hash_quick_update(EG(active_symbol_table), cv->name, cv->name_len+1, cv->hash_value, &new_zval, sizeof(zval *), (void **)ptr);
 }
 
+static inline zval *_get_zval_ptr_var(znode *node, temp_variable *Ts, zend_free_op *should_free TSRMLS_DC)
+{
+	if (T(node->u.var).var.ptr) {
+		PZVAL_UNLOCK(T(node->u.var).var.ptr, should_free);
+		return T(node->u.var).var.ptr;
+	} else {
+		temp_variable *T = &T(node->u.var);
+		zval *str = T->str_offset.str;
+		zval *ptr;
+
+		/* string offset */
+		ALLOC_ZVAL(ptr);
+		T->str_offset.ptr = ptr;
+		should_free->var = ptr;
+
+		if (T->str_offset.str->type != IS_STRING
+			|| ((int)T->str_offset.offset<0)
+			|| (T->str_offset.str->value.str.len <= T->str_offset.offset)) {
+			zend_error(E_NOTICE, "Uninitialized string offset:  %d", T->str_offset.offset);
+			ptr->value.str.val = STR_EMPTY_ALLOC();
+			ptr->value.str.len = 0;
+		} else {
+			char c = str->value.str.val[T->str_offset.offset];
+
+			ptr->value.str.val = estrndup(&c, 1);
+			ptr->value.str.len = 1;
+		}
+		PZVAL_UNLOCK_FREE(str);
+		ptr->refcount=1;
+		ptr->is_ref=1;
+		ptr->type = IS_STRING;
+		return ptr;
+	}
+}
+
 static inline zval *_get_zval_ptr(znode *node, temp_variable *Ts, zend_free_op *should_free, int type TSRMLS_DC)
 {
 /*	should_free->is_var = 0; */
@@ -170,37 +205,7 @@ static inline zval *_get_zval_ptr(znode *node, temp_variable *Ts, zend_free_op *
 			return &T(node->u.var).tmp_var;
 			break;
 		case IS_VAR:
-			if (T(node->u.var).var.ptr) {
-				PZVAL_UNLOCK(T(node->u.var).var.ptr, should_free);
-				return T(node->u.var).var.ptr;
-			} else {
-				temp_variable *T = &T(node->u.var);
-				zval *str = T->str_offset.str;
-				zval *ptr;
-
-				/* string offset */
-				ALLOC_ZVAL(ptr);
-				T->str_offset.ptr = ptr;
-				should_free->var = ptr;
-
-				if (T->str_offset.str->type != IS_STRING
-					|| ((int)T->str_offset.offset<0)
-					|| (T->str_offset.str->value.str.len <= T->str_offset.offset)) {
-					zend_error(E_NOTICE, "Uninitialized string offset:  %d", T->str_offset.offset);
-					ptr->value.str.val = STR_EMPTY_ALLOC();
-					ptr->value.str.len = 0;
-				} else {
-					char c = str->value.str.val[T->str_offset.offset];
-
-					ptr->value.str.val = estrndup(&c, 1);
-					ptr->value.str.len = 1;
-				}
-				PZVAL_UNLOCK_FREE(str);
-				ptr->refcount=1;
-				ptr->is_ref=1;
-				ptr->type = IS_STRING;
-				return ptr;
-			}
+			return _get_zval_ptr_var(node, Ts, should_free TSRMLS_CC);
 			break;
 		case IS_UNUSED:
 			should_free->var = 0;
@@ -288,41 +293,6 @@ static inline zval *_get_zval_ptr_const(znode *node, temp_variable *Ts, zend_fre
 static inline zval *_get_zval_ptr_tmp(znode *node, temp_variable *Ts, zend_free_op *should_free TSRMLS_DC)
 {
 	return should_free->var = &T(node->u.var).tmp_var;
-}
-
-static inline zval *_get_zval_ptr_var(znode *node, temp_variable *Ts, zend_free_op *should_free TSRMLS_DC)
-{
-	if (T(node->u.var).var.ptr) {
-		PZVAL_UNLOCK(T(node->u.var).var.ptr, should_free);
-		return T(node->u.var).var.ptr;
-	} else {
-		temp_variable *T = &T(node->u.var);
-		zval *str = T->str_offset.str;
-		zval *ptr;
-
-		/* string offset */
-		ALLOC_ZVAL(ptr);
-		T->str_offset.ptr = ptr;
-		should_free->var = ptr;
-
-		if (T->str_offset.str->type != IS_STRING
-			|| ((int)T->str_offset.offset<0)
-			|| (T->str_offset.str->value.str.len <= T->str_offset.offset)) {
-			zend_error(E_NOTICE, "Uninitialized string offset:  %d", T->str_offset.offset);
-			ptr->value.str.val = STR_EMPTY_ALLOC();
-			ptr->value.str.len = 0;
-		} else {
-			char c = str->value.str.val[T->str_offset.offset];
-
-			ptr->value.str.val = estrndup(&c, 1);
-			ptr->value.str.len = 1;
-		}
-		PZVAL_UNLOCK_FREE(str);
-		ptr->refcount=1;
-		ptr->is_ref=1;
-		ptr->type = IS_STRING;
-		return ptr;
-	}
 }
 
 static inline zval *_get_zval_ptr_cv(znode *node, temp_variable *Ts, zend_free_op *should_free, int type TSRMLS_DC)
