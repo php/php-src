@@ -1,3 +1,79 @@
+2002-08-16  sniper  <sniper@pb1.pair.com>
+
+    * ext/imap/php_imap.c: ws fixes
+
+2002-08-16  kalowsky  <kalowsky@pb1.pair.com>
+
+    * ext/bz2/bz2.c: no calloc works like this.  sorry about that.
+
+    * ext/bz2/bz2.c: Fix for bug #18947 submitted by pgr75@hotmail.com
+
+    * main/rfc1867.c: Fix for bug #18792 submitted by t.bubeck@reinform.de
+
+    * ext/imap/php_imap.c:
+    Silence a compiler warning, and returns the SUCCESS value on PHP_MINIT
+
+2002-08-16  Andi Gutmans  <andi@pb1.pair.com>
+
+    * ext/dio/dio.c: - Use tabs instead of spaces for indentation!
+    - Fix all sorts of ugly whitespace things.
+    - People, please write code according to our standards even if you don't
+    - like them.
+
+2002-08-16  iliaa  <iliaa@pb1.pair.com>
+
+    * ext/standard/pageinfo.c:
+    Fixed a compile failure in Win32 caused by previous patch.
+    Changed else statement to comply with PHP coding standards.
+
+2002-08-16  jason  <jason@pb1.pair.com>
+
+    * ext/sockets/sockets.c: Nuke warnings on strict compilers
+
+2002-08-16  iliaa  <iliaa@pb1.pair.com>
+
+    * ext/standard/pageinfo.c: Added a handler for php -r '' for SAFE_MODE
+
+2002-08-16  wez  <wez@pb1.pair.com>
+
+    * main/streams.c: Fix a little leak.
+
+2002-08-16  Sterling Hughes  <sterling@pb1.pair.com>
+
+    * ext/standard/basic_functions.c: clean this up a bit
+
+2002-08-16  wez  <wez@pb1.pair.com>
+
+    * main/safe_mode.c
+      main/streams.c
+      main/php_streams.h:
+    Enhance Ilia's recent patch to query the wrapper subsystem to determine
+    if a filename is a URL and thus if safe-mode checks should be skipped.
+
+2002-08-16  chregu  <chregu@pb1.pair.com>
+
+    * ext/domxml/php_domxml.c: More on the way to W3C coformance:
+
+2002-08-16  iliaa  <iliaa@pb1.pair.com>
+
+    * main/safe_mode.c:
+    Make https:// be exempt from safe_mode checks, just like http:// & ftp:// are.
+
+    * ext/standard/basic_functions.c:
+    Added safe_mode & open_basedir check when a user is chaning ini options
+    that specify file system paths. Fixes bug #17168.
+
+2002-08-16  Stig Bakken  <ssb@pb1.pair.com>
+
+    * tests/lang/035.phpt:
+    - Added set_exception_handler() function for registering a global,
+      catch-all exception handling function 
+    - Added set_exception_handler() function for registering a global,
+      catch-all exception handling function (Stig)
+
+    * Makefile.global:
+    * allow using the TESTS make variable again to determine which tests are run
+
 2002-08-15  Zeev Suraski  <zeev@pb1.pair.com>
 
     * sapi/apache/mod_php4.c:
