@@ -108,14 +108,12 @@ class PEAR_Packager extends PEAR_Common
         // XXX This needs to be checked in infoFromDescriptionFile
         //     or at least a helper method to do the proper checks
         if (empty($pkginfo['version'])) {
-            return $this->raiseError("No version information found in $pkgfile",
-                                     null, PEAR_ERROR_TRIGGER, E_USER_ERROR);
+            return $this->raiseError("No version info found in $pkgfile");
         }
         // TMP DIR -------------------------------------------------
         // We allow calls like "pear package /home/user/mypack/package.xml"
         if (!@chdir(dirname($pkgfile))) {
-            return $this->raiseError('Couldn\'t chdir to package.xml dir',
-                              null, PEAR_ERROR_TRIGGER, E_USER_ERROR);
+            return $this->raiseError('Could not chdir to '.dirname($pkgfile));
         }
         $pwd = getcwd();
         $pkgfile = basename($pkgfile);
@@ -123,8 +121,8 @@ class PEAR_Packager extends PEAR_Common
             $pkginfo['version'] = date('Ymd');
         }
         // don't want strange characters
-        $pkgname    = ereg_replace ('[^a-zA-Z0-9._]', '_', $pkginfo['package']);
-        $pkgversion = ereg_replace ('[^a-zA-Z0-9._\-]', '_', $pkginfo['version']);
+        $pkgname    = preg_replace('/[^a-z0-9._]/i', '_', $pkginfo['package']);
+        $pkgversion = preg_replace('/[^a-z0-9._-]/i', '_', $pkginfo['version']);
         $pkgver = $pkgname . '-' . $pkgversion;
 
         // ----- Create the package file list
@@ -134,7 +132,7 @@ class PEAR_Packager extends PEAR_Common
         // Copy files -----------------------------------------------
         foreach ($pkginfo['filelist'] as $fname => $atts) {
             if (!file_exists($fname)) {
-                return $this->raiseError("File $fname does not exists");
+                return $this->raiseError("File $fname does not exist");
             } else {
                 $filelist[$i++] = $fname;
             }
@@ -155,6 +153,9 @@ class PEAR_Packager extends PEAR_Common
         }
 
         $this->log(1, "Package $dest_package done");
+        $cvsversion = preg_replace('/[^a-z0-9]/i', '_', $pkgversion);
+        $cvstag = "RELEASE_$cvsversion";
+        $this->log(1, "CVS release tag: $cvstag");
         return $dest_package;
     }
 
