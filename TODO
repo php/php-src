@@ -7,13 +7,9 @@ Zend
       dimensional arrays.
     * Look at replacing c-lib call tolower().
     * Make hash API functions work with HASH_OF() to save time.
-    * Allow to set a default value for call-by-reference-parameters. 
-      eg: function hello (&$pallo = NULL) {} 
     * Add configure test to determine if dlsym() requires underscore and set
       DLSYM_NEEDS_UNDERSCORE accordingly. Perl and zsh have it in configure, 
       for example. (DONE?)
-    * Allow foreach ($array as $k => &$val) syntax. right now we cannot 
-      traverse an array without copying each element.
     * Native large number support (probably with GNU GMP)
     * Const'ify APIs. Right now, many functions leave parameters untouched,
       but don't declare those as const. This makes interaction with other
