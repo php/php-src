@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? March 2004, PHP 5 Release Candidate 1
+- Fixed bug #27457 (handling of numeric indexes in strtr()). (Dmitry)
 - Replaced the exec_finished hook by the zend_post_deactive hook for
   extensions. The new hook will be run after the symbol table and destructors
   are run. (Derick)
