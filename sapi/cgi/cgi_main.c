@@ -1378,18 +1378,18 @@ consult the installation file that came with this distribution, or visit \n\
 
 		/* request startup only after we've done all we can to
 		   get path_translated */
-        if (php_request_startup(TSRMLS_C)==FAILURE) {
-            php_module_shutdown(TSRMLS_C);
-            return FAILURE;
-        }
+		if (php_request_startup(TSRMLS_C)==FAILURE) {
+			php_module_shutdown(TSRMLS_C);
+			return FAILURE;
+		}
 		if (no_headers) {
 			SG(headers_sent) = 1;
 			SG(request_info).no_headers = 1;
 		}
 
-        /* This actually destructs the elements of the list - ugly hack */
-        zend_llist_apply(&global_vars, (llist_apply_func_t) php_register_command_line_global_vars TSRMLS_CC);
-        zend_llist_destroy(&global_vars);
+		/* This actually destructs the elements of the list - ugly hack */
+		zend_llist_apply(&global_vars, (llist_apply_func_t) php_register_command_line_global_vars TSRMLS_CC);
+		zend_llist_destroy(&global_vars);
 		
 		if (cgi || SG(request_info).path_translated) {
 			retval = php_fopen_primary_script(&file_handle TSRMLS_CC);
