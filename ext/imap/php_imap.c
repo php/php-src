@@ -5,7 +5,8 @@
    | Copyright (c) 1997, 1998, 1999, 2000 The PHP Group                   |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.01 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
+   | that is
+   bundled with this package in the file LICENSE, and is        |
    | available at through the world-wide-web at                           |
    | http://www.php.net/license/2_01.txt.                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
@@ -250,8 +251,7 @@ void mail_free_foblist(FOBJECTLIST **foblist)
  */
 ERRORLIST *mail_newerrorlist(void)
 {
-  return (ERRORLIST *) memset(fs_get(sizeof(ERRORLIST)),0,
-			      sizeof(ERRORLIST));
+	return (ERRORLIST *) memset(fs_get(sizeof(ERRORLIST)), 0, sizeof(ERRORLIST));
 }
 
 /* Mail garbage collect FOBJECTLIST
@@ -260,11 +260,13 @@ ERRORLIST *mail_newerrorlist(void)
  */
 void mail_free_errorlist(ERRORLIST **errlist)
 {
-  if (*errlist) {		/* only free if exists */
-    if ((*errlist)->text.data) fs_give ((void **) &(*errlist)->text.data);
-    mail_free_errorlist (&(*errlist)->next);
-    fs_give ((void **) errlist);	/* return string to free storage */
-  }
+	if (*errlist) {		/* only free if exists */
+		if ((*errlist)->text.data) {
+			fs_give((void **) &(*errlist)->text.data);
+		}
+		mail_free_errorlist (&(*errlist)->next);
+		fs_give((void **) errlist);	/* return string to free storage */
+	}
 }
 
 
@@ -603,17 +605,17 @@ void imap_do_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	int myargc=ARG_COUNT(ht);
 	IMAPLS_FETCH();
 	
-	if (myargc <3 || myargc >4 || zend_get_parameters(ht, myargc, &mailbox,&user,&passwd,&options) == FAILURE) {
+	if (myargc <3 || myargc >4 || zend_get_parameters(ht, myargc, &mailbox, &user, &passwd, &options) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
 	convert_to_string(mailbox);
 	convert_to_string(user);
 	convert_to_string(passwd);
-	if(myargc ==4) {
+	if (myargc ==4) {
 		convert_to_long(options);
 		flags = options->value.lval;
-		if(flags & PHP_EXPUNGE) {
+		if (flags & PHP_EXPUNGE) {
 			cl_flags = CL_EXPUNGE;
 			flags ^= PHP_EXPUNGE;
 		}
@@ -626,9 +628,8 @@ void imap_do_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	/* Cannot use a persistent connection if we cannot parse
 	 * out the server's hostname.
 	 */
-	if (	persistent &&
-		!mail_valid_net_parse(mailbox->value.str.val, &netmbx))
-	{
+	if (persistent
+		&& !mail_valid_net_parse(mailbox->value.str.val, &netmbx)) {
 		persistent = 0;
 	}
 
@@ -737,14 +738,14 @@ void imap_do_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		/* Update the hash. */
 		new_le.type = le_pimapchain;
 		new_le.ptr = headp;
-		if (	need_update &&
-			zend_hash_update(&EG(persistent_list), hashed_details,
+		if (need_update
+			&& zend_hash_update(&EG(persistent_list), hashed_details,
 				hashed_details_length, &new_le,
-				sizeof(new_le), NULL) == FAILURE)
-		{
+				sizeof(new_le), NULL) == FAILURE) {
 			/* unlink and free the new node */
-			if ((*node->prev = node->next))
+			if ((*node->prev = node->next)) {
 				node->next->prev = node->prev;
+			}
 			mail_close(node->imap_stream);
 			free(node);
 
@@ -756,8 +757,7 @@ void imap_do_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		efree(hashed_details);
 
 		imap_le_struct = node;
-	}
-	else {
+	} else {
 #endif
 		imap_stream = mail_open(NIL, mailbox->value.str.val, flags);
 		if (imap_stream == NIL) {
@@ -824,16 +824,16 @@ PHP_FUNCTION(imap_reopen)
 	convert_to_long(streamind);
 	ind = streamind->value.lval;
 	imap_le_struct = (pils *)zend_list_find(ind, &ind_type);
-	if(!imap_le_struct || !IS_STREAM(ind_type)) {
+	if (!imap_le_struct || !IS_STREAM(ind_type)) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 
 	convert_to_string(mailbox);
-	if(myargc == 3) {
+	if (myargc == 3) {
 		convert_to_long(options);
 		flags = options->value.lval;
-		if(flags & PHP_EXPUNGE) {
+		if (flags & PHP_EXPUNGE) {
 			cl_flags = CL_EXPUNGE;
 			flags ^= PHP_EXPUNGE;
 		}
@@ -859,7 +859,7 @@ PHP_FUNCTION(imap_append)
 	STRING st;
 	int myargc=ARG_COUNT(ht);
   
-	if ( myargc < 3 || myargc > 4 || zend_get_parameters( ht, myargc, &streamind, &folder, &message,&flags) == FAILURE) {
+	if (myargc < 3 || myargc > 4 || zend_get_parameters(ht, myargc, &streamind, &folder, &message,&flags) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
   
@@ -869,14 +869,14 @@ PHP_FUNCTION(imap_append)
 	if (myargc == 4) convert_to_string(flags);
 	ind = streamind->value.lval;
   
-	imap_le_struct = (pils *)zend_list_find( ind, &ind_type );
+	imap_le_struct = (pils *)zend_list_find(ind, &ind_type);
 
-	if(!imap_le_struct || !IS_STREAM(ind_type)) {
+	if (!imap_le_struct || !IS_STREAM(ind_type)) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 	INIT (&st,mail_string,(void *) message->value.str.val,message->value.str.len);
-	if(mail_append_full(imap_le_struct->imap_stream, folder->value.str.val,myargc==4?flags->value.str.val:NIL,NIL,&st)) {
+	if (mail_append_full(imap_le_struct->imap_stream, folder->value.str.val,myargc==4?flags->value.str.val:NIL,NIL,&st)) {
 		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;
@@ -902,7 +902,7 @@ PHP_FUNCTION(imap_num_msg)
 
 	imap_le_struct = (pils *)zend_list_find(ind, &ind_type);
 
-	if(!imap_le_struct || !IS_STREAM(ind_type)) {
+	if (!imap_le_struct || !IS_STREAM(ind_type)) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
@@ -923,15 +923,15 @@ PHP_FUNCTION(imap_ping)
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long( streamind );
+	convert_to_long(streamind);
 	ind = streamind->value.lval;
 
-	imap_le_struct = (pils *)zend_list_find( ind, &ind_type );
-	if(!imap_le_struct || !IS_STREAM(ind_type)) {
-		php_error( E_WARNING, "Unable to find stream pointer" );
+	imap_le_struct = (pils *)zend_list_find(ind, &ind_type);
+	if (!imap_le_struct || !IS_STREAM(ind_type)) {
+		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
-	RETURN_LONG( mail_ping( imap_le_struct->imap_stream ) );
+	RETURN_LONG(mail_ping(imap_le_struct->imap_stream));
 }
 /* }}} */
 
@@ -948,7 +948,7 @@ PHP_FUNCTION(imap_num_recent)
 	convert_to_long(streamind);
 	ind = streamind->value.lval;
 	imap_le_struct = (pils *)zend_list_find(ind, &ind_type);
-	if(!imap_le_struct || !IS_STREAM(ind_type)) {
+	if (!imap_le_struct || !IS_STREAM(ind_type)) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
@@ -974,7 +974,7 @@ PHP_FUNCTION(imap_expunge)
 
 	imap_le_struct = (pils *)zend_list_find(ind, &ind_type);
 
-	if(!imap_le_struct || !IS_STREAM(ind_type)) {
+	if (!imap_le_struct || !IS_STREAM(ind_type)) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
@@ -1001,15 +1001,15 @@ PHP_FUNCTION(imap_close)
 	convert_to_long(streamind);
 	ind = streamind->value.lval;
 	imap_le_struct = (pils *)zend_list_find(ind, &ind_type);
-	if(!imap_le_struct || !IS_STREAM(ind_type)) {
+	if (!imap_le_struct || !IS_STREAM(ind_type)) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
     }
-	if(myargcount==2) {
+	if (myargcount==2) {
 		convert_to_long(options);
 		flags = options->value.lval;
 		/* Do the translation from PHP's internal PHP_EXPUNGE define to c-client's CL_EXPUNGE */
-		if(flags & PHP_EXPUNGE) {
+		if (flags & PHP_EXPUNGE) {
 			flags ^= PHP_EXPUNGE;
 			flags |= CL_EXPUNGE;
 		}	
@@ -1094,11 +1094,13 @@ PHP_FUNCTION(imap_body)
 
 	convert_to_long(streamind);
 	convert_to_long(msgno);
-	if(myargc == 3) convert_to_long(flags);
+	if (myargc == 3) {
+		convert_to_long(flags);
+	}
 	ind = streamind->value.lval;
 
 	imap_le_struct = (pils *)zend_list_find(ind, &ind_type);
-	if(!imap_le_struct || !IS_STREAM(ind_type)) {
+	if (!imap_le_struct || !IS_STREAM(ind_type)) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
@@ -1124,7 +1126,7 @@ PHP_FUNCTION(imap_fetchtext_full)
 	ind = streamind->value.lval;
 
 	imap_le_struct = (pils *)zend_list_find(ind, &ind_type);
-	if(!imap_le_struct || !IS_STREAM(ind_type)) {
+	if (!imap_le_struct || !IS_STREAM(ind_type)) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
@@ -1148,15 +1150,17 @@ PHP_FUNCTION(imap_mail_copy)
 	convert_to_long(streamind);
 	convert_to_string(seq);
 	convert_to_string(folder);
-	if(myargcount == 4) convert_to_long(options);
+	if (myargcount == 4) {
+		convert_to_long(options);
+	}
 	ind = streamind->value.lval;
 
 	imap_le_struct = (pils *)zend_list_find(ind, &ind_type);
-	if(!imap_le_struct || !IS_STREAM(ind_type)) {
+	if (!imap_le_struct || !IS_STREAM(ind_type)) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
-	if ( mail_copy_full(imap_le_struct->imap_stream,seq->value.str.val,folder->value.str.val,myargcount == 4 ? options->value.lval : NIL)==T ) {
+	if (mail_copy_full(imap_le_struct->imap_stream,seq->value.str.val,folder->value.str.val,myargcount == 4 ? options->value.lval : NIL)==T) {
         RETURN_TRUE;
 	} else {
 		RETURN_FALSE;
@@ -1217,11 +1221,11 @@ PHP_FUNCTION(imap_createmailbox)
 	ind = streamind->value.lval;
 
 	imap_le_struct = (pils *)zend_list_find(ind, &ind_type);
-	if(!imap_le_struct || !IS_STREAM(ind_type)) {
+	if (!imap_le_struct || !IS_STREAM(ind_type)) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
-	if ( mail_create(imap_le_struct->imap_stream,folder->value.str.val)==T ) {
+	if (mail_create(imap_le_struct->imap_stream,folder->value.str.val)==T) {
         RETURN_TRUE;
 	} else {
 		RETURN_FALSE;
@@ -1233,26 +1237,26 @@ PHP_FUNCTION(imap_createmailbox)
    Rename a mailbox */
 PHP_FUNCTION(imap_renamemailbox)
 {
-	pval *streamind, *old, *new;
+	pval *streamind, *old_mailbox, *new_mailbox;
 	int ind, ind_type;
 	pils *imap_le_struct; 
 
-	if (ARG_COUNT(ht)!=3 || zend_get_parameters(ht,3,&streamind,&old,&new)==FAILURE){
+	if (ARG_COUNT(ht)!=3 || zend_get_parameters(ht, 3, &streamind, &old_mailbox, &new_mailbox)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
 	convert_to_long(streamind);
-	convert_to_string(old);
-	convert_to_string(new);
+	convert_to_string(old_mailbox);
+	convert_to_string(new_mailbox);
 
 	ind = streamind->value.lval;
 
 	imap_le_struct = (pils *)zend_list_find(ind, &ind_type);
-	if(!imap_le_struct || !IS_STREAM(ind_type)) {
+	if (!imap_le_struct || !IS_STREAM(ind_type)) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
-	if ( mail_rename(imap_le_struct->imap_stream,old->value.str.val,new->value.str.val)==T ) {
+	if (mail_rename(imap_le_struct->imap_stream, old_mailbox->value.str.val, new_mailbox->value.str.val)==T) {
         RETURN_TRUE;
 	} else {
 		RETURN_FALSE;
@@ -1278,11 +1282,11 @@ PHP_FUNCTION(imap_deletemailbox)
 	ind = streamind->value.lval;
 
 	imap_le_struct = (pils *)zend_list_find(ind, &ind_type);
-	if(!imap_le_struct || !IS_STREAM(ind_type)) {
+	if (!imap_le_struct || !IS_STREAM(ind_type)) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
-	if (mail_delete(imap_le_struct->imap_stream,folder->value.str.val)==T ) {
+	if (mail_delete(imap_le_struct->imap_stream,folder->value.str.val)==T) {
         RETURN_TRUE;
 	} else {
 		RETURN_FALSE;
@@ -1315,7 +1319,7 @@ PHP_FUNCTION(imap_list)
 	ind = streamind->value.lval;
 
 	imap_le_struct = (pils *)zend_list_find(ind, &ind_type);
-	if(!imap_le_struct || !IS_STREAM(ind_type)) {
+	if (!imap_le_struct || !IS_STREAM(ind_type)) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
@@ -1326,7 +1330,7 @@ PHP_FUNCTION(imap_list)
 	}
 	array_init(return_value);
     cur=IMAPG(imap_folders);
-    while (cur != NIL ) {
+    while (cur != NIL) {
 		add_next_index_string(return_value,cur->LTEXT,1);
         cur=cur->next;
     }
@@ -1418,7 +1422,7 @@ PHP_FUNCTION(imap_listscan)
 	ind = streamind->value.lval;
 
 	imap_le_struct = (pils *)zend_list_find(ind, &ind_type);
-	if(!imap_le_struct || !IS_STREAM(ind_type)) {
+	if (!imap_le_struct || !IS_STREAM(ind_type)) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
@@ -1429,7 +1433,7 @@ PHP_FUNCTION(imap_listscan)
 	}
 	array_init(return_value);
 	cur=IMAPG(imap_folders);
-	while (cur != NIL ) {
+	while (cur != NIL) {
 		add_next_index_string(return_value,cur->LTEXT,1);
 		cur=cur->next;
 	}
@@ -1456,12 +1460,12 @@ PHP_FUNCTION(imap_check)
 	ind = streamind->value.lval;
 
 	imap_le_struct = (pils *)zend_list_find(ind, &ind_type);
-	if(!imap_le_struct || !IS_STREAM(ind_type)) {
+	if (!imap_le_struct || !IS_STREAM(ind_type)) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 
-	if (mail_ping (imap_le_struct->imap_stream) == NIL ) {
+	if (mail_ping (imap_le_struct->imap_stream) == NIL) {
 		RETURN_FALSE;
     }
 	if (imap_le_struct->imap_stream && imap_le_struct->imap_stream->mailbox) {
@@ -1514,7 +1518,7 @@ PHP_FUNCTION(imap_delete)
    Remove the delete flag from a message */
 PHP_FUNCTION(imap_undelete)
 {
-	pval *streamind, * sequence, *flags;
+	pval *streamind, *sequence, *flags;
 	int ind, ind_type;
 	pils *imap_le_struct;
 	int myargc=ARG_COUNT(ht);
@@ -1532,7 +1536,7 @@ PHP_FUNCTION(imap_undelete)
 	ind = streamind->value.lval;
 
 	imap_le_struct = (pils *)zend_list_find(ind, &ind_type);
-	if(!imap_le_struct || !IS_STREAM(ind_type)) {
+	if (!imap_le_struct || !IS_STREAM(ind_type)) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
@@ -1563,9 +1567,19 @@ PHP_FUNCTION(imap_headerinfo)
 	
 	convert_to_long(streamind);
 	convert_to_long(msgno);
-	if (myargc >= 3) convert_to_long(fromlength); else fromlength = 0x00;
-	if (myargc >= 4) convert_to_long(subjectlength); else subjectlength = 0x00;
-	if (myargc == 5) convert_to_string(defaulthost);
+	if (myargc >= 3) {
+		convert_to_long(fromlength); 
+	} else {
+		fromlength = 0x00;
+	}
+	if (myargc >= 4) {
+		convert_to_long(subjectlength);
+	} else {
+		subjectlength = 0x00;
+	}
+	if (myargc == 5) {
+		convert_to_string(defaulthost);
+	}
 	
 	ind = streamind->value.lval;
 	imap_le_struct = (pils *)zend_list_find(ind, &ind_type);
@@ -1684,7 +1698,7 @@ PHP_FUNCTION(imap_lsub)
 	ind = streamind->value.lval;
 
 	imap_le_struct = (pils *)zend_list_find(ind, &ind_type);
-	if(!imap_le_struct || !IS_STREAM(ind_type)) {
+	if (!imap_le_struct || !IS_STREAM(ind_type)) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
@@ -1695,7 +1709,7 @@ PHP_FUNCTION(imap_lsub)
 	}
 	array_init(return_value);
 	cur=IMAPG(imap_sfolders);
-	while (cur != NIL ) {
+	while (cur != NIL) {
 		add_next_index_string(return_value,cur->LTEXT,1);
 		cur=cur->next;
 	}
@@ -1743,7 +1757,7 @@ PHP_FUNCTION(imap_lsub_full)
 	
 	array_init(return_value);
 	cur=IMAPG(imap_sfolder_objects);
-	while (cur != NIL ) {
+	while (cur != NIL) {
 		MAKE_STD_ZVAL(mboxob);
 		object_init(mboxob);
 		add_property_string(mboxob, "name", cur->LTEXT, 1);
@@ -1782,11 +1796,11 @@ PHP_FUNCTION(imap_subscribe)
 	ind = streamind->value.lval;
 
 	imap_le_struct = (pils *)zend_list_find(ind, &ind_type);
-	if(!imap_le_struct || !IS_STREAM(ind_type)) {
+	if (!imap_le_struct || !IS_STREAM(ind_type)) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
-	if ( mail_subscribe(imap_le_struct->imap_stream,folder->value.str.val)==T ) {
+	if (mail_subscribe(imap_le_struct->imap_stream,folder->value.str.val)==T) {
 		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;
@@ -1811,11 +1825,11 @@ PHP_FUNCTION(imap_unsubscribe)
 	ind = streamind->value.lval;
 
 	imap_le_struct = (pils *)zend_list_find(ind, &ind_type);
-	if(!imap_le_struct || !IS_STREAM(ind_type)) {
+	if (!imap_le_struct || !IS_STREAM(ind_type)) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
-	if ( mail_unsubscribe(imap_le_struct->imap_stream,folder->value.str.val)==T ) {
+	if (mail_unsubscribe(imap_le_struct->imap_stream,folder->value.str.val)==T) {
 		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;
@@ -1832,31 +1846,33 @@ PHP_FUNCTION(imap_fetchstructure)
 	pils *imap_le_struct;
 	BODY *body;
 	int myargc=ARG_COUNT(ht);
-	if ( myargc < 2  || myargc > 3 || zend_get_parameters( ht, myargc, &streamind, &msgno ,&flags) == FAILURE ) {
+	if (myargc < 2  || myargc > 3 || zend_get_parameters(ht, myargc, &streamind, &msgno ,&flags) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
-	convert_to_long( streamind );
-	convert_to_long( msgno );
+	convert_to_long(streamind);
+	convert_to_long(msgno);
 	if (msgno->value.lval < 1) {
 		RETURN_FALSE;
 	}
-	if(myargc == 3) convert_to_long(flags);
+	if (myargc == 3) {
+		convert_to_long(flags);
+	}
 	object_init(return_value);
 
 	ind = streamind->value.lval;
 
-	imap_le_struct = (pils *)zend_list_find( ind, &ind_type );
+	imap_le_struct = (pils *)zend_list_find(ind, &ind_type);
 
 	if (!imap_le_struct || !IS_STREAM(ind_type)) {
-		php_error( E_WARNING, "Unable to find stream pointer" );
+		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 	
-	mail_fetchstructure_full( imap_le_struct->imap_stream, msgno->value.lval, &body ,myargc == 3 ? flags->value.lval : NIL);
+	mail_fetchstructure_full(imap_le_struct->imap_stream, msgno->value.lval, &body ,myargc == 3 ? flags->value.lval : NIL);
 	
 	if (!body) {
-		php_error( E_WARNING, "No body information available" );
+		php_error(E_WARNING, "No body information available");
 		RETURN_FALSE;
 	}
 	
@@ -1874,30 +1890,33 @@ PHP_FUNCTION(imap_fetchbody)
 	char *body;
 	unsigned long len;
 	int myargc=ARG_COUNT(ht);
-	if(myargc < 3 || myargc >4 || zend_get_parameters( ht, myargc, &streamind, &msgno, &sec,&flags ) == FAILURE ) {
+
+	if (myargc < 3 || myargc >4 || zend_get_parameters(ht, myargc, &streamind, &msgno, &sec, &flags) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long( streamind );
-	convert_to_long( msgno );
-	convert_to_string( sec );
-	if(myargc == 4) convert_to_long(flags);
+	convert_to_long(streamind);
+	convert_to_long(msgno);
+	convert_to_string(sec);
+	if (myargc == 4) {
+		convert_to_long(flags);
+	}
 	ind = streamind->value.lval;
 
-	imap_le_struct = (pils *)zend_list_find( ind, &ind_type );
+	imap_le_struct = (pils *)zend_list_find(ind, &ind_type);
 
-	if(!imap_le_struct || !IS_STREAM(ind_type)) {
-		php_error( E_WARNING, "Unable to find stream pointer" );
+	if (!imap_le_struct || !IS_STREAM(ind_type)) {
+		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
  
-	body = mail_fetchbody_full( imap_le_struct->imap_stream, msgno->value.lval, sec->value.str.val, &len,myargc == 4 ? flags->value.lval : NIL );
+	body = mail_fetchbody_full(imap_le_struct->imap_stream, msgno->value.lval, sec->value.str.val, &len,myargc == 4 ? flags->value.lval : NIL);
 
-	if ( !body ) {
-		php_error( E_WARNING, "No body information available" );
+	if (!body) {
+		php_error(E_WARNING, "No body information available");
 		RETURN_FALSE;
 	}
-	RETVAL_STRINGL( body ,len,1);
+	RETVAL_STRINGL(body, len, 1);
 }
 
 /* }}} */
@@ -1909,11 +1928,11 @@ PHP_FUNCTION(imap_base64)
 	pval *text;
 	char *decode;
 	unsigned long newlength;
-	if ( ARG_COUNT(ht) != 1 || zend_get_parameters( ht, 1, &text) == FAILURE ) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters(ht, 1, &text) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_string( text );
+	convert_to_string(text);
 	object_init(return_value);
 
 	decode = (char *) rfc822_base64((unsigned char *) text->value.str.val, text->value.str.len,&newlength);
@@ -1928,11 +1947,11 @@ PHP_FUNCTION(imap_qprint)
 	pval *text;
 	char *decode;
 	unsigned long newlength;
-	if ( ARG_COUNT(ht) != 1 || zend_get_parameters( ht, 1, &text) == FAILURE ) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters(ht, 1, &text) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_string( text );
+	convert_to_string(text);
 	object_init(return_value);
 
 	decode = (char *) rfc822_qprint((unsigned char *) text->value.str.val, text->value.str.len,&newlength);
@@ -1947,11 +1966,11 @@ PHP_FUNCTION(imap_8bit)
 	pval *text;
 	char *decode;
 	unsigned long newlength;
-	if ( ARG_COUNT(ht) != 1 || zend_get_parameters( ht, 1, &text) == FAILURE ) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters(ht, 1, &text) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_string( text );
+	convert_to_string(text);
 	object_init(return_value);
 
 	decode = (char *) rfc822_8bit((unsigned char *) text->value.str.val, text->value.str.len,&newlength);
@@ -1965,7 +1984,7 @@ PHP_FUNCTION(imap_binary)
 {
 	pval *text;
 	unsigned long len;
-	if ( ARG_COUNT(ht) != 1 || zend_get_parameters( ht, 1, &text) == FAILURE ) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters(ht, 1, &text) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string(text);
@@ -1994,13 +2013,13 @@ PHP_FUNCTION(imap_mailboxmsginfo)
 
 	imap_le_struct = (pils *)zend_list_find(ind, &ind_type);
 
-	if(!imap_le_struct || !IS_STREAM(ind_type)) {
+	if (!imap_le_struct || !IS_STREAM(ind_type)) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 
 	/* Initialize return array */
-	if(object_init(return_value) == FAILURE) {
+	if (object_init(return_value) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -2033,23 +2052,29 @@ PHP_FUNCTION(imap_rfc822_write_address)
 	char string[MAILTMPLEN];
 	int argc;
 	argc=ARG_COUNT(ht);
-	if ( argc != 3 || zend_get_parameters( ht, argc, &mailbox,&host,&personal) == FAILURE ) {
+	if (argc != 3 || zend_get_parameters(ht, argc, &mailbox,&host,&personal) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string(mailbox);
 	convert_to_string(host);
 	convert_to_string(personal);
 	addr=mail_newaddr();
-	if(mailbox) addr->mailbox = cpystr(mailbox->value.str.val);
-	if(host) addr->host = cpystr(host->value.str.val);
-	if(personal) addr->personal = cpystr(personal->value.str.val);
+	if (mailbox) {
+		addr->mailbox = cpystr(mailbox->value.str.val);
+	}
+	if (host) {
+		addr->host = cpystr(host->value.str.val);
+	}
+	if (personal) {
+		addr->personal = cpystr(personal->value.str.val);
+	}
 	addr->next=NIL;
 	addr->error=NIL;
 	addr->adl=NIL;
 	string[0]=0x00;
   
-	rfc822_write_address(string,addr);
-	RETVAL_STRING(string,1);
+	rfc822_write_address(string, addr);
+	RETVAL_STRING(string, 1);
 }
 /* }}} */
 
@@ -2064,23 +2089,31 @@ PHP_FUNCTION(imap_rfc822_parse_adrlist)
 
 	env=mail_newenvelope();
 	argc=ARG_COUNT(ht);
-	if ( argc != 2 || zend_get_parameters( ht, argc, &str,&defaulthost) == FAILURE ) {
+	if (argc != 2 || zend_get_parameters(ht, argc, &str,&defaulthost) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string(str);
 	convert_to_string(defaulthost);
 	rfc822_parse_adrlist(&env->to,str->value.str.val,defaulthost->value.str.val);
-	if(array_init(return_value) == FAILURE) {
+	if (array_init(return_value) == FAILURE) {
 		RETURN_FALSE;
 	}
 	addresstmp=env->to;
-	if(addresstmp) do {
+	if (addresstmp) do {
 		MAKE_STD_ZVAL(tovals);
 		object_init(tovals);
-		if(addresstmp->mailbox) add_property_string(tovals,"mailbox",addresstmp->mailbox,1);
-		if(addresstmp->host) add_property_string(tovals,"host",addresstmp->host,1);
-		if(addresstmp->personal) add_property_string(tovals,"personal",addresstmp->personal,1);
-		if(addresstmp->adl) add_property_string(tovals,"adl",addresstmp->adl,1);
+		if (addresstmp->mailbox) {
+			add_property_string(tovals,"mailbox",addresstmp->mailbox,1);
+		}
+		if (addresstmp->host) {
+			add_property_string(tovals,"host",addresstmp->host,1);
+		}
+		if (addresstmp->personal) {
+			add_property_string(tovals,"personal",addresstmp->personal,1);
+		}
+		if (addresstmp->adl) {
+			add_property_string(tovals,"adl",addresstmp->adl,1);
+		}
 		add_next_index_object(return_value, tovals);
 	} while ((addresstmp = addresstmp->next));
 }
@@ -2336,8 +2369,9 @@ PHP_FUNCTION(imap_utf7_encode)
 		}
 		inp++;
 	}
-	if(state!=ST_NORMAL)
-	  outlen+=1+slen*3-slen/3;
+	if (state!=ST_NORMAL) {
+		outlen+=1+slen*3-slen/3;
+	}
 
 	/* allocate output buffer */
 	if ((out = emalloc(outlen + 1)) == NULL) {
@@ -2449,11 +2483,13 @@ PHP_FUNCTION(imap_setflag_full)
 	convert_to_long(streamind);
 	convert_to_string(sequence);
 	convert_to_string(flag);
-	if(myargc==4) convert_to_long(flags);
+	if (myargc==4) {
+		convert_to_long(flags);
+	}
 
 	ind = streamind->value.lval;
 	imap_le_struct = (pils *)zend_list_find(ind, &ind_type);
-	if(!imap_le_struct || !IS_STREAM(ind_type)) {
+	if (!imap_le_struct || !IS_STREAM(ind_type)) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
@@ -2479,10 +2515,12 @@ PHP_FUNCTION(imap_clearflag_full)
 	convert_to_long(streamind);
 	convert_to_string(sequence);
 	convert_to_string(flag);
-	if(myargc==4) convert_to_long(flags);
+	if (myargc==4) {
+		convert_to_long(flags);
+	}
 	ind = streamind->value.lval;
 	imap_le_struct = (pils *)zend_list_find(ind, &ind_type);
-	if(!imap_le_struct || !IS_STREAM(ind_type)) {
+	if (!imap_le_struct || !IS_STREAM(ind_type)) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
@@ -2661,7 +2699,7 @@ PHP_FUNCTION(imap_status)
 		RETURN_FALSE;
 	}
  
-	if(object_init(return_value) == FAILURE){
+	if (object_init(return_value) == FAILURE) {
 	  RETURN_FALSE;
 	}
  	if (mail_status(imap_le_struct->imap_stream, mbx->value.str.val, flags->value.lval)) {
@@ -2682,12 +2720,12 @@ PHP_FUNCTION(imap_status)
 			add_property_long(return_value,"uidvalidity",IMAPG(status_uidvalidity));
 		}
 #ifdef SA_QUOTA
-		if(IMAPG(status_flags) & SA_QUOTA) {
+		if (IMAPG(status_flags) & SA_QUOTA) {
 			add_property_long(return_value,"quota",IMAPG(status_quota));
 		}
 #endif
 #ifdef SA_QUOTA
-		if(IMAPG(status_flags) & SA_QUOTA_ALL) {
+		if (IMAPG(status_flags) & SA_QUOTA_ALL) {
 			add_property_long(return_value,"quota_all",IMAPG(status_quota_all));
 		}
 #endif
@@ -2730,43 +2768,51 @@ PHP_FUNCTION(imap_bodystruct)
 	}
 	
 	body=mail_body(imap_le_struct->imap_stream, msg->value.lval, section->value.str.val);
-	if(body->type) add_property_long( return_value, "type", body->type );
-	if(body->encoding) add_property_long( return_value, "encoding", body->encoding );
-	
-	if (body->subtype){
-		add_property_long( return_value, "ifsubtype", 1 );
-		add_property_string( return_value, "subtype",  body->subtype, 1 );
-	} else {
-		add_property_long( return_value, "ifsubtype", 0 );
+	if (body->type) {
+		add_property_long(return_value, "type", body->type);
+	}
+	if (body->encoding) {
+		add_property_long(return_value, "encoding", body->encoding);
 	}
 	
-	if (body->description){
-		add_property_long( return_value, "ifdescription", 1 );
-		add_property_string( return_value, "description",  body->description, 1 );
+	if (body->subtype) {
+		add_property_long(return_value, "ifsubtype", 1);
+		add_property_string(return_value, "subtype",  body->subtype, 1);
 	} else {
-		add_property_long( return_value, "ifdescription", 0 );
+		add_property_long(return_value, "ifsubtype", 0);
 	}
-	if (body->id){
-		add_property_long( return_value, "ifid", 1 );
-		add_property_string( return_value, "id",  body->id, 1 );
+	
+	if (body->description) {
+		add_property_long(return_value, "ifdescription", 1);
+		add_property_string(return_value, "description",  body->description, 1);
 	} else {
-		add_property_long( return_value, "ifid", 0 );
+		add_property_long(return_value, "ifdescription", 0);
+	}
+	if (body->id) {
+		add_property_long(return_value, "ifid", 1);
+		add_property_string(return_value, "id",  body->id, 1);
+	} else {
+		add_property_long(return_value, "ifid", 0);
 	}
 
 	
-	if(body->size.lines) add_property_long( return_value, "lines", body->size.lines );
-	if(body->size.bytes) add_property_long( return_value, "bytes", body->size.bytes );
+	if (body->size.lines) {
+		add_property_long(return_value, "lines", body->size.lines);
+	}
+	if (body->size.bytes) {
+		add_property_long(return_value, "bytes", body->size.bytes);
+	}
 #ifdef IMAP41
-	if ( body->disposition.type ){
-		add_property_long( return_value, "ifdisposition", 1);
-		add_property_string( return_value, "disposition", body->disposition.type, 1);
+	if (body->disposition.type) {
+		add_property_long(return_value, "ifdisposition", 1);
+		add_property_string(return_value, "disposition", body->disposition.type, 1);
 	} else {
-		add_property_long( return_value, "ifdisposition", 0);
+		add_property_long(return_value, "ifdisposition", 0);
 	}
 	
 	if (body->disposition.parameter) {
 		dpar = body->disposition.parameter;
-		add_property_long( return_value, "ifdparameters", 1);
+		add_property_long(return_value, "ifdparameters", 1);
 		MAKE_STD_ZVAL(dparametres);
 		array_init(dparametres);
 		do {
@@ -2774,7 +2820,7 @@ PHP_FUNCTION(imap_bodystruct)
 			object_init(dparam);
 			add_property_string(dparam, "attribute", dpar->attribute, 1);
 			add_property_string(dparam, "value", dpar->value, 1);
-			add_next_index_object(dparametres, dparam );
+			add_next_index_object(dparametres, dparam);
 		} while ((dpar = dpar->next));
 		add_assoc_object(return_value, "dparameters", dparametres);
 	} else {
@@ -2790,8 +2836,12 @@ PHP_FUNCTION(imap_bodystruct)
 		do {
 			MAKE_STD_ZVAL(param);
 			object_init(param);
-			if(par->attribute) add_property_string(param, "attribute", par->attribute, 1 );
-			if(par->value) add_property_string(param, "value", par->value, 1 );
+			if (par->attribute) {
+				add_property_string(param, "attribute", par->attribute, 1);
+			}
+			if (par->value) {
+				add_property_string(param, "value", par->value, 1);
+			}
 			
 			add_next_index_object(parametres, param);
 		} while ((par = par->next));
@@ -2863,19 +2913,23 @@ PHP_FUNCTION(imap_fetch_overview)
 				(env = mail_fetch_structure (imap_le_struct->imap_stream,i,NIL,NIL))) {
 				MAKE_STD_ZVAL(myoverview);
 				object_init(myoverview);
-				if(env->subject)
+				if (env->subject) {
 					add_property_string(myoverview,"subject",env->subject,1);
-				if(env->from) {
+				}
+				if (env->from) {
 					env->from->next=NULL;
 					rfc822_write_address(address,env->from);
 					add_property_string(myoverview,"from",address,1);
 				}
-				if(env->date)
+				if (env->date) {
 					add_property_string(myoverview,"date",env->date,1);
-				if(env->message_id)
+				}
+				if (env->message_id) {
 					add_property_string(myoverview,"message_id",env->message_id,1);
-				if(env->references)
+				}
+				if (env->references) {
 					add_property_string(myoverview,"references",env->references,1);
+				}
 				add_property_long(myoverview,"size",elt->rfc822_size);
 				add_property_long(myoverview,"uid",mail_uid(imap_le_struct->imap_stream,i));
 				add_property_long(myoverview,"msgno",i);
@@ -2915,48 +2969,48 @@ PHP_FUNCTION(imap_mail_compose)
 	convert_to_array(envelope);
 	convert_to_array(body);
 	env=mail_newenvelope();
-	if(zend_hash_find(envelope->value.ht,"remail",sizeof("remail"),(void **) &pvalue)== SUCCESS){
+	if (zend_hash_find(envelope->value.ht,"remail",sizeof("remail"),(void **) &pvalue)== SUCCESS) {
 		SEPARATE_ZVAL(pvalue);
 		convert_to_string(*pvalue);
 		env->remail=cpystr((*pvalue)->value.str.val);
 	}
 
-	if(zend_hash_find(envelope->value.ht,"return_path",sizeof("return_path"),(void **) &pvalue)== SUCCESS){
+	if (zend_hash_find(envelope->value.ht,"return_path",sizeof("return_path"),(void **) &pvalue)== SUCCESS) {
 		SEPARATE_ZVAL(pvalue);
 		convert_to_string(*pvalue);
 		rfc822_parse_adrlist (&env->return_path,(*pvalue)->value.str.val,"NO HOST");
 	}
-	if(zend_hash_find(envelope->value.ht,"date",sizeof("date"),(void **) &pvalue)== SUCCESS){
+	if (zend_hash_find(envelope->value.ht,"date",sizeof("date"),(void **) &pvalue)== SUCCESS) {
 		SEPARATE_ZVAL(pvalue);
 		convert_to_string(*pvalue);
 		env->date=cpystr((*pvalue)->value.str.val);
 	}
-	if(zend_hash_find(envelope->value.ht,"from",sizeof("from"),(void **) &pvalue)== SUCCESS){
+	if (zend_hash_find(envelope->value.ht,"from",sizeof("from"),(void **) &pvalue)== SUCCESS) {
 		SEPARATE_ZVAL(pvalue);
 		convert_to_string(*pvalue);
 		rfc822_parse_adrlist (&env->from,(*pvalue)->value.str.val,"NO HOST");
 	}
-	if(zend_hash_find(envelope->value.ht,"reply_to",sizeof("reply_to"),(void **) &pvalue)== SUCCESS){
+	if (zend_hash_find(envelope->value.ht,"reply_to",sizeof("reply_to"),(void **) &pvalue)== SUCCESS) {
 		SEPARATE_ZVAL(pvalue);
 		convert_to_string(*pvalue);
 		rfc822_parse_adrlist (&env->reply_to,(*pvalue)->value.str.val,"NO HOST");
 	}
-	if(zend_hash_find(envelope->value.ht,"to",sizeof("to"),(void **) &pvalue)== SUCCESS){
+	if (zend_hash_find(envelope->value.ht,"to",sizeof("to"),(void **) &pvalue)== SUCCESS) {
 		SEPARATE_ZVAL(pvalue);
 		convert_to_string(*pvalue);
 		rfc822_parse_adrlist (&env->to,(*pvalue)->value.str.val,"NO HOST");
 	}
-	if(zend_hash_find(envelope->value.ht,"cc",sizeof("cc"),(void **) &pvalue)== SUCCESS){
+	if (zend_hash_find(envelope->value.ht,"cc",sizeof("cc"),(void **) &pvalue)== SUCCESS) {
 		SEPARATE_ZVAL(pvalue);
 		convert_to_string(*pvalue);
 		rfc822_parse_adrlist (&env->cc,(*pvalue)->value.str.val,"NO HOST");
 	}
-	if(zend_hash_find(envelope->value.ht,"bcc",sizeof("bcc"),(void **) &pvalue)== SUCCESS){
+	if (zend_hash_find(envelope->value.ht,"bcc",sizeof("bcc"),(void **) &pvalue)== SUCCESS) {
 		SEPARATE_ZVAL(pvalue);
 		convert_to_string(*pvalue);
 		rfc822_parse_adrlist (&env->bcc,(*pvalue)->value.str.val,"NO HOST");
 	}
-	if(zend_hash_find(envelope->value.ht,"message_id",sizeof("message_id"),(void **) &pvalue)== SUCCESS){
+	if (zend_hash_find(envelope->value.ht,"message_id",sizeof("message_id"),(void **) &pvalue)== SUCCESS) {
 		SEPARATE_ZVAL(pvalue);
 		convert_to_string(*pvalue);
 		env->message_id=cpystr((*pvalue)->value.str.val);
@@ -2965,47 +3019,47 @@ PHP_FUNCTION(imap_mail_compose)
 	zend_hash_internal_pointer_reset(body->value.ht);
 	zend_hash_get_current_key(body->value.ht, &key, &ind);
 	zend_hash_get_current_data(body->value.ht, (void **) &data);
-	if(data->type == IS_ARRAY) {
+	if (data->type == IS_ARRAY) {
 		bod=mail_newbody();
 		topbod=bod;
-		if(zend_hash_find(data->value.ht,"type",sizeof("type"),(void **) &pvalue)== SUCCESS) {
+		if (zend_hash_find(data->value.ht,"type",sizeof("type"),(void **) &pvalue)== SUCCESS) {
 			SEPARATE_ZVAL(pvalue);
 			convert_to_long(*pvalue);
 			bod->type = (short) (*pvalue)->value.lval;
 		}
-		if(zend_hash_find(data->value.ht,"encoding",sizeof("encoding"),(void **) &pvalue)== SUCCESS){
+		if (zend_hash_find(data->value.ht,"encoding",sizeof("encoding"),(void **) &pvalue)== SUCCESS) {
 			SEPARATE_ZVAL(pvalue);
 			convert_to_long(*pvalue);
 			bod->encoding = (short) (*pvalue)->value.lval;
 		}
-		if(zend_hash_find(data->value.ht,"subtype",sizeof("subtype"),(void **) &pvalue)== SUCCESS){
+		if (zend_hash_find(data->value.ht,"subtype",sizeof("subtype"),(void **) &pvalue)== SUCCESS) {
 			SEPARATE_ZVAL(pvalue);
 			convert_to_string(*pvalue);
 			bod->subtype = cpystr((*pvalue)->value.str.val);
 		}
-		if(zend_hash_find(data->value.ht,"id",sizeof("id"),(void **) &pvalue)== SUCCESS){
+		if (zend_hash_find(data->value.ht,"id",sizeof("id"),(void **) &pvalue)== SUCCESS) {
 			SEPARATE_ZVAL(pvalue);
 			convert_to_string(*pvalue);
 			bod->id = cpystr((*pvalue)->value.str.val);
 		}
-		if(zend_hash_find(data->value.ht,"contents.data",sizeof("contents.data"),(void **) &pvalue)== SUCCESS){
+		if (zend_hash_find(data->value.ht,"contents.data",sizeof("contents.data"),(void **) &pvalue)== SUCCESS) {
 			SEPARATE_ZVAL(pvalue);
 			convert_to_string(*pvalue);     
 			bod->contents.text.data=(char *)fs_get((*pvalue)->value.str.len);
 			memcpy(bod->contents.text.data,(*pvalue)->value.str.val,(*pvalue)->value.str.len+1);
 			bod->contents.text.size = (*pvalue)->value.str.len;
 		}
-		if(zend_hash_find(data->value.ht,"lines",sizeof("lines"),(void **) &pvalue)== SUCCESS){
+		if (zend_hash_find(data->value.ht,"lines",sizeof("lines"),(void **) &pvalue)== SUCCESS) {
 			SEPARATE_ZVAL(pvalue);
 			convert_to_long(*pvalue);
 			bod->size.lines = (*pvalue)->value.lval;
 		}
-		if(zend_hash_find(data->value.ht,"bytes",sizeof("bytes"),(void **) &pvalue)== SUCCESS){
+		if (zend_hash_find(data->value.ht,"bytes",sizeof("bytes"),(void **) &pvalue)== SUCCESS) {
 			SEPARATE_ZVAL(pvalue);
 			convert_to_long(*pvalue);
 			bod->size.bytes = (*pvalue)->value.lval;
 		}
-		if(zend_hash_find(data->value.ht,"md5",sizeof("md5"),(void **) &pvalue)== SUCCESS){
+		if (zend_hash_find(data->value.ht,"md5",sizeof("md5"),(void **) &pvalue)== SUCCESS) {
 			SEPARATE_ZVAL(pvalue);
 			convert_to_string(*pvalue);
 			bod->md5 = cpystr((*pvalue)->value.str.val);
@@ -3014,8 +3068,8 @@ PHP_FUNCTION(imap_mail_compose)
 	zend_hash_move_forward(body->value.ht);
 	while(zend_hash_get_current_data(body->value.ht, (void **) &data)==SUCCESS) {
 		zend_hash_get_current_key(body->value.ht, &key, &ind);
-		if(data->type == IS_ARRAY) {
-			if(!toppart) {
+		if (data->type == IS_ARRAY) {
+			if (!toppart) {
 				bod->nested.part=mail_newbody_part();
 				mypart=bod->nested.part;
 				toppart=mypart;
@@ -3025,44 +3079,44 @@ PHP_FUNCTION(imap_mail_compose)
 				 mypart=mypart->next;
 				 bod=&mypart->body;
 			}
-			if(zend_hash_find(data->value.ht,"type",sizeof("type"),(void **) &pvalue)== SUCCESS) {
+			if (zend_hash_find(data->value.ht,"type",sizeof("type"),(void **) &pvalue)== SUCCESS) {
 				SEPARATE_ZVAL(pvalue);
 				convert_to_long(*pvalue);
 				bod->type = (short) (*pvalue)->value.lval;
 			}
-			if(zend_hash_find(data->value.ht,"encoding",sizeof("encoding"),(void **) &pvalue)== SUCCESS){
+			if (zend_hash_find(data->value.ht,"encoding",sizeof("encoding"),(void **) &pvalue)== SUCCESS) {
 				SEPARATE_ZVAL(pvalue);
 				convert_to_long(*pvalue);
 				bod->encoding = (short) (*pvalue)->value.lval;
 			}
-			if(zend_hash_find(data->value.ht,"subtype",sizeof("subtype"),(void **) &pvalue)== SUCCESS){
+			if (zend_hash_find(data->value.ht,"subtype",sizeof("subtype"),(void **) &pvalue)== SUCCESS) {
 				SEPARATE_ZVAL(pvalue);
 				convert_to_string(*pvalue);
 				bod->subtype=cpystr((*pvalue)->value.str.val);
 			}
-			if(zend_hash_find(data->value.ht,"id",sizeof("id"),(void **) &pvalue)== SUCCESS){
+			if (zend_hash_find(data->value.ht,"id",sizeof("id"),(void **) &pvalue)== SUCCESS) {
 				SEPARATE_ZVAL(pvalue);
 				convert_to_string(*pvalue);
 				bod->id=cpystr((*pvalue)->value.str.val);
 			}
-			if(zend_hash_find(data->value.ht,"contents.data",sizeof("contents.data"),(void **) &pvalue)== SUCCESS){
+			if (zend_hash_find(data->value.ht,"contents.data",sizeof("contents.data"),(void **) &pvalue)== SUCCESS) {
 				SEPARATE_ZVAL(pvalue);
 				convert_to_string(*pvalue);     
 				bod->contents.text.data=(char *)fs_get((*pvalue)->value.str.len);
 				memcpy(bod->contents.text.data,(*pvalue)->value.str.val,(*pvalue)->value.str.len+1);
 				bod->contents.text.size=(*pvalue)->value.str.len;
 			}
-			if(zend_hash_find(data->value.ht,"lines",sizeof("lines"),(void **) &pvalue)== SUCCESS){
+			if (zend_hash_find(data->value.ht,"lines",sizeof("lines"),(void **) &pvalue)== SUCCESS) {
 				SEPARATE_ZVAL(pvalue);
 				convert_to_long(*pvalue);
 				bod->size.lines=(*pvalue)->value.lval;
 			}
-			if(zend_hash_find(data->value.ht,"bytes",sizeof("bytes"),(void **) &pvalue)== SUCCESS){
+			if (zend_hash_find(data->value.ht,"bytes",sizeof("bytes"),(void **) &pvalue)== SUCCESS) {
 				SEPARATE_ZVAL(pvalue);
 				convert_to_long(*pvalue);
 				bod->size.bytes=(*pvalue)->value.lval;
 			}
-			if(zend_hash_find(data->value.ht,"md5",sizeof("md5"),(void **) &pvalue)== SUCCESS){
+			if (zend_hash_find(data->value.ht,"md5",sizeof("md5"),(void **) &pvalue)== SUCCESS) {
 				SEPARATE_ZVAL(pvalue);
 				convert_to_string(*pvalue);
 				bod->md5=cpystr((*pvalue)->value.str.val);
@@ -3144,7 +3198,7 @@ int _php_imap_mail(char *to, char *subject, char *message, char *headers, char *
 #endif
 
 #ifdef PHP_WIN32
-	if (imap_TSendMail(INI_STR("smtp"),&tsm_err,headers,subject,to,message,cc,bcc,rpath) != SUCCESS){
+	if (imap_TSendMail(INI_STR("smtp"),&tsm_err,headers,subject,to,message,cc,bcc,rpath) != SUCCESS) {
 		php_error(E_WARNING, GetSMErrorText(tsm_err));
 		return 0;
 	}
@@ -3241,7 +3295,7 @@ PHP_FUNCTION(imap_mail)
 		rpath = argv[6]->value.str.val;
 	}
 
-	if (_php_imap_mail(to, subject, message, headers, cc, bcc, rpath)){
+	if (_php_imap_mail(to, subject, message, headers, cc, bcc, rpath)) {
 		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;
@@ -3404,12 +3458,12 @@ PHP_FUNCTION(imap_mime_header_decode)
 	string=(*str)->value.str.val;
 	end=(*str)->value.str.len;
 			
-	if((charset=((char *)emalloc((end+1)*2)))) {
+	if ((charset=((char *)emalloc((end+1)*2)))) {
 		text=&charset[end+1];
 		while(offset<end) {													// Reached end of the string?
-			if((charset_token=(long) php_memnstr(&string[offset],"=?",2,string+end))) {		// Is there anything encoded in the string?
+			if ((charset_token=(long) php_memnstr(&string[offset],"=?",2,string+end))) {		// Is there anything encoded in the string?
 				charset_token -= (long)string;
-				if(offset!=charset_token) {										// Is there anything before the encoded data?
+				if (offset!=charset_token) {										// Is there anything before the encoded data?
 					// Retrieve unencoded data that is found at the beginning
 					memcpy(text,&string[offset],charset_token-offset);
 					text[charset_token-offset]=0x00;
@@ -3419,9 +3473,9 @@ PHP_FUNCTION(imap_mime_header_decode)
 					add_property_string(myobject,"text",text,1);
 					zend_hash_next_index_insert(return_value->value.ht,(void *)&myobject,sizeof(zval *),NULL);
 				}
-				if((encoding_token=(long)php_memnstr(&string[charset_token+2],"?",1,string+end))) {			// Find token for encoding
+				if ((encoding_token=(long)php_memnstr(&string[charset_token+2],"?",1,string+end))) {			// Find token for encoding
 					encoding_token-=(long)string;
-					if((end_token=(long)php_memnstr(&string[encoding_token+1],"?=",2,string+end))) {		// Find token for end of encoded data
+					if ((end_token=(long)php_memnstr(&string[encoding_token+1],"?=",2,string+end))) {		// Find token for end of encoded data
 						end_token-=(long)string;
 						memcpy(charset,&string[charset_token+2],encoding_token-(charset_token+2));	// Extract charset encoding
 						charset[encoding_token-(charset_token+2)]=0x00;
@@ -3429,11 +3483,13 @@ PHP_FUNCTION(imap_mime_header_decode)
 						memcpy(text,&string[encoding_token+3],end_token-(encoding_token+3));		// Extract text
 						text[end_token-(encoding_token+3)]=0x00;
 						decode=text;
-						if(encoding=='q' || encoding=='Q') {										// Decode 'q' encoded data
-							for(i=0;text[i]!=0x00;i++) if(text[i]=='_') text[i]=' ';							// Replace all *_' with space.
+						if (encoding=='q' || encoding=='Q') {										// Decode 'q' encoded data
+							for(i=0;text[i]!=0x00;i++) if (text[i]=='_') text[i]=' ';							// Replace all *_' with space.
 							decode = (char *) rfc822_qprint((unsigned char *) text, strlen(text),&newlength);
 						}
-						if(encoding=='b' || encoding=='B') decode = (char *) rfc822_base64((unsigned char *) text, strlen(text),&newlength); // Decode 'B' encoded data
+						if (encoding=='b' || encoding=='B') {
+							decode = (char *) rfc822_base64((unsigned char *) text, strlen(text),&newlength); // Decode 'B' encoded data
+						}
 						MAKE_STD_ZVAL(myobject);
 						object_init(myobject);
 						add_property_string(myobject,"charset",charset,1);
@@ -3441,7 +3497,9 @@ PHP_FUNCTION(imap_mime_header_decode)
 						zend_hash_next_index_insert(return_value->value.ht,(void *)&myobject,sizeof(zval *),NULL);
 						
 						offset+=end_token+2;
-						if(string[offset]==' ' && string[offset+1]=='=' && string[offset+2]=='?') offset++;	// Remove required space between encoded segments
+						if (string[offset]==' ' && string[offset+1]=='=' && string[offset+2]=='?') {
+							offset++;	// Remove required space between encoded segments
+						}
 						continue;								// Iterate the loop again please.
 					}
 				}
@@ -3488,7 +3546,9 @@ void _php_imap_parse_address (ADDRESS *addresslist, char *fulladdress, pval *pad
 		tempaddress[0] = 0x00;                                    /* reset tempaddress buffer */
 		rfc822_write_address(tempaddress, addresstmp);            /* ok, write the address into tempaddress string */
 		if ((strlen(tempaddress) + strlen(fulladdress)) < 1000) { /* is the new address + total address < 1000 */
-			if (strlen(fulladdress)) strcat(fulladdress, ",");    /* put in a comma */ 
+			if (strlen(fulladdress)) {
+				strcat(fulladdress, ",");	                      /* put in a comma */ 
+			}
 			strcat(fulladdress, tempaddress);                     /* put in the new address */
 		} else {                                                  /* no */
 			ok = 0;                                               /* stop looping */
@@ -3593,42 +3653,50 @@ void _php_imap_add_body(pval *arg, BODY *body)
 	PARAMETER *par, *dpar;
 	PART *part;
 	
-	if(body->type) add_property_long( arg, "type", body->type );
-	if(body->encoding) add_property_long( arg, "encoding", body->encoding );
-
-	if ( body->subtype ){
-		add_property_long( arg, "ifsubtype", 1 );
-		add_property_string( arg, "subtype",  body->subtype, 1 );
-	} else {
-		add_property_long( arg, "ifsubtype", 0 );
+	if (body->type) {
+		add_property_long(arg, "type", body->type);
+	}
+	if (body->encoding) {
+		add_property_long(arg, "encoding", body->encoding);
 	}
 
-	if ( body->description ){
-		add_property_long( arg, "ifdescription", 1 );
-		add_property_string( arg, "description",  body->description, 1 );
+	if (body->subtype) {
+		add_property_long(arg, "ifsubtype", 1);
+		add_property_string(arg, "subtype",  body->subtype, 1);
 	} else {
-		add_property_long( arg, "ifdescription", 0 );
+		add_property_long(arg, "ifsubtype", 0);
 	}
-	if ( body->id ){
-		add_property_long( arg, "ifid", 1 );
-		add_property_string( arg, "id",  body->id, 1 );
+
+	if (body->description) {
+		add_property_long(arg, "ifdescription", 1);
+		add_property_string(arg, "description",  body->description, 1);
 	} else {
-		add_property_long( arg, "ifid", 0 );
+		add_property_long(arg, "ifdescription", 0);
+	}
+	if (body->id) {
+		add_property_long(arg, "ifid", 1);
+		add_property_string(arg, "id",  body->id, 1);
+	} else {
+		add_property_long(arg, "ifid", 0);
 	}
 	
-	if(body->size.lines) add_property_long( arg, "lines", body->size.lines );
-	if(body->size.bytes) add_property_long( arg, "bytes", body->size.bytes );
+	if (body->size.lines) {
+		add_property_long(arg, "lines", body->size.lines);
+	}
+	if (body->size.bytes) {
+		add_property_long(arg, "bytes", body->size.bytes);
+	}
 #ifdef IMAP41
-	if ( body->disposition.type ){
-		add_property_long( arg, "ifdisposition", 1);
-		add_property_string( arg, "disposition", body->disposition.type, 1);
+	if (body->disposition.type) {
+		add_property_long(arg, "ifdisposition", 1);
+		add_property_string(arg, "disposition", body->disposition.type, 1);
 	} else {
-		add_property_long( arg, "ifdisposition", 0);
+		add_property_long(arg, "ifdisposition", 0);
 	}
 
 	if (body->disposition.parameter) {
 		dpar = body->disposition.parameter;
-		add_property_long( arg, "ifdparameters", 1);
+		add_property_long(arg, "ifdparameters", 1);
 		MAKE_STD_ZVAL(dparametres);
 		array_init(dparametres);
 		do {
@@ -3636,33 +3704,37 @@ void _php_imap_add_body(pval *arg, BODY *body)
 			object_init(dparam);
 			add_property_string(dparam, "attribute", dpar->attribute, 1);
 			add_property_string(dparam, "value", dpar->value, 1);
-			add_next_index_object(dparametres, dparam );
-        } while ( (dpar = dpar->next) );
-		add_assoc_object( arg, "dparameters", dparametres );
+			add_next_index_object(dparametres, dparam);
+        } while ((dpar = dpar->next));
+		add_assoc_object(arg, "dparameters", dparametres);
 	} else {
-		add_property_long( arg, "ifdparameters", 0);
+		add_property_long(arg, "ifdparameters", 0);
 	}
 #endif
  
 	if ((par = body->parameter)) {
-		add_property_long( arg, "ifparameters", 1);
+		add_property_long(arg, "ifparameters", 1);
 
 		MAKE_STD_ZVAL(parametres);
 		array_init(parametres);
 		do {
 			MAKE_STD_ZVAL(param);
 			object_init(param);
-			if(par->attribute) add_property_string(param, "attribute", par->attribute, 1 );
-			if(par->value) add_property_string(param, "value", par->value, 1 );
+			if (par->attribute) {
+				add_property_string(param, "attribute", par->attribute, 1);
+			}
+			if (par->value) {
+				add_property_string(param, "value", par->value, 1);
+			}
 
 			add_next_index_object(parametres, param);
-		} while ( (par = par->next) );
+		} while ((par = par->next));
 	} else {
 		MAKE_STD_ZVAL(parametres);
 		object_init(parametres);
-		add_property_long( arg, "ifparameters", 0);
+		add_property_long(arg, "ifparameters", 0);
 	}
-	add_assoc_object( arg, "parameters", parametres );
+	add_assoc_object(arg, "parameters", parametres);
 
 	/* multipart message ? */
 	if (body->type == TYPEMULTIPART) {
@@ -3738,7 +3810,7 @@ void mm_notify(MAILSTREAM *stream,char *str, long errflg)
 			IMAPG(imap_alertstack)->next = NIL; 
 		} else {
 			cur = IMAPG(imap_alertstack);
-			while (cur->next != NIL ) {
+			while (cur->next != NIL) {
 				cur = cur->next;
 			}
 			cur->next = mail_newstringlist ();
@@ -3786,7 +3858,7 @@ void mm_list(MAILSTREAM *stream,DTYPE delimiter,char *mailbox,long attributes)
 				IMAPG(imap_folders)->next=NIL; 
 			} else {
 				cur=IMAPG(imap_folders);
-				while (cur->next != NIL ) {
+				while (cur->next != NIL) {
 					cur=cur->next;
 				}
 				cur->next=mail_newstringlist ();
@@ -3833,7 +3905,7 @@ void mm_lsub(MAILSTREAM *stream,DTYPE delimiter,char *mailbox,long attributes)
 			IMAPG(imap_sfolders)->next=NIL; 
 		} else {
 			cur=IMAPG(imap_sfolders);
-			while (cur->next != NIL ) {
+			while (cur->next != NIL) {
 				cur=cur->next;
 			}
 			cur->next=mail_newstringlist ();
@@ -3891,10 +3963,10 @@ void mm_log(char *str,long errflg)
 			IMAPG(imap_errorstack)->next = NIL; 
 		} else {
 			cur = IMAPG(imap_errorstack);
-			while (cur->next != NIL ) {
+			while (cur->next != NIL) {
 				cur = cur->next;
 			}
-			cur->next = mail_newerrorlist ();
+			cur->next = mail_newerrorlist();
 			cur = cur->next;
 			cur->LSIZE = strlen(cur->LTEXT = cpystr(str));
 			cur->errflg = errflg;
