@@ -1,3 +1,77 @@
+2004-05-25  Stefan Esser  <sesser@suspekt.org>
+
+    * main/SAPI.c:
+      break is better
+
+2004-05-25  Brad House  <brad@mainstreetsoftworks.com>
+
+    * ext/mcve/config.m4
+      ext/mcve/config.m4:
+      PHP_SETUP_OPENSSL is NOT SNMP_SHARED_LIBADD, it's MCVE_SHARED_LIBADD
+      requires AC_PROG_EGREP when you phpize
+
+2004-05-25  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend_objects_API.h:
+      - Nuke unused decleration
+
+2004-05-25  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      configure.in
+      main/php_version.h:
+      Back to dev.
+
+    * ext/standard/dl.c:
+      Kill unused var.
+
+2004-05-25  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/standard/dl.c:
+      Merge that nicer error message here too
+
+    * main/streams/plain_wrapper.c:
+      -sigh*, obviously, we need this to be able to use sapi_module.name
+
+    * main/streams/plain_wrapper.c:
+      DEBUG -> PHP_DEBUG
+
+2004-05-25  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      configure.in
+      main/php_version.h:
+      Prepare for 4.3.7RC1.
+
+2004-05-25  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/sqlite/config.w32:
+      Allow sqlite to build as a shared ext under win32
+
+    * main/streams/plain_wrapper.c:
+      check if it matches... not if it doesn't...
+
+    * main/streams/plain_wrapper.c:
+      In debug mode, under CLI don't close stderr.
+      This is so that we can see any error reports.
+      
+
+2004-05-25  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend_alloc.c
+      ZendEngine2/zend_alloc.h:
+      - More fixes
+
+    * ZendEngine2/zend_alloc.c
+      ZendEngine2/zend_alloc.h:
+      - Make fix compile.
+
+    * ZendEngine2/zend_alloc.c
+      ZendEngine2/zend_alloc.h:
+      - Fix memory leak in mem cache in conjunction with Zend MM. How come no one
+      - noticed this? :)
+
 2004-05-24  Pierre-Alain Joye  <pierre@dotgeek.org>
 
     * (PHP_4_3)

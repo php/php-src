@@ -1,3 +1,21 @@
+2004-05-25  Andi Gutmans  <andi@zend.com>
+
+    * zend_objects_API.h:
+      - Nuke unused decleration
+
+    * zend_alloc.c
+      zend_alloc.h:
+      - More fixes
+
+    * zend_alloc.c
+      zend_alloc.h:
+      - Make fix compile.
+
+    * zend_alloc.c
+      zend_alloc.h:
+      - Fix memory leak in mem cache in conjunction with Zend MM. How come no one
+      - noticed this? :)
+
 2004-05-23  Andi Gutmans  <andi@zend.com>
 
     * zend_objects_API.c:
