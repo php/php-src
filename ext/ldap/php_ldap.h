@@ -79,6 +79,11 @@ PHP_FUNCTION(ldap_error);
 
 PHP_FUNCTION(ldap_compare);
 
+#ifdef STR_TRANSLATION
+PHP_FUNCTION(ldap_t61_to_8859);
+PHP_FUNCTION(ldap_8859_to_t61);
+#endif
+
 ZEND_BEGIN_MODULE_GLOBALS(ldap)
 	long default_link;
 	long num_links, max_links;
