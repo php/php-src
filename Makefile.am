@@ -1,7 +1,7 @@
 AUTOMAKE_OPTIONS = foreign
 
 ZEND_DIR = $(srcdir)/libzend
-SUBDIRS = libzend ext sapi $(TSRM_DIR) $(REGEX_DIR) . pecl
+SUBDIRS = libzend ext sapi $(TSRM_DIR) $(REGEX_DIR) . pear
 
 BUILDLDFLAGS = $(EXTRA_LDFLAGS) $(LDFLAGS)
 
