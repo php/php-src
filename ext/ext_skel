@@ -1,25 +1,26 @@
 #!/bin/sh
 
-EXTNAME="$1"
+extname="$1"
+EXTNAME=`echo $1|tr a-z A-Z`
 
 function givup() {
 	echo $*
 	exit 1
 }
 
-if test "$EXTNAME" = ""; then
+if test "$extname" = ""; then
 	givup "usage: $0 extension-name"
 fi
 
-if test -d "$EXTNAME" ; then
-	givup "Directory $EXTNAME already exists."
+if test -d "$extname" ; then
+	givup "Directory $extname already exists."
 fi
 
 echo "Creating directory"
 
-mkdir $EXTNAME || givup "Cannot create directory $EXTNAME"
+mkdir $extname || givup "Cannot create directory $extname"
 
-cd $EXTNAME
+cd $extname
 chmod 755 .
 
 echo -n "Creating basic files:"
@@ -27,8 +28,8 @@ echo -n "Creating basic files:"
 echo -n " config.m4"
 cat >config.m4 <<eof
 dnl \$Id\$
-dnl config.m4 for extension $EXTNAME
-dnl don't forget to call PHP_EXTENSION($EXTNAME)
+dnl config.m4 for extension $extname
+dnl don't forget to call PHP_EXTENSION($extname)
 
 eof
 
@@ -36,9 +37,9 @@ echo -n " setup.stub"
 cat >setup.stub <<eof
 # \$Id\$
 
-define_option with-$EXTNAME '$EXTNAME support?' yesnodir \\
+define_option with-$extname '$extname support?' yesnodir \\
     "defs" \\
-'    Whether to include $EXTNAME support.'
+'    Whether to include $extname support.'
 	
 eof
 
@@ -47,8 +48,8 @@ cat >Makefile.am <<eof
 # \$Id\$
 
 INCLUDES=@INCLUDES@ -I@top_srcdir@ -I@top_srcdir@/libzend
-noinst_LIBRARIES=libphpext_$EXTNAME.a
-libphpext_${EXTNAME}_a_SOURCES=$EXTNAME.c
+noinst_LIBRARIES=libphpext_$extname.a
+libphpext_${extname}_a_SOURCES=$extname.c
 
 eof
 
@@ -58,6 +59,12 @@ cat >.cvsignore <<eof
 .deps
 Makefile.in
 Makefile
+eof
+
+echo -n " config.h.stub"
+cat >config.h.stub<<eof
+/* define if you want to use the $extname extension */
+/* #undef HAVE_LIB$EXTNAME */
 eof
 
 chmod 644 *
