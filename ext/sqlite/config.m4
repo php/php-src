@@ -2,7 +2,7 @@ dnl $Id$
 dnl config.m4 for extension sqlite
 
 PHP_ARG_WITH(sqlite, for sqlite support,
-[  --with-sqlite             Include sqlite support])
+[  --with-sqlite           Include sqlite support])
 
 if test "$PHP_SQLITE" != "no"; then
 
