@@ -39,7 +39,7 @@ if test "$PHP_FILEINFO" != "no"; then
     -L$FILEINFO_DIR/lib -lm -lz -ldl
   ])
 
-  MAGIC_MIME_LOCATIONS="/usr/local/share/file/magic /usr/share/file/magic /usr/share/misc/file/magic /etc/magic"
+  MAGIC_MIME_LOCATIONS="/usr/local/share/file/magic /usr/share/file/magic /usr/share/misc/file/magic /etc/magic /usr/share/misc"
   for i in $MAGIC_MIME_LOCATIONS; do
     if test -f $i; then
        PHP_DEFAULT_MAGIC_FILE=$i
