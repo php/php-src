@@ -73,7 +73,7 @@ typedef struct _XML_Parser {
 
 XML_Parser XML_ParserCreate(const XML_Char *);
 XML_Parser XML_ParserCreateNS(const XML_Char *, const XML_Char);
-XML_ParserCreate_MM(const XML_Char *, const XML_Memory_Handling_Suite *, const XML_Char *);
+XML_Parser XML_ParserCreate_MM(const XML_Char *, const XML_Memory_Handling_Suite *, const XML_Char *);
 void XML_SetUserData(XML_Parser, void *);
 void *XML_GetUserData(XML_Parser);
 void XML_SetElementHandler(XML_Parser, XML_StartElementHandler, XML_EndElementHandler);
