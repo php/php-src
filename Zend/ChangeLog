@@ -1,3 +1,9 @@
+2004-08-04  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_reflection_api.c
+      tests/bug29523.phpt:
+      - Fix bug #29523 (ReflectionParameter::isOptional() is incorrect)
+
 2004-08-03  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ZEND_CHANGES:
