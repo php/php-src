@@ -570,7 +570,7 @@ SAPI_API struct stat *sapi_get_stat()
 }
 
 
-SAPI_API char *sapi_getenv(char *name, int name_len)
+SAPI_API char *sapi_getenv(char *name, size_t name_len)
 {
 	if (sapi_module.getenv) {
 		SLS_FETCH();

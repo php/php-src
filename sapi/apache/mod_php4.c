@@ -315,7 +315,7 @@ static struct stat *php_apache_get_stat(SLS_D)
 }
 
 
-static char *php_apache_getenv(char *name, int name_len SLS_DC)
+static char *php_apache_getenv(char *name, size_t name_len SLS_DC)
 {
 	return (char *) table_get(((request_rec *) SG(server_context))->subprocess_env, name);
 }
