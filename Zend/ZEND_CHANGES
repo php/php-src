@@ -69,7 +69,141 @@ Changes in the Zend Engine 2.0
       class they are declared in, whereas private member variables can 
       only be accessed by the class they belong to.
 
-    * Private and protected methods. (TBD)
+    * Private and protected methods.
+
+      The Zend Engine 2.0 introduces private and protected methods.
+
+      Example:
+
+        <?php
+        class Foo {
+          private function aPrivateMethod() {
+            echo "Foo::aPrivateMethod() called.\n";
+          }
+
+          protected function aProtectedMethod() {
+            echo "Foo::aProtectedMethod() called.\n";
+            $this->aPrivateMethod();
+          }
+        }
+
+        class Bar extends Foo {
+          public function aPublicMethod() {
+            echo "Bar::aPublicMethod() called.\n";
+            $this->aProtectedMethod();
+          }
+        }
+
+        $o = new Bar;
+        $o->aPublicMethod();
+        ?>
+
+      Old code that has no user-defined classes or functions named 
+      'public', 'protected' or 'private' should run without modifications.
+
+    * Abstract Methods.
+
+      The Zend Engine 2.0 introduces abstract methods. An abstract
+      method only declares the method's signature and does not
+      provide an implementation.
+
+      Example:
+
+        <?php
+        class AbstractClass {
+          abstract public function test();
+        }
+
+        class ImplementedClass extends AbstractClass {
+          public function test() {
+            echo "ImplementedClass::test() aufgerufen.\n";
+          }
+        }
+
+        $o = new ImplementedClass;
+        $o->test();
+        ?>
+
+      A class containing abstract methods may be instantiated, but
+      calling its abstract methods will result in an error.
+
+      Old code that has no user-defined classes or functions named 
+      'abstract' should run without modifications.
+
+    * Interfaces.
+
+      The Zend Engine 2.0 introduces interfaces. A class may implement
+      an arbitrary list of interfaces.
+
+      Example:
+
+        <?php
+        interface Throwable {
+          public function getMessage();
+        }
+
+        class Exception implements Throwable {
+          public function getMessage() {
+            // ...
+          }
+        }
+        ?>
+
+      Old code that has no user-defined classes or functions named 
+      'interface' or 'implements' should run without modifications.
+
+    * Class Type Hints.
+
+      While remaining loosely typed the Zend Engine 2.0 introduces the 
+      ability to use class type hints to declare the expected class of 
+      objects that are passed as parameters to a method.
+
+      Example:
+
+        <?php
+        interface Foo {
+          function a(Foo $foo);
+        }
+
+        interface Bar {
+          function b(Bar $bar);
+        }
+
+        class FooBar implements Foo, Bar {
+          function a(Foo $foo) {
+            // ...
+          }
+
+          function b(Bar $bar) {
+            // ...
+          }
+        }
+
+        $a = new FooBar;
+        $b = new FooBar;
+
+        $a->a($b);
+        $a->b($b);
+        ?>
+
+      These class type hints are not checked upon compilation, as would
+      be the case in a typed language, but during runtime.
+
+      This means that
+
+        function foo(Class $object) {
+          // ..
+        }
+
+      is equivalent to
+
+        function foo(Class $object) {
+          if (!($object instanceof Class)) {
+            die('Argument 1 must be an instance of Class');
+          }
+        }
+
+      This syntax only applies to objects/classes, not built-in types.
 
     * Object Cloning.
 
@@ -353,9 +487,25 @@ Changes in the Zend Engine 2.0
         print foo::$my_static;
         ?>
 
-    * Static methods. (TBD)
+    * Static Methods.
 
-	  * Abstract methods. (TBD)
+      The Zend Engine 2.0 introduces the 'static' keyword to declare
+      a method static, thus callable from outside the object context.
+
+      Example:
+
+        <?php
+        class Foo {
+          public static function aStaticMethod() {
+            // ...
+          }
+        }
+
+        Foo::aStaticMethod();
+        ?>
+
+      The pseudo variable $this is not available inside a method that
+      has been declared static.
 
     * instanceof (TBD)
 
@@ -379,7 +529,22 @@ Changes in the Zend Engine 2.0
         }
         ?>
 
-    * __autoload(). TBD.
+    * __autoload().
+
+      The __autoload() interceptor function will be automatically called 
+      when an undeclared class is to be instantiated. The name of that 
+      class will be passed to the __autoload() interceptor function as its 
+      only argument.
+
+      Example:
+
+        <?php
+        function __autoload($className) {
+          include_once $className . '.php';
+        }
+
+        $object = new ClassName;
+        ?>
 
     * Method calls and property accesses can be overloaded
       by class methods  __call(), __get() and __set().
