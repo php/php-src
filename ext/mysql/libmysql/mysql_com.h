@@ -76,7 +76,7 @@ enum enum_server_command {COM_SLEEP,COM_QUIT,COM_INIT_DB,COM_QUERY,
 #define CLIENT_INTERACTIVE	1024	/* This is an interactive client */
 #define CLIENT_SSL              2048     /* Switch to SSL after handshake */
 #define CLIENT_IGNORE_SIGPIPE   4096     /* IGNORE sigpipes */
-#define CLIENT_TRANSACTIONS	8196	/* Client knows about transactions */
+#define CLIENT_TRANSACTIONS	8192	/* Client knows about transactions */
 
 #define SERVER_STATUS_IN_TRANS  1	/* Transaction has started */
 #define SERVER_STATUS_AUTOCOMMIT 2	/* Server in auto_commit mode */

@@ -302,7 +302,7 @@ int sigwait(sigset_t *setp, int *sigp)
     pthread_t sigwait_thread_id;
     inited=1;
     sigemptyset(&pending_set);
-    pthread_mutex_init(&LOCK_sigwait,NULL);
+    pthread_mutex_init(&LOCK_sigwait,MY_MUTEX_INIT_FAST);
     pthread_cond_init(&COND_sigwait,NULL);
 
     pthread_attr_init(&thr_attr);

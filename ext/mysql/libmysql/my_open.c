@@ -93,7 +93,7 @@ File my_register_filename(File fd, const char *FileName, enum file_type
       my_file_opened++;
       my_file_info[fd].type = type_of_file;
 #if defined(THREAD) && !defined(HAVE_PREAD)
-      pthread_mutex_init(&my_file_info[fd].mutex,NULL);
+      pthread_mutex_init(&my_file_info[fd].mutex,MY_MUTEX_INIT_FAST);
 #endif
       pthread_mutex_unlock(&THR_LOCK_open);
       DBUG_PRINT("exit",("fd: %d",fd));

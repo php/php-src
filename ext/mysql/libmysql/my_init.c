@@ -34,6 +34,7 @@ static my_bool win32_init_tcp_ip();
 static my_bool my_init_done=0;
 
 
+
 static ulong atoi_octal(const char *str)
 {
   long int tmp;
@@ -62,6 +63,9 @@ void my_init(void)
 #ifndef __WIN__
   sigfillset(&my_signals);		/* signals blocked by mf_brkhant */
 #endif
+#endif /* THREAD */
+#ifdef UNIXWARE_7
+  (void) isatty(0);			/* Go around connect() bug in UW7 */
 #endif
   {
     DBUG_ENTER("my_init");
@@ -113,7 +117,12 @@ void my_end(int infoflag)
 #ifdef HAVE_GETRUSAGE
     struct rusage rus;
     if (!getrusage(RUSAGE_SELF, &rus))
-      fprintf(info_file,"\nUser time %.2f, System time %.2f\nMaximum resident set size %ld, Integral resident set size %ld\nNon physical pagefaults %ld, Physical pagefaults %ld, Swaps %ld\nBlocks in %ld out %ld, Messages in %ld out %ld, Signals %ld\nVouluntary context switches %ld, Invouluntary context switches %ld\n",
+      fprintf(info_file,"\n\
+User time %.2f, System time %.2f\n\
+Maximum resident set size %ld, Integral resident set size %ld\n\
+Non-physical pagefaults %ld, Physical pagefaults %ld, Swaps %ld\n\
+Blocks in %ld out %ld, Messages in %ld out %ld, Signals %ld\n\
+Voluntary context switches %ld, Involuntary context switches %ld\n",
 	      (rus.ru_utime.tv_sec * SCALE_SEC +
 	       rus.ru_utime.tv_usec / SCALE_USEC) / 100.0,
 	      (rus.ru_stime.tv_sec * SCALE_SEC +

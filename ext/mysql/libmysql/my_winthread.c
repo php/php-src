@@ -1,4 +1,5 @@
-/* Copyright Abandoned.  Public domain, no warranty, etc. */
+/* Copyright Abandoned 1996 TCX DataKonsult AB & Monty Program KB & Detron HB 
+This file is public domain and comes with NO WARRANTY of any kind */
 
 /*****************************************************************************
 ** Simulation of posix threads calls for WIN95 and NT
@@ -24,7 +25,7 @@ struct pthread_map
 
 void win_pthread_init(void)
 {
-  pthread_mutex_init(&THR_LOCK_thread,NULL);
+  pthread_mutex_init(&THR_LOCK_thread,MY_MUTEX_INIT_FAST);
 }
 
 /*

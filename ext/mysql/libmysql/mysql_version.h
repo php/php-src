@@ -7,14 +7,18 @@ This file is public domain and comes with NO WARRANTY of any kind */
 #include <custom_conf.h>
 #else
 #define PROTOCOL_VERSION		10
-#define MYSQL_SERVER_VERSION		"3.23.32"
+#define MYSQL_SERVER_VERSION		"3.23.39"
 #define MYSQL_SERVER_SUFFIX		""
 #define FRM_VER				6
-#define MYSQL_VERSION_ID		32332
-#define MYSQL_PORT			3306
+#define MYSQL_VERSION_ID		32339
 
-/* This is defined at configure time and found in main/php_config.h */
-/* #define MYSQL_UNIX_ADDR			"/tmp/mysql.sock" */
+#ifndef MYSQL_PORT
+#define MYSQL_PORT			3306
+#endif
+
+#ifndef MYSQL_UNIX_ADDR
+#define MYSQL_UNIX_ADDR			"/tmp/mysql.sock"
+#endif
 
 /* mysqld compile time options */
 #ifndef MYSQL_CHARSET

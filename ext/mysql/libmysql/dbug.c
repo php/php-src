@@ -341,7 +341,7 @@ pthread_mutex_t THR_LOCK_dbug;
 
 static void init_dbug_state(void)
 {
-  pthread_mutex_init(&THR_LOCK_dbug,NULL);
+  pthread_mutex_init(&THR_LOCK_dbug,MY_MUTEX_INIT_FAST);
 }
 
 static CODE_STATE *code_state(void)

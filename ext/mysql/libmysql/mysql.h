@@ -6,6 +6,14 @@ This file is public domain and comes with NO WARRANTY of any kind */
 #ifndef _mysql_h
 #define _mysql_h
 
+#ifdef __CYGWIN__     /* CYGWIN implements a UNIX API */
+#undef WIN
+#undef _WIN
+#undef _WIN32
+#undef _WIN64
+#undef __WIN__
+#endif
+
 #ifndef MYSQL_SERVER
 #ifdef	__cplusplus
 extern "C" {
@@ -215,12 +223,11 @@ MYSQL *		STDCALL mysql_real_connect(MYSQL *mysql, const char *host,
 void		STDCALL mysql_close(MYSQL *sock);
 int		STDCALL mysql_select_db(MYSQL *mysql, const char *db);
 int		STDCALL mysql_query(MYSQL *mysql, const char *q);
-int		STDCALL mysql_send_query(MYSQL *mysql, const char *q);
-int		STDCALL mysql_reap_query(MYSQL *mysql);
+int		STDCALL mysql_send_query(MYSQL *mysql, const char *q,
+					 unsigned int length);
+int		STDCALL mysql_read_query_result(MYSQL *mysql);
 int		STDCALL mysql_real_query(MYSQL *mysql, const char *q,
 					unsigned int length);
-int		STDCALL mysql_real_send_query(MYSQL *mysql, const char *q,
-					unsigned int len);
 int		STDCALL mysql_create_db(MYSQL *mysql, const char *DB);
 int		STDCALL mysql_drop_db(MYSQL *mysql, const char *DB);
 int		STDCALL mysql_shutdown(MYSQL *mysql);

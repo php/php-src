@@ -14,6 +14,19 @@ This file is public domain and comes with NO WARRANTY of any kind */
 #include <os2.h>
 #endif /* __EMX__ */
 
+#ifdef __CYGWIN__
+/* We use a Unix API, so pretend it's not Windows */
+#undef WIN
+#undef WIN32
+#undef _WIN
+#undef _WIN32
+#undef _WIN64
+#undef __WIN__
+#undef __WIN32__
+#define HAVE_ERRNO_AS_DEFINE
+#endif /* __CYGWIN__ */
+
+
 #if defined(_WIN32) || defined(_WIN64) || defined(__WIN32__) || defined(WIN32)
 #include <config-win.h>
 #else
@@ -305,7 +318,8 @@ typedef int	File;		/* File descriptor */
 typedef int	my_socket;	/* File descriptor for sockets */
 #define INVALID_SOCKET -1
 #endif
-typedef RETSIGTYPE sig_handler; /* Function to handle signals */
+/* Type for fuctions that handles signals */
+#define sig_handler RETSIGTYPE
 typedef void	(*sig_return)();/* Returns type from signal */
 #if defined(__GNUC__) && !defined(_lint)
 typedef char	pchar;		/* Mixed prototypes can take char */
@@ -797,6 +811,28 @@ typedef union {
 #else
 #define float4get(V,M)   memcpy_fixed((byte*) &V,(byte*) (M),sizeof(float))
 #define float4store(V,M) memcpy_fixed((byte*) V,(byte*) (&M),sizeof(float))
+
+#if defined(__FLOAT_WORD_ORDER) && (__FLOAT_WORD_ORDER == __BIG_ENDIAN)
+#define doublestore(T,V)    { *(T)= ((byte *) &V)[4];\
+                              *((T)+1)=(char) ((byte *) &V)[5];\
+                              *((T)+2)=(char) ((byte *) &V)[6];\
+                              *((T)+3)=(char) ((byte *) &V)[7];\
+                              *((T)+4)=(char) ((byte *) &V)[0];\
+                              *((T)+5)=(char) ((byte *) &V)[1];\
+                              *((T)+6)=(char) ((byte *) &V)[2];\
+                              *((T)+7)=(char) ((byte *) &V)[3]; }
+#define doubleget(V,M) { double def_temp;\
+                              ((byte*) &def_temp)[0]=(M)[4];\
+                              ((byte*) &def_temp)[1]=(M)[5];\
+                              ((byte*) &def_temp)[2]=(M)[6];\
+                              ((byte*) &def_temp)[3]=(M)[7];\
+                              ((byte*) &def_temp)[4]=(M)[0];\
+                              ((byte*) &def_temp)[5]=(M)[1];\
+                              ((byte*) &def_temp)[6]=(M)[2];\
+                              ((byte*) &def_temp)[7]=(M)[3];\
+			      (V) = def_temp; }
+#endif /* __FLOAT_WORD_ORDER */
+
 #define float8get(V,M)   doubleget((V),(M))
 #define float8store(V,M) doublestore((V),(M))
 #endif /* WORDS_BIGENDIAN */
@@ -849,7 +885,7 @@ typedef union {
 #ifndef doubleget
 #define doubleget(V,M)	 memcpy_fixed((byte*) &V,(byte*) (M),sizeof(double))
 #define doublestore(T,V) memcpy_fixed((byte*) (T),(byte*) &V,sizeof(double))
-#endif
+#endif /* doubleget */
 #define longlongget(V,M) memcpy_fixed((byte*) &V,(byte*) (M),sizeof(ulonglong))
 #define longlongstore(T,V) memcpy_fixed((byte*) (T),(byte*) &V,sizeof(ulonglong))
 

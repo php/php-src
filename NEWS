@@ -1,6 +1,8 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.0.7-dev
+- Updated ext/mysql/libmysql to version 3.23.39; Portability fixes, minor
+  bug fixes. (tim@mysql.com)
 - Added the CONNECTION_ABORTED, CONNECTION_TIMEOUT and CONNECTION_NORMAL
   constants. (Zak)
 - Added get_defined_constants() function to return an associative array of

@@ -10,13 +10,13 @@ $| = 1;
 my $command = shift || usage();
 $command =~ /^--(?:update|huh|restore)$/ or usage();
 
-my $from = shift || '/users/tim/my/work';
+my $from = shift || '/my/mysql';
 my @source_dirs = qw/dbug strings mysys libmysql include/;
 my $source_re = qr/\.(?:cc?|h)$/;
 my %skip = (
-  'ctype_autoconf.c' => 1,
-  'ctype_extra_sources.c' => 1,
-  'my_config.h' => 1,
+  'ctype_autoconf.c' => 1,              # PHP uses a pre-made one
+  'ctype_extra_sources.c' => 1,         # same here
+  'my_config.h' => 1,                   # we use php_config.h
 );
 
 opendir D, "."
@@ -75,6 +75,13 @@ sub usage
 usage: $0 --update [mysql-source-dir]
        $0 --huh
        $0 --restore
+
+    Typical use is:
+        \$ $0 --update 2>&1 > /tmp/php-update.diff
+        \$ @{[$ENV{EDITOR}||'vi']} /tmp/php-update.diff      #does it look okay?
+	\$ Monkey around a bit
+	\$ cvs diff -u | less		# does this look okay?
+        \$ rm *.orig
 EOF
 }
 

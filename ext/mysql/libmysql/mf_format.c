@@ -96,7 +96,7 @@ my_string fn_format(my_string to, const char *name, const char *dsk,
     (void) strmov(pos,ext);			/* Don't convert extension */
   }
   /* Purify gives a lot of UMR errors when using realpath */
-#if defined(HAVE_REALPATH) && !defined(HAVE_purify)
+#if defined(HAVE_REALPATH) && !defined(HAVE_purify) && !defined(HAVE_BROKEN_REALPATH)
   if (flag & 16)
   {
     struct stat stat_buff;

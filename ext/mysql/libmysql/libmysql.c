@@ -2,11 +2,11 @@
 This file is public domain and comes with NO WARRANTY of any kind */
 
 #define DONT_USE_RAID
+#include <global.h>
 #if defined(__WIN__) || defined(_WIN32) || defined(_WIN64)
 #include <winsock.h>
 #include <odbcinst.h>
 #endif
-#include <global.h>
 #include <my_sys.h>
 #include <mysys_err.h>
 #include <m_string.h>
@@ -473,7 +473,7 @@ static void free_old_query(MYSQL *mysql)
   DBUG_VOID_RETURN;
 }
 
-#ifdef HAVE_GETPWUID
+#if defined(HAVE_GETPWUID) && defined(NO_GETPWUID_DECL)
 struct passwd *getpwuid(uid_t);
 char* getlogin(void);
 #endif
@@ -489,14 +489,6 @@ static void read_user_name(char *name)
 #ifdef HAVE_GETPWUID
     struct passwd *skr;
     const char *str;
-/*#ifdef __cplusplus
-    extern "C" struct passwd *getpwuid(uid_t);
-    extern "C" { char* getlogin(void); }
-#else
-    char * getlogin();
-    struct passwd *getpwuid(uid_t);
-#endif
-*/
     if ((str=getlogin()) == NULL)
     {
       if ((skr=getpwuid(geteuid())) != NULL)
@@ -1653,6 +1645,7 @@ mysql_close(MYSQL *mysql)
     {
       free_old_query(mysql);
       mysql->status=MYSQL_STATUS_READY; /* Force command */
+      mysql->reconnect=0;
       simple_command(mysql,COM_QUIT,NullS,0,1);
       end_server(mysql);
     }
@@ -1696,87 +1689,30 @@ mysql_query(MYSQL *mysql, const char *query)
   return mysql_real_query(mysql,query, (uint) strlen(query));
 }
 
-int STDCALL
-mysql_send_query(MYSQL* mysql, const char* query)
-{
-  return mysql_real_send_query(mysql, query, strlen(query));
-}
-
-/* send the query and return so we can do something else */
-/* needs to be followed by mysql_reap_query() when we want to
-   finish processing it
+/*
+  Send the query and return so we can do something else.
+  Needs to be followed by mysql_read_query_result() when we want to
+  finish processing it.
 */  
-int STDCALL
-mysql_real_send_query(MYSQL* mysql, const char* query, uint len)
-{
-  return simple_command(mysql, COM_QUERY, query, len, 1);
-}
 
 int STDCALL
-mysql_reap_query(MYSQL* mysql)
+mysql_send_query(MYSQL* mysql, const char* query, uint length)
+{
+  return simple_command(mysql, COM_QUERY, query, length, 1);
+}
+
+int STDCALL mysql_read_query_result(MYSQL *mysql)
 {
   uchar *pos;
   ulong field_count;
   MYSQL_DATA *fields;
-  uint len;
-  DBUG_ENTER("mysql_reap_query");
-  DBUG_PRINT("enter",("handle: %lx",mysql));
-  if((len = net_safe_read(mysql)) == packet_error)
+  uint length;
+  DBUG_ENTER("mysql_read_query_result");
+
+  if ((length = net_safe_read(mysql)) == packet_error)
     DBUG_RETURN(-1);
   free_old_query(mysql);			/* Free old result */
- get_info:
-  pos=(uchar*) mysql->net.read_pos;
-  if ((field_count= net_field_length(&pos)) == 0)
-    {
-      mysql->affected_rows= net_field_length_ll(&pos);
-      mysql->insert_id=	  net_field_length_ll(&pos);
-      if (mysql->server_capabilities & CLIENT_TRANSACTIONS)
-	{
-	  mysql->server_status=uint2korr(pos); pos+=2;
-	}
-      if (pos < mysql->net.read_pos+len && net_field_length(&pos))
-	mysql->info=(char*) pos;
-      DBUG_RETURN(0);
-    }
-  if (field_count == NULL_LENGTH)		/* LOAD DATA LOCAL INFILE */
-    {
-      int error=send_file_to_server(mysql,(char*) pos);
-      if ((len=net_safe_read(mysql)) == packet_error || error)
-	DBUG_RETURN(-1);
-      goto get_info;				/* Get info packet */
-    }
-  if (!(mysql->server_status & SERVER_STATUS_AUTOCOMMIT))
-    mysql->server_status|= SERVER_STATUS_IN_TRANS;
-
-  mysql->extra_info= net_field_length_ll(&pos); /* Maybe number of rec */
-  if (!(fields=read_rows(mysql,(MYSQL_FIELD*) 0,5)))
-    DBUG_RETURN(-1);
-  if (!(mysql->fields=unpack_fields(fields,&mysql->field_alloc,
-				    (uint) field_count,0,
-				    (my_bool) test(mysql->server_capabilities &
-						   CLIENT_LONG_FLAG))))
-    DBUG_RETURN(-1);
-  mysql->status=MYSQL_STATUS_GET_RESULT;
-  mysql->field_count=field_count;
-  DBUG_RETURN(0);
-
-}
-
-int STDCALL
-mysql_real_query(MYSQL *mysql, const char *query, uint length)
-{
-  uchar *pos;
-  ulong field_count;
-  MYSQL_DATA *fields;
-  DBUG_ENTER("mysql_real_query");
-  DBUG_PRINT("enter",("handle: %lx",mysql));
-  DBUG_PRINT("query",("Query = \"%s\"",query));
-
-  if (simple_command(mysql,COM_QUERY,query,length,1) ||
-      (length=net_safe_read(mysql)) == packet_error)
-    DBUG_RETURN(-1);
-  free_old_query(mysql);			/* Free old result */
- get_info:
+get_info:
   pos=(uchar*) mysql->net.read_pos;
   if ((field_count= net_field_length(&pos)) == 0)
   {
@@ -1813,6 +1749,16 @@ mysql_real_query(MYSQL *mysql, const char *query, uint length)
   DBUG_RETURN(0);
 }
 
+int STDCALL
+mysql_real_query(MYSQL *mysql, const char *query, uint length)
+{
+  DBUG_ENTER("mysql_real_query");
+  DBUG_PRINT("enter",("handle: %lx",mysql));
+  DBUG_PRINT("query",("Query = \"%s\"",query));
+  if (simple_command(mysql,COM_QUERY,query,length,1))
+    DBUG_RETURN(-1);
+  DBUG_RETURN(mysql_read_query_result(mysql));
+}
 
 static int
 send_file_to_server(MYSQL *mysql, const char *filename)
