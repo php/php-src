@@ -29,7 +29,7 @@
 
 
 /*
-* class domdocumentfragment extends domnode 
+* class DOMDocumentFragment extends DOMNode 
 *
 * URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-B63ED1A3
 * Since: 
@@ -40,7 +40,7 @@ zend_function_entry php_dom_documentfragment_class_functions[] = {
 	{NULL, NULL, NULL}
 };
 
-/* {{{ proto void DomDocumentFragment::__construct(); */
+/* {{{ proto void DOMDocumentFragment::__construct(); */
 PHP_METHOD(domdocumentfragment, __construct)
 {
 
@@ -72,5 +72,5 @@ PHP_METHOD(domdocumentfragment, __construct)
 		php_libxml_increment_node_ptr((php_libxml_node_object *)intern, nodep, (void *)intern TSRMLS_CC);
 	}
 }
-/* }}} end DomDocumentFragment::__construct */
+/* }}} end DOMDocumentFragment::__construct */
 #endif

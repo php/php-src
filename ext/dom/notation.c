@@ -29,7 +29,7 @@
 
 
 /*
-* class domnotation extends domnode 
+* class DOMNotation extends DOMNode 
 *
 * URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-5431D1B9
 * Since: 
@@ -41,7 +41,7 @@ zend_function_entry php_dom_notation_class_functions[] = {
 
 /* {{{ attribute protos, not implemented yet */
 
-/* {{{ proto public_id	string	
+/* {{{ proto publicId	string	
 readonly=yes 
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-54F2B4D0
 Since: 
@@ -71,7 +71,7 @@ int dom_notation_public_id_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 
 
-/* {{{ proto system_id	string	
+/* {{{ proto systemId	string	
 readonly=yes 
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-E8AAB1D0
 Since: 

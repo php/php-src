@@ -29,7 +29,7 @@
 
 
 /*
-* class domcharacterdata extends domnode 
+* class DOMCharacterData extends DOMNode 
 *
 * URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-FF21A306
 * Since: 
@@ -105,7 +105,7 @@ int dom_characterdata_data_write(dom_object *obj, zval *newval TSRMLS_DC)
 
 /* }}} */
 
-/* {{{ proto length	unsigned long	
+/* {{{ proto length	long	
 readonly=yes 
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-7D61178C
 Since: 
@@ -140,7 +140,7 @@ int dom_characterdata_length_read(dom_object *obj, zval **retval TSRMLS_DC)
 /* }}} */
 
 
-/* {{{ proto domstring dom_characterdata_substring_data(unsigned long offset, unsigned long count);
+/* {{{ proto string dom_characterdata_substring_data(long offset, long count);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-6531BCCF
 Since: 
 */
@@ -190,7 +190,7 @@ PHP_FUNCTION(dom_characterdata_substring_data)
 /* }}} end dom_characterdata_substring_data */
 
 
-/* {{{ proto dom_void dom_characterdata_append_data(string arg);
+/* {{{ proto void dom_characterdata_append_data(string arg);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-32791A2F
 Since: 
 */
@@ -215,7 +215,7 @@ PHP_FUNCTION(dom_characterdata_append_data)
 /* }}} end dom_characterdata_append_data */
 
 
-/* {{{ proto dom_void dom_characterdata_insert_data(unsigned long offset, string arg);
+/* {{{ proto void dom_characterdata_insert_data(long offset, string arg);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-3EDB695F
 Since: 
 */
@@ -264,7 +264,7 @@ PHP_FUNCTION(dom_characterdata_insert_data)
 /* }}} end dom_characterdata_insert_data */
 
 
-/* {{{ proto dom_void dom_characterdata_delete_data(unsigned long offset, unsigned long count);
+/* {{{ proto void dom_characterdata_delete_data(long offset, long count);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-7C603781
 Since: 
 */
@@ -320,7 +320,7 @@ PHP_FUNCTION(dom_characterdata_delete_data)
 /* }}} end dom_characterdata_delete_data */
 
 
-/* {{{ proto dom_void dom_characterdata_replace_data(unsigned long offset, unsigned long count, string arg);
+/* {{{ proto void dom_characterdata_replace_data(long offset, long count, string arg);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-E5CBA7FB
 Since: 
 */

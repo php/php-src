@@ -29,7 +29,7 @@
 
 
 /*
-* class domentity extends domnode 
+* class DOMEntity extends DOMNode 
 *
 * URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-527DCFF2
 * Since: 
@@ -39,9 +39,7 @@ zend_function_entry php_dom_entity_class_functions[] = {
 	{NULL, NULL, NULL}
 };
 
-/* {{{ attribute protos, not implemented yet */
-
-/* {{{ proto public_id	string	
+/* {{{ proto publicId	string	
 readonly=yes 
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-D7303025
 Since: 
@@ -71,7 +69,7 @@ int dom_entity_public_id_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 
 
-/* {{{ proto system_id	string	
+/* {{{ proto systemId	string	
 readonly=yes 
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-D7C29F3E
 Since: 
@@ -101,7 +99,7 @@ int dom_entity_system_id_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 
 
-/* {{{ proto notation_name	string	
+/* {{{ proto notationName	string	
 readonly=yes 
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-6ABAEB38
 Since: 
@@ -134,7 +132,7 @@ int dom_entity_notation_name_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 
 
-/* {{{ proto actual_encoding	string	
+/* {{{ proto actualEncoding	string	
 readonly=no 
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Entity3-actualEncoding
 Since: DOM Level 3

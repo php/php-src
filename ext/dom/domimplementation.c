@@ -28,7 +28,7 @@
 #include "php_dom.h"
 
 /*
-* class domimplementation 
+* class DOMImplementation 
 *
 * URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-102161490
 * Since: 
@@ -41,9 +41,6 @@ zend_function_entry php_dom_domimplementation_class_functions[] = {
 	PHP_ME(domimplementation, createDocument, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_ALLOW_STATIC)
 	{NULL, NULL, NULL}
 };
-
-/* {{{ attribute protos, not implemented yet */
-
 
 /* {{{ proto boolean dom_domimplementation_has_feature(string feature, string version);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-5CED94D7
@@ -67,7 +64,7 @@ PHP_METHOD(domimplementation, hasFeature)
 /* }}} end dom_domimplementation_has_feature */
 
 
-/* {{{ proto domdocumenttype dom_domimplementation_create_document_type(string qualifiedName, string publicId, string systemId);
+/* {{{ proto DOMDocumentType dom_domimplementation_create_document_type(string qualifiedName, string publicId, string systemId);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Level-2-Core-DOM-createDocType
 Since: DOM Level 2
 */
@@ -121,7 +118,7 @@ PHP_METHOD(domimplementation, createDocumentType)
 /* }}} end dom_domimplementation_create_document_type */
 
 
-/* {{{ proto domdocument dom_domimplementation_create_document(string namespaceURI, string qualifiedName, documenttype doctype);
+/* {{{ proto DOMDocument dom_domimplementation_create_document(string namespaceURI, string qualifiedName, DOMDocumentType doctype);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Level-2-Core-DOM-createDocument
 Since: DOM Level 2
 */
@@ -224,7 +221,7 @@ PHP_METHOD(domimplementation, createDocument)
 /* }}} end dom_domimplementation_create_document */
 
 
-/* {{{ proto domnode dom_domimplementation_get_feature(string feature, string version);
+/* {{{ proto DOMNode dom_domimplementation_get_feature(string feature, string version);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#DOMImplementation3-getFeature
 Since: DOM Level 3
 */

@@ -29,7 +29,7 @@
 
 
 /*
-* class domcomment extends domcharacterdata 
+* class DOMComment extends DOMCharacterData 
 *
 * URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-1728279322
 * Since: 
@@ -40,7 +40,7 @@ zend_function_entry php_dom_comment_class_functions[] = {
 	{NULL, NULL, NULL}
 };
 
-/* {{{ proto void DomComment::__construct([string value]); */
+/* {{{ proto void DOMComment::__construct([string value]); */
 PHP_METHOD(domcomment, __construct)
 {
 
@@ -73,5 +73,5 @@ PHP_METHOD(domcomment, __construct)
 		php_libxml_increment_node_ptr((php_libxml_node_object *)intern, (xmlNodePtr)nodep, (void *)intern TSRMLS_CC);
 	}
 }
-/* }}} end DomComment::__construct */
+/* }}} end DOMComment::__construct */
 #endif

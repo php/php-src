@@ -29,7 +29,7 @@
 
 
 /*
-* class domnodelist 
+* class DOMNodeList 
 *
 * URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-536297177
 * Since: 
@@ -40,9 +40,7 @@ zend_function_entry php_dom_nodelist_class_functions[] = {
 	{NULL, NULL, NULL}
 };
 
-/* {{{ attribute protos, not implemented yet */
-
-/* {{{ proto length	unsigned long	
+/* {{{ proto length	int	
 readonly=yes 
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-203510337
 Since: 
@@ -95,7 +93,7 @@ int dom_nodelist_length_read(dom_object *obj, zval **retval TSRMLS_DC)
 /* }}} */
 
 
-/* {{{ proto domnode dom_nodelist_item(unsigned long index);
+/* {{{ proto DOMNode dom_nodelist_item(int index);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-844377136
 Since: 
 */

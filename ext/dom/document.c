@@ -42,7 +42,7 @@ struct _idsIterator {
 #define DOM_LOAD_FILE 1
 
 /*
-* class domdocument extends domnode 
+* class DOMDocument extends DOMNode 
 *
 * URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-i-Document
 * Since: 
@@ -88,7 +88,7 @@ zend_function_entry php_dom_document_class_functions[] = {
 	{NULL, NULL, NULL}
 };
 
-/* {{{ proto doctype	documenttype	
+/* {{{ proto docType	DOMDocumentType	
 readonly=yes 
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-B63ED1A31
 Since: 
@@ -124,7 +124,7 @@ int dom_document_doctype_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 
 
-/* {{{ proto implementation	domimplementation	
+/* {{{ proto implementation	DOMImplementation	
 readonly=yes 
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-1B793EBA
 Since: 
@@ -140,7 +140,7 @@ int dom_document_implementation_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 
 
-/* {{{ proto domelement document_element	documentElement	
+/* {{{ proto documentElement	DOMElement	
 readonly=yes 
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-87CD092
 Since: 
@@ -174,7 +174,7 @@ int dom_document_document_element_read(dom_object *obj, zval **retval TSRMLS_DC)
 /* }}} */
 
 
-/* {{{ proto actual_encoding	string	
+/* {{{ proto actualEncoding	string	
 readonly=no 
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-Document3-actualEncoding
 Since: DOM Level 3
@@ -399,7 +399,7 @@ int dom_document_version_write(dom_object *obj, zval *newval TSRMLS_DC)
 
 /* }}} */
 
-/* {{{ proto strict_error_checking	boolean	
+/* {{{ proto strictErrorChecking	boolean	
 readonly=no 
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-Document3-strictErrorChecking
 Since: DOM Level 3
@@ -486,7 +486,7 @@ int dom_document_format_output_write(dom_object *obj, zval *newval TSRMLS_DC)
 }
 /* }}} */
 
-/* {{{ proto validateonParse	boolean	
+/* {{{ proto validateOnParse	boolean	
 readonly=no
 */
 int	dom_document_validate_on_parse_read(dom_object *obj, zval **retval TSRMLS_DC)
@@ -658,7 +658,7 @@ int dom_document_substitue_entities_write(dom_object *obj, zval *newval TSRMLS_D
 /* }}} */
 
 
-/* {{{ proto document_uri	string	
+/* {{{ proto documentURI	string	
 readonly=no 
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-Document3-documentURI
 Since: DOM Level 3
@@ -724,7 +724,7 @@ int dom_document_document_uri_write(dom_object *obj, zval *newval TSRMLS_DC)
 
 
 
-/* {{{ proto config	domconfiguration	
+/* {{{ proto config	DOMConfiguration	
 readonly=yes 
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-Document3-config
 Since: DOM Level 3
@@ -740,7 +740,7 @@ int dom_document_config_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 
 
-/* {{{ proto domelement dom_document_create_element(string tagName [, string value]);
+/* {{{ proto DOMElement dom_document_create_element(string tagName [, string value]);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-2141741547
 Since: 
 */
@@ -774,7 +774,7 @@ PHP_FUNCTION(dom_document_create_element)
 /* }}} end dom_document_create_element */
 
 
-/* {{{ proto domdocumentfragment dom_document_create_document_fragment();
+/* {{{ proto DOMDocumentFragment dom_document_create_document_fragment();
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-35CB04B5
 Since: 
 */
@@ -802,7 +802,7 @@ PHP_FUNCTION(dom_document_create_document_fragment)
 /* }}} end dom_document_create_document_fragment */
 
 
-/* {{{ proto domtext dom_document_create_text_node(string data);
+/* {{{ proto DOMText dom_document_create_text_node(string data);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-1975348127
 Since: 
 */
@@ -831,7 +831,7 @@ PHP_FUNCTION(dom_document_create_text_node)
 /* }}} end dom_document_create_text_node */
 
 
-/* {{{ proto domcomment dom_document_create_comment(string data);
+/* {{{ proto DOMComment dom_document_create_comment(string data);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-1334481328
 Since: 
 */
@@ -860,7 +860,7 @@ PHP_FUNCTION(dom_document_create_comment)
 /* }}} end dom_document_create_comment */
 
 
-/* {{{ proto domcdatasection dom_document_create_cdatasection(string data);
+/* {{{ proto DOMCdataSection dom_document_create_cdatasection(string data);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-D26C0AF8
 Since: 
 */
@@ -889,7 +889,7 @@ PHP_FUNCTION(dom_document_create_cdatasection)
 /* }}} end dom_document_create_cdatasection */
 
 
-/* {{{ proto domprocessinginstruction dom_document_create_processing_instruction(string target, string data);
+/* {{{ proto DOMProcessingInstruction dom_document_create_processing_instruction(string target, string data);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-135944439
 Since: 
 */
@@ -925,7 +925,7 @@ PHP_FUNCTION(dom_document_create_processing_instruction)
 /* }}} end dom_document_create_processing_instruction */
 
 
-/* {{{ proto domattr dom_document_create_attribute(string name);
+/* {{{ proto DOMAttr dom_document_create_attribute(string name);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-1084891198
 Since: 
 */
@@ -960,7 +960,7 @@ PHP_FUNCTION(dom_document_create_attribute)
 /* }}} end dom_document_create_attribute */
 
 
-/* {{{ proto domentityreference dom_document_create_entity_reference(string name);
+/* {{{ proto DOMEntityReference dom_document_create_entity_reference(string name);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-392B75AE
 Since: 
 */
@@ -994,7 +994,7 @@ PHP_FUNCTION(dom_document_create_entity_reference)
 /* }}} end dom_document_create_entity_reference */
 
 
-/* {{{ proto domnodelist dom_document_get_elements_by_tag_name(string tagname);
+/* {{{ proto DOMNodeList dom_document_get_elements_by_tag_name(string tagname);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-A6C9094
 Since: 
 */
@@ -1021,7 +1021,7 @@ PHP_FUNCTION(dom_document_get_elements_by_tag_name)
 /* }}} end dom_document_get_elements_by_tag_name */
 
 
-/* {{{ proto domnode dom_document_import_node(node importedNode, boolean deep);
+/* {{{ proto DOMNode dom_document_import_node(DOMNode importedNode, boolean deep);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Core-Document-importNode
 Since: DOM Level 2
 */
@@ -1063,7 +1063,7 @@ PHP_FUNCTION(dom_document_import_node)
 /* }}} end dom_document_import_node */
 
 
-/* {{{ proto domelement dom_document_create_element_ns(string namespaceURI, string qualifiedName);
+/* {{{ proto DOMElement dom_document_create_element_ns(string namespaceURI, string qualifiedName);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-DocCrElNS
 Since: DOM Level 2
 */
@@ -1127,7 +1127,7 @@ PHP_FUNCTION(dom_document_create_element_ns)
 /* }}} end dom_document_create_element_ns */
 
 
-/* {{{ proto domattr dom_document_create_attribute_ns(string namespaceURI, string qualifiedName);
+/* {{{ proto DOMAttr dom_document_create_attribute_ns(string namespaceURI, string qualifiedName);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-DocCrAttrNS
 Since: DOM Level 2
 */
@@ -1193,7 +1193,7 @@ PHP_FUNCTION(dom_document_create_attribute_ns)
 /* }}} end dom_document_create_attribute_ns */
 
 
-/* {{{ proto domnodelist dom_document_get_elements_by_tag_name_ns(string namespaceURI, string localName);
+/* {{{ proto DOMNodeList dom_document_get_elements_by_tag_name_ns(string namespaceURI, string localName);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-getElBTNNS
 Since: DOM Level 2
 */
@@ -1221,7 +1221,7 @@ PHP_FUNCTION(dom_document_get_elements_by_tag_name_ns)
 /* }}} end dom_document_get_elements_by_tag_name_ns */
 
 
-/* {{{ proto domelement dom_document_get_element_by_id(string elementId);
+/* {{{ proto DOMElement dom_document_get_element_by_id(string elementId);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-getElBId
 Since: DOM Level 2
 */
@@ -1252,7 +1252,7 @@ PHP_FUNCTION(dom_document_get_element_by_id)
 /* }}} end dom_document_get_element_by_id */
 
 
-/* {{{ proto domnode dom_document_adopt_node(node source);
+/* {{{ proto DOMNode dom_document_adopt_node(DOMNode source);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-Document3-adoptNode
 Since: DOM Level 3
 */
@@ -1263,7 +1263,7 @@ PHP_FUNCTION(dom_document_adopt_node)
 /* }}} end dom_document_adopt_node */
 
 
-/* {{{ proto dom_void dom_document_normalize_document();
+/* {{{ proto void dom_document_normalize_document();
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-Document3-normalizeDocument
 Since: DOM Level 3
 */
@@ -1284,7 +1284,7 @@ PHP_FUNCTION(dom_document_normalize_document)
 /* }}} end dom_document_normalize_document */
 
 
-/* {{{ proto domnode dom_document_rename_node(node n, string namespaceURI, string qualifiedName);
+/* {{{ proto DOMNode dom_document_rename_node(node n, string namespaceURI, string qualifiedName);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-Document3-renameNode
 Since: DOM Level 3
 */
@@ -1294,7 +1294,7 @@ PHP_FUNCTION(dom_document_rename_node)
 }
 /* }}} end dom_document_rename_node */
 
-/* {{{ proto void DomDocument::__construct([string version], [string encoding]); */
+/* {{{ proto void DOMDocument::__construct([string version], [string encoding]); */
 PHP_METHOD(domdocument, __construct)
 {
 
@@ -1337,7 +1337,7 @@ PHP_METHOD(domdocument, __construct)
 		php_libxml_increment_node_ptr((php_libxml_node_object *)intern, (xmlNodePtr)docp, (void *)intern TSRMLS_CC);
 	}
 }
-/* }}} end dom_document_document */
+/* }}} end DOMDocument::__construct */
 
 char *_dom_get_valid_file_path(char *source, char *resolved_path, int resolved_path_len  TSRMLS_DC) {
 	xmlURI *uri;
@@ -1544,7 +1544,7 @@ static void dom_parse_document(INTERNAL_FUNCTION_PARAMETERS, int mode) {
 }
 /* }}} end dom_parser_document */
 
-/* {{{ proto boolean|domnode dom_document_load(string source);
+/* {{{ proto boolean|DOMNode dom_document_load(string source);
 URL: http://www.w3.org/TR/DOM-Level-3-LS/load-save.html#LS-DocumentLS-load
 Since: DOM Level 3
 */
@@ -1554,7 +1554,7 @@ PHP_METHOD(domdocument, load)
 }
 /* }}} end dom_document_load */
 
-/* {{{ proto boolean|domnode dom_document_loadxml(string source);
+/* {{{ proto boolean|DOMNode dom_document_loadxml(string source);
 URL: http://www.w3.org/TR/DOM-Level-3-LS/load-save.html#LS-DocumentLS-loadXML
 Since: DOM Level 3
 */
@@ -1564,7 +1564,7 @@ PHP_METHOD(domdocument, loadXML)
 }
 /* }}} end dom_document_loadxml */
 
-/* {{{ proto long|domnode dom_document_save(string file);
+/* {{{ proto long dom_document_save(string file);
 Convenience method to save to file
 */
 PHP_FUNCTION(dom_document_save)
@@ -1600,7 +1600,7 @@ PHP_FUNCTION(dom_document_save)
 }
 /* }}} end dom_document_save */
 
-/* {{{ proto string|domnode dom_document_savexml([node n]);
+/* {{{ proto string dom_document_savexml([node n]);
 URL: http://www.w3.org/TR/DOM-Level-3-LS/load-save.html#LS-DocumentLS-saveXML
 Since: DOM Level 3
 */
@@ -1729,7 +1729,7 @@ PHP_FUNCTION(dom_document_xinclude)
 }
 
 
-/* {{{ proto string|domnode dom_document_validate();
+/* {{{ proto boolean dom_document_validate();
 Since: DOM extended
 */
 PHP_FUNCTION(dom_document_validate)
@@ -1842,19 +1842,19 @@ _dom_document_schema_validate(INTERNAL_FUNCTION_PARAMETERS, int type)
 	}
 }
 
-/* {{{ proto boolean|domnode _dom_document_schema_validate(string filename); */
+/* {{{ proto boolean dom_document_schema_validate_file(string filename); */
 PHP_FUNCTION(dom_document_schema_validate_file)
 {
 	_dom_document_schema_validate(INTERNAL_FUNCTION_PARAM_PASSTHRU, DOM_LOAD_FILE);
 }
-/* }}} end _dom_document_schema_validate */
+/* }}} end dom_document_schema_validate_file */
 
-/* {{{ proto boolean|domnode _dom_document_schema_validate(string source); */
+/* {{{ proto boolean dom_document_schema_validate(string source); */
 PHP_FUNCTION(dom_document_schema_validate_xml)
 {
 	_dom_document_schema_validate(INTERNAL_FUNCTION_PARAM_PASSTHRU, DOM_LOAD_STRING);
 }
-/* }}} end _dom_document_schema_validate */
+/* }}} end dom_document_schema_validate */
 
 
 static void
@@ -1932,14 +1932,14 @@ _dom_document_relaxNG_validate(INTERNAL_FUNCTION_PARAMETERS, int type)
 	}
 }
 
-/* {{{ proto boolean|domnode dom_document_relaxNG_validate_file(string filename); */
+/* {{{ proto boolean dom_document_relaxNG_validate_file(string filename); */
 PHP_FUNCTION(dom_document_relaxNG_validate_file)
 {
 	_dom_document_relaxNG_validate(INTERNAL_FUNCTION_PARAM_PASSTHRU, DOM_LOAD_FILE);
 }
 /* }}} end dom_document_relaxNG_validate_file */
 
-/* {{{ proto boolean|domnode dom_document_relaxNG_validate_xml(string source); */
+/* {{{ proto boolean dom_document_relaxNG_validate_xml(string source); */
 PHP_FUNCTION(dom_document_relaxNG_validate_xml)
 {
 	_dom_document_relaxNG_validate(INTERNAL_FUNCTION_PARAM_PASSTHRU, DOM_LOAD_STRING);
@@ -2022,7 +2022,7 @@ static void dom_load_html(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	}
 }
 
-/* {{{ proto boolean|domnode dom_document_load_html_file(string source);
+/* {{{ proto boolean|DOMNode dom_document_load_html_file(string source);
 Since: DOM extended
 */
 PHP_METHOD(domdocument, loadHTMLFile)
@@ -2031,7 +2031,7 @@ PHP_METHOD(domdocument, loadHTMLFile)
 }
 /* }}} end dom_document_load_html_file */
 
-/* {{{ proto boolean|domnode dom_document_load_html(string source);
+/* {{{ proto boolean|DOMNode dom_document_load_html(string source);
 Since: DOM extended
 */
 PHP_METHOD(domdocument, loadHTML)

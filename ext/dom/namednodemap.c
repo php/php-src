@@ -29,7 +29,7 @@
 
 
 /*
-* class domnamednodemap 
+* class DOMNamedNodeMap 
 *
 * URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-1780488922
 * Since: 
@@ -46,9 +46,7 @@ zend_function_entry php_dom_namednodemap_class_functions[] = {
 	{NULL, NULL, NULL}
 };
 
-/* {{{ attribute protos, not implemented yet */
-
-/* {{{ proto length	unsigned long	
+/* {{{ proto length	int	
 readonly=yes 
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-6D0FB19E
 Since: 
@@ -90,7 +88,7 @@ int dom_namednodemap_length_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 
 
-/* {{{ proto domnode dom_namednodemap_get_named_item(string name);
+/* {{{ proto DOMNode dom_namednodemap_get_named_item(string name);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-1074577549
 Since: 
 */
@@ -140,7 +138,7 @@ PHP_FUNCTION(dom_namednodemap_get_named_item)
 /* }}} end dom_namednodemap_get_named_item */
 
 
-/* {{{ proto domnode dom_namednodemap_set_named_item(node arg);
+/* {{{ proto DOMNode dom_namednodemap_set_named_item(DOMNode arg);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-1025163788
 Since: 
 */
@@ -151,7 +149,7 @@ PHP_FUNCTION(dom_namednodemap_set_named_item)
 /* }}} end dom_namednodemap_set_named_item */
 
 
-/* {{{ proto domnode dom_namednodemap_remove_named_item(string name);
+/* {{{ proto DOMNode dom_namednodemap_remove_named_item(string name);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-D58B193
 Since: 
 */
@@ -162,7 +160,7 @@ PHP_FUNCTION(dom_namednodemap_remove_named_item)
 /* }}} end dom_namednodemap_remove_named_item */
 
 
-/* {{{ proto domnode dom_namednodemap_item(unsigned long index);
+/* {{{ proto DOMNode dom_namednodemap_item(int index);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-349467F9
 Since: 
 */
@@ -217,7 +215,7 @@ PHP_FUNCTION(dom_namednodemap_item)
 /* }}} end dom_namednodemap_item */
 
 
-/* {{{ proto domnode dom_namednodemap_get_named_item_ns(string namespaceURI, string localName);
+/* {{{ proto DOMNode dom_namednodemap_get_named_item_ns(string namespaceURI, string localName);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-getNamedItemNS
 Since: DOM Level 2
 */
@@ -267,7 +265,7 @@ PHP_FUNCTION(dom_namednodemap_get_named_item_ns)
 /* }}} end dom_namednodemap_get_named_item_ns */
 
 
-/* {{{ proto domnode dom_namednodemap_set_named_item_ns(node arg);
+/* {{{ proto DOMNode dom_namednodemap_set_named_item_ns(DOMNode arg);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-setNamedItemNS
 Since: DOM Level 2
 */
@@ -278,7 +276,7 @@ PHP_FUNCTION(dom_namednodemap_set_named_item_ns)
 /* }}} end dom_namednodemap_set_named_item_ns */
 
 
-/* {{{ proto domnode dom_namednodemap_remove_named_item_ns(string namespaceURI, string localName);
+/* {{{ proto DOMNode dom_namednodemap_remove_named_item_ns(string namespaceURI, string localName);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-removeNamedItemNS
 Since: DOM Level 2
 */

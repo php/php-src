@@ -29,7 +29,7 @@
 
 
 /*
-* class domentityreference extends domnode 
+* class DOMEntityReference extends DOMNode 
 *
 * URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-11C98490
 * Since: 
@@ -40,7 +40,7 @@ zend_function_entry php_dom_entityreference_class_functions[] = {
 	{NULL, NULL, NULL}
 };
 
-/* {{{ proto void DomEntityReference::__construct(string name); */
+/* {{{ proto void DOMEntityReference::__construct(string name); */
 PHP_METHOD(domentityreference, __construct)
 {
 	zval *id;
@@ -81,5 +81,5 @@ PHP_METHOD(domentityreference, __construct)
 	}
 }
 
-/* }}} end DomEntityReference::__construct */
+/* }}} end DOMEntityReference::__construct */
 #endif
