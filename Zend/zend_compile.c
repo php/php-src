@@ -152,7 +152,7 @@ ZEND_API zend_bool zend_is_compiling(TSRMLS_D)
 
 static zend_uint get_temporary_variable(zend_op_array *op_array)
 {
-	return (op_array->T)++;
+	return (op_array->T)++ * sizeof(temp_variable);
 }
 
 
