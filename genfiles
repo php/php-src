@@ -18,5 +18,6 @@ EOF
 
 rm config_vars.mk .deps ext/standard/libs.mk $files
 
-re2c -b ext/standard/url_scanner_ex.re | grep -v "#line" > ext/standard/url_scanner_ex.c
-
+f=ext/standard/url_scanner_ex.c
+cp $f $f.orig
+grep -v '#line ' $f.orig > $f
