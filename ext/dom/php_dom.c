@@ -441,7 +441,6 @@ PHP_MINIT_FUNCTION(dom)
 	memcpy(&dom_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	dom_object_handlers.read_property = dom_read_property;
 	dom_object_handlers.write_property = dom_write_property;
-	dom_object_handlers.get_property_ptr = dom_property_get_ptr;
 
 	zend_hash_init(&classes, 0, NULL, NULL, 1);
 
