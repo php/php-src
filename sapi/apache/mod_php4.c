@@ -163,6 +163,7 @@ int sapi_apache_header_handler(sapi_header_struct *sapi_header, sapi_headers_str
 
 	header_content = p = strchr(header_name, ':');
 	if (!p) {
+		efree(sapi_header->header);
 		return 0;
 	}
 
