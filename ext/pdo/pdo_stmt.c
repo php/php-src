@@ -670,7 +670,9 @@ void pdo_dbstmt_free_storage(zend_object *object TSRMLS_DC)
 	if (stmt->methods && stmt->methods->dtor) {
 		stmt->methods->dtor(stmt TSRMLS_CC);
 	}
-
+	if(stmt->query_string) {
+		efree(stmt->query_string);
+	}
 	zend_objects_store_del_ref(&stmt->database_object_handle TSRMLS_CC);
 		
 	efree(stmt);
