@@ -26,11 +26,6 @@
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#ifdef PHP_WIN32
-#include "win32/syslog.h"
-#else
-#include <syslog.h>
-#endif
 
 #include <string.h>
 #include <errno.h>

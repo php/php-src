@@ -44,9 +44,6 @@
 #if HAVE_LOCALE_H
 #include <locale.h>
 #endif
-#ifndef PHP_WIN32
-#include <syslog.h>		/* for possible syslog macro */
-#endif
 #include "safe_mode.h"
 #ifdef PHP_WIN32
 #include "win32/unistd.h"

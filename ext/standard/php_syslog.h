@@ -32,6 +32,12 @@
 
 #if HAVE_SYSLOG_H
 
+#ifdef PHP_WIN32
+#include "win32/syslog.h"
+#else
+#include <syslog.h>
+#endif
+
 extern PHP_MINIT_FUNCTION(syslog);
 extern PHP_RINIT_FUNCTION(syslog);
 extern PHP_RSHUTDOWN_FUNCTION(syslog);
