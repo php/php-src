@@ -706,10 +706,10 @@ _php_math_basetolong(zval *arg, int base) {
  */
 PHPAPI int
 _php_math_basetozval(zval *arg, int base, zval *ret) {
-	long mult = 1, num = 0, digit;
-	double fmult, fnum;
+	long num = 0, digit, onum;
+	double fnum;
 	int i;
-	int f_mode = 0;
+	int mode = 0;
 	char c, *s;
 
 	if (Z_TYPE_P(arg) != IS_STRING || base < 2 || base > 36) {
@@ -718,38 +718,34 @@ _php_math_basetozval(zval *arg, int base, zval *ret) {
 
 	s = Z_STRVAL_P(arg);
 
-	for (i = Z_STRLEN_P(arg) - 1; i >= 0; i--) {
-		c = toupper(s[i]);
-		if (c >= '0' && c <= '9') {
-			digit = (c - '0');
-		} else if (c >= 'A' && c <= 'Z') {
-			digit = (c - 'A' + 10);
-		} else {
+	for (i = Z_STRLEN_P(arg); i >= 0; i--) {
+		c = *s++;
+
+		digit = (c >= '0' && c <= '9') ? c - '0'
+			: (c >= 'A' && c <= 'Z') ? c - 'A' + 10
+			: (c >= 'a' && c <= 'z') ? c - 'a' + 10
+			: base;
+
+		if (digit >= base)
 			continue;
-		}
-		if (digit >= base) {
-			continue;
-		}
-		if(!f_mode && (!mult || digit > LONG_MAX/mult || num > LONG_MAX-mult*digit)) {
-			f_mode = 1;
-			if(!mult) {
-				fmult = (ulong) ULONG_MAX + 1;
-			} else {
-				fmult = (ulong) mult;
-			}
-			fnum = (ulong) num;
-		}
 		
-		if(f_mode) {
-			fnum += fmult * digit;
-			fmult *= base;
-		} else {
-			num += mult * digit;
-			mult *= base;
-		}
+		switch (mode) {
+		case 0: /* Integer */
+			onum = num;
+			num = num * base + digit;
+
+			if (num > onum)
+				break; /* No overflow, continue */
+			
+			fnum = onum;
+			mode = 1;
+			/* fall-through */
+		case 1: /* Float */
+			fnum = fnum * base + digit;
+		}	
 	}
 
-	if(f_mode) {
+	if (mode == 1) {
 		ZVAL_DOUBLE(ret, fnum);
 	} else {
 		ZVAL_LONG(ret, num);
