@@ -20,9 +20,6 @@
 #ifndef PHP_DBPLUS_H
 #define PHP_DBPLUS_H
 
-#include <saccess.h>
-#include <relation.h>
-#include <dblight.h>
 
 extern zend_module_entry dbplus_module_entry;
 #define phpext_dbplus_ptr &dbplus_module_entry
@@ -41,7 +38,6 @@ PHP_MINFO_FUNCTION(dbplus);
 
 PHP_FUNCTION(dbplus_add);
 PHP_FUNCTION(dbplus_aql);
-PHP_FUNCTION(dbplus_change);
 PHP_FUNCTION(dbplus_chdir);
 PHP_FUNCTION(dbplus_close);
 PHP_FUNCTION(dbplus_curr);
