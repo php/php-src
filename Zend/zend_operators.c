@@ -108,66 +108,82 @@ ZEND_API double zend_string_to_double(const char *number, zend_uint length)
 
 ZEND_API void convert_scalar_to_number(zval *op)
 {
-	char *strval;
+	switch (op->type) {
+		case IS_STRING:
+			{
+				char *strval;
 
-	if (op->type == IS_STRING) {
-		strval = op->value.str.val;
-		switch ((op->type=is_numeric_string(strval, op->value.str.len, &op->value.lval, &op->value.dval))) {
-			case IS_DOUBLE:
-			case IS_LONG:
-				break;
-#if 0&&WITH_BCMATH
-			case FLAG_IS_BC:
-				op->type = IS_DOUBLE; /* may have lost significant digits */
-				break;
+				strval = op->value.str.val;
+				switch ((op->type=is_numeric_string(strval, op->value.str.len, &op->value.lval, &op->value.dval))) {
+					case IS_DOUBLE:
+					case IS_LONG:
+						break;
+#if 0 && WITH_BCMATH
+					case FLAG_IS_BC:
+						op->type = IS_DOUBLE; /* may have lost significant digits */
+						break;
 #endif
-			default:
-				op->value.lval = strtol(op->value.str.val, NULL, 10);
-				op->type = IS_LONG;
+					default:
+						op->value.lval = strtol(op->value.str.val, NULL, 10);
+						op->type = IS_LONG;
+						break;
+				}
+				STR_FREE(strval);
 				break;
-		}
-		STR_FREE(strval);
-	} else if (op->type==IS_BOOL) {
-		op->type = IS_LONG;
-	} else if (op->type==IS_RESOURCE) {
-		zend_list_delete(op->value.lval);
-		op->type = IS_LONG;
-	} else if (op->type==IS_NULL) {
-		op->type = IS_LONG;
-		op->value.lval = 0;
+			}
+		case IS_BOOL:
+			op->type = IS_LONG;
+			break;
+		case IS_RESOURCE:
+			zend_list_delete(op->value.lval);
+			op->type = IS_LONG;
+			break;
+		case IS_NULL:
+			op->type = IS_LONG;
+			op->value.lval = 0;
+			break;
 	}
 }
 
 #define zendi_convert_scalar_to_number(op, holder, result)			\
 	if (op==result) {												\
 		convert_scalar_to_number(op);								\
-	} else if ((op)->type == IS_STRING) {							\
-		switch (((holder).type=is_numeric_string((op)->value.str.val, (op)->value.str.len, &(holder).value.lval, &(holder).value.dval))) {	\
-			case IS_DOUBLE:											\
-			case IS_LONG:											\
-				break;												\
-			case FLAG_IS_BC:												\
-				(holder).type = IS_DOUBLE; /* may have lost significant digits */	\
-				break;												\
-			default:												\
-				(holder).value.lval = strtol((op)->value.str.val, NULL, 10);		\
-				(holder).type = IS_LONG;							\
-				break;												\
-		}															\
-		(op) = &(holder);											\
-	} else if ((op)->type==IS_BOOL) {								\
-		(holder).value.lval = (op)->value.lval;						\
-		(holder).type = IS_LONG;									\
-		(op) = &(holder);											\
-	} else if ((op)->type==IS_RESOURCE) {							\
-		zend_list_delete((op)->value.lval);							\
-		(holder).value.lval = (op)->value.lval;						\
-		(holder).type = IS_LONG;									\
-		(op) = &(holder);											\
-	} else if ((op)->type==IS_NULL) {								\
-		(holder).value.lval = 0;									\
-		(holder).type = IS_LONG;									\
-		(op) = &(holder);											\
+	} else {														\
+		switch ((op)->type) {										\
+			case IS_STRING:											\
+				{													\
+					switch (((holder).type=is_numeric_string((op)->value.str.val, (op)->value.str.len, &(holder).value.lval, &(holder).value.dval))) {	\
+						case IS_DOUBLE:															\
+						case IS_LONG:															\
+							break;																\
+						case FLAG_IS_BC:														\
+							(holder).type = IS_DOUBLE; /* may have lost significant digits */	\
+							break;																\
+						default:																\
+							(holder).value.lval = strtol((op)->value.str.val, NULL, 10);		\
+							(holder).type = IS_LONG;						\
+							break;											\
+					}														\
+					(op) = &(holder);										\
+					break;													\
+				}															\
+			case IS_BOOL:													\
+				(holder).value.lval = (op)->value.lval;						\
+				(holder).type = IS_LONG;									\
+				(op) = &(holder);											\
+				break;														\
+			case IS_RESOURCE:												\
+				zend_list_delete((op)->value.lval);							\
+				(holder).value.lval = (op)->value.lval;						\
+				(holder).type = IS_LONG;									\
+				(op) = &(holder);											\
+				break;														\
+			case IS_NULL:													\
+				(holder).value.lval = 0;									\
+				(holder).type = IS_LONG;									\
+				(op) = &(holder);											\
+				break;														\
+		}																	\
 	}
 
 
@@ -175,15 +191,6 @@ ZEND_API void convert_scalar_to_number(zval *op)
 #define zendi_convert_to_long(op, holder, result)					\
 	if (op==result) {												\
 		convert_to_long(op);										\
-	} else if ((op)->type==IS_BOOL)	{								\
-		(holder).value.lval = (op)->value.lval;						\
-		(holder).type = IS_LONG;									\
-		(op) = &(holder);											\
-	} else if ((op)->type==IS_RESOURCE) {							\
-		zend_list_delete((op)->value.lval);							\
-		(holder).value.lval = (op)->value.lval;						\
-		(holder).type = IS_LONG;									\
-		(op) = &(holder);											\
 	} else if ((op)->type != IS_LONG) {								\
 		switch ((op)->type) {										\
 			case IS_NULL:											\
@@ -193,16 +200,23 @@ ZEND_API void convert_scalar_to_number(zval *op)
 				(holder).value.lval = (long) (op)->value.dval;		\
 				break;												\
 			case IS_STRING:											\
-				(holder).value.lval = strtol((op)->value.str.val, NULL, 10);		\
+				(holder).value.lval = strtol((op)->value.str.val, NULL, 10);					\
 				break;												\
 			case IS_ARRAY:											\
-				(holder).value.lval = (zend_hash_num_elements((op)->value.ht)?1:0);	\
+				(holder).value.lval = (zend_hash_num_elements((op)->value.ht)?1:0);				\
 				break;												\
 			case IS_OBJECT:											\
 				(holder).value.lval = (zend_hash_num_elements((op)->value.obj.properties)?1:0);	\
 				break;												\
+			case IS_RESOURCE:										\
+				zend_list_delete((op)->value.lval);					\
+				(holder).value.lval = (op)->value.lval;				\
+				break;												\
+			case IS_BOOL:											\
+				(holder).value.lval = (op)->value.lval;				\
+				break;												\
 			default:												\
-				zend_error(E_WARNING, "Cannot convert to ordinal value");			\
+				zend_error(E_WARNING, "Cannot convert to ordinal value");						\
 				(holder).value.lval = 0;							\
 				break;												\
 		}															\
