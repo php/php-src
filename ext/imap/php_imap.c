@@ -632,7 +632,7 @@ PHP_RSHUTDOWN_FUNCTION(imap)
 		if (EG(error_reporting) & E_NOTICE) {
 			ecur = IMAPG(imap_errorstack);
 			while (ecur != NIL) {
-				php_error(E_NOTICE, "%s(): %s (errflg=%d)", get_active_function_name(TSRMLS_C), ecur->LTEXT, ecur->errflg);
+				php_error(E_NOTICE, "%s(): %s (errflg=%ld)", get_active_function_name(TSRMLS_C), ecur->LTEXT, ecur->errflg);
 				ecur = ecur->next;
 			}
 		}

@@ -652,12 +652,12 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			list_entry new_le;
 
 			if (MySG(max_links)!=-1 && MySG(num_links)>=MySG(max_links)) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Too many open links (%d)", MySG(num_links));
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Too many open links (%ld)", MySG(num_links));
 				efree(hashed_details);
 				MYSQL_DO_CONNECT_RETURN_FALSE();
 			}
 			if (MySG(max_persistent)!=-1 && MySG(num_persistent)>=MySG(max_persistent)) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Too many open persistent links (%d)", MySG(num_persistent));
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Too many open persistent links (%ld)", MySG(num_persistent));
 				efree(hashed_details);
 				MYSQL_DO_CONNECT_RETURN_FALSE();
 			}
@@ -762,7 +762,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			}
 		}
 		if (MySG(max_links)!=-1 && MySG(num_links)>=MySG(max_links)) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Too many open links (%d)", MySG(num_links));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Too many open links (%ld)", MySG(num_links));
 			efree(hashed_details);
 			MYSQL_DO_CONNECT_RETURN_FALSE();
 		}
@@ -1772,7 +1772,7 @@ PHP_FUNCTION(mysql_result)
 		
 	convert_to_long_ex(row);
 	if (Z_LVAL_PP(row)<0 || Z_LVAL_PP(row)>=(int)mysql_num_rows(mysql_result)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to jump to row %d on MySQL result index %d", Z_LVAL_PP(row), Z_LVAL_PP(result));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to jump to row %ld on MySQL result index %ld", Z_LVAL_PP(row), Z_LVAL_PP(result));
 		RETURN_FALSE;
 	}
 	mysql_data_seek(mysql_result, Z_LVAL_PP(row));
@@ -1804,7 +1804,7 @@ PHP_FUNCTION(mysql_result)
 						i++;
 					}
 					if (!tmp_field) { /* no match found */
-						php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s%s%s not found in MySQL result index %d",
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s%s%s not found in MySQL result index %ld",
 									(table_name?table_name:""), (table_name?".":""), field_name, Z_LVAL_PP(result));
 						efree(field_name);
 						if (table_name) {
@@ -2025,7 +2025,7 @@ PHP_FUNCTION(mysql_data_seek)
 
 	convert_to_long_ex(offset);
 	if (Z_LVAL_PP(offset)<0 || Z_LVAL_PP(offset)>=(int)mysql_num_rows(mysql_result)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset %d is invalid for MySQL result index %d (or the query data is unbuffered)", Z_LVAL_PP(offset), Z_LVAL_PP(result));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset %ld is invalid for MySQL result index %ld (or the query data is unbuffered)", Z_LVAL_PP(offset), Z_LVAL_PP(result));
 		RETURN_FALSE;
 	}
 	mysql_data_seek(mysql_result, Z_LVAL_PP(offset));
@@ -2192,7 +2192,7 @@ PHP_FUNCTION(mysql_field_seek)
 
 	convert_to_long_ex(offset);
 	if (Z_LVAL_PP(offset)<0 || Z_LVAL_PP(offset)>=(int)mysql_num_fields(mysql_result)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Field %d is invalid for MySQL result index %d", Z_LVAL_PP(offset), Z_LVAL_PP(result));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Field %ld is invalid for MySQL result index %ld", Z_LVAL_PP(offset), Z_LVAL_PP(result));
 		RETURN_FALSE;
 	}
 	mysql_field_seek(mysql_result, Z_LVAL_PP(offset));
@@ -2225,7 +2225,7 @@ static void php_mysql_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 	
 	convert_to_long_ex(field);
 	if (Z_LVAL_PP(field)<0 || Z_LVAL_PP(field)>=(int)mysql_num_fields(mysql_result)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Field %d is invalid for MySQL result index %d", Z_LVAL_PP(field), Z_LVAL_PP(result));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Field %ld is invalid for MySQL result index %ld", Z_LVAL_PP(field), Z_LVAL_PP(result));
 		RETURN_FALSE;
 	}
 	mysql_field_seek(mysql_result, Z_LVAL_PP(field));

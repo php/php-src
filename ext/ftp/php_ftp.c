@@ -1161,7 +1161,7 @@ PHP_FUNCTION(ftp_set_option)
 			RETURN_TRUE;
 			break;
 		default:
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown option '%d'", option);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown option '%ld'", option);
 			RETURN_FALSE;
 			break;
 	}
@@ -1190,7 +1190,7 @@ PHP_FUNCTION(ftp_get_option)
 			RETURN_BOOL(ftp->autoseek);
 			break;
 		default:
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown option '%d'", option);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown option '%ld'", option);
 			RETURN_FALSE;
 			break;
 	}

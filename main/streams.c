@@ -2268,7 +2268,7 @@ exit_success:
 		 * know that they should try something else */
 		
 		php_error_docref(NULL TSRMLS_CC, E_WARNING,
-				"%d bytes of buffered data lost during conversion to FILE*!",
+				"%ld bytes of buffered data lost during conversion to FILE*!",
 				stream->writepos - stream->readpos);
 	}
 	
