@@ -166,7 +166,7 @@ static sapi_post_entry php_post_entries[] = {
 static const struct mb_overload_def mb_ovld[] = {
 	{MB_OVERLOAD_MAIL, "mail", "mb_send_mail", "mb_orig_mail"},
 	{MB_OVERLOAD_STRING, "strlen", "mb_strlen", "mb_orig_strlen"},
-	{MB_OVERLOAD_STRING, "strpos", "mb_strpos", "mb_orig_strrpos"},
+	{MB_OVERLOAD_STRING, "strpos", "mb_strpos", "mb_orig_strpos"},
 	{MB_OVERLOAD_STRING, "strrpos", "mb_strrpos", "mb_orig_strrpos"},
 	{MB_OVERLOAD_STRING, "substr", "mb_substr", "mb_orig_substr"},
 	{MB_OVERLOAD_STRING, "strtolower", "mb_strtolower", "mb_orig_strtolower"},
