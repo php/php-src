@@ -496,6 +496,7 @@ ZEND_API void shutdown_memory_manager(int silent, int clean_cache)
 	}
 #if MEMORY_LIMIT
 	AG(memory_exhausted)=0;
+	AG(allocated_memory_peak) = 0;
 #endif
 
 
