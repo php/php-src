@@ -192,6 +192,12 @@
 /* Define if you have the memcpy function.  */
 #define HAVE_MEMCPY 1
 
+/* Define if you have the strlcat function.  */
+/* #undef HAVE_STRLCAT */
+
+/* Define if you have the strlcpy function.  */
+/* #undef HAVE_STRLCPY */
+
 /* Define if you have the memmove function.  */
 #define HAVE_MEMMOVE 1
 
