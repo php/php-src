@@ -391,10 +391,10 @@ static inline void zend_assign_to_object(znode *result, zval **object_ptr, znode
 		*value = *orig_value;
 	 	value->is_ref = 0;
 		value->refcount = 0;
-		if (value->value.obj.handlers->clone_obj == NULL) {
+		if (Z_OBJ_HANDLER_P(value, clone_obj) == NULL) {
 			zend_error(E_ERROR, "Trying to clone an uncloneable object of class %s",  Z_OBJCE_P(orig_value)->name);
 		}
-		value->value.obj = orig_value->value.obj.handlers->clone_obj(orig_value TSRMLS_CC);
+		value->value.obj = Z_OBJ_HANDLER_P(orig_value, clone_obj)(orig_value TSRMLS_CC);
 	} else if (value_op->op_type == IS_TMP_VAR) {
 		zval *orig_value = value;
 
@@ -551,9 +551,14 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 		return;
 	}
 
-	/* TODO!: call set on object */
+	if(Z_TYPE_P(variable_ptr) == IS_OBJECT && Z_OBJ_HANDLER_P(variable_ptr, set)) {
+		/* TODO? ze1_compatibility_mode support */
+		Z_OBJ_HANDLER_P(variable_ptr, set)(variable_ptr_ptr, value TSRMLS_CC);
+		goto done_setting_var;
+	}
+	
 	if (EG(ze1_compatibility_mode) && Z_TYPE_P(value) == IS_OBJECT) {
-		if (value->value.obj.handlers->clone_obj == NULL) {
+		if (Z_OBJ_HANDLER_P(value, clone_obj) == NULL) {
 			zend_error(E_ERROR, "Trying to clone an uncloneable object of class %s",  Z_OBJCE_P(value)->name);
 		} else if (PZVAL_IS_REF(variable_ptr)) {
 	      	if (variable_ptr != value) {
@@ -567,7 +572,7 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 				*variable_ptr = *value;
 				variable_ptr->refcount = refcount;
 				variable_ptr->is_ref = 1;
-				variable_ptr->value.obj = value->value.obj.handlers->clone_obj(value TSRMLS_CC);
+				variable_ptr->value.obj = Z_OBJ_HANDLER_P(value, clone_obj)(value TSRMLS_CC);
 				if (type != IS_TMP_VAR) {
 					value->refcount--;
 				}
@@ -583,7 +588,7 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 			}
 			*variable_ptr = *value;
 			INIT_PZVAL(variable_ptr);
-			variable_ptr->value.obj = value->value.obj.handlers->clone_obj(value TSRMLS_CC);
+			variable_ptr->value.obj = Z_OBJ_HANDLER_P(value, clone_obj)(value TSRMLS_CC);
 		}
 	} else if (PZVAL_IS_REF(variable_ptr)) {
 		if (variable_ptr!=value) {
@@ -660,6 +665,8 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 		}
 		(*variable_ptr_ptr)->is_ref=0;
 	}
+	
+done_setting_var:
 	if (result) {
 		T(result->u.var).var.ptr_ptr = variable_ptr_ptr;
 		SELECTIVE_PZVAL_LOCK(*variable_ptr_ptr, result);
@@ -2858,10 +2865,10 @@ return_by_value:
 			ALLOC_ZVAL(*(EG(return_value_ptr_ptr)));
 			**EG(return_value_ptr_ptr) = *retval_ptr;
 			INIT_PZVAL(*EG(return_value_ptr_ptr));
-			if (retval_ptr->value.obj.handlers->clone_obj == NULL) {
+			if (Z_OBJ_HT_P(retval_ptr)->clone_obj == NULL) {
 				zend_error(E_ERROR, "Trying to clone an uncloneable object of class %s",  Z_OBJCE_P(retval_ptr)->name);
 			}
-			(*EG(return_value_ptr_ptr))->value.obj = retval_ptr->value.obj.handlers->clone_obj(retval_ptr TSRMLS_CC);
+			(*EG(return_value_ptr_ptr))->value.obj = Z_OBJ_HT_P(retval_ptr)->clone_obj(retval_ptr TSRMLS_CC);
 		} else if (!EG(free_op1)) { /* Not a temp var */
 			if (PZVAL_IS_REF(retval_ptr) && retval_ptr->refcount > 0) {
 				ALLOC_ZVAL(*(EG(return_value_ptr_ptr)));
