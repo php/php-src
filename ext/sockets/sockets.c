@@ -103,6 +103,9 @@ static unsigned char second_and_third_args_force_ref[] =
 static unsigned char second_arg_of_four_force_ref[] =
 {4, BYREF_NONE, BYREF_FORCE, BYREF_NONE, BYREF_NONE};
 
+static unsigned char fourth_arg_force_ref[] =
+{3, BYREF_NONE, BYREF_NONE, BYREF_NONE, BYREF_FORCE};
+
 static unsigned char second_fifth_and_sixth_args_force_ref[] =
 {6, BYREF_NONE, BYREF_FORCE, BYREF_NONE, BYREF_NONE, BYREF_FORCE, BYREF_FORCE};
 
@@ -121,7 +124,7 @@ function_entry sockets_functions[] = {
 	PHP_FE(socket_select,			first_through_third_args_force_ref)
 	PHP_FE(socket_create,			NULL)
 	PHP_FE(socket_create_listen,	NULL)
-	PHP_FE(socket_create_pair,		NULL)
+	PHP_FE(socket_create_pair,		fourth_arg_force_ref)
 	PHP_FE(socket_accept,			NULL)
 	PHP_FE(socket_set_nonblock,		NULL)
 	PHP_FE(socket_set_block,		NULL)
@@ -1853,7 +1856,7 @@ PHP_FUNCTION(socket_create_pair)
 	SOCKET		fds_array[2];
 	int			domain, type, protocol;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "llla", &domain, &type, &protocol, &fds_array_zval) == FAILURE)
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lllz", &domain, &type, &protocol, &fds_array_zval) == FAILURE)
 		return;
 
 	php_sock[0] = (php_socket*)emalloc(sizeof(php_socket));
@@ -1865,20 +1868,21 @@ PHP_FUNCTION(socket_create_pair)
 	}
 	
 	if (type > 10) {
-		php_error(E_WARNING, "%d() invalid socket type [%d] specified for argument 2, assuming SOCK_STREAM", get_active_function_name(TSRMLS_C), type);
+		php_error(E_WARNING, "%s() invalid socket type [%d] specified for argument 2, assuming SOCK_STREAM", get_active_function_name(TSRMLS_C), type);
 		type = SOCK_STREAM;
 	}
 	
-	zval_dtor(fds_array_zval);
-	if (array_init(fds_array_zval) == FAILURE) {
-		php_error(E_WARNING, "%s() can't initialize fds array", get_active_function_name(TSRMLS_C));
+	if (socketpair(domain, type, protocol, fds_array) != 0) {
+		SOCKETS_G(last_error) = errno;
+		php_error(E_WARNING, "%s() unable to create socket pair [%d]: %s", get_active_function_name(TSRMLS_C), errno, php_strerror(errno));
 		efree(php_sock[0]);
 		efree(php_sock[1]);
 		RETURN_FALSE;
 	}
 
-	if (socketpair(domain, type, protocol, fds_array) != 0) {
-		php_error(E_WARNING, "%s() unable to create socket pair [%d]: %s", get_active_function_name(TSRMLS_C), errno, php_strerror(errno));
+	zval_dtor(fds_array_zval);
+	if (array_init(fds_array_zval) == FAILURE) {
+		php_error(E_WARNING, "%s() can't initialize array for 3rd argument", get_active_function_name(TSRMLS_C));
 		efree(php_sock[0]);
 		efree(php_sock[1]);
 		RETURN_FALSE;
