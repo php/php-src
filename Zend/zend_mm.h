@@ -24,10 +24,15 @@
 
 #include <sys/types.h>
 
+#include "zend.h"
 #include "zend_types.h"
 
-/* Define this to enable Zend MM */
+
+#ifdef ZEND_WIN32
+#undef ZEND_MM
+#else
 #define ZEND_MM
+#endif
 
 /* mm block type */
 typedef struct _zend_mm_block {
