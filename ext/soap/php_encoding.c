@@ -1071,6 +1071,15 @@ static xmlNodePtr to_xml_object(encodeTypePtr type, zval *data, int style, xmlNo
 	sdlTypePtr sdlType = type->sdl_type;
 	TSRMLS_FETCH();
 
+	if (!data || Z_TYPE_P(data) == IS_NULL) {
+		xmlParam = xmlNewNode(NULL,"BOGUS");
+		xmlAddChild(parent, xmlParam);
+	  if (style == SOAP_ENCODED) {
+			xmlSetProp(xmlParam, "xsi:nil", "1");
+		}
+		return xmlParam;
+	}
+
 	if (sdlType) {
 		prop = NULL;
 		if (Z_TYPE_P(data) == IS_OBJECT) {
