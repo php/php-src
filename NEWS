@@ -152,6 +152,8 @@ PHP 4                                                                      NEWS
 - Updated PCRE to provide better error handling in certain cases. (Andrei)
 - NSAPI: added "bucket" parameter to list of non-php.ini-keys of php4_execute 
   for doing performance stats without warnings in server-log. (Uwe Schindler)
+- Fixed bug preventing from building oci8 as shared. 
+  (stanislav dot voroniy at portavita dot nl, Tony)
 - Fixed leap year checking with idate(). (Christian Schneider, Derick)
 - Fixed strip_tags() to correctly handle '\0' characters. (Stefan)
 - Fixed funny forking effect in FastCGI when PHP_FCGI_CHILDREN was not set.
