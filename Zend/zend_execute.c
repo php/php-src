@@ -475,7 +475,7 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 										STR_FREE(value->value.str.val);
 									} else {
 										/* We are going to use return value, make it real zval */
-										ALLOC_INIT_ZVAL(value);
+										ALLOC_ZVAL(value);
 										*value = T(op2->u.var).tmp_var;
 										value->is_ref = 0;
 										value->refcount = 0; /* LOCK will increase it */
