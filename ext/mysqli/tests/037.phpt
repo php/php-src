@@ -1,5 +1,7 @@
 --TEST--
 function test: mysqli_field_count()
+--SKIPIF--
+<?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
 

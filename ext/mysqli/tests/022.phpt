@@ -1,5 +1,7 @@
 --TEST--
 mysqli bind_param/bind_result char/text long 
+--SKIPIF--
+<?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
 	include "connect.inc";

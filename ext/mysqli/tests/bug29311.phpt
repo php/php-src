@@ -1,5 +1,7 @@
 --TEST--
 constructor test
+--SKIPIF--
+<?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
 	include "connect.inc";

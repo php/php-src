@@ -1,5 +1,7 @@
 --TEST--
 function test: mysqli_character_set_name
+--SKIPIF--
+<?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
 	include "connect.inc";

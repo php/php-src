@@ -1,5 +1,7 @@
 --TEST--
 function test: mysqli_num_rows()
+--SKIPIF--
+<?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
 

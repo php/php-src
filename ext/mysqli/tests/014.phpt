@@ -13,6 +13,8 @@ mysqli autocommit/commit/rollback
 		printf ("skip innodb support is not installed or enabled.");
 	}
 ?>
+--SKIPIF--
+<?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
 	include "connect.inc";

@@ -1,5 +1,7 @@
 --TEST--
 Bug #28817 testcase (properties)
+--SKIPIF--
+<?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
 	include "connect.inc";

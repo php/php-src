@@ -13,6 +13,8 @@ mysqli autocommit/commit/rollback with myisam
 		printf ("skip innodb support not installed.");
 	}
 ?>
+--SKIPIF--
+<?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
 	include "connect.inc";

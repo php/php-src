@@ -1,5 +1,7 @@
 --TEST--
 mysqli_get_metadata
+--SKIPIF--
+<?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
 	include "connect.inc";

@@ -1,5 +1,7 @@
 --TEST--
 non freed statement test 
+--SKIPIF--
+<?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
 	include "connect.inc";
