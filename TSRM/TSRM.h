@@ -68,8 +68,8 @@ typedef int ts_rsrc_id;
 # define MUTEX_T st_mutex_t
 #endif
 
-typedef void (*ts_allocate_ctor)(void *);
-typedef void (*ts_allocate_dtor)(void *);
+typedef void (*ts_allocate_ctor)(void *, void ***);
+typedef void (*ts_allocate_dtor)(void *, void ***);
 
 #define THREAD_HASH_OF(thr,ts)  (unsigned long)thr%(unsigned long)ts
 
@@ -82,7 +82,7 @@ TSRM_API int tsrm_startup(int expected_threads, int expected_resources, int debu
 TSRM_API void tsrm_shutdown(void);
 
 /* allocates a new thread-safe-resource id */
-TSRM_API ts_rsrc_id ts_allocate_id(size_t size, ts_allocate_ctor ctor, ts_allocate_dtor dtor);
+TSRM_API ts_rsrc_id ts_allocate_id(ts_rsrc_id *rsrc_id, size_t size, ts_allocate_ctor ctor, ts_allocate_dtor dtor);
 
 /* fetches the requested resource for the current thread */
 TSRM_API void *ts_resource_ex(ts_rsrc_id id, THREAD_T *th_id);
@@ -111,6 +111,16 @@ TSRM_API int tsrm_mutex_unlock(MUTEX_T mutexp);
 
 TSRM_API void *tsrm_set_new_thread_begin_handler(void (*new_thread_begin_handler)(THREAD_T thread_id));
 TSRM_API void *tsrm_set_new_thread_end_handler(void (*new_thread_end_handler)(THREAD_T thread_id));
+
+#define TSRM_SHUFFLE_RSRC_ID(rsrc_id)		((rsrc_id)+1)
+#define TSRM_UNSHUFFLE_RSRC_ID(rsrc_id)		((rsrc_id)-1)
+
+#define TSRMLS_FETCH()			void ***tsrm_ls = ts_resource_ex(0, NULL)
+#define TSRMG(id, type, element)	(((type) (*tsrm_ls)[TSRM_UNSHUFFLE_RSRC_ID(id)])->element)
+#define TSRMLS_D	void ***tsrm_ls
+#define TSRMLS_DC	, TSRMLS_D
+#define TSRMLS_C	tsrm_ls
+#define TSRMLS_CC	, TSRMLS_C
 
 #ifdef __cplusplus
 }
