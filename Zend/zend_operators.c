@@ -402,6 +402,10 @@ ZEND_API void convert_to_array(zval *op)
 			op->type = IS_ARRAY;
 			op->value.ht = op->value.obj.properties;
 			return;
+		case IS_NULL:
+			ALLOC_HASHTABLE(op->value.ht);
+			zend_hash_init(op->value.ht, 0, NULL, ZVAL_PTR_DTOR, 0);
+			op->type = IS_ARRAY;
 			break;
 		default:
 			convert_scalar_to_array(op, IS_ARRAY);
@@ -421,6 +425,11 @@ ZEND_API void convert_to_object(zval *op)
 			break;
 		case IS_OBJECT:
 			return;
+		case IS_NULL:
+			ALLOC_HASHTABLE(op->value.obj.properties);
+			zend_hash_init(op->value.obj.properties, 0, NULL, ZVAL_PTR_DTOR, 0);
+			op->value.obj.ce = &zend_standard_class_def;
+			op->type = IS_OBJECT;
 			break;
 		default:
 			convert_scalar_to_array(op, IS_OBJECT);
