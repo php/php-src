@@ -648,6 +648,7 @@ PHP_FUNCTION(imageloadfont)
 	if (body_size != body_size_check) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error reading font");
 		efree(font);
+		php_stream_close(stream);
 		RETURN_FALSE;
 	}
 
