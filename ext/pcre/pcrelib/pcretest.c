@@ -995,10 +995,10 @@ while (!done)
         }
 
       /* Failed to match. If this is a /g or /G loop and we previously set
-      PCRE_NOTEMPTY after a null match, this is not necessarily the end.
+      g_notempty after a null match, this is not necessarily the end.
       We want to advance the start offset, and continue. Fudge the offset
       values to achieve this. We won't be at the end of the string - that
-      was checked before setting PCRE_NOTEMPTY. */
+      was checked before setting g_notempty. */
 
       else
         {
@@ -1025,14 +1025,15 @@ while (!done)
       /* If we have matched an empty string, first check to see if we are at
       the end of the subject. If so, the /g loop is over. Otherwise, mimic
       what Perl's /g options does. This turns out to be rather cunning. First
-      we set PCRE_NOTEMPTY and try the match again at the same point. If this
-      fails (picked up above) we advance to the next character. */
+      we set PCRE_NOTEMPTY and PCRE_ANCHORED and try the match again at the
+      same point. If this fails (picked up above) we advance to the next
+      character. */
 
       g_notempty = 0;
       if (offsets[0] == offsets[1])
         {
         if (offsets[0] == len) break;
-        g_notempty = PCRE_NOTEMPTY;
+        g_notempty = PCRE_NOTEMPTY | PCRE_ANCHORED;
         }
 
       /* For /g, update the start offset, leaving the rest alone */

@@ -430,7 +430,7 @@ no back references.
 <P>
 Return information about the first character of any matched string, for a
 non-anchored pattern. If there is a fixed first character, e.g. from a pattern
-such as (cat|cow|coyote), then it is returned in the integer pointed to by
+such as (cat|cow|coyote), it is returned in the integer pointed to by
 <I>where</I>. Otherwise, if either
 </P>
 <P>
@@ -442,9 +442,9 @@ starts with "^", or
 (if it were set, the pattern would be anchored),
 </P>
 <P>
-then -1 is returned, indicating that the pattern matches only at the
-start of a subject string or after any "\n" within the string. Otherwise -2 is
-returned. For anchored patterns, -2 is returned.
+-1 is returned, indicating that the pattern matches only at the start of a
+subject string or after any "\n" within the string. Otherwise -2 is returned.
+For anchored patterns, -2 is returned.
 </P>
 <P>
 <PRE>
@@ -734,8 +734,8 @@ is a pointer to the vector of integer offsets that was passed to
 were captured by the match, including the substring that matched the entire
 regular expression. This is the value returned by <B>pcre_exec</B> if it
 is greater than zero. If <B>pcre_exec()</B> returned zero, indicating that it
-ran out of space in <I>ovector</I>, then the value passed as
-<I>stringcount</I> should be the size of the vector divided by three.
+ran out of space in <I>ovector</I>, the value passed as <I>stringcount</I> should
+be the size of the vector divided by three.
 </P>
 <P>
 The functions <B>pcre_copy_substring()</B> and <B>pcre_get_substring()</B>
@@ -857,7 +857,7 @@ patterns using the non-Perl item (?R).
 with the settings of captured strings when part of a pattern is repeated. For
 example, matching "aba" against the pattern /^(a(b)?)+$/ sets $2 to the value
 "b", but matching "aabbaa" against /^(aa(bb)?)+$/ leaves $2 unset. However, if
-the pattern is changed to /^(aa(b(b))?)+$/ then $2 (and $3) get set.
+the pattern is changed to /^(aa(b(b))?)+$/ then $2 (and $3) are set.
 </P>
 <P>
 In Perl 5.004 $2 is set in both cases, and that is also true of PCRE. If in the
@@ -1186,10 +1186,10 @@ end of the subject in both modes, and if all branches of a pattern start with
 <P>
 Outside a character class, a dot in the pattern matches any one character in
 the subject, including a non-printing character, but not (by default) newline.
-If the PCRE_DOTALL option is set, then dots match newlines as well. The
-handling of dot is entirely independent of the handling of circumflex and
-dollar, the only relationship being that they both involve newline characters.
-Dot has no special meaning in a character class.
+If the PCRE_DOTALL option is set, dots match newlines as well. The handling of
+dot is entirely independent of the handling of circumflex and dollar, the only
+relationship being that they both involve newline characters. Dot has no
+special meaning in a character class.
 </P>
 <LI><A NAME="SEC17" HREF="#TOC1">SQUARE BRACKETS</A>
 <P>
@@ -1580,7 +1580,7 @@ fails, because it matches the entire string due to the greediness of the .*
 item.
 </P>
 <P>
-However, if a quantifier is followed by a question mark, then it ceases to be
+However, if a quantifier is followed by a question mark, it ceases to be
 greedy, and instead matches the minimum number of times possible, so the
 pattern
 </P>
@@ -1605,8 +1605,8 @@ which matches one digit by preference, but can match two if that is the only
 way the rest of the pattern matches.
 </P>
 <P>
-If the PCRE_UNGREEDY option is set (an option which is not available in Perl)
-then the quantifiers are not greedy by default, but individual ones can be made
+If the PCRE_UNGREEDY option is set (an option which is not available in Perl),
+the quantifiers are not greedy by default, but individual ones can be made
 greedy by following them with a question mark. In other words, it inverts the
 default behaviour.
 </P>
@@ -1617,8 +1617,8 @@ compiled pattern, in proportion to the size of the minimum or maximum.
 </P>
 <P>
 If a pattern starts with .* or .{0,} and the PCRE_DOTALL option (equivalent
-to Perl's /s) is set, thus allowing the . to match newlines, then the pattern
-is implicitly anchored, because whatever follows will be tried against every
+to Perl's /s) is set, thus allowing the . to match newlines, the pattern is
+implicitly anchored, because whatever follows will be tried against every
 character position in the subject string, so there is no point in retrying the
 overall match at any position after the first. PCRE treats such a pattern as
 though it were preceded by \A. In cases where it is known that the subject
@@ -1677,7 +1677,7 @@ itself. So the pattern
 <P>
 matches "sense and sensibility" and "response and responsibility", but not
 "sense and responsibility". If caseful matching is in force at the time of the
-back reference, then the case of letters is relevant. For example,
+back reference, the case of letters is relevant. For example,
 </P>
 <P>
 <PRE>
@@ -1690,7 +1690,7 @@ capturing subpattern is matched caselessly.
 </P>
 <P>
 There may be more than one back reference to the same subpattern. If a
-subpattern has not actually been used in a particular match, then any back
+subpattern has not actually been used in a particular match, any back
 references to it always fail. For example, the pattern
 </P>
 <P>
@@ -1702,9 +1702,9 @@ references to it always fail. For example, the pattern
 always fails if it starts to match "a" rather than "bc". Because there may be
 up to 99 back references, all digits following the backslash are taken
 as part of a potential back reference number. If the pattern continues with a
-digit character, then some delimiter must be used to terminate the back
-reference. If the PCRE_EXTENDED option is set, this can be whitespace.
-Otherwise an empty comment can be used.
+digit character, some delimiter must be used to terminate the back reference.
+If the PCRE_EXTENDED option is set, this can be whitespace. Otherwise an empty
+comment can be used.
 </P>
 <P>
 A back reference that occurs inside the parentheses to which it refers fails
@@ -1836,7 +1836,7 @@ Several assertions (of any sort) may occur in succession. For example,
 matches "foo" preceded by three digits that are not "999". Notice that each of
 the assertions is applied independently at the same point in the subject
 string. First there is a check that the previous three characters are all
-digits, then there is a check that the same three characters are not "999".
+digits, and then there is a check that the same three characters are not "999".
 This pattern does <I>not</I> match "foo" preceded by six characters, the first
 of which are digits and the last three of which are not "999". For example, it
 doesn't match "123abcfoo". A pattern to do that is
@@ -1957,11 +1957,11 @@ what follows matches the rest of the pattern. If the pattern is specified as
 </PRE>
 </P>
 <P>
-then the initial .* matches the entire string at first, but when this fails
-(because there is no following "a"), it backtracks to match all but the last
-character, then all but the last two characters, and so on. Once again the
-search for "a" covers the entire string, from right to left, so we are no
-better off. However, if the pattern is written as
+the initial .* matches the entire string at first, but when this fails (because
+there is no following "a"), it backtracks to match all but the last character,
+then all but the last two characters, and so on. Once again the search for "a"
+covers the entire string, from right to left, so we are no better off. However,
+if the pattern is written as
 </P>
 <P>
 <PRE>
@@ -1969,7 +1969,7 @@ better off. However, if the pattern is written as
 </PRE>
 </P>
 <P>
-then there can be no backtracking for the .* item; it can match only the entire
+there can be no backtracking for the .* item; it can match only the entire
 string. The subsequent lookbehind assertion does a single test on the last four
 characters. If it fails, the match fails immediately. For long strings, this
 approach makes a significant difference to the processing time.
@@ -2032,11 +2032,10 @@ subpattern, a compile-time error occurs.
 </P>
 <P>
 There are two kinds of condition. If the text between the parentheses consists
-of a sequence of digits, then the condition is satisfied if the capturing
-subpattern of that number has previously matched. Consider the following
-pattern, which contains non-significant white space to make it more readable
-(assume the PCRE_EXTENDED option) and to divide it into three parts for ease
-of discussion:
+of a sequence of digits, the condition is satisfied if the capturing subpattern
+of that number has previously matched. Consider the following pattern, which
+contains non-significant white space to make it more readable (assume the
+PCRE_EXTENDED option) and to divide it into three parts for ease of discussion:
 </P>
 <P>
 <PRE>
@@ -2157,7 +2156,7 @@ on at the top level. If additional parentheses are added, giving
      ^                        ^
      ^                        ^
 </PRE>
-then the string they capture is "ab(cd)ef", the contents of the top level
+the string they capture is "ab(cd)ef", the contents of the top level
 parentheses. If there are more than 15 capturing parentheses in a pattern, PCRE
 has to obtain extra memory to store data during a recursion, which it does by
 using <B>pcre_malloc</B>, freeing it via <B>pcre_free</B> afterwards. If no

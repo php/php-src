@@ -44,11 +44,27 @@ modules, but which are not relevant to the outside. */
 #endif
 
 /* To cope with SunOS4 and other systems that lack memmove() but have bcopy(),
-define a macro for memmove() if HAVE_MEMMOVE is false. */
+define a macro for memmove() if HAVE_MEMMOVE is false, provided that HAVE_BCOPY
+is set. Otherwise, include an emulating function for those systems that have
+neither (there some non-Unix environments where this is the case). This assumes
+that all calls to memmove are moving strings upwards in store, which is the
+case in PCRE. */
 
 #if ! HAVE_MEMMOVE
 #undef  memmove        /* some systems may have a macro */
+#if HAVE_BCOPY
 #define memmove(a, b, c) bcopy(b, a, c)
+#else
+void *
+pcre_memmove(unsigned char *dest, const unsigned char *src, size_t n)
+{
+int i;
+dest += n;
+src += n;
+for (i = 0; i < n; ++i) *(--dest) =  *(--src);
+}
+#define memmove(a, b, c) pcre_memmove(a, b, c)
+#endif
 #endif
 
 /* Standard C headers plus the external interface definition */

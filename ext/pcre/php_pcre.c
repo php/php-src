@@ -476,7 +476,7 @@ static void php_pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global)
 		   This turns out to be rather cunning. First we set PCRE_NOTEMPTY and try
 		   the match again at the same point. If this fails (picked up above) we
 		   advance to the next character. */
-		g_notempty = (offsets[1] == offsets[0])? PCRE_NOTEMPTY : 0;
+		g_notempty = (offsets[1] == offsets[0])? PCRE_NOTEMPTY | PCRE_ANCHORED : 0;
 		
 		/* Advance to the position right after the last full match */
 		start_offset = offsets[1];
@@ -748,7 +748,7 @@ char *php_pcre_replace(char *regex,   int regex_len,
 		   This turns out to be rather cunning. First we set PCRE_NOTEMPTY and try
 		   the match again at the same point. If this fails (picked up above) we
 		   advance to the next character. */
-		g_notempty = (offsets[1] == offsets[0])? PCRE_NOTEMPTY : 0;
+		g_notempty = (offsets[1] == offsets[0])? PCRE_NOTEMPTY | PCRE_ANCHORED : 0;
 		
 		/* Advance to the next piece */
 		start_offset = offsets[1];
@@ -769,7 +769,7 @@ static char *php_replace_in_subject(zval *regex, zval *replace, zval **subject,
 				*subject_value,
 				*result;
 	int			 subject_len,
-				 replace_len;
+				 replace_len = 0;
 
 	/* Make sure we're dealing with strings. */	
 	convert_to_string_ex(subject);
@@ -1016,7 +1016,7 @@ PHP_FUNCTION(preg_split)
 		   This turns out to be rather cunning. First we set PCRE_NOTEMPTY and try
 		   the match again at the same point. If this fails (picked up above) we
 		   advance to the next character. */
-		g_notempty = (offsets[1] == offsets[0])? PCRE_NOTEMPTY : 0;
+		g_notempty = (offsets[1] == offsets[0])? PCRE_NOTEMPTY | PCRE_ANCHORED : 0;
 		
 		/* Advance to the position right after the last full match */
 		start_offset = offsets[1];
@@ -1104,7 +1104,7 @@ PHP_FUNCTION(preg_quote)
 				break;
 
 			default:
-				if (c == delim_char && quote_delim)
+				if (quote_delim && c == delim_char)
 					*q++ = '\\';
 				*q++ = c;
 				break;

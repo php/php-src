@@ -353,8 +353,8 @@ INFORMATION ABOUT A PATTERN
      Return information about the first character of any  matched
      string,  for  a  non-anchored  pattern.  If there is a fixed
      first   character,   e.g.   from   a   pattern    such    as
-     (cat|cow|coyote), then it is returned in the integer pointed
-     to by where. Otherwise, if either
+     (cat|cow|coyote),  it  is returned in the integer pointed to
+     by where. Otherwise, if either
 
      (a) the pattern was compiled with the PCRE_MULTILINE option,
      and every branch starts with "^", or
@@ -363,10 +363,10 @@ INFORMATION ABOUT A PATTERN
      PCRE_DOTALL is not set (if it were set, the pattern would be
      anchored),
 
-     then -1 is returned, indicating  that  the  pattern  matches
-     only  at  the  start  of  a subject string or after any "\n"
-     within the string. Otherwise -2 is  returned.  For  anchored
-     patterns, -2 is returned.
+     -1 is returned, indicating that the pattern matches only  at
+     the  start  of a subject string or after any "\n" within the
+     string. Otherwise -2 is returned.  For anchored patterns, -2
+     is returned.
 
        PCRE_INFO_FIRSTTABLE
 
@@ -622,8 +622,8 @@ EXTRACTING CAPTURED SUBSTRINGS
      entire regular expression. This is  the  value  returned  by
      pcre_exec  if  it  is  greater  than  zero.  If  pcre_exec()
      returned zero, indicating that it ran out of space in  ovec-
-     tor, then the value passed as stringcount should be the size
-     of the vector divided by three.
+     tor,  the  value passed as stringcount should be the size of
+     the vector divided by three.
 
      The functions pcre_copy_substring() and pcre_get_substring()
      extract a single substring, whose number is given as string-
@@ -739,7 +739,7 @@ DIFFERENCES FROM PERL
      "aba"  against the pattern /^(a(b)?)+$/ sets $2 to the value
      "b", but matching "aabbaa" against /^(aa(bb)?)+$/ leaves  $2
      unset.    However,    if   the   pattern   is   changed   to
-     /^(aa(b(b))?)+$/ then $2 (and $3) get set.
+     /^(aa(b(b))?)+$/ then $2 (and $3) are set.
 
      In Perl 5.004 $2 is set in both cases, and that is also true
      of PCRE. If in the future Perl changes to a consistent state
@@ -1056,11 +1056,11 @@ FULL STOP (PERIOD, DOT)
      Outside a character class, a dot in the pattern matches  any
      one character in the subject, including a non-printing char-
      acter, but not (by default)  newline.   If  the  PCRE_DOTALL
-     option  is  set,  then dots match newlines as well. The han-
-     dling of dot is entirely independent of the handling of cir-
-     cumflex  and  dollar,  the only relationship being that they
-     both involve newline characters.  Dot has no special meaning
-     in a character class.
+     option  is set, dots match newlines as well. The handling of
+     dot is entirely independent of the  handling  of  circumflex
+     and  dollar,  the  only  relationship  being  that they both
+     involve newline characters. Dot has no special meaning in  a
+     character class.
 
 
 
@@ -1406,9 +1406,9 @@ REPETITION
      fails, because it matches  the  entire  string  due  to  the
      greediness of the .*  item.
 
-     However, if a quantifier is followed  by  a  question  mark,
-     then it ceases to be greedy, and instead matches the minimum
-     number of times possible, so the pattern
+     However, if a quantifier is followed by a question mark,  it
+     ceases  to be greedy, and instead matches the minimum number
+     of times possible, so the pattern
 
        /\*.*?\*/
 
@@ -1425,7 +1425,7 @@ REPETITION
      that is the only way the rest of the pattern matches.
 
      If the PCRE_UNGREEDY option is set (an option which  is  not
-     available  in  Perl)  then the quantifiers are not greedy by
+     available  in  Perl),  the  quantifiers  are  not  greedy by
      default, but individual ones can be made greedy by following
      them  with  a  question mark. In other words, it inverts the
      default behaviour.
@@ -1437,7 +1437,7 @@ REPETITION
 
      If a pattern starts with .* or  .{0,}  and  the  PCRE_DOTALL
      option (equivalent to Perl's /s) is set, thus allowing the .
-     to match newlines, then the pattern is implicitly  anchored,
+     to match  newlines,  the  pattern  is  implicitly  anchored,
      because whatever follows will be tried against every charac-
      ter position in the subject string, so there is no point  in
      retrying  the overall match at any position after the first.
@@ -1490,8 +1490,8 @@ BACK REFERENCES
 
      matches "sense and sensibility" and "response and  responsi-
      bility",  but  not  "sense  and  responsibility". If caseful
-     matching is in force at the time of the back reference, then
-     the case of letters is relevant. For example,
+     matching is in force at the time of the back reference,  the
+     case of letters is relevant. For example,
 
        ((?i)rah)\s+\1
 
@@ -1501,8 +1501,8 @@ BACK REFERENCES
 
      There may be more than one back reference to the  same  sub-
      pattern.  If  a  subpattern  has not actually been used in a
-     particular match, then any  back  references  to  it  always
-     fail. For example, the pattern
+     particular match, any back references to it always fail. For
+     example, the pattern
 
        (a|(bc))\2
 
@@ -1510,9 +1510,9 @@ BACK REFERENCES
      Because  there  may  be up to 99 back references, all digits
      following the backslash are taken as  part  of  a  potential
      back reference number. If the pattern continues with a digit
-     character, then some delimiter must be used to terminate the
-     back reference. If the PCRE_EXTENDED option is set, this can
-     be whitespace.  Otherwise an empty comment can be used.
+     character, some delimiter must be used to terminate the back
+     reference.   If the PCRE_EXTENDED option is set, this can be
+     whitespace. Otherwise an empty comment can be used.
 
      A back reference that occurs inside the parentheses to which
      it  refers  fails when the subpattern is first used, so, for
@@ -1612,7 +1612,7 @@ ASSERTIONS
      matches "foo" preceded by three digits that are  not  "999".
      Notice  that each of the assertions is applied independently
      at the same point in the subject string. First  there  is  a
-     check  that  the  previous  three characters are all digits,
+     check that the previous three characters are all digits, and
      then there is a check that the same three characters are not
      "999".   This  pattern  does not match "foo" preceded by six
      characters, the first of which are digits and the last three
@@ -1713,21 +1713,20 @@ ONCE-ONLY SUBPATTERNS
 
        ^.*abcd$
 
-     then the initial .* matches the entire string at first,  but
-     when  this  fails  (because  there  is no following "a"), it
-     backtracks to match all but the last character, then all but
-     the  last  two  characters, and so on. Once again the search
-     for "a" covers the entire string, from right to left, so  we
-     are no better off. However, if the pattern is written as
+     the initial .* matches the entire string at first, but  when
+     this  fails  (because  there  is no following "a"), it back-
+     tracks to match all but the last character, then all but the
+     last  two  characters,  and so on. Once again the search for
+     "a" covers the entire string, from right to left, so we  are
+     no better off. However, if the pattern is written as
 
        ^(?>.*)(?<=abcd)
 
-     then there can be no backtracking for the .*  item;  it  can
-     match  only  the  entire  string.  The subsequent lookbehind
-     assertion does a single test on the last four characters. If
-     it  fails,  the  match  fails immediately. For long strings,
-     this approach makes a significant difference to the process-
-     ing time.
+     there can be no backtracking for the .* item; it  can  match
+     only  the entire string. The subsequent lookbehind assertion
+     does a single test on the last four characters. If it fails,
+     the match fails immediately. For long strings, this approach
+     makes a significant difference to the processing time.
 
      When a pattern contains an unlimited repeat inside a subpat-
      tern  that  can  itself  be  repeated an unlimited number of
@@ -1777,12 +1776,12 @@ CONDITIONAL SUBPATTERNS
      error occurs.
 
      There are two kinds of condition. If the  text  between  the
-     parentheses  consists  of  a  sequence  of  digits, then the
-     condition is satisfied if the capturing subpattern  of  that
-     number  has  previously matched. Consider the following pat-
-     tern, which contains non-significant white space to make  it
-     more  readable  (assume  the  PCRE_EXTENDED  option)  and to
-     divide it into three parts for ease of discussion:
+     parentheses  consists of a sequence of digits, the condition
+     is satisfied if the capturing subpattern of that number  has
+     previously  matched.  Consider  the following pattern, which
+     contains non-significant white space to make it  more  read-
+     able (assume the PCRE_EXTENDED option) and to divide it into
+     three parts for ease of discussion:
 
        ( \( )?    [^()]+    (?(1) \) )
 
@@ -1888,8 +1887,8 @@ RECURSIVE PATTERNS
 
        \( ( ( (?>[^()]+) | (?R) )* ) \)
           ^                        ^
-          ^                        ^ then the string they capture
-     is "ab(cd)ef", the contents of the top level parentheses. If
+          ^                        ^ the string they  capture  is
+     "ab(cd)ef",  the  contents  of the top level parentheses. If
      there are more than 15 capturing parentheses in  a  pattern,
      PCRE  has  to  obtain  extra  memory  to store data during a
      recursion, which it does by using  pcre_malloc,  freeing  it
