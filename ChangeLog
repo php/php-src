@@ -1,3 +1,89 @@
+2003-09-04  Ard Biesheuvel  <a.k.biesheuvel@its.tudelft.nl>
+
+    * ext/interbase/interbase.c:
+      Added support for binding arrays
+
+2003-09-04  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/PEAR/Installer.php:
+      remove debug code
+
+    * pear/PEAR/Installer.php:
+      fix bug in --force - $options was never passed to _installFile.
+      add PHPDoc
+
+    * pear/PEAR/Installer.php:
+      fix bug in --force on windows
+
+2003-09-04  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      ext/standard/var_unserializer.c:
+      really sync
+
+2003-09-04  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_object_handlers.c
+      tests/classes/static_properties_001.phpt
+      tests/classes/static_properties_002.phpt:
+      Tests show updating consts must happen once at runtime (revert
+      optimization).
+      Add tests for static properties.
+
+    * ZendEngine2/zend_reflection_api.c:
+      Add reflection_class::getstaticproerties()
+
+    * ext/sqlite/sqlite.c
+      ext/sqlite/tests/sqlite_oo_010.phpt
+      ext/sqlite/tests/sqlite_oo_013.phpt
+      ext/sqlite/tests/sqlite_oo_016.phpt
+      ext/sqlite/tests/sqlite_oo_020.phpt
+      ext/sqlite/tests/sqlite_oo_024.phpt:
+      Go with the mess
+
+2003-09-04  Ard Biesheuvel  <a.k.biesheuvel@its.tudelft.nl>
+
+    * ext/interbase/interbase.c
+      ext/interbase/php_interbase.h:
+      Don't rely on sizeof(int) == 4
+
+2003-09-04  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * main/main.c:
+      Remove unwanted space
+
+    * run-tests.php:
+      Update necessary test INIs
+
+2003-09-04  Ard Biesheuvel  <a.k.biesheuvel@its.tudelft.nl>
+
+    * ext/interbase/interbase.c
+      ext/interbase/php_interbase.h:
+      Fix inter-op with IB < 6
+      Fixes for 64-bit archs
+
+    * ext/interbase/interbase.c
+      ext/interbase/php_interbase.h:
+      Fixed fetching of arrays
+
+2003-09-04  Jon Parise  <jon@csh.rit.edu>
+
+    * (PHP_4_3)
+      ext/imap/php_imap.c:
+      MFH 1.176: Register the TYPEMODEL constant from c-client's mail.h.
+
+    * ext/imap/php_imap.c:
+      Register the TYPEMODEL constant from c-client's mail.h.
+
+2003-09-04  Ard Biesheuvel  <a.k.biesheuvel@its.tudelft.nl>
+
+    * ext/interbase/interbase.c:
+      No scaling for double type
+      Added missing array types
+      Precompute scale factors
+
 2003-09-03  Jani Taskinen  <jani.taskinen@kolumbus.fi>
 
     * acinclude.m4:
