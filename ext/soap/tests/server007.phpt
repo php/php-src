@@ -11,7 +11,7 @@ function Sub($x,$y) {
   return $x-$y;
 }
 
-$server = new soapserver("http://testuri.org");
+$server = new soapserver(null,array('uri'=>"http://testuri.org"));
 $server->addfunction(array("Sub","Add"));
 var_dump($server->getfunctions());
 echo "ok\n";

@@ -90,8 +90,8 @@ class Interop_Client
         $this->_getEndpoints($test, 1);
 
         // retreive endpoints from the endpoint server
-        $endpointArray = $soapclient->__call("GetEndpointInfo",array("groupName"=>$test),"http://soapinterop.org/","http://soapinterop.org/");
-        if ($soapclient->__isfault() || PEAR::isError($endpointArray)) {
+        $endpointArray = $soapclient->__call("GetEndpointInfo",array("groupName"=>$test),array('soapaction'=>"http://soapinterop.org/",'uri'=>"http://soapinterop.org/"));
+        if (is_soap_fault($endpointArray) || PEAR::isError($endpointArray)) {
             print "<pre>".$soapclient->wire."\n";
             print_r($endpointArray);
             print "</pre>";
@@ -134,7 +134,7 @@ class Interop_Client
     */
     function fetchEndpoints($test = NULL) {
         // fetch from the interop server
-        $soapclient = new SoapObject($this->interopServer);
+        $soapclient = new SoapClient($this->interopServer);
 
         if ($test) {
             $this->_fetchEndpoints($soapclient, $test);
@@ -358,8 +358,7 @@ class Interop_Client
         if ($this->useWSDL) {
             if (array_key_exists('wsdlURL',$endpoint_info)) {
                 if (!array_key_exists('client',$endpoint_info)) {
-                    $endpoint_info['client'] = new SoapObject($endpoint_info['wsdlURL']);
-                    $endpoint_info['client']->__trace(1);
+                    $endpoint_info['client'] = new SoapClient($endpoint_info['wsdlURL'], array("trace"=>1));
                 }
                 $soap =& $endpoint_info['client'];
 
@@ -394,8 +393,7 @@ class Interop_Client
                 $soapaction = 'urn:soapinterop';
             }
             if (!array_key_exists('client',$endpoint_info)) {
-                $endpoint_info['client'] = new SoapObject($endpoint_info['endpointURL'],$soapaction);
-                $endpoint_info['client']->__trace(1);
+                $endpoint_info['client'] = new SoapClient(null,array('location'=>$endpoint_info['endpointURL'],'uri'=>$soapaction,'trace'=>1));
             }
             $soap = $endpoint_info['client'];
         }
@@ -418,14 +416,14 @@ class Interop_Client
             $return = eval('return $soap->'.$soap_test->method_name.'('.$args.');');
         } else {
         	if ($soap_test->headers || $soap_test->headers_expect) {
-            $return = $soap->__call($soap_test->method_name,$soap_test->method_params,$soapaction, $namespace, $soap_test->headers, $result_headers);
+            $return = $soap->__call($soap_test->method_name,$soap_test->method_params,array('soapaction'=>$soapaction,'uri'=>$namespace), $soap_test->headers, $result_headers);
           } else {
-            $return = $soap->__call($soap_test->method_name,$soap_test->method_params,$soapaction, $namespace);
+            $return = $soap->__call($soap_test->method_name,$soap_test->method_params,array('soapaction'=>$soapaction,'uri'=>$namespace));
           }
         }
 
 
-        if(!$soap->__isfault()){
+        if(!is_soap_fault($return)){
             if ($soap_test->expect !== NULL) {
                 $sent = $soap_test->expect;
             } else if (is_array($soap_test->method_params) && count($soap_test->method_params) == 1) {
@@ -493,7 +491,7 @@ class Interop_Client
                                   );
             }
         } else {
-            $fault = $soap->__getfault();
+            $fault = $return;
             if ($soap_test->expect_fault) {
                 $ok = 1;
                 $res = 'OK';

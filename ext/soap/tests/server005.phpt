@@ -10,7 +10,7 @@ class Foo {
   }
 }
 
-$server = new soapserver("http://testuri.org");
+$server = new soapserver(null,array('uri'=>"http://testuri.org"));
 $server->setclass("Foo");
 
 $HTTP_RAW_POST_DATA = <<<EOF

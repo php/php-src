@@ -10,8 +10,7 @@ function Add($x,$y) {
   return $x+$y;
 }
 
-$server = new soapserver("http://testuri.org");
-$server->bind(dirname(__FILE__)."/test.wsdl");
+$server = new soapserver(dirname(__FILE__)."/test.wsdl");
 ob_start();
 $server->handle();
 $wsdl = ob_get_contents();

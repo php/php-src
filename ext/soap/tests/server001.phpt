@@ -8,7 +8,7 @@ function test() {
   return "Hello World";
 }
 
-$server = new soapserver("http://testuri.org");
+$server = new soapserver(null,array('uri'=>"http://testuri.org"));
 $server->addfunction("test");
 
 $HTTP_RAW_POST_DATA = <<<EOF

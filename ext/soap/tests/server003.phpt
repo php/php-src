@@ -4,7 +4,7 @@ SOAP Server 3: all functions
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
-$server = new soapserver("http://testuri.org");
+$server = new soapserver(null,array('uri'=>"http://testuri.org"));
 $server->addfunction(SOAP_FUNCTIONS_ALL);
 
 $HTTP_RAW_POST_DATA = <<<EOF

@@ -17,7 +17,7 @@ class foo {
   }
 }
 
-$server = new soapserver("http://testuri.org");
+$server = new soapserver(null,array('uri'=>"http://testuri.org"));
 $server->setclass("foo");
 $server->setpersistence(SOAP_PERSISTENCE_SESSION);
 

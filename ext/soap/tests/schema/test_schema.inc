@@ -53,13 +53,11 @@ EOF;
   $f = fopen($fname,"w");
   fwrite($f,$wsdl);
   fclose($f);
-  $x = new SoapObject($fname);
-  $y = new SoapServer("http://test-uri/");
-  $y->bind($fname);
+  $x = new SoapClient($fname, array("trace"=>1));
+  $y = new SoapServer($fname);
 	$y->addfunction("test");
   unlink($fname);
 
-  $x->__trace(1);
   $x->test($param);
   $xml = xml_parser_create();
   $req = $x->__getlastrequest();
