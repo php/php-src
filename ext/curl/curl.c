@@ -773,6 +773,7 @@ PHP_FUNCTION(curl_setopt)
 			HashTable        *postfields;
 			struct HttpPost  *first = NULL;
 			struct HttpPost  *last  = NULL;
+			char             *postval;
 			char             *string_key = NULL;
 			ulong             num_key;
 			uint              string_key_len;
@@ -791,9 +792,15 @@ PHP_FUNCTION(curl_setopt)
 				convert_to_string_ex(current);
 
 				zend_hash_get_current_key_ex(postfields, &string_key, &string_key_len, &num_key, 0, NULL);
-
-				error = curl_formadd(&first, &last, CURLFORM_COPYNAME, string_key, 
-									 CURLFORM_PTRCONTENTS, Z_STRVAL_PP(current), CURLFORM_END);
+				postval = Z_STRVAL_PP(current);
+				if (*postval == '@') {
+					error = curl_formadd(&first, &last, CURLFORM_COPYNAME, string_key,
+					                     CURLFORM_FILE, ++postval, CURLFORM_END);
+				}
+				else {
+					error = curl_formadd(&first, &last, CURLFORM_COPYNAME, string_key,
+					                     CURLFORM_PTRCONTENTS, postval, CURLFORM_END);
+				}
 			}
 
 			if (error != CURLE_OK) {
