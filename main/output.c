@@ -795,16 +795,9 @@ PHPAPI int php_get_output_start_lineno(TSRMLS_D)
 	return OG(output_start_lineno);
 }
 
-PHP_FUNCTION(output_remove_rewrite_var)
+PHP_FUNCTION(output_reset_rewrite_vars)
 {
-	char *name;
-	int name_len;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &name, &name_len) == FAILURE) {
-		RETURN_FALSE;
-	}
-
-	if (php_url_scanner_remove_var(name, name_len TSRMLS_CC) == SUCCESS) {
+	if (php_url_scanner_reset_vars(TSRMLS_C) == SUCCESS) {
 		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;

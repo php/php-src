@@ -25,11 +25,8 @@ PHP_MSHUTDOWN_FUNCTION(url_scanner_ex);
 PHP_RINIT_FUNCTION(url_scanner_ex);
 PHP_RSHUTDOWN_FUNCTION(url_scanner_ex);
 
-PHP_FUNCTION(output_add_rewrite_var);
-PHP_FUNCTION(output_remove_rewrite_var);
-
 int php_url_scanner_add_var(char *name, int name_len, char *value, int value_len, int urlencode TSRMLS_DC);
-int php_url_scanner_remove_var(char *name, int name_len TSRMLS_DC);
+int php_url_scanner_reset_vars(TSRMLS_D);
 
 int php_url_scanner_ex_activate(TSRMLS_D);
 int php_url_scanner_ex_deactivate(TSRMLS_D);
@@ -46,8 +43,8 @@ typedef struct {
 	/* The result buffer */
 	smart_str result;
 
-	/* The data which is appended to each relative URL */
-	HashTable *rewrite_vars;
+	/* The data which is appended to each relative URL/FORM */
+	smart_str form_app, url_app;
 
 	int active;
 

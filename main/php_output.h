@@ -94,5 +94,8 @@ ZEND_API extern php_output_globals output_globals;
 #define PHP_OUTPUT_HANDLER_INTERNAL     0
 #define PHP_OUTPUT_HANDLER_USER        1
 
+PHP_FUNCTION(output_add_rewrite_var);
+PHP_FUNCTION(output_reset_rewrite_vars);
+
 
 #endif /* PHP_OUTPUT_H */

@@ -1379,7 +1379,9 @@ PHP_FUNCTION(session_unset)
 static void php_rinit_session_globals(TSRMLS_D)
 {		
 	zend_hash_init(&PS(vars), 0, NULL, NULL, 0);
-	php_url_scanner_remove_var(PS(session_name), strlen(PS(session_name)) TSRMLS_CC); /* save even if we haven't registered */
+#if I_KNOW_WHAT_THE_PURPOSE_OF_THIS_IS
+	php_url_scanner_reset_vars(TSRMLS_C); /* save even if we haven't registered */
+#endif
 	PS(id) = NULL;
 	PS(session_status) = php_session_none;
 	PS(mod_data) = NULL;
