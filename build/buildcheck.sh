@@ -16,7 +16,7 @@
 #  |          Sascha Schumann <sascha@schumann.cx>                        |
 #  +----------------------------------------------------------------------+
 #
-# $Id: buildcheck.sh,v 1.21 2002-10-30 11:42:22 sas Exp $ 
+# $Id: buildcheck.sh,v 1.22 2003-01-13 10:27:50 sas Exp $ 
 #
 
 echo "buildconf: checking installation..."
@@ -72,8 +72,8 @@ fi
 
 # libtool 1.4 or newer
 # Prefer glibtool over libtool for Mac OS X compatibility
-libtool=`which glibtool 2> /dev/null`
-if test ! -f "$libtool"; then libtool=`which libtool`; fi
+libtool=`./build/shtool path glibtool 2> /dev/null`
+if test ! -f "$libtool"; then libtool=`./build/shtool path libtool`; fi
 lt_pversion=`$libtool --version 2>/dev/null|sed -n -e 's/^[^0-9]*//' -e 1's/[- ].*//p'`
 if test "$lt_pversion" = ""; then
 echo "buildconf: libtool not found."
@@ -94,7 +94,7 @@ echo "           to build PHP from CVS."
 exit 1
 fi
 
-am_prefix=`which automake | sed -e 's#/[^/]*/[^/]*$##'`
+am_prefix=`./build/shtool path automake | sed -e 's#/[^/]*/[^/]*$##'`
 lt_prefix=`echo $libtool | sed -e 's#/[^/]*/[^/]*$##'`
 if test "$am_prefix" != "$lt_prefix"; then
     echo "WARNING: automake and libtool are installed in different"
