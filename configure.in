@@ -519,7 +519,7 @@ vsnprintf \
 
 dnl Check for getaddrinfo, should be a better way, but...
 AC_CACHE_CHECK([for getaddrinfo], ac_cv_func_getaddrinfo,
-[AC_TRY_COMPILE([#include <netdb.h>],
+[AC_TRY_LINK([#include <netdb.h>],
                 [struct addrinfo *g,h;g=&h;getaddrinfo("","",g,&g);],
   ac_cv_func_getaddrinfo=yes, ac_cv_func_getaddrinfo=no)])
 if test "$ac_cv_func_getaddrinfo" = yes; then
