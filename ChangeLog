@@ -1,3 +1,69 @@
+2003-06-17  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/ircg.c:
+      Call free in the right domain
+
+2003-06-17  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * (PHP_4_3)
+      ext/standard/tests/general_functions/getopt.phpt
+      tests/basic/012.phpt:
+      variables_order needs to include S for both of these to work
+
+2003-06-17  Sara Golemon  <php@alphaweb.net>
+
+    * ext/standard/streamsfuncs.c:
+      No need to allocate a hashtable when return_value is just going to be
+      overwriten
+
+2003-06-17  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * main/main.c:
+      Handle numeric keys passed via GPC
+
+2003-06-17  Jani Taskinen  <sniper@iki.fi>
+
+    * (PHP_4_3)
+      NEWS:
+      BFN
+
+2003-06-17  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/imap/php_imap.c:
+      One more typo ;)
+
+    * ext/imap/php_imap.c:
+      Fixed a typo in the check
+
+    * (PHP_4_3)
+      ext/gd/libgd/gdft.c:
+      MFH: Fixed bug #24223 (missing variable initialization in bundled gd)
+
+    * ext/gd/libgd/gdft.c:
+      Fixed bug #24223 (missing variable initialization in bundled gd)
+
+    * (PHP_4_3)
+      NEWS:
+      BFN
+
+    * (PHP_4_3)
+      ext/standard/array.c
+      ext/standard/tests/array/bug24220.phpt:
+      Fixed bug #24220 (range() didn't handle numeric strings correctly)
+
+    * ext/standard/tests/array/bug24220.phpt:
+      
+      Added a test case for bug #24220
+
+2003-06-17  Sterling Hughes  <sterling@bumblebury.com>
+
+    * ext/sockets/php_sockets.h
+      ext/sockets/sockets.c:
+      rename SOCKET to PHP_SOCKET to avoid conflicts with Mono
+
+    * ext/mysqli/mysqli_profiler.h:
+      remove the wierdness that prevented the compileness
+
 2003-06-16  Jani Taskinen  <sniper@iki.fi>
 
     * (PHP_4_3)
