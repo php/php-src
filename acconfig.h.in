@@ -70,12 +70,6 @@
 /* Define if you have the crypt() function */
 #define HAVE_CRYPT 1
 
-/* Define if you have the Oracle database client libraries */
-#define HAVE_ORACLE 0
-
-/* Define if you have the Oracle version 8 database client libraries */
-#define HAVE_OCI8 0
-
 /* Define if you want the LDAP directory interface */
 #define HAVE_LDAP 0
 
@@ -124,10 +118,6 @@
 #define HAVE_SYBASE 0
 #define HAVE_SYBASE_CT 0
 
-#ifndef HAVE_MSQL
-#define HAVE_MSQL 0
-#endif
-
 #ifndef HAVE_PGSQL
 #define HAVE_PGSQL 0
 #endif
@@ -149,8 +139,6 @@
 #ifndef HAVE_PQCMDTUPLES
 #define HAVE_PQCMDTUPLES 0
 #endif
-
-#define MSQL1 0
 
 #ifndef DEBUG /* should be set to ZEND_DEBUG */
 #define DEBUG 0
@@ -209,6 +197,3 @@
 
 /* Define if you have the fdftk library */
 #define HAVE_FDFLIB 0
-
-/* Define to compile with mod_dav support */
-#define HAVE_MOD_DAV 0

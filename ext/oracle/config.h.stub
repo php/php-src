@@ -1,0 +1,6 @@
+/* Define if you have the Oracle database client libraries */
+#define HAVE_ORACLE 0
+
+/* Define if you have the Oracle version 8 database client libraries */
+#define HAVE_OCI8 0
+

@@ -2,37 +2,6 @@ dnl $Id$
 dnl
 dnl This file contains local autoconf functions.
 
-AC_DEFUN(AC_ORACLE_VERSION,[
-  AC_MSG_CHECKING([Oracle version])
-  if test -f "$ORACLEINST_TOP/orainst/unix.rgs"
-  then
-	ORACLE_VERSION=`grep '"ocommon"' $ORACLEINST_TOP/orainst/unix.rgs | sed 's/[ ][ ]*/:/g' | cut -d: -f 6 | cut -c 2-4`
-    test -z "$ORACLE_VERSION" && ORACLE_VERSION=7.3
-  else
-    ORACLE_VERSION=8.0
-  fi
-  AC_MSG_RESULT($ORACLE_VERSION)
-])
-
-dnl
-dnl Test mSQL version by checking if msql.h has "IDX_TYPE" defined.
-dnl
-AC_DEFUN(AC_MSQL_VERSION,[
-  AC_MSG_CHECKING([mSQL version])
-  ac_php_oldcflags=$CFLAGS
-  CFLAGS="$MSQL_INCLUDE $CFLAGS";
-  AC_TRY_COMPILE([#include <sys/types.h>
-#include "msql.h"],[int i = IDX_TYPE],[
-    AC_DEFINE(MSQL1,0)
-    MSQL_VERSION="2.0 or newer"
-  ],[
-    AC_DEFINE(MSQL1,1)
-    MSQL_VERSION="1.0"
-  ])
-  CFLAGS=$ac_php_oldcflags
-  AC_MSG_RESULT($MSQL_VERSION)
-])
-
 dnl
 dnl See if we have broken header files like SunOS has.
 dnl

@@ -51,9 +51,9 @@
 #include "functions/php3_ldap.h"
 #include "ext/mysql/php3_mysql.h"
 #include "functions/php3_bcmath.h"
-#include "functions/php3_msql.h"
-#include "functions/php3_oci8.h"
-#include "functions/oracle.h"
+#include "ext/msql/php3_msql.h"
+#include "ext/oracle/php3_oci8.h"
+#include "ext/oracle/oracle.h"
 #include "functions/php3_pgsql.h"
 #include "functions/php3_sybase.h"
 #include "functions/php3_sybase-ct.h"
@@ -62,7 +62,7 @@
 #include "functions/head.h"
 #include "functions/post.h"
 #include "functions/hw.h"
-#include "functions/filepro.h"
+#include "ext/filepro/filepro.h"
 #include "functions/db.h"
 #include "dl/snmp/php3_snmp.h"
 #include "functions/php3_zlib.h"
@@ -73,7 +73,7 @@
 #include "functions/php3_fdf.h"
 #include "functions/php3_sysvsem.h"
 #include "functions/php3_sysvshm.h"
-#include "functions/php3_dav.h"
+#include "ext/dav/php3_dav.h"
 
 unsigned char first_arg_force_ref[] = { 1, BYREF_FORCE };
 unsigned char first_arg_allow_ref[] = { 1, BYREF_ALLOW };

@@ -1,0 +1,2 @@
+#define HAVE_MSQL 0
+#define MSQL1 0
