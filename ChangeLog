@@ -1,3 +1,76 @@
+2001-08-31  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/README.txt: refinements
+
+2001-08-31  Jani Taskinen  <sniper@iki.fi>
+
+    * sapi/apache/mod_php4.h: WS
+
+2001-08-31  Zeev Suraski  <zeev@zend.com>
+
+    * ext/session/php_session.h
+      ext/session/session.c: Restore session_adapt_url()
+
+2001-08-31  Jani Taskinen  <sniper@iki.fi>
+
+    * NEWS: fixed NEWS entry
+
+2001-08-31  Zeev Suraski  <zeev@zend.com>
+
+    * ext/session/php_session.h
+      ext/session/session.c: Cleanup and clarify
+
+    * ext/session/session.c: define_sid updates
+
+2001-08-31  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/tests/pear_error.phpt: renumber error lines
+
+    * pear/PEAR.php: fix for DB/tests/db_error2.phpt
+
+    * pear/DB/common.php:
+    only register the last query in execute when an error is detected (saves
+    some processing time)
+
+    * pear/DB/common.php:
+    make prepare to also register the last query (gives the right error reporting
+    in case of fail)
+
+    * pear/PEAR.php:
+    fix problem when mixing different error modes under certain circumstances
+    (pear/test/pear_error3.phpt)
+
+    * pear/tests/pear_error.phpt:
+    make some tests to work. Still left the Notice of the deprecated use of
+    call_user_method, no way to shut it down.
+
+    * pear/PEAR.php:
+    Use _default_error_options as the options for PEAR_ERROR_CALLBACK.
+    Depreciate the use of _default_error_callback
+
+2001-08-31  Zeev Suraski  <zeev@zend.com>
+
+    * main/output.c: Support multiple chunked output buffering layers
+
+    * ext/session/session.c: Fix trans_sid handler registration logic
+
+    * main/output.c: Fix double freeing
+
+    * main/main.c
+      sapi/apache/mod_php4.c: API update
+
+2001-08-31  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/PEAR.php:
+    fix userinfo msg in Pear_Error::toString() when callback mode is selected
+    and style
+
+2001-08-31  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/standard/array.c:
+    - Made in_array() and search_array() allow the needle to be an array in
+      itself. 
+
 2001-08-30  Thomas V.V.Cox  <cox@idecnet.com>
 
     * pear/PEAR.php: killed obscure bug in pushErrorHandling
