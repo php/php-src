@@ -29,11 +29,14 @@ AC_DEFUN(PHP_WITH_PHP_CONFIG,[
 dnl
 AC_DEFUN(PHP_EXT_BUILDDIR,[.])dnl
 AC_DEFUN(PHP_EXT_SRCDIR,[$abs_srcdir])dnl
+AC_DEFUN(PHP_ALWAYS_SHARED,[
+  ext_output="yes, shared"
+  ext_shared=yes
+  test "[$]$1" = "no" && $1=yes
+])dnl
 dnl
 abs_srcdir=`(cd $srcdir && pwd)`
 abs_builddir=`pwd`
-
-php_always_shared=yes
 
 PHP_CONFIG_NICE(config.nice)
 
