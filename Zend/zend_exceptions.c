@@ -20,6 +20,7 @@
 
 #include "zend.h"
 #include "zend_API.h"
+#include "zend_reflection_api.h"
 
 zend_class_entry *default_exception_ptr;
 
@@ -129,6 +130,7 @@ ZEND_API zend_class_entry *zend_exception_get_default(void)
 ZEND_API void zend_register_default_classes(TSRMLS_D)
 {
 	zend_register_default_exception(TSRMLS_C);
+	zend_register_reflection_api(TSRMLS_C);
 }
 
 /*
