@@ -79,6 +79,7 @@ PHP_FUNCTION(virtual)
 	ap_destroy_sub_req(rr);
 	RETURN_FALSE;
 }
+/* }}} */
 
 #define ADD_LONG(name) \
 		add_property_long(return_value, #name, rr->name)
