@@ -208,7 +208,6 @@ change_node_zval(xmlNodePtr node, zval *value)
 }
 /* }}} */
 
-
 /* {{{ sxe_property_write()
  */
 static void
@@ -746,7 +745,7 @@ sxe_object_cast(zval *readobj, zval *writeobj, int type, int should_free TSRMLS_
 	php_sxe_object *sxe;
 	char           *contents = NULL;
 
-    sxe = php_sxe_fetch_object(readobj TSRMLS_CC);
+	sxe = php_sxe_fetch_object(readobj TSRMLS_CC);
 	if (should_free) {
 		zval_dtor(writeobj);
 	}
@@ -794,7 +793,7 @@ sxe_object_get(zval *property TSRMLS_DC)
 	 */
 	return NULL;
 }
-
+/* }}} */
 
 static zend_object_handlers sxe_object_handlers = {
 	ZEND_OBJECTS_STORE_HANDLERS,
@@ -1056,7 +1055,6 @@ PHP_MINFO_FUNCTION(simplexml)
 	php_info_print_table_header(2, "Simplexml support", "enabled");
 	php_info_print_table_row(2, "Revision", "$Revision$");
 	php_info_print_table_end();
-
 }
 /* }}} */
 
