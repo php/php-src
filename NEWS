@@ -1,6 +1,7 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ????, Version 4.1.1
+- Fixed several bugs and memleaks in the domxml extension. (Markus)
 - Fixed Bug #9878. Patch by bfoddy@mediaone.net. (jmoore)
 - Fixed bug #13885 (gmdate() timezone handling on windows). (jmoore)
 - Fixed several crash bugs in the mcrypt extension. (Derick)
