@@ -279,7 +279,7 @@ void zend_do_end_function_call(znode *function_name, znode *result, znode *argum
 void zend_do_return(znode *expr, int do_end_vparse TSRMLS_DC);
 
 void zend_do_try(znode *try_token TSRMLS_DC);
-void zend_do_begin_catch(znode *try_token, znode *catch_class, znode *catch_var TSRMLS_DC);
+void zend_do_begin_catch(znode *try_token, znode *catch_class, znode *catch_var, zend_bool first_catch TSRMLS_DC);
 void zend_do_end_catch(znode *try_token TSRMLS_DC);
 void zend_do_throw(znode *expr TSRMLS_DC);
 
