@@ -193,7 +193,7 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		}
 		else
 #endif
-		stream = php_stream_sock_open_host(host, port, socktype, timeout, persistent);
+		stream = php_stream_sock_open_host(host, port, socktype, (int)timeout, persistent);
 
 #if HAVE_OPENSSL_EXT
 		if (stream)	{

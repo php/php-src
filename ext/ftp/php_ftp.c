@@ -480,7 +480,7 @@ PHP_FUNCTION(ftp_get)
 		RETURN_FALSE;
 	}
 
-	outstream = php_stream_fopen(local, "wb", NULL TSRMLS_C);
+	outstream = php_stream_fopen(local, "wb", NULL TSRMLS_CC);
 
 	if (outstream == NULL)	{
 		php_stream_close(tmpstream);
@@ -547,7 +547,7 @@ PHP_FUNCTION(ftp_put)
 	ZEND_FETCH_RESOURCE(ftp, ftpbuf_t*, &z_ftp, -1, le_ftpbuf_name, le_ftpbuf);
 	XTYPE(xtype, mode);
 
-	instream = php_stream_fopen(local, "rb", NULL TSRMLS_C);
+	instream = php_stream_fopen(local, "rb", NULL TSRMLS_CC);
 
 	if (instream == NULL)	{
 		RETURN_FALSE;
