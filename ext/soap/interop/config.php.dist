@@ -1,5 +1,0 @@
-<?php
-// configuration items
-$interopConfig['DSN'] = 'mysql://root@localhost/soapinterop';
-$interopConfig['baseURL'] = 'http://localhost/soap/interop';
-?>
