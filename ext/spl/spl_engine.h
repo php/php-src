@@ -21,6 +21,7 @@
 
 #include "php.h"
 #include "php_spl.h"
+#include "zend_interfaces.h"
 
 /* {{{ zend_class_entry */
 static inline zend_class_entry *spl_get_class_entry(zval *obj TSRMLS_DC)
@@ -34,8 +35,26 @@ static inline zend_class_entry *spl_get_class_entry(zval *obj TSRMLS_DC)
 /* }}} */
 
 void spl_instantiate(zend_class_entry *pce, zval **object, int alloc TSRMLS_DC);
-int spl_instantiate_arg_ex1(zend_class_entry *pce, zval **retval, int alloc, zval *arg1 TSRMLS_DC);
-int spl_instantiate_arg_ex2(zend_class_entry *pce, zval **retval, int alloc, zval *arg1, zval *arg2 TSRMLS_DC);
+
+/* {{{ spl_instantiate_arg_ex1 */
+static inline int spl_instantiate_arg_ex1(zend_class_entry *pce, zval **retval, int alloc, zval *arg1 TSRMLS_DC)
+{
+	spl_instantiate(pce, retval, alloc TSRMLS_CC);
+	
+	zend_call_method(retval, pce, &pce->constructor, pce->constructor->common.function_name, strlen(pce->constructor->common.function_name), NULL, 1, arg1, NULL TSRMLS_CC);
+	return 0;
+}
+/* }}} */
+
+/* {{{ spl_instantiate_arg_ex2 */
+static inline int spl_instantiate_arg_ex2(zend_class_entry *pce, zval **retval, int alloc, zval *arg1, zval *arg2 TSRMLS_DC)
+{
+	spl_instantiate(pce, retval, alloc TSRMLS_CC);
+	
+	zend_call_method(retval, pce, &pce->constructor, pce->constructor->common.function_name, strlen(pce->constructor->common.function_name), NULL, 2, arg1, arg2 TSRMLS_CC);
+	return 0;
+}
+/* }}} */
 
 int spl_is_instance_of(zval **obj, zend_class_entry *ce TSRMLS_DC);
 
