@@ -1587,7 +1587,8 @@ PHP_FUNCTION(strrpos)
 {
 	zval *zneedle;
 	char *needle, *haystack;
-	int needle_len, haystack_len, offset = 0;
+	int needle_len, haystack_len;
+	long offset = 0;
 	char *p, *e, ord_needle[2];
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz|l", &haystack, &haystack_len, &zneedle, &offset) == FAILURE) {
