@@ -256,7 +256,7 @@ PHP_FUNCTION(ibase_service_detach)
 /* }}} */
 
 static void _php_ibase_service_query(INTERNAL_FUNCTION_PARAMETERS, 
-	ibase_service *svm, char info_action TSRMLS_DC) /* {{{ */
+	ibase_service *svm, char info_action) /* {{{ */
 {
 	static char spb[] = { isc_info_svc_timeout, 10, 0, 0, 0 };
 		
@@ -594,7 +594,7 @@ PHP_FUNCTION(ibase_server_info)
 	ZEND_FETCH_RESOURCE(svm, ibase_service *, &res, -1, 
 		"Interbase service manager handle", le_service);
 	
-	_php_ibase_service_query(INTERNAL_FUNCTION_PARAM_PASSTHRU, svm, action);
+	_php_ibase_service_query(INTERNAL_FUNCTION_PARAM_PASSTHRU, svm, (char)action);
 }
 /* }}} */
 #endif /* HAVE_IBASE6_API */
