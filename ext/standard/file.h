@@ -118,6 +118,7 @@ typedef struct {
 	long default_socket_timeout;
 	char *user_agent;
 	char *user_stream_current_filename; /* for simple recursion protection */
+	HashTable *stream_wrappers;			/* per-request copy of url_stream_wrappers_hash */
 } php_file_globals;
 
 #ifdef ZTS

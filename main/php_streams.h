@@ -530,6 +530,7 @@ PHP_RSHUTDOWN_FUNCTION(streams);
 
 PHPAPI int php_register_url_stream_wrapper(char *protocol, php_stream_wrapper *wrapper TSRMLS_DC);
 PHPAPI int php_unregister_url_stream_wrapper(char *protocol TSRMLS_DC);
+PHPAPI int php_register_url_stream_wrapper_volatile(char *protocol, php_stream_wrapper *wrapper TSRMLS_DC);
 PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC);
 PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, char **path_for_open, int options TSRMLS_DC);
 PHPAPI char *php_stream_locate_eol(php_stream *stream, char *buf, size_t buf_len TSRMLS_DC);
@@ -627,7 +628,8 @@ PHPAPI php_stream_context *php_stream_context_set(php_stream *stream, php_stream
 	
 
 /* Give other modules access to the url_stream_wrappers_hash */
-PHPAPI HashTable *php_stream_get_url_stream_wrappers_hash();
+PHPAPI HashTable *_php_stream_get_url_stream_wrappers_hash(TSRMLS_D);
+#define php_stream_get_url_stream_wrappers_hash()	_php_stream_get_url_stream_wrappers_hash(TSRMLS_C)
 
 #endif
 
