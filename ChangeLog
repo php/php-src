@@ -1,3 +1,40 @@
+2003-08-26  Jani Taskinen  <sniper@iki.fi>
+
+    * (PHP_4_3)
+      NEWS:
+      BFN
+
+    * (PHP_4_3)
+      main/config.w32.h
+      main/internal_functions_win32.c:
+      MFH: - Fixed bug #25166 (WDDX serializer handler missing in win32). (Jani)
+
+    * main/config.w32.h
+      main/internal_functions_win32.c:
+      - Fixed bug #25166 (WDDX serializer handler missing in win32). (Jani)
+
+    * (PHP_4_3)
+      ext/session/session.c:
+      More crap from previous commits
+
+    * (PHP_4_3)
+      ext/session/session.c:
+      Fix typo
+
+    * (PHP_4_3)
+      ext/session/session.c:
+      MFH: - Fixed crash bug when non-existing save/serializer handler is used
+
+    * ext/session/session.c:
+      - Prevent crash if non-existing save/serializer handler is tried to be used
+      - Added the registered serializers information to MINFO.
+
+2003-08-26  Sascha Schumann  <sascha@schumann.cx>
+
+    * scripts/Makefile.frag
+      scripts/Makefile.frag:
+      Use $(INSTALL_DATA) instead of cp
+
 2003-08-25  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_4_3)
