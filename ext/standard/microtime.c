@@ -55,7 +55,7 @@ PHP_FUNCTION(microtime)
 		msec = (double) (tp.tv_usec / MICRO_IN_SEC);
 		sec = tp.tv_sec;
 	}
-	if (msec > 1.0) msec -= (long) msec;
+	if (msec >= 1.0) msec -= (long) msec;
 	snprintf(ret, 100, "%.8f %ld", msec, sec);
 	RETVAL_STRING(ret,1);
 #endif
