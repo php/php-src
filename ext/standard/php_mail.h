@@ -36,6 +36,7 @@
 #if HAVE_SENDMAIL
 
 PHP_FUNCTION(mail);
+PHP_FUNCTION(ezmlm_hash);
 PHP_MINFO_FUNCTION(mail);
 extern int php_mail(char *to, char *subject, char *message, char *headers);
 

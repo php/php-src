@@ -455,6 +455,7 @@ function_entry basic_functions[] = {
 
 	/* functions from mail.c */
 	PHP_FE(mail,					NULL)
+	PHP_FE(ezmlm_hash,				NULL)
 
 	/* functions from syslog.c */
 	PHP_FE(openlog,					NULL)
