@@ -17,6 +17,7 @@
  */
 
 #define _WIN32_DCOM
+#define COBJMACROS
 
 #include "../rpc.h"
 #include "../handler.h"
@@ -25,7 +26,7 @@
 #include "com_wrapper.h"
 #include "conversion.h"
 #include "variant.h"
-
+#include "ext/standard/php_smart_str.h"
 #include <oleauto.h>
 
 
@@ -481,9 +482,143 @@ static int com_dtor(void *data)
 	return SUCCESS;
 }
 
+static inline void vt_type_to_zpp_string(ELEMDESC *elem, smart_str *argtypes_str, unsigned char *argflags)
+{
+	int ref = 0;
+	int nullable = 0;
+	char zppflag = 'z';
+	WORD vt, flags;
+
+	vt = elem->tdesc.vt;
+	flags = elem->paramdesc.wParamFlags;
+
+	if (vt == VT_PTR) {
+		nullable = 1;
+		ref = 0;
+		vt = elem->tdesc.lptdesc->vt;
+	} else {
+		ref = vt & VT_BYREF;
+	}
+	
+	if (vt & VT_ARRAY) {
+		zppflag = 'a';	
+	} else {
+		switch(vt & ~(VT_BYREF | VT_ARRAY)) {
+		case VT_UI1:
+		case VT_UI2:
+		case VT_UI4:
+		case VT_I1:
+		case VT_I2:
+		case VT_I4:
+			zppflag = 'l';
+			break;
+
+		case VT_R8:
+		case VT_CY:
+		case VT_DATE:
+			zppflag = 'd';
+			break;
+
+		case VT_BSTR:
+			zppflag = 's';
+			break;
+
+		case VT_BOOL:
+			zppflag = 'b';
+			break;
+
+		case VT_DISPATCH:
+		case VT_UNKNOWN:
+			zppflag = 'o';
+			break;
+
+		case VT_VARIANT:
+		default:
+			zppflag = 'z';
+
+		}
+	}
+
+	smart_str_appendl(argtypes_str, &zppflag, 1);
+	if (ref) {
+		smart_str_appendl(argtypes_str, "/", 1);
+		*argflags = BYREF_FORCE;
+	} else {
+		*argflags = BYREF_NONE;
+	}
+	if (nullable) {
+		smart_str_appendl(argtypes_str, "!", 1);
+	}
+}
+
 static int com_describe(rpc_string method_name, void *data, char **arg_types, unsigned char **ref_types)
 {
-	return SUCCESS;
+	rpc_internal *intern;
+	comval *obj;
+	ITypeInfo *typeinfo;
+	FUNCDESC *funcdesc;
+	MEMBERID fid;
+	OLECHAR *olename;
+	int retval = FAILURE, arg_count;
+	int i, type_len = 0;
+	smart_str argtypes_str = {0};
+	unsigned char *func_arg_types;
+	TSRMLS_FETCH();
+
+	GET_INTERNAL_EX(intern, data);
+	obj = (comval*)data;
+
+	if (C_TYPEINFO(obj)) {
+		typeinfo = C_TYPEINFO(obj);
+		ITypeInfo_AddRef(typeinfo);
+	} else if (FAILED(C_DISPATCH_VT(obj)->GetTypeInfo(C_DISPATCH(obj), 0, LOCALE_SYSTEM_DEFAULT, &typeinfo))) {
+		return FAILURE;
+	}
+
+	olename = php_char_to_OLECHAR(method_name.str, method_name.len, CP_ACP, FALSE);
+
+	if (SUCCEEDED(ITypeInfo_GetIDsOfNames(typeinfo, &olename, 1, &fid)) && SUCCEEDED(ITypeInfo_GetFuncDesc(typeinfo, fid, &funcdesc))) {
+
+		arg_count = funcdesc->cParams + (funcdesc->cParamsOpt == -1 ? 1 : funcdesc->cParamsOpt);
+		
+		func_arg_types = (unsigned char*)malloc((1 + arg_count) * sizeof(unsigned char));
+
+		func_arg_types[0] = arg_count;
+
+		/* required parameters first */
+		for (i = 0; i < funcdesc->cParams; i++) {
+			ELEMDESC *elem = &funcdesc->lprgelemdescParam[i];
+
+			vt_type_to_zpp_string(elem, &argtypes_str, &func_arg_types[i+1]);
+		}
+
+		if (funcdesc->cParamsOpt == -1) {
+			/* needs to be a SAFEARRAY of VARIANTS */
+			smart_str_appendl(&argtypes_str, "|z", 2);
+			func_arg_types[funcdesc->cParams+1] = BYREF_NONE;
+		} else if (funcdesc->cParamsOpt > 0) {
+			smart_str_appendl(&argtypes_str, "|", 1);
+
+			for (i = funcdesc->cParams; i < funcdesc->cParams + funcdesc->cParamsOpt; i++) {
+				ELEMDESC *elem = &funcdesc->lprgelemdescParam[i];
+
+				vt_type_to_zpp_string(elem, &argtypes_str, &func_arg_types[i+1]);
+			}
+		}
+
+		*ref_types = func_arg_types;
+		smart_str_0(&argtypes_str);
+		*arg_types = strdup(argtypes_str.c);
+		smart_str_free(&argtypes_str);
+
+		retval = SUCCESS;
+		ITypeInfo_ReleaseFuncDesc(typeinfo, funcdesc);
+	}
+	
+	efree(olename);
+	ITypeInfo_Release(typeinfo);
+
+	return retval;
 }
 
 static int com_call(rpc_string method_name, void **data, zval *return_value, int num_args, zval **args[])
