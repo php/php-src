@@ -17,7 +17,7 @@
   +----------------------------------------------------------------------+
 */
 
-// $Id: confutils.js,v 1.30 2003-12-23 17:20:50 wez Exp $
+// $Id: confutils.js,v 1.31 2004-01-07 20:06:32 wez Exp $
 
 var STDOUT = WScript.StdOut;
 var STDERR = WScript.StdErr;
@@ -387,16 +387,19 @@ function search_paths(thing_to_find, explicit_path, env_name)
 
 	STDOUT.Write("Checking for " + thing_to_find + " ... ");
 
+	thing_to_find = thing_to_find.replace(new RegExp("/", "g"), "\\");
+
 	if (explicit_path != null) {
 		if (typeof(explicit_path) == "string") {
 			explicit_path = explicit_path.split(";");
 		}
 
 		for (i = 0; i < explicit_path.length; i++) {
-			file = FSO.BuildPath(FSO.GetAbsolutePathName(explicit_path[i]), thing_to_find);
-			if (FSO.FileExists(file)) {
+			file = glob(explicit_path[i] + "\\" + thing_to_find);
+			if (file) {
 				found = true;
-				place = explicit_path[i];
+				place = file[0];
+				place = place.substr(0, place.length - thing_to_find.length - 1);
 				break;
 			}
 		}
@@ -406,8 +409,8 @@ function search_paths(thing_to_find, explicit_path, env_name)
 		env = WshShell.Environment("Process").Item(env_name);
 		env = env.split(";");
 		for (i = 0; i < env.length; i++) {
-			file = FSO.BuildPath(env[i], thing_to_find);
-			if (FSO.FileExists(file)) {
+			file = glob(env[i] + "\\" + thing_to_find);
+			if (file) {
 				found = true;
 				place = true;
 				break;
@@ -456,7 +459,127 @@ function PATH_PROG(progname, additional_paths, symbol)
 	return place;
 }
 
-function CHECK_LIB(libnames, target, path_to_check)
+function find_pattern_in_path(pattern, path)
+{
+	if (path == null) {
+		return false;
+	}
+
+	var dirs = path.split(';');
+	var i;
+	var items;
+
+	for (i = 0; i < dirs.length; i++) {
+		items = glob(dirs[i] + "\\" + pattern);
+		if (items) {
+			return condense_path(items[0]);
+		}
+	}
+	return false;
+}
+
+function CHECK_LIB(libnames, target, path_to_check, common_name)
+{
+	STDOUT.Write("Checking for library " + libnames + " ... ");
+
+	if (common_name == null && target != null) {
+		common_name = target;
+	}
+
+	if (path_to_check == null) {
+		path_to_check = "";
+	}
+
+	// if they specified a common name for the package that contains
+	// the library, tag some useful defaults on to the end of the
+	// path to be searched
+	if (common_name != null) {
+		path_to_check += ";" + PHP_PHP_BUILD + "\\" + common_name + "*";
+		path_to_check += ";" + PHP_PHP_BUILD + "\\lib\\" + common_name + "*";
+		path_to_check += ";..\\" + common_name + "*";
+	}
+
+	// Determine target for build flags
+	if (target == null) {
+		target = "";
+	} else {
+		target = "_" + target.toUpperCase();
+	}
+
+	// Expand path to include general dirs
+	path_to_check += ";" + php_usual_lib_suspects;
+
+	// It is common practice to put libs under one of these dir names
+	var subdirs = new Array(PHP_DEBUG == "yes" ? "Debug" : "Release", "lib", "libs", "libexec");
+
+	// libnames can be ; separated list of accepted library names
+	libnames = libnames.split(';');
+
+	var i, j, k, libname;
+	var location = false;
+	var path = path_to_check.split(';');
+	
+	for (i = 0; i < libnames.length; i++) {
+		libname = libnames[i];
+
+		for (k = 0; k < path.length; k++) {
+			location = glob(path[k] + "\\" + libname);
+			if (location) {
+				location = location[0];
+				break;
+			}
+			for (j = 0; j < subdirs.length; j++) {
+				location = glob(path[k] + "\\" + subdirs[j] + "\\" + libname);
+				if (location) {
+					location = location[0];
+					break;
+				}
+			}
+			if (location)
+				break;
+		}
+
+		if (location) {
+			location = condense_path(location);
+			var libdir = FSO.GetParentFolderName(location);
+			libname = FSO.GetFileName(location);
+			ADD_FLAG("LDFLAGS" + target, '/libpath:"' + libdir + '" ');
+			ADD_FLAG("LIBS" + target, libname);
+
+			STDOUT.WriteLine(location);
+
+			return location;
+		}
+
+		// Check in their standard lib path
+		location = find_pattern_in_path(libname, WshShell.Environment("Process").Item("LIB"));
+
+		if (location) {
+			location = condense_path(location);
+			libname = FSO.GetFileName(location);
+			ADD_FLAG("LIBS" + target, libname);
+
+			STDOUT.WriteLine("<in LIB path> " + libname);
+			return location;
+		}
+
+		// Check in their general extra libs path
+		location = find_pattern_in_path(libname, PHP_EXTRA_LIBS);
+		if (location) {
+			location = condense_path(location);
+			libname = FSO.GetFileName(location);
+			ADD_FLAG("LIBS" + target, libname);
+			STDOUT.WriteLine("<in extra libs path>");
+			return location;
+		}
+	}
+
+	STDOUT.WriteLine("<not found>");
+
+	return false;
+}
+
+function OLD_CHECK_LIB(libnames, target, path_to_check)
 {
 	if (target == null) {
 		target = "";
@@ -916,7 +1039,7 @@ function generate_config_h()
 	var indata;
 	var prefix;
 
-	prefix = PHP_PREFIX.replace("\\", "\\\\");
+	prefix = PHP_PREFIX.replace(new RegExp("\\\\", "g"), "\\\\");
 
 	STDOUT.WriteLine("Generating main/config.w32.h");
 	
@@ -1051,7 +1174,6 @@ function WARNING(msg)
 function copy_and_subst(srcname, destname, subst_array)
 {
 	if (!FSO.FileExists(srcname)) {
-		STDOUT.WriteLine("copy_and_subst under " + configure_module_dirname);
 		srcname = configure_module_dirname + "\\" + srcname;
 		destname = configure_module_dirname + "\\" + destname;
 	}
@@ -1080,6 +1202,12 @@ function glob(path_pattern)
 	var p;
 	var base = "";
 	var is_pat_re = /\*/;
+
+//STDOUT.WriteLine("glob: " + path_pattern);
+
+	if (FSO.FileExists(path_pattern)) {
+		return new Array(path_pattern);
+	}
 	
 	// first, build as much as possible that doesn't have a pattern
 	for (p = 0; p < path_parts.length; p++) {
@@ -1100,6 +1228,10 @@ function _inner_glob(base, p, parts)
 	var re = null;
 	var items = null;
 
+	if (p == parts.length) {
+		return false;
+	}
+
 //STDOUT.WriteLine("inner: base=" + base + " p=" + p + " pat=" + pat);
 
 	if (FSO.FileExists(full_name)) {
@@ -1116,9 +1248,13 @@ function _inner_glob(base, p, parts)
 	}
 
 	// Convert the pattern into a regexp
-	re = new RegExp("^" + pat.replace(/\./g, '\\.').replace(/\*/g, '.*') + "$");
+	re = new RegExp("^" + pat.replace(/\./g, '\\.').replace(/\*/g, '.*').replace(/\?/g, '.') + "$", "i");
 
 	items = new Array();
+
+	if (!FSO.FolderExists(base)) {
+		return false;
+	}
 
 	var folder = FSO.GetFolder(base);
 	var fc = null;
@@ -1158,6 +1294,9 @@ function _inner_glob(base, p, parts)
 			}
 		}
 	}
+
+	if (items.length == 0)
+		return false;
 
 	return items;
 }
