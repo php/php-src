@@ -2,9 +2,9 @@ dnl
 dnl $Id$
 dnl
 
-AC_MSG_CHECKING(for Apache 2.0 module support via DSO through APXS)
-AC_ARG_WITH(apxs2filter,
-[  --with-apxs2filter[=FILE]   EXPERIMENTAL: Build shared Apache 2.0 module. FILE is the optional
+AC_MSG_CHECKING(for Apache 2.0 handler-module support via DSO through APXS)
+AC_ARG_WITH(apxs2,
+[  --with-apxs2[=FILE]     EXPERIMENTAL: Build shared Apache 2.0 module. FILE is the optional
                           pathname to the Apache apxs tool; defaults to "apxs".],[
   if test "$withval" = "yes"; then
     APXS=apxs
@@ -23,7 +23,7 @@ AC_ARG_WITH(apxs2filter,
     AC_MSG_RESULT([Sorry, I cannot run apxs.  Possible reasons follow:]) 
     AC_MSG_RESULT()
     AC_MSG_RESULT([1. Perl is not installed])
-    AC_MSG_RESULT([2. apxs was not found. Try to pass the path using --with-apxs2=/path/to/apxs])
+    AC_MSG_RESULT([2. apxs was not found. Try to pass the path using --with-apxs2handler=/path/to/apxs])
     AC_MSG_RESULT([3. Apache was not built using --enable-so (the apxs usage page is displayed)])
     AC_MSG_RESULT()
     AC_MSG_RESULT([The output of $APXS follows:])
@@ -46,8 +46,8 @@ AC_ARG_WITH(apxs2filter,
   PHP_AP_EXTRACT_VERSION($APXS_HTTPD)
   if test "$APACHE_VERSION" -le 2000000; then
     AC_MSG_ERROR([You have enabled Apache 2 support while your server is Apache 1.3.  Please use the appropiate switch --with-apxs (without the 2)])
-  elif test "$APACHE_VERSION" -lt 2000040; then
-    AC_MSG_ERROR([Please note that Apache version >= 2.0.40 is required.])
+  elif test "$APACHE_VERSION" -lt 2000044; then
+    AC_MSG_ERROR([Please note that Apache version >= 2.0.44 is required.])
   fi
 
   APXS_LIBEXECDIR='$(INSTALL_ROOT)'`$APXS -q LIBEXECDIR`
@@ -67,7 +67,7 @@ AC_ARG_WITH(apxs2filter,
   case $host_alias in
   *aix*)
     EXTRA_LDFLAGS="$EXTRA_LDFLAGS -Wl,-brtl -Wl,-bI:$APXS_LIBEXECDIR/httpd.exp"
-    PHP_SELECT_SAPI(apache2filter, shared, sapi_apache2.c apache_config.c php_functions.c)
+    PHP_SELECT_SAPI(apache2handler, shared, sapi_apache2.c apache_config.c php_functions.c)
     INSTALL_IT="$INSTALL_IT $SAPI_LIBTOOL" 
     ;;
   *darwin*)
@@ -84,7 +84,7 @@ AC_ARG_WITH(apxs2filter,
     fi
     MH_BUNDLE_FLAGS="-bundle -bundle_loader $APXS_HTTPD $MH_BUNDLE_FLAGS"
     PHP_SUBST(MH_BUNDLE_FLAGS)
-    PHP_SELECT_SAPI(apache2filter, bundle, sapi_apache2.c apache_config.c php_functions.c)
+    PHP_SELECT_SAPI(apache2handler, bundle, sapi_apache2.c apache_config.c php_functions.c)
     SAPI_SHARED=libs/libphp4.so
     INSTALL_IT="$INSTALL_IT $SAPI_SHARED"
     ;;
@@ -93,11 +93,11 @@ AC_ARG_WITH(apxs2filter,
     if test -f _APP_; then `rm _APP_`; fi
     `ln -s $APXS_BINDIR/httpd _APP_`
     EXTRA_LIBS="$EXTRA_LIBS _APP_"
-    PHP_SELECT_SAPI(apache2filter, shared, sapi_apache2.c apache_config.c php_functions.c)
+    PHP_SELECT_SAPI(apache2handler, shared, sapi_apache2.c apache_config.c php_functions.c)
     INSTALL_IT="$INSTALL_IT $SAPI_LIBTOOL" 
     ;;
   *)
-    PHP_SELECT_SAPI(apache2filter, shared, sapi_apache2.c apache_config.c php_functions.c) 
+    PHP_SELECT_SAPI(apache2handler, shared, sapi_apache2.c apache_config.c php_functions.c) 
     INSTALL_IT="$INSTALL_IT $SAPI_LIBTOOL"
     ;;
   esac
