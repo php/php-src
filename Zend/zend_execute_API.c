@@ -30,6 +30,7 @@
 #include "zend_operators.h"
 #include "zend_constants.h"
 #include "zend_extensions.h"
+#include "zend_execute_locks.h"
 
 
 ZEND_API void (*zend_execute)(zend_op_array *op_array ELS_DC);

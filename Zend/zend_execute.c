@@ -31,6 +31,7 @@
 #include "zend_constants.h"
 #include "zend_extensions.h"
 #include "zend_fast_cache.h"
+#include "zend_execute_locks.h"
 
 #if defined(HAVE_ALLOCA) && defined(HAVE_ALLOCA_H)
 # include <alloca.h>
