@@ -369,15 +369,23 @@ PHPAPI FILE *php_fopen_with_path(char *filename, char *mode, char *path, char **
 			}
 			return fp;
 		} else {
-			if (php_check_open_basedir(filename)) return NULL;
-			return PHP_FOPEN(filename, mode);
+			if (php_check_open_basedir(filename)) {
+				return NULL;
+			}
+			fp = PHP_FOPEN(filename, mode);
+			if (fp && opened_path) {
+				*opened_path = expand_filepath(filename);
+			}
+			return fp;
 		}
 	}
 	if (!path || (path && !*path)) {
 		if (PG(safe_mode) && (!php_checkuid(filename, cm))) {
 			return NULL;
 		}
-		if (php_check_open_basedir(filename)) return NULL;
+		if (php_check_open_basedir(filename)) {
+			return NULL;
+		}
 		fp = PHP_FOPEN(filename, mode);
 		if (fp && opened_path) {
 			*opened_path = strdup(filename);
