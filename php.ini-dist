@@ -898,6 +898,9 @@ sockets.use_system_read = On
 ;printer.default_printer = ""
 
 [mbstring]
+; language for internal character representation.
+;mbstring.language = Japanese
+
 ; internal/script encoding.
 ; Some encoding cannot work as internal encoding.
 ; (e.g. SJIS, BIG5, ISO-2022-*)

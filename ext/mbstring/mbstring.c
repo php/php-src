@@ -462,7 +462,61 @@ php_mbregex_free_cache(mb_regex_t *pre)
 
 #endif
 
+
 /* php.ini directive handler */
+static PHP_INI_MH(OnUpdate_mbstring_language)
+{
+	int *list, size;
+	enum mbfl_no_language no_language;
+
+	no_language = mbfl_name2no_language(new_value);
+	if (no_language != mbfl_no_language_invalid) {
+		switch (no_language) {
+		case mbfl_no_language_japanese:
+			MBSTRG(language) = mbfl_no_language_japanese;
+			MBSTRG(current_language) = mbfl_no_language_japanese;
+			MBSTRG(internal_encoding) = mbfl_no_encoding_euc_jp;
+			MBSTRG(current_internal_encoding) = mbfl_no_encoding_euc_jp;
+			break;
+		case mbfl_no_language_korean:
+			MBSTRG(language) = mbfl_no_language_korean;
+			MBSTRG(current_language) = mbfl_no_language_korean;
+			MBSTRG(internal_encoding) = mbfl_no_encoding_euc_kr;
+			MBSTRG(current_internal_encoding) = mbfl_no_encoding_euc_kr;
+			break;
+		case mbfl_no_language_simplified_chinese:
+			MBSTRG(language) = mbfl_no_language_simplified_chinese;
+			MBSTRG(current_language) = mbfl_no_language_simplified_chinese;
+			MBSTRG(internal_encoding) = mbfl_no_encoding_euc_cn;
+			MBSTRG(current_internal_encoding) = mbfl_no_encoding_euc_cn;
+			break;
+		case mbfl_no_language_traditional_chinese:
+			MBSTRG(language) = mbfl_no_language_traditional_chinese;
+			MBSTRG(current_language) = mbfl_no_language_traditional_chinese;
+			MBSTRG(internal_encoding) = mbfl_no_encoding_euc_tw;
+			MBSTRG(current_internal_encoding) = mbfl_no_encoding_euc_tw;
+			break;
+		case mbfl_no_language_russian:
+			MBSTRG(language) = mbfl_no_language_russian;
+			MBSTRG(current_language) = mbfl_no_language_russian;
+			MBSTRG(internal_encoding) = mbfl_no_encoding_koi8r;
+			MBSTRG(current_internal_encoding) = mbfl_no_encoding_koi8r;
+			break;
+		case mbfl_no_language_english:
+		default:
+			MBSTRG(language) = mbfl_no_language_english;
+			MBSTRG(current_language) = mbfl_no_language_english;
+			MBSTRG(internal_encoding) = mbfl_no_encoding_8859_1;
+			MBSTRG(current_internal_encoding) = mbfl_no_encoding_8859_1;
+			break;
+		}
+
+	} else {
+		return FAILURE;
+	}
+	return SUCCESS;
+}
+
 static PHP_INI_MH(OnUpdate_mbstring_detect_order)
 {
 	int *list, size;
@@ -496,6 +550,7 @@ static PHP_INI_MH(OnUpdate_mbstring_http_input)
 
 	return SUCCESS;
 }
+
 
 static PHP_INI_MH(OnUpdate_mbstring_http_output)
 {
@@ -582,6 +637,7 @@ static PHP_INI_MH(OnUpdate_mbstring_substitute_character)
 
 /* php.ini directive registration */
 PHP_INI_BEGIN()
+	 PHP_INI_ENTRY("mbstring.language", NULL, PHP_INI_ALL, OnUpdate_mbstring_language)
 	 PHP_INI_ENTRY("mbstring.detect_order", NULL, PHP_INI_ALL, OnUpdate_mbstring_detect_order)
 	 PHP_INI_ENTRY("mbstring.http_input", NULL, PHP_INI_ALL, OnUpdate_mbstring_http_input)
 	 PHP_INI_ENTRY("mbstring.http_output", NULL, PHP_INI_ALL, OnUpdate_mbstring_http_output)
@@ -598,20 +654,25 @@ PHP_INI_END()
 static void
 php_mbstring_init_globals(zend_mbstring_globals *pglobals TSRMLS_DC)
 {
+	MBSTRG(language) = mbfl_no_language_english;
+	MBSTRG(current_language) = mbfl_no_language_english;
+	MBSTRG(internal_encoding) = mbfl_no_encoding_8859_1;
+	MBSTRG(current_internal_encoding) = mbfl_no_encoding_8859_1;
+
 #if defined(HAVE_MBSTR_CN) & !defined(HAVE_MBSTR_JA)
-	MBSTRG(language) = mbfl_no_language_chinese;
-	MBSTRG(current_language) = mbfl_no_language_chinese;
+	MBSTRG(language) = mbfl_no_language_simplified_chinese;
+	MBSTRG(current_language) = mbfl_no_language_simplified_chinese;
 	MBSTRG(internal_encoding) = mbfl_no_encoding_euc_cn;
 	MBSTRG(current_internal_encoding) = mbfl_no_encoding_euc_cn;
 #endif
 #if defined(HAVE_MBSTR_TW) & !defined(HAVE_MBSTR_JA)
-	MBSTRG(language) = mbfl_no_language_chinese;
-	MBSTRG(current_language) = mbfl_no_language_chinese;
+	MBSTRG(language) = mbfl_no_language_traditional_chinese;
+	MBSTRG(current_language) = mbfl_no_language_traditional_chinese;
 	MBSTRG(internal_encoding) = mbfl_no_encoding_euc_tw;
 	MBSTRG(current_internal_encoding) = mbfl_no_encoding_euc_tw;
 #endif
 #if defined(HAVE_MBSTR_KR) & !defined(HAVE_MBSTR_JA)
-	MBSTRG(language) = mbfl_no_language_chinese;
+	MBSTRG(language) = mbfl_no_language_korean;
 	MBSTRG(current_language) = mbfl_no_language_korean;
 	MBSTRG(internal_encoding) = mbfl_no_encoding_euc_kr;
 	MBSTRG(current_internal_encoding) = mbfl_no_encoding_euc_kr;
