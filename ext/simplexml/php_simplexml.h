@@ -59,7 +59,6 @@ typedef struct {
 	HashTable *properties;
 	xmlXPathContextPtr xpath;
 	struct {
-		php_libxml_node_ptr   *node;
 		int                   itertype;
 		char                  *name;
 		char                  *nsprefix;
@@ -70,9 +69,8 @@ typedef struct {
 
 #define SXE_ITER_NONE 0
 #define SXE_ITER_ELEMENT 1
-#define SXE_ITER_ATTR 2
-#define SXE_ITER_CHILD 3
-#define SXE_ITER_ATTRLIST 4
+#define SXE_ITER_CHILD 2
+#define SXE_ITER_ATTRLIST 3
 
 #ifdef ZTS
 #define SIMPLEXML_G(v) TSRMG(simplexml_globals_id, zend_simplexml_globals *, v)
