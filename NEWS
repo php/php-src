@@ -5,7 +5,7 @@ PHP 4.0                                                                    NEWS
 - Fixed long2ip() to return the correct IP address. (Evan)
 - Fix many memory leaks in the IMAP module (Stanislav, Andi, Zeev)
 - Fix bug in number_format (Jon Forsberg)
-- Make error_prepend_string and error_append_string work
+- Make error_prepend_string and error_append_string work (Rasmus)
 - array_walk() now automatically resets the array. (Andrei)
 - Added natural comparison/sorting routines strnatcmp(), strnatcasecmp(),
   natsort(), and natcasesort(). These are useful for comparing and sorting
