@@ -50,8 +50,9 @@ PHP_FUNCTION(odbc_commit);
 PHP_FUNCTION(odbc_connect);
 PHP_FUNCTION(odbc_pconnect);
 PHP_FUNCTION(odbc_cursor);
-PHP_FUNCTION(odbc_exec);
+PHP_FUNCTION(odbc_data_source);
 PHP_FUNCTION(odbc_do);
+PHP_FUNCTION(odbc_exec);
 PHP_FUNCTION(odbc_execute);
 #ifdef HAVE_DBMAKER
 PHP_FUNCTION(odbc_fetch_array);
