@@ -162,34 +162,29 @@ ZEND_API void convert_to_long_base(zval *op, int base)
 		case IS_BOOL:
 		case IS_RESOURCE:
 		case IS_LONG:
-			return;
+			break;
 		case IS_DOUBLE:
 			op->value.lval = (long) op->value.dval;
-			op->type = IS_LONG;
 			break;
 		case IS_STRING:
 			strval = op->value.str.val;
 			op->value.lval = strtol(strval, NULL, base);
-			op->type = IS_LONG;
 			STR_FREE(strval);
 			break;
 		case IS_ARRAY:
 			tmp = (zend_hash_num_elements(op->value.ht)?1:0);
 			zval_dtor(op);
 			op->value.lval = tmp;
-			op->type = IS_LONG;
 			break;
 		case IS_OBJECT:
 			tmp = (zend_hash_num_elements(op->value.obj.properties)?1:0);
 			zval_dtor(op);
 			op->value.lval = tmp;
-			op->type = IS_LONG;
 			break;
 		default:
 			zend_error(E_WARNING, "Cannot convert to ordinal value");
 			zval_dtor(op);
 			op->value.lval = 0;
-			op->type = IS_LONG;
 			break;
 	}
 

@@ -241,8 +241,23 @@ extern zend_utility_values zend_uv;
 	(z)->EA.is_ref = 0;		\
 	(z)->EA.locks = 0;
 
-#define MAKE_STD_ZVAL(zv) \
+#define MAKE_STD_ZVAL(zv)				 \
 	zv = (zval *) emalloc(sizeof(zval)); \
 	INIT_PZVAL(zv);
+
+#define SEPARATE_ZVAL(ppzv)									\
+	{														\
+		zval *orig_ptr = *(ppzv);							\
+															\
+		if (orig_ptr->refcount>1) {							\
+			orig_ptr->refcount--;							\
+			*(ppzv) = (zval *) emalloc(sizeof(zval));		\
+			**(ppzv) = *orig_ptr;							\
+			zval_copy_ctor(*(ppzv));						\
+			(*(ppzv))->refcount=1;							\
+			(*(ppzv))->EA.is_ref = 0;						\
+			(*(ppzv))->EA.locks = 0;						\
+		}													\
+	}
 
 #endif /* _ZEND_H */
