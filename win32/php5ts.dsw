@@ -87,7 +87,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "php4apache2"="..\SAPI\APACHE2FILTER\php4apache2.dsp" - Package Owner=<4>
+Project: "php4apache2"="..\SAPI\APACHE2HANDLER\php4apache2.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
