@@ -1,7 +1,11 @@
 --TEST--
 PEAR constructor/destructor test
 --SKIPIF--
-skip
+<?php
+if (!getenv('PHP_PEAR_RUNTESTS')) {
+    echo 'skip';
+}
+?>
 --FILE--
 <?php
 

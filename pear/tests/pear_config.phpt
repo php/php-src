@@ -1,13 +1,17 @@
 --TEST--
 PEAR_Config
 --SKIPIF--
-skip
+<?php
+if (!getenv('PHP_PEAR_RUNTESTS')) {
+    echo 'skip';
+}
+?>
 --FILE--
 <?php
 
 error_reporting(E_ALL);
 chdir(dirname(__FILE__));
-include "../PEAR/Config.php";
+include "PEAR/Config.php";
 copy("system.input", "system.conf");
 copy("user.input", "user.conf");
 copy("user2.input", "user2.conf");
@@ -222,7 +226,7 @@ string(9) "directory"
 master_server: name of the main PEAR server
 
 #9 testing: getKeys
-bin_dir cache_dir cache_ttl data_dir doc_dir ext_dir http_proxy master_server password php_dir preferred_state sig_bin sig_keydir sig_type test_dir umask username verbose
+bin_dir cache_dir cache_ttl data_dir doc_dir ext_dir http_proxy master_server password php_bin php_dir preferred_state sig_bin sig_keydir sig_keyid sig_type test_dir umask username verbose
 
 #10 testing: definedBy
 string(7) "default"
@@ -247,10 +251,12 @@ ext_dir: File Locations
 http_proxy: Internet Access
 master_server: Internet Access
 password: Maintainers
+php_bin: File Locations (Advanced)
 php_dir: File Locations
 preferred_state: Advanced
 sig_bin: Maintainers
 sig_keydir: Maintainers
+sig_keyid: Maintainers
 sig_type: Maintainers
 test_dir: File Locations (Advanced)
 umask: Advanced
@@ -263,9 +269,9 @@ Advanced, File Locations, File Locations (Advanced), Internet Access, Maintainer
 #14 testing: getGroupKeys
 Advanced: cache_ttl, preferred_state, umask, verbose
 File Locations: bin_dir, doc_dir, ext_dir, php_dir
-File Locations (Advanced): cache_dir, data_dir, test_dir
+File Locations (Advanced): cache_dir, data_dir, php_bin, test_dir
 Internet Access: http_proxy, master_server
-Maintainers: password, sig_bin, sig_keydir, sig_type, username
+Maintainers: password, sig_bin, sig_keydir, sig_keyid, sig_type, username
 
 #15 testing: getPrompt
 bin_dir: PEAR executables directory
@@ -277,10 +283,12 @@ ext_dir: PHP extension directory
 http_proxy: HTTP Proxy Server Address
 master_server: PEAR server
 password: PEAR password (for maintainers)
+php_bin: PHP CLI/CGI binary
 php_dir: PEAR directory
 preferred_state: Preferred Package State
 sig_bin: Signature Handling Program
 sig_keydir: Signature Key Directory
+sig_keyid: Signature Key Id
 sig_type: Package Signature Type
 test_dir: PEAR test directory
 umask: Unix file mask

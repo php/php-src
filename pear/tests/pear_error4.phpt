@@ -1,7 +1,11 @@
 --TEST--
 PEAR_Error: expected errors
 --SKIPIF--
-skip
+<?php
+if (!getenv('PHP_PEAR_RUNTESTS')) {
+    echo 'skip';
+}
+?>
 --FILE--
 <?php // -*- PHP -*-
 

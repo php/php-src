@@ -1,14 +1,21 @@
 --TEST--
 System commands tests
 --SKIPIF--
-skip
+<?php
+if (!getenv('PHP_PEAR_RUNTESTS')) {
+    echo 'skip';
+}
+?>
 --FILE--
 <?php
 error_reporting(E_ALL);
 require_once 'System.php';
 
 $sep = DIRECTORY_SEPARATOR;
-
+$ereg_sep = $sep;
+if (OS_WINDOWS) {
+    $ereg_sep .= $sep;
+}
 /*******************
         mkDir
 ********************/
@@ -17,6 +24,7 @@ System::mkDir('singledir');
 if( !is_dir('singledir') ){
     print "System::mkDir('singledir'); failed\n";
 }
+System::rm('singledir');
 
 // Multiple directory creation
 System::mkDir('dir1 dir2 dir3');
@@ -51,14 +59,15 @@ if (!@is_dir("dir2{$sep}dir21") || !@is_dir("dir6{$sep}dir61{$sep}dir611")) {
 
 // Create a temporal file with "tst" as filename prefix
 $tmpfile = System::mkTemp('tst');
-$tmpenv = System::tmpDir();
-if (!@is_file($tmpfile) || !ereg("^$tmpenv{$sep}tst", $tmpfile)) {
+$tmpenv = str_replace($sep, $ereg_sep, System::tmpDir());
+if (!@is_file($tmpfile) || !ereg("^$tmpenv{$ereg_sep}tst", $tmpfile)) {
     print "System::mkTemp('tst') failed\n";
+    var_dump(is_file($tmpfile), $tmpfile, "^$tmpenv{$ereg_sep}tst", !ereg("^$tmpenv{$ereg_sep}tst", $tmpfile));
 }
 
 // Create a temporal dir in "dir1" with default prefix "tmp"
 $tmpdir  = System::mkTemp('-d -t dir1');
-if (!@is_dir($tmpdir) || !ereg("^dir1{$sep}tmp", $tmpdir)) {
+if (!@is_dir($tmpdir) || !ereg("^dir1{$ereg_sep}tmp", $tmpdir)) {
     print "System::mkTemp('-d -t dir1') failed\n";
 }
 

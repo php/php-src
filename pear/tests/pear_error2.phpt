@@ -1,7 +1,11 @@
 --TEST--
 PEAR_Error: die mode
 --SKIPIF--
-skip
+<?php
+if (!getenv('PHP_PEAR_RUNTESTS')) {
+    echo 'skip';
+}
+?>
 --FILE--
 <?php // -*- C++ -*-
 
