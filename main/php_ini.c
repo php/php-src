@@ -30,11 +30,10 @@
 #include "zend_highlight.h"
 #include "SAPI.h"
 #include "php_main.h"
+#include "php_scandir.h"
 
-#if !HAVE_SCANDIR || !HAVE_ALPHASORT
- #include "php_scandir.h"
-#else
- #include <dirent.h>
+#if HAVE_SCANDIR && HAVE_ALPHASORT && HAVE_DIRENT_H
+#include <dirent.h>
 #endif
 
 #ifndef S_ISREG
@@ -432,7 +431,7 @@ int php_init_config()
 		struct dirent **namelist;
 		int ndir, i;
 
-		if ((ndir = scandir(PHP_CONFIG_FILE_SCAN_DIR, &namelist, 0, alphasort)) > 0) {
+		if ((ndir = php_scandir(PHP_CONFIG_FILE_SCAN_DIR, &namelist, 0, php_alphasort)) > 0) {
 			for (i = 0; i < ndir; i++) {
 				/* check for a .ini extension */
 				if (!(p = strrchr(namelist[i]->d_name, '.')) || (p && strcmp(p, ".ini"))) {
