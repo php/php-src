@@ -24,22 +24,19 @@
 
 command structure:
 
-* remote queries:
-** list available packages
-** list not-installed packages
-** list upgrades
-
-** list packages (by author/category/state)
-
-* operations on package files:
+* list available packages
+* list not-installed packages
+* list upgrades
+* list packages (by author/category/state)
 
 * installation commands:
+** install latest stable
+** install specific release
 
 * package generation commands:
 
+*/
 
-
- */
 require_once 'PEAR.php';
 require_once 'PEAR/Common.php';
 require_once 'PEAR/Config.php';
@@ -53,7 +50,7 @@ PEAR::setErrorHandling(PEAR_ERROR_PRINT, "pear: %s\n");
 
 // {{{ config file and option parsing
 
-$options = Console_Getopt::getopt($argv, "c:C:d:D:h?sSqu:v");
+$options = Console_Getopt::getopt($argv, "c:C:d:D:h?qu:v");
 if (PEAR::isError($options)) {
     usage($options);
 }
@@ -80,8 +77,6 @@ foreach ($opts as $opt) {
 }
 
 $config = new PEAR_Config($pear_user_config, $pear_default_config);
-$store_user_config = false;
-$store_default_config = false;
 $verbose = 1;
 
 foreach ($opts as $opt) {
@@ -95,12 +90,6 @@ foreach ($opts as $opt) {
             list($key, $value) = explode('=', $param);
             $config->set($key, $value, true);
             break;
-        case 's':
-            $store_user_config = true;
-            break;
-        case 'S':
-            $store_default_config = true;
-            break;
         case 'u':
             $config->toDefault($param);
             break;
@@ -113,24 +102,11 @@ foreach ($opts as $opt) {
     }
 }
 
-if ($store_default_config) {
-    if (@is_writeable($pear_default_config)) {
-        $config->writeConfigFile($pear_default_config, 'default');
-    } else {
-        die("You don't have write access to $pear_default_config, exiting!\n");
-    }
-}
-
-if ($store_user_config) {
-    $config->writeConfigFile($pear_user_config, 'userdefined');
-}
-
 $fallback_config = array(
     'master_server' => 'pear.php.net',
     'php_dir'       => PEAR_INSTALL_DIR,
     'ext_dir'       => PEAR_EXTENSION_DIR,
-    'doc_dir'       => PHP_DATADIR . DIRECTORY_SEPARATOR . 'pear' .
-                       DIRECTORY_SEPARATOR . 'doc',
+    'doc_dir'       => '',
     'verbose'       => true,
 );
 $fallback_done = array();
@@ -151,7 +127,6 @@ $command = (isset($options[1][1])) ? $options[1][1] : null;
 $rest = array_slice($options[1], 2);
 
 $command_options = array(
-    "list-installed" => "v",
     "install"        => "fr",
     "uninstall"      => "fr",
     "upgrade"        => "fr",
@@ -173,7 +148,7 @@ if (isset($command_options[$command])) {
 
 switch ($command) {
 
-    // {{{ install
+    // {{{ install, upgrade
 
     case 'install': case 'upgrade': {
         include_once 'PEAR/Installer.php';
@@ -200,7 +175,7 @@ switch ($command) {
                     break;
             }
         }
-        if ($installer->install($pkgfile, $install_options)) {
+        if ($installer->install($pkgfile, $install_options, $config)) {
             print "install ok\n";
         } else {
             print "install failed\n";
@@ -236,61 +211,9 @@ switch ($command) {
         break;
     }
     // }}}
-    // {{{ package
+    // {{{ list
 
-    case 'package': {
-        include_once 'PEAR/Packager.php';
-        $pkginfofile = isset($cmdargs[0]) ? $cmdargs[0] : null;
-        $packager =& new PEAR_Packager($script_dir, $ext_dir, $doc_dir);
-        $packager->setErrorHandling(PEAR_ERROR_DIE, "pear page: %s\n");
-        $packager->debug = $verbose;
-        if (PEAR::isError($packager->Package($pkginfofile))) {
-            print "\npackage failed\n";
-        } else {
-            print "package ok\n";
-        }
-        break;
-    }
-
-    // }}}
-    // {{{ info
-
-    case 'info': {
-        $parser = new PEAR_Common;
-        $parser->setErrorHandling(PEAR_ERROR_DIE, "pear info: %s\n");
-        $info = $parser->infoFromTgzFile($cmdargs[0]);
-        unset($info['filelist']);
-        present_array($info);
-        break;
-    }
-
-    // }}}
-    // {{{ list-installed
-
-    case 'list-installed': {
-        $reg = new PEAR_Registry;
-        $installed = $reg->packageInfo();
-        $i = $j = 0;
-        heading("Installed packages:");
-        foreach ($installed as $package) {
-            if ($i++ % 20 == 0) {
-                if ($j++ > 0) {
-                    print "\n";
-                }
-                printf("%-20s %-10s %s\n",
-                       "Package", "Version", "State");
-                print str_repeat("-", 75)."\n";
-            }
-            printf("%-20s %-10s %s\n", $package['package'],
-                   $package['version'], $package['release_state']);
-        }
-        break;
-    }
-
-    // }}}
-    // {{{ remote-list
-
-    case 'remote-list': {
+    case 'list': {
         $remote = new PEAR_Remote($config);
         $result = $remote->call('package.listAll');
         $i = $j = 0;
@@ -315,36 +238,6 @@ switch ($command) {
     }
 
     // }}}
-    // {{{ show-config
-
-    case 'show-config': {
-        $keys = $config->getKeys();
-        foreach ($keys as $key) {
-            $value = $config->get($key);
-            $xi = "";
-            if ($config->isDefaulted($key)) {
-                $xi .= " (default)";
-            }
-            if (isset($fallback_done[$key])) {
-                $xi .= " (built-in)";
-            }
-            printf("%s = %s%s\n", $key, $value, $xi);
-        }
-        break;
-    }
-
-    // }}}
-    // {{{ upload-release
-
-    case 'upload-release': {
-        if (sizeof($cmdargs) < 1) {
-            
-        }
-        $tarball = $cmdargs[0];
-        
-    }
-
-    // }}}
     default: {
         if (!$store_default_config && !$store_user_config) {
             usage();
@@ -364,7 +257,7 @@ function usage($error = null)
         fputs($stderr, $error);
     }
     fputs($stderr,
-          "Usage: pear [options] command [command-options] <parameters>\n".
+          "Usage: pear-get [options] command [command-options] <parameters>\n".
           "Options:\n".
           "     -v         increase verbosity level (default 1)\n".
           "     -q         be quiet, decrease verbosity level\n".
@@ -372,20 +265,14 @@ function usage($error = null)
           "     -C file    find system configuration in `file'\n".
           "     -d foo=bar set user config variable `foo' to `bar'\n".
           "     -D foo=bar set system config variable `foo' to `bar'\n".
-          "     -s         store user configuration\n".
-          "     -S         store system configuration\n".
           "     -u foo     unset `foo' in the user configuration\n".
           "     -h, -?     display help/usage (this message)\n".
           "Commands:\n".
           "   help [command]\n".
           "   install [-r] <package file>\n".
           "   uninstall [-r] <package name>\n".
-          "   package [package info file]\n".
-          "   list-installed\n".
-          "   remote-list\n".
+          "   list\n".
           "   info\n".
-          "   show-config\n".
-          "   upload-release\n".
           "\n");
     fclose($stderr);
     exit;

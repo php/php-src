@@ -147,7 +147,7 @@ BUILD_FILES = \
 	dynlib.m4 \
 	acinclude.m4
 
-bin_SCRIPTS = phpize php-config pear pearize phptar
+bin_SCRIPTS = phpize php-config pear pear-get pearize phptar
 
 install-build:
 	@echo "Installing build environment"
@@ -192,6 +192,9 @@ Makefile: Makefile.in $(top_builddir)/config.status
 
 scripts/pear: scripts/pear.in $(top_builddir)/config.status
 	(cd ..;CONFIG_FILES=pear/scripts/pear CONFIG_HEADERS= $(top_builddir)/config.status)
+
+scripts/pear-get: scripts/pear-get.in $(top_builddir)/config.status
+	(cd ..;CONFIG_FILES=pear/scripts/pear-get CONFIG_HEADERS= $(top_builddir)/config.status)
 
 scripts/phpize: scripts/phpize.in $(top_builddir)/config.status
 	(cd ..;CONFIG_FILES=pear/scripts/phpize CONFIG_HEADERS= $(top_builddir)/config.status)
