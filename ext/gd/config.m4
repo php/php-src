@@ -7,7 +7,8 @@ dnl Configure options
 dnl 
 
 PHP_ARG_WITH(gd, for GD support,
-[  --with-gd[=DIR]         Include GD support (DIR is GD's install dir).])
+[  --with-gd[=DIR]         Include GD support where DIR is GD install prefix.
+                          If DIR is not set, the bundled GD library will be used.])
 
 if test -z "$PHP_JPEG_DIR"; then
   PHP_ARG_WITH(jpeg-dir, for the location of libjpeg,
@@ -246,7 +247,7 @@ dnl
 dnl Main GD configure
 dnl 
 
-if test "$PHP_GD" = "php"; then
+if test "$PHP_GD" = "yes"; then
   GD_MODULE_TYPE=builtin
   extra_sources="libgd/gd.c libgd/gd_gd.c libgd/gd_gd2.c libgd/gd_io.c libgd/gd_io_dp.c \
         libgd/gd_io_file.c libgd/gd_ss.c libgd/gd_io_ss.c libgd/gd_png.c libgd/gd_jpeg.c \
@@ -325,46 +326,33 @@ dnl Various checks for GD features
   PHP_GD_FREETYPE1
   PHP_GD_T1LIB
 
-  if test "$PHP_GD" = "yes"; then
-    GD_SEARCH_PATHS="/usr/local /usr"
-  else
-    GD_SEARCH_PATHS=$PHP_GD
-  fi
-
-  for j in $GD_SEARCH_PATHS; do
-    for i in include/gd1.3 include/gd include gd1.3 gd ""; do
-      test -f $j/$i/gd.h && GD_INCLUDE=$j/$i
-    done
-
-    for i in lib/gd1.3 lib/gd lib gd1.3 gd ""; do
-      test -f $j/$i/libgd.$SHLIB_SUFFIX_NAME -o -f $j/$i/libgd.a && GD_LIB=$j/$i
-    done
+dnl Header path
+  for i in include/gd1.3 include/gd include gd1.3 gd ""; do
+    test -f "$PHP_GD/$i/gd.h" && GD_INCLUDE="$PHP_GD/$i"
   done
 
-dnl NetBSD package structure
-  if test -f /usr/pkg/include/gd/gd.h -a -z "$GD_INCLUDE" ; then
-    GD_INCLUDE=/usr/pkg/include/gd
-  fi
+dnl Library path
+  for i in lib/gd1.3 lib/gd lib gd1.3 gd ""; do
+    test -f "$PHP_GD/$i/libgd.$SHLIB_SUFFIX_NAME" -o -f "$PHP_GD/$i/libgd.a" && GD_LIB="$PHP_GD/$i"
+  done
 
-dnl SuSE 6.x package structure
-  if test -f /usr/include/gd/gd.h -a -z "$GD_INCLUDE" ; then
-    GD_INCLUDE=/usr/include/gd
-  fi
-
-  if test -n "$GD_INCLUDE" -a -n "$GD_LIB" ; then
+  if test -n "$GD_INCLUDE" && test -n "$GD_LIB"; then
     PHP_ADD_LIBRARY_WITH_PATH(gd, $GD_LIB, GD_SHARED_LIBADD)
     AC_DEFINE(HAVE_LIBGD,1,[ ])
     PHP_GD_CHECK_VERSION
   elif test -z "$GD_INCLUDE"; then
-    AC_MSG_ERROR([Unable to find gd.h anywhere under $GD_SEARCH_PATHS])
+    AC_MSG_ERROR([Unable to find gd.h anywhere under $PHP_GD])
   else
-    AC_MSG_ERROR([Unable to find libgd.(a|so) anywhere under $GD_SEARCH_PATHS])
+    AC_MSG_ERROR([Unable to find libgd.(a|so) anywhere under $PHP_GD])
   fi 
 
   PHP_EXPAND_PATH($GD_INCLUDE, GD_INCLUDE)
  fi
 fi
 
+dnl
+dnl Common for both builtin and external GD
+dnl
 if test "$PHP_GD" != "no"; then
   PHP_NEW_EXTENSION(gd, gd.c gdttf.c $extra_sources, $ext_shared,, \\$(GDLIB_CFLAGS))
 
@@ -372,7 +360,7 @@ if test "$PHP_GD" != "no"; then
     GDLIB_CFLAGS="-I$ext_srcdir/libgd $GDLIB_CFLAGS"
     PHP_ADD_BUILD_DIR($ext_builddir/libgd)
   else
-    GDLIB_CFLAGS="-I$GD_INCLUDE $GDLIB_FCLAGS"
+    GDLIB_CFLAGS="-I$GD_INCLUDE $GDLIB_CFLAGS"
     PHP_ADD_INCLUDE($GD_INCLUDE)
   
     PHP_CHECK_LIBRARY(gd, gdImageCreate, [], [
