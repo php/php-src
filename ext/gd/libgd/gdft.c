@@ -19,24 +19,37 @@
 #endif
 
 #ifdef WIN32
-extern int access(const char *pathname, int mode);
+#define access _access
 #ifndef R_OK
 #define R_OK 2
 #endif
 #endif
 
 /* number of antialised colors for indexed bitmaps */
+/* overwrite Windows GDI define in case of windows build */
+#ifdef NUMCOLORS
+#undef NUMCOLORS
+#endif
 #define NUMCOLORS 8
 
 char *
 gdImageStringTTF (gdImage * im, int *brect, int fg, char *fontlist,
 		  double ptsize, double angle, int x, int y, char *string)
 {
+  /* 2.0.6: valid return */ 
   return gdImageStringFT (im, brect, fg, fontlist, ptsize,
 		   angle, x, y, string);
 }
 
 #ifndef HAVE_LIBFREETYPE
+char *
+gdImageStringFTEx (gdImage * im, int *brect, int fg, char *fontlist,
+		 double ptsize, double angle, int x, int y, char *string,
+		 gdFTStringExtraPtr strex)
+{
+  return "libgd was not built with FreeType font support\n";
+}
+
 char *
 gdImageStringFT (gdImage * im, int *brect, int fg, char *fontlist,
 		 double ptsize, double angle, int x, int y, char *string)
@@ -86,8 +99,13 @@ gdImageStringFT (gdImage * im, int *brect, int fg, char *fontlist,
 #define TRUE !FALSE
 #endif
 
+#ifndef MAX
 #define MAX(a,b) ((a)>(b)?(a):(b))
+#endif
+
+#ifndef MIN
 #define MIN(a,b) ((a)<(b)?(a):(b))
+#endif
 
 typedef struct
 {
@@ -330,159 +348,161 @@ fontTest (void *element, void *key)
   return (strcmp (a->fontlist, b->fontlist) == 0);
 }
 
-static void *
-fontFetch (char **error, void *key)
+static void *fontFetch (char **error, void *key)
 {
-  font_t *a;
-  fontkey_t *b = (fontkey_t *) key;
-  int n;
-  int font_found = 0;
-  unsigned short platform, encoding;
-  char *fontsearchpath, *fontlist;
-  char *fullname = NULL;
-  char *name, *path, *dir;
-  char *strtok_ptr;
-  FT_Error err;
-  FT_CharMap found = 0;
-  FT_CharMap charmap;
+	font_t *a;
+	fontkey_t *b = (fontkey_t *) key;
+	int n;
+	int font_found = 0;
+	unsigned short platform, encoding;
+	char *fontsearchpath, *fontlist;
+	char *fullname = NULL;
+	char *name, *path=NULL, *dir;
+	char *strtok_ptr;
+	FT_Error err;
+	FT_CharMap found = 0;
+	FT_CharMap charmap;
 
-  a = (font_t *) gdMalloc (sizeof (font_t));
-  a->fontlist = strdup (b->fontlist);
-  a->library = b->library;
+	a = (font_t *) gdPMalloc(sizeof(font_t));
+	a->fontlist = gdPEstrdup(b->fontlist);
+	a->library = b->library;
 
-  /*
-   * Search the pathlist for any of a list of font names.
-   */
-  fontsearchpath = getenv ("GDFONTPATH");
-  if (!fontsearchpath)
-    fontsearchpath = DEFAULT_FONTPATH;
-  fontlist = strdup (a->fontlist);
+	/*
+	 * Search the pathlist for any of a list of font names.
+	 */
+	fontsearchpath = getenv ("GDFONTPATH");
+	if (!fontsearchpath) {
+		fontsearchpath = DEFAULT_FONTPATH;
+	}	
+	fontlist = gdEstrdup(a->fontlist);
 
-  /*
-   * Must use gd_strtok_r else pointer corrupted by strtok in nested loop.
-   */
-  for (name = gd_strtok_r (fontlist, LISTSEPARATOR, &strtok_ptr); name;
-       name = gd_strtok_r (0, LISTSEPARATOR, &strtok_ptr))
-    {
-
-      /* make a fresh copy each time - strtok corrupts it. */
-      path = strdup (fontsearchpath);
-      /*
-       * Allocate an oversized buffer that is guaranteed to be
-       * big enough for all paths to be tested.
-       */
-      fullname = gdRealloc (fullname,
-			    strlen (fontsearchpath) + strlen (name) + 6);
-      /* if name is an absolute filename then test directly */
-      if (*name == '/' || (name[0] != 0 && name[1] == ':' && (name[2] == '/' || name[2] == '\\')))
-	{
-	  sprintf (fullname, "%s", name);
-	  if (access (fullname, R_OK) == 0)
-	    {
-	      font_found++;
-	      break;
-	    }
+	/*
+	 * Must use gd_strtok_r else pointer corrupted by strtok in nested loop.
+	 */
+	for (name = gd_strtok_r (fontlist, LISTSEPARATOR, &strtok_ptr); name; name = gd_strtok_r (0, LISTSEPARATOR, &strtok_ptr)) {
+		/* make a fresh copy each time - strtok corrupts it. */
+		path = gdEstrdup (fontsearchpath);
+	
+		/*
+		* Allocate an oversized buffer that is guaranteed to be
+		* big enough for all paths to be tested.
+		*/
+		fullname = gdRealloc (fullname, strlen (fontsearchpath) + strlen (name) + 6);
+	
+		/* if name is an absolute filename then test directly */ 
+		if (*name == '/' || (name[0] != 0 && name[1] == ':' && (name[2] == '/' || name[2] == '\\'))) {
+			sprintf(fullname, "%s", name);
+			if (access(fullname, R_OK) == 0) {
+				font_found++;
+				break;
+			}
+		}
+		for (dir = strtok (path, PATHSEPARATOR); dir; dir = strtok (0, PATHSEPARATOR)) {
+			sprintf(fullname, "%s/%s", dir, name);
+			if (access (fullname, R_OK) == 0) {
+				font_found++;
+				break;
+			}
+			sprintf(fullname, "%s/%s.ttf", dir, name);
+			if (access (fullname, R_OK) == 0) {
+				font_found++;
+				break;
+			}
+			sprintf(fullname, "%s/%s.pfa", dir, name);
+			if (access(fullname, R_OK) == 0) {
+				font_found++;
+				break;
+			}
+			sprintf (fullname, "%s/%s.pfb", dir, name);
+			if (access(fullname, R_OK) == 0) {
+				font_found++;
+				break;
+			}
+		}
+		gdFree(path);
+		path = NULL;
+		if (font_found) {
+			break;
+		}	
 	}
-      for (dir = strtok (path, PATHSEPARATOR); dir;
-	   dir = strtok (0, PATHSEPARATOR))
-	{
-	  sprintf (fullname, "%s/%s", dir, name);
-	  if (access (fullname, R_OK) == 0)
-	    {
-	      font_found++;
-	      break;
-	    }
-	  sprintf (fullname, "%s/%s.ttf", dir, name);
-	  if (access (fullname, R_OK) == 0)
-	    {
-	      font_found++;
-	      break;
-	    }
-          sprintf (fullname, "%s/%s.pfa", dir, name);
-          if (access (fullname, R_OK) == 0)
-            {
-	      font_found++;
-	      break;
+  
+	if (path) {
+		gdFree(path);
 	}
-	  sprintf (fullname, "%s/%s.pfb", dir, name);
-	  if (access (fullname, R_OK) == 0)
-	    {
-	      font_found++;
-	break;
-    }
+  
+	gdFree(fontlist);
+  
+	if (!font_found) {
+		gdPFree(a->fontlist);
+		gdPFree(a);
+		if (fullname) {
+			gdFree(fullname);
+		}
+		*error = "Could not find/open font";
+		return NULL;
 	}
-  gdFree (path);
-      if (font_found)
-	break;
-  }
-  gdFree (fontlist);
-  if (!font_found)
-    {
-      *error = "Could not find/open font";
-      return NULL;
-    }
 
-  err = FT_New_Face (*b->library, fullname, 0, &a->face);
-  if (err)
-    {
-      *error = "Could not read font";
-      return NULL;
-    }
-  gdFree (fullname);
+	err = FT_New_Face (*b->library, fullname, 0, &a->face);
+	if (err) {
+		gdPFree(a->fontlist);
+		gdPFree(a);
+		if (fullname) {
+			gdFree(fullname);
+		}
+		*error = "Could not read font";
+		return NULL;
+	}
+	gdFree(fullname);
 
-/* FIXME - This mapping stuff is imcomplete - where is the spec? */
+	/* FIXME - This mapping stuff is imcomplete - where is the spec? */
 
-  a->have_char_map_unicode = 0;
-  a->have_char_map_big5 = 0;
-  a->have_char_map_sjis = 0;
-  a->have_char_map_apple_roman = 0;
-  for (n = 0; n < a->face->num_charmaps; n++)
-    {
-      charmap = a->face->charmaps[n];
-      platform = charmap->platform_id;
-      encoding = charmap->encoding_id;
-      if ((platform == 3 && encoding == 1)	/* Windows Unicode */
-	  || (platform == 3 && encoding == 0)	/* Windows Symbol */
-	  || (platform == 2 && encoding == 1)	/* ISO Unicode */
-	  || (platform == 0))
-	{			/* Apple Unicode */
-	  a->have_char_map_unicode = 1;
-	  found = charmap;
+	a->have_char_map_unicode = 0;
+	a->have_char_map_big5 = 0;
+	a->have_char_map_sjis = 0;
+	a->have_char_map_apple_roman = 0;
+	for (n = 0; n < a->face->num_charmaps; n++) {
+		charmap = a->face->charmaps[n];
+		platform = charmap->platform_id;
+		encoding = charmap->encoding_id;
+		if ((platform == 3 && encoding == 1)		/* Windows Unicode */
+			|| (platform == 3 && encoding == 0)	/* Windows Symbol */
+			|| (platform == 2 && encoding == 1)	/* ISO Unicode */
+			|| (platform == 0))
+		{						/* Apple Unicode */
+			a->have_char_map_unicode = 1;
+			found = charmap;
+		} else if (platform == 3 && encoding == 4) {	/* Windows Big5 */
+			a->have_char_map_big5 = 1;
+			found = charmap;
+		} else if (platform == 3 && encoding == 2) {	/* Windows Sjis */
+			a->have_char_map_sjis = 1;
+			found = charmap;
+		} else if ((platform == 1 && encoding == 0)	/* Apple Roman */
+			|| (platform == 2 && encoding == 0))
+		{						/* ISO ASCII */
+			a->have_char_map_apple_roman = 1;
+			found = charmap;
+		}
 	}
-      else if (platform == 3 && encoding == 4)
-	{			/* Windows Big5 */
-	  a->have_char_map_big5 = 1;
-	  found = charmap;
+	if (!found) {
+		gdPFree(a->fontlist);
+		gdPFree(a);
+		*error = "Unable to find a CharMap that I can handle";
+		return NULL;
 	}
-      else if (platform == 3 && encoding == 2)
-	{			/* Windows Sjis */
-	  a->have_char_map_sjis = 1;
-	  found = charmap;
-	}
-      else if ((platform == 1 && encoding == 0)		/* Apple Roman */
-	       || (platform == 2 && encoding == 0))
-	{			/* ISO ASCII */
-	  a->have_char_map_apple_roman = 1;
-	  found = charmap;
-	}
-    }
-  if (!found)
-    {
-      *error = "Unable to find a CharMap that I can handle";
-      return NULL;
-    }
 
-  return (void *) a;
+	/* 2.0.5: we should actually return this */
+	a->face->charmap = found;
+	return (void *) a;
 }
 
-static void
-fontRelease (void *element)
+static void fontRelease (void *element)
 {
-  font_t *a = (font_t *) element;
+	font_t *a = (font_t *) element;
 
-  FT_Done_Face (a->face);
-  gdFree (a->fontlist);
-  gdFree ((char *) element);
+	FT_Done_Face (a->face);
+	gdPFree(a->fontlist);
+	gdPFree((char *) element);
 }
 
 /********************************************************************/
@@ -570,7 +590,7 @@ gdft_draw_bitmap (gdCache_head_t *tc_cache, gdImage * im, int fg, FT_Bitmap bitm
 {
   unsigned char *pixel = NULL;
   int *tpixel = NULL;
-  int x, y, row, col, pc;
+  int x, y, row, col, pc, pcr;
 
   tweencolor_t *tc_elem;
   tweencolorkey_t tc_key;
@@ -584,6 +604,7 @@ gdft_draw_bitmap (gdCache_head_t *tc_cache, gdImage * im, int fg, FT_Bitmap bitm
     for (row = 0; row < bitmap.rows; row++)
       {
         pc = row * bitmap.pitch;
+        pcr = pc;
         y = pen_y + row;
         /* clip if out of bounds */
         if (y >= im->sy || y < 0)
@@ -602,17 +623,20 @@ gdft_draw_bitmap (gdCache_head_t *tc_cache, gdImage * im, int fg, FT_Bitmap bitm
             }
           else if (bitmap.pixel_mode == ft_pixel_mode_mono)
             {
-              level = ((bitmap.buffer[pc / 8]
-			       << (pc % 8)) & 128) ? gdAlphaOpaque :
-                gdAlphaTransparent;
+              /* 2.0.5: mode_mono fix from Giuliano Pochini */
+              level = ((bitmap.buffer[(col>>3)+pcr]) & (1<<(~col&0x07)))
+		? gdAlphaTransparent :
+                gdAlphaOpaque;
             }  
           else 
 	    {
 	      return "Unsupported ft_pixel_mode";
 	    }
-          if (fg >= 0) {
+          if ((fg >= 0) && (im->trueColor)) {
             /* Consider alpha in the foreground color itself to be an
-              upper bound on how opaque things get */
+              upper bound on how opaque things get, when truecolor is
+              available. Without truecolor this results in far too many
+              color indexes. */ 
             level = level * (gdAlphaMax - gdTrueColorGetAlpha(fg)) / gdAlphaMax;
           }
           level = gdAlphaMax - level;  
@@ -640,7 +664,9 @@ gdft_draw_bitmap (gdCache_head_t *tc_cache, gdImage * im, int fg, FT_Bitmap bitm
     /* Non-truecolor case, restored to its more or less original form */ 
   for (row = 0; row < bitmap.rows; row++)
     {
+      int pcr;
       pc = row * bitmap.pitch;
+      pcr = pc;
       if(bitmap.pixel_mode==ft_pixel_mode_mono)
              pc *= 8;    /* pc is measured in bits for monochrome images */
 
@@ -667,6 +693,9 @@ gdft_draw_bitmap (gdCache_head_t *tc_cache, gdImage * im, int fg, FT_Bitmap bitm
 	    {
 	      tc_key.pixel = ((bitmap.buffer[pc / 8]
 			       << (pc % 8)) & 128) ? NUMCOLORS : 0;
+              /* 2.0.5: mode_mono fix from Giuliano Pochini */
+              tc_key.pixel = ((bitmap.buffer[(col>>3)+pcr]) & (1<<(~col&0x07)))
+		? NUMCOLORS : 0;
 	    }
 	  else
 	    {
@@ -729,17 +758,19 @@ gdFreeFontCache()
 
 /********************************************************************/
 /* gdImageStringFT -  render a utf8 string onto a gd image          */
+
 char *
 gdImageStringFT (gdImage * im, int *brect, int fg, char *fontlist,
-                 double ptsize, double angle, int x, int y, char *string)
+		 double ptsize, double angle, int x, int y, char *string)
 {
-    return gdImageStringFTEx(im, brect, fg, fontlist, ptsize, angle, x, y, string, NULL);
+	return gdImageStringFTEx(im, brect, fg, fontlist,
+		ptsize, angle, x, y, string, 0);
 }
 
 char *
 gdImageStringFTEx (gdImage * im, int *brect, int fg, char *fontlist,
 		 double ptsize, double angle, int x, int y, char *string,
-		 gdFTStringExtra * strex)
+		gdFTStringExtraPtr strex)
 {
   FT_BBox bbox, glyph_bbox;
   FT_Matrix matrix;
@@ -761,10 +792,9 @@ gdImageStringFTEx (gdImage * im, int *brect, int fg, char *fontlist,
   int render = (im && (im->trueColor || (fg <= 255 && fg >= -255)));
   FT_BitmapGlyph bm;
   int render_mode = FT_LOAD_RENDER | FT_LOAD_FORCE_AUTOHINT;
-
-  /* fine tuning */
+  /* Now tuneable thanks to Wez Furlong */
   double linespace = LINESPACE;
-
+  /* 2.0.6: put this declaration with the other declarations! */
   /*
    *   make a new tweenColorCache on every call
    *   because caching colormappings between calls
@@ -774,6 +804,11 @@ gdImageStringFTEx (gdImage * im, int *brect, int fg, char *fontlist,
    */
   gdCache_head_t  *tc_cache;
 
+  if (strex) {
+    if ((strex->flags & gdFTEX_LINESPACE) == gdFTEX_LINESPACE) {
+      linespace = strex->linespacing;
+    }
+  }
   tc_cache = gdCacheCreate( TWEENCOLORCACHESIZE,
                tweenColorTest, tweenColorFetch, tweenColorRelease );
 
@@ -808,12 +843,6 @@ gdImageStringFTEx (gdImage * im, int *brect, int fg, char *fontlist,
     {
       gdCacheDelete( tc_cache );
       return "Could not set character size";
-    }
-
-    /* pull in supplied extended settings */
-    if (strex)      {
-        if ((strex->flags & gdFTEX_LINESPACE) == gdFTEX_LINESPACE)
-        linespace = strex->linespacing;
     }
 
   matrix.xx = (FT_Fixed) (cos_a * (1 << 16));
@@ -860,8 +889,8 @@ gdImageStringFTEx (gdImage * im, int *brect, int fg, char *fontlist,
       if (ch == '\r')
 	{
 	  penf.x = 0;
-	  x1 = (int)((penf.x * cos_a - penf.y * sin_a + 32.0) / 64.0);
-	  y1 = (int)((penf.x * sin_a + penf.y * cos_a + 32.0) / 64.0);
+	  x1 = (int)(penf.x * cos_a - penf.y * sin_a + 32) / 64;
+	  y1 = (int)(penf.x * sin_a + penf.y * cos_a + 32) / 64;
 	  pen.x = pen.y = 0;
 	  previous = 0;		/* clear kerning flag */
 	  next++;
@@ -870,10 +899,10 @@ gdImageStringFTEx (gdImage * im, int *brect, int fg, char *fontlist,
       /* newlines */
       if (ch == '\n')
 	{
-	  penf.y = penf.y - (int)(face->size->metrics.height * LINESPACE);
+	  penf.y -= (long)(face->size->metrics.height * linespace);
 	  penf.y = (penf.y - 32) & -64;		/* round to next pixel row */
-	  x1 = (int)((penf.x * cos_a - penf.y * sin_a + 32.0) / 64.0);
-	  y1 = (int)((penf.x * sin_a + penf.y * cos_a + 32.0) / 64.0);
+	  x1 = (int)(penf.x * cos_a - penf.y * sin_a + 32) / 64;
+	  y1 = (int)(penf.x * sin_a + penf.y * cos_a + 32) / 64;
 	  pen.x = pen.y = 0;
 	  previous = 0;		/* clear kerning flag */
 	  next++;
@@ -936,10 +965,8 @@ gdImageStringFTEx (gdImage * im, int *brect, int fg, char *fontlist,
 	      next++;
 	    }
 	}
-
       /* set rotation transform */
       FT_Set_Transform(face, &matrix, NULL);
-
       /* Convert character code to glyph index */
       glyph_index = FT_Get_Char_Index (face, ch);
 

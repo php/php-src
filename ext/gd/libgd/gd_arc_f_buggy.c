@@ -726,12 +726,12 @@ main (int argc, char *argv[])
   out = fopen ("test/arctest.png", "wb");
   if (!out)
     {
-      fprintf (stderr, "Can't create test/arctest.png\n");
+      php_gd_error("Can't create test/arctest.png\n");
       exit (1);
     }
   gdImagePng (im, out);
   fclose (out);
-  fprintf (stderr, "Test image written to test/arctest.png\n");
+  php_gd_error("Test image written to test/arctest.png\n");
   /* Destroy it */
   gdImageDestroy (im);
 

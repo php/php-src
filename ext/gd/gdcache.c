@@ -36,6 +36,8 @@
  * sizes of a few tens of elements.
  */
 
+#include "php.h"
+
 /* This just seems unessacary */
 #if PHP_WIN32
 #define ENABLE_GD_TTF
@@ -61,7 +63,7 @@ gdCacheCreate(
 {
 	gdCache_head_t *head; 
 
-	head = (gdCache_head_t *)malloc(sizeof(gdCache_head_t));
+	head = (gdCache_head_t *)pemalloc(sizeof(gdCache_head_t), 1);
 	head->mru = NULL;
 	head->size = size;
 	head->gdCacheTest = gdCacheTest;
@@ -80,9 +82,9 @@ gdCacheDelete( gdCache_head_t *head )
 		(*(head->gdCacheRelease))(elem->userdata);
 		prev = elem;
 		elem = elem->next;
-		free((char *)prev);
+		pefree((char *)prev, 1);
 	}
-	free((char *)head);
+	pefree((char *)head, 1);
 }
 
 void *
@@ -114,7 +116,7 @@ gdCacheGet( gdCache_head_t *head, void *keydata )
 		return NULL;
 	}
 	if (i < head->size) {  /* cache still growing - add new elem */
-		elem = (gdCache_element_t *)malloc(sizeof(gdCache_element_t));
+		elem = (gdCache_element_t *)pemalloc(sizeof(gdCache_element_t), 1);
 	}
 	else { /* cache full - replace least-recently-used */
 		/* preveprev becomes new end of list */

@@ -7,21 +7,13 @@
  */
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "gd.h"
 #include "gdhelpers.h"
 
-#ifndef HAVE_XPM
-gdImagePtr
-gdImageCreateFromXpm (char *filename)
-{
-  fprintf (stderr, "libgd was not built with xpm support\n");
-  return (NULL);
-}
-
-#else
+#ifdef HAVE_XPM
 
 #include <X11/xpm.h>
-#include <string.h>
 
 gdImagePtr
 gdImageCreateFromXpm (char *filename)
@@ -46,8 +38,6 @@ gdImageCreateFromXpm (char *filename)
 
   number = image.ncolors;
   colors = (int *) gdMalloc (sizeof (int) * number);
-  if (colors == NULL)
-    return (0);
   for (i = 0; i < number; i++)
     {
       switch (strlen (image.colorTable[i].c_color))
@@ -125,15 +115,13 @@ gdImageCreateFromXpm (char *filename)
 
       colors[i] = gdImageColorResolve (im, red, green, blue);
       if (colors[i] == -1)
-	fprintf (stderr, "ARRRGH\n");
+	php_gd_error("ARRRGH\n");
     }
 
   apixel = (char *) gdMalloc (image.cpp + 1);
-  if (apixel == NULL)
-    return (0);
   apixel[image.cpp] = '\0';
 
-  pointer = image.data;
+  pointer = (int *) image.data;
   for (i = 0; i < image.height; i++)
     {
       for (j = 0; j < image.width; j++)

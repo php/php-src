@@ -30,6 +30,11 @@ extern "C" {
 #include <stdio.h>
 #include "gd_io.h"
 
+void php_gd_error_ex(int type, const char *format, ...);
+
+void php_gd_error(const char *format, ...);
+
+
 /* The maximum number of palette entries in palette-based images.
 	In the wonderful new world of gd 2.0, you can of course have
 	many more colors when using truecolor mode. */
@@ -136,6 +141,8 @@ typedef struct gdImageStruct {
 		To do that, build your image as a truecolor image,
 		then quantize down to 8 bits. */
 	int alphaBlendingFlag;
+	/* Should antialias functions be used */
+	int antialias;
 	/* Should the alpha channel of the image be saved? This affects
 		PNG at the moment; other future formats may also
 		have that capability. JPEG doesn't. */
@@ -239,6 +246,7 @@ void gdImageSetPixel(gdImagePtr im, int x, int y, int color);
 int gdImageGetPixel(gdImagePtr im, int x, int y);
 
 void gdImageLine(gdImagePtr im, int x1, int y1, int x2, int y2, int color);
+void gdImageAALine(gdImagePtr im, int x1, int y1, int x2, int y2, int color);
 
 /* For backwards compatibility only. Use gdImageSetStyle()
 	for much more flexible line drawing. */
@@ -248,7 +256,6 @@ void gdImageDashedLine(gdImagePtr im, int x1, int y1, int x2, int y2, int color)
 void gdImageRectangle(gdImagePtr im, int x1, int y1, int x2, int y2, int color);
 /* Solid bar. Upper left corner first, lower right corner second. */
 void gdImageFilledRectangle(gdImagePtr im, int x1, int y1, int x2, int y2, int color);
-int gdImageBoundsSafe(gdImagePtr im, int x, int y);
 void gdImageChar(gdImagePtr im, gdFontPtr f, int x, int y, int c, int color);
 void gdImageCharUp(gdImagePtr im, gdFontPtr f, int x, int y, int c, int color);
 void gdImageString(gdImagePtr im, gdFontPtr f, int x, int y, unsigned char *s, int color);
@@ -300,6 +307,8 @@ int gdImageColorClosest(gdImagePtr im, int r, int g, int b);
 	beats the exact same color with radically different
 	transparency */
 int gdImageColorClosestAlpha(gdImagePtr im, int r, int g, int b, int a);
+/* An alternate method */
+int gdImageColorClosestHWB(gdImagePtr im, int r, int g, int b);
 /* Returns exact, 100% opaque matches only */
 int gdImageColorExact(gdImagePtr im, int r, int g, int b);
 /* Returns an exact match only, including alpha */
@@ -472,6 +481,7 @@ void gdImageSetThickness(gdImagePtr im, int thickness);
 /* On or off (1 or 0) for all three of these. */
 void gdImageInterlace(gdImagePtr im, int interlaceArg);
 void gdImageAlphaBlending(gdImagePtr im, int alphaBlendingArg);
+void gdImageAntialias(gdImagePtr im, int antialias);
 void gdImageSaveAlpha(gdImagePtr im, int saveAlphaArg);
 
 /* Macros to access information about images. */
@@ -538,5 +548,7 @@ int gdImageCompare(gdImagePtr im1, gdImagePtr im2);
 #ifdef __cplusplus
 }
 #endif
+
+#define gdImageBoundsSafe(im, x, y) (!(y < 0 || y >= (im)->sy || x < 0 || x >= (im)->sx))
 
 #endif /* GD_H */

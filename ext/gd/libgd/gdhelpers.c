@@ -2,8 +2,6 @@
 #include "config.h"
 #endif
 
-#include "php.h"
-
 #include "gd.h"
 #include "gdhelpers.h"
 #include <stdlib.h>
@@ -75,28 +73,4 @@ gd_strtok_r (char *s, char *sep, char **state)
   /* 5. Return token */
   *state = s;
   return result;
-}
-
-void *
-gdCalloc (size_t nmemb, size_t size)
-{
-  return calloc (nmemb, size);
-}
-
-void *
-gdMalloc (size_t size)
-{
-  return malloc (size);
-}
-
-void *
-gdRealloc (void *ptr, size_t size)
-{
-  return realloc (ptr, size);
-}
-
-void
-gdFree (void *ptr)
-{
-  free (ptr);
 }

@@ -7,8 +7,8 @@
 /* JCE: Arrange HAVE_LIBPNG so that it can be set in gd.h */
 #ifdef HAVE_LIBPNG
 
-#include "gdhelpers.h"
 #include "png.h"		/* includes zlib.h and setjmp.h */
+#include "gdhelpers.h"
 
 #define TRUE 1
 #define FALSE 0
@@ -59,15 +59,12 @@ gdPngErrorHandler (png_structp png_ptr, png_const_charp msg)
    * regardless of whether _BSD_SOURCE or anything else has (or has not)
    * been defined. */
 
-  fprintf (stderr, "gd-png:  fatal libpng error: %s\n", msg);
-  fflush (stderr);
+  php_gd_error_ex(E_ERROR, "gd-png:  fatal libpng error: %s\n", msg);
 
   jmpbuf_ptr = png_get_error_ptr (png_ptr);
   if (jmpbuf_ptr == NULL)
     {				/* we are completely hosed now */
-      fprintf (stderr,
-	       "gd-png:  EXTREMELY fatal error: jmpbuf unrecoverable; terminating.\n");
-      fflush (stderr);
+      php_gd_error_ex(E_ERROR, "gd-png:  EXTREMELY fatal error: jmpbuf unrecoverable; terminating.\n");
       exit (99);
     }
 
@@ -116,7 +113,7 @@ gdImageCreateFromPngCtx (gdIOCtx * infile)
   png_byte sig[8];
   png_structp png_ptr;
   png_infop info_ptr;
-  png_uint_32 width, height, rowbytes;
+  png_uint_32 width, height, rowbytes, w, h;
   int bit_depth, color_type, interlace_type;
   int num_palette, num_trans;
   png_colorp palette;
@@ -127,7 +124,6 @@ gdImageCreateFromPngCtx (gdIOCtx * infile)
   png_bytepp row_pointers = NULL;
   gdImagePtr im = NULL;
   int i, j, *open = NULL;
-  png_uint_32 ui, uj;
   volatile int transparent = -1;
   volatile int palette_allocated = FALSE;
 
@@ -149,14 +145,14 @@ gdImageCreateFromPngCtx (gdIOCtx * infile)
 #endif
   if (png_ptr == NULL)
     {
-      fprintf (stderr, "gd-png error: cannot allocate libpng main struct\n");
+      php_gd_error("gd-png error: cannot allocate libpng main struct\n");
       return NULL;
     }
 
   info_ptr = png_create_info_struct (png_ptr);
   if (info_ptr == NULL)
     {
-      fprintf (stderr, "gd-png error: cannot allocate libpng info struct\n");
+      php_gd_error("gd-png error: cannot allocate libpng info struct\n");
       png_destroy_read_struct (&png_ptr, NULL, NULL);
       return NULL;
     }
@@ -170,7 +166,7 @@ gdImageCreateFromPngCtx (gdIOCtx * infile)
 #ifndef PNG_SETJMP_NOT_SUPPORTED
   if (setjmp (gdPngJmpbufStruct.jmpbuf))
     {
-      fprintf (stderr, "gd-png error: setjmp returns error condition\n");
+      php_gd_error("gd-png error: setjmp returns error condition\n");
       png_destroy_read_struct (&png_ptr, &info_ptr, NULL);
       return NULL;
     }
@@ -194,7 +190,7 @@ gdImageCreateFromPngCtx (gdIOCtx * infile)
     }
   if (im == NULL)
     {
-      fprintf (stderr, "gd-png error: cannot allocate gdImage struct\n");
+      php_gd_error("gd-png error: cannot allocate gdImage struct\n");
       png_destroy_read_struct (&png_ptr, &info_ptr, NULL);
       gdFree (image_data);
       gdFree (row_pointers);
@@ -210,7 +206,7 @@ gdImageCreateFromPngCtx (gdIOCtx * infile)
     case PNG_COLOR_TYPE_PALETTE:
       png_get_PLTE (png_ptr, info_ptr, &palette, &num_palette);
 #ifdef DEBUG
-      fprintf (stderr, "gd-png color_type is palette, colors: %d\n",
+      php_gd_error("gd-png color_type is palette, colors: %d\n",
 	       num_palette);
 #endif /* DEBUG */
       if (png_get_valid (png_ptr, info_ptr, PNG_INFO_tRNS))
@@ -227,7 +223,7 @@ gdImageCreateFromPngCtx (gdIOCtx * infile)
 	      im->alpha[i] = gdAlphaMax - (trans[i] >> 1);
 	      if ((trans[i] == 0) && (firstZero))
 		{
-					  transparent = i;
+		  transparent = i;
 		  firstZero = 0;
 		}
 	    }
@@ -239,7 +235,7 @@ gdImageCreateFromPngCtx (gdIOCtx * infile)
       /* create a fake palette and check for single-shade transparency */
       if ((palette = (png_colorp) gdMalloc (256 * sizeof (png_color))) == NULL)
 	{
-	  fprintf (stderr, "gd-png error: cannot allocate gray palette\n");
+	  php_gd_error("gd-png error: cannot allocate gray palette\n");
 	  png_destroy_read_struct (&png_ptr, &info_ptr, NULL);
 	  return NULL;
 	}
@@ -307,22 +303,22 @@ gdImageCreateFromPngCtx (gdIOCtx * infile)
   rowbytes = png_get_rowbytes (png_ptr, info_ptr);
   if ((image_data = (png_bytep) gdMalloc (rowbytes * height)) == NULL)
     {
-      fprintf (stderr, "gd-png error: cannot allocate image data\n");
+      php_gd_error("gd-png error: cannot allocate image data\n");
       png_destroy_read_struct (&png_ptr, &info_ptr, NULL);
       return NULL;
     }
   if ((row_pointers = (png_bytepp) gdMalloc (height * sizeof (png_bytep))) == NULL)
     {
-      fprintf (stderr, "gd-png error: cannot allocate row pointers\n");
+      php_gd_error("gd-png error: cannot allocate row pointers\n");
       png_destroy_read_struct (&png_ptr, &info_ptr, NULL);
       gdFree (image_data);
       return NULL;
     }
 
   /* set the individual row_pointers to point at the correct offsets */
-  for (uj = 0; uj < height; ++uj)
+  for (h = 0; h < height; ++h)
     {
-      row_pointers[uj] = image_data + uj * rowbytes;
+      row_pointers[h] = image_data + h * rowbytes;
     }
 
   png_read_image (png_ptr, row_pointers);	/* read whole image... */
@@ -353,44 +349,44 @@ gdImageCreateFromPngCtx (gdIOCtx * infile)
   switch (color_type)
     {
     case PNG_COLOR_TYPE_RGB:
-      for (uj = 0; uj < height; uj++)
+      for (h = 0; h < height; h++)
 	{
 	  int boffset = 0;
-	  for (ui = 0; ui < width; ui++)
+	  for (w = 0; w < width; w++)
 	    {
-	      register png_byte r = row_pointers[uj][boffset++];
-	      register png_byte g = row_pointers[uj][boffset++];
-	      register png_byte b = row_pointers[uj][boffset++];
-	      im->tpixels[uj][ui] = gdTrueColor (r, g, b);
+	      register png_byte r = row_pointers[h][boffset++];
+	      register png_byte g = row_pointers[h][boffset++];
+	      register png_byte b = row_pointers[h][boffset++];
+	      im->tpixels[h][w] = gdTrueColor (r, g, b);
 	    }
 	}
       break;
     case PNG_COLOR_TYPE_RGB_ALPHA:
-      for (uj = 0; uj < height; uj++)
+      for (h = 0; h < height; h++)
 	{
 	  int boffset = 0;
-	  for (ui = 0; ui < width; ui++)
+	  for (w = 0; w < width; w++)
 	    {
-	      register png_byte r = row_pointers[uj][boffset++];
-	      register png_byte g = row_pointers[uj][boffset++];
-	      register png_byte b = row_pointers[uj][boffset++];
+	      register png_byte r = row_pointers[h][boffset++];
+	      register png_byte g = row_pointers[h][boffset++];
+	      register png_byte b = row_pointers[h][boffset++];
 	      /* gd has only 7 bits of alpha channel resolution, and
 	         127 is transparent, 0 opaque. A moment of convenience, 
 	         a lifetime of compatibility. */
 	      register png_byte a = gdAlphaMax -
-	      (row_pointers[uj][boffset++] >> 1);
-	      im->tpixels[uj][ui] = gdTrueColorAlpha (r, g, b, a);
+	      (row_pointers[h][boffset++] >> 1);
+	      im->tpixels[h][w] = gdTrueColorAlpha (r, g, b, a);
 	    }
 	}
       break;
     default:
       /* Palette image, or something coerced to be one */
-      for (uj = 0; uj < height; ++uj)
+      for (h = 0; h < height; ++h)
 	{
-	  for (ui = 0; ui < width; ++ui)
+	  for (w = 0; w < width; ++w)
 	    {
-	      register png_byte idx = row_pointers[uj][ui];
-	      im->pixels[uj][ui] = idx;
+	      register png_byte idx = row_pointers[h][w];
+	      im->pixels[h][w] = idx;
 	      open[idx] = 0;
 	    }
 	}
@@ -402,7 +398,7 @@ gdImageCreateFromPngCtx (gdIOCtx * infile)
 	{
 	  if (!open[i])
 	    {
-	      fprintf (stderr, "gd-png warning: image data references out-of-range"
+	      php_gd_error("gd-png warning: image data references out-of-range"
 		       " color index (%d)\n", i);
 	    }
 	}
@@ -467,14 +463,14 @@ gdImagePngCtx (gdImagePtr im, gdIOCtx * outfile)
 #endif
   if (png_ptr == NULL)
     {
-      fprintf (stderr, "gd-png error: cannot allocate libpng main struct\n");
+      php_gd_error("gd-png error: cannot allocate libpng main struct\n");
       return;
     }
 
   info_ptr = png_create_info_struct (png_ptr);
   if (info_ptr == NULL)
     {
-      fprintf (stderr, "gd-png error: cannot allocate libpng info struct\n");
+      php_gd_error("gd-png error: cannot allocate libpng info struct\n");
       png_destroy_write_struct (&png_ptr, (png_infopp) NULL);
       return;
     }
@@ -482,7 +478,7 @@ gdImagePngCtx (gdImagePtr im, gdIOCtx * outfile)
 #ifndef PNG_SETJMP_NOT_SUPPORTED
   if (setjmp (gdPngJmpbufStruct.jmpbuf))
     {
-      fprintf (stderr, "gd-png error: setjmp returns error condition\n");
+      php_gd_error("gd-png error: setjmp returns error condition\n");
       png_destroy_write_struct (&png_ptr, &info_ptr);
       return;
     }
@@ -565,9 +561,10 @@ gdImagePngCtx (gdImagePtr im, gdIOCtx * outfile)
     }
   if (im->trueColor && (!im->saveAlphaFlag) && (transparent >= 0))
     {
-      trans_rgb_value.red = gdTrueColorGetRed (im->trueColor);
-      trans_rgb_value.green = gdTrueColorGetGreen (im->trueColor);
-      trans_rgb_value.blue = gdTrueColorGetBlue (im->trueColor);
+    	/* 2.0.9: fixed by Thomas Winzig */
+      trans_rgb_value.red = gdTrueColorGetRed (im->transparent);
+      trans_rgb_value.green = gdTrueColorGetGreen (im->transparent);
+      trans_rgb_value.blue = gdTrueColorGetBlue (im->transparent);
       png_set_tRNS (png_ptr, info_ptr, 0, 0, &trans_rgb_value);
     }
   if (!im->trueColor)
@@ -596,7 +593,7 @@ gdImagePngCtx (gdImagePtr im, gdIOCtx * outfile)
 	    {
 	      trans_values[i] = 255 -
 		((im->alpha[i] << 1) +
-		 (im->alpha[i] >> 7));
+		 (im->alpha[i] >> 6));
 	    }
 	  png_set_tRNS (png_ptr, info_ptr, trans_values, 256, NULL);
 #endif
@@ -615,9 +612,10 @@ gdImagePngCtx (gdImagePtr im, gdIOCtx * outfile)
 		{
 		  if (im->alpha[i] != gdAlphaOpaque)
 		    {
+		       /* Andrew Hull: >> 6, not >> 7! (gd 2.0.5) */ 
 		      trans_values[j] = 255 -
 			((im->alpha[i] << 1) +
-			 (im->alpha[i] >> 7));
+			 (im->alpha[i] >> 6));
 		      mapping[i] = j++;
 		    }
 		  else
@@ -670,20 +668,10 @@ gdImagePngCtx (gdImagePtr im, gdIOCtx * outfile)
       /* Our little 7-bit alpha channel trick costs us a bit here. */
       png_bytep *row_pointers;
       row_pointers = gdMalloc (sizeof (png_bytep) * height);
-      if (row_pointers == NULL)
-	{
-	  fprintf (stderr, "gd-png error: unable to allocate row_pointers\n");
-	}
       for (j = 0; j < height; ++j)
 	{
 	  int bo = 0;
-	  if ((row_pointers[j] = (png_bytep) gdMalloc (width * channels)) == NULL)
-	    {
-	      fprintf (stderr, "gd-png error: unable to allocate rows\n");
-	      for (i = 0; i < j; ++i)
-		gdFree (row_pointers[i]);
-	      return;
-	    }
+	  row_pointers[j] = (png_bytep) gdMalloc (width * channels);
 	  for (i = 0; i < width; ++i)
 	    {
 	      unsigned char a;
@@ -698,7 +686,8 @@ gdImagePngCtx (gdImagePtr im, gdIOCtx * outfile)
 		     127 maps to 255. We also have to invert to match
 		     PNG's convention in which 255 is opaque. */
 		  a = gdTrueColorGetAlpha (im->tpixels[j][i]);
-		  row_pointers[j][bo++] = 255 - ((a << 1) + (a >> 7));
+		   /* Andrew Hull: >> 6, not >> 7! (gd 2.0.5) */ 
+		  row_pointers[j][bo++] = 255 - ((a << 1) + (a >> 6));
 		}
 	    }
 	}
