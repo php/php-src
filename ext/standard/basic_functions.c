@@ -1044,7 +1044,7 @@ PHP_FUNCTION(register_shutdown_function)
 	}
 	shutdown_function_entry.arguments = (pval **) emalloc(sizeof(pval *)*shutdown_function_entry.arg_count);
 
-	if (getParametersArray(ht, shutdown_function_entry.arg_count, shutdown_function_entry.arguments)==FAILURE) {
+	if (zend_get_parameters_array(ht, shutdown_function_entry.arg_count, shutdown_function_entry.arguments)==FAILURE) {
 		RETURN_FALSE;
 	}	
 	convert_to_string(shutdown_function_entry.arguments[0]);

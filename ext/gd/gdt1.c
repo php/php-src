@@ -38,7 +38,7 @@ PHP_FUNCTION(imagepsloadfont)
 	int l_ind;
 	gd_ps_font *f_ind;
 
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &file) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters(ht, 1, &file) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -84,7 +84,7 @@ PHP_FUNCTION(imagepscopyfont)
 	int l_ind, type;
 	gd_ps_font *nf_ind, *of_ind;
 
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &fnt) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters(ht, 1, &fnt) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -137,7 +137,7 @@ PHP_FUNCTION(imagepsfreefont)
 	pval *fnt;
 	int type;
 
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &fnt) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters(ht, 1, &fnt) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -164,7 +164,7 @@ PHP_FUNCTION(imagepsencodefont)
 	int type;
 	gd_ps_font *f_ind;
 
-	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &fnt, &enc) == FAILURE) {
+	if (ARG_COUNT(ht) != 2 || zend_get_parameters(ht, 2, &fnt, &enc) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -202,7 +202,7 @@ PHP_FUNCTION(imagepsextendfont)
 	int type;
 	gd_ps_font *f_ind;
 
-	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &fnt, &ext) == FAILURE) {
+	if (ARG_COUNT(ht) != 2 || zend_get_parameters(ht, 2, &fnt, &ext) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -230,7 +230,7 @@ PHP_FUNCTION(imagepsslantfont)
 	int type;
 	gd_ps_font*f_ind;
 
-	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &fnt, &slt) == FAILURE) {
+	if (ARG_COUNT(ht) != 2 || zend_get_parameters(ht, 2, &fnt, &slt) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -272,7 +272,7 @@ PHP_FUNCTION(imagepstext)
 
 	switch(ARG_COUNT(ht)) {
 	case 8:
-		if (getParameters(ht, 8, &img, &str, &fnt, &sz, &fg, &bg, &px, &py) == FAILURE) {
+		if (zend_get_parameters(ht, 8, &img, &str, &fnt, &sz, &fg, &bg, &px, &py) == FAILURE) {
 			RETURN_FALSE;
 		}
 		convert_to_string(str);
@@ -290,7 +290,7 @@ PHP_FUNCTION(imagepstext)
 		angle = 0;
 		break;
 	case 12:
-		if (getParameters(ht, 12, &img, &str, &fnt, &sz, &fg, &bg, &px, &py, &sp, &wd, &ang, &aas) == FAILURE) {
+		if (zend_get_parameters(ht, 12, &img, &str, &fnt, &sz, &fg, &bg, &px, &py, &sp, &wd, &ang, &aas) == FAILURE) {
 			RETURN_FALSE;
 		}
 		convert_to_string(str);
@@ -433,7 +433,7 @@ PHP_FUNCTION(imagepsbbox)
 
 	switch(ARG_COUNT(ht)) {
 	case 3:
-		if (getParameters(ht, 3, &str, &fnt, &sz) == FAILURE) {
+		if (zend_get_parameters(ht, 3, &str, &fnt, &sz) == FAILURE) {
 			RETURN_FALSE;
 		}
 		convert_to_string(str);
@@ -442,7 +442,7 @@ PHP_FUNCTION(imagepsbbox)
 		space = 0;
 		break;
 	case 6:
-		if (getParameters(ht, 6, &str, &fnt, &sz, &sp, &wd, &ang) == FAILURE) {
+		if (zend_get_parameters(ht, 6, &str, &fnt, &sz, &sp, &wd, &ang) == FAILURE) {
 			RETURN_FALSE;
 		}
 		convert_to_string(str);

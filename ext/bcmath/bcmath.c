@@ -73,12 +73,12 @@ PHP_FUNCTION(bcadd)
 
 	switch (ARG_COUNT(ht)) {
 		case 2:
-				if (getParameters(ht, 2, &left, &right) == FAILURE) {
+				if (zend_get_parameters(ht, 2, &left, &right) == FAILURE) {
 		        	WRONG_PARAM_COUNT;
     			}
 				break;
 		case 3:
-				if (getParameters(ht, 3, &left, &right, &scale_param) == FAILURE) {
+				if (zend_get_parameters(ht, 3, &left, &right, &scale_param) == FAILURE) {
 		        	WRONG_PARAM_COUNT;
     			}
 				convert_to_long(scale_param);
@@ -116,12 +116,12 @@ PHP_FUNCTION(bcsub)
 
 	switch (ARG_COUNT(ht)) {
 		case 2:
-				if (getParameters(ht, 2, &left, &right) == FAILURE) {
+				if (zend_get_parameters(ht, 2, &left, &right) == FAILURE) {
 		        	WRONG_PARAM_COUNT;
     			}
 				break;
 		case 3:
-				if (getParameters(ht, 3, &left, &right, &scale_param) == FAILURE) {
+				if (zend_get_parameters(ht, 3, &left, &right, &scale_param) == FAILURE) {
 		        	WRONG_PARAM_COUNT;
     			}
 				convert_to_long(scale_param);
@@ -159,12 +159,12 @@ PHP_FUNCTION(bcmul)
 
 	switch (ARG_COUNT(ht)) {
 		case 2:
-				if (getParameters(ht, 2, &left, &right) == FAILURE) {
+				if (zend_get_parameters(ht, 2, &left, &right) == FAILURE) {
 		        	WRONG_PARAM_COUNT;
     			}
 				break;
 		case 3:
-				if (getParameters(ht, 3, &left, &right, &scale_param) == FAILURE) {
+				if (zend_get_parameters(ht, 3, &left, &right, &scale_param) == FAILURE) {
 		        	WRONG_PARAM_COUNT;
     			}
 				convert_to_long(scale_param);
@@ -202,12 +202,12 @@ PHP_FUNCTION(bcdiv)
 
 	switch (ARG_COUNT(ht)) {
 		case 2:
-				if (getParameters(ht, 2, &left, &right) == FAILURE) {
+				if (zend_get_parameters(ht, 2, &left, &right) == FAILURE) {
 		        	WRONG_PARAM_COUNT;
     			}
 				break;
 		case 3:
-				if (getParameters(ht, 3, &left, &right, &scale_param) == FAILURE) {
+				if (zend_get_parameters(ht, 3, &left, &right, &scale_param) == FAILURE) {
 		        	WRONG_PARAM_COUNT;
     			}
 				convert_to_long(scale_param);
@@ -250,7 +250,7 @@ PHP_FUNCTION(bcmod)
 
 	switch (ARG_COUNT(ht)) {
 		case 2:
-				if (getParameters(ht, 2, &left, &right) == FAILURE) {
+				if (zend_get_parameters(ht, 2, &left, &right) == FAILURE) {
 		        	WRONG_PARAM_COUNT;
     			}
 				break;
@@ -292,12 +292,12 @@ PHP_FUNCTION(bcpow)
 
 	switch (ARG_COUNT(ht)) {
 		case 2:
-				if (getParameters(ht, 2, &left, &right) == FAILURE) {
+				if (zend_get_parameters(ht, 2, &left, &right) == FAILURE) {
 		        	WRONG_PARAM_COUNT;
     			}
 				break;
 		case 3:
-				if (getParameters(ht, 3, &left, &right, &scale_param) == FAILURE) {
+				if (zend_get_parameters(ht, 3, &left, &right, &scale_param) == FAILURE) {
 		        	WRONG_PARAM_COUNT;
     			}
 				convert_to_long(scale_param);
@@ -335,12 +335,12 @@ PHP_FUNCTION(bcsqrt)
 
 	switch (ARG_COUNT(ht)) {
 		case 1:
-				if (getParameters(ht, 1, &left) == FAILURE) {
+				if (zend_get_parameters(ht, 1, &left) == FAILURE) {
 		        	WRONG_PARAM_COUNT;
     			}
 				break;
 		case 2:
-				if (getParameters(ht, 2, &left, &scale_param) == FAILURE) {
+				if (zend_get_parameters(ht, 2, &left, &scale_param) == FAILURE) {
 		        	WRONG_PARAM_COUNT;
     			}
 				convert_to_long(scale_param);
@@ -375,12 +375,12 @@ PHP_FUNCTION(bccomp)
 
 	switch (ARG_COUNT(ht)) {
 		case 2:
-				if (getParameters(ht, 2, &left, &right) == FAILURE) {
+				if (zend_get_parameters(ht, 2, &left, &right) == FAILURE) {
 		        	WRONG_PARAM_COUNT;
     			}
 				break;
 		case 3:
-				if (getParameters(ht, 3, &left, &right, &scale_param) == FAILURE) {
+				if (zend_get_parameters(ht, 3, &left, &right, &scale_param) == FAILURE) {
 		        	WRONG_PARAM_COUNT;
     			}
 				convert_to_long(scale_param);
@@ -413,7 +413,7 @@ PHP_FUNCTION(bcscale)
 {
 	pval *new_scale;
 	
-	if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &new_scale)==FAILURE) {
+	if (ARG_COUNT(ht)!=1 || zend_get_parameters(ht, 1, &new_scale)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	

@@ -882,7 +882,7 @@ PHP_FUNCTION(set_socket_timeout)
 	int type, *sock;
 	struct timeval t;
 
-	if (ARG_COUNT(ht)!=2 || getParameters(ht, 2, &socket, &timeout)==FAILURE) {
+	if (ARG_COUNT(ht)!=2 || zend_get_parameters(ht, 2, &socket, &timeout)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long(socket);
