@@ -66,6 +66,7 @@ static int phpday_tab[2][12] =
 };
 
 #define isleap(year) (((year%4) == 0 && (year%100)!=0) || (year%400)==0)
+#define YEAR_BASE 1900
 
 /* {{{ proto int time(void)
    Return current UNIX timestamp */
@@ -395,7 +396,7 @@ php_date(INTERNAL_FUNCTION_PARAMETERS, int gm)
 				strcat(Z_STRVAL_P(return_value), day_full_names[ta->tm_wday]);
 				break;
 			case 'Y':		/* year, numeric, 4 digits */
-				sprintf(tmp_buff, "%d", ta->tm_year + 1900);  /* SAFE */
+				sprintf(tmp_buff, "%d", ta->tm_year + YEAR_BASE);  /* SAFE */
 				strcat(Z_STRVAL_P(return_value), tmp_buff);
 				break;
 			case 'M':		/* month, textual, 3 letters */
@@ -481,7 +482,7 @@ php_date(INTERNAL_FUNCTION_PARAMETERS, int gm)
 				}
 				break;
 			case 't':		/* days in current month */
-				sprintf(tmp_buff, "%2d", phpday_tab[isleap((ta->tm_year+1900))][ta->tm_mon] );
+				sprintf(tmp_buff, "%2d", phpday_tab[isleap((ta->tm_year+YEAR_BASE))][ta->tm_mon] );
 				strcat(Z_STRVAL_P(return_value), tmp_buff);
 				break;
 			case 'w':		/* day of the week, numeric EXTENSION */
@@ -505,7 +506,7 @@ php_date(INTERNAL_FUNCTION_PARAMETERS, int gm)
 				strcat(Z_STRVAL_P(return_value), tmp_buff);
 				break;
 			case 'L':		/* boolean for leapyear */
-				sprintf(tmp_buff, "%d", (isleap((ta->tm_year+1900)) ? 1 : 0 ) );
+				sprintf(tmp_buff, "%d", (isleap((ta->tm_year+YEAR_BASE)) ? 1 : 0 ) );
 				strcat(Z_STRVAL_P(return_value), tmp_buff);
 				break;
 			case 'T':		/* timezone name */
@@ -535,7 +536,7 @@ php_date(INTERNAL_FUNCTION_PARAMETERS, int gm)
 					day_short_names[ta->tm_wday],
 					ta->tm_mday,
 					mon_short_names[ta->tm_mon],
-					ta->tm_year + 1900,
+					ta->tm_year + YEAR_BASE,
 					ta->tm_hour,
 					ta->tm_min,
 					ta->tm_sec,
@@ -548,7 +549,7 @@ php_date(INTERNAL_FUNCTION_PARAMETERS, int gm)
 					day_short_names[ta->tm_wday],
 					ta->tm_mday,
 					mon_short_names[ta->tm_mon],
-					ta->tm_year + 1900,
+					ta->tm_year + YEAR_BASE,
 					ta->tm_hour,
 					ta->tm_min,
 					ta->tm_sec,
@@ -560,13 +561,24 @@ php_date(INTERNAL_FUNCTION_PARAMETERS, int gm)
 				strcat(Z_STRVAL_P(return_value), tmp_buff);
 				break;
 			case 'W':		/* ISO-8601 week number of year, weeks starting on Monday */
-				wd = ta->tm_wday==0 ? 7 : ta->tm_wday;
-				yd = ta->tm_yday + 1;
-				fd = (7 + (wd - yd) % 7 ) % 7;
-				wk = ( (yd + fd - 1) / 7 ) + 1;
-				if (fd>3) {
-					wk--;
+				wd = ta->tm_wday==0 ? 6 : ta->tm_wday-1;/* weekday */
+				yd = ta->tm_yday + 1;					/* days since January 1st */
+
+				fd = (7 + wd - yd % 7+ 1) % 7;			/* weekday (1st January) */	
+
+				/* week is a last year week (52 or 53) */
+				if ((yd <= 7 - fd) && fd > 3){			
+					wk = (fd == 4 || (fd == 5 && isleap((ta->tm_year + YEAR_BASE - 1)))) ? 53 : 52;
 				}
+				/* week is a next year week (1) */
+				else if (isleap((ta->tm_year+YEAR_BASE)) + 365 - yd < 3 - wd){
+					wk = 1;
+				}
+				/* normal week */
+				else {
+					wk = (yd + 6 - wd + fd) / 7 - (fd > 3);
+				}
+
 				sprintf(tmp_buff, "%d", wk);  /* SAFE */
 				strcat(Z_STRVAL_P(return_value), tmp_buff);
 				break;
