@@ -104,7 +104,7 @@ void dbx_call_any_function(INTERNAL_FUNCTION_PARAMETERS, char *function_name, zv
 	MAKE_STD_ZVAL(zval_function_name);
 	ZVAL_STRING(zval_function_name, function_name, 1);
 	if (call_user_function_ex(EG(function_table), NULL, zval_function_name, returnvalue, number_of_arguments, params, 0, NULL TSRMLS_CC) == FAILURE) {
-		zend_error(E_ERROR, "function '%s' not found", Z_STRVAL_P(zval_function_name));
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "function '%s' not found", Z_STRVAL_P(zval_function_name));
 	}
 	zval_dtor(zval_function_name); /* to free stringvalue memory */
 	FREE_ZVAL(zval_function_name);
@@ -262,19 +262,19 @@ ZEND_FUNCTION(dbx_connect)
 
 	if (Z_TYPE_PP(arguments[0]) == IS_LONG) {
 		if (!module_identifier_exists(Z_LVAL_PP(arguments[0]))) {
-			zend_error(E_WARNING, "dbx: module '%ld' not loaded or not supported.", Z_LVAL_PP(arguments[0]));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "dbx: module '%ld' not loaded or not supported.", Z_LVAL_PP(arguments[0]));
 			return;
 		}
 		module_identifier = Z_LVAL_PP(arguments[0]);
 	} else {
 		convert_to_string_ex(arguments[0]);
 		if (!module_exists(Z_STRVAL_PP(arguments[0]))) {
-			zend_error(E_WARNING, "dbx: module '%s' not loaded.", Z_STRVAL_PP(arguments[0]));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "dbx: module '%s' not loaded.", Z_STRVAL_PP(arguments[0]));
 			return;
 		}
 		module_identifier=get_module_identifier(Z_STRVAL_PP(arguments[0]));
 		if (!module_identifier) {
-			zend_error(E_WARNING, "dbx: unsupported module '%s'.", Z_STRVAL_PP(arguments[0]));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "dbx: unsupported module '%s'.", Z_STRVAL_PP(arguments[0]));
 			return;
 		}
 	}
@@ -303,7 +303,7 @@ ZEND_FUNCTION(dbx_connect)
 	}
 
 	if (object_init(return_value) != SUCCESS) {
-		zend_error(E_ERROR, "dbx: unable to create resulting object...");
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "dbx: unable to create resulting object...");
 		FREE_ZVAL(dbx_module);
 		zval_dtor(db_name); /* to free stringvalue memory */
 		FREE_ZVAL(db_name);
@@ -335,7 +335,7 @@ ZEND_FUNCTION(dbx_close)
 		WRONG_PARAM_COUNT;
 	}
 	if (!split_dbx_handle_object(arguments[0], &dbx_handle, &dbx_module, &dbx_database TSRMLS_CC)) {
-		zend_error(E_WARNING, "dbx_close: not a valid dbx_handle-object...");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "not a valid dbx_handle-object...");
 		RETURN_LONG(0);
 	}
 
@@ -387,7 +387,7 @@ ZEND_FUNCTION(dbx_query)
 		WRONG_PARAM_COUNT;
 	}
 	if (!split_dbx_handle_object(arguments[0], &dbx_handle, &dbx_module, &dbx_database TSRMLS_CC)) {
-		zend_error(E_WARNING, "dbx_query: not a valid dbx_handle-object...");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "not a valid dbx_handle-object...");
 		RETURN_LONG(0);
 	}
 	/* default values */
@@ -428,7 +428,7 @@ ZEND_FUNCTION(dbx_query)
 	 */
 	/* init return_value as object (of rows) */
 	if (object_init(return_value) != SUCCESS) {
-		zend_error(E_ERROR, "dbx_query: unable to create resulting object...");
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "unable to create resulting object...");
 		FREE_ZVAL(rv_result_handle);
 		RETURN_LONG(0);
 	}
@@ -449,7 +449,7 @@ ZEND_FUNCTION(dbx_query)
 	ZVAL_LONG(rv_column_count, 0);
 	result = switch_dbx_getcolumncount(&rv_column_count, &rv_result_handle, INTERNAL_FUNCTION_PARAM_PASSTHRU, dbx_module);
 	if (!result) { 
-		zend_error(E_ERROR, "dbx_query: get column_count failed...");
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "get column_count failed...");
 		FREE_ZVAL(rv_column_count);
 		RETURN_LONG(0); 
 	}
@@ -543,7 +543,7 @@ ZEND_FUNCTION(dbx_error)
 		WRONG_PARAM_COUNT;
 	}
 	if (!split_dbx_handle_object(arguments[0], &dbx_handle, &dbx_module, &dbx_database TSRMLS_CC)) {
-		zend_error(E_WARNING, "dbx_error: not a valid dbx_handle-object...");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "not a valid dbx_handle-object...");
 		RETURN_LONG(0);
 	}
 
@@ -576,7 +576,7 @@ ZEND_FUNCTION(dbx_escape_string)
 		WRONG_PARAM_COUNT;
 	}
 	if (!split_dbx_handle_object(arguments[0], &dbx_handle, &dbx_module, &dbx_database TSRMLS_CC)) {
-		zend_error(E_WARNING, "dbx_esc: not a valid dbx_handle-object...");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "not a valid dbx_handle-object...");
 		RETURN_NULL();
 	}
 	convert_to_string_ex(arguments[1]);
@@ -618,7 +618,7 @@ ZEND_FUNCTION(dbx_compare)
 
 	if (Z_TYPE_PP(arguments[0]) != IS_ARRAY
 	|| Z_TYPE_PP(arguments[1]) != IS_ARRAY) {
-		zend_error(E_WARNING, "Wrong argument type for compare");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Wrong argument type for compare");
 		RETURN_LONG(0);
 	}
 	convert_to_string_ex(arguments[2]); /* field name */
@@ -647,7 +647,7 @@ ZEND_FUNCTION(dbx_compare)
 
 	if (zend_hash_find(Z_ARRVAL_PP(arguments[0]), Z_STRVAL_PP(arguments[2]), Z_STRLEN_PP(arguments[2])+1, (void **) &zv_a)==FAILURE
 	|| zend_hash_find(Z_ARRVAL_PP(arguments[1]), Z_STRVAL_PP(arguments[2]), Z_STRLEN_PP(arguments[2])+1, (void **) &zv_b)==FAILURE)  {
-		zend_error(E_WARNING, "Field '%s' not available in result-object", Z_STRVAL_PP(arguments[2]));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Field '%s' not available in result-object", Z_STRVAL_PP(arguments[2]));
 		RETURN_LONG(0);
 	}
 
@@ -701,13 +701,13 @@ ZEND_FUNCTION(dbx_sort)
 
 	if (Z_TYPE_PP(arguments[0]) != IS_OBJECT
 	|| Z_TYPE_PP(arguments[1]) != IS_STRING) {
-		zend_error(E_WARNING, "Wrong argument type for sort");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Wrong argument type for sort");
 		RETURN_LONG(0);
 	}
 
 	if (zend_hash_find(Z_OBJPROP_PP(arguments[0]), "data", 5, (void **) &zval_data)==FAILURE
 	|| Z_TYPE_PP(zval_data) != IS_ARRAY) {
-		zend_error(E_WARNING, "Wrong argument type for sort");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Wrong argument type for sort");
 		RETURN_LONG(0);
 	}
 
@@ -736,7 +736,7 @@ int switch_dbx_connect(zval **rv, zval **host, zval **db, zval **username, zval 
 		case DBX_OCI8:  return dbx_oci8_connect(rv, host, db, username, password, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 		case DBX_SYBASECT: return dbx_sybasect_connect(rv, host, db, username, password, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 	}
-	zend_error(E_WARNING, "dbx_connect: not supported in this module");
+	php_error_docref(NULL TSRMLS_CC, E_WARNING, "not supported in this module");
 	return 0;
 }
 
@@ -752,7 +752,7 @@ int switch_dbx_pconnect(zval **rv, zval **host, zval **db, zval **username, zval
 		case DBX_OCI8:  return dbx_oci8_pconnect(rv, host, db, username, password, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 		case DBX_SYBASECT: return dbx_sybasect_pconnect(rv, host, db, username, password, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 	}
-	zend_error(E_WARNING, "dbx_pconnect: not supported in this module");
+	php_error_docref(NULL TSRMLS_CC, E_WARNING, "not supported in this module");
 	return 0;
 }
 
@@ -768,7 +768,7 @@ int switch_dbx_close(zval **rv, zval **dbx_handle, INTERNAL_FUNCTION_PARAMETERS,
 		case DBX_OCI8:  return dbx_oci8_close(rv, dbx_handle, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 		case DBX_SYBASECT: return dbx_sybasect_close(rv, dbx_handle, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 	}
-	zend_error(E_WARNING, "dbx_close: not supported in this module");
+	php_error_docref(NULL TSRMLS_CC, E_WARNING, "not supported in this module");
 	return 0;
 }
 
@@ -784,7 +784,7 @@ int switch_dbx_query(zval **rv, zval **dbx_handle, zval **db_name, zval **sql_st
 		case DBX_OCI8:  return dbx_oci8_query(rv, dbx_handle, db_name, sql_statement, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 		case DBX_SYBASECT: return dbx_sybasect_query(rv, dbx_handle, db_name, sql_statement, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 	}
-	zend_error(E_WARNING, "dbx_query: not supported in this module");
+	php_error_docref(NULL TSRMLS_CC, E_WARNING, "not supported in this module");
 	return 0;
 }
 
@@ -800,7 +800,7 @@ int switch_dbx_getcolumncount(zval **rv, zval **result_handle, INTERNAL_FUNCTION
 		case DBX_OCI8:  return dbx_oci8_getcolumncount(rv, result_handle, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 		case DBX_SYBASECT: return dbx_sybasect_getcolumncount(rv, result_handle, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 	}
-	zend_error(E_WARNING, "dbx_getcolumncount: not supported in this module");
+	php_error_docref(NULL TSRMLS_CC, E_WARNING, "not supported in this module");
 	return 0;
 }
 
@@ -816,7 +816,7 @@ int switch_dbx_getcolumnname(zval **rv, zval **result_handle, long column_index,
 		case DBX_OCI8:  return dbx_oci8_getcolumnname(rv, result_handle, column_index, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 		case DBX_SYBASECT: return dbx_sybasect_getcolumnname(rv, result_handle, column_index, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 	}
-	zend_error(E_WARNING, "dbx_getcolumnname: not supported in this module");
+	php_error_docref(NULL TSRMLS_CC, E_WARNING, "not supported in this module");
 	return 0;
 }
 
@@ -832,7 +832,7 @@ int switch_dbx_getcolumntype(zval **rv, zval **result_handle, long column_index,
 		case DBX_OCI8:  return dbx_oci8_getcolumntype(rv, result_handle, column_index, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 		case DBX_SYBASECT: return dbx_sybasect_getcolumntype(rv, result_handle, column_index, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 	}
-	zend_error(E_WARNING, "dbx_getcolumntype: not supported in this module");
+	php_error_docref(NULL TSRMLS_CC, E_WARNING, "not supported in this module");
 	return 0;
 }
 
@@ -848,7 +848,7 @@ int switch_dbx_getrow(zval **rv, zval **result_handle, long row_number, INTERNAL
 		case DBX_OCI8:  return dbx_oci8_getrow(rv, result_handle, row_number, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 		case DBX_SYBASECT: return dbx_sybasect_getrow(rv, result_handle, row_number, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 	}
-	zend_error(E_WARNING, "dbx_getrow: not supported in this module");
+	php_error_docref(NULL TSRMLS_CC, E_WARNING, "not supported in this module");
 	return 0;
 }
 
@@ -864,7 +864,7 @@ int switch_dbx_error(zval **rv, zval **dbx_handle, INTERNAL_FUNCTION_PARAMETERS,
 		/* case DBX_OCI8:  return dbx_oci8_error(rv, dbx_handle, INTERNAL_FUNCTION_PARAM_PASSTHRU); */
 		case DBX_SYBASECT: return dbx_sybasect_error(rv, dbx_handle, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 	}
-	zend_error(E_WARNING, "dbx_error: not supported in this module");
+	php_error_docref(NULL TSRMLS_CC, E_WARNING, "not supported in this module");
 	return 0;
 }
 
@@ -880,7 +880,7 @@ int switch_dbx_esc(zval **rv, zval **dbx_handle, zval **string, INTERNAL_FUNCTIO
 		case DBX_OCI8:  return dbx_oci8_esc(rv, dbx_handle, string, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 		case DBX_SYBASECT: return dbx_sybasect_esc(rv, dbx_handle, string, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 	}
-	zend_error(E_WARNING, "dbx_esc: not supported in this module");
+	php_error_docref(NULL TSRMLS_CC, E_WARNING, "not supported in this module");
 	return 0;
 }
 
