@@ -71,8 +71,8 @@ PHPAPI FILE *php_fopen_wrapper(char *filename, char *mode, int options, int *iss
 PHPAPI int php_fopen_primary_script(zend_file_handle *file_handle TSRMLS_DC);
 PHPAPI char *expand_filepath(const char *filepath, char *real_path TSRMLS_DC);
 
-PHPAPI int php_check_open_basedir(char *path TSRMLS_DC);
-PHPAPI int php_check_specific_open_basedir(char *basedir, char *path TSRMLS_DC);
+PHPAPI int php_check_open_basedir(const char *path TSRMLS_DC);
+PHPAPI int php_check_specific_open_basedir(const char *basedir, const char *path TSRMLS_DC);
 
 PHPAPI int php_check_safe_mode_include_dir(char *path TSRMLS_DC);
 
