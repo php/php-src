@@ -1,42 +1,102 @@
-What is PHP4 sapi/servlet?
+Java Servlet SAPI Module for PHP 4
 
-   PHP4 sapi/servlet builds upon the mechanism defined by ext/java to enable
-   the entire PHP processor to be run as a servlet.  The primary advanatage
-   of this from a PHP perspective is that web servers which support servlets
-   typically take great care in pooling and reusing JVMs.
 
-   Notes:
+  Introduction
 
-     1) While this code is intended to be able to run on any servlet engine,
-        it has only been tested on Apache's Jakarta/tomcat to date.  Bug
-        reports, success stories and/or patches required to get this code
-        to run on other engines would be appreciated.
+    The Java Servlet SAPI Module allows for the execution of PHP 4 as
+    a Servlet from within a Java Servlet Engine, such as Apache's
+    Jakarta Tomcat [1]. It builds upon the mechanism defined by PHP's
+    Java Extension, which can be found in /php4/ext/java.
 
-     2) PHP has a habit of changing the working directory.  Sapi/servlet will
-        eventually change it back, but while PHP is running the servlet engine
-        may not be able to load any classes from the CLASSPATH which are
-        specified using a relative directory syntax, or find the work directory
-        used for administration and JSP compilation tasks.
+    The primary advanatage of this from a PHP perspective is that web
+    servers which support servlets typically take great care in
+    pooling and reusing Java Virtual Machines (JVMs).
 
-Build and execution instructions:
+    While this code is intended to be able to run on any servlet
+    engine, it has only been tested on Apache's Jakarta Tomcat to
+    date. Bug reports, success stories and/or patches required to get
+    this code to run on other engines would be appreciated; please
+    send them to the PHP Development Mailinglist.
 
-  Most of the configuration hassles associated with ext/java are associated
-  with starting the JVM, and as such do not apply to sapi/servlet.  In
-  particular, no updates to php.ini are required on any operating system.
+    Note: PHP has a habit of changing the working directory. The Java
+    Servlet SAPI Module will eventually change it back, but while PHP
+    is running the servlet engine may not be able to load any classes
+    from the CLASSPATH which are specified using a relative directory
+    syntax, or find the work directory used for administration and JSP
+    compilation tasks.
 
-  Unix:
-    Build:
-      ./configure --with-servlet --with-java
-    Execute:
-      Put phpsrvlt.jar into your $CATALINA_HOME/lib directory
-      add directory containing libphp4.so to LD_LIBRARY_PATH
-      merge/overwrite build/tomcat/examples/WEB-INF/web.xml from sapi/servlet
 
-  Win32:
-    Build:
-      add jdsk (or d:\build\tomcat\classes) to CLASSPATH
-      build sapi\servlet\servlet.dsp
-    Execute:
-      Put phpsrvlt.jar into your $CATALINA_HOME/lib directory
-      add directory containing php4ts.dll and phpsrvlt.dll to PATH
-      merge/overwrite build\tomcat\examples\WEB-INF\web.xml from sapi\servlet
+  Installing PHP as a Servlet into Apache's Jakarta Tomcat
+
+    1.) Build the PHP 4 Java Servlet SAPI Module
+
+        UNIX
+
+          o ./configure --with-servlet --with-java
+
+          o Add directory containing libphp4.so to LD_LIBRARY_PATH
+
+        Windows
+
+          o Build ext/java/java.dsp, copy php_java.dll to your
+            extension_dir directory and enable the extension in the
+            php.ini
+
+          o Build sapi/servlet/servlet.dsp
+
+          o Add directory containing php4ts.dll and phpsrvlt.dll to
+            PATH
+
+    2.) Tomcat 3
+
+          * Add phpsrvlt.jar to CLASSPATH
+
+        Tomcat 4
+
+          * Copy phpsrvlt.jar into your $CATALINA_HOME/lib directory
+
+    3.) Tomcat 3
+
+          * Merge or overwrite build/tomcat/examples/WEB-INF/web.xml
+            with the configuration directives from the web.xml file
+            that comes with the Java Servlet SAPI Module.
+
+        Tomcat 4
+    
+          * Merge the configuration directives from web.xml file that
+            comes with the Java Servlet SAPI Module into your
+            Tomcat/conf/web.xml configuration file.
+
+            Make sure that the element ordering of the web.xml is laegal
+            with Tomcat and put all the <servlet> declarations first,
+            followed by all the <servlet-mapping> declarations.
+
+          * Add
+
+              <welcome-file>index.php</welcome-file>
+
+            to the
+
+              <welcome-file-list>
+                ...
+              </welcome-file-list>
+
+            block of your Tomcat/conf/web.xml configuration file.
+
+    4.) Test your installation by creating a test.php file in your
+        Tomcat/webapps/ROOT directory with
+
+          <?php phpinfo(); ?>
+
+        in it.
+
+        Access this file in your browser at
+
+          http://localhost:8080/test.php
+
+        and you should see the familiar output of phpinfo().
+
+
+  Installing PHP as a Generator into Apache's Cocoon2 Framework
+
+    1.) 
