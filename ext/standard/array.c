@@ -1960,8 +1960,7 @@ int multisort_compare(const void *a, const void *b)
 	int			  r;
 	int			  result = 0;
 	zval		  temp;
-	ARRAYLS_FETCH();
-
+	
 	r = 0;
 	do {
 		compare_function(&temp, *((zval **)ab[r]->pData), *((zval **)bb[r]->pData));
@@ -1982,7 +1981,6 @@ PHP_FUNCTION(multisort)
 	int				argc;
 	int				array_size;
 	int				i, k;
-	ARRAYLS_FETCH();
 	
 	/* Get the argument count and check it */
 	argc = ARG_COUNT(ht);
