@@ -12,6 +12,8 @@ PHP 4                                                                      NEWS
 - Added --clean option into phpize. (Jani)
 - Added --ldflags option into php-config. (Jani)
 - Added OCIPasswordChange() which allows renewing expired Oracle users. (Maxim)
+- Fixed bug #22042 (pg_result_seek() would never seek to the 1st row in the
+  result due to always seeking to row next to the one requested). (Ilia)
 - Fixed bug #17448 (Print the message when OCI_SUCCESS_WITH_INFO is returned).
   (Maxim)
 - Fixed bug #13561 (--without-pear disabled phpize/php-config install). (Jani)
