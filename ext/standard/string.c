@@ -1755,7 +1755,7 @@ PHP_FUNCTION(nl2br)
 {
 	pval **str;
 	
-	if (ARG_COUNT(ht)!=1 || getParametersEx(ht, 1, &str)==FAILURE) {
+	if (ARG_COUNT(ht)!=1 || getParametersEx(1, &str)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
