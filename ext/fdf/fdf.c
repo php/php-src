@@ -122,20 +122,20 @@ PHP_MSHUTDOWN_FUNCTION(fdf)
 /* {{{ proto int fdf_open(string filename)
    Opens a new fdf document */
 PHP_FUNCTION(fdf_open) {
-	pval *file;
+	pval **file;
 	int id, type;
 	FDFDoc fdf;
 	FDFErc err;
 	FDF_TLS_VARS;
 
 
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &file) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &file) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_string(file);
+	convert_to_string_ex(file);
 
-	err = FDFOpen(file->value.str.val, 0, &fdf);
+	err = FDFOpen((*file)->value.str.val, 0, &fdf);
 	if(err != FDFErcOK)
 		printf("Aiii, error\n");
 	if(!fdf)
@@ -148,17 +148,17 @@ PHP_FUNCTION(fdf_open) {
 /* {{{ proto void fdf_close(int fdfdoc)
    Closes the fdf document */
 PHP_FUNCTION(fdf_close) {
-	pval *arg1;
+	pval **arg1;
 	int id, type;
 	FDFDoc fdf;
 	FDF_TLS_VARS;
 
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	id=arg1->value.lval;
+	convert_to_long_ex(arg1);
+	id=(*arg1)->value.lval;
 	fdf = php3_list_find(id,&type);
 	if(!fdf || type!=FDF_GLOBAL(le_fdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
@@ -193,7 +193,7 @@ PHP_FUNCTION(fdf_create) {
 /* {{{ proto void fdf_get_value(int fdfdoc, string fieldname)
    Gets the value of a field as string */
 PHP_FUNCTION(fdf_get_value) {
-	pval *arg1, *arg2;
+	pval **arg1, **arg2;
 	int id, type;
 	ASInt32 nr;
 	char *buffer;
@@ -201,13 +201,13 @@ PHP_FUNCTION(fdf_get_value) {
 	FDFErc err;
 	FDF_TLS_VARS;
 
-	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
+	if (ARG_COUNT(ht) != 2 || getParametersEx(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	convert_to_string(arg2);
-	id=arg1->value.lval;
+	convert_to_long_ex(arg1);
+	convert_to_string_ex(arg2);
+	id=(*arg1)->value.lval;
 	fdf = php3_list_find(id,&type);
 	if(!fdf || type!=FDF_GLOBAL(le_fdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
@@ -236,28 +236,28 @@ PHP_FUNCTION(fdf_get_value) {
 /* {{{ proto void fdf_set_value(int fdfdoc, string fieldname, string value, int isName)
    Sets the value of a field */
 PHP_FUNCTION(fdf_set_value) {
-	pval *arg1, *arg2, *arg3, *arg4;
+	pval **arg1, **arg2, **arg3, **arg4;
 	int id, type;
 	FDFDoc fdf;
 	FDFErc err;
 	FDF_TLS_VARS;
 
-	if (ARG_COUNT(ht) != 4 || getParameters(ht, 4, &arg1, &arg2, &arg3, &arg4) == FAILURE) {
+	if (ARG_COUNT(ht) != 4 || getParametersEx(4, &arg1, &arg2,&arg3, &arg4) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	convert_to_string(arg2);
-	convert_to_string(arg3);
-	convert_to_long(arg4);
-	id=arg1->value.lval;
+	convert_to_long_ex(arg1);
+	convert_to_string_ex(arg2);
+	convert_to_string_ex(arg3);
+	convert_to_long_ex(arg4);
+	id=(*arg1)->value.lval;
 	fdf = php3_list_find(id,&type);
 	if(!fdf || type!=FDF_GLOBAL(le_fdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
-	err = FDFSetValue(fdf, arg2->value.str.val, arg3->value.str.val, (ASBool) arg4->value.lval);
+	err = FDFSetValue(fdf, (*arg2)->value.str.val,(*arg3)->value.str.val, (ASBool) (*arg4)->value.lval);
 	if(err != FDFErcOK)
 		printf("Aiii, error\n");
 
@@ -268,7 +268,7 @@ PHP_FUNCTION(fdf_set_value) {
 /* {{{ proto void fdf_next_field_name(int fdfdoc [, string fieldname])
    Gets the name of the next field name or the first field name */
 PHP_FUNCTION(fdf_next_field_name) {
-	pval *argv[2];
+	pval **argv[2];
 	int id, type, argc;
 	ASInt32 nr;
 	char *buffer, *fieldname;
@@ -280,18 +280,18 @@ PHP_FUNCTION(fdf_next_field_name) {
 	if((argc > 2) || (argc < 1))
 		WRONG_PARAM_COUNT;
 
-	if (getParametersArray(ht, argc, argv) == FAILURE) {
+	if (getParametersArrayEx(argc, argv) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(argv[0]);
+	convert_to_long_ex(argv[0]);
 	if(argc == 2) {
-		convert_to_string(argv[1]);
-		fieldname = argv[1]->value.str.val;
+		convert_to_string_ex(argv[1]);
+		fieldname = (*argv[1])->value.str.val;
 	} else {
 		fieldname = NULL;
 	}
-	id=argv[0]->value.lval;
+	id=(*argv[0])->value.lval;
 	fdf = php3_list_find(id,&type);
 	if(!fdf || type!=FDF_GLOBAL(le_fdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
@@ -316,30 +316,30 @@ PHP_FUNCTION(fdf_next_field_name) {
 /* {{{ proto void fdf_set_ap(int fdfdoc, string fieldname, int face, string filename, int pagenr)
    Sets the value of a field */
 PHP_FUNCTION(fdf_set_ap) {
-	pval *arg1, *arg2, *arg3, *arg4, *arg5;
+	pval **arg1, **arg2, **arg3, **arg4, **arg5;
 	int id, type;
 	FDFDoc fdf;
 	FDFErc err;
 	FDFAppFace face;
 	FDF_TLS_VARS;
 
-	if (ARG_COUNT(ht) != 5 || getParameters(ht, 5, &arg1, &arg2, &arg3, &arg4, &arg5) == FAILURE) {
+	if (ARG_COUNT(ht) != 5 || getParametersEx(5, &arg1, &arg2,&arg3, &arg4, &arg5) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	convert_to_string(arg2);
-	convert_to_long(arg3);
-	convert_to_string(arg4);
-	convert_to_long(arg5);
-	id=arg1->value.lval;
+	convert_to_long_ex(arg1);
+	convert_to_string_ex(arg2);
+	convert_to_long_ex(arg3);
+	convert_to_string_ex(arg4);
+	convert_to_long_ex(arg5);
+	id=(*arg1)->value.lval;
 	fdf = php3_list_find(id,&type);
 	if(!fdf || type!=FDF_GLOBAL(le_fdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
-	switch(arg3->value.lval) {
+	switch((*arg3)->value.lval) {
 		case 1:
 			face = FDFNormalAP;
 			break;
@@ -353,7 +353,8 @@ PHP_FUNCTION(fdf_set_ap) {
 			face = FDFNormalAP;
 	}
 
-	err = FDFSetAP(fdf, arg2->value.str.val, face, NULL, arg4->value.str.val, (ASInt32) arg5->value.lval);
+	err = FDFSetAP(fdf, (*arg2)->value.str.val, face, NULL,
+(*arg4)->value.str.val, (ASInt32) (*arg5)->value.lval);
 	if(err != FDFErcOK)
 		printf("Aiii, error\n");
 
@@ -364,27 +365,27 @@ PHP_FUNCTION(fdf_set_ap) {
 /* {{{ proto void fdf_set_status(int fdfdoc, string status)
    Sets the value in the /Status key. */
 PHP_FUNCTION(fdf_set_status) {
-	pval *arg1, *arg2;
+	pval **arg1, **arg2;
 	int id, type;
 	ASInt32 nr;
 	FDFDoc fdf;
 	FDFErc err;
 	FDF_TLS_VARS;
 
-	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
+	if (ARG_COUNT(ht) != 2 || getParametersEx(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	convert_to_string(arg2);
-	id=arg1->value.lval;
+	convert_to_long_ex(arg1);
+	convert_to_string_ex(arg2);
+	id=(*arg1)->value.lval;
 	fdf = php3_list_find(id,&type);
 	if(!fdf || type!=FDF_GLOBAL(le_fdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
-	err = FDFSetStatus(fdf, arg2->value.str.val);
+	err = FDFSetStatus(fdf, (*arg2)->value.str.val);
 	if(err != FDFErcOK)
 		printf("Aiii, error\n");
 
@@ -395,7 +396,7 @@ PHP_FUNCTION(fdf_set_status) {
 /* {{{ proto void fdf_get_status(int fdfdoc)
    Gets the value in the /Status key. */
 PHP_FUNCTION(fdf_get_status) {
-	pval *arg1;
+	pval **arg1;
 	int id, type;
 	ASInt32 nr;
 	char *buf;
@@ -403,12 +404,12 @@ PHP_FUNCTION(fdf_get_status) {
 	FDFErc err;
 	FDF_TLS_VARS;
 
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	id=arg1->value.lval;
+	convert_to_long_ex(arg1);
+	id=(*arg1)->value.lval;
 	fdf = php3_list_find(id,&type);
 	if(!fdf || type!=FDF_GLOBAL(le_fdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
@@ -432,26 +433,26 @@ PHP_FUNCTION(fdf_get_status) {
 /* {{{ proto void fdf_set_file(int fdfdoc, string filename)
    Sets the value of the FDF's /F key */
 PHP_FUNCTION(fdf_set_file) {
-	pval *arg1, *arg2;
+	pval **arg1, **arg2;
 	int id, type;
 	FDFDoc fdf;
 	FDFErc err;
 	FDF_TLS_VARS;
 
-	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
+	if (ARG_COUNT(ht) != 2 || getParametersEx(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	convert_to_string(arg2);
-	id=arg1->value.lval;
+	convert_to_long_ex(arg1);
+	convert_to_string_ex(arg2);
+	id=(*arg1)->value.lval;
 	fdf = php3_list_find(id,&type);
 	if(!fdf || type!=FDF_GLOBAL(le_fdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
-	err = FDFSetFile(fdf, arg2->value.str.val);
+	err = FDFSetFile(fdf, (*arg2)->value.str.val);
 	if(err != FDFErcOK)
 		printf("Aiii, error\n");
 
@@ -462,7 +463,7 @@ PHP_FUNCTION(fdf_set_file) {
 /* {{{ proto void fdf_get_file(int fdfdoc)
    Gets the value in the /F key. */
 PHP_FUNCTION(fdf_get_file) {
-	pval *arg1;
+	pval **arg1;
 	int id, type;
 	ASInt32 nr;
 	char *buf;
@@ -470,12 +471,12 @@ PHP_FUNCTION(fdf_get_file) {
 	FDFErc err;
 	FDF_TLS_VARS;
 
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	id=arg1->value.lval;
+	convert_to_long_ex(arg1);
+	id=(*arg1)->value.lval;
 	fdf = php3_list_find(id,&type);
 	if(!fdf || type!=FDF_GLOBAL(le_fdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
@@ -499,26 +500,26 @@ PHP_FUNCTION(fdf_get_file) {
 /* {{{ proto void fdf_save(int fdfdoc, string filename)
    Writes out an FDF file. */
 PHP_FUNCTION(fdf_save) {
-	pval *arg1, *arg2;
+	pval **arg1, **arg2;
 	int id, type;
 	FDFDoc fdf;
 	FDFErc err;
 	FDF_TLS_VARS;
 
-	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
+	if (ARG_COUNT(ht) != 2 || getParametersEx(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	convert_to_string(arg2);
-	id=arg1->value.lval;
+	convert_to_long_ex(arg1);
+	convert_to_string_ex(arg2);
+	id=(*arg1)->value.lval;
 	fdf = php3_list_find(id,&type);
 	if(!fdf || type!=FDF_GLOBAL(le_fdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
-	err = FDFSave(fdf, arg2->value.str.val);
+	err = FDFSave(fdf, (*arg2)->value.str.val);
 	if(err != FDFErcOK)
 		printf("Aiii, error\n");
 
@@ -528,23 +529,23 @@ PHP_FUNCTION(fdf_save) {
 /* {{{ proto void fdf_add_template(int fdfdoc, int newpage, string filename, string template, int rename)
    Adds a template to the FDF*/
 PHP_FUNCTION(fdf_add_template) {
-	pval *arg1, *arg2, *arg3, *arg4, *arg5;
+	pval **arg1, **arg2, **arg3, **arg4, **arg5;
 	int id, type;
 	FDFDoc fdf;
 	FDFErc err;
 	pdfFileSpecRec filespec;
 	FDF_TLS_VARS;
 
-	if (ARG_COUNT(ht) != 5 || getParameters(ht, 5, &arg1, &arg2, &arg3, &arg4, &arg5) == FAILURE) {
+	if (ARG_COUNT(ht) != 5 || getParametersEx(5, &arg1, &arg2,&arg3, &arg4, &arg5) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	convert_to_long(arg2);
-	convert_to_string(arg3);
-	convert_to_string(arg4);
-	convert_to_long(arg5);
-	id=arg1->value.lval;
+	convert_to_long_ex(arg1);
+	convert_to_long_ex(arg2);
+	convert_to_string_ex(arg3);
+	convert_to_string_ex(arg4);
+	convert_to_long_ex(arg5);
+	id=(*arg1)->value.lval;
 	fdf = php3_list_find(id,&type);
 	if(!fdf || type!=FDF_GLOBAL(le_fdf)) {
 		php3_error(E_WARNING,"Unable to find file identifier %d",id);
@@ -559,7 +560,7 @@ PHP_FUNCTION(fdf_add_template) {
 	filespec.ID[0] = NULL;
 	filespec.ID[1] = NULL;
 	filespec.bVolatile = false;
-	err = FDFAddTemplate(fdf, arg2->value.lval, &filespec, arg4->value.str.val, arg5->value.lval);
+	err = FDFAddTemplate(fdf, (*arg2)->value.lval, &filespec,(*arg4)->value.str.val, (*arg5)->value.lval);
 	if(err != FDFErcOK)
 		printf("Aiii, error\n");
 
