@@ -615,11 +615,11 @@ class DB_result
     }
 
     /**
-     * Fetch and return a row of data (it uses backend->fetchInto for that)
-     * @param   $fetchmode  format of fetched row
-     * @param   $rownum     the row number to fetch
+     * Fetch and return a row of data (it uses driver->fetchInto for that)
+     * @param int $fetchmode  format of fetched row
+     * @param int $rownum     the row number to fetch
      *
-     * @return  array   a row of data, NULL on no more rows or PEAR_Error on error
+     * @return  array a row of data, NULL on no more rows or PEAR_Error on error
      */
     function fetchRow($fetchmode = DB_FETCHMODE_DEFAULT, $rownum=null)
     {
@@ -628,7 +628,7 @@ class DB_result
         }
         if ($fetchmode === DB_FETCHMODE_OBJECT) {
             $fetchmode = DB_FETCHMODE_ASSOC;
-            $return_object = true;
+            $object_class = $this->dbh->fetchmode_object_class;
         }
         if ($this->dbh->limit_from !== null) {
             if ($this->row_counter === null) {
@@ -656,9 +656,13 @@ class DB_result
         if ($res !== DB_OK) {
             return $res;
         }
-        if (isset($return_object)) {
-            $class = $this->dbh->fetchmode_object_class;
-            $ret =& new $class($arr);
+        if (isset($object_class)) {
+            // default mode specified in DB_common::fetchmode_object_class property
+            if ($object_class == 'stdClass') {
+                $ret = (object) $arr;
+            } else {
+                $ret =& new $object_class($arr);
+            }
             return $ret;
         }
         return $arr;
@@ -667,12 +671,12 @@ class DB_result
     /**
      * Fetch a row of data into an existing variable.
      *
-     * @param   $arr        reference to data containing the row
-     * @param   $fetchmode  format of fetched row
-     * @param   $rownum     the row number to fetch
+     * @param  mixed $arr        reference to data containing the row
+     * @param  int   $fetchmode  format of fetched row
+     * @param  int   $rownum     the row number to fetch
      *
      * @return  mixed  DB_OK on success, NULL on no more rows or
-     *                 a DB_Error object on errors
+     *                 a DB_Error object on error
      */
     function fetchInto(&$arr, $fetchmode = DB_FETCHMODE_DEFAULT, $rownum=null)
     {
@@ -681,7 +685,7 @@ class DB_result
         }
         if ($fetchmode === DB_FETCHMODE_OBJECT) {
             $fetchmode = DB_FETCHMODE_ASSOC;
-            $return_object = true;
+            $object_class = $this->dbh->fetchmode_object_class;
         }
         if ($this->dbh->limit_from !== null) {
             if ($this->row_counter === null) {
@@ -706,9 +710,13 @@ class DB_result
             $this->row_counter++;
         }
         $res = $this->dbh->fetchInto($this->result, $arr, $fetchmode, $rownum);
-        if (($res === DB_OK) && isset($return_object)) {
-            $class = $this->dbh->fetchmode_object_class;
-            $arr = new $class($arr);
+        if (($res === DB_OK) && isset($object_class)) {
+            // default mode specified in DB_common::fetchmode_object_class property
+            if ($object_class == 'stdClass') {
+                $arr = (object) $arr;
+            } else {
+                $arr = new $object_class($arr);
+            }
         }
         return $res;
     }
@@ -768,6 +776,10 @@ class DB_result
     }
 }
 
+/**
+* Pear DB Row Object
+* @see DB_common::setFetchMode()
+*/
 class DB_row
 {
     function DB_row(&$arr)
