@@ -123,11 +123,13 @@
 
 #ifndef HAVE_STRLCPY
 PHPAPI size_t php_strlcpy(char *dst, const char *src, size_t siz);
+#undef strlcpy
 #define strlcpy php_strlcpy
 #endif
 
 #ifndef HAVE_STRLCAT
 PHPAPI size_t php_strlcat(char *dst, const char *src, size_t siz);
+#undef strlcat
 #define strlcat php_strlcat
 #endif
 
