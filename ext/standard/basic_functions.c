@@ -1700,7 +1700,7 @@ ZEND_API void php_get_highlight_struct(zend_syntax_highlighter_ini *syntax_highl
 }
 
 
-/* {{{ proto void highlight_file(string file_name)
+/* {{{ proto boolean highlight_file(string file_name)
    Syntax highlight a source file */
 PHP_FUNCTION(highlight_file)
 {
@@ -1723,7 +1723,7 @@ PHP_FUNCTION(highlight_file)
 /* }}} */
 
 
-/* {{{ proto void highlight_string(string string)
+/* {{{ proto boolean highlight_string(string string)
    Syntax highlight a string */
 PHP_FUNCTION(highlight_string)
 {
