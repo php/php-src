@@ -521,7 +521,7 @@ inline static unsigned short get_next_char(enum entity_charset charset,
 /* {{{ entity_charset determine_charset
  * returns the charset identifier based on current locale or a hint.
  * defaults to iso-8859-1 */
-static enum entity_charset determine_charset(char *charset_hint)
+static enum entity_charset determine_charset(char *charset_hint TSRMLS_DC)
 {
 	int i;
 	enum entity_charset charset = cs_8859_1;
@@ -572,13 +572,21 @@ static enum entity_charset determine_charset(char *charset_hint)
 #endif
 	}
 	if (charset_hint)	{
-		if(!len) len = strlen(charset_hint);
+		int found = 0;
+		if (!len)
+			len = strlen(charset_hint);
+		
 		/* now walk the charset map and look for the codeset */
 		for (i = 0; charset_map[i].codeset; i++)	{
 			if (strncasecmp(charset_hint, charset_map[i].codeset, len) == 0)	{
 				charset = charset_map[i].charset;
+				found = 1;
 				break;
 			}
+		}
+		if (!found) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "charset `%s' not supported, assuming iso-8859-1",
+					charset_hint);
 		}
 	}
 	return charset;
