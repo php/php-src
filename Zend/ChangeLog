@@ -1,3 +1,23 @@
+2003-12-01  Andi Gutmans  <andi@zend.com>
+
+    * zend_execute.c:
+      - Change to E_STRICT so as not to break existing scripts.
+      - Thanks Edin
+
+    * zend_builtin_functions.c:
+      - Nuke property_exists(). We need to fix isset() and this is already
+      - supported in reflection API. In any case, it's best not to add new
+      - functions in the general namespace except for keeping engine consistency
+      (which would have been true in this case)
+
+    * zend_API.c:
+      - Revert auto-conversion in parameter API
+
+    * zend_operators.c:
+      - Don't automatically call __toString() in convert_to_string_ex().
+      - use __toString() in your code.
+      - Keep the auto-case in make_printable_zval.
+
 2003-11-30  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_default_classes.c:

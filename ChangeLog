@@ -1,3 +1,180 @@
+2003-12-01  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/iconv/iconv.c:
+      Loosen error check. There's no reason to forbid a single '=' occurrence
+      in an unencoded string.
+      Fix white space handing. Meaningful spaces have got stripped wrongly
+      before this patch.
+
+    * ext/iconv/iconv.c:
+      Allow iconv_mime_decode_headers() to handle multiple occurence of a header.
+
+2003-12-01  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/string.c:
+      Optimize substr_replace (this makes it 3-8 times faster depending on the
+      string length).
+
+2003-12-01  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/iconv/tests/iconv_mime_decode.phpt:
+      Update test.
+
+    * ext/iconv/php_iconv.h:
+      Forgot about this one
+
+    * NEWS
+      ext/iconv/iconv.c:
+      Add iconv_mime_decode_headers() to parse multiple MIME headers.
+      A few trivial fixes.
+
+    * ext/iconv/iconv.c
+      ext/iconv/tests/iconv_mime_decode.phpt:
+      More RFC2047 conformance. Add ability to forcefully continue processing
+      on error.
+
+2003-12-01  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * buildconf:
+      The least intrusive way to 'import' PECL extensions into the main tree.
+      For the moment this deals with tidy, further extensions can be added at a
+      later point.
+
+2003-12-01  Andi Gutmans  <andi@zend.com>
+
+    * TSRM/tsrm_win32.c:
+      - Fix indentation
+
+2003-12-01  Sara Golemon  <php@alphaweb.net>
+
+    * ext/standard/filestat.c
+      main/php_streams.h
+      main/streams/plain_wrapper.c:
+      Move safemode/basedir checks for url_stat to plain_wrapper.
+
+2003-12-01  Derick Rethans  <php@derickrethans.nl>
+
+    * main/php_variables.c:
+      - Fix the default SAPI filter too; all weird problems should be gone again.
+
+2003-12-01  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      NEWS
+      ext/dio/dio.c:
+      MFH: - Fixed bug #26488 (Missing declaration of CRTSCTS in ext/dio/dio.c)
+
+    * ext/dio/dio.c:
+      WS fix
+
+    * ext/dio/dio.c:
+      - Fixed bug #26488 (Missing declaration of CRTSCTS in ext/dio/dio.c)
+
+2003-12-01  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_4_3)
+      ext/domxml/php_domxml.c:
+      Fix bug #26443: No errror reporting for Errors in the domxml extension
+
+2003-12-01  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * configure.in
+      sapi/cgi/config9.m4
+      sapi/cli/config.m4
+      scripts/Makefile.frag:
+      - Made --program-prefix and --program-suffix work. (See bug #23030)
+
+    * ext/bcmath/libbcmath/src/bcmath.h:
+      missing config.h include
+
+2003-12-01  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend_execute.c:
+      - Change to E_STRICT so as not to break existing scripts.
+      - Thanks Edin
+
+2003-12-01  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * tests/lang/bug26182.phpt:
+      - Nuke property_exists() calls
+      - Fix the test. (this is BUG in PHP 5, works in PHP 4)
+
+2003-12-01  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend_builtin_functions.c:
+      - Nuke property_exists(). We need to fix isset() and this is already
+      - supported in reflection API. In any case, it's best not to add new
+      - functions in the general namespace except for keeping engine consistency
+      (which would have been true in this case)
+
+    * ZendEngine2/zend_API.c:
+      - Revert auto-conversion in parameter API
+
+    * ZendEngine2/zend_operators.c:
+      - Don't automatically call __toString() in convert_to_string_ex().
+      - use __toString() in your code.
+      - Keep the auto-case in make_printable_zval.
+
+2003-12-01  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * NEWS
+      ext/db/.cvsignore
+      ext/db/CREDITS
+      ext/db/config.m4
+      ext/db/db.c
+      ext/db/db.dsp
+      ext/db/package.xml
+      ext/db/php_db.h
+      ext/db/tests/.cvsignore
+      ext/db/tests/001.phpt
+      ext/db/tests/002.phpt
+      ext/db/tests/003.phpt
+      ext/db/tests/004.phpt
+      ext/db/tests/005.phpt
+      ext/db/tests/006.phpt
+      ext/db/tests/test.inc
+      main/main.c:
+      - Moved ext/db to PECL.
+      
+
+2003-12-01  Christian Stocker  <chregu@phant.ch>
+
+    * ext/dom/document.c:
+      Fix Bug, if parser input is not a filename (By Adam)
+
+2003-12-01  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/tests/pear_installer4.phpt:
+      new test case and supporting files - incomplete, but works as it is
+
+    * pear/tests/pear_common_downloadHttp.phpt:
+      potential major booboo in unit test, probably won't affect this one
+
+    * pear/PEAR/Installer-minus-download.php:
+      2 bugs found here, added deprecation warning for those who have written
+      their own PEAR application
+
+    * pear/PEAR/Installer-minus-download.php:
+      2 bugs found here
+
+    * pear/PEAR/Downloader.php:
+      2 bugs found
+
+    * pear/tests/pear_common_downloadHttp.phpt:
+      fclose() might be needed
+
+    * pear/tests/pear_common_validPackageVersion.phpt:
+      new unit test
+
+    * pear/PEAR/Common.php:
+      fix bug found by unit testing in package ordering
+
+    * pear/tests/pear_common_sortPkgDeps.phpt:
+      fix unit test
+
+    * pear/tests/common_sortPkgDeps3_package.xml:
+      minor booboo
+
 2003-11-30  Greg Beaver  <greg@chiaraquartet.net>
 
     * pear/tests/common_sortPkgDeps1_package.xml
