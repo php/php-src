@@ -50,8 +50,7 @@ typedef struct _zend_mem_header {
     struct _zend_mem_header *pNext;
     struct _zend_mem_header *pLast;
 #endif
-	unsigned int size:31;
-	unsigned int cached:1;
+	unsigned int size;
 } zend_mem_header;
 
 typedef union _align_test {
