@@ -118,7 +118,7 @@ class Mail extends PEAR {
             if ($key == 'From') {
                 include_once 'Mail/rfc822.php';
                 
-                $from_arr = Mail_rfc822::parseAddressList($val, 'localhost');
+                $from_arr = Mail_rfc822::parseAddressList($val, 'localhost', false);
                 $from = $from_arr[0]->mailbox . '@' . $from_arr[0]->host;
                 if (strstr($from, ' ')) {
                     // Reject outright envelope From addresses with spaces.
