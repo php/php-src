@@ -46,29 +46,6 @@
 #include "ext/standard/php_string.h"
 #include "ext/standard/info.h"
 
-/*
-#include <stdio.h>
-#include <stdlib.h>
-#include <memory.h>
-#include <malloc.h>
-#include <math.h>
-#include <string.h>
-#include <time.h>
-#include <sys/stat.h>
-#include <ctype.h>
-
-#ifdef PHP_WIN32
-    #include <process.h>
-    #include <io.h>
-    #define stat _stat
-#else
-    #include <sys/types.h>
-    #include <dirent.h>
-    #include <unistd.h>
-    #include <errno.h>
-#endif
-*/
-
 typedef unsigned char uchar;
 
 #ifndef TRUE
@@ -101,6 +78,14 @@ typedef struct {
 	double FocalplaneUnits;
 	int ExifImageWidth;
 	int MotorolaOrder;
+	int Orientation;
+	char GPSinfo[48];
+	int ISOspeed;
+	char ExifVersion[16];
+	char Copyright[32];
+	char Software[32];
+	char *Thumbnail;
+	int ThumbnailSize;
 } ImageInfoType;
 
 /* This structure is used to store a section of a Jpeg file. */
@@ -109,14 +94,6 @@ typedef struct {
     int      Type;
     unsigned Size;
 } Section_t;
-
-#if 0
-int remove_thumbnails = FALSE;
-int DoSubdirs = FALSE;
-
-int ShowTags     = 0;        /* Do not show raw by default.          */
-int ShowStruct   = 1;        /* Show the built structure by default. */
-#endif
 
 #define EXIT_FAILURE  1
 #define EXIT_SUCCESS  0
@@ -146,22 +123,6 @@ PHP_MINFO_FUNCTION(exif) {
     php_info_print_table_row(2, "EXIF Support", "enabled" );
     php_info_print_table_end();
 }
-
-/*
-   These macros are used to read the input file.
-   To reuse this code in another application, you might need to change these.
-*/
-
-/* Error exit handler */
-/* #define ERREXIT(msg)  (fprintf(stderr,"Error : %s\n", msg), exit(EXIT_FAILURE)) */
-/*
-void ERREXIT(char *msg)
-{
-    fprintf(stderr,"Error : %s\n", msg);
-    fprintf(stderr,"in file '%s'\n",CurrentFile);
-    exit(EXIT_FAILURE);
-} 
-*/
 
 /* 
    JPEG markers consist of one or more 0xFF bytes, followed by a marker
@@ -273,14 +234,6 @@ static void process_SOFn (ImageInfoType *ImageInfo, uchar *Data, int marker)
         case M_SOF15: process = "Differential lossless, arithmetic coding";  break;
         default:      process = "Unknown";  break;
     }
-
-	/*
-    if (ShowTags) {
-        printf("JPEG image is %uw * %uh, %d color components, %d bits per sample\n",
-                   ImageInfo->Width, ImageInfo->Height, num_components, data_precision);
-        printf("JPEG process: %s\n", process);
-    }
-	*/
 }
 
 /*
@@ -309,11 +262,25 @@ static int ExifBytesPerFormat[] = {0,1,1,2,4,8,1,1,2,4,8,4,8};
 #define TAG_EXIF_OFFSET       0x8769
 #define TAG_INTEROP_OFFSET    0xa005
 
+#define TAG_COMPRESSION       0x0103
+
 #define TAG_MAKE              0x010F
 #define TAG_MODEL             0x0110
+#define TAG_ORIENTATION       0x0112
+
+#define TAG_SOFTWARE          0x0131
+
+#define TAG_THUMBOFFSET       0x0201
+#define TAG_THUMBSIZE         0x0202
+
+#define TAG_COPYRIGHT         0x8298
 
 #define TAG_EXPOSURETIME      0x829A
 #define TAG_FNUMBER           0x829D
+
+#define TAG_GPSINFO           0x8825
+#define TAG_ISOSPEED          0x8827
+#define TAG_EXIFVERSION       0x9000
 
 #define TAG_SHUTTERSPEED      0x9201
 #define TAG_APERTURE          0x9202
@@ -330,7 +297,6 @@ static int ExifBytesPerFormat[] = {0,1,1,2,4,8,1,1,2,4,8,4,8};
 #define TAG_FOCALPLANEXRES    0xa20E
 #define TAG_FOCALPLANEUNITS   0xa210
 #define TAG_IMAGEWIDTH        0xA002
-
 
 static const struct {
     unsigned short Tag;
@@ -451,27 +417,6 @@ static unsigned Get32u(void *Long, int MotorolaOrder)
     return (unsigned)Get32s(Long, MotorolaOrder) & 0xffffffff;
 }
 
-#if 0
-/* Display a number as one of its many formats */
-static void PrintFormatNumber(void *ValuePtr, int Format)
-{
-    switch(Format) {
-        case FMT_SBYTE:
-        case FMT_BYTE:      printf("%02x ",*(uchar *)ValuePtr);             break;
-        case FMT_USHORT:    printf("%d\n",Get16u(ValuePtr));                break;
-        case FMT_ULONG:     
-        case FMT_SLONG:     printf("%d\n",Get32s(ValuePtr));                break;
-        case FMT_SSHORT:    printf("%hd\n",(signed short)Get16u(ValuePtr)); break;
-        case FMT_URATIONAL:
-        case FMT_SRATIONAL: 
-           printf("%d/%d\n",Get32s(ValuePtr), Get32s(4+(char *)ValuePtr)); break;
-
-        case FMT_SINGLE:    printf("%f\n",(double)*(float *)ValuePtr);   break;
-        case FMT_DOUBLE:    printf("%f\n",*(double *)ValuePtr);          break;
-    }
-}
-#endif
-
 /* Evaluate number, be it int, rational, or float from directory. */
 static double ConvertAnyFormat(void *ValuePtr, int Format, int MotorolaOrder)
 {
@@ -522,6 +467,7 @@ static void ProcessExifDir(ImageInfoType *ImageInfo, char *DirStart, char *Offse
         php_error(E_ERROR,"Illegally sized directory");
     }
 
+
 	/*
     if (ShowTags) {
         printf("Directory with %d entries\n",NumDirEntries);
@@ -569,43 +515,7 @@ static void ProcessExifDir(ImageInfoType *ImageInfo, char *DirStart, char *Offse
 			*/
             LastExifRefd = ValuePtr+ByteCount;
         }
-#if 0	
-        if (ShowTags) {
-            /* Show tag name */
-            for (a=0;;a++) {
-                if (TagTable[a].Tag == 0) {
-                    printf("  Unknown Tag %04x Value = ", Tag);
-                    break;
-                }
-                if (TagTable[a].Tag == Tag) {
-                    printf("    %s = ",TagTable[a].Desc);
-                    break;
-                }
-            }
 
-            /* Show tag value. */
-            switch(Format) {
-
-                case FMT_UNDEFINED:
-                    /* Undefined is typically an ascii string. */
-
-                case FMT_STRING:
-                    /* String arrays printed without function call (different from int arrays) */
-                    printf("\"");
-                    for (a=0;a<ByteCount;a++) {
-                        if (isprint((ValuePtr)[a])) {
-                            putchar((ValuePtr)[a]);
-                        }
-                    }
-                    printf("\"\n");
-                    break;
-
-                default:
-                    /* Handle arrays of numbers later (will there ever be?) */
-                    PrintFormatNumber(ValuePtr, Format);
-            }
-        }
-#endif
         /* Extract useful components of tag */
         switch(Tag) {
 
@@ -616,6 +526,30 @@ static void ProcessExifDir(ImageInfoType *ImageInfo, char *DirStart, char *Offse
             case TAG_MODEL:
                 strncpy(ImageInfo->CameraModel, ValuePtr, 63);
                 break;
+
+            case TAG_GPSINFO:
+                strncpy(ImageInfo->GPSinfo, ValuePtr, 47);
+                break;
+
+            case TAG_EXIFVERSION:
+                strncpy(ImageInfo->ExifVersion, ValuePtr, 15);
+                break;
+
+            case TAG_COPYRIGHT:
+                strncpy(ImageInfo->Copyright, ValuePtr, 31);
+                break;
+
+			case TAG_SOFTWARE:
+                strncpy(ImageInfo->Software, ValuePtr, 31);
+                break;
+
+			case TAG_ORIENTATION:
+                ImageInfo->Orientation = (int)ConvertAnyFormat(ValuePtr, Format,ImageInfo->MotorolaOrder);
+				break;
+
+			case TAG_ISOSPEED:
+                ImageInfo->ISOspeed = (int)ConvertAnyFormat(ValuePtr, Format,ImageInfo->MotorolaOrder);
+				break;
 
             case TAG_DATETIME_ORIGINAL:
                 strncpy(ImageInfo->DateTime, ValuePtr, 19);
@@ -740,7 +674,7 @@ static void ProcessExifDir(ImageInfoType *ImageInfo, char *DirStart, char *Offse
 }
 
 /* 
-   rocess a EXIF marker
+   Process an EXIF marker
    Describes all the drivel that most digital cameras include...
 */
 static void process_EXIF (ImageInfoType *ImageInfo, char *CharBuf, unsigned int length, char *LastExifRefd)
@@ -751,12 +685,6 @@ static void process_EXIF (ImageInfoType *ImageInfo, char *CharBuf, unsigned int 
     ImageInfo->FocalplaneXRes = 0;
     ImageInfo->FocalplaneUnits = 0;
     ImageInfo->ExifImageWidth = 0;
-
-	/*
-    if (ShowTags) {
-        printf("Exif header %d bytes long\n",length);
-    }
-	*/
 
     {   /* Check the EXIF header component */
         static const uchar ExifHeader[] = {0x45, 0x78, 0x69, 0x66, 0x00, 0x00};
@@ -790,12 +718,6 @@ static void process_EXIF (ImageInfoType *ImageInfo, char *CharBuf, unsigned int 
     if (ImageInfo->FocalplaneXRes != 0) {
         ImageInfo->CCDWidth = (float)(ImageInfo->ExifImageWidth * ImageInfo->FocalplaneUnits / ImageInfo->FocalplaneXRes);
     }
-
-	/*
-    if (ShowTags) {
-        printf("Thunbnail size of Exif header: %d\n",length-(LastExifRefd-CharBuf));
-    }
-	*/
 }
  
 /* Parse the marker stream until SOS or EOI is seen; */
@@ -930,95 +852,6 @@ static int scan_JPEG_header (ImageInfoType *ImageInfo, FILE *infile, Section_t *
     return TRUE;
 }
 
-
-#if 0
-/* Command line parsing code */
-static const char *progname;   /* program name for error messages */
-#endif
-
-#if 0
-/* 
-   Show the collected image info, displaying camera F-stop and shutter speed
-   in a consistent and legible fashion.
-*/
-void ShowImageInfo(ImageInfoType *ImageInfo)
-{
-    printf("File name    : %s\n",ImageInfo->FileName);
-    printf("File size    : %d bytes\n",ImageInfo->FileSize);
-
-    {
-        char Temp[20];
-        struct tm ts;
-        ts = *localtime(&ImageInfo->FileDateTime);
-        strftime(Temp, 20, "%Y:%m:%d %H:%M:%S", &ts);
-        printf("File date    : %s\n",Temp);
-    }
-
-    if (ImageInfo->CameraMake[0]) {
-        printf("Camera make  : %s\n",ImageInfo->CameraMake);
-        printf("Camera model : %s\n",ImageInfo->CameraModel);
-    }
-    if (ImageInfo->DateTime[0]) {
-        printf("Date/Time    : %s\n",ImageInfo->DateTime);
-    }
-    printf("Resolution   : %d x %d\n",ImageInfo->Width, ImageInfo->Height);
-    if (ImageInfo->IsColor == 0) {
-        printf("Color/bw     : Black and white\n");
-    }
-    if (ImageInfo->FlashUsed >= 0) {
-        printf("Flash used   : %s\n",ImageInfo->FlashUsed ? "Yes" :"No");
-    }
-    if (ImageInfo->FocalLength) {
-        printf("Focal length : %4.1fmm",(double)ImageInfo->FocalLength);
-        if (ImageInfo->CCDWidth) {
-            printf("  (35mm equivalent: %dmm)",
-                        (int)(ImageInfo->FocalLength/ImageInfo->CCDWidth*35 + 0.5));
-        }
-        printf("\n");
-    }
-
-    if (ImageInfo->CCDWidth) {
-        printf("CCD Width    : %5.2fm\n",(double)ImageInfo->CCDWidth);
-    }
-
-    if (ImageInfo->ExposureTime) {
-        printf("Exposure time:%6.3f s ",(double)ImageInfo->ExposureTime);
-        if (ImageInfo->ExposureTime <= 0.5) {
-            printf(" (1/%d)",(int)(0.5 + 1/ImageInfo->ExposureTime));
-        }
-        printf("\n");
-    }
-    if (ImageInfo->ApertureFNumber) {
-        printf("Aperture     : f/%4.1f\n",(double)ImageInfo->ApertureFNumber);
-    }
-    if (ImageInfo->Distance) {
-        if (ImageInfo->Distance < 0) {
-            printf("Focus Dist.  : Infinite\n");
-        } else {
-            printf("Focus Dist.  :%5.2fm\n",(double)ImageInfo->Distance);
-        }
-    }
-
-    /* Print the comment. Print 'Comment:' for each new line of comment. */
-    if (ImageInfo->Comments[0]) {
-        int a,c;
-        printf("Comment      : ");
-        for (a=0;a<200;a++) {
-            c = ImageInfo->Comments[a];
-            if (c == '\0') break;
-            if (c == '\n') {
-                printf("\nComment      : ");
-            } else {
-                putchar(c);
-            }
-        }
-        printf("\n");
-    }
-
-    printf("\n");
-}
-#endif
-
 /* 
    Discard read data.
 */
@@ -1083,80 +916,38 @@ int ReadJpegFile(ImageInfoType *ImageInfo, Section_t *Sections,
 
     fclose(infile);
 
-    if (ret != FALSE) {
-        DiscardData(Sections, SectionsRead);
-    }
     return ret;
 }
 
-#if 0
-/* 
-   Remove exif thumbnail
-*/
-int RemoveThumbnail(Section_t *Sections)
-{
-    int a;
-    for (a=0;a<SectionsRead-1;a++) {
-        if (Sections[a].Type == M_EXIF) {
-            /* Truncate the thumbnail section of the exif. */
-            unsigned int Newsize = LastExifRefd-(char *)Sections[a].Data;
-            if (Sections[a].Size == Newsize) return FALSE; /* Thumbnail already gonne. */
-            Sections[a].Size = Newsize;
-            Sections[a].Data[0] = (uchar)(Newsize >> 8);
-            Sections[a].Data[1] = (uchar)Newsize;
-            return TRUE;
-        }
-    }
-    /* Not an exif image.  Don't know how to get rid of thumbnails. */
-    return FALSE;
-}
-#endif
-
-#if 0
-/*
-   Write image data back to disk.
-*/
-void WriteJpegFile(char *FileName, Section_t *Sections, int *SectionsRead, int *HaveAll)
-{
-    FILE *outfile;
-    int a;
-
-    if (!*HaveAll) {
-        php_error(E_ERROR,"Can't write back - didn't read all");
-    }
-
-    outfile = V_FOPEN(FileName,"wb");
-    if (outfile == NULL) {
-        php_error(E_ERROR,"Could not open file for write");
-    }
-
-    /* Initial static jpeg marker. */
-    fputc(0xff,outfile);
-    fputc(0xd8,outfile);
-    
-    /* Write all the misc sections */
-    for (a=0;a<*SectionsRead-1;a++) {
-        fputc(0xff,outfile);
-        fputc(Sections[a]->Type, outfile);
-        fwrite(Sections[a]->Data, Sections[a]->Size, 1, outfile);
-    }
-
-    /* Write the remaining image data. */
-    fwrite(Sections[a]->Data, Sections[a]->Size, 1, outfile);
-       
-    fclose(outfile);
-}
-#endif
-
-int php_read_jpeg_exif(ImageInfoType *ImageInfo, char *FileName, int ReadAll) {
+PHPAPI int php_read_jpeg_exif(ImageInfoType *ImageInfo, char *FileName, int ReadAll) {
 	Section_t Sections[20];
 	int SectionsRead;
 	char *LastExifRefd=NULL;
-	int ret;
+	int ret, i;
+	int thumbsize=0;
 
 	ImageInfo->MotorolaOrder = 0;
 
     ret = ReadJpegFile(ImageInfo, Sections, &SectionsRead, FileName, ReadAll, LastExifRefd); 
+	/*
+	 * Thought this might pick out the embedded thumbnail, but it doesn't work.
+    for (i=0;i<SectionsRead-1;i++) {
+        if (Sections[i].Type == M_EXIF) {
+			thumbsize = Sections[i].Size;
+			if(thumbsize>0) {
+				ImageInfo->Thumbnail = emalloc(thumbsize+5);
+				ImageInfo->ThumbnailSize = thumbsize;
+				ImageInfo->Thumbnail[0] = 0xff;
+				ImageInfo->Thumbnail[1] = 0xd8;
+				ImageInfo->Thumbnail[2] = 0xff;
+				memcpy(ImageInfo->Thumbnail+4, Sections[i].Data, thumbsize+4);
+			}
+        }
+    }
+	*/
+    if (ret != FALSE) {
+        DiscardData(Sections, &SectionsRead);
+    }
 	return(ret);
 }
 
@@ -1167,6 +958,9 @@ PHP_FUNCTION(read_exif_data) {
     int ac = ARG_COUNT(ht), ret;
 	ImageInfoType ImageInfo;
 	char tmp[64];
+
+	ImageInfo.Thumbnail = NULL;
+	ImageInfo.ThumbnailSize = 0;
 
     if (ac != 1 || zend_get_parameters_ex(ac, &p_name) == FAILURE)
 		WRONG_PARAM_COUNT;
@@ -1229,341 +1023,39 @@ PHP_FUNCTION(read_exif_data) {
 	if(ImageInfo.CCDWidth) {
 		add_assoc_double(return_value,"CCDWidth",ImageInfo.CCDWidth);
 	}
+	if(ImageInfo.Orientation) {
+		add_assoc_long(return_value,"Orientation",ImageInfo.Orientation);
+	}
+	if (ImageInfo.GPSinfo[0]) {
+		add_assoc_string(return_value,"GPSinfo",ImageInfo.GPSinfo,1);
+	}
+	if(ImageInfo.ISOspeed) {
+		add_assoc_long(return_value,"ISOspeed",ImageInfo.ISOspeed);
+	}
+	if (ImageInfo.ExifVersion[0]) {
+		add_assoc_string(return_value,"ExifVersion",ImageInfo.ExifVersion,1);
+	}
+	if (ImageInfo.Copyright[0]) {
+		add_assoc_string(return_value,"Copyright",ImageInfo.Copyright,1);
+	}
+	if (ImageInfo.Software[0]) {
+		add_assoc_string(return_value,"Software",ImageInfo.Software,1);
+	}
 	if(ImageInfo.Comments[0]) {
 		add_assoc_string(return_value,"Comments",ImageInfo.Comments,1);
 	}
+	if(ImageInfo.ThumbnailSize) {
+		add_assoc_stringl(return_value,"Thumbnail",ImageInfo.Thumbnail,ImageInfo.ThumbnailSize,1);
+		add_assoc_long(return_value,"ThumbnailSize",ImageInfo.ThumbnailSize);
+		efree(ImageInfo.Thumbnail);
+	}
 }
 
-#if 0
+#endif
+
 /*
-   Do selected operations to one file at a time.
-*/
-void ProcessFile(char *FileName)
-{
-    int MayModify = FALSE;
-    int Modified = FALSE;
-	ImageInfoType ImageInfo;
-	Section_t Sections[20];
-	int SectionsRead, HaveAll;
-	char *LastExifRefd;
-
-/*    FilesMatched = TRUE; / * Turns off complaining that nothing matched. */
-
-	/*
-    if (remove_thumbnails) {
-        MayModify = TRUE;
-    }
-	*/
-
-    if (!ReadJpegFile(&ImageInfo, &Sections, &SectionsRead, &HaveAll, FileName, MayModify, LastExifRefd)) return;
-
-    ShowImageInfo(&ImageInfo);
-
-	/*
-    if (remove_thumbnails) {
-        if (RemoveThumbnail(&Sections, SectionsRead)) {
-            Modified = TRUE;
-        }
-    }   
-	*/
-
-    if (Modified) {
-        char BackupName[400];
-        strcpy(BackupName, FileName);
-        strcat(BackupName, ".old");
-
-        /* Remove any .old file name that may pre-exist */
-        unlink(BackupName);
-
-        /* Rename the old file. */
-        rename(FileName, BackupName);
-
-        /* Write the new file. */
-        WriteJpegFile(FileName);
-
-        /* Now that we are done, remove original file. */
-        unlink(BackupName);
-    }
-    DiscardData(&Sections, &SectionsRead, &HaveAll);
-
-}
-#endif
-
-#if 0
-/* complain about bad state of the command line. */
-static void Usage (void)
-{
-    fprintf(stderr,"Program for extracting Digicam setting information from Exif Jpeg headers\n"
-                   "used by most Digital Cameras.  v0.9  Matthias Wandel, April 2000.\n"
-                   "http://www.sentex.net/~mwandel/jhead  mwandel@sentex.net\n"
-                   "\n");
-
-    fprintf(stderr,"Usage: %s [options] files\n", progname);
-    fprintf(stderr,"Where:\n"
-                   "[otpions] are:\n"
-                   "   -t     -->      Remove exif thumbnails from exif files\n"
-                   "   -r     -->      Recursive.\n"
-                   "   -h     -->      help (this text)\n"
-                   "   -v     -->      even more verbose output\n"
-                   "files     -->      path/filenames with or without widlcards\n"
-           );
-                    
-
-    exit(EXIT_FAILURE);
-}
-#endif
-
-/* Checking of an extension. */
-int ExtCheck(char *Ext, char *Pattern)
-{
-    for(;;Ext++,Pattern++) {
-        if (*Ext == *Pattern) {
-            if (*Ext == '\0') return 0; /* Matches. */
-            continue;
-        }
-        if (*Ext > 'A' && *Ext <= 'Z') {
-            if (*Ext+'a'-'A' == *Pattern) continue;
-        }
-        return 1; /* Differs. */
-    }
-}
-
-#if 0
-/* Handle a pattern, possibly using subdirectories... (Linux) */
-#ifndef PHP_WIN32
-static void HandleSubpath(char *Path)
-{
-    DIR *dirpt;
-
-    char DirName[200];
-    int a;
-    struct stat filestat;
-
-    if (stat(Path, &filestat)) {
-        printf("Error on '%s'\n",Path);
-        return;
-    }
-    if(!S_ISDIR(filestat.st_mode)) {
-        /* This is a file, not a directory. */
-        ProcessFile(Path);
-        return;
-    }
-
-    strcpy(DirName,Path);
-    a=strlen(DirName);
-
-    if (DirName[a-1] != '/') {
-        /* Make sure it ends with '/' */
-        DirName[a] = '/';
-        DirName[a+1] = '\0';
-    }
-
-    dirpt = opendir(DirName);
-    if (dirpt == NULL) {
-         printf("Could not read directory: %s",strerror(errno));
-         return;
-    }
-
-    for (;;) {
-        struct dirent *entry;
-        static char FullPath[400];
-
-        entry = readdir(dirpt);
-        if (entry == NULL) break;
-
-        strcpy(FullPath, DirName);
-        strcat(FullPath, entry->d_name);
-
-        if (stat(FullPath, &filestat)) {
-            printf("Error on '%s'\n",FullPath);
-            continue;
-        }
-
-        if(!S_ISREG(filestat.st_mode)) continue; /* Not a regular file.  Ignore. */
-
-        a=strlen(entry->d_name);
-
-        if (a < 5) continue; /* Too short a name to make sense (looking for .jpg extension) */
-
-        if (ExtCheck(entry->d_name+a-5, ".jpeg") != 0
-            && ExtCheck(entry->d_name+a-4, ".jpg") != 0) {
-            /* Its not .jpg or .jpeg. */
-            continue;
-        }
-
-        ProcessFile(FullPath);
-    }
-    closedir(dirpt);
-
-    /* 
-	   Do subdirectories after doing the current directory.
-       This necessitates reading the directory twice.
-	*/
-    if (DoSubdirs) {
-        dirpt = opendir(DirName);
-        for (;;) {
-            struct dirent *entry;
-            static char FullPath[400];
-
-            entry = readdir(dirpt);
-            if (entry == NULL) break;
-
-            strcpy(FullPath, DirName);
-            strcat(FullPath, entry->d_name);
-
-            if (stat(FullPath, &filestat)) {
-                printf("Error on '%s'\n",FullPath);
-                continue;
-            }
-
-            if(!S_ISDIR(filestat.st_mode)) continue; /* Not a directory. */
-
-            if (entry->d_name[0] == '.' || entry->d_name[0] == '_') {
-                /* Skip strange directory names (I use these for thumbnails) */
-            } else {
-                HandleSubpath(FullPath);
-            }
-        }
-        closedir(dirpt);
-    }
-}
-
-#else
-/* Handle a pattern, possibly using subdirectories... (Windows) */
-static void HandleSubpath(char *Path)
-{
-    struct _finddata_t finddata;
-
-    long find_handle;
-    char ThisPattern[200];
-    int a;
-
-    strcpy(ThisPattern,Path);
-
-    if (DoSubdirs) {
-        strcat(ThisPattern,"\\*");
-    }
-    find_handle = _findfirst(ThisPattern, &finddata);
-
-    if (find_handle == -1) {
-        fprintf(stderr, "Error: No file matches '%s'\n",Path);
-    }
-
-    for (;;) {
-        static char CombinedPath[400];
-        if (find_handle == -1) break;
-
-        if (finddata.attrib & _A_SUBDIR) goto nextfile; /* Its a subdirectory. */
-
-        a=strlen(finddata.name);
-
-        if (a < 5) goto nextfile; /* Too short a name to contain '.jpg' */
-
-        if (ExtCheck(finddata.name+a-5, ".jpeg") != 0
-            && ExtCheck(finddata.name+a-4, ".jpg") != 0) {
-            /* Its not .jpg or .jpeg. */
-            goto nextfile;
-        }
-
-        /* 
-		   This whole area is really gross, but below hack makes it so that
-           if I drag a single file on it on the desktop, it will find it
-           using the given paths.
-		*/
-        strcpy(CombinedPath, Path);
-        a=strlen(Path);
-
-        if (!DoSubdirs) {
-            for(;a;) {
-                a--;
-                if (!a) {
-                    CombinedPath[0] = 0;
-                    break;
-                }
-                if (CombinedPath[a] == '\\') {
-                    CombinedPath[a+1] = 0;
-                    break;
-                }
-            }
-        } else {
-            strcat(CombinedPath, "\\");
-        }
-        strcat(CombinedPath, finddata.name);
-
-        ProcessFile(CombinedPath);
-
-        nextfile:
-
-        if (_findnext(find_handle, &finddata) != 0) break;
-    }
-
-    _findclose(find_handle);
-
-    if (DoSubdirs) {
-        find_handle = _findfirst(ThisPattern, &finddata);
-        for (;;) {
-            if (find_handle == -1) break;
-
-            if (finddata.attrib & _A_SUBDIR) {
-                /* Its a subdirectory. */
-                if (finddata.name[0] == '.' || finddata.name[0] == '_') {
-                    /* Skip strange directory names (I use thes for thumbnails) */
-                } else {
-                    strcpy(ThisPattern, Path);
-                    strcat(ThisPattern, "\\");
-                    strcat(ThisPattern, finddata.name);
-                    HandleSubpath(ThisPattern);
-                }
-            }
-            if (_findnext(find_handle, &finddata) != 0) break;
-        }
-
-        _findclose(find_handle);
-    }
-}
-
-#endif
-#endif
-
-#if 0
-int main (int argc, char **argv)
-{
-    int argn;
-    char *arg;
-    progname = argv[0];
-
-    for (argn=1;argn<argc;argn++) {
-        arg = argv[argn];
-        if (arg[0] != '-') break;    /* Filenames from here on. */
-        if (!strcmp(arg,"-v")) {
-            ShowTags = TRUE;
-        } else if (!strcmp(arg,"-t")) {
-            remove_thumbnails = TRUE;
-        } else if (!strcmp(arg,"-r")) {
-            DoSubdirs = TRUE;
-        } else if (!strcmp(arg,"-h")) {
-            Usage();
-        } else {
-            printf("Argument '%s' not understood\n",arg);
-            Usage();
-        }
-    }
-    if (argn == argc) {
-        fprintf(stderr,"Error: Must supply a file name\n");
-        Usage();
-    }
-
-    for (;argn<argc;argn++) {
-        FilesMatched = FALSE;
-        
-        HandleSubpath(argv[argn]);
-
-        if (!FilesMatched) {
-            fprintf(stderr, "Error: No files matched '%s'\n",argv[argn]);
-        }
-    }
-    return EXIT_SUCCESS;
-}
-#endif
-
-#endif
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ */
