@@ -305,7 +305,6 @@ int main(int argc, char *argv[])
 	zend_llist global_vars;
 	int interactive=0;
     char *exec_direct=NULL;
-    char *compiled_string_description;
 /* end of temporary locals */
 #ifdef ZTS
 	zend_compiler_globals *compiler_globals;
@@ -480,7 +479,7 @@ int main(int argc, char *argv[])
 				behavior=PHP_MODE_HIGHLIGHT;
 				break;
 
-			case 'r': /* generate highlighted HTML from source */
+			case 'r': /* run code from command line */
 				behavior=PHP_MODE_CLI_DIRECT;
 				exec_direct=ap_php_optarg;
 				break;
@@ -605,11 +604,9 @@ int main(int argc, char *argv[])
 			break;
 #endif
 		case PHP_MODE_CLI_DIRECT:
-			compiled_string_description = zend_make_compiled_string_description("Command line code" TSRMLS_CC);
-        if (zend_eval_string(exec_direct, NULL, compiled_string_description TSRMLS_CC) == FAILURE) {
+        if (zend_eval_string(exec_direct, NULL, "Command line code" TSRMLS_CC) == FAILURE) {
             exit_status=254;
         }
-        efree(compiled_string_description);
 		}
 		
 		php_request_shutdown((void *) 0);
