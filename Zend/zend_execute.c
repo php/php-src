@@ -2371,7 +2371,7 @@ int zend_fetch_class_handler(ZEND_OPCODE_HANDLER_ARGS)
 
 			if(retval == FAILURE) {
 				/* try namespace */
-				if(zend_hash_find(&EG(global_namespace_ptr)->class_table, class_name_strval, class_name_strlen+1, (void **)&pce) == SUCCESS && (*pce)->type != ZEND_NAMESPACE) {
+				if(zend_hash_find(&EG(global_namespace_ptr)->class_table, class_name_strval, class_name_strlen+1, (void **)&pce) == SUCCESS && (*pce)->type != ZEND_USER_NAMESPACE && (*pce)->type != ZEND_INTERNAL_NAMESPACE) {
 					retval = SUCCESS;
 				}
 			}
@@ -2382,7 +2382,7 @@ int zend_fetch_class_handler(ZEND_OPCODE_HANDLER_ARGS)
 			if(EX(opline)->extended_value == ZEND_FETCH_CLASS_GLOBAL) {
 				ns = EG(global_namespace_ptr);
 			} else {
-				if (zend_hash_find(&EG(global_namespace_ptr)->class_table, EX(opline)->op1.u.constant.value.str.val, EX(opline)->op1.u.constant.value.str.len+1, (void **)&pce) == FAILURE || (*pce)->type != ZEND_NAMESPACE) {
+				if (zend_hash_find(&EG(global_namespace_ptr)->class_table, EX(opline)->op1.u.constant.value.str.val, EX(opline)->op1.u.constant.value.str.len+1, (void **)&pce) == FAILURE || ((*pce)->type != ZEND_USER_NAMESPACE && (*pce)->type != ZEND_INTERNAL_NAMESPACE)) {
 					zend_error(E_ERROR, "Namespace '%s' not found", EX(opline)->op1.u.constant.value.str.val);
 				}
 				ns = *pce;
@@ -3976,7 +3976,7 @@ int zend_start_namespace_handler(ZEND_OPCODE_HANDLER_ARGS)
 			zend_error(E_ERROR, "Internal error: Invalid type in namespace definition - %d", Z_TYPE_P(namespace_name));
 		}
 
-		if(zend_hash_find(&EG(global_namespace_ptr)->class_table, Z_STRVAL_P(namespace_name), Z_STRLEN_P(namespace_name)+1, (void **)&pns) != SUCCESS || (*pns)->type != ZEND_NAMESPACE) {
+		if(zend_hash_find(&EG(global_namespace_ptr)->class_table, Z_STRVAL_P(namespace_name), Z_STRLEN_P(namespace_name)+1, (void **)&pns) != SUCCESS || (*pns)->type != ZEND_USER_NAMESPACE) {
 			zend_error(E_ERROR, "Internal error: Cannot locate namespace '%s'", Z_STRVAL_P(namespace_name));
 		}
 	} else {

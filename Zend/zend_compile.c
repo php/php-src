@@ -3330,6 +3330,8 @@ void zend_destroy_property_info(zend_property_info *property_info)
 
 void zend_init_namespace(zend_namespace *ns TSRMLS_DC)
 {
+	zend_bool persistent_hashes = (ns->type == ZEND_INTERNAL_NAMESPACE) ? 1 : 0;
+
 	ns->refcount = 1;
 	ns->constants_updated = 0;
 	ns->ce_flags = 0;
@@ -3338,11 +3340,15 @@ void zend_init_namespace(zend_namespace *ns TSRMLS_DC)
 	ns->doc_comment = NULL;
 	ns->doc_comment_len = 0;
 
-	zend_hash_init(&ns->function_table, 10, NULL, ZEND_FUNCTION_DTOR, 0);
-	zend_hash_init(&ns->class_table, 10, NULL, ZEND_CLASS_DTOR, 0);
-	zend_hash_init(&ns->constants_table, 10, NULL, ZVAL_PTR_DTOR, 0);
-	ALLOC_HASHTABLE(ns->static_members);
-	zend_hash_init(ns->static_members, 0, NULL, ZVAL_PTR_DTOR, 0);
+	if (persistent_hashes) {
+		ns->static_members = (HashTable *) malloc(sizeof(HashTable));
+	} else {
+		ALLOC_HASHTABLE(ns->static_members);
+	}
+	zend_hash_init_ex(ns->static_members, 0, NULL, ZVAL_PTR_DTOR, persistent_hashes, 0);
+	zend_hash_init_ex(&ns->function_table, 10, NULL, ZEND_FUNCTION_DTOR, persistent_hashes, 0);
+	zend_hash_init_ex(&ns->class_table, 10, NULL, ZEND_CLASS_DTOR, persistent_hashes, 0);
+	zend_hash_init_ex(&ns->constants_table, 10, NULL, ZVAL_PTR_DTOR, persistent_hashes, 0);
 
 	ns->parent = NULL;
 	ns->ns = NULL;
@@ -3353,8 +3359,6 @@ void zend_init_namespace(zend_namespace *ns TSRMLS_DC)
 	ns->__set = NULL;
 	ns->__call = NULL;
 	ns->create_object = NULL;
-
-	ns->type = ZEND_NAMESPACE;
 }
 
 void zend_do_begin_namespace(znode *ns_token, znode *ns_name TSRMLS_DC)
@@ -3366,7 +3370,7 @@ void zend_do_begin_namespace(znode *ns_token, znode *ns_name TSRMLS_DC)
 
 	if(zend_hash_find(&CG(global_namespace).class_table, ns_name->u.constant.value.str.val, ns_name->u.constant.value.str.len+1, (void **)&pns) == SUCCESS) {
 		ns = *pns;
-		if(ns->type != ZEND_NAMESPACE || ns == CG(active_namespace)) {
+		if(ns->type != ZEND_USER_NAMESPACE || ns == CG(active_namespace)) {
 			zend_error(E_COMPILE_ERROR, "Cannot redefine namespace '%s' - class or namespace with this name already defined", ns->name);
 		}
 		FREE_PNODE(ns_name);
@@ -3374,6 +3378,7 @@ void zend_do_begin_namespace(znode *ns_token, znode *ns_name TSRMLS_DC)
 		ns = emalloc(sizeof(zend_namespace));
 		ns->name = ns_name->u.constant.value.str.val;
 		ns->name_length = ns_name->u.constant.value.str.len;
+		ns->type = ZEND_USER_NAMESPACE;
 		zend_hash_add(&CG(global_namespace).class_table, ns->name, ns->name_length+1, (void **)&ns, sizeof(zend_namespace *), NULL);
 		zend_init_namespace(ns TSRMLS_CC);
 		ns->line_start = zend_get_compiled_lineno(TSRMLS_C);

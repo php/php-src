@@ -1051,7 +1051,7 @@ static int copy_class_name(zend_class_entry **pce, int num_args, va_list args, z
 	zend_class_entry *ce  = *pce;
 
 	if (hash_key->nKeyLength==0 || hash_key->arKey[0]!=0) {
-		if (ce->type == ZEND_NAMESPACE) {
+		if (ce->type == ZEND_USER_NAMESPACE || ce->type == ZEND_INTERNAL_NAMESPACE) {
 			zval *subarray;
 
 			MAKE_STD_ZVAL(subarray);

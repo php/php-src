@@ -720,9 +720,10 @@ int zendlex(znode *zendlval TSRMLS_DC);
 #define ZEND_OVERLOADED_FUNCTION	3
 #define	ZEND_EVAL_CODE				4
 
-#define ZEND_INTERNAL_CLASS		1
-#define ZEND_USER_CLASS			2
-#define ZEND_NAMESPACE          3
+#define ZEND_INTERNAL_CLASS         1
+#define ZEND_USER_CLASS             2
+#define ZEND_INTERNAL_NAMESPACE     3
+#define ZEND_USER_NAMESPACE         4
 
 #define ZEND_EVAL				(1<<0)
 #define ZEND_INCLUDE			(1<<1)
