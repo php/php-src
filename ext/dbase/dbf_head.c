@@ -7,8 +7,8 @@
 #include <stdio.h>
 #include <fcntl.h>
 
-#include "dbf.h"
 #include "php.h"
+#include "dbf.h"
 
 void free_dbf_head(dbhead_t *dbh);
 int get_dbf_field(dbhead_t *dbh, dbfield_t *dbf);
@@ -220,7 +220,7 @@ char *get_dbf_f_fmt(dbfield_t *dbf)
 	return (char *)strdup(format);
 }
 
-dbhead_t *dbf_open(char *dp, int o_flags)
+dbhead_t *dbf_open(char *dp, int o_flags TSRMLS_DC)
 {
 	int fd;
 	char *cp;

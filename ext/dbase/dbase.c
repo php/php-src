@@ -137,7 +137,7 @@ PHP_FUNCTION(dbase_open)
 		RETURN_FALSE;
 	}
 
-	dbh = dbf_open(dbf_name->value.str.val, options->value.lval);
+	dbh = dbf_open(dbf_name->value.str.val, options->value.lval TSRMLS_CC);
 	if (dbh == NULL) {
 		php_error(E_WARNING, "unable to open database %s", dbf_name->value.str.val);
 		RETURN_FALSE;
