@@ -84,7 +84,7 @@ PHP_FUNCTION(strcoll);
 #endif
 
 
-#ifdef ZTS
+#if defined(HAVE_LOCALECONV) && defined(ZTS)
 PHP_MINIT_FUNCTION(localeconv);
 PHP_MSHUTDOWN_FUNCTION(localeconv);
 #endif
