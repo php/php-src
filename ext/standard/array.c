@@ -21,6 +21,7 @@
    +----------------------------------------------------------------------+
 */
 
+
 /* $Id$ */
 
 #include "php.h"
@@ -39,7 +40,6 @@
 #include "win32/unistd.h"
 #endif
 #include "zend_globals.h"
-#include "zend_variables.h"
 #include "php_globals.h"
 #include "php_array.h"
 #include "basic_functions.h"
