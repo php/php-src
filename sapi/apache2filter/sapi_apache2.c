@@ -29,13 +29,19 @@ php_apache_sapi_ub_write(const char *str, uint str_length)
 	ap_bucket *b;
 	ap_bucket_brigade *bb;
 	php_struct *ctx;
+	uint now;
 	SLS_FETCH();
 
 	ctx = SG(server_context);
 
 	bb = ap_brigade_create(ctx->f->r->pool);
-	b = ap_bucket_create_transient(str, str_length);
-	AP_BRIGADE_INSERT_TAIL(bb, b);
+	while (str_length > 0) {
+		now = MIN(str_length, 4096);
+		b = ap_bucket_create_transient(str, now);
+		AP_BRIGADE_INSERT_TAIL(bb, b);
+		str += now;
+		str_length -= now;
+	}
 	ap_pass_brigade(ctx->f->next, bb);
 	
 	return str_length;
@@ -313,7 +319,8 @@ ok:
 		eos = ap_bucket_create_eos();
 		AP_BRIGADE_INSERT_TAIL(bb, eos);
 		ap_pass_brigade(f->next, bb);
-	}
+	} else
+		ap_brigade_destroy(bb);
 
 	return APR_SUCCESS;
 }
