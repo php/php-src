@@ -1,6 +1,9 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 2002, Version 4.3.0
+- Added a default timeout to PHP streams (kalowsky, Ilia A <ilia@prohost.org>.
+- Added odbc_data_source() functionality to identify DB ServerName, and a 
+  description of it gathered from the DSN. (kalowsky)
 - Added $DomDocument->xinclude() for substitution of XIncludes in
 - Changed zlib.output_compression behavior. If larger chunk is preferred,
 - Copy() fixed to return 1 on 0 byte files. Patch by Ilia A <ilia@prohost.org>.
