@@ -8,11 +8,10 @@ Fixed:
     socket_iovec_alloc (Rasmus)
 	exif_imagetype,exif_thumbnail (Rasmus)
     dbase_open (Rasmus)
-
+	array_pad (Rasmus)
 
 Open:
 
-    array_pad
     bcsub (1)
     mb_ereg (2)
     mb_ereg_match (2)

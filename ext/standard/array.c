@@ -2339,6 +2339,10 @@ PHP_FUNCTION(array_pad)
 	
 	/* Populate the pads array */
 	num_pads = pad_size_abs - input_size;
+	if(num_pads > 1048576) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "You may only pad up to 1048576 elements at a time");
+		RETURN_FALSE;
+	}
 	pads = (zval ***)emalloc(num_pads * sizeof(zval **));
 	for (i = 0; i < num_pads; i++)
 		pads[i] = pad_value;
