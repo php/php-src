@@ -152,6 +152,8 @@ ap_php_conv_10(register wide_int num, register bool_int is_unsigned,
 	return (p);
 }
 
+/* If you change this value then also change bug24640.phpt.
+ */
 #define	NDIG	80
 
 
@@ -291,6 +293,7 @@ char *
 ap_php_cvt(double arg, int ndigits, int *decpt, int *sign, int eflag, char *buf)
 {
 	register int r2;
+	int mvl;
 	double fi, fj;
 	register char *p, *p1;
 
@@ -310,9 +313,16 @@ ap_php_cvt(double arg, int ndigits, int *decpt, int *sign, int eflag, char *buf)
 	 */
 	if (fi != 0) {
 		p1 = &buf[NDIG];
-		while (p1 > &buf[0] && fi != 0) {
+		while (fi != 0) {
 			fj = modf(fi / 10, &fi);
-			*--p1 = (int) ((fj + .03) * 10) + '0';
+			if (p1 > &buf[0]) {
+				*--p1 = (int) ((fj + .03) * 10) + '0';
+			} else {
+				mvl = NDIG - ndigits;
+				memmove(&buf[mvl], &buf[0], NDIG-mvl-1);
+				p1 += mvl;
+				*--p1 = (int) ((fj + .03) * 10) + '0';
+			}
 			r2++;
 		}
 		while (p1 < &buf[NDIG])
