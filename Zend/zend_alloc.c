@@ -116,7 +116,11 @@ ZEND_API void *_emalloc(size_t size)
 
 	if (!p) {
 		fprintf(stderr,"FATAL:  emalloc():  Unable to allocate %ld bytes\n", (long) size);
+#if !(WIN32||WINNT) && ZEND_DEBUG
+		kill(getpid(), SIGSEGV);
+#else
 		exit(1);
+#endif
 		HANDLE_UNBLOCK_INTERRUPTIONS();
 		return (void *)p;
 	}
@@ -222,7 +226,11 @@ ZEND_API void *_erealloc(void *ptr, size_t size, int allow_failure)
 	if (!p) {
 		if (!allow_failure) {
 			fprintf(stderr,"FATAL:  erealloc():  Unable to allocate %ld bytes\n", (long) size);
+#if !(WIN32||WINNT) && ZEND_DEBUG
+			kill(getpid(), SIGSEGV);
+#else
 			exit(1);
+#endif
 		}
 		ADD_POINTER_TO_LIST(orig);
 		HANDLE_UNBLOCK_INTERRUPTIONS();
