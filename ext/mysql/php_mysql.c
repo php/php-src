@@ -301,7 +301,7 @@ PHP_MINIT_FUNCTION(mysql)
 	ELS_FETCH();
 
 #ifdef ZTS
-	mysql_globals_id = ts_allocate_id(sizeof(php_mysql_globals), php_mysql_init_globals, NULL);
+	mysql_globals_id = ts_allocate_id(sizeof(php_mysql_globals), (ts_allocate_ctor) php_mysql_init_globals, NULL);
 #else
 	MySG(num_persistent)=0;
 #endif
