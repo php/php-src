@@ -1,3 +1,81 @@
+2004-08-02  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_reflection_api.c:
+      - Add methods to check parameter count
+
+2004-08-02  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_0)
+      ext/sqlite/sqlite.c:
+      MFH: Allow sqlite_fetch_column_types() to properly handle table names with
+      spaces in them.
+
+    * ext/sqlite/sqlite.c:
+      Allow sqlite_fetch_column_types() to properly handle table names with
+      spaces in them.
+
+2004-08-02  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_0)
+      ZendEngine2/zend_compile.c:
+      MFH Change to use memcmp instead of strcmp
+
+    * ZendEngine2/zend_compile.c:
+      - Change to use memcmp instead of strcmp
+
+2004-08-02  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/com_dotnet/com_dotnet.c:
+      Better error reporting
+
+2004-08-02  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend_compile.c:
+      - Fix typo
+
+2004-08-02  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_language_parser.y
+      ZendEngine2/zend_language_scanner.l:
+      - Remove all for now
+
+    * tests/classes/__call_002.phpt
+      tests/classes/__set__get_002.phpt
+      tests/classes/__set__get_003.phpt
+      tests/classes/destructor_visibility_001.phpt
+      tests/classes/destructor_visibility_002.phpt
+      tests/classes/destructor_visibility_003.phpt:
+      MFB Enforce protocol of magic methods/classes
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_execute_API.c
+      ext/mbstring/tests/htmlent.phpt
+      tests/classes/ctor_failure.phpt:
+      MFB: Enforce protocol on magic methods/functions
+
+2004-08-02  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/session/session.c:
+      fix empty_string issue
+      
+      Patch submitted by Antony Dovgal <tony2001@phpclub.net>
+
+    * ext/session/mod_files.c:
+      don't read empty files
+      
+      0 malloc noticed by Antony Dovgal <tony2001@phpclub.net>
+
+2004-08-02  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      Zend/zend_execute.c
+      ZendEngine2/zend_execute.c:
+      MFH: A gentler (performance wise) allocation of buffer for temp variables.
+
+    * ZendEngine2/zend_execute.c:
+      A gentler (performance wise) allocation of buffer for temp variables.
+
 2004-08-01  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * tests/classes/__call_002.phpt
