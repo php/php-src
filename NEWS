@@ -8,7 +8,7 @@ PHP                                                                        NEWS
   . Improved memory manager
   . Added Reflection API
   . Removed the not so working namespaces support
-  . Removed support for expressions within constant declerations.
+  . Removed support for expressions within constant declarations.
   . You can read about most changes in ZEND_CHANGES under the Zend directory.
 - Improved the DBX extension: (Marc)
   . Added DBX_RESULT_UNBUFFERED flag for dbx_query().
