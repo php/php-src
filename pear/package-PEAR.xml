@@ -31,23 +31,10 @@
     </maintainer>
   </maintainers>
   <release>
-    <version>0.90</version>
+    <version>0.91-dev</version>
     <state>beta</state>
-    <date>2002-05-28</date>
+    <date>YYYY-MM-DD</date>
     <notes>
-* fix: "help" command was broken
-* new command: "info"
-* new command: "config-help"
-* un-indent multi-line data from xml description files
-* new command: "build"
-* fix: config-set did not work with "set" parameters
-* disable magic_quotes_runtime
-* "install" now builds and installs C extensions
-* added PEAR::delExpect()
-* System class no longer inherits PEAR
-* grouped PEAR_Config parameters
-* add --nobuild option to install/upgrade commands
-* new and more generic Frontend API
 </notes>
     <filelist>
       <file role="data" name="package.dtd"/>
@@ -97,6 +84,31 @@
     </deps>
   </release>
   <changelog>
+    <release>
+      <version>0.90</version>
+      <state>beta</state>
+      <date>2002-05-28</date>
+      <notes>
+* fix: "help" command was broken
+* new command: "info"
+* new command: "config-help"
+* un-indent multi-line data from xml description files
+* new command: "build"
+* fix: config-set did not work with "set" parameters
+* disable magic_quotes_runtime
+* "install" now builds and installs C extensions
+* added PEAR::delExpect()
+* System class no longer inherits PEAR
+* grouped PEAR_Config parameters
+* add --nobuild option to install/upgrade commands
+* new and more generic Frontend API
+</notes>
+      <deps>
+  	<dep type="php" rel="ge" version="4.1"/>
+  	<dep type="pkg" rel="has" version="0.4">Archive_Tar</dep>
+  	<dep type="pkg" rel="ge" version="0.11">Console_Getopt</dep>
+      </deps>
+    </release>
     <release>
       <version>0.10</version>
       <state>beta</state>
