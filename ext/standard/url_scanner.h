@@ -22,4 +22,29 @@
 
 char *url_adapt(const char *src, size_t srclen, const char *data, size_t *newlen);
 
+enum url_state { 
+	STATE_NORMAL, 
+	STATE_TAG_START, 
+	STATE_TAG, 
+	STATE_IN_TAG, 
+	STATE_TAG_ATTR, 
+	STATE_TAG_IS, 
+	STATE_TAG_IS2, 
+	STATE_TAG_VAL, 
+	STATE_TAG_VAL2, 
+	STATE_TAG_QVAL1,
+	STATE_TAG_QVAL2, 
+	STATE_TAG_QVAL2b 
+};
+
+typedef struct url_adapt_struct {
+ 	enum url_state state;
+	char *tag;
+	char *attr;
+	char *val;
+	char delim;
+	char *p;
+	int l,ml;
+} url_adapt_state_t;
+
 #endif
