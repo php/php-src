@@ -96,6 +96,10 @@ SOURCE=.\html_entities.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\mb_gpc.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\mbfilter.c
 # End Source File
 # Begin Source File
@@ -141,6 +145,10 @@ SOURCE=.\php_unicode.c
 # Begin Source File
 
 SOURCE=.\cp932_table.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\mb_gpc.h
 # End Source File
 # Begin Source File
 
