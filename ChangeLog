@@ -1,3 +1,73 @@
+2001-04-24  Stig Bakken  <ssb@fast.no>
+
+    * TODO-4.1.txt: whoops, two less items for 4.1
+
+2001-04-24  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/curl/curl.c: Fixed a crash bug.
+
+    Return the proper amount.
+
+2001-04-24  Chuck Hagenbuch  <chuck@horde.org>
+
+    * ext/imap/php_imap.c: MFH: fix crash bug in imap_sort (#9908).
+
+2001-04-24  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/apache2filter/sapi_apache2.c:
+    MFH: Accomodate Apache HTTPD 2.0 API change
+
+    * sapi/apache2filter/sapi_apache2.c:
+    Accomodate Apache HTTPD 2.0 API change
+
+2001-04-24  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/DB/ifx.php:
+    don't return error on non-supported fetchmode (disturbs common::getAll)
+
+    * pear/DB/common.php:
+    -updated getXxx methods to use the DB_result interface, also some
+    improvements in error checking and updated inline doc. From this moment
+    fetchRow on DB_extentions is no longer needed.
+
+2001-04-24  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/php_ircg.h
+      ext/ircg/ircg.c
+      ext/ircg/ircg_scanner.c:
+    Add support for suppressing the "loopback" of messages sent using ircg_msg.
+
+    Add support for nickname escaping
+
+    Using this technique it becomes possible to use nicknames like
+    "John Doe" in the front-end.  Scripts can use ircg_nickname_(un)escape.
+    This should be applyable to channel names as well.
+
+    A new flag character (2) is introduced which unescapes the respective
+    argument.
+
+    I.e. a format string could look like
+
+    "%2f joins %c<script>parent.new_user('%12f','%1c')</script>"
+
+    In the case of "G|27n|27R", this would be interpolated as:
+
+    "G'n'R joins foobar<script>parent.new_user('G\'n\'R','foobar')</script>"
+
+    I.e. %12f means "unescape the parameter and apply javascript escaping".
+
+2001-04-24  Ulf Wendel  <ulf.wendel@phpdoc.de>
+
+    * pear/Cache.php
+      pear/Experimental/Cache/OutputCompression.php:
+    Made Cache::save() a wrapper for Cache::extSave()
+
+2001-04-24  David Hedbor  <david@hedbor.org>
+
+    * sapi/caudium/caudium.c:
+    Disable use of th_farm since it doesn't seem to work. Uses a Pike layer
+    thread farm now instead.
+
 2001-04-23  Zeev Suraski  <zeev@zend.com>
 
     * build/build2.mk: Remove unnecessary tab (was killing Tru64 make)
