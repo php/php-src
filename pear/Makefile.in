@@ -21,6 +21,7 @@ PEAR_SUBDIRS = \
 	Mail \
 	Math \
 	Net \
+	Numbers \
 	Payment \
 	PEAR \
 	XML
@@ -60,11 +61,14 @@ PEAR_FILES = \
 	Mail/smtp.php \
 	Math/Fraction.php \
 	Math/Util.php \
+	Net/Curl.php \
 	Net/SMTP.php \
 	Net/Socket.php \
+	Numbers/Roman.php \
 	PEAR/Installer.php \
 	Payment/Verisign.php \
-	XML/Parser.php
+	XML/Parser.php \
+	XML/RPC.php
 
 install-data-local: PEAR.php
 	@if $(mkinstalldirs) $(peardir); then \
