@@ -1068,6 +1068,49 @@ ZEND_API int zend_hash_sort(HashTable *ht, sort_func_t sort_func,
 }
 
 
+ZEND_API int zend_hash_compare(HashTable *ht1, HashTable *ht2, compare_func_t compar)
+{
+	Bucket *p1, *p2;
+	int result;
+
+	IS_CONSISTENT(ht1);
+	IS_CONSISTENT(ht2);
+
+	result = ht1->nNumOfElements - ht2->nNumOfElements;
+	if (result!=0) {
+		return result;
+	}
+	p1 = ht1->pListHead;
+	p2 = ht2->pListHead;
+
+	while (p1 && p2) {
+		if (p1->nKeyLength==0 && p2->nKeyLength==0) { /* numeric indices */
+			result = p1->h - p2->h;
+			if (result!=0) {
+				return result;
+			}
+		} else { /* string indices */
+			result = p1->nKeyLength - p2->nKeyLength;
+			if (result!=0) {
+				return result;
+			}
+			result = memcmp(p1->arKey, p2->arKey, p1->nKeyLength);
+			if (result!=0) {
+				return result;
+			}
+		}
+		result = compar(p1->pData, p2->pData);
+		if (result!=0) {
+			return result;
+		}
+		p1 = p1->pListNext;
+		p2 = p2->pListNext;
+	}
+
+	return 0;
+}
+
+
 ZEND_API int zend_hash_minmax(HashTable *ht, int (*compar) (const void *, const void *), int flag, void **pData)
 {
 	Bucket *p,*res;
