@@ -487,7 +487,7 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 				}
 			}
 		}
-		if (docref) {
+		if (docref && (PG(html_errors) || strlen(PG(docref_root)))) {
 			if (strncmp(docref, "http://", 7)) {
 				docref_root = PG(docref_root);
 				/* now check copy of extension */
@@ -515,10 +515,7 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 					}
 				}
 			}
-			if (!PG(html_errors) || !strlen(PG(docref_root))) {
-				/* no docref and no html errors -> do not point to any documentation (e.g. production boxes) */
-				spprintf(&message, 0, "%s: %s", origin, buffer);
-			} else if (PG(html_errors)) {
+			if (PG(html_errors)) {
 				spprintf(&message, 0, "%s [<a href='%s%s%s'>%s</a>]: %s", origin, docref_root, docref, docref_target, docref, buffer);
 			} else {
 				spprintf(&message, 0, "%s [%s%s%s]: %s", origin, docref_root, docref, docref_target, buffer);
