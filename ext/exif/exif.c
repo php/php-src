@@ -237,10 +237,12 @@ static size_t php_strnlen(char* str, size_t maxlen) {
 static const char * EXIF_ERROR_FILEEOF   = "Unexpected end of file reached";
 static const char * EXIF_ERROR_CORRUPT   = "File structure corrupted";
 static const char * EXIF_ERROR_THUMBEOF  = "Thumbnail goes IFD boundary or end of file reached";
+static const char * EXIF_ERROR_FSREALLOC = "Illegal reallocating of undefined file section";
 
 #define EXIF_ERRLOG_FILEEOF    php_error_docref(NULL TSRMLS_CC, E_WARNING, EXIF_ERROR_FILEEOF);
 #define EXIF_ERRLOG_CORRUPT    php_error_docref(NULL TSRMLS_CC, E_WARNING, EXIF_ERROR_CORRUPT);
 #define EXIF_ERRLOG_THUMBEOF   php_error_docref(NULL TSRMLS_CC, E_WARNING, EXIF_ERROR_THUMBEOF);
+#define EXIF_ERRLOG_FSREALLOC  php_error_docref(NULL TSRMLS_CC, E_WARNING, EXIF_ERROR_FSREALLOC);
 /* }}} */
 
 /* {{{ format description defines
@@ -1484,7 +1486,12 @@ static int exif_file_sections_realloc(image_info_type *ImageInfo, int section_in
 {
 	void *tmp;
 
-	if (size <= 0 || section_index >= ImageInfo->file.count) {
+	if (section_index >= ImageInfo->file.count) {
+		EXIF_ERRLOG_FSREALLOC
+		return -1;
+	}
+	tmp = erealloc(ImageInfo->file.list[section_index].data, size);
+	if (size == 0 || section_index >= ImageInfo->file.count) {
 		return -1;
 	}
 	tmp = erealloc(ImageInfo->file.list[section_index].data, size);
@@ -1538,7 +1545,7 @@ static void exif_iif_add_value(image_info_type *image_info, int section_index, c
 			if (value) {
 				length = php_strnlen(value, length);
 				if (PG(magic_quotes_runtime)) {
-					info_data->value.s = php_addslashes(value, length, &length, 0 TSRMLS_CC);
+					info_value->s = php_addslashes(value, length, &length, 0 TSRMLS_CC);
 				} else {
 					info_value->s = estrndup(value, length);
 				}
@@ -1565,7 +1572,7 @@ static void exif_iif_add_value(image_info_type *image_info, int section_index, c
 			if (value) {
 				/* do not recompute length here */
 				if (PG(magic_quotes_runtime)) {
-					info_data->value.s = php_addslashes(value, length, &length, 0 TSRMLS_CC);
+					info_value->s = php_addslashes(value, length, &length, 0 TSRMLS_CC);
 				} else {
 					info_value->s = estrndup(value, length);
 				}
@@ -1588,7 +1595,7 @@ static void exif_iif_add_value(image_info_type *image_info, int section_index, c
 				break;
 			} else
 			if (length>1) {
-				info_data->value.list = emalloc(length*sizeof(image_info_value));
+				info_value->list = emalloc(length*sizeof(image_info_value));
 			} else {
 				info_value = &info_data->value;
 			}
@@ -2799,9 +2806,7 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, cha
 						/* When there are any characters after the first NUL */
 						ImageInfo->CopyrightPhotographer  = estrdup(value_ptr);
 						ImageInfo->CopyrightEditor        = estrdup(value_ptr+length+1);
-						ImageInfo->Copyright              = emalloc(strlen(value_ptr)+strlen(value_ptr+length+1)+3);
-
-						sprintf(ImageInfo->Copyright, "%s, %s", value_ptr, value_ptr+length+1);
+						spprintf(&ImageInfo->Copyright, 0, "%s, %s", value_ptr, value_ptr+length+1);
 						/* format = TAG_FMT_UNDEFINED; this musn't be ASCII         */
 						/* but we are not supposed to change this                   */
 						/* keep in mind that image_info does not store editor value */
