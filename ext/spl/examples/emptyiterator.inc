@@ -1,6 +1,15 @@
 <?php
 
-/** \ingroup Examples
+/** @file emptyiterator.inc
+ * @ingroup Examples
+ * @brief class EmptyIterator
+ * @author  Marcus Boerger
+ * @date    2003 - 2004
+ *
+ * SPL - Standard PHP Library
+ */
+
+/** @ingroup Examples
  * @brief   An empty Iterator
  * @author  Marcus Boerger
  * @version 1.0

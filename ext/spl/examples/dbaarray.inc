@@ -1,8 +1,17 @@
 <?php
 
+/** @file dbaarray.inc
+ * @ingroup Examples
+ * @brief class DbaArray
+ * @author  Marcus Boerger
+ * @date    2003 - 2004
+ *
+ * SPL - Standard PHP Library
+ */
+
 if (!class_exists("DbaReader")) require_once("dbareader.inc");
 
-/** \ingroup Examples
+/** @ingroup Examples
  * @brief   This implements a DBA Array
  * @author  Marcus Boerger
  * @version 1.0

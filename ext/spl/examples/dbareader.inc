@@ -1,6 +1,15 @@
 <?php
 
-/** \ingroup Examples
+/** @file dbareader.inc
+ * @ingroup Examples
+ * @brief class DbaReader
+ * @author  Marcus Boerger
+ * @date    2003 - 2004
+ *
+ * SPL - Standard PHP Library
+ */
+
+/** @ingroup Examples
  * @brief   This implements a DBA Iterator.
  * @author  Marcus Boerger
  * @version 1.0

@@ -1,6 +1,15 @@
 <?php
 
-/** \ingroup Examples
+/** @file directorytree.inc
+ * @ingroup Examples
+ * @brief class DirectoryTree
+ * @author  Marcus Boerger
+ * @date    2003 - 2004
+ *
+ * SPL - Standard PHP Library
+ */
+
+/** @ingroup Examples
  * @brief   A directory iterator that does not show '.' and '..'.
  * @author  Marcus Boerger
  * @version 1.0

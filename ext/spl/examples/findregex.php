@@ -1,13 +1,15 @@
 <?php
 	
-/** Find a specific file by name.
+/** @file   findregex.php
+ * @brief   Program Find a specific file by name.
+ * @ingroup Examples
+ * @author  Marcus Boerger, Adam Trachtenberg
+ * @date    2004
  *
- * Usage: php findregex.php <path> <name>
+ * Usage: php findregex.php \<path\> \<name\>
  *
- * <path>  Path to search in.
- * <name>  Filename to look for.
- *
- * (c) Marcus Boerger, Adam Trachtenberg, 2004
+ * \<path\>  Path to search in.
+ * \<name\>  Filename to look for.
  */
 
 if ($argc < 3) {

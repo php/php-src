@@ -1,6 +1,15 @@
 <?php
 
-/** \ingroup Examples
+/** @file directorytreeiterator.inc
+ * @ingroup Examples
+ * @brief class DirectoryTreeIterator
+ * @author  Marcus Boerger
+ * @date    2003 - 2004
+ *
+ * SPL - Standard PHP Library
+ */
+
+/** @ingroup Examples
  * @brief   DirectoryIterator to generate ASCII graphic directory trees
  * @author  Marcus Boerger
  * @version 1.0

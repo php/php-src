@@ -1,15 +1,17 @@
 <?php
 
-/** dba dump utility
+/** @file   dba_dump.php
+ * @brief   Program DBA dump utility
+ * @ingroup Examples
+ * @author  Marcus Boerger
+ * @date    2003 - 2004
  *
- * Usage: php dba_dump.php <file> <handler> [<regex>]
+ * Usage: php dba_dump.php \<file\> \<handler\> [\<regex\>]
  *
- * Show all groups in the ini file specified by <file>.
- * The regular expression <regex> is used to filter the by setting name.
+ * Show all groups in the ini file specified by \<file\>.
+ * The regular expression \<regex\> is used to filter the by setting name.
  *
  * Note: configure with --enable-dba 
- *
- * (c) Marcus Boerger, 2003 - 2004
  */
 
 if ($argc < 3) {

@@ -1,6 +1,15 @@
 <?php
 
-/** \ingroup Examples
+/** @file infiniteiterator.inc
+ * @ingroup Examples
+ * @brief class InfiniteIterator
+ * @author  Marcus Boerger
+ * @date    2003 - 2004
+ *
+ * SPL - Standard PHP Library
+ */
+
+/** @ingroup Examples
  * @brief   An infinite Iterator
  * @author  Marcus Boerger
  * @version 1.0
