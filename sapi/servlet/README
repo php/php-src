@@ -12,11 +12,21 @@ Java Servlet SAPI Module for PHP 4
     servers which support servlets typically take great care in
     pooling and reusing Java Virtual Machines (JVMs).
 
+    PHP may also be bridged with the Apache Cocoon XML Publishing
+    Framework. [2]
+
+    A suitably configured system will invoke the PHP binaries through
+    JNI and the output of the page will be processed through the
+    configured XML parser and placed into the pipeline for processing
+    by such filters as XSLT. This enables PHP developers to access the
+    powers of Cocoon to separate their content, style, and logic
+    without requiring them to write a single line of Java code.
+
     While this code is intended to be able to run on any servlet
     engine, it has only been tested on Apache's Jakarta Tomcat to
     date. Bug reports, success stories and/or patches required to get
     this code to run on other engines would be appreciated; please
-    send them to the PHP Development Mailinglist [2].
+    send them to the PHP Development Mailinglist [3].
 
     Note: PHP has a habit of changing the working directory. The Java
     Servlet SAPI Module will eventually change it back, but while PHP
@@ -99,8 +109,14 @@ Java Servlet SAPI Module for PHP 4
 
   Installing PHP as a Generator into Apache's Cocoon2 Framework
 
-    1.) 
+    1.) Build the Java Servlet SAPI Module as described above.
+
+    2.) Add the following line to your Cocoon configuration
+
+          <generator name="php" 
+          class="org.apache.cocoon.generators.PhpGenerator"/>
 
 -- 
  [1] http://jakarta.apache.org/tomcat/
- [2] http://www.php.net/support.php
+ [2] http://xml.apache.org/cocoon2/
+ [3] http://www.php.net/support.php
