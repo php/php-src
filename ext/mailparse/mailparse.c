@@ -187,7 +187,7 @@ PHP_FUNCTION(mailparse_uudecode_all)
 	int nparts = 0;
 	php_stream * instream, *outstream = NULL, *partstream = NULL;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "r", &file))
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &file))
 		return;
 
 	instream = (php_stream*)zend_fetch_resource(&file TSRMLS_CC, -1, "File-Handle", &type, 1, php_file_le_stream());
