@@ -123,9 +123,10 @@ static void ps_files_close(ps_files *data)
 	}
 }
 
-static void ps_files_open(ps_files *data, const char *key TSRMLS_DC)
+static void ps_files_open(ps_files *data, const char *key)
 {
 	char buf[MAXPATHLEN];
+	TSRMLS_FETCH();
 
 	if (data->fd < 0 || !data->lastkey || strcmp(key, data->lastkey)) {
 		if (data->lastkey) {
@@ -136,10 +137,8 @@ static void ps_files_open(ps_files *data, const char *key TSRMLS_DC)
 		ps_files_close(data);
 		
 		if (!ps_files_valid_key(key) || 
-			!ps_files_path_create(buf, sizeof(buf), data, key)) {
-			data->fd = -1;
+				!ps_files_path_create(buf, sizeof(buf), data, key))
 			return;
-		}
 		
 		data->lastkey = estrdup(key);
 		
@@ -160,7 +159,7 @@ static void ps_files_open(ps_files *data, const char *key TSRMLS_DC)
 	}
 }
 
-static int ps_files_cleanup_dir(const char *dirname, int maxlifetime TSRMLS_DC)
+static int ps_files_cleanup_dir(const char *dirname, int maxlifetime)
 {
 	DIR *dir;
 	char dentry[sizeof(struct dirent) + MAXPATHLEN];
@@ -170,6 +169,7 @@ static int ps_files_cleanup_dir(const char *dirname, int maxlifetime TSRMLS_DC)
 	time_t now;
 	int nrdels = 0;
 	size_t dirname_len;
+	TSRMLS_FETCH();
 
 	dir = opendir(dirname);
 	if (!dir) {
@@ -254,7 +254,7 @@ PS_READ_FUNC(files)
 	struct stat sbuf;
 	PS_FILES_DATA;
 
-	ps_files_open(data, key TSRMLS_CC);
+	ps_files_open(data, key);
 	if (data->fd < 0)
 		return FAILURE;
 	
@@ -283,7 +283,7 @@ PS_WRITE_FUNC(files)
 	long n;
 	PS_FILES_DATA;
 
-	ps_files_open(data, key TSRMLS_CC);
+	ps_files_open(data, key);
 	if (data->fd < 0)
 		return FAILURE;
 
@@ -314,6 +314,7 @@ PS_DESTROY_FUNC(files)
 {
 	char buf[MAXPATHLEN];
 	PS_FILES_DATA;
+	TSRMLS_FETCH();
 
 	if (!ps_files_path_create(buf, sizeof(buf), data, key))
 		return FAILURE;
@@ -336,7 +337,7 @@ PS_GC_FUNC(files)
 	   an external entity (i.e. find -ctime x | xargs rm) */
 	   
 	if (data->dirdepth == 0)
-		*nrdels = ps_files_cleanup_dir(data->basedir, maxlifetime TSRMLS_CC);
+		*nrdels = ps_files_cleanup_dir(data->basedir, maxlifetime);
 	
 	return SUCCESS;
 }
