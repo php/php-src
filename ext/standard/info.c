@@ -323,8 +323,13 @@ void php_print_credits(int flag)
 	}
 
 	if (flag & PHP_CREDITS_GENERAL) {
-		/* Language */
+		/* Design & Concept */
+		php_info_print_table_start();
+		php_info_print_table_header(1, "Language Design & Concept");
+		php_info_print_table_row(1, "Andi Gutmans, Rasmus Lerdorf, Zeev Suraski");
+		php_info_print_table_end();
 
+		/* PHP 4.0 Language */
 		php_info_print_table_start();
 		php_info_print_table_colspan_header(2, "PHP 4.0 Authors");
 		php_info_print_table_header(2, "Contribution", "Authors");
