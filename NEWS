@@ -1,7 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2004, PHP 5.0.1
-- Updated several libriaries bundled with the windows release which now 
+- Updated several libraries bundled with the windows release which now 
   includes libxml2-2.6.11, libxslt-1.1.7 and iconv-1.9.1. (Rob, Edin)
 - Improved and moved ActiveScript SAPI to PECL.  (Wez)
 - Fixed bug #29505 (get_class_vars() severely broken when used with arrays).
