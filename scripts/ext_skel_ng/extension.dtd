@@ -36,11 +36,13 @@
 <!ELEMENT notes (#PCDATA)>
 
 <!ELEMENT functions (function)*>
-<!ELEMENT function (summary,proto,description*)>
+<!ELEMENT function (summary|proto|description|code)*>
 <!ATTLIST function
+  role  (internal|private|public) "public"
   name  CDATA #REQUIRED
 >
 <!ELEMENT proto (#PCDATA)>  
+<!ELEMENT code  (#PCDATA)>  
 
 <!ELEMENT constants (constant)*>
 <!ELEMENT constant (#PCDATA)>
