@@ -19,7 +19,6 @@
     (configure) Allow IFX_LIBDIR environment variable to specify the
                 Informix library path to allow linking with the static
                 libraries (libtool related). (Danny).
-       path for configure (Danny).
 
 1999-10-11  changelog  <changelog@www>
 
