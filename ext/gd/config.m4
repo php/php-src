@@ -8,7 +8,7 @@ AC_DEFUN(PHP_GD_JPEG,[
           fi
           old_LIBS=$LIBS
           LIBS="$LIBS -L$withval/lib"
-          AC_CHECK_LIB(jpeg,jpeg_read_header, [LIBS="$LIBS -L$withval/lib -ljpeg"],[AC_MSG_RESULT(no)],)
+          AC_CHECK_LIB(jpeg,jpeg_read_header, [LIBS="$LIBS -ljpeg"],[AC_MSG_RESULT(no)],)
           LIBS=$old_LIBS
           AC_ADD_LIBRARY_WITH_PATH(jpeg, $withval/lib)
           LIBS="$LIBS -L$withval/lib -ljpeg"
@@ -28,12 +28,12 @@ AC_DEFUN(PHP_GD_XPM,[
             withval="/usr/X11R6"
           fi
           old_LIBS=$LIBS
-          LIBS="$LIBS -lX11 -L$withval/lib"
+          LIBS="$LIBS -L$withval/lib -lX11"
           AC_CHECK_LIB(Xpm,XpmFreeXpmImage, [LIBS="$LIBS -L$withval/lib -lXpm"],[AC_MSG_RESULT(no)],)
           LIBS=$old_LIBS
           AC_ADD_LIBRARY_WITH_PATH(Xpm, $withval/lib)
           AC_ADD_LIBRARY_WITH_PATH(X11, $withval/lib)
-          LIBS="$LIBS -L$withval/lib -lXpm -lX11"
+          LIBS="$LIBS -L$withval/lib -lXpm -L$withval/lib -lX11"
         ],[
           AC_MSG_RESULT(no)
           AC_MSG_WARN(If configure fails try --with-xpm-dir=<DIR>)
@@ -45,7 +45,7 @@ AC_DEFUN(PHP_GD_CHECK_VERSION,[
         AC_CHECK_LIB(gd, gdImageString16,        [AC_DEFINE(HAVE_LIBGD13,1,[ ]) ])
         AC_CHECK_LIB(gd, gdImagePaletteCopy,     [AC_DEFINE(HAVE_LIBGD15,1,[ ]) ])
         AC_CHECK_LIB(gd, gdImageColorClosestHWB, [AC_DEFINE(HAVE_COLORCLOSESTHWB,1,[ ]) ])
-        AC_CHECK_LIB(z,compress, LIBS="-lz $LIBS",,)
+        AC_CHECK_LIB(z,  compress,      LIBS="-lz $LIBS",,)
         AC_CHECK_LIB(png,png_info_init, LIBS="-lpng $LIBS",,)
         AC_CHECK_LIB(gd, gdImageColorResolve,    [AC_DEFINE(HAVE_GDIMAGECOLORRESOLVE,1,[ ])])
         AC_CHECK_LIB(gd, gdImageCreateFromPng,   [AC_DEFINE(HAVE_GD_PNG,  1, [ ])])
@@ -137,6 +137,7 @@ dnl A whole whack of possible places where this might be
       test -f $withval/libgd.a && GD_LIB="$withval"
       test -f $withval/gd/libgd.a && GD_LIB="$withval/gd"
       test -f $withval/gd1.3/libgd.a && GD_LIB="$withval/gd1.3"
+
       if test -n "$GD_INCLUDE" && test -n "$GD_LIB" ; then
         AC_DEFINE(HAVE_LIBGD,1,[ ])
         if test "$shared" = "yes"; then
