@@ -1,3 +1,8 @@
+2004-04-09  Andi Gutmans  <andi@zend.com>
+
+    * zend_object_handlers.c:
+      - Fix bug #26441 (When __set() returned a value it corrupted it)
+
 2004-04-08  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_reflection_api.c:
