@@ -211,7 +211,7 @@ if test "$PHP_IMAP" != "no"; then
     ], [], $TST_LIBS)
 
     AC_MSG_CHECKING(whether IMAP works)
-    PHP_IMAP_TEST_BUILD(mail_open, [
+    PHP_IMAP_TEST_BUILD(mail_newbody, [
       AC_MSG_RESULT(yes)
     ], [
       AC_MSG_RESULT(no)
