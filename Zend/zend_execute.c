@@ -2556,8 +2556,8 @@ int zend_do_fcall_common_helper(ZEND_OPCODE_HANDLER_ARGS)
 		ALLOC_ZVAL(EX_T(EX(opline)->result.u.var).var.ptr);
 		INIT_ZVAL(*(EX_T(EX(opline)->result.u.var).var.ptr));
 
-		if (! zend_execute_internal) {
-			/* saves one function hall if the zend_execute_internal is not used */
+		if (!zend_execute_internal) {
+			/* saves one function call if zend_execute_internal is not used */
 			((zend_internal_function *) EX(function_state).function)->handler(EX(opline)->extended_value, EX_T(EX(opline)->result.u.var).var.ptr, EX(object), return_value_used TSRMLS_CC);
 		} else {
 			zend_execute_internal(execute_data, return_value_used TSRMLS_CC);
