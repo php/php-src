@@ -97,7 +97,11 @@ PHP_MINFO_FUNCTION(ctype)
 		return; \
  	switch (Z_TYPE_P(c)) { \
 	case IS_LONG: \
-		RETURN_BOOL(iswhat(Z_LVAL_P(c))); \
+		if (Z_LVAL_P(c) < 255 && Z_LVAL_P(c) > -127) {	\
+			RETURN_BOOL(iswhat(Z_LVAL_P(c))); \
+		}	\
+		SEPARATE_ZVAL(&c);	\
+		convert_to_string(c);	\
 	case IS_STRING: \
 		{ \
 			char *p; \
