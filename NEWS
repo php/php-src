@@ -1,6 +1,23 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 2002, Version 4.3.0
+- Added XsltObject->dump_file($result,$filename[,$compression]) for dumping
+  xslt-result directly into a file. (chregu)
+- Added XsltObject->dump_mem($result) for returning xslt-result directly
+  into a string (morus.walter@web.de, chregu)
+- Made mime_magic extension available on win32 platform. (Edin)
+- Added xslt_backend_version() and xslt_backend_name() for getting
+  information about the processor backend. (chregu)
+- Added php.ini option "allow_webdav_methods" to allow handling of
+  WebDAV http requests within PHP scripts. (chregu)
+- Added ImageColorMatch() and ImageLayerEffect() functions
+  which work with the bundled GD library (ttoohey)
+- Made major improvents to the pcntl extension(Jason):
+- Greatly improved performance, by switching the signal callback mechanism
+  to use ticks
+  Implemented object signal callback ability by using array($obj, $method)
+- Added a restart parameter to pcntl_signal, which allows you to disable
+  the default of system call restarting
 - Added php.ini option "double_buffering" that forces an additional first
   output buffer and improved handling of buffer sizes. (Marcus)
 - Changed DomNode->next_sibling and DomNode->previous_sibling to return NULL
