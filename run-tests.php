@@ -73,7 +73,11 @@ SAFE_MODE_WARNING;
 
 if (getenv('TEST_PHP_EXECUTABLE')) {
 	$php = getenv('TEST_PHP_EXECUTABLE');
-} else {
+	if ($php=='auto') {
+		$php = $cwd.'/sapi/cli/php';
+	}
+}
+if (!file_exists($php)) {
 	error("environment variable TEST_PHP_EXECUTABLE must be set to specify PHP executable!");
 }
 
