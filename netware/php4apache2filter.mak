@@ -4,7 +4,7 @@ PROJECT_ROOT = ../..
 
 # Module details
 MODULE_NAME = mod_php
-MODULE_DESC = "PHP 4.2.3 - Apache 1.3 Module"
+MODULE_DESC = "PHP 4.2.3 - Apache 2.0 Module"
 VMAJ = 2
 VMIN = 0
 VREV = 0
@@ -17,15 +17,9 @@ include $(PROJECT_ROOT)/netware/common.mif
 .SUFFIXES: .nlm .lib .obj .cpp .c .msg .mlc .mdb .xdc .d
 
 # Source files
-C_SRC = mod_php4.c \
-        php_apache.c \
-        sapi_apache.c \
-        libpre.c
-
-# Library files
-#LIBRARY  = $(PROJECT_ROOT)/$(BUILD)/phplib.lib \
-#           $(PROJECT_ROOT)/sapi/cgi/cgi.lib
-#           $(APACHE_DIR)/apache.lib
+C_SRC = apache_config.c \
+        php_functions.c \
+        sapi_apache2.c
 
 # Destination directories and files
 OBJ_DIR = $(BUILD)
@@ -46,21 +40,19 @@ C_FLAGS += -wchar_t on -bool on
 C_FLAGS += -processor Pentium
 C_FLAGS += -w nounusedarg -msext on
 C_FLAGS += -nostdinc
-C_FLAGS += -DNETWARE
+C_FLAGS += -DNETWARE -D__GNUC__
 C_FLAGS += -DZTS
 C_FLAGS += -DNLM_PLATFORM
 C_FLAGS += -DN_PLAT_NLM -DNLM=1 -D__NO_MATH_OPS
 C_FLAGS += -D__C9X_CMATH_INLINES_DEFINED -DAPACHE_OS_H -DNO_USE_SIGACTION -DMULTITHREAD
 C_FLAGS += -DNEW_LIBC
-#C_FLAGS  += -DUSE_WINSOCK_DIRECTLY=1
-#C_FLAGS += -I. -I- -I. -I../../netware -I$(SDK_DIR)/sdk -I$(SDK_DIR)/sdk/nks	# ../../netware added for special SYS/STAT.H
 C_FLAGS += -I. -I- -I. -I../../netware -I$(SDK_DIR)/include	# ../../netware added for special SYS/STAT.H
+C_FLAGS += -I$(SDK_DIR)/include/winsock	# For Apache 2.0 headers
 C_FLAGS += -I$(MWCIncludes)
-C_FLAGS += -I$(APACHE_DIR)/include -I$(APACHE_DIR)/os/netware
+C_FLAGS += -I$(APACHE_DIR)/include
 C_FLAGS += -I- -I../../main -I../../Zend -I../../TSRM -I../../ext/standard
 C_FLAGS += -I../../ -I../../netware -I$(PROJECT_ROOT)/regex
 C_FLAGS += -I$(WINSOCK_DIR)/include/nlm -I$(WINSOCK_DIR)/include
-C_FLAGS += -I$(SECURITY_DIR)/include
 
 
 # Extra stuff based on debug / release builds
@@ -81,21 +73,13 @@ else
 endif
 
 # Dependencies
-#MODULE = LibC \
-#         php-clib
 MODULE = LibC \
-         phplib \
-         nwsec
-IMPORT = @$(SDK_DIR)/imports/libc.imp            \
-         @$(PROJECT_ROOT)/netware/apachecore.imp \
-         @$(PROJECT_ROOT)/netware/phplib.imp     \
-         @$(SECURITY_DIR)/imports/nwsec.imp
+         phplib
+IMPORT = @$(SDK_DIR)/imports/libc.imp          \
+         @$(APACHE_DIR)/lib/httpd.imp   \
+         @$(APACHE_DIR)/lib/aprlib.imp  \
+         @$(PROJECT_ROOT)/netware/phplib.imp
 EXPORT = php4_module
-
-#API  = OutputToScreen
-#API  = EnterClib,
-#API += ExitClib
-#         @$(MPK_DIR)/import/mpkOrg.imp \
 
 
 # Virtual paths
@@ -150,7 +134,7 @@ endif
 ifdef LIBRARY
 	@echo $(LIBRARY) >> $(basename $@).link
 endif
-	@echo $(OBJECTS) >> $(basename $@).link
+	@echo $(OBJECTS) $(APACHE_DIR)/lib/libpre.obj >> $(basename $@).link
 
 	@$(LINK) @$(basename $@).link
 

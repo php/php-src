@@ -4,10 +4,10 @@ PROJECT_ROOT = .
 
 # Module details
 MODULE_NAME = phplib
-MODULE_DESC = "PHP 4.0.8 for NetWare (Beta) - PHP Library"
-VMAJ = 0
-VMIN = 60
-VREV = 1
+MODULE_DESC = "PHP 4.2.3 - Script Interpreter and Library"
+VMAJ = 2
+VMIN = 0
+VREV = 0
 
 #include the common settings
 include $(PROJECT_ROOT)/netware/common.mif
@@ -58,11 +58,14 @@ C_SRC = ext/bcmath/bcmath.c \
         ext/pcre/pcrelib/get.c \
         ext/pcre/pcrelib/maketables.c \
         ext/pcre/pcrelib/pcre.c \
+        ext/pcre/pcrelib/pcreposix.c \
         ext/pcre/pcrelib/study.c \
         ext/session/mod_files.c \
+        ext/session/mod_mm.c \
         ext/session/mod_user.c \
         ext/session/session.c \
         ext/snmp/snmp.c \
+        ext/standard/aggregation.c \
         ext/standard/array.c \
         ext/standard/assert.c \
         ext/standard/base64.c \
@@ -99,7 +102,7 @@ C_SRC = ext/bcmath/bcmath.c \
         ext/standard/microtime.c \
         ext/standard/pack.c \
         ext/standard/pageinfo.c \
-        ext/standard/parsedate.c \
+		ext/standard/parsedate.c \
         ext/standard/php_fopen_wrapper.c \
         ext/standard/quot_print.c \
         ext/standard/rand.c \
@@ -114,6 +117,8 @@ C_SRC = ext/bcmath/bcmath.c \
         ext/standard/url_scanner.c \
         ext/standard/url_scanner_ex.c \
         ext/standard/var.c \
+        ext/standard/var_unserializer.c \
+        ext/standard/versioning.c \
         main/fopen_wrappers.c \
         main/internal_functions_nw.c \
         main/main.c \
@@ -124,6 +129,7 @@ C_SRC = ext/bcmath/bcmath.c \
         main/php_ini.c \
         main/php_logos.c \
         main/php_open_temporary_file.c \
+        main/php_sprintf.c \
         main/php_ticks.c \
         main/php_variables.c \
         main/reentrancy.c \
@@ -138,9 +144,10 @@ C_SRC = ext/bcmath/bcmath.c \
         netware/mktemp.c \
         netware/pipe.c \
         netware/pwd.c \
-        netware/sendmail.c \
         netware/start.c \
+        netware/time_nw.c \
         netware/wfile.c \
+        regex/main.c \
         regex/regcomp.c \
         regex/regerror.c \
         regex/regexec.c \
@@ -167,6 +174,8 @@ C_SRC = ext/bcmath/bcmath.c \
 #        ext/wddx/wddx.c \
 #        netware/readdir.c \
 
+WIN32_C_SRC = sendmail.c \
+
 
 CPP_SRC_NODIR = $(notdir $(CPP_SRC))
 C_SRC_NODIR = $(notdir $(C_SRC))
@@ -174,7 +183,7 @@ SRC_DIR = $(dir $(CPP_SRC) $(C_SRC))
 
 # Library files
 LIBRARY  = $(PROJECT_ROOT)/Zend/$(BUILD)/Zend.lib $(PROJECT_ROOT)/TSRM/$(BUILD)/TSRM.lib
-LIBRARY += $(PROJECT_ROOT)/win32build/lib/resolv.lib
+#LIBRARY += $(PROJECT_ROOT)/win32build/lib/resolv.lib
 #LIBRARY += libmysql.lib
 
 # Destination directories and files
@@ -182,6 +191,7 @@ OBJ_DIR = $(BUILD)
 FINAL_DIR = $(BUILD)
 MAP_FILE = $(FINAL_DIR)\$(MODULE_NAME).map
 OBJECTS  = $(join $(SRC_DIR), $(addprefix $(OBJ_DIR)/,$(CPP_SRC_NODIR:.c=.obj) $(C_SRC_NODIR:.c=.obj)))
+WIN32_OBJECTS  = $(addprefix $(OBJ_DIR)/,$(WIN32_C_SRC:.c=.obj))
 DEPDS  = $(join $(SRC_DIR), $(addprefix $(OBJ_DIR)/,$(CPP_SRC_NODIR:.c=.d) $(C_SRC_NODIR:.c=.d)))
 
 # Binary file
@@ -197,6 +207,7 @@ C_FLAGS += -nostdinc -nosyspath
 C_FLAGS  += -DNETWARE -D__BIT_TYPES_DEFINED__ -DZTS
 #C_FLAGS  += -DZEND_DEBUG
 C_FLAGS  += -DPHP4DLLTS_EXPORTS -DPHP_EXPORTS -DLIBZEND_EXPORTS -DTSRM_EXPORTS -DSAPI_EXPORTS
+C_FLAGS  += -DCLIB_STAT_PATCH
 C_FLAGS  += -DHAVE_SYS_TIME_H -DHAVE_STRUCT_FLOCK -DVIRTUAL_DIR -DHAVE_TZNAME
 C_FLAGS  += -DHAVE_DLFCN_H -DHAVE_LIBDL
 #C_FLAGS  += -DCOMPILE_DL_LDAP
@@ -209,10 +220,11 @@ C_FLAGS  += -Iext/bcmath -Iext/bcmath/libbcmath/src
 C_FLAGS  += -Iext/xml -Iext/xml/expat/xmltok -Iext/xml/expat -Iext/xml/expat/xmlparse
 C_FLAGS  += -Iext/odbc -Iext/session -Iext/ftp -Iext/wddx -Iext/calendar -Iext/snmp
 #C_FLAGS  += -Iext/mysql -Iext/mysql/libmysql
-#C_FLAGS  += -I- -Inetware -I$(SDK_DIR)/sdk -I$(MWCIncludes)	# netware added for special SYS/STAT.H : Venkat(6/2/02)
-C_FLAGS  += -I- -Inetware -I$(SDK_DIR)/include -I$(MWCIncludes)	# netware added for special SYS/STAT.H : Venkat(6/2/02)
+#C_FLAGS  += -I- -Inetware -I$(SDK_DIR)/sdk -I$(MWCIncludes)	# netware added for special SYS/STAT.H
+C_FLAGS  += -I- -Inetware -I$(SDK_DIR)/include -I$(MWCIncludes)	# netware added for special SYS/STAT.H
+C_FLAGS  += -Iwin32
 
-C_FLAGS  += -I$(SDK_DIR)/include/winsock	# Added for socket calls : Ananth (16 Aug 2002)
+C_FLAGS  += -I$(SDK_DIR)/include/winsock	# Added for socket calls
 
 #C_FLAGS  += -I$(LDAP_DIR)/inc
 
@@ -244,7 +256,7 @@ API = NXGetEnvCount \
 
 # Virtual paths
 vpath %.cpp .
-vpath %.c .
+vpath %.c . win32
 vpath %.obj $(OBJ_DIR)
 
 
@@ -297,7 +309,8 @@ project: $(BINARY) $(MESSAGE)
 
 
 #$(BINARY): $(DEPDS) $(OBJECTS) $(LIBRARY)
-$(BINARY): $(OBJECTS) $(LIBRARY)
+##$(BINARY): $(OBJECTS) $(LIBRARY)
+$(BINARY): $(OBJECTS) $(WIN32_OBJECTS) $(LIBRARY)
 	@echo Import $(IMPORT) > $(basename $@).def
 ifdef API
 	@echo Import $(API) >> $(basename $@).def
@@ -339,14 +352,17 @@ endif
 	@echo $(wordlist 111, 115, $(OBJECTS)) >> $(basename $@).link
 	@echo $(wordlist 116, 120, $(OBJECTS)) >> $(basename $@).link
 	@echo $(wordlist 121, 125, $(OBJECTS)) >> $(basename $@).link
-	@echo $(wordlist 126, 127, $(OBJECTS)) >> $(basename $@).link
-#	@echo $(wordlist 126, 134, $(OBJECTS)) >> $(basename $@).link
+	@echo $(wordlist 126, 130, $(OBJECTS)) >> $(basename $@).link
+	@echo $(wordlist 131, 134, $(OBJECTS)) >> $(basename $@).link
+
+	@echo $(wordlist 1, 2, $(WIN32_OBJECTS)) >> $(basename $@).link
 
 	@$(LINK) @$(basename $@).link
 
 
 .PHONY: clean
-clean: cleand cleanobj cleanbin
+#clean: cleand cleanobj cleanbin
+clean: cleansrc cleanobj cleanbin
 
 .PHONY: cleand
 cleand:
@@ -373,6 +389,13 @@ cleand:
 	-@del "ext\wddx\$(OBJ_DIR)\*.d"
 	-@del "ext\calendar\$(OBJ_DIR)\*.d"
 	-@del "ext\snmp\$(OBJ_DIR)\*.d"
+
+.PHONY: cleansrc
+cleansrc:
+	@echo Deleting all generated source files...
+	-@del "parsedate.c"
+	-@del "parsedate.h"
+	-@del "parsedate.output"
 
 .PHONY: cleanobj
 cleanobj:

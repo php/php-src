@@ -17,9 +17,9 @@ include $(PROJECT_ROOT)/netware/common.mif
 # Source files
 CPP_SRC = 
 C_SRC = TSRM.c \
+        tsrm_nw.c \
         tsrm_strtok_r.c \
         tsrm_virtual_cwd.c \
-        tsrm_nw.c
 
 # Destination directories and files
 OBJ_DIR = $(BUILD)
@@ -33,14 +33,23 @@ ifndef BINARY
 endif
 
 # Compile flags
-C_FLAGS  = -c -maxerrors 25 -msgstyle gcc
+#C_FLAGS   = -c -maxerrors 25 -processor Pentium -align packed
+#C_FLAGS  += -w on -cpp_exceptions on -wchar_t off -bool on
+#C_FLAGS  += -msgstyle gcc -ext obj -ARM on -msext off -ansi off -nostdinc
+C_FLAGS += -c -maxerrors 25 -msgstyle gcc
 C_FLAGS += -wchar_t on -bool on
-C_FLAGS += -processor Pentium -align 1
+C_FLAGS += -processor Pentium
+#C_FLAGS += -r
 C_FLAGS += -nostdinc
+#C_FLAGS +=  -ext obj
+#C_FLAGS  += -DNLM_PLATFORM -D__GNUC__ -DTSRM_EXPORTS -D_LIB
 C_FLAGS  += -DZTS -DNETWARE -DHAVE_DIRENT_H
+C_FLAGS  += -DNEW_LIBC
+C_FLAGS  += -DCLIB_STAT_PATCH
 #C_FLAGS  += -DUSE_PIPE_OPEN
 C_FLAGS  += -DUSE_MKFIFO
-C_FLAGS  += -DCLIB_STAT_PATCH -DUSE_MPK
+##C_FLAGS  += -DUSE_MPK		# To use the LibC recursive mutex locking
+#C_FLAGS  += -I. -I- -I../netware -I$(SDK_DIR)/sdk	# ../netware added for special SYS/STAT.H
 C_FLAGS  += -I. -I- -I../netware -I$(SDK_DIR)/include	# ../netware added for special SYS/STAT.H
 C_FLAGS  += -I$(MPK_DIR)/include1
 C_FLAGS  += -I$(MWCIncludes)
@@ -79,18 +88,28 @@ project: $(BINARY) $(MESSAGE)
 $(OBJ_DIR)/%.d: %.c
 	@echo Building Dependencies for $(<F)
 	@$(CC) -M $< $(C_FLAGS) -o $@
+
+$(OBJ_DIR)/%.d: %.cpp
+	@echo Building Dependencies for $(<F)
+	@$(CC) -M $< $(C_FLAGS) -o $@
+
+$(OBJ_DIR)/%.obj: %.cpp
+	@echo Compiling $?...
+	@$(CC) $< $(C_FLAGS) -o $@
 	
 $(OBJ_DIR)/%.obj: %.c
 	@echo Compiling $?...
 	@$(CC) $< $(C_FLAGS) -o $@
 
-$(BINARY): $(DEPDS) $(OBJECTS)
+#$(BINARY): $(DEPDS) $(OBJECTS)
+$(BINARY): $(OBJECTS)
 	@echo Linking $@...
 	@$(LINK) $(LD_FLAGS) $(OBJECTS)
 
 
 .PHONY: clean
-clean: cleand cleanobj cleanbin
+#clean: cleand cleanobj cleanbin
+clean: cleanobj cleanbin
 
 .PHONY: cleand
 cleand:

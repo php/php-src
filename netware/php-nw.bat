@@ -12,4 +12,5 @@ set path=%path%;P:\APPS\SCRIPT\SW\GNUWIN32\BIN
 
 REM Build options
 REM set BUILD=release
-setbuild r 1
+setbuild d 1
+

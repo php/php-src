@@ -23,30 +23,9 @@
    much useful things under MS-DOS, but using them avoids many "#ifdef
    MSDOS" in ported UN*X code ...  */
 
-#ifndef PWD_H
-#define PWD_H
-
-/*
-    Not available in LibC / SDK header or CodeWarrior header files; so taking from Winsock
-    definitions, which should be OK
-*/
-typedef unsigned int DWORD;
-
-struct passwd {
-	char *pw_name;				/* user name */
-	char *pw_passwd;			/* encrypted password */
-	int pw_uid;					/* user uid */
-	int pw_gid;					/* user gid */
-	char *pw_comment;			/* comment */
-	char *pw_gecos;				/* Honeywell login info */
-	char *pw_dir;				/* home directory */
-	char *pw_shell;				/* default shell */
+struct group {
+	char *gr_name;				/* group name */
+	char *gr_passwd;			/* group password */
+	int gr_gid;					/* group id */
+	char **gr_mem;				/* group members */
 };
-
-extern struct passwd *getpwuid(int);
-extern struct passwd *getpwnam(char *name);
-extern char *getlogin(void);
-#ifndef NEW_LIBC
-int getpid();
-#endif
-#endif
