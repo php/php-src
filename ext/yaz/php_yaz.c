@@ -12,7 +12,7 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Adam Dickmeiss <adam@indexdata.dk>                          |
+   | Author: Adam Dickmeiss <adam@indexdata.dk>                           |
    +----------------------------------------------------------------------+
  */
 

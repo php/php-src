@@ -12,7 +12,7 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Tom May <tom@go2net.com>                                    |
+   | Author: Tom May <tom@go2net.com>                                     |
    +----------------------------------------------------------------------+
 */
 

@@ -12,8 +12,7 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Sylvain PAGES <spages@free.fr>                              |
-   |                                                                      |
+   | Author: Sylvain PAGES <spages@free.fr>                               |
    +----------------------------------------------------------------------+
  */
 

@@ -16,7 +16,6 @@
 // | Authors: Sterling Hughes <sterling@php.net>                          |
 // |          Stig Bakken <ssb@fast.no>                                   |
 // |          Tomas V.V.Cox <cox@idecnet.com>                             |
-// |                                                                      |
 // +----------------------------------------------------------------------+
 //
 // $Id$

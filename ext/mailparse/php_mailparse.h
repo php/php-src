@@ -12,7 +12,7 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Wez Furlong <wez@thebrainroom.com>                          |
+   | Author: Wez Furlong <wez@thebrainroom.com>                           |
    | Credit also given to Double Precision Inc. who wrote the code that   |
    | the support routines for this extension were based upon.             |
    +----------------------------------------------------------------------+

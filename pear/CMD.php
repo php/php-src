@@ -13,8 +13,7 @@
 // | obtain it through the world-wide-web, please send a note to          |
 // | license@php.net so we can mail you a copy immediately.               |
 // +----------------------------------------------------------------------+
-// | Authors: Anders Johannsen <anders@johannsen.com>                     |
-// |                                                                      |
+// | Author: Anders Johannsen <anders@johannsen.com>                      |
 // +----------------------------------------------------------------------+
 //
 define('CMD_RCSID', '$Id$');

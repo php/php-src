@@ -13,7 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Authors: Paul Panotzki - Bunyip Information Systems                  |
-   |          Jim Winstead (jimw@php.net)                                 |
+   |          Jim Winstead <jimw@php.net>                                 |
    |          Wez Furlong                                                 |
    +----------------------------------------------------------------------+
 */
