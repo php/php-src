@@ -250,10 +250,12 @@ PHP_FUNCTION(zip_entry_open)
 	zval             *zzip_ent;
 	ZZIP_DIR         *archive_p = NULL;
 	php_zzip_dirent  *entry = NULL;
-	int               mode;
+	char             *mode;
+	int               mode_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rr|l", &zzip_dp, &zzip_ent, &mode) == FAILURE)
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rr|s", &zzip_dp, &zzip_ent, &mode, &mode_len) == FAILURE) {
 		return;
+	}
 	ZEND_FETCH_RESOURCE(archive_p, ZZIP_DIR *,        &zzip_dp,  -1, le_zip_dir_name,   le_zip_dir);
 	ZEND_FETCH_RESOURCE(entry,     php_zzip_dirent *, &zzip_ent, -1, le_zip_entry_name, le_zip_entry);
 
