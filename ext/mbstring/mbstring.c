@@ -60,7 +60,7 @@
 #include "main/php_output.h"
 #include "ext/standard/info.h"
 
-#include "mbfl/mbfl_allocators.h"
+#include "libmbfl/mbfl/mbfl_allocators.h"
 
 #include "php_variables.h"
 #include "php_globals.h"
