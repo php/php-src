@@ -1,0 +1,21 @@
+*** /usr/local/share/libtool/ltconfig	Wed Jul 14 14:46:28 1999
+--- ltconfig	Wed Oct  6 20:32:14 1999
+***************
+*** 1226,1233 ****
+  
+    *)
+      if $LD --help 2>&1 | egrep ': supported targets:.* elf' > /dev/null; then
+!       archive_cmds='$CC -shared $libobjs $deplibs $linkopts ${wl}-soname $wl$soname -o $lib'
+!       archive_expsym_cmds='$CC -shared $libobjs $deplibs $linkopts ${wl}-soname $wl$soname ${wl}-retain-symbols-file $wl$export_symbols -o $lib'
+      else
+        ld_shlibs=no
+      fi
+--- 1226,1233 ----
+  
+    *)
+      if $LD --help 2>&1 | egrep ': supported targets:.* elf' > /dev/null; then
+!       archive_cmds='$CC -shared $compile_rpath $libobjs $deplibs $linkopts ${wl}-soname $wl$soname -o $lib'
+!       archive_expsym_cmds='$CC -shared $compile_rpath $libobjs $deplibs $linkopts ${wl}-soname $wl$soname ${wl}-retain-symbols-file $wl$export_symbols -o $lib'
+      else
+        ld_shlibs=no
+      fi
