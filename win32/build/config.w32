@@ -85,7 +85,7 @@ if (PHP_DEBUG == "yes" && PHP_ZTS == "yes") {
 
 // Find the php_build dir - it contains headers and libraries
 // that we need
-ARG_WITH('php-build', 'Where the php_build dir can be found.  Assumes that it is a sibling of this source dir (..\\php_build) if not specified', 'no');
+ARG_WITH('php-build', 'Path to where you extracted http://www.php.net/extra/win32build.zip. Assumes that it is a sibling of this source dir (..\\php_build) if not specified', 'no');
 
 if (PHP_PHP_BUILD == "no") {
 	if (FSO.FolderExists("..\\php_build")) {
