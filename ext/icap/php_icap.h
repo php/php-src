@@ -21,32 +21,29 @@ extern PHP_MINIT_FUNCTION(icap);
 PHP_MINFO_FUNCTION(icap);
 
 /* Functions accessable to PHP */
-extern zend_module_entry php3_icap_module_entry;
-#define php3_icap_module_ptr &php3_icap_module_entry
-#define phpext_icap_ptr php3_icap_module_ptr
+extern zend_module_entry php_icap_module_entry;
+#define php_icap_module_ptr &php_icap_module_entry
+#define phpext_icap_ptr php_icap_module_ptr
 
 extern int icap_init_request(INIT_FUNC_ARGS);
 extern int icap_end_request(void);
-void php3_icap_open(INTERNAL_FUNCTION_PARAMETERS);
-void php3_icap_popen(INTERNAL_FUNCTION_PARAMETERS);
-void php3_icap_reopen(INTERNAL_FUNCTION_PARAMETERS);
-void php3_icap_close(INTERNAL_FUNCTION_PARAMETERS);
-void php3_icap_fetch_event(INTERNAL_FUNCTION_PARAMETERS);
-void php3_icap_list_events(INTERNAL_FUNCTION_PARAMETERS);
-void php3_icap_create_calendar(INTERNAL_FUNCTION_PARAMETERS);
-void php3_icap_rename_calendar(INTERNAL_FUNCTION_PARAMETERS);
-void php3_icap_delete_calendar(INTERNAL_FUNCTION_PARAMETERS);
-void php3_icap_store_event(INTERNAL_FUNCTION_PARAMETERS);
-void php3_icap_delete_event(INTERNAL_FUNCTION_PARAMETERS);
-void php3_icap_snooze(INTERNAL_FUNCTION_PARAMETERS);
-void php3_icap_list_alarms(INTERNAL_FUNCTION_PARAMETERS);
-
-
-
+PHP_FUNCTION(icap_open);
+PHP_FUNCTION(icap_popen);
+PHP_FUNCTION(icap_reopen);
+PHP_FUNCTION(icap_close);
+PHP_FUNCTION(icap_fetch_event);
+PHP_FUNCTION(icap_list_events);
+PHP_FUNCTION(icap_create_calendar);
+PHP_FUNCTION(icap_rename_calendar);
+PHP_FUNCTION(icap_delete_calendar);
+PHP_FUNCTION(icap_store_event);
+PHP_FUNCTION(icap_delete_event);
+PHP_FUNCTION(icap_snooze);
+PHP_FUNCTION(icap_list_alarms);
 
 
 #else
-#define php3_icap_module_ptr NULL
+#define php_icap_module_ptr NULL
 #endif /* HAVE_ICAP */
 
 
