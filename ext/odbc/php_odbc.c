@@ -460,6 +460,7 @@ PHP_MINIT_FUNCTION(odbc)
 	REGISTER_LONG_CONSTANT("SQL_CHAR", SQL_CHAR, CONST_PERSISTENT | CONST_CS);
 	REGISTER_LONG_CONSTANT("SQL_VARCHAR", SQL_VARCHAR, CONST_PERSISTENT | CONST_CS);
 	REGISTER_LONG_CONSTANT("SQL_LONGVARCHAR", SQL_LONGVARCHAR, CONST_PERSISTENT | CONST_CS);
+	REGISTER_LONG_CONSTANT("SQL_BLOB", SQL_LONGVARBINARY, CONST_PERSISTENT | CONST_CS);
 	REGISTER_LONG_CONSTANT("SQL_DECIMAL", SQL_DECIMAL, CONST_PERSISTENT | CONST_CS);
 	REGISTER_LONG_CONSTANT("SQL_NUMERIC", SQL_NUMERIC, CONST_PERSISTENT | CONST_CS);
 	REGISTER_LONG_CONSTANT("SQL_BIT", SQL_BIT, CONST_PERSISTENT | CONST_CS);
@@ -653,6 +654,7 @@ int odbc_bindcols(odbc_result *result TSRMLS_DC)
 			case SQL_BINARY:
 			case SQL_VARBINARY:
 			case SQL_LONGVARBINARY:
+			case SQL_BLOB:
 			case SQL_LONGVARCHAR:
 				result->values[i].value = NULL;
 				break;
@@ -667,7 +669,7 @@ int odbc_bindcols(odbc_result *result TSRMLS_DC)
 			default:
 				rc = SQLColAttributes(result->stmt, (UWORD)(i+1), SQL_COLUMN_DISPLAY_SIZE,
 									NULL, 0, NULL, &displaysize);
-				displaysize = displaysize <= result->longreadlen ? displaysize : 
+				displaysize = displaysize <= result->longreadlen ? displaysize :
 								result->longreadlen;
 				result->values[i].value = (char *)emalloc(displaysize + 1);
 				rc = SQLBindCol(result->stmt, (UWORD)(i+1), SQL_C_CHAR, result->values[i].value,
@@ -1417,7 +1419,19 @@ static void php_odbc_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 					Z_STRVAL_P(tmp) = empty_string;
 					break;
 				}
-				if (result->binmode == 1) sql_c_type = SQL_C_BINARY;
+
+				if (result->binmode == 1) {
+					sql_c_type = SQL_C_BINARY;
+				}
+			case SQL_BLOB:
+				if (result->binmode <= 0) {
+					Z_STRVAL_P(tmp) = empty_string;
+					break;
+				}
+
+				if (result->binmode == 1) {
+					sql_c-type = SQL_C_BINARY;
+				}
 			case SQL_LONGVARCHAR:
 				if (IS_SQL_LONG(result->values[i].coltype) && result->longreadlen <= 0) {
 					Z_STRVAL_P(tmp) = empty_string;
@@ -1576,7 +1590,19 @@ PHP_FUNCTION(odbc_fetch_into)
 					Z_STRVAL_P(tmp) = empty_string;
 					break;
 				}
-				if (result->binmode == 1) sql_c_type = SQL_C_BINARY; 
+
+				if (result->binmode == 1) {
+					sql_c_type = SQL_C_BINARY; 
+				}
+			case SQL_BLOB:
+				if (result->binmode <= 0) {
+					Z_STRVAL_P(tmp) = empty_string;
+					break;
+				}
+
+				if (result->binmode == 1) {
+					sql_c_type = SQL_C_BINARY;
+				}
 			case SQL_LONGVARCHAR:
 				if (IS_SQL_LONG(result->values[i].coltype) && result->longreadlen <= 0) {
 					Z_STRVAL_P(tmp) = empty_string;
@@ -1794,8 +1820,15 @@ PHP_FUNCTION(odbc_result)
 		case SQL_BINARY:
 		case SQL_VARBINARY:
 		case SQL_LONGVARBINARY:
-			if (result->binmode <= 1) sql_c_type = SQL_C_BINARY;
-			if (result->binmode <= 0) break; 
+			if (result->binmode <= 1) 
+				sql_c_type = SQL_C_BINARY;
+			if (result->binmode <= 0) 
+				break; 
+		case SQL_BLOB:
+			if (result->binmode <= 1) 
+				sql_c_type = SQL_C_BINARY;
+			if (result->binmode <= 0) 
+				break;
 		case SQL_LONGVARCHAR:
 			if (IS_SQL_LONG(result->values[field_ind].coltype)) {
 			   if (result->longreadlen <= 0) 
@@ -1952,7 +1985,15 @@ PHP_FUNCTION(odbc_result_all)
 						php_printf("<td>Not printable</td>");
 						break;
 					}
-					if (result->binmode <= 1) sql_c_type = SQL_C_BINARY; 
+					if (result->binmode <= 1) 
+						sql_c_type = SQL_C_BINARY; 
+				case SQL_BLOB:
+					if (result->binmode <= 0) {
+						php_printf("<td>Not printable</td>");
+						break;
+					}
+					if (result->binmode <= 1) 
+						sql_c_type = SQL_C_BINARY; 
 				case SQL_LONGVARCHAR:
 					if (IS_SQL_LONG(result->values[i].coltype) && 
 						result->longreadlen <= 0) {
@@ -2111,7 +2152,7 @@ int odbc_sqlconnect(odbc_connection **conn, char *db, char *uid, char *pwd, int 
 
 		if (direct) {
 			rc = SQLDriverConnect((*conn)->hdbc, NULL, ldb, strlen(ldb), dsnbuf, 
-					              sizeof(dsnbuf) - 1, &dsnbuflen, SQL_DRIVER_NOPROMPT);
+                                  sizeof(dsnbuf) - 1, &dsnbuflen, SQL_DRIVER_NOPROMPT);
 		} else {
 			rc = SQLConnect((*conn)->hdbc, db, SQL_NTS, uid, SQL_NTS, pwd, SQL_NTS);
 		}
