@@ -65,6 +65,7 @@ function_entry session_functions[] = {
 	PHP_FE(session_decode, NULL)
 	PHP_FE(session_register, NULL)
 	PHP_FE(session_unregister, NULL)
+	PHP_FE(session_is_registered, NULL)
 	PHP_FE(session_encode, NULL)
 	PHP_FE(session_start, NULL)
 	PHP_FE(session_destroy, NULL)
@@ -472,6 +473,32 @@ PHP_FUNCTION(session_unregister)
 	PS_DEL_VAR(p_name->value.str.val);
 }
 /* }}} */
+
+
+/* {{{ proto bool session_is_registered(string varname)
+   checks if a variable is registered in session */
+PHP_FUNCTION(session_is_registered)
+{
+	pval *p_name;
+	pval *p_var;
+	int ac = ARG_COUNT(ht);
+	PSLS_FETCH();
+
+	if(ac != 1 || getParameters(ht, ac, &p_name) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	
+	convert_to_string(p_name);
+	
+	if (zend_hash_find(&PS(vars), p_name->value.str.val, p_name->value.str.len+1,
+					   (void **)&p_var) == SUCCESS) {
+		RETURN_TRUE;
+	} else {
+		RETURN_FALSE;
+	}
+}
+/* }}} */
+
 
 /* {{{ proto string session_encode()
    serializes the current setup and returns the serialized representation */
