@@ -1316,11 +1316,6 @@ static inline void php_register_server_variables(TSRMLS_D)
 		sapi_module.register_server_variables(array_ptr TSRMLS_CC);
 	}
 
-	/* argv/argc support */
-	if (PG(register_argc_argv)) {
-		php_build_argv(SG(request_info).query_string TSRMLS_CC);
-	}
-
 	/* PHP Authentication support */
 	if (SG(request_info).auth_user) {
 		php_register_variable("PHP_AUTH_USER", SG(request_info).auth_user, array_ptr TSRMLS_CC);
@@ -1482,6 +1477,11 @@ static int php_hash_environment(TSRMLS_D)
 		}
 	}
 
+	/* argv/argc support */
+	if (PG(register_argc_argv)) {
+		php_build_argv(SG(request_info).query_string TSRMLS_CC);
+	}
+
 	for (i=0; i<NUM_TRACK_VARS; i++) {
 		if (!PG(http_globals)[i]) {
 			if (!initialized_dummy_track_vars_array) {
@@ -1549,10 +1549,15 @@ static void php_build_argv(char *s TSRMLS_DC)
 	pval *arr, *argc, *tmp;
 	int count = 0;
 	char *ss, *space;
+
+	if (! (PG(register_globals) || SG(request_info).argc ||
+		   PG(http_globals)[TRACK_VARS_SERVER]) ) {
+		return;
+	}
 	
 	ALLOC_ZVAL(arr);
 	array_init(arr);
-	INIT_PZVAL(arr);
+	arr->is_ref = 0;
 
 	/* Prepare argv */
 	if (SG(request_info).argc) { /* are we in cli sapi? */
@@ -1605,7 +1610,7 @@ static void php_build_argv(char *s TSRMLS_DC)
 		Z_LVAL_P(argc) = count;
 	}
 	Z_TYPE_P(argc) = IS_LONG;
-	INIT_PZVAL(argc);
+	argc->is_ref = 0;
 
 	if (PG(register_globals) || SG(request_info).argc) {
 		arr->refcount++;
@@ -1614,7 +1619,9 @@ static void php_build_argv(char *s TSRMLS_DC)
 		zend_hash_add(&EG(symbol_table), "argc", sizeof("argc"), &argc, sizeof(zval *), NULL);
 	}
 
-	if ( PG(http_globals)[TRACK_VARS_SERVER] != NULL ) {
+	if (PG(http_globals)[TRACK_VARS_SERVER] != NULL) {
+		arr->refcount++;
+		argc->refcount++;
 		zend_hash_update(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_SERVER]), "argv", sizeof("argv"), &arr, sizeof(pval *), NULL);
 		zend_hash_update(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_SERVER]), "argc", sizeof("argc"), &argc, sizeof(pval *), NULL);
 	}
