@@ -1,3 +1,4 @@
+threaded version still leaks mem, don't know why
 extensions aren't loaded
 stdout to syslog
 testing
