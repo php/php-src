@@ -224,7 +224,7 @@ static int _build_trace_args(zval **arg, int num_args, va_list args, zend_hash_k
 static int _build_trace_string(zval **frame, int num_args, va_list args, zend_hash_key *hash_key)
 {
 	char *s_tmp, **str;
-	int *len;
+	int *len, *num;
 	long line;
 	HashTable *ht = Z_ARRVAL_PP(frame);
 	zval **file, **tmp;
@@ -232,6 +232,10 @@ static int _build_trace_string(zval **frame, int num_args, va_list args, zend_ha
 	str = va_arg(args, char**);
 	len = va_arg(args, int*);
 
+	s_tmp = emalloc(Z_STRLEN_PP(file) + MAX_LENGTH_OF_LONG + 2 + 1);
+	sprintf(s_tmp, "#%d ", (*num)++);
+	TRACE_APPEND_STRL(s_tmp, strlen(s_tmp));
+	efree(s_tmp);
 	if (zend_hash_find(ht, "file", sizeof("file"), (void**)&file) == SUCCESS) {
 		if (zend_hash_find(ht, "line", sizeof("line"), (void**)&tmp) == SUCCESS) {
 			line = Z_LVAL_PP(tmp);
@@ -261,10 +265,10 @@ ZEND_METHOD(exception, gettraceasstring)
 {
 	zval *trace;
 	char *str = estrdup("");
-	int len = 0;
+	int len = 0, num = 0;
 	
 	trace = zend_read_property(Z_OBJCE_P(getThis()), getThis(), "trace", sizeof("trace")-1, 1 TSRMLS_CC);
-	zend_hash_apply_with_arguments(Z_ARRVAL_P(trace), (apply_func_args_t)_build_trace_string, 2, &str, &len);
+	zend_hash_apply_with_arguments(Z_ARRVAL_P(trace), (apply_func_args_t)_build_trace_string, 2, &str, &len, &num);
 
 	str[len] = '\0';	
 	RETURN_STRINGL(str, len, 0); 
@@ -443,10 +447,31 @@ static void zend_error_va(int type, const char *file, uint lineno, const char *f
 ZEND_API void zend_exception_error(zval *exception TSRMLS_DC)
 {
 	if (instanceof_function(Z_OBJCE_P(exception), default_exception_ptr TSRMLS_CC)) {
-		zval *message = zend_read_property(default_exception_ptr, exception, "message", sizeof("message")-1, 1 TSRMLS_CC);
-		zval *file = zend_read_property(default_exception_ptr, exception, "file", sizeof("file")-1, 1 TSRMLS_CC);
-		zval *line = zend_read_property(default_exception_ptr, exception, "line", sizeof("line")-1, 1 TSRMLS_CC);
-		zend_error_va(E_ERROR, Z_STRVAL_P(file), Z_LVAL_P(line), "Uncaught exception '%s' with message '%s'", Z_OBJCE_P(exception)->name, Z_STRVAL_P(message));
+		zend_fcall_info fci;
+		zval fname;
+		zval *str, *file, *line;
+
+		file = zend_read_property(default_exception_ptr, exception, "file", sizeof("file")-1, 1 TSRMLS_CC);
+		line = zend_read_property(default_exception_ptr, exception, "line", sizeof("line")-1, 1 TSRMLS_CC);
+		
+		ZVAL_STRINGL(&fname, "tostring", sizeof("tostring")-1, 0);
+	
+		fci.size = sizeof(fci);
+		fci.function_table = &default_exception_ptr->function_table;
+		fci.function_name = &fname;
+		fci.symbol_table = NULL;
+		fci.object_pp = &exception;
+		fci.retval_ptr_ptr = &str;
+		fci.param_count = 0;
+		fci.params = NULL;
+		fci.no_separation = 1;
+	
+		zend_call_function(&fci, NULL TSRMLS_CC);
+		zval_ptr_dtor(&str);
+	
+		str = zend_read_property(default_exception_ptr, exception, "string", sizeof("string")-1, 1 TSRMLS_CC);
+
+		zend_error_va(E_ERROR, Z_STRVAL_P(file), Z_LVAL_P(line), "Uncaught %s\n  thrown", Z_STRVAL_P(str));
 	} else {
 		zend_error(E_ERROR, "Uncaught exception '%s'", Z_OBJCE_P(exception)->name);
 	}
