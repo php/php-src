@@ -1,3 +1,28 @@
+1999-10-21  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/url_scanner.c
+      ext/standard/url_scanner.re: Add <AREA HREF=...
+
+    * ext/session/mod_files.c (_ps_files_valid_key): small logic fix
+
+1999-10-21  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/hyperwave/hg_comm.c
+      ext/hyperwave/hg_comm.h
+      ext/hyperwave/hw.c
+      ext/hyperwave/php3_hyperwave.h:
+    Added hw_mapid(), read comment in hg_comm.c
+
+1999-10-21  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/session/mod_files.c (_ps_files_open): evaluate key (session id) before path creation
+
+1999-10-21  changelog  <changelog@www>
+
+    * ChangeLog: ChangeLog update
+
+    * NEWS: NEWS update
+
 1999-10-20  Andi Gutmans  <andi@php.net>
 
     * ext/com/COM.c
