@@ -76,6 +76,8 @@ _node_as_zval(php_sxe_object *sxe, xmlNodePtr node, zval *value)
 		add_next_index_zval(return_value, __v); \
 	}
 
+#define GET_NODE(__s, __n) (__n) = (__s)->node ? (__s)->node : xmlDocGetRootElement((__s)->document)
+
 /* {{{ sxe_property_read()
  */
 static zval *
@@ -106,13 +108,9 @@ sxe_property_read(zval *object, zval *member TSRMLS_DC)
 		return return_value;
 	}
 
-	if (sxe->node) {
-		node = sxe->node->xmlChildrenNode;
-	} else {
-		node = sxe->node = xmlDocGetRootElement(sxe->document)->xmlChildrenNode;
-	}
+	GET_NODE(sxe, node);
 
-	attr = sxe->node->properties;
+	attr = node->properties;
 	while (attr) {
 		if (!xmlStrcmp(attr->name, name)) {
 			APPEND_PREV_ELEMENT(counter, value);
@@ -124,6 +122,11 @@ sxe_property_read(zval *object, zval *member TSRMLS_DC)
 			APPEND_CUR_ELEMENT(counter, value);
 		}
 		attr = attr->next;
+	}
+
+	node = node->xmlChildrenNode;
+	if (!sxe->node) {
+		sxe->node = node;
 	}
 
 	while (node) {
@@ -161,7 +164,7 @@ change_node_zval(xmlNodePtr node, zval *value)
 		case IS_NULL:
 			convert_to_string(value);
 		case IS_STRING:
-			node->children->content = xmlStrndup(Z_STRVAL_P(value), Z_STRLEN_P(value));
+			node->xmlChildrenNode->content = xmlStrndup(Z_STRVAL_P(value), Z_STRLEN_P(value));
 			break;
 		default:
 			php_error(E_WARNING, "It is not yet possible to assign complex types to attributes");
@@ -169,6 +172,7 @@ change_node_zval(xmlNodePtr node, zval *value)
 	}
 }
 /* }}} */
+
 
 /* {{{ sxe_property_write()
  */
@@ -184,7 +188,8 @@ sxe_property_write(zval *object, zval *member, zval *value TSRMLS_DC)
 	name = Z_STRVAL_P(member);
 	sxe = php_sxe_fetch_object(object TSRMLS_CC);
 
-	node = sxe->node ? sxe->node->xmlChildrenNode : xmlDocGetRootElement(sxe->document)->xmlChildrenNode;
+	GET_NODE(sxe, node);
+	node = node->xmlChildrenNode;
 
 	while (node) {
 		if (!xmlStrcmp(node->name, name)) {
@@ -219,7 +224,35 @@ sxe_property_get_ptr(zval *object, zval *member TSRMLS_DC)
 static int
 sxe_property_exists(zval *object, zval *member, int check_empty TSRMLS_DC)
 {
+	php_sxe_object *sxe;
+	char           *name;
+	xmlNodePtr      node;
+	xmlAttrPtr      attr;
 	
+	sxe = php_sxe_fetch_object(object TSRMLS_CC);
+	name = Z_STRVAL_P(member);
+
+	GET_NODE(sxe, node);
+
+	attr = node->properties;
+	while (attr) {
+		if (!xmlStrcmp(attr->name, name)) {
+			return 1;
+		}
+
+		attr = attr->next;
+	}
+
+	node = node->xmlChildrenNode;
+	while (node) {
+		if (!xmlStrcmp(node->name, name)) {
+			return 1;
+		}
+
+		node = node->next;
+	}
+
+	return 0;
 }
 /* }}} */
 
