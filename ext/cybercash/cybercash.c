@@ -40,26 +40,40 @@ function_entry cybercash_functions[] = {
 	PHP_FE(cybercash_decr, NULL)
 	PHP_FE(cybercash_base64_encode, NULL)
 	PHP_FE(cybercash_base64_decode, NULL)
-	{0}
-  };
+	{NULL, NULL, NULL}
+};
 
 zend_module_entry cybercash_module_entry = {
 	"cybercash",
 	cybercash_functions,
-	NULL,NULL,
-	NULL,NULL,
 	NULL,
+	NULL,
+	NULL,
+	NULL,
+	PHP_MINFO(cybercash),
 	STANDARD_MODULE_PROPERTIES,
 };
 
+#ifdef COMPILE_DL_CYBERCASH
+ZEND_GET_MODULE(cybercash)
+#endif
+
+PHP_MINFO_FUNCTION(cybercash)
+{
+	php_info_print_table_start();
+	php_info_print_table_row(2, "Cybercash Support", "enabled");
+	php_info_print_table_end();
+}
+
 PHP_FUNCTION(cybercash_encr)
 {
-	pval **wmk, **sk, **inbuff;
+	zval **wmk, **sk, **inbuff;
 	unsigned char *outbuff, *macbuff;
 	unsigned int outAlloc, outLth;
 	long errcode;
-  
-	if(ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3,&wmk,&sk,&inbuff) == FAILURE) {
+
+	if (ZEND_NUM_ARGS() != 3 || 
+	    zend_get_parameters_ex(3, &wmk, &sk, &inbuff) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -67,132 +81,122 @@ PHP_FUNCTION(cybercash_encr)
 	convert_to_string_ex(sk);
 	convert_to_string_ex(inbuff);
 
-	outAlloc = (*inbuff)->value.str.len + 10;
+	outAlloc = Z_STRLEN_PP(inbuff) + 10;
 
-  outbuff = (unsigned char *)emalloc(outAlloc);
-  macbuff = (unsigned char *)emalloc(20);
+	outbuff = (unsigned char *)emalloc(sizeof(unsigned char) * outAlloc);
+	macbuff = (unsigned char *)emalloc(sizeof(unsigned char) * 20);
 
-  errcode = mck_encr((*wmk)->value.str.val,(*sk)->value.str.val,
-			(*inbuff)->value.str.len+1,
-                   	(*inbuff)->value.str.val,
-                   	outAlloc,
-                   	outbuff,
-                   	&outLth,
-                   	macbuff);
+	errcode = mck_encr(Z_STRVAL_PP(wmk),
+                       Z_STRVAL_PP(sk),
+                       Z_STRLEN_PP(inbuff) + 1,
+                       Z_STRVAL_PP(inbuff),
+                       outAlloc,
+                       outbuff,
+                       &outLth,
+                       macbuff);
 
-	array_init(return_value);
+	if (array_init(return_value) == FAILURE) {
+		php_error(E_WARNING, "Return value from cybercash_encr could not be initialized");
+		RETURN_FALSE;
+	}
 
-	add_assoc_long(return_value,"errcode",errcode);
+	add_assoc_long(return_value, "errcode", errcode);
 
-	if(!errcode)
-	{
-		add_assoc_stringl(return_value,"outbuff",outbuff,outLth,0);
-      		add_assoc_long(return_value,"outLth",outLth);
+	if (!errcode) {
+		add_assoc_stringl(return_value, "outbuff", outbuff, outLth, 0);
+		add_assoc_long(return_value,"outLth",outLth);
 		add_assoc_stringl(return_value,"macbuff",macbuff,20,0);
-    	}
-    	else
-    	{
-      		efree(outbuff);
-      		efree(macbuff);
-    	}
+	} else {
+		efree(outbuff);
+		efree(macbuff);
+	}
 }
 
 PHP_FUNCTION(cybercash_decr)
 {
-  pval **wmk,**sk,**inbuff;
-  unsigned char *outbuff, *macbuff;
-  unsigned int outAlloc, outLth;
-  long errcode;
+	zval **wmk,**sk,**inbuff;
+	unsigned char *outbuff, *macbuff;
+	unsigned int outAlloc, outLth;
+	long errcode;
   
 
-  if(ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3,&wmk,&sk,&inbuff) == FAILURE)
-  {
-    WRONG_PARAM_COUNT;
-  }
-
-  convert_to_string_ex(wmk);
-  convert_to_string_ex(sk);
-  convert_to_string_ex(inbuff);
-
-  outAlloc=(*inbuff)->value.str.len;
-
-  outbuff=(unsigned char *)emalloc(outAlloc);
-  macbuff=(unsigned char *)emalloc(20);
-
-  errcode=mck_decr((*wmk)->value.str.val,
-                   (*sk)->value.str.val,
-                   (*inbuff)->value.str.len,
-                   (*inbuff)->value.str.val,
-                   outAlloc,
-                   outbuff,
-                   &outLth,
-                   macbuff);
-
-	array_init(return_value);
-
-	add_assoc_long(return_value,"errcode",errcode);
-
-	if(!errcode) {
-		add_assoc_stringl(return_value,"outbuff",outbuff,outLth,0);
-		add_assoc_long(return_value,"outLth",outLth);
-		add_assoc_stringl(return_value,"macbuff",macbuff,20,0);
+	if (ZEND_NUM_ARGS() != 3 ||
+		zend_get_parameters_ex(3, &wmk, &sk, &inbuff) == FAILURE) {
+		WRONG_PARAM_COUNT;
 	}
-    	else
-    	{
-      		efree(outbuff);
-      		efree(macbuff);
-    	}
+
+	convert_to_string_ex(wmk);
+	convert_to_string_ex(sk);
+	convert_to_string_ex(inbuff);
+
+	outAlloc = Z_STRLEN_PP(inbuff);
+
+	outbuff = (unsigned char *)emalloc(sizeof(unsigned char) * outAlloc);
+	macbuff = (unsigned char *)emalloc(sizeof(unsigned char) * 20);
+
+	errcode = mck_decr(Z_STRVAL_PP(wmk),
+                       Z_STRVAL_PP(sk),
+                       Z_STRLEN_PP(inbuff),
+                       Z_STRLEN_PP(inbuff),
+                       outAlloc,
+                       outbuff,
+                       &outLth,
+                       macbuff);
+
+	if (array_init(return_value) == FAILURE) {
+		php_error(E_WARNING, "Could not initialize Return value from cybercash_decr")
+		RETURN_FALSE;
+	}
+
+	add_assoc_long(return_value, "errcode", errcode);
+
+	if (!errcode) {
+		add_assoc_stringl(return_value, "outbuff", outbuff, outLth, 0);
+		add_assoc_long(return_value, "outLth", outLth);
+		add_assoc_stringl(return_value, "macbuff", macbuff, 20, 0);
+	} else {
+		efree(outbuff);
+		efree(macbuff);
+	}
 }
 
 PHP_FUNCTION(cybercash_base64_encode)
 {
-  pval **inbuff;
-  char *outbuff;
-  long ret_length;
+	zval **inbuff;
+	char *outbuff;
+	long ret_length;
 
-  if(ZEND_NUM_ARGS() != 1 ||
-     zend_get_parameters_ex(1,&inbuff) == FAILURE)
-  {
-    WRONG_PARAM_COUNT;
-  }
+	if (ZEND_NUM_ARGS() != 1 ||
+	    zend_get_parameters_ex(1, &inbuff) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	convert_to_string_ex(inbuff);
 
-  convert_to_string_ex(inbuff);
-
-  outbuff=(char *)emalloc(
-    base64_enc_size((unsigned int)(*inbuff)->value.str.len));
+	outbuff = (char *)emalloc(base64_enc_size((unsigned int)Z_STRLEN_PP(inbuff)));
   
-  ret_length=base64_encode(outbuff,
-     (*inbuff)->value.str.val,(*inbuff)->value.str.len);
+	ret_length = base64_encode(outbuff, 
+		                       Z_STRVAL_PP(inbuff),
+							   Z_STRLEN_PP(inbuff));
 
-  return_value->value.str.val=outbuff;
-  return_value->value.str.len=ret_length;
-  return_value->type=IS_STRING;
-  
+	RETURN_STRINGL(outbuff, ret_length, 0);
 }
 
 PHP_FUNCTION(cybercash_base64_decode)
 {
-  pval **inbuff;
-  char *outbuff;
-  long ret_length;
+	zval **inbuff;
+	char *outbuff;
+	long ret_length;
 
-  if(ZEND_NUM_ARGS() != 1 ||
-     zend_get_parameters_ex(1,&inbuff) == FAILURE)
-  {
-    WRONG_PARAM_COUNT;
-  }
+	if (ZEND_NUM_ARGS() != 1 ||
+	    zend_get_parameters_ex(1, &inbuff) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	convert_to_string_ex(inbuff);
 
-  convert_to_string_ex(inbuff);
-
-  outbuff=(char *)emalloc(
-    base64_dec_size((unsigned int)(*inbuff)->value.str.len));
+	outbuff = (char *)emalloc(base64_dec_size((unsigned int)Z_STRLEN_PP(inbuff)));
   
-  ret_length=base64_decode(outbuff,
-     (*inbuff)->value.str.val,(*inbuff)->value.str.len);
+	ret_length = base64_decode(outbuff, Z_STRVAL_PP(inbuff), Z_STRLEN_PP(inbuff));
 
-  return_value->value.str.val=outbuff;
-  return_value->value.str.len=ret_length;
-  return_value->type=IS_STRING;
-  
+	RETURN_STRINGL(outbuff, ret_length, 0);
 }
 #endif
