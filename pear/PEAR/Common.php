@@ -57,16 +57,34 @@ class PEAR_Common extends PEAR
     var $pkginfo = array();
 
     /**
-     * Permitted maintainer roles
+     * Valid maintainer roles
      * @var array
      */
     var $maintainer_roles = array('lead','developer','contributor','helper');
 
     /**
-     * Permitted release states
+     * Valid release states
      * @var array
      */
-    var $releases_states  = array('alpha','beta','stable','snapshot','devel');
+    var $release_states  = array('alpha','beta','stable','snapshot','devel');
+
+    /**
+     * Valid dependency types
+     * @var array
+     */
+    var $dependency_types  = array('pkg','ext','php','prog','ldlib','rtlib','os','websrv','sapi');
+
+    /**
+     * Valid dependency relations
+     * @var array
+     */
+    var $dependency_relations  = array('has','eq','lt','le','gt','ge');
+
+    /**
+     * Valid file roles
+     * @var array
+     */
+    var $file_roles  = array('php','ext','test','doc','data','extsrc');
 
     /**
      * User Interface object (PEAR_Frontend_* class).  If null,
@@ -417,9 +435,9 @@ class PEAR_Common extends PEAR
                 }
                 break;
             case 'state':
-                if (!in_array($data, $this->releases_states)) {
+                /* if (!in_array($data, $this->release_states)) {
                     trigger_error("The release state: '$data' is not valid", E_USER_WARNING);
-                } elseif ($this->in_changelog) {
+                } else*/if ($this->in_changelog) {
                     $this->current_release['release_state'] = $data;
                 } else {
                     $this->pkginfo['release_state'] = $data;
@@ -549,7 +567,12 @@ class PEAR_Common extends PEAR
         if (!@is_file($file)) {
             return $this->raiseError('tgz :: could not open file');
         }
-        $tar = new Archive_Tar($file, true);
+        if (substr($file, -4) == '.tar') {
+            $compress = false;
+        } else {
+            $compress = true;
+        }
+        $tar = new Archive_Tar($file, $compress);
         $content = $tar->listContent();
         if (!is_array($content)) {
             return $this->raiseError('tgz :: could not get contents of package');
@@ -772,6 +795,131 @@ class PEAR_Common extends PEAR
         }
         $ret .= "$indent  </release>\n";
         return $ret;
+    }
+
+    // }}}
+    // {{{ validatePackageInfo()
+
+    function validatePackageInfo($info, &$errors, &$warnings)
+    {
+        if (is_string($info) && file_exists($info)) {
+            $tmp = substr($info, -4);
+            if ($tmp == '.xml') {
+                $info = $this->infoFromDescriptionFile($info);
+            } elseif ($tmp == '.tar' || $tmp == '.tgz') {
+                $info = $this->infoFromTgzFile($info);
+            } else {
+                $fp = fopen($params[0], "r");
+                $test = fread($fp, 5);
+                fclose($fp);
+                if ($test == "<?xml") {
+                    $info = $obj->infoFromDescriptionFile($params[0]);
+                } else {
+                    $info = $obj->infoFromTgzFile($params[0]);
+                }
+            }
+            if (PEAR::isError($info)) {
+                return $this->raiseError($info);
+            }
+        }
+        if (!is_array($info)) {
+            return false;
+        }
+        $errors = array();
+        $warnings = array();
+        if (empty($info['package'])) {
+            $errors[] = 'missing package name';
+        }
+        if (empty($info['summary'])) {
+            $errors[] = 'missing summary';
+        } elseif (strpos(trim($info['summary']), "\n") !== false) {
+            $warnings[] = 'summary should be on a single line';
+        }
+        if (empty($info['description'])) {
+            $errors[] = 'missing description';
+        }
+        if (empty($info['release_license'])) {
+            $errors[] = 'missing license';
+        }
+        if (empty($info['version'])) {
+            $errors[] = 'missing version';
+        }
+        if (empty($info['release_state'])) {
+            $errors[] = 'missing release state';
+        } elseif (!in_array($info['release_state'], $this->release_states)) {
+            $errors[] = "invalid release state `$info[release_state]', should be one of: ".implode(' ', $this->release_states);
+        }
+        if (empty($info['release_date'])) {
+            $errors[] = 'missing release date';
+        } elseif (!preg_match('/^\d{4}-\d\d-\d\d$/', $info['release_date'])) {
+            $errors[] = "invalid release date `$info[release_date]', format is YYYY-MM-DD";
+        }
+        if (empty($info['release_notes'])) {
+            $errors[] = "missing release notes";
+        }
+        if (empty($info['maintainers'])) {
+            $errors[] = 'no maintainer(s)';
+        } else {
+            $i = 1;
+            foreach ($info['maintainers'] as $m) {
+                if (empty($m['handle'])) {
+                    $errors[] = "maintainer $i: missing handle";
+                }
+                if (empty($m['role'])) {
+                    $errors[] = "maintainer $i: missing role";
+                } elseif (!in_array($m['role'], $this->maintainer_roles)) {
+                    $errors[] = "maintainer $i: invalid role `$m[role]', should be one of: ".implode(' ', $this->maintainer_roles);
+                }
+                if (empty($m['name'])) {
+                    $errors[] = "maintainer $i: missing name";
+                }
+                if (empty($m['email'])) {
+                    $errors[] = "maintainer $i: missing email";
+                }
+                $i++;
+            }
+        }
+        if (!empty($info['deps'])) {
+            $i = 1;
+            foreach ($info['deps'] as $d) {
+                if (empty($d['type'])) {
+                    $errors[] = "depenency $i: missing type";
+                } elseif (!in_array($d['type'], $this->dependency_types)) {
+                    $errors[] = "depenency $i: invalid type, should be one of: ".implode(' ', $this->depenency_types);
+                }
+                if (empty($d['rel'])) {
+                    $errors[] = "dependency $i: missing relation";
+                } elseif (!in_array($d['rel'], $this->dependency_relations)) {
+                    $errors[] = "dependency $i: invalid relation, should be one of: ".implode(' ', $this->dependency_relations);
+                }
+                if ($d['rel'] != 'has' && empty($d['version'])) {
+                    $warnings[] = "dependency $i: missing version";
+                } elseif ($d['rel'] == 'has' && !empty($d['version'])) {
+                    $warnings[] = "dependency $i: version ignored for `has' dependencies";
+                }
+                if ($d['type'] == 'php' && !empty($d['name'])) {
+                    $warnings[] = "dependency $i: name ignored for php type dependencies";
+                } elseif ($d['type'] != 'php' && empty($d['name'])) {
+                    $errors[] = "dependency $i: missing name";
+                }
+                $i++;
+            }
+        }
+        if (empty($info['filelist'])) {
+            $errors[] = 'no files';
+        } else {
+            foreach ($info['filelist'] as $file => $fa) {
+                if (empty($fa['role'])) {
+                    $errors[] = "$file: missing role";
+                } elseif (!in_array($fa['role'], $this->file_roles)) {
+                    $errors[] = "$file: invalid role, should be one of: ".implode(' ', $this->file_roles);
+                } elseif ($fa['role'] == 'extsrc' && empty($fa['sources'])) {
+                    $errors[] = "$file: no source files";
+                }
+                // Any checks we can do for baseinstalldir?
+            }
+        }
+        return true;
     }
 
     // }}}

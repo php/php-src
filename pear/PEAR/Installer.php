@@ -88,11 +88,11 @@ class PEAR_Installer extends PEAR_Common
 
     function _deletePackageFiles($package)
     {
-        $info = $this->registry->packageInfo($package);
-        if ($info == null) {
+        $filelist = $this->registry->packageInfo($package, 'filelist');
+        if ($filelist == null) {
             return $this->raiseError("$package not installed");
         }
-        foreach ($info['filelist'] as $file => $props) {
+        foreach ($filelist as $file => $props) {
             $path = $props['installed_as'];
             // XXX TODO: do a "rmdir -p dirname($path)" to maintain clean the fs
             if (!@unlink($path)) {
@@ -264,7 +264,7 @@ class PEAR_Installer extends PEAR_Common
         //  ==> XXX This part should be removed later on
         $flag_old_format = false;
         if (!is_file($descfile)) {
-          // ----- Look for old package .tgz archive format
+          // ----- Look for old package archive format
           // In this format the package.xml file was inside the package directory name
           $dp = opendir($tmpdir);
           do {
@@ -320,7 +320,7 @@ class PEAR_Installer extends PEAR_Common
             }
             if (empty($options['register_only'])) {
                 // when upgrading, remove old release's files first:
-                $this->_deletePackageFiles($package);
+                $this->_deletePackageFiles($pkgname);
             }
         }
 

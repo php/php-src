@@ -48,11 +48,14 @@ class PEAR_Command_Package extends PEAR_Command_Common
     function getCommands()
     {
         return array('package',
+                     'package-info',
                      'package-list',
-                     'package-info');
+                     'package-verify');
     }
 
     // }}}
+
+    // {{{ getHelp()
 
     function getHelp($command)
     {
@@ -67,9 +70,13 @@ class PEAR_Command_Package extends PEAR_Command_Common
             case 'packge-info':
                 return array('<pear package>',
                              'Shows information about a PEAR package');
+            case 'package-verify':
+                return array('<package.(tgz|tar|xml)>',
+                             'Verifies a package or description file');
         }
     }
 
+    // }}}
 
     // {{{ run()
 
@@ -94,12 +101,26 @@ class PEAR_Command_Package extends PEAR_Command_Common
             // {{{ package
 
             case 'package': {
-                $pkginfofile = isset($params[0]) ? $params[0] : null;
+                $pkginfofile = isset($params[0]) ? $params[0] : 'package.xml';
                 ob_start();
                 $packager =& new PEAR_Packager($this->config->get('php_dir'),
                                                $this->config->get('ext_dir'),
                                                $this->config->get('doc_dir'));
                 $packager->debug = $this->config->get('verbose');
+                $err = $warn = array();
+                $packager->validateInfo($pkginfofile, $err, $warn);
+                foreach ($err as $e) {
+                    $this->ui->displayLine("Error: $e");
+                }
+                foreach ($warn as $w) {
+                    $this->ui->displayLine("Warning: $w");
+                }
+                $this->ui->displayLine(sprintf('%d error(s), %d warning(s)',
+                                               sizeof($err), sizeof($warn)));
+                if (sizeof($err) > 0) {
+                    $this->ui->displayLine("Fix these errors and try again.");
+                    break;
+                }
                 $result = $packager->Package($pkginfofile);
                 $output = ob_get_contents();
                 ob_end_clean();
@@ -237,6 +258,42 @@ class PEAR_Command_Package extends PEAR_Command_Common
                     $this->ui->tableRow(array($key, $value), null, array(1 => array('wrap' => 55)));
                 }
                 $this->ui->endTable();
+                break;
+            }
+
+            // }}}
+            // {{{ package-verify
+
+            case 'package-verify': {
+                if (sizeof($params) < 1) {
+                    $help = $this->getHelp($command);
+                    return $this->raiseError("$command: missing parameter: $help[0]");
+                }
+                $obj = new PEAR_Common;
+                $info = null;
+                $validate_result = $obj->validatePackageInfo($info, $err, $warn);
+                if (file_exists($params[0])) {
+                    $fp = fopen($params[0], "r");
+                    $test = fread($fp, 5);
+                    fclose($fp);
+                    if ($test == "<?xml") {
+                        $info = $obj->infoFromDescriptionFile($params[0]);
+                    }
+                }
+                if (empty($info)) {
+                    $info = $obj->infoFromTgzFile($params[0]);
+                }
+                if (PEAR::isError($info)) {
+                    return $this->raiseError($info);
+                }
+                foreach ($err as $e) {
+                    $this->ui->displayLine("Error: $e");
+                }
+                foreach ($warn as $w) {
+                    $this->ui->displayLine("Warning: $w");
+                }
+                $this->ui->displayLine(sprintf('%d error(s), %d warning(s)',
+                                               sizeof($err), sizeof($warn)));
                 break;
             }
 
