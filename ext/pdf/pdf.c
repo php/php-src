@@ -88,7 +88,7 @@ function_entry pdf_functions[] = {
 	PHP_FE(pdf_set_info_title, NULL)	/* deprecated */
 	PHP_FE(pdf_set_info_subject, NULL)	/* deprecated */
 	PHP_FE(pdf_set_info_author, NULL)	/* deprecated */
-	PHP_FE(pdf_set_info_keywords, NULL)	/* deprecated /*
+	PHP_FE(pdf_set_info_keywords, NULL)	/* deprecated */
 	PHP_FE(pdf_open, NULL)
 	PHP_FE(pdf_close, NULL)
 	PHP_FE(pdf_begin_page, NULL)
@@ -456,7 +456,7 @@ PHP_FUNCTION(pdf_open) {
 #if defined PDF_OPEN_MEM_SUPPORTED
 		fp = NULL;
 #else
-		php3_error(E_WARNING, "Your version of pdflib does not support in memory creation of PDF documents. You have to pass a file handle to pdf_open()");
+		php_error(E_WARNING, "Your version of pdflib does not support in memory creation of PDF documents. You have to pass a file handle to pdf_open()");
 		WRONG_PARAM_COUNT;
 #endif
 	} else {
