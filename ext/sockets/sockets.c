@@ -1016,7 +1016,6 @@ PHP_FUNCTION(socket_bind)
 	long retval;
 	php_sockaddr_storage sa_storage;
 	struct sockaddr *sock_type = (struct sockaddr*) &sa_storage;
-	socklen_t length = sizeof(sa_storage);
 	php_socket *php_sock;
 	int argc = ZEND_NUM_ARGS();
 
@@ -1782,7 +1781,6 @@ PHP_FUNCTION(socket_getopt)
 	convert_to_long_ex(arg3);
 	
 	if (Z_LVAL_PP(arg2) == SO_LINGER) {
-		zval *optval_array = NULL;
 		optlen = sizeof(struct linger);
 
 		if (getsockopt(php_sock->socket, Z_LVAL_PP(arg2), Z_LVAL_PP(arg3), (char*)&linger_val, &optlen) != 0) {
