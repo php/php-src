@@ -27,6 +27,7 @@ PEAR_SUBDIRS = \
 	Numbers \
 	Payment \
 	PEAR \
+	Schedule \
 	XML
 
 PEAR_FILES = \
@@ -78,6 +79,7 @@ PEAR_FILES = \
 	Numbers/Roman.php \
 	PEAR/Installer.php \
 	Payment/Verisign.php \
+	Schedule/At.php \
 	XML/Parser.php \
 	XML/RPC.php
 
