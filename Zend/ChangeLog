@@ -1,3 +1,25 @@
+2002-06-29  Andi Gutmans  <andi@zend.com>
+
+    * zend.h: - Get ready for alpha2
+
+    * zend_execute_API.c: - Invalid -> Undefined
+
+    * zend_language_parser.y: - Add missing semi-colon.
+
+    * zend_execute_API.c
+      zend_execute.c: - Improve some error messages.
+
+    * zend_compile.c: - Revert previous fix.
+
+    * zend_compile.c: - Change E_ERROR -> E_COMPILE_ERROR where needed.
+
+    * zend_compile.c:
+    - Fix for bug #17882. We complain if the same method is declared twice.
+
+    * zend.h
+      zend_operators.c: - Fix bug 15037
+    - Bump version to alpha2-dev
+
 2002-06-28  Andi Gutmans  <andi@zend.com>
 
     * zend_operators.c: - WS fix

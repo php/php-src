@@ -1,3 +1,86 @@
+2002-06-29  Jani Taskinen  <sniper@iki.fi>
+
+    * config.guess
+      config.sub
+      ltmain.sh:
+    - Upgrade bundled libtool to 1.4.2. Following stuff mentioned at:
+      http://www.gnu.org/software/libtool/news.html
+
+      * Diagnose and warn about not-quite-working combinations of gcc and ld on Solaris.
+      * Improved OpenBSD support.
+      * Improved cygwin support.
+      * Bugfixes.
+
+2002-06-29  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/ircg.c
+      ext/standard/php_smart_str.h:
+    Fix some 8bit issues with IRCG nickname encoding and
+    Change the underlying interface of smart_str to accept unsigned char.
+
+2002-06-29  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/exif/exif.c: Unify error messages part 1
+
+    * ext/gd/gd.c: - Fix GD build with GD 1.8.3
+
+    * ext/standard/array.c: - Fix for bug #17654
+
+2002-06-29  Thies C. Arntzen  <thies@thieso.net>
+
+    * ext/standard/url_scanner_ex.c
+      ext/standard/url_scanner_ex.re: fix leak
+
+2002-06-29  Sergey Kartashoff  <gluke@biosys.net>
+
+    * ext/mnogosearch/README
+      ext/mnogosearch/index.php:
+    Search example (which demonstrates using of mnogosearch API) is updated.
+
+2002-06-29  James Cox  <james@blog.at>
+
+    * acinclude.m4: fixes extensions with "-"
+
+
+2002-06-29  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/xmlrpc/xmlrpc-epi-php.c:
+    Fix some build error on win32 (snapshot build)
+
+2002-06-29  James Cox  <james@blog.at>
+
+    * ext/gd/gd_bundled.dsp: make this build too.
+
+    * ext/gd/gd.dsp: removed these files from build.
+
+    * acinclude.m4: really fix it.
+
+
+2002-06-29  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/xslt/sablot.c:
+    This is not done anymore. (should fix win32 snapshot build too)
+
+2002-06-29  James Cox  <james@blog.at>
+
+    * acinclude.m4: fixes bug #17453
+
+2002-06-29  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/pdf/config.m4:
+    - Fix the shared problem. (the previous patch really didn't fix anything)
+
+    * build/rules.mk: Removing libs/ is not a good idea
+
+    * ext/db/db.c
+      ext/db/php_db.h: Missing TSRMLS_* stuff
+
+    * sapi/apache2filter/config.m4: Better fix it here too..
+
+2002-06-29  Rasmus Lerdorf  <rasmus@lerdorf.on.ca>
+
+    * sapi/apache/config.m4: Oops, extra pipe snuck in
+
 2002-06-28  Rasmus Lerdorf  <rasmus@lerdorf.on.ca>
 
     * sapi/apache/config.m4: Fix for bug #18055
