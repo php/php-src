@@ -239,51 +239,6 @@ PHP_MINFO_FUNCTION(dbplus)
 
 /* }}} */
 
-#if 0
-/* {{{ proto int dbplus_open(string name, int writing, int searchpath)
-
-    */
-PHP_FUNCTION(dbplus_open)
-{
-    relf *conn;
-
-    zval **name, **writing, **searchpath;
-    if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &name, &writing, &searchpath) == FAILURE){
-        WRONG_PARAM_COUNT;
-    }
-
-    convert_to_string_ex(name);
-    convert_to_long_ex(writing);
-    convert_to_long_ex(searchpath);
-
-    conn = cdb_open(Z_STRVAL_PP(name), Z_LVAL_PP(writing), Z_LVAL_PP(searchpath));
-    if(conn == NULL) {
-        /* TODO error handling */
-        RETURN_FALSE;
-    }
-
-    ZEND_REGISTER_RESOURCE(return_value, conn, le_dbplus);
-}
-
-/* }}} */
-
-/* {{{ proto void dbplus_close(int conn)
-    */
-PHP_FUNCTION(dbplus_close)
-{
-    zval **conn;
-    if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &conn) == FAILURE){
-        WRONG_PARAM_COUNT;
-    }
-
-    convert_to_long_ex(conn);
-
-    /* TODO resource type check */
-
-    zend_list_delete(Z_LVAL_PP(conn));  
-}
-/* }}} */
-#endif
 
 /*
  * Local variables:
