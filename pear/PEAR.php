@@ -670,11 +670,7 @@ class PEAR_Error
     var $code                 = -1;
     var $message              = '';
     var $userinfo             = '';
-
-    // Wait until we have a stack-groping function in PHP.
-    //var $file    = '';
-    //var $line    = 0;
-
+    var $backtrace            = null;
 
     // }}}
     // {{{ constructor
@@ -709,6 +705,9 @@ class PEAR_Error
         $this->code      = $code;
         $this->mode      = $mode;
         $this->userinfo  = $userinfo;
+        if (function_exists("debug_backtrace")) {
+            $this->backtrace = debug_backtrace();
+        }
         if ($mode & PEAR_ERROR_CALLBACK) {
             $this->level = E_USER_NOTICE;
             $this->callback = $options;
@@ -851,6 +850,25 @@ class PEAR_Error
     function getDebugInfo()
     {
         return $this->getUserInfo();
+    }
+
+    // }}}
+    // {{{ getBacktrace()
+
+    /**
+     * Get the call backtrace from where the error was generated.
+     * Supported with PHP 4.3.0 or newer.
+     *
+     * @param int $frame (optional) what frame to fetch
+     * @return array Backtrace, or NULL if not available.
+     * @access public
+     */
+    function getBacktrace($frame = null)
+    {
+        if ($frame === null) {
+            return $this->backtrace;
+        }
+        return $this->backtrace[$frame];
     }
 
     // }}}
