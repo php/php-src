@@ -1,3 +1,65 @@
+2004-04-22  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/sqlite/tests/bug28112.phpt:
+      Avoid warning to interfere test result
+
+    * (PHP_4_3)
+      NEWS:
+      BFN
+
+2004-04-22  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PECL_4_3)
+      ext/sqlite/sqlite.c:
+      MFH: Fixed bug #28112 (Empty queries may result in crashes).
+
+    * ext/sqlite/sqlite.c:
+      Empty query checks, bug #28112.
+
+2004-04-22  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/sqlite/tests/bug28112.phpt:
+      
+      Add test for bug #28112
+
+    * ext/sqlite/sqlite.c:
+      bugfix #28112
+
+2004-04-22  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/com_dotnet/tests/27974.phpt:
+      Add test
+
+    * ext/com_dotnet/com_variant.c:
+      A working fix for the safearray mapping bug.
+
+    * ext/standard/basic_functions.c:
+      The fix for the vc7 libc putenv bug is also needed here to avoid a crash.
+
+2004-04-22  Hartmut Holzgraefe  <hartmut@php-groupies.de>
+
+    * ext/mime_magic/DEPRECATED
+      ext/mime_magic/EXPERIMENTAL
+      ext/mime_magic/config.m4:
+      Depercating mime_magic in favor of PECL::fileinfo
+
+2004-04-22  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/com_dotnet/com_variant.c:
+      (probable) fix for Bug #27974: PHP Arrays are not mapped to VARIANTs.
+
+2004-04-22  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      ext/pgsql/pgsql.c:
+      MFH: Fixed possible crash inside pg_copy_(to|from) function if delimiter is
+      more then 1 character long.
+
+    * ext/pgsql/pgsql.c:
+      Fixed possible crash inside pg_copy_(to|from) function if delimiter is more
+      then 1 character long.
+
 2004-04-21  Wez Furlong  <wez.php@thebrainroom.net>
 
     * NEWS:
