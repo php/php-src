@@ -62,7 +62,7 @@ Encoding
 	  SOAP 1.2 doesn't support partially transmitted and sparse arrays
 - full support for structures???  
 + references (id,href)
-- SOAP 1.2 (enc:id,enc:ref)
++ SOAP 1.2 (enc:id,enc:ref)
 - references to external resources
 - default values
 - root attribute
