@@ -1,3 +1,95 @@
+2002-09-11  Edin Kadribasic  <edink@proventum.net>
+
+    * ext/standard/filestat.c: My compiler likes it like this.
+
+    * ext/standard/array.c: Fix ZTS build.
+
+2002-09-11  Sterling Hughes  <sterling@bumblebury.com>
+
+    * ext/swf/swf.c:
+    virtual filepath fix, don't know why i bother, the module isn't threadsafe
+    and never will be, but still...
+
+    * ext/standard/filestat.c:
+    max this use the virtual_filepath() function and feel all threadsafe and
+    wholesome inside
+
+2002-09-11  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/mysql/php_mysql.c: - Un-deprecating mysql_escape_string
+
+2002-09-11  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * run-tests.php: Unlink output files even if test is skipped.
+
+2002-09-11  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/array.c: - Little whitespace changes
+
+2002-09-11  Andrey Hristov  <andrey@webgate.bg>
+
+    * ext/standard/tests/array/007.phpt:
+    Regression test for array_diff() and array_diff_assoc(). The latter is newly
+    introduced.
+
+    * ext/standard/array.c
+      ext/standard/basic_functions.c
+      ext/standard/php_array.h:
+    New function added : array_diff_assoc() . Like array_diff() but does
+    additional checks on key values. Test script will be added too.
+
+2002-09-11  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/gd/config.m4: For now, check only when not using bundled GD lib.
+
+2002-09-11  Sander Roobol  <phy@wanadoo.nl>
+
+    * ext/dba/config.m4: Fix configure
+
+2002-09-11  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/gd/config.m4: Added build test. Bug: #19345
+
+    * ext/iconv/iconv.c: Fix bug: #19355 (the parameter is optional)
+
+2002-09-11  Dan Kalowsky  <dank@deadmime.org>
+
+    * ext/dba/config.m4:
+    Patch for Bug #19341 submitted by list@firehawksystems.com
+
+2002-09-11  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/standard/string.c: tok tok..
+
+2002-09-11  Andrei Zmievski  <andrei@php.net>
+
+    * ext/pcre/php_pcre.c:
+    - Added ability to use Perl-style ${n} subpattern references in the
+      replacement string for preg_replace(). Takes care of bug #18442. 
+
+2002-09-11  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/standard/string.c: ws fix
+
+    * ext/standard/string.c: fix proto
+
+    * ext/standard/info.c
+      ext/standard/dir.c: ws fix
+
+2002-09-11  Anantha Kesari H Y  <hyanantha@novell.com>
+
+    * ext/ftp/ftp.c: Removed unnecessary code that was added for NetWare
+
+    * netware/start.c: Changed the licence to the one used by PHP Group
+
+    * main/reentrancy.c: NetWare related changes/modifications
+
+2002-09-11  Edin Kadribasic  <edink@proventum.net>
+
+    * NEWS: Added note about file_exits() and friends.
+
+    * ext/standard/filestat.c: Fixed file_exists() on platforms using VCWD.
+
 2002-09-10  Edin Kadribasic  <edink@proventum.net>
 
     * ext/standard/array.c
