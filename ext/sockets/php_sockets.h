@@ -42,7 +42,6 @@ PHP_RINIT_FUNCTION(sockets);
 PHP_RSHUTDOWN_FUNCTION(sockets);
 PHP_MINFO_FUNCTION(sockets);
 
-PHP_FUNCTION(confirm_sockets_compiled);	/* For testing, remove later. */
 PHP_FUNCTION(confirm_sockets_compiled);
 PHP_FUNCTION(fd_alloc);
 PHP_FUNCTION(fd_dealloc);
@@ -58,13 +57,28 @@ PHP_FUNCTION(listen);
 PHP_FUNCTION(close);
 PHP_FUNCTION(write);
 PHP_FUNCTION(read);
-PHP_FUNCTION(signal);
 PHP_FUNCTION(getsockname);
 PHP_FUNCTION(getpeername);
 PHP_FUNCTION(socket);
 PHP_FUNCTION(connect);
 PHP_FUNCTION(strerror);
 PHP_FUNCTION(bind);
+PHP_FUNCTION(recv);
+PHP_FUNCTION(send);
+PHP_FUNCTION(recvfrom);
+PHP_FUNCTION(sendto);
+PHP_FUNCTION(build_iovec);
+PHP_FUNCTION(fetch_iovec);
+PHP_FUNCTION(free_iovec);
+PHP_FUNCTION(add_iovec);
+PHP_FUNCTION(delete_iovec);
+PHP_FUNCTION(set_iovec);
+PHP_FUNCTION(recvmsg);
+PHP_FUNCTION(sendmsg);
+PHP_FUNCTION(readv);
+PHP_FUNCTION(writev);
+PHP_FUNCTION(getsockopt);
+PHP_FUNCTION(setsockopt);
 
 /* Fill in this structure and use entries in it
    for thread safety instead of using true globals.
