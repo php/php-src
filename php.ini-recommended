@@ -556,6 +556,8 @@ default_socket_timeout = 60
 ;Windows Extensions
 ;Note that ODBC support is built in, so no dll is needed for it.
 ;
+
+;extension=php_tidy.dll
 ;extension=php_bz2.dll
 ;extension=php_cpdf.dll
 ;extension=php_curl.dll
