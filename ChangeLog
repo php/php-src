@@ -1,3 +1,49 @@
+2001-10-07  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/PEAR/Installer.php
+      pear/PEAR/Packager.php:
+    work on Windows support (use Tar class and System class)
+
+    * pear/PEAR/Common.php:
+    use the new System class for common file opperations
+
+    * pear/Experimental/System.php: list deepest dirs first
+
+2001-10-07  Jani Taskinen  <sniper@iki.fi>
+
+    * NEWS: make this entry readable.
+
+2001-10-07  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/basic_functions.c
+      ext/standard/file.c
+      ext/standard/file.h:
+    - Added mmapfile(), read a file into a variabele with mmap (Ilia A, Derick)
+    - Added mmapfile(), read a file into a variabele with mmap (Patch by:
+      Ilia A. <ilia@prohost.org>)
+
+2001-10-07  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/Experimental/System.php:
+        Static functions for different operations. Should work under
+        Unix and Windows. The names and usage has been taken from its
+        repectively GNU commands.
+        (initial commit and experimental state)
+
+2001-10-07  Jeroen van Wolffelaar  <jeroen@A-Eskwadraat.nl>
+
+    * ext/standard/array.c:
+    Fix naming inside php_search_array, comp_func is not a compare function.
+
+2001-10-07  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * NEWS: fix sp
+
+    * ext/standard/basic_functions.h
+      ext/standard/rand.c:
+     Have rand() and mt_rand() seed automatically if srand() or mt_srand() has
+     not been called. 
+
 2001-10-06  Stig Bakken  <ssb@fast.no>
 
     * ext/standard/tests/versioning/version_compare.phpt
