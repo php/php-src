@@ -19,6 +19,13 @@ PHP 4                                                                      NEWS
 - Moved extensions to PECL (http://pear.php.net/): (James, Derick)
   . ext/vpopmail
   . ext/cybermut
+- Fixed bug #20796 (when register_globals is on & arrays with same names are 
+  passed via get/post/cookie the data inside $_GET/$_POST/$_COOKIE can would be
+  corrupted). (Ilia)
+- Fixed bug #20725 (if the upload directory cannot be written to, the POST data
+  after the uploaded file is lost). (Ilia)
+- Fixed bug #20865 (array_key_exists() fails to find NULL key). (Ilia)
+- Fixed bug #20812 (ftp_get returned NULL on success, instead of TRUE). (Ilia)
 - Fixed bug #20785 (crash when using pdf_open_memory_image() to load a
   true-color image). (Ilia)
 - Fixed a crash when converting between true-color images (png/jpeg) and
