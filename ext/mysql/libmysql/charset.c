@@ -289,7 +289,8 @@ static CHARSET_INFO *find_charset_by_name(CHARSET_INFO **table, const char *name
   return NULL;
 }
 
-static CHARSET_INFO *add_charset(uint cs_number, const char *cs_name)
+static CHARSET_INFO *add_charset(uint cs_number, const char *cs_name,
+                                 myf flags)
 {
   CHARSET_INFO tmp_cs,*cs;
   uchar tmp_ctype[CTYPE_TABLE_SIZE];
@@ -304,7 +305,7 @@ static CHARSET_INFO *add_charset(uint cs_number, const char *cs_name)
   cs->to_lower=tmp_to_lower;
   cs->to_upper=tmp_to_upper;
   cs->sort_order=tmp_sort_order;
-  if (read_charset_file(cs_number, cs, MYF(MY_WME)))
+  if (read_charset_file(cs_number, cs, flags))
     return NULL;
 
   cs           = (CHARSET_INFO*) my_once_alloc(sizeof(CHARSET_INFO),
@@ -326,7 +327,7 @@ static CHARSET_INFO *add_charset(uint cs_number, const char *cs_name)
   return cs;
 }
 
-static CHARSET_INFO *get_internal_charset(uint cs_number)
+static CHARSET_INFO *get_internal_charset(uint cs_number, myf flags)
 {
   CHARSET_INFO *cs;
   /*
@@ -337,13 +338,13 @@ static CHARSET_INFO *get_internal_charset(uint cs_number)
   if (!(cs = find_charset((CHARSET_INFO**) cs_info_table.buffer, cs_number,
 			  cs_info_table.elements)))
     if (!(cs = find_compiled_charset(cs_number)))
-      cs=add_charset(cs_number, get_charset_name(cs_number));
+      cs=add_charset(cs_number, get_charset_name(cs_number), flags);
   pthread_mutex_unlock(&THR_LOCK_charset);
   return cs;
 }
 
 
-static CHARSET_INFO *get_internal_charset_by_name(const char *name)
+static CHARSET_INFO *get_internal_charset_by_name(const char *name, myf flags)
 {
   CHARSET_INFO *cs;
   /*
@@ -354,7 +355,7 @@ static CHARSET_INFO *get_internal_charset_by_name(const char *name)
   if (!(cs = find_charset_by_name((CHARSET_INFO**) cs_info_table.buffer, name,
 				 cs_info_table.elements)))
     if (!(cs = find_compiled_charset_by_name(name)))
-      cs=add_charset(get_charset_number(name), name);
+      cs=add_charset(get_charset_number(name), name, flags);
   pthread_mutex_unlock(&THR_LOCK_charset);
   return cs;
 }
@@ -364,7 +365,7 @@ CHARSET_INFO *get_charset(uint cs_number, myf flags)
 {
   CHARSET_INFO *cs;
   (void) init_available_charsets(MYF(0));	/* If it isn't initialized */
-  cs=get_internal_charset(cs_number);
+  cs=get_internal_charset(cs_number, flags);
 
   if (!cs && (flags & MY_WME))
   {
@@ -396,7 +397,7 @@ CHARSET_INFO *get_charset_by_name(const char *cs_name, myf flags)
 {
   CHARSET_INFO *cs;
   (void) init_available_charsets(MYF(0));	/* If it isn't initialized */
-  cs=get_internal_charset_by_name(cs_name);
+  cs=get_internal_charset_by_name(cs_name, flags);
 
   if (!cs && (flags & MY_WME))
   {
