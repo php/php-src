@@ -257,7 +257,7 @@ static int php_input_filter(ap_filter_t *f, apr_bucket_brigade *bb,
 	long old_index;
 	apr_bucket *b;
 	const char *str;
-	apr_ssize_t n;
+	apr_size_t n;
 	apr_status_t rv;
 	TSRMLS_FETCH();
 
@@ -322,10 +322,12 @@ static void php_apache_request_dtor(ap_filter_t *f TSRMLS_DC)
 {
 	php_request_shutdown(NULL);
 
-#undef safe_free
-#define safe_free(x) ((x)?free((x)):0)
-	safe_free(SG(request_info).query_string);
-	safe_free(SG(request_info).request_uri);
+	if (SG(request_info).query_string) {
+		free(SG(request_info).query_string);
+	}
+	if (SG(request_info).query_string) {
+		free(SG(request_info).request_uri);
+	}
 }
 
 static int php_output_filter(ap_filter_t *f, apr_bucket_brigade *bb)
