@@ -840,7 +840,6 @@ static void php_html_entities(INTERNAL_FUNCTION_PARAMETERS, int all)
 	}
 
 	replaced = php_escape_html_entities(str, str_len, &len, all, quote_style, hint_charset TSRMLS_CC);
-	efree(str);
 	RETVAL_STRINGL(replaced, len, 0);
 }
 /* }}} */
