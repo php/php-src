@@ -58,7 +58,7 @@
 
 typedef struct _zend_ini_entry zend_ini_entry;
 
-#define ZEND_INI_MH(name) int name(zend_ini_entry *entry, char *new_value, uint new_value_length, void *mh_arg1, void *mh_arg2, void *mh_arg3, int stage)
+#define ZEND_INI_MH(name) int name(zend_ini_entry *entry, char *new_value, uint new_value_length, void *mh_arg1, void *mh_arg2, void *mh_arg3, int stage TSRMLS_DC)
 #define ZEND_INI_DISP(name) void name(zend_ini_entry *ini_entry, int type)
 
 struct _zend_ini_entry {
@@ -90,7 +90,7 @@ ZEND_API int zend_copy_ini_directives(TSRMLS_D);
 
 ZEND_API void zend_ini_sort_entries(TSRMLS_D);
 
-ZEND_API int zend_register_ini_entries(zend_ini_entry *ini_entry, int module_number);
+ZEND_API int zend_register_ini_entries(zend_ini_entry *ini_entry, int module_number TSRMLS_DC);
 ZEND_API void zend_unregister_ini_entries(int module_number);
 ZEND_API void zend_ini_refresh_caches(int stage TSRMLS_DC);
 ZEND_API int zend_alter_ini_entry(char *name, uint name_length, char *new_value, uint new_value_length, int modify_type, int stage);
@@ -162,7 +162,7 @@ ZEND_API ZEND_INI_DISP(display_link_numbers);
 #define INI_ORIG_BOOL(name) ((zend_bool) INI_ORIG_INT(name))
 
 
-#define REGISTER_INI_ENTRIES() zend_register_ini_entries(ini_entries, module_number)
+#define REGISTER_INI_ENTRIES() zend_register_ini_entries(ini_entries, module_number TSRMLS_CC)
 #define UNREGISTER_INI_ENTRIES() zend_unregister_ini_entries(module_number)
 #define DISPLAY_INI_ENTRIES() display_ini_entries(zend_module)
 
