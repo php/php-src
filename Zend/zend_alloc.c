@@ -114,7 +114,7 @@ ZEND_API void *_emalloc(size_t size)
 	}
 
 	if (!p) {
-		fprintf(stderr,"FATAL:  emalloc():  Unable to allocate %d bytes\n", size);
+		fprintf(stderr,"FATAL:  emalloc():  Unable to allocate %ld bytes\n", (long) size);
 		exit(1);
 		HANDLE_UNBLOCK_INTERRUPTIONS();
 		return (void *)p;
@@ -218,7 +218,7 @@ ZEND_API void *_erealloc(void *ptr, size_t size)
 	REMOVE_POINTER_FROM_LIST(p);
 	p = (mem_header *) realloc(p,sizeof(mem_header)+size+PLATFORM_PADDING+END_ALIGNMENT(size)+END_MAGIC_SIZE);
 	if (!p) {
-		fprintf(stderr,"FATAL:  erealloc():  Unable to allocate %d bytes\n", size);
+		fprintf(stderr,"FATAL:  erealloc():  Unable to allocate %ld bytes\n", (long) size);
 		HANDLE_UNBLOCK_INTERRUPTIONS();
 		zend_bailout();
 		ADD_POINTER_TO_LIST(orig);
@@ -359,7 +359,7 @@ ZEND_API void shutdown_memory_manager(int silent, int clean_cache)
 					/* flush old leak */
 					if (leak_count>0) {
 						if (!silent && leak_count>1) {
-							zend_message_dispatcher(ZMSG_MEMORY_LEAK_REPEATED, (void *) (leak_count-1));
+							zend_message_dispatcher(ZMSG_MEMORY_LEAK_REPEATED, (void *) (long) (leak_count-1));
 						}
 						leak_count=0;
 						total_bytes=0;
@@ -384,7 +384,7 @@ ZEND_API void shutdown_memory_manager(int silent, int clean_cache)
 	}
 #if ZEND_DEBUG
 	if (!silent && leak_count>1) {
-		zend_message_dispatcher(ZMSG_MEMORY_LEAK_REPEATED, (void *) (leak_count-1));
+		zend_message_dispatcher(ZMSG_MEMORY_LEAK_REPEATED, (void *) (long) (leak_count-1));
 	}
 	if (had_leaks) {
 		ELS_FETCH();

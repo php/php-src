@@ -219,7 +219,8 @@ void fetch_array_begin(znode *result, znode *varname, znode *first_dim CLS_DC);
 void fetch_array_dim(znode *result, znode *parent, znode *dim CLS_DC);
 void do_print(znode *result, znode *arg CLS_DC);
 void do_echo(znode *arg CLS_DC);
-ZEND_API void *get_unary_op(int opcode);
+typedef int (*unary_op_type)(zval *, zval *);
+ZEND_API unary_op_type get_unary_op(int opcode);
 ZEND_API void *get_binary_op(int opcode);
 
 void do_while_cond(znode *expr, znode *close_bracket_token CLS_DC);
