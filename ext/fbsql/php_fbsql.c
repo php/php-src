@@ -155,16 +155,16 @@ struct PHPFBLink
 
 #define FBSQL_LOCK_DEFERRED 0
 #define FBSQL_LOCK_OPTIMISTIC 1
-#define FBSQL_LOCK_PESSIMISTIC 2		// default
+#define FBSQL_LOCK_PESSIMISTIC 2		/* default */
 
 #define FBSQL_ISO_READ_UNCOMMITTED 0
 #define FBSQL_ISO_READ_COMMITTED 1
 #define FBSQL_ISO_REPEATABLE_READ 2
-#define FBSQL_ISO_SERIALIZABLE 3		// default
+#define FBSQL_ISO_SERIALIZABLE 3		/* default */
 #define FBSQL_ISO_VERSIONED 4
 
-#define FBSQL_LOB_DIRECT 0				// default
-#define FBSQL_LOB_HANDLE 1				// default
+#define FBSQL_LOB_DIRECT 0				/* default */
+#define FBSQL_LOB_HANDLE 1				/I default */
 
 
 /* {{{ fbsql_functions[]
@@ -230,7 +230,7 @@ function_entry fbsql_functions[] = {
 	PHP_FE(fbsql_warnings,		NULL)
 
 	PHP_FE(fbsql_get_autostart_info,	NULL)
-//	PHP_FE(fbsql_set_autostart_info,	NULL)
+/*	PHP_FE(fbsql_set_autostart_info,	NULL) */
 
 /*	Aliases:  */
 	PHP_FALIAS(fbsql, fbsql_db_query, NULL)
@@ -961,10 +961,10 @@ static void php_fbsql_create_lob(INTERNAL_FUNCTION_PARAMETERS, int lob_type)
 
 	convert_to_string_ex(lob_data);
 	switch (lob_type) {
-		case 0 : // BLOB
+		case 0 : /* BLOB */
 			lobHandle = fbcdcWriteBLOB(phpLink->connection, Z_STRVAL_PP(lob_data), Z_STRLEN_PP(lob_data));
 			break;
-		case 1 : // CLOB
+		case 1 : /* CLOB */
 			lobHandle = fbcdcWriteCLOB(phpLink->connection, Z_STRVAL_PP(lob_data));
 			break;
 	}
@@ -2405,7 +2405,7 @@ void phpfbColumnAsString(PHPFBResult* result, int column, void* data , int* leng
 		case FB_BLOB:
 		{
 			if (*((unsigned char*) data) == '\1')
-			{  // Direct
+			{  /* Direct */
 				*length = ((FBCBlobDirect *)data)->blobSize;
 				*value = estrndup((char *)((FBCBlobDirect *)data)->blobData, *length);
 			}
@@ -3494,13 +3494,16 @@ PHP_FUNCTION(fbsql_get_autostart_info)
 
 			for (i=0; i<fbaCount(asInfo->infoLines); i++) {
 				FBArray* infoLine = fbaObjectAtIndex(asInfo->infoLines, i);
-//				if (fbaCount(infoLine) == 2) {
-//					fbaObjectAtIndex(infoLine, 0);
-//					fbaObjectAtIndex(infoLine, 1);
-//				}
-//				else {
+/*
+				if (fbaCount(infoLine) == 2) {
+					fbaObjectAtIndex(infoLine, 0);
+					fbaObjectAtIndex(infoLine, 1);
+				}
+				else {
+*/
 					add_index_string(return_value, i, fbaObjectAtIndex(infoLine, 0), 1);
-//				}
+/*				} 
+ */
 
 			}
 		}
