@@ -79,6 +79,7 @@ typedef struct {
     OCISvcCtx *pServiceContext;
 	sword error;
     OCIError *pError;
+	int needs_commit;
 } oci_connection;
 
 typedef struct {
