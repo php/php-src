@@ -1,3 +1,7 @@
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <php_config.h>
 
 /* PHP might define ulong, but we want to use our own typedef */
