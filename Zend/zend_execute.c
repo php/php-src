@@ -2433,6 +2433,11 @@ int zend_init_method_call_handler(ZEND_OPCODE_HANDLER_ARGS)
 	zend_ptr_stack_n_push(&EG(arg_types_stack), 3, EX(fbc), EX(object), EX(calling_scope));
 
 	function_name = get_zval_ptr(&EX(opline)->op2, EX(Ts), &EG(free_op2), BP_VAR_R);
+
+	if (Z_TYPE_P(function_name)!=IS_STRING) {
+		zend_error(E_ERROR, "Method name must be a string");
+	}
+
 	function_name_strval = function_name->value.str.val;
 	function_name_strlen = function_name->value.str.len;
 
@@ -2542,6 +2547,9 @@ int zend_init_fcall_by_name_handler(ZEND_OPCODE_HANDLER_ARGS)
 	} else {
 		function_name = get_zval_ptr(&EX(opline)->op2, EX(Ts), &EG(free_op2), BP_VAR_R);
 
+		if (Z_TYPE_P(function_name) != IS_STRING) {
+			zend_error(E_ERROR, "Function name must be a string");
+		}
 		function_name_strval = zend_str_tolower_dup(function_name->value.str.val, function_name->value.str.len);
 		function_name_strlen = function_name->value.str.len;
 	}
