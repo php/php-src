@@ -849,63 +849,58 @@ static void php_message_handler_for_zend(long message, void *data)
 	TSRMLS_FETCH();
 
 	switch (message) {
-		case ZMSG_FAILED_INCLUDE_FOPEN: {
-				php_error_docref("function.include" TSRMLS_CC, E_WARNING, "Failed opening '%s' for inclusion (include_path='%s')", php_strip_url_passwd((char *) data), STR_PRINT(PG(include_path)));
-			}
+		case ZMSG_FAILED_INCLUDE_FOPEN:
+			php_error_docref("function.include" TSRMLS_CC, E_WARNING, "Failed opening '%s' for inclusion (include_path='%s')", php_strip_url_passwd((char *) data), STR_PRINT(PG(include_path)));
 			break;
-		case ZMSG_FAILED_REQUIRE_FOPEN: {
-				php_error_docref("function.require" TSRMLS_CC, E_COMPILE_ERROR, "Failed opening required '%s' (include_path='%s')", php_strip_url_passwd((char *) data), STR_PRINT(PG(include_path)));
-			}
+		case ZMSG_FAILED_REQUIRE_FOPEN:
+			php_error_docref("function.require" TSRMLS_CC, E_COMPILE_ERROR, "Failed opening required '%s' (include_path='%s')", php_strip_url_passwd((char *) data), STR_PRINT(PG(include_path)));
 			break;
-		case ZMSG_FAILED_HIGHLIGHT_FOPEN: {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed opening '%s' for highlighting", php_strip_url_passwd((char *) data));
-			}
+		case ZMSG_FAILED_HIGHLIGHT_FOPEN:
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed opening '%s' for highlighting", php_strip_url_passwd((char *) data));
 			break;
 		case ZMSG_MEMORY_LEAK_DETECTED:
-		case ZMSG_MEMORY_LEAK_REPEATED: {
+		case ZMSG_MEMORY_LEAK_REPEATED:
 #if ZEND_DEBUG
-				if ((EG(error_reporting)&E_WARNING) && PG(report_memleaks)) {
-					char memory_leak_buf[512];
+			if ((EG(error_reporting)&E_WARNING) && PG(report_memleaks)) {
+				char memory_leak_buf[512];
 
-					if (message==ZMSG_MEMORY_LEAK_DETECTED) {
-						zend_mem_header *t = (zend_mem_header *) data;
-						void *ptr = (void *)((char *)t+sizeof(zend_mem_header)+MEM_HEADER_PADDING);
+				if (message==ZMSG_MEMORY_LEAK_DETECTED) {
+					zend_mem_header *t = (zend_mem_header *) data;
+					void *ptr = (void *)((char *)t+sizeof(zend_mem_header)+MEM_HEADER_PADDING);
 
-						snprintf(memory_leak_buf, 512, "%s(%d) :  Freeing 0x%.8lX (%d bytes), script=%s\n", t->filename, t->lineno, (unsigned long)ptr, t->size, SAFE_FILENAME(SG(request_info).path_translated));
-						if (t->orig_filename) {
-							char relay_buf[512];
+					snprintf(memory_leak_buf, 512, "%s(%d) :  Freeing 0x%.8lX (%d bytes), script=%s\n", t->filename, t->lineno, (unsigned long)ptr, t->size, SAFE_FILENAME(SG(request_info).path_translated));
+					if (t->orig_filename) {
+						char relay_buf[512];
 
-							snprintf(relay_buf, 512, "%s(%d) : Actual location (location was relayed)\n", t->orig_filename, t->orig_lineno);
-							strcat(memory_leak_buf, relay_buf);
-						}
-					} else {
-						unsigned long leak_count = (unsigned long) data;
-
-						snprintf(memory_leak_buf, 512, "Last leak repeated %ld time%s\n", leak_count, (leak_count>1?"s":""));
+						snprintf(relay_buf, 512, "%s(%d) : Actual location (location was relayed)\n", t->orig_filename, t->orig_lineno);
+						strcat(memory_leak_buf, relay_buf);
 					}
-#	if defined(PHP_WIN32)
-					OutputDebugString(memory_leak_buf);
-#	else
-					fprintf(stderr, "%s", memory_leak_buf);
-#	endif
-				}
-#endif
-			}
-			break;
-		case ZMSG_MEMORY_LEAKS_GRAND_TOTAL: {
-#if ZEND_DEBUG
-				if ((EG(error_reporting)&E_WARNING) && PG(report_memleaks)) {
-					char memory_leak_buf[512];
+				} else {
+					unsigned long leak_count = (unsigned long) data;
 
-					snprintf(memory_leak_buf, 512, "=== Total %d memory leaks detected ===\n", *((zend_uint *) data));
-#	if defined(PHP_WIN32)
-					OutputDebugString(memory_leak_buf);
-#	else
-					fprintf(stderr, "%s", memory_leak_buf);
-#	endif
+					snprintf(memory_leak_buf, 512, "Last leak repeated %ld time%s\n", leak_count, (leak_count>1?"s":""));
 				}
-#endif
+#	if defined(PHP_WIN32)
+				OutputDebugString(memory_leak_buf);
+#	else
+				fprintf(stderr, "%s", memory_leak_buf);
+#	endif
 			}
+#endif
+			break;
+		case ZMSG_MEMORY_LEAKS_GRAND_TOTAL:
+#if ZEND_DEBUG
+			if ((EG(error_reporting)&E_WARNING) && PG(report_memleaks)) {
+				char memory_leak_buf[512];
+
+				snprintf(memory_leak_buf, 512, "=== Total %d memory leaks detected ===\n", *((zend_uint *) data));
+#	if defined(PHP_WIN32)
+				OutputDebugString(memory_leak_buf);
+#	else
+				fprintf(stderr, "%s", memory_leak_buf);
+#	endif
+			}
+#endif
 			break;
 		case ZMSG_LOG_SCRIPT_NAME: {
 				struct tm *ta, tmbuf;
