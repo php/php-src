@@ -30,7 +30,7 @@ PEAR_FILES = \
 	PEAR.php \
 	PEAR/Installer.php
 
-install-data-local:
+install-data-local: PEAR.php
 	@if $(mkinstalldirs) $(peardir); then \
 		for i in $(PEAR_SUBDIRS); do \
 			$(mkinstalldirs) $(peardir)/$$i; \
