@@ -61,7 +61,8 @@ ZEND_API void _zval_dtor(zval *zvalue ZEND_FILE_LINE_DC)
 		case IS_CONSTANT:
 			STR_FREE_REL(zvalue->value.str.val);
 			break;
-		case IS_ARRAY: {
+		case IS_ARRAY:
+		case IS_CONSTANT_ARRAY: {
 				ELS_FETCH();
 
 				if (zvalue->value.ht && (zvalue->value.ht != &EG(symbol_table))) {
@@ -125,7 +126,8 @@ ZEND_API int _zval_copy_ctor(zval *zvalue ZEND_FILE_LINE_DC)
 			}
 			zvalue->value.str.val = (char *) estrndup_rel(zvalue->value.str.val, zvalue->value.str.len);
 			break;
-		case IS_ARRAY: {
+		case IS_ARRAY:
+		case IS_CONSTANT_ARRAY: {
 				zval *tmp;
 				HashTable *original_ht = zvalue->value.ht;
 				ELS_FETCH();

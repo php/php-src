@@ -286,9 +286,10 @@ ZEND_API int zend_is_true(zval *op)
 }
 
 
-ZEND_API int zval_update_constant(zval **pp)
+ZEND_API int zval_update_constant(zval **pp, void *arg)
 {
 	zval *p = *pp;
+	zend_bool inline_change = (zend_bool) arg;
 
 	if (p->type == IS_CONSTANT) {
 		zval c;
@@ -304,16 +305,22 @@ ZEND_API int zval_update_constant(zval **pp)
 						p->value.str.val,
 						p->value.str.val);
 			p->type = IS_STRING;
+			if (!inline_change) {
+				zval_copy_ctor(p);
+			}
 		} else {
-			STR_FREE(p->value.str.val);
+			if (inline_change) {
+				STR_FREE(p->value.str.val);
+			}
 			*p = c;
 		}
 		INIT_PZVAL(p);
 		p->refcount = refcount;
-	} else if (p->type == IS_ARRAY) {
+	} else if (p->type == IS_CONSTANT_ARRAY) {
 		SEPARATE_ZVAL(pp);
 		p = *pp;
-		zend_hash_apply(p->value.ht, (int (*)(void *)) zval_update_constant);
+		p->type = IS_ARRAY;
+		zend_hash_apply_with_argument(p->value.ht, (int (*)(void *,void *)) zval_update_constant, (void *) 1);
 	}
 	return 0;
 }

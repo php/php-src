@@ -267,6 +267,7 @@ typedef int (*zend_write_func_t)(const char *str, uint str_length);
 #define IS_BOOL		6
 #define IS_RESOURCE	7
 #define IS_CONSTANT	8
+#define IS_CONSTANT_ARRAY	9
 
 /* Special data type to temporarily mark large numbers */
 #define FLAG_IS_BC	9 /* for parser internal use only */

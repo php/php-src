@@ -530,7 +530,7 @@ static_scalar: /* compile-time evaluated scalars */
 	|	T_STRING 				{ do_fetch_constant(&$$, &$1, ZEND_CT CLS_CC); }
 	|	'+' static_scalar	{ $$ = $1; }
 	|	'-' static_scalar	{ zval minus_one;  minus_one.type = IS_LONG; minus_one.value.lval = -1;  mul_function(&$2.u.constant, &$2.u.constant, &minus_one);  $$ = $2; }
-	|	T_ARRAY '(' static_array_pair_list ')' { $$ = $3; }
+	|	T_ARRAY '(' static_array_pair_list ')' { $$ = $3; $$.u.constant.type = IS_CONSTANT_ARRAY; }
 ;
 
 
