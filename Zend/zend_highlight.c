@@ -137,14 +137,12 @@ ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini
 				continue;
 				break;
 			default:
-				if (token.type==0) {
+				if (in_string) {
+					next_color = syntax_highlighter_ini->highlight_string;
+				} else if (token.type == 0) {
 					next_color = syntax_highlighter_ini->highlight_keyword;
 				} else {
-					if (in_string) {
-						next_color = syntax_highlighter_ini->highlight_string;
-					} else {
-						next_color = syntax_highlighter_ini->highlight_default;
-					}
+					next_color = syntax_highlighter_ini->highlight_default;
 				}
 				break;
 		}
