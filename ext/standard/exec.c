@@ -452,9 +452,10 @@ PHP_FUNCTION(escapeshellarg)
 PHP_FUNCTION(shell_exec)
 {
 	FILE *in;
-	int readbytes, total_readbytes=0, allocated_space;
+	size_t total_readbytes;
 	pval **cmd;
 	char *ret;
+	php_stream *stream;
 
 	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &cmd)==FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -474,21 +475,16 @@ PHP_FUNCTION(shell_exec)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to execute '%s'", Z_STRVAL_PP(cmd));
 		RETURN_FALSE;
 	}
-	allocated_space = EXEC_INPUT_BUF;
-	ret = (char *) emalloc(allocated_space);
-	while (1) {
-		readbytes = fread(ret+total_readbytes, 1, EXEC_INPUT_BUF, in);
-		if (readbytes<=0) {
-			break;
-		}
-		total_readbytes += readbytes;
-		allocated_space = total_readbytes+EXEC_INPUT_BUF;
-		ret = (char *) erealloc(ret, allocated_space);
-	}
-	pclose(in);
+
+	stream = php_stream_fopen_from_pipe(in, "rb");
+	total_readbytes = php_stream_copy_to_mem(stream, &ret, PHP_STREAM_COPY_ALL, 0);
+	php_stream_close(stream); 
 	
-	RETVAL_STRINGL(ret, total_readbytes, 0);
-	Z_STRVAL_P(return_value)[total_readbytes] = '\0';	
+	if (total_readbytes > 0) {
+		RETURN_STRINGL(ret, total_readbytes, 0);
+	} else {
+		RETURN_NULL();	
+	}
 }
 /* }}} */
 
