@@ -1,3 +1,53 @@
+2004-08-16  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      ext/gd/gd.c
+      ext/gd/gd.c:
+      MFH: Fixed bug #29594 (Use PHP's own tmpfile() implementation).
+
+    * ext/gd/gd.c:
+      Fixed bug #29594 (Use PHP's own tmpfile() implementation).
+
+2004-08-16  Zeev Suraski  <zeev@zend.com>
+
+    * (PHP_4_3)
+      NEWS
+      NEWS:
+      -** empty log message ***
+
+    * main/main.c:
+      Fix an oldie fd leak
+
+    * (PHP_4_3)
+      main/main.c:
+      Fix an OLDIE fd leak
+
+2004-08-16  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_0)
+      NEWS:
+      BFN
+
+    * (PHP_5_0)
+      ZendEngine2/zend_reflection_api.c:
+      MFH: Fix bug #29447: Reflection API issues
+
+    * ZendEngine2/zend_reflection_api.c:
+      - Fix bug #29447: Reflection API issues
+
+2004-08-16  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_0)
+      NEWS
+      ext/standard/ftp_fopen_wrapper.c:
+      MFH: Fixed bug #29678 (opendir() with ftp:// wrapper segfaults if path
+      does not have trailing slash).
+
+    * ext/standard/ftp_fopen_wrapper.c:
+      Fixed bug #29678 (opendir() with ftp:// wrapper segfaults if path does not
+      have trailing slash).
+
 2004-08-15  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ZendEngine2/zend_compile.c:
