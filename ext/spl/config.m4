@@ -2,7 +2,7 @@ dnl $Id$
 dnl config.m4 for extension SPL
 
 PHP_ARG_ENABLE(spl, enable SPL suppport,
-[  --disable-spl           Enable Standard PHP Library], yes)
+[  --disable-spl           Disable Standard PHP Library], yes)
 
 if test "$PHP_SPL" != "no"; then
 	if test "$ext_shared" = "yes"; then
