@@ -108,11 +108,13 @@ static void phpi_FDFClose(zend_rsrc_list_entry *rsrc)
 	(void)FDFClose(fdf);
 }
 
-static sapi_post_entry supported_post_entries[] = {
-#if HAVE_FDFLIB
-	{ "application/vnd.fdf",	sizeof("application/vnd.fdf")-1,	php_default_post_reader, fdf_post_handler},
-#endif
-	{ NULL, 0, NULL }
+#define FDF_POST_CONTENT_TYPE	"application/vnd.fdf"
+
+static sapi_post_entry php_fdf_post_entry =	{
+	FDF_POST_CONTENT_TYPE,
+	sizeof(FDF_POST_CONTENT_TYPE)-1,
+	sapi_read_standard_form_data,
+	fdf_post_handler
 };
 
 
@@ -123,9 +125,9 @@ PHP_MINIT_FUNCTION(fdf)
 	FDF_GLOBAL(le_fdf) = zend_register_list_destructors_ex(phpi_FDFClose, NULL, "fdf", module_number);
 
 	/* add handler for Acrobat FDF form post requests */
-	sapi_add_post_entry("application/vnd.fdf",	php_default_post_reader, fdf_post_handler);
+	sapi_register_post_entry(&php_fdf_post_entry);
 
-  /* Constants used by fdf_set_opt() */
+	/* Constants used by fdf_set_opt() */
 	REGISTER_LONG_CONSTANT("FDFValue", FDFValue, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FDFStatus", FDFStatus, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FDFFile", FDFFile, CONST_CS | CONST_PERSISTENT);
@@ -176,7 +178,7 @@ PHP_MSHUTDOWN_FUNCTION(fdf)
 	FDFErc err;
 
 	/* remove handler for Acrobat FDF form post requests */
-	sapi_remove_post_entry("application/vnd.fdf"); 
+	sapi_unregister_post_entry(&php_fdf_post_entry); 
 
 #ifdef PHP_WIN32
 	return SUCCESS;
@@ -769,10 +771,9 @@ SAPI_POST_HANDLER_FUNC(fdf_post_handler)
 	char *name=NULL,*value=NULL,*p;
 	int name_len=0,value_len=0;
 	char *lastfieldname =NULL;
-	char *strtok_buf = NULL;
 	char *filename = NULL;
 	FDFErc err;
-	ASInt32 nBytes, datalen;
+	ASInt32 nBytes;
 	zval *array_ptr = (zval *) arg;
 	ELS_FETCH();
 	PLS_FETCH();
@@ -811,6 +812,7 @@ SAPI_POST_HANDLER_FUNC(fdf_post_handler)
 				err = FDFGetValue(theFDF,name,value,value_len-1,&nBytes);
 				if(err == FDFErcOK && nBytes != 0) {
 					for(p=value;*p;p++) if(*p=='\r') *p='\n';
+					if(lastfieldname) efree(lastfieldname);
 					lastfieldname = estrdup(name);		
 					php_register_variable(name, value, array_ptr ELS_CC PLS_CC);
 				} 
