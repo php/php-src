@@ -1403,9 +1403,9 @@ consult the installation file that came with this distribution, or visit \n\
 		*/
 		if (cgi 
 #if PHP_FASTCGI
-			|| fastcgi) 
+			|| fastcgi
 #endif
-		{
+		) {
 			file_handle.type = ZEND_HANDLE_FILENAME;
 			file_handle.filename = SG(request_info).path_translated;
 			file_handle.handle.fp = NULL;
