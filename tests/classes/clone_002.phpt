@@ -15,7 +15,7 @@ class test {
 $obj = new test;
 $obj->p2 = 'A';
 $obj->p3 = 'B';
-$copy = $obj->__clone();
+$copy = clone $obj;
 $copy->p3 = 'C';
 echo "Object\n";
 var_dump($obj);
@@ -38,7 +38,7 @@ object(test)#2 (3) {
   ["p1"]=>
   int(1)
   ["p2"]=>
-  int(2)
+  string(1) "A"
   ["p3"]=>
   string(1) "C"
 }

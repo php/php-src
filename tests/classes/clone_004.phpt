@@ -27,7 +27,7 @@ $o1->b = array(3,4);
 $o1->show();
 
 echo "Clone\n";
-$o2 = $o1->__clone();
+$o2 = clone $o1;
 $o2->show();
 
 echo "Modify\n";
@@ -58,9 +58,19 @@ object(test)#1 (2) {
 Clone
 object(test)#2 (2) {
   ["b"]=>
-  string(4) "test"
+  array(2) {
+    [0]=>
+    int(3)
+    [1]=>
+    int(4)
+  }
   ["a"]=>
-  string(4) "base"
+  array(2) {
+    [0]=>
+    int(1)
+    [1]=>
+    int(2)
+  }
 }
 Modify
 object(test)#2 (2) {
