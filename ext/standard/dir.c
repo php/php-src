@@ -399,10 +399,10 @@ PHP_FUNCTION(glob)
 	}
 
 #ifndef GLOB_NOMATCH
-	// now catch the FreeBSD style of "no matches"
+	/* now catch the FreeBSD style of "no matches" */
 	if (!globbuf.gl_pathc) {
-			array_init(return_value);
-			return;
+		array_init(return_value);
+		return;
 	}
 #endif
 
