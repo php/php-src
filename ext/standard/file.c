@@ -919,19 +919,33 @@ PHP_FUNCTION(fgetc) {
 
 
 /* Strip any HTML tags while reading */
-/* {{{ proto string fgetss(int fp, int length)
+/* {{{ proto string fgetss(int fp, int length [, allowable_tags])
 Get a line from file pointer and strip HTML tags */
 PHP_FUNCTION(fgetss)
 {
-	pval *fd, *bytes;
+	pval *fd, *bytes, *allow=NULL;
 	FILE *fp;
 	int id, len, type;
 	char *buf;
 	int issock=0;
 	int *sock,socketd=0;
 	
-	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &fd, &bytes) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	switch(ARG_COUNT(ht)) {
+		case 2:
+			if (getParameters(ht, 2, &fd, &bytes) == FAILURE) {
+				RETURN_FALSE;
+			}
+			break;
+		case 3:
+			if (getParameters(ht, 3, &fd, &bytes, &allow) == FAILURE) {
+				RETURN_FALSE;
+			}
+			convert_to_string(allow);
+			break;
+		default:
+			WRONG_PARAM_COUNT;
+			/* NOTREACHED */
+			break;
 	}
 
 	convert_to_long(fd);
@@ -959,7 +973,7 @@ PHP_FUNCTION(fgetss)
 		RETURN_FALSE;
 	}
 
-	_php3_strip_tags(buf, fgetss_state);
+	_php3_strip_tags(buf, len, fgetss_state, allow->value.str.val);
 	RETURN_STRING(buf, 0);
 }
 /* }}} */
