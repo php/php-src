@@ -5,6 +5,16 @@ sinclude(ext/mysql/libmysql/mysql.m4)
 sinclude(libmysql/acinclude.m4)
 sinclude(libmysql/mysql.m4)
 
+AC_DEFUN(MYSQL_LIB_CHK,[
+  str="$MYSQL_DIR/$1/libmysqlclient.*"
+  for i in `echo $str`; do
+    if test -r $i; then
+      MYSQL_LIB_DIR="$MYSQL_DIR/$1"
+      break 2
+    fi
+  done
+])
+	
 AC_DEFUN(PHP_MYSQL_SOCK,[
   AC_MSG_CHECKING(for MySQL UNIX socket)
   MYSQL_SOCK=/tmp/mysql.sock
@@ -56,7 +66,15 @@ elif test "$PHP_MYSQL" != "no"; then
     AC_MSG_ERROR(Cannot find header files under $PHP_MYSQL)
   fi
 
-  AC_ADD_LIBRARY_WITH_PATH(mysqlclient, $MYSQL_DIR/lib/mysql, MYSQL_SHARED_LIBADD)
+  for i in lib lib/mysql; do
+    MYSQL_LIB_CHK($i)
+  done
+
+  if test -z "$MYSQL_LIB_DIR"; then
+    AC_MSG_ERROR(Cannot find mysqlclient library under $MYSQL_DIR)
+  fi
+
+  AC_ADD_LIBRARY_WITH_PATH(mysqlclient, $MYSQL_LIB_DIR, MYSQL_SHARED_LIBADD)
 
   AC_ADD_INCLUDE($MYSQL_INC_DIR)
 fi
