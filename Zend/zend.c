@@ -158,7 +158,7 @@ static void register_standard_class()
 }
 
 
-int zend_startup(zend_utility_functions *utility_functions, zend_utility_values *utility_values, char **extensions)
+int zend_startup(zend_utility_functions *utility_functions, char **extensions)
 {
 	start_memory_manager();
 
@@ -176,7 +176,6 @@ int zend_startup(zend_utility_functions *utility_functions, zend_utility_values 
 	zend_compile_files = compile_files;
 	zend_execute = execute;
 
-	zend_uv = *utility_values;
 	zend_llist_init(&zend_extensions, sizeof(zend_extension), (void (*)(void *)) zend_extension_dtor, 1);
 
 	/* set up version */
@@ -210,6 +209,12 @@ void zend_shutdown()
 	zend_llist_destroy(&zend_extensions);
 	free(zend_version_info);
 	zend_shutdown_constants();
+}
+
+
+void zend_set_utility_values(zend_utility_values *utility_values)
+{
+	zend_uv = *utility_values;
 }
 
 

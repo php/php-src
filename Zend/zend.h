@@ -153,8 +153,9 @@ typedef struct {
 #define IS_CONSTANT	9
 #define IS_METHOD	10 /* for overloaded function calls */
 
-int zend_startup(zend_utility_functions *utility_functions, zend_utility_values *utility_values, char **extensions);
+int zend_startup(zend_utility_functions *utility_functions, char **extensions);
 void zend_shutdown();
+void zend_set_utility_values(zend_utility_values *utility_values);
 ZEND_API void zend_bailout();
 ZEND_API char *get_zend_version();
 
