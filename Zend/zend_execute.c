@@ -1891,7 +1891,6 @@ binary_assign_op_addr_obj:
 			case ZEND_INIT_METHOD_CALL:
 				{
 					zval *function_name;
-					zval tmp;
 					char *function_name_strval;
 					int function_name_strlen;
 					
