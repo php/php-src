@@ -805,6 +805,13 @@ void zend_deactivate_modules(TSRMLS_D)
 	} zend_end_try();
 }
 
+void zend_call_destructors(TSRMLS_D) 
+{
+	zend_try {
+		shutdown_destructors(TSRMLS_C);
+	} zend_end_try();
+}
+
 void zend_deactivate(TSRMLS_D)
 {
 	/* we're no longer executing anything */
