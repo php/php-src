@@ -1,3 +1,23 @@
+2004-02-23  Andi Gutmans  <andi@zend.com>
+
+    * zend_language_parser.y:
+      - Improve precendence:
+      
+      <?php
+      
+      $obj->foo = "Blah";
+      
+      if (!$obj instanceof StdClass) {
+          print "No";
+      } else {
+          print "Yes";
+      }
+
+    * zend_language_parser.y:
+      - Decrease precedence of instanceof so that the following is true:
+      php -r 'var_export((object)1 instanceof stdClass);';
+      Patch by Jan Lehnardt
+
 2004-02-22  Derick Rethans  <php@derickrethans.nl>
 
     * zend_operators.c:
