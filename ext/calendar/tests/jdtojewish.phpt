@@ -1,7 +1,7 @@
 --TEST--
 jdtojewish() function
 --FILE--
-<?
+<?php
 
 var_dump(jdtojewish(gregoriantojd(10,28,2002))."\r\n".
 	jdtojewish(gregoriantojd(10,28,2002),true)."\r\n".
