@@ -55,6 +55,7 @@ PHP_FUNCTION(domxml_children);
 PHP_FUNCTION(domxml_last_child);
 PHP_FUNCTION(domxml_parent);
 PHP_FUNCTION(domxml_node);
+PHP_FUNCTION(domxml_unlink_node);
 PHP_FUNCTION(domxml_new_child);
 PHP_FUNCTION(domxml_set_content);
 
