@@ -7,7 +7,7 @@ PHP 4                                                                      NEWS
   invalid callbacks. (Andrei)
 - Fixed a memory corruption bug in overload extension. (Andrei)
 - Fixed error handling in fsockopen() on win32. (Jason)
-- Added optional timeout parameter to fsockopen(). (Jason)
+- Added win32 support for the timeout parameter of fsockopen(). (Jason)
 - Fixed shuffle() to provide equal distribution of values. (Andrei)
 - Added --with-mysql-sock configure option which can be used to override
   the unix socket location. (e.g. NFS compiles, etc.) (James Cox)
