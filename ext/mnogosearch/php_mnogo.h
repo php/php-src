@@ -18,7 +18,7 @@
    | Authors: 								  |
    |  Initial version     by  Alex Barkov <bar@izhcom.ru>                 |
    |                      and Ramil Kalimullin <ram@izhcom.ru>            |
-   |  Further development by  Sergey Kartashoff <gluke@biosys.net>        |
+   |  Further development by  Sergey Kartashoff <gluke@mail.ru>           |
    +----------------------------------------------------------------------+
  */
 
