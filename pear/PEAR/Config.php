@@ -131,6 +131,11 @@ when installing packages without a version or state specified',
             'valid_set' => array(
                 'stable', 'beta', 'alpha', 'devel', 'snapshot', 'any'),
             ),
+        'http_proxy' => array(
+            'type' => 'string',
+            'default' => '',
+            'doc' => 'HTTP proxy (host:port) to use when downloading packages',
+            ),
 /*
         'testset1' => array(
             'type' => 'set',
