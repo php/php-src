@@ -589,12 +589,12 @@ static void php_message_handler_for_zend(long message, void *data)
 						snprintf(memory_leak_buf, 512, "%s:  Freeing 0x%0.8lX (%d bytes), allocated in %s on line %d<br>\n", SG(request_info).path_translated, (unsigned long)ptr, t->size,t->filename,t->lineno);
 #endif
 					} else {
-						uint leak_count = (uint) data;
+						unsigned long leak_count = (unsigned long) data;
 
 #if WIN32||WINNT
-						snprintf(memory_leak_buf, 512, "Last leak repeated %d time%s\n", leak_count, (leak_count>1?"s":""));
+						snprintf(memory_leak_buf, 512, "Last leak repeated %ld time%s\n", leak_count, (leak_count>1?"s":""));
 #else
-						snprintf(memory_leak_buf, 512, "%s:  Last leak repeated %d time%s\n", SG(request_info).path_translated, leak_count, (leak_count>1?"s":""));
+						snprintf(memory_leak_buf, 512, "%s:  Last leak repeated %ld time%s\n", SG(request_info).path_translated, leak_count, (leak_count>1?"s":""));
 #endif
 					}
 #	if WIN32||WINNT
