@@ -833,6 +833,7 @@ PHPAPI void php_session_start(TSRMLS_D)
 	zval **data;
 	char *p;
 	int send_cookie = 1;
+	int define_sid = 1;
 	int module_number = PS(module_number);
 	int nrand;
 	int lensess;
@@ -859,6 +860,7 @@ PHPAPI void php_session_start(TSRMLS_D)
 			PPID2SID;
 			PS(apply_trans_sid) = 0;
 			send_cookie = 0;
+			define_sid = 0;
 		}
 
 		if (!PS(id) &&
@@ -930,8 +932,7 @@ PHPAPI void php_session_start(TSRMLS_D)
 	}
 
 
-	/* define SID always, if the client did not send a cookie */
-	if (send_cookie) {
+	if (define_sid) {
 		smart_str var = {0};
 
 		smart_str_appends(&var, PS(session_name));
