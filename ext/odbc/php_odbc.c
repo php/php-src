@@ -2082,7 +2082,7 @@ PHP_FUNCTION(odbc_setoption)
 	RETCODE rc;
 	pval *arg1, *arg2, *arg3, *arg4;
 
- 	if ( getParameters(ht, 3, &arg1, &arg2, &arg3, &arg4) == FAILURE) {
+ 	if ( getParameters(ht, 4, &arg1, &arg2, &arg3, &arg4) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}                            
  

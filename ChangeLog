@@ -2,6 +2,8 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? 1999, Version 4.0 Beta 3
+- Add support for the Easysoft ODBC-ODCB Bridge (martin@easysoft.com)
+- Fix bug in odbc_setoption, getParameter call incorrect (martin@easysoft.com)
 - Ora_Fetch_Into now resets the returned array in all cases (Thies) 
 - Fixed NULL-Column problem in Oracle-Driver (Thies)
 - Added extra metadata functions to ODBC, SQLTables etc (nick@easysoft.com)

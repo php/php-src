@@ -84,6 +84,13 @@ PHP_FUNCTION(solid_fetch_prev);
 #include <sqlext.h>
 #define HAVE_SQL_EXTENDED_FETCH 1
 
+#elif HAVE_ESOOB /* Easysoft ODBC-ODBC Bridge library */
+
+#define ODBC_TYPE "ESOOB"
+#include <sql.h>
+#include <sqlext.h>
+#define HAVE_SQL_EXTENDED_FETCH 1
+
 #elif HAVE_OPENLINK /* OpenLink ODBC drivers */
 
 #define ODBC_TYPE "Openlink"

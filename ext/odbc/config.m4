@@ -224,6 +224,33 @@ AC_ARG_WITH(iodbc,
 fi
 
 if test -z "$ODBC_TYPE"; then
+AC_MSG_CHECKING(for Easysoft ODBC-ODBC Bridge support)
+AC_ARG_WITH(esoob,
+[  --with-esoob[=DIR]      Include Easysoft OOB support. DIR is the OOB base
+                          install directory,
+                          defaults to /usr/local/easysoft/oob/client.],
+[
+  if test "$withval" = "yes"; then
+    withval=/usr/local/easysoft/oob/client
+  fi
+  if test "$withval" != "no"; then
+    ODBC_INCDIR=$withval/include
+    ODBC_LIBDIR=$withval/lib
+    ODBC_LFLAGS=-L$ODBC_LIBDIR
+    ODBC_INCLUDE=-I$ODBC_INCDIR
+    ODBC_LIBS=-lesoobclient
+    ODBC_TYPE=ESOOB
+    AC_DEFINE(HAVE_ESOOB)
+    AC_MSG_RESULT(yes)
+  else
+    AC_MSG_RESULT(no)
+  fi
+],[
+  AC_MSG_RESULT(no)
+])
+fi
+
+if test -z "$ODBC_TYPE"; then
 AC_MSG_CHECKING(for unixODBC support)
 AC_ARG_WITH(unixODBC,
 [  --with-unixODBC[=DIR]   Include unixODBC support.  DIR is the unixODBC base
