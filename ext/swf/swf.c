@@ -460,7 +460,6 @@ void php_swf_define(INTERNAL_FUNCTION_PARAMETERS, int opt)
 	if (opt) {
 		swf_defineline((*objid)->value.lval, (float)(*x1)->value.dval, (float)(*y1)->value.dval,
 	 	               (float)(*x2)->value.dval, (float)(*y2)->value.dval, (float)(*width)->value.dval);
-                   (float)(*x2)->value.dval, (float)(*y2)->value.dval, (float)(*width)->value.dval);
 	} else {
 		swf_definerect((*objid)->value.lval, (float)(*x1)->value.dval, (float)(*y1)->value.dval,
 	 	               (float)(*x2)->value.dval, (float)(*y2)->value.dval, (float)(*width)->value.dval);
@@ -505,17 +504,20 @@ PHP_FUNCTION(swf_definepoly)
 	}
 	
 	npoints = (*NumPoints)->value.lval;
-	for (i = 0; i < npoints; i++) {
+	for (i = 0; i < npoints; i++)
+	{
 		if (zend_hash_index_find((*coordinates)->value.ht, (i * 2), (void **)&var) == SUCCESS) {
 			SEPARATE_ZVAL(var);
 			convert_to_double_ex(var);
 			coords[i][0] = (float)(*var)->value.dval;
 		}
+		
 		if (zend_hash_index_find((*coordinates)->value.ht, (i * 2) + 1, (void **)&var) == SUCCESS) {
 			SEPARATE_ZVAL(var);
 			convert_to_double_ex(var);
 			coords[i][1] = (float)(*var)->value.dval;
 		}
+		
 	}
 	swf_definepoly((*obj_id)->value.lval, coords, npoints, (float)(*width)->value.dval);
 }
