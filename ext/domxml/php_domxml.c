@@ -2320,7 +2320,7 @@ PHP_FUNCTION(domxml_node_unlink_node)
 PHP_FUNCTION(domxml_node_replace_node)
 {
 	zval *id, *rv = NULL, *node;
-	xmlNodePtr repnode, nodep, new_repnode;
+	xmlNodePtr repnode, nodep, old_repnode;
 	int ret;
 
 	DOMXML_GET_THIS_OBJ(nodep, id, le_domxmlnodep);
@@ -2331,23 +2331,9 @@ PHP_FUNCTION(domxml_node_replace_node)
 
 	DOMXML_GET_OBJ(repnode, node, le_domxmlnodep);
 
-	/* check if the new node is already part of the document. In such a case
-	 * we better make a copy to prevent changing identical nodes at different
-	 * positions in the document at the same time.
-	 * A node created with e.g. create_element() doesn't have parents.
-	 */
-	if(repnode->parent) {
-		if (NULL == (new_repnode = xmlCopyNode(repnode, 1))) {
-			php_error(E_WARNING, "%s(): unable to clone node", get_active_function_name(TSRMLS_C));
-			RETURN_FALSE;
-		}
-	} else {
-		new_repnode = repnode;
-	}
+	old_repnode = xmlReplaceNode(nodep, repnode);
 
-	repnode = xmlReplaceNode(nodep, new_repnode);
-
-	DOMXML_RET_OBJ(rv, nodep, &ret);
+	DOMXML_RET_OBJ(rv, old_repnode, &ret);
 }
 /* }}} */
 
