@@ -184,7 +184,7 @@ static int call_get_handler(zval *object, zval *prop_name, zval **prop_value TSR
 	temp_ce = *Z_OBJCE_P(object);
 	DISABLE_HANDLERS(temp_ce);
 	orig_ce = Z_OBJCE_P(object);
-	Z_OBJCE_P(object) = &temp_ce;
+	Z_OBJ_P(object)->ce = &temp_ce;
 
 	result_ptr->is_ref = 1;
 	result_ptr->refcount = 1;
@@ -203,7 +203,7 @@ static int call_get_handler(zval *object, zval *prop_name, zval **prop_value TSR
 											&retval,
 											1, args,
 											0, NULL TSRMLS_CC);
-		Z_OBJCE_P(object) = orig_ce;
+		Z_OBJ_P(object)->ce = orig_ce;
 
 		if (call_result == FAILURE || !retval) {
 			php_error(E_WARNING, "unable to call %s::" GET_HANDLER "_%s() handler", Z_OBJCE_P(object)->name, Z_STRVAL_P(prop_name));
@@ -221,7 +221,7 @@ static int call_get_handler(zval *object, zval *prop_name, zval **prop_value TSR
 											&retval,
 											2, args,
 											0, NULL TSRMLS_CC);
-		Z_OBJCE_P(object) = orig_ce;
+		Z_OBJ_P(object)->ce = orig_ce;
 
 		if (call_result == FAILURE || !retval) {
 			php_error(E_WARNING, "unable to call %s::" GET_HANDLER "() handler", Z_OBJCE_P(object)->name);
@@ -269,7 +269,7 @@ int call_set_handler(zval *object, zval *prop_name, zval *value TSRMLS_DC)
 	temp_ce = *Z_OBJCE_P(object);
 	DISABLE_HANDLERS(temp_ce);
 	orig_ce = Z_OBJCE_P(object);
-	Z_OBJCE_P(object) = &temp_ce;
+	Z_OBJ_P(object)->ce = &temp_ce;
 
 	if (value->refcount == 0) {
 		MAKE_STD_ZVAL(value_copy);
@@ -291,7 +291,7 @@ int call_set_handler(zval *object, zval *prop_name, zval *value TSRMLS_DC)
 											&retval,
 											1, args,
 											0, NULL TSRMLS_CC);
-		Z_OBJCE_P(object) = orig_ce;
+		Z_OBJ_P(object)->ce = orig_ce;
 
 		if (call_result == FAILURE || !retval) {
 			php_error(E_WARNING, "unable to call %s::" SET_HANDLER "_%s() handler", Z_OBJCE_P(object)->name, Z_STRVAL_P(prop_name));
@@ -309,7 +309,7 @@ int call_set_handler(zval *object, zval *prop_name, zval *value TSRMLS_DC)
 											&retval,
 											2, args,
 											0, NULL TSRMLS_CC);
-		Z_OBJCE_P(object) = orig_ce;
+		Z_OBJ_P(object)->ce = orig_ce;
 
 		if (call_result == FAILURE || !retval) {
 			php_error(E_WARNING, "unable to call %s::" SET_HANDLER "() handler", orig_ce->name);
@@ -541,7 +541,7 @@ static void overload_call_method(INTERNAL_FUNCTION_PARAMETERS, zend_property_ref
 		temp_ce = *Z_OBJCE_P(object);
 		DISABLE_HANDLERS(temp_ce);
 		orig_ce = Z_OBJCE_P(object);
-		Z_OBJCE_P(object) = &temp_ce;
+		Z_OBJ_P(object)->ce = &temp_ce;
 
 		ZVAL_STRINGL(&call_handler, CALL_HANDLER, sizeof(CALL_HANDLER)-1, 0);
 		ZVAL_STRINGL(&method_name, Z_STRVAL(method->element), Z_STRLEN(method->element), 0);
@@ -568,7 +568,7 @@ static void overload_call_method(INTERNAL_FUNCTION_PARAMETERS, zend_property_ref
 											&retval,
 											3, handler_args,
 											0, NULL TSRMLS_CC);
-		Z_OBJCE_P(object) = orig_ce;
+		Z_OBJ_P(object)->ce = orig_ce;
 		zval_ptr_dtor(&arg_array);
 
 		if (call_result == FAILURE || !retval) {
