@@ -4662,6 +4662,35 @@ PHP_FUNCTION(strpbrk)
 }
 /* }}} */
 
+/* {{{ proto int substr_compare(string main_str, string str, int offset [, int length [, bool case_sensitivity]])
+   Binary safe optionally case insensitive comparison of 2 strings from an offset, up to length characters */
+PHP_FUNCTION(substr_compare)
+{
+	char *s1, *s2;
+	int s1_len, s2_len;
+	long offset, len=0;
+	zend_bool cs=0;
+	uint cmp_len;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ssl|lb", &s1, &s1_len, &s2, &s2_len, &offset, &len, &cs) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	if (len && offset >= s1_len) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The start position cannot exceed initial string length.");
+		RETURN_FALSE;
+	}
+
+	cmp_len = (uint) (len ? len : MAX(s2_len, (s1_len - offset)));
+
+	if (!cs) {
+		RETURN_LONG(zend_binary_strncmp(s1 + offset, (s1_len - offset), s2, s2_len, cmp_len));
+	} else {
+		RETURN_LONG(zend_binary_strncasecmp(s1 + offset, (s1_len - offset), s2, s2_len, cmp_len));
+	}
+}
+/* }}} */
+
 /*
  * Local variables:
  * tab-width: 4
