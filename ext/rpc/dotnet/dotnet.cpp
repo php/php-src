@@ -16,7 +16,6 @@
    +----------------------------------------------------------------------+
  */
 
-
 /*
  * This module implements support for Microsoft .Net components.
  */
@@ -38,11 +37,11 @@ extern "C" {  /* this should be included in the includes itself !! */
 
 #include "php.h"
 #include "ext/standard/info.h"
-#include "../com/conversion.h"
-#include "../com/php_COM.h"
 
 }
 
+#include "../com/conversion.h"
+#include "../com/php_COM.h"
 #include "Mscoree.h"
 #include "mscorlib.h"
 
@@ -76,7 +75,7 @@ HRESULT dotnet_init() {
   return ERROR_SUCCESS;
 }
 
-HRESULT dotnet_create(OLECHAR *assembly, OLECHAR *datatype, struct IDispatch **object) {
+HRESULT dotnet_create(OLECHAR *assembly, OLECHAR *datatype, i_dispatch *object) {
   HRESULT hr;
 
   _ObjectHandle *pHandle;
@@ -89,7 +88,7 @@ HRESULT dotnet_create(OLECHAR *assembly, OLECHAR *datatype, struct IDispatch **o
   pHandle->Release();
   if (FAILED(hr)) return hr;
  
-  *object = unwrapped.pdispVal;
+  php_COM_set(object, unwrapped.pdispVal, TRUE);
   return ERROR_SUCCESS;
 }
   
@@ -109,7 +108,7 @@ PHP_FUNCTION(DOTNET_load)
 	HRESULT hr;
 	pval *assembly_name, *datatype_name;
 	OLECHAR *assembly, *datatype;
-	IDispatch FAR *i_dispatch = NULL;
+	i_dispatch *obj;
 
 	if (ZEND_NUM_ARGS() != 2) WRONG_PARAM_COUNT;
 
@@ -123,8 +122,10 @@ PHP_FUNCTION(DOTNET_load)
 	convert_to_string(datatype_name);
 	datatype = php_char_to_OLECHAR(datatype_name->value.str.val, datatype_name->value.str.len, codepage);
 
+	obj = (i_dispatch *) emalloc(sizeof(i_dispatch));
+
 	/* obtain IDispatch */
-	hr=dotnet_create(assembly, datatype, &i_dispatch);
+	hr=dotnet_create(assembly, datatype, obj);
 	efree(assembly);
 	efree(datatype);
 	if (FAILED(hr)) {
@@ -132,14 +133,16 @@ PHP_FUNCTION(DOTNET_load)
 		error_message = php_COM_error_message(hr);
 		php_error(E_WARNING,"Error obtaining .Net class for %s in assembly %s: %s",datatype_name->value.str.val,assembly_name->value.str.val,error_message);
 		LocalFree(error_message);
+		efree(obj);
 		RETURN_FALSE;
 	}
-	if (!i_dispatch) {
+	if (!obj->i.dispatch) {
 		php_error(E_WARNING,"Unable to locate %s in assembly %s",datatype_name->value.str.val,assembly_name->value.str.val);
+		efree(obj);
 		RETURN_FALSE;
 	}
 
-	RETURN_LONG(zend_list_insert(i_dispatch,php_COM_get_le_idispatch()));
+	RETURN_LONG(zend_list_insert(obj, php_COM_get_le_idispatch()));
 }
 /* }}} */
 
