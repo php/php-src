@@ -1,3 +1,40 @@
+2002-07-25  sniper  <sniper@pb1.pair.com>
+
+    * acinclude.m4
+      sapi/apache/config.m4:
+    - Fixed bug: #18560, the macro was not defined always.
+
+    * configure.in: MFH: fix bug #18570
+
+    * main/main.c:
+    Allow setting post_max_size and upload_max_filesize in .htaccess files too
+
+    * ext/imap/config.m4: Fixed bug: #18561.
+
+2002-07-25  derick  <derick@pb1.pair.com>
+
+    * ext/standard/basic_functions.c:
+    - Added parameter to print_r which returns the variable representation
+      instead of echoing it.
+    - Added parameter to print_r which returns the variable representation
+      instead of echoing it. 
+
+2002-07-25  sesser  <sesser@pb1.pair.com>
+
+    * main/main.c: MFH
+
+    * main/main.c: do not dtor empty elements
+
+2002-07-25  derick  <derick@pb1.pair.com>
+
+    * ext/tokenizer/tokenizer.c: - MFH for fix for bug #16939
+
+2002-07-25  helly  <helly@pb1.pair.com>
+
+    * ext/exif/exif.c:
+    -handling of thumbnails in sub IFDs (the Photoshopway for TIFF)
+    -Some Photoshop specific tags
+
 2002-07-24  sesser  <sesser@pb1.pair.com>
 
     * main/php_variables.c: MFH

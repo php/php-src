@@ -1,3 +1,13 @@
+2002-07-25  sniper  <sniper@pb1.pair.com>
+
+    * Zend.m4: Fixed 3 major failures in this test:
+
+      1. Tests work better when they are actually run..
+      2. When file is opened, it should be closed sometime too.
+      3. AC_TRY_RUN cleans after itself (rm -f conftest.*), so it's
+         good idea to read the values while the file still exists.
+
+
 2002-07-24  Andi Gutmans  <andi@pb1.pair.com>
 
     * zend_mm.c: - Fix some compile problems with the new configure checks.
