@@ -72,7 +72,6 @@ int dbx_odbc_close(zval **rv, zval **dbx_handle, INTERNAL_FUNCTION_PARAMETERS)
 	int number_of_arguments=1;
 	zval **arguments[1];
 	zval *returned_zval=NULL;
-	int exit_status=EG(exit_status);
 
 	int actual_resource_type;
 	void *resource;

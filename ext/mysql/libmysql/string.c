@@ -37,7 +37,7 @@ my_bool init_dynamic_string(DYNAMIC_STRING *str, const char *init_str,
 
 my_bool dynstr_set(DYNAMIC_STRING *str, const char *init_str)
 {
-  uint length;
+  uint length=0;
   DBUG_ENTER("dynstr_set");
 
   if (init_str && (length= (uint) strlen(init_str)+1) > str->max_length)

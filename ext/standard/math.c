@@ -677,7 +677,7 @@ _php_math_basetolong(zval *arg, int base) {
 PHPAPI int
 _php_math_basetozval(zval *arg, int base, zval *ret) {
 	long num = 0;
-	double fnum;
+	double fnum = 0;
 	int i;
 	int mode = 0;
 	char c, *s;
