@@ -11,13 +11,13 @@ PHP                                                                        NEWS
 - Updated bundled oniguruma library (used for multibyte regular expression)
   to 3.7.0. (Moriyoshi)
 - Updated bundled libmbfl library (used for multibyte functions). (Moriyoshi)
-- Fixed bug preventing from building oci8 as shared. 
-  (stanislav dot voroniy at portavita dot nl, Tony)
   Fixed bugs:
   . Bug #32063 (mb_convert_encoding ignores named entity 'alpha')
   . Bug #31911 (mb_decode_mimeheader() is case-sensitive to hex escapes)
   . bug #30573 (compiler warnings in libmbfl due to invalid type cast)
   . Bug #30549 (incorrect character translations for some ISO8859 charsets).
+- Fixed bug preventing from building oci8 as shared. 
+  (stanislav dot voroniy at portavita dot nl, Tony)
 - Fixed a bug in mysql_affected_rows and mysql_stmt_affected_rows when the
   api function returns -1 (Georg)
 - Fixed several leaks in ext/browscap and sapi/embed. (Andrei)
@@ -33,6 +33,8 @@ PHP                                                                        NEWS
   child class). (Marcus)
 - Fixed bug #32238 (spl_array.c: void function cannot return value). (Johannes)
 - Fixed bug #32210 (proc_get_status() sets "running" always to true). (Ilia)
+- Fixed bug #32200 (Prevent using both --with-apxs2 and --with-apxs2filter).
+  (Jani)
 - Fixed bug #32160 (file truncation in copy() when source & destination are
   the same). (Ilia)
 - Fixed bug #32134 (Overloading offsetGet/offsetSet). (Marcus)
