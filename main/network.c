@@ -940,7 +940,7 @@ static size_t php_sockop_read(php_stream *stream, char *buf, size_t count TSRMLS
 
 		nr_bytes = recv(sock->socket, buf, count, 0);
 
-		if (nr_bytes == 0 || (nr_bytes < count && php_socket_errno() != EWOULDBLOCK)) {
+		if (nr_bytes == 0 || (nr_bytes == -1 && php_socket_errno() != EWOULDBLOCK)) {
 			stream->eof = 1;
 		}
 	}
