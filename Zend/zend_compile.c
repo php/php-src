@@ -295,6 +295,7 @@ void fetch_array_dim(znode *result, znode *parent, znode *dim CLS_DC)
 
 void fetch_string_offset(znode *result, znode *parent, znode *offset CLS_DC)
 {
+	fetch_array_dim(result, parent, offset CLS_CC);
 }
 
 
