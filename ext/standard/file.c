@@ -1344,7 +1344,7 @@ PHP_FUNCTION(mkdir)
 	convert_to_string_ex(arg1);
 	convert_to_long_ex(arg2);
 	mode = (*arg2)->value.lval;
-	if (PG(safe_mode) &&(!php_checkuid((*arg1)->value.str.val,3))) {
+	if (PG(safe_mode) &&(!php_checkuid((*arg1)->value.str.val, NULL, 3))) {
 		RETURN_FALSE;
 	}
 	ret = V_MKDIR((*arg1)->value.str.val,mode);
@@ -1369,7 +1369,7 @@ PHP_FUNCTION(rmdir)
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(arg1);
-	if (PG(safe_mode) &&(!php_checkuid((*arg1)->value.str.val,1))) {
+	if (PG(safe_mode) &&(!php_checkuid((*arg1)->value.str.val, NULL, 1))) {
 		RETURN_FALSE;
 	}
 	ret = rmdir((*arg1)->value.str.val);
@@ -1563,7 +1563,7 @@ PHP_FUNCTION(rename)
 	old_name = (*old_arg)->value.str.val;
 	new_name = (*new_arg)->value.str.val;
 
-	if (PG(safe_mode) &&(!php_checkuid(old_name, 2))) {
+	if (PG(safe_mode) &&(!php_checkuid(old_name, NULL, 2))) {
 		RETURN_FALSE;
 	}
 	ret = rename(old_name, new_name);
@@ -1669,7 +1669,7 @@ PHP_FUNCTION(copy)
 	convert_to_string_ex(source);
 	convert_to_string_ex(target);
 
-	if (PG(safe_mode) &&(!php_checkuid((*source)->value.str.val,2))) {
+	if (PG(safe_mode) &&(!php_checkuid((*source)->value.str.val, NULL, 2))) {
 		RETURN_FALSE;
 	}
 	

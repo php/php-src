@@ -160,7 +160,7 @@ static gzFile php_gzopen_wrapper(char *path, char *mode, int options)
 		return php_gzopen_with_path(path, mode, PG(include_path), NULL);
 	}
 	else {
-		if (options & ENFORCE_SAFE_MODE && PG(safe_mode) && (!php_checkuid(path,1))) {
+		if (options & ENFORCE_SAFE_MODE && PG(safe_mode) && (!php_checkuid(path, NULL, 1))) {
 			return NULL;
 		}
 		if (php_check_open_basedir(path)) return NULL;
@@ -186,7 +186,7 @@ static gzFile *php_gzopen_with_path(char *filename, char *mode, char *path, char
 	
 	/* Relative path open */
 	if (*filename == '.') {
-		if (PG(safe_mode) &&(!php_checkuid(filename,2))) {
+		if (PG(safe_mode) &&(!php_checkuid(filename, NULL, 2))) {
 			return(NULL);
 		}
 		if (php_check_open_basedir(filename)) return NULL;
@@ -209,7 +209,7 @@ static gzFile *php_gzopen_with_path(char *filename, char *mode, char *path, char
 			} else {
 				strlcpy(trypath,filename,sizeof(trypath));
 			}
-			if (!php_checkuid(trypath,2)) {
+			if (!php_checkuid(trypath, NULL, 2)) {
 				return(NULL);
 			}
 			if (php_check_open_basedir(trypath)) return NULL;
@@ -225,7 +225,7 @@ static gzFile *php_gzopen_with_path(char *filename, char *mode, char *path, char
 	}
 
 	if (!path || (path && !*path)) {
-		if (PG(safe_mode) &&(!php_checkuid(filename,2))) {
+		if (PG(safe_mode) &&(!php_checkuid(filename, NULL, 2))) {
 			return(NULL);
 		}
 		if (php_check_open_basedir(filename)) return NULL;
@@ -252,7 +252,7 @@ static gzFile *php_gzopen_with_path(char *filename, char *mode, char *path, char
 		}
 		snprintf(trypath, MAXPATHLEN, "%s/%s", ptr, filename);
 		if (PG(safe_mode)) {
-			if (V_STAT(trypath,&sb) == 0 &&(!php_checkuid(trypath,2))) {
+			if (V_STAT(trypath,&sb) == 0 &&(!php_checkuid(trypath, NULL, 2))) {
 				efree(pathbuf);
 				return(NULL);
 			}

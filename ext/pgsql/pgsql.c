@@ -1539,7 +1539,7 @@ PHP_FUNCTION(pg_loimport)
 			break;
 	}
 	
-	if (PG(safe_mode) &&(!php_checkuid(Z_STRVAL_PP(file_in), 2))) {
+	if (PG(safe_mode) &&(!php_checkuid(Z_STRVAL_PP(file_in), NULL, 2))) {
 		RETURN_FALSE;
 	}
 

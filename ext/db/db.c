@@ -289,7 +289,7 @@ dbm_info *php_dbm_open(char *filename, char *mode) {
 		return NULL;
 	}
 
-	if (PG(safe_mode) && (!php_checkuid(filename, 2))) {
+	if (PG(safe_mode) && (!php_checkuid(filename, NULL, 2))) {
 		return NULL;
 	}
 

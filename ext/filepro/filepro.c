@@ -203,7 +203,7 @@ PHP_FUNCTION(filepro)
 	
 	sprintf(workbuf, "%s/map", dir->value.str.val);
 
-	if (PG(safe_mode) && (!php_checkuid(workbuf, 2))) {
+	if (PG(safe_mode) && (!php_checkuid(workbuf, NULL, 2))) {
 		RETURN_FALSE;
 	}
 	
@@ -302,7 +302,7 @@ PHP_FUNCTION(filepro_rowcount)
 	/* Now read the records in, moving forward recsize-1 bytes each time */
 	sprintf(workbuf, "%s/key", FP_GLOBAL(fp_database));
 
-	if (PG(safe_mode) && (!php_checkuid(workbuf, 2))) {
+	if (PG(safe_mode) && (!php_checkuid(workbuf, NULL, 2))) {
 		RETURN_FALSE;
 	}
 	
@@ -527,7 +527,7 @@ PHP_FUNCTION(filepro_retrieve)
 	/* Now read the record in */
 	sprintf(workbuf, "%s/key", FP_GLOBAL(fp_database));
 
-	if (PG(safe_mode) && (!php_checkuid(workbuf, 2))) {
+	if (PG(safe_mode) && (!php_checkuid(workbuf, NULL, 2))) {
 		RETURN_FALSE;
 	}
 	
