@@ -111,10 +111,9 @@ Java Servlet SAPI Module for PHP 4
 
     1.) Build the Java Servlet SAPI Module as described above.
 
-    2.) Add the following line to your Cocoon configuration
-
-          <generator name="php" 
-          class="org.apache.cocoon.generators.PhpGenerator"/>
+    2.) Copy phpsrvlet.jar into your Cocoon/lib directory and rebuild
+        Cocoon. You need the Cocoon source tree in order to do this, a
+        binary distribution does not suffice.
 
 -- 
  [1] http://jakarta.apache.org/tomcat/
