@@ -47,6 +47,7 @@ SPL_METHOD(Array, offsetUnset);
 SPL_METHOD(Array, append);
 SPL_METHOD(Array, getArrayCopy);
 SPL_METHOD(Array, seek);
+SPL_METHOD(Array, count);
 
 static
 ZEND_BEGIN_ARG_INFO(arginfo_array___construct, 0)
@@ -83,6 +84,7 @@ static zend_function_entry spl_funcs_ArrayObject[] = {
 	SPL_ME(Array, offsetUnset,   arginfo_array_offsetGet, ZEND_ACC_PUBLIC)
 	SPL_ME(Array, append,        arginfo_array_append,    ZEND_ACC_PUBLIC)
 	SPL_ME(Array, getArrayCopy,  NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(Array, count,         NULL, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 
@@ -100,6 +102,7 @@ static zend_function_entry spl_funcs_ArrayIterator[] = {
 	SPL_ME(Array, append,        arginfo_array_append,    ZEND_ACC_PUBLIC)
 	SPL_ME(Array, getArrayCopy,  NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(Array, seek,          arginfo_array_seek,    ZEND_ACC_PUBLIC)
+	SPL_ME(Array, count,         NULL, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 
@@ -714,6 +717,24 @@ SPL_METHOD(Array, seek)
 	zend_hash_internal_pointer_reset_ex(aht, &intern->pos);
 	
 	while (position-- > 0 && spl_array_next(intern TSRMLS_CC));
+} /* }}} */
+
+/* {{{ proto bool ArrayObject::count()
+ Return the number of elements in the Iterator. */
+SPL_METHOD(Array, count)
+{
+	long position;
+	zval *object = getThis();
+	spl_array_object *intern = (spl_array_object*)zend_object_store_get_object(object TSRMLS_CC);
+	HashTable *aht = HASH_OF(intern->array);
+	HashPosition pos;
+
+	if (!aht) {
+		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Array was modified outside object and is no longer an array");
+		RETURN_LONG(0);
+	}
+
+	RETURN_LONG(zend_hash_num_elements(aht));
 } /* }}} */
 
 /* {{{ proto mixed|NULL ArrayIterator::current()
