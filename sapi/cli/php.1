@@ -27,7 +27,7 @@ Command Line Interface 'CLI'
 ]
 .IR file
 [[--] 
-.IR args...
+.IR args
 ]
 .LP
 .B php
@@ -35,7 +35,7 @@ Command Line Interface 'CLI'
 .B -r 
 .IR code
 [[--]
-.IR args...
+.IR args
 ]
 .LP
 .B php
@@ -47,7 +47,7 @@ Command Line Interface 'CLI'
 [-E 
 .IR code
 ] [[--]
-.IR args...
+.IR args
 ]
 .LP
 .B php
@@ -59,12 +59,12 @@ Command Line Interface 'CLI'
 [-E 
 .IR code
 ] [[--]
-.IR args...
+.IR args
 ]
 .LP
 .B php
 [options] -- [
-.IR args...
+.IR args
 ]
 .LP
 .SH DESCRIPTION
@@ -182,7 +182,7 @@ Display source with stripped comments and whitespace
 Load Zend extension 
 .IR file
 .TP
-.IR args...
+.IR args
 Arguments passed to script. Use 
 .B '--'
 .IR args 
@@ -207,8 +207,11 @@ This source file is subject to version 2.02 of the
 license,
 that is bundled with this package in the file LICENSE, and is
 available at through the world-wide-web at
-.BR
+.PD 0
+.P
 .B http://www.php.net/license/2_02.txt.
+.P
+.PD 1
 If you did not receive a copy of the PHP license and are unable to
 obtain it through the world-wide-web, please send a note to
 .B license@php.net 
