@@ -59,7 +59,7 @@ ub4 _oci_error(OCIError *err, pdo_dbh_t *dbh, pdo_stmt_t *stmt, char *what, swor
 	pdo_oci_db_handle *H = (pdo_oci_db_handle *)dbh->driver_data;
 	pdo_oci_error_info *einfo;
 	pdo_oci_stmt *S = NULL;
-	enum pdo_error_type *pdo_err = &dbh->error_code;
+	pdo_error_type *pdo_err = &dbh->error_code;
 	
 	einfo = &H->einfo;
 
@@ -111,12 +111,14 @@ ub4 _oci_error(OCIError *err, pdo_dbh_t *dbh, pdo_stmt_t *stmt, char *what, swor
 			zend_bailout();
 			break;
 
+#if 0
 		case 955:	/* ORA-00955: name is already used by an existing object */
 			*pdo_err = PDO_ERR_ALREADY_EXISTS;
 			break;
+#endif
 
 		case 12154:	/* ORA-12154: TNS:could not resolve service name */
-			*pdo_err = PDO_ERR_NOT_FOUND;
+			strcpy(*pdo_err, "42S02");
 			break;
 			
 		case 22:	/* ORA-00022: invalid session id */
@@ -127,16 +129,16 @@ ub4 _oci_error(OCIError *err, pdo_dbh_t *dbh, pdo_stmt_t *stmt, char *what, swor
 			/* consider the connection closed */
 			dbh->is_closed = 1;
 			H->attached = 0;
-			*pdo_err = PDO_ERR_DISCONNECTED;
+			strcpy(*pdo_err, "01002"); /* FIXME */
 			break;
 
 		default:
-			*pdo_err = PDO_ERR_CANT_MAP;
+			strcpy(*pdo_err, "HY000");
 	}
 
 	/* little mini hack so that we can use this code from the dbh ctor */
 	if (!dbh->methods) {
-		zend_throw_exception_ex(php_pdo_get_exception(), *pdo_err TSRMLS_CC, einfo->errmsg);
+		zend_throw_exception_ex(php_pdo_get_exception(), 0, TSRMLS_CC, "SQLSTATE[%s]: %s", *pdo_err, einfo->errmsg);
 	}
 
 	return einfo->errcode;
