@@ -37,31 +37,31 @@
   * 
   *   $timer->profiling_information();
   * 
-  * @author	  Sebastian Bergmann <sb@phpOpenTracker.de>
+  * @author   Sebastian Bergmann <sb@phpOpenTracker.de>
   * @version  1.0 28/09/00
-  * @access		public
+  * @access   public
   */
 
   class Timer
   {
     // {{{ properties
 
-  	/**
-  	* Contains the markers
-  	* @var		array
-  	* @access	public
-  	*/
+    /**
+    * Contains the markers
+    * @var    array
+    * @access public
+    */
 
     var $markers = array();
     
     // }}}
     // {{{ start()
 
-  	/**
-  	* Set "Start" marker.
-  	* @brother stop()
-  	* @access	public
-  	*/
+    /**
+    * Set "Start" marker.
+    * @brother  stop()
+    * @access   public
+    */
 
     function start()
     {
@@ -71,11 +71,11 @@
     // }}}
     // {{{ stop()
 
-  	/**
-  	* Set "Stop" marker.
-  	* @brother start()
-  	* @access	public
-  	*/
+    /**
+    * Set "Stop" marker.
+    * @brother  start()
+    * @access   public
+    */
 
     function stop()
     {
@@ -85,11 +85,11 @@
     // }}}
     // {{{ set_marker()
 
-  	/**
-  	* Set marker.
-  	* @brother stop()
-  	* @access	public
-  	*/
+    /**
+    * Set marker.
+    * @brother  stop()
+    * @access   public
+    */
 
     function set_marker( $name )
     {
@@ -100,13 +100,13 @@
     // }}}
     // {{{ time_elapsed()
 
-  	/**
-  	* Returns the time elapsed betweens two markers.
+    /**
+    * Returns the time elapsed betweens two markers.
     * @param  string  $start        start marker, defaults to "Start"
     * @param  string  $end          end marker, defaults to "Stop"
     * @return double  $time_elapsed time elapsed between $start and $end
-  	* @access	public
-  	*/
+    * @access  public
+    */
 
     function time_elapsed( $start = "Start", $end = "Stop" )
     {
@@ -116,10 +116,10 @@
     // }}}
     // {{{ profiling_information()
 
-  	/**
-  	* Prints profiling information.
-  	* @access	public
-  	*/
+    /**
+    * Prints profiling information.
+    * @access public
+    */
 
     function profiling_information()
     {
