@@ -25,6 +25,8 @@ require_once 'PEAR/Config.php';
 
 class PEAR_Command_Registry extends PEAR_Command_Common
 {
+    // {{{ command definitions
+
     var $commands = array(
         'list' => array(
             'summary' => 'List Installed Packages',
@@ -50,6 +52,9 @@ Tests if a package is installed in the system. Will exit(1) if it is not.
 '),
         );
 
+    // }}}
+    // {{{ constructor
+
     /**
      * PEAR_Command_Registry constructor.
      *
@@ -59,6 +64,9 @@ Tests if a package is installed in the system. Will exit(1) if it is not.
     {
         parent::PEAR_Command_Common($ui, $config);
     }
+
+    // }}}
+    // {{{ doList()
 
     function doList($command, $options, $params)
     {
@@ -151,6 +159,9 @@ Tests if a package is installed in the system. Will exit(1) if it is not.
         return true;
     }
 
+    // }}}
+    // {{{ doShellTest()
+
     function doShellTest($command, $options, $params) {
         $this->pushErrorHandling(PEAR_ERROR_RETURN);
         $reg = &new PEAR_Registry($this->config->get('php_dir'));
@@ -178,6 +189,7 @@ Tests if a package is installed in the system. Will exit(1) if it is not.
         }
     }
 
+    // }}}
 }
 
 ?>
