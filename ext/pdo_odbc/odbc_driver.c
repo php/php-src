@@ -61,7 +61,7 @@ static int odbc_handle_closer(pdo_dbh_t *dbh TSRMLS_DC)
 	return 0;
 }
 
-static int odbc_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len, pdo_stmt_t *stmt TSRMLS_DC)
+static int odbc_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len, pdo_stmt_t *stmt, long options, zval *driver_options TSRMLS_DC)
 {
 	RETCODE rc;
 	pdo_odbc_db_handle *H = (pdo_odbc_db_handle *)dbh->driver_data;
