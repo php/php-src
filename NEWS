@@ -2,6 +2,9 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.1
+- Add a crc32 checksum function - used by the udm_search search engine
+  and currently run through a system call.  This will speed up the udm_search
+  php frontend significantly. (Rasmus)
 - Modified in_array() to not touch array pointer. (Andrei)
 - Added restore_error_handler(). (Zeev, Zend engine)
 - Fixed erroneous file names and line numbers in error situations under the
