@@ -1850,12 +1850,14 @@ send_by_ref:
 					zval *expr_ptr, **expr_ptr_ptr = NULL;
 					zval *offset=get_zval_ptr(&opline->op2, Ts, &EG(free_op2), BP_VAR_R);
 
+					SUSPEND_GARBAGE();
 					if (opline->extended_value) {
 						expr_ptr_ptr=get_zval_ptr_ptr(&opline->op1, Ts, BP_VAR_R);
 						expr_ptr = *expr_ptr_ptr;
 					} else {
 						expr_ptr=get_zval_ptr(&opline->op1, Ts, &EG(free_op1), BP_VAR_R);
 					}
+					RESUME_GARBAGE();
 					
 					if (opline->opcode==ZEND_INIT_ARRAY) {
 						array_init(array_ptr);
