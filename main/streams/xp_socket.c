@@ -185,14 +185,27 @@ static int php_sockop_close(php_stream *stream, int close_handle TSRMLS_DC)
 
 static int php_sockop_flush(php_stream *stream TSRMLS_DC)
 {
+#if 0
 	php_netstream_data_t *sock = (php_netstream_data_t*)stream->abstract;
 	return fsync(sock->socket);
+#endif
+	return 0;
 }
 
 static int php_sockop_stat(php_stream *stream, php_stream_statbuf *ssb TSRMLS_DC)
 {
 	php_netstream_data_t *sock = (php_netstream_data_t*)stream->abstract;
 	return fstat(sock->socket, &ssb->sb);
+}
+
+static inline int sock_sendto(php_netstream_data_t *sock, char *buf, size_t buflen, int flags,
+		struct sockaddr *addr, socklen_t addrlen
+		TSRMLS_DC)
+{
+	if (addr) {
+		return sendto(sock->socket, buf, buflen, flags, addr, addrlen);
+	}
+	return send(sock->socket, buf, buflen, flags);
 }
 
 static inline int sock_recvfrom(php_netstream_data_t *sock, char *buf, size_t buflen, int flags,
@@ -233,11 +246,13 @@ static int php_sockop_set_option(php_stream *stream, int option, int value, void
 				if (value == -1) {
 					if (sock->timeout.tv_sec == -1) {
 						tv.tv_sec = FG(default_socket_timeout);
+						tv.tv_usec = 0;
 					} else {
 						tv = sock->timeout;
 					}
 				} else {
 					tv.tv_sec = value;
+					tv.tv_usec = 0;
 				}
 
 				if (sock->socket == -1) {
@@ -312,7 +327,7 @@ static int php_sockop_set_option(php_stream *stream, int option, int value, void
 					if ((xparam->inputs.flags & STREAM_OOB) == STREAM_OOB) {
 						flags |= MSG_OOB;
 					}
-					xparam->outputs.returncode = sendto(sock->socket,
+					xparam->outputs.returncode = sock_sendto(sock,
 							xparam->inputs.buf, xparam->inputs.buflen,
 							flags,
 							xparam->inputs.addr,
