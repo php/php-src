@@ -1,3 +1,78 @@
+2002-02-05  Andi Gutmans  <andi@zend.com>
+
+    * ext/wddx/wddx.c
+      ext/standard/array.c:
+    - Add TSRMLS_FETCH()'s needed for the new object overloading in ZE2.
+
+2002-02-05  Mark L. Woodward  <mlwmohawk@mohawksoft.com>
+
+    * ext/msession/msession.c:
+    Sorry guys, PHP 4.0.6's ZEND_MODULE_API_NO is whacked, it has an extra
+    zero, thus ZEND_MODULE_API_NO >= xxxx, will not work for about 18000 years.
+    Added better checking, and cleaned up some of the #ifdef you seem to love
+    so much.
+
+2002-02-05  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/msession/msession.c:
+    removed the new-style parameter parser code for bc *and* readability
+    reasons, changed the remaining #ifdefs to check the api version
+    directly instead of using the not really related OLD_ZEND_PARAM macro
+
+2002-02-05  David Eriksson  <david@2good.com>
+
+    * ext/satellite/.cvsignore
+      ext/satellite/Makefile.in
+      ext/satellite/README
+      ext/satellite/class.c
+      ext/satellite/class.h
+      ext/satellite/common.c
+      ext/satellite/common.h
+      ext/satellite/config.m4
+      ext/satellite/corba.c
+      ext/satellite/corba.h
+      ext/satellite/enum.c
+      ext/satellite/enum.h
+      ext/satellite/findtype.c
+      ext/satellite/findtype.h
+      ext/satellite/hashtable.c
+      ext/satellite/hashtable.h
+      ext/satellite/multiple_components.patch
+      ext/satellite/namedvalue_to_zval.c
+      ext/satellite/namedvalue_to_zval.h
+      ext/satellite/object.c
+      ext/satellite/object.h
+      ext/satellite/php_orbit.c
+      ext/satellite/php_orbit.h
+      ext/satellite/struct.c
+      ext/satellite/struct.h
+      ext/satellite/typecode.c
+      ext/satellite/typecode.h
+      ext/satellite/typemanager.c
+      ext/satellite/typemanager.h
+      ext/satellite/zval_to_namedvalue.c
+      ext/satellite/zval_to_namedvalue.h:
+    - Removed Satellite. It is now part of PEAR.
+
+2002-02-05  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * main/output.c: pval -> zval
+    Check number of parameters
+
+    * main/main.c
+      php.ini-dist: register_globals=off is defualt for 4.2.0
+
+2002-02-05  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/session/session.c: Let's be consistent and use zval instead of pval
+
+    * ext/session/php_session.h
+      ext/session/session.c: Export php_session_start().
+
+    * configure.in:
+    The extensions build as shared were installed into wrong place
+    even as the layout was PHP.
+
 2002-02-04  Jaroslaw Kolakowski  <J.Kolakowski@students.mimuw.edu.pl>
 
     * ext/domxml/php_domxml.c:
