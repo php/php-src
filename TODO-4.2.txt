@@ -10,3 +10,6 @@
 * allow foreach($array as list($var1, $var2))
 
 * clean up "$instance = &new object" syntax (default to the =& behaviour?)
+
+* chaning PHP error messages so that they point to pages or sections in the
+  PHP manual
