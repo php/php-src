@@ -165,7 +165,7 @@ function do_testing($argc, &$argv)
         $dir = ".";
     }
 
-    if ($dir) {
+    if (isset($dir) && $dir) {
         find_testdirs($dir);
         for ($i = 0; $i < sizeof($testdirs); $i++) {
             run_tests_in_dir($testdirs[$i]);
