@@ -5,8 +5,6 @@ PHP 4                                                                      NEWS
   instead of false (W3C specs). (chregu)
 - Changed DomNode->insert_before() and DomNode->append_child() to conform to
   W3C specs (moving not copying nodes, accepting NULL as 2nd param). (chregu)
-- Added set_exception_handler() function for registering a global,
-  catch-all exception handling function (Stig)
 - Added DomNode->set_namespace(uri[,prefix]) (chregu)
 - Fixed shuffle() to properly generate all possibilities.  (Patch provided by 
   Adam <adam@trachtenberg.com> )
