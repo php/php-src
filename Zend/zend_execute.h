@@ -65,6 +65,8 @@ ZEND_API int zend_lookup_class(char *name, int name_length, zend_class_entry ***
 ZEND_API int zend_eval_string(char *str, zval *retval_ptr, char *string_name TSRMLS_DC);
 ZEND_API int zend_eval_string_ex(char *str, zval *retval_ptr, char *string_name, int handle_exceptions TSRMLS_DC);
 
+ZEND_API void zend_throw_exception_object(zval *exception TSRMLS_DC);
+
 static inline int i_zend_is_true(zval *op)
 {
 	int result;
