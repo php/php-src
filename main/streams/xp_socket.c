@@ -230,10 +230,14 @@ static int php_sockop_set_option(php_stream *stream, int option, int value, void
 				char buf;
 				int alive = 1;
 
-				if (sock->timeout.tv_sec == -1) {
-					tv.tv_sec = FG(default_socket_timeout);
+				if (value == -1) {
+					if (sock->timeout.tv_sec == -1) {
+						tv.tv_sec = FG(default_socket_timeout);
+					} else {
+						tv = sock->timeout;
+					}
 				} else {
-					tv = sock->timeout;
+					tv.tv_sec = value;
 				}
 
 				if (sock->socket == -1) {
