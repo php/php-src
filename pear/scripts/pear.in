@@ -20,25 +20,24 @@
 //
 
 require_once 'PEAR.php';
-require_once "PEAR/Config.php";
-require_once "PEAR/Command.php";
-require_once "Console/Getopt.php";
+require_once 'PEAR/Config.php';
+require_once 'PEAR/Command.php';
+require_once 'Console/Getopt.php';
 
 PEAR_Command::setFrontendType('CLI');
 $all_commands = PEAR_Command::getCommands();
 $cmd_options  = PEAR_Command::getOptions();
 
-$progname = basename($argv[0]);
-
-PEAR::setErrorHandling(PEAR_ERROR_DIE, "$progname: %s\n");
-$argv = Console_Getopt::readPHPArgv();
+$progname = basename(__FILE__);
 
 // XXX change Getopt to use raiseError() ?
+$argv = Console_Getopt::readPHPArgv();
 $options = Console_Getopt::getopt($argv, "c:C:d:D:h?sSqu:v" . $cmd_options);
 if (PEAR::isError($options)) {
     usage($options);
 }
 
+PEAR::setErrorHandling(PEAR_ERROR_DIE, "$progname: %s\n");
 $opts = $options[0];
 
 $pear_user_config = '';
@@ -132,15 +131,31 @@ function usage($error = null, $helpsubject = null)
 {
     global $progname, $all_commands;
     $stderr = fopen('php://stderr', 'w');
+    fputs($stderr, "\n");
     if (PEAR::isError($error)) {
         fputs($stderr, $error->getMessage());
     } elseif ($error !== null) {
         fputs($stderr, $error);
     }
-    fputs($stderr,
-        "Usage: $progname [options] command [command-options] <parameters>\n");
-    if ($helpsubject == "options") {
-        fputs($stderr,
+    if ($helpsubject != null) {
+        $put = cmdHelp($helpsubject);
+    } else {
+        $put =
+            "Usage: $progname [options] command [command-options] <parameters>\n".
+            "Type \"$progname help options\" to list all options.\n".
+            "Type \"$progname help <command>\" to get the help for the specified command.\n".
+            "Commands:\n   " . implode("\n   ", array_keys($all_commands));
+    }
+    fputs($stderr, "$put\n\n");
+    fclose($stderr);
+    exit;
+}
+
+function cmdHelp($command)
+{
+    global $progname, $all_commands, $config;
+    if ($command == "options") {
+        return
         "Options:\n".
         "     -v         increase verbosity level (default 1)\n".
         "     -q         be quiet, decrease verbosity level\n".
@@ -151,16 +166,11 @@ function usage($error = null, $helpsubject = null)
         "     -s         store user configuration\n".
         "     -S         store system configuration\n".
         "     -u foo     unset `foo' in the user configuration\n".
-        "     -h, -?     display help/usage (this message)\n");
-    } else {
-        fputs($stderr,
-              "Type \"$progname help options\" to list all options.\n");
+        "     -h, -?     display help/usage (this message)\n";
+    } elseif ($help = PEAR_Command::getHelp($command)) {
+        return "Usage : $progname $command {$help[0]}\n{$help[1]}";
     }
-    fputs($stderr,
-          "Commands:\n   " . implode("\n   ", array_keys($all_commands)) .
-          "\n");
-    fclose($stderr);
-    exit;
+    return "No such command";
 }
 
 // }}}
