@@ -1,23 +1,23 @@
 --TEST--
 General function test
---SKIPIF--
-<?php if(version_compare(zend_version(), "2.0.0-dev", '>=')) echo "skip removed in Zend Engine 2\n"; ?>
 --FILE--
 <?php 
 
 echo "Before function declaration...\n";
 
-old_function print_something_multiple_times $something,$times (
+function print_something_multiple_times($something,$times)
+{
   echo "----\nIn function, printing the string \"$something\" $times times\n";
   for ($i=0; $i<$times; $i++) {
     echo "$i) $something\n";
   }
   echo "Done with function...\n-----\n";
-);
+}
 
-old_function some_other_function (
+function some_other_function()
+{
   echo "This is some other function, to ensure more than just one function works fine...\n";
-);
+}
 
 
 echo "After function declaration...\n";

@@ -1,13 +1,12 @@
 --TEST--
 General function test
---SKIPIF--
-<?php if(version_compare(zend_version(), "2.0.0-dev", '>=')) echo "skip removed in Zend Engine 2\n"; ?>
 --FILE--
 <?php 
 
-old_function a (
+function a()
+{
   echo "hey\n";
-);
+}
 
 function b($i)
 {
@@ -34,13 +33,14 @@ c(7,14);
 a();
 
 
-old_function factorial $n (
+function factorial($n)
+{
   if ($n==0 || $n==1) {
     return 1;
   } else {
     return factorial($n-1)*$n;
   }
-);
+}
 
 
 function factorial2($start, $n)
@@ -63,17 +63,18 @@ for ($k=0; $k<10; $k++) {
 
 echo "and now, from a function...\n";
 
-old_function call_fact (
+function call_fact()
+{
   echo "(it should break at 5...)\n";
   for ($i=0; $i<=10; $i++) {
     if ($i == 5) break;
     $n=factorial($i);
     echo "factorial($i) = $n\n";
   }
-);
+}
 
-old_function return4 ( return 4; );
-old_function return7 ( return 7; );
+function return4() { return 4; }
+function return7() { return 7; }
 
 for ($k=0; $k<10; $k++) {
   call_fact();
@@ -86,12 +87,13 @@ echo "$result\n";
 $result=factorial2(return4(),return7());
 echo "$result\n";
 
-old_function andi $i, $j (
+function andi($i, $j)
+{
 	for ($k=$i ; $k<=$j ; $k++) {
 		if ($k >5) continue;
 		echo "$k\n";
 	}
-);
+}
 
 andi (3,10);
 --EXPECT--
