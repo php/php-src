@@ -394,6 +394,9 @@ session.entropy_file      =         ; specified here to create the session id
 session.cache_limiter     = nocache ; set to {nocache,private,public} to
                                     ; determine HTTP caching aspects
 session.cache_expire      = 180     ; document expires after n minutes
+session.use_trans_sid     = 1       ; use transient sid support if enabled
+                                    ; by compiling with --enable-trans-sid
+
 
 [MSSQL]
 ;extension=php_mssql.dll
