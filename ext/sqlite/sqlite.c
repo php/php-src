@@ -2680,12 +2680,14 @@ PHP_FUNCTION(sqlite_escape_string)
 		enclen = php_sqlite_encode_binary(string, stringlen, ret+1);
 		RETVAL_STRINGL(ret, enclen+1, 0);
 		
-	} else  {
+	} else if (stringlen) {
 		ret = sqlite_mprintf("%q", string);
 		if (ret) {
 			RETVAL_STRING(ret, 1);
 			sqlite_freemem(ret);
 		}
+	} else {
+		RETURN_EMPTY_STRING();
 	}
 }
 /* }}} */
