@@ -67,13 +67,6 @@ cat >config.h.stub<<eof
 /* #undef HAVE_LIB$EXTNAME */
 eof
 
-echo -n " .cvsignore"
-cat >.cvsignore<<eof
-.deps
-Makefile.in
-Makefile
-eof
-
 chmod 644 *
 
 echo " [done]."
