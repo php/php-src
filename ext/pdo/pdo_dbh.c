@@ -157,9 +157,9 @@ static PHP_METHOD(PDO, prepare)
 	RETURN_FALSE;
 }
 
-/* {{{ proto bool PDO::beginWork()
+/* {{{ proto bool PDO::beginTransaction()
    Initiates a transaction */
-static PHP_METHOD(PDO, beginWork)
+static PHP_METHOD(PDO, beginTransaction)
 {
 	pdo_dbh_t *dbh = zend_object_store_get_object(getThis() TSRMLS_CC);
 
@@ -257,13 +257,41 @@ fail:
 }
 /* }}} */
 
+/* {{{ proto bool PDO::exec(string query)
+   Execute a query that does not return a row set */
+static PHP_METHOD(PDO, exec)
+{
+	pdo_dbh_t *dbh = zend_object_store_get_object(getThis() TSRMLS_CC);
+	pdo_stmt_t *stmt;
+	char *statement;
+	long statement_len;
+	int rows;
+
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &statement, &statement_len)) {
+		RETURN_FALSE;
+	}
+
+	if (!statement_len) {
+		RETURN_FALSE;
+	}
+
+	rows = dbh->methods->doer(dbh, statement, statement_len TSRMLS_CC);
+
+	if (rows >= 0) {
+		RETURN_LONG(rows);
+	}
+
+	RETURN_FALSE;
+}
+/* }}} */
 
 function_entry pdo_dbh_functions[] = {
 	PHP_ME(PDO, prepare, 		NULL, 					ZEND_ACC_PUBLIC)
-	PHP_ME(PDO, beginWork,		NULL,					ZEND_ACC_PUBLIC)
+	PHP_ME(PDO, beginTransaction,NULL,					ZEND_ACC_PUBLIC)
 	PHP_ME(PDO, commit,			NULL,					ZEND_ACC_PUBLIC)
 	PHP_ME(PDO, rollBack,		NULL,					ZEND_ACC_PUBLIC)
 	PHP_ME(PDO, setAttribute,	NULL,					ZEND_ACC_PUBLIC)
+	PHP_ME(PDO, exec,			NULL,					ZEND_ACC_PUBLIC)
 
 	{NULL, NULL, NULL}
 };
