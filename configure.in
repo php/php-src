@@ -1084,6 +1084,10 @@ PHP_ADD_SOURCES(Zend, \
     zend_list.c zend_indent.c zend_builtin_functions.c zend_sprintf.c \
     zend_ini.c zend_qsort.c)
 
+if test -r "Zend/zend_objects.c"; then
+  PHP_ADD_SOURCES(Zend, zend_objects.c zend_object_handlers.c)
+fi
+
 dnl Selectively disable optimization due to high RAM usage during
 dnl compiling the executor.
 if test -n "$GCC" && test "$ZEND_INLINE_OPTIMIZATION" != "yes"; then
