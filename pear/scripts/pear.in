@@ -33,6 +33,8 @@ ini_set('magic_quotes_runtime', false);
 error_reporting(E_ALL & ~E_NOTICE);
 set_error_handler('error_handler');
 
+$pear_package_version = "@pear_version@";
+
 require_once 'PEAR.php';
 require_once 'PEAR/Config.php';
 require_once 'PEAR/Command.php';
@@ -227,7 +229,6 @@ function cmdHelp($command)
         "     -u foo     unset `foo' in the user configuration\n".
         "     -h, -?     display help/usage (this message)\n".
         "     -V         version information\n";
-
     } elseif ($command == "shortcuts") {
         $sc = PEAR_Command::getShortcuts();
         $ret = "Shortcuts:\n";
@@ -237,8 +238,7 @@ function cmdHelp($command)
         return $ret;
 
     } elseif ($command == "version") {
-        $reg = &new PEAR_Registry($config->get('php_dir'));
-        return "PEAR " . $reg->packageInfo('PEAR', 'version');
+        return "PEAR $GLOBALS[pear_package_version]";
 
     } elseif ($help = PEAR_Command::getHelp($command)) {
         if (is_string($help)) {

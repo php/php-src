@@ -67,7 +67,7 @@ $GLOBALS['_PEAR_Common_file_roles'] = array('php','ext','test','doc','data','src
  * Valid replacement types
  * @var array
  */
-$GLOBALS['_PEAR_Common_replacement_types'] = array('php-const', 'pear-config');
+$GLOBALS['_PEAR_Common_replacement_types'] = array('php-const', 'pear-config', 'package-info');
 
 /**
  * Valid "provide" types

@@ -223,10 +223,12 @@ class PEAR_Installer extends PEAR_Common
                     }
                 } elseif ($a['type'] == 'pear-config') {
                     $to = $this->config->get($a['to']);
+                } elseif ($a['type'] == 'package-info') {
+                    $to = $this->pkginfo[$a['to']];
                 }
                 if ($to) {
-                    $subst_from = $a['from'];
-                    $subst_to = $to;
+                    $subst_from[] = $a['from'];
+                    $subst_to[] = $to;
                 }
             }
             $this->log(2, "doing ".sizeof($subst_from)." substitution(s) for $dest_file");
