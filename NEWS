@@ -1,6 +1,7 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.2.0-dev
+- Allow a series of consecutive catch() statements (Andi, Zend Engine)
 - Added debug_zval_dump(), which works similar to var_dump, yet displays extra
   internal information such as refcounts and true type names. (Jason)
 - Added Andrei's tokenizer extension. (Stig)
