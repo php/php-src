@@ -1787,6 +1787,9 @@ void gdImageFillToBorder (gdImagePtr im, int x, int y, int border, int color)
 		leftLimit = i;
 	}
 	if (leftLimit == -1) {
+		if (restoreAlphaBleding) {
+			im->alphaBlendingFlag = 1;
+		}
 		return;
 	}
 	/* Seek right */
@@ -1834,7 +1837,6 @@ void gdImageFillToBorder (gdImagePtr im, int x, int y, int border, int color)
 	if (restoreAlphaBleding) {
 		im->alphaBlendingFlag = 1;
 	}
-
 }
 
 /*
