@@ -28,7 +28,6 @@
 #include "zend_ptr_stack.h"
 #include "zend_constants.h"
 #include "zend_extensions.h"
-#include "zend_execute_locks.h"
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
 #endif
