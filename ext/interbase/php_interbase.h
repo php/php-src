@@ -132,7 +132,7 @@ typedef struct {
 	ISC_ARRAY_DESC ar_desc;
 	int el_type, /* sqltype kinda SQL_TEXT, ...*/
 		el_size; /* element size in bytes */
-	ISC_LONG ISC_FAR ar_size; /* all array size in bytes */
+	ISC_LONG ar_size; /* all array size in bytes */
 } ibase_array;
 
 typedef struct {
@@ -146,10 +146,9 @@ typedef struct {
 	ibase_trans *trans;
 	isc_stmt_handle stmt;
 	unsigned short type;
+	unsigned char has_more_rows, statement_type;
 	XSQLDA *out_sqlda;
 	ibase_array *out_array;
-	unsigned char has_more_rows;
-	char statement_type;
 } ibase_result;
 
 typedef struct {
@@ -163,12 +162,12 @@ typedef struct {
 	unsigned short dialect;
 	char statement_type;
 	char *query;
-	int trans_res_id;
+	long trans_res_id;
 } ibase_query;
 
 typedef struct {
 	ibase_db_link *link;
-	int link_res_id;
+	long link_res_id;
 	ISC_LONG event_id;
 	unsigned short event_count;
 	char **events;
