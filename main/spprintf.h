@@ -23,7 +23,7 @@
 
 extern int spprintf( char **pbuf, size_t max_len, const char *format, ...);
 
-extern int vspprintf(char **pbuf, size_t max_len, const char *format, va_list ap);
+PHPAPI extern int vspprintf(char **pbuf, size_t max_len, const char *format, va_list ap);
 
 #endif /* SNPRINTF_H */
 
