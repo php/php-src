@@ -1,3 +1,4 @@
+/* do not frame this - we must be able to include this file multiple times */
 
 #undef regexec
 #undef regerror
@@ -8,10 +9,14 @@
 
 #if !(WIN32|WINNT)
 
+#ifndef PHP_NO_ALIASES
+
 #define regexec php_regexec
 #define regerror php_regerror
 #define regfree php_regfree
 #define regcomp php_regcomp
+
+#endif
 
 #endif
 
