@@ -3411,7 +3411,7 @@ PHP_FUNCTION(imap_search)
 	}
 	
 	IMAPG(imap_messages) = NIL;
-	mail_search_full(imap_le_struct->imap_stream, NIL, mail_criteria(Z_STRVAL_PP(criteria)), flags);
+	mail_search_full(imap_le_struct->imap_stream, NIL, mail_criteria(cpystr(Z_STRVAL_PP(criteria))), flags);
 	if (IMAPG(imap_messages) == NIL) {
 		RETURN_FALSE;
 	}
