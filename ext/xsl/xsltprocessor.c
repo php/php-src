@@ -113,7 +113,7 @@ static char **php_xsl_xslt_make_params(HashTable *parht, int xpath_params TSRMLS
 				SEPARATE_ZVAL(value);
 				convert_to_string(*value);
 			}
-
+			
 			if (!xpath_params) {
 				xpath_expr = php_xsl_xslt_string_to_xpathexpr(Z_STRVAL_PP(value) TSRMLS_CC);
 			} else {
@@ -157,8 +157,7 @@ static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int t
 
 	fci.param_count = nargs - 1;
 	fci.params = safe_emalloc(fci.param_count, sizeof(zval**), 0);
-
-	args = safe_emalloc(nargs - 1, sizeof(zval *), 0);
+	args = safe_emalloc(fci.param_count, sizeof(zval *), 0);
 	/* Reverse order to pop values off ctxt stack */
 	for (i = nargs - 2; i >= 0; i--) {
 		obj = valuePop(ctxt);
@@ -574,28 +573,54 @@ PHP_FUNCTION(xsl_xsltprocessor_transform_to_xml)
 /* }}} end xsl_xsltprocessor_transform_to_xml */
 
 
-/* {{{ proto xsl_ xsl_xsltprocessor_set_parameter(string namespace, string name, string value);
+/* {{{ proto xsl_ xsl_xsltprocessor_set_parameter(string namespace, mixed name [, string value]);
 */
 PHP_FUNCTION(xsl_xsltprocessor_set_parameter)
 {
  
 	zval *id;
-	int name_len = 0, namespace_len = 0, value_len = 0;
-	char *name, *namespace, *value;
+	zval *array_value, **entry, *new_string;
 	xsl_object *intern;
-	zval *new_string;
-
+	char *string_key, *name, *value, *namespace;
+	ulong idx;
+	int string_key_len, namespace_len, name_len, value_len;
 	DOM_GET_THIS(id);
-	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sss", &namespace, &namespace_len, &name, &name_len, &value, &value_len) == FAILURE) {
-		RETURN_FALSE;
-	}
-	intern = (xsl_object *)zend_object_store_get_object(id TSRMLS_CC);
-   
 
-	MAKE_STD_ZVAL(new_string);
-	ZVAL_STRING(new_string, value, 1);
-	zend_hash_update(intern->parameter, name, name_len + 1, &new_string, sizeof(zval*), NULL);
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "sa", &namespace, &namespace_len, &array_value) == SUCCESS) {
+		intern = (xsl_object *)zend_object_store_get_object(id TSRMLS_CC);
+		zend_hash_internal_pointer_reset(Z_ARRVAL_P(array_value));
+
+		while (zend_hash_get_current_data(Z_ARRVAL_P(array_value), (void **)&entry) == SUCCESS) {
+			SEPARATE_ZVAL(entry);
+			convert_to_string_ex(entry);
+			
+			if (zend_hash_get_current_key_ex(Z_ARRVAL_P(array_value), &string_key, &string_key_len, &idx, 0, NULL) != HASH_KEY_IS_STRING) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid parameter array");
+				RETURN_FALSE;
+			}
+			
+			ALLOC_ZVAL(new_string);
+			ZVAL_ADDREF(*entry);
+			COPY_PZVAL_TO_ZVAL(*new_string, *entry);
+			
+			zend_hash_update(intern->parameter, string_key, string_key_len + 1, &new_string, sizeof(zval*), NULL);
+			zend_hash_move_forward(Z_ARRVAL_P(array_value));
+		}
+		RETURN_TRUE;
+
+	} else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "sss", &namespace, &namespace_len, &name, &name_len, &value, &value_len) == SUCCESS) {
+		
+		intern = (xsl_object *)zend_object_store_get_object(id TSRMLS_CC);
+		
+		MAKE_STD_ZVAL(new_string);
+		ZVAL_STRING(new_string, value, 1);
+		
+		zend_hash_update(intern->parameter, name, name_len + 1, &new_string, sizeof(zval*), NULL);
+		RETURN_TRUE;
+	} else {
+		WRONG_PARAM_COUNT;
+	}
+	
 }
 /* }}} end xsl_xsltprocessor_set_parameter */
 
