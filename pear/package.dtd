@@ -1,5 +1,5 @@
 <!--
-     $Id: package.dtd,v 1.16 2002-02-23 21:21:18 cox Exp $
+     $Id: package.dtd,v 1.17 2002-02-24 10:45:28 ssb Exp $
 
      This is the PEAR package description, version 1.0b3.
      It should be used with the informal public identifier:
@@ -21,7 +21,7 @@
 
   -->
 
-<!ELEMENT package (name|summary|description|license|maintainers|release|changelog?)>
+<!ELEMENT package (name|summary|description|license|maintainers|release|changelog)+>
 <!ATTLIST package type    (source|binary|empty) "empty"
                   version CDATA                 #REQUIRED>
 
@@ -33,7 +33,7 @@
 
 <!ELEMENT maintainers (maintainer)+>
 
-<!ELEMENT maintainer (user|role|name|email)>
+<!ELEMENT maintainer (user|role|name|email)+>
 
 <!ELEMENT user (#PCDATA)>
 
@@ -41,9 +41,9 @@
 
 <!ELEMENT email (#PCDATA)>
 
-<!ELEMENT changelog (release)*>
+<!ELEMENT changelog (release)+>
 
-<!ELEMENT release (version|license|state|date|notes|filelist|deps?)>
+<!ELEMENT release (version|license|state|date|notes|filelist|deps)+>
 
 <!ELEMENT version (#PCDATA)>
 
@@ -53,9 +53,9 @@
 
 <!ELEMENT notes (#PCDATA)>
 
-<!ELEMENT filelist (dir|file|libfile)*>
+<!ELEMENT filelist (dir|file|libfile)+>
 
-<!ELEMENT dir (dir|file|libfile)*>
+<!ELEMENT dir (dir|file|libfile)+>
 <!ATTLIST dir name           CDATA #REQUIRED
               baseinstalldir CDATA #IMPLIED>
 
@@ -66,7 +66,7 @@
                format         CDATA              #IMPLIED
                baseinstalldir CDATA              #IMPLIED>
 
-<!ELEMENT libfile (libname|sources|includes|libadd)*>
+<!ELEMENT libfile (libname|sources|includes|libadd)+>
 
 <!ELEMENT libname (#PCDATA)>
 
