@@ -2690,7 +2690,7 @@ PHP_FUNCTION(pdf_add_note)
 /* }}} */
 
 /* {{{ proto bool pdf_add_locallink(resource pdfdoc, float llx, float lly, float urx, float ury, int page, string dest)
-   Adds link to web resource */
+   Adds link to local resource */
 PHP_FUNCTION(pdf_add_locallink)
 {
 	zval **arg1, **arg2, **arg3, **arg4, **arg5, **arg6, **arg7;
