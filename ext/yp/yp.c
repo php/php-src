@@ -76,7 +76,7 @@ PHP_FUNCTION(yp_get_default_domain)
 {
 	char *outdomain;
 
-	if(YP(error) = yp_get_default_domain(&outdomain)) {
+	if((YP(error) = yp_get_default_domain(&outdomain))) {
 		php_error(E_WARNING, yperr_string (YP(error)));
 		RETURN_FALSE;
 	}
@@ -103,7 +103,7 @@ PHP_FUNCTION(yp_order)
 	convert_to_string_ex(domain);
 	convert_to_string_ex(map);
 
-	if(YP(error) = yp_order(Z_STRVAL_PP (domain), Z_STRVAL_PP (map), &outval)) {
+	if((YP(error) = yp_order(Z_STRVAL_PP (domain), Z_STRVAL_PP (map), &outval))) {
 		php_error(E_WARNING, yperr_string (YP(error)));
 		RETURN_FALSE;
 	}
@@ -126,7 +126,7 @@ PHP_FUNCTION(yp_master)
 	convert_to_string_ex(domain);
 	convert_to_string_ex(map);
 
-	if(YP(error) = yp_master(Z_STRVAL_PP (domain), Z_STRVAL_PP (map), &outname)) {
+	if((YP(error) = yp_master(Z_STRVAL_PP (domain), Z_STRVAL_PP (map), &outname))) {
 		php_error(E_WARNING, yperr_string (YP(error)));
 		RETURN_FALSE;
 	}
@@ -151,7 +151,7 @@ PHP_FUNCTION(yp_match)
 	convert_to_string_ex(map);
 	convert_to_string_ex(key);
 
-	if(YP(error) = yp_match(Z_STRVAL_PP (domain), Z_STRVAL_PP (map), Z_STRVAL_PP (key), Z_STRLEN_PP (key), &outval, &outvallen)) {
+	if((YP(error) = yp_match(Z_STRVAL_PP (domain), Z_STRVAL_PP (map), Z_STRVAL_PP (key), Z_STRLEN_PP (key), &outval, &outvallen))) {
 		php_error(E_WARNING, yperr_string (YP(error)));
 		RETURN_FALSE;
 	}
@@ -175,7 +175,7 @@ PHP_FUNCTION(yp_first)
 	convert_to_string_ex(domain);
 	convert_to_string_ex(map);
 
-	if(YP(error) = yp_first(Z_STRVAL_PP (domain), Z_STRVAL_PP (map), &outkey, &outkeylen, &outval, &outvallen)) {
+	if((YP(error) = yp_first(Z_STRVAL_PP (domain), Z_STRVAL_PP (map), &outkey, &outkeylen, &outval, &outvallen))) {
 		php_error(E_WARNING, yperr_string (YP(error)));
 		RETURN_FALSE;
 	}
@@ -204,7 +204,7 @@ PHP_FUNCTION(yp_next)
 	convert_to_string_ex(map);
 	convert_to_string_ex(key);
 
-	if(YP(error) = yp_next(Z_STRVAL_PP (domain), Z_STRVAL_PP (map), Z_STRVAL_PP (key), Z_STRLEN_PP (key), &outkey, &outkeylen, &outval, &outvallen)) {
+	if((YP(error) = yp_next(Z_STRVAL_PP (domain), Z_STRVAL_PP (map), Z_STRVAL_PP (key), Z_STRLEN_PP (key), &outkey, &outkeylen, &outval, &outvallen))) {
 		php_error(E_WARNING, yperr_string (YP(error)));
 		RETURN_FALSE;
 	}
@@ -392,6 +392,8 @@ PHP_MINIT_FUNCTION(yp)
 PHP_RINIT_FUNCTION(yp)
 {
 	YP(error) = 0;
+	
+	return SUCCESS;
 }
 
 PHP_MINFO_FUNCTION(yp)
