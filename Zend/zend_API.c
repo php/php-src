@@ -975,12 +975,11 @@ zend_bool zend_is_callable(zval *callable, zend_bool syntax_only, char **callabl
 						retval = 1;
 					if (!retval && callable_name) {
 						char *ptr;
-						int ce_name_len = strlen(ce->name);
 
-						callable_name_len = ce_name_len + Z_STRLEN_PP(method) + sizeof("::");
+						callable_name_len = ce->name_length + Z_STRLEN_PP(method) + sizeof("::");
 						ptr = *callable_name = emalloc(callable_name_len);
-						memcpy(ptr, ce->name, ce_name_len);
-						ptr += ce_name_len;
+						memcpy(ptr, ce->name, ce->name_length);
+						ptr += ce->name_length;
 						memcpy(ptr, "::", sizeof("::") - 1);
 						ptr += sizeof("::") - 1;
 						memcpy(ptr, Z_STRVAL_PP(method), Z_STRLEN_PP(method) + 1);
