@@ -203,7 +203,8 @@ class System
     }
 
     /**
-    * Make directories
+    * Make directories. Note that we use call_user_func('mkdir') to avoid
+    * a problem with ZE2 calling System::mkDir instead of the native PHP func.
     *
     * @param    string  $args    the name of the director(y|ies) to create
     * @return   bool    True for success
@@ -232,14 +233,14 @@ class System
                     $dir = dirname($dir);
                 }
                 while ($newdir = array_shift($dirstack)) {
-                    if (!mkdir($newdir, $mode)) {
+                    if (!call_user_func('mkdir', $newdir, $mode)) {
                         $ret = false;
                     }
                 }
             }
         } else {
             foreach($opts[1] as $dir) {
-                if (!@is_dir($dir) && !mkdir($dir, $mode)) {
+                if (!@is_dir($dir) && !call_user_func('mkdir', $dir, $mode)) {
                     $ret = false;
                 }
             }
@@ -354,7 +355,7 @@ class System
         $tmp = tempnam($tmpdir, $prefix);
         if (isset($tmp_is_dir)) {
             unlink($tmp); // be careful possible race condition here
-            if (!mkdir($tmp, 0700)) {
+            if (!call_user_func('mkdir', $tmp, 0700)) {
                 return System::raiseError("Unable to create temporary directory $tmpdir");
             }
         }
