@@ -5,5 +5,5 @@ LTLIBRARY_LIBADD        = $(LTLIBRARY_DEPENDENCIES)
 LTLIBRARY_SHARED_LIBADD = $(LTLIBRARY_LIBADD)
 
 SUBDIRS = xmltok xmlparse
-	
+
 include $(top_srcdir)/build/dynlib.mk
