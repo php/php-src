@@ -20,29 +20,34 @@
 
 /**
 * This UDF library adds the ability to call PHP functions from SQL
-* statements. You will have to declare a different external function for 
-* each number of parameters you require. Currently, only string arguments
-* are supported as input, the output can be numeric as well.
+* statements. Because of SQL's strong typing, you will have to declare
+* an external function for every combination of input and output parameters 
+* your application requires. The types of the input arguments and the result
+* type can be either [VAR]CHARs or unscaled integers or floats.
 * 
 * Declare the functions like this:
 * 
 *     DECLARE EXTERNAL FUNCTION CALL_PHP1
-*         CSTRING(xx),<type> BY DESCRIPTOR, CSTRING(xx)
+*         CSTRING(xx),
+*         <return type> BY DESCRIPTOR,
+*         <arg type> BY DESCRIPTOR
 *         RETURNS PARAMETER 2
 *         ENTRY_POINT 'udf_call_php1' MODULE_NAME 'php_ibase_udf'
 * 
 *     DECLARE EXTERNAL FUNCTION CALL_PHP2
-*         CSTRING(xx),<type> BY DESCRIPTOR, CSTRING(xx), CSTRING(xx)
+*         CSTRING(xx),
+*         <return type> BY DESCRIPTOR, 
+*         <arg type> BY DESCRIPTOR,
+*         <arg type> BY DESCRIPTOR
 *         RETURNS PARAMETER 2
 *         ENTRY_POINT 'udf_call_php2' MODULE_NAME 'php_ibase_udf'
 * 
-*     ... and so on.
+*     ... and so on. [for up to 8 input arguments]
 * 
 * The first input parameter contains the function you want to call. The
 * second argument is the result, and should not be passed as an argument.
-* Subsequent arguments are passed to the called function. The lengths of
-* the input strings can have any value >1. The type and length of the
-* output depends on its declaration.
+* [the DB will do this for you] Subsequent arguments are passed to the
+* function in argument 1. 
 * 
 * The declared functions can be called from SQL like:
 * 
@@ -64,43 +69,66 @@
 #include "zend_API.h"
 #include "php.h"
 
-#include "stdarg.h"
-#include "ib_util.h"
 #include "ibase.h"
-
-#ifdef ZTS
-#error This functionality is not available in ZTS mode
-#endif
 
 #define min(a,b) ((a)<(b)?(a):(b))
 
-static void call_php(char *name, PARAMDSC *r, int argc, ...)
+static void call_php(char *name, PARAMDSC *r, int argc, PARAMDSC **argv)
 {
-	zval callback, args[4], *argp[4], return_value;
-	va_list va;
-	int i;
-	PARAMVARY *res = (PARAMVARY*)(r->dsc_address);
-
-	INIT_ZVAL(callback);
-	ZVAL_STRING(&callback,name,0);
 
 	do {
+		zval callback, args[4], *argp[4], return_value;
+		PARAMVARY *res = (PARAMVARY*)r->dsc_address;
+		int i;
+
+		INIT_ZVAL(callback);
+		ZVAL_STRING(&callback,name,0);
+
 		/* check if the requested function exists */
 		if (!zend_is_callable(&callback, 0, NULL)) {
 			break;
 		}
 	
-		va_start(va, argc);
-	
 		/* create the argument array */
 		for (i = 0; i < argc; ++i) {
-			char *arg = va_arg(va, char*);
-			
-			INIT_ZVAL(args[i]);
-			ZVAL_STRING(argp[i] = &args[i], arg, 0);
-		}
 
-		va_end(va);
+			INIT_ZVAL(args[i]);
+			argp[i] = &args[i];
+			
+			/* test arg for null */
+			if (argv[i]->dsc_flags & DSC_null) {
+				ZVAL_NULL(argp[i]);
+				continue;
+			}
+
+			switch (argv[i]->dsc_dtype) {
+				case dtype_cstring:
+					ZVAL_STRING(argp[i], (char*)argv[i]->dsc_address,0);
+					break;
+				case dtype_text:
+					ZVAL_STRINGL(argp[i], (char*)argv[i]->dsc_address, argv[i]->dsc_length,0);
+					break;
+				case dtype_varying:
+					ZVAL_STRINGL(argp[i], ((PARAMVARY*)argv[i]->dsc_address)->vary_string,
+						((PARAMVARY*)argv[i]->dsc_address)->vary_length,0);
+					break;
+
+				case dtype_short:
+					ZVAL_LONG(argp[i], *(short*)argv[i]->dsc_address);
+					break;
+				case dtype_long:
+					ZVAL_LONG(argp[i], *(ISC_LONG*)argv[i]->dsc_address);
+					break;
+
+				case dtype_real:
+					ZVAL_DOUBLE(argp[i], *(float*)argv[i]->dsc_address);
+					break;
+				case dtype_double:
+					ZVAL_DOUBLE(argp[i], *(double*)argv[i]->dsc_address);
+					break;
+					
+			}
+		}
 		
 		/* now call the function */
 		if (FAILURE == call_user_function(EG(function_table), NULL,
@@ -108,6 +136,7 @@ static void call_php(char *name, PARAMDSC *r, int argc, ...)
 			break;
 		}
 	
+		/* return whatever type we got back from the callback: let DB handle conversion */
 		switch (Z_TYPE(return_value)) {
 
 			case IS_LONG:
@@ -120,6 +149,10 @@ static void call_php(char *name, PARAMDSC *r, int argc, ...)
 				r->dsc_dtype = dtype_double;
 				*(double*)r->dsc_address = Z_DVAL(return_value);
 				r->dsc_length = sizeof(double);
+				break;
+
+			case IS_NULL:
+				r->dsc_flags |= DSC_null;
 				break;
 
 			default:
@@ -146,23 +179,59 @@ static void call_php(char *name, PARAMDSC *r, int argc, ...)
 	php_error_docref(NULL, E_WARNING, "Error calling function '%s' from database", name);
 }
 
-void udf_call_php1(char *name, PARAMDSC *r, char *arg1)
+
+/* Entry points for the DB engine */
+
+void udf_call_php1(char *name, PARAMDSC *r, PARAMDSC *arg1)
 {
-	call_php(name, r, 1, arg1);
+	PARAMDSC *args[1] = { arg1 };
+	call_php(name, r, 1, args);
 }
 
-void udf_call_php2(char *name, PARAMDSC *r, char *arg1, char *arg2)
+void udf_call_php2(char *name, PARAMDSC *r, PARAMDSC *arg1, PARAMDSC *arg2)
 {
-	call_php(name, r, 2, arg1, arg2);
+	PARAMDSC *args[2] = { arg1, arg2 };
+	call_php(name, r, 2, args);
 }
 
-void udf_call_php3(char *name, PARAMDSC *r, char *arg1, char *arg2, char *arg3)
+void udf_call_php3(char *name, PARAMDSC *r, PARAMDSC *arg1, PARAMDSC *arg2, PARAMDSC *arg3)
 {
-	call_php(name, r, 3, arg1, arg2, arg3);
+	PARAMDSC *args[3] = { arg1, arg2, arg3 };
+	call_php(name, r, 3, args);
 }
 
-void udf_call_php4(char *name, PARAMDSC *r, char *arg1, char *arg2, char *arg3, char *arg4)
+void udf_call_php4(char *name, PARAMDSC *r, PARAMDSC *arg1, PARAMDSC *arg2, PARAMDSC *arg3, 
+	PARAMDSC *arg4)
 {
-	call_php(name, r, 4, arg1, arg2, arg3, arg4);
+	PARAMDSC *args[4] = { arg1, arg2, arg3, arg4 };
+	call_php(name, r, 4, args);
+}
+
+void udf_call_php5(char *name, PARAMDSC *r, PARAMDSC *arg1, PARAMDSC *arg2, PARAMDSC *arg3, 
+	PARAMDSC *arg4, PARAMDSC *arg5)
+{
+	PARAMDSC *args[5] = { arg1, arg2, arg3, arg4, arg5 };
+	call_php(name, r, 5, args);
+}
+
+void udf_call_php6(char *name, PARAMDSC *r, PARAMDSC *arg1, PARAMDSC *arg2, PARAMDSC *arg3, 
+	PARAMDSC *arg4, PARAMDSC *arg5, PARAMDSC *arg6)
+{
+	PARAMDSC *args[6] = { arg1, arg2, arg3, arg4, arg5, arg6 };
+	call_php(name, r, 6, args);
+}
+
+void udf_call_php7(char *name, PARAMDSC *r, PARAMDSC *arg1, PARAMDSC *arg2, PARAMDSC *arg3, 
+	PARAMDSC *arg4, PARAMDSC *arg5, PARAMDSC *arg6, PARAMDSC *arg7)
+{
+	PARAMDSC *args[7] = { arg1, arg2, arg3, arg4, arg5, arg6, arg7 };
+	call_php(name, r, 7, args);
+}
+
+void udf_call_php8(char *name, PARAMDSC *r, PARAMDSC *arg1, PARAMDSC *arg2, PARAMDSC *arg3, 
+	PARAMDSC *arg4, PARAMDSC *arg5, PARAMDSC *arg6, PARAMDSC *arg7, PARAMDSC *arg8)
+{
+	PARAMDSC *args[8] = { arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8 };
+	call_php(name, r, 8, args);
 }
 
