@@ -1590,6 +1590,7 @@ static void php_session_flush(TSRMLS_D)
 	if(PS(session_status)==php_session_active) {
 		php_session_save_current_state(TSRMLS_C);
 	}
+	PS(session_status)=php_session_none;
 }
 
 /* {{{ proto void session_write_close(void)
