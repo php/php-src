@@ -2,8 +2,8 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? 1999, Version 4.0 Beta 3
-- Made serialize/unserialize work on classes. CAUTION: when unserializing the 
-  class to be unserialized needs to be known! (Thies)
+- Made serialize/unserialize work on classes & speedups. CAUTION: when 
+  unserializing the class to be unserialized needs to be known! (Thies)
 - Reworked preg_* functions according to the new PCRE API, which also made
   them behave much more like Perl ones (Andrey)
 - Made it possible to specify external location of PCRE library (Andrey)
