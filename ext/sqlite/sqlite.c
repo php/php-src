@@ -1396,7 +1396,7 @@ PHP_FUNCTION(sqlite_single_query)
 
 	while (rres->curr_row < rres->nrows) {
 		MAKE_STD_ZVAL(ent);
-		php_sqlite_fetch_string(rres, decode_binary, ent TSRMLS_DC);
+		php_sqlite_fetch_string(rres, decode_binary, ent TSRMLS_CC);
 
 		/* if set and we only have 1 row in the result set, return the result as a string. */
 		if (srow) {
@@ -1435,7 +1435,7 @@ PHP_FUNCTION(sqlite_fetch_string)
 	}
 	ZEND_FETCH_RESOURCE(res, struct php_sqlite_result *, &zres, -1, "sqlite result", le_sqlite_result);
 
-	php_sqlite_fetch_string(res, decode_binary, return_value TSRMLS_DC);
+	php_sqlite_fetch_string(res, decode_binary, return_value TSRMLS_CC);
 }
 /* }}} */
 
