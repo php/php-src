@@ -95,7 +95,7 @@ PHPAPI int php_start_ob_buffer(zval *output_handler)
 	if (OG(lock)) {
 		return FAILURE;
 	}
-	php_ob_init(4096, 1024, output_handler);
+	php_ob_init(40*1024, 10*1024, output_handler);
 	OG(php_body_write) = php_b_body_write;
 	return SUCCESS;
 }
