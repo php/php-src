@@ -26,18 +26,18 @@ define('PEAR_OBSERVER_DIE',        -8);
 /**
  * Base PEAR_Exception Class
  *
- * Features:
+ * 1) Features:
  *
  * - Nestable exceptions (throw new PEAR_Exception($msg, $prev_exception))
  * - Definable triggers, shot when exceptions occur
  * - Pretty and informative error messages
  * - Added more context info avaible (like class, method or cause)
  *
- * Ideas:
+ * 2) Ideas:
  *
  * - Maybe a way to define a 'template' for the output
  *
- * 1) Inherited properties from PHP Exception Class:
+ * 3) Inherited properties from PHP Exception Class:
  *
  * protected $message
  * protected $code
@@ -45,7 +45,7 @@ define('PEAR_OBSERVER_DIE',        -8);
  * protected $file
  * private   $trace
  *
- * 2) Inherited methods from PHP Exception Class:
+ * 4) Inherited methods from PHP Exception Class:
  *
  * __clone
  * __construct
@@ -57,7 +57,7 @@ define('PEAR_OBSERVER_DIE',        -8);
  * getTraceAsString
  * __toString
  *
- * 3) Usage example
+ * 5) Usage example
  *
  * <code>
  *  require_once 'PEAR/Exception.php';
@@ -73,7 +73,7 @@ define('PEAR_OBSERVER_DIE',        -8);
  *  }
  *  // each time a exception is thrown the 'myLogger' will be called
  *  // (its use is completely optional)
- *  PEAR_Exception::addObserver('mylogger', 'myLogger');
+ *  PEAR_Exception::addObserver('myLogger');
  *  $test = new Test;
  *  try {
  *     $test->foo();
@@ -84,7 +84,7 @@ define('PEAR_OBSERVER_DIE',        -8);
  *
  * @since PHP 5
  * @package PEAR
- * @version $Rev:$
+ * @version $Revision$
  * @author Tomas V.V.Cox <cox@idecnet.com>
  * @author Hans Lellelid <hans@velum.net>
  *
@@ -124,20 +124,29 @@ class PEAR_Exception extends Exception
         $this->method = $this->error_class.'::'.$this->error_method.'()';
         parent::__construct($message, $code);
 
-        $this->signal();
+        $this->_signal();
     }
 
-    public static function addObserver($label, $callback)
+    /**
+     * @param mixed $callback  - A valid php callback, see php_func is_callable()
+     *                         - A PEAR_OBSERVER_* constant
+     *                         - An array(const PEAR_OBSERVER_*,mixed $options)
+     *
+     * @param string $label    - The name of the observer. Use this if you want
+     *                           to remove it later with delObserver()
+     */
+
+    public static function addObserver($callback, $label = 'default')
     {
         self::$_observers[$label] = $callback;
     }
 
-    public static function delObserver($label)
+    public static function delObserver($label = 'default')
     {
         unset(self::$_observers[$label]);
     }
 
-    private function signal()
+    private function _signal()
     {
         foreach (self::$_observers as $func) {
             if (is_callable($func)) {
@@ -164,11 +173,11 @@ class PEAR_Exception extends Exception
         }
     }
 
-    public function getCauseMessage($obj)
+    private function _getCauseMessage()
     {
-        $msg = '     ' . $obj->method . " at {$obj->file} ({$obj->line})\n";
-        if ($obj->cause instanceof Exception) {
-            return $msg.$obj->getCauseMessage($obj->cause);
+        $msg = '     ' . $this->method . " at {$this->file} ({$this->line})\n";
+        if ($this->cause instanceof Exception) {
+            return $msg.$this->cause->_getCauseMessage();
         }
         return $msg;
     }
@@ -199,7 +208,7 @@ class PEAR_Exception extends Exception
                '  File (Line)  : ' . "{$this->file} ({$this->line})\n" .
                '  Method       : ' . $this->method . "\n";
         if ($this->cause instanceof Exception) {
-            $str .= "  Nested Error : \n".$this->getCauseMessage($this);
+            $str .= "  Nested Error : \n".$this->_getCauseMessage();
         }
         if (isset($_SERVER['REQUEST_URI'])) {
             return nl2br('<pre>'.htmlentities($str).'</pre>');
