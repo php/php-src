@@ -7,11 +7,11 @@ Bug #22414: passthru() does not read data correctly
 	}
 ?>
 --INI--
-output_handler=
+output_handler=a
 --FILE--
 <?php
-	$php = getenv('TEST_PHP_EXECUTABLE');
-	$pwd = realpath(dirname(__FILE__));
+$php = getenv('TEST_PHP_EXECUTABLE');
+$tmpfile = tempnam('/tmp', 'phpt');
 	
 	/* Regular Data Test */
 	passthru($php . ' -r " echo \"HELLO\"; "');
@@ -22,16 +22,16 @@ output_handler=
 	@unlink($pwd . '/passthru_test');
 	
 	$cmd = $php . " -r \\\" readfile(@getenv(TEST_PHP_EXECUTABLE)); \\\"";
-	$cmd = $php . ' -r \' passthru("'.$cmd.'"); \' > ' . $pwd . '/passthru_test';
+	$cmd = $php . ' -r \' passthru("'.$cmd.'"); \' > '.$tmpfile ;
 	exec($cmd);
 	
-	if (md5_file($php) == md5_file($pwd . '/passthru_test')) {
+	if (md5_file($php) == md5_file($tmpfile)) {
 		echo "Works\n";
 	} else {
 		echo "Does not work\n";
 	}
 	
-	@unlink($pwd . '/passthru_test');
+	@unlink($tmpfile);
 ?>
 --EXPECT--
 HELLO
