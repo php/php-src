@@ -29,6 +29,7 @@
 %x ST_LOOKING_FOR_PROPERTY
 %x ST_LOOKING_FOR_VARNAME
 %x ST_COMMENT
+%x ST_ONE_LINE_COMMENT
 %option stack
 
 %{
@@ -751,7 +752,6 @@ ANY_CHAR (.|[\n])
 }
 
 <ST_LOOKING_FOR_PROPERTY>{ANY_CHAR} {
-	/*unput(yytext[0]);*/
 	yyless(0);
 	yy_pop_state();
 }
@@ -994,7 +994,6 @@ ANY_CHAR (.|[\n])
 
 
 <ST_LOOKING_FOR_VARNAME>{ANY_CHAR} {
-	/*unput(yytext[0]);*/
 	yyless(0);
 	yy_pop_state();
 	yy_push_state(ST_IN_SCRIPTING);
@@ -1176,8 +1175,34 @@ ANY_CHAR (.|[\n])
 }
 
 
-<ST_IN_SCRIPTING>([#]|"//")([^\n\r?]|"?"[^>\n\r])*("?\n"|"?\r\n")? { /* eat one line comments */
-	HANDLE_NEWLINE(yytext[yyleng-1]);
+<ST_IN_SCRIPTING>([#]|"//") {
+	BEGIN(ST_ONE_LINE_COMMENT);
+	yymore();
+}
+
+<ST_ONE_LINE_COMMENT>"?"|">" {
+	yymore();
+}
+
+<ST_ONE_LINE_COMMENT>[^\n\r?>]+ {
+	yymore();
+}
+
+<ST_ONE_LINE_COMMENT>"\n"|"\r\n" {
+	zendlval->value.str.val = yytext; /* no copying - intentional */
+	zendlval->value.str.len = yyleng;
+	zendlval->type = IS_STRING;
+	BEGIN(ST_IN_SCRIPTING);
+	CG(zend_lineno)++;
+	return T_COMMENT;
+}
+
+<ST_ONE_LINE_COMMENT>"?>" {
+	zendlval->value.str.val = yytext; /* no copying - intentional */
+	zendlval->value.str.len = yyleng;
+	zendlval->type = IS_STRING;
+	yyless(yyleng-2);
+	BEGIN(ST_IN_SCRIPTING);
 	return T_COMMENT;
 }
 
@@ -1457,9 +1482,6 @@ ANY_CHAR (.|[\n])
 	zendlval->value.lval = (long) yytext[0];
 	if (yyleng == 2) {
 		yyless(1);
-		/*unput(yytext[1]);
-		yytext[1] = 0;
-		yyleng--;*/
 	}
 	return T_CHARACTER;	
 }
@@ -1473,7 +1495,6 @@ ANY_CHAR (.|[\n])
 <ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>"{$" {
 	zendlval->value.lval = (long) yytext[0];
 	yy_push_state(ST_IN_SCRIPTING);
-	/*unput('$');*/
 	yyless(1);
 	return T_CURLY_OPEN;
 }
