@@ -149,7 +149,7 @@ if (isset($argc) && $argc > 1) {
 		$testfile = realpath($argv[$i]);
 		if (is_dir($testfile)) {
 			find_files($testfile);
-		} else if(preg_match("/\.phpt$/", $name)) {
+		} else if(preg_match("/\.phpt$/", $testfile)) {
 			$test_files[] = $testfile;
 		}
 	}
