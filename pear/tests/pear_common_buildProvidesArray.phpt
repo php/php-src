@@ -54,6 +54,7 @@ fclose($fp);
 $ret = PEAR_Common::analyzeSourceCode($testdir . DIRECTORY_SEPARATOR . 'test5.php');
 echo "pre-test: returns false with valid PHP? ";
 echo $ret ? "no\n" : "yes\n";
+$ret['source_file'] = str_replace(array(dirname(__FILE__),DIRECTORY_SEPARATOR), array('', '/'), $ret['source_file']);
 var_dump($ret);
 unlink($testdir . DIRECTORY_SEPARATOR . 'test5.php');
 $common = new PEAR_Common;
@@ -65,7 +66,9 @@ rmdir($testdir);
 --POST--
 --EXPECT--
 pre-test: returns false with valid PHP? no
-array(5) {
+array(6) {
+  ["source_file"]=>
+  string(45) "/pear_common_buildProvidesArraytest/test5.php"
   ["declared_classes"]=>
   array(2) {
     [0]=>
@@ -110,14 +113,18 @@ array(1) {
   ["provides"]=>
   array(4) {
     ["class;test2"]=>
-    array(2) {
+    array(3) {
+      ["file"]=>
+      string(9) "test5.php"
       ["type"]=>
       string(5) "class"
       ["name"]=>
       string(5) "test2"
     }
     ["class;blah"]=>
-    array(3) {
+    array(4) {
+      ["file"]=>
+      string(9) "test5.php"
       ["type"]=>
       string(5) "class"
       ["name"]=>
@@ -126,14 +133,18 @@ array(1) {
       string(5) "test2"
     }
     ["function;test"]=>
-    array(2) {
+    array(3) {
+      ["file"]=>
+      string(9) "test5.php"
       ["type"]=>
       string(8) "function"
       ["name"]=>
       string(4) "test"
     }
     ["function;fool"]=>
-    array(2) {
+    array(3) {
+      ["file"]=>
+      string(9) "test5.php"
       ["type"]=>
       string(8) "function"
       ["name"]=>
