@@ -88,6 +88,21 @@ php_core_globals core_globals;
 PHPAPI int core_globals_id;
 #endif
 
+/* temporary workaround for thread-safety issues in libzend */
+#if defined(ZTS) && !defined(NO_GLOBAL_LOCK)
+static THREAD_T global_lock;
+#define global_lock() tsrm_mutex_lock(global_lock)
+#define global_unlock() tsrm_mutex_unlock(global_lock);
+#define global_lock_init() global_lock = tsrm_mutex_alloc()
+#define global_lock_destroy() tsrm_mutex_free(global_lock)
+#else
+#define global_lock()
+#define global_unlock()
+#define global_lock_init()
+#define global_lock_destroy()
+#endif
+ 
+
 void _php3_build_argv(char * ELS_DC);
 static void php3_timeout(int dummy);
 static void php3_set_timeout(long seconds);
@@ -661,6 +676,8 @@ static void php_message_handler_for_zend(long message, void *data)
 
 int php_request_startup(CLS_D ELS_DC PLS_DC SLS_DC)
 {
+	global_lock();
+	
 	php_output_startup();
 
 	if (PG(output_buffering)) {
@@ -760,6 +777,8 @@ void php_request_shutdown(void *dummy)
 		request_info.php_argv0 = NULL;
 	}
 #endif
+
+	global_unlock();
 }
 
 
@@ -822,6 +841,7 @@ int php_module_startup(sapi_module_struct *sf)
 	WSADATA wsaData;
 #endif
 
+	global_lock_init();
 	SG(server_context) = NULL;
 	SG(request_info).request_method = NULL;
 	sapi_activate(SLS_C);
@@ -935,6 +955,7 @@ void php_module_shutdown()
 	sapi_rqst->flush(sapi_rqst->scid);
 #endif
 
+	global_lock_destroy();
 	zend_shutdown();
 	UNREGISTER_INI_ENTRIES();
 	php_ini_mshutdown();
