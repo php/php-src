@@ -172,7 +172,9 @@ ZEND_API void *_emalloc(size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 		return (void *)p;
 	}
 	p->cached = 0;
+#if ZEND_DEBUG || !defined(ZEND_MM)
 	ADD_POINTER_TO_LIST(p);
+#endif
 	p->size = size; /* Save real size for correct cache output */
 #if ZEND_DEBUG
 	p->filename = __zend_filename;
@@ -231,7 +233,9 @@ ZEND_API void _efree(void *ptr ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 		return;
 	}
 	HANDLE_BLOCK_INTERRUPTIONS();
+#if ZEND_DEBUG || !defined(ZEND_MM)
 	REMOVE_POINTER_FROM_LIST(p);
+#endif
 
 #if MEMORY_LIMIT
 	AG(allocated_memory) -= SIZE;
@@ -288,7 +292,9 @@ ZEND_API void *_erealloc(void *ptr, size_t size, int allow_failure ZEND_FILE_LIN
 	CALCULATE_REAL_SIZE_AND_CACHE_INDEX(size);
 
 	HANDLE_BLOCK_INTERRUPTIONS();
+#if ZEND_DEBUG || !defined(ZEND_MM)
 	REMOVE_POINTER_FROM_LIST(p);
+#endif
 	p = (zend_mem_header *) ZEND_DO_REALLOC(p, sizeof(zend_mem_header)+MEM_HEADER_PADDING+SIZE+END_MAGIC_SIZE);
 	if (!p) {
 		if (!allow_failure) {
@@ -299,11 +305,15 @@ ZEND_API void *_erealloc(void *ptr, size_t size, int allow_failure ZEND_FILE_LIN
 			exit(1);
 #endif
 		}
+#if ZEND_DEBUG || !defined(ZEND_MM)
 		ADD_POINTER_TO_LIST(orig);
+#endif
 		HANDLE_UNBLOCK_INTERRUPTIONS();
 		return (void *)NULL;
 	}
+#if ZEND_DEBUG || !defined(ZEND_MM)
 	ADD_POINTER_TO_LIST(p);
+#endif
 #if ZEND_DEBUG
 	p->filename = __zend_filename;
 	p->lineno = __zend_lineno;
@@ -461,7 +471,7 @@ ZEND_API void shutdown_memory_manager(int silent, int clean_cache TSRMLS_DC)
 		return;
 	}
 #endif
-
+#if ZEND_DEBUG || !defined(ZEND_MM)
 	for (fci=0; fci<MAX_FAST_CACHE_TYPES; fci++) {
 		fast_cache_list_entry = AG(fast_cache_list_head)[fci];
 		while (fast_cache_list_entry) {
@@ -579,6 +589,7 @@ ZEND_API void shutdown_memory_manager(int silent, int clean_cache TSRMLS_DC)
 	}
 #endif
 
+#endif
 #endif
 }
 

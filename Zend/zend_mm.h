@@ -22,7 +22,7 @@
 
 #include <sys/types.h>
 
-#include "zend.h"
+#include "zend_types.h"
 
 /* Define this to enable Zend MM */
 #undef ZEND_MM

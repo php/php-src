@@ -26,6 +26,8 @@
 #include "../TSRM/TSRM.h"
 #include "zend_globals_macros.h"
 
+#include "zend_mm.h"
+
 #define MEM_BLOCK_START_MAGIC	0x7312F8DCL
 #define MEM_BLOCK_END_MAGIC		0x2A8FCC84L
 #define MEM_BLOCK_FREED_MAGIC	0x99954317L
@@ -43,8 +45,10 @@ typedef struct _zend_mem_header {
 	THREAD_T thread_id;
 # endif
 #endif
+#if ZEND_DEBUG || !defined(ZEND_MM)
     struct _zend_mem_header *pNext;
     struct _zend_mem_header *pLast;
+#endif
 	unsigned int size:31;
 	unsigned int cached:1;
 } zend_mem_header;
