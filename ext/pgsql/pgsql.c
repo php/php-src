@@ -987,7 +987,7 @@ PHP_FUNCTION(pg_affected_rows)
 PHP_FUNCTION(pg_last_notice) 
 {
 	if (PGG(last_notice)) {
-		RETURN_STRINGL(PGG(last_notice), PGG(last_notice_len), 0);
+		RETURN_STRINGL(PGG(last_notice), PGG(last_notice_len), 1);
 	} else {       
 		RETURN_FALSE;
 	}
