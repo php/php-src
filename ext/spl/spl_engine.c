@@ -176,10 +176,9 @@ spl_is_a spl_implements(zend_class_entry *ce)
 /* {{{ spl_call_method */
 int spl_call_method(zval **object_pp, zend_class_entry *obj_ce, zend_function **fn_proxy, char *function_name, int fname_len, zval **retval, HashTable *symbol_table TSRMLS_DC, int param_count, ...)
 {
-	int i, l;
+	int i;
 	zval *arg;
 	zval *param;
-	unsigned char *arg_types;
 	zval **original_return_value;
 	HashTable *calling_symbol_table;
 	zend_function_state *original_function_state_ptr;
@@ -219,15 +218,11 @@ int spl_call_method(zval **object_pp, zend_class_entry *obj_ce, zend_function **
 
 	va_start(args, param_count);
 	if (param_count) {
-		if ((arg_types = EX(function_state).function->common.arg_types) != NULL) {
-			l = arg_types[0];
-		} else {
-			l = 0;
-		}
 		for (i=1; i<=param_count; i++) {
 			arg = va_arg(args, zval*);
 	
-			if (i<=l && arg_types[i]==BYREF_FORCE && !PZVAL_IS_REF(arg)) {
+			if (ARG_SHOULD_BE_SENT_BY_REF(EX(function_state).function, i)
+			&& !PZVAL_IS_REF(arg)) {
 				if (arg->refcount > 1) {
 					zval *new_zval;
 	
