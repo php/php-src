@@ -6,14 +6,15 @@
 #include "php.h"
 
 /**********************************************************************
- * Implement dirent-style opendir/readdir/closedir on Window 95/NT
+ * Implement dirent-style opendir/readdir/rewinddir/closedir on Win32
  *
- * Functions defined are opendir(), readdir() and closedir() with the
- * same prototypes as the normal dirent.h implementation.
+ * Functions defined are opendir(), readdir(), rewinddir() and
+ * closedir() with the same prototypes as the normal dirent.h
+ * implementation.
  *
- * Does not implement telldir(), seekdir(), rewinddir() or scandir(). 
- * The dirent struct is compatible with Unix, except that d_ino is 
- * always 1 and d_off is made up as we go along.
+ * Does not implement telldir(), seekdir(), or scandir().  The dirent
+ * struct is compatible with Unix, except that d_ino is always 1 and
+ * d_off is made up as we go along.
  *
  * The DIR typedef is not compatible with Unix.
  **********************************************************************/
