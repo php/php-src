@@ -793,11 +793,6 @@ SOURCE=.\ext\pcre\pcrelib\pcre.h
 # PROP Default_Filter ".c"
 # Begin Source File
 
-SOURCE=.\dlist.c
-# ADD CPP /I "ext\xml\expat\xmltok" /I "ext\xml\expat\xmlparse"
-# End Source File
-# Begin Source File
-
 SOURCE=.\ext\wddx\wddx.c
 # ADD CPP /I "ext\xml\expat\xmltok" /I "ext\xml\expat\xmlparse"
 # End Source File
