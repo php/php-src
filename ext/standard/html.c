@@ -60,7 +60,6 @@ static void _php3_htmlentities(INTERNAL_FUNCTION_PARAMETERS, int all)
     int i, len, maxlen;
     unsigned char *old;
 	char *new;
-	TLS_VARS;
 
     if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;

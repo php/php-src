@@ -44,7 +44,6 @@ char *_php3_number_format(double, int, char ,char);
    Return the absolute value of the number */
 void php3_abs(INTERNAL_FUNCTION_PARAMETERS) {
 	pval *value;
-	TLS_VARS;
 	
 	if (ARG_COUNT(ht)!=1||getParameters(ht,1,&value)==FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -69,7 +68,6 @@ void php3_abs(INTERNAL_FUNCTION_PARAMETERS) {
    Returns the next highest integer value of the number */
 void php3_ceil(INTERNAL_FUNCTION_PARAMETERS) {
 	pval *value;
-	TLS_VARS;
 	
 	if (ARG_COUNT(ht)!=1||getParameters(ht,1,&value)==FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -94,7 +92,6 @@ void php3_ceil(INTERNAL_FUNCTION_PARAMETERS) {
    Returns the next lowest integer value from the number */
 void php3_floor(INTERNAL_FUNCTION_PARAMETERS) {
 	pval *value;
-	TLS_VARS;
 	
 	if (ARG_COUNT(ht)!=1||getParameters(ht,1,&value)==FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -134,7 +131,6 @@ inline double rint(double n)
 void php3_round(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *value;
-	TLS_VARS;
 
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &value) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -272,7 +268,6 @@ void php3_pi(INTERNAL_FUNCTION_PARAMETERS)
 void php3_pow(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *num1, *num2;
-	TLS_VARS;
 	
 	if (ARG_COUNT(ht) != 2 || getParameters(ht,2,&num1,&num2) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -348,7 +343,6 @@ void php3_sqrt(INTERNAL_FUNCTION_PARAMETERS)
 void php3_deg2rad(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *deg;
-	TLS_VARS;
 
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &deg) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -363,7 +357,6 @@ void php3_deg2rad(INTERNAL_FUNCTION_PARAMETERS)
 void php3_rad2deg(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *rad;
-	TLS_VARS;
 
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &rad) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -452,7 +445,6 @@ void php3_bindec(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *arg;
 	long ret;
-	TLS_VARS;
 	
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -471,7 +463,6 @@ void php3_hexdec(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *arg;
 	long ret;
-	TLS_VARS;
 	
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -490,7 +481,6 @@ void php3_octdec(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *arg;
 	long ret;
-	TLS_VARS;
 	
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;

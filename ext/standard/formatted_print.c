@@ -79,30 +79,29 @@ _php3_cvt(double arg, int ndigits, int *decpt, int *sign, int eflag)
 #ifndef THREAD_SAFE
 	static char cvt_buf[NDIG];
 #endif
-	TLS_VARS;
 
 	if (ndigits >= NDIG - 1)
 		ndigits = NDIG - 2;
 	r2 = 0;
 	*sign = 0;
-	p = &STATIC(cvt_buf)[0];
+	p = &cvt_buf[0];
 	if (arg < 0) {
 		*sign = 1;
 		arg = -arg;
 	}
 	arg = modf(arg, &fi);
-	p1 = &STATIC(cvt_buf)[NDIG];
+	p1 = &cvt_buf[NDIG];
 	/*
 	 * Do integer part
 	 */
 	if (fi != 0) {
-		p1 = &STATIC(cvt_buf)[NDIG];
+		p1 = &cvt_buf[NDIG];
 		while (fi != 0) {
 			fj = modf(fi / 10, &fi);
 			*--p1 = (int) ((fj + .03) * 10) + '0';
 			r2++;
 		}
-		while (p1 < &STATIC(cvt_buf)[NDIG])
+		while (p1 < &cvt_buf[NDIG])
 			*p++ = *p1++;
 	} else if (arg > 0) {
 		while ((fj = arg * 10) < 1) {
@@ -110,41 +109,41 @@ _php3_cvt(double arg, int ndigits, int *decpt, int *sign, int eflag)
 			r2--;
 		}
 	}
-	p1 = &STATIC(cvt_buf)[ndigits];
+	p1 = &cvt_buf[ndigits];
 	if (eflag == 0)
 		p1 += r2;
 	*decpt = r2;
-	if (p1 < &STATIC(cvt_buf)[0]) {
-		STATIC(cvt_buf)[0] = '\0';
-		return (STATIC(cvt_buf));
+	if (p1 < &cvt_buf[0]) {
+		cvt_buf[0] = '\0';
+		return (cvt_buf);
 	}
-	while (p <= p1 && p < &STATIC(cvt_buf)[NDIG]) {
+	while (p <= p1 && p < &cvt_buf[NDIG]) {
 		arg *= 10;
 		arg = modf(arg, &fj);
 		*p++ = (int) fj + '0';
 	}
-	if (p1 >= &STATIC(cvt_buf)[NDIG]) {
-		STATIC(cvt_buf)[NDIG - 1] = '\0';
-		return (STATIC(cvt_buf));
+	if (p1 >= &cvt_buf[NDIG]) {
+		cvt_buf[NDIG - 1] = '\0';
+		return (cvt_buf);
 	}
 	p = p1;
 	*p1 += 5;
 	while (*p1 > '9') {
 		*p1 = '0';
-		if (p1 > STATIC(cvt_buf))
+		if (p1 > cvt_buf)
 			++ * --p1;
 		else {
 			*p1 = '1';
 			(*decpt)++;
 			if (eflag == 0) {
-				if (p > STATIC(cvt_buf))
+				if (p > cvt_buf)
 					*p = '0';
 				p++;
 			}
 		}
 	}
 	*p = '\0';
-	return (STATIC(cvt_buf));
+	return (cvt_buf);
 }
 
 
@@ -567,7 +566,6 @@ PHP_FUNCTION(user_sprintf)
 {
 	char *result;
 	int len;
-	TLS_VARS;
 	
 	if ((result=php3_formatted_print(ht,&len))==NULL) {
 		RETURN_FALSE;
@@ -581,7 +579,6 @@ PHP_FUNCTION(user_printf)
 {
 	char *result;
 	int len;
-	TLS_VARS;
 	
 	if ((result=php3_formatted_print(ht,&len))==NULL) {
 		RETURN_FALSE;

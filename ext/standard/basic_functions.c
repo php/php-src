@@ -364,8 +364,7 @@ int php3_mshutdown_basic(SHUTDOWN_FUNC_ARGS)
 
 int php3_rinit_basic(INIT_FUNC_ARGS)
 {
-	TLS_VARS;
-	GLOBAL(strtok_string) = NULL;
+	strtok_string = NULL;
 #if HAVE_PUTENV
 	if (_php3_hash_init(&putenv_ht, 1, NULL, (void (*)(void *)) _php3_putenv_destructor, 0) == FAILURE) {
 		return FAILURE;
@@ -379,8 +378,7 @@ int php3_rinit_basic(INIT_FUNC_ARGS)
 
 int php3_rshutdown_basic(SHUTDOWN_FUNC_ARGS)
 {
-	TLS_VARS;
-	STR_FREE(GLOBAL(strtok_string));
+	STR_FREE(strtok_string);
 #if HAVE_PUTENV
 	_php3_hash_destroy(&putenv_ht);
 #endif
@@ -398,7 +396,6 @@ void php3_getenv(INTERNAL_FUNCTION_PARAMETERS)
 #endif
 	pval *str;
 	char *ptr;
-	TLS_VARS;
 
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &str) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -426,14 +423,14 @@ void php3_getenv(INTERNAL_FUNCTION_PARAMETERS)
 
 	if (str->type == IS_STRING &&
 #if APACHE
-		((ptr = (char *)table_get(GLOBAL(php3_rqst)->subprocess_env, str->value.str.val)) || (ptr = getenv(str->value.str.val)))
+		((ptr = (char *)table_get(php3_rqst->subprocess_env, str->value.str.val)) || (ptr = getenv(str->value.str.val)))
 #endif
 #if CGI_BINARY
 		(ptr = getenv(str->value.str.val))
 #endif
 
 #if USE_SAPI
-		(ptr = GLOBAL(sapi_rqst)->getenv(GLOBAL(sapi_rqst)->scid,str->value.str.val))
+		(ptr = sapi_rqst->getenv(sapi_rqst->scid,str->value.str.val))
 #endif
 #endif
 		) {
@@ -448,7 +445,6 @@ void php3_putenv(INTERNAL_FUNCTION_PARAMETERS)
 {
 
 	pval *str;
-	TLS_VARS;
 
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &str) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -523,7 +519,6 @@ void php3_toggle_short_open_tag(INTERNAL_FUNCTION_PARAMETERS)
 #if 0
 	pval *value;
 	int ret;
-	TLS_VARS;
 	
 	ret = php3_ini.short_open_tag;
 
@@ -621,7 +616,6 @@ void php3_key_sort(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *array;
 	HashTable *target_hash;
-	TLS_VARS;
 
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &array) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -727,7 +721,6 @@ void php3_asort(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *array;
 	HashTable *target_hash;
-	TLS_VARS;
 
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &array) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -751,7 +744,6 @@ void php3_arsort(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *array;
 	HashTable *target_hash;
-	TLS_VARS;
 
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &array) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -775,7 +767,6 @@ void php3_sort(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *array;
 	HashTable *target_hash;
-	TLS_VARS;
 
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &array) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -799,7 +790,6 @@ void php3_rsort(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *array;
 	HashTable *target_hash;
-	TLS_VARS;
 
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &array) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -848,7 +838,6 @@ void php3_user_sort(INTERNAL_FUNCTION_PARAMETERS)
 	pval *array;
 	pval *old_compare_func;
 	HashTable *target_hash;
-	TLS_VARS;
 
 	old_compare_func = user_compare_func_name;
 	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &array, &user_compare_func_name) == FAILURE) {
@@ -875,7 +864,6 @@ void php3_auser_sort(INTERNAL_FUNCTION_PARAMETERS)
 	pval *array;
 	pval *old_compare_func;
 	HashTable *target_hash;
-	TLS_VARS;
 
 	old_compare_func = user_compare_func_name;
 	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &array, &user_compare_func_name) == FAILURE) {
@@ -950,7 +938,6 @@ void php3_user_key_sort(INTERNAL_FUNCTION_PARAMETERS)
 	pval *array;
 	pval *old_compare_func;
 	HashTable *target_hash;
-	TLS_VARS;
 
 	old_compare_func = user_compare_func_name;
 	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &array, &user_compare_func_name) == FAILURE) {
@@ -1180,11 +1167,10 @@ void php3_flush(INTERNAL_FUNCTION_PARAMETERS)
 #endif
 {
 #if APACHE
-	TLS_VARS;
 #  if MODULE_MAGIC_NUMBER > 19970110
-	rflush(GLOBAL(php3_rqst));
+	rflush(php3_rqst);
 #  else
-	bflush(GLOBAL(php3_rqst)->connection->client);
+	bflush(php3_rqst->connection->client);
 #  endif
 #endif
 #if FHTTPD
@@ -1194,8 +1180,7 @@ void php3_flush(INTERNAL_FUNCTION_PARAMETERS)
 	fflush(stdout);
 #endif
 #if USE_SAPI
-	TLS_VARS;
-	GLOBAL(sapi_rqst)->flush(GLOBAL(sapi_rqst)->scid);
+	sapi_rqst->flush(sapi_rqst->scid);
 #endif
 }
 
@@ -1227,7 +1212,6 @@ void php3_usleep(INTERNAL_FUNCTION_PARAMETERS)
 void php3_gettype(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *arg;
-	TLS_VARS;
 
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1270,7 +1254,6 @@ void php3_settype(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *var, *type;
 	char *new_type;
-	TLS_VARS;
 
 	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &var, &type) ==
 		FAILURE) {
@@ -1379,7 +1362,6 @@ static int _php3_array_walk(const void *a)
 void php3_array_walk(INTERNAL_FUNCTION_PARAMETERS) {
 	pval *array, *old_walk_func_name;
 	HashTable *target_hash;
-	TLS_VARS;
 
 	old_walk_func_name = php3_array_walk_func_name;
 	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &array, &php3_array_walk_func_name) == FAILURE) {
@@ -1404,7 +1386,6 @@ void php3_max(INTERNAL_FUNCTION_PARAMETERS)
 	pval **argv;
 	int argc, i;
 	unsigned short max_type = IS_LONG;
-	TLS_VARS;
 
 	argc = ARG_COUNT(ht);
 	/* if there is one parameter and this parameter is an array of
@@ -1469,8 +1450,6 @@ void php3_max(INTERNAL_FUNCTION_PARAMETERS)
 
 void php3_get_current_user(INTERNAL_FUNCTION_PARAMETERS)
 {
-	TLS_VARS;
-
 	RETURN_STRING(_php3_get_current_user(),1);
 }
 
@@ -1576,7 +1555,6 @@ void php3_error_log(INTERNAL_FUNCTION_PARAMETERS)
 	pval *string, *erropt = NULL, *option = NULL, *emailhead = NULL;
 	int opt_err = 0;
 	char *message, *opt=NULL, *headers=NULL;
-	TLS_VARS;
 
 	switch(ARG_COUNT(ht)) {
 	case 1:

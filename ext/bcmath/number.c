@@ -116,16 +116,13 @@ new_num (length, scale)
 
 /* Intitialize the number package! */
 
-void
-init_numbers (void)
+void init_numbers (void)
 {
-	TLS_VARS;
-
-	GLOBAL(_zero_) = new_num (1,0);
-	GLOBAL(_one_)  = new_num (1,0);
-	GLOBAL(_one_)->n_value[0] = 1;
-	GLOBAL(_two_)  = new_num (1,0);
-	GLOBAL(_two_)->n_value[0] = 2;
+	_zero_ = new_num (1,0);
+	_one_  = new_num (1,0);
+	_one_->n_value[0] = 1;
+	_two_  = new_num (1,0);
+	_two_->n_value[0] = 2;
 }
 
 /* Intitialize the number package! */
@@ -133,11 +130,9 @@ init_numbers (void)
 void
 destruct_numbers ()
 {
-	TLS_VARS;
-
-	free_num(&GLOBAL(_zero_));
-	free_num(&GLOBAL(_one_));
-	free_num(&GLOBAL(_two_));
+	free_num(&_zero_);
+	free_num(&_one_);
+	free_num(&_two_);
 }
 
 /* Make a copy of a number!  Just increments the reference count! */
@@ -157,8 +152,7 @@ void
 init_num (num)
      bc_num *num;
 {
-	TLS_VARS;
-	*num = copy_num (GLOBAL(_zero_));
+	*num = copy_num (_zero_);
 }
 
 
@@ -376,10 +370,9 @@ is_zero (num)
 {
   int  count;
   char *nptr;
-  TLS_VARS;
 
   /* Quick check. */
-  if (num == GLOBAL(_zero_)) return TRUE;
+  if (num == _zero_) return TRUE;
 
   /* Initialize */
   count = num->n_len + num->n_scale;
@@ -1083,7 +1076,6 @@ bc_raisemod (base, expo, mod, result, scale)
 {
   bc_num power, exponent, parity, temp;
   int rscale;
-	TLS_VARS;
 
   /* Check for correct numbers. */
   if (is_zero(mod)) return -1;
@@ -1092,14 +1084,14 @@ bc_raisemod (base, expo, mod, result, scale)
   /* Set initial values.  */
   power = copy_num (base);
   exponent = copy_num (expo);
-  temp = copy_num (GLOBAL(_one_));
+  temp = copy_num (_one_);
   init_num (&parity);
 
   /* Check the exponent for scale digits. */
   if (exponent->n_scale != 0)
     {
       rt_warn ("non-zero scale in exponent");
-      bc_divide (exponent, GLOBAL(_one_), &exponent, 0); /*truncate */
+      bc_divide (exponent, _one_, &exponent, 0); /*truncate */
     }
 
   /* Check the modulus for scale digits. */
@@ -1110,7 +1102,7 @@ bc_raisemod (base, expo, mod, result, scale)
   rscale = MAX(scale, base->n_scale);
   while ( !is_zero(exponent) )
     {
-      (void) bc_divmod (exponent, GLOBAL(_two_), &exponent, &parity, 0);
+      (void) bc_divmod (exponent, _two_, &exponent, &parity, 0);
       if ( !is_zero(parity) )
 	{
 	  bc_multiply (temp, power, &temp, rscale);
@@ -1143,7 +1135,6 @@ bc_raise (num1, num2, result, scale)
    long exponent;
    int rscale;
    char neg;
-	TLS_VARS;
 
    /* Check the exponent for scale digits and convert to a long. */
    if (num2->n_scale != 0)
@@ -1156,7 +1147,7 @@ bc_raise (num1, num2, result, scale)
    if (exponent == 0)
      {
        free_num (result);
-       *result = copy_num (GLOBAL(_one_));
+       *result = copy_num (_one_);
        return;
      }
 
@@ -1196,7 +1187,7 @@ bc_raise (num1, num2, result, scale)
    /* Assign the value. */
    if (neg)
      {
-       bc_divide (GLOBAL(_one_), temp, result, rscale);
+       bc_divide (_one_, temp, result, rscale);
        free_num (&temp);
      }
    else
@@ -1241,10 +1232,9 @@ bc_sqrt (num, scale)
   int rscale, cmp_res, done;
   int cscale;
   bc_num guess, guess1, point5, diff;
-	TLS_VARS;
 
   /* Initial checks. */
-  cmp_res = bc_compare (*num, GLOBAL(_zero_));
+  cmp_res = bc_compare (*num, _zero_);
   if (cmp_res < 0)
     return 0;		/* error */
   else
@@ -1252,15 +1242,15 @@ bc_sqrt (num, scale)
       if (cmp_res == 0)
 	{
 	  free_num (num);
-	  *num = copy_num (GLOBAL(_zero_));
+	  *num = copy_num (_zero_);
 	  return 1;
 	}
     }
-  cmp_res = bc_compare (*num, GLOBAL(_one_));
+  cmp_res = bc_compare (*num, _one_);
   if (cmp_res == 0)
     {
       free_num (num);
-      *num = copy_num (GLOBAL(_one_));
+      *num = copy_num (_one_);
       return 1;
     }
 
@@ -1276,7 +1266,7 @@ bc_sqrt (num, scale)
   /* Calculate the initial guess. */
   if (cmp_res < 0)
     /* The number is between 0 and 1.  Guess should start at 1. */
-    guess = copy_num (GLOBAL(_one_));
+    guess = copy_num (_one_);
   else
     {
       /* The number is greater than 1.  Guess should start at 10^(exp/2). */
@@ -1309,7 +1299,7 @@ bc_sqrt (num, scale)
 
   /* Assign the number and clean up. */
   free_num (num);
-  bc_divide (guess,GLOBAL(_one_),num,rscale);
+  bc_divide (guess,_one_,num,rscale);
   free_num (&guess);
   free_num (&guess1);
   free_num (&point5);
@@ -1534,7 +1524,6 @@ str2num (num, str, scale)
   int digits, strscale;
   char *ptr, *nptr;
   char zero_int;
-	TLS_VARS;
 
   /* Prepare num. */
   free_num (num);
@@ -1551,7 +1540,7 @@ str2num (num, str, scale)
   while (isdigit(*ptr)) ptr++, strscale++;	/* digits */
   if ((*ptr != '\0') || (digits+strscale == 0))
     {
-      *num = copy_num (GLOBAL(_zero_));
+      *num = copy_num (_zero_);
       return;
     }
 

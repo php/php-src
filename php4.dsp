@@ -161,10 +161,6 @@ SOURCE=".\configuration-parser.tab.h"
 # End Source File
 # Begin Source File
 
-SOURCE=.\control_structures.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\ext\standard\cyr_convert.h
 # End Source File
 # Begin Source File

@@ -154,7 +154,6 @@ static void _php3_fsockopen(INTERNAL_FUNCTION_PARAMETERS, int persistent) {
 	int socketd = -1;
 	unsigned short portno;
 	char *key = NULL;
-	TLS_VARS;
 	
 	if (arg_count > 4 || arg_count < 2 || getParametersArray(ht,arg_count,args)==FAILURE) {
 		FREE_SOCK;
@@ -189,7 +188,7 @@ static void _php3_fsockopen(INTERNAL_FUNCTION_PARAMETERS, int persistent) {
 				(void *) &sockp) == SUCCESS) {
 		efree(key);
 		*sock = *sockp;
-		RETURN_LONG(php3_list_insert(sock, GLOBAL(wsa_fp)));
+		RETURN_LONG(php3_list_insert(sock, wsa_fp));
 	}
 	
 	if (portno) {
@@ -266,7 +265,7 @@ static void _php3_fsockopen(INTERNAL_FUNCTION_PARAMETERS, int persistent) {
 				key, strlen(key) + 1, NULL);
 	}
 	if(key) efree(key);
-	id = php3_list_insert(sock,GLOBAL(wsa_fp));
+	id = php3_list_insert(sock,wsa_fp);
 	RETURN_LONG(id);
 }
 /* }}} */

@@ -67,23 +67,8 @@
 
 module MODULE_VAR_EXPORT php3_module;
 
-#ifndef THREAD_SAFE
 int saved_umask;
-#else
-#define GLOBAL(a) php3_globals->a
-#define STATIC GLOBAL
-#define TLS_VARS \
-	php3_globals_struct *php3_globals; \
-	php3_globals = TlsGetValue(TlsIndex);
-#endif
 
-#ifndef TLS_VARS
-#define TLS_VARS
-#endif
-
-#ifndef GLOBAL
-#define GLOBAL(x) x
-#endif
 
 #if WIN32|WINNT
 /* popenf isn't working on Windows, use open instead*/
@@ -167,15 +152,13 @@ BOOL WINAPI DllMain(HANDLE hModule,
 
 void php3_save_umask()
 {
-	TLS_VARS;
-	GLOBAL(saved_umask) = umask(077);
-	umask(GLOBAL(saved_umask));
+	saved_umask = umask(077);
+	umask(saved_umask);
 }
 
 void php3_restore_umask()
 {
-	TLS_VARS;
-	umask(GLOBAL(saved_umask));
+	umask(saved_umask);
 }
 
 int send_php3(request_rec *r, int display_source_mode, char *filename)

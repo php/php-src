@@ -125,30 +125,29 @@ PHPAPI char *_php3_get_current_user()
 #endif
 	struct passwd *pwd;
 	int uid;
-	TLS_VARS;
 
-	if (GLOBAL(request_info).current_user) {
-		return GLOBAL(request_info).current_user;
+	if (request_info.current_user) {
+		return request_info.current_user;
 	}
 
 	/* FIXME: I need to have this somehow handled if
 	USE_SAPI is defined, because cgi will also be
 	interfaced in USE_SAPI */
 #if CGI_BINARY || USE_SAPI || FHTTPD
-	if (!GLOBAL(request_info).filename || (stat(GLOBAL(request_info).filename,&statbuf)==-1)) {
+	if (!request_info.filename || (stat(request_info.filename,&statbuf)==-1)) {
 		return empty_string;
 	}
 	uid = statbuf.st_uid;
 #endif
 #if APACHE
-	uid = GLOBAL(php3_rqst)->finfo.st_uid;
+	uid = php3_rqst->finfo.st_uid;
 #endif
 
 	if ((pwd=getpwuid(uid))==NULL) {
 		return empty_string;
 	}
-	GLOBAL(request_info).current_user_length = strlen(pwd->pw_name);
-	GLOBAL(request_info).current_user = estrndup(pwd->pw_name,GLOBAL(request_info).current_user_length);
+	request_info.current_user_length = strlen(pwd->pw_name);
+	request_info.current_user = estrndup(pwd->pw_name,request_info.current_user_length);
 	
-	return GLOBAL(request_info).current_user;		
+	return request_info.current_user;		
 }	

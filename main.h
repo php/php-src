@@ -39,7 +39,7 @@
 #include "php_globals.h"
 
 int php3_request_startup(CLS_D ELS_DC PLS_DC);
-extern void php3_request_shutdown(void *dummy INLINE_TLS);
+extern void php3_request_shutdown(void *dummy);
 extern void php3_request_shutdown_for_exec(void *dummy);
 extern int php3_module_startup();
 extern void php3_module_shutdown();

@@ -57,14 +57,12 @@ char *getlogin()
 struct passwd *
  getpwuid(int uid)
 {
-	TLS_VARS;
+	pw.pw_name = getlogin();
+	pw.pw_dir = home_dir;
+	pw.pw_shell = login_shell;
+	pw.pw_uid = 0;
 
-	GLOBAL(pw).pw_name = getlogin();
-	GLOBAL(pw).pw_dir = home_dir;
-	GLOBAL(pw).pw_shell = login_shell;
-	GLOBAL(pw).pw_uid = 0;
-
-	return &GLOBAL(pw);
+	return &pw;
 }
 
 /*

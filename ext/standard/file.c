@@ -222,7 +222,6 @@ PHP_FUNCTION(flock)
     int issock=0;
     int *sock, fd=0;
     int act = 0;
-    TLS_VARS;
 
     if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
         WRONG_PARAM_COUNT;
@@ -232,13 +231,13 @@ PHP_FUNCTION(flock)
     convert_to_long(arg2);
 
     fp = php3_list_find(arg1->value.lval, &type);
-    if (type == GLOBAL(wsa_fp)){
+    if (type == wsa_fp){
         issock = 1;
         sock = php3_list_find(arg1->value.lval, &type);
         fd = *sock;
     }
 
-    if ((!fp || (type!=GLOBAL(le_fp) && type!=GLOBAL(le_pp))) && (!fd || type!=GLOBAL(wsa_fp))) {
+    if ((!fp || (type!=le_fp && type!=le_pp)) && (!fd || type!=wsa_fp)) {
         php3_error(E_WARNING,"Unable to find file identifier %d",arg1->value.lval);
         RETURN_FALSE;
     }
@@ -467,7 +466,7 @@ void php3_file(INTERNAL_FUNCTION_PARAMETERS)
 
 static void __pclose(FILE *pipe)
 {
-	GLOBAL(pclose_ret) = pclose(pipe);
+	pclose_ret = pclose(pipe);
 }
 
 
@@ -497,10 +496,10 @@ static void _php3_unlink_uploaded_file(char *file)
 
 int php3_minit_file(INIT_FUNC_ARGS)
 {
-	GLOBAL(le_fp) = register_list_destructors(fclose,NULL);
-	GLOBAL(le_pp) = register_list_destructors(__pclose,NULL);
-	GLOBAL(wsa_fp) = register_list_destructors(_php3_closesocket,NULL);
-	GLOBAL(le_uploads) = register_list_destructors(_php3_unlink_uploaded_file,NULL);
+	le_fp = register_list_destructors(fclose,NULL);
+	le_pp = register_list_destructors(__pclose,NULL);
+	wsa_fp = register_list_destructors(_php3_closesocket,NULL);
+	le_uploads = register_list_destructors(_php3_unlink_uploaded_file,NULL);
 	return SUCCESS;
 }
 
@@ -575,13 +574,13 @@ void php3_fopen(INTERNAL_FUNCTION_PARAMETERS)
 		efree(p);
 		RETURN_FALSE;
 	}
-	GLOBAL(fgetss_state)=0;
+	fgetss_state=0;
 	if (issock) {
 		sock=emalloc(sizeof(int));
 		*sock=socketd;
-		id = php3_list_insert(sock,GLOBAL(wsa_fp));
+		id = php3_list_insert(sock,wsa_fp);
 	} else {
-		id = php3_list_insert(fp,GLOBAL(le_fp));
+		id = php3_list_insert(fp,le_fp);
 	}
 	efree(p);
 	RETURN_LONG(id);
@@ -603,7 +602,7 @@ void php3_fclose(INTERNAL_FUNCTION_PARAMETERS)
 	convert_to_long(arg1);
 	id=arg1->value.lval;
 	fp = php3_list_find(id,&type);
-	if (!fp || (type!=GLOBAL(le_fp) && type!=GLOBAL(wsa_fp))) {
+	if (!fp || (type!=le_fp && type!=wsa_fp)) {
 		php3_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
@@ -662,7 +661,7 @@ void php3_popen(INTERNAL_FUNCTION_PARAMETERS)
 			RETURN_FALSE;
 		}
 	}
-	id = php3_list_insert(fp,GLOBAL(le_pp));
+	id = php3_list_insert(fp,le_pp);
 	efree(p);
 	RETURN_LONG(id);
 }
@@ -684,12 +683,12 @@ void php3_pclose(INTERNAL_FUNCTION_PARAMETERS)
 	id = arg1->value.lval;
 
 	fp = php3_list_find(id,&type);
-	if (!fp || type!=GLOBAL(le_pp)) {
+	if (!fp || type!=le_pp) {
 		php3_error(E_WARNING,"Unable to find pipe identifier %d",id);
 		RETURN_FALSE;
 	}
 	php3_list_delete(id);
-	RETURN_LONG(GLOBAL(pclose_ret));
+	RETURN_LONG(pclose_ret);
 }
 /* }}} */
 
@@ -711,12 +710,12 @@ void php3_feof(INTERNAL_FUNCTION_PARAMETERS)
 	convert_to_long(arg1);
 	id = arg1->value.lval;
 	fp = php3_list_find(id,&type);
-	if (type==GLOBAL(wsa_fp)){
+	if (type==wsa_fp){
 		issock=1;
 		sock = php3_list_find(id,&type);
 		socketd=*sock;
 	}
-	if ((!fp || (type!=GLOBAL(le_fp) && type!=GLOBAL(le_pp))) && (!socketd || type!=GLOBAL(wsa_fp))) {
+	if ((!fp || (type!=le_fp && type!=le_pp)) && (!socketd || type!=wsa_fp)) {
 		php3_error(E_WARNING,"Unable to find file identifier %d",id);
 		/* we're at the eof if the file doesn't exist */
 		RETURN_TRUE;
@@ -748,7 +747,7 @@ void php3_set_socket_blocking(INTERNAL_FUNCTION_PARAMETERS)
 	block = arg2->value.lval;
 	
 	sock = php3_list_find(id,&type);
-	if (type!=GLOBAL(wsa_fp)) {
+	if (type!=wsa_fp) {
 		php3_error(E_WARNING,"%d is not a socket id",id);
 		RETURN_FALSE;
 	}
@@ -807,7 +806,7 @@ void php3_set_socket_timeout(INTERNAL_FUNCTION_PARAMETERS)
 	convert_to_long(timeout);
 	
 	sock = php3_list_find(socket->value.lval, &type);
-	if (type!=GLOBAL(wsa_fp)) {
+	if (type!=wsa_fp) {
 		php3_error(E_WARNING,"%d is not a socket id",socket->value.lval);
 		RETURN_FALSE;
 	}
@@ -841,12 +840,12 @@ void php3_fgets(INTERNAL_FUNCTION_PARAMETERS)
 	len = arg2->value.lval;
 
 	fp = php3_list_find(id,&type);
-	if (type==GLOBAL(wsa_fp)){
+	if (type==wsa_fp){
 		issock=1;
 		sock = php3_list_find(id,&type);
 		socketd=*sock;
 	}
-	if ((!fp || (type!=GLOBAL(le_fp) && type!=GLOBAL(le_pp))) && (!socketd || type!=GLOBAL(wsa_fp))) {
+	if ((!fp || (type!=le_fp && type!=le_pp)) && (!socketd || type!=wsa_fp)) {
 		php3_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
@@ -887,12 +886,12 @@ void php3_fgetc(INTERNAL_FUNCTION_PARAMETERS) {
 	id = arg1->value.lval;
 
 	fp = php3_list_find(id,&type);
-	if (type==GLOBAL(wsa_fp)){
+	if (type==wsa_fp){
 		issock=1;
 		sock = php3_list_find(id,&type);
 		socketd = *sock;
 	}
-	if ((!fp || (type!=GLOBAL(le_fp) && type!=GLOBAL(le_pp))) && (!socketd || type!=GLOBAL(wsa_fp))) {
+	if ((!fp || (type!=le_fp && type!=le_pp)) && (!socketd || type!=wsa_fp)) {
 		php3_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
@@ -934,12 +933,12 @@ void php3_fgetss(INTERNAL_FUNCTION_PARAMETERS)
 	len = bytes->value.lval;
 
 	fp = php3_list_find(id,&type);
-	if (type==GLOBAL(wsa_fp)){
+	if (type==wsa_fp){
 		issock=1;
 		sock = php3_list_find(id,&type);
 		socketd=*sock;
 	}
-	if ((!fp || (type!=GLOBAL(le_fp) && type!=GLOBAL(le_pp))) && (!socketd || type!=GLOBAL(wsa_fp))) {
+	if ((!fp || (type!=le_fp && type!=le_pp)) && (!socketd || type!=wsa_fp)) {
 		php3_error(E_WARNING, "Unable to find file identifier %d", id);
 		RETURN_FALSE;
 	}
@@ -962,67 +961,67 @@ void php3_fgetss(INTERNAL_FUNCTION_PARAMETERS)
 	while (c) {
 		switch (c) {
 			case '<':
-				if (GLOBAL(fgetss_state) == 0) {
+				if (fgetss_state == 0) {
 					lc = '<';
-					GLOBAL(fgetss_state) = 1;
+					fgetss_state = 1;
 				}
 				break;
 
 			case '(':
-				if (GLOBAL(fgetss_state) == 2) {
+				if (fgetss_state == 2) {
 					if (lc != '\"') {
 						lc = '(';
 						br++;
 					}
-				} else if (GLOBAL(fgetss_state) == 0) {
+				} else if (fgetss_state == 0) {
 					*(rp++) = c;
 				}
 				break;	
 
 			case ')':
-				if (GLOBAL(fgetss_state) == 2) {
+				if (fgetss_state == 2) {
 					if (lc != '\"') {
 						lc = ')';
 						br--;
 					}
-				} else if (GLOBAL(fgetss_state) == 0) {
+				} else if (fgetss_state == 0) {
 					*(rp++) = c;
 				}
 				break;	
 
 			case '>':
-				if (GLOBAL(fgetss_state) == 1) {
+				if (fgetss_state == 1) {
 					lc = '>';
-					GLOBAL(fgetss_state) = 0;
-				} else if (GLOBAL(fgetss_state) == 2) {
+					fgetss_state = 0;
+				} else if (fgetss_state == 2) {
 					if (!br && lc != '\"') {
-						GLOBAL(fgetss_state) = 0;
+						fgetss_state = 0;
 					}
 				}
 				break;
 
 			case '\"':
-				if (GLOBAL(fgetss_state) == 2) {
+				if (fgetss_state == 2) {
 					if (lc == '\"') {
 						lc = '\0';
 					} else if (lc != '\\') {
 						lc = '\"';
 					}
-				} else if (GLOBAL(fgetss_state) == 0) {
+				} else if (fgetss_state == 0) {
 					*(rp++) = c;
 				}
 				break;
 
 			case '?':
-				if (GLOBAL(fgetss_state)==1) {
+				if (fgetss_state==1) {
 					br=0;
-					GLOBAL(fgetss_state)=2;
+					fgetss_state=2;
 					break;
 				}
 				/* fall-through */
 
 			default:
-				if (GLOBAL(fgetss_state) == 0) {
+				if (fgetss_state == 0) {
 					*(rp++) = c;
 				}	
 		}
@@ -1073,12 +1072,12 @@ void php3_fwrite(INTERNAL_FUNCTION_PARAMETERS)
 	id = arg1->value.lval;	
 
 	fp = php3_list_find(id,&type);
-	if (type==GLOBAL(wsa_fp)){
+	if (type==wsa_fp){
 		issock=1;
 		sock = php3_list_find(id,&type);
 		socketd=*sock;
 	}
-	if ((!fp || (type!=GLOBAL(le_fp) && type!=GLOBAL(le_pp))) && (!socketd || type!=GLOBAL(wsa_fp))) {
+	if ((!fp || (type!=le_fp && type!=le_pp)) && (!socketd || type!=wsa_fp)) {
 		php3_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
@@ -1112,7 +1111,7 @@ void php3_rewind(INTERNAL_FUNCTION_PARAMETERS)
 	convert_to_long(arg1);
 	id = arg1->value.lval;	
 	fp = php3_list_find(id,&type);
-	if (!fp || (type!=GLOBAL(le_fp) && type!=GLOBAL(le_pp))) {
+	if (!fp || (type!=le_fp && type!=le_pp)) {
 		php3_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
@@ -1137,7 +1136,7 @@ void php3_ftell(INTERNAL_FUNCTION_PARAMETERS)
 	convert_to_long(arg1);
 	id = arg1->value.lval;	
 	fp = php3_list_find(id,&type);
-	if (!fp || (type!=GLOBAL(le_fp) && type!=GLOBAL(le_pp))) {
+	if (!fp || (type!=le_fp && type!=le_pp)) {
 		php3_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
@@ -1164,7 +1163,7 @@ void php3_fseek(INTERNAL_FUNCTION_PARAMETERS)
 	pos = arg2->value.lval;
 	id = arg1->value.lval;
 	fp = php3_list_find(id,&type);
-	if (!fp || (type!=GLOBAL(le_fp) && type!=GLOBAL(le_pp))) {
+	if (!fp || (type!=le_fp && type!=le_pp)) {
 		php3_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
@@ -1342,12 +1341,12 @@ void php3_fpassthru(INTERNAL_FUNCTION_PARAMETERS)
 	convert_to_long(arg1);
 	id = arg1->value.lval;
 	fp = php3_list_find(id,&type);
-	if (type==GLOBAL(wsa_fp)){
+	if (type==wsa_fp){
 		issock=1;
 		sock = php3_list_find(id,&type);
 		socketd=*sock;
 	}
-	if ((!fp || (type!=GLOBAL(le_fp) && type!=GLOBAL(le_pp))) && (!socketd || type!=GLOBAL(wsa_fp))) {
+	if ((!fp || (type!=le_fp && type!=le_pp)) && (!socketd || type!=wsa_fp)) {
 		php3_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
@@ -1485,12 +1484,12 @@ void php3_fread(INTERNAL_FUNCTION_PARAMETERS)
 	len = arg2->value.lval;
 
 	fp = php3_list_find(id,&type);
-	if (type==GLOBAL(wsa_fp)){
+	if (type==wsa_fp){
 		issock=1;
 		sock = php3_list_find(id,&type);
 		socketd=*sock;
 	}
-	if ((!fp || (type!=GLOBAL(le_fp) && type!=GLOBAL(le_pp))) && (!socketd || type!=GLOBAL(wsa_fp))) {
+	if ((!fp || (type!=le_fp && type!=le_pp)) && (!socketd || type!=wsa_fp)) {
 		php3_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
@@ -1514,7 +1513,7 @@ void php3_fread(INTERNAL_FUNCTION_PARAMETERS)
 /* aparently needed for pdf to be compiled as a module under windows */
 PHPAPI int php3i_get_le_fp(void)
 {
-	return GLOBAL(le_fp);
+	return le_fp;
 }
 
 /*

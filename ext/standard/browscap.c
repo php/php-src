@@ -53,9 +53,8 @@ static int browser_reg_compare(pval *browser)
 {
 	pval *browser_name;
 	regex_t r;
-	TLS_VARS;
 
-	if (GLOBAL(found_browser_entry)) { /* already found */
+	if (found_browser_entry) { /* already found */
 		return 0;
 	}
 	_php3_hash_find(browser->value.ht,"browser_name_pattern",sizeof("browser_name_pattern"),(void **) &browser_name);
@@ -65,8 +64,8 @@ static int browser_reg_compare(pval *browser)
 	if (regcomp(&r,browser_name->value.str.val,REG_NOSUB)!=0) {
 		return 0;
 	}
-	if (regexec(&r,GLOBAL(lookup_browser_name),0,NULL,0)==0) {
-		GLOBAL(found_browser_entry) = browser;
+	if (regexec(&r,lookup_browser_name,0,NULL,0)==0) {
+		found_browser_entry = browser;
 	}
 	regfree(&r);
 	return 0;
@@ -100,14 +99,14 @@ void php3_get_browser(INTERNAL_FUNCTION_PARAMETERS)
 	
 	convert_to_string(agent_name);
 
-	if (_php3_hash_find(&GLOBAL(browser_hash), agent_name->value.str.val, agent_name->value.str.len+1, (void **) &agent)==FAILURE) {
-		GLOBAL(lookup_browser_name) = agent_name->value.str.val;
-		GLOBAL(found_browser_entry) = NULL;
-		_php3_hash_apply(&GLOBAL(browser_hash),(int (*)(void *)) browser_reg_compare);
+	if (_php3_hash_find(&browser_hash, agent_name->value.str.val, agent_name->value.str.len+1, (void **) &agent)==FAILURE) {
+		lookup_browser_name = agent_name->value.str.val;
+		found_browser_entry = NULL;
+		_php3_hash_apply(&browser_hash,(int (*)(void *)) browser_reg_compare);
 		
-		if (GLOBAL(found_browser_entry)) {
-			agent = GLOBAL(found_browser_entry);
-		} else if (_php3_hash_find(&GLOBAL(browser_hash), "Default Browser", sizeof("Default Browser"), (void **) &agent)==FAILURE) {
+		if (found_browser_entry) {
+			agent = found_browser_entry;
+		} else if (_php3_hash_find(&browser_hash, "Default Browser", sizeof("Default Browser"), (void **) &agent)==FAILURE) {
 			RETURN_FALSE;
 		}
 	}
@@ -118,7 +117,7 @@ void php3_get_browser(INTERNAL_FUNCTION_PARAMETERS)
 	return_value->value.ht->pDestructor = PVAL_DESTRUCTOR;
 
 	while (_php3_hash_find(agent->value.ht, "parent", sizeof("parent"), (void **) &agent_name)==SUCCESS) {
-		if (_php3_hash_find(&GLOBAL(browser_hash), agent_name->value.str.val, agent_name->value.str.len+1, (void **) &agent)==FAILURE) {
+		if (_php3_hash_find(&browser_hash, agent_name->value.str.val, agent_name->value.str.len+1, (void **) &agent)==FAILURE) {
 			break;
 		}
 		_php3_hash_merge(return_value->value.ht,agent->value.ht,(void (*)(void *pData)) pval_copy_constructor, (void *) &tmp, sizeof(pval));

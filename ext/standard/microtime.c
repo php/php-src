@@ -65,7 +65,6 @@ void php3_microtime(INTERNAL_FUNCTION_PARAMETERS)
 	long sec = 0L;
 	double msec = 0.0;
 	char ret[100];
-	TLS_VARS;
 	
 	if (gettimeofday((struct timeval *) &tp, (NUL)) == 0) {
 		msec = (double) (tp.tv_usec / MICRO_IN_SEC);

@@ -37,23 +37,22 @@ php3_request_info request_info;
 int php3_init_request_info(void *conf)
 {
 	char *buf;	/* temporary buffers */
-	TLS_VARS;
 
-	GLOBAL(request_info).path_info = getenv("PATH_INFO");
-	GLOBAL(request_info).path_translated = getenv("PATH_TRANSLATED");
-	GLOBAL(request_info).query_string = getenv("QUERY_STRING");
-	GLOBAL(request_info).current_user = NULL;
-	GLOBAL(request_info).current_user_length = 0;
-	GLOBAL(request_info).request_method = getenv("REQUEST_METHOD");
-	GLOBAL(request_info).script_name = getenv("SCRIPT_NAME");
+	request_info.path_info = getenv("PATH_INFO");
+	request_info.path_translated = getenv("PATH_TRANSLATED");
+	request_info.query_string = getenv("QUERY_STRING");
+	request_info.current_user = NULL;
+	request_info.current_user_length = 0;
+	request_info.request_method = getenv("REQUEST_METHOD");
+	request_info.script_name = getenv("SCRIPT_NAME");
 	buf = getenv("CONTENT_LENGTH");
-	GLOBAL(request_info).content_length = (buf ? atoi(buf) : 0);
-	GLOBAL(request_info).content_type = getenv("CONTENT_TYPE");
-	GLOBAL(request_info).cookies = getenv("HTTP_COOKIE");
-	GLOBAL(request_info).script_filename = getenv("SCRIPT_FILENAME");
+	request_info.content_length = (buf ? atoi(buf) : 0);
+	request_info.content_type = getenv("CONTENT_TYPE");
+	request_info.cookies = getenv("HTTP_COOKIE");
+	request_info.script_filename = getenv("SCRIPT_FILENAME");
 	/* Hack for annoying servers that do not set SCRIPT_FILENAME for us */
-	if (!GLOBAL(request_info).script_filename) {
-		GLOBAL(request_info).script_filename = GLOBAL(request_info).php_argv0;
+	if (!request_info.script_filename) {
+		request_info.script_filename = request_info.php_argv0;
 	}
 #if WIN32|WINNT
 	/* FIXME WHEN APACHE NT IS FIXED */
@@ -61,10 +60,10 @@ int php3_init_request_info(void *conf)
 	   script filename to php.exe thus makes us parse php.exe instead of file.php
 	   requires we get the info from path translated.  This can be removed at
 	   such a time taht apache nt is fixed */
-	else if (GLOBAL(request_info).path_translated) {
-		GLOBAL(request_info).script_filename = GLOBAL(request_info).path_translated;
+	else if (request_info.path_translated) {
+		request_info.script_filename = request_info.path_translated;
 	} else {
-		GLOBAL(request_info).script_filename = NULL;
+		request_info.script_filename = NULL;
 	}
 #endif
 
@@ -76,16 +75,16 @@ int php3_init_request_info(void *conf)
 	   Notice that this means that we don't need to efree() it in
 	   php3_destroy_request_info()! */
 #if DISCARD_PATH
-	if (GLOBAL(request_info).script_filename) {
-		GLOBAL(request_info).filename = estrdup(GLOBAL(request_info).script_filename);
+	if (request_info.script_filename) {
+		request_info.filename = estrdup(request_info.script_filename);
 	} else {
-		GLOBAL(request_info).filename = NULL;
+		request_info.filename = NULL;
 	}
 #else
-	if (GLOBAL(request_info).path_translated) {
-		GLOBAL(request_info).filename = estrdup(GLOBAL(request_info).path_translated);
+	if (request_info.path_translated) {
+		request_info.filename = estrdup(request_info.path_translated);
 	} else {
-		GLOBAL(request_info).filename = NULL;
+		request_info.filename = NULL;
 	}
 #endif
 	return SUCCESS;
@@ -93,7 +92,7 @@ int php3_init_request_info(void *conf)
 
 int php3_destroy_request_info(void *conf)
 {
-	STR_FREE(GLOBAL(request_info).current_user);
+	STR_FREE(request_info.current_user);
 	return SUCCESS;
 }
 #endif
@@ -107,7 +106,6 @@ int php3_init_request_info(void *conf)
 {
 	static int exit_requested = 0;
 	int i, len;
-	TLS_VARS;
 	req = NULL;
 
 	setalarm(idle_timeout);
@@ -123,22 +121,22 @@ int php3_init_request_info(void *conf)
 					strncpy(script_name_resolved_buffer, req->script_name_resolved, 2047);
 					script_name_resolved_buffer[2047] = 0;
 
-					GLOBAL(request_info).path_info = NULL;	/* Not supported */
-					GLOBAL(request_info).path_translated = script_name_resolved_buffer;
-					GLOBAL(request_info).query_string = req->query_string;
-					GLOBAL(request_info).current_user = NULL;
-					GLOBAL(request_info).current_user_length = 0;
-					GLOBAL(request_info).request_method = method_names[req->method];
-					GLOBAL(request_info).script_name = req->script_name;
-					GLOBAL(request_info).content_length = req->databuffsize;
-					GLOBAL(request_info).content_type = req->content_type;
-					GLOBAL(request_info).cookies = NULL;
+					request_info.path_info = NULL;	/* Not supported */
+					request_info.path_translated = script_name_resolved_buffer;
+					request_info.query_string = req->query_string;
+					request_info.current_user = NULL;
+					request_info.current_user_length = 0;
+					request_info.request_method = method_names[req->method];
+					request_info.script_name = req->script_name;
+					request_info.content_length = req->databuffsize;
+					request_info.content_type = req->content_type;
+					request_info.cookies = NULL;
 					for (i = 0; i < req->nlines; i++) {
 						if (req->lines[i].paramc > 1) {
 							if (req->lines[i].params[0]) {
 								if (!strcasecmp(req->lines[i].params[0], "HTTP_COOKIE")) {
 									if (req->lines[i].params[1]) {
-										GLOBAL(request_info).cookies = req->lines[i].params[1];
+										request_info.cookies = req->lines[i].params[1];
 									}
 								}
 							}
@@ -151,10 +149,10 @@ int php3_init_request_info(void *conf)
 					   the include file hash table, and gets freed with that table.
 					   Notice that this means that we don't need to efree() it in
 					   php3_destroy_request_info()! */
-					if (GLOBAL(request_info).path_translated)
-						GLOBAL(request_info).filename = estrdup(GLOBAL(request_info).path_translated);
+					if (request_info.path_translated)
+						request_info.filename = estrdup(request_info.path_translated);
 					else
-						GLOBAL(request_info).filename = NULL;
+						request_info.filename = NULL;
 
 					return SUCCESS;
 				} else {
@@ -196,20 +194,19 @@ int php3_init_request_info(void *conf)
 int php3_init_request_info(void *conf)
 {
 	const char *buf;
-	TLS_VARS;
 
-	GLOBAL(request_info).current_user = NULL;
-	GLOBAL(request_info).current_user_length = 0;
+	request_info.current_user = NULL;
+	request_info.current_user_length = 0;
 
-	GLOBAL(request_info).filename = GLOBAL(php3_rqst)->filename;
-	GLOBAL(request_info).request_method = GLOBAL(php3_rqst)->method;
-	GLOBAL(request_info).query_string = GLOBAL(php3_rqst)->args;
-	GLOBAL(request_info).content_type = table_get(GLOBAL(php3_rqst)->subprocess_env, "CONTENT_TYPE");
+	request_info.filename = php3_rqst->filename;
+	request_info.request_method = php3_rqst->method;
+	request_info.query_string = php3_rqst->args;
+	request_info.content_type = table_get(php3_rqst->subprocess_env, "CONTENT_TYPE");
 
-	buf = table_get(GLOBAL(php3_rqst)->subprocess_env, "CONTENT_LENGTH");
-	GLOBAL(request_info).content_length = (buf ? atoi(buf) : 0);
+	buf = table_get(php3_rqst->subprocess_env, "CONTENT_LENGTH");
+	request_info.content_length = (buf ? atoi(buf) : 0);
 
-	GLOBAL(request_info).cookies = table_get(GLOBAL(php3_rqst)->subprocess_env, "HTTP_COOKIE");
+	request_info.cookies = table_get(php3_rqst->subprocess_env, "HTTP_COOKIE");
 
 	return SUCCESS;
 }
@@ -220,21 +217,20 @@ int php3_init_request_info(void *conf)
 /* temporary until I figure a beter way to do it */
 int php3_init_request_info(void *conf)
 {
-	TLS_VARS;
-	if (GLOBAL(sapi_rqst)->filename)
-		GLOBAL(request_info).filename = estrdup(GLOBAL(sapi_rqst)->filename);
+	if (sapi_rqst->filename)
+		request_info.filename = estrdup(sapi_rqst->filename);
 	else
-		GLOBAL(request_info).filename = NULL;
-	GLOBAL(request_info).path_info = GLOBAL(sapi_rqst)->path_info;
-	GLOBAL(request_info).path_translated = GLOBAL(sapi_rqst)->path_translated;
-	GLOBAL(request_info).query_string = GLOBAL(sapi_rqst)->query_string;
-	GLOBAL(request_info).current_user = GLOBAL(sapi_rqst)->current_user;
-	GLOBAL(request_info).current_user_length = GLOBAL(sapi_rqst)->current_user_length;
-	GLOBAL(request_info).request_method = GLOBAL(sapi_rqst)->request_method;
-	GLOBAL(request_info).script_name = GLOBAL(sapi_rqst)->script_name;
-	GLOBAL(request_info).content_length = GLOBAL(sapi_rqst)->content_length;
-	GLOBAL(request_info).content_type = GLOBAL(sapi_rqst)->content_type;
-	GLOBAL(request_info).cookies = GLOBAL(sapi_rqst)->cookies;
+		request_info.filename = NULL;
+	request_info.path_info = sapi_rqst->path_info;
+	request_info.path_translated = sapi_rqst->path_translated;
+	request_info.query_string = sapi_rqst->query_string;
+	request_info.current_user = sapi_rqst->current_user;
+	request_info.current_user_length = sapi_rqst->current_user_length;
+	request_info.request_method = sapi_rqst->request_method;
+	request_info.script_name = sapi_rqst->script_name;
+	request_info.content_length = sapi_rqst->content_length;
+	request_info.content_type = sapi_rqst->content_type;
+	request_info.cookies = sapi_rqst->cookies;
 
 	return SUCCESS;
 }

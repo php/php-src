@@ -117,42 +117,9 @@ extern unsigned char second_arg_allow_ref[];
 # endif
 #endif
 
-/*Thread Safety*/
-#if THREAD_SAFE
-#define GLOBAL(a) php3_globals->a
-#define STATIC GLOBAL
-#define TLS_VARS \
-	php3_globals_struct *php3_globals; \
-	php3_globals = TlsGetValue(TlsIndex);
-#define CREATE_MUTEX(a,b) a = CreateMutex (NULL, FALSE, b);
-#define SET_MUTEX(a) WaitForSingleObject( a, INFINITE );
-#define FREE_MUTEX(a) ReleaseMutex(a);
-
-/*redirect variables to the flex structure*/
-#if !defined(YY_BUFFER_NEW) && !defined(COMPILE_DL)
-#include "FlexSafe.h"
-#endif
-
-#define INLINE_TLS ,struct php3_global_struct *php3_globals
-#define INLINE_TLS_VOID struct php3_global_struct *php3_globals
-#define _INLINE_TLS ,php3_globals
-#define _INLINE_TLS_VOID php3_globals
-
-#else
-#define GLOBAL(a) a
-#define STATIC GLOBAL
-#define TLS_VARS
 #define CREATE_MUTEX(a,b)
 #define SET_MUTEX(a)
 #define FREE_MUTEX(a)
-
-/* needed in control structures */
-#define INLINE_TLS
-#define INLINE_TLS_VOID void
-#define _INLINE_TLS
-#define _INLINE_TLS_VOID
-
-#endif
 
 /*
  * Then the ODBC support can use both iodbc and Solid,

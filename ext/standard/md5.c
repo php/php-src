@@ -46,7 +46,6 @@ void php3_md5(INTERNAL_FUNCTION_PARAMETERS)
 	unsigned char digest[16];
 	int i;
 	char *r;
-	TLS_VARS;
 	
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;

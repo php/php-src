@@ -61,11 +61,9 @@ static long bc_precision;
 
 int php3_rinit_bcmath(INIT_FUNC_ARGS)
 {
-	TLS_VARS;
-
 	init_numbers();
-	if (cfg_get_long("bcmath.scale",&GLOBAL(bc_precision))==FAILURE) {
-		GLOBAL(bc_precision)=0;
+	if (cfg_get_long("bcmath.scale",&bc_precision)==FAILURE) {
+		bc_precision=0;
 	}
 	return SUCCESS;
 }
@@ -82,7 +80,7 @@ void php3_bcmath_add(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *left, *right,*scale_param;
 	bc_num first, second, result;
-	int scale=GLOBAL(bc_precision);
+	int scale=bc_precision;
 
 	switch (ARG_COUNT(ht)) {
 		case 2:
@@ -125,7 +123,7 @@ void php3_bcmath_sub(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *left, *right,*scale_param;
 	bc_num first, second, result;
-	int scale=GLOBAL(bc_precision);
+	int scale=bc_precision;
 
 	switch (ARG_COUNT(ht)) {
 		case 2:
@@ -168,7 +166,7 @@ void php3_bcmath_mul(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *left, *right,*scale_param;
 	bc_num first, second, result;
-	int scale=GLOBAL(bc_precision);
+	int scale=bc_precision;
 
 	switch (ARG_COUNT(ht)) {
 		case 2:
@@ -211,7 +209,7 @@ void php3_bcmath_div(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *left, *right,*scale_param;
 	bc_num first, second, result;
-	int scale=GLOBAL(bc_precision);
+	int scale=bc_precision;
 
 	switch (ARG_COUNT(ht)) {
 		case 2:
@@ -301,7 +299,7 @@ void php3_bcmath_pow(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *left, *right,*scale_param;
 	bc_num first, second, result;
-	int scale=GLOBAL(bc_precision);
+	int scale=bc_precision;
 
 	switch (ARG_COUNT(ht)) {
 		case 2:
@@ -344,7 +342,7 @@ void php3_bcmath_sqrt(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *left,*scale_param;
 	bc_num result;
-	int scale=GLOBAL(bc_precision);
+	int scale=bc_precision;
 
 	switch (ARG_COUNT(ht)) {
 		case 1:
@@ -384,7 +382,7 @@ void php3_bcmath_comp(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *left, *right, *scale_param;
 	bc_num first, second;
-	int scale=GLOBAL(bc_precision);
+	int scale=bc_precision;
 
 	switch (ARG_COUNT(ht)) {
 		case 2:
@@ -431,7 +429,7 @@ void php3_bcmath_set_scale(INTERNAL_FUNCTION_PARAMETERS)
 	}
 	
 	convert_to_long(new_scale);
-	GLOBAL(bc_precision) = new_scale->value.lval;
+	bc_precision = new_scale->value.lval;
 	RETURN_TRUE;
 }
 /* }}} */
