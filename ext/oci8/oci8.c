@@ -683,7 +683,8 @@ PHP_MINIT_FUNCTION(oci)
 	REGISTER_LONG_CONSTANT("SQLT_RDD",SQLT_RDD, CONST_CS | CONST_PERSISTENT);
 
 #ifdef PHP_OCI8_HAVE_COLLECTIONS
-	REGISTER_LONG_CONSTANT("OCI_B_SQLT_NTY",SQLT_NTY, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("OCI_B_NTY",SQLT_NTY, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SQLT_NTY",SQLT_NTY, CONST_CS | CONST_PERSISTENT);	
 	REGISTER_STRING_CONSTANT("OCI_SYSDATE","SYSDATE",CONST_PERSISTENT);
 #endif
 
@@ -5734,7 +5735,7 @@ PHP_FUNCTION(oci_fetch_object)
 }
 /* }}} */
 
-/* {{{ proto object oci_fetch_row( resource stmt )
+/* {{{ proto array oci_fetch_row( resource stmt )
    Fetch a result row as an enumerated array */
 PHP_FUNCTION(oci_fetch_row)
 {
@@ -5742,7 +5743,7 @@ PHP_FUNCTION(oci_fetch_row)
 }
 /* }}} */
 
-/* {{{ proto object oci_fetch_assoc( resource stmt )
+/* {{{ proto array oci_fetch_assoc( resource stmt )
    Fetch a result row as an associative array */
 PHP_FUNCTION(oci_fetch_assoc)
 {
@@ -5750,7 +5751,7 @@ PHP_FUNCTION(oci_fetch_assoc)
 }
 /* }}} */
 
-/* {{{ proto object oci_fetch_array( resource stmt [, int mode ])
+/* {{{ proto array oci_fetch_array( resource stmt [, int mode ])
    Fetch a result row as an array */
 PHP_FUNCTION(oci_fetch_array)
 {
@@ -6438,9 +6439,14 @@ PHP_FUNCTION(oci_collection_append)
 
 				RETURN_TRUE;
 				break;
+			default:
+				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Unknown or unsupported type of element");
+				RETURN_FALSE;
+				break;
 		}
 	}
-
+	
+	php_error_docref(NULL TSRMLS_CC, E_NOTICE, "oci_collection_append() should not be called like this. Use $collection->append($element) to append an element to the collection");
 	RETURN_FALSE;
 }
 /* }}} */
@@ -6552,9 +6558,14 @@ PHP_FUNCTION(oci_collection_element_get)
 				}
 				RETURN_DOUBLE(dnum);
 				break;
+			default:
+				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Unknown or unsupported type of element");
+				RETURN_FALSE;
+				break;
 		}
 	}
 
+	php_error_docref(NULL TSRMLS_CC, E_NOTICE, "oci_collection_element_get() should not be called like this. Use $collection->getelem($index) to get an element of the collection with the given index");
 	RETURN_FALSE;
 }
 /* }}} */
@@ -6599,6 +6610,7 @@ PHP_FUNCTION(oci_collection_assign)
 		RETURN_TRUE;
 	}
 
+	php_error_docref(NULL TSRMLS_CC, E_NOTICE, "oci_collection_assign() should not be called like this. Use $collection->assign($collection_value) to assign value to the collection");
 	RETURN_FALSE;
 }
 /* }}} */
@@ -6782,6 +6794,8 @@ PHP_FUNCTION(oci_collection_element_assign)
 				break;
 		}
 	}
+
+	php_error_docref(NULL TSRMLS_CC, E_NOTICE, "oci_collection_element_assign() should not be called like this. Use $collection->assignelem($index, $value) to assign value to an element of the collection");
 	RETURN_FALSE;
 }
 /* }}} */
@@ -6818,6 +6832,8 @@ PHP_FUNCTION(oci_collection_size)
 
 		RETURN_LONG(sz);
 	}
+
+	php_error_docref(NULL TSRMLS_CC, E_NOTICE, "oci_collection_size() should not be called like this. Use $collection->size() to get size of the collection");
 	RETURN_FALSE;
 }
 /* }}} */
@@ -6839,6 +6855,8 @@ PHP_FUNCTION(oci_collection_max)
 
 		RETURN_LONG(sz);
 	}
+
+	php_error_docref(NULL TSRMLS_CC, E_NOTICE, "oci_collection_max() should not be called like this. Use $collection->max() to get maximum number of elements in the collection");
 	RETURN_FALSE;
 }
 /* }}} */
@@ -6875,6 +6893,8 @@ PHP_FUNCTION(oci_collection_trim)
 		}
 		RETURN_TRUE;
 	}
+
+	php_error_docref(NULL TSRMLS_CC, E_NOTICE, "oci_collection_trim() should not be called like this. Use $collection->trim($length) to trim collection to the given length");
 	RETURN_FALSE;
 }
 /* }}} */
