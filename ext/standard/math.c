@@ -338,7 +338,7 @@ PHP_FUNCTION(sqrt)
 
 /* }}} */
 /* {{{ proto double deg2rad(double number)
-   Converts the number in degrees to the radian equivalent  */
+   Converts the number in degrees to the radian equivalent */
 
 PHP_FUNCTION(deg2rad)
 {
@@ -657,7 +657,7 @@ char *_php_math_number_format(double d,int dec,char dec_point,char thousand_sep)
 }
 
 /* }}} */
-/* {{{ proto string number_format(double number, [,int num_decimal_places [, string  dec_seperator, string thousands_seperator)]])
+/* {{{ proto string number_format(double number [, int num_decimal_places [, string  dec_seperator, string thousands_seperator)]])
    Formats a number with grouped thousands */
 
 PHP_FUNCTION(number_format)
