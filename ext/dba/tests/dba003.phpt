@@ -3,6 +3,7 @@ DBA Insert/Replace/Fetch Test
 --SKIPIF--
 <?php 
 	require_once('skipif.inc');
+	die("info $HND handler used");
 ?>
 --FILE--
 <?php
