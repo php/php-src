@@ -1,0 +1,6 @@
+# $Source$
+# $Id$
+
+define_option with-pcre 'pcre support?' yesnodir no \
+'    Whether to build the pcre extension.'
+	

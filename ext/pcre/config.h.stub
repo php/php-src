@@ -1,0 +1,2 @@
+/* define if you want to use the pcre extension */
+#define	HAVE_LIBPCRE 0
