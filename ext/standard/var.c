@@ -194,18 +194,12 @@ void php3api_var_serialize(pval *buf, pval **struc)
 
 		case IS_ARRAY:
 			ch = 'a';
-			goto got_array;
-
-		case IS_OBJECT:
-			ch = 'o';
-
-		  got_array:
 			i = _php3_hash_num_elements((*struc)->value.ht);
 			slen = sprintf(s, "%c:%d:{", ch, i);
 			STR_CAT(buf, s, slen);
 			if (i > 0) {
 				char *key;
-				pval **data,*d;
+				pval *data,*d;
 				ulong index;
 				
 				_php3_hash_internal_pointer_reset((*struc)->value.ht);
@@ -213,8 +207,10 @@ void php3api_var_serialize(pval *buf, pval **struc)
 					if ((i = _php3_hash_get_current_key((*struc)->value.ht, &key, &index)) == HASH_KEY_NON_EXISTANT) {
 						break;
 					}
-					if (_php3_hash_get_current_data((*struc)->value.ht, (void **) (&data)) !=
-							SUCCESS || !data || ((*data) == (*struc))) {
+					if (_php3_hash_get_current_data((*struc)->value.ht, (void **) (&data)) != SUCCESS || !data || (data == (*struc))) {
+						continue;
+					}
+					if (data->type==IS_STRING && data->value.str.val==undefined_variable_string) {
 						continue;
 					}
 
@@ -241,6 +237,51 @@ void php3api_var_serialize(pval *buf, pval **struc)
 			}
 			STR_CAT(buf, "}", 1);
 			return;
+
+		case IS_OBJECT:
+			i = zend_hash_num_elements((*struc)->value.obj.properties);
+			slen = sprintf(s, "o:%d:{", i);
+			STR_CAT(buf, s, slen);
+			if (i > 0) {
+				char *key;
+				pval *data,*d;
+				ulong index;
+
+				zend_hash_internal_pointer_reset((*struc)->value.obj.properties);
+				for (;; _php3_hash_move_forward((*struc)->value.obj.properties)) {
+					if ((i = _php3_hash_get_current_key((*struc)->value.obj.properties, &key, &index)) == HASH_KEY_NON_EXISTANT) {
+						break;
+					}
+					if (_php3_hash_get_current_data((*struc)->value.obj.properties, (void **) (&data)) != SUCCESS || !data || (data == (*struc))) {
+						continue;
+					}
+					if (data->type==IS_STRING && data->value.str.val==undefined_variable_string) {
+						continue;
+					}
+
+					switch (i) {
+						case HASH_KEY_IS_LONG:
+							d = emalloc(sizeof(pval));	
+							d->type = IS_LONG;
+							d->value.lval = index;
+							php3api_var_serialize(buf, &d);
+							efree(d);
+							break;
+						case HASH_KEY_IS_STRING:
+							d = emalloc(sizeof(pval));	
+							d->type = IS_STRING;
+							d->value.str.val = key;
+							d->value.str.len = strlen(key);
+							php3api_var_serialize(buf, &d);
+							efree(key);
+							efree(d);
+							break;
+					}
+					php3api_var_serialize(buf, data);
+				}
+			}
+			STR_CAT(buf, "}", 1);
+			break;
 
 		default:
 			STR_CAT(buf, "i:0;", 4);
@@ -327,17 +368,54 @@ int php3api_var_unserialize(pval **rval, char **p, char *max)
 
 		case 'a':
 			(*rval)->type = IS_ARRAY;
-			goto got_array;
 
-		case 'o':
-			(*rval)->type = IS_OBJECT;
-
-		  got_array:
 			(*rval)->refcount = 1;
 			(*rval)->is_ref = 0;
 			(*p) += 2;
 			i = atoi(*p);
 			(*rval)->value.ht = (HashTable *) emalloc(sizeof(HashTable));
+			_php3_hash_init((*rval)->value.ht, i + 1, NULL, PVAL_PTR_DTOR, 0);
+			while (**p && **p != ':') {
+				(*p)++;
+			}
+			if (**p != ':' || *((*p) + 1) != '{') {
+				return 0;
+			}
+			for ((*p) += 2; **p && **p != '}' && i > 0; i--) {
+				pval *key = emalloc(sizeof(pval));
+				pval *data = emalloc(sizeof(pval));
+				
+				if (!php3api_var_unserialize(&key, p, max)) {
+				    efree(key);
+					efree(data);
+					return 0;
+				}
+				if (!php3api_var_unserialize(&data, p, max)) {
+					pval_destructor(key);
+				    efree(key);
+					efree(data);
+					return 0;
+				}
+				switch (key->type) {
+					case IS_LONG:
+						_php3_hash_index_update((*rval)->value.ht, key->value.lval, &data, sizeof(data), NULL);
+						break;
+					case IS_STRING:
+						_php3_hash_add((*rval)->value.ht, key->value.str.val, key->value.str.len + 1, &data, sizeof(data), NULL);
+						break;
+				}
+				pval_destructor(key);
+				efree(key);
+			}
+			return *((*p)++) == '}';
+		case 'o':
+			(*rval)->type = IS_OBJECT;
+
+			(*rval)->refcount = 1;
+			(*rval)->is_ref = 0;
+			(*p) += 2;
+			i = atoi(*p);
+			(*rval)->value.obj.properties = (HashTable *) emalloc(sizeof(HashTable));
 			_php3_hash_init((*rval)->value.ht, i + 1, NULL, PVAL_PTR_DTOR, 0);
 			while (**p && **p != ':') {
 				(*p)++;
