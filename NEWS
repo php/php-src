@@ -20,6 +20,8 @@ PHP 4                                                                      NEWS
 - Fixed bug #27509 (broken getaddrinfo() causes fsockopen() error). (Sara)
 - Fixed bug #27505 (htmlentities() does not handle BIG5 correctly). (Ilia, 
   ywliu at hotmail dot com)
+- Fixed bug #27498 (bogus safe_mode error on nonexistent directories for
+  chdir() and opendir() functions). (Ilia)
 - Fixed bug #27460 (base64_decode() does not handle extra padding).
   (Ilia, naish at klanen dot net)
 - Fixed bug #27443 (defined() returns wrong type). (Derick)

@@ -275,7 +275,7 @@ PHP_FUNCTION(chdir)
 		RETURN_FALSE;
 	}
 
-	if (PG(safe_mode) && !php_checkuid(str, NULL, CHECKUID_ALLOW_ONLY_FILE)) {
+	if (PG(safe_mode) && !php_checkuid(str, NULL, CHECKUID_CHECK_FILE_AND_DIR)) {
 		RETURN_FALSE;
 	}
 	ret = VCWD_CHDIR(str);
