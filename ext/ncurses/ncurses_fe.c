@@ -133,7 +133,11 @@ function_entry ncurses_functions[] = {
   PHP_FE(ncurses_mvinch, NULL)
   PHP_FE(ncurses_mvwaddstr, NULL)
   PHP_FE(ncurses_insstr, NULL)
+
+#if 0
   PHP_FE(ncurses_instr, NULL)
+#endif
+
   PHP_FE(ncurses_mvhline, NULL)
   PHP_FE(ncurses_mvcur, NULL)
   PHP_FE(ncurses_init_color, NULL)

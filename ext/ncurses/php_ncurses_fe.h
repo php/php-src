@@ -123,7 +123,11 @@ PHP_FUNCTION(ncurses_mvgetch);
 PHP_FUNCTION(ncurses_mvinch);
 PHP_FUNCTION(ncurses_mvwaddstr);
 PHP_FUNCTION(ncurses_insstr);
+
+#if 0
 PHP_FUNCTION(ncurses_instr);
+#endif
+
 PHP_FUNCTION(ncurses_mvhline);
 PHP_FUNCTION(ncurses_mvcur);
 PHP_FUNCTION(ncurses_init_color);
