@@ -2035,7 +2035,7 @@ PHP_FUNCTION(domxml_node_type)
 }
 /* }}} */
 
-/* {{{ proto bool domxml_clone_node(void)
+/* {{{ proto object domxml_clone_node([bool deep])
    Clones a node */
 PHP_FUNCTION(domxml_clone_node)
 {
