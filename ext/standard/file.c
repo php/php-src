@@ -1356,7 +1356,7 @@ PHP_FUNCTION(fflush)
 }
 /* }}} */
 
-/* {{{ proto int set_file_buffer(int fp, int buffer)
+/* {{{ proto int set_file_buffer(resource fp, int buffer)
    Set file write buffer */
 PHP_FUNCTION(set_file_buffer)
 {
@@ -1391,6 +1391,9 @@ PHP_FUNCTION(set_file_buffer)
 		ret = setvbuf((FILE *) what, NULL, _IOFBF, buff);
 	}
 
+	if (ret) {
+		php_error(E_WARNING, "Illegal value for set_file_buffer()");
+	}
 	RETURN_LONG(ret);
 }
 /* }}} */
