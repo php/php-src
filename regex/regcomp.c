@@ -4,11 +4,11 @@
 #include <ctype.h>
 #include <limits.h>
 #include <stdlib.h>
-#include <regex.h>
 
 #define POSIX_MISTAKE
 
 #include "utils.h"
+#include "regex.h"
 #include "regex2.h"
 
 #include "cclass.h"
@@ -53,7 +53,7 @@ static char nuls[10];		/* place to point scanner in event of error */
 #define	NEXTn(n)	(p->next += (n))
 #define	GETNEXT()	(*p->next++)
 #define	SETERROR(e)	seterr(p, (e))
-#define	REQUIRE(co, e)	((co) || SETERROR(e))
+#define	REQUIRE(co, e)	(void) ((co) || SETERROR(e))
 #define	MUSTSEE(c, e)	(REQUIRE(MORE() && PEEK() == (c), e))
 #define	MUSTEAT(c, e)	(REQUIRE(MORE() && GETNEXT() == (c), e))
 #define	MUSTNOTSEE(c, e)	(REQUIRE(!MORE() || PEEK() != (c), e))
@@ -204,7 +204,7 @@ int stop;			/* character this ERE should end at */
 		conc = HERE();
 		while (MORE() && (c = PEEK()) != '|' && c != stop)
 			p_ere_exp(p);
-		REQUIRE(HERE() != conc, REG_EMPTY);	/* require nonempty */
+		(void) REQUIRE(HERE() != conc, REG_EMPTY);	/* require nonempty */
 
 		if (!EAT('|'))
 			break;		/* NOTE BREAK OUT */
@@ -1171,6 +1171,7 @@ register char *cp;
 	cs->multis[cs->smultis - 1] = '\0';
 }
 
+#if 0
 /*
  - mcsub - subtract a collating element from a cset
  == static void mcsub(register cset *cs, register char *cp);
@@ -1210,6 +1211,7 @@ register char *cp;
 	return(mcfind(cs, cp) != NULL);
 }
 
+
 /*
  - mcfind - find a collating element in a cset
  == static char *mcfind(register cset *cs, register char *cp);
@@ -1228,6 +1230,7 @@ register char *cp;
 			return(p);
 	return(NULL);
 }
+#endif
 
 /*
  - mcinvert - invert the list of collating elements in a cset
