@@ -1,3 +1,148 @@
+2001-08-15  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/DB/mysql.php:
+    fix free result in tableInfo (reported by "Yermo M. Lamers" <yml@dtlink.com>)
+
+2001-08-15  Zeev Suraski  <zeev@zend.com>
+
+    * ext/standard/basic_functions.c: MFH
+
+2001-08-15  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/ircg.c: add two further checks to fix possible crashes
+    (%m in the quit message can now be NULL)
+
+2001-08-15  Zeev Suraski  <zeev@zend.com>
+
+    * ext/standard/basic_functions.c: Fix build
+
+2001-08-15  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/standard/info.c: Add the build time too. Bug: #12774
+
+    * configure.in: MFH
+
+    * configure.in: Fix --with-pear=path too.
+
+2001-08-15  Chuck Hagenbuch  <chuck@horde.org>
+
+    * pear/PEAR.php:
+    PEAR::raiseError() can be called statically - don't assume $this will be
+    there!
+
+2001-08-15  Stig Bakken  <ssb@fast.no>
+
+    * pear/CODING_STANDARDS: * point people to the manual instead
+
+    * pear/XML/RPC.php: * moved to pear
+
+2001-08-15  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/DB/mssql.php:
+    use push/pop in nextID to don't disturb the sequence work
+
+2001-08-15  Jeroen van Wolffelaar  <jeroen@A-Eskwadraat.nl>
+
+    * ext/standard/math.c
+      ext/standard/php_math.h: MFH
+
+    * ext/standard/math.c
+      ext/standard/php_math.h:
+    Remove cbrt also, and mark logm1 and exp1p as expermintal
+
+    * ext/standard/math.c: MF407
+
+    * ext/standard/math.c:
+    It was agreed that log2, exp2 and exp10 shouldn't be added to PHP. log10
+    already existed.
+
+
+2001-08-15  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/DB/mssql.php:
+    - added sequences (emulated), contributed by: Esben Maaløe <acebone@f2s.com>
+    - added extension error handling: errorCode, mssqRaiseError, errorcode_map,...
+
+    untested changes, please test them or provide a SQL Server :-)
+
+2001-08-15  Daniel Beulshausen  <daniel@php4win.de>
+
+    * ext/fdf/fdf.dsp
+      ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.dsp: accomodate SAPI_API changes
+
+    * main/SAPI.c
+      main/SAPI.h
+      main/php_content_types.c
+      main/php_content_types.h
+      main/php_variables.c
+      main/rfc1867.c
+      main/rfc1867.h: fix SAPI_POST_* exports
+
+2001-08-15  Harald Radi  <h.radi@nme.at>
+
+    * NEWS: com entry was missing
+
+    * NEWS: no message
+
+2001-08-15  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * pear/Cache/DB.php:
+    Implement free(). Mark tableInfo() as not implemented. Fixx PHPDoc.
+
+2001-08-15  Thies C. Arntzen  <thies@thieso.net>
+
+    * ext/oci8/oci8.c: MFH the recursion-hack
+
+2001-08-15  Chuck Hagenbuch  <chuck@horde.org>
+
+    * pear/Log/Observer.php
+      pear/Log/observer.php:
+    Log_Observer isn't a driver, so capitalize it appropriately, and add a
+    directory for Log_Observer_* subclass examples
+
+2001-08-15  Thies C. Arntzen  <thies@thieso.net>
+
+    * ext/oci8/oci8.c:
+    mega patch to avoid recursive oci-calls as they might break oracle!
+
+    php will simply exit() (!!!) once it encounters an attemp to call oracle
+    while still in an oracle-call. this can only happen when the script gets
+    interrupted (timeout, apache-restart) and php tries to run the cleanups even
+    though we are in an unclean state. i will add an -ini flag soon (not before
+    4.0.7) which will (optional) make php not run the cleanups when in an unclean
+    state!
+
+2001-08-15  Zeev Suraski  <zeev@zend.com>
+
+    * main/php_version.h
+      configure.in: Reroll 4.0.7RC1
+
+2001-08-15  Harald Radi  <h.radi@nme.at>
+
+    * ext/iisfunc/iisfunc.cpp
+      ext/iisfunc/iisfunc.h
+      ext/iisfunc/setup.c
+      ext/iisfunc/setup.h:
+    - removed all those CoInitialize() and CoCreateInstance() calls
+    - created a global IMSAdminBase instance for the whole module
+
+    * ext/iisfunc/iisfunc.dsp: fixed _TS settings
+
+    * ext/dotnet/dotnet.cpp
+      ext/com/COM.c: removed CoInitialize() and CoUninitialize()
+
+2001-08-15  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * pear/Cache/DB.php: Stramlining a bit.
+
+2001-08-15  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/standard/file.c:
+     Removed select(), fd_set(), etc. (wasn't present in the first place, and
+     these are implemented in the sockwasn't present in the first place, and
+     these are implemented in the sockets extension))
+
 2001-08-14  Zeev Suraski  <zeev@zend.com>
 
     * sapi/cgi/cgi_main.c: Revert an old bogus patch
