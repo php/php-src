@@ -750,8 +750,7 @@ class PEAR_Error
                       is_object($this->callback[0]) &&
                       is_string($this->callback[1]) &&
                       strlen($this->callback[1])) {
-                      @call_user_func($this->callback[0], $this->callback[1],
-                                 $this);
+                      @call_user_func($this->callback, $this);
             }
         }
     }
