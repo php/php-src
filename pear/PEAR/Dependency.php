@@ -51,8 +51,8 @@ class PEAR_Dependency
     }
 
     /**
-    * This method maps the xml dependency definition to the
-    * PEAR_dependecy one
+    * This method maps the XML dependency definition to the
+    * corresponding one from PEAR_Dependency
     *
     * $opts => Array
     *    (
@@ -61,6 +61,10 @@ class PEAR_Dependency
     *        [version] => 3.4
     *        [name] => HTML_Common
     *    )
+    *
+    * @param  string Error message
+    * @param  array  Options
+    * @return boolean
     */
     function callCheckMethod(&$errmsg, $opts)
     {
