@@ -64,7 +64,7 @@ typedef struct ps_module_struct {
 typedef enum {
 	php_session_disabled,
 	php_session_none,
-	php_session_active,
+	php_session_active
 } php_session_status;
 
 typedef struct _php_ps_globals {
