@@ -177,7 +177,8 @@ PHP_MINIT_FUNCTION(fdf)
 /* }}} */
 
 /* {{{ RINIT */
-PHP_RINIT_FUNCTION(fdf) {
+PHP_RINIT_FUNCTION(fdf)
+{
 	return SUCCESS;
 }
 /* }}} */
