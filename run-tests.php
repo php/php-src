@@ -44,7 +44,7 @@ ob_implicit_flush();
 error_reporting(E_ALL);
 
 if (ini_get('safe_mode')) {
-    echo <<<SAFE_MODE_WARNING
+    echo <<< SAFE_MODE_WARNING
 
 +-----------------------------------------------------------+
 |                       ! WARNING !                         |
@@ -62,25 +62,25 @@ SAFE_MODE_WARNING;
 // Require the explicit specification.
 // Otherwise we could end up testing the wrong file!
 
-if(isset($_ENV['TEST_PHP_EXECUTABLE'])) {
+if (isset($_ENV['TEST_PHP_EXECUTABLE'])) {
 	$php = $_ENV['TEST_PHP_EXECUTABLE'];
 } else {
 	error("environment variable TEST_PHP_EXECUTABLE must be set to specify PHP executable!");
 }
 
-if(isset($_ENV['TEST_PHP_LOG_FORMAT'])) {
+if (isset($_ENV['TEST_PHP_LOG_FORMAT'])) {
 	$log_format = strtoupper($_ENV['TEST_PHP_LOG_FORMAT']);
 } else {
 	$log_format = 'LEOD';
 }
 
-if(!@is_executable($php)) {
+if (!@is_executable($php)) {
 	error("invalid PHP executable specified by TEST_PHP_EXECUTABLE  = " . $php);
 }
 
 // Check whether a detailed log is wanted.
 
-if(isset($_ENV['TEST_PHP_DETAILED'])) {
+if (isset($_ENV['TEST_PHP_DETAILED'])) {
 	define('DETAILED', $_ENV['TEST_PHP_DETAILED']);
 } else {
 	define('DETAILED', 0);
@@ -103,7 +103,7 @@ INI wanted  : " . realpath('php.ini-dist') . "
 // Make sure we are using the proper php.ini.
 
 $php_ini = realpath("php.ini-dist");
-if(realpath(get_cfg_var('cfg_file_path')) != $php_ini) {
+if (realpath(get_cfg_var('cfg_file_path')) != $php_ini) {
 	error("php.ini-dist was not used!");
 }
 $php .= " -c $php_ini";
@@ -115,63 +115,65 @@ $test_files = array();
 $test_results = array();
 
 // If parameters given assume they represent selected tests to run.
-if (isset($argc) && $argc>1) {
+if (isset($argc) && $argc > 1) {
 	for ($i=1; $i<$argc; $i++) {
 		$testfile = realpath($argv[$i]);
 		$test_to_run[$testfile] = 1;
 	}
+
+	// Run selected tests.
+	if (count($test_to_run)) {
+		echo "Running selected tests.\n";
+		foreach($test_to_run AS $name=>$runnable) {
+			echo "test: $name runnable: $runnable\n";
+			if ($runnable) {
+				$test_results[$name] = run_test($php,$name);
+			}
+		}
+		exit(0);
+	}
 }
 
 // Compile a list of all test files (*.phpt).
-$test_files     = array();
-$module_of_test = array();
-find_files(getcwd());
+$test_files = array();
+$exts_to_test = get_loaded_extensions();
+sort($exts_to_test);
+$extra_dirs = array('pear', 'tests');
+$cwd=getcwd();
 
-function find_files($dir) {
-	global $test_files, $module_of_test;
+// First get list of test files in ext/ 
+foreach ($exts_to_test as $dir) {
+	find_files("{$cwd}/ext/{$dir}");
+}
 
-	/* FIXME: this messes up if you unpack PHP in /ext/pear :) */
-	if (ereg('/ext/([^/]+)/',"$dir/",$r)) {
-		$module = $r[1];
-	} else if (ereg('/pear/',"$dir/")) {
-		$module = 'pear';
-	} else {
-		$module = '';
-	}
+// Then the rest
+foreach ($extra_dirs as $dir) {
+	find_files("{$cwd}/{$dir}");
+}
+
+function find_files($dir)
+{
+	global $test_files;
 
 	$o = opendir($dir) or error("cannot open directory: $dir");
-	while (($name = readdir($o))!==false) {
+	while (($name = readdir($o)) !== false) {
 		if (is_dir("{$dir}/{$name}") && !in_array($name, array('.', '..', 'CVS'))) {
 			find_files("{$dir}/{$name}");
 	    }
 	
 		// Cleanup any left-over tmp files from last run.
-		if (substr($name, -4)=='.tmp') {
+		if (substr($name, -4) == '.tmp') {
 			@unlink("$dir/$name");
 			continue;
 		}
 
 		// Otherwise we're only interested in *.phpt files.
-		if (substr($name, -5)=='.phpt') {
+		if (substr($name, -5) == '.phpt') {
 			$testfile = realpath("{$dir}/{$name}");
 			$test_files[] = $testfile;
-//			$module_of_test[$testfile] = $module;
 		}
 	}
-
 	closedir($o);
-}
-
-// Run only selected tests, if specified.
-if (count($test_to_run)) {
-	echo "Running selected tests.\n";
-	foreach($test_to_run AS $name=>$runnable) {
-		echo "test: $name runnable: $runnable\n";
-		if ($runnable) {
-			$test_results[$name] = run_test($php,$name);
-		}
-	}
-	exit(0);
 }
 
 sort($test_files);
@@ -231,9 +233,9 @@ Time taken      : " . sprintf("%4d seconds", $end_time - $start_time) . "
 //  Write the given text to a temporary file, and return the filename.
 //
 
-function save_text($filename,$text) {
-    $fp = @fopen($filename,'w')
-        or error("Cannot open file '" . $filename . "' (save_text)");
+function save_text($filename,$text)
+{
+    $fp = @fopen($filename,'w') or error("Cannot open file '" . $filename . "' (save_text)");
     fwrite($fp,$text);
     fclose($fp);
     if (1 < DETAILED) echo "
@@ -464,7 +466,8 @@ $output
     return 'FAILED';
 }
 
-function generate_diff($wanted,$output) {
+function generate_diff($wanted,$output)
+{
     $w = explode("\n", $wanted);
     $o = explode("\n", $output);
     $w1 = array_diff($w,$o);
@@ -478,7 +481,8 @@ function generate_diff($wanted,$output) {
     return implode("\r\n", $diff);
 }
 
-function error($message) {
+function error($message)
+{
 	echo "ERROR: {$message}\n";
 	exit(1);
 }
