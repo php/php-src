@@ -201,7 +201,6 @@ int sapi_stack_apply_with_argument_stop_if_http_error(sapi_stack *stack, int typ
 {
 	int i;
 	int ret = DECLINED;
-
 	switch (type) {
 		case ZEND_STACK_APPLY_TOPDOWN:
 			for (i=stack->top-1; i>=0; i--) {
@@ -708,12 +707,11 @@ static int send_php(request_rec *r, int display_source_mode, char *filename)
 		
 		php_save_umask();
 		if(!AP(setup_env)) {
+			AP(setup_env) = 1;
 			add_common_vars(r);
 			add_cgi_vars(r);
-			AP(setup_env) = 1;
 		}
 		init_request_info(TSRMLS_C);
-		fprintf(stderr, "%s:%d\n", __FILE__,__LINE__);
 		apache_php_module_main(r, display_source_mode TSRMLS_CC);
 		
 		/* Done, restore umask, turn off timeout, close file and return */
@@ -1238,22 +1236,23 @@ static int php_run_hook(php_handler *handler, request_rec *r)
 	php_per_dir_config *conf;
 
 	TSRMLS_FETCH();
+
 	if(!AP(apache_config_loaded)) {
 		conf = (php_per_dir_config *) get_module_config(r->per_dir_config, &php4_module);
 		if (conf)
 			   zend_hash_apply((HashTable *)conf->ini_settings, (apply_func_t) php_apache_alter_ini_entries TSRMLS_CC);
 		AP(apache_config_loaded) = 1;
 	}
-	if (!handler->name)
-			return DECLINED;
-	hard_timeout("send", r);
-	SG(server_context) = r;
+	if (!handler->name) {
+		return DECLINED;
+	}
 	php_save_umask();
 	if (!AP(setup_env)) {
+		AP(setup_env) = 1;
 		add_common_vars(r);
 		add_cgi_vars(r);
-		AP(setup_env) = 1;
 	}
+	SG(server_context) = r;
 	init_request_info(TSRMLS_C);
 	apache_php_module_hook(r, handler, &ret TSRMLS_CC);
 	php_restore_umask();
@@ -1268,8 +1267,8 @@ static int php_run_hook(php_handler *handler, request_rec *r)
 
 static int php_uri_translation(request_rec *r)
 {	
-	TSRMLS_FETCH();
 	php_per_server_config *conf;
+	TSRMLS_FETCH();
 	AP(current_hook) = AP_URI_TRANS;
 	conf = (php_per_server_config *) get_module_config(r->server->module_config, &php4_module);
 	return sapi_stack_apply_with_argument_stop_if_equals(&conf->uri_handlers, 
@@ -1279,8 +1278,8 @@ static int php_uri_translation(request_rec *r)
 
 static int php_header_hook(request_rec *r)
 {
-	TSRMLS_FETCH();
 	php_per_dir_config *conf;
+	TSRMLS_FETCH();
 	AP(current_hook) = AP_HEADER_PARSE;
 	conf = (php_per_dir_config *) get_module_config(r->per_dir_config, &php4_module);
 	return sapi_stack_apply_with_argument_stop_if_http_error(&conf->headers_handlers,
@@ -1290,8 +1289,8 @@ static int php_header_hook(request_rec *r)
 
 static int php_auth_hook(request_rec *r)
 {
-	TSRMLS_FETCH();
 	php_per_dir_config *conf;
+	TSRMLS_FETCH();
 	AP(current_hook) = AP_AUTHENTICATION;
 	conf = (php_per_dir_config *) get_module_config(r->per_dir_config, &php4_module);
 	return sapi_stack_apply_with_argument_stop_if_equals(&conf->auth_handlers, 
@@ -1301,20 +1300,22 @@ static int php_auth_hook(request_rec *r)
 
 static int php_access_hook(request_rec *r)
 {
-	TSRMLS_FETCH();
 	php_per_dir_config *conf;
+	int status = DECLINED;
+	TSRMLS_FETCH();
 	AP(current_hook) = AP_ACCESS_CONTROL;
 	conf = (php_per_dir_config *) get_module_config(r->per_dir_config, &php4_module);
-	return sapi_stack_apply_with_argument_stop_if_http_error(&conf->access_handlers,
+	status =  sapi_stack_apply_with_argument_stop_if_http_error(&conf->access_handlers,
 			ZEND_STACK_APPLY_BOTTOMUP,
 			(int (*)(void *element, void *)) php_run_hook, r);
+	return status;
 
 }
 
 static int php_type_hook(request_rec *r)
 {
-	TSRMLS_FETCH();
 	php_per_dir_config *conf;
+	TSRMLS_FETCH();
 	AP(current_hook) = AP_TYPE_CHECKING;
 	conf = (php_per_dir_config *) get_module_config(r->per_dir_config, &php4_module);
 	return sapi_stack_apply_with_argument_stop_if_equals(&conf->type_handlers,
@@ -1325,8 +1326,8 @@ static int php_type_hook(request_rec *r)
 
 static int php_fixup_hook(request_rec *r)
 {
-	TSRMLS_FETCH();
 	php_per_dir_config *conf;
+	TSRMLS_FETCH();
 	AP(current_hook) = AP_FIXUP;
 	conf = (php_per_dir_config *) get_module_config(r->per_dir_config, &php4_module);
 	return sapi_stack_apply_with_argument_stop_if_http_error(&conf->fixup_handlers,
@@ -1337,8 +1338,8 @@ static int php_fixup_hook(request_rec *r)
 
 static int php_logger_hook(request_rec *r)
 {
-	TSRMLS_FETCH();
 	php_per_dir_config *conf;
+	TSRMLS_FETCH();
 	AP(current_hook) = AP_LOGGING;
 	conf = (php_per_dir_config *) get_module_config(r->per_dir_config, &php4_module);
 	return sapi_stack_apply_with_argument_stop_if_http_error(&conf->logger_handlers,
@@ -1349,9 +1350,9 @@ static int php_logger_hook(request_rec *r)
  
 static int php_post_read_hook(request_rec *r)
 {
-	TSRMLS_FETCH();
 	php_per_dir_config *conf;
 	php_per_server_config *svr;
+	TSRMLS_FETCH();
 	AP(current_hook) = AP_POST_READ;
 	svr = get_module_config(r->server->module_config, &php4_module);
 	if(ap_is_initial_req(r)) {
@@ -1365,8 +1366,8 @@ static int php_post_read_hook(request_rec *r)
 
 static int php_response_handler(request_rec *r)
 {
-	TSRMLS_FETCH();
 	php_per_dir_config *conf;
+	TSRMLS_FETCH();
 	AP(current_hook) = AP_RESPONSE;
 	conf = (php_per_dir_config *) get_module_config(r->per_dir_config, &php4_module);
 	return sapi_stack_apply_with_argument_all(&conf->response_handlers, ZEND_STACK_APPLY_BOTTOMUP, (int (*)(void *element, void *)) php_run_hook, r);
