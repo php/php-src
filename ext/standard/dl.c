@@ -236,22 +236,11 @@ void php_dl(pval *file, int type, pval *return_value TSRMLS_DC)
 	}
 	module_entry->type = type;
 	module_entry->module_number = zend_next_free_module();
-	zend_register_module_ex(module_entry TSRMLS_CC);
-
-	if ((type == MODULE_TEMPORARY) && module_entry->request_startup_func) {
-		if (module_entry->request_startup_func(type, module_entry->module_number TSRMLS_CC)) {
-			php_error_docref(NULL TSRMLS_CC, error_type, "Unable to initialize module '%s'", module_entry->name);
-			DL_UNLOAD(handle);
-			RETURN_FALSE;
-		}
-	}
 	
-	/* update the .request_started property... */
-	if (zend_hash_find(&module_registry, module_entry->name, strlen(module_entry->name)+1, (void **) &tmp)==FAILURE) {
-		php_error_docref(NULL TSRMLS_CC, error_type, "Loaded module '%s' got lost", module_entry->name);
+	if (zend_register_module_ex(module_entry TSRMLS_CC) == FAILURE) {
+		DL_UNLOAD(handle);
 		RETURN_FALSE;
 	}
-	tmp->handle = handle;
 	
 	RETURN_TRUE;
 }
