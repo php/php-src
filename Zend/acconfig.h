@@ -1,5 +1,6 @@
 #define ZEND_API
 #define ZEND_DLEXPORT
+#define ZEND_DLIMPORT
 
 @TOP@
 
