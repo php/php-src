@@ -498,7 +498,7 @@ int OS_Write(int fd, char * buf, size_t len)
  *
  *----------------------------------------------------------------------
  */
-int OS_SpawnChild(char *appPath, int listenFd, PROCESS_INFORMATION *pInfo, char *env)
+int OS_SpawnChild(char *appPath, int listenFd)
 {
     int forkResult;
 

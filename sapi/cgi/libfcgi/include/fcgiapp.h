@@ -80,6 +80,19 @@ typedef struct FCGX_Stream {
 typedef char **FCGX_ParamArray;
 
 /*
+ * A vector of pointers representing the parameters received
+ * by a FastCGI application server, with the vector's length
+ * and last valid element so adding new parameters is efficient.
+ */
+
+typedef struct Params {
+    FCGX_ParamArray vec;    /* vector of strings */
+    int length;		    /* number of string vec can hold */
+    char **cur;		    /* current item in vec; *cur == NULL */
+} Params;
+typedef Params *ParamsPtr;
+
+/*
  * FCGX_Request Flags
  *
  * Setting FCGI_FAIL_ACCEPT_ON_INTR prevents FCGX_Accept() from
@@ -98,11 +111,11 @@ typedef struct FCGX_Request {
     FCGX_Stream *in;
     FCGX_Stream *out;
     FCGX_Stream *err;
-	char **envp;
+	FCGX_ParamArray envp;
 
 	/* Don't use anything below here */
 
-    struct Params *paramsPtr;
+    ParamsPtr paramsPtr;
     int ipcFd;               /* < 0 means no connection */
     int isBeginProcessed;     /* FCGI_BEGIN_REQUEST seen */
     int keepConnection;       /* don't close ipcFd at end of request */
@@ -351,7 +364,8 @@ DLLAPI void FCGX_SetExitStatus(int status, FCGX_Stream *stream);
  *----------------------------------------------------------------------
  */
 DLLAPI char *FCGX_GetParam(const char *name, FCGX_ParamArray envp);
-
+DLLAPI void FCGX_PutEnv(FCGX_Request *request, char *nameValue);
+
 /*
  *======================================================================
  * Readers
@@ -533,7 +547,7 @@ DLLAPI int FCGX_VFPrintF(FCGX_Stream *stream, const char *format, va_list arg);
  *----------------------------------------------------------------------
  */
 DLLAPI int FCGX_FFlush(FCGX_Stream *stream);
-
+
 /*
  *======================================================================
  * Both Readers and Writers

@@ -108,7 +108,11 @@ DLLAPI int OS_CreateLocalIpcFd(const char *bindPath, int backlog, int bCreateMut
 DLLAPI int OS_FcgiConnect(char *bindPath);
 DLLAPI int OS_Read(int fd, char * buf, size_t len);
 DLLAPI int OS_Write(int fd, char * buf, size_t len);
+#ifdef _WIN32
 DLLAPI int OS_SpawnChild(char *execPath, int listenFd, PROCESS_INFORMATION *pInfo, char *env);
+#else
+DLLAPI int OS_SpawnChild(char *execPath, int listenfd);
+#endif
 DLLAPI int OS_AsyncReadStdin(void *buf, int len, OS_AsyncProc procPtr,
                       ClientData clientData);
 DLLAPI int OS_AsyncRead(int fd, int offset, void *buf, int len,
