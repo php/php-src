@@ -114,6 +114,7 @@ zend_module_entry apache_module_entry = {
    Get and set Apache request notes */
 PHP_FUNCTION(apache_child_terminate)
 {
+#ifndef MULTITHREAD
 	APLS_FETCH();
 	SLS_FETCH();
 
@@ -122,6 +123,9 @@ PHP_FUNCTION(apache_child_terminate)
 	} else { /* tell them to get lost! */
 		php_error(E_WARNING, "apache.child_terminate is disabled");
 	}
+#else
+		php_error(E_WARNING, "apache_child_terminate() is not supported in this build");
+#endif
 }
 /* }}} */
 
