@@ -1904,6 +1904,7 @@ PHP_FUNCTION(fgetcsv)
 									/* real enclosure */
 									memcpy(tptr, hunk_begin, bptr - hunk_begin - 1);
 									tptr += (bptr - hunk_begin - 1);
+									hunk_begin = bptr;
 									goto quit_loop_2;
 								}
 								memcpy(tptr, hunk_begin, bptr - hunk_begin);
@@ -1929,6 +1930,7 @@ PHP_FUNCTION(fgetcsv)
 								/* real enclosure */
 								memcpy(tptr, hunk_begin, bptr - hunk_begin - 1);
 								tptr += (bptr - hunk_begin - 1);
+								hunk_begin = bptr;
 								goto quit_loop_2;
 							case 1:
 								bptr += inc_len;
@@ -1959,7 +1961,6 @@ PHP_FUNCTION(fgetcsv)
 						/* break is omitted intentionally */
 					case 1:
 						if (*bptr == delimiter) {
-							bptr += inc_len;
 							goto quit_loop_3;
 						}
 						break;
@@ -1971,6 +1972,9 @@ PHP_FUNCTION(fgetcsv)
 			}
 
 		quit_loop_3:
+			memcpy(tptr, hunk_begin, bptr - hunk_begin);
+			tptr += (bptr - hunk_begin);
+			bptr += inc_len;
 			comp_end = tptr;
 		} else {
 			/* 2B. Handle non-enclosure field */
