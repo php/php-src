@@ -1,3 +1,23 @@
+2000-12-27  Sterling Hughes  <Sterling.Hughes@pentap.net>
+
+    * pear/Numbers/Roman.php:
+    Add the Numbers_Roman class for converting to and from Roman numerals.
+
+2000-12-27  Zeev Suraski  <zeev@zend.com>
+
+    * ext/standard/basic_functions.c
+      ext/standard/file.c
+      ext/standard/info.c
+      main/main.c
+      main/php_ini.c
+      win32/php4dll.dsp:
+    - Make the INI mechanism thread safe (fix necessary API changes from Zend)
+    - Make the Win32 non-TS configuration build again
+
+2000-12-27  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/pcre/php_pcre.c: Fix argument check (bug #8421).
+
 2000-12-26  Zeev Suraski  <zeev@zend.com>
 
     * ext/mysql/libmysql/libmysql.dsp
