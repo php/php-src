@@ -121,16 +121,14 @@ class PEAR_Packager extends PEAR_Common
             return $pkginfo;
         }
         // TMP DIR -------------------------------------------------
-        $pwd = getcwd();
-        $new_pwd = dirname($pkgfile);
-        // We allow calls like "pear package /home/cox/mypack/package.xml"
-        if ($new_pwd != '.') {
-            chdir($new_pwd);
-            $new_pwd = getcwd();
-            $orig_pwd = $pwd;
-            $pwd = $new_pwd;
-            $pkgfile = basename($pkgfile);
+        $orig_pwd = getcwd();
+        // We allow calls like "pear package /home/user/mypack/package.xml"
+        if (!@chdir(dirname($pkgfile))) {
+            return $this->raiseError('Couldn\'t chdir to package.xml dir',
+                              null, PEAR_ERROR_TRIGGER, E_USER_ERROR);
         }
+        $pwd = getcwd();
+        $pkgfile = basename($pkgfile);
         $pkgver = $pkginfo['package'] . '-' . $pkginfo['version'];
         // don't want strange characters
         $pkgver = ereg_replace ('[^a-zA-Z0-9._-]', '_', $pkgver);
@@ -172,15 +170,15 @@ class PEAR_Packager extends PEAR_Common
 
         // TAR the Package -------------------------------------------
         chdir(dirname($this->tmpdir));
+        $dest_package = $orig_pwd . DIRECTORY_SEPARATOR . "${pkgver}.tgz";
         // XXX FIXME Windows and non-GNU tar
-        $pwd = (isset($orig_pwd)) ? $orig_pwd : $pwd;
-        $cmd = "tar -cvzf $pwd/${pkgver}.tgz $pkgver";
+        $cmd = "tar -cvzf $dest_package $pkgver";
+        $this->log(2, "+ launched cmd: $cmd");
         // XXX TODO: add an extra param where to leave the package?
         $this->log(1, `$cmd`);
-        $this->log(1, "Package $pwd/${pkgver}.tgz done");
-        if (isset($orig_pwd)) {
-            chdir($orig_pwd);
-        }
+        $this->log(1, "Package $dest_package done");
+        chdir($orig_pwd);
+        return $dest_package;
     }
 
     /* XXXX REMOVEME: this is the old code
