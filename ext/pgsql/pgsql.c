@@ -3190,16 +3190,14 @@ PHPAPI int php_pgsql_convert(PGconn *pg_link, const char *table_name, const zval
 								!strcmp(Z_STRVAL_PP(val), "true") || !strcmp(Z_STRVAL_PP(val), "True") ||
 								!strcmp(Z_STRVAL_PP(val), "yes") || !strcmp(Z_STRVAL_PP(val), "Yes") ||
 								!strcmp(Z_STRVAL_PP(val), "1")) {
-								Z_STRVAL_P(new_val) = estrdup("'t'");
-								Z_STRLEN_P(new_val) = 1;
+								ZVAL_STRING(new_val, "'t'", 1);
 							}
 							else if (!strcmp(Z_STRVAL_PP(val), "f") || !strcmp(Z_STRVAL_PP(val), "F") ||
 									 !strcmp(Z_STRVAL_PP(val), "n") || !strcmp(Z_STRVAL_PP(val), "N") ||
 									 !strcmp(Z_STRVAL_PP(val), "false") ||  !strcmp(Z_STRVAL_PP(val), "False") ||
 									 !strcmp(Z_STRVAL_PP(val), "no") ||  !strcmp(Z_STRVAL_PP(val), "No") ||
 									 !strcmp(Z_STRVAL_PP(val), "0")) {
-								Z_STRVAL_P(new_val) = estrdup("'f'");
-								Z_STRLEN_P(new_val) = 1;
+								ZVAL_STRING(new_val, "'f'", 1);
 							}
 							else {
 								php_error(E_NOTICE, "%s() detected invalid value (%s) for pgsql %s field (%s)",
@@ -3212,12 +3210,11 @@ PHPAPI int php_pgsql_convert(PGconn *pg_link, const char *table_name, const zval
 					case IS_LONG:
 					case IS_BOOL:
 						if (Z_LVAL_PP(val)) {
-							Z_STRVAL_P(new_val) = estrdup("'t'");
+							ZVAL_STRING(new_val, "'t'", 1);
 						}
 						else {
-							Z_STRVAL_P(new_val) = estrdup("'f'");
+							ZVAL_STRING(new_val, "'f'", 1);
 						}
-						Z_STRLEN_P(new_val) = 1;
 						break;
 
 					case IS_NULL:
@@ -3827,8 +3824,8 @@ PHPAPI int php_pgsql_insert(PGconn *pg_link, const char *table, zval *var_array,
 				break;
 			default:
 				/* should not happen */
-				php_error(E_WARNING, "%s(): Report this error to php-dev@lists.php.net",
-						  get_active_function_name(TSRMLS_C));
+				php_error(E_WARNING, "%s(): Report this error to php-dev@lists.php.net. Type = %d",
+						  get_active_function_name(TSRMLS_C), Z_TYPE_PP(val));
 				goto cleanup;
 				break;
 		}
