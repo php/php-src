@@ -60,7 +60,7 @@ ZEND_BEGIN_MODULE_GLOBALS(yaz)
 ZEND_END_MODULE_GLOBALS(yaz)
     
 #ifdef ZTS
-#define YAZSG(v) TSRMG(yaz_globals_id, zend_yaz_globals *. v)
+#define YAZSG(v) TSRMG(yaz_globals_id, zend_yaz_globals *, v)
 #else
 #define YAZSG(v) (yaz_globals.v)
 #endif
