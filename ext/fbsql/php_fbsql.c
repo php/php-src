@@ -666,7 +666,7 @@ PHP_FUNCTION(fbsql_pconnect)
 }
 /* }}} */
 
-/* {{{ proto int fbsql_close([resource link_identifier])
+/* {{{ proto bool fbsql_close([resource link_identifier])
    Close a connection to a database server */
 PHP_FUNCTION(fbsql_close)
 {
@@ -907,7 +907,7 @@ PHP_FUNCTION(fbsql_commit)
 }
 /* }}} */
 
-/* {{{ proto int fbsql_rollback([resource link_identifier])
+/* {{{ proto bool fbsql_rollback([resource link_identifier])
    Rollback all statments since last commit */
 PHP_FUNCTION(fbsql_rollback)
 {
@@ -1135,7 +1135,7 @@ static void php_fbsql_lob_size(INTERNAL_FUNCTION_PARAMETERS, int lob_type)
 	RETURN_LONG(fbcbhBlobSize((FBCBlobHandle *)Z_STRVAL_PP(lob_handle)));
 }
 
-/* {{{ proto string fbsql_blob_size(string blob_handle [, resource link_identifier])
+/* {{{ proto int fbsql_blob_size(string blob_handle [, resource link_identifier])
    Get the size of a BLOB identified by blob_handle */
 PHP_FUNCTION(fbsql_blob_size)
 {
@@ -1143,7 +1143,7 @@ PHP_FUNCTION(fbsql_blob_size)
 }
 /* }}} */
 
-/* {{{ proto string fbsql_clob_size(string clob_handle [, resource link_identifier])
+/* {{{ proto int fbsql_clob_size(string clob_handle [, resource link_identifier])
    Get the size of a CLOB identified by clob_handle */
 PHP_FUNCTION(fbsql_clob_size)
 {
@@ -2597,7 +2597,7 @@ PHP_FUNCTION(fbsql_result)
 }
 /* }}} */
 
-/* {{{ proto int fbsql_next_result(int result)
+/* {{{ proto bool fbsql_next_result(int result)
    Switch to the next result if multiple results are available */
 PHP_FUNCTION(fbsql_next_result)
 {
@@ -2953,7 +2953,7 @@ static void php_fbsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 	result->columnIndex = 0;
 }
 
-/* {{{ proto int fbsql_data_seek(int result, int row_number)
+/* {{{ proto bool fbsql_data_seek(int result, int row_number)
    Move the internal row counter to the specified row_number */
 PHP_FUNCTION(fbsql_data_seek)
 {
@@ -3211,7 +3211,7 @@ PHP_FUNCTION(fbsql_field_table)
 }
 /* }}} */
 
-/* {{{ proto string fbsql_field_len(int result [, int field_index])
+/* {{{ proto mixed fbsql_field_len(int result [, int field_index])
    Get the column length for a specified field_index */
 PHP_FUNCTION(fbsql_field_len)
 {

@@ -554,7 +554,7 @@ PHP_FUNCTION(ftp_fget)
 }
 /* }}} */
 
-/* {{{ proto bool ftp_nb_fget(resource stream, resource fp, string remote_file, int mode[, int resumepos])
+/* {{{ proto int ftp_nb_fget(resource stream, resource fp, string remote_file, int mode[, int resumepos])
    Retrieves a file from the FTP server asynchronly and writes it to an open file */
 PHP_FUNCTION(ftp_nb_fget)
 {
@@ -831,7 +831,7 @@ PHP_FUNCTION(ftp_fput)
 }
 /* }}} */
 
-/* {{{ proto bool ftp_nb_fput(resource stream, string remote_file, resource fp, int mode[, int startpos])
+/* {{{ proto int ftp_nb_fput(resource stream, string remote_file, resource fp, int mode[, int startpos])
    Stores a file from an open file to the FTP server nbronly */
 PHP_FUNCTION(ftp_nb_fput)
 {
@@ -936,7 +936,7 @@ PHP_FUNCTION(ftp_put)
 /* }}} */
 
 
-/* {{{ proto bool ftp_nb_put(resource stream, string remote_file, string local_file, int mode[, int startpos])
+/* {{{ proto int ftp_nb_put(resource stream, string remote_file, string local_file, int mode[, int startpos])
    Stores a file on the FTP server */
 PHP_FUNCTION(ftp_nb_put)
 {
@@ -1110,7 +1110,7 @@ PHP_FUNCTION(ftp_site)
 }
 /* }}} */
 
-/* {{{ proto void ftp_close(resource stream)
+/* {{{ proto bool ftp_close(resource stream)
    Closes the FTP stream */
 PHP_FUNCTION(ftp_close)
 {
