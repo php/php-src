@@ -138,7 +138,7 @@ ZEND_API int zend_register_ini_entries(zend_ini_entry *ini_entry, int module_num
 			zend_unregister_ini_entries(module_number);
 			return FAILURE;
 		}
-		if ((zend_get_configuration_directive(p->name, p->name_length, &default_value))) {
+		if ((zend_get_configuration_directive(p->name, p->name_length, &default_value))==SUCCESS) {
 			if (!hashed_ini_entry->on_modify
 				|| hashed_ini_entry->on_modify(hashed_ini_entry, default_value.value.str.val, default_value.value.str.len, hashed_ini_entry->mh_arg1, hashed_ini_entry->mh_arg2, hashed_ini_entry->mh_arg3, ZEND_INI_STAGE_STARTUP)==SUCCESS) {
 				hashed_ini_entry->value = default_value.value.str.val;
