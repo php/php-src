@@ -1,3 +1,59 @@
+2000-12-24  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/gmp/tests/002.phpt
+      ext/mcrypt/tests/001.phpt:
+    Skip mcrypt/gmp tests, if the extensions are not available.
+
+    * ext/session/tests/001.phpt
+      ext/session/tests/002.phpt
+      ext/session/tests/003.phpt
+      ext/session/tests/004.phpt: Add session tests
+
+    * ext/session/mod_user.c
+      ext/session/session.c: MFH s/efree/FREE_ZVAL/ change
+
+    * ext/session/tests/004.phpt: Add session_set_save_handler test
+
+    * ext/session/mod_user.c
+      ext/session/session.c: More instances of s/efree/FREE_ZVAL/
+
+    * ext/session/mod_user.c:
+    Not freeing the zval using FREE_ZVAL caused a segfault in
+    shutdown_memory_manager.
+
+    * ext/session/tests/003.phpt:
+    Also call some member functions of the deserialized objects
+
+    * build/rules.mk:
+    Run run-tests.php in srcdir and add top_builddir/pear to the include
+    path (does not seem to work though yet.  The include path does not
+    seem to get changed at all).
+
+    * ext/session/tests/003.phpt: Add session object deserialization test
+
+    * ext/session/tests/001.phpt
+      ext/session/tests/002.phpt:
+    Add two regression tests for the session module
+
+    * ext/standard/var.c:
+    Fix segfault introduced through recent zend_hash_get_current_key* changes.
+
+    * tests/dirname.phpt:
+    Sync the expected output with Linux dirname output.  The test passes now.
+    Perhaps this should be split into two tests, because the
+    Win32 paths don't work properly with PHP's dirname on Unix.
+
+    * build/rules.mk
+      run-tests.php: Merge test-related changes
+
+    * build/rules.mk
+      run-tests.php: Fix "make test" in VPATH environments
+
+2000-12-24  Thies C. Arntzen  <thies@thieso.net>
+
+    * ext/xml/xml.c:
+    revert last fix. the problem is now fixed globally in Zend.
+
 2000-12-23  Thies C. Arntzen  <thies@thieso.net>
 
     * ext/xml/xml.c: fix #8363.
