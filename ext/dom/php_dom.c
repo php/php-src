@@ -404,7 +404,7 @@ PHP_MINIT_FUNCTION(dom)
 	dom_domexception_class_entry = zend_register_internal_class_ex(&ce, zend_exception_get_default(), NULL TSRMLS_CC);
 	dom_domexception_class_entry->ce_flags |= ZEND_ACC_FINAL;
 	dom_domexception_class_entry->constructor->common.fn_flags |= ZEND_ACC_PROTECTED;
-	zend_declare_property_long(dom_domexception_class_entry, "code", sizeof("code")-1, 0, ZEND_ACC_PUBLIC);
+	zend_declare_property_long(dom_domexception_class_entry, "code", sizeof("code")-1, 0, ZEND_ACC_PUBLIC TSRMLS_CC);
 
 	REGISTER_DOM_CLASS(ce, "domstringlist", NULL, php_dom_domstringlist_class_functions, dom_domstringlist_class_entry);
 	
