@@ -2991,7 +2991,7 @@ PHP_FUNCTION(nl2br)
 	convert_to_string_ex(str);
 
 	/* Windows style line-endings */
-	tmp = boyer_str_to_str((*str)->value.str.val, (*str)->value.str.len, "\r\n", 2, "<br />\r\n", 8, &new_length);
+	tmp = php_str_to_str((*str)->value.str.val, (*str)->value.str.len, "\r\n", 2, "<br />\r\n", 8, &new_length);
 	if (new_length != (*str)->value.str.len)
 		RETURN_STRINGL (tmp, new_length, 0);
 	efree (tmp);
