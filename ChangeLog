@@ -1,3 +1,109 @@
+2003-11-28  Sara Golemon  <php@alphaweb.net>
+
+    * NEWS
+      ext/standard/basic_functions.h
+      ext/standard/filestat.c
+      ext/standard/ftp_fopen_wrapper.c
+      main/php_streams.h
+      main/streams/plain_wrapper.c
+      main/streams/streams.c:
+      Route php_stat() via streams/url_stat API (php_stream_stat_path).
+      This enables fopen-wrappers support on stat() and related family calls.
+
+2003-11-28  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/openssl/xp_ssl.c
+      main/streams/streams.c
+      main/streams/xp_socket.c:
+      (sort of) MFB, feof fix for sockets.
+
+    * (PHP_4_3)
+      main/streams.c:
+      Probable fix for #25575; STDIN/STDOUT/STDERR streams not registered
+      as network sockets when PHP run from x?inetd.
+
+    * (PHP_4_3)
+      main/network.c
+      main/streams.c:
+      Fix for bug #25939; feof not working correctly for sockets.
+      Possibly also fixes #23220; warnings issued by fgets on ssl sockets.
+
+2003-11-28  Christian Stocker  <chregu@phant.ch>
+
+    * ext/xsl/php_xsl.c
+      ext/xsl/php_xsl.h:
+      - Added possibility to call php functions as XSLT-functions
+        eg: <xsl:value-of select="php:function('date','r')"/>
+        Namespace is http://php.net/functions
+
+    * ext/dom/element.c
+      ext/dom/php_dom.c
+      ext/dom/php_dom.h
+      ext/dom/xml_common.h:
+      changing dom_object_get_data to php_dom_object_get_data and PHP_DOM_EXPORT
+      it
+      (by Rob Richards)
+
+2003-11-28  Greg Beaver  <greg@chiaraquartet.net>
+
+    * (PHP_4_3)
+      pear/PEAR.php:
+      odd merge conflict fixed
+
+2003-11-28  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      ext/standard/http_fopen_wrapper.c:
+      Fixed bug #26440 (MFH missing context options).
+
+    * (PHP_4_3)
+      ext/standard/file.c:
+      MFH: More memory leak fixes for stream contexts.
+
+    * ext/standard/streamsfuncs.c:
+      More memory leak fixes for stream contexts.
+
+    * NEWS
+      NEWS:
+      Bug fixing news.
+
+2003-11-28  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_4_3)
+      ext/domxml/php_domxml.c:
+      Fix for bug #26446: domxml_open_file() returns an empty error-Array
+
+2003-11-28  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * (PHP_4_3)
+      ext/com/COM.c:
+      MFH: Fix for Bug #25664; calling ITypeInfo::Invoke with bogus params.
+
+    * ext/com_dotnet/com_com.c:
+      Fix #25664 - COM crashes when calling a Delphi implementations of
+      ITypeInfo.
+      Problem was that our extension assumes that the first param to
+      ITypeInfo::Invoke was a reference to the COM object; this is not
+      necessarily true and caused a crash in this instance.
+      Problem solved by removing the ITypeInfo::Invoke call, as it doesn't buy
+      us anything anyway.
+
+    * ext/standard/var.c:
+      fix #26001; serialize crashes when accessing an overloaded
+      object that has no properties (NULL hashtable).
+
+    * ext/com_dotnet/com_handlers.c:
+      fix memleak
+
+2003-11-28  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ZendEngine2/zend_API.c:
+      Add removed lcname, it is still needed.
+
+    * main/streams/streams.c:
+      Fixed a memory leak.
+
 2003-11-27  Jani Taskinen  <jani.taskinen@kolumbus.fi>
 
     * (PHP_4_3)
