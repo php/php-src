@@ -2039,7 +2039,7 @@ PHP_FUNCTION(ldap_start_tls)
 #endif /* (LDAP_API_VERSION > 2000) || HAVE_NSLDAP */
 
 #if defined(LDAP_API_FEATURE_X_OPENLDAP) && defined(HAVE_3ARG_SETREBINDPROC)
-/* {{{ proto _ldap_rebind_proc()
+/* {{{ _ldap_rebind_proc()
 */
 int _ldap_rebind_proc(LDAP *ldap, const char *url, ber_tag_t req, ber_int_t msgid, void *params)
 {
