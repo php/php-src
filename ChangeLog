@@ -1,3 +1,64 @@
+2003-11-06  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS:
+      Bug fixing news.
+
+    * (PHP_4_3)
+      Zend/zend_operators.c:
+      MFH: Fixed bug #26148 (Print the notice before modifying variable on type
+      mismatch).
+
+    * ZendEngine2/zend_operators.c:
+      Fixed bug #26148 (Print the notice before modifying variable on type
+      mismatch).
+      
+      
+      Patch by: morten-bugs dot php dot net at afdelingp dot dk
+
+2003-11-06  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/ming/ming.c
+      ext/ming/ming.c:
+      Getting rid of c++ style comments
+
+2003-11-06  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * (PHP_4_3)
+      ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.h
+      main/rfc1867.c:
+      bug fixed: name parameter of multipart form was not converted into internal
+      encoding when mbstring.encoding_translation is on.
+
+2003-11-06  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/oci8/oci8.c
+      ext/oci8/oci8.c:
+      WS
+
+    * ext/oci8/oci8.c
+      ext/oci8/oci8.c:
+      Fix a format string
+      
+      Nuke a sprintf (slooow)
+      
+      And embed the charset as part of the hashed details (persistent conn key),
+      because the function otherwise happily returns incompatible connections.
+      (e.g. US7ASCII vs. UTF8; the client-side charset is not alterable once a
+       connection has been established.)
+
+2003-11-06  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/ming/ming.c
+      ext/ming/php_ming.h:
+      MFB: Adding new features from ming 0.3a.
+
+    * (PHP_4_3)
+      ext/ming/ming.c
+      ext/ming/php_ming.h:
+      Adding new features from ming 0.3a.
+
 2003-11-05  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/pcntl/pcntl.c

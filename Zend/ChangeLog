@@ -1,3 +1,12 @@
+2003-11-06  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * zend_operators.c:
+      Fixed bug #26148 (Print the notice before modifying variable on type
+      mismatch).
+      
+      
+      Patch by: morten-bugs dot php dot net at afdelingp dot dk
+
 2003-11-04  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_execute.c
