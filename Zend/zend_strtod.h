@@ -22,7 +22,10 @@
  * can be found in zend_strtod.c */
 #ifndef ZEND_STRTOD_H
 #define ZEND_STRTOD_H
+#include <zend.h>
 
-double zend_strtod(const char *s00, char **se);
+BEGIN_EXTERN_C()
+ZEND_API double zend_strtod(const char *s00, char **se);
+END_EXTERN_C()
 
 #endif
