@@ -5,7 +5,7 @@
 
 typedef struct _zend_object_bucket {
 	zend_bool valid;
-	zend_bool constructor_called;
+	zend_bool destructor_called;
 	union _bucket {
 		struct {
 			zend_object object;

@@ -69,7 +69,7 @@ void zend_objects_call_destructors(zend_objects *objects TSRMLS_DC)
 
 	for (i = 1; i < objects->top ; i++) {
 		if (EG(objects).object_buckets[i].valid) {
-			EG(objects).object_buckets[i].constructor_called = 1;
+			EG(objects).object_buckets[i].destructor_called = 1;
 			zend_objects_destroy_object(&EG(objects).object_buckets[i].bucket.obj.object, i TSRMLS_CC);
 			EG(objects).object_buckets[i].valid = 0;
 		}
@@ -95,7 +95,7 @@ zend_object_value zend_objects_new(zend_object **object, zend_class_entry *class
 		handle = EG(objects).top++;
 	}
 	EG(objects).object_buckets[handle].valid = 1;
-	EG(objects).object_buckets[handle].constructor_called = 0;
+	EG(objects).object_buckets[handle].destructor_called = 0;
 	EG(objects).object_buckets[handle].bucket.obj.refcount = 1;
 	
 	*object = &EG(objects).object_buckets[handle].bucket.obj.object;
@@ -146,8 +146,8 @@ void zend_objects_delete_obj(zval *zobject TSRMLS_DC)
 
 	object = &EG(objects).object_buckets[handle].bucket.obj.object;
 
-	if (!EG(objects).object_buckets[handle].constructor_called) {
-		EG(objects).object_buckets[handle].constructor_called = 1;
+	if (!EG(objects).object_buckets[handle].destructor_called) {
+		EG(objects).object_buckets[handle].destructor_called = 1;
 		zend_objects_destroy_object(object, handle TSRMLS_CC);
 	}
 	
@@ -172,9 +172,9 @@ void zend_objects_del_ref(zval *zobject TSRMLS_DC)
 		zend_object *object;
 		do {
 			if (EG(objects).object_buckets[handle].valid) {
-				if (!EG(objects).object_buckets[handle].constructor_called) {
+				if (!EG(objects).object_buckets[handle].destructor_called) {
 					object = &EG(objects).object_buckets[handle].bucket.obj.object;
-					EG(objects).object_buckets[handle].constructor_called = 1;
+					EG(objects).object_buckets[handle].destructor_called = 1;
 					zend_objects_destroy_object(object, handle TSRMLS_CC);
 					if (EG(objects).object_buckets[handle].bucket.obj.refcount == 0) {
 						ZEND_OBJECTS_ADD_TO_FREE_LIST();
