@@ -231,7 +231,7 @@ php_mbregex_init_option(const char *parg, int narg, int *option, int *eval)
  */
 
 /* {{{ proto string mb_regex_encoding([string encoding])
-   Returns the current encoding as a string. */
+   Returns the current encoding for regex as a string. */
 PHP_FUNCTION(mb_regex_encoding)
 {
 	zval **arg1;
