@@ -80,6 +80,7 @@
         E_WARNING   => 'Warning'
       );
       
+      if (!(error_reporting() & $errno)) return;
       printf(
         "\n%s: %s in %s on line %d\n", 
         $names[$errno], 
