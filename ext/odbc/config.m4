@@ -2,35 +2,71 @@ dnl
 dnl Figure out which library file to link with for the Solid support.
 dnl
 AC_DEFUN(AC_FIND_SOLID_LIBS,[
-  AC_MSG_CHECKING([Solid library file])
+  AC_MSG_CHECKING([Solid library file])  
+  ac_solid_uname_r=`uname -r 2>/dev/null`
   ac_solid_uname_s=`uname -s 2>/dev/null`
   case $ac_solid_uname_s in
-    AIX) ac_solid_os=a3x;;
-    HP-UX) ac_solid_os=h9x;;
+    AIX) ac_solid_os=a3x;;   # a4x for AIX4
+    HP-UX) ac_solid_os=h9x;; # h1x for hpux11, h0x for hpux10
     IRIX) ac_solid_os=irx;;
-    Linux) ac_solid_os=lux;;
+    Linux) ac_solid_os=lux;; # this is only valid for libc5 systems, use 'l2x' for glibc2 systems
     SunOS) ac_solid_os=ssx;; # should we deal with SunOS 4?
-    FreeBSD) ac_solid_os=fbx;;
+    FreeBSD) if [$ac_solid_uname_r < "3."]; then
+        ac_solid_os=fbx
+      else
+        ac_solid_os=fex
+      fi;;
     # "uname -s" on SCO makes no sense.
   esac
-  ODBC_LIBS=`echo $1/scl${ac_solid_os}*.so | cut -d' ' -f1`
+
+  if test -f $1/scl${ac_solid_os}30.a; then
+    ac_solid_verion=30
+    ac_solid_prefix=scl
+  elif test -f $1/scl${ac_solid_os}23.a; then
+    ac_solid_version=23
+    ac_solid_prefix=scl
+  elif test -f $1/soc${ac_solid_os}35.a; then
+    ac_solid_version=35
+    ac_solid_prefix=soc
+  fi
+
+  ODBC_LIBS=`echo $1/${ac_solid_prefix}${ac_solid_os}${ac_solid_version}*.so | cut -d' ' -f1`
   if test ! -f $ODBC_LIBS; then
-    ODBC_LIBS=`echo $1/scl${ac_solid_os}*.a | cut -d' ' -f1`
+    ODBC_LIBS=`echo $1/${ac_solid_prefix}${ac_solid_os}${ac_solid_version}.a | cut -d' ' -f1`
   fi
   if test ! -f $ODBC_LIBS; then
-    ODBC_LIBS=`echo $1/scl2x${ac_solid_os}*.a | cut -d' ' -f1`
+    if test $ac_solid_version == 35; then
+      ODBC_LIBS=`echo $1/libsolodbc.so | cut -d' ' -f1`
+    else
+      ODBC_LIBS=`echo $1/${ac_solid_prefix}${ac_solid_os}${ac_solid_version}.so| cut -d' ' -f1`
+    fi
   fi
   if test ! -f $ODBC_LIBS; then
-    ODBC_LIBS=`echo $1/scl2x${ac_solid_os}*.a | cut -d' ' -f1`
+    if test $ac_solid_version == 35; then
+      ODBC_LIBS=`echo $1/libsolodbc.a | cut -d' ' -f1`
+    else
+      ODBC_LIBS=`echo $1/${ac_solid_prefix}${ac_solid_os}${ac_solid_version}.a | cut -d' ' -f1`
+    fi
   fi
   if test ! -f $ODBC_LIBS; then
-    ODBC_LIBS=`echo $1/bcl${ac_solid_os}*.so | cut -d' ' -f1`
+    if test $ac_solid_version == 35; then
+      ODBC_LIBS=`echo $1/bcl${ac_solid_prefix}*.so | cut -d' ' -f1`
+    else
+      ODBC_LIBS=`echo $1/bcl${ac_solid_os}*.so | cut -d' ' -f1`
+    fi
   fi
   if test ! -f $ODBC_LIBS; then
-    ODBC_LIBS=`echo $1/bcl${ac_solid_os}*.a | cut -d' ' -f1`
+    if $ac_solid_version == 35; then
+      ODBC_LIBS=`echo $1/bcl${ac_solid_prefix}*.a | cut -d' ' -f1`
+    else
+      ODBC_LIBS=`echo $1/bcl${ac_solid_os}*.a | cut -d' ' -f1`
+    fi
   fi
   AC_MSG_RESULT(`echo $ODBC_LIBS | sed -e 's!.*/!!'`)
 ])
+
+
+
 
 dnl
 dnl Figure out which library file to link with for the Empress support.
@@ -110,7 +146,11 @@ AC_ARG_WITH(solid,
     ODBC_LIBDIR=$withval/lib
     ODBC_INCLUDE=-I$ODBC_INCDIR
     ODBC_TYPE=solid
-    AC_DEFINE(HAVE_SOLID,1,[ ])
+    if test -f $ODBC_LIBDIR/libsolodbc.a; then
+      AC_DEFINE(HAVE_SOLID_35,1,[ ])
+    else
+      AC_DEFINE(HAVE_SOLID,1,[ ])
+    fi
     AC_MSG_RESULT(yes)
     AC_FIND_SOLID_LIBS($ODBC_LIBDIR)
   else
