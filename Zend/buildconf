@@ -1,13 +1,5 @@
 #!/bin/sh
 
-if test -f mkinstalldirs; then
-    automake
-else
-    automake --add-missing
-fi
-
-autoheader
-
 mv aclocal.m4 aclocal.m4.old 2>/dev/null
 aclocal
 if cmp aclocal.m4.old aclocal.m4 > /dev/null 2>&1; then
@@ -26,3 +18,5 @@ else
     echo created or modified configure
 fi
 
+autoheader
+automake --add-missing --include-deps
