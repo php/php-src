@@ -50,7 +50,7 @@ ext/oci8
 
 ext/standard
 ------------
-    * fix basename()/dirname() to respect trailing slash
+    * implement pathinfo()
     * possibly modify parsing of GPC data to automatically create arrays if
       variable name is seen more than once.
     * implement regex-cache for url-functions.
