@@ -53,7 +53,7 @@ void shutdown_executor(ELS_D);
 void execute(zend_op_array *op_array ELS_DC);
 ZEND_API int zend_is_true(zval *op);
 ZEND_API inline void safe_free_zval_ptr(zval *p);
-ZEND_API void zend_eval_string(char *str, zval *retval_ptr CLS_DC ELS_DC);
+ZEND_API int zend_eval_string(char *str, zval *retval_ptr CLS_DC ELS_DC);
 ZEND_API inline int i_zend_is_true(zval *op);
 ZEND_API int zval_update_constant(zval **pp);
 ZEND_API inline void zend_assign_to_variable_reference(znode *result, zval **variable_ptr_ptr, zval **value_ptr_ptr, temp_variable *Ts ELS_DC);
