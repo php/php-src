@@ -58,7 +58,16 @@
 #endif
 
 #if defined(HAVE_LIBDL)
-# define DL_LOAD(libname)			dlopen(libname, RTLD_NOW)
+
+# ifndef RTLD_LAZY
+#  define RTLD_LAZY 1    /* Solaris 1, FreeBSD's (2.1.7.1 and older) */
+# endif
+
+# ifndef RTLD_GLOBAL
+#  define RTLD_GLOBAL 0
+# endif
+
+# define DL_LOAD(libname)			dlopen(libname, RTLD_LAZY | RTLD_GLOBAL)
 # define DL_UNLOAD					dlclose
 # define DL_FETCH_SYMBOL			dlsym
 # define DL_HANDLE					void *
