@@ -248,7 +248,7 @@ PHP_FUNCTION(get_browser)
 
 	if (ZEND_NUM_ARGS() == 2) {
 		convert_to_boolean_ex(retarr);
-		return_array = Z_LVAL_PP(retarr);
+		return_array = Z_BVAL_PP(retarr);
 	}
 
 	if (zend_hash_find(&browser_hash, Z_STRVAL_PP(agent_name), Z_STRLEN_PP(agent_name)+1, (void **) &agent)==FAILURE) {
