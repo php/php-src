@@ -120,7 +120,7 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 	/* allocate an environment */
 	
 	/* handle for the server */
-	H->server = mysql_init(NULL);
+	dbh->driver_data = H->server = mysql_init(NULL);
 	if(vars[2].optval && strcmp("localhost", vars[2].optval)) {
 		host = vars[2].optval;
 		port = atoi(vars[3].optval); 
@@ -138,7 +138,6 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 
 	H->attached = 1;
 
-	dbh->driver_data = H;
 	dbh->methods = &mysql_methods;
 	dbh->alloc_own_columns = 1;
 	dbh->supports_placeholders = 1;
