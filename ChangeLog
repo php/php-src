@@ -1,3 +1,28 @@
+2002-09-24  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/reg.c: Fixed bug #17957
+
+2002-09-24  Zeev Suraski  <zeev@zend.com>
+
+    * ext/standard/basic_functions.c: Fix indirection
+
+2002-09-24  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/standard/html.c:
+    Fix for #19570: last character in translation table is omitted.
+
+2002-09-24  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/mime_magic/mime_magic.c: Fix typo
+
+    * ext/mime_magic/config.m4:
+    Replace underscores with dashes in --enable-mime-magic
+
+2002-09-24  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/standard/file.c:
+    Fix EOL markers for file() so that Mac EOL work correctly.
+
 2002-09-23  Jani Taskinen  <sniper@iki.fi>
 
     * NEWS: yadda yadda..
