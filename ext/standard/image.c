@@ -49,11 +49,16 @@
 #endif
 #include "php_image.h"
 
+#if HAVE_ZLIB
+#include "zlib.h"
+#endif
+
 /* file type markers */
 PHPAPI const char php_sig_gif[3] = {'G', 'I', 'F'};
 PHPAPI const char php_sig_psd[4] = {'8', 'B', 'P', 'S'};
 PHPAPI const char php_sig_bmp[2] = {'B', 'M'};
 PHPAPI const char php_sig_swf[3] = {'F', 'W', 'S'};
+PHPAPI const char php_sig_swc[3] = {'C', 'W', 'S'};
 PHPAPI const char php_sig_jpg[3] = {(char) 0xff, (char) 0xd8, (char) 0xff};
 PHPAPI const char php_sig_png[8] = {(char) 0x89, (char) 0x50, (char) 0x4e, (char) 0x47,
 (char) 0x0d, (char) 0x0a, (char) 0x1a, (char) 0x0a};
@@ -156,6 +161,37 @@ static unsigned long int php_swf_get_bits (unsigned char* buffer, unsigned int p
 	return result;
 }
 /* }}} */
+
+#if HAVE_ZLIB
+/* {{{ php_handle_swc
+ */
+static struct gfxinfo *php_handle_swc (php_stream * stream TSRMLS_DC)
+{
+	struct gfxinfo *result = NULL;
+
+	long bits;
+	unsigned char a[64];
+	unsigned long len = 64;
+	char *b;
+
+	b = ecalloc (1, len + 1);
+
+	result = (struct gfxinfo *) ecalloc (1, sizeof (struct gfxinfo));
+	php_stream_seek(stream, 5, SEEK_CUR);
+
+	php_stream_read(stream, a, sizeof(a)); /* fread(a, sizeof(a), 1, fp); */
+	uncompress (b, &len, a, sizeof(a));
+	
+	bits = php_swf_get_bits (b, 0, 5);
+	result->width = (php_swf_get_bits (b, 5 + bits, bits) -
+		php_swf_get_bits (b, 5, bits)) / 20;
+	result->height = (php_swf_get_bits (b, 5 + (3 * bits), bits) -
+		php_swf_get_bits (b, 5 + (2 * bits), bits)) / 20;
+	efree (b);
+	return result;
+}
+/* }}} */
+#endif
 
 /* {{{ php_handle_swf
  */
@@ -658,6 +694,10 @@ PHPAPI int php_getimagetype(php_stream * stream, char *filetype TSRMLS_DC)
 		}
 	} else if (!memcmp(filetype, php_sig_swf, 3)) {
 		return IMAGE_FILETYPE_SWF;
+#if HAVE_ZLIB
+	} else if (!memcmp(filetype, php_sig_swc, 3)) {
+		return IMAGE_FILETYPE_SWC;
+#endif
 	} else if (!memcmp(filetype, php_sig_psd, 3)) {
 		return IMAGE_FILETYPE_PSD;
 	} else if (!memcmp(filetype, php_sig_bmp, 2)) {
@@ -739,6 +779,11 @@ PHP_FUNCTION(getimagesize)
         case IMAGE_FILETYPE_SWF:
 			result = php_handle_swf(stream TSRMLS_CC);
 	        break;
+#if HAVE_ZLIB
+        case IMAGE_FILETYPE_SWC:
+			result = php_handle_swc(stream TSRMLS_CC);
+	        break;
+#endif
         case IMAGE_FILETYPE_PSD:
 			result = php_handle_psd(stream TSRMLS_CC);
 	        break;
