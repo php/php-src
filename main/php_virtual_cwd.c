@@ -108,7 +108,7 @@ static int php_is_file_ok(const cwd_state *state)
 }
 
 
-char *virtual_getcwd(cwd_state *state, uint *length)
+char *virtual_getcwd_ex(cwd_state *state, uint *length)
 {
 	if (state->cwd_length == 0) {
 		char *retval;
@@ -136,6 +136,30 @@ char *virtual_getcwd(cwd_state *state, uint *length)
 	*length = state->cwd_length;
 	return strdup(state->cwd);
 }
+
+
+/* Same semantics as UNIX getcwd() */
+char *virtual_getcwd(char *buf, size_t size)
+{
+	cwd_state state; /* Needs to be a ZTS var such as PG(), just included it so that this will compile */
+	uint length;
+	char *cwd;
+
+	cwd = virtual_getcwd_ex(&state, &length);
+
+	if (buf == NULL) {
+		return cwd;
+	}
+	if (length > size-1) {
+		free(cwd);
+		errno = ERANGE; /* Is this OK? */
+		return NULL;
+	}
+	memcpy(buf, cwd, length+1);
+	free(cwd);
+	return buf;
+}
+
 
 /* returns 0 for ok, 1 for error */
 int virtual_file_ex(cwd_state *state, char *path, verify_path_func verify_path)
@@ -273,9 +297,9 @@ main(void)
 	state.cwd_length = strlen(state.cwd);
 
 #define T(a) \
-	printf("[%s] $ cd %s\n", virtual_getcwd(&state, &length), a); \
+	printf("[%s] $ cd %s\n", virtual_getcwd_ex(&state, &length), a); \
 	virtual_chdir(&state, strdup(a)); \
-	printf("new path is %s\n", virtual_getcwd(&state, &length));
+	printf("new path is %s\n", virtual_getcwd_ex(&state, &length));
 	
 	T("..")
 	T("...")
