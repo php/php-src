@@ -33,20 +33,16 @@ PHP_FUNCTION(metaphone);
    Break english phrases down into their phonemes */
 PHP_FUNCTION(metaphone)
 {
-	pval **pstr, **pphones;
+	char *str;
 	char *result = 0;
-	int phones = 0;
+	int phones = 0, str_len;
 
-	if (zend_get_parameters_ex(2, &pstr, &pphones) == SUCCESS) {
-		convert_to_long_ex(pphones);
-		phones = Z_LVAL_PP(pphones);
-	} else if (zend_get_parameters_ex(1, &pstr) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &str, &str_len,
+							  &phones) == FAILURE) {
+		return;
 	}
 
-	convert_to_string_ex(pstr);
-
-	if (metaphone(Z_STRVAL_PP(pstr), phones, &result, 1) == 0) {
+	if (metaphone(str, phones, &result, 1) == 0) {
 		RETVAL_STRING(result, 0);
 	} else {
 		if (result) {

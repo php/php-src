@@ -28,9 +28,8 @@
    Calculate the soundex key of a string */
 PHP_FUNCTION(soundex)
 {
-	char	*somestring;
-	int	i, _small, len, code, last;
-	pval	*arg, **parg;
+	char	*str;
+	int	i, _small, str_len, code, last;
 	char	soundex[4 + 1];
 
 	static char soundex_table[26] =
@@ -61,25 +60,21 @@ PHP_FUNCTION(soundex)
 	 0,							/* Y */
 	 '2'};						/* Z */
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &parg) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &str, &str_len) == FAILURE) {
+		return;
 	}
-	convert_to_string_ex(parg);
-	arg = *parg;
-	if (Z_STRLEN_P(arg)==0) {
+	if (str_len == 0) {
 		RETURN_FALSE;
 	}
-	somestring = Z_STRVAL_P(arg);
-	len = Z_STRLEN_P(arg);
 
 	/* build soundex string */
 	last = -1;
-	for (i = 0, _small = 0; i < len && _small < 4; i++) {
+	for (i = 0, _small = 0; i < str_len && _small < 4; i++) {
 		/* convert chars to upper case and strip non-letter chars */
 		/* BUG: should also map here accented letters used in non */
 		/* English words or names (also found in English text!): */
 		/* esstsett, thorn, n-tilde, c-cedilla, s-caron, ... */
-		code = toupper(somestring[i]);
+		code = toupper(str[i]);
 		if (code >= 'A' && code <= 'Z') {
 			if (_small == 0) {
 				/* remember first valid char */
@@ -106,9 +101,7 @@ PHP_FUNCTION(soundex)
 	}
 	soundex[_small] = '\0';
 
-	Z_STRVAL_P(return_value) = estrndup(soundex, _small);
-	Z_STRLEN_P(return_value) = _small;
-	Z_TYPE_P(return_value) = IS_STRING;
+	RETURN_STRINGL(soundex, _small, 1);
 }
 /* }}} */
 
