@@ -351,7 +351,7 @@ PHP_FUNCTION(ftp_mkdir)
 		RETURN_FALSE;
 	}
 
-	RETURN_STRING(tmp, 1);
+	RETURN_STRING(tmp, 0);
 }
 /* }}} */
 
@@ -403,7 +403,7 @@ PHP_FUNCTION(ftp_nlist)
 	array_init(return_value);
 	for (ptr = nlist; *ptr; ptr++)
 		add_next_index_string(return_value, *ptr, 1);
-	free(nlist);
+	efree(nlist);
 }
 /* }}} */
 
@@ -431,7 +431,7 @@ PHP_FUNCTION(ftp_rawlist)
 	array_init(return_value);
 	for (ptr = llist; *ptr; ptr++)
 		add_next_index_string(return_value, *ptr, 1);
-	free(llist);
+	efree(llist);
 }
 /* }}} */
 
@@ -449,7 +449,6 @@ PHP_FUNCTION(ftp_systype)
 
 	ZEND_FETCH_RESOURCE(ftp, ftpbuf_t*, &z_ftp, -1, le_ftpbuf_name, le_ftpbuf);
 
-	syst = ftp_syst(ftp);
 	if (NULL == (syst = ftp_syst(ftp))) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", ftp->inbuf);
 		RETURN_FALSE;
