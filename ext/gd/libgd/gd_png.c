@@ -561,9 +561,10 @@ gdImagePngCtx (gdImagePtr im, gdIOCtx * outfile)
     }
   if (im->trueColor && (!im->saveAlphaFlag) && (transparent >= 0))
     {
-      trans_rgb_value.red = gdTrueColorGetRed (im->trueColor);
-      trans_rgb_value.green = gdTrueColorGetGreen (im->trueColor);
-      trans_rgb_value.blue = gdTrueColorGetBlue (im->trueColor);
+    	/* 2.0.9: fixed by Thomas Winzig */
+      trans_rgb_value.red = gdTrueColorGetRed (im->transparent);
+      trans_rgb_value.green = gdTrueColorGetGreen (im->transparent);
+      trans_rgb_value.blue = gdTrueColorGetBlue (im->transparent);
       png_set_tRNS (png_ptr, info_ptr, 0, 0, &trans_rgb_value);
     }
   if (!im->trueColor)
