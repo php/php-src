@@ -85,8 +85,6 @@ ZEND_GET_MODULE(ctype)
  */
 PHP_MINFO_FUNCTION(ctype)
 {
-	TSRMLS_FETCH();
-
 	php_info_print_table_start();
 	php_info_print_table_row(2, "ctype functions", "enabled (experimental)");
 	php_info_print_table_end();

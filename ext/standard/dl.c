@@ -203,7 +203,7 @@ void php_dl(pval *file, int type, pval *return_value)
 
 PHP_MINFO_FUNCTION(dl)
 {
-        php_info_print_table_row(2, "Dynamic Library Support", "enabled");
+	php_info_print_table_row(2, "Dynamic Library Support", "enabled");
 }
 
 #else

@@ -126,9 +126,9 @@ PHP_RINIT_FUNCTION(bcmath)
 
 PHP_MINFO_FUNCTION(bcmath)
 {
-  php_info_print_table_start();
-  php_info_print_table_row(2, "BCMath support", "enabled");
-  php_info_print_table_end();
+	php_info_print_table_start();
+	php_info_print_table_row(2, "BCMath support", "enabled");
+	php_info_print_table_end();
 }
 
 /* {{{ proto string bcadd(string left_operand, string right_operand [, int scale])

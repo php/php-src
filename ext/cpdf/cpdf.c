@@ -205,7 +205,8 @@ PHP_MINFO_FUNCTION(cpdf) {
 	php_info_print_table_end();
 }
 
-PHP_MSHUTDOWN_FUNCTION(cpdf){
+PHP_MSHUTDOWN_FUNCTION(cpdf)
+{
 	return SUCCESS;
 }
 

@@ -208,13 +208,17 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
  */
 PHP_MINFO_FUNCTION(mail)
 {
-#ifdef PHP_WIN32
 	char *sendmail_path = INI_STR("sendmail_path");
-	if (!sendmail_path) 
-        php_info_print_table_row(2, "Internal Sendmail Support for Windows 4", "enabled");
-	else
+
+#ifdef PHP_WIN32
+	if (!sendmail_path) {
+        php_info_print_table_row(2, "Internal Sendmail Support for Windows", "enabled");
+	} else {
+        php_info_print_table_row(2, "Path to sendmail", sendmail_path);
+	}
+#else
+    php_info_print_table_row(2, "Path to sendmail", sendmail_path);
 #endif
-        php_info_print_table_row(2, "Path to sendmail", INI_STR("sendmail_path") );
 }
 /* }}} */
 

@@ -112,9 +112,6 @@ PHP_MINIT_FUNCTION(muscat)
 
 PHP_MSHUTDOWN_FUNCTION(muscat)
 {
-/* Remove comments if you have entries in php.ini
-	UNREGISTER_INI_ENTRIES();
-*/
 	return SUCCESS;
 }
 

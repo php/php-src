@@ -98,9 +98,9 @@ PHP_MINIT_FUNCTION(ftp)
 
 PHP_MINFO_FUNCTION(ftp)
 {
-  php_info_print_table_start();
-  php_info_print_table_row(2, "FTP support", "enabled");
-  php_info_print_table_end();
+	php_info_print_table_start();
+	php_info_print_table_row(2, "FTP support", "enabled");
+	php_info_print_table_end();
 }
 
 

@@ -67,14 +67,14 @@ function_entry ii_functions[] = {
 };
 
 zend_module_entry ingres_ii_module_entry = {
-  "ingres_ii",
-  ii_functions,
-  PHP_MINIT(ii),
-  PHP_MSHUTDOWN(ii),
-  PHP_RINIT(ii),
-  PHP_RSHUTDOWN(ii),
-  PHP_MINFO(ii),
-  STANDARD_MODULE_PROPERTIES
+	"ingres_ii",
+	ii_functions,
+	PHP_MINIT(ii),
+	PHP_MSHUTDOWN(ii),
+	PHP_RINIT(ii),
+	PHP_RSHUTDOWN(ii),
+	PHP_MINFO(ii),
+	STANDARD_MODULE_PROPERTIES
 };
 
 #ifdef COMPILE_DL_INGRES_II
@@ -312,8 +312,6 @@ PHP_RINIT_FUNCTION(ii)
 */
 PHP_RSHUTDOWN_FUNCTION(ii)
 {
-  TSRMLS_FETCH();
-
   if (IIG(default_link)!=-1) {
     zend_list_delete(IIG(default_link));
     IIG(default_link) = -1;
@@ -326,7 +324,6 @@ PHP_RSHUTDOWN_FUNCTION(ii)
 PHP_MINFO_FUNCTION(ii)
 {
   char buf[32];
-  TSRMLS_FETCH();
 
   php_info_print_table_start();
   php_info_print_table_header(2, "Ingres II Support", "enabled");

@@ -91,7 +91,6 @@ PHP_MINIT_FUNCTION(qtdom)
 PHP_MSHUTDOWN_FUNCTION(qtdom)
 {
     qdom_shutdown();
-
 	return SUCCESS;
 }
 /* }}} */

@@ -361,11 +361,8 @@ PHP_RINIT_FUNCTION(oracle)
  */
 PHP_MSHUTDOWN_FUNCTION(oracle)
 {
-	TSRMLS_FETCH();
-
 	zend_hash_destroy(ORA(conns));
 	free(ORA(conns));
-
 	return SUCCESS;
 }
 /* }}} */
@@ -1570,7 +1567,6 @@ PHP_FUNCTION(ora_errorcode)
  */
 PHP_MINFO_FUNCTION(oracle)
 {
-
 	php_info_print_table_start();
 	php_info_print_table_row(2, "Oracle Support", "enabled");
 #ifndef PHP_WIN32

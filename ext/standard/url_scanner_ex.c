@@ -47,7 +47,6 @@ static PHP_INI_MH(OnUpdateTags)
 	char *key;
 	char *lasts;
 	char *tmp;
-	TSRMLS_FETCH();
 	
 	ctx = &BG(url_adapt_state_ex);
 	
@@ -874,7 +873,6 @@ PHP_RINIT_FUNCTION(url_scanner)
 PHP_RSHUTDOWN_FUNCTION(url_scanner)
 {
 	url_adapt_state_ex_t *ctx;
-	TSRMLS_FETCH();
 	
 	ctx = &BG(url_adapt_state_ex);
 
@@ -901,8 +899,6 @@ PHP_MINIT_FUNCTION(url_scanner)
 
 PHP_MSHUTDOWN_FUNCTION(url_scanner)
 {
-	TSRMLS_FETCH();
-
 	UNREGISTER_INI_ENTRIES();
 	zend_hash_destroy(BG(url_adapt_state_ex).tags);
 	free(BG(url_adapt_state_ex).tags);

@@ -120,10 +120,11 @@ PHP_MSHUTDOWN_FUNCTION(filepro)
 	SET_MUTEX(fp_mutex);
 	numthreads--;
 	if (!numthreads){
-	if (!TlsFree(FPTls)){
-		FREE_MUTEX(fp_mutex);
-		return 0;
-	}}
+		if (!TlsFree(FPTls)){
+			FREE_MUTEX(fp_mutex);
+			return 0;
+		}
+	}
 	FREE_MUTEX(fp_mutex);
 #endif
 #endif

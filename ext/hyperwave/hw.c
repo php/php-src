@@ -196,8 +196,6 @@ static void php_hw_init_globals(zend_hw_globals *hw_globals)
 
 static PHP_INI_MH(OnHyperwavePort)
 {
-	TSRMLS_FETCH();
-
 	if (new_value==NULL) {
 		HwSG(default_port) = HG_SERVER_PORT;
 	} else {

@@ -80,14 +80,14 @@ static function_entry satellite_functions[] = {
  * module entry
  */
 zend_module_entry satellite_module_entry = {
-  "satellite",
-  satellite_functions,
-  PHP_MINIT(satellite),			/* module startup */
-  PHP_MSHUTDOWN(satellite),	/* module shutdown */
-  NULL,											/* request startup */
-  NULL,											/* request shutdown */
-  PHP_MINFO(satellite),			/* module info */
-  STANDARD_MODULE_PROPERTIES
+	"satellite",
+	satellite_functions,
+	PHP_MINIT(satellite),			/* module startup */
+	PHP_MSHUTDOWN(satellite),	/* module shutdown */
+	NULL,											/* request startup */
+	NULL,											/* request shutdown */
+	PHP_MINFO(satellite),			/* module info */
+	STANDARD_MODULE_PROPERTIES
 };
 
 /*
@@ -115,10 +115,8 @@ PHP_MINIT_FUNCTION(satellite)
 PHP_MSHUTDOWN_FUNCTION(satellite)
 {
 	TypeManager_Shutdown();
-	orbit_corba_shutdown();
-	
+	orbit_corba_shutdown();	
 	UNREGISTER_INI_ENTRIES();
-	
 	return SUCCESS;
 }
 
@@ -132,7 +130,7 @@ PHP_MINFO_FUNCTION(satellite)
 	php_info_print_table_header(2, "CORBA support via Satellite", "enabled");
 	php_info_print_table_end();
 
-  DISPLAY_INI_ENTRIES();
+	DISPLAY_INI_ENTRIES();
 }
 
 /* instruct the type manager to load an IDL file if not already loaded */

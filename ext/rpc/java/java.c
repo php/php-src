@@ -106,10 +106,11 @@ php_java_globals java_globals;
 
 static zend_class_entry java_class_entry;
 
-static PHP_INI_MH(OnIniUpdate) {
-  if (new_value) *(char**)mh_arg1 = new_value;
-  iniUpdated=1;
-  return SUCCESS;
+static PHP_INI_MH(OnIniUpdate)
+{
+	if (new_value) *(char**)mh_arg1 = new_value;
+	iniUpdated=1;
+	return SUCCESS;
 }
 
 PHP_INI_BEGIN()

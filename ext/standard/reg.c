@@ -102,8 +102,6 @@ PHP_MINIT_FUNCTION(regex)
 
 PHP_MSHUTDOWN_FUNCTION(regex)
 {
-	TSRMLS_FETCH();
-
 	zend_hash_destroy(&REG(ht_rc));
 	return SUCCESS;
 }

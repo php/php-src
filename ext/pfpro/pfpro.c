@@ -107,8 +107,6 @@ PHP_RINIT_FUNCTION(pfpro)
 
 PHP_RSHUTDOWN_FUNCTION(pfpro)
 {
-	TSRMLS_FETCH();
-
 	if (PFPROG(initialized) == 1) {
 		pfproCleanup();
 	}

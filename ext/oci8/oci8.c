@@ -535,8 +535,6 @@ static int _server_pcleanup(oci_server *server)
 
 PHP_MSHUTDOWN_FUNCTION(oci)
 {
-	TSRMLS_FETCH();
-
 	OCI(shutdown) = 1;
 
     oci_debug("START php_mshutdown_oci");

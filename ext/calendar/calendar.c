@@ -57,14 +57,14 @@ function_entry calendar_functions[] = {
 
 
 zend_module_entry calendar_module_entry = {
-  "calendar", 
-  calendar_functions, 
-  PHP_MINIT(calendar),
-  NULL,
-  NULL,
-  NULL,
-  PHP_MINFO(calendar),
-  STANDARD_MODULE_PROPERTIES,
+	"calendar", 
+	calendar_functions, 
+	PHP_MINIT(calendar),
+	NULL,
+	NULL,
+	NULL,
+	PHP_MINFO(calendar),
+	STANDARD_MODULE_PROPERTIES,
 };
 
 #ifdef COMPILE_DL_CALENDAR

@@ -52,8 +52,6 @@ enum {
 
 static PHP_INI_MH(OnChangeCallback)
 {
-	TSRMLS_FETCH();
-		 
 	if (ASSERTG(callback)) {
 		zval_ptr_dtor(&ASSERTG(callback));
 	} else {
@@ -102,8 +100,6 @@ PHP_MINIT_FUNCTION(assert)
 
 PHP_MSHUTDOWN_FUNCTION(assert)
 {
-	TSRMLS_FETCH();
-
 	if (ASSERTG(callback)) {
 		zval_ptr_dtor(&ASSERTG(callback));
 	}
@@ -112,8 +108,6 @@ PHP_MSHUTDOWN_FUNCTION(assert)
 
 PHP_RSHUTDOWN_FUNCTION(assert)
 {
-	TSRMLS_FETCH();
-
 	if (ASSERTG(callback)) { 
 		zval_ptr_dtor(&ASSERTG(callback));
 		ASSERTG(callback) = NULL;
