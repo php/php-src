@@ -1,3 +1,89 @@
+2000-09-20  brianlmoon  <brianlmoon@toye>
+
+    * ext/mysql/php_mysql.c
+      ext/mysql/php_mysql.h:
+    added mysql_fetch_assoc.  Acts like mysql_fetch_array used to.
+
+2000-09-20  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/curl/.cvsignore: This was missing..
+
+2000-09-20  Chuck Hagenbuch  <chuck@horde.org>
+
+    * pear/DB/common.php:
+    declare var $fetchmode in DB_Common to avoid lots and lots of errors.
+
+2000-09-20  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/url_scanner_ex.c
+      ext/standard/url_scanner_ex.re:
+    Cleanup SCANNER_DEBUG and don't NUL terminate work buffer
+
+    * ext/standard/url_scanner_ex.c
+      ext/standard/url_scanner_ex.re:
+    Use emalloc and friends. Since we reuse all buffers, this does not affect
+    the speed.
+
+    The smart_str_* functions don't NUL terminate strings anymore. We can
+    rely on the length of the strings completely.
+
+    * ext/standard/url_scanner_ex.c
+      ext/standard/url_scanner_ex.h
+      ext/standard/url_scanner_ex.re:
+    Remove this pseudo optimization from the previous rewrite.
+
+    Since we leave/enter the loop more often, the cost of maintaining
+    c_arg/c_val is higher than simply copying the tag/arg string once.
+
+    * ext/standard/url_scanner_ex.c
+      ext/standard/url_scanner_ex.h
+      ext/standard/url_scanner_ex.re:
+    Another 5%-10% speed increase achieved by
+
+    - making ctx->val read-only
+    - adding a special appendc function for appending single characters
+
+2000-09-20  Joey Smith  <joey@joeysmith.com>
+
+    * ext/sybase_ct/php_sybase_ct.c:
+    le_link and le_plink are no longer part of the sybase_globals.
+
+2000-09-20  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/url_scanner_ex.c
+      ext/standard/url_scanner_ex.re:
+    Add support for URLs containing NAME info (for scrolling; #name).
+
+    * ext/session/session.c: Deactivate E_NOTICE message on gc
+
+    * ext/standard/url_scanner_ex.h:
+    Rename prototype to currently used name. These stupid names will go away once
+    the transition periode ends.
+
+    * ext/session/session.c: s/url_scanner.h/url_scanner_ex.h/
+
+    * ext/session/session.c: Make the new url scanner the default.
+
+    If there are any problems (especially with characters > 127), let me know.
+
+    * ext/standard/url_scanner_ex.c
+      ext/standard/url_scanner_ex.h
+      ext/standard/url_scanner_ex.re:
+    2nd Rewrite of the main scanner engine. This version is cleaner and faster.
+
+    It handles the following tags currently:
+
+    <FRAME .. SRC=URL ..>
+    <INPUT .. TYPE=IMAGE SRC=URL ..>
+    <A     .. HREF=URL ..>
+    <AREA  .. HREF=URL ..>
+    <IMG   .. SRC=URL ..>
+
+    Additional ones can be added within seconds.
+
+    The support for HTML forms has been significantly improved. The scanner
+    will now add proper Hidden Fields for the Session ID.
+
 2000-09-19  Jani Taskinen  <sniper@iki.fi>
 
     * acinclude.m4: This fix prevents adding an empty -l to LIBS
