@@ -1,6 +1,6 @@
-diff -Nur thttpd-2.20b/Makefile.in thttpd-2.20b-php/Makefile.in
---- thttpd-2.20b/Makefile.in	Tue Jul  4 18:21:32 2000
-+++ thttpd-2.20b-php/Makefile.in	Mon Nov 13 14:25:48 2000
+diff -ur thttpd-2.21/Makefile.in thttpd-2.21-p/Makefile.in
+--- thttpd-2.21/Makefile.in	Thu Mar 29 20:36:21 2001
++++ thttpd-2.21-p/Makefile.in	Sun Apr 22 15:59:42 2001
 @@ -46,13 +46,15 @@
  
  # You shouldn't need to edit anything below here.
@@ -38,10 +38,10 @@ diff -Nur thttpd-2.20b/Makefile.in thttpd-2.20b-php/Makefile.in
  
  tar:
  	@name=`sed -n -e '/SERVER_SOFTWARE/!d' -e 's,.*thttpd/,thttpd-,' -e 's, .*,,p' version.h` ; \
-diff -Nur thttpd-2.20b/libhttpd.c thttpd-2.20b-php/libhttpd.c
---- thttpd-2.20b/libhttpd.c	Wed Sep 27 20:13:24 2000
-+++ thttpd-2.20b-php/libhttpd.c	Mon Nov 13 14:25:57 2000
-@@ -75,6 +75,8 @@
+diff -ur thttpd-2.21/libhttpd.c thttpd-2.21-p/libhttpd.c
+--- thttpd-2.21/libhttpd.c	Sat Apr 21 02:11:32 2001
++++ thttpd-2.21-p/libhttpd.c	Sun Apr 22 16:01:41 2001
+@@ -85,6 +85,8 @@
  #include "match.h"
  #include "tdate_parse.h"
  
@@ -50,7 +50,7 @@ diff -Nur thttpd-2.20b/libhttpd.c thttpd-2.20b-php/libhttpd.c
  #ifndef STDIN_FILENO
  #define STDIN_FILENO 0
  #endif
-@@ -225,6 +227,8 @@
+@@ -243,6 +245,8 @@
  	free( (void*) hs->cwd );
      if ( hs->cgi_pattern != (char*) 0 )
  	free( (void*) hs->cgi_pattern );
@@ -59,7 +59,7 @@ diff -Nur thttpd-2.20b/libhttpd.c thttpd-2.20b-php/libhttpd.c
      if ( hs->charset != (char*) 0 )
  	free( (void*) hs->charset );
      if ( hs->url_pattern != (char*) 0 )
-@@ -232,6 +236,7 @@
+@@ -250,6 +254,7 @@
      if ( hs->local_pattern != (char*) 0 )
  	free( (void*) hs->local_pattern );
      free( (void*) hs );
@@ -67,7 +67,7 @@ diff -Nur thttpd-2.20b/libhttpd.c thttpd-2.20b-php/libhttpd.c
      }
  
  
-@@ -292,6 +297,7 @@
+@@ -313,6 +318,7 @@
  	}
  
      hs->port = port;
@@ -75,7 +75,7 @@ diff -Nur thttpd-2.20b/libhttpd.c thttpd-2.20b-php/libhttpd.c
      if ( cgi_pattern == (char*) 0 )
  	hs->cgi_pattern = (char*) 0;
      else
-@@ -363,6 +369,8 @@
+@@ -386,6 +392,8 @@
  	return (httpd_server*) 0;
  	}
  
@@ -83,19 +83,20 @@ diff -Nur thttpd-2.20b/libhttpd.c thttpd-2.20b-php/libhttpd.c
 +
      /* Done initializing. */
      if ( hs->binding_hostname == (char*) 0 )
- 	syslog( LOG_INFO, "%s starting on port %d", SERVER_SOFTWARE, hs->port );
-@@ -2167,7 +2175,9 @@
- void
- httpd_close_conn( httpd_conn* hc, struct timeval* nowP )
+ 	syslog( LOG_INFO, "%.80s starting on port %d", SERVER_SOFTWARE, hs->port );
+@@ -2336,7 +2344,10 @@
      {
+     make_log_entry( hc, nowP );
+ 
 -    if ( hc->file_address != (char*) 0 )
-+	if (hc->file_address == (char *) 1) {
-+		thttpd_closed_conn(hc->conn_fd);
-+	} else if ( hc->file_address != (char*) 0 )
++    if ( hc->file_address == (char*) 1 )
++    {
++	thttpd_closed_conn(hc->conn_fd);
++    } else if ( hc->file_address != (char*) 0 )
  	{
- 	mmc_unmap( hc->file_address, nowP, &(hc->sb) );
+ 	mmc_unmap( hc->file_address, &(hc->sb), nowP );
  	hc->file_address = (char*) 0;
-@@ -3336,6 +3346,11 @@
+@@ -3543,6 +3554,11 @@
  	 ( hc->sb.st_mode & S_IXOTH ) &&
  	 match( hc->hs->cgi_pattern, hc->expnfilename ) )
  	return cgi( hc );
@@ -107,9 +108,11 @@ diff -Nur thttpd-2.20b/libhttpd.c thttpd-2.20b-php/libhttpd.c
  
      /* It's not CGI.  If it's executable or there's pathinfo, someone's
      ** trying to either serve or run a non-CGI file as CGI.   Either case
-diff -Nur thttpd-2.20b/libhttpd.h thttpd-2.20b-php/libhttpd.h
---- thttpd-2.20b/libhttpd.h	Tue Jun 13 20:48:56 2000
-+++ thttpd-2.20b-php/libhttpd.h	Mon Nov 13 14:25:48 2000
+Only in thttpd-2.21-p: libhttpd.c.rej
+Only in thttpd-2.21-p: libhttpd.c~
+diff -ur thttpd-2.21/libhttpd.h thttpd-2.21-p/libhttpd.h
+--- thttpd-2.21/libhttpd.h	Fri Apr 13 07:37:17 2001
++++ thttpd-2.21-p/libhttpd.h	Sun Apr 22 15:59:42 2001
 @@ -69,6 +69,7 @@
      char* server_hostname;
      int port;
@@ -118,19 +121,20 @@ diff -Nur thttpd-2.20b/libhttpd.h thttpd-2.20b-php/libhttpd.h
      char* charset;
      char* cwd;
      int listen4_fd, listen6_fd;
-diff -Nur thttpd-2.20b/thttpd.c thttpd-2.20b-php/thttpd.c
---- thttpd-2.20b/thttpd.c	Wed Sep 27 21:31:48 2000
-+++ thttpd-2.20b-php/thttpd.c	Mon Nov 13 14:25:57 2000
-@@ -1332,6 +1333,12 @@
- 	c->bytes_sent = hc->bytes;
+diff -ur thttpd-2.21/thttpd.c thttpd-2.21-p/thttpd.c
+--- thttpd-2.21/thttpd.c	Sun Apr 15 18:09:20 2001
++++ thttpd-2.21-p/thttpd.c	Sun Apr 22 15:59:42 2001
+@@ -1392,6 +1392,12 @@
  	clear_connection( c, tvP );
  	return;
-+	}
+ 	}
 +	if (hc->file_address == (char *) 1) {
 +		tmr_cancel( c->idle_read_timer );
 +		c->idle_read_timer = (Timer*) 0;
 +		c->wouldblock_delay = 0;
 +		return;
- 	}
++	}
      if ( c->bytes_sent >= c->bytes_to_send )
  	{
+ 	/* There's nothing to send. */
+Only in thttpd-2.21-p: thttpd.c~
