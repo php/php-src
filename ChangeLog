@@ -2,6 +2,14 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ??? ?? 1999, Version 4.0 Beta 2
+- Removed --with-shared-apache (Sascha)
+- Added patch for reverse lookup table in base64_decode (Sascha)
+  Submitted by bfranklin@dct.com
+- Merged in php3 version of str_replace (Sascha)
+- Added DBA module (Sascha)
+- Added session id detection within REQUEST_URI (Sascha)
+- Merged in HP-UX/ANSI compatibility switch from php3 (Sascha)
+- Fixed rpath handling for utilitites built during Apache build (Sascha)
 - Added missing E_ error level constants (Zeev, libzend)
 - Fixed a bug in sending multiple HTTP Cookies under Apache (Zeev)
 - Fixed implicit connect on the MySQL, mSQL, PostgreSQL and Sybase
