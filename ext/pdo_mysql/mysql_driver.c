@@ -160,7 +160,7 @@ static long mysql_handle_doer(pdo_dbh_t *dbh, const char *sql, long sql_len TSRM
 	}
 }
 
-static char *pdo_mysql_last_insert_id(pdo_dbh_t *dbh, const char *name, unsigned int *len, TSRMLS_DC)
+static char *pdo_mysql_last_insert_id(pdo_dbh_t *dbh, const char *name, unsigned int *len TSRMLS_DC)
 {
 	pdo_mysql_db_handle *H = (pdo_mysql_db_handle *)dbh->driver_data;
 	char *id = NULL;
