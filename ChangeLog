@@ -1,3 +1,19 @@
+2000-10-04  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/skeleton/skeleton.c:
+    Use ZEND_DECLARE_MODULE_GLOBALS instead of equivalent #if ZTS/#else/#endif
+    construct.
+
+    * ext/standard/url_scanner_ex.c
+      ext/standard/url_scanner_ex.re:
+    Ignore close tags and use unsigned char type.
+
+2000-10-04  Stig Bakken  <ssb@fast.no>
+
+    * tests/dirname.phpt
+      tests/testdirname:
+    * changed Andi's "testdirname" into a real regression test
+
 2000-10-03  Sascha Schumann  <sascha@schumann.cx>
 
     * ext/shmop/README: typo
