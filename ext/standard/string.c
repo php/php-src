@@ -2966,7 +2966,7 @@ PHPAPI char *php_str_to_str_ex(char *haystack, int length,
 	char *new_str;
 
 	if (needle_len < length) {
-		char *end, *haystack_dup, *needle_dup;
+		char *end, *haystack_dup = NULL, *needle_dup = NULL;
 		char *e, *s, *p, *r;
 
 		if (needle_len == str_len) {
@@ -3002,14 +3002,33 @@ PHPAPI char *php_str_to_str_ex(char *haystack, int length,
 				new_str = emalloc(length + 1);
 			} else {
 				int count = 0;
-				char *o = haystack, *endp = haystack + length;
+				char *o, *n, *endp;
 
-				while ((o = php_memnstr(o, needle, needle_len, endp))) {
+				if (case_sensitivity) {
+					o = haystack;
+					n = needle;
+				} else {
+					haystack_dup = estrndup(haystack, length);
+					needle_dup = estrndup(needle, needle_len);
+					php_strtolower(haystack_dup, length);
+					php_strtolower(needle_dup, needle_len);
+					o = haystack_dup;
+					n = needle_dup;
+				}
+				endp = o + length;
+
+				while ((o = php_memnstr(o, n, needle_len, endp))) {
 					o += needle_len;
 					count++;
 				}
 				if (count == 0) {
 					/* Needle doesn't occur, shortcircuit the actual replacement. */
+					if (haystack_dup) {
+						efree(haystack_dup);
+					}
+					if (needle_dup) {
+						efree(needle_dup);
+					}
 					new_str = estrndup(haystack, length);
 					if (_new_length) {
 						*_new_length = length;
@@ -3039,11 +3058,6 @@ PHPAPI char *php_str_to_str_ex(char *haystack, int length,
 					e += end - p;
 				}
 			} else {
-				haystack_dup = estrndup(haystack, length);
-				needle_dup = estrndup(needle, needle_len);
-				php_strtolower(haystack_dup, length);
-				php_strtolower(needle_dup, needle_len);
-
 				end = haystack_dup + length;
 
 				for (p = haystack_dup; (r = php_memnstr(p, needle_dup, needle_len, end)); p = r + needle_len) {
@@ -3060,7 +3074,12 @@ PHPAPI char *php_str_to_str_ex(char *haystack, int length,
 					memcpy(e, haystack + (p - haystack_dup), end - p);
 					e += end - p;
 				}
+			}
+
+			if (haystack_dup) {
 				efree(haystack_dup);
+			}
+			if (needle_dup) {
 				efree(needle_dup);
 			}
 
