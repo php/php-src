@@ -69,7 +69,7 @@ OBJS = main.o internal_functions.o snprintf.o php3_sprintf.o \
        php_ini.o
 
 FUNCTIONS_SOURCE = functions/fhttpd.c \
-       functions/crypt.c functions/db.c functions/dl.c \
+       functions/crypt.c functions/dl.c \
        functions/head.c functions/imap.c functions/mime.c \
        functions/pgsql.c functions/post.c functions/sybase.c \
        functions/sybase-ct.c functions/xml.c \

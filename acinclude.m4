@@ -16,25 +16,6 @@ AC_DEFUN(AC_MISSING_FCLOSE_DECL,[
   ])
 ])
 
-# Checks for libraries.
-# Prefer gdbm, Berkeley DB and ndbm/dbm, in that order
-AC_DEFUN(AC_PREFERRED_DB_LIB,[
-  AC_CHECK_LIB(gdbm, gdbm_open,[AC_DEFINE(GDBM) DBM_TYPE=gdbm; DBM_LIB=-lgdbm],
-  [AC_CHECK_LIB(db, dbm_open,[AC_DEFINE(NDBM) DBM_TYPE=ndbm; DBM_LIB=-ldb],
-   [AC_CHECK_LIB(c, dbm_open,[AC_DEFINE(NDBM) DBM_TYPE=ndbm; DBM_LIB=],
-    [AC_CHECK_LIB(dbm, dbm_open,[AC_DEFINE(NDBM) DBM_TYPE=ndbm; DBM_LIB=-ldbm],
-     [DBM_TYPE=""])])])])
-  AC_MSG_CHECKING([preferred dbm library])
-  if test "a$DBM_TYPE" = a; then
-    AC_MSG_RESULT(none found)
-    AC_MSG_WARN(No dbm library found - using built-in flatfile support)
-  else
-    AC_MSG_RESULT($DBM_TYPE chosen)
-  fi
-  AC_SUBST(DBM_LIB)
-  AC_SUBST(DBM_TYPE)
-])
-
 dnl
 dnl Check for broken sprintf()
 dnl

@@ -150,8 +150,6 @@ fi
 INCLUDES=""
 AC_SUBST(INCLUDES)
 
-AC_PREFERRED_DB_LIB
-
 AC_CHECK_LIB(nsl, gethostname, [
   LIBS="-lnsl $LIBS"
   AC_DEFINE(HAVE_LIBNSL) ], [])
@@ -210,24 +208,6 @@ fi
 AC_MISSING_FCLOSE_DECL
 dnl QNX requires unix.h to allow functions in libunix to work properly
 AC_CHECK_HEADERS(fcntl.h unistd.h crypt.h sys/file.h memory.h pwd.h grp.h sys/socket.h sys/wait.h syslog.h string.h sys/varargs.h stdarg.h sys/time.h signal.h netinet/in.h dlfcn.h limits.h sys/types.h unix.h arpa/inet.h)
-if test "$DBM_LIB" = "-lgdbm"; then
-	AC_CHECK_HEADER(gdbm.h, [ GDBM_INCLUDE="" ], [ 
-		AC_MSG_RESULT("Try /usr/local/include/gdbm.h"); 
-		AC_CHECK_HEADER(/usr/local/include/gdbm.h, [ GDBM_INCLUDE="-I/usr/local/include" ],[
-			AC_MSG_RESULT("Try /opt/local/include/gdbm.h");
-			AC_CHECK_HEADER(/opt/local/include/gdbm.h, [ GDBM_INCLUDE="-I/opt/local/include" ],[
-				dnl if in /usr/pkg/include, do not add anything.  See above.
-				AC_MSG_RESULT("Try /usr/pkg/include/gdbm.h");
-				AC_CHECK_HEADER(/usr/pkg/include/gdbm.h, [ GDBM_INCLUDE="" ],[
-					AC_MSG_RESULT("Giving up - You need to install gdbm.h somewhere");
-					exit
-				])
-			])
-		])	
-	])
-    INCLUDES="$INCLUDES $GDBM_INCLUDES"
-dnl## AC_SUBST(GDBM_INCLUDE)
-fi
 
 dnl Checks for typedefs, structures, and compiler characteristics.
 AC_STRUCT_TM
