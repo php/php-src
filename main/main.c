@@ -1148,7 +1148,7 @@ PHPAPI void php_execute_script(zend_file_handle *primary_file CLS_DC ELS_DC PLS_
 			&& primary_file->filename) {
 		char *filename;
 
-		filename = strrchr(primary_file->filename, PHP_SEPARATOR);
+		filename = strrchr(primary_file->filename, PHP_DIR_SEPARATOR);
 		
 		if (filename) {
 			filename++;
