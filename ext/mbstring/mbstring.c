@@ -2625,7 +2625,7 @@ PHP_FUNCTION(mb_convert_encoding)
 	if (ret != NULL) {
 		RETVAL_STRINGL(ret, size, 0);		/* the string is already strdup()'ed */
 	} else {
-		RETVAL_STRINGL("", 0, 1);
+		RETVAL_FALSE;
 	}
 	if ( s_free) {
 		efree(s_free);
