@@ -1,3 +1,22 @@
+2000-03-20  Andrei Zmievski  <andrei@ispi.net>
+
+    * NEWS: Please use @ in front of _all_ lines intended for NEWS file.
+
+2000-03-20  Rasmus Lerdorf  <rasmus@php.net>
+
+    * SAPI.h
+      php.ini-dist:
+    As it turns out, there are some browsers that can't handle default
+    charsets.  I think forcing this on is going to cause us a lot of headache,
+    so turn it off by default.
+
+    * ext/mysql/php_mysql.c:
+    Make it possible to specify both a port and a socket in mysql_[p]connect
+
+2000-03-20  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/imap/imap.c: Fixed a proto.
+
 2000-03-19  Charles Hagenbuch  <chagenbu@wso.williams.edu>
 
     * ext/gettext/gettext.c: initial function prototypes
