@@ -1343,10 +1343,22 @@ void do_brk_cont(int op, znode *expr CLS_DC)
 void do_switch_cond(znode *cond CLS_DC)
 {
 	zend_switch_entry switch_entry;
+	zend_op *opline;
+
+	/* Initialize the conditional value */
+	opline = get_next_op(CG(active_op_array) CLS_CC);
+	opline->opcode = ZEND_BOOL;
+	opline->result.u.var = get_temporary_variable(CG(active_op_array));
+	opline->result.op_type = IS_TMP_VAR;
+	opline->op1.op_type = IS_CONST;
+	opline->op1.u.constant.type = IS_BOOL;
+	opline->op1.u.constant.value.lval = 0;
+	INIT_PZVAL(&opline->op1.u.constant);
+	SET_UNUSED(opline->op2);
 
 	switch_entry.cond = *cond;
 	switch_entry.default_case = -1;
-	switch_entry.control_var = -1;
+	switch_entry.control_var = opline->result.u.var;
 	zend_stack_push(&CG(switch_cond_stack), (void *) &switch_entry, sizeof(switch_entry));
 
 	do_begin_loop(CLS_C);
@@ -1411,9 +1423,6 @@ void do_case_before_statement(znode *case_list, znode *case_token, znode *case_e
 	zend_stack_top(&CG(switch_cond_stack), (void **) &switch_entry_ptr);
 
 	opline->opcode = ZEND_CASE;
-	if (switch_entry_ptr->control_var==-1) {
-		switch_entry_ptr->control_var = get_temporary_variable(CG(active_op_array));
-	}
 	opline->result.u.var = switch_entry_ptr->control_var;
 	opline->result.op_type = IS_TMP_VAR;
 	opline->op1 = switch_entry_ptr->cond;
@@ -1476,22 +1485,19 @@ void do_default_before_statement(znode *case_list, znode *default_token CLS_DC)
 	next_op_number = get_next_op_number(CG(active_op_array));
 	opline = get_next_op(CG(active_op_array) CLS_CC);
 	opline->opcode = ZEND_BOOL;
-	if (switch_entry_ptr->control_var==-1) {
-		switch_entry_ptr->control_var = get_temporary_variable(CG(active_op_array));
-	}
 	opline->result.u.var = switch_entry_ptr->control_var;
 	opline->result.op_type = IS_TMP_VAR;
 	opline->op1.op_type = IS_CONST;
-	opline->op1.u.constant.type = IS_LONG;
+	opline->op1.u.constant.type = IS_BOOL;
 	opline->op1.u.constant.value.lval = 1;
 	INIT_PZVAL(&opline->op1.u.constant);
 	SET_UNUSED(opline->op2);
 	switch_entry_ptr->default_case = next_op_number;
 
-	next_op_number = get_next_op_number(CG(active_op_array));
 	if (case_list->op_type==IS_UNUSED) {
 		return;
 	}
+	next_op_number = get_next_op_number(CG(active_op_array));
 	CG(active_op_array)->opcodes[case_list->u.opline_num].op1.u.opline_num = next_op_number;
 }
 
