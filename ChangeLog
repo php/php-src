@@ -1,3 +1,29 @@
+2002-02-18  Martin Jansen  <mail@martin-jansen.de>
+
+    * pear/PEAR.php: ='typo'
+
+2002-02-18  Marc Boeren  <M.Boeren@guidance.nl>
+
+    * ext/dbx/dbx.c
+      ext/dbx/dbx_sybasect.h:
+    Oops: source copy&paste should be done with care :) (Mc)
+
+    * ext/dbx/CREDITS
+      ext/dbx/Makefile.in
+      ext/dbx/dbx.c
+      ext/dbx/dbx.dsp
+      ext/dbx/dbx_sybasect.c
+      ext/dbx/dbx_sybasect.h
+      ext/dbx/tests/002.phpt
+      ext/dbx/tests/005.phpt
+      ext/dbx/tests/006.phpt
+      ext/dbx/tests/dbx_test.p:
+    Added support for Sybase-CT to dbx module (Mc).
+
+2002-02-18  Ludovico Magnocavallo  <ludo@sumatrasolutions.com>
+
+    * pear/DB/ibase.php: fixed typo
+
 2002-02-17  Martin Jansen  <mail@martin-jansen.de>
 
     * pear/scripts/pearcmd-info.php: * Fix for bug #15500
