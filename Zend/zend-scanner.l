@@ -51,7 +51,12 @@
 
 #ifdef ZTS
 # include <fstream.h>
-# include <stdiostr.h>
+# ifdef HAVE_STDIOSTR_H
+#  include <stdiostr.h>
+# endif
+# ifdef HAVE_STDIOSTREAM_H
+#  include <stdiostream.h>
+# endif
 # if WIN32||WINNT
 #  include <strstrea.h>
 # else
@@ -59,12 +64,12 @@
 # endif
 #endif
 
-#if HAVE_STDARG_H
-#include <stdarg.h>
+#ifdef HAVE_STDARG_H
+# include <stdarg.h>
 #endif
 
-#if HAVE_UNISTD_H
-#include <unistd.h>
+#ifdef HAVE_UNISTD_H
+# include <unistd.h>
 #endif
 
 #ifdef ZTS
@@ -224,7 +229,7 @@ ZEND_API inline int open_file_for_scanning(zend_file_handle *file_handle CLS_DC)
 				if (!file_handle->handle.fp) {
 					return FAILURE;
 				}
-				file_handle->handle.is = new stdiostream(file_handle->handle.fp);
+				file_handle->handle.is = new istdiostream(file_handle->handle.fp);
 				break;
 			}
 		case ZEND_HANDLE_FP:
@@ -234,7 +239,7 @@ ZEND_API inline int open_file_for_scanning(zend_file_handle *file_handle CLS_DC)
 				if (!file_handle->handle.fp) {
 					return FAILURE;
 				}
-				file_handle->handle.is = new stdiostream(file_handle->handle.fp);
+				file_handle->handle.is = new istdiostream(file_handle->handle.fp);
 			}	
 			break;
 	}

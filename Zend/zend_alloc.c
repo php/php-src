@@ -23,11 +23,11 @@
 #include "zend.h"
 #include "zend_alloc.h"
 #include "zend_globals.h"
-#if HAVE_SIGNAL_H
-#include <signal.h>
+#ifdef HAVE_SIGNAL_H
+# include <signal.h>
 #endif
-#if HAVE_UNISTD_H
-#include <unistd.h>
+#ifdef HAVE_UNISTD_H
+# include <unistd.h>
 #endif
 
 #ifndef ZTS
@@ -124,7 +124,7 @@ ZEND_API void *_emalloc(size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 
 	if (!p) {
 		fprintf(stderr,"FATAL:  emalloc():  Unable to allocate %ld bytes\n", (long) size);
-#if ZEND_DEBUG && HAVE_KILL && HAVE_GETPID
+#if ZEND_DEBUG && defined(HAVE_KILL) && defined(HAVE_GETPID)
 		kill(getpid(), SIGSEGV);
 #else
 		exit(1);

@@ -21,8 +21,8 @@
 #include <stdio.h>
 #include <signal.h>
 
-#if (HAVE_ALLOCA && HAVE_ALLOCA_H)
-#include <alloca.h>
+#if defined(HAVE_ALLOCA) && defined(HAVE_ALLOCA_H)
+# include <alloca.h>
 #endif
 
 #include "zend.h"

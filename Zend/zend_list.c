@@ -25,7 +25,6 @@
 #include "zend_API.h"
 #include "zend_globals.h"
 
-
 ZEND_API int le_index_ptr;
 
 static inline int zend_list_do_insert(HashTable *list,void *ptr, int type)

@@ -26,8 +26,8 @@
 #include "zend_constants.h"
 #include "zend_operators.h"
 
-#if HAVE_STDARG_H
-#include <stdarg.h>
+#ifdef HAVE_STDARG_H
+# include <stdarg.h>
 #endif
 
 /* these variables are true statics/globals, and have to be mutex'ed on every access */

@@ -18,12 +18,17 @@
 */
 
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <limits.h>
-
 #include "zend.h"
 
+#include <stdio.h>
+
+#ifdef HAVE_STDLIB_H
+# include <stdlib.h>
+#endif
+
+#ifdef HAVE_LIMITS_H
+# include <limits.h>
+#endif
 
 #define HANDLE_NUMERIC(key,length,func) { \
 	register char *tmp=key; \
