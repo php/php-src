@@ -403,6 +403,8 @@ PHPAPI int php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int persistent,
 	/* seemed like the smallest impact on unfamiliar code */
 	int ret = SUCCESS; 
 
+	INIT_PZVAL(pval_arg);
+
 	/* Add SafeArray support */
 	if (var_arg->vt & VT_ARRAY)
 	{
@@ -679,21 +681,19 @@ PHPAPI int php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int persistent,
 				}
 				else
 				{
-					pval_arg->type = IS_OBJECT;
-					pval_arg->value.obj.ce = &com_class_entry;
-					pval_arg->value.obj.properties = (HashTable *) emalloc(sizeof(HashTable));
-					pval_arg->is_ref = 1;
-					pval_arg->refcount = 1;
-					zend_hash_init(pval_arg->value.obj.properties, 0, NULL, ZVAL_PTR_DTOR, 0);
-
-					ALLOC_ZVAL(handle);
 					obj = emalloc(sizeof(i_dispatch));
 					php_COM_set(obj, var_arg->pdispVal, TRUE);
 
-					handle->type = IS_LONG;
-					handle->value.lval = zend_list_insert(obj, php_COM_get_le_idispatch());
-					pval_copy_constructor(handle);
+					pval_arg->type = IS_OBJECT;
+					pval_arg->value.obj.ce = &com_class_entry;
+					pval_arg->value.obj.properties = (HashTable *) emalloc(sizeof(HashTable));
+					zend_hash_init(pval_arg->value.obj.properties, 0, NULL, ZVAL_PTR_DTOR, 0);
+
+					ALLOC_ZVAL(handle);
 					INIT_PZVAL(handle);
+					ZVAL_LONG(handle, zend_list_insert(obj, php_COM_get_le_idispatch()));
+
+					pval_copy_constructor(handle);
 					zend_hash_index_update(pval_arg->value.obj.properties, 0, &handle, sizeof(pval *), NULL);
 				}
 			}
