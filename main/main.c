@@ -400,16 +400,11 @@ PHPAPI void php_html_puts(const char *str, uint size TSRMLS_DC)
 			case '&':
 				smart_str_appendl(&s, "&amp;", sizeof("&amp;")-1);
 				break;
-			case ' ': {
-					const char *nextchar = p;
+			case ' ':
+				while (++p < end && *p == ' ');
 
-					while (++nextchar < end && *nextchar == ' ');
-
-					p = nextchar;
-					smart_str_appends(&s, "&nbsp;");
-					continue;
-				}
-				break;
+				smart_str_appends(&s, "&nbsp;");
+				continue;
 			case '\t':
 				smart_str_appendl(&s, "&nbsp;&nbsp;&nbsp;&nbsp;", sizeof("&nbsp;&nbsp;&nbsp;&nbsp;")-1);
 				break;
