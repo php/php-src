@@ -49,7 +49,7 @@ install-su: install-pear install-tester
 test: $(SAPI_CLI_PATH)
 	@TEST_PHP_EXECUTABLE=$(top_builddir)/$(SAPI_CLI_PATH) \
 	 TEST_PHP_SRCDIR=$(top_srcdir) \
-			$(top_builddir)/$(SAPI_CLI_PATH) $(top_srcdir)/run-tests.php $(TESTS)
+			$(top_builddir)/$(SAPI_CLI_PATH) -c $(top_srcdir)/php.ini-dist $(top_srcdir)/run-tests.php $(TESTS)
 
 clean:
 	find . -name \*.lo -o -name \*.o | xargs rm -f
