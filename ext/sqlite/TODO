@@ -1,0 +1,22 @@
+- Transparent binary encoding of return values from PHP callback functions.
+
+- Add user-space callback for the authorizer function (this is potentially
+  very slow, so it needs to be implemented carefully).
+
+- Add user-space callback to handle busy databases.
+
+- Test-suite
+
+  o Test how robust we are when a user-space function is registered as
+    a callback for a persistent connection in script A, then script B is
+	called that doesn't register the callback but does make use of the
+	function in an SQL query.
+	--> Our test suite doesn't allow us to test persistent connections
+	    at this time :/
+
+- If building a ZTS build, -DTHREADSAFE while compiling libsqlite
+
+- If building a non-debug build, -DNDEBUG will disable the expensive
+  asserts in the inner loop. (and double performance)
+
+vim:tw=78
