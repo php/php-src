@@ -830,7 +830,8 @@ static void php_html_entities(INTERNAL_FUNCTION_PARAMETERS, int all)
 {
 	char *str, *hint_charset = NULL;
 	int str_len, hint_charset_len = 0;
-	int len, quote_style = ENT_COMPAT;
+	int len;
+	long quote_style = ENT_COMPAT;
 	char *replaced;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|ls", &str, &str_len,
