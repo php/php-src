@@ -105,7 +105,7 @@ case $os in
 	-scout)
 		;;
 	-wrs)
-		os=vxworks
+		os=-vxworks
 		basic_machine=$1
 		;;
 	-hiux*)
@@ -156,13 +156,17 @@ case $os in
 	-psos*)
 		os=-psos
 		;;
+	-mint | -mint[0-9]*)
+		basic_machine=m68k-atari
+		os=-mint
+		;;
 esac
 
 # Decode aliases for certain CPU-COMPANY combinations.
 case $basic_machine in
 	# Recognize the basic CPU types without company name.
 	# Some are omitted here because they have special meanings below.
-	tahoe | i860 | m32r | m68k | m68000 | m88k | ns32k | arc | arm \
+	tahoe | i860 | ia64 | m32r | m68k | m68000 | m88k | ns32k | arc | arm \
 		| arme[lb] | pyramid | mn10200 | mn10300 | tron | a29k \
 		| 580 | i960 | h8300 \
 		| hppa | hppa1.0 | hppa1.1 | hppa2.0 | hppa2.0w | hppa2.0n \
@@ -171,12 +175,12 @@ case $basic_machine in
 		| 1750a | dsp16xx | pdp11 | mips16 | mips64 | mipsel | mips64el \
 		| mips64orion | mips64orionel | mipstx39 | mipstx39el \
 		| mips64vr4300 | mips64vr4300el | mips64vr4100 | mips64vr4100el \
-		| mips64vr5000 | miprs64vr5000el \
+		| mips64vr5000 | miprs64vr5000el | mcore \
 		| sparc | sparclet | sparclite | sparc64 | sparcv9 | v850 | c4x \
-		| thumb | d10v)
+		| thumb | d10v | fr30)
 		basic_machine=$basic_machine-unknown
 		;;
-	m88110 | m680[12346]0 | m683?2 | m68360 | m5200 | z8k | v70 | h8500 | w65)
+	m88110 | m680[12346]0 | m683?2 | m68360 | m5200 | z8k | v70 | h8500 | w65 | pj | pjl)
 		;;
 
 	# We use `pc' rather than `unknown'
@@ -191,7 +195,8 @@ case $basic_machine in
 		exit 1
 		;;
 	# Recognize the basic CPU types with company name.
-	vax-* | tahoe-* | i[34567]86-* | i860-* | m32r-* | m68k-* | m68000-* \
+	# FIXME: clean up the formatting here.
+	vax-* | tahoe-* | i[34567]86-* | i860-* | ia64-* | m32r-* | m68k-* | m68000-* \
 	      | m88k-* | sparc-* | ns32k-* | fx80-* | arc-* | arm-* | c[123]* \
 	      | mips-* | pyramid-* | tron-* | a29k-* | romp-* | rs6000-* \
 	      | power-* | none-* | 580-* | cray2-* | h8300-* | h8500-* | i960-* \
@@ -204,10 +209,10 @@ case $basic_machine in
 	      | sparc64-* | sparcv9-* | sparc86x-* | mips16-* | mips64-* | mipsel-* \
 	      | mips64el-* | mips64orion-* | mips64orionel-* \
 	      | mips64vr4100-* | mips64vr4100el-* | mips64vr4300-* | mips64vr4300el-* \
-	      | mipstx39-* | mipstx39el-* \
+	      | mipstx39-* | mipstx39el-* | mcore-* \
 	      | f301-* | armv*-* | t3e-* \
 	      | m88110-* | m680[01234]0-* | m683?2-* | m68360-* | z8k-* | d10v-* \
-	      | thumb-* | v850-* | d30v-* | tic30-* | c30-* )
+	      | thumb-* | v850-* | d30v-* | tic30-* | c30-* | fr30-* )
 		;;
 	# Recognize the various machine names and aliases which stand
 	# for a CPU type and a company and sometimes even an OS.
@@ -425,7 +430,6 @@ case $basic_machine in
 		;;
 	i370-ibm* | ibm*)
 		basic_machine=i370-ibm
-		os=-mvs
 		;;
 # I'm not sure what "Sysv32" means.  Should this be sysv3.2?
 	i[34567]86v32)
@@ -460,6 +464,9 @@ case $basic_machine in
 		basic_machine=i386-unknown
 		os=-mingw32
 		;;
+	i386-qnx | qnx)
+		basic_machine=i386-qnx
+		;;
 	iris | iris4d)
 		basic_machine=mips-sgi
 		case $os in
@@ -488,7 +495,7 @@ case $basic_machine in
 	miniframe)
 		basic_machine=m68000-convergent
 		;;
-	*mint | *MiNT)
+	*mint | -mint[0-9]* | *MiNT | *MiNT[0-9]*)
 		basic_machine=m68k-atari
 		os=-mint
 		;;
@@ -514,6 +521,10 @@ case $basic_machine in
 		basic_machine=i386-unknown
 		os=-msdos
 		;;
+	mvs)
+		basic_machine=i370-ibm
+		os=-mvs
+		;;
 	ncr3000)
 		basic_machine=i486-ncr
 		os=-sysv4
@@ -523,7 +534,7 @@ case $basic_machine in
 		os=-netbsd
 		;;
 	netwinder)
-		basic_machine=armv4l-corel
+		basic_machine=armv4l-rebel
 		os=-linux
 		;;
 	news | news700 | news800 | news900)
@@ -907,7 +918,7 @@ case $os in
 	      | -udi* | -eabi* | -lites* | -ieee* | -go32* | -aux* \
 	      | -cygwin* | -pe* | -psos* | -moss* | -proelf* | -rtems* \
 	      | -mingw32* | -linux-gnu* | -uxpv* | -beos* | -mpeix* | -udk* \
-	      | -interix* | -uwin* | -rhapsody* | -openstep* | -oskit*)
+	      | -interix* | -uwin* | -rhapsody* | -opened* | -openstep* | -oskit*)
 	# Remember, each alternative MUST END IN *, to match a version number.
 		;;
 	-sim | -es1800* | -hms* | -xray | -os68k* | -none* | -v88r* \
@@ -925,6 +936,9 @@ case $os in
 		;;
 	-sunos6*)
 		os=`echo $os | sed -e 's|sunos6|solaris3|'`
+		;;
+	-opened*)
+		os=-openedition
 		;;
 	-osfrose*)
 		os=-osfrose
@@ -962,6 +976,9 @@ case $os in
 		;;
 	-oss*)
 		os=-sysv3
+		;;
+        -qnx)
+		os=-qnx4
 		;;
 	-svr4)
 		os=-sysv4
@@ -1012,7 +1029,7 @@ case $basic_machine in
 	*-acorn)
 		os=-riscix1.2
 		;;
-	arm*-corel)
+	arm*-rebel)
 		os=-linux
 		;;
 	arm*-semi)
@@ -1186,7 +1203,7 @@ case $basic_machine in
 			-genix*)
 				vendor=ns
 				;;
-			-mvs*)
+			-mvs* | -opened*)
 				vendor=ibm
 				;;
 			-ptx*)

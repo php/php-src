@@ -24,7 +24,7 @@
 
 # Written by Per Bothner <bothner@cygnus.com>.
 # The master version of this file is at the FSF in /home/gd/gnu/lib.
-# Please send patches to the Autoconf mailing list <autoconf@gnu.org>.
+# Please send patches to <autoconf-patches@gnu.org>.
 #
 # This script attempts to guess a canonical system name similar to
 # config.sub.  If it succeeds, it prints the system name on stdout, and
@@ -155,6 +155,9 @@ EOF
 	exit 0 ;;
     wgrisc:OpenBSD:*:*)
 	echo mipsel-unknown-openbsd${UNAME_RELEASE}
+	exit 0 ;;
+    *:OS/390:*:*)
+	echo i370-ibm-openedition
 	exit 0 ;;
     arm:RISC*:1.[012]*:*|arm:riscix:1.[012]*:*)
 	echo arm-acorn-riscix${UNAME_RELEASE}
@@ -328,15 +331,18 @@ EOF
     AViiON:dgux:*:*)
         # DG/UX returns AViiON for all architectures
         UNAME_PROCESSOR=`/usr/bin/uname -p`
-        if [ $UNAME_PROCESSOR = mc88100 -o $UNAME_PROCESSOR = mc88110 ] ; then
-	if [ ${TARGET_BINARY_INTERFACE}x = m88kdguxelfx \
-	     -o ${TARGET_BINARY_INTERFACE}x = x ] ; then
+	if [ $UNAME_PROCESSOR = mc88100 ] || [ $UNAME_PROCESSOR = mc88110]
+	then
+	    if [ ${TARGET_BINARY_INTERFACE}x = m88kdguxelfx ] || \
+	       [ ${TARGET_BINARY_INTERFACE}x = x ]
+	    then
 		echo m88k-dg-dgux${UNAME_RELEASE}
-	else
+	    else
 		echo m88k-dg-dguxbcs${UNAME_RELEASE}
+	    fi
+	else
+	    echo i586-dg-dgux${UNAME_RELEASE}
 	fi
-        else echo i586-dg-dgux${UNAME_RELEASE}
-        fi
  	exit 0 ;;
     M88*:DolphinOS:*:*)	# DolphinOS (SVR3)
 	echo m88k-dolphin-sysv3
@@ -453,7 +459,7 @@ EOF
                   exit (0);
               }
 EOF
-	($CC_FOR_BUILD $dummy.c -o $dummy 2>/dev/null ) && HP_ARCH=`./$dummy`
+	(CCOPTS= $CC_FOR_BUILD $dummy.c -o $dummy 2>/dev/null ) && HP_ARCH=`./$dummy`
 	rm -f $dummy.c $dummy
 	esac
 	HPUX_REV=`echo ${UNAME_RELEASE}|sed -e 's/[^.]*.[0B]*//'`
@@ -550,7 +556,7 @@ EOF
 	echo t90-cray-unicos${UNAME_RELEASE}
 	exit 0 ;;
     CRAY*T3E:*:*:*)
-	echo t3e-cray-unicosmk${UNAME_RELEASE}
+	echo alpha-cray-unicosmk${UNAME_RELEASE}
 	exit 0 ;;
     CRAY-2:*:*:*)
 	echo cray2-cray-unicos
@@ -588,7 +594,7 @@ EOF
 	echo ${UNAME_MACHINE}-unknown-freebsd`echo ${UNAME_RELEASE}|sed -e 's/[-(].*//'`
 	exit 0 ;;
     *:NetBSD:*:*)
-	echo ${UNAME_MACHINE}-unknown-netbsd`echo ${UNAME_RELEASE}|sed -e 's/[-_].*/\./'`
+	echo ${UNAME_MACHINE}-unknown-netbsd`echo ${UNAME_RELEASE}|sed -e 's/[-_].*//'`
 	exit 0 ;;
     *:OpenBSD:*:*)
 	echo ${UNAME_MACHINE}-unknown-openbsd`echo ${UNAME_RELEASE}|sed -e 's/[-_].*/\./'`
@@ -618,12 +624,6 @@ EOF
 	echo `echo ${UNAME_MACHINE}|sed -e 's,[-/].*$,,'`-unknown-gnu`echo ${UNAME_RELEASE}|sed -e 's,/.*$,,'`
 	exit 0 ;;
     *:Linux:*:*)
-	# uname on the ARM produces all sorts of strangeness, and we need to
-	# filter it out.
-	case "$UNAME_MACHINE" in
-	  armv*)		      UNAME_MACHINE=$UNAME_MACHINE ;;
-	  arm* | sa110*)	      UNAME_MACHINE="arm" ;;
-	esac
 
 	# The BFD linker knows what the default object file format is, so
 	# first see if it will tell us. cd to the root directory to prevent
@@ -636,11 +636,38 @@ EOF
 				    s/ .*//
 				    p'`
         case "$ld_supported_emulations" in
-	  i?86linux)  echo "${UNAME_MACHINE}-pc-linux-gnuaout"      ; exit 0 ;;
-	  i?86coff)   echo "${UNAME_MACHINE}-pc-linux-gnucoff"      ; exit 0 ;;
-	  sparclinux) echo "${UNAME_MACHINE}-unknown-linux-gnuaout" ; exit 0 ;;
-	  armlinux)   echo "${UNAME_MACHINE}-unknown-linux-gnuaout" ; exit 0 ;;
-	  m68klinux)  echo "${UNAME_MACHINE}-unknown-linux-gnuaout" ; exit 0 ;;
+	  *ia64)
+		echo "${UNAME_MACHINE}-unknown-linux"
+		exit 0
+		;;
+	  i?86linux)
+		echo "${UNAME_MACHINE}-pc-linux-gnuaout"
+		exit 0
+		;;
+	  i?86coff)
+		echo "${UNAME_MACHINE}-pc-linux-gnucoff"
+		exit 0
+		;;
+	  sparclinux)
+		echo "${UNAME_MACHINE}-unknown-linux-gnuaout"
+		exit 0
+		;;
+	  armlinux)
+		echo "${UNAME_MACHINE}-unknown-linux-gnuaout"
+		exit 0
+		;;
+	  elf32arm*)
+		echo "${UNAME_MACHINE}-unknown-linux-gnu"
+		exit 0
+		;;
+	  armelf_linux*)
+		echo "${UNAME_MACHINE}-unknown-linux-gnu"
+		exit 0
+		;;
+	  m68klinux)
+		echo "${UNAME_MACHINE}-unknown-linux-gnuaout"
+		exit 0
+		;;
 	  elf32ppc)
 		# Determine Lib Version
 		cat >$dummy.c <<EOF
@@ -670,7 +697,9 @@ EOF
 			fi
 		fi	
 		rm -f $dummy.c $dummy
-		echo powerpc-unknown-linux-gnu${LIBC} ; exit 0 ;;
+		echo powerpc-unknown-linux-gnu${LIBC}
+		exit 0
+		;;
 	esac
 
 	if test "${UNAME_MACHINE}" = "alpha" ; then
@@ -797,19 +826,21 @@ EOF
 	echo ${UNAME_MACHINE}-pc-sysv4.2uw${UNAME_VERSION}
 	exit 0 ;;
     i?86:*:4.*:* | i?86:SYSTEM_V:4.*:*)
+	UNAME_REL=`echo ${UNAME_RELEASE} | sed 's/\/MP$//'`
 	if grep Novell /usr/include/link.h >/dev/null 2>/dev/null; then
-		echo ${UNAME_MACHINE}-univel-sysv${UNAME_RELEASE}
+		echo ${UNAME_MACHINE}-univel-sysv${UNAME_REL}
 	else
-		echo ${UNAME_MACHINE}-pc-sysv${UNAME_RELEASE}
+		echo ${UNAME_MACHINE}-pc-sysv${UNAME_REL}
 	fi
 	exit 0 ;;
     i?86:*:5:7*)
-	UNAME_REL=`(/bin/uname -X|egrep Release|sed -e 's/.*= //')`
-	(/bin/uname -X|egrep i80486 >/dev/null) && UNAME_MACHINE=i486
-	(/bin/uname -X|egrep '^Machine.*Pentium' >/dev/null) && UNAME_MACHINE=i586
-	(/bin/uname -X|egrep '^Machine.*Pent.*II' >/dev/null) && UNAME_MACHINE=i686
-	(/bin/uname -X|egrep '^Machine.*Pentium Pro' >/dev/null) && UNAME_MACHINE=i585
-	echo ${UNAME_MACHINE}-${UNAME_SYSTEM}${UNAME_VERSION}-sysv${UNAME_RELEASE}
+        # Fixed at (any) Pentium or better
+        UNAME_MACHINE=i586
+        if [ ${UNAME_SYSTEM} = "UnixWare" ] ; then
+	    echo ${UNAME_MACHINE}-sco-sysv${UNAME_RELEASE}uw${UNAME_VERSION}
+	else
+	    echo ${UNAME_MACHINE}-pc-sysv${UNAME_RELEASE}
+	fi
 	exit 0 ;;
     i?86:*:3.2:*)
 	if test -f /usr/options/cb.name; then
@@ -942,6 +973,9 @@ EOF
 	exit 0 ;;
     *:Rhapsody:*:*)
 	echo ${UNAME_MACHINE}-apple-rhapsody${UNAME_RELEASE}
+	exit 0 ;;
+    *:QNX:*:4*)
+	echo i386-qnx-qnx${UNAME_VERSION}
 	exit 0 ;;
 esac
 
