@@ -3005,7 +3005,7 @@ PHP_FUNCTION(imap_mail_compose)
 			convert_to_string_ex(pvalue);
 			bod->description = cpystr(Z_STRVAL_PP(pvalue));
 		}
-		if (zend_hash_find(Z_ARRVAL_PP(data), "Z_TYPE(disposition)", sizeof("Z_TYPE(disposition)"), (void **) &pvalue)== SUCCESS) {
+		if (zend_hash_find(Z_ARRVAL_PP(data), "disposition.type", sizeof("disposition.type"), (void **) &pvalue)== SUCCESS) {
 			convert_to_string_ex(pvalue);
 			Z_TYPE(bod->disposition) = (char *) fs_get(Z_STRLEN_PP(pvalue) + 1);
 			memcpy(Z_TYPE(bod->disposition), Z_STRVAL_PP(pvalue), Z_STRLEN_PP(pvalue)+1);
@@ -3091,7 +3091,7 @@ PHP_FUNCTION(imap_mail_compose)
 				convert_to_string_ex(pvalue);
 				bod->description = cpystr(Z_STRVAL_PP(pvalue));
 			}
-			if (zend_hash_find(Z_ARRVAL_PP(data), "Z_TYPE(disposition)", sizeof("Z_TYPE(disposition)"), (void **) &pvalue)== SUCCESS) {
+			if (zend_hash_find(Z_ARRVAL_PP(data), "disposition.type", sizeof("disposition.type"), (void **) &pvalue)== SUCCESS) {
 				convert_to_string_ex(pvalue);
 				Z_TYPE(bod->disposition) = (char *) fs_get(Z_STRLEN_PP(pvalue) + 1);
 				memcpy(Z_TYPE(bod->disposition), Z_STRVAL_PP(pvalue), Z_STRLEN_PP(pvalue)+1);
