@@ -366,7 +366,6 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 		/* get include file name */
 		if (PG(log_errors) || PG(display_errors) || (!module_initialized)) {
 			size = vsnprintf(buffer, sizeof(buffer) - 1, format, orig_args);
-			va_end(orig_args);
 			
 			buffer[sizeof(buffer) - 1] = 0;
 
@@ -442,7 +441,6 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 		pval *tmp;
 
 		size = vsnprintf(buffer, sizeof(buffer) - 1, format, orig_args);
-		va_end(orig_args);
 
 		buffer[sizeof(buffer) - 1] = 0;
 
