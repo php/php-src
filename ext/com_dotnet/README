@@ -65,14 +65,9 @@ $word->Quit();
 
 TODO:
 
-- Dispatch wrapper for PHP objects.
-  The wrapper will enable you to sink events sourced from COM objects,
-  and allow ActiveScript sapi to function again.
-- Indexed array function for (g|s)etting array-style properties that are not
-  actually arrays.
-- SafeArray support for variant class.
-  Currently there is no way to access a safearray from php.
-- A few other com_xxx functions need to be ported from the PHP 4 extension.
+- Mapping PHP arrays as SafeArray's.  This is currently not done.
+  Probably will implement this into $a = new variant($php_array, VT_ARRAY)
+  or something similar.
 - documentation
 
 * dotnet support requires that you have the mscoree.h header from the .net sdk
