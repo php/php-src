@@ -13,13 +13,13 @@ $db->query("CREATE TABLE strings(foo VARCHAR, bar VARCHAR, baz VARCHAR)");
 
 echo "Buffered\n";
 $r = $db->query("SELECT * from strings");
-for($i=0; $i<$r->num_fields(); $i++) {
-	var_dump($r->field_name($i));
+for($i=0; $i<$r->numFields(); $i++) {
+	var_dump($r->fieldName($i));
 }
 echo "Unbuffered\n";
-$r = $db->unbuffered_query("SELECT * from strings");
-for($i=0; $i<$r->num_fields(); $i++) {
-	var_dump($r->field_name($i));
+$r = $db->queryUnbuffered("SELECT * from strings");
+for($i=0; $i<$r->numFields(); $i++) {
+	var_dump($r->fieldName($i));
 }
 echo "DONE!\n";
 ?>

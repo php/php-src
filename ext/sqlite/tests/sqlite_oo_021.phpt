@@ -13,13 +13,13 @@ for ($i = 0; $i < 10; $i++) {
 }
 $db->query("INSERT INTO test_db (data) VALUES(NULL)");
 
-var_dump($db->single_query("SELECT id FROM test_db WHERE id=5"));
-var_dump($db->single_query("SELECT * FROM test_db WHERE id=4"));
-var_dump($db->single_query("SELECT data FROM test_db WHERE id=6"));
-var_dump($db->single_query("SELECT * FROM test_db WHERE id < 5"));
-var_dump($db->single_query("SELECT * FROM test db WHERE id < 4"));
-var_dump($db->single_query("SELECT * FROM test_db WHERE id=999999"));
-var_dump($db->single_query("SELECT id FROM test_db WHERE id=5", FALSE));
+var_dump($db->querySingle("SELECT id FROM test_db WHERE id=5"));
+var_dump($db->querySingle("SELECT * FROM test_db WHERE id=4"));
+var_dump($db->querySingle("SELECT data FROM test_db WHERE id=6"));
+var_dump($db->querySingle("SELECT * FROM test_db WHERE id < 5"));
+var_dump($db->querySingle("SELECT * FROM test db WHERE id < 4"));
+var_dump($db->querySingle("SELECT * FROM test_db WHERE id=999999"));
+var_dump($db->querySingle("SELECT id FROM test_db WHERE id=5", FALSE));
 
 echo "DONE!\n";
 ?>
@@ -38,7 +38,7 @@ array(4) {
   string(1) "4"
 }
 
-Warning: sqlite_db::single_query(): no such table: test in %s on line %d
+Warning: sqlite_db::querySingle(): no such table: test in %s on line %d
 bool(false)
 NULL
 array(1) {

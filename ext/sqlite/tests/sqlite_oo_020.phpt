@@ -39,7 +39,7 @@ foreach ($data as $str) {
 	$db->query("INSERT INTO strings VALUES('${str[0]}','${str[1]}')");
 }
 
-$r = $db->unbuffered_query("SELECT a, b from strings");
+$r = $db->queryUnbuffered("SELECT a, b from strings");
 while ($r->valid()) {
 	var_dump($r->current(SQLITE_NUM));
 	$r->next();

@@ -22,7 +22,7 @@ foreach ($data as $str) {
 }
 
 $r = $db->query("SELECT a from strings");
-while ($row = $r->fetch_array(SQLITE_NUM)) {
+while ($row = $r->fetch(SQLITE_NUM)) {
 	var_dump($row);
 }
 echo "DONE!\n";

@@ -189,32 +189,32 @@ function_entry sqlite_functions[] = {
 };
 
 function_entry sqlite_funcs_db[] = {
-	PHP_ME_MAPPING(sqlite_db, sqlite_open, NULL)
+	PHP_ME_MAPPING(__construct, sqlite_open, NULL)
 /*	PHP_ME_MAPPING(close, sqlite_close, NULL)*/
 	PHP_ME_MAPPING(query, sqlite_query, NULL)
-	PHP_ME_MAPPING(array_query, sqlite_array_query, NULL)
-	PHP_ME_MAPPING(single_query, sqlite_single_query, NULL)
-	PHP_ME_MAPPING(unbuffered_query, sqlite_unbuffered_query, NULL)
-	PHP_ME_MAPPING(last_insert_rowid, sqlite_last_insert_rowid, NULL)
+	PHP_ME_MAPPING(queryAll, sqlite_array_query, NULL)
+	PHP_ME_MAPPING(querySingle, sqlite_single_query, NULL)
+	PHP_ME_MAPPING(queryUnbuffered, sqlite_unbuffered_query, NULL)
+	PHP_ME_MAPPING(lastInsertRowid, sqlite_last_insert_rowid, NULL)
 	PHP_ME_MAPPING(changes, sqlite_changes, NULL)
-	PHP_ME_MAPPING(create_aggregate, sqlite_create_aggregate, NULL)
-	PHP_ME_MAPPING(create_function, sqlite_create_function, NULL)
-	PHP_ME_MAPPING(busy_timeout, sqlite_busy_timeout, NULL)
-	PHP_ME_MAPPING(last_error, sqlite_last_error, NULL)
-	PHP_ME_MAPPING(fetch_column_types, sqlite_fetch_column_types, NULL)
+	PHP_ME_MAPPING(createAggregate, sqlite_create_aggregate, NULL)
+	PHP_ME_MAPPING(createFunction, sqlite_create_function, NULL)
+	PHP_ME_MAPPING(busyTimeout, sqlite_busy_timeout, NULL)
+	PHP_ME_MAPPING(lastError, sqlite_last_error, NULL)
+	PHP_ME_MAPPING(fetchColumnTypes, sqlite_fetch_column_types, NULL)
 /*	PHP_ME_MAPPING(error_string, sqlite_error_string, NULL) static */
 /*	PHP_ME_MAPPING(escape_string, sqlite_escape_string, NULL) static */
 	{NULL, NULL, NULL}
 };
 
 function_entry sqlite_funcs_query[] = {
-	PHP_ME_MAPPING(fetch_array, sqlite_fetch_array, NULL)
-	PHP_ME_MAPPING(fetch_object, sqlite_fetch_object, NULL)
-	PHP_ME_MAPPING(fetch_single, sqlite_fetch_single, NULL)
-	PHP_ME_MAPPING(fetch_all, sqlite_fetch_all, NULL)
+	PHP_ME_MAPPING(fetch, sqlite_fetch_array, NULL)
+	PHP_ME_MAPPING(fetchObject, sqlite_fetch_object, NULL)
+	PHP_ME_MAPPING(fetchSingle, sqlite_fetch_single, NULL)
+	PHP_ME_MAPPING(fetchAll, sqlite_fetch_all, NULL)
 	PHP_ME_MAPPING(column, sqlite_column, NULL)
-	PHP_ME_MAPPING(num_fields, sqlite_num_fields, NULL)
-	PHP_ME_MAPPING(field_name, sqlite_field_name, NULL)
+	PHP_ME_MAPPING(numFields, sqlite_num_fields, NULL)
+	PHP_ME_MAPPING(fieldName, sqlite_field_name, NULL)
 	/* spl_forward */
 	PHP_ME_MAPPING(current, sqlite_current, NULL)
 	PHP_ME_MAPPING(next, sqlite_next, NULL)
@@ -223,20 +223,20 @@ function_entry sqlite_funcs_query[] = {
 	PHP_ME_MAPPING(rewind, sqlite_rewind, NULL)
 	/* additional */
 	PHP_ME_MAPPING(prev, sqlite_prev, NULL)
-	PHP_ME_MAPPING(hasprev, sqlite_has_prev, NULL)
-	PHP_ME_MAPPING(num_rows, sqlite_num_rows, NULL)
+	PHP_ME_MAPPING(hasPrev, sqlite_has_prev, NULL)
+	PHP_ME_MAPPING(numRows, sqlite_num_rows, NULL)
 	PHP_ME_MAPPING(seek, sqlite_seek, NULL)
 	{NULL, NULL, NULL}
 };
 
 function_entry sqlite_funcs_ub_query[] = {
-	PHP_ME_MAPPING(fetch_array, sqlite_fetch_array, NULL)
-	PHP_ME_MAPPING(fetch_object, sqlite_fetch_object, NULL)
-	PHP_ME_MAPPING(fetch_single, sqlite_fetch_single, NULL)
-	PHP_ME_MAPPING(fetch_all, sqlite_fetch_all, NULL)
+	PHP_ME_MAPPING(fetch, sqlite_fetch_array, NULL)
+	PHP_ME_MAPPING(fetchObject, sqlite_fetch_object, NULL)
+	PHP_ME_MAPPING(fetchSingle, sqlite_fetch_single, NULL)
+	PHP_ME_MAPPING(fetchAll, sqlite_fetch_all, NULL)
 	PHP_ME_MAPPING(column, sqlite_column, NULL)
-	PHP_ME_MAPPING(num_fields, sqlite_num_fields, NULL)
-	PHP_ME_MAPPING(field_name, sqlite_field_name, NULL)
+	PHP_ME_MAPPING(numFields, sqlite_num_fields, NULL)
+	PHP_ME_MAPPING(fieldName, sqlite_field_name, NULL)
 	/* spl_forward */
 	PHP_ME_MAPPING(current, sqlite_current, NULL)
 	PHP_ME_MAPPING(next, sqlite_next, NULL)
