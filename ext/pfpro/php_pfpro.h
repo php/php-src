@@ -48,10 +48,10 @@ typedef struct {
 	int le_pfpro;
 	int initialised;
 	char *defaulthost;
-	char *defaultport;
-	char *defaulttimeout;
+	int defaultport;
+	int defaulttimeout;
 	char *proxyaddress;
-	char *proxyport;
+	int proxyport;
 	char *proxylogon;
 	char *proxypassword;
 } php_pfpro_globals;
