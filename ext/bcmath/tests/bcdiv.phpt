@@ -2,6 +2,8 @@
 bcdiv() function
 --SKIP--
 <?php if(!extension_loaded("bcmath")) print "skip"; ?>
+--INI--
+bcmath.scale=0
 --FILE--
 <?php
 echo bcdiv("1", "2"),"\n";

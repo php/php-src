@@ -2,6 +2,8 @@
 bcadd() function
 --SKIP--
 <?php if(!extension_loaded("bcmath")) print "skip"; ?>
+--INI--
+bcmath.scale=0
 --FILE--
 <?php
 echo bcadd("1", "2"),"\n";
