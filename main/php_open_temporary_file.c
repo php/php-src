@@ -122,7 +122,7 @@ static FILE *php_do_open_temporary_file(const char *path, const char *pfx, char 
 		return NULL;
 	}
 
-	if (path[strlen(path)-1] == '/') {
+	if (IS_SLASH(path[strlen(path)-1])) {
 		trailing_slash = "";
 	} else {
 		trailing_slash = "/";
