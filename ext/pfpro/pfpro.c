@@ -27,6 +27,8 @@
 
 #if HAVE_PFPRO
 
+#include "ext/standard/php_string.h"
+
 #ifdef ZTS
 int pfpro_globals_id;
 #else
