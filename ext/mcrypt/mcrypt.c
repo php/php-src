@@ -1210,7 +1210,7 @@ PHP_FUNCTION(mcrypt_ofb)
 PHP_FUNCTION(mcrypt_create_iv)
 {
 	char *iv;
-	iv_source source = RANDOM;
+	long source = RANDOM;
 	long size;
 	int n = 0;
 

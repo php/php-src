@@ -1451,9 +1451,9 @@ static void _php_iconv_show_error(php_iconv_err_t err, const char *out_charset, 
 PHP_FUNCTION(iconv_strlen)
 {
 	char *charset;
-	long charset_len;
+	int charset_len;
 	char *str;
-	long str_len; 
+	int str_len; 
 
 	php_iconv_err_t err;
 
@@ -1481,9 +1481,9 @@ PHP_FUNCTION(iconv_strlen)
 PHP_FUNCTION(iconv_substr)
 {
 	char *charset;
-	long charset_len;
+	int charset_len;
 	char *str;
-	long str_len; 
+	int str_len; 
 	long offset, length;
 	zval *len_z = NULL;
 
@@ -1527,11 +1527,11 @@ PHP_FUNCTION(iconv_substr)
 PHP_FUNCTION(iconv_strpos)
 {
 	char *charset;
-	long charset_len;
+	int charset_len;
 	char *haystk;
-	long haystk_len; 
+	int haystk_len; 
 	char *ndl;
-	long ndl_len;
+	int ndl_len;
 	long offset;
 
 	php_iconv_err_t err;
@@ -1569,11 +1569,11 @@ PHP_FUNCTION(iconv_strpos)
 PHP_FUNCTION(iconv_strrpos)
 {
 	char *charset;
-	long charset_len;
+	int charset_len;
 	char *haystk;
-	long haystk_len; 
+	int haystk_len; 
 	char *ndl;
-	long ndl_len;
+	int ndl_len;
 
 	php_iconv_err_t err;
 
@@ -1604,18 +1604,18 @@ PHP_FUNCTION(iconv_strrpos)
 PHP_FUNCTION(iconv_mime_encode)
 {
 	char *field_name;
-	long field_name_len;
+	int field_name_len;
 	char *field_value;
-	long field_value_len;
+	int field_value_len;
 	char *scheme;
-	long scheme_len;	
+	int scheme_len;	
 	char *in_charset;
-	long in_charset_len;
+	int in_charset_len;
 	char *out_charset;
-	long out_charset_len;
+	int out_charset_len;
 	long line_len = 76;
 	char *lfchars = "\r\n";
-	long lfchars_len = sizeof("\r\n")-1; 
+	int lfchars_len = sizeof("\r\n")-1; 
 	
 	php_iconv_enc_scheme_t scheme_id = PHP_ICONV_ENC_SCHEME_BASE64;
 
@@ -1668,9 +1668,9 @@ PHP_FUNCTION(iconv_mime_encode)
 PHP_FUNCTION(iconv_mime_decode)
 {
 	char *encoded_str;
-	long encoded_str_len;
+	int encoded_str_len;
 	char *charset;
-	long charset_len;
+	int charset_len;
 	
 	smart_str retval = {0};
 

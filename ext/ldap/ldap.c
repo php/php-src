@@ -345,11 +345,11 @@ PHP_FUNCTION(ldap_connect)
 {
 	char *host = NULL;
 	int hostlen;
-	int port = 389; /* Default port */
+	long port = 389; /* Default port */
 #ifdef HAVE_ORALDAP
 	char *wallet, *walletpasswd;
 	int walletlen, walletpasswdlen;
-	int authmode;
+	long authmode;
 	int ssl=0;
 #endif
 	ldap_linkdata *ld;

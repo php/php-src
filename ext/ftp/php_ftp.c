@@ -151,7 +151,8 @@ PHP_FUNCTION(ftp_connect)
 {
 	ftpbuf_t	*ftp;
 	char		*host;
-	int			host_len, port = 0;
+	int		host_len;
+	long 		port = 0;
 	long		timeout_sec = FTP_DEFAULT_TIMEOUT;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|ll", &host, &host_len, &port, &timeout_sec) == FAILURE) {
@@ -186,7 +187,8 @@ PHP_FUNCTION(ftp_ssl_connect)
 {
 	ftpbuf_t	*ftp;
 	char		*host;
-	int			host_len, port = 0;
+	int		host_len;
+	long		port = 0;
 	long		timeout_sec = FTP_DEFAULT_TIMEOUT;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|ll", &host, &host_len, &port, &timeout_sec) == FAILURE) {

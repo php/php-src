@@ -107,7 +107,7 @@ PHP_FUNCTION(mhash_count)
    Gets the block size of hash */
 PHP_FUNCTION(mhash_get_block_size)
 {
-	int hash;
+	long hash;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &hash) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -123,7 +123,7 @@ PHP_FUNCTION(mhash_get_block_size)
 PHP_FUNCTION(mhash_get_hash_name)
 {
 	char *name;
-	int hash;
+	long hash;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &hash) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -147,7 +147,7 @@ PHP_FUNCTION(mhash)
 	MHASH td;
 	int bsize;
 	unsigned char *hash_data;
-	int hash;
+	long hash;
 	int data_len, key_len=0;
 	char *data, *key=NULL;
 	
@@ -196,7 +196,7 @@ PHP_FUNCTION(mhash_keygen_s2k)
 {
 	KEYGEN keystruct;
 	char salt[SALT_SIZE], *ret;
-	int hash, bytes;
+	long hash, bytes;
 	char *password, *in_salt;
 	int password_len, salt_len;
 	
