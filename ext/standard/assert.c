@@ -86,10 +86,12 @@ PHP_INI_BEGIN()
 	 STD_PHP_INI_ENTRY("assert.quiet_eval", "0",	PHP_INI_ALL,	OnUpdateInt,		quiet_eval,		 	php_assert_globals,		assert_globals)
 PHP_INI_END()
 
+#ifdef ZTS
 static void php_assert_init_globals(php_assert_globals *assert_globals)
 {
 	ASSERT(callback) = 0;
 }
+#endif
 
 PHP_MINIT_FUNCTION(assert)
 {
@@ -174,7 +176,7 @@ PHP_FUNCTION(assert)
 
 	if ((*assertion)->type == IS_STRING) {
 		zval retval;
-		int old_error_reporting;
+		int old_error_reporting = 0; /* shut up gcc! */
 
 		myeval = (*assertion)->value.str.val;
 
