@@ -1370,7 +1370,7 @@ class PEAR_Common extends PEAR
      */
     function betterStates($state, $include = false)
     {
-        static $states = array('devel', 'snapshot', 'alpha', 'beta', 'stable');
+        static $states = array('snapshot', 'devel', 'alpha', 'beta', 'stable');
         $i = array_search($state, $states);
         if ($i === false) {
             return false;
@@ -1751,7 +1751,7 @@ class PEAR_Common extends PEAR
                 $newret[] = $p;
             }
         }
-        
+
         $func = $uninstall ? '_sortPkgDepsRev' : '_sortPkgDeps';
         usort($newret, array('PEAR_Common', $func));
         $packages = $newret;
