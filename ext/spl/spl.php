@@ -14,9 +14,85 @@
  * SPL - Standard PHP Library
  *
  * SPL is a collection of interfaces and classes that are meant to solve 
- * standard problems. 
+ * standard problems and implements some efficient data access interfaces 
+ * and classes. You'll find the classes documented using php code in the 
+ * file spl.php or in corresponding .inc files in subdirectories examples 
+ * and internal. Based on the internal implementations or the files in the 
+ * examples subdirectory there are also some .php files to experiment with.
+ * 
+ * The .inc files are not included automatically because they are sooner or 
+ * later integrated into the extension. That means that you either need to 
+ * put the code of examples/autoload.inc into your autoprepend file or that 
+ * you have to point your ini setting auto_prepend_file to that file.
+ * 
+ * Below is a list of interfaces/classes already availabel natively through
+ * the SPL extension grouped by category.
+ * 
+ * 1) Iterators
+ * 
+ * SPL offers some advanced iterator algorithms:
+ * 
+ * - interface RecursiveIterator implements Iterator
+ * - interface OuterIterator extends Iterator
+ * - class RecursiveIteratorIterator implements OuterIterator
+ * - abstract class FilterIterator implements OuterIterator
+ * - class ParentIterator extends FilterIterator implements RecursiveIterator
+ * - interface SeekableIterator implements Iterator
+ * - class LimitIterator implements OuterIterator
+ * - class CachingIterator implements OuterIterator
+ * - class CachingRecursiveIterator extends CachingIterator implements RecursiveIterator
+ * - class IteratorIterator implements OuterIterator
+ * - class NoRewindIterator implements OuterIterator
+ * - class EmptyIterator implements Iterator
+ * - class InfiniteIterator extends IteratorIterator
+ * - class AppendIterator implements OuterIterator
+ * 
+ * 2) Directories
+ * 
+ * SPL offers two advanced directory classes:
+ * 
+ * - class DirectoryIterator implements Iterator
+ * - class RecursiveDirectoryIterator extends DirectoryIterator implements RecursiveIterator
+ * 
+ * 3) XML
+ * 
+ * SPL offers an advanced XML handling class:
+ * 
+ * - class SimpleXMLIterator extends simplexml_element extends recursiveiterator
+ * 
+ * 4) Array Overloading
+ * 
+ * SPL offers advanced Array overloading:
+ * 
+ * - class ArrayObject implements IteratorAggregate
+ * - class ArrayIterator implements Iterator
  *
- * A nice article about it can be found 
+ * 5) Counting
+ *
+ * - interface Counable allows to hook into the standard array function count().
+ *
+ * 6) Exceptions
+ *
+ * SPL provides a set of standard exception classes each meant to indicate a 
+ * certain problem type.
+ *
+ * - class LogicException           extends Exception
+ * - class BadFunctionCallException extends LogicException
+ * - class BadMethodCallException   extends BadFunctionCallException
+ * - class DomainException          extends LogicException
+ * - class InvalidArgumentException extends LogicException
+ * - class LengthException          extends LogicException
+ * - class OutOfRangeException      extends LogicException
+ * - class RuntimeException         extends Exception
+ * - class OutOfBoundsException     extends RuntimeException
+ * - class OverflowException        extends RuntimeException
+ * - class RangeException           extends RuntimeException
+ * - class UnderflowException       extends RuntimeException
+ * 
+ * As the above suggest an ArrayObject creates an ArrayIterator when it comes to
+ * iteration (e.g. ArrayObject instance used inside foreach). 
+ * 
+ * A nice article about SPL can be found 
  * <a href="http://www.sitepoint.com/article/php5-standard-library/1">here</a>.
  *
  * You can download this documentation as a chm file 
@@ -646,14 +722,14 @@ class CachingRecursiveIterator extends CachingIterator implements RecursiveItera
 	/** Construct an instance form a RecursiveIterator.
 	 *
 	 * @param $iterator inner iterator
-	 * @param flags Bitmask: 
+	 * @param $flags Bitmask: 
 	 *              - CIT_CALL_TOSTRING  whether to call __toString() for 
 	 *                     every element. This is optional since it is not 
 	 *                     always used nad takes an additional fcall.
 	 *              - CIT_CATCH_GET_CHILD whether to catch exceptions when 
 	 *                     trying to get childs) 
 	 */
-	function __construct(RecursiveIterator $iterator, $getStrVal);
+	function __construct(RecursiveIterator $iterator, $flags = CIT_CALL_TOSTRING);
 }
 
 /** @ingroup SPL
