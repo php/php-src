@@ -244,7 +244,7 @@ void php_set_session_var(char *name, size_t namelen, zval *state_val, php_unseri
 		zval **old_symbol;
 		if (zend_hash_find(&EG(symbol_table),name,namelen+1,(void *)&old_symbol) == SUCCESS) { 
 			/* 
-			   There where old one, we need to replace it accurately.
+			   There was an old one, we need to replace it accurately.
 			   hash_update in zend_set_hash_symbol is not good, because
 			   it will leave referenced variables (such as local instances
 			   of a global variable) dangling.
