@@ -6,6 +6,8 @@ PHP 4                                                                      NEWS
   and gmp_fact() to prevent SIGFPE. (Tony)
 - Changed phpize not to require libtool. (Jani)
 - Updated bundled libmbfl library (used for multibyte functions). (Moriyoshi)
+- Fixed bug #32373 (segfault in bzopen() if supplied path to non-existent 
+  file). (Tony)
 - Fixed bug #32340 (insert_before($node,NULL) does not return). (Rob) 
 - Fixed bug #32114 (DOM crashing when attribute appended to Document). (Rob)
   Fixed bugs:

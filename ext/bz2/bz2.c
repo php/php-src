@@ -196,7 +196,7 @@ PHP_BZ2_API php_stream *_php_stream_bz2open(php_stream_wrapper *wrapper,
 		/* remove the file created by php_stream_open_wrapper(), it is not needed since BZ2 functions
 		 * failed.
 		 */
-		if (!bz_file && mode[0] == 'w') {
+		if (opened_path && !bz_file && mode[0] == 'w') {
 			VCWD_UNLINK(*opened_path);
 		}
 	}
