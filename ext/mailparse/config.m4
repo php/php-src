@@ -2,7 +2,7 @@ dnl $Id$
 dnl config.m4 for extension mailparse
 
 PHP_ARG_ENABLE(mailparse, whether to enable mailparse support,
-[  --enable-mailparse           Enable mailparse support])
+[  --enable-mailparse      Enable mailparse support])
 
 if test "$PHP_MAILPARSE" != "no"; then
   if test "$ext_shared" != "yes" && test "$enable_mbstring" != "yes"; then
