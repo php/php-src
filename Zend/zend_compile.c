@@ -77,6 +77,7 @@ void zend_init_compiler_data_structures(CLS_D)
 	CG(active_ce_parent_class_name).value.str.val = NULL;
 	zend_llist_init(&CG(list_llist), sizeof(list_llist_element), NULL, 0);
 	zend_llist_init(&CG(dimension_llist), sizeof(int), NULL, 0);
+	zend_stack_init(&CG(list_stack));
 	CG(handle_op_arrays) = 1;
 	CG(in_compilation) = 0;
 	init_compiler_declarables(CLS_C);
@@ -101,6 +102,7 @@ void shutdown_compiler(CLS_D)
 	zend_stack_destroy(&CG(foreach_copy_stack));
 	zend_stack_destroy(&CG(object_stack));
 	zend_stack_destroy(&CG(declare_stack));
+	zend_stack_destroy(&CG(list_stack));
 	zend_hash_destroy(&CG(filenames_table));
 	zend_llist_destroy(&CG(open_files));
 }
@@ -1853,6 +1855,8 @@ void zend_do_new_list_end(CLS_D)
 
 void zend_do_list_init(CLS_D)
 {
+	zend_stack_push(&CG(list_stack), &CG(list_llist), sizeof(zend_llist));
+	zend_stack_push(&CG(list_stack), &CG(dimension_llist), sizeof(zend_llist));
 	zend_llist_init(&CG(list_llist), sizeof(list_llist_element), NULL, 0);
 	zend_llist_init(&CG(dimension_llist), sizeof(int), NULL, 0);
 	zend_do_new_list_begin(CLS_C);
@@ -1911,6 +1915,17 @@ void zend_do_list_end(znode *result, znode *expr CLS_DC)
 	zend_llist_destroy(&CG(dimension_llist));
 	zend_llist_destroy(&CG(list_llist));
 	*result = *expr;
+	{
+		zend_llist *p;
+
+		/* restore previous lists */
+		zend_stack_top(&CG(list_stack), (void **) &p);
+		CG(dimension_llist) = *p;
+		zend_stack_del_top(&CG(list_stack));
+		zend_stack_top(&CG(list_stack), (void **) &p);
+		CG(list_llist) = *p;
+		zend_stack_del_top(&CG(list_stack));
+	}
 }
 
 
