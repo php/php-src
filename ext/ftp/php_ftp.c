@@ -108,7 +108,7 @@ PHP_MINFO_FUNCTION(ftp)
 
 #define	XTYPE(xtype, mode)	{ \
 								if (mode != FTPTYPE_ASCII && mode != FTPTYPE_IMAGE) { \
-									php_error(E_WARNING, "%s(): mode must be FTP_ASCII or FTP_BINARY", get_active_function_name(TSRMLS_C)); \
+									php_error(E_WARNING, "%s(): Mode must be FTP_ASCII or FTP_BINARY", get_active_function_name(TSRMLS_C)); \
 									RETURN_FALSE; \
 								} \
 								xtype = mode; \
@@ -129,7 +129,7 @@ PHP_FUNCTION(ftp_connect)
 	}
 
 	if (timeout_sec <= 0) {
-		php_error(E_WARNING, "%s(): timeout has to be greater than 0",
+		php_error(E_WARNING, "%s(): Timeout has to be greater than 0",
 				  get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
 	}
@@ -418,7 +418,7 @@ PHP_FUNCTION(ftp_fget)
 	}
 
 	if (php_stream_error(stream)) {
-		php_error(E_WARNING, "%s(): error writing %s", get_active_function_name(TSRMLS_C), Z_STRVAL_P(z_file));
+		php_error(E_WARNING, "%s(): Error writing %s", get_active_function_name(TSRMLS_C), Z_STRVAL_P(z_file));
 		RETURN_FALSE;
 	}
 
@@ -476,7 +476,7 @@ PHP_FUNCTION(ftp_get)
 
 	if (!ftp_get(ftp, tmpstream, remote, xtype) || php_stream_error(tmpstream)) {
 		php_stream_close(tmpstream);
-		php_error(E_WARNING, "ftp_get: %s", ftp->inbuf);
+		php_error(E_WARNING, "%s(): %s", get_active_function_name(TSRMLS_C), ftp->inbuf);
 		RETURN_FALSE;
 	}
 
@@ -484,13 +484,13 @@ PHP_FUNCTION(ftp_get)
 
 	if (outstream == NULL)	{
 		php_stream_close(tmpstream);
-		php_error(E_WARNING, "%s(): error opening %s", get_active_function_name(TSRMLS_C), local);
+		php_error(E_WARNING, "%s(): Error opening %s", get_active_function_name(TSRMLS_C), local);
 		RETURN_FALSE;
 	}
 
 	php_stream_rewind(tmpstream);
 	if (php_stream_copy_to_stream(tmpstream, outstream, PHP_STREAM_COPY_ALL) == 0)	{	
-		php_error(E_WARNING, "%s(): error writing %s", get_active_function_name(TSRMLS_C), local);
+		php_error(E_WARNING, "%s(): Error writing %s", get_active_function_name(TSRMLS_C), local);
 		RETVAL_FALSE;
 	}
 	else
@@ -713,12 +713,12 @@ PHP_FUNCTION(ftp_set_option)
 	switch (option) {
 		case PHP_FTP_OPT_TIMEOUT_SEC:
 			if (Z_TYPE_P(z_value) != IS_LONG) {
-				php_error(E_WARNING, "%s(): option TIMEOUT_SEC expects value of type long, %s given",
+				php_error(E_WARNING, "%s(): Option TIMEOUT_SEC expects value of type long, %s given",
 						  get_active_function_name(TSRMLS_C), zend_zval_type_name(z_value));
 				RETURN_FALSE;
 			}
 			if (Z_LVAL_P(z_value) <= 0) {
-				php_error(E_WARNING, "%s(): timeout has to be greater than 0",
+				php_error(E_WARNING, "%s(): Timeout has to be greater than 0",
 						  get_active_function_name(TSRMLS_C));
 				RETURN_FALSE;
 			}
@@ -726,7 +726,7 @@ PHP_FUNCTION(ftp_set_option)
 			RETURN_TRUE;
 			break;
 		default:
-			php_error(E_WARNING, "%s(): unknown option '%d'", get_active_function_name(TSRMLS_C), option);
+			php_error(E_WARNING, "%s(): Unknown option '%d'", get_active_function_name(TSRMLS_C), option);
 			RETURN_FALSE;
 			break;
 	}
@@ -752,7 +752,7 @@ PHP_FUNCTION(ftp_get_option)
 			RETURN_LONG(ftp->timeout_sec);
 			break;
 		default:
-			php_error(E_WARNING, "%s(): unknown option '%d'", get_active_function_name(TSRMLS_C), option);
+			php_error(E_WARNING, "%s(): Unknown option '%d'", get_active_function_name(TSRMLS_C), option);
 			RETURN_FALSE;
 			break;
 	}
