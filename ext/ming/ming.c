@@ -24,7 +24,7 @@
 #endif
 
 #include "php.h"
-#include "php_ming.h"
+#include "php_globals.h"
 #include "ext/standard/info.h"
 #include "ext/standard/file.h"
 #include "ext/standard/fsock.h"
@@ -32,6 +32,7 @@
 
 #if HAVE_MING
 
+#include "php_ming.h"
 #include <stdio.h>
 #include <math.h>
 #include <ming.h>
@@ -69,6 +70,7 @@ static SWFMorph getMorph(zval *id TSRMLS_DC);
 static SWFMovieClip getSprite(zval *id TSRMLS_DC);
 static SWFSound getSound(zval *id TSRMLS_DC);
 #ifdef HAVE_NEW_MING
+static SWFFontCharacter getFontCharacter(zval *id TSRMLS_DC);
 static SWFSoundInstance getSoundInstance(zval *id TSRMLS_DC);
 #endif
 
@@ -3869,6 +3871,7 @@ PHP_MINIT_FUNCTION(ming)
 	INIT_CLASS_ENTRY(sprite_class_entry, "swfsprite", swfsprite_functions);
 	INIT_CLASS_ENTRY(sound_class_entry, "swfsound", swfsound_functions);
 #ifdef HAVE_NEW_MING
+	INIT_CLASS_ENTRY(fontchar_class_entry, "swffontchar", swffontchar_functions);
 	INIT_CLASS_ENTRY(soundinstance_class_entry, "swfsoundinstance", swfsoundinstance_functions);
 #endif
 
@@ -3885,6 +3888,10 @@ PHP_MINIT_FUNCTION(ming)
 	action_class_entry_ptr = zend_register_internal_class(&action_class_entry TSRMLS_CC);
 	morph_class_entry_ptr = zend_register_internal_class(&morph_class_entry TSRMLS_CC);
 	sprite_class_entry_ptr = zend_register_internal_class(&sprite_class_entry TSRMLS_CC);
+#ifdef HAVE_NEW_MING
+	fontchar_class_entry_ptr = zend_register_internal_class(&fontchar_class_entry TSRMLS_CC);
+	soundinstance_class_entry_ptr = zend_register_internal_class(&soundinstance_class_entry TSRMLS_CC);
+#endif
 
 	return SUCCESS;
 }
