@@ -87,3 +87,4 @@ extern ZEND_API zend_executor_globals executor_globals;
 #endif
 
 #endif /* _ZEND_GLOBALS_MACROS_H */
+
