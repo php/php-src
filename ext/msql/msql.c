@@ -252,6 +252,7 @@ DLEXPORT PHP_MINIT_FUNCTION(msql)
 }
 
 DLEXPORT PHP_MSHUTDOWN_FUNCTION(msql)
+{
 #ifdef THREAD_SAFE
 	msql_global_struct *msql_globals;
 	msql_globals = TlsGetValue(MSQLTls); 
