@@ -39,7 +39,6 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 
 $GLOBALS['_PEAR_default_error_mode']     = PEAR_ERROR_RETURN;
 $GLOBALS['_PEAR_default_error_options']  = E_USER_NOTICE;
-$GLOBALS['_PEAR_default_error_callback'] = '';
 $GLOBALS['_PEAR_destructor_object_list'] = array();
 
 //
@@ -234,11 +233,9 @@ class PEAR
         if (isset($this)) {
             $setmode     = &$this->_default_error_mode;
             $setoptions  = &$this->_default_error_options;
-            //$setcallback = &$this->_default_error_callback;
         } else {
             $setmode     = &$GLOBALS['_PEAR_default_error_mode'];
             $setoptions  = &$GLOBALS['_PEAR_default_error_options'];
-            //$setcallback = &$GLOBALS['_PEAR_default_error_callback'];
         }
 
         switch ($mode) {
@@ -371,45 +368,19 @@ class PEAR
                 $mode = PEAR_ERROR_RETURN;
             }
         }
-
+        // No mode given, try global ones
         if ($mode === null) {
+            // Class error handler
             if (isset($this) && isset($this->_default_error_mode)) {
-                $mode = $this->_default_error_mode;
-            } else {
-                $mode = $GLOBALS['_PEAR_default_error_mode'];
-            }
-        }
-
-        if ($mode == PEAR_ERROR_TRIGGER && $options === null) {
-            if (isset($this)) {
-                if (isset($this->_default_error_options)) {
-                    $options = $this->_default_error_options;
-                }
-            } else {
+                $mode    = $this->_default_error_mode;
+                $options = $this->_default_error_options;
+            // Global error handler
+            } elseif (isset($GLOBALS['_PEAR_default_error_mode'])) {
+                $mode    = $GLOBALS['_PEAR_default_error_mode'];
                 $options = $GLOBALS['_PEAR_default_error_options'];
             }
         }
 
-        if ($mode == PEAR_ERROR_CALLBACK) {
-            if (!is_string($options) &&
-                !(is_array($options) && sizeof($options) == 2 &&
-                  is_object($options[0]) && is_string($options[1])))
-            {
-                if (isset($this) && isset($this->_default_error_options)) {
-                    $options = $this->_default_error_options;
-                } else {
-                    $options = $GLOBALS['_PEAR_default_error_options'];
-                }
-            }
-        } else {
-            if ($options === null) {
-                if (isset($this) && isset($this->_default_error_options)) {
-                    $options = $this->_default_error_options;
-                } else {
-                    $options = $GLOBALS['_PEAR_default_error_options'];
-                }
-            }
-        }
         if ($error_class !== null) {
             $ec = $error_class;
         } elseif (isset($this) && isset($this->_error_class)) {
@@ -446,13 +417,9 @@ class PEAR
             if (isset($this)) {
                 $def_mode = &$this->_default_error_mode;
                 $def_options = &$this->_default_error_options;
-                // XXX Used anywhere?
-                //$def_callback = &$this->_default_error_callback;
             } else {
                 $def_mode = &$GLOBALS['_PEAR_default_error_mode'];
                 $def_options = &$GLOBALS['_PEAR_default_error_options'];
-                // XXX Used anywhere?
-                //$def_callback = &$GLOBALS['_PEAR_default_error_callback'];
             }
             $stack = array();
             $stack[] = array($def_mode, $def_options);
