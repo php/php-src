@@ -2,6 +2,7 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 200?, Version 4.0.5
+- Fix date('r') overflow
 - Made the php.ini path reported in phpinfo() always point to the absolute
   path that was opened (Zeev)
 - Made the INI mechanism thread safe (Zeev, Zend engine)
