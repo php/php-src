@@ -649,7 +649,7 @@ static int schema_restriction_simpleContent(sdlPtr sdl, xmlAttrPtr tsn, xmlNodeP
 	}
 
 	trav = restType->children;
-	if (trav != NULL && node_is_equal(trav, "annotaion")) {
+	if (trav != NULL && node_is_equal(trav, "annotation")) {
 		/* TODO: <annotation> support */
 		trav = trav->next;
 	}
@@ -748,7 +748,7 @@ static int schema_restriction_complexContent(sdlPtr sdl, xmlAttrPtr tsn, xmlNode
 
 	trav = restType->children;
 	if (trav != NULL && node_is_equal(trav,"annotation")) {
-		/* TODO: <annotaion> support */
+		/* TODO: <annotation> support */
 		trav = trav->next;
 	}
 	if (trav != NULL) {
@@ -873,7 +873,7 @@ static int schema_extension_simpleContent(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr
 
 	trav = extType->children;
 	if (trav != NULL && node_is_equal(trav,"annotation")) {
-		/* TODO: <annotaion> support */
+		/* TODO: <annotation> support */
 		trav = trav->next;
 	}
 	while (trav != NULL) {
@@ -928,7 +928,7 @@ static int schema_extension_complexContent(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePt
 
 	trav = extType->children;
 	if (trav != NULL && node_is_equal(trav,"annotation")) {
-		/* TODO: <annotaion> support */
+		/* TODO: <annotation> support */
 		trav = trav->next;
 	}
 	if (trav != NULL) {
@@ -1010,7 +1010,7 @@ static int schema_all(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr all, sdlTypePtr cur
 
 	trav = all->children;
 	if (trav != NULL && node_is_equal(trav,"annotation")) {
-		/* TODO: <annotaion> support */
+		/* TODO: <annotation> support */
 		trav = trav->next;
 	}
 	while (trav != NULL) {
@@ -1132,7 +1132,7 @@ static int schema_group(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr groupType, sdlTyp
 
 	trav = groupType->children;
 	if (trav != NULL && node_is_equal(trav,"annotation")) {
-		/* TODO: <annotaion> support */
+		/* TODO: <annotation> support */
 		trav = trav->next;
 	}
 	if (trav != NULL) {
@@ -1210,7 +1210,7 @@ static int schema_choice(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr choiceType, sdlT
 
 	trav = choiceType->children;
 	if (trav != NULL && node_is_equal(trav,"annotation")) {
-		/* TODO: <annotaion> support */
+		/* TODO: <annotation> support */
 		trav = trav->next;
 	}
 	while (trav != NULL) {
@@ -1276,7 +1276,7 @@ static int schema_sequence(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr seqType, sdlTy
 
 	trav = seqType->children;
 	if (trav != NULL && node_is_equal(trav,"annotation")) {
-		/* TODO: <annotaion> support */
+		/* TODO: <annotation> support */
 		trav = trav->next;
 	}
 	while (trav != NULL) {
