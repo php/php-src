@@ -2384,10 +2384,7 @@ void unmangle_property_name(char *mangled_property, char **class_name, char **pr
 void zend_do_declare_property(znode *var_name, znode *value, zend_uint access_type TSRMLS_DC)
 {
 	zval *property;
-	zend_property_info property_info;
 	zend_property_info *existing_property_info;
-	HashTable *target_symbol_table;
-	zend_bool free_var_name = 0;
 
 	if (CG(active_class_entry)->ce_flags & ZEND_ACC_INTERFACE) {
 		zend_error(E_COMPILE_ERROR, "Interfaces may not include member variables");
@@ -2400,10 +2397,6 @@ void zend_do_declare_property(znode *var_name, znode *value, zend_uint access_ty
 	if (access_type & ZEND_ACC_FINAL) {
 		zend_error(E_COMPILE_ERROR, "Cannot declare property $%s::%s final, the final modifier is allowed only for methods",
 				   CG(active_class_entry)->name, var_name->u.constant.value.str.val);
-	}
-
-	if (!(access_type & ZEND_ACC_PPP_MASK)) {
-		access_type |= ZEND_ACC_PUBLIC;
 	}
 
 	if (zend_hash_find(&CG(active_class_entry)->properties_info, var_name->u.constant.value.str.val, var_name->u.constant.value.str.len+1, (void **) &existing_property_info)==SUCCESS) {
@@ -2420,48 +2413,8 @@ void zend_do_declare_property(znode *var_name, znode *value, zend_uint access_ty
 		property->type = IS_NULL;
 	}
 
-	if (access_type & ZEND_ACC_STATIC) {
-		target_symbol_table = CG(active_class_entry)->static_members;
-	} else {
-		target_symbol_table = &CG(active_class_entry)->default_properties;
-	}
-
-	switch (access_type & ZEND_ACC_PPP_MASK) {
-		case ZEND_ACC_PRIVATE: {
-				char *priv_name;
-				int priv_name_length;
-
-				mangle_property_name(&priv_name, &priv_name_length, CG(active_class_entry)->name, CG(active_class_entry)->name_length, var_name->u.constant.value.str.val, var_name->u.constant.value.str.len);
-				free_var_name = 1;
-				zend_hash_update(target_symbol_table, priv_name, priv_name_length+1, &property, sizeof(zval *), NULL);
-				property_info.name = priv_name;
-				property_info.name_length = priv_name_length;
-			}
-			break;
-		case ZEND_ACC_PROTECTED: {
-				char *prot_name;
-				int prot_name_length;
-
-				mangle_property_name(&prot_name, &prot_name_length, "*", 1, var_name->u.constant.value.str.val, var_name->u.constant.value.str.len);
-				free_var_name = 1;
-				zend_hash_update(target_symbol_table, prot_name, prot_name_length+1, &property, sizeof(zval *), NULL);
-				property_info.name = prot_name;
-				property_info.name_length = prot_name_length;
-			}
-			break;
-		case ZEND_ACC_PUBLIC:
-			zend_hash_update(target_symbol_table, var_name->u.constant.value.str.val, var_name->u.constant.value.str.len+1, &property, sizeof(zval *), NULL);
-			property_info.name = var_name->u.constant.value.str.val;
-			property_info.name_length = var_name->u.constant.value.str.len;
-			break;
-	}
-	property_info.flags = access_type;
-	property_info.h = zend_get_hash_value(property_info.name, property_info.name_length+1);
-
-	zend_hash_update(&CG(active_class_entry)->properties_info, var_name->u.constant.value.str.val, var_name->u.constant.value.str.len+1, &property_info, sizeof(zend_property_info), NULL);
-	if (free_var_name) {
-		efree(var_name->u.constant.value.str.val);
-	}
+	zend_declare_property(CG(active_class_entry), var_name->u.constant.value.str.val, var_name->u.constant.value.str.len, property, access_type);
+	efree(var_name->u.constant.value.str.val);
 }
 
 

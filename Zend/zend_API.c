@@ -1565,6 +1565,7 @@ zend_bool zend_is_callable(zval *callable, zend_bool syntax_only, char **callabl
 	return retval;
 }
 
+
 ZEND_API char *zend_get_module_version(char *module_name)
 {
 	zend_module_entry *module;
@@ -1576,7 +1577,8 @@ ZEND_API char *zend_get_module_version(char *module_name)
     return module->version;
 }
 
-ZEND_API void zend_declare_property(zend_class_entry *ce, char *name, int namelen, zval *property, int access_type)
+
+ZEND_API int zend_declare_property(zend_class_entry *ce, char *name, int name_length, zval *property, int access_type)
 {
 	zend_property_info property_info;
 	HashTable *target_symbol_table;
@@ -1590,36 +1592,38 @@ ZEND_API void zend_declare_property(zend_class_entry *ce, char *name, int namele
 		target_symbol_table = &ce->default_properties;
 	}
 	switch (access_type & ZEND_ACC_PPP_MASK) {
-	  case ZEND_ACC_PRIVATE: {
-		char *priv_name;
-		int priv_name_length;
+		case ZEND_ACC_PRIVATE: {
+				char *priv_name;
+				int priv_name_length;
 
-		mangle_property_name(&priv_name, &priv_name_length, ce->name, ce->name_length, name, namelen);
-		zend_hash_update(target_symbol_table, priv_name, priv_name_length+1, &property, sizeof(zval *), NULL);
-		property_info.name = priv_name;
-		property_info.name_length = priv_name_length;
-	  }
-	  break;
-	  case ZEND_ACC_PROTECTED: {
-		char *prot_name;
-		int prot_name_length;
+				mangle_property_name(&priv_name, &priv_name_length, ce->name, ce->name_length, name, name_length);
+				zend_hash_update(target_symbol_table, priv_name, priv_name_length+1, &property, sizeof(zval *), NULL);
+				property_info.name = priv_name;
+				property_info.name_length = priv_name_length;
+			}
+			break;
+		case ZEND_ACC_PROTECTED: {
+				char *prot_name;
+				int prot_name_length;
 
-		mangle_property_name(&prot_name, &prot_name_length, "*", 1, name, namelen);
-		zend_hash_update(target_symbol_table, prot_name, prot_name_length+1, &property, sizeof(zval *), NULL);
-		property_info.name = prot_name;
-		property_info.name_length = prot_name_length;
-	  }
-	  break;
-	  case ZEND_ACC_PUBLIC:
-		zend_hash_update(target_symbol_table, name, namelen+1, &property, sizeof(zval *), NULL);
-		property_info.name = estrdup(name);
-		property_info.name_length = namelen;
-		break;
+				mangle_property_name(&prot_name, &prot_name_length, "*", 1, name, name_length);
+				zend_hash_update(target_symbol_table, prot_name, prot_name_length+1, &property, sizeof(zval *), NULL);
+				property_info.name = prot_name;
+				property_info.name_length = prot_name_length;
+			}
+			break;
+		case ZEND_ACC_PUBLIC:
+			zend_hash_update(target_symbol_table, name, name_length+1, &property, sizeof(zval *), NULL);
+			property_info.name = estrndup(name, name_length);
+			property_info.name_length = name_length;
+			break;
 	}
 	property_info.flags = access_type;
 	property_info.h = zend_get_hash_value(property_info.name, property_info.name_length+1);
 
-	zend_hash_update(&ce->properties_info, name, namelen + 1, &property_info, sizeof(zend_property_info), NULL);
+	zend_hash_update(&ce->properties_info, name, name_length + 1, &property_info, sizeof(zend_property_info), NULL);
+
+	return SUCCESS;
 }
 /*
  * Local variables:
