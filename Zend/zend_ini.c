@@ -158,7 +158,7 @@ static int zend_ini_refresh_cache(zend_ini_entry *p, int stage)
 
 ZEND_API void zend_ini_refresh_caches(int stage)
 {
-	zend_hash_apply_with_argument(&known_directives, (int (*)(void *, void *)) zend_ini_refresh_cache, (void *) stage);
+	zend_hash_apply_with_argument(&known_directives, (int (*)(void *, void *)) zend_ini_refresh_cache, (void *)(long) stage);
 }
 
 
