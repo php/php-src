@@ -136,11 +136,10 @@ int dom_attr_value_read(dom_object *obj, zval **retval TSRMLS_DC)
 	
 	if ((content = xmlNodeGetContent((xmlNodePtr) attrp)) != NULL) {
 		ZVAL_STRING(*retval, content, 1);
+		xmlFree(content);
 	} else {
 		ZVAL_EMPTY_STRING(*retval);
 	}
-
-	xmlFree(content);
 
 	return SUCCESS;
 
@@ -148,6 +147,7 @@ int dom_attr_value_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 int dom_attr_value_write(dom_object *obj, zval *newval TSRMLS_DC)
 {
+	zval value_copy;
 	xmlAttrPtr attrp;
 
 	attrp = (xmlAttrPtr) dom_object_get_node(obj);
@@ -155,7 +155,21 @@ int dom_attr_value_write(dom_object *obj, zval *newval TSRMLS_DC)
 	if (attrp->children) {
 		node_list_unlink(attrp->children TSRMLS_CC);
 	}
+
+	if (newval->type != IS_STRING) {
+		if(newval->refcount > 1) {
+			value_copy = *newval;
+			zval_copy_ctor(&value_copy);
+			newval = &value_copy;
+		}
+		convert_to_string(newval);
+	}
+
 	xmlNodeSetContentLen((xmlNodePtr) attrp, Z_STRVAL_P(newval), Z_STRLEN_P(newval) + 1);
+
+	if (newval == &value_copy) {
+		zval_dtor(newval);
+	}
 
 	return SUCCESS;
 }
@@ -223,7 +237,11 @@ PHP_FUNCTION(dom_attr_is_id)
 	xmlAttrPtr attrp;
 	xmlNodePtr nodep;
 
-	DOM_GET_THIS_OBJ(attrp, id, xmlAttrPtr, intern);
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &id, dom_attr_class_entry) == FAILURE) {
+		return;
+	}
+
+	DOM_GET_OBJ(attrp, id, xmlAttrPtr, intern);
 
 	nodep = attrp->parent;
 
