@@ -262,6 +262,7 @@ typedef struct {
 #endif
 	} val;
 	short sqlind;
+	void *allocated;
 } BIND_BUF;
 
 /* get blob identifier from argument
@@ -1319,6 +1320,7 @@ static int _php_ibase_bind(XSQLDA *sqlda, zval **b_vars, BIND_BUF *buf, ibase_qu
 	for (i = 0; i < sqlda->sqld; var++, i++) { /* bound vars */
 		
 		buf[i].sqlind = 0;
+		buf[i].allocated = NULL;
 		var->sqlind = &buf[i].sqlind;
 		b_var = b_vars[i];
 		
@@ -1462,40 +1464,35 @@ static int _php_ibase_bind(XSQLDA *sqlda, zval **b_vars, BIND_BUF *buf, ibase_qu
 #endif
 				break;
 			case SQL_BLOB:
-				{
-					ibase_blob_handle *ib_blob_id;
+				if (Z_TYPE_P(b_var) != IS_STRING || Z_STRLEN_P(b_var) != sizeof(ibase_blob_handle) || 
+				   ((ibase_blob_handle *)(Z_STRVAL_P(b_var)))->bl_handle != 0) {
 
-					if (Z_TYPE_P(b_var) != IS_STRING || Z_STRLEN_P(b_var) != sizeof(ibase_blob_handle) || 
-					   ((ibase_blob_handle *)(Z_STRVAL_P(b_var)))->bl_handle != 0) {
-						ibase_blob_handle *ib_blob;
+					ibase_blob_handle ib_blob;
 
-						ib_blob = (ibase_blob_handle *) emalloc(sizeof(ibase_blob_handle));
-						ib_blob->trans_handle = ib_query->trans;
-						ib_blob->link = ib_query->link;
-						ib_blob->bl_handle = NULL;
-						if (isc_create_blob(IB_STATUS, &ib_blob->link, &ib_blob->trans_handle, &ib_blob->bl_handle, &ib_blob->bl_qd)) {
-							efree(ib_blob);
-							_php_ibase_error(TSRMLS_C);
-							return FAILURE;
-						}
+					ib_blob.trans_handle = ib_query->trans->handle;
+					ib_blob.link = ib_query->link->handle;
+					ib_blob.bl_handle = NULL;
 
-						if (_php_ibase_blob_add(&b_var, ib_blob TSRMLS_CC) != SUCCESS) {
-							efree(ib_blob);
-							return FAILURE;
-						}
-							
-						if (isc_close_blob(IB_STATUS, &ib_blob->bl_handle)) {
-							_php_ibase_error(TSRMLS_C);
-							efree(ib_blob);
-							return FAILURE;
-						}
-						ib_blob_id = ib_blob;
-					} else {
-						ib_blob_id = (ibase_blob_handle *) Z_STRVAL_P(b_var);
+					if (isc_create_blob(IB_STATUS, &ib_blob.link, &ib_blob.trans_handle, &ib_blob.bl_handle, &ib_blob.bl_qd)) {
+						_php_ibase_error(TSRMLS_C);
+						return FAILURE;
 					}
-					var->sqldata = (void ISC_FAR *) &ib_blob_id->bl_qd;
+
+					if (_php_ibase_blob_add(&b_var, &ib_blob TSRMLS_CC) != SUCCESS) {
+						return FAILURE;
+					}
+						
+					if (isc_close_blob(IB_STATUS, &ib_blob.bl_handle)) {
+						_php_ibase_error(TSRMLS_C);
+						return FAILURE;
+					}
+					buf[i].allocated = var->sqldata = (void ISC_FAR *) emalloc(sizeof(ISC_QUAD));
+					*(ISC_QUAD ISC_FAR *) var->sqldata = ib_blob.bl_qd;
+					
+				} else {
+					var->sqldata = (void ISC_FAR *) &((ibase_blob_handle *) Z_STRVAL_P(b_var))->bl_qd;
 				}
-			break;
+				break;
 			case SQL_ARRAY:
 				_php_ibase_module_error("Binding arrays not supported yet");
 				return FAILURE;
@@ -1730,8 +1727,17 @@ _php_ibase_exec_error:		 /* I'm a bad boy... */
 	if (in_sqlda) {
 		efree(in_sqlda);
 	}
-	if (bind_buf)
+	if (bind_buf) {
+		int i;
+
+		/* free memory allocated in binding stage */
+		for (i = 0; i < ib_query->in_sqlda->sqld; ++i) {
+			if (bind_buf[i].allocated != NULL) {
+				efree(bind_buf[i].allocated);
+			}
+		}
 		efree(bind_buf);
+	}
 
 	if (rv == FAILURE) {
 		if (IB_RESULT) {
@@ -3372,11 +3378,9 @@ PHP_FUNCTION(ibase_blob_open)
 		RETURN_FALSE;
 	}
 	
-	ib_blob->link = ib_blob_id->link;
-	ib_blob->trans_handle = ib_blob_id->trans_handle;
-	ib_blob->bl_qd.gds_quad_high = ib_blob_id->bl_qd.gds_quad_high;
-	ib_blob->bl_qd.gds_quad_low = ib_blob_id->bl_qd.gds_quad_low;
+	*ib_blob = *ib_blob_id;
 	ib_blob->bl_handle = NULL;
+
 	if (isc_open_blob(IB_STATUS, &ib_blob->link, &ib_blob->trans_handle, &ib_blob->bl_handle, &ib_blob->bl_qd)) {
 		efree(ib_blob);
 		_php_ibase_error(TSRMLS_C);
@@ -3385,6 +3389,7 @@ PHP_FUNCTION(ibase_blob_open)
 	
 	RETURN_LONG(zend_list_insert(ib_blob, le_blob));
 }
+/* }}} */
 
 /* {{{ proto bool ibase_blob_add(int blob_id, string data)
    Add data into created blob */
@@ -3612,10 +3617,14 @@ PHP_FUNCTION(ibase_blob_import)
 	zval **link_arg, **file_arg;
 	int link_id = 0, size;
 	unsigned short b;
-	ibase_blob_handle ib_blob;
+	ibase_blob_handle ib_blob = { NULL, NULL, { 0, 0 }, NULL };
 	ibase_db_link *ib_link;
 	ibase_trans *trans = NULL;
-	char bl_data[IBASE_BLOB_SEG]; /* FIXME? blob_seg_size parameter?	 */
+#if (IBASE_BLOB_SEG > USHRT_MAX)
+	char bl_data[USHRT_MAX]; /* should never be > 64k */
+#else
+	char bl_data[IBASE_BLOB_SEG];
+#endif
 	php_stream *stream;
 
 	RESET_ERRMSG;
@@ -3648,9 +3657,6 @@ PHP_FUNCTION(ibase_blob_import)
 	
 	ib_blob.link = ib_link->handle;
 	ib_blob.trans_handle = trans->handle;
-	ib_blob.bl_handle = NULL;
-	ib_blob.bl_qd.gds_quad_high = 0;
-	ib_blob.bl_qd.gds_quad_low = 0;
 	
 	if (isc_create_blob(IB_STATUS, &ib_blob.link, &ib_blob.trans_handle, &ib_blob.bl_handle, &ib_blob.bl_qd)) {
 		_php_ibase_error(TSRMLS_C);
