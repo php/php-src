@@ -1,27 +1,22 @@
-/*  pwd.c - Try to approximate UN*X's getuser...() functions under MS-DOS.
-   Copyright (C) 1990 by Thorsten Ohl, td12@ddagsi3.bitnet
+/*
+   +----------------------------------------------------------------------+
+   | PHP Version 4                                                        |
+   +----------------------------------------------------------------------+
+   | Copyright (c) 1997-2002 The PHP Group                                |
+   +----------------------------------------------------------------------+
+   | This source file is subject to version 2.02 of the PHP license,      |
+   | that is bundled with this package in the file LICENSE, and is        |
+   | available at through the world-wide-web at                           |
+   | http://www.php.net/license/2_02.txt.                                 |
+   | If you did not receive a copy of the PHP license and are unable to   |
+   | obtain it through the world-wide-web, please send a note to          |
+   | license@php.net so we can mail you a copy immediately.               |
+   +----------------------------------------------------------------------+
+   | Author: Sterling Hughes <sterling@php.net>                           |
+   +----------------------------------------------------------------------+
+*/
 
-   This program is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 1, or (at your option)
-   any later version.
-
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
-
-   You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software
-   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-   $Header$
- */
-
-/* This 'implementation' is conjectured from the use of this functions in
-   the RCS and BASH distributions.  Of course these functions don't do too
-   much useful things under MS-DOS, but using them avoids many "#ifdef
-   MSDOS" in ported UN*X code ...  */
+/* $Id$ */
 
 #include "php.h"				/*php specific */
 #define WIN32_LEAN_AND_MEAN
@@ -35,40 +30,37 @@
 #include "grp.h"
 
 #ifndef THREAD_SAFE
-static struct passwd pw;		/* should we return a malloc()'d structure   */
+static struct passwd pwd;
 #endif
-static char *home_dir = ".";	/* we feel (no|every)where at home */
+
+static char *home_dir = ".";
 static char *login_shell = "not command.com!";
 
-struct passwd *getpwnam(char *name)
+struct passwd *
+getpwnam(char *name)
 {
 	return (struct passwd *) 0;
 }
 
 
-char *getlogin()
+char *
+getlogin()
 {
 	static char name[256];
-	DWORD dw = 256;
-	GetUserName(name, &dw);
+	DWORD max_len = 256;
+
+	GetUserName(name, &max_len);
 	return name;
 }
 
 struct passwd *
- getpwuid(int uid)
+getpwuid(int user_id)
 {
-	pw.pw_name = getlogin();
-	pw.pw_dir = home_dir;
-	pw.pw_shell = login_shell;
-	pw.pw_uid = 0;
+	pwd.pw_name = getlogin();
+	pwd.pw_dir = home_dir;
+	pwd.pw_shell = login_shell;
+	pwd.pw_uid = 0;
 
-	return &pw;
+	return &pwd;
 }
 
-/*
- * Local Variables:
- * mode:C
- * ChangeLog:ChangeLog
- * compile-command:make
- * End:
- */
