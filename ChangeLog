@@ -1,3 +1,77 @@
+2002-03-27  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/gmp/gmp.c: MFH: fixed bug: #16237
+
+    * ext/gmp/gmp.c: Fixed bug: #16237
+
+    * sapi/cli/php_cli.c: WS fix
+
+2002-03-27  Joseph Tate  <jtate@mi-corporation.com>
+
+    * ext/domxml/php_domxml.c: Fixing compile warning under Win32
+
+2002-03-27  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * sapi/cli/php_cli.c: recorrect las checkin
+
+2002-03-27  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/mailparse/rfc2045.c: - MFH for multiple To: lines
+
+2002-03-27  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/standard/string.c: fix for Bug #16314
+
+2002-03-27  Jani Taskinen  <sniper@iki.fi>
+
+    * .cvsignore: autoconf 2.53 uses this directory for some temporary stuff
+
+    * ext/mcve/mcve_simple_test.php
+      ext/mcve/mcve_test1.php
+      ext/mcve/mcve_test2.php
+      ext/mcve/tests/mcve_simple_test.php
+      ext/mcve/tests/mcve_test1.php
+      ext/mcve/tests/mcve_test2.php: Moved these example scripts out of tests.
+
+    * ext/ming/config.m4: - Fixed bug: #16203
+
+2002-03-27  Wez Furlong  <wez.php@thebrainroom.com>
+
+    * ext/mailparse/tests/003.phpt: add test case for multiple To: lines
+
+    * ext/mailparse/rfc2045.c: allow headers hash to handle multiple To: lines
+
+2002-03-27  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/mime_magic/config.m4: not enabled by default
+
+    * ext/mime_magic/mime_magic.c
+      ext/mime_magic/php_mime_magic.h:
+    moved 'static' prototypes to prevent warnings
+
+    * ext/mime_magic/mime_magic.c
+      ext/mime_magic/php_mime_magic.h:
+    preparing for Content-Encoding detection
+
+2002-03-27  Sascha Schumann  <sascha@schumann.cx>
+
+    * acinclude.m4: Factorize a few library/libpath-related functions
+
+    * ext/mcal/config.m4:
+    Defer linking against libmcal until we have built the extension,
+    so that extension-supplied symbols are available.
+
+    Also factorize the header file checks.
+
+    Reported by: Brandon Knitter
+    URL: http://news.php.net/article.php?group=php.dev&article=81833
+
+    * ext/mailparse/libs.mk: Remove generated file
+
+2002-03-27  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * ext/pgsql/pgsql.c: MFH error message consistency changes
+
 2002-03-26  Jon Parise  <jon@csh.rit.edu>
 
     * ext/mime_magic/.cvsignore: Ignore generated files.
