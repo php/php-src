@@ -160,6 +160,7 @@ static int le_domxmlpip;
 static int le_domxmlcommentp;
 static int le_domxmlnotationp;
 static int le_domxmlparserp;
+static int le_domxmlnamespacep;
 
 /*static int le_domxmlentityp;*/
 static int le_domxmlentityrefp;
@@ -513,6 +514,13 @@ static zend_function_entry php_domxmlattr_class_functions[] = {
 };
 
 static zend_function_entry php_domxmlns_class_functions[] = {
+	PHP_FALIAS(node_name,				domxml_node_name,				NULL)
+	PHP_FALIAS(node_type,				domxml_node_type,				NULL)
+	PHP_FALIAS(node_value,				domxml_node_value,			NULL)
+	PHP_FALIAS(prefix,				domxml_node_prefix,			NULL)
+	PHP_FALIAS(namespace_uri,			domxml_node_namespace_uri,		NULL)
+	PHP_FALIAS(owner_document,			domxml_node_owner_document,		NULL)
+	PHP_FALIAS(parent_node,				domxml_node_parent,			NULL)
 	{NULL, NULL, NULL}
 };
 
@@ -733,11 +741,19 @@ static void php_free_xml_node(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 
 	/* if node has no parent, it will not be freed by php_free_xml_doc, so do it here
 	and for all children as well. */
-	if (node->parent == NULL) {
+	if (node->parent == NULL || node->type == XML_NAMESPACE_DECL) {
 		/* Attribute Nodes ccontain accessible children 
 		attr_list_wrapper_dtor(node->properties); */
 		xmlSetTreeDoc(node, NULL);
-		node_list_wrapper_dtor((xmlNodePtr) node->properties, 1 TSRMLS_CC);
+		if (node->type == XML_NAMESPACE_DECL) {
+			if (node->ns) {
+				xmlFreeNs(node->ns);
+				node->ns = NULL;
+			}
+			node->type = XML_ELEMENT_NODE;
+		} else {
+			node_list_wrapper_dtor((xmlNodePtr) node->properties, 1 TSRMLS_CC);
+		}
 		node_list_wrapper_dtor(node->children, 1 TSRMLS_CC);
 		node_wrapper_dtor(node);
 		xmlFreeNode(node);
@@ -1371,6 +1387,22 @@ PHPAPI zval *php_domobject_new(xmlNodePtr obj, int *found, zval *wrapper_in  TSR
 			break;
 		}
 
+		case XML_NAMESPACE_DECL:
+		{
+			xmlNodePtr nodep = obj;
+			if(!wrapper_in)
+				object_init_ex(wrapper, domxmlns_class_entry);
+			rsrc_type = le_domxmlnamespacep;
+			add_property_long(wrapper, "type", Z_TYPE_P(nodep));
+			add_property_stringl(wrapper, "name", (char *) nodep->name, strlen(nodep->name), 1);
+			content = xmlNodeGetContent(nodep->children);
+			if (content) {
+				add_property_stringl(wrapper, "value", (char *) content, strlen(content), 1);
+				xmlFree(content);
+			}
+			break;
+		}
+
 		default:
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unsupported node type: %d\n", Z_TYPE_P(obj));
 			FREE_ZVAL(wrapper);
@@ -1508,6 +1540,7 @@ PHP_MINIT_FUNCTION(domxml)
 	le_domxmlpip = zend_register_list_destructors_ex(php_free_xml_node, NULL, "dompi", module_number);
 	le_domxmlparserp =	zend_register_list_destructors_ex(php_free_xml_parser, NULL, "domparser", module_number);
 	le_domxmldoctypep = zend_register_list_destructors_ex(php_free_xml_node, NULL, "domdocumenttype", module_number);
+	le_domxmlnamespacep = zend_register_list_destructors_ex(php_free_xml_node, NULL, "domnamespacenode", module_number);
 	le_domxmldocp = zend_register_list_destructors_ex(php_free_xml_doc, NULL, "domdocument", module_number);
 	/* Freeing the document contains freeing the complete tree.
 	   Therefore nodes, attributes etc. may not be freed seperately.
@@ -1890,6 +1923,7 @@ PHP_FUNCTION(domxml_node_name)
 	zval *id;
 	xmlNode *n;
 	int fullQName = 0;
+	xmlChar *qname = NULL;
 	const char *str = NULL;
 
 	DOMXML_PARAM_ONE(n, id, le_domxmlnodep,"|b",&fullQName);
@@ -1897,14 +1931,22 @@ PHP_FUNCTION(domxml_node_name)
 	switch (Z_TYPE_P(n)) {
 		case XML_ELEMENT_NODE:
 			if (fullQName && n->ns && n->ns->prefix) {
-				/* there is maybe a better way of doing this...*/
-				char *tmpstr;
-				tmpstr = (char*) emalloc((strlen(n->ns->prefix)+strlen(n->name))  * sizeof(char)) ;
-				sprintf(tmpstr,"%s:%s", (char*) n->ns->prefix, (char*) n->name);
-				str = strdup(tmpstr);
-				efree(tmpstr);
+				qname = xmlStrdup(n->ns->prefix);
+				qname = xmlStrcat(qname, ":");
+				qname = xmlStrcat(qname, n->name);
+				str = qname;
 			} else {
 				str = n->name;
+			}
+			break;
+		case XML_NAMESPACE_DECL:
+			if (n->ns != NULL && n->ns->prefix) {
+				qname = xmlStrdup("xmlns");
+				qname = xmlStrcat(qname, ":");
+				qname = xmlStrcat(qname, n->name);
+				str = qname;
+			} else {
+				str = (char *) n->name;
 			}
 			break;
 
@@ -1950,7 +1992,10 @@ PHP_FUNCTION(domxml_node_name)
 	}
 
 	if(str != NULL) {
-		RETURN_STRING((char *) str, 1);
+		RETVAL_STRING((char *) str, 1);
+		if (qname) {
+			xmlFree(qname);
+		}
 	} else {
 		RETURN_EMPTY_STRING();
 	}
@@ -1975,6 +2020,11 @@ PHP_FUNCTION(domxml_node_value)
 		case XML_CDATA_SECTION_NODE:
 		case XML_PI_NODE:
 			str = n->content;
+			break;
+		case XML_NAMESPACE_DECL:
+			if (n->children) {
+				str = n->children->content;
+			}
 			break;
 		default:
 			str = NULL;
@@ -3935,11 +3985,19 @@ static xmlDocPtr domxml_document_parser(int mode, int loadtype, char *source, vo
 
 	xmlInitParser();
 
+	keep_blanks = xmlKeepBlanksDefault(keep_blanks);
+
 	if (loadtype == DOMXML_LOAD_FILE) {
 		ctxt = xmlCreateFileParserCtxt(source);
 	} else {
 		ctxt = xmlCreateDocParserCtxt(source);
 	}
+
+	xmlKeepBlanksDefault(keep_blanks);
+	/* xmlIndentTreeOutput default is changed in xmlKeepBlanksDefault
+	reset back to 1 which is default value */
+
+	xmlIndentTreeOutput = 1;
 
 	if (ctxt == NULL) {
 		return(NULL);
@@ -3954,7 +4012,6 @@ static xmlDocPtr domxml_document_parser(int mode, int loadtype, char *source, vo
 
 	ctxt->validate = validate;
 	ctxt->loadsubset = resolve_externals;
-	ctxt->keepBlanks = keep_blanks;
 	ctxt->replaceEntities = substitute_ent;
 
 	if (data != NULL) {
@@ -4885,6 +4942,8 @@ static void php_xpathptr_eval(INTERNAL_FUNCTION_PARAMETERS, int mode, int expr)
 
 	if (contextnode) {
 		DOMXML_GET_OBJ(contextnodep, contextnode, le_domxmlnodep);
+	} else {
+		contextnodep = xmlDocGetRootElement(ctxp->doc);
 	}
 	ctxp->node = contextnodep;
 
@@ -4941,9 +5000,27 @@ static void php_xpathptr_eval(INTERNAL_FUNCTION_PARAMETERS, int mode, int expr)
 				xmlNodePtr node = nodesetp->nodeTab[i];
 				zval *child;
 				int retnode;
+				xmlNsPtr curns;
+				xmlNodePtr nsparent;
+				
+				if (node->type == XML_NAMESPACE_DECL) {
+					nsparent = node->_private;
+					curns = xmlNewNs(NULL, node->name, NULL);
+					if (node->children) {
+						curns->prefix = xmlStrdup((char *) node->children);
+					}
+					if (node->children) {
+						node = xmlNewDocNode(ctxp->doc, NULL, (char *) node->children, node->name);
+					} else {
+						node = xmlNewDocNode(ctxp->doc, NULL, "xmlns", node->name);
+					}
+					node->type = XML_NAMESPACE_DECL;
+					node->parent = nsparent;
+					node->ns = curns;
+				}
 
-				/* construct a node object */
 				child = php_domobject_new(node, &retnode, NULL TSRMLS_CC);
+
 				zend_hash_next_index_insert(Z_ARRVAL_P(arr), &child, sizeof(zval *), NULL);
 			}
 			zend_hash_update(Z_OBJPROP_P(rv), "nodeset", sizeof("nodeset"), (void *) &arr, sizeof(zval *), NULL);
