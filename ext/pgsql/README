@@ -42,13 +42,15 @@ You cannot specify PostgreSQL source directly to build PostgreSQL
 module with specific version. You need to install PostgreSQL 
 somewhere in your system to build PHP with PostgreSQL support.
 
-==== Note For PostgreSQL 7.2 beta ====
-Current CVS version (probably 4.0.6 or later) compiles without
-modefication.
+==== Note For PostgreSQL 7.2 ====
+I've tested upto 7.2.1.
 
 ==== TODO List ===
-pg_convert_array() - convert array elements for SQL statement.
-Support async connection create.
+Make pg_convert() smater. 
+ - Better regex
+ - User defiend type support
+Support async connection.
+Support async notification.
 
 ==== Experimental Functions =====
 
@@ -173,17 +175,46 @@ Seeks position of large object
 
 --------------------------------------------------------------------
 
-Notice messge function
+Notice message function
 
 --------------------------------------------------------------------
 
 string pg_last_notice(resource connection)
 Returns the last notice set by the backend 
-Currently pg_last_notice() does not return notice message associated
-with the connection.
+
+This function is fully implemed in only in current CVS version.
+PHP 4.3.0 supposed to included fully implemented version.
 
 NOTE: Added in PHP 4.0.6, but there is bug in notice message handling
 in PHP 4.0.6. Do no use 4.0.6 with pgsql module!!
+
+--------------------------------------------------------------------
+
+Utility functions (for PHP 4.3.0)
+
+--------------------------------------------------------------------
+array pg_metadata(resource db, string table)
+   Get metadata
+
+--------------------------------------------------------------------
+array pg_convert(resource db, string table, array values)
+   Check and convert values for PostgreSQL SQL statement
+
+--------------------------------------------------------------------
+bool pg_insert(resource db, string table, array values[, bool convert[, bool async]])
+   Insert values (filed=>value) to table 
+
+--------------------------------------------------------------------
+bool pg_update(resource db, string table, array fields, array ids[, bool convert[, bool async]])
+   Update table using values (field=>value) and ids (id=>value) 
+
+--------------------------------------------------------------------
+bool pg_delete(resource db, string table, array ids[, bool convert[, bool async]])
+   Delete records has ids (id=>value) 
+
+--------------------------------------------------------------------
+array pg_select(resource db, string table, array ids[, bool convert])
+   Select records that has ids (id=>value) 
 
 --------------------------------------------------------------------
 
