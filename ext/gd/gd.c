@@ -1620,6 +1620,8 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
 				if(q<0||q>255) {
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid threshold value '%d'. It must be between 0 and 255", q);
 				}
+				gdImageWBMP(im, q, fp);
+				break;
 			case PHP_GDIMG_TYPE_JPG:
 				(*func_p)(im, fp, q);
 				break;
@@ -1662,6 +1664,8 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
 				if(q<0||q>255) {
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid threshold value '%d'. It must be between 0 and 255", q);
 				}
+				gdImageWBMP(im, q, tmp);
+				break;
 			case PHP_GDIMG_TYPE_JPG:
 				(*func_p)(im, tmp, q);
 				break;
@@ -3623,6 +3627,10 @@ static void _php_image_bw_convert( gdImagePtr im_org, gdIOCtx *out, int threshol
 	if (black == -1) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to allocate the colors for the destination buffer");
 		return;
+	}
+
+	if (im_org->trueColor) {
+		gdImageTrueColorToPalette(im_org, 1, 256);
 	}
 
 	for (y = 0; y < dest_height; y++) {
