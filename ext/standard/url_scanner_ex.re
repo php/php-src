@@ -244,6 +244,12 @@ enum {
 	tag_arg(ctx PLS_CC); \
 }
 
+#ifdef SCANNER_DEBUG
+#define scdebug(x) printf x
+#else
+#define scdebug(x)
+#endif
+
 static inline void mainloop(url_adapt_state_ex_t *ctx, const char *newdata, size_t newlen)
 {
 	char *end, *q;
@@ -264,9 +270,7 @@ alpha = [a-zA-Z];
 	
 	while(1) {
 		start = YYCURSOR;
-#ifdef SCANNER_DEBUG
-		printf("state %d at %s\n", STATE, YYCURSOR);
-#endif
+		scdebug(("state %d at %s\n", STATE, YYCURSOR));
 	switch(STATE) {
 		
 		case STATE_PLAIN:
@@ -316,14 +320,11 @@ alpha = [a-zA-Z];
 	}
 
 stop:
-#ifdef SCANNER_DEBUG
-	printf("stopped in state %d at pos %d (%d:%c)\n", STATE, YYCURSOR - ctx->buf.c, *YYCURSOR, *YYCURSOR);
-#endif
+	scdebug(("stopped in state %d at pos %d (%d:%c)\n", STATE, YYCURSOR - ctx->buf.c, *YYCURSOR, *YYCURSOR));
 
 	rest = YYLIMIT - start;
 		
-	memmove(ctx->buf.c, start, rest);
-	ctx->buf.c[rest] = '\0';
+	if (rest) memmove(ctx->buf.c, start, rest);
 	ctx->buf.len = rest;
 }
 
