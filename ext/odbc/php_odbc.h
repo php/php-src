@@ -54,7 +54,9 @@ PHP_FUNCTION(odbc_commit);
 PHP_FUNCTION(odbc_connect);
 PHP_FUNCTION(odbc_pconnect);
 PHP_FUNCTION(odbc_cursor);
+#ifdef HAVE_SQLDATASOURCES
 PHP_FUNCTION(odbc_data_source);
+#endif
 PHP_FUNCTION(odbc_do);
 PHP_FUNCTION(odbc_exec);
 PHP_FUNCTION(odbc_execute);

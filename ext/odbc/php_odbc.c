@@ -79,7 +79,9 @@ function_entry odbc_functions[] = {
 	PHP_FE(odbc_commit, NULL)
 	PHP_FE(odbc_connect, NULL)
 	PHP_FE(odbc_cursor, NULL)
+#ifdef HAVE_SQLDATASOURCES
 	PHP_FE(odbc_data_source, NULL)
+#endif
 	PHP_FE(odbc_execute, NULL)
 	PHP_FE(odbc_error, NULL)
 	PHP_FE(odbc_errormsg, NULL)
@@ -1183,6 +1185,7 @@ PHP_FUNCTION(odbc_cursor)
 }
 /* }}} */
 
+#ifdef HAVE_SQLDATASOURCES
 /* {{{ proto array odbc_data_source(int connection_id, int fetch_type)
    Return information about the currently connected data source */
 PHP_FUNCTION(odbc_data_source)
@@ -1243,6 +1246,7 @@ PHP_FUNCTION(odbc_data_source)
 
 }
 /* }}} */
+#endif /* HAVE_SQLDATASOURCES *
 
 /* {{{ proto int odbc_exec(int connection_id, string query [, int flags])
    Prepare and execute an SQL statement */
