@@ -118,16 +118,15 @@ typedef struct xbuf_area xbuffy;
 /* Resize xbuf so that add bytes can be added. Reallocation is done
  * in defined block size to minimize calls to realloc.
  */
-static int xbuf_resize(xbuffy *xbuf, size_t add) 
+static void xbuf_resize(xbuffy *xbuf, size_t add) 
 {
 	char *buf;
-	int	ret;
 	size_t size, offset;
 
 	if (xbuf->buf) {
 		offset = xbuf->nextb - xbuf->buf;
 		if (offset+add < xbuf->size) {
-			return 0; /* do not change size if not necessary */
+			return; /* do not change size if not necessary */
 		}
 	} else {
 		offset = 0;
@@ -139,32 +138,27 @@ static int xbuf_resize(xbuffy *xbuf, size_t add)
 	}
 	if (xbuf->max_len && size > xbuf->max_len) {
 		size = xbuf->max_len;
-		ret = 1;
-	} else {
-		ret = 0;
 	}
-	
+
 	buf = erealloc(xbuf->buf, size+1); /* alloc space for NUL */
 	
-	if (!buf) {
-		return 1;
-	} else {
+	if (buf) {
 		xbuf->buf = buf;
 		xbuf->buf_end = xbuf->max_len ? &buf[size] : (char *) ~0;
 		xbuf->nextb = buf+offset;
 		xbuf->size = size;
-		return ret;
 	}
 }
 
 /* Initialise xbuffy with size spprintf_BLOCK_SIZE
  */
-static int xbuf_init(xbuffy *xbuf, size_t max_len) 
+static char * xbuf_init(xbuffy *xbuf, size_t max_len) 
 {
 	xbuf->buf = NULL;
 	xbuf->size = 0;
 	xbuf->max_len = max_len;
-	return xbuf_resize(xbuf, 0); /* NOT max_len */
+	xbuf_resize(xbuf, 0); /* NOT max_len */
+	return xbuf->buf;
 }
 
 /*
@@ -617,7 +611,7 @@ PHPAPI int vspprintf(char **pbuf, size_t max_len, const char *format, va_list ap
 	 * Notice that if no length is given, we initialize buf_end to the
 	 * highest possible address.
 	 */
-	if (xbuf_init(&xbuf, max_len)) {
+	if (!xbuf_init(&xbuf, max_len)) {
 		if (pbuf)
 			*pbuf = NULL;
 		return 0;
