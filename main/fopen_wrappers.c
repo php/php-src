@@ -18,8 +18,6 @@
  */
 /* $Id$ */
 
-/* Synced with php3 revision 1.66 1999-06-18 [ssb] */
-
 #include "php.h"
 #include "php_globals.h"
 #include "SAPI.h"
@@ -278,7 +276,7 @@ PHPAPI FILE *php_fopen_primary_script(void)
 	}							/* if doc_root && path_info */
 	if (!fn) {
 		/* we have to free SG(request_info).path_translated here because
-		   php3_destroy_request_info assumes that it will get
+		   php_destroy_request_info assumes that it will get
 		   freed when the include_names hash is emptied, but
 		   we're not adding it in this case */
 		STR_FREE(SG(request_info).path_translated);
