@@ -115,8 +115,9 @@ CREATING SOURCE FILES
 
 CREATING THE SELF-CONTAINED EXTENSION
 
-  Put config.m4 and the source files into one directory. Afterwards,
-  run phpize (this is installed during make install by PHP 4.0).
+  Put config.m4 and the source files into one directory. Then, run phpize
+  (this is installed during make install by PHP 4.0).
+
   For example, if you configured PHP with --prefix=/php, you would run
 
      $ /php/bin/phpize
