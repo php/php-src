@@ -167,8 +167,12 @@ static void _php_do_opendir(INTERNAL_FUNCTION_PARAMETERS, int createobject)
 	dirp = emalloc(sizeof(php_dir));
 
 	dirp->dir = V_OPENDIR((*arg)->value.str.val);
-	
-	if (! dirp->dir) {
+
+#ifdef PHP_WIN32
+	if (!dirp->dir || dirp->dir->finished) {
+#else
+	if (!dirp->dir) {
+#endif
 		efree(dirp);
 		php_error(E_WARNING, "OpenDir: %s (errno %d)", strerror(errno), errno);
 		RETURN_FALSE;
