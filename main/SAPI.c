@@ -356,7 +356,7 @@ static int sapi_extract_response_code(const char *header_line)
 /* This function expects a *duplicated* string, that was previously emalloc()'d.
  * Pointers sent to this functions will be automatically freed by the framework.
  */
-SAPI_API int sapi_add_header(char *header_line, uint header_line_len, zend_bool duplicate)
+SAPI_API int sapi_add_header_ex(char *header_line, uint header_line_len, zend_bool duplicate, zend_bool replace)
 {
 	int retval, free_header = 0;
 	sapi_header_struct sapi_header;
@@ -390,6 +390,7 @@ SAPI_API int sapi_add_header(char *header_line, uint header_line_len, zend_bool 
 
 	sapi_header.header = header_line;
 	sapi_header.header_len = header_line_len;
+	sapi_header.replace = replace;
 
 	/* Check the header for a few cases that we have special support for in SAPI */
 	if (header_line_len>=5 
