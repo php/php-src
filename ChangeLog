@@ -1,3 +1,56 @@
+2002-10-20  Sean Bright  <elixer@erols.com>
+
+    * README.SELF-CONTAINED-EXTENSIONS: Fix some verbage.
+
+2002-10-20  Jani Taskinen  <sniper@iki.fi>
+
+    * NEWS: Try keep those most important entries as first..
+
+2002-10-20  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * main/memory_streams.c: style fix
+
+2002-10-20  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * main/streams.c: Fixed incorrect handling of files starting with a .
+
+2002-10-20  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/mbstring/php_mbregex.c:
+    Changed mb_regex_set_options() more informative
+
+2002-10-20  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * configure.in: Add the actual ftok check for Derick :-)
+
+2002-10-20  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/basic_functions.c
+      ext/standard/ftok.c
+      ext/standard/php_ftok.h: - Only include ftok() if it is available
+
+    * ext/standard/ftok.c
+      ext/standard/php_ftok.h
+      ext/standard/basic_functions.c:
+    - Remove #ifdefs around ftok function so that it is also available when
+      none of the IPC extensions are enabled.
+
+2002-10-20  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/mbstring/mbstring.c: ZTS fixes
+
+2002-10-20  Masaki Fujimoto  <fujimoto@studio.co.jp>
+
+    * main/main.c
+      ext/mbstring/mbfilter.c
+      ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.h:
+    fixed highlight related bugs (in case shift_jis input/output filters are enabled)
+
+2002-10-20  Maxim Maletsky  <maxim@maxim.cx>
+
+    * ext/oci8/oci8.c: fixed proto: OCIExecute() returns boolean, not integer
+
 2002-10-19  Derick Rethans  <d.rethans@jdimedia.nl>
 
     * ext/standard/tests/strings/implode.phpt:
