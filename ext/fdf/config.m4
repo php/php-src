@@ -1,39 +1,37 @@
 dnl $Id$
 
-AC_MSG_CHECKING(whether to include fdftk support)
-AC_ARG_WITH(fdftk,
-[  --with-fdftk[=DIR]      Include fdftk support.
-                          DIR is the fdftk install directory,
-                          defaults to /usr/local.],
-[
-  case "$withval" in
-    no)
-      AC_MSG_RESULT(no) ;;
-    yes)
-      AC_MSG_RESULT(yes)
-      PHP_EXTENSION(fdf)
-      AC_CHECK_LIB(FdfTk, FDFOpen, [
-        AC_DEFINE(HAVE_FDFLIB,1,[ ])
-        EXTRA_LIBS="$EXTRA_LIBS -lFdfTk"
-      ],[AC_MSG_ERROR(fdftk module requires fdftk 2.0)])
-      ;;
-    *)
-      test -f $withval/include/FdfTk.h && FDFLIB_INCLUDE="-I$withval/include"
-      if test -n "$FDFLIB_INCLUDE" ; then
-        AC_MSG_RESULT(yes)
-        PHP_EXTENSION(fdf)
-        old_LIBS=$LIBS
-        LIBS="$LIBS -L$withval/lib"
-        AC_CHECK_LIB(FdfTk, FDFOpen, [
-          AC_DEFINE(HAVE_FDFLIB,1,[ ])
-          EXTRA_LIBS="$EXTRA_LIBS -L$withval/lib -lFdfTk"
-        ],[AC_MSG_ERROR(fdftk module requires fdftk lib 2.0.)])
-        LIBS=$old_LIBS
-        INCLUDES="$INCLUDES $FDFLIB_INCLUDE"
-      else
-        AC_MSG_RESULT(no)
-      fi ;;
-  esac
-],[
-  AC_MSG_RESULT(no)
-])
+PHP_ARG_WITH(fdftk, for fdftk support,
+[  --with-fdftk[=DIR]      Include fdftk support])
+
+if test "PHP_FDFTK" != "no"; then
+  if test -r $PHP_FDFTK/include/FdfTk.h; then
+    FDFTK_DIR=$PHP_FDFTK
+  else
+    AC_MSG_CHECKING(for fdftk in default path)
+    for i in /usr/local /usr; do
+      if test -r $i/include/FdfTk.h; then
+        FDFTK_DIR=$i
+        AC_MSG_RESULT(found in $i)
+      fi
+    done
+  fi
+
+  if test -z "$FDFTK_DIR"; then
+    AC_MSG_RESULT(not found)
+    AC_MSG_ERROR(Please reinstall the fdftk distribution)
+  fi
+
+  AC_ADD_INCLUDE($FDFTK_DIR/include)
+  
+  old_LIBS=$LIBS
+  LIBS="$LIBS -lm"
+  AC_CHECK_LIB(FdfTk, FDFOpen, [AC_DEFINE(HAVE_FDFLIB,1,[ ])],
+     [AC_MSG_ERROR(fdftk module requires fdftk 2.0)])
+  LIBS=$old_LIBS
+
+  PHP_SUBST(FDFTK_SHARED_LIBADD)
+  AC_ADD_LIBRARY_WITH_PATH(FdfTk, $FDFTK_DIR/lib, FDFTK_SHARED_LIBADD)
+
+  PHP_EXTENSION(fdftk, $ext_shared)
+fi
+
