@@ -324,6 +324,10 @@ php_date(INTERNAL_FUNCTION_PARAMETERS, int gm)
 		} else {
 			tname[0] = "???";
 		}
+
+		if (tzname[1] != NULL) {
+			tname[1] = tzname[1];
+		}
 #endif
 	}
 
