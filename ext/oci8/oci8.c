@@ -98,7 +98,7 @@ PHP_OCI_API php_oci_globals oci_globals;
 /* {{{ dynamically loadable module stuff */
 
 #if COMPILE_DL
-DLEXPORT zend_module_entry *get_module() { return &oci_module_entry; };
+DLEXPORT zend_module_entry *get_module() { return &oci8_module_entry; };
 #endif /* COMPILE_DL */
 
 /* }}} */
@@ -340,8 +340,8 @@ static void php_oci_init_globals(OCILS_D)
 
 PHP_MINIT_FUNCTION(oci)
 {
+	OCILS_FETCH();
 	zend_class_entry oci_lob_class_entry;
-	ELS_FETCH();
 
 	OCI(shutdown) = 0;
 
