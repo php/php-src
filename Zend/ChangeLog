@@ -1,3 +1,21 @@
+2003-12-16  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * zend_compile.h
+      zend_object_handlers.h
+      zend_stream.h:
+      Sync: Export externally used functions.
+
+2003-12-16  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_compile.c:
+      export class initialization function
+
+    * zend_object_handlers.c:
+      export externally used functions
+
+    * zend_stream.c:
+      export function
+
 2003-12-15  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend.c

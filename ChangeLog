@@ -1,3 +1,255 @@
+2003-12-16  Derick Rethans  <php@derickrethans.nl>
+
+    * NEWS
+      ext/standard/datetime.c
+      ext/standard/tests/time/date.phpt:
+      - Added 'c' modifier to date() which returns the date in ISO 8601 format.
+
+2003-12-16  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * NEWS
+      ext/pcre/php_pcre.c
+      ext/pcre/pcrelib/AUTHORS
+      ext/pcre/pcrelib/COPYING
+      ext/pcre/pcrelib/ChangeLog
+      ext/pcre/pcrelib/INSTALL
+      ext/pcre/pcrelib/LICENCE
+      ext/pcre/pcrelib/NEWS
+      ext/pcre/pcrelib/NON-UNIX-USE
+      ext/pcre/pcrelib/README
+      ext/pcre/pcrelib/dftables.c
+      ext/pcre/pcrelib/dll.mk
+      ext/pcre/pcrelib/internal.h
+      ext/pcre/pcrelib/maketables.c
+      ext/pcre/pcrelib/pcre.c
+      ext/pcre/pcrelib/pcre.h
+      ext/pcre/pcrelib/pcregrep.c
+      ext/pcre/pcrelib/pcreposix.c
+      ext/pcre/pcrelib/pcretest.c
+      ext/pcre/pcrelib/study.c
+      ext/pcre/pcrelib/doc/Tech.Notes
+      ext/pcre/pcrelib/doc/pcre.txt:
+      MFB
+
+    * (PHP_4_3)
+      NEWS
+      ext/pcre/config.m4:
+      Umm, let's not enable NO_RECURSE by default. The matches on some
+      patterns can be more than twice as slow as before.
+
+    * (PHP_4_3)
+      ext/pcre/php_pcre.c:
+      Fix function name.
+
+    * ext/pcre/php_pcre.c:
+      -** empty log message ***
+
+    * (PHP_4_3)
+      NEWS
+      ext/pcre/config.m4
+      ext/pcre/php_pcre.c
+      ext/pcre/pcrelib/AUTHORS
+      ext/pcre/pcrelib/COPYING
+      ext/pcre/pcrelib/ChangeLog
+      ext/pcre/pcrelib/INSTALL
+      ext/pcre/pcrelib/LICENCE
+      ext/pcre/pcrelib/NEWS
+      ext/pcre/pcrelib/NON-UNIX-USE
+      ext/pcre/pcrelib/README
+      ext/pcre/pcrelib/dftables.c
+      ext/pcre/pcrelib/dll.mk
+      ext/pcre/pcrelib/internal.h
+      ext/pcre/pcrelib/maketables.c
+      ext/pcre/pcrelib/pcre.c
+      ext/pcre/pcrelib/pcre.h
+      ext/pcre/pcrelib/pcregrep.c
+      ext/pcre/pcrelib/pcreposix.c
+      ext/pcre/pcrelib/pcretest.c
+      ext/pcre/pcrelib/study.c
+      ext/pcre/pcrelib/doc/Tech.Notes
+      ext/pcre/pcrelib/doc/pcre.txt:
+      - Upgraded library to version 4.5
+      - Define NO_RECURSE to avoid stack problems.
+      - Moved contents of RINIT hook to MINIT and removed RINIT.
+      - Removed a couple of extraneous files.
+
+2003-12-16  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/dba/dba.dsp:
+      Add inifile
+
+    * ext/dba/dba_flatfile.c:
+      Fix winbuild
+
+    * ext/simplexml/tests/011.phpt
+      ext/simplexml/tests/012.phpt
+      ext/simplexml/tests/013.phpt:
+      Not needed here (copy'n'paste)
+
+2003-12-16  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * ext/xmlrpc/libxmlrpc/simplestring.c
+      ext/xmlrpc/libxmlrpc/xml_element.c
+      ext/xmlrpc/libxmlrpc/xmlrpc.c
+      ext/xmlrpc/libxmlrpc/xmlrpc_introspection.c:
+      Fix some compile warnings (patch by Joe Orton)
+
+2003-12-16  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * sapi/tests/.cvsignore:
+      Add missing .cvsignore
+
+    * ext/simplexml/tests/013.phpt:
+      Add a test to check split text content collecting
+
+    * ext/simplexml/simplexml.c:
+      Better comment
+
+2003-12-16  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * ext/sockets/sockets.c:
+      nuke unused code
+
+2003-12-16  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/simplexml/CREDITS:
+      Add myself
+
+    * ext/simplexml/simplexml.c
+      ext/simplexml/tests/012.phpt:
+      Add error handling for element/attribute creation/changing
+
+    * ext/simplexml/tests/011.phpt:
+      Add test for string conversion capabilities when used with echo/print.
+
+2003-12-16  Sara Golemon  <php@alphaweb.net>
+
+    * (PHP_4_3)
+      NEWS
+      ext/ftp/ftp.c:
+      MFH: Fail loudly. This is too often reported as a "bug".
+
+    * ext/ftp/ftp.c:
+      Fail loudly, silence bogus bugs.
+
+2003-12-16  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/gd/libgd/gdft.c
+      ext/gd/libgd/gdft.c:
+      ZTS fix.
+
+    * ext/dom/php_dom.c
+      ext/simplexml/simplexml.c
+      ext/xml/xml.c:
+      Removed duplicate php_libxml_(init|shutdown) they are already done by
+      ext/libxml.
+
+2003-12-16  Antony Dovgal  <tony2001@phpclub.net>
+
+    * ext/oci8/config.m4
+      ext/oci8/oci8.c:
+      fix bug #26133 (thanks to Harald)
+      rename constant and add library check to config.m4
+      add info lines to see if Collection & Temp Lob support enabled or not
+      add OCI_THREADED to use thread safe OCI mode with ZTS (should fix bug
+      #26558)
+
+    * ext/oci8/oci8.c:
+      fix warning, concerned to second _oci_close_server() call
+
+2003-12-16  Derick Rethans  <php@derickrethans.nl>
+
+    * run-tests.php:
+      - Remove debug info :)
+
+    * run-tests.php:
+      - Added %e modifier which gets replaced by the current value of
+        DIRECTORY_SEPARATOR.
+
+2003-12-16  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ZendEngine2/zend_compile.h
+      ZendEngine2/zend_object_handlers.h
+      ZendEngine2/zend_stream.h:
+      Sync: Export externally used functions.
+
+2003-12-16  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/session/tests/014.phpt:
+      Incorrect test file was fixed. (Use pattern insted of absolute filename)
+
+2003-12-16  Harald Radi  <harald.radi+coding.php@nme.at>
+
+    * ext/oci8/oci8.c:
+      fix non-zts build errors
+
+2003-12-16  Stanislav Malyshev  <stas@zend.com>
+
+    * ZendEngine2/zend_compile.c:
+      export class initialization function
+
+    * ZendEngine2/zend_object_handlers.c:
+      export externally used functions
+
+    * ZendEngine2/zend_stream.c:
+      export function
+
+2003-12-16  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/xml/tests/bug26614.phpt:
+      Improper test file was fixed.
+
+2003-12-16  Harald Radi  <harald.radi+coding.php@nme.at>
+
+    * ext/oci8/oci8.c
+      ext/oci8/php_oci8.h:
+      
+
+    * ext/oci8/CREDITS:
+      add myself
+
+    * ext/oci8/oci8.dsp:
+      fix include path
+
+2003-12-16  Georg Richter  <phpinfo@t-online.de>
+
+    * ext/mysqli/mysqli_api.c
+      ext/mysqli/mysqli_fe.c
+      ext/mysqli/mysqli_prop.c:
+      added properties
+      	- insert_id
+      	- server_status
+      fixed bug in mysqli_execute (report func)
+
+2003-12-16  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * NEWS:
+      BFN
+
+2003-12-16  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ext/gd/libgd/gdft.c:
+      Fix ZTS build.
+
+2003-12-16  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/package-PEAR.xml:
+      remove optional dep on xmlrpc, not really useful at this point
+      add required dep on pcre, as it is used without reservation in
+      PEAR_Config, and other places
+
+2003-12-16  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      ext/pgsql/pgsql.c:
+      MFH: Fixed Bug #26625 (pg_convert sets NULL incorrectly for character data
+      types).
+
+    * ext/pgsql/pgsql.c:
+      Fixed Bug #26625 (pg_convert sets NULL incorrectly for character data
+      types).
+
 2003-12-15  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ext/standard/image.c:
