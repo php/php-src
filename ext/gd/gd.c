@@ -850,7 +850,7 @@ PHP_FUNCTION(imagecolorclosest)
    Get the index of the color which has the hue, white and blackness nearest to the given color */
 PHP_FUNCTION(imagecolorclosesthwb)
 {
-#if HAVE_GDIMAGECOLORRESOLVE
+#if HAVE_COLORCLOSESTHWB
 	zval **imgind, **r, **g, **b;
 	int col;
 	gdImagePtr im;
