@@ -1034,14 +1034,15 @@ ZEND_API int do_bind_function_or_class(zend_op *opline, HashTable *function_tabl
 		case ZEND_DECLARE_FUNCTION: {
 				zend_function *function;
 
-				zend_hash_find(function_table, opline->op1.u.constant.value.str.val, opline->op1.u.constant.value.str.len, (void **) &function);
-				if (zend_hash_add(function_table, opline->op2.u.constant.value.str.val, opline->op2.u.constant.value.str.len+1, function, sizeof(zend_function), (void **) &function)==FAILURE) {
+				zend_hash_find(function_table, opline->op1.u.constant.value.str.val, opline->op1.u.constant.value.str.len, (void *) &function);
+				if (zend_hash_add(function_table, opline->op2.u.constant.value.str.val, opline->op2.u.constant.value.str.len+1, function, sizeof(zend_function), NULL)==FAILURE) {
 					if (!compile_time) {
 						zend_error(E_ERROR, "Cannot redeclare %s()", opline->op2.u.constant.value.str.val);
 					}
 					return FAILURE;
 				} else {
-					function_add_ref(function);
+					(*function->op_array.refcount)++;
+					function->op_array.static_variables = NULL; /* NULL out the unbound function */
 					return SUCCESS;
 				}
 			}
