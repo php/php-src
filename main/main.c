@@ -831,6 +831,7 @@ int php_module_startup(sapi_module_struct *sf)
 	
 	PG(header_is_being_sent) = 0;
 	SG(request_info).headers_only = 0;
+	SG(request_info).argv0 = NULL;
 	PG(connection_status) = PHP_CONNECTION_NORMAL;
 
 #if HAVE_SETLOCALE

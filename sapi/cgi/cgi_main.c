@@ -166,9 +166,9 @@ static void sapi_cgi_log_message(char *message)
 static int sapi_cgi_deactivate(SLS_D)
 {
 	fflush(stdout);
-	if(request_info.php_argv0) {
-		free(request_info.php_argv0);
-		request_info.php_argv0 = NULL;
+	if(SG(request_info).argv0) {
+		free(SG(request_info).argv0);
+		SG(request_info).argv0 = NULL;
 	}
 	return SUCCESS;
 }
@@ -241,6 +241,43 @@ static void php_cgi_usage(char *argv0)
 static void init_request_info(SLS_D)
 {
 	char *content_length = getenv("CONTENT_LENGTH");
+	char *script_filename;
+
+
+	script_filename = getenv("SCRIPT_FILENAME");
+	/* Hack for annoying servers that do not set SCRIPT_FILENAME for us */
+	if (!script_filename) {
+		script_filename = SG(request_info).argv0;
+	}
+#if PHP_WIN32
+	/* FIXME WHEN APACHE NT IS FIXED */
+	/* a hack for apache nt because it does not appear to set argv[1] and sets
+	   script filename to php.exe thus makes us parse php.exe instead of file.php
+	   requires we get the info from path translated.  This can be removed at
+	   such a time taht apache nt is fixed */
+	if (script_filename) {
+		script_filename = getenv("PATH_TRANSLATED");
+	}
+#endif
+
+	/* doc_root configuration variable is currently ignored,
+	   as it is with every other access method currently also. */
+
+	/* We always need to emalloc() filename, since it gets placed into
+	   the include file hash table, and gets freed with that table.
+	   Notice that this means that we don't need to efree() it in
+	   php_destroy_request_info()! */
+#if DISCARD_PATH
+	if (script_filename) {
+		SLS_FETCH();
+
+		SG(request_info).path_translated = estrdup(script_filename);
+	} else {
+		SLS_FETCH();
+
+		SG(request_info).path_translated = NULL;
+	}
+#endif
 
 	SG(request_info).request_method = getenv("REQUEST_METHOD");
 	SG(request_info).query_string = getenv("QUERY_STRING");
@@ -252,6 +289,8 @@ static void init_request_info(SLS_D)
 	/* CGI does not support HTTP authentication */
 	SG(request_info).auth_user = NULL;
 	SG(request_info).auth_password = NULL;
+
+
 }
 
 
@@ -283,6 +322,7 @@ int main(int argc, char *argv[])
 	int free_path_translated=0;
 	int orig_optind=ap_php_optind;
 	char *orig_optarg=ap_php_optarg;
+	char *argv0=NULL;
 #if SUPPORT_INTERACTIVE
 	int interactive=0;
 #endif
@@ -322,9 +362,11 @@ int main(int argc, char *argv[])
 		|| getenv("GATEWAY_INTERFACE")
 		|| getenv("REQUEST_METHOD")) {
 		cgi = 1;
-		if (argc > 1)
-			request_info.php_argv0 = strdup(argv[1]);
-		else request_info.php_argv0 = NULL;
+		if (argc > 1) {
+			argv0 = strdup(argv[1]);
+		} else {
+			argv0 = NULL;
+		}
 #if FORCE_CGI_REDIRECT
 		if (!getenv("REDIRECT_STATUS")) {
 			PUTS("<b>Security Alert!</b>  PHP CGI cannot be accessed directly.\n\
@@ -379,8 +421,10 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 	SG(server_context) = (void *) 1; /* avoid server_context==NULL checks */
 	CG(extended_info) = 0;
 
+	SG(request_info).argv0 = argv0;
+
 	if (!cgi) {					/* never execute the arguments if you are a CGI */
-		request_info.php_argv0 = NULL;
+		SG(request_info).argv0 = NULL;
 		while ((c = ap_php_getopt(argc, argv, "c:d:qvisnaeh?vf:")) != -1) {
 			switch (c) {
 				case 'f':
