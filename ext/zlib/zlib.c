@@ -890,6 +890,34 @@ PHP_FUNCTION(gzencode)
 }
 /* }}} */
 
+/* {{{ php_ob_gzhandler_check
+ */
+int php_ob_gzhandler_check(TSRMLS_DC)
+{
+	/* check for wrong usages */
+	if (OG(ob_nesting_level>0)) {
+		if (php_ob_handler_used("ob_gzhandler" TSRMLS_CC)) {
+			php_error_docref("ref.outcontrol" TSRMLS_CC, E_WARNING, "output handler 'ob_gzhandler' cannot be used twice");
+			return FAILURE;
+		}
+		if (php_ob_handler_used("mb_output_handler" TSRMLS_CC)) {
+			php_error_docref("ref.outcontrol" TSRMLS_CC, E_WARNING, "output handler 'ob_gzhandler' cannot be used after 'mb_output_handler'");
+			return FAILURE;
+		}
+		if (php_ob_handler_used("URL-Rewriter" TSRMLS_CC)) {
+			php_error_docref("ref.outcontrol" TSRMLS_CC, E_WARNING, "output handler 'ob_gzhandler' cannot be used after 'URL-Rewriter'");
+			return FAILURE;
+		}
+		if (php_ob_init_conflict("ob_gzhandler", "zlib output compression" TSRMLS_CC)) {
+			return FAILURE;
+		}
+	}
+
+	return SUCCESS;
+}
+
+/* }}} */
+
 /* {{{ proto string ob_gzhandler(string str, int mode)
    Encode str based on accept-encoding setting - designed to be called from ob_start() */
 PHP_FUNCTION(ob_gzhandler)
@@ -902,24 +930,6 @@ PHP_FUNCTION(ob_gzhandler)
 
 	if (ZEND_NUM_ARGS()!=2 || zend_get_parameters_ex(2, &zv_string, &zv_mode)==FAILURE) {
 		ZEND_WRONG_PARAM_COUNT();
-	}
-
-	/* check for wrong usages */
-	if (OG(ob_nesting_level>1)) {
-		if (php_ob_handler_used("ob_gzhandler" TSRMLS_CC)) {
-			php_error_docref("ref.outcontrol" TSRMLS_CC, E_WARNING, "output handler 'ob_gzhandler' cannot be used twice");
-			RETURN_FALSE;
-		}
-		if (php_ob_handler_used("mb_output_handler" TSRMLS_CC)) {
-			php_error_docref("ref.outcontrol" TSRMLS_CC, E_WARNING, "output handler 'ob_gzhandler' cannot be used after 'mb_output_handler'");
-			RETURN_FALSE;
-		}
-		if (php_ob_handler_used("URL-Rewriter" TSRMLS_CC)) {
-			php_error_docref("ref.outcontrol" TSRMLS_CC, E_WARNING, "output handler 'ob_gzhandler' cannot be used after 'URL-Rewriter'");
-			RETURN_FALSE;
-		}
-		if (php_ob_init_conflict("ob_gzhandler", "zlib output compression" TSRMLS_CC))
-			RETURN_FALSE;
 	}
 
 	if (ZLIBG(ob_gzhandler_status)==-1
