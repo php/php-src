@@ -29,6 +29,9 @@
 #include "zend_constants.h"
 #include "zend_extensions.h"
 #include "zend_execute_locks.h"
+#if HAVE_SYS_TIME_H
+#include <sys/time.h>
+#endif
 
 
 ZEND_API void (*zend_execute)(zend_op_array *op_array ELS_DC);
@@ -544,6 +547,7 @@ static void zend_timeout(int dummy)
 #endif
 
 
+#ifdef ZEND_WIN32
 static LRESULT CALLBACK zend_timeout_WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 {
 	switch (message) {
@@ -559,7 +563,6 @@ static LRESULT CALLBACK zend_timeout_WndProc(HWND hWnd, UINT message, WPARAM wPa
 }
 
 
-#ifdef ZEND_WIN32
 void zend_register_timeout_wndclass()
 {
 	wc.style=0;
@@ -604,13 +607,15 @@ void zend_set_timeout(long seconds)
 	SetTimer(EG(timeout_window), 1, seconds*1000, NULL);
 #else
 #	ifdef HAVE_SETITIMER
-	struct itimerval t_r;		/* timeout requested */
+	{
+		struct itimerval t_r;		/* timeout requested */
 
-	t_r.it_value.tv_sec = seconds;
-	t_r.it_value.tv_usec = t_r.it_interval.tv_sec = t_r.it_interval.tv_usec = 0;
+		t_r.it_value.tv_sec = seconds;
+		t_r.it_value.tv_usec = t_r.it_interval.tv_sec = t_r.it_interval.tv_usec = 0;
 
-	setitimer(ITIMER_PROF, &t_r, NULL);
-	signal(SIGPROF, zend_timeout);
+		setitimer(ITIMER_PROF, &t_r, NULL);
+		signal(SIGPROF, zend_timeout);
+	}
 #	endif
 #endif
 }
@@ -624,11 +629,13 @@ void zend_unset_timeout(void)
 	KillTimer(EG(timeout_window), 1);
 #else
 #	ifdef HAVE_SETITIMER
-	struct itimerval no_timeout;
+	{
+		struct itimerval no_timeout;
 
-	no_timeout.it_value.tv_sec = no_timeout.it_value.tv_usec = no_timeout.it_interval.tv_sec = no_timeout.it_interval.tv_usec = 0;
+		no_timeout.it_value.tv_sec = no_timeout.it_value.tv_usec = no_timeout.it_interval.tv_sec = no_timeout.it_interval.tv_usec = 0;
 
-	setitimer(ITIMER_PROF, &no_timeout, NULL);
+		setitimer(ITIMER_PROF, &no_timeout, NULL);
+	}
 #	endif
 #endif
 }
