@@ -294,7 +294,7 @@ static void compiler_globals_ctor(zend_compiler_globals *compiler_globals TSRMLS
 
 	compiler_globals->class_table = &compiler_globals->main_class.class_table;
 	zend_hash_init_ex(compiler_globals->class_table, 10, NULL, ZEND_CLASS_DTOR, 1, 0);
-	zend_hash_copy(compiler_globals->class_table, GLOBAL_CLASS_TABLE, (copy_ctor_func_t) zend_class_add_ref, &tmp_class, sizeof(zend_class_entry));
+	zend_hash_copy(compiler_globals->class_table, GLOBAL_CLASS_TABLE, (copy_ctor_func_t) zend_class_add_ref, &tmp_class, sizeof(zend_class_entry *));
 
 	zend_set_default_compile_time_values(TSRMLS_C);
 
