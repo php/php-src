@@ -161,10 +161,6 @@ SOURCE=..\main\php_ini.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\main\php_realpath.c
-# End Source File
-# Begin Source File
-
 SOURCE=..\main\php_ticks.c
 # End Source File
 # Begin Source File
