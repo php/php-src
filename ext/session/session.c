@@ -95,45 +95,23 @@ static PHP_INI_MH(OnUpdateSerializer)
 }
 
 
-static PHP_INI_MH(OnUpdateStringCopy)
-{
-	char **p;
-#ifndef ZTS
-	char *base = (char *) mh_arg2;
-#else
-	char *base;
-
-	base = (char *) ts_resource(*((int *) mh_arg2));
-#endif
-
-	p = (char **) (base+(size_t) mh_arg1);
-
-	if (*p && stage != PHP_INI_STAGE_STARTUP) {
-		STR_FREE(*p);
-	}
-
-	if (stage != PHP_INI_STAGE_DEACTIVATE) {
-		*p = estrdup(new_value);
-	}
-	return SUCCESS;
-}
 
 PHP_INI_BEGIN()
-	STD_PHP_INI_ENTRY("session.save_path",			"/tmp",			PHP_INI_ALL, OnUpdateStringCopy,		save_path,			php_ps_globals,	ps_globals)
-	STD_PHP_INI_ENTRY("session.name",				"PHPSESSID",	PHP_INI_ALL, OnUpdateStringCopy,		session_name,		php_ps_globals,	ps_globals)
+	STD_PHP_INI_ENTRY("session.save_path",			"/tmp",			PHP_INI_ALL, OnUpdateString,		save_path,			php_ps_globals,	ps_globals)
+	STD_PHP_INI_ENTRY("session.name",				"PHPSESSID",	PHP_INI_ALL, OnUpdateString,		session_name,		php_ps_globals,	ps_globals)
 	PHP_INI_ENTRY("session.save_handler",			"files",		PHP_INI_ALL, OnUpdateSaveHandler)
 	STD_PHP_INI_BOOLEAN("session.auto_start",		"0",			PHP_INI_ALL, OnUpdateBool,			auto_start,			php_ps_globals,	ps_globals)
 	STD_PHP_INI_ENTRY("session.gc_probability",		"1",			PHP_INI_ALL, OnUpdateInt,			gc_probability,		php_ps_globals,	ps_globals)
 	STD_PHP_INI_ENTRY("session.gc_maxlifetime",		"1440",			PHP_INI_ALL, OnUpdateInt,			gc_maxlifetime,		php_ps_globals,	ps_globals)
 	PHP_INI_ENTRY("session.serialize_handler",		"php",			PHP_INI_ALL, OnUpdateSerializer)
 	STD_PHP_INI_ENTRY("session.cookie_lifetime",	"0",			PHP_INI_ALL, OnUpdateInt,			cookie_lifetime,	php_ps_globals,	ps_globals)
-	STD_PHP_INI_ENTRY("session.cookie_path",		"/",			PHP_INI_ALL, OnUpdateStringCopy,		cookie_path,		php_ps_globals,	ps_globals)
-	STD_PHP_INI_ENTRY("session.cookie_domain",		"",				PHP_INI_ALL, OnUpdateStringCopy,		cookie_domain,		php_ps_globals,	ps_globals)
+	STD_PHP_INI_ENTRY("session.cookie_path",		"/",			PHP_INI_ALL, OnUpdateString,		cookie_path,		php_ps_globals,	ps_globals)
+	STD_PHP_INI_ENTRY("session.cookie_domain",		"",				PHP_INI_ALL, OnUpdateString,		cookie_domain,		php_ps_globals,	ps_globals)
 	STD_PHP_INI_BOOLEAN("session.use_cookies",		"1",			PHP_INI_ALL, OnUpdateBool,			use_cookies,		php_ps_globals,	ps_globals)
-	STD_PHP_INI_ENTRY("session.referer_check",		"",				PHP_INI_ALL, OnUpdateStringCopy,		extern_referer_chk,	php_ps_globals,	ps_globals)
-	STD_PHP_INI_ENTRY("session.entropy_file",		"",				PHP_INI_ALL, OnUpdateStringCopy,		entropy_file,		php_ps_globals,	ps_globals)
+	STD_PHP_INI_ENTRY("session.referer_check",		"",				PHP_INI_ALL, OnUpdateString,		extern_referer_chk,	php_ps_globals,	ps_globals)
+	STD_PHP_INI_ENTRY("session.entropy_file",		"",				PHP_INI_ALL, OnUpdateString,		entropy_file,		php_ps_globals,	ps_globals)
 	STD_PHP_INI_ENTRY("session.entropy_length",		"0",			PHP_INI_ALL, OnUpdateInt,			entropy_length,		php_ps_globals,	ps_globals)
-	STD_PHP_INI_ENTRY("session.cache_limiter",		"nocache",		PHP_INI_ALL, OnUpdateStringCopy,		cache_limiter,		php_ps_globals,	ps_globals)
+	STD_PHP_INI_ENTRY("session.cache_limiter",		"nocache",		PHP_INI_ALL, OnUpdateString,		cache_limiter,		php_ps_globals,	ps_globals)
 	STD_PHP_INI_ENTRY("session.cache_expire",		"180",			PHP_INI_ALL, OnUpdateInt,			cache_expire,		php_ps_globals,	ps_globals)
 	/* Commented out until future discussion */
 	/* PHP_INI_ENTRY("session.encode_sources", "globals,track", PHP_INI_ALL, NULL) */
@@ -999,15 +977,11 @@ PHP_FUNCTION(session_set_cookie_params)
 
 	if (ZEND_NUM_ARGS() > 1) {
 		convert_to_string_ex(path);
-		efree(PS(cookie_path));
-		PS(cookie_path) = estrndup((*path)->value.str.val,
-								   (*path)->value.str.len);
+		php_alter_ini_entry("session.cookie_path", sizeof("session.cookie_path"), Z_STRVAL_PP(path), Z_STRLEN_PP(path), PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
 
 		if (ZEND_NUM_ARGS() > 2) {
 			convert_to_string_ex(domain);
-			efree(PS(cookie_domain));
-			PS(cookie_domain) = estrndup((*domain)->value.str.val,
-										 (*domain)->value.str.len);
+			php_alter_ini_entry("session.cookie_domain", sizeof("session.cookie_domain"), Z_STRVAL_PP(domain), Z_STRLEN_PP(domain), PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
 		}
 	}
 }
@@ -1050,8 +1024,7 @@ PHP_FUNCTION(session_name)
 
 	if (ac == 1) {
 		convert_to_string_ex(p_name);
-		efree(PS(session_name));
-		PS(session_name) = estrndup((*p_name)->value.str.val, (*p_name)->value.str.len);
+		php_alter_ini_entry("session.name", sizeof("session.name"), Z_STRVAL_PP(p_name), Z_STRLEN_PP(p_name), PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
 	}
 	
 	RETVAL_STRING(old, 0);
@@ -1109,7 +1082,7 @@ PHP_FUNCTION(session_set_save_handler)
 	if (PS(nr_open_sessions) > 0)
 		RETURN_FALSE;
 	
-	php_alter_ini_entry("session.save_handler", sizeof("session.save_handler"), "user", sizeof("user"), PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
+	php_alter_ini_entry("session.save_handler", sizeof("session.save_handler"), "user", sizeof("user")-1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
 
 	mdata = emalloc(sizeof(*mdata));
 	
@@ -1140,8 +1113,7 @@ PHP_FUNCTION(session_save_path)
 
 	if (ac == 1) {
 		convert_to_string_ex(p_name);
-		efree(PS(save_path));
-		PS(save_path) = estrndup((*p_name)->value.str.val, (*p_name)->value.str.len);
+		php_alter_ini_entry("session.save_path", sizeof("session.save_path"), Z_STRVAL_PP(p_name), Z_STRLEN_PP(p_name), PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
 	}
 	
 	RETVAL_STRING(old, 0);
@@ -1189,8 +1161,7 @@ PHP_FUNCTION(session_cache_limiter)
 
 	if (ac == 1) {
 		convert_to_string_ex(p_cache_limiter);
-		efree(PS(cache_limiter));
-		PS(cache_limiter) = estrndup((*p_cache_limiter)->value.str.val, (*p_cache_limiter)->value.str.len);
+		php_alter_ini_entry("session.cache_limiter", sizeof("session.cache_limiter"), Z_STRVAL_PP(p_cache_limiter), Z_STRLEN_PP(p_cache_limiter), PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
 	}
 	
 	RETVAL_STRING(old, 0);
@@ -1397,16 +1368,7 @@ static void php_rinit_session_globals(PSLS_D)
 	PS(id) = NULL;
 	PS(nr_open_sessions) = 0;
 	PS(mod_data) = NULL;
-	PS(entropy_file) = estrdup(INI_STR("entropy_file"));
-	PS(extern_referer_chk) = estrdup(INI_STR("extern_referer_chk"));
-	PS(save_path) = estrdup(INI_STR("save_path"));
-	PS(session_name) = estrdup(INI_STR("session_name"));
-	PS(cache_limiter) = estrdup(INI_STR("cache_limiter"));
-	PS(cookie_path) = estrdup(INI_STR("cookie_path"));
-	PS(cookie_domain) = estrdup(INI_STR("cookie_domain"));
 }
-
-#define FREE_NULL(x) STR_FREE(x); (x) = NULL;
 
 static void php_rshutdown_session_globals(PSLS_D)
 {
@@ -1414,13 +1376,6 @@ static void php_rshutdown_session_globals(PSLS_D)
 		PS(mod)->close(&PS(mod_data));
 	if (PS(id)) 
 		efree(PS(id));
-	FREE_NULL(PS(entropy_file));
-	FREE_NULL(PS(extern_referer_chk));
-	FREE_NULL(PS(save_path));
-	FREE_NULL(PS(session_name));
-	FREE_NULL(PS(cache_limiter));
-	FREE_NULL(PS(cookie_path));
-	FREE_NULL(PS(cookie_domain));
 	zend_hash_destroy(&PS(vars));
 }
 
