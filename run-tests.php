@@ -612,6 +612,10 @@ function system_with_timeout($commandline)
 			$data .= $line;
 		}
 	}
+	$stat = proc_get_status($proc);
+	if ($stat['signaled']) {
+		$data .= "\nTermsig=".$stat['stopsig'];
+	}
 	$code = proc_close($proc);
 	return $data;
 }
@@ -704,7 +708,6 @@ TEST $file
 				$reason = (ereg("^info[[:space:]]*(.+)\$", trim($output))) ? ereg_replace("^info[[:space:]]*(.+)\$", "\\1", trim($output)) : FALSE;
 				if ($reason) {
 					$info = " (info: $reason)";
-					$tested .= $info;
 				}
 			}
 			if (eregi("^warn", trim($output))) {
@@ -712,7 +715,6 @@ TEST $file
 				if ($reason) {
 					$warn = true; /* only if there is a reason */
 					$info = " (warn: $reason)";
-					$tested .= $info;
 				}
 			}
 		}
