@@ -46,11 +46,12 @@ typedef struct _zend_mm_segment {
 	struct _zend_mm_segment *next_segment;
 } zend_mm_segment;
 
+#define ZEND_MM_NUM_BUCKETS 64
+
 typedef struct _zend_mm_heap {
-	/* Head of free list */
-	zend_mm_free_block *free_list;
 	zend_mm_segment *segments_list;
 	size_t block_size;
+	zend_mm_free_block *free_buckets[ZEND_MM_NUM_BUCKETS];
 } zend_mm_heap;
 
 zend_bool zend_mm_startup(zend_mm_heap *heap, size_t block_size);
