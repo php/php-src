@@ -39,7 +39,7 @@ if test "$PHP_NCURSES" != "no"; then
    ], [
      AC_MSG_ERROR(Wrong ncurses lib version or lib not found)
    ], [
-     -L$NCURSES_DIR/lib -lm"
+     -L$NCURSES_DIR/lib -lm
    ])
   
    AC_CHECK_LIB(ncurses, color_set,   [AC_DEFINE(HAVE_NCURSES_COLOR_SET,  1, [ ])])
