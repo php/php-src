@@ -315,7 +315,7 @@ retry:
 					}
 
 					if (st != 11) {
-						sprint_value(buf,vars->name, vars->name_length, vars);
+						sprint_value((struct sbuf *)buf,vars->name, vars->name_length, vars);
 					}
 #if 0
 					Debug("snmp response is: %s\n",buf);
@@ -325,7 +325,7 @@ retry:
 					} else if (st == 2) {
 						add_next_index_string(return_value,buf,1); /* Add to returned array */
 					} else if (st == 3)  {
-						sprint_objid(buf2, vars->name, vars->name_length);
+						sprint_objid((struct sbuf *)buf2, vars->name, vars->name_length);
 						add_assoc_string(return_value,buf2,buf,1);
 					}
 					if (st >= 2 && st != 11) {
@@ -344,7 +344,7 @@ retry:
 						for (count=1, vars = response->variables; vars && count != response->errindex;
 						vars = vars->next_variable, count++);
 						if (vars) {
-							sprint_objid(buf,vars->name, vars->name_length);
+							sprint_objid((struct sbuf *)buf,vars->name, vars->name_length);
 						}
 						php_error(E_WARNING,"This name does not exist: %s\n",buf);
 					}
