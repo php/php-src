@@ -909,3 +909,43 @@ ZEND_API int zend_disable_function(char *function_name, uint function_name_lengt
 	disabled_function[0].fname = function_name;
 	return zend_register_functions(disabled_function, CG(function_table), MODULE_PERSISTENT);
 }
+
+ZEND_API zend_bool zend_is_callable(zval *function)
+{
+	char *lcname;
+	zend_bool retval = 0;
+	ELS_FETCH();
+
+	switch (Z_TYPE_P(function)) {
+		case IS_STRING:
+			lcname = estrndup(Z_STRVAL_P(function), Z_STRLEN_P(function));
+			zend_str_tolower(lcname, Z_STRLEN_P(function));
+			if (zend_hash_exists(EG(function_table), lcname, Z_STRLEN_P(function)+1)) 
+				retval = 1;
+			efree(lcname);
+			break;
+
+		case IS_ARRAY:
+			{
+				zval **method;
+				zval **obj;
+				
+				if (zend_hash_index_find(Z_ARRVAL_P(function), 0, (void **) &obj) == SUCCESS &&
+					zend_hash_index_find(Z_ARRVAL_P(function), 1, (void **) &method) == SUCCESS &&
+					Z_TYPE_PP(obj) == IS_OBJECT &&
+					Z_TYPE_PP(method) == IS_STRING) {
+					lcname = estrndup(Z_STRVAL_PP(method), Z_STRLEN_PP(method));
+					zend_str_tolower(lcname, Z_STRLEN_PP(method));
+					if (zend_hash_exists(&Z_OBJCE_PP(obj)->function_table, lcname, Z_STRLEN_PP(method)+1))
+						retval = 1;
+					efree(lcname);
+				}
+			}
+			break;
+
+		default:
+			break;
+	}
+
+	return retval;
+}
