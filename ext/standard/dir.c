@@ -151,6 +151,10 @@ static void _php_do_opendir(INTERNAL_FUNCTION_PARAMETERS, int createobject)
 		RETURN_FALSE;
 	}
 	
+	if (PG(safe_mode) &&(!php_checkuid(Z_STRVAL_PP(arg), NULL, CHECKUID_ALLOW_ONLY_DIR))) {
+		RETURN_FALSE;
+	}
+	
 	dirp = emalloc(sizeof(php_dir));
 
 	dirp->dir = VCWD_OPENDIR(Z_STRVAL_PP(arg));
