@@ -1,13 +1,6 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 2002, Version 4.3.0
-- fgets($fp) (with no length parameter) now uses a buffer as long as the
-  the next line available from the $fp. Previously, there was a 1KB limit.
-  (Wez)
-- Changed registry entries under "HKLM\SOFTWARE\PHP\Per Directory Values" to
-  work also with administrative directives such as safe_mode, open_basedir,
-  etc. (Claudio Felber) 
-- Added PGSQL_CONNECT_FORCE_NEW option to pg_connect() (Yasuo)
 - ATTENTION! "make install" will *by default* install the CLI SAPI binary in 
   {PREFIX}/bin/php. If you don't disable the CGI binary, it will be
   installed as {PREFIX}/bin/php-cgi.
@@ -18,6 +11,12 @@ PHP 4                                                                      NEWS
   . ext/icap
   . sapi/fhttpd
 - Moved ext/vpopmail to PECL. (James)
+- Fixed fgets($fp) to read until line-end when length parameter is not used.
+  (Wez)
+- Changed registry entries under "HKLM\SOFTWARE\PHP\Per Directory Values" to
+  work also with administrative directives such as safe_mode, open_basedir,
+  etc. (Claudio Felber) 
+- Added PGSQL_CONNECT_FORCE_NEW option to pg_connect() (Yasuo)
 - Added ICONV_IMPL and ICONV_VERSION constants to iconv extension to
   indicate which iconv implementation is used. (Moriyoshi)
 - Fixed bug #17580 (Allow ini parser to parse files >16K). (Ilia)
