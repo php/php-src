@@ -21,9 +21,11 @@
 
 #include "snprintf.h"
 
+BEGIN_EXTERN_C()
 extern int spprintf( char **pbuf, size_t max_len, const char *format, ...);
 
 PHPAPI extern int vspprintf(char **pbuf, size_t max_len, const char *format, va_list ap);
+END_EXTERN_C()
 
 #endif /* SNPRINTF_H */
 
