@@ -2091,11 +2091,11 @@ PHP_FUNCTION(pg_lo_export)
 		RETURN_FALSE;
 	}
 	
-	if (PG(safe_mode) &&(!php_checkuid(file_in, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
+	if (PG(safe_mode) &&(!php_checkuid(file_out, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
 		RETURN_FALSE;
 	}
 	
-	if (php_check_open_basedir(file_in TSRMLS_CC)) {
+	if (php_check_open_basedir(file_out TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
 
