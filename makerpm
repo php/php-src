@@ -6,7 +6,7 @@
 PREFIX="php"
 TARDIR="`basename \`pwd\``"
 RELEASE=${1:-1}
-VERSION=${2:-`echo $TARDIR | sed "s/$PREFIX//g"`}
+VERSION=${2:-`echo $TARDIR | sed "s/$PREFIX-//g"`}
 
 if	[ "$VERSION" = "" ]
 then	cat <<"EOH"
@@ -24,23 +24,22 @@ echo -n "Building RPM version $VERSION, release: $RELEASE "
 sleep 1 ; echo -n . ; sleep 1 ; echo -n . ; sleep 1 ; echo -n .
 echo
 
-TAR=php$VERSION.tar.gz
-SPEC=php$VERSION.spec
+TAR=php-$VERSION.tar.gz
+SPEC=php-$VERSION.spec
 
 # write out the .spec file
 sed -e "s/PVERSION/$VERSION/g" \
     -e "s/PRELEASE/$RELEASE/g" \
     -e "s/TARDIR/$TARDIR/g" \
     > $SPEC <<'EOF'
-Summary: PHP4b1 - a powerful scripting language for HTML
+Summary: PHP 4 - A powerful scripting language
 Name: mod_php4
 Version: PVERSION
 Release: PRELEASE
 Group: Networking/Daemons
-Source0: http://www.php.net/distributions/php%{PACKAGE_VERSION}.tar.gz
-#Source1: php3-manual.tar.gz
+Source0: http://www.php.net/distributions/php-%{PACKAGE_VERSION}.tar.gz
 Copyright: GPL
-BuildRoot: /tmp/php3-root
+BuildRoot: /tmp/php4-root
 Requires: webserver
 
 %description
@@ -57,31 +56,18 @@ chown -R root.root .
 %build
 # first the standalone (why can't you build both at once?)
 # need to run this under sh or it breaks
-cd ext/wddx
-ln -s /usr/src/redhat/BUILD/apache_1.3.9/src/lib/expat-lite ./xml
-cd ../..
 
 sh ./configure --prefix=/usr \
-	--without-gd \
 	--with-config-file-path=/usr/lib \
 	--enable-force-cgi-redirect \
-	--enable-debugger=yes \
 	--enable-safe-mode \
 	--with-exec-dir=/usr/bin \
 	--with-mysql=/usr \
 	--with-imap=/usr \
 	--with-pdflib=/usr \
-	--with-system-regex \
-	--enable-track-vars \
-	--with-ttf \
-	--with-zlib \
-	--with-xml=/usr/src/redhat/BUILD/apache_1.3.9/src/lib/expat-lite \
-	--with-wddx \
-
-# ldap don't work
-#	--with-ldap=/usr \
-
-# system regex conflicts with apache_ssl for some reason
+	--with-zlib=/usr \
+	--enable-xml \
+	--enable-wddx 
 
 make
 mv php php.keepme
@@ -89,27 +75,17 @@ mv php php.keepme
 # then the apache module 
 rm config.cache
 sh ./configure --prefix=/usr \
-	--without-gd \
 	--with-apxs=/usr/sbin/apxs \
 	--enable-versioning \
 	--with-config-file-path=/usr/lib \
-	--enable-debugger=yes \
 	--enable-safe-mode \
 	--with-exec-dir=/usr/bin \
 	--with-mysql=/usr \
 	--with-imap=/usr \
 	--with-pdflib=/usr \
-	--with-system-regex \
-	--enable-track-vars \
-	--with-ttf \
-	--with-zlib \
-	--with-xml=/usr/src/redhat/BUILD/apache_1.3.9/src/lib/expat-lite \
-	--with-wddx \
-
-# ldap don't work
-#	--with-ldap=/usr \
-
-# system regex conflicts with apache_ssl for some reason
+	--with-zlib=/usr \
+	--enable-xml \
+	--enable-wddx 
 
 make clean
 make
@@ -127,6 +103,9 @@ install -m 755 php $RPM_BUILD_ROOT/usr/bin
 rm -rf $RPM_BUILD_ROOT
 
 %changelog
+* Fri Jun 29 2001 Jani Taskinen <sniper@iki.fi>
+- Removed some useless configure options. Made the tar names correct.
+
 * Sun Apr 30 2000 Joey Smith <joey@samaritan.com>
 - Small fix: Description still referred to package as PHP3.
 
