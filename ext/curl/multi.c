@@ -62,7 +62,7 @@ PHP_FUNCTION(curl_multi_init)
 }
 /* }}} */
 
-/* {{{ int curl_multi_add_handle(resource multi, resource ch)
+/* {{{ proto int curl_multi_add_handle(resource multi, resource ch)
    Add a normal cURL handle to a cURL multi handle */
 PHP_FUNCTION(curl_multi_add_handle)
 {
@@ -119,7 +119,7 @@ static void _make_timeval_struct(struct timeval *to, double timeout)
 	to->tv_usec = conv % 1000000;
 }
 
-/* {{{ int curl_multi_select(resource mh[, double timeout])
+/* {{{ proto int curl_multi_select(resource mh[, double timeout])
    Get all the sockets associated with the cURL extension, which can then be "selected" */
 PHP_FUNCTION(curl_multi_select)
 {
@@ -230,6 +230,8 @@ PHP_FUNCTION(curl_multi_info_read)
 }
 /* }}} */
 
+/* {{{ proto void curl_multi_close(resource mh)
+	Close a set of cURL handles */
 PHP_FUNCTION(curl_multi_close)
 {
 	zval      *z_mh;
@@ -243,6 +245,7 @@ PHP_FUNCTION(curl_multi_close)
 
 	zend_list_delete(Z_LVAL_P(z_mh));
 }
+/* }}} */
 
 void _php_curl_multi_close(zend_rsrc_list_entry *rsrc)
 {

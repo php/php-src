@@ -544,7 +544,7 @@ PHP_FUNCTION(aggregate_properties_by_regexp)
 #endif
 
 
-/* {{{ proto array aggregation_info(object obj)
+/* {{{ proto array aggregate_info(object obj)
  */
 PHP_FUNCTION(aggregate_info)
 {
