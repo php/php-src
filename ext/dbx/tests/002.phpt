@@ -10,7 +10,7 @@ if (DBX_MYSQL=="DBX_MYSQL")               print('!DBX_MYSQL');
 if (DBX_ODBC=="DBX_ODBC")                 print('!DBX_ODBC');
 if (DBX_PGSQL=="DBX_PGSQL")               print('!DBX_PGSQL');
 if (DBX_MSSQL=="DBX_MSSQL")               print('!DBX_MSSQL');
-if (DBX_FBSQL=="DBX_MSSQL")               print('!DBX_FBSQL');
+if (DBX_FBSQL=="DBX_FBSQL")               print('!DBX_FBSQL');
 if (DBX_PERSISTENT=="DBX_PERSISTENT")     print('!DBX_PERSISTENT');
 if (DBX_RESULT_INFO=="DBX_RESULT_INFO")   print('!DBX_RESULT_INFO');
 if (DBX_RESULT_INDEX=="DBX_RESULT_INDEX") print('!DBX_RESULT_INDEX');
