@@ -57,11 +57,18 @@ ZEND_API zend_alloc_globals alloc_globals;
 
 #define _CHECK_MEMORY_LIMIT(s, rs, file, lineno) { AG(allocated_memory) += rs;\
 								if (AG(memory_limit)<AG(allocated_memory)) {\
-									if (!file) { \
-										zend_error(E_ERROR,"Allowed memory size of %d bytes exhausted (tried to allocate %d bytes)", AG(memory_limit),s); \
-									} else { \
-										zend_error(E_ERROR,"Allowed memory size of %d bytes exhausted at %s:%d (tried to allocate %d bytes)", AG(memory_limit), file, lineno, s); \
-									} \
+									if ((AG(memory_limit)+1048576)<AG(allocated_memory)) { \
+										/* failed to handle this gracefully, exit() */ \
+										exit(1);	\
+									}	\
+									if (!AG(memory_exhausted)) {	\
+										if (!file) { \
+											zend_error(E_ERROR,"Allowed memory size of %d bytes exhausted (tried to allocate %d bytes)", AG(memory_limit),s); \
+										} else { \
+											zend_error(E_ERROR,"Allowed memory size of %d bytes exhausted at %s:%d (tried to allocate %d bytes)", AG(memory_limit), file, lineno, s); \
+										} \
+										AG(memory_exhausted)=1;	\
+									}	\
 								} \
 							}
 # endif
@@ -435,6 +442,7 @@ ZEND_API void shutdown_memory_manager(int silent, int clean_cache)
 				}
 			}
 #endif
+			AG(allocated_memory) -= t->size;
 			p = t->pNext;
 			REMOVE_POINTER_FROM_LIST(t);
 			free(t);
@@ -451,6 +459,7 @@ ZEND_API void shutdown_memory_manager(int silent, int clean_cache)
 			}
 		}
 	}
+	AG(memory_exhausted)=0;
 
 #if (ZEND_DEBUG)
 	do {
