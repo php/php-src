@@ -182,7 +182,7 @@ static void reflection_register_implement(zend_class_entry *class_entry, zend_cl
 	class_entry->interfaces[num_interfaces - 1] = interface_entry;
 }
 
-static void reflection_free_objects_storage(zend_object *object TSRMLS_DC)
+static void reflection_free_objects_storage(void *object TSRMLS_DC)
 {
 	reflection_object *intern = (reflection_object *) object;
 
@@ -2309,6 +2309,67 @@ ZEND_METHOD(reflection_class, getStaticProperties)
 }
 /* }}} */
 
+/* {{{ proto public mixed ReflectionClass::getStaticPropertyValue(string name [, mixed default])
+   Returns the value of a tsstic property */
+ZEND_METHOD(reflection_class, getStaticPropertyValue)
+{
+	reflection_object *intern;
+	zend_class_entry *ce;
+	char *name;
+	int name_len;
+	zval **prop, *def_value = NULL;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|z", &name, &name_len, &def_value) == FAILURE) {
+		return;
+	}
+
+	GET_REFLECTION_OBJECT_PTR(ce);
+
+	zend_update_class_constants(ce TSRMLS_CC);
+	prop = zend_std_get_static_property(ce, name, name_len, 1 TSRMLS_CC);
+	if (!prop) {
+		if (def_value) {
+			RETURN_ZVAL(def_value, 1, 0);
+		} else {
+			zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, 
+				"Class %s does not have a property named %s", ce->name, name);
+		}
+		return;
+	} else {
+		RETURN_ZVAL(*prop, 1, 0);
+	}
+}
+/* }}} */
+
+/* {{{ proto public void ReflectionClass::setStaticPropertyValue($name, $value)
+   Sets the value of a static property */
+ZEND_METHOD(reflection_class, setStaticPropertyValue)
+{
+	reflection_object *intern;
+	zend_class_entry *ce;
+	char *name;
+	int name_len;
+	zval **variable_ptr, *value;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz", &name, &name_len, &value) == FAILURE) {
+		return;
+	}
+
+	GET_REFLECTION_OBJECT_PTR(ce);
+
+	zend_update_class_constants(ce TSRMLS_CC);
+	variable_ptr = zend_std_get_static_property(ce, name, name_len, 1 TSRMLS_CC);
+	if (!variable_ptr) {
+		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, 
+				"Class %s does not have a property named %s", ce->name, name);
+		return;
+	}	
+	zval_dtor(*variable_ptr);
+	**variable_ptr = *value;
+	zval_copy_ctor(*variable_ptr);
+}
+/* }}} */
+
 /* {{{ proto public array ReflectionClass::getDefaultProperties()
    Returns an associative array containing copies of all default property values of the class */
 ZEND_METHOD(reflection_class, getDefaultProperties)
@@ -3721,6 +3782,8 @@ static zend_function_entry reflection_class_functions[] = {
 	ZEND_ME(reflection_class, getParentClass, NULL, 0)
 	ZEND_ME(reflection_class, isSubclassOf, NULL, 0)
 	ZEND_ME(reflection_class, getStaticProperties, NULL, 0)
+	ZEND_ME(reflection_class, getStaticPropertyValue, NULL, 0)
+	ZEND_ME(reflection_class, setStaticPropertyValue, NULL, 0)
 	ZEND_ME(reflection_class, getDefaultProperties, NULL, 0)
 	ZEND_ME(reflection_class, isIterateable, NULL, 0)
 	ZEND_ME(reflection_class, implementsInterface, NULL, 0)
