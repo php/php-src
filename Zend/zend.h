@@ -280,7 +280,7 @@ struct _zend_class_entry {
 	union _zend_function *clone;
 
 	/* handlers */
-	zend_object_value (*create_object)(zend_class_entry *class_type);
+	zend_object_value (*create_object)(zend_class_entry *class_type TSRMLS_DC);
 	void (*handle_function_call)(INTERNAL_FUNCTION_PARAMETERS, zend_property_reference *property_reference);
 	zval (*handle_property_get)(zend_property_reference *property_reference);
 	int (*handle_property_set)(zend_property_reference *property_reference, zval *value);
