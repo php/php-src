@@ -114,6 +114,7 @@ PHP_MYSQLI_EXPORT(zend_object_value) mysqli_objects_new(zend_class_entry *class_
 	intern->zo.ce = class_type;
 	intern->zo.in_get = 0;
 	intern->zo.in_set = 0;
+	intern->ptr = NULL;
 
 	ALLOC_HASHTABLE(intern->zo.properties);
 	zend_hash_init(intern->zo.properties, 0, NULL, ZVAL_PTR_DTOR, 0);
