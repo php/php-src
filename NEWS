@@ -10,6 +10,8 @@ PHP 4                                                                      NEWS
 - Added a warning when creating temp stream fails with ftp_(n)list(). (Sara)
 - Fixed header handler in NSAPI SAPI module (header->replace was ignored,
   send_default_content_type now sends value from php.ini). (Uwe Schindler)
+- Fixed bug #26752 (Silent unterminated loop when length parameter for
+  fgets(), fread() and fgetss() is 0). (Ilia)
 - Fixed bug #26751 (PHP can't find the MySQL socket on a case sensitive file
   system). (Derick)
 - Fixed Bug #26703 (Certain characters inside strings incorrectly treated as

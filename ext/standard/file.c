@@ -1374,8 +1374,8 @@ PHPAPI PHP_FUNCTION(fgets)
 		convert_to_long_ex(arg2);
 		len = Z_LVAL_PP(arg2);
 
-		if (len < 0) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length parameter may not be negative");
+		if (len <= 0) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length parameter must be greater then 0.");
 			RETURN_FALSE;
 		}
 
@@ -1471,8 +1471,8 @@ PHPAPI PHP_FUNCTION(fgetss)
 
 	convert_to_long_ex(bytes);
 	len = Z_LVAL_PP(bytes);
-	if (len < 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length parameter may not be negative");
+	if (len <= 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length parameter must be greater then 0.");
 		RETURN_FALSE;
 	}
 
@@ -2136,8 +2136,8 @@ PHPAPI PHP_FUNCTION(fread)
 
 	convert_to_long_ex(arg2);
 	len = Z_LVAL_PP(arg2);
-	if (len < 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length parameter may not be negative");
+	if (len <= 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length parameter must be greater then 0.");
 		RETURN_FALSE;
 	}
 
