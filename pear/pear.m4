@@ -28,6 +28,8 @@ abs_srcdir=`(cd $srcdir && pwd)`
 
 php_always_shared=yes
 
+PHP_CONFIG_NICE(config.nice)
+
 AC_PROG_CC
 AC_PROG_CC_C_O
 
