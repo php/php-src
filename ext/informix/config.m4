@@ -74,7 +74,7 @@ WARNING: You specified Informix base install directory that is different
         case "$i" in
         *.o)
             IFX_OBJS="$IFX_OBJS $i"
-            AC_ADD_LIBRARY_WITH_PATH(php_ifx, $abs_builddir/ext/informix);;
+            AC_ADD_LIBRARY_WITH_PATH(ifx, $abs_builddir/ext/informix);;
         -l*)
             lib=`echo $i|sed 's/^-l//'`
             AC_ADD_LIBRARY($lib);;
