@@ -1,5 +1,5 @@
 <?php
 if(!extension_loaded("xslt")) {
-	die("skip\n");
+	die("skip xslt extension not available");
 }
 ?>
