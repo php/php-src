@@ -491,12 +491,15 @@ static int sapi_nsapi_header_handler(sapi_header_struct *sapi_header, sapi_heade
 		param_free(pblock_remove("content-type", rc->rq->srvhdrs));
 		pblock_nvinsert("content-type", header_content, rc->rq->srvhdrs);
 	} else {
+		/* to lower case because NSAPI reformats the headers and wants lowercase */
+		for (p=header_name; *p; p++) {
+			*p=tolower(*p);
+		}
+		if (sapi_header->replace) param_free(pblock_remove(header_name, rc->rq->srvhdrs));
 		pblock_nvinsert(header_name, header_content, rc->rq->srvhdrs);
 	}
 
-	*p = ':';	/* restore '*p' */
-
-	efree(sapi_header->header);
+	sapi_free_header(sapi_header);
 
 	return 0;	/* don't use the default SAPI mechanism, NSAPI duplicates this functionality */
 }
@@ -506,10 +509,6 @@ static int sapi_nsapi_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 	int retval;
 	nsapi_request_context *rc = (nsapi_request_context *)SG(server_context);
 
-	/*
-	 * We could probably just do this in the header_handler. But, I
-	 * don't know what the implication of doing it there is.
-	 */
 	if (SG(sapi_headers).send_default_content_type) {
 		char *hd;
 		param_free(pblock_remove("content-type", rc->rq->srvhdrs));
