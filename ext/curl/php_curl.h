@@ -41,6 +41,7 @@ extern zend_module_entry curl_module_entry;
 #define CURLOPT_BINARYTRANSFER 19914
 
 PHP_MINIT_FUNCTION(curl);
+PHP_MSHUTDOWN_FUNCTION(curl);
 PHP_MINFO_FUNCTION(curl);
 PHP_FUNCTION(curl_version);
 PHP_FUNCTION(curl_init);
@@ -90,6 +91,7 @@ typedef struct {
 	struct _php_curl_error   err;
 	struct _php_curl_free    to_free;
 	long                     id;
+    int                      performed;
 } php_curl;
 
 

@@ -557,6 +557,7 @@ static void alloc_curl_handle(php_curl **ch)
 	(*ch)->handlers->write = ecalloc(1, sizeof(php_curl_write));
 	(*ch)->handlers->write_header = ecalloc(1, sizeof(php_curl_write));
 	(*ch)->handlers->read  = ecalloc(1, sizeof(php_curl_read));
+	(*ch)->performed = 0;
 	memset(&(*ch)->err, 0, sizeof((*ch)->err));
 	
 	zend_llist_init(&(*ch)->to_free.str, sizeof(char *), 
@@ -772,7 +773,6 @@ PHP_FUNCTION(curl_setopt)
 			HashTable        *postfields;
 			struct HttpPost  *first = NULL;
 			struct HttpPost  *last  = NULL;
-			char             *postval;
 			char             *string_key = NULL;
 			ulong             num_key;
 			uint              string_key_len;
@@ -879,6 +879,11 @@ PHP_FUNCTION(curl_exec)
 	}
 	ZEND_FETCH_RESOURCE(ch, php_curl *, zid, -1, le_curl_name, le_curl);
 
+	if (ch->performed) {
+		php_error(E_WARNING, "Multiple executions on the same handle are not currently supported, please upgrade to the next version of PHP");
+		RETURN_FALSE;
+	}
+
 	error = curl_easy_perform(ch->cp);
 	if (error != CURLE_OK) {
 		if (ch->handlers->write->buf.c)
@@ -886,6 +891,8 @@ PHP_FUNCTION(curl_exec)
 		SAVE_CURL_ERROR(ch, error);
 		RETURN_FALSE;
 	}
+
+	ch->performed = 1;
 
 	if (ch->handlers->write->method == PHP_CURL_RETURN) {
 		if (ch->handlers->write->type != PHP_CURL_BINARY) 
