@@ -279,6 +279,11 @@ void fetch_array_dim(znode *result, znode *parent, znode *dim CLS_DC)
 }
 
 
+void fetch_string_offset(znode *result, znode *parent, znode *offset CLS_DC)
+{
+}
+
+
 void do_print(znode *result, znode *arg CLS_DC)
 {
 	zend_op *opline = get_next_op(CG(active_op_array) CLS_CC);

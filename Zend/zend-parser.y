@@ -590,8 +590,9 @@ cvar_without_objects:
 
 
 reference_variable:
-		dim_list { $$ = $1; }
-	|	compound_variable		{ do_fetch_globals(&$1 CLS_CC); do_begin_variable_parse(CLS_C); fetch_simple_variable(&$$, &$1, 1 CLS_CC); }
+		reference_variable '[' dim_offset ']'	{ fetch_array_dim(&$$, &$1, &$3 CLS_CC); }
+	|	reference_variable '{' expr '}'			{ fetch_string_offset(&$$, &$1, &$3 CLS_CC); }
+	|	compound_variable						{ do_fetch_globals(&$1 CLS_CC); do_begin_variable_parse(CLS_C); fetch_simple_variable(&$$, &$1, 1 CLS_CC); }
 ;
 	
 
@@ -600,18 +601,10 @@ compound_variable:
 	|	'$' '{' expr '}'	{ $$ = $3; }
 ;
 
-
-dim_list:
-		dim_list '[' dim_offset ']'	{ fetch_array_dim(&$$, &$1, &$3 CLS_CC); }
-	|	compound_variable  { do_fetch_globals(&$1 CLS_CC); do_begin_variable_parse(CLS_C); } '[' dim_offset	']'	{ fetch_array_begin(&$$, &$1, &$4 CLS_CC); }
-;
-
-
 dim_offset:
 		/* empty */		{ $$.op_type = IS_UNUSED; }
 	|	expr			{ $$ = $1; }
 ;
-
 
 ref_list:
 		object_property  { $$ = $1; }
@@ -619,21 +612,19 @@ ref_list:
 ;
 
 object_property:
-		scalar_object_property		{ znode tmp_znode;  do_pop_object(&tmp_znode CLS_CC);  do_fetch_property(&$$, &tmp_znode, &$1 CLS_CC); }
-	|	object_dim_list { $$ = $1; }
-;
-
-scalar_object_property:
-		variable_name	{ $$ = $1; }
+		object_dim_list { $$ = $1; }
 	|	cvar_without_objects { do_end_variable_parse(BP_VAR_R, 0 CLS_CC); $$ = $1; }
 ;
 
-
 object_dim_list:
-		object_dim_list '[' dim_offset ']' { fetch_array_dim(&$$, &$1, &$3 CLS_CC); }
-	|	variable_name { znode tmp_znode, res;  do_pop_object(&tmp_znode CLS_CC);  do_fetch_property(&res, &tmp_znode, &$1 CLS_CC);  $1 = res; } '[' dim_offset ']' { fetch_array_dim(&$$, &$1, &$4 CLS_CC); }
+		object_dim_list '[' dim_offset ']'	{ fetch_array_dim(&$$, &$1, &$3 CLS_CC); }
+	|	object_dim_list '{' expr '}'		{ fetch_string_offset(&$$, &$1, &$3 CLS_CC); }
+	|	property_name { $$ = $1; }
 ;
 
+property_name:
+	variable_name { znode tmp_znode;  do_pop_object(&tmp_znode CLS_CC);  do_fetch_property(&$$, &tmp_znode, &$1 CLS_CC);}
+;
 
 variable_name:
 		T_STRING		{ $$ = $1; }

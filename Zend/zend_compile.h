@@ -230,6 +230,7 @@ void do_fetch_globals(znode *varname CLS_DC);
 
 void fetch_array_begin(znode *result, znode *varname, znode *first_dim CLS_DC);
 void fetch_array_dim(znode *result, znode *parent, znode *dim CLS_DC);
+void fetch_string_offset(znode *result, znode *parent, znode *offset CLS_DC);
 void do_print(znode *result, znode *arg CLS_DC);
 void do_echo(znode *arg CLS_DC);
 typedef int (*unary_op_type)(zval *, zval *);
