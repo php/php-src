@@ -1,3 +1,27 @@
+2002-09-16  Tal Peer  <tal@kaktos.co.il>
+
+    * ext/fribidi/CREDITS: oops.
+
+    * ext/fribidi/CREDITS: Added myself
+
+2002-09-16  Jani Taskinen  <sniper@iki.fi>
+
+    * NEWS: tuning
+
+    * ext/fribidi/README
+      ext/fribidi/config.m4
+      ext/fribidi/fribidi.c
+      ext/fribidi/fribidi.php
+      ext/fribidi/php_fribidi.h:
+    - Require Fribidi 0.10.4 -> no more glib needed.
+    - Cleaned up a bit.
+
+    * sapi/isapi/php4isapi.c: Should fix #19425
+
+2002-09-16  Anantha Kesari H Y  <hyanantha@novell.com>
+
+    * netware/phplib.imp: Updatation of symbols exported for NetWare
+
 2002-09-15  Tal Peer  <tal@kaktos.co.il>
 
     * ext/fribidi/fribidi.c:
