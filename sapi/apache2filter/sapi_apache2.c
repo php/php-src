@@ -252,9 +252,7 @@ static int php_input_filter(ap_filter_t *f, apr_bucket_brigade *bb,
 		return ap_get_brigade(f->next, bb, mode, block, readbytes);
 	}
 
-	ctx = SG(server_context);
-
-	if (ctx == NULL) {
+	if (SG(server_context) == NULL) {
 		/* Initialize filter context */
 		SG(server_context) = ctx = apr_pcalloc(f->r->pool, sizeof(*ctx));
 	}
@@ -330,9 +328,9 @@ static int php_output_filter(ap_filter_t *f, apr_bucket_brigade *bb)
 	ap_add_common_vars(f->r);
 	ap_add_cgi_vars(f->r);
 
-	if (f->ctx == NULL) {
+	if (SG(server_context) == NULL) {
 		/* Initialize filter context */
-		f->ctx = ctx = apr_pcalloc(f->r->pool, sizeof(*ctx));
+		SG(server_context) = ctx = apr_pcalloc(f->r->pool, sizeof(*ctx));
 		ctx->f = f;
 	}
 
@@ -365,7 +363,6 @@ static int php_output_filter(ap_filter_t *f, apr_bucket_brigade *bb)
 				}
 			}
 
-			SG(server_context) = ctx;
 			apply_config(conf);
 			php_apache_request_ctor(f, ctx TSRMLS_CC);
 
