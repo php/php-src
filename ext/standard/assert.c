@@ -77,7 +77,7 @@ PHP_INI_END()
 
 static void php_assert_init_globals(zend_assert_globals *assert_globals_p TSRMLS_DC)
 {
-	ASSERTG(callback) = NULL;
+	assert_globals_p->callback = NULL;
 }
 
 PHP_MINIT_FUNCTION(assert)
