@@ -49,7 +49,7 @@ static zend_bool is_protected_variable(char *varname PLS_DC)
 
 static void safe_php_register_variable(char *var, char *strval, zval *track_vars_array ELS_DC PLS_DC)
 {
-	if (!is_protected_variable(strval PLS_CC)) {
+	if (!is_protected_variable(var PLS_CC)) {
 		php_register_variable(var, strval, track_vars_array ELS_CC PLS_CC);
 	}
 }
@@ -203,10 +203,9 @@ static void php_mime_split(char *buf, int cnt, char *boundary, zval *array_ptr)
 						abuf = estrndup(namebuf, strlen(namebuf)-arr_len);
 						sprintf(lbuf, "%s_name[%s]", abuf, arr_index);
 						add_protected_variable(lbuf PLS_CC);
-						add_protected_variable(abuf PLS_CC);
 					} else {
 						sprintf(lbuf, "%s_name", namebuf);
-						add_protected_variable(abuf PLS_CC);
+						add_protected_variable(lbuf PLS_CC);
 					}
 					s = strrchr(filenamebuf, '\\');
 					if (s && s > filenamebuf) {
