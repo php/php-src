@@ -519,40 +519,34 @@ PHP_FUNCTION(com_load)
 			server_name = NULL;
 		} else if (Z_TYPE_P(server_name) == IS_ARRAY) {
 			pval **tmp;
-			/* DAB: 22 Sept 2001 */
-			/* Aha - we have a number of possible */
-			/* arguments. They are in the hash */
-			/* By name: Server, Domain, Username, Password */
-			/* Flags. */
-			/* This has been crafted to maintian maximum backward */
-			/* compatability, If the server name is specified as a */
-			/* string, then the function shoule behave as before */
-			/* by defaulting username and password and using the */
-			/* (I believe) incorrect CLSCTX_SERVER instantiation */
-			/* paramter. However if server is specified in this array */
-			/* then we use either CLSCTX_REMOTE_SERVER or whatever */
-			/* flags are specified in the array */
+			/* DAB: 22 Sept 2001
+			 * Aha - we have a number of possible arguments.
+			 * They are in the hash By name: Server, Domain, Username, Password
+			 * Flags.
+			 * This has been crafted to maintian maximum backward compatability.
+			 * If the server name is specified as a string, then the function
+			 * should behave as before by defaulting username and password and
+			 * using the (I believe) incorrect CLSCTX_SERVER instantiation
+			 * paramter. However if server is specified in this array then we
+			 * use either CLSCTX_REMOTE_SERVER or whatever flags are specified
+			 * in the array */
 			HashTable *ht = Z_ARRVAL(*server_name);
 			if (FAILURE == zend_hash_find(ht, "Server", 7, (void **) &tmp)) {
 				server_name = NULL;
 			} else {
 				server_name = *tmp;
 				convert_to_string_ex(&server_name);
-				/* CLSCTX_SERVER includes INPROC and LOCAL */
-				/* SERVER. This means that any local server */
-				/* will be instantiated BEFORE even looking */
-				/* on a remote server. Thus if we have a */
-				/* server name, probably we want to access */
-				/* a remote machine or we would not have */
-				/* bothered specifying it. So it would be */
-				/* wrong to to connect locally. Futher, */
-				/* unless the name passed is a GUID, there has */
-				/* to be something to map the Prog.Id to GUID */
-				/* and unless that has been modified to remove */
-				/* the information about local instantiation */
-				/* CLSCTX_SERVER would force a local instantiation */
-				/* This setting can be overridden below if the user */
-				/* specifies a flags element */
+				/* CLSCTX_SERVER includes INPROC and LOCAL SERVER. This means
+				 * that any local server will be instantiated BEFORE even
+				 * looking on a remote server. Thus if we have a server name,
+				 * probably we want to access a remote machine or we would not
+				 * have bothered specifying it. So it would be wrong to to
+				 * connect locally. Futher, unless the name passed is a GUID,
+				 * there has to be something to map the Prog.Id to GUID and
+				 * unless that has been modified to remove the information
+				 * about local instantiation CLSCTX_SERVER would force a local
+				 * instantiation This setting can be overridden below if the
+				 * user specifies a flags element */
 				flags = CLSCTX_REMOTE_SERVER;
 			}
 			if (FAILURE == zend_hash_find(ht, "Username", 9, (void **) &tmp)) {
