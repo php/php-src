@@ -39,6 +39,7 @@ PHP                                                                        NEWS
 - Fixed support for <![CDATA[]]> fields within XML documents in ext/xml. 
   (Sterling)
 - Fixed visibility of __construct and __clone. (Marcus)
+- Fixed bug #25756 (SimpleXML's validate_schema_file() broken). (Moriyoshi)
 - Fixed bug #24766 (strange result array from unpack()). (Moriyoshi)
 - Fixed bug #24729 ($obj = new $className; causes crash when $className is not 
   set). (Marcus)
