@@ -12,11 +12,11 @@
 #  | obtain it through the world-wide-web, please send a note to          |
 #  | license@php.net so we can mail you a copy immediately.               |
 #  +----------------------------------------------------------------------+
-#  | Authors: Stig Bakken <ssb@fast.no>                                   |
+#  | Authors: Stig Bakken <ssb@php.net>                                   |
 #  |          Sascha Schumann <sascha@schumann.cx>                        |
 #  +----------------------------------------------------------------------+
 #
-# $Id: buildcheck.sh,v 1.21.2.2 2003-04-16 12:05:43 jan Exp $ 
+# $Id: buildcheck.sh,v 1.21.2.3 2003-05-19 13:14:06 sniper Exp $ 
 #
 
 echo "buildconf: checking installation..."
@@ -70,10 +70,10 @@ else
 echo "buildconf: automake version $am_version (ok)"
 fi
 
-# libtool 1.4 or newer
+# libtool 1.4.3 or newer
 # Prefer glibtool over libtool for Mac OS X compatibility
-libtool=`which glibtool 2> /dev/null`
-if test ! -r "$libtool"; then libtool=`which libtool`; fi
+libtool=`./build/shtool path glibtool 2> /dev/null`
+if test ! -r "$libtool"; then libtool=`./build/shtool path libtool`; fi
 lt_pversion=`$libtool --version 2>/dev/null|sed -n -e 's/^[^0-9]*//' -e 1's/[- ].*//p'`
 if test "$lt_pversion" = ""; then
 echo "buildconf: libtool not found."
@@ -100,7 +100,7 @@ echo "           to build PHP from CVS."
 exit 1
 fi
 
-am_prefix=`which automake | sed -e 's#/[^/]*/[^/]*$##'`
+am_prefix=`./build/shtool path automake | sed -e 's#/[^/]*/[^/]*$##'`
 lt_prefix=`echo $libtool | sed -e 's#/[^/]*/[^/]*$##'`
 if test "$am_prefix" != "$lt_prefix"; then
     echo "WARNING: automake and libtool are installed in different"
