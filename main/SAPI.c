@@ -2,12 +2,10 @@
    +----------------------------------------------------------------------+
    | Server API Abstraction Layer                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998, 1999 SAPI Development Team                       |
+   | Copyright (c) 1999 SAPI Development Team                             |
    +----------------------------------------------------------------------+
-   | This source file is subject to the Zend license, that is bundled     |
-   | with this package in the file LICENSE.  If you did not receive a     |
-   | copy of the Zend license, please mail us at zend@zend.com so we can  |
-   | send you a copy immediately.                                         |
+   | This source file is subject to the GNU public license, that is       |
+   | bundled with this package in the file LICENSE.                       |
    +----------------------------------------------------------------------+
    | Design:  Shane Caraveo <shane@caraveo.com>                           |
    | Authors: Andi Gutmans <andi@zend.com>                                |
