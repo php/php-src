@@ -255,7 +255,7 @@ class PEAR_Common extends PEAR
 
     function infoFromDescriptionFile($descfile)
     {
-        if (!is_file($descfile) || !is_readable($descfile) ||
+        if (!@is_file($descfile) || !is_readable($descfile) ||
              (!$fp = @fopen($descfile, 'r'))) {
             return $this->raiseError("Unable to open $descfile");
         }
@@ -291,6 +291,7 @@ class PEAR_Common extends PEAR
             $this->pkginfo[$k] = trim($v);
         }
         $this->pkginfo['filelist'] = &$this->filelist;
+        //print_r($this->pkginfo);exit;
         return $this->pkginfo;
     }
 
