@@ -1,6 +1,12 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.0.7-dev
+- New mailparse extension for parsing and manipulating MIME mail (Wez)
+- Define HAVE_CONFIG_H when building standalone DSO extensions (Stig)
+- Added the 'u' modifier to printf/sprintf which prints unsigned longs.
+  (Derick)
+- Added the 'u' modifier to printf/sprintf which prints unsigned longs.
+  (Derick)
 - Improved IRIX compatibility. (Sascha)
 - Fixed crash bug in bzopen() when specifying an invalid file. (Andi)
 - Fixed bugs in the mcrypt extension that caused crashes. (Derick)
