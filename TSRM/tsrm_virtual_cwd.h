@@ -44,7 +44,7 @@
 #include "readdir.h"
 #include <sys/utime.h>
 /* mode_t isn't defined on Windows */
-typedef int mode_t;
+typedef unsigned short mode_t;
 
 #define DEFAULT_SLASH '\\'
 #define IS_SLASH(c)	((c) == '/' || (c) == '\\')
