@@ -1381,7 +1381,7 @@ static int array_data_shuffle(const void *a, const void*b) {
 }
 
 
-/* {{{ proto int shuffle(array array_arg)
+/* {{{ proto bool shuffle(array array_arg)
    Randomly shuffle the contents of an array */
 PHP_FUNCTION(shuffle)
 {
