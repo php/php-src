@@ -94,7 +94,10 @@ php_apache_sapi_header_handler(sapi_header_struct *sapi_header, sapi_headers_str
 
 	val = strchr(sapi_header->header, ':');
 
-	if (!val) return 0;
+	if (!val) {
+		sapi_free_header(sapi_header);
+		return 0;
+	}
 
 	*val = '\0';
 	

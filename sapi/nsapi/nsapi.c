@@ -156,6 +156,7 @@ sapi_nsapi_header_handler(sapi_header_struct *sapi_header, sapi_headers_struct *
 	header_name = sapi_header->header;
 	header_content = p = strchr(header_name, ':');
 	if (p == NULL) {
+		efree(sapi_header->header);
 		return 0;
 	}
 
