@@ -2296,6 +2296,12 @@ PHP_FUNCTION(domxml_node_append_child)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can't append attribute node");
 		RETURN_FALSE;
 	}
+
+	/* XXX:ls */
+	if (child == parent) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can't append node to itself");
+		RETURN_FALSE;
+	}
 	
 	if (!(child->doc == NULL || child->doc == parent->doc)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can't append node, which is in a different document than the parent node");
