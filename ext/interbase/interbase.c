@@ -2863,7 +2863,7 @@ PHP_FUNCTION(ibase_blob_import)
 		RETURN_FALSE;
 	}
 
-	what = zend_fetch_resource(arg1, -1, "File-Handle", &type, 2, php_file_le_fopen(), php_file_le_stream());
+	what = zend_fetch_resource(file_arg, -1, "File-Handle", &type, 2, php_file_le_fopen(), php_file_le_stream());
 	ZEND_VERIFY_RESOURCE(what);
 
 	if (type == php_file_le_fopen())
