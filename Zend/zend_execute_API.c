@@ -357,7 +357,7 @@ ZEND_API void _zval_ptr_dtor(zval **zval_ptr ZEND_FILE_LINE_DC)
 	(*zval_ptr)->refcount--;
 	if ((*zval_ptr)->refcount==0) {
 		zval_dtor(*zval_ptr);
-		safe_free_zval_ptr(*zval_ptr);
+		safe_free_zval_ptr_rel(*zval_ptr ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_CC);
 	} else if ((*zval_ptr)->refcount == 1) {
 		(*zval_ptr)->is_ref = 0;
 	}

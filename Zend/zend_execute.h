@@ -51,12 +51,13 @@ void shutdown_executor(TSRMLS_D);
 ZEND_API void execute(zend_op_array *op_array TSRMLS_DC);
 ZEND_API void execute_internal(zend_execute_data *execute_data_ptr, int return_value_used TSRMLS_DC);
 ZEND_API int zend_is_true(zval *op);
-static inline void safe_free_zval_ptr(zval *p)
+#define safe_free_zval_ptr(p) safe_free_zval_ptr_rel(p ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC)
+static inline void safe_free_zval_ptr_rel(zval *p ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
 	TSRMLS_FETCH();
 
 	if (p!=EG(uninitialized_zval_ptr)) {
-		FREE_ZVAL(p);
+		FREE_ZVAL_REL(p);
 	}
 }
 ZEND_API int zend_lookup_class(char *name, int name_length, zend_class_entry ***ce TSRMLS_DC);
