@@ -36,6 +36,8 @@ for arg in $0 "$@"; do
 done
 
 AC_CANONICAL_HOST
+AC_CANONICAL_TARGET
+
 AC_CONFIG_HEADER(main/php_config.h)
 
 MAJOR_VERSION=5
