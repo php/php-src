@@ -1255,9 +1255,7 @@ PHP_FUNCTION(mysql_result)
 			return_value->value.str.val = (char *) safe_estrndup(sql_row[field_offset],return_value->value.str.len);
 		}
 	} else {
-		return_value->value.str.val = undefined_variable_string;
-		return_value->value.str.len=0;
-		return_value->type = IS_STRING;
+		return_value->type = IS_UNSET;
 	}
 	
 	return_value->type = IS_STRING;
