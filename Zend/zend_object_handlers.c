@@ -83,7 +83,7 @@ static zval *zend_std_call_getter(zval *object, zval *member TSRMLS_DC)
 static int zend_std_call_setter(zval *object, zval *member, zval *value TSRMLS_DC)
 {
 	zval *retval = NULL;
-	int ret;
+	int result;
 	zend_class_entry *ce = Z_OBJCE_P(object);
 
 	SEPARATE_ARG_IF_REF(member);
@@ -100,17 +100,13 @@ static int zend_std_call_setter(zval *object, zval *member, zval *value TSRMLS_D
 	zval_ptr_dtor(&member);
 	zval_ptr_dtor(&value);
 
-	if (retval && zend_is_true(retval)) {
-		ret = SUCCESS;
-	} else {
-		ret = FAILURE;
-	}
-
 	if (retval) {
+		result = i_zend_is_true(retval) ? SUCCESS : FAILURE;
 		zval_ptr_dtor(&retval);
+		return result;
+	} else {
+		return FAILURE;
 	}
-	
-	return ret;
 }
 
 
@@ -395,9 +391,13 @@ static int zend_std_has_dimension(zval *object, zval *offset, int check_empty TS
 		SEPARATE_ARG_IF_REF(offset);
 		zend_call_method_with_1_params(&object, ce, NULL, "offsetexists", &retval, offset);
 		zval_ptr_dtor(&offset);
-		result = i_zend_is_true(retval);
-		zval_ptr_dtor(&retval);
-		return result;
+		if (retval) {
+			result = i_zend_is_true(retval);
+			zval_ptr_dtor(&retval);
+			return result;
+		} else {
+			return 0;
+		}
 	} else {
 		zend_error(E_ERROR, "Cannot use object of type %s as array", ce->name);
 		return 0;
