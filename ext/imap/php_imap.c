@@ -2621,8 +2621,10 @@ PHP_FUNCTION(imap_fetchheader)
 	zval **streamind, **msgno, **flags;
 	int ind, ind_type, msgindex;
 	pils *imap_le_struct;
+	char *body, *header, *tempstring;
+	unsigned long blen, hlen;
 	int myargc = ZEND_NUM_ARGS();
-
+	
 	if (myargc < 2 || myargc > 3 || zend_get_parameters_ex(myargc, &streamind, &msgno, &flags) == FAILURE) {
 		ZEND_WRONG_PARAM_COUNT();
 	}
@@ -2652,8 +2654,18 @@ PHP_FUNCTION(imap_fetchheader)
 		php_error(E_WARNING, "Bad message number");
 		RETURN_FALSE;
 	}
-	
-	RETVAL_STRING(mail_fetchheader_full(imap_le_struct->imap_stream, Z_LVAL_PP(msgno), NIL, NIL, myargc==3 ? Z_LVAL_PP(flags) : NIL), 1);
+
+	if ((myargc == 3) && (Z_LVAL_PP(flags) & FT_PREFETCHTEXT)) {
+		header = mail_fetchheader_full(imap_le_struct->imap_stream, Z_LVAL_PP(msgno), NIL, &hlen, Z_LVAL_PP(flags));
+		body = mail_fetchtext_full(imap_le_struct->imap_stream, Z_LVAL_PP(msgno), &blen, Z_LVAL_PP(flags));
+		tempstring = emalloc(hlen+blen+1);
+		strcpy(tempstring,header);
+		strcat(tempstring,body);
+		RETVAL_STRINGL(tempstring,(hlen+blen+1),1);
+		efree(tempstring);
+	} else {
+		RETVAL_STRING(mail_fetchheader_full(imap_le_struct->imap_stream, Z_LVAL_PP(msgno), NIL, NIL, NIL), 1);
+	}
 }
 /* }}} */
 
