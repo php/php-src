@@ -1278,7 +1278,8 @@ PHP_FUNCTION(fseek)
 PHP_FUNCTION(mkdir)
 {
 	pval **arg1, **arg2;
-	int ret,mode;
+	int ret;
+	mode_t mode;
 	PLS_FETCH();
 	
 	if (ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
@@ -1286,11 +1287,11 @@ PHP_FUNCTION(mkdir)
 	}
 	convert_to_string_ex(arg1);
 	convert_to_long_ex(arg2);
-	mode = (*arg2)->value.lval;
+	mode = (mode_t) (*arg2)->value.lval;
 	if (PG(safe_mode) &&(!php_checkuid((*arg1)->value.str.val, NULL, 3))) {
 		RETURN_FALSE;
 	}
-	ret = V_MKDIR((*arg1)->value.str.val,mode);
+	ret = V_MKDIR((*arg1)->value.str.val, mode);
 	if (ret < 0) {
 		php_error(E_WARNING,"MkDir failed (%s)", strerror(errno));
 		RETURN_FALSE;
