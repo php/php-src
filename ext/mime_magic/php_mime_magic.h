@@ -159,10 +159,8 @@ static long from_oct(int, char *);
 static int fsmagic(const char *fn);
 
 
-#if 0 /* TODO */
+#if HAVE_ZLIB
 static int zmagic(unsigned char *, int);
-static int uncompress(int, unsigned char **, int);
-static int uncompress_child(void *, child_info *);
 #endif
 
 /*
