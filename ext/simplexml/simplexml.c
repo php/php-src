@@ -55,6 +55,7 @@ _node_as_zval(php_sxe_object *sxe, xmlNodePtr node, zval *value TSRMLS_DC)
 
 	subnode = php_sxe_object_new(TSRMLS_C);
 	subnode->document = sxe->document;
+	subnode->document->refcount++;
 	subnode->nsmap = sxe->nsmap;
 	subnode->node = node;
 
@@ -74,8 +75,22 @@ _node_as_zval(php_sxe_object *sxe, xmlNodePtr node, zval *value TSRMLS_DC)
 		add_next_index_zval(return_value, __v); \
 	}
 
-#define GET_NODE(__s, __n) (__n) = (__s)->node ? (__s)->node : xmlDocGetRootElement((__s)->document)
+#define GET_NODE(__s, __n) (__n) = (__s)->node ? (__s)->node : xmlDocGetRootElement((xmlDocPtr) (__s)->document->ptr)
 
+
+/* {{{ match_ns()
+ */
+static inline int 
+match_ns(php_sxe_object *sxe, xmlNodePtr node, xmlChar *name)
+{
+	if (!xmlStrcmp(node->ns->prefix, name) || !xmlStrcmp((xmlChar *) xmlHashLookup(sxe->nsmap, node->ns->href), name)) {
+		return 1;
+	}
+
+	return 0;
+}
+/* }}} */
+	
 /* {{{ sxe_property_read()
  */
 static zval *
@@ -106,7 +121,7 @@ sxe_property_read(zval *object, zval *member TSRMLS_DC)
 			APPEND_PREV_ELEMENT(counter, value);
 			
 			MAKE_STD_ZVAL(value);
-			contents = xmlNodeListGetString(sxe->document, attr->children, 1);
+			contents = xmlNodeListGetString((xmlDocPtr) sxe->document->ptr, attr->children, 1);
 			ZVAL_STRING(value, contents, 0);
 
 			APPEND_CUR_ELEMENT(counter, value);
@@ -123,23 +138,15 @@ sxe_property_read(zval *object, zval *member TSRMLS_DC)
 		SKIP_TEXT(node);
 		
 		if (node->ns) {
-			if (!xmlStrcmp(node->ns->prefix, name)) {
+			if (match_ns(sxe, node, name)) {
 				MAKE_STD_ZVAL(value);
 				_node_as_zval(sxe, node->parent, value);
 				APPEND_CUR_ELEMENT(counter, value);
+
 				goto next_iter;
 			}
-			
-			mapname = xmlHashLookup(sxe->nsmap, node->ns->href);
-			if (mapname && !xmlStrcmp((xmlChar *) mapname, name)) {
-				MAKE_STD_ZVAL(value);
-				_node_as_zval(sxe, node->parent, value);
-				APPEND_CUR_ELEMENT(counter, value);
-				goto next_iter;
-			}
-									
 		}
-		
+			
 		if (!xmlStrcmp(node->name, name)) {
 			APPEND_PREV_ELEMENT(counter, value);
 
@@ -149,7 +156,7 @@ sxe_property_read(zval *object, zval *member TSRMLS_DC)
 			APPEND_CUR_ELEMENT(counter, value);
 		}
 
-	next_iter:
+next_iter:
 		node = node->next;
 	}
 
@@ -355,7 +362,9 @@ _get_base_node_value(xmlNodePtr node, zval **value TSRMLS_CC)
 		}
 	} else {
 		subnode = php_sxe_object_new(TSRMLS_C);
-		subnode->document = node->doc;
+		subnode->document = emalloc(sizeof(simplexml_ref_obj));
+		subnode->document->refcount = 2;
+		subnode->document->ptr = node->doc;
 		subnode->node = node;
 
 		(*value)->type = IS_OBJECT;
@@ -435,8 +444,8 @@ sxe_objects_compare(zval *object1, zval *object2 TSRMLS_DC)
 	if (sxe1->node == NULL) {
 		if (sxe2->node) {
 			return 1;
-		} else if (sxe1->document == sxe2->document) {
-			return 9;
+		} else if (sxe1->document->ptr == sxe2->document->ptr) {
+			return 0;
 		}
 	} else {
 		return !(sxe1->node == sxe2->node);
@@ -489,10 +498,10 @@ simplexml_ce_xpath_search(INTERNAL_FUNCTION_PARAMETERS)
 
 	sxe = php_sxe_fetch_object(getThis() TSRMLS_CC);
 	if (!sxe->xpath) {
-		sxe->xpath = xmlXPathNewContext(sxe->document);
+		sxe->xpath = xmlXPathNewContext((xmlDocPtr) sxe->document->ptr);
 	}
 	if (!sxe->node) {
-		sxe->node = xmlDocGetRootElement(sxe->document);
+		sxe->node = xmlDocGetRootElement((xmlDocPtr) sxe->document->ptr);
 	}
 	sxe->xpath->node = sxe->node;
 
@@ -559,7 +568,7 @@ simplexml_ce_schema_validate(INTERNAL_FUNCTION_PARAMETERS, int type)
 	}
 
 	vptr = xmlSchemaNewValidCtxt(sptr);
-	is_valid = xmlSchemaValidateDoc(vptr, sxe->document);
+	is_valid = xmlSchemaValidateDoc(vptr, (xmlDocPtr) sxe->document->ptr);
 	xmlSchemaFree(sptr);
 	xmlSchemaFreeValidCtxt(vptr);
 
@@ -678,7 +687,7 @@ sxe_object_cast(zval *readobj, zval *writeobj, int type, int should_free TSRMLS_
 	}
 
 	if (sxe->node) {
-		contents = xmlNodeListGetString(sxe->document, sxe->node->children, 1);
+		contents = xmlNodeListGetString((xmlDocPtr) sxe->document->ptr, sxe->node->children, 1);
 		if (!xmlIsBlankNode(sxe->node->children) && contents) {
 			cast_object(writeobj, type, NULL TSRMLS_CC);
 		}
@@ -743,7 +752,9 @@ sxe_object_clone(void *object, void **clone_ptr TSRMLS_DC)
 
 	clone = php_sxe_object_new(TSRMLS_C);
 
-	clone->document = xmlCopyDoc(sxe->document, 1);
+	clone->document = emalloc(sizeof(simplexml_ref_obj));
+	clone->document->refcount = 1;
+	clone->document->ptr = xmlCopyDoc((xmlDocPtr) sxe->document->ptr, 1);
 
 	*clone_ptr = (void *) clone;
 }
@@ -767,8 +778,8 @@ sxe_object_dtor(void *object, zend_object_handle handle TSRMLS_DC)
 
 	sxe = (php_sxe_object *) object;
 
-	if (sxe->document) {
-		xmlFreeDoc(sxe->document);
+	if (--sxe->document->refcount <= 0) {
+		xmlFreeDoc(sxe->document->ptr);
 	}
 	
 	if (sxe->xpath) {
@@ -838,11 +849,15 @@ PHP_FUNCTION(simplexml_load_file)
 	}
 
 	sxe = php_sxe_object_new(TSRMLS_C);
-	sxe->document = xmlParseFile(filename);
-	sxe->nsmap = xmlHashCreate(10);
-	if (sxe->document == NULL) {
+	sxe->document = emalloc(sizeof(simplexml_ref_obj));
+	sxe->document->refcount = 1;
+	sxe->document->ptr = (void *) xmlParseFile(filename);
+	if (sxe->document->ptr == NULL) {
+		efree(sxe->document);
 		RETURN_FALSE;
 	}
+	sxe->nsmap = xmlHashCreate(10);
+	
 
 	return_value->type = IS_OBJECT;
 	return_value->value.obj = php_sxe_register_object(sxe TSRMLS_CC);
@@ -862,12 +877,15 @@ PHP_FUNCTION(simplexml_load_string)
 	}
 
 	sxe = php_sxe_object_new(TSRMLS_C);
-	sxe->document = xmlParseMemory(data, data_len);
-	sxe->nsmap = xmlHashCreate(10);
-	if (sxe->document == NULL) {
+	sxe->document = emalloc(sizeof(simplexml_ref_obj));
+	sxe->document->refcount = 1;
+	sxe->document->ptr = xmlParseMemory(data, data_len);
+	if (sxe->document->ptr == NULL) {
+		efree(sxe->document);
 		RETURN_FALSE;
 	}
-
+	sxe->nsmap = xmlHashCreate(10);
+	
 	return_value->type = IS_OBJECT;
 	return_value->value.obj = php_sxe_register_object(sxe TSRMLS_CC);
 }
@@ -888,7 +906,7 @@ PHP_FUNCTION(simplexml_save_document_file)
 
 	sxe = php_sxe_fetch_object(element TSRMLS_CC);
 
-	xmlSaveFile(filename, sxe->document);
+	xmlSaveFile(filename, (xmlDocPtr) sxe->document->ptr);
 
 	RETURN_TRUE;
 }
@@ -907,7 +925,7 @@ PHP_FUNCTION(simplexml_save_document_string)
 	}
 
 	sxe = php_sxe_fetch_object(element TSRMLS_CC);
-	xmlDocDumpMemory(sxe->document, (xmlChar **) &Z_STRVAL_P(data), &Z_STRLEN_P(data));
+	xmlDocDumpMemory((xmlDocPtr) sxe->document->ptr, (xmlChar **) &Z_STRVAL_P(data), &Z_STRLEN_P(data));
 	Z_TYPE_P(data) = IS_STRING;
 	zval_add_ref(&data);
 

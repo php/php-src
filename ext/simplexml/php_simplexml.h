@@ -52,11 +52,18 @@ PHP_RSHUTDOWN_FUNCTION(simplexml);
 PHP_MINFO_FUNCTION(simplexml);
 
 typedef struct {
+	void *ptr;
+	int   refcount;
+} simplexml_ref_obj;
+
+typedef struct {
 	zend_object zo;
-	xmlDocPtr document;
+	xmlHashTablePtr nsmap;
+	simplexml_ref_obj *document;
 	xmlXPathContextPtr xpath;
 	xmlNodePtr node;
 } php_sxe_object;
+
 
 
 #ifdef ZTS
