@@ -6,7 +6,8 @@ PHP 4                                                                      NEWS
   enabled. (Jason)
 - Added CLI (command line interface) sapi which is more suitable for writing 
   shell scripts. Some of the differences to CGI sapi are: no HTTP headers, 
-  plain text error messages, does not change working directory, etc. 
+  plain text error messages, does not change working directory, have a new -r
+  option which executes a piece of PHP code directly from the commmand line, etc.
   "make install" will install CLI SAPI version of php in {PREFIX}/bin/php while
   CGI is renamed and installed as {PREFIX}/bin/php-cgi. (Edin)
 - Fixed HTTP file upload support to handle big files better. (Jani)
