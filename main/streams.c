@@ -891,7 +891,9 @@ exit_success:
 int php_init_stream_wrappers(TSRMLS_D)
 {
 	if (PG(allow_url_fopen)) {
-		return zend_hash_init(&url_stream_wrappers_hash, 0, NULL, NULL, 1);
+		if (zend_hash_init(&url_stream_wrappers_hash, 0, NULL, NULL, 1) == SUCCESS)
+			return php_init_user_streams(TSRMLS_C);
+		return FAILURE;
 	}
 	return SUCCESS;
 }
@@ -940,7 +942,7 @@ static php_stream *php_stream_open_url(char *path, char *mode, int options, char
 			protocol = NULL;
 		}
 		if (wrapper)	{
-			php_stream *stream = wrapper->create(path, mode, options, opened_path STREAMS_REL_CC TSRMLS_CC);
+			php_stream *stream = wrapper->create(path, mode, options, opened_path, wrapper->wrappercontext STREAMS_REL_CC TSRMLS_CC);
 			if (stream)
 				stream->wrapper = wrapper;
 			return stream;

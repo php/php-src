@@ -71,6 +71,7 @@ PHP_NAMED_FUNCTION(php_if_ftruncate);
 PHP_NAMED_FUNCTION(php_if_fstat);
 
 PHP_FUNCTION(fgetwrapperdata);
+PHP_FUNCTION(file_register_wrapper);
 
 PHPAPI int php_set_sock_blocking(int socketd, int block);
 PHPAPI int php_file_le_stream(void);
