@@ -12,7 +12,8 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Author: David Croft <david@infotrek.co.uk>                           |
+   | Authors: David Croft <david@infotrek.co.uk>,                         |
+   |          John Donagher <john@webmeta.com>                            |
    +----------------------------------------------------------------------+
 */
 
@@ -22,8 +23,7 @@
    as I've yet to decide whether this is a good way to place "default"
    stuff like hosts and proxies */
 
-/* Status: Working. Awaiting comments from Signio as to whether
-   PNInit and ProcessPNTransaction have any meaningful return value */
+/* Status: Working. */
 
 #include "php.h"
 #include "php_ini.h"
@@ -55,8 +55,8 @@ zend_module_entry pfpro_module_entry = {
 	pfpro_functions,
 	PHP_MINIT(pfpro),
 	PHP_MSHUTDOWN(pfpro),
-	NULL, 					/* request start */
-	NULL, 					/* request end */
+	PHP_RINIT(pfpro),					/* request start */
+	PHP_RSHUTDOWN(pfpro),				/* request end */
 	PHP_MINFO(pfpro),
 	STANDARD_MODULE_PROPERTIES
 };
@@ -86,10 +86,21 @@ PHP_MSHUTDOWN_FUNCTION(pfpro)
 	return SUCCESS;
 }
 
+PHP_RINIT_FUNCTION(pfpro)
+{
+    return SUCCESS;
+}
+
+PHP_RSHUTDOWN_FUNCTION(pfpro)
+{
+    return SUCCESS;
+}
+
+
 PHP_MINFO_FUNCTION(pfpro)
 {
 	php_info_print_table_start();
-	php_info_print_table_header(2, "Signio Payflow Pro support", "enabled");
+	php_info_print_table_header(2, "Verisign Payflow Pro support", "enabled");
 	php_info_print_table_end();
 
 	/*
@@ -165,7 +176,7 @@ PHP_FUNCTION(pfpro_process_raw)
 	/* No, I don't like that Signio tell you to use a
 	   fixed length buffer either */
 
-	char response[512];
+	char response[512] = "";
 
 	if (ZEND_NUM_ARGS() < 1 || ZEND_NUM_ARGS() > 8) {
 		WRONG_PARAM_COUNT;
@@ -263,8 +274,8 @@ PHP_FUNCTION(pfpro_process)
 	pval ***args;
 
 	HashTable *target_hash;
-	ulong lkey;
-	char *varname;
+	ulong num_key;
+	char *string_key;
 	zval **entry;
 	int pass;
 
@@ -283,10 +294,15 @@ PHP_FUNCTION(pfpro_process)
 	/* No, I don't like that Signio tell you to use a
 	   fixed length buffer either */
 
-	char response[512];
+	char response[512] = "";
 
 	char tmpbuf[128];
 	char *rsppos, *valpos;
+
+    char buf[128], sbuf[128];
+    char *p1, *p2, *p_end,          /* Pointers for string manipulation */
+        *sp1, *sp2, *sp_end,
+        *pdelim1="&", *pdelim2="=";
 
 
 	if (ZEND_NUM_ARGS() < 1 || ZEND_NUM_ARGS() > 8) {
@@ -296,13 +312,13 @@ PHP_FUNCTION(pfpro_process)
 	args = (pval ***) emalloc(sizeof(pval **) * ZEND_NUM_ARGS());
 
 	if (zend_get_parameters_array_ex(ZEND_NUM_ARGS(), args) == FAILURE) {
-        php_error(E_WARNING, "Unable to read parameters in pfpro_process()");
+        php_error(E_ERROR, "Unable to read parameters in pfpro_process()");
  		efree(args);
 		RETURN_FALSE;
 	}
 
 	if ((*args[0])->type != IS_ARRAY) {
-		php_error(E_WARNING, "First parameter to pfpro_process() must be an array");
+		php_error(E_ERROR, "First parameter to pfpro_process() must be an array");
  		efree(args);
 		RETURN_FALSE;
 	}
@@ -359,20 +375,48 @@ PHP_FUNCTION(pfpro_process)
 		zend_hash_internal_pointer_reset(target_hash);
 
 		while (zend_hash_get_current_data(target_hash, (void **)&entry) == SUCCESS) {
-			if (zend_hash_get_current_key(target_hash, &varname, &lkey) == HASH_KEY_IS_STRING) {
-				if (parmlength > 0) {
-					if (pass == 1)
-						strcpy(parmlist + parmlength, "&");
-					parmlength += 1;
-				}
 
+			if (parmlength > 0) {
 				if (pass == 1)
-					strcpy(parmlist + parmlength, varname);
-				parmlength += strlen(varname);
+					strcpy(parmlist + parmlength, "&");
+				parmlength += 1;
+			}
 
-				if ((*entry)->type == IS_STRING) {
-					if (strchr((*entry)->value.str.val, '&') ||
-						strchr((*entry)->value.str.val, '=')) {
+			/* John I don't see any need to put the key in a zval
+			   if it's not used as such and is pulled straight out */
+
+			switch (zend_hash_get_current_key(target_hash, &string_key, &num_key)) {
+
+				case HASH_KEY_IS_STRING:
+
+					if (pass == 1)
+						strcpy(parmlist + parmlength, string_key);
+					parmlength += strlen(string_key);
+
+					efree(string_key);
+
+					break;
+					
+				case HASH_KEY_IS_LONG:
+
+					sprintf(tmpbuf, "%d", num_key);
+					if (pass == 1)
+						strcpy(parmlist + parmlength, tmpbuf);
+					parmlength += strlen(tmpbuf);
+
+					break;
+
+				default:
+					php_error(E_ERROR, "pfpro_process() array keys must be strings or integers");
+					efree(args);
+					RETURN_FALSE;
+			}
+
+
+			switch ((*entry)->type) {
+				case IS_STRING:
+					if (strchr((*entry)->value.str.val, '&')
+						|| strchr((*entry)->value.str.val, '=')) {
 						sprintf(tmpbuf, "[%d]=", (*entry)->value.str.len);
 						if (pass == 1)
 							strcpy(parmlist + parmlength, tmpbuf);
@@ -383,31 +427,33 @@ PHP_FUNCTION(pfpro_process)
 							strcpy(parmlist + parmlength, "=");
 						parmlength += 1;
 					}
+
 					if (pass == 1)
 						strcpy(parmlist + parmlength, (*entry)->value.str.val);
 					parmlength += (*entry)->value.str.len;
-				}
-				else if ((*entry)->type == IS_LONG) {
+
+					break;
+
+				case IS_LONG:
 					sprintf(tmpbuf, "=%d", (*entry)->value.lval);
 					if (pass == 1)
 						strcpy(parmlist + parmlength, tmpbuf);
 					parmlength += strlen(tmpbuf);
-				}
-				else if ((*entry)->type == IS_DOUBLE) {
+
+					break;
+
+				case IS_DOUBLE:
 					sprintf(tmpbuf, "=%.2f", (*entry)->value.dval);
 					if (pass == 1)
 						strcpy(parmlist + parmlength, tmpbuf);
 					parmlength += strlen(tmpbuf);
-				}
-				else {
-					php_error(E_WARNING, "pfpro_process() array values should be strings, ints or floats");
-				}
-				efree(varname);
-			}
-			else {
-				php_error(E_WARNING, "pfpro_process() array keys must be strings");
-				efree(args);
-				RETURN_FALSE;
+
+					break;
+
+				default:
+					php_error(E_ERROR, "pfpro_process() array values must be strings, ints or floats");
+					efree(args);
+					RETURN_FALSE;
 			}
 			zend_hash_move_forward(target_hash);
 		}
@@ -442,7 +488,7 @@ PHP_FUNCTION(pfpro_process)
 	   from this BEFORE we knock it off to the bank */
 
 	if (array_init(return_value) == FAILURE) {
-		php_error(E_WARNING, "pfpro_process() unable to create array");
+		php_error(E_ERROR, "pfpro_process() unable to create array");
 		RETURN_FALSE;
 	}
 
@@ -458,6 +504,8 @@ PHP_FUNCTION(pfpro_process)
 		efree(address);
 	}
 
+
+#if 0
 	/* Decode the response back into a PHP array */
 
 	rsppos = strtok(response, "&");
@@ -471,6 +519,66 @@ PHP_FUNCTION(pfpro_process)
 		}
 		
 	} while (rsppos = strtok(NULL, "&"));
+#else
+
+
+	/* This final chunk of code is to walk the string returned by Signio
+	   and build a string array to return to the user */
+
+	/* John, I suspect this code will fall over if there are less than
+	   3 items in the response string -- david */
+
+	/* Clean our str[n]cpy buffers */
+	memset(buf, 0, sizeof(buf));
+	memset(sbuf, 0, sizeof(sbuf));
+
+	p_end = response + strlen(response);
+	p1 = response;
+	p2 = (char*)php_memnstr(response, pdelim1, 1, p_end);
+	
+	sp1 = (char*)php_memnstr(response, pdelim2, 1, p2);
+	strncpy(buf, p1, sp1-p1);
+	
+	sp1++;
+	strncpy(sbuf, sp1, p2-sp1);
+	
+	add_assoc_string(return_value, &buf[0], &sbuf[0], 1);
+
+	do {
+		memset(buf, 0, sizeof(buf));
+		memset(sbuf, 0, sizeof(sbuf));
+
+		p1 = p2+1;
+
+		if ((sp2 = (char*)php_memnstr(p1, pdelim1, 1, p_end)) != NULL) {
+			sp1 = (char*)php_memnstr(p1, pdelim2, 1, sp2);
+			strncpy(buf, p1, sp1-p1);
+			
+			sp1++;
+
+			strncpy(sbuf, sp1, sp2-sp1);
+			
+			add_assoc_string(return_value, &buf[0], &sbuf[0], 1);
+		}
+
+
+	} while ((p2 = (char*)php_memnstr(p1, pdelim1, 1, p_end)) != NULL);
+	
+	if (p1 <= p_end) {
+		memset(buf, 0, sizeof(buf));
+		memset(sbuf, 0, sizeof(sbuf));
+
+		sp1 = (char*)php_memnstr(p1, pdelim2, 1, p_end);
+		strncpy(buf, p1, sp1-p1);
+			
+		sp1++;
+		strncpy(sbuf, sp1, p_end-sp1);
+
+		add_assoc_string(return_value, &buf[0], &sbuf[0], 1);
+	}
+
+#endif
+
 }
 /* }}} */
 
