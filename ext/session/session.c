@@ -495,7 +495,7 @@ static void php_session_decode(const char *val, int vallen TSRMLS_DC)
 
 static char hexconvtab[] = "0123456789abcdef";
 
-static char *_php_create_id(int *newlen TSRMLS_DC)
+char *php_session_create_id(PS_CREATESID_ARGS)
 {
 	PHP_MD5_CTX context;
 	unsigned char digest[16];
@@ -548,18 +548,29 @@ static void php_session_initialize(TSRMLS_D)
 {
 	char *val;
 	int vallen;
-	
+
+	/* Open session handler first */
 	if (PS(mod)->open(&PS(mod_data), PS(save_path), PS(session_name) TSRMLS_CC) == FAILURE) {
 		php_error(E_ERROR, "Failed to initialize session module");
 		return;
 	}
+	
+	/* If there is no ID, use session module to create one */
+	if (!PS(id))
+		PS(id) = PS(mod)->createsid(&PS(mod_data), NULL);
+	
+	/* Read data */
+	/* Question: if you create a SID here, should you also try to read data?
+	 * I'm not sure, but while not doing so will remove one session operation
+	 * it could prove usefull for those sites which wish to have "default"
+	 * session information
+	 */
 	php_session_track_init(TSRMLS_C);
 	if (PS(mod)->read(&PS(mod_data), PS(id), &val, &vallen TSRMLS_CC) == SUCCESS) {
 		php_session_decode(val, vallen TSRMLS_CC);
 		efree(val);
 	}
 }
-
 
 static void php_session_save_current_state(TSRMLS_D)
 {
@@ -918,8 +929,7 @@ PHPAPI void php_session_start(TSRMLS_D)
 			PS(apply_trans_sid) = 1;
 	}
 	
-	if (!PS(id))
-		PS(id) = _php_create_id(NULL TSRMLS_CC);
+	php_session_initialize(TSRMLS_C);
 	
 	if (!PS(use_cookies) && send_cookie) {
 		if (PS(use_trans_sid))
@@ -950,7 +960,6 @@ PHPAPI void php_session_start(TSRMLS_D)
 	}
 
 	php_session_cache_limiter(TSRMLS_C);
-	php_session_initialize(TSRMLS_C);
 
 	if (PS(mod_data) && PS(gc_probability) > 0) {
 		int nrdels = -1;

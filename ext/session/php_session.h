@@ -30,6 +30,12 @@
 #define PS_DESTROY_ARGS void **mod_data, const char *key TSRMLS_DC
 #define PS_GC_ARGS void **mod_data, int maxlifetime, int *nrdels TSRMLS_DC
 
+#define HAVE_PHP_SESSION_CREATESID
+#define PS_CREATESID_ARGS void **mod_data, int *newlen
+
+/* default create id function */
+char *php_session_create_id(PS_CREATESID_ARGS);
+
 typedef struct ps_module_struct {
 	const char *name;
 	int (*open)(PS_OPEN_ARGS);
@@ -38,6 +44,7 @@ typedef struct ps_module_struct {
 	int (*write)(PS_WRITE_ARGS);
 	int (*destroy)(PS_DESTROY_ARGS);
 	int (*gc)(PS_GC_ARGS);
+	char *(*createsid)(PS_CREATESID_ARGS);
 } ps_module;
 
 #define PS_GET_MOD_DATA() *mod_data
@@ -49,6 +56,7 @@ typedef struct ps_module_struct {
 #define PS_WRITE_FUNC(x) 	int ps_write_##x(PS_WRITE_ARGS)
 #define PS_DESTROY_FUNC(x) 	int ps_delete_##x(PS_DESTROY_ARGS)
 #define PS_GC_FUNC(x) 		int ps_gc_##x(PS_GC_ARGS)
+#define PS_CREATESID_FUNC(x)	char *ps_createsid_##x(PS_CREATESID_ARGS)
 
 #define PS_FUNCS(x) \
 	PS_OPEN_FUNC(x); \
@@ -56,12 +64,26 @@ typedef struct ps_module_struct {
 	PS_READ_FUNC(x); \
 	PS_WRITE_FUNC(x); \
 	PS_DESTROY_FUNC(x); \
-	PS_GC_FUNC(x)
-
+	PS_GC_FUNC(x);	\
+	PS_CREATESID_FUNC(x)
 
 #define PS_MOD(x) \
 	#x, ps_open_##x, ps_close_##x, ps_read_##x, ps_write_##x, \
-	 ps_delete_##x, ps_gc_##x 
+	 ps_delete_##x, ps_gc_##x, php_session_create_id
+
+/* SID enabled module handler definitions */
+#define PS_FUNCS_SID(x) \
+	PS_OPEN_FUNC(x); \
+	PS_CLOSE_FUNC(x); \
+	PS_READ_FUNC(x); \
+	PS_WRITE_FUNC(x); \
+	PS_DESTROY_FUNC(x); \
+	PS_GC_FUNC(x); \
+	PS_CREATESID_FUNC(x)
+
+#define PS_MOD_SID(x) \
+	#x, ps_open_##x, ps_close_##x, ps_read_##x, ps_write_##x, \
+	 ps_delete_##x, ps_gc_##x, ps_createsid_##x
 
 typedef enum {
 	php_session_disabled,
