@@ -89,6 +89,8 @@ typedef Bucket* HashPosition;
 
 BEGIN_EXTERN_C()
 
+ZEND_API zend_bool zend_is_numeric_key(char *arKey, uint nKeyLength, long *val);
+
 /* startup/shutdown */
 ZEND_API int _zend_hash_init(HashTable *ht, uint nSize, hash_func_t pHashFunction, dtor_func_t pDestructor, zend_bool persistent ZEND_FILE_LINE_DC);
 ZEND_API int _zend_hash_init_ex(HashTable *ht, uint nSize, hash_func_t pHashFunction, dtor_func_t pDestructor, zend_bool persistent, zend_bool bApplyProtection ZEND_FILE_LINE_DC);
@@ -162,6 +164,7 @@ ZEND_API int zend_hash_exists(HashTable *ht, char *arKey, uint nKeyLength);
 ZEND_API int zend_hash_quick_exists(HashTable *ht, char *arKey, uint nKeyLength, ulong h);
 ZEND_API int zend_hash_index_exists(HashTable *ht, ulong h);
 ZEND_API ulong zend_hash_next_free_element(HashTable *ht);
+
 
 /* traversing */
 #define zend_hash_has_more_elements_ex(ht, pos) \
@@ -282,6 +285,53 @@ END_EXTERN_C()
 #define ZEND_INIT_SYMTABLE_EX(ht, n, persistent)			\
 	zend_hash_init(ht, n, NULL, ZVAL_PTR_DTOR, persistent)
 
+
+static inline int zend_symtable_update(HashTable *ht, char *arKey, uint nKeyLength, void *pData, uint nDataSize, void **pDest)					\
+{
+	int idx;
+
+	if (zend_is_numeric_key(arKey, nKeyLength, &idx)) {
+		return zend_hash_index_update(ht, idx, pData, nDataSize, pDest);
+	} else {
+		return zend_hash_update(ht, arKey, nKeyLength, pData, nDataSize, pDest);
+	}
+}
+
+
+static inline int zend_symtable_del(HashTable *ht, char *arKey, uint nKeyLength)
+{
+	int idx;
+
+	if (zend_is_numeric_key(arKey, nKeyLength, &idx)) {
+		return zend_hash_index_del(ht, idx);
+	} else {
+		return zend_hash_del(ht, arKey, nKeyLength);
+	}
+}
+
+
+static inline int zend_symtable_find(HashTable *ht, char *arKey, uint nKeyLength, void **pData)
+{
+	int idx;
+
+	if (zend_is_numeric_key(arKey, nKeyLength, &idx)) {
+		return zend_hash_index_find(ht, idx, pData);
+	} else {
+		return zend_hash_find(ht, arKey, nKeyLength, pData);
+	}
+}
+
+
+static inline int zend_symtable_exists(HashTable *ht, char *arKey, uint nKeyLength)
+{
+	int idx;
+
+	if (zend_is_numeric_key(arKey, nKeyLength, &idx)) {
+		return zend_hash_index_exists(ht, idx);
+	} else {
+		return zend_hash_exists(ht, arKey, nKeyLength);
+	}
+}
 
 #endif							/* ZEND_HASH_H */
 

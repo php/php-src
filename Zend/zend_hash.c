@@ -130,6 +130,38 @@ ZEND_API ulong zend_hash_func(char *arKey, uint nKeyLength)
 	}
 
 
+ZEND_API zend_bool zend_is_numeric_key(char *arKey, uint nKeyLength, long *val)
+{
+	char *tmp = arKey;
+
+	if ((*tmp>='0' && *tmp<='9')) { /* possibly a numeric index */
+		char *end=tmp+nKeyLength-1;	
+		ulong idx;
+		
+		if (*tmp++=='0' && nKeyLength>2) { /* don't accept numbers with leading zeros */
+			return 0;
+		}
+		
+		while (tmp<end) {
+			if (!(*tmp>='0' && *tmp<='9')) {
+				break;
+			}
+			tmp++;
+		}
+
+		if (tmp==end && *tmp=='\0') { /* a numeric index */
+			idx = strtol(arKey, NULL, 10);
+			if (idx!=LONG_MAX) {
+				*val = idx;
+				return 1;
+			}
+		}
+	}
+
+	return 0;
+}
+
+
 ZEND_API int _zend_hash_init(HashTable *ht, uint nSize, hash_func_t pHashFunction, dtor_func_t pDestructor, zend_bool persistent ZEND_FILE_LINE_DC)
 {
 	uint i = 3;
