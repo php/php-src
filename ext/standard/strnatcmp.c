@@ -52,12 +52,12 @@ compare_right(char const **a, char const *aend, char const **b, char const *bend
 	   both numbers to know that they have the same magnitude, so we
 	   remember it in BIAS. */
 	for(;; (*a)++, (*b)++) {
-		if ((*a == aend || !isdigit((int)**a)) &&
-			(*b == bend || !isdigit((int)**b)))
+		if ((*a == aend || !isdigit((int)(unsigned char)**a)) &&
+			(*b == bend || !isdigit((int)(unsigned char)**b)))
 			return bias;
-		else if (*a == aend || !isdigit((int)**a))
+		else if (*a == aend || !isdigit((int)(unsigned char)**a))
 			return -1;
-		else if (*b == bend || !isdigit((int)**b))
+		else if (*b == bend || !isdigit((int)(unsigned char)**b))
 			return +1;
 		else if (**a < **b) {
 			if (!bias)
@@ -80,12 +80,12 @@ compare_left(char const **a, char const *aend, char const **b, char const *bend)
      /* Compare two left-aligned numbers: the first to have a
         different value wins. */
 	for(;; (*a)++, (*b)++) {
-		if ((*a == aend || !isdigit((int)**a)) &&
-			(*b == bend || !isdigit((int)**b)))
+		if ((*a == aend || !isdigit((int)(unsigned char)**a)) &&
+			(*b == bend || !isdigit((int)(unsigned char)**b)))
 			return 0;
-		else if (*a == aend || !isdigit((int)**a))
+		else if (*a == aend || !isdigit((int)(unsigned char)**a))
 			return -1;
-		else if (*b == bend || !isdigit((int)**b))
+		else if (*b == bend || !isdigit((int)(unsigned char)**b))
 			return +1;
 		 else if (**a < **b)
 			 return -1;
@@ -116,14 +116,14 @@ PHPAPI int strnatcmp_ex(char const *a, size_t a_len, char const *b, size_t b_len
 		ca = *ap; cb = *bp;
 
 		/* skip over leading spaces or zeros */
-		while (isspace((int)ca))
+		while (isspace((int)(unsigned char)ca))
 			ca = *++ap;
 
-		while (isspace((int)cb))
+		while (isspace((int)(unsigned char)cb))
 			cb = *++bp;
 
 		/* process run of digits */
-		if (isdigit((int)ca)  &&  isdigit((int)cb)) {
+		if (isdigit((int)(unsigned char)ca)  &&  isdigit((int)(unsigned char)cb)) {
 			fractional = (ca == '0' || cb == '0');
 
 			if (fractional)
@@ -143,8 +143,8 @@ PHPAPI int strnatcmp_ex(char const *a, size_t a_len, char const *b, size_t b_len
 		}
 
 		if (fold_case) {
-			ca = toupper(ca);
-			cb = toupper(cb);
+			ca = toupper((int)(unsigned char)ca);
+			cb = toupper((int)(unsigned char)cb);
 		}
 
 		if (ca < cb)
