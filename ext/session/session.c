@@ -655,7 +655,7 @@ static void _php_session_start(PSLS_D)
 	track_vars = INI_BOOL("track_vars");
 
 	if (!register_globals && !track_vars) {
-		php_error(E_ERROR, "The sessions module will not work, if you have disabled track_vars and register_globals. Enable at least one of them.");
+		php_error(E_ERROR, "The session module will not work, if you have disabled track_vars and register_globals. Enable at least one of them.");
 		return;
 	}
 
