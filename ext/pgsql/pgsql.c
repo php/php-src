@@ -2925,7 +2925,7 @@ static php_pgsql_data_type php_pgsql_get_data_type(const char *type_name, size_t
 	   user defined types. (Yasuo) */
 	
 	/* boolean */
-	if (!strcmp(type_name, "boolean"))
+	if (!strcmp(type_name, "bool")|| !strcmp(type_name, "boolean"))
 		return PG_BOOL;
 	/* object id */
 	if (!strcmp(type_name, "oid"))
