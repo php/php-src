@@ -1213,7 +1213,12 @@ PHP_FUNCTION(fbsql_database)
 		if (phpLink->databaseName) free(phpLink->databaseName);
 		phpLink->databaseName = strdup(Z_STRVAL_PP(dbname));
 	}
-	RETURN_STRING(phpLink->databaseName, 1);
+	if (phpLink->databaseName) {
+		RETURN_STRING(phpLink->databaseName, 1);
+	}
+	else {
+		RETURN_FALSE;
+	}
 }
 /* }}} */
 
