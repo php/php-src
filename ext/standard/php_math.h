@@ -55,6 +55,20 @@ PHP_FUNCTION(number_format);
 PHP_FUNCTION(deg2rad);
 PHP_FUNCTION(rad2deg);
 
+PHP_FUNCTION(exp2);
+PHP_FUNCTION(exp10);
+PHP_FUNCTION(log2);
+PHP_FUNCTION(cbrt);
+PHP_FUNCTION(hypot);
+PHP_FUNCTION(expm1);
+PHP_FUNCTION(log1p);
+PHP_FUNCTION(sinh);
+PHP_FUNCTION(cosh);
+PHP_FUNCTION(tanh);
+PHP_FUNCTION(asinh);
+PHP_FUNCTION(acosh);
+PHP_FUNCTION(atanh);
+
 #include <math.h>
 
 #ifndef M_E
