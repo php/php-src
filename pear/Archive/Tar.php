@@ -576,7 +576,7 @@ class Archive_Tar extends PEAR
             $p_hitem = readdir($p_hdir); // '..' directory
             while ($p_hitem = readdir($p_hdir)) {
                 if ($v_filename != ".")
-                    $p_temp_list[0] = $v_filename.'/'.$p_hitem;
+                    $p_temp_list[0] = $v_filename.DIRECTORY_SEPARATOR.$p_hitem;
                 else
                     $p_temp_list[0] = $p_hitem;
 
@@ -612,17 +612,17 @@ class Archive_Tar extends PEAR
           return true;
       }
       if ($p_remove_dir != '') {
-          if (substr($p_remove_dir, -1) != '/')
-              $p_remove_dir .= '/';
+          if (substr($p_remove_dir, -1) != DIRECTORY_SEPARATOR)
+              $p_remove_dir .= DIRECTORY_SEPARATOR;
 
           if (substr($p_filename, 0, strlen($p_remove_dir)) == $p_remove_dir)
               $v_stored_filename = substr($p_filename, strlen($p_remove_dir));
       }
       if ($p_add_dir != '') {
-          if (substr($p_add_dir, -1) == '/')
+          if (substr($p_add_dir, -1) == DIRECTORY_SEPARATOR)
               $v_stored_filename = $p_add_dir.$v_stored_filename;
           else
-              $v_stored_filename = $p_add_dir.'/'.$v_stored_filename;
+              $v_stored_filename = $p_add_dir.DIRECTORY_SEPARATOR.$v_stored_filename;
       }
 
       if (strlen($v_stored_filename) > 99) {
@@ -813,16 +813,16 @@ class Archive_Tar extends PEAR
 
     // ----- Look for removing the WINDOW '\'
     if (OS_WINDOWS && strpos($p_path, '\\')) {
-        str_replace('\\', '/', $p_path);
+        str_replace('\\', DIRECTORY_SEPARATOR, $p_path);
     }
 
-    if ($p_path == '' || (substr($p_path, 0, 1) != '/' && substr($p_path, 0, 3) != "../" && !strpos($p_path, ':'))) {
+    if ($p_path == '' || (substr($p_path, 0, 1) != DIRECTORY_SEPARATOR && substr($p_path, 0, 3) != "../" && !strpos($p_path, ':'))) {
       $p_path = "./".$p_path;
     }
 
     // ----- Look for path to remove format (should end by /)
-    if (($p_remove_path != '') && (substr($p_remove_path, -1) != '/'))
-      $p_remove_path .= '/';
+    if (($p_remove_path != '') && (substr($p_remove_path, -1) != DIRECTORY_SEPARATOR))
+      $p_remove_path .= DIRECTORY_SEPARATOR;
     $p_remove_path_size = strlen($p_remove_path);
 
     switch ($p_mode) {
@@ -867,7 +867,7 @@ class Archive_Tar extends PEAR
 
         for ($i=0; $i<sizeof($p_file_list); $i++) {
           // ----- Look if it is a directory
-          if (substr($p_file_list[$i], -1) == '/') {
+          if (substr($p_file_list[$i], -1) == DIRECTORY_SEPARATOR) {
             // ----- Look if the directory is in the filename path
             if ((strlen($v_header['filename']) > strlen($p_file_list[$i])) && (substr($v_header['filename'], 0, strlen($p_file_list[$i])) == $p_file_list[$i])) {
               $v_extract_file = TRUE;
@@ -891,14 +891,14 @@ class Archive_Tar extends PEAR
         if (($p_remove_path != '')
             && (substr($v_header['filename'], 0, $p_remove_path_size) == $p_remove_path))
           $v_header['filename'] = substr($v_header['filename'], $p_remove_path_size);
-        if (($p_path != "./") && ($p_path != '/')) {
-          while (substr($p_path, -1) == '/')
+        if (($p_path != "./") && ($p_path != DIRECTORY_SEPARATOR)) {
+          while (substr($p_path, -1) == DIRECTORY_SEPARATOR)
             $p_path = substr($p_path, 0, strlen($p_path)-1);
 
-          if (substr($v_header['filename'], 0, 1) == '/')
+          if (substr($v_header['filename'], 0, 1) == DIRECTORY_SEPARATOR)
               $v_header['filename'] = $p_path.$v_header['filename'];
           else
-            $v_header['filename'] = $p_path.'/'.$v_header['filename'];
+            $v_header['filename'] = $p_path.DIRECTORY_SEPARATOR.$v_header['filename'];
         }
         if (file_exists($v_header['filename'])) {
           if ((@is_dir($v_header['filename'])) && ($v_header['typeflag'] == '')) {
@@ -992,8 +992,8 @@ class Archive_Tar extends PEAR
         // ----- Log extracted files
         if (($v_file_dir = dirname($v_header['filename'])) == $v_header['filename'])
           $v_file_dir = '';
-        if ((substr($v_header['filename'], 0, 1) == '/') && ($v_file_dir == ''))
-          $v_file_dir = '/';
+        if ((substr($v_header['filename'], 0, 1) == DIRECTORY_SEPARATOR) && ($v_file_dir == ''))
+          $v_file_dir = DIRECTORY_SEPARATOR;
 
         $p_list_detail[$v_nb++] = $v_header;
       }
@@ -1097,7 +1097,7 @@ class Archive_Tar extends PEAR
         // ----- Look for not empty path
         if ($p_dir != '') {
             // ----- Explode path by directory names
-            $v_list = explode('/', $p_dir);
+            $v_list = explode(DIRECTORY_SEPARATOR, $p_dir);
 
             // ----- Study directories from last to first
             for ($i=sizeof($v_list)-1; $i>=0; $i--) {
@@ -1112,13 +1112,13 @@ class Archive_Tar extends PEAR
                 }
                 else if (($v_list[$i] == '') && ($i!=(sizeof($v_list)-1)) && ($i!=0)) {
                     // ----- Ignore only the double '//' in path,
-                    // but not the first and last '/'
+                    // but not the first and last DIRECTORY_SEPARATOR
                 } else {
-                    $v_result = $v_list[$i].($i!=(sizeof($v_list)-1)?'/'.$v_result:'');
+                    $v_result = $v_list[$i].($i!=(sizeof($v_list)-1)?DIRECTORY_SEPARATOR.$v_result:'');
                 }
             }
         }
-        $v_result = strtr($v_result, '\\', '/');
+        $v_result = strtr($v_result, '\\', DIRECTORY_SEPARATOR);
         return $v_result;
     }
     // }}}
