@@ -925,7 +925,7 @@ static void zend_fetch_dimension_address_from_tmp_var(znode *result, znode *op1,
 
 static void zend_fetch_property_address(znode *result, znode *op1, znode *op2, temp_variable *Ts, int type TSRMLS_DC)
 {
-	zval **container_ptr = get_obj_zval_ptr_ptr(op1, Ts, type);
+	zval **container_ptr = get_obj_zval_ptr_ptr(op1, Ts, type TSRMLS_CC);
 	zval *container;
 	zval ***retval = &Ts[result->u.var].var.ptr_ptr;
 	
@@ -982,7 +982,7 @@ static void zend_fetch_property_address_read(znode *result, znode *op1, znode *o
 	retval = &Ts[result->u.var].var.ptr;
 	Ts[result->u.var].var.ptr_ptr = retval;
 
-	container = get_obj_zval_ptr(op1, Ts, &EG(free_op1), type);
+	container = get_obj_zval_ptr(op1, Ts, &EG(free_op1), type TSRMLS_CC);
 
 	if (container == EG(error_zval_ptr)) {
 		*retval = EG(error_zval_ptr);
@@ -1033,7 +1033,7 @@ static void zend_fetch_property_address_read(znode *result, znode *op1, znode *o
 
 static void zend_pre_incdec_property(znode *result, znode *op1, znode *op2, temp_variable * Ts, int (*incdec_op)(zval *) TSRMLS_DC)
 {
-	zval **object_ptr = get_obj_zval_ptr_ptr(op1, Ts, BP_VAR_W);
+	zval **object_ptr = get_obj_zval_ptr_ptr(op1, Ts, BP_VAR_W TSRMLS_CC);
 	zval *object;
 	zval *property = get_zval_ptr(op2, Ts, &EG(free_op2), BP_VAR_R);
 	zval **retval = &Ts[result->u.var].var.ptr;
@@ -1080,7 +1080,7 @@ static void zend_pre_incdec_property(znode *result, znode *op1, znode *op2, temp
 
 static void zend_post_incdec_property(znode *result, znode *op1, znode *op2, temp_variable * Ts, int (*incdec_op)(zval *) TSRMLS_DC)
 {
-	zval **object_ptr = get_obj_zval_ptr_ptr(op1, Ts, BP_VAR_W);
+	zval **object_ptr = get_obj_zval_ptr_ptr(op1, Ts, BP_VAR_W TSRMLS_CC);
 	zval *object;
 	zval *property = get_zval_ptr(op2, Ts, &EG(free_op2), BP_VAR_R);
 	zval *retval = &Ts[result->u.var].tmp_var;
@@ -1948,7 +1948,7 @@ binary_assign_op_addr_obj:
 
 					EX(calling_scope) = EG(scope);
 
-					EX(object) = get_obj_zval_ptr(&EX(opline)->op1, EX(Ts), &EG(free_op1), BP_VAR_R);
+					EX(object) = get_obj_zval_ptr(&EX(opline)->op1, EX(Ts), &EG(free_op1), BP_VAR_R TSRMLS_CC);
 							
 					if (EX(object) && EX(object)->type == IS_OBJECT) {
 						EX(fbc) = Z_OBJ_HT_P(EX(object))->get_method(EX(object), function_name_strval, function_name_strlen TSRMLS_CC);
