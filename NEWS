@@ -6,7 +6,8 @@ PHP 4.0                                                                    NEWS
 - Fixed selecting nested-tables in OCI8. (Thies)
 - RFC-854 fix for internal FTP-Code. Commands have to end in "\r\n" (Thies)
 - Fix OpenLink ODBC support (Stig)
-- Fix min/max behaviour (Thies)
+- min(),max(),a[r]sort(),[r]sort() now work consistent with the language-core.
+  (Thies)
 - tempnam() now uses mkstemp() if available (Stig)
 - serialize() and var_dump() now honor the precision as set in php.ini
   for doubles. (Thies)
