@@ -9,6 +9,18 @@ PHP 4                                                                      NEWS
   . Disallow linkage of Berkeley db submodules against libraries with
     different major version.
   . Disallow configuring of more than one Berkeley db handler. 
+- Fixed bug #21511 (config.status warning). (Jani)
+- Fixed bug #21531 (file_exists() and other filestat functions report errors
+  when the requested file/directory does not exists). (Sara)
+- Fixed bug #21544 (Extended checks for where FreeTDS is installed). (Frank)
+- Fixed bug #21523 (number_format could cause a memory allocation for a
+  negative memory size in situations where the sprintf implementation of the
+  host system generated less decimal places than were requested). (Wez)
+- Fixed bug #21529 (memory corruption by fsockopen()). (Ilia)
+- Fixed bug #21518 (imagecreatefromstring() crashed when dealing with invalid
+  image files). (Ilia)
+- Fixed bug #20802 (PHP would die silently when memory limit is reached). 
+  (Ilia)
 - Fixed bug #21498 (mysql_pconnect connection problems). (Georg)
 - Fixed bug #21443 (improper handling of ? surrounded by spaces in
   get_browser()). (Ilia)
