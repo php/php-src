@@ -47,6 +47,8 @@ PHP 4                                                                      NEWS
 - Fixed bug #26438 (error in thttpd SAPI installation). (Jani)
 - Fixed bug #26391 (parse_url() destroys strings that contain a character 
   in range of \x80-\xff)). (Moriyoshi)
+- Fixed bug #26415 (Updated bundled OpenSSL DLLs in the Windows
+  distribution to 0.9.7c). (Edin)
 - Fixed bug #25963 (PostgreSQL error message include \n characters).
   (Marcus, Ilia)
 - Fixed bug #26384 (crash in domxslt->process()). (Christian)
