@@ -1326,6 +1326,16 @@ void session_adapt_url(const char *url, size_t urllen, char **new, size_t *newle
 	if (PS(define_sid) && PS(nr_open_sessions) > 0)
 		*new = url_adapt_single_url(url, urllen, PS(session_name), PS(id), newlen);
 }
+
+void session_adapt_flush(int (*write)(const char *, uint))
+{
+	char *str;
+	size_t len;
+	
+	str = url_adapt_flush(&len);
+	if (str) write(str, len);
+}
+
 #endif
 
 /* {{{ proto void session_unset(void)

@@ -254,9 +254,14 @@ PHPAPI void php_end_ob_buffer(zend_bool send_buffer, zend_bool just_flush)
 PHPAPI void php_end_ob_buffers(zend_bool send_buffer)
 {
 	OLS_FETCH();
+	BLS_FETCH();
 
 	while (OG(nesting_level)!=0) {
 		php_end_ob_buffer(send_buffer, 0);
+	}
+
+	if (send_buffer && BG(use_trans_sid)) {
+		session_adapt_flush(OG(php_header_write));
 	}
 }
 /* }}} */
