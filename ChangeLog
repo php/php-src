@@ -1,3 +1,11 @@
+1999-12-25  Zeev Suraski  <zeev@php.net>
+
+    * ext/pgsql/pgsql.c: Make PostgreSQL compile again
+
+1999-12-25  Andi Gutmans  <andi@php.net>
+
+    * ext/standard/string.c: - Get rid of two warnings
+
 1999-12-24  Sascha Schumann  <sascha@schumann.cx>
 
     * .cvsignore
