@@ -5,7 +5,7 @@ ZEND_API void {%EXECUTOR_NAME%}(zend_op_array *op_array TSRMLS_DC)
 	zend_execute_data execute_data;
 	{%HELPER_VARS%}
 
-	{%INTERANL_LABELS%}
+	{%INTERNAL_LABELS%}
 
 	/* Initialize execute_data */
 	EX(fbc) = NULL;
