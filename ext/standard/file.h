@@ -113,6 +113,7 @@ typedef struct {
 	char *user_agent;
 	char *user_stream_current_filename; /* for simple recursion protection */
 	php_stream_context *default_context;
+	HashTable *stream_wrappers;			/* per-request copy of url_stream_wrappers_hash */
 } php_file_globals;
 
 #ifdef ZTS
