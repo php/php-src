@@ -347,7 +347,11 @@ PHP_FUNCTION(getimagesize)
 		result = php3_handle_gif (fp);
 		itype = 1;
 	} else if (!memcmp(filetype, php3_sig_jpg, 3)) {
-		result = php3_handle_jpeg(fp,*info);
+		if (info) {
+			result = php3_handle_jpeg(fp,*info);
+		} else {
+			result = php3_handle_jpeg(fp,NULL);
+		}
 		itype = 2;
 	} else if (!memcmp(filetype, php3_sig_png, 3)) {
 		fseek(fp, 0L, SEEK_SET);
