@@ -1691,8 +1691,11 @@ PHP_FUNCTION(mb_parse_str)
 	var = encstr;
 	n = Z_STRLEN_PP(arg_str);
 	while (n > 0) {
-		if (*var == *separator) {
-			num++;
+		char *p;
+		for (p = separator; *p != '\0'; ++p) {
+			if (*p == *var) {
+				num++;
+			}
 		}
 		var++;
 		n--;
