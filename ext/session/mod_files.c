@@ -275,6 +275,10 @@ PS_READ_FUNC(files)
 #endif
 
 	if (n != sbuf.st_size) {
+		if (n == -1)
+			php_error(E_WARNING, "read failed: %s (%d)", strerror(errno), errno);
+		else
+			php_error(E_WARNING, "read returned less bytes than requested");
 		efree(*val);
 		return FAILURE;
 	}
@@ -307,7 +311,10 @@ PS_WRITE_FUNC(files)
 #endif
 
 	if (n != vallen) {
-		php_error(E_WARNING, "write failed: %s (%d)", strerror(errno), errno);
+		if (n == -1)
+			php_error(E_WARNING, "write failed: %s (%d)", strerror(errno), errno);
+		else
+			php_error(E_WARNING, "write wrote less bytes than requested");
 		return FAILURE;
 	}
 
