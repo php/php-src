@@ -355,9 +355,9 @@ static int sapi_apache_get_fd(int *nfd TSRMLS_DC)
 	
 	if (fd >= 0) {
 		if (nfd) *nfd = fd;
-		return 0;
+		return SUCCESS;
 	}
-	return -1;
+	return FAILURE;
 }
 /* }}} */
 
@@ -369,7 +369,7 @@ static int sapi_apache_force_http_10(TSRMLS_D)
 	
 	r->proto_num = HTTP_VERSION(1,0);
 	
-	return 0;
+	return SUCCESS;
 }
 
 /* {{{ sapi_apache_get_target_uid
@@ -377,7 +377,7 @@ static int sapi_apache_force_http_10(TSRMLS_D)
 static int sapi_apache_get_target_uid(uid_t *obj TSRMLS_DC)
 {
 	*obj = ap_user_id;
-	return 0;
+	return SUCCESS;
 }
 
 /* {{{ sapi_apache_get_target_gid
@@ -385,7 +385,7 @@ static int sapi_apache_get_target_uid(uid_t *obj TSRMLS_DC)
 static int sapi_apache_get_target_gid(gid_t *obj TSRMLS_DC)
 {
 	*obj = ap_group_id;
-	return 0;
+	return SUCCESS;
 }
 
 /* {{{ sapi_module_struct apache_sapi_module

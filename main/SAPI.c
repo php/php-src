@@ -856,7 +856,7 @@ SAPI_API int sapi_get_fd(int *fd TSRMLS_DC)
 	if (sapi_module.get_fd) {
 		return sapi_module.get_fd(fd TSRMLS_CC);
 	} else {
-		return -1;
+		return FAILURE;
 	}
 }
 
@@ -865,7 +865,7 @@ SAPI_API int sapi_force_http_10(TSRMLS_D)
 	if (sapi_module.force_http_10) {
 		return sapi_module.force_http_10(TSRMLS_C);
 	} else {
-		return -1;
+		return FAILURE;
 	}
 }
 
@@ -875,7 +875,7 @@ SAPI_API int sapi_get_target_uid(uid_t *obj TSRMLS_DC)
 	if (sapi_module.get_target_uid) {
 		return sapi_module.get_target_uid(obj TSRMLS_CC);
 	} else {
-		return -1;
+		return FAILURE;
 	}
 }
 
@@ -884,7 +884,7 @@ SAPI_API int sapi_get_target_gid(gid_t *obj TSRMLS_DC)
 	if (sapi_module.get_target_gid) {
 		return sapi_module.get_target_gid(obj TSRMLS_CC);
 	} else {
-		return -1;
+		return FAILURE;
 	}
 }
 
