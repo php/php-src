@@ -13,7 +13,7 @@
  *
  * The only thing a class has to do is 
  */
-interface iterator {
+interface spl_iterator {
 	
 	/*! \brief Create a new iterator
 	 *
@@ -29,7 +29,7 @@ interface iterator {
  * can be used as a parameter to be iterated (normally an array).
  *
  * \code
-	class c implements spl_foreach, spl_forward {
+	class c implements spl_iterator, spl_forward {
 		private $num = 0;
 		function new_iterator() {
 			$this->num = 0;
@@ -62,7 +62,7 @@ interface iterator {
  * If you need this you must split the two parts.
  *
  * \code
-	class c implements spl_foreach {
+	class c implements spl_iterator {
 		public $max = 3;
 		function new_iterator() {
 			return new c_iter($this);
@@ -97,7 +97,7 @@ interface iterator {
  * You can also use this interface with the for() construct.
  *
  * \code
-	class c implements spl_foreach {
+	class c implements spl_iterator {
 		public $max = 3;
 		function new_iterator() {
 			return new c_iter($this);
@@ -127,7 +127,7 @@ interface iterator {
  	}
    \endcode
  */
-interface forward {
+interface spl_forward {
 	
 	/*! \brief Retrieve the current currentent
 	 *
@@ -155,7 +155,7 @@ interface forward {
  * \note If you use sequence in foreach then rewind() will be called
  *       first.
  */
-interface sequence extends forward {
+interface spl_sequence extends spl_forward {
 
 	/*! Restart the sequence by positioning it to the first element.
 	 */
@@ -167,7 +167,7 @@ interface sequence extends forward {
  * This interface allows to implement associative iterators
  * and containers.
  */
-interface assoc {
+interface spl_assoc {
 	
 	/*! \brief Retrieve the current elements key
 	 *
@@ -185,17 +185,17 @@ interface assoc {
 	foreach($t as $key => $elem).
    \endcode
  */	
-interface assoc_forward extends forward implements assoc {
+interface spl_assoc_forward implements spl_forward, spl_assoc {
 }
 
 /*! \brief associative sequence
  */
-interface assoc_sequence extends sequence implements assoc {
+interface spl_assoc_sequence implements spl_sequence, spl_assoc {
 }
 
 /*! \brief array read only access for objects
  */
-interface array_read {
+interface spl_array_read {
 	
 	/*! Check whether or not the given index exists.
 	 * The returned value is interpreted as converted to bool.
@@ -226,7 +226,7 @@ interface array_read {
 	}
    \endcode
  */
-interface array_access extends array_read {
+interface spl_array_access extends spl_array_read {
 
 	/*! Set the value identified by $index to $value.
 	 */
@@ -254,7 +254,7 @@ interface array_access extends array_read {
 	}
    \endcode
  */
-interface array_access_ex extends array_access {
+interface spl_array_access_ex extends spl_array_access {
 
 	/*! Create an array_writer interface for the specified index.
 	 *
@@ -294,7 +294,7 @@ interface array_access_ex extends array_access {
  *
  * See array_access for more.
  */
-interface array_writer {
+interface spl_array_writer {
 
 	/*! Set the corresponding value to $value.
 	 */
