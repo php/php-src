@@ -645,6 +645,25 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 	EG(interactive) = interactive;
 #endif
 
+	if (!cgi) {
+		if (!SG(request_info).query_string) {
+			for (i = ap_php_optind, len = 0; i < argc; i++) {
+				len += strlen(argv[i]) + 1;
+			}
+
+			s = malloc(len + 1);	/* leak - but only for command line version, so ok */
+			*s = '\0';			/* we are pretending it came from the environment  */
+			for (i = ap_php_optind, len = 0; i < argc; i++) {
+				strcat(s, argv[i]);
+				if (i < (argc - 1)) {
+					strcat(s, "+");
+				}
+			}
+			SG(request_info).query_string = s;
+		}
+	}
+
+
 	if (!cgi_started) {
 		if (php_request_startup(CLS_C ELS_CC PLS_CC SLS_CC)==FAILURE) {
 			php_module_shutdown();
@@ -664,21 +683,9 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 	zend_llist_destroy(&global_vars);
 
 	if (!cgi) {
-		if (!SG(request_info).query_string) {
-			for (i = ap_php_optind, len = 0; i < argc; i++)
-				len += strlen(argv[i]) + 1;
-
-			s = malloc(len + 1);	/* leak - but only for command line version, so ok */
-			*s = '\0';			/* we are pretending it came from the environment  */
-			for (i = ap_php_optind, len = 0; i < argc; i++) {
-				strcat(s, argv[i]);
-				if (i < (argc - 1))
-					strcat(s, "+");
-			}
-			SG(request_info).query_string = s;
-		}
-		if (!SG(request_info).path_translated && argc > ap_php_optind)
+		if (!SG(request_info).path_translated && argc > ap_php_optind) {
 			SG(request_info).path_translated = estrdup(argv[ap_php_optind]);
+		}
 	} else {
 	/* If for some reason the CGI interface is not setting the
 	   PATH_TRANSLATED correctly, SG(request_info).path_translated is NULL.
