@@ -67,7 +67,7 @@
 	} else {
 		echo "Error reading database\n";
 	}
-	if ($dba_reader) {
+	if (!empty($dba_reader)) {
 		dba_close($dba_reader);
 	}
 	if (($db_file = dba_popen($db_filename, 'r'.($handler!='gdbm'?'-':''), $handler))!==FALSE) {
