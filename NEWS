@@ -1,5 +1,7 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? ??? 200?, Version 4.0.7-dev
+- Upgraded expat to version 1.95.1. (Thies)
 
 ?? ??? 200?, Version 4.0.6
 - Fixed a possible crash in the PHP CGI when no input file is
