@@ -57,7 +57,7 @@ PHP_FUNCTION(gethostbyaddr)
 {
 	pval **arg;
 	
-	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &arg) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(arg);
@@ -96,7 +96,7 @@ PHP_FUNCTION(gethostbyname)
 {
 	pval **arg;
 	
-	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &arg) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(arg);
@@ -116,7 +116,7 @@ PHP_FUNCTION(gethostbynamel)
 	struct in_addr in;
 	int i;
 
-	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &arg) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(arg);
@@ -173,14 +173,14 @@ PHP_FUNCTION(checkdnsrr)
 	
 	switch (ARG_COUNT(ht)) {
 	case 1:
-		if (getParametersEx(1, &arg1) == FAILURE) {
+		if (zend_get_parameters_ex(1, &arg1) == FAILURE) {
 			WRONG_PARAM_COUNT;
 		}
 		type = T_MX;
 		convert_to_string_ex(arg1);
 		break;
 	case 2:
-		if (getParametersEx(2, &arg1, &arg2) == FAILURE) {
+		if (zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
 			WRONG_PARAM_COUNT;
 		}
 		convert_to_string_ex(arg1);

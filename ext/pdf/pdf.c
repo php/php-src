@@ -365,7 +365,7 @@ PHP_FUNCTION(pdf_open) {
 	PDF *pdf;
 	PDF_TLS_VARS;
 
-	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &file) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &file) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 

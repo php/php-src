@@ -97,7 +97,7 @@ PHP_FUNCTION(getrusage)
 	int who = RUSAGE_SELF;
 
 	if(ac == 1 &&
-		getParametersEx(ac, &pwho) != FAILURE) {
+		zend_get_parameters_ex(ac, &pwho) != FAILURE) {
 		convert_to_long_ex(pwho);
 		if((*pwho)->value.lval == 1)
 			who = RUSAGE_CHILDREN;

@@ -749,7 +749,7 @@ PHP_FUNCTION(session_name)
 
 	old = estrdup(PS(session_name));
 
-	if(ac < 0 || ac > 1 || getParametersEx(ac, &p_name) == FAILURE) {
+	if(ac < 0 || ac > 1 || zend_get_parameters_ex(ac, &p_name) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -774,7 +774,7 @@ PHP_FUNCTION(session_module_name)
 
 	old = estrdup(PS(mod)->name);
 
-	if(ac < 0 || ac > 1 || getParametersEx(ac, &p_name) == FAILURE) {
+	if(ac < 0 || ac > 1 || zend_get_parameters_ex(ac, &p_name) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -808,7 +808,7 @@ PHP_FUNCTION(session_set_save_handler)
 	ps_user *mdata;
 	PSLS_FETCH();
 
-	if(ARG_COUNT(ht) != 6 || getParametersArrayEx(6, args) == FAILURE) {
+	if(ARG_COUNT(ht) != 6 || zend_get_parameters_array_ex(6, args) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
@@ -842,7 +842,7 @@ PHP_FUNCTION(session_save_path)
 
 	old = estrdup(PS(save_path));
 
-	if(ac < 0 || ac > 1 || getParametersEx(ac, &p_name) == FAILURE) {
+	if(ac < 0 || ac > 1 || zend_get_parameters_ex(ac, &p_name) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -868,7 +868,7 @@ PHP_FUNCTION(session_id)
 	if(PS(id))
 		old = estrdup(PS(id));
 
-	if(ac < 0 || ac > 1 || getParametersEx(ac, &p_name) == FAILURE) {
+	if(ac < 0 || ac > 1 || zend_get_parameters_ex(ac, &p_name) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -919,7 +919,7 @@ PHP_FUNCTION(session_register)
 	} else
 		args = (zval ***)emalloc(argc * sizeof(zval **));
 	
-	if (getParametersArrayEx(argc, args) == FAILURE) {
+	if (zend_get_parameters_array_ex(argc, args) == FAILURE) {
 		efree(args);
 		WRONG_PARAM_COUNT;
 	}
@@ -948,7 +948,7 @@ PHP_FUNCTION(session_unregister)
 	int ac = ARG_COUNT(ht);
 	PSLS_FETCH();
 
-	if(ac != 1 || getParametersEx(ac, &p_name) == FAILURE) {
+	if(ac != 1 || zend_get_parameters_ex(ac, &p_name) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
@@ -970,7 +970,7 @@ PHP_FUNCTION(session_is_registered)
 	int ac = ARG_COUNT(ht);
 	PSLS_FETCH();
 
-	if(ac != 1 || getParametersEx(ac, &p_name) == FAILURE) {
+	if(ac != 1 || zend_get_parameters_ex(ac, &p_name) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
@@ -1006,7 +1006,7 @@ PHP_FUNCTION(session_decode)
 	pval **str;
 	PSLS_FETCH();
 
-	if(ARG_COUNT(ht) != 1 || getParametersEx(1, &str) == FAILURE) {
+	if(ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &str) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 

@@ -50,7 +50,7 @@ static void php_html_entities(INTERNAL_FUNCTION_PARAMETERS, int all)
     unsigned char *old;
 	char *new;
 
-    if (ARG_COUNT(ht) != 1 || getParametersEx(1, &arg) == FAILURE) {
+    if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
     }
 
@@ -131,7 +131,7 @@ PHP_FUNCTION(get_html_translation_table)
 	int inx;
 	char ind[ 2 ];
 
-	if (ac < 0 || ac > 1 || getParametersEx(ac, &whichone) == FAILURE) {
+	if (ac < 0 || ac > 1 || zend_get_parameters_ex(ac, &whichone) == FAILURE) {
         WRONG_PARAM_COUNT;
     }
 

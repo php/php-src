@@ -330,13 +330,13 @@ static void _pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global)
 	/* Get function parameters and do error-checking. */
 	switch(ARG_COUNT(ht)) {
 		case 2:
-			if (getParametersEx(2, &regex, &subject) == FAILURE) {
+			if (zend_get_parameters_ex(2, &regex, &subject) == FAILURE) {
 				WRONG_PARAM_COUNT;
 			}
 			break;
 			
 		case 3:
-			if (getParametersEx(3, &regex, &subject, &subpats) == FAILURE) {
+			if (zend_get_parameters_ex(3, &regex, &subject, &subpats) == FAILURE) {
 				WRONG_PARAM_COUNT;
 			}
 			if (global)
@@ -348,7 +348,7 @@ static void _pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global)
 			break;
 
 		case 4:
-			if (getParametersEx(4, &regex, &subject, &subpats, &subpats_order) == FAILURE) {
+			if (zend_get_parameters_ex(4, &regex, &subject, &subpats, &subpats_order) == FAILURE) {
 				WRONG_PARAM_COUNT;
 			}
 			if (!ParameterPassedByReference(ht, 3)) {
@@ -855,7 +855,7 @@ PHP_FUNCTION(preg_replace)
 	ulong			 num_key;
 	
 	/* Get function parameters and do error-checking. */
-	if (ARG_COUNT(ht) != 3 || getParametersEx(3, &regex, &replace, &subject) == FAILURE) {
+	if (ARG_COUNT(ht) != 3 || zend_get_parameters_ex(3, &regex, &replace, &subject) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -933,7 +933,7 @@ PHP_FUNCTION(preg_split)
 
 	/* Get function parameters and do error checking */	
 	argc = ARG_COUNT(ht);
-	if (argc < 1 || argc > 4 || getParametersEx(argc, &regex, &subject, &limit, &flags) == FAILURE) {
+	if (argc < 1 || argc > 4 || zend_get_parameters_ex(argc, &regex, &subject, &limit, &flags) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
@@ -1041,7 +1041,7 @@ PHP_FUNCTION(preg_quote)
 		 	 c;				/* Current character */
 	
 	/* Get the arguments and check for errors */
-	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &in_str_arg) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &in_str_arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
@@ -1112,7 +1112,7 @@ PHP_FUNCTION(preg_grep)
 	
 	/* Get arguments and do error checking */
 	
-	if (ARG_COUNT(ht) != 2 || getParametersEx(ARG_COUNT(ht), &regex, &input) == FAILURE) {
+	if (ARG_COUNT(ht) != 2 || zend_get_parameters_ex(ARG_COUNT(ht), &regex, &input) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	

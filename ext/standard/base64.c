@@ -146,7 +146,7 @@ PHP_FUNCTION(base64_encode) {
 	unsigned char *result;
 	int ret_length;
 
-	if (ARG_COUNT(ht)!=1 || getParametersEx(1,&string) == FAILURE) {
+	if (ARG_COUNT(ht)!=1 || zend_get_parameters_ex(1,&string) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(string);
@@ -169,7 +169,7 @@ PHP_FUNCTION(base64_decode) {
 	unsigned char *result;
 	int ret_length;
 
-	if (ARG_COUNT(ht)!=1 || getParametersEx(1,&string) == FAILURE) {
+	if (ARG_COUNT(ht)!=1 || zend_get_parameters_ex(1,&string) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(string);

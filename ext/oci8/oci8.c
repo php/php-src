@@ -2029,7 +2029,7 @@ static void oci_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent,int exclu
     oci_connection *connection = 0;
     OCILS_FETCH();
 	
-    if (getParametersEx(3, &userParam, &passParam, &dbParam) == SUCCESS) {
+    if (zend_get_parameters_ex(3, &userParam, &passParam, &dbParam) == SUCCESS) {
 		convert_to_string_ex(userParam);
 		convert_to_string_ex(passParam);
 		convert_to_string_ex(dbParam);
@@ -2037,7 +2037,7 @@ static void oci_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent,int exclu
 		username = (*userParam)->value.str.val;
 		password = (*passParam)->value.str.val;
 		dbname = (*dbParam)->value.str.val;
-    } else if (getParametersEx(2, &userParam, &passParam) == SUCCESS) {
+    } else if (zend_get_parameters_ex(2, &userParam, &passParam) == SUCCESS) {
 		convert_to_string_ex(userParam);
 		convert_to_string_ex(passParam);
 
@@ -2181,7 +2181,7 @@ PHP_FUNCTION(ocidefinebyname)
 	ub2	ocitype = SQLT_STR; /* zero terminated string */
 	int ac = ARG_COUNT(ht);
 
-    if (ac < 3 || ac > 4 || getParametersEx(ac, &stmt, &name, &var, &type) == FAILURE) {
+    if (ac < 3 || ac > 4 || zend_get_parameters_ex(ac, &stmt, &name, &var, &type) == FAILURE) {
         WRONG_PARAM_COUNT;
     }
 
@@ -2243,7 +2243,7 @@ PHP_FUNCTION(ocibindbyname)
 	dvoid *mydescr = 0;
 	int ac = ARG_COUNT(ht);
 
-    if (ac < 4 || ac > 5 || getParametersEx(ac, &stmt, &name, &var, &maxlen, &type) == FAILURE) {
+    if (ac < 4 || ac > 5 || zend_get_parameters_ex(ac, &stmt, &name, &var, &maxlen, &type) == FAILURE) {
         WRONG_PARAM_COUNT;
     }
 
@@ -2426,7 +2426,7 @@ PHP_FUNCTION(ocisavelob)
 		}
 
 		offset = 0;	
-	    if (getParametersEx(2, &arg, &oarg) == SUCCESS) {
+	    if (zend_get_parameters_ex(2, &arg, &oarg) == SUCCESS) {
 			convert_to_long_ex(oarg);
 			offparam = (*oarg)->value.lval;
 
@@ -2446,7 +2446,7 @@ PHP_FUNCTION(ocisavelob)
 			} else {
 				offset = offparam;
 			}
-    	} else if (getParametersEx(1, &arg) == FAILURE) {
+    	} else if (zend_get_parameters_ex(1, &arg) == FAILURE) {
         	WRONG_PARAM_COUNT;
     	}
 
@@ -2526,7 +2526,7 @@ PHP_FUNCTION(ocisavelobfile)
 			RETURN_FALSE;
 		}
 
-	    if (getParametersEx(1, &arg) == FAILURE) {
+	    if (zend_get_parameters_ex(1, &arg) == FAILURE) {
         	WRONG_PARAM_COUNT;
     	}
 
@@ -2658,7 +2658,7 @@ PHP_FUNCTION(ociwritelobtofile)
 			RETURN_FALSE;
 		}
 
-	    if (ac < 0 || ac > 3 || getParametersEx(ac, &zfilename, &zstart, &zlength) == FAILURE) {
+	    if (ac < 0 || ac > 3 || zend_get_parameters_ex(ac, &zfilename, &zstart, &zlength) == FAILURE) {
         	WRONG_PARAM_COUNT;
     	}
 
@@ -2822,10 +2822,10 @@ PHP_FUNCTION(ocinewdescriptor)
 
     descr.type = OCI_DTYPE_LOB;
 
-	if (getParametersEx(2, &conn, &type) == SUCCESS) {
+	if (zend_get_parameters_ex(2, &conn, &type) == SUCCESS) {
 		convert_to_long_ex(type);
 		descr.type = (*type)->value.lval;
-	} else if (getParametersEx(1, &conn) == FAILURE) {
+	} else if (zend_get_parameters_ex(1, &conn) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -2876,7 +2876,7 @@ PHP_FUNCTION(ocirollback)
 	pval **conn;
 	oci_connection *connection;
 
-	if (getParametersEx(1, &conn) == FAILURE) {
+	if (zend_get_parameters_ex(1, &conn) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -2905,7 +2905,7 @@ PHP_FUNCTION(ocicommit)
 	pval **conn;
 	oci_connection *connection;
 
-	if (getParametersEx(1, &conn) == FAILURE) {
+	if (zend_get_parameters_ex(1, &conn) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -2935,7 +2935,7 @@ PHP_FUNCTION(ocicolumnname)
 	oci_statement *statement;
 	oci_out_column *outcol;
 
-	if (getParametersEx(2, &stmt, &col) == FAILURE) {
+	if (zend_get_parameters_ex(2, &stmt, &col) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -2960,7 +2960,7 @@ PHP_FUNCTION(ocicolumnsize)
 	oci_statement *statement;
 	oci_out_column *outcol;
 
-	if (getParametersEx(2, &stmt, &col) == FAILURE) {
+	if (zend_get_parameters_ex(2, &stmt, &col) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -2984,7 +2984,7 @@ PHP_FUNCTION(ocicolumntype)
 	oci_statement *statement;
 	oci_out_column *outcol;
 
-	if (getParametersEx(2, &stmt, &col) == FAILURE) {
+	if (zend_get_parameters_ex(2, &stmt, &col) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -3047,7 +3047,7 @@ PHP_FUNCTION(ocicolumnisnull)
 	oci_statement *statement;
 	oci_out_column *outcol;
 
-	if (getParametersEx(2, &stmt, &col) == FAILURE) {
+	if (zend_get_parameters_ex(2, &stmt, &col) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -3077,7 +3077,7 @@ PHP_FUNCTION(ociinternaldebug)
 	pval **arg;
 	OCILS_FETCH();
 
-	if (getParametersEx(1, &arg) == FAILURE) {
+	if (zend_get_parameters_ex(1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long_ex(arg);
@@ -3096,10 +3096,10 @@ PHP_FUNCTION(ociexecute)
 	oci_statement *statement;
 	ub4 execmode;
 
-	if (getParametersEx(2, &stmt, &mode) == SUCCESS) {
+	if (zend_get_parameters_ex(2, &stmt, &mode) == SUCCESS) {
 		convert_to_long_ex(mode);
 		execmode = (*mode)->value.lval;
-	} else if (getParametersEx(1, &stmt) == SUCCESS) {
+	} else if (zend_get_parameters_ex(1, &stmt) == SUCCESS) {
 		execmode = OCI_COMMIT_ON_SUCCESS;
 	} else {
 		WRONG_PARAM_COUNT;
@@ -3124,7 +3124,7 @@ PHP_FUNCTION(ocicancel)
 	pval **stmt;
 	oci_statement *statement;
 
-	if (getParametersEx(1, &stmt) == FAILURE) {
+	if (zend_get_parameters_ex(1, &stmt) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -3148,7 +3148,7 @@ PHP_FUNCTION(ocifetch)
 	oci_statement *statement;
 	ub4 nrows = 1; /* only one row at a time is supported for now */
 
-	if (getParametersEx(1, &stmt) == FAILURE) {
+	if (zend_get_parameters_ex(1, &stmt) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -3176,7 +3176,7 @@ PHP_FUNCTION(ocifetchinto)
 	int mode = OCI_NUM;
 	int ac = ARG_COUNT(ht);
 
-    if (ac < 2 || ac > 3 || getParametersEx(ac, &stmt, &array, &fmode) == FAILURE) {
+    if (ac < 2 || ac > 3 || zend_get_parameters_ex(ac, &stmt, &array, &fmode) == FAILURE) {
         WRONG_PARAM_COUNT;
     }
 	
@@ -3265,7 +3265,7 @@ PHP_FUNCTION(ocifetchstatement)
 	char namebuf[ 128 ];
 	int ac = ARG_COUNT(ht);
 
-	if (ac < 2 || ac > 3 || getParametersEx(ac, &stmt, &array, &fmode) == FAILURE) {
+	if (ac < 2 || ac > 3 || zend_get_parameters_ex(ac, &stmt, &array, &fmode) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
@@ -3324,7 +3324,7 @@ PHP_FUNCTION(ocifreestatement)
 	pval **stmt;
 	oci_statement *statement;
 
-	if (getParametersEx(1, &stmt) == FAILURE) {
+	if (zend_get_parameters_ex(1, &stmt) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -3347,7 +3347,7 @@ PHP_FUNCTION(ocilogoff)
 	oci_connection *connection;
 	pval **conn;
 
-	if (getParametersEx(1, &conn) == FAILURE) {
+	if (zend_get_parameters_ex(1, &conn) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -3423,7 +3423,7 @@ PHP_FUNCTION(ocierror)
 
 	OCILS_FETCH();
 
-	if (getParametersEx(1, &arg) == SUCCESS) {
+	if (zend_get_parameters_ex(1, &arg) == SUCCESS) {
 		statement = (oci_statement *) zend_fetch_resource(arg, -1, NULL, NULL, 1, le_stmt);
 		if (statement) {
 			errh = statement->pError;
@@ -3470,7 +3470,7 @@ PHP_FUNCTION(ocinumcols)
 	pval **stmt;
 	oci_statement *statement;
 
-	if (getParametersEx(1, &stmt) == FAILURE) {
+	if (zend_get_parameters_ex(1, &stmt) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -3490,7 +3490,7 @@ PHP_FUNCTION(ociparse)
 	oci_connection *connection;
 	oci_statement *statement;
 
-	if (getParametersEx(2, &conn, &query) == FAILURE) {
+	if (zend_get_parameters_ex(2, &conn, &query) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -3513,7 +3513,7 @@ PHP_FUNCTION(ocisetprefetch)
 	pval **stmt, **size;
 	oci_statement *statement;
 
-	if (getParametersEx(2, &stmt, &size) == FAILURE) {
+	if (zend_get_parameters_ex(2, &stmt, &size) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -3538,7 +3538,7 @@ PHP_FUNCTION(ocinewcursor)
 	oci_connection *connection;
 	oci_statement *statement;
 
-	if (getParametersEx(1, &conn) == FAILURE) {
+	if (zend_get_parameters_ex(1, &conn) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -3560,7 +3560,7 @@ PHP_FUNCTION(ociresult)
 	oci_statement *statement;
 	oci_out_column *outcol = NULL;
 
-	if (getParametersEx(2, &stmt, &col) == FAILURE) {
+	if (zend_get_parameters_ex(2, &stmt, &col) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -3586,7 +3586,7 @@ PHP_FUNCTION(ociserverversion)
 	pval **conn;
 	char version[256];
 
-	if (getParametersEx(1, &conn) == FAILURE) {
+	if (zend_get_parameters_ex(1, &conn) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -3620,7 +3620,7 @@ PHP_FUNCTION(ocistatementtype)
 	oci_statement *statement;
 	ub2 stmttype;
 
-	if (getParametersEx(1, &stmt) == FAILURE) {
+	if (zend_get_parameters_ex(1, &stmt) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -3677,7 +3677,7 @@ PHP_FUNCTION(ocirowcount)
 	oci_statement *statement;
 	ub4 rowcount;
 
-	if (getParametersEx(1, &stmt) == FAILURE) {
+	if (zend_get_parameters_ex(1, &stmt) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 

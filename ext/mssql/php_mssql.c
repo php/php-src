@@ -312,7 +312,7 @@ void php_mssql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		case 1: {
 				pval **yyhost;
 				
-				if (getParametersEx(1, &yyhost)==FAILURE) {
+				if (zend_get_parameters_ex(1, &yyhost)==FAILURE) {
 					WRONG_PARAM_COUNT;
 				}
 				convert_to_string_ex(yyhost);
@@ -323,7 +323,7 @@ void php_mssql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		case 2: {
 				pval **yyhost,**yyuser;
 				
-				if (getParametersEx(2, &yyhost, &yyuser)==FAILURE) {
+				if (zend_get_parameters_ex(2, &yyhost, &yyuser)==FAILURE) {
 					WRONG_PARAM_COUNT;
 				}
 				convert_to_string_ex(yyhost);
@@ -336,7 +336,7 @@ void php_mssql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		case 3: {
 				pval **yyhost,**yyuser,**yypasswd;
 			
-				if (getParametersEx(3, &yyhost, &yyuser, &yypasswd) == FAILURE) {
+				if (zend_get_parameters_ex(3, &yyhost, &yyuser, &yypasswd) == FAILURE) {
 					WRONG_PARAM_COUNT;
 				}
 				convert_to_string_ex(yyhost);
@@ -602,7 +602,7 @@ PHP_FUNCTION(mssql_close)
 			id = MS_SQL_G(default_link);
 			break;
 		case 1:
-			if (getParametersEx(1, &mssql_link_index)==FAILURE) {
+			if (zend_get_parameters_ex(1, &mssql_link_index)==FAILURE) {
 				RETURN_FALSE;
 			}
 			ZEND_FETCH_RESOURCE2(mssql_ptr, mssql_link *, mssql_link_index, -1, "MS SQL-Link", MS_SQL_G(le_link), MS_SQL_G(le_plink));
@@ -628,13 +628,13 @@ PHP_FUNCTION(mssql_select_db)
 	
 	switch(ARG_COUNT(ht)) {
 		case 1:
-			if (getParametersEx(1, &db)==FAILURE) {
+			if (zend_get_parameters_ex(1, &db)==FAILURE) {
 				RETURN_FALSE;
 			}
 			id = php_mssql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 			break;
 		case 2:
-			if (getParametersEx(2, &db, &mssql_link_index)==FAILURE) {
+			if (zend_get_parameters_ex(2, &db, &mssql_link_index)==FAILURE) {
 				RETURN_FALSE;
 			}
 			ZEND_FETCH_RESOURCE2(mssql_ptr, mssql_link *, mssql_link_index, -1, "MS SQL-Link", MS_SQL_G(le_link), MS_SQL_G(le_plink));
@@ -753,13 +753,13 @@ PHP_FUNCTION(mssql_query)
 
 	switch(ARG_COUNT(ht)) {
 		case 1:
-			if (getParametersEx(1, &query)==FAILURE) {
+			if (zend_get_parameters_ex(1, &query)==FAILURE) {
 				RETURN_FALSE;
 			}
 //			id = MS_SQL_G(default_link);
 			break;
 		case 2:
-			if (getParametersEx(2, &query, &mssql_link_index)==FAILURE) {
+			if (zend_get_parameters_ex(2, &query, &mssql_link_index)==FAILURE) {
 				RETURN_FALSE;
 			}
 			ZEND_FETCH_RESOURCE2(mssql_ptr, mssql_link *, mssql_link_index, -1, "MS SQL-Link", MS_SQL_G(le_link), MS_SQL_G(le_plink));
@@ -876,7 +876,7 @@ PHP_FUNCTION(mssql_free_result)
 	MSSQLLS_FETCH();
 
 	
-	if (ARG_COUNT(ht)!=1 || getParametersEx(1, &mssql_result_index)==FAILURE) {
+	if (ARG_COUNT(ht)!=1 || zend_get_parameters_ex(1, &mssql_result_index)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
@@ -899,7 +899,7 @@ PHP_FUNCTION(mssql_num_rows)
 	MSSQLLS_FETCH();
 
 	
-	if (ARG_COUNT(ht)!=1 || getParametersEx(1, &mssql_result_index)==FAILURE) {
+	if (ARG_COUNT(ht)!=1 || zend_get_parameters_ex(1, &mssql_result_index)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
@@ -916,7 +916,7 @@ PHP_FUNCTION(mssql_num_fields)
 	MSSQLLS_FETCH();
 
 	
-	if (ARG_COUNT(ht)!=1 || getParametersEx(1, &mssql_result_index)==FAILURE) {
+	if (ARG_COUNT(ht)!=1 || zend_get_parameters_ex(1, &mssql_result_index)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
@@ -934,7 +934,7 @@ PHP_FUNCTION(mssql_fetch_row)
 	pval *field_content;
 	MSSQLLS_FETCH();
 
-	if (ARG_COUNT(ht)!=1 || getParametersEx(1, &mssql_result_index)==FAILURE) {
+	if (ARG_COUNT(ht)!=1 || zend_get_parameters_ex(1, &mssql_result_index)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -964,7 +964,7 @@ static void php_mssql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS)
 	PLS_FETCH();
 
 	
-	if (ARG_COUNT(ht)!=1 || getParametersEx(1, &mssql_result_index)==FAILURE) {
+	if (ARG_COUNT(ht)!=1 || zend_get_parameters_ex(1, &mssql_result_index)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 

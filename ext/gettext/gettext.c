@@ -51,7 +51,7 @@ PHP_FUNCTION(textdomain)
     char *domain_name, *retval;
 	char *val;
 
-    if (ARG_COUNT(ht) != 1 || getParametersEx(1, &domain) == FAILURE) {
+    if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &domain) == FAILURE) {
 		WRONG_PARAM_COUNT;
     }
     convert_to_string_ex(domain);
@@ -73,7 +73,7 @@ PHP_FUNCTION(gettext)
     pval **msgid;
     char *msgstr;
 
-    if (ARG_COUNT(ht) != 1 || getParametersEx(1, &msgid) == FAILURE) {
+    if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &msgid) == FAILURE) {
 		WRONG_PARAM_COUNT;
     }
     convert_to_string_ex(msgid);
@@ -89,7 +89,7 @@ PHP_FUNCTION(dgettext)
 	char *msgstr;
 
 	if (ARG_COUNT(ht) != 2
-		|| getParametersEx(2, &domain_name, &msgid) == FAILURE)
+		|| zend_get_parameters_ex(2, &domain_name, &msgid) == FAILURE)
 	{
 		WRONG_PARAM_COUNT;
 	}
@@ -107,7 +107,7 @@ PHP_FUNCTION(dcgettext)
 	char *msgstr;
 
 	if (ARG_COUNT(ht) != 3
-		|| getParametersEx(3, &domain_name, &msgid, &category) == FAILURE)
+		|| zend_get_parameters_ex(3, &domain_name, &msgid, &category) == FAILURE)
 	{
 		WRONG_PARAM_COUNT;
 	}
@@ -129,7 +129,7 @@ PHP_FUNCTION(bindtextdomain)
 	char *val;
 
 	if (ARG_COUNT(ht) != 2
-		|| getParametersEx(2, &domain_name, &dir) == FAILURE)
+		|| zend_get_parameters_ex(2, &domain_name, &dir) == FAILURE)
 	{
 		WRONG_PARAM_COUNT;
 	}

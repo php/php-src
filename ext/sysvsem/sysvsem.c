@@ -146,14 +146,14 @@ PHP_FUNCTION(sem_get)
 
 	switch (ARG_COUNT(ht)) {
 		case 1:
-			if (getParametersEx(1, &arg_key)==FAILURE) {
+			if (zend_get_parameters_ex(1, &arg_key)==FAILURE) {
 				RETURN_FALSE;
 			}
 			convert_to_long_ex(arg_key);
 			key = (int)(*arg_key)->value.lval;
 			break;
 		case 2:
-			if (getParametersEx(2, &arg_key, &arg_max_acquire)==FAILURE) {
+			if (zend_get_parameters_ex(2, &arg_key, &arg_max_acquire)==FAILURE) {
 				RETURN_FALSE;
 			}
 			convert_to_long_ex(arg_key);
@@ -162,7 +162,7 @@ PHP_FUNCTION(sem_get)
 			max_acquire = (int)(*arg_max_acquire)->value.lval;
 			break;
 		case 3:
-			if (getParametersEx(3, &arg_key, &arg_max_acquire, &arg_perm)==FAILURE) {
+			if (zend_get_parameters_ex(3, &arg_key, &arg_max_acquire, &arg_perm)==FAILURE) {
 				RETURN_FALSE;
 			}
 			convert_to_long_ex(arg_key);
@@ -289,7 +289,7 @@ static void php_sysvsem_semop(INTERNAL_FUNCTION_PARAMETERS, int acquire)
 
 	switch(ARG_COUNT(ht)) {
 		case 1:
-			if (getParametersEx(1, &arg_id)==FAILURE) {
+			if (zend_get_parameters_ex(1, &arg_id)==FAILURE) {
 				RETURN_FALSE;
 			}
 			convert_to_long_ex(arg_id);

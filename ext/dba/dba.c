@@ -95,13 +95,13 @@ typedef struct dba_handler {
 /* these are used to get the standard arguments */
 
 #define DBA_GET1 												\
-	if(ac != 1 || getParametersEx(ac, &id) != SUCCESS) { 		\
+	if(ac != 1 || zend_get_parameters_ex(ac, &id) != SUCCESS) { 		\
 		WRONG_PARAM_COUNT; 										\
 	}
 
 #define DBA_GET2 												\
 	pval **key; 												\
-	if(ac != 2 || getParametersEx(ac, &key, &id) != SUCCESS) { 	\
+	if(ac != 2 || zend_get_parameters_ex(ac, &key, &id) != SUCCESS) { 	\
 		WRONG_PARAM_COUNT; 										\
 	} 															\
 	convert_to_string_ex(key)
@@ -211,7 +211,7 @@ static void php_dba_update(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	DBA_ID_PARS;
 	pval **val, **key;
 
-	if(ac != 3 || getParametersEx(ac, &key, &val, &id) != SUCCESS) {
+	if(ac != 3 || zend_get_parameters_ex(ac, &key, &val, &id) != SUCCESS) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(key);
@@ -245,7 +245,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	
 	/* we pass additional args to the respective handler */
 	args = emalloc(ac * sizeof(pval *));
-	if(getParametersArrayEx(ac, args) != SUCCESS) {
+	if(zend_get_parameters_array_ex(ac, args) != SUCCESS) {
 		FREENOW;
 		WRONG_PARAM_COUNT;
 	}

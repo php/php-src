@@ -173,7 +173,7 @@ PHP_FUNCTION(iptcembed)
 
     switch(ARG_COUNT(ht)){
     case 3:
-        if (getParametersEx(3, &iptcdata, &jpeg_file, &spool_flag) == FAILURE) {
+        if (zend_get_parameters_ex(3, &iptcdata, &jpeg_file, &spool_flag) == FAILURE) {
             WRONG_PARAM_COUNT;
         }
         convert_to_string_ex(iptcdata);
@@ -183,7 +183,7 @@ PHP_FUNCTION(iptcembed)
         break;
 
     case 2:
-        if (getParametersEx(2, &iptcdata, &jpeg_file) == FAILURE) {
+        if (zend_get_parameters_ex(2, &iptcdata, &jpeg_file) == FAILURE) {
             WRONG_PARAM_COUNT;
         }
         convert_to_string_ex(iptcdata);
@@ -303,7 +303,7 @@ PHP_FUNCTION(iptcparse)
 	unsigned char key[ 16 ];
 	zval *values, **str, **element;
 
-	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &str) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &str) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(str);

@@ -484,7 +484,7 @@ void php_odgbc_fetch_attribs(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	ODBCLS_FETCH();
 	PLS_FETCH();
 
-	if (getParametersEx(2, &pv_res, &pv_flag) == FAILURE)
+	if (zend_get_parameters_ex(2, &pv_res, &pv_flag) == FAILURE)
 		WRONG_PARAM_COUNT;
 
     convert_to_long_ex(pv_flag);
@@ -571,7 +571,7 @@ void odbc_transact(INTERNAL_FUNCTION_PARAMETERS, int type)
 	pval **pv_conn;
 	ODBCLS_FETCH();
 	
- 	if (getParametersEx(1, &pv_conn) == FAILURE) {
+ 	if (zend_get_parameters_ex(1, &pv_conn) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}                            
  
@@ -630,7 +630,7 @@ PHP_FUNCTION(odbc_prepare)
 	odbc_connection *conn;
 	RETCODE rc;
 
-	if (getParametersEx(2, &pv_conn, &pv_query) == FAILURE) {
+	if (zend_get_parameters_ex(2, &pv_conn, &pv_query) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -706,10 +706,10 @@ PHP_FUNCTION(odbc_execute)
 	
 	numArgs = ARG_COUNT(ht);
 	if (numArgs == 1) {
-		if (getParametersEx(1, &pv_res) == FAILURE)
+		if (zend_get_parameters_ex(1, &pv_res) == FAILURE)
 			WRONG_PARAM_COUNT;
 	} else {
-		if (getParametersEx(2, &pv_res, &pv_param_arr) == FAILURE)
+		if (zend_get_parameters_ex(2, &pv_res, &pv_param_arr) == FAILURE)
 			WRONG_PARAM_COUNT;
 
         if ((*pv_param_arr)->type != IS_ARRAY) {
@@ -859,7 +859,7 @@ PHP_FUNCTION(odbc_cursor)
 	RETCODE rc;
 	ODBCLS_FETCH();
 
-	if (getParametersEx(1, &pv_res) == FAILURE) {
+	if (zend_get_parameters_ex(1, &pv_res) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -928,11 +928,11 @@ PHP_FUNCTION(odbc_exec)
 
 	numArgs = ARG_COUNT(ht);
 	if (numArgs > 2) {
-		if (getParametersEx(3, &pv_conn, &pv_query, &pv_flags) == FAILURE)
+		if (zend_get_parameters_ex(3, &pv_conn, &pv_query, &pv_flags) == FAILURE)
 			WRONG_PARAM_COUNT;
 		convert_to_long_ex(pv_flags);
 	} else {
-		if (getParametersEx(2, &pv_conn, &pv_query) == FAILURE)
+		if (zend_get_parameters_ex(2, &pv_conn, &pv_query) == FAILURE)
 			WRONG_PARAM_COUNT;
 	}
 
@@ -1029,11 +1029,11 @@ PHP_FUNCTION(odbc_fetch_into)
 
 	switch(numArgs) {
 		case 2:
-			if (getParametersEx(2, &pv_res, &pv_res_arr) == FAILURE)
+			if (zend_get_parameters_ex(2, &pv_res, &pv_res_arr) == FAILURE)
 				WRONG_PARAM_COUNT;
 			break;
 		case 3:
-			if (getParametersEx(3, &pv_res, &pv_row, &pv_res_arr) == FAILURE)
+			if (zend_get_parameters_ex(3, &pv_res, &pv_row, &pv_res_arr) == FAILURE)
 				WRONG_PARAM_COUNT;
 			convert_to_long_ex(pv_row);
 			rownum = (*pv_row)->value.lval;
@@ -1051,7 +1051,7 @@ PHP_FUNCTION(odbc_fetch_into)
 
 	numArgs = ARG_COUNT(ht);
 
-	if (numArgs != 2 || getParametersEx(2, &pv_res, &pv_res_arr) == FAILURE) {
+	if (numArgs != 2 || zend_get_parameters_ex(2, &pv_res, &pv_res_arr) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -1161,7 +1161,7 @@ PHP_FUNCTION(solid_fetch_prev)
 	RETCODE rc;
 	pval **pv_res;
 	
-	if (getParametersEx(1, &pv_res) == FAILURE)
+	if (zend_get_parameters_ex(1, &pv_res) == FAILURE)
 		WRONG_PARAM_COUNT;
 	
 	ZEND_FETCH_RESOURCE(result, odbc_result *, pv_res, -1, "ODBC result", le_result);
@@ -1197,10 +1197,10 @@ PHP_FUNCTION(odbc_fetch_row)
 
 	numArgs = ARG_COUNT(ht);
 	if (numArgs ==  1) {
-		if (getParametersEx(1, &pv_res) == FAILURE)
+		if (zend_get_parameters_ex(1, &pv_res) == FAILURE)
 			WRONG_PARAM_COUNT;
 	} else {
-		if (getParametersEx(2, &pv_res, &pv_row) == FAILURE)
+		if (zend_get_parameters_ex(2, &pv_res, &pv_row) == FAILURE)
 			WRONG_PARAM_COUNT;
 		convert_to_long_ex(pv_row);
 		rownum = (*pv_row)->value.lval;
@@ -1257,7 +1257,7 @@ PHP_FUNCTION(odbc_result)
 	field_ind = -1;
 	field = NULL;
 
-	if (ARG_COUNT(ht) != 2 || getParametersEx(2 , &pv_res, &pv_field) == FAILURE) {
+	if (ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2 , &pv_res, &pv_field) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
@@ -1425,10 +1425,10 @@ PHP_FUNCTION(odbc_result_all)
 
 	numArgs = ARG_COUNT(ht);
 	if (numArgs ==  1) {
-		if (getParametersEx(1, &pv_res) == FAILURE)
+		if (zend_get_parameters_ex(1, &pv_res) == FAILURE)
 			WRONG_PARAM_COUNT;
 	} else {
-		if (getParametersEx(2, &pv_res, &pv_format) == FAILURE)
+		if (zend_get_parameters_ex(2, &pv_res, &pv_format) == FAILURE)
 			WRONG_PARAM_COUNT;
 	}
 				
@@ -1538,7 +1538,7 @@ PHP_FUNCTION(odbc_free_result)
 	pval **pv_res;
 	odbc_result *result;
 
-	if (getParametersEx(1, &pv_res) == FAILURE) {
+	if (zend_get_parameters_ex(1, &pv_res) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -1667,14 +1667,14 @@ void odbc_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	 */
 	switch(ARG_COUNT(ht)) {
 		case 3:	
-			if (getParametersEx(3, &pv_db, &pv_uid, &pv_pwd) == FAILURE) {
+			if (zend_get_parameters_ex(3, &pv_db, &pv_uid, &pv_pwd) == FAILURE) {
 				WRONG_PARAM_COUNT;
 			}
 			/* Use Default: Probably a better way to do this */
 			cur_opt = SQL_CUR_DEFAULT;
 			break;
 		case 4:
-			if (getParametersEx(4, &pv_db, &pv_uid, &pv_pwd, &pv_opt) == FAILURE) {
+			if (zend_get_parameters_ex(4, &pv_db, &pv_uid, &pv_pwd, &pv_opt) == FAILURE) {
 				WRONG_PARAM_COUNT;
 			}
 			convert_to_long_ex(pv_opt);
@@ -1841,7 +1841,7 @@ PHP_FUNCTION(odbc_close)
 	odbc_connection *conn;
 	ODBCLS_FETCH();
 
-    if (getParametersEx(1, &pv_conn) == FAILURE) {
+    if (zend_get_parameters_ex(1, &pv_conn) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -1859,7 +1859,7 @@ PHP_FUNCTION(odbc_num_rows)
 	SDWORD rows;
 	pval **pv_res;
 	
-	if (getParametersEx(1, &pv_res) == FAILURE) {
+	if (zend_get_parameters_ex(1, &pv_res) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}            
 
@@ -1876,7 +1876,7 @@ PHP_FUNCTION(odbc_num_fields)
 	odbc_result   *result;
 	pval     **pv_res;
 
- 	if (getParametersEx(1, &pv_res) == FAILURE) {
+ 	if (zend_get_parameters_ex(1, &pv_res) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}                            
 	ZEND_FETCH_RESOURCE(result, odbc_result *, pv_res, -1, "ODBC result", le_result); 
@@ -1891,7 +1891,7 @@ PHP_FUNCTION(odbc_field_name)
 	odbc_result       *result;
 	pval     **pv_res, **pv_num;
 	
-	if (getParametersEx(2, &pv_res, &pv_num) == FAILURE) {
+	if (zend_get_parameters_ex(2, &pv_res, &pv_num) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 		
@@ -1927,7 +1927,7 @@ PHP_FUNCTION(odbc_field_type)
 	SWORD   	tmplen;
 	pval     **pv_res, **pv_num;
 
-	if (getParametersEx(2, &pv_res, &pv_num) == FAILURE) {
+	if (zend_get_parameters_ex(2, &pv_res, &pv_num) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -1964,7 +1964,7 @@ PHP_FUNCTION(odbc_field_len)
 	SDWORD len;
 	pval **pv_res, **pv_num;
 
-	if (getParametersEx(2, &pv_res, &pv_num) == FAILURE) {
+	if (zend_get_parameters_ex(2, &pv_res, &pv_num) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -2004,7 +2004,7 @@ PHP_FUNCTION(odbc_field_num)
 	int i;
 	pval **pv_res, **pv_name;
 
-	if (getParametersEx(2, &pv_res, &pv_name) == FAILURE) {
+	if (zend_get_parameters_ex(2, &pv_res, &pv_name) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
@@ -2042,11 +2042,11 @@ PHP_FUNCTION(odbc_autocommit)
 
 	argc = ARG_COUNT(ht);
 	if (argc == 2) {
-		if (getParametersEx(2, &pv_conn, &pv_onoff) == FAILURE) {
+		if (zend_get_parameters_ex(2, &pv_conn, &pv_onoff) == FAILURE) {
 			WRONG_PARAM_COUNT;
 		}
 	} else if (argc == 1) {
-		if (getParametersEx(1, &pv_conn) == FAILURE) {
+		if (zend_get_parameters_ex(1, &pv_conn) == FAILURE) {
 			WRONG_PARAM_COUNT;
 		}
 	} else {
@@ -2114,7 +2114,7 @@ PHP_FUNCTION(odbc_setoption)
 	RETCODE rc;
 	pval **pv_handle, **pv_which, **pv_opt, **pv_val;
 
- 	if ( getParametersEx(4, &pv_handle, &pv_which, &pv_opt, &pv_val) == FAILURE) {
+ 	if ( zend_get_parameters_ex(4, &pv_handle, &pv_which, &pv_opt, &pv_val) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}                            
  
@@ -2172,11 +2172,11 @@ PHP_FUNCTION(odbc_tables)
 
 	argc = ARG_COUNT(ht);
 	if (argc == 1) {
-		if (getParametersEx(1, &pv_conn) == FAILURE) {
+		if (zend_get_parameters_ex(1, &pv_conn) == FAILURE) {
             WRONG_PARAM_COUNT;
 		}
 	} else if (argc == 5) {
-		if (getParametersEx(5, &pv_conn, &pv_cat, &pv_schema, &pv_table, &pv_type) == FAILURE) {
+		if (zend_get_parameters_ex(5, &pv_conn, &pv_cat, &pv_schema, &pv_table, &pv_type) == FAILURE) {
 			WRONG_PARAM_COUNT;
 		}
 		convert_to_string_ex(pv_cat);
@@ -2254,11 +2254,11 @@ PHP_FUNCTION(odbc_columns)
 
 	argc = ARG_COUNT(ht);
 	if (argc == 1) {
-        if (getParametersEx(1, &pv_conn) == FAILURE) {
+        if (zend_get_parameters_ex(1, &pv_conn) == FAILURE) {
             WRONG_PARAM_COUNT;
 		}
 	} else if (argc == 5) {
-		if (getParametersEx(5, &pv_conn, &pv_cat, &pv_schema, &pv_table, &pv_column) == FAILURE) {
+		if (zend_get_parameters_ex(5, &pv_conn, &pv_cat, &pv_schema, &pv_table, &pv_column) == FAILURE) {
 			WRONG_PARAM_COUNT;
 		}
 	    convert_to_string_ex(pv_cat);
@@ -2337,7 +2337,7 @@ PHP_FUNCTION(odbc_columnprivileges)
 
 	argc = ARG_COUNT(ht);
 	if (argc == 5) {
-		if (getParametersEx(5, &pv_conn, &pv_cat, &pv_schema, &pv_table, &pv_column) == FAILURE) {
+		if (zend_get_parameters_ex(5, &pv_conn, &pv_cat, &pv_schema, &pv_table, &pv_column) == FAILURE) {
 			WRONG_PARAM_COUNT;
 		}
 		convert_to_string_ex(pv_cat);
@@ -2419,7 +2419,7 @@ PHP_FUNCTION(odbc_foreignkeys)
 
 	argc = ARG_COUNT(ht);
 	if (argc == 7) {
-		if (getParametersEx(7, &pv_conn, &pv_pcat, &pv_pschema, &pv_ptable, 
+		if (zend_get_parameters_ex(7, &pv_conn, &pv_pcat, &pv_pschema, &pv_ptable, 
                     &pv_fcat, &pv_fschema, &pv_ftable) == FAILURE) {
 			WRONG_PARAM_COUNT;
 		}
@@ -2516,11 +2516,11 @@ PHP_FUNCTION(odbc_gettypeinfo)
 
 	argc = ARG_COUNT(ht);
 	if (argc == 1) {
-        if (getParametersEx(1, &pv_conn) == FAILURE) {
+        if (zend_get_parameters_ex(1, &pv_conn) == FAILURE) {
             WRONG_PARAM_COUNT;
 		}
 	} else if (argc == 2) {
-		if (getParametersEx(2, &pv_conn, &pv_data_type) == FAILURE) {
+		if (zend_get_parameters_ex(2, &pv_conn, &pv_data_type) == FAILURE) {
 			WRONG_PARAM_COUNT;
 		}
 	    convert_to_long_ex(pv_data_type);
@@ -2588,7 +2588,7 @@ PHP_FUNCTION(odbc_primarykeys)
 
 	argc = ARG_COUNT(ht);
 	if (argc == 4) {
-		if (getParametersEx(4, &pv_conn, &pv_cat, &pv_schema, &pv_table) == FAILURE) {
+		if (zend_get_parameters_ex(4, &pv_conn, &pv_cat, &pv_schema, &pv_table) == FAILURE) {
 			WRONG_PARAM_COUNT;
 		}
 	    convert_to_string_ex(pv_cat);
@@ -2664,11 +2664,11 @@ PHP_FUNCTION(odbc_procedurecolumns)
 
 	argc = ARG_COUNT(ht);
 	if (argc == 1) {
-        if (getParametersEx(1, &pv_conn) == FAILURE) {
+        if (zend_get_parameters_ex(1, &pv_conn) == FAILURE) {
             WRONG_PARAM_COUNT;
 		}
 	} else if (argc == 5) {
-		if (getParametersEx(5, &pv_conn, &pv_cat, &pv_schema, &pv_proc, &pv_col) == FAILURE) {
+		if (zend_get_parameters_ex(5, &pv_conn, &pv_cat, &pv_schema, &pv_proc, &pv_col) == FAILURE) {
 			WRONG_PARAM_COUNT;
 		}
 	    convert_to_string_ex(pv_cat);
@@ -2748,11 +2748,11 @@ PHP_FUNCTION(odbc_procedures)
 
 	argc = ARG_COUNT(ht);
 	if (argc == 1) {
-        if (getParametersEx(1, &pv_conn) == FAILURE) {
+        if (zend_get_parameters_ex(1, &pv_conn) == FAILURE) {
             WRONG_PARAM_COUNT;
 		}
 	} else if (argc == 4) {
-		if (getParametersEx(4, &pv_conn, &pv_cat, &pv_schema, &pv_proc) == FAILURE) {
+		if (zend_get_parameters_ex(4, &pv_conn, &pv_cat, &pv_schema, &pv_proc) == FAILURE) {
 			WRONG_PARAM_COUNT;
 		}
 		convert_to_string_ex(pv_cat);
@@ -2831,7 +2831,7 @@ PHP_FUNCTION(odbc_specialcolumns)
 
 	argc = ARG_COUNT(ht);
 	if (argc == 7) {
-		if (getParametersEx(7, &pv_conn, &pv_type, &pv_cat, &pv_schema, 
+		if (zend_get_parameters_ex(7, &pv_conn, &pv_type, &pv_cat, &pv_schema, 
                     &pv_name, &pv_scope, &pv_nullable) == FAILURE) {
 			WRONG_PARAM_COUNT;
 		}
@@ -2918,7 +2918,7 @@ PHP_FUNCTION(odbc_statistics)
 
 	argc = ARG_COUNT(ht);
 	if (argc == 6) {
-		if (getParametersEx(6, &pv_conn, &pv_cat, &pv_schema, 
+		if (zend_get_parameters_ex(6, &pv_conn, &pv_cat, &pv_schema, 
                     &pv_name, &pv_unique, &pv_reserved) == FAILURE) {
 			WRONG_PARAM_COUNT;
 		}
@@ -3001,7 +3001,7 @@ PHP_FUNCTION(odbc_tableprivileges)
 
 	argc = ARG_COUNT(ht);
 	if (argc == 4) {
-		if (getParametersEx(4, &pv_conn, &pv_cat, &pv_schema, &pv_table) == FAILURE) {
+		if (zend_get_parameters_ex(4, &pv_conn, &pv_cat, &pv_schema, &pv_table) == FAILURE) {
 			WRONG_PARAM_COUNT;
 		}
 	    convert_to_string_ex(pv_cat);

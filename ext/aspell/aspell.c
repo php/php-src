@@ -78,7 +78,7 @@ PHP_FUNCTION(aspell_new)
 	int ind;
 	
 	argc = ARG_COUNT(ht);
-	if (argc < 1 || argc > 2 || getParametersEx(argc,&master,&personal) == FAILURE) {
+	if (argc < 1 || argc > 2 || zend_get_parameters_ex(argc,&master,&personal) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(master);
@@ -109,7 +109,7 @@ PHP_FUNCTION(aspell_suggest)
 
 	
 	argc = ARG_COUNT(ht);
-	if (argc != 2 || getParametersEx(argc, &scin,&word) == FAILURE) {
+	if (argc != 2 || zend_get_parameters_ex(argc, &scin,&word) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long_ex(scin);
@@ -143,7 +143,7 @@ PHP_FUNCTION(aspell_check)
 
    int argc;
     argc = ARG_COUNT(ht);
-    if (argc != 2 || getParametersEx(argc, &scin,&word) == FAILURE) {
+    if (argc != 2 || zend_get_parameters_ex(argc, &scin,&word) == FAILURE) {
         WRONG_PARAM_COUNT;
     }
     convert_to_long_ex(scin);
@@ -175,7 +175,7 @@ PHP_FUNCTION(aspell_check_raw)
   aspell *sc;
 
     argc = ARG_COUNT(ht);
-    if (argc != 2 || getParametersEx(argc, &scin,&word) == FAILURE) {
+    if (argc != 2 || zend_get_parameters_ex(argc, &scin,&word) == FAILURE) {
         WRONG_PARAM_COUNT;
     }
     convert_to_long_ex(scin);

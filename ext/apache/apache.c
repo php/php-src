@@ -127,7 +127,7 @@ PHP_FUNCTION(apache_note)
 	SLS_FETCH();
 
 	if (arg_count<1 || arg_count>2 ||
-		getParametersEx(arg_count,&arg_name,&arg_val) ==FAILURE ) {
+		zend_get_parameters_ex(arg_count,&arg_name,&arg_val) ==FAILURE ) {
 		WRONG_PARAM_COUNT;
 	}
 	
@@ -278,7 +278,7 @@ PHP_FUNCTION(virtual)
 	request_rec *rr = NULL;
 	SLS_FETCH();
 
-	if (ARG_COUNT(ht) != 1 || getParametersEx(1,&filename) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1,&filename) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(filename);
@@ -351,7 +351,7 @@ PHP_FUNCTION(apache_lookup_uri)
 	request_rec *rr=NULL;
 	SLS_FETCH();
 
-	if (ARG_COUNT(ht) != 1 || getParametersEx(1,&filename) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1,&filename) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(filename);
@@ -425,7 +425,7 @@ PHP_FUNCTION(apache_exec_uri)
 	request_rec *rr=NULL;
 	SLS_FETCH();
 
-	if (ARG_COUNT(ht) != 1 || getParametersEx(1,&filename) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1,&filename) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(filename);

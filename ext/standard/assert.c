@@ -174,7 +174,7 @@ PHP_FUNCTION(assert)
 		RETURN_TRUE;
 	}
 
-	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &assertion) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &assertion) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -279,7 +279,7 @@ PHP_FUNCTION(assert_options)
 	int ac = ARG_COUNT(ht);
 	ASSERTLS_FETCH();
 	
-	if (ac < 1 || ac > 2 || getParametersEx(ac, &what, &value) == FAILURE) {
+	if (ac < 1 || ac > 2 || zend_get_parameters_ex(ac, &what, &value) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 

@@ -51,7 +51,7 @@ PHP_FUNCTION(uniqid)
 	struct timeval tv;
 
 	argc = ARG_COUNT(ht);
-	if (argc < 1 || argc > 2 || getParametersEx(argc, &prefix, &flags)) {
+	if (argc < 1 || argc > 2 || zend_get_parameters_ex(argc, &prefix, &flags)) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(prefix);

@@ -158,7 +158,7 @@ PHP_FUNCTION(parse_url)
 	pval **string;
 	url *resource;
 
-	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &string) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &string) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(string);
@@ -266,7 +266,7 @@ PHP_FUNCTION(urlencode)
 	pval **arg;
 	char *str;
 
-	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &arg) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(arg);
@@ -288,7 +288,7 @@ PHP_FUNCTION(urldecode)
 	pval **arg;
 	int len;
 
-	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &arg) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(arg);
@@ -366,7 +366,7 @@ PHP_FUNCTION(rawurlencode)
 	pval **arg;
 	char *str;
 
-	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &arg) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(arg);
@@ -387,7 +387,7 @@ PHP_FUNCTION(rawurldecode)
 	pval **arg;
 	int len;
 
-	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &arg) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(arg);
