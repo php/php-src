@@ -16,7 +16,7 @@ REM ----------------------------------------------------------------------
 REM  Authors:     Alexander Merz (alexmerz@php.net)                         
 REM ----------------------------------------------------------------------
 REM
-REM  $Id: pear.bat,v 1.5 2001/12/11 15:31:48 sebastian Exp $
+REM  $Id: pear.bat,v 1.6 2002/04/09 09:28:04 alexmerz Exp $
 
 REM change this four lines to match the paths of your system
 REM -------------------
@@ -27,5 +27,5 @@ set PEAR_DOC_DIR=c:\php\pear\docs
 REM -------------------
 set DIRECTORY_SEPARATOR=\
 
-%PHP_PATH%\php-cgi.exe -q %PEAR_INSTALL_DIR%\scripts\pear.in %1 %2 %3 %4 %5 %6 %7 %8 %9
+%PHP_PATH%\php.exe -q %PEAR_INSTALL_DIR%\scripts\pear.in %1 %2 %3 %4 %5 %6 %7 %8 %9
 @ECHO ON
