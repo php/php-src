@@ -2,6 +2,8 @@ dnl
 dnl $Id$
 dnl
 
+if test "$PHP_PDO" != "no"; then
+
 AC_DEFUN([PHP_PGSQL_CHECK_FUNCTIONS],[
 ])
 
@@ -111,4 +113,6 @@ if test "$PHP_PDO_PGSQL" != "no"; then
 
   PHP_NEW_EXTENSION(pdo_pgsql, pdo_pgsql.c pgsql_driver.c pgsql_statement.c, $ext_shared,,-I$pdo_inc_path $PDO_PGSQL_CFLAGS)
   PHP_ADD_EXTENSION_DEP(pdo_pgsql, pdo) 
+fi
+
 fi

@@ -2,6 +2,8 @@ dnl
 dnl $Id$
 dnl
 
+if test "$PHP_PDO" != "no"; then
+
 PHP_ARG_WITH(pdo-firebird,for Firebird support for PDO,
 [  --with-pdo-firebird[=DIR]  Include Firebird support for PDO.  DIR is the Firebird base
                           install directory, defaults to /opt/firebird])
@@ -56,4 +58,6 @@ if test "$PHP_PDO_FIREBIRD" != "no"; then
   PHP_NEW_EXTENSION(pdo_firebird, pdo_firebird.c firebird_driver.c firebird_statement.c, $ext_shared,,-I$pdo_inc_path)
   PHP_SUBST(PDO_FIREBIRD_SHARED_LIBADD)
   PHP_ADD_EXTENSION_DEP(pdo_firebird, pdo)
+fi
+
 fi
