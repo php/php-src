@@ -398,9 +398,6 @@ zend_op_array *compile_filename(zval *filename, zend_bool unique CLS_DC)
 	file_handle.type = ZEND_HANDLE_FILENAME;
 	file_handle.opened_path = NULL;
 	retval = zend_compile_files(1 CLS_CC, 1, &file_handle);
-	if (file_handle.opened_path) {
-		free(file_handle.opened_path);
-	}
 	if (filename==&tmp) {
 		zval_dtor(&tmp);
 	}
