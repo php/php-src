@@ -1,3 +1,139 @@
+2001-12-06  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/msession/msession.c: added protos (but without description yet)
+
+    * ext/msession/msession.c: some cleanup of ext_skel stuff
+
+    * ext/msession/msession.c: whitespace/indent
+
+    * ext/standard/basic_functions.h
+      ext/standard/string.c
+      ext/standard/basic_functions.c: renamed rot13 to str_rot13()
+
+    * ext/sockets/sockets.c: proto fix
+
+2001-12-06  Doug MacEachern  <dougm@covalent.net>
+
+    * sapi/apache2filter/php_functions.c:
+    need to call ap_destroy_sub_req() before RETURN_TRUE in apache_sub_req()
+    (Jon Parise <jon@php.net>)
+
+2001-12-06  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/standard/string.c
+      ext/standard/basic_functions.h
+      ext/standard/basic_functions.c: ported rot13() from php3
+
+2001-12-06  Jani Taskinen  <sniper@iki.fi>
+
+    * dynlib.m4:
+    Fix shared extension linking when compiling with e.g. CGI sapi.
+
+2001-12-06  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/standard/file.c
+      ext/standard/formatted_print.c
+      ext/gd/gd.c
+      ext/mssql/php_mssql.c
+      ext/openssl/openssl.c
+      ext/satellite/object.c
+      ext/satellite/php_orbit.c
+      ext/iisfunc/setup.c: proto fixes
+
+    * ext/cyrus/cyrus.c: fixing the proto fixes
+
+    * ext/standard/md5.c: proto fix
+
+    * ext/icap/php_icap.c: proto fix (sort of)
+
+    * ext/dio/dio.c: proto fixes
+
+2001-12-06  Ulf Wendel  <ulf.wendel@phpdoc.de>
+
+    * pear/HTML/IT.php: removed useless argument
+
+    * pear/HTML/IT.php
+      pear/HTML/ITX.php: beside minor cosmetic changes:
+
+     - implemented replaceBlock()
+     - added an example on callback functions
+
+2001-12-06  Zeev Suraski  <zeev@zend.com>
+
+    * ext/mysql/php_mysql.c:
+    Work around a quirk in the MySQL client library to fix unbuffered queries
+
+2001-12-06  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/session/php_session.h: - MFH for the session fix
+
+2001-12-06  Zeev Suraski  <zeev@zend.com>
+
+    * ext/session/php_session.h: Fix session_unregister()
+
+    * ext/session/php_session.h
+      ext/session/session.c: Remove PS_DEL_VAR macro, always use PS_DEL_VARL()
+
+2001-12-06  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/standard/info.c:
+    use PHP_INFO_ALL and PHP_CREDITS_ALL instead of hardcoding them
+
+2001-12-06  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/DB/sybase.php: added sysbase_ct to the test for extensions
+    (thanks Bradley Bell <bradleyb@u.washington.edu>)
+
+2001-12-06  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/cyrus/cyrus.c: 2 arguments, not 3
+
+2001-12-06  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * ext/mysql/php_mysql.c:
+    - Prototype new parameter which forces the creation of new links.
+
+2001-12-06  Jani Taskinen  <sniper@iki.fi>
+
+    * pear/tests/.cvsignore: Ignore .reg files created by pear_registry test.
+
+    * pear/DB/tests/odbc/skipif.inc
+      pear/DB/tests/pgsql/skipif.inc
+      pear/DB/tests/mysql/skipif.inc
+      pear/DB/tests/oci8/skipif.inc
+      pear/DB/tests/ibase/skipif.inc:
+    Fixed the skipping of these test. They weren't skipped if you had
+    disabled dl().
+
+2001-12-06  Jason Greene  <jason@inetgurus.net>
+
+    * ext/sockets/sockets.c:
+    Fix broken format string in socket_recv -> zend_parse_parameters
+    Rewrote socket_setopt and socket_getopt to be cleaner
+
+2001-12-06  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/pcntl/tests/001.phpt:
+    Fix test when allow_call_time_pass_reference = Off
+
+    * ext/bz2/bz2.c:
+    Fixed bug which was introduced by the last optimizing "fixes".
+
+2001-12-06  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/DB/mssql.php:
+    modified the test for the MS SQL type extensions support
+
+2001-12-06  Doug MacEachern  <dougm@covalent.net>
+
+    * sapi/apache2filter/php_functions.c:
+    destroy subrequests returned from ap_sub_req_lookup_uri
+
+    * sapi/apache2filter/php_functions.c:
+    call to ap_sub_req_lookup_uri() needs to pass ctx->f->next rather than
+    NULL for next_filter argument in order for ap_run_sub_req() output to
+    end up where expected.  ("William A. Rowe, Jr." <wrowe@rowe-clan.net>)
+
 2001-12-05  Hartmut Holzgraefe  <hartmut@six.de>
 
     * ext/ircg/ircg.c: proto fixes
