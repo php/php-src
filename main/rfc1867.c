@@ -51,10 +51,11 @@
 #define MAX_SIZE_OF_INDEX sizeof("[tmp_name]")
 
 /* Errors */
-#define UPLOAD_ERROR_A  2  /* Uploaded file exceeded upload_max_filesize */
-#define UPLOAD_ERROR_B  3  /* Uploaded file exceeded MAX_FILE_SIZE */
-#define UPLOAD_ERROR_C  4  /* Only partiallly uploaded */
-
+#define UPLOAD_ERROR_A  1  /* Uploaded file exceeded upload_max_filesize */
+#define UPLOAD_ERROR_B  2  /* Uploaded file exceeded MAX_FILE_SIZE */
+#define UPLOAD_ERROR_C  3  /* Only partiallly uploaded */
+#define UPLOAD_ERROR_D  4  /* No file uploaded */
+#define UPLOAD_ERROR_E  5  /* Uploaded file size 0 bytes */
 
 static void add_protected_variable(char *varname TSRMLS_DC)
 {
@@ -695,6 +696,11 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 			total_bytes = 0;
 			cancel_upload = 0;
 
+			if(strlen(filename) == 0) {
+				sapi_module.sapi_error(E_WARNING, "No file uploaded");
+				cancel_upload = UPLOAD_ERROR_D;
+			}
+
 			while (!cancel_upload && (blen = multipart_buffer_read(mbuff, buff, sizeof(buff) TSRMLS_CC)))
 			{
 				if (total_bytes > PG(upload_max_filesize)) {
@@ -715,6 +721,11 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 				} 
 			} 
 			fclose(fp);
+
+			if(strlen(filename) > 0 && total_bytes == 0) {
+				sapi_module.sapi_error(E_WARNING, "Uploaded file size 0 - file [%s=%s] not saved", param, filename);
+				cancel_upload = UPLOAD_ERROR_E;
+			}
 			
 			if (cancel_upload || total_bytes == 0) {
 
