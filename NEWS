@@ -14,6 +14,7 @@ PHP                                                                        NEWS
     statements into ibase_query()
   . Added ibase_commit_ret() and ibase_rollback_ret()
   . Added ibase_drop_db() 
+  . Added ibase_gen_id()
   . Added ibase_name_result()
   . Added ibase_errcode() 
   . Added ibase_affected_rows() and ibase_num_params()
