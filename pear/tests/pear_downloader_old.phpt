@@ -202,6 +202,29 @@ unset($installpackages[0]['file']);
 chdir($curdir);
 cleanall($temp_path);
 
+echo "\n================Test --alldeps\nTest preferred_state = stable\n";
+$config->set('preferred_state', 'stable');
+
+echo "Test simple direct url download:\n";
+
+$config = &PEAR_Config::singleton();
+$packages = array("http://$server/get/pkg1-1.1.tgz");
+$a = $installer->download($packages, array('alldeps' => true), &$config, &$installpackages, &$errors);
+var_dump($a, $errors);
+echo "Packages downloaded and version:\n";
+foreach ($installpackages as $package) {
+    echo $package['pkg'] . '-' . $package['info']['version'] . "\n";
+}
+
+/*
+echo "File exists? ";
+echo (is_file($installpackages[0]['file'])) ? "yes\n" : "no\n";
+echo "File is the same? ";
+$good = implode('', file(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'test-pkg6' . DIRECTORY_SEPARATOR . 'pkg6-1.1.tgz'));
+$dled = implode('', file($installpackages[0]['file']));
+echo ($good == $dled) ? "yes\n" : "no\n";
+unlink($installpackages[0]['file']);
+unset($installpackages[0]['file']);*/
 // ------------------------------------------------------------------------- //
 
 function cleanall($dir)
@@ -402,3 +425,18 @@ array(0) {
 }
 File exists? yes
 File is the same? yes
+
+================Test --alldeps
+Test preferred_state = stable
+Test simple direct url download:
+Warning: PEAR Warning: PEAR_Installer::download() is deprecated in favor of PEAR_Downloader class
+NULL
+array(0) {
+}
+Packages downloaded and version:
+pkg1-1.1
+pkg2-1.1
+pkg3-1.1
+pkg4-1.1
+pkg5-1.1
+pkg6-1.1
