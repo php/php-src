@@ -62,6 +62,11 @@ AC_ARG_WITH(apxs,
     APXS_LIBEXECDIR=`$APXS -q LIBEXECDIR`
     EXTRA_LDFLAGS="$EXTRA_LDFLAGS -Wl,-bI:$APXS_LIBEXECDIR/httpd.exp"
     ;;
+  *darwin*)
+    APXS_HTTPD=`$APXS -q SBINDIR`/`$APXS -q TARGET`
+    MH_BUNDLE_FLAGS="-bundle -bundle_loader $APXS_HTTPD"
+    PHP_SUBST(MH_BUNDLE_FLAGS)
+    ;;
   esac
 ],[
   AC_MSG_RESULT(no)
