@@ -538,6 +538,7 @@ PHP_FUNCTION (imagecreatefromstring)
 	gdImagePtr im;
 	int imtype;
 	char sig[8];
+	GDLS_FETCH();
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &data) == FAILURE)
 		WRONG_PARAM_COUNT;
