@@ -61,6 +61,10 @@
 #include <syslog.h>
 #endif
 
+#if HAVE_SIGNAL_H
+#include <signal.h>
+#endif
+
 #include "zend_compile.h"
 #include "zend_execute.h"
 #include "zend_highlight.h"
@@ -333,6 +337,13 @@ int main(int argc, char *argv[])
 	sapi_globals_struct *sapi_globals;
 #endif
 
+
+#if HAVE_SIGNAL_H
+	signal(SIGPIPE,SIG_IGN); /* ignore SIGPIPE in standalone mode so that sockets created via
+								fsockopen() don't kill PHP if the remote site closes it. 
+								in apache|apxs mode apache does that for us! 
+								thies@digicol.de 20000419 */
+#endif
 
 #ifndef ZTS
 	if (setjmp(EG(bailout))!=0) {
