@@ -40,7 +40,7 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 	}
 
 	if (ht->nApplyCount > 0) {
-		/* Prevent Recuriosn */
+		/* Prevent recursion */
 		return SUCCESS;
 	}
 
@@ -50,9 +50,10 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 	}
 	arg_sep_len = strlen(arg_sep);
 
-	for(zend_hash_internal_pointer_reset(ht);
+	for (zend_hash_internal_pointer_reset(ht);
 		(key_type = zend_hash_get_current_key_ex(ht, &key, &key_len, &idx, 0, NULL)) != HASH_KEY_NON_EXISTANT;
-		zend_hash_move_forward(ht)) {
+		zend_hash_move_forward(ht)
+	) {
 		if (key_len && key[key_len-1] == '\0') {
 			/* We don't want that trailing NULL */
 			key_len -= 1;
@@ -168,6 +169,8 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 }
 /* }}} */
 
+/* {{{ proto string http_build_query(mixed formdata [, string prefix])
+   */
 PHP_FUNCTION(http_build_query)
 {
 	zval *formdata;
