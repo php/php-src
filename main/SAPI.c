@@ -637,7 +637,7 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg TSRMLS_DC)
 					result = php_pcre_replace("/realm=\"(.*?)\"/i", 16,
 											 ptr, ptr_len,
 											 repl_temp,
-											 0, &result_len, -1 TSRMLS_CC);
+											 0, &result_len, -1, NULL TSRMLS_CC);
 					if(result_len==ptr_len) {
 						efree(result);
 						sprintf(Z_STRVAL_P(repl_temp), "realm=\\1-%ld\\2", myuid);
@@ -645,7 +645,7 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg TSRMLS_DC)
 						result = php_pcre_replace("/realm=([^\\s]+)(.*)/i", 21, 
 											 	ptr, ptr_len,
 											 	repl_temp,
-											 	0, &result_len, -1 TSRMLS_CC);
+											 	0, &result_len, -1, NULL TSRMLS_CC);
 						if(result_len==ptr_len) {
 							char *lower_temp = estrdup(ptr);	
 							char conv_temp[32];
