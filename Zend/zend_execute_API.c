@@ -134,6 +134,12 @@ void shutdown_executor(ELS_D)
 
 	zend_hash_destroy(&EG(symbol_table));
 
+	while (EG(garbage_ptr)--) {
+		if (EG(garbage)[EG(garbage_ptr)]->refcount==1) {
+			zval_ptr_dtor(&EG(garbage)[EG(garbage_ptr)]);
+		}
+	}
+
 	destroy_resource_list(ELS_C); /* must be destroyed after the main symbol table is destroyed */
 
 	zend_ptr_stack_destroy(&EG(argument_stack));
@@ -145,11 +151,7 @@ void shutdown_executor(ELS_D)
 #if ZEND_DEBUG
 	signal(SIGSEGV, original_sigsegv_handler);
 #endif
-	while (EG(garbage_ptr)--) {
-		if (EG(garbage)[EG(garbage_ptr)]->refcount==1) {
-			zval_ptr_dtor(&EG(garbage)[EG(garbage_ptr)]);
-		}
-	}
+
 
 	zend_hash_destroy(&EG(imported_files));
 }
