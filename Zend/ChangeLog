@@ -1,3 +1,29 @@
+2002-03-01  Andrei Zmievski  <andrei@ispi.net>
+
+    * zend_API.c: MFZE1
+
+2002-03-01  Andi Gutmans  <andi@zend.com>
+
+    * zend_compile.c
+      zend_compile.h
+      zend_execute.c
+      zend_execute_API.c
+      zend_globals.h
+      zend_language_parser.y
+      zend_language_scanner.l:
+    - Remove use of C++ reserved words namespace/this
+
+    * zend_opcode.c
+      zend_language_parser.y
+      zend_compile.h
+      zend_compile.c
+      zend_API.c: - Fix bug in nested try/catch's
+    - Infrastructure for implementing imports of methods.
+
+    * zend_objects.c:
+    - Fix crash reported by Sebastian when destructor function causes a fatal
+    - error. I hope this does it and we don't find any other problems.
+
 2002-02-26  Andi Gutmans  <andi@zend.com>
 
     * zend_alloc.h
