@@ -615,9 +615,10 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 					found = (*ce != NULL?SUCCESS:FAILURE);
 					fci->object_pp = EG(This)?&EG(This):NULL;
 				} else {
+					zend_class_entry *scope;
 					int in_autoload = EG(in_autoload);
 					EG(in_autoload) = 0;
-					zend_class_entry *scope = EG(active_op_array)->scope; 
+					scope = EG(active_op_array)->scope; 
 
 					found = zend_lookup_class(Z_STRVAL_PP(fci->object_pp), Z_STRLEN_PP(fci->object_pp), &ce TSRMLS_CC);
 					if (found == FAILURE) {
