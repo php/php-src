@@ -539,7 +539,7 @@ int GetTimeInfo(TIMEINFO *Now)
     struct timeval	tv;
 #endif	/* defined(HAVE_GETTIMEOFDAY) */
 #if	!defined(HAVE_TM_GMTOFF)
-    struct tm		local, tmbuf;
+    struct tm		local;
     struct tm		gmt;
 #endif	/* !defined(HAVE_TM_GMTOFF) */
 
