@@ -140,7 +140,7 @@ static void ini_error(char *str)
 		fprintf(stderr, "PHP:  %s", error_buf);
 #endif
 	} else {
-		zend_error(E_WARNING, error_buf);
+		zend_error(E_CORE_WARNING, error_buf);
 	}
 	efree(error_buf);
 }
