@@ -61,14 +61,6 @@ static int le_result, le_conn, le_pconn;
 
 #define SAFE_SQL_NTS(n) ((SWORD) ((n)?(SQL_NTS):0))
 
-/*
- * #if defined( HAVE_IBMDB2 ) || defined( HAVE_UNIXODBC )
-	SQLHANDLE henv;
-#else
-	HENV henv;
-#endif
-*/		
-	
 function_entry odbc_functions[] = {
 	PHP_FE(odbc_setoption, NULL)
 	PHP_FE(odbc_autocommit, NULL)
@@ -122,7 +114,7 @@ zend_module_entry odbc_module_entry = {
 	PHP_MINIT(odbc), 
 	PHP_MSHUTDOWN(odbc),
     PHP_RINIT(odbc), 
-	NULL, 
+	PHP_RSHUTDOWN(odbc), 
 	PHP_MINFO(odbc), 
 	STANDARD_MODULE_PROPERTIES
 };
@@ -136,6 +128,14 @@ ZEND_API php_odbc_globals odbc_globals;
 #if COMPILE_DL
 DLEXPORT zend_module_entry *get_module(void) { return &odbc_module_entry; };
 #endif
+
+static int _odbc_stmt_cleanup(list_entry *le)
+{
+	if(le->type == le_result){
+		return 1;
+	}
+	return 0;
+}
 
 static void _free_odbc_result(odbc_result *res)
 {
@@ -420,6 +420,15 @@ PHP_RINIT_FUNCTION(odbc)
 	return SUCCESS;
 }
 
+PHP_RSHUTDOWN_FUNCTION(odbc)
+{
+	ELS_FETCH();
+	
+	/* Close all statements before connection */
+	zend_hash_apply(&EG(regular_list), (int (*)(void *)) _odbc_stmt_cleanup);
+	return SUCCESS;
+}
+
 PHP_MSHUTDOWN_FUNCTION(odbc)
 {
 	ODBCLS_FETCH();
@@ -457,15 +466,17 @@ void ODBC_SQL_ERROR(SQLHANDLE henv, SQLHANDLE conn, SQLHANDLE stmt, char *func)
 void ODBC_SQL_ERROR(HENV henv, HDBC conn, HSTMT stmt, char *func)
 #endif
 {
-    char	state[6];     /* Not used */
+	char	state[6];
 	SDWORD	error;        /* Not used */
 	char	errormsg[255];
 	SWORD	errormsgsize; /* Not used */
-    RETCODE ret;
+	RETCODE ret;
 	ODBCLS_FETCH();
 
-    do {
-	    ret = SQLError(henv, conn, stmt, state,
+#if !defined (HAVE_ADABAS)
+	do {
+#endif
+		ret = SQLError(henv, conn, stmt, state,
 			    &error, errormsg, sizeof(errormsg)-1, &errormsgsize);
 	    if (func) {
 		    php_error(E_WARNING, "SQL error: %s, SQL state %s in %s",
@@ -474,7 +485,9 @@ void ODBC_SQL_ERROR(HENV henv, HDBC conn, HSTMT stmt, char *func)
 		    php_error(E_WARNING, "SQL error: %s, SQL state %s",
 				    errormsg, state);
 	    }
-    } while ( SQL_SUCCEEDED( ret ));
+#if !defined (HAVE_ADABAS)
+	} while (SQL_SUCCEEDED(ret));
+#endif
 }
 
 void php_odgbc_fetch_attribs(INTERNAL_FUNCTION_PARAMETERS, int mode)
