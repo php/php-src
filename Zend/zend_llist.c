@@ -208,46 +208,54 @@ ZEND_API int zend_llist_count(zend_llist *l)
 }
 
 
-ZEND_API void *zend_llist_get_first(zend_llist *l)
+ZEND_API void *zend_llist_get_first_ex(zend_llist *l, zend_llist_position *pos)
 {
-	l->traverse_ptr = l->head;
-	if (l->traverse_ptr) {
-		return l->traverse_ptr->data;
+	zend_llist_position *current = pos ? pos : &l->traverse_ptr;
+
+	*current = l->head;
+	if (*current) {
+		return (*current)->data;
 	} else {
 		return NULL;
 	}
 }
 
 
-ZEND_API void *zend_llist_get_last(zend_llist *l)
+ZEND_API void *zend_llist_get_last_ex(zend_llist *l, zend_llist_position *pos)
 {
-	l->traverse_ptr = l->tail;
-	if (l->traverse_ptr) {
-		return l->traverse_ptr->data;
+	zend_llist_position *current = pos ? pos : &l->traverse_ptr;
+
+	*current = l->tail;
+	if (*current) {
+		return (*current)->data;
 	} else {
 		return NULL;
 	}
 }
 
 
-ZEND_API void *zend_llist_get_next(zend_llist *l)
+ZEND_API void *zend_llist_get_next_ex(zend_llist *l, zend_llist_position *pos)
 {
-	if (l->traverse_ptr) {
-		l->traverse_ptr = l->traverse_ptr->next;
-		if (l->traverse_ptr) {
-			return l->traverse_ptr->data;
+	zend_llist_position *current = pos ? pos : &l->traverse_ptr;
+
+	if (*current) {
+		*current = (*current)->next;
+		if (*current) {
+			return (*current)->data;
 		}
 	}
 	return NULL;
 }
 
 
-ZEND_API void *zend_llist_get_prev(zend_llist *l)
+ZEND_API void *zend_llist_get_prev_ex(zend_llist *l, zend_llist_position *pos)
 {
-	if (l->traverse_ptr) {
-		l->traverse_ptr = l->traverse_ptr->prev;
-		if (l->traverse_ptr) {
-			return l->traverse_ptr->data;
+	zend_llist_position *current = pos ? pos : &l->traverse_ptr;
+
+	if (*current) {
+		*current = (*current)->prev;
+		if (*current) {
+			return (*current)->data;
 		}
 	}
 	return NULL;
