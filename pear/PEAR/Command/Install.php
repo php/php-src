@@ -53,6 +53,10 @@ class PEAR_Command_Install extends PEAR_Command_Common
                     'shortopt' => 's',
                     'doc' => 'soft install, fail silently, or upgrade if already installed',
                     ),
+                'nobuild' => array(
+                    'shortopt' => 'B',
+                    'doc' => 'don\'t build C extensions',
+                    ),
                 'nocompress' => array(
                     'shortopt' => 'Z',
                     'doc' => 'request uncompressed files when downloading',
@@ -94,6 +98,10 @@ four ways of specifying packages.
                 'register-only' => array(
                     'shortopt' => 'r',
                     'doc' => 'do not install files, only register the package as upgraded',
+                    ),
+                'nobuild' => array(
+                    'shortopt' => 'B',
+                    'doc' => 'don\'t build C extensions',
                     ),
                 'nocompress' => array(
                     'shortopt' => 'Z',
