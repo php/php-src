@@ -385,6 +385,7 @@ PHPAPI int php_stream_xport_recvfrom(php_stream *stream, char *buf, size_t bufle
 	php_stream_xport_param param;
 	int ret = 0;
 	int recvd_len = 0;
+#if 0
 	int oob;
 
 	if (flags == 0 && addr == NULL) {
@@ -416,6 +417,7 @@ PHPAPI int php_stream_xport_recvfrom(php_stream *stream, char *buf, size_t bufle
 			return recvd_len;
 		}
 	}
+#endif
 
 	/* otherwise, we are going to bypass the buffer */
 	
@@ -453,9 +455,11 @@ PHPAPI int php_stream_xport_sendto(php_stream *stream, const char *buf, size_t b
 	int ret = 0;
 	int oob;
 
+#if 0
 	if (flags == 0 && addr == NULL) {
 		return php_stream_write(stream, buf, buflen);
 	}
+#endif
 	
 	oob = (flags & STREAM_OOB) == STREAM_OOB;
 
