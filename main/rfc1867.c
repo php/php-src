@@ -159,7 +159,7 @@ void php_mime_split(char *buf, int cnt, char *boundary)
 				*(loc - 4) = '\0';
 
 				/* Magic function that figures everything out */
-				php_parse_gpc_data(ptr,namebuf,http_post_vars ELS_CC PLS_CC);
+				php_parse_gpc_data2(ptr,namebuf,http_post_vars ELS_CC PLS_CC);
 
 				/* And a little kludge to pick out special MAX_FILE_SIZE */
 				itype = php3_check_ident_type(namebuf);

@@ -2,6 +2,8 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? 1999, Version 4.0 Beta 3
+- Rewrote the GET/POST/Cookie data reader to support multi-dimensional
+  arrays! (Zeev)
 - Renamed allow_builtin_links to expose_php (defaults to On).  This directive
   tells PHP whether it may expose its existence to the outside world, e.g.
   by adding itself to the Web server header (Zeev)
