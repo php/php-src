@@ -1,3 +1,90 @@
+2001-05-15  Jon Parise  <jon@csh.rit.edu>
+
+    * ext/standard/basic_functions.c
+      ext/standard/filestat.c
+      ext/standard/php_filestat.h:
+     - Added disk_total_space() to return the total size of a filesystem.
+       (Patch from Steven Bower)
+
+    * ext/standard/basic_functions.c
+      ext/standard/filestat.c
+      ext/standard/php_filestat.h:
+     - Renamed diskfreespace() to disk_free_space() to conform to established
+       naming conventions. (jon)
+
+2001-05-15  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/pcre/php_pcre.c:
+    Revert previous commit - callback_name does need to be checked because
+    it is set conditional on is_callable_replace.
+
+2001-05-15  Andi Gutmans  <andi@zend.com>
+
+    * configure.in
+      main/php_version.h: - Get ready for 4.0.6RC1
+
+2001-05-15  Daniel Beulshausen  <daniel@php4win.de>
+
+    * sapi/apache/php_apache.c: MFH
+
+2001-05-15  Jon Parise  <jon@csh.rit.edu>
+
+    * pear/Cache.php
+      pear/Cache/Output.php
+      pear/Cache/OutputCompression.php: (Merge from head branch)
+    - Renaming $no_cache to $caching and inverting it's meaning
+    - Adding accessors for private $caching flag: getCaching() and setCaching()
+
+    * pear/Cache/Output.php
+      pear/Cache/OutputCompression.php
+      pear/Cache.php:
+    - Renaming $no_cache to $caching and inverting it's meaning
+    - Adding accessors for private $caching flag: getCaching() and setCaching()
+
+2001-05-15  Zeev Suraski  <zeev@zend.com>
+
+    * sapi/apache/mod_php4.c: MFH
+
+    * sapi/apache/mod_php4.c:
+    Move the initialization to a safer place (earlier, it could end up
+    not being reset to 0 under certain circumstances)
+
+2001-05-15  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/PEAR/Installer.php:
+    Put the verbose mode to work again. Some other style.
+
+    * pear/PEAR/Installer.php: white spaces and indenting
+
+2001-05-15  Andrei Zmievski  <andrei@ispi.net>
+
+    * NEWS: Fix up a couple of entires.
+
+2001-05-15  Christian Stocker  <chregu@nomad.ch>
+
+    * pear/Makefile.in: 2 files from Cache/ were missing here, too.
+
+    * pear/Makefile.in: 2 files from Cache/ were missing.
+
+2001-05-15  Gavin Sherry  <swm@linuxworld.com.au>
+
+    * ext/sysvshm/sysvshm.c: fixed shm_remove to expect the correct argument.
+
+    * ext/sysvsem/php_sysvsem.h:
+    Added function sem_remove
+
+    * ext/sysvsem/sysvsem.c: Added sem_remove to remove semaphores from memory
+
+2001-05-15  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/standard/url.c: MFB
+
+    * ext/standard/url.c: Fix bug: #1249
+
+    * ext/db/config.m4: MFH
+
+    * ext/db/config.m4: Fix bug: #5418
+
 2001-05-14  Zeev Suraski  <zeev@zend.com>
 
     * ext/com/VARIANT.c
