@@ -59,6 +59,8 @@ This file is public domain and comes with NO WARRANTY of any kind */
 #include "my_static.h"
 #include "mysys_err.h"
 
+ulonglong safemalloc_mem_limit = ~(ulonglong)0;
+
 #define pNext		tInt._pNext
 #define pPrev		tInt._pPrev
 #define sFileName	tInt._sFileName
@@ -111,11 +113,15 @@ gptr _mymalloc (uint uSize, const char *sFile, uint uLine, myf MyFlags)
     DBUG_ENTER("_mymalloc");
     DBUG_PRINT("enter",("Size: %u",uSize));
 
+
     if (!sf_malloc_quick)
       (void) _sanity (sFile, uLine);
 
-    /* Allocate the physical memory */
-    pTmp = (struct remember *) malloc (
+    if(uSize + lCurMemory > safemalloc_mem_limit)
+      pTmp = 0;
+    else
+       /* Allocate the physical memory */
+       pTmp = (struct remember *) malloc (
 		sizeof (struct irem)			/* remember data  */
 		+ sf_malloc_prehunc
 		+ uSize					/* size requested */

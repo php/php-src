@@ -88,7 +88,7 @@ int my_pthread_create_detached=1;
 
 int my_sigwait(const sigset_t *set,int *sig)
 {
-  int signal=sigwait(set);
+  int signal=sigwait((sigset_t*) set);
   if (signal < 0)
     return errno;
   *sig=signal;
@@ -403,26 +403,26 @@ int my_pthread_cond_init(pthread_cond_t *mp, const pthread_condattr_t *attr)
 
 #if !defined(my_gethostbyname_r) && defined(HAVE_GETHOSTBYNAME_R)
 
-#if defined(HAVE_GLIBC2_STYLE_GETHOSTBYNAME_R)
+#if defined(HAVE_GETHOSTBYNAME_R_GLIBC2_STYLE)
 
 struct hostent *my_gethostbyname_r(const char *name,
 				   struct hostent *result, char *buffer,
 				   int buflen, int *h_errnop)
 {
   struct hostent *hp;
-  assert((size_t) buflen >= sizeof(*result));
+  dbug_assert((size_t) buflen >= sizeof(*result));
   if (gethostbyname_r(name,result, buffer, (size_t) buflen, &hp, h_errnop))
     return 0;
   return hp;
 }
 
-#elif defined(_HPUX_SOURCE) || (defined(_AIX) && !defined(_AIX32_THREADS))
+#elif defined(HAVE_GETHOSTBYNAME_R_RETURN_INT)
 
 struct hostent *my_gethostbyname_r(const char *name,
 				   struct hostent *result, char *buffer,
 				   int buflen, int *h_errnop)
 {
-  assert(buflen >= sizeof(struct hostent_data));
+  dbug_assert(buflen >= sizeof(struct hostent_data));
   if (gethostbyname_r(name,result,(struct hostent_data *) buffer) == -1)
   {
     *h_errnop= errno;
@@ -438,7 +438,7 @@ struct hostent *my_gethostbyname_r(const char *name,
 				   int buflen, int *h_errnop)
 {
   struct hostent *hp;
-  assert(buflen >= sizeof(struct hostent_data));
+  dbug_assert(buflen >= sizeof(struct hostent_data));
   hp= gethostbyname_r(name,result,(struct hostent_data *) buffer);
   *h_errnop= errno;
   return hp;

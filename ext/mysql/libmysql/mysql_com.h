@@ -12,15 +12,11 @@ This file is public domain and comes with NO WARRANTY of any kind */
 #define NAME_LEN	64		/* Field/table name length */
 #define HOSTNAME_LENGTH 60
 #define USERNAME_LENGTH 16
+#define SERVER_VERSION_LENGTH 60
 
 #define LOCAL_HOST	"localhost"
 #define LOCAL_HOST_NAMEDPIPE "."
 
-#if defined(__EMX__) || defined(__OS2__)
-#undef MYSQL_UNIX_ADDR
-#define MYSQL_OS2_ADDR "\\socket\\MySQL"
-#define MYSQL_UNIX_ADDR MYSQL_OS2_ADDR
-#endif
 #if defined(__WIN__) && !defined( _CUSTOMCONFIG_)
 #define MYSQL_NAMEDPIPE "MySQL"
 #define MYSQL_SERVICENAME "MySql"
@@ -32,7 +28,7 @@ enum enum_server_command {COM_SLEEP,COM_QUIT,COM_INIT_DB,COM_QUERY,
 			  COM_PROCESS_INFO,COM_CONNECT,COM_PROCESS_KILL,
 			  COM_DEBUG,COM_PING,COM_TIME,COM_DELAYED_INSERT,
 			  COM_CHANGE_USER, COM_BINLOG_DUMP,
-                          COM_TABLE_DUMP};
+                          COM_TABLE_DUMP, COM_CONNECT_OUT};
 
 #define NOT_NULL_FLAG	1		/* Field can't be NULL */
 #define PRI_KEY_FLAG	2		/* Field is part of a primary key */
@@ -47,6 +43,7 @@ enum enum_server_command {COM_SLEEP,COM_QUIT,COM_INIT_DB,COM_QUERY,
 #define AUTO_INCREMENT_FLAG 512		/* field is a autoincrement field */
 #define TIMESTAMP_FLAG	1024		/* Field is a timestamp */
 #define SET_FLAG	2048		/* field is a set */
+#define NUM_FLAG	32768		/* Field is num (for clients) */
 #define PART_KEY_FLAG	16384		/* Intern; Part of some key */
 #define GROUP_FLAG	32768		/* Intern: Group field */
 #define UNIQUE_FLAG	65536		/* Intern: Used by sql_yacc */

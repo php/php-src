@@ -18,11 +18,17 @@ This file is public domain and comes with NO WARRANTY of any kind */
 #define	SYSTEM_TYPE	"Win95/Win98"
 #endif
 
-#ifdef _WIN32
-#define MACHINE_TYPE	"i32"		/* Define to machine type name */
+#ifdef _WIN64
+#define MACHINE_TYPE	"ia64"		/* Define to machine type name */
 #else
-#define MACHINE_TYPE	"i64"		/* Define to machine type name */
+#define MACHINE_TYPE	"i32"		/* Define to machine type name */
+#ifndef _WIN32
+#define _WIN32				/* Compatible with old source */
 #endif
+#ifndef __WIN32__
+#define __WIN32__
+#endif
+#endif /* _WIN64 */
 #ifndef __WIN__
 #define __WIN__                       /* To make it easier in VC++ */
 #endif
@@ -62,6 +68,7 @@ This file is public domain and comes with NO WARRANTY of any kind */
 #define	SIGQUIT		SIGTERM		/* No SIGQUIT */
 
 #undef _REENTRANT			/* Crashes something for win32 */
+#undef SAFE_MUTEX			/* Can't be used on windows */
 
 #define LONGLONG_MIN	((__int64) 0x8000000000000000)
 #define LONGLONG_MAX	((__int64) 0x7FFFFFFFFFFFFFFF)
@@ -230,7 +237,9 @@ inline double ulonglong2double(ulonglong value)
 #define HAVE_RINT               /* defined in this file */
 #define NO_FCNTL_NONBLOCK       /* No FCNTL */
 #define HAVE_ALLOCA
-/* #define HAVE_COMPRESS */
+#define HAVE_STRPBRK
+#define HAVE_STRSTR
+#define HAVE_COMPRESS
 
 #ifdef NOT_USED
 #define HAVE_SNPRINTF		/* Gave link error */
@@ -265,9 +274,9 @@ inline double ulonglong2double(ulonglong value)
 #define FN_NETWORK_DRIVES	/* Uses \\ to indicate network drives */
 #define FN_NO_CASE_SENCE	/* Files are not case-sensitive */
 #define FN_LOWER_CASE	TRUE	/* Files are represented in lower case */
-#define MY_NFILE	127	/* This is only used to save filenames */
+#define MY_NFILE	1024
 
-
+#define DO_NOT_REMOVE_THREAD_WRAPPERS
 #define thread_safe_increment(V,L) InterlockedIncrement((long*) &(V))
 /* The following is only used for statistics, so it should be good enough */
 #ifdef __NT__  /* This should also work on Win98 but .. */

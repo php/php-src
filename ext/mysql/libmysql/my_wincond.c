@@ -1,13 +1,13 @@
 /* Copyright Abandoned 1996 TCX DataKonsult AB & Monty Program KB & Detron HB 
 This file is public domain and comes with NO WARRANTY of any kind */
 
-
 /*****************************************************************************
 ** The following is a simple implementation of posix conditions
 *****************************************************************************/
 
+#undef SAFE_MUTEX			/* Avoid safe_mutex redefinitions */
 #include "mysys_priv.h"
-#if defined(THREAD) && defined(__WIN32__)
+#if defined(THREAD) && defined(__WIN__)
 #include <m_string.h>
 #undef getpid
 #include <process.h>
@@ -125,4 +125,4 @@ struct tm *localtime_r(const time_t *timep,struct tm *tmp)
   }
   return tmp;
 }
-#endif /* __WIN32__ */
+#endif /* __WIN__ */

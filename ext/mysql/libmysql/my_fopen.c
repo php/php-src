@@ -30,7 +30,10 @@ FILE *my_fopen(const char *FileName, int Flags, myf MyFlags)
       so we can ignore if this doesn't work.
     */
     if ((uint) fileno(fd) >= MY_NFILE)
+    {
+      thread_safe_increment(my_stream_opened,&THR_LOCK_open);
       DBUG_RETURN(fd);				/* safeguard */
+    }
     pthread_mutex_lock(&THR_LOCK_open);
     if ((my_file_info[fileno(fd)].name = (char*)
 	 my_strdup(FileName,MyFlags)))
@@ -73,11 +76,12 @@ int my_fclose(FILE *fd, myf MyFlags)
       my_error(EE_BADCLOSE, MYF(ME_BELL+ME_WAITTANG),
 	       my_filename(file),errno);
   }
+  else
+    my_stream_opened--;
   if ((uint) file < MY_NFILE && my_file_info[file].type != UNOPEN)
   {
     my_file_info[file].type = UNOPEN;
-    my_free(my_file_info[file].name, MYF(0));
-    my_stream_opened--;
+    my_free(my_file_info[file].name, MYF(MY_ALLOW_ZERO_PTR));
   }
   pthread_mutex_unlock(&THR_LOCK_open);
   DBUG_RETURN(err);
@@ -85,11 +89,9 @@ int my_fclose(FILE *fd, myf MyFlags)
 
 
 	/* Make a stream out of a file handle */
+	/* Name may be 0 */
 
-FILE *my_fdopen(File Filedes, int Flags, myf MyFlags)
-
-				/* Read | write .. */
-				/* Special flags */
+FILE *my_fdopen(File Filedes, const char *name, int Flags, myf MyFlags)
 {
   FILE *fd;
   char type[5];
@@ -107,11 +109,18 @@ FILE *my_fdopen(File Filedes, int Flags, myf MyFlags)
   else
   {
     pthread_mutex_lock(&THR_LOCK_open);
-    if (my_file_info[Filedes].type != UNOPEN)
+    my_stream_opened++;
+    if (Filedes < MY_NFILE)
     {
+      if (my_file_info[Filedes].type != UNOPEN)
+      {
+        my_file_opened--;			/* File is opened with my_open ! */
+      }
+      else
+      {
+        my_file_info[Filedes].name=  my_strdup(name,MyFlags);
+      }
       my_file_info[Filedes].type = STREAM_BY_FDOPEN;
-      my_file_opened--;			/* File is opened with my_open ! */
-      my_stream_opened++;
     }
     pthread_mutex_unlock(&THR_LOCK_open);
   }

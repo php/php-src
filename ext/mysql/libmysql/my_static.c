@@ -16,7 +16,7 @@ This file is public domain and comes with NO WARRANTY of any kind */
 my_string	home_dir=0,my_progname=0;
 char		NEAR curr_dir[FN_REFLEN]= {0},
 		NEAR home_dir_buff[FN_REFLEN]= {0};
-uint		my_stream_opened=0,my_file_opened=0;
+ulong		my_stream_opened=0,my_file_opened=0, my_tmp_file_created=0;
 int		NEAR my_umask=0664, NEAR my_umask_dir=0777;
 #ifndef THREAD
 int		NEAR my_errno=0;

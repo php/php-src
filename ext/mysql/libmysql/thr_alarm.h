@@ -9,13 +9,6 @@ This file is public domain and comes with NO WARRANTY of any kind */
 extern "C" {
 #endif
 
-typedef struct st_alarm {
-  ulong expire_time;
-  int alarmed;					/* 1 when alarm is due */
-  pthread_t thread;
-  my_bool malloced;
-} ALARM;
-
 #ifndef USE_ALARM_THREAD
 #define USE_ONE_SIGNAL_HAND		/* One must call process_alarm */
 #endif
@@ -32,55 +25,74 @@ typedef struct st_alarm {
 #define THR_SERVER_ALARM SIGALRM
 #endif
 
-#ifdef DONT_USE_THR_ALARM
+#if defined(DONT_USE_THR_ALARM)
 
 #define USE_ALARM_THREAD
 #undef USE_ONE_SIGNAL_HAND
 
-typedef struct st_win_timer
+typedef struct st_thr_alarm_entry
 {
   uint crono;
-} thr_alarm_t;
+} thr_alarm_entry;
 
-#define thr_alarm_init(A)   (A)->crono=0
-#define thr_alarm_in_use(A) (A).crono
-#define init_thr_alarm(A)
-#define thr_alarm_kill(A)
-#define end_thr_alarm()
-#define thr_alarm(A,B) (((A)->crono=1)-1)
-#define thr_got_alarm(A) (A).crono
-#define thr_end_alarm(A)
-
-#else
-
-#ifdef __WIN__
-typedef struct st_win_timer
-{
-  rf_SetTimer crono;
-} thr_alarm_t;
-
-bool thr_got_alarm(thr_alarm_t *alrm);
 #define thr_alarm_init(A)   (A)->crono=0
 #define thr_alarm_in_use(A) (A)->crono
 #define init_thr_alarm(A)
 #define thr_alarm_kill(A)
-#else
+#define end_thr_alarm()
+#define thr_alarm(A,B) (((A)->crono=1)-1)
+#define thr_got_alarm(A) (A)->crono
+#define thr_end_alarm(A)
 
-typedef int* thr_alarm_t;
-#define thr_got_alarm(thr_alarm) (*thr_alarm)
-#define thr_alarm_init(A) (*A)=0
-#define thr_alarm_in_use(A) ((A) != 0)
-void init_thr_alarm(uint max_alarm);
-void thr_alarm_kill(pthread_t thread_id);
-sig_handler process_alarm(int);
+#else
+#if defined(__WIN__)
+typedef struct st_thr_alarm_entry
+{
+  rf_SetTimer crono;
+} thr_alarm_entry;
+
+#elif defined(__EMX__)
+
+typedef struct st_thr_alarm_entry
+{
+  uint crono;
+  uint event;
+} thr_alarm_entry;
+
+#else /* System with posix threads */
+
+typedef int thr_alarm_entry;
+
+#define thr_got_alarm(thr_alarm) (**(thr_alarm))
+
 #endif /* __WIN__ */
 
-bool thr_alarm(thr_alarm_t *alarmed,uint sec, ALARM *buff);
+typedef thr_alarm_entry* thr_alarm_t;
+
+typedef struct st_alarm {
+  ulong expire_time;
+  thr_alarm_entry alarmed;		/* set when alarm is due */
+  pthread_t thread;
+  my_bool malloced;
+} ALARM;
+
+#define thr_alarm_init(A) (*(A))=0
+#define thr_alarm_in_use(A) (*(A)!= 0)
+void init_thr_alarm(uint max_alarm);
+bool thr_alarm(thr_alarm_t *alarmed, uint sec, ALARM *buff);
+void thr_alarm_kill(pthread_t thread_id);
 void thr_end_alarm(thr_alarm_t *alarmed);
 void end_thr_alarm(void);
+sig_handler process_alarm(int);
+#ifndef thr_got_alarm
+bool thr_got_alarm(thr_alarm_t *alrm);
+#endif
+
+
 #endif /* DONT_USE_THR_ALARM */
 
 #ifdef	__cplusplus
 }
-#endif
-#endif
+#endif /* __cplusplus */
+#endif /* _thr_alarm_h */
+
