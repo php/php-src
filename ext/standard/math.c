@@ -101,45 +101,59 @@ PHP_FUNCTION(floor) {
 }
 
 /* }}} */
-/* {{{ proto int round(double number)
-   Returns the rounded value of the number */
 
-#ifndef HAVE_RINT
-/* emulate rint */
-inline double rint(double n)
-{
-	double i, f;
-	f = modf(n, &i);
-	if (f > .5)
-		i++;
-	else if (f < -.5)
-		i--;
-	return i;
-}
-#endif
 
+/* {{{ proto int round(double number, int precision)
+   Returns the number rounded to specified precision. */
 PHP_FUNCTION(round)
 {
-	zval **value;
-
-	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &value) == FAILURE) {
+	zval **value, **precision;
+	int places = 0;
+	double f, return_val;
+	
+	if (ZEND_NUM_ARGS() < 1 || ZEND_NUM_ARGS() > 2 ||
+		zend_get_parameters_ex(ZEND_NUM_ARGS(), &value, &precision) == FAILURE) {
 		WRONG_PARAM_COUNT;
+	}
+
+	if (ZEND_NUM_ARGS() == 2) {
+		convert_to_long_ex(precision);
+		places = (int) Z_LVAL_PP(precision);
 	}
 
 	convert_scalar_to_number_ex(value);
 
-	if ((*value)->type == IS_DOUBLE) {
-		double d;
-		d=rint((*value)->value.dval);
-		if(d==0.0) d=0.0; /* workaround for rint() returning -0 instead of 0 */
-		RETURN_DOUBLE(d);
-	} else if ((*value)->type == IS_LONG) {
-		RETURN_DOUBLE((double)(*value)->value.lval);
-	}
-	RETURN_FALSE;
-}
+	switch (Z_TYPE_PP(value)) {
+		case IS_LONG:
+			/* Simple case - long that doesn't need to be rounded. */
+			if (places >= 0) {
+				RETURN_DOUBLE((double) Z_LVAL_PP(value));
+			}
+			/* break omitted intentionally */
 
+		case IS_DOUBLE:
+			return_val = (Z_TYPE_PP(value) == IS_LONG) ? Z_LVAL_PP(value) : Z_DVAL_PP(value);
+
+			f = pow(10.0, places);
+
+			return_val *= f;
+			if (return_val >= 0.0)
+				return_val = floor(return_val + 0.5);
+			else
+				return_val = ceil(return_val - 0.5);
+			return_val /= f;
+
+			RETURN_DOUBLE(return_val);
+			break;
+
+		default:
+			RETURN_FALSE;
+			break;
+	}
+}
 /* }}} */
+
+
 /* {{{ proto double sin(double number)
    Returns the sine of the number in radians */
 

@@ -346,7 +346,6 @@ putenv \
 random \
 rand_r \
 regcomp \
-rint \
 setitimer \
 setlocale \
 setsockopt \
