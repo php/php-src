@@ -16,7 +16,6 @@ if test "$PHP_PCRE_REGEX" != "no"; then
     PCRE_LIBADD=pcrelib/libpcre.la
     PCRE_SHARED_LIBADD=pcrelib/libpcre.la
     PCRE_SUBDIRS=pcrelib
-    CPPFLAGS="$CPPFLAGS -DSUPPORT_UTF8"
     PHP_SUBST(PCRE_LIBADD)
     PHP_SUBST(PCRE_SUBDIRS)
     AC_DEFINE(HAVE_BUNDLED_PCRE, 1, [ ])
