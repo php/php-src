@@ -138,7 +138,7 @@ php_memnstr(char *haystack, char *needle, int needle_len, char *end)
 	end -= needle_len;
 
 	while (p <= end) {
-		if ((p = strchr(p, *needle)) &&  ne == p[needle_len-1]) {
+		if ((p = memchr(p, *needle, (end-p+1))) && ne == p[needle_len-1]) {
 			if (!memcmp(needle, p, needle_len-1)) {
 				return p;
 			}
