@@ -75,6 +75,7 @@ static int pdo_mysql_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 
 		if (!stmt->executed) {
 			stmt->column_count = (int) mysql_num_fields(S->result);
+			S->fields = mysql_fetch_fields(S->result);
 		}
 	} else {
 		// this was a DML or DDL query (INSERT, UPDATE, DELETE, ...
@@ -98,8 +99,9 @@ static int pdo_mysql_stmt_fetch(pdo_stmt_t *stmt,
 		return 0;	
 	}
 	if ((S->current_data = mysql_fetch_row(S->result)) == NULL) {
-		/* there seems to be no way of distinguishing 'no data' from 'error' */
-		pdo_mysql_error_stmt(stmt);
+		if (mysql_errno(S->H->server)) {
+			pdo_mysql_error_stmt(stmt);
+		}
 		return 0;
 	} 
 	S->current_lengths = mysql_fetch_lengths(S->result);
@@ -112,27 +114,30 @@ static int pdo_mysql_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC)
 	MYSQL_RES *R = S->result;
 	MYSQL_FIELD *F;
 	struct pdo_column_data *cols = stmt->columns;
-	unsigned int num_fields, i;
+	unsigned int i;
 
 	if (!S->result) {
 		return 0;	
 	}
+
+	if (colno >= stmt->column_count) {
+		/* error invalid column */
+		return 0;
+	}
+
 	/* fetch all on demand, this seems easiest 
 	** if we've been here before bail out 
 	*/
 	if (cols[0].name) {
 		return 1;
 	}
-	num_fields = mysql_num_fields(R);
-	F = mysql_fetch_fields(R);
-	for (i=0; i < num_fields; i++) {
+	for(i=0; i < stmt->column_count; i++) {
 		int namelen;
-		namelen = strlen(F[i].name);
-		cols[i].precision = F[i].decimals;
-		cols[i].maxlen = F[i].length;
+		namelen = strlen(S->fields[i].name);
+		cols[i].precision = S->fields[i].decimals;
+		cols[i].maxlen = S->fields[i].length;
 		cols[i].namelen = namelen;
-		/* FIXME where does this get freed? */
-		cols[i].name = estrndup(F[i].name, namelen + 1);
+		cols[i].name = estrndup(S->fields[i].name, namelen + 1);
 		cols[i].param_type = PDO_PARAM_STR;
 	}
 	return 1;
@@ -145,9 +150,8 @@ static int pdo_mysql_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, unsig
 	if (S->current_data == NULL || !S->result) {
 		return 0;
 	}
-	if (colno >= mysql_num_fields(S->result)) {
+	if (colno >= stmt->column_count) {
 		/* error invalid column */
-		pdo_mysql_error_stmt(stmt);
 		return 0;
 	}
 	*ptr = S->current_data[colno];
@@ -199,21 +203,16 @@ static int pdo_mysql_stmt_col_meta(pdo_stmt_t *stmt, long colno, zval *return_va
 	if (!S->result) {
 		return FAILURE;
 	}
-	if (colno >= mysql_num_fields(S->result)) {
+	if (colno >= stmt->column_count) {
 		/* error invalid column */
-		pdo_mysql_error_stmt(stmt);
-		return FAILURE;
-	}
-	mysql_field_seek(S->result, colno);
-	F = mysql_fetch_field(S->result);
-	if (!F) {
-		pdo_mysql_error_stmt(stmt);
 		return FAILURE;
 	}
 
 	array_init(return_value);
 	MAKE_STD_ZVAL(flags);
 	array_init(flags);
+
+	F = S->fields + colno;
 
 	if (F->def) {
 		add_assoc_string(return_value, "mysql:def", F->def, 1);
