@@ -1053,7 +1053,7 @@ PHP_FUNCTION(mssql_query)
 		RETURN_FALSE;
 	}
 
-	if ((num_fields = dbnumcols(mssql_ptr->link)) <= 0) {
+	if ((num_fields = dbnumcols(mssql_ptr->link)) <= 0 && !dbdataready(mssql_ptr->link)) {
 		RETURN_TRUE;
 	}
 
@@ -1067,8 +1067,10 @@ PHP_FUNCTION(mssql_query)
 	result->mssql_ptr = mssql_ptr;
 	result->cur_field=result->cur_row=result->num_rows=0;
 
-	result->fields = (mssql_field *) emalloc(sizeof(mssql_field)*result->num_fields);
-	result->num_rows = _mssql_fetch_batch(mssql_ptr, result, retvalue TSRMLS_CC);
+	if (num_fields > 0) {
+		result->fields = (mssql_field *) emalloc(sizeof(mssql_field)*result->num_fields);
+		result->num_rows = _mssql_fetch_batch(mssql_ptr, result, retvalue TSRMLS_CC);
+	}
 	
 	ZEND_REGISTER_RESOURCE(return_value, result, le_result);
 }
