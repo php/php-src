@@ -15,3 +15,5 @@ Bundled Modules		php_calendar.dll	Calendar functions
 			php_imap.dll		IMAP module
 			php_ldap.dll		LDAP module
 			php_mssql70.dll		MS-SQL 7.0 module
+			php_zlib.dll
+			
