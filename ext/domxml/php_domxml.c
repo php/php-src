@@ -1382,7 +1382,9 @@ static void domxml_error_ext(void *ctx, const char *msg, ...)
 		} 
 		add_assoc_string(errormessages,"errormessage",buf,1);				
 		input = ctxt->input;
-		add_assoc_string(errormessages,"nodename",ctxt->name,1); 
+		if (ctxt->name) {
+			add_assoc_string(errormessages,"nodename",ctxt->name,1); 
+		}
 		if (input != NULL) {
 			add_assoc_long(errormessages,"line",input->line);
 			add_assoc_long(errormessages,"col",input->col);
