@@ -525,7 +525,7 @@ static char *substring_conf(char *start, int len, char quote TSRMLS_DC)
 		} else {
 #if HAVE_MBSTRING && !defined(COMPILE_DL_MBSTRING)
 			if (php_mb_encoding_translation(TSRMLS_C)) {
-				size_t j = php_mb_mbchar_bytes(start+i TSRMLS_CC);
+				size_t j = php_mb_gpc_mbchar_bytes(start+i TSRMLS_CC);
 				while (j-- > 0 && i < len) {
 					*resp++ = start[i++];
 				}
@@ -547,6 +547,12 @@ static char *substring_conf(char *start, int len, char quote TSRMLS_DC)
 static char *php_ap_getword_conf(char **line TSRMLS_DC)
 {
 	char *str = *line, *strend, *res, quote;
+
+#if HAVE_MBSTRING && !defined(COMPILE_DL_MBSTRING)
+	if (php_mb_encoding_translation(TSRMLS_C)) {
+		php_mb_gpc_encoding_detector(str, strlen(str), NULL TSRMLS_CC);
+	}
+#endif
 
 	while (*str && isspace(*str)) {
 		++str;
@@ -690,7 +696,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 {
 	char *boundary, *s=NULL, *boundary_end = NULL, *start_arr=NULL, *array_index=NULL;
 	char *temp_filename=NULL, *lbuf=NULL, *abuf=NULL;
-	int boundary_len=0, total_bytes=0, cancel_upload=0, is_arr_upload=0, array_len=0, max_file_size=0, skip_upload=0, anonindex=0, is_anonymous;
+	int boundary_len=0, total_bytes=0, cancel_upload=0, is_arr_upload=0, array_len=0, max_file_size=0, skip_upload=0, str_len=0, anonindex=0, is_anonymous;
 	zval *http_post_files=NULL;
 	zend_bool magic_quotes_gpc;
 	multipart_buffer *mbuff;
@@ -806,6 +812,14 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 				}
 
 				sapi_module.input_filter(PARSE_POST, param, &value, strlen(value) TSRMLS_CC);
+#if HAVE_MBSTRING && !defined(COMPILE_DL_MBSTRING)
+				if (php_mb_encoding_translation(TSRMLS_C)) {
+					if (php_mb_gpc_encoding_detector(value, strlen(value), NULL TSRMLS_CC) == SUCCESS) {
+						str_len = strlen(value);
+						php_mb_gpc_encoding_converter(&value , &str_len, NULL, NULL TSRMLS_CC);
+					} 
+				}
+#endif
 				safe_php_register_variable(param, value, array_ptr, 0 TSRMLS_CC);
 				if (!strcasecmp(param, "MAX_FILE_SIZE")) {
 					max_file_size = atol(value);
@@ -931,6 +945,10 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 
 #if HAVE_MBSTRING && !defined(COMPILE_DL_MBSTRING)
 			if (php_mb_encoding_translation(TSRMLS_C)) {
+				if(php_mb_gpc_encoding_detector(filename, strlen(filename), NULL TSRMLS_CC) == SUCCESS) {
+					str_len = strlen(filename);
+					php_mb_gpc_encoding_converter(&filename, &str_len, NULL, NULL TSRMLS_CC);
+				}
 				s = php_mb_strrchr(filename, '\\' TSRMLS_CC);
 			} else {
 				s = strrchr(filename, '\\');
