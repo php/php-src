@@ -235,7 +235,7 @@ static void php_read_APP(int socketd, FILE *fp, int issock,unsigned int marker,p
 	length = php_read2(socketd,fp,issock);
 	length -= 2;				/* length includes itself */
 
-    buffer = emalloc(length);
+	buffer = emalloc(length);
 
  	if (FP_FREAD(buffer, (long) length, socketd, fp, issock) <= 0) {
 		efree(buffer);
@@ -281,7 +281,7 @@ static struct gfxinfo *php_handle_jpeg (int socketd, FILE *fp, int issock, pval 
 					result = (struct gfxinfo *) ecalloc(1,sizeof(struct gfxinfo));
 					FP_FREAD(tmp, sizeof(tmp), socketd, fp, issock); 
  					result->bits   = FP_FGETC(socketd,fp,issock);
-				    FP_FREAD(a, sizeof(a), socketd, fp, issock);
+					FP_FREAD(a, sizeof(a), socketd, fp, issock);
 					result->height = (((unsigned short) a[ 0 ]) << 8) + ((unsigned short) a[ 1 ]);
 					result->width  = (((unsigned short) a[ 2 ]) << 8) + ((unsigned short) a[ 3 ]);
 					result->channels = FP_FGETC(socketd,fp,issock);
@@ -312,7 +312,7 @@ static struct gfxinfo *php_handle_jpeg (int socketd, FILE *fp, int issock, pval 
 				if (info) {	
 					php_read_APP(socketd,fp,issock,marker,info); /* read all the app markes... */
 				} else {
-				    php_skip_variable(socketd,fp,issock);
+					php_skip_variable(socketd,fp,issock);
 				}
 				break;
 
@@ -344,7 +344,8 @@ PHP_FUNCTION(getimagesize)
 	char temp[64];
 	struct gfxinfo *result = NULL;
 	
-	switch(ZEND_NUM_ARGS()){
+	switch(ZEND_NUM_ARGS()) {
+
 	case 1:
 		if (zend_get_parameters_ex(1, &arg1) == FAILURE) {
 			WRONG_PARAM_COUNT;
@@ -357,9 +358,9 @@ PHP_FUNCTION(getimagesize)
 			WRONG_PARAM_COUNT;
 		}
 		if (!ParameterPassedByReference(ht, 2)) {
-            php_error(E_WARNING, "Array to be filled with values must be passed by reference.");
-            RETURN_FALSE;
-        }
+			php_error(E_WARNING, "Array to be filled with values must be passed by reference.");
+			RETURN_FALSE;
+		}
 
 		zval_dtor(*info);
 
