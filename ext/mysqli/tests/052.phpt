@@ -1,5 +1,7 @@
 --TEST--
 call statement after close
+--SKIPIF--
+<?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
 	include "connect.inc";
@@ -7,7 +9,7 @@ call statement after close
 	/************************
 	 * statement call  after close 
 	 ************************/
-	$link = mysqli_connect("localhost", $user, $passwd);
+	$link = mysqli_connect($host, $user, $passwd);
 
 	$stmt2 = mysqli_prepare($link, "SELECT CURRENT_USER()");
 

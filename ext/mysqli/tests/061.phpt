@@ -1,5 +1,7 @@
 --TEST--
 local infile handler
+--SKIPIF--
+<?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
 	include "connect.inc";
@@ -10,7 +12,7 @@ local infile handler
 	}
 	
 	/*** test mysqli_connect 127.0.0.1 ***/
-	$link = mysqli_connect("localhost", $user, $passwd, "test");
+	$link = mysqli_connect($host, $user, $passwd, "test");
 
 	/* create temporary file */
 	$fp = fopen("061.csv", "w");

@@ -1,12 +1,13 @@
 --TEST--
 function test: mysqli_errno
+--SKIPIF--
+<?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
-	$user = "root";
-	$passwd = "";
+	include "connect.inc";
 
 	/*** test mysqli_connect 127.0.0.1 ***/
-	$link = mysqli_connect("localhost", $user, $passwd);
+	$link = mysqli_connect($host, $user, $passwd);
 	$errno = mysqli_errno($link);
 	var_dump($errno);
 

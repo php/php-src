@@ -1,13 +1,13 @@
 --TEST--
 function test: mysqli_get_proto_info
+--SKIPIF--
+<?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
-	$user = "root";
-	$passwd = "";
-
+	include "connect.inc";
 	
 	/*** test mysqli_connect 127.0.0.1 ***/
-	$link = mysqli_connect("localhost", $user, $passwd);
+	$link = mysqli_connect($host, $user, $passwd);
 
 	$pinfo = mysqli_get_proto_info($link);
 

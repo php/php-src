@@ -3,7 +3,7 @@ mysqli_bind_result (SHOW)
 --SKIPIF--
 <?php	
 	include "connect.inc";
-	$link = mysqli_connect("localhost", $user, $passwd);
+	$link = mysqli_connect($host, $user, $passwd);
 
 
 	$stmt = mysqli_prepare($link, "SHOW VARIABLES LIKE 'port'");
@@ -15,12 +15,14 @@ mysqli_bind_result (SHOW)
 	$stmt->close();
 	mysqli_close($link);
 ?>
+--SKIPIF--
+<?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
 	include "connect.inc";
 	
 	/*** test mysqli_connect 127.0.0.1 ***/
-	$link = mysqli_connect("localhost", $user, $passwd);
+	$link = mysqli_connect($host, $user, $passwd);
 
 	$stmt = mysqli_prepare($link, "SHOW VARIABLES LIKE 'port'");
 	mysqli_execute($stmt);

@@ -1,5 +1,7 @@
 --TEST--
 extend mysqli 
+--SKIPIF--
+<?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
 	include "connect.inc";
@@ -11,7 +13,7 @@ extend mysqli
 	}
 
 	$foo = new foobar();
-	$foo->connect("localhost", $user, $passwd);
+	$foo->connect($host, $user, $passwd);
 	$foo->close();
 	printf("%s\n", $foo->test());
 ?>

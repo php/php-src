@@ -1,5 +1,7 @@
 --TEST--
 Bug #30967 testcase (properties)
+--SKIPIF--
+<?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
 	include "connect.inc";
@@ -10,7 +12,7 @@ Bug #30967 testcase (properties)
 	class mysql2 extends mysql1 {
 	}
 
-	$mysql = new mysql2("localhost", "root", "", "test");
+	$mysql = new mysql2($host, "root", "", "test");
 
 	$mysql->query("THIS DOES NOT WORK");
 	printf("%d\n", $mysql->errno);
