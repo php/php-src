@@ -921,7 +921,7 @@ PHP_FUNCTION(fgets)
 	/* needed because recv doesnt put a null at the end*/
 	memset(buf,0,len+1);
 #ifdef HAVE_FLUSHIO
-	if (!issock) {
+	if (type == le_fopen) {
 		fseek((FILE*)what, 0, SEEK_CUR);
 	}
 #endif
@@ -969,7 +969,7 @@ PHP_FUNCTION(fgetc) {
 	}
 
 #ifdef HAVE_FLUSHIO
-	if (!issock) {
+	if (type == le_fopen) {
 		fseek((FILE*)what, 0, SEEK_CUR);
 	}
 #endif
@@ -1172,7 +1172,9 @@ PHP_FUNCTION(fwrite)
 		ret = SOCK_WRITEL((*arg2)->value.str.val,num_bytes,socketd);
 	} else {
 #ifdef HAVE_FLUSHIO
-		fseek((FILE*)what, 0, SEEK_CUR);
+		if (type == le_fopen) {
+			fseek((FILE*)what, 0, SEEK_CUR);
+		}
 #endif
 		ret = fwrite((*arg2)->value.str.val,1,num_bytes,(FILE*)what);
 	}
@@ -1814,7 +1816,9 @@ PHP_FUNCTION(fread)
 	
 	if (!issock) {
 #ifdef HAVE_FLUSHIO
-		fseek((FILE*)what, 0, SEEK_CUR);
+		if (type == le_fopen)
+			fseek((FILE*)what, 0, SEEK_CUR);
+		}
 #endif
 		return_value->value.str.len = fread(return_value->value.str.val, 1, len, (FILE*)what);
 		return_value->value.str.val[return_value->value.str.len] = 0;
