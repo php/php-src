@@ -1380,7 +1380,7 @@ ZEND_METHOD(reflection_function, invoke)
 
 	if (result == FAILURE) {
 		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, 
-			"Invocation of method %s() failed", fptr->common.function_name);
+			"Invocation of function %s() failed", fptr->common.function_name);
 		return;
 	}
 
@@ -1444,7 +1444,7 @@ ZEND_METHOD(reflection_function, invokeArgs)
 
 	if (result == FAILURE) {
 		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, 
-			"Invokation of method %s() failed", fptr->common.function_name);
+			"Invocation of function %s() failed", fptr->common.function_name);
 		return;
 	}
 
