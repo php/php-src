@@ -599,6 +599,14 @@ if test "$PHP_PEAR" = "yes"; then
   PEAR_DIR=pear
 fi
 
+# temporary until streams are better integrated
+PHP_ARG_ENABLE(php-streams,whether to enable php streams,
+[  --enable-php-streams    Include experimental php streams.
+                          Do not use unless you are testing the code!])
+
+if test "$PHP_PHP_STREAMS" = "yes"; then
+  AC_DEFINE(HAVE_PHP_STREAM, 1, [Whether to use php streams])
+fi
 
 divert(5)
 
