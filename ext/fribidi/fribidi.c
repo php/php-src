@@ -93,28 +93,30 @@ PHP_MINFO_FUNCTION(fribidi)
 }
 /* }}} */
 
-/*--------------------------------------------------------------*/
-/* Name: fribidi_log2vis                                        */
-/* Purpose: convert a logical string to a visual one            */
-/* Input: 1) The logical string.                                */
-/*        2) Base direction -                                   */
-/*             Possible values:                                 */
-/*             a) FRIBIDI_LTR  - left to right.                 */
-/*             b) FRIBIDI_RTL  - right to left.                 */
-/*             c) FRIBIDI_AUTO - autodetected by the BiDi       */
-/*                               BiDi algorithm.                */
-/*        3) Character code being used -                        */
-/*             Possible values (i.e., charsets supported)      */
-/*              FRIBIDI_CHARSET_UTF8                            */
-/*              FRIBIDI_CHARSET_8859_6                          */  
-/*				FRIBIDI_CHARSET_8859_8                          */
-/*				FRIBIDI_CHARSET_CP1255                          */
-/*				FRIBIDI_CHARSET_CP1256                          */
-/*				FRIBIDI_CHARSET_ISIRI_3342                      */
-/*                                                              */
-/* Output: on success: The visual string.                       */
-/*         on failure: FALSE                                    */ 
-/*--------------------------------------------------------------*/           
+/*
++ -----------------------------------------------------------+
+| Name: fribidi_log2vis                                      |
+| Purpose: convert a logical string to a visual one          |
+| Input: 1) The logical string.                              |
+|        2) Base direction -                                 |
+|             Possible values:                               |
+|             a) FRIBIDI_LTR  - left to right.               |
+|             b) FRIBIDI_RTL  - right to left.               |
+|             c) FRIBIDI_AUTO - autodetected by the BiDi     |
+|                               BiDi algorithm.              |
+|        3) Character code being used -                      |
+|             Possible values (i.e., charsets supported)     |
+|              FRIBIDI_CHARSET_UTF8                          |
+|              FRIBIDI_CHARSET_8859_6                        |
+|              FRIBIDI_CHARSET_8859_8                        |
+|              FRIBIDI_CHARSET_CP1255                        |
+|              FRIBIDI_CHARSET_CP1256                        |
+|              FRIBIDI_CHARSET_ISIRI_3342                    |
+|                                                            |
+| Output: on success: The visual string.                     |
+|         on failure: FALSE                                  |
++------------------------------------------------------------+
+*/           
 
 /* {{{ proto string fribidi_log2vis(string str, long direction, int charset)
    Convert a logical string to a visual one */
