@@ -21,6 +21,7 @@
 // $Id$
 
 require_once "PEAR/Command/Common.php";
+require_once "PEAR/Builder.php";
 
 /**
  * PEAR commands for building extensions.
@@ -54,49 +55,20 @@ Builds one or more extensions contained in a package.'
         if (sizeof($params) < 1) {
             $params[0] = 'package.xml';
         }
-        $obj = &new PEAR_Common();
-        if (PEAR::isError($info = $obj->infoFromAny($params[0]))) {
-            return $info;
-        }
-        $configure_command = "./configure";
-        if (isset($info['configure_options'])) {
-            foreach ($info['configure_options'] as $o) {
-                $r = $this->ui->userDialog($o['prompt'], 'text', @$o['default']);
-                if ($r == 'yes' && substr($o['name'], 0, 5) == 'with-') {
-                    $configure_command .= " --$o[name]";
-                } else {
-                    $configure_command .= " --$o[name]=$r";
-                }
-            }
-        }
-        if (isset($_ENV['MAKE'])) {
-            $make_command = $_ENV['MAKE'];
-        } else {
-            $make_command = 'make';
-        }
-        $to_run = array(
-            "phpize",
-            $configure_command,
-            $make_command,
-            );
-        foreach ($to_run as $cmd) {
-            if (PEAR::isError($err = $this->_runCommand($cmd))) {
-                return $err;
-            }
+        $builder = &new PEAR_Builder($this->ui);
+        $err = $builder->build($params[0], array(&$this, 'buildCallback'));
+        if (PEAR::isError($err)) {
+            return $err;
         }
         return true;
     }
 
-    function _runCommand($command)
+    function buildCallback($what, $data)
     {
-        $pp = @popen($command, "r");
-        if (!$pp) {
-            return $this->raiseError("failed to run `$command'");
+        switch ($what) {
+            case 'output':
+                $this->ui->displayLine(rtrim($data));
+                break;
         }
-        while ($line = fgets($pp, 1024)) {
-            $this->ui->displayLine(rtrim($line));
-        }
-        pclose($pp);
-        
     }
 }

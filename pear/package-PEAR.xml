@@ -35,11 +35,13 @@
     <state>beta</state>
     <date>YYYY-MM-DD</date>
     <notes>
-* fixed broken "help" command
+* fix: "help" command was broken
 * new command: "info"
 * new command: "config-help"
 * un-indent multi-line data from xml description files
 * new command: "build"
+* fix: config-set did not work with "set" parameters
+* disable magic_quotes_runtime
 </notes>
     <filelist>
       <file role="data" name="package.dtd"/>
@@ -65,6 +67,7 @@
           <file role="php" name="CLI.php"/>
           <file role="php" name="Gtk.php"/>
         </dir>
+        <file role="php" name="Builder.php"/>
         <file role="php" name="Installer.php"/>
         <file role="php" name="Packager.php"/>
         <file role="php" name="Registry.php"/>
