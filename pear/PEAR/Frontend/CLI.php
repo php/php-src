@@ -397,7 +397,7 @@ class PEAR_Frontend_CLI extends PEAR
                 break;
             case 'config-show':
                 $data['border'] = true;
-                $opts = array(0 => array('wrap' => 20),
+                $opts = array(0 => array('wrap' => 30),
                               1 => array('wrap' => 20),
                               2 => array('wrap' => 35));
                 $this->_startTable($data);
