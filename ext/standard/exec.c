@@ -347,15 +347,18 @@ char * _php3_escapeshellcmd(char *str) {
 PHP_FUNCTION(escapeshellcmd)
 {
 	pval *arg1;
-	char *cmd;
+	char *cmd = NULL;
 
 	if (getParameters(ht, 1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	cmd = _php3_escapeshellcmd(arg1->value.str.val);
-
-	RETVAL_STRING(cmd,1);
-	efree(cmd);
+	
+	convert_to_string(arg1);
+	if (arg1->value.str.len) {
+		cmd = _php3_escapeshellcmd(arg1->value.str.val);
+		RETVAL_STRING(cmd, 1);
+		efree(cmd);
+	}
 }
 /* }}} */
 
