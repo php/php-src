@@ -1,16 +1,16 @@
 ## Process this file with automake to produce Makefile.in -*- makefile -*-
 
-#CLEANFILES = zend-parser.c zend-parser.h zend-scanner.c zend-parser.output 
+#CLEANFILES = zend_language_parser.c zend_language_parser.h zend_language_scanner.c zend_language_parser.output 
 
 AUTOMAKE_OPTIONS=foreign
 EXTRA_LTLIBRARIES=libZend_cc.la libZend_c.la
 noinst_LTLIBRARIES=$(ZEND_SCANNER) libZend.la
 
-libZend_cc_la_SOURCES=zend-scanner-cc.cc
-libZend_c_la_SOURCES=zend-scanner.c
+libZend_cc_la_SOURCES=zend_language_scanner_cc.cc
+libZend_c_la_SOURCES=zend_language_scanner.c
 
 libZend_la_SOURCES=\
-	zend-parser.y \
+	zend_language_parser.y \
 	zend_alloc.c zend_compile.c zend_constants.c zend_dynamic_array.c \
 	zend_execute.c zend_execute_API.c zend_highlight.c zend_llist.c \
 	zend_opcode.c zend_operators.c zend_ptr_stack.c zend_stack.c \
@@ -24,17 +24,17 @@ libZend_la_DEPENDENCIES = $(ZEND_SCANNER)
 
 # automake isn't too clever about "non-standard" use of lex and yacc
 
-$(libZend_la_OBJECTS) zend-scanner.lo zend-scanner-cc.lo: zend-parser.h
+$(libZend_la_OBJECTS) zend_language_scanner.lo zend_language_scanner_cc.lo: zend_language_parser.h
 
-zend-scanner.c: $(srcdir)/zend-scanner.l
-	$(LEX) -Pzend -o$@ -i $(srcdir)/zend-scanner.l
+zend_language_scanner.c: $(srcdir)/zend_language_scanner.l
+	$(LEX) -Pzend -o$@ -i $(srcdir)/zend_language_scanner.l
 
-zend-scanner-cc.cc: $(srcdir)/zend-scanner.l
-	$(LEX) -+ -B -i -S$(srcdir)/flex.skl -Pzend -o$@ $(srcdir)/zend-scanner.l
+zend_language_scanner_cc.cc: $(srcdir)/zend_language_scanner.l
+	$(LEX) -+ -B -i -S$(srcdir)/flex.skl -Pzend -o$@ $(srcdir)/zend_language_scanner.l
 
-zend-parser.h: zend-parser.c
-zend-parser.c: $(srcdir)/zend-parser.y
-	$(YACC) -p zend -v -d $(srcdir)/zend-parser.y -o zend-parser.c
+zend_language_parser.h: zend_language_parser.c
+zend_language_parser.c: $(srcdir)/zend_language_parser.y
+	$(YACC) -p zend -v -d $(srcdir)/zend_language_parser.y -o zend_language_parser.c
 
 depend:
 

@@ -86,7 +86,7 @@
 	".\zend_llist.h"\
 	".\zend_ptr_stack.h"\
 	".\zend_stack.h"\
-	".\zend-parser.tab.h"\
+	".\zend_language_parser.tab.h"\
 	".\zend.h"\
 	".\zend_errors.h"\
 	".\zend_globals.h"\
