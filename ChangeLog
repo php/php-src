@@ -1,3 +1,35 @@
+2001-09-29  Jon Parise  <jon@csh.rit.edu>
+
+    * configure.in: Build pear/scripts/phptar in the configure run.
+
+2001-09-29  Sergey Kartashoff  <gluke@biosys.net>
+
+    * ext/mnogosearch/index.php: Search frontend example has been updated.
+
+    * ext/mnogosearch/php_mnogo.c:
+    - initial support of mnogosearch-3.2.x has been added. Not all features
+      are implemented currently.
+    - initial support of mnogosearch-3.2.x has been added. Not all features
+      are implemented currently.
+
+    * ext/mnogosearch/index.php:
+2001-09-29  Rui Hirokawa  <louis@cityfujisawa.ne.jp>
+
+    * pear/DB/pgsql.php:
+    fixed a bug of DB/pgsql connecting on alternate ports. (contributed by Jeremy Maziarz <jmaziarz@linus.mitre.org>)
+
+    * ext/ming/config.m4: ming-0.2a needs rint() in libm.
+
+2001-09-29  Mark L. Woodward  <mlwmohawk@mohawksoft.com>
+
+    * ext/msession/msession.c:
+    Doh! Return nothing when there is nothing back from a plugin
+
+2001-09-29  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/PEAR/Common.php:
+    extract only the package.xml file instead of all files
+
 2001-09-28  Mark L. Woodward  <mlwmohawk@mohawksoft.com>
 
     * ext/msession/msession.c
