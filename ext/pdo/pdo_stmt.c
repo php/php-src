@@ -241,7 +241,6 @@ static int really_register_bound_param(struct pdo_bound_param_data *param, pdo_s
 	}
 
 	if (param->name) {
-fprintf(stderr, "registering %d %s\n", param->namelen, param->name);
 		param->name = estrndup(param->name, param->namelen);
 		zend_hash_update(hash, param->name, param->namelen, param, sizeof(*param), (void**)&pparam);
 	} else {
