@@ -303,7 +303,6 @@ package if needed.
         $downloaded = $this->downloader->getDownloadedPackages();
         $this->installer->sortPkgDeps($downloaded);
         foreach ($downloaded as $pkg) {
-            $bn = basename($pkg['file']);
             $info = $this->installer->install($pkg['file'], $options, $this->config);
             if (is_array($info)) {
                 if ($this->config->get('verbose') > 0) {
