@@ -67,6 +67,16 @@ int foo(int x, ...) {
 int main() { return foo(10, "", 3.14); }
       ], [cv_php_mbstring_stdarg=yes], [cv_php_mbstring_stdarg=no])
     ])
+
+    AC_CHECK_HEADERS([stdlib.h string.h strings.h unistd.h sys/time.h sys/times.h])
+    AC_CHECK_SIZEOF(int, 4)
+    AC_CHECK_SIZEOF(short, 2)
+    AC_CHECK_SIZEOF(long, 4)
+    AC_C_CONST
+    AC_HEADER_TIME 
+    AC_FUNC_ALLOCA
+    AC_FUNC_MEMCMP
+
     if test "$cv_php_mbstring_stdarg" = "yes"; then
       AC_DEFINE([HAVE_STDARG_PROTOTYPES], 1, [Define if stdarg.h is available])
     fi
