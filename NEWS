@@ -2,7 +2,7 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2004, PHP 5 Release Candidate 1
 - Renamed php.ini option "zend2.implicit_clone" to 
-  "zend.ze2_compatibility_mode" as it doesn't only affect implicit cloning.
+  "zend.ze1_compatibility_mode" as it doesn't only affect implicit cloning.
   (Andi, Zeev)
 - Methods that override parent methods are now subject to prototype checking,
   and have to be compatible with the method they're overriding - this check is 
