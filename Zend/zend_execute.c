@@ -550,6 +550,12 @@ static void zend_fetch_var_address(zend_op *opline, temp_variable *Ts, int type 
 		case ZEND_FETCH_STATIC_MEMBER:
 			target_symbol_table = Ts[opline->op2.u.var].EA.class_entry->static_members;
 			break;
+		case ZEND_FETCH_THIS:
+			if (!EG(this)) {
+				zend_error(E_ERROR, "Using $this when not in object context");
+			}
+			target_symbol_table = Z_OBJPROP_P(EG(this));
+			break;
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 
@@ -1595,7 +1601,14 @@ binary_assign_op_addr: {
 					
 					EX(calling_namespace) = EG(namespace);
 
-					EX(object).ptr = get_zval_ptr(&EX(opline)->op1, EX(Ts), &EG(free_op1), BP_VAR_R);
+					if (EX(opline)->extended_value == ZEND_FETCH_THIS) {
+						if (!EG(this)) {
+							zend_error(E_ERROR, "Can't fetch $this as not in object context");
+						}
+						EX(object).ptr = EG(this);
+					} else {
+						EX(object).ptr = get_zval_ptr(&EX(opline)->op1, EX(Ts), &EG(free_op1), BP_VAR_R);
+					}
 							
 					/* Nuked overloaded method code. This will be redone differently */
 
@@ -1634,7 +1647,6 @@ binary_assign_op_addr: {
 					zval *function_name;
 					zend_function *function;
 					zval tmp;
-					zval **object_ptr_ptr;
 					zend_class_entry *ce;
 					zend_bool is_const;
 					char *function_name_strval;
@@ -1662,14 +1674,10 @@ binary_assign_op_addr: {
 					
 					EX(calling_namespace) = EG(namespace);
 					
-					if (zend_hash_find(EG(active_symbol_table), "this", sizeof("this"), (void **) &object_ptr_ptr)==FAILURE) {
-						EX(object).ptr=NULL;
-					} else {
-						/* We assume that "this" is already is_ref and pointing to the object.
-						   If it isn't then tough */
-						EX(object).ptr = *object_ptr_ptr;
-						EX(object).ptr->refcount++; /* For this pointer */
+					if (EX(object).ptr = EG(this)) {
+						EX(object).ptr->refcount++;
 					}
+
 					ce = EX(Ts)[EX(opline)->op1.u.var].EA.class_entry;
 
 					EX(calling_namespace) = ce;
@@ -1764,11 +1772,15 @@ do_fcall_common:
 				{
 					zval **original_return_value;
 					zend_class_entry *current_namespace;
+					zval *current_this;
 					int return_value_used = RETURN_VALUE_USED(EX(opline));
 
 					zend_ptr_stack_n_push(&EG(argument_stack), 2, (void *) EX(opline)->extended_value, NULL);
 					current_namespace = EG(namespace);
 					EG(namespace) = EX(calling_namespace);
+
+					current_this = EG(this);
+					EG(this) = EX(object).ptr;
 
 					EX(Ts)[EX(opline)->result.u.var].var.ptr_ptr = &EX(Ts)[EX(opline)->result.u.var].var.ptr;
 
@@ -1776,9 +1788,6 @@ do_fcall_common:
 						ALLOC_ZVAL(EX(Ts)[EX(opline)->result.u.var].var.ptr);
 						INIT_ZVAL(*(EX(Ts)[EX(opline)->result.u.var].var.ptr));
 						((zend_internal_function *) EX(function_state).function)->handler(EX(opline)->extended_value, EX(Ts)[EX(opline)->result.u.var].var.ptr, EX(object).ptr, return_value_used TSRMLS_CC);
-						if (EX(object).ptr) {
-							zval_ptr_dtor(&EX(object).ptr);
-						}
 						EX(Ts)[EX(opline)->result.u.var].var.ptr->is_ref = 0;
 						EX(Ts)[EX(opline)->result.u.var].var.ptr->refcount = 1;
 						if (!return_value_used) {
@@ -1798,16 +1807,6 @@ do_fcall_common:
 						}
 						calling_symbol_table = EG(active_symbol_table);
 						EG(active_symbol_table) = EX(function_state).function_symbol_table;
-						if (EX(opline)->opcode==ZEND_DO_FCALL_BY_NAME
-							&& EX(object).ptr
-							&& EX(fbc)->type!=ZEND_OVERLOADED_FUNCTION) {
-							zval **this_ptr;
-							zval *null_ptr = NULL;
-
-							zend_hash_update(EX(function_state).function_symbol_table, "this", sizeof("this"), &null_ptr, sizeof(zval *), (void **) &this_ptr);
-							*this_ptr = EX(object).ptr;
-							EX(object).ptr = NULL;
-						}
 						original_return_value = EG(return_value_ptr_ptr);
 						EG(return_value_ptr_ptr) = EX(Ts)[EX(opline)->result.u.var].var.ptr_ptr;
 						EG(active_op_array) = (zend_op_array *) EX(function_state).function;
@@ -1854,6 +1853,12 @@ do_fcall_common:
 
 					EG(namespace) = current_namespace;
 
+					if (EG(this)) {
+						zval_ptr_dtor(&EG(this));
+					}
+
+					EG(this) = current_this;
+					
 					if (EG(exception)) {
 						if (EX(opline)->op2.u.opline_num == -1) {
 							RETURN_FROM_EXECUTE_LOOP(execute_data);

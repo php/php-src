@@ -917,6 +917,12 @@ void zend_do_begin_method_call(znode *left_bracket TSRMLS_DC)
 	}
 
 	last_op->opcode = ZEND_INIT_METHOD_CALL;
+
+	if (last_op->extended_value == ZEND_FETCH_THIS) {
+		last_op->op2 = last_op->op1;		
+		memset(&last_op->op1, 0, sizeof(znode));
+	}
+
 	zend_lowercase_znode_if_const(&last_op->op2);
 
 	left_bracket->u.constant.value.lval = ZEND_INIT_FCALL_BY_NAME;
@@ -1980,6 +1986,26 @@ void zend_do_fetch_property(znode *result, znode *object, znode *property TSRMLS
 {
 	zend_op opline;
 	zend_llist *fetch_list_ptr;
+	
+	zend_stack_top(&CG(bp_stack), (void **) &fetch_list_ptr);
+
+	if (fetch_list_ptr->count == 1) {
+		zend_llist_element *le;
+		zend_op *opline_ptr;
+
+		le = fetch_list_ptr->head;
+		opline_ptr = (zend_op *) le->data;
+		if ((opline_ptr->op1.op_type == IS_CONST) && (opline_ptr->op1.u.constant.type == IS_STRING) &&
+			(opline_ptr->op1.u.constant.value.str.len == (sizeof("this")-1)) &&
+			!memcmp(opline_ptr->op1.u.constant.value.str.val, "this", sizeof("this"))) {
+			efree(opline_ptr->op1.u.constant.value.str.val);
+			opline_ptr->op1 = *property;
+			opline_ptr->extended_value = ZEND_FETCH_THIS;
+
+			*result = opline_ptr->result;
+			return;
+		}
+	}
 
 	init_op(&opline TSRMLS_CC);
 	opline.opcode = ZEND_FETCH_OBJ_W;	/* the backpatching routine assumes W */
@@ -1990,7 +2016,6 @@ void zend_do_fetch_property(znode *result, znode *object, znode *property TSRMLS
 	opline.op2 = *property;
 	*result = opline.result;
 
-	zend_stack_top(&CG(bp_stack), (void **) &fetch_list_ptr);
 	zend_llist_add_element(fetch_list_ptr, &opline);
 }
 
