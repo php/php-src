@@ -80,7 +80,7 @@ PHPAPI struct tm *php_gmtime_r(const time_t *const timep, struct tm *p_tm)
 	
 #if !defined(HAVE_LOCALTIME_R) && defined(HAVE_LOCALTIME)
 
-PHPAPI struct tm *localtime_r(const time_t *const timep, struct tm *p_tm)
+PHPAPI struct tm *php_localtime_r(const time_t *const timep, struct tm *p_tm)
 {
 	struct tm *tmp;
 	
@@ -101,7 +101,7 @@ PHPAPI struct tm *localtime_r(const time_t *const timep, struct tm *p_tm)
 
 #if !defined(HAVE_CTIME_R) && defined(HAVE_CTIME)
 
-PHPAPI char *ctime_r(const time_t *clock, char *buf)
+PHPAPI char *php_ctime_r(const time_t *clock, char *buf)
 {
 	char *tmp;
 	
