@@ -898,9 +898,9 @@ EXTRA_LDFLAGS="$EXTRA_LDFLAGS $PHP_LDFLAGS"
 
 PHP_BUILD_DATE=`date '+%Y-%m-%d'`
 AC_DEFINE_UNQUOTED(PHP_BUILD_DATE,"$PHP_BUILD_DATE",[PHP build date])
-PHP_UNAME=`uname -a`
+PHP_UNAME=`uname -a | xargs`
 AC_DEFINE_UNQUOTED(PHP_UNAME,"$PHP_UNAME",[uname -a output])
-PHP_OS=`uname`
+PHP_OS=`uname | xargs`
 AC_DEFINE_UNQUOTED(PHP_OS,"$PHP_OS",[uname output])
 
 if test "$disable_cli" != "1"; then
