@@ -383,27 +383,19 @@ static int
 php_ns_module_main(NSLS_D SLS_DC)
 {
 	zend_file_handle file_handle;
-	int fd;
 	CLS_FETCH();
 	ELS_FETCH();
 	PLS_FETCH();
 
-	file_handle.type = ZEND_HANDLE_FD;
+	file_handle.type = ZEND_HANDLE_FILENAME;
 	file_handle.filename = SG(request_info).path_translated;
-	file_handle.handle.fd = fd = open(SG(request_info).path_translated, O_RDONLY);
-	if (fd == -1) {
-		return NS_ERROR;
-	}
 	
 	if (php_request_startup(CLS_C ELS_CC PLS_CC SLS_CC) == FAILURE) {
-		close(fd);
 		return NS_ERROR;
 	}
 	php_ns_hash_environment(NSLS_C CLS_CC ELS_CC PLS_CC SLS_CC);
 	php_execute_script(&file_handle CLS_CC ELS_CC PLS_CC);
 	php_request_shutdown(NULL);
-
-	close(fd);
 
 	return NS_OK;
 }
