@@ -30,6 +30,7 @@
 #include "safe_mode.h"
 #include "SAPI.h"
 
+
 /*
  * php_checkuid
  *
@@ -40,20 +41,23 @@
  * 2 - if file does not exist, check directory
  * 3 - only check directory (needed for mkdir)
  */
-PHPAPI int php_checkuid(const char *fn, char *fopen_mode, int mode)
+
+PHPAPI int php_checkuid(const char *filename, char *fopen_mode, int mode)
 {
 	struct stat sb;
 	int ret;
 	long uid=0L, duid=0L;
 	char *s;
 
-	if (!fn) return(0); /* path must be provided */
+	if (!filename) {
+		return 0; /* path must be provided */
+	}
 
 	if (fopen_mode) {
 		if (fopen_mode[0] == 'r') {
-			mode = 0;
+			mode = CHECKUID_DISALLOW_FILE_NOT_EXISTS;
 		} else {
-			mode = 2;
+			mode = CHECKUID_CHECK_FILE_AND_DIR;
 		}
 	}
 
@@ -61,58 +65,64 @@ PHPAPI int php_checkuid(const char *fn, char *fopen_mode, int mode)
 	 * If given filepath is a URL, allow - safe mode stuff
 	 * related to URL's is checked in individual functions
      */	
-	if (!strncasecmp(fn,"http://",7) || !strncasecmp(fn,"ftp://",6)) {
-		return(1);
+	if (!strncasecmp(filename,"http://",7) || !strncasecmp(filename,"ftp://",6)) {
+		return 1;
 	}
 		
-	if (mode<3) {
-		ret = V_STAT(fn,&sb);
-		if (ret<0 && mode < 2) {
-			php_error(E_WARNING,"Unable to access %s",fn);
-			return(mode);
-		}
-		if (ret>-1) {
-			uid=sb.st_uid;
-			if (uid==php_getuid()) return(1);
+	if (mode != CHECKUID_ALLOW_ONLY_DIR) {
+		ret = V_STAT(filename, &sb);
+		if (ret < 0) {
+			if (mode == CHECKUID_DISALLOW_FILE_NOT_EXISTS) {
+				php_error(E_WARNING, "Unable to access %s", filename);
+				return 0;
+			} else if (mode == CHECKUID_ALLOW_FILE_NOT_EXISTS)
+				php_error(E_WARNING, "Unable to access %s", filename);{
+				return 1;
+			}
+		} else {
+			uid = sb.st_uid;
+			if (uid == php_getuid()) {
+				return 1;
+			}
 		}
 	}
-	s = strrchr(fn,'/');
+	s = strrchr(filename,'/');
 
 	/* This loop gets rid of trailing slashes which could otherwise be
 	 * used to confuse the function.
 	 */
-	while(s && *(s+1)=='\0' && s>fn) {
+	while(s && *(s+1)=='\0' && s>filename) {
 		*s='\0';
-		s = strrchr(fn,'/');
+		s = strrchr(filename,'/');
 	}
 
 	if (s) {
 		*s='\0';
-		ret = V_STAT(fn,&sb);
+		ret = V_STAT(filename, &sb);
 		*s='/';
-		if (ret<0) {
-			php_error(E_WARNING, "Unable to access %s",fn);
-			return(0);
+		if (ret < 0) {
+			php_error(E_WARNING, "Unable to access %s", filename);
+			return 0;
 		}
 		duid = sb.st_uid;
 	} else {
-		s = emalloc(MAXPATHLEN+1);
-		if (!V_GETCWD(s,MAXPATHLEN)) {
+		char cwd[MAXPATHLEN+1];
+		if (!V_GETCWD(cwd, MAXPATHLEN)) {
 			php_error(E_WARNING, "Unable to access current working directory");
-			return(0);
+			return 0;
 		}
-		ret = V_STAT(s,&sb);
-		efree(s);
-		if (ret<0) {
-			php_error(E_WARNING, "Unable to access %s",s);
-			return(0);
+		ret = V_STAT(cwd, &sb);
+		if (ret < 0) {
+			php_error(E_WARNING, "Unable to access %s", cwd);
+			return 0;
 		}
 		duid = sb.st_uid;
 	}
-	if (duid == (uid=php_getuid())) return(1);
-	else {
-		php_error(E_WARNING, "SAFE MODE Restriction in effect.  The script whose uid is %ld is not allowed to access %s owned by uid %ld",uid,fn,duid);
-		return(0);
+	if (duid == (uid=php_getuid())) {
+		return 1;
+	} else {
+		php_error(E_WARNING, "SAFE MODE Restriction in effect.  The script whose uid is %ld is not allowed to access %s owned by uid %ld", uid, filename, duid);
+		return 0;
 	}
 }
 
