@@ -8,6 +8,7 @@ PHP                                                                        NEWS
 - Fixed bug #30276 (Possible crash in ctype_digit on large numbers). (Ilia)
 - Fixed bug #30224 (Sybase date strings are sometimes not null terminated).
   (Ilia)
+- Fixed bug #30175 (SOAP results aren't parsed correctly). (Dmitry)
 - Fixed bug #30147 (OO sqlite_fetch_object did not reset error handler). (Wez)
 - Fixed bug #30133 (get_current_user() crashes on Windows). (Edin)
 - Fixed bug #30057 (did not detect IPV6 on FreeBSD 4.1). (Wez)
