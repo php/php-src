@@ -885,7 +885,7 @@ static sdlPtr load_wsdl(char *struri)
 
 							f->name = estrdup(name->children->content);
 							f->details = wsdl_message(&ctx, message->children->content);
-							if (f->details == NULL || zend_hash_num_elements(f->details) != 1) {
+							if (f->details == NULL || zend_hash_num_elements(f->details) > 1) {
 								php_error(E_ERROR, "SOAP-ERROR: Parsing WSDL: The fault message '%s' must have a single part", message->children->content);
 							}
 
