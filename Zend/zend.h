@@ -280,6 +280,7 @@ struct _zend_class_entry {
 	struct _zend_class_entry *parent; 
 	int *refcount;
 	zend_bool constants_updated;
+	zend_bool is_namespace;
 
 	HashTable function_table;
 	HashTable default_properties;

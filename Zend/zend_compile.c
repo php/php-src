@@ -841,10 +841,7 @@ int zend_do_begin_function_call(znode *function_name TSRMLS_DC)
 	
 	zend_str_tolower(function_name->u.constant.value.str.val, function_name->u.constant.value.str.len);
 	if (zend_hash_find(CG(function_table), function_name->u.constant.value.str.val, function_name->u.constant.value.str.len+1, (void **) &function)==FAILURE) {
-		znode tmp = *function_name;
-
-		zval_copy_ctor(&tmp.u.constant);
-		zend_do_begin_dynamic_function_call(&tmp TSRMLS_CC);
+		zend_do_begin_dynamic_function_call(function_name TSRMLS_CC);
 		return 1; /* Dynamic */
 	}
 	
@@ -1705,7 +1702,7 @@ void zend_do_default_before_statement(znode *case_list, znode *default_token TSR
 }
 
 
-void zend_do_begin_class_declaration(znode *class_token, znode *class_name, znode *parent_class_name TSRMLS_DC)
+void zend_do_begin_class_declaration(znode *class_token, znode *class_name, znode *parent_class_name, zend_bool is_namespace TSRMLS_DC)
 {
 	zend_op *opline;
 	int runtime_inheritance = 0;
@@ -1718,6 +1715,7 @@ void zend_do_begin_class_declaration(znode *class_token, znode *class_name, znod
 	new_class_entry.refcount = (int *) emalloc(sizeof(int));
 	*new_class_entry.refcount = 1;
 	new_class_entry.constants_updated = 0;
+	new_class_entry.is_namespace = is_namespace;
 	
 	zend_str_tolower(new_class_entry.name, new_class_entry.name_length);
 
