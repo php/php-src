@@ -10,7 +10,7 @@
     * ext/standard/string.c:    we save one buffer-copy as well (hehe)
 
     * ext/standard/string.c:
-1999-12-06  Andrei Zmievski  <zmievski@ispi.net>
+1999-12-06  Andrei Zmievski  <andrei@ispi.net>
 
     * ext/pcre/php_pcre.c: Add another item.
 
@@ -157,7 +157,7 @@
 
     * configuration-parser.y: Build error
 
-1999-12-04  Andrei Zmievski  <zmievski@ispi.net>
+1999-12-04  Andrei Zmievski  <andrei@ispi.net>
 
     * ext/session/session.c:
     Cast val to (char *) to avoid compile warning.
@@ -340,7 +340,7 @@
     .*\.[ch] files were changed. There is a slight chance that my script missed
     a few changes, please correct them manually.
 
-1999-12-04  Andrei Zmievski  <zmievski@ispi.net>
+1999-12-04  Andrei Zmievski  <andrei@ispi.net>
 
     * ext/session/session.c:
     (php_set_session_var) Initialize the refcount here.
@@ -367,7 +367,7 @@
 
     * TODO: some more ideas
 
-1999-12-04  Andrei Zmievski  <zmievski@ispi.net>
+1999-12-04  Andrei Zmievski  <andrei@ispi.net>
 
     * ext/session/session.c:
     (PHP session_register) Correct calling convention.
@@ -437,7 +437,7 @@
 
     * ext/standard/info.c: Added credit notes for Roxen SAPI module
 
-1999-12-03  Andrei Zmievski  <zmievski@ispi.net>
+1999-12-03  Andrei Zmievski  <andrei@ispi.net>
 
     * ext/session/mod_files.c: Include errno.h.
 
@@ -642,7 +642,7 @@
 
     * ext/informix/ifx.ec: Typo
 
-1999-11-29  Andrei Zmievski  <zmievski@ispi.net>
+1999-11-29  Andrei Zmievski  <andrei@ispi.net>
 
     * pear/DB.php: Modified to use preg_* functions.
 
@@ -683,7 +683,7 @@
       Don't worry, such a dsn can be as short as "mysql"
     - Added mysql support
 
-1999-11-29  Andrei Zmievski  <zmievski@ispi.net>
+1999-11-29  Andrei Zmievski  <andrei@ispi.net>
 
     * NEWS: Name update.
 
@@ -766,7 +766,7 @@
     Improved build (now sets also runtime library search paths, works
     out-of-the-box with Apache)
 
-1999-11-27  Andrei Zmievski  <zmievski@ispi.net>
+1999-11-27  Andrei Zmievski  <andrei@ispi.net>
 
     * ext/domxml/.cvsignore: Don't cry, CVS.
 
@@ -1006,7 +1006,7 @@
 
     * NEWS: Mention new select(), fd_set() and fd_isset() functions
 
-1999-11-24  Andrei Zmievski  <zmievski@ispi.net>
+1999-11-24  Andrei Zmievski  <andrei@ispi.net>
 
     * NEWS: Cleaning up remnants of ChangeLog manipulations.
 
@@ -1057,7 +1057,7 @@
       sapi/roxen/roxen.c:
     First version of Pike/Roxen module for embedding PHP.
 
-1999-11-23  Andrei Zmievski  <zmievski@ispi.net>
+1999-11-23  Andrei Zmievski  <andrei@ispi.net>
 
     * TODO: Re-arranging a bit.
 
@@ -1071,7 +1071,7 @@
 
     * TODO: add some points
 
-1999-11-23  Andrei Zmievski  <zmievski@ispi.net>
+1999-11-23  Andrei Zmievski  <andrei@ispi.net>
 
     * sapi/cgi/cgi_main.c:
     (main) In this special case, free path_translated. Fix for #2795.
@@ -1117,7 +1117,7 @@
     * ext/standard/output.c
       main.c: errors during startup trap server
 
-1999-11-23  Andrei Zmievski  <zmievski@ispi.net>
+1999-11-23  Andrei Zmievski  <andrei@ispi.net>
 
     * NEWS: Formatting.
 
@@ -1132,7 +1132,7 @@
     * ext/standard/output.c
       main.c: Fixed a leak when using automatic output buffering
 
-1999-11-22  Andrei Zmievski  <zmievski@ispi.net>
+1999-11-22  Andrei Zmievski  <andrei@ispi.net>
 
     * buildconf: Don't forget the pickle.
 
@@ -1249,7 +1249,7 @@
       ext/dba/php3_db3.h
       ext/dba/Makefile.am: add Berkeley DB3 support
 
-1999-11-20  Andrei Zmievski  <zmievski@ispi.net>
+1999-11-20  Andrei Zmievski  <andrei@ispi.net>
 
     * ext/standard/string.c:
     (PHP substr_replace) Changed the order of the arguments.
@@ -1304,7 +1304,7 @@
     - Start PostgreSQL support for Win32. Just added preliminary ZTS support.
       Still need to make minit ZTS.
 
-1999-11-19  Andrei Zmievski  <zmievski@ispi.net>
+1999-11-19  Andrei Zmievski  <andrei@ispi.net>
 
     * ext/pcre/php_pcre.c:
     (PHP preg_replace) Fixed a bug that cause backreferences to lose
@@ -1392,7 +1392,7 @@
 
     * NEWS: NEWS update
 
-1999-11-16  Andrei Zmievski  <zmievski@ispi.net>
+1999-11-16  Andrei Zmievski  <andrei@ispi.net>
 
     * ext/standard/basic_functions.c
       ext/standard/php3_string.h
@@ -1418,7 +1418,7 @@
     * php_version.h
       configure.in: 4.0b3 coming up
 
-1999-11-15  Andrei Zmievski  <zmievski@ispi.net>
+1999-11-15  Andrei Zmievski  <andrei@ispi.net>
 
     * NEWS: cleaning up
 
@@ -1485,7 +1485,7 @@
       configure.in
       php.h:    Removed the mkstemp stuff and added tmpfile() function instead.
 
-1999-11-13  Andrei Zmievski  <zmievski@ispi.net>
+1999-11-13  Andrei Zmievski  <andrei@ispi.net>
 
     * internal_functions.c.in: These are inserted automatically now.
 
@@ -1655,7 +1655,7 @@
 1999-11-10  Rasmus Lerdorf  <rasmus@php.net>
 
     * ext/oci8/oci8.c:
-1999-11-10  Andrei Zmievski  <zmievski@ispi.net>
+1999-11-10  Andrei Zmievski  <andrei@ispi.net>
 
     * NEWS: Remove duplicates.
 
@@ -1881,7 +1881,7 @@
     * ext/sybase/sybase.c:
     (php3_sybase_get_column_content) initialize buffer before call to dbconvert()
 
-1999-11-04  Andrei Zmievski  <zmievski@ispi.net>
+1999-11-04  Andrei Zmievski  <andrei@ispi.net>
 
     * ext/standard/basic_functions.c:
     (PHP multisort) More work, not yet done though.
@@ -1934,7 +1934,7 @@
     * configure.in:
     Additional check for concurrent use of --with-{apache,apxs}
 
-1999-11-02  Andrei Zmievski  <zmievski@ispi.net>
+1999-11-02  Andrei Zmievski  <andrei@ispi.net>
 
     * ext/standard/basic_functions.c: Remove extraneous comment.
 
@@ -1948,7 +1948,7 @@
 
     * NEWS: NEWS update
 
-1999-11-01  Andrei Zmievski  <zmievski@ispi.net>
+1999-11-01  Andrei Zmievski  <andrei@ispi.net>
 
     * ext/standard/basic_functions.c
       ext/standard/basic_functions.h: Added array_pad() function.
@@ -1958,7 +1958,7 @@
     * ext/imap/imap.c:
     Trying to clean up the last of the body->id/body->description confusion.
 
-1999-11-01  Andrei Zmievski  <zmievski@ispi.net>
+1999-11-01  Andrei Zmievski  <andrei@ispi.net>
 
     * php.ini-dist: Added new session configuration directives.
 
@@ -2036,7 +2036,7 @@
     * Makefile.am:
     Remove set-if-not-set colon, since CPPFLAGS is never set by automake.
 
-1999-10-28  Andrei Zmievski  <zmievski@ispi.net>
+1999-10-28  Andrei Zmievski  <andrei@ispi.net>
 
     * ext/pcre/php_pcre.c: Fix bug #2623.
 
@@ -2051,7 +2051,7 @@
     * php4dllts.dsp:
     look for output.c in its new location in the windows build
 
-1999-10-27  Andrei Zmievski  <zmievski@ispi.net>
+1999-10-27  Andrei Zmievski  <andrei@ispi.net>
 
     * ext/standard/basic_functions.c
       ext/standard/php3_string.h
@@ -2074,7 +2074,7 @@
     Win32 project need to be updated to reflect new position.
 
     * ext/oci8/oci8.c:
-1999-10-27  Andrei Zmievski  <zmievski@ispi.net>
+1999-10-27  Andrei Zmievski  <andrei@ispi.net>
 
     * ext/standard/basic_functions.c: Forgot to remove function entry.
 
@@ -2082,7 +2082,7 @@
 
     * ext/standard/file.c: eliminated warinigs
 
-1999-10-26  Andrei Zmievski  <zmievski@ispi.net>
+1999-10-26  Andrei Zmievski  <andrei@ispi.net>
 
     * TODO: No tabs please.
 
@@ -2199,7 +2199,7 @@
 
     * ext/standard/var.c: (PHP var_dump, serialize) fixed mem_leak.
 
-1999-10-20  Andrei Zmievski  <zmievski@ispi.net>
+1999-10-20  Andrei Zmievski  <andrei@ispi.net>
 
     * .cvsignore: Ignore shared modules directory.
 
@@ -2218,7 +2218,7 @@
 
     * NEWS: NEWS update
 
-1999-10-19  Andrei Zmievski  <zmievski@ispi.net>
+1999-10-19  Andrei Zmievski  <andrei@ispi.net>
 
     * main.c: Revert my patches to error functions.
 
@@ -2230,7 +2230,7 @@
     (0 == false) is true
     (0 === false) is false (integer != boolean)
 
-1999-10-19  Andrei Zmievski  <zmievski@ispi.net>
+1999-10-19  Andrei Zmievski  <andrei@ispi.net>
 
     * ext/standard/basic_functions.c (PHP extract):
     Fixed bug that would mess up global and referenced
@@ -2284,11 +2284,11 @@
 
     * ext/standard/math.c: One typo corrected.
 
-1999-10-17  Andrei Zmievski  <zmievski@ispi.net>
+1999-10-17  Andrei Zmievski  <andrei@ispi.net>
 
     * ext/zlib/zlib.c: Fix bug #2548.
 
-1999-10-16  Andrei Zmievski  <zmievski@ispi.net>
+1999-10-16  Andrei Zmievski  <andrei@ispi.net>
 
     * ext/xml/xml.c
       ext/standard/file.c
@@ -2309,7 +2309,7 @@
     - Get windows version to compile again. No biggy if array_map is not #if 0'd
       out even if it doesn't work.
 
-1999-10-15  Andrei Zmievski  <zmievski@ispi.net>
+1999-10-15  Andrei Zmievski  <andrei@ispi.net>
 
     * ext/standard/basic_functions.h: *** empty log message ***
 
@@ -2347,7 +2347,7 @@
     * ext/standard/basic_functions.h
       ext/standard/basic_functions.c: (is_resource, is_bool) new functions
 
-1999-10-15  Andrei Zmievski  <zmievski@ispi.net>
+1999-10-15  Andrei Zmievski  <andrei@ispi.net>
 
     * ext/pcre/php_pcre.c:
     (_php_replace_in_subject)
@@ -2372,7 +2372,7 @@
     but they are accessible thru "php_file_le_socket(), php_file_le_uploads()..."
     i also updated the ftp, pdf and file-upload stuff to match the new requirements.
 
-1999-10-15  Andrei Zmievski  <zmievski@ispi.net>
+1999-10-15  Andrei Zmievski  <andrei@ispi.net>
 
     * ext/standard/string.c (PHP implode): Properly separate zval for another case.
 
@@ -2426,7 +2426,7 @@
     new zend-api for html-function (not worth mentioning in NEWS)
 
     * ext/standard/math.c:
-1999-10-13  Andrei Zmievski  <zmievski@ispi.net>
+1999-10-13  Andrei Zmievski  <andrei@ispi.net>
 
     * MAINTAINERS: Add mhash module.
 
@@ -2471,7 +2471,7 @@
       ext/msql/php_msql.c:
     new improved resource-API (i hope everything still compiles)
 
-1999-10-12  Andrei Zmievski  <zmievski@ispi.net>
+1999-10-12  Andrei Zmievski  <andrei@ispi.net>
 
     * MAINTAINERS: Just some formatting.
 
@@ -2486,7 +2486,7 @@
 
     * NEWS: NEWS update
 
-1999-10-11  Andrei Zmievski  <zmievski@ispi.net>
+1999-10-11  Andrei Zmievski  <andrei@ispi.net>
 
     * ext/standard/basic_functions.c:
     Modified sorting functions to use updated zend_hash() prototype.
@@ -2585,7 +2585,7 @@
       ext/odbc/php_odbc.h:
     Moved Environment handle to connection struct for thread safety
 
-1999-10-08  Andrei Zmievski  <zmievski@ispi.net>
+1999-10-08  Andrei Zmievski  <andrei@ispi.net>
 
     * README.CVS-RULES: Mention php-cvs-daily list.
 
@@ -2597,7 +2597,7 @@
         Implement temporary workaround for thread-safety issues. This
         serializes all request accesses. To disable, define NO_GLOBAL_LOCK
 
-1999-10-08  Andrei Zmievski  <zmievski@ispi.net>
+1999-10-08  Andrei Zmievski  <andrei@ispi.net>
 
     * README.CVS-RULES: More emphasis on ChangeLog and NEWS daily updates.
 
@@ -2609,7 +2609,7 @@
 
     * tests/test.php4: test
 
-1999-10-08  Andrei Zmievski  <zmievski@ispi.net>
+1999-10-08  Andrei Zmievski  <andrei@ispi.net>
 
     * README.CVS-RULES:
     More information on how to use the special prefixes and the frequency
@@ -2643,7 +2643,7 @@
     * sapi/aolserver/aolserver.c:
     Apparently, we did too much cleanup. The server survives now much longer.
 
-1999-10-07  Andrei Zmievski  <zmievski@ispi.net>
+1999-10-07  Andrei Zmievski  <andrei@ispi.net>
 
     * NEWS: NEWS update
 
@@ -2675,7 +2675,7 @@
     * sapi/aolserver/aolserver.c:
         Add comments to the source code and fix POST-read-data bug.
 
-1999-10-07  Andrei Zmievski  <zmievski@ispi.net>
+1999-10-07  Andrei Zmievski  <andrei@ispi.net>
 
     * TODO-LeftOver: Some ChangeLog surgery.
 
@@ -2694,7 +2694,7 @@
     * sapi/aolserver/Makefile.am
       sapi/aolserver/config.m4:     nsapi => aolserver changes
 
-1999-10-07  Andrei Zmievski  <zmievski@ispi.net>
+1999-10-07  Andrei Zmievski  <andrei@ispi.net>
 
     * NEWS:
     Renaming ChangeLog to NEWS. All future entries intended for public should
@@ -2711,7 +2711,7 @@
       ext/pdf/php3_pdf.h:
     - new functions pdf_get_font, pdf_get_fontsize, pdf_get_fontname
 
-1999-10-07  Andrei Zmievski  <zmievski@ispi.net>
+1999-10-07  Andrei Zmievski  <andrei@ispi.net>
 
     * tests/testfunc: Test commit again.
 
