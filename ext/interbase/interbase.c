@@ -574,7 +574,6 @@ PHP_RSHUTDOWN_FUNCTION(ibase)
 PHP_MINFO_FUNCTION(ibase)
 {
 	char tmp[32];
-	TSRMLS_FETCH();
 
 	php_info_print_table_start();
 	php_info_print_table_row(2, "Interbase Support", "enabled");    

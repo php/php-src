@@ -792,7 +792,7 @@ PHP_FUNCTION(mb_preferred_mime_name)
 
 #if defined(MBSTR_ENC_TRANS)
 static void
-php_mbstr_encoding_handler(zval *arg, char *res, char *separator)
+php_mbstr_encoding_handler(zval *arg, char *res, char *separator TSRMLS_DC)
 {
 	char *var, *val;
 	char *strtok_buf = NULL, **val_list;
@@ -802,7 +802,6 @@ php_mbstr_encoding_handler(zval *arg, char *res, char *separator)
 	mbfl_string string, result, *ret;
 	mbfl_encoding_detector *identd;
 	mbfl_buffer_converter *convd;
-	TSRMLS_FETCH();
 
 	mbfl_string_init(&string);
 	mbfl_string_init(&result);
@@ -927,7 +926,7 @@ SAPI_POST_HANDLER_FUNC(php_mbstr_post_handler)
 {
 	MBSTRG(http_input_identify_post) = mbfl_no_encoding_invalid;
 
-	php_mbstr_encoding_handler(arg, SG(request_info).post_data, "&");
+	php_mbstr_encoding_handler(arg, SG(request_info).post_data, "&" TSRMLS_CC);
 
 	if (MBSTRG(http_input_identify) != mbfl_no_encoding_invalid) {
 		MBSTRG(http_input_identify_post) = MBSTRG(http_input_identify);
@@ -1023,7 +1022,7 @@ void mbstr_treat_data(int arg, char *str, zval* destArray TSRMLS_DC)
 		break;
 	}
 
-	php_mbstr_encoding_handler(array_ptr, res, separator);
+	php_mbstr_encoding_handler(array_ptr, res, separator TSRMLS_CC);
 
 	if (MBSTRG(http_input_identify) != mbfl_no_encoding_invalid) {
 		switch(arg){

@@ -61,13 +61,6 @@ ZEND_BEGIN_MODULE_GLOBALS(ctype)
 ZEND_END_MODULE_GLOBALS(ctype)
 */
 
-/* In every function that needs to use variables in php_ctype_globals,
-   do call TSRMLS_FETCH(); after declaring other variables used by
-   that function, and always refer to them as CTYPEG(variable).
-   You are encouraged to rename these macros something shorter, see
-   examples in any other php module directory.
-*/
-
 #ifdef ZTS
 #define CTYPEG(v) TSRMG(ctype_globals_id, php_ctype_globals *, v)
 #else

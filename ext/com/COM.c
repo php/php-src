@@ -84,7 +84,7 @@ PHPAPI HRESULT php_COM_clone(comval *obj, comval *clone, int cleanup);
 
 PHPAPI int php_COM_get_le_comval();
 static ITypeLib *php_COM_find_typelib(char *search_string, int mode);
-static int php_COM_load_typelib(ITypeLib *TypeLib, int mode);
+static int php_COM_load_typelib(ITypeLib *TypeLib, int mode TSRMLS_DC);
 
 static int le_comval;
 static int codepage;
@@ -414,7 +414,7 @@ static PHP_INI_MH(OnTypelibFileChange)
 		}
 		if((pTL = php_COM_find_typelib(typelib_name, mode)) != NULL)
 		{
-			php_COM_load_typelib(pTL, mode);
+			php_COM_load_typelib(pTL, mode TSRMLS_CC);
 			pTL->lpVtbl->Release(pTL);
 		}
 	}
@@ -606,7 +606,7 @@ PHP_FUNCTION(com_load)
 
 			if(C_TYPEINFO_VT(obj)->GetContainingTypeLib(C_TYPEINFO(obj), &pTL, &idx) == S_OK)
 			{
-				php_COM_load_typelib(pTL, mode);
+				php_COM_load_typelib(pTL, mode TSRMLS_CC);
 				pTL->lpVtbl->Release(pTL);
 			}
 		}
@@ -623,7 +623,7 @@ PHP_FUNCTION(com_load)
 				/* idx 0 should deliver the ITypeInfo for the IDispatch Interface */
 				if(INI_INT("com.autoregister_typelib"))
 				{
-					php_COM_load_typelib(pTL, mode);
+					php_COM_load_typelib(pTL, mode TSRMLS_CC);
 				}
 				pTL->lpVtbl->Release(pTL);
 			}
@@ -1128,7 +1128,7 @@ PHP_FUNCTION(com_load_typelib)
 
 	convert_to_string_ex(&arg_typelib);
 	pTL = php_COM_find_typelib(Z_STRVAL_P(arg_typelib), mode);
-	if(php_COM_load_typelib(pTL, mode) == SUCCESS)
+	if(php_COM_load_typelib(pTL, mode TSRMLS_CC) == SUCCESS)
 	{
 		pTL->lpVtbl->Release(pTL);
 		RETURN_TRUE;
@@ -1573,12 +1573,11 @@ static ITypeLib *php_COM_find_typelib(char *search_string, int mode)
 	return TypeLib;
 }
 
-static int php_COM_load_typelib(ITypeLib *TypeLib, int mode)
+static int php_COM_load_typelib(ITypeLib *TypeLib, int mode TSRMLS_DC)
 {
 	ITypeComp *TypeComp;
 	int i;
 	int interfaces;
-	TSRMLS_FETCH();
 
 	if(NULL == TypeLib)
 	{
@@ -1687,10 +1686,8 @@ PHP_FUNCTION(com_isenum)
 }
 /* }}} */
 
-void php_register_COM_class(void)
+void php_register_COM_class(TSRMLS_D)
 {
-	TSRMLS_FETCH();
-
 	INIT_OVERLOADED_CLASS_ENTRY(com_class_entry, "COM", NULL,
 								php_COM_call_function_handler,
 								php_COM_get_property_handler,
@@ -1703,7 +1700,7 @@ PHP_MINIT_FUNCTION(COM)
 {
 	CoInitialize(NULL);
 	le_comval = zend_register_list_destructors_ex(php_comval_destructor, NULL, "COM", module_number);
-	php_register_COM_class();
+	php_register_COM_class(TSRMLS_C);
 	REGISTER_INI_ENTRIES();
 	return SUCCESS;
 }
