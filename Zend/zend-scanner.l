@@ -1316,14 +1316,15 @@ ESCAPED_AND_WHITESPACE [\n\t\r #'.:;,()|^&+-/*=%!~<>?@]+
 
 
 <ST_IN_SCRIPTING>"%>"([\n]|"\r\n")? {
-	zendlval->value.str.val = yytext; /* no copying - intentional */
 	zendlval->value.str.len = yyleng;
 	zendlval->type = IS_STRING;
 	HANDLE_NEWLINES(yytext,yyleng);
 	if (CG(asp_tags)) {
 		BEGIN(INITIAL);
+		zendlval->value.str.val = yytext; /* no copying - intentional */
 		return T_CLOSE_TAG;  /* implicit ';' at php-end tag */
 	} else {
+	        zendlval->value.str.val = (char *) estrndup(yytext, yyleng);
 		return T_INLINE_HTML;
 	}
 }
