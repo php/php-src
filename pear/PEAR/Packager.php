@@ -51,7 +51,6 @@ class PEAR_Packager extends PEAR_Common
 
     function _PEAR_Packager()
     {
-        chdir($this->orig_pwd);
         $this->_PEAR_Common();
     }
 
