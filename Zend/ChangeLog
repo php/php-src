@@ -1,3 +1,84 @@
+2004-02-25  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_objects_API.c:
+      As Andi found out the dtor may increase the refcount.
+
+2004-02-25  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * zend_builtin_functions.c:
+      ws + cs
+
+2004-02-25  Zeev Suraski  <zeev@zend.com>
+
+    * zend_compile.c
+      zend_execute.c:
+      Fix leak in foreach ($o->mthd()->arr)
+
+    * zend_API.c
+      zend_API.h
+      zend_compile.c
+      zend_compile.h
+      zend_execute.c:
+      - Improve ARG_INFO() macros to support supplying required_num_args
+      - Initial fix for foreach($o->mthd()->arr) crash (now leaks)
+
+2004-02-25  Derick Rethans  <php@derickrethans.nl>
+
+    * zend_highlight.c:
+      - Use <span> instead of <font> in highlight_string(). (Patch by
+      mg@iceni.pl)
+
+2004-02-25  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * zend_exceptions.c:
+      Improve error messages
+
+2004-02-25  Zeev Suraski  <zeev@zend.com>
+
+    * zend.c
+      zend_compile.c
+      zend_execute.c
+      zend_execute_API.c
+      zend_globals.h
+      zend_variables.c:
+      - Rename compatiblity mode to zend.ze2_compatibility_mode (it doesn't  
+      only affect auto-clone).
+      - Perform implementation checks even with simple inheritance (off when
+        compatibility mode is enabled).
+      - Restore default arguments in interfaces and handle it correctly.
+      - Move registration of internal classes later in the startup sequence
+        in order to have INI options available.
+
+2004-02-25  Derick Rethans  <php@derickrethans.nl>
+
+    * zend_exceptions.c:
+      - Fixed bug #27391 (typo in Fatal Error message).
+
+2004-02-25  Zeev Suraski  <zeev@zend.com>
+
+    * zend_API.c
+      zend_compile.c
+      zend_compile.h
+      zend_opcode.c:
+      - Abstract methods cannot have defaults for arguments
+      - Make function foo($a, $b=null) satisfy both foo($a) and foo($a, $b)
+        prototypes
+
+2004-02-25  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * zend_reflection_api.c:
+      Proto fixes.
+
+2004-02-25  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_objects_API.c:
+      Fix object destruction/free in shutdown
+      - set destructor_called even when no dtor is given
+      - use free_storage even when no dtor hat to be called
+
+    * zend_objects_API.c:
+      Checking once for dtor is enough
+
 2004-02-24  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_API.c:

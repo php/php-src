@@ -1,3 +1,181 @@
+2004-02-25  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/standard/tests/general_functions/highlight_heredoc.phpt
+      tests/strings/004.phpt
+      tests/strings/bug26703.phpt:
+      - Fix tests after change to highlight_string()
+
+2004-02-25  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      ext/sockets/sockets.c:
+      MFH:
+      	Fixed bug #21760 (Use of uninitialized pointer inside php_read()).
+      	Fixed 3 possible crashes due to integer overflow or invalid user input
+      	inside the sockets extension.
+
+    * ext/sockets/sockets.c:
+      Fixed bug #21760 (Use of uninitialized pointer inside php_read()).
+      Fixed 3 possible crashes due to integer overflow or invalid user input
+      inside the sockets extension.
+
+2004-02-25  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_objects_API.c:
+      As Andi found out the dtor may increase the refcount.
+
+2004-02-25  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * ZendEngine2/zend_builtin_functions.c:
+      ws + cs
+
+    * tests/lang/bug22367.phpt:
+      Revert and add the compatibility option.
+
+    * NEWS:
+      typofix
+
+2004-02-25  Ard Biesheuvel  <a.k.biesheuvel@ewi.tudelft.nl>
+
+    * ext/bcmath/bcmath.c
+      ext/ftp/php_ftp.c
+      ext/mysqli/mysqli_nonapi.c
+      ext/mysqli/mysqli_report.c
+      ext/oci8/oci8.c
+      ext/pgsql/pgsql.c
+      ext/sqlite/sqlite.c
+      ext/standard/dir.c
+      ext/standard/file.c
+      ext/standard/streamsfuncs.c
+      ext/standard/string.c
+      ext/standard/sunfuncs.c
+      ext/standard/var.c
+      ext/w32api/w32api.c:
+      Wordsize fixes
+
+2004-02-25  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * NEWS:
+      style
+
+    * tests/lang/bug27395.phpt:
+      
+      Test for bug #27395
+
+2004-02-25  Andi Gutmans  <andi@zend.com>
+
+    * NEWS:
+      - More NEWS
+
+2004-02-25  Zeev Suraski  <zeev@zend.com>
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_execute.c:
+      Fix leak in foreach ($o->mthd()->arr)
+
+    * tests/lang/bug22367.phpt:
+      This is no longer valid out of the box PHP 5 code.
+      We tried to enable compatibility mode but the test engine doesn't appear
+      to take the --INI-- section into account in compile time, so it didn't
+      work...
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_execute.c:
+      - Improve ARG_INFO() macros to support supplying required_num_args
+      - Initial fix for foreach($o->mthd()->arr) crash (now leaks)
+
+2004-02-25  Derick Rethans  <php@derickrethans.nl>
+
+    * ZendEngine2/zend_highlight.c:
+      - Use <span> instead of <font> in highlight_string(). (Patch by
+      mg@iceni.pl)
+
+2004-02-25  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * ext/mysqli/config.w32:
+      Do not corrupt mysql build with mysqli build stuff. (should fix #27387)
+
+    * ZendEngine2/zend_exceptions.c:
+      Improve error messages
+
+2004-02-25  Zeev Suraski  <zeev@zend.com>
+
+    * NEWS:
+      update
+
+2004-02-25  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      NEWS
+      ext/standard/pack.c:
+      MFH: Fixed bug #27384 (unpack() misbehaves with 1 char string). (GeorgeS)
+
+2004-02-25  Zeev Suraski  <zeev@zend.com>
+
+    * php.ini-dist
+      php.ini-recommended
+      main/main.c:
+        - Rename compatiblity mode to zend.ze2_compatibility_mode (it doesn't  
+      only affect auto-clone).
+        - Perform implementation checks even with simple inheritance (off when
+          compatibility mode is enabled).
+        - Restore default arguments in interfaces and handle it correctly.
+        - Move registration of internal classes later in the startup sequence
+          in order to have INI options available.
+
+    * ZendEngine2/zend.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_globals.h
+      ZendEngine2/zend_variables.c:
+      - Rename compatiblity mode to zend.ze2_compatibility_mode (it doesn't  
+      only affect auto-clone).
+      - Perform implementation checks even with simple inheritance (off when
+        compatibility mode is enabled).
+      - Restore default arguments in interfaces and handle it correctly.
+      - Move registration of internal classes later in the startup sequence
+        in order to have INI options available.
+
+2004-02-25  Derick Rethans  <php@derickrethans.nl>
+
+    * ZendEngine2/zend_exceptions.c:
+      - Fixed bug #27391 (typo in Fatal Error message).
+
+2004-02-25  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ext/standard/http_fopen_wrapper.c:
+      ZTS fix.
+
+2004-02-25  Zeev Suraski  <zeev@zend.com>
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_opcode.c:
+      - Abstract methods cannot have defaults for arguments
+      - Make function foo($a, $b=null) satisfy both foo($a) and foo($a, $b)
+        prototypes
+
+2004-02-25  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ZendEngine2/zend_reflection_api.c:
+      Proto fixes.
+
+2004-02-25  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_objects_API.c:
+      Fix object destruction/free in shutdown
+      - set destructor_called even when no dtor is given
+      - use free_storage even when no dtor hat to be called
+
+    * ZendEngine2/zend_objects_API.c:
+      Checking once for dtor is enough
+
 2004-02-24  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ZendEngine2/zend_API.c:
