@@ -110,6 +110,10 @@ SOURCE=.\dbx_mysql.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\dbx_oci8.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\dbx_odbc.c
 # End Source File
 # Begin Source File
@@ -135,6 +139,10 @@ SOURCE=.\dbx_mssql.h
 # Begin Source File
 
 SOURCE=.\dbx_mysql.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\dbx_oci8.h
 # End Source File
 # Begin Source File
 

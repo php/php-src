@@ -41,6 +41,14 @@ switch ($connection) {
         $password="dbx_testpassword";
         $module_name="fbsql";
         break;
+    case DBX_OCI8:
+        $module=DBX_OCI8;
+        $host="";
+        $database="dbx_test";
+        $username="dbx_testuser";
+        $password="dbx_testpassword";
+        $module_name="oci8";
+        break;
     }
 
 ?>
