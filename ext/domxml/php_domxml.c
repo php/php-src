@@ -393,16 +393,19 @@ void *php_xpath_get_object(zval *wrapper, int rsrc_type1, int rsrc_type2)
 	TSRMLS_FETCH();
 
 	if (Z_TYPE_P(wrapper) != IS_OBJECT) {
-		php_error(E_ERROR, "Wrapper is not an object");
+		php_error(E_WARNING, "Wrapper is not an object");
+        return NULL;
 	}
 
 	if (zend_hash_index_find(Z_OBJPROP_P(wrapper), 0, (void **) &handle) ==	FAILURE) {
-		php_error(E_ERROR, "Underlying object missing");
+		php_error(E_WARNING, "Underlying object missing");
+        return NULL;
 	}
 
 	obj = zend_list_find(Z_LVAL_PP(handle), &type);
 	if (!obj || ((type != rsrc_type1) && (type != rsrc_type2))) {
-		php_error(E_ERROR, "Underlying object missing or of invalid type");
+		php_error(E_WARNING, "Underlying object missing or of invalid type");
+        return NULL;
 	}
 
 	return obj;
@@ -493,17 +496,20 @@ void *php_xpath_get_context(zval *wrapper, int rsrc_type1, int rsrc_type2 TSRMLS
 	int type;
 
 	if (Z_TYPE_P(wrapper) != IS_OBJECT) {
-		php_error(E_ERROR, "Wrapper is not an object");
+		php_error(E_WARNING, "Wrapper is not an object");
+        return NULL;
 	}
 
 	if (zend_hash_index_find(Z_OBJPROP_P(wrapper), 0, (void **) &handle) ==
 		FAILURE) {
-		php_error(E_ERROR, "Underlying object missing");
+		php_error(E_WARNING, "Underlying object missing");
+        return NULL;
 	}
 
 	obj = zend_list_find(Z_LVAL_PP(handle), &type);
 	if (!obj || ((type != rsrc_type1) && (type != rsrc_type2))) {
-		php_error(E_ERROR, "Underlying object missing or of invalid type");
+		php_error(E_WARNING, "Underlying object missing or of invalid type");
+        return NULL;
 	}
 
 	return obj;
@@ -591,18 +597,21 @@ void *php_dom_get_object(zval *wrapper, int rsrc_type1, int rsrc_type2 TSRMLS_DC
 	int type;
 
 	if (Z_TYPE_P(wrapper) != IS_OBJECT) {
-		php_error(E_ERROR, "Wrapper is not an object");
+		php_error(E_WARNING, "Wrapper is not an object");
+        return NULL;
 	}
 
 	if (zend_hash_index_find(Z_OBJPROP_P(wrapper), 0, (void **) &handle) ==	FAILURE) {
-		php_error(E_ERROR, "Underlying object missing");
+		php_error(E_WARNING, "Underlying object missing");
+        return NULL;
 	}
 
 	obj = zend_list_find(Z_LVAL_PP(handle), &type);
 
 /* The following test should be replaced with search in all parents */
 	if (!obj) {		/* || ((type != rsrc_type1) && (type != rsrc_type2))) { */
-		php_error(E_ERROR, "Underlying object missing or of invalid type");
+		php_error(E_WARNING, "Underlying object missing or of invalid type");
+        return NULL;
 	}
 
 	return obj;
@@ -953,6 +962,9 @@ PHP_FUNCTION(domxml_attr_name)
 
 	id = getThis();
 	attrp = php_dom_get_object(id, le_domxmlattrp, 0 TSRMLS_CC);
+    if (!attrp) {
+        RETURN_FALSE;
+    }
 
 	RETURN_STRING((char *) (attrp->name), 1);
 }
@@ -2562,7 +2574,7 @@ static void php_xpathptr_new_context(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	id = getThis();
 
 	if (!id) {
-		php_error(E_ERROR, "Invalid object");
+		php_error(E_WARNING, "Invalid object");
 		RETURN_FALSE;
 	}
 
@@ -2637,6 +2649,9 @@ static void php_xpathptr_eval(INTERNAL_FUNCTION_PARAMETERS, int mode, int expr)
 
 
 	ctxp = php_xpath_get_context(id, le_xpathctxp, 0 TSRMLS_CC);
+    if (!ctxp) {
+        RETURN_FALSE;
+    }
 	convert_to_string(str);
 
 	if (contextnode) {
