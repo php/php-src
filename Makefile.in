@@ -29,13 +29,13 @@ PROGRAM_DEPENDENCIES = $(PROGRAM_LDADD)
 
 targets = $(LTLIBRARY_NAME) $(PROGRAM_NAME)
 
-install_targets = install-local install-modules
+install_targets = install-sapi install-modules
 
 include $(top_srcdir)/build/rules.mk
 include $(top_srcdir)/build/library.mk
 include $(top_srcdir)/build/program.mk
 
-install-local:
+install-sapi:
 	@$(LIBTOOL) --silent --mode=install cp libphp4.la $(phptempdir)/libphp4.la >/dev/null 2>&1
 	-@$(mkinstalldirs) $(bindir)
 	$(INSTALL_IT)
