@@ -1,3 +1,31 @@
+2005-01-22  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_5_0)
+      Zend.m4
+      configure.in
+      zend_strtod.c:
+      MFH: Compile fix for systems without uint32_t typedef
+
+    * Zend.m4
+      configure.in
+      zend_strtod.c:
+      - Compile fix for systems without uint32_t typedef
+
+2005-01-22  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_API.c
+      zend_API.h
+      zend_reflection_api.c:
+      - Fix #31651 (ReflectionClass::getDefaultProperties segfaults with arrays.)
+
+2005-01-22  Andi Gutmans  <andi@zend.com>
+
+    * zend_compile.c
+      zend_compile.h
+      zend_execute.c
+      zend_execute.h:
+      - Two new API calls for Derick (retreive CV name and value) by Dmitry
+
 2005-01-20  Jani Taskinen  <jani.taskinen@kolumbus.fi>
 
     * zend.h

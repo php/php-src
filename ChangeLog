@@ -1,3 +1,78 @@
+2005-01-22  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      Zend/zend.c
+      sapi/cli/php_cli.c:
+      MFH: - Memory leak fixes from ZE2 + HEAD CLI
+
+    * (PHP_4_3)
+      Zend/Zend.m4
+      Zend/configure.in
+      Zend/zend_strtod.c
+      ZendEngine2/Zend.m4
+      ZendEngine2/configure.in
+      ZendEngine2/zend_strtod.c:
+      - Compile fix for systems without uint32_t typedef
+
+    * (PHP_4_3)
+      scripts/phpize.in:
+      MFH: - Remove also autom4te.cache dir with phpize --clean
+
+    * scripts/phpize.in
+      scripts/phpize.in:
+      - Remove also autom4te.cache dir with phpize --clean
+
+    * (PHP_5_0)
+      ZendEngine2/Zend.m4
+      ZendEngine2/configure.in
+      ZendEngine2/zend_strtod.c:
+      MFH: Compile fix for systems without uint32_t typedef
+
+2005-01-22  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_0)
+      NEWS:
+      - BFN
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_reflection_api.c:
+      - Fix #31651 (ReflectionClass::getDefaultProperties segfaults with arrays.)
+
+2005-01-22  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute.h:
+      - Two new API calls for Derick (retreive CV name and value) by Dmitry
+
+2005-01-22  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      acinclude.m4
+      ext/dba/config.m4
+      ext/mcrypt/config.m4:
+      MFH: - Typofix + removed unnecessary unsets caused by it
+
+    * acinclude.m4
+      acinclude.m4
+      ext/dba/config.m4
+      ext/dba/config.m4
+      ext/mcrypt/config.m4
+      ext/mcrypt/config.m4:
+      - Typofix + removed unnecessary unsets caused by it
+
+    * (PHP_4_3)
+      NEWS
+      NEWS:
+      massage news
+
+2005-01-22  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ext/exif/exif.c:
+      MFB (bugfix for 24851)
+
 2005-01-21  Andrei Zmievski  <andrei@gravitonic.com>
 
     * (PHP_5_0)
