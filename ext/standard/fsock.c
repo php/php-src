@@ -70,6 +70,8 @@
 #include "url.h"
 #include "fsock.h"
 
+#include "php_network.h"
+
 #ifdef ZTS
 static int fsock_globals_id;
 #else
@@ -129,77 +131,6 @@ PHPAPI int php_is_persistent_sock(int sock)
 		return 1;
 	}
 	return 0;
-}
-/* }}} */
-/* {{{ connect_nonb */
-PHPAPI int connect_nonb(int sockfd,
-						struct sockaddr *addr,
-						socklen_t addrlen,
-						struct timeval *timeout)
-{
-/* probably won't work on Win32, someone else might try it (read: fix it ;) */
-
-#if (!defined(__BEOS__) && !defined(PHP_WIN32)) && (defined(O_NONBLOCK) || defined(O_NDELAY))
-
-#ifndef O_NONBLOCK
-#define O_NONBLOCK O_NDELAY
-#endif
-
-	int flags;
-	int n;
-	int error = 0;
-	socklen_t len;
-	int ret = 0;
-	fd_set rset;
-	fd_set wset;
-
-	flags = fcntl(sockfd, F_GETFL, 0);
-	fcntl(sockfd, F_SETFL, flags | O_NONBLOCK);
-
-	if ((n = connect(sockfd, addr, addrlen)) < 0) {
-		if (errno != EINPROGRESS) {
-			return -1;
-		}
-	}
-
-	if (n == 0) {
-		goto ok;
-	}
-
-	FD_ZERO(&rset);
-	FD_SET(sockfd, &rset);
-
-	wset = rset;
-
-	if ((n = select(sockfd + 1, &rset, &wset, NULL, timeout)) == 0) {
-		error = ETIMEDOUT;
-	}
-
-	if(FD_ISSET(sockfd, &rset) || FD_ISSET(sockfd, &wset)) {
-		len = sizeof(error);
-		/*
-		  BSD-derived systems set errno correctly
-		  Solaris returns -1 from getsockopt in case of error
-		*/
-		if (getsockopt(sockfd, SOL_SOCKET, SO_ERROR, &error, &len) < 0) {
-			ret = -1;
-		}
-	} else {
-		/* whoops: sockfd has disappeared */
-		ret = -1;
-	}
-
- ok:
-	fcntl(sockfd, F_SETFL, flags);
-
-	if(error) {
-		errno = error;
-		ret = -1;
-	}
-	return ret;
-#else /* !defined(PHP_WIN32) && ... */
-      return connect(sockfd, addr, addrlen);
-#endif
 }
 /* }}} */
 /* {{{ php_fsockopen() */
@@ -281,7 +212,7 @@ static void php_fsockopen(INTERNAL_FUNCTION_PARAMETERS, int persistent) {
 
 		server.sin_port = htons(portno);
 
-		if (connect_nonb(socketd, (struct sockaddr *)&server, sizeof(server), &timeout) == SOCK_CONN_ERR) {
+		if (php_connect_nonb(socketd, (struct sockaddr *)&server, sizeof(server), &timeout) == SOCK_CONN_ERR) {
 			CLOSE_SOCK(1);
 
 			if (arg_count>2) {
@@ -308,7 +239,7 @@ static void php_fsockopen(INTERNAL_FUNCTION_PARAMETERS, int persistent) {
 		unix_addr.sun_family = AF_UNIX;
 		strlcpy(unix_addr.sun_path, (*args[0])->value.str.val, sizeof(unix_addr.sun_path));
 
-		if (connect_nonb(socketd, (struct sockaddr *) &unix_addr, sizeof(unix_addr), &timeout) == SOCK_CONN_ERR) {
+		if (php_connect_nonb(socketd, (struct sockaddr *) &unix_addr, sizeof(unix_addr), &timeout) == SOCK_CONN_ERR) {
 			CLOSE_SOCK(1);
 			if (arg_count>2) {
 				zval_dtor(*args[2]);
@@ -607,12 +538,11 @@ PHPAPI void php_sockset_timeout(int socket, struct timeval *timeout)
 /*
  * FIXME: fgets depends on '\n' as line delimiter
  */
-PHPAPI char *php_sock_fgets(char *buf, size_t maxlen, int socket)
+static char * php_sock_fgets_internal(char * buf, size_t maxlen, php_sockbuf * sock)
 {
 	char *p = NULL;
 	char *ret = NULL;
 	size_t amount = 0;
-	SOCK_FIND(sock, socket);
 
 	if (maxlen==0) {
 		buf[0] = 0;
@@ -656,6 +586,12 @@ PHPAPI char *php_sock_fgets(char *buf, size_t maxlen, int socket)
 
 	return ret;
 }
+PHPAPI char *php_sock_fgets(char *buf, size_t maxlen, int socket)
+{
+	SOCK_FIND(sock, socket);
+	return php_sock_fgets_internal(buf, maxlen, sock);
+}
+
 
 /* }}} */
 
@@ -693,6 +629,94 @@ PHPAPI int php_sock_feof(int socket)
 	return ret;
 }
 
+/* {{{ stream abstraction */
+#if HAVE_PHP_STREAM
+static size_t php_sockop_write(php_stream * stream, const char * buf, size_t count)
+{
+	php_sockbuf * sock = (php_sockbuf*)stream->abstract;
+	return send(sock->socket, buf, count, 0);
+}
+
+static size_t php_sockop_read(php_stream * stream, char * buf, size_t count)
+{
+	php_sockbuf * sock = (php_sockbuf*)stream->abstract;
+	size_t ret = 0;
+
+	if (sock->is_blocked)
+		php_sockread_total(sock, count);
+	else
+		php_sockread(sock);
+
+	if(count < 0)
+		return ret;
+
+	ret = MIN(TOREAD(sock), count);
+	if (ret) {
+		memcpy(buf, READPTR(sock), ret);
+		sock->readpos += ret;
+	}
+
+	return ret;
+}
+
+static int php_sockop_close(php_stream * stream)
+{
+	php_sockbuf * sock = (php_sockbuf*)stream->abstract;
+
+	SOCK_CLOSE(sock->socket);
+	SOCK_DESTROY(sock);
+
+	return 0;
+}
+
+static int php_sockop_flush(php_stream * stream)
+{
+	php_sockbuf * sock = (php_sockbuf*)stream->abstract;
+	return fsync(sock->socket);
+}
+
+static int php_sockop_cast(php_stream * stream, int castas, void ** ret)
+{
+	php_sockbuf * sock = (php_sockbuf*)stream->abstract;
+
+	switch(castas)	{
+		case PHP_STREAM_AS_STDIO:
+			if (ret)	{
+				/* DANGER!: data buffered in stream->readbuf will be forgotten! */
+				if (TOREAD(sock) > 0)
+					zend_error(E_WARNING, "%s(): buffered data lost during conversion to FILE*!", get_active_function_name());
+				*ret = fdopen(sock->socket, stream->mode);
+				if (*ret)
+					return SUCCESS;
+				return FAILURE;
+			}
+			return SUCCESS;
+		case PHP_STREAM_AS_FD:
+		case PHP_STREAM_AS_SOCKETD:
+			if (ret)
+				*ret = (void*)sock->socket;
+			return SUCCESS;
+		default:
+			return FAILURE;
+	}
+}
+
+static char * php_sockop_gets(php_stream * stream, char *buf, size_t size)
+{
+	php_sockbuf * sock = (php_sockbuf*)stream->abstract;
+	return php_sock_fgets_internal(buf, size, sock);		
+}
+
+php_stream_ops php_stream_socket_ops = {
+	php_sockop_write, php_sockop_read,
+	php_sockop_close, php_sockop_flush,
+	NULL, php_sockop_gets,
+	php_sockop_cast,
+	"socket"
+};
+#endif
+/* }}} */
+
 /* {{{ php_sock_fread() */
 
 PHPAPI size_t php_sock_fread(char *ptr, size_t size, int socket)
@@ -723,111 +747,6 @@ PHPAPI void php_msock_destroy(int *data)
 /* }}} */
 
 
-/* {{{ stream abstraction */
-#if HAVE_PHP_STREAM
-static size_t php_sockop_write(php_stream * stream, const char * buf, size_t count)
-{
-	int socket = (int)stream->abstract;
-	return send(socket, buf, count, 0);
-}
-
-static void php_stream_sockwait_for_data(php_stream * stream)
-{
-	fd_set fdr, tfdr;
-	int retval, socket;
-	struct timeval timeout, *ptimeout;
-
-	socket = (int)stream->abstract;
-
-	FD_ZERO(&fdr);
-	FD_SET(socket, &fdr);
-	stream->timeout_event = 0;
-
-	if (stream->timeout.tv_sec == -1)
-		ptimeout = NULL;
-	else
-		ptimeout = &timeout;
-
-	while(1) {
-		tfdr = fdr;
-		timeout = stream->timeout;
-
-		retval = select(socket + 1, &tfdr, NULL, NULL, ptimeout);
-
-		if (retval == 0)
-			stream->timeout_event = 1;
-
-		if (retval >= 0)
-			break;
-	}
-}
-
-static size_t php_sockop_read(php_stream * stream, char * buf, size_t count)
-{
-	int socket = (int)stream->abstract;
-
-	/* For blocking sockets, we wait until there is some
-	   data to read (real data or EOF)
-
-	   Otherwise, recv() may time out and return 0 and
-	   therefore sock->eof would be set errornously.
-	 */
-
-	if (stream->is_blocked)	{
-		php_stream_sockwait_for_data(stream);
-		if (stream->timeout_event)
-			return 0;
-	}
-	return recv(socket, buf, count, 0);
-}
-
-static int php_sockop_close(php_stream * stream)
-{
-	int socket = (int)stream->abstract;
-	SOCK_CLOSE(socket);
-	return 0;
-}
-
-static int php_sockop_flush(php_stream * stream)
-{
-	int socket = (int)stream->abstract;
-	return fsync(socket);
-}
-
-static int php_sockop_cast(php_stream * stream, int castas, void ** ret)
-{
-	int socket = (int)stream->abstract;
-
-	switch(castas)	{
-		case PHP_STREAM_AS_STDIO:
-			if (ret)	{
-				/* DANGER!: data buffered in stream->readbuf will be forgotten! */
-				*ret = fdopen(socket, stream->mode);
-				if (*ret)
-					return SUCCESS;
-				return FAILURE;
-			}
-			return SUCCESS;
-		case PHP_STREAM_AS_FD:
-		case PHP_STREAM_AS_SOCKETD:
-			if (ret)
-				*ret = (void*)socket;
-			return SUCCESS;
-		default:
-			return FAILURE;
-	}
-}
-
-php_stream_ops php_stream_socket_ops = {
-	php_sockop_write, php_sockop_read,
-	php_sockop_close, php_sockop_flush,
-	NULL, NULL,
-	php_sockop_cast,
-	"socket"
-};
-#endif
-
-/* }}} */
 
 PHP_RSHUTDOWN_FUNCTION(fsock)
 {
@@ -836,10 +755,11 @@ PHP_RSHUTDOWN_FUNCTION(fsock)
 	php_cleanup_sockbuf(0 FLS_CC);
 	return SUCCESS;
 }
-
+/* }}} */
 /*
  * Local variables:
  * tab-width: 4
  * c-basic-offset: 4
  * End:
+ * vim: sw=4 ts=4 tw=78
  */

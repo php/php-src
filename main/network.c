@@ -185,6 +185,83 @@ static int php_network_getaddresses(const char *host, struct sockaddr ***sal)
 	return 0;
 }
 
+/* {{{ php_connect_nonb */
+PHPAPI int php_connect_nonb(int sockfd,
+						struct sockaddr *addr,
+						socklen_t addrlen,
+						struct timeval *timeout)
+{
+	/* probably won't work on Win32, someone else might try it (read: fix it ;) */
+
+#if (!defined(__BEOS__) && !defined(PHP_WIN32)) && (defined(O_NONBLOCK) || defined(O_NDELAY))
+
+#ifndef O_NONBLOCK
+#define O_NONBLOCK O_NDELAY
+#endif
+
+	int flags;
+	int n;
+	int error = 0;
+	socklen_t len;
+	int ret = 0;
+	fd_set rset;
+	fd_set wset;
+
+	if (timeout == NULL)	{
+		/* blocking mode */
+		return connect(sockfd, addr, addrlen);
+	}
+	
+	flags = fcntl(sockfd, F_GETFL, 0);
+	fcntl(sockfd, F_SETFL, flags | O_NONBLOCK);
+
+	if ((n = connect(sockfd, addr, addrlen)) < 0) {
+		if (errno != EINPROGRESS) {
+			return -1;
+		}
+	}
+
+	if (n == 0) {
+		goto ok;
+	}
+
+	FD_ZERO(&rset);
+	FD_SET(sockfd, &rset);
+
+	wset = rset;
+
+	if ((n = select(sockfd + 1, &rset, &wset, NULL, timeout)) == 0) {
+		error = ETIMEDOUT;
+	}
+
+	if(FD_ISSET(sockfd, &rset) || FD_ISSET(sockfd, &wset)) {
+		len = sizeof(error);
+		/*
+		   BSD-derived systems set errno correctly
+		   Solaris returns -1 from getsockopt in case of error
+		   */
+		if (getsockopt(sockfd, SOL_SOCKET, SO_ERROR, &error, &len) < 0) {
+			ret = -1;
+		}
+	} else {
+		/* whoops: sockfd has disappeared */
+		ret = -1;
+	}
+
+ok:
+	fcntl(sockfd, F_SETFL, flags);
+
+	if(error) {
+		errno = error;
+		ret = -1;
+	}
+	return ret;
+#else /* !defined(PHP_WIN32) && ... */
+	return connect(sockfd, addr, addrlen);
+#endif
+}
+/* }}} */
+
 /*
  * Creates a socket of type socktype and connects to the given host and
  * port, returns the created socket on success, else returns -1.
@@ -194,9 +271,15 @@ int php_hostconnect(char *host, unsigned short port, int socktype, int timeout)
 {	
 	int s;
 	struct sockaddr **sal, **psal;
-
+	struct timeval timeoutval;
+	
 	if (php_network_getaddresses(host, &sal))
 		return -1;
+	
+	if (timeout)	{
+		timeoutval.tv_sec = timeout;
+		timeoutval.tv_usec = 0;
+	}
 	
 	psal = sal;
 	while (*sal != NULL) {
@@ -204,28 +287,32 @@ int php_hostconnect(char *host, unsigned short port, int socktype, int timeout)
 		if (s != SOCK_ERR) {
 			switch ((*sal)->sa_family) {
 #if defined( HAVE_GETADDRINFO ) && defined( HAVE_IPV6 )
-			case AF_INET6: {
-				struct sockaddr_in6 *sa =
-					(struct sockaddr_in6 *)*sal;
-				
-				sa->sin6_family = (*sal)->sa_family;
-				sa->sin6_port = htons(port);
-				if (connect(s, (struct sockaddr *) sa,
-					    sizeof(*sa)) != SOCK_CONN_ERR)
-					goto ok;
-			} break;
+				case AF_INET6:
+					{
+						struct sockaddr_in6 *sa =
+							(struct sockaddr_in6 *)*sal;
+
+						sa->sin6_family = (*sal)->sa_family;
+						sa->sin6_port = htons(port);
+						if (php_connect_nonb(s, (struct sockaddr *) sa,
+									sizeof(*sa), timeout ? &timeoutval : NULL) != SOCK_CONN_ERR)
+							goto ok;
+					} 
+					break;
 #endif
-			case AF_INET: {
-				struct sockaddr_in *sa =
-					(struct sockaddr_in *)*sal;
+				case AF_INET:
+					{
+						struct sockaddr_in *sa =
+							(struct sockaddr_in *)*sal;
 
-				sa->sin_family = (*sal)->sa_family;
-				sa->sin_port = htons(port);
-				if (connect(s, (struct sockaddr *) sa,
-					    sizeof(*sa)) != SOCK_CONN_ERR)
-					goto ok;
+						sa->sin_family = (*sal)->sa_family;
+						sa->sin_port = htons(port);
+						if (php_connect_nonb(s, (struct sockaddr *) sa,
+									sizeof(*sa), timeout ? &timeoutval : NULL) != SOCK_CONN_ERR)
+							goto ok;
 
-			} break;
+					} 
+					break;
 			}
 			close (s);
 		}
@@ -245,4 +332,5 @@ int php_hostconnect(char *host, unsigned short port, int socktype, int timeout)
  * tab-width: 8
  * c-basic-offset: 8
  * End:
+ * vim: ts=4 sw=4 tw=78
  */

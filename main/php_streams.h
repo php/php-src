@@ -26,73 +26,46 @@
 #include <sys/time.h>
 #endif
 
+/* See README.STREAMS in php4 root dir for more info about this stuff */
 
 typedef struct _php_stream php_stream;
 
 typedef struct _php_stream_ops  {
-/* stdio like functions - these are mandatory! */
+	/* stdio like functions - these are mandatory! */
 	size_t (*write)(php_stream * stream, const char * buf, size_t count);
 	size_t (*read)(php_stream * stream, char * buf, size_t count);
 	int    (*close)(php_stream * stream);
 	int    (*flush)(php_stream * stream);
-/* these are optional */
+	/* these are optional */
 	int    (*seek)(php_stream * stream, off_t offset, int whence);
-/* used only in unbuffered mode */
 	char * (*gets)(php_stream * stream, char * buf, size_t size);
 	int (*cast)(php_stream * stream, int castas, void ** ret);
 	const char * label; /* label for this ops structure */
 } php_stream_ops;
 
-typedef struct _php_stream_buffer	{
-	char * buffer;
-	size_t buflen;
-
-	int dirty;	/* 1 if we need to commit data */
-
-	off_t readpos;
-	off_t writepos;
-
-	size_t chunksize;	/* amount to commit in one operation */
-	int persistent;
-} php_stream_buffer;
-
-PHPAPI int php_stream_buf_init(php_stream_buffer * buffer, int persistent, size_t chunksize);
-PHPAPI int php_stream_buf_cleanup(php_stream_buffer * buffer);
-/* add data into buffer, growing it if required */
-PHPAPI int php_stream_buf_append(php_stream_buffer * buffer, const char * buf, size_t size);
-/* read data out of buffer */
-PHPAPI size_t php_stream_buf_read(php_stream_buffer * buffer, char * buf, size_t size);
-PHPAPI int php_stream_buf_overwrite(php_stream_buffer * buffer, const char * buf, size_t size);
-
 struct _php_stream  {
 	php_stream_ops * ops;
 	void * abstract;  		/* convenience pointer for abstraction */
-	int eof;
-
-	/* for convenience for sockets */
-	int is_blocked;
-	struct timeval timeout;
-	int timeout_event;
-
-	int readahead;			/* number of chunks to read-ahead */
-
 	int is_persistent;
 	char mode[16];			/* "rwb" etc. ala stdio */
-	/* the stream can be buffered  */
-	int is_buffered;
-	php_stream_buffer readbuf;
-
+	/* so we know how to clean it up correctly.  This should be set to
+	 * PHP_STREAM_FCLOSE_XXX as appropriate */
+	int fclose_stdiocast;
 	FILE * stdiocast;    /* cache this, otherwise we might leak! */
 }; /* php_stream */
+#define PHP_STREAM_FCLOSE_NONE 0
+#define PHP_STREAM_FCLOSE_FDOPEN	1
+#define PHP_STREAM_FCLOSE_FOPENCOOKIE 2
+
 
 /* allocate a new stream for a particular ops */
-PHPAPI php_stream * php_stream_alloc(php_stream_ops * ops, void * abstract, size_t bufsize, int persistent, const char * mode);
+PHPAPI php_stream * php_stream_alloc(php_stream_ops * ops, void * abstract, int persistent, const char * mode);
 
 PHPAPI int php_stream_free(php_stream * stream, int call_dtor);
 #define php_stream_close(stream)	php_stream_free(stream, 1)
 
-/* seeking is only supported for reading! */
 PHPAPI int php_stream_seek(php_stream * stream, off_t offset, int whence);
+#define php_stream_rewind(stream)	php_stream_seek(stream, 0L, SEEK_SET)
 PHPAPI off_t php_stream_tell(php_stream * stream);
 PHPAPI size_t php_stream_read(php_stream * stream, char * buf, size_t count);
 PHPAPI size_t php_stream_write(php_stream * stream, const char * buf, size_t count);
@@ -114,14 +87,21 @@ PHPAPI php_stream * php_stream_fopen(const char * filename, const char * mode);
 /* cast as a socketd */
 #define PHP_STREAM_AS_SOCKETD	2
 
-/* warning: once you have cast a stream as a FILE*, you probably should not use
-   the php_stream_XXX api after that point, or you will confuse the buffering
-   in FILE* and/or php_stream *
-*/
 PHPAPI int php_stream_cast(php_stream * stream, int castas, void ** ret, int show_err);
 /* use this to check if a stream can be cast into another form */
 #define php_stream_can_cast(stream, as)	php_stream_cast(stream, as, NULL, 0)
 
+/* use this to check if a stream is of a particular type:
+ * PHPAPI int php_stream_is(php_stream * stream, php_stream_ops * ops); */
+#define php_stream_is(stream, anops)		(stream->ops == anops)
+
 #endif /* HAVE_PHP_STREAM */
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim: sw=4 ts=4 tw=78
+ */
 
 #endif
