@@ -103,6 +103,11 @@ static int volatile maxFd = -1;
 static int shutdownPending = FALSE;
 static int shutdownNow = FALSE;
 
+#ifndef HAVE_STRLCPY
+#define strlcpy php_strlcpy
+#endif
+size_t strlcpy(char *dst, const char *src, size_t siz);
+
 void OS_ShutdownPending()
 {
     shutdownPending = TRUE;
@@ -293,7 +298,7 @@ int OS_CreateLocalIpcFd(const char *bindPath, int backlog, int bCreateMutex)
     short   port = 0;
     char    host[MAXPATHLEN];
 
-    strcpy(host, bindPath);
+    strlcpy(host, bindPath, MAXPATHLEN-1);
     if((tp = strchr(host, ':')) != 0) {
 	*tp++ = 0;
 	if((port = atoi(tp)) == 0) {
@@ -396,7 +401,7 @@ int OS_FcgiConnect(char *bindPath)
     short   port = 0;
     int	    tcp = FALSE;
 
-    strcpy(host, bindPath);
+    strlcpy(host, bindPath, MAXPATHLEN-1);
     if((tp = strchr(host, ':')) != 0) {
 	*tp++ = 0;
 	if((port = atoi(tp)) == 0) {
