@@ -54,7 +54,7 @@
    Return the target of a symbolic link */
 PHP_FUNCTION(readlink)
 {
-	pval **filename;
+	zval **filename;
 	char buff[256];
 	int ret;
 
@@ -63,7 +63,7 @@ PHP_FUNCTION(readlink)
 	}
 	convert_to_string_ex(filename);
 
-	ret = readlink((*filename)->value.str.val, buff, 255);
+	ret = readlink(Z_STRVAL_PP(filename), buff, 255);
 	if (ret == -1) {
 		php_error(E_WARNING, "readlink failed (%s)", strerror(errno));
 		RETURN_FALSE;
@@ -78,7 +78,7 @@ PHP_FUNCTION(readlink)
    Returns the st_dev field of the UNIX C stat structure describing the link */
 PHP_FUNCTION(linkinfo)
 {
-	pval **filename;
+	zval **filename;
 	struct stat sb;
 	int ret;
 
@@ -87,11 +87,12 @@ PHP_FUNCTION(linkinfo)
 	}
 	convert_to_string_ex(filename);
 
-	ret = VCWD_LSTAT((*filename)->value.str.val, &sb);
+	ret = VCWD_LSTAT(Z_STRVAL_PP(filename), &sb);
 	if (ret == -1) {
-		php_error(E_WARNING, "LinkInfo failed (%s)", strerror(errno));
+		php_error(E_WARNING, "Linkinfo failed (%s)", strerror(errno));
 		RETURN_LONG(-1L);
 	}
+
 	RETURN_LONG((long) sb.st_dev);
 }
 /* }}} */
@@ -100,7 +101,7 @@ PHP_FUNCTION(linkinfo)
    Create a symbolic link */
 PHP_FUNCTION(symlink)
 {
-	pval **topath, **frompath;
+	zval **topath, **frompath;
 	int ret;
 
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &topath, &frompath) == FAILURE) {
@@ -109,19 +110,21 @@ PHP_FUNCTION(symlink)
 	convert_to_string_ex(topath);
 	convert_to_string_ex(frompath);
 
-	if (PG(safe_mode) && !php_checkuid((*topath)->value.str.val, NULL, CHECKUID_CHECK_FILE_AND_DIR)) {
+	if (PG(safe_mode) && !php_checkuid(Z_STRVAL_PP(topath), NULL, CHECKUID_CHECK_FILE_AND_DIR)) {
 		RETURN_FALSE;
 	}
-	if (!strncasecmp((*topath)->value.str.val, "http://", 7) || !strncasecmp((*topath)->value.str.val, "ftp://", 6)) {
+
+	if (!strncasecmp(Z_STRVAL_PP(topath), "http://", 7) || !strncasecmp(Z_STRVAL_PP(topath), "ftp://", 6)) {
 		php_error(E_WARNING, "Unable to symlink to a URL");
 		RETURN_FALSE;
 	}
 
-	ret = symlink((*topath)->value.str.val, (*frompath)->value.str.val);
+	ret = symlink(Z_STRVAL_PP(topath), Z_STRVAL_PP(frompath));
 	if (ret == -1) {
-		php_error(E_WARNING, "SymLink failed (%s)", strerror(errno));
+		php_error(E_WARNING, "Symlink failed (%s)", strerror(errno));
 		RETURN_FALSE;
 	}
+
 	RETURN_TRUE;
 }
 /* }}} */
@@ -130,7 +133,7 @@ PHP_FUNCTION(symlink)
    Create a hard link */
 PHP_FUNCTION(link)
 {
-	pval **topath, **frompath;
+	zval **topath, **frompath;
 	int ret;
 
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &topath, &frompath) == FAILURE) {
@@ -139,19 +142,21 @@ PHP_FUNCTION(link)
 	convert_to_string_ex(topath);
 	convert_to_string_ex(frompath);
 
-	if (PG(safe_mode) && !php_checkuid((*topath)->value.str.val, NULL, CHECKUID_CHECK_FILE_AND_DIR)) {
+	if (PG(safe_mode) && !php_checkuid(Z_STRVAL_PP(topath), NULL, CHECKUID_CHECK_FILE_AND_DIR)) {
 		RETURN_FALSE;
 	}
-	if (!strncasecmp((*topath)->value.str.val, "http://", 7) || !strncasecmp((*topath)->value.str.val, "ftp://", 6)) {
+
+	if (!strncasecmp((*topath)->value.str.val, "http://", 7) || !strncasecmp(Z_STRVAL_PP(topath), "ftp://", 6)) {
 		php_error(E_WARNING, "Unable to link to a URL");
 		RETURN_FALSE;
 	}
 
-	ret = link((*topath)->value.str.val, (*frompath)->value.str.val);
+	ret = link(Z_STRVAL_PP(topath), Z_STRVAL_PP(frompath));
 	if (ret == -1) {
 		php_error(E_WARNING, "Link failed (%s)", strerror(errno));
 		RETURN_FALSE;
 	}
+
 	RETURN_TRUE;
 }
 /* }}} */
@@ -163,6 +168,6 @@ PHP_FUNCTION(link)
  * tab-width: 4
  * c-basic-offset: 4
  * End:
- * vim600: sw=4 ts=4 tw=78 fdm=marker
- * vim<600: sw=4 ts=4 tw=78
+ * vim600: noet sw=4 ts=4 tw=78 fdm=marker
+ * vim<600: noet sw=4 ts=4 tw=78
  */
