@@ -148,6 +148,22 @@ static PHP_INI_MH(OnUpdateErrorReporting)
 }
 
 
+static PHP_INI_MH(OnDisableFunctions)
+{
+	char *func;
+	char *new_value_dup = zend_strndup(new_value, new_value_length);	/* This is an intentional leak,
+																		 * it's not a big deal as it's process-wide
+																		 */
+
+	func = strtok(new_value_dup, ", ");
+	while (func) {
+		zend_disable_function(func, strlen(func));
+		func = strtok(NULL, ", ");
+	}
+	return SUCCESS;
+}
+
+
 /* Need to convert to strings and make use of:
  * DEFAULT_SHORT_OPEN_TAG
  * PHP_SAFE_MODE
@@ -232,6 +248,8 @@ PHP_INI_BEGIN()
 	PHP_INI_ENTRY("precision",					"14",		PHP_INI_ALL,		OnSetPrecision)
 	PHP_INI_ENTRY("sendmail_from",				NULL,		PHP_INI_ALL,		NULL)
 	PHP_INI_ENTRY("sendmail_path",	DEFAULT_SENDMAIL_PATH,	PHP_INI_SYSTEM,		NULL)
+
+	PHP_INI_ENTRY("disable_functions",			"",			PHP_INI_SYSTEM,		OnDisableFunctions)
 PHP_INI_END()
 
 
