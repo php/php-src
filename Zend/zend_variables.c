@@ -153,12 +153,7 @@ ZEND_API int _zval_copy_ctor(zval *zvalue ZEND_FILE_LINE_DC)
 		case IS_OBJECT:
 			{
 				TSRMLS_FETCH();
-
-				if (EG(ze1_compatibility_mode)) {
-					zvalue->value.obj = zvalue->value.obj.handlers->clone_obj(zvalue TSRMLS_CC);
-				} else {
-					Z_OBJ_HT_P(zvalue)->add_ref(zvalue TSRMLS_CC);
-				}
+				Z_OBJ_HT_P(zvalue)->add_ref(zvalue TSRMLS_CC);
 			}
 			break;
 	}
