@@ -465,6 +465,8 @@ PHP_FUNCTION(phpinfo)
 		flag = 0xFFFFFFFF;
 	}
 
+	php_print_info(flag TSRMLS_CC);
+
 	RETURN_TRUE;
 }
 
