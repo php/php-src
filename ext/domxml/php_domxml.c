@@ -265,8 +265,10 @@ static zend_function_entry domxml_functions[] = {
 	PHP_FE(xpath_eval_expression,										NULL)
 	PHP_FE(xpath_register_ns,											NULL)
 	PHP_FE(domxml_doc_get_elements_by_tagname,							NULL)
-	PHP_FE(domxml_doc_get_element_by_id,								NULL)
 #endif
+
+	PHP_FE(domxml_doc_get_element_by_id,								NULL)
+
 #if defined(LIBXML_XPTR_ENABLED)
 	PHP_FE(xptr_new_context,											NULL)
 	PHP_FE(xptr_eval,													NULL)
@@ -314,7 +316,6 @@ static function_entry php_domxmldoc_class_functions[] = {
 	PHP_FALIAS(create_cdata_section,	domxml_doc_create_cdata_section,	NULL)
 	PHP_FALIAS(create_entity_reference,	domxml_doc_create_entity_reference,	NULL)
 	PHP_FALIAS(create_processing_instruction,	domxml_doc_create_processing_instruction,	NULL)
-	PHP_FALIAS(get_elements_by_tagname,	domxml_doc_get_elements_by_tagname,	NULL)
 	PHP_FALIAS(get_element_by_id,		domxml_doc_get_element_by_id,	NULL)
 	/* Everything below this comment is none DOM compliant */
 	/* children is deprecated because it is inherited from DomNode */
@@ -433,7 +434,9 @@ static zend_function_entry php_domxmlelement_class_functions[] = {
 /* since this function is not implemented, outcomment it for the time beeing
 	PHP_FALIAS(set_attribute_node,		domxml_elem_set_attribute_node,	NULL)
 */
+#if defined(LIBXML_XPATH_ENABLED)			
 	PHP_FALIAS(get_elements_by_tagname,	domxml_elem_get_elements_by_tagname,	NULL)
+#endif
 	PHP_FALIAS(has_attribute,	domxml_elem_has_attribute,	NULL)
 	{NULL, NULL, NULL}
 };
@@ -2993,6 +2996,7 @@ PHP_FUNCTION(domxml_doc_get_elements_by_tagname)
 	FREE_ZVAL(rv);
 }
 /* }}} */
+#endif
 
 typedef struct _idsIterator idsIterator;
 struct _idsIterator {
@@ -3034,7 +3038,6 @@ PHP_FUNCTION(domxml_doc_get_element_by_id)
 	}
 }
 /* }}} */
-#endif
 
 /* {{{ proto string domxml_elem_get_elements_by_tagname(string tagname)
    Returns array with nodes with given tagname in element or empty array, if not found */
