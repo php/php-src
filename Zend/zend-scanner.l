@@ -1053,7 +1053,7 @@ ESCAPED_AND_WHITESPACE [\n\t\r #'.:;,()|^&+-/*=%!~<>?@]+
 }
 
 <ST_IN_SCRIPTING>"^=" {
-	return XT_OR_EQUAL;
+	return T_XOR_EQUAL;
 }
 
 <ST_IN_SCRIPTING>"||" {
