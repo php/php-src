@@ -1281,6 +1281,7 @@ PHP_FUNCTION(yaz_connect)
             option_set (as, "otherInfo0", otherInfo[0]);
             option_set (as, "otherInfo1", otherInfo[1]);
             option_set (as, "otherInfo2", otherInfo[2]);
+            option_set (as, "proxy", proxy_str);
 			ZOOM_connection_connect (as->zoom_conn, zurl_str, 0);
 			break;
 		}
@@ -1334,6 +1335,7 @@ PHP_FUNCTION(yaz_connect)
         option_set (as, "otherInfo0", otherInfo[0]);
         option_set (as, "otherInfo1", otherInfo[1]);
         option_set (as, "otherInfo2", otherInfo[2]);
+        option_set (as, "proxy", proxy_str);
         
 		ZOOM_connection_connect (as->zoom_conn, zurl_str, 0);
 #else
