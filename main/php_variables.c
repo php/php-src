@@ -209,7 +209,7 @@ SAPI_POST_HANDLER_FUNC(php_std_post_handler)
 }
 
 
-void php_treat_data(int arg, char *str ELS_DC PLS_DC SLS_DC)
+void php_treat_data(int arg, char *str, zval* destArray ELS_DC PLS_DC SLS_DC)
 {
 	char *res = NULL, *var, *val;
 	pval *array_ptr;
@@ -236,7 +236,7 @@ void php_treat_data(int arg, char *str ELS_DC PLS_DC SLS_DC)
 			}
 			break;
 		default:
-			array_ptr=NULL;
+			array_ptr=destArray;
 			break;
 	}
 
