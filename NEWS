@@ -5,6 +5,7 @@ PHP                                                                        NEWS
 - Fixed bug #28851 (call_user_func_array has typo in error message). (Marcus)
 - Fixed bug #28831 (ArrayObject::offsetGet() does the work of offsetUnset()). 
   (Marcus)
+- Fixed bug #28822 (ArrayObject::offsetExists() works inverted). (Marcus)
 - Fixed bug #28789 (ReflectionProperty getValue() fails on public static 
   members). (Marcus)
 - Fixed bug #28771 (Segfault when using xslt and clone). (Rob)
