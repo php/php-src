@@ -13,7 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Authors: Jani Lehtimäki <jkl@njet.net>                               |
-   |   
+   |          Thies C. Arntzen <thies@digicol.de>                         |
    +----------------------------------------------------------------------+
  */
 
@@ -246,8 +246,72 @@ void php_var_serialize(pval *buf, pval **struc)
 			}
 			return;
 
+		case IS_OBJECT: {
+				zval *retval_ptr;
+				zval *fname;
+				int res;
+				CLS_FETCH();
+
+				MAKE_STD_ZVAL(fname);
+				ZVAL_STRING(fname,"_sleep_",1);
+
+				res =  call_user_function_ex(CG(function_table), *struc, fname, &retval_ptr, 0, 0, 1);
+
+				if ((res == SUCCESS)) {
+					if (retval_ptr && HASH_OF(retval_ptr)) {
+						int count = zend_hash_num_elements(HASH_OF(retval_ptr));
+						slen = sprintf(s, "O:%d:\"%s\":%d:{",(*struc)->value.obj.ce->name_length,(*struc)->value.obj.ce->name, count);
+						STR_CAT(buf, s, slen);
+						if (count > 0) {
+							char *key;
+							zval **d,**name;
+							ulong index;
+							
+							zend_hash_internal_pointer_reset(HASH_OF(retval_ptr));
+							for (;; zend_hash_move_forward(HASH_OF(retval_ptr))) {
+								if ((i = zend_hash_get_current_key(HASH_OF(retval_ptr), &key, &index)) == HASH_KEY_NON_EXISTANT) {
+									break;
+								}
+
+								zend_hash_get_current_data(HASH_OF(retval_ptr), (void **) (&name));
+
+								if ((*name)->type != IS_STRING) {
+									php_error(E_NOTICE, "_sleep_ should return an array only containing the names of instance-variables to serialize.");
+									continue;
+								}
+
+								php_var_serialize(buf, name);
+								
+								if (zend_hash_find((*struc)->value.obj.properties,(*name)->value.str.val,(*name)->value.str.len+1,(void*)&d) == SUCCESS) {
+									php_var_serialize(buf,d);	
+								}
+							}
+						}
+						STR_CAT(buf, "}", 1);
+					}
+				} else {
+					zval_dtor(fname);
+					FREE_ZVAL(fname);
+
+					if (retval_ptr) {
+						zval_dtor(retval_ptr);
+						FREE_ZVAL(retval_ptr);
+					}
+					goto std_array;
+				}
+
+				zval_dtor(fname);
+				FREE_ZVAL(fname);
+
+				if (retval_ptr) {
+					zval_dtor(retval_ptr);
+					FREE_ZVAL(retval_ptr);
+				}
+				return;	
+			}
+
 		case IS_ARRAY:
-		case IS_OBJECT:
+		  std_array:
 			myht = HASH_OF(*struc);
 			i = zend_hash_num_elements(myht);
 			if ((*struc)->type == IS_ARRAY) {
@@ -397,7 +461,7 @@ int php_var_unserialize(pval **rval, const char **p, const char *max)
 
 		case 'a':
 		case 'o':
-		case 'O':
+		case 'O': 
 			INIT_PZVAL(*rval);
 
 			if (cur == 'a') {
@@ -469,14 +533,14 @@ int php_var_unserialize(pval **rval, const char **p, const char *max)
 				ALLOC_INIT_ZVAL(data);
 
 				if (!php_var_unserialize(&key, p, max)) {
-				  	zval_dtor(key);
-				  	FREE_ZVAL(key);
+					zval_dtor(key);
+					FREE_ZVAL(key);
 					FREE_ZVAL(data);
 					return 0;
 				}
 				if (!php_var_unserialize(&data, p, max)) {
 					zval_dtor(key);
-				    FREE_ZVAL(key);
+					FREE_ZVAL(key);
 					zval_dtor(data);
 					FREE_ZVAL(data);
 					return 0;
@@ -492,11 +556,24 @@ int php_var_unserialize(pval **rval, const char **p, const char *max)
 				zval_dtor(key);
 				FREE_ZVAL(key);
 			}
-			return *((*p)++) == '}';
 
-		default:
-			return 0;
+			if ((*rval)->type == IS_OBJECT) {
+				zval *retval_ptr;
+				zval *fname;
+
+				MAKE_STD_ZVAL(fname);
+				ZVAL_STRING(fname,"_wakeup_",1);
+
+				call_user_function_ex(CG(function_table), *rval, fname, &retval_ptr, 0, 0, 1);
+
+				zval_dtor(fname);
+				FREE_ZVAL(fname);
+			}
+
+			return *((*p)++) == '}';
 	}
+
+	return 0;
 }
 
 /* }}} */
