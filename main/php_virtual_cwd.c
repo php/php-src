@@ -19,10 +19,7 @@
 
 #ifdef ZTS
 #include "TSRM.h"
-static int cwd_globals_id;
-#else
-static zend_cwd_globals cwd_globals;
-endif
+#endif
 
 ZEND_DECLARE_MODULE_GLOBALS(cwd);
 

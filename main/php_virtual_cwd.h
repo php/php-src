@@ -61,6 +61,7 @@ ZEND_END_MODULE_GLOBALS(cwd)
 # define CWDLS_CC , CWDLS_C
 # define CWDG(v) (cwd_globals->v)
 # define CWDLS_FETCH()    zend_cwd_globals *cwd_globals = ts_resource(cwd_globals_id)
+CWD_API extern int cwd_globals_id;
 #else
 # define CWDLS_D  void
 # define CWDLS_DC
@@ -68,6 +69,7 @@ ZEND_END_MODULE_GLOBALS(cwd)
 # define CWDLS_CC
 # define CWDG(v) (cwd_globals.v)
 # define CWDLS_FETCH()
+extern CWD_API zend_cwd_globals cwd_globals;
 #endif
 
 #endif /* VIRTUAL_CWD_H */
