@@ -667,6 +667,8 @@ PHP_MSHUTDOWN_FUNCTION(openssl)
 	php_unregister_url_stream_wrapper("ftps" TSRMLS_CC);
 
 	php_stream_xport_unregister("ssl" TSRMLS_CC);
+	php_stream_xport_unregister("sslv2" TSRMLS_CC);
+	php_stream_xport_unregister("sslv3" TSRMLS_CC);
 	php_stream_xport_unregister("tls" TSRMLS_CC);
 
 	/* reinstate the default tcp handler */
