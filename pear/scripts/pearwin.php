@@ -90,7 +90,7 @@ switch ($command) {
         break;
     case 'list-installed':
         include_once 'PEAR/Registry.php';
-        $reg = new PEAR_Registry;
+        $reg = new PEAR_Registry($script_dir);
         $installed = $reg->packageInfo();
         $i = $j = 0;
         print("Installed packages:\n");
