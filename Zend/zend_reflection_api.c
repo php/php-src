@@ -1614,13 +1614,13 @@ ZEND_METHOD(reflection_method, invoke)
 	} else {
 		if ((Z_TYPE_PP(params[0]) != IS_OBJECT)) {
 			efree(params);
-
 			_DO_THROW("Non-object passed to Invoke()");
 			/* Returns from this function */
 		}
 		obj_ce = Z_OBJCE_PP(params[0]);
 
 		if (!instanceof_function(obj_ce, mptr->common.scope TSRMLS_CC)) {
+			efree(params);
 			_DO_THROW("Given object is not an instance of the class this method was declared in");
 			/* Returns from this function */
 		}
