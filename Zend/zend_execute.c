@@ -3371,8 +3371,18 @@ int zend_recv_handler(ZEND_OPCODE_HANDLER_ARGS)
 	if (zend_ptr_stack_get_arg(arg_num, (void **) &param TSRMLS_CC)==FAILURE) {
 		char *space;
 		char *class_name = get_active_class_name(&space TSRMLS_CC);
+		zend_execute_data *ptr = EG(current_execute_data);
+
+		if(ptr) {
+			ptr = ptr->prev_execute_data;
+		}
+
 		zend_verify_arg_type((zend_function *) EG(active_op_array), arg_num, NULL TSRMLS_CC);
-		zend_error(E_WARNING, "Missing argument %ld for %s%s%s()", opline->op1.u.constant.value.lval, class_name, space, get_active_function_name(TSRMLS_C));
+		if(ptr && ptr->op_array) {
+			zend_error(E_WARNING, "Missing argument %ld for %s%s%s(), called in %s on line %d and defined", opline->op1.u.constant.value.lval, class_name, space, get_active_function_name(TSRMLS_C), ptr->op_array->filename, ptr->opline->lineno);
+		} else {
+			zend_error(E_WARNING, "Missing argument %ld for %s%s%s()", opline->op1.u.constant.value.lval, class_name, space, get_active_function_name(TSRMLS_C));
+		}
 		if (opline->result.op_type == IS_VAR) {
 			PZVAL_UNLOCK_FREE(*EX_T(opline->result.u.var).var.ptr_ptr);
 		}
