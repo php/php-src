@@ -36,7 +36,7 @@
 
 #include "php.h"
 
-#if defined(COMPILE_DL) || defined(COMPILE_DL_ICAP)
+#ifdef COMPILE_DL_ICAP
 #include "dl/phpdl.h"
 #endif
 
@@ -101,7 +101,7 @@ zend_module_entry php_icap_module_entry = {
 };
 
 
-#if defined(COMPILE_DL) || defined(COMPILE_DL_ICAP)
+#ifdef COMPILE_DL_ICAP
 ZEND_GET_MODULE(php_icap)
 #endif
 

@@ -18,7 +18,7 @@
 
 /* $Id$ */
 
-#if defined(COMPILE_DL) || defined(COMPILE_DL_MSSQL)
+#ifdef COMPILE_DL_MSSQL
 #include "dl/phpdl.h"
 #define HAVE_MSSQL 1
 #endif
@@ -80,7 +80,7 @@ int mssql_globals_id;
 PHP_MSSQL_API php_mssql_globals mssql_globals;
 #endif
 
-#if defined(COMPILE_DL) || defined(COMPILE_DL_MSSQL)
+#ifdef COMPILE_DL_MSSQL
 ZEND_GET_MODULE(mssql)
 #endif
 

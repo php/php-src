@@ -168,7 +168,7 @@ zend_module_entry pdf_module_entry = {
 	"pdf", pdf_functions, PHP_MINIT(pdf), PHP_MSHUTDOWN(pdf), NULL, NULL, PHP_MINFO(pdf), STANDARD_MODULE_PROPERTIES 
 };
 
-#if defined(COMPILE_DL) || defined(COMPILE_DL_PDF)
+#ifdef COMPILE_DL_PDF
 #include "dl/phpdl.h"
 ZEND_GET_MODULE(pdf)
 #endif

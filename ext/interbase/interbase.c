@@ -108,7 +108,7 @@ zend_module_entry ibase_module_entry =
 	STANDARD_MODULE_PROPERTIES
 };
 
-#if defined(COMPILE_DL) || defined(COMPILE_DL_INTERBASE)
+#ifdef COMPILE_DL_INTERBASE
 #include "dl/phpdl.h"
 ZEND_GET_MODULE(ibase)
 
@@ -526,7 +526,7 @@ PHP_MINFO_FUNCTION(ibase)
 	php_info_print_table_start();
 	php_info_print_table_row(2, "Interbase Support", "enabled");    
 	php_info_print_table_row(2, "Revision", "$Revision$");
-#if defined(COMPILE_DL) || defined(COMPILE_DL_INTERBASE)
+#ifdef COMPILE_DL_INTERBASE
 	php_info_print_table_row(2, "Dynamic Module", "yes");
 #endif
 	php_info_print_table_row(2, "Allow Persistent Links", (IBG(allow_persistent)?"Yes":"No") );

@@ -129,7 +129,7 @@ zend_module_entry posix_module_entry = {
 	STANDARD_MODULE_PROPERTIES
 };
 
-#if defined(COMPILE_DL) || defined(COMPILE_DL_POSIX)
+#ifdef COMPILE_DL_POSIX
 ZEND_GET_MODULE(posix)
 #endif
 

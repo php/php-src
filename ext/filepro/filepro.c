@@ -76,7 +76,7 @@ PHP_MINIT_FUNCTION(filepro)
 {
 #ifdef THREAD_SAFE
 	fp_global_struct *fp_globals;
-#if defined(COMPILE_DL) || defined(COMPILE_DL_FILEPRO)
+#ifdef COMPILE_DL_FILEPRO
 	CREATE_MUTEX(fp_mutex,"FP_TLS");
 	SET_MUTEX(fp_mutex);
 	numthreads++;
@@ -105,7 +105,7 @@ PHP_MSHUTDOWN_FUNCTION(filepro)
 	fp_globals = TlsGetValue(FPTls); 
 	if (fp_globals != 0) 
 		LocalFree((HLOCAL) fp_globals); 
-#if defined(COMPILE_DL) || defined(COMPILE_DL_FILEPRO)
+#ifdef COMPILE_DL_FILEPRO
 	SET_MUTEX(fp_mutex);
 	numthreads--;
 	if (!numthreads){
@@ -136,7 +136,7 @@ zend_module_entry filepro_module_entry = {
 };
 
 
-#if defined(COMPILE_DL) || defined(COMPILE_DL_FILEPRO)
+#ifdef COMPILE_DL_FILEPRO
 #include "dl/phpdl.h"
 ZEND_GET_MODULE(filepro)
 #if (WIN32|WINNT) && defined(THREAD_SAFE)

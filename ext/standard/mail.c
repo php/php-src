@@ -34,7 +34,7 @@
 #include "win32/sendmail.h"
 #endif
 
-#if defined(COMPILE_DL) || defined(COMPILE_DL_STANDARD)
+#ifdef COMPILE_DL_STANDARD
 ZEND_GET_MODULE(odbc)
 #endif
 

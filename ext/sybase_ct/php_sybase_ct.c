@@ -73,7 +73,7 @@ zend_module_entry sybase_module_entry = {
 	"sybase_ct", sybase_functions, PHP_MINIT(sybase), PHP_MSHUTDOWN(sybase), PHP_RINIT(sybase), PHP_RSHUTDOWN(sybase), PHP_MINFO(sybase), STANDARD_MODULE_PROPERTIES
 };
 
-#if defined(COMPILE_DL) || defined(COMPILE_DL_SYBASE_CT)
+#ifdef COMPILE_DL_SYBASE_CT
 ZEND_GET_MODULE(sybase)
 #endif
 

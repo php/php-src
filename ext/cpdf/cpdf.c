@@ -158,7 +158,7 @@ zend_module_entry cpdf_module_entry = {
 	"cpdf", cpdf_functions, PHP_MINIT(cpdf), PHP_MSHUTDOWN(cpdf), PHP_RINIT(cpdf), NULL, PHP_MINFO(cpdf), STANDARD_MODULE_PROPERTIES
 };
 
-#if defined(COMPILE_DL) || defined(COMPILE_DL_CPDF)
+#ifdef COMPILE_DL_CPDF
 #include "dl/phpdl.h"
 ZEND_GET_MODULE(cpdf)
 #endif

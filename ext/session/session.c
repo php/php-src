@@ -120,7 +120,7 @@ zend_module_entry session_module_entry = {
 	STANDARD_MODULE_PROPERTIES
 };
 
-#if defined(COMPILE_DL) || defined(COMPILE_DL_SESSION)
+#ifdef COMPILE_DL_SESSION
 ZEND_GET_MODULE(session)
 #endif
 
