@@ -101,6 +101,8 @@ function_entry imap_functions[] = {
 	PHP_FE(imap_createmailbox,	NULL)
 	PHP_FE(imap_renamemailbox,	NULL)
 	PHP_FE(imap_deletemailbox,	NULL)
+	PHP_FE(imap_get_quota,		NULL)
+	PHP_FE(imap_set_quota,		NULL)
 	PHP_FALIAS(imap_listmailbox, imap_list,	NULL)
 	PHP_FALIAS(imap_getmailboxes, imap_list_full,	NULL)
 	PHP_FALIAS(imap_scanmailbox, imap_listscan,	NULL)
@@ -355,6 +357,20 @@ MESSAGELIST *mail_newmessagelist(void)
 								  sizeof(MESSAGELIST));
 }
 
+/* Mail GET_QUOTA callback
+ * Called via the mail_parameter function in c-client:src/c-client/mail.c
+ * Author DRK
+ */
+void mail_getquota(MAILSTREAM *stream, char *qroot,QUOTALIST *qlist)
+{
+	/* this should only be run through once */
+	for (; qlist; qlist = qlist->next)
+	{
+		IMAPG(quota_usage) = qlist->usage;
+		IMAPG(quota_limit) = qlist->limit;
+	}
+}
+
 /* Mail garbage collect MESSAGELIST
  * Accepts: pointer to MESSAGELIST pointer
  * Author: CJH
@@ -532,16 +548,12 @@ PHP_MINIT_FUNCTION(imap)
 	REGISTER_MAIN_LONG_CONSTANT("SA_UIDVALIDITY",SA_UIDVALIDITY , CONST_PERSISTENT | CONST_CS);
 	/* UID validity value */
 
-#ifdef SA_QUOTA
-	sa_all |= SA_QUOTA;
-        REGISTER_MAIN_LONG_CONSTANT("SA_QUOTA",SA_QUOTA , CONST_PERSISTENT | CONST_CS);
+	sa_all |= GET_QUOTA;
+        REGISTER_MAIN_LONG_CONSTANT("GET_QUOTA",GET_QUOTA , CONST_PERSISTENT | CONST_CS);
      /* Disk space taken up by mailbox. */
-#endif
-#ifdef SA_QUOTA_ALL
-	sa_all |= SA_QUOTA_ALL;
-        REGISTER_MAIN_LONG_CONSTANT("SA_QUOTA_ALL",SA_QUOTA_ALL , CONST_PERSISTENT | CONST_CS);
+	sa_all |= GET_QUOTAROOT;
+        REGISTER_MAIN_LONG_CONSTANT("GET_QUOTAROOT",GET_QUOTAROOT , CONST_PERSISTENT | CONST_CS);
      /* Disk space taken up by all mailboxes owned by user. */
-#endif
 	REGISTER_MAIN_LONG_CONSTANT("SA_ALL", sa_all, CONST_PERSISTENT | CONST_CS);
      /* get all status information */
 		
@@ -996,6 +1008,80 @@ PHP_FUNCTION(imap_num_recent)
 		RETURN_FALSE;
 	}
 	RETURN_LONG(imap_le_struct->imap_stream->recent);
+}
+/* }}} */
+
+
+/* {{{ proto array imap_get_quota(int stream_id, string qroot)
+	Returns the quota set to the mailbox account qroot */
+PHP_FUNCTION(imap_get_quota)
+{
+	zval **streamind, **qroot;
+
+	int ind, ind_type;
+	pils *imap_le_struct;
+
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &streamind, &qroot) == FAILURE) {
+		ZEND_WRONG_PARAM_COUNT();
+	}
+
+	convert_to_long_ex(streamind);
+	convert_to_string_ex(qroot);
+
+	ind = Z_LVAL_PP(streamind);
+	imap_le_struct = (pils *) zend_list_find(ind, &ind_type);
+	if (!imap_le_struct || !IS_STREAM(ind_type)) {
+		php_error(E_WARNING, "Unable to find stream pointer");
+		RETURN_FALSE;
+	}
+
+	/* set the callback for the GET_QUOTA function */
+	mail_parameters(NIL, SET_QUOTA, (void *) mail_getquota);
+
+	if(!imap_getquota(imap_le_struct->imap_stream, Z_STRVAL_PP(qroot))) {
+		php_error(E_WARNING, "c-client imap_getquota failed");
+		RETURN_FALSE;
+	}
+
+	if (array_init(return_value) == FAILURE) {
+		php_error(E_WARNING, "Unable to allocate array memory");
+		RETURN_FALSE;
+	}
+		
+	add_assoc_long(return_value, "usage", IMAPG(quota_usage));
+	add_assoc_long(return_value, "limit", IMAPG(quota_limit));
+}
+/* }}} */
+
+
+/* {{{ proto int imap_set_quota(int stream_id, string qroot, int mailbox_size)
+   Will set the quota for qroot mailbox */
+PHP_FUNCTION(imap_set_quota)
+{
+	zval **streamind, **qroot, **mailbox_size;
+	STRINGLIST	limits;
+	int ind, ind_type;
+	pils *imap_le_struct;
+
+	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &streamind, &qroot, &mailbox_size) == FAILURE) {
+		ZEND_WRONG_PARAM_COUNT();
+	}
+
+	convert_to_long_ex(streamind);
+	convert_to_string_ex(qroot);
+	convert_to_long_ex(mailbox_size);
+
+	limits.text.data = "STORAGE";
+	limits.text.size = Z_LVAL_PP(mailbox_size);
+	limits.next = NIL;
+
+	ind = Z_LVAL_PP(streamind);
+	imap_le_struct = (pils *) zend_list_find(ind, &ind_type);
+	if (!imap_le_struct || !IS_STREAM(ind_type)) {
+		php_error(E_WARNING, "Unable to find stream pointer");
+		RETURN_FALSE;
+	}
+	RETURN_LONG(imap_setquota(imap_le_struct->imap_stream, Z_STRVAL_PP(qroot), &limits));
 }
 /* }}} */
 
@@ -2813,6 +2899,7 @@ PHP_FUNCTION(imap_status)
 	if (object_init(return_value) == FAILURE) {
 		RETURN_FALSE;
 	}
+
  	if (mail_status(imap_le_struct->imap_stream, Z_STRVAL_PP(mbx), Z_LVAL_PP(flags))) {
 	    add_property_long(return_value, "flags", IMAPG(status_flags));
 		if (IMAPG(status_flags) & SA_MESSAGES) {
@@ -2830,16 +2917,6 @@ PHP_FUNCTION(imap_status)
 		if (IMAPG(status_flags) & SA_UIDVALIDITY) {
 			add_property_long(return_value, "uidvalidity", IMAPG(status_uidvalidity));
 		}
-#ifdef SA_QUOTA
-		if (IMAPG(status_flags) & SA_QUOTA) {
-			add_property_long(return_value, "quota", IMAPG(status_quota));
-		}
-#endif
-#ifdef SA_QUOTA
-		if (IMAPG(status_flags) & SA_QUOTA_ALL) {
-			add_property_long(return_value, "quota_all", IMAPG(status_quota_all));
-		}
-#endif
 	} else {
 		RETURN_FALSE;
 	}
@@ -4075,17 +4152,6 @@ void mm_status(MAILSTREAM *stream, char *mailbox,MAILSTATUS *status)
 	if (IMAPG(status_flags) & SA_UIDVALIDITY) {
 		IMAPG(status_uidvalidity)=status->uidvalidity;
 	}
-
-#ifdef SA_QUOTA
-	if (IMAPG(status_flags) & SA_QUOTA) {
-		IMAPG(status_quota)=status->quota;
-	}
-#endif
-#ifdef SA_QUOTA_ALL
-	if (IMAPG(status_flags) & SA_QUOTA_ALL) { 
-		IMAPG(status_quota_all)=status->quota_all;
-	}
-#endif
 }
 
 void mm_log(char *str, long errflg)
