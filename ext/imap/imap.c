@@ -31,7 +31,7 @@
 
 #include "php.h"
 
-#if COMPILE_DL
+#ifdef COMPILE_DL_IMAP
 #include "dl/phpdl.h"
 #endif
 
@@ -47,6 +47,7 @@
 #include "modules.h"
 #if (WIN32|WINNT)
 #include "winsock.h"
+MAILSTREAM DEFAULTPROTO;
 #endif
 
 #ifdef IMAP41
@@ -189,7 +190,7 @@ zend_module_entry imap_module_entry = {
 };
 
 
-#if COMPILE_DL
+#ifdef COMPILE_DL_IMAP
 DLEXPORT zend_module_entry *get_module(void) { return &imap_module_entry; }
 #endif
 
@@ -439,9 +440,9 @@ PHP_MINIT_FUNCTION(imap)
 	mail_link (&mmdfdriver);      /* link in the mmdf driver */
 	mail_link (&newsdriver);      /* link in the news driver */
 	mail_link (&philedriver);     /* link in the phile driver */
+	auth_link (&auth_log);        /* link in the log authenticator */
 #endif
 	mail_link (&dummydriver);     /* link in the dummy driver */
-	auth_link (&auth_log);        /* link in the log authenticator */
 	/* lets allow NIL */
 
 	REGISTER_MAIN_LONG_CONSTANT("NIL", NIL, CONST_PERSISTENT | CONST_CS);
