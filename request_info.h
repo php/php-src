@@ -25,14 +25,14 @@ typedef struct {
 	int current_user_length;
 	const char *script_filename;
 	char *php_argv0;
-} php3_request_info;
+} php_request_info;
 
 #ifndef THREAD_SAFE
-PHPAPI extern php3_request_info request_info;
+PHPAPI extern php_request_info request_info;
 #endif
 
-extern int php3_init_request_info(void *conf);
-extern int php3_destroy_request_info(void *conf);
+extern int php_init_request_info(void *conf);
+extern int php_destroy_request_info(void *conf);
 
 #endif
 /*

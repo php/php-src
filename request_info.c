@@ -20,11 +20,11 @@
 #include "SAPI.h"
 
 #ifndef THREAD_SAFE
-PHPAPI php3_request_info request_info;
+PHPAPI php_request_info request_info;
 #endif
 
 #if CGI_BINARY
-int php3_init_request_info(void *conf)
+int php_init_request_info(void *conf)
 {
 	request_info.current_user = NULL;
 	request_info.current_user_length = 0;
@@ -51,7 +51,7 @@ int php3_init_request_info(void *conf)
 	/* We always need to emalloc() filename, since it gets placed into
 	   the include file hash table, and gets freed with that table.
 	   Notice that this means that we don't need to efree() it in
-	   php3_destroy_request_info()! */
+	   php_destroy_request_info()! */
 #if DISCARD_PATH
 	if (request_info.script_filename) {
 		SLS_FETCH();
@@ -64,7 +64,7 @@ int php3_init_request_info(void *conf)
 	return SUCCESS;
 }
 
-int php3_destroy_request_info(void *conf)
+int php_destroy_request_info(void *conf)
 {
 	STR_FREE(request_info.current_user);
 	return SUCCESS;
@@ -73,7 +73,7 @@ int php3_destroy_request_info(void *conf)
 
 
 #if APACHE
-int php3_init_request_info(void *conf)
+int php_init_request_info(void *conf)
 {
 	request_rec *r;
 	SLS_FETCH();
@@ -88,7 +88,7 @@ int php3_init_request_info(void *conf)
 #endif
 
 #if !CGI_BINARY
-int php3_destroy_request_info(void *conf)
+int php_destroy_request_info(void *conf)
 {
 	/* see above for why we don't want to efree() request_info.filename */
 	STR_FREE(request_info.current_user);

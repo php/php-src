@@ -17,8 +17,6 @@
  */
 /* $Id$ */
 
-/* Synced with php3 revision 1.25 1999-06-16 [ssb] */
-
 #ifndef _FOPEN_WRAPPERS_H
 #define _FOPEN_WRAPPERS_H
 
