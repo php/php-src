@@ -1,3 +1,47 @@
+2002-03-15  Andi Gutmans  <andi@zend.com>
+
+    * zend_execute.c
+      zend_object_handlers.h
+      zend_objects.c
+      zend_objects.h
+      zend_variables.c: - Pass TSRMLS to callbacks.
+
+    * zend_execute.c:
+    - Scope fix. When calling an imported function the scope will change
+    - correctly to the scope of the functions class.
+    <?php
+
+    	function Hello()
+    	{
+    		print "Wrong one\n";
+    	}
+
+    	class MyClass {
+    		static $hello = "Hello, World\n";
+
+    		function Hello()
+    		{
+    			print self::$hello;
+    		}
+
+    		function Trampoline()
+    		{
+    			Hello();
+    		}
+    	}
+
+    	import function Trampoline from MyClass;
+
+    	Trampoline();
+    ?>
+
+    * zend_opcode.c
+      zend_execute.c
+      zend_compile.h
+      zend_compile.c:
+    - Fix issues with $this when using it by itself without indirection such as
+    - $this->foo.
+
 2002-03-14  Stanislav Malyshev  <stas@zend.com>
 
     * OBJECTS2_HOWTO: more cleanup
