@@ -281,9 +281,30 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 #ifndef ZEND_WIN32
 	if (strstr(path, "..")) {
 		/* If .. is found then we need to resolve real path as the .. code doesn't work with symlinks */
-		if (realpath(path, resolved_path)) {
-			path = resolved_path;
-			path_length = strlen(path);
+		if (IS_ABSOLUTE_PATH(path, path_length)) {
+			if (realpath(path, resolved_path)) {
+				path = resolved_path;
+				path_length = strlen(path);
+			}
+		} else { /* Concat current directory with relative path and then run realpath() on it */
+			char *tmp;
+			char *ptr;
+
+			ptr = tmp = (char *) malloc(state->cwd_length+path_length+sizeof("/"));
+			if (!tmp) {
+				return 1;
+			}
+			memcpy(ptr, state->cwd, state->cwd_length);
+			ptr += state->cwd_length;
+			*ptr++ = DEFAULT_SLASH;
+			memcpy(ptr, path, path_length);
+			ptr += path_length;
+			*ptr = '\0';
+			if (realpath(tmp, resolved_path)) {
+				path = resolved_path;
+				path_length = strlen(path);
+			}
+			free(tmp);
 		}
 	}
 #endif
