@@ -1933,16 +1933,22 @@ dnl Search for bison and check it's version
 dnl
 AC_DEFUN([PHP_PROG_BISON], [
   AC_PROG_YACC
-  if test "$YACC" != "bison -y"; then
-    AC_MSG_WARN([You will need bison 1.28, 1.35, 1.75 or 1.875 if you want to regenerate the Zend/PHP parsers.])
-  else
-    AC_MSG_CHECKING([bison version])
-    set `bison --version| grep 'GNU Bison' | cut -d ' ' -f 4 | sed -e 's/\./ /'|tr -d a-z`
-    if test "${1}" -ne "1" -o "(" "${2}" != "28" -a "${2}" != "35" -a "${2}" != "75" -a "${2}" != "875" ")"; then 
-      AC_MSG_WARN([You will need bison 1.28, 1.35, 1.75 or 1.875 if you want to regenerate the Zend/PHP parsers (found ${1}.${2}).])
-    fi
-    AC_MSG_RESULT(${1}.${2} (ok))
+  if test "$YACC" = "bison -y"; then
+    AC_CACHE_CHECK([for bison version], php_cv_bison_version, [
+      set `bison --version| grep 'GNU Bison' | cut -d ' ' -f 4 | sed -e 's/\./ /'|tr -d a-z`
+      if test "${1}" -ne "1" -o "(" "${2}" != "28" -a "${2}" != "35" -a "${2}" != "75" -a "${2}" != "875" ")"; then 
+        php_cv_bison_version=invalid
+      else
+        php_cv_bison_version="${1}.${2} (ok)"
+      fi
+    ])
   fi
+  case $php_cv_bison_version in
+    ""|invalid[)]
+      AC_MSG_WARN([You will need bison 1.28, 1.35, 1.75 or 1.875 if you want to regenerate the Zend/PHP parsers (found ${1}.${2}).])
+      YACC="exit 0;"
+      ;;
+  esac
   PHP_SUBST(YACC)
 ])
 
@@ -1965,19 +1971,25 @@ AC_DEFUN([PHP_PROG_LEX], [
     LEX_CFLAGS="-DYY_USE_CONST"
   fi
 
-  AC_MSG_CHECKING([flex version])
   if test "$LEX" ;then
-    flexvers=`echo "" | $LEX -V -v --version 2>/dev/null | sed -e 's/^.* //' -e 's/\./ /g'`
-    if test ! -z "$flexvers"; then
-      set $flexvers
-      if test "${1}" != "2" -o "${2}" != "5" -o "${3}" != "4"; then
-        AC_MSG_WARN([You will need flex 2.5.4 if you want to regenerate Zend/PHP lexical parsers.])
+    AC_CACHE_CHECK([for flex version], php_cv_flex_version, [
+      flexvers=`echo "" | $LEX -V -v --version 2>/dev/null | sed -e 's/^.* //' -e 's/\./ /g'`
+      if test ! -z "$flexvers"; then
+        set $flexvers
+        if test "${1}" != "2" -o "${2}" != "5" -o "${3}" != "4"; then
+          php_cv_flex_version=invalid
+        else
+          php_cv_flex_version="${1}.${2}.${3} (ok)"
+        fi
       fi
-    fi
-    AC_MSG_RESULT(${1}.${2}.${3} (ok))
-  else
-    AC_MSG_WARN([You will need flex 2.5.4 or later if you want to regenerate Zend/PHP lexical parsers.])
+    ])
   fi
+  case $php_cv_flex_version in
+    ""|invalid[)]
+      AC_MSG_WARN([You will need flex 2.5.4 if you want to regenerate Zend/PHP lexical parsers.])
+      LEX="exit 0;"
+      ;;
+  esac
   PHP_SUBST(LEX)
 ])
 
@@ -1989,19 +2001,21 @@ dnl
 AC_DEFUN([PHP_PROG_RE2C],[
   AC_CHECK_PROG(RE2C, re2c, re2c)
   if test -n "$RE2C"; then
-    AC_MSG_CHECKING([re2c version])
-    AC_CACHE_VAL(php_cv_re2c_version, [
-      if test `echo "" | re2c --vernum 2>/dev/null` -lt "904"; then
-        AC_MSG_WARN([You will need re2c 0.94 or later if you want to regenerate PHP parsers.])
+    AC_CACHE_CHECK([for re2c version], php_cv_re2c_version, [
+      re2c_vernum=`echo "" | re2c --vernum 2>/dev/null`
+      if test -z "$rec2_vernum" || test "$re2c_vernum" -lt "904"; then
         php_cv_re2c_version=invalid
       else
         php_cv_re2c_version="`echo "" | re2c --version | cut -d ' ' -f 2  2>/dev/null` (ok)"
       fi 
     ])
-    AC_MSG_RESULT([$php_cv_re2c_version])
-  else 
-    AC_MSG_WARN([You will need re2c 0.94 or later if you want to regenerate PHP parsers.])
   fi
+  case $php_cv_re2c_version in
+    ""|invalid[)]
+      AC_MSG_WARN([You will need re2c 0.94 or later if you want to regenerate PHP parsers.])
+      RE2C="exit 0;"
+      ;;
+  esac
   PHP_SUBST(RE2C)
 ])
 
