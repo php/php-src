@@ -149,6 +149,7 @@ typedef struct {
 	int drop_stmt;
 	XSQLDA *out_sqlda;
 	ibase_array *out_array;
+	unsigned char has_more_rows;
 } ibase_result;
 
 typedef struct _php_ibase_varchar {

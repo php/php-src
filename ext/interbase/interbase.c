@@ -1467,6 +1467,7 @@ static int _php_ibase_exec(ibase_result **ib_resultp, ibase_query *ib_query, int
 		IB_RESULT->trans = ib_query->trans;
 		IB_RESULT->stmt = ib_query->stmt; 
 		IB_RESULT->drop_stmt = 0; /* when free result close but not drop!*/
+		IB_RESULT->has_more_rows = 1;
 
 		out_sqlda = IB_RESULT->out_sqlda = emalloc(XSQLDA_LENGTH(ib_query->out_sqlda->sqld));
 		memcpy(out_sqlda, ib_query->out_sqlda, XSQLDA_LENGTH(ib_query->out_sqlda->sqld));
@@ -2072,17 +2073,16 @@ static void _php_ibase_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int fetch_type)
 
 	ZEND_FETCH_RESOURCE(ib_result, ibase_result *, result_arg, -1, "InterBase result", le_result);
 
-	if (ib_result->out_sqlda == NULL) {
-		_php_ibase_module_error("Trying to fetch results from a non-select query");
+	if (ib_result->out_sqlda == NULL || !ib_result->has_more_rows) {
 		RETURN_FALSE;
 	}
 	
-	if (isc_dsql_fetch(IB_STATUS, &ib_result->stmt, 1, ib_result->out_sqlda) == 100L) {
-		RETURN_FALSE;  /* end of cursor */
-	}
-	
-	if (IB_STATUS[0] && IB_STATUS[1]) { /* error in fetch */
-		_php_ibase_error(TSRMLS_C);
+	if (isc_dsql_fetch(IB_STATUS, &ib_result->stmt, 1, ib_result->out_sqlda)) {
+
+		ib_result->has_more_rows = 0;
+		if (IB_STATUS[0]) { /* error in fetch */
+			_php_ibase_error(TSRMLS_C);
+		}
 		RETURN_FALSE;
 	}
 	
