@@ -2973,8 +2973,8 @@ PHPAPI int php_pgsql_convert(PGconn *pg_link, const char *table_name, const zval
 	char *field = NULL;
 	uint field_len = -1;
 	ulong num_idx = -1;
-	zval *meta, **def, **type, **val, *new_val;
-	int new_len, key_type, err = 0;
+	zval *meta, **def, **type, **not_null, **has_default, **val, *new_val;
+	int new_len, key_type, err = 0, skip_field;
 	
 	assert(pg_link != NULL);
 	assert(Z_TYPE_P(values) == IS_ARRAY);
@@ -2997,6 +2997,7 @@ PHPAPI int php_pgsql_convert(PGconn *pg_link, const char *table_name, const zval
 	for (zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(values), &pos);
 		 zend_hash_get_current_data_ex(Z_ARRVAL_P(values), (void **)&val, &pos) == SUCCESS;
 		 zend_hash_move_forward_ex(Z_ARRVAL_P(values), &pos)) {
+		skip_field = 0;
 		if ((key_type = zend_hash_get_current_key_ex(Z_ARRVAL_P(values), &field, &field_len, &num_idx, 0, &pos)) == FAILURE) {
 			php_error(E_WARNING, "%s() failed to get array key type",
 					  get_active_function_name(TSRMLS_C));
@@ -3017,8 +3018,18 @@ PHPAPI int php_pgsql_convert(PGconn *pg_link, const char *table_name, const zval
 						  get_active_function_name(TSRMLS_C), field);
 			err = 1;
 		}
-		if (!def || zend_hash_find(Z_ARRVAL_PP(def), "type", 5, (void **)&type) == FAILURE) {
-			php_error(E_NOTICE, "%s() detected broken meta data",
+		if (!err && zend_hash_find(Z_ARRVAL_PP(def), "type", sizeof("type"), (void **)&type) == FAILURE) {
+			php_error(E_NOTICE, "%s() detected broken meta data. Missing 'type'",
+					  get_active_function_name(TSRMLS_C));
+			err = 1;
+		}
+		if (!err && zend_hash_find(Z_ARRVAL_PP(def), "not null", sizeof("not null"), (void **)&not_null) == FAILURE) {
+			php_error(E_NOTICE, "%s() detected broken meta data. Missing 'not null'",
+					  get_active_function_name(TSRMLS_C));
+			err = 1;
+		}
+		if (!err && zend_hash_find(Z_ARRVAL_PP(def), "has default", sizeof("has default"), (void **)&has_default) == FAILURE) {
+			php_error(E_NOTICE, "%s() detected broken meta data. Missing 'has default'",
 					  get_active_function_name(TSRMLS_C));
 			err = 1;
 		}
@@ -3085,6 +3096,20 @@ PHPAPI int php_pgsql_convert(PGconn *pg_link, const char *table_name, const zval
 					default:
 						err = 1;
 				}
+				if (!err && !strcmp(Z_STRVAL_P(new_val), "NULL")) {
+					/* if value is NULL and has default, remove entry to use default value*/
+					if (Z_BVAL_PP(has_default)) {
+						zval_dtor(new_val);
+						FREE_ZVAL(new_val);
+						skip_field = 1;
+					}
+					/* raise error if it's not null */
+					else if (Z_BVAL_PP(not_null)) {
+						php_error(E_NOTICE, "%s() detected NULL for 'NOT NULL' field '%s'",
+								  get_active_function_name(TSRMLS_C), field );
+						err = 1;
+					}
+				}				
 				if (err) {
 					php_error(E_NOTICE, "%s() expects string, null, long or boolelan value for pgsql '%s' (%s)",
 							  get_active_function_name(TSRMLS_C), Z_STRVAL_PP(type), field);
@@ -3127,6 +3152,20 @@ PHPAPI int php_pgsql_convert(PGconn *pg_link, const char *table_name, const zval
 					default:
 						err = 1;
 				}
+				if (!err && !strcmp(Z_STRVAL_P(new_val), "NULL")) {
+					/* if value is NULL and has default, remove entry to use default value*/
+					if (Z_BVAL_PP(has_default)) {
+						zval_dtor(new_val);
+						FREE_ZVAL(new_val);
+						skip_field = 1;
+					}
+					/* raise error if it's not null */
+					else if (Z_BVAL_PP(not_null)) {
+						php_error(E_NOTICE, "%s() detected NULL for 'NOT NULL' field '%s'",
+								  get_active_function_name(TSRMLS_C), field );
+						err = 1;
+					}
+				}				
 				if (err) {
 					php_error(E_NOTICE, "%s() expects string, null, long or double value for pgsql '%s' (%s)",
 							  get_active_function_name(TSRMLS_C), Z_STRVAL_PP(type), field);
@@ -3168,6 +3207,20 @@ PHPAPI int php_pgsql_convert(PGconn *pg_link, const char *table_name, const zval
 					default:
 						err = 1;
 				}
+				if (!err && !strcmp(Z_STRVAL_P(new_val), "NULL")) {
+					/* if value is NULL and has default, remove entry to use default value*/
+					if (Z_BVAL_PP(has_default)) {
+						zval_dtor(new_val);
+						FREE_ZVAL(new_val);
+						skip_field = 1;
+					}
+					/* raise error if it's not null */
+					else if (Z_BVAL_PP(not_null)) {
+						php_error(E_NOTICE, "%s() detected NULL for 'NOT NULL' field '%s'",
+								  get_active_function_name(TSRMLS_C), field );
+						err = 1;
+					}
+				}				
 				if (err) {
 					php_error(E_NOTICE, "%s() expects string, null, long or double value for pgsql '%s' (%s)",
 							  get_active_function_name(TSRMLS_C), Z_STRVAL_PP(type), field);
@@ -3216,6 +3269,20 @@ PHPAPI int php_pgsql_convert(PGconn *pg_link, const char *table_name, const zval
 					default:
 						err = 1;
 				}
+				if (!err && !strcmp(Z_STRVAL_P(new_val), "NULL")) {
+					/* if value is NULL and has default, remove entry to use default value*/
+					if (Z_BVAL_PP(has_default)) {
+						zval_dtor(new_val);
+						FREE_ZVAL(new_val);
+						skip_field = 1;
+					}
+					/* raise error if it's not null */
+					else if (Z_BVAL_PP(not_null)) {
+						php_error(E_NOTICE, "%s() detected NULL for 'NOT NULL' field '%s'",
+								  get_active_function_name(TSRMLS_C), field );
+						err = 1;
+					}
+				}				
 				if (err) {
 					php_error(E_NOTICE, "%s() expects string, null, long or double value for pgsql '%s' (%s)",
 							  get_active_function_name(TSRMLS_C), Z_STRVAL_PP(type), field);
@@ -3258,12 +3325,24 @@ PHPAPI int php_pgsql_convert(PGconn *pg_link, const char *table_name, const zval
 					default:
 						err = 1;
 				}
-#ifdef PHP_DEBUG				
+				if (!err && !strcmp(Z_STRVAL_P(new_val), "NULL")) {
+					/* if value is NULL and has default, remove entry to use default value*/
+					if (Z_BVAL_PP(has_default)) {
+						zval_dtor(new_val);
+						FREE_ZVAL(new_val);
+						skip_field = 1;
+					}
+					/* raise error if it's not null */
+					else if (Z_BVAL_PP(not_null)) {
+						php_error(E_NOTICE, "%s() detected NULL for 'NOT NULL' field '%s'",
+								  get_active_function_name(TSRMLS_C), field );
+						err = 1;
+					}
+				}				
 				if (err) {
 					php_error(E_NOTICE, "%s() expects string, null, long or double value for '%s' (%s)",
 							  get_active_function_name(TSRMLS_C), Z_STRVAL_PP(type), field);
 				}
-#endif
 				break;
 				
 			case PG_CIDR:
@@ -3291,8 +3370,21 @@ PHPAPI int php_pgsql_convert(PGconn *pg_link, const char *table_name, const zval
 
 					default:
 						err = 1;
-				}
-				
+				}				
+				if (!err && !strcmp(Z_STRVAL_P(new_val), "NULL")) {
+					/* if value is NULL and has default, remove entry to use default value*/
+					if (Z_BVAL_PP(has_default)) {
+						zval_dtor(new_val);
+						FREE_ZVAL(new_val);
+						skip_field = 1;
+					}
+					/* raise error if it's not null */
+					else if (Z_BVAL_PP(not_null)) {
+						php_error(E_NOTICE, "%s() detected NULL for 'NOT NULL' field '%s'",
+								  get_active_function_name(TSRMLS_C), field );
+						err = 1;
+					}
+				}				
 				if (err) {
 					php_error(E_NOTICE, "%s() expects string or null for '%s' (%s)",
 							  get_active_function_name(TSRMLS_C), Z_STRVAL_PP(type), field);
@@ -3325,6 +3417,20 @@ PHPAPI int php_pgsql_convert(PGconn *pg_link, const char *table_name, const zval
 					default:
 						err = 1;
 				}
+				if (!err && !strcmp(Z_STRVAL_P(new_val), "NULL")) {
+					/* if value is NULL and has default, remove entry to use default value*/
+					if (Z_BVAL_PP(has_default)) {
+						zval_dtor(new_val);
+						FREE_ZVAL(new_val);
+						skip_field = 1;
+					}
+					/* raise error if it's not null */
+					else if (Z_BVAL_PP(not_null)) {
+						php_error(E_NOTICE, "%s() detected NULL for 'NOT NULL' field '%s'",
+								  get_active_function_name(TSRMLS_C), field );
+						err = 1;
+					}
+				}				
 				if (err) {
 					php_error(E_NOTICE, "%s() expects string or null for pgsql %s field (%s)",
 							  get_active_function_name(TSRMLS_C), Z_STRVAL_PP(type), field);
@@ -3356,6 +3462,20 @@ PHPAPI int php_pgsql_convert(PGconn *pg_link, const char *table_name, const zval
 					default:
 						err = 1;
 				}
+				if (!err && !strcmp(Z_STRVAL_P(new_val), "NULL")) {
+					/* if value is NULL and has default, remove entry to use default value*/
+					if (Z_BVAL_PP(has_default)) {
+						zval_dtor(new_val);
+						FREE_ZVAL(new_val);
+						skip_field = 1;
+					}
+					/* raise error if it's not null */
+					else if (Z_BVAL_PP(not_null)) {
+						php_error(E_NOTICE, "%s() detected NULL for 'NOT NULL' field '%s'",
+								  get_active_function_name(TSRMLS_C), field );
+						err = 1;
+					}
+				}				
 				if (err) {
 					php_error(E_NOTICE, "%s() expects string or null for pgsql %s field (%s)",
 							  get_active_function_name(TSRMLS_C), Z_STRVAL_PP(type), field);
@@ -3387,6 +3507,20 @@ PHPAPI int php_pgsql_convert(PGconn *pg_link, const char *table_name, const zval
 					default:
 						err = 1;
 				}
+				if (!err && !strcmp(Z_STRVAL_P(new_val), "NULL")) {
+					/* if value is NULL and has default, remove entry to use default value*/
+					if (Z_BVAL_PP(has_default)) {
+						zval_dtor(new_val);
+						FREE_ZVAL(new_val);
+						skip_field = 1;
+					}
+					/* raise error if it's not null */
+					else if (Z_BVAL_PP(not_null)) {
+						php_error(E_NOTICE, "%s() detected NULL for 'NOT NULL' field '%s'",
+								  get_active_function_name(TSRMLS_C), field );
+						err = 1;
+					}
+				}				
 				if (err) {
 					php_error(E_NOTICE, "%s() expects string or null for pgsql %s field (%s)",
 							  get_active_function_name(TSRMLS_C), Z_STRVAL_PP(type), field);
@@ -3419,6 +3553,20 @@ PHPAPI int php_pgsql_convert(PGconn *pg_link, const char *table_name, const zval
 					default:
 						err = 1;
 				}
+				if (!err && !strcmp(Z_STRVAL_P(new_val), "NULL")) {
+					/* if value is NULL and has default, remove entry to use default value*/
+					if (Z_BVAL_PP(has_default)) {
+						zval_dtor(new_val);
+						FREE_ZVAL(new_val);
+						skip_field = 1;
+					}
+					/* raise error if it's not null */
+					else if (Z_BVAL_PP(not_null)) {
+						php_error(E_NOTICE, "%s() detected NULL for 'NOT NULL' field '%s'",
+								  get_active_function_name(TSRMLS_C), field );
+						err = 1;
+					}
+				}				
 				if (err) {
 					php_error(E_NOTICE, "%s() expects string or null for pgsql %s field (%s)",
 							  get_active_function_name(TSRMLS_C), Z_STRVAL_PP(type), field);
@@ -3462,6 +3610,20 @@ PHPAPI int php_pgsql_convert(PGconn *pg_link, const char *table_name, const zval
 					default:
 						err = 1;
 				}
+				if (!err && !strcmp(Z_STRVAL_P(new_val), "NULL")) {
+					/* if value is NULL and has default, remove entry to use default value*/
+					if (Z_BVAL_PP(has_default)) {
+						zval_dtor(new_val);
+						FREE_ZVAL(new_val);
+						skip_field = 1;
+					}
+					/* raise error if it's not null */
+					else if (Z_BVAL_PP(not_null)) {
+						php_error(E_NOTICE, "%s() detected NULL for 'NOT NULL' field '%s'",
+								  get_active_function_name(TSRMLS_C), field );
+						err = 1;
+					}
+				}				
 				if (err) {
 					php_error(E_NOTICE, "%s() expects string, null, long or double value for pgsql '%s' (%s)",
 							  get_active_function_name(TSRMLS_C), Z_STRVAL_PP(type), field);
@@ -3476,8 +3638,7 @@ PHPAPI int php_pgsql_convert(PGconn *pg_link, const char *table_name, const zval
 							ZVAL_STRING(new_val, "NULL", 1);
 						}
 						else {
-							/* FIXME: better regex must be used */
-							if (php_pgsql_convert_match(Z_STRVAL_PP(val), "^([0-9]{2,2}:){5,5}[0-9]{2,2}$", 1 TSRMLS_CC) == FAILURE) {
+							if (php_pgsql_convert_match(Z_STRVAL_PP(val), "^([0-9a-f]{2,2}:){5,5}[0-9a-f]{2,2}$", 1 TSRMLS_CC) == FAILURE) {
 								err = 1;
 							}
 							else {
@@ -3494,6 +3655,20 @@ PHPAPI int php_pgsql_convert(PGconn *pg_link, const char *table_name, const zval
 					default:
 						err = 1;
 				}
+				if (!err && !strcmp(Z_STRVAL_P(new_val), "NULL")) {
+					/* if value is NULL and has default, remove entry to use default value*/
+					if (Z_BVAL_PP(has_default)) {
+						zval_dtor(new_val);
+						FREE_ZVAL(new_val);
+						skip_field = 1;
+					}
+					/* raise error if it's not null */
+					else if (Z_BVAL_PP(not_null)) {
+						php_error(E_NOTICE, "%s() detected NULL for 'NOT NULL' field '%s'",
+								  get_active_function_name(TSRMLS_C), field );
+						err = 1;
+					}
+				}				
 				if (err) {
 					php_error(E_NOTICE, "%s() expects string or null for pgsql %s field (%s)",
 							  get_active_function_name(TSRMLS_C), Z_STRVAL_PP(type), field);
@@ -3529,9 +3704,12 @@ PHPAPI int php_pgsql_convert(PGconn *pg_link, const char *table_name, const zval
 			FREE_ZVAL(new_val);
 			break;			
 		}
-		field = php_addslashes(field, strlen(field), &new_len, 0 TSRMLS_CC);
-		add_assoc_zval(result, field, new_val);
-		efree(field);
+		if (!skip_field) {
+			/* If field is NULL and HAS DEFAULT, should be skipped */
+			field = php_addslashes(field, strlen(field), &new_len, 0 TSRMLS_CC);
+			add_assoc_zval(result, field, new_val);
+			efree(field);
+		}
 	} /* for */
 	zval_dtor(meta);
 	FREE_ZVAL(meta);
