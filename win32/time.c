@@ -11,6 +11,14 @@
  *
  *****************************************************************************/
 
+/* $Id$ */
+
+ /**
+  *
+  * 04-Feb-2001
+  *   - Added patch by "Vanhanen, Reijo" <Reijo.Vanhanen@helsoft.fi>
+  *     Improves accuracy of msec
+  */
 
 /* Include stuff ************************************************************ */
 
@@ -21,22 +29,92 @@
 #include <mmsystem.h>
 #include <errno.h>
 
+int getfilesystemtime(struct timeval *time_Info) 
+{
+FILETIME ft;
+__int64 ff;
+
+    GetSystemTimeAsFileTime(&ft);   /* 100 ns blocks since 01-Jan-1641 */
+                                    /* resolution seems to be 0.01 sec */ 
+    ff = *(__int64*)(&ft);
+    time_Info->tv_sec = (int)(ff/(__int64)10000000-(__int64)11644473600);
+    time_Info->tv_usec = (int)(ff % 10000000)/10;
+    return 0;
+}
+
+ 
+
 int gettimeofday(struct timeval *time_Info, struct timezone *timezone_Info)
 {
-	_int64 mstimer, freq;
+
+	static struct timeval starttime = {0, 0};
+	static __int64 lasttime = 0;
+	static __int64 freq = 0;
+	__int64 timer;
+	LARGE_INTEGER li;
+	BOOL b;
+	double dt;
+
 	/* Get the time, if they want it */
 	if (time_Info != NULL) {
-		time_Info->tv_sec = time(NULL);
-		/* get ticks-per-second of the performance counter
-		   Note the necessary typecast to a LARGE_INTEGER structure 
-		 */
-		if (!QueryPerformanceFrequency((LARGE_INTEGER *) & freq)) {
-			time_Info->tv_usec = 0;
-		} else {
-			QueryPerformanceCounter((LARGE_INTEGER *) & mstimer);
-			mstimer = (__int64) (mstimer * .8);
-			time_Info->tv_usec = (long) (mstimer % 0x0FFFFFFF);
-		}
+		if (starttime.tv_sec == 0) {
+            b = QueryPerformanceFrequency(&li);
+            if (!b) {
+                starttime.tv_sec = -1;
+            }
+            else {
+                freq = li.QuadPart;
+                b = QueryPerformanceCounter(&li);
+                if (!b) {
+                    starttime.tv_sec = -1;
+                }
+                else {
+                    getfilesystemtime(&starttime);
+                    timer = li.QuadPart;
+                    dt = (double)timer/freq;
+                    starttime.tv_usec -= (int)((dt-(int)dt)*1000000);
+                    if (starttime.tv_usec < 0) {
+                        starttime.tv_usec += 1000000;
+                        --starttime.tv_sec;
+                    }
+                    starttime.tv_sec -= (int)dt;
+                }
+            }
+        }
+        if (starttime.tv_sec > 0) {
+            b = QueryPerformanceCounter(&li);
+            if (!b) {
+                starttime.tv_sec = -1;
+            }
+            else {
+                timer = li.QuadPart;
+                if (timer < lasttime) {
+                    getfilesystemtime(time_Info);
+                    dt = (double)timer/freq;
+                    starttime = *time_Info;
+                    starttime.tv_usec -= (int)((dt-(int)dt)*1000000);
+                    if (starttime.tv_usec < 0) {
+                        starttime.tv_usec += 1000000;
+                        --starttime.tv_sec;
+                    }
+                    starttime.tv_sec -= (int)dt;
+                }
+                else {
+                    lasttime = timer;
+                    dt = (double)timer/freq;
+                    time_Info->tv_sec = starttime.tv_sec + (int)dt;
+                    time_Info->tv_usec = starttime.tv_usec + (int)((dt-(int)dt)*1000000);
+                    if (time_Info->tv_usec > 1000000) {
+                        time_Info->tv_usec -= 1000000;
+                        ++time_Info->tv_sec;
+                    }
+                }
+            }
+        }
+        if (starttime.tv_sec < 0) {
+            getfilesystemtime(time_Info);
+        }
+
 	}
 	/* Get the timezone, if they want it */
 	if (timezone_Info != NULL) {
@@ -52,21 +130,32 @@ int gettimeofday(struct timeval *time_Info, struct timezone *timezone_Info)
 /* this usleep isnt exactly accurate but should do ok */
 void usleep(unsigned int useconds)
 {
-	__int64 mstimer, freq;
-	long now, then;
-	if (QueryPerformanceFrequency((LARGE_INTEGER *) & freq)) {
-		QueryPerformanceCounter((LARGE_INTEGER *) & mstimer);
-		now = (long) (((__int64) (mstimer * .8)) % 0x0FFFFFFF);
-		then = now + useconds;
-		while (now < then) {
-			QueryPerformanceCounter((LARGE_INTEGER *) & mstimer);
-			now = (long) (((__int64) (mstimer * .8)) % 0x0FFFFFFF);
-		}
-	} else {
-		/*workaround for systems without performance counter
-		   this is actualy a millisecond sleep */
-		Sleep((int) (useconds / 1000));
-	}
+struct timeval tnow, tthen, t0;
+
+	gettimeofday(&tthen, NULL);
+    t0 = tthen;
+    tthen.tv_usec += useconds;
+    while (tthen.tv_usec > 1000000) {
+        tthen.tv_usec -= 1000000;
+        tthen.tv_sec++;
+    }
+    
+	if (useconds > 10000) {
+        useconds -= 10000;
+        Sleep(useconds/1000);
+    }
+    
+	while (1) {
+        gettimeofday(&tnow, NULL);
+        if (tnow.tv_sec > tthen.tv_sec) {
+            break;
+        }
+        if (tnow.tv_sec == tthen.tv_sec) {
+            if (tnow.tv_usec > tthen.tv_usec) {
+                break;
+            }
+        }
+    }
 }
 
 
