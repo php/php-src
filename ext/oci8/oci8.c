@@ -836,9 +836,9 @@ static void _oci_define_hash_dtor(void *data)
  */
 static void _oci_desc_flush_hash_dtor(void *data)
 {
+	oci_descriptor *descr = *(oci_descriptor **)data;
 	TSRMLS_FETCH();
 	
-	oci_descriptor *descr = *(oci_descriptor **)data;
 	if (descr->buffering == 2 && (descr->type == OCI_DTYPE_LOB || descr->type == OCI_DTYPE_FILE)) {
 		oci_lob_flush(descr,OCI_LOB_BUFFER_FREE TSRMLS_CC);
 		descr->buffering = 1;
