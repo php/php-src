@@ -1,3 +1,132 @@
+2003-01-31  Melvyn Sopacua  <msopacua@idg.nl>
+
+    * ext/mcrypt/config.m4:
+      Require 2.5.6+
+      MFB: Be -ltdl aware
+
+2003-01-31  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/openssl/openssl.c:
+      Fixed bug #21986 (openssl test failure).
+
+2003-01-31  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_4_3)
+      ext/dba/config.m4:
+      MFH: Shared dba requires at least db-3.3
+
+    * ext/dba/config.m4:
+      Shared dba requires at least db-3.3
+
+    * ext/dba/dba.c:
+      Fix proto
+
+2003-01-31  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/ext_skel.php
+      ext/ext_skel.php
+      ext/ext_skel_win32.php:
+      Rename script.
+      Add check for CLI version
+
+    * ext/ext_skel_win32.php
+      ext/ext_skel_win32.php:
+      
+      file ext_skel_win32.php was initially added on branch PHP_4_3.
+
+2003-01-31  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/var.c:
+      Unbreak $Id tag
+
+2003-01-31  Melvyn Sopacua  <msopacua@idg.nl>
+
+    * (PHP_4_3)
+      ext/mcrypt/config.m4:
+      "The ugly patch"
+      Make mcrypt compile, when we finally are free of -ltdl. Bug #20926.
+      
+
+2003-01-31  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_4_3)
+      ext/mbstring/mbfilter.c
+      ext/mbstring/mbstring.c
+      ext/mbstring/tests/mb_send_mail01.phpt
+      ext/mbstring/tests/mb_send_mail02.phpt
+      ext/mbstring/tests/mb_send_mail03.phpt
+      ext/mbstring/tests/mb_send_mail04.phpt
+      ext/mbstring/tests/mb_send_mail05.phpt
+      ext/mbstring/tests/mb_send_mail06.phpt:
+      MFH: fixed a mb_send_mail() bug.
+
+2003-01-31  Jani Taskinen  <sniper@iki.fi>
+
+    * (PHP_4_3)
+      NEWS:
+      Moved from HEAD.
+
+    * NEWS:
+      Moved these entries to PHP_4_3 branch NEWS (for 4.3.1)
+
+    * ext/oci8/php_oci8.h:
+      No c++ comments..
+
+2003-01-31  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/mbstring/mbfilter.c
+      ext/mbstring/mbstring.c
+      ext/mbstring/tests/mb_send_mail01.phpt
+      ext/mbstring/tests/mb_send_mail02.phpt
+      ext/mbstring/tests/mb_send_mail03.phpt
+      ext/mbstring/tests/mb_send_mail04.phpt
+      ext/mbstring/tests/mb_send_mail05.phpt
+      ext/mbstring/tests/mb_send_mail06.phpt
+      ext/mbstring/tests/mb_send_mail07.phpt:
+      Fixed a mb_send_mail() bug that has been reported in php-i18n@lists.php.net
+      See http://lists.php.net/article.php?group=php.i18n&article=427
+
+2003-01-31  Sascha Schumann  <sascha@schumann.cx>
+
+    * php.ini-dist:
+      Remove obsolete warning
+
+2003-01-31  Sara Golemon  <php@alphaweb.net>
+
+    * ext/ftp/ftp.c
+      ext/ftp/ftp.h
+      ext/ftp/php_ftp.c
+      ext/ftp/php_ftp.h:
+      Add ftp_raw() to send raw command strings to an FTP server.
+
+2003-01-31  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/skeleton/skeleton.php:
+      Use platform specific extension.
+
+    * ext/skeleton/skeleton.dsp:
+      Dtandard visual studio project for ext_skel
+
+    * ext/ext_skel.php:
+      Wrapper script to use ext_skel on Win32
+
+    * (PHP_4_3)
+      ext/ext_skel.php:
+      Wrapper script to execute ext_skel on WIn32
+
+    * ext/ext_skel.php:
+      
+      file ext_skel.php was initially added on branch PHP_4_3.
+
+    * (PHP_4_3)
+      ext/skeleton/skeleton.php:
+      Allow extensions to be loaded on win32
+
+    * ext/skeleton/skeleton.dsp
+      ext/skeleton/skeleton.dsp:
+      
+      file skeleton.dsp was initially added on branch PHP_4_3.
+
 2003-01-30  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/session/session.c:
