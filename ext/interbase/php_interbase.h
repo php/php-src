@@ -76,7 +76,7 @@ PHP_FUNCTION(ibase_errmsg);
 #define IBASE_TRANS_ON_LINK 10
 #define IBASE_BLOB_SEG 4096
 
-typedef struct {
+ZEND_BEGIN_MODULE_GLOBALS(ibase)
 	ISC_STATUS status[20];
 	long default_link;
 	long num_links, num_persistent;
@@ -91,7 +91,7 @@ typedef struct {
 	char *timeformat;
 	char *cfg_timeformat;
 	char *errmsg;
-} php_ibase_globals;
+ZEND_END_MODULE_GLOBALS(ibase)
 
 typedef struct {
 	isc_tr_handle trans[IBASE_TRANS_ON_LINK];
@@ -155,14 +155,15 @@ enum php_interbase_option {
 };
 
 #ifdef ZTS
-#define IBLS_D php_ibase_globals *ibase_globals
+#define IBLS_D zend_ibase_globals *ibase_globals
+#define IBLS_C ibase_globals
 #define IBG(v) (ibase_globals->v)
-#define IBLS_FETCH() php_ibase_globals *ibase_globals = ts_resource(ibase_globals_id)
+#define IBLS_FETCH() zend_ibase_globals *ibase_globals = ts_resource(ibase_globals_id)
 #else
 #define IBLS_D
+#define IBLS_C
 #define IBG(v) (ibase_globals.v)
 #define IBLS_FETCH()
-extern PHP_IBASE_API php_ibase_globals ibase_globals;
 #endif
 
 #else
