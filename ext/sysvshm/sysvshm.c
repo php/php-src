@@ -18,7 +18,9 @@
  
 /* $Id$ */
 
-/* This has been built and tested on Solaris 2.6.
+/* This has been built and tested on Linux 2.2.14 
+ *
+ * This has been built and tested on Solaris 2.6.
  * It may not compile or execute correctly on other systems.
  */
 
@@ -173,26 +175,25 @@ PHP_FUNCTION(shm_detach)
 /* }}} */
 /* {{{ proto int shm_remove(int shm_identifier)
    Removes shared memory from Unix systems */
+
 PHP_FUNCTION(shm_remove)
 {
-	pval **arg_key;
+	pval **arg_id;
 	long id;
-	key_t key;
+	int type;
+	sysvshm_shm *shm_list_ptr;
 
-	if(ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg_key) == FAILURE) {
+	if(ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg_id) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long_ex(arg_key);
+	convert_to_long_ex(arg_id);
 	
-	key = (*arg_key)->value.lval;
+	id = (*arg_id)->value.lval;
 
-	if((id=shmget(key,0,0))<0) {
-		php_error(E_WARNING, "%d is not a existing SysV shared memory key", key);
-		RETURN_FALSE;
-	}
-	if(shmctl(id,IPC_RMID,NULL)<0) {
-		php_error(E_WARNING, "shm_remove() failed for key 0x%x: %s", key, strerror(errno));
+	shm_list_ptr = (sysvshm_shm *) zend_list_find(id, &type);
+	if(shmctl(shm_list_ptr->id,IPC_RMID,NULL)<0) {
+		php_error(E_WARNING, "shm_remove() failed for key 0x%x, id %i: %s", shm_list_ptr->key, id,strerror(errno));
 		RETURN_FALSE;
 	} 
 
