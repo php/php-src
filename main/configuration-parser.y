@@ -492,8 +492,8 @@ statement:
 			}
 		}
 	|	T_ZEND_EXTENSION_DEBUG '=' cfg_string { 
-#if !defined(ZTS) && ZEND_DEBUG
 			if (parsing_mode==PARSING_MODE_CFG) {
+#if !defined(ZTS) && ZEND_DEBUG
 				zend_load_extension($3.value.str.val);
 #endif
 				free($3.value.str.val);
