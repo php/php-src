@@ -771,6 +771,36 @@ static PHP_METHOD(PDO, query)
 }
 /* }}} */
 
+/* {{{ proto string PDO::quote(string string [, int paramtype])
+   quotes string for use in a query.  The optional paramtype acts as a hint for drivers that have alternate quoting styles.  The default value is PDO_PARAM_STR */
+static PHP_METHOD(PDO, quote)
+{
+	pdo_dbh_t *dbh = zend_object_store_get_object(getThis() TSRMLS_CC);
+	char *str;
+	int str_len;
+	long paramtype = PDO_PARAM_STR;
+	char *qstr;
+	size_t qlen;
+
+	if (FAILURE == zend_parse_parameters(1 TSRMLS_CC, "s|l", &str, &str_len,
+			&paramtype)) {
+		RETURN_FALSE;
+	}
+	
+	PDO_DBH_CLEAR_ERR();
+	if (!dbh->methods->quoter) {
+		pdo_raise_impl_error(dbh, NULL, "IM001", "driver does not support quoting" TSRMLS_CC);
+		RETURN_FALSE;
+	}
+
+	if (dbh->methods->quoter(dbh, str, str_len, &qstr, &qlen, paramtype TSRMLS_CC)) {
+		RETURN_STRINGL(qstr, qlen, 0);
+	}
+	PDO_HANDLE_DBH_ERR();
+}
+/* }}} */
+
+
 function_entry pdo_dbh_functions[] = {
 	PHP_ME_MAPPING(__construct, dbh_constructor,	NULL)
 	PHP_ME(PDO, prepare, 		NULL, 					ZEND_ACC_PUBLIC)
@@ -784,6 +814,7 @@ function_entry pdo_dbh_functions[] = {
 	PHP_ME(PDO, errorCode,		NULL,					ZEND_ACC_PUBLIC)
 	PHP_ME(PDO, errorInfo,		NULL,					ZEND_ACC_PUBLIC)
 	PHP_ME(PDO, getAttribute,	NULL,					ZEND_ACC_PUBLIC)
+	PHP_ME(PDO, quote,			NULL,					ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 
