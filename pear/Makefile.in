@@ -47,7 +47,7 @@ install-build:
 		-e 's#@PHPINCLUDEDIR@#$(phpincludedir)#g' \
 		< $(srcdir)/php-config.in > $(bindir)/php-config.tmp && \
 	chmod +x $(bindir)/php-config.tmp && \
-	mv $(bindir)/php-config.tmp $(bindir)/php-config &&
+	mv $(bindir)/php-config.tmp $(bindir)/php-config
 
 SRC_HEADERS = \
 	php.h \
