@@ -1170,7 +1170,6 @@ static void php_mysql_do_query_general(zval **query, zval **mysql_link, int link
 {
 	php_mysql_conn *mysql;
 	MYSQL_RES *mysql_result;
-	char tmp[128];
 	
 	ZEND_FETCH_RESOURCE2(mysql, php_mysql_conn *, mysql_link, link_id, "MySQL-Link", le_link, le_plink);
 	
@@ -1189,7 +1188,7 @@ static void php_mysql_do_query_general(zval **query, zval **mysql_link, int link
 		mysql_result = (MYSQL_RES *) zend_list_find(mysql->active_result_id, &type);
 		if (mysql_result && type==le_result) {
 			if (!mysql_eof(mysql_result)) {
-				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "%s(): Function called without first fetching all rows from a previous unbuffered query");
+				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Function called without first fetching all rows from a previous unbuffered query");
 				while (mysql_fetch_row(mysql_result));
 			}
 			zend_list_delete(mysql->active_result_id);
@@ -1216,12 +1215,9 @@ static void php_mysql_do_query_general(zval **query, zval **mysql_link, int link
     			mysql_result = mysql_use_result(&mysql->conn);
 				while ((row = mysql_fetch_row(mysql_result))) {
 					if (!strcmp("ALL", row[1])) {
-						sprintf((char *)&tmp, "Your query requires a full tablescan (table %s, %s rows affected). Use EXPLAIN to optimize your query.", row[0], row[6]);
-						php_error_docref("http://www.mysql.com/doc" TSRMLS_CC, E_WARNING, tmp);
-					}
-					else if (!strcmp("INDEX", row[1])) {
-						sprintf((char *)&tmp, "Your query requires a full indexscan (table %s, %s rows affected). Use EXPLAIN to optimize your query.", row[0], row[6]);
-						php_error_docref("http://www.mysql.com/doc" TSRMLS_CC, E_WARNING, tmp);
+						php_error_docref("http://www.mysql.com/doc" TSRMLS_CC, E_WARNING, "Your query requires a full tablescan (table %s, %s rows affected). Use EXPLAIN to optimize your query.", row[0], row[6]);
+					} else if (!strcmp("INDEX", row[1])) {
+						php_error_docref("http://www.mysql.com/doc" TSRMLS_CC, E_WARNING, "Your query requires a full indexscan (table %s, %s rows affected). Use EXPLAIN to optimize your query.", row[0], row[6]);
 					}
 				}
 				mysql_free_result(mysql_result);
