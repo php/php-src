@@ -476,6 +476,10 @@ PHP_FUNCTION(file_set_contents)
 
 	stream = php_stream_open_wrapper(filename, "wb", 
 			(use_include_path ? USE_PATH : 0) | ENFORCE_SAFE_MODE | REPORT_ERRORS, NULL);
+	if (stream == NULL) {
+		RETURN_FALSE;
+	}
+
 	if (data_len) {
 		numbytes = php_stream_write(stream, data, data_len);
 		if (numbytes < 0) {
