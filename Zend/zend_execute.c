@@ -4035,23 +4035,25 @@ static int zend_isset_isempty_dim_prop_obj_handler(int prop_dim, ZEND_OPCODE_HAN
 		} else if ((*container)->type == IS_STRING) { /* string offsets */
 			zval tmp_offset;
 
-			if (Z_TYPE_P(offset) != IS_LONG) {
-				tmp_offset = *offset;
-				zval_copy_ctor(&tmp_offset);
-				convert_to_long(&tmp_offset);
-				offset = &tmp_offset;
-			}
-			switch (opline->extended_value) {
-				case ZEND_ISSET:
-					if (offset->value.lval >= 0 && offset->value.lval < Z_STRLEN_PP(container)) {
-						result = 1;
-					}
-					break;
-				case ZEND_ISEMPTY:
-					if (offset->value.lval >= 0 && offset->value.lval < Z_STRLEN_PP(container) && Z_STRVAL_PP(container)[offset->value.lval] != '0') {
-						result = 1;
-					}
-					break;
+			if (!prop_dim) {
+				if (Z_TYPE_P(offset) != IS_LONG) {
+					tmp_offset = *offset;
+					zval_copy_ctor(&tmp_offset);
+					convert_to_long(&tmp_offset);
+					offset = &tmp_offset;
+				}
+				switch (opline->extended_value) {
+					case ZEND_ISSET:
+						if (offset->value.lval >= 0 && offset->value.lval < Z_STRLEN_PP(container)) {
+							result = 1;
+						}
+						break;
+					case ZEND_ISEMPTY:
+						if (offset->value.lval >= 0 && offset->value.lval < Z_STRLEN_PP(container) && Z_STRVAL_PP(container)[offset->value.lval] != '0') {
+							result = 1;
+						}
+						break;
+				}
 			}
 		}
 	}
