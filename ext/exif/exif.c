@@ -58,8 +58,10 @@
 #include "ext/standard/php_image.h"
 #include "ext/standard/info.h" 
 
-#if defined(HAVE_MBSTRING) && !defined(COMPILE_DL_MBSTRING)
+#if HAVE_MBSTRING
+#if !defined(COMPILE_DL_MBSTRING) 
 #define EXIF_USE_MBSTRING 1
+#endif
 #endif
 
 #ifdef EXIF_USE_MBSTRING
