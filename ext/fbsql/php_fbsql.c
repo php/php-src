@@ -1994,7 +1994,7 @@ PHP_FUNCTION(fbsql_list_dbs)
    Retreive a list of all tables from the specifoied database */
 PHP_FUNCTION(fbsql_list_tables)
 {
-	char* sql = "select t0.\"table_name\"from information_schema.tables t0, information_schema.SCHEMATA t1 where t0.schema_pk = t1.schema_pk and t1.\"schema_name\" = current_schema;";
+	char* sql = "select t0.\"table_name\"from information_schema.tables t0, information_schema.SCHEMATA t1 where t0.schema_pk = t1.schema_pk and t1.\"schema_name\" = current_schema order by \"table_name\";";
 	PHPFBLink* phpLink = NULL;
 	zval	**fbsql_link_index = NULL, **database_name;
 	int id;
