@@ -159,7 +159,7 @@ static int fill_buffer(multipart_buffer *self TSRMLS_DC)
 	int bytes_to_read, actual_read = 0;
 
 	/* shift the existing data if necessary */
-	if(self->bytes_in_buffer > 0 && self->buf_begin != self->buffer) {
+	if (self->bytes_in_buffer > 0 && self->buf_begin != self->buffer) {
 		memmove(self->buffer, self->buf_begin, self->bytes_in_buffer);
 	}
 
@@ -169,14 +169,14 @@ static int fill_buffer(multipart_buffer *self TSRMLS_DC)
 	bytes_to_read = self->bufsize - self->bytes_in_buffer;
 
 	/* read the required number of bytes */
-	if(bytes_to_read > 0) {
+	if (bytes_to_read > 0) {
 
 		char *buf = self->buffer + self->bytes_in_buffer;
 
 		actual_read = sapi_module.read_post(buf, bytes_to_read TSRMLS_CC);
 
 		/* update the buffer length */
-		if(actual_read > 0) {
+		if (actual_read > 0) {
 			self->bytes_in_buffer += actual_read;
 		}
 	}
@@ -188,7 +188,7 @@ static int fill_buffer(multipart_buffer *self TSRMLS_DC)
 /* eof if we are out of bytes, or if we hit the final boundary */
 static int multipart_buffer_eof(multipart_buffer *self TSRMLS_DC)
 {
-	if( (self->bytes_in_buffer == 0 && fill_buffer(self TSRMLS_CC) < 1) ) {
+	if ( (self->bytes_in_buffer == 0 && fill_buffer(self TSRMLS_CC) < 1) ) {
 		return 1;
 	} else {
 		return 0;
@@ -202,7 +202,7 @@ static multipart_buffer *multipart_buffer_new(char *boundary, int boundary_len)
 	multipart_buffer *self = (multipart_buffer *) ecalloc(1, sizeof(multipart_buffer));
 
 	int minsize = boundary_len + 6;
-	if(minsize < FILLUNIT) minsize = FILLUNIT;
+	if (minsize < FILLUNIT) minsize = FILLUNIT;
 
 	self->buffer = (char *) ecalloc(1, minsize + 1);
 	self->bufsize = minsize;
@@ -238,10 +238,10 @@ static char *next_line(multipart_buffer *self)
 	char* line = self->buf_begin;
 	char* ptr = memchr(self->buf_begin, '\n', self->bytes_in_buffer);
 
-	if(ptr) {	/* LF found */
+	if (ptr) {	/* LF found */
 
 		/* terminate the string, remove CRLF */
-		if((ptr - line) > 0 && *(ptr-1) == '\r') {
+		if ((ptr - line) > 0 && *(ptr-1) == '\r') {
 			*(ptr-1) = 0;
 		} else {
 			*ptr = 0;
@@ -254,7 +254,7 @@ static char *next_line(multipart_buffer *self)
 	} else {	/* no LF found */
 
 		/* buffer isn't completely full, fail */
-		if(self->bytes_in_buffer < self->bufsize) {
+		if (self->bytes_in_buffer < self->bufsize) {
 			return NULL;
 		}
 		/* return entire buffer as a partial line */
@@ -272,7 +272,7 @@ static char *get_line(multipart_buffer *self TSRMLS_DC)
 {
 	char* ptr = next_line(self);
 
-	if(!ptr) {
+	if (!ptr) {
 		fill_buffer(self TSRMLS_CC);
 		ptr = next_line(self);
 	}
@@ -284,8 +284,12 @@ static char *get_line(multipart_buffer *self TSRMLS_DC)
 /* Free header entry */
 static void php_free_hdr_entry(mime_header_entry *h)
 {
-	if(h->key)   efree(h->key);
-	if(h->value) efree(h->value);
+	if (h->key) {
+		efree(h->key);
+	}
+	if (h->value) {
+		efree(h->value);
+	}
 }
 
 
@@ -298,7 +302,7 @@ static int find_boundary(multipart_buffer *self, char *boundary TSRMLS_DC)
 	while( (line = get_line(self TSRMLS_CC)) )
 	{
 		/* finished if we found the boundary */
-		if(!strcmp(line, boundary)) {
+		if (!strcmp(line, boundary)) {
 			return 1;
 		}
 	}
@@ -316,7 +320,7 @@ static int multipart_buffer_headers(multipart_buffer *self, zend_llist *header T
 	int prev_len, cur_len;
 	
 	/* didn't find boundary, abort */
-	if(!find_boundary(self, self->boundary TSRMLS_CC)) {
+	if (!find_boundary(self, self->boundary TSRMLS_CC)) {
 		return 0;
 	}
 
@@ -329,14 +333,14 @@ static int multipart_buffer_headers(multipart_buffer *self, zend_llist *header T
 		char *key = line;
 		char *value = strchr(line, ':');
 
-		if(value) {
+		if (value) {
 			*value = 0;
 			do { value++; } while(isspace(*value));
 
 			entry.value = estrdup(value);
 			entry.key = estrdup(key);
 
-		} else if(zend_llist_remove_tail(header)) { /* If no ':' on the line, add to previous line */
+		} else if (zend_llist_remove_tail(header)) { /* If no ':' on the line, add to previous line */
 
 			prev_len = strlen(prev_entry.value);
 			cur_len = strlen(line);
@@ -367,7 +371,7 @@ static char *php_mime_get_hdr_value(zend_llist header, char *key)
 	
 	entry = zend_llist_get_first(&header);
 	do {
-		if(!strcasecmp(entry->key, key)) {
+		if (!strcasecmp(entry->key, key)) {
 			return entry->value;
 		}
 	} while ((entry = zend_llist_get_next(&header)));
@@ -480,7 +484,7 @@ static void *php_ap_memstr(char *haystack, int haystacklen, char *needle, int ne
 		len = haystacklen - (ptr - (char *)haystack);
 
 		/* done if matches up to capacity of buffer */
-		if(memcmp(needle, ptr, needlen < len ? needlen : len) == 0 && (partial || len >= needlen)) {
+		if (memcmp(needle, ptr, needlen < len ? needlen : len) == 0 && (partial || len >= needlen)) {
 			break;
 		}
 
@@ -499,12 +503,12 @@ static int multipart_buffer_read(multipart_buffer *self, char *buf, int bytes TS
 	char *bound;
 
 	/* fill buffer if needed */
-	if(bytes > self->bytes_in_buffer) {
+	if (bytes > self->bytes_in_buffer) {
 		fill_buffer(self TSRMLS_CC);
 	}
 
 	/* look for a potential boundary match, only read data up to that point */
-	if((bound = php_ap_memstr(self->buf_begin, self->bytes_in_buffer, self->boundary_next, self->boundary_next_len, 1))) {
+	if ((bound = php_ap_memstr(self->buf_begin, self->bytes_in_buffer, self->boundary_next, self->boundary_next_len, 1))) {
 		max = bound - self->buf_begin;
 	} else {
 		max = self->bytes_in_buffer;
@@ -514,13 +518,13 @@ static int multipart_buffer_read(multipart_buffer *self, char *buf, int bytes TS
 	len = max < bytes-1 ? max : bytes-1;
 
 	/* if we read any data... */
-	if(len > 0) {
+	if (len > 0) {
 
 		/* copy the data */
 		memcpy(buf, self->buf_begin, len);
 		buf[len] = 0;
 
-		if(bound && len > 0 && buf[len-1] == '\r') {
+		if (bound && len > 0 && buf[len-1] == '\r') {
 			buf[--len] = 0;
 		}
 
@@ -548,7 +552,7 @@ static char *multipart_buffer_read_body(multipart_buffer *self TSRMLS_DC)
 		memcpy(out, buf, read_bytes);
 	}
 
-	if(out) {
+	if (out) {
 		out = erealloc(out, total_bytes + 1);
 		out[total_bytes] = '\0';
 	}
@@ -649,13 +653,15 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 				if (strchr(pair, '=')) {
 					key = php_ap_getword(&pair, '=');
 					
-					if(!strcmp(key, "name")) {
+					if (!strcmp(key, "name")) {
 						param = php_ap_getword_conf(&pair);
-					} else if(!strcmp(key, "filename")) {
+					} else if (!strcmp(key, "filename")) {
 						filename = php_ap_getword_conf(&pair);
 					}
 				}
-				if(key) efree(key);
+				if (key) {
+					efree(key);
+				}
 			}
 
 		/* Normal form variable, safe to read all data into memory */
@@ -663,7 +669,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 
 				char *value = multipart_buffer_read_body(mbuff TSRMLS_CC);
 
-				if(!value) {
+				if (!value) {
 					value = "";
 				}
 
@@ -673,7 +679,9 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 				}
 
 				efree(param);
-				if(value != "") efree(value);
+				if (value != "") {
+					efree(value);
+				}
 				continue;
 			}
 
@@ -708,9 +716,9 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 			} 
 			fclose(fp);
 			
-			if(cancel_upload || total_bytes == 0) {
+			if (cancel_upload || total_bytes == 0) {
 
-				if(temp_filename) {
+				if (temp_filename) {
 					unlink(temp_filename);
 					efree(temp_filename);
 				}
@@ -736,15 +744,19 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 							(end_arr = strrchr(param,']')) && 
 							(end_arr = param+strlen(param)-1);
 
-			if(is_arr_upload) {
+			if (is_arr_upload) {
 				array_len = strlen(start_arr);
-				if(array_index) efree(array_index);
+				if (array_index) {
+					efree(array_index);
+				}
 				array_index = estrndup(start_arr+1, array_len-2);   
 			}
 			
 	
-		/* Add $foo_name */
-			if(lbuf) efree(lbuf);
+			/* Add $foo_name */
+			if (lbuf) {
+				efree(lbuf);
+			}
 			lbuf = (char *) emalloc(strlen(param) + array_len + MAX_SIZE_OF_INDEX + 1);
 			
 			if (is_arr_upload) {
@@ -799,7 +811,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 
 	
 		/* Add $foo[tmp_name] */
-			if(is_arr_upload) {
+			if (is_arr_upload) {
 				sprintf(lbuf, "%s[tmp_name][%s]", abuf, array_index);
 			} else {
 				sprintf(lbuf, "%s[tmp_name]", param);
@@ -824,7 +836,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 					file_size.type = IS_LONG;
 				}	
 	
-				if(is_arr_upload) {
+				if (is_arr_upload) {
 					sprintf(lbuf, "%s[error][%s]", abuf, array_index);
 				} else {
 					sprintf(lbuf, "%s[error]", param);
@@ -832,7 +844,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 				register_http_post_files_variable_ex(lbuf, &error_type, http_post_files, 0 TSRMLS_CC);
 							
 			/* Add $foo_size */
-				if(is_arr_upload) {
+				if (is_arr_upload) {
 					sprintf(lbuf, "%s_size[%s]", abuf, array_index);
 				} else {
 					sprintf(lbuf, "%s_size", param);
