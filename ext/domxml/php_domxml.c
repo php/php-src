@@ -749,6 +749,8 @@ static void php_free_xml_attr(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	xmlNodePtr node = (xmlNodePtr) rsrc->ptr;
 	if (node->parent == NULL) {
+		/* Attribute Nodes contain accessible children */
+		node_list_wrapper_dtor(node->children, 0);
 		node_wrapper_dtor(node);
 		xmlFreeProp((xmlAttrPtr) node);
 	} else {
@@ -1789,12 +1791,42 @@ PHP_FUNCTION(domxml_attr_value)
 {
 	zval *id;
 	xmlAttrPtr attrp;
+	xmlChar *content;
 
 	DOMXML_GET_THIS_OBJ(attrp, id, le_domxmlattrp);
 
 	DOMXML_NO_ARGS();
 
-	RETURN_STRING((char *) xmlNodeGetContent((xmlNodePtr) attrp), 1);
+	/* RETURN_STRING((char *) xmlNodeGetContent((xmlNodePtr) attrp), 1); */
+	if (content = xmlNodeGetContent((xmlNodePtr) attrp)) {
+		RETVAL_STRING(content,1);
+	} else {
+		RETURN_EMPTY_STRING();
+	}
+	xmlFree(content);
+}
+/* }}} */
+
+/* {{{ proto bool domxml_attr_set_value(string content)
+   Set value of attribute */
+PHP_FUNCTION(domxml_attr_set_value)
+{
+	zval *id;
+	xmlAttrPtr attrp;
+	int content_len;
+	char *content;
+
+	DOMXML_PARAM_TWO(attrp, id, le_domxmlattrp, "s", &content, &content_len);
+
+	/* 	If attribute has children unlink referenced nodes
+		Spec indicates that content is to be overwritten and not appended
+		xmlNodeSetContentLen will take care of removing and freeing the rest */
+	if (attrp->children) {
+		node_list_unlink(((xmlNodePtr) attrp) ->children);
+	}
+	xmlNodeSetContentLen((xmlNodePtr) attrp, content, content_len);
+	RETURN_TRUE;
+
 }
 /* }}} */
 
@@ -1840,12 +1872,19 @@ PHP_FUNCTION(domxml_pi_data)
 {
 	zval *id;
 	xmlNodePtr nodep;
+	xmlChar *content;
 
 	DOMXML_GET_THIS_OBJ(nodep, id, le_domxmlpip);
 
 	DOMXML_NO_ARGS();
 
-	RETURN_STRING(xmlNodeGetContent(nodep), 1);
+	/* RETURN_STRING(xmlNodeGetContent(nodep), 1); */
+	if (content = xmlNodeGetContent(nodep)) {
+		RETVAL_STRING(content,1);
+	} else {
+		RETURN_EMPTY_STRING();
+	}
+	xmlFree(content);
 }
 /* }}} */
 
