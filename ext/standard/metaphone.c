@@ -141,7 +141,7 @@ char _codes[26] =
 
 /* Allows us to safely look ahead an arbitrary # of letters */
 /* I probably could have just used strlen... */
-char Lookahead(char *word, int how_far)
+static char Lookahead(char *word, int how_far)
 {
 	char letter_ahead = '\0';	/* null by default */
 	int idx;
