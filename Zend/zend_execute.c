@@ -3095,7 +3095,7 @@ int zend_new_handler(ZEND_OPCODE_HANDLER_ARGS)
 	object_init_ex(EX_T(EX(opline)->result.u.var).var.ptr, EX_T(EX(opline)->op1.u.var).class_entry);
 	EX_T(EX(opline)->result.u.var).var.ptr->refcount=1;
 	EX_T(EX(opline)->result.u.var).var.ptr->is_ref=1;
-
+	
 	NEXT_OPCODE();
 }
 
@@ -3731,6 +3731,9 @@ int zend_jmp_no_ctor_handler(ZEND_OPCODE_HANDLER_ARGS)
 
 	EX(fbc_constructor) = NULL;
 	if (constructor == NULL) {
+		if(EX(opline)->op1.u.EA.type & EXT_TYPE_UNUSED) {
+			zval_ptr_dtor(EX_T(EX(opline)->op1.u.var).var.ptr_ptr);
+		}
 		EX(opline) = op_array->opcodes + EX(opline)->op2.u.opline_num;
 		return 0; /* CHECK_ME */
 	} else {
