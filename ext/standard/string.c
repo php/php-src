@@ -304,6 +304,7 @@ void _php3_implode(pval *delim, pval *arr, pval *return_value)
 	/* convert everything to strings, and calculate length */
 	_php3_hash_internal_pointer_reset(arr->value.ht);
 	while (_php3_hash_get_current_data(arr->value.ht, (void **) &tmp) == SUCCESS) {
+		SEPARATE_ZVAL(tmp);
 		convert_to_string(*tmp);
 		if ((*tmp)->type == IS_STRING && (*tmp)->value.str.val != undefined_variable_string) {
 			len += (*tmp)->value.str.len;
