@@ -219,7 +219,7 @@ php_sprintf_appendint(char **buffer, int *pos, int *size, long number,
 	do {
 		nmagn = magn / 10;
 
-		numbuf[--i] = (magn - (nmagn * 10)) + '0';
+		numbuf[--i] = (unsigned char)(magn - (nmagn * 10)) + '0';
 		magn = nmagn;
 	}
 	while (magn > 0 && i > 0);
@@ -254,7 +254,7 @@ php_sprintf_appenduint(char **buffer, int *pos, int *size,
 	do {
 		nmagn = magn / 10;
 
-		numbuf[--i] = (magn - (nmagn * 10)) + '0';
+		numbuf[--i] = (unsigned char)(magn - (nmagn * 10)) + '0';
 		magn = nmagn;
 	}
 	while (magn > 0 && i > 0);
