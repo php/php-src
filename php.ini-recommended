@@ -609,6 +609,7 @@ define_syslog_variables  = Off
 [mail function]
 ; For Win32 only.
 SMTP = localhost
+smtp_port = 25
 
 ; For Win32 only.
 ;sendmail_from = me@example.com
