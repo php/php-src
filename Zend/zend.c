@@ -906,7 +906,7 @@ ZEND_API void zend_error(int type, const char *format, ...)
 			z_error_message->value.str.val[ZEND_ERROR_BUFFER_SIZE - 1] = '\0';
 			z_error_message->value.str.len = strlen(z_error_message->value.str.val);
 #else
-			strncpy(z_error_message->value.str.val, va_arg(format, char *), ZEND_ERROR_BUFFER_SIZE);
+			strncpy(z_error_message->value.str.val, format, ZEND_ERROR_BUFFER_SIZE);
 			z_error_message->value.str.val[ZEND_ERROR_BUFFER_SIZE - 1] = '\0';
 			z_error_message->value.str.len = strlen(z_error_message->value.str.val);
 			/* This is risky... */
