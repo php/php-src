@@ -31,6 +31,8 @@ typedef struct {
 } smart_str;
 
 typedef struct {
+	smart_str c_arg;
+	smart_str c_tag;
 	smart_str arg;
 	smart_str tag;
 	smart_str para;

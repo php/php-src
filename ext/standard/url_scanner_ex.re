@@ -85,7 +85,7 @@ static inline void smart_str_setl(smart_str *dest, const char *src, size_t len)
 {
 	dest->len = len;
 	dest->a = len + 1;
-	dest->c = src;
+	dest->c = (char *) src;
 }
 
 static inline void smart_str_appends(smart_str *dest, const char *src)
@@ -117,12 +117,21 @@ static inline void attach_url(smart_str *url, smart_str *name, smart_str *val, c
 	smart_str_append(url, val);
 }
 
-static char *check_tag_arg[] = {
-	"a", "href",
-	"area", "href",
-	"frame", "source",
-	"img", "src",
-	NULL
+struct php_tag_arg {
+	char *tag;
+	int taglen;
+	char *arg;
+	int arglen;
+};
+
+#define TAG_ARG_ENTRY(a,b) {#a,sizeof(#a)-1,#b,sizeof(#b)-1},
+
+static struct php_tag_arg check_tag_arg[] = {
+	TAG_ARG_ENTRY(a, href)
+	TAG_ARG_ENTRY(area, href)
+	TAG_ARG_ENTRY(frame, source)
+	TAG_ARG_ENTRY(img, src)
+	{0}
 };
 
 static inline void tag_arg(url_adapt_state_t *ctx PLS_DC)
@@ -130,9 +139,11 @@ static inline void tag_arg(url_adapt_state_t *ctx PLS_DC)
 	char f = 0;
 	int i;
 
-	for (i = 0; check_tag_arg[i]; i += 2) {
-		if (strcasecmp(ctx->tag.c, check_tag_arg[i]) == 0
-				&& strcasecmp(ctx->arg.c, check_tag_arg[i + 1]) == 0) {
+	for (i = 0; check_tag_arg[i].tag; i++) {
+		if (check_tag_arg[i].arglen == ctx->arg.len
+				&& check_tag_arg[i].taglen == ctx->tag.len
+				&& strncasecmp(ctx->tag.c, check_tag_arg[i].tag, ctx->tag.len) == 0
+				&& strncasecmp(ctx->arg.c, check_tag_arg[i].arg, ctx->arg.len) == 0) {
 			f = 1;
 			break;
 		}
@@ -159,12 +170,12 @@ all = [\000-\377];
 	
 #define YYFILL(n) goto finish
 #define YYCTYPE unsigned char
-#define YYLIMIT (ctx->work.c+ctx->work.len)
+#define YYLIMIT endptr
 #define YYCURSOR cursor
 #define YYMARKER marker
 
 #define HANDLE_FORM \
-	if (strcasecmp(ctx->tag.c, "form") == 0) { \
+	if (ctx->tag.len == 4 && strncasecmp(ctx->tag.c, "form", ctx->tag.len) == 0) { \
 		smart_str_appends(&ctx->result, "><INPUT TYPE=HIDDEN NAME=\""); \
 		smart_str_append(&ctx->result, &ctx->name); \
 		smart_str_appends(&ctx->result, "\" VALUE=\""); \
@@ -186,14 +197,20 @@ static void mainloop(url_adapt_state_t *ctx, smart_str *newstuff)
 {
 	char *para_start, *arg_start, *tag_start;
 	char *start = NULL;
-	char *cursor, *marker;
+	char *cursor;
+	char *marker;
+	char *endptr;
 	PLS_FETCH();
 
 	arg_start = para_start = tag_start = NULL;
 	smart_str_append(&ctx->work, newstuff);
 	smart_str_free(&ctx->result);
 
+	smart_str_setl(&ctx->arg, ctx->c_arg.c, ctx->c_arg.len);
+	smart_str_setl(&ctx->tag, ctx->c_tag.c, ctx->c_tag.len);
+
 	cursor = ctx->work.c;
+	endptr = ctx->work.c + ctx->work.len;
 	
 	while (YYCURSOR < YYLIMIT) {
 		start = YYCURSOR;
@@ -215,7 +232,7 @@ static void mainloop(url_adapt_state_t *ctx, smart_str *newstuff)
   [a-zA-Z]+ [ >]	{ 
   						YYCURSOR--; 
   						arg_start = YYCURSOR;
-						smart_str_copyl(&ctx->tag, start, YYCURSOR - start); 
+						smart_str_setl(&ctx->tag, start, YYCURSOR - start); 
 #ifdef SCANNER_DEBUG
 						printf("TAG(%s)\n", ctx->tag.c);
 #endif
@@ -253,7 +270,7 @@ static void mainloop(url_adapt_state_t *ctx, smart_str *newstuff)
   						char *p;
 
 						for (p = start; isalpha(*p); p++);
-						smart_str_copyl(&ctx->arg, start, p - start);
+						smart_str_setl(&ctx->arg, start, p - start);
 #ifdef SCANNER_DEBUG
 						printf("ARG(%s)\n", ctx->arg.c);
 #endif
@@ -311,6 +328,15 @@ static void mainloop(url_adapt_state_t *ctx, smart_str *newstuff)
 	ctx->work.len = n
 	
 finish:
+	if (ctx->arg.c)
+		smart_str_copyl(&ctx->c_arg, ctx->arg.c, ctx->arg.len);
+	else
+		smart_str_free(&ctx->c_arg);
+	if (ctx->tag.c)
+		smart_str_copyl(&ctx->c_tag, ctx->tag.c, ctx->tag.len);
+	else
+		smart_str_free(&ctx->c_tag);
+	
 	if (ctx->state >= 2) {
 		if (para_start) {
 			PRESERVE(para_start);
@@ -377,8 +403,8 @@ PHP_RSHUTDOWN_FUNCTION(url_scanner)
 
 	smart_str_free(&BG(url_adapt_state).result);
 	smart_str_free(&BG(url_adapt_state).work);
-	smart_str_free(&BG(url_adapt_state).tag);
-	smart_str_free(&BG(url_adapt_state).arg);
+	smart_str_free(&BG(url_adapt_state).c_tag);
+	smart_str_free(&BG(url_adapt_state).c_arg);
 	smart_str_free(&BG(url_adapt_state).para);
 
 	return SUCCESS;
