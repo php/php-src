@@ -1261,7 +1261,7 @@ char *strerror(int errnum)
 PHPAPI char *_php3_addslashes(char *str, int length, int *new_length, int should_free)
 {
 	/* maximum string length, worst case situation */
-	char *new_str = (char *) emalloc((length?length:strlen(str))*2+1); 
+	char *new_str = (char *) emalloc((length?length:(length=strlen(str)))*2+1); 
 	char *source,*target;
 	char *end;
 	char c;
