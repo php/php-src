@@ -266,9 +266,8 @@ int dom_document_encoding_write(dom_object *obj, zval *newval TSRMLS_DC)
 	}
 
 	docp->encoding = xmlStrdup((const xmlChar *) Z_STRVAL_P(newval));
-    charset = (int)xmlParseCharEncoding( (const char*)docp->encoding );
-    if ( charset > 0 ) {
-        docp->charset = charset;
+    charset = (int)xmlParseCharEncoding((const char*) docp->encoding);
+    if (charset > 0) {
 		return SUCCESS;
     } else {
         /* TODO: ERROR XML_CHAR_ENCODING_ERROR */
