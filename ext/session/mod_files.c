@@ -92,10 +92,10 @@ static char *_ps_files_path_create(char *buf, size_t buflen, ps_files *data, con
 			(strlen(data->basedir) + 2 * data->dirdepth + keylen + 5 + sizeof(FILE_PREFIX))) 
 		return NULL;
 	p = key;
-	n = sprintf(buf, "%s%c", data->basedir, PHP_SEPARATOR);
+	n = sprintf(buf, "%s%c", data->basedir, PHP_DIR_SEPARATOR);
 	for (i = 0; i < data->dirdepth; i++) {
 		buf[n++] = *p++;
-		buf[n++] = PHP_SEPARATOR;
+		buf[n++] = PHP_DIR_SEPARATOR;
 	}
 	buf[n] = '\0';
 	strcat(buf, FILE_PREFIX);
@@ -169,7 +169,7 @@ static int _ps_files_cleanup_dir(const char *dirname, int maxlifetime)
 		/* does the file start with our prefix? */
 		if (!strncmp(entry->d_name, FILE_PREFIX, sizeof(FILE_PREFIX) - 1) &&
 				/* create full path */
-				snprintf(buf, MAXPATHLEN, "%s%c%s", dirname, PHP_SEPARATOR,
+				snprintf(buf, MAXPATHLEN, "%s%c%s", dirname, PHP_DIR_SEPARATOR,
 					entry->d_name) > 0 &&
 				/* stat the directory entry */
 				V_STAT(buf, &sbuf) == 0 &&

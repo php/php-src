@@ -306,8 +306,8 @@ static sapi_module_struct sapi_module = {
 
 static void init_request_info(sapi_globals_struct *sapi_globals, LPCONTROL_BLOCK lpCB)
 {
-	char *path_end = strrchr(lpCB->lpszFileName, PHP_SEPARATOR);
-	if ( path_end ) *path_end = PHP_SEPARATOR;
+	char *path_end = strrchr(lpCB->lpszFileName, PHP_DIR_SEPARATOR);
+	if ( path_end ) *path_end = PHP_DIR_SEPARATOR;
 
 	SG(server_context) = lpCB;
 	SG(request_info).request_method  = lpCB->lpszMethod;
