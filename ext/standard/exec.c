@@ -55,11 +55,11 @@ int php_Exec(int type, char *cmd, pval *array, pval *return_value TSRMLS_DC)
 	void (*sig_handler)();
 #endif
 
-	buf = (char*) emalloc(EXEC_INPUT_BUF);
-    if (!buf) {
+	buf = (char *) emalloc(EXEC_INPUT_BUF);
+	if (!buf) {
 		php_error(E_WARNING, "Unable to emalloc %d bytes for exec buffer", EXEC_INPUT_BUF);
 		return -1;
-    }
+	}
 	buflen = EXEC_INPUT_BUF;
 
 	if (PG(safe_mode)) {
@@ -110,6 +110,7 @@ int php_Exec(int type, char *cmd, pval *array, pval *return_value TSRMLS_DC)
 #endif
 			return -1;
 		}
+
 	} else { /* not safe_mode */
 #if PHP_SIGCHILD
 		sig_handler = signal (SIGCHLD, SIG_DFL);
