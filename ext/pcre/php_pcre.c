@@ -124,7 +124,7 @@ static PHP_RINIT_FUNCTION(pcre)
 
 /* {{{ pcre_get_compiled_regex
  */
-PHPAPI pcre* pcre_get_compiled_regex(char *regex, pcre_extra *extra, int *preg_options) {
+PHPAPI pcre* pcre_get_compiled_regex(char *regex, pcre_extra **extra, int *preg_options) {
 	pcre				*re = NULL;
 	int				 	 coptions = 0;
 	int				 	 soptions = 0;
@@ -153,7 +153,7 @@ PHPAPI pcre* pcre_get_compiled_regex(char *regex, pcre_extra *extra, int *preg_o
 #if HAVE_SETLOCALE
 		if (!strcmp(pce->locale, locale)) {
 #endif
-			extra = pce->extra;
+			*extra = pce->extra;
 			*preg_options = pce->preg_options;
 			return pce->re;
 #if HAVE_SETLOCALE
@@ -283,7 +283,7 @@ PHPAPI pcre* pcre_get_compiled_regex(char *regex, pcre_extra *extra, int *preg_o
 	/* If study option was specified, study the pattern and
 	   store the result in extra for passing to pcre_exec. */
 	if (do_study) {
-		extra = pcre_study(re, soptions, &error);
+		*extra = pcre_study(re, soptions, &error);
 		if (error != NULL) {
 			zend_error(E_WARNING, "Error while studying pattern");
 		}
@@ -295,7 +295,7 @@ PHPAPI pcre* pcre_get_compiled_regex(char *regex, pcre_extra *extra, int *preg_o
 
 	/* Store the compiled pattern and extra info in the cache. */
 	new_entry.re = re;
-	new_entry.extra = extra;
+	new_entry.extra = *extra;
 	new_entry.preg_options = poptions;
 #if HAVE_SETLOCALE
 	new_entry.locale = locale;
@@ -383,7 +383,7 @@ static void php_pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global)
 	}
 
 	/* Compile regex or get it from cache. */
-	if ((re = pcre_get_compiled_regex(Z_STRVAL_PP(regex), extra, &preg_options)) == NULL) {
+	if ((re = pcre_get_compiled_regex(Z_STRVAL_PP(regex), &extra, &preg_options)) == NULL) {
 		RETURN_FALSE;
 	}
 
@@ -709,7 +709,7 @@ PHPAPI char *php_pcre_replace(char *regex,   int regex_len,
 					 walk_last;			/* Last walked character */
 
 	/* Compile regex or get it from cache. */
-	if ((re = pcre_get_compiled_regex(regex, extra, &preg_options)) == NULL) {
+	if ((re = pcre_get_compiled_regex(regex, &extra, &preg_options)) == NULL) {
 		return NULL;
 	}
 
@@ -1110,7 +1110,7 @@ PHP_FUNCTION(preg_split)
 	convert_to_string_ex(subject);
 	
 	/* Compile regex or get it from cache. */
-	if ((re = pcre_get_compiled_regex(Z_STRVAL_PP(regex), extra, &preg_options)) == NULL) {
+	if ((re = pcre_get_compiled_regex(Z_STRVAL_PP(regex), &extra, &preg_options)) == NULL) {
 		RETURN_FALSE;
 	}
 	
@@ -1322,7 +1322,7 @@ PHP_FUNCTION(preg_grep)
 	}
 	
 	/* Compile regex or get it from cache. */
-	if ((re = pcre_get_compiled_regex(Z_STRVAL_PP(regex), extra, &preg_options)) == NULL) {
+	if ((re = pcre_get_compiled_regex(Z_STRVAL_PP(regex), &extra, &preg_options)) == NULL) {
 		RETURN_FALSE;
 	}
 

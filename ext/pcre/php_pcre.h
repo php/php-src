@@ -42,7 +42,7 @@ PHP_FUNCTION(preg_quote);
 PHP_FUNCTION(preg_grep);
 
 PHPAPI char *php_pcre_replace(char *regex,   int regex_len, char *subject, int subject_len, zval *replace_val, int is_callable_replace, int *result_len, int limit TSRMLS_DC);
-PHPAPI pcre* pcre_get_compiled_regex(char *regex, pcre_extra *extra, int *options);
+PHPAPI pcre* pcre_get_compiled_regex(char *regex, pcre_extra **extra, int *options);
 
 extern zend_module_entry pcre_module_entry;
 #define pcre_module_ptr &pcre_module_entry
