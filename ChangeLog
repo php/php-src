@@ -1,3 +1,106 @@
+2002-09-05  Zeev Suraski  <zeev@zend.com>
+
+    * main/php_version.h
+      NEWS
+      configure.in: Go with 4.2.3 (will be posted tomorrow)
+
+2002-09-05  Joseph Tate  <jtate@mi-corporation.com>
+
+    * win32/.cvsignore:
+2002-09-05  Dan Kalowsky  <dank@deadmime.org>
+
+    * ext/standard/string.c: silence a windows build warning
+
+2002-09-05  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/standard/filestat.c: Remove unnecessarily commented code.
+
+    * ext/standard/dl.c: Remove unnecessary commented code.
+
+    * ext/gd/config.m4:
+    Using --with-zlib-dir should work now with phpized builds too.
+
+2002-09-05  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/filestat.c: - Unbreak build
+
+    * ext/standard/filestat.c: - Tabs for indentation
+
+    * ext/standard/dl.c: - Please use tabs for indentation
+
+2002-09-05  Anantha Kesari H Y  <hyanantha@novell.com>
+
+    * main/php_streams.h
+      ext/standard/dl.c
+      ext/standard/dns.c
+      ext/standard/file.c
+      ext/standard/filestat.c
+      ext/standard/flock_compat.c
+      ext/standard/fsock.c
+      ext/standard/fsock.h
+      ext/standard/ftp_fopen_wrapper.c
+      ext/standard/head.c
+      ext/standard/http_fopen_wrapper.c:
+    NetWare related additions/modifications
+
+2002-09-05  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/string.c:
+    Fixed a buffer overflow that occurs when wordwrap is unable to calculate
+    the correct number of times the multi-byte break needs to be inserted into
+    the string.
+
+2002-09-05  Edin Kadribasic  <edink@proventum.net>
+
+    * win32/php4dllts.dsp:
+    Added UTF-8 support to pcre on windows as suggested by Wez Furlong.
+
+2002-09-05  Anantha Kesari H Y  <hyanantha@novell.com>
+
+    * ext/standard/datetime.c
+      ext/standard/basic_functions.c
+      ext/snmp/snmp.c
+      ext/pcre/pcrelib/internal.h: NetWare related additions/modifications
+
+    * netware/start.c: File used by extensions like LDAP, MySQL etc.
+
+2002-09-05  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/string.c: - php_error -> php_error_docref
+    - corrected proto of implode() (to match the docs)
+
+2002-09-05  Anantha Kesari H Y  <hyanantha@novell.com>
+
+    * ext/ldap/ldap.mak: NetWare makefile for LDAP Extension
+
+    * ext/ldap/ldap.c: NetWare related additions/modifications
+
+2002-09-05  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/standard/string.c: in stristr:
+    this check was in the wrong place, the real version was some lines
+    below, this one assumed the type was 'string' in any case
+    now it looks like strstr
+
+2002-09-05  Anantha Kesari H Y  <hyanantha@novell.com>
+
+    * ext/ftp/ftp.c
+      ext/ftp/php_ftp.c:
+    NetWare related additions/modifications into FTP files
+
+    * netware/setbuild.bat
+      netware/php-nw.bat:
+    Batch file to set build type (Release/Debug) and Apache version to be built
+
+2002-09-05  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/gd/config.m4:
+    This _should_ fix those builds where gd.h might be in many places in
+    the system. Not guaranteed, but now the path for the found gd.h is always
+    first in the includes.
+
+    * ext/gd/gd.c: Fix build with GD < 2.0.x
+
 2002-09-04  Yasuo Ohgaki  <yohgaki@ohgaki.net>
 
     * ext/pgsql/pgsql.c: php_error -> php_error_docref
