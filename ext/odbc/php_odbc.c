@@ -1929,6 +1929,7 @@ int odbc_sqlconnect(odbc_connection **conn, char *db, char *uid, char *pwd, int 
 		char    dsnbuf[300];
 		short   dsnbuflen;
 		char    *ldb = 0;
+		int		ldb_len = 0;
 
 		if (strstr((char*)db, ";")) {
 			direct = 1;
@@ -1937,8 +1938,9 @@ int odbc_sqlconnect(odbc_connection **conn, char *db, char *uid, char *pwd, int 
 				ldb = (char*)emalloc(strlen(db) + strlen(uid) + strlen(pwd) + 12);
 				sprintf(ldb, "%s;UID=%s;PWD=%s", db, uid, pwd);
 			} else {
-				ldb = (char*)emalloc(strlen(db) + 1);
-				strcat(ldb, db);
+				ldb_len = (strlen(db)+1);
+				ldb = (char*)emalloc(ldb_len);
+				strlcpy(ldb, db, ldb_len);
 			}
 		}
 
