@@ -31,12 +31,16 @@
 #include "ext/standard/info.h"
 #include "ext/standard/php_string.h"
 #include "php_simplexml.h"
+#include "simplexml.h"
 #include "zend_default_classes.h"
 #include "zend_interfaces.h"
+#if HAVE_SPL
+#include "ext/spl/spl_sxe.h"
+#endif
 
 zend_class_entry *sxe_class_entry = NULL;
 
-PHP_API zend_class_entry *sxe_get_element_class_entry()
+ZEND_API zend_class_entry *sxe_get_element_class_entry()
 {
 	return sxe_class_entry;
 }
@@ -45,22 +49,7 @@ PHP_API zend_class_entry *sxe_get_element_class_entry()
 
 #define SXE_METHOD(func) PHP_METHOD(simplexml_element, func)
 
-#define SKIP_TEXT(__p) \
-	if ((__p)->type == XML_TEXT_NODE) { \
-		goto next_iter; \
-	}
-
-static php_sxe_object *php_sxe_object_new(zend_class_entry *ce TSRMLS_DC);
 static zend_object_value php_sxe_register_object(php_sxe_object * TSRMLS_DC);
-
-/* {{{ php_sxe_fetch_object()
- */
-static inline php_sxe_object *
-php_sxe_fetch_object(zval *object TSRMLS_DC)
-{
-	return (php_sxe_object *) zend_object_store_get_object(object TSRMLS_CC);
-}
-/* }}} */
 
 /* {{{ _node_as_zval()
  */
@@ -105,8 +94,6 @@ static void _node_as_zval(php_sxe_object *sxe, xmlNodePtr node, zval *value, int
 		php_error(E_WARNING, "Node no longer exists"); \
 	} \
 }
-
-static void php_sxe_reset_iterator(php_sxe_object *sxe TSRMLS_DC);
 
 static xmlNodePtr php_sxe_get_first_node(php_sxe_object *sxe, xmlNodePtr node TSRMLS_DC) {
 	php_sxe_object *intern;
@@ -1053,7 +1040,7 @@ php_sxe_register_object(php_sxe_object *intern TSRMLS_DC)
 
 /* {{{ sxe_object_new()
  */
-static zend_object_value
+ZEND_API zend_object_value
 sxe_object_new(zend_class_entry *ce TSRMLS_DC)
 {
 	php_sxe_object    *intern;
@@ -1186,7 +1173,7 @@ zend_object_iterator_funcs php_sxe_iterator_funcs = {
 	php_sxe_iterator_rewind,
 };
 
-static void php_sxe_reset_iterator(php_sxe_object *sxe TSRMLS_DC)
+ZEND_API void php_sxe_reset_iterator(php_sxe_object *sxe TSRMLS_DC)
 {
 	xmlNodePtr node;
 	char *prefix;
@@ -1305,15 +1292,11 @@ static int php_sxe_iterator_current_key(zend_object_iterator *iter, char **str_k
 
 }
 
-static void php_sxe_iterator_move_forward(zend_object_iterator *iter TSRMLS_DC)
+ZEND_API void php_sxe_move_forward_iterator(php_sxe_object *sxe TSRMLS_DC)
 {
 	xmlNodePtr      node;
 	php_sxe_object  *intern;
-	php_sxe_object	*sxe;
 	char *prefix;
-
-	php_sxe_iterator *iterator = (php_sxe_iterator *)iter;
-	sxe = iterator->sxe;
 
 	if (sxe->iter.data) {
 		intern = (php_sxe_object *)zend_object_store_get_object(sxe->iter.data TSRMLS_CC);
@@ -1364,6 +1347,12 @@ next_iter:
 		ALLOC_INIT_ZVAL(sxe->iter.data);
 		_node_as_zval(sxe, node, sxe->iter.data, SXE_ITER_NONE, NULL, NULL TSRMLS_CC);
 	}
+}
+
+static void php_sxe_iterator_move_forward(zend_object_iterator *iter TSRMLS_DC)
+{
+	php_sxe_iterator *iterator = (php_sxe_iterator *)iter;
+	php_sxe_move_forward_iterator(iterator->sxe TSRMLS_CC);
 }
 
 static void php_sxe_iterator_rewind(zend_object_iterator *iter TSRMLS_DC)
@@ -1484,6 +1473,12 @@ PHP_MINIT_FUNCTION(simplexml)
 	sxe_object_handlers.get_constructor = zend_get_std_object_handlers()->get_constructor;
 	sxe_object_handlers.get_class_entry = zend_get_std_object_handlers()->get_class_entry;
 	sxe_object_handlers.get_class_name = zend_get_std_object_handlers()->get_class_name;
+
+#if HAVE_SPL
+	if (zend_get_module_started("spl") == SUCCESS) {
+		PHP_MINIT(spl_sxe)(INIT_FUNC_ARGS_PASSTHRU);
+	}
+#endif /* HAVE_SPL */
 
 	return SUCCESS;
 }
