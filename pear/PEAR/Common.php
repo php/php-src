@@ -51,7 +51,7 @@ $GLOBALS['_PEAR_Common_tempfiles'] = array();
  * Valid maintainer roles
  * @var array
  */
-$GLOBALS['_PEAR_Common_maintainer_roles'] = array('lead','developer','contributor','helper', 'emeritus');
+$GLOBALS['_PEAR_Common_maintainer_roles'] = array('lead','developer','contributor','helper');
 
 /**
  * Valid release states
