@@ -92,7 +92,9 @@ static int _free_reg_cache(reg_cache *rc)
 	return 1;
 }
 
+#undef regfree
 #define regfree(a);
+#undef regcomp
 #define regcomp(a,b,c) _php_regcomp(a,b,c)
 	
 static void php_reg_init_globals(php_reg_globals *reg_globals) 

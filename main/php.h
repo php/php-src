@@ -203,6 +203,10 @@ extern char *strerror(int);
 #define UNBLOCK_INTERRUPTIONS unblock_alarms
 #endif
 
+#if REGEX == 1 || REGEX == 0
+#include "regex/regex_extra.h"
+#endif
+
 #if HAVE_PWD_H
 # if WIN32||WINNT
 #include "win32/pwd.h"

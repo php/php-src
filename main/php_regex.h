@@ -1,7 +1,7 @@
 #ifndef _PHP_REGEX_H
 #define _PHP_REGEX_H
 
-#if REGEX
+#if REGEX == 1
 #include "regex/regex.h"
 #ifndef _REGEX_H
 #define _REGEX_H 1				/* this should stop Apache from loading the system version of regex.h */
@@ -18,7 +18,7 @@
 #ifndef _H_REGEX
 #define _H_REGEX 1              /* This one is for AIX */
 #endif
-#else
+#elif REGEX == 0
 #include <regex.h>
 #endif
 

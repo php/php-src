@@ -146,21 +146,23 @@ AC_DEFUN(AC_CHECK_CC_OPTION,[
   fi
 ])
 
-AC_DEFUN(PHP_HSREGEX,[
+AC_DEFUN(PHP_REGEX,[
 
-test -z "$HSREGEX" && HSREGEX="$WANT_HSREGEX"		
-AC_MSG_CHECKING(whether to use bundled regex library)
-AC_MSG_RESULT($HSREGEX)
-
-if test "$HSREGEX" = "yes"; then
+if test "$REGEX_TYPE" = "php"; then
   REGEX_LIB=regex/libregex.la
+  REGEX_DIR=regex
   AC_DEFINE(HSREGEX)
   AC_DEFINE(REGEX,1)
-else
-  REGEX_LIB=
+elif test "$REGEX_TYPE" = "system"; then
   AC_DEFINE(REGEX,0)
+elif test "$REGEX_TYPE" = "apache"; then
+  AC_DEFINE(REGEX,2)
 fi
 
+AC_MSG_CHECKING(which regex library to use)
+AC_MSG_RESULT($REGEX_TYPE)
+
+AC_SUBST(REGEX_DIR)
 AC_SUBST(REGEX_LIB)
 AC_SUBST(HSREGEX)
 ])

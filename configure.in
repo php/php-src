@@ -629,7 +629,7 @@ if test "$enable_debug" != "yes"; then
   AM_SET_LIBTOOL_VARIABLE([--silent])
 fi
 
-PHP_HSREGEX
+PHP_REGEX
 
 dnl If we are using gcc and the user has not specified CFLAGS, add -O2.
 test -n "$auto_cflags" && test -n "$GCC" && CFLAGS="$CFLAGS -O2"
