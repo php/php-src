@@ -15,8 +15,8 @@ fi
 
 test -d build || mkdir build
 
-(cd $phpdir && cp $FILES_BUILD $builddir/build)
-(cd $phpdir && cp $FILES $builddir)
+(cd $phpdir && cp $FILES_BUILD "$builddir"/build)
+(cd $phpdir && cp $FILES "$builddir")
 
 sed \
 -e "s#@prefix@#$prefix#" \
