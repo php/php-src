@@ -2329,7 +2329,6 @@ int zend_fetch_class_handler(ZEND_OPCODE_HANDLER_ARGS)
 	char *class_name_strval = NULL;
 	zend_uint class_name_strlen = 0;
 	zval *class_name;					
-	zval tmp;
 	
 	if (EX(opline)->op2.op_type == IS_UNUSED) {
 		if (EX(opline)->extended_value == ZEND_FETCH_CLASS_SELF) {
@@ -2364,13 +2363,8 @@ int zend_fetch_class_handler(ZEND_OPCODE_HANDLER_ARGS)
 		if (class_name->type == IS_OBJECT) {
 			ce = Z_OBJCE_P(class_name);
 		} else {
-			tmp = *class_name;
-			zval_copy_ctor(&tmp);
-			convert_to_string(&tmp);
-			zend_str_tolower(tmp.value.str.val, tmp.value.str.len);
-
-			class_name_strval = tmp.value.str.val;
-			class_name_strlen = tmp.value.str.len;
+			class_name_strval = zend_str_tolower_copy(class_name->value.str.val, class_name->value.str.len);
+			class_name_strlen = class_name->value.str.len;
 		}
 	}
 	
@@ -2411,7 +2405,7 @@ int zend_fetch_class_handler(ZEND_OPCODE_HANDLER_ARGS)
 		EX_T(EX(opline)->result.u.var).EA.class_entry = ce;
 	}
 	if (!is_const) {
-		zval_dtor(&tmp);
+		efree(class_name_strval);
 		FREE_OP(EX(Ts), &EX(opline)->op2, EG(free_op2));
 	}
 	NEXT_OPCODE();
@@ -2507,7 +2501,6 @@ int zend_init_method_call_handler(ZEND_OPCODE_HANDLER_ARGS)
 int zend_init_static_method_call_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zval *function_name;
-	zval tmp;
 	zend_class_entry *ce;
 	zend_bool is_const;
 	char *function_name_strval;
@@ -2523,13 +2516,8 @@ int zend_init_static_method_call_handler(ZEND_OPCODE_HANDLER_ARGS)
 	} else {
 		function_name = get_zval_ptr(&EX(opline)->op2, EX(Ts), &EG(free_op2), BP_VAR_R);
 
-		tmp = *function_name;
-		zval_copy_ctor(&tmp);
-		convert_to_string(&tmp);
-		zend_str_tolower(tmp.value.str.val, tmp.value.str.len);
-
-		function_name_strval = tmp.value.str.val;
-		function_name_strlen = tmp.value.str.len;
+		function_name_strval = zend_str_tolower_copy(function_name->value.str.val, function_name->value.str.len);
+		function_name_strlen = function_name->value.str.len;
 	}
 
 	if (EX(opline)->op1.op_type == IS_UNUSED) {
@@ -2542,7 +2530,7 @@ int zend_init_static_method_call_handler(ZEND_OPCODE_HANDLER_ARGS)
 	EX(calling_scope) = EX(fbc)->common.scope;
 
 	if (!is_const) {
-		zval_dtor(&tmp);
+		efree(function_name_strval);
 		FREE_OP(EX(Ts), &EX(opline)->op2, EG(free_op2));
 	}
 
@@ -2562,7 +2550,6 @@ int zend_init_fcall_by_name_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zval *function_name;
 	zend_function *function;
-	zval tmp;
 	zend_bool is_const;
 	char *function_name_strval;
 	int function_name_strlen;
@@ -2577,13 +2564,8 @@ int zend_init_fcall_by_name_handler(ZEND_OPCODE_HANDLER_ARGS)
 	} else {
 		function_name = get_zval_ptr(&EX(opline)->op2, EX(Ts), &EG(free_op2), BP_VAR_R);
 
-		tmp = *function_name;
-		zval_copy_ctor(&tmp);
-		convert_to_string(&tmp);
-		zend_str_tolower(tmp.value.str.val, tmp.value.str.len);
-
-		function_name_strval = tmp.value.str.val;
-		function_name_strlen = tmp.value.str.len;
+		function_name_strval = zend_str_tolower_copy(function_name->value.str.val, function_name->value.str.len);
+		function_name_strlen = function_name->value.str.len;
 	}
 	
 
@@ -2610,7 +2592,7 @@ int zend_init_fcall_by_name_handler(ZEND_OPCODE_HANDLER_ARGS)
 	} while (0);
 	
 	if (!is_const) {
-		zval_dtor(&tmp);
+		efree(function_name_strval);
 		FREE_OP(EX(Ts), &EX(opline)->op2, EG(free_op2));
 	}
 	EX(fbc) = function;
