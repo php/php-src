@@ -158,3 +158,29 @@ Installing PHP can be done in four simple steps:
 
    When you are finished making changes to your srm.conf file, you can
    start up your server.
+
+USING PHP3 AND PHP4 AS CONCURRENT APACHE MODULES
+
+   Recent operating systems provide the ability to perform versioning and
+   scoping. This features make it possible to let PHP3 and PHP4 run as
+   concurrent modules in one Apache server. 
+   
+   This feature is known to work on the following platforms:
+
+   - Linux with recent binutils (2.9.1.x tested)
+   - Solaris 2.5 or better
+   - FreeBSD (4.0-current tested)
+   
+   To enable it, configure PHP3 and PHP4 to use APXS (--with-apxs) and the
+   necessary link extensions (--enable-versioning). Otherwise, all standard
+   installations instructions apply. For example:
+
+   		$ ./configure \
+				--with-apxs=/apache/bin/apxs \
+				--enable-versioning \
+				--with-mysql \
+				--enable-track-vars
+
+   If this also works on your platform or if you know a way to do it, please
+   report it to our bug database at http://bugs.php.net
+
