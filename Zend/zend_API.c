@@ -1234,6 +1234,10 @@ int zend_register_functions(zend_class_entry *scope, zend_function_entry *functi
 				scope->ce_flags |= ZEND_ACC_ABSTRACT;
 			}
 		} else {
+			if (scope && scope->ce_flags&ZEND_ACC_INTERFACE) {
+				zend_error(error_type, "Interface %s cannot contain non abstract method %s()", scope->name, ptr->fname);
+				return FAILURE;
+			}
 			if (!internal_function->handler) {
 				zend_error(error_type, "Method %s%s%s() cannot be a NULL function", scope ? scope->name : "", scope ? "::" : "", ptr->fname);
 				zend_unregister_functions(functions, count, target_function_table TSRMLS_CC);
