@@ -171,6 +171,7 @@ typedef struct {
 
 extern php3_module_entry oci8_module_entry;
 #define oci8_module_ptr &oci8_module_entry
+#define phpext_oci8_ptr &oci8_module_entry
 
 #define OCI8_MAX_NAME_LEN 64
 #define OCI8_MAX_DATA_SIZE 2097152 /* two megs */
