@@ -26,7 +26,6 @@
 PHP_FUNCTION(crypt);
 #if HAVE_CRYPT
 PHP_MINIT_FUNCTION(crypt);
-PHP_RINIT_FUNCTION(crypt);
 #endif
 
 #endif
