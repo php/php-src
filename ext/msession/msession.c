@@ -53,8 +53,8 @@
 /* Test if system is OK fror use. */
 /* Macros may be ugly, but I can globaly add debuging when needed. */
 #define	IFCONNECT_BEGIN		if(s_reqb && s_conn) {
-#define IFCONNECT_ENDVAL(V) 	} else { php_error(E_WARNING, s_szNoInit, get_active_function_name(TSRMLS_C)); return V; }
-#define IFCONNECT_END		} else { php_error(E_WARNING, s_szNoInit, get_active_function_name(TSRMLS_C)); RETURN_FALSE; }
+#define IFCONNECT_ENDVAL(V) 	} else { php_error_docref(NULL TSRMLS_CC, E_WARNING, "Msession not initialized"); return V; }
+#define IFCONNECT_END		} else { php_error_docref(NULL TSRMLS_CC, E_WARNING, "Msession not initialized"); RETURN_FALSE; }
 
 #ifndef HAVE_PHP_SESSION
 #error HAVE_PHP_SESSION not defined
@@ -112,10 +112,6 @@ ps_module ps_mod_msession = {
 };
 #endif
 #endif
-
-/* Static strings */
-static char s_szNoInit[]="%s(): Msession not initialized";
-static char s_szErrFmt[]="%s(): %s";
 
 /* Per-process variables need by msession */
 static char	s_szdefhost[]="localhost";
@@ -280,8 +276,6 @@ int PHPExecRequestStrings(int req, char *session, int n, char **strings)
 int PHPMsessionConnect(const char *szhost, int nport)
 {
 	int fNewHost=FALSE;
-
-	TSRMLS_FETCH();
 	
 	if(!s_reqb)
 		s_reqb = AllocateRequestBuffer(2048);
@@ -358,7 +352,7 @@ int PHPMsessionSetData(char *session, char *data TSRMLS_DC)
 	PHPExecRequest(REQ_DATASET, session,"",data,0);
 	ret = (s_reqb->req.stat==REQ_OK);
 	if(s_reqb->req.stat!=REQ_OK)
-		php_error(E_WARNING, s_szErrFmt, get_active_function_name(TSRMLS_C), ReqbErr(s_reqb));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, ReqbErr(s_reqb));
 
 	return ret;
 
@@ -373,7 +367,7 @@ int PHPMsessionDestroy(char *session TSRMLS_DC)
 	PHPExecRequest( REQ_DROP, session, "","",0);
 	ret = (s_reqb->req.stat==REQ_OK);
 	if(s_reqb->req.stat!=REQ_OK)
-		php_error(E_WARNING, s_szErrFmt, get_active_function_name(TSRMLS_C), ReqbErr(s_reqb));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, ReqbErr(s_reqb));
 	return ret;
 	
 	IFCONNECT_ENDVAL(0)
@@ -406,7 +400,7 @@ PHP_FUNCTION(msession_connect)
 	}
 	else
 	{
-		php_error(E_WARNING, "%s(): MSession connect failed", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "MSession connect failed");
 		RETURN_FALSE;
 	}
 }
@@ -460,7 +454,7 @@ PHP_FUNCTION(msession_create)
 	}
 	else
 	{
-		php_error(E_WARNING, s_szErrFmt, get_active_function_name(TSRMLS_C), ReqbErr(s_reqb));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, ReqbErr(s_reqb));
 		RETURN_FALSE;
 	}
 	IFCONNECT_END
@@ -507,7 +501,7 @@ PHP_FUNCTION(msession_lock)
 	}
 	else
 	{
-		php_error(E_WARNING, s_szErrFmt, get_active_function_name(TSRMLS_C), ReqbErr(s_reqb));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, ReqbErr(s_reqb));
 		RETURN_FALSE;
 	}
 
@@ -615,7 +609,7 @@ PHP_FUNCTION(msession_unlock)
 	}
 	else
 	{
-		php_error(E_WARNING, s_szErrFmt, get_active_function_name(TSRMLS_C), ReqbErr(s_reqb));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, ReqbErr(s_reqb));
 		RETURN_FALSE;
 	}
 	IFCONNECT_END
@@ -655,7 +649,7 @@ PHP_FUNCTION(msession_set)
 	}
 	else
 	{
-		php_error(E_WARNING, s_szErrFmt, get_active_function_name(TSRMLS_C), ReqbErr(s_reqb));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, ReqbErr(s_reqb));
 		RETURN_FALSE;
 	}
 	IFCONNECT_END
@@ -694,7 +688,7 @@ PHP_FUNCTION(msession_get)
 	}
 	else
 	{
-		php_error(E_WARNING, s_szErrFmt, get_active_function_name(TSRMLS_C), ReqbErr(s_reqb));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, ReqbErr(s_reqb));
 		RETURN_NULL();
 	}
 	IFCONNECT_END
@@ -726,7 +720,7 @@ PHP_FUNCTION(msession_uniq)
 	}
 	else
 	{
-		php_error(E_WARNING, s_szErrFmt, get_active_function_name(TSRMLS_C), ReqbErr(s_reqb));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, ReqbErr(s_reqb));
 		RETURN_NULL();
 	}
 	IFCONNECT_END
@@ -758,7 +752,7 @@ PHP_FUNCTION(msession_randstr)
 	}
 	else
 	{
-		php_error(E_WARNING, s_szErrFmt, get_active_function_name(TSRMLS_C), ReqbErr(s_reqb));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, ReqbErr(s_reqb));
 		RETURN_NULL();
 	}
 	IFCONNECT_END
@@ -803,7 +797,7 @@ PHP_FUNCTION(msession_find)
 	}
 	else if(s_reqb->req.stat != REQ_OK)
 	{
-		php_error(E_WARNING, s_szErrFmt, get_active_function_name(TSRMLS_C), ReqbErr(s_reqb));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, ReqbErr(s_reqb));
 		RETURN_NULL();
 	}
 	IFCONNECT_END
@@ -835,7 +829,7 @@ PHP_FUNCTION(msession_list)
 	{
 		/* May this should be an error? */
 		if(s_reqb->req.param !=  REQE_NOSESSION) 
-			php_error(E_WARNING, s_szErrFmt, get_active_function_name(TSRMLS_C), ReqbErr(s_reqb));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, ReqbErr(s_reqb));
 		RETURN_NULL();
 	}
 	IFCONNECT_END
@@ -885,7 +879,7 @@ PHP_FUNCTION(msession_get_array)
 	else
 	{
 		if(s_reqb->req.param !=  REQE_NOSESSION)
-			php_error(E_WARNING, s_szErrFmt, get_active_function_name(TSRMLS_C), ReqbErr(s_reqb));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, ReqbErr(s_reqb));
 		RETURN_NULL();
 	}
 	IFCONNECT_END
@@ -926,12 +920,6 @@ PHP_FUNCTION(msession_set_array)
 
 	pairs = (char **)emalloc(sizeof(char *) * countpair * 2);
 
-	if(!pairs)
-	{
-		ELOG("no pairs");
-		RETURN_FALSE;
-	}
-
 	ELOG("have pairs");
 
 	/* Initializes pos */
@@ -969,7 +957,7 @@ PHP_FUNCTION(msession_set_array)
 	PHPExecRequestMulti(REQ_SETVAL, Z_STRVAL_PP(session), countpair, pairs,0);
 
 	if(s_reqb->req.stat != REQ_OK)
-		php_error(E_WARNING, s_szErrFmt, get_active_function_name(TSRMLS_C), ReqbErr(s_reqb));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, ReqbErr(s_reqb));
 	efree((void *)pairs);
 	IFCONNECT_END
 }
@@ -1015,7 +1003,7 @@ PHP_FUNCTION(msession_listvar)
 	}
 	else
 	{
-		php_error(E_WARNING, s_szErrFmt, get_active_function_name(TSRMLS_C), ReqbErr(s_reqb));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, ReqbErr(s_reqb));
 		RETURN_NULL();
 	}
 	IFCONNECT_END
@@ -1055,7 +1043,7 @@ PHP_FUNCTION(msession_timeout)
 	}
 	else
 	{
-		php_error(E_WARNING, s_szErrFmt, get_active_function_name(TSRMLS_C), ReqbErr(s_reqb));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, ReqbErr(s_reqb));
 		RETURN_NULL();
 	}
 	IFCONNECT_END
@@ -1087,7 +1075,7 @@ PHP_FUNCTION(msession_inc)
 	}
 	else
 	{
-		php_error(E_WARNING, s_szErrFmt, get_active_function_name(TSRMLS_C), ReqbErr(s_reqb));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, ReqbErr(s_reqb));
 		RETURN_FALSE;
 	}
 	IFCONNECT_END
@@ -1191,7 +1179,7 @@ PHP_FUNCTION(msession_plugin)
 	}
 	else if(s_reqb->req.stat != REQ_OK)
 	{
-		php_error(E_WARNING, s_szErrFmt, get_active_function_name(TSRMLS_C), ReqbErr(s_reqb));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, ReqbErr(s_reqb));
 		RETURN_FALSE;
 		
 	}
@@ -1240,7 +1228,7 @@ PHP_FUNCTION(msession_call)
 	}
 	else if(s_reqb->req.stat != REQ_OK)
 	{
-		php_error(E_WARNING, s_szErrFmt, get_active_function_name(TSRMLS_C), ReqbErr(s_reqb));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, ReqbErr(s_reqb));
 		RETURN_FALSE;
 	}
 	IFCONNECT_END
@@ -1269,7 +1257,7 @@ PHP_FUNCTION(msession_exec)
 	}
 	else
 	{
-		php_error(E_WARNING, s_szErrFmt, get_active_function_name(TSRMLS_C), ReqbErr(s_reqb));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, ReqbErr(s_reqb));
 		RETURN_NULL();
 	}
 	IFCONNECT_END
@@ -1289,7 +1277,7 @@ PHP_FUNCTION(msession_ping)
 	}
 	else
 	{
-		php_error(E_WARNING, s_szErrFmt, get_active_function_name(TSRMLS_C), ReqbErr(s_reqb));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, ReqbErr(s_reqb));
 		RETURN_FALSE;
 	}
 	IFCONNECT_END
@@ -1384,7 +1372,7 @@ PS_CREATE_SID_FUNC(msession)
 		else
 		{
 			ELOG("Reports that UNIQ failed");
-			php_error(E_WARNING, s_szErrFmt, get_active_function_name(TSRMLS_C), ReqbErr(s_reqb));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, ReqbErr(s_reqb));
 		}
 	}
 	ELOG("Yikes, could not get sid from msession 2003");
