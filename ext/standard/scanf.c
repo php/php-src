@@ -1235,7 +1235,8 @@ inline void scan_set_error_return(int numVars,pval **return_value) {
 		(*return_value)->type = IS_LONG;
 		(*return_value)->value.lval = SCAN_ERROR_EOF;  /* EOF marker */
 	} else {	
-		pval_destructor( *return_value );	
+	  /* pval_destructor( *return_value ); */ 
+	  /* convert_to_null calls destructor */
    		convert_to_null( *return_value );
 	}	
 }
