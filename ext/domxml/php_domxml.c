@@ -2519,7 +2519,7 @@ static void php_xpathptr_eval(INTERNAL_FUNCTION_PARAMETERS, int mode, int expr)
 	convert_to_string(str);
 	
 	if (contextnode) {
-		contextnodep = php_dom_get_object(contextnode, le_domxmlnodep, 0);
+		contextnodep = php_dom_get_object(contextnode, le_domxmlnodep, 0 TSRMLS_CC);
 	}
 	ctxp->node = contextnodep;
 
