@@ -1,3 +1,28 @@
+2001-04-12  Chuck Hagenbuch  <chuck@horde.org>
+
+    * pear/HTML/Select.php:
+    move the selected logic back to the toHtml() method so that you can add
+    selected values after adding the options.
+
+    * pear/HTML/Select.php:
+    simplify the toHtml() loop, use foreach() instead of for(), and move the
+    logic around selected attributes to the addOption() method.
+
+    * pear/HTML/Select.php: - run option labels through htmlentities()
+    - update the API version
+    - a few more style and xHTML compliance fixes.
+
+    * pear/HTML/Common.php:
+    xHTML compliance, and run attribute values through htmlentities().
+
+    * pear/HTML/Select.php: A bit of style, and:
+
+    - made HTML more compact/production quality - remove unnecesary comments and
+      whitespace.
+    - added a method for using a flat array (array('foo', 'bar')) as both the
+      keys and values of the select.
+    - include DB.php conditionally, so it's not loaded when not needed.
+
 2001-04-11  Thies C. Arntzen  <thies@thieso.net>
 
     * ext/oci8/oci8.c: MFH - never initialize OCI in OCI_THREADED mode
