@@ -335,7 +335,7 @@ TEST $file
     putenv("PATH_TRANSLATED=$tmp_file");
     putenv("SCRIPT_FILENAME=$tmp_file");
 
-    if (isset($section_text['POST'])) {
+    if (!empty($section_text['POST'])) {
     
         $post = trim($section_text['POST']);
         save_text($tmp_post,$post);
