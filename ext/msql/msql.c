@@ -1121,7 +1121,7 @@ DLEXPORT PHP_FUNCTION(msql_fetch_object)
    Fetch a result row as an associative array */
 DLEXPORT PHP_FUNCTION(msql_fetch_array)
 {
-	php3_msql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	php3_msql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
 
