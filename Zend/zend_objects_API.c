@@ -165,7 +165,7 @@ ZEND_API void *zend_object_store_get_object(zval *zobject TSRMLS_DC)
 {
 	zend_object_handle handle = Z_OBJ_HANDLE_P(zobject);
 
-	if (handle >= EG(objects_store).top || !EG(objects_store).object_buckets[handle].valid) {
+	if (!EG(objects_store).object_buckets[handle].valid) {
 		zend_error(E_ERROR, "Trying to access invalid object");
 		return NULL;
 	}
