@@ -656,10 +656,8 @@ PHPAPI int php_sscanf_internal(	char *string, char *format,
 
     if (!numVars) {
         /* allocate an array for return */
-        if (array_init(*return_value) == FAILURE) {
-			scan_set_error_return(0, return_value);			
-            return FAILURE;
-        }
+        array_init(*return_value);
+
         for (i = 0; i < totalVars; i++) {
            	if (add_next_index_null(*return_value) == FAILURE) {
 				scan_set_error_return(0, return_value);

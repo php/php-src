@@ -173,9 +173,7 @@ PHP_FUNCTION(gethostbynamel)
 	}
 	convert_to_string_ex(arg);
 
-	if (array_init(return_value) == FAILURE) {
-		RETURN_FALSE;
-	}
+	array_init(return_value);
 
 	hp = gethostbyname(Z_STRVAL_PP(arg));
 	if (hp == NULL || hp->h_addr_list == NULL) {
@@ -343,9 +341,7 @@ static u_char *php_parserr(u_char *cp, querybuf *answer, int type_to_fetch, int 
 	}
 
 	MAKE_STD_ZVAL(*subarray);
-	if (array_init(*subarray) != SUCCESS) {
-		return NULL;
-	}
+	array_init(*subarray);
 
 	add_assoc_string(*subarray, "host", name, 1);
 	switch (type) {
@@ -466,13 +462,9 @@ PHP_FUNCTION(dns_get_record)
 			type_param = Z_LVAL_P(fetch_type);
 			pval_destructor(authns);
 			addtl_recs = 1;		/* We want the additional Records */
-			if (array_init(authns) != SUCCESS) {
-				RETURN_FALSE;
-			}
+			array_init(authns);
 			pval_destructor(addtl);
-			if (array_init(addtl) != SUCCESS) {
-				RETURN_FALSE;
-			}
+			array_init(addtl);
 			break;
 		default:
 			WRONG_PARAM_COUNT;
@@ -486,9 +478,7 @@ PHP_FUNCTION(dns_get_record)
 	}
 
 	/* Initialize the return array */
-	if (array_init(return_value) != SUCCESS) {
-		RETURN_FALSE;
-	}
+	array_init(return_value);
 
 	/* - We emulate an or'ed type mask by querying type by type. (Steps 0 - 7)
 	 *   If additional info is wanted we check again with T_ANY (step 8/9)
@@ -627,9 +617,7 @@ PHP_FUNCTION(dns_get_mx)
 			}
 			need_weight = 1;
 			pval_destructor(weight_list); /* start with clean array */
-			if (array_init(weight_list) == FAILURE) {
-				RETURN_FALSE;
-			}
+			array_init(weight_list);
 			break;
 
 		default:
@@ -638,9 +626,7 @@ PHP_FUNCTION(dns_get_mx)
 
 	convert_to_string(host);
 	pval_destructor(mx_list); /* start with clean array */
-	if (array_init(mx_list) == FAILURE ) {
-		RETURN_FALSE;
-	}
+	array_init(mx_list);
 
 	/* Go! */
 	i = res_search(Z_STRVAL_P(host), C_IN, T_MX, (u_char *)&ans, sizeof(ans));

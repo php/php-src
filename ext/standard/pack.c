@@ -534,8 +534,7 @@ PHP_FUNCTION(unpack)
 	inputlen = Z_STRLEN_PP(inputarg);
 	inputpos = 0;
 
-	if (array_init(return_value) == FAILURE)
-		RETURN_FALSE;
+	array_init(return_value);
 
 	while (formatlen-- > 0) {
 		char type = *(format++);

@@ -1518,9 +1518,7 @@ PHP_FUNCTION(getopt)
 	}
 
 	/* Initialize the return value as an array. */
-	if (array_init(return_value)) {
-		RETURN_FALSE;
-	}
+	array_init(return_value);
 
 	/* Disable getopt()'s error messages. */
 	opterr = 0;

@@ -793,9 +793,7 @@ PHP_FUNCTION(explode)
 		RETURN_FALSE;
 	}
 
-	if (array_init(return_value) == FAILURE) {
-		RETURN_FALSE;
-	}
+	array_init(return_value);
 
 	if (limit == 0 || limit == 1) {
 		add_index_stringl(return_value, 0, Z_STRVAL_PP(str), Z_STRLEN_PP(str), 1);
@@ -3721,13 +3719,9 @@ PHP_FUNCTION(localeconv)
 		WRONG_PARAM_COUNT;
 	}
 
-	if (array_init(return_value) == FAILURE) {
-		RETURN_FALSE;
-	}
-
-	if (array_init(grouping) == FAILURE || array_init(mon_grouping) == FAILURE) {
-		RETURN_FALSE;
-	}	
+	array_init(return_value);
+	array_init(grouping);
+	array_init(mon_grouping);
 
 #ifdef HAVE_LOCALECONV
 	{

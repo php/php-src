@@ -662,10 +662,7 @@ PHP_FUNCTION(localtime)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid local time");
 		RETURN_FALSE;
 	}
-	if (array_init(return_value) == FAILURE) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Cannot prepare return array from localtime");
-		RETURN_FALSE;
-	}
+	array_init(return_value);
 
 	if (assoc_array) {
 		add_assoc_long(return_value, "tm_sec",   ta->tm_sec);
@@ -713,10 +710,7 @@ PHP_FUNCTION(getdate)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot perform date calculation");
 		return;
 	}
-	if (array_init(return_value) == FAILURE) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Unable to initialize array");
-		return;
-	}
+	array_init(return_value);
 	add_assoc_long(return_value, "seconds", ta->tm_sec);
 	add_assoc_long(return_value, "minutes", ta->tm_min);
 	add_assoc_long(return_value, "hours", ta->tm_hour);
