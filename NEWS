@@ -4,7 +4,8 @@ PHP 4.0                                                                    NEWS
 ?? ??? 2000, Version 4.0.3-dev
 - Fix some potential OpenBSD and NetBSD crash bugs when opening files. (Andi)
 - Add EscapeShellArg() function (Rasmus)
-- Add a php.ini option session.use_trans_sid to enable/disable trans-sid. (Sterling)
+- Add a php.ini option session.use_trans_sid to enable/disable trans-sid.
+  (Sterling)
 - Quick-fix for the file upload security alert (Rasmus)
 - Fixed a potential security issue with HTTP file upload (Zeev)
 - Add the Sablotron extension for XSL parsing. (Sterling)
@@ -38,7 +39,8 @@ PHP 4.0                                                                    NEWS
   syntax for the walk function. (Andrei)
 - Fixed segfault with fgets(), fgetcsv(), fgetss(), and fread() when
   called with negative length argument. (Torben)
-- Fix by-reference parameters passing for xml_ functions and for scanf functions (Stas)
+- Fix by-reference parameters passing for xml_ functions and for scanf
+  functions (Stas)
 - Added experimental Oracle LDAP SDK support. 8.1.6 or later needed. Configure
   with something like --with-ldap=/usr/local/oracle/product/8.1.6 (Stig Venaas)
 - Fixed memory leaks in eval();  A script that used eval() extensively, could
