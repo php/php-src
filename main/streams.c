@@ -2819,7 +2819,10 @@ PHPAPI void php_stream_notification_notify(php_stream_context *context, int noti
 
 PHPAPI void php_stream_context_free(php_stream_context *context)
 {
-	zval_ptr_dtor(&context->options);
+	if (context->options) {
+		zval_ptr_dtor(&context->options);
+		context->options = NULL;
+	}
 	efree(context);
 }
 

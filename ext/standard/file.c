@@ -134,7 +134,12 @@ PHPAPI int php_le_stream_context(void)
 
 static ZEND_RSRC_DTOR_FUNC(file_context_dtor)
 {
-	php_stream_context_free((php_stream_context*)rsrc->ptr);
+	php_stream_context *context = (php_stream_context*)rsrc->ptr;
+	if (context->options) {
+		zval_ptr_dtor(&context->options);
+		context->options = NULL;
+	}
+	php_stream_context_free(context);
 }
 
 static void file_globals_ctor(php_file_globals *file_globals_p TSRMLS_DC)
@@ -888,7 +893,6 @@ static int parse_context_options(php_stream_context *context, zval *options)
 			while (SUCCESS == zend_hash_get_current_data_ex(Z_ARRVAL_PP(wval), (void**)&oval, &opos)) {
 
 				if (HASH_KEY_IS_STRING == zend_hash_get_current_key_ex(Z_ARRVAL_PP(wval), &okey, &okey_len, &num_key, 0, &opos)) {
-					ZVAL_ADDREF(*oval);
 					php_stream_context_set_option(context, wkey, okey, *oval);
 				}
 				zend_hash_move_forward_ex(Z_ARRVAL_PP(wval), &opos);
