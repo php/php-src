@@ -213,6 +213,8 @@ $PHP_FAILED_TESTS = array();
 
 // If parameters given assume they represent selected tests to run.
 $failed_tests_file= false;
+$pass_option_n = false;
+$pass_options = '';
 if (isset($argc) && $argc > 1) {
 	for ($i=1; $i<$argc; $i++) {
 		if (substr($argv[$i],0,1) == '-') {   
@@ -234,6 +236,12 @@ if (isset($argc) && $argc > 1) {
 				case 'a':
 					$failed_tests_file = fopen($argv[++$i], 'a+t');
 					break;
+				case 'n':
+					if (!$pass_option_n) {
+						$pass_options .= ' -n';
+					}
+					$pass_option_n = true;
+					break;
 				default:
 					echo "Illegal switch specified!\n";
 				case "h":
@@ -254,6 +262,8 @@ Options:
     -w <file>   Write a list of all failed tests to <file>.
 
     -a <file>   Same as -w but append rather then truncating <file>.
+
+    -n          Pass -n option to the php binary.
 
     -h <file>   This Help.
 
@@ -638,7 +648,7 @@ function system_with_timeout($commandline)
 
 function run_test($php, $file, $test_cnt, $test_idx)
 {
-	global $log_format, $info_params, $ini_overwrites, $cwd, $PHP_FAILED_TESTS;
+	global $log_format, $info_params, $ini_overwrites, $cwd, $PHP_FAILED_TESTS, $pass_options;
 
 	if (DETAILED) echo "
 =================
@@ -804,7 +814,7 @@ TEST $file
 		putenv("CONTENT_TYPE=application/x-www-form-urlencoded");
 		putenv("CONTENT_LENGTH=$content_length");
 
-		$cmd = "$php$ini_settings -f $tmp_file 2>&1 < $tmp_post";
+		$cmd = "$php$pass_options$ini_settings -f $tmp_file 2>&1 < $tmp_post";
 
 	} else {
 
@@ -812,7 +822,7 @@ TEST $file
 		putenv("CONTENT_TYPE=");
 		putenv("CONTENT_LENGTH=");
 
-		$cmd = "$php$ini_settings -f $tmp_file$args 2>&1";
+		$cmd = "$php$pass_options$ini_settings -f $tmp_file$args 2>&1";
 	}
 
 	if (DETAILED) echo "
