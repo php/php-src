@@ -1,8 +1,2 @@
-Authors:
-Brad House <brad@mainstreetsoftworks.com>
-Chris Faulhaber <jedgar@fxp.org>
-
-BugFixes:
-- Memory leak when mcve_destroyconn() not called:
-  Steven Schoch <cardhelp@starnet.com>
-
+MCVE
+Brad House, Chris Faulhaber, Steven Schoch
