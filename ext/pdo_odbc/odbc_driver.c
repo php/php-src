@@ -30,56 +30,6 @@
 #include "php_pdo_odbc.h"
 #include "php_pdo_odbc_int.h"
 
-static struct {
-	char state[6];
-	enum pdo_error_type err;
-} odbc_to_pdo_err_map[] = {
-	/* this table maps ODBC V3 SQLSTATE codes to PDO_ERR codes */
-	{ "42S01", PDO_ERR_ALREADY_EXISTS },
-	{ "42S11", PDO_ERR_ALREADY_EXISTS },
-	{ "42S21", PDO_ERR_ALREADY_EXISTS },
-	{ "IM001", PDO_ERR_NOT_IMPLEMENTED },
-	{ "42S22", PDO_ERR_NOT_FOUND },
-	{ "42S12", PDO_ERR_NOT_FOUND },
-	{ "42S02", PDO_ERR_NOT_FOUND },
-	{ "42000", PDO_ERR_SYNTAX },
-	{ "23000", PDO_ERR_CONSTRAINT },
-	{ "22025", PDO_ERR_SYNTAX },
-	{ "22019", PDO_ERR_SYNTAX },
-	{ "22018", PDO_ERR_SYNTAX },
-	{ "08S01", PDO_ERR_DISCONNECTED },
-	{ "01S07", PDO_ERR_TRUNCATED },
-	
-};
-
-static HashTable err_hash;
-
-void pdo_odbc_fini_error_table(void)
-{
-	zend_hash_destroy(&err_hash);
-}
-
-void pdo_odbc_init_error_table(void)
-{
-	int i;
-
-	zend_hash_init(&err_hash, 0, NULL, NULL, 1);
-
-	for (i = 0; i < sizeof(odbc_to_pdo_err_map)/sizeof(odbc_to_pdo_err_map[0]); i++) {
-		zend_hash_add(&err_hash, odbc_to_pdo_err_map[i].state, sizeof(odbc_to_pdo_err_map[i].state),
-				&odbc_to_pdo_err_map[i].err, sizeof(odbc_to_pdo_err_map[i].err), NULL);
-	}
-}
-
-static enum pdo_error_type pdo_odbc_map_error(char *state)
-{
-	enum pdo_error_type *p_err;
-	if (SUCCESS == zend_hash_find(&err_hash, state, sizeof(odbc_to_pdo_err_map[0].state), (void**)&p_err)) {
-		return *p_err;
-	}
-	return PDO_ERR_CANT_MAP;
-}
-
 static int pdo_odbc_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *info TSRMLS_DC)
 {
 	pdo_odbc_db_handle *H = (pdo_odbc_db_handle *)dbh->driver_data;
@@ -92,8 +42,9 @@ static int pdo_odbc_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *inf
 		einfo = &S->einfo;
 	}
 
-	spprintf(&message, 0, "%s: %d %s [SQL State %s] (%s:%d)",
-				einfo->what, einfo->last_error, einfo->last_err_msg, einfo->last_state, einfo->file, einfo->line);
+	spprintf(&message, 0, "SQLSTATE[%s] %s: %d %s (%s:%d)",
+				einfo->last_state, einfo->what, einfo->last_error,
+				einfo->last_err_msg, einfo->file, einfo->line);
 
 	add_next_index_long(info, einfo->last_error);
 	add_next_index_string(info, message, 0);
@@ -110,7 +61,7 @@ void pdo_odbc_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, PDO_ODBC_HSTMT statement, 
 	pdo_odbc_db_handle *H = (pdo_odbc_db_handle*)dbh->driver_data;
 	pdo_odbc_errinfo *einfo = &H->einfo;
 	pdo_odbc_stmt *S = NULL;
-	enum pdo_error_type *pdo_err = &dbh->error_code;
+	pdo_error_type *pdo_err = &dbh->error_code;
 
 	if (stmt) {
 		S = (pdo_odbc_stmt*)stmt->driver_data;
@@ -131,11 +82,11 @@ void pdo_odbc_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, PDO_ODBC_HSTMT statement, 
 	einfo->line = line;
 	einfo->what = what;
 
-	*pdo_err = pdo_odbc_map_error(einfo->last_state);
+	strcpy(*pdo_err, einfo->last_err_msg);
 
 	if (!dbh->methods) {
-		zend_throw_exception_ex(php_pdo_get_exception(), *pdo_err TSRMLS_CC, "%s: %d %s [SQL State %s]",
-				what, einfo->last_error, einfo->last_err_msg, einfo->last_state);
+		zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC, "SQLSTATE[%s] %s: %d %s",
+				*pdo_err, what, einfo->last_error, einfo->last_err_msg);
 	}
 }
 /* }}} */

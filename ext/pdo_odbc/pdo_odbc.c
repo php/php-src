@@ -80,8 +80,6 @@ PHP_MINIT_FUNCTION(pdo_odbc)
 		return FAILURE;
 	}
 
-	pdo_odbc_init_error_table();
-
 #ifdef SQL_ATTR_CONNECTION_POOLING
 	/* ugh, we don't really .ini stuff in PDO, but since ODBC connection
 	 * pooling is process wide, we can't set it from within the scope of a

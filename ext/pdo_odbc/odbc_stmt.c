@@ -233,8 +233,7 @@ static int odbc_stmt_set_param(pdo_stmt_t *stmt, long attr, zval *val TSRMLS_DC)
 		default:
 			strcpy(S->einfo.last_err_msg, "Unknown Attribute");
 			S->einfo.what = "setAttribute";
-			stmt->error_code = PDO_ERR_NOT_IMPLEMENTED;
-			S->einfo.last_state[0] = '\0';
+			strcpy(S->einfo.last_state, "IM0001");
 			return -1;
 	}
 
