@@ -240,10 +240,6 @@ AC_CHECK_LIB(nsl, gethostname, [
 
 fi
 
-AC_CHECK_LIB(crypt, crypt, [
- PHP_ADD_LIBRARY(crypt)
- AC_DEFINE(HAVE_LIBCRYPT,1,[ ]) ], [])
-
 AC_CHECK_LIB(dl, dlopen,[PHP_ADD_LIBRARY(dl)])
 
 dnl The sin may be in a library which need not be specifed
@@ -600,6 +596,12 @@ PHP_ARG_ENABLE(php-streams,whether to enable php streams,
 if test "$PHP_PHP_STREAMS" = "yes"; then
   AC_DEFINE(HAVE_PHP_STREAM, 1, [Whether to use php streams])
 fi
+
+AC_CHECK_LIB(crypt, crypt, [
+ PHP_ADD_LIBRARY(crypt)
+ AC_DEFINE(HAVE_LIBCRYPT,1,[ ]) 
+ AC_DEFINE(HAVE_CRYPT,1,[ ]) 
+], [])
 
 divert(5)
 
