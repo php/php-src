@@ -152,6 +152,7 @@ static void ini_error(char *str)
 int zend_parse_ini_file(zend_file_handle *fh, zend_ini_parser_cb_t ini_parser_cb, void *arg)
 {
 	zend_ini_parser_param ini_parser_param;
+	int retval;
 
 	ini_parser_param.ini_parser_cb = ini_parser_cb;
 	ini_parser_param.arg = arg;
@@ -159,7 +160,12 @@ int zend_parse_ini_file(zend_file_handle *fh, zend_ini_parser_cb_t ini_parser_cb
 	if (zend_ini_open_file_for_scanning(fh)==FAILURE) {
 		return FAILURE;
 	}
-	if (ini_parse(&ini_parser_param)==0) {
+
+	retval = ini_parse(&ini_parser_param);
+
+	zend_ini_close_file(fh);
+
+	if (retval==0) {
 		return SUCCESS;
 	} else {
 		return FAILURE;
@@ -188,12 +194,14 @@ statement_list:
 statement:
 		TC_STRING '=' string_or_value {
 #if DEBUG_CFG_PARSER
-			printf("'%s' = '%s'\n",$1.value.str.val,$3.value.str.val);
+			printf("'%s' = '%s'\n", $1.value.str.val, $3.value.str.val);
 #endif
 			ZEND_INI_PARSER_CB(&$1, &$3, ZEND_INI_PARSER_ENTRY, ZEND_INI_PARSER_ARG);
+			free($1.value.str.val);
+			free($3.value.str.val);
 		}
-	|	TC_STRING { ZEND_INI_PARSER_CB(&$1, NULL, ZEND_INI_PARSER_ENTRY, ZEND_INI_PARSER_ARG); }
-	|	SECTION { ZEND_INI_PARSER_CB(&$1, NULL, ZEND_INI_PARSER_SECTION, ZEND_INI_PARSER_ARG); }
+	|	TC_STRING { ZEND_INI_PARSER_CB(&$1, NULL, ZEND_INI_PARSER_ENTRY, ZEND_INI_PARSER_ARG); free($1.value.str.val); }
+	|	SECTION { ZEND_INI_PARSER_CB(&$1, NULL, ZEND_INI_PARSER_SECTION, ZEND_INI_PARSER_ARG); free($1.value.str.val); }
 	|	'\n'
 ;
 
