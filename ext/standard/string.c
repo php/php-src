@@ -1360,11 +1360,11 @@ PHP_FUNCTION(stristr)
 		
 	if (found) {
 		found_offset = found - Z_STRVAL_PP(haystack);
-		RETURN_STRINGL(haystack_orig + found_offset,
+		RETVAL_STRINGL(haystack_orig + found_offset,
 		               Z_STRLEN_PP(haystack) - found_offset, 
 					   1);
 	} else {
-		RETURN_FALSE;
+		RETVAL_FALSE;
 	}
 
 	efree(haystack_orig);
