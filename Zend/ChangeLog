@@ -1,3 +1,15 @@
+2002-06-23  Andi Gutmans  <andi@zend.com>
+
+    * zend_compile.c
+      zend_execute.c:
+    - Fix problem with constructor not being inherited and called correctly.
+
+    * zend_mm.c: - Fix small bug
+
+    * zend_mm.c:
+    - Almost completely implement realloc(). It now resizes in place when
+    - possible.
+
 2002-06-22  Andi Gutmans  <andi@zend.com>
 
     * zend_alloc.c
