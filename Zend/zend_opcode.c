@@ -108,6 +108,13 @@ ZEND_API void destroy_zend_function(zend_function *function TSRMLS_DC)
 	}
 }
 
+ZEND_API void zend_function_dtor(zend_function *function)
+{
+	TSRMLS_FETCH();
+
+	destroy_zend_function(function TSRMLS_CC);
+}
+
 static void zend_cleanup_op_array_data(zend_op_array *op_array)
 {
 	if (op_array->static_variables) {
