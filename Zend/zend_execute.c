@@ -1384,7 +1384,7 @@ binary_assign_op_addr: {
 						if (opline->op1.op_type == IS_VAR) {
 							SELECTIVE_PZVAL_LOCK(*Ts[opline->op1.u.var].var.ptr_ptr, &opline->op1);
 						}
-						if (opline->op2.op_type==IS_VAR) {
+						if (opline->op2.op_type == IS_VAR) {
 							PZVAL_LOCK(*Ts[opline->op2.u.var].var.ptr_ptr);
 						}
 					}
