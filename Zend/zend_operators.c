@@ -461,13 +461,13 @@ ZEND_API void _convert_to_string(zval *op ZEND_FILE_LINE_DC)
 		}
 		case IS_ARRAY:
 			zval_dtor(op);
-			op->value.str.val = estrndup_rel("Array",sizeof("Array")-1);
+			op->value.str.val = estrndup_rel("Array", sizeof("Array")-1);
 			op->value.str.len = sizeof("Array")-1;
 			zend_error(E_NOTICE, "Array to string conversion");
 			break;
 		case IS_OBJECT:
 			zval_dtor(op);
-			op->value.str.val = estrndup_rel("Object",sizeof("Object")-1);
+			op->value.str.val = estrndup_rel("Object", sizeof("Object")-1);
 			op->value.str.len = sizeof("Object")-1;
 			zend_error(E_NOTICE, "Object to string conversion");
 			break;
@@ -1041,7 +1041,7 @@ ZEND_API int concat_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 		result->value.str.len = op1->value.str.len + op2->value.str.len;
 		result->value.str.val = (char *) emalloc(result->value.str.len + 1);
 		memcpy(result->value.str.val, op1->value.str.val, op1->value.str.len);
-		memcpy(result->value.str.val+op1->value.str.len, op2->value.str.val,op2->value.str.len);
+		memcpy(result->value.str.val+op1->value.str.len, op2->value.str.val, op2->value.str.len);
 		result->value.str.val[result->value.str.len] = 0;
 		result->type = IS_STRING;
 	}
@@ -1414,7 +1414,7 @@ static void increment_string(zval *str)
 
     if (carry) {
         t = (char *) emalloc(str->value.str.len+1+1);
-        memcpy(t+1,str->value.str.val, str->value.str.len);
+        memcpy(t+1, str->value.str.val, str->value.str.len);
         str->value.str.len++;
         t[str->value.str.len] = '\0';
         switch (last) {
@@ -1559,7 +1559,7 @@ ZEND_API int zend_binary_strncmp(char *s1, uint len1, char *s2, uint len2, uint 
 ZEND_API int zend_binary_strcasecmp(char *s1, uint len1, char *s2, uint len2)
 {
 	int len;
-	int c1,c2;
+	int c1, c2;
 
 	len = MIN(len1, len2);
 
@@ -1578,7 +1578,7 @@ ZEND_API int zend_binary_strcasecmp(char *s1, uint len1, char *s2, uint len2)
 ZEND_API int zend_binary_strncasecmp(char *s1, uint len1, char *s2, uint len2, uint length)
 {
 	int len;
-	int c1,c2;
+	int c1, c2;
 
 	len = MIN(length, MIN(len1, len2));
 
@@ -1619,7 +1619,7 @@ ZEND_API int zend_binary_zval_strncasecmp(zval *s1, zval *s2, zval *s3)
 
 ZEND_API void zendi_smart_strcmp(zval *result, zval *s1, zval *s2)
 {
-	int ret1,ret2;
+	int ret1, ret2;
 	long lval1, lval2;
 	double dval1, dval2;
 	
@@ -1632,9 +1632,9 @@ ZEND_API void zendi_smart_strcmp(zval *result, zval *s1, zval *s2)
 			/* use the BC math library to compare the numbers */
 			init_num(&first);
 			init_num(&second);
-			str2num(&first,s1->value.str.val,100); /* this scale should do */
-			str2num(&second,s2->value.str.val,100); /* ditto */
-			result->value.lval = bc_compare(first,second);
+			str2num(&first, s1->value.str.val, 100); /* this scale should do */
+			str2num(&second, s2->value.str.val, 100); /* ditto */
+			result->value.lval = bc_compare(first, second);
 			result->value.lval = ZEND_NORMALIZE_BOOL(result->value.lval);
 			result->type = IS_LONG;
 			free_num(&first);
@@ -1712,7 +1712,7 @@ ZEND_API void zend_compare_objects(zval *result, zval *o1, zval *o2 TSRMLS_DC)
 static inline int is_numeric_string(char *str, int length, long *lval, double *dval)
 {
 	register char *p=str, *end=str+length;
-	unsigned char had_period=0,had_exponent=0;
+	unsigned char had_period=0, had_exponent=0;
 	char *end_ptr;
 	
 	if (!length) {
