@@ -1,3 +1,35 @@
+2005-03-10  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * tests/bug28442.phpt
+      tests/bug28442.phpt:
+      
+      - Bugfix #28442
+
+    * zend_compile.c:
+      - Bugfix #28442
+
+2005-03-10  Anantha Kesari H Y  <hyanantha@novell.com>
+
+    * (PHP_5_0)
+      acconfig.h:
+      Autoconf based build can be used for NetWare
+
+    * (PHP_5_0)
+      zend.h:
+      NetWare can make use of ./configure generated zend_config.h
+
+    * (PHP_5_0)
+      Zend.m4:
+      This patch is needed for cross compilation to go through
+
+2005-03-10  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_vm_execute.h:
+      - #31562 2nd part
+
+    * zend_vm_def.h:
+      - Fix #31562
+
 2005-03-07  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend.h

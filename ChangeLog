@@ -1,3 +1,142 @@
+2005-03-10  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/standard/string.c:
+      - Cosmetics
+
+    * ext/standard/string.c:
+      - Do not touch return_valu's refcount or is_ref
+
+2005-03-10  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/ftp/ftp.c
+      ext/ftp/php_ftp.c:
+      Final set of fixes for bug #27633.
+      
+
+2005-03-10  Rob Richards  <rrichards@ctindustries.net>
+
+    * acinclude.m4:
+      require libxml 2.6.0 or higher
+
+2005-03-10  Zeev Suraski  <zeev@zend.com>
+
+    * ext/standard/basic_functions.c:
+      Oops, revert.
+
+    * ext/standard/basic_functions.c:
+      Fix prototype
+
+2005-03-10  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * run-tests2.php
+      server-tests.php
+      server-tests.php
+      server-tests.php:
+      - Rename test script
+
+    * run-tests2.php:
+      - Make this work under 5
+
+2005-03-10  Anantha Kesari H Y  <hyanantha@novell.com>
+
+    * (PHP_5_0)
+      main/php_compat.h:
+      NetWare can use of ./configure generated php_config.h
+
+    * (PHP_5_0)
+      ext/standard/ftp_fopen_wrapper.c:
+      NetWare Specific stat member changes
+
+2005-03-10  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/tests/bug28442.phpt
+      ZendEngine2/tests/bug28442.phpt:
+      
+      - Bugfix #28442
+
+    * ZendEngine2/zend_compile.c:
+      - Bugfix #28442
+
+2005-03-10  Anantha Kesari H Y  <hyanantha@novell.com>
+
+    * (PHP_5_0)
+      ext/standard/pageinfo.c:
+      NetWare LibC has pwd.h and removing the redundant NEW_LIBC checks
+
+    * (PHP_5_0)
+      ext/standard/pack.c
+      ext/standard/rand.c:
+      NetWare LibC has pwd.h
+
+    * (PHP_5_0)
+      ext/standard/basic_functions.c:
+      NetWare LibC has netdb.h
+
+    * (PHP_5_0)
+      ext/session/mod_files.c:
+      NetWare stat structure difference has been handled
+
+2005-03-10  Joe Orton  <jorton@redhat.com>
+
+    * (PHP_4_3)
+      sapi/apache2handler/sapi_apache2.c
+      sapi/apache2handler/sapi_apache2.c:
+      MFH: - Fixed bug #31717: Reject PATH_INFO if "AcceptPathInfo off" is used.
+
+2005-03-10  Anantha Kesari H Y  <hyanantha@novell.com>
+
+    * (PHP_5_0)
+      ZendEngine2/acconfig.h:
+      Autoconf based build can be used for NetWare
+
+    * (PHP_5_0)
+      main/php.h:
+      NetWare LibC has param.h and pwd.h
+
+    * (PHP_5_0)
+      ZendEngine2/zend.h:
+      NetWare can make use of ./configure generated zend_config.h
+
+2005-03-10  Joe Orton  <jorton@redhat.com>
+
+    * ext/standard/html.c:
+      Fix /*-within-comment warning from GCC.
+
+    * sapi/apache2handler/sapi_apache2.c:
+      - Fixed bug #31717: Reject PATH_INFO if "AcceptPathInfo off" is used.
+
+2005-03-10  Anantha Kesari H Y  <hyanantha@novell.com>
+
+    * (PHP_5_0)
+      TSRM/threads.m4:
+      This fix is needed for cross compilation to go through
+
+    * (PHP_5_0)
+      ZendEngine2/Zend.m4:
+      This patch is needed for cross compilation to go through
+
+2005-03-10  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_vm_execute.h:
+      - #31562 2nd part
+
+    * ZendEngine2/zend_vm_def.h:
+      - Fix #31562
+
+    * (PHP_4_3)
+      NEWS
+      NEWS
+      NEWS
+      NEWS:
+      - BFN
+
+    * ext/standard/var_unserializer.c:
+      - Wrong order of action - touch
+
+    * ext/standard/var_unserializer.re:
+      - Fix #31442 unserialize broken on 64-bit systems
+      - Fix one warning
+
 2005-03-09  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ext/standard/var_unserializer.c:
