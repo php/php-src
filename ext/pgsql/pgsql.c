@@ -117,6 +117,7 @@ function_entry pgsql_functions[] = {
 	PHP_FE(pg_field_num,	NULL)
 	PHP_FE(pg_field_size,	NULL)
 	PHP_FE(pg_field_type,	NULL)
+	PHP_FE(pg_field_type_oid, NULL)
 	PHP_FE(pg_field_prtlen,	NULL)
 	PHP_FE(pg_field_is_null,NULL)
 	/* async message function */
@@ -1251,6 +1252,7 @@ static char *get_field_name(PGconn *pgsql, Oid oid, HashTable *list TSRMLS_DC)
 #define PHP_PG_FIELD_NAME 1
 #define PHP_PG_FIELD_SIZE 2
 #define PHP_PG_FIELD_TYPE 3
+#define PHP_PG_FIELD_TYPE_OID 4
 
 /* {{{ php_pgsql_get_field_info
  */
@@ -1259,6 +1261,7 @@ static void php_pgsql_get_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_typ
 	zval **result, **field;
 	PGresult *pgsql_result;
 	pgsql_result_handle *pg_result;
+	Oid oid;
 	
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &result, &field)==FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1290,6 +1293,24 @@ static void php_pgsql_get_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_typ
 			Z_STRLEN_P(return_value) = strlen(Z_STRVAL_P(return_value));
 			Z_TYPE_P(return_value) = IS_STRING;
 			break;
+		case PHP_PG_FIELD_TYPE_OID:
+			
+			oid = PQftype(pgsql_result, Z_LVAL_PP(field));
+
+			if (oid > LONG_MAX) {
+				smart_str s = {0};
+				smart_str_append_unsigned(&s, oid);
+				smart_str_0(&s);
+				Z_STRVAL_P(return_value) = s.c;
+				Z_STRLEN_P(return_value) = s.len;
+				Z_TYPE_P(return_value) = IS_STRING;
+			}
+			else
+			{
+				Z_LVAL_P(return_value) = (long)oid;
+				Z_TYPE_P(return_value) = IS_LONG;
+			}
+			break;
 		default:
 			RETURN_FALSE;
 	}
@@ -1317,6 +1338,15 @@ PHP_FUNCTION(pg_field_size)
 PHP_FUNCTION(pg_field_type)
 {
 	php_pgsql_get_field_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP_PG_FIELD_TYPE);
+}
+/* }}} */
+
+
+/* {{{ proto string pg_field_type_oid(resource result, int field_number)
+   Returns the type oid for the given field */
+PHP_FUNCTION(pg_field_type_oid)
+{
+        php_pgsql_get_field_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP_PG_FIELD_TYPE_OID);
 }
 /* }}} */
 
