@@ -594,7 +594,7 @@ int main(int argc, char *argv[])
 					SG(headers_sent) = 1;
 					SG(request_info).no_headers = 1;
 				}
-				php_printf("PHP %s (%s), Copyright (c) 1997-2002 The PHP Group\n%s", PHP_VERSION, sapi_module.name, get_zend_version());
+				php_printf("PHP %s (%s) (built: %s %s), Copyright (c) 1997-2002 The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__, __TIME__, get_zend_version());
 				php_end_ob_buffers(1 TSRMLS_CC);
 				exit(1);
 				break;
