@@ -235,7 +235,7 @@ static sb4 oci_bind_out_callback(dvoid *, OCIBind *, ub4, ub4, dvoid **, ub4 **,
 static sb4 oci_failover_callback(dvoid *svchp,dvoid* envhp,dvoid *fo_ctx,ub4 fo_type, ub4 fo_event);
 #endif
 
-static int oci_lob_flush(oci_descriptor*, int);
+static int oci_lob_flush(oci_descriptor *, int flush_flag TSRMLS_DC);
 
 /* }}} */
 /* {{{ extension macros */
@@ -831,7 +831,7 @@ _oci_desc_flush_hash_dtor(void *data)
 {
 	oci_descriptor *descr = *((oci_descriptor **)data);
 	if (descr->buffering == 2 && (descr->type == OCI_DTYPE_LOB || descr->type == OCI_DTYPE_FILE)) {
-        oci_lob_flush(descr,OCI_LOB_BUFFER_FREE);
+        oci_lob_flush(descr,OCI_LOB_BUFFER_FREE TSRMLS_CC);
         descr->buffering = 1;
 	}
 }
@@ -1067,7 +1067,7 @@ _oci_descriptor_list_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
     /* flushing Lobs & Files with buffering enabled */
     if ((descr->type == OCI_DTYPE_FILE || descr->type == OCI_DTYPE_LOB) && descr->buffering == 2) {
     	oci_debug("descriptor #%d needs to be flushed. flushing..",descr->id);
-        oci_lob_flush(descr,OCI_LOB_BUFFER_FREE);
+        oci_lob_flush(descr,OCI_LOB_BUFFER_FREE TSRMLS_CC);
     }
     
 	CALL_OCI(OCIDescriptorFree(
@@ -3226,7 +3226,8 @@ CLEANUP:
 /* }}} */
 
 /* {{{ oci_lob_flush() */
-static int oci_lob_flush(oci_descriptor* descr, int flush_flag) {
+static int oci_lob_flush(oci_descriptor* descr, int flush_flag TSRMLS_DC)
+{
     OCILobLocator *mylob;
     oci_connection *connection;
 
@@ -4396,7 +4397,7 @@ PHP_FUNCTION(oci_lob_flush)
 			RETURN_FALSE;
 		}
         
-        if (oci_lob_flush(descr,flush_flag) == 1) {
+        if (oci_lob_flush(descr,flush_flag TSRMLS_CC) == 1) {
             RETURN_TRUE;
         }
         
