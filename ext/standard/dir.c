@@ -98,9 +98,9 @@ static zend_function_entry php_dir_class_functions[] = {
 
 static void php_set_default_dir(int id TSRMLS_DC)
 {
-    if (DIRG(default_dir)!=-1) {
-        zend_list_delete(DIRG(default_dir));
-    }
+	if (DIRG(default_dir)!=-1) {
+		zend_list_delete(DIRG(default_dir));
+	}
 
 	if (id != -1) {
 		zend_list_addref(id);
@@ -214,7 +214,8 @@ PHP_FUNCTION(chroot)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &str, &str_len) == FAILURE) {
 		RETURN_FALSE;
 	}
-    ret = chroot(str);
+	
+	ret = chroot(str);
 	
 	if (ret != 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s (errno %d)", strerror(errno), errno);
@@ -326,7 +327,7 @@ PHP_NAMED_FUNCTION(php_if_readdir)
 
 #ifdef HAVE_GLOB
 /* {{{ proto array glob(string pattern [, int flags])
-    Find pathnames matching a pattern */
+   Find pathnames matching a pattern */
 PHP_FUNCTION(glob)
 {
 	char *pattern = NULL;
