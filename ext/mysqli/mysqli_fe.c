@@ -64,6 +64,9 @@ function_entry mysqli_functions[] = {
 	PHP_FE(mysqli_disable_reads_from_master,			NULL)
 	PHP_FE(mysqli_disable_rpl_parse,					NULL)
 	PHP_FE(mysqli_dump_debug_info,						NULL)
+#ifdef HAVE_EMBEDDED_MYSQLI
+	PHP_FE(mysqli_embedded_connect,						NULL)
+#endif
 	PHP_FE(mysqli_enable_reads_from_master,				NULL)
 	PHP_FE(mysqli_enable_rpl_parse,						NULL)
 	PHP_FE(mysqli_errno,								NULL)
@@ -115,9 +118,12 @@ function_entry mysqli_functions[] = {
 	PHP_FE(mysqli_select_db,							NULL)
 	PHP_FE(mysqli_send_long_data,						NULL)
 	PHP_FE(mysqli_send_query,							NULL)
+#ifdef HAVE_EMBEDDED_MYSQLI
+	PHP_FE(mysqli_server_end,							NULL)
+	PHP_FE(mysqli_server_init,							NULL)
+#endif
 	PHP_FALIAS(mysqli_set_opt, 		mysqli_options, 	NULL)
 	PHP_FE(mysqli_slave_query,							NULL)
-
 #if MYSQL_VERSION_ID >= 40101
 	PHP_FE(mysqli_sqlstate,   							NULL)
 #endif
