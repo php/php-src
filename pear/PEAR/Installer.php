@@ -384,6 +384,7 @@ class PEAR_Installer extends PEAR_Common
             list($type, $data) = $tr;
             switch ($type) {
                 case 'rename':
+                    @unlink($data[1]);
                     @rename($data[0], $data[1]);
                     $this->log(3, "+ mv $data[0] $data[1]");
                     break;
