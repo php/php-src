@@ -391,8 +391,8 @@ static int php_ub_body_write(const char *str, uint str_length)
  */
 
 
-/* {{{ proto void ob_start(void)
-   Turn on Output Buffering */
+/* {{{ proto void ob_start([ string user_function])
+   Turn on Output Buffering (specifying an optional output handler). */
 PHP_FUNCTION(ob_start)
 {
 	zval *output_handler;
