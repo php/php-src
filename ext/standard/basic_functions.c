@@ -212,6 +212,7 @@ function_entry basic_functions[] = {
 	PHP_FE(exec, 									second_and_third_args_force_ref)
 	PHP_FE(system, 									second_arg_force_ref)
 	PHP_FE(escapeshellcmd, 							NULL)
+	PHP_FE(escapeshellarg, 							NULL)
 	PHP_FE(passthru, 								second_arg_force_ref)
 	PHP_FE(shell_exec, 								NULL)
 
