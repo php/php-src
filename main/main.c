@@ -773,6 +773,8 @@ int php_module_startup(sapi_functions_struct *sf)
 		return SUCCESS;
 	}
 
+	sapi_functions = *sf;
+
 	zend_output_startup();
 
 	zuf.error_function = php3_error;
