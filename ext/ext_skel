@@ -3,7 +3,8 @@
 extname="$1"
 EXTNAME=`echo $1|tr a-z A-Z`
 if [ ! -z $2 -a -r $2 ]; then
-    functions=`cat $2`
+    functions=$2
+    echo=$2
 fi
 
 givup() {
@@ -12,7 +13,7 @@ givup() {
 }
 
 if test "$extname" = ""; then
-	givup "usage: $0 extension-name [function-names]"
+	givup "usage: $0 extension-name [/full/path/to/function-list]"
 fi
 
 if test -d "$extname" ; then
@@ -20,6 +21,7 @@ if test -d "$extname" ; then
 fi
 
 test -f ext_skel || givup "ext_skel must be in the current directory"
+test -d skeleton || givup "subdirectory skeleton does not exist or is not directory"
 
 if echo '\c' | grep -s c >/dev/null 2>&1
 then
@@ -39,33 +41,8 @@ mkdir $extname || givup "Cannot create directory $extname"
 cd $extname
 chmod 755 .
 
-touch function_entries
-touch function_declarations
-touch function_stubs
-
-if [ $2 ] ; then
-    cat > function_stubs <<EOF
-/* Don't forget to remove the '#'-mark before protos when you have finished
-   with your function, so PHP's documentation system recognizes it. And
-   you really documented your function, didn't you?
-*/
-
-EOF
-    for f in $functions; do
-	$ECHO_E "\tPHP_FE($f,\tNULL)" >> function_entries
-	$ECHO_E "PHP_FUNCTION($f);" >> function_declarations
-	cat >> function_stubs <<EOF
-
-/* {{{ #proto $f()
-   */
-PHP_FUNCTION($f)
-{
-    php_error(E_WARNING, "$f: not yet implemented");
-}
-/* }}} */
-
-EOF
-    done
+if [ ! -z $functions ]; then
+    cat $functions | awk -f ../skeleton/create_stubs
 fi
 
 $ECHO_N "Creating basic files:$ECHO_C"
@@ -148,9 +125,11 @@ cat ../skeleton/skeleton.php | sed \
 -e "s/extname/$extname/g" \
 > $extname.php
 
-rm function_entries
-rm function_declarations
-rm function_stubs
+if [ ! -z $functions ]; then
+    rm function_entries
+    rm function_declarations
+    rm function_stubs
+fi
 
 chmod 644 *
 
