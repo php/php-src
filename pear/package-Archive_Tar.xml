@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
 <!DOCTYPE package SYSTEM "../package.dtd">
-<!-- do not use the "Type" attribute here, that one is only for
-     generated package.xml files -->
 <package version="1.0">
   <name>Archive_Tar</name>
   <summary>Tar file management class</summary>
@@ -26,14 +24,17 @@ loaded.
     </maintainer>
   </maintainers>
   <release>
-    <version>0.3</version>
+    <version>0.4</version>
     <date>2002-04-13</date>
-    <notes>Windows bugfix: used wrong directory separators</notes>
+    <notes>Windows bugfix: use forward slashes inside archives</notes>
     <state>stable</state>
     <filelist>
-     <dir name="Archive">
-      <file role="php" name="Tar.php"/>
-     </dir>
+      <dir name="/" baseinstalldir="Archive">
+	<file role="php">Tar.php</file>
+	<dir name="docs">
+	  <file role="doc">Tar.txt</file>
+	</dir>
+      </dir>
     </filelist>
   </release>
   <changelog>
@@ -42,14 +43,12 @@ loaded.
       <date>2002-02-18</date>
       <notes>From initial commit to stable</notes>
       <state>stable</state>
-      <filelist>
-	<dir name="/" baseinstalldir="Archive">
-	  <file role="php">Tar.php</file>
-	  <dir name="docs" role="doc">
-	    <file>Tar.txt</file>
-	  </dir>
-	</dir>
-      </filelist>
+    </release>
+    <release>
+      <version>0.3</version>
+      <date>2002-04-13</date>
+      <notes>Windows bugfix: used wrong directory separators</notes>
+      <state>stable</state>
     </release>
   </changelog>
 </package>
