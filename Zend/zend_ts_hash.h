@@ -19,15 +19,15 @@
 #ifndef ZEND_TS_HASH_H
 #define ZEND_TS_HASH_H
 
-#ifdef ZTS
-
 #include "zend.h"
 
 typedef struct _zend_ts_hashtable {
 	HashTable hash;
 	zend_uint reader;
+#ifdef ZTS
 	MUTEX_T mx_reader;
 	MUTEX_T mx_writer;
+#endif
 } TsHashTable;
 
 BEGIN_EXTERN_C()
@@ -114,8 +114,5 @@ END_EXTERN_C()
 
 #define ZEND_TS_INIT_SYMTABLE_EX(ht, n, persistent)			\
 	zend_ts_hash_init(ht, n, NULL, ZVAL_PTR_DTOR, persistent)
-
-
-#endif /* ZTS */
 
 #endif							/* ZEND_HASH_H */

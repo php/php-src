@@ -16,60 +16,73 @@
    +----------------------------------------------------------------------+
 */
 
-#ifdef ZTS
 
 #include "zend_ts_hash.h"
 
 /* ts management functions */
 static void begin_read(TsHashTable *ht)
 {
+#ifdef ZTS
 	tsrm_mutex_lock(ht->mx_reader);
 	if ((++(ht->reader)) == 1) {
 		tsrm_mutex_lock(ht->mx_writer);
 	}
 	tsrm_mutex_unlock(ht->mx_reader);
+#endif
 }
 
 static void end_read(TsHashTable *ht)
 {
+#ifdef ZTS
 	tsrm_mutex_lock(ht->mx_reader);
 	if ((--(ht->reader)) == 0) {
 		tsrm_mutex_unlock(ht->mx_writer);
 	}
 	tsrm_mutex_unlock(ht->mx_reader);
+#endif
 }
 
 static void begin_write(TsHashTable *ht)
 {
+#ifdef ZTS
 	tsrm_mutex_lock(ht->mx_writer);
+#endif
 }
 
 static void end_write(TsHashTable *ht)
 {
+#ifdef ZTS
 	tsrm_mutex_unlock(ht->mx_writer);
+#endif
 }
 
 /* delegates */
 ZEND_API int zend_ts_hash_init(TsHashTable *ht, uint nSize, hash_func_t pHashFunction, dtor_func_t pDestructor, zend_bool persistent)
 {
+#ifdef ZTS
 	ht->mx_reader = tsrm_mutex_alloc();
 	ht->mx_writer = tsrm_mutex_alloc();
 	ht->reader = 0;
+#endif
 	return zend_hash_init(TS_HASH(ht), nSize, pHashFunction, pDestructor, persistent);
 }
 
 ZEND_API int zend_ts_hash_init_ex(TsHashTable *ht, uint nSize, hash_func_t pHashFunction, dtor_func_t pDestructor, zend_bool persistent, zend_bool bApplyProtection)
 {
+#ifdef ZTS
 	ht->mx_reader = tsrm_mutex_alloc();
 	ht->mx_writer = tsrm_mutex_alloc();
 	ht->reader = 0;
+#endif
 	return zend_hash_init_ex(TS_HASH(ht), nSize, pHashFunction, pDestructor, persistent, bApplyProtection);
 }
 
 ZEND_API void zend_ts_hash_destroy(TsHashTable *ht)
 {
+#ifdef ZTS
 	tsrm_mutex_free(ht->mx_reader);
 	tsrm_mutex_free(ht->mx_writer);
+#endif
 	zend_hash_destroy(TS_HASH(ht));
 }
 
@@ -125,8 +138,10 @@ ZEND_API int zend_ts_hash_add_empty_element(TsHashTable *ht, char *arKey, uint n
 
 ZEND_API void zend_ts_hash_graceful_destroy(TsHashTable *ht)
 {
+#ifdef ZTS
 	tsrm_mutex_free(ht->mx_reader);
 	tsrm_mutex_free(ht->mx_reader);
+#endif
 	zend_hash_graceful_destroy(TS_HASH(ht));
 }
 
@@ -338,5 +353,3 @@ void zend_ts_hash_display(TsHashTable *ht)
 	end_read(ht);
 }
 #endif
-
-#endif /* ZTS */
