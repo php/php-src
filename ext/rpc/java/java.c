@@ -287,7 +287,7 @@ static jobject _java_makeObject(pval* arg JG_DC) {
   switch (arg->type) {
     case IS_STRING:
       result=(*jenv)->NewByteArray(jenv,arg->value.str.len);
-      (*jenv)->SetByteArrayRegion(jenv,(jbyteArray)arg,0,
+      (*jenv)->SetByteArrayRegion(jenv,(jbyteArray)result,0,
         arg->value.str.len, arg->value.str.val);
       break;
 
