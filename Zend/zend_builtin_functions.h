@@ -23,6 +23,7 @@
 #define ZEND_BUILTIN_FUNCTIONS_H
 
 int zend_startup_builtin_functions(TSRMLS_D);
+ZEND_API void zend_fetch_debug_backtrace(zval *return_value TSRMLS_DC);
 
 #endif /* ZEND_BUILTIN_FUNCTIONS_H */
 
