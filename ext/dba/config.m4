@@ -140,6 +140,7 @@ AC_DEFUN(PHP_DBA_DB_CHECK,[
         AC_CHECK_LIB($LIB, $3, [
           AC_EGREP_CPP(yes,[
 #include "$THIS_INCLUDE"
+#if DB_VERSION_MAJOR == $1
             yes
 #endif
           ],[
@@ -150,6 +151,10 @@ AC_DEFUN(PHP_DBA_DB_CHECK,[
       ])
     fi
   done
+  if test -z "$THIS_LIBS"; then
+	AC_MSG_CHECKING(for db$1 major version)
+    AC_MSG_ERROR(Header contains different version)
+  fi
   if test "$1" = "4"; then
     AC_MSG_CHECKING(for db4 minor version and patch level)
     AC_EGREP_CPP(yes,[
