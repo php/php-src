@@ -686,7 +686,7 @@ void php_request_shutdown(void *dummy)
 	} zend_end_try();
 
 	zend_try {
-		sapi_send_headers();
+		sapi_send_headers(TSRMLS_C);
 	} zend_end_try();
 
 	if (PG(modules_activated)) zend_try {
@@ -860,7 +860,7 @@ int php_module_startup(sapi_module_struct *sf)
 	/* initialize fopen wrappers registry 
 	   (this uses configuration parameters from php.ini)
 	 */
-	if (php_init_fopen_wrappers() == FAILURE) {
+	if (php_init_fopen_wrappers(TSRMLS_C) == FAILURE) {
 		php_printf("PHP:  Unable to initialize fopen url wrappers.\n");
 		return FAILURE;
 	}
@@ -959,10 +959,10 @@ void php_module_shutdown()
 #endif
 
 	php_shutdown_ticks(TSRMLS_C);
-	sapi_flush();
+	sapi_flush(TSRMLS_C);
 
 	zend_shutdown(TSRMLS_C);
-	php_shutdown_fopen_wrappers();
+	php_shutdown_fopen_wrappers(TSRMLS_C);
 	php_shutdown_info_logos();
 	UNREGISTER_INI_ENTRIES();
 #ifndef ZTS
@@ -1177,7 +1177,7 @@ PHPAPI int php_handle_special_queries(TSRMLS_D)
 {
 	if (SG(request_info).query_string && SG(request_info).query_string[0]=='=' 
 			&& PG(expose_php)) {
-		if (php_info_logos(SG(request_info).query_string+1)) {	
+		if (php_info_logos(SG(request_info).query_string+1 TSRMLS_CC)) {
 			return 1;
 		} else if (!strcmp(SG(request_info).query_string+1, PHP_CREDITS_GUID)) {
 			php_print_credits(PHP_CREDITS_ALL);

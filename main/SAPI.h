@@ -130,10 +130,10 @@ SAPI_API void sapi_activate(TSRMLS_D);
 SAPI_API void sapi_deactivate(TSRMLS_D);
 SAPI_API void sapi_initialize_empty_request(TSRMLS_D);
 
-SAPI_API int sapi_add_header_ex(char *header_line, uint header_line_len, zend_bool duplicate, zend_bool replace);
+SAPI_API int sapi_add_header_ex(char *header_line, uint header_line_len, zend_bool duplicate, zend_bool replace TSRMLS_DC);
 #define sapi_add_header(header_line, header_line_len, duplicate) \
-	sapi_add_header_ex((header_line), (header_line_len), (duplicate), 1)
-SAPI_API int sapi_send_headers(void);
+	sapi_add_header_ex((header_line), (header_line_len), (duplicate), 1 TSRMLS_CC)
+SAPI_API int sapi_send_headers(TSRMLS_D);
 SAPI_API void sapi_free_header(sapi_header_struct *sapi_header);
 SAPI_API void sapi_handle_post(void *arg TSRMLS_DC);
 
@@ -142,9 +142,9 @@ SAPI_API int sapi_register_post_entry(sapi_post_entry *post_entry);
 SAPI_API void sapi_unregister_post_entry(sapi_post_entry *post_entry);
 SAPI_API int sapi_register_default_post_reader(void (*default_post_reader)(TSRMLS_D));
 
-SAPI_API int sapi_flush(void);
-SAPI_API struct stat *sapi_get_stat(void);
-SAPI_API char *sapi_getenv(char *name, size_t name_len);
+SAPI_API int sapi_flush(TSRMLS_D);
+SAPI_API struct stat *sapi_get_stat(TSRMLS_D);
+SAPI_API char *sapi_getenv(char *name, size_t name_len TSRMLS_DC);
 
 SAPI_API char *sapi_get_default_content_type(TSRMLS_D);
 SAPI_API void sapi_get_default_content_type_header(sapi_header_struct *default_header TSRMLS_DC);

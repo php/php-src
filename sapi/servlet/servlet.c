@@ -318,8 +318,6 @@ JNIEXPORT void JNICALL Java_net_php_servlet_send
 	char cwd[MAXPATHLEN];
 #endif
 	TSRMLS_FETCH();
-	TSRMLS_FETCH();
-	TSRMLS_FETCH();
 
 	zend_try {
 		SG(server_context) = emalloc(sizeof(servlet_request));
@@ -379,7 +377,7 @@ JNIEXPORT void JNICALL Java_net_php_servlet_send
 
 			if (open_file_for_scanning(&file_handle TSRMLS_CC)==SUCCESS) {
 				php_get_highlight_struct(&syntax_highlighter_ini);
-				sapi_send_headers();
+				sapi_send_headers(TSRMLS_C);
 				zend_highlight(&syntax_highlighter_ini TSRMLS_CC);
 			}
 		} else {

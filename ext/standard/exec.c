@@ -175,7 +175,7 @@ int php_Exec(int type, char *cmd, pval *array, pval *return_value TSRMLS_DC)
 		
 			if (type == 1) {
 				if (output) PUTS(buf);
-				sapi_flush();
+				sapi_flush(TSRMLS_C);
 			}
 			else if (type == 2) {
 				/* strip trailing whitespaces */	

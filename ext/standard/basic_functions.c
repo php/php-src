@@ -779,13 +779,13 @@ PHP_MINIT_FUNCTION(basic)
 #endif
 
 	if(PG(allow_url_fopen)) {
-		if (FAILURE==php_register_url_wrapper("http", php_fopen_url_wrap_http)) {
+		if (FAILURE==php_register_url_wrapper("http", php_fopen_url_wrap_http TSRMLS_CC)) {
 			return FAILURE;
 		}
-		if (FAILURE==php_register_url_wrapper("ftp", php_fopen_url_wrap_ftp)) {
+		if (FAILURE==php_register_url_wrapper("ftp", php_fopen_url_wrap_ftp TSRMLS_CC)) {
 			return FAILURE;
 		}
-		if (FAILURE==php_register_url_wrapper("php", php_fopen_url_wrap_php)) {
+		if (FAILURE==php_register_url_wrapper("php", php_fopen_url_wrap_php TSRMLS_CC)) {
 			return FAILURE;
 		}
 	}
@@ -803,9 +803,9 @@ PHP_MSHUTDOWN_FUNCTION(basic)
 #endif
 
 	if(PG(allow_url_fopen)) {
-		php_unregister_url_wrapper("http");
-		php_unregister_url_wrapper("ftp");
-		php_unregister_url_wrapper("php");
+		php_unregister_url_wrapper("http" TSRMLS_CC);
+		php_unregister_url_wrapper("ftp" TSRMLS_CC);
+		php_unregister_url_wrapper("php" TSRMLS_CC);
 	}
 
 	UNREGISTER_INI_ENTRIES();
@@ -998,7 +998,7 @@ PHP_FUNCTION(getenv)
 	}
 
 
-	ptr = sapi_getenv(Z_STRVAL_PP(str), Z_STRLEN_PP(str));
+	ptr = sapi_getenv(Z_STRVAL_PP(str), Z_STRLEN_PP(str) TSRMLS_CC);
 	if (!ptr) {
 		ptr = getenv(Z_STRVAL_PP(str));
 	}
@@ -1161,7 +1161,7 @@ PHP_FUNCTION(strval)
    Flush the output buffer */
 PHP_FUNCTION(flush)
 {
-	sapi_flush();
+	sapi_flush(TSRMLS_C);
 }
 /* }}} */
 

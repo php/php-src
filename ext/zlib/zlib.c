@@ -165,7 +165,7 @@ PHP_MINIT_FUNCTION(zlib)
 #if HAVE_FOPENCOOKIE
 
 	if(PG(allow_url_fopen)) {
-		php_register_url_wrapper("zlib",zlib_fopen_wrapper);
+		php_register_url_wrapper("zlib",zlib_fopen_wrapper TSRMLS_CC);
 	}
 #endif
 
@@ -202,7 +202,7 @@ PHP_MSHUTDOWN_FUNCTION(zlib)
 {
 #if HAVE_FOPENCOOKIE
 	if(PG(allow_url_fopen)) {
-	    php_unregister_url_wrapper("zlib"); 
+	    php_unregister_url_wrapper("zlib" TSRMLS_CC); 
     }
 #endif
 	

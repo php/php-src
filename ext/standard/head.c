@@ -53,7 +53,7 @@ PHP_FUNCTION(header)
 		case 1:
 			convert_to_string_ex(arg1);
 	}
-	sapi_add_header_ex(Z_STRVAL_PP(arg1), Z_STRLEN_PP(arg1), 1, replace);
+	sapi_add_header_ex(Z_STRVAL_PP(arg1), Z_STRLEN_PP(arg1), 1, replace TSRMLS_CC);
 }
 /* }}} */
 
@@ -61,7 +61,7 @@ PHPAPI int php_header()
 {
 	TSRMLS_FETCH();
 
-	if (sapi_send_headers()==FAILURE || SG(request_info).headers_only) {
+	if (sapi_send_headers(TSRMLS_C)==FAILURE || SG(request_info).headers_only) {
 		return 0; /* don't allow output */
 	} else {
 		return 1; /* allow output */

@@ -366,12 +366,11 @@ static int sapi_extract_response_code(const char *header_line)
 /* This function expects a *duplicated* string, that was previously emalloc()'d.
  * Pointers sent to this functions will be automatically freed by the framework.
  */
-SAPI_API int sapi_add_header_ex(char *header_line, uint header_line_len, zend_bool duplicate, zend_bool replace)
+SAPI_API int sapi_add_header_ex(char *header_line, uint header_line_len, zend_bool duplicate, zend_bool replace TSRMLS_DC)
 {
 	int retval, free_header = 0;
 	sapi_header_struct sapi_header;
 	char *colon_offset;
-	TSRMLS_FETCH();
 
 	if (SG(headers_sent) && !SG(request_info).no_headers) {
 		char *output_start_filename = php_get_output_start_filename();
@@ -465,11 +464,10 @@ SAPI_API int sapi_add_header_ex(char *header_line, uint header_line_len, zend_bo
 }
 
 
-SAPI_API int sapi_send_headers()
+SAPI_API int sapi_send_headers(TSRMLS_D)
 {
 	int retval;
 	int ret = FAILURE;
-	TSRMLS_FETCH();
 
 	if (SG(headers_sent) || SG(request_info).no_headers) {
 		return SUCCESS;
@@ -555,11 +553,9 @@ SAPI_API int sapi_register_default_post_reader(void (*default_post_reader)(TSRML
 }
 
 
-SAPI_API int sapi_flush()
+SAPI_API int sapi_flush(TSRMLS_D)
 {
 	if (sapi_module.flush) {
-		TSRMLS_FETCH();
-
 		sapi_module.flush(SG(server_context));
 		return SUCCESS;
 	} else {
@@ -567,10 +563,8 @@ SAPI_API int sapi_flush()
 	}
 }
 
-SAPI_API struct stat *sapi_get_stat()
+SAPI_API struct stat *sapi_get_stat(TSRMLS_D)
 {
-	TSRMLS_FETCH();
-
 	if (sapi_module.get_stat) {
 		return sapi_module.get_stat(TSRMLS_C);
 	} else {
@@ -582,11 +576,9 @@ SAPI_API struct stat *sapi_get_stat()
 }
 
 
-SAPI_API char *sapi_getenv(char *name, size_t name_len)
+SAPI_API char *sapi_getenv(char *name, size_t name_len TSRMLS_DC)
 {
 	if (sapi_module.getenv) {
-		TSRMLS_FETCH();
-
 		return sapi_module.getenv(name, name_len TSRMLS_CC);
 	} else {
 		return NULL;
