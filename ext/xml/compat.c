@@ -629,7 +629,8 @@ XML_GetCurrentColumnNumber(XML_Parser parser)
 int
 XML_GetCurrentByteIndex(XML_Parser parser)
 {
-	return parser->parser->input->consumed;
+	return parser->parser->input->consumed +
+			(parser->parser->input->cur - parser->parser->input->base);
 }
 
 const XML_Char *XML_ExpatVersion(void)
