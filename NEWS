@@ -1,6 +1,9 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.0.7-dev
+- Fixed a bug in dbase_get_record() and dbase_get_record_with_names().
+  boolean fields are now returned correctly.
+  Patch by Lawrence E. Widman <widman@cardiothink.com> (Jani)
 - Added --version option to php-config (Stig)
 - Improved support for thttpd-2.21b by incorporating patches for all known
   bugs (Sascha)
