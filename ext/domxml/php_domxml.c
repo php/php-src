@@ -540,7 +540,7 @@ zend_module_entry domxml_module_entry = {
 	PHP_MINIT(domxml),
 	PHP_MSHUTDOWN(domxml),
 	NULL,
-	NULL(domxml),
+	NULL,
 	PHP_MINFO(domxml),
 	DOMXML_API_VERSION, /* Extension versionnumber */
 	STANDARD_MODULE_PROPERTIES
