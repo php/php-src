@@ -9,6 +9,7 @@ if (PHP_XML == "yes" && PHP_LIBXML == "yes") {
 	if (!PHP_XML_SHARED) {
 		ADD_FLAG("CFLAGS_XML", "/D LIBXML_STATIC ");
 	}
+	ADD_EXTENSION_DEP('xml', 'libxml');
 }
 
 

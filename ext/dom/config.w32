@@ -16,6 +16,7 @@ if (PHP_DOM == "yes" && PHP_LIBXML == "yes") {
 	if (!PHP_DOM_SHARED) {
 		ADD_FLAG("CFLAGS_DOM", "/D LIBXML_STATIC ");
 	}
+	ADD_EXTENSION_DEP('dom', 'libxml');
 }
 
 

@@ -25,6 +25,7 @@ if (PHP_XSL != "no") {
 					ADD_FLAG("LDFLAGS_XSL", "/nodefaultlib:msvcrt");
 				}
 			}
+			ADD_EXTENSION_DEP('xsl', 'libxml');
 		} else {
 			WARNING("xsl not enabled; libraries and headers not found");
 		}

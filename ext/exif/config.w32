@@ -6,4 +6,5 @@ ARG_WITH("exif", "exif", "no");
 if (PHP_EXIF == "yes") {
 	EXTENSION("exif", "exif.c");
 	AC_DEFINE('HAVE_EXIF', 1, 'Have exif');
+	ADD_EXTENSION_DEP('exif', 'mbstring');
 }
