@@ -8,13 +8,14 @@ dnl   $Id$
 PHP_ARG_ENABLE(xslt, whether to enable xslt support,
 [  --enable-xslt           Enable xslt support])
 
-PHP_ARG_WITH(xslt-sablot, whether to enable the sablotron backend,
-[  --with-xslt-sablot      Enable the sablotron backend])
-
-PHP_ARG_WITH(expat-dir, for Sablotron XSL support,
-[  --with-expat-dir=DIR    Sablotron: libexpat dir for Sablotron 0.50])
-
 if test "$PHP_XSLT" != "no"; then
+
+	PHP_ARG_WITH(xslt-sablot, whether to enable the sablotron backend,
+	[  --with-xslt-sablot      Enable the sablotron backend])
+
+	PHP_ARG_WITH(expat-dir, libexpat dir for Sablotron XSL support,
+	[  --with-expat-dir=DIR    Sablotron: libexpat dir for Sablotron 0.50])
+
 	if test "$PHP_XSLT_SABLOT" != "no"; then
 		XSLT_CHECK_DIR=$PHP_XSLT_SABLOT
 		XSLT_TEST_FILE=/include/sablot.h
