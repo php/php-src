@@ -4639,7 +4639,7 @@ PHP_FUNCTION(ocicollgetelem)
 			RETURN_FALSE;
 		}
 		
-		// Return false if value does not exist at that location
+		/* Return false if value does not exist at that location */
 		if(exists == 0) {
 			RETURN_FALSE;
 		}
