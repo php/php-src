@@ -698,9 +698,11 @@ void node_free_resource(xmlNodePtr node TSRMLS_DC)
 {
 	xmlDtdPtr extSubset, intSubset;
 	xmlDocPtr docp;
+
 	if (!node) {
 		return;
 	}
+
 	switch (node->type) {
 		case XML_DOCUMENT_NODE:
 		case XML_HTML_DOCUMENT_NODE:

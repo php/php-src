@@ -982,6 +982,10 @@ PHP_FUNCTION(dom_node_append_child)
 		return;
 	}
 
+	if (!PZVAL_IS_REF(node)) {
+		zval_add_ref(&node);
+	}
+	
 	DOM_GET_OBJ(child, node, xmlNodePtr);
 
 	if (dom_hierarchy(nodep, child) == FAILURE) {
