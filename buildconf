@@ -149,5 +149,7 @@ else
     echo "buildconf: created or modified configure"
 fi
 
-(cd libzend; ./buildconf libzend/)
-(cd TSRM; ./buildconf TSRM/)
+if test "$supplied_flag" != "--local"; then
+  (cd libzend; ./buildconf libzend/)
+  (cd TSRM; ./buildconf TSRM/)
+fi

@@ -741,6 +741,9 @@ AC_SUBST(PHP_LIBS)
 AC_SUBST(PHP_SAPI)
 AC_SUBST(SAPI_TARGET)
 
+test -d sapi || mkdir sapi
+test -d ext || mkdir ext
+
 #libphp4.module 
 AC_OUTPUT([Makefile php4.spec $PHP_OUTPUT_FILES
            scripts/mkextlib regex/Makefile build-defs.h], [], [
