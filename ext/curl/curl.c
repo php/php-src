@@ -146,6 +146,7 @@ PHP_MINIT_FUNCTION(curl)
 	REGISTER_LONG_CONSTANT("CURLOPT_PROXY", CURLOPT_PROXY, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CURLOPT_VERBOSE", CURLOPT_VERBOSE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CURLOPT_HEADER", CURLOPT_HEADER, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("CURLOPT_HTTPHEADER", CURLOPT_HEADER, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CURLOPT_NOPROGRESS", CURLOPT_NOPROGRESS, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CURLOPT_NOBODY", CURLOPT_NOBODY, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CURLOPT_FAILONERROR", CURLOPT_FAILONERROR, CONST_CS | CONST_PERSISTENT);
@@ -300,7 +301,7 @@ PHP_FUNCTION(curl_init)
 	}
 	memset(curl_handle, 0, sizeof(php_curl));
 
-	zend_llist_init(&curl_handle->to_free,sizeof(char *),curl_free_string,0);
+	zend_llist_init(&curl_handle->to_free, sizeof(char *), curl_free_string, 0);
 
 	curl_handle->cp = curl_easy_init();
 	if (!curl_handle->cp) {
@@ -576,7 +577,8 @@ PHP_FUNCTION(curl_exec)
 	CURLcode ret;
 	FILE *fp;
 	char buf[4096];
-	int b;
+	int b,
+	    is_temp_file;
 	unsigned long pos = 0;
 	
 	if (ZEND_NUM_ARGS() != 1 ||
@@ -595,6 +597,8 @@ PHP_FUNCTION(curl_exec)
 		}
 		
 		curl_easy_setopt(curl_handle->cp, CURLOPT_FILE, fp);
+		
+		is_temp_file = 1;
 	
 	} else if (curl_handle->return_transfer &&
 	           curl_handle->output_file) {
@@ -614,6 +618,9 @@ PHP_FUNCTION(curl_exec)
 		} else {
 			RETURN_TRUE;
 		}
+		
+		if (fp && is_temp_file) 
+			fclose(fp);
 
 	}
 	
@@ -624,6 +631,9 @@ PHP_FUNCTION(curl_exec)
 		while ((b = fread(buf, 1, sizeof(buf), fp)) > 0) {
 			php_write(buf, b);
 		}
+		
+		if (is_temp_file)
+			fclose(fp);
 		
 	} else {
 		
@@ -641,6 +651,9 @@ PHP_FUNCTION(curl_exec)
 			pos += b;
 		}
 		ret_data[stat_sb.st_size - 1] = '\0';
+		
+		if (is_temp_file)
+			fclose(fp);
 		
 		RETURN_STRINGL(ret_data, stat_sb.st_size, 0);
 	
