@@ -1510,7 +1510,7 @@ PHP_FUNCTION(iconv_substr)
 }
 /* }}} */
 
-/* {{{ proto string iconv_strpos(string haystack, string needle, int offset [, string charset])
+/* {{{ proto int iconv_strpos(string haystack, string needle, int offset [, string charset])
    Finds position of first occurrence of needle within part of haystack beginning with offset */
 PHP_FUNCTION(iconv_strpos)
 {
@@ -1552,7 +1552,7 @@ PHP_FUNCTION(iconv_strpos)
 }
 /* }}} */
 
-/* {{{ proto string iconv_strrpos(string haystack, string needle [, string charset])
+/* {{{ proto int iconv_strrpos(string haystack, string needle [, string charset])
    Finds position of last occurrence of needle within part of haystack beginning with offset */
 PHP_FUNCTION(iconv_strrpos)
 {
