@@ -442,7 +442,7 @@ Changes in the Zend Engine 2.0
       Old code that has no user-defined functions 'catch', 'throw' and
       'try' will run without modifications.
 
-    * Derefencing objects returned from functions.
+    * Dereferencing objects returned from functions.
 
       Example:
 
