@@ -2363,7 +2363,6 @@ PHP_FUNCTION(pg_copy_from)
 PHP_FUNCTION(pg_escape_string)
 {
 	char *from = NULL, *to = NULL;
-	long type = PGSQL_ESCAPE_STRING;
 	int len;
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s",
 							  &from, &len) == FAILURE) {
@@ -2383,7 +2382,6 @@ PHP_FUNCTION(pg_escape_string)
 PHP_FUNCTION(pg_escape_bytea)
 {
 	char *from = NULL, *to = NULL;
-	long type = PGSQL_ESCAPE_STRING;
 	int len;
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s",
 							  &from, &len) == FAILURE) {
