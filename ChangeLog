@@ -1,3 +1,55 @@
+2000-10-15  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/ldap/config.m4:
+    Changed to look also for liblber.so (sometimes there are only shared libs)
+    Fixes bug 6072.
+
+2000-10-15  David Eriksson  <david@2good.com>
+
+    * EXTENSIONS: Added Satellite to list of extensions
+
+    * ext/satellite/README
+      ext/satellite/class.c
+      ext/satellite/class.h
+      ext/satellite/enum.c
+      ext/satellite/object.c
+      ext/satellite/struct.c:
+    Updated build instructions, changed E_ERRORs to E_WARNINGs
+
+2000-10-15  Jan Lehnardt  <jan@lehnardt.de>
+
+    * pear/PHPDoc/renderer/PhpdocRendererObject.php
+      pear/PHPDoc/renderer/html/PhpdocHTMLClassRenderer.php
+      pear/PHPDoc/renderer/html/PhpdocHTMLDocumentRenderer.php
+      pear/PHPDoc/renderer/html/PhpdocHTMLIndexRenderer.php
+      pear/PHPDoc/renderer/html/PhpdocHTMLModuleRenderer.php
+      pear/PHPDoc/renderer/html/PhpdocHTMLRenderer.php
+      pear/PHPDoc/renderer/html/PhpdocHTMLRendererManager.php
+      pear/PHPDoc/renderer/html/PhpdocHTMLWarningRenderer.php
+      pear/PHPDoc/core/Phpdoc.php
+      pear/PHPDoc/core/PhpdocSetupHandler.php:
+    Again a commit for thomas weinert. now you can change the file extention of the genarated files to your needs. $doc->setTargetFileSuffix(".php"); to have .php e.g.
+
+2000-10-15  Stig Bakken  <ssb@fast.no>
+
+    * pear/DB.php
+      pear/DB/mysql.php
+      pear/PEAR.php.in: PEAR DB: added DB_ERROR_VALUE_COUNT_ON_ROW
+
+    * pear/DB/common.php
+      pear/DB/mysql.php
+      pear/DB.php:
+    PEAR DB: added DB_ERROR_NOT_LOCKED, gave DB_common::raiseError an optional
+    "nativecode" parameter.
+
+    * pear/HTML/Form.php:
+    PEAR HTML_Form: select boxes now handles both scalars, arrays and
+    assoc. arrays in default value
+
+2000-10-15  Jani Taskinen  <sniper@iki.fi>
+
+    * acinclude.m4: Fix the fix as Sascha suggested.
+
 2000-10-14  Marko Karppinen  <karppinen@pobox.com>
 
     * ext/gd/config.m4
