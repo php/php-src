@@ -1,3 +1,19 @@
+2001-11-28  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/DB/common.php:
+    query() now accepts statement/params that acts like prepare-execute,
+    use this instead of executeQuery()
+
+2001-11-28  Ulf Wendel  <ulf.wendel@phpdoc.de>
+
+    * pear/Cache/Output.php:
+    Added a forgotten asterix within a multi-line comment
+
+2001-11-28  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/domxml/php_domxml.c:
+    - introduced several macros to simply code (done by Markus Fischer)
+
 2001-11-27  Sascha Schumann  <sascha@schumann.cx>
 
     * ext/ircg/ircg.c
