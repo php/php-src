@@ -860,7 +860,7 @@ char *url_adapt_ext(const char *src, size_t srclen, const char *name, const char
 	return ctx->result.c;
 }
 
-PHP_RINIT_FUNCTION(url_scanner)
+int php_url_scanner_ex_activate(TSRMLS_D)
 {
 	url_adapt_state_ex_t *ctx;
 	
@@ -871,7 +871,7 @@ PHP_RINIT_FUNCTION(url_scanner)
 	return SUCCESS;
 }
 
-PHP_RSHUTDOWN_FUNCTION(url_scanner)
+int php_url_scanner_ex_deactivate(TSRMLS_D)
 {
 	url_adapt_state_ex_t *ctx;
 	

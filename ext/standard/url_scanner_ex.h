@@ -21,8 +21,8 @@
 
 PHP_MINIT_FUNCTION(url_scanner_ex);
 PHP_MSHUTDOWN_FUNCTION(url_scanner_ex);
-PHP_RSHUTDOWN_FUNCTION(url_scanner_ex);
-PHP_RINIT_FUNCTION(url_scanner_ex);
+int php_url_scanner_ex_activate(TSRMLS_D);
+int php_url_scanner_ex_deactivate(TSRMLS_D);
 
 char *url_adapt_ext_ex(const char *src, size_t srclen, const char *name, const char *value, size_t *newlen, zend_bool do_flush TSRMLS_DC);
 

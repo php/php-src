@@ -20,8 +20,8 @@
 #ifndef URI_SCANNER_H
 #define URI_SCANNER_H
 
-PHP_RINIT_FUNCTION(url_scanner);
-PHP_RSHUTDOWN_FUNCTION(url_scanner);
+int php_url_scanner_activate(TSRMLS_D);
+int php_url_scanner_deactivate(TSRMLS_D);
 
 char *url_adapt(const char *src, size_t srclen, const char *data, size_t *newlen);
 
