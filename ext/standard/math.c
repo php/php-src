@@ -32,7 +32,13 @@
 #define M_PI 3.14159265358979323846
 #endif
 
-#define PHP_ROUND_FUZZ 0.50000000001
+#ifndef PHP_ROUND_FUZZ
+# ifndef PHP_WIN32
+#  define PHP_ROUND_FUZZ 0.50000000001
+# else
+#  define PHP_ROUND_FUZZ 0.5
+# endif
+#endif
 
 /* {{{ proto int abs(int number)
    Return the absolute value of the number */
