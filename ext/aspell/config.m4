@@ -19,6 +19,7 @@ AC_ARG_WITH(aspell,
     fi
     AC_DEFINE(HAVE_ASPELL)
     AC_MSG_RESULT(yes)
+	PHP_EXTENSION(aspell)
   else
     AC_MSG_ERROR(no)
   fi
