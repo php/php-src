@@ -22,6 +22,7 @@
 
 require_once 'PEAR.php';
 require_once 'Archive/Tar.php';
+require_once 'Experimental/System.php';
 
 /**
 * TODO:
@@ -78,7 +79,7 @@ class PEAR_Common extends PEAR
                $file = array_shift($this->_tempfiles))
         {
             if (@is_dir($file)) {
-                system("rm -rf $file"); // XXX FIXME Windows
+                System::rm("-rf $file"); // XXX FIXME Windows
             } elseif (file_exists($file)) {
                 unlink($file);
             }
