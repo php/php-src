@@ -25,6 +25,7 @@
 #include <stdio.h>
 #include <swf.h>
 #include "ext/standard/info.h"
+#include "ext/standard/file.h"
 #include "php_swf.h"
 
 #ifdef ZTS
