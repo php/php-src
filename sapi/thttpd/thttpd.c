@@ -241,6 +241,23 @@ static void thttpd_request_ctor(TLS_D SLS_DC)
 	SG(request_info).auth_user = NULL;
 	SG(request_info).auth_password = NULL;
 
+	if (TG(hc)->authorization[0] != '\0' 
+			&& strncmp(TG(hc)->authorization, "Basic ", 6) == 0) {
+		char *pass;
+		char *user;
+
+		user = php_base64_decode(TG(hc)->authorization + 6, strlen(TG(hc)->authorization) - 6, NULL);
+		if (user) {
+			pass = strchr(user, ':');
+			if (pass) {
+				*pass++ = '\0';
+				SG(request_info).auth_user = user;
+				SG(request_info).auth_password = estrdup(pass);
+			} else
+				efree(user);
+		}
+	}
+
 	TG(post_off) = TG(hc)->read_idx - TG(hc)->checked_idx;
 
 	/* avoid feeding \r\n from POST data to SAPI */
@@ -283,6 +300,8 @@ void thttpd_php_init(void)
 
 void thttpd_php_shutdown(void)
 {
-	sapi_module.shutdown(&sapi_module);
-	sapi_shutdown();
+	if (SG(server_context) != NULL) {
+		sapi_module.shutdown(&sapi_module);
+		sapi_shutdown();
+	}
 }
