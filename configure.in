@@ -159,8 +159,12 @@ case $host_alias in
     CPPFLAGS="$CPPFLAGS -D_XPG_IV";;
 *hpux*)
     if test "$GCC" = "yes"; then
-      CPPFLAGS="$CPPFLAGS -D_XOPEN_SOURCE_EXTENDED"  
-    fi  
+      CPPFLAGS="$CPPFLAGS -D_XOPEN_SOURCE_EXTENDED"
+    fi
+    ;;
+*netware*)
+    PHP_BUILD_PROGRAM
+    PHP_ADD_SOURCES(win32, sendmail.c, -I$CFLAGS,php)
     ;;
 esac
 
@@ -428,13 +432,14 @@ if test "$ac_cv_sockaddr_storage" = yes; then
 fi
 
 dnl Check if sockaddr data structure includes an "sa_len" member
-
 AC_TRY_COMPILE([
 #include <sys/types.h>
 #include <sys/socket.h>
-], [static struct sockaddr sa; int n = (int) sa.sa_len; return n],
-[AC_DEFINE(HAVE_SOCKADDR_LEN,1,[Whether sockaddr struct has sa_len])],
-[])
+], [
+  static struct sockaddr sa; int n = (int) sa.sa_len; return n
+], [
+  AC_DEFINE(HAVE_SOCKADDR_LEN,1,[Whether sockaddr struct has sa_len])
+], [])
 
 dnl Check for IPv6 support
 AC_CACHE_CHECK([for IPv6 support], ac_cv_ipv6_support,
@@ -565,7 +570,7 @@ int main(void) {
   freeaddrinfo(ai);
   exit(0);
 }
-  ],ac_cv_func_getaddrinfo=yes, ac_cv_func_getaddrinfo=no),
+  ],ac_cv_func_getaddrinfo=yes, ac_cv_func_getaddrinfo=no, ac_cv_func_getaddrinfo=no),
 ac_cv_func_getaddrinfo=no)])
 if test "$ac_cv_func_getaddrinfo" = yes; then
   AC_DEFINE(HAVE_GETADDRINFO,1,[Define if you have the getaddrinfo function])
