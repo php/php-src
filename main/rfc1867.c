@@ -12,7 +12,7 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Rasmus Lerdorf <rasmus@lerdorf.on.ca>                       |
+   | Authors: Rasmus Lerdorf <rasmus@php.net>                             |
    +----------------------------------------------------------------------+
  */
 /* $Id$ */
@@ -28,7 +28,7 @@
 
 
 #define NEW_BOUNDARY_CHECK 1
-#define SAFE_RETURN { if (namebuf) efree(namebuf); if (filenamebuf) efree(filenamebuf); if (lbuf) efree(lbuf); return; }
+#define SAFE_RETURN { if (namebuf) efree(namebuf); if (filenamebuf) efree(filenamebuf); if (lbuf) efree(lbuf); if (abuf) efree(abuf); if(arr_index) efree(arr_index); return; }
 
 /* The longest property name we use in an uploaded file array */
 #define MAX_SIZE_OF_INDEX sizeof("[tmp_name]")
@@ -63,9 +63,10 @@ static void php_mime_split(char *buf, int cnt, char *boundary, zval *array_ptr)
 	int len, state = 0, Done = 0, rem, urem;
 	int eolsize;
 	long bytes, max_file_size = 0;
-	char *namebuf=NULL, *filenamebuf=NULL, *lbuf=NULL;
+	char *namebuf=NULL, *filenamebuf=NULL, *lbuf=NULL, 
+		 *abuf=NULL, *start_arr=NULL, *end_arr=NULL, *arr_index=NULL;
 	FILE *fp;
-	int itype;
+	int itype, is_arr_upload=0, arr_len=0;
 	zval *http_post_files=NULL;
 	ELS_FETCH();
 	PLS_FETCH();
@@ -134,6 +135,19 @@ static void php_mime_split(char *buf, int cnt, char *boundary, zval *array_ptr)
 					loc2 = memchr(loc + 1, '\n', rem);
 					rem -= (loc2 - ptr) + 1;
 					ptr = loc2 + 1;
+					/* is_arr_upload is true when name of file upload field
+					 * ends in [.*]
+					 * start_arr is set to point to 1st [
+					 * end_arr points to last ]
+					 */
+					is_arr_upload = (start_arr = strrchr(namebuf,'[')) && 
+									(end_arr = strrchr(namebuf,']')) && 
+									(end_arr = namebuf+strlen(namebuf)-1);
+					if(is_arr_upload) {
+						arr_len = strlen(start_arr);
+						if(arr_index) efree(arr_index);
+						arr_index = estrndup(start_arr+1,arr_len-1);	
+					}
 				} else {
 					php_error(E_WARNING, "File upload error - no name component in content disposition");
 					SAFE_RETURN;
@@ -152,7 +166,15 @@ static void php_mime_split(char *buf, int cnt, char *boundary, zval *array_ptr)
 					filenamebuf = estrndup(filename, s-filename);
 
 					/* Add $foo_name */
-					sprintf(lbuf, "%s_name", namebuf);
+					if (is_arr_upload) {
+						if (abuf) {
+							efree(abuf);
+						}
+						abuf = estrndup(namebuf, strlen(namebuf)-arr_len);
+						sprintf(lbuf, "%s_name[%s]", abuf, arr_index);
+					} else {
+						sprintf(lbuf, "%s_name", namebuf);
+					}
 					s = strrchr(filenamebuf, '\\');
 					if (s && s > filenamebuf) {
 						php_register_variable(lbuf, s+1, NULL ELS_CC PLS_CC);
@@ -161,7 +183,11 @@ static void php_mime_split(char *buf, int cnt, char *boundary, zval *array_ptr)
 					}
 
 					/* Add $foo[name] */
-					sprintf(lbuf, "%s[name]", namebuf);
+                    if (is_arr_upload) {
+                        sprintf(lbuf, "%s[name][%s]", abuf, arr_index);
+                    } else {
+                        sprintf(lbuf, "%s[name]", namebuf);
+                    }
 					if (s && s > filenamebuf) {
 						register_http_post_files_variable(lbuf, s+1, http_post_files ELS_CC PLS_CC);
 					} else {
@@ -174,11 +200,19 @@ static void php_mime_split(char *buf, int cnt, char *boundary, zval *array_ptr)
 							*(loc2 - 1) = '\0';
 
 							/* Add $foo_type */
-							sprintf(lbuf, "%s_type", namebuf);
+                            if (is_arr_upload) {
+                                sprintf(lbuf, "%s_type[%s]", abuf, arr_index);
+                            } else {
+                                sprintf(lbuf, "%s_type", namebuf);
+                            }
 							php_register_variable(lbuf, loc+15, NULL ELS_CC PLS_CC);
 
 							/* Add $foo[type] */
-							sprintf(lbuf, "%s[type]", namebuf);
+                            if (is_arr_upload) {
+                                sprintf(lbuf, "%s[type][%s]", abuf, arr_index);
+                            } else {
+								sprintf(lbuf, "%s[type]", namebuf);
+							}
 							register_http_post_files_variable(lbuf, loc+15, http_post_files ELS_CC PLS_CC);
 
 							*(loc2 - 1) = '\n';
@@ -272,7 +306,11 @@ static void php_mime_split(char *buf, int cnt, char *boundary, zval *array_ptr)
 				php_register_variable(namebuf, fn, NULL ELS_CC PLS_CC);
 
 				/* Add $foo[tmp_name] */
-				sprintf(lbuf, "%s[tmp_name]", namebuf);
+				if(is_arr_upload) {
+					sprintf(lbuf, "%s[tmp_name][%s]", abuf, arr_index);
+				} else {
+					sprintf(lbuf, "%s[tmp_name]", namebuf);
+				}
 				register_http_post_files_variable(lbuf, fn, http_post_files ELS_CC PLS_CC);
 				{
 					zval file_size;
@@ -281,11 +319,19 @@ static void php_mime_split(char *buf, int cnt, char *boundary, zval *array_ptr)
 					file_size.type = IS_LONG;
 
 					/* Add $foo_size */
-					sprintf(lbuf, "%s_size", namebuf);
+					if(is_arr_upload) {
+						sprintf(lbuf, "%s_size[%s]", abuf, arr_index);
+					} else {
+						sprintf(lbuf, "%s_size", namebuf);
+					}
 					php_register_variable_ex(lbuf, &file_size, NULL ELS_CC PLS_CC);
 
 					/* Add $foo[size] */
-					sprintf(lbuf, "%s[size]", namebuf);
+					if(is_arr_upload) {
+						sprintf(lbuf, "%s[size][%s]", abuf, arr_index);
+					} else {
+						sprintf(lbuf, "%s[size]", namebuf);
+					}
 					register_http_post_files_variable_ex(lbuf, &file_size, http_post_files ELS_CC PLS_CC);
 				}
 				state = 0;
