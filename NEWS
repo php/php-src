@@ -2,6 +2,7 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? 1999, Version 4.0 Beta 3
+- RFC-854 fix for internal FTP-Code. Commands have to end in "\r\n" (Thies)
 - Fix OpenLink ODBC support (Stig)
 - Fix min/max behaviour (Thies)
 - tempnam() now uses mkstemp() if available (Stig)
