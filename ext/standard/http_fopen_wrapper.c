@@ -114,37 +114,50 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 		return NULL;
 	}
 
-	if (strpbrk(mode, "awx+")) {
-		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "HTTP wrapper does not support writeable connections.");
-		return NULL;
-	}
-
 	resource = php_url_parse(path);
 	if (resource == NULL) {
 		return NULL;
 	}
 
 	if (strncasecmp(resource->scheme, "http", sizeof("http")) && strncasecmp(resource->scheme, "https", sizeof("https"))) {
-		php_url_free(resource);
-		return php_stream_open_wrapper_ex(path, mode, ENFORCE_SAFE_MODE | REPORT_ERRORS, NULL, context);
-	}
-	
-	use_ssl = resource->scheme && (strlen(resource->scheme) > 4) && resource->scheme[4] == 's';
-	/* choose default ports */
-	if (use_ssl && resource->port == 0)
-		resource->port = 443;
-	else if (resource->port == 0)
-		resource->port = 80;
+		if (!context || 
+			php_stream_context_get_option(context, wrapper->wops->label, "proxy", &tmpzval) == FAILURE ||
+			Z_TYPE_PP(tmpzval) != IS_STRING ||
+			Z_STRLEN_PP(tmpzval) <= 0) {
+			php_url_free(resource);
+			return php_stream_open_wrapper_ex(path, mode, ENFORCE_SAFE_MODE | REPORT_ERRORS, NULL, context);
+		}
+		/* Called from a non-http wrapper with http proxying requested (i.e. ftp) */
+		request_fulluri = 1;
+		use_ssl = 0;
 
-	if (context && !use_ssl &&
-		php_stream_context_get_option(context, "http", "proxy", &tmpzval) == SUCCESS &&
-		Z_TYPE_PP(tmpzval) == IS_STRING &&
-		Z_STRLEN_PP(tmpzval) > 0) {
-		/* Don't use proxy server for SSL resources */
 		transport_len = Z_STRLEN_PP(tmpzval);
 		transport_string = estrndup(Z_STRVAL_PP(tmpzval), Z_STRLEN_PP(tmpzval));
 	} else {
-		transport_len = spprintf(&transport_string, 0, "%s://%s:%d", use_ssl ? "ssl" : "tcp", resource->host, resource->port);
+		/* Normal http request (possibly with proxy) */
+	
+		if (strpbrk(mode, "awx+")) {
+			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "HTTP wrapper does not support writeable connections.");
+			return NULL;
+		}
+
+		use_ssl = resource->scheme && (strlen(resource->scheme) > 4) && resource->scheme[4] == 's';
+		/* choose default ports */
+		if (use_ssl && resource->port == 0)
+			resource->port = 443;
+		else if (resource->port == 0)
+			resource->port = 80;
+
+		if (context && !use_ssl &&
+			php_stream_context_get_option(context, wrapper->wops->label, "proxy", &tmpzval) == SUCCESS &&
+			Z_TYPE_PP(tmpzval) == IS_STRING &&
+			Z_STRLEN_PP(tmpzval) > 0) {
+			/* Don't use proxy server for SSL resources */
+			transport_len = Z_STRLEN_PP(tmpzval);
+			transport_string = estrndup(Z_STRVAL_PP(tmpzval), Z_STRLEN_PP(tmpzval));
+		} else {
+			transport_len = spprintf(&transport_string, 0, "%s://%s:%d", use_ssl ? "ssl" : "tcp", resource->host, resource->port);
+		}
 	}
 
 	stream = php_stream_xport_create(transport_string, transport_len, options,
@@ -192,7 +205,8 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 	}
 
 	/* Should we send the entire path in the request line, default to no. */
-	if (context &&
+	if (!request_fulluri &&
+		context &&
 		php_stream_context_get_option(context, "http", "request_fulluri", &tmpzval) == SUCCESS) {
 		(*tmpzval)->refcount++;
 		SEPARATE_ZVAL(tmpzval);
@@ -292,7 +306,8 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 
 	/* Send Host: header so name-based virtual hosts work */
 	if ((have_header & HTTP_HEADER_HOST) == 0) {
-		if ((use_ssl && resource->port != 443) || (!use_ssl && resource->port != 80))	{
+		if ((use_ssl && resource->port != 443 && resource->port != 0) || 
+			(!use_ssl && resource->port != 80 && resource->port != 0))	{
 			if (snprintf(scratch, scratch_len, "Host: %s:%i\r\n", resource->host, resource->port) > 0)
 				php_stream_write(stream, scratch, strlen(scratch));
 		} else {
@@ -525,7 +540,7 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 			} else {
 				strlcpy(new_path, location, sizeof(new_path));
 			}
-			stream = php_stream_url_wrap_http_ex(NULL, new_path, mode, options, opened_path, context, --redirect_max, 0 STREAMS_CC TSRMLS_CC);
+			stream = php_stream_url_wrap_http_ex(wrapper, new_path, mode, options, opened_path, context, --redirect_max, 0 STREAMS_CC TSRMLS_CC);
 			if (stream && stream->wrapperdata)	{
 				entryp = &entry;
 				MAKE_STD_ZVAL(entry);
@@ -594,7 +609,7 @@ static php_stream_wrapper_ops http_stream_wops = {
 	php_stream_http_stream_stat,
 	NULL, /* stat_url */
 	NULL, /* opendir */
-	"HTTP",
+	"http",
 	NULL, /* unlink */
 	NULL, /* rename */
 	NULL, /* mkdir */
