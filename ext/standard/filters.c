@@ -838,7 +838,7 @@ static php_conv_err_t php_conv_qprint_encode_convert(php_conv_qprint_encode *ins
 
 static php_conv_err_t php_conv_qprint_encode_ctor(php_conv_qprint_encode *inst, unsigned int line_len, const char *lbchars, size_t lbchars_len, int lbchars_dup, int opts, int persistent)
 {
-	if (line_len < 4) {
+	if (line_len < 4 && lbchars != NULL) {
 		return PHP_CONV_ERR_TOO_BIG;
 	}
 	inst->_super.convert_op = (php_conv_convert_func) php_conv_qprint_encode_convert;
