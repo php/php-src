@@ -21,6 +21,8 @@
 #include "php_ini.h"
 #include "php_dbplus.h"
 
+#include "ext/standard/php_string.h"
+
 #include <saccess.h>
 #include <relation.h>
 #include <dblight.h>
@@ -61,46 +63,64 @@ var2tuple(relf *r, zval **zv, tuple *t)
     if (! *element) {
       return 1;
     }
-
+    
     switch(ap->att_type) {
+          
     case FT_SHORT:   
+      /* short integer */
       convert_to_long_ex(element);
       AFFIX(ap, t)->f_short    = (short) (*element)->value.lval; 
       break;
-    case FT_UNSIGNED:     
+    
+    case FT_UNSIGNED:    
+      /* unsigned short integer */
       convert_to_long_ex(element);
       AFFIX(ap, t)->f_unsigned = (unsigned) (*element)->value.lval; 
       break;
-    case FT_SEQUENCE:
+
     case FT_LONG:         
+      /* 32bit signed long */
+    case FT_SEQUENCE:
+      /* unique sequence number -> just a long to outsiders */
       convert_to_long_ex(element);
-      AFFIX(ap, t)->f_long     = (long) (*element)->value.lval; 
+      AFFIX(ap, t)->f_long     = (long4) (*element)->value.lval; 
       break;
+
     case FT_DATE:         
+      /* date -> long containing YYYYMMDD */
       convert_to_long_ex(element);
-      AFFIX(ap, t)->f_date     = (long) (*element)->value.lval; 
+      AFFIX(ap, t)->f_date     = (long4) (*element)->value.lval; 
       break;
+
     case FT_TIME:         
+      /* time as unix timestamp */
       convert_to_long_ex(element);
-      AFFIX(ap, t)->f_time     = (long) (*element)->value.lval; 
+      AFFIX(ap, t)->f_time     = (long4) (*element)->value.lval; 
       break;
+
     case FT_FLOAT:        
+      /* single prec. floating point */
       convert_to_double_ex(element);
       AFFIX(ap, t)->f_float    = (float) (*element)->value.dval; 
       break;
+      
     case FT_DOUBLE:       
+      /* double prec. floating point */
       convert_to_double_ex(element);
       AFFIX(ap, t)->f_double   = (double) (*element)->value.dval; 
       break;
-    case FT_STRING: case FT_DEUTSCH: case FT_CHAR:      
-        convert_to_string_ex(element);
-        afput(ap, t, (field *)0, (*element)->value.str.val); 
-        break;
-    case FT_TIMESTAMP:
-      /* TODO
-      str2timestamp(SvPV(sv, na), (timestamp *)AFFIX(ap, t));
-      */
+
+    case FT_STRING: 
+    case FT_DEUTSCH: 
+    case FT_CHAR:      
+    case FT_ANSI:
+    case FT_ISO:
+    case FT_ISOL:
+      /* different variants of Strings */
+      convert_to_string_ex(element);
+      afput(ap, t, (field *)0, (*element)->value.str.val); 
       break;
+
     default:
       php_error(E_WARNING,"%s is of yet unsupported type %d",ap->att_name,ap->att_type);
       break;
@@ -823,7 +843,7 @@ PHP_FUNCTION(dbplus_rchperm)
 }
 /* }}} */
 
-/* {{{ proto int dbplus_rcreate(string name, string domlist [, int overwrite])
+/* {{{ proto int dbplus_rcreate(string name, mixed domlist [, int overwrite])
     */
 PHP_FUNCTION(dbplus_rcreate)
 {
@@ -852,7 +872,22 @@ PHP_FUNCTION(dbplus_rcreate)
   }
 
   convert_to_string_ex(name);
-  convert_to_string_ex(domlist);
+
+  switch ( (*domlist)->type ) {
+  case IS_STRING:
+    convert_to_string_ex(domlist);
+    break;
+
+  case IS_ARRAY: 
+    {
+      zval tmp;     
+      ZVAL_STRING(&tmp," ",0);
+      php_implode(&tmp,*domlist,*domlist);
+    }
+    break;
+
+  default:
+  }
 
   at0 = create2att(_STRING(domlist), &ndoms);
   if (at0) {
@@ -1012,14 +1047,14 @@ PHP_FUNCTION(dbplus_restorepos)
 }
 /* }}} */
 
-/* {{{ proto int dbplus_rkeys(int relation, [string|array] domlist)
+/* {{{ proto int dbplus_rkeys(int relation, mixed domlist)
     */
 PHP_FUNCTION(dbplus_rkeys)
 {
   relf *r, *rnew;
   zval **relation, **domlist, **zdata;
   int nkeys=0;
-  char *p, *name=NULL, *keys[40]; /* TODO hardcoded magic number ??? */
+  char *name=NULL, *keys[40]; /* TODO hardcoded magic number ??? */
 
   if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &relation, &domlist) == FAILURE){
     WRONG_PARAM_COUNT;
@@ -1027,7 +1062,8 @@ PHP_FUNCTION(dbplus_rkeys)
 
   DBPLUS_FETCH_RESOURCE(r, relation);
 
-  if((*domlist)->type == IS_ARRAY) {
+  switch((*domlist)->type) {
+  case IS_ARRAY:
     convert_to_array_ex(domlist);
     for(zend_hash_internal_pointer_reset(_HASH(domlist));
         SUCCESS==zend_hash_get_current_data(_HASH(domlist), (void **)&zdata);
@@ -1035,19 +1071,25 @@ PHP_FUNCTION(dbplus_rkeys)
       if((*zdata)->type==IS_STRING)
         keys[nkeys++] = _STRING(zdata);
       else {
-        php_error(E_WARNING, "Domlist array contains non-string value(s)");
+        php_error(E_WARNING, "dbplus_rkeys: domlist array contains non-string value(s)");
         Acc_error = ERR_USER;
         RETURN_FALSE;
       }
     }
-  } else {
+    break;
+
+  case IS_STRING:
     convert_to_string_ex(domlist);
-    name = estrdup(_STRING(domlist));
-    while ( ( p = strtok ( nkeys ? 0 : name, " \t") ) ) {
-      keys[nkeys++] = p;
-		}
+    keys[0] = _STRING(domlist);
+    nkeys = 1;
+    break;
+
+  default:
+    php_error(E_WARNING, "dbplus_rkeys: domlist has to be of type string or an array of strings");
+    Acc_error = ERR_USER;
+    RETURN_FALSE;   
   }
-  
+    
   rnew = cdbRkeys(r, nkeys, keys);
   if(name) efree(name);
 
@@ -1127,14 +1169,14 @@ PHP_FUNCTION(dbplus_rrename)
 }
 /* }}} */
 
-/* {{{ proto int dbplus_rsecindex(int relation, string domlist, int compact)
+/* {{{ proto int dbplus_rsecindex(int relation, mixed domlist, int compact)
     */
 PHP_FUNCTION(dbplus_rsecindex)
 {
   relf *r, *rnew;
   zval **relation, **domlist, **compact, **zdata;
   int nkeys=0;
-  char *p, *name=NULL, *keys[40]; /* TODO hardcoded magic number ??? */
+  char *name=NULL, *keys[40]; /* TODO hardcoded magic number ??? */
 
   if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &relation, &domlist, &compact) == FAILURE){
     WRONG_PARAM_COUNT;
@@ -1142,7 +1184,8 @@ PHP_FUNCTION(dbplus_rsecindex)
 
   DBPLUS_FETCH_RESOURCE(r, relation);
 
-  if((*domlist)->type == IS_ARRAY) {
+  switch ( (*domlist)->type ) {
+  case IS_ARRAY:
     convert_to_array_ex(domlist);
     for(zend_hash_internal_pointer_reset(_HASH(domlist));
         SUCCESS==zend_hash_get_current_data(_HASH(domlist), (void **)&zdata);
@@ -1150,23 +1193,27 @@ PHP_FUNCTION(dbplus_rsecindex)
       if((*zdata)->type==IS_STRING)
         keys[nkeys++] = _STRING(zdata);
       else {
-        php_error(E_WARNING, "Domlist array contains non-string value(s)");
+        php_error(E_WARNING, "dbplus_rsecindex: domlist array contains non-string value(s)");
         Acc_error = ERR_USER;
         RETURN_FALSE;
       }
     }
-  } else {
+    break;
+    
+  case IS_STRING:
     convert_to_string_ex(domlist);
-    name = estrdup(_STRING(domlist));
-    while ( ( p = strtok ( nkeys ? 0 : name, "   ") ) ) {
-      keys[nkeys++] = p;
-		}
+    keys[0] = _STRING(domlist);
+    nkeys = 1;
+    break;
+
+  default:
+    php_error(E_WARNING, "dbplus_rsecindex: domlist has to be of type string or an array of strings");
+    Acc_error = ERR_USER;
+    RETURN_FALSE;   
   }
 
   convert_to_long_ex(compact);
   
-  php_error(E_WARNING,"nkeys: %d keys: '%s', compact: %s",nkeys,keys,_INT(compact));
-
   rnew = cdbRsecindex(r, nkeys, keys, _INT(compact));
   if(name) efree(name);
 
