@@ -12,7 +12,8 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Author: Sascha Schumann <sascha@schumann.cx>                         |
+   | Authors: Sascha Schumann <sascha@schumann.cx>                        |
+   |          Marcus Boerger <helly@php.net>                              |
    +----------------------------------------------------------------------+
  */
 
@@ -315,7 +316,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	int i;
 	int lock_mode, lock_flag, lock_dbf = 0;
 	char *file_mode;
-	char mode[4], *pmode;
+	char mode[4], *pmode, *lock_file_mode;
 	
 	if(ac < 3) {
 		WRONG_PARAM_COUNT;
@@ -452,11 +453,14 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	info->argv = args + 3;
 
 	if (lock_mode) {
-		if (lock_dbf)
+		if (lock_dbf) {
 			info->lock.name = estrdup(info->path);
-		else
+			lock_file_mode = file_mode;
+		} else {
 			spprintf(&info->lock.name, 0, "%s.lck", info->path);
-		info->lock.fp = php_stream_open_wrapper(info->lock.name, "a+b", STREAM_MUST_SEEK|REPORT_ERRORS|IGNORE_PATH|ENFORCE_SAFE_MODE, NULL);
+			lock_file_mode = "a+b";
+		}
+		info->lock.fp = php_stream_open_wrapper(info->lock.name, lock_file_mode, STREAM_MUST_SEEK|REPORT_ERRORS|IGNORE_PATH|ENFORCE_SAFE_MODE, NULL);
 		if (!info->lock.fp) {
 			dba_close(info TSRMLS_CC);
 			/* stream operation already wrote an error message */
