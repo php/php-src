@@ -1366,6 +1366,7 @@ static void create_class(HashTable *class_table, char *name, int name_length, ze
 	zend_hash_init(&new_class_entry.function_table, 10, NULL, ZEND_FUNCTION_DTOR, 0);
 	zend_hash_init(&new_class_entry.class_table, 10, NULL, ZEND_CLASS_DTOR, 0);
 	zend_hash_init(&new_class_entry.default_properties, 10, NULL, ZVAL_PTR_DTOR, 0);
+	zend_hash_init(&new_class_entry.private_properties, 10, NULL, ZVAL_PTR_DTOR, 0);
 	ALLOC_HASHTABLE(new_class_entry.static_members);
 	zend_hash_init(new_class_entry.static_members, 10, NULL, ZVAL_PTR_DTOR, 0);
 	zend_hash_init(&new_class_entry.constants_table, 10, NULL, ZVAL_PTR_DTOR, 0);
@@ -1520,6 +1521,7 @@ ZEND_API int do_bind_function_or_class(zend_op *opline, HashTable *function_tabl
 					(*ce->refcount)--;
 					zend_hash_destroy(&ce->function_table);
 					zend_hash_destroy(&ce->default_properties);
+					zend_hash_destroy(&ce->private_properties);
 					zend_hash_destroy(ce->static_members);
 					zend_hash_destroy(&ce->constants_table);
 					return FAILURE;
@@ -1856,6 +1858,7 @@ void zend_do_begin_class_declaration(znode *class_token, znode *class_name, znod
 	zend_hash_init(&new_class_entry.function_table, 10, NULL, ZEND_FUNCTION_DTOR, 0);
 	zend_hash_init(&new_class_entry.class_table, 10, NULL, ZEND_CLASS_DTOR, 0);
 	zend_hash_init(&new_class_entry.default_properties, 10, NULL, ZVAL_PTR_DTOR, 0);
+	zend_hash_init(&new_class_entry.private_properties, 10, NULL, ZVAL_PTR_DTOR, 0);
 	ALLOC_HASHTABLE(new_class_entry.static_members);
 	zend_hash_init(new_class_entry.static_members, 10, NULL, ZVAL_PTR_DTOR, 0);
 	zend_hash_init(&new_class_entry.constants_table, 10, NULL, ZVAL_PTR_DTOR, 0);
@@ -1963,6 +1966,20 @@ void zend_do_end_class_declaration(znode *class_token TSRMLS_DC)
 	}
 }
 
+void mangle_private_property_name(char **dest, int *dest_length, char *src1, int src1_length, char *src2, int src2_length)
+{
+	char *priv_name;
+	int priv_name_length;
+
+	priv_name_length = 1 + src1_length + 1 + src2_length;
+	priv_name = emalloc(priv_name_length+1);
+	priv_name[0] = '\0';
+	memcpy(priv_name + 1, src1, src1_length+1);
+	memcpy(priv_name + 1 + src1_length + 1, src2, src2_length+1);
+
+	*dest = priv_name;
+	*dest_length = priv_name_length;
+}
 
 void zend_do_declare_property(znode *var_name, znode *value, int declaration_type TSRMLS_DC)
 {
@@ -1978,6 +1995,19 @@ void zend_do_declare_property(znode *var_name, znode *value, int declaration_typ
 	}
 
 	switch (declaration_type) {
+		case T_PRIVATE:
+			{
+				char *priv_name;
+				int priv_name_length;
+
+				mangle_private_property_name(&priv_name, &priv_name_length, CG(active_class_entry)->name, CG(active_class_entry)->name_length, var_name->u.constant.value.str.val, var_name->u.constant.value.str.len);
+				zend_hash_update(&CG(active_class_entry)->default_properties, priv_name, priv_name_length+1, &property, sizeof(zval *), NULL);
+				efree(priv_name);
+
+				property->refcount++;
+				zend_hash_update(&CG(active_class_entry)->private_properties, var_name->u.constant.value.str.val, var_name->u.constant.value.str.len+1, &property, sizeof(zval *), NULL);
+				break;
+			}
 		case T_VAR:
 			zend_hash_update(&CG(active_class_entry)->default_properties, var_name->u.constant.value.str.val, var_name->u.constant.value.str.len+1, &property, sizeof(zval *), NULL);
 			break;
@@ -2009,6 +2039,17 @@ void zend_do_fetch_property(znode *result, znode *object, znode *property TSRMLS
 			opline_ptr->op1 = *property;
 			SET_UNUSED(opline_ptr->op2);
 			opline_ptr->op2.u.EA.type = ZEND_FETCH_FROM_THIS;
+
+			if ((opline_ptr->op1.op_type == IS_CONST) && zend_hash_exists(&CG(active_class_entry)->private_properties, opline_ptr->op1.u.constant.value.str.val, opline_ptr->op1.u.constant.value.str.len+1)) {
+				char *priv_name;
+				int priv_name_length;
+
+				mangle_private_property_name(&priv_name, &priv_name_length, CG(active_class_entry)->name, CG(active_class_entry)->name_length, opline_ptr->op1.u.constant.value.str.val, opline_ptr->op1.u.constant.value.str.len);
+
+				STR_FREE(opline_ptr->op1.u.constant.value.str.val);
+				opline_ptr->op1.u.constant.value.str.val = priv_name;
+				opline_ptr->op1.u.constant.value.str.len = priv_name_length;
+			}
 
 			*result = opline_ptr->result;
 			return;

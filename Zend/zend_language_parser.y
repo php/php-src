@@ -111,6 +111,7 @@
 %token T_USE
 %token T_GLOBAL
 %token T_STATIC
+%token T_PRIVATE
 %token T_VAR
 %token T_UNSET
 %token T_ISSET
@@ -421,6 +422,7 @@ class_variable_decleration:
 class_decleration_type:
 		T_VAR		{ $$.op_type = T_VAR; }
 	|	T_STATIC	{ $$.op_type = T_STATIC; }
+	|	T_PRIVATE	{ $$.op_type = T_PRIVATE; }
 ;
 
 class_constant_decleration:
