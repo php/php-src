@@ -7,16 +7,13 @@ PHP 4                                                                      NEWS
   strings between upper, lower and title case using Unicode mappings.
   Fixed bug #19257 (strtolower & strtoupper does not work for UTF-8 strings).
   (Wez)
-- Fixed bug #18521 (htmlentities did not warn about unsupported charsets).
-  (Wez)
+- Fixed bug #18521 (htmlentities didn't warn about unsupported charsets). (Wez)
 - Fixed bug #11643 (Session related, fix SID redefinition). (Ilia)
-- Fixed bug #18556 (Scripting Engine, problem with locales like tr_TR). 
-  (Ilia)
+- Fixed bug #18556 (Scripting Engine, problem with locales like tr_TR). (Ilia)
 - Changed y2k_compliance to default to 1 now. (Sascha)
 - Added platform independent socket error constants for better error handling.
 - Fixed include(), require() and GD functions to work with remote files under
-  win32.
-  Fixed bug #18609 (ImageCreateFromJPEG can't fetch from a URL. (Wez)
+  win32. Fixed bug #18609 (ImageCreateFromJPEG can't fetch from a URL. (Wez)
 - Update output of phpinfo() to use more CSS to reduce the file size, do
   proper HTML escaping, and make it XHTML compliant. (Colin)
 - Added php.ini option "auto_detect_line_endings" which enables PHP to detect
