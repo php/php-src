@@ -1,3 +1,28 @@
+2002-01-28  Stig Bakken  <ssb@fast.no>
+
+    * pear/Net/Socket.php:
+    * doc comments, add setTimeout() and getStatus(), thanks to
+      Mads Mohr Christensen <mohr@slamkode.dk>
+
+2002-01-28  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * EXTENSIONS: Commit for mr. torben:
+    Add XSLT to extensions file, mark sablot obsolete
+
+2002-01-28  Jon Parise  <jon@csh.rit.edu>
+
+    * ext/standard/math.c: These are now defined in zend_config.w32.h.
+
+2002-01-28  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/DB/dbase.php:
+    PEAR dbase driver. Supports, connect, fetch modes, row limit,
+    numrows and numcols.
+
+2002-01-28  jim winstead  <jimw@apache.org>
+
+    * ext/interbase/Makefile.in: testing checkin
+
 2002-01-27  Jon Parise  <jon@csh.rit.edu>
 
     * ext/standard/math.c:
