@@ -3208,7 +3208,9 @@ PHP_FUNCTION(array_reduce)
 
 	if (ZEND_NUM_ARGS() > 2) {
 		result = *initial;
-		zval_add_ref(&result);
+	} else {
+		MAKE_STD_ZVAL(result);
+		ZVAL_LONG(result, 0);
 	}
 
 	/* (zval **)input points to an element of argument stack
