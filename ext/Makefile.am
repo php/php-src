@@ -6,4 +6,4 @@ noinst_LIBRARIES=libphpext.a
 
 libphpext.a: @EXT_LIBS@
 	top_srcdir=$(top_srcdir) $(top_builddir)/scripts/mkextlib $@ $(SUBDIRS)
-	test "`uname -s`" = "Rhapsody" && $(RANLIB) $@
+	-@test "`uname -s`" = "Rhapsody" && $(RANLIB) $@
