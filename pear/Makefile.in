@@ -52,6 +52,7 @@ BUILD_FILES = \
 	build/fastgen.sh \
 	build/library.mk \
 	build/ltlib.mk \
+	build/mkdep.awk \
 	build/program.mk \
 	build/rules.mk \
 	build/rules_common.mk \
