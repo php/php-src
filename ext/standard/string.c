@@ -496,7 +496,7 @@ void php_trim(zval *str, zval *return_value, int mode TSRMLS_DC)
 
 /* {{{ php_trim2
  */
-PHPAPI void php_trim2(zval *str, zval *what, zval *return_value, int mode TSRMLS_DC)
+PHPAPI void php_trim2(zval **str, zval **what, zval *return_value, int mode TSRMLS_DC)
 /* mode 1 : trim left
    mode 2 : trim right
    mode 3 : trim left and right
@@ -505,13 +505,13 @@ PHPAPI void php_trim2(zval *str, zval *what, zval *return_value, int mode TSRMLS
 */
 {
 	register int i;
-	int len = str->value.str.len;
+	int len = Z_STRLEN_PP(str);
 	int trimmed = 0;
-	char *c = str->value.str.val;
+	char *c = Z_STRVAL_PP(str);
 	char mask[256];
 
 	if (what) {
-		php_charmask(Z_STRVAL_P(what), Z_STRLEN_P(what), mask TSRMLS_CC);
+		php_charmask(Z_STRVAL_PP(what), Z_STRLEN_PP(what), mask TSRMLS_CC);
 	} else {
 		php_charmask(" \n\r\t\v\0", 6, mask TSRMLS_CC);
 	}
@@ -561,7 +561,7 @@ PHP_FUNCTION(chop)
 		convert_to_string_ex(what);
 	}
 
-	php_trim2(*str, *what, return_value, 2 TSRMLS_CC);
+	php_trim2(str, what, return_value, 2 TSRMLS_CC);
 }
 /* }}} */
 
@@ -582,7 +582,7 @@ PHP_FUNCTION(trim)
 		convert_to_string_ex(what);
 	}
 
-	php_trim2(*str, *what, return_value, 3 TSRMLS_CC);
+	php_trim2(str, what, return_value, 3 TSRMLS_CC);
 }
 /* }}} */
 
@@ -603,7 +603,7 @@ PHP_FUNCTION(ltrim)
 		convert_to_string_ex(what);
 	}
 	
-	php_trim2(*str, *what, return_value, 1 TSRMLS_CC);
+	php_trim2(str, what, return_value, 1 TSRMLS_CC);
 }
 /* }}} */
 
