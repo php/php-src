@@ -337,7 +337,7 @@ PHP_RSHUTDOWN_FUNCTION(imap)
 }
 
 
-inline int add_next_index_object(zval *arg, zval *tmp)
+static inline int add_next_index_object(zval *arg, zval *tmp)
 {
 	HashTable *symtable;
 	

@@ -155,7 +155,7 @@ static inline void save_lexical_state(zend_lex_state *lex_state CLS_DC)
 }
 
 
-inline void restore_lexical_state(zend_lex_state *lex_state CLS_DC)
+static inline void restore_lexical_state(zend_lex_state *lex_state CLS_DC)
 {
 #ifndef ZTS
 	YY_BUFFER_STATE original_buffer_state = YY_CURRENT_BUFFER;
