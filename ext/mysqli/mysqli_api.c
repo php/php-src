@@ -282,12 +282,12 @@ PHP_FUNCTION(mysqli_bind_result)
 
 			case MYSQL_TYPE_LONGLONG:
 				stmt->bind[ofs].type = IS_STRING; 
-				stmt->bind[ofs].buflen = (stmt->stmt->fields) ? stmt->stmt->fields[ofs].length + 1 : 256;
+				stmt->bind[ofs].buflen = sizeof(my_ulonglong); 
 				stmt->bind[ofs].buffer = (char *)emalloc(stmt->bind[ofs].buflen);
 				bind[ofs].buffer_type = MYSQL_TYPE_LONGLONG;
 				bind[ofs].buffer = stmt->bind[ofs].buffer;
 				bind[ofs].is_null = &stmt->is_null[ofs];
-				bind[ofs].buffer_length = stmt->bind[ofs].buflen - 1;
+				bind[ofs].buffer_length = stmt->bind[ofs].buflen;
 				break;
 			case MYSQL_TYPE_DATE:
 			case MYSQL_TYPE_TIME:
@@ -298,15 +298,16 @@ PHP_FUNCTION(mysqli_bind_result)
 			case MYSQL_TYPE_BLOB:
 			case MYSQL_TYPE_TIMESTAMP:
 				stmt->bind[ofs].type = IS_STRING; 
-				stmt->bind[ofs].buflen = (stmt->stmt->fields) ? stmt->stmt->fields[ofs].length + 1: 256;
+				stmt->bind[ofs].buflen = (stmt->stmt->fields) ? stmt->stmt->fields[ofs].length + 1: 250;
 				stmt->bind[ofs].buffer = (char *)emalloc(stmt->bind[ofs].buflen);
 				bind[ofs].buffer_type = MYSQL_TYPE_STRING;
 				bind[ofs].buffer = stmt->bind[ofs].buffer;
 				bind[ofs].is_null = &stmt->is_null[ofs];
 				bind[ofs].buffer_length = stmt->bind[ofs].buflen;
+				bind[ofs].length = &stmt->bind[ofs].buflen;
 				break;
 		}
-		bind[ofs].length = &stmt->bind[ofs].buflen;
+//		bind[ofs].length = &stmt->bind[ofs].buflen;
 	}
 
 	if (mysql_bind_result(stmt->stmt, bind)) {
