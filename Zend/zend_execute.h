@@ -35,7 +35,9 @@ typedef union _temp_variable {
 		zend_bool fcall_returned_reference;
 	} var;
 	struct {
-		zval tmp_var;
+		zval **ptr_ptr;
+		zval *ptr;
+		zend_bool fcall_returned_reference;
 		zval *str;
 		zend_uint offset;
 	} str_offset;

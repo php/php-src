@@ -137,27 +137,31 @@ static inline zval *_get_zval_ptr(znode *node, temp_variable *Ts, zend_free_op *
 			} else {
 				temp_variable *T = &T(node->u.var);
 				zval *str = T->str_offset.str;
+				zval *ptr;
 
 				/* string offset */
-				should_free->var = &T(node->u.var).tmp_var;
+				ALLOC_ZVAL(ptr);
+				T->str_offset.ptr = ptr;
+				should_free->var = ptr;
+				should_free->is_var = 1;
 
 				if (T->str_offset.str->type != IS_STRING
 					|| ((int)T->str_offset.offset<0)
 					|| (T->str_offset.str->value.str.len <= T->str_offset.offset)) {
 					zend_error(E_NOTICE, "Uninitialized string offset:  %d", T->str_offset.offset);
-					T->tmp_var.value.str.val = STR_EMPTY_ALLOC();
-					T->tmp_var.value.str.len = 0;
+					ptr->value.str.val = STR_EMPTY_ALLOC();
+					ptr->value.str.len = 0;
 				} else {
 					char c = str->value.str.val[T->str_offset.offset];
 
-					T->tmp_var.value.str.val = estrndup(&c, 1);
-					T->tmp_var.value.str.len = 1;
+					ptr->value.str.val = estrndup(&c, 1);
+					ptr->value.str.len = 1;
 				}
 				PZVAL_UNLOCK_FREE(str);
-				T->tmp_var.refcount=1;
-				T->tmp_var.is_ref=1;
-				T->tmp_var.type = IS_STRING;
-				return &T->tmp_var;
+				ptr->refcount=1;
+				ptr->is_ref=1;
+				ptr->type = IS_STRING;
+				return ptr;
 			}
 			break;
 		case IS_UNUSED:
@@ -174,11 +178,12 @@ static inline zval **_get_zval_ptr_ptr(znode *node, temp_variable *Ts, zend_free
 	if (node->op_type==IS_VAR) {
 		if (T(node->u.var).var.ptr_ptr) {
 			PZVAL_UNLOCK(*T(node->u.var).var.ptr_ptr, should_free);
+			return T(node->u.var).var.ptr_ptr;
 		} else {
 			/* string offset */
 			PZVAL_UNLOCK(T(node->u.var).str_offset.str, should_free);
+			return NULL;
 		}
-		return T(node->u.var).var.ptr_ptr;
 	} else {
 		should_free->var = 0;
 		return NULL;
@@ -539,20 +544,7 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 			T->str_offset.str->value.str.val[T->str_offset.offset] = final_value->value.str.val[0];
 			
 			if (op2) {
-				if (op2->op_type == IS_VAR) {
-					if (value == &T(op2->u.var).tmp_var) {
-						if (result->u.EA.type & EXT_TYPE_UNUSED) {
-							/* We are not going to use return value, drop it */
-							STR_FREE(value->value.str.val);
-						} else {
-							/* We are going to use return value, make it real zval */
-							ALLOC_ZVAL(value);
-							*value = T(op2->u.var).tmp_var;
-							value->is_ref = 0;
-							value->refcount = 0; /* LOCK will increase it */
-						}
-					}
-				} else {
+				if (op2->op_type == IS_TMP_VAR) {
 					if (final_value == &T(op2->u.var).tmp_var) {
 						/* we can safely free final_value here
 						 * because separation is done only
@@ -827,6 +819,7 @@ static void zend_fetch_var_address(zend_op *opline, temp_variable *Ts, int type 
 			}
 		}
 		switch (opline->op2.u.EA.type) {
+		  case ZEND_FETCH_GLOBAL:
 			case ZEND_FETCH_LOCAL:
 				FREE_OP(free_op1);
 				break;
