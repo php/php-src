@@ -971,24 +971,17 @@ PHP_FUNCTION(mysql_stat)
 	Returns the default character set for the current connection */
 PHP_FUNCTION(mysql_character_set_name)
 {
-	zval *mysql_link;
+	zval *mysql_link = NULL;
 	int id = -1;
 	php_mysql_conn *mysql;
 
-	switch(ZEND_NUM_ARGS()) {
-		case 0:
-			id = php_mysql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
-			CHECK_LINK(id);
-			break;
-		case 1:
-			if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r",&mysql_link)==FAILURE) {
-				RETURN_FALSE;
-			}
-			id = -1;
-			break;
-		default:
-			WRONG_PARAM_COUNT;
-			break;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|r", &mysql_link) == FAILURE) {
+		return;
+	}
+
+	if (ZEND_NUM_ARGS() == 0) {
+		id = php_mysql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+		CHECK_LINK(id);
 	}
 
 	ZEND_FETCH_RESOURCE2(mysql, php_mysql_conn *, &mysql_link, id, "MySQL-Link", le_link, le_plink);
@@ -1349,32 +1342,28 @@ PHP_FUNCTION(mysql_list_fields)
 	Returns a result set describing the current server threads */
 PHP_FUNCTION(mysql_list_processes)
 {
-	zval *mysql_link;
+	zval *mysql_link = NULL;
 	int id = -1;
 	php_mysql_conn *mysql;
 	MYSQL_RES *mysql_result;
 
-	switch(ZEND_NUM_ARGS()) {
-		case 0:
-			id = php_mysql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
-			CHECK_LINK(id);
-			break;
-		case 1:
-			if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r",&mysql_link)==FAILURE) {
-				RETURN_FALSE;
-			}
-			break;
-		default:
-			WRONG_PARAM_COUNT;
-			break;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|r", &mysql_link) == FAILURE) {
+		return;
+	}
+
+	if (ZEND_NUM_ARGS() == 0) {
+		id = php_mysql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+		CHECK_LINK(id);
 	}
 
 	ZEND_FETCH_RESOURCE2(mysql, php_mysql_conn *, &mysql_link, id, "MySQL-Link", le_link, le_plink);
 
-	if ((mysql_result=mysql_list_processes(&mysql->conn))==NULL) {
+	mysql_result = mysql_list_processes(&mysql->conn);
+	if (mysql_result == NULL) {
 		php_error(E_WARNING, "Unable to save MySQL query result");
 		RETURN_FALSE;
 	}
+
 	ZEND_REGISTER_RESOURCE(return_value, mysql_result, le_result);
 }
 /* }}} */
@@ -1524,13 +1513,12 @@ PHP_FUNCTION(mysql_real_escape_string)
 		return;
 	}
 
-	if (mysql_link == NULL) {
+	if (ZEND_NUM_ARGS() == 1) {
 		id = php_mysql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 		CHECK_LINK(id);
 	}
-	else {
-		ZEND_FETCH_RESOURCE2(mysql, php_mysql_conn *, &mysql_link, id, "MySQL-Link", le_link, le_plink);
-	}
+
+	ZEND_FETCH_RESOURCE2(mysql, php_mysql_conn *, &mysql_link, id, "MySQL-Link", le_link, le_plink);
 
 	new_str = emalloc(str_len * 2 + 1);
 	new_str_len = mysql_real_escape_string(&mysql->conn, new_str, str, str_len);
