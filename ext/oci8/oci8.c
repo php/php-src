@@ -1061,7 +1061,7 @@ static void _oci_coll_list_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 
 	/* Note sure if we need to free the object.  Have an
 	   oracle TAR out on this one.
-	   OCIDescriptorFree(descr->ocidescr, Z_TYPE_P(descr)); */
+	   OCIDescriptorFree(descr->ocidescr, descr->type); */
 
 	oci_debug("END   _oci_coll_list_dtor: %d",coll->id);
 
@@ -1086,7 +1086,7 @@ static void _oci_descriptor_list_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 	CALL_OCI(
 		OCIDescriptorFree(
 			descr->ocidescr, 
-			Z_TYPE_P(descr)
+			descr->type
 		)
 	);
 
@@ -1350,23 +1350,23 @@ static oci_out_column *oci_get_col(oci_statement *statement, int col, zval **val
 
 /* {{{ oci_new_desc()
 */
-static oci_descriptor *oci_new_desc(int type,oci_connection *connection)
+static oci_descriptor *oci_new_desc(int type, oci_connection *connection)
 {
 	oci_descriptor *descr;
 	TSRMLS_FETCH();
 
 	descr = emalloc(sizeof(oci_descriptor));
 	
-	Z_TYPE_P(descr) = type;
+	descr->type = type;
 
-	switch (Z_TYPE_P(descr)) {
+	switch (descr->type) {
 		case OCI_DTYPE_FILE:
 		case OCI_DTYPE_LOB:
 		case OCI_DTYPE_ROWID:
 			break;
 
 		default:
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown descriptor type %d.",Z_TYPE_P(descr));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown descriptor type %d.", descr->type);
 			efree(descr);
 			return 0;
 	}
@@ -1375,7 +1375,7 @@ static oci_descriptor *oci_new_desc(int type,oci_connection *connection)
 		OCIDescriptorAlloc(
 			connection->session->pEnv,
 			(dvoid*)&(descr->ocidescr), 
-			Z_TYPE_P(descr), 
+			descr->type, 
 			(size_t) 0, 
 			(dvoid **) 0
 		)
@@ -2149,7 +2149,7 @@ static int oci_lobgetlen(oci_connection *connection, oci_descriptor *mydescr, ub
 	if (mydescr->lob_size >= 0) {
 		*loblen = mydescr->lob_size;
 	} else {
-		if (Z_TYPE_P(mydescr) == OCI_DTYPE_FILE) {
+		if (mydescr->type == OCI_DTYPE_FILE) {
 			CALL_OCI_RETURN(connection->error,
 				OCILobFileOpen(
 					connection->pServiceContext, 
@@ -2181,7 +2181,7 @@ static int oci_lobgetlen(oci_connection *connection, oci_descriptor *mydescr, ub
 		}
 		mydescr->lob_size = *loblen;
 
-		if (Z_TYPE_P(mydescr) == OCI_DTYPE_FILE) {
+		if (mydescr->type == OCI_DTYPE_FILE) {
 			CALL_OCI_RETURN(connection->error,
 				OCILobFileClose(
 					connection->pServiceContext, 
@@ -2207,7 +2207,7 @@ static int oci_lobgetlen(oci_connection *connection, oci_descriptor *mydescr, ub
 /* {{{ oci_loadlob()
 */
 #define LOBREADSIZE 1048576l /* 1MB */
-static int oci_loadlob(oci_connection *connection, oci_descriptor *mydescr, char **buffer,ub4 *loblen)
+static int oci_loadlob(oci_connection *connection, oci_descriptor *mydescr, char **buffer, ub4 *loblen)
 {
 	ub4 siz = 0;
 	ub4 readlen = 0;
@@ -2216,7 +2216,7 @@ static int oci_loadlob(oci_connection *connection, oci_descriptor *mydescr, char
 
 	*loblen = 0;
 	
-	if (Z_TYPE_P(mydescr) == OCI_DTYPE_FILE) {
+	if (mydescr->type == OCI_DTYPE_FILE) {
 		CALL_OCI_RETURN(connection->error,
 			OCILobFileOpen(
 				connection->pServiceContext, 
@@ -2285,7 +2285,7 @@ static int oci_loadlob(oci_connection *connection, oci_descriptor *mydescr, char
 		return -1;
 	}
 
-	if (Z_TYPE_P(mydescr) == OCI_DTYPE_FILE) {
+	if (mydescr->type == OCI_DTYPE_FILE) {
 		CALL_OCI_RETURN(connection->error,
 			OCILobFileClose(
 				connection->pServiceContext, 
@@ -2330,7 +2330,7 @@ static int oci_readlob(oci_connection *connection, oci_descriptor *mydescr, char
 		return -1;
 	}
 
-	if (Z_TYPE_P(mydescr) == OCI_DTYPE_FILE) {
+	if (mydescr->type == OCI_DTYPE_FILE) {
 		CALL_OCI_RETURN(connection->error,
 			OCILobFileOpen(
 				connection->pServiceContext, 
@@ -2418,7 +2418,7 @@ static int oci_readlob(oci_connection *connection, oci_descriptor *mydescr, char
 		return -1;
 	}
 
-	if (Z_TYPE_P(mydescr) == OCI_DTYPE_FILE) {
+	if (mydescr->type == OCI_DTYPE_FILE) {
 		CALL_OCI_RETURN(connection->error,
 			OCILobFileClose(
 				connection->pServiceContext, 
@@ -3130,8 +3130,9 @@ CLEANUP:
 */
 static int _oci_session_cleanup(void *data TSRMLS_DC)
 {
-	list_entry *le = (list_entry *) data;
-	if (Z_TYPE_P(le) == le_session) {
+	zend_rsrc_list_entry *le = (zend_rsrc_list_entry *) data;
+
+	if (le->type == le_session) {
 		oci_server *server = ((oci_session*) le->ptr)->server;
 		if (server->is_open == 2) 
 			return 1;
@@ -3583,7 +3584,7 @@ PHP_FUNCTION(oci_define_by_name)
 
 	define->name = (text*) estrndup(Z_STRVAL_PP(name),Z_STRLEN_PP(name));
 	define->name_len = Z_STRLEN_PP(name);
-	Z_TYPE_P(define) = ocitype;
+	define->type = ocitype;
 	define->zval = *var;
 	zval_add_ref(var);
 
@@ -4876,7 +4877,7 @@ PHP_FUNCTION(oci_lob_export)
 			goto bail;
 		}
 		
-		if (Z_TYPE_P(descr) == OCI_DTYPE_FILE) {
+		if (descr->type == OCI_DTYPE_FILE) {
 			CALL_OCI_RETURN(connection->error,
 				OCILobFileOpen(
 					connection->pServiceContext, 
@@ -4969,7 +4970,7 @@ PHP_FUNCTION(oci_lob_export)
 			fp = 0;
 		}
 
-		if (Z_TYPE_P(descr) == OCI_DTYPE_FILE) {
+		if (descr->type == OCI_DTYPE_FILE) {
 			CALL_OCI_RETURN(connection->error,
 				OCILobFileClose(
 					connection->pServiceContext, 
