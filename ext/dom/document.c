@@ -1204,10 +1204,10 @@ PHP_FUNCTION(dom_document_document)
 }
 /* }}} end dom_document_document */
 
-/* {{{ static xmlDocPtr dom_document_parser(zval *id, int mode, char *source TSRMLS_DC) */
+/* {{{ */
 static xmlDocPtr dom_document_parser(zval *id, int mode, char *source TSRMLS_DC) {
     xmlDocPtr ret;
-    xmlParserCtxtPtr ctxt;
+    xmlParserCtxtPtr ctxt = NULL;
 	dom_doc_props *doc_props;
 	dom_object *intern;
 	dom_ref_obj *document = NULL;
@@ -1232,12 +1232,60 @@ static xmlDocPtr dom_document_parser(zval *id, int mode, char *source TSRMLS_DC)
 
 	xmlInitParser();
 
+	keep_blanks = xmlKeepBlanksDefault(keep_blanks);
+
 	if (mode == DOM_LOAD_FILE) {
-		expand_filepath(source, resolved_path TSRMLS_CC);
-		ctxt = xmlCreateFileParserCtxt(resolved_path);
+
+		xmlURI *uri;
+		xmlChar *escsource;
+		char *file_dest;
+		int isFileUri = 0;
+
+		uri = xmlCreateURI();
+		escsource = xmlURIEscapeStr(source, ":");
+		xmlParseURIReference(uri, escsource);
+		xmlFree(escsource);
+
+		if (uri->scheme != NULL) {
+			/* absolute file uris - libxml only supports localhost or empty host */
+			if (strncasecmp(source, "file:///",8) == 0) {
+				isFileUri = 1;
+#ifdef PHP_WIN32
+				source += 8;
+#else
+				source += 7;
+#endif
+			} else if (strncasecmp(source, "file://localhost/",17) == 0) {
+				isFileUri = 1;
+#ifdef PHP_WIN32
+				source += 17;
+#else
+				source += 16;
+#endif
+			}
+		}
+
+		file_dest = source;
+
+		if ((uri->scheme == NULL || isFileUri)) {
+			if (! VCWD_REALPATH(source, resolved_path)) {
+				expand_filepath(source, resolved_path TSRMLS_CC);
+			}
+			file_dest = resolved_path;
+		}
+
+		xmlFreeURI(uri);
+
+		if ((PG(safe_mode) && (!php_checkuid(file_dest, NULL, CHECKUID_CHECK_FILE_AND_DIR))) || php_check_open_basedir(file_dest TSRMLS_CC)) {
+			ctxt = NULL;
+		} else {
+			ctxt = xmlCreateFileParserCtxt(file_dest);
+		}
 	} else {
 		ctxt = xmlCreateDocParserCtxt(source);
 	}
+
+	xmlKeepBlanksDefault(keep_blanks);
 
 	if (ctxt == NULL) {
 		return(NULL);
@@ -1266,7 +1314,6 @@ static xmlDocPtr dom_document_parser(zval *id, int mode, char *source TSRMLS_DC)
 	ctxt->recovery = 0;
 	ctxt->validate = validate;
     ctxt->loadsubset = (resolve_externals * XML_COMPLETE_ATTRS);
-    ctxt->keepBlanks = keep_blanks;
 	ctxt->replaceEntities = substitute_ent;
 
 	ctxt->vctxt.error = php_dom_ctx_error;
@@ -1274,9 +1321,6 @@ static xmlDocPtr dom_document_parser(zval *id, int mode, char *source TSRMLS_DC)
 
 	if (ctxt->sax != NULL) {
 		ctxt->sax->error = php_dom_ctx_error;
-		if (ctxt->keepBlanks == 0) {
-			ctxt->sax->ignorableWhitespace = ignorableWhitespace;
-		}
 	}
 
 	xmlParseDocument(ctxt);
@@ -1297,7 +1341,7 @@ static xmlDocPtr dom_document_parser(zval *id, int mode, char *source TSRMLS_DC)
 
 	return(ret);
 }
-/* }}} end dom_parser_document */
+/* }}} */
 
 /* {{{ static void dom_parse_document(INTERNAL_FUNCTION_PARAMETERS, int mode) */
 static void dom_parse_document(INTERNAL_FUNCTION_PARAMETERS, int mode) {
@@ -1312,12 +1356,6 @@ static void dom_parse_document(INTERNAL_FUNCTION_PARAMETERS, int mode) {
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &source, &source_len) == FAILURE) {
 		return;
-	}
-
-	if (mode == DOM_LOAD_FILE) {
-		if ((PG(safe_mode) && (!php_checkuid(source, NULL, CHECKUID_CHECK_FILE_AND_DIR))) || php_check_open_basedir(source TSRMLS_CC)) {
-			RETURN_FALSE;
-		}
 	}
 
 	newdoc = dom_document_parser(id, mode, source TSRMLS_CC);

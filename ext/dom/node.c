@@ -65,13 +65,23 @@ Since:
 int dom_node_node_name_read(dom_object *obj, zval **retval TSRMLS_DC)
 {
 	xmlNode *nodep;
+	xmlNsPtr ns;
 	char *str = NULL;
+	xmlChar *qname = NULL;
 
 	nodep = dom_object_get_node(obj);
 
 	switch (nodep->type) {
 		case XML_ATTRIBUTE_NODE:
 		case XML_ELEMENT_NODE:
+			ns = nodep->ns;
+			if (ns != NULL && ns->prefix) {
+				qname = xmlStrdup(ns->prefix);
+				qname = xmlStrcat(qname, ":");
+			}
+			qname = xmlStrcat(qname, nodep->name);
+			str = qname;
+			break;
 		case XML_DOCUMENT_TYPE_NODE:
 		case XML_DTD_NODE:
 		case XML_PI_NODE:
@@ -112,6 +122,10 @@ int dom_node_node_name_read(dom_object *obj, zval **retval TSRMLS_DC)
 		ZVAL_STRING(*retval, str, 1);
 	} else {
 		ZVAL_EMPTY_STRING(*retval);
+	}
+	
+	if (qname != NULL) {
+		xmlFree(qname);
 	}
 
 	return SUCCESS;
@@ -654,9 +668,21 @@ Since: DOM Level 3
 */
 int dom_node_base_uri_read(dom_object *obj, zval **retval TSRMLS_DC)
 {
-	/* TODO: Implement this feature */
+	xmlNode *nodep;
+	xmlChar *baseuri;
+
+	nodep = dom_object_get_node(obj);
+
 	ALLOC_ZVAL(*retval);
-	ZVAL_NULL(*retval);
+
+	baseuri = xmlNodeGetBase(nodep->doc, nodep);
+	if (baseuri) {
+		ZVAL_STRING(*retval, (char *) (baseuri), 1);
+		xmlFree(baseuri);
+	} else {
+		ZVAL_NULL(*retval);
+	}
+
 	return SUCCESS;
 }
 
@@ -1315,18 +1341,38 @@ PHP_FUNCTION(dom_node_lookup_prefix)
 
 
 /* {{{ proto boolean dom_node_is_default_namespace(string namespaceURI);
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Node3-isDefaultNamespace
+URL: http://www.w3.org/TR/DOM-Level-3-Core/core.html#Node3-isDefaultNamespace
 Since: DOM Level 3
 */
 PHP_FUNCTION(dom_node_is_default_namespace)
 {
- DOM_NOT_IMPLEMENTED();
+	zval *id;
+	xmlNodePtr nodep;
+	dom_object *intern;
+	xmlNsPtr nsptr;
+	int uri_len = 0;
+	char *uri;
+
+	DOM_GET_THIS_OBJ(nodep, id, xmlNodePtr, intern);
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &uri, &uri_len) == FAILURE) {
+		return;
+	}
+	
+	if (uri_len > 0) {
+		nsptr = xmlSearchNs(nodep->doc, nodep, NULL);
+		if (nsptr && xmlStrEqual(nsptr->href, uri)) {
+			RETURN_TRUE;
+		}
+	}
+
+	RETURN_FALSE;
 }
 /* }}} end dom_node_is_default_namespace */
 
 
 /* {{{ proto domstring dom_node_lookup_namespace_uri(string prefix);
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Node3-lookupNamespaceURI
+URL: http://www.w3.org/TR/DOM-Level-3-Core/core.html#Node3-lookupNamespaceURI
 Since: DOM Level 3
 */
 PHP_FUNCTION(dom_node_lookup_namespace_uri)

@@ -250,13 +250,13 @@ dom_object *dom_object_get_data(xmlNodePtr obj)
 /* }}} end dom_object_get_data */
 
 /* {{{ php_dom_clear_object */
-static void php_dom_clear_object(dom_object *object TSRMLS_DC)
+static int php_dom_clear_object(dom_object *object TSRMLS_DC)
 {
 	if (object->prop_handler) {
 		object->prop_handler = NULL;
 	}
 	decrement_node_ptr(object TSRMLS_CC);
-	decrement_document_reference(object TSRMLS_CC);
+	return decrement_document_reference(object TSRMLS_CC);
 }
 /* }}} end php_dom_clear_object */
 
@@ -284,14 +284,16 @@ void php_dom_set_object(dom_object *object, xmlNodePtr obj TSRMLS_DC)
 /* }}} end php_dom_set_object */
 
 /* {{{ dom_unregister_node */
-void dom_unregister_node(xmlNodePtr nodep TSRMLS_DC)
+static int dom_unregister_node(xmlNodePtr nodep TSRMLS_DC)
 {
 	dom_object *wrapper;
-
+	
 	wrapper = dom_object_get_data(nodep);
 	if (wrapper != NULL ) {
-		php_dom_clear_object(wrapper TSRMLS_CC);
+		return php_dom_clear_object(wrapper TSRMLS_CC);
 	}
+
+	return -1;
 }
 /* }}} end dom_unregister_node */
 
@@ -405,17 +407,6 @@ void dom_write_property(zval *object, zval *member, zval *value TSRMLS_DC)
 }
 /* }}} */
 
-static zval **dom_property_get_ptr(zval *object, zval *member TSRMLS_DC)
-{
-	zval **prop_ptr;
-	zval *property;
-
-	property = dom_read_property(object, member, 0 TSRMLS_CC);
-	prop_ptr = &property;
-
-	return prop_ptr;
-}
-
 zend_module_entry dom_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"dom",
@@ -441,6 +432,7 @@ PHP_MINIT_FUNCTION(dom)
 	memcpy(&dom_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	dom_object_handlers.read_property = dom_read_property;
 	dom_object_handlers.write_property = dom_write_property;
+	dom_object_handlers.get_property_ptr_ptr = NULL;
 
 	zend_hash_init(&classes, 0, NULL, NULL, 1);
 
@@ -871,7 +863,9 @@ void node_free_list(xmlNodePtr node TSRMLS_DC)
 			
 			curnode = node->next;
 			xmlUnlinkNode(node);
-			dom_unregister_node(node TSRMLS_CC);
+			if (dom_unregister_node(node TSRMLS_CC) == 0) {
+				node->doc = NULL;
+			}
 			dom_node_free(node);
 		}
 	}
@@ -903,7 +897,9 @@ void node_free_resource(xmlNodePtr node TSRMLS_DC)
 					default:
 						node_free_list((xmlNodePtr) node->properties TSRMLS_CC);
 				}
-				dom_unregister_node(node TSRMLS_CC);
+				if (dom_unregister_node(node TSRMLS_CC) == 0) {
+					node->doc = NULL;
+				}
 				dom_node_free(node);
 			} else {
 				dom_unregister_node(node TSRMLS_CC);

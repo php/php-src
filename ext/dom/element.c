@@ -107,10 +107,20 @@ Since:
 int dom_element_tag_name_read(dom_object *obj, zval **retval TSRMLS_DC)
 {
 	xmlNodePtr nodep;
+	xmlNsPtr ns;
+	xmlChar *qname;
 
 	nodep = dom_object_get_node(obj);
 	ALLOC_ZVAL(*retval);
-	ZVAL_STRING(*retval, (char *) (nodep->name), 1);
+	ns = nodep->ns;
+	if (ns != NULL && ns->prefix) {
+		qname = xmlStrdup(ns->prefix);
+		qname = xmlStrcat(qname, ":");
+	}
+	qname = xmlStrcat(qname, nodep->name);
+	ZVAL_STRING(*retval, qname, 1);
+	xmlFree(qname);
+
 	return SUCCESS;
 }
 
@@ -309,14 +319,12 @@ PHP_FUNCTION(dom_element_set_attribute_node)
 
 	existattrp = xmlHasProp(nodep, attrp->name);
 	if (existattrp != NULL) {
-		if ((oldobj = dom_object_get_data((xmlNodePtr) existattrp)) == NULL) {
-			xmlUnlinkNode((xmlNodePtr) existattrp);
-		} else {
-			if (((node_ptr *)oldobj->ptr)->node == (xmlNodePtr) attrp) {
-				RETURN_NULL();
-			}
-			xmlUnlinkNode((xmlNodePtr) existattrp);
+		if ((oldobj = dom_object_get_data((xmlNodePtr) existattrp)) != NULL && 
+			((node_ptr *)oldobj->ptr)->node == (xmlNodePtr) attrp)
+		{
+			RETURN_NULL();
 		}
+		xmlUnlinkNode((xmlNodePtr) existattrp);
 	}
 
 	if (attrp->doc == NULL && nodep->doc != NULL) {
@@ -343,16 +351,15 @@ Since:
 */
 PHP_FUNCTION(dom_element_remove_attribute_node)
 {
-	zval *id;
+	zval *id, *node, *rv = NULL;
 	xmlNode *nodep;
 	xmlAttr *attrp;
-	dom_object *intern;
-	int name_len;
-	char *name;
+	dom_object *intern, *attrobj;
+	int ret;
 
 	DOM_GET_THIS_OBJ(nodep, id, xmlNodePtr, intern);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s",  &name, &name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o",  &node) == FAILURE) {
 		return;
 	}
 
@@ -361,22 +368,16 @@ PHP_FUNCTION(dom_element_remove_attribute_node)
 		RETURN_FALSE;
 	}
 
-	attrp = xmlHasProp(nodep,name);
-	if (attrp == NULL) {
+	DOM_GET_OBJ(attrp, node, xmlAttrPtr, attrobj);
+
+	if (attrp->type != XML_ATTRIBUTE_NODE || attrp->parent != nodep) {
+		php_dom_throw_error(NOT_FOUND_ERR, dom_get_strict_error(intern->document) TSRMLS_CC);
 		RETURN_FALSE;
 	}
 
-	/*	Check for registered nodes within attributes tree when attribute is not referenced  
-		Unlink dependant nodes and free attribute if not registered */
-	if (dom_object_get_data((xmlNodePtr) attrp) == NULL) {
-		node_list_unlink(attrp->children TSRMLS_CC);
-		xmlUnlinkNode((xmlNodePtr) attrp);
-		xmlFreeProp(attrp);
-	} else {
-		xmlUnlinkNode((xmlNodePtr) attrp);
-	}
+	xmlUnlinkNode((xmlNodePtr) attrp);
 
-	RETURN_TRUE;
+	DOM_RET_OBJ(rv, (xmlNodePtr) attrp, &ret, intern);
 
 }
 /* }}} end dom_element_remove_attribute_node */
@@ -684,14 +685,12 @@ PHP_FUNCTION(dom_element_set_attribute_node_ns)
     }
 
 	if (existattrp != NULL) {
-		if ((oldobj = dom_object_get_data((xmlNodePtr) existattrp)) == NULL) {
-			xmlUnlinkNode((xmlNodePtr) existattrp);
-		} else {
-			if (((node_ptr *)oldobj->ptr)->node == (xmlNodePtr) attrp) {
-				RETURN_NULL();
-			}
-			xmlUnlinkNode((xmlNodePtr) existattrp);
+		if ((oldobj = dom_object_get_data((xmlNodePtr) existattrp)) != NULL && 
+			((node_ptr *)oldobj->ptr)->node == (xmlNodePtr) attrp)
+		{
+			RETURN_NULL();
 		}
+		xmlUnlinkNode((xmlNodePtr) existattrp);
 	}
 
 	if (attrp->doc == NULL && nodep->doc != NULL) {
