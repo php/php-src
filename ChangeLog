@@ -2394,7 +2394,7 @@
 
     * sapi/apache/libpre.c
       sapi/apache/php_apache_http.h:
-      Added missing headers and $Id$ tags.
+      Added missing headers and Id tags.
 
     * sapi/cgi/config9.m4:
       MFB: Fixed bug #22356 (Do not add empty -I flags).
@@ -2953,7 +2953,7 @@
       main/streams/plain_wrapper.c
       main/streams/streams.c
       main/streams/userspace.c:
-      ws fixes + missing $Id$ tags, headers added
+      ws fixes + missing Id tags, headers added
 
 2003-02-19  Corne' Cornelius  <cornec@reach.co.za>
 
@@ -3871,7 +3871,7 @@
 
     * (PHP_4_3)
       sapi/cgi/cgi_main.c:
-      Added missing $Id$ tag
+      Added missing Id tag
 
 2003-02-14  Thies C. Arntzen  <thies@thieso.net>
 
