@@ -4063,7 +4063,7 @@ int zend_verify_abstract_class_function(zend_function *fn, zend_abstract_info *a
 	return 0;
 }
 
-int zend_verify_abstract_class(ZEND_OPCODE_HANDLER_ARGS)
+int zend_verify_abstract_class_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_class_entry *ce = EX_T(EX(opline)->op1.u.var).EA.class_entry;
 	zend_abstract_info ai;
@@ -4262,7 +4262,7 @@ void zend_init_opcodes_handlers()
 
 	zend_opcode_handlers[ZEND_ADD_INTERFACE] = zend_add_interface_handler;
 	zend_opcode_handlers[ZEND_VERIFY_INSTANCEOF] = zend_verify_instanceof_handler;
-	zend_opcode_handlers[ZEND_VERIFY_ABSTRACT_CLASS] = zend_verify_abstract_class;
+	zend_opcode_handlers[ZEND_VERIFY_ABSTRACT_CLASS] = zend_verify_abstract_class_handler;
 
 	zend_opcode_handlers[ZEND_ASSIGN_DIM] = zend_assign_dim_handler;
 }
