@@ -1,7 +1,12 @@
 --TEST--
 Bug #16069
 --SKIPIF--
-<?php include( 'skipif.inc' ); if( @iconv('CP932', 'EUC-JP//TRANSLIT', "\x87\x6d") == '' ) die("skip\n"); ?>
+<?php
+include( 'skipif.inc' );
+if (@iconv('CP932', 'EUC-JP//TRANSLIT', "\x87\x6d")=='') {
+	die("skip  CP932 translit not available\n");
+}
+?>
 --POST--
 --GET--
 --FILE--
