@@ -1,6 +1,7 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 2002, Version 4.3.0
+- Copy() fixed to return 1 on 0 byte files. Patch by Ilia A <ilia@prohost.org>.
 - Added ob_list_handlers() which returns an array of all active output
   handlers. (marcus)
 - Added mbstring encoding/decoding "HTML-ENTITIES". (Marcus)
