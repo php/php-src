@@ -1,0 +1,96 @@
+Extensions
+----------
+MySQL, ODBC, FTP, Calendar, BCMath, COM, PCRE, Session, WDDX and XML support is *built-in*.
+You don't need to load any additional extensions in order to use these functions.
+
+
+Installtion instructions
+------------------------
+
+Apache:
+1. Stop the Apache Webserver.
+Edit the httpd.conf and put in these lines, modified to your environment:
+2. Unzip the Package to c:\php, now move php4ts.dll to the windows/system(32) directory, overwritte any older file!
+
+# for the apache module
+LoadModule php4_module c:/php/sapi/php4apache.dll
+AddType application/x-httpd-php .php4
+
+#for the cgi binary (you can use that one compiled with force cgi redirect too)
+ScriptAlias /php4/ "C:/php/"
+Action application/x-httpd-php4 "/php4/php.exe"
+AddType application/x-httpd-php4 .php
+
+3. Copy the php.ini-dist to your sysroot (directory where you installed windows), rename it to php.ini, and
+edit the php.ini to fit your needs.
+4. Restart the Apache server.
+
+
+
+Oreilly Wesite Pro:
+1. First make sure that you got atleast Version 2.5
+2. Edit the Server Properties and select the tab "Mapping"
+3. From the List select "Associations" and enter the desired extension (".php") and the path to the cgi exe or the isapi dll
+4. Now select "Content Types" add the same extension ".php" and enter the contenttype:
+cgi wwwserver/shellcgi
+isapi wwwserver/isapi
+
+5. Copy the php.ini-dist to your Systemroot (Directory where you installed windows), rename it to php.ini, and
+edit it to fit your needs.
+6. Edit the php.ini to fit your needs.
+
+
+Xitami:
+1. Copy the php.ini-dist to your Systemroot (Directory where you installed windows), rename it to php.ini, and
+edit it to fit your needs.
+2. Make sure the webserver is running, and point your browser to xitamis admin console (usually http://127.0.0.1/admin), and click on Configuration
+3. Now navigate to the Filters, and put the extension which php should parse (i.e. .php) into the field File extensions (.xxx)
+4. In Filter command or script put the path and name of your php executable i.e. c:\php\php.exe
+5. Press the 'Save' icon 
+
+
+IIS 4.0+ (isapi):
+1. Copy the php.ini-dist to your systemroot (the directory where you installed windows), rename it to php.ini, and
+edit it to fit your needs
+2. Start the Microsoft Management Console or the Internet Services Manager, located in your Control Panel
+3. Click on your webserver, and select properties
+4. If you don't want to perform HTTP Authentication using PHP, you can (and should) skip this step. Under ISAPI Filters,
+add a new ISAPI filter. Use PHP as the filter name, and supply a path to the php4isapi.dll
+5. Under Home Directory, click on the Configuration button. Add a new entry to the Application Mappings. Use the path the
+php4isapi.dll as the Executable, supply .php as the extension, leave Method exclusions, blank, and check the Script engine
+checkbox
+6. Stop IIS completely
+7. Start IIS again 
+
+
+IIS 4.0+ (CGI)
+1. Copy the php.ini-dist to your systemroot (the directory where you installed windows), rename it to php.ini, and
+edit it to fit your needs
+2. Start the Microsoft Management Console (may appear as 'Internet Services Manager', either in your Windows NT 4.0
+Option Pack branch or the Control Panel->Administrative Tools under Windows 2000).
+3. Right click on your Web server node (will most probably appear as 'Default Web Server'), and select 'Properties'.
+4. Under 'Home Directory', click on the 'Configuration' button. Add a new
+5. entry to the Application Mappings; Use the path to php.exe as the Executable, supply .php as the extension, leave
+'Method exclusions', blank, and check the Script engine checkbox.
+6. Put a .php file under your Web server's document root and check if it works!
+
+
+PWS 4.0+ (isapi):
+1. Copy the php.ini-dist to your systemroot (the directory where you installed windows), rename it to php.ini, and
+edit it to fit your needs
+2. Edit the enclosed PWS-php4isapi.reg (ISAPI interface) or PWS-php4cgi.reg (CGI interface) file to reflect the location of
+your php4isapi.dll / php.exe. Forward slashes should be escaped, for example:
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\w3svc\parameters\Script Map] ".php"="C:\\Program Files\\PHP\\php4isapi.dll"
+3. In the PWS Manager, right click on a given directory you want to add PHP support to, and select Properties. Check the 'Execute' checkbox, and confirm. 
+
+
+PWS 4.0+ (CGI):
+1. Copy the php.ini-dist to your systemroot (the directory where you installed windows), rename it to php.ini, and
+edit it to fit your needs
+2. Edit the enclosed PWS-php4.reg file to reflect the location of your php.exe. Forward slashes should be escaped,
+for example:
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\w3svc\parameters\Script Map] ".php"="C:\\Program Files\\PHP\\php.exe"
+3. In the PWS Manager, right click on a given directory you want to add PHP
+support to, and select Properties. Check the 'Execute' checkbox, and
+confirm.
+4. At this point, PWS should have built-in PHP support.
