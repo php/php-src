@@ -944,44 +944,46 @@ PHP_FUNCTION(yaz_record)
 			if (!strcmp (type, "array"))
 			{
 				Z_External *ext = (Z_External *) ZOOM_record_get (r, "ext", 0);
-				oident *ent = oid_getentbyoid(ext->direct_reference);
-
-				if (ext->which == Z_External_grs1 && ent->value == VAL_GRS1)
+				if (ext)
 				{
-					retval_grs1 (return_value, ext->u.grs1);
-				}
-				else if (ext->which == Z_External_octet)
-				{
-					char *buf = (char *) (ext->u.octet_aligned->buf);
-					ODR odr = odr_createmem (ODR_DECODE);
-					Z_GenericRecord *rec = 0;
-
-					switch (ent->value)
+					oident *ent = oid_getentbyoid(ext->direct_reference);
+					if (ext->which == Z_External_grs1 && ent->value == VAL_GRS1)
 					{
-					case VAL_SOIF:
-					case VAL_HTML:
-						break;
-					case VAL_TEXT_XML:
-					case VAL_APPLICATION_XML:
-						/* text2grs1 (&buf, &len, t->odr_in, 0, 0); */
-						break;
-					default:
-						rec = marc_to_grs1 (buf, odr);
+						retval_grs1 (return_value, ext->u.grs1);
 					}
-					if (rec)
-						retval_grs1 (return_value, rec);
-					odr_destroy (odr);
+					else if (ext->which == Z_External_octet)
+					{
+						char *buf = (char *) (ext->u.octet_aligned->buf);
+						ODR odr = odr_createmem (ODR_DECODE);
+						Z_GenericRecord *rec = 0;
+						
+						switch (ent->value)
+						{
+						case VAL_SOIF:
+						case VAL_HTML:
+							break;
+						case VAL_TEXT_XML:
+						case VAL_APPLICATION_XML:
+							/* text2grs1 (&buf, &len, t->odr_in, 0, 0); */
+							break;
+						default:
+							rec = marc_to_grs1 (buf, odr);
+						}
+						if (rec)
+							retval_grs1 (return_value, rec);
+						odr_destroy (odr);
+					}
 				}
 			}
-            else
+			else
 			{
-                int rlen;
+				int rlen;
 				const char *info = ZOOM_record_get (r, type, &rlen);
 
-                return_value->value.str.len = (rlen > 0) ? rlen : 0;
-                return_value->value.str.val =
-                    estrndup(info, return_value->value.str.len);
-                return_value->type = IS_STRING;
+				return_value->value.str.len = (rlen > 0) ? rlen : 0;
+				return_value->value.str.val =
+					estrndup(info, return_value->value.str.len);
+				return_value->type = IS_STRING;
 			}
 		}
 	}
