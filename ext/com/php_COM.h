@@ -19,7 +19,7 @@ PHP_FUNCTION(com_propput);
 PHP_FUNCTION(com_load_typelib);
 PHP_FUNCTION(com_isenum);
 
-PHPAPI HRESULT php_COM_invoke(comval *obj, DISPID dispIdMember, WORD wFlags, DISPPARAMS FAR*  pDispParams, VARIANT FAR* pVarResult TSRMLS_DC);
+PHPAPI HRESULT php_COM_invoke(comval *obj, DISPID dispIdMember, WORD wFlags, DISPPARAMS FAR*  pDispParams, VARIANT FAR* pVarResult, char **ErrString TSRMLS_DC);
 PHPAPI HRESULT php_COM_get_ids_of_names(comval *obj, OLECHAR FAR* FAR* rgszNames, DISPID FAR* rgDispId TSRMLS_DC);
 PHPAPI HRESULT php_COM_release(comval *obj TSRMLS_DC);
 PHPAPI HRESULT php_COM_addref(comval *obj TSRMLS_DC);

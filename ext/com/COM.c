@@ -102,15 +102,14 @@ static PHP_MINFO_FUNCTION(COM)
 	DISPLAY_INI_ENTRIES();
 }
 
-PHPAPI HRESULT php_COM_invoke(comval *obj, DISPID dispIdMember, WORD wFlags, DISPPARAMS FAR*  pDispParams, VARIANT FAR*  pVarResult TSRMLS_DC)
+PHPAPI HRESULT php_COM_invoke(comval *obj, DISPID dispIdMember, WORD wFlags, DISPPARAMS FAR*  pDispParams, VARIANT FAR*  pVarResult, char **ErrString TSRMLS_DC)
 {
 	HRESULT hr;
 	int failed = FALSE;
 	unsigned int ArgErr;
 	EXCEPINFO ExceptInfo;
 
-	/* TODO: Make use of the ArgError when hr==E_INVALIDARG */
-	/* TODO: Deal with the ExceptInfo structure in the error message */
+	*ErrString = NULL;
 	if(C_ISREFD(obj))
 	{
 		if(C_HASTLIB(obj))
@@ -134,6 +133,33 @@ PHPAPI HRESULT php_COM_invoke(comval *obj, DISPID dispIdMember, WORD wFlags, DIS
 		else
 		{
 			hr = C_DISPATCH_VT(obj)->Invoke(C_DISPATCH(obj), dispIdMember, &IID_NULL, LOCALE_SYSTEM_DEFAULT, wFlags, pDispParams, pVarResult, &ExceptInfo, &ArgErr);
+		}
+
+		if (FAILED(hr))
+		{
+			switch (hr)
+			{
+				case DISP_E_EXCEPTION:
+				{
+					int srclen;
+					char *src = php_OLECHAR_to_char(ExceptInfo.bstrSource, &srclen, 1, codepage TSRMLS_CC);
+					int desclen;
+					char *desc = php_OLECHAR_to_char(ExceptInfo.bstrDescription, &desclen, 1, codepage TSRMLS_CC);
+					*ErrString = pemalloc(srclen+desclen+50, 1);
+					sprintf(*ErrString, "<b>Source</b>: %s <b>Description</b>: %s", src, desc);
+					pefree(src, 1);
+					pefree(desc, 1);
+					SysFreeString(ExceptInfo.bstrSource);
+					SysFreeString(ExceptInfo.bstrDescription);
+					SysFreeString(ExceptInfo.bstrHelpFile);
+				}
+				break;
+				case DISP_E_PARAMNOTFOUND:
+				case DISP_E_TYPEMISMATCH:
+					*ErrString = pemalloc(25, 1);
+					sprintf(*ErrString, "<b>Argument</b>: %d", pDispParams->cArgs-ArgErr+1);
+					break;
+			}
 		}
 
 		return hr;
@@ -550,7 +576,7 @@ PHP_FUNCTION(com_load)
 		{
 			php_COM_destruct(obj TSRMLS_CC);
 			error_message = php_COM_error_message(hr TSRMLS_CC);  
-			php_error(E_WARNING,"Invalid ProgID or Moniker:  %s\n", error_message);
+			php_error(E_WARNING,"Invalid ProgID, GUID string, or Moniker: %s", error_message);
 			LocalFree(error_message);
 			RETURN_FALSE;
 		}
@@ -589,7 +615,7 @@ PHP_FUNCTION(com_load)
 		{
 			error_message = php_COM_error_message(hr TSRMLS_CC);
 			clsid_str = php_string_from_clsid(&clsid TSRMLS_CC);
-			php_error(E_WARNING,"Unable to obtain IDispatch interface for CLSID %s:  %s",clsid_str,error_message);
+			php_error(E_WARNING,"Unable to obtain IDispatch interface for CLSID %s: %s",clsid_str,error_message);
 			LocalFree(error_message);
 			efree(clsid_str);
 			php_COM_destruct(obj TSRMLS_CC);
@@ -673,7 +699,7 @@ int do_COM_invoke(comval *obj, pval *function_name, VARIANT *var_result, pval **
 				break;
 
 			default:
-				php_error(E_WARNING,"Wrong argument count to IEnumVariant::Next()\n");
+				php_error(E_WARNING,"Wrong argument count to IEnumVariant::Next()");
 
 				return FAILURE;
 		}
@@ -696,7 +722,7 @@ int do_COM_invoke(comval *obj, pval *function_name, VARIANT *var_result, pval **
 		if(FAILED(hr = C_ENUMVARIANT_VT(obj)->Next(C_ENUMVARIANT(obj), count, pSA->pvData, &count)))
 		{
 			char *error_message = php_COM_error_message(hr TSRMLS_CC);
-			php_error(E_WARNING,"IEnumVariant::Next() failed:  %s\n", error_message);
+			php_error(E_WARNING,"IEnumVariant::Next() failed: %s", error_message);
 			efree(error_message);
 			VariantClear(var_result);
 			return FAILURE;
@@ -708,7 +734,7 @@ int do_COM_invoke(comval *obj, pval *function_name, VARIANT *var_result, pval **
 			if(FAILED(SafeArrayRedim(pSA, rgsabound)))
 			{
 				char *error_message = php_COM_error_message(hr TSRMLS_CC);
-				php_error(E_WARNING,"IEnumVariant::Next() failed:  %s\n", error_message);
+				php_error(E_WARNING,"IEnumVariant::Next() failed: %s", error_message);
 				efree(error_message);
 				VariantClear(var_result);
 				return FAILURE;
@@ -722,7 +748,7 @@ int do_COM_invoke(comval *obj, pval *function_name, VARIANT *var_result, pval **
 		if(FAILED(hr = C_ENUMVARIANT_VT(obj)->Reset(C_ENUMVARIANT(obj))))
 		{
 			char *error_message = php_COM_error_message(hr TSRMLS_CC);
-			php_error(E_WARNING,"IEnumVariant::Next() failed:  %s\n", error_message);
+			php_error(E_WARNING,"IEnumVariant::Next() failed: %s", error_message);
 			efree(error_message);
 			return FAILURE;
 		}
@@ -744,13 +770,13 @@ int do_COM_invoke(comval *obj, pval *function_name, VARIANT *var_result, pval **
 				break;
 
 			default:
-				php_error(E_WARNING,"Wrong argument count to IEnumVariant::Skip()\n");
+				php_error(E_WARNING,"Wrong argument count to IEnumVariant::Skip()");
 				return FAILURE;
 		}
 		if(FAILED(hr = C_ENUMVARIANT_VT(obj)->Skip(C_ENUMVARIANT(obj), count)))
 		{
 			char *error_message = php_COM_error_message(hr TSRMLS_CC);
-			php_error(E_WARNING,"IEnumVariant::Next() failed:  %s\n", error_message);
+			php_error(E_WARNING,"IEnumVariant::Next() failed: %s", error_message);
 			efree(error_message);
 			return FAILURE;
 		}
@@ -759,6 +785,8 @@ int do_COM_invoke(comval *obj, pval *function_name, VARIANT *var_result, pval **
 	}
 	else
 	{
+		char *ErrString;
+
 		funcname = php_char_to_OLECHAR(Z_STRVAL_P(function_name), Z_STRLEN_P(function_name), codepage TSRMLS_CC);
 
 		hr = php_COM_get_ids_of_names(obj, &funcname, &dispid TSRMLS_CC);
@@ -766,7 +794,7 @@ int do_COM_invoke(comval *obj, pval *function_name, VARIANT *var_result, pval **
 		if(FAILED(hr))
 		{
 			error_message = php_COM_error_message(hr TSRMLS_CC);
-			php_error(E_WARNING,"Unable to lookup %s:  %s\n", Z_STRVAL_P(function_name), error_message);
+			php_error(E_WARNING,"Unable to lookup %s: %s", Z_STRVAL_P(function_name), error_message);
 			LocalFree(error_message);
 			efree(funcname);
 			return FAILURE;
@@ -785,7 +813,7 @@ int do_COM_invoke(comval *obj, pval *function_name, VARIANT *var_result, pval **
 		dispparams.cArgs = arg_count;
 		dispparams.cNamedArgs = 0;
 
-		hr = php_COM_invoke(obj, dispid, DISPATCH_METHOD|DISPATCH_PROPERTYGET, &dispparams, var_result TSRMLS_CC);
+		hr = php_COM_invoke(obj, dispid, DISPATCH_METHOD|DISPATCH_PROPERTYGET, &dispparams, var_result, &ErrString TSRMLS_CC);
 
 		efree(funcname);
 		for (current_arg=0;current_arg<arg_count;current_arg++)
@@ -797,7 +825,15 @@ int do_COM_invoke(comval *obj, pval *function_name, VARIANT *var_result, pval **
 		if(FAILED(hr))
 		{
 			error_message = php_COM_error_message(hr TSRMLS_CC);
-			php_error(E_WARNING,"Invoke() failed:  %s\n", error_message);
+			if (ErrString)
+			{
+				php_error(E_WARNING,"Invoke() failed: %s %s", error_message, ErrString);
+				pefree(ErrString, 1);
+			}
+			else
+			{
+				php_error(E_WARNING,"Invoke() failed: %s", error_message);
+			}
 			LocalFree(error_message);
 			return FAILURE;
 		}
@@ -945,7 +981,7 @@ static int do_COM_propget(VARIANT *var_result, comval *obj, pval *arg_property, 
 	OLECHAR *propname;
 	char *error_message;
 	DISPPARAMS dispparams;
-
+	char *ErrString;
 
 	/* obtain property handler */
 	propname = php_char_to_OLECHAR(Z_STRVAL_P(arg_property), Z_STRLEN_P(arg_property), codepage TSRMLS_CC);
@@ -955,7 +991,7 @@ static int do_COM_propget(VARIANT *var_result, comval *obj, pval *arg_property, 
 	if(FAILED(hr))
 	{
 		error_message = php_COM_error_message(hr TSRMLS_CC);
-		php_error(E_WARNING,"Unable to lookup %s:  %s\n", Z_STRVAL_P(arg_property), error_message);
+		php_error(E_WARNING,"Unable to lookup %s: %s", Z_STRVAL_P(arg_property), error_message);
 		LocalFree(error_message);
 		efree(propname);
 		if(cleanup)
@@ -968,12 +1004,20 @@ static int do_COM_propget(VARIANT *var_result, comval *obj, pval *arg_property, 
 	dispparams.cArgs = 0;
 	dispparams.cNamedArgs = 0;
 
-	hr = php_COM_invoke(obj, dispid, DISPATCH_PROPERTYGET, &dispparams, var_result TSRMLS_CC);
+	hr = php_COM_invoke(obj, dispid, DISPATCH_PROPERTYGET, &dispparams, var_result, &ErrString TSRMLS_CC);
 
 	if(FAILED(hr))
 	{
 		error_message = php_COM_error_message(hr TSRMLS_CC);
-		php_error(E_WARNING,"PropGet() failed:  %s\n", error_message);
+		if (ErrString)
+		{
+			php_error(E_WARNING,"PropGet() failed: %s %s", error_message, ErrString);
+			pefree(ErrString, 1);
+		}
+		else
+		{
+			php_error(E_WARNING,"PropGet() failed: %s", error_message);
+		}
 		LocalFree(error_message);
 		efree(propname);
 		if(cleanup)
@@ -1001,6 +1045,7 @@ static void do_COM_propput(pval *return_value, comval *obj, pval *arg_property, 
 	VARIANT *var_result, *new_value;
 	DISPPARAMS dispparams;
 	DISPID mydispid = DISPID_PROPERTYPUT;
+	char *ErrString;
 
 	ALLOC_VARIANT(var_result);
 	ALLOC_VARIANT(new_value);
@@ -1013,7 +1058,7 @@ static void do_COM_propput(pval *return_value, comval *obj, pval *arg_property, 
 	if(FAILED(hr))
 	{
 		error_message = php_COM_error_message(hr TSRMLS_CC);
-		php_error(E_WARNING,"Unable to lookup %s:  %s\n", Z_STRVAL_P(arg_property), error_message);
+		php_error(E_WARNING,"Unable to lookup %s: %s", Z_STRVAL_P(arg_property), error_message);
 		LocalFree(error_message);
 		efree(propname);
 
@@ -1029,12 +1074,20 @@ static void do_COM_propput(pval *return_value, comval *obj, pval *arg_property, 
 	dispparams.cArgs = 1;
 	dispparams.cNamedArgs = 1;
 
-	hr = php_COM_invoke(obj, dispid, DISPATCH_PROPERTYPUT, &dispparams, NULL TSRMLS_CC);
+	hr = php_COM_invoke(obj, dispid, DISPATCH_PROPERTYPUT, &dispparams, NULL, &ErrString TSRMLS_CC);
 
 	if(FAILED(hr))
 	{
 		error_message = php_COM_error_message(hr TSRMLS_CC);
-		php_error(E_WARNING,"PropPut() failed:  %s\n", error_message);
+		if (ErrString)
+		{
+			php_error(E_WARNING,"PropPut() failed: %s %s", error_message, ErrString);
+			pefree(ErrString, 1);
+		}
+		else
+		{
+			php_error(E_WARNING,"PropPut() failed: %s", error_message);
+		}
 		LocalFree(error_message);
 		efree(propname);
 
@@ -1047,7 +1100,7 @@ static void do_COM_propput(pval *return_value, comval *obj, pval *arg_property, 
 	dispparams.cArgs = 0;
 	dispparams.cNamedArgs = 0;
 
-	hr = php_COM_invoke(obj, dispid, DISPATCH_PROPERTYGET, &dispparams, var_result TSRMLS_CC);
+	hr = php_COM_invoke(obj, dispid, DISPATCH_PROPERTYGET, &dispparams, var_result, &ErrString TSRMLS_CC);
 
 	if(SUCCEEDED(hr))
 	{
@@ -1057,6 +1110,11 @@ static void do_COM_propput(pval *return_value, comval *obj, pval *arg_property, 
 	{
 		*return_value = *value;
 		zval_copy_ctor(return_value);
+	}
+
+	if (ErrString)
+	{
+		pefree(ErrString, 1);
 	}
 
 	FREE_VARIANT(var_result);
