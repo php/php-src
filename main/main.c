@@ -96,9 +96,6 @@ void *gLock;					/*mutex variable */
 /* True globals (no need for thread safety) */
 HashTable configuration_hash;
 PHPAPI char *php3_ini_path = NULL;
-#ifdef ZTS
-php_core_globals *main_core_globals=NULL;
-#endif
 
 
 #define SAFE_FILENAME(f) ((f)?(f):"-")
@@ -755,20 +752,17 @@ static void php3_config_ini_shutdown()
 }
 
 
-#ifdef ZTS
-static void core_globals_ctor(php_core_globals *core_globals)
-{
-	if (main_core_globals) {
-		*core_globals = *main_core_globals;
-	}
-}
-#endif
-
-
 static int zend_body_write_wrapper(const char *str, uint str_length)
 {
 	return zend_body_write(str, str_length);
 }
+
+#ifdef ZTS
+static void php_new_thread_end_handler(THREAD_T thread_id)
+{
+	php_ini_refresh_caches();
+}
+#endif
 
 
 int php_module_startup(sapi_module_struct *sf)
@@ -810,10 +804,11 @@ int php_module_startup(sapi_module_struct *sf)
 	zuf.get_ini_entry = php_get_ini_entry_for_zend;
 	zend_startup(&zuf, NULL);
 
+	tsrm_set_new_thread_end_handler(php_new_thread_end_handler);
+
 #ifdef ZTS
-	core_globals_id = ts_allocate_id(sizeof(php_core_globals), core_globals_ctor, NULL);
+	core_globals_id = ts_allocate_id(sizeof(php_core_globals), NULL, NULL);
 	core_globals = ts_resource(core_globals_id);
-	main_core_globals = core_globals;
 #endif
 
 	PG(header_is_being_sent) = 0;
@@ -835,11 +830,12 @@ int php_module_startup(sapi_module_struct *sf)
 	le_index_ptr = _register_list_destructors(NULL, NULL, 0);
 	FREE_MUTEX(gLock);
 
+	php_ini_mstartup();
+
 	if (php3_config_ini_startup() == FAILURE) {
 		return FAILURE;
 	}
 
-	php_ini_mstartup();
 	REGISTER_INI_ENTRIES();
 
 	zuv.short_tags = (unsigned char) PG(short_tags);

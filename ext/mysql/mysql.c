@@ -246,14 +246,36 @@ static PHP_INI_MH(OnMySQLPort)
 }
 
 
+static PHP_INI_DISP(display_link_numbers)
+{
+	char *value;
+
+	if (type==PHP_INI_DISPLAY_ORIG && ini_entry->modified) {
+		value = ini_entry->orig_value;
+	} else if (ini_entry->value) {
+		value = ini_entry->value;
+	} else {
+		value = NULL;
+	}
+
+	if (value) {
+		if (atoi(value)==-1) {
+			PUTS("Unlimited");
+		} else {
+			php_printf("%s", value);
+		}
+	}
+}
+
+
 PHP_INI_BEGIN()
-	STD_PHP_INI_ENTRY("mysql.allow_persistent",	"1",	PHP_INI_SYSTEM,		OnUpdateInt,		allow_persistent,	php_mysql_globals,		mysql_globals)
-	STD_PHP_INI_ENTRY("mysql.max_persistent",	"-1",	PHP_INI_SYSTEM,		OnUpdateInt,		max_persistent,		php_mysql_globals,		mysql_globals)
-	STD_PHP_INI_ENTRY("mysql.max_links",		"-1",	PHP_INI_SYSTEM,		OnUpdateInt,		max_links,			php_mysql_globals,		mysql_globals)
-	STD_PHP_INI_ENTRY("mysql.default_host",		NULL,	PHP_INI_ALL,		OnUpdateString,		default_host,		php_mysql_globals,		mysql_globals)
-	STD_PHP_INI_ENTRY("mysql.default_user",		NULL,	PHP_INI_ALL,		OnUpdateString,		default_user,		php_mysql_globals,		mysql_globals)
-	STD_PHP_INI_ENTRY("mysql.default_password",	NULL,	PHP_INI_ALL,		OnUpdateString,		default_password,	php_mysql_globals,		mysql_globals)
-	PHP_INI_ENTRY("mysql.default_port",		NULL,	PHP_INI_ALL,		OnMySQLPort)
+	STD_PHP_INI_BOOLEAN("mysql.allow_persistent",	"1",	PHP_INI_SYSTEM,		OnUpdateInt,		allow_persistent,	php_mysql_globals,		mysql_globals)
+	STD_PHP_INI_ENTRY_EX("mysql.max_persistent",	"-1",	PHP_INI_SYSTEM,		OnUpdateInt,		max_persistent,		php_mysql_globals,		mysql_globals,	display_link_numbers)
+	STD_PHP_INI_ENTRY_EX("mysql.max_links",		"-1",	PHP_INI_SYSTEM,			OnUpdateInt,		max_links,			php_mysql_globals,		mysql_globals,		display_link_numbers)
+	STD_PHP_INI_ENTRY("mysql.default_host",		NULL,	PHP_INI_ALL,			OnUpdateString,		default_host,		php_mysql_globals,		mysql_globals)
+	STD_PHP_INI_ENTRY("mysql.default_user",		NULL,	PHP_INI_ALL,			OnUpdateString,		default_user,		php_mysql_globals,		mysql_globals)
+	STD_PHP_INI_ENTRY("mysql.default_password",	NULL,	PHP_INI_ALL,			OnUpdateString,		default_password,	php_mysql_globals,		mysql_globals)
+	PHP_INI_ENTRY("mysql.default_port",		NULL,	PHP_INI_ALL,			OnMySQLPort)
 PHP_INI_END()
 
 
@@ -267,6 +289,8 @@ static void php_mysql_init_globals(php_mysql_globals *mysql_globals)
 
 PHP_MINIT_FUNCTION(mysql)
 {
+	ELS_FETCH();
+
 #ifdef ZTS
 	mysql_globals_id = ts_allocate_id(sizeof(php_mysql_globals), php_mysql_init_globals, NULL);
 #else
@@ -306,41 +330,24 @@ PHP_RINIT_FUNCTION(mysql)
 
 PHP_MINFO_FUNCTION(mysql)
 {
-	char maxp[16],maxl[16];
+	char buf[32];
 	MySLS_FETCH();
-	
-	if (MySG(max_persistent)==-1) {
-		strcpy(maxp,"Unlimited");
-	} else {
-		snprintf(maxp,15,"%ld",MySG(max_persistent));
-		maxp[15]=0;
-	}
-	if (MySG(max_links)==-1) {
-		strcpy(maxl,"Unlimited");
-	} else {
-		snprintf(maxl,15,"%ld",MySG(max_links));
-		maxl[15]=0;
-	}
-	php_printf("<table cellpadding=5>"
-				"<tr><td>Allow persistent links:</td><td>%s</td></tr>\n"
-				"<tr><td>Persistent links:</td><td>%d/%s</td></tr>\n"
-				"<tr><td>Total links:</td><td>%d/%s</td></tr>\n"
-				"<tr><td>Client API version:</td><td>%s</td></tr>\n"
+
+	DISPLAY_INI_ENTRIES();
+
+	php_printf("<table border=5 width=\"600\">");
+	php_info_print_table_header(2, "Key", "Value");
+	sprintf(buf, "%d", MySG(num_persistent));
+	php_info_print_table_row(2, "Active Persistent Links", buf);
+	sprintf(buf, "%d", MySG(num_links));
+	php_info_print_table_row(2, "Active Links", buf);
+	php_info_print_table_row(2, "Client API version", mysql_get_client_info());
 #if !(WIN32|WINNT)
-				"<tr><td valign=\"top\">Compilation definitions:</td><td>"
-				"<tt>MYSQL_INCLUDE=%s<br>\n"
-		        "MYSQL_LFLAGS=%s<br>\n"
-		        "MYSQL_LIBS=%s<br></tt></td></tr>"
+	php_info_print_table_row(2, "MYSQL_INCLUDE", PHP_MYSQL_INCLUDE);
+	php_info_print_table_row(2, "MYSQL_LFLAGS", PHP_MYSQL_LFLAGS);
+	php_info_print_table_row(2, "MYSQL_LIBS", PHP_MYSQL_LIBS);
 #endif
-				"</table>\n",
-				(MySG(allow_persistent)?"Yes":"No"),
-				MySG(num_persistent),maxp,
-				MySG(num_links),maxl,
-				mysql_get_client_info()
-#if !(WIN32|WINNT)
-				,PHP_MYSQL_INCLUDE,PHP_MYSQL_LFLAGS,PHP_MYSQL_LIBS
-#endif
-				);
+	php_printf("</table>\n");
 }
 
 

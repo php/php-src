@@ -51,7 +51,7 @@ highlight.html		=	#000000
 ; Misc
 allow_builtin_links	=	Off		; Sets whether phpinfo() will generate built-in links that display the PHP
 								; and Zend logos, and tells PHP whether to honor them or not.
-								; It is no securty threat in any way, but it make sit possible
+								; It is no security threat in any way, but it makes it possible
 								; to determine whether you use PHP on your server or not.
 
 
