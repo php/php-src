@@ -1,3 +1,35 @@
+1999-12-11  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/standard/array.c
+      ext/standard/php_array.h:
+    Added array globals in preparation for multisort() changes.
+
+    * TODO
+      ext/standard/string.c:
+    (PHP php_implode) Made binary-safe.
+
+    * ext/standard/file.c
+      ext/standard/php_string.h:
+    get_meta_tags() was using php_stristr() so it needed to be changed.
+    Optimized it to use php_memnstr() directly.
+
+    * ext/standard/string.c
+      TODO:
+    Made strstr(), stristr(), and ucwords() binary-safe(). Also corrected
+    stristr() behavior to match that of strstr() if needle is not a string.
+
+1999-12-11  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/apache/config.m4
+      configure.in:
+    Moving APXS-specific checks into respective config.m4. The placement of
+    `%APXS -q..` caused error messages, if APXS was not used.
+
+1999-12-11  Andreas Karajannis  <Andreas.Karajannis@gmd.de>
+
+    * ext/odbc/php_odbc.h
+      ext/odbc/php_odbc.c: Don't include functions not supported by Solid
+
 1999-12-10  Andrei Zmievski  <andrei@ispi.net>
 
     * pear/DB/mysql.php: Copy & paste correction.
