@@ -21,7 +21,7 @@
 #ifndef _ZEND_H
 #define _ZEND_H
 
-#define ZEND_VERSION "0.80A"
+#define ZEND_VERSION "0.90"
 
 
 #ifdef __cplusplus
