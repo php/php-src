@@ -3146,45 +3146,59 @@ PHP_FUNCTION(array_merge)
 PHP_FUNCTION(array_keys)
 {
 	zval		*input,			/* Input array */
+				*search_value,	/* Value to search for */
 			   **entry,			/* An entry in the input array */
+				 res,			/* Result of comparison */
 				*new_val;		/* New value */
+	int			 add_key;		/* Flag to indicate whether a key should be added */
 	char		*string_key;	/* String key */
 	ulong		 num_key;		/* Numeric key */
+
+	search_value = NULL;
 	
 	/* Get arguments and do error-checking */
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, ARG_COUNT(ht), &input) == FAILURE) {
+	if (ARG_COUNT(ht) < 1 || ARG_COUNT(ht) > 2 ||
+		getParameters(ht, ARG_COUNT(ht), &input, &search_value) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
 	if (input->type != IS_ARRAY) {
-		zend_error(E_WARNING, "Argument to keys() should be an array");
+		zend_error(E_WARNING, "First argument to array_keys() should be an array");
 		return;
 	}
 	
 	/* Initialize return array */
 	array_init(return_value);
+	add_key = 1;
 	
 	/* Go through input array and add keys to the return array */
 	zend_hash_internal_pointer_reset(input->value.ht);
 	while(zend_hash_get_current_data(input->value.ht, (void **)&entry) == SUCCESS) {
-		new_val = (zval *)emalloc(sizeof(zval));
-		INIT_PZVAL(new_val);
-		
-		switch (zend_hash_get_current_key(input->value.ht, &string_key, &num_key)) {
-			case HASH_KEY_IS_STRING:
-				new_val->type = IS_STRING;
-				new_val->value.str.val = string_key;
-				new_val->value.str.len = strlen(string_key);
-				zend_hash_next_index_insert(return_value->value.ht, &new_val,
-											sizeof(zval *), NULL);
-				break;
+		if (search_value != NULL) {
+     		is_equal_function(&res, search_value, *entry);
+			add_key = zval_is_true(&res);
+		}
+	
+		if (add_key) {	
+			new_val = (zval *)emalloc(sizeof(zval));
+			INIT_PZVAL(new_val);
 
-			case HASH_KEY_IS_LONG:
-				new_val->type = IS_LONG;
-				new_val->value.lval = num_key;
-				zend_hash_next_index_insert(return_value->value.ht, &new_val,
-											sizeof(zval *), NULL);
-				break;
+			switch (zend_hash_get_current_key(input->value.ht, &string_key, &num_key)) {
+				case HASH_KEY_IS_STRING:
+					new_val->type = IS_STRING;
+					new_val->value.str.val = string_key;
+					new_val->value.str.len = strlen(string_key);
+					zend_hash_next_index_insert(return_value->value.ht, &new_val,
+												sizeof(zval *), NULL);
+					break;
+
+				case HASH_KEY_IS_LONG:
+					new_val->type = IS_LONG;
+					new_val->value.lval = num_key;
+					zend_hash_next_index_insert(return_value->value.ht, &new_val,
+												sizeof(zval *), NULL);
+					break;
+			}
 		}
 
 		zend_hash_move_forward(input->value.ht);
@@ -3206,7 +3220,7 @@ PHP_FUNCTION(array_values)
 	}
 	
 	if (input->type != IS_ARRAY) {
-		zend_error(E_WARNING, "Argument to values() should be an array");
+		zend_error(E_WARNING, "Argument to array_values() should be an array");
 		return;
 	}
 	
