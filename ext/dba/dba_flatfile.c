@@ -157,16 +157,16 @@ DBA_CLOSE_FUNC(flatfile)
 {
 	DBM_DATA;
 
-#if NFS_HACK
-	VCWD_UNLINK(dba->lockfn);
-#else
 	if (dba->lockfn) {
+#if NFS_HACK
+		VCWD_UNLINK(dba->lockfn);
+#else
 		/*dba->lockfd = VCWD_OPEN_MODE(dba->lockfn, O_RDWR, 0644);*/
 		flock(dba->lockfd, LOCK_UN);
 		close(dba->lockfd);
-	}
 #endif
-	efree(dba->lockfn);
+		efree(dba->lockfn);
+	}
 
 	php_stream_close(dba->fp);
 	if (dba->nextkey.dptr)
