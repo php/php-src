@@ -46,7 +46,7 @@ PHP_FUNCTION(sha1)
 	zend_bool raw_output = 0;
 	char sha1str[41];
 	PHP_SHA1_CTX context;
-	unsigned char digest[21];
+	unsigned char digest[20];
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|b", &arg, &arg_len, &raw_output) == FAILURE) {
 		return;
@@ -57,7 +57,6 @@ PHP_FUNCTION(sha1)
 	PHP_SHA1Update(&context, arg, arg_len);
 	PHP_SHA1Final(digest, &context);
 	if (raw_output) {
-		digest[20] = '\0';
 		RETURN_STRINGL(digest, 20, 1);
 	} else {
 		make_sha1_digest(sha1str, digest);
