@@ -268,17 +268,12 @@ static void php_mysql_set_default_link(int id TSRMLS_DC)
 */
 static int php_mysql_select_db(php_mysql_conn *mysql, char *db TSRMLS_DC)
 {
-	/* a small optimization to avoid selecting the database if it is already selected */
-	if (mysql->conn.db && !strcmp(mysql->conn.db, db)) {
-		return 1;
-	} else {
-		PHPMY_UNBUFFERED_QUERY_CHECK();
+	PHPMY_UNBUFFERED_QUERY_CHECK();
 
-		if (mysql_select_db(&mysql->conn, db) != 0) {
-			return 0;
-		} else {
-			return 1;
-		}
+	if (mysql_select_db(&mysql->conn, db) != 0) {
+		return 0;
+	} else {
+		return 1;
 	}
 }
 /* }}} */
