@@ -13,7 +13,7 @@ class foo
 
 	function &method1() {
 		print __CLASS__."::".__FUNCTION__."\n";
-		return @$this->foo;
+		return $this->foo;
 	}
 
 	function &method2() {
@@ -23,7 +23,7 @@ class foo
 
 	function method3() {
 		print __CLASS__."::".__FUNCTION__."\n";
-		return @$this->foo;
+		return $this->foo;
 	}
 }
 
