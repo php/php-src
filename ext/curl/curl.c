@@ -38,8 +38,7 @@ int curl_globals_id;
 php_curl_globals curl_globals;
 #endif
 
-/* Basically grabbed from the source code of cURL */
-#ifdef PHP_WIN32
+#if PHP_WIN32
 static void win32_cleanup();
 static void win32_init();
 
@@ -86,7 +85,7 @@ zend_module_entry curl_module_entry = {
 	curl_functions,
 	PHP_MINIT(curl),
 	PHP_MSHUTDOWN(curl),
-	PHP_RINIT(curl),
+	NULL,
 	NULL,
 	PHP_MINFO(curl),
 	STANDARD_MODULE_PROPERTIES
@@ -205,15 +204,11 @@ PHP_MINIT_FUNCTION(curl)
 	REGISTER_LONG_CONSTANT("CURLE_BAD_CALLING_ORDER", CE_BAD_CALLING_ORDER, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CURL_LAST", C_LAST, CONST_CS | CONST_PERSISTENT);
 	
-	if (win32_init() != CURLE_OK)
-		return FAILURE;
+	win32_init();
+
+	CURLG(output_start).next = NULL;
 
 	return SUCCESS;
-}
-
-PHP_RINIT_FUNCTION(curl)
-{
-	CURLG(use_file) = 0;
 }
 
 PHP_MSHUTDOWN_FUNCTION(curl)
@@ -316,9 +311,16 @@ PHP_FUNCTION(curl_setopt)
 		ZEND_FETCH_RESOURCE(fp, FILE *, uCurlValue, -1, "File-handle", php_file_le_fopen());
 		ret = curl_easy_setopt(cp, option, fp);
 		
-		if (option & CURLOPT_FILE)
-			CURLG(use_file) = 1;
-
+		if (option == CURLOPT_FILE) {
+			CURLG(output_node) = &CURLG(output_start);
+			while (CURLG(output_node)->next)
+				CURLG(output_node) = CURLG(output_node)->next;
+			
+			CURLG(output_node)->next = (struct curl_fileid_table *)emalloc(sizeof(struct curl_fileid_table));
+			CURLG(output_node) = CURLG(output_node)->next;
+			CURLG(output_node)->id = Z_LVAL_PP(uCurlId);
+			CURLG(output_node)->next = NULL;
+		}
 	}
 
 	RETURN_LONG(php_curl_error_translator(ret));
@@ -332,6 +334,7 @@ PHP_FUNCTION (curl_exec)
 	zval **uCurlId;
 	CURL *cp;
 	CURLcode ret;
+	int use_file = 0;
 	CURLLS_FETCH();
 	
 	if (ZEND_NUM_ARGS() != 1 ||
@@ -341,7 +344,17 @@ PHP_FUNCTION (curl_exec)
 	
 	ZEND_FETCH_RESOURCE(cp, CURL *, uCurlId, -1, "CURL Handle", CURLG(le_curl));
 	
-	if (CURLG(use_file)) {
+	CURLG(output_node) = CURLG(output_start).next;
+	while (CURLG(output_node))
+	{
+		if (CURLG(output_node)->id == Z_LVAL_PP(uCurlId)) {
+			use_file = 1;
+			break;
+		}
+		CURLG(output_node) = CURLG(output_node)->next;
+	}
+	
+	if (use_file) {
 		ret = curl_easy_perform (cp);
 	} else {
 		FILE *tmp;
