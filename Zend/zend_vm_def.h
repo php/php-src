@@ -2863,10 +2863,13 @@ ZEND_VM_HANDLER(77, ZEND_FE_RESET, CONST|TMP|VAR|CV, ANY)
 	if (ce && ce->get_iterator) {
 		iter = ce->get_iterator(ce, array_ptr TSRMLS_CC);
 
-		if (iter) {
+		if (iter && !EG(exception)) {
 			array_ptr = zend_iterator_wrap(iter TSRMLS_CC);
 		} else {
-			array_ptr->refcount++;
+			zval_ptr_dtor(&array_ptr);
+			if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
+			zend_throw_exception_internal(NULL TSRMLS_CC);
+			ZEND_VM_NEXT_OPCODE();
 		}
 	}
 

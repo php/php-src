@@ -1959,10 +1959,13 @@ static int ZEND_FE_RESET_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	if (ce && ce->get_iterator) {
 		iter = ce->get_iterator(ce, array_ptr TSRMLS_CC);
 
-		if (iter) {
+		if (iter && !EG(exception)) {
 			array_ptr = zend_iterator_wrap(iter TSRMLS_CC);
 		} else {
-			array_ptr->refcount++;
+			zval_ptr_dtor(&array_ptr);
+			if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
+			zend_throw_exception_internal(NULL TSRMLS_CC);
+			ZEND_VM_NEXT_OPCODE();
 		}
 	}
 
@@ -4368,10 +4371,13 @@ static int ZEND_FE_RESET_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	if (ce && ce->get_iterator) {
 		iter = ce->get_iterator(ce, array_ptr TSRMLS_CC);
 
-		if (iter) {
+		if (iter && !EG(exception)) {
 			array_ptr = zend_iterator_wrap(iter TSRMLS_CC);
 		} else {
-			array_ptr->refcount++;
+			zval_ptr_dtor(&array_ptr);
+			if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
+			zend_throw_exception_internal(NULL TSRMLS_CC);
+			ZEND_VM_NEXT_OPCODE();
 		}
 	}
 
@@ -7439,10 +7445,13 @@ static int ZEND_FE_RESET_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	if (ce && ce->get_iterator) {
 		iter = ce->get_iterator(ce, array_ptr TSRMLS_CC);
 
-		if (iter) {
+		if (iter && !EG(exception)) {
 			array_ptr = zend_iterator_wrap(iter TSRMLS_CC);
 		} else {
-			array_ptr->refcount++;
+			zval_ptr_dtor(&array_ptr);
+			if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
+			zend_throw_exception_internal(NULL TSRMLS_CC);
+			ZEND_VM_NEXT_OPCODE();
 		}
 	}
 
@@ -18208,10 +18217,13 @@ static int ZEND_FE_RESET_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	if (ce && ce->get_iterator) {
 		iter = ce->get_iterator(ce, array_ptr TSRMLS_CC);
 
-		if (iter) {
+		if (iter && !EG(exception)) {
 			array_ptr = zend_iterator_wrap(iter TSRMLS_CC);
 		} else {
-			array_ptr->refcount++;
+			zval_ptr_dtor(&array_ptr);
+			if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
+			zend_throw_exception_internal(NULL TSRMLS_CC);
+			ZEND_VM_NEXT_OPCODE();
 		}
 	}
 
@@ -30500,10 +30512,13 @@ static int ZEND_FE_RESET_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	if (ce && ce->get_iterator) {
 		iter = ce->get_iterator(ce, array_ptr TSRMLS_CC);
 
-		if (iter) {
+		if (iter && !EG(exception)) {
 			array_ptr = zend_iterator_wrap(iter TSRMLS_CC);
 		} else {
-			array_ptr->refcount++;
+			zval_ptr_dtor(&array_ptr);
+			if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
+			zend_throw_exception_internal(NULL TSRMLS_CC);
+			ZEND_VM_NEXT_OPCODE();
 		}
 	}
 
