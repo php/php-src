@@ -1586,7 +1586,7 @@ PHP_FUNCTION(hw_changeobject) {
 #undef BUFFERLEN
 /* }}} */
 
-/* {{{ proto void hw_modifyobject(int link, int objid, array remattributes, array addattributes, [int mode])
+/* {{{ proto void hw_modifyobject(int link, int objid, array remattributes, array addattributes [, int mode])
    Modifies attributes of an object */
 #define BUFFERLEN 200
 PHP_FUNCTION(hw_modifyobject) {
@@ -1921,7 +1921,7 @@ PHP_FUNCTION(hw_cp) {
 }
 /* }}} */
 
-/* {{{ proto hwdoc hw_gettext(int link, int objid[, int rootid])
+/* {{{ proto hwdoc hw_gettext(int link, int objid [, int rootid])
    Returns text document. Links are relative to rootid if given */
 PHP_FUNCTION(hw_gettext) {
 	pval *argv[3];
@@ -2023,7 +2023,7 @@ PHP_FUNCTION(hw_edittext) {
 /* }}} */
 
 /* {{{ proto hwdoc hw_getcgi(int link, int objid)
-   Returns the output of a cgi script */
+   Returns the output of a CGI script */
 #define BUFFERLEN 1000
 /* FIX ME: The buffer cgi_env_str should be allocated dynamically */
 PHP_FUNCTION(hw_getcgi) {
@@ -2324,7 +2324,7 @@ PHP_FUNCTION(hw_pipedocument) {
 /* }}} */
 
 /* {{{ proto hwdoc hw_pipecgi(int link, int objid)
-   Returns output of cgi script */
+   Returns output of CGI script */
 #define BUFFERLEN 1000
 /* FIX ME: The buffer cgi_env_str should be allocated dynamically */
 PHP_FUNCTION(hw_pipecgi) {
@@ -3375,7 +3375,7 @@ PHP_FUNCTION(hw_identify) {
 /* }}} */
 
 /* {{{ proto array hw_objrec2array(string objrec)
-   Returns object array of object record*/
+   Returns object array of object record */
 PHP_FUNCTION(hw_objrec2array) {
 	zval **arg1, **arg2;
 
@@ -3595,7 +3595,7 @@ PHP_FUNCTION(hw_getsrcbydestobj) {
 /* }}} */
 
 /* {{{ proto int hw_mapid(int link, int serverid, int destid)
-   Returns virtual object id of document on remote hw server */
+   Returns virtual object id of document on remote Hyperwave server */
 PHP_FUNCTION(hw_mapid) {
 	pval **arg1, **arg2, **arg3;
 	int link, type, servid, id, virtid;
@@ -3626,7 +3626,7 @@ PHP_FUNCTION(hw_mapid) {
 /* }}} */
 
 /* {{{ proto string hw_getrellink(int link, int rootid, int sourceid, int destid)
-   Get link form source to dest relative to rootid */
+   Get link from source to dest relative to rootid */
 PHP_FUNCTION(hw_getrellink) {
 	pval **arg1, **arg2, **arg3, **arg4;
 	int link, type;
