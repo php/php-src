@@ -318,6 +318,10 @@ class PEAR_Dependency
         if ($relation == 'has') {
             return false;
         }
+        if ($relation == 'not') {
+            $errmsg = "Invalid dependency - 'not' is allowed when specifying PHP, you must run PHP in PHP"
+            return PEAR_DEPENDENCY_BAD_DEPENDENCY;
+        }
         if (substr($req, 0, 2) == 'v.') {
             $req = substr($req,2, strlen($req) - 2);
         }
