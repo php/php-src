@@ -1056,6 +1056,8 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	PG(connection_status) = PHP_CONNECTION_NORMAL;
 	PG(during_request_startup) = 0;
 
+	CG(zend_lineno) = 0;
+
 #if HAVE_SETLOCALE
 	setlocale(LC_CTYPE, "");
 #endif
