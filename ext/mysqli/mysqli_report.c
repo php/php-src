@@ -52,13 +52,13 @@ PHP_FUNCTION(mysqli_report)
 /* }}} */
 
 /* {{{ void php_mysqli_report_error(char *sqlstate, int errorno, char *error) */ 
-void php_mysqli_report_error(char *sqlstate, int errorno, char *error) {
+void php_mysqli_report_error(char *sqlstate, int errorno, char *error TSRMLS_DC) {
 	php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error (%s/%d): %s", sqlstate, errorno, error);
 }
 /* }}} */
 
 /* {{{ void php_mysqli_report_index() */ 
-void php_mysqli_report_index(char *query, unsigned int status) {
+void php_mysqli_report_index(char *query, unsigned int status TSRMLS_DC) {
 	char index[15];
 
 	if (status & SERVER_QUERY_NO_GOOD_INDEX_USED) {
