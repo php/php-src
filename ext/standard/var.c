@@ -324,7 +324,7 @@ PHPAPI void php_var_serialize(zval *buf, zval **struc, HashTable *var_hash)
 					if ((i = zend_hash_get_current_key_ex(myht, &key, NULL, &index, 0, &pos)) == HASH_KEY_NON_EXISTANT) {
 						break;
 					}
-					if (zend_hash_get_current_data_ex(myht, (void **) (&data), &pos) != SUCCESS || !data /* || ((*data) == (*struc)) */) {
+					if (zend_hash_get_current_data_ex(myht, (void **) (&data), &pos) != SUCCESS || !data || data == struc) {
 						continue;
 					}
 
@@ -342,7 +342,6 @@ PHPAPI void php_var_serialize(zval *buf, zval **struc, HashTable *var_hash)
 							FREE_ZVAL(d);
 							break;
 					}
-					if (data == struc) return;
 					php_var_serialize(buf, data, var_hash);
 				}
 			}
