@@ -654,12 +654,14 @@ _oci_conn_list_dtor(oci_connection *connection)
 	}
 
 	if (connection->pServiceContext) {
-		/*
-		connection->error = 
-			OCITransCommit(connection->pServiceContext,
-						   connection->pError, 
-						   (ub4)0);
-		*/
+		connection->error =
+			OCITransRollback(connection->pServiceContext,
+							 connection->pError,
+							 (ub4)0);
+ 
+		if (connection->error) {
+			oci_error(connection->pError, "failed to rollback outstanding transactions!", connection->error);
+		}
 
 		OCIHandleFree((dvoid *) connection->pServiceContext, (ub4) OCI_HTYPE_SVCCTX);
 	}
