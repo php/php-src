@@ -215,7 +215,7 @@ static char *_php_create_id(int *newlen)
 	return estrdup(buf);
 }
 
-static void _php_session_initialize(PSLS_DC)
+static void _php_session_initialize(PSLS_D)
 {
 	char *val;
 	int vallen;
