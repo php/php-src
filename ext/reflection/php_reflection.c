@@ -1008,7 +1008,7 @@ ZEND_METHOD(reflection_function, __construct)
 	if (zend_hash_find(EG(function_table), lcname, name_len + 1, (void **)&fptr) == FAILURE) {
 		free_alloca(lcname);
 		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, 
-			"Function %s() does not exist", Z_STRVAL_P(name));
+			"Function %s() does not exist", name_str);
 		return;
 	}
 	free_alloca(lcname);
