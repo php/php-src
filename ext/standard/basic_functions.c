@@ -701,6 +701,7 @@ function_entry basic_functions[] = {
 	PHP_FE(stream_get_line,												NULL)
 	PHP_FE(stream_register_wrapper,											NULL)
 	PHP_FE(stream_get_wrappers,												NULL)
+	PHP_FE(stream_get_transports,											NULL)
 	PHP_FE(get_headers,													NULL)
 
 #if HAVE_SYS_TIME_H || defined(PHP_WIN32)
