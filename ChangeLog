@@ -1,3 +1,51 @@
+2001-12-04  Frank M. Kromann  <frank@frontbase.com>
+
+    * win32/sendmail.c:
+    Remove check for "To:" in headers. If "Reply-To:" exists the the To: entry was not created.
+    This is WIn32 only.
+
+2001-12-04  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/session/session.c
+      ext/yaz/php_yaz.c: proto fix
+
+    * ext/zip/zip.c: proto fixes
+
+    * sapi/apache/php_apache.c: proto fix
+
+    * ext/ctype/ctype.c: proto fixes
+
+2001-12-04  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/standard/file.c:
+    Make the length parameter to fgets optional (defaults to 1024)
+
+2001-12-04  Frank M. Kromann  <frank@frontbase.com>
+
+    * ext/imap/php_imap.c
+      ext/imap/imap.dsp: Enable imap_mail() on win32
+
+    * win32/sendmail.c
+      win32/sendmail.h: modified to enable imap_mail() on win32
+
+    * win32/imap_sendmail.h
+      win32/imap_sendmail.c: Adding files to enable imap_mail() on win32
+
+2001-12-04  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * sapi/servlet/EXPERIMENTAL:
+    Mark sapi/servlet as what it is: experimental.
+
+    * ext/java/EXPERIMENTAL: Mark ext/java as what it is: experimental.
+
+    * ext/xmlrpc/.cvsignore: Add Win32 specific files to .cvsignore.
+
+    * win32/php_modules.dsw: Add XMLRPC extension.
+
+2001-12-04  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/pdf/Makefile.in: typo fix
+
 2001-12-03  Jani Taskinen  <sniper@iki.fi>
 
     * ext/pdf/config.m4:
