@@ -1654,7 +1654,7 @@ do_fcall_common:
 					}
 					INIT_PZVAL(valptr);
 					zend_ptr_stack_push(&EG(argument_stack), valptr);
-					FREE_OP(&opline->op1, EG(free_op1));  /* for string offsets */
+					FREE_OP(&opline->op1, EG(free_op1));
 				}
 				NEXT_OPCODE();
 			case ZEND_SEND_VAR:
