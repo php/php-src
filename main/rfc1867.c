@@ -78,8 +78,8 @@ void php_mb_gpc_stack_variable(char *param, char *value, char ***pval_list, int 
 
 	if (*num_vars>=*num_vars_max){
 		(*num_vars_max) += 16;
-		*pval_list = (char **)erealloc(val_list, *num_vars_max*sizeof(char *));
-		*plen_list = (int *)erealloc(len_list, *num_vars_max*sizeof(int));
+		*pval_list = (char **)erealloc(val_list, (*num_vars_max+2)*sizeof(char *));
+		*plen_list = (int *)erealloc(len_list, (*num_vars_max+2)*sizeof(int));
 		val_list=*pval_list;
 		len_list=*plen_list;
 	}
@@ -755,7 +755,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 	int max_file_size=0, skip_upload=0, anonindex=0, is_anonymous;
 	zval *http_post_files=NULL;
 #if HAVE_MBSTRING && !defined(COMPILE_DL_MBSTRING)
-	int str_len = 0, num_vars = 0, num_vars_max = 2*10+1, *len_list = NULL;
+	int str_len = 0, num_vars = 0, num_vars_max = 2*10, *len_list = NULL;
 	char **val_list = NULL;
 #endif
 	zend_bool magic_quotes_gpc;
@@ -814,8 +814,8 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 
 #if HAVE_MBSTRING && !defined(COMPILE_DL_MBSTRING)
 	if (php_mb_encoding_translation(TSRMLS_C)) {
-		val_list = (char **)ecalloc(num_vars_max, sizeof(char *));
-		len_list = (int *)ecalloc(num_vars_max, sizeof(int));
+		val_list = (char **)ecalloc(num_vars_max+2, sizeof(char *));
+		len_list = (int *)ecalloc(num_vars_max+2, sizeof(int));
 	}
 #endif
 	zend_llist_init(&header, sizeof(mime_header_entry), (llist_dtor_func_t) php_free_hdr_entry, 0);
