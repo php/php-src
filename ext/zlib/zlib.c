@@ -955,6 +955,13 @@ static void php_gzip_output_handler(char *output, uint output_len, char **handle
 	do_end = (mode & PHP_OUTPUT_HANDLER_END ? 1 : 0);
 	if (php_deflate_string(output, output_len, handled_output, handled_output_len, ZLIBG(ob_gzip_coding), do_start, do_end, ZLIBG(output_compression_level) TSRMLS_CC)!=SUCCESS) {
 		zend_error(E_ERROR, "Compression failed");
+	} else {
+		if (do_start && do_end) {
+			char lenbuf[64];
+
+			sprintf(lenbuf,"Content-Length: %d", *handled_output_len);
+			sapi_add_header(lenbuf,strlen(lenbuf), 1);
+		}
 	}
 }
 /* }}} */
@@ -984,7 +991,7 @@ int php_enable_output_compression(int buffer_size TSRMLS_DC)
 	} else {
 		return FAILURE;
 	}
-	
+
 	php_start_ob_buffer(NULL, buffer_size, 0 TSRMLS_CC);
 	php_ob_set_internal_handler(php_gzip_output_handler, buffer_size*1.5, "zlib output compression", 0 TSRMLS_CC);
 	return SUCCESS;
