@@ -90,8 +90,8 @@ LINK32=link.exe
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 0
-# PROP Output_Dir "php4___Win32_Release_inline"
-# PROP Intermediate_Dir "php4___Win32_Release_inline"
+# PROP Output_Dir "Release_inline"
+# PROP Intermediate_Dir "Release_inline"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MD /W3 /GX /O2 /I "Zend" /I "." /I "regex\\" /I "..\bindlib_w32" /D "NDEBUG" /D "MSVC5" /D "_CONSOLE" /D "WIN32" /D "_MBCS" /D ZEND_DEBUG=0 /Fr /FD /c

@@ -19,6 +19,7 @@ CFG=TSRM - Win32 Debug_TS
 !MESSAGE 
 !MESSAGE "TSRM - Win32 Debug_TS" (based on "Win32 (x86) Static Library")
 !MESSAGE "TSRM - Win32 Release_TS" (based on "Win32 (x86) Static Library")
+!MESSAGE "TSRM - Win32 Release_TS_inline" (based on "Win32 (x86) Static Library")
 !MESSAGE 
 
 # Begin Project
@@ -74,12 +75,36 @@ LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
 # ADD LIB32 /nologo
 
+!ELSEIF  "$(CFG)" == "TSRM - Win32 Release_TS_inline"
+
+# PROP BASE Use_MFC 0
+# PROP BASE Use_Debug_Libraries 0
+# PROP BASE Output_Dir "TSRM___Win32_Release_TS_inline"
+# PROP BASE Intermediate_Dir "TSRM___Win32_Release_TS_inline"
+# PROP BASE Target_Dir ""
+# PROP Use_MFC 0
+# PROP Use_Debug_Libraries 0
+# PROP Output_Dir "Release_TS_inline"
+# PROP Intermediate_Dir "Release_TS_inline"
+# PROP Target_Dir ""
+# ADD BASE CPP /nologo /MD /W3 /GX /O2 /I "." /D "NDEBUG" /D "WIN32" /D "_MBCS" /D "_LIB" /D "TSRM_EXPORTS" /YX /FD /c
+# ADD CPP /nologo /MD /W3 /GX /O2 /I "." /D "NDEBUG" /D "WIN32" /D "_MBCS" /D "_LIB" /D "TSRM_EXPORTS" /YX /FD /c
+# ADD BASE RSC /l 0x40d /d "NDEBUG"
+# ADD RSC /l 0x40d /d "NDEBUG"
+BSC32=bscmake.exe
+# ADD BASE BSC32 /nologo
+# ADD BSC32 /nologo
+LIB32=link.exe -lib
+# ADD BASE LIB32 /nologo
+# ADD LIB32 /nologo
+
 !ENDIF 
 
 # Begin Target
 
 # Name "TSRM - Win32 Debug_TS"
 # Name "TSRM - Win32 Release_TS"
+# Name "TSRM - Win32 Release_TS_inline"
 # Begin Group "Source Files"
 
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"

@@ -91,8 +91,8 @@ LINK32=link.exe
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 0
-# PROP Output_Dir "php4isapi___Win32_Release_TS_inline"
-# PROP Intermediate_Dir "php4isapi___Win32_Release_TS_inline"
+# PROP Output_Dir "Release_TS_inline"
+# PROP Intermediate_Dir "Release_TS_inline"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MD /W3 /GX /O2 /I "...\..\include" /I "..\..\win32" /I "..\..\Zend" /I "..\.." /D "NDEBUG" /D "_WINDOWS" /D "_USRDLL" /D "PHP4ISAPI_EXPORTS" /D "MSVC5" /D "ZTS" /D "WIN32" /D "_MBCS" /D ZEND_DEBUG=0 /FR /YX /FD /c
