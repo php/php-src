@@ -1,3 +1,147 @@
+2002-10-09  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/standard/css.c: Revert previous change, it did not fix anything.
+
+2002-10-09  Melvyn Sopacua  <msopacua@idg.nl>
+
+    * ext/iconv/tests/Quotes.UTF-8
+      ext/iconv/tests/translit-utf8.inc
+      ext/iconv/tests/translit-utf8.phpt: Test for standard transliteration.
+    Original check-translit from GNU libiconv-1.8
+
+2002-10-09  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Remote.php: * fix a diff/patch screwup
+
+2002-10-09  James Cox  <james@blog.at>
+
+    * ext/standard/css.c: overrule <center>
+
+2002-10-09  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/iconv/tests/003.inc
+      ext/iconv/tests/003.phpt
+      ext/iconv/tests/bug16069.inc
+      ext/iconv/tests/bug16069.phpt: - Use a more descriptive filename
+
+2002-10-09  Moriyoshi Koizumi  <readjust@deneb.freemail.ne.jp>
+
+    * ext/iconv/tests/003.inc
+      ext/iconv/tests/003.phpt
+      ext/iconv/tests/translit.inc
+      ext/iconv/tests/translit.phpt:
+    Renamed the test case files in order to avoid confusion
+
+2002-10-09  Jan Lehnardt  <jan@dasmoped.net>
+
+    * ext/qtdom/config.m4:  - fix alignment
+
+    * ext/pspell/config.m4:  - note aspell
+
+    * ext/readline/readline.c:  - fix build on FreeBSD, verified by thies.
+
+2002-10-09  Sterling Hughes  <sterling@bumblebury.com>
+
+    * ext/standard/array.c:
+    clean these functions up using zend_parse_parameters and nuke the use of
+    HASH_OF() which is inappropriate in these cases...
+
+    * ext/standard/array.c: small cleanups...
+
+2002-10-09  Colin Viebrock  <colin@easydns.com>
+
+    * ext/standard/info.c: no charsets, only basic entity escaping
+
+2002-10-09  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/gd/tests/bug19266.phpt: - Skip when GD is not available
+
+2002-10-09  Andrey Hristov  <andrey@webgate.bg>
+
+    * ext/standard/string.c: ws fixes.
+
+2002-10-09  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/gd/tests/bug19266.phpt: - Added test case for bug #19266
+
+2002-10-09  Zak Greant  <zak@mysql.com>
+
+    * ext/mysql/php_mysql.c: Removed spurious code. Thanks Derick
+
+2002-10-09  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/php_string.h
+      ext/standard/string.c:
+    Optimizations to various php string functions substr_count(), strrev(),
+    nl2br(), php_addslashes() and php_memnstr().
+
+    * ext/sybase/php_sybase_db.c: Fixed memory leaks.
+
+2002-10-09  Zak Greant  <zak@mysql.com>
+
+    * ext/mysql/php_mysql.c:
+    Minor tweak - using memcpy(), instead of strcpy() for static strings. Gives better performance. Thanks Zeev.
+
+2002-10-09  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * ext/iconv/tests/translit.phpt: added @ to suppress a notice.
+
+2002-10-09  Zak Greant  <zak@mysql.com>
+
+    * ext/mysql/php_mysql.c:
+    Possible fix for bug #19529 (thanks Rasmus, Arjen and Monty)
+
+    Major changes to _restore_connection_defaults
+     - added code block to finds and releases the active mysql result (if any)
+     - this should prevent the 'Commands out of sync' error that would be
+       raised when a query is made when unfreed results exist
+
+    Minor changes to _restore_connection_defaults
+     - replaced calls to mysql_real_query with mysql_query
+       - we probably should not be using mysql_real_query without checking to
+         see if we have a version that supports the function.
+       - given that we control the query strings here and do not need to
+         worry about binary safety, I am using mysql_query instead
+       - see the bug report for further discussion
+
+2002-10-09  Pierre-Alain Joye  <paj@pearfr.org>
+
+    * pear/tests/pear_config.phpt: Add cache_ttl, cache_dir to expect output
+    Update text for username, password
+    Tests pass now
+
+2002-10-09  Andrey Hristov  <andrey@webgate.bg>
+
+    * ext/standard/tests/strings/003.phpt: Test case for str_shuffle().
+
+    * ext/standard/string.c:
+    Returning to the old behavior of str_shuffle() a bit. Now the passed string is
+    left unmodified and the shuffled string is returned.
+
+2002-10-09  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * ext/imap/php_imap.c:
+    - Fix protos (resource instead of int for stream_id, fix some return protos,
+      consistent usage of options instead of flags).
+    - Make imap_ping,imap_setquota and imap_setacl  return a real (bool) now.
+
+2002-10-09  Sascha Schumann  <sascha@schumann.cx>
+
+    * php.ini-dist: Emphasize a couple of points
+
+2002-10-09  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * NEWS: - Update
+
+2002-10-09  Zak Greant  <zak@mysql.com>
+
+    * ext/mysql/php_mysql.c:
+    Set default value for mysql.connect_timeout to -1. This setting matches the setting in php.ini-dist and ensures that the default behavior is to leave connect_timeout alone.
+
+2002-10-09  George Schlossnagle  <george@omniti.com>
+
+    * sapi/apache/mod_php4.c: fixed return values for php_response_handler
+
 2002-10-08  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/standard/tests/strings/nl2br.phpt: Added nl2br() test

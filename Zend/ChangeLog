@@ -1,3 +1,23 @@
+2002-10-09  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_object_handlers.c: Fix object write handler behaviour:
+    * If this value is already set to given value, don't try to set it again.
+    * If we have reference, we should not move it.
+    * If we are assigning referenced variable, we should separate it.
+
+2002-10-09  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * zend_API.c
+      zend_builtin_functions.c
+      zend_compile.c
+      zend_constants.c
+      zend_execute.c
+      zend_execute_API.c
+      zend_language_parser.y
+      zend_object_handlers.c
+      zend_operators.c
+      zend_operators.h: MFZE1 zend_str_tolower issue.
+
 2002-10-07  Andi Gutmans  <andi@zend.com>
 
     * tests/zend2.php: - Fix test
