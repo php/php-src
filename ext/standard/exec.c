@@ -398,7 +398,7 @@ PHP_FUNCTION(shell_exec)
 		allocated_space = total_readbytes+EXEC_INPUT_BUF;
 		return_value->value.str.val = (char *) erealloc(return_value->value.str.val,allocated_space);
 	}
-	fclose(in);
+	pclose(in);
 		
 	return_value->value.str.val = erealloc(return_value->value.str.val,total_readbytes+1);
 	return_value->value.str.val[total_readbytes]=0;
