@@ -54,7 +54,13 @@ AC_DEFUN(LIB_BUILD,[
   lib_target=""
   
   $php_shtool mkdir -p $1
+  if test "$BSD_MAKEFILE" = "yes"; then
+    lib_include_conf=".include \"\$(top_builddir)/config_vars.mk\""
+  else
+    lib_include_conf="include \$(top_builddir)/config_vars.mk"
+  fi
   cat >$lib_makefile<<EOF
+$lib_include_conf
 LTLIBRARY_OBJECTS = \$(LTLIBRARY_SOURCES:.c=.lo) \$(LTLIBRARY_OBJECTS_X)
 LTLIBRARY_SHARED_OBJECTS = \$(LTLIBRARY_OBJECTS:.lo=.slo)
 EOF
