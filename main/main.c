@@ -620,7 +620,7 @@ static void php_message_handler_for_zend(long message, void *data)
 						mem_header *t = (mem_header *) data;
 						void *ptr = (void *)((char *)t+sizeof(mem_header)+PLATFORM_PADDING);
 
-						snprintf(memory_leak_buf, 512, "%s(%d) :  Freeing 0x%0.8X (%d bytes), script=%s\n", t->filename, t->lineno, (unsigned long)ptr, t->size, SAFE_FILENAME(SG(request_info).path_translated));
+						snprintf(memory_leak_buf, 512, "%s(%d) :  Freeing 0x%0.8lX (%d bytes), script=%s\n", t->filename, t->lineno, (unsigned long)ptr, t->size, SAFE_FILENAME(SG(request_info).path_translated));
 						if (t->orig_filename) {
 							char relay_buf[512];
 
