@@ -152,7 +152,7 @@ zend_module_entry imap_module_entry = {
 
 
 #if COMPILE_DL
-DLEXPORT php3_module_entry *get_module(void) { return &imap_module_entry; }
+DLEXPORT zend_module_entry *get_module(void) { return &imap_module_entry; }
 #endif
 
 /* 
