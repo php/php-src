@@ -1043,7 +1043,7 @@ static void php_session_reset_id(TSRMLS_D)
 
 	if (PS(apply_trans_sid)) {
 		php_url_scanner_reset_vars(TSRMLS_C);
-		php_url_scanner_add_var(PS(session_name), strlen(PS(session_name)), PS(id), strlen(PS(id)), 0 TSRMLS_CC);
+		php_url_scanner_add_var(PS(session_name), strlen(PS(session_name)), PS(id), strlen(PS(id)), 1 TSRMLS_CC);
 	}
 }
 	
