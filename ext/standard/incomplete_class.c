@@ -39,7 +39,7 @@ static void incomplete_class_message(int error_type TSRMLS_DC)
 	char *class_name = NULL;
 
 	if(EG(This)) {
-		class_name = php_lookup_class_name(EG(This), NULL, 0);
+		class_name = php_lookup_class_name(EG(This), NULL);
 	}
 	
 	if (!class_name)
@@ -114,7 +114,7 @@ zend_class_entry *php_create_incomplete_class(TSRMLS_D)
 
 /* {{{ php_lookup_class_name
  */
-char *php_lookup_class_name(zval *object, size_t *nlen, zend_bool del)
+char *php_lookup_class_name(zval *object, size_t *nlen)
 {
 	zval **val;
 	char *retval = NULL;
@@ -128,9 +128,6 @@ char *php_lookup_class_name(zval *object, size_t *nlen, zend_bool del)
 
 		if (nlen)
 			*nlen = Z_STRLEN_PP(val);
-
-		if (del)
-			zend_hash_del(object_properties, MAGIC_MEMBER, sizeof(MAGIC_MEMBER));
 	}
 
 	return (retval);
