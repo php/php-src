@@ -98,7 +98,10 @@ PHPAPI int php_checkuid(const char *filename, char *fopen_mode, int mode)
 
 		/* Trim off filename */
 		if ((s = strrchr(path, DEFAULT_SLASH))) {
-			*s = '\0';
+			if (s == path)
+				path[1] = '\0';
+			else
+				*s = '\0';
 		}
 	} else { /* CHECKUID_ALLOW_ONLY_DIR */
 		s = strrchr(filename, DEFAULT_SLASH);
