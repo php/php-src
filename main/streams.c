@@ -36,7 +36,6 @@
 #endif
 
 #define CHUNK_SIZE	8192
-#define PHP_STREAM_MAX_MEM	2 * 1024 * 1024
 
 #ifdef PHP_WIN32
 #define EWOULDBLOCK WSAEWOULDBLOCK
@@ -1161,7 +1160,7 @@ PHPAPI int _php_stream_make_seekable(php_stream *origstream, php_stream **newstr
 	if (flags & PHP_STREAM_PREFER_STDIO)
 		*newstream = php_stream_fopen_tmpfile();
 	else
-		*newstream = php_stream_temp_create(TEMP_STREAM_DEFAULT, PHP_STREAM_MAX_MEM);
+		*newstream = php_stream_temp_new();
 
 	if (*newstream == NULL)
 		return PHP_STREAM_FAILED;
