@@ -1,7 +1,3 @@
-2000-07-18  Ken Coar  <coar@php.net>
-
-    * ext/standard/formatted_print.c: Fix zero-precision %s processing
-
 2000-07-17  Hénot David  <henot@iie.cnam.fr>
 
     * ext/ingres_ii/ii.c
