@@ -961,7 +961,7 @@ static char *php_replace_in_subject(zval *regex, zval *replace, zval **subject, 
 }
 
 
-static void preg_replace_impl(INTERNAL_FUNCTION_PARAMETERS, int is_callable_replace)
+static void preg_replace_impl(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_callable_replace)
 {
 	zval		   **regex,
 				   **replace,
