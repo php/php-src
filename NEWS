@@ -515,9 +515,9 @@ PHP 4                                                                      NEWS
   there's no need to import them using the 'global' statement.  (Andi & Zeev)
 - Added vprintf() and vsprintf() functions that allow passing all arguments
   after format as an array. (Andrei)
-- Added support for GD2 image type for ImageCreateFromString() (Jani)
+- Added support for GD2 image type for ImageCreateFromString(). (Jani)
 - Added ImageCreateFromGD(), ImageCreateFromGD2(), ImageCreateFromGD2part(),
-  ImageGD() and ImageGD2() functions (Jani)
+  ImageGD() and ImageGD2() functions. (Jani)
 - addcslashes now warns when charlist is invalid. The returned string
   remained the same (Jeroen)
 - Added optional extra argument to gmp_init(). The extra argument
