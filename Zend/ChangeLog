@@ -1,3 +1,12 @@
+2003-12-28  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_API.c:
+      WS
+
+    * zend_API.h
+      zend_compile.c:
+      Fix order of class_entry member initialization (needed for example for DOM)
+
 2003-12-27  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_language_parser.y:
