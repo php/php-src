@@ -162,7 +162,7 @@ PHP_FUNCTION(jpeg2wbmp);
 PHP_FUNCTION(png2wbmp);
 PHP_FUNCTION(image2wbmp);
 
-PHPAPI int phpi_get_le_gd(void);
+PHP_GD_API int phpi_get_le_gd(void);
 
 /* This is missing from gd.h */
 #if HAVE_COLORCLOSESTHWB
