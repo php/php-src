@@ -760,11 +760,6 @@ typedef struct _sqlite_object {
 	} u;
 } sqlite_object;
 
-static void sqlite_object_clone(void *object, void **object_clone TSRMLS_DC)
-{
-	/* TODO */
-}
-
 static int sqlite_free_persistent(list_entry *le, void *ptr TSRMLS_DC)
 {
 	return le->ptr == ptr;
