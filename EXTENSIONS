@@ -295,7 +295,7 @@ MAINTENANCE:         Odd Fixes
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           mcrypt
-PRIMARY MAINTAINER:  Sascha Schumann <sascha@schumann.cx>
+PRIMARY MAINTAINER:  Derick Rethans <d.rethans@jdimedia.nl>
 MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
