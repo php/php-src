@@ -2,6 +2,13 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ???, Version 4.0 Beta 5
+- Fixed a (fairly common) situation where error_reporting values would not be
+  properly restored after a call to error_reporting(), in between requests (Zeev)
+- The various $HTTP_*_VARS[] are now protected, and cannot be manipulated by
+  user input (Zeev)
+- Added ini_set() as an alias to ini_alter() (Zeev)
+- The string None is now recognized as a keyword by the php.ini processor, and
+  can be used to denote an empty string (Zeev)
 - Added get_class_vars(string class_name) and get_object_vars(object obj)
   function. (Andrei, Zend library)
 - Add pdf_set_parameter(), pdf_skew(), pdf_show_boxed() (Uwe)
