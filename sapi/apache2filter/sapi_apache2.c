@@ -454,14 +454,19 @@ php_apache_server_startup(apr_pool_t *pconf, apr_pool_t *plog,
 	 * prevents us from starting PHP until the second load. */
 	apr_pool_userdata_get(&data, userdata_key, s->process->pool);
 	if (data == NULL) {
-		apr_pool_userdata_setn((const void *)1, userdata_key,
-							   apr_pool_cleanup_null, s->process->pool);
+		/* We must use set() here and *not* setn(), otherwise the
+		 * static string pointed to by userdata_key will be mapped
+		 * to a different location when the DSO is reloaded and the
+		 * pointers won't match, causing get() to return NULL when
+		 * we expected it to return non-NULL. */
+		apr_pool_userdata_set((const void *)1, userdata_key,
+							  apr_pool_cleanup_null, s->process->pool);
 		return OK;
 	}
 	else if (data == (const void *)2) {
 		return OK;
 	}
-	apr_pool_userdata_setn((const void *)2, userdata_key,
+	apr_pool_userdata_set((const void *)2, userdata_key,
 						   apr_pool_cleanup_null, s->process->pool);
 
 	/* Set up our overridden path. */
