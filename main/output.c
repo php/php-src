@@ -52,10 +52,12 @@ typedef struct {
 } php_output_globals;
 
 #ifdef ZTS
+#define OLS_D php_output_globals *output_globals
 #define OG(v) (output_globals->v)
 #define OLS_FETCH() php_output_globals *output_globals = ts_resource(output_globals_id)
 int output_globals_id;
 #else
+#define OLS_D
 #define OG(v) (output_globals.v)
 #define OLS_FETCH()
 php_output_globals output_globals;
@@ -68,8 +70,7 @@ PHP_FUNCTION(ob_end_clean);
 PHP_FUNCTION(ob_get_contents);
 
 
-#ifdef ZTS
-static void php_output_init_globals(php_output_globals *output_globals)
+static void php_output_init_globals(OLS_D)
 {
  	OG(php_body_write) = NULL;
 	OG(php_header_write) = NULL;
@@ -78,20 +79,14 @@ static void php_output_init_globals(php_output_globals *output_globals)
 	OG(ob_block_size) = 0;
 	OG(ob_text_length) = 0;
 }
-#endif
 
 
 PHP_GINIT_FUNCTION(output)
 {
 #ifdef ZTS
 	output_globals_id = ts_allocate_id(sizeof(php_output_globals), NULL, NULL);
-#else
- 	OG(php_body_write) = NULL;
-	OG(php_header_write) = NULL;
-	OG(ob_buffer) = NULL;
-	OG(ob_size) = 0;
-	OG(ob_block_size) = 0;
-	OG(ob_text_length) = 0;
+#else 
+	php_output_init_globals();
 #endif
 
 	return SUCCESS;
