@@ -121,7 +121,7 @@ int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, int inquery_len, char **ou
 			}
 			/* lookup bind first via hash and then index */
 			/* stupid keys need to be null-terminated, even though we know their length */
-			crutch  = s.tok[s.cur-s.tok + 1];
+			crutch  = s.tok[s.cur-s.tok];
 			s.tok[s.cur-s.tok] = '\0';
 			if((SUCCESS == zend_hash_find(params, s.tok, s.cur-s.tok + 1,(void **)&param))  
 			    ||
@@ -147,7 +147,7 @@ int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, int inquery_len, char **ou
 					*outquery_len += (Z_STRLEN_P(param->parameter));
 				}
 			}
-			else_{
+			else {
 				/* error and cleanup */
 				efree(*outquery);
 				*outquery = NULL;
