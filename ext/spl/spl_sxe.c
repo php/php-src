@@ -35,7 +35,7 @@ zend_class_entry *spl_ce_SimpleXMLIterator = NULL;
 
 #if HAVE_LIBXML && HAVE_SIMPLEXML
 
-#include "ext/simplexml/simplexml.h"
+#include "ext/simplexml/php_simplexml_exports.h"
 
 SPL_METHOD(SimpleXMLIterator, rewind) /* {{{ */
 {
