@@ -1,3 +1,105 @@
+2001-05-22  Andy Sautins  <asautins@veripost.net>
+
+    * ext/oci8/oci8.c:
+
+       - Add correct OCIObjectFree to free collections immediately ( OCI_FREECOLLECTION_FORCE )
+       - Added schema optional parameter to OCINewCollection to allow accessing types in
+         other schemas.
+       - Added OCI_TYPECODE_TABLE to OCINewCollection to allow creation of collection of TYPES
+         as well as VARRAYS
+
+2001-05-22  Shane Caraveo  <shane@php.net>
+
+    * sapi/cgi/cgi_main.c:
+    The -c commandline option was not working at all, need to set the path
+    override before calling on the module startup.
+
+2001-05-22  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/ccvs/Makefile.in
+      ext/ccvs/ccvs.c
+      ext/ccvs/config.m4: Fixed bug: #10914
+
+2001-05-22  Andrei Zmievski  <andrei@ispi.net>
+
+    * NEWS: Fixes.
+
+2001-05-22  Andi Gutmans  <andi@zend.com>
+
+    * ext/standard/basic_functions.c
+      ext/standard/basic_functions.h
+      ext/standard/output.c
+      ext/standard/php_output.h: - Start nuking not needed GINIT
+
+2001-05-22  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * php.ini-dist: Fixed bug #10892.
+
+2001-05-22  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/session/session.c: MFH
+
+2001-05-22  Frank M. Kromann  <frank@frontbase.com>
+
+    * ext/iisfunc/setup.c: Fixing prototypes to match function names
+    TODO Rename functions to follow coding standards.
+
+    * ext/odbc/php_odbc.c
+      ext/fbsql/php_fbsql.c: Fixing prototypes to match function names
+
+2001-05-22  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/session/session.c:
+    - Made $HTTP_SESSION_VARS['foo'] and $foo be references to the same value
+      when register_globals is on. 
+
+2001-05-22  Frank M. Kromann  <frank@frontbase.com>
+
+    * ext/fbsql/php_fbsql.c:
+    Changing how persistant links are added to zend_lists
+
+2001-05-22  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/scripts/pear.in:
+    remove "?" from Console_Getopt. Sorry Andrei it was there and
+    I left there :)
+
+    * pear/PEAR/Installer.php:
+    - added error cheking and abort when no script install dir is set
+    - minor typos
+
+    * pear/scripts/pear.in: - Added the following params support:
+    	* -p set script install dir
+    	* -e set extension install dir
+    	* -d set documentation dest dir
+    	* -v set verbose level
+    - Some error reporting clean up
+    - Added the standar PHP copyright header and authors
+
+2001-05-22  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/ircg.c: MFH
+
+    * ext/ircg/ircg.c: Fix HEX_VALUE
+
+    Submitted by: Axel Sander
+
+2001-05-22  Jon Parise  <jon@csh.rit.edu>
+
+    * configure.in
+      ext/standard/filestat.c:
+    FreeBSD defines statfs(2) in <sys/mount.h>.  Teach PHP to look for it there.
+
+    * ext/standard/filestat.c
+      configure.in:
+    FreeBSD defines statfs(2) in <sys/mount.h>.  Teach PHP to look for it there.
+
+2001-05-22  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/imap/config.m4: this fixes a few apache can not start bugs.
+
+    * ext/imap/config.m4: This fixes a few apache can not start bugs.
+
 2001-05-21  Derick Rethans  <d.rethans@jdimedia.nl>
 
     * ext/pdf/pdf.c: - Nuke warning
