@@ -1,6 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-08 Apr 2004, Version 4.3.6RC3
+15 Apr 2004, Version 4.3.6
+- Updated bundled PDFLib library to version 5.0.3p1 in Windows distribution.
+  (Edin)
 - Fixed a crash in multi-threaded environments when a thread is shutdown by
   the web server. (Stas)
 - Fixed a bug that prevented building of the GD extension against external GD
