@@ -26,6 +26,7 @@
 #include <libxml/parserInternals.h>
 #include <libxml/tree.h>
 #include <libxml/xmlerror.h>
+#include <libxml/xinclude.h>
 #if defined(LIBXML_HTML_ENABLED)
 #include <libxml/HTMLparser.h>
 #include <libxml/HTMLtree.h>
