@@ -274,6 +274,10 @@ PHP_INI_END()
 static void php_mysql_init_globals(zend_mysql_globals *mysql_globals)
 {
 	mysql_globals->num_persistent = 0;
+	mysql_globals->default_socket = NULL;
+	mysql_globals->default_host = NULL;
+	mysql_globals->default_user = NULL;
+	mysql_globals->default_password = NULL;
 }
 
 
@@ -349,10 +353,10 @@ PHP_MINFO_FUNCTION(mysql)
 
 static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 {
-	char *user, *passwd, *host_and_port, *socket, *tmp, *host=NULL;
-	char *hashed_details;
+	char *user=NULL, *passwd=NULL, *host_and_port=NULL, *socket=NULL, *tmp=NULL, *host=NULL;
+	char *hashed_details=NULL;
 	int hashed_details_length, port = MYSQL_PORT;
-	MYSQL *mysql;
+	MYSQL *mysql=NULL;
 	void (*handler) (int);
 	zval **z_host=NULL, **z_user=NULL, **z_passwd=NULL;
 	zend_bool free_host=0;
