@@ -367,8 +367,9 @@ PHP_FUNCTION(posix_getgroups)
 	}
 
 	if (array_init(return_value) == FAILURE) {
-		// TODO: Should we issue a warning here so we don't have ambiguity
-		// with the above return value ?
+		/* TODO: Should we issue a warning here so we don't have ambiguity
+		 * with the above return value ?
+		 */
 		RETURN_FALSE;
 	}
 
@@ -501,8 +502,9 @@ PHP_FUNCTION(posix_uname)
 	}
 
 	if (array_init(return_value) == FAILURE) {
-		// TODO: Should we issue a warning here so we don't have ambiguity
-		// with the above return value ?
+		/* TODO: Should we issue a warning here so we don't have ambiguity
+		 * with the above return value ?
+		 */
 		RETURN_FALSE;
 	}
 
@@ -537,8 +539,9 @@ PHP_FUNCTION(posix_times)
 	}
 
 	if (array_init(return_value) == FAILURE) {
-		// TODO: Should we issue a warning here so we don't have ambiguity
-		// with the above return value ?
+		/* TODO: Should we issue a warning here so we don't have ambiguity
+		 * with the above return value ?
+		 */
 		RETURN_FALSE;
 	}
 
@@ -566,8 +569,9 @@ PHP_FUNCTION(posix_ctermid)
 		return;
 
 	if (NULL == (p = ctermid(buffer))) {
-		// Found no documentation how the defined behaviour is when this
-		// function fails
+		/* Found no documentation how the defined behaviour is when this
+		 * function fails
+		 */
 		POSIX_G(last_error) = errno;
 		RETURN_FALSE;
 	}
@@ -733,8 +737,9 @@ PHP_FUNCTION(posix_getgrnam)
 	}
 	
 	if (array_init(return_value) == FAILURE) {
-		// TODO: Should we issue a warning here so we don't have ambiguity
-		// with the above return value ?
+		/* TODO: Should we issue a warning here so we don't have ambiguity
+		 * with the above return value ?
+		 */
 		RETURN_FALSE;
 	}
 
@@ -762,8 +767,9 @@ PHP_FUNCTION(posix_getgrgid)
 	}
 
 	if (array_init(return_value) == FAILURE) {
-		// TODO: Should we issue a warning here so we don't have ambiguity
-		// with the above return value ?
+		/* TODO: Should we issue a warning here so we don't have ambiguity
+		 * with the above return value ?
+		 */
 		RETURN_FALSE;
 	}
 
