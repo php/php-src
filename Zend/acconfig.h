@@ -56,8 +56,10 @@ int zend_sprintf(char *buffer, const char *format, ...);
 
 #ifdef HAVE_FINITE
 #define zend_finite(a) finite(a)
-#elif defined(HAVE_ISFINITE)
+#elif defined(HAVE_ISFINITE) || defined(isfinite)
 #define zend_finite(a) isfinite(a)
+#elif defined(fpclassify)
+#define zend_finite(a) ((fpclassify((a))!=FP_INFINITE&&fpclassify((a))!=FP_NAN)?1:0)
 #else
 #define zend_finite(a) (zend_isnan(a) ? 0 : zend_isinf(a) ? 0 : 1)
 #endif
