@@ -1,3 +1,29 @@
+2000-11-28  Jani Taskinen  <sniper@iki.fi>
+
+    * main/.cvsignore: One file missing.
+
+    * ext/bcmath/libbcmath/.cvsignore
+      ext/bcmath/libbcmath/src/.cvsignore: Added missing .cvsignore files.
+
+    * ext/sybase/php_sybase_db.c: Fixed typo. bug #8001
+
+    * main/reentrancy.c:
+    - Fixed a bug which made readdir() unusable in some systems. 
+
+    * ext/gd/config.m4
+      ext/gd/php_gd.h: AC_CHECK_LIB prints out yes/no itself.
+
+2000-11-28  Sascha Schumann  <sascha@schumann.cx>
+
+    * main/SAPI.h: A field of mines
+
+    Submitted by: jon@csh.rit.edu
+
+    * NEWS: Add note about an old change
+
+    * build/rules_common.mk
+      configure.in: Always add top_srcdir to the header file search path.
+
 2000-11-27  Daniel Beulshausen  <daniel@php4win.de>
 
     * ext/gettext/gettext.c: fix path operations, under win32
