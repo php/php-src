@@ -1221,16 +1221,16 @@ PHP_FUNCTION(imap_mail_copy)
 }
 /* }}} */
 
-/* {{{ proto int imap_mail_move(int stream_id, int msg_no, string mailbox)
+/* {{{ proto int imap_mail_move(int stream_id, int msg_no, string mailbox [, int options])
    Move specified message to a mailbox */
 PHP_FUNCTION(imap_mail_move)
 {
-	pval *streamind,*seq, *folder;
+	pval *streamind,*seq, *folder, *options;
 	int ind, ind_type;
 	pils *imap_le_struct; 
-
-	if (ARG_COUNT(ht)!=3 
-		|| getParameters(ht,3,&streamind,&seq,&folder) == FAILURE) {
+	int myargcount = ARG_COUNT(ht);
+	if (myargcount > 4 || myargcount < 3 
+		|| getParameters(ht,myargcount,&streamind,&seq,&folder,&options) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -1245,7 +1245,7 @@ PHP_FUNCTION(imap_mail_move)
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
-	if ( mail_move(imap_le_struct->imap_stream,seq->value.str.val,folder->value.str.val)==T ) {
+	if ( mail_copy_full(imap_le_struct->imap_stream,seq->value.str.val,folder->value.str.val,myargcount == 4 ? ( options->value.lval | CP_MOVE ) : CP_MOVE )==T ) {
         RETURN_TRUE;
 	} else {
 		RETURN_FALSE;
@@ -1534,20 +1534,21 @@ PHP_FUNCTION(imap_check)
 
 /* }}} */
 
-/* {{{ proto int imap_delete(int stream_id, int msg_no)
+/* {{{ proto int imap_delete(int stream_id, int msg_no [, int flags ])
    Mark a message for deletion */
 PHP_FUNCTION(imap_delete)
 {
-	pval *streamind, * msgno;
+	pval *streamind, *sequence, *flags;
 	int ind, ind_type;
 	pils *imap_le_struct;
+	int myargc=ARG_COUNT(ht);
 
-	if (ARG_COUNT(ht)!=2 || getParameters(ht,2,&streamind,&msgno) == FAILURE) {
+	if ( myargc < 3 || myargc > 4 || getParameters(ht,myargc,&streamind,&sequence,&flags) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
 	convert_to_long(streamind);
-	convert_to_string(msgno);
+	convert_to_string(sequence);
 
 	ind = streamind->value.lval;
 
@@ -1557,7 +1558,7 @@ PHP_FUNCTION(imap_delete)
 		RETURN_FALSE;
 	}
 
-	mail_setflag(imap_le_struct->imap_stream,msgno->value.str.val,"\\DELETED");
+	mail_setflag_full(imap_le_struct->imap_stream,sequence->value.str.val,"\\DELETED",myargc == 4 ? flags->value.lval : NIL);
 	RETVAL_TRUE;
 }
 /* }}} */
@@ -1566,16 +1567,16 @@ PHP_FUNCTION(imap_delete)
    Remove the delete flag from a message */
 PHP_FUNCTION(imap_undelete)
 {
-	pval *streamind, * msgno;
+	pval *streamind, * sequence, *flags;
 	int ind, ind_type;
 	pils *imap_le_struct;
+	int myargc=ARG_COUNT(ht);
 
-	if (ARG_COUNT(ht)!=2 || getParameters(ht,2,&streamind,&msgno) == FAILURE) {
+	if ( myargc < 3 || myargc > 4 || getParameters(ht,myargc,&streamind,&sequence,&flags) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-
 	convert_to_long(streamind);
-	convert_to_string(msgno);
+	convert_to_string(sequence);
 
 	ind = streamind->value.lval;
 
@@ -1585,7 +1586,7 @@ PHP_FUNCTION(imap_undelete)
 		RETURN_FALSE;
 	}
 
-	mail_clearflag (imap_le_struct->imap_stream,msgno->value.str.val,"\\DELETED");
+	mail_clearflag_full(imap_le_struct->imap_stream,sequence->value.str.val,"\\DELETED",myargc == 4 ? flags->value.lval : NIL);
 	RETVAL_TRUE;
 }
 /* }}} */
