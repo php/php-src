@@ -26,11 +26,17 @@
 #include <sys/file.h>
 #endif
 
+#if HAVE_DIRENT_H
+#include <dirent.h>
+#endif
+
 #include <fcntl.h>
 
 #include "php_session.h"
 #include "mod_files.h"
 #include "ext/standard/flock_compat.h"
+
+#define FILE_PREFIX "sess_"
 
 typedef struct {
 	int fd;
@@ -102,7 +108,7 @@ static void _ps_files_open(ps_files *data, const char *key)
 
 		keylen = strlen(key);
 		if(keylen <= data->dirdepth || MAXPATHLEN < 
-				(strlen(data->basedir) + 2 * data->dirdepth + keylen + 5)) 
+				(strlen(data->basedir) + 2 * data->dirdepth + keylen + 5 + sizeof(FILE_PREFIX))) 
 			return;
 		p = key;
 		n = sprintf(buf, "%s/", data->basedir);
@@ -110,6 +116,7 @@ static void _ps_files_open(ps_files *data, const char *key)
 			buf[n++] = *p++;
 			buf[n++] = DIR_DELIMITER;
 		}
+		strcat(buf, FILE_PREFIX);
 		strcat(buf, p);
 		
 		data->lastkey = estrdup(key);
@@ -186,8 +193,49 @@ PS_DESTROY_FUNC(files)
 	return SUCCESS;
 }
 
+static void ps_files_cleanup_dir(const char *dirname, int maxlifetime)
+{
+	DIR *dir;
+	struct dirent *entry;
+	struct stat sbuf;
+	char buf[MAXPATHLEN];
+	time_t now;
+
+	dir = opendir(dirname);
+	if(!dir) return;
+
+	time(&now);
+
+	while((entry = readdir(dir))) {
+		/* does the file start with our prefix? */
+		if(!strncmp(entry->d_name, FILE_PREFIX, sizeof(FILE_PREFIX) - 1) &&
+				/* create full path */
+				snprintf(buf, MAXPATHLEN, "%s%c%s", dirname, DIR_DELIMITER,
+					entry->d_name) > 0 &&
+				/* stat the directory entry */
+				stat(buf, &sbuf) == 0 &&
+				/* is it expired? */
+				(now - sbuf.st_atime) > maxlifetime) {
+			unlink(buf);
+		}
+	}
+
+	closedir(dir);
+}
+
 PS_GC_FUNC(files) 
 {
+	PS_FILES_DATA;
+	
+	/* we don't perform any cleanup, if dirdepth is larger than 0.
+	   we return SUCCESS, since all cleanup should be handled by
+	   an external entity (i.e. find -ctime x | xargs rm) */
+	   
+	if(data->dirdepth > 0) {
+		return SUCCESS;
+	}
+
+	ps_files_cleanup_dir(data->basedir, maxlifetime);
 	
 	return SUCCESS;
 }
