@@ -931,10 +931,10 @@ mssql.min_message_severity = 10
 ; Compatability mode with old versions of PHP 3.0.
 mssql.compatability_mode = Off
 
-; connec timeout
+; Connec timeout
 ;mssql.connect_timeout = 5
 
-; query timeout
+; Query timeout
 ;mssql.timeout = 60
 
 ; Valid range 0 - 2147483647.  Default = 4096.
