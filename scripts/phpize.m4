@@ -52,18 +52,6 @@ PHP_BUILD_SHARED
 
 AC_PREFIX_DEFAULT()
 
-AC_ARG_WITH(openssl,
-[  --with-openssl[=DIR]    Include OpenSSL support (requires OpenSSL >= 0.9.5) ],
-[
-  if test "$withval" != "no"; then
-    PHP_WITH_SHARED
-    PHP_OPENSSL=$withval
-    ext_openssl_shared=yes
-    ext_shared=yes
-    PHP_SETUP_OPENSSL
-  fi
-])
-
 AC_PROG_AWK
     
 sinclude(config.m4)
