@@ -33,30 +33,6 @@
 #define COMMON ((*struc)->is_ref?"&":"")
 
 /* }}} */
-
-PHPAPI zend_class_entry *php_create_empty_class(char *class_name,int len)
-{ 
-	zend_class_entry nclass,*nclassp;
-
-	CLS_FETCH();
-
-	memset(&nclass,0,sizeof(zend_class_entry));
-
-	nclass.name = estrdup(class_name);
-	nclass.name_length = len;
-	nclass.type = ZEND_USER_CLASS;
-	nclass.refcount = (int *) emalloc(sizeof(int));
-	*nclass.refcount = 1;
-	nclass.constants_updated = 0;
-
-	zend_hash_init(&nclass.function_table, 10, NULL, ZEND_FUNCTION_DTOR, 0);
-	zend_hash_init(&nclass.default_properties, 10, NULL, ZVAL_PTR_DTOR, 0);
-
-	zend_hash_update(CG(class_table), nclass.name, nclass.name_length + 1, &nclass, sizeof(zend_class_entry), (void **) &nclassp);
-
-	return nclassp;
-}
-
 /* {{{ php_var_dump */
 
 static int php_array_element_dump(zval **zv, int num_args, va_list args, zend_hash_key *hash_key)
@@ -475,11 +451,8 @@ int php_var_unserialize(pval **rval, const char **p, const char *max)
 					(*p) += i;
 					
 					if (zend_hash_find(EG(class_table), class_name, i+1, (void **) &ce)==FAILURE) {
-						ce = php_create_empty_class(class_name,i);
-						/*
 						php_error(E_NOTICE, "Unserializing non-existant class: %s! No methods will be available!", class_name);
 						ce = &zend_standard_class_def;
-						*/
 					}
 
 					efree(class_name);
