@@ -37,7 +37,7 @@ if (isset($_ENV['PHP_PEAR_SYSCONF_DIR'])) {
     define('PEAR_CONFIG_SYSCONFDIR', $_ENV['PHP_PEAR_SYSCONF_DIR']);
 } elseif (isset($_ENV['SystemRoot'])) {
     define('PEAR_CONFIG_SYSCONFDIR', $_ENV['SystemRoot']);
-} elseif (@is_dir(PHP_SYSCONFDIR)) {
+} else {
     define('PEAR_CONFIG_SYSCONFDIR', PHP_SYSCONFDIR);
 }
 
