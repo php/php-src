@@ -41,15 +41,6 @@ struct _idsIterator {
 #define DOM_LOAD_STRING 0
 #define DOM_LOAD_FILE 1
 
-static void idsHashScanner(void *payload, void *data, xmlChar *name)
-{
-	idsIterator *priv = (idsIterator *) data;
-
-	if (priv->element == NULL && xmlStrEqual (name, priv->elementId)) {
-		priv->element = ((xmlNode *)((xmlID *)payload)->attr)->parent;
-	}
-}
-
 /*
 * class domdocument extends domnode 
 *
@@ -1030,9 +1021,8 @@ PHP_FUNCTION(dom_document_get_element_by_id)
 {
 	zval *id, *rv = NULL;
 	xmlDocPtr docp;
-	idsIterator iter;
-	xmlHashTable *ids = NULL;
-	int ret,idname_len;
+	xmlAttrPtr  attrp;
+	int ret, idname_len;
 	dom_object *intern;
 	char *idname;
 
@@ -1041,16 +1031,14 @@ PHP_FUNCTION(dom_document_get_element_by_id)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &idname, &idname_len) == FAILURE) {
 		return;
 	}
+	attrp = xmlGetID(docp, (xmlChar *) idname);
 
-	ids = (xmlHashTable *) docp->ids;
-	if (ids) {
-		iter.elementId = (xmlChar *) idname;
-		iter.element = NULL;
-		xmlHashScan(ids, (void *)idsHashScanner, &iter);
-		DOM_RET_OBJ(rv, (xmlNodePtr) iter.element, &ret, intern);
+	if (attrp && attrp->parent) {
+		DOM_RET_OBJ(rv, (xmlNodePtr) attrp->parent, &ret, intern);
 	} else {
 		RETVAL_NULL();
 	}
+
 }
 /* }}} end dom_document_get_element_by_id */
 
@@ -1517,25 +1505,30 @@ PHP_FUNCTION(dom_document_validate)
 	zval *id;
 	xmlDoc *docp;
 	dom_object *intern;
-	xmlValidCtxt cvp;
-	    
+	xmlValidCtxt *cvp;
+	
 	DOM_GET_THIS_OBJ(docp, id, xmlDocPtr, intern);
-
+	
 	if (docp->intSubset == NULL) {
 		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "No DTD given in XML-Document");
 	}
-    
-	cvp.userData = NULL;
-	cvp.error    = (xmlValidityErrorFunc) php_libxml_error_handler;
-	cvp.warning  = (xmlValidityErrorFunc) php_libxml_error_handler;
-
-	if (xmlValidateDocument(&cvp, docp)) {
+	
+	cvp = xmlNewValidCtxt();
+	
+	cvp->userData = NULL;
+	cvp->error    = (xmlValidityErrorFunc) php_libxml_error_handler;
+	cvp->warning  = (xmlValidityErrorFunc) php_libxml_error_handler;
+	
+	if (xmlValidateDocument(cvp, docp)) {
 		RETVAL_TRUE;
 	} else {
 		RETVAL_FALSE;
 	}
+	
+	xmlFreeValidCtxt(cvp);
+	
 }
-/* }}} end dom_document_validate */
+ 
 
 #if defined(LIBXML_SCHEMAS_ENABLED)
 static void
