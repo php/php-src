@@ -1,3 +1,16 @@
+2002-05-02  Andi Gutmans  <andi@zend.com>
+
+    * zend.h
+      zend_builtin_functions.c
+      zend_compile.h
+      zend_execute.c
+      zend_execute_API.c
+      zend_globals.h: Initial support for built-in backtracing.
+    There are still a few problems such as includes and calling other functions
+    from internal functions which aren't seen (will have to think if and how to
+    fix this).
+    Also the main scripts filename isn't available. Need to think about that.
+
 2002-04-30  Stanislav Malyshev  <stas@zend.com>
 
     * zend_API.h
