@@ -1,7 +1,7 @@
 // $Id$
 // vim:ft=javascript
 
-ARG_ENABLE("mssql", "mssql support", "no");
+ARG_WITH("mssql", "mssql support", "no");
 
 if (PHP_MSSQL == "yes") {
 	EXTENSION("mssql", "php_mssql.c");
