@@ -1,3 +1,35 @@
+2004-12-10  Andi Gutmans  <andi@zend.com>
+
+    * main/main.c:
+      - Fix bug #27728 (Can't return within a zend_try{} or the previous
+      state isn't restored.
+
+2004-12-10  Antony Dovgal  <tony2001@phpclub.net>
+
+    * ext/standard/file.c:
+      fix buffer overrun & segfault in get_meta_tags() when there is no tag value
+
+2004-12-10  Andi Gutmans  <andi@zend.com>
+
+    * (PHP_5_0)
+      NEWS
+      configure.in
+      ZendEngine2/zend.h
+      main/php_version.h:
+      - Back to -dev
+
+    * (PHP_5_0)
+      NEWS
+      configure.in
+      ZendEngine2/zend.h
+      main/php_version.h:
+      - 5.0.3RC2
+
+2004-12-10  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/pcre/php_pcre.c:
+      Avoid causing a crash.
+
 2004-12-09  Antony Dovgal  <tony2001@phpclub.net>
 
     * (PHP_4_3)

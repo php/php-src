@@ -1,3 +1,13 @@
+2004-12-10  Andi Gutmans  <andi@zend.com>
+
+    * (PHP_5_0)
+      zend.h:
+      - Back to -dev
+
+    * (PHP_5_0)
+      zend.h:
+      - 5.0.3RC2
+
 2004-12-07  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_exceptions.c
