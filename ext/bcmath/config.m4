@@ -9,7 +9,7 @@ if test "$PHP_BCMATH" != "no"; then
   AC_DEFINE(WITH_BCMATH, 1, [Whether you have bcmath])
   PHP_EXTENSION(bcmath, $ext_shared)
   if test ! -f $ext_srcdir/number.c || grep "Dummy File" $ext_srcdir/number.c >/dev/null; then
-    AC_MSG_ERROR(You do not have the bcmath package. Please read the README-BCMATH file.)
+    AC_MSG_ERROR(You do not have the bcmath package. Please read the README.BCMATH file.)
   fi
 fi
 
