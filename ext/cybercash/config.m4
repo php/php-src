@@ -12,12 +12,14 @@ AC_ARG_WITH(cybercash,
       if test -n "$MCK_DIR"; then
 	AC_MSG_RESULT(yes)
 	PHP_EXTENSION(cybercash)
+	old_LIBS="$LIBS"
 	LIBS="$LIBS -L$MCK_DIR/lib"
+	AC_CHECK_LIB(mckcrypto,base64_encode,[AC_DEFINE(HAVE_MCK,1,[ ])],
+		[AC_MSG_ERROR(Please reinstall the CyberCash MCK - cannot find mckcrypto lib)])
+	LIBS="$old_LIBS"
 	AC_ADD_LIBRARY_WITH_PATH(mckcrypto, $MCK_DIR/lib)
 	AC_ADD_INCLUDE($MCK_DIR)
-	AC_DEFINE(HAVE_MCK,1,[Whether you have CyberCash])
       else
-        AC_MSG_ERROR(Please reinstall the CyberCash MCK - I cannot find mckcrypt.h)
         AC_MSG_RESULT(no)
       fi
 fi
