@@ -19,15 +19,6 @@ Changes in the Zend Engine 2.0
       the box or after a very small amount of modifications would be
       high.
 
-      [Not sure if the following will be implemented after all]
-      To simplify migration, the Zend Engine 2.0 supports an optional
-      'auto-clone' feature, which performs a cloning of the object
-      whenever it would have been copied in the Zend Engine 1.0.
-      Optionally, it emits an E_NOTICE message whenever such an
-      automatic clone occurs, in order to allow developers to
-      gradually migrate to the behavior of the Zend Engine 2 (without
-      automatic clones).
-
     * Private Members.
 
       The Zend Engine 2.0 introduces private member variables. Note
@@ -68,18 +59,18 @@ Changes in the Zend Engine 2.0
       duplication, the Zend Engine 1.0 did a bitwise copy making an
       identical replica of all the object's properties.
 
-      Creating a copy of an object with fully replicated properties is 
-      not always the wanted behavior. A good example of the need for 
+      Creating a copy of an object with fully replicated properties is
+      not always the wanted behavior. A good example of the need for
       copy constructors, is if you have an object which represents a
       GTK window and the object holds the resource of this GTK window,
       when you create a duplicate you might want to create a new
       window with the same properties and have the new object hold the
-      resource of the new window. Another example is if your object 
-      holds a reference to another object which it uses and when you 
-      replicate the parent object you want to create a new instance of 
+      resource of the new window. Another example is if your object
+      holds a reference to another object which it uses and when you
+      replicate the parent object you want to create a new instance of
       this other object so that the replica has its own separate copy.
 
-      An object copy is created by calling the object's __clone() 
+      An object copy is created by calling the object's __clone()
       method.
 
       Example:
@@ -88,15 +79,15 @@ Changes in the Zend Engine 2.0
         $copy_of_object = $object->__clone();
         ?>
 
-      When the developer asks to create a new copy of an object, the 
-      Zend Engine will check if a __clone() method has been defined or 
-      not. If not, it will call a default __clone() which will copy 
-      all of the object's properties. If a __clone() method is 
-      defined, then it will be responsible to set the necessary 
-      properties in the created object. For convenience, the engine 
-      will supply a function that imports all of the properties from 
-      the source object, so that they can start with a by-value 
-      replica of the source object, and only override properties that 
+      When the developer asks to create a new copy of an object, the
+      Zend Engine will check if a __clone() method has been defined or
+      not. If not, it will call a default __clone() which will copy
+      all of the object's properties. If a __clone() method is
+      defined, then it will be responsible to set the necessary
+      properties in the created object. For convenience, the engine
+      will supply a function that imports all of the properties from
+      the source object, so that they can start with a by-value
+      replica of the source object, and only override properties that
       need to be changed. [The function hasn't been implemented yet]
 
       Example:
@@ -143,7 +134,7 @@ Changes in the Zend Engine 2.0
       script, this script will yield a parser error with the Zend
       Engine 2.0, since 'delete' is now a reserved word.
 
-    * Namespaces.
+    * Nested classes (namespaces).
 
       The Zend Engine 1.0 provided only three scopes: the global
       scope, the class scope and the function scope. All scopes but
@@ -153,21 +144,31 @@ Changes in the Zend Engine 2.0
       Zend Engine 1.0's scoping methods were inherently limited for
       solving symbol name collision problems.
 
-      The Zend Engine 2.0 introduces the concept of namespaces to
-      manage the symbol collision problem by making it possible to
+      The Zend Engine 2.0 introduces the concept of nested classes
+      to solve the symbol collision problem by making it possible to
       define multiple symbol tables able to contain all types of
-      symbols. The Zend Engine is aware of a current namespace,
-      defaulting to the current global one. The current namespace may
-      be changed on a file-by-file basis. Symbols in other namespaces
-      than the current one may be referenced using a new namespace
-      operator.
+      symbols. The Zend Engine is aware of a current class,
+      defaulting to the global scope. Each class can contain it's
+      own set of constants, functions and static variables. In order
+      to access a class's local symbols you can use the self:: class
+      accessor, for example, you can do self::$my_static_name = "Hello".
+      You can also use the class's name such as
+      MyClass::$my_static_name = "Hello". WIth both constants and
+      functions, if you don't specify a class context the current class
+      will be searched first and if the search fails then the global
+      scope will be searched. If you want to force PHP to only check the
+      global scope you can use the main:: accessor. For example,
+      main::strlen() to make sure you're calling the strlen() in the main
+      scope. You will only need to worry about this if you are defining
+      methods which have the same name as global functions. For
+      constants you can use the same notation such as self::MY_CONSTANT
+      or main::MY_CONSTANT.
+      Sometimes you will not want to access constants, functions or classes
+      via the class accessor (i.e. MyClass::) because you use them very
+      often and are an extremely slow typist. In this case, you can import
+      functions, classes and constants from classes with the import keyword.
+      It's quite self explanatory and there are a few examples below.
 
-      Namespaces and classes are the same with the Zend Engine 2.0, 
-      except that you can't instantiate a namespace with "new". This 
-      essentially also makes a class a namespace, so the scoping rules 
-      for namespaces apply for classes. Some of the consequences of 
-      this are: [Not finalized. Right now we basically have nested
-      classes so you can instantiate any nested class]
 
         * Classes may contain classes.
 
@@ -188,7 +189,7 @@ Changes in the Zend Engine 2.0
                 function db_connect($user) {
                     print "Connecting to Oracle database '$this->host' as $user\n";
                 }
-            }	
+            }
 
             $MySQL_obj = new DB::MySQL();
             $MySQL_obj->db_connect('Susan');
@@ -252,7 +253,7 @@ Changes in the Zend Engine 2.0
             $obj->foo();
             ?>
 
-          This prints "foobar" two times, since a bar() method exists 
+          This prints "foobar" two times, since a bar() method exists
           in the current namespace.
 
         * It is possible to "import" symbols from one namespace into
@@ -307,7 +308,7 @@ Changes in the Zend Engine 2.0
             class MyOuterClass {
                 const Hello = "Hello, World\n";
             }
-            
+
             import const Hello from MyOuterClass;
             print Hello;
             ?>
@@ -339,14 +340,14 @@ Changes in the Zend Engine 2.0
         <?php
         class BaseClass {
             function __construct() {
-                print "In BaseClass constructor\n";	
+                print "In BaseClass constructor\n";
             }
         }
 
         class SubClass extends BaseClass {
             function __construct() {
                 parent::__construct();
-                print "In SubClass constructor\n";	
+                print "In SubClass constructor\n";
             }
         }
 
@@ -389,7 +390,7 @@ Changes in the Zend Engine 2.0
 
             function __destruct() {
                 print 'Destroying ' . $this->name . "\n";
-            }	
+            }
         }
 
         $obj = new MyDestructableClass();
@@ -448,13 +449,13 @@ Changes in the Zend Engine 2.0
         <?php
         class Circle {
             function draw() {
-                print "Circle\n";	
+                print "Circle\n";
             }
         }
 
         class Square {
             function draw() {
-                print "Square\n";	
+                print "Square\n";
             }
         }
 
