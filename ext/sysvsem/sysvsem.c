@@ -411,7 +411,11 @@ PHP_FUNCTION(sem_remove)
                 RETURN_FALSE;
         }
 
-	if(semctl(sem_ptr->semid,NULL,IPC_RMID,NULL)<0) {
+#if HAVE_SEMUN
+		if(semctl(sem_ptr->semid,NULL,IPC_RMID,un)<0) {
+#else
+		if(semctl(sem_ptr->semid,NULL,IPC_RMID,NULL)<0) {
+#endif
                 php_error(E_WARNING, "sem_remove() failed for id %d: %s", id, strerror(errno));
                 RETURN_FALSE;
         }
