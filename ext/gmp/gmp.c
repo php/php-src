@@ -178,7 +178,7 @@ ZEND_MODULE_INFO_D(gmp)
 if(Z_TYPE_PP(zval) == IS_RESOURCE) { \
 	ZEND_FETCH_RESOURCE(gmpnumber, mpz_t *, zval, -1, GMP_RESOURCE_NAME, le_gmp);\
 } else {\
-	if(convert_to_gmp(&gmpnumber, zval, 0) == FAILURE) {\
+	if(convert_to_gmp(&gmpnumber, zval, 0 TSRMLS_CC) == FAILURE) {\
 		RETURN_FALSE;\
 	}\
 	ZEND_REGISTER_RESOURCE(NULL, gmpnumber, le_gmp);\
@@ -190,7 +190,7 @@ if(Z_TYPE_PP(zval) == IS_RESOURCE) { \
 
 /* {{{ convert_to_gmp
  * Convert zval to be gmp number */
-static int convert_to_gmp(mpz_t * *gmpnumber, zval **val, int base) 
+static int convert_to_gmp(mpz_t * *gmpnumber, zval **val, int base TSRMLS_DC) 
 {
 	int ret = 0;
 	int skip_lead = 0;
@@ -224,7 +224,7 @@ static int convert_to_gmp(mpz_t * *gmpnumber, zval **val, int base)
 		}
 		break;
 	default:
-		zend_error(E_WARNING,"Unable to convert variable to GMP - wrong type");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING,"Unable to convert variable to GMP - wrong type");
 		efree(*gmpnumber);
 		return FAILURE;
 	}
@@ -469,12 +469,12 @@ ZEND_FUNCTION(gmp_init)
 			convert_to_long_ex(base_arg);
 			base = Z_LVAL_PP(base_arg);
 		if(base < 2 || base > 36) {
-			zend_error(E_WARNING, "Bad base for conversion: %d (should be between 2 and 36)", base);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad base for conversion: %d (should be between 2 and 36)", base);
 			RETURN_FALSE;
 		}
 	}
 
-	if(convert_to_gmp(&gmpnumber, number_arg, base) == FAILURE) {
+	if(convert_to_gmp(&gmpnumber, number_arg, base TSRMLS_CC) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -531,7 +531,7 @@ ZEND_FUNCTION(gmp_strval)
 	}
 
 	if(base < 2 || base > 36) {
-		zend_error(E_WARNING, "Bad base for conversion: %d", base);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad base for conversion: %d", base);
 		RETURN_FALSE;
 	}
 
@@ -760,7 +760,7 @@ ZEND_FUNCTION(gmp_pow)
 	convert_to_long_ex(exp_arg);
 
 	if(Z_LVAL_PP(exp_arg) < 0) {
-		zend_error(E_WARNING,"Negative exponent not supported");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING,"Negative exponent not supported");
 		RETURN_FALSE;
 	}
 	

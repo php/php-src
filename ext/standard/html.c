@@ -703,7 +703,7 @@ PHPAPI char *php_unescape_html_entities(unsigned char *old, int oldlen, int *new
 
 				/* When we have MBCS entities in the tables above, this will need to handle it */
 				if (k > 0xff) {
-					zend_error(E_WARNING, "cannot yet handle MBCS in html_entity_decode()!");
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "cannot yet handle MBCS!");
 				}
 				replacement[0] = k;
 				replacement[1] = '\0';

@@ -69,11 +69,11 @@ long _crack_open_dict(char *dictpath TSRMLS_DC)
 	long resource;
 
 	if (CRACKG(current_id) != -1) {
-		zend_error(E_WARNING, "Can not use more than one open dictionary with this implementation of libcrack");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can not use more than one open dictionary with this implementation of libcrack");
 		return -1;
 	}
 	if (NULL == (pwdict = PWOpen(dictpath, "r"))) {
-		zend_error(E_WARNING, "Unable to open a crack dictionary");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to open a crack dictionary");
 		return -1;
 	}
 
@@ -256,7 +256,7 @@ ZEND_FUNCTION(crack_getlastmessage)
 	}
 	
 	if (NULL == CRACKG(last_message)) {
-		zend_error(E_WARNING, "No obscure checks in this session");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "No obscure checks in this session");
 		RETURN_FALSE;
 	}
 

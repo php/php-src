@@ -367,12 +367,12 @@ PHPAPI int php_var_unserialize(UNSERIALIZE_PARAMETER)
 			ZVAL_STRING(arg_func_name, class_name, 1);
 				
 			if (call_user_function_ex(CG(function_table), NULL, user_func, &retval_ptr, 1, args, 0, NULL TSRMLS_CC) != SUCCESS) {
-				zend_error(E_WARNING, "'unserialize_callback_func' defined (%s) but not found", user_func->value.str.val);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "defined (%s) but not found", user_func->value.str.val);
 				incomplete_class = 1;
 				ce = PHP_IC_ENTRY;
 			} else {
 				if (zend_hash_find(CG(class_table), class_name, len2 + 1, (void **) &ce) != SUCCESS) {
-					zend_error(E_WARNING, "'unserialize_callback_func' (%s) hasn't defined the class it was called for", user_func->value.str.val);
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "(%s) hasn't defined the class it was called for", user_func->value.str.val);
 					incomplete_class = 1;
 					ce = PHP_IC_ENTRY;
 				} else {
@@ -403,7 +403,7 @@ PHPAPI int php_var_unserialize(UNSERIALIZE_PARAMETER)
 
 "}" {
 	/* this is the case where we have less data than planned */
-	zend_error(E_NOTICE, "Unexpected end of serialized data");
+	php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Unexpected end of serialized data");
 	return 0; /* not sure if it should be 0 or 1 here? */
 }
 

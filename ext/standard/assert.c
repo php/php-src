@@ -157,8 +157,8 @@ PHP_FUNCTION(assert)
 		compiled_string_description = zend_make_compiled_string_description("assert code" TSRMLS_CC);
 		if (zend_eval_string(myeval, &retval, compiled_string_description TSRMLS_CC) == FAILURE) {
 			efree(compiled_string_description);
-			zend_error(E_ERROR, "Failure evaluating code:\n%s", myeval);
-			/* zend_error() does not return in this case. */
+			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Failure evaluating code:\n%s", myeval);
+			/* php_error_docref() does not return in this case. */
 		}
 		efree(compiled_string_description);
 
