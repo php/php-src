@@ -539,59 +539,59 @@ Changes in the Zend Engine 2.0
 
       __get() and __set() Example:
 
-    	  <?php
-    		class Setter {
-      		  public $n;
-      		  public $x = array('a' => 1, 'b' => 2, 'c' => 3);
+        <?php
+            class Setter {
+                public $n;
+                public $x = array('a' => 1, 'b' => 2, 'c' => 3);
 
-      		  function __get($nm) {
-          			print "Getting [$nm]\n";
+                function __get($nm) {
+                    print "Getting [$nm]\n";
 
-          			if(isset($this->x[$nm])) {
-            			  $r = $this->x[$nm];
-            			  print "Returning: $r\n";
-            			  return $r;
-          			} else {
-            			  print "Nothing!\n";
-          			}
-      		  }
+                    if(isset($this->x[$nm])) {
+                        $r = $this->x[$nm];
+                        print "Returning: $r\n";
+                        return $r;
+                    } else {
+                        print "Nothing!\n";
+                    }
+                }
 
-    	      function __set($nm, $val) {
-              	print "Setting [$nm] to $val\n";
+                function __set($nm, $val) {
+                    print "Setting [$nm] to $val\n";
 
-              	if(isset($this->x[$nm])) {
-                    $this->x[$nm] = $val;
-                    print "OK!\n";
-              	} else {
-        	          print "Not OK!\n";
-          			}
-      		  }
-    		}
+                    if(isset($this->x[$nm])) {
+                        $this->x[$nm] = $val;
+                        print "OK!\n";
+                    } else {
+                        print "Not OK!\n";
+                    }
+                }
+            }
 
-    		$foo = new Setter();
-    		$foo->n = 1;
-    		$foo->a = 100;
-    		$foo->a++;
-    		$foo->z++;
-    		var_dump($foo);
-    	  ?>
+            $foo = new Setter();
+            $foo->n = 1;
+            $foo->a = 100;
+            $foo->a++;
+            $foo->z++;
+            var_dump($foo);
+        ?>
 
       __call() Example:
 
-    	  <?php
-    		class Caller {
-        	  var $x = array(1, 2, 3);
+        <?php
+            class Caller {
+                var $x = array(1, 2, 3);
 
-      		  function __call($m, $a) {
-          			print "Method $m called:\n";
-          			var_dump($a);
-          			return $this->x;
-      		  }
-    		}
+                function __call($m, $a) {
+                     print "Method $m called:\n";
+                     var_dump($a);
+                     return $this->x;
+                }
+            }
 
-    		$foo = new Caller();
-  	    $a = $foo->test(1, '2', 3.4, true);
-    		var_dump($a);
+            $foo = new Caller();
+            $a = $foo->test(1, '2', 3.4, true);
+            var_dump($a);
         ?>
 
 
