@@ -2379,6 +2379,10 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, char *mode, int optio
 	path_to_open = path;
 
 	wrapper = php_stream_locate_url_wrapper(path, &path_to_open, options TSRMLS_CC);
+	if (options & STREAM_USE_URL && (!wrapper || !wrapper->is_url)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "This function may only be used against URLs.");
+		return NULL;
+	}
 
 	if (wrapper)	{
 

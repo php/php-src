@@ -43,6 +43,7 @@ PHP_FUNCTION(urlencode);
 PHP_FUNCTION(urldecode);
 PHP_FUNCTION(rawurlencode);
 PHP_FUNCTION(rawurldecode);
+PHP_FUNCTION(get_headers);
 
 #endif /* URL_H */
 
