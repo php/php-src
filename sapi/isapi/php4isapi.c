@@ -452,6 +452,27 @@ static void init_request_info(sapi_globals_struct *sapi_globals, LPEXTENSION_CON
 }
 
 
+static void php_isapi_report_exception(char *message, int message_len SLS_DC)
+{
+	if (!SG(headers_sent)) {
+		HSE_SEND_HEADER_EX_INFO header_info;
+		LPEXTENSION_CONTROL_BLOCK lpECB = (LPEXTENSION_CONTROL_BLOCK) SG(server_context);
+
+		header_info.pszStatus = "500 Internal Server Error";
+#ifndef WITH_ZEUS
+		header_info.cchStatus = strlen(header_info.pszStatus);
+#endif
+		header_info.pszHeader = "Content-Type: text/html\r\n\r\n";
+		header_info.cchHeader = strlen(header_info.pszHeader);
+
+		lpECB->dwHttpStatusCode = 500;
+		lpECB->ServerSupportFunction(lpECB->ConnID, HSE_REQ_SEND_RESPONSE_HEADER_EX, &header_info, NULL, NULL);
+		SG(headers_sent)=1;
+	}
+	sapi_isapi_ub_write(message, message_len);
+}
+
+
 BOOL WINAPI GetExtensionVersion(HSE_VERSION_INFO *pVer)
 {
 	pVer->dwExtensionVersion = HSE_VERSION;
@@ -516,22 +537,10 @@ DWORD WINAPI HttpExtensionProc(LPEXTENSION_CONTROL_BLOCK lpECB)
 			}
 
 			CG(unclean_shutdown)=1;
-
-			if (!SG(headers_sent)) {
-				HSE_SEND_HEADER_EX_INFO header_info;
-
-				header_info.pszStatus = "500 Internal Server Error";
-#ifndef WITH_ZEUS
-				header_info.cchStatus = strlen(header_info.pszStatus);
-#endif
-				header_info.pszHeader = "Content-Type: text/html\r\n\r\n";
-				header_info.cchHeader = strlen(header_info.pszHeader);
-
-				lpECB->dwHttpStatusCode = 500;
-				lpECB->ServerSupportFunction(lpECB->ConnID, HSE_REQ_SEND_RESPONSE_HEADER_EX, &header_info, NULL, NULL);
-				SG(headers_sent)=1;
-			}
-			sapi_isapi_ub_write("Stack Overflow", sizeof("Stack Overflow")-1);		
+			php_isapi_report_exception("Stack overflow", sizeof("Stack overflow")-1 SLS_CC);
+		} else if (_exception_code()==EXCEPTION_ACCESS_VIOLATION) {
+			php_isapi_report_exception("Access violation", sizeof("Access violation")-1 SLS_CC);
+			ExitThread(0);
 		} else {
 			ExitThread(0);
 		}
