@@ -6,8 +6,8 @@ Bug #22414: passthru() does not read data correctly
 		die('skip this test cannot be run under safe-mode');
 	}
 ?>
---POST--
---GET--
+--INI--
+output_handler=
 --FILE--
 <?php
 	$php = getenv('TEST_PHP_EXECUTABLE');
