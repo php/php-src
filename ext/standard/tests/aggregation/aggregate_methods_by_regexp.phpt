@@ -4,7 +4,7 @@ aggregating methods matching regular expression
 --GET--
 --FILE--
 <?php
-include "./ext/standard/tests/aggregation/aggregate.lib";
+include "ext/standard/tests/aggregation/aggregate.lib";
 
 $obj = new simple();
 aggregate_methods_by_regexp($obj, 'helper', '/^do/');
