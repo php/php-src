@@ -45,20 +45,20 @@ esac
 
 test -d build || mkdir build
 
-(cd $phpdir && cp $FILES_BUILD "$builddir"/build)
-(cd $phpdir && cp $FILES "$builddir")
+(cd "$phpdir" && cp $FILES_BUILD "$builddir"/build)
+(cd "$phpdir" && cp $FILES "$builddir")
 
 sed \
 -e "s#@prefix@#$prefix#" \
-< $phpdir/phpize.m4 > configure.in
+< "$phpdir/phpize.m4" > configure.in
 
 touch install-sh mkinstalldirs missing
 
 aclocal || exit 1
 autoconf || exit 1
 autoheader || exit 1
-test -x $builddir/build/shtool || chmod +x $builddir/build/shtool
-if test ! -x $builddir/build/shtool; then
+test -x "$builddir/build/shtool" || chmod +x "$builddir/build/shtool"
+if test ! -x "$builddir/build/shtool"; then
   echo "shtool at '$builddir/build/shtool' not executable. "
   echo "Make sure that the file exists and is executable and then rerun this script. "
   echo 
