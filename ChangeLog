@@ -1,3 +1,27 @@
+2000-07-04  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/standard/array.c: Not every argument type is mixed.
+
+    * ext/standard/array.c: Missed a two liner.
+
+2000-07-04  Mike Waychison  <mwaychison@cobalt.com>
+
+    * ext/standard/datetime.c:
+    (PHP date) Added new 'O' format modifier for printing out the GMT Offset in
+               the same manner as emails have in their Date: header.  The format
+               is similar to [+-]HHMM of offset.
+
+2000-07-04  Stig Bakken  <ssb@fast.no>
+
+    * main/main.c
+      main/php_globals.h:
+    Added "html_errors" directive to optionally disable HTML formatting of error
+    messages.  The default is on. (Stig)
+
+2000-07-04  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ext_skel: Make script work on POSIX sh
+
 2000-07-03  Zeev Suraski  <zeev@php.net>
 
     * ext/sybase/php_sybase_db.c: Fix logic (thanks to Dean Bennett)
