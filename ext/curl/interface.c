@@ -433,6 +433,9 @@ static size_t curl_write(char *data, size_t size, size_t nmemb, void *ctx)
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not call the CURLOPT_WRITEFUNCTION");
 				length = -1;
 			} else {
+				if (Z_TYPE_P(retval_ptr) != IS_LONG) {
+					convert_to_long_ex(&retval_ptr);
+				}
 				length = Z_LVAL_P(retval_ptr);
 			}
 
@@ -500,8 +503,8 @@ static size_t curl_read(char *data, size_t size, size_t nmemb, void *ctx)
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot call the CURLOPT_READFUNCTION"); 
 			} else {
 				if (Z_TYPE_P(retval_ptr) == IS_STRING) {
-					memcpy(data, Z_STRVAL_P(retval_ptr), size * nmemb);
-					length = Z_STRLEN_P(retval_ptr);
+					length = MIN(size * nmemb, Z_STRLEN_P(retval_ptr));
+					memcpy(data, Z_STRVAL_P(retval_ptr), length);
 				}
 			}
 
@@ -571,6 +574,9 @@ static size_t curl_write_header(char *data, size_t size, size_t nmemb, void *ctx
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not call the CURLOPT_HEADERFUNCTION");
 				length = -1;
 			} else {
+				if (Z_TYPE_P(retval_ptr) != IS_LONG) {
+					convert_to_long_ex(&retval_ptr);
+				}
 				length = Z_LVAL_P(retval_ptr);
 			}
 			zval_ptr_dtor(argv[0]);
@@ -578,8 +584,12 @@ static size_t curl_write_header(char *data, size_t size, size_t nmemb, void *ctx
 			zval_ptr_dtor(&retval_ptr);
 			break;
 		}
+
 		case PHP_CURL_IGNORE:
 			return length;
+
+		default:
+			return -1;
 	}
 
 	return length;
@@ -595,7 +605,7 @@ static size_t curl_passwd(void *ctx, char *prompt, char *buf, int buflen)
 	zval        *argv[3];
 	zval        *retval = NULL;
 	int          error;
-	int          ret = 0;
+	int          ret = -1;
 	TSRMLS_FETCH_FROM_CTX(ch->thread_ctx);
 
 	MAKE_STD_ZVAL(argv[0]);
@@ -610,13 +620,15 @@ static size_t curl_passwd(void *ctx, char *prompt, char *buf, int buflen)
 	error = call_user_function(EG(function_table), NULL, func, retval, 2, argv TSRMLS_CC);
 	if (error == FAILURE) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not call the CURLOPT_PASSWDFUNCTION");
-		ret = -1;
 	} else {
-		if (Z_STRLEN_P(retval) > buflen) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Returned password is too long for libcurl to handle");
-			ret = -1;
+		if (Z_TYPE_P(retval) != IS_STRING) {
+			if (Z_STRLEN_P(retval) > buflen) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Returned password is too long for libcurl to handle");
+			} else {
+				strlcpy(buf, Z_STRVAL_P(retval), Z_STRLEN_P(retval));
+			}
 		} else {
-			strlcpy(buf, Z_STRVAL_P(retval), buflen);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "User handler '%s' did not return a string.", Z_STRVAL_P(func));
 		}
 	}
 	
