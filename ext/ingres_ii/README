@@ -1,0 +1,13 @@
+Ingres II extension for PHP 4.0
+===============================
+
+This extension provides access to Ingres II servers from PHP 4.0.
+It is still in developpement and has been only quickly tested on
+linux (Mandrake 5.3 for intel), so you should avoid using it with
+critical data.
+
+To enable the extension just add --with-ii to your ./configure
+line. If the Ingres files are not found, use --with-ii=DIR instead
+to specify your Ingres installation directory.
+
+Please report suggestions to henot@php.net.

@@ -42,6 +42,10 @@ EXTENSION:           hyperwave
 PRIMARY MAINTAINER:  Uwe Steinmann <steinm@php.net>
 STATUS:              Maintained
 --------------------------------------------------------------------------------
+EXTENSION:           ii
+PRIMARY MAINTAINER:  David Hénot <henot@php.net>
+STATUS:              Maintained
+--------------------------------------------------------------------------------
 EXTENSION:           informix
 PRIMARY MAINTAINER:  Danny Heijl <Danny.Heijl@cevi.be>
 STATUS:              Maintained

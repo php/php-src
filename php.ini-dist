@@ -417,6 +417,14 @@ mssql.compatability_mode	= Off	; compatability mode with old versions of PHP 3.0
 ;assert.callback			=	0	; user-function to be called if an assertion fails.
 ;assert.quiet_eval			=	0	; eval the expression with current error_reporting(). set to true if you want error_reporting(0) around the eval().
 
+[Ingres II]
+ii.allow_persistent			=	On	; allow or prevent persistent link
+ii.max_persistent			=	-1	; maximum number of persistent links. (-1 means no limit)
+ii.max_links				=  -1	; maximum number of links, including persistents (-1 means no limit)
+ii.default_database			=		; default database (format : [node_id::]dbname[/srv_class]
+ii.default_user				=		; default user
+ii.default_password			=		; default password
+
 ; Local Variables:
 ; tab-width: 4
 ; End:
