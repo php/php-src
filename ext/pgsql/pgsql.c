@@ -883,10 +883,14 @@ PHP_FUNCTION(pg_result)
 		RETURN_FALSE;
 	}
 	
-	return_value->value.str.val = PQgetvalue(pgsql_result, Z_LVAL_PP(row), field_offset);
-	return_value->value.str.len = (return_value->value.str.val ? strlen(return_value->value.str.val) : 0);
-	return_value->value.str.val = safe_estrndup(return_value->value.str.val,return_value->value.str.len);
-	return_value->type = IS_STRING;
+	if (PQgetisnull(pgsql_result, Z_LVAL_PP(row), field_offset)) {
+		return_value->type = IS_NULL;
+	} else {
+		return_value->value.str.val = PQgetvalue(pgsql_result, Z_LVAL_PP(row), field_offset);
+		return_value->value.str.len = (return_value->value.str.val ? strlen(return_value->value.str.val) : 0);
+		return_value->value.str.val = safe_estrndup(return_value->value.str.val,return_value->value.str.len);
+		return_value->type = IS_STRING;
+	}
 }
 /* }}} */
 
@@ -933,33 +937,39 @@ static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 	}
 	array_init(return_value);
 	for (i = 0, num_fields = PQnfields(pgsql_result); i<num_fields; i++) {
-		element = PQgetvalue(pgsql_result, Z_LVAL_PP(row), i);
-		element_len = (element ? strlen(element) : 0);
-		if (element) {
-			char *data;
-			int data_len;
-			int should_copy=0;
-
-			if (PG(magic_quotes_runtime)) {
-				data = php_addslashes(element, element_len, &data_len, 0);
-			} else {
-				data = safe_estrndup(element, element_len);
-				data_len = element_len;
-			}
-			
+		if (PQgetisnull(pgsql_result, Z_LVAL_PP(row), i)) {
 			if (result_type & PGSQL_NUM) {
-				add_index_stringl(return_value, i, data, data_len, should_copy);
-				should_copy=1;
-			}
-			
-			if (result_type & PGSQL_ASSOC) {
+				add_index_unset(return_value, i);
+			} else {
 				field_name = PQfname(pgsql_result, i);
-				add_assoc_stringl(return_value, field_name, data, data_len, should_copy);
+				add_assoc_unset(return_value, field_name);
 			}
-        } else {
-            /* NULL field, don't set it */
-            /* add_get_index_stringl(return_value, i, empty_string, 0, (void **) &pval_ptr); */
-        }
+		} else {
+			element = PQgetvalue(pgsql_result, Z_LVAL_PP(row), i);
+			element_len = (element ? strlen(element) : 0);
+			if (element) {
+				char *data;
+				int data_len;
+				int should_copy=0;
+
+				if (PG(magic_quotes_runtime)) {
+					data = php_addslashes(element, element_len, &data_len, 0);
+				} else {
+					data = safe_estrndup(element, element_len);
+					data_len = element_len;
+				}
+			
+				if (result_type & PGSQL_NUM) {
+					add_index_stringl(return_value, i, data, data_len, should_copy);
+					should_copy=1;
+				}
+			
+				if (result_type & PGSQL_ASSOC) {
+					field_name = PQfname(pgsql_result, i);
+					add_assoc_stringl(return_value, field_name, data, data_len, should_copy);
+				}
+			}
+		}
 	}
 }
 
