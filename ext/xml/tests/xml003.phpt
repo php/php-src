@@ -1,7 +1,10 @@
 --TEST--
 XML parser test, xml_set_object callbacks
 --SKIPIF--
-<?php include("skipif.inc"); ?>
+<?php
+require_once("skipif.inc");
+XML_SAX_IMPL == 'libxml' && die('skip this test is not intended for libxml SAX parser');
+?>
 --INI--
 magic_quotes_runtime=0
 --FILE--
