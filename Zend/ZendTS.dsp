@@ -435,9 +435,7 @@ InputDir=.
 InputPath=.\zend_ini_parser.y
 
 BuildCmds= \
-	if not "X%CYGWIN%"=="X" bison --output=zend_ini_parser.c -v -d -S "%CYGWIN%\share\bison.simple" -p ini_ zend_ini_parser.y \
-	if "X%CYGWIN%"=="X" bison --output=zend_ini_parser.c -v -d -S "C:\Program Files\Cygnus\share\bison.simple" -p ini_ zend_ini_parser.y \
-	
+	bison --output=zend_ini_parser.c -v -d -p ini_ zend_ini_parser.y
 
 "$(InputDir)\zend_ini_parser.c" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
    $(BuildCmds)
@@ -514,9 +512,7 @@ InputDir=.
 InputPath=".\zend_language_parser.y"
 
 BuildCmds= \
-	if not "X%CYGWIN%"=="X" bison --output=zend_language_parser.c -v -d -S "%CYGWIN%\share\bison.simple" -p zend zend_language_parser.y \
-	if "X%CYGWIN%"=="X" bison --output=zend_language_parser.c -v -d -S "C:\Program Files\Cygnus\share\bison.simple" -p zend zend_language_parser.y \
-	
+	bison --output=zend_language_parser.c -v -d -p zend zend_language_parser.y
 
 "$(InputDir)\zend_language_parser.c" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
    $(BuildCmds)
