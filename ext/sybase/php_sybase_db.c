@@ -406,6 +406,7 @@ static void php_sybase_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 	/* set a DBLOGIN record */	
 	if ((sybase.login=dblogin())==NULL) {
 		php_error(E_WARNING,"Sybase:  Unable to allocate login record");
+		efree(hashed_details);
 		RETURN_FALSE;
 	}
 	
@@ -479,6 +480,7 @@ static void php_sybase_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 		} else {  /* we do */
 			if (Z_TYPE_P(le) != php_sybase_module.le_plink) {
 				php_error(E_WARNING,"Sybase:  Hashed persistent link is not a Sybase link!");
+				efree(hashed_details);
 				RETURN_FALSE;
 			}
 			
@@ -513,6 +515,7 @@ static void php_sybase_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 			void *ptr;
 
 			if (Z_TYPE_P(index_ptr) != le_index_ptr) {
+				efree(hashed_details);
 				RETURN_FALSE;
 			}
 			link = (int) index_ptr->ptr;
