@@ -12,7 +12,8 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Author: Rasmus Lerdorf <rasmus@php.net>                              |
+   | Authors: Rasmus Lerdorf <rasmus@php.net>                             |
+   |          Marcus Boerger <helly@php.net>                              |
    +----------------------------------------------------------------------+
  */
 /* $Id$ */
@@ -56,6 +57,9 @@ PHPAPI const char php_sig_swf[3] = {'F', 'W', 'S'};
 PHPAPI const char php_sig_jpg[3] = {(char) 0xff, (char) 0xd8, (char) 0xff};
 PHPAPI const char php_sig_png[8] = {(char) 0x89, (char) 0x50, (char) 0x4e, (char) 0x47,
 (char) 0x0d, (char) 0x0a, (char) 0x1a, (char) 0x0a};
+PHPAPI const char php_sig_tif_ii[8] = {'I','I', (char)0x2A, (char)0x00, (char)0x08, (char)0x00, (char)0x00, (char)0x00};
+PHPAPI const char php_sig_tif_mm[8] = {'M','M', (char)0x00, (char)0x2A, (char)0x00, (char)0x00, (char)0x00, (char)0x08};
+
 
 /* return info as a struct, to make expansion easier */
 
@@ -395,7 +399,139 @@ static struct gfxinfo *php_handle_jpeg (int socketd, FILE *fp, int issock, pval 
 }
 /* }}} */
 
-/* main function */
+/* {{{ tiff constants
+ */
+PHPAPI const int php_tiff_bytes_per_format[] = {0, 1, 1, 2, 4, 8, 1, 1, 2, 4, 8, 4, 8};
+
+/* uncompressed only */
+#define TAG_IMAGEWIDTH              0x0100
+#define TAG_IMAGEHEIGHT             0x0101
+/* compressed images only */
+#define TAG_COMP_IMAGEWIDTH         0xA002
+#define TAG_COMP_IMAGEHEIGHT        0xA003
+
+#define TAG_FMT_BYTE       1
+#define TAG_FMT_STRING     2
+#define TAG_FMT_USHORT     3
+#define TAG_FMT_ULONG      4
+#define TAG_FMT_URATIONAL  5
+#define TAG_FMT_SBYTE      6
+#define TAG_FMT_UNDEFINED  7
+#define TAG_FMT_SSHORT     8
+#define TAG_FMT_SLONG      9
+#define TAG_FMT_SRATIONAL 10
+#define TAG_FMT_SINGLE    11
+#define TAG_FMT_DOUBLE    12
+
+typedef unsigned char uchar;
+/* }}} */
+
+/* {{{ php_ifd_get16u
+ * Convert a 16 bit unsigned value from file's native byte order */
+static int php_ifd_get16u(void *Short, int motorola_intel)
+{
+	if (motorola_intel) {
+		return (((uchar *)Short)[0] << 8) | ((uchar *)Short)[1];
+	} else {
+		return (((uchar *)Short)[1] << 8) | ((uchar *)Short)[0];
+	}
+}
+/* }}} */
+
+/* {{{ php_ifd_get16s
+ * Convert a 16 bit signed value from file's native byte order */
+static signed short php_ifd_get16s(void *Short, int motorola_intel)
+{
+	return (signed short)php_ifd_get16u(Short, motorola_intel);
+}
+/* }}} */
+
+/* {{{ php_ifd_get32s
+ * Convert a 32 bit signed value from file's native byte order */
+static int php_ifd_get32s(void *Long, int motorola_intel)
+{
+	if (motorola_intel) {
+		return  ((( char *)Long)[0] << 24) | (((uchar *)Long)[1] << 16)
+			  | (((uchar *)Long)[2] << 8 ) | (((uchar *)Long)[3] << 0 );
+	} else {
+		return  ((( char *)Long)[3] << 24) | (((uchar *)Long)[2] << 16)
+			  | (((uchar *)Long)[1] << 8 ) | (((uchar *)Long)[0] << 0 );
+	}
+}
+/* }}} */
+
+/* {{{ php_ifd_get32u
+ * Convert a 32 bit unsigned value from file's native byte order */
+static unsigned php_ifd_get32u(void *Long, int motorola_intel)
+{
+	return (unsigned)php_ifd_get32s(Long, motorola_intel) & 0xffffffff;
+}
+/* }}} */
+
+/* {{{ php_handle_tiff
+   main loop to parse TIFF structure */
+static struct gfxinfo *php_handle_tiff (int socketd, FILE *fp, int issock, pval *info, int motorola_intel)
+{
+	struct gfxinfo *result = NULL;
+
+	int i, sn, num_entries;
+	unsigned char *dir_entry;
+	size_t ifd_size, dir_size, entry_value, entry_length, width, height;
+	int entry_tag , entry_type;
+	char *ifd_data;
+
+	ifd_size = 2;
+	ifd_data = emalloc(ifd_size);
+	FP_FREAD(ifd_data, 2, socketd, fp, issock);
+    num_entries = php_ifd_get16u(ifd_data, motorola_intel);
+	dir_size = 2/*num dir entries*/ +12/*length of entry*/*num_entries +4/* offset to next ifd (points to thumbnail or NULL)*/;
+	ifd_size = dir_size;
+	ifd_data = erealloc(ifd_data,ifd_size);
+	FP_FREAD(ifd_data+2, dir_size-2, socketd, fp, issock);
+	/* now we have the directory we can look how long it should be */
+	ifd_size = dir_size;
+	for(i=0;i<num_entries;i++) {
+		dir_entry 	 = ifd_data+2+i*12;
+		entry_tag    = php_ifd_get16u(dir_entry+0, motorola_intel);
+		entry_type   = php_ifd_get16u(dir_entry+2, motorola_intel);
+		entry_length = php_ifd_get32u(dir_entry+4, motorola_intel) * php_tiff_bytes_per_format[entry_type];
+		switch(entry_type) {
+			case TAG_FMT_USHORT:
+				entry_value  = php_ifd_get16u(dir_entry+8, motorola_intel);
+				break;
+			case TAG_FMT_SSHORT:
+				entry_value  = php_ifd_get16s(dir_entry+8, motorola_intel);
+				break;
+			case TAG_FMT_ULONG:
+				entry_value  = php_ifd_get32u(dir_entry+8, motorola_intel);
+				break;
+			case TAG_FMT_SLONG:
+				entry_value  = php_ifd_get32s(dir_entry+8, motorola_intel);
+				break;
+			default:
+			    continue;
+		}
+		switch(entry_tag) {
+			case TAG_IMAGEWIDTH:
+			case TAG_COMP_IMAGEWIDTH:
+				width  = entry_value;
+				break;
+			case TAG_IMAGEHEIGHT:
+			case TAG_COMP_IMAGEHEIGHT:
+				height = entry_value;
+				break;
+		}
+	}
+	if ( width && height) {
+		/* not the same when in for-loop */
+		result = (struct gfxinfo *) ecalloc(1, sizeof(struct gfxinfo));
+		result->height = height;
+		result->width  = width;
+		return result;
+	}
+	return NULL;
+}
+/* }}} */
 
 /* {{{ proto array getimagesize(string imagefile [, array info])
    Get the size of an image as 4-element array */
@@ -463,31 +599,41 @@ PHP_FUNCTION(getimagesize)
 
 	if (!memcmp(filetype, php_sig_gif, 3)) {
 		result = php_handle_gif (socketd, fp, issock);
-		itype = 1;
+		itype = IMAGE_FILETYPE_GIF;
 	} else if (!memcmp(filetype, php_sig_jpg, 3)) {
 		if (info) {
 			result = php_handle_jpeg(socketd, fp, issock, *info);
 		} else {
 			result = php_handle_jpeg(socketd, fp, issock, NULL);
 		}
-		itype = 2;
+		itype = IMAGE_FILETYPE_JPEG;
 	} else if (!memcmp(filetype, php_sig_png, 3)) {
 		FP_FREAD(filetype+3, 5, socketd, fp, issock);
 		if (!memcmp(filetype, php_sig_png, 8)) {
 			result = php_handle_png(socketd, fp, issock);
-			itype = 3;
+			itype = IMAGE_FILETYPE_PNG;
 		} else {
 			php_error(E_WARNING, "PNG file corrupted by ASCII conversion");
 		}
 	} else if (!memcmp(filetype, php_sig_swf, 3)) {
 		result = php_handle_swf(socketd, fp, issock);
-		itype = 4;
+		itype = IMAGE_FILETYPE_SWF;
 	} else if (!memcmp(filetype, php_sig_psd, 3)) {
 		result = php_handle_psd(socketd, fp, issock);
-		itype = 5;
+		itype = IMAGE_FILETYPE_PSD;
 	} else if (!memcmp(filetype, php_sig_bmp, 2)) {
 		result = php_handle_bmp(socketd, fp, issock);
-		itype = 6;
+		itype = IMAGE_FILETYPE_BMP;
+	} else {
+		FP_FREAD(filetype+3, 5, socketd, fp, issock);
+		if (!memcmp(filetype, php_sig_tif_ii, 8)) {
+			result = php_handle_tiff(socketd, fp, issock, NULL, 0);
+			itype = IMAGE_FILETYPE_TIFF;
+		} else
+		if (!memcmp(filetype, php_sig_tif_mm, 8)) {
+			result = php_handle_tiff(socketd, fp, issock, NULL, 1);
+			itype = IMAGE_FILETYPE_TIFF;
+		}
 	}
 
 	zend_list_delete(rsrc_id);
