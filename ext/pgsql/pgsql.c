@@ -94,9 +94,30 @@ function_entry pgsql_functions[] = {
 #if HAVE_PQPARAMETERSTATUS
 	PHP_FE(pg_parameter_status, NULL)
 #endif
+#if HAVE_PGTRANSACTIONSTATUS
+	PHP_FE(pg_transaction_status, NULL)
+#endif
 	/* query functions */
 	PHP_FE(pg_query,		NULL)
+#if HAVE_PQEXECPARAMS
+	PHP_FE(pg_query_params,		NULL)
+#endif
+#if HAVE_PQPREPARE
+	PHP_FE(pg_prepare,		NULL)
+#endif
+#if HAVE_PQEXECPREPARED
+	PHP_FE(pg_execute,		NULL)
+#endif
 	PHP_FE(pg_send_query,	NULL)
+#if HAVE_PQSENDQUERYPARAMS
+	PHP_FE(pg_send_query_params,	NULL)
+#endif
+#if HAVE_PQSENDPREPARE
+	PHP_FE(pg_send_prepare,	NULL)
+#endif
+#if HAVE_PQSENDQUERYPREPARED
+	PHP_FE(pg_send_execute,	NULL)
+#endif
 	PHP_FE(pg_cancel_query, NULL)
 	/* result functions */
 	PHP_FE(pg_fetch_result,	NULL)
@@ -125,6 +146,9 @@ function_entry pgsql_functions[] = {
 	PHP_FE(pg_get_pid,      NULL)
 	/* error message functions */
 	PHP_FE(pg_result_error, NULL)
+#if HAVE_PQRESULTERRORFIELD
+	PHP_FE(pg_result_error_field, NULL)
+#endif
 	PHP_FE(pg_last_error,   NULL)
 	PHP_FE(pg_last_notice,  NULL)
 	/* copy functions */
@@ -435,6 +459,14 @@ PHP_MINIT_FUNCTION(pgsql)
 	/* For pg_connection_status() */
 	REGISTER_LONG_CONSTANT("PGSQL_CONNECTION_BAD", CONNECTION_BAD, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PGSQL_CONNECTION_OK", CONNECTION_OK, CONST_CS | CONST_PERSISTENT);
+#if HAVE_PGTRANSACTIONSTATUS
+	/* For pg_transaction_status() */
+	REGISTER_LONG_CONSTANT("PGSQL_TRANSACTION_IDLE", PQTRANS_IDLE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PGSQL_TRANSACTION_ACTIVE", PQTRANS_ACTIVE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PGSQL_TRANSACTION_INTRANS", PQTRANS_INTRANS, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PGSQL_TRANSACTION_INERROR", PQTRANS_INERROR, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PGSQL_TRANSACTION_UNKNOWN", PQTRANS_UNKNOWN, CONST_CS | CONST_PERSISTENT);
+#endif
 	/* For lo_seek() */
 	REGISTER_LONG_CONSTANT("PGSQL_SEEK_SET", SEEK_SET, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PGSQL_SEEK_CUR", SEEK_CUR, CONST_CS | CONST_PERSISTENT);
@@ -451,6 +483,19 @@ PHP_MINIT_FUNCTION(pgsql)
 	REGISTER_LONG_CONSTANT("PGSQL_BAD_RESPONSE", PGRES_BAD_RESPONSE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PGSQL_NONFATAL_ERROR", PGRES_NONFATAL_ERROR, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PGSQL_FATAL_ERROR", PGRES_FATAL_ERROR, CONST_CS | CONST_PERSISTENT);
+	/* For pg_result_error_field() field codes */
+	REGISTER_LONG_CONSTANT("PGSQL_DIAG_SEVERITY", PG_DIAG_SEVERITY, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PGSQL_DIAG_SQLSTATE", PG_DIAG_SQLSTATE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PGSQL_DIAG_MESSAGE_PRIMARY", PG_DIAG_MESSAGE_PRIMARY, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PGSQL_DIAG_MESSAGE_DETAIL", PG_DIAG_MESSAGE_DETAIL, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PGSQL_DIAG_MESSAGE_HINT", PG_DIAG_MESSAGE_HINT, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PGSQL_DIAG_STATEMENT_POSITION", PG_DIAG_STATEMENT_POSITION, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PGSQL_DIAG_INTERNAL_POSITION", PG_DIAG_INTERNAL_POSITION, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PGSQL_DIAG_INTERNAL_QUERY", PG_DIAG_INTERNAL_QUERY, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PGSQL_DIAG_CONTEXT", PG_DIAG_CONTEXT, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PGSQL_DIAG_SOURCE_FILE", PG_DIAG_SOURCE_FILE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PGSQL_DIAG_SOURCE_LINE", PG_DIAG_SOURCE_LINE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PGSQL_DIAG_SOURCE_FUNCTION", PG_DIAG_SOURCE_FUNCTION, CONST_CS | CONST_PERSISTENT);
 	/* pg_convert options */
 	REGISTER_LONG_CONSTANT("PGSQL_CONV_IGNORE_DEFAULT", PGSQL_CONV_IGNORE_DEFAULT, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PGSQL_CONV_FORCE_NULL", PGSQL_CONV_FORCE_NULL, CONST_CS | CONST_PERSISTENT);
@@ -1098,6 +1143,374 @@ PHP_FUNCTION(pg_query)
 	}
 }
 /* }}} */
+
+#if HAVE_PQEXECPARAMS || HAVE_PQEXECPREPARED
+/* {{{ _php_pgsql_free_params */
+static void _php_pgsql_free_params(char **params, int num_params)
+{
+	if (num_params > 0) {
+		efree(params);
+	}
+}
+/* }}} */
+#endif
+
+#if HAVE_PQEXECPARAMS
+/* {{{ proto resource pg_query_params([resource connection,] string query, array params)
+   Execute a query */
+PHP_FUNCTION(pg_query_params)
+{
+	zval **query, **pgsql_link = NULL;
+	zval **pv_param_arr, **tmp;
+	int id = -1;
+	int leftover = 0;
+	int num_params = 0;
+	char **params = NULL;
+	unsigned char otype;
+	PGconn *pgsql;
+	PGresult *pgsql_result;
+	ExecStatusType status;
+	pgsql_result_handle *pg_result;
+
+	switch(ZEND_NUM_ARGS()) {
+		case 2:
+			if (zend_get_parameters_ex(2, &query, &pv_param_arr)==FAILURE) {
+				RETURN_FALSE;
+			}
+			id = PGG(default_link);
+			CHECK_DEFAULT_LINK(id);
+			break;
+		case 3:
+			if (zend_get_parameters_ex(3, &pgsql_link, &query, &pv_param_arr)==FAILURE) {
+				RETURN_FALSE;
+			}
+			break;
+		default:
+			WRONG_PARAM_COUNT;
+			break;
+	}
+	if (pgsql_link == NULL && id == -1) {
+		RETURN_FALSE;
+	}	
+
+	if (Z_TYPE_PP(pv_param_arr) != IS_ARRAY) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "No array passed");
+		RETURN_FALSE;
+	}
+
+	ZEND_FETCH_RESOURCE2(pgsql, PGconn *, pgsql_link, id, "PostgreSQL link", le_link, le_plink);
+
+	convert_to_string_ex(query);
+	if (PQ_SETNONBLOCKING(pgsql, 0)) {
+		php_error_docref(NULL TSRMLS_CC, E_NOTICE,"Cannot set connection to blocking mode");
+		RETURN_FALSE;
+	}
+	while ((pgsql_result = PQgetResult(pgsql))) {
+		PQclear(pgsql_result);
+		leftover = 1;
+	}
+	if (leftover) {
+		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Found results on this connection. Use pg_get_result() to get these results first");
+	}
+
+	zend_hash_internal_pointer_reset(Z_ARRVAL_PP(pv_param_arr));
+	num_params = zend_hash_num_elements(Z_ARRVAL_PP(pv_param_arr));
+	if (num_params > 0) {
+		int i = 0;
+		params = (char **)safe_emalloc(sizeof(char *), num_params, 0);
+		
+		for(i = 0; i < num_params; i++) {
+			if (zend_hash_get_current_data(Z_ARRVAL_PP(pv_param_arr), (void **) &tmp) == FAILURE) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING,"Error getting parameter");
+				_php_pgsql_free_params(params, num_params);
+				RETURN_FALSE;
+			}
+
+			otype = (*tmp)->type;
+			convert_to_string(*tmp);
+			if (Z_TYPE_PP(tmp) != IS_STRING) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING,"Error converting parameter");
+				_php_pgsql_free_params(params, num_params);
+				RETURN_FALSE;
+			}
+
+			if (otype == IS_NULL) {
+				params[i] = NULL;
+			}
+			else {
+				params[i] = Z_STRVAL_PP(tmp);
+			}
+
+			zend_hash_move_forward(Z_ARRVAL_PP(pv_param_arr));
+		}
+	}
+
+	pgsql_result = PQexecParams(pgsql, Z_STRVAL_PP(query), num_params, 
+					NULL, (const char * const *)params, NULL, NULL, 0);
+	if ((PGG(auto_reset_persistent) & 2) && PQstatus(pgsql) != CONNECTION_OK) {
+		PQclear(pgsql_result);
+		PQreset(pgsql);
+		pgsql_result = PQexecParams(pgsql, Z_STRVAL_PP(query), num_params, 
+						NULL, (const char * const *)params, NULL, NULL, 0);
+	}
+
+	if (pgsql_result) {
+		status = PQresultStatus(pgsql_result);
+	} else {
+		status = (ExecStatusType) PQstatus(pgsql);
+	}
+	
+	_php_pgsql_free_params(params, num_params);
+
+	switch (status) {
+		case PGRES_EMPTY_QUERY:
+		case PGRES_BAD_RESPONSE:
+		case PGRES_NONFATAL_ERROR:
+		case PGRES_FATAL_ERROR:
+			PHP_PQ_ERROR("Query failed: %s", pgsql);
+			PQclear(pgsql_result);
+			RETURN_FALSE;
+			break;
+		case PGRES_COMMAND_OK: /* successful command that did not return rows */
+		default:
+			if (pgsql_result) {
+				pg_result = (pgsql_result_handle *) emalloc(sizeof(pgsql_result_handle));
+				pg_result->conn = pgsql;
+				pg_result->result = pgsql_result;
+				pg_result->row = 0;
+				ZEND_REGISTER_RESOURCE(return_value, pg_result, le_result);
+			} else {
+				PQclear(pgsql_result);
+				RETURN_FALSE;
+			}
+			break;
+	}
+}
+/* }}} */
+#endif
+
+#if HAVE_PQPREPARE
+/* {{{ proto resource pg_prepare([resource connection,] string stmtname, string query)
+   Prepare a query for future execution */
+PHP_FUNCTION(pg_prepare)
+{
+	zval **query, **stmtname, **pgsql_link = NULL;
+	int id = -1;
+	int leftover = 0;
+	PGconn *pgsql;
+	PGresult *pgsql_result;
+	ExecStatusType status;
+	pgsql_result_handle *pg_result;
+
+	switch(ZEND_NUM_ARGS()) {
+		case 2:
+			if (zend_get_parameters_ex(2, &stmtname, &query)==FAILURE) {
+				RETURN_FALSE;
+			}
+			id = PGG(default_link);
+			CHECK_DEFAULT_LINK(id);
+			break;
+		case 3:
+			if (zend_get_parameters_ex(3, &pgsql_link, &stmtname, &query)==FAILURE) {
+				RETURN_FALSE;
+			}
+			break;
+		default:
+			WRONG_PARAM_COUNT;
+			break;
+	}
+	if (pgsql_link == NULL && id == -1) {
+		RETURN_FALSE;
+	}	
+
+	ZEND_FETCH_RESOURCE2(pgsql, PGconn *, pgsql_link, id, "PostgreSQL link", le_link, le_plink);
+
+	convert_to_string_ex(stmtname);
+	convert_to_string_ex(query);
+	if (PQ_SETNONBLOCKING(pgsql, 0)) {
+		php_error_docref(NULL TSRMLS_CC, E_NOTICE,"Cannot set connection to blocking mode");
+		RETURN_FALSE;
+	}
+	while ((pgsql_result = PQgetResult(pgsql))) {
+		PQclear(pgsql_result);
+		leftover = 1;
+	}
+	if (leftover) {
+		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Found results on this connection. Use pg_get_result() to get these results first");
+	}
+	pgsql_result = PQprepare(pgsql, Z_STRVAL_PP(stmtname), Z_STRVAL_PP(query), 0, NULL);
+	if ((PGG(auto_reset_persistent) & 2) && PQstatus(pgsql) != CONNECTION_OK) {
+		PQclear(pgsql_result);
+		PQreset(pgsql);
+		pgsql_result = PQprepare(pgsql, Z_STRVAL_PP(stmtname), Z_STRVAL_PP(query), 0, NULL);
+	}
+
+	if (pgsql_result) {
+		status = PQresultStatus(pgsql_result);
+	} else {
+		status = (ExecStatusType) PQstatus(pgsql);
+	}
+	
+	switch (status) {
+		case PGRES_EMPTY_QUERY:
+		case PGRES_BAD_RESPONSE:
+		case PGRES_NONFATAL_ERROR:
+		case PGRES_FATAL_ERROR:
+			PHP_PQ_ERROR("Query failed: %s", pgsql);
+			PQclear(pgsql_result);
+			RETURN_FALSE;
+			break;
+		case PGRES_COMMAND_OK: /* successful command that did not return rows */
+		default:
+			if (pgsql_result) {
+				pg_result = (pgsql_result_handle *) emalloc(sizeof(pgsql_result_handle));
+				pg_result->conn = pgsql;
+				pg_result->result = pgsql_result;
+				pg_result->row = 0;
+				ZEND_REGISTER_RESOURCE(return_value, pg_result, le_result);
+			} else {
+				PQclear(pgsql_result);
+				RETURN_FALSE;
+			}
+			break;
+	}
+}
+/* }}} */
+#endif
+
+#if HAVE_PQEXECPREPARED
+/* {{{ proto resource pg_execute([resource connection,] string stmtname, array params)
+   Execute a prepared query  */
+PHP_FUNCTION(pg_execute)
+{
+	zval **stmtname, **pgsql_link = NULL;
+	zval **pv_param_arr, **tmp;
+	int id = -1;
+	int leftover = 0;
+	int num_params = 0;
+	char **params = NULL;
+	unsigned char otype;
+	PGconn *pgsql;
+	PGresult *pgsql_result;
+	ExecStatusType status;
+	pgsql_result_handle *pg_result;
+
+	switch(ZEND_NUM_ARGS()) {
+		case 2:
+			if (zend_get_parameters_ex(2, &stmtname, &pv_param_arr)==FAILURE) {
+				RETURN_FALSE;
+			}
+			id = PGG(default_link);
+			CHECK_DEFAULT_LINK(id);
+			break;
+		case 3:
+			if (zend_get_parameters_ex(3, &pgsql_link, &stmtname, &pv_param_arr)==FAILURE) {
+				RETURN_FALSE;
+			}
+			break;
+		default:
+			WRONG_PARAM_COUNT;
+			break;
+	}
+	if (pgsql_link == NULL && id == -1) {
+		RETURN_FALSE;
+	}	
+
+	if (Z_TYPE_PP(pv_param_arr) != IS_ARRAY) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "No array passed");
+		RETURN_FALSE;
+	}
+
+	ZEND_FETCH_RESOURCE2(pgsql, PGconn *, pgsql_link, id, "PostgreSQL link", le_link, le_plink);
+
+	convert_to_string_ex(stmtname);
+	if (PQ_SETNONBLOCKING(pgsql, 0)) {
+		php_error_docref(NULL TSRMLS_CC, E_NOTICE,"Cannot set connection to blocking mode");
+		RETURN_FALSE;
+	}
+	while ((pgsql_result = PQgetResult(pgsql))) {
+		PQclear(pgsql_result);
+		leftover = 1;
+	}
+	if (leftover) {
+		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Found results on this connection. Use pg_get_result() to get these results first");
+	}
+
+	zend_hash_internal_pointer_reset(Z_ARRVAL_PP(pv_param_arr));
+	num_params = zend_hash_num_elements(Z_ARRVAL_PP(pv_param_arr));
+	if (num_params > 0) {
+		int i = 0;
+		params = (char **)safe_emalloc(sizeof(char *), num_params, 0);
+		
+		for(i = 0; i < num_params; i++) {
+			if (zend_hash_get_current_data(Z_ARRVAL_PP(pv_param_arr), (void **) &tmp) == FAILURE) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING,"Error getting parameter");
+				_php_pgsql_free_params(params, num_params);
+				RETURN_FALSE;
+			}
+
+			otype = (*tmp)->type;
+			convert_to_string(*tmp);
+			if (Z_TYPE_PP(tmp) != IS_STRING) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING,"Error converting parameter");
+				_php_pgsql_free_params(params, num_params);
+				RETURN_FALSE;
+			}
+
+			if (otype == IS_NULL) {
+				params[i] = NULL;
+			}
+			else {
+				params[i] = Z_STRVAL_PP(tmp);
+			}
+
+			zend_hash_move_forward(Z_ARRVAL_PP(pv_param_arr));
+		}
+	}
+
+	pgsql_result = PQexecPrepared(pgsql, Z_STRVAL_PP(stmtname), num_params, 
+					(const char * const *)params, NULL, NULL, 0);
+	if ((PGG(auto_reset_persistent) & 2) && PQstatus(pgsql) != CONNECTION_OK) {
+		PQclear(pgsql_result);
+		PQreset(pgsql);
+		pgsql_result = PQexecPrepared(pgsql, Z_STRVAL_PP(stmtname), num_params, 
+						(const char * const *)params, NULL, NULL, 0);
+	}
+
+	if (pgsql_result) {
+		status = PQresultStatus(pgsql_result);
+	} else {
+		status = (ExecStatusType) PQstatus(pgsql);
+	}
+	
+	_php_pgsql_free_params(params, num_params);
+
+	switch (status) {
+		case PGRES_EMPTY_QUERY:
+		case PGRES_BAD_RESPONSE:
+		case PGRES_NONFATAL_ERROR:
+		case PGRES_FATAL_ERROR:
+			PHP_PQ_ERROR("Query failed: %s", pgsql);
+			PQclear(pgsql_result);
+			RETURN_FALSE;
+			break;
+		case PGRES_COMMAND_OK: /* successful command that did not return rows */
+		default:
+			if (pgsql_result) {
+				pg_result = (pgsql_result_handle *) emalloc(sizeof(pgsql_result_handle));
+				pg_result->conn = pgsql;
+				pg_result->result = pgsql_result;
+				pg_result->row = 0;
+				ZEND_REGISTER_RESOURCE(return_value, pg_result, le_result);
+			} else {
+				PQclear(pgsql_result);
+				RETURN_FALSE;
+			}
+			break;
+	}
+}
+/* }}} */
+#endif
 
 #define PHP_PG_NUM_ROWS 1
 #define PHP_PG_NUM_FIELDS 2
@@ -3046,6 +3459,45 @@ PHP_FUNCTION(pg_result_error)
 }
 /* }}} */
 
+#if HAVE_PQRESULTERRORFIELD
+/* {{{ proto string pg_result_error_field(resource result, int fieldcode)
+   Get error message field associated with result */
+PHP_FUNCTION(pg_result_error_field)
+{
+	zval *result;
+	long fieldcode;
+	PGresult *pgsql_result;
+	pgsql_result_handle *pg_result;
+	char *field = NULL;
+
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "rl",
+								 &result, &fieldcode) == FAILURE) {
+		RETURN_FALSE;
+	}
+	
+	ZEND_FETCH_RESOURCE(pg_result, pgsql_result_handle *, &result, -1, "PostgreSQL result", le_result);
+
+	pgsql_result = pg_result->result;
+	if (!pgsql_result) {
+		RETURN_FALSE;
+	}
+	if (fieldcode & (PG_DIAG_SEVERITY|PG_DIAG_SQLSTATE|PG_DIAG_MESSAGE_PRIMARY|PG_DIAG_MESSAGE_DETAIL
+				|PG_DIAG_MESSAGE_HINT|PG_DIAG_STATEMENT_POSITION|PG_DIAG_INTERNAL_POSITION
+				|PG_DIAG_INTERNAL_QUERY|PG_DIAG_CONTEXT|PG_DIAG_SOURCE_FILE|PG_DIAG_SOURCE_LINE
+				|PG_DIAG_SOURCE_FUNCTION)) {
+		field = (char *)PQresultErrorField(pgsql_result, fieldcode);
+		if (field == NULL) {
+			RETURN_NULL();
+		} else {
+			RETURN_STRING(field, 1);
+		}
+	} else {
+		RETURN_FALSE;
+	}
+}
+/* }}} */
+#endif
+
 /* {{{ proto int pg_connection_status(resource connnection)
    Get connection status */
 PHP_FUNCTION(pg_connection_status)
@@ -3063,6 +3515,28 @@ PHP_FUNCTION(pg_connection_status)
 
 	RETURN_LONG(PQstatus(pgsql));
 }
+
+/* }}} */
+
+#if HAVE_PGTRANSACTIONSTATUS
+/* {{{ proto int pg_transaction_status(resource connnection)
+   Get transaction status */
+PHP_FUNCTION(pg_transaction_status)
+{
+	zval *pgsql_link = NULL;
+	int id = -1;
+	PGconn *pgsql;
+
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "r",
+								 &pgsql_link) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	ZEND_FETCH_RESOURCE2(pgsql, PGconn *, &pgsql_link, id, "PostgreSQL link", le_link, le_plink);
+
+	RETURN_LONG(PQtransactionStatus(pgsql));
+}
+#endif
 
 /* }}} */
 
@@ -3173,7 +3647,7 @@ PHP_FUNCTION(pg_connection_busy)
 }
 /* }}} */
 
-/* {{{ proto bool pg_send_query(resource connection, string qeury)
+/* {{{ proto bool pg_send_query(resource connection, string query)
    Send asynchronous query */
 PHP_FUNCTION(pg_send_query)
 {
@@ -3218,6 +3692,242 @@ PHP_FUNCTION(pg_send_query)
 }
 /* }}} */
 
+#if HAVE_PQSENDQUERYPARAMS
+/* {{{ proto bool pg_send_query_params(resource connection, string query)
+   Send asynchronous parameterized query */
+PHP_FUNCTION(pg_send_query_params)
+{
+	zval **pgsql_link;
+	zval **pv_param_arr, **tmp;
+	int num_params = 0;
+	char **params = NULL;
+	unsigned char otype;
+	zval **query;
+	int id = -1;
+	PGconn *pgsql;
+	PGresult *res;
+	int leftover = 0;
+
+	if (zend_get_parameters_ex(3, &pgsql_link, &query, &pv_param_arr) == FAILURE) {
+		return;
+	}
+
+	if (pgsql_link == NULL && id == -1) {
+		RETURN_FALSE;
+	}	
+
+	if (Z_TYPE_PP(pv_param_arr) != IS_ARRAY) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "No array passed");
+		RETURN_FALSE;
+	}
+
+	ZEND_FETCH_RESOURCE2(pgsql, PGconn *, pgsql_link, id, "PostgreSQL link", le_link, le_plink);
+
+	convert_to_string_ex(query);
+	if (PQ_SETNONBLOCKING(pgsql, 1)) {
+		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Cannot set connection to nonblocking mode");
+		RETURN_FALSE;
+	}
+	while ((res = PQgetResult(pgsql))) {
+		PQclear(res);
+		leftover = 1;
+	}
+	if (leftover) {
+		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "There are results on this connection. Call pg_get_result() until it returns FALSE");
+	}
+
+	zend_hash_internal_pointer_reset(Z_ARRVAL_PP(pv_param_arr));
+	num_params = zend_hash_num_elements(Z_ARRVAL_PP(pv_param_arr));
+	if (num_params > 0) {
+		int i = 0;
+		params = (char **)safe_emalloc(sizeof(char *), num_params, 0);
+		
+		for(i = 0; i < num_params; i++) {
+			if (zend_hash_get_current_data(Z_ARRVAL_PP(pv_param_arr), (void **) &tmp) == FAILURE) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING,"Error getting parameter");
+				_php_pgsql_free_params(params, num_params);
+				RETURN_FALSE;
+			}
+
+			otype = (*tmp)->type;
+			convert_to_string(*tmp);
+			if (Z_TYPE_PP(tmp) != IS_STRING) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING,"Error converting parameter");
+				_php_pgsql_free_params(params, num_params);
+				RETURN_FALSE;
+			}
+
+			if (otype == IS_NULL) {
+				params[i] = NULL;
+			}
+			else {
+				params[i] = Z_STRVAL_PP(tmp);
+			}
+
+			zend_hash_move_forward(Z_ARRVAL_PP(pv_param_arr));
+		}
+	}
+
+	if (!PQsendQueryParams(pgsql, Z_STRVAL_PP(query), num_params, NULL, (const char * const *)params, NULL, NULL, 0)) {
+		if ((PGG(auto_reset_persistent) & 2) && PQstatus(pgsql) != CONNECTION_OK) {
+			PQreset(pgsql);
+		}
+		if (!PQsendQueryParams(pgsql, Z_STRVAL_PP(query), num_params, NULL, (const char * const *)params, NULL, NULL, 0)) {
+			_php_pgsql_free_params(params, num_params);
+			RETURN_FALSE;
+		}
+	}
+	_php_pgsql_free_params(params, num_params);
+	if (PQ_SETNONBLOCKING(pgsql, 0)) {
+		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Cannot set connection to blocking mode");
+	}
+	RETURN_TRUE;
+}
+/* }}} */
+#endif
+
+#if HAVE_PQSENDPREPARE
+/* {{{ proto bool pg_send_prepare(resource connection, string stmtname, string query)
+   Asynchronously prepare a query for future execution */
+PHP_FUNCTION(pg_send_prepare)
+{
+	zval **pgsql_link;
+	zval **query, **stmtname;
+	int id = -1;
+	PGconn *pgsql;
+	PGresult *res;
+	int leftover = 0;
+
+	if (zend_get_parameters_ex(3, &pgsql_link, &stmtname, &query) == FAILURE) {
+		return;
+	}
+	if (pgsql_link == NULL && id == -1) {
+		RETURN_FALSE;
+	}	
+
+	ZEND_FETCH_RESOURCE2(pgsql, PGconn *, pgsql_link, id, "PostgreSQL link", le_link, le_plink);
+
+	convert_to_string_ex(stmtname);
+	convert_to_string_ex(query);
+	if (PQ_SETNONBLOCKING(pgsql, 1)) {
+		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Cannot set connection to nonblocking mode");
+		RETURN_FALSE;
+	}
+	while ((res = PQgetResult(pgsql))) {
+		PQclear(res);
+		leftover = 1;
+	}
+	if (leftover) {
+		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "There are results on this connection. Call pg_get_result() until it returns FALSE");
+	}
+	if (!PQsendPrepare(pgsql, Z_STRVAL_PP(stmtname), Z_STRVAL_PP(query), 0, NULL)) {
+		if ((PGG(auto_reset_persistent) & 2) && PQstatus(pgsql) != CONNECTION_OK) {
+			PQreset(pgsql);
+		}
+		if (!PQsendPrepare(pgsql, Z_STRVAL_PP(stmtname), Z_STRVAL_PP(query), 0, NULL)) {
+			RETURN_FALSE;
+		}
+	}
+	if (PQ_SETNONBLOCKING(pgsql, 0)) {
+		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Cannot set connection to blocking mode");
+	}
+	RETURN_TRUE;
+}
+/* }}} */
+#endif
+
+#if HAVE_PQSENDQUERYPREPARED
+/* {{{ proto bool pg_send_execute(resource connection, string stmtname, array params)
+   Executes prevriously prepared stmtname asynchronously */
+PHP_FUNCTION(pg_send_execute)
+{
+	zval **pgsql_link;
+	zval **pv_param_arr, **tmp;
+	int num_params = 0;
+	char **params = NULL;
+	unsigned char otype;
+	zval **stmtname;
+	int id = -1;
+	PGconn *pgsql;
+	PGresult *res;
+	int leftover = 0;
+
+	if (zend_get_parameters_ex(3, &pgsql_link, &stmtname, &pv_param_arr)==FAILURE) {
+		return;
+	}
+	if (pgsql_link == NULL && id == -1) {
+		RETURN_FALSE;
+	}	
+
+	if (Z_TYPE_PP(pv_param_arr) != IS_ARRAY) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "No array passed");
+		RETURN_FALSE;
+	}
+
+	ZEND_FETCH_RESOURCE2(pgsql, PGconn *, pgsql_link, id, "PostgreSQL link", le_link, le_plink);
+
+	convert_to_string_ex(stmtname);
+	if (PQ_SETNONBLOCKING(pgsql, 1)) {
+		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Cannot set connection to nonblocking mode");
+		RETURN_FALSE;
+	}
+	while ((res = PQgetResult(pgsql))) {
+		PQclear(res);
+		leftover = 1;
+	}
+	if (leftover) {
+		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "There are results on this connection. Call pg_get_result() until it returns FALSE");
+	}
+
+	zend_hash_internal_pointer_reset(Z_ARRVAL_PP(pv_param_arr));
+	num_params = zend_hash_num_elements(Z_ARRVAL_PP(pv_param_arr));
+	if (num_params > 0) {
+		int i = 0;
+		params = (char **)safe_emalloc(sizeof(char *), num_params, 0);
+		
+		for(i = 0; i < num_params; i++) {
+			if (zend_hash_get_current_data(Z_ARRVAL_PP(pv_param_arr), (void **) &tmp) == FAILURE) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING,"Error getting parameter");
+				_php_pgsql_free_params(params, num_params);
+				RETURN_FALSE;
+			}
+
+			otype = (*tmp)->type;
+			convert_to_string(*tmp);
+			if (Z_TYPE_PP(tmp) != IS_STRING) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING,"Error converting parameter");
+				_php_pgsql_free_params(params, num_params);
+				RETURN_FALSE;
+			}
+
+			if (otype == IS_NULL) {
+				params[i] = NULL;
+			}
+			else {
+				params[i] = Z_STRVAL_PP(tmp);
+			}
+
+			zend_hash_move_forward(Z_ARRVAL_PP(pv_param_arr));
+		}
+	}
+
+	if (!PQsendQueryPrepared(pgsql, Z_STRVAL_PP(stmtname), num_params, (const char * const *)params, NULL, NULL, 0)) {
+		if ((PGG(auto_reset_persistent) & 2) && PQstatus(pgsql) != CONNECTION_OK) {
+			PQreset(pgsql);
+		}
+		if (!PQsendQueryPrepared(pgsql, Z_STRVAL_PP(stmtname), num_params, (const char * const *)params, NULL, NULL, 0)) {
+			_php_pgsql_free_params(params, num_params);
+			RETURN_FALSE;
+		}
+	}
+	_php_pgsql_free_params(params, num_params);
+	if (PQ_SETNONBLOCKING(pgsql, 0)) {
+		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Cannot set connection to blocking mode");
+	}
+	RETURN_TRUE;
+}
+/* }}} */
+#endif
 
 /* {{{ proto resource pg_get_result(resource connection)
    Get asynchronous query result */

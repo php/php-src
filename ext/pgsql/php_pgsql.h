@@ -75,9 +75,30 @@ PHP_FUNCTION(pg_ping);
 #if HAVE_PQPARAMETERSTATUS
 PHP_FUNCTION(pg_parameter_status);
 #endif
+#if HAVE_PGTRANSACTIONSTATUS
+PHP_FUNCTION(pg_transaction_status);
+#endif
 /* query functions */
 PHP_FUNCTION(pg_query);
+#if HAVE_PQEXECPARAMS
+PHP_FUNCTION(pg_query_params);
+#endif
+#if HAVE_PQPREPARE
+PHP_FUNCTION(pg_prepare);
+#endif
+#if HAVE_PQEXECPREPARED
+PHP_FUNCTION(pg_execute);
+#endif
 PHP_FUNCTION(pg_send_query);
+#if HAVE_PQSENDQUERYPARAMS
+PHP_FUNCTION(pg_send_query_params);
+#endif
+#if HAVE_PQSENDPREPARE
+PHP_FUNCTION(pg_send_prepare);
+#endif
+#if HAVE_PQSENDQUERYPREPARED
+PHP_FUNCTION(pg_send_execute);
+#endif
 PHP_FUNCTION(pg_cancel_query);
 /* result functions */
 PHP_FUNCTION(pg_fetch_assoc);
@@ -106,6 +127,9 @@ PHP_FUNCTION(pg_get_notify);
 PHP_FUNCTION(pg_get_pid);
 /* error message functions */
 PHP_FUNCTION(pg_result_error);
+#if HAVE_PQRESULTERRORFIELD
+PHP_FUNCTION(pg_result_error_field);
+#endif
 PHP_FUNCTION(pg_last_error);
 PHP_FUNCTION(pg_last_notice);
 /* copy functions */
