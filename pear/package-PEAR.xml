@@ -66,6 +66,7 @@ use of inadvisable @ in setErrorHandling
 * Fix #25008 - unhelpful error message
 * Fixed optional dependencies in Dependency.php
 * Fix #25322 - bad md5sum should be fatal error
+* Package uninstall now also removes empty directories
     </notes>
     <provides type="class" name="OS_Guess" />
     <provides type="class" name="System" />
