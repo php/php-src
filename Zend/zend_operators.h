@@ -55,14 +55,14 @@ BEGIN_EXTERN_C()
 ZEND_API void convert_scalar_to_number(zval *op);
 ZEND_API void convert_to_string(zval *op);
 ZEND_API void convert_to_long(zval *op);
+ZEND_API void convert_to_double(zval *op);
 ZEND_API void convert_to_long_base(zval *op, int base);
-ZEND_API void convert_to_unset(zval *op);
+ZEND_API void convert_to_null(zval *op);
 ZEND_API void convert_to_boolean(zval *op);
 ZEND_API void convert_to_array(zval *op);
 ZEND_API void convert_to_object(zval *op);
 ZEND_API int add_char_to_string(zval *result, zval *op1, zval *op2);
 ZEND_API int add_string_to_string(zval *result, zval *op1, zval *op2);
-ZEND_API void convert_to_double(zval *op);
 END_EXTERN_C()
 
 ZEND_API int zval_is_true(zval *op);
@@ -77,53 +77,21 @@ ZEND_API int zend_binary_strcasecmp(char *s1, uint len1, char *s2, uint len2);
 
 ZEND_API void zendi_smart_strcmp(zval *result, zval *s1, zval *s2);
 
-#define convert_to_long_ex(ppzv)							\
-	if ((*ppzv)->type!=IS_LONG) {							\
-		if (!(*ppzv)->is_ref) {							\
+#define convert_to_ex_master(ppzv, lower_type, upper_type)	\
+	if ((*ppzv)->type!=IS_##upper_type) {					\
+		if (!(*ppzv)->is_ref) {								\
 			SEPARATE_ZVAL(ppzv);							\
 		}													\
-		convert_to_long(*ppzv);								\
+		convert_to_##lower_type(*ppzv);						\
 	}
 
-#define convert_to_double_ex(ppzv)							\
-	if ((*ppzv)->type!=IS_DOUBLE) {							\
-		if (!(*ppzv)->is_ref) {							\
-			SEPARATE_ZVAL(ppzv);							\
-		}													\
-		convert_to_double(*ppzv);							\
-	}
-
-#define convert_to_string_ex(ppzv)							\
-	if ((*ppzv)->type!=IS_STRING) {							\
-		if (!(*ppzv)->is_ref) {							\
-			SEPARATE_ZVAL(ppzv);							\
-		}													\
-		convert_to_string(*ppzv);							\
-	}
-
-#define convert_to_array_ex(ppzv)							\
-	if ((*ppzv)->type!=IS_ARRAY) {							\
-		if (!(*ppzv)->is_ref) {							\
-			SEPARATE_ZVAL(ppzv);							\
-		}													\
-		convert_to_array(*ppzv);							\
-	}
-
-#define convert_to_object_ex(ppzv)							\
-	if ((*ppzv)->type!=IS_OBJECT) {							\
-		if (!(*ppzv)->is_ref) {							\
-			SEPARATE_ZVAL(ppzv);							\
-		}													\
-		convert_to_object(*ppzv);							\
-	}
-
-#define convert_to_boolean_ex(ppzv)							\
-	if ((*ppzv)->type!=IS_BOOL) {							\
-		if (!(*ppzv)->is_ref) {							\
-			SEPARATE_ZVAL(ppzv);							\
-		}													\
-		convert_to_boolean(*ppzv);							\
-	}
+#define convert_to_boolean_ex(ppzv)	convert_to_ex_master(ppzv, boolean, BOOL)
+#define convert_to_long_ex(ppzv)	convert_to_ex_master(ppzv, long, LONG)
+#define convert_to_double_ex(ppzv)	convert_to_ex_master(ppzv, double, DOUBLE)
+#define convert_to_string_ex(ppzv)	convert_to_ex_master(ppzv, string, STRING)
+#define convert_to_array_ex(ppzv)	convert_to_ex_master(ppzv, array, ARRAY)
+#define convert_to_object_ex(ppzv)	convert_to_ex_master(ppzv, object, OBJECT)
+#define convert_to_null_ex(ppzv)	convert_to_ex_master(ppzv, null, NULL)
 
 #define convert_scalar_to_number_ex(ppzv)							\
 	if ((*ppzv)->type!=IS_LONG && (*ppzv)->type!=IS_DOUBLE) {		\
