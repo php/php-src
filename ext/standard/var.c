@@ -48,6 +48,11 @@ void php_var_dump(pval **struc, int level)
 			PHPWRITE(&buf[1], i - 1);
 			break;
 
+		case IS_UNSET:
+			i = sprintf(buf, "%*cNULL\n", level, ' ');
+			PHPWRITE(&buf[1], i - 1);
+			break;
+
 		case IS_LONG:
 			i = sprintf(buf, "%*cint(%ld)\n", level, ' ', (*struc)->value.lval);
 			PHPWRITE(&buf[1], i - 1);
@@ -198,6 +203,10 @@ void php_var_serialize(pval *buf, pval **struc)
 			STR_CAT(buf, s, slen);
 			return;
 
+		case IS_UNSET:
+			STR_CAT(buf, "N;", 2);
+			return;
+
 		case IS_LONG:
 			slen = sprintf(s, "i:%ld;", (*struc)->value.lval);
 			STR_CAT(buf, s, slen);
@@ -296,6 +305,16 @@ int php_var_unserialize(pval **rval, const char **p, const char *max)
 	ELS_FETCH();
 
 	switch (cur = **p) {
+		case 'N':
+			if (*((*p) + 1) != ';') {
+				return 0;
+			}
+			(*p)++;
+			INIT_PZVAL(*rval);
+			(*rval)->type = IS_UNSET;
+			(*p)++;
+			return 1;
+
 		case 'b': /* bool */
 		case 'i':
 			if (*((*p) + 1) != ':') {
@@ -439,8 +458,8 @@ int php_var_unserialize(pval **rval, const char **p, const char *max)
 				ALLOC_ZVAL(key);
 				ALLOC_ZVAL(data);
 				if (!php_var_unserialize(&key, p, max)) {
-				  zval_dtor(key);
-				  efree(key);
+				  	zval_dtor(key);
+				  	efree(key);
 					efree(data);
 					return 0;
 				}
