@@ -82,17 +82,17 @@ typedef struct {
     OCISvcCtx *pServiceContext;
 	sword error;
     OCIError *pError;
-	HashTable *descriptors;
-	int descriptors_count;
 } oci_connection;
 
 typedef struct {
+	int id;
+	oci_connection *conn;
 	dvoid *ocidescr;
 	ub4 type;
 } oci_descriptor;
 
 typedef struct {
-    pval *pval;
+    zval *zval;
     text *name;
     ub4 name_len;
 	ub4 type;
@@ -106,18 +106,17 @@ typedef struct {
     OCIStmt *pStmt;
 	char *last_query;
 	HashTable *columns;
-	int ncolumns;
 	HashTable *binds;
 	HashTable *defines;
+	int ncolumns;
 	int executed;
 } oci_statement;
 
 typedef struct {
 	OCIBind *pBind;
-	pval *value;
+	zval *zval;
 	dvoid *descr;		/* used for binding of LOBS etc */
     OCIStmt *pStmt;     /* used for binding REFCURSORs */
-	ub4 maxsize;
 	sb2 indicator;
 	ub2 retcode;
 } oci_bind;
@@ -137,9 +136,9 @@ typedef struct {
 	ub2 is_descr;
 	ub2 is_cursor;
     int descr;
-    oci_descriptor *pdescr;
     oci_statement *pstmt;
 	int stmtid;
+	int descid;
 	void *data;
 	oci_define *define;
 	int piecewise;
