@@ -85,11 +85,11 @@
 /* type casts left out, put here to remove warnings in
    msvc
 */
-extern void rfc822_date(char *date);
+void rfc822_date(char *date);
 extern char *cpystr(const char *string);
 extern unsigned long find_rightmost_bit (unsigned long *valptr);
-extern void fs_give (void **block);
-extern void *fs_get (size_t size);
+void fs_give (void **block);
+void *fs_get (size_t size);
 int add_assoc_object(pval *arg, char *key, pval tmp);
 int add_next_index_object(pval *arg, pval tmp);
 void imap_add_body( pval *arg, BODY *body );
@@ -402,7 +402,7 @@ int imap_init(INIT_FUNC_ARGS)
 
 /* {{{ proto int imap_open(string mailbox, string user, string password [, int options])
    Open an IMAP stream to a mailbox */
-void php3_imap_open(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(imap_open)
 {
 	pval *mailbox;
 	pval *user;
@@ -454,7 +454,7 @@ void php3_imap_open(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int imap_reopen(int stream_id, string mailbox [, int options])
    Reopen IMAP stream to new mailbox */
-void php3_imap_reopen(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(imap_reopen)
 {
 	pval *streamind;
 	pval *mailbox;
@@ -499,7 +499,7 @@ void php3_imap_reopen(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int imap_append(int stream_id, string folder, string message [, string flags])
    Append a string message to a specified mailbox */
-void php3_imap_append(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(imap_append)
 {
   pval *streamind,*folder, *message,*flags;
   int ind, ind_type;
@@ -537,7 +537,7 @@ void php3_imap_append(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto imap_num_msg(int stream_id)
    Gives the number of messages in the current mailbox */
-void php3_imap_num_msg(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(imap_num_msg)
 {
 	pval *streamind;
 	int ind, ind_type;
@@ -564,7 +564,7 @@ void php3_imap_num_msg(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int imap_ping(int stream_id)
    Check if the IMAP stream is still active */
-void php3_imap_ping(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(imap_ping)
 {
 	pval *streamind;
 	int ind, ind_type;
@@ -588,7 +588,7 @@ void php3_imap_ping(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int imap_num_recent(int stream_id)
    Gives the number of recent messages in current mailbox */
-void php3_imap_num_recent(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(imap_num_recent)
 {
 	pval *streamind;
 	int ind, ind_type;
@@ -609,7 +609,7 @@ void php3_imap_num_recent(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int imap_expunge(int stream_id)
    Delete all messages marked for deletion */
-void php3_imap_expunge(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(imap_expunge)
 {
 	pval *streamind;
 	int ind, ind_type;
@@ -638,7 +638,7 @@ void php3_imap_expunge(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int imap_close(int stream_id [, int options])
    Close an IMAP stream */
-void php3_imap_close(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(imap_close)
 {
 	pval *options, *streamind;
 	int ind, ind_type;
@@ -673,7 +673,7 @@ void php3_imap_close(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto array imap_headers(int stream_id)
    Returns headers for all messages in a mailbox */
-void php3_imap_headers(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(imap_headers)
 {
 	pval *streamind;
 	int ind, ind_type;
@@ -734,7 +734,7 @@ void php3_imap_headers(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto imap_body(int stream_id, int msg_no [, int options])
    Read the message body */
-void php3_imap_body(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(imap_body)
 {
 	pval *streamind, * msgno, *flags;
 	int ind, ind_type;
@@ -761,7 +761,7 @@ void php3_imap_body(INTERNAL_FUNCTION_PARAMETERS)
 /*    v--- add proto here when this function is done */
 /* {{{ string imap_fetchtext_full(int stream_id, int msg_no [, int options])
    Read the body of a message*/
-void php3_imap_fetchtext_full(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(imap_fetchtext_full)
 {
 	pval *streamind, * msgno, *flags;
 	int ind, ind_type;
@@ -787,7 +787,7 @@ void php3_imap_fetchtext_full(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int imap_mail_copy(int stream_id, int msg_no, string mailbox [, int options])
    Copy specified message to a mailbox */
-void php3_imap_mail_copy(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(imap_mail_copy)
 {
 	pval *streamind,*seq, *folder, *options;
 	int ind, ind_type;
@@ -819,7 +819,7 @@ void php3_imap_mail_copy(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto imap_mail_move(int stream_id, int msg_no, string mailbox)
    Move specified message to a mailbox */
-void php3_imap_mail_move(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(imap_mail_move)
 {
 	pval *streamind,*seq, *folder;
 	int ind, ind_type;
@@ -851,7 +851,7 @@ void php3_imap_mail_move(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int imap_createmailbox(int stream_id, string mailbox)
    Create a new mailbox */
-void php3_imap_createmailbox(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(imap_createmailbox)
 {
 	pval *streamind, *folder;
 	int ind, ind_type;
@@ -881,7 +881,7 @@ void php3_imap_createmailbox(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int imap_renamemailbox(int stream_id, string old_name, string new_name)
    Rename a mailbox */
-void php3_imap_renamemailbox(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(imap_renamemailbox)
 {
 	pval *streamind, *old, *new;
 	int ind, ind_type;
@@ -912,7 +912,7 @@ void php3_imap_renamemailbox(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto imap_deletemailbox(int stream_id, string mailbox)
    Delete a mailbox */
-void php3_imap_deletemailbox(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(imap_deletemailbox)
 {
 	pval *streamind, *folder;
 	int ind, ind_type;
@@ -942,7 +942,7 @@ void php3_imap_deletemailbox(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto array imap_list(int stream_id, string ref, string pattern)
    Read the list of mailboxes */
-void php3_imap_list(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(imap_list)
 {
 	pval *streamind, *ref, *pat;
 	int ind, ind_type;
@@ -982,7 +982,7 @@ void php3_imap_list(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto imap_scan(int stream_id, string ref, string pattern, string content)
    Read list of mailboxes containing a certain string */
-void php3_imap_listscan(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(imap_listscan)
 {
 	pval *streamind, *ref, *pat, *content;
 	int ind, ind_type;
@@ -1022,7 +1022,7 @@ void php3_imap_listscan(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto object imap_check(int stream_id)
    Get mailbox properties */
-void php3_imap_check(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(imap_check)
 {
 	pval *streamind;
 	int ind, ind_type;
@@ -1062,7 +1062,7 @@ void php3_imap_check(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int imap_delete(int stream_id, int msg_no)
    Mark a message for deletion */
-void php3_imap_delete(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(imap_delete)
 {
 	pval *streamind, * msgno;
 	int ind, ind_type;
@@ -1090,7 +1090,7 @@ void php3_imap_delete(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int imap_undelete(int stream_id, int msg_no)
    Remove the delete flag from a message */
-void php3_imap_undelete(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(imap_undelete)
 {
 	pval *streamind, * msgno;
 	int ind, ind_type;
@@ -1118,7 +1118,7 @@ void php3_imap_undelete(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto object imap_header(int stream_id, int msg_no [, int from_length [, int subject_length [, string default_host]]])
    Read the header of the message */
-void php3_imap_headerinfo(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(imap_headerinfo)
 {
 	pval *streamind, * msgno,to,tovals,from,fromvals,reply_to,reply_tovals,sender;
 	pval *fromlength;
@@ -1476,7 +1476,7 @@ add_property_string(return_value,"fetchsubject",fulladdress,1);
 /* KMLANG */
 /* {{{ proto array imap_lsub(int stream_id, string ref, string pattern)
    Return a list of subscribed mailboxes */
-void php3_imap_lsub(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(imap_lsub)
 {
 	pval *streamind, *ref, *pat;
 	int ind, ind_type;
@@ -1515,7 +1515,7 @@ void php3_imap_lsub(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int imap_subscribe(int stream_id, string mailbox)
    Subscribe to a mailbox */
-void php3_imap_subscribe(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(imap_subscribe)
 {
 	pval *streamind, *folder;
 	int ind, ind_type;
@@ -1545,7 +1545,7 @@ void php3_imap_subscribe(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int imap_unsubscribe(int stream_id, string mailbox)
    Unsubscribe from a mailbox */
-void php3_imap_unsubscribe(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(imap_unsubscribe)
 {
 	pval *streamind, *folder;
 	int ind, ind_type;
@@ -1670,7 +1670,7 @@ void imap_add_body( pval *arg, BODY *body )
 
 /* {{{ proto object imap_fetchstructure(int stream_id, int msg_no [, int options])
    Read the full structure of a message */
-void php3_imap_fetchstructure(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(imap_fetchstructure)
 {
 	pval *streamind, *msgno,*flags;
 	int ind, ind_type;
@@ -1708,7 +1708,7 @@ void php3_imap_fetchstructure(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto string imap_fetchbody(int stream_id, int msg_no, int section [, int options])
    Get a specific body section */
-void php3_imap_fetchbody(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(imap_fetchbody)
 {
 	pval *streamind, *msgno, *sec,*flags;
 	int ind, ind_type;
@@ -1745,7 +1745,7 @@ void php3_imap_fetchbody(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto string imap_base64(string text)
    Decode BASE64 encoded text */
-void php3_imap_base64(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(imap_base64)
 {
 	pval *text;
 	char *decode;
@@ -1764,7 +1764,7 @@ void php3_imap_base64(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto string imap_qprint(string text)
    Convert a quoted-printable string to an 8-bit string */
-void php3_imap_qprint(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(imap_qprint)
 {
 	pval *text;
 	char *decode;
@@ -1783,7 +1783,7 @@ void php3_imap_qprint(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto string imap_8bit(string text)
    Convert an 8-bit string to a quoted-printable string */
-void php3_imap_8bit(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(imap_8bit)
 {
 	pval *text;
 	char *decode;
@@ -1802,7 +1802,7 @@ void php3_imap_8bit(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto string imap_binary(string text)
    Convert an 8bit string to a base64 string */
-void php3_imap_binary(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(imap_binary)
 {
 	pval *text;
 	unsigned long len;
@@ -1816,7 +1816,7 @@ void php3_imap_binary(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto array imap_mailboxmsginfo(int stream_id)
    Returns info about the current mailbox in an associative array */
-void php3_imap_mailboxmsginfo(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(imap_mailboxmsginfo)
 {
 	pval *streamind;
 	char date[50];
@@ -1867,7 +1867,7 @@ void php3_imap_mailboxmsginfo(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto string imap_rfc822_write_address(string mailbox, string host, string personal)
    Returns a properly formatted email address given the mailbox, host, and personal info */
-void php3_imap_rfc822_write_address(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(imap_rfc822_write_address)
 {
 	pval *mailbox,*host,*personal;
 	ADDRESS *addr;
@@ -1896,7 +1896,7 @@ void php3_imap_rfc822_write_address(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto array imap_rfc822_parse_adrlist(string address_string, string default_host)
    Parses an address string */
-void php3_imap_rfc822_parse_adrlist(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(imap_rfc822_parse_adrlist)
 {
        pval *string,*defaulthost,tovals;
        ADDRESS *addresstmp;
@@ -1928,7 +1928,7 @@ void php3_imap_rfc822_parse_adrlist(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int imap_setflag_full(int stream_id, string sequence, string flag [, int options])
    Sets flags on messages */
-void php3_imap_setflag_full(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(imap_setflag_full)
 {
 	pval *streamind;
 	pval *sequence;
@@ -1959,7 +1959,7 @@ void php3_imap_setflag_full(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto imap_clearflag_full(int stream_id, string sequence, string flag [, int options])
    Clears flags on messages */
-void php3_imap_clearflag_full(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(imap_clearflag_full)
 {
 	pval *streamind;
 	pval *sequence;
@@ -1987,7 +1987,7 @@ void php3_imap_clearflag_full(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto array imap_sort(int stream_id, int criteria, int reverse [, int options])
    Sort an array of message headers */
-void php3_imap_sort(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(imap_sort)
 {
 	pval *streamind;
 	pval *pgm;
@@ -2037,7 +2037,7 @@ void php3_imap_sort(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto string imap_fetchheader(int stream_id, int msg_no [, int options])
    Get the full unfiltered header for a message */
-void php3_imap_fetchheader(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(imap_fetchheader)
 {
 	pval *streamind, * msgno, * flags;
 	int ind, ind_type;
@@ -2064,7 +2064,7 @@ void php3_imap_fetchheader(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int imap_uid(int stream_id, int msg_no)
    Get the unique message id associated with a standard sequential message number */
-void php3_imap_uid(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(imap_uid)
 {
  	pval *streamind, *msgno;
  	int ind, ind_type;
@@ -2092,7 +2092,7 @@ void php3_imap_uid(INTERNAL_FUNCTION_PARAMETERS)
  
 /* {{{ proto int imap_msgno(int stream_id, int unique_msg_id)
    Get the sequence number associated with a UID */
-void php3_imap_msgno(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(imap_msgno)
 {
  	pval *streamind, *msgno;
  	int ind, ind_type;
@@ -2120,7 +2120,7 @@ void php3_imap_msgno(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto object imap_status(int stream_id, string mailbox, int options)
    Get status info from a mailbox */
-void php3_imap_status(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(imap_status)
 {
  	pval *streamind, *mbx, *flags;
  	int ind, ind_type;
@@ -2163,7 +2163,7 @@ void php3_imap_status(INTERNAL_FUNCTION_PARAMETERS)
  
 /* {{{ proto object imap_bodystruct(int stream_id, int msg_no, int section)
    Read the structure of a specified body section of a specific message */
-void php3_imap_bodystruct(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(imap_bodystruct)
 {
  	pval *streamind, *msg, *section;
  	int ind, ind_type;
@@ -2263,7 +2263,7 @@ void php3_imap_bodystruct(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto array imap_fetch_overview(int stream_id, int msg_no)
    Read an overview of the information in the headers of the given message */ 
-void php3_imap_fetch_overview(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(imap_fetch_overview)
 {
  	pval *streamind, *sequence;
  	int ind, ind_type;
@@ -2317,7 +2317,7 @@ void php3_imap_fetch_overview(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto string imap_mail_compose(array envelope, array body)
    Create a MIME message based on given envelope and body sections */
-void php3_imap_mail_compose(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(imap_mail_compose)
 {
   pval *envelope, *body;
   char *key;

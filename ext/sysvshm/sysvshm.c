@@ -86,7 +86,7 @@ int php3_minit_sysvshm(INIT_FUNC_ARGS)
 
 /* {{{ proto int shm_attach(int key, int size, int flag)
    Return an id for the shared memory with the given key. */
-void php3_sysvshm_attach(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(sysvshm_attach)
 {
 	pval *arg_key,*arg_size,*arg_flag;
 	long shm_size,shm_flag;
@@ -178,7 +178,7 @@ void php3_sysvshm_attach(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int shm_detach(int id)
    releases the shared memory attachment with the given id. */
-void php3_sysvshm_detach(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(sysvshm_detach)
 {
 	pval *arg_id;
 	long id;
@@ -218,7 +218,7 @@ void php3_sysvshm_detach(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int shm_remove(int key)
    removes the shared memory with the given key. */
-void php3_sysvshm_remove(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(sysvshm_remove)
 {
 	pval *arg_key;
 	long id;
@@ -255,7 +255,7 @@ void php3_sysvshm_remove(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int shm_put(int id, int key, object *variable)
    insert a variable into shared memory. */
-void php3_sysvshm_put_var(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(sysvshm_put_var)
 {
 	pval *arg_id, *arg_key, *arg_var;
 	long key, id;
@@ -310,7 +310,7 @@ void php3_sysvshm_put_var(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto string/float/int/array shm_get_var(int id, int key)
    returns a variable into shared memory. */
-void php3_sysvshm_get_var(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(sysvshm_get_var)
 {
 	pval *arg_id, *arg_key;
 	long key, id;
@@ -361,7 +361,7 @@ void php3_sysvshm_get_var(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int shm_remove_var(int id, int key)
    removes variable from shared memory. */
-void php3_sysvshm_remove_var(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(sysvshm_remove_var)
 {
 	pval *arg_id, *arg_key;
 	long key, id;

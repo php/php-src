@@ -460,7 +460,7 @@ static int php3_msql_get_default_link(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int msql_connect([string hostname[:port]] [, string username] [, string password])
    Open a connection to an mSQL Server */
-DLEXPORT void php3_msql_connect(INTERNAL_FUNCTION_PARAMETERS)
+DLEXPORT PHP_FUNCTION(msql_connect)
 {
 	php3_msql_do_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU,0);
 }
@@ -468,7 +468,7 @@ DLEXPORT void php3_msql_connect(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int msql_pconnect([string hostname[:port]] [, string username] [, string password])
    Open a persistent connection to an mSQL Server */
-DLEXPORT void php3_msql_pconnect(INTERNAL_FUNCTION_PARAMETERS)
+DLEXPORT PHP_FUNCTION(msql_pconnect)
 {
 	php3_msql_do_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU,1);
 }
@@ -476,7 +476,7 @@ DLEXPORT void php3_msql_pconnect(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int msql_close([int link_identifier])
    Close an mSQL connection */
-DLEXPORT void php3_msql_close(INTERNAL_FUNCTION_PARAMETERS)
+DLEXPORT PHP_FUNCTION(msql_close)
 {
 	pval *msql_link;
 	int id,type;
@@ -512,7 +512,7 @@ DLEXPORT void php3_msql_close(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int msql_select_db(string database_name [, int link_identifier])
    Select an mSQL database */
-DLEXPORT void php3_msql_select_db(INTERNAL_FUNCTION_PARAMETERS)
+DLEXPORT PHP_FUNCTION(msql_select_db)
 {
 	pval *db,*msql_link;
 	int id,type;
@@ -556,7 +556,7 @@ DLEXPORT void php3_msql_select_db(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int msql_create_db(string database_name [, int link_identifier])
    Create an mSQL database */
-DLEXPORT void php3_msql_create_db(INTERNAL_FUNCTION_PARAMETERS)
+DLEXPORT PHP_FUNCTION(msql_create_db)
 {
 	pval *db,*msql_link;
 	int id,type;
@@ -599,7 +599,7 @@ DLEXPORT void php3_msql_create_db(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int msql_drop_db(string database_name [, int link_identifier])
    Drop (delete) an mSQL database */
-DLEXPORT void php3_msql_drop_db(INTERNAL_FUNCTION_PARAMETERS)
+DLEXPORT PHP_FUNCTION(msql_drop_db)
 {
 	pval *db,*msql_link;
 	int id,type;
@@ -642,7 +642,7 @@ DLEXPORT void php3_msql_drop_db(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int msql_query(string query [, int link_identifier])
    Send an SQL query to mSQL */
-DLEXPORT void php3_msql_query(INTERNAL_FUNCTION_PARAMETERS)
+DLEXPORT PHP_FUNCTION(msql_query)
 {
 	pval *query,*msql_link;
 	int id,type;
@@ -685,7 +685,7 @@ DLEXPORT void php3_msql_query(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int msql_db_query(string database_name, string query [, int link_identifier])
    Send an SQL query to mSQL */
-DLEXPORT void php3_msql_db_query(INTERNAL_FUNCTION_PARAMETERS)
+DLEXPORT PHP_FUNCTION(msql_db_query)
 {
 	pval *db,*query,*msql_link;
 	int id,type;
@@ -733,7 +733,7 @@ DLEXPORT void php3_msql_db_query(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int msql_list_dbs([int link_identifier])
    List databases available on an mSQL server */
-DLEXPORT void php3_msql_list_dbs(INTERNAL_FUNCTION_PARAMETERS)
+DLEXPORT PHP_FUNCTION(msql_list_dbs)
 {
 	pval *msql_link;
 	int id,type;
@@ -772,7 +772,7 @@ DLEXPORT void php3_msql_list_dbs(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int msql_list_tables(string database_name [, int link_identifier])
    List tables in an mSQL database */
-DLEXPORT void php3_msql_list_tables(INTERNAL_FUNCTION_PARAMETERS)
+DLEXPORT PHP_FUNCTION(msql_list_tables)
 {
 	pval *db,*msql_link;
 	int id,type;
@@ -819,7 +819,7 @@ DLEXPORT void php3_msql_list_tables(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int msql_list_fields(string database_name, string table_name [, int link_identifier])
    List mSQL result fields */
-DLEXPORT void php3_msql_list_fields(INTERNAL_FUNCTION_PARAMETERS)
+DLEXPORT PHP_FUNCTION(msql_list_fields)
 {
 	pval *db,*table,*msql_link;
 	int id,type;
@@ -867,7 +867,7 @@ DLEXPORT void php3_msql_list_fields(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto string msql_error([int link_identifier])
    Returns the text of the error message from previous mSQL operation */
-void php3_msql_error(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(msql_error)
 {
 	if (ARG_COUNT(ht)) {
 		WRONG_PARAM_COUNT;
@@ -878,7 +878,7 @@ void php3_msql_error(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int msql_result(int query, int row [, mixed field])
    Get result data */
-DLEXPORT void php3_msql_result(INTERNAL_FUNCTION_PARAMETERS)
+DLEXPORT PHP_FUNCTION(msql_result)
 {
 	pval *result, *row, *field=NULL;
 	m_result *msql_result;
@@ -982,7 +982,7 @@ DLEXPORT void php3_msql_result(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int msql_num_rows(int query)
    Get number of rows in a result */
-DLEXPORT void php3_msql_num_rows(INTERNAL_FUNCTION_PARAMETERS)
+DLEXPORT PHP_FUNCTION(msql_num_rows)
 {
 	pval *result;
 	m_result *msql_result;
@@ -1001,7 +1001,7 @@ DLEXPORT void php3_msql_num_rows(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int msql_num_fields(int query)
    Get number of fields in a result */
-DLEXPORT void php3_msql_num_fields(INTERNAL_FUNCTION_PARAMETERS)
+DLEXPORT PHP_FUNCTION(msql_num_fields)
 {
 	pval *result;
 	m_result *msql_result;
@@ -1020,7 +1020,7 @@ DLEXPORT void php3_msql_num_fields(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto array msql_fetch_row(int query)
    Get a result row as an enumerated array */
-DLEXPORT void php3_msql_fetch_row(INTERNAL_FUNCTION_PARAMETERS)
+DLEXPORT PHP_FUNCTION(msql_fetch_row)
 {
 	pval *result;
 	m_result *msql_result;
@@ -1053,7 +1053,7 @@ DLEXPORT void php3_msql_fetch_row(INTERNAL_FUNCTION_PARAMETERS)
 }
 /* }}} */
 
-static void php3_msql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS)
+static PHP_FUNCTION(msql_fetch_hash)
 {
 	pval *result;
 	m_result *msql_result;
@@ -1099,7 +1099,7 @@ static void php3_msql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto object msql_fetch_object(int query)
    Fetch a result row as an object */
-DLEXPORT void php3_msql_fetch_object(INTERNAL_FUNCTION_PARAMETERS)
+DLEXPORT PHP_FUNCTION(msql_fetch_object)
 {
 	php3_msql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 	if (return_value->type==IS_ARRAY) {
@@ -1110,7 +1110,7 @@ DLEXPORT void php3_msql_fetch_object(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto array msql_fetch_array(int query)
    Fetch a result row as an associative array */
-DLEXPORT void php3_msql_fetch_array(INTERNAL_FUNCTION_PARAMETERS)
+DLEXPORT PHP_FUNCTION(msql_fetch_array)
 {
 	php3_msql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
@@ -1118,7 +1118,7 @@ DLEXPORT void php3_msql_fetch_array(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int msql_data_seek(int query, int row_number)
    Move internal result pointer */
-DLEXPORT void php3_msql_data_seek(INTERNAL_FUNCTION_PARAMETERS)
+DLEXPORT PHP_FUNCTION(msql_data_seek)
 {
 	pval *result,*offset;
 	m_result *msql_result;
@@ -1183,7 +1183,7 @@ static char *php3_msql_get_field_name(int field_type)
 
 /* {{{ proto object msql_fetch_field(int query [, int field_offset])
    Get column information from a result and return as an object */
-DLEXPORT void php3_msql_fetch_field(INTERNAL_FUNCTION_PARAMETERS)
+DLEXPORT PHP_FUNCTION(msql_fetch_field)
 {
 	pval *result, *field=NULL;
 	m_result *msql_result;
@@ -1238,7 +1238,7 @@ DLEXPORT void php3_msql_fetch_field(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int msql_field_seek(int query, int field_offset)
    Set result pointer to a specific field offset */
-DLEXPORT void php3_msql_field_seek(INTERNAL_FUNCTION_PARAMETERS)
+DLEXPORT PHP_FUNCTION(msql_field_seek)
 {
 	pval *result, *offset;
 	m_result *msql_result;
@@ -1360,7 +1360,7 @@ static void php3_msql_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 
 /* {{{ proto string msql_field_name(int query, int field_index)
    Get the name of the specified field in a result */
-DLEXPORT void php3_msql_field_name(INTERNAL_FUNCTION_PARAMETERS)
+DLEXPORT PHP_FUNCTION(msql_field_name)
 {
 	php3_msql_field_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP3_MSQL_FIELD_NAME);
 }
@@ -1368,7 +1368,7 @@ DLEXPORT void php3_msql_field_name(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto string msql_field_table(int query, int field_offset)
    Get name of the table the specified field is in */
-DLEXPORT void php3_msql_field_table(INTERNAL_FUNCTION_PARAMETERS)
+DLEXPORT PHP_FUNCTION(msql_field_table)
 {
 	php3_msql_field_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP3_MSQL_FIELD_TABLE);
 }
@@ -1376,7 +1376,7 @@ DLEXPORT void php3_msql_field_table(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int msql_field_len(int query, int field_offet)
    Returns the length of the specified field */
-DLEXPORT void php3_msql_field_len(INTERNAL_FUNCTION_PARAMETERS)
+DLEXPORT PHP_FUNCTION(msql_field_len)
 {
 	php3_msql_field_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP3_MSQL_FIELD_LEN);
 }
@@ -1384,7 +1384,7 @@ DLEXPORT void php3_msql_field_len(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto string msql_field_type(int query, int field_offset)
    Get the type of the specified field in a result */
-DLEXPORT void php3_msql_field_type(INTERNAL_FUNCTION_PARAMETERS)
+DLEXPORT PHP_FUNCTION(msql_field_type)
 {
 	php3_msql_field_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP3_MSQL_FIELD_TYPE);
 }
@@ -1392,7 +1392,7 @@ DLEXPORT void php3_msql_field_type(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto string msql_field_flags(int query, int field_offset)
    Get the flags associated with the specified field in a result */
-DLEXPORT void php3_msql_field_flags(INTERNAL_FUNCTION_PARAMETERS)
+DLEXPORT PHP_FUNCTION(msql_field_flags)
 {
 	php3_msql_field_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP3_MSQL_FIELD_FLAGS);
 }
@@ -1401,7 +1401,7 @@ DLEXPORT void php3_msql_field_flags(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int msql_free_result(int query)
    Free result memory */
-DLEXPORT void php3_msql_free_result(INTERNAL_FUNCTION_PARAMETERS)
+DLEXPORT PHP_FUNCTION(msql_free_result)
 {
 	pval *result;
 	m_result *msql_result;
@@ -1421,7 +1421,7 @@ DLEXPORT void php3_msql_free_result(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int msql_affected_rows(int query)
    Return number of affected rows */
-DLEXPORT void php3_msql_affected_rows(INTERNAL_FUNCTION_PARAMETERS) 
+DLEXPORT PHP_FUNCTION(msql_affected_rows) 
 {
 	pval *result;
 	m_result *msql_result;

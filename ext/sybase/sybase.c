@@ -494,18 +494,18 @@ static int php3_sybase_get_default_link(INTERNAL_FUNCTION_PARAMETERS)
 }
 
 
-void php3_sybase_connect(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(sybase_connect)
 {
 	php3_sybase_do_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU,0);
 }
 
-void php3_sybase_pconnect(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(sybase_pconnect)
 {
 	php3_sybase_do_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU,1);
 }
 
 
-void php3_sybase_close(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(sybase_close)
 {
 	pval *sybase_link_index;
 	int id,type;
@@ -537,7 +537,7 @@ void php3_sybase_close(INTERNAL_FUNCTION_PARAMETERS)
 }
 	
 
-void php3_sybase_select_db(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(sybase_select_db)
 {
 	pval *db,*sybase_link_index;
 	int id,type;
@@ -659,7 +659,7 @@ static void php3_sybase_get_column_content(sybase_link *sybase_ptr,int offset,pv
 }
 
 
-void php3_sybase_query(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(sybase_query)
 {
 	pval *query,*sybase_link_index;
 	int id,type,retvalue;
@@ -796,7 +796,7 @@ void php3_sybase_query(INTERNAL_FUNCTION_PARAMETERS)
 }
 
                         
-void php3_sybase_free_result(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(sybase_free_result)
 {
 	pval *sybase_result_index;
 	sybase_result *result;
@@ -821,13 +821,13 @@ void php3_sybase_free_result(INTERNAL_FUNCTION_PARAMETERS)
 }
 
 
-void php3_sybase_get_last_message(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(sybase_get_last_message)
 {
 	RETURN_STRING(php3_sybase_module.server_message,1);
 }
 
 
-void php3_sybase_num_rows(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(sybase_num_rows)
 {
 	pval *result_index;
 	int type,id;
@@ -851,7 +851,7 @@ void php3_sybase_num_rows(INTERNAL_FUNCTION_PARAMETERS)
 }
 
 
-void php3_sybase_num_fields(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(sybase_num_fields)
 {
 	pval *result_index;
 	int type,id;
@@ -875,7 +875,7 @@ void php3_sybase_num_fields(INTERNAL_FUNCTION_PARAMETERS)
 }
 
 
-void php3_sybase_fetch_row(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(sybase_fetch_row)
 {
 	pval *sybase_result_index;
 	int type,i,id;
@@ -909,7 +909,7 @@ void php3_sybase_fetch_row(INTERNAL_FUNCTION_PARAMETERS)
 }
 
 
-static void php3_sybase_fetch_hash(INTERNAL_FUNCTION_PARAMETERS)
+static PHP_FUNCTION(sybase_fetch_hash)
 {
 	pval *sybase_result_index;
 	sybase_result *result;
@@ -950,7 +950,7 @@ static void php3_sybase_fetch_hash(INTERNAL_FUNCTION_PARAMETERS)
 }
 
 
-void php3_sybase_fetch_object(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(sybase_fetch_object)
 {
 	php3_sybase_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 	if (return_value->type==IS_ARRAY) {
@@ -959,12 +959,12 @@ void php3_sybase_fetch_object(INTERNAL_FUNCTION_PARAMETERS)
 }
 
 
-void php3_sybase_fetch_array(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(sybase_fetch_array)
 {
 	php3_sybase_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
-void php3_sybase_data_seek(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(sybase_data_seek)
 {
 	pval *sybase_result_index,*offset;
 	int type,id;
@@ -1041,7 +1041,7 @@ static char *php3_sybase_get_field_name(int type)
 }
 
 
-void php3_sybase_fetch_field(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(sybase_fetch_field)
 {
 	pval *sybase_result_index,*offset;
 	int type,id,field_offset;
@@ -1097,7 +1097,7 @@ void php3_sybase_fetch_field(INTERNAL_FUNCTION_PARAMETERS)
 	add_property_string(return_value, "type", php3_sybase_get_field_name(result->fields[field_offset].type), 1);
 }
 
-void php3_sybase_field_seek(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(sybase_field_seek)
 {
 	pval *sybase_result_index,*offset;
 	int type,id,field_offset;
@@ -1129,7 +1129,7 @@ void php3_sybase_field_seek(INTERNAL_FUNCTION_PARAMETERS)
 }
 
 
-void php3_sybase_result(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(sybase_result)
 {
 	pval *row, *field, *sybase_result_index;
 	int id,type,field_offset=0;
@@ -1217,7 +1217,7 @@ void php3_info_sybase(ZEND_MODULE_INFO_FUNC_ARGS)
 }
 
 
-void php3_sybase_min_error_severity(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(sybase_min_error_severity)
 {
 	pval *severity;
 	
@@ -1229,7 +1229,7 @@ void php3_sybase_min_error_severity(INTERNAL_FUNCTION_PARAMETERS)
 }
 
 
-void php3_sybase_min_message_severity(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(sybase_min_message_severity)
 {
 	pval *severity;
 	

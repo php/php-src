@@ -673,7 +673,7 @@ static void php3_hw_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 /* ***************************** */
 /* {{{ proto int hw_connect(string host, int port [string username [, string password]])
    Connect to the Hyperwave server */
-void php3_hw_connect(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(hw_connect)
 {
 	php3_hw_do_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU,0);
 }
@@ -681,7 +681,7 @@ void php3_hw_connect(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int hw_pconnect(string host, int port [string username [, string password]])
    Connect to the Hyperwave server persistent */
-void php3_hw_pconnect(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(hw_pconnect)
 {
 	php3_hw_do_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU,1);
 }
@@ -689,7 +689,7 @@ void php3_hw_pconnect(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto void hw_close(int link)
    Close connection to Hyperwave server */
-void php3_hw_close(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(hw_close) {
 	pval *arg1;
 	int id, type;
 	hw_connection *ptr;
@@ -711,7 +711,7 @@ void php3_hw_close(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto void hw_info(int link)
    Outputs info string */
-void php3_hw_info(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(hw_info)
 {
 	pval *arg1;
 	int id, type;
@@ -744,7 +744,7 @@ void php3_hw_info(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int hw_error(int link)
    Returns last error number */
-void php3_hw_error(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(hw_error)
 {
 	pval *arg1;
 	int id, type;
@@ -766,7 +766,7 @@ void php3_hw_error(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto string hw_errormsg(int link)
    Returns last error message */
-void php3_hw_errormsg(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(hw_errormsg)
 {
 	pval *arg1;
 	int id, type;
@@ -854,7 +854,7 @@ void php3_hw_errormsg(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto hw_root(void)
    Returns object id of root collection */
-void php3_hw_root(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(hw_root)
 {
 	return_value->value.lval = 0;
 	return_value->type = IS_LONG;
@@ -889,7 +889,7 @@ char *php3_hw_command(INTERNAL_FUNCTION_PARAMETERS, int comm) {
 
 /* {{{ proto string hw_stat(int link)
    Returns status string */
-void php3_hw_stat(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(hw_stat) {
         char *object;
 
 	object = php3_hw_command(INTERNAL_FUNCTION_PARAM_PASSTHRU, STAT_COMMAND);
@@ -904,7 +904,7 @@ void php3_hw_stat(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto array hw_who(int link)
    Returns names and info of users loged in */
-void php3_hw_who(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(hw_who) {
 	pval user_arr;
         char *object, *ptr, *temp, *attrname;
 	int i;
@@ -1013,7 +1013,7 @@ void php3_hw_who(INTERNAL_FUNCTION_PARAMETERS) {
 }
 /* }}} */
 
-void php3_hw_dummy(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(hw_dummy) {
 	pval *arg1, *arg2, *arg3;
 	int link, id, type, msgid;
 	hw_connection *ptr;
@@ -1048,7 +1048,7 @@ php3_printf("%s", object);
 
 /* {{{ proto string hw_getobject(int link, int objid)
    Returns object record  */
-void php3_hw_getobject(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(hw_getobject) {
 	pval *arg1, *arg2;
 	int link, id, type;
 	hw_connection *ptr;
@@ -1083,7 +1083,7 @@ void php3_hw_getobject(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto int hw_insertobject(int link, string objrec, string parms)
    Inserts an object */
-void php3_hw_insertobject(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(hw_insertobject) {
 	pval *arg1, *arg2, *arg3;
 	int link, type;
 	char *objrec, *parms;
@@ -1117,7 +1117,7 @@ void php3_hw_insertobject(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto string hw_getandlock(int link, int objid)
    Returns object record and locks object */
-void php3_hw_getandlock(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(hw_getandlock) {
 	pval *arg1, *arg2;
 	int link, id, type;
 	hw_connection *ptr;
@@ -1149,7 +1149,7 @@ void php3_hw_getandlock(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto void hw_unlock(int link, int objid)
    Unlocks object */
-void php3_hw_unlock(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(hw_unlock) {
 	pval *arg1, *arg2;
 	int link, id, type;
 	hw_connection *ptr;
@@ -1177,7 +1177,7 @@ void php3_hw_unlock(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto void hw_deleteobject(int link, int objid)
    Deletes object */
-void php3_hw_deleteobject(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(hw_deleteobject) {
 	pval *arg1, *arg2;
 	int link, id, type;
 	hw_connection *ptr;
@@ -1204,7 +1204,7 @@ void php3_hw_deleteobject(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto void hw_changeobject(int link, int objid, array attributes)
    Changes attributes of an object */
-void php3_hw_changeobject(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(hw_changeobject) {
 	pval *arg1, *arg2, *arg3;
 	int link, id, type, i;
 	hw_connection *ptr;
@@ -1383,21 +1383,21 @@ void php3_hw_mvcp(INTERNAL_FUNCTION_PARAMETERS, int mvcp) {
 
 /* {{{ proto void hw_mv(int link, array objrec, int from, int dest)
    Moves object */
-void php3_hw_mv(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(hw_mv) {
 	php3_hw_mvcp(INTERNAL_FUNCTION_PARAM_PASSTHRU, MOVE);
 }
 /* }}} */
 
 /* {{{ proto void hw_cp(int link, array objrec, int dest)
    Copies object */
-void php3_hw_cp(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(hw_cp) {
 	php3_hw_mvcp(INTERNAL_FUNCTION_PARAM_PASSTHRU, COPY);
 }
 /* }}} */
 
 /* {{{ proto hwdoc hw_gettext(int link, int objid[, int rootid])
    Returns text document. Links are relative to rootid if given */
-void php3_hw_gettext(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(hw_gettext) {
 	pval *argv[3];
 	int argc, link, id, type, mode;
 	int rootid = 0;
@@ -1449,7 +1449,7 @@ void php3_hw_gettext(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto void hw_edittext(int link, hwdoc doc)
    Modifies text document */
-void php3_hw_edittext(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(hw_edittext) {
 	pval *arg1, *arg2;
 	int link, id, doc, type;
 	hw_connection *ptr;
@@ -1490,7 +1490,7 @@ void php3_hw_edittext(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto hwdoc hw_getcgi(int link, int objid)
    Returns the output of a cgi script */
-void php3_hw_getcgi(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(hw_getcgi) {
 	pval *arg1, *arg2;
 	int link, id, type;
 	hw_document *doc;
@@ -1551,7 +1551,7 @@ void php3_hw_getcgi(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto hwdoc hw_getremote(int link, int objid)
    Returns the output of a remote document */
-void php3_hw_getremote(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(hw_getremote) {
 	pval *arg1, *arg2;
 	int link, id, type;
 	hw_document *doc;
@@ -1591,7 +1591,7 @@ void php3_hw_getremote(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto [array|hwdoc] hw_getremotechildren(int link, int objid)
    Returns the remote document if only one or an array of object records */
-void php3_hw_getremotechildren(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(hw_getremotechildren) {
 	pval *arg1, *arg2;
 	int link, type, i;
 	hw_connection *ptr;
@@ -1649,7 +1649,7 @@ void php3_hw_getremotechildren(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto void hw_setlinkroot(int link, int rootid)
    Set the id to which links are calculated */
-void php3_hw_setlinkroot(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(hw_setlinkroot) {
 	pval *arg1, *arg2;
 	int link, type, rootid;
 	hw_connection *ptr;
@@ -1674,7 +1674,7 @@ void php3_hw_setlinkroot(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto hwdoc hw_pipedocument(int link, int objid)
    Returns document */
-void php3_hw_pipedocument(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(hw_pipedocument) {
 	pval *argv[3];
 	int link, id, type, argc, mode;
 	int rootid = 0;
@@ -1744,7 +1744,7 @@ fprintf(stderr, "size = %d\n", count);
 
 /* {{{ proto hwdoc hw_pipecgi(int link, int objid)
    Returns output of cgi script */
-void php3_hw_pipecgi(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(hw_pipecgi) {
 	pval *arg1, *arg2;
 	int link, id, type;
 	hw_connection *ptr;
@@ -1809,7 +1809,7 @@ void php3_hw_pipecgi(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto void hw_insertdocument(int link, int parentid, hwdoc doc) 
    Insert new document */
-void php3_hw_insertdocument(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(hw_insertdocument) {
 	pval *arg1, *arg2, *arg3;
 	int link, id, doc, type;
 	hw_connection *ptr;
@@ -1859,7 +1859,7 @@ void php3_hw_insertdocument(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto hwdoc hw_new_document(int link, string data, string objrec, int size)
    Create a new document */
-void php3_hw_new_document(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(hw_new_document) {
 	pval *arg1, *arg2, *arg3;
 	hw_document *doc;
 
@@ -1883,7 +1883,7 @@ void php3_hw_new_document(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto void hw_free_document(hwdoc doc)
    Frees memory of document */
-void php3_hw_free_document(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(hw_free_document) {
 	pval *arg1;
 	int id, type;
 	hw_document *ptr;
@@ -1904,7 +1904,7 @@ void php3_hw_free_document(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto void hw_output_document(hwdoc doc)
    Prints document */
-void php3_hw_output_document(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(hw_output_document) {
 	pval *arg1;
 	int id, type, count;
 	hw_document *ptr;
@@ -1933,7 +1933,7 @@ void php3_hw_output_document(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto string hw_document_bodytag(hwdoc doc [, string prefix])
    Return bodytag prefixed by prefix */
-void php3_hw_document_bodytag(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(hw_document_bodytag) {
 	pval *argv[2];
 	int id, type, argc;
 	hw_document *ptr;
@@ -1972,7 +1972,7 @@ void php3_hw_document_bodytag(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto string hw_document_content(hwdoc doc)
    Returns content of document */
-void php3_hw_document_content(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(hw_document_content) {
 	pval *argv[1];
 	int id, type, argc;
 	hw_document *ptr;
@@ -1997,7 +1997,7 @@ void php3_hw_document_content(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto int hw_document_content(hwdoc doc)
    Returns size of document */
-void php3_hw_document_size(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(hw_document_size) {
 	pval *arg1;
 	int id, type;
 	hw_document *ptr;
@@ -2018,7 +2018,7 @@ void php3_hw_document_size(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto string hw_document_content(hwdoc doc)
    Returns object record of document */
-void php3_hw_document_attributes(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(hw_document_attributes) {
 	pval *arg1;
 	int id, type;
 	hw_document *ptr;
@@ -2040,7 +2040,7 @@ void php3_hw_document_attributes(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto array hw_getparentsobj(int link, int objid)
    Returns array of parent object records */
-void php3_hw_getparentsobj(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(hw_getparentsobj) {
 	pval *arg1, *arg2;
 	int link, id, type;
 	int count;
@@ -2074,7 +2074,7 @@ void php3_hw_getparentsobj(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto array hw_getparents(int link, int objid)
    Returns array of parent object ids */
-void php3_hw_getparents(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(hw_getparents) {
 	pval *arg1, *arg2;
 	int link, id, type;
 	int count;
@@ -2118,7 +2118,7 @@ void php3_hw_getparents(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto array hw_children(int link, int objid)
    Returns array of children object ids */
-void php3_hw_children(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(hw_children) {
 	pval *arg1, *arg2;
 	int link, id, type;
 	int count;
@@ -2162,7 +2162,7 @@ void php3_hw_children(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto array hw_children(int link, int objid)
    Returns array of children object records */
-void php3_hw_childrenobj(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(hw_childrenobj) {
 	pval *arg1, *arg2;
 	int link, id, type;
 	int count;
@@ -2196,7 +2196,7 @@ void php3_hw_childrenobj(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto array hw_childcoll(int link, int objid)
    Returns array of child collection object ids */
-void php3_hw_getchildcoll(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(hw_getchildcoll) {
 	pval *arg1, *arg2;
 	int link, id, type;
 	int count;
@@ -2240,7 +2240,7 @@ void php3_hw_getchildcoll(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto array hw_childcollobj(int link, int objid)
    Returns array of child collection object records */
-void php3_hw_getchildcollobj(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(hw_getchildcollobj) {
 	pval *arg1, *arg2;
 	int link, id, type;
 	int count;
@@ -2274,7 +2274,7 @@ void php3_hw_getchildcollobj(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto int hw_docbyanchor(int link, int anchorid)
    Returns objid of document belonging to anchorid */
-void php3_hw_docbyanchor(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(hw_docbyanchor) {
 	pval *arg1, *arg2;
 	int link, id, type;
 	hw_connection *ptr;
@@ -2304,7 +2304,7 @@ void php3_hw_docbyanchor(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto array hw_docbyanchorobj(int link, int anchorid)
    Returns object record of document belonging to anchorid */
-void php3_hw_docbyanchorobj(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(hw_docbyanchorobj) {
 	pval *arg1, *arg2;
 	int link, id, type;
 	hw_connection *ptr;
@@ -2338,7 +2338,7 @@ void php3_hw_docbyanchorobj(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto array hw_getobjectbyquery(int link, string query, int maxhits)
    Search for query and return maxhits objids */
-void php3_hw_getobjectbyquery(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(hw_getobjectbyquery) {
 	pval *arg1, *arg2, *arg3;
 	int link, type, maxhits;
 	char *query;
@@ -2380,7 +2380,7 @@ void php3_hw_getobjectbyquery(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto array hw_getobjectbyqueryobj(int link, string query, int maxhits)
    Search for query and return maxhits object records */
-void php3_hw_getobjectbyqueryobj(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(hw_getobjectbyqueryobj) {
 	pval *arg1, *arg2, *arg3;
 	int link, type, maxhits;
 	char *query;
@@ -2417,7 +2417,7 @@ void php3_hw_getobjectbyqueryobj(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto array hw_getobjectbyquerycoll(int link, int collid, string query, int maxhits)
    Search for query in collection and return maxhits objids */
-void php3_hw_getobjectbyquerycoll(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(hw_getobjectbyquerycoll) {
 	pval *arg1, *arg2, *arg3, *arg4;
 	int link, id, type, maxhits;
 	char *query;
@@ -2461,7 +2461,7 @@ void php3_hw_getobjectbyquerycoll(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto array hw_getobjectbyquerycollobj(int link, int collid, string query, int maxhits)
    Search for query in collection and return maxhits object records */
-void php3_hw_getobjectbyquerycollobj(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(hw_getobjectbyquerycollobj) {
 	pval *arg1, *arg2, *arg3, *arg4;
 	int link, id, type, maxhits;
 	char *query;
@@ -2500,7 +2500,7 @@ void php3_hw_getobjectbyquerycollobj(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto array hw_getchilddoccoll(int link, int objid)
    Returns all children ids which are documents */
-void php3_hw_getchilddoccoll(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(hw_getchilddoccoll) {
 	pval *arg1, *arg2;
 	int link, id, type;
 	int count, i;
@@ -2538,7 +2538,7 @@ void php3_hw_getchilddoccoll(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto array hw_getchilddoccollobj(int link, int objid)
    Returns all children object records which are documents */
-void php3_hw_getchilddoccollobj(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(hw_getchilddoccollobj) {
 	pval *arg1, *arg2;
 	int link, id, type;
 	int count;
@@ -2572,7 +2572,7 @@ void php3_hw_getchilddoccollobj(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto array hw_getanchors(int link, int objid)
    Return all anchors of object */
-void php3_hw_getanchors(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(hw_getanchors) {
 	pval *arg1, *arg2;
 	int link, id, type;
 	int count, i;
@@ -2610,7 +2610,7 @@ void php3_hw_getanchors(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto array hw_getanchorsobj(int link, int objid)
    Return all object records of anchors of object */
-void php3_hw_getanchorsobj(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(hw_getanchorsobj) {
 	pval *arg1, *arg2;
 	int link, id, type;
 	int count;
@@ -2643,7 +2643,7 @@ void php3_hw_getanchorsobj(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto string hw_getusername(int link)
    Returns the current user name */
-void php3_hw_getusername(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(hw_getusername) {
 	pval *arg1;
 	int link, type;
 	hw_connection *ptr;
@@ -2667,7 +2667,7 @@ void php3_hw_getusername(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto void hw_identify(int link, string username, string password)
    Identifies at Hyperwave server */
-void php3_hw_identify(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(hw_identify) {
 	pval *arg1, *arg2, *arg3;
 	int link, type;
 	char *name, *passwd, *userdata;
@@ -2716,7 +2716,7 @@ void php3_hw_identify(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto array hw_objrec2array(string objrec)
    Returns object array of object record*/
-void php3_hw_objrec2array(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(hw_objrec2array) {
 	pval *arg1;
 
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
@@ -2729,7 +2729,7 @@ void php3_hw_objrec2array(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto string hw_array2objrec(array objarr)
    Returns object record of object array */
-void php3_hw_array2objrec(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(hw_array2objrec) {
 	pval *arg1;
 	char *objrec, *retobj;
 
@@ -2749,7 +2749,7 @@ void php3_hw_array2objrec(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto array hw_incollections(int link, array objids, array collids, int para)
    Returns object ids which are in collections */
-void php3_hw_incollections(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(hw_incollections) {
 	pval *arg1, *arg2, *arg3, *arg4;
 	int type, link, i;
 	hw_connection *ptr;
@@ -2810,7 +2810,7 @@ void php3_hw_incollections(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto void hw_inscoll(int link, int parentid, array objarr)
    Inserts collection */
-void php3_hw_inscoll(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(hw_inscoll) {
 	pval *arg1, *arg2, *arg3;
 	char *objrec;
 	int id, newid, type, link;
@@ -2848,7 +2848,7 @@ void php3_hw_inscoll(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto void hw_inscoll(int link, int parentid, array objarr [, string text])
    Inserts document */
-void php3_hw_insdoc(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(hw_insdoc) {
 	pval *argv[4];
 	char *objrec, *text;
 	int id, newid, type, link, argc;
@@ -2890,7 +2890,7 @@ void php3_hw_insdoc(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto int hw_getsrcbydestobj(int link, int destid)
    Returns object id of source docuent by destination anchor */
-void php3_hw_getsrcbydestobj(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(hw_getsrcbydestobj) {
 	pval *arg1, *arg2;
 	int link, type, id;
 	int count;
@@ -2924,7 +2924,7 @@ void php3_hw_getsrcbydestobj(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto string hw_getrellink(int link, int rootid, int sourceid, int destid)
    Get link form source to dest relative to rootid */
-void php3_hw_getrellink(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(hw_getrellink) {
 	pval *arg1, *arg2, *arg3, *arg4;
 	int link, type;
 	int rootid, destid, sourceid;
@@ -2964,7 +2964,7 @@ void php3_info_hw(ZEND_MODULE_INFO_FUNC_ARGS)
 	php3_printf("HG-CSP Version: 7.17");
 }
 
-void php3_hw_connection_info(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(hw_connection_info)
 {
 	pval *arg1;
 	hw_connection *ptr;

@@ -243,7 +243,7 @@ int php3_mshutdown_COM(SHUTDOWN_FUNC_ARGS)
 }
 
 
-void php3_COM_load(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(COM_load)
 {
 	pval *module_name, *server_name=NULL;
 	CLSID clsid;
@@ -457,7 +457,7 @@ int do_COM_invoke(IDispatch *i_dispatch, pval *function_name, VARIANTARG *var_re
 }
 
 
-void php3_COM_invoke(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(COM_invoke)
 {
 	pval **arguments;
 	pval *object, *function_name;

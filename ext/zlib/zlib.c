@@ -310,7 +310,7 @@ static gzFile *php3_gzopen_with_path(char *filename, char *mode, char *path, cha
 
 /* {{{ proto array gzfile(string filename)
 Read und uncompress entire .gz-file into an array */
-void php3_gzfile(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(gzfile) {
 	pval *filename, *arg2;
 	gzFile zp;
 	char *slashed, buf[8192];
@@ -350,7 +350,7 @@ void php3_gzfile(INTERNAL_FUNCTION_PARAMETERS) {
 
 	/* Now loop through the file and do the magic quotes thing if needed */
 	memset(buf,0,8191);
-	while((int)gzgets(zp, buf, 8191)) {
+	while(gzgets(zp, buf, 8191) != NULL) {
 		if (PG(magic_quotes_runtime)) {
 			int len;
 			
@@ -366,7 +366,7 @@ void php3_gzfile(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto int gzopen(string filename, string mode [, int use_include_path])
 Open a .gz-file and return a .gz-file pointer */
-void php3_gzopen(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(gzopen) {
 	pval *arg1, *arg2, *arg3;
 	gzFile *zp;
 	char *p;
@@ -414,7 +414,7 @@ void php3_gzopen(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto int gzclose(int zp)
 Close an open .gz-file pointer */
-void php3_gzclose(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(gzclose) {
 	pval *arg1;
 	int id, type;
 	gzFile *zp;
@@ -437,7 +437,7 @@ void php3_gzclose(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto int gzeof(int zp)
 Test for end-of-file on a .gz-file pointer */
-void php3_gzeof(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(gzeof) {
 	pval *arg1;
 	gzFile *zp;
 	int id, type;
@@ -464,7 +464,7 @@ void php3_gzeof(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto string gzgets(int zp, int length)
 Get a line from .gz-file pointer */
-void php3_gzgets(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(gzgets) {
 	pval *arg1, *arg2;
 	gzFile *zp;
 	int id, len, type;
@@ -487,7 +487,7 @@ void php3_gzgets(INTERNAL_FUNCTION_PARAMETERS) {
 	buf = emalloc(sizeof(char) * (len + 1));
 	/* needed because recv doesnt put a null at the end*/
 	memset(buf,0,len+1);
-	if (!((int)gzgets(zp, buf, len))) {
+	if (!(gzgets(zp, buf, len) != NULL)) {
 		efree(buf);
 		RETVAL_FALSE;
 	} else {
@@ -505,7 +505,7 @@ void php3_gzgets(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto string gzgetc(int zp)
 Get a character from .gz-file pointer */
-void php3_gzgetc(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(gzgetc) {
 	pval *arg1;
 	gzFile *zp;
 	int id, type, c;
@@ -541,7 +541,7 @@ void php3_gzgetc(INTERNAL_FUNCTION_PARAMETERS) {
 /* Strip any HTML tags while reading */
 /* {{{ proto string gzgetss(int zp, int length)
 Get a line from file pointer and strip HTML tags */
-void php3_gzgetss(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(gzgetss)
 {
 	pval *fd, *bytes;
 	gzFile *zp;
@@ -568,7 +568,7 @@ void php3_gzgetss(INTERNAL_FUNCTION_PARAMETERS)
 	buf = emalloc(sizeof(char) * (len + 1));
 	/*needed because recv doesnt set null char at end*/
 	memset(buf,0,len+1);
-	if (!((int)gzgets(zp, buf, len))) {
+	if (!(gzgets(zp, buf, len) != NULL)) {
 		efree(buf);
 		RETURN_FALSE;
 	}
@@ -658,7 +658,7 @@ void php3_gzgetss(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int gzwrite(int zp, string str [, int length])
 Binary-safe .gz-file write */
-void php3_gzwrite(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(gzwrite) {
 	pval *arg1, *arg2, *arg3=NULL;
 	gzFile *zp;
 	int ret,id,type;
@@ -707,7 +707,7 @@ void php3_gzwrite(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto int gzrewind(int zp)
 Rewind the position of a .gz-file pointer */
-void php3_gzrewind(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(gzrewind) {
 	pval *arg1;
 	int id,type;
 	gzFile *zp;
@@ -730,7 +730,7 @@ void php3_gzrewind(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto int gztell(int zp)
 Get .gz-file pointer's read/write position */
-void php3_gztell(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(gztell) {
 	pval *arg1;
 	int id, type;
 	long pos;
@@ -754,7 +754,7 @@ void php3_gztell(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto int gzseek(int zp, int offset)
 Seek on a file pointer */
-void php3_gzseek(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(gzseek) {
 	pval *arg1, *arg2;
 	int ret,id,type;
 	long pos;
@@ -783,7 +783,7 @@ void php3_gzseek(INTERNAL_FUNCTION_PARAMETERS) {
  */
 /* {{{ proto int readgzfile(string filename [, int use_include_path])
 Output a .gz-file */
-void php3_readgzfile(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(readgzfile) {
 	pval *arg1, *arg2;
 	char buf[8192];
 	gzFile *zp;
@@ -834,7 +834,7 @@ void php3_readgzfile(INTERNAL_FUNCTION_PARAMETERS) {
  */
 /* {{{ proto int gzpassthru(int zp)
 Output all remaining data from a .gz-file pointer */
-void php3_gzpassthru(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(gzpassthru) {
 	pval *arg1;
 	gzFile *zp;
 	char buf[8192];
@@ -864,7 +864,7 @@ void php3_gzpassthru(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto int gzread(int zp, int length)
 Binary-safe file read */
-void php3_gzread(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(gzread)
 {
 	pval *arg1, *arg2;
 	gzFile *zp;

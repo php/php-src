@@ -46,7 +46,7 @@
 #  include <cli0core.h>
 #  include <cli0ext1.h>
 #  define HAVE_SQL_EXTENDED_FETCH 0
-extern void php3_solid_fetch_prev(INTERNAL_FUNCTION_PARAMETERS);
+PHP_FUNCTION(solid_fetch_prev);
 
 # elif HAVE_EMPRESS /* Empress */
 
@@ -120,35 +120,35 @@ extern php3_module_entry odbc_module_entry;
 extern int php3_minit_odbc(INIT_FUNC_ARGS);
 extern int php3_mshutdown_odbc(SHUTDOWN_FUNC_ARGS);
 extern int php3_rinit_odbc(INIT_FUNC_ARGS);
-extern void php3_info_odbc(ZEND_MODULE_INFO_FUNC_ARGS);
-extern PHP_FUNCTION(odbc_setoption);
-extern PHP_FUNCTION(odbc_autocommit);
-extern PHP_FUNCTION(odbc_close);
-extern PHP_FUNCTION(odbc_close_all);
-extern PHP_FUNCTION(odbc_commit);
-extern PHP_FUNCTION(odbc_connect);
-extern PHP_FUNCTION(odbc_pconnect);
-extern void php3_odbc_do_connect(INTERNAL_FUNCTION_PARAMETERS, int);
-extern PHP_FUNCTION(odbc_cursor);
-extern PHP_FUNCTION(odbc_exec);
-extern PHP_FUNCTION(odbc_do);
-extern PHP_FUNCTION(odbc_execute);
-extern PHP_FUNCTION(odbc_fetch_into);
-extern PHP_FUNCTION(odbc_fetch_row);
-extern PHP_FUNCTION(odbc_field_len);
-extern PHP_FUNCTION(odbc_field_name);
-extern PHP_FUNCTION(odbc_field_type);
-extern PHP_FUNCTION(odbc_field_num);
-extern PHP_FUNCTION(odbc_free_result);
-extern PHP_FUNCTION(odbc_num_fields);
-extern PHP_FUNCTION(odbc_num_rows);
-extern PHP_FUNCTION(odbc_prepare);
-extern PHP_FUNCTION(odbc_result);
-extern PHP_FUNCTION(odbc_result_all);
-extern PHP_FUNCTION(odbc_rollback);
-extern void php3_odbc_transact(INTERNAL_FUNCTION_PARAMETERS, int);
-extern PHP_FUNCTION(odbc_binmode);
-extern PHP_FUNCTION(odbc_longreadlen);
+void php3_info_odbc(ZEND_MODULE_INFO_FUNC_ARGS);
+PHP_FUNCTION(odbc_setoption);
+PHP_FUNCTION(odbc_autocommit);
+PHP_FUNCTION(odbc_close);
+PHP_FUNCTION(odbc_close_all);
+PHP_FUNCTION(odbc_commit);
+PHP_FUNCTION(odbc_connect);
+PHP_FUNCTION(odbc_pconnect);
+void php3_odbc_do_connect(INTERNAL_FUNCTION_PARAMETERS, int);
+PHP_FUNCTION(odbc_cursor);
+PHP_FUNCTION(odbc_exec);
+PHP_FUNCTION(odbc_do);
+PHP_FUNCTION(odbc_execute);
+PHP_FUNCTION(odbc_fetch_into);
+PHP_FUNCTION(odbc_fetch_row);
+PHP_FUNCTION(odbc_field_len);
+PHP_FUNCTION(odbc_field_name);
+PHP_FUNCTION(odbc_field_type);
+PHP_FUNCTION(odbc_field_num);
+PHP_FUNCTION(odbc_free_result);
+PHP_FUNCTION(odbc_num_fields);
+PHP_FUNCTION(odbc_num_rows);
+PHP_FUNCTION(odbc_prepare);
+PHP_FUNCTION(odbc_result);
+PHP_FUNCTION(odbc_result_all);
+PHP_FUNCTION(odbc_rollback);
+void php3_odbc_transact(INTERNAL_FUNCTION_PARAMETERS, int);
+PHP_FUNCTION(odbc_binmode);
+PHP_FUNCTION(odbc_longreadlen);
 
 typedef struct odbc_connection {
 #if HAVE_DB2
@@ -250,6 +250,8 @@ extern ZEND_API php_odbc_globals odbc_globals;
 # define odbc_module_ptr NULL
 
 #endif /* HAVE_UODBC */
+
+#define phpext_odbc_ptr odbc_module_ptr
 
 #endif /* _PHP_ODBC_H */
 

@@ -1,6 +1,6 @@
 #! /bin/sh
 
-# $Id: genif.sh,v 1.5 1999-05-11 00:01:41 zeev Exp $
+# $Id: genif.sh,v 1.6 1999-05-21 10:05:41 sas Exp $
 # replacement for genif.pl
 
 infile="$1"
@@ -18,8 +18,8 @@ includes=""
 
 for ext in ${1+"$@"} ; do
 	module_ptrs="	phpext_${ext}_ptr,\\\n$module_ptrs"
-	for pre in php3 php php4 zend; do
-		hdrfile="ext/$ext/${pre}_${ext}.h"
+	for pre in php3_ php_ php4_ zend_ "" ; do
+		hdrfile="ext/$ext/${pre}${ext}.h"
 		if test -f "$srcdir/$hdrfile" ; then
 			includes="#include \"$hdrfile\"\\\n$includes"
 		fi

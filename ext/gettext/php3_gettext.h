@@ -40,12 +40,12 @@
 extern php3_module_entry php3_gettext_module_entry;
 #define gettext_module_ptr &php3_gettext_module_entry
 
-extern void php3_info_gettext(ZEND_MODULE_INFO_FUNC_ARGS);
-extern void php3_textdomain(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_gettext(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_dgettext(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_dcgettext(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_bindtextdomain(INTERNAL_FUNCTION_PARAMETERS);
+void php3_info_gettext(ZEND_MODULE_INFO_FUNC_ARGS);
+PHP_FUNCTION(textdomain);
+PHP_FUNCTION(gettext);
+PHP_FUNCTION(dgettext);
+PHP_FUNCTION(dcgettext);
+PHP_FUNCTION(bindtextdomain);
 
 #else
 #define gettext_module_ptr NULL

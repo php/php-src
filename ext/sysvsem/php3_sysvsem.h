@@ -47,10 +47,10 @@ extern int php3_minit_sysvsem(INIT_FUNC_ARGS);
 extern int php3_rinit_sysvsem(INIT_FUNC_ARGS);
 extern int php3_mshutdown_sysvsem(SHUTDOWN_FUNC_ARGS);
 extern int php3_rshutdown_sysvsem(SHUTDOWN_FUNC_ARGS);
-extern void php3_info_sysvsem(void);
-extern void php3_sysvsem_get(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_sysvsem_acquire(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_sysvsem_release(INTERNAL_FUNCTION_PARAMETERS);
+void php3_info_sysvsem(void);
+PHP_FUNCTION(sysvsem_get);
+PHP_FUNCTION(sysvsem_acquire);
+PHP_FUNCTION(sysvsem_release);
 
 typedef struct {
 	int le_sem;

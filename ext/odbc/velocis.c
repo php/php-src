@@ -188,7 +188,7 @@ velocis_del_result(HashTable *list,int ind)
 
 /* Users functions */
 
-void php3_velocis_connect(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(velocis_connect)
 {
 	pval *serv,*user,*pass;
 	char *Serv = NULL;
@@ -235,7 +235,7 @@ void php3_velocis_connect(INTERNAL_FUNCTION_PARAMETERS)
 	RETURN_LONG(ind);
 }
 
-void php3_velocis_close(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(velocis_close)
 {
 	pval *id;
 	VConn *conn;
@@ -256,7 +256,7 @@ void php3_velocis_close(INTERNAL_FUNCTION_PARAMETERS)
 	RETURN_TRUE;
 }
 
-void php3_velocis_exec(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(velocis_exec)
 {
 	pval *ind,*exec_str;
 	char *query = NULL;
@@ -354,7 +354,7 @@ void php3_velocis_exec(INTERNAL_FUNCTION_PARAMETERS)
 	RETURN_LONG(indx);
 }
 
-void php3_velocis_fetch(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(velocis_fetch)
 {
 	pval *ind;
 	Vresult *res;
@@ -387,7 +387,7 @@ void php3_velocis_fetch(INTERNAL_FUNCTION_PARAMETERS)
 	RETURN_TRUE;
 }
 
-void php3_velocis_result(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(velocis_result)
 {
 	pval *ind,*col;
 	Vresult *res;
@@ -484,7 +484,7 @@ l1:
 	}
 }
 
-void php3_velocis_freeresult(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(velocis_freeresult)
 {
 	pval *ind;
 	Vresult *res;
@@ -503,7 +503,7 @@ void php3_velocis_freeresult(INTERNAL_FUNCTION_PARAMETERS)
 	RETURN_TRUE;
 }
 
-void php3_velocis_autocommit(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(velocis_autocommit)
 {
 	pval *id;
 	RETCODE stat;
@@ -526,7 +526,7 @@ void php3_velocis_autocommit(INTERNAL_FUNCTION_PARAMETERS)
 	RETURN_TRUE;
 }
 
-void php3_velocis_off_autocommit(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(velocis_off_autocommit)
 {
 	pval *id;
 	RETCODE stat;
@@ -549,7 +549,7 @@ void php3_velocis_off_autocommit(INTERNAL_FUNCTION_PARAMETERS)
 	RETURN_TRUE;
 }
 
-void php3_velocis_commit(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(velocis_commit)
 {
 	pval *id;
 	RETCODE stat;
@@ -572,7 +572,7 @@ void php3_velocis_commit(INTERNAL_FUNCTION_PARAMETERS)
 	RETURN_TRUE;
 }
 
-void php3_velocis_rollback(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(velocis_rollback)
 {
 	pval *id;
 	RETCODE stat;
@@ -595,7 +595,7 @@ void php3_velocis_rollback(INTERNAL_FUNCTION_PARAMETERS)
 	RETURN_TRUE;
 }
 
-void php3_velocis_fieldname(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(velocis_fieldname)
 {
 	pval *ind,*col;
 	Vresult *res;
@@ -619,7 +619,7 @@ void php3_velocis_fieldname(INTERNAL_FUNCTION_PARAMETERS)
 	RETURN_STRING(res->values[indx].name,TRUE);
 }
 
-void php3_velocis_fieldnum(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(velocis_fieldnum)
 {
 	pval *ind;
 	Vresult *res;

@@ -47,36 +47,36 @@ extern int php3_minit_sybase(INIT_FUNC_ARGS);
 extern int php3_rinit_sybase(INIT_FUNC_ARGS);
 extern int php3_mshutdown_sybase(SHUTDOWN_FUNC_ARGS);
 extern int php3_rshutdown_sybase(SHUTDOWN_FUNC_ARGS);
-extern void php3_info_sybase(ZEND_MODULE_INFO_FUNC_ARGS);
-extern void php3_sybase_connect(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_sybase_pconnect(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_sybase_close(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_sybase_select_db(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_sybase_query(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_sybase_free_result(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_sybase_get_last_message(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_sybase_num_rows(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_sybase_num_fields(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_sybase_fetch_row(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_sybase_fetch_array(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_sybase_fetch_object(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_sybase_data_seek(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_sybase_result(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_sybase_field_seek(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_sybase_min_error_severity(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_sybase_min_message_severity(INTERNAL_FUNCTION_PARAMETERS);
+void php3_info_sybase(ZEND_MODULE_INFO_FUNC_ARGS);
+PHP_FUNCTION(sybase_connect);
+PHP_FUNCTION(sybase_pconnect);
+PHP_FUNCTION(sybase_close);
+PHP_FUNCTION(sybase_select_db);
+PHP_FUNCTION(sybase_query);
+PHP_FUNCTION(sybase_free_result);
+PHP_FUNCTION(sybase_get_last_message);
+PHP_FUNCTION(sybase_num_rows);
+PHP_FUNCTION(sybase_num_fields);
+PHP_FUNCTION(sybase_fetch_row);
+PHP_FUNCTION(sybase_fetch_array);
+PHP_FUNCTION(sybase_fetch_object);
+PHP_FUNCTION(sybase_data_seek);
+PHP_FUNCTION(sybase_result);
+PHP_FUNCTION(sybase_field_seek);
+PHP_FUNCTION(sybase_min_error_severity);
+PHP_FUNCTION(sybase_min_message_severity);
 
-extern void php3_sybase_db_query(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_sybase_list_fields(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_sybase_fetch_lengths(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_sybase_fetch_field(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_sybase_field_seek(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_sybase_free_result(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_sybase_field_name(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_sybase_field_table(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_sybase_field_len(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_sybase_field_type(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_sybase_field_flags(INTERNAL_FUNCTION_PARAMETERS);
+PHP_FUNCTION(sybase_db_query);
+PHP_FUNCTION(sybase_list_fields);
+PHP_FUNCTION(sybase_fetch_lengths);
+PHP_FUNCTION(sybase_fetch_field);
+PHP_FUNCTION(sybase_field_seek);
+PHP_FUNCTION(sybase_free_result);
+PHP_FUNCTION(sybase_field_name);
+PHP_FUNCTION(sybase_field_table);
+PHP_FUNCTION(sybase_field_len);
+PHP_FUNCTION(sybase_field_type);
+PHP_FUNCTION(sybase_field_flags);
 
 
 
@@ -137,5 +137,7 @@ extern sybase_module php3_sybase_module;
 #define sybase_module_ptr NULL
 
 #endif
+
+#define phpext_sybase_ptr sybase_module_ptr
 
 #endif /* _PHP3_SYBASE_H */

@@ -109,6 +109,8 @@ PHP_FUNCTION(utf8_decode);
 
 #endif /* HAVE_LIBEXPAT */
 
+#define phpext_xml_ptr xml_module_ptr
+
 /*
  * Local variables:
  * tab-width: 4

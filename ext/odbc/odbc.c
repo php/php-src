@@ -592,7 +592,7 @@ PHP_FUNCTION(odbc_prepare)
  */
 /* {{{ proto odbc_execute(int result_id [, array parameters_array])
    Execute a prepared statement */
-extern PHP_FUNCTION(odbc_execute)
+PHP_FUNCTION(odbc_execute)
 { 
     pval *arg1, *arg2, arr, *tmp;
     typedef struct params_t {
@@ -1074,7 +1074,7 @@ PHP_FUNCTION(odbc_fetch_into)
 /* }}} */
 
 #if HAVE_SOLID
-void php3_solid_fetch_prev(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(solid_fetch_prev)
 {
 	int         res_ind;
 	odbc_result   *result;

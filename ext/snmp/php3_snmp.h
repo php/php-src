@@ -43,14 +43,16 @@ extern php3_module_entry snmp_module_entry;
 #define snmp_module_ptr &snmp_module_entry
 
 extern int php3i_snmp_init(INIT_FUNC_ARGS);
-extern PHP_FUNCTION(snmpget);
-extern PHP_FUNCTION(snmpwalk);
-extern PHP_FUNCTION(snmprealwalk);
-extern void php3_info_snmp(ZEND_MODULE_INFO_FUNC_ARGS);
+PHP_FUNCTION(snmpget);
+PHP_FUNCTION(snmpwalk);
+PHP_FUNCTION(snmprealwalk);
+void php3_info_snmp(ZEND_MODULE_INFO_FUNC_ARGS);
 #else
 
 #define snmp_module_ptr NULL
 
 #endif /* HAVE_SNMP */
+
+#define phpext_snmp_ptr snmp_module_ptr
 
 #endif  /* _PHP3_SNMP_H */

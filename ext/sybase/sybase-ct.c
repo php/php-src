@@ -626,18 +626,18 @@ static int php3_sybct_get_default_link(INTERNAL_FUNCTION_PARAMETERS)
 }
 
 
-void php3_sybct_connect(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(sybct_connect)
 {
 	php3_sybct_do_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU,0);
 }
 
-void php3_sybct_pconnect(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(sybct_pconnect)
 {
 	php3_sybct_do_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU,1);
 }
 
 
-void php3_sybct_close(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(sybct_close)
 {
 	pval *sybct_link_index;
 	int id,type;
@@ -744,7 +744,7 @@ static int exec_cmd(sybct_link *sybct_ptr,char *cmdbuf)
 }
 
 
-void php3_sybct_select_db(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(sybct_select_db)
 {
 	pval *db,*sybct_link_index;
 	int id,type;
@@ -955,7 +955,7 @@ static sybct_result * _php3_sybct_fetch_result_set (sybct_link *sybct_ptr)
 }
 
 
-void php3_sybct_query(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(sybct_query)
 {
 	pval *query,*sybct_link_index;
 	int id,type;
@@ -1169,7 +1169,7 @@ void php3_sybct_query(INTERNAL_FUNCTION_PARAMETERS)
 }
 
 
-void php3_sybct_free_result(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(sybct_free_result)
 {
 	pval *sybct_result_index;
 	sybct_result *result;
@@ -1195,7 +1195,7 @@ void php3_sybct_free_result(INTERNAL_FUNCTION_PARAMETERS)
 
 
 #if 0
-void php3_sybct_get_last_message(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(sybct_get_last_message)
 {
 	if (php3_sybct_module.server_message) {
 		RETURN_STRING(php3_sybct_module.server_message,1);
@@ -1204,7 +1204,7 @@ void php3_sybct_get_last_message(INTERNAL_FUNCTION_PARAMETERS)
 #endif 
 
 
-void php3_sybct_num_rows(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(sybct_num_rows)
 {
 	pval *result_index;
 	int type,id;
@@ -1228,7 +1228,7 @@ void php3_sybct_num_rows(INTERNAL_FUNCTION_PARAMETERS)
 }
 
 
-void php3_sybct_num_fields(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(sybct_num_fields)
 {
 	pval *result_index;
 	int type,id;
@@ -1252,7 +1252,7 @@ void php3_sybct_num_fields(INTERNAL_FUNCTION_PARAMETERS)
 }
 
 
-void php3_sybct_fetch_row(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(sybct_fetch_row)
 {
 	pval *sybct_result_index;
 	int type,i,id;
@@ -1286,7 +1286,7 @@ void php3_sybct_fetch_row(INTERNAL_FUNCTION_PARAMETERS)
 }
 
 
-static void php3_sybct_fetch_hash(INTERNAL_FUNCTION_PARAMETERS)
+static PHP_FUNCTION(sybct_fetch_hash)
 {
 	pval *sybct_result_index;
 	sybct_result *result;
@@ -1328,7 +1328,7 @@ static void php3_sybct_fetch_hash(INTERNAL_FUNCTION_PARAMETERS)
 }
 
 
-void php3_sybct_fetch_object(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(sybct_fetch_object)
 {
 	php3_sybct_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 	if (return_value->type==IS_ARRAY) {
@@ -1337,12 +1337,12 @@ void php3_sybct_fetch_object(INTERNAL_FUNCTION_PARAMETERS)
 }
 
 
-void php3_sybct_fetch_array(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(sybct_fetch_array)
 {
 	php3_sybct_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
-void php3_sybct_data_seek(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(sybct_data_seek)
 {
 	pval *sybct_result_index,*offset;
 	int type,id;
@@ -1416,7 +1416,7 @@ static char *php3_sybct_get_field_name(CS_INT type)
 }
 
 
-void php3_sybct_fetch_field(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(sybct_fetch_field)
 {
 	pval *sybct_result_index,*offset;
 	int type,id,field_offset;
@@ -1473,7 +1473,7 @@ void php3_sybct_fetch_field(INTERNAL_FUNCTION_PARAMETERS)
 }
 
 
-void php3_sybct_field_seek(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(sybct_field_seek)
 {
 	pval *sybct_result_index,*offset;
 	int type,id,field_offset;
@@ -1505,7 +1505,7 @@ void php3_sybct_field_seek(INTERNAL_FUNCTION_PARAMETERS)
 }
 
 
-void php3_sybct_result(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(sybct_result)
 {
 	pval *row, *field, *sybct_result_index;
 	int id,type,field_offset=0;
@@ -1562,7 +1562,7 @@ void php3_sybct_result(INTERNAL_FUNCTION_PARAMETERS)
 }
 
 
-void php3_sybct_affected_rows(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(sybct_affected_rows)
 {
 	pval *sybct_link_index;
 	int id,type;
@@ -1625,7 +1625,7 @@ void php3_info_sybct(ZEND_MODULE_INFO_FUNC_ARGS)
 }
 
 
-void php3_sybct_min_client_severity(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(sybct_min_client_severity)
 {
 	pval *severity;
 	
@@ -1637,7 +1637,7 @@ void php3_sybct_min_client_severity(INTERNAL_FUNCTION_PARAMETERS)
 }
 
 
-void php3_sybct_min_server_severity(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(sybct_min_server_severity)
 {
 	pval *severity;
 	

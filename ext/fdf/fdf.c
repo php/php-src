@@ -124,7 +124,7 @@ int php3_mend_fdf(void){
 
 /* {{{ proto int fdf_open(string filename)
    Opens a new fdf document */
-void php3_fdf_open(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(fdf_open) {
 	pval *file;
 	int id, type;
 	FDFDoc fdf;
@@ -150,7 +150,7 @@ void php3_fdf_open(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto void fdf_close(int fdfdoc)
    Closes the fdf document */
-void php3_fdf_close(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(fdf_close) {
 	pval *arg1;
 	int id, type;
 	FDFDoc fdf;
@@ -176,7 +176,7 @@ void php3_fdf_close(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto void fdf_create(void)
    Creates a new fdf document */
-void php3_fdf_create(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(fdf_create) {
 	int id, type;
 	FDFDoc fdf;
 	FDFErc err;
@@ -195,7 +195,7 @@ void php3_fdf_create(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto void fdf_get_value(int fdfdoc, string fieldname)
    Gets the value of a field as string */
-void php3_fdf_get_value(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(fdf_get_value) {
 	pval *arg1, *arg2;
 	int id, type;
 	ASInt32 nr;
@@ -231,7 +231,7 @@ void php3_fdf_get_value(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto void fdf_set_value(int fdfdoc, string fieldname, string value, int isName)
    Sets the value of a field */
-void php3_fdf_set_value(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(fdf_set_value) {
 	pval *arg1, *arg2, *arg3, *arg4;
 	int id, type;
 	FDFDoc fdf;
@@ -263,7 +263,7 @@ void php3_fdf_set_value(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto void fdf_next_field_name(int fdfdoc [, string fieldname])
    Gets the name of the next field name or the first field name */
-void php3_fdf_next_field_name(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(fdf_next_field_name) {
 	pval *argv[2];
 	int id, type, argc;
 	ASInt32 nr;
@@ -311,7 +311,7 @@ void php3_fdf_next_field_name(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto void fdf_set_ap(int fdfdoc, string fieldname, int face, string filename, int pagenr)
    Sets the value of a field */
-void php3_fdf_set_ap(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(fdf_set_ap) {
 	pval *arg1, *arg2, *arg3, *arg4, *arg5;
 	int id, type;
 	FDFDoc fdf;
@@ -359,7 +359,7 @@ void php3_fdf_set_ap(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto void fdf_set_status(int fdfdoc, string status)
    Sets the value in the /Status key. */
-void php3_fdf_set_status(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(fdf_set_status) {
 	pval *arg1, *arg2;
 	int id, type;
 	ASInt32 nr;
@@ -390,7 +390,7 @@ void php3_fdf_set_status(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto void fdf_get_status(int fdfdoc)
    Gets the value in the /Status key. */
-void php3_fdf_get_status(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(fdf_get_status) {
 	pval *arg1;
 	int id, type;
 	ASInt32 nr;
@@ -427,7 +427,7 @@ void php3_fdf_get_status(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto void fdf_set_file(int fdfdoc, string filename)
    Sets the value of the FDF's /F key */
-void php3_fdf_set_file(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(fdf_set_file) {
 	pval *arg1, *arg2;
 	int id, type;
 	FDFDoc fdf;
@@ -457,7 +457,7 @@ void php3_fdf_set_file(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto void fdf_get_file(int fdfdoc)
    Gets the value in the /F key. */
-void php3_fdf_get_file(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(fdf_get_file) {
 	pval *arg1;
 	int id, type;
 	ASInt32 nr;
@@ -494,7 +494,7 @@ void php3_fdf_get_file(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto void fdf_save(int fdfdoc, string filename)
    Writes out an FDF file. */
-void php3_fdf_save(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(fdf_save) {
 	pval *arg1, *arg2;
 	int id, type;
 	FDFDoc fdf;
