@@ -274,14 +274,11 @@ static void php_mssql_init_globals(zend_mssql_globals *mssql_globals)
 	long compatability_mode;
 
 	mssql_globals->num_persistent = 0;
+	mssql_globals->get_column_content = php_mssql_get_column_content_with_type;
 	if (cfg_get_long("mssql.compatability_mode", &compatability_mode) == SUCCESS) {
 		if (compatability_mode) {
 			mssql_globals->get_column_content = php_mssql_get_column_content_without_type;	
-		} else {
-			mssql_globals->get_column_content = php_mssql_get_column_content_with_type;
 		}
-	} else {
-		mssql_globals->get_column_content = php_mssql_get_column_content_with_type;
 	}
 }
 
@@ -521,6 +518,7 @@ static void php_mssql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 				if (DBSETOPT(mssql.link, DBTEXTLIMIT, buffer)==FAIL) {
 					efree(hashed_details);
 					dbfreelogin(mssql.login);
+					dbclose(mssql.link);
 					RETURN_FALSE;
 				}
 			}
@@ -540,6 +538,7 @@ static void php_mssql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 				free(mssql_ptr);
 				efree(hashed_details);
 				dbfreelogin(mssql.login);
+				dbclose(mssql.link);
 				RETURN_FALSE;
 			}
 			MS_SQL_G(num_persistent)++;
@@ -550,22 +549,25 @@ static void php_mssql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 				log_error("PHP/MS SQL:  Hashed persistent link is not a MS SQL link!",php_rqst->server);
 #endif
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Hashed persistent link is not a MS SQL link!");
+				efree(hashed_details);
 				RETURN_FALSE;
 			}
 			
 			mssql_ptr = (mssql_link *) le->ptr;
 			/* test that the link hasn't died */
 			if (DBDEAD(mssql_ptr->link) == TRUE) {
+				dbclose(mssql_ptr->link);
 #if BROKEN_MSSQL_PCONNECTS
 				log_error("PHP/MS SQL:  Persistent link died, trying to reconnect...",php_rqst->server);
 #endif
-				if ((mssql_ptr->link=dbopen(mssql_ptr->login,host))==FAIL) {
+				if ((mssql_ptr->link=dbopen(mssql_ptr->login,host))==NULL) {
 #if BROKEN_MSSQL_PCONNECTS
 					log_error("PHP/MS SQL:  Unable to reconnect!",php_rqst->server);
 #endif
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Link to server lost, unable to reconnect");
 					zend_hash_del(&EG(persistent_list), hashed_details, hashed_details_length+1);
 					efree(hashed_details);
+					dbfreelogin(mssql_ptr->login);
 					RETURN_FALSE;
 				}
 #if BROKEN_MSSQL_PCONNECTS
@@ -577,6 +579,8 @@ static void php_mssql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 #endif
 					zend_hash_del(&EG(persistent_list), hashed_details, hashed_details_length + 1);
 					efree(hashed_details);
+					dbfreelogin(mssql_ptr->login);
+					dbclose(mssql_ptr->link);
 					RETURN_FALSE;
 				}
 			}
@@ -595,6 +599,8 @@ static void php_mssql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			void *ptr;
 
 			if (Z_TYPE_P(index_ptr) != le_index_ptr) {
+				efree(hashed_details);
+				dbfreelogin(mssql.login);
 				RETURN_FALSE;
 			}
 			link = (int) index_ptr->ptr;
@@ -604,6 +610,7 @@ static void php_mssql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 				Z_LVAL_P(return_value) = link;
 				php_mssql_set_default_link(link TSRMLS_CC);
 				Z_TYPE_P(return_value) = IS_RESOURCE;
+				dbfreelogin(mssql.login);
 				efree(hashed_details);
 				return;
 			} else {
@@ -613,12 +620,14 @@ static void php_mssql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		if (MS_SQL_G(max_links) != -1 && MS_SQL_G(num_links) >= MS_SQL_G(max_links)) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Too many open links (%ld)", MS_SQL_G(num_links));
 			efree(hashed_details);
+			dbfreelogin(mssql.login);
 			RETURN_FALSE;
 		}
 		
 		if ((mssql.link=dbopen(mssql.login, host))==NULL) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to connect to server:  %s", host);
 			efree(hashed_details);
+			dbfreelogin(mssql.login);
 			RETURN_FALSE;
 		}
 
@@ -634,6 +643,7 @@ static void php_mssql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			if (DBSETOPT(mssql.link, DBTEXTLIMIT, buffer)==FAIL) {
 				efree(hashed_details);
 				dbfreelogin(mssql.login);
+				dbclose(mssql.link);
 				RETURN_FALSE;
 			}
 		}
@@ -977,6 +987,7 @@ static void _mssql_get_sp_result(mssql_link *mssql_ptr, mssql_statement *stateme
 						case SQLINT2:
 						case SQLINT4:
 							convert_to_long_ex(&bind->zval);
+							/* FIXME this works only on little endian machine !!! */
 							Z_LVAL_P(bind->zval) = *((int *)(dbretdata(mssql_ptr->link,i)));
 							break;
 			
@@ -997,6 +1008,7 @@ static void _mssql_get_sp_result(mssql_link *mssql_ptr, mssql_statement *stateme
 							Z_STRLEN_P(bind->zval) = dbretlen(mssql_ptr->link,i);
 							Z_STRVAL_P(bind->zval) = estrndup(dbretdata(mssql_ptr->link,i),Z_STRLEN_P(bind->zval));
 							break;
+						/* TODO binary */
 					}
 				}
 				else {
@@ -1184,6 +1196,9 @@ PHP_FUNCTION(mssql_query)
 	while ((num_fields = dbnumcols(mssql_ptr->link)) <= 0 && retvalue == SUCCEED) {
 		retvalue = dbresults(mssql_ptr->link);
 	}
+	if (retvalue != SUCCEED) {
+		RETURN_FALSE;
+	}
 	if ((num_fields = dbnumcols(mssql_ptr->link)) <= 0) {
 		RETURN_TRUE;
 	}
@@ -1204,12 +1219,8 @@ PHP_FUNCTION(mssql_query)
 	result->mssql_ptr = mssql_ptr;
 	result->cur_field=result->cur_row=result->num_rows=0;
 
-	if (num_fields > 0) {
-		result->fields = (mssql_field *) safe_emalloc(sizeof(mssql_field), result->num_fields, 0);
-		result->num_rows = _mssql_fetch_batch(mssql_ptr, result, retvalue TSRMLS_CC);
-	}
-	else
-		result->fields = NULL;
+	result->fields = (mssql_field *) safe_emalloc(sizeof(mssql_field), result->num_fields, 0);
+	result->num_rows = _mssql_fetch_batch(mssql_ptr, result, retvalue TSRMLS_CC);
 	
 	ZEND_REGISTER_RESOURCE(return_value, result, le_result);
 }
@@ -2218,7 +2229,7 @@ PHP_FUNCTION(mssql_guid_string)
 			break;
 	}
 
-	dbconvert(NULL, SQLBINARY, (BYTE*)Z_STRVAL_PP(binary), 16, SQLCHAR, buffer, -1);
+	dbconvert(NULL, SQLBINARY, (BYTE*)Z_STRVAL_PP(binary), min(16, Z_STRLEN_PP(binary)), SQLCHAR, buffer, -1);
 
 	if (sf) {
 		php_strtoupper(buffer, 32);
@@ -2226,6 +2237,7 @@ PHP_FUNCTION(mssql_guid_string)
 	}
 	else {
 		int i;
+		/* FIXME this works only on little endian machine */
 		for (i=0; i<4; i++) {
 			buffer2[2*i] = buffer[6-2*i];
 			buffer2[2*i+1] = buffer[7-2*i];
