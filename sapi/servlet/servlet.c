@@ -71,11 +71,6 @@ typedef struct {
 
 extern zend_module_entry java_module_entry;
 
-static zend_module_entry *additional_php_extensions[] = {
-  &java_module_entry
-};
-
-#define EXTCOUNT (sizeof(additional_php_extensions)/sizeof(zend_module_entry *))
 
 /***************************************************************************/
 
@@ -261,7 +256,7 @@ JNIEXPORT void JNICALL Java_net_php_servlet_startup
 
 	sapi_startup(&servlet_sapi_module);
 
-	if (php_module_startup(&servlet_sapi_module, additional_php_extensions, EXTCOUNT)==FAILURE) {
+	if (php_module_startup(&servlet_sapi_module, &java_module_entry, 1)==FAILURE) {
 		ThrowServletException(jenv,"module startup failure");
 		return;
 	}
