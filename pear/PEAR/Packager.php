@@ -174,8 +174,10 @@ class PEAR_Packager extends PEAR
         fclose($fp);
         chdir(dirname($this->tmpdir));
         // XXX FIXME Windows and non-GNU tar
-        $pkgver = quotemeta($this->pkgver);
-        system("tar -cvzf $pwd/${pkgver}.tgz $pkgver");
+        $pkgver = $this->pkgver;
+        $cmd = "tar -cvzf $pwd/${pkgver}.tgz $pkgver";
+        $this->log(1, `$cmd`);
+        $this->log(1, "Package $pwd/${pkgver}.tgz done");
     }
 
     // }}}
@@ -237,6 +239,8 @@ class PEAR_Packager extends PEAR
                 $pwd = getcwd();
                 $this->pkgver = $this->pkginfo["Package,Name"] . "-" .
                     $this->pkginfo["Release,Version"];
+                // don't want extrange characters
+                $this->pkgver = ereg_replace ("[^a-zA-Z0-9._-]", '_', $this->pkgver);
                 $this->tmpdir = $pwd . DIRECTORY_SEPARATOR . $this->pkgver;
                 if (file_exists($this->tmpdir)) {
                     xml_parser_free($xp);
