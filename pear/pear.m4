@@ -3,7 +3,7 @@ AC_INIT(Makefile.in)
 
 AC_DEFUN(PHP_WITH_PHP_CONFIG,[
   AC_ARG_WITH(php-config,
-[  --with-php-config=[PATH]],[
+[  --with-php-config=PATH],[
   PHP_CONFIG=$withval
 ],[
   PHP_CONFIG=php-config
@@ -45,6 +45,7 @@ AC_PROG_LIBTOOL
 SHARED_LIBTOOL='$(LIBTOOL)'
 PHP_COMPILE='$(LIBTOOL) --mode=compile $(COMPILE) -c $<'
 phplibdir="`pwd`/modules"
+CPPFLAGS="$CPPFLAGS -DHAVE_CONFIG_H"
 
 test "$prefix" = "NONE" && prefix="/usr/local"
 test "$exec_prefix" = "NONE" && exec_prefix='$(prefix)'
