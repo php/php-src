@@ -2842,7 +2842,7 @@ PHP_FUNCTION(array_slice)
 /* }}} */
 
 
-/* {{{ proto array array_merge(array arr1 [, array arr2, ...])
+/* {{{ proto array array_merge(array arr1, array arr2 [, ...])
    Merges elements from passed arrays into one array */
 PHP_FUNCTION(array_merge)
 {
