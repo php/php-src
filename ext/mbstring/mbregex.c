@@ -309,8 +309,10 @@ init_syntax_once()
 	int ch;
 	TSRMLS_FETCH();
 
-   if (done)
-     return;
+	if (done) {
+		efree(s);
+		return;
+	}
 
    memset(re_syntax_table, 0, sizeof(re_syntax_table));
 
