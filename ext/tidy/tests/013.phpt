@@ -4,7 +4,7 @@ Parsing a file using constructor
 <?php if (!extension_loaded("tidy")) print "skip"; ?>
 --FILE--
 <?php
-        $tidy = new tidy("ext/tidy/tests/013.html", array("show-body-only"=>true));
+        $tidy = new tidy(dirname(__FILE__)."/013.html", array("show-body-only"=>true));
         $tidy->cleanRepair();
         echo $tidy;
 
