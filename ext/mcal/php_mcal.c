@@ -107,6 +107,7 @@ function_entry mcal_functions[] = {
 	PHP_FE(mcal_time_valid,NULL)
 	PHP_FE(mcal_day_of_week,NULL)
 	PHP_FE(mcal_day_of_year,NULL)
+	PHP_FE(mcal_week_of_year,NULL)
 	PHP_FE(mcal_date_compare,NULL)
 	PHP_FE(mcal_event_init,NULL)
 	PHP_FE(mcal_next_recurrence,NULL)
@@ -1252,6 +1253,31 @@ PHP_FUNCTION(mcal_day_of_year)
 	dt_setdate(&mydate,year->value.lval,month->value.lval, day->value.lval);
 
 	RETURN_LONG(dt_dayofyear(&mydate));
+}
+/* }}} */
+
+/* {{{ proto int mcal_week_of_year(int year, int month, int day)
+   Returns the week number of the given date */
+PHP_FUNCTION(mcal_week_of_year)
+{
+	pval *year, *month, *day;
+	int myargc;
+	
+	myargc = ARG_COUNT(ht);
+	if (myargc != 3 || getParameters(ht,myargc,&year,&month,&day) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	
+ 	convert_to_long(year);
+ 	convert_to_long(month);
+ 	convert_to_long(day);
+	
+ 	if (datevalid(year->value.lval,month->value.lval,day->value.lval)) { 
+		RETURN_LONG(dt_weekofyear(day->value.lval,month->value.lval,year->value.lval));
+	}
+	else {
+		RETURN_FALSE;
+	}
 }
 /* }}} */
 
