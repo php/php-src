@@ -418,7 +418,7 @@ PHP_MINIT_FUNCTION(imap)
 #ifndef PHP_WIN32
 	auth_link(&auth_log);		/* link in the log authenticator */
 	auth_link(&auth_md5);       /* link in the cram-md5 authenticator */ 
-#ifdef HAVE_IMAP_AUTH_GSS
+#ifdef HAVE_IMAP_KRB && defined(HAVE_IMAP_AUTH_GSS)
 	auth_link(&auth_gss);		/* link in the gss authenticator */
 #endif
 
