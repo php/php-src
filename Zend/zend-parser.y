@@ -47,7 +47,7 @@
 %}
 
 %pure_parser
-%expect 4
+%expect 7
 
 %left T_INCLUDE T_EVAL T_IMPORT
 %left ','
@@ -129,7 +129,8 @@
 %token T_OPEN_TAG_WITH_ECHO
 %token T_CLOSE_TAG
 %token T_WHITESPACE
-%token T_HEREDOC
+%token T_START_HEREDOC
+%token T_END_HEREDOC
 %token T_DOLLAR_OPEN_CURLY_BRACES
 %token T_CURLY_OPEN
 %token T_PAAMAYIM_NEKUDOTAYIM
@@ -538,7 +539,7 @@ scalar:
 	|	common_scalar			{ $$ = $1; }
 	|	'"' encaps_list '"' 	{ $$ = $2; }
 	|	'\'' encaps_list '\''	{ $$ = $2; }
-	|	T_HEREDOC encaps_list T_HEREDOC { $$ = $2; do_end_heredoc(CLS_C); }
+	|	T_START_HEREDOC encaps_list T_END_HEREDOC { $$ = $2; do_end_heredoc(CLS_C); }
 ;
 
 

@@ -1440,7 +1440,7 @@ ESCAPED_AND_WHITESPACE [\n\t\r #'.:;,()|^&+-/*=%!~<>?@]+
 	}
 	CG(heredoc) = estrndup(s, CG(heredoc_len));
 	BEGIN(ST_HEREDOC);
-	return T_HEREDOC;
+	return T_START_HEREDOC;
 }
 	
 
@@ -1475,6 +1475,8 @@ ESCAPED_AND_WHITESPACE [\n\t\r #'.:;,()|^&+-/*=%!~<>?@]+
 	}
 
 	if (label_len==CG(heredoc_len) && !memcmp(yytext, CG(heredoc), label_len)) {
+		zendlval->value.str.val = estrndup(yytext, yyleng); /* unput destroys yytext */
+		zendlval->value.str.len = yyleng;
 		if (unput_semicolon) {
 			unput(';');
 		}
@@ -1482,7 +1484,7 @@ ESCAPED_AND_WHITESPACE [\n\t\r #'.:;,()|^&+-/*=%!~<>?@]+
 		CG(heredoc)=NULL;
 		CG(heredoc_len)=0;
 		BEGIN(ST_IN_SCRIPTING);
-		return T_HEREDOC;
+		return T_END_HEREDOC;
 	} else {
 		zendlval->value.str.val = (char *)estrndup(yytext, yyleng);
 		zendlval->value.str.len = yyleng;

@@ -137,6 +137,9 @@ ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini
 			case T_DOLLAR_OPEN_CURLY_BRACES:
 				html_puts("{", 1);
 				break;
+			case T_END_HEREDOC:
+				html_puts(token.value.str.val, token.value.str.len);
+				break;
 			default:
 				html_puts(zendtext, zendleng);
 				break;
@@ -151,6 +154,14 @@ ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini
 				default:
 					efree(token.value.str.val);
 					break;
+			}
+		} else if (token_type == T_END_HEREDOC) {
+			zend_bool has_semicolon=(strchr(token.value.str.val, ';')?1:0);
+
+			efree(token.value.str.val);
+			if (has_semicolon) {
+				/* the following semicolon was unput(), ignore it */
+				lex_scan(&token CLS_CC);
 			}
 		}
 		token.type = 0;
