@@ -178,7 +178,7 @@ function_entry exif_functions[] = {
 };
 /* }}} */
 
-#define EXIF_VERSION "2.0a $Revision$"
+#define EXIF_VERSION "1.0a $Revision$"
 
 PHP_MINFO_FUNCTION(exif);
 
@@ -634,7 +634,7 @@ static int ProcessExifComment(char **pszInfoPtr,char *szValuePtr,int ByteCount)
 	char  mbBuffer[MB_CUR_MAX];
 
 	/* Copy the comment */
-	if ( ((ByteCount>8) && !memcmp(szValuePtr, "UNICODE\0", 8)) || !memcmp(szValuePtr, "JIS\0\0\0\0\0", 8)) {
+	if ( (ByteCount>8) && (!memcmp(szValuePtr, "UNICODE\0", 8) || !memcmp(szValuePtr, "JIS\0\0\0\0\0", 8))) {
 		/* treat JIS encoding as if it where UNICODE */
 		szValuePtr = szValuePtr+8;
 		ByteCount -= 8;
