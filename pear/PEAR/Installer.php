@@ -81,6 +81,27 @@ class PEAR_Installer extends PEAR_Common
 
     // }}}
 
+    // {{{ _deletePackageFiles()
+
+    function _deletePackageFiles($package)
+    {
+        $info = $this->registry->packageInfo($package);
+        if ($info == null) {
+            return $this->raiseError("$package not installed");
+        }
+        foreach ($info['filelist'] as $file => $props) {
+            $base = (isset($props['baseinstalldir'])) ? $props['baseinstalldir'] : '';
+            $path = PEAR_INSTALL_DIR . DIRECTORY_SEPARATOR . $base .
+                 DIRECTORY_SEPARATOR . $file;
+            if (!@unlink($path)) {
+                $this->log(2, "unable to delete: $path");
+            } else {
+                $this->log(2, "+ deleted file: $path");
+            }
+        }
+    }
+
+    // }}}
     // {{{ _installFile()
 
     function _installFile($file, $dest_dir, $atts)
@@ -131,8 +152,10 @@ class PEAR_Installer extends PEAR_Common
 
     function install($pkgfile, $options = array())
     {
-        // XXX FIXME Add here code to manage packages database
-        //$this->loadPackageList("$this->statedir/packages.lst");
+        // recognized options:
+        // - register_only : update registry but don't install files
+        // - upgrade       : upgrade existing install
+        //
         if (empty($this->registry)) {
             $this->registry = new PEAR_Registry;
         }
@@ -212,8 +235,28 @@ class PEAR_Installer extends PEAR_Common
             return $pkginfo;
         }
 
-        if ($this->registry->packageExists($pkginfo['package'])) {
-            return $this->raiseError("package already installed");
+        $pkgname = $pkginfo['package'];
+
+        if (empty($options['upgrade'])) {
+            // checks to do only when installing new packages
+            if (empty($options['force']) && $this->registry->packageExists($pkgname)) {
+                return $this->raiseError("$pkgname already installed");
+            }
+        } else {
+            // check to do only when upgrading packages
+            if (!$this->registry->packageExists($pkgname)) {
+                return $this->raiseError("$pkgname not installed");
+            }
+            $v1 = $this->registry->packageInfo($pkgname, 'version');
+            $v2 = $pkginfo['version'];
+            $cmp = version_compare($v1, $v2, 'gt');
+            if (empty($options['force']) && !version_compare($v2, $v1, 'gt')) {
+                return $this->raiseError("upgrade to a newer version ($v2 is not newer than $v1)");
+            }
+            if (empty($options['register_only'])) {
+                // when upgrading, remove old release's files first:
+                $this->_deletePackageFiles($package);
+            }
         }
 
         // Copy files to dest dir ---------------------------------------
@@ -238,9 +281,13 @@ class PEAR_Installer extends PEAR_Common
         }            
 
         // Register that the package is installed -----------------------
-        $this->registry->addPackage($pkginfo['package'], $pkginfo);
+        if (empty($options['upgrade'])) {
+            $ret = $this->registry->addPackage($pkgname, $pkginfo);
+        } else {
+            $ret = $this->registry->updatePackage($pkgname, $pkginfo, false);
+        }
         chdir($oldcwd);
-        return true;
+        return $ret;
     }
 
     // }}}
@@ -251,25 +298,12 @@ class PEAR_Installer extends PEAR_Common
         if (empty($this->registry)) {
             $this->registry = new PEAR_Registry;
         }
-        if (!$this->registry->packageExists($package)) {
-            return $this->raiseError("is not installed");
-        }
-        $info = $this->registry->packageInfo($package);
-        if (empty($options['register_only'])) {
-            foreach ($info['filelist'] as $file => $props) {
-                $base = (isset($props['baseinstalldir'])) ? $props['baseinstalldir'] : '';
-                $path = PEAR_INSTALL_DIR . DIRECTORY_SEPARATOR . $base .
-                     DIRECTORY_SEPARATOR . $file;
-                if (!@unlink($path)) {
-                    $this->log(2, "unable to delete: $path");
-                } else {
-                    $this->log(2, "+ deleted file: $path");
-                }
-            }
-        }
-        // Register that the package is no longer installed -------------
-        $this->registry->deletePackage($package);
-        return true;
+
+        // Delete the files
+        $this->_deletePackageFiles($package);
+
+        // Register that the package is no longer installed
+        return $this->registry->deletePackage($package);
     }
 
     // }}}
