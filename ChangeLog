@@ -1,3 +1,69 @@
+2004-07-22  Stefan Esser  <sesser@suspekt.org>
+
+    * ext/gd/gd.dsp:
+      Fix .dsp
+
+    * ext/gd/config.m4
+      ext/gd/config.w32
+      ext/gd/gd.dsp
+      ext/gd/libgd/gd.h
+      ext/gd/libgd/gd_gif_out.c
+      ext/gd/libgd/gd_topal.c:
+      Merge changes from GD 2.0.28
+
+2004-07-22  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * tests/classes/bug26737.phpt
+      tests/classes/bug26737.phpt:
+      Fix testcase
+
+2004-07-22  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * NEWS:
+      news...
+
+    * ext/standard/basic_functions.c
+      ext/standard/file.c
+      ext/standard/streamsfuncs.c
+      ext/standard/streamsfuncs.h:
+      Added stream_context_get_default() which returns the default context
+      option.
+      You may then set options that affect streams operations for the whole
+      script.
+      
+      Added stream_socket_enable_crypto() which allows you to turn on or off a
+      crypto
+      layer (eg: SSL/TLS) on stream, if supported by the underlying transport.
+      
+      Registered a bunch of constants for that.
+
+2004-07-22  Zeev Suraski  <zeev@zend.com>
+
+    * ZendEngine2/zend_object_handlers.c:
+      Fix bug in handling of protected properties
+
+    * win32/php5dllts.dsp:
+      Fix Windows build
+
+2004-07-22  Georg Richter  <georg@mysql.com>
+
+    * (PHP_5_0)
+      ext/mysqli/config.m4:
+      MFH: changed warning (bug #29298) for outdated client library
+
+    * ext/mysqli/config.m4:
+      changed warning (bug #29298) for outdated client library
+
+2004-07-22  Sara Golemon  <php@alphaweb.net>
+
+    * (PHP_5_0)
+      ext/mysqli/mysqli_api.c:
+      MFH: This should fix binary safety for bound results.
+
+    * ext/mysqli/mysqli_api.c:
+      This should fix binary safety for bound results or may coogle strike me
+      down.
+
 2004-07-21  Edin Kadribasic  <edink@emini.dk>
 
     * configure.in

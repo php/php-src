@@ -1,3 +1,8 @@
+2004-07-22  Zeev Suraski  <zeev@zend.com>
+
+    * zend_object_handlers.c:
+      Fix bug in handling of protected properties
+
 2004-07-21  Edin Kadribasic  <edink@emini.dk>
 
     * zend_builtin_functions.c:
