@@ -35,7 +35,7 @@ struct pdo_bound_param_data;
 # define FALSE 0
 #endif
 
-#define PDO_DRIVER_API	20050220
+#define PDO_DRIVER_API	20050222
 
 enum pdo_param_type {
 	PDO_PARAM_NULL,
@@ -78,6 +78,7 @@ enum pdo_fetch_type {
 	PDO_FETCH_COLUMN,	/* fetch a numbered column only */
 	PDO_FETCH_CLASS,	/* create an instance of named class, call ctor and set properties */
 	PDO_FETCH_INTO,		/* fetch row into an existing object */
+	PDO_FETCH_FUNC,		/* fetch into function and return its result */
 	PDO_FETCH__MAX /* must be last */
 };
 
@@ -484,6 +485,16 @@ struct pdo_bound_param_data {
 
 /* represents a prepared statement */
 struct _pdo_stmt_t {
+	/* these items must appear in this order at the beginning of the
+       struct so that this can be cast as a zend_object.  we need this
+       to allow the extending class to escape all the custom handlers
+	   that PDO declares.
+    */
+	zend_class_entry *ce; 
+	HashTable *properties;
+	unsigned int in_get:1;
+	unsigned int in_set:1;
+
 	/* driver specifics */
 	struct pdo_stmt_methods *methods;
 	void *driver_data;
@@ -543,11 +554,19 @@ struct _pdo_stmt_t {
 		int column;
 		struct {
 			zend_class_entry *ce;	
-			zval *ctor_args;
+			zval *ctor_args;            /* freed */
 			zval *retval_ptr; 
 			zend_fcall_info fci;
 			zend_fcall_info_cache fcc;
 		} cls;
+		struct {
+			zval *function;
+			zval *fetch_args;           /* freed */
+			zval *object;
+			zend_fcall_info fci;
+			zend_fcall_info_cache fcc;
+			zval **values;              /* freed */
+		} func;
 		zval *into;
 	} fetch;
 };
