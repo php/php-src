@@ -1,10 +1,9 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2002, Version 4.3.0
-- Fixed memory allocation problem in iconv. Fix is only available on systems 
-  which have iconv() support in libc. (Yasuo)
-- Fixed a crash bug in var_dump() when variable contains recursive references.
+- Fixed memory allocation problem on systems that have iconv() support in libc.
   (Yasuo)
+- Made var_dump() handle recursive structures better. (Yasuo)
 - Added optional 3rd parameter "int encoding_mode" to gzencode() and fixed 
   parameters to conform documentation. (Stefan)
 - Added exif_imagetype() function. (Marcus)
