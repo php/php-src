@@ -5,13 +5,14 @@ PHP 4                                                                      NEWS
   send_default_content_type now sends value from php.ini). (Uwe Schindler)
 - Fixed bug #26458 (var_dump(), var_export(), debug_zval_dump() not binary
   safe for array keys). (Ilia)
+- Fixed bug #26447 (--with-openssl=shared causes compile errors). (Jani)
 - Fixed bug #26446 (domxml_open_file() returns an empty error-Array). (Rob)
-- Fixed bug #26438 (error in thttpd SAPI installation). (Jani)
 - Fixed bug #26440 (MFH missing context options). (Ilia)
+- Fixed bug #26438 (error in thttpd SAPI installation). (Jani)
 - Fixed bug #25963 (PostgreSQL error message include \n characters).
   (Marcus, Ilia)
-- Fixed bug #26376 (typo in ext/odbc/config.m4: DBMaker test fails). (Jani)
 - Fixed bug #26384 (crash in domxslt->process()). (Christian)
+- Fixed bug #26376 (typo in ext/odbc/config.m4: DBMaker test fails). (Jani)
 - Fixed bug #26355 (flock() doesn't initialize the wouldblock argument). (Ilia)
 - Fixed bug #26309 (Fixed argument parsing for imageftbbox()). (Ilia)
 - Fixed bug #26285 (escapeshellarg() uses wrong quotes on windows). (Ilia)
