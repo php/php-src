@@ -810,13 +810,26 @@ session.cookie_domain =
 ; Handler used to serialize data.  php is the standard serializer of PHP.
 session.serialize_handler = php
 
-; Percentual probability that the 'garbage collection' process is started
+; Define the probability that the 'garbage collection' process is started
 ; on every session initialization.
+; The probability is calculated by using gc_probability/gc_dividend,
+; e.g. 1/100 means 1%.
+
 session.gc_probability = 1
+session.gc_dividend    = 1000
 
 ; After this number of seconds, stored data will be seen as 'garbage' and
 ; cleaned up by the garbage collection process.
 session.gc_maxlifetime = 1440
+
+; PHP 4.2 and less have an undocumented feature/bug that allows you to
+; to initialize a session variable in the global scope, albeit register_globals
+; is disabled.  PHP 4.3 and later will warn you, if this feature is used.
+; You can disable the feature and the warning seperately. At this time,
+; the warning is only displayed, if bug_compat_42 is enabled.
+
+session.bug_compat_42 = 0
+session.bug_compat_warn = 1
 
 ; Check HTTP Referer to invalidate externally stored URLs containing ids.
 ; HTTP_REFERER has to contain this substring for the session to be
