@@ -534,9 +534,11 @@ int php_shutdown_config(void)
 	zend_hash_destroy(&configuration_hash);
 	if (php_ini_opened_path) {
 		free(php_ini_opened_path);
+		php_ini_opened_path = NULL;
 	}
 	if (php_ini_scanned_files) {
 		free(php_ini_scanned_files);
+		php_ini_scanned_files = NULL;
 	}
 	return SUCCESS;
 }
