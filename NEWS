@@ -14,8 +14,7 @@ PHP 4                                                                      NEWS
 - Fixed bug #17497 (mssql extension crashes if magic_quotes_runtime is on).
   (Sterling)
 - Remove $_FILES from $_REQUEST (import_request_variables is not modified), 
-  this didn't work properly in the first place, and added confusion. 
-  (Sterling)
+  this didn't work properly in the first place, and added confusion. (Sterling)
 - Fix the socket_read() function on win32 to work in normal mode (reading to
   the end of a line), as well as binary mode. (Sterling)
 - Fixed bug #20110 (added sanity check to prevent include/require functions
