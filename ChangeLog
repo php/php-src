@@ -1,3 +1,41 @@
+2002-07-10  Harald Radi  <harald.radi+coding.php@nme.at>
+
+    * ext/rpc/com/com.c
+      win32/php4dllts.dsp:
+    merging parts of the old com extension to the new rpc extension
+
+2002-07-10  Jason Greene  <jason@inetgurus.net>
+
+    * ext/standard/basic_functions.c
+      ext/standard/file.c:
+    Fixed socket_set_timeout on win32 (Jason, Edin, Jani)
+
+    * ext/standard/basic_functions.c
+      ext/standard/file.c:
+    Fix socket_set_timeout on win32 ( was not being included )
+
+2002-07-10  Georg Richter  <georg.richter@phpev.de>
+
+    * ext/mysql/php_mysql.c: 1) New constants:
+    MYSQL_CLIENT_SSL for ssl connections
+    MYSQL_CLIENT_COMPRESS for compressed protocol
+    MYSQL_CLIENT_IGNORE_SPACES for spaces after function names
+    MYSQL_CLIENT_INTERACTIVE for closing connections after timeout_interactive seconds
+
+    2) Optional parameter client_flags for mysql_connect and mysql_pconnect
+    For parameter desctiption see 1.
+    This also should fix bug #13589
+
+    3) New internal function _rollback_mysql_transactions, which is called via
+    PHP_RSHUTDOWN_FUNCTION
+    This fixes bug #12513
+
+2002-07-10  Stig Bakken  <ssb@fast.no>
+
+    * pear/packages/DB-1.2.tar
+      pear/packages/XML_Parser-1.0.tar
+      pear/packages/XML_RPC-1.0.3.tar: * signed these packages
+
 2002-07-09  Derick Rethans  <d.rethans@jdimedia.nl>
 
     * ext/ftp/php_ftp.c: - Initialize var properly
