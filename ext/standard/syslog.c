@@ -57,7 +57,7 @@ static void start_syslog(void);
 
 int php3_minit_syslog(INIT_FUNC_ARGS)
 {
-	TLS_VARS;
+	ELS_FETCH();
 	
 	/* error levels */
 	REGISTER_LONG_CONSTANT("LOG_EMERG", LOG_EMERG, CONST_CS | CONST_PERSISTENT); /* system unusable */

@@ -167,6 +167,7 @@ int php3_init_config(void)
 	{
 		char *env_location,*default_location,*php_ini_path;
 		int safe_mode_state = PG(safe_mode);
+		char *open_basedir = PG(open_basedir);
 		char *opened_path;
 		int free_default_location=0;
 		
@@ -209,12 +210,14 @@ int php3_init_config(void)
 			strcpy(php_ini_path,default_location);
 		}
 		PG(safe_mode) = 0;
+		PG(open_basedir) = NULL;
 		cfgin = php3_fopen_with_path("php3.ini","r",php_ini_path,&opened_path);
 		free(php_ini_path);
 		if (free_default_location) {
 			free(default_location);
 		}
 		PG(safe_mode) = safe_mode_state;
+		PG(open_basedir) = open_basedir;
 
 		if (!cfgin) {
 # if WIN32|WINNT
