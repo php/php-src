@@ -1201,6 +1201,17 @@ PHPAPI size_t _php_stream_copy_to_stream(php_stream *src, php_stream *dest, size
 	}
 #endif
 
+	{
+		php_stream_statbuf sbuf;
+		if (php_stream_stat(src, &sbuf TSRMLS_CC) == 0) {
+			/* in the event that the source file is 0 bytes, return 1 to indicate success
+			 * because opening the file to write had already created a copy */
+			if (sbuf.sb.st_size == 0) {
+				return 1;
+			}
+		}
+	}
+
 	while(1) {
 		readchunk = sizeof(buf);
 
