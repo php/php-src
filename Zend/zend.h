@@ -350,6 +350,15 @@ END_EXTERN_C()
 
 #define ZEND_MAX_RESERVED_RESOURCES	1
 
+#if (WINNT|WIN32)
+#define EMPTY_SWITCH_DEFAULT_CASE() \
+			default:				\
+				__assume(0);		\
+				break;
+#else
+#define EMPTY_SWITCH_DEFAULT_CASE()
+#endif
+
 #endif /* _ZEND_H */
 
 /*
