@@ -127,6 +127,7 @@ static char *ps_files_path_create(char *buf, size_t buflen, ps_files *data, cons
 static void ps_files_close(ps_files *data)
 {
 	if (data->fd != -1) {
+		flock(data->fd, LOCK_UN);
 		close(data->fd);
 		data->fd = -1;
 	}
