@@ -582,7 +582,7 @@ PHP_FUNCTION(file_get_wrapper_data)
 }
 /* }}} */
 
-/* {{{ file_context related functions */
+/* {{{ stream_context related functions */
 static void user_space_stream_notifier(php_stream_context *context, int notifycode, int severity,
 		char *xmsg, int xcode, size_t bytes_sofar, size_t bytes_max, void * ptr TSRMLS_DC)
 {
@@ -618,7 +618,39 @@ static void user_space_stream_notifier(php_stream_context *context, int notifyco
 		zval_ptr_dtor(&retval);
 }
 
-static int parse_context_options(php_stream_context *context, zval *params)
+static int parse_context_options(php_stream_context *context, zval *options)
+{
+	HashPosition pos, opos;
+	zval **wval, **oval;
+	char *wkey, *okey;
+	int wkey_len, okey_len;
+	int ret = SUCCESS;
+	
+	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(options), &pos);
+	while (SUCCESS == zend_hash_get_current_data_ex(Z_ARRVAL_P(options), (void**)&wval, &pos)) {
+		if (HASH_KEY_IS_STRING == zend_hash_get_current_key_ex(Z_ARRVAL_P(options), &wkey, &wkey_len, NULL, 0, &pos)
+				&& Z_TYPE_PP(wval) == IS_ARRAY) {
+
+			zend_hash_internal_pointer_reset_ex(Z_ARRVAL_PP(wval), &opos);
+			while (SUCCESS == zend_hash_get_current_data_ex(Z_ARRVAL_PP(wval), (void**)&oval, &opos)) {
+
+				if (HASH_KEY_IS_STRING == zend_hash_get_current_key_ex(Z_ARRVAL_PP(wval), &okey, &okey_len, NULL, 0, &opos)) {
+					ZVAL_ADDREF(*oval);
+					php_stream_context_set_option(context, wkey, okey, *oval);
+				}
+				zend_hash_move_forward_ex(Z_ARRVAL_PP(wval), &opos);
+			}
+
+		} else {
+			zend_error(E_WARNING, "options should have the form [\"wrappername\"][\"optionname\"] = $value");
+		}
+		zend_hash_move_forward_ex(Z_ARRVAL_P(options), &pos);
+	}
+
+	return ret;
+}
+
+static int parse_context_params(php_stream_context *context, zval *params)
 {
 	int ret = SUCCESS;
 	zval **tmp;
@@ -635,14 +667,91 @@ static int parse_context_options(php_stream_context *context, zval *params)
 		context->notifier->ptr = *tmp;
 		ZVAL_ADDREF(*tmp);
 	}
+	if (SUCCESS == zend_hash_find(Z_ARRVAL_P(params), "options", sizeof("options"), (void**)&tmp)) {
+		parse_context_options(context, *tmp);
+	}
 	
 	return ret;
 }
+
+/* given a zval which is either a stream or a context, return the underlying
+ * stream_context.  If it is a stream that does not have a context assigned, it
+ * will create and assign a context and return that.  */
+static php_stream_context *decode_context_param(zval *contextresource) {
+	php_stream_context *context = NULL; void *what; int type;
+
+	what = zend_fetch_resource(&contextresource TSRMLS_CC, -1, "Stream-Context", &type, 2, le_stream_context, le_stream);
+
+	if (what && type == le_stream) {
+		php_stream *stream = (php_stream*)what;
+		context = stream->context;
+		if (context == NULL)
+			context = stream->context = php_stream_context_alloc();
+	} else if (what && type == le_stream_context) {
+		context = (php_stream_context*)what;
+	}
+	return context;
+}
 /* }}} */
 
-/* {{{ proto bool file_context_set_params(resource context, array options)
+/* {{{ proto array stream_context_get_options(resource context|resource stream)
+   Retrieve options for a stream/wrapper/context */
+PHP_FUNCTION(stream_context_get_options)
+{
+	zval *zcontext;
+	php_stream_context *context;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &zcontext) == FAILURE) {
+		RETURN_FALSE;
+	}
+	context = decode_context_param(zcontext);
+	ZEND_VERIFY_RESOURCE(context);
+
+	array_init(return_value);
+	*return_value = *context->options;
+	zval_copy_ctor(return_value);
+}
+/* }}} */
+
+/* {{{ proto bool stream_context_set_option(resource context|resource stream, string wrappername, string optionname, mixed value)
+   Set an option for a wrapper */
+PHP_FUNCTION(stream_context_set_option)
+{
+	zval *options = NULL, *zcontext = NULL, *zvalue = NULL;
+	php_stream_context *context;
+	char *wrappername, *optionname;
+	long wrapperlen, optionlen;
+
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC,
+				"rssz", &zcontext, &wrappername, &wrapperlen,
+				&optionname, &optionlen, &zvalue) == FAILURE) {
+		if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC,
+					"ra", &zcontext, &options) == FAILURE) {
+			zend_error(E_WARNING, "%s() called with wrong number or type of parameters; please RTM",
+					get_active_function_name(TSRMLS_C));
+			RETURN_FALSE;
+		}
+	}
+
+	/* figure out where the context is coming from exactly */
+	context = decode_context_param(zcontext);
+	ZEND_VERIFY_RESOURCE(context);
+
+	if (options) {
+		/* handle the array syntax */
+		RETVAL_BOOL(parse_context_options(context, options) == SUCCESS);
+	} else {
+		ZVAL_ADDREF(zvalue);
+		php_stream_context_set_option(context, wrappername, optionname, zvalue);
+		RETVAL_TRUE;
+	}
+	
+}
+/* }}} */
+
+/* {{{ proto bool stream_context_set_params(resource context|resource stream, array options)
    Set parameters for a file context */
-PHP_FUNCTION(file_context_set_params)
+PHP_FUNCTION(stream_context_set_params)
 {
 	zval *params, *zcontext;
 	php_stream_context *context;
@@ -651,16 +760,16 @@ PHP_FUNCTION(file_context_set_params)
 		RETURN_FALSE;
 	}
 
-	context = (php_stream_context*)zend_fetch_resource(&zcontext TSRMLS_CC, -1, "Stream-Context", NULL, 1, le_stream_context);
+	context = decode_context_param(zcontext);
 	ZEND_VERIFY_RESOURCE(context);
 
-	RETVAL_BOOL(parse_context_options(context, params) == SUCCESS);
+	RETVAL_BOOL(parse_context_params(context, params) == SUCCESS);
 }
 /* }}} */
 
-/* {{{ proto resource file_context_create([array options])
+/* {{{ proto resource stream_context_create([array options])
    Create a file context and optionally set parameters */
-PHP_FUNCTION(file_context_create)
+PHP_FUNCTION(stream_context_create)
 {
 	zval *params = NULL;
 	php_stream_context *context;
