@@ -16,7 +16,7 @@
 #  |          Sascha Schumann <sascha@schumann.cx>                        |
 #  +----------------------------------------------------------------------+
 #
-# $Id: buildcheck.sh,v 1.14 2002-01-24 23:31:45 markonen Exp $ 
+# $Id: buildcheck.sh,v 1.15 2002-03-03 23:03:34 zak Exp $ 
 #
 
 echo "buildconf: checking installation..."
@@ -37,7 +37,11 @@ echo "           to build PHP from CVS."
 exit 1
 else
 echo "buildconf: autoconf version $ac_version (ok)"
+echo "**Note: Certain versions of autoconf may generate the warning:"
+echo "        'AC_PROG_CPP called before AC_PROG_CC'"
+echo "        This error message is expected and can usually be ignored."
 fi
+
 
 # automake 1.4 or newer
 am_version=`automake --version 2>/dev/null|head -1|sed -e 's/^[^0-9]*//' -e 's/[a-z]* *$//'`
