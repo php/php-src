@@ -25,14 +25,11 @@
  *
  *  <?php
  *      require("PEAR/WebInstaller.php");
- *      $installer = new PEAR_WebInstaller("/path/to/your/install/dir","http://php.chregu.tv/pear/");
+ *      $installer = new PEAR_WebInstaller("/path/to/your/install/dir","http://pear.php.net/download/");
  *      $installer->start();
  *  ?>
  *
  *  and put PEAR/WebInstaller.php (this script) anywhere in your include_path.
- *
- *  (http://php.chregu.tv/pear/ is just for testing purposes until this
- *    system runs on pear.php.net, but feel free to use it till then)
  *
  *  Both parameters are optional. If the install dir is ommitted, the
  *  installer takes either the system wide pear-directory (mostly
@@ -42,7 +39,7 @@
  *
  *  The second parameter points to the server/directory where all the
  *  packages and especially Packages.xml is located. If not given, the
- *  standard PEAR-Repository is taken (http://pear.php.net/whatever..)
+ *  standard PEAR-Repository is taken (http://pear.php.net/download/)
  *
  *  After installation, just add the install-dir to your include_path and
  *  the packages should work.
@@ -88,7 +85,7 @@ class PEAR_WebInstaller extends PEAR
     var $AllPackages;
 
     /** URL to the server containing all packages in tgz-Format and the Package.xml */
-    var $remotedir = "http://php.chregu.tv/pear/";
+    var $remotedir = "http://pear.php.net/download/";
 
     /*  Directory where the to be installed files should be put
         per default PEAR_INSTALL_DIR (/usr/local/lib/php) if it's writeable for the webserver,
