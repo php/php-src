@@ -366,7 +366,7 @@ PHP_INI_END()
 #ifdef ZTS
 static void php_ifx_init_globals(php_ifx_globals *ifx_globals)
 {
-	IFXG(num_persistent) = 0;
+    IFXG(num_persistent) = 0;
     IFXG(nullvalue) = malloc(1);
     IFXG(nullvalue)[0] = 0;
     IFXG(nullstring) = malloc(5);
@@ -947,7 +947,7 @@ EXEC SQL END DECLARE SECTION;
     affected_rows = sqlca.sqlerrd[0];    /* save estimated affected rows */
     for (e = 0; e < 6; e++) sqlerrd[e] = sqlca.sqlerrd[e];
    
-    EXEC SQL ALLOCATE DESCRIPTOR :descrpid WITH MAX 256;
+    EXEC SQL ALLOCATE DESCRIPTOR :descrpid WITH MAX 384;
     if (ifx_check() < 0) {
         IFXG(sv_sqlcode) = SQLCODE;
         php_error(E_WARNING,"Allocate desciptor <%s> fails (%s)",
@@ -1333,7 +1333,7 @@ EXEC SQL END DECLARE SECTION;
     }
     affected_rows = sqlca.sqlerrd[0];    /* save estimated affected rows */
     for (e = 0; e < 6; e++) sqlerrd[e] = sqlca.sqlerrd[e];
-    EXEC SQL ALLOCATE DESCRIPTOR :descrpid WITH MAX 256;
+    EXEC SQL ALLOCATE DESCRIPTOR :descrpid WITH MAX 384;
     if (ifx_check() < 0) {
         IFXG(sv_sqlcode) = SQLCODE;
         php_error(E_WARNING,"Allocate desciptor <%s> fails (%s)",
