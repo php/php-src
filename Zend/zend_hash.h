@@ -73,6 +73,8 @@ typedef struct hashtable {
 #endif
 } HashTable;
 
+typedef Bucket* HashPosition;
+
 BEGIN_EXTERN_C()
 
 /* startup/shutdown */
@@ -146,13 +148,28 @@ ZEND_API int zend_hash_index_exists(HashTable *ht, ulong h);
 ZEND_API ulong zend_hash_next_free_element(HashTable *ht);
 
 /* traversing */
-ZEND_API void zend_hash_move_forward(HashTable *ht);
-ZEND_API void zend_hash_move_backwards(HashTable *ht);
-ZEND_API int zend_hash_get_current_key(HashTable *ht, char **str_index, ulong *num_index);
-ZEND_API int zend_hash_get_current_key_type(HashTable *ht);
-ZEND_API int zend_hash_get_current_data(HashTable *ht, void **pData);
-ZEND_API void zend_hash_internal_pointer_reset(HashTable *ht);
-ZEND_API void zend_hash_internal_pointer_end(HashTable *ht);
+ZEND_API void zend_hash_move_forward_ex(HashTable *ht, HashPosition *pos);
+ZEND_API void zend_hash_move_backwards_ex(HashTable *ht, HashPosition *pos);
+ZEND_API int zend_hash_get_current_key_ex(HashTable *ht, char **str_index, ulong *num_index, HashPosition *pos);
+ZEND_API int zend_hash_get_current_key_type_ex(HashTable *ht, HashPosition *pos);
+ZEND_API int zend_hash_get_current_data_ex(HashTable *ht, void **pData, HashPosition *pos);
+ZEND_API void zend_hash_internal_pointer_reset_ex(HashTable *ht, HashPosition *pos);
+ZEND_API void zend_hash_internal_pointer_end_ex(HashTable *ht, HashPosition *pos);
+
+#define zend_hash_move_forward(ht) \
+	zend_hash_move_forward_ex(ht, NULL)
+#define zend_hash_move_backwards(ht) \
+	zend_hash_move_backwards_ex(ht, NULL)
+#define zend_hash_get_current_key(ht, str_index, num_index) \
+	zend_hash_get_current_key_ex(ht, str_index, num_index, NULL)
+#define zend_hash_get_current_key_type(ht) \
+	zend_hash_get_current_key_type_ex(ht, NULL)
+#define zend_hash_get_current_data(ht, pData) \
+	zend_hash_get_current_data_ex(ht, pData, NULL)
+#define zend_hash_internal_pointer_reset(ht) \
+	zend_hash_internal_pointer_reset_ex(ht, NULL)
+#define zend_hash_internal_pointer_end(ht) \
+	zend_hash_internal_pointer_end_ex(ht, NULL)
 
 /* Copying, merging and sorting */
 ZEND_API void zend_hash_copy(HashTable *target, HashTable *source, copy_ctor_func_t pCopyConstructor, void *tmp, uint size);

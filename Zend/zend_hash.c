@@ -893,48 +893,60 @@ ZEND_API int zend_hash_num_elements(HashTable *ht)
 }
 
 
-ZEND_API void zend_hash_internal_pointer_reset(HashTable *ht)
+ZEND_API void zend_hash_internal_pointer_reset_ex(HashTable *ht, HashPosition *pos)
 {
 	IS_CONSISTENT(ht);
 
-	ht->pInternalPointer = ht->pListHead;
+	if (pos)
+		*pos = ht->pListHead;
+	else
+		ht->pInternalPointer = ht->pListHead;
 }
 
 
 /* This function will be extremely optimized by remembering 
  * the end of the list
  */
-ZEND_API void zend_hash_internal_pointer_end(HashTable *ht)
+ZEND_API void zend_hash_internal_pointer_end_ex(HashTable *ht, HashPosition *pos)
 {
 	IS_CONSISTENT(ht);
 
-	ht->pInternalPointer = ht->pListTail;
+	if (pos)
+		*pos = ht->pListTail;
+	else
+		ht->pInternalPointer = ht->pListTail;
 }
 
 
-ZEND_API void zend_hash_move_forward(HashTable *ht)
+ZEND_API void zend_hash_move_forward_ex(HashTable *ht, HashPosition *pos)
 {
 	IS_CONSISTENT(ht);
 
-	if (ht->pInternalPointer) {
+	if (pos) {
+		*pos = (*pos)->pListNext;
+	} else if (ht->pInternalPointer) {
 		ht->pInternalPointer = ht->pInternalPointer->pListNext;
 	}
 }
 
-ZEND_API void zend_hash_move_backwards(HashTable *ht)
+ZEND_API void zend_hash_move_backwards_ex(HashTable *ht, HashPosition *pos)
 {
 	IS_CONSISTENT(ht);
 
-	if (ht->pInternalPointer) {
+	if (pos) {
+		*pos = (*pos)->pListLast;
+	} else if (ht->pInternalPointer) {
 		ht->pInternalPointer = ht->pInternalPointer->pListLast;
 	}
 }
 
 
 /* This function should be made binary safe  */
-ZEND_API int zend_hash_get_current_key(HashTable *ht, char **str_index, ulong *num_index)
+ZEND_API int zend_hash_get_current_key_ex(HashTable *ht, char **str_index, ulong *num_index, HashPosition *pos)
 {
-	Bucket *p = ht->pInternalPointer;
+	Bucket *p;
+   
+	p = pos ? (*pos) : ht->pInternalPointer;
 
 	IS_CONSISTENT(ht);
 
@@ -952,9 +964,11 @@ ZEND_API int zend_hash_get_current_key(HashTable *ht, char **str_index, ulong *n
 }
 
 
-ZEND_API int zend_hash_get_current_key_type(HashTable *ht)
+ZEND_API int zend_hash_get_current_key_type_ex(HashTable *ht, HashPosition *pos)
 {
-	Bucket *p = ht->pInternalPointer;
+	Bucket *p;
+   
+	p = pos ? (*pos) : ht->pInternalPointer;
 
 	IS_CONSISTENT(ht);
 
@@ -969,9 +983,11 @@ ZEND_API int zend_hash_get_current_key_type(HashTable *ht)
 }
 
 
-ZEND_API int zend_hash_get_current_data(HashTable *ht, void **pData)
+ZEND_API int zend_hash_get_current_data_ex(HashTable *ht, void **pData, HashPosition *pos)
 {
-	Bucket *p = ht->pInternalPointer;
+	Bucket *p;
+   
+	p = pos ? (*pos) : ht->pInternalPointer;
 
 	IS_CONSISTENT(ht);
 
