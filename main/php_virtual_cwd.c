@@ -16,6 +16,8 @@ CWD_API int cwd_globals_id;
 cwd_globals_struct cwd_globals;
 #endif
 
+cwd_state true_global_cwd_state;
+
 #ifndef PHP_WIN32
 #include <unistd.h>
 #endif
@@ -108,9 +110,29 @@ static int php_is_file_ok(const cwd_state *state)
 	return (1);
 }
 
-void virtual_cwd_init()
+static void cwd_globals_ctor(cwd_globals_struct *cwd_globals)
 {
-	/* Initialize the true global cwd */
+	cwd_globals->cwd.cwd = (char *) malloc(true_global_cwd_state.cwd_length+1);
+	memcpy(cwd_globals->cwd.cwd, true_global_cwd_state.cwd, true_global_cwd_state.cwd_length+1);
+	cwd_globals->cwd.cwd_length = true_global_cwd_state.cwd_length;
+}
+
+void virtual_cwd_startup()
+{
+	char cwd[1024]; /* Should probably use system define here */
+	char *result;
+
+	result = getcwd(cwd, sizeof(cwd));	
+	if (!result) {
+		cwd[0] = '\0';
+	}
+	true_global_cwd_state.cwd = strdup(cwd);
+	true_global_cwd_state.cwd_length = strlen(cwd);
+#ifdef ZTS
+        cwd_globals_id = ts_allocate_id(sizeof(cwd_globals_struct), (ts_allocate_ctor) cwd_globals_ctor, NULL);
+#else   
+        cwd_globals_ctor(&cwd_globals);
+#endif  
 }
 
 char *virtual_getcwd_ex(int *length)
