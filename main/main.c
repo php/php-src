@@ -434,7 +434,7 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 				}
 			}
 			if (PG(html_errors)) {
-				php_error(type, "%s(%s) [<a href='%s%s%s'>%s</a>]: %s", get_active_function_name(TSRMLS_C), params, docref_root, docref, docref, docref_target, buffer);
+				php_error(type, "%s(%s) [<a href='%s%s%s'>%s</a>]: %s", get_active_function_name(TSRMLS_C), params, docref_root, docref, docref_target, docref, buffer);
 			} else {
 				php_error(type, "%s(%s) [%s%s%s]: %s", get_active_function_name(TSRMLS_C), params, docref_root, docref, docref_target, buffer);
 			}
