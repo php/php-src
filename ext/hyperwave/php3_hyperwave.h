@@ -156,6 +156,7 @@ PHP_FUNCTION(hw_getrellink);
 PHP_FUNCTION(hw_dummy);
 PHP_FUNCTION(hw_who);
 PHP_FUNCTION(hw_stat);
+PHP_FUNCTION(hw_mapid);
 
 #else
 #define hw_module_ptr NULL

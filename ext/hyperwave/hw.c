@@ -110,6 +110,7 @@ function_entry hw_functions[] = {
 	PHP_FE(hw_getrellink,							NULL)
 	PHP_FE(hw_who,									NULL)
 	PHP_FE(hw_stat,									NULL)
+	PHP_FE(hw_mapid,									NULL)
 	PHP_FE(hw_dummy,								NULL)
 	{NULL, NULL, NULL}
 };
@@ -3583,6 +3584,37 @@ PHP_FUNCTION(hw_getsrcbydestobj) {
 	/* create return value and free all memory */
 	if( 0 > make_return_objrec(&return_value, childObjRecs, count))
 		RETURN_FALSE;
+}
+/* }}} */
+
+/* {{{ proto int hw_mapid(int link, int serverid, int destid)
+   Returns virtual object id of document on remote hw server */
+PHP_FUNCTION(hw_mapid) {
+	pval *arg1, *arg2, *arg3;
+	int link, type, servid, id, virtid;
+	hw_connection *ptr;
+
+	if (ARG_COUNT(ht) != 3 || getParameters(ht, 3, &arg1, &arg2, &arg3) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	convert_to_long(arg1);
+	convert_to_long(arg2);
+	convert_to_long(arg3);
+	link=arg1->value.lval;
+	servid=arg2->value.lval;
+	id=arg3->value.lval;
+	ptr = php3_list_find(link,&type);
+	if(!ptr || (type!=HwSG(le_socketp) && type!=HwSG(le_psocketp))) {
+		php3_error(E_WARNING,"Unable to find file identifier %d",link);
+		RETURN_FALSE;
+	}
+
+	set_swap(ptr->swap_on);
+	if (0 != (ptr->lasterror = send_mapid(ptr->socket, servid, id, &virtid))) {
+		php3_error(E_WARNING, "send_command (mapid) returned %d\n", ptr->lasterror);
+		RETURN_FALSE;
+	}
+	RETURN_LONG(virtid);
 }
 /* }}} */
 
