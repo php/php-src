@@ -396,7 +396,7 @@ PHP_FUNCTION(ob_get_contents)
 PHP_FUNCTION(ob_implicit_flush)
 {
 	zval **zv_flag;
-	int flag = 0;
+	int flag;
 
 	switch(ZEND_NUM_ARGS()) {
 		case 0:
@@ -408,6 +408,9 @@ PHP_FUNCTION(ob_implicit_flush)
 			}
 			convert_to_long_ex(zv_flag);
 			flag = (*zv_flag)->value.lval;
+			break;
+		default:
+			WRONG_PARAM_COUNT;
 			break;
 	}
 	if (flag) {
