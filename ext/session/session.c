@@ -786,9 +786,9 @@ PHP_FUNCTION(session_unset)
 	for(zend_hash_internal_pointer_reset(&PS(vars));
 			zend_hash_get_current_key(&PS(vars), &variable, NULL) == HASH_KEY_IS_STRING;
 			zend_hash_move_forward(&PS(vars))) {
-		if(zend_hash_find(EG(active_symbol_table), variable, strlen(variable) + 1, (void **) &tmp)
+		if(zend_hash_find(&EG(symbol_table), variable, strlen(variable) + 1, (void **) &tmp)
 				== SUCCESS) {
-			zend_hash_del(EG(active_symbol_table), variable, strlen(variable) + 1);
+			zend_hash_del(&EG(symbol_table), variable, strlen(variable) + 1);
 		}
 	}
 }
