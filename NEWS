@@ -5,13 +5,11 @@ PHP                                                                        NEWS
   (Dmitry, Andi)
 - Added possibility to check in which extension an internal class was defined 
   in using reflection API. (Marcus)
-- Changed most class and method names to studlyCaps (exception ext/mysqli). 
-  (Marcus)
+- Changed class and method names to use studlyCaps convention. (Marcus)
 - Changed language parser to throw errors when a non-empty signature is used in
   a destructor definition. (Marcus)
 - Changed HTTP file uploads not to throw E_WARNINGs and E_NOTICEs. The error 
   value in the $_FILES global should be used for error handling. (Derick)
-- Changed SQLite extension to use studlyCaps convention in its OO API. (Marcus)
 - Changed __construct() to always take precedence over old style constructor.
   (Dmitry)
 - Fixed bug #27997 (SPL: Crash with getInnerIterator()). (Marcus)
