@@ -66,9 +66,11 @@
 /* Enable / Disable WDDX extension (default: enabled) */
 #define HAVE_WDDX 1
 
-/* Enable / Disable XML extension (default: enabled) */
-#define HAVE_XML 1
+/* Enable / Disable XML extensions (default: enabled) */
 #define HAVE_LIBXML 1
+#define HAVE_DOM 1
+#define HAVE_SIMPLEXML 1
+#define HAVE_XML 1
 
 /* Enable / Disable ZLIB extension (default: enabled) */
 #define HAVE_ZLIB 1

@@ -433,6 +433,185 @@ SOURCE=..\ext\pcre\pcrelib\pcre.h
 # End Source File
 # End Group
 # End Group
+
+# Begin Group "DOM"
+# Begin Group "DOM Source Files"
+
+# PROP Default_Filter ".c"
+# Begin Source File
+
+SOURCE=..\ext\dom\attr.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\dom\cdatasection.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\dom\characterdata.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\dom\comment.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\dom\document.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\dom\documentfragment.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\dom\documenttype.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\dom\domconfiguration.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\dom\domerror.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\dom\domerrorhandler.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\dom\domexception.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\dom\domimplementation.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\dom\domimplementationlist.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\dom\domimplementationsource.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\dom\domlocator.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\dom\domstringlist.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\dom\element.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\dom\entity.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\dom\entityreference.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\dom\namednodemap.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\dom\namelist.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\dom\node.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\dom\nodelist.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\dom\notation.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\dom\php_dom.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\dom\processinginstruction.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\dom\string_extend.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\dom\text.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\dom\typeinfo.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\dom\userdatahandler.c
+# End Source File
+# End Group
+# Begin Group "DOM Header Files"
+
+# PROP Default_Filter ".h"
+# Begin Source File
+
+SOURCE=..\ext\dom\dom_ce.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\dom\dom_fe.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\dom\dom_properties.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\dom\php_dom.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\dom\xml_common.h
+# End Source File
+# End Group
+# Begin Group "Resource Files"
+
+# PROP Default_Filter "ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"
+# End Group
+# End Group
+
+# Begin Group "SimpleXML"
+# Begin Group "SimpleXML Source Files"
+
+# PROP Default_Filter ".c"
+# Begin Source File
+
+SOURCE=..\ext\simplexml\simplexml.c
+# End Source File
+# End Group
+# Begin Group "SimpleXML Header Files"
+
+# PROP Default_Filter ".h"
+# Begin Source File
+
+SOURCE=..\ext\simplexml\php_simplexml.h
+# End Source File
+# End Group
+# Begin Group "Resource Files"
+
+# PROP Default_Filter "ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"
+# End Group
+# End Group
+
 # Begin Group "Regular Expressions"
 
 # PROP Default_Filter ""
