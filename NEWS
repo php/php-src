@@ -9,6 +9,7 @@ PHP 4                                                                      NEWS
   (Ilia, naish at klanen dot net)
 - Fixed bug #27443 (defined() returns wrong type). (Derick)
 - Fixed bug #27437 (wrong freetype include inside GD library). (Ilia)
+- Fixed bug #27424 (headers missing on flush() in apache 2 SAPIs). (Ilia)
 - Fixed bug #27421 (mbstring.func_overload should be system ini setting).
   (Ilia)
 - Fixed bug #27384 (unpack() misbehaves with 1 char string). (GeorgeS)

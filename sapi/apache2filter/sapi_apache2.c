@@ -238,7 +238,10 @@ php_apache_sapi_flush(void *server_context)
 	if (!server_context)
 		return;
 
+	sapi_send_headers(TSRMLS_C);
+
 	ctx->r->status = SG(sapi_headers).http_response_code;
+	SG(headers_sent) = 1;
 
 	f = ctx->f;
 

@@ -261,6 +261,8 @@ php_apache_sapi_flush(void *server_context)
 	r = ctx->r;
 	brigade = ctx->brigade;
 
+	sapi_send_headers(TSRMLS_C);
+
 	r->status = SG(sapi_headers).http_response_code;
 	SG(headers_sent) = 1;
 
