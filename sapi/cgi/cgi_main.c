@@ -1110,7 +1110,6 @@ consult the installation file that came with this distribution, or visit \n\
 
 
 	php_module_shutdown(TSRMLS_C);
-		return SUCCESS;
 
 #ifdef ZTS
 	tsrm_shutdown();
