@@ -3,6 +3,7 @@ DBA FirstKey/NextKey Loop Test With 5 Items
 --SKIPIF--
 <?php 
 	require_once('skipif.inc');
+	die("info $HND handler used");
 ?>
 --FILE--
 <?php

@@ -12,4 +12,5 @@
 			die('skip CDB currently supports only reading and creating');
 		}
 	}
+	$HND = strtoupper($handler[0]);
 ?>
