@@ -74,7 +74,7 @@ short_open_tag = On
 asp_tags = Off
 
 ; The number of significant digits displayed in floating point numbers.
-precision    =  14
+precision    =  12
 
 ; Enforce year 2000 compliance (will cause problems with non-compliant browsers)
 y2k_compliance = Off
