@@ -334,6 +334,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("mysql.default_password",		NULL,	PHP_INI_ALL,		OnUpdateString,		default_password,	zend_mysql_globals,		mysql_globals)
 	PHP_INI_ENTRY("mysql.default_port",				NULL,	PHP_INI_ALL,		OnMySQLPort)
 	STD_PHP_INI_ENTRY("mysql.default_socket",		NULL,	PHP_INI_ALL,		OnUpdateStringUnempty,	default_socket,	zend_mysql_globals,		mysql_globals)
+	STD_PHP_INI_ENTRY_EX("mysql.connect_timeout",	"0",	PHP_INI_SYSTEM,		OnUpdateInt,		connect_timeout, 	zend_mysql_globals,		mysql_globals, display_link_numbers)
 PHP_INI_END()
 /* }}} */
 
@@ -348,6 +349,7 @@ static void php_mysql_init_globals(zend_mysql_globals *mysql_globals)
 	mysql_globals->default_password = NULL;
 	mysql_globals->connect_errno = 0;
 	mysql_globals->connect_error = NULL;
+	mysql_globals->connect_timeout = 0;
 }
 /* }}} */
 
@@ -472,7 +474,9 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	void (*handler) (int);
 	zval **z_host=NULL, **z_user=NULL, **z_passwd=NULL, **z_new_link=NULL, **z_client_flags=NULL;
 	zend_bool free_host=0, new_link=0;
+	long connect_timeout;
 
+	connect_timeout = MySG(connect_timeout);
 	socket = MySG(default_socket);
 
 	if (PG(sql_safe_mode)) {
@@ -625,6 +629,10 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			mysql->active_result_id = 0;
 #if MYSQL_VERSION_ID > 32199 /* this lets us set the port number */
 			mysql_init(&mysql->conn);
+
+			if (connect_timeout != -1)
+				mysql_options(&mysql->conn, MYSQL_OPT_CONNECT_TIMEOUT, (const char *)&connect_timeout);
+
 			if (mysql_real_connect(&mysql->conn, host, user, passwd, NULL, port, socket, client_flags)==NULL) {
 #else
 			if (mysql_connect(&mysql->conn, host, user, passwd)==NULL) {
@@ -718,6 +726,10 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		mysql->active_result_id = 0;
 #if MYSQL_VERSION_ID > 32199 /* this lets us set the port number */
 		mysql_init(&mysql->conn);
+
+		if (connect_timeout != -1)
+				mysql_options(&mysql->conn, MYSQL_OPT_CONNECT_TIMEOUT, (const char *)&connect_timeout);
+
 		if (mysql_real_connect(&mysql->conn, host, user, passwd, NULL, port, socket, client_flags)==NULL) {
 #else
 		if (mysql_connect(&mysql->conn, host, user, passwd)==NULL) {
