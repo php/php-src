@@ -35,14 +35,14 @@
 char *php_session_create_id(PS_CREATE_SID_ARGS);
 
 typedef struct ps_module_struct {
-	const char *name;
-	int (*open)(PS_OPEN_ARGS);
-	int (*close)(PS_CLOSE_ARGS);
-	int (*read)(PS_READ_ARGS);
-	int (*write)(PS_WRITE_ARGS);
-	int (*destroy)(PS_DESTROY_ARGS);
-	int (*gc)(PS_GC_ARGS);
-	char *(*create_sid)(PS_CREATE_SID_ARGS);
+	const char *s_name;
+	int (*s_open)(PS_OPEN_ARGS);
+	int (*s_close)(PS_CLOSE_ARGS);
+	int (*s_read)(PS_READ_ARGS);
+	int (*s_write)(PS_WRITE_ARGS);
+	int (*s_destroy)(PS_DESTROY_ARGS);
+	int (*s_gc)(PS_GC_ARGS);
+	char *(*s_create_sid)(PS_CREATE_SID_ARGS);
 } ps_module;
 
 #define PS_GET_MOD_DATA() *mod_data

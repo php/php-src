@@ -597,14 +597,14 @@ static void php_session_initialize(TSRMLS_D)
 	}
 
 	/* Open session handler first */
-	if (PS(mod)->open(&PS(mod_data), PS(save_path), PS(session_name) TSRMLS_CC) == FAILURE) {
+	if (PS(mod)->s_open(&PS(mod_data), PS(save_path), PS(session_name) TSRMLS_CC) == FAILURE) {
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Failed to initialize session module");
 		return;
 	}
 	
 	/* If there is no ID, use session module to create one */
 	if (!PS(id))
-		PS(id) = PS(mod)->create_sid(&PS(mod_data), NULL TSRMLS_CC);
+		PS(id) = PS(mod)->s_create_sid(&PS(mod_data), NULL TSRMLS_CC);
 	
 	/* Read data */
 	/* Question: if you create a SID here, should you also try to read data?
@@ -613,7 +613,7 @@ static void php_session_initialize(TSRMLS_D)
 	 * session information
 	 */
 	php_session_track_init(TSRMLS_C);
-	if (PS(mod)->read(&PS(mod_data), PS(id), &val, &vallen TSRMLS_CC) == SUCCESS) {
+	if (PS(mod)->s_read(&PS(mod_data), PS(id), &val, &vallen TSRMLS_CC) == SUCCESS) {
 		php_session_decode(val, vallen TSRMLS_CC);
 		efree(val);
 	}
@@ -681,10 +681,10 @@ static void php_session_save_current_state(TSRMLS_D)
 
 			val = php_session_encode(&vallen TSRMLS_CC);
 			if (val) {
-				ret = PS(mod)->write(&PS(mod_data), PS(id), val, vallen TSRMLS_CC);
+				ret = PS(mod)->s_write(&PS(mod_data), PS(id), val, vallen TSRMLS_CC);
 				efree(val);
 			} else {
-				ret = PS(mod)->write(&PS(mod_data), PS(id), "", 0 TSRMLS_CC);
+				ret = PS(mod)->s_write(&PS(mod_data), PS(id), "", 0 TSRMLS_CC);
 			}
 		}
 
@@ -692,12 +692,12 @@ static void php_session_save_current_state(TSRMLS_D)
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to write session data (%s). Please "
 					"verify that the current setting of session.save_path "
 					"is correct (%s)",
-					PS(mod)->name,
+					PS(mod)->s_name,
 					PS(save_path));
 	}
 	
 	if (PS(mod_data))
-		PS(mod)->close(&PS(mod_data) TSRMLS_CC);
+		PS(mod)->s_close(&PS(mod_data) TSRMLS_CC);
 }
 
 static char *month_names[] = {
@@ -892,7 +892,7 @@ static ps_module *_php_find_ps_module(char *name TSRMLS_DC)
 	int i;
 
 	for (i = 0, mod = ps_modules; i < MAX_MODULES; i++, mod++)
-		if (*mod && !strcasecmp(name, (*mod)->name)) {
+		if (*mod && !strcasecmp(name, (*mod)->s_name)) {
 			ret = *mod;
 			break;
 		}
@@ -1048,7 +1048,7 @@ PHPAPI void php_session_start(TSRMLS_D)
 
 		nrand = (int) ((float) PS(gc_dividend) * php_combined_lcg(TSRMLS_C));
 		if (nrand < PS(gc_probability)) {
-			PS(mod)->gc(&PS(mod_data), PS(gc_maxlifetime), &nrdels TSRMLS_CC);
+			PS(mod)->s_gc(&PS(mod_data), PS(gc_maxlifetime), &nrdels TSRMLS_CC);
 #if 0
 			if (nrdels != -1)
 				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "purged %d expired session objects\n", nrdels);
@@ -1066,7 +1066,7 @@ static zend_bool php_session_destroy(TSRMLS_D)
 		return FAILURE;
 	}
 
-	if (PS(mod)->destroy(&PS(mod_data), PS(id) TSRMLS_CC) == FAILURE) {
+	if (PS(mod)->s_destroy(&PS(mod_data), PS(id) TSRMLS_CC) == FAILURE) {
 		retval = FAILURE;
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Session object destruction failed");
 	}
@@ -1163,7 +1163,7 @@ PHP_FUNCTION(session_module_name)
 	if (ac < 0 || ac > 1 || zend_get_parameters_ex(ac, &p_name) == FAILURE)
 		WRONG_PARAM_COUNT;
 	
-	old = safe_estrdup(PS(mod)->name);
+	old = safe_estrdup(PS(mod)->s_name);
 
 	if (ac == 1) {
 		ps_module *tempmod;
@@ -1172,7 +1172,7 @@ PHP_FUNCTION(session_module_name)
 		tempmod = _php_find_ps_module(Z_STRVAL_PP(p_name) TSRMLS_CC);
 		if (tempmod) {
 			if (PS(mod_data))
-				PS(mod)->close(&PS(mod_data) TSRMLS_CC);
+				PS(mod)->s_close(&PS(mod_data) TSRMLS_CC);
 			PS(mod) = tempmod;
 			PS(mod_data) = NULL;
 		} else {
@@ -1525,7 +1525,7 @@ static void php_rinit_session_globals(TSRMLS_D)
 static void php_rshutdown_session_globals(TSRMLS_D)
 {
 	if (PS(mod_data)) {
-		PS(mod)->close(&PS(mod_data) TSRMLS_CC);
+		PS(mod)->s_close(&PS(mod_data) TSRMLS_CC);
 	}
 	if (PS(id)) {
 		efree(PS(id));
@@ -1623,8 +1623,8 @@ PHP_MINFO_FUNCTION(session)
 	int i;
 	
 	for (i = 0, mod = ps_modules; i < MAX_MODULES; i++, mod++) {
-		if (*mod && (*mod)->name) {
-			smart_str_appends(&handlers, (*mod)->name);
+		if (*mod && (*mod)->s_name) {
+			smart_str_appends(&handlers, (*mod)->s_name);
 			smart_str_appendc(&handlers, ' ');
 		}
 	}
