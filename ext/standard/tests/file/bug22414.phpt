@@ -2,6 +2,9 @@
 Bug #22414: passthru() does not read data correctly
 --SKIPIF--
 <?php
+	if (ini_get("safe_mode")) {
+		die('skip this test cannot be run under safe-mode');
+	}
 	$cat_path = @shell_exec("which cat");
 	if (empty($cat_path)) {
 		die('skip cat binary needed for this test is not avaliable');	
