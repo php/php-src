@@ -474,6 +474,12 @@ Wrote: /usr/src/redhat/RPMS/i386/PEAR::Net_Socket-1.0-1.i386.rpm
         } else {
             $arch = 'noarch';
         }
+        $cfk = array('master_server', 'php_dir', 'ext_dir', 'doc_dir',
+                     'bin_dir', 'data_dir', 'test_dir');
+        foreach ($cfg as $k) {
+            $info[$k] = $this->config->get($k);
+        }
+        $info['arch'] = $arch;
         $fp = @fopen($spec_template, "r");
         if (!$fp) {
             return $this->raiseError("could not open RPM spec file template $spec_template: $php_errormsg");
