@@ -797,6 +797,7 @@ void module_destructor(zend_module_entry *module)
 	if (module->type == MODULE_TEMPORARY) {
 		zend_clean_module_rsrc_dtors(module->module_number);
 		clean_module_constants(module->module_number);
+		module->request_shutdown_func(module->type, module->module_number);
 	}
 
 	if (module->module_started && module->module_shutdown_func) {
@@ -837,26 +838,24 @@ int module_registry_request_startup(zend_module_entry *module)
 
 
 /* for persistent modules - call request shutdown and flag NOT to erase
- * for temporary modules - call request shutdown and flag to erase
+ * for temporary modules - do nothing, and flag to erase
  */
 int module_registry_cleanup(zend_module_entry *module)
 {
-	if (module->request_shutdown_func) {
-#if 0
-		zend_printf("%s:  Request shutdown\n",module->name);
-#endif
-		module->request_shutdown_func(module->type, module->module_number);
-	}
-
 	switch(module->type) {
 		case MODULE_PERSISTENT:
+			if (module->request_shutdown_func) {
+#if 0
+				zend_printf("%s:  Request shutdown\n",module->name);
+#endif
+				module->request_shutdown_func(module->type, module->module_number);
+			}
 			return 0;
 			break;
 		case MODULE_TEMPORARY:
 			return 1;
 			break;
 	}
-
 	return 0;
 }
 
