@@ -119,6 +119,7 @@ struct _zend_compiler_globals {
 
 	int interactive;
 
+	zend_uint start_lineno;
 	zend_bool in_clone_method;
 	zend_bool increment_lineno;
 

@@ -79,6 +79,7 @@ void zend_init_compiler_data_structures(TSRMLS_D)
 	zend_stack_init(&CG(list_stack));
 	CG(handle_op_arrays) = 1;
 	CG(in_compilation) = 0;
+	CG(start_lineno) = 0;
 	init_compiler_declarables(TSRMLS_C);
 	CG(throw_list) = NULL;
  	zend_register_auto_global("GLOBALS", sizeof("GLOBALS")-1 TSRMLS_CC);
