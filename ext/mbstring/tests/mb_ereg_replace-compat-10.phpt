@@ -1,9 +1,12 @@
 --TEST--
-mb_ereg_replace() compatibility test 10 (counterpart: ext/standard/tests/reg/013.phpt)
---POST--
---GET--
+mb_ereg_replace() compat test 10
+--SKIPIF--
+extension_loaded('mbstring') or die('skip');
 --FILE--
-<?php $a="abc123";
-  echo mb_ereg_replace("123","def\\g\\\\hi\\",$a)?>
+<?php
+/* (counterpart: ext/standard/tests/reg/013.phpt) */
+  $a="abc123";
+  echo mb_ereg_replace("123","def\\g\\\\hi\\",$a);
+?>
 --EXPECT--
 abcdef\g\\hi\

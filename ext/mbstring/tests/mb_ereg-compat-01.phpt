@@ -1,9 +1,11 @@
 --TEST--
-mb_ereg() compatibility test 1 (counterpart: ext/standard/tests/reg/004.phpt)
---POST--
---GET--
+mb_ereg() compat test 1
+--SKIPIF--
+extension_loaded('mbstring') or die('skip');
 --FILE--
-<?php $a="This is a nice and simple string";
+<?php
+/* (counterpart: ext/standard/tests/reg/004.phpt) */
+  $a="This is a nice and simple string";
   if (mb_ereg(".*nice and simple.*",$a)) {
     echo "ok\n";
   }
