@@ -94,6 +94,10 @@ PHP_FUNCTION(ldap_rename);
 PHP_FUNCTION(ldap_start_tls);
 #endif
 
+#ifdef HAVE_3ARG_SETREBINDPROC
+PHP_FUNCTION(ldap_set_rebind_proc);
+#endif
+
 #ifdef STR_TRANSLATION
 PHP_FUNCTION(ldap_t61_to_8859);
 PHP_FUNCTION(ldap_8859_to_t61);
