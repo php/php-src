@@ -2435,11 +2435,7 @@ PHP_FUNCTION(odbc_autocommit)
 
 	ZEND_FETCH_RESOURCE2(conn, odbc_connection *, pv_conn, -1, "ODBC-Link", le_conn, le_pconn);
 	
-#ifndef HAVE_DBMAKER	
-	if ((*pv_onoff)) {
-#else
 	if (pv_onoff && (*pv_onoff)) {
-#endif
 		convert_to_long_ex(pv_onoff);
 		rc = SQLSetConnectOption(conn->hdbc, SQL_AUTOCOMMIT,
 								 ((*pv_onoff)->value.lval) ?
