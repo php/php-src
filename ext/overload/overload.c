@@ -44,6 +44,7 @@
 #include "ext/standard/info.h"
 #include "php_overload.h"
 
+#ifndef ZEND_ENGINE_2
 #if HAVE_OVERLOAD
 
 #define GET_HANDLER  "__get"
@@ -695,6 +696,7 @@ PHP_FUNCTION(overload)
 /* }}} */
 
 #endif /* HAVE_OVERLOAD */
+#endif /* ZEND_ENGINE_2 */
 
 /*
  * Local variables:
