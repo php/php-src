@@ -68,7 +68,7 @@ PHP_FUNCTION(microtime)
 
 
 /* {{{ proto array gettimeofday(void)
-   returns the current time as array */
+   Returns the current time as array */
 PHP_FUNCTION(gettimeofday)
 {
 #ifdef HAVE_GETTIMEOFDAY
@@ -91,8 +91,8 @@ PHP_FUNCTION(gettimeofday)
 /* }}} */
 
 #ifdef HAVE_GETRUSAGE
-/* {{{ proto array getrusage([ int who ])
-   returns an array of usage statistics */
+/* {{{ proto array getrusage([int who])
+   Returns an array of usage statistics */
 PHP_FUNCTION(getrusage)
 {
 	struct rusage usg;

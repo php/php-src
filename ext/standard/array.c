@@ -1081,7 +1081,7 @@ static void _compact_var(HashTable *eg_active_symbol_table, zval *return_value, 
 /* }}} */
 
 
-/* {{{ proto array compact(string var_name | array var_names [, ... ])
+/* {{{ proto array compact(string var_name |, array var_names [, ... ]])
    Creates a hash containing variables and their values */
 PHP_FUNCTION(compact)
 {
@@ -1409,8 +1409,7 @@ PHP_FUNCTION(array_unshift)
 
 
 /* {{{ proto array array_splice(array input, int offset [, int length [, array replacement]])
-   Removes the elements designated by offset and length and replace them with
-   supplied array */
+   Removes the elements designated by offset and length and replace them with supplied array */
 PHP_FUNCTION(array_splice)
 {
 	zval	  ***args,				/* Function arguments array */
@@ -1644,8 +1643,7 @@ PHP_FUNCTION(array_merge)
 
 
 /* {{{ proto array array_keys(array input [, mixed search_value])
-   Return just the keys from the input array, optionally only
-   for the specified search_value */
+   Return just the keys from the input array, optionally only for the specified search_value */
 PHP_FUNCTION(array_keys)
 {
 	zval	   **input,			/* Input array */
@@ -1989,7 +1987,7 @@ int multisort_compare(const void *a, const void *b)
 	efree(args);							\
 	RETURN_FALSE;
 
-/* {{{ proto bool array_multisort(array $ar1 [, SORT_ASC|SORT_DESC] [, array $ar2 [ICASE|NUM] [DESC|ASC], ...])
+/* {{{ proto bool array_multisort(array ar1 [, SORT_ASC|SORT_DESC] [, array ar2 [ICASE|NUM] [DESC|ASC], ...])
    Sort multiple arrays at once similar to how ORDER BY clause works in SQL */
 PHP_FUNCTION(array_multisort)
 {

@@ -160,7 +160,7 @@ static int php_iptc_next_marker(FILE *fp,int spool,unsigned char **spoolbuf)
 
 static char psheader[] = "\xFF\xED\0\0Photoshop 3.0\08BIM\x04\x04\0\0\0\0";
 
-/* {{{ proto array iptcembed(string iptcdata, string jpeg_file_name [ , int spool ])
+/* {{{ proto array iptcembed(string iptcdata, string jpeg_file_name [, int spool])
    Embed binary IPTC data into a JPEG image. */
 PHP_FUNCTION(iptcembed)
 {
@@ -294,7 +294,7 @@ PHP_FUNCTION(iptcembed)
 }
 
 /* {{{ proto array iptcparse(string iptcdata)
-   Parse binary IPTC-data into associative array.  */
+   Parse binary IPTC-data into associative array */
 PHP_FUNCTION(iptcparse)
 {
 	unsigned int length, inx, len, inheader, tagsfound;
