@@ -1930,7 +1930,9 @@ int zend_fetch_dim_unset_handler(ZEND_OPCODE_HANDLER_ARGS)
 	}
 	*/
 	zend_fetch_dimension_address(&EX(opline)->result, &EX(opline)->op1, &EX(opline)->op2, EX(Ts), BP_VAR_R TSRMLS_CC);
-	if (EX_T(EX(opline)->result.u.var).var.ptr_ptr != NULL) {
+	if (EX_T(EX(opline)->result.u.var).var.ptr_ptr == NULL) {
+		zend_error(E_ERROR, "Cannot unset string offsets");
+	} else {
 		PZVAL_UNLOCK(*EX_T(EX(opline)->result.u.var).var.ptr_ptr);
 		if (EX_T(EX(opline)->result.u.var).var.ptr_ptr != &EG(uninitialized_zval_ptr)) {
 			SEPARATE_ZVAL_IF_NOT_REF(EX_T(EX(opline)->result.u.var).var.ptr_ptr);
@@ -3476,6 +3478,9 @@ int zend_unset_dim_obj_handler(ZEND_OPCODE_HANDLER_ARGS)
 						zend_error(E_ERROR, "Cannot use object as array");
 					}
 					Z_OBJ_HT_P(*container)->unset_dimension(*container, offset TSRMLS_CC);
+					break;
+				case IS_STRING:
+					zend_error(E_ERROR, "Cannot unset string offsets");
 					break;
 				default:
 					ht = NULL;
