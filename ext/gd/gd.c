@@ -99,36 +99,6 @@ static int _php_image_type ( char data[8] );
 static void _php_image_convert(INTERNAL_FUNCTION_PARAMETERS, int image_type);
 static void _php_image_bw_convert(gdImagePtr im_org, gdIOCtx *out, int threshold);
 
-#ifdef THREAD_SAFE
-DWORD GDlibTls;
-static int numthreads=0;
-void *gdlib_mutex=NULL;
-
-/*
-typedef struct gdlib_global_struct{
-	int le_gd;
-	int le_gd_font;
-#if HAVE_LIBT1
-	int le_ps_font;
-	int le_ps_enc;
-#endif
-} gdlib_global_struct;
-
-# define GD_GLOBAL(a) gdlib_globals->a
-# define GD_TLS_VARS gdlib_global_struct *gdlib_globals = TlsGetValue(GDlibTls);
-
-#else
-#  define GD_GLOBAL(a) a
-#  define GD_TLS_VARS
-int le_gd;
-int le_gd_font;
-#if HAVE_LIBT1
-int le_ps_font;
-int le_ps_enc;
-#endif
-*/
-#endif
-
 function_entry gd_functions[] = {
 	PHP_FE(imagearc,								NULL)
 	PHP_FE(imagechar,								NULL)
@@ -245,24 +215,6 @@ static void php_free_gd_font(zend_rsrc_list_entry *rsrc)
 
 PHP_MINIT_FUNCTION(gd)
 {
-#if defined(THREAD_SAFE)
-	gdlib_global_struct *gdlib_globals;
-	PHP_MUTEX_ALLOC(gdlib_mutex);
-	PHP_MUTEX_LOCK(gdlib_mutex);
-	numthreads++;
-	if (numthreads==1){
-		if (!PHP3_TLS_PROC_STARTUP(GDlibTls)){
-			PHP_MUTEX_UNLOCK(gdlib_mutex);
-			PHP_MUTEX_FREE(gdlib_mutex);
-			return FAILURE;
-		}
-	}
-	PHP_MUTEX_UNLOCK(gdlib_mutex);
-	if(!PHP3_TLS_THREAD_INIT(GDlibTls,gdlib_globals,gdlib_global_struct)){
-		PHP_MUTEX_FREE(gdlib_mutex);
-		return FAILURE;
-	}
-#endif
 	le_gd = zend_register_list_destructors_ex(php_free_gd_image, NULL, "gd", module_number);
 	le_gd_font = zend_register_list_destructors_ex(php_free_gd_font, NULL, "gd font", module_number);
 #if HAVE_LIBT1
