@@ -134,7 +134,8 @@
 #define WSDL_SOAP12OLD_NAMESPACE "http://schemas.xmlsoap.org/wsdl/soap12/"
 #define WSDL_SOAP_NS_PREFIX "wsdlSoap"
 
-#define WSDL_HTTP_NAMESPACE "http://schemas.xmlsoap.org/wsdl/http/"
+#define WSDL_HTTP11_NAMESPACE "http://schemas.xmlsoap.org/wsdl/http/"
+#define WSDL_HTTP12_NAMESPACE	"http://www.w3.org/2003/05/soap/bindings/HTTP/"
 #define WSDL_HTTP_NS_PREFIX "http"
 
 #define WSDL_HTTP_TRANSPORT "http://schemas.xmlsoap.org/soap/http"
