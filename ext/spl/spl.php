@@ -309,7 +309,7 @@ class spl_array_it implements spl_sequence_assoc {
 
 /*! \brief Directory iterator
  */
-class spl_array_it implements spl_sequence {
+class spl_dir implements spl_sequence {
 
 	/*! Construct a directory iterator from a path-string.
 	 *
