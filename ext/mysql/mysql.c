@@ -1433,11 +1433,11 @@ static void php3_mysql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 	
 	mysql_field_seek(mysql_result,0);
 	for (mysql_field=mysql_fetch_field(mysql_result),i=0; mysql_field; mysql_field=mysql_fetch_field(mysql_result),i++) {
-		char *data;
-		int data_len;
-		int should_copy;
-		
 		if (mysql_row[i]) {
+			char *data;
+			int data_len;
+			int should_copy;
+
 			if (PG(magic_quotes_runtime)) {
 				data = _php3_addslashes(mysql_row[i],mysql_row_lengths[i],&data_len,0);
 				should_copy = 0;
