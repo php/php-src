@@ -1,5 +1,7 @@
 --TEST--
 Test 4: Checking UTF8 Output
+--SKIPIF--
+<?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
 echo "Test 4: Checking UTF8 Output";

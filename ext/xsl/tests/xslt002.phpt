@@ -1,5 +1,7 @@
 --TEST--
 Test 2: Transform To HTML String
+--SKIPIF--
+<?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
 echo "Test 2: Transform To HTML String";

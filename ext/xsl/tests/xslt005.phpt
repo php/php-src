@@ -1,5 +1,7 @@
 --TEST--
 Test 5: Checking Indent
+--SKIPIF--
+<?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
 echo "Test 5: Checking Indent";
