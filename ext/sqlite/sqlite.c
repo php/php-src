@@ -146,7 +146,7 @@ struct php_sqlite_result {
 struct php_sqlite_db {
 	sqlite *db;
 	int last_err_code;
-	int is_persistent;
+	zend_bool is_persistent;
 	int rsrc_id;
 
 	HashTable callbacks;
