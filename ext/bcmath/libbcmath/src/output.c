@@ -86,15 +86,11 @@ bc_out_long (val, size, space, out_char)
    as the routine to do the actual output of the characters. */
 
 void
-bc_out_num (num, o_base, out_char, leading_zero)
-     bc_num num;
-     int o_base;
 #ifdef __STDC__
-     void (*out_char)(int);
+bc_out_num (bc_num num, int o_base, void (*out_char)(int), int leading_zero TSRMLS_DC)
 #else
-     void (*out_char)();
+bc_out_num (bc_num num, int o_base, void (*out_char)(), int leading_zero TSRMLS_DC)
 #endif
-     int leading_zero;
 {
   char *nptr;
   int  index, fdigit, pre_space;
@@ -105,7 +101,7 @@ bc_out_num (num, o_base, out_char, leading_zero)
   if (num->n_sign == MINUS) (*out_char) ('-');
 
   /* Output the number. */
-  if (bc_is_zero (num))
+  if (bc_is_zero (num TSRMLS_CC))
     (*out_char) ('0');
   else
     if (o_base == 10)
@@ -118,7 +114,7 @@ bc_out_num (num, o_base, out_char, leading_zero)
 	else
 	  nptr++;
 
-	if (leading_zero && bc_is_zero (num))
+	if (leading_zero && bc_is_zero (num TSRMLS_CC))
 	  (*out_char) ('0');
 
 	/* Now the fraction. */
@@ -132,36 +128,36 @@ bc_out_num (num, o_base, out_char, leading_zero)
     else
       {
 	/* special case ... */
-	if (leading_zero && bc_is_zero (num))
+	if (leading_zero && bc_is_zero (num TSRMLS_CC))
 	  (*out_char) ('0');
 
 	/* The number is some other base. */
 	digits = NULL;
-	bc_init_num (&int_part);
-	bc_divide (num, _one_, &int_part, 0);
-	bc_init_num (&frac_part);
-	bc_init_num (&cur_dig);
-	bc_init_num (&base);
+	bc_init_num (&int_part TSRMLS_CC);
+	bc_divide (num, BCG(_one_), &int_part, 0 TSRMLS_CC);
+	bc_init_num (&frac_part TSRMLS_CC);
+	bc_init_num (&cur_dig TSRMLS_CC);
+	bc_init_num (&base TSRMLS_CC);
 	bc_sub (num, int_part, &frac_part, 0);
 	/* Make the INT_PART and FRAC_PART positive. */
 	int_part->n_sign = PLUS;
 	frac_part->n_sign = PLUS;
 	bc_int2num (&base, o_base);
-	bc_init_num (&max_o_digit);
+	bc_init_num (&max_o_digit TSRMLS_CC);
 	bc_int2num (&max_o_digit, o_base-1);
 
 
 	/* Get the digits of the integer part and push them on a stack. */
-	while (!bc_is_zero (int_part))
+	while (!bc_is_zero (int_part TSRMLS_CC))
 	  {
-	    bc_modulo (int_part, base, &cur_dig, 0);
+	    bc_modulo (int_part, base, &cur_dig, 0 TSRMLS_CC);
 		/* PHP Change:  malloc() -> emalloc() */
 	    temp = (stk_rec *) emalloc (sizeof(stk_rec));
 	    if (temp == NULL) bc_out_of_memory();
 	    temp->digit = bc_num2long (cur_dig);
 	    temp->next = digits;
 	    digits = temp;
-	    bc_divide (int_part, base, &int_part, 0);
+	    bc_divide (int_part, base, &int_part, 0 TSRMLS_CC);
 	  }
 
 	/* Print the digits on the stack. */
@@ -185,9 +181,9 @@ bc_out_num (num, o_base, out_char, leading_zero)
 	  {
 	    (*out_char) ('.');
 	    pre_space = 0;
-	    t_num = bc_copy_num (_one_);
+	    t_num = bc_copy_num (BCG(_one_));
 	    while (t_num->n_len <= num->n_scale) {
-	      bc_multiply (frac_part, base, &frac_part, num->n_scale);
+	      bc_multiply (frac_part, base, &frac_part, num->n_scale TSRMLS_CC);
 	      fdigit = bc_num2long (frac_part);
 	      bc_int2num (&int_part, fdigit);
 	      bc_sub (frac_part, int_part, &frac_part, 0);
@@ -197,7 +193,7 @@ bc_out_num (num, o_base, out_char, leading_zero)
 		bc_out_long (fdigit, max_o_digit->n_len, pre_space, out_char);
 		pre_space = 1;
 	      }
-	      bc_multiply (t_num, base, &t_num, 0);
+	      bc_multiply (t_num, base, &t_num, 0 TSRMLS_CC);
 	    }
 	    bc_free_num (&t_num);
 	  }

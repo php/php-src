@@ -41,10 +41,7 @@
 /* Convert strings to bc numbers.  Base 10 only.*/
 
 void
-bc_str2num (num, str, scale)
-     bc_num *num;
-     char *str;
-     int scale;
+bc_str2num (bc_num *num, char *str, int scale TSRMLS_DC)
 {
   int digits, strscale;
   char *ptr, *nptr;
@@ -65,7 +62,7 @@ bc_str2num (num, str, scale)
   while (isdigit((int)*ptr)) ptr++, strscale++;	/* digits */
   if ((*ptr != '\0') || (digits+strscale == 0))
     {
-      *num = bc_copy_num (_zero_);
+      *num = bc_copy_num (BCG(_zero_));
       return;
     }
 

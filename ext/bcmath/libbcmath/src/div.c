@@ -85,9 +85,7 @@ _one_mult (num, size, digit, result)
    by zero is tried.  The algorithm is found in Knuth Vol 2. p237. */
 
 int
-bc_divide (n1, n2, quot, scale)
-     bc_num n1, n2, *quot;
-     int scale;
+bc_divide (bc_num n1, bc_num n2, bc_num *quot, int scale TSRMLS_DC)
 {
   bc_num qval;
   unsigned char *num1, *num2;
@@ -100,7 +98,7 @@ bc_divide (n1, n2, quot, scale)
   unsigned int  norm;
 
   /* Test for divide by zero. */
-  if (bc_is_zero (n2)) return -1;
+  if (bc_is_zero (n2 TSRMLS_CC)) return -1;
 
   /* Test for divide by 1.  If it is we must truncate. */
   if (n2->n_scale == 0)
@@ -261,7 +259,7 @@ bc_divide (n1, n2, quot, scale)
 
   /* Clean up and return the number. */
   qval->n_sign = ( n1->n_sign == n2->n_sign ? PLUS : MINUS );
-  if (bc_is_zero (qval)) qval->n_sign = PLUS;
+  if (bc_is_zero (qval TSRMLS_CC)) qval->n_sign = PLUS;
   _bc_rm_leading_zeros (qval);
   bc_free_num (quot);
   *quot = qval;
