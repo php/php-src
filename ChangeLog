@@ -15,6 +15,9 @@
 
     * ext/standard/info.c: add MS SQL module to credit info
 
+    * ext/mssql/mssql.dsp:
+    Project changed to allow compilation for MS SQL 6.5 or 7.0
+
 1999-11-22  Zeev Suraski  <zeev@php.net>
 
     * NEWS: *** empty log message ***
@@ -25,9 +28,23 @@
 
     * tests/testcpdf: - test for cpdf module
 
+    * ext/cpdf/Makefile.am
+      ext/cpdf/config.h.stub
+      ext/cpdf/config.m4
+      ext/cpdf/cpdf.c
+      ext/cpdf/php3_cpdf.h: - port of clibpdf module based on ClibPDF 2.x.
+      This module is not tested yet, it just compiles.
+      I don't expect any real problem since the api hasn't changed.
+      ClibPDF 1.x isn't support anymore.
+
 1999-11-22  Stig Bakken  <ssb@fast.no>
 
-    * Makefile.am
+    * pecl/DB/odbc.php
+      pecl/.cvsignore
+      pecl/DB.php
+      pecl/Makefile.am
+      pecl/README
+      Makefile.am
       build.mk
       configure.in:    Introduced PECL - PHP Extension and Code Library (prounounced "picke"), in
     the "pecl" subdir.  "make install" will now install the database abstraction
@@ -43,6 +60,17 @@
 1999-11-22  changelog  <changelog@www>
 
     * NEWS: NEWS update
+
+1999-11-22  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/aolserver/aolserver.c:
+    (php_ns_hash_environment) Ns_ConnHost() may return NULL, check for it
+
+    * sapi/aolserver/aolserver.c:
+    (PHP getallheaders) added function for AOLserver
+
+    (php_ns_hash_environment) added REMOTE_PORT, SERVER_PORT, SERVER_NAME,
+    PATH_TRANSLATED, GATEWAY_INTERFACE variables
 
 1999-11-21  Sascha Schumann  <sascha@schumann.cx>
 
@@ -72,6 +100,11 @@
 
     * ext/standard/string.c: (PHP strtr) little smarter
 
+1999-11-21  Stefan Roehrich  <sr@linux.de>
+
+    * ext/java/README
+      ext/java/java.c: Java module now works with Linux jdk 1.2pre2.
+
 1999-11-21  Rasmus Lerdorf  <rasmus@php.net>
 
     * ext/gd/config.m4
@@ -99,6 +132,7 @@
 1999-11-20  Sascha Schumann  <sascha@schumann.cx>
 
     * sapi/cgi/php.sym
+      sapi/aolserver/php.sym
       sapi/apache/php.sym
       acinclude.m4
       configure.in
@@ -261,11 +295,6 @@
     * php_version.h
       configure.in: 4.0b3 coming up
 
-1999-11-16  Stig Bakken  <ssb@fast.no>
-
-    * php_version.h
-      configure.in: 4.0b3 coming up
-
 1999-11-15  Andrei Zmievski  <zmievski@ispi.net>
 
     * NEWS: cleaning up
@@ -304,9 +333,6 @@
 1999-11-14  Andi Gutmans  <andi@php.net>
 
     * sapi/isapi/php4isapi.c
-      php4isapi/php4isapi.c
-      php4isapi/php4isapi.def
-      php4isapi/php4isapi.dsp
       php4ts.dsw:
     - Remove ISAPI project from main dir as it's been copied to sapi/isapi
 
@@ -400,6 +426,7 @@
     * sapi/cgi/Makefile.am
       sapi/isapi/Makefile.am
       ext/zlib/Makefile.am
+      sapi/aolserver/Makefile.am
       ext/wddx/Makefile.am
       ext/yp/Makefile.am
       ext/sysvsem/Makefile.am
@@ -409,6 +436,7 @@
       ext/session/Makefile.am
       ext/standard/Makefile.am
       ext/pdf/Makefile.am
+      ext/readline/Makefile.am
       ext/oracle/Makefile.am
       ext/pcre/Makefile.am
       ext/oci8/Makefile.am
@@ -486,6 +514,10 @@
 
     * fopen-wrappers.c:    (PHP fopen) commands send to a FTP-server need to end in "\r\n" (RFC 854)
 
+1999-11-10  Frank M. Kromann  <fmk@swwwing.com>
+
+    * ext/mssql/php_mssql.c: Fixing the use of mssql.textsize in pconnect()
+
 1999-11-10  Rasmus Lerdorf  <rasmus@php.net>
 
     * ext/gd/config.m4:
@@ -507,6 +539,10 @@
 1999-11-10  changelog  <changelog@www>
 
     * NEWS: NEWS update
+
+1999-11-10  Sam Ruby  <rubys@us.ibm.com>
+
+    * ext/java/.cvsignore: add Java and MSDev outputs
 
 1999-11-09  Frank M. Kromann  <fmk@swwwing.com>
 
@@ -540,6 +576,11 @@
     * php4dll.dsp: add mergesort into build
 
 1999-11-09  Stig Bakken  <ssb@fast.no>
+
+    * ext/java/.cvsignore
+      ext/java/config.m4:
+    - substitute JAVA_LFLAGS (not set, but used in libphp_java_la_LIBADD)
+    - add .cvsignore file
 
     * configure.in
       php_version.h: 4.0b3-RC4
@@ -592,6 +633,28 @@
     * configure.in
       php_version.h: Bump version to 4.0b3-RC3.
 
+1999-11-09  Sam Ruby  <rubys@us.ibm.com>
+
+    * ext/java/Makefile.am
+      ext/java/README
+      ext/java/config.h.stub
+      ext/java/config.m4
+      ext/java/java.c
+      ext/java/java.dsp
+      ext/java/jawt.php
+      ext/java/jver.php
+      ext/java/reflect.java:    Users of PHP are hereby granted a non-exclusive, irrevocable, world-wide,
+    royalty-free, non-transferable license to use, execute, prepare derivative
+    works of, and distribute (internally and externally, and including derivative
+    works) the code accompanying this license as part of, and integrated into PHP.
+    WARRANTY OF ANY KIND EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+    THE IMPLIED WARRANTY OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+    AND ANY WARRANTY OF NON-INFRINGEMENT.  THE ENTIRE RISK ARISING OUT OF THE USE
+    OR PERFORMANCE OF THIS CODE REMAINS WITH USERS OF PHP.  The owner of this code
+    represents and warrants that it is legally entitled to grant the above license.
+
+1999-11-09  Stig Bakken  <ssb@fast.no>
+
     * makedist: Makedist can now be run from outside the CVS tree.
 
     * ext/standard/basic_functions.c:
@@ -634,13 +697,14 @@
     * configure.in
       php.h: (PHP tempnam) now uses mkstemp() if available
 
-1999-11-08  changelog  <changelog@www>
+1999-11-07  Sascha Schumann  <sascha@schumann.cx>
 
-    * ChangeLog: ChangeLog update
+    * sapi/aolserver/aolserver.c:
+    (php_ns_request_ctor) enable HTTP Access Authentication
+
+    (php_ns_hash_environment) supply PATH_TRANSLATED to scripts
 
 1999-11-07  changelog  <changelog@www>
-
-    * ChangeLog: ChangeLog update
 
     * NEWS: NEWS update
 
@@ -672,8 +736,6 @@
 
 1999-11-06  changelog  <changelog@www>
 
-    * ChangeLog: ChangeLog update
-
     * NEWS: NEWS update
 
 1999-11-05  Rasmus Lerdorf  <rasmus@php.net>
@@ -696,10 +758,6 @@
     * ext/sybase/sybase.c:
     (php3_sybase_get_column_content) initialize buffer before call to dbconvert()
 
-1999-11-05  changelog  <changelog@www>
-
-    * ChangeLog: ChangeLog update
-
 1999-11-04  Andrei Zmievski  <zmievski@ispi.net>
 
     * ext/standard/basic_functions.c:
@@ -715,18 +773,28 @@
       configure.in
       php_version.h
       buildconf:
-1999-11-04  changelog  <changelog@www>
+1999-11-04  Andi Gutmans  <andi@php.net>
 
-    * ChangeLog: ChangeLog update
+    * ext/mssql/mssql.dsp:
+    - Add include path. Used relative include path assuming php4 and bindlib_w32
+      are in the same directory.
 
 1999-11-03  Andrei Zmievski  <zmievski@ispi.net>
 
     * TODO: *** empty log message ***
 
-1999-11-03  Frank M. Kromann  <fmk@businessnet.dk>
+1999-11-03  Frank M. Kromann  <fmk@swwwing.com>
 
     * MAINTAINERS
       NEWS: Added MS SQL server module
+
+    * ext/mssql/.cvsignore: Changed directory names to match project
+
+    * ext/mssql/.cvsignore
+      ext/mssql/Readme_w32.txt
+      ext/mssql/mssql.dsp
+      ext/mssql/php_mssql.c
+      ext/mssql/php_mssql.h: Adding MS SQL Server module for Win32
 
 1999-11-03  Andi Gutmans  <andi@php.net>
 
@@ -736,8 +804,6 @@
     * ext/standard/basic_functions.c: Fix compile warning
 
 1999-11-03  changelog  <changelog@www>
-
-    * ChangeLog: ChangeLog update
 
     * NEWS: NEWS update
 
@@ -760,8 +826,6 @@
     (PHP getprotoby{name,number}) New Functions
 
 1999-11-02  changelog  <changelog@www>
-
-    * ChangeLog: ChangeLog update
 
     * NEWS: NEWS update
 
@@ -787,8 +851,6 @@
 
 1999-11-01  changelog  <changelog@www>
 
-    * ChangeLog: ChangeLog update
-
     * NEWS: NEWS update
 
 1999-11-01  Evan Klinger  <evan715@sirius.com>
@@ -810,10 +872,6 @@
 1999-10-31  Sam Ruby  <rubys@us.ibm.com>
 
     * configuration-parser.y:
-1999-10-31  changelog  <changelog@www>
-
-    * ChangeLog: ChangeLog update
-
 1999-10-30  Rasmus Lerdorf  <rasmus@php.net>
 
     * php_regex.h: typing in the dark
@@ -833,10 +891,6 @@
     defines symbols that prevents other stuff from including the wrong versions
     of regex header files.
 
-1999-10-30  changelog  <changelog@www>
-
-    * ChangeLog: ChangeLog update
-
 1999-10-29  Rasmus Lerdorf  <rasmus@php.net>
 
     * ext/imap/imap.c: Fix typo found by hholzgra@media-engineering.de
@@ -848,8 +902,6 @@
     * NEWS: Looked like this was done by RedHat the way I wrote it.
 
 1999-10-29  changelog  <changelog@www>
-
-    * ChangeLog: ChangeLog update
 
     * NEWS: NEWS update
 
@@ -875,11 +927,9 @@
 
 1999-10-28  changelog  <changelog@www>
 
-    * ChangeLog: ChangeLog update
-
     * NEWS: NEWS update
 
-1999-10-28  rubys  <rubys@www>
+1999-10-28  Sam Ruby  <rubys@us.ibm.com>
 
     * php4dllts.dsp:
     look for output.c in its new location in the windows build
@@ -911,10 +961,6 @@
 
     * ext/standard/basic_functions.c: Forgot to remove function entry.
 
-1999-10-27  changelog  <changelog@www>
-
-    * ChangeLog: ChangeLog update
-
 1999-10-26  Thies C. Arntzen  <thies@digicol.de>
 
     * ext/standard/file.c: eliminated warinigs
@@ -928,13 +974,9 @@
 
     * TODO: Some todo things.
 
-1999-10-26  changelog  <changelog@www>
+1999-10-25  Thies C. Arntzen  <thies@digicol.de>
 
-    * ChangeLog: ChangeLog update
-
-1999-10-25  changelog  <changelog@www>
-
-    * ChangeLog: ChangeLog update
+    * ext/readline/readline.c: added some more options
 
 1999-10-24  Thies C. Arntzen  <thies@digicol.de>
 
@@ -949,7 +991,7 @@
       ext/pcre/config.m4:
     Define USE_BCOPY, if memmove is not found (i.e. SunOS 4). Fix for #2480
 
-1999-10-24  rubys  <rubys@www>
+1999-10-24  Sam Ruby  <rubys@us.ibm.com>
 
     * php4dllts.dsp
       php4dll.dsp:
@@ -960,13 +1002,10 @@
     * ext/session/session.c:
     (PHP session_register, session_unregister) always return true
 
-1999-10-24  changelog  <changelog@www>
+1999-10-23  Thies C. Arntzen  <thies@digicol.de>
 
-    * ChangeLog: ChangeLog update
-
-1999-10-23  changelog  <changelog@www>
-
-    * ChangeLog: ChangeLog update
+    * ext/readline/readline.c:
+    one can now use callbacks for custom completion functions (still work-in-progress)
 
 1999-10-22  Sascha Schumann  <sascha@schumann.cx>
 
@@ -979,10 +1018,6 @@
 
     * ext/standard/var.c:
     unserialize no longer complaints about unserializing empty-strings (started that just a few days ago)
-
-1999-10-22  changelog  <changelog@www>
-
-    * ChangeLog: ChangeLog update
 
 1999-10-21  Sascha Schumann  <sascha@schumann.cx>
 
@@ -1005,9 +1040,14 @@
 
 1999-10-21  changelog  <changelog@www>
 
-    * ChangeLog: ChangeLog update
-
     * NEWS: NEWS update
+
+1999-10-20  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/aolserver/aolserver.c:
+    (php_ns_hash_environment): provide more CGI/1.1 variables to scripts.
+
+    Added REQUEST_METHOD, QUERY_STRING, REMOTE_ADDR
 
 1999-10-20  Andi Gutmans  <andi@php.net>
 
@@ -1033,6 +1073,8 @@
 
     * ext/standard/info.c (_display_module_info): Add anchor for module names
 
+    * sapi/aolserver/aolserver.c (php_info_aolserver): add more information from the server context
+
 1999-10-20  Thies C. Arntzen  <thies@digicol.de>
 
     * ext/xml/xml.c:
@@ -1050,9 +1092,12 @@
 
     * ext/xml/xml.c (PHP xml_parse_into_struct): fixed mem-leak when encountering invalid XML.
 
-1999-10-20  changelog  <changelog@www>
+1999-10-20  Sascha Schumann  <sascha@schumann.cx>
 
-    * ChangeLog: ChangeLog update
+    * sapi/aolserver/aolserver.c:
+    (php_ns_hash_environment) add SERVER_SOFTWARE, SERVER_BOOTTIME, SERVER_BUILDDATE, SERVER_PROTOCOL
+
+1999-10-20  changelog  <changelog@www>
 
     * NEWS: NEWS update
 
@@ -1088,11 +1133,9 @@
 
 1999-10-19  changelog  <changelog@www>
 
-    * ChangeLog: ChangeLog update
-
     * NEWS: NEWS update
 
-1999-10-18  Egon Schmid  <eschmid@delos.lf.net>
+1999-10-18  Egon Schmid  <eschmid@s.netic.de>
 
     * ext/standard/formatted_print.c: More forgotten prototypes.
 
@@ -1108,8 +1151,6 @@
 
 1999-10-18  changelog  <changelog@www>
 
-    * ChangeLog: ChangeLog update
-
     * NEWS: NEWS update
 
 1999-10-17  Sascha Schumann  <sascha@schumann.cx>
@@ -1120,7 +1161,7 @@
       ext/gd/gd.c
       ext/gd/php3_gd.h: Add PNG support. Tested with gd 1.7.3.
 
-1999-10-17  Egon Schmid  <eschmid@delos.lf.net>
+1999-10-17  Egon Schmid  <eschmid@s.netic.de>
 
     * ext/standard/dl.c: Looks better, but isn't wrong
 
@@ -1234,6 +1275,23 @@
       php4dllts.dsp:
     - Converted math.c to use new convert_to_number_ex() macro.
 
+1999-10-14  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/readline/config.m4
+      ext/readline/php_readline.h
+      ext/readline/readline.c: configure works for me (RH 6.1)
+
+    * ext/readline/.cvsignore: forgot
+
+    * ext/readline/Makefile.am
+      ext/readline/config.h.stub
+      ext/readline/config.m4
+      ext/readline/php_readline.h
+      ext/readline/readline.c
+      ext/readline/setup.stub:
+    interface to GNU-Readline! (not yet active, autoconf needs to be done)
+    very neat - but only usable in standalone (command-promt) mode!
+
 1999-10-13  Sascha Schumann  <sascha@schumann.cx>
 
     * MAINTAINERS: Add dba and mcrypt extensions to list.
@@ -1261,8 +1319,6 @@
     (shell_exec) use pclose for FILE* that has been opened via popen!
 
 1999-10-13  changelog  <changelog@www>
-
-    * ChangeLog: ChangeLog update
 
     * NEWS: NEWS update
 
@@ -1309,10 +1365,7 @@
 
 1999-10-12  changelog  <changelog@www>
 
-    * NEWS
-      ChangeLog: *** empty log message ***
-
-    * ChangeLog: ChangeLog update
+    * NEWS: *** empty log message ***
 
     * NEWS: NEWS update
 
@@ -1337,10 +1390,7 @@
     (configure) Allow IFX_LIBDIR environment variable to specify the
                 Informix library path to allow linking with the static
                 libraries (libtool related). (Danny).
-
-1999-10-11  changelog  <changelog@www>
-
-    * ChangeLog: ChangeLog update
+       path for configure (Danny).
 
 1999-10-10  Sascha Schumann  <sascha@schumann.cx>
 
@@ -1382,12 +1432,6 @@
     * ext/informix/Makefile.am
       ext/informix/config.m4: Link in IFX_LIBS properly.
 
-1999-10-10  changelog  <changelog@www>
-
-    * ChangeLog: ChangeLog update
-
-1999-10-10  Sascha Schumann  <sascha@schumann.cx>
-
     * build.mk:
     Clean up and add 'clean' target which removes standard targets recursively
 
@@ -1412,8 +1456,6 @@
     fix suggested by sascha for xml-build in apxs mode
 
 1999-10-09  changelog  <changelog@www>
-
-    * ChangeLog: ChangeLog update
 
     * NEWS: NEWS update
 
@@ -1442,11 +1484,25 @@
 
     * README.CVS-RULES: More emphasis on ChangeLog and NEWS daily updates.
 
+1999-10-08  changelog  <changelog@www>
+
+    * tests/testclassfunc: mailing list test
+
+    * tests/testfe: testing
+
+    * tests/test.php4: test
+
 1999-10-08  Andrei Zmievski  <zmievski@ispi.net>
 
     * README.CVS-RULES:
     More information on how to use the special prefixes and the frequency
     of NEWS and ChangeLog updates.
+
+1999-10-08  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/aolserver/aolserver.c:
+    (php_info_aolserver): Show information about the SAPI module
+    (php_ns_module_main): Return early, if request startup failed
 
 1999-10-08  Jouni Ahto  <jah@mork.net>
 
@@ -1454,29 +1510,27 @@
       ext/gd/gdt1.h:
     Added the files for t1lib support. No porting from PHP3 done yet.
 
-1999-10-08  changelog  <changelog@www>
-
-    * ChangeLog: ChangeLog update
-
-1999-10-08  Jouni Ahto  <jah@mork.net>
-
     * ext/standard/datetime.c:
     (PHP gmmktime) Should now give right values. Note that there was never need for
     	       the acrobacy adjusting the time for GMT. mktime() fills
-    	       tm_gmtoff with just the right offset to add.
+    	       tm_gmtoff with just the right offset to add. (Jouni)
 
     * ext/standard/php3_string.h
       ext/standard/string.c
       ext/standard/basic_functions.c:
     (PHP setlocale) Locale settings are now correctly restored to the values
-    		set in environment at request shutdown.
+    		set in environment at request shutdown. (Jouni)
+
+1999-10-07  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/aolserver/aolserver.c:
+    Apparently, we did too much cleanup. The server survives now much longer.
 
 1999-10-07  Andrei Zmievski  <zmievski@ispi.net>
 
     * NEWS: NEWS update
 
-    * ChangeLog
-      MAINTAINERS
+    * MAINTAINERS
       README.CVS-RULES
       TODO:
     New files.
@@ -1485,19 +1539,28 @@
 
 1999-10-07  Sascha Schumann  <sascha@schumann.cx>
 
+    * sapi/aolserver/aolserver.c: POST works now and does not block anymore.
+
     * sapi/cgi/config.m4
       sapi/isapi/config.m4
       sapi/apache/config.m4
+      sapi/aolserver/config.m4
       configure.in: Remove SAPI_TARGET and use PHP_SAPI completely.
 
     The target filename is now available as SAPI_PROGRAM, SAPI_SHARED, and
     SAPI_STATIC.
 
+    * sapi/aolserver/aolserver.c:
+    (ns_globals_struct): remove content_type member
+
+    (php_ns_request_dtor): remove content_type destructor, re-add path_translated destructor
+
+    * sapi/aolserver/aolserver.c:
+        Add comments to the source code and fix POST-read-data bug.
+
 1999-10-07  Andrei Zmievski  <zmievski@ispi.net>
 
-    * ChangeLog.3
-      ChangeLog.TODO
-      TODO-LeftOver: Some ChangeLog surgery.
+    * TODO-LeftOver: Some ChangeLog surgery.
 
 1999-10-07  Sascha Schumann  <sascha@schumann.cx>
 
@@ -1511,17 +1574,12 @@
 
 1999-10-07  Sascha Schumann  <sascha@schumann.cx>
 
-    * sapi/nsapi/.cvsignore
-      sapi/nsapi/Makefile.am
-      sapi/nsapi/aolserver.c
-      sapi/nsapi/config.m4:     nsapi => aolserver
-
-        "NSAPI" suggests Netscape too often.
+    * sapi/aolserver/Makefile.am
+      sapi/aolserver/config.m4:     nsapi => aolserver changes
 
 1999-10-07  Andrei Zmievski  <zmievski@ispi.net>
 
-    * ChangeLog
-      NEWS:
+    * NEWS:
     Renaming ChangeLog to NEWS. All future entries intended for public should
     go into NEWS.
 
@@ -1542,7 +1600,7 @@
 
     * tests/testfunc: Testing commit.
 
-    * sapi/nsapi/.cvsignore
+    * sapi/aolserver/.cvsignore
       sapi/cgi/.cvsignore
       sapi/isapi/.cvsignore
       sapi/apache/.cvsignore
@@ -1600,12 +1658,11 @@
 
     * ext/db/db.c: fix ZTS compile
 
-    * ext/xml/xml.c
-      ChangeLog: fixed hopefully last XML problem. that one was hard!
+    * ext/xml/xml.c: fixed hopefully last XML problem. that one was hard!
 
 1999-10-07  Sascha Schumann  <sascha@schumann.cx>
 
-    * sapi/nsapi/aolserver.c (php_ns_request_handler): call ts_free_thread() to clean up
+    * sapi/aolserver/aolserver.c (php_ns_request_handler): call ts_free_thread() to clean up
 
 1999-10-07  Thies C. Arntzen  <thies@digicol.de>
 
@@ -1620,8 +1677,7 @@
 
 1999-10-07  Thies C. Arntzen  <thies@digicol.de>
 
-    * ChangeLog
-      php_content_types.c:
+    * php_content_types.c:
     SET_VAR_STR* expect a emalloc'ed  copy of the string!
 
 1999-10-06  Sascha Schumann  <sascha@schumann.cx>
