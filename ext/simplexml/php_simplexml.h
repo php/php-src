@@ -47,6 +47,7 @@ extern zend_module_entry simplexml_module_entry;
 #include <libxml/xmlschemas.h>
 
 PHP_MINIT_FUNCTION(simplexml);
+PHP_MSHUTDOWN_FUNCTION(simplexml);
 #if HAVE_SPL && !defined(COMPILE_DL_SPL)
 PHP_RINIT_FUNCTION(simplexml);
 #endif
