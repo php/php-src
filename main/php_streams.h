@@ -407,10 +407,8 @@ END_EXTERN_C()
 #define PHP_STREAM_OPTION_RETURN_NOTIMPL	-2 /* underlying stream does not implement; streams can handle it instead */
 
 /* copy up to maxlen bytes from src to dest.  If maxlen is PHP_STREAM_COPY_ALL, copy until eof(src).
- * Uses mmap if the src is a plain file and at offset 0 
- * To ensure we don't take up too much memory when reading large files, set the default mmap length
- * at this many bytes */
-#define PHP_STREAM_COPY_ALL		2000000
+ * Uses mmap if the src is a plain file and at offset 0 */
+#define PHP_STREAM_COPY_ALL		((size_t)-1)
 
 BEGIN_EXTERN_C()
 PHPAPI size_t _php_stream_copy_to_stream(php_stream *src, php_stream *dest, size_t maxlen STREAMS_DC TSRMLS_DC);
