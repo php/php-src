@@ -47,7 +47,6 @@
 #include "uniqid.h"
 #include "php_var.h"
 #include "quot_print.h"
-#include "type.h"
 #include "dl.h"
 #include "php_crypt.h"
 #include "head.h"
@@ -58,6 +57,7 @@
 #include "php_assert.h"
 #include "php_versioning.h"
 #include "php_ftok.h"
+#include "php_type.h"
 
 #define phpext_standard_ptr basic_functions_module_ptr
 
