@@ -87,14 +87,6 @@ ZEND_API int zend_list_insert(void *ptr, int type)
 }
 
 
-ZEND_API int zend_plist_insert(void *ptr, int type)
-{
-	ELS_FETCH();
-
-	return zend_list_do_insert(&EG(persistent_list), ptr, type);
-}
-
-
 ZEND_API int zend_list_addref(int id)
 {
 	zend_rsrc_list_entry *le;
@@ -118,27 +110,11 @@ ZEND_API int zend_list_delete(int id)
 }
 
 
-ZEND_API int zend_plist_delete(int id)
-{
-	ELS_FETCH();
-
-	return zend_list_do_delete(&EG(persistent_list), id);
-}
-
-
 ZEND_API void *zend_list_find(int id, int *type)
 {
 	ELS_FETCH();
 
 	return zend_list_do_find(&EG(regular_list), id, type);
-}
-
-
-ZEND_API void *zend_plist_find(int id, int *type)
-{
-	ELS_FETCH();
-
-	return zend_list_do_find(&EG(persistent_list), id, type);
 }
 
 
