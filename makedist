@@ -108,12 +108,9 @@ done
 # to install
 set -x
 ./buildconf --copy
-cd libzend
-bison -p zend -d zend-parser.y -o zend-parser.c
-flex -Pzend -ozend-scanner.c -i zend-scanner.l
-cd ..
-bison -p cfg -d configuration-parser.y -o configuration-parser.c
-flex -Pcfg -oconfiguration-scanner.c -i configuration-scanner.l
+
+./genfiles
+
 echo "/* Dummy File */" > ext/bcmath/number.c
 echo "/* Dummy File */" > ext/bcmath/number.h
 
