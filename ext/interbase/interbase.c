@@ -285,8 +285,8 @@ static inline int _php_ibase_string_to_quad(char const *id, ISC_QUAD *qd)
 	} else {
 		ISC_UINT64 res;
 		int n = sscanf(id, BLOB_ID_MASK, &res);
-		qd->gds_quad_high = (SLONG) (res >> 0x20);
-		qd->gds_quad_low = (ULONG) (res & 0xFFFFFFFF);
+		qd->gds_quad_high = (long) (res >> 0x20);
+		qd->gds_quad_low = (unsigned long) (res & 0xFFFFFFFF);
 		return n;
 	}
 }
@@ -461,29 +461,27 @@ static void _php_ibase_free_result(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 static void _php_ibase_free_query(ibase_query *ib_query TSRMLS_DC)
 {
 	IBDEBUG("Freeing query...");
-	if (ib_query) {
-		if (ib_query->in_sqlda) {
-			efree(ib_query->in_sqlda);
+
+	if (ib_query->in_sqlda) {
+		efree(ib_query->in_sqlda);
+	}
+	if (ib_query->out_sqlda) {
+		efree(ib_query->out_sqlda);
+	}
+	if (ib_query->stmt) {
+		IBDEBUG("Dropping statement handle (free_query)...");
+		if (isc_dsql_free_statement(IB_STATUS, &ib_query->stmt, DSQL_drop)) {
+			_php_ibase_error(TSRMLS_C);
 		}
-		if (ib_query->out_sqlda) {
-			efree(ib_query->out_sqlda);
-		}
-		if (ib_query->stmt) {
-			IBDEBUG("Dropping statement handle (free_query)...");
-			if (isc_dsql_free_statement(IB_STATUS, &ib_query->stmt, DSQL_drop)) {
-				_php_ibase_error(TSRMLS_C);
-			}
-		}
-		if (ib_query->in_array) {
-			efree(ib_query->in_array);
-		}
-		if (ib_query->out_array) {
-			efree(ib_query->out_array);
-		}
-		if (ib_query->query) {
-			efree(ib_query->query);
-		}
-		efree(ib_query);
+	}
+	if (ib_query->in_array) {
+		efree(ib_query->in_array);
+	}
+	if (ib_query->out_array) {
+		efree(ib_query->out_array);
+	}
+	if (ib_query->query) {
+		efree(ib_query->query);
 	}
 }
 /* }}} */
@@ -491,30 +489,10 @@ static void _php_ibase_free_query(ibase_query *ib_query TSRMLS_DC)
 /* {{{ php_ibase_free_query_rsrc() */
 static void php_ibase_free_query_rsrc(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
-	ibase_query *ib_query = (ibase_query *)rsrc->ptr;
-
-	IBDEBUG("Freeing query by dtor...");
-	if (ib_query) {
-		if (ib_query->in_sqlda) {
-			efree(ib_query->in_sqlda);
-		}
-		if (ib_query->out_sqlda) {
-			efree(ib_query->out_sqlda);
-		}
-		if (ib_query->stmt) {
-			IBDEBUG("Dropping statement handle (free_query dtor)...");
-			isc_dsql_free_statement(IB_STATUS, &ib_query->stmt, DSQL_drop);
-		}
-		if (ib_query->in_array) {
-			efree(ib_query->in_array);
-		}
-		if (ib_query->out_array) {
-			efree(ib_query->out_array);
-		}
-		if (ib_query->query) {
-			efree(ib_query->query);
-		}
-		efree(ib_query);
+	if (rsrc->ptr != NULL) {
+		IBDEBUG("Preparing to free query by dtor...");
+		_php_ibase_free_query((ibase_query *)rsrc->ptr);
+		efree(rsrc->ptr);
 	}
 }
 /* }}} */
@@ -1176,120 +1154,114 @@ static int _php_ibase_alloc_array(ibase_array **ib_arrayp, int *array_cntp, XSQL
 
 /* {{{ _php_ibase_alloc_query() */
 /* allocate and prepare query */
-static int _php_ibase_alloc_query(ibase_query **ib_queryp, ibase_db_link *link, ibase_trans *trans, char *query, unsigned short dialect, int trans_res_id TSRMLS_DC)
+static int _php_ibase_alloc_query(ibase_query *ib_query, ibase_db_link *link, ibase_trans *trans, char *query, unsigned short dialect, int trans_res_id TSRMLS_DC)
 {
-#define IB_QUERY (*ib_queryp)
 	static char info_type[] = {isc_info_sql_stmt_type};
 	char result[8];
 	
-	IB_QUERY = emalloc(sizeof(ibase_query));
-	IB_QUERY->link = link;
-	IB_QUERY->trans = trans;
-	IB_QUERY->stmt = NULL;
-	IB_QUERY->out_sqlda = NULL;
-	IB_QUERY->in_sqlda = NULL;
-	IB_QUERY->in_array = NULL;
-	IB_QUERY->in_array_cnt = 0;
-	IB_QUERY->out_array = NULL;
-	IB_QUERY->out_array_cnt = 0;
-	IB_QUERY->dialect = dialect;
-	IB_QUERY->statement_type = '\0';
-	IB_QUERY->query = estrdup(query);
-	IB_QUERY->trans_res_id = trans_res_id;
+	ib_query->link = link;
+	ib_query->trans = trans;
+	ib_query->stmt = NULL;
+	ib_query->out_sqlda = NULL;
+	ib_query->in_sqlda = NULL;
+	ib_query->in_array = NULL;
+	ib_query->in_array_cnt = 0;
+	ib_query->out_array = NULL;
+	ib_query->out_array_cnt = 0;
+	ib_query->dialect = dialect;
+	ib_query->statement_type = '\0';
+	ib_query->query = estrdup(query);
+	ib_query->trans_res_id = trans_res_id;
 	
-	if (isc_dsql_allocate_statement(IB_STATUS, &link->handle, &IB_QUERY->stmt)) {
+	if (isc_dsql_allocate_statement(IB_STATUS, &link->handle, &ib_query->stmt)) {
 		_php_ibase_error(TSRMLS_C);
 		goto _php_ibase_alloc_query_error;
 	}
 
-	IB_QUERY->out_sqlda = (XSQLDA *) emalloc(XSQLDA_LENGTH(1));
-	IB_QUERY->out_sqlda->sqln = 1;
-	IB_QUERY->out_sqlda->version = SQLDA_CURRENT_VERSION;
+	ib_query->out_sqlda = (XSQLDA *) emalloc(XSQLDA_LENGTH(1));
+	ib_query->out_sqlda->sqln = 1;
+	ib_query->out_sqlda->version = SQLDA_CURRENT_VERSION;
 
-	if (isc_dsql_prepare(IB_STATUS, &IB_QUERY->trans->handle, &IB_QUERY->stmt, 0, query, dialect, IB_QUERY->out_sqlda)) {
+	if (isc_dsql_prepare(IB_STATUS, &ib_query->trans->handle, &ib_query->stmt, 0, query, dialect, ib_query->out_sqlda)) {
 		_php_ibase_error(TSRMLS_C);
 		goto _php_ibase_alloc_query_error;
 	}
 
 	/* find out what kind of statement was prepared */
-	if (isc_dsql_sql_info(IB_STATUS, &IB_QUERY->stmt, sizeof(info_type), info_type, sizeof(result), result)) {
+	if (isc_dsql_sql_info(IB_STATUS, &ib_query->stmt, sizeof(info_type), info_type, sizeof(result), result)) {
 		_php_ibase_error(TSRMLS_C);
 		goto _php_ibase_alloc_query_error;
 	}
-	IB_QUERY->statement_type = result[3];	
+	ib_query->statement_type = result[3];	
 	
 	/* not enough output variables ? */
-	if (IB_QUERY->out_sqlda->sqld > IB_QUERY->out_sqlda->sqln) {
-		IB_QUERY->out_sqlda = erealloc(IB_QUERY->out_sqlda, XSQLDA_LENGTH(IB_QUERY->out_sqlda->sqld));
-		IB_QUERY->out_sqlda->sqln = IB_QUERY->out_sqlda->sqld;
-		IB_QUERY->out_sqlda->version = SQLDA_CURRENT_VERSION;
-		if (isc_dsql_describe(IB_STATUS, &IB_QUERY->stmt, SQLDA_CURRENT_VERSION, IB_QUERY->out_sqlda)) {
+	if (ib_query->out_sqlda->sqld > ib_query->out_sqlda->sqln) {
+		ib_query->out_sqlda = erealloc(ib_query->out_sqlda, XSQLDA_LENGTH(ib_query->out_sqlda->sqld));
+		ib_query->out_sqlda->sqln = ib_query->out_sqlda->sqld;
+		ib_query->out_sqlda->version = SQLDA_CURRENT_VERSION;
+		if (isc_dsql_describe(IB_STATUS, &ib_query->stmt, SQLDA_CURRENT_VERSION, ib_query->out_sqlda)) {
 			_php_ibase_error(TSRMLS_C);
 			goto _php_ibase_alloc_query_error;
 		}
 	}
 
 	/* maybe have input placeholders? */
-	IB_QUERY->in_sqlda = emalloc(XSQLDA_LENGTH(1));
-	IB_QUERY->in_sqlda->sqln = 1;
-	IB_QUERY->in_sqlda->version = SQLDA_CURRENT_VERSION;
-	if (isc_dsql_describe_bind(IB_STATUS, &IB_QUERY->stmt, SQLDA_CURRENT_VERSION, IB_QUERY->in_sqlda)) {
+	ib_query->in_sqlda = emalloc(XSQLDA_LENGTH(1));
+	ib_query->in_sqlda->sqln = 1;
+	ib_query->in_sqlda->version = SQLDA_CURRENT_VERSION;
+	if (isc_dsql_describe_bind(IB_STATUS, &ib_query->stmt, SQLDA_CURRENT_VERSION, ib_query->in_sqlda)) {
 		_php_ibase_error(TSRMLS_C);
 		goto _php_ibase_alloc_query_error;
 	}
 	
 	/* not enough input variables ? */
-	if (IB_QUERY->in_sqlda->sqln < IB_QUERY->in_sqlda->sqld) {
-		IB_QUERY->in_sqlda = erealloc(IB_QUERY->in_sqlda, XSQLDA_LENGTH(IB_QUERY->in_sqlda->sqld));
-		IB_QUERY->in_sqlda->sqln = IB_QUERY->in_sqlda->sqld;
-		IB_QUERY->in_sqlda->version = SQLDA_CURRENT_VERSION;
-		if (isc_dsql_describe_bind(IB_STATUS, &IB_QUERY->stmt, SQLDA_CURRENT_VERSION, IB_QUERY->in_sqlda)) {
+	if (ib_query->in_sqlda->sqln < ib_query->in_sqlda->sqld) {
+		ib_query->in_sqlda = erealloc(ib_query->in_sqlda, XSQLDA_LENGTH(ib_query->in_sqlda->sqld));
+		ib_query->in_sqlda->sqln = ib_query->in_sqlda->sqld;
+		ib_query->in_sqlda->version = SQLDA_CURRENT_VERSION;
+		if (isc_dsql_describe_bind(IB_STATUS, &ib_query->stmt, SQLDA_CURRENT_VERSION, ib_query->in_sqlda)) {
 			_php_ibase_error(TSRMLS_C);
 			goto _php_ibase_alloc_query_error;
 		}
 	}
 	
 	/* allocate arrays... */
-	if (_php_ibase_alloc_array(&IB_QUERY->in_array, &IB_QUERY->in_array_cnt, IB_QUERY->in_sqlda, link->handle, trans->handle TSRMLS_CC) == FAILURE) {
+	if (_php_ibase_alloc_array(&ib_query->in_array, &ib_query->in_array_cnt, ib_query->in_sqlda, link->handle, trans->handle TSRMLS_CC) == FAILURE) {
 		goto _php_ibase_alloc_query_error; /* error report already done */
 	}
 	
-	if (_php_ibase_alloc_array(&IB_QUERY->out_array, &IB_QUERY->out_array_cnt, IB_QUERY->out_sqlda, link->handle, trans->handle TSRMLS_CC) == FAILURE) {
+	if (_php_ibase_alloc_array(&ib_query->out_array, &ib_query->out_array_cnt, ib_query->out_sqlda, link->handle, trans->handle TSRMLS_CC) == FAILURE) {
 		goto _php_ibase_alloc_query_error;
 	}
 
 	/* no, haven't placeholders at all */
-	if (IB_QUERY->in_sqlda->sqld == 0) {
-		efree(IB_QUERY->in_sqlda);
-		IB_QUERY->in_sqlda = NULL;
+	if (ib_query->in_sqlda->sqld == 0) {
+		efree(ib_query->in_sqlda);
+		ib_query->in_sqlda = NULL;
 	}
 
-	if (IB_QUERY->out_sqlda->sqld == 0) {
-		efree(IB_QUERY->out_sqlda);
-		IB_QUERY->out_sqlda = NULL;
+	if (ib_query->out_sqlda->sqld == 0) {
+		efree(ib_query->out_sqlda);
+		ib_query->out_sqlda = NULL;
 	}
 
 	return SUCCESS;
 	
 _php_ibase_alloc_query_error:
 	
-	if (IB_QUERY->out_sqlda) {
-		efree(IB_QUERY->out_sqlda);
+	if (ib_query->out_sqlda) {
+		efree(ib_query->out_sqlda);
 	}
-	if (IB_QUERY->in_sqlda) {
-		efree(IB_QUERY->in_sqlda);
+	if (ib_query->in_sqlda) {
+		efree(ib_query->in_sqlda);
 	}
-	if (IB_QUERY->out_array) {
-		efree(IB_QUERY->out_array);
+	if (ib_query->out_array) {
+		efree(ib_query->out_array);
 	}
-	if (IB_QUERY->query) {
-		efree(IB_QUERY->query);
+	if (ib_query->query) {
+		efree(ib_query->query);
 	}
-	efree(IB_QUERY);
-	IB_QUERY = NULL;
-	
 	return FAILURE;
-#undef IB_QUERY
 }
 /* }}} */
 
@@ -2055,7 +2027,7 @@ PHP_FUNCTION(ibase_query)
 	int i, bind_n = 0, trans_res_id = 0;
 	ibase_db_link *ib_link = NULL;
 	ibase_trans *trans = NULL;
-	ibase_query *ib_query;
+	ibase_query ib_query;
 	ibase_result *ib_result = NULL;
 	char *query;
 
@@ -2181,8 +2153,8 @@ PHP_FUNCTION(ibase_query)
 		RETURN_FALSE;
 	}
 
-	if (_php_ibase_exec(INTERNAL_FUNCTION_PARAM_PASSTHRU, &ib_result, ib_query, bind_n, bind_args) == FAILURE) {
-		_php_ibase_free_query(ib_query TSRMLS_CC);
+	if (_php_ibase_exec(INTERNAL_FUNCTION_PARAM_PASSTHRU, &ib_result, &ib_query, bind_n, bind_args) == FAILURE) {
+		_php_ibase_free_query(&ib_query TSRMLS_CC);
 		free_alloca(args);
 		RETURN_FALSE;
 	}
@@ -2191,13 +2163,12 @@ PHP_FUNCTION(ibase_query)
 	
 	if (ib_result) { /* select statement */
 		ib_result->drop_stmt = 1; /* drop stmt when free result */
-		ib_query->stmt = NULL; /* keep stmt when free query */
-		_php_ibase_free_query(ib_query TSRMLS_CC);
 		ib_result->has_more_rows = 1;
 		ZEND_REGISTER_RESOURCE(return_value, ib_result, le_result);
-	} else {
-		_php_ibase_free_query(ib_query TSRMLS_CC);
+
+		ib_query.stmt = NULL; /* keep stmt when free query */
 	}
+	_php_ibase_free_query(&ib_query TSRMLS_CC);
 }
 /* }}} */
 
@@ -2736,7 +2707,7 @@ static void _php_ibase_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int fetch_type)
 }
 /* }}} */
 
-/* {{{ proto array ibase_fetch_row(resource result [, int blob_flag])
+/* {{{ proto array ibase_fetch_row(resource result [, int fetch_flags])
    Fetch a row  from the results of a query */
 PHP_FUNCTION(ibase_fetch_row)
 {
@@ -2744,7 +2715,7 @@ PHP_FUNCTION(ibase_fetch_row)
 }
 /* }}} */
 
-/* {{{ proto array ibase_fetch_assoc(resource result [, int blob_flag])
+/* {{{ proto array ibase_fetch_assoc(resource result [, int fetch_flags])
    Fetch a row  from the results of a query */
 PHP_FUNCTION(ibase_fetch_assoc)
 {
@@ -2752,7 +2723,7 @@ PHP_FUNCTION(ibase_fetch_assoc)
 }
 /* }}} */
 
-/* {{{ proto object ibase_fetch_object(resource result [, int blob_flag])
+/* {{{ proto object ibase_fetch_object(resource result [, int fetch_flags])
    Fetch a object from the results of a query */
 PHP_FUNCTION(ibase_fetch_object)
 {
@@ -2865,7 +2836,10 @@ PHP_FUNCTION(ibase_prepare)
 		RETURN_FALSE;
 	}
 	
-	if (_php_ibase_alloc_query(&ib_query, ib_link, trans, query, ib_link->dialect, trans_res_id TSRMLS_CC) == FAILURE) {
+	ib_query = emalloc(sizeof(ibase_query));
+
+	if (_php_ibase_alloc_query(ib_query, ib_link, trans, query, ib_link->dialect, trans_res_id TSRMLS_CC) == FAILURE) {
+		efree(ib_query);
 		RETURN_FALSE;
 	}
 	ib_query->cursor_open = 0;
