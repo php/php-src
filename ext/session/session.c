@@ -507,9 +507,12 @@ static void _php_session_save_current_state(PSLS_D)
 		ret = PS(mod)->write(&PS(mod_data), PS(id), "", 0);
 	
 	if (ret == FAILURE)
-		php_error(E_WARNING, "Failed to write session data. Please check that "
-				"the current setting of session.save_path is correct (%s)",
+		php_error(E_WARNING, "Failed to write session data (%s). Please "
+				"verify that the current setting of session.save_path "
+				"is correct (%s)",
+				PS(mod)->name,
 				PS(save_path));
+	
 	
 	PS(mod)->close(&PS(mod_data));
 }
