@@ -22,6 +22,11 @@
 /* $Id$ */
 
 #define NO_REGEX_EXTRA_H
+#ifdef WIN32
+#include <winsock2.h>
+#define PHP_EXPORTS
+#include <stddef.h>
+#endif
 
 #include "php.h"
 
@@ -53,6 +58,7 @@
 #include "util_script.h"
 #include "php_version.h"
 /*#include "mod_php4.h"*/
+
 
 PHPAPI int apache_php_module_main(request_rec *r, int fd, int display_source_mode SLS_DC)
 {
