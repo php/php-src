@@ -2,12 +2,13 @@
 
 	class php_function extends php_element {
 	  // all known php types
-		function php_function($name, $summary, $proto, $desc="", $code="") {
+		function php_function($name, $summary, $proto, $desc="", $code="", $role="") {
 			$this->name = $name;
 			$this->summary = $summary;
-			$this->parse_proto($proto);
 			$this->desc = empty($desc) ? "&warn.undocumented.func;" : $desc;
       $this->code = $code;
+			$this->role = empty($role) ? "public" : $role;
+			if($this->role === "public") $this->parse_proto($proto);
 		} 
 		
 		function parse_proto($proto) {
@@ -76,6 +77,10 @@
 		}
 
 		function c_code() {
+			$code = "";
+
+			switch($this->role) {
+			case "public":
 			$code .= "\n/* {{{ proto {$this->returns} {$this->name}(";
 			if(isset($this->params)) {
 				foreach($this->params as $param) {
@@ -160,7 +165,18 @@
 			}
 			$code .= "\tphp_error(E_WARNING, \"{$this->name}: not yet implemented\");\n";
 			$code .= "}\n/* }}} */\n\n";
-
+			  break;
+		  case "internal":
+				if(!empty($this->code)) {
+					$code .= "\t\t{\n";
+					$code .= $this->code."\n";
+					$code .= "\t\t}\n";
+				}
+				break;
+  		case "private":
+				$code .= $this->code."\n";				
+				break;
+		  }
 			return $code;
 		}
 

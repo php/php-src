@@ -23,6 +23,8 @@
 		
 		$this->constants = array();
 		$this->functions = array();
+		$this->internal_functions = array();
+		$this->private_functions = array();
 		$this->globals   = array();
 		$this->phpini    = array();
 		$this->users     = array();
@@ -128,7 +130,22 @@
 		}
 
 		function handle_functions_function($attr) {
-			$this->functions[$attr['name']] = new php_function($attr['name'], $this->func_summary, $this->func_proto, @$this->func_desc, @$this->func_code);
+			$role = isset($attr['role']) ? $attr['role'] : "public";
+			$function = new php_function($attr['name'], $this->func_summary, $this->func_proto, @$this->func_desc, @$this->func_code, $role);
+			switch($role) {
+			case "internal":
+				$this->internal_functions[$attr['name']] = $function;
+				break;
+			case "private":
+				$this->private_functions[$attr['name']] = $function;
+				break;
+			case "public":
+				$this->functions[$attr['name']] = $function;
+				break;
+			default:
+				$this->error("function role must be either public, private or internal");
+				break;
+			}
 			unset($this->func_summary);
 			unset($this->func_proto);
 			unset($this->func_desc);
@@ -477,15 +494,20 @@ PHP_MINIT_FUNCTION({$this->name})
 ";
 
 		if(count($this->globals)) {
-			$code .= "  ZEND_INIT_MODULE_GLOBALS({$this->name}, php_{$this->name}_init_globals, NULL)\n";
+			$code .= "\tZEND_INIT_MODULE_GLOBALS({$this->name}, php_{$this->name}_init_globals, NULL)\n";
 		}
 
 		if(count($this->phpini)) {
-			$code .= "  REGISTER_INI_ENTRIES();\n";
+			$code .= "\tREGISTER_INI_ENTRIES();\n";
 		}
 
-		$code .="\n  /* add your stuff here */\n";
-
+		if(isset($this->internal_functions['MINIT'])) {
+      if(count($this->globals) || count($this->phpini)) $code .= "\n\t{\n";
+			$code .= $this->internal_functions['MINIT']->code;
+      if(count($this->globals) || count($this->phpini)) $code .= "\n\t}\n";
+		} else {
+			$code .="\n\t/* add your stuff here */\n";
+		}
 		$code .= "
   return SUCCESS;
 }
@@ -500,10 +522,16 @@ PHP_MSHUTDOWN_FUNCTION({$this->name})
 ";
 
 		if(count($this->phpini)) {
-			$code .= "  UNREGISTER_INI_ENTRIES();\n";
+			$code .= "\tUNREGISTER_INI_ENTRIES();\n";
 		}
 
-		$code .="\n  /* add your stuff here */\n";
+		if(isset($this->internal_functions['MSHUTDOWN'])) {
+      if(count($this->phpini)) $code .= "\n\t{\n";
+			$code .= $this->internal_functions['MSHUTDOWN']->code;
+      if(count($this->phpini)) $code .= "\n\t}\n";
+		} else {
+		  $code .="\n\t/* add your stuff here */\n";
+    }
 
 		$code .= "
   return SUCCESS;
@@ -516,9 +544,16 @@ PHP_MSHUTDOWN_FUNCTION({$this->name})
 /* {{{ PHP_RINIT_FUNCTION */
 PHP_RINIT_FUNCTION({$this->name})
 {
-  /* add your stuff here */
+";
 
-   return SUCCESS;
+		if(isset($this->internal_functions['RINIT'])) {
+			$code .= $this->internal_functions['RINIT']->code;
+		} else {
+       $code .= "  /* add your stuff here */\n";
+    }
+
+    $code .= "
+\treturn SUCCESS;
 }
 /* }}} */
 
@@ -528,9 +563,16 @@ PHP_RINIT_FUNCTION({$this->name})
 /* {{{ PHP_RSHUTDOWN_FUNCTION */
 PHP_RSHUTDOWN_FUNCTION({$this->name})
 {
-  /* add your stuff here */
+";
 
-  return SUCCESS;
+		if(isset($this->internal_functions['RSHUTDOWN'])) {
+			$code .= $this->internal_functions['RSHUTDOWN']->code;
+		} else {
+       $code .= "  /* add your stuff here */\n";
+    }
+
+    $code .= "
+\treturn SUCCESS;
 }
 /* }}} */
 
@@ -540,15 +582,23 @@ PHP_RSHUTDOWN_FUNCTION({$this->name})
 /* {{{ PHP_MINFO_FUNCTION */
 PHP_MINFO_FUNCTION({$this->name})
 {
-  php_info_print_table_start();
-  php_info_print_table_header(2, \"{$this->name} support\", \"enabled\");
-  php_info_print_table_end();
+\tphp_info_print_table_start();
+\tphp_info_print_table_header(2, \"{$this->name} support\", \"enabled\");
+\tphp_info_print_table_end();
 
-  /* add your stuff here */
 ";
 
+		if(isset($this->internal_functions['MINFO'])) {
+      $code .= "\n\t{\n";
+			$code .= $this->internal_functions['MINFO']->code;
+      $code .= "\n\t}\n";
+		} else {
+       $code .= "\t/* add your stuff here */\n";
+    }
+
+
 if(count($this->phpini)) {
-	$code .= "\n  DISPLAY_INI_ENTRIES();";
+	$code .= "\n\tDISPLAY_INI_ENTRIES();";
 }
 $code .= "
 }
@@ -561,6 +611,16 @@ $code .= "
 
 	// }}} 
 
+
+	function private_functions_c() {
+		$code = "";
+
+		foreach ($this->private_functions as $name => $func) {
+      $code .= "\n\t/* {{{ $name() */\n{$func->code}\n\t/* }}} */\n\n";
+    }
+
+  	return $code;
+  }
 
 	// {{{ public functions
 
@@ -749,7 +809,7 @@ $code .= "
 			fputs($fp, "/* {{{ {$this->name}_functions[] */\n");
 			fputs($fp, "function_entry {$this->name}_functions[] = {\n");
 			foreach($this->functions as $name => $function) {
-				fputs($fp, sprintf("  PHP_FE(%-20s, NULL)\n",$name));
+				fputs($fp, sprintf("\tPHP_FE(%-20s, NULL)\n",$name));
 			}
 			fputs($fp, "};\n/* }}} */\n\n");
 			
@@ -760,6 +820,8 @@ $code .= "
 			fputs($fp, "/* }}} */\n\n");
 
 			fputs($fp, $this->internal_functions_c());
+
+			fputs($fp, $this->private_functions_c());
 
 			fputs($fp, $this->public_functions_c());
 
