@@ -3537,10 +3537,9 @@ PHPAPI void php_strip_tags(char *rbuf, int len, int *stateptr, char *allow, int 
 PHP_FUNCTION(str_repeat)
 {
 	zval		**input_str;		/* Input string */
-	zval		**mult;				/* Multiplier */
-	char		 *result;			/* Resulting string */
-	int			  result_len;		/* Length of the resulting string */
-	int			  i;
+	zval		**mult;			/* Multiplier */
+	char		*result;		/* Resulting string */
+	int		result_len;		/* Length of the resulting string */
 	
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &input_str, &mult) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -3567,12 +3566,24 @@ PHP_FUNCTION(str_repeat)
 	result_len = Z_STRLEN_PP(input_str) * Z_LVAL_PP(mult);
 	result = (char *)emalloc(result_len + 1);
 	
-	/* Copy the input string into the result as many times as necessary */
-	for (i = 0; i < Z_LVAL_PP(mult); i++) {
-		memcpy(result + Z_STRLEN_PP(input_str) * i,
-			   Z_STRVAL_PP(input_str),
-			   Z_STRLEN_PP(input_str));
+	/* Heavy optimization for situations where multiplier is 1 byte long */
+	if (Z_LVAL_PP(mult) == 1) {
+		memset(result, *(Z_STRVAL_PP(input_str)), Z_LVAL_PP(mult)); 
+	} else {
+		char *s, *e, *ee;
+		int l=0;
+		memcpy(result, Z_STRVAL_PP(input_str), Z_STRLEN_PP(input_str));
+		s = result;
+		e = result + Z_STRLEN_PP(input_str);
+		ee = result + result_len;
+		
+		while (e<ee) {
+			l = (e-s) < (ee-e) ? (e-s) : (ee-e);
+			memmove(e, s, l);
+			e += l;
+		}
 	}
+
 	result[result_len] = '\0';
 	
 	RETURN_STRINGL(result, result_len, 0);
