@@ -26,10 +26,8 @@ extern zend_module_entry simplexml_module_entry;
 
 #ifdef PHP_WIN32
 #define PHP_SIMPLEXML_API __declspec(dllexport)
-#define SIMPLEXML_IMPORT __declspec(dllimport)
 #else
 #define PHP_SIMPLEXML_API
-#define SIMPLEXML_IMPORT extern
 #endif
 
 #ifdef ZTS
