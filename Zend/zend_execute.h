@@ -142,6 +142,7 @@ void execute_new_code(TSRMLS_D);
 
 
 /* services */
+ZEND_API char *get_active_class_name(char **space TSRMLS_DC);
 ZEND_API char *get_active_function_name(TSRMLS_D);
 ZEND_API char *zend_get_executed_filename(TSRMLS_D);
 ZEND_API uint zend_get_executed_lineno(TSRMLS_D);

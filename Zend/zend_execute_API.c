@@ -297,6 +297,35 @@ void shutdown_executor(TSRMLS_D)
 }
 
 
+/* return class name and "::" or "". */
+ZEND_API char *get_active_class_name(char **space TSRMLS_DC)
+{
+	if (!zend_is_executing(TSRMLS_C)) {
+		if (space) {
+			*space = "";
+		}
+		return "";
+	}
+	switch (EG(function_state_ptr)->function->type) {
+		case ZEND_USER_FUNCTION:
+		case ZEND_INTERNAL_FUNCTION:
+		{
+			zend_class_entry *ce = EG(function_state_ptr)->function->common.scope;
+
+			if (space) {
+				*space = ce ? "::" : "";
+			}
+			return ce ? ce->name : "";
+		}
+		default:
+			if (space) {
+				*space = "";
+			}
+			return "";
+	}
+}
+
+
 ZEND_API char *get_active_function_name(TSRMLS_D)
 {
 	if (!zend_is_executing(TSRMLS_C)) {
