@@ -114,6 +114,8 @@ static int mysql_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len, 
 	pdo_mysql_stmt *S = ecalloc(1, sizeof(pdo_mysql_stmt));
 
 	S->H = H;
+	S->result = NULL;
+
 	stmt->driver_data = S;
 	stmt->methods = &mysql_stmt_methods;
 	stmt->supports_placeholders = PDO_PLACEHOLDER_NONE;
