@@ -2,7 +2,6 @@ dnl $Id$
 dnl config.m4 for extension domxml
 
 PHP_ARG_WITH(dom, for DOM support,
-Make sure that the comment is aligned:
 [  --with-dom[=DIR]       Include DOM support (requires libxml >= 2.0).
                           DIR is the libxml install directory,
                           defaults to /usr.])
