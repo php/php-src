@@ -364,7 +364,7 @@ ZEND_INI_DISP(zend_ini_color_displayer_cb)
 	}
 	if (value) {
 		if (zend_uv.html_errors) {
-			zend_printf("<font color=\"%s\">%s</font>", value, value);
+			zend_printf("<font style=\"color: %s\">%s</font>", value, value);
 		} else {
 			ZEND_PUTS(value);
 		}   
