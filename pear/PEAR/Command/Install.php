@@ -94,9 +94,7 @@ class PEAR_Command_Install extends PEAR_Command_Common
 
     function run($command, $options, $params)
     {
-        $installer = &new PEAR_Installer($this->config);
-        $installer->setFrontend($this->ui);
-        $installer->debug = $this->config->get('verbose');
+        $installer = &new PEAR_Installer($this->ui);
 
         $failmsg = '';
         $opts = array();
