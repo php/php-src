@@ -1,3 +1,61 @@
+2004-05-13  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      ext/standard/string.c
+      ext/standard/tests/strings/bug28386.phpt:
+      MFH: Fixed bug #28386 (wordwrap() wraps lines 1 character too soon).
+
+    * ext/standard/string.c
+      ext/standard/tests/strings/bug28386.phpt:
+      Fixed bug #28386 (wordwrap() wraps lines 1 character too soon).
+
+    * (PHP_4_3)
+      sapi/isapi/php4isapi.c:
+      MFH: Make isapi more compatible with apache sapis as far as the creation
+      $_COOKIE super-global and various $_SERVER values.
+
+    * sapi/isapi/php5isapi.c:
+      Make isapi more compatible with apache sapis as far as the creation
+      $_COOKIE super-global and various $_SERVER values.
+
+2004-05-13  Edin Kadribasic  <edink@emini.dk>
+
+    * (PHP_4_3)
+      ext/curl/curl.c:
+      Make curl compile with the latest win32 libcurl
+
+2004-05-13  Stanislav Malyshev  <stas@zend.com>
+
+    * (PECL_4_3)
+      ext/sqlite/php_sqlite.h
+      ext/sqlite/sqlite.c:
+      add sqlite_exec - now to the right tag
+
+    * ext/sqlite/php_sqlite.h
+      ext/sqlite/sqlite.c:
+      add sqlite_exec()
+
+    * (PHP_4)
+      ext/sqlite/php_sqlite.h
+      ext/sqlite/sqlite.c:
+      Add sqlite_exec
+
+2004-05-13  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      ext/session/tests/skipif.inc:
+      MFH: Skip session tests if session.save_path is not writable.
+
+    * ext/session/tests/skipif.inc:
+      Skip session tests if session.save_path is not writable.
+
+2004-05-13  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * TSRM/TSRM.c:
+      - Once ts_free_id() will be used, we cannot call ctors for deleted ids
+        when creating new threads.
+
 2004-05-12  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ZendEngine2/zend_API.c:
