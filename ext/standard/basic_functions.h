@@ -90,6 +90,7 @@ PHP_FUNCTION(highlight_string);
 ZEND_API void php_get_highlight_struct(zend_syntax_highlighter_ini *syntax_highlighter_ini);
 
 PHP_FUNCTION(ini_get);
+PHP_FUNCTION(ini_get_all);
 PHP_FUNCTION(ini_set);
 PHP_FUNCTION(ini_restore);
 
