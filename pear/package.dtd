@@ -1,5 +1,5 @@
 <!--
-     $Id: package.dtd,v 1.8 2001-09-02 00:11:44 jmcastagnetto Exp $
+     $Id: package.dtd,v 1.9 2001-09-04 03:23:56 ssb Exp $
 
      This is the PEAR package description, version 1.1b1.
      It should be used with the informal public identifier:
@@ -44,13 +44,13 @@
 	%global.atts; 
 >
 <!--=============== ELEMENT: maintainer ====================================-->
-<!ELEMENT maintainer (initials, name, email)>
+<!ELEMENT maintainer (user, name, email)>
 <!ATTLIST maintainer
 	%global.atts; 
 >
-<!--=============== ELEMENT: initials ======================================-->
-<!ELEMENT initials (#PCDATA)>
-<!ATTLIST initials
+<!--=============== ELEMENT: user ==========================================-->
+<!ELEMENT user (#PCDATA)>
+<!ATTLIST user
 	%global.atts; 
 >
 <!--=============== ELEMENT: email =========================================-->
