@@ -27,8 +27,8 @@
   /* Lists an object array
   */
   function list_attr($attributes) {
-    var_dump($attributes);
-		return;
+//    var_dump($attributes);
+//		return;
     for($i=0; $i<count($attributes); $i++) {
       $key = key($attributes);
       switch($key) {
@@ -59,7 +59,17 @@
           printf("\n");
           break;
         default:
-          printf("%s = %s\n", $key, $attributes[$key]);
+          if(is_array($attributes[$key])) {
+             $group_arr = $attributes[$key];
+             $cj = count($group_arr);
+             for($j=0; $j<$cj; $j++) {
+               printf("%s = %s\n", $key, $group_arr[$j]);
+               next($group_arr);
+             }
+           } else {
+             printf("%s = %s\n", $key, $attributes[$key]);
+           }
+
         }
       next($attributes);
       }
