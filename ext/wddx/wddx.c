@@ -618,10 +618,12 @@ static void _php_wddx_deserialize(zval *packet, zval *return_value)
 	
 	XML_ParserFree(parser);
 
-	wddx_stack_top(&stack, (void**)&ent);
-	*return_value = *(ent->data);
-	zval_copy_ctor(return_value);
-	
+	if (!wddx_stack_is_empty(&stack)) {
+		wddx_stack_top(&stack, (void**)&ent);
+		*return_value = *(ent->data);
+		zval_copy_ctor(return_value);
+	}
+		
 	wddx_stack_destroy(&stack);
 }
 /* }}} */
