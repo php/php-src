@@ -1,3 +1,87 @@
+2003-08-16  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS:
+      BFN
+
+2003-08-16  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * NEWS
+      ext/standard/parsedate.y
+      ext/standard/tests/time/bug17988.phpt:
+      - Fixed bug #17988: strtotime fails to parse timestamp from postgresql
+
+2003-08-16  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_reflection_api.c:
+      Simplify abstract method declaration
+
+    * ZendEngine2/zend_object_handlers.h:
+      WS
+
+2003-08-16  Ard Biesheuvel  <a.k.biesheuvel@its.tudelft.nl>
+
+    * ext/interbase/tests/004.phpt:
+      Fix failure on accidental fread() of 0 bytes
+
+    * ext/interbase/interbase.c:
+      Always fill entire buffer in ibase_blob_get()
+
+2003-08-16  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * tests/lang/bug24658.phpt:
+      Add some debug help
+
+2003-08-16  Ard Biesheuvel  <a.k.biesheuvel@its.tudelft.nl>
+
+    * ext/interbase/interbase.c:
+      Fixed bug #18744
+
+    * ext/interbase/php_interbase.h:
+      Some general cleaning up
+      Some preliminary changes for extensions to array functions
+
+    * ext/interbase/interbase.c:
+      Fixed bug #24224
+      Some general cleaning up
+      Some preliminary changes for extensions to array functions
+
+    * ext/interbase/tests/004.phpt:
+      Test for bug #24224
+
+2003-08-16  Jason Greene  <jason@inetgurus.net>
+
+    * ext/sockets/php_sockets.h
+      ext/sockets/php_sockets_win.c
+      ext/sockets/php_sockets_win.h
+      ext/sockets/sockets.c:
+      Remove all vector based functions for the following reasons:
+      - This solves alot of platform compatibility problems
+      - The possible security issue of allocating an incredibly large vector
+      pool is prevented
+      - They are of little to no benefit in a high level language
+      - 99% of all things done with these functions can be done using
+      sendto/recvfrom
+
+2003-08-16  Ard Biesheuvel  <a.k.biesheuvel@its.tudelft.nl>
+
+    * ext/interbase/interbase.c
+      ext/interbase/php_interbase.h:
+      Removed ibase_num_rows()
+      Converted some MACRO-isms
+
+2003-08-16  Jani Taskinen  <sniper@iki.fi>
+
+    * NEWS:
+      Removed ibase_num_rows() (requested by Ard)
+
+2003-08-16  Ard Biesheuvel  <a.k.biesheuvel@its.tudelft.nl>
+
+    * ext/interbase/interbase.c:
+      Added comment about ibase_num_rows()
+
 2003-08-15  Sascha Schumann  <sascha@schumann.cx>
 
     * ZendEngine2/zend_execute.c
