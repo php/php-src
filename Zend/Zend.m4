@@ -212,7 +212,7 @@ AC_C_INLINE
 AC_SUBST(INLINE_CFLAGS)
 
 AC_MSG_CHECKING(target system is Darwin)
-if echo "$target" | grep "darwin"; then
+if echo "$target" | grep "darwin" > /dev/null; then
   AC_DEFINE([DARWIN], 1, [Define if the target system is darwin])
   AC_MSG_RESULT(yes)
 else
