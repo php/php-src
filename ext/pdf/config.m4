@@ -4,6 +4,7 @@ dnl
 
 PHP_ARG_WITH(pdflib,for PDFlib support,
 [  --with-pdflib[=DIR]     Include PDFlib support.])
+remember_ext_shared=$ext_shared
 
 if test "$PHP_PDFLIB" != "no"; then
 
@@ -86,6 +87,7 @@ if test "$PHP_PDFLIB" != "no"; then
   dnl # The main PDFlib configure
   dnl #
 
+  ext_shared=$remember_ext_shared
   case $PHP_PDFLIB in
     yes)
       AC_CHECK_LIB(pdf, PDF_show_boxed, [
@@ -122,3 +124,4 @@ See config.log for more information.
     ;;
   esac
 fi
+
