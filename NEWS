@@ -13,6 +13,8 @@ PHP 4                                                                      NEWS
 - Moved extensions to PECL (http://pear.php.net/): (James, Derick)
   . ext/vpopmail
   . ext/cybermut
+- Fixed bug #20424 (stream_get_meta_data craches on a normal file stream).
+  (Derick, Wez)
 - Added "neutral" language entry to mbstring spec. (Moriyoshi) 
 - Modified log() to accept multiple bases. (Jason)
 - Added gd_info() which returns an array of gd support information. (Marcus)

@@ -2029,7 +2029,8 @@ static php_stream_wrapper_ops php_plain_files_wrapper_ops = {
 	NULL,
 	NULL,
 	php_plain_files_url_stater,
-	php_plain_files_dir_opener
+	php_plain_files_dir_opener,
+	"plainfile"
 };
 
 static php_stream_wrapper php_plain_files_wrapper = {
