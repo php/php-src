@@ -20,4 +20,5 @@
 
 * Finish PHP streams abstraction, nuke all that issock stuff, implement SSL
   socket support. (wez)
-
+  - ext/ftp/ -> all FILEs to streams
+  - ext/bz2/ -> convert to stream impl.
