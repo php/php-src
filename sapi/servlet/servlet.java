@@ -160,7 +160,7 @@ public class servlet extends HttpServlet {
        String contextPath=getServletContext().getRealPath(servletPath);
 
        send(request.getMethod(), request.getQueryString(),
-            request.getPathInfo(), contextPath,
+            request.getRequestURI(), contextPath,
             request.getContentType(), request.getContentLength(),
 	    request.getRemoteUser(), display_source_mode);
 
