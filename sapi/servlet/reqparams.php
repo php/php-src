@@ -7,7 +7,7 @@
 <h3>Request Parameters Example</h3>
 Parameters in this request:<br>
 <?php
-  $e = $request->parameterNames;
+  $e = $request->getParameterNames();
 
   if (!$e->hasMoreElements()) {
     echo "No Parameters, Please enter some"; 
