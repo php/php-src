@@ -1518,7 +1518,16 @@ PHPAPI php_stream *_php_stream_fopen_with_path(char *filename, char *mode, char 
 	filename_length = strlen(filename);
 
 	/* Relative path open */
-	if (*filename == '.') {
+	if (*filename == '.' && (*(filename+1) == '/' || *(filename+1) == '.')) {
+		/* further checks, we could have ....... filenames */
+		ptr = filename + 1;
+		if (ptr == '.') {
+			while (*(++ptr) == '.');
+			if (ptr != '/') { /* not a relative path after all */
+				goto not_relative_path;
+			}
+		}
+
 
 		if (php_check_open_basedir(filename TSRMLS_CC)) {
 			return NULL;
@@ -1534,6 +1543,8 @@ PHPAPI php_stream *_php_stream_fopen_with_path(char *filename, char *mode, char 
 	 * files in safe_mode_include_dir (or subdir) are excluded from
 	 * safe mode GID/UID checks
 	 */
+
+	not_relative_path:
 
 	/* Absolute path open */
 	if (IS_ABSOLUTE_PATH(filename, filename_length)) {
