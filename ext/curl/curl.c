@@ -97,6 +97,8 @@ function_entry curl_functions[] = {
 	PHP_FE(curl_exec,     NULL)
 #if LIBCURL_VERSION_NUM >= 0x070401
 	PHP_FE(curl_getinfo,  NULL)
+#else
+	PHP_FALIAS(curl_getinfo, warn_not_available, NULL)
 #endif
 	PHP_FE(curl_error,    NULL)
 	PHP_FE(curl_errno,    NULL)
@@ -526,11 +528,7 @@ PHP_FUNCTION(curl_setopt)
 					RETURN_FALSE;
 				}
 
-				commands = (struct curl_slist *)emalloc(sizeof(struct curl_slist));
-				if (!commands) {
-					php_error(E_WARNING, "Couldn't allocate command list from %s()", get_active_function_name());
-					RETURN_FALSE;
-				}
+				commands = (struct curl_slist *) emalloc(sizeof(struct curl_slist));
 				memset(commands, 0, sizeof(struct curl_slist));
 				
 				for (zend_hash_internal_pointer_reset(php_commands);
@@ -604,7 +602,7 @@ PHP_FUNCTION(curl_exec)
 	} else if (curl_handle->return_transfer &&
 	           curl_handle->output_file) {
 
-		ZEND_FETCH_RESOURCE(fp, FILE *, (zval **)NULL, curl_handle->output_file, "File-Handle", php_file_le_fopen());
+		ZEND_FETCH_RESOURCE(fp, FILE *, (zval **) NULL, curl_handle->output_file, "File-Handle", php_file_le_fopen());
 
 	}
 	
@@ -626,38 +624,38 @@ PHP_FUNCTION(curl_exec)
 	}
 	
 	fseek(fp, 0, SEEK_SET);
-		
+
 	if (curl_handle->php_stdout) {
 		
 		while ((b = fread(buf, 1, sizeof(buf), fp)) > 0) {
 			php_write(buf, b);
 		}
-		
+
 		if (is_temp_file)
 			fclose(fp);
-		
+
 	} else {
-		
+
 		char *ret_data;
 		struct stat stat_sb;
-		
+
 		if (fstat(fileno(fp), &stat_sb)) {
 			RETURN_FALSE;
 		}
 				
-		ret_data = emalloc(stat_sb.st_size+1);
-		
+		ret_data = (char *) emalloc(stat_sb.st_size + 1);
+
 		while ((b = fread(buf, 1, sizeof(buf), fp)) > 0) {
 			memcpy(ret_data + pos, buf, b);
 			pos += b;
 		}
 		ret_data[stat_sb.st_size] = '\0';
-		
+
 		if (is_temp_file)
 			fclose(fp);
-		
+
 		RETURN_STRINGL(ret_data, stat_sb.st_size, 0);
-	
+
 	}
 
 }
@@ -688,37 +686,37 @@ PHP_FUNCTION(curl_getinfo)
 
 		curl_easy_getinfo(curl_handle->cp, CURLINFO_EFFECTIVE_URL, &url);
 		add_assoc_string(return_value, "url", url, 1);
-		
+
 		curl_easy_getinfo(curl_handle->cp, CURLINFO_HTTP_CODE, &l_code);
 		add_assoc_long(return_value, "http_code", l_code);
-		
+
 		curl_easy_getinfo(curl_handle->cp, CURLINFO_HEADER_SIZE, &l_code);
 		add_assoc_long(return_value, "header_size", l_code);
-		
+
 		curl_easy_getinfo(curl_handle->cp, CURLINFO_REQUEST_SIZE, &l_code);
 		add_assoc_long(return_value, "request_size", l_code);
-		
+
 		curl_easy_getinfo(curl_handle->cp, CURLINFO_TOTAL_TIME, &d_code);
 		add_assoc_double(return_value, "total_time", d_code);
-		
+
 		curl_easy_getinfo(curl_handle->cp, CURLINFO_NAMELOOKUP_TIME, &d_code);
 		add_assoc_double(return_value, "namelookup_time", d_code);
-		
+
 		curl_easy_getinfo(curl_handle->cp, CURLINFO_CONNECT_TIME, &d_code);
 		add_assoc_double(return_value, "connect_time", d_code);
-		
+
 		curl_easy_getinfo(curl_handle->cp, CURLINFO_PRETRANSFER_TIME, &d_code);
 		add_assoc_double(return_value, "pretransfer_time", d_code);
-		
+
 		curl_easy_getinfo(curl_handle->cp, CURLINFO_SIZE_UPLOAD, &d_code);
 		add_assoc_double(return_value, "size_upload", d_code);
-		
+
 		curl_easy_getinfo(curl_handle->cp, CURLINFO_SIZE_DOWNLOAD, &d_code);
 		add_assoc_double(return_value, "size_download", d_code);
-		
+
 		curl_easy_getinfo(curl_handle->cp, CURLINFO_SPEED_DOWNLOAD, &d_code);
 		add_assoc_double(return_value, "speed_download", d_code);
-		
+
 		curl_easy_getinfo(curl_handle->cp, CURLINFO_SPEED_UPLOAD, &d_code);
 		add_assoc_double(return_value, "speed_upload", d_code);
 	} else {
@@ -768,7 +766,7 @@ PHP_FUNCTION(curl_error)
 	    zend_get_parameters_ex(1, &curl_id) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	
+
 	ZEND_FETCH_RESOURCE(curl_handle, php_curl *, curl_id, -1, "CURL Handle", le_curl);
 	RETURN_STRING(curl_handle->error, 1);
 }
