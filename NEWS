@@ -1,5 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+26 Jun 2003, Version 4.3.3RC2
+- dummy (remove when first entry is added)
+
 19 Jun 2003, Version 4.3.3RC1
 - Synchronized bundled GD library with GD 2.0.15. (Ilia)
 - Improved the engine to use POSIX/socket IO where feasible. (Sascha)
