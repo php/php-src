@@ -2910,7 +2910,7 @@ int zend_recv_handler(ZEND_OPCODE_HANDLER_ARGS)
 
 	if (zend_ptr_stack_get_arg(arg_num, (void **) &param TSRMLS_CC)==FAILURE) {
 		zend_verify_arg_type((zend_function *) EG(active_op_array), arg_num, NULL TSRMLS_CC);
-		zend_error(E_WARNING, "Missing argument %ld for %s()\n", EX(opline)->op1.u.constant.value.lval, get_active_function_name(TSRMLS_C));
+		zend_error(E_WARNING, "Missing argument %ld for %s()", EX(opline)->op1.u.constant.value.lval, get_active_function_name(TSRMLS_C));
 		if (EX(opline)->result.op_type == IS_VAR) {
 			PZVAL_UNLOCK(*EX_T(EX(opline)->result.u.var).var.ptr_ptr);
 		}
