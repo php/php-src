@@ -2454,7 +2454,7 @@ int zend_init_fcall_by_name_handler(ZEND_OPCODE_HANDLER_ARGS)
 	zval *function_name;
 	zend_function *function;
 	zend_bool is_const;
-	char *function_name_strval;
+	char *function_name_strval, *lcname;
 	int function_name_strlen;
 
 	zend_ptr_stack_n_push(&EG(arg_types_stack), 3, EX(fbc), EX(object), EX(calling_scope));
@@ -2470,16 +2470,18 @@ int zend_init_fcall_by_name_handler(ZEND_OPCODE_HANDLER_ARGS)
 		if (Z_TYPE_P(function_name) != IS_STRING) {
 			zend_error(E_ERROR, "Function name must be a string");
 		}
-		function_name_strval = zend_str_tolower_dup(function_name->value.str.val, function_name->value.str.len);
+		function_name_strval = function_name->value.str.val;
 		function_name_strlen = function_name->value.str.len;
 	}
 
-	if (zend_hash_find(EG(function_table), function_name_strval, function_name_strlen+1, (void **) &function)==FAILURE) {
+	lcname = zend_str_tolower_dup(function_name_strval, function_name_strlen);
+	if (zend_hash_find(EG(function_table), lcname, function_name_strlen+1, (void **) &function)==FAILURE) {
+		efree(lcname);
 		zend_error(E_ERROR, "Call to undefined function %s()", function_name_strval);
 	}
 
+	efree(lcname);
 	if (!is_const) {
-		efree(function_name_strval);
 		FREE_OP(EX(Ts), &EX(opline)->op2, EG(free_op2));
 	} 
 

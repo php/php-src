@@ -1140,12 +1140,16 @@ void zend_do_receive_arg(zend_uchar op, znode *var, znode *offset, znode *initia
 int zend_do_begin_function_call(znode *function_name TSRMLS_DC)
 {
 	zend_function *function;
+	char *lcname;
 	
-	zend_str_tolower(function_name->u.constant.value.str.val, function_name->u.constant.value.str.len);
-	if (zend_hash_find(CG(function_table), function_name->u.constant.value.str.val, function_name->u.constant.value.str.len+1, (void **) &function)==FAILURE) {
+	lcname = zend_str_tolower_dup(function_name->u.constant.value.str.val, function_name->u.constant.value.str.len);
+	if (zend_hash_find(CG(function_table), lcname, function_name->u.constant.value.str.len+1, (void **) &function)==FAILURE) {
 		zend_do_begin_dynamic_function_call(function_name TSRMLS_CC);
+		efree(lcname);
 		return 1; /* Dynamic */
 	}
+	efree(function_name->u.constant.value.str.val);
+	function_name->u.constant.value.str.val = lcname;
 	
 	switch (function->type) {
 		case ZEND_USER_FUNCTION:	{
