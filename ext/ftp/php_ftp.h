@@ -64,6 +64,7 @@ PHP_FUNCTION(ftp_size);
 PHP_FUNCTION(ftp_mdtm);
 PHP_FUNCTION(ftp_rename);
 PHP_FUNCTION(ftp_delete);
+PHP_FUNCTION(ftp_site);
 PHP_FUNCTION(ftp_quit);
 
 #define phpext_ftp_ptr php_ftp_module_ptr

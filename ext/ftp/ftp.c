@@ -167,7 +167,7 @@ ftp_close(ftpbuf_t *ftp)
 {
 	if (ftp == NULL)
 		return NULL;
-	if (ftp->fd)
+	if (ftp->fd != -1)
 		close(ftp->fd);
 	ftp_gc(ftp);
 	free(ftp);
@@ -677,6 +677,21 @@ ftp_rename(ftpbuf_t *ftp, const char *src, const char *dest)
 	if (!ftp_putcmd(ftp, "RNTO", dest))
 		return 0;
 	if (!ftp_getresp(ftp) || ftp->resp != 250)
+		return 0;
+
+	return 1;
+}
+
+
+int
+ftp_site(ftpbuf_t *ftp, const char *cmd)
+{
+	if (ftp == NULL)
+		return 0;
+
+	if (!ftp_putcmd(ftp, "SITE", cmd))
+		return 0;
+	if (!ftp_getresp(ftp) || ftp->resp < 200 || ftp->resp >= 300)
 		return 0;
 
 	return 1;
