@@ -419,7 +419,7 @@ PHP_FUNCTION(imagecreate)
 #ifdef HAVE_GD_PNG
 
 /* {{{ proto int imagecreatefrompng(string filename)
-   Create a new image from file or URL */
+   Create a new image from PNG file or URL */
 PHP_FUNCTION(imagecreatefrompng)
 {
 	zval **file;
@@ -454,7 +454,7 @@ PHP_FUNCTION(imagecreatefrompng)
 /* }}} */
 
 /* {{{ proto int imagepng(int im [, string filename])
-   Output image to browser or file */
+   Output PNG image to browser or file */
 PHP_FUNCTION(imagepng)
 {
 	zval **imgind, **file;
@@ -524,7 +524,7 @@ PHP_FUNCTION(imagepng)
 #ifdef HAVE_GD_GIF
 
 /* {{{ proto int imagecreatefromgif(string filename)
-   Create a new image from file or URL */
+   Create a new image from GIF file or URL */
 PHP_FUNCTION(imagecreatefromgif )
 {
 	zval **file;
@@ -564,7 +564,7 @@ PHP_FUNCTION(imagecreatefromgif )
 /* }}} */
 
 /* {{{ proto int imagegif(int im [, string filename])
-   Output image to browser or file */
+   Output GIF image to browser or file */
 PHP_FUNCTION(imagegif)
 {
 	zval **imgind, **file;
@@ -677,7 +677,7 @@ PHP_FUNCTION(imagecreatefromjpeg)
 /* }}} */
 
 /* {{{ proto int imagejpeg(int im [, string filename [, int quality]])
-   Output image to browser or file */
+   Output JPEG image to browser or file */
 PHP_FUNCTION(imagejpeg)
 {
 	zval **imgind, **file, **qual;
@@ -1682,7 +1682,7 @@ PHP_FUNCTION(imagestringup) {
 }
 /* }}} */
 
-/* {{{ proto int imagecopy(int dst_im, int src_im, int dstX, int dstY, int srcX, int srcY, int srcW, int srcH)
+/* {{{ proto int imagecopy(int dst_im, int src_im, int dst_x, int dst_y, int src_x, int src_y, int src_w, int src_h)
    Copy part of an image */ 
 PHP_FUNCTION(imagecopy)
 {
@@ -1720,7 +1720,7 @@ PHP_FUNCTION(imagecopy)
 }
 /* }}} */
 
-/* {{{ proto int imagecopyresized(int dst_im, int src_im, int dstX, int dstY, int srcX, int srcY, int dstW, int dstH, int srcW, int srcH);
+/* {{{ proto int imagecopyresized(int dst_im, int src_im, int dst_x, int dst_y, int src_x, int src_y, int dst_w, int dst_h, int src_w, int src_h);
    Copy and resize part of an image */
 PHP_FUNCTION(imagecopyresized)
 {
