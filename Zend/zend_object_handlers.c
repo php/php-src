@@ -918,7 +918,6 @@ int zend_std_object_get_class_name(zval *object, char **class_name, zend_uint *c
 ZEND_API int zend_std_cast_object_tostring(zval *readobj, zval *writeobj, int type, int should_free TSRMLS_DC)
 {
 	zval fname, *retval;
-	int is_ref, refcount;
 	
 	switch (type) {
 		case IS_STRING:
@@ -932,13 +931,9 @@ ZEND_API int zend_std_cast_object_tostring(zval *readobj, zval *writeobj, int ty
 					MAKE_STD_ZVAL(retval);
 					ZVAL_STRINGL(retval, empty_string, 0, 0);
 				}
-				zval_dtor(writeobj);
-				is_ref = writeobj->is_ref;
-				refcount = writeobj->refcount;
 				*writeobj = *retval;
 				zval_copy_ctor(writeobj);
-				writeobj->is_ref = is_ref;
-				writeobj->refcount = refcount;
+				INIT_PZVAL(writeobj);
 				zval_ptr_dtor(&retval);
 				return SUCCESS;
 			}
