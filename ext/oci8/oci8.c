@@ -66,9 +66,6 @@
 #include "ext/standard/info.h"
 #include "php_ini.h"
 
-/* #define HAVE_OCI8_TEMP_LOB 1 */
-#define WITH_COLLECTIONS 1
-
 #if HAVE_OCI8
 
 #include "php_oci8.h"
@@ -84,13 +81,13 @@ static long num_links = 0;
 static int le_conn;
 static int le_stmt;
 static int le_desc;
-#ifdef WITH_COLLECTIONS 
+#ifdef PHP_OCI8_HAVE_COLLECTIONS 
 static int le_coll;
 #endif
 static int le_server;
 static int le_session;
 static zend_class_entry *oci_lob_class_entry_ptr;
-#ifdef WITH_COLLECTIONS
+#ifdef PHP_OCI8_HAVE_COLLECTIONS
 static zend_class_entry *oci_coll_class_entry_ptr;
 #endif
 
@@ -193,7 +190,7 @@ static void oci_debug(const char *format, ...);
 static void _oci_conn_list_dtor(oci_connection *connection TSRMLS_DC);
 static void _oci_stmt_list_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC);
 static void _oci_descriptor_list_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC);
-#ifdef WITH_COLLECTIONS
+#ifdef PHP_OCI8_HAVE_COLLECTIONS
 static void _oci_coll_list_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC);
 #endif
 static void _oci_server_list_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC);
@@ -207,7 +204,7 @@ static void _oci_bind_hash_dtor(void *data);
 static oci_connection *oci_get_conn(zval ** TSRMLS_DC);
 static oci_statement *oci_get_stmt(zval ** TSRMLS_DC);
 static oci_descriptor *oci_get_desc(int TSRMLS_DC);
-#ifdef WITH_COLLECTIONS
+#ifdef PHP_OCI8_HAVE_COLLECTIONS
 /* Questionable name.  Very close to oci_get_col */
 static oci_collection *oci_get_coll(int TSRMLS_DC);
 #endif
@@ -297,7 +294,7 @@ PHP_FUNCTION(ocipasswordchange);
 PHP_FUNCTION(ociwritetemporarylob);
 PHP_FUNCTION(ocicloselob);
 #endif
-#ifdef WITH_COLLECTIONS
+#ifdef PHP_OCI8_HAVE_COLLECTIONS
 PHP_FUNCTION(ocinewcollection);
 PHP_FUNCTION(ocifreecollection);
 PHP_FUNCTION(ocicollappend);
@@ -327,7 +324,7 @@ PHP_FUNCTION(ocicolltrim);
 		RETURN_FALSE; \
 	}
 
-#ifdef WITH_COLLECTIONS
+#ifdef PHP_OCI8_HAVE_COLLECTIONS
 #define OCI_GET_COLL(collection,index) \
 	collection = oci_get_coll(index TSRMLS_CC); \
 	if (collection == NULL) { \
@@ -418,7 +415,7 @@ static zend_function_entry php_oci_functions[] = {
 	PHP_FE(ocinewdescriptor,       NULL)
 	PHP_FE(ocisetprefetch,         NULL)
 	PHP_FE(ocipasswordchange,      NULL)
-#ifdef WITH_COLLECTIONS
+#ifdef PHP_OCI8_HAVE_COLLECTIONS
 	PHP_FE(ocifreecollection,      NULL)
 	PHP_FE(ocicollappend,          NULL)
 	PHP_FE(ocicollgetelem,         NULL)
@@ -461,7 +458,7 @@ static zend_function_entry php_oci_lob_class_functions[] = {
 	{NULL,NULL,NULL}
 };
 
-#ifdef WITH_COLLECTIONS
+#ifdef PHP_OCI8_HAVE_COLLECTIONS
 static zend_function_entry php_oci_coll_class_functions[] = {
 	PHP_FALIAS(append,        ocicollappend,        NULL)
 	PHP_FALIAS(getelem,       ocicollgetelem,       NULL)
@@ -534,28 +531,34 @@ static int _server_pcleanup(oci_server *server TSRMLS_DC)
 PHP_MINIT_FUNCTION(oci)
 {
 	zend_class_entry oci_lob_class_entry;
-#ifdef WITH_COLLECTIONS
+#ifdef PHP_OCI8_HAVE_COLLECTIONS
 	zend_class_entry oci_coll_class_entry;
 #endif
 
 #ifdef HAVE_OCI8_SHARED_MODE
 
-#ifdef WITH_COLLECTIONS
-#define PHP_OCI_INIT_MODE OCI_SHARED | OCI_OBJECT
+#ifdef PHP_OCI8_HAVE_COLLECTIONS
+#define PHP_OCI_INIT_MODE_TMP OCI_SHARED | OCI_OBJECT
 #else
-#define PHP_OCI_INIT_MODE OCI_SHARED
+#define PHP_OCI_INIT_MODE_TMP OCI_SHARED
 #endif
 
 #else
 
-#ifdef WITH_COLLECTIONS
-#define PHP_OCI_INIT_MODE OCI_DEFAULT | OCI_OBJECT
+#ifdef PHP_OCI8_HAVE_COLLECTIONS
+#define PHP_OCI_INIT_MODE_TMP OCI_DEFAULT | OCI_OBJECT
 #else
-#define PHP_OCI_INIT_MODE OCI_DEFAULT
+#define PHP_OCI_INIT_MODE_TMP OCI_DEFAULT
 #endif
 
 #endif
 
+#ifdef ZTS
+#define PHP_OCI_INIT_MODE PHP_OCI_INIT_MODE_TMP | OCI_THREADED
+#else
+#define PHP_OCI_INIT_MODE PHP_OCI_INIT_MODE_TMP
+#endif
+    
 	mutex_alloc(mx_lock);
 
 	persistent_servers = malloc(sizeof(TsHashTable));
@@ -574,19 +577,19 @@ PHP_MINIT_FUNCTION(oci)
 	le_stmt = zend_register_list_destructors_ex(_oci_stmt_list_dtor, NULL, "oci8 statement", module_number);
 	le_conn = zend_register_list_destructors_ex(php_oci_free_conn_list, NULL, "oci8 connection", module_number);
 	le_desc = zend_register_list_destructors_ex(_oci_descriptor_list_dtor, NULL, "oci8 descriptor", module_number);
-#ifdef WITH_COLLECTIONS
+#ifdef PHP_OCI8_HAVE_COLLECTIONS
 	le_coll = zend_register_list_destructors_ex(_oci_coll_list_dtor, NULL, "oci8 collection", module_number);
 #endif
 	le_server = zend_register_list_destructors_ex(_oci_server_list_dtor, NULL, "oci8 server", module_number);
 	le_session = zend_register_list_destructors_ex(_oci_session_list_dtor, NULL, "oci8 session", module_number);
 
 	INIT_CLASS_ENTRY(oci_lob_class_entry, "OCI-Lob", php_oci_lob_class_functions);
-#ifdef WITH_COLLECTIONS
+#ifdef PHP_OCI8_HAVE_COLLECTIONS
 	INIT_CLASS_ENTRY(oci_coll_class_entry, "OCI-Collection", php_oci_coll_class_functions);
 #endif
 
 	oci_lob_class_entry_ptr = zend_register_internal_class(&oci_lob_class_entry TSRMLS_CC);
-#ifdef WITH_COLLECTIONS
+#ifdef PHP_OCI8_HAVE_COLLECTIONS
 	oci_coll_class_entry_ptr = zend_register_internal_class(&oci_coll_class_entry TSRMLS_CC);
 #endif
 
@@ -611,7 +614,7 @@ PHP_MINIT_FUNCTION(oci)
 	REGISTER_LONG_CONSTANT("SQLT_BLOB",SQLT_BLOB, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SQLT_RDD",SQLT_RDD, CONST_CS | CONST_PERSISTENT);
 
-#ifdef WITH_COLLECTIONS
+#ifdef PHP_OCI8_HAVE_COLLECTIONS
 	REGISTER_LONG_CONSTANT("OCI_B_SQLT_NTY",SQLT_NTY, CONST_CS | CONST_PERSISTENT);
 	REGISTER_STRING_CONSTANT("OCI_SYSDATE","SYSDATE",CONST_PERSISTENT);
 #endif
@@ -724,6 +727,19 @@ PHP_MINFO_FUNCTION(oci)
 	php_info_print_table_row(2, "Compile-time ORACLE_HOME", PHP_OCI8_DIR );
 	php_info_print_table_row(2, "Libraries Used", PHP_OCI8_SHARED_LIBADD );
 #endif
+
+#ifdef HAVE_OCI8_TEMP_LOB
+	php_info_print_table_row(2, "Temporary Lob support", "enabled" );
+#else
+	php_info_print_table_row(2, "Temporary Lob support", "disabled" );
+#endif
+
+#ifdef HAVE_OCI8_COLLECTIONS
+	php_info_print_table_row(2, "Collections support", "enabled" );
+#else
+	php_info_print_table_row(2, "Collections support", "disabled" );
+#endif
+    
 	php_info_print_table_end();
 
 }
@@ -940,7 +956,7 @@ static void php_oci_free_conn_list(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 }
 /* }}} */
 
-#ifdef WITH_COLLECTIONS
+#ifdef PHP_OCI8_HAVE_COLLECTIONS
 
 /* {{{ _oci_coll_list_dtor()
  */
@@ -971,8 +987,6 @@ _oci_descriptor_list_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	oci_descriptor *descr = (oci_descriptor *)rsrc->ptr;
 	oci_debug("START _oci_descriptor_list_dtor: %d",descr->id);
-
-	zend_list_delete(descr->conn->id);
 
 	CALL_OCI(OCIDescriptorFree(
 				descr->ocidescr, 
@@ -1286,7 +1300,7 @@ oci_new_desc(int type,oci_connection *connection)
 	return descr;
 }
 
-#ifdef WITH_COLLECTIONS
+#ifdef PHP_OCI8_HAVE_COLLECTIONS
 
 /* {{{ _oci_get_ocicoll() */
 
@@ -3192,7 +3206,7 @@ PHP_FUNCTION(ocibindbyname)
 	oci_statement *bindstmt;
 	oci_bind bind, *bindp;
 	oci_descriptor *descr;
-#ifdef WITH_COLLECTIONS
+#ifdef PHP_OCI8_HAVE_COLLECTIONS
 	oci_collection *coll;
 	dvoid *mycoll = 0;
 #endif
@@ -3221,7 +3235,7 @@ PHP_FUNCTION(ocibindbyname)
 	OCI_GET_STMT(statement,stmt);
 
 	switch (ocitype) {
-#ifdef WITH_COLLECTIONS
+#ifdef PHP_OCI8_HAVE_COLLECTIONS
 		case SQLT_NTY:
 			if(Z_TYPE_PP(var) != IS_OBJECT) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Variable must be allocated using OCINewCollection()");
@@ -3334,7 +3348,7 @@ break;
 		}
 	}
 
-#ifdef WITH_COLLECTIONS
+#ifdef PHP_OCI8_HAVE_COLLECTIONS
 	if (ocitype == SQLT_NTY) {
 		/* Bind object */
 		CALL_OCI_RETURN(statement->error, OCIBindObject(
@@ -5880,7 +5894,7 @@ PHP_FUNCTION(ocirowcount)
 
 /* }}} */
 
-#ifdef WITH_COLLECTIONS
+#ifdef PHP_OCI8_HAVE_COLLECTIONS
 /* {{{ oci_get_coll() */
 
 static oci_collection *oci_get_coll(int ind TSRMLS_DC)

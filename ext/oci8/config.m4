@@ -138,10 +138,22 @@ if test "$PHP_OCI8" != "no"; then
     -L$OCI8_DIR/lib $OCI8_SHARED_LIBADD
   ])
 
+  dnl
+  dnl Check if we have collections
+  dnl
+  PHP_CHECK_LIBRARY(clntsh, OCICollAssign,
+  [
+    AC_DEFINE(HAVE_OCI8_COLLECTIONS,1,[ ])
+  ], [], [
+    -L$OCI8_DIR/lib $OCI8_SHARED_LIBADD
+  ])
+
+
   PHP_NEW_EXTENSION(oci8, oci8.c, $ext_shared)
   AC_DEFINE(HAVE_OCI8,1,[ ])
 
   PHP_SUBST_OLD(OCI8_SHARED_LIBADD)
   PHP_SUBST_OLD(OCI8_DIR)
   PHP_SUBST_OLD(OCI8_VERSION)
+  
 fi
