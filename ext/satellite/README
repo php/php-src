@@ -20,6 +20,15 @@ an entry to your php.ini like this:
 Note: If you compile Satellite as a dynamic PHP extension you must have the
       above line located before the extension=satellite.so line in php.ini!
 
+
+Known issues
+------------
+
+The ORBit version required by Satellite does not properly handle an IOR that contains
+a "Multiple Components Profile". If you run into these problems, please apply the patch
+named 'multiple_components.patch' to your ORBit directory before building.
+
+			
 PHP as an Apache static module
 ------------------------------
 Before linking Apache you must do either of these things:
