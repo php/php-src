@@ -70,6 +70,7 @@ PEAR Installer:
 * Fixed optional dependencies in Dependency.php
 * Fix #25322 - bad md5sum should be fatal error
 * Package uninstall now also removes empty directories
+* Fixed locking problems for reading commands (pear list, pear info)
 
 OS_Guess Class:
 
