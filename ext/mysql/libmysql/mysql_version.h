@@ -3,18 +3,8 @@
 
 /* Version numbers for protocol & mysqld */
 
-#ifdef _CUSTOMCONFIG_
-	#include <custom_conf.h>
-#else
-#define PROTOCOL_VERSION		10
-#define MYSQL_SERVER_VERSION		"3.23.22-beta"
+#define MYSQL_SERVER_VERSION		"3.23.10-alpha"
 #define FRM_VER				6
-#define MYSQL_VERSION_ID		32322
-#define MYSQL_PORT			3306
-#define MYSQL_UNIX_ADDR			"/tmp/mysql.sock"
-
+#define MYSQL_VERSION_ID		32310
 /* mysqld compile time options */
-#ifndef MYSQL_CHARSET
 #define MYSQL_CHARSET			"latin1"
-#endif
-#endif

@@ -1,31 +1,11 @@
-/* Copyright (C) 2000 MySQL AB & MySQL Finland AB & TCX DataKonsult AB
-   
-   This library is free software; you can redistribute it and/or
-   modify it under the terms of the GNU Library General Public
-   License as published by the Free Software Foundation; either
-   version 2 of the License, or (at your option) any later version.
-   
-   This library is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-   Library General Public License for more details.
-   
-   You should have received a copy of the GNU Library General Public
-   License along with this library; if not, write to the Free
-   Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
-   MA 02111-1307, USA */
+/* Copyright Abandoned 1996 TCX DataKonsult AB & Monty Program KB & Detron HB
+   This file is public domain and comes with NO WARRANTY of any kind */
 
 /* Error messages for mysql clients */
 /* error messages for the demon is in share/language/errmsg.sys */
 
-#ifdef	__cplusplus
-extern "C" {
-#endif
 void	init_client_errs(void);
 extern const char *client_errors[];	/* Error messages */
-#ifdef	__cplusplus
-}
-#endif
 
 #define CR_MIN_ERROR		2000	/* For easier client code */
 #define CR_MAX_ERROR		2999
@@ -51,5 +31,3 @@ extern const char *client_errors[];	/* Error messages */
 #define CR_NAMEDPIPEWAIT_ERROR 2016
 #define CR_NAMEDPIPEOPEN_ERROR 2017
 #define CR_NAMEDPIPESETSTATE_ERROR 2018
-#define CR_CANT_READ_CHARSET	2019
-#define CR_NET_PACKET_TOO_LARGE 2020

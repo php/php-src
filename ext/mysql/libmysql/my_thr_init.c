@@ -1,19 +1,5 @@
-/* Copyright (C) 2000 MySQL AB & MySQL Finland AB & TCX DataKonsult AB
-   
-   This library is free software; you can redistribute it and/or
-   modify it under the terms of the GNU Library General Public
-   License as published by the Free Software Foundation; either
-   version 2 of the License, or (at your option) any later version.
-   
-   This library is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-   Library General Public License for more details.
-   
-   You should have received a copy of the GNU Library General Public
-   License along with this library; if not, write to the Free
-   Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
-   MA 02111-1307, USA */
+/* Copyright Abandoned 1996 TCX DataKonsult AB & Monty Program KB & Detron HB
+   This file is public domain and comes with NO WARRANTY of any kind */
 
 /*
 ** Functions to handle initializating and allocationg of all mysys & debug
@@ -30,12 +16,11 @@ pthread_key(struct st_my_thread_var*, THR_KEY_mysys);
 pthread_key(struct st_my_thread_var, THR_KEY_mysys);
 #endif
 pthread_mutex_t THR_LOCK_malloc,THR_LOCK_open,THR_LOCK_keycache,
-	        THR_LOCK_lock,THR_LOCK_isam,THR_LOCK_myisam,THR_LOCK_heap,
-	        THR_LOCK_net, THR_LOCK_charset; 
+		THR_LOCK_lock,THR_LOCK_isam,THR_LOCK_heap,THR_LOCK_net;
 #ifndef HAVE_LOCALTIME_R
 pthread_mutex_t LOCK_localtime_r;
 #endif
-#ifdef __WIN__
+#ifdef __WIN32__
 pthread_mutex_t THR_LOCK_thread;
 #endif
 
@@ -55,11 +40,9 @@ my_bool my_thread_global_init(void)
   pthread_mutex_init(&THR_LOCK_keycache,NULL);
   pthread_mutex_init(&THR_LOCK_lock,NULL);
   pthread_mutex_init(&THR_LOCK_isam,NULL);
-  pthread_mutex_init(&THR_LOCK_myisam,NULL);
   pthread_mutex_init(&THR_LOCK_heap,NULL);
   pthread_mutex_init(&THR_LOCK_net,NULL);
-  pthread_mutex_init(&THR_LOCK_charset,NULL);
-#ifdef __WIN__
+#ifdef __WIN32__
   pthread_mutex_init(&THR_LOCK_thread,NULL);
 #endif
 #ifndef HAVE_LOCALTIME_R
@@ -81,7 +64,7 @@ my_bool my_thread_init(void)
 {
   struct st_my_thread_var *tmp;
   pthread_mutex_lock(&THR_LOCK_lock);
-#if !defined(__WIN__) || defined(USE_TLS)
+#if !defined(__WIN32__) || defined(USE_TLS)
   if (my_pthread_getspecific(struct st_my_thread_var *,THR_KEY_mysys))
   {
     pthread_mutex_unlock(&THR_LOCK_lock);
@@ -128,11 +111,11 @@ void my_thread_end(void)
     pthread_cond_destroy(&tmp->suspend);
 #endif
     pthread_mutex_destroy(&tmp->mutex);
-#if !defined(__WIN__) || defined(USE_TLS)
+#if !defined(__WIN32__) || defined(USE_TLS)
     free(tmp);
 #endif
   }
-#if !defined(__WIN__) || defined(USE_TLS)
+#if !defined(__WIN32__) || defined(USE_TLS)
   pthread_setspecific(THR_KEY_mysys,0);
 #endif
 }
@@ -162,7 +145,7 @@ long my_thread_id()
 {
 #if defined(HAVE_PTHREAD_GETSEQUENCE_NP)
   return pthread_getsequence_np(pthread_self());
-#elif (defined(__sun) || defined(__sgi) || defined(__linux__)) && !defined(HAVE_mit_thread)
+#elif defined(__sun) || defined(__sgi) || defined(__linux__)
   return pthread_self();
 #else
   return my_thread_var->id;
