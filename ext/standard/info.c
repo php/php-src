@@ -57,6 +57,7 @@ PHPAPI void php_print_info(int flag)
 {
 	char **env,*tmp1,*tmp2;
 	char *php3_uname;
+	int allow_builtin_links = INI_INT("allow_builtin_links");
 #if WIN32|WINNT
 	char php3_windows_uname[256];
 	DWORD dwBuild=0;
@@ -67,6 +68,7 @@ PHPAPI void php_print_info(int flag)
 	ELS_FETCH();
 	PLS_FETCH();
 	SLS_FETCH();
+
 	
 	if (flag & PHP_INFO_GENERAL) {
 #if WIN32|WINNT
@@ -85,11 +87,14 @@ PHPAPI void php_print_info(int flag)
 
 		php_printf("<center><h1>PHP Version %s</h1></center>\n", PHP_VERSION);
 
-		PUTS("<hr><a href=\"http://www.php.net/\"><img src=\"");
-		if (SG(request_info).request_uri) {
-			PUTS(SG(request_info).request_uri);
+		PUTS("<hr>");
+		if (allow_builtin_links) {
+			PUTS("<a href=\"http://www.php.net/\"><img src=\"");
+			if (SG(request_info).request_uri) {
+				PUTS(SG(request_info).request_uri);
+			}
+			PUTS("?=PHPE9568F34-D428-11d2-A769-00AA001ACF42\" border=\"0\" align=\"right\"></a>\n");
 		}
-		PUTS("?=PHPE9568F34-D428-11d2-A769-00AA001ACF42\" border=\"0\" align=\"right\"></a>\n");
 		php_printf("System: %s<br>Build Date: %s\n<br>", php3_uname, __DATE__);
 		php_printf("php.ini path:  %s<br>\n", CONFIGURATION_FILE_PATH);
 
@@ -100,18 +105,21 @@ PHPAPI void php_print_info(int flag)
 		php_printf("ZTS is undefined");
 #endif
 		/* Zend Engine */
-		PUTS("<hr><a href=\"http://www.zend.com/\"><img src=\"");
-		if (SG(request_info).request_uri) {
-			PUTS(SG(request_info).request_uri);
-		}
-		PUTS("?=PHPE9568F35-D428-11d2-A769-00AA001ACF42\" border=\"0\" align=\"right\"></a>\n");
-		php_printf("This program makes use of the Zend scripting language engine:<br><pre>%s</pre>", get_zend_version());
 		PUTS("<hr>");
+		if (allow_builtin_links) {
+			PUTS("<a href=\"http://www.zend.com/\"><img src=\"");
+			if (SG(request_info).request_uri) {
+				PUTS(SG(request_info).request_uri);
+			}
+			PUTS("?=PHPE9568F35-D428-11d2-A769-00AA001ACF42\" border=\"0\" align=\"right\"></a>\n");
+		}
+		php_printf("This program makes use of the Zend scripting language engine:<br><pre>%s</pre>", get_zend_version());
 	}
 
 	PUTS("<center>");
 
-	if (flag & PHP_INFO_CREDITS) {	
+	if ((flag & PHP_INFO_CREDITS) && allow_builtin_links) {	
+		PUTS("<hr>");
 		PUTS("<a href=\"");
 		if (SG(request_info).request_uri) {
 			PUTS(SG(request_info).request_uri);
