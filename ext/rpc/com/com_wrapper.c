@@ -100,6 +100,7 @@ static PHP_MINFO_FUNCTION(COM)
 	DISPLAY_INI_ENTRIES();
 }
 
+
 PHPAPI HRESULT php_COM_invoke(comval *obj, DISPID dispIdMember, WORD wFlags, DISPPARAMS FAR*  pDispParams, VARIANT FAR*  pVarResult, char **ErrString TSRMLS_DC)
 {
 	HRESULT hr;
@@ -164,6 +165,7 @@ PHPAPI HRESULT php_COM_invoke(comval *obj, DISPID dispIdMember, WORD wFlags, DIS
 	}
 }
 
+
 PHPAPI HRESULT php_COM_get_ids_of_names(comval *obj, OLECHAR FAR* FAR* rgszNames, DISPID FAR* rgDispId TSRMLS_DC)
 {
 	HRESULT hr;
@@ -195,6 +197,7 @@ PHPAPI HRESULT php_COM_get_ids_of_names(comval *obj, OLECHAR FAR* FAR* rgszNames
 	}
 }
 
+
 PHPAPI HRESULT php_COM_release(comval *obj TSRMLS_DC)
 {
 	HRESULT hr;
@@ -215,6 +218,7 @@ PHPAPI HRESULT php_COM_release(comval *obj TSRMLS_DC)
 	return obj->refcount;
 }
 
+
 PHPAPI HRESULT php_COM_addref(comval *obj TSRMLS_DC)
 {
 	if (C_ISREFD(obj)) {
@@ -224,6 +228,7 @@ PHPAPI HRESULT php_COM_addref(comval *obj TSRMLS_DC)
 	return obj->refcount;
 }
 
+
 PHPAPI HRESULT php_COM_set(comval *obj, IDispatch FAR* FAR* ppDisp, int cleanup TSRMLS_DC)
 {
 	HRESULT hr = 1;
@@ -232,16 +237,10 @@ PHPAPI HRESULT php_COM_set(comval *obj, IDispatch FAR* FAR* ppDisp, int cleanup 
 	IDispatch FAR* pDisp;
 
 	pDisp = *ppDisp;
-	if(cleanup)
-	{
-		*ppDisp = NULL;
-	}
-	
-	pDisp = *ppDisp;
 	if (cleanup) {
 		*ppDisp = NULL;
 	}
-
+	
 	C_REFCOUNT(obj) = 1;
 	C_DISPATCH(obj) = pDisp;
 	C_HASTLIB(obj) = SUCCEEDED(C_DISPATCH_VT(obj)->GetTypeInfo(C_DISPATCH(obj), 0, LANG_NEUTRAL, &C_TYPEINFO(obj)));
@@ -277,6 +276,7 @@ PHPAPI HRESULT php_COM_set(comval *obj, IDispatch FAR* FAR* ppDisp, int cleanup 
 	return hr;
 }
 
+
 PHPAPI HRESULT php_COM_clone(comval *obj, comval *clone, int cleanup TSRMLS_DC)
 {
 	HRESULT hr;
@@ -307,6 +307,7 @@ PHPAPI HRESULT php_COM_clone(comval *obj, comval *clone, int cleanup TSRMLS_DC)
 	return hr;
 }
 
+
 PHPAPI char *php_COM_error_message(HRESULT hr TSRMLS_DC)
 {
 	void *pMsgBuf;
@@ -322,6 +323,7 @@ PHPAPI char *php_COM_error_message(HRESULT hr TSRMLS_DC)
 	return pMsgBuf;
 }
 
+
 static char *php_string_from_clsid(const CLSID *clsid TSRMLS_DC)
 {
 	LPOLESTR ole_clsid;
@@ -333,6 +335,7 @@ static char *php_string_from_clsid(const CLSID *clsid TSRMLS_DC)
 
 	return clsid_str;
 }
+
 
 PHPAPI HRESULT php_COM_destruct(comval *obj TSRMLS_DC)
 {
@@ -718,6 +721,7 @@ int do_COM_invoke(comval *obj, pval *function_name, VARIANT *var_result, pval **
 		char *ErrString;
 
 		funcname = php_char_to_OLECHAR(Z_STRVAL_P(function_name), Z_STRLEN_P(function_name), codepage TSRMLS_CC);
+
 		hr = php_COM_get_ids_of_names(obj, &funcname, &dispid TSRMLS_CC);
 
 		if (FAILED(hr)) {
@@ -877,6 +881,7 @@ PHP_FUNCTION(com_addref)
 }
 /* }}} */
 
+
 static int do_COM_offget(VARIANT *result, comval *array, pval *property, int cleanup TSRMLS_DC)
 {
 	pval function_name;
@@ -890,6 +895,7 @@ static int do_COM_offget(VARIANT *result, comval *array, pval *property, int cle
 
 	return retval;
 }
+
 
 static int do_COM_propget(VARIANT *var_result, comval *obj, pval *arg_property, int cleanup TSRMLS_DC)
 {
@@ -910,7 +916,6 @@ static int do_COM_propget(VARIANT *var_result, comval *obj, pval *arg_property, 
 		php_error(E_WARNING,"Unable to lookup %s: %s", Z_STRVAL_P(arg_property), error_message);
 		LocalFree(error_message);
 		efree(propname);
-
 		if (cleanup) {
 			php_COM_destruct(obj TSRMLS_CC);
 		}
@@ -931,10 +936,8 @@ static int do_COM_propget(VARIANT *var_result, comval *obj, pval *arg_property, 
 		} else {
 			php_error(E_WARNING,"PropGet() failed: %s", error_message);
 		}
-
 		LocalFree(error_message);
 		efree(propname);
-
 		if (cleanup) {
 			php_COM_destruct(obj TSRMLS_CC);
 		}
@@ -942,7 +945,6 @@ static int do_COM_propget(VARIANT *var_result, comval *obj, pval *arg_property, 
 	}
 
 	efree(propname);
-
 	if (cleanup) {
 		php_COM_destruct(obj TSRMLS_CC);
 	}
@@ -998,7 +1000,6 @@ static void do_COM_propput(pval *return_value, comval *obj, pval *arg_property, 
 		} else {
 			php_error(E_WARNING,"PropPut() failed: %s", error_message);
 		}
-
 		LocalFree(error_message);
 		efree(propname);
 
@@ -1154,7 +1155,6 @@ PHPAPI pval php_COM_get_property_handler(zend_property_reference *property_refer
 
 	for (element=property_reference->elements_list->head; element; element=element->next) {
 		overloaded_property = (zend_overloaded_element *) element->data;
-
 		switch (overloaded_property->type) {
 			case OE_IS_ARRAY:
 				if (do_COM_offget(var_result, obj, &overloaded_property->element, FALSE TSRMLS_CC) == FAILURE) {
@@ -1184,7 +1184,6 @@ PHPAPI pval php_COM_get_property_handler(zend_property_reference *property_refer
 					} else {
 						RETVAL_COM(obj);
 					}
-
 					return return_value;
 				}
 				break;
@@ -1379,6 +1378,7 @@ PHPAPI void php_COM_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_pro
 	pval_destructor(&function_name->element);
 }
 
+
 static ITypeLib *php_COM_find_typelib(char *search_string, int mode TSRMLS_DC)
 {
 	ITypeLib *TypeLib = NULL;
@@ -1542,6 +1542,7 @@ static ITypeLib *php_COM_find_typelib(char *search_string, int mode TSRMLS_DC)
 	return TypeLib;
 }
 
+
 static int php_COM_load_typelib(ITypeLib *TypeLib, int mode TSRMLS_DC)
 {
 	ITypeComp *TypeComp;
@@ -1589,7 +1590,6 @@ static int php_COM_load_typelib(ITypeLib *TypeLib, int mode TSRMLS_DC)
 					continue;
 				}
 				const_name = php_OLECHAR_to_char(bstr_ids, &c.name_len, codepage TSRMLS_CC);
-
 				c.name = zend_strndup(const_name, c.name_len);
 				c.name_len++; /* length should include the NULL */
 
@@ -1603,7 +1603,6 @@ static int php_COM_load_typelib(ITypeLib *TypeLib, int mode TSRMLS_DC)
 					if (!compare_function(&results, &c.value, &exists TSRMLS_CC) && INI_INT("com.autoregister_verbose")) {
 						php_error(E_WARNING,"Type library value %s is already defined and has a different value", c.name);
 					}
-
 					free(c.name);
 					j++;
 					continue;
@@ -1654,6 +1653,7 @@ PHP_FUNCTION(com_isenum)
 	RETURN_BOOL(C_HASENUM(obj));
 }
 /* }}} */
+
 
 static void php_register_COM_class(TSRMLS_D)
 {
