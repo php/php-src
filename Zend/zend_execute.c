@@ -637,7 +637,7 @@ static inline void zend_assign_to_object(znode *result, zval **object_ptr, znode
 			*retval = EG(uninitialized_zval_ptr);
 			PZVAL_LOCK(*retval);
 		}
-		PZVAL_UNLOCK_FREE(value);
+		FREE_OP(free_value);
 		return;
 	}
 	
