@@ -1,3 +1,42 @@
+2001-09-02  Jeroen van Wolffelaar  <jeroen@A-Eskwadraat.nl>
+
+    * ext/standard/php_rand.h
+      ext/standard/rand.c
+      ext/standard/rand_mt.c
+      ext/standard/rand_sys.c
+      ext/standard/basic_functions.c:
+    Fix the other 5% of the build - thanx to Zeev & Wez
+
+    * ext/standard/rand_sys.c:
+    Fix linebreaks which were somehow converted to win32
+
+    * ext/standard/array.c
+      ext/standard/php_rand.h
+      ext/standard/rand.c
+      ext/standard/rand_sys.c: Fix build for 95%
+
+2001-09-02  Richard Heyes  <richard.heyes@heyes-computing.net>
+
+    * pear/Mail/RFC822.php:
+    Modified php4/pear/Mail/RFC822.php to use PEAR error handling. Now returns
+    a pear error object instead of an array.
+
+2001-09-02  Stig Bakken  <ssb@fast.no>
+
+    * pear/HTML/Form.php: * replaced HTML with XHTML
+    * some E_ALL fixes
+
+    * pear/DB/common.php:
+    * using parent::raiseError, my PHP goes into a memory-exhausting loop
+
+2001-09-02  Jesus M. Castagnetto  <jmcastagnetto@yahoo.com>
+
+    * pear/package.dtd: s/fileList/filelist/
+
+    * pear/package.dtd:
+    Changed element and attribute names to lowercase to match the changes
+    in the package.xml files
+
 2001-09-01  Sascha Schumann  <sascha@schumann.cx>
 
     * ext/ircg/ircg.c:
