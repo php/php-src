@@ -1,3 +1,55 @@
+2001-09-20  Richard Heyes  <richard.heyes@heyes-computing.net>
+
+    * pear/Mail/mime.php:
+
+    Changed case of NULL to null
+
+    * pear/Mail/mime.php:
+
+    Removed a couple of spaces.
+
+    * pear/Mail/mime.php:
+
+    All code changes. Including better encoding support, more control over build
+    process and character set support.
+
+2001-09-20  Frank M. Kromann  <frank@frontbase.com>
+
+    * ext/iisfunc/iisfunc.cpp
+      ext/iisfunc/setup.c
+      ext/iisfunc/setup.h: Fixing crash on module init.
+    Renaming functions and adding aliases for compatibility
+    Fixing some prototypes
+
+2001-09-20  Richard Heyes  <richard.heyes@heyes-computing.net>
+
+    * pear/Mail/mime.php:
+
+    Changed all \r\n to be configurable. Lots changed hence the seperate commit.
+
+    * pear/Mail/mime.php:
+
+    Mostly style updates, eg changing private functions/variables to be underscore
+    prefixed.
+
+2001-09-20  Wez Furlong  <wez.php@thebrainroom.com>
+
+    * ext/sockets/sockets.c: MFH
+
+2001-09-20  Mark L. Woodward  <mlwmohawk@mohawksoft.com>
+
+    * ext/msession/Makefile
+      ext/msession/msession.c
+      ext/msession/reqclient.h: (Removed Makefile, added accidentally.)
+    Eliminated mod_msession in ext/session, and moved that code into msesion.c
+
+2001-09-20  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/math.c:
+    Rework some string-to-number and vice-versa functions to work smarter
+    (e.g. without using functions that use slow locales, without allocating
+     extra memory and with fewer integer/float operations)
+
 2001-09-19  Stig Venaas  <venaas@uninett.no>
 
     * ext/ldap/ldap.c:
