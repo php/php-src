@@ -1,3 +1,9 @@
+2004-01-02  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * zend_default_classes.c:
+      Do not show exception message if it's empty.
+      
+
 2003-12-31  Andrei Zmievski  <andrei@gravitonic.com>
 
     * zend_default_classes.c:
