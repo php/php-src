@@ -251,10 +251,10 @@ PHP_MINFO_FUNCTION(gd)
 /* this next part is stupid ... if I knew better, I'd put them all on one row (cmv) */
 
 #ifdef HAVE_GD_GIF
-	php_info_print_table_row(2, "GIF Support", "enabled);
+	php_info_print_table_row(2, "GIF Support", "enabled");
 #endif
 #ifdef HAVE_GD_PNG
-	php_info_print_table_row(2, "PNG Support", "enabled);
+	php_info_print_table_row(2, "PNG Support", "enabled");
 #endif
 	php_info_print_table_end();
 }
