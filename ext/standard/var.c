@@ -209,7 +209,7 @@ void php_var_serialize(pval *buf, pval **struc)
 
 				res =  call_user_function_ex(CG(function_table), *struc, fname, &retval_ptr, 0, 0, 1, NULL);
 
-				if ((res == SUCCESS)) {
+				if (res == SUCCESS) {
 					if (retval_ptr && HASH_OF(retval_ptr)) {
 						int count = zend_hash_num_elements(HASH_OF(retval_ptr));
 						slen = sprintf(s, "O:%d:\"%s\":%d:{",(*struc)->value.obj.ce->name_length,(*struc)->value.obj.ce->name, count);
@@ -218,14 +218,15 @@ void php_var_serialize(pval *buf, pval **struc)
 							char *key;
 							zval **d,**name;
 							ulong index;
+							HashPosition pos;
 							
-							zend_hash_internal_pointer_reset(HASH_OF(retval_ptr));
-							for (;; zend_hash_move_forward(HASH_OF(retval_ptr))) {
-								if ((i = zend_hash_get_current_key(HASH_OF(retval_ptr), &key, &index)) == HASH_KEY_NON_EXISTANT) {
+							zend_hash_internal_pointer_reset_ex(HASH_OF(retval_ptr),&pos);
+							for (;; zend_hash_move_forward_ex(HASH_OF(retval_ptr),&pos)) {
+								if ((i = zend_hash_get_current_key_ex(HASH_OF(retval_ptr), &key, NULL, &index, &pos)) == HASH_KEY_NON_EXISTANT) {
 									break;
 								}
 
-								zend_hash_get_current_data(HASH_OF(retval_ptr), (void **) (&name));
+								zend_hash_get_current_data_ex(HASH_OF(retval_ptr), (void **) (&name), &pos);
 
 								if ((*name)->type != IS_STRING) {
 									php_error(E_NOTICE, "__sleep should return an array only containing the names of instance-variables to serialize.");
@@ -246,8 +247,7 @@ void php_var_serialize(pval *buf, pval **struc)
 					FREE_ZVAL(fname);
 
 					if (retval_ptr) {
-						zval_dtor(retval_ptr);
-						FREE_ZVAL(retval_ptr);
+						zval_ptr_dtor(&retval_ptr);
 					}
 					goto std_array;
 				}
@@ -255,8 +255,9 @@ void php_var_serialize(pval *buf, pval **struc)
 				zval_dtor(fname);
 				FREE_ZVAL(fname);
 
-				if (retval_ptr)
+				if (retval_ptr) {
 					zval_ptr_dtor(&retval_ptr);
+				}
 				return;	
 			}
 
@@ -274,13 +275,14 @@ void php_var_serialize(pval *buf, pval **struc)
 				char *key;
 				pval **data,*d;
 				ulong index;
+				HashPosition pos;
 				
-				zend_hash_internal_pointer_reset(myht);
-				for (;; zend_hash_move_forward(myht)) {
-					if ((i = zend_hash_get_current_key(myht, &key, &index)) == HASH_KEY_NON_EXISTANT) {
+				zend_hash_internal_pointer_reset_ex(myht, &pos);
+				for (;; zend_hash_move_forward_ex(myht, &pos)) {
+					if ((i = zend_hash_get_current_key_ex(myht, &key, NULL, &index, &pos)) == HASH_KEY_NON_EXISTANT) {
 						break;
 					}
-					if (zend_hash_get_current_data(myht, (void **) (&data)) != SUCCESS || !data || ((*data) == (*struc))) {
+					if (zend_hash_get_current_data_ex(myht, (void **) (&data), &pos) != SUCCESS || !data || ((*data) == (*struc))) {
 						if (i == HASH_KEY_IS_STRING)
 							efree(key);
 						continue;
