@@ -1342,6 +1342,15 @@ char *mbstr_strrchr(const char *s, char c TSRMLS_DC){
 	return last;
 }
 
+int mbstr_is_mb_leadbyte(const char *s TSRMLS_DC){
+	unsigned char *p = (unsigned char *)s;
+	if (MBSTRG(current_language) == mbfl_no_language_japanese 
+		&& IS_SJIS1(*p) && IS_SJIS2(*(p+1))){
+		return 1;
+	}
+	return 0;
+}
+
 /* http input processing */
 void mbstr_treat_data(int arg, char *str, zval* destArray TSRMLS_DC)
 {
