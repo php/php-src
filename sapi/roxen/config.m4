@@ -29,7 +29,7 @@ AC_ARG_WITH(roxen,
 	AC_DEFINE(HAVE_ROXEN,1,[Whether you use Roxen])
 	PHP_SAPI=roxen
 	PHP_BUILD_SHARED
-	INSTALL_IT="\$(SHELL) \$(srcdir)/install-sh -m 0755 $SAPI_SHARED $PIKE_MODULE_DIR/PHP4.so"
+	INSTALL_IT="\$(INSTALL) -m 0755 $SAPI_SHARED $PIKE_MODULE_DIR/PHP4.so"
 	RESULT="yes
 	Pike binary used:      $PIKE
 	Pike include dir:      $PIKE_INCLUDE_DIR
