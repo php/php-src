@@ -508,6 +508,7 @@ PHP_ARG_WITH(pear, [whether to install PEAR, and where],
 
 if test "$PHP_PEAR" != "no"; then
   PEAR_DIR=pear
+  PEAR_INSTALLDIR=$PHP_PEAR
 fi
 
 if test "$PHP_PEAR" = "DEFAULT" -o "x$PHP_PEAR" = "xyes"; then
