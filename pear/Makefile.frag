@@ -53,15 +53,15 @@ peardir=$(PEAR_INSTALLDIR)
 #PEARCMD=$(top_builddir)/sapi/cli/php -d include_path=$(top_srcdir)/pear pear/scripts/pear.in
 
 install-pear-installer: $(top_builddir)/sapi/cli/php
-	$(top_builddir)/sapi/cli/php $(srcdir)/install-pear.php $(srcdir)/package-*.xml
+	@$(top_builddir)/sapi/cli/php $(srcdir)/install-pear.php $(srcdir)/package-*.xml
 
 install-pear-packages: $(top_builddir)/sapi/cli/php
-	$(top_builddir)/sapi/cli/php $(srcdir)/install-pear.php $(srcdir)/packages/*.tar
+	@$(top_builddir)/sapi/cli/php $(srcdir)/install-pear.php $(srcdir)/packages/*.tar
 
 install-pear:
+	@echo "Installing PEAR environment:      $(INSTALL_ROOT)$(peardir)/"
 	@if $(mkinstalldirs) $(INSTALL_ROOT)$(peardir); then \
-		$(MAKE) install-pear-installer; \
-		$(MAKE) install-pear-packages; \
+		$(MAKE) -s install-pear-installer install-pear-packages; \
 	else \
 		cat $(srcdir)/install-pear.txt; \
 		exit 5; \
@@ -82,20 +82,21 @@ bin_SCRIPTS = phpize php-config
 # pear phptar
 
 install-build:
-	@echo "Installing build environment"
+	@echo "Installing build environment:     $(INSTALL_ROOT)$(phpbuilddir)/"
 	@$(mkinstalldirs) $(INSTALL_ROOT)$(phpbuilddir) $(INSTALL_ROOT)$(bindir) && \
 	(cd $(top_srcdir) && cp $(BUILD_FILES) $(INSTALL_ROOT)$(phpbuilddir))
 
 install-programs:
+	@echo "Installing helper programs:       $(INSTALL_ROOT)$(bindir)/"
 	@for prog in $(bin_SCRIPTS); do \
-		echo "Installing program: $$prog"; \
+		echo "  program: $$prog"; \
 		$(INSTALL) -m 755 $(builddir)/scripts/$$prog $(INSTALL_ROOT)$(bindir)/$$prog; \
 	done; \
 	#for file in $(INSTALL_ROOT)$(bindir)/pearcmd-*.php; do \
 	#	rm -f $$file; \
 	#done; \
 	for prog in phpextdist; do \
-		echo "Installing program: $$prog"; \
+		echo "  program: $$prog"; \
 		$(INSTALL) -m 755 $(srcdir)/scripts/$$prog $(INSTALL_ROOT)$(bindir)/$$prog; \
 	done
 
@@ -117,7 +118,7 @@ install-headers:
 		paths="$$paths $(INSTALL_ROOT)$(phpincludedir)/$$i"; \
 	done; \
 	$(mkinstalldirs) $$paths && \
-	echo "Installing header files" && \
+	echo "Installing header files:          $(INSTALL_ROOT)$(phpincludedir)/" && \
 	for i in $(HEADER_DIRS); do \
 		(cd $(top_srcdir)/$$i && cp -p *.h $(INSTALL_ROOT)$(phpincludedir)/$$i; \
 		cd $(top_builddir)/$$i && cp -p *.h $(INSTALL_ROOT)$(phpincludedir)/$$i) 2>/dev/null || true; \

@@ -26,9 +26,11 @@ install: $(install_targets)
 
 
 install-cli: sapi/cli/php
-	$(INSTALL_CLI)
+	@echo "Installing PHP CLI binary:        $(INSTALL_ROOT)$(bindir)/"
+	@$(INSTALL_CLI)
 
 install-sapi: libphp4.la
+	@echo "Installing PHP SAPI module"
 	-@$(LIBTOOL) --silent --mode=install cp libphp4.la $(phptempdir)/libphp4.la >/dev/null 2>&1
 	-@$(mkinstalldirs) $(INSTALL_ROOT)$(bindir)
 	-@if test ! -r $(phptempdir)/libphp4.$(SHLIB_SUFFIX_NAME); then \
@@ -39,17 +41,17 @@ install-sapi: libphp4.la
 			fi; \
 		done; \
 	fi
-	$(INSTALL_IT)
+	@$(INSTALL_IT)
 
 install-modules: build-modules
 	@test -d modules && \
 	$(mkinstalldirs) $(INSTALL_ROOT)$(EXTENSION_DIR) && \
-	echo "installing shared modules into $(EXTENSION_DIR)" && \
+	echo "Installing shared extensions:     $(INSTALL_ROOT)$(EXTENSION_DIR)/" && \
 	rm -f modules/*.la && \
 	cp modules/* $(INSTALL_ROOT)$(EXTENSION_DIR) >/dev/null 2>&1 || true
 
 install-tester:
-	@echo "Installing regression tester"
+	@echo "Installing regression tester:     $(INSTALL_ROOT)$(PEAR_INSTALLDIR)/"
 	@$(mkinstalldirs) $(PEAR_INSTALLDIR)
 	@$(INSTALL) -m 755 $(top_srcdir)/run-tests.php $(INSTALL_ROOT)$(PEAR_INSTALLDIR)
 
