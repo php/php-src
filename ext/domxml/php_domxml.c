@@ -237,8 +237,10 @@ static zend_function_entry domxml_functions[] = {
 	PHP_FE(domxml_parser_end_element,											NULL)
 	PHP_FE(domxml_parser_comment,											NULL)
 	PHP_FE(domxml_parser_characters,											NULL)
-	PHP_FE(domxml_parser_reference,											NULL)
-	PHP_FE(domxml_parser_cdata_block,											NULL)
+	PHP_FE(domxml_parser_entity_reference,											NULL)
+	PHP_FE(domxml_parser_processing_instruction,											NULL)
+	PHP_FE(domxml_parser_cdata_section,											NULL)
+	PHP_FE(domxml_parser_namespace_decl,											NULL)
 	PHP_FE(domxml_parser_start_document,											NULL)
 	PHP_FE(domxml_parser_end_document,											NULL)
 	PHP_FE(domxml_parser_get_document,											NULL)
@@ -330,9 +332,11 @@ static function_entry php_domxmlparser_class_functions[] = {
 	PHP_FALIAS(start_element,				domxml_parser_start_element,		NULL)
 	PHP_FALIAS(end_element,				domxml_parser_end_element,		NULL)
 	PHP_FALIAS(characters,				domxml_parser_characters,		NULL)
-	PHP_FALIAS(reference,				domxml_parser_reference,		NULL)
-	PHP_FALIAS(cdata_block,				domxml_parser_cdata_block,		NULL)
+	PHP_FALIAS(entity_reference,				domxml_parser_entity_reference,		NULL)
+	PHP_FALIAS(processing_instruction,				domxml_parser_processing_instruction,		NULL)
+	PHP_FALIAS(cdata_section,				domxml_parser_cdata_section,		NULL)
 	PHP_FALIAS(comment,				domxml_parser_comment,		NULL)
+	PHP_FALIAS(namespace_decl,				domxml_parser_namespace_decl,		NULL)
 	PHP_FALIAS(start_document,				domxml_parser_start_document,		NULL)
 	PHP_FALIAS(end_document,				domxml_parser_end_document,		NULL)
 	PHP_FALIAS(get_document,				domxml_parser_get_document,		NULL)
@@ -4111,9 +4115,9 @@ PHP_FUNCTION(domxml_parser_comment)
 }
 /* }}} */
 
-/* {{{ proto bool domxml_parser_cdata_block(string chunk)
+/* {{{ proto bool domxml_parser_cdata_section(string chunk)
    adds a cdata block */
-PHP_FUNCTION(domxml_parser_cdata_block)
+PHP_FUNCTION(domxml_parser_cdata_section)
 {
 	zval *id;
 	xmlParserCtxtPtr parserp;
@@ -4155,9 +4159,9 @@ PHP_FUNCTION(domxml_parser_characters)
 }
 /* }}} */
 
-/* {{{ proto bool domxml_parser_reference(string reference)
+/* {{{ proto bool domxml_parser_entity_reference(string reference)
    Adds entity reference */
-PHP_FUNCTION(domxml_parser_reference)
+PHP_FUNCTION(domxml_parser_entity_reference)
 {
 	zval *id;
 	xmlParserCtxtPtr parserp;
@@ -4176,6 +4180,51 @@ PHP_FUNCTION(domxml_parser_reference)
 	RETURN_TRUE;
 }
 /* }}} */
+
+/* {{{ proto bool domxml_parser_processing_instruction(string target, string data)
+   Adds processing instruction */
+PHP_FUNCTION(domxml_parser_processing_instruction)
+{
+	zval *id;
+	xmlParserCtxtPtr parserp;
+	char *data,*target;
+	int data_len, target_len;
+	
+	DOMXML_PARAM_FOUR(parserp, id, le_domxmlparserp,"ss", &target, &target_len, &data, &data_len);
+
+	if (parserp->myDoc == NULL) {
+		php_error(E_WARNING, "%s(): Document was not started", get_active_function_name(TSRMLS_C));
+		RETURN_FALSE;
+	}
+
+	processingInstruction(parserp, (xmlChar *) target, (xmlChar *) data);
+	
+	RETURN_TRUE;
+}
+/* }}} */
+
+/* {{{ proto bool domxml_parser_namespace_decl(string href, string prefix)
+   Adds namespace declaration */
+PHP_FUNCTION(domxml_parser_namespace_decl)
+{
+	zval *id;
+	xmlParserCtxtPtr parserp;
+	char *href,*prefix;
+	int href_len, prefix_len;
+	
+	DOMXML_PARAM_FOUR(parserp, id, le_domxmlparserp,"ss", &href, &href_len, &prefix, &prefix_len);
+
+	if (parserp->myDoc == NULL) {
+		php_error(E_WARNING, "%s(): Document was not started", get_active_function_name(TSRMLS_C));
+		RETURN_FALSE;
+	}
+
+	namespaceDecl(parserp, (xmlChar *) href, (xmlChar *) prefix);
+	
+	RETURN_TRUE;
+}
+/* }}} */
+
 
 /* {{{ proto bool domxml_parser_add_chunk(string chunk)
    adds xml-chunk to parser */
