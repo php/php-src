@@ -535,10 +535,11 @@ static inline zval **zend_fetch_dimension_address_inner(HashTable *ht, znode *op
 			}
 			break;
 		case IS_DOUBLE:
+		case IS_RESOURCE:
 		case IS_LONG: {
 				long index;
 
-				if(dim->type == IS_LONG) {
+				if (dim->type == IS_LONG || dim->type == IS_RESOURCE) {
 					index = dim->value.lval;
 				} else {
 					index = (long)dim->value.dval;
