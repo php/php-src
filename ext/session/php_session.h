@@ -79,6 +79,7 @@ typedef struct {
 	int entropy_length;
 	int lifetime;
 	zend_bool define_sid;
+	zend_bool use_cookies;
 	ps_module *mod;
 	void *mod_data;
 	HashTable vars;
