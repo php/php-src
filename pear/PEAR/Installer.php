@@ -129,7 +129,7 @@ class PEAR_Installer extends PEAR_Common
      * @return bool true if successful, false if not
      */
 
-    function install($pkgfile)
+    function install($pkgfile, $options = array())
     {
         // XXX FIXME Add here code to manage packages database
         //$this->loadPackageList("$this->statedir/packages.lst");
@@ -217,23 +217,27 @@ class PEAR_Installer extends PEAR_Common
         }
 
         // Copy files to dest dir ---------------------------------------
-        if (!is_dir($this->phpdir)) {
-            chdir($oldcwd);
-            return $this->raiseError("no script destination directory found",
-                                     null, PEAR_ERROR_DIE);
-        }
-        $tmp_path = dirname($descfile);
-        foreach ($pkginfo['filelist'] as $fname => $atts) {
-            $dest_dir = $this->phpdir . DIRECTORY_SEPARATOR;
-            if (isset($atts['baseinstalldir'])) {
-                $dest_dir .= $atts['baseinstalldir'] . DIRECTORY_SEPARATOR;
+        if (empty($options['register_only'])) {
+            if (!is_dir($this->phpdir)) {
+                chdir($oldcwd);
+                return $this->raiseError("no script destination directory\n",
+                                         null, PEAR_ERROR_DIE);
             }
-            if (dirname($fname) != '.') {
-                $dest_dir .= dirname($fname) . DIRECTORY_SEPARATOR;
+            $tmp_path = dirname($descfile);
+            foreach ($pkginfo['filelist'] as $fname => $atts) {
+                $dest_dir = $this->phpdir . DIRECTORY_SEPARATOR;
+                if (isset($atts['baseinstalldir'])) {
+                    $dest_dir .= $atts['baseinstalldir'] . DIRECTORY_SEPARATOR;
+                }
+                if (dirname($fname) != '.') {
+                    $dest_dir .= dirname($fname) . DIRECTORY_SEPARATOR;
+                }
+                $fname = $tmp_path . DIRECTORY_SEPARATOR . $fname;
+                $this->_installFile($fname, $dest_dir, $atts);
             }
-            $fname = $tmp_path . DIRECTORY_SEPARATOR . $fname;
-            $this->_installFile($fname, $dest_dir, $atts);
-        }
+        }            
+
+        // Register that the package is installed -----------------------
         $this->registry->addPackage($pkginfo['package'], $pkginfo);
         chdir($oldcwd);
         return true;
@@ -251,16 +255,19 @@ class PEAR_Installer extends PEAR_Common
             return $this->raiseError("is not installed");
         }
         $info = $this->registry->packageInfo($package);
-        foreach ($info['filelist'] as $file => $props) {
-            $base = (isset($props['baseinstalldir'])) ? $props['baseinstalldir'] : '';
-            $path = PEAR_INSTALL_DIR . DIRECTORY_SEPARATOR . $base .
-                    DIRECTORY_SEPARATOR . $file;
-            if (!@unlink($path)) {
-                $this->log(2, "unable to delete: $path");
-            } else {
-                $this->log(2, "+ deleted file: $path");
+        if (empty($options['register_only'])) {
+            foreach ($info['filelist'] as $file => $props) {
+                $base = (isset($props['baseinstalldir'])) ? $props['baseinstalldir'] : '';
+                $path = PEAR_INSTALL_DIR . DIRECTORY_SEPARATOR . $base .
+                     DIRECTORY_SEPARATOR . $file;
+                if (!@unlink($path)) {
+                    $this->log(2, "unable to delete: $path");
+                } else {
+                    $this->log(2, "+ deleted file: $path");
+                }
             }
         }
+        // Register that the package is no longer installed -------------
         $this->registry->deletePackage($package);
         return true;
     }
