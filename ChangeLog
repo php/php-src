@@ -1,3 +1,35 @@
+2002-04-15  Frank M. Kromann  <frank@frontbase.com>
+
+    * ext/mbstring/mbstring.h: Fixing Win32 compilation of mbstring
+
+    * ext/exif/exif.dsp: Fixing Win32 compilation of exit
+
+    * main/php_streams.h
+      main/spprintf.c
+      main/spprintf.h
+      main/streams.c: Adding PHPAPI needed for exif on Win32
+
+2002-04-15  Mark L. Woodward  <mlwmohawk@mohawksoft.com>
+
+    * ext/msession/reqclient.h
+      ext/msession/msession.c: Chages for beta3
+
+2002-04-15  Wez Furlong  <wez.php@thebrainroom.com>
+
+    * main/network.c: should not be there
+
+    * main/network.c: Some minor tweaks and debugging for sockets.
+
+2002-04-15  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/domxml/php_domxml.c:
+    - DomNode->replace_node() now returns the node that was replace and
+      not the new node
+    - fixes Bug #15949
+
+    * ext/domxml/php_domxml.h
+      ext/domxml/php_domxml.c: - added DomNode->replace_child()
+
 2002-04-14  Sterling Hughes  <sterling@bumblebury.com>
 
     * NEWS: this news entry reports a new mailparse addition
