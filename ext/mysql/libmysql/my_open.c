@@ -1,25 +1,11 @@
-/* Copyright (C) 2000 MySQL AB & MySQL Finland AB & TCX DataKonsult AB
-   
-   This library is free software; you can redistribute it and/or
-   modify it under the terms of the GNU Library General Public
-   License as published by the Free Software Foundation; either
-   version 2 of the License, or (at your option) any later version.
-   
-   This library is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-   Library General Public License for more details.
-   
-   You should have received a copy of the GNU Library General Public
-   License along with this library; if not, write to the Free
-   Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
-   MA 02111-1307, USA */
+/* Copyright Abandoned 1996 TCX DataKonsult AB & Monty Program KB & Detron HB
+   This file is public domain and comes with NO WARRANTY of any kind */
 
 #define USES_TYPES
 #include "mysys_priv.h"
 #include "mysys_err.h"
 #include <errno.h>
-#if defined(MSDOS) || defined(__WIN__)
+#if defined(MSDOS) || defined(__WIN32__)
 #include <share.h>
 #endif
 
@@ -34,7 +20,7 @@ File my_open(const char *FileName, int Flags, myf MyFlags)
   DBUG_ENTER("my_open");
   DBUG_PRINT("my",("Name: '%s'  Flags: %d  MyFlags: %d",
 		   FileName, Flags, MyFlags));
-#if defined(MSDOS) || defined(__WIN__)
+#if defined(MSDOS) || defined(__WIN32__)
   if (Flags & O_SHARE)
     fd = sopen((my_string) FileName, (Flags & ~O_SHARE) | O_BINARY, SH_DENYNO);
   else
@@ -86,7 +72,7 @@ int my_close(File fd, myf MyFlags)
     if (MyFlags & (MY_FAE | MY_WME))
       my_error(EE_BADCLOSE, MYF(ME_BELL+ME_WAITTANG),my_filename(fd),errno);
   }
-  if ((uint) fd < MY_NFILE && my_file_info[fd].type != UNOPEN)
+  if (fd < MY_NFILE && my_file_info[fd].type != UNOPEN)
   {
     my_file_opened--;
     my_free(my_file_info[fd].name, MYF(0));

@@ -1,19 +1,5 @@
-/* Copyright (C) 2000 MySQL AB & MySQL Finland AB & TCX DataKonsult AB
-   
-   This library is free software; you can redistribute it and/or
-   modify it under the terms of the GNU Library General Public
-   License as published by the Free Software Foundation; either
-   version 2 of the License, or (at your option) any later version.
-   
-   This library is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-   Library General Public License for more details.
-   
-   You should have received a copy of the GNU Library General Public
-   License along with this library; if not, write to the Free
-   Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
-   MA 02111-1307, USA */
+/* Copyright Abandoned 1996 TCX DataKonsult AB & Monty Program KB & Detron HB
+   This file is public domain and comes with NO WARRANTY of any kind */
 
 #include "mysys_priv.h"
 #include <m_string.h>
@@ -53,13 +39,13 @@ void pack_dirname(my_string to, const char *from)
   LINT_INIT(buff_length);
   if (!(cwd_err= my_getwd(buff,FN_REFLEN,MYF(0))))
   {
-    buff_length= (uint) strlen(buff);
+    buff_length=strlen(buff);
     d_length=(uint) (start-to);
     if ((start == to ||
 	 (buff_length == d_length && !bcmp(buff,start,d_length))) &&
 	*start != FN_LIBCHAR && *start)
     {						/* Put current dir before */
-      bchange(to,d_length,buff,buff_length,(uint) strlen(to)+1);
+      bchange(to,d_length,buff,buff_length,strlen(to)+1);
     }
   }
 
@@ -68,7 +54,7 @@ void pack_dirname(my_string to, const char *from)
     length=0;
     if (home_dir)
     {
-      length= (uint) strlen(home_dir);
+      length=strlen(home_dir);
       if (home_dir[length-1] == FN_LIBCHAR)
 	length--;				/* Don't test last '/' */
     }
@@ -92,7 +78,7 @@ void pack_dirname(my_string to, const char *from)
       }
       if (is_prefix(to,buff))
       {
-	length= (uint) strlen(buff);
+	length=strlen(buff);
 	if (to[length])
 	  (void) strmov_overlapp(to,to+length);	/* Remove everything before */
 	else
@@ -212,44 +198,6 @@ uint cleanup_dirname(register my_string to, const char *from)
 } /* cleanup_dirname */
 
 
-	/*
-	  On system where you don't have symbolic links, the following
-	  code will allow you to create a file: 
-	  directory-name.lnk that should contain the real path
-	  to the directory.  This will be used if the directory name
-	  doesn't exists
-	*/
-	  
-
-my_bool my_use_symdir=0;	/* Set this if you want to use symdirs */
-
-#ifdef USE_SYMDIR
-void symdirget(char *dir)
-{
-  char buff[FN_REFLEN];
-  char *pos=strend(dir);
-  if (dir[0] && pos[-1] != FN_DEVCHAR && access(dir, F_OK))
-  {
-    FILE *fp;
-    char temp= *(--pos);            /* May be "/" or "\" */
-    strmov(pos,".sym");
-    fp = my_fopen(dir, O_RDONLY,MYF(0));
-    *pos++=temp; *pos=0;	  /* Restore old filename */
-    if (fp)
-    {
-      if (fgets(buff, sizeof(buff), fp))
-      {
-	for (pos=strend(buff);
-	     pos > buff && (iscntrl(pos[-1]) || isspace(pos[-1])) ;
-	     pos --);
-	strmake(dir,buff, (uint) (pos-buff));
-      }
-      my_fclose(fp,MYF(0));
-    }
-  }
-}
-#endif /* USE_SYMDIR */
-
 	/* Unpacks dirname to name that can be used by open... */
 	/* Make that last char of to is '/' if from not empty and
 	   from doesn't end in FN_DEVCHAR */
@@ -261,11 +209,11 @@ uint unpack_dirname(my_string to, const char *from)
 						  /* to may be == from */
 {
   uint length,h_length;
-  char buff[FN_REFLEN+1+4],*suffix,*tilde_expansion;
+  char buff[FN_REFLEN+1],*suffix,*tilde_expansion;
   DBUG_ENTER("unpack_dirname");
 
   (void) intern_filename(buff,from);		/* Change to intern name */
-  length= (uint) strlen(buff);			/* Fix that '/' is last */
+  length=strlen(buff);				/* Fix that '/' is last */
   if (length &&
 #ifdef FN_DEVCHAR
       buff[length-1] != FN_DEVCHAR &&
@@ -283,7 +231,7 @@ uint unpack_dirname(my_string to, const char *from)
     if (tilde_expansion)
     {
       length-=(uint) (suffix-buff)-1;
-      if (length+(h_length= (uint) strlen(tilde_expansion)) <= FN_REFLEN)
+      if (length+(h_length=strlen(tilde_expansion)) <= FN_REFLEN)
       {
 	if (tilde_expansion[h_length-1] == FN_LIBCHAR)
 	  h_length--;
@@ -295,10 +243,6 @@ uint unpack_dirname(my_string to, const char *from)
       }
     }
   }
-#ifdef USE_SYMDIR
-  if (my_use_symdir)
-    symdirget(buff);
-#endif
   DBUG_RETURN(system_filename(to,buff));	/* Fix for open */
 } /* unpack_dirname */
 

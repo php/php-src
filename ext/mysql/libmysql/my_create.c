@@ -1,26 +1,12 @@
-/* Copyright (C) 2000 MySQL AB & MySQL Finland AB & TCX DataKonsult AB
-   
-   This library is free software; you can redistribute it and/or
-   modify it under the terms of the GNU Library General Public
-   License as published by the Free Software Foundation; either
-   version 2 of the License, or (at your option) any later version.
-   
-   This library is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-   Library General Public License for more details.
-   
-   You should have received a copy of the GNU Library General Public
-   License along with this library; if not, write to the Free
-   Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
-   MA 02111-1307, USA */
+/* Copyright Abandoned 1996 TCX DataKonsult AB & Monty Program KB & Detron HB
+   This file is public domain and comes with NO WARRANTY of any kind */
 
 #define USES_TYPES
 #include "mysys_priv.h"
 #include <my_dir.h>
 #include "mysys_err.h"
 #include <errno.h>
-#if defined(MSDOS) || defined(__WIN__)
+#if defined(MSDOS) || defined(__WIN32__)
 #include <share.h>
 #endif
 
@@ -48,7 +34,7 @@ File my_create(const char *FileName, int CreateFlags, int access_flags,
 #elif defined(VMS)
   fd = open((my_string) FileName, access_flags | O_CREAT, 0,
 	    "ctx=stm","ctx=bin");
-#elif defined(MSDOS) || defined(__WIN__)
+#elif defined(MSDOS) || defined(__WIN32__)
   if (access_flags & O_SHARE)
     fd = sopen((my_string) FileName, access_flags | O_CREAT | O_BINARY,
 	       SH_DENYNO, MY_S_IREAD | MY_S_IWRITE);
@@ -62,15 +48,11 @@ File my_create(const char *FileName, int CreateFlags, int access_flags,
   if (fd >= 0)
   {
     if ((int) fd >= MY_NFILE)
-    {
-      DBUG_PRINT("exit",("fd: %d",fd));
       DBUG_RETURN(fd);				/* safeguard */
-    }
     if ((my_file_info[fd].name = (char*) my_strdup(FileName,MyFlags)))
     {
       my_file_opened++;
       my_file_info[fd].type = FILE_BY_CREATE;
-      DBUG_PRINT("exit",("fd: %d",fd));
       DBUG_RETURN(fd);
     }
     VOID(my_close(fd,MyFlags));
