@@ -50,7 +50,7 @@
 #include "fopen-wrappers.h"
 #include "ext/standard/php_standard.h"
 #include "snprintf.h"
-#include "php_gpce.h"
+#include "php_variables.h"
 #if WIN32|WINNT
 #include <io.h>
 #include <fcntl.h>
@@ -251,8 +251,9 @@ PHP_INI_BEGIN()
 #endif
 
 	STD_PHP_INI_BOOLEAN("gpc_globals",			"1",			PHP_INI_ALL,		OnUpdateBool,				gpc_globals,	php_core_globals,	core_globals)
-	STD_PHP_INI_ENTRY("gpc_order",				"GPC",			PHP_INI_ALL,		OnUpdateStringUnempty,	gpc_order,		php_core_globals,	core_globals)
-	STD_PHP_INI_ENTRY("arg_separator",			"&",			PHP_INI_ALL,		OnUpdateStringUnempty,	arg_separator,	php_core_globals,	core_globals)
+	STD_PHP_INI_ENTRY("gpc_order",				"GPC",			PHP_INI_ALL,		OnUpdateStringUnempty,	gpc_order,			php_core_globals,	core_globals)
+	STD_PHP_INI_ENTRY("variables_order",		NULL,			PHP_INI_ALL,		OnUpdateStringUnempty,	variables_order,	php_core_globals,	core_globals)
+	STD_PHP_INI_ENTRY("arg_separator",			"&",			PHP_INI_ALL,		OnUpdateStringUnempty,	arg_separator,		php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("ignore_user_abort",	"1",			PHP_INI_ALL,		OnUpdateBool,			ignore_user_abort,		php_core_globals,	core_globals)
 PHP_INI_END()
 
@@ -702,24 +703,10 @@ int php_request_startup(CLS_D ELS_DC PLS_DC SLS_DC)
 	}
 
 	if (SG(request_info).auth_user) {
-		zval *auth_user;
-
-		MAKE_STD_ZVAL(auth_user);
-		auth_user->type = IS_STRING;
-		auth_user->value.str.val = SG(request_info).auth_user;
-		auth_user->value.str.len = strlen(auth_user->value.str.val);
-
-		zend_hash_update(&EG(symbol_table), "PHP_AUTH_USER", sizeof("PHP_AUTH_USER"), &auth_user, sizeof(zval *), NULL);
+		php_register_variable(SG(request_info).auth_user, "PHP_AUTH_USER", NULL ELS_CC PLS_CC);
 	}
 	if (SG(request_info).auth_password) {
-		zval *auth_password;
-
-		MAKE_STD_ZVAL(auth_password);
-		auth_password->type = IS_STRING;
-		auth_password->value.str.val = SG(request_info).auth_password;
-		auth_password->value.str.len = strlen(auth_password->value.str.val);
-
-		zend_hash_update(&EG(symbol_table), "PHP_AUTH_PW", sizeof("PHP_AUTH_PW"), &auth_password, sizeof(zval *), NULL);
+		php_register_variable(SG(request_info).auth_password, "PHP_AUTH_PW", NULL ELS_CC PLS_CC);
 	}
 	
 	return SUCCESS;
@@ -1009,14 +996,35 @@ void php_module_shutdown()
 }
 
 
-/* in 3.1 some of this should move into sapi */
-static int zend_hash_environment(PLS_D ELS_DC SLS_DC)
+static inline void php_register_server_variables(ELS_D SLS_DC PLS_DC)
 {
-	char **env, *p, *t;
+	zval *array_ptr=NULL;
+
+	if (PG(track_vars)) {
+		ALLOC_ZVAL(array_ptr);
+		array_init(array_ptr);
+		INIT_PZVAL(array_ptr);
+		zend_hash_add(&EG(symbol_table), "HTTP_SERVER_VARS", sizeof("HTTP_ENV_VARS"), &array_ptr, sizeof(pval *),NULL);
+	}
+	sapi_module.register_server_variables(array_ptr ELS_CC SLS_CC PLS_CC);
+}
+
+
+static int zend_hash_environment(ELS_D SLS_DC PLS_DC)
+{
+	char *p;
 	unsigned char _gpc_flags[3] = {0,0,0};
-	pval *tmp;
-	
-	p = PG(gpc_order);
+	zend_bool have_variables_order;
+
+	if (PG(variables_order)) {
+		p = PG(variables_order);
+		have_variables_order=1;
+	} else {
+		p = PG(gpc_order);
+		have_variables_order=0;
+		php_import_environment_variables(ELS_C PLS_CC);
+	}
+
 	while(*p) {
 		switch(*p++) {
 			case 'p':
@@ -1040,94 +1048,27 @@ static int zend_hash_environment(PLS_D ELS_DC SLS_DC)
 					_gpc_flags[2]=1;
 				}
 				break;
+			case 'e':
+			case 'E':
+				if (have_variables_order) {
+					php_import_environment_variables(ELS_C PLS_CC);
+				} else {
+					php_error(E_CORE_WARNING, "Unsupported 'e' element (environment) used in gpc_order - use variables_order instead");
+				}
+				break;
+			case 's':
+			case 'S':
+				if (sapi_module.register_server_variables) {
+					php_register_server_variables(ELS_C SLS_CC PLS_CC);
+				}
+				break;
 		}
 	}
 
-	
-	for (env = environ; env != NULL && *env != NULL; env++) {
-		p = strchr(*env, '=');
-		if (!p) {				/* malformed entry? */
-			continue;
-		}
-		t = estrndup(*env, p - *env);
-		ALLOC_ZVAL(tmp);
-		tmp->value.str.len = strlen(p + 1);
-		tmp->value.str.val = estrndup(p + 1, tmp->value.str.len);
-		tmp->type = IS_STRING;
-		INIT_PZVAL(tmp);
-		/* environmental variables never take precedence over get/post/cookie variables */
-		zend_hash_add(&EG(symbol_table), t, p - *env + 1, &tmp, sizeof(pval *), NULL);
-		efree(t);
-	}
 
-#if APACHE
-	{
-		pval **tmp_ptr;
-		register int i;
-		array_header *arr = table_elts(((request_rec *) SG(server_context))->subprocess_env);
-		table_entry *elts = (table_entry *) arr->elts;
-		int len;
-
-		for (i = 0; i < arr->nelts; i++) {
-			len = strlen(elts[i].key);
-			t = elts[i].key;
-			ALLOC_ZVAL(tmp);
-			if (elts[i].val) {
-				tmp->value.str.len = strlen(elts[i].val);
-				tmp->value.str.val = estrndup(elts[i].val, tmp->value.str.len);
-			} else {
-				tmp->value.str.len = 0;
-				tmp->value.str.val = empty_string;
-			}
-			INIT_PZVAL(tmp);
-			tmp->type = IS_STRING;
-			zend_hash_update(&EG(symbol_table), t, strlen(t)+1, &tmp, sizeof(pval *), NULL);
-		}
-		/* insert special variables */
-		if (zend_hash_find(&EG(symbol_table), "SCRIPT_FILENAME", sizeof("SCRIPT_FILENAME"), (void **) &tmp_ptr) == SUCCESS) {
-			(*tmp_ptr)->refcount++;
-			zend_hash_update(&EG(symbol_table), "PATH_TRANSLATED", sizeof("PATH_TRANSLATED"), tmp_ptr, sizeof(pval *), NULL);
-		}
-		ALLOC_ZVAL(tmp);
-		tmp->value.str.len = strlen(((request_rec *) SG(server_context))->uri);
-		tmp->value.str.val = estrndup(((request_rec *) SG(server_context))->uri, tmp->value.str.len);
-		INIT_PZVAL(tmp);
-		tmp->type = IS_STRING;
-		zend_hash_update(&EG(symbol_table), "PHP_SELF", sizeof("PHP_SELF"), (void *) &tmp, sizeof(pval *), NULL);
+	if (!have_variables_order) {
+		php_register_server_variables(ELS_C SLS_CC PLS_CC);
 	}
-#else
-	{
-		/* Build the special-case PHP_SELF variable for the CGI version */
-		char *pi;
-#if FORCE_CGI_REDIRECT
-		pi = SG(request_info).request_uri;
-		ALLOC_ZVAL(tmp);
-		tmp->value.str.val = emalloc(((pi)?strlen(pi):0) + 1);
-		tmp->value.str.len = php_sprintf(tmp->value.str.val, "%s", (pi ? pi : ""));	/* SAFE */
-		tmp->type = IS_STRING;
-		INIT_PZVAL(tmp);
-#else
-		int l = 0;
-		char *sn;
-		sn = request_info.script_name;
-		pi = SG(request_info).request_uri;
-		if (sn)
-			l += strlen(sn);
-		if (pi)
-			l += strlen(pi);
-		if (pi && sn && !strcmp(pi, sn)) {
-			l -= strlen(pi);
-			pi = NULL;
-		}
-		ALLOC_ZVAL(tmp);
-		tmp->value.str.val = emalloc(l + 1);
-		tmp->value.str.len = php_sprintf(tmp->value.str.val, "%s%s", (sn ? sn : ""), (pi ? pi : ""));	/* SAFE */
-		tmp->type = IS_STRING;
-		INIT_PZVAL(tmp);
-#endif
-		zend_hash_update(&EG(symbol_table), "PHP_SELF", sizeof("PHP_SELF"), (void *) & tmp, sizeof(pval *), NULL);
-	}
-#endif
 
 
 	/* need argc/argv support as well */
@@ -1135,6 +1076,7 @@ static int zend_hash_environment(PLS_D ELS_DC SLS_DC)
 
 	return SUCCESS;
 }
+
 
 void _php_build_argv(char *s ELS_DC)
 {
@@ -1193,6 +1135,7 @@ PHPAPI void php_execute_script(zend_file_handle *primary_file CLS_DC ELS_DC PLS_
 	zend_file_handle prepend_file, append_file;
 	SLS_FETCH();
 
+	zend_hash_environment(ELS_C SLS_CC PLS_CC);
 	zend_activate_modules();
 	if (SG(request_info).query_string && SG(request_info).query_string[0]=='=' 
 		&& PG(expose_php)) {
@@ -1240,7 +1183,6 @@ PHPAPI void php_execute_script(zend_file_handle *primary_file CLS_DC ELS_DC PLS_
 	}	
 	EG(main_op_array) = zend_compile_files(0 CLS_CC, 3, prepend_file_p, primary_file, append_file_p);
 	if (EG(main_op_array)) {
-		zend_hash_environment(PLS_C ELS_CC SLS_CC);
 		EG(active_op_array) = EG(main_op_array);
 		zend_execute(EG(main_op_array) ELS_CC);
 	}

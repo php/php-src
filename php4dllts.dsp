@@ -160,15 +160,15 @@ SOURCE=.\php_content_types.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\php_gpce.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\php_ini.c
 # End Source File
 # Begin Source File
 
 SOURCE=.\php_realpath.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\php_variables.c
 # End Source File
 # Begin Source File
 
@@ -260,10 +260,6 @@ SOURCE=.\php_globals.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\php_gpce.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\php_ini.h
 # End Source File
 # Begin Source File
@@ -273,6 +269,10 @@ SOURCE=.\php_realpath.h
 # Begin Source File
 
 SOURCE=.\php_regex.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\php_variables.h
 # End Source File
 # Begin Source File
 

@@ -416,6 +416,7 @@ PHP_FUNCTION(apache_lookup_uri)
 }
 /* }}} */
 
+
 #if 0
 This function is most likely a bad idea.  Just playing with it for now.
 

@@ -222,6 +222,39 @@ int sapi_apache_send_headers(sapi_headers_struct *sapi_headers SLS_DC)
 }
 
 
+static void sapi_apache_register_server_variables(zval *track_vars_array ELS_DC SLS_DC PLS_DC)
+{
+	pval **tmp_ptr;
+	register int i;
+	array_header *arr = table_elts(((request_rec *) SG(server_context))->subprocess_env);
+	table_entry *elts = (table_entry *) arr->elts;
+	int len;
+	char *script_filename=NULL;
+	ELS_FETCH();
+	PLS_FETCH();
+
+	for (i = 0; i < arr->nelts; i++) {
+		char *val;
+
+		if (elts[i].val) {
+			val = elts[i].val;
+			if (!strcmp(val, "SCRIPT_FILENAME")) {
+				script_filename = val;
+			}
+		} else {
+			val = empty_string;
+		}
+		php_register_variable(val, elts[i].key, NULL ELS_CC PLS_CC);
+	}
+
+	/* insert special variables */
+	if (script_filename) {
+		php_register_variable(script_filename, "PATH_TRANSLATED", NULL ELS_CC PLS_CC);
+	}
+	php_register_variable(SG(server_context)->uri, "PHP_SELF", NULL ELS_CC PLS_CC);
+}
+*
+
 static sapi_module_struct sapi_module = {
 	"Apache",						/* name */
 									
@@ -240,6 +273,8 @@ static sapi_module_struct sapi_module = {
 
 	sapi_apache_read_post,			/* read POST data */
 	sapi_apache_read_cookies,		/* read Cookies */
+
+	sapi_apache_register_server_variables,		/* register server variables */
 
 	STANDARD_SAPI_MODULE_PROPERTIES
 };
