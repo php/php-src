@@ -1,6 +1,8 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.0.8-dev
+- Added array_change_key_case() function that returns array with
+  with all string keys lowercased or uppercased (EdinK)
 - Added parameter to ircg_pconnect to suppress treating non-fatal errors
   as fatal, and added conversion of Windows quotes to &quot; (Sascha)
 - Added new function pcntl_exec, which behaves similar to execve.
