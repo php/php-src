@@ -25,7 +25,8 @@
 #include "php_ini.h"
 #include "php_globals.h"
 #include "SAPI.h"
-#include "main.h"
+/* Was using Pike's main.h */
+#include "../../main.h" 
 #include "ext/standard/info.h"
 
 #include "php_version.h"
@@ -592,17 +593,16 @@ static int php_roxen_module_main(SLS_D)
 #endif
 #endif
 
-  /* Change virtual directory, if the feature is enabled */
 #ifdef VIRTUAL_DIR
+  /* Change virtual directory, if the feature is enabled */
   dir = malloc(len = strlen(THIS->filename));
   strcpy(dir, THIS->filename);
   while(--len >= 0 && dir[len] != '/')
     ;
-  /* VERY BAD, but should work */
   if(len > 0) {
     dir[len] = '\0';
-    V_CHDIR(dir);
   }
+  V_CHDIR(dir);
   free(dir);
 #endif
 
