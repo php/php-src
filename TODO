@@ -6,6 +6,7 @@ Zend
     * allow foreach ($array as $k => &$val) syntax. right now we cannot 
       traverse an array without copying each element.
     * look at replacing c-lib call tolower().
+    * make hash API functions work with HASH_OF() to save time.
 
 global
 ------
