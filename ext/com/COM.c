@@ -133,20 +133,32 @@ PHPAPI HRESULT php_COM_invoke(comval *obj, DISPID dispIdMember, WORD wFlags, DIS
 		if (FAILED(hr)) {
 			switch (hr) {
 				case DISP_E_EXCEPTION: {
-						int srclen;
-						char *src = php_OLECHAR_to_char(ExceptInfo.bstrSource, &srclen, codepage TSRMLS_CC);
-						int desclen;
-						char *desc = php_OLECHAR_to_char(ExceptInfo.bstrDescription, &desclen, codepage TSRMLS_CC);
+						int srclen=0;
+						char *src=estrdup("");
+						int desclen=0;
+						char *desc=estrdup("");
 
+						if (ExceptInfo.bstrSource)
+						{
+							src = php_OLECHAR_to_char(ExceptInfo.bstrSource, &srclen, codepage TSRMLS_CC);
+							SysFreeString(ExceptInfo.bstrSource);
+						}
+						if (ExceptInfo.bstrDescription)
+						{
+							desc = php_OLECHAR_to_char(ExceptInfo.bstrDescription, &desclen, codepage TSRMLS_CC);
+							SysFreeString(ExceptInfo.bstrDescription);
+						}
+						
 						*ErrString = pemalloc(srclen+desclen+50, 1);
 						sprintf(*ErrString, "<b>Source</b>: %s <b>Description</b>: %s", src, desc);
 						efree(src);
 						efree(desc);
-						SysFreeString(ExceptInfo.bstrSource);
-						SysFreeString(ExceptInfo.bstrDescription);
-						SysFreeString(ExceptInfo.bstrHelpFile);
+						
+						if (ExceptInfo.bstrHelpFile)
+						{
+							SysFreeString(ExceptInfo.bstrHelpFile);
+						}
 					}
-					break;
 				case DISP_E_PARAMNOTFOUND:
 				case DISP_E_TYPEMISMATCH:
 					*ErrString = pemalloc(25, 1);
