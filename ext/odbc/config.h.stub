@@ -1,0 +1,9 @@
+#define HAVE_SOLID 0
+#define HAVE_IODBC 0
+#define HAVE_OPENLINK 0
+#define HAVE_ADABAS 0
+#define HAVE_CODBC 0
+#define HAVE_UODBC 0
+#define HAVE_EMPRESS 0
+#define HAVE_VELOCIS 0
+

@@ -26,28 +26,5 @@ else
     echo created or modified configure
 fi
 
-cd libzend
+cd libzend; ./buildconf
 
-if test -f mkinstalldirs; then
-    automake
-else
-    automake --add-missing
-fi
-
-mv aclocal.m4 aclocal.m4.old 2>/dev/null
-aclocal
-if cmp aclocal.m4.old aclocal.m4 > /dev/null 2>&1; then
-    echo keeping libzend/aclocal.m4
-    mv aclocal.m4.old aclocal.m4
-else
-    echo created or modified libzend/aclocal.m4
-fi
-
-mv configure configure.old 2>/dev/null
-autoconf
-if cmp configure.old configure > /dev/null 2>&1; then
-    echo keeping libzend/configure
-    mv configure.old configure
-else
-    echo created or modified libzend/configure
-fi
