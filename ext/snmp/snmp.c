@@ -150,7 +150,9 @@ void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st) {
 	case 9:
 		RETURN_LONG(snmp_get_quick_print()?1:0);
 	case 10:
-		if(myargc != 1 || getParameters(ht, myargc, &a1)) WRONG_PARAM_COUNT;
+		if (myargc != 1 || getParameters(ht, myargc, &a1) == FAILURE) {
+			WRONG_PARAM_COUNT;
+		}
 		convert_to_long(a1);
 		snmp_set_quick_print((int) a1->value.lval);
 		RETURN_TRUE;
@@ -327,14 +329,14 @@ PHP_FUNCTION(snmpget) {
 }
 /* }}} */
 
-/* {{{ proto string snmpwalk(string host, string community, string object_id [, int timeout [, int retries]]) 
+/* {{{ proto array snmpwalk(string host, string community, string object_id [, int timeout [, int retries]]) 
    Return all objects under the specified object id */
 PHP_FUNCTION(snmpwalk) {
 	return php_snmp(INTERNAL_FUNCTION_PARAM_PASSTHRU,2);
 }
 /* }}} */
 
-/* {{{ proto string snmprealwalk(string host, string community, string object_id [, int timeout [, int retries]])
+/* {{{ proto array snmprealwalk(string host, string community, string object_id [, int timeout [, int retries]])
    Return all objects including their respective object id withing the specified one */
 PHP_FUNCTION(snmprealwalk)
 {
@@ -342,7 +344,7 @@ PHP_FUNCTION(snmprealwalk)
 }
 /* }}} */
 
-/* {{{ proto string snmprealoid(string host, string community, string object_id [, int timeout [, int retries]])
+/* {{{ proto array snmpwalkoid(string host, string community, string object_id [, int timeout [, int retries]])
    Return all objects including their respective object id withing the specified one */
 PHP_FUNCTION(snmpwalkoid)
 {
