@@ -332,7 +332,7 @@ parameter.
         $data = array(
             'caption' => $caption,
             'border' => 1,
-            'headline' => array('Package', 'Version', 'Size'),
+            'headline' => array('Package', 'Local', 'Remote', 'Size'),
             );
         foreach ($latest as $pkg => $info) {
             $package = strtolower($pkg);
@@ -355,7 +355,7 @@ parameter.
             } else {
                 $fs = "  -"; // XXX center instead
             }
-            $data['data'][] = array($pkg, $version, $fs);
+            $data['data'][] = array($pkg, $inst_version, $version, $fs);
         }
         if (empty($data['data'])) {
             $this->ui->outputData('No upgrades available');
