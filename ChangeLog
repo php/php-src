@@ -1,3 +1,81 @@
+2003-11-13  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/simplexml/tests/009.phpt:
+      Fix testcase name
+
+2003-11-13  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * ext/imap/php_imap.c:
+      proto fix
+
+2003-11-13  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * NEWS:
+      BFN
+
+    * ZendEngine2/zend_operators.c:
+      Bugfix #26156 (REPLACE_ZVAL_VALUE works on uninit stack-based zvals)
+
+2003-11-13  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/simplexml/simplexml.c
+      ext/simplexml/tests/004.phpt
+      ext/simplexml/tests/009.phpt
+      ext/simplexml/tests/009.xml:
+      Fix classname, CDATA handling (semantically identical to text) and
+      iterators (Return sub elements as objects, converted to string you get
+      the text).
+
+    * (PHP_4_3)
+      ext/dba/dba.c:
+      MFH: Proto fixes (Friedhelm Betz <holliwell|gmx.net>)
+
+    * ext/dba/dba.c:
+      Proto fixes (Friedhelm Betz <holliwell|gmx.net>)
+
+2003-11-13  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * acinclude.m4:
+      - Fixed build of shared extensions which require openssl and when you only
+        have static openssl libraries.
+
+2003-11-13  Edin Kadribasic  <edink@emini.dk>
+
+    * ext/gd/libgd/gd_jpeg.c
+      main/config.w32.h
+      sapi/cgi/libfcgi/include/fcgi_config_win32.h:
+      Windows compile fix (patch by sfox@php.net).
+
+2003-11-13  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_4_3)
+      NEWS:
+      BFN
+
+    * (PHP_4_3)
+      ext/dba/dba_db2.c
+      ext/dba/dba_db3.c
+      ext/dba/dba_db4.c
+      ext/dba/tests/dba007.phpt:
+      MFH Bugfix #25794: Cannot open existing hash db3 file with write
+
+    * ext/dba/dba_db2.c
+      ext/dba/dba_db3.c
+      ext/dba/dba_db4.c:
+      Bugfix #25794: Cannot open existing hash db3 file with write
+
+    * ZendEngine2/ZEND_CHANGES
+      ZendEngine2/zend_interfaces.c:
+      IteratorAggregate::getIterator() cannot return anythingy else than objects
+
+    * ext/dba/dba.c:
+      Pass eof
+
+2003-11-13  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend_compile.c:
+      - Make sure internal clasess are malloced
+
 2003-11-12  Ilia Alshanetsky  <ilia@prohost.org>
 
     * configure.in

@@ -1,3 +1,19 @@
+2003-11-13  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * zend_operators.c:
+      Bugfix #26156 (REPLACE_ZVAL_VALUE works on uninit stack-based zvals)
+
+2003-11-13  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZEND_CHANGES
+      zend_interfaces.c:
+      IteratorAggregate::getIterator() cannot return anythingy else than objects
+
+2003-11-13  Andi Gutmans  <andi@zend.com>
+
+    * zend_compile.c:
+      - Make sure internal clasess are malloced
+
 2003-11-10  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_iterators.c:
