@@ -268,11 +268,16 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 							val = cur;
 						} else {
 							val = get_node(cur->children, param->paramName);
-							if (val == NULL && res_count == 1) {
-								val = get_node(cur->children, "return");
-							}
-							if (val == NULL && res_count == 1) {
-								val = get_node(cur->children, "result");
+							if (res_count == 1) {
+								if (val == NULL) {
+									val = get_node(cur->children, "return");
+								}
+								if (val == NULL) {
+									val = get_node(cur->children, "result");
+								}
+								if (val == NULL && cur->children && cur->children->next == NULL) {
+									val = cur->children;								  
+								}
 							}
 						}
 					}
