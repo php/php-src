@@ -278,6 +278,13 @@ PRIMARY MAINTAINER:  Sascha Schumann <sascha@schumann.cx>
 MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
+EXTENSION:           muscat
+PRIMARY MAINTAINER:  Sam Liddicott <sam@ananova.com>
+MAINTENANCE:         Maintained
+STATUS:              Working
+SINCE:               4.0.5
+COMMENT:             Not tested against windows, only core API completed, rest under development
+-------------------------------------------------------------------------------
 EXTENSION:           openssl
 PRIMARY MAINTAINER:  Stig Venaas <venaas@php.net>
 MAINTENANCE:         Maintained
