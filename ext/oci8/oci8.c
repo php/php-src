@@ -4299,7 +4299,8 @@ PHP_FUNCTION(ocifreecoll)
     int inx;
     oci_collection *coll;
     oci_connection *connection;
-
+	OCILS_FETCH();
+	
     if ((id = getThis()) != 0) {
         inx = _oci_get_ocicoll(id,&coll);
         if (inx) {
