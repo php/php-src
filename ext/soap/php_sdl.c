@@ -152,7 +152,9 @@ xmlNodePtr sdl_guess_convert_xml(encodeType enc, zval *data, int style)
 	else
 		ret = guess_xml_convert(enc, data, style);
 
-	//set_ns_and_type(ret, enc);
+	/*
+	set_ns_and_type(ret, enc);
+	*/
 	return ret;
 }
 
@@ -287,7 +289,7 @@ zval *sdl_convert_zval(xmlNodePtr data, sdlTypePtr type)
 		service->soap_class.ce = ce;
 	}
 }
-//this function will take a zval and apply all attributes of sldTypePtr
+// this function will take a zval and apply all attributes of sldTypePtr
 zval *sdl_convert_zval_to_zval(zval *data, sdlTypePtr type)
 {
 }
@@ -342,7 +344,8 @@ sdlBindingPtr get_binding_from_name(sdlPtr sdl, char *name, char *ns)
 
 int load_php_sdl()
 {
-/*	xmlNodePtr rootElement;
+#ifdef BRAD_0
+	xmlNodePtr rootElement;
 	xmlNodePtr services;
 
 	SOAP_SERVER_GLOBAL_VARS();
@@ -360,7 +363,7 @@ int load_php_sdl()
 			HashTable *include = NULL;
 			HashTable *cl = NULL;
 
-			//Init New Service
+			/* Init New Service */
 			newService = emalloc(sizeof(phpSoapService));
 			newService->serviceNode = services;
 			newService->started = FALSE;
@@ -372,14 +375,14 @@ int load_php_sdl()
 
 			attrib = services->properties;
 			trav = attrib;
-			//Get Attributes of Service
+			/* Get Attributes of Service */
 			do
 			{
 				if(IS_ATTRIBUTE_TYPE(trav,PHP_SOAPSERVER_SERVICE_NAME))
 				{
 					char* name = ATTRIBUTE_VALUE(trav);
 
-					//Assign Service Vals
+					/* Assign Service Vals */
 					ALLOC_INIT_ZVAL(newService->serviceName);
 					ZVAL_STRING(newService->serviceName,name,1);
 				}
@@ -388,18 +391,18 @@ int load_php_sdl()
 				{
 					char* started = ATTRIBUTE_VALUE(trav);
 
-					//Assign Service Vals
+					/* Assign Service Vals */
 					if(!stricmp(started,"true"))
 						newService->started = TRUE;
 				}
 			}
 			while(trav = trav->next);
 
-			//Get ChildNodes of Service
+			/* Get ChildNodes of Service */
 			trav = services->children;
 			do
 			{
-				//Include Files
+				/* Include Files */
 				if(IS_ELEMENT_TYPE(trav,PHP_SOAPSERVER_SERVICE_INCLUDE_FILE))
 				{
 					xmlNodePtr trav1 = trav->properties;
@@ -417,7 +420,7 @@ int load_php_sdl()
 					while(trav1 = trav1->next);
 				}
 
-				//Functions
+				/* Functions */
 				if(IS_ELEMENT_TYPE(trav,PHP_SOAPSERVER_SERVICE_FUNCTION))
 				{
 					phpSoapServiceFunctionPtr function;
@@ -485,7 +488,7 @@ int load_php_sdl()
 					zend_hash_add(fn,Z_STRVAL_P(function->functionName),Z_STRLEN_P(function->functionName),function,sizeof(phpSoapServiceFunction),NULL);
 				}
 
-				//Classes
+				/* Classes */
 				if(IS_ELEMENT_TYPE(trav,PHP_SOAPSERVER_SERVICE_CLASS))
 				{
 					xmlNodePtr att, func;
@@ -505,7 +508,7 @@ int load_php_sdl()
 		}
 	}
 	while(services = services->next);
-*/
+#endif
 	return TRUE;
 }
 
@@ -598,7 +601,7 @@ sdlPtr load_wsdl(char *struri, sdlPtr parent)
 			if(bindingAttr == NULL)
 				php_error(E_ERROR, "SOAP-ERROR: Parsing WSDL: No binding associated with port");
 
-			//find address and figure out binding type
+			/* find address and figure out binding type */
 			address = get_node(port->children, "address");
 			if(!address)
 				php_error(E_ERROR, "SOAP-ERROR: Parsing WSDL: No address associated with port");
@@ -928,7 +931,8 @@ int write_ms_sdl()
 
 int load_ms_sdl(char *struri,int force_load)
 {
-/* Commenting this out. Does anyone need it?
+/* Commenting this out. Does anyone need it? */
+#ifdef BRAD_0
 
 	if(get_sdl(struri) == NULL || force_load)
 	{
@@ -981,7 +985,7 @@ int load_ms_sdl(char *struri,int force_load)
 				ALLOC_INIT_ZVAL(tmpFunction->soapAction);
 				ZVAL_STRING(tmpFunction->soapAction,soapAction,1);
 
-				//Request
+				/* Request */
 				req = get_node(reqRes->children,"request");
 				tmpattr = get_attribute(req->properties,"ref");
 				if(tmpattr != NULL)
@@ -996,7 +1000,7 @@ int load_ms_sdl(char *struri,int force_load)
 					efree(namespace);
 				}
 
-				//Response
+				/* Response */
 				res = get_node(reqRes->children,"response");
 				tmpattr = get_attribute(res->properties,"ref");
 				if(tmpattr != NULL)
@@ -1011,7 +1015,7 @@ int load_ms_sdl(char *struri,int force_load)
 					efree(namespace);
 				}
 
-				//Parameters
+				/* Parameters */
 				paramOrd = get_node(reqRes->children,"parameterorder");
 				if(paramOrd != NULL)
 				{
@@ -1024,7 +1028,7 @@ int load_ms_sdl(char *struri,int force_load)
 					ALLOC_INIT_ZVAL(array);
 					array_init(array);
 
-					//Split on space
+					/* Split on space */
 					php_explode(space, tempZval, array, -1);
 					zend_hash_internal_pointer_reset(array->value.ht);
 					count = zend_hash_num_elements(array->value.ht);
@@ -1057,7 +1061,8 @@ int load_ms_sdl(char *struri,int force_load)
 		sdlPtr->have_sdl = 1;
 		map_types_to_functions(sdlPtr);
 		zend_hash_add(SOAP_GLOBAL(SDLs),struri,strlen(struri),sdlPtr,sizeof(SDL),NULL);
-	}*/
+	}
+#endif
 	return FALSE;
 }
 

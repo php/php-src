@@ -40,7 +40,7 @@ encode defaultEncoding[] = {
 	{{SOAP_ENC_OBJECT, SOAP_ENC_OBJECT_STRING, SOAP_ENC_NAMESPACE, NULL}, to_zval_object, to_xml_object},
 	{{SOAP_ENC_ARRAY, SOAP_ENC_ARRAY_STRING, SOAP_ENC_NAMESPACE, NULL}, to_zval_array, to_xml_array},
 
-	//support some of the 1999 data types
+	/* support some of the 1999 data types */
 	{{XSD_STRING, XSD_STRING_STRING, XSD_1999_NAMESPACE, NULL}, to_zval_string, to_xml_string},
 	{{XSD_BOOLEAN, XSD_BOOLEAN_STRING, XSD_1999_NAMESPACE, NULL}, to_zval_bool, to_xml_bool},
 	{{XSD_DECIMAL, XSD_DECIMAL_STRING, XSD_1999_NAMESPACE, NULL}, to_zval_long, to_xml_string},
@@ -53,7 +53,7 @@ encode defaultEncoding[] = {
 
 	{{END_KNOWN_TYPES, NULL, NULL, NULL}, guess_zval_convert, guess_xml_convert}
 
-//TODO: finish off encoding
+/* TODO: finish off encoding */
 /*
 #define XSD_DURATION 107
 #define XSD_DURATION_STRING "duration"
@@ -259,8 +259,8 @@ zval *to_zval_after_user(encodeType type, zval *data)
 }
 #endif
 
-//TODO: get rid of "bogus".. ither by passing in the already created xmlnode or passing in the node name
-//String encode/decode
+/* TODO: get rid of "bogus".. ither by passing in the already created xmlnode or passing in the node name */
+/* String encode/decode */
 zval *to_zval_string(encodeType type, xmlNodePtr data)
 {
 	zval *ret;
@@ -389,7 +389,7 @@ xmlNodePtr to_xml_bool(encodeType type, zval *data, int style)
 	return ret;
 }
 
-//Null encode/decode
+/* Null encode/decode */
 zval *to_zval_null(encodeType type, xmlNodePtr data)
 {
 	zval *ret;
@@ -410,7 +410,7 @@ xmlNodePtr to_xml_null(encodeType type, zval *data, int style)
 	return ret;
 }
 
-//Struct encode/decode
+/* Struct encode/decode */
 zval *to_zval_object(encodeType type, xmlNodePtr data)
 {
 	zval *ret;
@@ -447,7 +447,7 @@ xmlNodePtr to_xml_object(encodeType type, zval *data, int style)
 	int i;
 	TSRMLS_FETCH();
 
-	//Special handling of class SoapVar
+	/* Special handling of class SoapVar */
 	if(data && Z_TYPE_P(data) == IS_OBJECT && !strcmp(Z_OBJCE_P(data)->name, soap_var_class_entry.name))
 	{
 		zval **ztype, **zdata, **zns, **zstype, **zname, **znamens;
@@ -519,7 +519,7 @@ xmlNodePtr to_xml_object(encodeType type, zval *data, int style)
 	return xmlParam;
 }
 
-//Array encode/decode
+/* Array encode/decode */
 xmlNodePtr guess_array_map(encodeType type, zval *data, int style)
 {
 	encodePtr enc = NULL;
@@ -624,7 +624,7 @@ zval *to_zval_array(encodeType type, xmlNodePtr data)
 	return ret;
 }
 
-//Map encode/decode
+/* Map encode/decode */
 xmlNodePtr to_xml_map(encodeType type, zval *data, int style)
 {
 	xmlNodePtr xmlParam;
@@ -637,7 +637,7 @@ xmlNodePtr to_xml_map(encodeType type, zval *data, int style)
 	if(Z_TYPE_P(data) == IS_ARRAY)
 	{
 		i = zend_hash_num_elements(Z_ARRVAL_P(data));
-		//TODO: Register namespace...???
+		/* TODO: Register namespace...??? */
 		xmlSetProp(xmlParam, "xmlns:apache", "http://xml.apache.org/xml-soap");
 		zend_hash_internal_pointer_reset(data->value.ht);
 		for(;i > 0;i--)
@@ -731,7 +731,7 @@ zval *to_zval_map(encodeType type, xmlNodePtr data)
 	return ret;
 }
 
-//Unknown encode/decode
+/* Unknown encode/decode */
 xmlNodePtr guess_xml_convert(encodeType type, zval *data, int style)
 {
 	encodePtr enc;
@@ -760,14 +760,16 @@ zval *guess_zval_convert(encodeType type, xmlNodePtr data)
 		if(tmpattr != NULL)
 		{
 			enc = get_conversion_from_type(data, tmpattr->children->content);
-		//	if(enc == NULL)
-		//		php_error(E_ERROR, "Error (Don't know how to encode/decode \"%s\")", tmpattr->children->content);
+		/*
+			if(enc == NULL)
+				php_error(E_ERROR, "Error (Don't know how to encode/decode \"%s\")", tmpattr->children->content);
+		*/
 		}
 
 		if(enc == NULL)
 		{
-			//Didn't have a type, totally guess here
-			//Logic: has children = IS_OBJECT else IS_STRING
+			/* Didn't have a type, totally guess here */
+			/* Logic: has children = IS_OBJECT else IS_STRING */
 			xmlNodePtr trav;
 
 			if(get_attribute(data->properties, "arrayType"))
@@ -791,10 +793,10 @@ zval *guess_zval_convert(encodeType type, xmlNodePtr data)
 	return master_to_zval(enc, data);
 }
 
-//Time encode/decode
+/* Time encode/decode */
 xmlNodePtr to_xml_datetime_ex(encodeType type, zval *data, char *format, int style)
 {
-	//logic hacked from ext/standard/datetime.c
+	/* logic hacked from ext/standard/datetime.c */
 	struct tm *ta, tmbuf;
 	time_t timestamp;
 	int max_reallocs = 5;

@@ -5,7 +5,7 @@ int le_http_socket = 0;
 int le_url = 0;
 int le_service = 0;
 
-// Local functions
+/* Local functions */
 static void function_to_string(sdlFunctionPtr function, smart_str *buf);
 static void type_to_string(sdlTypePtr type, smart_str *buf, int level);
 
@@ -126,7 +126,7 @@ static void php_soap_init_globals(zend_soap_globals *soap_globals)
 	{
 		enc = (long)&defaultEncoding[i];
 
-		//If has a ns and a str_type then index it
+		/* If has a ns and a str_type then index it */
 		if(defaultEncoding[i].details.type_str)
 		{
 			if(defaultEncoding[i].details.ns != NULL)
@@ -142,18 +142,18 @@ static void php_soap_init_globals(zend_soap_globals *soap_globals)
 				zend_hash_add(soap_globals->defEnc, defaultEncoding[i].details.type_str, strlen(defaultEncoding[i].details.type_str) + 1, &enc, sizeof(encodePtr), NULL);
 			}
 		}
-		//Index everything by number
+		/* Index everything by number */
 		zend_hash_index_update(soap_globals->defEncIndex, defaultEncoding[i].details.type, &enc, sizeof(encodePtr), NULL);
 		i++;
 	}
 	while(defaultEncoding[i].details.type != END_KNOWN_TYPES);
 
-	//hash by namespace
+	/* hash by namespace */
 	zend_hash_add(soap_globals->defEncNs, XSD_1999_NAMESPACE, sizeof(XSD_1999_NAMESPACE), XSD_NS_PREFIX, sizeof(XSD_NS_PREFIX), NULL);
 	zend_hash_add(soap_globals->defEncNs, XSD_NAMESPACE, sizeof(XSD_NAMESPACE), XSD_NS_PREFIX, sizeof(XSD_NS_PREFIX), NULL);
 	zend_hash_add(soap_globals->defEncNs, APACHE_NAMESPACE, sizeof(APACHE_NAMESPACE), APACHE_NS_PREFIX, sizeof(APACHE_NS_PREFIX), NULL);
 	zend_hash_add(soap_globals->defEncNs, SOAP_ENC_NAMESPACE, sizeof(SOAP_ENC_NAMESPACE), SOAP_ENC_NS_PREFIX, sizeof(SOAP_ENC_NS_PREFIX), NULL);
-	//and by prefix
+	/* and by prefix */
 	zend_hash_add(soap_globals->defEncPrefix, XSD_NS_PREFIX, sizeof(XSD_NS_PREFIX), XSD_NAMESPACE, sizeof(XSD_NAMESPACE), NULL);
 	zend_hash_add(soap_globals->defEncPrefix, APACHE_NS_PREFIX, sizeof(APACHE_NS_PREFIX), APACHE_NAMESPACE, sizeof(APACHE_NAMESPACE), NULL);
 	zend_hash_add(soap_globals->defEncPrefix, SOAP_ENC_NS_PREFIX, sizeof(SOAP_ENC_NS_PREFIX), SOAP_ENC_NAMESPACE, sizeof(SOAP_ENC_NAMESPACE), NULL);
@@ -182,26 +182,26 @@ PHP_MSHUTDOWN_FUNCTION(soap)
 
 PHP_MINIT_FUNCTION(soap)
 {
-	//TODO: add ini entry for always use soap errors
+	/* TODO: add ini entry for always use soap errors */
 	ZEND_INIT_MODULE_GLOBALS(soap, php_soap_init_globals, php_soap_del_globals);
 
-	//Register SoapObject class
+	/* Register SoapObject class */
 	INIT_OVERLOADED_CLASS_ENTRY(soap_class_entry, PHP_SOAP_CLASSNAME, soap_client_functions, soap_call_function_handler, NULL, NULL);
 	zend_register_internal_class(&soap_class_entry TSRMLS_CC);
 
-	//Register SoapVar class
+	/* Register SoapVar class */
 	INIT_CLASS_ENTRY(soap_var_class_entry, PHP_SOAP_VAR_CLASSNAME, soap_var_functions);
 	zend_register_internal_class(&soap_var_class_entry TSRMLS_CC);
 
-	//Register SoapServer class
+	/* Register SoapServer class */
 	INIT_CLASS_ENTRY(soap_server_class_entry, PHP_SOAP_SERVER_CLASSNAME, soap_server_functions);
 	zend_register_internal_class(&soap_server_class_entry TSRMLS_CC);
 
-	//Register SoapFault class
+	/* Register SoapFault class */
 	INIT_CLASS_ENTRY(soap_fault_class_entry, PHP_SOAP_FAULT_CLASSNAME, soap_fault_functions);
 	zend_register_internal_class(&soap_fault_class_entry TSRMLS_CC);
 
-	//Register SoapParam class
+	/* Register SoapParam class */
 	INIT_CLASS_ENTRY(soap_param_class_entry, PHP_SOAP_PARAM_CLASSNAME, soap_param_functions);
 	zend_register_internal_class(&soap_param_class_entry TSRMLS_CC);
 
@@ -402,7 +402,7 @@ PHP_FUNCTION(soap_encode_to_zval)
 }
 #endif
 
-//SoapParam functions
+/* SoapParam functions */
 PHP_FUNCTION(soapparam)
 {
 	zval *thisObj, *data;
@@ -419,7 +419,7 @@ PHP_FUNCTION(soapparam)
 	add_property_zval(thisObj, "param_data", data);
 }
 
-//SoapFault functions
+/* SoapFault functions */
 PHP_FUNCTION(soapfault)
 {
 	char *fault_string = NULL, *fault_code = NULL, *fault_actor = NULL;
@@ -437,7 +437,7 @@ PHP_FUNCTION(soapfault)
 	set_soap_fault(thisObj, fault_code, fault_string, fault_actor, details TSRMLS_CC);
 }
 
-//SoapVar functions
+/* SoapVar functions */
 PHP_FUNCTION(soapvar)
 {
 	zval *data, *thisObj, *type;
@@ -471,7 +471,7 @@ PHP_FUNCTION(soapvar)
 		add_property_stringl(thisObj, "enc_namens", namens, namens_len, 1);
 }
 
-//SoapServer functions
+/* SoapServer functions */
 PHP_FUNCTION(soapserver)
 {
 	zval *thisObj;
@@ -899,12 +899,13 @@ PHP_FUNCTION(handle)
 		}
 	}
 
-//Turn on output buffering... we don't want people print in their methods
-//#if PHP_API_VERSION <= 20010901
-//	if(php_start_ob_buffer(NULL, 0 TSRMLS_CC) != SUCCESS)
-//#else
+/* Turn on output buffering... we don't want people print in their methods
+ #if PHP_API_VERSION <= 20010901
+	if(php_start_ob_buffer(NULL, 0 TSRMLS_CC) != SUCCESS)
+ #else
+*/
 	if(php_start_ob_buffer(NULL, 0, 0 TSRMLS_CC) != SUCCESS)
-//#endif
+/* #endif */
 		php_error(E_ERROR,"ob_start failed");
 
 	if (zend_hash_find(&EG(symbol_table), HTTP_RAW_POST_DATA, sizeof(HTTP_RAW_POST_DATA), (void **) &raw_post)!=FAILURE
@@ -923,16 +924,18 @@ PHP_FUNCTION(handle)
 		if(service->type == SOAP_CLASS)
 		{
 			soap_obj = NULL;
-			//If persistent then set soap_obj from from the previous created session (if available)
+			/* If persistent then set soap_obj from from the previous created session (if available) */
 			if(service->soap_class.persistance == SOAP_PERSISTENCE_SESSION)
 			{
 				zval **tmp_soap;
 
-				//Try and call session regiser for our dummy session object
-				//The only reason that i use call_user_function is that
-				//their isn't a way to start the session from an extension
-				//so calling session_register will both register the var
-				//and start the session
+				/*
+				  Try and call session regiser for our dummy session object
+				  The only reason that i use call_user_function is that
+				  their isn't a way to start the session from an extension
+				  so calling session_register will both register the var
+				  and start the session
+				*/
 				{
 					zval *bogus_session_name, session_register, sess_retval;
 
@@ -955,19 +958,19 @@ PHP_FUNCTION(handle)
 					zval_dtor(&sess_retval);
 				}
 
-				//Find the soap object and assign
+				/* Find the soap object and assign */
 				if(zend_hash_find(&EG(symbol_table), "_bogus_session_name", sizeof("_bogus_session_name"), (void **) &tmp_soap) == SUCCESS)
 					soap_obj = *tmp_soap;
 			}
 
-			//If new session or something wierd happned
+			/* If new session or something wierd happned */
 			if(soap_obj == NULL)
 			{
 				zval *tmp_soap;
 				MAKE_STD_ZVAL(tmp_soap);
 				object_init_ex(tmp_soap, service->soap_class.ce);
 
-				//Call constructor
+				/* Call constructor */
 				if(zend_hash_exists(&Z_OBJCE_P(tmp_soap)->function_table, service->soap_class.ce->name, strlen(service->soap_class.ce->name) + 1))
 				{
 					zval c_ret, constructor;
@@ -982,7 +985,7 @@ PHP_FUNCTION(handle)
 					zval_dtor(&c_ret);
 				}
 
-				//If session then update session hash with new object
+				/* If session then update session hash with new object */
 				if(service->soap_class.persistance == SOAP_PERSISTENCE_SESSION)
 				{
 					zval **tmp_soap_pp;
@@ -1028,10 +1031,10 @@ PHP_FUNCTION(handle)
 		else
 			php_error(E_ERROR, "Function (%s) call failed", Z_STRVAL(function_name));
 
-		//Flush buffer
+		/* Flush buffer */
 		php_end_ob_buffer(0, 0 TSRMLS_CC);
 
-		//xmlDocDumpMemoryEnc(doc_return, &buf, &size, XML_CHAR_ENCODING_UTF8);
+		/* xmlDocDumpMemoryEnc(doc_return, &buf, &size, XML_CHAR_ENCODING_UTF8); */
 		xmlDocDumpMemory(doc_return, &buf, &size);
 
 		if(size == 0)
@@ -1041,7 +1044,7 @@ PHP_FUNCTION(handle)
 		sapi_add_header("Content-Type: text/xml", sizeof("Content-Type: text/xml"), 1);
 		sapi_add_header(cont_len, strlen(cont_len) + 1, 1);
 
-		//Free Memory
+		/* Free Memory */
 		if(num_params > 0)
 		{
 			for(i = 0; i < num_params;i++)
@@ -1081,9 +1084,11 @@ void soap_error_handler(int error_num, const char *error_filename, const uint er
 		buffer_len = sizeof(buffer) - 1;
 	}
 
-	//Trap all errors
-	//What do do with these warnings
-	//    E_WARNING, E_NOTICE, E_CORE_WARNING, E_COMPILE_WARNING, E_USER_WARNING, E_USER_NOTICE
+	/*
+	  Trap all errors
+	  What do do with these warnings
+	    E_WARNING, E_NOTICE, E_CORE_WARNING, E_COMPILE_WARNING, E_USER_WARNING, E_USER_NOTICE
+	 */
 	if(error_num == E_USER_ERROR || error_num == E_COMPILE_ERROR || error_num == E_CORE_ERROR ||
 		error_num == E_ERROR || error_num == E_PARSE)
 	{
@@ -1096,7 +1101,7 @@ void soap_error_handler(int error_num, const char *error_filename, const uint er
 		INIT_ZVAL(outbuflen);
 		INIT_ZVAL(ret);
 
-		//Get output buffer and send as fault detials
+		/* Get output buffer and send as fault detials */
 		if(php_ob_get_length(&outbuflen TSRMLS_CC) != FAILURE && Z_LVAL(outbuflen) != 0)
 			php_ob_get_buffer(&outbuf TSRMLS_CC);
 		php_end_ob_buffer(0, 0 TSRMLS_CC);
@@ -1104,16 +1109,20 @@ void soap_error_handler(int error_num, const char *error_filename, const uint er
 		set_soap_fault(&ret, "SOAP-ENV:Server", buffer, NULL, &outbuf TSRMLS_CC);
 		doc_return = seralize_response_call(NULL, NULL, NULL, &ret);
 
-		//Build and send our headers + http 500 status
-		//xmlDocDumpMemoryEnc(doc_return, &buf, &size, XML_CHAR_ENCODING_UTF8);
+		/* Build and send our headers + http 500 status */
+		/* 
+		  xmlDocDumpMemoryEnc(doc_return, &buf, &size, XML_CHAR_ENCODING_UTF8);
+		*/
 		xmlDocDumpMemory(doc_return, &buf, &size);
 		sprintf(cont_len,"Content-Length: %d\0", size);
 		sapi_add_header(cont_len, strlen(cont_len) + 1, 1);
 		sapi_add_header("Content-Type: text/xml", sizeof("Content-Type: text/xml"), 1);
 
-		// Want to return HTTP 500 but apache wants to over write
-		// our fault code with their own handling... Figure this out later
-		// sapi_add_header("HTTP/1.1 500 Internal Service Error", sizeof("HTTP/1.1 500 Internal Service Error"), 1);
+		/* 
+		   Want to return HTTP 500 but apache wants to over write
+		   our fault code with their own handling... Figure this out later
+		   sapi_add_header("HTTP/1.1 500 Internal Service Error", sizeof("HTTP/1.1 500 Internal Service Error"), 1);
+		*/
 		php_write(buf, size TSRMLS_CC);
 
 		xmlFreeDoc(doc_return);
@@ -1127,7 +1136,7 @@ void soap_error_handler(int error_num, const char *error_filename, const uint er
 	}
 }
 
-// SoapObject functions
+/* SoapObject functions */
 PHP_FUNCTION(soapobject)
 {
 	char *location, *uri = NULL;
@@ -1140,13 +1149,13 @@ PHP_FUNCTION(soapobject)
 	{
 		if(uri)
 		{
-			// if two parameters assume 'proxy' and 'uri'
+			/* if two parameters assume 'proxy' and 'uri' */
 			add_property_stringl(thisObj, "location", location, location_len, 1);
 			add_property_stringl(thisObj, "uri", uri, uri_len, 1);
 		}
 		else
 		{
-			// if one parameter assume 'wsdl'
+			/* if one parameter assume 'wsdl' */
 			sdlPtr sdl;
 			int ret;
 
@@ -1498,8 +1507,10 @@ void soap_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_property_refe
 
 	GET_THIS_OBJECT(thisObj);
 
-	//Find if the function being called is already defined...
-	//  ( IMHO: zend should handle this functionality )
+	/* 
+	   Find if the function being called is already defined...
+	  ( IMHO: zend should handle this functionality )
+	*/
 	if(zend_hash_find(&Z_OBJCE_P(thisObj)->function_table, function, Z_STRLEN(function_name->element) + 1, (void **) &builtin_function) == SUCCESS)
 	{
 		builtin_function->internal_function.handler(INTERNAL_FUNCTION_PARAM_PASSTHRU);
@@ -1652,7 +1663,7 @@ void deseralize_function_call(sdlPtr sdl, xmlDocPtr request, zval *function_name
 			trav3 = body->children;
 			do
 			{
-				// TODO: make 'strict' (use th sdl defnintions)
+				/* TODO: make 'strict' (use th sdl defnintions) */
 				if(trav3->type == XML_ELEMENT_NODE)
 				{
 					zval tmp_function_name, **tmp_parameters;
@@ -2057,7 +2068,7 @@ static void type_to_string(sdlTypePtr type, smart_str *buf, int level)
 	}
 }
 
-//Deletes
+/* Deletes */
 void delete_sdl(void *handle)
 {
 	sdlPtr tmp = *((sdlPtr*)handle);
@@ -2230,7 +2241,7 @@ void delete_mapping(void *data)
 	efree(map);
 }
 
-// Should not need
+/* Should not need */
 int my_call_user_function(HashTable *function_table, zval **object_pp, zval *function_name, zval *retval_ptr, int param_count, zval *params[] TSRMLS_DC)
 {
 	if(call_user_function(function_table, object_pp, function_name, retval_ptr, param_count, params TSRMLS_CC) == FAILURE)
@@ -2257,7 +2268,7 @@ int my_call_user_function(HashTable *function_table, zval **object_pp, zval *fun
 			zend_llist_init(property_reference.elements_list, sizeof(zend_overloaded_element), NULL, 0);
 			zend_llist_add_element(property_reference.elements_list, &overloaded_element);
 
-			//Build argument stack
+			/* Build argument stack */
 			for(i = 0;i < param_count;i++)
 				zend_ptr_stack_push(&EG(argument_stack), params[i]);
 			zend_ptr_stack_n_push(&EG(argument_stack), 2, (void *)param_count, NULL);

@@ -186,7 +186,7 @@ int schema_simpleContent(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr simpCompType, s
 	content = get_node(simpCompType->children, "extension");
 	if(content == NULL)
 	{
-		//schema_extension(sdl, tsn, content, cur_type);
+		/* schema_extension(sdl, tsn, content, cur_type); */
 		php_error(E_ERROR, "Error parsing schema (doesn't support extensions on simpleContent)");
 		return TRUE;
 	}
@@ -218,7 +218,9 @@ int schema_restriction_simpleType(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr restTy
 	base = get_attribute(restType->properties, "base");
 	if(base != NULL)
 	{
-		//cur_type->base = estrdup(base->children->content);
+		/*
+		cur_type->base = estrdup(base->children->content);
+		*/
 	}
 
 	if(cur_type->restrictions == NULL)
@@ -611,7 +613,9 @@ int schema_choice(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr choiceType, sdlTypePtr
 {
 	xmlNodePtr trav, data;
 
-	//cur_type->property_type = CHOICE;
+	/*
+	cur_type->property_type = CHOICE;
+	*/
 
 	trav = choiceType->children;
 	FOREACHNODE(trav, "element", data)
@@ -796,7 +800,7 @@ int schema_complexType(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr compType, sdlType
 		return TRUE;
 	}
 
-	//(group | all | choice | sequence)
+	/* (group | all | choice | sequence) */
 	content = get_node(compType->children, "group");
 	if(content != NULL)
 	{
@@ -911,7 +915,7 @@ int schema_element(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr element, sdlTypePtr c
 	if(curattr)
 		cur_type->min_occurs = atoi(curattr->children->content);
 
-	//nillable = boolean : false
+	/* nillable = boolean : false */
 	attrs = element->properties;
 	curattr = get_attribute(attrs, "nillable");
 	if(curattr)
@@ -925,7 +929,7 @@ int schema_element(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr element, sdlTypePtr c
 	else
 		cur_type->nullable = FALSE;
 
-	//type = QName
+	/* type = QName */
 	curattr = get_attribute(attrs, "type");
 	if(!curattr)
 		curattr = name;
