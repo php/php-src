@@ -33,7 +33,6 @@ typedef struct _zend_alloc_globals zend_alloc_globals;
 # define CLS_CC , CLS_C
 # define CG(v) (((zend_compiler_globals *) compiler_globals)->v)
 # define CLS_FETCH()	zend_compiler_globals *compiler_globals = (zend_compiler_globals *) ts_resource(compiler_globals_id)
-# define YYPARSE_PARAM compiler_globals
 # define YYLEX_PARAM compiler_globals
 BEGIN_EXTERN_C()
 int zendparse(void *compiler_globals);
