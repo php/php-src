@@ -15,6 +15,7 @@
    | Authors: Rasmus Lerdorf <rasmus@lerdorf.on.ca>                       |
    |          Zeev Suraski <zeev@zend.com>                                |
    |          Pedro Melo <melo@ip.pt>                                     |
+   |          Jeroen van Wolffelaar <jeroen@php.net>                      |
    +----------------------------------------------------------------------+
  */
 /* $Id$ */
