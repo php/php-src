@@ -705,16 +705,21 @@ PHP_FUNCTION(end)
    Move array argument's internal pointer to the previous element and return it */
 PHP_FUNCTION(prev)
 {
-	zval **entry;
-	zval  *array;
+	pval **array, **entry;
+	HashTable *target_hash;
 
-	if (zend_parse_parameters(1 TSRMLS_CC, "a", &array) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &array) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	target_hash = HASH_OF(*array);
+	if (!target_hash) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Passed variable is not an array or object");
 		RETURN_FALSE;
 	}
-	zend_hash_move_backwards(Z_ARRVAL_P(array));
+	zend_hash_move_backwards(target_hash);
 
 	if (return_value_used) {	
-		if (zend_hash_get_current_data(Z_ARRVAL_P(array), (void **) &entry) == FAILURE) {
+		if (zend_hash_get_current_data(target_hash, (void **) &entry) == FAILURE) {
 			RETURN_FALSE;
 		}
 	
@@ -728,16 +733,21 @@ PHP_FUNCTION(prev)
    Move array argument's internal pointer to the next element and return it */
 PHP_FUNCTION(next)
 {
-	zval **entry;
-	zval  *array;
+	pval **array, **entry;
+	HashTable *target_hash;
 
-	if (zend_parse_parameters(1 TSRMLS_CC, "a", &array) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &array) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	target_hash = HASH_OF(*array);
+	if (!target_hash) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Passed variable is not an array or object");
 		RETURN_FALSE;
 	}
-	zend_hash_move_forward(Z_ARRVAL_P(array));
+	zend_hash_move_forward(target_hash);
 
 	if (return_value_used) {
-		if (zend_hash_get_current_data(Z_ARRVAL_P(array), (void **) &entry) == FAILURE) {
+		if (zend_hash_get_current_data(target_hash, (void **) &entry) == FAILURE) {
 			RETURN_FALSE;
 		}
 	  
@@ -751,16 +761,21 @@ PHP_FUNCTION(next)
    Set array argument's internal pointer to the first element and return it */	
 PHP_FUNCTION(reset)
 {
-	zval **entry;
-	zval  *array;
+	pval **array, **entry;
+	HashTable *target_hash;
 
-	if (zend_parse_parameters(1 TSRMLS_CC, "a", &array) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &array) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	target_hash = HASH_OF(*array);
+	if (!target_hash) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Passed variable is not an array or object");
 		RETURN_FALSE;
 	}
-	zend_hash_internal_pointer_reset(Z_ARRVAL_P(array));
+	zend_hash_internal_pointer_reset(target_hash);
 
 	if (return_value_used) {	
-		if (zend_hash_get_current_data(Z_ARRVAL_P(array), (void **) &entry) == FAILURE) {
+		if (zend_hash_get_current_data(target_hash, (void **) &entry) == FAILURE) {
 			RETURN_FALSE;
 		}
 
@@ -774,17 +789,20 @@ PHP_FUNCTION(reset)
    Return the element currently pointed to by the internal array pointer */
 PHP_FUNCTION(current)
 {
-	zval **entry;
-	zval  *array;
+	pval **array, **entry;
+	HashTable *target_hash;
 
-	if (zend_parse_parameters(1 TSRMLS_CC, "a", &array) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &array) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	target_hash = HASH_OF(*array);
+	if (!target_hash) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Passed variable is not an array or object");
 		RETURN_FALSE;
 	}
-
-	if (zend_hash_get_current_data(Z_ARRVAL_P(array), (void **) &entry) == FAILURE) {
+	if (zend_hash_get_current_data(target_hash, (void **) &entry) == FAILURE) {
 		RETURN_FALSE;
 	}
-
 	*return_value = **entry;
 	zval_copy_ctor(return_value);
 }
@@ -794,27 +812,29 @@ PHP_FUNCTION(current)
    Return the key of the element currently pointed to by the internal array pointer */
 PHP_FUNCTION(key)
 {
-	zval  *array;
-	char  *string_key;
-	uint   string_key_length;
-	ulong  num_key = -1;
+	pval **array;
+	char *string_key;
+	uint string_length;
+	ulong num_key;
+	HashTable *target_hash;
 
-	if (zend_parse_parameters(1 TSRMLS_CC, "a", &array) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &array) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	target_hash = HASH_OF(*array);
+	if (!target_hash) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Passed variable is not an array or object");
 		RETURN_FALSE;
 	}
-
-	switch (zend_hash_get_current_key_ex(Z_ARRVAL_P(array),
-										 &string_key,
-										 &string_key_length,
-										 &num_key,
-										 0,
-										 NULL)) {
+	switch (zend_hash_get_current_key_ex(target_hash, &string_key, &string_length, &num_key, 0, NULL)) {
 		case HASH_KEY_IS_STRING:
-			RETURN_STRINGL(string_key, string_key_length - 1, 1);
+			RETVAL_STRINGL(string_key, string_length - 1, 1);
+			break;
 		case HASH_KEY_IS_LONG:
-			RETURN_LONG(num_key);
-		default:
-			RETURN_NULL();
+			RETVAL_LONG(num_key);
+			break;
+		case HASH_KEY_NON_EXISTANT:
+			return;
 	}
 }
 /* }}} */
