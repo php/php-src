@@ -129,11 +129,13 @@ const char *zend_mh_bundle_error(void);
 # define ZEND_EXTENSIONS_SUPPORT	0
 #endif
 
+#if HAVE_ALLOCA_H && !defined(_ALLOCA_H)
+#  include <alloca.h>
+#endif
+
 /* AIX requires this to be the first thing in the file.  */
 #ifndef __GNUC__
-# if HAVE_ALLOCA_H
-#  include <alloca.h>
-# else
+# ifndef HAVE_ALLOCA_H
 #  ifdef _AIX
  #pragma alloca
 #  else
