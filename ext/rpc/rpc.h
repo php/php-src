@@ -5,7 +5,8 @@
 #define HANDLER handler_entries[__handler_counter]
 #define HANDLER_COUNT (sizeof(handler_entries) / sizeof(rpc_handler_entry))
 
-#define RPC_HT(intern) (*(intern->handlers))
+#define RPC_HT(intern) (*((intern)->handlers))
+#define RPC_CLASS(intern) ((intern)->hash)
 
 #define GET_INTERNAL(intern)	rpc_internal *intern;								\
 								if (GET_INTERNAL_EX(intern, object) != SUCCESS) {	\
