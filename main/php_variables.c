@@ -512,12 +512,12 @@ int php_hash_environment(TSRMLS_D)
 		uint long_name_len;
 		zend_bool jit_initialization;
 	} auto_global_records[] = {
-		{ "_POST", sizeof("_POST"), "HTTP_POST_GLOBALS", sizeof("HTTP_POST_GLOBALS"), 0 },
-		{ "_GET", sizeof("_GET"), "HTTP_GET_GLOBALS", sizeof("HTTP_GET_GLOBALS"), 0 },
-		{ "_COOKIE", sizeof("_COOKIE"), "HTTP_COOKIE_GLOBALS", sizeof("HTTP_COOKIE_GLOBALS"), 0 },
-		{ "_SERVER", sizeof("_SERVER"), "HTTP_SERVER_GLOBALS", sizeof("HTTP_SERVER_GLOBALS"), 1 },
-		{ "_ENV", sizeof("_ENV"), "HTTP_ENV_GLOBALS", sizeof("HTTP_ENV_GLOBALS"), 1 },
-		{ "_FILES", sizeof("_FILES"), "HTTP_FILES_GLOBALS", sizeof("HTTP_FILES_GLOBALS"), 0 },
+		{ "_POST", sizeof("_POST"), "HTTP_POST_VARS", sizeof("HTTP_POST_VARS"), 0 },
+		{ "_GET", sizeof("_GET"), "HTTP_GET_VARS", sizeof("HTTP_GET_VARS"), 0 },
+		{ "_COOKIE", sizeof("_COOKIE"), "HTTP_COOKIE_VARS", sizeof("HTTP_COOKIE_VARS"), 0 },
+		{ "_SERVER", sizeof("_SERVER"), "HTTP_SERVER_VARS", sizeof("HTTP_SERVER_VARS"), 1 },
+		{ "_ENV", sizeof("_ENV"), "HTTP_ENV_VARS", sizeof("HTTP_ENV_VARS"), 1 },
+		{ "_FILES", sizeof("_FILES"), "HTTP_POST_FILES", sizeof("HTTP_POST_FILES"), 0 },
 	};
 	size_t num_track_vars = sizeof(auto_global_records)/sizeof(struct auto_global_record);
 	size_t i;
@@ -632,7 +632,7 @@ static zend_bool php_auto_globals_create_server(char *name, uint name_len TSRMLS
 	PG(http_globals)[TRACK_VARS_SERVER]->refcount++;
 
 	if (PG(register_long_arrays)) {
-		zend_hash_update(&EG(symbol_table), "HTTP_SERVER_GLOBALS", sizeof("HTTP_SERVER_GLOBALS"), &PG(http_globals)[TRACK_VARS_SERVER], sizeof(zval *), NULL);
+		zend_hash_update(&EG(symbol_table), "HTTP_SERVER_VARS", sizeof("HTTP_SERVER_VARS"), &PG(http_globals)[TRACK_VARS_SERVER], sizeof(zval *), NULL);
 		PG(http_globals)[TRACK_VARS_SERVER]->refcount++;
 	}
 
@@ -651,7 +651,7 @@ static zend_bool php_auto_globals_create_env(char *name, uint name_len TSRMLS_DC
 	PG(http_globals)[TRACK_VARS_ENV]->refcount++;
 
 	if (PG(register_long_arrays)) {
-		zend_hash_update(&EG(symbol_table), "HTTP_ENV_GLOBALS", sizeof("HTTP_ENV_GLOBALS"), &PG(http_globals)[TRACK_VARS_ENV], sizeof(zval *), NULL);
+		zend_hash_update(&EG(symbol_table), "HTTP_ENV_VARS", sizeof("HTTP_ENV_VARS"), &PG(http_globals)[TRACK_VARS_ENV], sizeof(zval *), NULL);
 		PG(http_globals)[TRACK_VARS_ENV]->refcount++;
 	}
 
