@@ -9,7 +9,7 @@ AC_DEFUN(AC_FIND_SOLID_LIBS,[
     AIX) ac_solid_os=a3x;;   # a4x for AIX4
     HP-UX) ac_solid_os=h9x;; # h1x for hpux11, h0x for hpux10
     IRIX) ac_solid_os=irx;;
-    Linux) if ldd -v /bin/sh | grep GLIHC > /dev/null; then
+    Linux) if ldd -v /bin/sh | grep GLIBC > /dev/null; then
 		ac_solid_os=l2x
 	else
 		ac_solid_os=lux
