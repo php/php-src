@@ -1,3 +1,42 @@
+2004-03-04  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * zend_language_scanner.l:
+      - Fix memleak when scanner is called from within tokenizer extension.
+
+2004-03-04  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_execute.h:
+      fix the fix
+
+    * zend_execute.h:
+      oops, fix cut&paste gone bad
+
+    * zend_execute.h:
+      Fix object true value: if we are in compat mode and it's Zend object -
+      use PHP4 rules. Otherwise, object is always true.
+
+2004-03-04  Derick Rethans  <php@derickrethans.nl>
+
+    * zend_constants.h
+      zend_operators.h:
+      - Fixed a 64bit issue (for zend_builtin_functions.c, module_number is an
+      int).
+      - Change the MAX_LENGTH_OF_LONG constant to 20, as LONG_MAX is 20
+      characters.
+        (Patches by Ard Biesheuven)
+
+    * tests/zend_operators.phpt:
+      - Added instance_of test (patch by Ard Biesheuvel)
+
+2004-03-04  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_compile.c:
+      Disallow redefining ctors and cleanup
+
+    * zend_mm.c:
+      Handle out of memory/bad size situation gracefully, without getting into
+      loop
+
 2004-03-03  Andi Gutmans  <andi@zend.com>
 
     * zend_objects_API.c:
