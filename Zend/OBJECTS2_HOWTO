@@ -51,7 +51,7 @@ write_property is used to directly write object's property by
 name.  This handler is used to assign property variables or to change them 
 in operations like += or ++ (unless get_property_zval_ptr is also set).
 
-get_property_zval_ptr is used to obtain pointer to modifyable zval for 
+get_property_zval_ptr is used to obtain pointer to modifiable zval for 
 operations like += or ++. This should be used only if your object model 
 stores properties as real zval's that can be modified from outside. 
 Otherwise this handler should be NULL and the engine will use 

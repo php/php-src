@@ -24,7 +24,7 @@
 
 #include "zend_compile.h"
 
-#define ZEND_EXTENSION_API_NO	90021012
+#define ZEND_EXTENSION_API_NO	90040412
 
 typedef struct _zend_extension_version_info {
 	int zend_extension_api_no;
