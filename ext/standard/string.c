@@ -59,8 +59,8 @@ static char *php_bin2hex(const unsigned char *old, const size_t oldlen, size_t *
 	return new;
 }
 
-/* proto bin2hex(string data)
-   converts the binary representation of data to hex */
+/* {{{ proto string bin2hex(string data)
+   Converts the binary representation of data to hex */
 PHP_FUNCTION(bin2hex)
 {
 	zval **data;
@@ -81,7 +81,7 @@ PHP_FUNCTION(bin2hex)
 
 	RETURN_STRINGL(new, newlen, 0);
 }
-
+/* }}} */
 
 /* {{{ proto int strspn(string str, string mask)
    Find length of initial segment consisting entirely of characters found in mask */
@@ -1436,9 +1436,7 @@ PHPAPI void php_stripslashes(char *str, int *len)
 }
 
 /* {{{ proto string addcslashes(string str, string charlist)
-   Escape all chars mentioned in charlist with backslash. It creates
-   octal representations if asked to backslash characters with 8th bit set
-   or with ASCII<32 (except '\n', '\r', '\t' etc...) */
+   Escape all chars mentioned in charlist with backslash. It creates octal representations if asked to backslash characters with 8th bit set or with ASCII<32 (except '\n', '\r', '\t' etc...). */
 PHP_FUNCTION(addcslashes)
 {
 	zval **str, **what;
@@ -1469,7 +1467,7 @@ PHP_FUNCTION(addslashes)
 /* }}} */
 
 /* {{{ proto string stripcslashes(string str)
-   Strip backslashes from a string. Uses C-style conventions*/
+   Strip backslashes from a string. Uses C-style conventions */
 PHP_FUNCTION(stripcslashes)
 {
 	zval **str;
@@ -2369,7 +2367,7 @@ PHP_FUNCTION(str_repeat)
 }
 /* }}} */
 
-/* {{{ proto mixed count_chars(string input[, int mode])
+/* {{{ proto mixed count_chars(string input [, int mode])
    Returns info about what characters are used in input */
 PHP_FUNCTION(count_chars)
 {
