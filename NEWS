@@ -4,6 +4,7 @@ PHP 4                                                                      NEWS
 - Fixed MacOSX shared extensions crashing on Apache startup. (Rasmus)
 - Added Oracle Instant Client support. (cjbj at hotmail dot com, Tony)
 - Fixed bug #31580 (fgetcsv() problematic with "" escape sequences). (Ilia)
+- Fixed bug #31480 (Possible infinite loop in imap_mail_compose()). (Ilia)
 - Fixed bug #31479 (Fixed crash in chunk_split(), when chunklen > strlen). (Ilia)
 - Fixed bug #31454 (session_set_save_handler crashes PHP when supplied
   non-existent object ref). (Tony)
