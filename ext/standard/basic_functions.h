@@ -118,6 +118,9 @@ PHP_FUNCTION(print_r);
 PHP_FUNCTION(define);
 PHP_FUNCTION(defined);
 
+PHP_FUNCTION(function_exists);
+PHP_FUNCTION(extract);
+
 #if HAVE_PUTENV
 typedef struct {
 	char *putenv_string;
