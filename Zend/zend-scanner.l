@@ -1019,7 +1019,7 @@ ESCAPED_AND_WHITESPACE [\n\t\r #'.:;,()|^&+-/*=%!~<>?@]+
 }
 
 
-<IN_SCRIPTING>(["]([^"$\\]|([\\]+[^\\$]))*["])|([']([^'\\]|([\\]+['\\]))*['])  {
+<IN_SCRIPTING>(["]([^$"\\]|("\\".))*["]) {
 	register char *s, *t;
 	char *end;
 	
@@ -1051,11 +1051,48 @@ ESCAPED_AND_WHITESPACE [\n\t\r #'.:;,()|^&+-/*=%!~<>?@]+
 					zendlval->value.str.len--;
 					break;
 				case '\\':
-					*t++ = '\\';
-					zendlval->value.str.len--;
-					break;
 				case '$':
 				case '"':
+					*t++ = *s;
+					zendlval->value.str.len--;
+					break;
+				default:
+					*t++ = '\\';
+					*t++ = *s;
+					break;
+			}
+			s++;
+		} else {
+			*t++ = *s++;
+		}
+	}
+	*t = 0;
+	
+	return T_CONSTANT_ENCAPSED_STRING;
+}
+
+
+<IN_SCRIPTING>([']([^'\\]|("\\".))*[']) {
+	register char *s, *t;
+	char *end;
+	
+	zendlval->value.str.val = estrndup(yytext+1, yyleng-2);
+	zendlval->value.str.len = yyleng-2;
+	zendlval->type = IS_STRING;
+	HANDLE_NEWLINES(yytext,yyleng);
+	
+	/* convert escape sequences */
+	s = t = zendlval->value.str.val;
+	end = s+zendlval->value.str.len;
+	while (s<end) {
+		if (*s=='\\') {
+			s++;
+			if (s>=end) {
+				continue;
+			}
+			switch(*s) {
+				case '\\':
+				case '\'':
 					*t++ = *s;
 					zendlval->value.str.len--;
 					break;
@@ -1296,8 +1333,6 @@ ESCAPED_AND_WHITESPACE [\n\t\r #'.:;,()|^&+-/*=%!~<>?@]+
 <DOUBLE_QUOTES,BACKQUOTE,INITIAL,IN_SCRIPTING,LOOKING_FOR_PROPERTY><<EOF>> {
 	return 0;
 }
-
-
 
 
 <IN_SCRIPTING,INITIAL,DOUBLE_QUOTES,BACKQUOTE,SINGLE_QUOTE>. {
