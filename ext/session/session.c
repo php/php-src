@@ -223,13 +223,13 @@ static void php_set_session_var(char *name, size_t namelen,
 	state_val_copy->refcount = 0;
 
 	if (PG(register_globals)) {
-		zend_set_hash_symbol(state_val_copy, name, namelen, 0, 2, PS(http_session_vars)->value.ht, &EG(symbol_table));
+		zend_set_hash_symbol(state_val_copy, name, namelen, 0, 2, Z_ARRVAL_P(PS(http_session_vars)), &EG(symbol_table));
 	} else {
 		if (PG(register_globals)) {
 			zend_set_hash_symbol(state_val_copy, name, namelen, 0, 1, &EG(symbol_table));
 		}
 
-		zend_set_hash_symbol(state_val_copy, name, namelen, 0, 1, PS(http_session_vars)->value.ht);
+		zend_set_hash_symbol(state_val_copy, name, namelen, 0, 1, Z_ARRVAL_P(PS(http_session_vars)));
 	}
 }
 
@@ -238,7 +238,7 @@ static int php_get_session_var(char *name, size_t namelen, zval ***state_var PLS
 	HashTable *ht = &EG(symbol_table);
 
 	if (!PG(register_globals))
-		ht = PS(http_session_vars)->value.ht;
+		ht = Z_ARRVAL_P(PS(http_session_vars));
 
 	return zend_hash_find(ht, name, namelen + 1, (void **)state_var);
 }
@@ -474,7 +474,7 @@ static void php_session_track_init(void)
 
 	if (zend_hash_find(&EG(symbol_table), "HTTP_SESSION_VARS", sizeof("HTTP_SESSION_VARS"), (void **)&old_vars) == SUCCESS && Z_TYPE_PP(old_vars) == IS_ARRAY) {
 	  PS(http_session_vars) = *old_vars;
-	  zend_hash_clean(PS(http_session_vars)->value.ht);
+	  zend_hash_clean(Z_ARRVAL_P(PS(http_session_vars)));
 	} else {
 	  if(old_vars) {
 		zend_hash_del(&EG(symbol_table), "HTTP_SESSION_VARS", sizeof("HTTP_SESSION_VARS"));
@@ -578,9 +578,9 @@ static void php_session_save_current_state(PSLS_D)
 		return;
 	  }
 
-	  for (zend_hash_internal_pointer_reset(PS(http_session_vars)->value.ht);
-		   zend_hash_get_current_key(PS(http_session_vars)->value.ht, &variable, &num_key) == HASH_KEY_IS_STRING;
-		   zend_hash_move_forward(PS(http_session_vars)->value.ht)) {
+	  for (zend_hash_internal_pointer_reset(Z_ARRVAL_P(PS(http_session_vars)));
+		   zend_hash_get_current_key(Z_ARRVAL_P(PS(http_session_vars)), &variable, &num_key) == HASH_KEY_IS_STRING;
+		   zend_hash_move_forward(Z_ARRVAL_P(PS(http_session_vars)))) {
 		PS_ADD_VAR(variable);
 	  }
 	}
