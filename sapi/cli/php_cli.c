@@ -395,7 +395,7 @@ static void php_cli_usage(char *argv0)
 }
 /* }}} */
 
-static void define_command_line_ini_entry(char *arg)
+static void define_command_line_ini_entry(char *arg TSRMLS_DC)
 {
 	char *name, *value;
 
@@ -661,7 +661,7 @@ int main(int argc, char *argv[])
 			switch (c) {
 
 			case 'd': /* define ini entries on command line */
-				define_command_line_ini_entry(php_optarg);
+				define_command_line_ini_entry(php_optarg TSRMLS_CC);
 				break;
 
 			case 'h': /* help & quit */
