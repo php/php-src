@@ -2,38 +2,24 @@ dnl
 dnl $Id$
 dnl
 
-PHP_ARG_ENABLE(mbstring, whether to enable multibyte string support,
-[  --enable-mbstring       Enable multibyte string support])
+PHP_ARG_ENABLE(mbstring, whether to disable multibyte string support,
+[  --disable-mbstring       Disable multibyte string support], yes)
+
+PHP_ARG_ENABLE(mbstr_enc_trans, whether to disable encoding translation,
+[  --enable-mbstr-enc-trans Enable encoding translation], yes)
+
+PHP_ARG_ENABLE(mbregex, whether to disable multibyte regex support,
+[  --enable-mbregex         Enable multibyte regex support], yes)
 
 if test "$PHP_MBSTRING" != "no"; then
-  AC_DEFINE(HAVE_MBSTRING,1,[ ])
+  AC_DEFINE(HAVE_MBSTRING,1,[whether to have multibyte string support])
   PHP_NEW_EXTENSION(mbstring, mbfilter_ja.c mbfilter.c mbstring.c mbregex.c php_mbregex.c, $ext_shared)
 fi
 
-AC_MSG_CHECKING(whether to enable japanese encoding translation)
-AC_ARG_ENABLE(mbstr_enc_trans,
-[  --enable-mbstr-enc-trans
-                          Enable japanese encoding translation],[
-  if test "$enableval" = "yes" ; then
-    AC_DEFINE(MBSTR_ENC_TRANS, 1, [ ])
-    AC_MSG_RESULT(yes)
-  else
-    AC_MSG_RESULT(no)
-  fi
-],[
-  AC_MSG_RESULT(no)
-])
+if test "$PHP_MBSTR_ENC_TRANS" != "no" ; then
+  AC_DEFINE(MBSTR_ENC_TRANS, 1, [whether to have encoding translation])
+fi
 
-AC_MSG_CHECKING(whether to enable multibyte regex support)
-AC_ARG_ENABLE(mbregex,
-[  --enable-mbregex
-                          Enable multibyte regex support],[
-  if test "$enableval" = "yes" ; then
-    AC_DEFINE(HAVE_MBREGEX, 1, [ ])
-    AC_MSG_RESULT(yes)
-  else
-    AC_MSG_RESULT(no)
-  fi
-],[
-  AC_MSG_RESULT(no)
-])
+if test "$MBREGEX" != "no" ; then
+  AC_DEFINE(HAVE_MBREGEX, 1, [whether to havee multibyte regex support])
+fi
