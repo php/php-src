@@ -4283,8 +4283,11 @@ PHPAPI int php_pgsql_update(PGconn *pg_link, const char *table, zval *var_array,
 	smart_str_appendc(&querystr, ';');	
 	smart_str_0(&querystr);
 
-	if (do_exec(&querystr, PGRES_COMMAND_OK, pg_link, opt TSRMLS_CC) == 0)
+	if ((opt & PGSQL_DML_EXEC) && do_exec(&querystr, PGRES_COMMAND_OK, pg_link, opt TSRMLS_CC) == 0) {
 		ret = SUCCESS;
+	} else if (opt & PGSQL_DML_STRING) {
+		ret = SUCCESS;
+	}
 
 cleanup:
 	if (var_converted) {
@@ -4376,8 +4379,11 @@ PHPAPI int php_pgsql_delete(PGconn *pg_link, const char *table, zval *ids_array,
 	smart_str_appendc(&querystr, ';');
 	smart_str_0(&querystr);
 
-	if (do_exec(&querystr, PGRES_COMMAND_OK, pg_link, opt TSRMLS_CC) == 0)
+	if ((opt & PGSQL_DML_EXEC) && do_exec(&querystr, PGRES_COMMAND_OK, pg_link, opt TSRMLS_CC) == 0) {
 		ret = SUCCESS;
+	} else if (opt & PGSQL_DML_STRING) {
+		ret = SUCCESS;
+	}
 
 cleanup:
 	if (!(opt & PGSQL_DML_NO_CONV)) {
