@@ -27,8 +27,6 @@
 #include "zend_execute.h"
 #include "zend_API.h"
 #include "zend_ptr_stack.h"
-#include "zend_variables.h"
-#include "zend_operators.h"
 #include "zend_constants.h"
 #include "zend_extensions.h"
 #include "zend_fast_cache.h"

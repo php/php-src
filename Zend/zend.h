@@ -237,6 +237,9 @@ typedef struct _zend_utility_values {
 } zend_utility_values;
 
 
+typedef int (*zend_write_func_t)(const char *str, uint str_length);
+
+
 #undef MIN
 #undef MAX
 #define MAX(a,b)  (((a)>(b))?(a):(b))
@@ -282,7 +285,9 @@ ZEND_API char *get_zend_version(void);
 
 ZEND_API void zend_make_printable_zval(zval *expr, zval *expr_copy, int *use_copy);
 ZEND_API int zend_print_zval(zval *expr, int indent);
+ZEND_API int zend_print_zval_ex(zend_write_func_t write_func, zval *expr, int indent);
 ZEND_API void zend_print_zval_r(zval *expr, int indent);
+ZEND_API void zend_print_zval_r_ex(zend_write_func_t write_func, zval *expr, int indent);
 
 ZEND_API extern char *empty_string;
 
@@ -302,9 +307,10 @@ ZEND_API extern char *empty_string;
 #define ZEND_PUTS(str)					zend_write((str), strlen((str)))
 #define ZEND_PUTC(c)					zend_write(&(c), 1), (c)
 
+
 BEGIN_EXTERN_C()
 extern ZEND_API int (*zend_printf)(const char *format, ...);
-extern ZEND_API int (*zend_write)(const char *str, uint str_length);
+extern ZEND_API zend_write_func_t zend_write;
 extern ZEND_API void (*zend_error)(int type, const char *format, ...);
 extern ZEND_API FILE *(*zend_fopen)(const char *filename, char **opened_path);
 extern ZEND_API void (*zend_block_interruptions)(void);

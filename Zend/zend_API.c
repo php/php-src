@@ -19,12 +19,10 @@
 
 
 #include "zend.h"
-#include "zend_variables.h"
 #include "zend_execute.h"
 #include "zend_API.h"
 #include "modules.h"
 #include "zend_constants.h"
-#include "zend_operators.h"
 
 #ifdef HAVE_STDARG_H
 # include <stdarg.h>

@@ -24,6 +24,8 @@
 #include "modules.h"
 #include "zend_list.h"
 #include "zend_fast_cache.h"
+#include "zend_operators.h"
+#include "zend_variables.h"
 
 
 #define ZEND_NAMED_FUNCTION(name) void name(INTERNAL_FUNCTION_PARAMETERS)

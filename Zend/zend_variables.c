@@ -23,7 +23,6 @@
 #include "zend_API.h"
 #include "zend_globals.h"
 #include "zend_constants.h"
-#include "zend_variables.h"
 #include "zend_list.h"
 
 ZEND_API char *empty_string = "";	/* in order to save emalloc() and efree() time for

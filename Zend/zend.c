@@ -19,8 +19,6 @@
 
 
 #include "zend.h"
-#include "zend_operators.h"
-#include "zend_variables.h"
 #include "zend_extensions.h"
 #include "modules.h"
 #include "zend_constants.h"
@@ -41,7 +39,7 @@
 /* true multithread-shared globals */
 ZEND_API zend_class_entry zend_standard_class_def;
 ZEND_API int (*zend_printf)(const char *format, ...);
-ZEND_API int (*zend_write)(const char *str, uint str_length);
+ZEND_API zend_write_func_t zend_write;
 ZEND_API void (*zend_error)(int type, const char *format, ...);
 ZEND_API FILE *(*zend_fopen)(const char *filename, char **opened_path);
 ZEND_API void (*zend_block_interruptions)(void);
@@ -163,6 +161,12 @@ ZEND_API void zend_make_printable_zval(zval *expr, zval *expr_copy, int *use_cop
 
 ZEND_API int zend_print_zval(zval *expr, int indent)
 {
+	return zend_print_zval_ex(zend_write, expr, indent);
+}
+
+
+ZEND_API int zend_print_zval_ex(zend_write_func_t write_func, zval *expr, int indent)
+{
 	zval expr_copy;
 	int use_copy;
 
@@ -176,7 +180,7 @@ ZEND_API int zend_print_zval(zval *expr, int indent)
 		}
 		return 0;
 	}
-	ZEND_WRITE(expr->value.str.val,expr->value.str.len);
+	write_func(expr->value.str.val,expr->value.str.len);
 	if (use_copy) {
 		zval_dtor(expr);
 	}
@@ -184,7 +188,13 @@ ZEND_API int zend_print_zval(zval *expr, int indent)
 }
 
 
-ZEND_API void zend_print_zval_r(zval *expr, int indent) 
+ZEND_API void zend_print_zval_r(zval *expr, int indent)
+{
+	zend_print_zval_r_ex(zend_write, expr, indent);
+}
+
+
+ZEND_API void zend_print_zval_r_ex(zend_write_func_t write_func, zval *expr, int indent) 
 {
 	switch(expr->type) {
 		case IS_ARRAY:
@@ -298,7 +308,7 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions, i
 	/* Set up utility functions and values */
 	zend_error = utility_functions->error_function;
 	zend_printf = utility_functions->printf_function;
-	zend_write = utility_functions->write_function;
+	zend_write = (zend_write_func_t) utility_functions->write_function;
 	zend_fopen = utility_functions->fopen_function;
 	if (!zend_fopen) {
 		zend_fopen = zend_fopen_wrapper;
