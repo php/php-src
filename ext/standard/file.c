@@ -1907,7 +1907,7 @@ PHP_FUNCTION(copy)
 		RETURN_FALSE;
 	}
 
-	if (php_check_open_basedir((*source)->value.str.val)) {
+	if (php_check_open_basedir((*source)->value.str.val TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
 
@@ -1915,7 +1915,7 @@ PHP_FUNCTION(copy)
 		RETURN_FALSE;
 	}
 
-	if (php_check_open_basedir((*target)->value.str.val)) {
+	if (php_check_open_basedir((*target)->value.str.val TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
 

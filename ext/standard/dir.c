@@ -148,7 +148,7 @@ static void _php_do_opendir(INTERNAL_FUNCTION_PARAMETERS, int createobject)
 	}
 	convert_to_string_ex(arg);
 
-	if (php_check_open_basedir((*arg)->value.str.val)) {
+	if (php_check_open_basedir((*arg)->value.str.val TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
 	

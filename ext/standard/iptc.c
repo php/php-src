@@ -210,8 +210,9 @@ PHP_FUNCTION(iptcembed)
         break;
     }
 
-    if (php_check_open_basedir((*jpeg_file)->value.str.val)) 
+    if (php_check_open_basedir((*jpeg_file)->value.str.val TSRMLS_CC)) {
 		RETURN_FALSE;
+	}
 
     if ((fp = VCWD_FOPEN((*jpeg_file)->value.str.val,"rb")) == 0) {
         php_error(E_WARNING, "Unable to open %s", (*jpeg_file)->value.str.val);

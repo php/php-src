@@ -90,10 +90,8 @@ HashTable fopen_url_wrappers_hash;
 
 /* {{{ php_register_url_wrapper
  */
-PHPAPI int php_register_url_wrapper(char *protocol, FILE * (*wrapper)(char *path, char *mode, int options, int *issock, int *socketd, char **opened_path))
+PHPAPI int php_register_url_wrapper(char *protocol, FILE * (*wrapper)(char *path, char *mode, int options, int *issock, int *socketd, char **opened_path) TSRMLS_DC)
 {
-	TSRMLS_FETCH();
-
 	if(PG(allow_url_fopen)) {
 		return zend_hash_add(&fopen_url_wrappers_hash, protocol, strlen(protocol), &wrapper, sizeof(wrapper), NULL);
 	} else {
@@ -104,10 +102,8 @@ PHPAPI int php_register_url_wrapper(char *protocol, FILE * (*wrapper)(char *path
 
 /* {{{ php_unregister_url_wrapper
  */
-PHPAPI int php_unregister_url_wrapper(char *protocol)
+PHPAPI int php_unregister_url_wrapper(char *protocol TSRMLS_DC)
 {
-	TSRMLS_FETCH();
-
 	if(PG(allow_url_fopen)) {
 		return zend_hash_del(&fopen_url_wrappers_hash, protocol, strlen(protocol));
 	} else {
@@ -118,27 +114,22 @@ PHPAPI int php_unregister_url_wrapper(char *protocol)
 
 /* {{{ php_init_fopen_wrappers
  */
-int php_init_fopen_wrappers(void) 
+int php_init_fopen_wrappers(TSRMLS_D) 
 {
-	TSRMLS_FETCH();
-
-	if(PG(allow_url_fopen)) 
+	if(PG(allow_url_fopen)) {
 		return zend_hash_init(&fopen_url_wrappers_hash, 0, NULL, NULL, 1);
-	
+	}
 	return SUCCESS;
 }
 /* }}} */
 
 /* {{{ php_shutdown_fopen_wrappers
  */
-int php_shutdown_fopen_wrappers(void) 
+int php_shutdown_fopen_wrappers(TSRMLS_D)
 {
-	TSRMLS_FETCH();
-
 	if(PG(allow_url_fopen)) {
 		zend_hash_destroy(&fopen_url_wrappers_hash);
 	}
-
 	return SUCCESS;
 }
 /* }}} */
@@ -196,10 +187,8 @@ PHPAPI int php_check_specific_open_basedir(char *basedir, char *path TSRMLS_DC)
 
 /* {{{ php_check_open_basedir
  */
-PHPAPI int php_check_open_basedir(char *path)
+PHPAPI int php_check_open_basedir(char *path TSRMLS_DC)
 {
-	TSRMLS_FETCH();
-
 	/* Only check when open_basedir is available */
 	if (PG(open_basedir) && *PG(open_basedir)) {
 		char *pathbuf;
@@ -240,8 +229,9 @@ PHPAPI int php_check_open_basedir(char *path)
 static FILE *php_fopen_and_set_opened_path(const char *path, char *mode, char **opened_path)
 {
 	FILE *fp;
+	TSRMLS_FETCH();
 
-	if (php_check_open_basedir((char *)path)) {
+	if (php_check_open_basedir((char *)path TSRMLS_CC)) {
 		return NULL;
 	}
 	fp = VCWD_FOPEN(path, mode);

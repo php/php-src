@@ -47,7 +47,7 @@ static void php_statpage(TSRMLS_D)
 {
 	struct stat *pstat;
 
-	pstat = sapi_get_stat();
+	pstat = sapi_get_stat(TSRMLS_C);
 
 	if (BG(page_uid)==-1 || BG(page_gid)==-1) {
 		if(pstat) {

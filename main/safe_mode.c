@@ -166,7 +166,7 @@ PHPAPI char *php_get_current_user()
 	USE_SAPI is defined, because cgi will also be
 	interfaced in USE_SAPI */
 
-	pstat = sapi_get_stat();
+	pstat = sapi_get_stat(TSRMLS_C);
 
 	if (!pstat) {
 		return empty_string;
