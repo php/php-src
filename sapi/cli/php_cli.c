@@ -608,6 +608,7 @@ int main(int argc, char *argv[])
 				php_cli_usage(argv[0]);
 				php_end_ob_buffers(1 TSRMLS_CC);
 				exit_status=1;
+				zend_ini_deactivate(TSRMLS_C);
 				goto out_err;
 
 			case 'i': /* php info & quit */
