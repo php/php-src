@@ -1,3 +1,9 @@
+2004-10-20  Andi Gutmans  <andi@zend.com>
+
+    * zend_operators.c:
+      - If object handles are equal then save the comparison of properties in
+      - the == operator.
+
 2004-10-18  Anantha Kesari H Y  <hyanantha@novell.com>
 
     * zend_modules.h:
