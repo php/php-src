@@ -16,14 +16,10 @@
    +----------------------------------------------------------------------+
  */
 
-#ifndef LAYER_H
-#define LAYER_H
+#ifndef PHP_COM_H
+#define PHP_COM_H
 
-#include "handler.h"
-#include "com/com.h"
+extern zend_module_entry com_module_entry;
+#define phpext_com_ptr &com_module_entry
 
-rpc_handler_entry handler_entries[] = {
-	RPC_HANDLER(com)
-};
-
-#endif /* LAYER_H */
+#endif	/* PHP_COM_H */
