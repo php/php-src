@@ -1,6 +1,6 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? Jul 2003, Version 4.3.3
+19 Jun 2003, Version 4.3.3RC1
 - Synchronized bundled GD library with GD 2.0.15. (Ilia)
 - Improved the engine to use POSIX/socket IO where feasible. (Sascha)
 - Improved the NSAPI SAPI module (Uwe Schindler)
