@@ -198,6 +198,8 @@
 /* Define if you have the setlocale function.  */
 #define HAVE_SETLOCALE 1
 
+#define HAVE_LOCALE_H
+
 /* Define if you have the setvbuf function.  */
 #ifndef HAVE_BINDLIB
 #define HAVE_SETVBUF 1
@@ -252,22 +254,22 @@
 /* #undef HAVE_SYS_DIR_H */
 
 /* Define if you have the <sys/file.h> header file.  */
-#define HAVE_SYS_FILE_H 1
+#undef HAVE_SYS_FILE_H
 
 /* Define if you have the <sys/ndir.h> header file.  */
 /* #undef HAVE_SYS_NDIR_H */
 
 /* Define if you have the <sys/socket.h> header file.  */
-#define HAVE_SYS_SOCKET_H 0
+#undef HAVE_SYS_SOCKET_H
 
 /* Define if you have the <sys/wait.h> header file.  */
-#define HAVE_SYS_WAIT_H 0
+#undef HAVE_SYS_WAIT_H
 
 /* Define if you have the <syslog.h> header file.  */
 #define HAVE_SYSLOG_H 1
 
 /* Define if you have the <unistd.h> header file.  */
-#define HAVE_UNISTD_H 0
+#undef HAVE_UNISTD_H
 
 /* Define if you have the crypt library (-lcrypt).  */
 /* #undef HAVE_LIBCRYPT 0 */
