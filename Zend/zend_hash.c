@@ -108,7 +108,12 @@ static void _zend_is_inconsistent(HashTable *ht, char *file, int line)
 static uint PrimeNumbers[] =
 {5, 11, 19, 53, 107, 223, 463, 983, 1979, 3907, 7963, 16229, 32531, 65407, 130987, 262237, 524521, 1048793, 2097397, 4194103, 8388857, 16777447, 33554201, 67108961, 134217487, 268435697, 536870683, 1073741621, 2147483399};
 
-static int zend_hash_if_full_do_resize(HashTable *ht);
+#define ZEND_HASH_IF_FULL_DO_RESIZE(ht)				\
+	if ((ht)->nNumOfElements > (ht)->nTableSize) {	\
+		zend_hash_do_resize(ht);					\
+	}
+
+static int zend_hash_do_resize(HashTable *ht);
 
 static uint nNumPrimeNumbers = sizeof(PrimeNumbers) / sizeof(ulong);
 
@@ -266,7 +271,7 @@ ZEND_API int zend_hash_add_or_update(HashTable *ht, char *arKey, uint nKeyLength
 	HANDLE_UNBLOCK_INTERRUPTIONS();
 
 	ht->nNumOfElements++;
-	zend_hash_if_full_do_resize(ht);		/* If the Hash table is full, resize it */
+	ZEND_HASH_IF_FULL_DO_RESIZE(ht);		/* If the Hash table is full, resize it */
 	return SUCCESS;
 }
 
@@ -337,7 +342,7 @@ ZEND_API int zend_hash_quick_add_or_update(HashTable *ht, char *arKey, uint nKey
 	HANDLE_UNBLOCK_INTERRUPTIONS();
 
 	ht->nNumOfElements++;
-	zend_hash_if_full_do_resize(ht);		/* If the Hash table is full, resize it */
+	ZEND_HASH_IF_FULL_DO_RESIZE(ht);		/* If the Hash table is full, resize it */
 	return SUCCESS;
 }
 
@@ -405,19 +410,18 @@ ZEND_API int zend_hash_index_update_or_next_insert(HashTable *ht, ulong h, void 
 		ht->nNextFreeElement = h + 1;
 	}
 	ht->nNumOfElements++;
-	zend_hash_if_full_do_resize(ht);
+	ZEND_HASH_IF_FULL_DO_RESIZE(ht);
 	return SUCCESS;
 }
 
 
-static int zend_hash_if_full_do_resize(HashTable *ht)
+static int zend_hash_do_resize(HashTable *ht)
 {
 	Bucket **t;
 
 	IS_CONSISTENT(ht);
 
-	if ((ht->nNumOfElements > ht->nTableSize)
-		&& (ht->nHashSizeIndex < nNumPrimeNumbers - 1)) {		/* Let's double the table size */
+	if ((ht->nHashSizeIndex < nNumPrimeNumbers - 1)) {		/* Let's double the table size */
 		t = (Bucket **) perealloc_recoverable(ht->arBuckets, PrimeNumbers[ht->nHashSizeIndex + 1] * sizeof(Bucket *), ht->persistent);
 		if (t) {
 			HANDLE_BLOCK_INTERRUPTIONS();
