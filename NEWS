@@ -3,6 +3,10 @@ PHP 4.0                                                                    NEWS
 
 ?? ?? 1999, Version 4.0 Beta 3
 
+- Fixed gmmktime() so that the following should always be true:
+  gmmktime([args]) == mktime([args]) + date('Z', mktime([args])) (Jouni)
+- setlocale doesn't anymore screw up things if you forgot to change it back
+  to the original settings. (Jouni)
 - Switched to new system where ChangeLog is automagically updated from commit
   messages. NEWS file is now the place for public announcements. (Andrei)
 - Fixed refcount problem in XML module. (Thies)
