@@ -283,7 +283,7 @@ PHPAPI void php_stream_filter_free(php_stream_filter *filter TSRMLS_DC)
 	pefree(filter, filter->is_persistent);
 }
 
-PHPAPI void php_stream_filter_prepend(php_stream_filter_chain *chain, php_stream_filter *filter TSRMLS_DC)
+PHPAPI void _php_stream_filter_prepend(php_stream_filter_chain *chain, php_stream_filter *filter TSRMLS_DC)
 {
 	filter->next = chain->head;
 	filter->prev = NULL;
@@ -297,7 +297,7 @@ PHPAPI void php_stream_filter_prepend(php_stream_filter_chain *chain, php_stream
 	filter->chain = chain;
 }
 
-PHPAPI void php_stream_filter_append(php_stream_filter_chain *chain, php_stream_filter *filter TSRMLS_DC)
+PHPAPI void _php_stream_filter_append(php_stream_filter_chain *chain, php_stream_filter *filter TSRMLS_DC)
 {
 	php_stream *stream = chain->stream;
 
