@@ -204,7 +204,11 @@ static int sapi_cli_ub_write(const char *str, uint str_length TSRMLS_DC)
 	{
 		ret = sapi_cli_single_write(ptr, remaining);
 		if (!ret) {
+#ifdef PHP_CLI_WIN32_NO_CONSOLE
+			break;
+#else
 			php_handle_aborted_connection();
+#endif
 		}
 		ptr += ret;
 		remaining -= ret;
@@ -217,7 +221,9 @@ static int sapi_cli_ub_write(const char *str, uint str_length TSRMLS_DC)
 static void sapi_cli_flush(void *server_context)
 {
 	if (fflush(stdout)==EOF) {
+#ifndef PHP_CLI_WIN32_NO_CONSOLE
 		php_handle_aborted_connection();
+#endif
 	}
 }
 
@@ -510,7 +516,11 @@ static int cli_seek_file_begin(zend_file_handle *file_handle, char *script_file,
 
 /* {{{ main
  */
+#ifdef PHP_CLI_WIN32_NO_CONSOLE
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd)
+#else
 int main(int argc, char *argv[])
+#endif
 {
 	int exit_status = SUCCESS;
 	int c;
@@ -535,6 +545,10 @@ int main(int argc, char *argv[])
 	php_core_globals *core_globals;
 	sapi_globals_struct *sapi_globals;
 	void ***tsrm_ls;
+#endif
+#ifdef PHP_CLI_WIN32_NO_CONSOLE
+	int argc = __argc;
+	char **argv = __argv;
 #endif
 
 #if defined(PHP_WIN32) && defined(_DEBUG) && defined(PHP_WIN32_DEBUG_HEAP)
