@@ -35,12 +35,9 @@ class PEAR_Remote extends PEAR
 
     // {{{ PEAR_Remote(config_object)
 
-    function PEAR_Remote($config = null)
+    function PEAR_Remote(&$config)
     {
         $this->PEAR();
-        if ($config === null) {
-            $config = &PEAR_Config::singleton();
-        }
         $this->config = $config;
     }
 
@@ -72,7 +69,7 @@ class PEAR_Remote extends PEAR
         $password = $this->config->get('password');
         if ($username && $password) {
             $tmp = base64_encode("$username:$password");
-            $req_headers .= "Authorization: Basic $auth\r\n";
+            $req_headers .= "Authorization: Basic $tmp\r\n";
         }
         fwrite($fp, ("POST /xmlrpc.php HTTP/1.0\r\n$req_headers\r\n$request"));
         $response = '';
@@ -84,9 +81,13 @@ class PEAR_Remote extends PEAR
             case "200":
                 break;
             case "401":
-                return $this->raiseError("PEAR_Remote: authorization required, please log in first");
+                if ($username && $password) {
+                    return $this->raiseError("PEAR_Remote: authorization failed", 401);
+                } else {
+                    return $this->raiseError("PEAR_Remote: authorization required, please log in first", 401);
+                }
             default:
-                return $this->raiseError("PEAR_Remote: unexpected HTTP response: $matches[1] $matches[2]");
+                return $this->raiseError("PEAR_Remote: unexpected HTTP response: $matches[1] $matches[2]", (int)$matches[1]);
         }
         while (trim(fgets($fp, 2048)) != ''); // skip rest of headers
         while ($chunk = fread($fp, 10240)) {
@@ -106,11 +107,11 @@ class PEAR_Remote extends PEAR
                 if ($ret['userinfo'] === '') $ret['userinfo'] = null;
                 if (strtolower($class) == 'db_error') {
                     $ret = $this->raiseError(DB::errorMessage($ret['code']),
-                                                $ret['code'], null, null,
-                                                $ret['userinfo']);
+                                             $ret['code'], null, null,
+                                             $ret['userinfo']);
                 } else {
                     $ret = $this->raiseError($ret['message'], $ret['code'],
-                                                null, null, $ret['userinfo']);
+                                             null, null, $ret['userinfo']);
                 }
             }
         }
