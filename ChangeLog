@@ -1,3 +1,83 @@
+2000-06-17  Andrei Zmievski  <andrei@ispi.net>
+
+    * NEWS: Relic from cvs conflict?
+
+2000-06-17  Zeev Suraski  <zeev@php.net>
+
+    * NEWS: Update news
+
+2000-06-17  Andi Gutmans  <andi@php.net>
+
+    * NEWS: - Add notice about CGI fix
+
+2000-06-17  Zeev Suraski  <zeev@php.net>
+
+    * ext/ftp/ftp.c
+      ext/ftp/php_ftp.c
+      ext/standard/array.c
+      ext/standard/basic_functions.c
+      ext/standard/parsedate.y
+      ext/standard/string.c
+      ext/standard/var.c
+      ext/wddx/wddx.c:
+    - Fix a couple of wranings in the FTP code and in parsedate.y
+    - Be safer with LC_MESSAGES
+    - Align with the latest Zend change in call_user_function_ex()
+
+2000-06-17  Andrei Zmievski  <andrei@ispi.net>
+
+    * acinclude.m4: Wrong number of commas.
+
+    * ext/wddx/wddx.c
+      ext/standard/var.c:
+    Have to use zval_ptr_dtor() on values returned from user functions.
+
+2000-06-17  Andi Gutmans  <andi@php.net>
+
+    * ext/wddx/wddx.c
+      win32/sendmail.c
+      ext/standard/string.c: - Make Windows compile
+    - Windows doesn't support LC_MESSAGES
+
+    * sapi/pi3web/pi3web_sapi.c: - Remove ^M and C++ comments
+
+2000-06-17  Holger Zimmermann  <zimpel@t-online.de>
+
+    * NEWS: Announced Pi3Web support
+
+    * sapi/pi3web/Makefile.in
+      sapi/pi3web/README
+      sapi/pi3web/config.m4
+      sapi/pi3web/php.sym
+      sapi/pi3web/pi3web_sapi.c: Added Pi3Web support
+
+2000-06-17  Sascha Schumann  <sascha@schumann.cx>
+
+    * acinclude.m4:
+    Suppress AC_ADD_LIBRARY(x) where x is matched by /^(c|c_r|pthread*)$/
+
+    * ext/yaz/config.m4:
+    Make use of the new macros PHP_EVAL_LIBLINE and PHP_EVAL_INCLINE
+
+    * acinclude.m4: Add PHP_EVAL_LIBLINE and PHP_EVAL_INCLINE
+
+2000-06-17  Jouni Ahto  <jah@mork.net>
+
+    * ext/skeleton/create_stubs:
+    - Missed one if() and cosmetic changes.
+
+2000-06-17  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/standard/info.c:
+    changed default cell alignment to "left" (see bug id #5048)
+
+    * ext/standard/string.c:
+    setlocale didn't recognize LC_MESSAGES (BUG ID#3957)
+
+    * sapi/apache/config.m4:
+    look for apxs in /usr/sbin (that's where SUSE puts it)
+    if no path is given and apxs is not found in $PATH
+
 2000-06-16  Hartmut Holzgraefe  <hartmut@six.de>
 
     * configure.in: fix for BUG #5066
