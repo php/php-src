@@ -40,7 +40,12 @@
 	inifile *dba = info->dbf
 
 #define INIFILE_GKEY \
-	key_type ini_key = inifile_key_split((char*)key) /* keylen not needed here */
+	key_type ini_key; \
+	if (!key) { \
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "No key specified"); \
+		return 0; \
+	} \
+	ini_key = inifile_key_split((char*)key) /* keylen not needed here */
 
 #define INIFILE_DONE \
 	inifile_key_free(&ini_key)
@@ -119,9 +124,12 @@ DBA_EXISTS_FUNC(inifile)
 
 DBA_DELETE_FUNC(inifile)
 {
+	int res;
+
 	INIFILE_DATA;
 	INIFILE_GKEY;
-	int res =  inifile_delete(dba, &ini_key TSRMLS_CC);
+
+	res =  inifile_delete(dba, &ini_key TSRMLS_CC);
 
 	INIFILE_DONE;
 	return (res == -1 ? FAILURE : SUCCESS);
