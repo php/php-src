@@ -92,6 +92,7 @@ PHP_FUNCTION(swf_addbuttonrecord);
 PHP_FUNCTION(swf_oncondition);
 PHP_FUNCTION(swf_endbutton);
 PHP_FUNCTION(swf_viewport);
+PHP_FUNCTION(swf_ortho);
 PHP_FUNCTION(swf_ortho2);
 PHP_FUNCTION(swf_perspective);
 PHP_FUNCTION(swf_polarview);

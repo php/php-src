@@ -83,6 +83,7 @@ function_entry swf_functions[] = {
 	PHP_FE(swf_oncondition,		NULL)
 	PHP_FE(swf_endbutton,		NULL)
 	PHP_FE(swf_viewport,		NULL)
+	PHP_FE(swf_ortho,		NULL)
 	PHP_FE(swf_ortho2,		NULL)
 	PHP_FE(swf_perspective,		NULL)
 	PHP_FE(swf_polarview,		NULL)
@@ -998,6 +999,28 @@ PHP_FUNCTION(swf_viewport)
 PHP_FUNCTION(swf_ortho2)
 {
 	php_swf_geo_same(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
+}
+/* }}} */
+
+/* {{{ proto void swf_ortho(double xmin, double xmax, double ymin, double ymax, double zmin, double zmax)
+   Defines an orthographic mapping of user coordinates onto the current viewport */
+PHP_FUNCTION(swf_ortho)
+{
+	zval **xmin, **xmax, **ymin, **ymax, **zmin, **zmax;
+	if (ARG_COUNT(ht) != 6 ||
+	    zend_get_parameters_ex(6, &xmin, &xmax, &ymin, &ymax, &zmin, &zmax) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	convert_to_double_ex(xmin);
+	convert_to_double_ex(xmax);
+	convert_to_double_ex(ymin);
+	convert_to_double_ex(ymax);
+	convert_to_double_ex(zmin);
+	convert_to_double_ex(zmax);
+	
+	swf_ortho((*xmin)->value.dval, (*xmax)->value.dval,
+	          (*ymin)->value.dval, (*ymax)->value.dval,
+	          (*zmin)->value.dval, (*zmax)->value.dval);
 }
 /* }}} */
 
