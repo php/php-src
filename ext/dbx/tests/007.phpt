@@ -1,12 +1,18 @@
 --TEST--
 dbx_sort
 --SKIPIF--
-<?php if (!extension_loaded("dbx")) print("skip"); ?>
+<?php 
+    if (!extension_loaded("dbx")) print("skip"); 
+    else {
+        include_once("dbx_test.p");
+        if ($connection===NULL) print("skip");
+        }
+?>
 --POST--
 --GET--
 --FILE--
 <?php 
-include_once("ext/dbx/tests/dbx_test.p");
+include_once("dbx_test.p");
 $sql_statement = "select id, description from tbl where parentid=1 order by id";
 $compare_function = "cmp";
 $invalid_compare_function = "invalid_cmp";

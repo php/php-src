@@ -1,12 +1,18 @@
 --TEST--
 dbx_query
 --SKIPIF--
-<?php if (!extension_loaded("dbx")) print("skip"); ?>
+<?php 
+    if (!extension_loaded("dbx")) print("skip"); 
+    else {
+        include_once("dbx_test.p");
+        if ($connection===NULL) print("skip");
+        }
+?>
 --POST--
 --GET--
 --FILE--
 <?php 
-include_once("ext/dbx/tests/dbx_test.p");
+include_once("dbx_test.p");
 $sql_statement = "select * from tbl order by id";
 $invalid_sql_statement = "invalid select * from tbl";
 $sql_select_statement = "select * from tbl where id=999999 and parentid=999999";
