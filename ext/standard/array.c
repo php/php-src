@@ -2141,7 +2141,7 @@ PHPAPI int php_array_merge(HashTable *dest, HashTable *src, int recursive TSRMLS
 			case HASH_KEY_IS_STRING:
 				if (recursive &&
 					zend_hash_find(dest, string_key, string_key_len, (void **)&dest_entry) == SUCCESS) {
-					if (*src_entry == *dest_entry) {
+					if (*src_entry == *dest_entry && ((*dest_entry)->refcount % 2)) {
 						php_error_docref(NULL TSRMLS_CC, E_WARNING, "recursion detected");
 						return 0;
 					}
