@@ -1293,7 +1293,7 @@ PHP_FUNCTION(mb_parse_str)
 PHP_FUNCTION(mb_output_handler)
 {
 	char *arg_string;
-	size_t arg_string_len;
+	int arg_string_len;
 	long arg_status;
 	mbfl_string string, result;
 	const char *charset;
@@ -2014,7 +2014,7 @@ PHP_FUNCTION(mb_convert_encoding)
 PHP_FUNCTION(mb_convert_case)
 {
 	char *str, *from_encoding = (char*)mbfl_no2preferred_mime_name(MBSTRG(current_internal_encoding));
-	long str_len, from_encoding_len;
+	int str_len, from_encoding_len;
 	long case_mode = 0;
 	char *newstr;
 	size_t ret_len;
@@ -2024,7 +2024,7 @@ PHP_FUNCTION(mb_convert_case)
 				&case_mode, &from_encoding, &from_encoding_len) == FAILURE)
 		RETURN_FALSE;
 
-	newstr = php_unicode_convert_case(case_mode, str, str_len, &ret_len, from_encoding TSRMLS_CC);
+	newstr = php_unicode_convert_case(case_mode, str, (size_t) str_len, &ret_len, from_encoding TSRMLS_CC);
 
 	if (newstr) {
 		RETVAL_STRINGL(newstr, ret_len, 0);
@@ -2038,7 +2038,7 @@ PHP_FUNCTION(mb_convert_case)
 PHP_FUNCTION(mb_strtoupper)
 {
 	char *str, *from_encoding = (char*)mbfl_no2preferred_mime_name(MBSTRG(current_internal_encoding));
-	long str_len, from_encoding_len;
+	int str_len, from_encoding_len;
 	char *newstr;
 	size_t ret_len;
 
@@ -2046,7 +2046,7 @@ PHP_FUNCTION(mb_strtoupper)
 				&from_encoding, &from_encoding_len) == FAILURE) {
 		return;
 	}
-	newstr = php_unicode_convert_case(PHP_UNICODE_CASE_UPPER, str, str_len, &ret_len, from_encoding TSRMLS_CC);
+	newstr = php_unicode_convert_case(PHP_UNICODE_CASE_UPPER, str, (size_t) str_len, &ret_len, from_encoding TSRMLS_CC);
 
 	if (newstr) {
 		RETURN_STRINGL(newstr, ret_len, 0);
@@ -2061,7 +2061,7 @@ PHP_FUNCTION(mb_strtoupper)
 PHP_FUNCTION(mb_strtolower)
 {
 	char *str, *from_encoding = (char*)mbfl_no2preferred_mime_name(MBSTRG(current_internal_encoding));
-	long str_len, from_encoding_len;
+	int str_len, from_encoding_len;
 	char *newstr;
 	size_t ret_len;
 
@@ -2069,7 +2069,7 @@ PHP_FUNCTION(mb_strtolower)
 				&from_encoding, &from_encoding_len) == FAILURE) {
 		return;
 	}
-	newstr = php_unicode_convert_case(PHP_UNICODE_CASE_LOWER, str, str_len, &ret_len, from_encoding TSRMLS_CC);
+	newstr = php_unicode_convert_case(PHP_UNICODE_CASE_LOWER, str, (size_t) str_len, &ret_len, from_encoding TSRMLS_CC);
 
 	if (newstr) {
 		RETURN_STRINGL(newstr, ret_len, 0);
