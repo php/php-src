@@ -21,8 +21,18 @@
  *
  * see http://www.sendmail.com/partner/resources/development/milter_api/smfi_register.html#flags
  */
+
+function milter_log($msg)
+{
+	$GLOBALS['log'] = fopen("/tmp/milter.log", "a");
+	fwrite($GLOBALS['log'], date("[H:i:s d.m.Y]") . "\t{$msg}\n");
+	fclose($GLOBALS['log']);
+}
+
 function milter_init() {
-  smfi_setflags(SMFIF_ADDHDRS);
+	milter_log("-- startup --");
+	milter_log("milter_init()");
+	smfi_setflags(SMFIF_ADDHDRS);
 }
 
 /**
@@ -30,6 +40,7 @@ function milter_init() {
  */
 function milter_connect($connect)
 {
+	milter_log("milter_connect('$connect')");
 }
 
 /**
@@ -38,6 +49,7 @@ function milter_connect($connect)
  */
 function milter_helo($helo)
 {
+	milter_log("milter_helo('$helo')");
 }
 
 /**
@@ -46,6 +58,10 @@ function milter_helo($helo)
  */
 function milter_envfrom($args)
 {
+	milter_log("milter_envfrom(args[])");
+	foreach ($args as $ix => $arg) {
+		milter_log("\targs[$ix] = $arg");
+	}
 }
 
 /**
@@ -54,6 +70,10 @@ function milter_envfrom($args)
  */
 function milter_envrcpt($args)
 {
+	milter_log("milter_envrcpt(args[])");
+	foreach ($args as $ix => $arg) {
+		milter_log("\targs[$ix] = $arg");
+	}
 }
 
 /**
@@ -62,6 +82,7 @@ function milter_envrcpt($args)
  */
 function milter_header($header, $value)
 {
+	milter_log("milter_header('$header', '$value')");
 }
 
 /**
@@ -69,13 +90,15 @@ function milter_header($header, $value)
  */
 function milter_eoh()
 {
+	milter_log("milter_eoh()");
 }
 
 /**
  * is called zero or more times between milter_eoh and milter_eom.
  */
-function mlfi_body($bodypart)
+function milter_body($bodypart)
 {
+	milter_log("milter_body('$bodypart')");
 }
 
 /**
@@ -85,6 +108,7 @@ function mlfi_body($bodypart)
  */
 function milter_eom()
 {
+	milter_log("milter_eom()");
   /* add PHP header to the message */
   smfi_addheader("X-PHP", phpversion());	
 }
@@ -93,14 +117,16 @@ function milter_eom()
  * may be called at any time during message processing
  * (i.e. between some message-oriented routine and milter_eom).
  */
-function mlfi_abort()
+function milter_abort()
 {
+	milter_log("milter_abort()");
 }
 
 /**
  * is always called once at the end of each connection.
  */
-function mlfi_close()
+function milter_close()
 {
+	milter_log("milter_close()");
 }
 ?>
