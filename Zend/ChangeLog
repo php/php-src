@@ -1,3 +1,23 @@
+2005-01-11  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_5_0)
+      zend_execute.c
+      tests/bug31098.phpt:
+      - MFH: fix for bug #31098.
+
+    * tests/bug31098.phpt
+      tests/bug31436.phpt:
+      
+      - Test renaming
+
+    * zend_vm_execute.h
+      tests/bug31436.phpt:
+      - Fix bug #31436 (isset() incorrectly returns true in dereference of a
+      wrong type)
+
+    * zend_compile.c:
+      - Fix bug #31478 (segfault with empty())
+
 2005-01-10  Rasmus Lerdorf  <rasmus@lerdorf.com>
 
     * zend.h
