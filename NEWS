@@ -2,6 +2,11 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 200?, Version 4.0.6
+- Added GD 2.0.1 support for truecolor and alpha channels, plus some other gd
+  functions, both old and new - see docs for more info (Wez)
+- Added S/MIME sign/verify encrypt/decrypt functions to openssl extension,
+  along with some other certificate manipulation and interrogation functions.
+  See docs for more info (Wez)
 - printf argnum (parameter swapping) support (Morten Poulsen, Rasmus)
 - Add DIRECTORY_SEPARATOR constant ('/' on UNIX, '\' on Windows) (Stig)
 - Added small change to php_odbc module, to check for failed SQLDisconnects
