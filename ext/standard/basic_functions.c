@@ -903,20 +903,6 @@ function_entry basic_functions[] = {
 	PHP_FE(stream_bucket_append,				NULL)
 	PHP_FE(stream_bucket_new,					NULL)
 
-	/* functions from aggregate.c */
-	PHP_FE(aggregate,						first_arg_force_ref)
-	PHP_FE(aggregate_methods,				first_arg_force_ref)
-	PHP_FE(aggregate_methods_by_list,		first_arg_force_ref)
-	PHP_FE(aggregate_properties,			first_arg_force_ref)
-	PHP_FE(aggregate_properties_by_list,	first_arg_force_ref)
-#if (HAVE_PCRE || HAVE_BUNDLED_PCRE) && !defined(COMPILE_DL_PCRE)
-	PHP_FE(aggregate_methods_by_regexp,		first_arg_force_ref)
-	PHP_FE(aggregate_properties_by_regexp,	first_arg_force_ref)
-#endif
-	PHP_FE(deaggregate,						first_arg_force_ref)
-	PHP_FE(aggregate_info,				first_arg_force_ref)
-	PHP_FALIAS(aggregation_info,			aggregate_info,				first_arg_force_ref)
-
 	PHP_FE(output_add_rewrite_var,											NULL)
 	PHP_FE(output_reset_rewrite_vars,										NULL)
 	PHP_FE(date_sunrise,														NULL)
@@ -1009,7 +995,6 @@ static void basic_globals_ctor(php_basic_globals *basic_globals_p TSRMLS_DC)
 	BG(next) = NULL;
 	BG(left) = -1;
 	BG(user_tick_functions) = NULL;
-	BG(aggregation_table) = NULL;
 	BG(user_filter_map) = NULL;
 	BG(user_compare_func_ptr) = NULL;
 	BG(array_walk_func_ptr) = NULL;
@@ -1233,12 +1218,6 @@ PHP_RSHUTDOWN_FUNCTION(basic)
 		zend_llist_destroy(BG(user_tick_functions));
 		efree(BG(user_tick_functions));
 		BG(user_tick_functions) = NULL;
-	}
-
-	if (BG(aggregation_table)) {
-		zend_hash_destroy(BG(aggregation_table));
-		efree(BG(aggregation_table));
-		BG(aggregation_table) = NULL;
 	}
 
 	if (BG(user_filter_map)) {

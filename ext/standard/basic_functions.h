@@ -197,7 +197,6 @@ typedef struct {
 	size_t mmap_len;
 #endif
 
-	HashTable *aggregation_table;
 	HashTable *user_filter_map;
 } php_basic_globals;
 
