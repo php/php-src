@@ -47,6 +47,7 @@ typedef union _mm_align_test {
 /* Aligned header size */
 #define ZEND_MM_ALIGNED_SIZE(size)	(size+(((ZEND_MM_ALIGNMENT-size)%ZEND_MM_ALIGNMENT+ZEND_MM_ALIGNMENT)%ZEND_MM_ALIGNMENT))
 #define ZEND_MM_ALIGNED_HEADER_SIZE	ZEND_MM_ALIGNED_SIZE(sizeof(zend_mm_block))
+#define ZEND_MM_ALIGNED_FREE_HEADER_SIZE ZEND_MM_ALIGNED_SIZE(sizeof(zend_mm_free_block))
 
 
 /* Memory calculations */
@@ -58,7 +59,7 @@ typedef union _mm_align_test {
 #define ZEND_MM_DEBUG(stmt)
 
 
-static inline void zend_mm_add_to_free_list(zend_mm_heap *heap, zend_mm_block *mm_block)
+static inline void zend_mm_add_to_free_list(zend_mm_heap *heap, zend_mm_free_block *mm_block)
 {
 	mm_block->next_free_block = heap->free_list;
 	mm_block->prev_free_block = NULL;
@@ -70,7 +71,7 @@ static inline void zend_mm_add_to_free_list(zend_mm_heap *heap, zend_mm_block *m
 }
 
 
-static inline void zend_mm_remove_from_free_list(zend_mm_heap *heap, zend_mm_block *mm_block)
+static inline void zend_mm_remove_from_free_list(zend_mm_heap *heap, zend_mm_free_block *mm_block)
 {
 	if (mm_block->prev_free_block) {
 		mm_block->prev_free_block->next_free_block = mm_block->next_free_block;
@@ -86,24 +87,24 @@ static inline void zend_mm_remove_from_free_list(zend_mm_heap *heap, zend_mm_blo
 
 zend_bool zend_mm_add_memory_block(zend_mm_heap *heap, size_t block_size)
 {
-	zend_mm_block *mm_block;
+	zend_mm_free_block *mm_block;
 	zend_mm_block *guard_block;
 
 	/* align block size downwards */
 	block_size -= block_size % ZEND_MM_ALIGNMENT;
 
-	mm_block = (zend_mm_block *) malloc(block_size);
+	mm_block = (zend_mm_free_block *) malloc(block_size);
 	if (!mm_block) {
 		return 1;
 	}
-	mm_block->size = block_size - ZEND_MM_ALIGNED_HEADER_SIZE; /* keep one guard block in the end */
+	mm_block->size = block_size - ZEND_MM_ALIGNED_FREE_HEADER_SIZE; /* keep one guard block in the end */
 	mm_block->type = ZEND_MM_FREE_BLOCK;
 	mm_block->prev_size = 0; /* Size is always at least ZEND_MM_ALIGNED_HEADER_SIZE big (>0) so 0 is OK */
 	
 	/* setup guard block */
 	guard_block = ZEND_MM_BLOCK_AT(mm_block, mm_block->size);
 	guard_block->type = ZEND_MM_USED_BLOCK;
-	guard_block->size = ZEND_MM_ALIGNED_HEADER_SIZE;
+	guard_block->size = ZEND_MM_ALIGNED_FREE_HEADER_SIZE;
 	guard_block->prev_size = mm_block->size;
 	ZEND_MM_DEBUG(("Setup guard block at 0x%0.8X\n", guard_block));
 
@@ -122,11 +123,7 @@ zend_bool zend_mm_startup(zend_mm_heap *heap, size_t block_size)
 	heap->block_size = block_size;
 	heap->free_list = NULL;
 
-	if (zend_mm_add_memory_block(heap, block_size)) {
-		return 1;
-	}
-
-	return 0;
+	return zend_mm_add_memory_block(heap, block_size);
 }
 
 
@@ -137,10 +134,11 @@ void zend_mm_shutdown(zend_mm_heap *heap)
 void *zend_mm_alloc(zend_mm_heap *heap, size_t size)
 {
 	size_t true_size;
-	zend_mm_block *p, *best_fit=NULL, *new_free_block;
+	zend_mm_free_block *p, *best_fit=NULL, *new_free_block;
 	size_t remaining_size;
 
-	true_size = ZEND_MM_ALIGNED_SIZE(size)+ZEND_MM_ALIGNED_HEADER_SIZE;
+	/* The max() can probably be optimized with an if() which checks more specific cases */
+	true_size = max(ZEND_MM_ALIGNED_SIZE(size)+ZEND_MM_ALIGNED_HEADER_SIZE, ZEND_MM_ALIGNED_FREE_HEADER_SIZE);
 	for (p = heap->free_list; p; p = p->next_free_block) {
 		if (p->size == true_size) {
 			best_fit = p;
@@ -169,14 +167,14 @@ void *zend_mm_alloc(zend_mm_heap *heap, size_t size)
 	/* calculate sizes */
 	remaining_size = best_fit->size - true_size;
 
-	if (remaining_size < ZEND_MM_ALIGNED_HEADER_SIZE) {
+	if (remaining_size < ZEND_MM_ALIGNED_FREE_HEADER_SIZE) {
 		/* keep best_fit->size as is, it'll include this extra space */
 		return ZEND_MM_DATA_OF(best_fit);
 	}
 
 	/* prepare new free block */
 	best_fit->size = true_size;
-	new_free_block = ZEND_MM_BLOCK_AT(best_fit, best_fit->size);
+	new_free_block = (zend_mm_free_block *) ZEND_MM_BLOCK_AT(best_fit, best_fit->size);
 
 	new_free_block->type = ZEND_MM_FREE_BLOCK;
 	new_free_block->size = remaining_size;
@@ -217,22 +215,23 @@ void zend_mm_free(zend_mm_heap *heap, void *p)
 	/* merge with the next block if empty */
 	if (next_block->type == ZEND_MM_FREE_BLOCK) {
 		mm_block->size += next_block->size;
-		zend_mm_remove_from_free_list(heap, next_block);
+		zend_mm_remove_from_free_list(heap, (zend_mm_free_block *) next_block);
 		next_block = ZEND_MM_BLOCK_AT(mm_block, mm_block->size);	/* recalculate */
 		next_block->prev_size = mm_block->size;
 	}
 
 	mm_block->type = ZEND_MM_FREE_BLOCK;
 	if (!in_free_list) {
-		zend_mm_add_to_free_list(heap, mm_block);
+		zend_mm_add_to_free_list(heap, (zend_mm_free_block *) mm_block);
 	}
 }
 
+/* This still needs optimizing to truely resize when possible */
 void *zend_mm_realloc(zend_mm_heap *heap, void *p, size_t size)
 {
 	void *ptr;
 	zend_mm_block *mm_block = ZEND_MM_HEADER_OF(p);
-	size_t true_size = ZEND_MM_ALIGNED_SIZE(size)+ZEND_MM_ALIGNED_HEADER_SIZE;
+	size_t true_size = max(ZEND_MM_ALIGNED_SIZE(size)+ZEND_MM_ALIGNED_HEADER_SIZE, ZEND_MM_ALIGNED_FREE_HEADER_SIZE);
 
 	if (true_size <= mm_block->size) {
 		return p;
