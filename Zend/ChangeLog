@@ -1,3 +1,45 @@
+2003-08-31  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_reflection_api.c:
+      Don't repeat first const count(consts) time
+
+    * zend_reflection_api.c:
+      Beautify output
+
+    * zend_reflection_api.c:
+      Add reflection_parameters, patch by Timm Friebe
+
+    * zend_default_classes.c:
+      Excluded chars < 32 when displaying string parameters that would obliterate
+      output.
+
+2003-08-31  Zeev Suraski  <zeev@zend.com>
+
+    * zend_arg_defs.c
+      zend_builtin_functions.c
+      zend_modules.h:
+      Attempt at fixing the linkage problem in Win32
+
+2003-08-31  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_execute.c:
+      Synch error message with other one to fix tests
+
+    * zend_reflection_api.c:
+      Check whether we may access tat union
+
+    * zend.c:
+      Revisited: Replace the non portable code by spprintf
+
+    * zend_reflection_api.c:
+      Using zend_spprintf should be faster here
+
+    * zend.c
+      zend.h
+      zend_default_classes.c:
+      Make vspprintf available as zend utility function. Use it in exception
+      output.
+
 2003-08-30  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_default_classes.c:

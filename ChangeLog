@@ -1,3 +1,161 @@
+2003-08-31  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      ext/ftp/ftp.c:
+      MFH: Make sure that ftp->data is nulled after it's freed. This may fix bug
+
+    * ext/ftp/ftp.c:
+      Make sure that ftp->data is nulled after it's freed. This may fix bug
+
+    * ext/calendar/calendar.c
+      ext/dio/dio.c
+      ext/ldap/ldap.c
+      ext/mssql/php_mssql.c
+      ext/openssl/openssl.c
+      ext/sockets/sockets.c
+      ext/sysvsem/sysvsem.c
+      ext/sysvshm/sysvshm.c
+      ext/xmlrpc/xmlrpc-epi-php.c:
+      Fixed compiler warnings.
+
+2003-08-31  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/PEAR/Common.php:
+      typo
+
+    * pear/PEAR/Installer.php:
+      Tomas say:
+      
+      "I think you'd have to let the user still install the package with
+      --force."
+      
+      I say, OK :)
+
+2003-08-31  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * ext/dba/dba.dsp:
+      - Fix win32 debug build
+
+    * ext/mbstring/mbstring.dsp:
+      - Fix the win32 build.
+
+2003-08-31  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_reflection_api.c:
+      Don't repeat first const count(consts) time
+
+    * ZendEngine2/zend_reflection_api.c:
+      Beautify output
+
+    * ZendEngine2/zend_reflection_api.c:
+      Add reflection_parameters, patch by Timm Friebe
+
+    * ext/sysvmsg/sysvmsg.c:
+      Fix formatting specifier
+
+    * ext/pcntl/pcntl.c:
+      No dots at the end of error messages
+
+    * ext/pcntl/pcntl.c:
+      Fix format specifiers
+
+2003-08-31  Zeev Suraski  <zeev@zend.com>
+
+    * ext/curl/interface.c
+      ext/gmp/gmp.c
+      ext/ldap/ldap.c
+      ext/mbstring/mbstring.c
+      ext/mcve/mcve.c
+      ext/mssql/php_mssql.c
+      ext/oci8/oci8.c
+      ext/odbc/php_odbc.c
+      ext/openssl/openssl.c
+      ext/oracle/oracle.c
+      ext/pcntl/pcntl.c
+      ext/pcre/php_pcre.c
+      ext/sockets/sockets.c
+      ext/sqlite/sqlite.c
+      ext/sysvmsg/sysvmsg.c
+      ext/xml/xml.c
+      ext/xmlrpc/xmlrpc-epi-php.c
+      ext/yaz/php_yaz.c:
+      Fix Win32 linkage problems
+
+2003-08-31  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_default_classes.c:
+      Excluded chars < 32 when displaying string parameters that would obliterate
+      output.
+
+2003-08-31  Zeev Suraski  <zeev@zend.com>
+
+    * ZendEngine2/zend_arg_defs.c
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_modules.h:
+      Attempt at fixing the linkage problem in Win32
+
+2003-08-31  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_execute.c:
+      Synch error message with other one to fix tests
+
+    * ZendEngine2/zend_reflection_api.c:
+      Check whether we may access tat union
+
+    * ext/mysqli/mysqli_api.c:
+      Revert commit by accident, sorry
+
+2003-08-31  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * scripts/Makefile.frag:
+      - Single header files installation.
+
+2003-08-31  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend.c
+      ext/mysqli/mysqli_api.c:
+      Revisited: Replace the non portable code by spprintf
+
+    * ZendEngine2/zend_reflection_api.c:
+      Using zend_spprintf should be faster here
+
+    * ZendEngine2/zend.c
+      ZendEngine2/zend.h
+      ZendEngine2/zend_default_classes.c
+      main/main.c:
+      Make vspprintf available as zend utility function. Use it in exception
+      output.
+
+2003-08-31  Sergey Kartashoff  <gluke@mail.ru>
+
+    * ext/mnogosearch/php_mnogo.c:
+      - a new UDM_PARAM_SEARCH_RESULTS mnogosearch API command added to limit
+        maximum number of search results
+
+    * (PHP_4_3)
+      ext/mnogosearch/php_mnogo.c:
+      - mnogosearch extension updated to compile with mnogosearch-3.2.15
+      - a new UDM_PARAM_SEARCH_RESULTS mnogosearch API command added to limit
+        maximum number of search results
+
+2003-08-31  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/PEAR/Installer.php:
+      This patch should fix all unintended upgrading/installation of packages
+      less stable than preferred state
+
+    * pear/package-PEAR.xml
+      pear/PEAR/Installer.php:
+      fix #25322
+
+2003-08-31  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * scripts/Makefile.frag:
+      install sqlite headers with the rest of php.
+      We only really need sqlite.h, but our build system doesn't provide for
+      installation of a single header file
+      (at least not that I can see)
+
 2003-08-30  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ZendEngine2/zend_default_classes.c:
