@@ -35,21 +35,13 @@ extern char *apache2_php_ini_path_override;
 typedef struct php_struct {
 	int state;
 	request_rec *r;
-	conn_rec *c;
-
-    apr_bucket_brigade *bb;
-	/* Length of post_data buffer */
-	int post_len;
-	/* Index for reading from buffer */
-	int post_idx;
-	/* stat structure of the current file */	
+	apr_bucket_brigade *brigade;
+	/* stat structure of the current file */
 #if defined(NETWARE) && defined(CLIB_STAT_PATCH)
 	struct stat_libc finfo;
 #else
 	struct stat finfo;
 #endif
-	/* Buffer for request body filter */
-	char *post_data;
 	/* Whether or not we've processed PHP in the output filters yet. */
 	int request_processed;
 } php_struct;

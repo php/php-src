@@ -55,50 +55,57 @@
 #undef shutdown /* To avoid Winsock confusion */
 #endif
 
+#define PHP_MAGIC_TYPE "application/x-httpd-php"
+#define PHP_SOURCE_MAGIC_TYPE "application/x-httpd-php-source"
+#define PHP_SCRIPT "php-script"
+
 /* A way to specify the location of the php.ini dir in an apache directive */
 char *apache2_php_ini_path_override = NULL;
 
 static int
 php_apache_sapi_ub_write(const char *str, uint str_length TSRMLS_DC)
 {
-	apr_bucket *b;
-	apr_bucket_brigade *bb;
-	apr_bucket_alloc_t *ba;
+	apr_bucket *bucket;
+	apr_bucket_brigade *brigade;
+	request_rec *r;
 	php_struct *ctx;
-    char* copy_str;
+
+	if (str_length == 0) {
+		return 0;
+	}
 
 	ctx = SG(server_context);
-	if (str_length == 0) 
-        return 0;
-    copy_str = apr_pmemdup( ctx->r->pool, str, str_length+1);
-	b = apr_bucket_pool_create(copy_str, str_length, ctx->r->pool, ctx->c->bucket_alloc);
-	APR_BRIGADE_INSERT_TAIL(ctx->bb, b);
+	r = ctx->r;
+	brigade = ctx->brigade;
+	
+	bucket = apr_bucket_transient_create(str, str_length,
+						 r->connection->bucket_alloc);
+	APR_BRIGADE_INSERT_TAIL(brigade, bucket);
 
-#if 0
 	/* Add a Flush bucket to the end of this brigade, so that
 	 * the transient buckets above are more likely to make it out
 	 * the end of the filter instead of having to be copied into
-	 * someone's setaside. */
-	b = apr_bucket_flush_create(ba);
-	APR_BRIGADE_INSERT_TAIL(bb, b);
-#endif
-/*	
-	if (ap_pass_brigade(f->next, bb) != APR_SUCCESS) {
+	 * someone's setaside.
+	 */
+	bucket = apr_bucket_flush_create(r->connection->bucket_alloc);
+	APR_BRIGADE_INSERT_TAIL(brigade, bucket);
+	
+	if (ap_pass_brigade(r->output_filters, brigade) != APR_SUCCESS) {
 		php_handle_aborted_connection();
 	}
-*/	
+	/* Ensure this brigade is empty for the next usage. */
+	apr_brigade_cleanup(brigade);
+	
 	return str_length; /* we always consume all the data passed to us. */
 }
 
 static int
-php_apache_sapi_header_handler(sapi_header_struct *sapi_header, sapi_headers_struct *sapi_headers TSRMLS_DC)
+php_apache_sapi_header_handler(sapi_header_struct *sapi_header,sapi_headers_struct *sapi_headers TSRMLS_DC)
 {
 	php_struct *ctx;
-	ap_filter_t *f;
 	char *val;
 
 	ctx = SG(server_context);
-	f = ctx->r->output_filters;
 
 	val = strchr(sapi_header->header, ':');
 
@@ -113,12 +120,16 @@ php_apache_sapi_header_handler(sapi_header_struct *sapi_header, sapi_headers_str
 		val++;
 	} while (*val == ' ');
 
-	if (!strcasecmp(sapi_header->header, "content-type"))
-		ctx->r->content_type = apr_pstrdup(ctx->r->pool, val);
-	else if (sapi_header->replace)
+	if (!strcasecmp(sapi_header->header, "content-type")) {
+		val = apr_pstrdup(ctx->r->pool, val);
+		ap_set_content_type(ctx->r, val);
+	}
+	else if (sapi_header->replace) {
 		apr_table_set(ctx->r->headers_out, sapi_header->header, val);
-	else
+	}
+	else {
 		apr_table_add(ctx->r->headers_out, sapi_header->header, val);
+	}
 	
 	sapi_free_header(sapi_header);
 
@@ -138,50 +149,33 @@ php_apache_sapi_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 static int
 php_apache_sapi_read_post(char *buf, uint count_bytes TSRMLS_DC)
 {
-	int n;
-	int to_read;
-	php_struct *ctx;
+	apr_size_t len;
+	php_struct *ctx = SG(server_context);
+	request_rec *r;
+	apr_bucket_brigade *brigade;
 	apr_status_t rv;
-    apr_bucket_brigade *bb;
-    apr_bucket *bucket;
-    char *last=buf;
-    int last_count=0;
-    int seen_eos=0;
 
-    ctx = SG(server_context);
-    bb = apr_brigade_create(ctx->r->pool, ctx->c->bucket_alloc);
+	r = ctx->r;
+	brigade = ctx->brigade;
+	len = count_bytes;
 
-	if ((rv = ap_get_brigade(ctx->r->input_filters, bb, AP_MODE_READBYTES, APR_BLOCK_READ, count_bytes)) != APR_SUCCESS) {
-		return 0;
+	rv = ap_get_brigade(r->input_filters, brigade, AP_MODE_READBYTES,
+						APR_BLOCK_READ, len);
+
+	if (rv == APR_SUCCESS) {
+		apr_brigade_flatten(brigade, buf, &len);
 	}
-	
-    APR_BRIGADE_FOREACH(bucket,bb) {
-            const char*data;
-            apr_size_t len;
-            if (APR_BUCKET_IS_EOS(bucket)) {
-                seen_eos = 1;
-                break;
-            }
-            /* We can't do much with this. */
-            if (APR_BUCKET_IS_FLUSH(bucket)) {
-                continue;
-            }
+	else {
+		len = 0;
+	}
 
-            apr_bucket_read(bucket, &data, &len, APR_BLOCK_READ);
-            if (last_count +len >  count_bytes) {
-                ap_log_rerror(APLOG_MARK, APLOG_ERR, 0, ctx->r,
-                      "PHP: Read too much post data raise a bug please: %s", ctx->r->uri);
-                break;
-            }
-            memcpy( last, data, len);
-            last += len;
-            last_count += len;
-    }
-    /*
-    ap_log_rerror(APLOG_MARK, APLOG_DEBUG, 0, ctx->r,
-                      "PHP: read post data : %s %*s len %ld", ctx->r->uri, last_count, buf, last_count);
-*/
-	return last_count;
+	apr_brigade_cleanup(brigade);
+	
+	/* This is downcast is okay, because len is constrained by
+	 * count_bytes and we know ap_get_brigade won't return more
+	 * than that.
+	 */
+	return len;
 }
 
 static struct stat*
@@ -250,35 +244,28 @@ static void
 php_apache_sapi_flush(void *server_context)
 {
 	php_struct *ctx;
-	apr_bucket_alloc_t *ba;
-	apr_bucket *b;
-    /*
-     * XXX: handle flush
-     * this has issues has PHP is not re-entrant, and can introduce race issues
-     * so until PHP is reentrant don't flush.
-     */
-    return;
+	apr_bucket_brigade *brigade;
+	apr_bucket *bucket;
+	request_rec *r;
 
-#ifdef NEVER
 	ctx = server_context;
 
 	/* If we haven't registered a server_context yet,
 	 * then don't bother flushing. */
-	if (!server_context)
+	if (!server_context) {
 		return;
-    
-	/* Send a flush bucket down the filter chain. The current default
-	 * handler seems to act on the first flush bucket, but ignores
-	 * all further flush buckets.
-	 */
-	
-	ba = ctx->c->bucket_alloc;
-	b = apr_bucket_flush_create(ba);
-	APR_BRIGADE_INSERT_TAIL(ctx->bb, b);
-	if (ap_pass_brigade(r->output_filters, ctx->bb) != APR_SUCCESS) {
+	}
+
+	r = ctx->r;
+	brigade = ctx->brigade;
+
+	/* Send a flush bucket down the filter chain. */
+	bucket = apr_bucket_flush_create(r->connection->bucket_alloc);
+	APR_BRIGADE_INSERT_TAIL(brigade, bucket);
+	if (ap_pass_brigade(r->output_filters, brigade) != APR_SUCCESS) {
 		php_handle_aborted_connection();
 	}
-#endif
+	apr_brigade_cleanup(brigade);
 }
 
 static void php_apache_sapi_log_message(char *msg)
@@ -303,18 +290,6 @@ static void php_apache_sapi_log_message(char *msg)
 	}
 }
 
-static int
-php_apache_disable_caching(ap_filter_t *f)
-{
-	/* Identify PHP scripts as non-cacheable, thus preventing 
-	 * Apache from sending a 304 status when the browser sends
-	 * If-Modified-Since header.
-	 */
-	f->r->no_local_copy = 1;
-	
-	return OK;
-}
-
 extern zend_module_entry php_apache_module;
 
 static int php_apache2_startup(sapi_module_struct *sapi_module)
@@ -326,8 +301,8 @@ static int php_apache2_startup(sapi_module_struct *sapi_module)
 }
 
 static sapi_module_struct apache2_sapi_module = {
-	"apache2hook",
-	"Apache 2.0 Hook",
+	"apache2handler",
+	"Apache 2.0 Handler",
 
 	php_apache2_startup,						/* startup */
 	php_module_shutdown_wrapper,			/* shutdown */
@@ -370,7 +345,7 @@ static void php_apache_add_version(apr_pool_t *p)
 {
 	TSRMLS_FETCH();
 	if (PG(expose_php)) {
-		ap_add_version_component(p, "PhP/" PHP_VERSION);
+		ap_add_version_component(p, "PHP/" PHP_VERSION);
 	}
 }
 
@@ -385,15 +360,15 @@ static int php_pre_config(apr_pool_t *pconf, apr_pool_t *plog, apr_pool_t *ptemp
 		return DONE;
 	}
 #endif
-    /* When this is NULL, apache won't override the hard-coded default
-     * php.ini path setting. */
-    apache2_php_ini_path_override = NULL;
-    return OK;
+	/* When this is NULL, apache won't override the hard-coded default
+	 * php.ini path setting. */
+	apache2_php_ini_path_override = NULL;
+	return OK;
 }
 
 static int
 php_apache_server_startup(apr_pool_t *pconf, apr_pool_t *plog,
-                          apr_pool_t *ptemp, server_rec *s)
+		                  apr_pool_t *ptemp, server_rec *s)
 {
 	void *data = NULL;
 	const char *userdata_key = "apache2hook_post_config";
@@ -435,9 +410,9 @@ static void php_add_filter(request_rec *r, ap_filter_t *f)
 	while (f) {
 		if (strcmp(f->frec->name, "PHP") == 0) {
 			ap_log_error(APLOG_MARK, APLOG_WARNING | APLOG_NOERRNO,
-				     0, r->server,
-				     "\"Set%sFilter PHP\" already configured for %s",
-				     output ? "Output" : "Input", r->uri);
+					 0, r->server,
+					 "\"Set%sFilter PHP\" already configured for %s",
+					 output ? "Output" : "Input", r->uri);
 			return;
 		}
 		f = f->next;
@@ -457,63 +432,24 @@ static apr_status_t php_server_context_cleanup(void *data_)
 	return APR_SUCCESS;
 }
 
-static int php_handler(request_rec *r)
+static void php_apache_request_ctor(request_rec *r, php_struct *ctx TSRMLS_DC)
 {
-	int content_type_len = strlen("application/x-httpd-php");
+	char *content_type;
 	const char *auth;
-	php_struct *ctx;
-    zend_file_handle zfd;
-	TSRMLS_FETCH();
-
-    if (!r->content_type) {
-        return DECLINED;
-    }
-    if (strncmp(r->handler, "application/x-httpd-php", content_type_len -1))  {
-        return DECLINED;
-    }
-
-    r->allowed |= (AP_METHOD_BIT << M_GET);
-    r->allowed |= (AP_METHOD_BIT << M_POST);
-    if (r->method_number != M_GET && r->method_number != M_POST ) {
-        return DECLINED;
-    }
-
-    /* XXX not sure if we need this */
-    if (r->finfo.filetype == 0) {
-        ap_log_rerror(APLOG_MARK, APLOG_ERR, 0, r,
-                "File does not exist: %s", r->filename);
-        return HTTP_NOT_FOUND;
-    }
-    
-	/* Initialize filter context */
-	SG(server_context) = ctx = apr_pcalloc(r->pool, sizeof(*ctx));
-
-	/* register a cleanup so we clear out the SG(server_context)
-	 * after each request. Note: We pass in the pointer to the
-	 * server_context in case this is handled by a different thread. */
-	apr_pool_cleanup_register(r->pool, (void *)&SG(server_context),
-							  php_server_context_cleanup,
-							  apr_pool_cleanup_null);
-
-	ap_add_common_vars(r);
-	ap_add_cgi_vars(r);
 
 	SG(sapi_headers).http_response_code = 200;
-	SG(request_info).content_type = apr_table_get(r->headers_in, "Content-Type");
+	SG(request_info).content_type = apr_table_get(r->headers_in,
+												  "Content-Type");
 	SG(request_info).query_string = apr_pstrdup(r->pool, r->args);
 	SG(request_info).request_method = r->method;
 	SG(request_info).request_uri = apr_pstrdup(r->pool, r->uri);
 	r->no_local_copy = 1;
-	r->content_type = apr_pstrdup(r->pool, sapi_get_default_content_type(TSRMLS_C));
-    /*
-     * XXX handle POST data
-     */
-    SG(request_info).post_data = NULL;
-    SG(request_info).post_data_length = 0;
-    /*
-	SG(request_info).post_data = ctx->post_data;
-	SG(request_info).post_data_length = ctx->post_len;
-    */
+
+	content_type = sapi_get_default_content_type(TSRMLS_C);
+	ap_set_content_type(r, apr_pstrdup(r->pool,
+									sapi_get_default_content_type(TSRMLS_C)));
+	efree(content_type);
+
 	apr_table_unset(r->headers_out, "Content-Length");
 	apr_table_unset(r->headers_out, "Last-Modified");
 	apr_table_unset(r->headers_out, "Expires");
@@ -526,68 +462,125 @@ static int php_handler(request_rec *r)
 		SG(request_info).auth_user = NULL;
 		SG(request_info).auth_password = NULL;
 	}
+	php_request_startup(TSRMLS_C);
+}
+
+static void php_apache_request_dtor(request_rec *r TSRMLS_DC)
+{
+	php_request_shutdown(NULL);
+}
+
+static int php_handler(request_rec *r)
+{
+	php_struct *ctx;
+	void *conf;
+	char *enabled;
+	apr_bucket_brigade *brigade;
+	apr_bucket *bucket;
+	apr_status_t rv;
+	request_rec *parent_req = NULL;
+	TSRMLS_FETCH();
+
+	if (strcmp(r->handler, PHP_MAGIC_TYPE) &&
+		strcmp(r->handler, PHP_SOURCE_MAGIC_TYPE) &&
+		strcmp(r->handler, PHP_SCRIPT)) {
+		return DECLINED;
+	}
+
+	conf = ap_get_module_config(r->per_dir_config, &php4_module);
+	enabled = get_php_config(conf, "engine", sizeof("engine"));
+
+	/* handle situations where user turns the engine off */
+	if (*enabled == '0') {
+		return DECLINED;
+	}
+
 	/* setup standard CGI variables */
+	ap_add_common_vars(r);
+	ap_add_cgi_vars(r);
+
 	ctx = SG(server_context);
 	if (ctx == NULL) {
-		ap_log_rerror(APLOG_MARK, APLOG_ERR|APLOG_NOERRNO, 0, r,
-					 "php failed to get server context");
-        return HTTP_INTERNAL_SERVER_ERROR;
+		ctx = SG(server_context) = apr_pcalloc(r->pool, sizeof(*ctx));;
+		/* register a cleanup so we clear out the SG(server_context)
+		 * after each request. Note: We pass in the pointer to the
+		 * server_context in case this is handled by a different thread.
+		 */
+		apr_pool_cleanup_register(r->pool, (void *)&SG(server_context),
+								  php_server_context_cleanup,
+								  apr_pool_cleanup_null);
+
+		ctx->r = r;
+		brigade = apr_brigade_create(r->pool, r->connection->bucket_alloc);
+		ctx->brigade = brigade;
+
+		php_apache_request_ctor(r, ctx TSRMLS_CC);
+		apply_config(conf);
+	}
+	else {
+		parent_req = ctx->r;
+		ctx->r = r;
+		brigade = ctx->brigade;
 	}
 
-    ctx->r = r;
-    ctx->c = r->connection;
+	/* Determine if we need to parse the file or show the source */
+	if (strncmp(r->handler, PHP_SOURCE_MAGIC_TYPE,
+				sizeof(PHP_SOURCE_MAGIC_TYPE) - 1) == 0) {
+		zend_syntax_highlighter_ini syntax_highlighter_ini;
+		php_get_highlight_struct(&syntax_highlighter_ini);
+		highlight_file((char *)r->filename,
+					   &syntax_highlighter_ini TSRMLS_CC);
+	}
+	else {
+		zend_file_handle zfd;
 
-	php_request_startup(TSRMLS_C);
+		zfd.type = ZEND_HANDLE_FILENAME;
+		zfd.filename = (char *) r->filename;
+		zfd.free_filename = 0;
+		zfd.opened_path = NULL;
 
-    ctx->bb = apr_brigade_create(r->pool, ctx->c->bucket_alloc);
-
-    zfd.type = ZEND_HANDLE_FILENAME;
-	zfd.filename = r->filename;
-	zfd.free_filename = 0;
-	zfd.opened_path = NULL;
-	php_execute_script(&zfd TSRMLS_CC);
+		if (!parent_req) {
+			php_execute_script(&zfd TSRMLS_CC);
+		}
+		else {
+			zend_execute_scripts(ZEND_INCLUDE TSRMLS_CC, NULL, 1, &zfd);
+		}
 #if MEMORY_LIMIT
-	{
-        char *mem_usage;
+		{
+			char *mem_usage;
 
-        mem_usage = apr_psprintf(r->pool, "%u", AG(allocated_memory_peak));
-        AG(allocated_memory_peak) = 0;
-        apr_table_set(r->notes, "mod_php_memory_usage", mem_usage);
-    }
+			mem_usage = apr_psprintf(ctx->r->pool, "%u",
+									 AG(allocated_memory_peak));
+			AG(allocated_memory_peak) = 0;
+			apr_table_set(r->notes, "mod_php_memory_usage", mem_usage);
+		}
 #endif
-
-	php_request_shutdown(NULL);
-/*
- * handled by APR
-	if (SG(request_info).query_string) {
-		free(SG(request_info).query_string);
 	}
-	if (SG(request_info).request_uri) {
-		free(SG(request_info).request_uri);
-	}
-*/
-    APR_BRIGADE_INSERT_TAIL(ctx->bb, apr_bucket_eos_create(ctx->c->bucket_alloc));
-    r->status = SG(sapi_headers).http_response_code;
-    return ap_pass_brigade( r->output_filters, ctx->bb);
-/*
- * XXX: check.. how do we set the response code ?
-    return SG(sapi_headers).http_response_code;
- */
 
+	if (!parent_req) {
+		php_apache_request_dtor(r TSRMLS_CC);
+		ctx->request_processed = 1;
+		bucket = apr_bucket_eos_create(r->connection->bucket_alloc);
+		APR_BRIGADE_INSERT_TAIL(brigade, bucket);
+
+		rv = ap_pass_brigade(r->output_filters, brigade);
+		if (rv != APR_SUCCESS) {
+			php_handle_aborted_connection();
+		}
+		apr_brigade_cleanup(brigade);
+	}
+	else {
+		ctx->r = parent_req;
+	}
+
+	return OK;
 }
+
 static void php_register_hook(apr_pool_t *p)
 {
 	ap_hook_pre_config(php_pre_config, NULL, NULL, APR_HOOK_MIDDLE);
 	ap_hook_post_config(php_apache_server_startup, NULL, NULL, APR_HOOK_MIDDLE);
-    /*
-	ap_hook_insert_filter(php_insert_filter, NULL, NULL, APR_HOOK_MIDDLE);
-	ap_hook_post_read_request(php_post_read_request, NULL, NULL, APR_HOOK_MIDDLE);
-    */
-    ap_hook_handler(php_handler, NULL, NULL, APR_HOOK_MIDDLE);
-    /*
-	ap_register_output_filter("PHP", php_output_filter, php_apache_disable_caching, AP_FTYPE_RESOURCE);
-	ap_register_input_filter("PHP", php_input_filter, php_apache_disable_caching, AP_FTYPE_RESOURCE);
-    */
+	ap_hook_handler(php_handler, NULL, NULL, APR_HOOK_MIDDLE);
 }
 
 AP_MODULE_DECLARE_DATA module php4_module = {

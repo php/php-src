@@ -65,39 +65,29 @@ PHP_FUNCTION(virtual)
 
 	convert_to_string_ex(filename);
 	
-	php_error_docref(NULL TSRMLS_CC, E_ERROR, 
-            "Virtual Function is not implemented in Apache2Handler '%s' "
-            "use SSI instead http://httpd.apache.org/docs-2.0/mod/mod_include.html", 
-            Z_STRVAL_PP(filename));
-	ap_destroy_sub_req(rr);
-    RETURN_FALSE;
 
-    /* ### this function is unsafe until PHP becomes re-entrant
-     * as running virtual('foo.php') from inside another php script
-     * can cause bad things to happen.
-     * Workaround:
-     * Use <!--#include virtual="filename" --> instead, and add the INCLUDES filter
-     */
-#ifdef NEVER
 	if (!(rr = php_apache_lookup_uri(Z_STRVAL_PP(filename) TSRMLS_CC))) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to include '%s' - URI lookup failed", Z_STRVAL_PP(filename));
 		RETURN_FALSE;
 	}
-	
-	if (rr->status == HTTP_OK) {
-		if (ap_run_sub_req(rr)) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to include '%s' - request execution failed", Z_STRVAL_PP(filename));
-			ap_destroy_sub_req(rr);
-			RETURN_FALSE;
-		}
+
+	if (rr->status != HTTP_OK) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to include '%s' - error finding URI", Z_STRVAL_PP(filename));
 		ap_destroy_sub_req(rr);
-		RETURN_TRUE;
+		RETURN_FALSE;
 	}
-	
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to include '%s' - error finding URI", Z_STRVAL_PP(filename));
+
+	/* Flush everything. */
+	php_end_ob_buffers(1 TSRMLS_CC);
+	php_header();
+
+	if (ap_run_sub_req(rr)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to include '%s' - request execution failed", Z_STRVAL_PP(filename));
+		ap_destroy_sub_req(rr);
+		RETURN_FALSE;
+	}
 	ap_destroy_sub_req(rr);
-	RETURN_FALSE;
-#endif
+	RETURN_TRUE;
 }
 /*  */
 
