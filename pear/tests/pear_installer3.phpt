@@ -95,6 +95,7 @@ $installer->addFileOperation('rename', array($temp_path . DIRECTORY_SEPARATOR .
     DIRECTORY_SEPARATOR . 'tmp' . DIRECTORY_SEPARATOR . 'renamed.phpt'));
 
 echo 'file renamed.phpt exists?';
+clearstatcache();
 echo (file_exists($temp_path . DIRECTORY_SEPARATOR . 'tmp' . DIRECTORY_SEPARATOR
     . 'renamed.phpt') ? " yes\n" : " no\n");
 echo "test valid commitFileTransaction():\n";
@@ -104,6 +105,7 @@ if ($installer->commitFileTransaction()) {
     echo "didn't work!\n";
 }
 echo 'file renamed.phpt exists?';
+clearstatcache();
 echo (file_exists($temp_path . DIRECTORY_SEPARATOR . 'tmp' . DIRECTORY_SEPARATOR
     . 'renamed.phpt') ? " yes\n" : " no\n");
 unlink($temp_path . DIRECTORY_SEPARATOR . 'tmp' . DIRECTORY_SEPARATOR
@@ -111,9 +113,11 @@ unlink($temp_path . DIRECTORY_SEPARATOR . 'tmp' . DIRECTORY_SEPARATOR
 
 echo "Do valid addFileOperation() chmod\n";
 touch($temp_path . DIRECTORY_SEPARATOR . 'tmp' . DIRECTORY_SEPARATOR . 'installertestfooblah.phpt');
+clearstatcache();
 $perms = fileperms($temp_path . DIRECTORY_SEPARATOR . 'tmp' . DIRECTORY_SEPARATOR . 'installertestfooblah.phpt');
 // check to see if chmod works on this OS
 chmod($temp_path . DIRECTORY_SEPARATOR . 'tmp' . DIRECTORY_SEPARATOR . 'installertestfooblah.phpt', 0776);
+clearstatcache();
 if (fileperms($temp_path . DIRECTORY_SEPARATOR . 'tmp' . DIRECTORY_SEPARATOR . 'installertestfooblah.phpt')
       == $perms && substr(PHP_OS, 0, 3) == 'WIN') {
     // we are on windows, so skip this test, but simulate success
@@ -144,7 +148,33 @@ EOF;
 unlink($temp_path . DIRECTORY_SEPARATOR . 'tmp' . DIRECTORY_SEPARATOR
     . 'installertestfooblah.phpt');
 
+mkdir($temp_path . DIRECTORY_SEPARATOR . 'tmp' . DIRECTORY_SEPARATOR
+    . 'installertestfooblah');
+echo "Do valid addFileOperation() rmdir\n";
+echo 'directory exists?';
+clearstatcache();
+echo (is_dir($temp_path . DIRECTORY_SEPARATOR .
+    'tmp' . DIRECTORY_SEPARATOR . 'installertestfooblah') ? " yes\n" : " no\n");
+$installer->addFileOperation('rmdir', array($temp_path . DIRECTORY_SEPARATOR .
+    'tmp' . DIRECTORY_SEPARATOR . 'installertestfooblah'));
+
+echo "test valid commitFileTransaction():\n";
+if ($installer->commitFileTransaction()) {
+    echo "worked\n";
+} else {
+    echo "didn't work!\n";
+}
+echo 'directory exists?';
+
+clearstatcache();
+echo (is_dir($temp_path . DIRECTORY_SEPARATOR .
+    'tmp' . DIRECTORY_SEPARATOR . 'installertestfooblah') ? " yes\n" : " no\n");
+
+echo "Do valid addFileOperation() installed_as\n";
+// to be finished
+    
 // invalid tests
+echo "\n==>Invalid tests\n";
 echo "Do valid addFileOperation() delete with non-existing file\n";
 $installer->addFileOperation('delete', array('gloober62456.phpt'));
 echo 'count($installer->file_operations) = ';
@@ -226,6 +256,16 @@ about to commit 1 file operations
 successfully committed 1 file operations
 worked
 file permissions are: 640
+Do valid addFileOperation() rmdir
+directory exists? yes
+test valid commitFileTransaction():
+about to commit 1 file operations
+successfully committed 1 file operations
+worked
+directory exists? no
+Do valid addFileOperation() installed_as
+
+==>Invalid tests
 Do valid addFileOperation() delete with non-existing file
 count($installer->file_operations) = int(1)
 test invalid commitFileTransaction():
