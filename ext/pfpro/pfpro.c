@@ -19,6 +19,7 @@
 
 /* $Id$ */
 
+/* {{{ includes */
 #include "php.h"
 #include "php_ini.h"
 #include "php_pfpro.h"
@@ -28,15 +29,17 @@
 #if HAVE_PFPRO
 
 #include "ext/standard/php_string.h"
+/* }}} */
 
+/* {{{ zts */
 #ifdef ZTS
 int pfpro_globals_id;
 #else
 php_pfpro_globals pfpro_globals;
 #endif
+/* }}} */
 
-/* Function table */
-
+/* {{{ Function table */
 function_entry pfpro_functions[] = {
 	PHP_FE(pfpro_version, NULL)
 	PHP_FE(pfpro_init, NULL)
@@ -45,7 +48,9 @@ function_entry pfpro_functions[] = {
 	PHP_FE(pfpro_process, NULL)
 	{NULL, NULL, NULL}
 };
+/* }}} */
 
+/* {{{ Zend module entry */
 zend_module_entry pfpro_module_entry = {
 	"pfpro",
 	pfpro_functions,
@@ -56,12 +61,15 @@ zend_module_entry pfpro_module_entry = {
 	PHP_MINFO(pfpro),
 	STANDARD_MODULE_PROPERTIES
 };
+/* }}} */
 
+/* {{{ dl() stuff */
 #ifdef COMPILE_DL_PFPRO
 ZEND_GET_MODULE(pfpro)
 #endif
+/* }}} */
 
-
+/* {{{ initialization defaults */
 PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("pfpro.defaulthost",		"test.signio.com",	PHP_INI_ALL, OnUpdateString,	defaulthost,			php_pfpro_globals,	pfpro_globals)
 	STD_PHP_INI_ENTRY("pfpro.defaultport",			"443",			PHP_INI_ALL, OnUpdateInt,		defaultport,			php_pfpro_globals,	pfpro_globals)
@@ -104,8 +112,9 @@ PHP_RSHUTDOWN_FUNCTION(pfpro)
 
     return SUCCESS;
 }
+/* }}} */
 
-
+/* {{{ minfo registration */
 PHP_MINFO_FUNCTION(pfpro)
 {
 	php_info_print_table_start();
@@ -115,8 +124,7 @@ PHP_MINFO_FUNCTION(pfpro)
 
 	DISPLAY_INI_ENTRIES();
 }
-
-
+/* }}} */
 
 /* {{{ proto string pfpro_version()
    Returns the version of the Payflow Pro library */
@@ -129,8 +137,6 @@ PHP_FUNCTION(pfpro_version)
 	RETURN_STRING(PNVersion(), 1);
 }
 /* }}} */
-
-
 
 /* {{{ proto void pfpro_init()
    Initialises the Payflow Pro library */
@@ -150,8 +156,6 @@ PHP_FUNCTION(pfpro_init)
 }
 /* }}} */
 
-
-
 /* {{{ proto void pfpro_cleanup()
    Shuts down the Payflow Pro library */
 PHP_FUNCTION(pfpro_cleanup)
@@ -169,8 +173,6 @@ PHP_FUNCTION(pfpro_cleanup)
 	RETURN_TRUE;
 }
 /* }}} */
-
-
 
 /* {{{ proto string pfpro_process_raw(string parmlist [, string hostaddress [, int port, [, int timeout [, string proxyAddress [, int proxyPort [, string proxyLogon [, string proxyPassword]]]]]]])
    Raw Payflow Pro transaction processing */
@@ -289,8 +291,6 @@ PHP_FUNCTION(pfpro_process_raw)
 	RETURN_STRING(response, 1);
 }
 /* }}} */
-
-
 
 /* {{{ proto array pfpro_process(array parmlist [, string hostaddress [, int port, [, int timeout [, string proxyAddress [, int proxyPort [, string proxyLogon [, string proxyPassword]]]]]]])
    Payflow Pro transaction processing using arrays */
