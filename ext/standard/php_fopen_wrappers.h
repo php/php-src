@@ -25,8 +25,8 @@
 
 php_stream *php_stream_url_wrap_http(php_stream_wrapper *wrapper, char *path, char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC);
 php_stream *php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, char *path, char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC);
-extern php_stream_wrapper php_stream_http_wrapper;
-extern php_stream_wrapper php_stream_ftp_wrapper;
+PHPAPI php_stream_wrapper php_stream_http_wrapper;
+PHPAPI php_stream_wrapper php_stream_ftp_wrapper;
 extern php_stream_wrapper php_stream_php_wrapper;
 
 #endif

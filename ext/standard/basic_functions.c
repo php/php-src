@@ -1107,10 +1107,6 @@ PHP_MINIT_FUNCTION(basic)
 #ifndef PHP_CURL_URL_WRAPPERS
 	php_register_url_stream_wrapper("http", &php_stream_http_wrapper TSRMLS_CC);
 	php_register_url_stream_wrapper("ftp", &php_stream_ftp_wrapper TSRMLS_CC);
-# if HAVE_OPENSSL_EXT
-	php_register_url_stream_wrapper("https", &php_stream_http_wrapper TSRMLS_CC);
-	php_register_url_stream_wrapper("ftps", &php_stream_ftp_wrapper TSRMLS_CC);
-# endif
 #endif
 
 #if HAVE_RES_SEARCH && !(defined(__BEOS__)||defined(PHP_WIN32) || defined(NETWARE))
@@ -1135,10 +1131,6 @@ PHP_MSHUTDOWN_FUNCTION(basic)
 #ifndef PHP_CURL_URL_WRAPPERS
 	php_unregister_url_stream_wrapper("http" TSRMLS_CC);
 	php_unregister_url_stream_wrapper("ftp" TSRMLS_CC);
-# if HAVE_OPENSSL_EXT
-	php_unregister_url_stream_wrapper("https" TSRMLS_CC);
-	php_unregister_url_stream_wrapper("ftps" TSRMLS_CC);
-# endif
 #endif
 
 	UNREGISTER_INI_ENTRIES();
