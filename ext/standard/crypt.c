@@ -46,6 +46,7 @@
 extern char *crypt(char *__key,char *__salt);
 #endif
 
+#include "php_lcg.h"
 #include "php_crypt.h"
 
 /* 
@@ -150,12 +151,12 @@ PHP_FUNCTION(crypt)
 	/* The automatic salt generation only covers standard DES and md5-crypt */
 	if(!*salt) {
 #if HAVE_SRAND48
-		srand48((unsigned int) time(0) * getpid());
+		srand48((unsigned int) time(0) * getpid() * (php_combined_lcg() * 10000.0));
 #else
 #if HAVE_SRANDOM
-		srandom((unsigned int) time(0) * getpid());
+		srandom((unsigned int) time(0) * getpid() * (php_combined_lcg() * 10000.0));
 #else
-		srand((unsigned int) time(0) * getpid());
+		srand((unsigned int) time(0) * getpid() * (php_combined_lcg() * 10000.0));
 #endif
 #endif
 
