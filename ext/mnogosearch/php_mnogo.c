@@ -77,6 +77,7 @@
 #define UDM_PARAM_SEARCHD		22
 #define UDM_PARAM_QSTRING		23
 #define UDM_PARAM_REMOTE_ADDR		24
+#define UDM_PARAM_QUERY			25
 
 /* udm_add_search_limit constants */
 #define UDM_LIMIT_URL		1
@@ -294,6 +295,7 @@ DLEXPORT PHP_MINIT_FUNCTION(mnogosearch)
 	
 	REGISTER_LONG_CONSTANT("UDM_PARAM_QSTRING",	UDM_PARAM_QSTRING,CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("UDM_PARAM_REMOTE_ADDR",	UDM_PARAM_REMOTE_ADDR,CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("UDM_PARAM_QUERY",	UDM_PARAM_QUERY,CONST_CS | CONST_PERSISTENT);
 	
 	/* udm_add_search_limit constants */
 	REGISTER_LONG_CONSTANT("UDM_LIMIT_CAT",		UDM_LIMIT_CAT,CONST_CS | CONST_PERSISTENT);
@@ -419,6 +421,10 @@ DLEXPORT PHP_FUNCTION(udm_alloc_agent)
 			
 #if UDM_VERSION_ID >= 30204
 				Env=UdmEnvInit(NULL);
+				UdmVarListReplaceStr(&Env->Vars,"SyslogFacility","local7");
+				UdmSetLogLevel(Env,0);
+				UdmOpenLog("mnoGoSearch-php",Env,0);
+				
 				if(!memcmp(dbaddr,"searchd:",8)){
 					UDM_URL	Url;
 					UdmURLParse(&Url,dbaddr);
@@ -465,6 +471,10 @@ DLEXPORT PHP_FUNCTION(udm_alloc_agent)
 				
 #if UDM_VERSION_ID >= 30204
 				Env=UdmEnvInit(NULL);
+				UdmVarListReplaceStr(&Env->Vars,"SyslogFacility","local7");
+				UdmSetLogLevel(Env,0);
+				UdmOpenLog("mnoGoSearch-php",Env,0);
+
 				if(!memcmp(dbaddr,"searchd:",8)){
 					UDM_URL	Url;
 					UdmURLParse(&Url,dbaddr);
@@ -851,6 +861,7 @@ DLEXPORT PHP_FUNCTION(udm_set_agent_param)
 #endif			
 			break;
 
+
 		case UDM_PARAM_REMOTE_ADDR:
 #if UDM_VERSION_ID >= 30204
 			UdmVarListReplaceStr(&Agent->Conf->Vars,"IP",val);
@@ -959,6 +970,14 @@ DLEXPORT PHP_FUNCTION(udm_set_agent_param)
 			snprintf(Agent->Conf->vardir,sizeof(Agent->Conf->vardir)-1,"%s%s",val,UDMSLASHSTR);
 #endif			
 			break;
+			
+#if UDM_VERSION_ID >= 30204
+		case UDM_PARAM_QUERY:
+			UdmVarListReplaceStr(&Agent->Conf->Vars,"q",val);
+
+			break;
+#endif
+
 #endif
 		default:
 			php_error(E_WARNING,"Udm_Set_Agent_Param: Unknown agent session parameter");
