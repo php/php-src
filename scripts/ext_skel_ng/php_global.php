@@ -33,7 +33,7 @@
 
 
 		static function c_code_header($name) {
-			return "static void php_{name}_init_globals(zend_{name}_globals *{name}_globals)\n{\n";
+			return "static void php_{$name}_init_globals(zend_{$name}_globals *{$name}_globals)\n{\n";
 		}
 
 		function c_code($name) {
@@ -46,11 +46,11 @@
 			return $code;
 		}
 
-		static function c_code_footer() {
+		static function c_code_footer($name) {
 			return "
 }
 
-static void php_{name}_shutdown_globals(zend_{name}_globals *{name}_globals)
+static void php_{$name}_shutdown_globals(zend_{$name}_globals *{$name}_globals)
 {
 }";
 		}
