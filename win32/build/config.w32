@@ -214,6 +214,10 @@ AC_DEFINE('HAVE_GETADDRINFO', main_network_has_ipv6);
 AC_DEFINE('HAVE_GAI_STRERROR', main_network_has_ipv6);
 AC_DEFINE('HAVE_IPV6', main_network_has_ipv6);
 
+ARG_ENABLE("memory-limit", "Enable memory limit checking code", "no");
+
+AC_DEFINE('MEMORY_LIMIT', PHP_MEMORY_LIMIT == "yes" ? 1 : 0);
+
 /* For snapshot builders, where can we find the additional
  * files that make up the snapshot template? */
 ARG_WITH("snapshot-template", "Path to snapshot builder template dir", "no");
