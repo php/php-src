@@ -1,3 +1,31 @@
+2004-12-06  Stanislav Malyshev  <stas@zend.com>
+
+    * tests/bug30998.phpt:
+      add test
+
+    * zend.c
+      zend.c:
+      port fix for #30998: Crash when user error handler returns false on amd64
+
+2004-12-06  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_compile.c
+      zend_compile.c
+      tests/bug30922.phpt:
+      Fixed bug #30922 (reflective functions crash PHP when interfaces extend
+      themselves)
+
+    * tests/bug30922.phpt
+      tests/bug30922.phpt:
+      
+      file bug30922.phpt was initially added on branch PHP_5_0.
+
+2004-12-06  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_5_0)
+      zend_builtin_functions.c:
+      if fetch called not from PHP function, ptr can be NULL
+
 2004-12-01  Ilia Alshanetsky  <ilia@prohost.org>
 
     * zend_strtod.c:

@@ -1,3 +1,107 @@
+2004-12-06  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * run-tests.php:
+      Added -d option which allows ini options to be specified via command line.
+      Patch by: Sean Coates
+
+    * (PHP_4_3)
+      NEWS
+      NEWS
+      ext/standard/file.c
+      ext/standard/file.c:
+      MFH: Fixed bug #30990 (allow popen() on *NIX to accept 'b' flag).
+
+    * ext/standard/file.c:
+      Fixed bug #30990 (allow popen() on *NIX to accept 'b' flag).
+
+2004-12-06  Derick Rethans  <php@derickrethans.nl>
+
+    * acinclude.m4
+      acinclude.m4
+      configure.in
+      configure.in
+      ext/iconv/config.m4
+      ext/iconv/config.m4
+      ext/iconv/php_iconv.h
+      ext/iconv/php_iconv.h:
+      - MF43: Install the iconv extension headers to <installpath>/ext/iconv so
+      that
+        external extensions can use them.
+
+    * (PHP_4_3)
+      acinclude.m4
+      configure.in
+      ext/iconv/config.m4
+      ext/iconv/php_iconv.h:
+      - Install the iconv extension headers to <installpath>/ext/iconv so that
+        external extensions can use them.
+
+2004-12-06  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/mssql/php_mssql.c:
+      MFB: revert
+
+    * (PHP_5_0)
+      NEWS
+      ext/mssql/php_mssql.c:
+      MFB: revert.
+
+    * (PHP_4_3)
+      NEWS
+      ext/mssql/php_mssql.c:
+      Revert, this is not needed after all.
+
+2004-12-06  Stanislav Malyshev  <stas@zend.com>
+
+    * sapi/apache2handler/sapi_apache2.c
+      sapi/apache2handler/sapi_apache2.c
+      sapi/apache2handler/sapi_apache2.c:
+      fix startup - if startup did not succeed, do not continue with execution
+
+    * sapi/apache2handler/sapi_apache2.c
+      sapi/apache2handler/sapi_apache2.c
+      sapi/apache2handler/sapi_apache2.c:
+      do not zero out peak - MM shutdown would do that
+
+    * ZendEngine2/tests/bug30998.phpt:
+      add test
+
+    * ZendEngine2/zend.c
+      ZendEngine2/zend.c:
+      port fix for #30998: Crash when user error handler returns false on amd64
+
+    * (PHP_4_3)
+      Zend/zend.c:
+      fix crash on amd64 (and possibly others) - you can't really use va_list
+      more
+      than once portably
+
+2004-12-06  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/tests/bug30922.phpt
+      ZendEngine2/tests/bug30922.phpt:
+      
+      file bug30922.phpt was initially added on branch PHP_5_0.
+
+    * (PHP_5_0)
+      NEWS
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/tests/bug30922.phpt:
+      Fixed bug #30922 (reflective functions crash PHP when interfaces extend
+      themselves)
+
+2004-12-06  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_5_0)
+      ZendEngine2/zend_builtin_functions.c:
+      if fetch called not from PHP function, ptr can be NULL
+
+2004-12-06  Georg Richter  <georg@mysql.com>
+
+    * ext/mysqli/mysqli_prop.c:
+      fixed windows compile errors (Thx to Sebastian Bergmann)
+
 2004-12-05  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_4_3)
