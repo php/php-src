@@ -492,6 +492,7 @@ ZEND_API void _convert_to_string(zval *op ZEND_FILE_LINE_DC)
 			op->value.str.len = sizeof("Array")-1;
 			break;
 		case IS_OBJECT: {
+#if ANDI_0
 			TSRMLS_FETCH();
 			if (op->value.obj.handlers->cast_object) {
 				if (op->value.obj.handlers->cast_object(op, op, IS_STRING, 1 TSRMLS_CC) == SUCCESS) {
@@ -501,6 +502,7 @@ ZEND_API void _convert_to_string(zval *op ZEND_FILE_LINE_DC)
 			} else {
 				zend_error(E_NOTICE, "Object of class %s to string conversion", Z_OBJCE_P(op)->name);
 			}
+#endif
 			zval_dtor(op);
 			op->value.str.val = estrndup_rel("Object", sizeof("Object")-1);
 			op->value.str.len = sizeof("Object")-1;
