@@ -1107,6 +1107,7 @@ class PEAR_Common extends PEAR
                 if (empty($c['prompt'])) {
                     $errors[] = "configure option $i: missing prompt";
                 }
+                $i++;
             }
         }
         if (empty($info['filelist'])) {
