@@ -1221,10 +1221,12 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, zend_function_entr
 			internal_function->arg_info = ptr->arg_info+1;
 			internal_function->num_args = ptr->num_args;
 			internal_function->pass_rest_by_reference = ptr->arg_info[0].pass_by_reference;
+			internal_function->return_reference = ptr->arg_info[0].return_reference;
 		} else {
 			internal_function->arg_info = NULL;
 			internal_function->num_args = 0;
 			internal_function->pass_rest_by_reference = 0;
+			internal_function->return_reference = 0;
 		}
 		if (ptr->flags) {
 			if (!(ptr->flags & ZEND_ACC_PPP_MASK)) {

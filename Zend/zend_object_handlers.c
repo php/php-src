@@ -386,9 +386,15 @@ zval *zend_std_read_dimension(zval *object, zval *offset, int type TSRMLS_DC)
 			}
 			return 0;
 		}
-		if (retval->refcount > 0) { /* Should always  be  the case */
-			retval->refcount--;
+
+		if ((type == BP_VAR_W || type == BP_VAR_RW)
+			&& !retval->is_ref) {
+			zend_error(E_ERROR, "offsetGet() must return by reference for multi-dimensional array support");
 		}
+
+		/* Undo PZVAL_LOCK() */
+		retval->refcount--;
+
 		return retval;
 	} else {
 		zend_error(E_ERROR, "Cannot use object of type %s as array", ce->name);

@@ -1718,6 +1718,11 @@ static zend_bool zend_do_perform_implementation_check(zend_function *fe)
 		return 0;
 	}
 
+	if (fe->common.prototype->common.return_reference != ZEND_RETURN_REFERENCE_AGNOSTIC
+		&& fe->common.return_reference != fe->common.prototype->common.return_reference) {
+		return 0;
+	}
+
 	for (i=0; i< fe->common.num_args; i++) {
 		if (ZEND_LOG_XOR(fe->common.arg_info[i].class_name, fe->common.prototype->common.arg_info[i].class_name)) {
 			/* Only one has a type hint and the other one doesn't */

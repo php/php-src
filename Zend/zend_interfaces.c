@@ -385,7 +385,7 @@ zend_function_entry zend_funcs_iterator[] = {
 zend_function_entry *zend_funcs_traversable    = NULL;
 
 static
-ZEND_BEGIN_ARG_INFO(arginfo_arrayaccess_offset, 0) 
+ZEND_BEGIN_ARG_INFO(arginfo_arrayaccess_offset, 0)
 	ZEND_ARG_INFO(0, offset)
 ZEND_END_ARG_INFO();
 

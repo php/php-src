@@ -140,6 +140,7 @@ typedef struct _zend_arg_info {
 	zend_uint class_name_len;
 	zend_bool allow_null;
 	zend_bool pass_by_reference;
+	zend_bool return_reference;
 } zend_arg_info;
 
 struct _zend_op_array {
@@ -152,6 +153,7 @@ struct _zend_op_array {
 	zend_uint num_args;
 	zend_arg_info *arg_info;
 	zend_bool pass_rest_by_reference;
+	unsigned char return_reference;
 	/* END of common elements */
 
 	zend_uint *refcount;
@@ -174,7 +176,6 @@ struct _zend_op_array {
 	zend_op *start_op;
 	int backpatch_count;
 
-	zend_bool return_reference;
 	zend_bool done_pass_two;
 	zend_bool uses_this;
 
@@ -188,6 +189,10 @@ struct _zend_op_array {
 };
 
 
+#define ZEND_RETURN_VALUE				0
+#define ZEND_RETURN_REFERENCE			1
+#define ZEND_RETURN_REFERENCE_AGNOSTIC	2
+
 typedef struct _zend_internal_function {
 	/* Common elements */
 	zend_uchar type;
@@ -198,6 +203,7 @@ typedef struct _zend_internal_function {
 	zend_uint num_args;
 	zend_arg_info *arg_info;
 	zend_bool pass_rest_by_reference;
+	unsigned char return_reference;
 	/* END of common elements */
 
 	void (*handler)(INTERNAL_FUNCTION_PARAMETERS);
@@ -217,6 +223,7 @@ typedef union _zend_function {
 		zend_uint num_args;
 		zend_arg_info *arg_info;
 		zend_bool pass_rest_by_reference;
+		unsigned char return_reference;
 	} common;
 	
 	zend_op_array op_array;
