@@ -1837,7 +1837,7 @@ binary_assign_op_addr_obj:
 							tmp = *class_name;
 							zval_copy_ctor(&tmp);
 							convert_to_string(&tmp);
-							zend_str_tolower_nlc(tmp.value.str.val, tmp.value.str.len);
+							zend_str_tolower(tmp.value.str.val, tmp.value.str.len);
 
 							class_name_strval = tmp.value.str.val;
 							class_name_strlen = tmp.value.str.len;
@@ -1970,7 +1970,7 @@ binary_assign_op_addr_obj:
 						tmp = *function_name;
 						zval_copy_ctor(&tmp);
 						convert_to_string(&tmp);
-						zend_str_tolower_nlc(tmp.value.str.val, tmp.value.str.len);
+						zend_str_tolower(tmp.value.str.val, tmp.value.str.len);
 
 						function_name_strval = tmp.value.str.val;
 						function_name_strlen = tmp.value.str.len;
@@ -2019,7 +2019,7 @@ binary_assign_op_addr_obj:
 						tmp = *function_name;
 						zval_copy_ctor(&tmp);
 						convert_to_string(&tmp);
-						zend_str_tolower_nlc(tmp.value.str.val, tmp.value.str.len);
+						zend_str_tolower(tmp.value.str.val, tmp.value.str.len);
 
 						function_name_strval = tmp.value.str.val;
 						function_name_strlen = tmp.value.str.len;

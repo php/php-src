@@ -1570,18 +1570,7 @@ ZEND_API int zval_is_true(zval *op)
 	return (op->value.lval ? 1 : 0);
 }
 
-
 ZEND_API void zend_str_tolower(char *str, unsigned int length)
-{
-	register char *p=str, *end=p+length;
-	
-	while (p<end) {
-		*p = tolower(*p);
-		p++;
-	}
-}
-
-ZEND_API void zend_str_tolower_nlc(char *str, unsigned int length)
 {
 	register char *p=str, *end=p+length;
 	
