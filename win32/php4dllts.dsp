@@ -1972,10 +1972,6 @@ SOURCE=..\win32\grp.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\md5crypt.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\win32\param.h
 # End Source File
 # Begin Source File
