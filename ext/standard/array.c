@@ -3133,9 +3133,9 @@ PHP_FUNCTION(array_map)
 /* }}} */
 
 
-/* {{{ proto bool key_exists(mixed key, array search)
+/* {{{ proto bool array_key_exists(mixed key, array search)
    Checks if the given key or index exists in the array */
-PHP_FUNCTION(key_exists)
+PHP_FUNCTION(array_key_exists)
 {
 	zval **key,					/* key to check for */
 		 **array;				/* array to check in */
