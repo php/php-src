@@ -166,6 +166,7 @@ function_entry basic_functions[] = {
 	PHP_FE(addcslashes,								NULL)
 	PHP_FE(chop,									NULL)
 	PHP_FE(str_replace,								NULL)
+	PHP_FE(str_repeat,								NULL)
 	PHP_FE(chunk_split,								NULL)
 	PHP_FE(trim,									NULL)
 	PHP_FE(ltrim,									NULL)

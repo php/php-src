@@ -2053,6 +2053,50 @@ PHPAPI void php_strip_tags(char *rbuf, int len, int state, char *allow) {
 	if(allow) efree(tbuf);
 }
 
+/* {{{ proto string str_repeat(string input, int mult)
+   Returns the input string repeat mult times */
+PHP_FUNCTION(str_repeat)
+{
+	zval		**input_str;		/* Input string */
+	zval		**mult;				/* Multiplier */
+	char		 *result;			/* Resulting string */
+	int			  result_len;		/* Length of the resulting string */
+	int			  i;
+	
+	if (ARG_COUNT(ht) != 2 || getParametersEx(2, &input_str, &mult) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	
+	/* Make sure we're dealing with proper types */
+	convert_to_string_ex(input_str);
+	convert_to_long_ex(mult);
+	
+	if ((*mult)->value.lval < 1) {
+		php_error(E_WARNING, "Second argument to %s() has to be greater than 0",
+				  get_active_function_name());
+		return;
+	}
+
+	/* Don't waste our time if it's empty */
+	if ((*input_str)->value.str.len == 0)
+		RETURN_STRINGL(empty_string, 0, 1);
+	
+	/* Initialize the result string */	
+	result_len = (*input_str)->value.str.len * (*mult)->value.lval;
+	result = (char *)emalloc(result_len + 1);
+	
+	/* Copy the input string into the result as many times as necessary */
+	for (i=0; i<(*mult)->value.lval; i++) {
+		memcpy(result + (*input_str)->value.str.len * i,
+			   (*input_str)->value.str.val,
+			   (*input_str)->value.str.len);
+	}
+	result[result_len] = '\0';
+	
+	RETURN_STRINGL(result, result_len + 1, 0);
+}
+/* }}} */
+
 /*
  * Local variables:
  * tab-width: 4
