@@ -13,7 +13,8 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Authors: Sascha Schumann <sascha@schumann.cx>                        |
-   |          Nikos Mavroyanopoulos <nmav@hellug.gr>                      |
+   |                                                                      |
+   | HMAC functionality added by Nikos Mavroyanopoulos <nmav@hellug.gr>   |
    +----------------------------------------------------------------------+
  */
 
