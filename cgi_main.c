@@ -142,7 +142,10 @@ int main(int argc, char *argv[])
 	}
 #endif
 
+#ifdef ZTS
 	tsrm_startup(1,1,0);
+#endif
+
 	sapi_startup(&sapi_module);
 
 #if WIN32|WINNT
