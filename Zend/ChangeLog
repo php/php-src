@@ -1,3 +1,21 @@
+2002-08-28  Thies Arntzen  <thies@pb1.pair.com>
+
+    * zend_builtin_functions.c
+      zend_execute_API.c: debug_backtrace()
+    - make args passed to functions called vy call_user_function available again.
+
+    * zend_builtin_functions.c: debug_backtrace():
+    - make args work if called from the error_handler
+    - fix refcount for args
+
+    * zend.c:
+    clear current_execute_data on bailout as it would point into some freed area
+    on the stack.
+
+2002-08-28  derick  <derick@pb1.pair.com>
+
+    * zend.c: - MFZE1
+
 2002-08-26  Thies Arntzen  <thies@pb1.pair.com>
 
     * zend_builtin_functions.c:
