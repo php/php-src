@@ -1862,3 +1862,30 @@ IFS="- /.
   APACHE_VERSION=`expr [$]4 \* 1000000 + [$]5 \* 1000 + [$]6`
 ])
 
+dnl
+dnl PHP_C_BIGENDIAN
+dnl Replacement macro for AC_C_BIGENDIAN
+dnl
+AC_DEFUN([PHP_C_BIGENDIAN],
+[AC_CACHE_CHECK(whether byte ordering is bigendian, ac_cv_c_bigendian_php,
+ [
+  ac_cv_c_bigendian_php=unknown
+  AC_TRY_RUN(
+  [
+int main(void)
+{
+	short one = 1;
+	char *cp = (char *)&one;
+
+	if (*cp == 0) {
+		return(0);
+	} else {
+		return(1);
+	}
+}
+  ], [ac_cv_c_bigendian_php=yes], [ac_cv_c_bigendian_php=no], [ac_cv_c_bigendian_php=unknown])
+  if test $ac_cv_c_bigendian_php = yes; then
+    AC_DEFINE(WORDS_BIGENDIAN)
+  fi
+ ])
+])
