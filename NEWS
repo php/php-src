@@ -2,6 +2,9 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.2
+- You can now call Ora_Error() without prameters to get the reason
+  for a failed connection attempt. (Kirill Maximov)
+- New extension "pfpro" for interface with Signio Payflow Pro (David Croft)
 - Add IMG_GIF, IMG_JPG, IMG_JPEG, IMG_PNG and IMG_WBMP constants for
   imagetypes() function (Rasmus)
 - Add ImageTypes() function which returns a bitfield with the supported
