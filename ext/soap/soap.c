@@ -1177,12 +1177,12 @@ PHP_METHOD(soapserver, handle)
 		}
 
 		sprintf(cont_len, "Content-Length: %d", size);
+		sapi_add_header(cont_len, strlen(cont_len) + 1, 1);
 		if (soap_version == SOAP_1_2) {
 			sapi_add_header("Content-Type: application/soap+xml; charset=\"utf-8\"", sizeof("Content-Type: application/soap+xml; charset=\"utf-8\""), 1);
 		} else {
 			sapi_add_header("Content-Type: text/xml; charset=\"utf-8\"", sizeof("Content-Type: text/xml; charset=\"utf-8\""), 1);
 		}
-		sapi_add_header(cont_len, strlen(cont_len) + 1, 1);
 
 		/* Free Memory */
 		if (num_params > 0) {
@@ -1253,11 +1253,16 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 		set_soap_fault(&ret, "Server", buffer, NULL, &outbuf TSRMLS_CC);
 		doc_return = seralize_response_call(NULL, NULL, NULL, &ret, soap_version TSRMLS_CC);
 
-		/* Build and send our headers + http 500 status */
 		/*
 		  xmlDocDumpMemoryEnc(doc_return, &buf, &size, XML_CHAR_ENCODING_UTF8);
 		*/
 		xmlDocDumpMemory(doc_return, &buf, &size);
+
+		/*
+		   Want to return HTTP 500 but apache wants to over write
+		   our fault code with their own handling... Figure this out later
+		*/
+		sapi_add_header("HTTP/1.1 500 Internal Service Error", sizeof("HTTP/1.1 500 Internal Service Error"), 1);
 		sprintf(cont_len,"Content-Length: %d", size);
 		sapi_add_header(cont_len, strlen(cont_len) + 1, 1);
 		if (soap_version == SOAP_1_2) {
@@ -1265,11 +1270,6 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 		} else {
 			sapi_add_header("Content-Type: text/xml; charset=\"utf-8\"", sizeof("Content-Type: text/xml; charset=\"utf-8\""), 1);
 		}
-		/*
-		   Want to return HTTP 500 but apache wants to over write
-		   our fault code with their own handling... Figure this out later
-		   sapi_add_header("HTTP/1.1 500 Internal Service Error", sizeof("HTTP/1.1 500 Internal Service Error"), 1);
-		*/
 		php_write(buf, size TSRMLS_CC);
 
 		xmlFreeDoc(doc_return);
