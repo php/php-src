@@ -1,7 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2004, PHP 5.1.0
-- Implement true/false/NULL as keywords. (Marcus)
+- Changed the implementation of TRUE, FALSE, and NULL from constants to
+  keywords. (Marcus)
 - Fixed ZTS destruction. (Marcus)
 
 13 Jul 2004, PHP 5.0.0
