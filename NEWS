@@ -1,6 +1,7 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.0.8-dev
+- Fix for LONG_VARCHAR type crashing submitted by Walter Franzini (walter@sys-net.it)
 - Simplified use of rand() functions. Now you do not need to use srand()
   anymore, nor mt_rand(). See the manual for more details (Jeroen)
 - Made in_array() and search_array() allow the needle to be an array in
