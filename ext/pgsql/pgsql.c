@@ -721,6 +721,9 @@ void php_pgsql_get_link_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 	
 	ZEND_FETCH_RESOURCE2(pgsql, PGconn *, pgsql_link, id, "PostgreSQL link", le_link, le_plink);
 
+	if (PQstatus(pgsql) != CONNECTION_OK) {
+		PQreset(pgsql);
+	}
 	switch(entry_type) {
 		case PHP_PG_DBNAME:
 			Z_STRVAL_P(return_value) = PQdb(pgsql);
