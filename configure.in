@@ -14,7 +14,7 @@ if test -n "$with_apache" && test -n "$with_apxs"; then
 fi
 
 cwd=`pwd`
-passthru="$@"
+for i in $@; do passthru="$passthru \"$i\""; done
 
 CONFIGURE_COMMAND=$0
 for arg in "$@"; do
@@ -53,13 +53,13 @@ if test $? -ne 0 ; then
 else
 	rm -f php_version.h.new
 fi
-AC_SUBST(PHP_VERSION)
 
 AM_CONFIG_HEADER(php_config.h)
 AM_MAINTAINER_MODE
 
 phplibdir=$libdir/php
 AC_SUBST(phplibdir)
+AC_SUBST(PHP_VERSION)
 
 dnl We want this one before the checks, so the checks can modify CFLAGS.
 test -z "$CFLAGS" && auto_cflags=1
@@ -253,22 +253,38 @@ if test "$ac_cv_struct_tm_gmtoff" = yes; then
   AC_DEFINE(HAVE_TM_GMTOFF)
 fi
 
-AC_CACHE_CHECK(for struct flock,php_struct_flock,
+AC_CACHE_CHECK(for struct flock,ac_cv_struct_flock,
     AC_TRY_COMPILE([
 #include <unistd.h>
 #include <fcntl.h>
         ],
         [struct flock x;],
         [
-          php_struct_flock=yes
+          ac_cv_struct_flock=yes
         ],[
-          php_struct_flock=no
+          ac_cv_struct_flock=no
         ])
 )
-if test "$php_struct_flock" = "yes" ; then
+
+AC_CACHE_CHECK(for socklen_t,ac_cv_socklen_t,
+  AC_TRY_COMPILE([
+#include <sys/types.h>
+#include <sys/socket.h>
+],[
+socklen_t x;
+],[
+  ac_cv_socklen_t=yes
+],[
+  ac_cv_socklen_t=no
+]))
+
+  
+if test "$ac_cv_struct_flock" = "yes" ; then
     AC_DEFINE(HAVE_STRUCT_FLOCK, 1)
-else
-    AC_DEFINE(HAVE_STRUCT_FLOCK, 0)
+fi
+
+if test "$ac_cv_socklen_t" = "no"; then
+  AC_DEFINE(socklen_t, "unsigned int", [Unix98 specifies to be socklen_t at least unsigned 32-bit])
 fi
 
 AC_CHECK_SIZEOF(long, 8)
