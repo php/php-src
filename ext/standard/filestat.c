@@ -551,7 +551,7 @@ static void php_stat(const char *filename, int type, pval *return_value)
 		case S_IFDIR: RETURN_STRING("dir",1);
 		case S_IFBLK: RETURN_STRING("block",1);
 		case S_IFREG: RETURN_STRING("file",1);
-#ifndef ZEND_WIN32
+#if !defined(ZEND_WIN32)&&!defined(__BEOS__)
 		case S_IFSOCK: RETURN_STRING("socket",1);
 #endif
 		}

@@ -51,7 +51,9 @@
 #else
 #include <netinet/in.h>
 #include <netdb.h>
+#if HAVE_ARPA_INET_H
 #include <arpa/inet.h>
+#endif
 #endif
 
 #ifdef PHP_WIN32

@@ -35,6 +35,10 @@
 #include <io.h>
 #endif
 
+#ifdef __BEOS__
+#define realpath(x,y) strcpy(y,x)
+#endif
+
 #define VIRTUAL_CWD_DEBUG 0
 
 #ifdef ZTS

@@ -28,10 +28,16 @@
 #define WINNT 1
 #endif
 /* located in www.php.net/extra/bindlib.zip */
+#if HAVE_ARPA_INET_H
 #include "arpa/inet.h"
+#endif
 #include "netdb.h"
+#if HAVE_ARPA_NAMESERV_H
 #include "arpa/nameser.h"
+#endif
+#if HAVE_RESOLV_H
 #include "resolv.h"
+#endif
 #endif
 #include <winsock.h>
 #else
@@ -155,7 +161,7 @@ char *php_gethostbyname(char *name)
 	return estrdup(inet_ntoa(in));
 }
 
-#if !defined(PHP_WIN32)||HAVE_BINDLIB
+#if HAVE_BINDLIB && !(defined(__BEOS__)||defined(PHP_WIN32))
 
 /* {{{ proto int checkdnsrr(string host [, string type])
    Check DNS records corresponding to a given Internet host name or IP address */

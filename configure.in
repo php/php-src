@@ -106,6 +106,8 @@ case "$host_alias" in
     CPPFLAGS="$CPPFLAGS -traditional-cpp";;
 *bsdi*)
     BSD_MAKEFILE=yes;;
+*beos*)
+	LIBS="$LIBS -lbe -lroot"
 esac
 
 AM_PROG_CC_STDC
@@ -294,6 +296,7 @@ stdarg.h \
 stdlib.h \
 string.h \
 syslog.h \
+sysexits.h \
 sys/file.h \
 sys/mman.h \
 sys/resource.h \
@@ -301,6 +304,7 @@ sys/select.h \
 sys/socket.h \
 sys/statfs.h \
 sys/statvfs.h \
+sys/sysexits.h \
 sys/time.h \
 sys/types.h \
 sys/varargs.h \
@@ -360,6 +364,8 @@ gai_strerror \
 gcvt \
 getlogin \
 gethostbyaddr \
+getprotobyname \
+getprotobynumber \
 getrusage \
 gettimeofday \
 gmtime_r \

@@ -36,7 +36,9 @@
 #ifndef PHP_WIN32
 #include <netinet/in.h>
 #include <netdb.h>
+#if HAVE_ARPA_INET_H
 #include <arpa/inet.h>
+#endif
 #else
 int		 inet_aton(const char *, struct in_addr *);
 #endif
