@@ -417,7 +417,7 @@ static void compiler_globals_ctor(zend_compiler_globals *compiler_globals TSRMLS
 
 	compiler_globals->auto_globals = (HashTable *) malloc(sizeof(HashTable));
 	zend_hash_init_ex(compiler_globals->auto_globals, 8, NULL, NULL, 1, 0);
-	zend_hash_copy(compiler_globals->auto_globals, global_auto_globals_table, NULL, NULL, sizeof(void *) /* empty element */);
+	zend_hash_copy(compiler_globals->auto_globals, global_auto_globals_table, NULL, NULL, sizeof(zend_auto_global) /* empty element */);
 }
 
 
@@ -573,7 +573,7 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions, i
 
 #ifdef ZTS
 	zend_hash_init_ex(GLOBAL_CONSTANTS_TABLE, 20, NULL, ZEND_CONSTANT_DTOR, 1, 0);
-	zend_hash_init_ex(GLOBAL_AUTO_GLOBALS_TABLE, 8, NULL, NULL, 1, 0);
+	zend_hash_init_ex(GLOBAL_AUTO_GLOBALS_TABLE, 8, NULL, (dtor_func_t) zend_auto_global_dtor, 1, 0);
 	ts_allocate_id(&compiler_globals_id, sizeof(zend_compiler_globals), (ts_allocate_ctor) compiler_globals_ctor, (ts_allocate_dtor) compiler_globals_dtor);
 	ts_allocate_id(&executor_globals_id, sizeof(zend_executor_globals), (ts_allocate_ctor) executor_globals_ctor, (ts_allocate_dtor) executor_globals_dtor);
 	ts_allocate_id(&language_scanner_globals_id, sizeof(zend_scanner_globals), (ts_allocate_ctor) scanner_globals_ctor, NULL);
@@ -590,7 +590,7 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions, i
 	zend_hash_destroy(executor_globals->zend_constants);
 	*executor_globals->zend_constants = *GLOBAL_CONSTANTS_TABLE;
 #else
-	zend_hash_init_ex(CG(auto_globals), 8, NULL, NULL, 1, 0);
+	zend_hash_init_ex(CG(auto_globals), 8, NULL, (dtor_func_t) zend_auto_global_dtor, 1, 0);
 	scanner_globals_ctor(&ini_scanner_globals TSRMLS_CC);
 	scanner_globals_ctor(&language_scanner_globals TSRMLS_CC);
 	zend_startup_constants();
@@ -600,6 +600,7 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions, i
 #endif
 	register_standard_class(TSRMLS_C);
 	zend_register_standard_constants(TSRMLS_C);
+ 	zend_register_auto_global("GLOBALS", sizeof("GLOBALS")-1, NULL TSRMLS_CC);
 
 #ifndef ZTS
 	zend_init_rsrc_plist(TSRMLS_C);
