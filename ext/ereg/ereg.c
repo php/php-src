@@ -26,11 +26,7 @@
 #include "reg.h"
 #include "ext/standard/info.h"
 
-#ifdef ZTS
-int reg_globals_id;
-#else
-static php_reg_globals reg_globals;
-#endif
+ZEND_DECLARE_MODULE_GLOBALS(reg)
 
 typedef struct {
 	regex_t preg;
@@ -75,25 +71,28 @@ static void _free_reg_cache(reg_cache *rc)
 #undef regcomp
 #define regcomp(a, b, c) _php_regcomp(a, b, c)
 	
-static void php_reg_init_globals(php_reg_globals *reg_globals TSRMLS_DC)
+static void php_reg_init_globals(zend_reg_globals *reg_globals TSRMLS_DC)
 {
 	zend_hash_init(&reg_globals->ht_rc, 0, NULL, (void (*)(void *)) _free_reg_cache, 1);
 }
 
+static void php_reg_destroy_globals(zend_reg_globals *reg_globals TSRMLS_DC)
+{
+	zend_hash_destroy(&reg_globals->ht_rc);
+}
+
 PHP_MINIT_FUNCTION(regex)
 {
-#ifdef ZTS
-	ts_allocate_id(&reg_globals_id, sizeof(php_reg_globals), (ts_allocate_ctor) php_reg_init_globals, NULL);
-#else
-	php_reg_init_globals(&reg_globals TSRMLS_CC);
-#endif
-
+	ZEND_INIT_MODULE_GLOBALS(reg, php_reg_init_globals, php_reg_destroy_globals);
 	return SUCCESS;
 }
 
 PHP_MSHUTDOWN_FUNCTION(regex)
 {
-	zend_hash_destroy(&REG(ht_rc));
+#ifndef ZTS
+	php_reg_destroy_globals(&reg_globals TSRMLS_CC);
+#endif
+
 	return SUCCESS;
 }
 
