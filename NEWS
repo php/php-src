@@ -20,6 +20,7 @@ PHP 4                                                                      NEWS
   situations). (Ilia)
 - Fixed bug #22245 (References inside $_SESSION not being handled). (Ilia)
 - Fixed bug #21957 (serialize() mangles objects with __sleep). (Ilia)
+- Fixed bug #21918 (strange behaviour of mixed type in array-keys). (Marcus)
 
 07 Aug 2003, Version 4.3.3RC3
 - Fixed bug #24958 (Incorrect handling of 404s). (Ilia, Justin)
