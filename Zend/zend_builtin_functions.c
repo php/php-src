@@ -1109,13 +1109,15 @@ ZEND_FUNCTION(set_exception_handler)
 		ZEND_WRONG_PARAM_COUNT();
 	}
 
-	if (!zend_is_callable(*exception_handler, 0, &exception_handler_name)) {
-		zend_error(E_WARNING, "%s() expects the argument (%s) to be a valid callback",
-				   get_active_function_name(TSRMLS_C), exception_handler_name?exception_handler_name:"unknown");
+	if (Z_TYPE_PP(exception_handler) != IS_NULL) { /* NULL == unset */
+		if (!zend_is_callable(*exception_handler, 0, &exception_handler_name)) {
+			zend_error(E_WARNING, "%s() expects the argument (%s) to be a valid callback",
+					   get_active_function_name(TSRMLS_C), exception_handler_name?exception_handler_name:"unknown");
+			efree(exception_handler_name);
+			return;
+		}
 		efree(exception_handler_name);
-		return;
 	}
-	efree(exception_handler_name);
 
 	if (EG(user_exception_handler)) {
 		had_orig_exception_handler = 1;
@@ -1125,7 +1127,7 @@ ZEND_FUNCTION(set_exception_handler)
 	}
 	ALLOC_ZVAL(EG(user_exception_handler));
 
-	if (Z_STRLEN_PP(exception_handler)==0) { /* unset user-defined handler */
+	if (Z_TYPE_PP(exception_handler) == IS_NULL) { /* unset user-defined handler */
 		FREE_ZVAL(EG(user_exception_handler));
 		EG(user_exception_handler) = NULL;
 		RETURN_TRUE;
