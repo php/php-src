@@ -293,8 +293,11 @@ AC_DEFUN([PHP_SHLIB_SUFFIX_NAME],[
   SHLIB_SUFFIX_NAME=so
   case $host_alias in
   *hpux*[)]
-	SHLIB_SUFFIX_NAME=sl
-	;;
+    SHLIB_SUFFIX_NAME=sl
+    ;;
+  *darwin*[)]
+    SHLIB_SUFFIX_NAME=dylib
+    ;;
   esac
 ])
 
