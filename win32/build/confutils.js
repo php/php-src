@@ -17,7 +17,7 @@
   +----------------------------------------------------------------------+
 */
 
-// $Id: confutils.js,v 1.44 2004-08-02 18:48:49 fmk Exp $
+// $Id: confutils.js,v 1.45 2004-08-03 00:02:48 wez Exp $
 
 var STDOUT = WScript.StdOut;
 var STDERR = WScript.StdErr;
@@ -256,9 +256,7 @@ function conf_process_args()
 	args = WScript.Arguments;
 	for (i = 0; i < args.length; i++) {
 		arg = args(i);
-		if (nice.length + arg.length < 2045) {	// The max string length for CONFIGURE_COMMAND is 2048 in VC6
-			nice += ' "' + arg + '"';
-		}
+		nice += ' "' + arg + '"';
 		if (arg == "--help") {
 			configure_help_mode = true;
 			break;
@@ -1212,8 +1210,9 @@ function generate_config_h()
 	outfile.Write(indata);
 
 	var keys = (new VBArray(configure_hdr.Keys())).toArray();
-	var i;
+	var i, j;
 	var item;
+	var pieces, stuff_to_crack, chunk;
 
 	outfile.WriteBlankLines(1);
 	outfile.WriteLine("/* values determined by configure.js */");
@@ -1222,7 +1221,29 @@ function generate_config_h()
 		item = configure_hdr.Item(keys[i]);
 		outfile.WriteBlankLines(1);
 		outfile.WriteLine("/* " + item[1] + " */");
-		outfile.WriteLine("#define " + keys[i] + " " + item[0]);
+		pieces = item[0];
+
+		if (typeof(pieces) == "string" && pieces.charCodeAt(0) == 34) {
+			/* quoted string have a maximal length of 2k under vc.
+			 * solution is to crack them and let the compiler concat
+			 * them implicitly */
+			stuff_to_crack = pieces;
+			pieces = "";
+
+			while (stuff_to_crack.length) {
+				j = 65;
+				while (stuff_to_crack.charCodeAt(j) != 32 && j < stuff_to_crack.length)
+					j++;
+
+				chunk = stuff_to_crack.substr(0, j);
+				pieces += chunk;
+				stuff_to_crack = stuff_to_crack.substr(chunk.length);
+				if (stuff_to_crack.length)
+					pieces += '" "';
+			}
+		}
+		
+		outfile.WriteLine("#define " + keys[i] + " " + pieces);
 	}
 	
 	outfile.Close();
