@@ -336,6 +336,7 @@ typedef struct _zend_utility_functions {
 typedef struct _zend_utility_values {
 	char *import_use_extension;
 	uint import_use_extension_length;
+	zend_bool html_errors;
 } zend_utility_values;
 
 
