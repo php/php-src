@@ -159,6 +159,10 @@ Installation of Windows extensions
    Before overwriting them, it is a good idea to backup them or move them to
    another folder - just in case something goes wrong.
 
+   Download the latest version of the Microsoft Data Access Components (MDAC)
+   for your platform, especially Microsoft Windows 9x/NT4 users.
+   MDAC is available at http://www.microsoft.com/data/ .
+
    Also note that some extensions need 3rd party libraries, 
    e.g. php_oci8.dll needs the Oracle 8 client libraries to be installed
    on your system. These are not bundled with PHP distribution.
