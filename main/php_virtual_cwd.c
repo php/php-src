@@ -271,10 +271,22 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 	int copy_amount = -1;
 	char *free_path;
 	zend_bool is_absolute = 0;
+#ifndef ZEND_WIN32
+	char resolved_path[MAXPATHLEN];
+#endif
 
 	if (path_length == 0) 
 		return (0);
 
+#ifndef ZEND_WIN32
+	if (strstr(path, "..")) {
+		/* If .. is found then we need to resolve real path as the .. code doesn't work with symlinks */
+		if (realpath(path, resolved_path)) {
+			path = resolved_path;
+			path_length = strlen(path);
+		}
+	}
+#endif
 	free_path = path_copy = estrndup(path, path_length);
 
 	old_state = (cwd_state *) malloc(sizeof(cwd_state));
