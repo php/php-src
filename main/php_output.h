@@ -77,16 +77,10 @@ typedef struct _php_output_globals {
 
 
 #ifdef ZTS
-#define OLS_D php_output_globals *output_globals
-#define OLS_C output_globals
-#define OG(v) (output_globals->v)
-#define OLS_FETCH() php_output_globals *output_globals = ts_resource(output_globals_id)
+#define OG(v) TSRMG(output_globals_id, php_output_globals *, v)
 ZEND_API extern int output_globals_id;
 #else
-#define OLS_D void
-#define OLS_C
 #define OG(v) (output_globals.v)
-#define OLS_FETCH()
 ZEND_API extern php_output_globals output_globals;
 #endif
 

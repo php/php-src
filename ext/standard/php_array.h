@@ -89,20 +89,10 @@ typedef struct {
 } php_array_globals;
 
 #ifdef ZTS
-#define ARRAYLS_D php_array_globals *array_globals
-#define ARRAYLS_DC , ARRAYLS_D
-#define ARRAYLS_C array_globals
-#define ARRAYLS_CC , ARRAYLS_C
-#define ARRAYG(v) (array_globals->v)
-#define ARRAYLS_FETCH() php_array_globals *array_globals = ts_resource(array_globals_id)
+#define ARRAYG(v) TSRMG(array_globals_id, php_array_globals *, v)
 extern int array_globals_id;
 #else
-#define ARRAYLS_D
-#define ARRAYLS_DC
-#define ARRAYLS_C
-#define ARRAYLS_CC
 #define ARRAYG(v) (array_globals.v)
-#define ARRAYLS_FETCH()
 extern php_array_globals array_globals;
 #endif
 

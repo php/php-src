@@ -153,7 +153,6 @@ PHPAPI void php_print_info(int flag)
 	time_t the_time;
 	struct tm *ta, tmbuf;
 	TSRMLS_FETCH();
-	SLS_FETCH();
 
 	the_time = time(NULL);
 	ta = php_localtime_r(&the_time, &tmbuf);

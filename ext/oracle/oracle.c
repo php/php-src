@@ -204,7 +204,7 @@ ZEND_GET_MODULE(oracle)
 static int _close_oraconn(zend_rsrc_list_entry *rsrc)
 {
 	oraConnection *conn = (oraConnection *)rsrc->ptr;
-	ORALS_FETCH();
+	TSRMLS_FETCH();
 	
 	conn->open = 0;
 
@@ -240,7 +240,7 @@ pval_ora_param_destructor(oraParam *param)
 static int _close_oracur(oraCursor *cur)
 {
 	int i;
-	ORALS_FETCH();
+	TSRMLS_FETCH();
 
 	if (cur){
 		if (cur->query){
@@ -286,7 +286,7 @@ static void php_close_ora_cursor(zend_rsrc_list_entry *rsrc)
 
 /* {{{ php_ora_init_globals
  */
-static void php_ora_init_globals(ORALS_D TSRMLS_DC)
+static void php_ora_init_globals(php_ora_globals *ora_globals_p TSRMLS_DC)
 {
 	if (cfg_get_long("oracle.allow_persistent",
 			 &ORA(allow_persistent))
@@ -321,7 +321,7 @@ PHP_MINIT_FUNCTION(oracle)
 #ifdef ZTS
 	ts_allocate_id(&ora_globals_id, sizeof(php_ora_globals), (ts_allocate_ctor) php_ora_init_globals, NULL);
 #else
-	php_ora_init_globals(ORALS_C TSRMLS_CC);
+	php_ora_init_globals(&ora_globals TSRMLS_CC);
 #endif
 
 	le_cursor = zend_register_list_destructors_ex(php_close_ora_cursor, NULL, "oracle cursor", module_number);
@@ -347,8 +347,6 @@ PHP_MINIT_FUNCTION(oracle)
  */
 PHP_RINIT_FUNCTION(oracle)
 {
-	ORALS_FETCH();
-	
 	ORA(num_links) = 
 		ORA(num_persistent);
 	/*
@@ -364,7 +362,7 @@ PHP_RINIT_FUNCTION(oracle)
  */
 PHP_MSHUTDOWN_FUNCTION(oracle)
 {
-	ORALS_FETCH();
+	TSRMLS_FETCH();
 
 	zend_hash_destroy(ORA(conns));
 	free(ORA(conns));
@@ -431,7 +429,6 @@ void ora_do_logon(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	char *hashed_details;
 	int hashed_details_length;
 	oraConnection *db_conn;
-	ORALS_FETCH();
 
 	if (zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1516,7 +1513,6 @@ PHP_FUNCTION(ora_error)
 	void *res;
 	int what;
 	int argc = ZEND_NUM_ARGS();
-	ORALS_FETCH();
 
 	if (argc < 0 || argc >> 1 || zend_get_parameters_ex(argc, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1549,7 +1545,6 @@ PHP_FUNCTION(ora_errorcode)
 	void *res;
 	int what;
 	int argc = ZEND_NUM_ARGS();
-	ORALS_FETCH();
 
 	if (argc < 0 || argc >> 1 || zend_get_parameters_ex(argc, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1599,7 +1594,7 @@ ora_get_cursor(HashTable *list, pval **ind)
 {
 	oraCursor *cursor;
 	oraConnection *db_conn;
-	ORALS_FETCH();
+	TSRMLS_FETCH();
 
 	cursor = (oraCursor *) zend_fetch_resource(ind, -1, "Oracle-Cursor", NULL, 1, le_cursor);
 	if (! cursor) {
@@ -1741,7 +1736,6 @@ int ora_set_param_values(oraCursor *cursor, int isout)
 	oraParam *param;
 	pval **pdata;
 	int i, len, plen;
-
 	TSRMLS_FETCH();
 
 	zend_hash_internal_pointer_reset(cursor->params);

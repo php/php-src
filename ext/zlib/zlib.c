@@ -147,9 +147,9 @@ static void phpi_destructor_gzclose(zend_rsrc_list_entry *rsrc)
 #ifdef ZTS
 /* {{{ php_zlib_init_globals
  */
-static void php_zlib_init_globals(ZLIBLS_D TSRMLS_DC)
+static void php_zlib_init_globals(php_zlib_globals *zlib_globals_p TSRMLS_DC)
 {
-        ZLIBG(gzgetss_state) = 0;
+	ZLIBG(gzgetss_state) = 0;
 }
 /* }}} */
 #endif
@@ -158,7 +158,7 @@ static void php_zlib_init_globals(ZLIBLS_D TSRMLS_DC)
  */
 PHP_MINIT_FUNCTION(zlib)
 {
-	PLS_FETCH();
+	TSRMLS_FETCH();
 
 #ifdef ZTS
 	ts_allocate_id(&zlib_globals_id, sizeof(php_zlib_globals), (ts_allocate_ctor) php_zlib_init_globals, NULL);
@@ -187,8 +187,6 @@ PHP_MINIT_FUNCTION(zlib)
  */
 PHP_RINIT_FUNCTION(zlib)
 {
-	ZLIBLS_FETCH();
-
 	ZLIBG(ob_gzhandler_status) = 0;
 	switch (ZLIBG(output_compression)) {
 		case 0:
@@ -208,7 +206,7 @@ PHP_RINIT_FUNCTION(zlib)
 PHP_MSHUTDOWN_FUNCTION(zlib)
 {
 #if HAVE_FOPENCOOKIE
-	PLS_FETCH();
+	TSRMLS_FETCH();
 
 	if(PG(allow_url_fopen)) {
 	    php_unregister_url_wrapper("zlib"); 
@@ -261,7 +259,6 @@ PHP_FUNCTION(gzfile)
 	char *slashed, buf[8192];
 	register int i=0;
 	int use_include_path = 0;
-	PLS_FETCH();
 
 	/* check args */
 	switch (ZEND_NUM_ARGS()) {
@@ -317,7 +314,6 @@ PHP_FUNCTION(gzopen)
 	gzFile *zp;
 	char *p;
 	int use_include_path = 0;
-	ZLIBLS_FETCH();
 	
 	switch(ZEND_NUM_ARGS()) {
 	case 2:
@@ -400,7 +396,6 @@ PHP_FUNCTION(gzgets)
 	gzFile *zp;
 	int len;
 	char *buf;
-	PLS_FETCH();
 	
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -470,7 +465,6 @@ PHP_FUNCTION(gzgetss)
 	char *buf;
 	char *allowed_tags=NULL;
 	int allowed_tags_len=0;
-	ZLIBLS_FETCH();
 	
 	switch(ZEND_NUM_ARGS()) {
 		case 2:
@@ -521,7 +515,6 @@ PHP_FUNCTION(gzwrite)
 	gzFile *zp;
 	int ret;
 	int num_bytes;
-	PLS_FETCH();
 
 	switch (ZEND_NUM_ARGS()) {
 		case 2:
@@ -705,7 +698,6 @@ PHP_FUNCTION(gzread)
 	pval **arg1, **arg2;
 	gzFile *zp;
 	int len;
-	PLS_FETCH();
 	
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -993,7 +985,7 @@ PHP_FUNCTION(gzinflate)
 
 /* {{{ php_do_deflate
  */
-static int php_do_deflate(uint str_length, Bytef **p_buffer, uint *p_buffer_len, zend_bool do_start, zend_bool do_end ZLIBLS_DC)
+static int php_do_deflate(uint str_length, Bytef **p_buffer, uint *p_buffer_len, zend_bool do_start, zend_bool do_end TSRMLS_DC)
 {
 	Bytef *buffer;
 	uInt prev_outlen, outlen;
@@ -1043,7 +1035,7 @@ static int php_do_deflate(uint str_length, Bytef **p_buffer, uint *p_buffer_len,
 int php_deflate_string(const char *str, uint str_length, char **newstr, uint *new_length, int coding, zend_bool do_start, zend_bool do_end)
 {
 	int err;
-	ZLIBLS_FETCH();
+	TSRMLS_FETCH();
 
 	ZLIBG(compression_coding) = coding;
 
@@ -1080,7 +1072,7 @@ int php_deflate_string(const char *str, uint str_length, char **newstr, uint *ne
 		ZLIBG(crc) = crc32(ZLIBG(crc), (const Bytef *) str, str_length);
 	}
 
-	err = php_do_deflate(str_length, (Bytef **) newstr, new_length, do_start, do_end ZLIBLS_CC);
+	err = php_do_deflate(str_length, (Bytef **) newstr, new_length, do_start, do_end TSRMLS_CC);
 	/* TODO: error handling (err may be Z_STREAM_ERROR, Z_BUF_ERROR, ?) */
 
 	if (do_start) {
@@ -1159,7 +1151,6 @@ PHP_FUNCTION(ob_gzhandler)
 	zval **data, **a_encoding;
 	zend_bool return_original=0;
 	zend_bool do_start, do_end;
-	ZLIBLS_FETCH();
 
 	if (ZEND_NUM_ARGS()!=2 || zend_get_parameters_ex(2, &zv_string, &zv_mode)==FAILURE) {
 		ZEND_WRONG_PARAM_COUNT();
@@ -1242,7 +1233,7 @@ PHP_FUNCTION(ob_gzhandler)
 static void php_gzip_output_handler(char *output, uint output_len, char **handled_output, uint *handled_output_len, int mode)
 {
 	zend_bool do_start, do_end;
-	ZLIBLS_FETCH();
+	TSRMLS_FETCH();
 
 	do_start = (mode & PHP_OUTPUT_HANDLER_START ? 1 : 0);
 	do_end = (mode & PHP_OUTPUT_HANDLER_END ? 1 : 0);
@@ -1258,7 +1249,6 @@ int php_enable_output_compression(int buffer_size)
 {
 	zval **a_encoding, **data;
 	TSRMLS_FETCH();
-	ZLIBLS_FETCH();
 
 	if (zend_hash_find(&EG(symbol_table), "HTTP_SERVER_VARS", sizeof("HTTP_SERVER_VARS"), (void **) &data)==FAILURE
 		|| Z_TYPE_PP(data)!=IS_ARRAY

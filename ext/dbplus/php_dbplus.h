@@ -105,11 +105,9 @@ ZEND_END_MODULE_GLOBALS(dbplus)
 */
 
 #ifdef ZTS
-#define DBPLUSG(v) (dbplus_globals->v)
-#define DBPLUSLS_FETCH() php_dbplus_globals *dbplus_globals = ts_resource(dbplus_globals_id)
+#define AG(v) TSRMG(dbplus_globals_id, php_dbplus_globals *, v)
 #else
 #define DBPLUSG(v) (dbplus_globals.v)
-#define DBPLUSLS_FETCH()
 #endif
 
 

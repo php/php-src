@@ -59,7 +59,7 @@ PHP_FUNCTION(header)
 
 PHPAPI int php_header()
 {
-	SLS_FETCH();
+	TSRMLS_FETCH();
 
 	if (sapi_send_headers()==FAILURE || SG(request_info).headers_only) {
 		return 0; /* don't allow output */
@@ -84,7 +84,6 @@ PHP_FUNCTION(setcookie)
 	pval **arg[6];
 	int arg_count;
 	zval **z_name=NULL, **z_value=NULL, **z_path=NULL, **z_domain=NULL;
-	SLS_FETCH();
 
 	arg_count = ZEND_NUM_ARGS();
 	if (arg_count < 1 || arg_count > 6 || zend_get_parameters_array_ex(arg_count, arg) == FAILURE) {
@@ -181,8 +180,6 @@ PHP_FUNCTION(setcookie)
    Return true if headers have already been sent, false otherwise */
 PHP_FUNCTION(headers_sent)
 {
-	SLS_FETCH();
-	
 	if (SG(headers_sent)) {
 		RETURN_TRUE;
 	} else {

@@ -118,19 +118,9 @@ ZEND_END_MODULE_GLOBALS(mbstring);
 
 
 #ifdef ZTS
-#define MBSTRLS_D zend_mbstring_globals *mbstring_globals
-#define MBSTRLS_DC , MBSTRLS_D
-#define MBSTRLS_C mbstring_globals
-#define MBSTRLS_CC , MBSTRLS_C
-#define MBSTRG(v) (mbstring_globals->v)
-#define MBSTRLS_FETCH() zend_mbstring_globals *mbstring_globals = ts_resource(mbstring_globals_id)
+#define MBSTRG(v) TSRMG(mbstring_globals_id, zend_mbstring_globals *, v)
 #else
-#define MBSTRLS_D
-#define MBSTRLS_DC
-#define MBSTRLS_C
-#define MBSTRLS_CC
 #define MBSTRG(v) (mbstring_globals.v)
-#define MBSTRLS_FETCH()
 #endif
 
 #else	/* HAVE_MBSTRING */

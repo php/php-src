@@ -68,11 +68,9 @@ ZEND_END_MODULE_GLOBALS(fribidi)
 */
 
 #ifdef ZTS
-#define FRIBIDIG(v) (fribidi_globals->v)
-#define FRIBIDILS_FETCH() php_fribidi_globals *fribidi_globals = ts_resource(fribidi_globals_id)
+#define FRIBIDIG(v) TSRMG(fribidi_globals_id, php_fribidi_globals *, v)
 #else
 #define FRIBIDIG(v) (fribidi_globals.v)
-#define FRIBIDILS_FETCH()
 #endif
 
 #else

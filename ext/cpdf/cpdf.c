@@ -65,12 +65,10 @@ typedef struct cpdflib_global_struct{
 #endif
 } cpdflib_global_struct;
 
-# define CPDF_GLOBAL(a) cpdflib_globals->a
-# define CPDF_TLS_VARS cpdflib_global_struct *cpdflib_globals=TlsGetValue(CPDFlibTls)
+# define CPDF_GLOBAL(v) TSRMG(CPDFlibTls, cpdflib_global_struct *, v)
 
 #else
-#  define CPDF_GLOBAL(a) a
-#  define CPDF_TLS_VARS
+# define CPDF_GLOBAL(a) a
 static int le_cpdf;
 static int le_outline;
 #if HAVE_LIBGD13
@@ -213,10 +211,10 @@ PHP_MSHUTDOWN_FUNCTION(cpdf){
 
 /* {{{ proto void cpdf_global_set_document_limits(int maxPages, int maxFonts, int maxImages, int maxAnnots, int maxObjects)
    Sets document settings for all documents */
-PHP_FUNCTION(cpdf_global_set_document_limits) {
+PHP_FUNCTION(cpdf_global_set_document_limits)
+{
 	pval *argv[5];
 	int argc;
-	CPDF_TLS_VARS;
 
 	argc = ZEND_NUM_ARGS();
 	if(argc != 5)
@@ -238,12 +236,11 @@ PHP_FUNCTION(cpdf_global_set_document_limits) {
 
 /* {{{ proto bool cpdf_set_creator(int pdfdoc, string creator)
    Sets the creator field */
-PHP_FUNCTION(cpdf_set_creator) {
+PHP_FUNCTION(cpdf_set_creator)
+{
 	pval *arg1, *arg2;
 	int id, type;
 	CPDFdoc *pdf;
-	CPDF_TLS_VARS;
-
 
 	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -266,12 +263,11 @@ PHP_FUNCTION(cpdf_set_creator) {
 
 /* {{{ proto bool cpdf_set_title(int pdfptr, string title)
    Fills the title field of the info structure */
-PHP_FUNCTION(cpdf_set_title) {
+PHP_FUNCTION(cpdf_set_title)
+{
 	pval *arg1, *arg2;
 	int id, type;
 	CPDFdoc *pdf;
-	CPDF_TLS_VARS;
-
 
 	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -294,11 +290,11 @@ PHP_FUNCTION(cpdf_set_title) {
 
 /* {{{ proto bool cpdf_set_subject(int pdfptr, string subject)
    Fills the subject field of the info structure */
-PHP_FUNCTION(cpdf_set_subject) {
+PHP_FUNCTION(cpdf_set_subject)
+{
 	pval *arg1, *arg2;
 	int id, type;
 	CPDFdoc *pdf;
-	CPDF_TLS_VARS;
 
 
 	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
@@ -322,12 +318,11 @@ PHP_FUNCTION(cpdf_set_subject) {
 
 /* {{{ proto bool cpdf_set_keywords(int pdfptr, string keywords)
    Fills the keywords field of the info structure */
-PHP_FUNCTION(cpdf_set_keywords) {
+PHP_FUNCTION(cpdf_set_keywords)
+{
 	pval *arg1, *arg2;
 	int id, type;
 	CPDFdoc *pdf;
-	CPDF_TLS_VARS;
-
 
 	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -350,15 +345,13 @@ PHP_FUNCTION(cpdf_set_keywords) {
 
 /* {{{ proto void cpdf_set_viewer_preferences(int pdfdoc, array preferences)
    How to show the document in the viewer */
-PHP_FUNCTION(cpdf_set_viewer_preferences) {
+PHP_FUNCTION(cpdf_set_viewer_preferences)
+{
 	zval *arg1, *arg2;
 	zval **zvalue;
-
 	int id, type;
-
 	CPDFdoc *pdf;
 	CPDFviewerPrefs vP = { 0, 0, 0, 0, 0, 0, 0, 0 };
-	CPDF_TLS_VARS;
 
 	if(ZEND_NUM_ARGS() != 2)
 		WRONG_PARAM_COUNT;
@@ -426,11 +419,11 @@ PHP_FUNCTION(cpdf_set_viewer_preferences) {
 
 /* {{{ proto int cpdf_open(int compression [, string filename [, array doc_limits]])
    Opens a new pdf document */
-PHP_FUNCTION(cpdf_open) {
+PHP_FUNCTION(cpdf_open)
+{
 	pval *arg1, *arg2, *arg3;
 	int id, argc;
 	CPDFdoc *cpdf;
-	CPDF_TLS_VARS;
 
 	argc = ZEND_NUM_ARGS();
 	switch(argc) {
@@ -480,11 +473,11 @@ PHP_FUNCTION(cpdf_open) {
 
 /* {{{ proto void cpdf_close(int pdfdoc)
    Closes the pdf document */
-PHP_FUNCTION(cpdf_close) {
+PHP_FUNCTION(cpdf_close)
+{
 	pval *arg1;
 	int id, type;
 	CPDFdoc *pdf;
-	CPDF_TLS_VARS;
 
 	if (ZEND_NUM_ARGS() != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -506,13 +499,13 @@ PHP_FUNCTION(cpdf_close) {
 #define BUFFERLEN 40
 /* {{{ proto void cpdf_page_init(int pdfdoc, int pagenr, int orientation, int height, int width [, double unit])
    Starts page */
-PHP_FUNCTION(cpdf_page_init) {
+PHP_FUNCTION(cpdf_page_init)
+{
 	pval *argv[6];
 	int id, type, pagenr, orientation;
 	int height, width, argc;
 	char buffer[BUFFERLEN];
 	CPDFdoc *pdf;
-	CPDF_TLS_VARS;
 
 	argc = ZEND_NUM_ARGS();
 	if(argc < 5 || argc > 6)
@@ -551,11 +544,11 @@ PHP_FUNCTION(cpdf_page_init) {
 
 /* {{{ proto void cpdf_finalize_page(int pdfdoc, int pagenr)
    Ends the page to save memory */
-PHP_FUNCTION(cpdf_finalize_page) {
+PHP_FUNCTION(cpdf_finalize_page)
+{
 	pval *arg1, *arg2;
 	int id, type, pagenr;
 	CPDFdoc *pdf;
-	CPDF_TLS_VARS;
 
 	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -579,11 +572,11 @@ PHP_FUNCTION(cpdf_finalize_page) {
 
 /* {{{ proto void cpdf_set_current_page(int pdfdoc, int pagenr)
    Sets page for output */
-PHP_FUNCTION(cpdf_set_current_page) {
+PHP_FUNCTION(cpdf_set_current_page)
+{
 	pval *arg1, *arg2;
 	int id, type, pagenr;
 	CPDFdoc *pdf;
-	CPDF_TLS_VARS;
 
 	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -607,11 +600,11 @@ PHP_FUNCTION(cpdf_set_current_page) {
 
 /* {{{ proto void cpdf_begin_text(int pdfdoc)
    Starts text section */
-PHP_FUNCTION(cpdf_begin_text) {
+PHP_FUNCTION(cpdf_begin_text)
+{
 	pval *arg1;
 	int id, type;
 	CPDFdoc *pdf;
-	CPDF_TLS_VARS;
 
 	if (ZEND_NUM_ARGS() != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -633,11 +626,11 @@ PHP_FUNCTION(cpdf_begin_text) {
 
 /* {{{ proto void cpdf_end_text(int pdfdoc)
    Ends text section */
-PHP_FUNCTION(cpdf_end_text) {
+PHP_FUNCTION(cpdf_end_text)
+{
 	pval *arg1;
 	int id, type;
 	CPDFdoc *pdf;
-	CPDF_TLS_VARS;
 
 	if (ZEND_NUM_ARGS() != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -659,11 +652,11 @@ PHP_FUNCTION(cpdf_end_text) {
 
 /* {{{ proto void cpdf_show(int pdfdoc, string text)
    Output text at current position */
-PHP_FUNCTION(cpdf_show) {
+PHP_FUNCTION(cpdf_show)
+{
 	pval *arg1, *arg2;
 	int id, type;
 	CPDFdoc *pdf;
-	CPDF_TLS_VARS;
 
 	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -686,11 +679,11 @@ PHP_FUNCTION(cpdf_show) {
 
 /* {{{ proto void cpdf_show_xy(int pdfdoc, string text, double x-koor, double y-koor [, int mode])
    Output text at position */
-PHP_FUNCTION(cpdf_show_xy) {
+PHP_FUNCTION(cpdf_show_xy)
+{
 	pval *argv[5];
 	int id, type, argc, mode=0;
 	CPDFdoc *pdf;
-	CPDF_TLS_VARS;
 
 	argc = ZEND_NUM_ARGS();
 	if((argc < 4) || (argc > 5))
@@ -724,11 +717,11 @@ PHP_FUNCTION(cpdf_show_xy) {
 
 /* {{{ proto void cpdf_continue_text(int pdfdoc, string text)
    Output text in next line */
-PHP_FUNCTION(cpdf_continue_text) {
+PHP_FUNCTION(cpdf_continue_text)
+{
 	pval *arg1, *arg2;
 	int id, type;
 	CPDFdoc *pdf;
-	CPDF_TLS_VARS;
 
 	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -751,11 +744,11 @@ PHP_FUNCTION(cpdf_continue_text) {
 
 /* {{{ proto void cpdf_text(int pdfdoc, string text [, double x-koor, double y-koor [, int mode [, double orientation [, int alignmode]]]])
    Output text */
-PHP_FUNCTION(cpdf_text) {
+PHP_FUNCTION(cpdf_text)
+{
 	pval *argv[7];
 	int id, type, argc, mode=0;
 	CPDFdoc *pdf;
-	CPDF_TLS_VARS;
 
 	argc = ZEND_NUM_ARGS();
 	if((argc < 2) || (argc == 3) || (argc > 7) || getParametersArray(ht, argc, argv) == FAILURE)
@@ -841,11 +834,11 @@ PHP_FUNCTION(cpdf_text) {
 
 /* {{{ proto void cpdf_set_font(int pdfdoc, string font, double size, string encoding)
    Select the current font face, size and encoding */
-PHP_FUNCTION(cpdf_set_font) {
+PHP_FUNCTION(cpdf_set_font)
+{
 	pval *arg1, *arg2, *arg3, *arg4;
 	int id, type;
 	CPDFdoc *pdf;
-	CPDF_TLS_VARS;
 
 	if (ZEND_NUM_ARGS() != 4 || getParameters(ht, 4, &arg1, &arg2, &arg3, &arg4) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -875,11 +868,11 @@ PHP_FUNCTION(cpdf_set_font) {
 
 /* {{{ proto void cpdf_set_font_directories(int pdfdoc, string pfmdir, string pfbdir)
    Set directories to search when using external fonts. */
-PHP_FUNCTION(cpdf_set_font_directories) {
+PHP_FUNCTION(cpdf_set_font_directories)
+{
 	pval *arg1, *arg2, *arg3;
 	int id, type;
 	CPDFdoc *pdf;
-	CPDF_TLS_VARS;
 
 	if (ZEND_NUM_ARGS() != 3 || getParameters(ht, 3, &arg1, &arg2, &arg3) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -903,11 +896,11 @@ PHP_FUNCTION(cpdf_set_font_directories) {
 
 /* {{{ proto void cpdf_set_font_map_file(int pdfdoc, string filename)
    Set fontname to filename translation map when using external fonts. */
-PHP_FUNCTION(cpdf_set_font_map_file) {
+PHP_FUNCTION(cpdf_set_font_map_file)
+{
 	pval *arg1, *arg2;
 	int id, type;
 	CPDFdoc *pdf;
-	CPDF_TLS_VARS;
 
 	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -930,11 +923,11 @@ PHP_FUNCTION(cpdf_set_font_map_file) {
 
 /* {{{ proto void cpdf_set_leading(int pdfdoc, double distance)
    Sets distance between text lines */
-PHP_FUNCTION(cpdf_set_leading) {
+PHP_FUNCTION(cpdf_set_leading)
+{
 	pval *arg1, *arg2;
 	int id, type;
 	CPDFdoc *pdf;
-	CPDF_TLS_VARS;
 
 	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -957,11 +950,11 @@ PHP_FUNCTION(cpdf_set_leading) {
 
 /* {{{ proto void cpdf_set_text_rendering(int pdfdoc, int rendermode)
    Determines how text is rendered */
-PHP_FUNCTION(cpdf_set_text_rendering) {
+PHP_FUNCTION(cpdf_set_text_rendering)
+{
 	pval *arg1, *arg2;
 	int id, type;
 	CPDFdoc *pdf;
-	CPDF_TLS_VARS;
 
 	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -984,11 +977,11 @@ PHP_FUNCTION(cpdf_set_text_rendering) {
 
 /* {{{ proto void cpdf_set_horiz_scaling(int pdfdoc, double scale)
    Sets horizontal scaling of text */
-PHP_FUNCTION(cpdf_set_horiz_scaling) {
+PHP_FUNCTION(cpdf_set_horiz_scaling)
+{
 	pval *arg1, *arg2;
 	int id, type;
 	CPDFdoc *pdf;
-	CPDF_TLS_VARS;
 
 	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1011,11 +1004,11 @@ PHP_FUNCTION(cpdf_set_horiz_scaling) {
 
 /* {{{ proto void cpdf_set_text_rise(int pdfdoc, double value)
    Sets the text rise */
-PHP_FUNCTION(cpdf_set_text_rise) {
+PHP_FUNCTION(cpdf_set_text_rise)
+{
 	pval *arg1, *arg2;
 	int id, type;
 	CPDFdoc *pdf;
-	CPDF_TLS_VARS;
 
 	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1038,14 +1031,14 @@ PHP_FUNCTION(cpdf_set_text_rise) {
 
 /* {{{ proto void cpdf_set_text_matrix(int pdfdoc, arry matrix)
    Sets the text matrix */
-PHP_FUNCTION(cpdf_set_text_matrix) {
+PHP_FUNCTION(cpdf_set_text_matrix)
+{
 	pval *arg1, *arg2, *data;
 	int id, type, i;
 	HashTable *matrix;
 	CPDFdoc *pdf;
 	float *pdfmatrixptr;
 	float pdfmatrix[6];
-	CPDF_TLS_VARS;
 
 	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1091,11 +1084,11 @@ PHP_FUNCTION(cpdf_set_text_matrix) {
 
 /* {{{ proto void cpdf_set_text_pos(int pdfdoc, double x, double y [, int mode])
    Set the position of text for the next cpdf_show call */
-PHP_FUNCTION(cpdf_set_text_pos) {
+PHP_FUNCTION(cpdf_set_text_pos)
+{
 	pval *argv[4];
 	int id, type, argc, mode=0;
 	CPDFdoc *pdf;
-	CPDF_TLS_VARS;
 
 	argc = ZEND_NUM_ARGS();
 	if((argc < 3) || (argc > 4))
@@ -1128,11 +1121,11 @@ PHP_FUNCTION(cpdf_set_text_pos) {
 
 /* {{{ proto void cpdf_rotate_text(int pdfdoc, double angle)
    Sets character spacing */
-PHP_FUNCTION(cpdf_rotate_text) {
+PHP_FUNCTION(cpdf_rotate_text)
+{
 	pval *arg1, *arg2;
 	int id, type;
 	CPDFdoc *pdf;
-	CPDF_TLS_VARS;
 
 	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1155,11 +1148,11 @@ PHP_FUNCTION(cpdf_rotate_text) {
 
 /* {{{ proto void cpdf_set_char_spacing(int pdfdoc, double space)
    Sets character spacing */
-PHP_FUNCTION(cpdf_set_char_spacing) {
+PHP_FUNCTION(cpdf_set_char_spacing)
+{
 	pval *arg1, *arg2;
 	int id, type;
 	CPDFdoc *pdf;
-	CPDF_TLS_VARS;
 
 	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1182,11 +1175,11 @@ PHP_FUNCTION(cpdf_set_char_spacing) {
 
 /* {{{ proto void cpdf_set_word_spacing(int pdfdoc, double space)
    Sets spacing between words */
-PHP_FUNCTION(cpdf_set_word_spacing) {
+PHP_FUNCTION(cpdf_set_word_spacing)
+{
 	pval *arg1, *arg2;
 	int id, type;
 	CPDFdoc *pdf;
-	CPDF_TLS_VARS;
 
 	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1209,12 +1202,12 @@ PHP_FUNCTION(cpdf_set_word_spacing) {
 
 /* {{{ proto double cpdf_stringwidth(int pdfdoc, string text)
    Returns width of text in current font */
-PHP_FUNCTION(cpdf_stringwidth) {
+PHP_FUNCTION(cpdf_stringwidth)
+{
 	pval *arg1, *arg2;
 	int id, type;
 	double width;
 	CPDFdoc *pdf;
-	CPDF_TLS_VARS;
 
 	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1237,11 +1230,11 @@ PHP_FUNCTION(cpdf_stringwidth) {
 
 /* {{{ proto void cpdf_save(int pdfdoc)
    Saves current enviroment */
-PHP_FUNCTION(cpdf_save) {
+PHP_FUNCTION(cpdf_save)
+{
 	pval *arg1;
 	int id, type;
 	CPDFdoc *pdf;
-	CPDF_TLS_VARS;
 
 	if (ZEND_NUM_ARGS() != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1263,11 +1256,11 @@ PHP_FUNCTION(cpdf_save) {
 
 /* {{{ proto void cpdf_restore(int pdfdoc)
    Restores formerly saved enviroment */
-PHP_FUNCTION(cpdf_restore) {
+PHP_FUNCTION(cpdf_restore)
+{
 	pval *arg1;
 	int id, type;
 	CPDFdoc *pdf;
-	CPDF_TLS_VARS;
 
 	if (ZEND_NUM_ARGS() != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1289,11 +1282,11 @@ PHP_FUNCTION(cpdf_restore) {
 
 /* {{{ proto void cpdf_translate(int pdfdoc, double x, double y)
    Sets origin of coordinate system */
-PHP_FUNCTION(cpdf_translate) {
+PHP_FUNCTION(cpdf_translate)
+{
 	pval *arg1, *arg2, *arg3;
 	int id, type;
 	CPDFdoc *pdf;
-	CPDF_TLS_VARS;
 
 	if (ZEND_NUM_ARGS() != 3 || getParameters(ht, 3, &arg1, &arg2, &arg3) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1317,11 +1310,11 @@ PHP_FUNCTION(cpdf_translate) {
 
 /* {{{ proto void cpdf_scale(int pdfdoc, double x-scale, double y-scale)
    Sets scaling */
-PHP_FUNCTION(cpdf_scale) {
+PHP_FUNCTION(cpdf_scale)
+{
 	pval *arg1, *arg2, *arg3;
 	int id, type;
 	CPDFdoc *pdf;
-	CPDF_TLS_VARS;
 
 	if (ZEND_NUM_ARGS() != 3 || getParameters(ht, 3, &arg1, &arg2, &arg3) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1345,11 +1338,11 @@ PHP_FUNCTION(cpdf_scale) {
 
 /* {{{ proto void cpdf_rotate(int pdfdoc, double angle)
    Sets rotation */
-PHP_FUNCTION(cpdf_rotate) {
+PHP_FUNCTION(cpdf_rotate)
+{
 	pval *arg1, *arg2;
 	int id, type;
 	CPDFdoc *pdf;
-	CPDF_TLS_VARS;
 
 	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1372,11 +1365,11 @@ PHP_FUNCTION(cpdf_rotate) {
 
 /* {{{ proto void cpdf_setflat(int pdfdoc, double value)
    Sets flatness */
-PHP_FUNCTION(cpdf_setflat) {
+PHP_FUNCTION(cpdf_setflat)
+{
 	pval *arg1, *arg2;
 	int id, type;
 	CPDFdoc *pdf;
-	CPDF_TLS_VARS;
 
 	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1404,11 +1397,11 @@ PHP_FUNCTION(cpdf_setflat) {
 
 /* {{{ proto void cpdf_setlinejoin(int pdfdoc, int value)
    Sets linejoin parameter */
-PHP_FUNCTION(cpdf_setlinejoin) {
+PHP_FUNCTION(cpdf_setlinejoin)
+{
 	pval *arg1, *arg2;
 	int id, type;
 	CPDFdoc *pdf;
-	CPDF_TLS_VARS;
 
 	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1436,11 +1429,11 @@ PHP_FUNCTION(cpdf_setlinejoin) {
 
 /* {{{ proto void cpdf_setlinecap(int pdfdoc, int value)
    Sets linecap parameter */
-PHP_FUNCTION(cpdf_setlinecap) {
+PHP_FUNCTION(cpdf_setlinecap)
+{
 	pval *arg1, *arg2;
 	int id, type;
 	CPDFdoc *pdf;
-	CPDF_TLS_VARS;
 
 	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1468,11 +1461,11 @@ PHP_FUNCTION(cpdf_setlinecap) {
 
 /* {{{ proto void cpdf_setmiterlimit(int pdfdoc, double value)
    Sets miter limit */
-PHP_FUNCTION(cpdf_setmiterlimit) {
+PHP_FUNCTION(cpdf_setmiterlimit)
+{
 	pval *arg1, *arg2;
 	int id, type;
 	CPDFdoc *pdf;
-	CPDF_TLS_VARS;
 
 	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1500,11 +1493,11 @@ PHP_FUNCTION(cpdf_setmiterlimit) {
 
 /* {{{ proto void cpdf_setlinewidth(int pdfdoc, double width)
    Sets line width */
-PHP_FUNCTION(cpdf_setlinewidth) {
+PHP_FUNCTION(cpdf_setlinewidth)
+{
 	pval *arg1, *arg2;
 	int id, type;
 	CPDFdoc *pdf;
-	CPDF_TLS_VARS;
 
 	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1528,12 +1521,12 @@ PHP_FUNCTION(cpdf_setlinewidth) {
 #define BUFFERLEN 20
 /* {{{ proto void cpdf_setdash(int pdfdoc, long white, long black)
    Sets dash pattern */
-PHP_FUNCTION(cpdf_setdash) {
+PHP_FUNCTION(cpdf_setdash)
+{
 	pval *arg1, *arg2, *arg3;
 	int id, type;
 	char buffer[BUFFERLEN];
 	CPDFdoc *pdf;
-	CPDF_TLS_VARS;
 
 	if (ZEND_NUM_ARGS() != 3 || getParameters(ht, 3, &arg1, &arg2, &arg3) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1559,11 +1552,11 @@ PHP_FUNCTION(cpdf_setdash) {
 
 /* {{{ proto void cpdf_moveto(int pdfdoc, double x, double y [, int mode])
    Sets current point */
-PHP_FUNCTION(cpdf_moveto) {
+PHP_FUNCTION(cpdf_moveto)
+{
 	pval *argv[4];
 	int id, type, argc, mode=0;
 	CPDFdoc *pdf;
-	CPDF_TLS_VARS;
 
 	argc = ZEND_NUM_ARGS();
 	if((argc < 3) || (argc > 4))
@@ -1596,11 +1589,11 @@ PHP_FUNCTION(cpdf_moveto) {
 
 /* {{{ proto void cpdf_rmoveto(int pdfdoc, double x, double y [, int mode])
    Sets current point */
-PHP_FUNCTION(cpdf_rmoveto) {
+PHP_FUNCTION(cpdf_rmoveto)
+{
 	pval *argv[4];
 	int id, type, argc, mode=0;
 	CPDFdoc *pdf;
-	CPDF_TLS_VARS;
 
 	argc = ZEND_NUM_ARGS();
 	if((argc < 3) || (argc > 4))
@@ -1633,11 +1626,11 @@ PHP_FUNCTION(cpdf_rmoveto) {
 
 /* {{{ proto void cpdf_curveto(int pdfdoc, double x1, double y1, double x2, double y2, double x3, double y3 [, int mode])
    Draws a curve */
-PHP_FUNCTION(cpdf_curveto) {
+PHP_FUNCTION(cpdf_curveto)
+{
 	pval *argv[8];
 	int id, type, argc, mode=0;
 	CPDFdoc *pdf;
-	CPDF_TLS_VARS;
 
 	argc = ZEND_NUM_ARGS();
 	if((argc < 7) || (argc > 8))
@@ -1684,11 +1677,11 @@ PHP_FUNCTION(cpdf_curveto) {
 
 /* {{{ proto void cpdf_lineto(int pdfdoc, double x, double y [, int mode])
    Draws a line */
-PHP_FUNCTION(cpdf_lineto) {
+PHP_FUNCTION(cpdf_lineto)
+{
 	pval *argv[4];
 	int id, type, argc, mode=0;
 	CPDFdoc *pdf;
-	CPDF_TLS_VARS;
 
 	argc = ZEND_NUM_ARGS();
 	if((argc < 3) || (argc > 4))
@@ -1721,11 +1714,11 @@ PHP_FUNCTION(cpdf_lineto) {
 
 /* {{{ proto void cpdf_rlineto(int pdfdoc, double x, double y [, int mode])
    Draws a line relative to current point */
-PHP_FUNCTION(cpdf_rlineto) {
+PHP_FUNCTION(cpdf_rlineto)
+{
 	pval *argv[4];
 	int id, type, argc, mode=0;
 	CPDFdoc *pdf;
-	CPDF_TLS_VARS;
 
 	argc = ZEND_NUM_ARGS();
 	if((argc < 3) || (argc > 4))
@@ -1758,11 +1751,11 @@ PHP_FUNCTION(cpdf_rlineto) {
 
 /* {{{ proto void cpdf_circle(int pdfdoc, double x, double y, double radius [, int mode])
    Draws a circle */
-PHP_FUNCTION(cpdf_circle) {
+PHP_FUNCTION(cpdf_circle)
+{
 	pval *argv[5];
 	int id, type, argc, mode=0;
 	CPDFdoc *pdf;
-	CPDF_TLS_VARS;
 
 	argc = ZEND_NUM_ARGS();
 	if((argc < 4) || (argc > 5))
@@ -1796,11 +1789,11 @@ PHP_FUNCTION(cpdf_circle) {
 
 /* {{{ proto void cpdf_arc(int pdfdoc, double x, double y, double radius, double start, double end [, int mode])
    Draws an arc */
-PHP_FUNCTION(cpdf_arc) {
+PHP_FUNCTION(cpdf_arc)
+{
 	pval *argv[7];
 	int id, type, argc, mode=0;
 	CPDFdoc *pdf;
-	CPDF_TLS_VARS;
 
 	argc = ZEND_NUM_ARGS();
 	if((argc < 6) || (argc > 7))
@@ -1836,11 +1829,11 @@ PHP_FUNCTION(cpdf_arc) {
 
 /* {{{ proto void cpdf_rect(int pdfdoc, double x, double y, double width, double height [, int mode])
    Draws a rectangle */
-PHP_FUNCTION(cpdf_rect) {
+PHP_FUNCTION(cpdf_rect)
+{
 	pval *argv[6];
 	int id, type, argc, mode=0;
 	CPDFdoc *pdf;
-	CPDF_TLS_VARS;
 
 	argc = ZEND_NUM_ARGS();
 	if((argc < 5) || (argc > 6))
@@ -1881,11 +1874,11 @@ PHP_FUNCTION(cpdf_rect) {
 
 /* {{{ proto void cpdf_newpath(int pdfdoc)
    Starts new path */
-PHP_FUNCTION(cpdf_newpath) {
+PHP_FUNCTION(cpdf_newpath)
+{
 	pval *arg1;
 	int id, type;
 	CPDFdoc *pdf;
-	CPDF_TLS_VARS;
 
 	if (ZEND_NUM_ARGS() != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1907,11 +1900,11 @@ PHP_FUNCTION(cpdf_newpath) {
 
 /* {{{ proto void cpdf_closepath(int pdfdoc)
    Close path */
-PHP_FUNCTION(cpdf_closepath) {
+PHP_FUNCTION(cpdf_closepath)
+{
 	pval *arg1;
 	int id, type;
 	CPDFdoc *pdf;
-	CPDF_TLS_VARS;
 
 	if (ZEND_NUM_ARGS() != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1933,11 +1926,11 @@ PHP_FUNCTION(cpdf_closepath) {
 
 /* {{{ proto void cpdf_closepath_stroke(int pdfdoc)
    Close path and draw line along path */
-PHP_FUNCTION(cpdf_closepath_stroke) {
+PHP_FUNCTION(cpdf_closepath_stroke)
+{
 	pval *arg1;
 	int id, type;
 	CPDFdoc *pdf;
-	CPDF_TLS_VARS;
 
 	if (ZEND_NUM_ARGS() != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1960,11 +1953,11 @@ PHP_FUNCTION(cpdf_closepath_stroke) {
 
 /* {{{ proto void cpdf_stroke(int pdfdoc)
    Draw line along path path */
-PHP_FUNCTION(cpdf_stroke) {
+PHP_FUNCTION(cpdf_stroke)
+{
 	pval *arg1;
 	int id, type;
 	CPDFdoc *pdf;
-	CPDF_TLS_VARS;
 
 	if (ZEND_NUM_ARGS() != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1986,11 +1979,11 @@ PHP_FUNCTION(cpdf_stroke) {
 
 /* {{{ proto void cpdf_fill(int pdfdoc)
    Fill current path */
-PHP_FUNCTION(cpdf_fill) {
+PHP_FUNCTION(cpdf_fill)
+{
 	pval *arg1;
 	int id, type;
 	CPDFdoc *pdf;
-	CPDF_TLS_VARS;
 
 	if (ZEND_NUM_ARGS() != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -2012,11 +2005,11 @@ PHP_FUNCTION(cpdf_fill) {
 
 /* {{{ proto void cpdf_fill_stroke(int pdfdoc)
    Fill and stroke current path */
-PHP_FUNCTION(cpdf_fill_stroke) {
+PHP_FUNCTION(cpdf_fill_stroke)
+{
 	pval *arg1;
 	int id, type;
 	CPDFdoc *pdf;
-	CPDF_TLS_VARS;
 
 	if (ZEND_NUM_ARGS() != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -2039,11 +2032,11 @@ PHP_FUNCTION(cpdf_fill_stroke) {
 
 /* {{{ proto void cpdf_closepath_fill_stroke(int pdfdoc)
    Close, fill and stroke current path */
-PHP_FUNCTION(cpdf_closepath_fill_stroke) {
+PHP_FUNCTION(cpdf_closepath_fill_stroke)
+{
 	pval *arg1;
 	int id, type;
 	CPDFdoc *pdf;
-	CPDF_TLS_VARS;
 
 	if (ZEND_NUM_ARGS() != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -2067,11 +2060,11 @@ PHP_FUNCTION(cpdf_closepath_fill_stroke) {
 
 /* {{{ proto void cpdf_clip(int pdfdoc)
    Clips to current path */
-PHP_FUNCTION(cpdf_clip) {
+PHP_FUNCTION(cpdf_clip)
+{
 	pval *arg1;
 	int id, type;
 	CPDFdoc *pdf;
-	CPDF_TLS_VARS;
 
 	if (ZEND_NUM_ARGS() != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -2093,11 +2086,11 @@ PHP_FUNCTION(cpdf_clip) {
 
 /* {{{ proto void cpdf_setgray_fill(int pdfdoc, double value)
    Sets filling color to gray value */
-PHP_FUNCTION(cpdf_setgray_fill) {
+PHP_FUNCTION(cpdf_setgray_fill)
+{
 	pval *arg1, *arg2;
 	int id, type;
 	CPDFdoc *pdf;
-	CPDF_TLS_VARS;
 
 	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -2120,11 +2113,11 @@ PHP_FUNCTION(cpdf_setgray_fill) {
 
 /* {{{ proto void cpdf_setgray_stroke(int pdfdoc, double value)
    Sets drawing color to gray value */
-PHP_FUNCTION(cpdf_setgray_stroke) {
+PHP_FUNCTION(cpdf_setgray_stroke)
+{
 	pval *arg1, *arg2;
 	int id, type;
 	CPDFdoc *pdf;
-	CPDF_TLS_VARS;
 
 	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -2147,11 +2140,11 @@ PHP_FUNCTION(cpdf_setgray_stroke) {
 
 /* {{{ proto void cpdf_setgray(int pdfdoc, double value)
    Sets drawing and filling color to gray value */
-PHP_FUNCTION(cpdf_setgray) {
+PHP_FUNCTION(cpdf_setgray)
+{
 	pval *arg1, *arg2;
 	int id, type;
 	CPDFdoc *pdf;
-	CPDF_TLS_VARS;
 
 	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -2174,11 +2167,11 @@ PHP_FUNCTION(cpdf_setgray) {
 
 /* {{{ proto void cpdf_setrgbcolor_fill(int pdfdoc, double red, double green, double blue)
    Sets filling color to rgb color value */
-PHP_FUNCTION(cpdf_setrgbcolor_fill) {
+PHP_FUNCTION(cpdf_setrgbcolor_fill)
+{
 	pval *arg1, *arg2, *arg3, *arg4;
 	int id, type;
 	CPDFdoc *pdf;
-	CPDF_TLS_VARS;
 
 	if (ZEND_NUM_ARGS() != 4 || getParameters(ht, 4, &arg1, &arg2, &arg3, &arg4) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -2203,11 +2196,11 @@ PHP_FUNCTION(cpdf_setrgbcolor_fill) {
 
 /* {{{ proto void cpdf_setrgbcolor_stroke(int pdfdoc, double red, double green, double blue)
    Sets drawing color to rgb color value */
-PHP_FUNCTION(cpdf_setrgbcolor_stroke) {
+PHP_FUNCTION(cpdf_setrgbcolor_stroke)
+{
 	pval *arg1, *arg2, *arg3, *arg4;
 	int id, type;
 	CPDFdoc *pdf;
-	CPDF_TLS_VARS;
 
 	if (ZEND_NUM_ARGS() != 4 || getParameters(ht, 4, &arg1, &arg2, &arg3, &arg4) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -2232,11 +2225,11 @@ PHP_FUNCTION(cpdf_setrgbcolor_stroke) {
 
 /* {{{ proto void cpdf_setrgbcolor(int pdfdoc, double red, double green, double blue)
    Sets drawing and filling color to rgb color value */
-PHP_FUNCTION(cpdf_setrgbcolor) {
+PHP_FUNCTION(cpdf_setrgbcolor)
+{
 	pval *arg1, *arg2, *arg3, *arg4;
 	int id, type;
 	CPDFdoc *pdf;
-	CPDF_TLS_VARS;
 
 	if (ZEND_NUM_ARGS() != 4 || getParameters(ht, 4, &arg1, &arg2, &arg3, &arg4) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -2261,11 +2254,11 @@ PHP_FUNCTION(cpdf_setrgbcolor) {
 
 /* {{{ proto void cpdf_set_page_animation(int pdfdoc, int transition, double duration, double direction, int orientation, int inout)
    Sets transition between pages */
-PHP_FUNCTION(cpdf_set_page_animation) {
+PHP_FUNCTION(cpdf_set_page_animation)
+{
 	pval *arg1, *arg2, *arg3, *arg4, *arg5, *arg6;
 	int id, type;
 	CPDFdoc *pdf;
-	CPDF_TLS_VARS;
 
 	if (ZEND_NUM_ARGS() != 6 || getParameters(ht, 6, &arg1, &arg2, &arg3, &arg4, &arg5, &arg6) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -2293,11 +2286,11 @@ PHP_FUNCTION(cpdf_set_page_animation) {
 
 /* {{{ proto array cpdf_finalize(int pdfdoc)
    Creates pdf doc in memory */
-PHP_FUNCTION(cpdf_finalize) {
+PHP_FUNCTION(cpdf_finalize)
+{
 	pval *arg1;
 	int id, type;
 	CPDFdoc *pdf;
-	CPDF_TLS_VARS;
 
 	if (ZEND_NUM_ARGS() != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -2319,12 +2312,12 @@ PHP_FUNCTION(cpdf_finalize) {
 
 /* {{{ proto array cpdf_output_buffer(int pdfdoc)
    Returns the internal memory stream as string */
-PHP_FUNCTION(cpdf_output_buffer) {
+PHP_FUNCTION(cpdf_output_buffer)
+{
 	pval *arg1;
 	int id, type, lenght;
 	CPDFdoc *pdf;
 	char *buffer;
-	CPDF_TLS_VARS;
 
 	if (ZEND_NUM_ARGS() != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -2348,11 +2341,11 @@ PHP_FUNCTION(cpdf_output_buffer) {
 
 /* {{{ proto array cpdf_save_to_file(int pdfdoc, string filename)
    Saves the internal memory stream to a file */
-PHP_FUNCTION(cpdf_save_to_file) {
+PHP_FUNCTION(cpdf_save_to_file)
+{
 	pval *arg1, *arg2;
 	int id, type;
 	CPDFdoc *pdf;
-	CPDF_TLS_VARS;
 
 	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -2380,12 +2373,12 @@ PHP_FUNCTION(cpdf_save_to_file) {
 
 /* {{{ proto void cpdf_import_jpeg(int pdfdoc, string filename, double x, double y, double angle, double width, double height, double x-scale, double y-scale, int gsave [, int mode])
    Includes jpeg image */
-PHP_FUNCTION(cpdf_import_jpeg) {
+PHP_FUNCTION(cpdf_import_jpeg)
+{
 	pval *argv[11];
 	int id, type, argc, mode=0;
 	float width, height, xscale, yscale;
 	CPDFdoc *pdf;
-	CPDF_TLS_VARS;
 
 	argc = ZEND_NUM_ARGS();
 	if((argc < 10) || (argc > 11))
@@ -2448,14 +2441,14 @@ PHP_FUNCTION(cpdf_import_jpeg) {
 #if HAVE_LIBGD13
 /* {{{ proto void cpdf_place_inline_image(int pdfdoc, int gdimage, double x, double y, double angle, fload width, float height, int gsave [, int mode])
    Includes image */
-PHP_FUNCTION(cpdf_place_inline_image) {
+PHP_FUNCTION(cpdf_place_inline_image)
+{
 	pval *argv[11];
 	int id, gid, type, argc, mode=0;
 	int count, i, j, color;
 	CPDFdoc *pdf;
 	unsigned char *buffer, *ptr;
 	gdImagePtr im;
-	CPDF_TLS_VARS;
 
 	argc = ZEND_NUM_ARGS();
 	if((argc < 8) || (argc > 9))
@@ -2540,12 +2533,12 @@ PHP_FUNCTION(cpdf_place_inline_image) {
 
 /* {{{ proto void cpdf_add_annotation(int pdfdoc, double xll, double yll, double xur, double xur, string title, string text [, int mode])
    Sets annotation */
-PHP_FUNCTION(cpdf_add_annotation) {
+PHP_FUNCTION(cpdf_add_annotation)
+{
 	pval *argv[11];
 	int id, type, argc, mode=0;
 	CPDFdoc *pdf;
 	CPDFannotAttrib attrib;
-	CPDF_TLS_VARS;
 
 	argc = ZEND_NUM_ARGS();
 	if((argc < 7) || (argc > 8))
@@ -2600,12 +2593,12 @@ PHP_FUNCTION(cpdf_add_annotation) {
 
 /* {{{ proto void cpdf_set_action_url(int pdfdoc, double xll, double yll, double xur, double xur, string url [, int mode])
    Sets Hyperlink */
-PHP_FUNCTION(cpdf_set_action_url) {
+PHP_FUNCTION(cpdf_set_action_url)
+{
 	pval *argv[11];
 	int id, type, argc, mode=0;
 	CPDFdoc *pdf;
 	CPDFannotAttrib attrib;
-	CPDF_TLS_VARS;
 
 	argc = ZEND_NUM_ARGS();
 	if((argc < 6) || (argc > 7))
@@ -2657,12 +2650,12 @@ PHP_FUNCTION(cpdf_set_action_url) {
 
 /* {{{ proto int cpdf_add_outline(int pdfdoc, int lastoutline, int sublevel, int open, int pagenr, string title)
    Add outline */
-PHP_FUNCTION(cpdf_add_outline) {
+PHP_FUNCTION(cpdf_add_outline)
+{
 	pval *argv[11];
 	int id, oid, type, argc;
 	CPDFdoc *pdf;
 	CPDFoutlineEntry *lastoutline;
-	CPDF_TLS_VARS;
 
 	argc = ZEND_NUM_ARGS();
 	if(argc != 6)

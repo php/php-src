@@ -96,19 +96,9 @@ ZEND_BEGIN_MODULE_GLOBALS(mysql)
 ZEND_END_MODULE_GLOBALS(mysql)
 
 #ifdef ZTS
-# define MySLS_D	zend_mysql_globals *mysql_globals
-# define MySLS_DC	, MySLS_D
-# define MySLS_C	mysql_globals
-# define MySLS_CC , MySLS_C
-# define MySG(v) (mysql_globals->v)
-# define MySLS_FETCH()	zend_mysql_globals *mysql_globals = ts_resource(mysql_globals_id)
+# define MySG(v) TSRMG(mysql_globals_id, zend_mysql_globals *, v)
 #else
-# define MySLS_D
-# define MySLS_DC
-# define MySLS_C
-# define MySLS_CC
 # define MySG(v) (mysql_globals.v)
-# define MySLS_FETCH()
 #endif
 
 

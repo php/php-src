@@ -115,7 +115,7 @@ static int le_stream = FAILURE;
 static void _file_popen_dtor(zend_rsrc_list_entry *rsrc)
 {
 	FILE *pipe = (FILE *)rsrc->ptr;
-	FLS_FETCH();
+	TSRMLS_FETCH();
 
 	FG(pclose_ret) = pclose(pipe);
 }
@@ -168,7 +168,7 @@ PHPAPI int php_file_le_socket(void) /* XXX doe we really want this???? */
 }
 
 
-static void file_globals_ctor(FLS_D TSRMLS_DC)
+static void file_globals_ctor(php_file_globals *file_globals_p TSRMLS_DC)
 {
 	zend_hash_init(&FG(ht_fsock_keys), 0, NULL, NULL, 1);
 	zend_hash_init(&FG(ht_fsock_socks), 0, NULL, (void (*)(void *))php_msock_destroy, 1);
@@ -179,11 +179,11 @@ static void file_globals_ctor(FLS_D TSRMLS_DC)
 }
 
 
-static void file_globals_dtor(FLS_D TSRMLS_DC)
+static void file_globals_dtor(php_file_globals *file_globals_p TSRMLS_DC)
 {
 	zend_hash_destroy(&FG(ht_fsock_socks));
 	zend_hash_destroy(&FG(ht_fsock_keys));
-	php_cleanup_sockbuf(1 FLS_CC);
+	php_cleanup_sockbuf(1 TSRMLS_CC);
 }
 
 
@@ -200,7 +200,7 @@ PHP_MINIT_FUNCTION(file)
 #ifdef ZTS
 	ts_allocate_id(&file_globals_id, sizeof(php_file_globals), (ts_allocate_ctor) file_globals_ctor, (ts_allocate_dtor) file_globals_dtor);
 #else
-	file_globals_ctor(FLS_C TSRMLS_CC);
+	file_globals_ctor(&file_globals TSRMLS_CC);
 #endif
 
 	REGISTER_LONG_CONSTANT("SEEK_SET", SEEK_SET, CONST_CS | CONST_PERSISTENT);
@@ -219,10 +219,9 @@ PHP_MINIT_FUNCTION(file)
 PHP_MSHUTDOWN_FUNCTION(file)
 {
 #ifndef ZTS
-	FLS_FETCH();
 	TSRMLS_FETCH();
 
-	file_globals_dtor(FLS_C TSRMLS_CC);
+	file_globals_dtor(&file_globals TSRMLS_CC);
 #endif
 	return SUCCESS;
 }
@@ -298,7 +297,6 @@ PHP_FUNCTION(get_meta_tags)
 	char *name=NULL, *value=NULL, *temp=NULL;
 	php_meta_tags_token tok, tok_last;
 	php_meta_tags_data md;
-	PLS_FETCH();
 
 	/* check args */
 	switch (ARG_COUNT(ht)) {
@@ -479,7 +477,6 @@ PHP_FUNCTION(file)
 	int issock=0, socketd=0;
 	int target_len, len;
 	zend_bool reached_eof=0;
-	PLS_FETCH();
 
 	/* check args */
 	switch (ARG_COUNT(ht)) {
@@ -645,7 +642,6 @@ PHP_NAMED_FUNCTION(php_if_fopen)
 	int *sock;
 	int use_include_path = 0;
 	int issock=0, socketd=0;
-	FLS_FETCH();
 
 	switch(ARG_COUNT(ht)) {
 	case 2:
@@ -726,7 +722,6 @@ PHP_FUNCTION(popen)
 	FILE *fp;
 	char *p,*tmp = NULL;
 	char *b, buf[1024];
-	PLS_FETCH();
 
 	if (ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -783,7 +778,6 @@ PHP_FUNCTION(pclose)
 {
 	pval **arg1;
 	void *what;
-	FLS_FETCH();
 
 	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -995,7 +989,6 @@ PHP_FUNCTION(fgets)
 	int issock=0;
 	int socketd=0;
 	void *what;
-	PLS_FETCH();
 
 	if (ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1128,7 +1121,6 @@ PHP_FUNCTION(fgetss)
 	void *what;
 	char *allowed_tags=NULL;
 	int allowed_tags_len=0;
-	FLS_FETCH();
 
 	switch(ARG_COUNT(ht)) {
 	case 2:
@@ -1279,7 +1271,6 @@ PHP_FUNCTION(fwrite)
 	int issock=0;
 	int socketd=0;
 	void *what;
-	PLS_FETCH();
 
 	switch (ARG_COUNT(ht)) {
 	case 2:
@@ -1508,7 +1499,6 @@ PHP_FUNCTION(mkdir)
 	pval **arg1, **arg2;
 	int ret;
 	mode_t mode;
-	PLS_FETCH();
 
 	if (ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1535,7 +1525,6 @@ PHP_FUNCTION(rmdir)
 {
 	pval **arg1;
 	int ret;
-	PLS_FETCH();
 
 	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1578,7 +1567,8 @@ static size_t php_passthru_fd(int socketd, FILE *fp, int issock)
 			len = sbuf.st_size - off;
 			p = mmap(0, len, PROT_READ, MAP_SHARED, fd, off);
 			if (p != (void *) MAP_FAILED) {
-				BLS_FETCH();
+				TSRMLS_FETCH();
+
 				BG(mmap_file) = p;
 				BG(mmap_len) = len;
 				PHPWRITE(p, len);
@@ -1732,7 +1722,6 @@ PHP_FUNCTION(rename)
 	pval **old_arg, **new_arg;
 	char *old_name, *new_name;
 	int ret;
-	PLS_FETCH();
 
 	if (ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &old_arg, &new_arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1764,7 +1753,6 @@ PHP_FUNCTION(unlink)
 {
 	pval **filename;
 	int ret;
-	PLS_FETCH();
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &filename) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1907,7 +1895,6 @@ PHP_NAMED_FUNCTION(php_if_fstat)
 PHP_FUNCTION(copy)
 {
 	pval **source, **target;
-	PLS_FETCH();
 
 	if (ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &source, &target) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -2010,7 +1997,6 @@ PHP_FUNCTION(fread)
 	int issock=0;
 	int socketd=0;
 	void *what;
-	PLS_FETCH();
 
 	if (ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;

@@ -69,19 +69,9 @@ ZEND_END_MODULE_GLOBALS(dbx)
 */
 
 #ifdef ZTS
-#define DBXLS_D	zend_dbx_globals *dbx_globals
-#define DBXLS_DC	, DBXLS_D
-#define DBXLS_C	dbx_globals
-#define DBXLS_CC , DBXLS_C
-#define DBXG(v) (dbx_globals->v)
-#define DBXLS_FETCH() zend_dbx_globals *dbx_globals = ts_resource(dbx_globals_id)
+#define DBXG(v) TSRMG(dbx_globals_id, zend_dbx_globals *, v)
 #else
-#define DBXLS_D
-#define DBXLS_DC
-#define DBXLS_C
-#define DBXLS_CC
 #define DBXG(v) (dbx_globals.v)
-#define DBXLS_FETCH()
 #endif
 
 #endif	/* ZEND_PHP_DBX_H */

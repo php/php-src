@@ -352,7 +352,6 @@ PHP_MINFO_FUNCTION(mcrypt)
 	int i, count;
 	smart_str tmp1 = {0};
 	smart_str tmp2 = {0};
-	MCLS_FETCH();
 
 	modules = mcrypt_list_algorithms (MCG(algorithms_dir), &count);
 	if (count == 0) {
@@ -409,7 +408,6 @@ PHP_FUNCTION(mcrypt_module_open)
 	zval **cipher, **cipher_directory, **mode, **mode_directory;
 	MCRYPT td;
 	int argc;
-    MCLS_FETCH();
     
 	argc = ZEND_NUM_ARGS();
 	MCRYPT_CHECK_PARAM_COUNT (4,4)
@@ -446,7 +444,6 @@ PHP_FUNCTION(mcrypt_generic_init)
 	int max_key_size, key_size, iv_size;
 	MCRYPT td;
 	int argc;
-    MCLS_FETCH();
 	
 	argc = ZEND_NUM_ARGS();
 	MCRYPT_CHECK_PARAM_COUNT (3,3)
@@ -498,7 +495,6 @@ PHP_FUNCTION(mcrypt_generic)
 	int argc;
 	unsigned char* data_s;
 	int block_size, data_size;
-    MCLS_FETCH();
 	
 	argc = ZEND_NUM_ARGS();
 	MCRYPT_CHECK_PARAM_COUNT (2,2)
@@ -539,7 +535,6 @@ PHP_FUNCTION(mdecrypt_generic)
 	int argc;
 	char* data_s;
 	int block_size, data_size;
-    MCLS_FETCH();
 	
 	argc = ZEND_NUM_ARGS();
 	MCRYPT_CHECK_PARAM_COUNT (2,2)
@@ -579,7 +574,6 @@ PHP_FUNCTION(mcrypt_enc_get_supported_key_sizes)
 	MCRYPT td;
 	int argc, i, count;
 	int *key_sizes;
-    MCLS_FETCH();
 	
 	argc = ZEND_NUM_ARGS();
 	MCRYPT_GET_TD_ARG
@@ -606,7 +600,6 @@ PHP_FUNCTION(mcrypt_enc_self_test)
 {
 	zval **mcryptind;
 	MCRYPT td;
-    MCLS_FETCH();
 	
 	MCRYPT_GET_TD_ARG
 
@@ -619,7 +612,6 @@ PHP_FUNCTION(mcrypt_module_close)
 {
 	zval **mcryptind;
 	MCRYPT td;
-    MCLS_FETCH();
 	
 	MCRYPT_GET_TD_ARG
 
@@ -639,7 +631,6 @@ PHP_FUNCTION(mcrypt_generic_end)
 {
 	zval **mcryptind;
 	MCRYPT td;
-    MCLS_FETCH();
 	
 	MCRYPT_GET_TD_ARG
 
@@ -658,7 +649,6 @@ PHP_FUNCTION(mcrypt_enc_is_block_algorithm_mode)
 {
 	zval **mcryptind;
 	MCRYPT td;
-    MCLS_FETCH();
 	
 	MCRYPT_GET_TD_ARG
 
@@ -676,7 +666,6 @@ PHP_FUNCTION(mcrypt_enc_is_block_algorithm)
 {
 	zval **mcryptind;
 	MCRYPT td;
-    MCLS_FETCH();
 	
 	MCRYPT_GET_TD_ARG
 
@@ -694,7 +683,6 @@ PHP_FUNCTION(mcrypt_enc_is_block_mode)
 {
 	zval **mcryptind;
 	MCRYPT td;
-    MCLS_FETCH();
 	
 	MCRYPT_GET_TD_ARG
 
@@ -712,7 +700,6 @@ PHP_FUNCTION(mcrypt_enc_get_block_size)
 {
 	zval **mcryptind;
 	MCRYPT td;
-    MCLS_FETCH();
 	
 	MCRYPT_GET_TD_ARG
 
@@ -727,7 +714,6 @@ PHP_FUNCTION(mcrypt_enc_get_key_size)
 {
 	zval **mcryptind;
 	MCRYPT td;
-    MCLS_FETCH();
 	
 	MCRYPT_GET_TD_ARG
 
@@ -742,7 +728,6 @@ PHP_FUNCTION(mcrypt_enc_get_iv_size)
 {
 	zval **mcryptind;
 	MCRYPT td;
-    MCLS_FETCH();
 	
 	MCRYPT_GET_TD_ARG
 
@@ -758,7 +743,6 @@ PHP_FUNCTION(mcrypt_enc_get_algorithms_name)
 	zval **mcryptind;
 	MCRYPT td;
 	char *name;
-    MCLS_FETCH();
 	
 	MCRYPT_GET_TD_ARG
 
@@ -776,7 +760,6 @@ PHP_FUNCTION(mcrypt_enc_get_modes_name)
 	zval **mcryptind;
 	MCRYPT td;
 	char *name;
-    MCLS_FETCH();
 	
 	MCRYPT_GET_TD_ARG
 
@@ -794,7 +777,6 @@ PHP_FUNCTION(mcrypt_module_self_test)
 	zval **arg1, **lib_dir;
 	char *lib_dir_s;
 	int argc;
-    MCLS_FETCH();
 	
 	argc = ZEND_NUM_ARGS();
 
@@ -817,7 +799,6 @@ PHP_FUNCTION(mcrypt_module_is_block_algorithm_mode)
 	zval **arg1, **lib_dir;
 	char *lib_dir_s;
 	int argc;
-    MCLS_FETCH();
 	
 	argc = ZEND_NUM_ARGS();
 
@@ -840,7 +821,6 @@ PHP_FUNCTION(mcrypt_module_is_block_algorithm)
 	zval **arg1, **lib_dir;
 	char *lib_dir_s;
 	int argc;
-    MCLS_FETCH();
 	
 	argc = ZEND_NUM_ARGS();
 
@@ -863,7 +843,6 @@ PHP_FUNCTION(mcrypt_module_is_block_mode)
 	zval **arg1, **lib_dir;
 	char *lib_dir_s;
 	int argc;
-    MCLS_FETCH();
 	
 	argc = ZEND_NUM_ARGS();
 
@@ -886,7 +865,6 @@ PHP_FUNCTION(mcrypt_module_get_algo_block_size)
 	zval **arg1, **lib_dir;
 	char *lib_dir_s;
 	int argc;
-    MCLS_FETCH();
 	
 	argc = ZEND_NUM_ARGS();
 
@@ -904,7 +882,6 @@ PHP_FUNCTION(mcrypt_module_get_algo_key_size)
 	zval **arg1, **lib_dir;
 	char *lib_dir_s;
 	int argc;
-    MCLS_FETCH();
 	
 	argc = ZEND_NUM_ARGS();
 
@@ -923,7 +900,6 @@ PHP_FUNCTION(mcrypt_module_get_supported_key_sizes)
 	char *lib_dir_s;
 	int argc, i, count;
 	int *key_sizes;
-    MCLS_FETCH();
 	
 	argc = ZEND_NUM_ARGS();
 
@@ -997,7 +973,6 @@ PHP_FUNCTION(mcrypt_list_modes)
 	char **modules;
 	char *lib_dir_s;
 	int i, count, argc;
-    MCLS_FETCH();
 
 	argc = ZEND_NUM_ARGS();
 	MCRYPT_CHECK_PARAM_COUNT (0,1)
@@ -1044,7 +1019,6 @@ PHP_FUNCTION(mcrypt_get_key_size)
 	char *module_dir_string;
 	long key_size;
 	MCRYPT td;
-    MCLS_FETCH();
 
 	MCRYPT_GET_INI
 
@@ -1085,7 +1059,6 @@ PHP_FUNCTION(mcrypt_get_block_size)
 	char *module_dir_string;
 	long key_size;
 	MCRYPT td;
-    MCLS_FETCH();
 
 	MCRYPT_GET_INI
 
@@ -1126,7 +1099,6 @@ PHP_FUNCTION(mcrypt_get_iv_size)
 	char *module_dir_string;
 	long key_size;
 	MCRYPT td;
-    MCLS_FETCH();
 
 	MCRYPT_GET_INI
 
@@ -1166,7 +1138,6 @@ PHP_FUNCTION(mcrypt_get_cipher_name)
 	char *module_dir_string;
 	char *cipher_name;
 	MCRYPT td;
-    MCLS_FETCH();
 
 	MCRYPT_GET_INI
 
@@ -1223,7 +1194,6 @@ static void php_mcrypt_do_crypt (char* cipher, zval **key, zval **data, char *mo
 	char *key_s = NULL, *iv_s;
 	char *data_s;
 	MCRYPT td;
-    MCLS_FETCH();
 
 	MCRYPT_GET_INI
 

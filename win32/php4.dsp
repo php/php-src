@@ -68,7 +68,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /Zi /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
-# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I ".." /I "..\main" /I "..\Zend" /I "..\regex\\" /I "..\..\bindlib_w32" /I "..\TSRM" /D "DEBUG" /D "_DEBUG" /D "_CONSOLE" /D ZEND_DEBUG=1 /D "MSVC5" /D "WIN32" /D "_MBCS" /D "ZEND_WIN32" /D "PHP_WIN32" /FR /FD /c
+# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I ".." /I "..\main" /I "..\Zend" /I "..\regex\\" /I "..\..\bindlib_w32" /I "..\TSRM" /D "DEBUG" /D "_DEBUG" /D "_CONSOLE" /D "MSVC5" /D "PHP_WIN32" /D ZEND_DEBUG=1 /D "ZEND_WIN32" /D "WIN32" /D "_MBCS" /FR /FD /c
 # SUBTRACT CPP /YX
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
 # ADD RSC /l 0x409 /i "c:\include" /d "_DEBUG"

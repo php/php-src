@@ -214,7 +214,7 @@ zend_module_entry sablot_module_entry = {
 ZEND_GET_MODULE(sablot)
 #endif
 
-static void php_sablot_init_globals(SABLOTLS_D TSRMLS_DC)
+static void php_sablot_init_globals(php_sablot_init_globals *sablot_init_globals_p TSRMLS_DC)
 {
 	SABLOTG(processor)             = NULL;
 	SABLOTG(errors)                = NULL;
@@ -229,7 +229,7 @@ PHP_MINIT_FUNCTION(sablot)
 #ifdef ZTS
 	ts_allocate_id(&sablot_globals_id, sizeof(php_sablot_globals), (ts_allocate_ctor)php_sablot_init_globals, NULL);
 #else
-	php_sablot_init_globals(SABLOTLS_C TSRMLS_CC);
+	php_sablot_init_globals(&sablot_globals TSRMLS_CC);
 #endif
 
     le_sablot = zend_register_list_destructors_ex(_php_sablot_free_processor, NULL, "Sablotron XSLT", module_number);
@@ -239,7 +239,8 @@ PHP_MINIT_FUNCTION(sablot)
 
 PHP_MSHUTDOWN_FUNCTION(sablot)
 {
-	SABLOTLS_FETCH();
+	TSRMLS_FETCH();
+
 	if (SABLOTG(processor)) {
 		SablotUnregHandler(SABLOTG(processor), HLR_MESSAGE, NULL, NULL);
 		SablotDestroyProcessor(SABLOTG(processor));
@@ -250,7 +251,7 @@ PHP_MSHUTDOWN_FUNCTION(sablot)
 
 PHP_RSHUTDOWN_FUNCTION(sablot)
 {
-	SABLOTLS_FETCH();
+	TSRMLS_FETCH();
 
 	SABLOT_FREE_ERROR_HANDLE(SABLOTG_HANDLE);
 
@@ -271,10 +272,7 @@ PHP_FUNCTION(xslt_output_begintransform)
 {
     /* The name of the file to pass the output through */
     zval **file;
-    
-    /* needed for the output transformation file name */
-    SABLOTLS_FETCH();
-    
+        
     if (ZEND_NUM_ARGS() != 1 ||
         zend_get_parameters_ex(1, &file) == FAILURE) {
         WRONG_PARAM_COUNT;
@@ -302,10 +300,6 @@ PHP_FUNCTION(xslt_output_endtransform)
          *buffer = NULL;
     int ret = 0;
     
-    /* Fetch both the output globals and the sablotron globals */
-    OLS_FETCH();
-    SABLOTLS_FETCH();
-
     /** 
      * Make sure that we don't have more than one output buffer going on
      * at the same time.
@@ -393,8 +387,6 @@ PHP_FUNCTION(xslt_transform)
 
     int argc = ZEND_NUM_ARGS(), 
         ret  = 0;
-
-    SABLOTLS_FETCH();
     
     if (argc < 3 || argc > 6 ||
         zend_get_parameters_ex(argc, &xslt_uri, &transform_uri, &result_uri, &xslt_params, &xslt_args, &result) == FAILURE) {
@@ -506,7 +498,6 @@ PHP_FUNCTION(xslt_process)
     char *tRes = NULL;
     int ret  = 0, 
         argc = ZEND_NUM_ARGS();
-    SABLOTLS_FETCH();
     
     if (argc < 3 || argc > 4 ||
         zend_get_parameters_ex(argc, &xslt, &input, &result, &base) == FAILURE) {
@@ -573,7 +564,6 @@ PHP_FUNCTION(xslt_create)
     php_sablot *handle;
     SablotHandle p;
     int ret;
-    SABLOTLS_FETCH();
     
     ret = SablotCreateProcessor(&p);
     
@@ -632,7 +622,6 @@ PHP_FUNCTION(xslt_run)
          *result  = NULL;
     int argc = ZEND_NUM_ARGS(),
         ret  = 0;
-    SABLOTLS_FETCH();
     
     if (argc < 3 || argc > 6 ||
         zend_get_parameters_ex(argc, &xh, &xslt_file, &data_file, &xslt_result, &xslt_params, &xslt_args) == FAILURE) {
@@ -712,7 +701,7 @@ PHP_FUNCTION(xslt_openlog)
     int ret      = 0, 
         loglevel = 0, 
         argc     = ZEND_NUM_ARGS();
-    SABLOTLS_FETCH();
+    TSRMLS_FETCH();
     
     if (argc < 2 || argc > 3 ||
         zend_get_parameters_ex(argc, &xh, &logfile, &opt_loglevel) == FAILURE) {
@@ -745,7 +734,6 @@ PHP_FUNCTION(xslt_closelog)
     zval **xh;
     php_sablot *handle;
     int ret;
-    SABLOTLS_FETCH();
     
     if (ZEND_NUM_ARGS() != 1 ||
         zend_get_parameters_ex(1, &xh) == FAILURE) {
@@ -773,7 +761,6 @@ PHP_FUNCTION(xslt_fetch_result)
          *rname = NULL;
     int argc = ZEND_NUM_ARGS(), 
         ret = 0;
-    SABLOTLS_FETCH();
 
     if (argc < 1 || argc > 2 ||
         zend_get_parameters_ex(argc, &xh, &result_name) == FAILURE) {
@@ -814,7 +801,6 @@ PHP_FUNCTION(xslt_free)
 {
     zval **xh;
     php_sablot *handle;
-    SABLOTLS_FETCH();
     
     if (ZEND_NUM_ARGS() != 1 ||
         zend_get_parameters_ex(1, &xh) == FAILURE) {
@@ -837,7 +823,6 @@ PHP_FUNCTION(xslt_set_sax_handler)
     HashTable *handlers_list;
     char *string_key = NULL;
     ulong num_key;
-    SABLOTLS_FETCH();
     
 
     if (ZEND_NUM_ARGS() != 2 ||
@@ -904,7 +889,6 @@ PHP_FUNCTION(xslt_set_scheme_handler)
     HashTable *handlers_list;
     char *string_key = NULL;
     ulong num_key;
-    SABLOTLS_FETCH();
 
     if (ZEND_NUM_ARGS() != 2 ||
         zend_get_parameters_ex(2, &xh, &handlers) == FAILURE) {
@@ -952,7 +936,6 @@ PHP_FUNCTION(xslt_set_encoding)
     int ret      = 0, 
         loglevel = 0, 
         argc     = ZEND_NUM_ARGS();
-    SABLOTLS_FETCH();
     
     if (argc != 2  ||
         zend_get_parameters_ex(argc, &xh, &encoding) == FAILURE) {
@@ -976,7 +959,6 @@ PHP_FUNCTION(xslt_set_base)
 	php_sablot  *handle;
 	int          argc = ZEND_NUM_ARGS(),
 	             ret  = 0;
-	SABLOTLS_FETCH();
 
 	if (argc < 2 || argc > 3 ||
 	    zend_get_parameters_ex(argc, &xh, &scheme, &base) == FAILURE) {
@@ -1025,7 +1007,6 @@ PHP_FUNCTION(xslt_error)
     php_sablot *handle;
     int serrno = 0,
         argc = ZEND_NUM_ARGS();
-    SABLOTLS_FETCH();
     
     if (argc < 0 || argc > 1 ||
         zend_get_parameters_ex(argc, &xh) == FAILURE) {
@@ -1068,8 +1049,6 @@ PHP_FUNCTION(xslt_errno)
     php_sablot *handle;
     int argc = ZEND_NUM_ARGS();
     
-    SABLOTLS_FETCH();
-
     if (argc < 0 || argc > 1 ||
         zend_get_parameters_ex(argc, &xh) == FAILURE) {
         WRONG_PARAM_COUNT;
@@ -1091,8 +1070,6 @@ PHP_FUNCTION(xslt_set_error_handler)
     zval **arg1, **arg2;
     php_sablot *handle;
     int argc = ZEND_NUM_ARGS();
-
-    SABLOTLS_FETCH();
     
     if (argc > 2 || argc < 1 ||
         zend_get_parameters_ex(argc, &arg1, &arg2) == FAILURE) {
@@ -1374,7 +1351,7 @@ static MH_ERROR _php_sablot_error(void *userData, SablotHandle p, MH_ERROR code,
         idx,
         len;
 
-    SABLOTLS_FETCH();
+    TSRMLS_FETCH();
    
     if (userData == NULL) {
         SABLOT_FREE_ERROR_HANDLE(SABLOTG_HANDLE);
@@ -1427,7 +1404,6 @@ static MH_ERROR _php_sablot_error(void *userData, SablotHandle p, MH_ERROR code,
     
     if (errorHandler) {
         zval *retval;
-        TSRMLS_FETCH();
         
         MAKE_STD_ZVAL(retval);
         
@@ -1488,7 +1464,7 @@ static MH_ERROR _php_sablot_error(void *userData, SablotHandle p, MH_ERROR code,
 static void _php_sablot_standard_error(php_sablot_error *errors, php_sablot_error errors_start, int code, int level)
 {
     char *errstr = NULL;
-    SABLOTLS_FETCH();
+    TSRMLS_FETCH();
     
     errors = errors_start.next;
     while (errors) {

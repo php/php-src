@@ -90,7 +90,7 @@ PHP_INI_END()
 
 
 
-static void php_apache_globals_ctor(php_apache_info_struct *apache_globals TSRMLS_DC)
+static void php_apache_globals_ctor(php_apache_info_struct *apache_globals_p TSRMLS_DC)
 {
 	apache_globals->in_request = 0;
 }
@@ -124,8 +124,8 @@ zend_module_entry apache_module_entry = {
 PHP_FUNCTION(apache_child_terminate)
 {
 #ifndef MULTITHREAD
-	APLS_FETCH();
-	SLS_FETCH();
+	ATSRMLS_FETCH();
+	TSRMLS_FETCH();
 
 	if (AP(terminate_child)) {
 		ap_child_terminate( ((request_rec *)SG(server_context)) );
@@ -145,7 +145,7 @@ PHP_FUNCTION(apache_note)
 	pval **arg_name,**arg_val;
 	char *note_val;
 	int arg_count = ARG_COUNT(ht);
-	SLS_FETCH();
+	TSRMLS_FETCH();
 
 	if (arg_count<1 || arg_count>2 ||
 		zend_get_parameters_ex(arg_count,&arg_name,&arg_val) ==FAILURE ) {
@@ -185,7 +185,7 @@ PHP_MINFO_FUNCTION(apache)
 	extern char *user_name;
 	extern gid_t group_id;
 	extern int max_requests_per_child;
-	SLS_FETCH();
+	TSRMLS_FETCH();
 
 	serv = ((request_rec *) SG(server_context))->server;
 
@@ -245,7 +245,7 @@ PHP_MINFO_FUNCTION(apache)
 		array_header *arr;
 		table_entry *elts;
 		request_rec *r;
-		SLS_FETCH();
+		TSRMLS_FETCH();
 
 		r = ((request_rec *) SG(server_context));
 		arr = table_elts(r->subprocess_env);
@@ -265,7 +265,7 @@ PHP_MINFO_FUNCTION(apache)
 		table_entry *env;
 		int i;
 		request_rec *r;
-		SLS_FETCH();
+		TSRMLS_FETCH();
 		
 		r = ((request_rec *) SG(server_context));
 		SECTION("HTTP Headers Information");
@@ -306,7 +306,7 @@ PHP_FUNCTION(virtual)
 {
 	pval **filename;
 	request_rec *rr = NULL;
-	SLS_FETCH();
+	TSRMLS_FETCH();
 
 	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1,&filename) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -346,8 +346,8 @@ PHP_FUNCTION(getallheaders)
     array_header *env_arr;
     table_entry *tenv;
     int i;
-    SLS_FETCH();
-    PLS_FETCH();
+    TSRMLS_FETCH();
+    TSRMLS_FETCH();
 	
     if (array_init(return_value) == FAILURE) {
 		RETURN_FALSE;
@@ -373,7 +373,7 @@ PHP_FUNCTION(apache_lookup_uri)
 {
 	pval **filename;
 	request_rec *rr=NULL;
-	SLS_FETCH();
+	TSRMLS_FETCH();
 
 	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1,&filename) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -448,7 +448,7 @@ PHP_FUNCTION(apache_exec_uri)
 {
 	pval **filename;
 	request_rec *rr=NULL;
-	SLS_FETCH();
+	TSRMLS_FETCH();
 
 	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1,&filename) == FAILURE) {
 		WRONG_PARAM_COUNT;

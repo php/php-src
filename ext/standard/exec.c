@@ -54,8 +54,7 @@ int php_Exec(int type, char *cmd, pval *array, pval *return_value)
 #if PHP_SIGCHILD
 	void (*sig_handler)();
 #endif
-	PLS_FETCH();
-	FLS_FETCH();
+	TSRMLS_FETCH();
 
 	buf = (char*) emalloc(EXEC_INPUT_BUF);
     if (!buf) {
@@ -458,7 +457,6 @@ PHP_FUNCTION(shell_exec)
 	int readbytes,total_readbytes=0,allocated_space;
 	pval **cmd;
 	char *ret;
-	PLS_FETCH();
 
 	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1,&cmd)==FAILURE) {
 		WRONG_PARAM_COUNT;

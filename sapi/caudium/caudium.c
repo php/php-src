@@ -92,13 +92,13 @@ typedef struct
   struct pike_string *filename;
   int my_fd;
   int written;
-  SLS_D;
+  TSRMLS_D;
 } php_caudium_request;
 
 
 void pike_module_init(void);
 void pike_module_exit(void);
-static void free_struct(SLS_D);
+static void free_struct(TSRMLS_D);
 void f_php_caudium_request_handler(INT32 args);
 
 /* Defines to get to the data supplied when the script is started. */
@@ -207,7 +207,7 @@ INLINE static int
 php_caudium_low_ub_write(const char *str, uint str_length) {
   int sent_bytes = 0;
   struct pike_string *to_write = NULL;
-  PLS_FETCH();
+  TSRMLS_FETCH();
   GET_THIS();
   if(!MY_FD_OBJ->prog) {
     PG(connection_status) = PHP_CONNECTION_ABORTED;
@@ -237,7 +237,7 @@ php_caudium_low_ub_write(const char *str, uint str_length) {
 static int
 php_caudium_sapi_ub_write(const char *str, uint str_length)
 {
-  PLS_FETCH();
+  TSRMLS_FETCH();
   GET_THIS();
   int sent_bytes = 0, fd = MY_FD;
   if(fd)
@@ -332,7 +332,7 @@ php_caudium_set_header(char *header_name, char *value, char *p)
  */
 static int
 php_caudium_sapi_header_handler(sapi_header_struct *sapi_header,
-			      sapi_headers_struct *sapi_headers SLS_DC)
+			      sapi_headers_struct *sapi_headers TSRMLS_DC)
 {
   char *header_name, *header_content, *p;
   header_name = sapi_header->header;
@@ -354,9 +354,9 @@ php_caudium_sapi_header_handler(sapi_header_struct *sapi_header,
  */
 
 INLINE static int
-php_caudium_low_send_headers(sapi_headers_struct *sapi_headers SLS_DC)
+php_caudium_low_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 {
-  PLS_FETCH();
+  TSRMLS_FETCH();
   struct pike_string *ind;
   struct svalue *s_headermap;
   GET_THIS();
@@ -381,10 +381,10 @@ php_caudium_low_send_headers(sapi_headers_struct *sapi_headers SLS_DC)
 }
 
 static int
-php_caudium_sapi_send_headers(sapi_headers_struct *sapi_headers SLS_DC)
+php_caudium_sapi_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 {
   int res = 0;
-  THREAD_SAFE_RUN(res = php_caudium_low_send_headers(sapi_headers SLS_CC), "send headers");
+  THREAD_SAFE_RUN(res = php_caudium_low_send_headers(sapi_headers TSRMLS_CC), "send headers");
   return res;
 }
 
@@ -397,7 +397,7 @@ INLINE static int php_caudium_low_read_post(char *buf, uint count_bytes)
 {
   uint total_read = 0;
   GET_THIS();
-  PLS_FETCH();
+  TSRMLS_FETCH();
   
   if(!MY_FD_OBJ->prog)
   {
@@ -418,7 +418,7 @@ INLINE static int php_caudium_low_read_post(char *buf, uint count_bytes)
 }
 
 static int
-php_caudium_sapi_read_post(char *buf, uint count_bytes SLS_DC)
+php_caudium_sapi_read_post(char *buf, uint count_bytes TSRMLS_DC)
 {
   uint total_read = 0;
   THREAD_SAFE_RUN(total_read = php_caudium_low_read_post(buf, count_bytes), "read post");
@@ -431,7 +431,7 @@ php_caudium_sapi_read_post(char *buf, uint count_bytes SLS_DC)
  */
 	
 static char *
-php_caudium_sapi_read_cookies(SLS_D)
+php_caudium_sapi_read_cookies(TSRMLS_D)
 {
   char *cookies;
   cookies = lookup_string_header("HTTP_COOKIE", NULL);
@@ -474,55 +474,55 @@ static zend_module_entry php_caudium_module = {
 };
 
 
-INLINE static void low_sapi_caudium_register_variables(zval *track_vars_array TSRMLS_DC SLS_DC PLS_DC)   
+INLINE static void low_sapi_caudium_register_variables(zval *track_vars_array TSRMLS_DC TSRMLS_DC TSRMLS_DC)   
 {
   char *tmp;
   php_register_variable("PHP_SELF", SG(request_info).request_uri,
-			track_vars_array TSRMLS_CC PLS_CC);
+			track_vars_array TSRMLS_CC);
   php_register_variable("GATEWAY_INTERFACE", "CGI/1.1",
-			track_vars_array TSRMLS_CC PLS_CC);
+			track_vars_array TSRMLS_CC);
   php_register_variable("REQUEST_METHOD",
 			(char *) SG(request_info).request_method,
-			track_vars_array TSRMLS_CC PLS_CC);
+			track_vars_array TSRMLS_CC);
   php_register_variable("REQUEST_URI", SG(request_info).request_uri,
-			track_vars_array TSRMLS_CC PLS_CC);
+			track_vars_array TSRMLS_CC);
   php_register_variable("PATH_TRANSLATED", SG(request_info).path_translated,
-			track_vars_array TSRMLS_CC PLS_CC);
+			track_vars_array TSRMLS_CC);
 
   if( (tmp = lookup_string_header("SERVER_NAME", NULL)) != NULL)
-    php_register_variable("SERVER_NAME", tmp, track_vars_array TSRMLS_CC PLS_CC);
+    php_register_variable("SERVER_NAME", tmp, track_vars_array TSRMLS_CC);
   if( (tmp = lookup_string_header("SERVER_PORT", NULL)) != NULL)
-    php_register_variable("SERVER_PORT", tmp, track_vars_array TSRMLS_CC PLS_CC);
+    php_register_variable("SERVER_PORT", tmp, track_vars_array TSRMLS_CC);
   if( (tmp = lookup_string_header("SERVER_PROTOCOL", NULL)) != NULL)
-    php_register_variable("SERVER_PROTOCOL", tmp, track_vars_array TSRMLS_CC PLS_CC);
+    php_register_variable("SERVER_PROTOCOL", tmp, track_vars_array TSRMLS_CC);
   if( (tmp = lookup_string_header("SCRIPT_NAME", NULL)) != NULL)
-    php_register_variable("SCRIPT_NAME", tmp, track_vars_array TSRMLS_CC PLS_CC);
+    php_register_variable("SCRIPT_NAME", tmp, track_vars_array TSRMLS_CC);
   if( (tmp = lookup_string_header("SCRIPT_FILENAME", NULL)) != NULL)
-    php_register_variable("SCRIPT_FILENAME", tmp, track_vars_array TSRMLS_CC PLS_CC);
+    php_register_variable("SCRIPT_FILENAME", tmp, track_vars_array TSRMLS_CC);
   if( (tmp = lookup_string_header("REMOTE_ADDR", NULL)) != NULL)
-    php_register_variable("REMOTE_ADDR", tmp, track_vars_array TSRMLS_CC PLS_CC);
+    php_register_variable("REMOTE_ADDR", tmp, track_vars_array TSRMLS_CC);
   if( (tmp = lookup_string_header("REMOTE_PORT", NULL)) != NULL)
-    php_register_variable("REMOTE_PORT", tmp, track_vars_array TSRMLS_CC PLS_CC);
+    php_register_variable("REMOTE_PORT", tmp, track_vars_array TSRMLS_CC);
   if( (tmp = lookup_string_header("DOCUMENT_ROOT", NULL)) != NULL)
-    php_register_variable("DOCUMENT_ROOT", tmp, track_vars_array TSRMLS_CC PLS_CC);
+    php_register_variable("DOCUMENT_ROOT", tmp, track_vars_array TSRMLS_CC);
   if( (tmp = lookup_string_header("HTTP_CONNECTION", NULL)) != NULL)
-    php_register_variable("HTTP_CONNECTION", tmp, track_vars_array TSRMLS_CC PLS_CC);
+    php_register_variable("HTTP_CONNECTION", tmp, track_vars_array TSRMLS_CC);
   if( (tmp = lookup_string_header("HTTP_USER_AGENT", NULL)) != NULL)
-    php_register_variable("HTTP_USER_AGENT", tmp, track_vars_array TSRMLS_CC PLS_CC);
+    php_register_variable("HTTP_USER_AGENT", tmp, track_vars_array TSRMLS_CC);
   if( (tmp = lookup_string_header("DOCUMENT_ROOT", NULL)) != NULL)
-    php_register_variable("DOCUMENT_ROOT", tmp, track_vars_array TSRMLS_CC PLS_CC);
+    php_register_variable("DOCUMENT_ROOT", tmp, track_vars_array TSRMLS_CC);
   if( (tmp = lookup_string_header("QUERY_STRING", "")) != NULL)
-    php_register_variable("QUERY_STRING", tmp, track_vars_array TSRMLS_CC PLS_CC);
+    php_register_variable("QUERY_STRING", tmp, track_vars_array TSRMLS_CC);
   if( (tmp = lookup_string_header("REMOTE_USER", NULL)) != NULL)
-    php_register_variable("REMOTE_USER", tmp, track_vars_array TSRMLS_CC PLS_CC);
+    php_register_variable("REMOTE_USER", tmp, track_vars_array TSRMLS_CC);
   if( (tmp = lookup_string_header("REMOTE_PASSWORD", NULL)) != NULL)
-    php_register_variable("REMOTE_PASSWORD", tmp, track_vars_array TSRMLS_CC PLS_CC);
+    php_register_variable("REMOTE_PASSWORD", tmp, track_vars_array TSRMLS_CC);
   
 }
 
-static void sapi_caudium_register_variables(zval *track_vars_array TSRMLS_DC SLS_DC PLS_DC)
+static void sapi_caudium_register_variables(zval *track_vars_array TSRMLS_DC TSRMLS_DC TSRMLS_DC)
 {
-  THREAD_SAFE_RUN(low_sapi_caudium_register_variables(track_vars_array TSRMLS_CC SLS_CC PLS_CC), "register_variables");
+  THREAD_SAFE_RUN(low_sapi_caudium_register_variables(track_vars_array TSRMLS_CC TSRMLS_CC TSRMLS_CC), "register_variables");
 }
 
 /* this structure is static (as in "it does not change") */
@@ -556,7 +556,7 @@ static sapi_module_struct caudium_sapi_module = {
  * with a number of variables. HTTP_* variables are created for
  * the HTTP header data, so that a script can access these.
  */
-static void php_caudium_hash_environment(CLS_D TSRMLS_DC PLS_DC SLS_DC)
+static void php_caudium_hash_environment(TSRMLS_D)
 {
   int i;
   char buf[512];
@@ -612,9 +612,8 @@ static void php_caudium_module_main(php_caudium_request *ureq)
   struct thread_state *state;
   extern struct program *thread_id_prog;
 #endif
-  SLS_FETCH();
-  CLS_FETCH();
-  PLS_FETCH();
+  TSRMLS_FETCH();
+  TSRMLS_FETCH();
   TSRMLS_FETCH();
   GET_THIS();
   THIS->filename = ureq->filename;
@@ -673,7 +672,7 @@ static void php_caudium_module_main(php_caudium_request *ureq)
   }
 
   /* Let PHP4 handle the deconding of the AUTH */
-  php_handle_auth_data(lookup_string_header("HTTP_AUTHORIZATION", NULL), SLS_C);
+  php_handle_auth_data(lookup_string_header("HTTP_AUTHORIZATION", NULL), TSRMLS_C);
    /* Swap out this thread and release the interpreter lock to allow
    * Pike threads to run. We wait since the above would otherwise require
    * a lot of unlock/lock.
@@ -700,24 +699,24 @@ static void php_caudium_module_main(php_caudium_request *ureq)
   file_handle.free_filename = 0;
 
   THIS->written = 0;
-  res = php_request_startup(CLS_C TSRMLS_CC PLS_CC SLS_CC);
+  res = php_request_startup(TSRMLS_C);
 
   if(res == FAILURE) {
     THREAD_SAFE_RUN({
       apply_svalue(&THIS->done_cb, 0);
       pop_stack();
-      free_struct(SLS_C);
+      free_struct(TSRMLS_C);
     }, "Negative run response");
   } else {
-    THREAD_SAFE_RUN(php_caudium_hash_environment(CLS_C TSRMLS_CC PLS_CC SLS_CC),
+    THREAD_SAFE_RUN(php_caudium_hash_environment(TSRMLS_C),
 		    "environment hashing");
-    php_execute_script(&file_handle CLS_CC TSRMLS_CC PLS_CC);
+    php_execute_script(&file_handle TSRMLS_CC);
     php_request_shutdown(NULL);
     THREAD_SAFE_RUN({
       push_int(THIS->written);
       apply_svalue(&THIS->done_cb, 1);
       pop_stack();
-      free_struct(SLS_C);
+      free_struct(TSRMLS_C);
     }, "positive run response");
   }
 
@@ -795,7 +794,7 @@ void f_php_caudium_request_handler(INT32 args)
   pop_n_elems(args);
 }
 
-static void free_struct(SLS_D)
+static void free_struct(TSRMLS_D)
 {
   GET_THIS();
   if(THIS->request_data) free_mapping(THIS->request_data);

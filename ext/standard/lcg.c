@@ -50,7 +50,7 @@ double php_combined_lcg(void)
 {
 	php_int32 q;
 	php_int32 z;
-	LCGLS_FETCH();
+	TSRMLS_FETCH();
 
 	MODMULT(53668,40014,12211,2147483563L, LCG(s1));
 	MODMULT(52774,40692,3791, 2147483399L, LCG(s2));
@@ -63,7 +63,7 @@ double php_combined_lcg(void)
 	return z * 4.656613e-10;
 }
 
-static void lcg_init_globals(LCGLS_D TSRMLS_DC)
+static void lcg_init_globals(php_lcg_globals *lcg_globals_p TSRMLS_DC)
 {
 	LCG(s1) = 1;
 #ifdef ZTS
@@ -83,7 +83,7 @@ PHP_MINIT_FUNCTION(lcg)
 PHP_RINIT_FUNCTION(lcg)
 {
 	if (!php_lcg_initialized) {
-		lcg_init_globals();
+		lcg_init_globals(&lcg_globals TSRMLS_CC);
 		php_lcg_initialized = 1;
 	}
 	return SUCCESS;

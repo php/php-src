@@ -119,21 +119,9 @@ typedef struct {
 
 
 #ifdef ZTS
-#define SABLOTG(v) (sablot_globals->v)
-#define SABLOTLS_FETCH() php_sablot_globals *sablot_globals = ts_resource(sablot_globals_id)
-#define SABLOTG_HANDLE (*sablot_globals)
-#define SABLOTLS_C sablot_globals
-#define SABLOTLS_CC , SABLOTLS_C
-#define SABLOTLS_D php_sablot_globals *sablot_globals
-#define SABLOTLS_DC , SABLOTLS_D
+#define SABLOTG(v) TSRMG(sablot_globals_id, php_sablot_globals *, v)
 #else
 #define SABLOTG(v) (sablot_globals.v)
-#define SABLOTG_HANDLE sablot_globals
-#define SABLOTLS_FETCH()
-#define SABLOTLS_C
-#define SABLOTLS_CC
-#define SABLOTLS_D
-#define SABLOTLS_DC
 #endif
 
 #else

@@ -27,7 +27,7 @@
 	BG(incomplete_class)
 
 #define PHP_IC_ENTRY_READ \
-	(PHP_IC_ENTRY ? PHP_IC_ENTRY : php_create_incomplete_class(BLS_C))
+	(PHP_IC_ENTRY ? PHP_IC_ENTRY : php_create_incomplete_class(TSRMLS_C))
 
 
 #define PHP_SET_CLASS_ATTRIBUTES(struc) 				\
@@ -53,7 +53,7 @@
 extern "C" {
 #endif
 
-zend_class_entry *php_create_incomplete_class(BLS_D);
+zend_class_entry *php_create_incomplete_class(TSRMLS_D);
 
 char *php_lookup_class_name(zval *object, size_t *nlen, zend_bool del);
 void  php_store_class_name(zval *object, const char *name, size_t len);

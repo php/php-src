@@ -284,7 +284,8 @@ PHP_FUNCTION(dbmopen) {
 
 /* {{{ php_dbm_open
  */
-dbm_info *php_dbm_open(char *filename, char *mode) {
+dbm_info *php_dbm_open(char *filename, char *mode)
+{
 	dbm_info *info;
 	int ret, lock=0;
 	char *lockfn = NULL;
@@ -298,7 +299,7 @@ dbm_info *php_dbm_open(char *filename, char *mode) {
 
 	DBM_TYPE dbf=NULL;
 	DBM_MODE_TYPE imode;
-	PLS_FETCH();
+	TSRMLS_FETCH();
 
 	if (filename == NULL) {
 		php_error(E_WARNING, "NULL filename passed to php_dbm_open()");
@@ -564,11 +565,12 @@ PHP_FUNCTION(dbmreplace)
 
 /* {{{ php_dbm_replace
  */
-int php_dbm_replace(dbm_info *info, char *key, char *value) {
+int php_dbm_replace(dbm_info *info, char *key, char *value)
+{
 	DBM_TYPE dbf;
 	int ret;
 	datum key_datum, value_datum;
-	PLS_FETCH();
+	TSRMLS_FETCH();
 
 	if (PG(magic_quotes_runtime)) {
 		php_stripslashes(key,NULL);
@@ -629,11 +631,12 @@ PHP_FUNCTION(dbmfetch)
 
 /* {{{ php_dbm_fetch
  */
-char *php_dbm_fetch(dbm_info *info, char *key) {
+char *php_dbm_fetch(dbm_info *info, char *key)
+{
 	datum key_datum, value_datum;
 	char *ret;
 	DBM_TYPE dbf;
-	PLS_FETCH();
+	TSRMLS_FETCH();
 
 	key_datum.dptr = key;
 	key_datum.dsize = strlen(key);
@@ -863,11 +866,12 @@ PHP_FUNCTION(dbmnextkey)
 
 /* {{{ php_dbm_nextkey
  */
-char *php_dbm_nextkey(dbm_info *info, char *key) {
+char *php_dbm_nextkey(dbm_info *info, char *key)
+{
 	datum key_datum, ret_datum;
 	char *ret;
 	DBM_TYPE dbf;
-	PLS_FETCH();
+	TSRMLS_FETCH();
 
 	key_datum.dptr = key;
 	key_datum.dsize = strlen(key);

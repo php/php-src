@@ -128,7 +128,7 @@ PHP_PGSQL_API php_pgsql_globals pgsql_globals;
  */
 static void php_pgsql_set_default_link(int id)
 {   
-	PGLS_FETCH();
+	TSRMLS_FETCH();
 
 	zend_list_addref(id);
 
@@ -145,7 +145,7 @@ static void php_pgsql_set_default_link(int id)
 static void _close_pgsql_link(zend_rsrc_list_entry *rsrc)
 {
 	PGconn *link = (PGconn *)rsrc->ptr;
-	PGLS_FETCH();
+	TSRMLS_FETCH();
 
 	PQfinish(link);
 	PGG(num_links)--;
@@ -157,7 +157,7 @@ static void _close_pgsql_link(zend_rsrc_list_entry *rsrc)
 static void _close_pgsql_plink(zend_rsrc_list_entry *rsrc)
 {
 	PGconn *link = (PGconn *)rsrc->ptr;
-	PGLS_FETCH();
+	TSRMLS_FETCH();
 
 	PQfinish(link);
 	PGG(num_persistent)--;
@@ -173,7 +173,7 @@ static void _close_pgsql_plink(zend_rsrc_list_entry *rsrc)
 static void
 _notice_handler(void *arg, const char *message)
 {
-	PGLS_FETCH();
+	TSRMLS_FETCH();
 
 	if (! PGG(ignore_notices)) {
 		php_log_err((char *) message);
@@ -190,7 +190,7 @@ _notice_handler(void *arg, const char *message)
 static int _rollback_transactions(zend_rsrc_list_entry *rsrc)
 {
 	PGconn *link;
-	PGLS_FETCH();
+	TSRMLS_FETCH();
 
 	if (rsrc->type != le_plink) 
 		return 0;
@@ -235,7 +235,7 @@ PHP_INI_END()
 
 /* {{{ php_pgsql_init_globals
  */
-static void php_pgsql_init_globals(PGLS_D TSRMLS_DC)
+static void php_pgsql_init_globals(php_pgsql_globals *pgsql_globals_p TSRMLS_DC)
 {
 	PGG(num_persistent) = 0;
 	PGG(ignore_notices) = 0;
@@ -250,7 +250,7 @@ PHP_MINIT_FUNCTION(pgsql)
 #ifdef ZTS
 	ts_allocate_id(&pgsql_globals_id, sizeof(php_pgsql_globals), (ts_allocate_ctor) php_pgsql_init_globals, NULL);
 #else
-	php_pgsql_init_globals(PGLS_C TSRMLS_CC);
+	php_pgsql_init_globals(&pgsql_globals TSRMLS_CC);
 #endif
 
 	REGISTER_INI_ENTRIES();
@@ -283,8 +283,6 @@ PHP_MSHUTDOWN_FUNCTION(pgsql)
  */
 PHP_RINIT_FUNCTION(pgsql)
 {
-	PGLS_FETCH();
-
 	PGG(default_link)=-1;
 	PGG(num_links) = PGG(num_persistent);
 	return SUCCESS;
@@ -306,7 +304,7 @@ PHP_RSHUTDOWN_FUNCTION(pgsql)
 PHP_MINFO_FUNCTION(pgsql)
 {
 	char buf[32];
-	PGLS_FETCH();
+	TSRMLS_FETCH();
 
 	php_info_print_table_start();
 	php_info_print_table_header(2, "PostgreSQL Support", "enabled");
@@ -330,7 +328,6 @@ void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 	char *hashed_details;
 	int hashed_details_length;
 	PGconn *pgsql;
-	PGLS_FETCH();
 	
 	switch(ZEND_NUM_ARGS()) {
 		case 1: { /* new style, using connection string */
@@ -543,8 +540,6 @@ void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
  */
 int php_pgsql_get_default_link(INTERNAL_FUNCTION_PARAMETERS)
 {
-	PGLS_FETCH();
-
 	if (PGG(default_link)==-1) { /* no link opened yet, implicitly open one */
 		ht = 0;
 		php_pgsql_do_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU,0);
@@ -576,7 +571,6 @@ PHP_FUNCTION(pg_close)
 	zval **pgsql_link = NULL;
 	int id;
 	PGconn *pgsql;
-	PGLS_FETCH();
 	
 	switch (ZEND_NUM_ARGS()) {
 		case 0:
@@ -625,7 +619,6 @@ void php_pgsql_get_link_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 	zval **pgsql_link = NULL;
 	int id = -1;
 	PGconn *pgsql;
-	PGLS_FETCH();
 
 	switch(ZEND_NUM_ARGS()) {
 		case 0:
@@ -730,7 +723,6 @@ PHP_FUNCTION(pg_exec)
 	PGresult *pgsql_result;
 	ExecStatusType status;
 	pgsql_result_handle *pg_result;
-	PGLS_FETCH();
 
 	switch(ZEND_NUM_ARGS()) {
 		case 1:
@@ -798,7 +790,6 @@ PHP_FUNCTION(pg_end_copy)
 	int id = -1;
 	PGconn *pgsql;
 	int result = 0;
-	PGLS_FETCH();
 
 	switch(ZEND_NUM_ARGS()) {
 		case 0:
@@ -835,7 +826,6 @@ PHP_FUNCTION(pg_put_line)
 	int id = -1;
 	PGconn *pgsql;
 	int result = 0;
-	PGLS_FETCH();
 
 	switch(ZEND_NUM_ARGS()) {
 		case 1:
@@ -937,8 +927,6 @@ PHP_FUNCTION(pg_cmdtuples)
    Returns the last notice set by the backend */
 PHP_FUNCTION(pg_last_notice) 
 {
-	PGLS_FETCH();
-
 	if (PGG(last_notice) == NULL) {
 		RETURN_FALSE;
 	} else {       
@@ -1156,7 +1144,7 @@ static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 	int i, num_fields, pgsql_row;
 	char *element, *field_name;
 	uint element_len;
-	PLS_FETCH();
+	TSRMLS__FETCH();
 
 	switch (ZEND_NUM_ARGS()) {
 		case 1:
@@ -1419,7 +1407,6 @@ PHP_FUNCTION(pg_trace)
 	char *mode = "w";
 	int issock, socketd;
 	FILE *fp;
-	PGLS_FETCH();
 
 	id = PGG(default_link);
 
@@ -1473,7 +1460,6 @@ PHP_FUNCTION(pg_untrace)
 	zval **pgsql_link = NULL;
 	int id = -1;
 	PGconn *pgsql;
-	PGLS_FETCH();
 
 	switch (ZEND_NUM_ARGS()) {
 		case 0:
@@ -1504,7 +1490,6 @@ PHP_FUNCTION(pg_locreate)
 	PGconn *pgsql;
 	Oid pgsql_oid;
 	int id = -1;
-	PGLS_FETCH();
 
 	switch(ZEND_NUM_ARGS()) {
 		case 0:
@@ -1549,7 +1534,6 @@ PHP_FUNCTION(pg_lounlink)
 	PGconn *pgsql;
 	Oid pgsql_oid;
 	int id = -1;
-	PGLS_FETCH();
 
 	switch(ZEND_NUM_ARGS()) {
 		case 1:
@@ -1594,7 +1578,6 @@ PHP_FUNCTION(pg_loopen)
 	int create=0;
 	char *mode_string=NULL;
 	pgLofp *pgsql_lofp;
-	PGLS_FETCH();
 
 	switch(ZEND_NUM_ARGS()) {
 		case 2:
@@ -1829,8 +1812,7 @@ PHP_FUNCTION(pg_loimport)
 	int id = -1;
 	PGconn *pgsql;
 	Oid oid;
-	PLS_FETCH();
-	PGLS_FETCH();
+	TSRMLS__FETCH();
 	
 	switch (ZEND_NUM_ARGS()) {
 		case 1:
@@ -1875,7 +1857,6 @@ PHP_FUNCTION(pg_loexport)
 	int id = -1;
 	Oid oid;
 	PGconn *pgsql;
-	PGLS_FETCH();
 	
 	switch (ZEND_NUM_ARGS()) {
 		case 2:
@@ -1920,7 +1901,6 @@ PHP_FUNCTION(pg_set_client_encoding)
 	zval **encoding, **pgsql_link = NULL;
 	int id = -1;
 	PGconn *pgsql;
-	PGLS_FETCH();
 
 	switch(ZEND_NUM_ARGS()) {
 		case 1:
@@ -1956,7 +1936,6 @@ PHP_FUNCTION(pg_client_encoding)
 	zval **pgsql_link = NULL;
 	int id = -1;
 	PGconn *pgsql;
-	PGLS_FETCH();
 
 	switch(ZEND_NUM_ARGS()) {
 		case 0:

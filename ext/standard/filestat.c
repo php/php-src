@@ -88,8 +88,6 @@
 
 PHP_RINIT_FUNCTION(filestat)
 {
-	BLS_FETCH();
-
 	BG(CurrentStatFile)=NULL;
 	BG(CurrentStatLength)=0;
 	return SUCCESS;
@@ -98,7 +96,7 @@ PHP_RINIT_FUNCTION(filestat)
 
 PHP_RSHUTDOWN_FUNCTION(filestat)
 {
-	BLS_FETCH();
+	TSRMLS_FETCH();
 
 	if (BG(CurrentStatFile)) {
 		efree (BG(CurrentStatFile));
@@ -316,7 +314,6 @@ PHP_FUNCTION(chgrp)
 	gid_t gid;
 	struct group *gr=NULL;
 	int ret;
-	PLS_FETCH();
 
 	if (ZEND_NUM_ARGS()!=2 || zend_get_parameters_ex(2,&filename,&group)==FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -364,7 +361,6 @@ PHP_FUNCTION(chown)
 	int ret;
 	uid_t uid;
 	struct passwd *pw = NULL;
-	PLS_FETCH();
 
 	if (ZEND_NUM_ARGS()!=2 || zend_get_parameters_ex(2,&filename,&user)==FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -408,7 +404,6 @@ PHP_FUNCTION(chmod)
 	pval **filename, **mode;
 	int ret;
 	mode_t imode;
-	PLS_FETCH();
 
 	if (ZEND_NUM_ARGS()!=2 || zend_get_parameters_ex(2,&filename,&mode)==FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -452,7 +447,6 @@ PHP_FUNCTION(touch)
 	FILE *file;
 	struct utimbuf *newtime = NULL;
 	int ac = ZEND_NUM_ARGS();
-	PLS_FETCH();
 
 	if (ac == 1 && zend_get_parameters_ex(1,&filename) != FAILURE) {
 #ifndef HAVE_UTIME_NULL
@@ -517,8 +511,6 @@ PHP_FUNCTION(touch)
    Clear file stat cache */
 PHP_FUNCTION(clearstatcache)
 {
-	BLS_FETCH();
-
 	if (BG(CurrentStatFile)) {
 		efree(BG(CurrentStatFile));
 		BG(CurrentStatFile) = NULL;
@@ -538,7 +530,7 @@ static void php_stat(const char *filename, php_stat_len filename_length, int typ
 	int rmask=S_IROTH,wmask=S_IWOTH,xmask=S_IXOTH; /* access rights defaults to other */
 	char *stat_sb_names[13]={"dev","ino","mode","nlink","uid","gid","rdev",
 			      "size","atime","mtime","ctime","blksize","blocks"};
-	BLS_FETCH();
+	TSRMLS_FETCH();
 
 	stat_sb = &BG(sb);
 

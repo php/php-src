@@ -21,13 +21,13 @@
 #include "php.h"
 #include "php_ticks.h"
 
-int php_startup_ticks(PLS_D)
+int php_startup_ticks(TSRMLS_D)
 {
 	zend_llist_init(&PG(tick_functions), sizeof(void(*)(int)), NULL, 1);
 	return SUCCESS;
 }
 
-void php_shutdown_ticks(PLS_D)
+void php_shutdown_ticks(TSRMLS_D)
 {
 	zend_llist_destroy(&PG(tick_functions));
 }
@@ -43,14 +43,14 @@ static int php_compare_tick_functions(void *elem1, void *elem2)
 
 PHPAPI void php_add_tick_function(void (*func)(int))
 {
-	PLS_FETCH();
+	TSRMLS_FETCH();
 
 	zend_llist_add_element(&PG(tick_functions), (void *)&func);
 }
 
 PHPAPI void php_remove_tick_function(void (*func)(int))
 {
-	PLS_FETCH();
+	TSRMLS_FETCH();
 
 	zend_llist_del_element(&PG(tick_functions), func,
 						   (int(*)(void*,void*))php_compare_tick_functions);
@@ -66,7 +66,7 @@ static void php_tick_iterator(void *data, void *arg)
 
 void php_run_ticks(int count)
 {
-	PLS_FETCH();
+	TSRMLS_FETCH();
 
 	zend_llist_apply_with_argument(&PG(tick_functions), (void(*)(void*,void*))php_tick_iterator, &count);
 }

@@ -100,8 +100,6 @@ PHP_MSHUTDOWN_FUNCTION(pfpro)
 
 PHP_RINIT_FUNCTION(pfpro)
 {
-	PFPROLS_FETCH();
-
 	PFPROG(initialized) = 0;
 
     return SUCCESS;
@@ -109,7 +107,7 @@ PHP_RINIT_FUNCTION(pfpro)
 
 PHP_RSHUTDOWN_FUNCTION(pfpro)
 {
-	PFPROLS_FETCH();
+	TSRMLS_FETCH();
 
 	if (PFPROG(initialized) == 1) {
 		pfproCleanup();
@@ -147,8 +145,6 @@ PHP_FUNCTION(pfpro_version)
    Initializes the Payflow Pro library */
 PHP_FUNCTION(pfpro_init)
 {
-	PFPROLS_FETCH();
-
 	if (ZEND_NUM_ARGS() != 0) {
 		WRONG_PARAM_COUNT;
 	}
@@ -165,8 +161,6 @@ PHP_FUNCTION(pfpro_init)
    Shuts down the Payflow Pro library */
 PHP_FUNCTION(pfpro_cleanup)
 {
-	PFPROLS_FETCH();
-
 	if (ZEND_NUM_ARGS() != 0) {
 		WRONG_PARAM_COUNT;
 	}
@@ -202,8 +196,6 @@ PHP_FUNCTION(pfpro_process_raw)
 	int context;
 	char *response;
 #endif
-
-	PFPROLS_FETCH();
 
 	if (ZEND_NUM_ARGS() < 1 || ZEND_NUM_ARGS() > 8) {
 		WRONG_PARAM_COUNT;
@@ -332,8 +324,6 @@ PHP_FUNCTION(pfpro_process)
     char *p1, *p2, *p_end,          /* Pointers for string manipulation */
         *sp1, *sp2,
         *pdelim1="&", *pdelim2="=";
-
-	PFPROLS_FETCH();
 
 	if (ZEND_NUM_ARGS() < 1 || ZEND_NUM_ARGS() > 8) {
 		WRONG_PARAM_COUNT;

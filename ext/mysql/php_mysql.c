@@ -213,7 +213,7 @@ static void _free_mysql_result(zend_rsrc_list_entry *rsrc)
  */
 static void php_mysql_set_default_link(int id)
 {
-	MySLS_FETCH();
+	TSRMLS_FETCH();
 
 	if (MySG(default_link)!=-1) {
 		zend_list_delete(MySG(default_link));
@@ -229,7 +229,7 @@ static void _close_mysql_link(zend_rsrc_list_entry *rsrc)
 {
 	php_mysql_conn *link = (php_mysql_conn *)rsrc->ptr;
 	void (*handler) (int);   
-	MySLS_FETCH();
+	TSRMLS_FETCH();
 
 	handler = signal(SIGPIPE, SIG_IGN);
 	mysql_close(&link->conn);
@@ -245,7 +245,7 @@ static void _close_mysql_plink(zend_rsrc_list_entry *rsrc)
 {
 	php_mysql_conn *link = (php_mysql_conn *)rsrc->ptr;
 	void (*handler) (int);
-	MySLS_FETCH();
+	TSRMLS_FETCH();
 
 	handler = signal(SIGPIPE, SIG_IGN);
 	mysql_close(&link->conn);
@@ -261,7 +261,7 @@ static void _close_mysql_plink(zend_rsrc_list_entry *rsrc)
  */
 static PHP_INI_MH(OnMySQLPort)
 {
-	MySLS_FETCH();
+	TSRMLS_FETCH();
 
 	if (new_value==NULL) { /* default port */
 #ifndef PHP_WIN32
@@ -347,8 +347,6 @@ PHP_MSHUTDOWN_FUNCTION(mysql)
  */
 PHP_RINIT_FUNCTION(mysql)
 {
-	MySLS_FETCH();
-	
 	MySG(default_link)=-1;
 	MySG(num_links) = MySG(num_persistent);
 	/* Reset connect error/errno on every request */
@@ -362,7 +360,7 @@ PHP_RINIT_FUNCTION(mysql)
  */
 PHP_RSHUTDOWN_FUNCTION(mysql)
 {
-	MySLS_FETCH();
+	TSRMLS_FETCH();
 	if (MySG(connect_error)!=NULL) {
 		efree(MySG(connect_error));
 	}
@@ -375,7 +373,7 @@ PHP_RSHUTDOWN_FUNCTION(mysql)
 PHP_MINFO_FUNCTION(mysql)
 {
 	char buf[32];
-	MySLS_FETCH();
+	TSRMLS_FETCH();
 
 	php_info_print_table_start();
 	php_info_print_table_header(2, "MySQL Support", "enabled");
@@ -417,8 +415,6 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	void (*handler) (int);
 	zval **z_host=NULL, **z_user=NULL, **z_passwd=NULL;
 	zend_bool free_host=0;
-	MySLS_FETCH();
-	PLS_FETCH();
 
 	socket = MySG(default_socket);
 
@@ -667,7 +663,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 
 /* {{{ php_mysql_get_default_link
  */
-static int php_mysql_get_default_link(INTERNAL_FUNCTION_PARAMETERS MySLS_DC)
+static int php_mysql_get_default_link(INTERNAL_FUNCTION_PARAMETERS)
 {
 	if (MySG(default_link)==-1) { /* no link opened yet, implicitly open one */
 		ht = 0;
@@ -700,7 +696,6 @@ PHP_FUNCTION(mysql_close)
 	zval **mysql_link=NULL;
 	int id;
 	php_mysql_conn *mysql;
-	MySLS_FETCH();
 
 	switch (ZEND_NUM_ARGS()) {
 		case 0:
@@ -740,14 +735,13 @@ PHP_FUNCTION(mysql_select_db)
 	zval **db, **mysql_link;
 	int id;
 	php_mysql_conn *mysql;
-	MySLS_FETCH();
 	
 	switch(ZEND_NUM_ARGS()) {
 		case 1:
 			if (zend_get_parameters_ex(1, &db)==FAILURE) {
 				RETURN_FALSE;
 			}
-			id = php_mysql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU MySLS_CC);
+			id = php_mysql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 			CHECK_LINK(id);
 			break;
 		case 2:
@@ -795,11 +789,10 @@ PHP_FUNCTION(mysql_get_host_info)
 	zval **mysql_link;
 	int id;
 	php_mysql_conn *mysql;
-	MySLS_FETCH();
 
 	switch(ZEND_NUM_ARGS()) {
 		case 0:
-			id = php_mysql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU MySLS_CC);
+			id = php_mysql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 			CHECK_LINK(id);
 			break;
 		case 1:
@@ -826,11 +819,10 @@ PHP_FUNCTION(mysql_get_proto_info)
 	zval **mysql_link;
 	int id;
 	php_mysql_conn *mysql;
-	MySLS_FETCH();
 
 	switch(ZEND_NUM_ARGS()) {
 		case 0:
-			id = php_mysql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU MySLS_CC);
+			id = php_mysql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 			CHECK_LINK(id);
 			break;
 		case 1:
@@ -857,11 +849,10 @@ PHP_FUNCTION(mysql_get_server_info)
 	zval **mysql_link;
 	int id;
 	php_mysql_conn *mysql;
-	MySLS_FETCH();
 
 	switch(ZEND_NUM_ARGS()) {
 		case 0:
-			id = php_mysql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU MySLS_CC);
+			id = php_mysql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 			CHECK_LINK(id);
 			break;
 		case 1:
@@ -890,14 +881,13 @@ PHP_FUNCTION(mysql_create_db)
 	zval **db, **mysql_link;
 	int id;
 	php_mysql_conn *mysql;
-	MySLS_FETCH();
 	
 	switch(ZEND_NUM_ARGS()) {
 		case 1:
 			if (zend_get_parameters_ex(1, &db)==FAILURE) {
 				RETURN_FALSE;
 			}
-			id = php_mysql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU MySLS_CC);
+			id = php_mysql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 			CHECK_LINK(id);
 			break;
 		case 2:
@@ -929,14 +919,13 @@ PHP_FUNCTION(mysql_drop_db)
 	zval **db, **mysql_link;
 	int id;
 	php_mysql_conn *mysql;
-	MySLS_FETCH();
 	
 	switch(ZEND_NUM_ARGS()) {
 		case 1:
 			if (zend_get_parameters_ex(1, &db)==FAILURE) {
 				RETURN_FALSE;
 			}
-			id = php_mysql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU MySLS_CC);
+			id = php_mysql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 			CHECK_LINK(id);
 			break;
 		case 2:
@@ -968,7 +957,7 @@ static void php_mysql_do_query_general(zval **query, zval **mysql_link, int link
 {
 	php_mysql_conn *mysql;
 	MYSQL_RES *mysql_result;
-	MySLS_FETCH();
+	TSRMLS_FETCH();
 	
 	ZEND_FETCH_RESOURCE2(mysql, php_mysql_conn *, mysql_link, link_id, "MySQL-Link", le_link, le_plink);
 	
@@ -1031,14 +1020,13 @@ static void php_mysql_do_query(INTERNAL_FUNCTION_PARAMETERS, int use_store)
 {
 	zval **query, **mysql_link;
 	int id;
-	MySLS_FETCH();
 	
 	switch(ZEND_NUM_ARGS()) {
 		case 1:
 			if (zend_get_parameters_ex(1, &query)==FAILURE) {
 				RETURN_FALSE;
 			}
-			id = php_mysql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU MySLS_CC);
+			id = php_mysql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 			CHECK_LINK(id);
 			break;
 		case 2:
@@ -1079,14 +1067,13 @@ PHP_FUNCTION(mysql_db_query)
 {
 	zval **db, **query, **mysql_link;
 	int id;
-	MySLS_FETCH();
 	
 	switch(ZEND_NUM_ARGS()) {
 		case 2:
 			if (zend_get_parameters_ex(2, &db, &query)==FAILURE) {
 				RETURN_FALSE;
 			}
-			id = php_mysql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU MySLS_CC);
+			id = php_mysql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 			CHECK_LINK(id);
 			break;
 		case 3:
@@ -1115,11 +1102,10 @@ PHP_FUNCTION(mysql_list_dbs)
 	int id;
 	php_mysql_conn *mysql;
 	MYSQL_RES *mysql_result;
-	MySLS_FETCH();
 	
 	switch(ZEND_NUM_ARGS()) {
 		case 0:
-			id = php_mysql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU MySLS_CC);
+			id = php_mysql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 			CHECK_LINK(id);
 			break;
 		case 1:
@@ -1152,14 +1138,13 @@ PHP_FUNCTION(mysql_list_tables)
 	int id;
 	php_mysql_conn *mysql;
 	MYSQL_RES *mysql_result;
-	MySLS_FETCH();
 	
 	switch(ZEND_NUM_ARGS()) {
 		case 1:
 			if (zend_get_parameters_ex(1, &db)==FAILURE) {
 				RETURN_FALSE;
 			}
-			id = php_mysql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU MySLS_CC);
+			id = php_mysql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 			CHECK_LINK(id);
 			break;
 		case 2:
@@ -1196,14 +1181,13 @@ PHP_FUNCTION(mysql_list_fields)
 	int id;
 	php_mysql_conn *mysql;
 	MYSQL_RES *mysql_result;
-	MySLS_FETCH();
 	
 	switch(ZEND_NUM_ARGS()) {
 		case 2:
 			if (zend_get_parameters_ex(2, &db, &table)==FAILURE) {
 				RETURN_FALSE;
 			}
-			id = php_mysql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU MySLS_CC);
+			id = php_mysql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 			CHECK_LINK(id);
 			break;
 		case 3:
@@ -1240,7 +1224,6 @@ PHP_FUNCTION(mysql_error)
 	zval **mysql_link;
 	int id;
 	php_mysql_conn *mysql;
-	MySLS_FETCH();
 	
 	switch(ZEND_NUM_ARGS()) {
 		case 0:
@@ -1279,7 +1262,6 @@ PHP_FUNCTION(mysql_errno)
 	zval **mysql_link;
 	int id;
 	php_mysql_conn *mysql;
-	MySLS_FETCH();
 	
 	switch(ZEND_NUM_ARGS()) {
 		case 0:
@@ -1318,7 +1300,6 @@ PHP_FUNCTION(mysql_affected_rows)
 	zval **mysql_link;
 	int id;
 	php_mysql_conn *mysql;
-	MySLS_FETCH();
 	
 	switch(ZEND_NUM_ARGS()) {
 		case 0:
@@ -1373,7 +1354,6 @@ PHP_FUNCTION(mysql_insert_id)
 	zval **mysql_link;
 	int id;
 	php_mysql_conn *mysql;
-	MySLS_FETCH();
 	
 	switch(ZEND_NUM_ARGS()) {
 		case 0:
@@ -1409,7 +1389,6 @@ PHP_FUNCTION(mysql_result)
 	MYSQL_ROW sql_row;
 	mysql_row_length_type *sql_row_lengths;
 	int field_offset=0;
-	PLS_FETCH();
 
 	switch (ZEND_NUM_ARGS()) {
 		case 2:
@@ -1552,7 +1531,6 @@ static void php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type, 
 	mysql_row_length_type *mysql_row_lengths;
 	int num_fields;
 	int i;
-	PLS_FETCH();
 
 	if (ZEND_NUM_ARGS() > expected_args) {
 		WRONG_PARAM_COUNT;

@@ -67,19 +67,9 @@ ZEND_BEGIN_MODULE_GLOBALS(mcrypt)
 ZEND_END_MODULE_GLOBALS(mcrypt)
 
 #ifdef ZTS
-# define MCLS_D        zend_mcrypt_globals *mcrypt_globals
-# define MCLS_DC       , MCLS_D
-# define MCLS_C        mcrypt_globals
-# define MCLS_CC       , MCLS_C
-# define MCG(v)        (mcrypt_globals->v)
-# define MCLS_FETCH()  zend_mcrypt_globals *mcrypt_globals = ts_resource(mcrypt_globals_id)
+# define MCG(v) TSRMG(mcrypt_globals_id, zend_mcrypt_globals *, v)
 #else
-# define MCLS_D
-# define MCLS_DC
-# define MCLS_C
-# define MCLS_CC
 # define MCG(v)        (mcrypt_globals.v)
-# define MCLS_FETCH()
 #endif
 
 #endif

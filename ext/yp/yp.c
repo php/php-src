@@ -72,9 +72,9 @@ ZEND_GET_MODULE(yp)
 
 /* {{{ proto string yp_get_default_domain(void)
    Returns the domain or false */
-PHP_FUNCTION(yp_get_default_domain) {
+PHP_FUNCTION(yp_get_default_domain)
+{
 	char *outdomain;
-	YPLS_FETCH();
 
 	if(YP(error) = yp_get_default_domain(&outdomain)) {
 		php_error(E_WARNING, yperr_string (YP(error)));
@@ -86,7 +86,8 @@ PHP_FUNCTION(yp_get_default_domain) {
 
 /* {{{ proto int yp_order(string domain, string map)            
    Returns the order number or false */
-PHP_FUNCTION(yp_order) {
+PHP_FUNCTION(yp_order)
+{
 	pval **domain, **map;
 
 #if SOLARIS_YP
@@ -94,8 +95,6 @@ PHP_FUNCTION(yp_order) {
 #else
 	int outval;
 #endif
-
-	YPLS_FETCH();
 
 	if((ZEND_NUM_ARGS() != 2) || zend_get_parameters_ex(2,&domain,&map) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -115,10 +114,10 @@ PHP_FUNCTION(yp_order) {
 
 /* {{{ proto string yp_master(string domain, string map)
    Returns the machine name of the master */
-PHP_FUNCTION(yp_master) {
+PHP_FUNCTION(yp_master)
+{
 	pval **domain, **map;
 	char *outname;
-	YPLS_FETCH();
 
 	if((ZEND_NUM_ARGS() != 2) || zend_get_parameters_ex(2,&domain,&map) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -138,11 +137,11 @@ PHP_FUNCTION(yp_master) {
 
 /* {{{ proto string yp_match(string domain, string map, string key)
    Returns the matched line or false */
-PHP_FUNCTION(yp_match) {
+PHP_FUNCTION(yp_match)
+{
 	pval **domain, **map, **key;
 	char *outval;
 	int outvallen;
-	YPLS_FETCH();
 
 	if((ZEND_NUM_ARGS() != 3) || zend_get_parameters_ex(3,&domain,&map,&key) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -163,11 +162,11 @@ PHP_FUNCTION(yp_match) {
 
 /* {{{ proto array yp_first(string domain, string map)
    Returns the first key as array with $var[$key] and the the line as the value */
-PHP_FUNCTION(yp_first) {
+PHP_FUNCTION(yp_first)
+{
 	pval **domain, **map;
 	char *outval, *outkey;
 	int outvallen, outkeylen;
-	YPLS_FETCH();
 
 	if((ZEND_NUM_ARGS() != 2) || zend_get_parameters_ex(2,&domain,&map) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -191,11 +190,11 @@ PHP_FUNCTION(yp_first) {
 
 /* {{{ proto array yp_next(string domain, string map, string key)
    Returns an array with $var[$key] and the the line as the value */
-PHP_FUNCTION(yp_next) {
+PHP_FUNCTION(yp_next)
+{
 	pval **domain, **map, **key;
 	char *outval, *outkey;
 	int outvallen, outkeylen;
-	YPLS_FETCH();
 
 	if((ZEND_NUM_ARGS() != 3) || zend_get_parameters_ex(3,&domain,&map,&key) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -223,7 +222,7 @@ static int php_foreach_all (int instatus, char *inkey, int inkeylen, char *inval
 	zval *status, *key, *value;
 	zval **args [3];
 	zval *retval;
-	CLS_FETCH();
+	TSRMLS_FETCH();
 
 	args[0] = &status;
 	args[1] = &key;
@@ -259,7 +258,8 @@ static int php_foreach_all (int instatus, char *inkey, int inkeylen, char *inval
 
 /* {{{ proto void yp_all(string domain, string map, string callback)
    Traverse the map and call a function on each entry */
-PHP_FUNCTION(yp_all) {
+PHP_FUNCTION(yp_all)
+{
 	pval **domain, **map, **php_callback;
 	struct ypall_callback callback;
 
@@ -297,7 +297,8 @@ static int php_foreach_cat (int instatus, char *inkey, int inkeylen, char *inval
 
 	if (err != YPERR_NOMORE)
 	{
-		YPLS_FETCH();
+		TSRMLS_FETCH();
+
 		YP(error) = err;
 		php_error(E_WARNING, yperr_string (err));
 	}
@@ -330,9 +331,8 @@ PHP_FUNCTION(yp_cat) {
 
 /* {{{ proto int yp_errno()
    Returns the error code from the last call or 0 if no error occured */
-PHP_FUNCTION(yp_errno) {
-	YPLS_FETCH();
-
+PHP_FUNCTION(yp_errno)
+{
 	if((ZEND_NUM_ARGS() != 0)) {
 		WRONG_PARAM_COUNT;
 	}
@@ -391,7 +391,6 @@ PHP_MINIT_FUNCTION(yp)
 
 PHP_RINIT_FUNCTION(yp)
 {
-	YPLS_FETCH();
 	YP(error) = 0;
 }
 

@@ -160,7 +160,7 @@ static int le_xml_parser;
 
 
 #ifdef ZTS
-static void php_xml_init_globals(php_xml_globals *xml_globals TSRMLS_DC)
+static void php_xml_init_globals(php_xml_globals *xml_globals_p TSRMLS_DC)
 {
 	XML(default_encoding) = "ISO-8859-1";
 }
@@ -1045,7 +1045,6 @@ PHP_FUNCTION(xml_parser_create)
 	zval **encodingArg;
 	XML_Char *encoding;
 	char thisfunc[] = "xml_parser_create";
-	XMLLS_FETCH();
 	
 	argc = ZEND_NUM_ARGS();
 
@@ -1097,7 +1096,6 @@ PHP_FUNCTION(xml_parser_create_ns)
 	zval **encodingArg, **sepArg;
 	XML_Char *encoding, *sep;
 	char thisfunc[] = "xml_parser_create";
-	XMLLS_FETCH();
 	
 	argc = ZEND_NUM_ARGS();
 

@@ -57,11 +57,9 @@ ZEND_END_MODULE_GLOBALS(cybermut)
 */
 
 #ifdef ZTS
-#define CYBERMUTG(v) (cybermut_globals->v)
-#define CYBERMUTLS_FETCH() php_cybermut_globals *cybermut_globals = ts_resource(cybermut_globals_id)
+#define CYBERMUTG(v) TSRMG(cybermut_globals_id, php_cybermut_globals *, v)
 #else
 #define CYBERMUTG(v) (cybermut_globals.v)
-#define CYBERMUTLS_FETCH()
 #endif
 
 #endif	/* PHP_CYBERMUT_H */

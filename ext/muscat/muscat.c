@@ -271,7 +271,6 @@ PHP_FUNCTION(muscat_give)
 	char *string = NULL;
 	_muscat_handle *handle;
 	int r;
-	MUSCATLS_FETCH();
 
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &Muscat_handle_arg, &string_arg) == FAILURE){
 		WRONG_PARAM_COUNT;
@@ -296,7 +295,6 @@ PHP_FUNCTION(muscat_get)
 	zval **Muscat_handle_arg;
 	_muscat_handle *handle;
 	int r;
-	MUSCATLS_FETCH();
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &Muscat_handle_arg) == FAILURE){
 		WRONG_PARAM_COUNT;
@@ -325,7 +323,6 @@ PHP_FUNCTION(muscat_close)
 {
 	zval **muscat_handle_arg;
 	_muscat_handle *handle;
-	MUSCATLS_FETCH();
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &muscat_handle_arg) == FAILURE){
 		WRONG_PARAM_COUNT;

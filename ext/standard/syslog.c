@@ -36,7 +36,7 @@
 #include "basic_functions.h"
 #include "php_ext_syslog.h"
 
-static void start_syslog(BLS_D);
+static void start_syslog(TSRMLS_D);
 
 /* {{{ PHP_MINIT_FUNCTION
  */
@@ -104,10 +104,8 @@ PHP_MINIT_FUNCTION(syslog)
 
 PHP_RINIT_FUNCTION(syslog)
 {
-	BLS_FETCH();
-
 	if (INI_INT("define_syslog_variables")) {
-		start_syslog(BLS_C);
+		start_syslog(TSRMLS_C);
 	} else {
 		BG(syslog_started)=0;
 	}
@@ -118,7 +116,7 @@ PHP_RINIT_FUNCTION(syslog)
 
 PHP_RSHUTDOWN_FUNCTION(syslog)
 {
-	BLS_FETCH();
+	TSRMLS_FETCH();
 	
 	if (BG(syslog_device)) {
 		efree(BG(syslog_device));
@@ -128,10 +126,8 @@ PHP_RSHUTDOWN_FUNCTION(syslog)
 
 /* {{{ start_syslog
  */
-static void start_syslog(BLS_D)
+static void start_syslog(TSRMLS_D)
 {
-	TSRMLS_FETCH();
-	
 	/* error levels */
 	SET_VAR_LONG("LOG_EMERG", LOG_EMERG); /* system unusable */
 	SET_VAR_LONG("LOG_ALERT", LOG_ALERT); /* immediate action required */
@@ -197,10 +193,8 @@ static void start_syslog(BLS_D)
    Initializes all syslog-related variables */
 PHP_FUNCTION(define_syslog_variables)
 {
-	BLS_FETCH();
-
 	if (!BG(syslog_started)) {
-		start_syslog(BLS_C);
+		start_syslog(TSRMLS_C);
 	}
 }
 /* }}} */
@@ -215,7 +209,6 @@ PHP_FUNCTION(define_syslog_variables)
 PHP_FUNCTION(openlog)
 {
 	pval **ident, **option, **facility;
-	BLS_FETCH();
 
 	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &ident, &option, &facility) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -236,8 +229,6 @@ PHP_FUNCTION(openlog)
    Close connection to system logger */
 PHP_FUNCTION(closelog)
 {
-	BLS_FETCH();
-
 	closelog();
 	if (BG(syslog_device)) {
 		efree(BG(syslog_device));

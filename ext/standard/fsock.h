@@ -72,7 +72,7 @@ PHPAPI int php_sockdestroy(int socket);
 PHPAPI int php_sock_close(int socket);
 PHPAPI size_t php_sock_set_def_chunk_size(size_t size);
 PHPAPI void php_msock_destroy(int *data);
-PHPAPI void php_cleanup_sockbuf(int persistent FLS_DC);
+PHPAPI void php_cleanup_sockbuf(int persistent TSRMLS_DC);
 
 PHPAPI struct php_sockbuf *php_get_socket(int socket);
 

@@ -193,19 +193,9 @@ extern zend_module_entry oci8_module_entry;
 #define OCI_PIECE_SIZE    (64*1024)-1
 
 #ifdef ZTS
-#define OCILS_D php_oci_globals *oci_globals
-#define OCILS_DC , OCILS_D
-#define OCILS_C oci_globals
-#define OCILS_CC , OCILS_C
-#define OCI(v) (oci_globals->v)
-#define OCILS_FETCH() php_oci_globals *oci_globals = ts_resource(oci_globals_id)
+#define OCI(v) TSRMG(oci_globals_id, php_oci_globals *, v)
 #else
-#define OCILS_D
-#define OCILS_DC
-#define OCILS_C
-#define OCILS_CC
 #define OCI(v) (oci_globals.v)
-#define OCILS_FETCH()
 #endif
 
 #else /* !HAVE_OCI8 */

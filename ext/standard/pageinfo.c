@@ -43,7 +43,7 @@
 
 /* {{{ php_statpage
  */
-static void php_statpage(BLS_D)
+static void php_statpage(TSRMLS_D)
 {
 	struct stat *pstat;
 
@@ -64,18 +64,18 @@ static void php_statpage(BLS_D)
  */
 long php_getuid(void)
 {
-	BLS_FETCH();
+	TSRMLS_FETCH();
 
-	php_statpage(BLS_C);
+	php_statpage(TSRMLS_C);
 	return (BG(page_uid));
 }
 /* }}} */
 
 long php_getgid(void)
 {
-	BLS_FETCH();
+	TSRMLS_FETCH();
 
-	php_statpage(BLS_C);
+	php_statpage(TSRMLS_C);
 	return (BG(page_gid));
 }
 
@@ -128,9 +128,7 @@ PHP_FUNCTION(getmypid)
    Get the inode of the current script being parsed */
 PHP_FUNCTION(getmyinode)
 {
-	BLS_FETCH();
-
-	php_statpage(BLS_C);
+	php_statpage(TSRMLS_C);
 	if (BG(page_inode) < 0) {
 		RETURN_FALSE;
 	} else {
@@ -143,9 +141,7 @@ PHP_FUNCTION(getmyinode)
    Get time of last page modification */
 PHP_FUNCTION(getlastmod)
 {
-	BLS_FETCH();
-
-	php_statpage(BLS_C);
+	php_statpage(TSRMLS_C);
 	if (BG(page_mtime) < 0) {
 		RETURN_FALSE;
 	} else {

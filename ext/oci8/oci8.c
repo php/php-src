@@ -395,7 +395,7 @@ CONST void ocifree(dvoid *ctx, dvoid *ptr)
 /* }}} */
 /* {{{ startup, shutdown and info functions */
 
-static void php_oci_init_globals(OCILS_D TSRMLS_DC)
+static void php_oci_init_globals(php_oci_globals *oci_globals_p TSRMLS_DC)
 { 
 	OCI(shutdown)	= 0;
 
@@ -435,7 +435,7 @@ PHP_MINIT_FUNCTION(oci)
 #ifdef ZTS
 	ts_allocate_id(&oci_globals_id, sizeof(php_oci_globals), (ts_allocate_ctor) php_oci_init_globals, NULL);
 #else
-	php_oci_init_globals(OCILS_C TSRMLS_CC);
+	php_oci_init_globals(&oci_globals TSRMLS_CC);
 #endif
 
 	le_stmt = zend_register_list_destructors_ex(_oci_stmt_list_dtor, NULL, "oci8 statement", module_number);
@@ -507,8 +507,6 @@ PHP_MINIT_FUNCTION(oci)
 
 PHP_RINIT_FUNCTION(oci)
 {
-	OCILS_FETCH();
-	
 	/* XXX NYI
 	OCI(num_links) = 
 		OCI(num_persistent);
@@ -537,7 +535,7 @@ static int _server_pcleanup(oci_server *server)
 
 PHP_MSHUTDOWN_FUNCTION(oci)
 {
-	OCILS_FETCH();
+	TSRMLS_FETCH();
 
 	OCI(shutdown) = 1;
 
@@ -921,7 +919,7 @@ oci_error(OCIError *err_p, char *what, sword status)
 static int oci_ping(oci_server *server)
 {
 	char version[256];
-	OCILS_FETCH();
+	TSRMLS_FETCH();
 
     OCI(error) = 
 		OCIServerVersion(server->pServer,
@@ -946,7 +944,7 @@ static int oci_ping(oci_server *server)
 
 static void oci_debug(const char *format, ...)
 {
-	OCILS_FETCH();
+	TSRMLS_FETCH();
 
     if (OCI(debug_mode)) {
 		char buffer[1024];
@@ -1055,7 +1053,7 @@ static oci_descriptor*
 oci_new_desc(int type,oci_connection *connection)
 {
 	oci_descriptor *descr;
-	OCILS_FETCH();
+	TSRMLS_FETCH();
 
 	descr = emalloc(sizeof(oci_descriptor));
 	
@@ -1253,7 +1251,7 @@ oci_setprefetch(oci_statement *statement,int size)
 static oci_statement *oci_parse(oci_connection *connection, char *query, int len)
 {
 	oci_statement *statement;
-	OCILS_FETCH();
+	TSRMLS_FETCH();
 
 	statement = ecalloc(1,sizeof(oci_statement));
 
@@ -1998,7 +1996,7 @@ static oci_session *_oci_open_session(oci_server* server,char *username,char *pa
 	oci_session *session = 0, *psession = 0;
 	OCISvcCtx *svchp = 0;
 	char *hashed_details;
-    OCILS_FETCH();
+    TSRMLS_FETCH();
 
 	/* 
 	   check if we already have this user authenticated
@@ -2160,7 +2158,7 @@ _oci_close_session(oci_session *session)
 {
 	OCISvcCtx *svchp;
 	char *hashed_details;
-	OCILS_FETCH();
+	TSRMLS_FETCH();
 
 	if (! session) {
 		return;
@@ -2240,7 +2238,7 @@ _oci_close_session(oci_session *session)
 static oci_server *_oci_open_server(char *dbname,int persistent)
 { 
 	oci_server *server, *pserver = 0;
-    OCILS_FETCH();
+    TSRMLS_FETCH();
 
 	/* 
 	   check if we already have this server open 
@@ -2359,7 +2357,7 @@ _oci_close_server(oci_server *server)
 {
 	char *dbname;
 	int oldopen;
-	OCILS_FETCH();
+	TSRMLS_FETCH();
 	TSRMLS_FETCH();
 
 	oldopen = server->is_open;
@@ -2412,7 +2410,6 @@ static void oci_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent,int exclu
     oci_server *server = 0;
     oci_session *session = 0;
     oci_connection *connection = 0;
-    OCILS_FETCH();
 	
     if (zend_get_parameters_ex(3, &userParam, &passParam, &dbParam) == SUCCESS) {
 		convert_to_string_ex(userParam);
@@ -3656,7 +3653,6 @@ PHP_FUNCTION(ocicolumnisnull)
 PHP_FUNCTION(ociinternaldebug)
 {
 	zval **arg;
-	OCILS_FETCH();
 
 	if (zend_get_parameters_ex(1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -3991,8 +3987,6 @@ PHP_FUNCTION(ocierror)
 	sword error = 0;
 	dvoid *errh = NULL;
 
-	OCILS_FETCH();
-
 	if (zend_get_parameters_ex(1, &arg) == SUCCESS) {
 		statement = (oci_statement *) zend_fetch_resource(arg, -1, NULL, NULL, 1, le_stmt);
 		if (statement) {
@@ -4308,7 +4302,6 @@ PHP_FUNCTION(ocifreecollection)
     int inx;
     oci_collection *coll;
     oci_connection *connection;
-	OCILS_FETCH();
 	
     if ((id = getThis()) != 0) {
         inx = _oci_get_ocicoll(id,&coll);
@@ -4351,8 +4344,6 @@ PHP_FUNCTION(ocicollappend)
 	OCIDate dt;
     int inx;
 	double ndx;
-
-	OCILS_FETCH();
 
     if ((id = getThis()) != 0) {
         if ((inx = _oci_get_ocicoll(id,&coll)) == 0) {
@@ -4461,8 +4452,6 @@ PHP_FUNCTION(ocicollgetelem)
 	int len;
 	double dnum;
 
-	OCILS_FETCH();
-
 	if ((id = getThis()) != 0) {
 		if ((inx = _oci_get_ocicoll(id,&coll)) == 0) {
 			RETURN_FALSE;
@@ -4540,8 +4529,6 @@ PHP_FUNCTION(ocicollassign)
 	oci_collection *coll,*from_coll;
 	int inx;
 
-	OCILS_FETCH();
-
 	if ((id = getThis()) != 0) {
 		if ((inx = _oci_get_ocicoll(id,&coll)) == 0) {
 			RETURN_FALSE;
@@ -4585,8 +4572,6 @@ PHP_FUNCTION(ocicollassignelem)
 	OCIString *ocistr = (OCIString *)0;
 	OCIDate dt;
 	double  dnum;
-
-	OCILS_FETCH();
 
 	if ((id = getThis()) != 0) {
 		if ((inx = _oci_get_ocicoll(id,&coll)) == 0) {
@@ -4699,8 +4684,6 @@ PHP_FUNCTION(ocicollsize)
 	sb4 sz;
 	int inx;
 
-	OCILS_FETCH();
-
 	if ((id = getThis()) != 0) {
 		if ((inx = _oci_get_ocicoll(id,&coll)) == 0) {
 			RETURN_FALSE;
@@ -4727,7 +4710,6 @@ PHP_FUNCTION(ocicollmax)
 	oci_collection *coll;
 	sb4 sz;
 	int inx;
-	OCILS_FETCH();
 
 	if ((id = getThis()) != 0) {
 		if ((inx = _oci_get_ocicoll(id,&coll)) == 0) {
@@ -4748,8 +4730,6 @@ PHP_FUNCTION(ocicolltrim)
 	zval *id,**arg;
 	oci_collection *coll;
 	int inx;
-
-	OCILS_FETCH();
 
 	if ((id = getThis()) != 0) {
 		if ((inx = _oci_get_ocicoll(id,&coll)) == 0) {
@@ -4782,10 +4762,6 @@ PHP_FUNCTION(ocinewcollection)
     oci_connection *connection;
     oci_collection *coll;
 	int ac = ZEND_NUM_ARGS();
-
-	OCILS_FETCH();
-
-
 
     if (ac < 2 || ac > 3 || zend_get_parameters_ex(ac, &conn, &tdo, &schema) == FAILURE) {
         WRONG_PARAM_COUNT;

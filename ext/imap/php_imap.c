@@ -189,7 +189,7 @@ static int le_pimapchain;
 void mail_close_it(zend_rsrc_list_entry *rsrc)
 {
 	pils *imap_le_struct = (pils *)rsrc->ptr;
-	IMAPLS_FETCH();
+	TSRMLS_FETCH();
 
 	mail_close_full(imap_le_struct->imap_stream, imap_le_struct->flags);
 
@@ -300,8 +300,6 @@ void mail_free_errorlist(ERRORLIST **errlist)
 /* Author: CJH */
 PHP_RINIT_FUNCTION(imap)
 {
-	IMAPLS_FETCH();
-
 	IMAPG(imap_errorstack) = NIL;
 	IMAPG(imap_alertstack) = NIL;
 	return SUCCESS;
@@ -312,7 +310,7 @@ PHP_RSHUTDOWN_FUNCTION(imap)
 {
 	ERRORLIST *ecur = NIL;
 	STRINGLIST *acur = NIL;
-	IMAPLS_FETCH();
+	TSRMLS_FETCH();
 
 	if (IMAPG(imap_errorstack) != NIL) {
 		/* output any remaining errors at their original error level */
@@ -368,7 +366,7 @@ MESSAGELIST *mail_newmessagelist(void)
  */
 void mail_getquota(MAILSTREAM *stream, char *qroot,QUOTALIST *qlist)
 {
-	IMAPLS_FETCH();
+	TSRMLS_FETCH();
 
 	/* this should only be run through once */
 	for (; qlist; qlist = qlist->next)
@@ -657,7 +655,6 @@ void imap_do_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 #endif
 	int ind;
 	int myargc=ZEND_NUM_ARGS();
-	IMAPLS_FETCH();
 	
 	if (myargc <3 || myargc >4 || zend_get_parameters_ex(myargc, &mailbox, &user, &passwd, &options) == FAILURE) {
 		ZEND_WRONG_PARAM_COUNT();
@@ -1032,7 +1029,6 @@ PHP_FUNCTION(imap_get_quota)
 	zval **streamind, **qroot;
 	int ind, ind_type;
 	pils *imap_le_struct;
-	IMAPLS_FETCH();
 
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &streamind, &qroot) == FAILURE) {
 		ZEND_WRONG_PARAM_COUNT();
@@ -1465,7 +1461,6 @@ PHP_FUNCTION(imap_list)
 	int ind, ind_type;
 	pils *imap_le_struct; 
 	STRINGLIST *cur=NIL;
-	IMAPLS_FETCH();
 
 	/* set flag for normal, old mailbox list */
 	IMAPG(folderlist_style) = FLIST_ARRAY;
@@ -1512,7 +1507,6 @@ PHP_FUNCTION(imap_list_full)
 	pils *imap_le_struct; 
 	FOBJECTLIST *cur=NIL;
 	char *delim=NIL;
-	IMAPLS_FETCH();
 	
 	/* set flag for new, improved array of objects mailbox list */
 	IMAPG(folderlist_style) = FLIST_OBJECT;
@@ -1571,7 +1565,6 @@ PHP_FUNCTION(imap_listscan)
 	int ind, ind_type;
 	pils *imap_le_struct;
 	STRINGLIST *cur=NIL;
-	IMAPLS_FETCH();
 
 	if (ZEND_NUM_ARGS()!=4 || zend_get_parameters_ex(4, &streamind, &ref, &pat, &content) == FAILURE) {
 		ZEND_WRONG_PARAM_COUNT();
@@ -1847,8 +1840,6 @@ PHP_FUNCTION(imap_lsub)
 	int ind, ind_type;
 	pils *imap_le_struct;
 	STRINGLIST *cur=NIL;
-	IMAPLS_FETCH();
-
 	
 	/* set flag for normal, old mailbox list */
 	IMAPG(folderlist_style) = FLIST_ARRAY;
@@ -1893,7 +1884,7 @@ PHP_FUNCTION(imap_lsub_full)
 	pils *imap_le_struct;
 	FOBJECTLIST *cur=NIL;
 	char *delim=NIL;
-	IMAPLS_FETCH();
+	TSRMLS_FETCH();
 	
 	delim = emalloc(2 * sizeof(char));
 	
@@ -2868,7 +2859,6 @@ PHP_FUNCTION(imap_status)
  	int ind, ind_type;
 	pils *imap_le_struct;
 	int myargc=ZEND_NUM_ARGS();
-	IMAPLS_FETCH();
 
  	if (myargc != 3 || zend_get_parameters_ex(myargc, &streamind, &mbx, &flags) == FAILURE) {
  		ZEND_WRONG_PARAM_COUNT();
@@ -3618,7 +3608,6 @@ PHP_FUNCTION(imap_search)
 	long flags;
     char *search_criteria;
 	MESSAGELIST *cur;
-	IMAPLS_FETCH();
     
 	args = ZEND_NUM_ARGS();
 	if (args < 2 || args > 3 || zend_get_parameters_ex(args, &streamind, &criteria, &search_flags) == FAILURE) {
@@ -3669,7 +3658,6 @@ PHP_FUNCTION(imap_alerts)
 {
 	STRINGLIST *cur=NIL;
 	int arg_count = ZEND_NUM_ARGS();
-	IMAPLS_FETCH();
     
 	if (arg_count > 0) {
 		ZEND_WRONG_PARAM_COUNT();
@@ -3697,7 +3685,6 @@ PHP_FUNCTION(imap_errors)
 {
 	ERRORLIST *cur=NIL;
 	int arg_count = ZEND_NUM_ARGS();
-	IMAPLS_FETCH();
     
 	if (arg_count > 0) {
 		ZEND_WRONG_PARAM_COUNT();
@@ -3725,7 +3712,6 @@ PHP_FUNCTION(imap_last_error)
 {
 	ERRORLIST *cur=NIL;
 	int arg_count = ZEND_NUM_ARGS();
-	IMAPLS_FETCH();
     
 	if (arg_count > 0) {
 		ZEND_WRONG_PARAM_COUNT();
@@ -4090,7 +4076,7 @@ void _php_imap_add_body(zval *arg, BODY *body)
 void mm_searched(MAILSTREAM *stream,unsigned long number)
 {
 	MESSAGELIST *cur = NIL;
-	IMAPLS_FETCH();
+	TSRMLS_FETCH();
   
 	if (IMAPG(imap_messages) == NIL) {
 		IMAPG(imap_messages) = mail_newmessagelist();
@@ -4124,7 +4110,7 @@ void mm_flags(MAILSTREAM *stream,unsigned long number)
 void mm_notify(MAILSTREAM *stream, char *str, long errflg)
 {
 	STRINGLIST *cur = NIL;
-	IMAPLS_FETCH();
+	TSRMLS_FETCH();
   
 	if (strncmp(str, "[ALERT] ", 8) == 0) {
 		if (IMAPG(imap_alertstack) == NIL) {
@@ -4148,7 +4134,7 @@ void mm_list(MAILSTREAM *stream,DTYPE delimiter, char *mailbox, long attributes)
 {
 	STRINGLIST *cur=NIL;
 	FOBJECTLIST *ocur=NIL;
-	IMAPLS_FETCH();
+	TSRMLS_FETCH();
 	
 	if (IMAPG(folderlist_style) == FLIST_OBJECT) {
 		/* build up a the new array of objects */
@@ -4197,7 +4183,7 @@ void mm_lsub(MAILSTREAM *stream,DTYPE delimiter, char *mailbox, long attributes)
 {
 	STRINGLIST *cur=NIL;
 	FOBJECTLIST *ocur=NIL;
-	IMAPLS_FETCH();
+	TSRMLS_FETCH();
 	
 	if (IMAPG(folderlist_style) == FLIST_OBJECT) {
 		/* build the array of objects */
@@ -4241,7 +4227,7 @@ void mm_lsub(MAILSTREAM *stream,DTYPE delimiter, char *mailbox, long attributes)
 
 void mm_status(MAILSTREAM *stream, char *mailbox,MAILSTATUS *status)
 {
-	IMAPLS_FETCH();
+	TSRMLS_FETCH();
 
 	IMAPG(status_flags)=status->flags;
 	if (IMAPG(status_flags) & SA_MESSAGES) {
@@ -4264,7 +4250,7 @@ void mm_status(MAILSTREAM *stream, char *mailbox,MAILSTATUS *status)
 void mm_log(char *str, long errflg)
 {
 	ERRORLIST *cur = NIL;
-	IMAPLS_FETCH();
+	TSRMLS_FETCH();
   
 	/* Author: CJH */
 	if (errflg != NIL) { /* CJH: maybe put these into a more comprehensive log for debugging purposes? */
@@ -4296,7 +4282,7 @@ void mm_dlog(char *str)
 
 void mm_login(NETMBX *mb, char *user, char *pwd, long trial)
 {
-	IMAPLS_FETCH();
+	TSRMLS_FETCH();
 
 	if (*mb->user) {
 		strlcpy (user,mb->user, MAILTMPLEN);

@@ -146,7 +146,7 @@ static int _rollback_transaction(II_LINK *link)
 static void _close_ii_link(II_LINK *link)
 {
   IIAPI_DISCONNPARM disconnParm;
-  IILS_FETCH();
+  TSRMLS_FETCH();
 
   if(link->tranHandle && _rollback_transaction(link)) {
     php_error(E_WARNING,"Ingres II:  Unable to rollback transaction !!");
@@ -179,7 +179,7 @@ static void php_close_ii_link(zend_rsrc_list_entry *rsrc)
 static void _close_ii_plink(zend_rsrc_list_entry *rsrc)
 {
 	II_LINK *link = (II_LINK *)rsrc->ptr;
-	IILS_FETCH();
+	TSRMLS_FETCH();
 	
 	_close_ii_link(link);
 	IIG(num_persistent)--;
@@ -193,7 +193,7 @@ static void _clean_ii_plink(zend_rsrc_list_entry *rsrc)
 {
 	II_LINK *link = (II_LINK *)rsrc->ptr;
   IIAPI_AUTOPARM autoParm;
-  IILS_FETCH();
+  TSRMLS_FETCH();
 
   if(link->autocommit) {
 
@@ -226,7 +226,7 @@ static void _clean_ii_plink(zend_rsrc_list_entry *rsrc)
 */
 static void php_ii_set_default_link(int id)
 {
-	IILS_FETCH();
+	TSRMLS_FETCH();
 
 	if (IIG(default_link)!=-1) {
 		zend_list_delete(IIG(default_link));
@@ -239,7 +239,7 @@ static void php_ii_set_default_link(int id)
    if none has been set, tries to open a new one with default
    parameters
 */
-static int php_ii_get_default_link(INTERNAL_FUNCTION_PARAMETERS IILS_DC)
+static int php_ii_get_default_link(INTERNAL_FUNCTION_PARAMETERS TSRMLS_DC)
 {
 	if (IIG(default_link)==-1) { /* no link opened yet, implicitly open one */
 		ht = 0;
@@ -303,8 +303,6 @@ PHP_MSHUTDOWN_FUNCTION(ii)
 */
 PHP_RINIT_FUNCTION(ii)
 {
-  IILS_FETCH();
-
   IIG(default_link) = -1;
   IIG(num_links) = IIG(num_persistent);
   return SUCCESS;
@@ -314,7 +312,7 @@ PHP_RINIT_FUNCTION(ii)
 */
 PHP_RSHUTDOWN_FUNCTION(ii)
 {
-  IILS_FETCH();
+  TSRMLS_FETCH();
 
   if (IIG(default_link)!=-1) {
     zend_list_delete(IIG(default_link));
@@ -328,7 +326,7 @@ PHP_RSHUTDOWN_FUNCTION(ii)
 PHP_MINFO_FUNCTION(ii)
 {
   char buf[32];
-  IILS_FETCH();
+  TSRMLS_FETCH();
 
   php_info_print_table_start();
   php_info_print_table_header(2, "Ingres II Support", "enabled");
@@ -397,8 +395,6 @@ static void php_ii_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
   int hashed_details_length;
   IIAPI_CONNPARM connParm;
   II_LINK *link;
-  IILS_FETCH();
-  PLS_FETCH();
   
   /* Setting db, user and pass according to sql_safe_mode, parameters and/or default values */
   argc = ZEND_NUM_ARGS();
@@ -623,7 +619,6 @@ PHP_FUNCTION(ingres_close)
   int argc;
   int link_id = -1;
   II_LINK *ii_link;
-  IILS_FETCH();
   
   argc = ZEND_NUM_ARGS();
   if (argc > 1 || (argc && zend_get_parameters_ex(argc, &link) == FAILURE)){
@@ -663,7 +658,6 @@ PHP_FUNCTION(ingres_query)
   II_LINK *ii_link;
   IIAPI_QUERYPARM queryParm;
   IIAPI_GETDESCRPARM getDescrParm;
-  IILS_FETCH();
   
   argc = ZEND_NUM_ARGS();
   if (argc < 1 || argc > 2 || zend_get_parameters_ex(argc, &query, &link) == FAILURE){
@@ -671,7 +665,7 @@ PHP_FUNCTION(ingres_query)
   }
   
   if (argc < 2) {
-    link_id = php_ii_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU IILS_CC);
+    link_id = php_ii_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU TSRMLS_CC);
   }
   ZEND_FETCH_RESOURCE2(ii_link, II_LINK *, link, link_id, "Ingres II Link", le_ii_link, le_ii_plink);
   
@@ -736,7 +730,6 @@ PHP_FUNCTION(ingres_num_rows)
   int link_id = -1;
   II_LINK *ii_link;
   IIAPI_GETQINFOPARM getQInfoParm;
-  IILS_FETCH();
   
   argc = ZEND_NUM_ARGS();
   if (argc > 1 || zend_get_parameters_ex(argc, &link) == FAILURE){
@@ -744,7 +737,7 @@ PHP_FUNCTION(ingres_num_rows)
   }
   
   if (argc < 1) {
-    link_id = php_ii_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU IILS_CC);
+    link_id = php_ii_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU TSRMLS_CC);
   }
 
   ZEND_FETCH_RESOURCE2(ii_link, II_LINK *, link, link_id, "Ingres II Link", le_ii_link, le_ii_plink);
@@ -778,7 +771,6 @@ PHP_FUNCTION(ingres_num_fields)
   int argc;
   int link_id = -1;
   II_LINK *ii_link;
-  IILS_FETCH();
   
   argc = ZEND_NUM_ARGS();
   if (argc > 1 || zend_get_parameters_ex(argc, &link) == FAILURE){
@@ -786,7 +778,7 @@ PHP_FUNCTION(ingres_num_fields)
   }
   
   if (argc < 1) {
-    link_id = php_ii_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU IILS_CC);
+    link_id = php_ii_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU TSRMLS_CC);
   }
 
   ZEND_FETCH_RESOURCE2(ii_link, II_LINK *, link, link_id, "Ingres II Link", le_ii_link, le_ii_plink);
@@ -812,7 +804,6 @@ static void php_ii_field_info(INTERNAL_FUNCTION_PARAMETERS, int info_type)
   char *name, *fun_name;
   int index;
   II_LINK *ii_link;
-  IILS_FETCH();
   
   argc = ZEND_NUM_ARGS();
   if (argc < 1 || argc > 2 || zend_get_parameters_ex(argc, &idx, &link) == FAILURE){
@@ -820,7 +811,7 @@ static void php_ii_field_info(INTERNAL_FUNCTION_PARAMETERS, int info_type)
   }
 
   if (argc < 2) {
-    link_id = php_ii_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU IILS_CC);
+    link_id = php_ii_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU TSRMLS_CC);
   }
 
   ZEND_FETCH_RESOURCE2(ii_link, II_LINK *, link, link_id, "Ingres II Link", le_ii_link, le_ii_plink);
@@ -1014,7 +1005,6 @@ static void php_ii_fetch(INTERNAL_FUNCTION_PARAMETERS, II_LINK *ii_link, int res
   long value_long;
   char *value_char_p;
   int len, should_copy, correct_length;
-  PLS_FETCH();
 
   /* array initialization */
   if (array_init(return_value)==FAILURE) {
@@ -1195,7 +1185,6 @@ PHP_FUNCTION(ingres_fetch_array)
   int argc;
   int link_id = -1;
   II_LINK *ii_link;
-  IILS_FETCH();
   
   argc = ZEND_NUM_ARGS();
   if (argc > 2 || zend_get_parameters_ex(argc, &result_type, &link) == FAILURE){
@@ -1203,7 +1192,7 @@ PHP_FUNCTION(ingres_fetch_array)
   }
 
   if (argc != 2) {
-    link_id = php_ii_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU IILS_CC);
+    link_id = php_ii_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU TSRMLS_CC);
   }
 
   if (argc != 0) {
@@ -1225,7 +1214,6 @@ PHP_FUNCTION(ingres_fetch_row)
   int argc;
   int link_id = -1;
   II_LINK *ii_link;
-  IILS_FETCH();
   
   argc = ZEND_NUM_ARGS();
   if (argc > 1 || zend_get_parameters_ex(argc, &link) == FAILURE){
@@ -1233,7 +1221,7 @@ PHP_FUNCTION(ingres_fetch_row)
   }
 
   if (argc != 1) {
-    link_id = php_ii_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU IILS_CC);
+    link_id = php_ii_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU TSRMLS_CC);
   }
 
   ZEND_FETCH_RESOURCE2(ii_link, II_LINK *, link, link_id, "Ingres II Link", le_ii_link, le_ii_plink);
@@ -1250,7 +1238,6 @@ PHP_FUNCTION(ingres_fetch_object)
   int argc;
   int link_id = -1;
   II_LINK *ii_link;
-  IILS_FETCH();
   
   argc = ZEND_NUM_ARGS();
   if (argc > 2 || zend_get_parameters_ex(argc, &result_type, &link) == FAILURE){
@@ -1258,7 +1245,7 @@ PHP_FUNCTION(ingres_fetch_object)
   }
 
   if (argc != 2) {
-    link_id = php_ii_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU IILS_CC);
+    link_id = php_ii_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU TSRMLS_CC);
   }
 
   if (argc != 0) {
@@ -1283,7 +1270,6 @@ PHP_FUNCTION(ingres_rollback)
   int argc;
   int link_id = -1;
   II_LINK *ii_link;
-  IILS_FETCH();
   
   argc = ZEND_NUM_ARGS();
   if (argc > 1 || (argc && zend_get_parameters_ex(argc, &link) == FAILURE)){
@@ -1311,7 +1297,6 @@ PHP_FUNCTION(ingres_commit)
   int link_id = -1;
   II_LINK *ii_link;
   IIAPI_COMMITPARM commitParm;
-  IILS_FETCH();
   
   argc = ZEND_NUM_ARGS();
   if (argc > 1 || (argc && zend_get_parameters_ex(argc, &link) == FAILURE)){
@@ -1353,7 +1338,6 @@ PHP_FUNCTION(ingres_autocommit)
   int link_id = -1;
   II_LINK *ii_link;
   IIAPI_AUTOPARM autoParm;
-  IILS_FETCH();
   
   argc = ZEND_NUM_ARGS();
   if (argc > 1 || (argc && zend_get_parameters_ex(argc, &link) == FAILURE)){

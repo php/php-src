@@ -169,10 +169,9 @@ PHP_FUNCTION(pdf_setmatrix);
 
 #ifdef ZTS
 #define PDFG(v) (pdf_globals->v)
-#define PDFLS_FETCH() php_pdf_globals *pdf_globals = ts_resource(pdf_globals_id)
+#define PDFG(v) TSRMG(pdf_globals_id, php_pdf_globals *, v)
 #else
 #define PDFG(v) (pdf_globals.v)
-#define PDFLS_FETCH()
 #endif
 
 

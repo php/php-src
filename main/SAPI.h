@@ -116,49 +116,39 @@ typedef struct {
 
 
 #ifdef ZTS
-# define SLS_D	sapi_globals_struct *sapi_globals
-# define SLS_DC	, SLS_D
-# define SLS_C	sapi_globals
-# define SLS_CC , SLS_C
-# define SG(v) (sapi_globals->v)
-# define SLS_FETCH()	sapi_globals_struct *sapi_globals = ts_resource(sapi_globals_id)
+# define SG(v) TSRMG(sapi_globals_id, sapi_globals_struct *, v)
 SAPI_API extern int sapi_globals_id;
 #else
-# define SLS_D	void
-# define SLS_DC
-# define SLS_C
-# define SLS_CC
 # define SG(v) (sapi_globals.v)
-# define SLS_FETCH()
 extern SAPI_API sapi_globals_struct sapi_globals;
 #endif
 
 
 SAPI_API void sapi_startup(sapi_module_struct *sf);
 SAPI_API void sapi_shutdown(void);
-SAPI_API void sapi_activate(SLS_D);
-SAPI_API void sapi_deactivate(SLS_D);
-SAPI_API void sapi_initialize_empty_request(SLS_D);
+SAPI_API void sapi_activate(TSRMLS_D);
+SAPI_API void sapi_deactivate(TSRMLS_D);
+SAPI_API void sapi_initialize_empty_request(TSRMLS_D);
 
 SAPI_API int sapi_add_header_ex(char *header_line, uint header_line_len, zend_bool duplicate, zend_bool replace);
 #define sapi_add_header(header_line, header_line_len, duplicate) \
 	sapi_add_header_ex((header_line), (header_line_len), (duplicate), 1)
 SAPI_API int sapi_send_headers(void);
 SAPI_API void sapi_free_header(sapi_header_struct *sapi_header);
-SAPI_API void sapi_handle_post(void *arg SLS_DC);
+SAPI_API void sapi_handle_post(void *arg TSRMLS_DC);
 
 SAPI_API int sapi_register_post_entries(sapi_post_entry *post_entry);
 SAPI_API int sapi_register_post_entry(sapi_post_entry *post_entry);
 SAPI_API void sapi_unregister_post_entry(sapi_post_entry *post_entry);
-SAPI_API int sapi_register_default_post_reader(void (*default_post_reader)(SLS_D));
+SAPI_API int sapi_register_default_post_reader(void (*default_post_reader)(TSRMLS_D));
 
 SAPI_API int sapi_flush(void);
 SAPI_API struct stat *sapi_get_stat(void);
 SAPI_API char *sapi_getenv(char *name, size_t name_len);
 
-SAPI_API char *sapi_get_default_content_type(SLS_D);
-SAPI_API void sapi_get_default_content_type_header(sapi_header_struct *default_header SLS_DC);
-SAPI_API size_t sapi_apply_default_charset(char **mimetype, size_t len SLS_DC);
+SAPI_API char *sapi_get_default_content_type(TSRMLS_D);
+SAPI_API void sapi_get_default_content_type_header(sapi_header_struct *default_header TSRMLS_DC);
+SAPI_API size_t sapi_apply_default_charset(char **mimetype, size_t len TSRMLS_DC);
 
 struct _sapi_module_struct {
 	char *name;
@@ -167,24 +157,24 @@ struct _sapi_module_struct {
 	int (*startup)(struct _sapi_module_struct *sapi_module);
 	int (*shutdown)(struct _sapi_module_struct *sapi_module);
 
-	int (*activate)(SLS_D);
-	int (*deactivate)(SLS_D);
+	int (*activate)(TSRMLS_D);
+	int (*deactivate)(TSRMLS_D);
 
 	int (*ub_write)(const char *str, unsigned int str_length);
 	void (*flush)(void *server_context);
-	struct stat *(*get_stat)(SLS_D);
-	char *(*getenv)(char *name, size_t name_len SLS_DC);
+	struct stat *(*get_stat)(TSRMLS_D);
+	char *(*getenv)(char *name, size_t name_len TSRMLS_DC);
 
 	void (*sapi_error)(int type, const char *error_msg, ...);
 
-	int (*header_handler)(sapi_header_struct *sapi_header, sapi_headers_struct *sapi_headers SLS_DC);
-	int (*send_headers)(sapi_headers_struct *sapi_headers SLS_DC);
+	int (*header_handler)(sapi_header_struct *sapi_header, sapi_headers_struct *sapi_headers TSRMLS_DC);
+	int (*send_headers)(sapi_headers_struct *sapi_headers TSRMLS_DC);
 	void (*send_header)(sapi_header_struct *sapi_header, void *server_context);
 
-	int (*read_post)(char *buffer, uint count_bytes SLS_DC);
-	char *(*read_cookies)(SLS_D);
+	int (*read_post)(char *buffer, uint count_bytes TSRMLS_DC);
+	char *(*read_cookies)(TSRMLS_D);
 
-	void (*register_server_variables)(zval *track_vars_array TSRMLS_DC SLS_DC PLS_DC);
+	void (*register_server_variables)(zval *track_vars_array TSRMLS_DC);
 	void (*log_message)(char *message);
 
 	char *php_ini_path_override;
@@ -192,15 +182,15 @@ struct _sapi_module_struct {
 	void (*block_interruptions)(void);
 	void (*unblock_interruptions)(void);
 
-	void (*default_post_reader)(SLS_D);
+	void (*default_post_reader)(TSRMLS_D);
 };
 
 
 struct _sapi_post_entry {
 	char *content_type;
 	uint content_type_len;
-	void (*post_reader)(SLS_D);
-	void (*post_handler)(char *content_type_dup, void *arg SLS_DC);
+	void (*post_reader)(TSRMLS_D);
+	void (*post_handler)(char *content_type_dup, void *arg TSRMLS_DC);
 };
 
 /* header_handler() constants */
@@ -217,8 +207,8 @@ struct _sapi_post_entry {
 #define SAPI_DEFAULT_CHARSET		""
 #define SAPI_PHP_VERSION_HEADER		"X-Powered-By: PHP/" PHP_VERSION
 
-#define SAPI_POST_READER_FUNC(post_reader) SAPI_API void post_reader(SLS_D)
-#define SAPI_POST_HANDLER_FUNC(post_handler) SAPI_API void post_handler(char *content_type_dup, void *arg SLS_DC)
+#define SAPI_POST_READER_FUNC(post_reader) SAPI_API void post_reader(TSRMLS_D)
+#define SAPI_POST_HANDLER_FUNC(post_handler) SAPI_API void post_handler(char *content_type_dup, void *arg TSRMLS_DC)
 
 SAPI_POST_READER_FUNC(sapi_read_standard_form_data);
 SAPI_POST_READER_FUNC(php_default_post_reader);

@@ -45,20 +45,10 @@ typedef struct {
 } php_dir_globals;
 
 #ifdef ZTS
-#define DIRG(v) (dir_globals->v)
-#define DIRLS_FETCH() php_dir_globals *dir_globals = ts_resource(dir_globals_id)
-#define DIRLS_D		php_dir_globals *dir_globals
-#define DIRLS_DC	, DIRLS_D
-#define DIRLS_C		dir_globals
-#define DIRLS_CC	, DIRLS_C
+#define DIRG(v) TSRMG(dir_globals_id, php_dir_globals *, v)
 int dir_globals_id;
 #else
 #define DIRG(v) (dir_globals.v)
-#define DIRLS_FETCH()
-#define DIRLS_D
-#define DIRLS_DC
-#define DIRLS_C
-#define DIRLS_CC
 php_dir_globals dir_globals;
 #endif
 
@@ -97,7 +87,7 @@ static zend_function_entry php_dir_class_functions[] = {
 };
 
 
-static void php_set_default_dir(int id DIRLS_DC)
+static void php_set_default_dir(int id TSRMLS_DC)
 {
     if (DIRG(default_dir)!=-1) {
         zend_list_delete(DIRG(default_dir));
@@ -120,8 +110,6 @@ static void _dir_dtor(zend_rsrc_list_entry *rsrc)
 
 PHP_RINIT_FUNCTION(dir)
 {
-	DIRLS_FETCH();
-
 	DIRG(default_dir) = -1;
 	return SUCCESS;
 }
@@ -153,7 +141,6 @@ static void _php_do_opendir(INTERNAL_FUNCTION_PARAMETERS, int createobject)
 {
 	pval **arg;
 	php_dir *dirp;
-	DIRLS_FETCH();
 	
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -183,7 +170,7 @@ static void _php_do_opendir(INTERNAL_FUNCTION_PARAMETERS, int createobject)
 
 	dirp->id = zend_list_insert(dirp,le_dirp);
 
-	php_set_default_dir(dirp->id DIRLS_CC);
+	php_set_default_dir(dirp->id TSRMLS_CC);
 
 	if (createobject) {
 		object_init_ex(return_value, dir_class_entry_ptr);
@@ -221,14 +208,13 @@ PHP_FUNCTION(closedir)
 {
 	pval **id, **tmp, *myself;
 	php_dir *dirp;
-	DIRLS_FETCH();
 
 	FETCH_DIRP();
 
 	zend_list_delete(dirp->id);
 
 	if (dirp->id == DIRG(default_dir)) {
-		php_set_default_dir(-1 DIRLS_CC);
+		php_set_default_dir(-1 TSRMLS_CC);
 	}
 }
 
@@ -275,7 +261,6 @@ PHP_FUNCTION(chdir)
 {
 	pval **arg;
 	int ret;
-	PLS_FETCH();
 	
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -334,7 +319,6 @@ PHP_FUNCTION(rewinddir)
 {
 	pval **id, **tmp, *myself;
 	php_dir *dirp;
-	DIRLS_FETCH();
 	
 	FETCH_DIRP();
 
@@ -350,7 +334,6 @@ PHP_NAMED_FUNCTION(php_if_readdir)
 	php_dir *dirp;
 	char entry[sizeof(struct dirent)+MAXPATHLEN];
 	struct dirent *result = (struct dirent *)&entry; /* patch for libc5 readdir problems */
-	DIRLS_FETCH();
 
 	FETCH_DIRP();
 

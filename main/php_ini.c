@@ -202,7 +202,7 @@ int php_init_config(char *php_ini_path_override)
 	char *open_basedir;
 	int free_ini_search_path=0;
 	zend_file_handle fh;
-	PLS_FETCH();
+	TSRMLS_FETCH();
 
 	if (zend_hash_init(&configuration_hash, 0, NULL, (dtor_func_t) pvalue_config_destructor, 1)==FAILURE) {
 		return FAILURE;

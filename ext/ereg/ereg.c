@@ -53,7 +53,7 @@ static int _php_regcomp(regex_t *preg, const char *pattern, int cflags)
 	int r = 0;
 	int patlen = strlen(pattern);
 	reg_cache *rc = NULL;
-	REGLS_FETCH();
+	TSRMLS_FETCH();
 	
 	if(zend_hash_find(&REG(ht_rc), (char *) pattern, patlen+1, (void **) &rc) == FAILURE ||
 			rc->cflags != cflags) {
@@ -102,7 +102,7 @@ PHP_MINIT_FUNCTION(regex)
 
 PHP_MSHUTDOWN_FUNCTION(regex)
 {
-	REGLS_FETCH();
+	TSRMLS_FETCH();
 
 	zend_hash_destroy(&REG(ht_rc));
 	return SUCCESS;

@@ -176,19 +176,9 @@ ZEND_END_MODULE_GLOBALS(imap)
 
 
 #ifdef ZTS
-# define IMAPLS_D	zend_imap_globals *imap_globals
-# define IMAPLS_DC	, IMAPLS_D
-# define IMAPLS_C	imap_globals
-# define IMAPLS_CC , IMAPLS_C
-# define IMAPG(v) (imap_globals->v)
-# define IMAPLS_FETCH()	zend_imap_globals *imap_globals = ts_resource(imap_globals_id)
+# define IMAPG(v) TSRMG(imap_globals_id, zend_imap_globals *, v)
 #else
-# define IMAPLS_D
-# define IMAPLS_DC
-# define IMAPLS_C
-# define IMAPLS_CC
 # define IMAPG(v) (imap_globals.v)
-# define IMAPLS_FETCH()
 #endif
 
 #define phpext_imap_ptr imap_module_ptr

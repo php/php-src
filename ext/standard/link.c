@@ -102,7 +102,6 @@ PHP_FUNCTION(symlink)
 {
 	pval **topath, **frompath;
 	int ret;
-	PLS_FETCH();
 
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &topath, &frompath) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -133,7 +132,6 @@ PHP_FUNCTION(link)
 {
 	pval **topath, **frompath;
 	int ret;
-	PLS_FETCH();
 
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &topath, &frompath) == FAILURE) {
 		WRONG_PARAM_COUNT;

@@ -85,6 +85,7 @@ FILE *php_fopen_url_wrap_http(char *path, char *mode, int options, int *issock, 
 	zval *response_header;
 	char *http_header_line;
 	int http_header_line_length, http_header_line_size;
+	TSRMLS_FETCH();
 
 	resource = php_url_parse((char *) path);
 	if (resource == NULL) {
@@ -274,7 +275,6 @@ FILE *php_fopen_url_wrap_http(char *path, char *mode, int options, int *issock, 
 		php_url_free(resource);
 		if (location[0] != '\0') {
 			zval **response_header_new, *entry, **entryp;
-			TSRMLS_FETCH();
 
 			fp = php_fopen_url_wrap_http(location, mode, options, issock, socketd, opened_path);
 			if (zend_hash_find(EG(active_symbol_table), "http_response_header", sizeof("http_response_header"), (void **) &response_header_new) == SUCCESS) {
@@ -299,7 +299,6 @@ FILE *php_fopen_url_wrap_http(char *path, char *mode, int options, int *issock, 
 	*issock = 1;
  out:
 	{
-		TSRMLS_FETCH();
 		ZEND_SET_SYMBOL(EG(active_symbol_table), "http_response_header", response_header);
 	}	
 	return (fp);

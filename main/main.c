@@ -83,7 +83,7 @@ php_core_globals core_globals;
 PHPAPI int core_globals_id;
 #endif
 
-static void php_build_argv(char *s, zval *track_vars_array TSRMLS_DC PLS_DC);
+static void php_build_argv(char *s, zval *track_vars_array TSRMLS_DC);
 
 #define SAFE_FILENAME(f) ((f)?(f):"-")
 
@@ -275,7 +275,7 @@ PHPAPI void php_log_err(char *log_message)
 	char error_time_str[128];
 	struct tm tmbuf;
 	time_t error_time;
-	PLS_FETCH();
+	TSRMLS_FETCH();
 
 	/* Try to use the specified logging location. */
 	if (PG(error_log) != NULL) {
@@ -344,7 +344,6 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 	char buffer[1024];
 	int buffer_len;
 	TSRMLS_FETCH();
-	PLS_FETCH();
 
 	buffer_len = vsnprintf(buffer, sizeof(buffer)-1, format, args);
 	buffer[sizeof(buffer)-1]=0;
@@ -480,7 +479,6 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 PHP_FUNCTION(set_time_limit)
 {
 	zval **new_timeout;
-	PLS_FETCH();
 
 	if (PG(safe_mode)) {
 		php_error(E_WARNING, "Cannot set time limit in safe mode");
@@ -537,13 +535,13 @@ static void php_message_handler_for_zend(long message, void *data)
 {
 	switch (message) {
 		case ZMSG_FAILED_INCLUDE_FOPEN: {
-				PLS_FETCH();
+				TSRMLS_FETCH();
 
 				php_error(E_WARNING, "Failed opening '%s' for inclusion (include_path='%s')", php_strip_url_passwd((char *) data), STR_PRINT(PG(include_path)));
 			}
 			break;
 		case ZMSG_FAILED_REQUIRE_FOPEN: {
-				PLS_FETCH();
+				TSRMLS_FETCH();
 
 				php_error(E_COMPILE_ERROR, "Failed opening required '%s' (include_path='%s')", php_strip_url_passwd((char *) data), STR_PRINT(PG(include_path)));
 			}
@@ -558,7 +556,7 @@ static void php_message_handler_for_zend(long message, void *data)
 				if (EG(error_reporting)&E_WARNING) {
 #if ZEND_DEBUG
 					char memory_leak_buf[512];
-					SLS_FETCH();
+					TSRMLS_FETCH();
 
 					if (message==ZMSG_MEMORY_LEAK_DETECTED) {
 						zend_mem_header *t = (zend_mem_header *) data;
@@ -589,7 +587,7 @@ static void php_message_handler_for_zend(long message, void *data)
 				struct tm *ta, tmbuf;
 				time_t curtime;
 				char *datetime_str, asctimebuf[52];
-				SLS_FETCH();
+				TSRMLS_FETCH();
 
 				time(&curtime);
 				ta = php_localtime_r(&curtime, &tmbuf);
@@ -614,11 +612,11 @@ static void sigchld_handler(int apar)
 /* }}} */
 #endif
 
-static int php_hash_environment(TSRMLS_D SLS_DC PLS_DC);
+static int php_hash_environment(TSRMLS_D);
 
 /* {{{ php_request_startup
  */
-int php_request_startup(CLS_D TSRMLS_DC PLS_DC SLS_DC)
+int php_request_startup(TSRMLS_D)
 {
 	int retval = SUCCESS;
 
@@ -636,8 +634,8 @@ int php_request_startup(CLS_D TSRMLS_DC PLS_DC SLS_DC)
 		PG(header_is_being_sent) = 0;
 		PG(connection_status) = PHP_CONNECTION_NORMAL;
 		
-		zend_activate(CLS_C TSRMLS_CC);
-		sapi_activate(SLS_C);
+		zend_activate(TSRMLS_C);
+		sapi_activate(TSRMLS_C);
 
 		zend_set_timeout(EG(timeout_seconds));
 
@@ -662,7 +660,7 @@ int php_request_startup(CLS_D TSRMLS_DC PLS_DC SLS_DC)
 		/* We turn this off in php_execute_script() */
 		/* PG(during_request_startup) = 0; */
 
-		php_hash_environment(TSRMLS_C SLS_CC PLS_CC);
+		php_hash_environment(TSRMLS_C);
 		zend_activate_modules();
 		PG(modules_activated)=1;
 	} zend_catch {
@@ -687,10 +685,7 @@ void php_request_shutdown_for_exec(void *dummy)
  */
 void php_request_shutdown(void *dummy)
 {
-	CLS_FETCH();
 	TSRMLS_FETCH();
-	SLS_FETCH();
-	PLS_FETCH();
 
 	zend_try {
 		php_end_ob_buffers((zend_bool)(SG(request_info).headers_only?0:1));
@@ -708,10 +703,10 @@ void php_request_shutdown(void *dummy)
 		zend_deactivate_modules();
 	}
 		
-	zend_deactivate(CLS_C TSRMLS_CC);
+	zend_deactivate(TSRMLS_C);
 
 	zend_try {
-		sapi_deactivate(SLS_C);
+		sapi_deactivate(TSRMLS_C);
 	} zend_end_try();
 
 	zend_try { 
@@ -780,6 +775,7 @@ int php_module_startup(sapi_module_struct *sf)
 #ifdef ZTS
 	zend_executor_globals *executor_globals;
 	void ***tsrm_ls;
+
 	php_core_globals *core_globals;
 	sapi_globals_struct *sapi_globals = ts_resource(sapi_globals_id);
 #endif
@@ -802,8 +798,12 @@ int php_module_startup(sapi_module_struct *sf)
     php_os=PHP_OS;
 #endif
 
-	sapi_initialize_empty_request(SLS_C);
-	sapi_activate(SLS_C);
+#ifdef ZTS
+	tsrm_ls = ts_resource(0);
+#endif
+
+	sapi_initialize_empty_request(TSRMLS_C);
+	sapi_activate(TSRMLS_C);
 
 	if (module_initialized) {
 		return SUCCESS;
@@ -827,7 +827,6 @@ int php_module_startup(sapi_module_struct *sf)
 
 #ifdef ZTS
 	executor_globals = ts_resource(executor_globals_id);
-	tsrm_ls = ts_resource(0);
 	ts_allocate_id(&core_globals_id, sizeof(php_core_globals), (ts_allocate_ctor) core_globals_ctor, NULL);
 	core_globals = ts_resource(core_globals_id);
 #endif
@@ -898,7 +897,7 @@ int php_module_startup(sapi_module_struct *sf)
 	REGISTER_MAIN_STRINGL_CONSTANT("PHP_CONFIG_FILE_PATH", PHP_CONFIG_FILE_PATH, sizeof(PHP_CONFIG_FILE_PATH)-1, CONST_PERSISTENT | CONST_CS);
 	php_output_register_constants();
 
-	if (php_startup_ticks(PLS_C) == FAILURE) {
+	if (php_startup_ticks(TSRMLS_C) == FAILURE) {
 		php_printf("Unable to start PHP ticks\n");
 		return FAILURE;
 	}
@@ -925,7 +924,7 @@ int php_module_startup(sapi_module_struct *sf)
 
 	/* */
 	module_initialized = 1;
-	sapi_deactivate(SLS_C);
+	sapi_deactivate(TSRMLS_C);
 
 	/* we're done */
 	return SUCCESS;
@@ -951,7 +950,7 @@ int php_module_shutdown_wrapper(sapi_module_struct *sapi_globals)
 void php_module_shutdown()
 {
 	int module_number=0;	/* for UNREGISTER_INI_ENTRIES() */
-	PLS_FETCH();
+	TSRMLS_FETCH();
 
 	if (!module_initialized) {
 		return;
@@ -965,7 +964,7 @@ void php_module_shutdown()
 	WSACleanup();
 #endif
 
-	php_shutdown_ticks(PLS_C);
+	php_shutdown_ticks(TSRMLS_C);
 	sapi_flush();
 
 	zend_shutdown();
@@ -982,7 +981,7 @@ void php_module_shutdown()
 
 /* {{{ php_register_server_variables
  */
-static inline void php_register_server_variables(TSRMLS_D SLS_DC PLS_DC)
+static inline void php_register_server_variables(TSRMLS_D)
 {
 	zval *array_ptr=NULL;
 
@@ -993,27 +992,27 @@ static inline void php_register_server_variables(TSRMLS_D SLS_DC PLS_DC)
 
 	/* Server variables */
 	if (sapi_module.register_server_variables) {
-		sapi_module.register_server_variables(array_ptr TSRMLS_CC SLS_CC PLS_CC);
+		sapi_module.register_server_variables(array_ptr TSRMLS_CC);
 	}
 
 	/* argv/argc support */
 	if (PG(register_argc_argv)) {
-		php_build_argv(SG(request_info).query_string, array_ptr TSRMLS_CC PLS_CC);
+		php_build_argv(SG(request_info).query_string, array_ptr TSRMLS_CC);
 	}
 
 	/* PHP Authentication support */
 	if (SG(request_info).auth_user) {
-		php_register_variable("PHP_AUTH_USER", SG(request_info).auth_user, array_ptr TSRMLS_CC PLS_CC);
+		php_register_variable("PHP_AUTH_USER", SG(request_info).auth_user, array_ptr TSRMLS_CC);
 	}
 	if (SG(request_info).auth_password) {
-		php_register_variable("PHP_AUTH_PW", SG(request_info).auth_password, array_ptr TSRMLS_CC PLS_CC);
+		php_register_variable("PHP_AUTH_PW", SG(request_info).auth_password, array_ptr TSRMLS_CC);
 	}
 }
 /* }}} */
 
 /* {{{ php_hash_environment
  */
-static int php_hash_environment(TSRMLS_D SLS_DC PLS_DC)
+static int php_hash_environment(TSRMLS_D)
 {
 	char *p;
 	unsigned char _gpc_flags[3] = {0,0,0};
@@ -1053,7 +1052,7 @@ static int php_hash_environment(TSRMLS_D SLS_DC PLS_DC)
 		ALLOC_ZVAL(PG(http_globals)[TRACK_VARS_ENV]);
 		array_init(PG(http_globals)[TRACK_VARS_ENV]);
 		INIT_PZVAL(PG(http_globals)[TRACK_VARS_ENV]);
-		php_import_environment_variables(PG(http_globals)[TRACK_VARS_ENV] TSRMLS_CC PLS_CC);
+		php_import_environment_variables(PG(http_globals)[TRACK_VARS_ENV] TSRMLS_CC);
 	}
 
 	while(p && *p) {
@@ -1061,21 +1060,21 @@ static int php_hash_environment(TSRMLS_D SLS_DC PLS_DC)
 			case 'p':
 			case 'P':
 				if (!_gpc_flags[0] && !SG(headers_sent) && SG(request_info).request_method && !strcasecmp(SG(request_info).request_method, "POST")) {
-					php_treat_data(PARSE_POST, NULL, NULL TSRMLS_CC PLS_CC SLS_CC);	/* POST Data */
+					php_treat_data(PARSE_POST, NULL, NULL TSRMLS_CC);	/* POST Data */
 					_gpc_flags[0]=1;
 				}
 				break;
 			case 'c':
 			case 'C':
 				if (!_gpc_flags[1]) {
-					php_treat_data(PARSE_COOKIE, NULL, NULL  TSRMLS_CC PLS_CC SLS_CC);	/* Cookie Data */
+					php_treat_data(PARSE_COOKIE, NULL, NULL TSRMLS_CC);	/* Cookie Data */
 					_gpc_flags[1]=1;
 				}
 				break;
 			case 'g':
 			case 'G':
 				if (!_gpc_flags[2]) {
-					php_treat_data(PARSE_GET, NULL, NULL  TSRMLS_CC PLS_CC SLS_CC);	/* GET Data */
+					php_treat_data(PARSE_GET, NULL, NULL TSRMLS_CC);	/* GET Data */
 					_gpc_flags[2]=1;
 				}
 				break;
@@ -1085,20 +1084,20 @@ static int php_hash_environment(TSRMLS_D SLS_DC PLS_DC)
 					ALLOC_ZVAL(PG(http_globals)[TRACK_VARS_ENV]);
 					array_init(PG(http_globals)[TRACK_VARS_ENV]);
 					INIT_PZVAL(PG(http_globals)[TRACK_VARS_ENV]);
-					php_import_environment_variables(PG(http_globals)[TRACK_VARS_ENV] TSRMLS_CC PLS_CC);
+					php_import_environment_variables(PG(http_globals)[TRACK_VARS_ENV] TSRMLS_CC);
 				} else {
 					php_error(E_WARNING, "Unsupported 'e' element (environment) used in gpc_order - use variables_order instead");
 				}
 				break;
 			case 's':
 			case 'S':
-				php_register_server_variables(TSRMLS_C SLS_CC PLS_CC);
+				php_register_server_variables(TSRMLS_C);
 				break;
 		}
 	}
 
 	if (!have_variables_order) {
-		php_register_server_variables(TSRMLS_C SLS_CC PLS_CC);
+		php_register_server_variables(TSRMLS_C);
 	}
 
 	for (i=0; i<6; i++) {
@@ -1121,7 +1120,7 @@ static int php_hash_environment(TSRMLS_D SLS_DC PLS_DC)
 
 /* {{{ php_build_argv
  */
-static void php_build_argv(char *s, zval *track_vars_array TSRMLS_DC PLS_DC)
+static void php_build_argv(char *s, zval *track_vars_array TSRMLS_DC)
 {
 	pval *arr, *argc, *tmp;
 	int count = 0;
@@ -1180,7 +1179,7 @@ static void php_build_argv(char *s, zval *track_vars_array TSRMLS_DC PLS_DC)
 
 /* {{{ php_handle_special_queries
  */
-PHPAPI int php_handle_special_queries(SLS_D PLS_DC)
+PHPAPI int php_handle_special_queries(TSRMLS_D)
 {
 	if (SG(request_info).query_string && SG(request_info).query_string[0]=='=' 
 			&& PG(expose_php)) {
@@ -1197,15 +1196,14 @@ PHPAPI int php_handle_special_queries(SLS_D PLS_DC)
 
 /* {{{ php_execute_script
  */
-PHPAPI int php_execute_script(zend_file_handle *primary_file CLS_DC TSRMLS_DC PLS_DC)
+PHPAPI int php_execute_script(zend_file_handle *primary_file TSRMLS_DC)
 {
 	zend_file_handle *prepend_file_p, *append_file_p;
 	zend_file_handle prepend_file, append_file;
 	char *old_cwd;
-	SLS_FETCH();
 
 	EG(exit_status) = 0;
-	if (php_handle_special_queries(SLS_C PLS_CC)) {
+	if (php_handle_special_queries(TSRMLS_C)) {
 		return 0;
 	}
 #define OLD_CWD_SIZE 4096
@@ -1243,7 +1241,7 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file CLS_DC TSRMLS_DC PL
 		} else {
 			append_file_p = NULL;
 		}
-		zend_execute_scripts(ZEND_REQUIRE CLS_CC TSRMLS_CC, 3, prepend_file_p, primary_file, append_file_p);
+		zend_execute_scripts(ZEND_REQUIRE TSRMLS_CC, 3, prepend_file_p, primary_file, append_file_p);
 	} zend_end_try();
 
 	if (old_cwd[0] != '\0') {
@@ -1258,7 +1256,7 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file CLS_DC TSRMLS_DC PL
  */
 PHPAPI void php_handle_aborted_connection(void)
 {
-	PLS_FETCH();
+	TSRMLS_FETCH();
 
 	PG(connection_status) = PHP_CONNECTION_ABORTED;
 	php_output_set_status(0);
@@ -1271,7 +1269,7 @@ PHPAPI void php_handle_aborted_connection(void)
 
 /* {{{ php_handle_auth_data
  */
-PHPAPI int php_handle_auth_data(const char *auth SLS_DC)
+PHPAPI int php_handle_auth_data(const char *auth TSRMLS_DC)
 {
 	int ret = -1;
 
@@ -1303,13 +1301,13 @@ PHPAPI int php_handle_auth_data(const char *auth SLS_DC)
 
 /* {{{ php_lint_script
  */
-PHPAPI int php_lint_script(zend_file_handle *file CLS_DC TSRMLS_DC PLS_DC)
+PHPAPI int php_lint_script(zend_file_handle *file TSRMLS_DC)
 {
 	zend_op_array *op_array;
 
 	zend_try {
-		op_array = zend_compile_file(file, ZEND_INCLUDE CLS_CC);
-		zend_destroy_file_handle(file CLS_CC);
+		op_array = zend_compile_file(file, ZEND_INCLUDE TSRMLS_CC);
+		zend_destroy_file_handle(file TSRMLS_CC);
 
 		if (op_array) {
 			destroy_op_array(op_array);

@@ -59,13 +59,6 @@
 #include <signal.h>
 #endif
 
-#define TLS_D
-#define TLS_DC
-#define TLS_C
-#define TLS_CC
-#define TLS_FETCH()
-
-
 FCGX_Stream *in, *out, *err;
 FCGX_ParamArray envp;
 char *path_info = NULL;
@@ -124,12 +117,12 @@ static void sapi_fastcgi_send_header(sapi_header_struct *sapi_header, void *serv
 	FCGX_PutStr( "\r\n", 2, out );
 }
 
-static int sapi_fastcgi_read_post(char *buffer, uint count_bytes SLS_DC)
+static int sapi_fastcgi_read_post(char *buffer, uint count_bytes TSRMLS_DC)
 {
 	size_t read_bytes = 0, tmp;
 	int c;
 	char *pos = buffer;
-	TLS_FETCH();
+	TSRMLS_FETCH();
 
 	while( count_bytes ) {
 		c = FCGX_GetStr( pos, count_bytes, in );
@@ -141,13 +134,13 @@ static int sapi_fastcgi_read_post(char *buffer, uint count_bytes SLS_DC)
 	return read_bytes;
 }
 
-static char *sapi_fastcgi_read_cookies(SLS_D)
+static char *sapi_fastcgi_read_cookies(TSRMLS_D)
 {
 	return getenv( "HTTP_COOKIE" );
 }
 
 
-static void sapi_fastcgi_register_variables(zval *track_vars_array TSRMLS_DC SLS_DC PLS_DC)
+static void sapi_fastcgi_register_variables(zval *track_vars_array TSRMLS_DC TSRMLS_DC TSRMLS_DC)
 {
 	char *self = getenv("REQUEST_URI");
 	char *ptr = strchr( self, '?' );
@@ -162,7 +155,7 @@ static void sapi_fastcgi_register_variables(zval *track_vars_array TSRMLS_DC SLS
 
 	/* strip query string off this */
 	if ( ptr ) *ptr = 0;
-	php_register_variable( "PHP_SELF", getenv("REQUEST_URI"), track_vars_array TSRMLS_CC PLS_CC);
+	php_register_variable( "PHP_SELF", getenv("REQUEST_URI"), track_vars_array TSRMLS_CC);
 	if ( ptr ) *ptr = '?';
 }
 
@@ -199,26 +192,25 @@ static sapi_module_struct fastcgi_sapi_module = {
 	STANDARD_SAPI_MODULE_PROPERTIES
 };
 
-static void fastcgi_module_main(TLS_D SLS_DC)
+static void fastcgi_module_main(TSRMLS_D TSRMLS_DC)
 {
 	zend_file_handle file_handle;
-	CLS_FETCH();
 	TSRMLS_FETCH();
-	PLS_FETCH();
+	TSRMLS_FETCH();
 
 	file_handle.type = ZEND_HANDLE_FILENAME;
 	file_handle.filename = SG(request_info).path_translated;
 	file_handle.free_filename = 0;
 	file_handle.opened_path = NULL;
 
-	if (php_request_startup(CLS_C TSRMLS_CC PLS_CC SLS_CC) == SUCCESS) {
-		php_execute_script(&file_handle CLS_CC TSRMLS_CC PLS_CC);
+	if (php_request_startup(TSRMLS_C) == SUCCESS) {
+		php_execute_script(&file_handle TSRMLS_CC);
 		php_request_shutdown(NULL);
 	}
 }
 
 
-static void init_request_info( SLS_D )
+static void init_request_info( TSRMLS_D )
 {
 	char *content_length = getenv("CONTENT_LENGTH");
 	char *content_type = getenv( "CONTENT_TYPE" );
@@ -275,7 +267,7 @@ static void init_request_info( SLS_D )
 #ifdef DEBUG_FASTCGI
 	fprintf( stderr, "Authorization: %s\n", auth );
 #endif
-	php_handle_auth_data(auth SLS_CC);
+	php_handle_auth_data(auth TSRMLS_CC);
 
 
 }
@@ -480,13 +472,13 @@ int main(int argc, char *argv[])
 			cgi_env, (cgi_env_size+1)*sizeof(char *) );
 		environ = merge_env;
 
-		init_request_info( TLS_C SLS_CC );
+		init_request_info(TSRMLS_C);
 		SG(server_context) = (void *) 1; /* avoid server_context==NULL checks */
 		CG(extended_info) = 0;		      
 		SG(request_info).argv0 = argv0;		       
 		zend_llist_init(&global_vars, sizeof(char *), NULL, 0);
 
-		fastcgi_module_main( TLS_C SLS_CC );
+		fastcgi_module_main(TSRMLS_C);
 		if( path_info ) {
 		   free( path_info );
 		   path_info = NULL;

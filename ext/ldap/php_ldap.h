@@ -101,19 +101,9 @@ ZEND_BEGIN_MODULE_GLOBALS(ldap)
 ZEND_END_MODULE_GLOBALS(ldap)
 
 #ifdef ZTS
-# define LDAPLS_D	zend_ldap_globals *ldap_globals
-# define LDAPLS_DC	, LDAPLS_D
-# define LDAPLS_C	ldap_globals
-# define LDAPLS_CC , LDAPLS_C
-# define LDAPG(v) (ldap_globals->v)
-# define LDAPLS_FETCH()	zend_ldap_globals *ldap_globals = ts_resource(ldap_globals_id)
+# define LDAPG(v) TSRMG(ldap_globals_id, zend_ldap_globals *, v)
 #else
-# define LDAPLS_D
-# define LDAPLS_DC
-# define LDAPLS_C
-# define LDAPLS_CC
 # define LDAPG(v) (ldap_globals.v)
-# define LDAPLS_FETCH()
 #endif
 
 

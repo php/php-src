@@ -70,7 +70,7 @@ static void php_free_pcre_cache(void *data)
 
 
 #ifdef ZTS
-static void php_pcre_init_globals(php_pcre_globals *pcre_globals)
+static void php_pcre_init_globals(php_pcre_globals *pcre_globals TSRMLS_DC)
 {
 	zend_hash_init(&PCRE_G(pcre_cache), 0, NULL, php_free_pcre_cache, 1);
 }
@@ -609,7 +609,6 @@ static int preg_do_eval(char *eval_str, int eval_str_len, char *subject,
 	int			 backref;			/* Current backref */
 	char        *compiled_string_description;
 	smart_str    code = {0};
-	CLS_FETCH();
 	TSRMLS_FETCH();
 	
 	eval_str_end = eval_str + eval_str_len;
@@ -664,7 +663,7 @@ static int preg_do_eval(char *eval_str, int eval_str_len, char *subject,
 
 	compiled_string_description = zend_make_compiled_string_description("regexp code");
 	/* Run the code */
-	if (zend_eval_string(code.c, &retval, compiled_string_description CLS_CC TSRMLS_CC) == FAILURE) {
+	if (zend_eval_string(code.c, &retval, compiled_string_description TSRMLS_CC) == FAILURE) {
 		efree(compiled_string_description);
 		zend_error(E_ERROR, "Failed evaluating code:\n%s\n", code);
 		/* zend_error() does not return in this case */

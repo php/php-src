@@ -619,7 +619,7 @@ static PHP_INI_MH(OnUpdateSafeModeProtectedEnvVars)
 	char *protected_vars, *protected_var;
 	char *token_buf;
 	int dummy=1;
-	BLS_FETCH();
+	TSRMLS_FETCH();
 
 	protected_vars = estrndup(new_value, new_value_length);
 	zend_hash_clean(&BG(sm_protected_env_vars));
@@ -636,7 +636,7 @@ static PHP_INI_MH(OnUpdateSafeModeProtectedEnvVars)
 
 static PHP_INI_MH(OnUpdateSafeModeAllowedEnvVars)
 {
-	BLS_FETCH();
+	TSRMLS_FETCH();
 
 	if (BG(sm_allowed_env_vars)) {
 		free(BG(sm_allowed_env_vars));
@@ -691,7 +691,7 @@ static void php_putenv_destructor(putenv_entry *pe)
 
 void test_class_startup(void);
 
-static void basic_globals_ctor(BLS_D TSRMLS_DC)
+static void basic_globals_ctor(php_basic_globals *basic_globals_p TSRMLS_DC)
 {
 	BG(next) = NULL;
 	BG(left) = -1;
@@ -709,7 +709,7 @@ static void basic_globals_ctor(BLS_D TSRMLS_DC)
 #endif
 }
 
-static void basic_globals_dtor(BLS_D TSRMLS_DC)
+static void basic_globals_dtor(php_basic_globals *basic_globals_p TSRMLS_DC)
 {
 	zend_hash_destroy(&BG(sm_protected_env_vars));
 	if (BG(sm_allowed_env_vars)) {
@@ -723,12 +723,10 @@ static void basic_globals_dtor(BLS_D TSRMLS_DC)
 
 PHP_MINIT_FUNCTION(basic)
 {
-	PLS_FETCH();
-
 #ifdef ZTS
 	ts_allocate_id(&basic_globals_id, sizeof(php_basic_globals), (ts_allocate_ctor) basic_globals_ctor, (ts_allocate_dtor) basic_globals_dtor);
 #else
-	basic_globals_ctor(BLS_C TSRMLS_CC);
+	basic_globals_ctor(&basic_globals TSRMLS_CC);
 #endif
 
 	REGISTER_LONG_CONSTANT("CONNECTION_ABORTED", PHP_CONNECTION_ABORTED, CONST_CS | CONST_PERSISTENT);
@@ -802,14 +800,13 @@ PHP_MINIT_FUNCTION(basic)
 
 PHP_MSHUTDOWN_FUNCTION(basic)
 {
-	PLS_FETCH();
-	BLS_FETCH();
 	TSRMLS_FETCH();
 
-	basic_globals_dtor(BLS_C TSRMLS_CC);
 
 #ifdef ZTS
 	ts_free_id(basic_globals_id);
+#else
+	basic_globals_dtor(&basic_globals TSRMLS_CC);
 #endif
 
 	if(PG(allow_url_fopen)) {
@@ -838,8 +835,6 @@ PHP_MSHUTDOWN_FUNCTION(basic)
 
 PHP_RINIT_FUNCTION(basic)
 {
-	BLS_FETCH();
-
 	BG(strtok_string) = NULL;
 	BG(locale_string) = NULL;
 	BG(user_compare_func_name) = NULL;
@@ -884,7 +879,7 @@ PHP_RINIT_FUNCTION(basic)
 
 PHP_RSHUTDOWN_FUNCTION(basic)
 {
-	BLS_FETCH();
+	TSRMLS_FETCH();
 
 	STR_FREE(BG(strtok_string));
 	BG(strtok_string) = NULL;
@@ -1030,7 +1025,6 @@ PHP_FUNCTION(getenv)
 PHP_FUNCTION(putenv)
 {
 	pval **str;
-	BLS_FETCH();
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &str) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1041,7 +1035,6 @@ PHP_FUNCTION(putenv)
 		int ret;
 		char *p,**env;
 		putenv_entry pe;
-		PLS_FETCH();
 
 		pe.putenv_string = estrndup(Z_STRVAL_PP(str),Z_STRLEN_PP(str));
 		pe.key = estrndup(Z_STRVAL_PP(str), Z_STRLEN_PP(str));
@@ -1333,7 +1326,6 @@ PHP_FUNCTION(get_cfg_var)
 PHP_FUNCTION(set_magic_quotes_runtime)
 {
 	pval **new_setting;
-	PLS_FETCH();
 
 	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &new_setting)==FAILURE) {
 		RETURN_FALSE;
@@ -1349,8 +1341,6 @@ PHP_FUNCTION(set_magic_quotes_runtime)
    Get the current active configuration setting of magic_quotes_runtime */
 PHP_FUNCTION(get_magic_quotes_runtime)
 {
-	PLS_FETCH();
-
 	RETURN_LONG(PG(magic_quotes_runtime));
 }
 /* }}} */
@@ -1359,8 +1349,6 @@ PHP_FUNCTION(get_magic_quotes_runtime)
    Get the current active configuration setting of magic_quotes_gpc */
 PHP_FUNCTION(get_magic_quotes_gpc)
 {
-	PLS_FETCH();
-
 	RETURN_LONG(PG(magic_quotes_gpc));
 }
 /* }}} */
@@ -1865,7 +1853,7 @@ static void user_tick_function_call(user_tick_function_entry *tick_fe)
 
 static void run_user_tick_functions(int tick_count)
 {
-	BLS_FETCH();
+	TSRMLS_FETCH();
 
 	zend_llist_apply(BG(user_tick_functions), (llist_apply_func_t)user_tick_function_call);
 }
@@ -1888,7 +1876,6 @@ static int user_tick_function_compare(user_tick_function_entry *tick_fe1,
 
 void php_call_shutdown_functions(void)
 {
-	BLS_FETCH();
 	TSRMLS_FETCH();
 
 	if (BG(user_shutdown_function_names)) zend_try {
@@ -1905,7 +1892,6 @@ PHP_FUNCTION(register_shutdown_function)
 {
 	php_shutdown_function_entry shutdown_function_entry;
 	int i;
-	BLS_FETCH();
 
 	shutdown_function_entry.arg_count = ZEND_NUM_ARGS();
 
@@ -2203,8 +2189,6 @@ PHP_FUNCTION(print_r)
    Returns true if client disconnected */
 PHP_FUNCTION(connection_aborted)
 {
-	PLS_FETCH();
-
     RETURN_LONG(PG(connection_status)&PHP_CONNECTION_ABORTED);
 }
 /* }}} */
@@ -2213,8 +2197,6 @@ PHP_FUNCTION(connection_aborted)
    Returns the connection status bitfield */
 PHP_FUNCTION(connection_status)
 {
-	PLS_FETCH();
-
     RETURN_LONG(PG(connection_status));
 }
 /* }}} */
@@ -2225,7 +2207,6 @@ PHP_FUNCTION(ignore_user_abort)
 {
     pval **arg;
     int old_setting;
-	PLS_FETCH();
 
     old_setting = PG(ignore_user_abort);
     switch (ZEND_NUM_ARGS()) {
@@ -2355,7 +2336,6 @@ PHP_FUNCTION(register_tick_function)
 {
 	user_tick_function_entry tick_fe;
 	int i;
-	BLS_FETCH();
 
 	tick_fe.arg_count = ZEND_NUM_ARGS();
 	if (tick_fe.arg_count < 1) {
@@ -2394,7 +2374,6 @@ PHP_FUNCTION(unregister_tick_function)
 {
 	zval **function;
 	user_tick_function_entry tick_fe;
-	BLS_FETCH();
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(ZEND_NUM_ARGS(), &function)) {
 		WRONG_PARAM_COUNT;
@@ -2426,7 +2405,6 @@ PHPAPI PHP_FUNCTION(warn_not_available)
 PHP_FUNCTION(is_uploaded_file)
 {
 	zval **path;
-	SLS_FETCH();
 
 	if (!SG(rfc1867_uploaded_files)) {
 		RETURN_FALSE;
@@ -2452,8 +2430,6 @@ PHP_FUNCTION(move_uploaded_file)
 {
 	zval **path, **new_path;
 	zend_bool successful=0;
-	SLS_FETCH();
-	PLS_FETCH();
 
 	if (!SG(rfc1867_uploaded_files)) {
 		RETURN_FALSE;
@@ -2513,7 +2489,7 @@ static void php_simple_ini_parser_cb(zval *arg1, zval *arg2, int callback_type, 
 static void php_ini_parser_cb_with_sections(zval *arg1, zval *arg2, int callback_type, zval *arr)
 {
 	zval *element;
-	BLS_FETCH();
+	TSRMLS_FETCH();
 
 	switch (callback_type) {
 		case ZEND_INI_PARSER_ENTRY: {
@@ -2561,7 +2537,7 @@ PHP_FUNCTION(parse_ini_file)
 			}
 			convert_to_boolean_ex(process_sections);
 			if (Z_BVAL_PP(process_sections)) {
-				BLS_FETCH();
+				TSRMLS_FETCH();
 
 				BG(active_ini_file_section) = NULL;
 				ini_parser_cb = (zend_ini_parser_cb_t) php_ini_parser_cb_with_sections;

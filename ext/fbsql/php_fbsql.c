@@ -243,7 +243,8 @@ static void phpfbReleasePLink (zend_rsrc_list_entry *rsrc);
 static void phpfbReleaseResult(zend_rsrc_list_entry *rsrc)
 {
 	PHPFBResult* result = (PHPFBResult *)rsrc->ptr;
-	FBSQLLS_FETCH();
+	TSRMLS_FETCH();
+
 	if (result)
 	{
 		if (result->fetchHandle) {
@@ -262,7 +263,8 @@ static void phpfbReleaseResult(zend_rsrc_list_entry *rsrc)
 static void phpfbReleaseLink (zend_rsrc_list_entry *rsrc)
 {
 	PHPFBLink* link = (PHPFBLink *)rsrc->ptr;
-	FBSQLLS_FETCH();
+	TSRMLS_FETCH();
+
 	if (link)
 	{
 		if (link->hostName) free(link->hostName);
@@ -284,7 +286,8 @@ static void phpfbReleaseLink (zend_rsrc_list_entry *rsrc)
 static void phpfbReleasePLink (zend_rsrc_list_entry *rsrc)
 {
 	PHPFBLink* link = (PHPFBLink *)rsrc->ptr;
-	FBSQLLS_FETCH();
+	TSRMLS_FETCH();
+
 	if (link)
 	{
 		if (link->hostName) free(link->hostName);
@@ -306,7 +309,7 @@ static void phpfbReleasePLink (zend_rsrc_list_entry *rsrc)
 
 static void php_fbsql_set_default_link(int id)
 {
-	FBSQLLS_FETCH();
+	TSRMLS_FETCH();
 
 	if (FB_SQL_G(linkIndex)!=-1) {
 		zend_list_delete(FB_SQL_G(linkIndex));
@@ -315,7 +318,7 @@ static void php_fbsql_set_default_link(int id)
 	zend_list_addref(id);
 }
 
-static int php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAMETERS FBSQLLS_DC)
+static int php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAMETERS TSRMLS_DC)
 {
 	if (FB_SQL_G(linkIndex)==-1) { /* no link opened yet, implicitly open one */
 		ht = 0;
@@ -389,8 +392,6 @@ PHP_MSHUTDOWN_FUNCTION(fbsql)
 
 PHP_RINIT_FUNCTION(fbsql)
 {
-	FBSQLLS_FETCH();
-	
 	FB_SQL_G(linkIndex) = -1;
 	FB_SQL_G(linkCount) = FB_SQL_G(persistantCount);
 	return SUCCESS;
@@ -404,7 +405,8 @@ PHP_RSHUTDOWN_FUNCTION(fbsql)
 PHP_MINFO_FUNCTION(fbsql)
 {
 	char buf[32];
-	FBSQLLS_FETCH();
+	TSRMLS_FETCH();
+
 	php_info_print_table_start();
 	php_info_print_table_header(2, "FrontBase support", "enabled");
 
@@ -439,8 +441,6 @@ static void php_fbsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistant)
 	char *hostName = NULL, *userName = NULL, *userPassword = NULL;
 	int argc = ZEND_NUM_ARGS(), create_new = 0;
 	zval **argv[3];
-	FBSQLLS_FETCH();
-
 
 	if ((argc < 0) || (argc > 3)) WRONG_PARAM_COUNT;
 	if (zend_get_parameters_ex(argc,&argv[0],&argv[1],&argv[2])==FAILURE) RETURN_FALSE;
@@ -627,11 +627,10 @@ PHP_FUNCTION(fbsql_close)
 	PHPFBLink* phpLink = NULL;
 	zval	**fbsql_link_index = NULL;
 	int id;
-	FBSQLLS_FETCH();
 
 	switch (ZEND_NUM_ARGS()) {
 		case 0:
-			id = php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU FBSQLLS_CC);
+			id = php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU TSRMLS_CC);
 			CHECK_LINK(id);
 			break;
 		case 1:
@@ -667,7 +666,7 @@ static int php_fbsql_select_db(char *databaseName, PHPFBLink *link)
 	unsigned port;
 	FBCDatabaseConnection* c;
 	FBCMetaData*           md;
-	FBSQLLS_FETCH();
+	TSRMLS_FETCH();
 
 	if (!link->databaseName || strcmp(link->databaseName, databaseName)) 
 	{
@@ -749,7 +748,6 @@ PHP_FUNCTION(fbsql_autocommit)
 	FBCMetaData* md;
 	zval **fbsql_link_index = NULL, **onoff = NULL;
 	zend_bool OnOff;
-	FBSQLLS_FETCH();
 
 	switch (ZEND_NUM_ARGS()) {
 		case 1:
@@ -791,11 +789,10 @@ PHP_FUNCTION(fbsql_commit)
 	FBCMetaData* md;
 	zval	**fbsql_link_index = NULL;
 	int id;
-	FBSQLLS_FETCH();
 
 	switch (ZEND_NUM_ARGS()) {
 		case 0:
-			id = php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU FBSQLLS_CC);
+			id = php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU TSRMLS_CC);
 			CHECK_LINK(id);
 			break;
 		case 1:
@@ -829,11 +826,10 @@ PHP_FUNCTION(fbsql_rollback)
 	FBCMetaData* md;
 	zval	**fbsql_link_index = NULL;
 	int id;
-	FBSQLLS_FETCH();
 
 	switch (ZEND_NUM_ARGS()) {
 		case 0:
-			id = php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU FBSQLLS_CC);
+			id = php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU TSRMLS_CC);
 			CHECK_LINK(id);
 			break;
 		case 1:
@@ -865,7 +861,6 @@ PHP_FUNCTION(fbsql_hostname)
 {
 	PHPFBLink* phpLink = NULL;
 	zval	**fbsql_link_index = NULL, **host_name = NULL;
-	FBSQLLS_FETCH();
 
 	switch (ZEND_NUM_ARGS()) {
 		case 1:
@@ -900,7 +895,6 @@ PHP_FUNCTION(fbsql_database)
 {
 	PHPFBLink* phpLink = NULL;
 	zval **fbsql_link_index = NULL, **dbname = NULL;
-	FBSQLLS_FETCH();
 
 	switch (ZEND_NUM_ARGS()) {
 		case 1:
@@ -935,7 +929,6 @@ PHP_FUNCTION(fbsql_database_password)
 {
 	PHPFBLink* phpLink = NULL;
 	zval **fbsql_link_index = NULL, **db_password = NULL;
-	FBSQLLS_FETCH();
 
 	switch (ZEND_NUM_ARGS()) {
 		case 1:
@@ -970,7 +963,6 @@ PHP_FUNCTION(fbsql_username)
 {
 	PHPFBLink* phpLink = NULL;
 	zval **fbsql_link_index = NULL, **username = NULL;
-	FBSQLLS_FETCH();
 
 	switch (ZEND_NUM_ARGS()) {
 		case 1:
@@ -1005,7 +997,6 @@ PHP_FUNCTION(fbsql_password)
 {   
 	PHPFBLink* phpLink = NULL;
 	zval **fbsql_link_index = NULL, **password = NULL;
-	FBSQLLS_FETCH();
 
 	switch (ZEND_NUM_ARGS()) {
 		case 1:
@@ -1042,16 +1033,15 @@ PHP_FUNCTION(fbsql_select_db)
 	zval	**fbsql_link_index = NULL, **dbname;
 	int id;
 	char*          name = NULL;
-	FBSQLLS_FETCH();
 
 	switch (ZEND_NUM_ARGS()) {
 		case 0:
 			name = FB_SQL_G(databaseName);
-			id = php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU FBSQLLS_CC);
+			id = php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU TSRMLS_CC);
 			CHECK_LINK(id);
 			break;
 		case 1:
-			id = php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU FBSQLLS_CC);
+			id = php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU TSRMLS_CC);
 			CHECK_LINK(id);
 			if (zend_get_parameters_ex(1, &dbname)==FAILURE) {
 				RETURN_FALSE;
@@ -1098,19 +1088,18 @@ PHP_FUNCTION(fbsql_change_user)
 	int id;
 	char *name = NULL, *userName, *userPassword;
 	char buffer[1024];
-	FBSQLLS_FETCH();
 
 	switch (ZEND_NUM_ARGS()) {
 		case 2:
 			name = FB_SQL_G(databaseName);
-			id = php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU FBSQLLS_CC);
+			id = php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU TSRMLS_CC);
 			CHECK_LINK(id);
 			if (zend_get_parameters_ex(2, &user, &password)==FAILURE) {
 				RETURN_FALSE;
 			}
 			break;
 		case 3:
-			id = php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU FBSQLLS_CC);
+			id = php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU TSRMLS_CC);
 			CHECK_LINK(id);
 			if (zend_get_parameters_ex(3, &user, &password, &database)==FAILURE) {
 				RETURN_FALSE;
@@ -1158,11 +1147,10 @@ PHP_FUNCTION(fbsql_create_db)
 	int id;
 	int i, status;
 	char *databaseName;
-	FBSQLLS_FETCH();
 
 	switch (ZEND_NUM_ARGS()) {
 		case 1:
-			id = php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU FBSQLLS_CC);
+			id = php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU TSRMLS_CC);
 			CHECK_LINK(id);
 			if (zend_get_parameters_ex(1, &database_name)==FAILURE) {
 				RETURN_FALSE;
@@ -1229,11 +1217,10 @@ PHP_FUNCTION(fbsql_drop_db)
 	int id;
 	int i, status;
 	char *databaseName;
-	FBSQLLS_FETCH();
 
 	switch (ZEND_NUM_ARGS()) {
 		case 1:
-			id = php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU FBSQLLS_CC);
+			id = php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU TSRMLS_CC);
 			CHECK_LINK(id);
 			if (zend_get_parameters_ex(1, &database_name)==FAILURE) {
 				RETURN_FALSE;
@@ -1301,11 +1288,10 @@ PHP_FUNCTION(fbsql_start_db)
 	int id;
 	int i, status;
 	char *databaseName;
-	FBSQLLS_FETCH();
 
 	switch (ZEND_NUM_ARGS()) {
 		case 1:
-			id = php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU FBSQLLS_CC);
+			id = php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU TSRMLS_CC);
 			CHECK_LINK(id);
 			if (zend_get_parameters_ex(1, &database_name)==FAILURE) {
 				RETURN_FALSE;
@@ -1377,11 +1363,10 @@ PHP_FUNCTION(fbsql_stop_db)
 	int id;
 	int i, status;
 	char *databaseName;
-	FBSQLLS_FETCH();
 
 	switch (ZEND_NUM_ARGS()) {
 		case 1:
-			id = php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU FBSQLLS_CC);
+			id = php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU TSRMLS_CC);
 			CHECK_LINK(id);
 			if (zend_get_parameters_ex(1, &database_name)==FAILURE) {
 				RETURN_FALSE;
@@ -1433,11 +1418,10 @@ PHP_FUNCTION(fbsql_db_status)
 	zval	**fbsql_link_index = NULL, **database_name;
 	int id;
 	char *databaseName;
-	FBSQLLS_FETCH();
 
 	switch (ZEND_NUM_ARGS()) {
 		case 1:
-			id = php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU FBSQLLS_CC);
+			id = php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU TSRMLS_CC);
 			CHECK_LINK(id);
 			if (zend_get_parameters_ex(1, &database_name)==FAILURE) {
 				RETURN_FALSE;
@@ -1473,7 +1457,7 @@ int mdOk(PHPFBLink* link, FBCMetaData* md)
 {
 	FBCDatabaseConnection* c = link->connection;
 	int result = 1;
-	FBSQLLS_FETCH();
+	TSRMLS_FETCH();
 
 	link->errorNo = 0;
 	if (link->errorText)
@@ -1516,7 +1500,7 @@ static void phpfbQuery(INTERNAL_FUNCTION_PARAMETERS, char* sql, PHPFBLink* link)
 	char*          tp;
 	char*          fh; 
 	unsigned int   sR = 1, cR = 0;
-	FBSQLLS_FETCH();
+	TSRMLS_FETCH();
 
 	meta     = fbcdcExecuteDirectSQL(link->connection, sql);
 
@@ -1598,11 +1582,10 @@ PHP_FUNCTION(fbsql_query)
 	PHPFBLink* phpLink = NULL;
 	zval	**fbsql_link_index = NULL, **query;
 	int id;
-	FBSQLLS_FETCH();
 
 	switch (ZEND_NUM_ARGS()) {
 		case 1:
-			id = php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU FBSQLLS_CC);
+			id = php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU TSRMLS_CC);
 			CHECK_LINK(id);
 			if (zend_get_parameters_ex(1, &query)==FAILURE) {
 				RETURN_FALSE;
@@ -1633,11 +1616,10 @@ PHP_FUNCTION(fbsql_db_query)
 	PHPFBLink* phpLink = NULL;
 	zval	**fbsql_link_index = NULL, **dbname, **query;
 	int id;
-	FBSQLLS_FETCH();
 
 	switch (ZEND_NUM_ARGS()) {
 		case 2:
-			id = php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU FBSQLLS_CC);
+			id = php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU TSRMLS_CC);
 			CHECK_LINK(id);
 			if (zend_get_parameters_ex(2, &dbname, &query)==FAILURE) {
 				RETURN_FALSE;
@@ -1677,11 +1659,10 @@ PHP_FUNCTION(fbsql_list_dbs)
 	PHPFBLink* phpLink = NULL;
 	zval	**fbsql_link_index = NULL;
 	int id;
-	FBSQLLS_FETCH();
 
 	switch (ZEND_NUM_ARGS()) {
 		case 0:
-			id = php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU FBSQLLS_CC);
+			id = php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU TSRMLS_CC);
 			CHECK_LINK(id);
 			break;
 		case 1:
@@ -1724,11 +1705,10 @@ PHP_FUNCTION(fbsql_list_tables)
 	zval	**fbsql_link_index = NULL, **database_name;
 	int id;
 	char *databaseName;
-	FBSQLLS_FETCH();
 
 	switch (ZEND_NUM_ARGS()) {
 		case 1:
-			id = php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU FBSQLLS_CC);
+			id = php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU TSRMLS_CC);
 			CHECK_LINK(id);
 			if (zend_get_parameters_ex(1, &database_name)==FAILURE) {
 				RETURN_FALSE;
@@ -1771,11 +1751,10 @@ PHP_FUNCTION(fbsql_list_fields)
 	int id;
 	char *databaseName, *tableName;
 	char             sql[1024];
-	FBSQLLS_FETCH();
 
 	switch (ZEND_NUM_ARGS()) {
 		case 2:
-			id = php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU FBSQLLS_CC);
+			id = php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU TSRMLS_CC);
 			CHECK_LINK(id);
 			if (zend_get_parameters_ex(2, &database_name, &table_name)==FAILURE) {
 				RETURN_FALSE;
@@ -1813,11 +1792,10 @@ PHP_FUNCTION(fbsql_error)
 	PHPFBLink* phpLink = NULL;
 	zval	**fbsql_link_index = NULL;
 	int id;
-	FBSQLLS_FETCH();
 
 	switch (ZEND_NUM_ARGS()) {
 		case 0:
-			id = php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU FBSQLLS_CC);
+			id = php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU TSRMLS_CC);
 			CHECK_LINK(id);
 			break;
 		case 1:
@@ -1848,11 +1826,10 @@ PHP_FUNCTION(fbsql_errno)
 	PHPFBLink* phpLink = NULL;
 	zval	**fbsql_link_index = NULL;
 	int id;
-	FBSQLLS_FETCH();
 
 	switch (ZEND_NUM_ARGS()) {
 		case 0:
-			id = php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU FBSQLLS_CC);
+			id = php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU TSRMLS_CC);
 			CHECK_LINK(id);
 			break;
 		case 1:
@@ -1877,7 +1854,6 @@ PHP_FUNCTION(fbsql_warnings)
 {
 	int   argc     = ARG_COUNT(ht);
 	zval	**argv[1];
-	FBSQLLS_FETCH();
 
 	if ((argc < 0) || (argc > 1)) WRONG_PARAM_COUNT;
 	if (zend_get_parameters_ex(argc,&argv[0])==FAILURE) RETURN_FALSE;
@@ -1897,11 +1873,10 @@ PHP_FUNCTION(fbsql_affected_rows)
 	PHPFBLink* phpLink = NULL;
 	zval	**fbsql_link_index = NULL;
 	int id;
-	FBSQLLS_FETCH();
 
 	switch (ZEND_NUM_ARGS()) {
 		case 0:
-			id = php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU FBSQLLS_CC);
+			id = php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU TSRMLS_CC);
 			CHECK_LINK(id);
 			break;
 		case 1:
@@ -1927,11 +1902,10 @@ PHP_FUNCTION(fbsql_insert_id)
 	PHPFBLink* phpLink = NULL;
 	zval	**fbsql_link_index = NULL;
 	int id;
-	FBSQLLS_FETCH();
 
 	switch (ZEND_NUM_ARGS()) {
 		case 0:
-			id = php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU FBSQLLS_CC);
+			id = php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU TSRMLS_CC);
 			CHECK_LINK(id);
 			break;
 		case 1:
@@ -2225,7 +2199,6 @@ PHP_FUNCTION(fbsql_result)
 	zval **fbsql_result_index = NULL, **row = NULL, **field = NULL;
 	int rowIndex;
 	int columnIndex;
-	FBSQLLS_FETCH();
 
 	switch (ZEND_NUM_ARGS()) {
 		case 1:
@@ -2298,7 +2271,6 @@ PHP_FUNCTION(fbsql_next_result)
 {
 	PHPFBResult* result = NULL;
 	zval **fbsql_result_index = NULL;
-	FBSQLLS_FETCH();
 
 	switch (ZEND_NUM_ARGS()) {
 		case 1:
@@ -2348,7 +2320,6 @@ PHP_FUNCTION(fbsql_num_rows)
 	PHPFBResult* result = NULL;
 	zval **fbsql_result_index = NULL;
 	int rowCount;
-	FBSQLLS_FETCH();
 
 	switch (ZEND_NUM_ARGS()) {
 		case 1:
@@ -2382,7 +2353,6 @@ PHP_FUNCTION(fbsql_num_fields)
 {
 	PHPFBResult* result = NULL;
 	zval **fbsql_result_index = NULL;
-	FBSQLLS_FETCH();
 
 	switch (ZEND_NUM_ARGS()) {
 		case 1:
@@ -2448,7 +2418,6 @@ static void php_fbsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 	int rowIndex;
 	int i;
 	void **row;
-	FBSQLLS_FETCH();
 
 	switch (ZEND_NUM_ARGS()) {
 		case 1:
@@ -2558,7 +2527,6 @@ PHP_FUNCTION(fbsql_data_seek)
 	PHPFBResult* result = NULL;
 	zval **fbsql_result_index = NULL, **row_number = NULL;
 	int rowIndex;
-	FBSQLLS_FETCH();
 
 	switch (ZEND_NUM_ARGS()) {
 		case 2:
@@ -2596,7 +2564,6 @@ PHP_FUNCTION(fbsql_fetch_lengths)
 	PHPFBResult* result = NULL;
 	zval **fbsql_result_index = NULL;
 	int i;
-	FBSQLLS_FETCH();
 
 	switch (ZEND_NUM_ARGS()) {
 		case 1:
@@ -2628,7 +2595,6 @@ PHP_FUNCTION(fbsql_fetch_field)
 	PHPFBResult* result = NULL;
 	zval **fbsql_result_index = NULL, **field_index = NULL;
 	int column = -1;
-	FBSQLLS_FETCH();
 
 	switch (ZEND_NUM_ARGS()) {
 		case 1:
@@ -2685,7 +2651,6 @@ PHP_FUNCTION(fbsql_field_seek)
 	PHPFBResult* result = NULL;
 	zval **fbsql_result_index = NULL, **field_index = NULL;
 	int column = -1;
-	FBSQLLS_FETCH();
 
 	switch (ZEND_NUM_ARGS()) {
 		case 1:
@@ -2728,7 +2693,6 @@ PHP_FUNCTION(fbsql_field_name)
 	PHPFBResult* result = NULL;
 	zval **fbsql_result_index = NULL, **field_index = NULL;
 	int column = -1;
-	FBSQLLS_FETCH();
 
 	switch (ZEND_NUM_ARGS()) {
 		case 1:
@@ -2777,7 +2741,6 @@ PHP_FUNCTION(fbsql_field_table)
 	PHPFBResult* result = NULL;
 	zval **fbsql_result_index = NULL, **field_index = NULL;
 	int column = -1;
-	FBSQLLS_FETCH();
 
 	switch (ZEND_NUM_ARGS()) {
 		case 1:
@@ -2818,7 +2781,6 @@ PHP_FUNCTION(fbsql_field_len)
 	PHPFBResult* result = NULL;
 	zval **fbsql_result_index = NULL, **field_index = NULL;
 	int column = -1;
-	FBSQLLS_FETCH();
 
 	switch (ZEND_NUM_ARGS()) {
 		case 1:
@@ -2870,7 +2832,6 @@ PHP_FUNCTION(fbsql_field_type)
 	PHPFBResult* result = NULL;
 	zval **fbsql_result_index = NULL, **field_index = NULL;
 	int column = -1;
-	FBSQLLS_FETCH();
 
 	switch (ZEND_NUM_ARGS()) {
 		case 1:
@@ -2924,7 +2885,6 @@ PHP_FUNCTION(fbsql_field_flags)
 	int column = -1;
 	char buf[512];
 	int len;
-	FBSQLLS_FETCH();
 
 	switch (ZEND_NUM_ARGS()) {
 		case 1:
@@ -3006,7 +2966,6 @@ PHP_FUNCTION(fbsql_free_result)
 {
 	PHPFBResult* result = NULL;
 	zval	**fbsql_result_index = NULL;
-	FBSQLLS_FETCH();
 
 	switch (ZEND_NUM_ARGS()) {
 		case 1:
@@ -3033,11 +2992,10 @@ PHP_FUNCTION(fbsql_get_autostart_info)
 	zval	**fbsql_link_index = NULL;
 	int id;
 	FBCAutoStartInfo* asInfo;
-	FBSQLLS_FETCH();
 
 	switch (ZEND_NUM_ARGS()) {
 		case 0:
-			id = php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU FBSQLLS_CC);
+			id = php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU TSRMLS_CC);
 			CHECK_LINK(id);
 			break;
 		case 1:
