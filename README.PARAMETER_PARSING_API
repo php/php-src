@@ -105,11 +105,13 @@ if (zend_parse_parameters(3 TSRMLS_CC, "zbr!",
 /* Get either a set of 3 longs or a string. */
 long l1, l2, l3;
 char *s;
+long length;
+
 if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC,
 							 "lll", &l1, &l2, &l3) == SUCCESS) {
 	/* manipulate longs */
 } else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC,
-									"s", &s) == SUCCESS) {
+									"s", &s, &length) == SUCCESS) {
 	/* manipulate string */
 } else {
 	/* output error */
