@@ -322,6 +322,8 @@ int call_user_function_ex(HashTable *function_table, zval *object, zval *functio
 	zend_op **original_opline_ptr;
 	ELS_FETCH();
 
+	*retval_ptr_ptr = NULL;
+
 	if (object) {
 		if (object->type != IS_OBJECT) {
 			return FAILURE;
@@ -370,7 +372,6 @@ int call_user_function_ex(HashTable *function_table, zval *object, zval *functio
 
 	zend_ptr_stack_push(&EG(argument_stack), (void *) (long) param_count);
 
-	*retval_ptr_ptr = NULL;
 	if (function_state.function->type == ZEND_USER_FUNCTION) {
 		calling_symbol_table = EG(active_symbol_table);
 		ALLOC_HASHTABLE(EG(active_symbol_table));
