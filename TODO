@@ -4,7 +4,7 @@ parenthesis means that person has taken on this project.
 Zend
 ----
     * allow foreach ($array as $k => &$val) syntax. right now we can not 
-	  traverse an array without copying each element.
+      traverse an array without copying each element.
 
 global
 ------
@@ -39,7 +39,7 @@ documentation
 
 ext/wddx
 --------
-	* implement wddx_packet_as_javascript(). (Andrei)
+    * implement wddx_packet_as_javascript(). (Andrei)
 
 ext/oci8
 --------
@@ -47,6 +47,7 @@ ext/oci8
 
 ext/standard
 ------------
+    * array_add(), array_rand() (Andrei)
     * implement pathinfo()
     * possibly modify parsing of GPC data to automatically create arrays if
       variable name is seen more than once.
