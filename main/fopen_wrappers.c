@@ -1077,7 +1077,8 @@ PHPAPI char *expand_filepath(const char *filepath, char *real_path)
 		memcpy(real_path,new_state.cwd,copy_len);
 		real_path[copy_len]='\0';
 	} else {
-		real_path = new_state.cwd;
+		real_path = estrndup(new_state.cwd, new_state.cwd_length);
+		free(new_state.cwd);
 	}
 
 	return real_path;

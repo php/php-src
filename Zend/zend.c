@@ -214,7 +214,7 @@ ZEND_API void zend_print_zval_r_ex(zend_write_func_t write_func, zval *expr, int
 static FILE *zend_fopen_wrapper(const char *filename, char **opened_path)
 {
 	if (opened_path) {
-		*opened_path = strdup(filename);
+		*opened_path = estrdup(filename);
 	}
 	return fopen(filename, "rb");
 }

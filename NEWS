@@ -2,6 +2,8 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.3-dev
+- Internal opened_path variable now uses the Zend memory manager so that full
+  paths of files won't leak on unclean shutdown (Andi)
 - Removed support of print $obj automatically calling the __string_value()
   method. Instead define yourself a method such as toString() and use
   print $obj->toString() (Andi, Zend Engine)
