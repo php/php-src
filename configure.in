@@ -87,11 +87,11 @@ dnl -------------------------------------------------------------------------
 
 cwd=`pwd`
 
-PHP_INIT_BUILD_SYSTEM
-
 php_shtool=$srcdir/build/shtool
 T_MD=`$php_shtool echo -n -e %B`
 T_ME=`$php_shtool echo -n -e %b`
+
+PHP_INIT_BUILD_SYSTEM
 
 dnl We want this one before the checks, so the checks can modify CFLAGS.
 test -z "$CFLAGS" && auto_cflags=1
@@ -1177,10 +1177,10 @@ fi
 # Create configuration headers
 #
 
-test -d TSRM || mkdir TSRM
+test -d TSRM || $php_shtool mkdir TSRM
 echo '#include "../main/php_config.h"' > TSRM/tsrm_config.h
 
-test -d Zend || mkdir Zend
+test -d Zend || $php_shtool mkdir Zend
 
 cat >Zend/zend_config.h <<FEO
 #include "../main/php_config.h"

@@ -28,7 +28,7 @@ AC_DEFUN([PHP_DEFINE],[
 dnl PHP_INIT_BUILD_SYSTEM
 dnl
 AC_DEFUN([PHP_INIT_BUILD_SYSTEM],[
-mkdir include >/dev/null 2>&1
+$php_shtool mkdir include
 > Makefile.objects
 > Makefile.fragments
 dnl We need to play tricks here to avoid matching the egrep line itself
@@ -667,21 +667,6 @@ AC_DEFUN([PHP_SUBST_OLD],[
   AC_SUBST($1)
 ])
 
-AC_DEFUN([PHP_MKDIR_P_CHECK],[
-  AC_CACHE_CHECK(for working mkdir -p, ac_cv_mkdir_p,[
-    test -d conftestdir && rm -rf conftestdir
-    mkdir -p conftestdir/somedir >/dev/null 2>&1
-dnl `mkdir -p' must be quiet about creating existing directories
-    mkdir -p conftestdir/somedir >/dev/null 2>&1
-    if test "$?" = "0" && test -d conftestdir/somedir; then
-      ac_cv_mkdir_p=yes
-    else
-      ac_cv_mkdir_p=no
-    fi
-    rm -rf conftestdir
-  ])
-])
-
 AC_DEFUN([PHP_TM_GMTOFF],[
 AC_CACHE_CHECK([for tm_gmtoff in struct tm], ac_cv_struct_tm_gmtoff,
 [AC_TRY_COMPILE([#include <sys/types.h>
@@ -1274,10 +1259,7 @@ AC_DEFUN([PHP_ADD_BUILD_DIR],[
 ])
 
 AC_DEFUN([PHP_GEN_BUILD_DIRS],[
-  PHP_MKDIR_P_CHECK
-  if test "$ac_cv_mkdir_p" = "yes"; then
-    mkdir -p $BUILD_DIR
-  fi
+  $php_shtool mkdir -p $BUILD_DIR
 ])
 
 dnl
