@@ -38,7 +38,7 @@ array(4) {
   string(1) "4"
 }
 
-Warning: single_query(): no such table: test in %s on line %d
+Warning: sqlite_db::single_query(): no such table: test in %s on line %d
 bool(false)
 NULL
 array(1) {
