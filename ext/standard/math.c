@@ -390,7 +390,7 @@ PHP_FUNCTION(rad2deg)
 /*
  * Convert a string representation of a base(2-36) number to a long.
  */
-static long
+PHPAPI long
 _php_math_basetolong(zval *arg, int base) {
 	long mult = 1, num = 0, digit;
 	int i;
@@ -427,7 +427,7 @@ _php_math_basetolong(zval *arg, int base) {
  * Convert a long to a string containing a base(2-36) representation of
  * the number.
  */
-static char *
+PHPAPI char *
 _php_math_longtobase(zval *arg, int base)
 {
 	static char digits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
