@@ -16,7 +16,7 @@ echo "extname extension is available";
   to pass, differences between the output and the
   expected text are interpreted as failure
 
-	see php4/README.testing for further information on
+	see php4/README.TESTING for further information on
   writing regression tests
 */
 ?>
