@@ -366,12 +366,7 @@ PHP_FUNCTION(posix_getgroups)
 		RETURN_FALSE;
 	}
 
-	if (array_init(return_value) == FAILURE) {
-		/* TODO: Should we issue a warning here so we don't have ambiguity
-		 * with the above return value ?
-		 */
-		RETURN_FALSE;
-	}
+	array_init(return_value);
 
 	for (i=0; i<result; i++) {
 		add_next_index_long(return_value, gidlist[i]);
@@ -501,12 +496,7 @@ PHP_FUNCTION(posix_uname)
 		RETURN_FALSE;
 	}
 
-	if (array_init(return_value) == FAILURE) {
-		/* TODO: Should we issue a warning here so we don't have ambiguity
-		 * with the above return value ?
-		 */
-		RETURN_FALSE;
-	}
+	array_init(return_value);
 
 	add_assoc_string(return_value, "sysname",  u.sysname,  1);
 	add_assoc_string(return_value, "nodename", u.nodename, 1);
@@ -538,12 +528,7 @@ PHP_FUNCTION(posix_times)
 		RETURN_FALSE;
 	}
 
-	if (array_init(return_value) == FAILURE) {
-		/* TODO: Should we issue a warning here so we don't have ambiguity
-		 * with the above return value ?
-		 */
-		RETURN_FALSE;
-	}
+	array_init(return_value);
 
 	add_assoc_long(return_value, "ticks",	ticks);			/* clock ticks */
 	add_assoc_long(return_value, "utime",	t.tms_utime);	/* user time */
@@ -736,8 +721,7 @@ int php_posix_group_to_array(struct group *g, zval *array_group) {
 		return 0;
 
 	MAKE_STD_ZVAL(array_members);
-	if (array_init(array_members) == FAILURE)
-		return 0;
+	array_init(array_members);
 	
 	add_assoc_string(array_group, "name", g->gr_name, 1);
 	add_assoc_string(array_group, "passwd", g->gr_passwd, 1);
@@ -779,12 +763,7 @@ PHP_FUNCTION(posix_getgrnam)
 		RETURN_FALSE;
 	}
 	
-	if (array_init(return_value) == FAILURE) {
-		/* TODO: Should we issue a warning here so we don't have ambiguity
-		 * with the above return value ?
-		 */
-		RETURN_FALSE;
-	}
+	array_init(return_value);
 
 	if (!php_posix_group_to_array(g, return_value)) {
 		php_error(E_WARNING, "%s() unable to convert posix group to array",
@@ -809,12 +788,7 @@ PHP_FUNCTION(posix_getgrgid)
 		RETURN_FALSE;
 	}
 
-	if (array_init(return_value) == FAILURE) {
-		/* TODO: Should we issue a warning here so we don't have ambiguity
-		 * with the above return value ?
-		 */
-		RETURN_FALSE;
-	}
+	array_init(return_value);
 
 	if (!php_posix_group_to_array(g, return_value)) {
 		php_error(E_WARNING, "%s() unable to convert posix group struct to array",
@@ -856,9 +830,7 @@ PHP_FUNCTION(posix_getpwnam)
 		RETURN_FALSE;
 	}
 	
-	if (array_init(return_value) == FAILURE) {
-		RETURN_FALSE;
-	}
+	array_init(return_value);
 
 	if (!php_posix_passwd_to_array(pw, return_value)) {
 		php_error(E_WARNING, "%s() unable to convert posix passwd struct to array",
@@ -884,9 +856,7 @@ PHP_FUNCTION(posix_getpwuid)
 		RETURN_FALSE;
 	}
 
-	if (array_init(return_value) == FAILURE) {
-		RETURN_FALSE;
-	}
+	array_init(return_value);
 
 	if (!php_posix_passwd_to_array(pw, return_value)) {
 		php_error(E_WARNING, "%s() unable to convert posix passwd struct to array",
@@ -1002,9 +972,7 @@ PHP_FUNCTION(posix_getrlimit)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE)
 		return;
 
-	if (array_init(return_value) == FAILURE) {
-		RETURN_FALSE;
-	}
+	array_init(return_value);
 
 	for (l=limits; l->name; l++) {
 		if (posix_addlimit(l->limit, l->name, return_value TSRMLS_CC) == FAILURE)
