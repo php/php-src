@@ -749,7 +749,7 @@ AC_DEFUN(PHP_ADD_LIBRARY,[
  c|c_r|pthread*) ;;
  *)
 ifelse($3,,[
-   PHP_X_ADD_LIBRARY($1,$2,LIBS)
+   PHP_X_ADD_LIBRARY($1,$2,PHP_EXTENSION_LIBS)
 ],[
    if test "$ext_shared" = "yes"; then
      PHP_X_ADD_LIBRARY($1,$2,$3)
