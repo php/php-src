@@ -7,7 +7,7 @@ PHP 4                                                                      NEWS
   . iconv_mime_decode()
   . iconv_mime_encode()
 - Removed support for libmcrypt 2.2.x to allow cleaner code. Another reason
-  to upgrade libmcrypt to a 2.5.x series as the older ones have too much bugs
+  to upgrade libmcrypt to a 2.5.x series as the older ones have too many bugs
   to be safely used with PHP. (Derick)
 - Fixed bug #17098 (make Apache2 aware that PHP scripts represent dynamic data
   and should not be cached). (Ilia)
