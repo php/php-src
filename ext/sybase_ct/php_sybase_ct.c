@@ -39,6 +39,7 @@ function_entry sybase_functions[] = {
 	PHP_FE(sybase_select_db,			NULL)
 	PHP_FE(sybase_query,				NULL)
 	PHP_FE(sybase_free_result,			NULL)
+	PHP_FE(sybase_get_last_message,		NULL)
 	PHP_FE(sybase_num_rows,				NULL)
 	PHP_FE(sybase_num_fields,			NULL)
 	PHP_FE(sybase_fetch_row,			NULL)
@@ -58,6 +59,7 @@ function_entry sybase_functions[] = {
 	PHP_FALIAS(mssql_select_db,			sybase_select_db,		NULL)
 	PHP_FALIAS(mssql_query,				sybase_query,			NULL)
 	PHP_FALIAS(mssql_free_result,		sybase_free_result,		NULL)
+	PHP_FALIAS(mssql_get_last_message,	sybase_get_last_message,NULL)
 	PHP_FALIAS(mssql_num_rows,			sybase_num_rows,		NULL)
 	PHP_FALIAS(mssql_num_fields,		sybase_num_fields,		NULL)
 	PHP_FALIAS(mssql_fetch_row,			sybase_fetch_row,		NULL)
@@ -202,6 +204,9 @@ static CS_RETCODE _client_message_handler(CS_CONTEXT *context, CS_CONNECTION *co
 	if (CS_SEVERITY(errmsg->msgnumber) >= SybCtG(min_client_severity)) {
 		php_error(E_WARNING, "Sybase:  Client message:  %s (severity %d)", errmsg->msgstring, CS_SEVERITY(errmsg->msgnumber));
 	}
+	STR_FREE(SybCtG(server_message));
+	SybCtG(server_message) = estrdup(errmsg->msgstring);
+
 
 	/* If this is a timeout message, return CS_FAIL to cancel the
 	 * operation and mark the connection as dead.
@@ -226,6 +231,8 @@ static CS_RETCODE _server_message_handler(CS_CONTEXT *context, CS_CONNECTION *co
 		php_error(E_WARNING, "Sybase:  Server message:  %s (severity %d, procedure %s)",
 					srvmsg->text, srvmsg->severity, ((srvmsg->proclen>0) ? srvmsg->proc : "N/A"));
 	}
+	STR_FREE(SybCtG(server_message));
+	SybCtG(server_message) = estrdup(srvmsg->text);
 
 	/* If this is a deadlock message, set the connection's deadlock flag
 	 * so we will retry the request.  Sorry about the bare constant here,
@@ -339,7 +346,7 @@ PHP_RINIT_FUNCTION(sybase)
 	SybCtG(default_link)=-1;
 	SybCtG(num_links) = SybCtG(num_persistent);
 	SybCtG(appname) = estrndup("PHP 4.0", 7);
-	SybCtG(server_message) = NULL;
+	SybCtG(server_message) = empty_string;
 	return SUCCESS;
 }
 
@@ -361,9 +368,7 @@ PHP_RSHUTDOWN_FUNCTION(sybase)
 	SybCtLS_FETCH();
 
 	efree(SybCtG(appname));
-	if (SybCtG(server_message)) {
-		efree(SybCtG(server_message));
-	}
+	STR_FREE(SybCtG(server_message));
 	return SUCCESS;
 }
 
@@ -1226,6 +1231,16 @@ PHP_FUNCTION(sybase_free_result)
 	RETURN_TRUE;
 }
 
+/* }}} */
+
+/* {{{ proto string sybase_get_last_message(void)
+   Returns the last message from server (over min_message_severity) */
+PHP_FUNCTION(sybase_get_last_message)
+{
+	SybCtLS_FETCH();
+	
+	RETURN_STRING(SybCtG(server_message),1);
+}
 /* }}} */
 
 /* {{{ proto int sybase_num_rows(int result)
