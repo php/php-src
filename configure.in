@@ -795,20 +795,16 @@ PHP_CONFIGURE_PART(Generating files)
 PHP_GEN_CONFIG_VARS
 touch .deps
 
-#libphp4.module 
-AC_OUTPUT([php4.spec Zend/Makefile 
-           build-defs.h
-		   $PHP_OUTPUT_FILES
-		   ], [], [
+ALL_OUTPUT_FILES="php4.spec Zend/Makefile build-defs.h $PHP_OUTPUT_FILES"
 
-if test "$CONFIG_FILES" = ""; then
-    PHP_GEN_MAKEFILES
-else
-    for file in $PHP_FAST_OUTPUT_FILES; do
-		if test "\$file" = "\$CONFIG_FILES"; then
-			PHP_GEN_MAKEFILE(\$file)
-		fi
-    done
+AC_OUTPUT($ALL_OUTPUT_FILES, [], [
+
+if test "\$CONFIG_FILES" = "$ALL_OUTPUT_FILES"; then
+  REDO_ALL=yes
+fi
+
+if test -n "\$REDO_ALL"; then
+  PHP_GEN_MAKEFILES($PHP_FAST_OUTPUT_FILES)
 fi
 		   
 if test ! -f $srcdir/ext/bcmath/number.c; then
@@ -834,7 +830,7 @@ cat >Zend/zend_config.h <<FEO
 FEO
 
 # run this only when generating all the files?
-if test "\$CONFIG_FILES" = ""; then
+if test -n "\$REDO_ALL"; then
   # Hacking while airborne considered harmful.
   #
   echo "creating main/internal_functions.c"
