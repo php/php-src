@@ -1,3 +1,33 @@
+2003-06-15  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * zend_constants.c:
+      Fix ZTS build.
+
+2003-06-15  Stanislav Malyshev  <stas@zend.com>
+
+    * zend.c:
+      Fix bug #23279 - exception handler exits after first function call
+
+    * zend_execute_API.c:
+      No need to duplicate code - zend_get_constant() knows to
+      handle class constants now
+
+    * zend_execute_API.c:
+      Fix bug #18872 - Improper handling of class constants used as default
+      function argument values
+
+    * zend_constants.c:
+      set ending \0 for string
+
+    * zend_compile.c
+      zend_constants.c
+      zend_language_parser.y:
+      Fix bug #23384 - static class::constant constants should now
+      work in static & array expressions.
+
+    * zend_execute_API.c:
+      Fix bug #21800 - initialize opcode handlers in interactive mode
+
 2003-06-14  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_hash.c:
