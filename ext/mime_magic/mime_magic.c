@@ -156,6 +156,7 @@
 #include "php_ini.h"
 #include "ext/standard/info.h"
 #include "php_mime_magic.h"
+#include "phpmimemagic.h"
 
 #include <fcntl.h>
 #include <sys/types.h>

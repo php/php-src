@@ -4,10 +4,10 @@
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2003 The PHP Group                                |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.0 of the PHP license,       |
+  | This source file is subject to version 2.02 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_0.txt.                                  |
+  | available at through the world-wide-web at                           |
+  | http://www.php.net/license/2_02.txt.                                 |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -58,6 +58,17 @@ struct magic {
     unsigned char reln;		/* relation (0=eq, '>'=gt, etc) */
     char type;			/* int, short, long or string. */
     char vallen;		/* length of string value, if any */
+#define BYTE    1
+#define SHORT    2
+#define LONG    4
+#define STRING    5
+#define DATE    6
+#define BESHORT    7
+#define BELONG    8
+#define BEDATE    9
+#define LESHORT    10
+#define LELONG    11
+#define LEDATE    12
     union VALUETYPE {
 		unsigned char b;
 		unsigned short h;
@@ -356,12 +367,9 @@ typedef struct {
 } magic_req_rec;
 
 
-/* Globals */
 ZEND_BEGIN_MODULE_GLOBALS(mime_magic)
 	char *magicfile;
 	magic_req_rec *req_dat;
-	int    debug;           /* shall magic file parser errors be shown? */
-	char *status;           /* status message for phpinfo() */
 ZEND_END_MODULE_GLOBALS(mime_magic)
 
 #ifdef ZTS
