@@ -35,6 +35,14 @@
 # include <alloca.h>
 #endif
 
+#define AI_USE_PTR(ai) \
+	if ((ai).ptr_ptr) { \
+		(ai).ptr = *((ai).ptr_ptr); \
+		(ai).ptr_ptr = &((ai).ptr); \
+	} else { \
+		(ai).ptr = NULL; \
+	}
+
 #define get_zval_ptr(node, Ts, should_free, type) _get_zval_ptr(node, Ts, should_free ELS_CC)
 #define get_zval_ptr_ptr(node, Ts, type) _get_zval_ptr_ptr(node, Ts ELS_CC)
 
@@ -81,10 +89,10 @@ static inline zval *_get_zval_ptr(znode *node, temp_variable *Ts, int *should_fr
 			return &Ts[node->u.var].tmp_var;
 			break;
 		case IS_VAR:
-			if (Ts[node->u.var].var.ptr_ptr) {
-				PZVAL_UNLOCK(*Ts[node->u.var].var.ptr_ptr);
+			if (Ts[node->u.var].var.ptr) {
+				PZVAL_UNLOCK(Ts[node->u.var].var.ptr);
 				*should_free = 0;
-				return *Ts[node->u.var].var.ptr_ptr;
+				return Ts[node->u.var].var.ptr;
 			} else {
 				*should_free = 1;
 
@@ -288,6 +296,7 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 		}
 		Ts[result->u.var].var.ptr_ptr = &EG(uninitialized_zval_ptr);
 		SELECTIVE_PZVAL_LOCK(*Ts[result->u.var].var.ptr_ptr, result);
+		AI_USE_PTR(Ts[result->u.var].var);
 		return;
 	}
 
@@ -297,6 +306,7 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 		if (result) {
 			Ts[result->u.var].var.ptr_ptr = &EG(uninitialized_zval_ptr);
 			SELECTIVE_PZVAL_LOCK(*Ts[result->u.var].var.ptr_ptr, result);
+			AI_USE_PTR(Ts[result->u.var].var);
 		}
 		return;
 	}
@@ -400,6 +410,7 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 	if (result) {
 		Ts[result->u.var].var.ptr_ptr = variable_ptr_ptr;
 		SELECTIVE_PZVAL_LOCK(*variable_ptr_ptr, result);
+		AI_USE_PTR(Ts[result->u.var].var);
 	} 
 }
 
@@ -1049,6 +1060,7 @@ binary_assign_op_addr: {
 					if (*var_ptr == EG(error_zval_ptr)) {
 						Ts[opline->result.u.var].var.ptr_ptr = &EG(uninitialized_zval_ptr);
 						SELECTIVE_PZVAL_LOCK(*Ts[opline->result.u.var].var.ptr_ptr, &opline->result);
+						AI_USE_PTR(Ts[opline->result.u.var].var);
 						opline++;
 						continue;
 					}
@@ -1070,6 +1082,7 @@ binary_assign_op_addr: {
 					Ts[opline->result.u.var].var.ptr_ptr = var_ptr;
 					SELECTIVE_PZVAL_LOCK(*var_ptr, &opline->result);
 					FREE_OP(&opline->op2, EG(free_op2));
+					AI_USE_PTR(Ts[opline->result.u.var].var);
 				}
 				break;
 			case ZEND_PRE_INC:
@@ -1085,6 +1098,7 @@ binary_assign_op_addr: {
 					if (*var_ptr == EG(error_zval_ptr)) {
 						Ts[opline->result.u.var].var.ptr_ptr = &EG(uninitialized_zval_ptr);
 						SELECTIVE_PZVAL_LOCK(*Ts[opline->result.u.var].var.ptr_ptr, &opline->result);
+						AI_USE_PTR(Ts[opline->result.u.var].var);
 						opline++;
 						continue;
 					}
@@ -1116,6 +1130,7 @@ binary_assign_op_addr: {
 						case ZEND_PRE_DEC:
 							Ts[opline->result.u.var].var.ptr_ptr = var_ptr;
 							SELECTIVE_PZVAL_LOCK(*var_ptr, &opline->result);
+							AI_USE_PTR(Ts[opline->result.u.var].var);
 							break;
 					}
 				}
@@ -1132,6 +1147,7 @@ binary_assign_op_addr: {
 				break;
 			case ZEND_FETCH_R:
 				zend_fetch_var_address(&opline->result, &opline->op1, &opline->op2, Ts, BP_VAR_R ELS_CC);
+				AI_USE_PTR(Ts[opline->result.u.var].var);
 				break;
 			case ZEND_FETCH_W:
 				zend_fetch_var_address(&opline->result, &opline->op1, &opline->op2, Ts, BP_VAR_W ELS_CC);
@@ -1147,6 +1163,7 @@ binary_assign_op_addr: {
 					PZVAL_LOCK(*Ts[opline->op1.u.var].var.ptr_ptr);
 				}
 				zend_fetch_dimension_address(&opline->result, &opline->op1, &opline->op2, Ts, BP_VAR_R ELS_CC);
+				AI_USE_PTR(Ts[opline->result.u.var].var);
 				break;
 			case ZEND_FETCH_DIM_W:
 				zend_fetch_dimension_address(&opline->result, &opline->op1, &opline->op2, Ts, BP_VAR_W ELS_CC);
@@ -1159,6 +1176,7 @@ binary_assign_op_addr: {
 				break;
 			case ZEND_FETCH_OBJ_R:
 				zend_fetch_property_address(&opline->result, &opline->op1, &opline->op2, Ts, BP_VAR_R ELS_CC);
+				AI_USE_PTR(Ts[opline->result.u.var].var);
 				break;
 			case ZEND_FETCH_OBJ_W:
 				zend_fetch_property_address(&opline->result, &opline->op1, &opline->op2, Ts, BP_VAR_W ELS_CC);
@@ -1171,6 +1189,7 @@ binary_assign_op_addr: {
 				break;
 			case ZEND_FETCH_DIM_TMP_VAR:
 				zend_fetch_dimension_address_from_tmp_var(&opline->result, &opline->op1, &opline->op2, Ts ELS_CC);
+				AI_USE_PTR(Ts[opline->result.u.var].var);
 				break;
 			case ZEND_ASSIGN: {
 					zval *value = get_zval_ptr(&opline->op2, Ts, &EG(free_op2), BP_VAR_R);
@@ -1708,6 +1727,7 @@ send_by_ref:
 						 */
 						FREE_OP(&opline->op1, EG(free_op1));
 						Ts[opline->op1.u.var].var.ptr_ptr = NULL;
+						AI_USE_PTR(Ts[opline->op1.u.var].var);
 					}
 				}
 				break;
