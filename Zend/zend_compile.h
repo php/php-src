@@ -388,7 +388,7 @@ ZEND_API void zend_file_handle_dtor(zend_file_handle *fh);
 
 ZEND_API void destroy_zend_function(zend_function *function);
 ZEND_API void destroy_zend_class(zend_class_entry **pce);
-void zend_class_add_ref(zend_class_entry *ce);
+void zend_class_add_ref(zend_class_entry **ce);
 
 #define ZEND_FUNCTION_DTOR (void (*)(void *)) destroy_zend_function
 #define ZEND_CLASS_DTOR (void (*)(void *)) destroy_zend_class
