@@ -1,3 +1,11 @@
+2002-08-14  jason  <jason@pb1.pair.com>
+
+    * zend_compile.c
+      zend_compile.h
+      zend_globals.h
+      zend_language_parser.y:
+    MFZE1 (use token instead of global for opcode counting)
+
 2002-08-13  Andi Gutmans  <andi@pb1.pair.com>
 
     * zend_execute_API.c:

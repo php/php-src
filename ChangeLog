@@ -1,3 +1,150 @@
+2002-08-14  helly  <helly@pb1.pair.com>
+
+    * ext/standard/info.c: do not include "php_have_iconv.h"
+
+2002-08-14  yohgaki  <yohgaki@pb1.pair.com>
+
+    * ext/session/session.c
+      php.ini-dist
+      php.ini-recommended: MFH. Trans SID related changes.
+
+    * ext/session/session.c: Forgot to update source default.
+
+2002-08-14  kalowsky  <kalowsky@pb1.pair.com>
+
+    * ext/imap/php_imap.c:
+    Comming a fix for a compile error found in Bug #15630
+
+    * ext/odbc/php_odbc.c: Silencing a compilier warning on windows
+
+    * ext/java/config.m4:
+    Updating the error message to state a difference between libraries and
+    include.  Also restoring old for search to keep BC on configure
+
+2002-08-14  chregu  <chregu@pb1.pair.com>
+
+    * ext/domxml/php_domxml.c:
+    - let DomNode->replace_child always behave correctly (acc. to W3C specs)
+    if the newchild had the same parent as the old child, nothing happened,
+    which seemed strange behaviout to me...
+
+2002-08-14  kalowsky  <kalowsky@pb1.pair.com>
+
+    * NEWS: Giving Ilia his props
+
+    * sapi/apache/mod_php4.c:
+    Fix for Bug #9280 with regards to an Expect header.  patch submitted by
+    Ilia <ilia@prohost.org>
+
+    * ext/java/config.m4:
+    Adding a check for the binaries rather than just the directories.
+
+2002-08-14  chregu  <chregu@pb1.pair.com>
+
+    * ext/domxml/php_domxml.c:
+    DomNode->replace_node moves instead of copies node.
+
+2002-08-14  kalowsky  <kalowsky@pb1.pair.com>
+
+    * ext/java/config.m4:
+    JavaC doesn't take flags like this, Java jar does, pay attention kalowsky
+
+    * ext/java/config.m4:
+    cleaning up the displayed path (removing the ./ in the middle)
+
+    * sapi/nsapi/config.m4:
+    Fix for Bug #18794, and probably various others with nsapi
+
+    * ext/odbc/php_odbc.c: correcting these to be only docref's not docref1's
+
+    * ext/java/config.m4
+      ext/java/java.c:
+    Adding in MSG_RESULT check and \n for configure output viewing
+
+2002-08-14  chregu  <chregu@pb1.pair.com>
+
+    * ext/domxml/php_domxml.c:
+    - fix for bug #17771 (insert_before misbeaviour (DOM L2 spec.))
+     - DomNode->insert_before behaves now according to W3C spec
+       ie. new_child is moved, not copied. (chregu)
+
+2002-08-14  kalowsky  <kalowsky@pb1.pair.com>
+
+    * ext/java/config.m4: Correcting mis-versioned comment
+
+    * ext/java/config.m4: JAVA_INCLUDE, not JAVE_INCLUDE
+
+    * ext/java/config.m4:
+    A little more clean up on the error messages, with a sample JDK 1.3 path to libjava.so
+
+    * ext/java/config.m4: correcting the AC_MSG_RESULT line
+
+    * ext/java/config.m4: adding in PATH check for JavaJar as well...
+
+2002-08-14  chregu  <chregu@pb1.pair.com>
+
+    * ext/domxml/php_domxml.c
+      ext/domxml/php_domxml.h:
+     - Added some namespace support with DomNode->add_namespace(uri, prefix)
+       and DomDocument->create_element_ns(uri, nodename) (chregu)
+
+2002-08-14  kalowsky  <kalowsky@pb1.pair.com>
+
+    * ext/java/config.m4: Fix a bug for a user provided path as eru.
+
+2002-08-14  chregu  <chregu@pb1.pair.com>
+
+    * ext/domxml/php_domxml.h: bump up api version number
+
+    * ext/domxml/php_domxml.c: fix for bug #18196
+
+    * ext/domxml/php_domxml.c:
+    fix for bug #18395 (DOMXML crash on removing previously created attributes)
+
+    * ext/domxml/php_domxml.c:
+     - DomNode->child_nodes() returns empty array instead of false, if no
+     - child nodes are found (chregu)
+
+2002-08-14  helly  <helly@pb1.pair.com>
+
+    * NEWS: -remove corrupt entry until change has been completed
+    -minor fixes
+    -honor Derick for his idea error messages to point to the manual
+
+2002-08-14  yohgaki  <yohgaki@pb1.pair.com>
+
+    * php.ini-dist
+      php.ini-recommended: Added trans_sid security risk examples.
+
+2002-08-14  dets  <dets@pb1.pair.com>
+
+    * ext/mbstring/mbfilter.c
+      ext/mbstring/mbfilter.h
+      ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.h
+      ext/mbstring/unicode_table_ru.h:
+    Revert from patch added mb_guess_encoding to previous version
+
+2002-08-14  yohgaki  <yohgaki@pb1.pair.com>
+
+    * ext/mbstring/README:
+    Add warning... It seems posting message to php-dev/php-cvs does not work!
+
+2002-08-14  dets  <dets@pb1.pair.com>
+
+    * ext/mbstring/mbfilter.c
+      ext/mbstring/mbfilter.h
+      ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.h
+      ext/mbstring/unicode_table_ru.h:
+    Added new function mb_guess_encoding, based on symbols rating
+
+2002-08-14  kalowsky  <kalowsky@pb1.pair.com>
+
+    * NEWS:
+    Adding in updates for the fixes to ODBC, and markers for the pack/unpack
+    memory leaks
+
 2002-08-13  kalowsky  <kalowsky@pb1.pair.com>
 
     * ext/odbc/php_odbc.c: Fix for Bug #17572
