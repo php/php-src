@@ -435,13 +435,15 @@ int php_var_unserialize(pval **rval, const char **p, const char *max)
 				pval *data = emalloc(sizeof(pval));
 				
 				if (!php_var_unserialize(&key, p, max)) {
-				    efree(key);
+				  zval_dtor(key);
+				  efree(key);
 					efree(data);
 					return 0;
 				}
 				if (!php_var_unserialize(&data, p, max)) {
-					pval_destructor(key);
+					zval_dtor(key);
 				    efree(key);
+					zval_dtor(data);
 					efree(data);
 					return 0;
 				}
