@@ -2970,31 +2970,6 @@ int exif_read_file(image_info_type *ImageInfo, char *FileName, int read_thumbnai
 			php_error(E_NOTICE,"open stream is file: %d", ImageInfo->FileSize);
 		}
 	} else {
-
-/* *
-		php_stream *mem_stream;
-		mem_stream = php_stream_temp_create(TEMP_STREAM_DEFAULT, 20000000);
-		ImageInfo->FileSize = php_stream_copy_to_stream(ImageInfo->infile, mem_stream, PHP_STREAM_COPY_ALL);
-		php_stream_close(ImageInfo->infile);
-		ImageInfo->infile = mem_stream;
-*
-* Use one of these two versions if not using STREAM_MUST_SEEK in php_stream_open_wrapper
-*
-		php_stream *mem_stream;
-		switch(php_stream_make_seekable( ImageInfo->infile, &mem_stream))
-		{
-			default:
-			case PHP_STREAM_FAILED:
-			case PHP_STREAM_CRITICAL:
-				php_stream_close(ImageInfo->infile);
-				return FALSE;
-			case PHP_STREAM_UNCHANGED:
-			case PHP_STREAM_RELEASED:
-				ImageInfo->infile = mem_stream;
-				break;
-		}
-*/
-/* end of second */
 		if ( !ImageInfo->FileSize) {
 			php_stream_seek(ImageInfo->infile,0,SEEK_END);
 			ImageInfo->FileSize = php_stream_tell(ImageInfo->infile);
