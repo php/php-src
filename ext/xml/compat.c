@@ -240,6 +240,7 @@ XML_ParserCreate_MM(const XML_Char *encoding, const XML_Memory_Handling_Suite *m
 	xmlMemSetup(memsuite->free_fcn, memsuite->malloc_fcn, memsuite->realloc_fcn, _expat_compat_intn_strdup); /* WHOCANFIXME: not reentrant ! */
 
 	parser = (XML_Parser) memsuite->malloc_fcn(sizeof(struct _XML_Parser));
+	parser->namespace = 0;
 	parser->mem_hdlrs = *memsuite;
 	parser->parser = xmlCreatePushParserCtxt((xmlSAXHandlerPtr) &php_xml_compat_handlers, (void *) parser, NULL, 0, NULL);
 	if (parser->parser == NULL) {
