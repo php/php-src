@@ -46,16 +46,16 @@ require_once 'Console/Getopt.php';
 
 error_reporting(E_ALL & ~E_NOTICE);
 
-PEAR::setErrorHandling(PEAR_ERROR_PRINT, "pear: %s\n");
-
-// {{{ config file and option parsing
-if (!isset($argv)) {
-    die("Could not read cmd args (register_argc_argv=Off?)\n");
+$argv = Console_Getopt::readPHPArgv();
+if (PEAR::isError($argv)) {
+    die($argv->getMessage());
 }
-$options = Console_Getopt::getopt($argv, "c:C:d:D:h?qu:v");
+$options = Console_Getopt::getopt($argv, "c:C:d:D:h?sSqu:v");
 if (PEAR::isError($options)) {
     usage($options);
 }
+
+PEAR::setErrorHandling(PEAR_ERROR_PRINT, "pear: %s\n");
 
 if (OS_WINDOWS) {
     $pear_default_config = PHP_SYSCONFDIR.DIRECTORY_SEPARATOR.'pearsys.ini';
