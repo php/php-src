@@ -44,7 +44,7 @@
 #else
 #include "php_config.h"
 #endif
-#if HAVE_LIBTTF|HAVE_LIBFREETYPE
+#if (HAVE_LIBTTF | HAVE_LIBFREETYPE) && !defined(HAVE_GD_CACHE_CREATE)
 
 #include "gdcache.h"
 
