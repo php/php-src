@@ -187,7 +187,7 @@ function_entry sqlite_functions[] = {
 	PHP_FE(sqlite_unbuffered_query, NULL)
 	PHP_FE(sqlite_create_aggregate, NULL)
 	PHP_FE(sqlite_create_function, NULL)
-	PHP_FE(sqlite_factory, NULL)
+	PHP_FE(sqlite_factory, arg3_force_ref)
 	PHP_FE(sqlite_udf_encode_binary, NULL)
 	PHP_FE(sqlite_udf_decode_binary, NULL)
 	{NULL, NULL, NULL}
