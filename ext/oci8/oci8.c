@@ -2969,7 +2969,7 @@ PHP_FUNCTION(ocisavelob)
 		loblen = Z_STRLEN_PP(arg);
 	
 		if (loblen < 1) {
-			php_error(E_WARNING, "Cannot save a lob wich size is less than 1 byte");
+			php_error(E_WARNING, "Cannot save a lob which size is less than 1 byte");
 			RETURN_FALSE;
 		}
 
