@@ -1,3 +1,19 @@
+2000-03-17  Hartmut Holzgraefe  <hholzgra@media-engineering.de>
+
+    * ext/standard/filestat.c: is_executable() for root fixed
+    this is an intermediate patch, switching from stat() to
+    access() for is_(readable|writable|executable) shall
+    fix the whole topic once and for all
+
+2000-03-17  Andi Gutmans  <andi@php.net>
+
+    * php_virtual_cwd.c: - Fix Win32 compile
+
+2000-03-17  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/standard/file.c:
+    ftruncate returns 1 on success and 0 on failure instead of 0 on success and -1 on failure.
+
 2000-03-16  Andi Gutmans  <andi@php.net>
 
     * php_virtual_cwd.c: - Last one for today.
