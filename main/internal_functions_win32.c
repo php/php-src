@@ -60,11 +60,6 @@
 /* SNMP has to be moved to ext */
 /* #include "dl/snmp/php_snmp.h" */
 
-unsigned char first_arg_force_ref[] = { 1, BYREF_FORCE };
-unsigned char first_arg_allow_ref[] = { 1, BYREF_ALLOW };
-unsigned char second_arg_force_ref[] = { 2, BYREF_NONE, BYREF_FORCE };
-unsigned char second_arg_allow_ref[] = { 2, BYREF_NONE, BYREF_ALLOW };
-
 zend_module_entry *php_builtin_extensions[] = {
 #if WITH_BCMATH
 	phpext_bcmath_ptr,
