@@ -59,7 +59,7 @@ class PEAR_Command_Config extends PEAR_Command_Common
     // }}}
     // {{{ run()
 
-    function run($command, $params)
+    function run($command, $options, $params)
     {
         $cf =& $this->config;
         $failmsg = '';

@@ -59,7 +59,7 @@ class PEAR_Command_List extends PEAR_Command_Common
     // }}}
     // {{{ run()
 
-    function run($command, $params)
+    function run($command, $options, $params)
     {
         $reg = new PEAR_Registry(); // XXX Use config here
         $installed = $reg->packageInfo();

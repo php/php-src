@@ -60,22 +60,25 @@ class PEAR_Command_Install extends PEAR_Command_Common
     // }}}
     // {{{ run()
 
-    function run($command, $params)
+    function run($command, $options, $params)
     {
         $installer =& new PEAR_Installer($this->config->get('php_dir'),
                                          $this->config->get('ext_dir'),
                                          $this->config->get('doc_dir'));
         $installer->debug = $this->config->get('verbose');
         $failmsg = '';
-        $options = array();
+        $opts = array();
         switch ($command) {
             case 'install':
             case 'upgrade': {
                 if ($command == 'upgrade') {
-                    $options['upgrade'] = true;
+                    $opts['upgrade'] = true;
+                }
+                if (isset($options['f'])) {
+                    $opts['force'] = true;
                 }
                 // The ['force'] and ['nodeps'] options are still missing
-                if ($installer->install($params[0], $options, $this->config)) {
+                if ($installer->install(@$params[0], $opts, $this->config)) {
                     $this->ui->displayLine("install ok");
                 } else {
                     $failmsg = "install failed";
@@ -101,6 +104,11 @@ class PEAR_Command_Install extends PEAR_Command_Common
     }
 
     // }}}
+
+    function getOptions()
+    {
+        return array('f');
+    }
 }
 
 ?>

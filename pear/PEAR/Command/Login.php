@@ -70,7 +70,7 @@ class PEAR_Command_Login extends PEAR_Command_Common
      *
      * @access public
      */
-    function run($command, $params)
+    function run($command, $options, $params)
     {
         $cf = $this->config;
         $failmsg = '';
