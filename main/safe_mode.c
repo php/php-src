@@ -88,7 +88,7 @@ PHPAPI int php_checkuid(const char *fn, int mode) {
 		duid = sb.st_uid;
 	} else {
 		s = emalloc(MAXPATHLEN+1);
-		if (!PHP_GETCWD(s,MAXPATHLEN)) {
+		if (!V_GETCWD(s,MAXPATHLEN)) {
 			php_error(E_WARNING, "Unable to access current working directory");
 			return(0);
 		}
