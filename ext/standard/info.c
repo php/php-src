@@ -24,6 +24,7 @@
 #include "php_globals.h"
 #include "ext/standard/head.h"
 #include "info.h"
+#include "credits.h"
 #include "SAPI.h"
 #include <time.h>
 #if !defined(PHP_WIN32)
@@ -38,7 +39,6 @@
 
 #define SECTION(name)  PUTS("<H2 align=\"center\">" name "</H2>\n")
 
-#define CREDIT_LINE(module, authors) php_info_print_table_row(2, module, authors)
 PHPAPI extern char *php_ini_path;
 
 static int _display_module_info(zend_module_entry *module, void *arg)
@@ -330,151 +330,6 @@ PHPAPI void php_print_info(int flag)
 }
 
 
-void php_print_credits(int flag)
-{
-	if (flag & PHP_CREDITS_FULLPAGE) {
-		PUTS("<html><head><title>PHP Credits</title></head><body>\n");
-	}
-
-	php_info_print_style();
-
-	PUTS("<h1 align=\"center\">PHP 4.0 Credits</h1>\n");
-
-	if (flag & PHP_CREDITS_GROUP) {
-		/* Group */
-
-		php_info_print_table_start();
-		php_info_print_table_header(1, "PHP Group");
-		php_info_print_table_row(1, "Thies C. Arntzen, Stig Bakken, Andi Gutmans, Rasmus Lerdorf, Sam Ruby,\
-					Sascha Schumann, Zeev Suraski, Jim Winstead, Andrei Zmievski");
-		php_info_print_table_end();
-	}
-
-	if (flag & PHP_CREDITS_GENERAL) {
-		/* Design & Concept */
-		php_info_print_table_start();
-		php_info_print_table_header(1, "Language Design & Concept");
-		php_info_print_table_row(1, "Andi Gutmans, Rasmus Lerdorf, Zeev Suraski");
-		php_info_print_table_end();
-
-		/* PHP 4.0 Language */
-		php_info_print_table_start();
-		php_info_print_table_colspan_header(2, "PHP 4.0 Authors");
-		php_info_print_table_header(2, "Contribution", "Authors");
-		CREDIT_LINE("Zend Scripting Language Engine", "Andi Gutmans, Zeev Suraski");
-		CREDIT_LINE("Extension Module API", "Andi Gutmans, Zeev Suraski");
-		CREDIT_LINE("UNIX Build and Modularization", "Stig Bakken, Sascha Schumann");
-		CREDIT_LINE("Win32 Port", "Shane Caraveo, Zeev Suraski");
-		CREDIT_LINE("Server API (SAPI) Abstraction Layer", "Andi Gutmans, Shane Caraveo, Zeev Suraski");
-		php_info_print_table_end();
-	}
-
-	if (flag & PHP_CREDITS_SAPI) {
-		/* SAPI Modules */
-
-		php_info_print_table_start();
-		php_info_print_table_colspan_header(2, "SAPI Modules");
-		php_info_print_table_header(2, "Contribution", "Authors");
-		CREDIT_LINE("AOLserver", "Sascha Schumann");
-		CREDIT_LINE("Apache 1.3", "Rasmus Lerdorf, Zeev Suraski");
-		CREDIT_LINE("Apache 2.0", "Sascha Schumann");
-		CREDIT_LINE("Caudium / Roxen", "David Hedbor");
-		CREDIT_LINE("CGI", "Rasmus Lerdorf, Stig Bakken");
-		CREDIT_LINE("fhttpd", "Alex Belits");
-		CREDIT_LINE("ISAPI", "Andi Gutmans, Zeev Suraski");
-		CREDIT_LINE("Java Servlet", "Sam Ruby");
-		CREDIT_LINE("NSAPI", "Jayakumar Muthukumarasamy");
-		CREDIT_LINE("phttpd", "Thies C. Arntzen");
-		CREDIT_LINE("pi3web", "Holger Zimmermann");
-		CREDIT_LINE("thttpd", "Sascha Schumann");
-		php_info_print_table_end();
-	}
-
-	if (flag & PHP_CREDITS_MODULES) {
-		/* Modules */
-
-		php_info_print_table_start();
-		php_info_print_table_colspan_header(2, "Module Authors");
-		php_info_print_table_header(2, "Module", "Authors");
-		CREDIT_LINE("Apache", "Rasmus Lerdorf, Stig Bakken, David Sklar");
-		CREDIT_LINE("aspell", "Rasmus Lerdorf");
-		CREDIT_LINE("Assert", "Thies C. Arntzen");
-		CREDIT_LINE("BC Math", "Andi Gutmans");
-		CREDIT_LINE("bz2", "Sterling Hughes");
-		CREDIT_LINE("ccvs", "Brendan W. McAdams, Doug DeJulio");
-		CREDIT_LINE("Win32 COM", "Zeev Suraski");
-		CREDIT_LINE("cpdf", "Uwe Steinmann");
-		CREDIT_LINE("CURL", "Sterling Hughes");
-		CREDIT_LINE("CyberCash", "Evan Klinger");
-		CREDIT_LINE("DAV", "Stig Bakken");
-		CREDIT_LINE("DBA", "Sascha Schumann");
-		CREDIT_LINE("DBM", "Rasmus Lerdorf, Jim Winstead");
-		CREDIT_LINE("dBase", "Jim Winstead");
-		CREDIT_LINE("domxml", "Uwe Steinmann");
-		CREDIT_LINE("dotnet", "Sam Ruby");
-		CREDIT_LINE("EXIF", "Rasmus Lerdorf");
-		CREDIT_LINE("FDF", "Uwe Steinmann");
-		CREDIT_LINE("FilePro", "Chad Robinson");
-		CREDIT_LINE("FTP", "Andrew Skalski");
-		CREDIT_LINE("GD imaging", "Rasmus Lerdorf, Stig Bakken, Jim Winstead, Jouni Ahto");
-		CREDIT_LINE("GetText", "Alex Plotnick");
-		CREDIT_LINE("HyperWave", "Uwe Steinmann");
-		CREDIT_LINE("icap", "Mark Musone");
-		CREDIT_LINE("iisfunc", "Frank M. Kromann");
-		CREDIT_LINE("IMAP", "Rex Logan, Mark Musone, Brian Wang, Kaj-Michael Lang, Antoni Pamies Olive, Rasmus Lerdorf, Andrew Skalski, Chuck Hagenbuch");
-		CREDIT_LINE("Informix", "Danny Heijl, Christian Cartus");
-		CREDIT_LINE("Ingres II", "David Hénot");
-		CREDIT_LINE("InterBase", "Jouni Ahto, Andrew Avdeev");
-		CREDIT_LINE("Java", "Sam Ruby");
-		CREDIT_LINE("LDAP", "Amitay Isaacs, Eric Warnke, Rasmus Lerdorf, Gerrit Thomson");
-		CREDIT_LINE("MCAL", "Mark Musone, Chuck Hagenbuch");
-		CREDIT_LINE("mcrypt", "Sascha Schumann, Derick Rethans");
-		CREDIT_LINE("mhash", "Sascha Schumann");
-		CREDIT_LINE("MS SQL", "Frank M. Kromann");
-		CREDIT_LINE("mSQL", "Zeev Suraski");
-		CREDIT_LINE("MySQL", "Zeev Suraski");
-		CREDIT_LINE("OCI8", "Stig Bakken, Thies C. Arntzen");
-		CREDIT_LINE("ODBC", "Stig Bakken, Andreas Karajannis, Frank M. Kromann");
-		CREDIT_LINE("Oracle", "Stig Bakken, Mitch Golden, Rasmus Lerdorf, Andreas Karajannis, Thies C. Arntzen");
-		CREDIT_LINE("Ovrimos", "Nikos Mavroyanopoulos");
-		CREDIT_LINE("Perl Compatible Regexps", "Andrei Zmievski");
-		CREDIT_LINE("PDF", "Uwe Steinmann");
-		CREDIT_LINE("Verisign Payflow Pro", "John Donagher, David Croft");
-		CREDIT_LINE("Posix", "Kristian Köhntopp");
-		CREDIT_LINE("PostgreSQL", "Jouni Ahto, Zeev Suraski");
-		CREDIT_LINE("Readline", "Thies C. Arntzen");
-		CREDIT_LINE("Recode", "Kristian Köhntopp");
-		CREDIT_LINE("Sablot", "Sterling Hughes");
-		CREDIT_LINE("Satellite (CORBA)", "David Eriksson");
-		CREDIT_LINE("Sessions", "Sascha Schumann, Andrei Zmievski");
-		CREDIT_LINE("Shared Memory Operations", "Slava Poliakov, Ilia Alshanetsky");
-		CREDIT_LINE("SNMP", "Rasmus Lerdorf");
-		CREDIT_LINE("Sockets", "Chris Vandomelen, Sterling Hughes");
-		CREDIT_LINE("SWF", "Sterling Hughes");
-		CREDIT_LINE("Sybase-DB", "Zeev Suraski");
-		CREDIT_LINE("Sybase-CT", "Zeev Suraski, Tom May");
-		CREDIT_LINE("System V Semaphores", "Tom May");
-		CREDIT_LINE("System V Shared Memory", "Christian Cartus");
-		CREDIT_LINE("WDDX", "Andrei Zmievski");
-		CREDIT_LINE("XML", "Stig Bakken, Thies C. Arntzen");
-		CREDIT_LINE("YAZ", "Adam Dickmeiss");
-		CREDIT_LINE("Yellow Pages", "Stephanie Wehner");
-		CREDIT_LINE("Zlib", "Rasmus Lerdorf, Stefan Roehrich");
-		php_info_print_table_end();
-	}
-
-	if (flag & PHP_CREDITS_DOCS) {
-		php_info_print_table_start();
-		php_info_print_table_header(1, "PHP Documentation Team");
-		php_info_print_table_row(1, "Alexander Aulbach, Stig Bakken, Rasmus Lerdorf, Egon Schmid, Zeev Suraski, Lars Torben Wilson, Jim Winstead");
-		php_info_print_table_row(1, "Edited by:  Stig Bakken and Egon Schmid");
-		php_info_print_table_end();
-	}
-
-	if (flag & PHP_CREDITS_FULLPAGE) {
-		PUTS("</body></html>\n");
-	}
-}
 
 PHPAPI void php_info_print_table_start()
 {
