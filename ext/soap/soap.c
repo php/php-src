@@ -1262,7 +1262,7 @@ PHP_METHOD(SoapServer, handle)
 						INIT_ZVAL(readfile_ret);
 						MAKE_STD_ZVAL(param);
 
-						sapi_add_header("Content-Type: text/xml; charset=\"utf-8\"", sizeof("Content-Type: text/xml; charset=\"utf-8\""), 1);
+						sapi_add_header("Content-Type: text/xml; charset=\"utf-8\"", sizeof("Content-Type: text/xml; charset=\"utf-8\"")-1, 1);
 						ZVAL_STRING(param, service->sdl->source, 1);
 						ZVAL_STRING(&readfile, "readfile", 1);
 						if (call_user_function(EG(function_table), NULL, &readfile, &readfile_ret, 1, &param  TSRMLS_CC) == FAILURE) {
@@ -1623,11 +1623,11 @@ PHP_METHOD(SoapServer, handle)
 	}
 
 	sprintf(cont_len, "Content-Length: %d", size);
-	sapi_add_header(cont_len, strlen(cont_len) + 1, 1);
+	sapi_add_header(cont_len, strlen(cont_len), 1);
 	if (soap_version == SOAP_1_2) {
-		sapi_add_header("Content-Type: application/soap+xml; charset=\"utf-8\"", sizeof("Content-Type: application/soap+xml; charset=\"utf-8\""), 1);
+		sapi_add_header("Content-Type: application/soap+xml; charset=\"utf-8\"", sizeof("Content-Type: application/soap+xml; charset=\"utf-8\"")-1, 1);
 	} else {
-		sapi_add_header("Content-Type: text/xml; charset=\"utf-8\"", sizeof("Content-Type: text/xml; charset=\"utf-8\""), 1);
+		sapi_add_header("Content-Type: text/xml; charset=\"utf-8\"", sizeof("Content-Type: text/xml; charset=\"utf-8\"")-1, 1);
 	}
 
 	xmlFreeDoc(doc_return);
@@ -1707,13 +1707,13 @@ static void soap_server_fault_ex(sdlFunctionPtr function, zval* fault, soapHeade
 	   Want to return HTTP 500 but apache wants to over write
 	   our fault code with their own handling... Figure this out later
 	*/
-	sapi_add_header("HTTP/1.1 500 Internal Service Error", sizeof("HTTP/1.1 500 Internal Service Error"), 1);
+	sapi_add_header("HTTP/1.1 500 Internal Service Error", sizeof("HTTP/1.1 500 Internal Service Error")-1, 1);
 	sprintf(cont_len,"Content-Length: %d", size);
-	sapi_add_header(cont_len, strlen(cont_len) + 1, 1);
+	sapi_add_header(cont_len, strlen(cont_len), 1);
 	if (soap_version == SOAP_1_2) {
-		sapi_add_header("Content-Type: application/soap+xml; charset=\"utf-8\"", sizeof("Content-Type: application/soap+xml; charset=\"utf-8\""), 1);
+		sapi_add_header("Content-Type: application/soap+xml; charset=\"utf-8\"", sizeof("Content-Type: application/soap+xml; charset=\"utf-8\"")-1, 1);
 	} else {
-		sapi_add_header("Content-Type: text/xml; charset=\"utf-8\"", sizeof("Content-Type: text/xml; charset=\"utf-8\""), 1);
+		sapi_add_header("Content-Type: text/xml; charset=\"utf-8\"", sizeof("Content-Type: text/xml; charset=\"utf-8\"")-1, 1);
 	}
 	php_write(buf, size TSRMLS_CC);
 
@@ -1993,10 +1993,18 @@ static int do_request(zval *this_ptr, xmlDoc *request, char *location, char *act
 	ZVAL_STRINGL(params[0], buf, buf_size, 0);
 	INIT_ZVAL(param1);
 	params[1] = &param1;
-	ZVAL_STRING(params[1], location, 0);
+	if (location == NULL) {
+		ZVAL_NULL(params[1]);
+	} else {
+		ZVAL_STRING(params[1], location, 0);
+	}
 	INIT_ZVAL(param2);
 	params[2] = &param2;
-	ZVAL_STRING(params[2], action, 0);
+	if (action == NULL) {
+		ZVAL_NULL(params[2]);
+	} else {
+		ZVAL_STRING(params[2], action, 0);
+	}
 	INIT_ZVAL(param3);
 	params[3] = &param3;
 	ZVAL_LONG(params[3], version);
@@ -2035,8 +2043,6 @@ static void do_soap_call(zval* this_ptr,
  	sdlPtr old_sdl = NULL;
  	sdlFunctionPtr fn;
 	xmlDocPtr request = NULL;
-	char *buffer;
-	int len;
 	int ret = FALSE;
 	int soap_version;
 	zval response;
@@ -2602,8 +2608,6 @@ static sdlFunctionPtr deserialize_function_call(sdlPtr sdl, xmlDocPtr request, c
 	xmlNodePtr trav,env,head,body,func;
 	xmlAttrPtr attr;
 	sdlFunctionPtr function;
-
-	ZVAL_EMPTY_STRING(function_name);
 
 	/* Get <Envelope> element */
 	env = NULL;
@@ -3745,8 +3749,12 @@ static void type_to_string(sdlTypePtr type, smart_str *buf, int level)
 		case XSD_TYPEKIND_SIMPLE:
 		case XSD_TYPEKIND_LIST:
 		case XSD_TYPEKIND_UNION:
-			smart_str_appendl(buf, type->encode->details.type_str, strlen(type->encode->details.type_str));
-			smart_str_appendc(buf, ' ');
+			if (type->encode) {
+				smart_str_appendl(buf, type->encode->details.type_str, strlen(type->encode->details.type_str));
+				smart_str_appendc(buf, ' ');
+			} else {
+				smart_str_appendl(buf, "anyType ", sizeof("anyType ")-1);
+			}
 			smart_str_appendl(buf, type->name, strlen(type->name));
 			break;
 		case XSD_TYPEKIND_COMPLEX:
@@ -3771,7 +3779,7 @@ static void type_to_string(sdlTypePtr type, smart_str *buf, int level)
 						len = end-(*ext)->val;
 					}
 					if (len == 0) {
-						smart_str_appendl(buf, "anyType", 7);
+						smart_str_appendl(buf, "anyType", sizeof("anyType")-1);
 					} else {
 						smart_str_appendl(buf, (*ext)->val, len);
 					}

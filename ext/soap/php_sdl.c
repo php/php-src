@@ -1459,14 +1459,12 @@ static sdlPtr get_sdl_from_cache(const char *fn, const char *uri, time_t t)
 			binding->name = sdl_deserialize_string(&in);
 			binding->location = sdl_deserialize_string(&in);
 			WSDL_CACHE_GET_1(binding->bindingType,sdlBindingType,&in);
-			if (binding->bindingType == BINDING_SOAP) {
-				if (*in != 0) {
-				  sdlSoapBindingPtr soap_binding = binding->bindingAttributes = emalloc(sizeof(sdlSoapBinding));
-					WSDL_CACHE_GET_1(soap_binding->style,sdlEncodingStyle,&in);
-					WSDL_CACHE_GET_1(soap_binding->transport,sdlTransport,&in);
-				} else {
-					WSDL_CACHE_SKIP(1,&in);
-				}
+			if (binding->bindingType == BINDING_SOAP && *in != 0) {
+			  sdlSoapBindingPtr soap_binding = binding->bindingAttributes = emalloc(sizeof(sdlSoapBinding));
+				WSDL_CACHE_GET_1(soap_binding->style,sdlEncodingStyle,&in);
+				WSDL_CACHE_GET_1(soap_binding->transport,sdlTransport,&in);
+			} else {
+				WSDL_CACHE_SKIP(1,&in);
 			}
 			bindings[i] = binding;
 		}
@@ -1490,18 +1488,16 @@ static sdlPtr get_sdl_from_cache(const char *fn, const char *uri, time_t t)
 		} else {
 			func->binding = bindings[binding_num-1];
 		}
-		if (func->binding && func->binding->bindingType == BINDING_SOAP) {
-			if (*in != 0) {
-				sdlSoapBindingFunctionPtr binding = func->bindingAttributes = emalloc(sizeof(sdlSoapBindingFunction));
-				memset(binding, 0, sizeof(sdlSoapBindingFunction));
-				WSDL_CACHE_GET_1(binding->style,sdlEncodingStyle,&in);
-				binding->soapAction = sdl_deserialize_string(&in);
-				sdl_deserialize_soap_body(&binding->input, encoders, types, &in);
-				sdl_deserialize_soap_body(&binding->output, encoders, types, &in);
-			} else {
-				WSDL_CACHE_SKIP(1, &in);
-				func->bindingAttributes = NULL;
-			}
+		if (func->binding && func->binding->bindingType == BINDING_SOAP && *in != 0) {
+			sdlSoapBindingFunctionPtr binding = func->bindingAttributes = emalloc(sizeof(sdlSoapBindingFunction));
+			memset(binding, 0, sizeof(sdlSoapBindingFunction));
+			WSDL_CACHE_GET_1(binding->style,sdlEncodingStyle,&in);
+			binding->soapAction = sdl_deserialize_string(&in);
+			sdl_deserialize_soap_body(&binding->input, encoders, types, &in);
+			sdl_deserialize_soap_body(&binding->output, encoders, types, &in);
+		} else {
+			WSDL_CACHE_SKIP(1, &in);
+			func->bindingAttributes = NULL;
 		}
 
 		func->requestParameters = sdl_deserialize_parameters(encoders, types, &in);
