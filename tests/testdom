@@ -52,7 +52,7 @@ $xmlstr = "<?xml version='1.0'?>
 
 $dom = dom($xmlstr);
 echo "XML Version: ".$dom->version."\n";
-$dtd = $dom->intdtd();
+$dtd = $dom->dtd();
 $rootnode = $dom->root();
 /* The following line causes a segm fault if more than 5 methods are in
    class node, see ext/domxml/domxml.c */
@@ -60,5 +60,12 @@ $attr = $rootnode->getattr("language");
 
 /* if the above weren't there, php will probably crash somewhere after here */
 output_node($rootnode);
+
+$doc = newxmldoc("1.0");
+$root = $doc->addroot("HTML");
+echo $root->name;
+$root->newchild("TITLE", "Hier der Titel");
+$root->newchild("BODY", "");
+echo $doc->dumpmem();
 
 ?>
