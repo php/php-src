@@ -122,7 +122,7 @@ static int handle_ssl_error(php_stream *stream, int nr_bytes TSRMLS_DC)
 static size_t php_openssl_sockop_write(php_stream *stream, const char *buf, size_t count TSRMLS_DC)
 {
 	php_openssl_netstream_data_t *sslsock = (php_openssl_netstream_data_t*)stream->abstract;
-	size_t didwrite;
+	int didwrite;
 	
 	if (sslsock->ssl_active) {
 		int retry = 1;
@@ -141,9 +141,14 @@ static size_t php_openssl_sockop_write(php_stream *stream, const char *buf, size
 		didwrite = php_stream_socket_ops.write(stream, buf, count TSRMLS_CC);
 	}
 	
-	if (didwrite > 0)
+	if (didwrite > 0) {
 		php_stream_notify_progress_increment(stream->context, didwrite, 0);
+	}
 
+	if (didwrite < 0) {
+		didwrite = 0;
+	}
+	
 	return didwrite;
 }
 
@@ -174,8 +179,13 @@ static size_t php_openssl_sockop_read(php_stream *stream, char *buf, size_t coun
 		nr_bytes = php_stream_socket_ops.read(stream, buf, count TSRMLS_CC);
 	}
 
-	if (nr_bytes > 0)
+	if (nr_bytes > 0) {
 		php_stream_notify_progress_increment(stream->context, nr_bytes, 0);
+	}
+
+	if (nr_bytes < 0) {
+		nr_bytes = 0;
+	}
 
 	return nr_bytes;
 }
