@@ -20,7 +20,7 @@ libZend_la_SOURCES=\
 libZend_la_LIBADD = $(ZEND_SCANNER)
 libZend_la_LDFLAGS = @EXTRA_LIBS@
 libZend_la_DEPENDENCIES = $(ZEND_SCANNER)
-
+	
 # automake isn't too clever about "non-standard" use of lex and yacc
 
 zend-scanner.l: zend-parser.h
@@ -35,3 +35,5 @@ zend-parser.h: zend-parser.c
 zend-parser.c: zend-parser.y
 	$(YACC) -p zend -v -d $(srcdir)/zend-parser.y -o zend-parser.c
 
+zend_execute.lo: $(srcdir)/zend_execute.c
+	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(INCLUDES) $(CPPFLAGS) $(INLINE_CFLAGS) -c $(srcdir)/zend_execute.c
