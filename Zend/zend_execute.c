@@ -1890,21 +1890,31 @@ int zend_post_dec_handler(ZEND_OPCODE_HANDLER_ARGS)
 }
 
 
-int zend_print_handler(ZEND_OPCODE_HANDLER_ARGS)
+int zend_echo_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
-	zend_print_variable(get_zval_ptr(&opline->op1, EX(Ts), &EG(free_op1), BP_VAR_R));
-	EX_T(opline->result.u.var).tmp_var.value.lval = 1;
-	EX_T(opline->result.u.var).tmp_var.type = IS_LONG;
+	zval *free_op1;
+	zval z_copy;
+	zval *z = get_zval_ptr(&opline->op1, EX(Ts), &free_op1, BP_VAR_R);
+
+	if (Z_TYPE_P(z) == IS_OBJECT && Z_OBJ_HT_P(z)->get_method != NULL && 
+		zend_std_cast_object_tostring(z, &z_copy, IS_STRING, 0 TSRMLS_CC) == SUCCESS) {
+		zend_print_variable(&z_copy);
+		zval_dtor(&z_copy);
+	} else {
+		zend_print_variable(z);
+	}
+
 	FREE_OP(EX(Ts), &opline->op1, EG(free_op1));
 	NEXT_OPCODE();
 }
 
 
-int zend_echo_handler(ZEND_OPCODE_HANDLER_ARGS)
+int zend_print_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
-	zend_print_variable(get_zval_ptr(&opline->op1, EX(Ts), &EG(free_op1), BP_VAR_R));
-	FREE_OP(EX(Ts), &opline->op1, EG(free_op1));
-	NEXT_OPCODE();
+	EX_T(opline->result.u.var).tmp_var.value.lval = 1;
+	EX_T(opline->result.u.var).tmp_var.type = IS_LONG;
+
+	return zend_echo_handler(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 }
 
 
