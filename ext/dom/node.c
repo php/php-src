@@ -202,6 +202,8 @@ int dom_node_node_value_write(dom_object *obj, zval *newval TSRMLS_DC)
 		case XML_COMMENT_NODE:
 		case XML_CDATA_SECTION_NODE:
 		case XML_PI_NODE:
+		case XML_ELEMENT_NODE:
+			convert_to_string(newval);
 			xmlNodeSetContentLen(nodep, Z_STRVAL_P(newval), Z_STRLEN_P(newval) + 1);
 			break;
 		default:
