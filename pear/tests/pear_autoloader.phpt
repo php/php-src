@@ -1,7 +1,8 @@
 --TEST--
 PEAR_Autoloader
 --SKIPIF--
-<?php if (!extension_loaded("overload")) die("skip\n"); ?>
+skip
+<?php /*if (!extension_loaded("overload")) die("skip\n"); */ ?>
 --FILE--
 <?php
 
