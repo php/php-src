@@ -1,6 +1,6 @@
 # Microsoft Developer Studio Project File - Name="dbx" - Package Owner=<4>
 # Microsoft Developer Studio Generated Build File, Format Version 6.00
-# **DO NOT EDIT **
+# ** DO NOT EDIT **
 
 # TARGTYPE "Win32 (x86) Dynamic-Link Library" 0x0102
 
@@ -120,6 +120,10 @@ SOURCE=.\dbx_odbc.c
 
 SOURCE=.\dbx_pgsql.c
 # End Source File
+# Begin Source File
+
+SOURCE=.\dbx_sybasect.c
+# End Source File
 # End Group
 # Begin Group "Header Files"
 
@@ -151,6 +155,10 @@ SOURCE=.\dbx_odbc.h
 # Begin Source File
 
 SOURCE=.\dbx_pgsql.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\dbx_sybasect.h
 # End Source File
 # Begin Source File
 
