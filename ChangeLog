@@ -1,3 +1,8 @@
+2004-04-10  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/standard/user_filters.c:
+      studlyCaps
+
 2004-04-09  Sara Golemon  <php@alphaweb.net>
 
     * main/network.c:
