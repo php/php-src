@@ -274,7 +274,7 @@ PHP_FUNCTION(xslt_set_sax_handlers)
 		/* Character handler, called when data is found */
 		else if (strcasecmp(string_key, "character") == 0) {
 			XSLT_SAX(handle).characters = *handler;
-			zval_add_ref(XSLT_SAX(handle).characters);
+			zval_add_ref(&XSLT_SAX(handle).characters);
 		}
 		/* Invalid handler name, tsk, tsk, tsk :) */
 		else {
@@ -351,7 +351,7 @@ PHP_FUNCTION(xslt_set_scheme_handlers)
 		}
 
 		assign_handle = *handler;
-		zval_add_ref(assign_handle);
+		zval_add_ref(&assign_handle);
 	}
 }
 /* }}} */
@@ -371,7 +371,7 @@ PHP_FUNCTION(xslt_set_error_handler)
 	ZEND_FETCH_RESOURCE(handle, php_xslt *, processor_p, -1, le_xslt_name, le_xslt);
 
 	XSLT_ERROR(handle) = *error_func;
-	zval_add_ref(XSLT_ERROR(handle));
+	zval_add_ref(&XSLT_ERROR(handle));
 }
 /* }}} */
 
@@ -658,7 +658,7 @@ static void register_sax_handler_pair(zval *handler1, zval *handler2, zval **han
 	/* Grab and assign handler 1 */
 	if (zend_hash_index_find(Z_ARRVAL_PP(handler), 0, (void **) &current) == SUCCESS) {
 		handler1 = *current;
-		zval_add_ref(handler1);
+		zval_add_ref(&handler1);
 	}
 	else {
 		php_error(E_WARNING, "Wrong format of arguments to xslt_set_sax_handlers()");
@@ -668,7 +668,7 @@ static void register_sax_handler_pair(zval *handler1, zval *handler2, zval **han
 	/* Grab and assign handler 2 */
 	if (zend_hash_index_find(Z_ARRVAL_PP(handler), 1, (void **) &current) == SUCCESS) {
 		handler2 = *current;
-		zval_add_ref(handler2);
+		zval_add_ref(&handler2);
 	}
 	else {
 		php_error(E_WARNING, "Wrong format of arguments to xslt_set_sax_handlers()");
