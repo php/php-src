@@ -384,21 +384,14 @@ static void _php_ibase_close_plink(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 /* {{{ _php_ibase_free_result() */
 static void _php_ibase_free_result(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
-	char tr_items[] = {isc_info_tra_id };
-	char tmp[32]; /* should be enough as on the Api doc */
-
 	ibase_result *ib_result = (ibase_result *)rsrc->ptr;
 
-	IBDEBUG("Freeing result...");
+	IBDEBUG("Freeing result by dtor...");
 	if (ib_result){
 		_php_ibase_free_xsqlda(ib_result->out_sqlda);
-		isc_transaction_info(IB_STATUS, &ib_result->trans,sizeof(tr_items), tr_items, sizeof(tmp), tmp );
-		/* we have a transaction still open and we really want to drop the statement ? */
-		if ( !(IB_STATUS[0] && IB_STATUS[1])  && ib_result->drop_stmt && ib_result->stmt ) {
-			IBDEBUG("Dropping statement handle (free_result)...");
-			if (isc_dsql_free_statement(IB_STATUS, &ib_result->stmt, DSQL_drop)) {
-				_php_ibase_error(TSRMLS_C);
-			}
+		if (ib_result->drop_stmt && ib_result->stmt) {
+			IBDEBUG("Dropping statement handle (free_result dtor)...");
+			isc_dsql_free_statement(IB_STATUS, &ib_result->stmt, DSQL_drop);
 		} else {
 			/* Shouldn't be here unless query was select and had parameter
 			   placeholders, in which case ibase_execute handles this???
@@ -422,8 +415,6 @@ static void _php_ibase_free_result(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 /* {{{ _php_ibase_free_query() */
 static void _php_ibase_free_query(ibase_query *ib_query)
 {
-	char tr_items[] = {isc_info_tra_id };
-	char tmp[32] ; /* ...should be enough as on the Api doc */
 	TSRMLS_FETCH();
 
 	IBDEBUG("Freeing query...");
@@ -434,9 +425,7 @@ static void _php_ibase_free_query(ibase_query *ib_query)
 		if (ib_query->out_sqlda) {
 			efree(ib_query->out_sqlda);
 		}
-		isc_transaction_info(IB_STATUS, &ib_query->trans,sizeof(tr_items), tr_items, sizeof(tmp), tmp );
-		/* we have the trans still open and a statement to drop? */
-		if ( !(IB_STATUS[0] && IB_STATUS[1])  &&  ib_query->stmt) {
+		if (ib_query->stmt) {
 			IBDEBUG("Dropping statement handle (free_query)...");
 			if (isc_dsql_free_statement(IB_STATUS, &ib_query->stmt, DSQL_drop)){
 				_php_ibase_error(TSRMLS_C);
@@ -453,12 +442,33 @@ static void _php_ibase_free_query(ibase_query *ib_query)
 }
 /* }}} */
 
+/* {{{ php_ibase_free_query_rsrc() */
 static void php_ibase_free_query_rsrc(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
-	ibase_query *query = (ibase_query *)rsrc->ptr;
+	ibase_query *ib_query = (ibase_query *)rsrc->ptr;
 
-	_php_ibase_free_query(query);
+	IBDEBUG("Freeing query by dtor...");
+	if (ib_query) {
+		if (ib_query->in_sqlda) {
+			efree(ib_query->in_sqlda);
+		}
+		if (ib_query->out_sqlda) {
+			efree(ib_query->out_sqlda);
+		}
+		if (ib_query->stmt) {
+			IBDEBUG("Dropping statement handle (free_query dtor)...");
+			isc_dsql_free_statement(IB_STATUS, &ib_query->stmt, DSQL_drop);
+		}
+		if (ib_query->in_array) {
+			efree(ib_query->in_array);
+		}
+		if (ib_query->out_array) {
+			efree(ib_query->out_array);
+		}
+		efree(ib_query);
+	}
 }
+/* }}} */
 
 /* {{{ _php_ibase_free_blob()	*/
 static void _php_ibase_free_blob(zend_rsrc_list_entry *rsrc TSRMLS_DC)
