@@ -2344,7 +2344,7 @@ PHP_FUNCTION(pdf_open_memory_image) {
 	}
 
 
-#if PDFLIB_MINORVERSION == 0
+#if PDFLIB_MAJORVERSION < 3 & PDFLIB_MINORVERSION == 0
 		pdf_image = PDF_open_memory_image(pdf, buffer, im->sx, im->sy, 3, 8);
 #else
 		pdf_image = PDF_open_image(pdf, "raw", "memory", buffer, im->sx*im->sy*3, im->sx, im->sy, 3, 8, NULL);
@@ -2440,7 +2440,7 @@ PHP_FUNCTION(pdf_place_image) {
 /* {{{ proto void pdf_put_image(int pdf, int pdfimage)
    Stores image in the pdf document for later use */
 PHP_FUNCTION(pdf_put_image) {
-#if PDFLIB_MINORVERSION > 0
+#if PDFLIB_MINORVERSION > 0 | PDFLIB_MAJORVERSION > 2
 #else
 	pval *arg1, *arg2;
 	int id, type;
@@ -2449,8 +2449,8 @@ PHP_FUNCTION(pdf_put_image) {
 #endif
 	PDF_TLS_VARS;
 	
-#if PDFLIB_MINORVERSION > 0
-	php_error(E_WARNING, "Version 2.01 of pdflib does not need the pdf_put_image() anymore, check the docs!");
+#if PDFLIB_MINORVERSION > 0 | PDFLIB_MAJORVERSION > 2
+	php_error(E_WARNING, "Version 2.01 and higher of pdflib does not need the pdf_put_image() anymore, check the docs!");
 #else
 	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -2482,7 +2482,7 @@ PHP_FUNCTION(pdf_put_image) {
 /* {{{ proto void pdf_execute_image(int pdf, int pdfimage, int x, int y, int scale)
    Places stored image in the pdf document */
 PHP_FUNCTION(pdf_execute_image) {
-#if PDFLIB_MINORVERSION >= 01
+#if PDFLIB_MINORVERSION >= 01 | PDFLIB_MAJORVERSION > 2
 #else
 	pval *arg1, *arg2, *arg3, *arg4, *arg5;
 	int id, type;
@@ -2491,8 +2491,8 @@ PHP_FUNCTION(pdf_execute_image) {
 	PDF_TLS_VARS;
 #endif
 
-#if PDFLIB_MINORVERSION >= 01
-	php_error(E_WARNING, "Version 2.01 of pdflib does not need the pdf_execute_image() anymore, check the docs!");
+#if PDFLIB_MINORVERSION >= 01 | PDFLIB_MAJORVERSION > 2
+	php_error(E_WARNING, "Version 2.01 and higher of pdflib does not need the pdf_execute_image() anymore, check the docs!");
 #else
 	if (ARG_COUNT(ht) != 5 || getParameters(ht, 5, &arg1, &arg2, &arg3, &arg4, &arg5) == FAILURE) {
 		WRONG_PARAM_COUNT;
