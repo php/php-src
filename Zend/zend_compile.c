@@ -1372,6 +1372,7 @@ void do_shell_exec(znode *result, znode *cmd CLS_DC)
 	opline->op1.u.constant.is_ref = 0;
 	opline->op1.u.constant.type = IS_STRING;
 	opline->op1.op_type = IS_CONST;
+	opline->extended_value = 1;
 	SET_UNUSED(opline->op2);
 	*result = opline->result;
 }

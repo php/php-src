@@ -142,8 +142,10 @@ void shutdown_executor(ELS_D)
 }
 
 
-ZEND_API char *get_active_function_name(ELS_D)
+ZEND_API char *get_active_function_name()
 {
+	ELS_FETCH();
+
 	switch(EG(function_state_ptr)->function->type) {
 		case ZEND_USER_FUNCTION: {
 				char *function_name = ((zend_op_array *) EG(function_state_ptr)->function)->function_name;

@@ -203,7 +203,7 @@ static inline zval **zend_fetch_property_address_inner(HashTable *ht, znode *op2
 }
 
 
-static inline void zend_assign_to_variable(znode *result, znode *op1, zval *value, int type, temp_variable *Ts ELS_DC)
+static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2, zval *value, int type, temp_variable *Ts ELS_DC)
 {
 	zval **variable_ptr_ptr = get_zval_ptr_ptr(op1, Ts, BP_VAR_W);
 	zval *variable_ptr;
@@ -231,6 +231,11 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, zval *valu
 						}
 
 						T->EA.str->value.str.val[T->EA.offset] = value->value.str.val[0];
+						if (op2
+							&& op2->op_type == IS_VAR
+							&& value==&Ts[op2->u.var].tmp_var) {
+							efree(value->value.str.val);
+						}
 						if (value == &tmp) {
 							zval_dtor(value);
 						}
@@ -1073,7 +1078,7 @@ binary_assign_op_addr: {
 			case ZEND_ASSIGN: {
 					zval *value = get_zval_ptr(&opline->op2, Ts, &free_op2, BP_VAR_R);
 
-					zend_assign_to_variable(&opline->result, &opline->op1, value, (free_op2?IS_TMP_VAR:opline->op2.op_type), Ts ELS_CC);
+					zend_assign_to_variable(&opline->result, &opline->op1, &opline->op2, value, (free_op2?IS_TMP_VAR:opline->op2.op_type), Ts ELS_CC);
 					/* zend_assign_to_variable() always takes care of op2, never free it! */
 				}
 				break;
@@ -1466,7 +1471,7 @@ send_by_ref:
 					} else if ((*param)->is_ref) {
 						zend_assign_to_variable_reference(NULL, get_zval_ptr_ptr(&opline->result, Ts, BP_VAR_W), param, NULL ELS_CC);
 					} else {
-						zend_assign_to_variable(NULL, &opline->result, *param, IS_VAR, Ts ELS_CC);
+						zend_assign_to_variable(NULL, &opline->result, NULL, *param, IS_VAR, Ts ELS_CC);
 					}
 				}
 				break;
@@ -1505,7 +1510,7 @@ send_by_ref:
 					if (assignment_value->is_ref) {
 						zend_assign_to_variable_reference(NULL, get_zval_ptr_ptr(&opline->result, Ts, BP_VAR_W), param, NULL ELS_CC);
 					} else {
-						zend_assign_to_variable(NULL, &opline->result, assignment_value, IS_VAR, Ts ELS_CC);
+						zend_assign_to_variable(NULL, &opline->result, NULL, assignment_value, IS_VAR, Ts ELS_CC);
 					}
 				}
 				break;
