@@ -125,7 +125,7 @@ class PEAR_Command_Remote extends PEAR_Command_Common
                     $pkgfile = $params[0];
                 }
                 $this->bytes_downloaded = 0;
-                $saved = PEAR_Common::downloadHttp($pkgfile, $this->ui, $this->config, '.',
+                $saved = PEAR_Common::downloadHttp($pkgfile, $this->ui, '.',
                                                    array(&$this, 'downloadCallback'));
                 if (PEAR::isError($saved)) {
                     return $this->raiseError($saved);
