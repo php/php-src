@@ -45,7 +45,7 @@ ZEND_API zend_alloc_globals alloc_globals;
 #define ZEND_DO_REALLOC(ptr, size)	(AG(memory_heap) ? HeapReAlloc(AG(memory_heap), HEAP_NO_SERIALIZE, ptr, size) : realloc(ptr, size))
 #else
 #define ZEND_DO_MALLOC(size)		malloc(size)
-#define ZEND_DO_FREE(ptr)			free(size)
+#define ZEND_DO_FREE(ptr)			free(ptr)
 #define ZEND_DO_REALLOC(ptr, size)	realloc(ptr, size)
 #endif
 
