@@ -246,7 +246,6 @@ static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int t
 	/*fci.function_handler_cache = &function_ptr;*/
 	if (!zend_make_callable(&handler, &callable TSRMLS_CC)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to call handler %s()", callable);
-		efree(callable);
 		
 	} else {
 		result = zend_call_function(&fci, NULL TSRMLS_CC);
@@ -273,6 +272,7 @@ static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int t
 			zval_ptr_dtor(&retval);
 		}
 	}
+	efree(callable);
 	zval_dtor(&handler);
 	for (i = 0; i < nargs - 1; i++) {
 		zval_ptr_dtor(&args[i]);
