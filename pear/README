@@ -29,6 +29,6 @@ CODING RULES AND GUIDELINES
 * All PHP code must use <?php ?>.  This is the only really portable tag.
 
 * Before adding a new top-level directory ("DB" is one), discuss your
-  intentions on php-pear@lists.php.net.
+  intentions on pear-dev@lists.php.net.
 
 * Please see the CODING_STANDARDS file for full rules and guidelines.
