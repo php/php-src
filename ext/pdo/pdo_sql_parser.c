@@ -3,9 +3,9 @@
 #include "php.h"
 #include "php_pdo_driver.h"
 
-#define TEXT 1
-#define BIND 2
-#define EOI 3
+#define PDO_PARSER_TEXT 1
+#define PDO_PARSER_BIND 2
+#define PDO_PARSER_EOI 3
 
 #define RET(i) {s->cur = cursor; return i; }
 
@@ -77,7 +77,7 @@ yy2:	yyaccept = 0;
 	if(yych >= '\001')	goto yy14;
 yy3:
 #line 36
-	{ RET(TEXT); }
+	{ RET(PDO_PARSER_TEXT); }
 yy4:	yych = *++YYCURSOR;
 	if(yybm[0+yych] & 64)	goto yy10;
 	goto yy3;
@@ -87,18 +87,18 @@ yy5:	++YYCURSOR;
 yy6:	if(yybm[0+yych] & 32)	goto yy5;
 yy7:
 #line 37
-	{ RET(TEXT); }
+	{ RET(PDO_PARSER_TEXT); }
 yy8:	yych = *++YYCURSOR;
 yy9:
 #line 38
-	{ RET(EOI); }
+	{ RET(PDO_PARSER_EOI); }
 yy10:	++YYCURSOR;
 	if(YYLIMIT == YYCURSOR) YYFILL(1);
 	yych = *YYCURSOR;
 yy11:	if(yybm[0+yych] & 64)	goto yy10;
 yy12:
 #line 35
-	{ RET(BIND); }
+	{ RET(PDO_PARSER_BIND); }
 yy13:	++YYCURSOR;
 	if(YYLIMIT == YYCURSOR) YYFILL(1);
 	yych = *YYCURSOR;
@@ -118,14 +118,14 @@ yy16:	++YYCURSOR;
 yy17:	yych = *++YYCURSOR;
 yy18:
 #line 34
-	{ RET(TEXT); }
+	{ RET(PDO_PARSER_TEXT); }
 }
 #line 39
 	
 }
 
 int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, int inquery_len, char **outquery, 
-                        int *outquery_len)
+		int *outquery_len TSRMLS_DC)
 {
 	Scanner s;
 	char *ptr;
@@ -157,13 +157,13 @@ int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, int inquery_len, char **ou
 	ptr = *outquery;
 	s.cur = inquery;
 	s.lim = inquery + inquery_len;
-	while((t = scan(&s)) != EOI) {
-		if(t == TEXT) {
+	while((t = scan(&s)) != PDO_PARSER_EOI) {
+		if(t == PDO_PARSER_TEXT) {
 			memcpy(ptr, s.tok, s.cur - s.tok);
 			ptr += (s.cur - s.tok);
 			*outquery_len += (s.cur - s.tok);
 		}
-		else if(t == BIND) {
+		else if(t == PDO_PARSER_BIND) {
 			if(!params) { 
 				/* error */
 				efree(*outquery);
