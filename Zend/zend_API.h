@@ -333,7 +333,7 @@ ZEND_API int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci
 ZEND_API int zend_set_hash_symbol(zval *symbol, char *name, int name_length,
                                   zend_bool is_ref, int num_symbol_tables, ...);
 
-ZEND_API int delete_global_variable(char *name, int name_len TSRMLS_DC);
+ZEND_API int zend_delete_global_variable(char *name, int name_len TSRMLS_DC);
 
 #define add_method(arg, key, method)	add_assoc_function((arg), (key), (method))
 

@@ -526,8 +526,8 @@ static void php_session_track_init(TSRMLS_D)
 	zval *session_vars = NULL;
 	
 	/* Unconditionally destroy existing arrays -- possible dirty data */
-	delete_global_variable("HTTP_SESSION_VARS", sizeof("HTTP_SESSION_VARS")-1 TSRMLS_CC);
-	delete_global_variable("_SESSION", sizeof("_SESSION")-1 TSRMLS_CC);
+	zend_delete_global_variable("HTTP_SESSION_VARS", sizeof("HTTP_SESSION_VARS")-1 TSRMLS_CC);
+	zend_delete_global_variable("_SESSION", sizeof("_SESSION")-1 TSRMLS_CC);
 
 	MAKE_STD_ZVAL(session_vars);
 	array_init(session_vars);
@@ -1679,7 +1679,7 @@ PHP_FUNCTION(session_unset)
 
 			while (zend_hash_get_current_key_ex(ht, &str, &str_len, &num_key, 
 						0, &pos) == HASH_KEY_IS_STRING) {
-				delete_global_variable(str, str_len-1 TSRMLS_CC);
+				zend_delete_global_variable(str, str_len-1 TSRMLS_CC);
 				zend_hash_move_forward_ex(ht, &pos);
 			}
 		}

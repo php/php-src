@@ -1343,7 +1343,7 @@ void zend_verify_abstract_class(zend_class_entry *ce TSRMLS_DC)
 	}
 }
 
-ZEND_API int delete_global_variable(char *name, int name_len TSRMLS_DC)
+ZEND_API int zend_delete_global_variable(char *name, int name_len TSRMLS_DC)
 {
 	zend_execute_data *ex;
 
