@@ -144,7 +144,7 @@ static void php_network_freeaddresses(struct sockaddr **sal)
 /* {{{ php_network_getaddresses
  * Returns number of addresses, 0 for none/error
  */
-static int php_network_getaddresses(const char *host, struct sockaddr ***sal)
+static int php_network_getaddresses(const char *host, struct sockaddr ***sal TSRMLS_DC)
 {
 	struct sockaddr **sap;
 	int n;
@@ -372,7 +372,7 @@ PHPAPI int php_connect_nonb_win32(SOCKET sockfd,
  * port, returns the created socket on success, else returns -1.
  * timeout gives timeout in seconds, 0 means blocking mode.
  */
-int php_hostconnect(const char *host, unsigned short port, int socktype, struct timeval *timeout)
+int php_hostconnect(const char *host, unsigned short port, int socktype, struct timeval *timeout TSRMLS_DC)
 {	
 	int n, repeatto, s;
 	struct sockaddr **sal, **psal;
@@ -382,7 +382,7 @@ int php_hostconnect(const char *host, unsigned short port, int socktype, struct 
 	int err;
 #endif
 	
-	n = php_network_getaddresses(host, &sal);
+	n = php_network_getaddresses(host, &sal TSRMLS_CC);
 
 	if (n == 0)
 		return -1;
@@ -537,7 +537,7 @@ PHPAPI php_stream *_php_stream_sock_open_host(const char *host, unsigned short p
 {
 	int socket;
 
-	socket = php_hostconnect(host, port, socktype, timeout);
+	socket = php_hostconnect(host, port, socktype, timeout TSRMLS_CC);
 
 	if (socket == -1)
 		return NULL;
