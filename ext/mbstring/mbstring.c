@@ -3331,7 +3331,7 @@ MBSTRING_API int php_mb_gpc_encoding_converter(char **str, int *len, int num, co
 		TSRMLS_DC)
 {
 	int i;
-	mbfl_string string, result, *ret;
+	mbfl_string string, result, *ret = NULL;
 	enum mbfl_no_encoding from_encoding, to_encoding;
 	mbfl_buffer_converter *convd;
 
@@ -3395,7 +3395,7 @@ MBSTRING_API int php_mb_gpc_encoding_detector(char **arg_string, int *arg_length
 {
 	mbfl_string string;
 	enum mbfl_no_encoding *elist;
-	enum mbfl_no_encoding encoding;
+	enum mbfl_no_encoding encoding = mbfl_no_encoding_invalid;
 	mbfl_encoding_detector *identd = NULL; 
 
 	int size, *list;
