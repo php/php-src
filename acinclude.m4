@@ -416,18 +416,22 @@ AC_DEFUN(AC_EXPAND_PATH,[
 ])
 
 dnl
-dnl AC_ADD_LIBPATH(path)
+dnl AC_ADD_LIBPATH(path[, shared-libadd])
 dnl
 dnl add a library to linkpath/runpath
 dnl
 AC_DEFUN(AC_ADD_LIBPATH,[
   if test "$1" != "/usr/lib"; then
     AC_EXPAND_PATH($1, ai_p)
-    AC_PHP_ONCE(LIBPATH, $ai_p, [
-      test -n "$ld_runpath_switch" && LDFLAGS="$LDFLAGS $ld_runpath_switch$ai_p"
-      LDFLAGS="$LDFLAGS -L$ai_p"
-      PHP_RPATHS="$PHP_RPATHS $ai_p"
-    ])
+    if test "$ext_shared" = "yes" && test -n "$2"; then
+      $2="-R$1 -L$1 [$]$2"
+    else
+      AC_PHP_ONCE(LIBPATH, $ai_p, [
+        test -n "$ld_runpath_switch" && LDFLAGS="$LDFLAGS $ld_runpath_switch$ai_p"
+        LDFLAGS="$LDFLAGS -L$ai_p"
+        PHP_RPATHS="$PHP_RPATHS $ai_p"
+      ])
+    fi
   fi
 ])
 
@@ -462,17 +466,29 @@ AC_DEFUN(AC_ADD_INCLUDE,[
   fi
 ])
 
+AC_DEFUN(PHP_X_ADD_LIBRARY,[
+  ifelse($2,,$3="-l$1 [$]$3", $3="[$]$3 -l$1")
+])
+
 dnl
-dnl AC_ADD_LIBRARY(library[, append])
+dnl AC_ADD_LIBRARY(library[, append[, shared-libadd]])
 dnl
 dnl add a library to the link line
 dnl
 AC_DEFUN(AC_ADD_LIBRARY,[
-  AC_PHP_ONCE(LIBRARY, $1, [
-    if test "$1" != "c"; then
-      ifelse($#, 1, LIBS="-l$1 $LIBS", LIBS="$LIBS -l$1")
-    fi
-  ])
+ if test "$1" != "c"; then
+ifelse($3,,[
+   AC_PHP_ONCE(LIBRARY, $1, [
+     PHP_X_ADD_LIBRARY($1,$2,LIBS)
+   ])
+],[
+   if test "$ext_shared" = "yes"; then
+     PHP_X_ADD_LIBRARY($1,$2,$3)
+   else
+     AC_ADD_LIBRARY($1,$2)
+   fi
+])
+  fi
 ])
 
 dnl
@@ -500,17 +516,13 @@ ifelse($3,,[
   AC_ADD_LIBRARY($1)
 ],[
   if test "$ext_shared" = "yes"; then
+    $3="-l$1 [$]$3"
     if test -n "$2"; then
-      $3="-R$2 -L$2 -l$1 [$]$3"
-	else
-      $3="-l$1 [$]$3"
+      AC_ADD_LIBPATH($2,$3)
     fi
   else
-    if test -n "$2"; then
-      AC_ADD_LIBPATH($2)
-	fi
-    AC_ADD_LIBRARY($1)
- fi
+    AC_ADD_LIBRARY_WITH_PATH($1,$2)
+  fi
 ])
 ])
 
