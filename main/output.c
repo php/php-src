@@ -480,6 +480,34 @@ static zval* php_ob_handler_from_string(const char *handler_name TSRMLS_DC)
 }
 /* }}} */
 
+/* {{{ php_check_object_method_array
+ * This function set *name to the 'object->method()' of NULL if given.
+ * The callee must free that result using efree() function.
+ */
+static int php_check_object_method_array(HashTable *ht, char **name)
+{
+	if (zend_hash_num_elements(ht)>1) {
+		zval **object, **method;
+
+		if (zend_hash_index_find(ht, 0, (void **) &object)!=FAILURE
+		&&  zend_hash_index_find(ht, 1, (void **) &method)!=FAILURE)
+		{
+			if ((*object)->type == IS_OBJECT
+			&&  (*method)->type == IS_STRING)
+			{
+				if (*name) {
+					spprintf(name, 0, "%s->%s()", Z_OBJCE_PP(object)->name, Z_STRVAL_PP(method));
+				}
+				return 1;
+			}
+		} 		
+	}
+	if (*name)
+		*name = NULL;
+	return 0;
+}
+/* }}} */
+
 /* {{{ php_ob_init
  */
 static int php_ob_init(uint initial_size, uint block_size, zval *output_handler, uint chunk_size, zend_bool erase TSRMLS_DC)
@@ -517,10 +545,18 @@ static int php_ob_init(uint initial_size, uint block_size, zval *output_handler,
 	}
 	else if (output_handler && output_handler->type == IS_ARRAY) {
 		result = 0;
-		zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(output_handler), &pos);
-		while (zend_hash_get_current_data_ex(Z_ARRVAL_P(output_handler), (void **)&tmp, &pos) == SUCCESS) {
-			result &= php_ob_init(initial_size, block_size, *tmp, chunk_size, erase TSRMLS_CC);
-			zend_hash_move_forward_ex(Z_ARRVAL_P(output_handler), &pos);
+		/* do we have array(object,method) */
+		if (php_check_object_method_array(Z_ARRVAL_P(output_handler), &handler_name)) {
+			SEPARATE_ZVAL(&output_handler);
+			output_handler->refcount++;
+			result = php_ob_init_named(initial_size, block_size, handler_name, output_handler, chunk_size, erase TSRMLS_CC);
+			efree(handler_name);
+		} else {
+			zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(output_handler), &pos);
+			while (zend_hash_get_current_data_ex(Z_ARRVAL_P(output_handler), (void **)&tmp, &pos) == SUCCESS) {
+				result &= php_ob_init(initial_size, block_size, *tmp, chunk_size, erase TSRMLS_CC);
+				zend_hash_move_forward_ex(Z_ARRVAL_P(output_handler), &pos);
+			}
 		}
 		result = result ? SUCCESS : FAILURE;
 	}
