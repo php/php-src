@@ -365,10 +365,18 @@ int call_user_function_ex(HashTable *function_table, zval **object_pp, zval *fun
 		object_pp = NULL;
 	}
 	if (object_pp) {
-		if (Z_TYPE_PP(object_pp) != IS_OBJECT) {
+		if (Z_TYPE_PP(object_pp) == IS_OBJECT) {
+			function_table = &(*object_pp)->value.obj.ce->function_table;
+		} else if (Z_TYPE_PP(object_pp) == IS_STRING) {
+			zend_class_entry *ce;
+
+			if (zend_hash_find(EG(class_table), Z_STRVAL_PP(object_pp), Z_STRLEN_PP(object_pp) + 1, (void **) &ce)==FAILURE)
+				return FAILURE;
+
+			function_table = &ce->function_table;
+			object_pp = NULL;
+		} else
 			return FAILURE;
-		}
-		function_table = &(*object_pp)->value.obj.ce->function_table;
 	}
 
 	if (function_name->type!=IS_STRING) {
