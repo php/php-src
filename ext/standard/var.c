@@ -468,7 +468,7 @@ static inline void php_var_serialize_string(smart_str *buf, char *str, int len)
 	smart_str_appendl(buf, "\";", 2);
 }
 
-static inline void php_var_serialize_class_name(smart_str *buf, zval **struc TSRMLS_DC)
+static inline zend_bool php_var_serialize_class_name(smart_str *buf, zval **struc TSRMLS_DC)
 {
 	PHP_CLASS_ATTRIBUTES;
 
@@ -479,16 +479,21 @@ static inline void php_var_serialize_class_name(smart_str *buf, zval **struc TSR
 	smart_str_appendl(buf, class_name, name_len);
 	smart_str_appendl(buf, "\":", 2);
 	PHP_CLEANUP_CLASS_ATTRIBUTES();
+	return incomplete_class;
 }
 
 static void php_var_serialize_class(smart_str *buf, zval **struc, zval *retval_ptr, HashTable *var_hash TSRMLS_DC)
 {
 	int count;
+	zend_bool  incomplete_class;
 
-	php_var_serialize_class_name(buf, struc TSRMLS_CC);
+	incomplete_class = php_var_serialize_class_name(buf, struc TSRMLS_CC);
 	/* count after serializing name, since php_var_serialize_class_name
 	   changes the count if the variable is incomplete class */
 	count = zend_hash_num_elements(HASH_OF(retval_ptr));
+	if (incomplete_class) {
+		--count;
+	}
 	smart_str_append_long(buf, count);
 	smart_str_appendl(buf, ":{", 2);
 
@@ -512,6 +517,9 @@ static void php_var_serialize_class(smart_str *buf, zval **struc, zval *retval_p
 			if (i == HASH_KEY_NON_EXISTANT)
 				break;
 
+			if (incomplete_class && strcmp(key, MAGIC_MEMBER) == 0) {
+				continue;
+			}
 			zend_hash_get_current_data_ex(HASH_OF(retval_ptr), 
 					(void **) &name, &pos);
 
@@ -624,17 +632,21 @@ static void php_var_serialize_intern(smart_str *buf, zval **struc, HashTable *va
 					zval_ptr_dtor(&retval_ptr);
 				/* fall-through */
 			}
-		case IS_ARRAY:
+		case IS_ARRAY: {
+			zend_bool incomplete_class = 0;
 			if (Z_TYPE_PP(struc) == IS_ARRAY) {
 				smart_str_appendl(buf, "a:", 2);
 				myht = HASH_OF(*struc);
 			} else {
-				php_var_serialize_class_name(buf, struc TSRMLS_CC);
+				incomplete_class = php_var_serialize_class_name(buf, struc TSRMLS_CC);
 				myht = Z_OBJPROP_PP(struc);
 			}
 			/* count after serializing name, since php_var_serialize_class_name
 			   changes the count if the variable is incomplete class */
 			i = myht ? zend_hash_num_elements(myht) : 0;
+			if (i > 0 && incomplete_class) {
+				--i;
+			}
 			smart_str_append_long(buf, i);
 			smart_str_appendl(buf, ":{", 2);
 			if (i > 0) {
@@ -650,6 +662,10 @@ static void php_var_serialize_intern(smart_str *buf, zval **struc, HashTable *va
 							&index, 0, &pos);
 					if (i == HASH_KEY_NON_EXISTANT)
 						break;
+					
+					if (incomplete_class && strcmp(key, MAGIC_MEMBER) == 0) {
+						continue;
+					}		
 					
 					switch (i) {
 					  case HASH_KEY_IS_LONG:
@@ -674,6 +690,7 @@ static void php_var_serialize_intern(smart_str *buf, zval **struc, HashTable *va
 			}
 			smart_str_appendc(buf, '}');
 			return;
+		}
 		default:
 			smart_str_appendl(buf, "i:0;", 4);
 			return;
