@@ -1,7 +1,0 @@
-# $Source$
-# $Id$
-
-define_option with-imap 'IMAP support?' yesnodir \
-    'no /usr/local/imap IMAP base install' \
-'     Whether to build with IMAP (Internet Message Access Protocol)\n
-     support.\n'
