@@ -1,3 +1,20 @@
+1999-10-26  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/standard/file.c: eliminated warinigs
+
+1999-10-26  Andrei Zmievski  <zmievski@ispi.net>
+
+    * TODO: No tabs please.
+
+    * ext/standard/basic_functions.c
+      ext/standard/basic_functions.h: (PHP array_map) Away with it.
+
+    * TODO: Some todo things.
+
+1999-10-26  changelog  <changelog@www>
+
+    * ChangeLog: ChangeLog update
+
 1999-10-25  changelog  <changelog@www>
 
     * ChangeLog: ChangeLog update
