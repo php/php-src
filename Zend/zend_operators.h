@@ -73,7 +73,7 @@ static inline int is_numeric_string(char *str, int length, long *lval, double *d
 		conv_base=16;
 	}
 	errno=0;
-	local_lval = strtol(str, &end_ptr, 16);
+	local_lval = strtol(str, &end_ptr, conv_base);
 	if (errno!=ERANGE && end_ptr == str+length) { /* integer string */
 		if (lval) {
 			*lval = local_lval;
