@@ -92,9 +92,9 @@ class RecursiveIteratorIterator implements OuterIterator
 		while ($this->count) {
 			$it = $this->ait[$this->count];
 			if ($it->valid()) {
-				if (!$it->recursed && $it->hasChildren()) {
+				if (!$it->recursed && callHasChildren()) {
 					$it->recursed = true;
-					$sub = $it->getChildren();
+					$sub = callGetChildren();
 					$sub->recursed = false;
 					$sub->rewind();
 					if ($sub->valid()) {
@@ -147,14 +147,32 @@ class RecursiveIteratorIterator implements OuterIterator
 	{
 		return $this->level;
 	}
-	
+
+	/** @return whether current sub iterators current element has children
+	 * @since PHP 5.1
+	 */
+	function callHasChildren()
+	{
+		return $this->ait[$this->count]->hasChildren();
+	}
+
+	/** @return current sub iterators current children
+	 * @since PHP 5.1
+	 */
+	function callGetChildren()
+	{
+		return $this->ait[$this->count]->getChildren();
+	}
+
 	/** Called right after calling getChildren()
+	 * @since PHP 5.1
 	 */
 	function beginChildren()
 	{
 	}
 	
 	/** Called after current child iterator is invalid
+	 * @since PHP 5.1
 	 */
 	function endChildren()
 	{
