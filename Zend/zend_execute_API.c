@@ -264,7 +264,7 @@ void shutdown_executor(TSRMLS_D)
 
 		while (EG(symtable_cache_ptr)>=EG(symtable_cache)) {
 			zend_hash_destroy(*EG(symtable_cache_ptr));
-			efree(*EG(symtable_cache_ptr));
+			FREE_HASHTABLE(*EG(symtable_cache_ptr));
 			EG(symtable_cache_ptr)--;
 		}
 	} zend_end_try();
