@@ -2,6 +2,7 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ???, Version 4.0 Beta 5
+- Fixed Sybase-DB compilation (Zeev)
 - Fixed a (fairly common) situation where error_reporting values would not be
   properly restored after a call to error_reporting(), in between requests (Zeev)
 - The various $HTTP_*_VARS[] are now protected, and cannot be manipulated by
