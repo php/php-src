@@ -716,20 +716,10 @@ gdImagePngCtx (gdImagePtr im, gdIOCtx * outfile)
 	{
 	  png_bytep *row_pointers;
 	  row_pointers = gdMalloc (sizeof (png_bytep) * height);
-	  if (row_pointers == NULL)
-	    {
-	      fprintf (stderr, "gd-png error: unable to allocate row_pointers\n");
-	    }
 	  for (j = 0; j < height; ++j)
 	    {
-	      if ((row_pointers[j] = (png_bytep) gdMalloc (width)) == NULL)
-		{
-		  fprintf (stderr, "gd-png error: unable to allocate rows\n");
-		  for (i = 0; i < j; ++i)
-		    gdFree (row_pointers[i]);
-		  return;
-		}
-	      for (i = 0; i < width; ++i)
+	      row_pointers[j] = (png_bytep) gdMalloc (width);
+	      for (i = 0; i < width; ++i) 
 		row_pointers[j][i] = mapping[im->pixels[j][i]];
 	    }
 

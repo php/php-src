@@ -1490,200 +1490,118 @@ zeroHistogram (hist4d histogram)
 void
 gdImageTrueColorToPalette (gdImagePtr im, int dither, int colorsWanted)
 {
-  my_cquantize_ptr cquantize = 0;
-  int i;
-  size_t arraysize;
-  if (!im->trueColor || colorsWanted <= 0)
-    {
-      /* Nothing to do! */
-      return;
-    }
-  if (colorsWanted > gdMaxColors)
-    {
-      colorsWanted = gdMaxColors;
-    }
-  im->pixels = gdCalloc (sizeof (unsigned char *), im->sy);
-  if (!im->pixels)
-    {
-      /* No can do */
-      goto outOfMemory;
-    }
-  for (i = 0; (i < im->sy); i++)
-    {
-      im->pixels[i] = gdCalloc (sizeof (unsigned char *), im->sx);
-      if (!im->pixels[i])
-	{
-	  goto outOfMemory;
+	my_cquantize_ptr cquantize = 0;
+	int i;
+	size_t arraysize;
+	if (!im->trueColor || colorsWanted <= 0) {
+		/* Nothing to do! */
+		return;
 	}
-    }
-  cquantize = (my_cquantize_ptr) gdCalloc (sizeof (my_cquantizer), 1);
-  if (!cquantize)
-    {
-      /* No can do */
-      goto outOfMemory;
-    }
-  /* Allocate the histogram/inverse colormap storage */
-  cquantize->histogram = (hist4d) gdMalloc (HIST_C0_ELEMS * sizeof (hist3d));
-  for (i = 0; i < HIST_C0_ELEMS; i++)
-    {
-      int j;
-      cquantize->histogram[i] = (hist3d) gdCalloc (HIST_C1_ELEMS,
-						   sizeof (hist2d));
-      if (!cquantize->histogram[i])
-	{
-	  goto outOfMemory;
+	
+	if (colorsWanted > gdMaxColors) {
+		colorsWanted = gdMaxColors;
 	}
-      for (j = 0; (j < HIST_C1_ELEMS); j++)
-	{
-	  cquantize->histogram[i][j] = (hist2d) gdCalloc (HIST_C2_ELEMS * HIST_C3_ELEMS,
-							  sizeof (histcell));
-	  if (!cquantize->histogram[i][j])
-	    {
-	      goto outOfMemory;
-	    }
-	}
-    }
-  cquantize->fserrors = (FSERRPTR) gdMalloc (4 * sizeof (FSERROR));
-  init_error_limit (im, cquantize);
-  arraysize = (size_t) ((im->sx + 2) *
-			(4 * sizeof (FSERROR)));
-  /* Allocate Floyd-Steinberg workspace. */
-  cquantize->fserrors = gdCalloc (arraysize, 1);
-  if (!cquantize->fserrors)
-    {
-      goto outOfMemory;
-    }
-  cquantize->on_odd_row = FALSE;
 
-  /* Do the work! */
-  zeroHistogram (cquantize->histogram);
-  prescan_quantize (im, cquantize);
-  select_colors (im, cquantize, colorsWanted);
-  /* TBB HACK REMOVE */
-#if 0
-  {
-    FILE *out = fopen ("palettemap.png", "wb");
-    int i;
-    gdImagePtr im2 = gdImageCreateTrueColor (256, 256);
-    for (i = 0; (i < 256); i++)
-      {
-	gdImageFilledRectangle (im2, (i % 16) * 16, (i / 16) * 16,
-				(i % 16) * 16 + 15, (i / 16) * 16 + 15,
-				gdTrueColorAlpha (im->red[i], im->green[i],
-						im->blue[i], im->alpha[i]));
-      }
-    gdImagePng (im2, out);
-    fclose (out);
-    gdImageDestroy (im2);
-  }
-#endif
-  zeroHistogram (cquantize->histogram);
-  if (dither)
-    {
-      pass2_fs_dither (im, cquantize);
-    }
-  else
-    {
-      pass2_no_dither (im, cquantize);
-    }
-  if (cquantize->transparentIsPresent)
-    {
-      int mt = -1;
-      int mtIndex = -1;
-      for (i = 0; (i < im->colorsTotal); i++)
-	{
-	  if (im->alpha[i] > mt)
-	    {
-	      mtIndex = i;
-	      mt = im->alpha[i];
-	    }
+	im->pixels = gdCalloc (sizeof (unsigned char *), im->sy);
+
+	for (i = 0; i < im->sy; i++) {
+		im->pixels[i] = gdCalloc (sizeof (unsigned char *), im->sx);
 	}
-      for (i = 0; (i < im->colorsTotal); i++)
-	{
-	  if (im->alpha[i] == mt)
-	    {
-	      im->alpha[i] = gdAlphaTransparent;
-	    }
-	}
-    }
-  if (cquantize->opaqueIsPresent)
-    {
-      int mo = 128;
-      int moIndex = -1;
-      for (i = 0; (i < im->colorsTotal); i++)
-	{
-	  if (im->alpha[i] < mo)
-	    {
-	      moIndex = i;
-	      mo = im->alpha[i];
-	    }
-	}
-      for (i = 0; (i < im->colorsTotal); i++)
-	{
-	  if (im->alpha[i] == mo)
-	    {
-	      im->alpha[i] = gdAlphaOpaque;
-	    }
-	}
-    }
-  /* Success! Get rid of the truecolor image data. */
-  im->trueColor = 0;
-  /* Junk the truecolor pixels */
-  for (i = 0; i < im->sy; i++)
-    {
-      gdFree (im->tpixels[i]);
-    }
-  gdFree (im->tpixels);
-  im->tpixels = 0;
-  /* Tediously free stuff. */
-outOfMemory:
-  if (im->trueColor)
-    {
-      /* On failure only */
-      for (i = 0; i < im->sy; i++)
-	{
-	  if (im->pixels[i])
-	    {
-	      gdFree (im->pixels[i]);
-	    }
-	}
-      if (im->pixels)
-	{
-	  gdFree (im->pixels);
-	}
-      im->pixels = 0;
-    }
-  for (i = 0; i < HIST_C0_ELEMS; i++)
-    {
-      if (cquantize->histogram[i])
-	{
-	  int j;
-	  for (j = 0; j < HIST_C1_ELEMS; j++)
-	    {
-	      if (cquantize->histogram[i][j])
-		{
-		  gdFree (cquantize->histogram[i][j]);
+	cquantize = (my_cquantize_ptr) gdCalloc (sizeof (my_cquantizer), 1);
+
+	/* Allocate the histogram/inverse colormap storage */
+	cquantize->histogram = (hist4d) gdMalloc (HIST_C0_ELEMS * sizeof (hist3d));
+	for (i = 0; i < HIST_C0_ELEMS; i++) {
+		int j;
+		cquantize->histogram[i] = (hist3d) gdCalloc (HIST_C1_ELEMS, sizeof (hist2d));
+		for (j = 0; j < HIST_C1_ELEMS; j++) {
+			cquantize->histogram[i][j] = (hist2d) gdCalloc (HIST_C2_ELEMS * HIST_C3_ELEMS, sizeof (histcell));
 		}
-	    }
-	  gdFree (cquantize->histogram[i]);
 	}
-    }
-  if (cquantize->histogram)
-    {
-      gdFree (cquantize->histogram);
-    }
-  if (cquantize->fserrors)
-    {
-      gdFree (cquantize->fserrors);
-    }
-  if (cquantize->error_limiter_storage)
-    {
-      gdFree (cquantize->error_limiter_storage);
-    }
-  if (cquantize)
-    {
-      gdFree (cquantize);
-    }
+
+	cquantize->fserrors = (FSERRPTR) gdMalloc (4 * sizeof (FSERROR));
+	init_error_limit (im, cquantize);
+	arraysize = (size_t) ((im->sx + 2) * (4 * sizeof (FSERROR)));
+	gdFree(cquantize->fserrors);
+	/* Allocate Floyd-Steinberg workspace. */
+	cquantize->fserrors = gdCalloc (arraysize, 1);
+	cquantize->on_odd_row = FALSE;
+
+	/* Do the work! */
+	zeroHistogram (cquantize->histogram);
+	prescan_quantize (im, cquantize);
+	select_colors (im, cquantize, colorsWanted);
+
+	zeroHistogram (cquantize->histogram);
+	if (dither) {
+		pass2_fs_dither (im, cquantize);
+	} else {
+		pass2_no_dither (im, cquantize);
+	}
+	if (cquantize->transparentIsPresent) {
+		int mt = -1;
+		int mtIndex = -1;
+		for (i = 0; i < im->colorsTotal; i++) {
+			if (im->alpha[i] > mt) {
+				mtIndex = i;
+				mt = im->alpha[i];
+			}
+		}
+		for (i = 0; i < im->colorsTotal; i++) {
+			if (im->alpha[i] == mt) {
+				im->alpha[i] = gdAlphaTransparent;
+			}
+		}
+	}
+	if (cquantize->opaqueIsPresent) {
+		int mo = 128;
+		int moIndex = -1;
+		for (i = 0; i < im->colorsTotal; i++) {
+			if (im->alpha[i] < mo) {
+				moIndex = i;
+				mo = im->alpha[i];
+			}
+		}
+		for (i = 0; i < im->colorsTotal; i++) {
+			if (im->alpha[i] == mo) {
+				im->alpha[i] = gdAlphaOpaque;
+			}
+		}
+	}
+	
+	/* Success! Get rid of the truecolor image data. */
+	im->trueColor = 0;
+	/* Junk the truecolor pixels */
+	for (i = 0; i < im->sy; i++) {
+		gdFree(im->tpixels[i]);
+	}
+	gdFree (im->tpixels);
+	im->tpixels = 0;
+	/* Tediously free stuff. */
+
+	for (i = 0; i < HIST_C0_ELEMS; i++) {
+		if (cquantize->histogram[i]) {
+			int j;
+			for (j = 0; j < HIST_C1_ELEMS; j++) {
+				if (cquantize->histogram[i][j]) {
+					gdFree(cquantize->histogram[i][j]);
+				}
+			}
+			gdFree(cquantize->histogram[i]);
+		}
+	}
+	if (cquantize->histogram) {
+		gdFree(cquantize->histogram);
+	}
+	if (cquantize->fserrors) {
+		gdFree(cquantize->fserrors);
+	}
+	if (cquantize->error_limiter_storage) {
+		gdFree(cquantize->error_limiter_storage);
+	}
+	if (cquantize) {
+		gdFree(cquantize);
+	}
 }
 
 /* bring the palette colors in im2 to be closer to im1
