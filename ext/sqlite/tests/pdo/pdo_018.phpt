@@ -3,6 +3,7 @@ PDO_SQLite2: PDO Unserializing
 --SKIPIF--
 <?php # vim:ft=php
 require_once('skipif.inc');
+if (!interface_exists('Serializable')) die ('skip Interface Serializable does not exist');
 ?>
 --FILE--
 <?php
