@@ -169,7 +169,11 @@ static int sapi_apache_header_handler(sapi_header_struct *sapi_header, sapi_head
 {
 	char *header_name, *header_content, *p;
 	request_rec *r = (request_rec *) SG(server_context);
-
+	if(!r) {
+		efree(sapi_header->header);
+		return 0;
+	}
+      
 	header_name = sapi_header->header;
 
 	header_content = p = strchr(header_name, ':');
@@ -293,11 +297,15 @@ static void php_apache_request_shutdown(void *dummy)
 	TSRMLS_FETCH();
 
 	php_output_set_status(0 TSRMLS_CC);
-	SG(server_context) = NULL; /* The server context (request) is invalid by the time run_cleanups() is called */
 	if (AP(in_request)) {
 		AP(in_request) = 0;
 		php_request_shutdown(dummy);
 	}
+	SG(server_context) = NULL; 
+    /* 
+     * The server context (request) is NOT invalid by the time 
+     * run_cleanups() is called 
+     */
 }
 /* }}} */
 
