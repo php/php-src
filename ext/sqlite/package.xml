@@ -26,20 +26,22 @@
   <license>PHP</license>
   <release>
     <state>beta</state>
-    <version>0.7</version>
-    <date>2003-04-18</date>
+    <version>0.9</version>
+    <date>2003-04-21</date>
 	<notes>
-		SQLite is now bundled with the extension; no need to download and build
-		it separately.
-		
-		Fixed memory corruption bug when calling back into a PHP function from
-		an SQL statement.
+		Added:
+			sqlite_popen() for persistent db connections.
+			sqlite_unbuffered_query() for high performance queries.
+			sqlite_last_error() returns error code from last operation.
+			sqlite_error_string() returns description of error.
+			sqlite_create_aggregate() for registering aggregating SQL functions.
+			sqlite_create_function() for registering regular SQL functions.
 
-		Added sqlite_busy_timeout() to set the maximum duration for attempting
-		to lock the database when updating it.  Default timeout is set to 1/2
-		second.
+		Fixed some build issues for thread-safe builds.
 
-		NULL columns are now correctly returned as NULL values.
+		API is considered stabilized for 4.3.x; this is a pre-release before
+		announcing stable version 1.0.
+
     </notes>
     <filelist>
       <file role="src" name="config.m4"/>
