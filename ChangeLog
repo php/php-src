@@ -2,6 +2,7 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? 1999, Version 4.0 Beta 3
+- Fixed mysql_errno() to work with recent versions of MySQL (Zeev)
 - Fixed a problem with define() and boolean values (Zeev)
 - Fixed inclusion of gd/freetype functions (Sascha)
 - Fixed persistency of MHASH_* constants (Sascha)
