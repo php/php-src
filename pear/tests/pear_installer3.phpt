@@ -88,6 +88,63 @@ if ($installer->commitFileTransaction()) {
     echo "didn't work!\n";
 }
 
+echo "Do valid addFileOperation() rename\n";
+touch($temp_path . DIRECTORY_SEPARATOR . 'tmp' . DIRECTORY_SEPARATOR . 'installertestfooblah.phpt');
+$installer->addFileOperation('rename', array($temp_path . DIRECTORY_SEPARATOR .
+    'tmp' . DIRECTORY_SEPARATOR . 'installertestfooblah.phpt', $temp_path .
+    DIRECTORY_SEPARATOR . 'tmp' . DIRECTORY_SEPARATOR . 'renamed.phpt'));
+
+echo 'file renamed.phpt exists?';
+echo (file_exists($temp_path . DIRECTORY_SEPARATOR . 'tmp' . DIRECTORY_SEPARATOR
+    . 'renamed.phpt') ? " yes\n" : " no\n");
+echo "test valid commitFileTransaction():\n";
+if ($installer->commitFileTransaction()) {
+    echo "worked\n";
+} else {
+    echo "didn't work!\n";
+}
+echo 'file renamed.phpt exists?';
+echo (file_exists($temp_path . DIRECTORY_SEPARATOR . 'tmp' . DIRECTORY_SEPARATOR
+    . 'renamed.phpt') ? " yes\n" : " no\n");
+unlink($temp_path . DIRECTORY_SEPARATOR . 'tmp' . DIRECTORY_SEPARATOR
+    . 'renamed.phpt');
+
+echo "Do valid addFileOperation() chmod\n";
+touch($temp_path . DIRECTORY_SEPARATOR . 'tmp' . DIRECTORY_SEPARATOR . 'installertestfooblah.phpt');
+$perms = fileperms($temp_path . DIRECTORY_SEPARATOR . 'tmp' . DIRECTORY_SEPARATOR . 'installertestfooblah.phpt');
+// check to see if chmod works on this OS
+chmod($temp_path . DIRECTORY_SEPARATOR . 'tmp' . DIRECTORY_SEPARATOR . 'installertestfooblah.phpt', 0776);
+if (fileperms($temp_path . DIRECTORY_SEPARATOR . 'tmp' . DIRECTORY_SEPARATOR . 'installertestfooblah.phpt')
+      == $perms) {
+    // we are on windows, most likely, so skip this test, but simulate success
+echo <<<EOF
+file permissions are: 776
+test valid commitFileTransaction():
+about to commit 1 file operations
+successfully committed 1 file operations
+worked
+file permissions are: 640
+
+EOF;
+} else {
+    $installer->addFileOperation('chmod', array(0640, $temp_path . DIRECTORY_SEPARATOR .
+        'tmp' . DIRECTORY_SEPARATOR . 'installertestfooblah.phpt'));
+    
+    echo 'file permissions are: ' . decoct(fileperms($temp_path . DIRECTORY_SEPARATOR .
+        'tmp' . DIRECTORY_SEPARATOR . 'installertestfooblah.phpt')) . "\n";
+    echo "test valid commitFileTransaction():\n";
+    if ($installer->commitFileTransaction()) {
+        echo "worked\n";
+    } else {
+        echo "didn't work!\n";
+    }
+    echo 'file permissions are: ' . decoct(fileperms($temp_path . DIRECTORY_SEPARATOR .
+        'tmp' . DIRECTORY_SEPARATOR . 'installertestfooblah.phpt')) . "\n";
+}
+unlink($temp_path . DIRECTORY_SEPARATOR . 'tmp' . DIRECTORY_SEPARATOR
+    . 'installertestfooblah.phpt');
+
+// invalid tests
 echo "Do valid addFileOperation() delete with non-existing file\n";
 $installer->addFileOperation('delete', array('gloober62456.phpt'));
 echo 'count($installer->file_operations) = ';
@@ -98,6 +155,7 @@ if ($installer->commitFileTransaction()) {
     echo "worked\n";
 } else {
     echo "didn't work!\n";
+    $installer->rollbackFileTransaction();
 }
 
 echo "Do valid addFileOperation() rename with non-existing file\n";
@@ -110,6 +168,20 @@ if ($installer->commitFileTransaction()) {
     echo "worked\n";
 } else {
     echo "didn't work!\n";
+    $installer->rollbackFileTransaction();
+}
+
+echo "Do valid addFileOperation() chmod with non-existing file\n";
+$installer->addFileOperation('chmod', array(0640, 'faber.com'));
+echo 'count($installer->file_operations) = ';
+var_dump(count($installer->file_operations));
+
+echo "test invalid commitFileTransaction():\n";
+if ($installer->commitFileTransaction()) {
+    echo "worked\n";
+} else {
+    echo "didn't work!\n";
+    $installer->rollbackFileTransaction();
 }
 
 //cleanup
@@ -140,6 +212,20 @@ test valid commitFileTransaction():
 about to commit 1 file operations
 successfully committed 1 file operations
 worked
+Do valid addFileOperation() rename
+file renamed.phpt exists? no
+test valid commitFileTransaction():
+about to commit 1 file operations
+successfully committed 1 file operations
+worked
+file renamed.phpt exists? yes
+Do valid addFileOperation() chmod
+file permissions are: 776
+test valid commitFileTransaction():
+about to commit 1 file operations
+successfully committed 1 file operations
+worked
+file permissions are: 640
 Do valid addFileOperation() delete with non-existing file
 count($installer->file_operations) = int(1)
 test invalid commitFileTransaction():
@@ -153,3 +239,11 @@ test invalid commitFileTransaction():
 about to commit 1 file operations
 cannot rename file gloober62456.phpt, doesn't exist
 didn't work!
+rolling back 1 file operations
+Do valid addFileOperation() chmod with non-existing file
+count($installer->file_operations) = int(1)
+test invalid commitFileTransaction():
+about to commit 1 file operations
+permission denied (chmod): faber.com 640
+didn't work!
+rolling back 1 file operations
