@@ -67,7 +67,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /Zi /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
-# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "..\libzend" /I "." /I "regex\\" /I "..\bindlib_w32" /D "DEBUG" /D "_DEBUG" /D "MSVC5" /D "_CONSOLE" /D "WIN32" /D "_MBCS" /D ZEND_DEBUG=1 /FR /FD /c
+# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "libzend" /I "." /I "regex\\" /I "..\bindlib_w32" /D "DEBUG" /D "_DEBUG" /D "MSVC5" /D "_CONSOLE" /D "WIN32" /D "_MBCS" /D ZEND_DEBUG=1 /FR /FD /c
 # SUBTRACT CPP /YX
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
 # ADD RSC /l 0x409 /i "c:\include" /d "_DEBUG"
