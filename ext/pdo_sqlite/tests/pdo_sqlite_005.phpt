@@ -22,19 +22,18 @@ class TestBase
 
 class TestDerived extends TestBase
 {
-	protected $p1;
-	protected $p2;
+	protected $row;
 
-	public function __construct($p1, $p2)
+	public function __construct(&$row)
 	{
-		$this->p1 = $p1;
-		$this->p2 = $p2;
+		echo __METHOD__ . "($row,{$this->id})\n";
+		$this->row = $row++;
 	}
 }
 
 var_dump($db->query('SELECT * FROM test')->fetchAll(PDO_FETCH_CLASS));
 var_dump($db->query('SELECT * FROM test')->fetchAll(PDO_FETCH_CLASS, 'TestBase'));
-var_dump($db->query('SELECT * FROM test')->fetchAll(PDO_FETCH_CLASS, 'TestDerived', array(1,2)));
+var_dump($db->query('SELECT * FROM test')->fetchAll(PDO_FETCH_CLASS, 'TestDerived', array(0)));
 ?>
 ===DONE===
 <?php exit(0); ?>
@@ -97,13 +96,14 @@ array(3) {
     string(2) "CC"
   }
 }
+TestDerived::__construct(0,1)
+TestDerived::__construct(1,2)
+TestDerived::__construct(2,3)
 array(3) {
   [0]=>
-  object(TestDerived)#%d (6) {
-    ["p1:protected"]=>
-    int(1)
-    ["p2:protected"]=>
-    int(2)
+  object(TestDerived)#%d (5) {
+    ["row:protected"]=>
+    int(0)
     ["id"]=>
     string(1) "1"
     ["val:protected"]=>
@@ -114,11 +114,9 @@ array(3) {
     string(2) "AA"
   }
   [1]=>
-  object(TestDerived)#%d (6) {
-    ["p1:protected"]=>
+  object(TestDerived)#%d (5) {
+    ["row:protected"]=>
     int(1)
-    ["p2:protected"]=>
-    int(2)
     ["id"]=>
     string(1) "2"
     ["val:protected"]=>
@@ -129,10 +127,8 @@ array(3) {
     string(2) "BB"
   }
   [2]=>
-  object(TestDerived)#%d (6) {
-    ["p1:protected"]=>
-    int(1)
-    ["p2:protected"]=>
+  object(TestDerived)#%d (5) {
+    ["row:protected"]=>
     int(2)
     ["id"]=>
     string(1) "3"
