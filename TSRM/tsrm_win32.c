@@ -23,6 +23,7 @@
 #include <fcntl.h>
 #include <io.h>
 #include <process.h>
+#include <time.h>
 
 #include "TSRM.h"
 
@@ -39,15 +40,30 @@ static tsrm_win32_globals win32_globals;
 static void tsrm_win32_ctor(tsrm_win32_globals *globals TSRMLS_DC)
 {
 	globals->process = NULL;
+	globals->shm	 = NULL;
 	globals->process_size = 0;
+	globals->shm_size	  = 0;
 	globals->comspec = _strdup((GetVersion()<0x80000000)?"cmd.exe":"command.com");
 }
 
 static void tsrm_win32_dtor(tsrm_win32_globals *globals TSRMLS_DC)
 {
-	if (globals->process != NULL) {
+	shm_pair *ptr;
+
+	if (globals->process) {
 		free(globals->process);
 	}
+
+	if (globals->shm) {
+		for (ptr = globals->shm; ptr < (globals->shm + globals->shm_size); ptr++) {
+			UnmapViewOfFile(ptr->addr);
+			CloseHandle(ptr->segment);
+			UnmapViewOfFile(ptr->descriptor);
+			CloseHandle(ptr->info);
+		}
+		free(globals->shm);
+	}
+
 	free(globals->comspec);
 }
 
@@ -67,10 +83,10 @@ TSRM_API void tsrm_win32_shutdown(void)
 #endif
 }
 
-static ProcessPair* process_get(FILE *stream TSRMLS_DC)
+static process_pair *process_get(FILE *stream TSRMLS_DC)
 {
-	ProcessPair* ptr;
-	ProcessPair* newptr;
+	process_pair *ptr;
+	process_pair *newptr;
 	
 	for (ptr = TWG(process); ptr < (TWG(process) + TWG(process_size)); ptr++) {
 		if (ptr->stream == stream) {
@@ -82,7 +98,7 @@ static ProcessPair* process_get(FILE *stream TSRMLS_DC)
 		return ptr;
 	}
 	
-	newptr = (ProcessPair*)realloc((void*)TWG(process), (TWG(process_size)+1)*sizeof(ProcessPair));
+	newptr = (process_pair*)realloc((void*)TWG(process), (TWG(process_size)+1)*sizeof(process_pair));
 	if (newptr == NULL) {
 		return NULL;
 	}
@@ -90,6 +106,38 @@ static ProcessPair* process_get(FILE *stream TSRMLS_DC)
 	TWG(process) = newptr;
 	ptr = newptr + TWG(process_size);
 	TWG(process_size)++;
+	return ptr;
+}
+
+static shm_pair *shm_get(int key, void *addr)
+{
+	shm_pair *ptr;
+	shm_pair *newptr;
+	TSRMLS_FETCH();
+	
+	for (ptr = TWG(shm); ptr < (TWG(shm) + TWG(shm_size)); ptr++) {
+		if (!ptr->descriptor) {
+			continue;
+		}
+		if (!addr && ptr->descriptor->shm_perm.key == key) {
+			break;
+		} else if (ptr->addr == addr) {
+			break;
+		}
+	}
+
+	if (ptr < (TWG(shm) + TWG(shm_size))) {
+		return ptr;
+	}
+	
+	newptr = (shm_pair*)realloc((void*)TWG(shm), (TWG(shm_size)+1)*sizeof(shm_pair));
+	if (newptr == NULL) {
+		return NULL;
+	}
+	
+	TWG(shm) = newptr;
+	ptr = newptr + TWG(shm_size);
+	TWG(shm_size)++;
 	return ptr;
 }
 
@@ -110,7 +158,7 @@ TSRM_API FILE *popen(const char *command, const char *type)
 	SECURITY_ATTRIBUTES security;
 	HANDLE in, out;
 	char *cmd;
-	ProcessPair *proc;
+	process_pair *proc;
 	TSRMLS_FETCH();
 
 	security.nLength				= sizeof(SECURITY_ATTRIBUTES);
@@ -169,7 +217,7 @@ TSRM_API FILE *popen(const char *command, const char *type)
 TSRM_API int pclose(FILE *stream)
 {
 	DWORD termstat = 0;
-	ProcessPair* process;
+	process_pair *process;
 	TSRMLS_FETCH();
 
 	if ((process = process_get(stream TSRMLS_CC)) == NULL) {
@@ -187,4 +235,125 @@ TSRM_API int pclose(FILE *stream)
 	return termstat;
 }
 
+TSRM_API int shmget(int key, int size, int flags)
+{
+	shm_pair *shm;
+	char shm_segment[26], shm_info[29];
+	HANDLE shm_handle, info_handle;
+	BOOL created = FALSE;
+
+	if (size < 0) {
+		return -1;
+	}
+
+	sprintf(shm_segment, "TSRM_SHM_SEGMENT:%d", key);
+	sprintf(shm_info, "TSRM_SHM_DESCRIPTOR:%d", key);
+
+	shm_handle  = OpenFileMapping(FILE_MAP_ALL_ACCESS, FALSE, shm_segment);
+	info_handle = OpenFileMapping(FILE_MAP_ALL_ACCESS, FALSE, shm_info);
+
+	if ((!shm_handle && !info_handle)) {
+		if (flags & IPC_EXCL) {
+			return -1;
+		}
+		if (flags & IPC_CREAT) {
+			shm_handle	= CreateFileMapping(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0, size, shm_segment);
+			info_handle	= CreateFileMapping(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0, sizeof(shm->descriptor), shm_info);
+			created		= TRUE;
+		}
+		if ((!shm_handle || !info_handle)) {
+			return -1;
+		}
+	}
+
+	shm = shm_get(key, NULL);
+	shm->segment = shm_handle;
+	shm->info	 = info_handle;
+	shm->descriptor = MapViewOfFileEx(shm->info, FILE_MAP_ALL_ACCESS, 0, 0, 0, NULL);
+
+	if (created) {
+		shm->descriptor->shm_perm.key	= key;
+		shm->descriptor->shm_segsz		= size;
+		shm->descriptor->shm_ctime		= time(NULL);
+		shm->descriptor->shm_cpid		= getpid();
+		shm->descriptor->shm_perm.mode	= flags;
+
+		shm->descriptor->shm_perm.cuid	= shm->descriptor->shm_perm.cgid= 0;
+		shm->descriptor->shm_perm.gid	= shm->descriptor->shm_perm.uid = 0;
+		shm->descriptor->shm_atime		= shm->descriptor->shm_dtime	= 0;
+		shm->descriptor->shm_lpid		= shm->descriptor->shm_nattch	= 0;
+		shm->descriptor->shm_perm.mode	= shm->descriptor->shm_perm.seq	= 0;
+	}
+
+	if (shm->descriptor->shm_perm.key != key || size > shm->descriptor->shm_segsz ) {
+		CloseHandle(shm->segment);
+		UnmapViewOfFile(shm->descriptor);
+		CloseHandle(shm->info);
+		return -1;
+	}
+
+	return key;
+}
+
+TSRM_API void *shmat(int key, const void *shmaddr, int flags)
+{
+	shm_pair *shm = shm_get(key, NULL);
+
+	if (!shm->segment) {
+		return (void*)-1;
+	}
+
+	shm->descriptor->shm_atime = time(NULL);
+	shm->descriptor->shm_lpid  = getpid();
+	shm->descriptor->shm_nattch++;
+
+	shm->addr = MapViewOfFileEx(shm->segment, FILE_MAP_ALL_ACCESS, 0, 0, 0, NULL);
+
+	return shm->addr;
+}
+
+TSRM_API int shmdt(const void *shmaddr)
+{
+	shm_pair *shm = shm_get(0, (void*)shmaddr);
+
+	if (!shm->segment) {
+		return -1;
+	}
+
+	shm->descriptor->shm_dtime = time(NULL);
+	shm->descriptor->shm_lpid  = getpid();
+	shm->descriptor->shm_nattch--;
+
+	return UnmapViewOfFile(shm->addr) ? 0 : -1;
+}
+
+TSRM_API int shmctl(int key, int cmd, struct shmid_ds *buf) {
+	shm_pair *shm = shm_get(key, NULL);
+
+	if (!shm->segment) {
+		return -1;
+	}
+
+	switch (cmd) {
+		case IPC_STAT:
+			memcpy(buf, shm->descriptor, sizeof(shm->descriptor));
+			return 0;
+
+		case IPC_SET:
+			shm->descriptor->shm_ctime		= time(NULL);
+			shm->descriptor->shm_perm.uid	= buf->shm_perm.uid;
+			shm->descriptor->shm_perm.gid	= buf->shm_perm.gid;
+			shm->descriptor->shm_perm.mode	= buf->shm_perm.mode;
+			return 0;
+
+		case IPC_RMID:
+			if (shm->descriptor->shm_nattch < 1) {
+				shm->descriptor->shm_perm.key = -1;
+			}
+			return 0;
+
+		default:
+			return -1;
+	}
+}
 #endif
