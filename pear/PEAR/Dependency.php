@@ -126,8 +126,8 @@ class PEAR_Dependency
     function checkPackage(&$errmsg, $name, $req = null, $relation = 'has',
                           $opt = false)
     {
-        if (substr($relation, 0, 2) == 'v.') {
-            $relation = substr($relation, 2);
+        if (is_string($req) && substr($req, 0, 2) == 'v.') {
+            $req = substr($req, 2);
         }
         switch ($relation) {
             case 'has':
