@@ -18,6 +18,10 @@
 
 /* $Id$ */
 
+#if HAVE_SYS_SOCKET_H
+# include <sys/socket.h>
+#endif
+
 typedef php_stream *(php_stream_transport_factory_func)(const char *proto, long protolen,
 		char *resourcename, long resourcenamelen,
 		const char *persistent_id, int options, int flags,
