@@ -322,8 +322,10 @@ void zenderror(char *error)
 
 ZEND_API void zend_bailout()
 {
+	CLS_FETCH();
 	ELS_FETCH();
 
+	CG(unclean_shutdown) = 1;
 	longjmp(EG(bailout), FAILURE);
 }
 
