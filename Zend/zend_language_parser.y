@@ -627,28 +627,29 @@ r_cvar_without_static_member:
 
 
 cvar:
-		base_cvar_without_objects T_OBJECT_OPERATOR { zend_do_push_object(&$1 TSRMLS_CC); } object_property { zend_do_push_object(&$4 TSRMLS_CC); } method_or_not
-			variable_properties { zend_do_pop_object(&$$ TSRMLS_CC); }
+		base_cvar_without_objects T_OBJECT_OPERATOR { zend_do_push_object(&$1 TSRMLS_CC); }
+			object_property { zend_do_push_object(&$4 TSRMLS_CC); } method_or_not variable_properties
+			{ zend_do_pop_object(&$$ TSRMLS_CC); $$.u.EA.type = $1.u.EA.type | ($7.u.EA.type ? $7.u.EA.type : $6.u.EA.type); }
 	|	base_cvar_without_objects { $$ = $1; }
 ;
 
 
 variable_properties:
-		variable_properties variable_property
-	|	/* empty */
+		variable_properties variable_property { $$.u.EA.type = $2.u.EA.type; }
+	|	/* empty */ { $$.u.EA.type = 0; }
 ;
 
 
 variable_property:
-		T_OBJECT_OPERATOR object_property { zend_do_push_object(&$2 TSRMLS_CC); } method_or_not
+		T_OBJECT_OPERATOR object_property { zend_do_push_object(&$2 TSRMLS_CC); } method_or_not { $$.u.EA.type = $4.u.EA.type; }
 ;
 
 method_or_not:
 		'(' { zend_do_pop_object(&$1 TSRMLS_CC); zend_do_begin_method_call(NULL, &$1 TSRMLS_CC); }
 				function_call_parameter_list ')' 
 			{ zend_do_end_function_call(&$1, &$$, &$3, 0, 1 TSRMLS_CC); zend_do_extended_fcall_end(TSRMLS_C);
-			  zend_do_push_object(&$$ TSRMLS_CC); }
-	|	/* empty */
+			  zend_do_push_object(&$$ TSRMLS_CC); $$.u.EA.type = ZEND_PARSED_METHOD_CALL; }
+	|	/* empty */ { $$.u.EA.type = ZEND_PARSED_MEMBER; }
 ;
 
 cvar_without_objects:
@@ -662,10 +663,10 @@ static_member:
 
 
 base_cvar_without_objects:
-		reference_variable { $$ = $1; }
-	|	simple_indirect_reference reference_variable { zend_do_indirect_references(&$$, &$1, &$2 TSRMLS_CC); }
-	|	static_member { $$ = $1; }
-	|	function_call { zend_do_begin_variable_parse(TSRMLS_C); $$ = $1; }
+		reference_variable { $$ = $1; $$.u.EA.type = ZEND_PARSED_VARIABLE; }
+	|	simple_indirect_reference reference_variable { zend_do_indirect_references(&$$, &$1, &$2 TSRMLS_CC); $$.u.EA.type = ZEND_PARSED_VARIABLE; }
+	|	static_member { $$ = $1; $$.u.EA.type = ZEND_PARSED_STATIC_MEMBER; }
+	|	function_call { zend_do_begin_variable_parse(TSRMLS_C); $$ = $1; $$.u.EA.type = ZEND_PARSED_FUNCTION_CALL; }
 ;
 
 reference_variable:
