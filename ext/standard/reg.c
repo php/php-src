@@ -492,17 +492,16 @@ PHP_FUNCTION(eregi_replace)
 }
 /* }}} */
 
-/* ("root", "passwd", "uid", "gid", "other:stuff:like:/bin/sh")
-   = split(":", $passwd_file, 5); */
-/* {{{ proto array split(string pattern, string string [, int limit])
-   Split string into array by regular expression */
-PHP_FUNCTION(split)
+static void php_split(INTERNAL_FUNCTION_PARAMETERS, int icase)
 {
 	pval **spliton, **str, **arg_count = NULL;
 	regex_t re;
 	regmatch_t subs[1];
 	char *strp, *endp;
-	int err, size, count;
+	int err, size, count, copts = 0;
+
+	if (icase)
+		copts = REG_ICASE;
 	
 	switch (ZEND_NUM_ARGS()) {
 	case 2:
@@ -526,7 +525,7 @@ PHP_FUNCTION(split)
 	strp = (*str)->value.str.val;
 	endp = (*str)->value.str.val + strlen((*str)->value.str.val);
 
-	err = regcomp(&re, (*spliton)->value.str.val, REG_EXTENDED);
+	err = regcomp(&re, (*spliton)->value.str.val, REG_EXTENDED | copts);
 	if (err) {
 		php_error(E_WARNING, "unexpected regex error (%d)", err);
 		RETURN_FALSE;
@@ -586,10 +585,30 @@ PHP_FUNCTION(split)
 	add_next_index_stringl(return_value, strp, size, 1);
 
 	regfree(&re);
-
-	return;
 }
+
+/* ("root", "passwd", "uid", "gid", "other:stuff:like:/bin/sh")
+   = split(":", $passwd_file, 5); */
+/* {{{ proto array split(string pattern, string string [, int limit])
+   Split string into array by regular expression */
+
+PHP_FUNCTION(split)
+{
+	php_split(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+}
+
 /* }}} */
+
+/* {{{ proto array spliti(string pattern, string string [, int limit])
+   Split string into array by regular expression case-insensitive */
+
+PHP_FUNCTION(spliti)
+{
+	php_split(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
+}
+
+/* }}} */
+
 
 /* {{{ proto string sql_regcase(string string)
    Make regular expression for case insensitive match */

@@ -346,6 +346,7 @@ function_entry basic_functions[] = {
 	PHP_FE(eregi,									third_argument_force_ref)
 	PHP_FE(eregi_replace,							NULL)
 	PHP_FE(split,									NULL)
+	PHP_FE(spliti,									NULL)
 	PHP_FALIAS(join,			implode,			NULL)
 	PHP_FE(sql_regcase,								NULL)
 
