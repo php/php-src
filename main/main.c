@@ -335,7 +335,6 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 	char buffer[1024];
 	int size = 0;
 	va_list args;
-	CLS_FETCH();
 	ELS_FETCH();
 	PLS_FETCH();
 

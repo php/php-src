@@ -1078,7 +1078,6 @@ PHP_FUNCTION(fscanf)
     
     zval ***args;
     int argCount;   
-    PLS_FETCH();
     
     argCount = ZEND_NUM_ARGS();
     if (argCount < 2) {
