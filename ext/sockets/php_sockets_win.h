@@ -42,7 +42,7 @@
 #define close(a) closesocket(a)
 #define CMSG_DATA(cmsg) ((cmsg)->cmsg_data)
 
-typedef long ssize_t;
+typedef int ssize_t;
 
 struct	sockaddr_un {
 	short	sun_family;

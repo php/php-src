@@ -1103,9 +1103,9 @@ PHP_FUNCTION(socket_iovec_alloc)
    Returns the data held in the iovec specified by iovec_id[iovec_position] */
 PHP_FUNCTION(socket_iovec_fetch)
 {
-	zval		*iovec_id;
-	php_iovec_t	*vector;
-	int			iovec_position;
+	zval			*iovec_id;
+	php_iovec_t		*vector;
+	unsigned int	iovec_position;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &iovec_id, &iovec_position) == FAILURE)
 		return;
@@ -1125,10 +1125,11 @@ PHP_FUNCTION(socket_iovec_fetch)
    Sets the data held in iovec_id[iovec_position] to new_val */
 PHP_FUNCTION(socket_iovec_set)
 {
-	zval		*iovec_id;
-	php_iovec_t	*vector;
-	int			iovec_position, new_val_len;
-	char		*new_val;
+	zval			*iovec_id;
+	php_iovec_t		*vector;
+	int				new_val_len;
+	unsigned int	iovec_position;
+	char			*new_val;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rls", &iovec_id, &iovec_position, &new_val, &new_val_len) == FAILURE)
 		return;
@@ -1186,7 +1187,7 @@ PHP_FUNCTION(socket_iovec_delete)
 	zval			*iovec_id;
 	php_iovec_t		*vector;
 	struct iovec	*vector_array;
-	int				i, iov_pos;
+	unsigned int	i, iov_pos;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &iovec_id, &iov_pos) == FAILURE)
 		return;
