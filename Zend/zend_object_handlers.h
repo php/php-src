@@ -24,7 +24,7 @@
 
 union _zend_function;
 
-typedef zval *(*zend_object_read_property_t)(zval *object, zval *member, int type TSRMLS_DC);
+typedef zval *(*zend_object_read_property_t)(zval *object, zval *member TSRMLS_DC);
 /* Used to fetch property from the object, read-only */
 typedef void (*zend_object_write_property_t)(zval *object, zval *member, zval *value TSRMLS_DC);
 /* Used to set property of the object */
