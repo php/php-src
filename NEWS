@@ -1,6 +1,7 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 200?, Version 5.0.0
+- Fixed bug #17448 (Print the message when OCI_SUCCESS_WITH_INFO is returned).
 - Enhanced jpeg 2000 support for GetImageSize(). (marcus, Adam Wright)
 - Fixed bug #20155: xmlrpc compile problem with zendengine2 (Derick, Jan
   Schneider)
