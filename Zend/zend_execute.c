@@ -597,12 +597,14 @@ static inline void zend_fetch_dimension_address(znode *result, znode *op1, znode
 				case BP_VAR_R:
 				case BP_VAR_IS:
 					*retval = &EG(uninitialized_zval_ptr);
-					return;
+					break;
 				case BP_VAR_W:
 				case BP_VAR_RW:
 					*retval = &EG(error_zval_ptr);
-					return;
+					break;
 			}
+			SELECTIVE_PZVAL_LOCK(**retval, result);
+			return;
 		}
 
 		/* prepare the new element */
@@ -1149,6 +1151,7 @@ binary_assign_op_addr: {
 				break;
 			case ZEND_FETCH_IS:
 				zend_fetch_var_address(&opline->result, &opline->op1, &opline->op2, Ts, BP_VAR_IS ELS_CC);
+				AI_USE_PTR(Ts[opline->result.u.var].var);
 				break;
 			case ZEND_FETCH_DIM_R:
 				if (opline->extended_value == ZEND_FETCH_ADD_LOCK) {
@@ -1165,6 +1168,7 @@ binary_assign_op_addr: {
 				break;
 			case ZEND_FETCH_DIM_IS:
 				zend_fetch_dimension_address(&opline->result, &opline->op1, &opline->op2, Ts, BP_VAR_IS ELS_CC);
+				AI_USE_PTR(Ts[opline->result.u.var].var);
 				break;
 			case ZEND_FETCH_DIM_FUNC_ARG:
 				if (ARG_SHOULD_BE_SENT_BY_REF(opline->extended_value)) {
@@ -1188,6 +1192,7 @@ binary_assign_op_addr: {
 				break;
 			case ZEND_FETCH_OBJ_IS:
 				zend_fetch_property_address(&opline->result, &opline->op1, &opline->op2, Ts, BP_VAR_IS ELS_CC);
+				AI_USE_PTR(Ts[opline->result.u.var].var);
 				break;
 			case ZEND_FETCH_OBJ_FUNC_ARG:
 				if (ARG_SHOULD_BE_SENT_BY_REF(opline->extended_value)) {
@@ -2022,7 +2027,7 @@ send_by_ref:
 				}
 				break;
 			case ZEND_ISSET_ISEMPTY: {
-					zval **var = get_zval_ptr_ptr(&opline->op1, Ts, BP_VAR_IS);
+					zval *var = get_zval_ptr(&opline->op1, Ts, &EG(free_op1), BP_VAR_IS);
 					int isset;
 
 					if (!var) {
@@ -2033,12 +2038,11 @@ send_by_ref:
 							} else {
 								isset = 0;
 							}
-							zval_ptr_dtor(&Ts[opline->op1.u.var].EA.str);
 						} else {
 							isset = 1;
 						}
-					} else if (var==&EG(uninitialized_zval_ptr)
-						|| ((*var)->type == IS_STRING && (*var)->value.str.val == undefined_variable_string)) {
+					} else if (var==EG(uninitialized_zval_ptr)
+						|| (var->type == IS_STRING && var->value.str.val == undefined_variable_string)) {
 						isset = 0;
 					} else {
 						isset = 1;
@@ -2056,7 +2060,7 @@ send_by_ref:
 								} else {
 									Ts[opline->result.u.var].tmp_var.value.lval = 0;
 								}
-							} else if (!isset || !zend_is_true(*var)) {
+							} else if (!isset || !zend_is_true(var)) {
 								Ts[opline->result.u.var].tmp_var.value.lval = 1;
 							} else {
 								Ts[opline->result.u.var].tmp_var.value.lval = 0;
