@@ -1,6 +1,21 @@
+set $zts = 0
+
+define ____executor_globals
+	if $zts
+		set $eg = ((zend_executor_globals) (*((void ***) tsrm_ls))[executor_globals_id-1])
+	else
+		set $eg = executor_globals
+	end
+end
+
+document ____executor_globals
+	portable way of accessing executor_globals
+	type "set $zts = 1" if you use --enable-maintainer-zts on your configure line
+end
+
 define dump_bt
-    set $t = $arg0
-    while $t
+	set $t = $arg0
+	while $t
 		printf "[0x%08x] ", $t
 		if $t->function_state.function->common.function_name
 			printf "%s() ", $t->function_state.function->common.function_name
@@ -12,7 +27,7 @@ define dump_bt
 		end
 		set $t = $t->prev_execute_data
 		printf "\n"
-    end
+	end
 end
 
 document dump_bt
@@ -29,6 +44,7 @@ document printzv
 end
 
 define ____printzv
+	____executor_globals
 	set $zvalue = $arg0
 
 	if $zvalue->type == 0
@@ -64,7 +80,7 @@ define ____printzv
 
 	printf "[0x%08x] ", $zvalue
 
-	if $zvalue == executor_globals.uninitialized_zval_ptr
+	if $zvalue == $eg.uninitialized_zval_ptr
 		printf "*uninitialized* "
 	end
 	printf "(refcount=%d) %s: ", $zvalue->refcount, $typename
@@ -94,17 +110,19 @@ define ____printzv
 	if $zvalue->type == 5
 		if ! $arg1
 			printf "(prop examination disabled due to a gdb bug)"
-#			set $ht = $zvalue->value.obj.handlers->get_properties($zvalue)
-#			printf "{\n"
-#			set $ind = $ind + 1
-#			____print_ht $ht
-#			set $ind = $ind - 1
-#			set $i = $ind
-#			while $i > 0
-#				printf "  "
-#				set $i = $i - 1
-#			end
-#			printf "}"
+			if $zvalue->value.obj.handlers->get_properties
+#				set $ht = $zvalue->value.obj.handlers->get_properties($zvalue)
+#				printf "{\n"
+#				set $ind = $ind + 1
+#				____print_ht $ht
+#				set $ind = $ind - 1
+#				set $i = $ind
+#				while $i > 0
+#					printf "  "
+#					set $i = $i - 1
+#				end
+#				printf "}"
+			end
 		end
 	end
 	if $zvalue->type == 6
@@ -156,6 +174,7 @@ document print_ht
 end
 
 define printzn
+	____executor_globals
 	set $ind = 0
 	set $znode = $arg0
 	if $znode->op_type == 1
@@ -179,12 +198,12 @@ define printzn
 	end
 	if $znode->op_type == 2
 		printf ": "
-		set $tvar = (union _temp_variable *)((char *)executor_globals.current_execute_data->Ts + $znode->u.var)
+		set $tvar = (union _temp_variable *)((char *)$eg.current_execute_data->Ts + $znode->u.var)
 		____printzv ((union _temp_variable *)$tvar)->tmp_var
 	end
 	if $znode->op_type == 4
 		printf ": "
-		set $tvar = (union _temp_variable *)((char *)executor_globals.current_execute_data->Ts + $znode->u.var)
+		set $tvar = (union _temp_variable *)((char *)$eg.current_execute_data->Ts + $znode->u.var)
 		____printzv *$tvar->var.ptr_ptr
 	end
 	if $znode->op_type == 8
