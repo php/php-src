@@ -797,6 +797,38 @@ ZEND_API void zend_hash_merge(HashTable *target, HashTable *source, copy_ctor_fu
 }
 
 
+ZEND_API void zend_hash_merge_ex(HashTable *target, HashTable *source, copy_ctor_func_t pCopyConstructor, uint size, zend_bool (*pReplaceOrig)(void *orig, void *new))
+{
+	Bucket *p;
+	void *t;
+	void *pOrig;
+
+	IS_CONSISTENT(source);
+	IS_CONSISTENT(target);
+
+    p = source->pListHead;
+	while (p) {
+		if (p->nKeyLength>0) {
+			if (zend_hash_find(target, p->arKey, p->nKeyLength, &pOrig)==FAILURE
+				|| pReplaceOrig(pOrig, p->pData)) {
+				if (zend_hash_update(target, p->arKey, p->nKeyLength, p->pData, size, &t)==SUCCESS && pCopyConstructor) {
+					pCopyConstructor(t);
+				}
+			}
+		} else {
+			if (zend_hash_index_find(target, p->h, &pOrig)==FAILURE
+				|| pReplaceOrig(pOrig, p->pData)) {
+				if (zend_hash_index_update(target, p->h, p->pData, size, &t)==SUCCESS && pCopyConstructor) {
+					pCopyConstructor(t);
+				}
+			}
+		}
+		p = p->pListNext;
+	}
+	target->pInternalPointer = target->pListHead;
+}
+
+
 ZEND_API ulong zend_get_hash_value(HashTable *ht, char *arKey, uint nKeyLength)
 {
 	IS_CONSISTENT(ht);
