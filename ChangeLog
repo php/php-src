@@ -1,3 +1,35 @@
+2000-08-16  Andi Gutmans  <andi@php.net>
+
+    * main/fopen-wrappers.c
+      main/fopen-wrappers.h:
+    - The beginning of an attempt to cleanup fopen-wrappers.
+    - I started with trying to localize the V_FOPEN's so that we can have a
+    - version which won't really open the file for include_once/require_once to
+    - work faster and have less chance of a race which would cause a fd leak.
+    - What I did will, therefore, change but I want to do this step by step
+    - because the code is extremley messy so first of all I want to make sure
+    - that the isolating of the V_FOPEN code doesn't break anything.
+    - How about moving URL stuff out of this file?
+    - php_fopen_url_wrapper() copy and pasted the second part of
+    - php_fopen_wrapper() (incorrectly). Please try not to copy&paste code but
+    - centralize functionality. Need to think of a nice way to nuke one of the
+    - copies and have both functions use the same one.
+
+2000-08-16  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/oci8/oci8.c: compile fix
+
+2000-08-16  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/standard/assert.c: proto fixed
+
+2000-08-16  Jouni Ahto  <jah@mork.net>
+
+    * ext/pgsql/pgsql.c:
+    - Return NULL type when column is NULL, now that we have it in PHP4.
+    - Fixed a bug in handling NULL columns, PQgetvalue() doesn't return a NULL
+      pointer in this case, but a pointer to a string of 0 length...
+
 2000-08-15  Sascha Schumann  <sascha@schumann.cx>
 
     * build/rules.mk: Change the C++ extension to .cpp
