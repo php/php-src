@@ -32,6 +32,7 @@ typedef struct _zend_mm_block {
 	unsigned int size : 31;
 	unsigned int type : 1;
 	size_t prev_size;
+	unsigned int guard_block : 1;
 } zend_mm_block;
 
 typedef struct _zend_mm_free_block {
