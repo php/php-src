@@ -43,16 +43,23 @@
 #define WDDX_VAR_S				"<var name='%s'>"
 #define WDDX_VAR_E				"</var>"
 
+#define php_wddx_add_chunk(packet, str) { \
+		char *__s = (str); \
+		php_wddx_add_chunk_ex(packet, __s, strlen(__s)); \
+	}
+#define php_wddx_add_chunk_static(packet, str) \
+	php_wddx_add_chunk_ex(packet, str, sizeof(str)-1);
+
 typedef struct _wddx_packet wddx_packet;
 
 wddx_packet *php_wddx_constructor(void);
 void 		 php_wddx_destructor(wddx_packet *packet);
 
-void 		 php_wddx_packet_start(wddx_packet *packet, char *comment);
+void 		 php_wddx_packet_start(wddx_packet *packet, char *comment, int comment_len);
 void 		 php_wddx_packet_end(wddx_packet *packet);
 
 void 		 php_wddx_serialize_var(wddx_packet *packet, zval *var, char *name);
-void 		 php_wddx_add_chunk(wddx_packet *packet, char *str);
+void 		 php_wddx_add_chunk_ex(wddx_packet *packet, char *str, int length);
 void 		 php_wddx_deserialize_ex(char *, int, zval *return_value);
 char		*php_wddx_gather(wddx_packet *packet);
 
