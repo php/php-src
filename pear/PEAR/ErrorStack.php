@@ -61,22 +61,40 @@ $GLOBALS['_PEAR_ERRORSTACK_SINGLETON'] = array();
 /**
  * Global error callback (default)
  * 
- * This is only used 
+ * This is only used if set to non-false.  * is the default callback for
+ * all packages, whereas specific packages may set a default callback
+ * for all instances, regardless of whether they are a singleton or not.
+ *
+ * To exclude non-singletons, only set the local callback for the singleton
  * @see PEAR_ErrorStack::setDefaultCallback()
  * @access private
  * @global array $GLOBALS['_PEAR_ERRORSTACK_DEFAULT_CALLBACK']
  */
-$GLOBALS['_PEAR_ERRORSTACK_DEFAULT_CALLBACK'] = false;
+$GLOBALS['_PEAR_ERRORSTACK_DEFAULT_CALLBACK'] = array(
+    '*' => false,
+);
 
 /**
  * Global Log object (default)
  * 
- * This is only used 
+ * This is only used if set to non-false.  Use to set a default log object for
+ * all stacks, regardless of instantiation order or location
  * @see PEAR_ErrorStack::setDefaultLogger()
  * @access private
  * @global array $GLOBALS['_PEAR_ERRORSTACK_DEFAULT_LOGGER']
  */
 $GLOBALS['_PEAR_ERRORSTACK_DEFAULT_LOGGER'] = false;
+
+/**
+ * Global Overriding Callback
+ * 
+ * This callback will override any error callbacks that specific loggers have set.
+ * Use with EXTREME caution
+ * @see PEAR_ErrorStack::staticPushCallback()
+ * @access private
+ * @global array $GLOBALS['_PEAR_ERRORSTACK_DEFAULT_LOGGER']
+ */
+$GLOBALS['_PEAR_ERRORSTACK_OVERRIDE_CALLBACK'] = array();
 
 /**#@+
  * One of four possible return values from the error Callback
@@ -350,14 +368,16 @@ class PEAR_ErrorStack {
      * This method sets the callback that can be used to generate error
      * messages for a singleton
      * @param array|string Callback function/method
+     * @param string Package name, or false for all packages
      * @static
      */
-    function setDefaultCallback($callback = false)
+    function setDefaultCallback($callback = false, $package = false)
     {
         if (!is_callable($callback)) {
             $callback = false;
         }
-        $GLOBALS['_PEAR_ERRORSTACK_DEFAULT_CALLBACK'] = $callback;
+        $package = $package ? $package : '*';
+        $GLOBALS['_PEAR_ERRORSTACK_DEFAULT_CALLBACK'][$package] = $callback;
     }
     
     /**
@@ -412,7 +432,10 @@ class PEAR_ErrorStack {
     }
     
     /**
-     * Set an error Callback for every package error stack
+     * Set a temporary overriding error callback for every package error stack
+     *
+     * Use this to temporarily disable all existing callbacks (can be used
+     * to emulate the @ operator, for instance)
      * @see PEAR_ERRORSTACK_PUSHANDLOG, PEAR_ERRORSTACK_PUSH, PEAR_ERRORSTACK_LOG
      * @see staticPopCallback(), pushCallback()
      * @param string|array $cb
@@ -420,21 +443,20 @@ class PEAR_ErrorStack {
      */
     function staticPushCallback($cb)
     {
-        foreach($GLOBALS['_PEAR_ERRORSTACK_SINGLETON'] as $package => $unused) {
-            $GLOBALS['_PEAR_ERRORSTACK_SINGLETON'][$package]->pushCallback($cb);
-        }
+        array_push($GLOBALS['_PEAR_ERRORSTACK_OVERRIDE_CALLBACK'], $cb);
     }
     
     /**
-     * Remove a callback from every error callback stack
+     * Remove a temporary overriding error callback
      * @see staticPushCallback()
      * @return array|string|false
      * @static
      */
     function staticPopCallback()
     {
-        foreach($GLOBALS['_PEAR_ERRORSTACK_SINGLETON'] as $package => $unused) {
-            $GLOBALS['_PEAR_ERRORSTACK_SINGLETON'][$package]->popCallback();
+        array_pop($GLOBALS['_PEAR_ERRORSTACK_OVERRIDE_CALLBACK']);
+        if (!is_array($GLOBALS['_PEAR_ERRORSTACK_OVERRIDE_CALLBACK'])) {
+            $GLOBALS['_PEAR_ERRORSTACK_OVERRIDE_CALLBACK'] = array();
         }
     }
     
@@ -523,23 +545,25 @@ class PEAR_ErrorStack {
             $err['repackage'] = $repackage;
         }
         $push = $log = true;
-        $callback = $this->popCallback();
-        if (is_callable($callback)) {
-            $this->pushCallback($callback);
-            switch(call_user_func($callback, $err)){
-            	case PEAR_ERRORSTACK_IGNORE: 
-            		return $err;
-        		break;
-            	case PEAR_ERRORSTACK_PUSH: 
-            		$log = false;
-        		break;
-            	case PEAR_ERRORSTACK_LOG: 
-            		$push = false;
-        		break;
-                // anything else returned has the same effect as pushandlog
+        // try the overriding callback first
+        $callback = $this->staticPopCallback();
+        if ($callback) {
+            $this->staticPushCallback($callback);
+        }
+        if (!is_callable($callback)) {
+            // try the local callback next
+            $callback = $this->popCallback();
+            if (is_callable($callback)) {
+                $this->pushCallback($callback);
+            } else {
+                // try the default callback
+                $callback = isset($GLOBALS['_PEAR_ERRORSTACK_DEFAULT_CALLBACK'][$this->_package]) ?
+                    $GLOBALS['_PEAR_ERRORSTACK_DEFAULT_CALLBACK'][$this->_package] :
+                    $GLOBALS['_PEAR_ERRORSTACK_DEFAULT_CALLBACK']['*'];
             }
-        } elseif (is_callable($GLOBALS['_PEAR_ERRORSTACK_DEFAULT_CALLBACK'])) {
-            switch(call_user_func($GLOBALS['_PEAR_ERRORSTACK_DEFAULT_CALLBACK'], $err)){
+        }
+        if (is_callable($callback)) {
+            switch(call_user_func($callback, $err)){
             	case PEAR_ERRORSTACK_IGNORE: 
             		return $err;
         		break;
