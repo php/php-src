@@ -151,7 +151,7 @@ static void sapi_read_post_data(SLS_D)
 		post_reader_func = post_entry->post_reader;
 	} else {
 		if (!sapi_module.default_post_reader) {
-			sapi_module.sapi_error(E_COMPILE_ERROR, "Unsupported content type:  '%s'", content_type);
+			sapi_module.sapi_error(E_ERROR, "Unsupported content type:  '%s'", content_type);
 			return;
 		}
 		SG(request_info).post_entry = NULL;
@@ -280,7 +280,7 @@ SAPI_API void sapi_activate(SLS_D)
 		if (SG(request_info).request_method 
 			&& !strcmp(SG(request_info).request_method, "POST")) {
 			if (!SG(request_info).content_type) {
-				sapi_module.sapi_error(E_COMPILE_ERROR, "No content-type in POST request");
+				sapi_module.sapi_error(E_ERROR, "No content-type in POST request");
 			}
 			sapi_read_post_data(SLS_C);
 		} else {
