@@ -402,8 +402,6 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 					while((p=strchr(docref_buf, '_'))!=NULL) *p = '-';
 					docref = docref_buf;
 				}
-			} else {
-				/* FIXME: need to handle non function calls and non TSRM builds here */
 			}
 		}
 		if (docref) {
@@ -412,8 +410,11 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 			} else {
 				php_error(type, "%s(%s) [%s%s]: %s", get_active_function_name(TSRMLS_C), params, PG(docref_root), docref, buffer);
 			}
-		} else {
-			php_error(type, "%s(%s): %s", get_active_function_name(TSRMLS_C), params, buffer);
+		} else {                                
+			docref = get_active_function_name(TSRMLS_C);
+			if (!docref)
+				docref = "Unknown";
+			php_error(type, "%s(%s): %s", docref, params, buffer);
 		}
 		efree(buffer);
 		if (docref_buf)
