@@ -1,3 +1,20 @@
+2000-07-20  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/standard/string.c: fix for bug #5707
+
+2000-07-20  Sterling Hughes  <stirling@bestweb.net>
+
+    * ext/sybase_ct/php_sybase_ct.c: fix 5705
+    .
+
+2000-07-20  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/pcre/php_pcre.c: Fix bug $5676.
+
+2000-07-20  Sterling Hughes  <stirling@bestweb.net>
+
+    * ext/dbase/dbase.c: Fix dbase_create() for real.
+
 2000-07-19  David Croft  <david@infotrek.co.uk>
 
     * ext/pfpro/pfpro.c:
