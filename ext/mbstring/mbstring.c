@@ -3354,6 +3354,10 @@ MBSTRING_API int php_mb_gpc_encoding_converter(char **str, int *len, int num, co
 		from_encoding = MBSTRG(http_input_identify);
 	}
 
+	if (from_encoding == mbfl_no_encoding_pass) {
+		return 0;
+	}
+
 	/* initialize string */
 	mbfl_string_init(&string);
 	mbfl_string_init(&result);
@@ -3395,6 +3399,19 @@ MBSTRING_API int php_mb_gpc_encoding_detector(char **arg_string, int *arg_length
 	mbfl_encoding_detector *identd = NULL; 
 
 	int size, *list;
+
+	if (MBSTRG(http_input_list_size) == 1 && 
+		MBSTRG(http_input_list)[0] == mbfl_no_encoding_pass) {
+		MBSTRG(http_input_identify) = mbfl_no_encoding_pass;
+		return SUCCESS;
+	}
+
+	if (MBSTRG(http_input_list_size) == 1 && 
+		MBSTRG(http_input_list)[0] != mbfl_no_encoding_auto &&
+		mbfl_no_encoding2name(MBSTRG(http_input_list)[0]) != NULL) {
+		MBSTRG(http_input_identify) = MBSTRG(http_input_list)[0];
+		return SUCCESS;
+	}
 
 	if (arg_list && strlen(arg_list)>0) {
 		/* make encoding list */
