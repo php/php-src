@@ -734,6 +734,7 @@ static int php_sqlite_authorizer(void *autharg, int access_type, const char *arg
 		ce.create_object = sqlite_object_new_ ## name; \
 		sqlite_ce_ ## name = zend_register_internal_class_ex(&ce, parent, NULL TSRMLS_CC); \
 		memcpy(&sqlite_object_handlers_ ## name, zend_get_std_object_handlers(), sizeof(zend_object_handlers)); \
+		sqlite_object_handlers_ ## name.clone_obj = NULL; \
 	}
 
 zend_class_entry *sqlite_ce_db, *sqlite_ce_exception;
@@ -803,7 +804,7 @@ static void sqlite_object_new(zend_class_entry *class_type, zend_object_handlers
 	zend_hash_init(intern->std.properties, 0, NULL, ZVAL_PTR_DTOR, 0);
 	zend_hash_copy(intern->std.properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
 
-	retval->handle = zend_objects_store_put(intern, sqlite_object_dtor, sqlite_object_clone TSRMLS_CC);
+	retval->handle = zend_objects_store_put(intern, sqlite_object_dtor, NULL TSRMLS_CC);
 	retval->handlers = handlers;
 }
 
