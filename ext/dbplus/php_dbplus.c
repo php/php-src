@@ -32,6 +32,8 @@ void string_to_scalop(char *op, enum scalop *sop);
 field * string_to_field(char *val, attribute *ap, int flags);
 void cdb_tcl(int,char *,char **, int *);
 relf * aql_exec(char *, char *);
+tuple *rnext(relf *);
+
 
 #define _STRING(x) ((*x)->value.str.val)
 #define _INT(x)    ((*x)->value.lval)
@@ -759,7 +761,7 @@ PHP_FUNCTION(dbplus_next)
 {
   zval **relation, **tname;
   relf *r;
-  tuple t;
+  tuple *t;
   int stat;
   
   if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &relation, &tname) == FAILURE){
@@ -768,9 +770,15 @@ PHP_FUNCTION(dbplus_next)
   
   DBPLUS_FETCH_RESOURCE(r, relation);
   
-  stat = cdb_next(r, &t);
+	if(r->r_sid = 9999) {
+		t = rnext(r);
+		stat = Acc_error;
+	} else {
+		t = (tuple *) pmalloc(sizeof(tuple));
+		stat = cdb_next(r, t);
+	}
   if(stat==ERR_NOERR) {
-    tuple2var(r, &t, tname);
+    tuple2var(r, t, tname);
   }
 
   RETURN_LONG(stat);
@@ -1138,7 +1146,7 @@ PHP_FUNCTION(dbplus_rquery)
 {
   relf *r;
   zval **name, **dbpath;
-  int argc;
+  int argc = ZEND_NUM_ARGS();
   
   if ((argc <1) || (argc>2) || (zend_get_parameters_ex(2, &name, &dbpath) == FAILURE)){
     WRONG_PARAM_COUNT;
@@ -1150,6 +1158,8 @@ PHP_FUNCTION(dbplus_rquery)
     /* TODO error handling */
     RETURN_FALSE;
   }
+
+	r->r_sid = 9999;
 
   ZEND_REGISTER_RESOURCE(return_value, r, le_dbplus_relation);
 }
