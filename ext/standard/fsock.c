@@ -174,20 +174,20 @@ static void php_fsockopen(INTERNAL_FUNCTION_PARAMETERS, int persistent) {
 		WRONG_PARAM_COUNT;
 	}
 	switch(arg_count) {
-		case 5:
-			convert_to_double_ex(args[4]);
-			conv = (unsigned long) (Z_DVAL_PP(args[4]) * 1000000.0);
-			timeout.tv_sec = conv / 1000000;
-			timeout.tv_usec = conv % 1000000;
-			/* fall-through */
-		case 4:
-			zval_ptr_dtor(args[3]);
-			ZVAL_STRING(*args[3], "", 1);
-			/* fall-through */
-		case 3:
-			zval_ptr_dtor(args[2]);
-			ZVAL_LONG(*args[2], 0);
-			break;
+	case 5:
+		convert_to_double_ex(args[4]);
+		conv = (unsigned long) (Z_DVAL_PP(args[4]) * 1000000.0);
+		timeout.tv_sec = conv / 1000000;
+		timeout.tv_usec = conv % 1000000;
+		/* fall-through */
+	case 4:
+		zval_ptr_dtor(args[3]);
+		ZVAL_STRING(*args[3], "", 1);
+		/* fall-through */
+	case 3:
+		zval_ptr_dtor(args[2]);
+		ZVAL_LONG(*args[2], 0);
+		break;
 	}
 	convert_to_string_ex(args[0]);
 	convert_to_long_ex(args[1]);
