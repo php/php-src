@@ -180,8 +180,8 @@ typedef struct _zend_utility_functions {
 	int (*write_function)(const char *str, uint str_length);
 	FILE *(*fopen_function)(const char *filename, char **opened_path);
 	void (*message_handler)(long message, void *data);
-	void (*block_interruptions)();
-	void (*unblock_interruptions)();
+	void (*block_interruptions)(void);
+	void (*unblock_interruptions)(void);
 	int (*get_ini_entry)(char *name, uint name_length, zval *contents);
 } zend_utility_functions;
 
@@ -210,13 +210,13 @@ typedef struct _zend_utility_values {
 #define IS_METHOD	10 /* for overloaded function calls */
 
 int zend_startup(zend_utility_functions *utility_functions, char **extensions);
-void zend_shutdown();
+void zend_shutdown(void);
 
 void zend_set_utility_values(zend_utility_values *utility_values);
 BEGIN_EXTERN_C()
-ZEND_API void zend_bailout();
+ZEND_API void zend_bailout(void);
 END_EXTERN_C()
-ZEND_API char *get_zend_version();
+ZEND_API char *get_zend_version(void);
 
 ZEND_API void zend_make_printable_zval(zval *expr, zval *expr_copy, int *use_copy);
 ZEND_API int zend_print_zval(zval *expr, int indent);
@@ -238,8 +238,8 @@ extern ZEND_API int (*zend_printf)(const char *format, ...);
 extern ZEND_API int (*zend_write)(const char *str, uint str_length);
 extern ZEND_API void (*zend_error)(int type, const char *format, ...);
 extern ZEND_API FILE *(*zend_fopen)(const char *filename, char **opened_path);
-extern ZEND_API void (*zend_block_interruptions)();
-extern ZEND_API void (*zend_unblock_interruptions)();
+extern ZEND_API void (*zend_block_interruptions)(void);
+extern ZEND_API void (*zend_unblock_interruptions)(void);
 extern ZEND_API void (*zend_message_dispatcher)(long message, void *data);
 extern ZEND_API int (*zend_get_ini_entry)(char *name, uint name_length, zval *contents);
 END_EXTERN_C()

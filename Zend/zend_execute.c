@@ -1779,7 +1779,7 @@ send_by_ref:
 			case ZEND_INIT_ARRAY:
 			case ZEND_ADD_ARRAY_ELEMENT: {
 					zval *array_ptr = &Ts[opline->result.u.var].tmp_var;
-					zval *expr_ptr, **expr_ptr_ptr;
+					zval *expr_ptr, **expr_ptr_ptr = NULL;
 					zval *offset=get_zval_ptr(&opline->op2, Ts, &EG(free_op2), BP_VAR_R);
 
 					if (opline->extended_value) {

@@ -21,6 +21,6 @@
 #ifndef _ZEND_INDENT_H
 #define _ZEND_INDENT_H
 
-ZEND_API void zend_indent();
+ZEND_API void zend_indent(void);
 
 #endif /* _ZEND_INDENT_H */
