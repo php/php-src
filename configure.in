@@ -1226,7 +1226,7 @@ AC_DEFINE([HAVE_BUILD_DEFS_H], 1, [ ])
 $php_shtool mkdir -p pear/scripts
 $php_shtool mkdir -p scripts
 
-ALL_OUTPUT_FILES="php4.spec main/build-defs.h \
+ALL_OUTPUT_FILES="php5.spec main/build-defs.h \
 scripts/phpize scripts/php-config \
 $PHP_OUTPUT_FILES"
 

@@ -8,6 +8,6 @@ if (PHP_ACTIVESCRIPT == "yes") {
 		ERROR("ActiveScript module requires an --enable-zts build of PHP");
 	}
 
-	SAPI('activescript', 'classfactory.cpp php4activescript.c scriptengine.cpp', 'php' + PHP_VERSION + 'activescript.dll', '/D PHP4ISAPI_EXPORTS');
-	ADD_FLAG('LDFLAGS_ACTIVESCRIPT', 'oleaut32.lib ole32.lib user32.lib advapi32.lib /DEF:' + configure_module_dirname + '\\php4activescript.def');
+	SAPI('activescript', 'classfactory.cpp php5activescript.c scriptengine.cpp', 'php' + PHP_VERSION + 'activescript.dll', '/D PHP5ISAPI_EXPORTS');
+	ADD_FLAG('LDFLAGS_ACTIVESCRIPT', 'oleaut32.lib ole32.lib user32.lib advapi32.lib /DEF:' + configure_module_dirname + '\\php5activescript.def');
 }

@@ -1,4 +1,5 @@
-OpenSSL extension for PHP4
+OpenSSL extension for PHP
+
 $Id$
 
 The functions implemented so far make it possible to seal and open data, and

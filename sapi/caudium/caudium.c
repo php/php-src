@@ -38,7 +38,7 @@
  */
 #define NO_PIKE_SHORTHAND
 
-/* Ok, we are now using Pike level threads to handle PHP4 since
+/* Ok, we are now using Pike level threads to handle PHP5 since
  * the nice th_farm threads aren't working on Linux with glibc 2.2
  * (why this is I don't know).
  */
@@ -79,7 +79,7 @@
 #endif
 
 #ifndef PIKE_THREADS
-#error The PHP4 module requires that your Pike has thread support.
+#error The PHP5 module requires that your Pike has thread support.
 #endif
 
 #undef HIDE_GLOBAL_VARIABLES
@@ -624,7 +624,7 @@ static void php_caudium_module_main(php_caudium_request *ureq)
     SG(request_info).headers_only = 0;
   }
 
-  /* Let PHP4 handle the deconding of the AUTH */
+  /* Let PHP5 handle the deconding of the AUTH */
   php_handle_auth_data(lookup_string_header("HTTP_AUTHORIZATION", NULL), TSRMLS_C);
    /* Swap out this thread and release the interpreter lock to allow
    * Pike threads to run. We wait since the above would otherwise require
@@ -713,10 +713,10 @@ void f_php_caudium_request_handler(INT32 args)
   if(THIS == NULL)
     Pike_error("Out of memory.");
 
-  get_all_args("PHP4.Interpreter->run", args, "%S%m%O%*", &script,
+  get_all_args("PHP5.Interpreter->run", args, "%S%m%O%*", &script,
 	       &request_data, &my_fd_obj, &done_callback);
   if(done_callback->type != PIKE_T_FUNCTION) 
-    Pike_error("PHP4.Interpreter->run: Bad argument 4, expected function.\n");
+    Pike_error("PHP5.Interpreter->run: Bad argument 4, expected function.\n");
   add_ref(request_data);
   add_ref(my_fd_obj);
   add_ref(script);

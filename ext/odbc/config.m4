@@ -214,7 +214,7 @@ AC_MSG_CHECKING(for Empress support)
 AC_ARG_WITH(empress,
 [  --with-empress[=DIR]    Include Empress support.  DIR is the Empress base
                           install directory, defaults to \$EMPRESSPATH.
-                          From PHP4, this option only supports Empress Version
+                          From PHP 4, this option only supports Empress Version
                           8.60 and above],
 [
   PHP_WITH_SHARED
@@ -246,7 +246,7 @@ AC_ARG_WITH(empress-bcs,
 [  --with-empress-bcs[=DIR]
                           Include Empress Local Access support.  DIR is the 
                           Empress base install directory, defaults to 
-                          \$EMPRESSPATH.  From PHP4, this option only supports
+                          \$EMPRESSPATH.  From PHP 4, this option only supports
                           Empress Version 8.60 and above.],
 [
   PHP_WITH_SHARED

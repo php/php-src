@@ -2,11 +2,11 @@
 
 cd ..\sapi\%1
 
-if "%2" == "clean" make -f ..\..\netware\php4%1.mak clean
+if "%2" == "clean" make -f ..\..\netware\php5%1.mak clean
 if "%2" == "/?" goto USAGE
 
 REM Build command
-make -f ..\..\netware\php4%1.mak
+make -f ..\..\netware\php5%1.mak
 goto EXIT
 
 :USAGE

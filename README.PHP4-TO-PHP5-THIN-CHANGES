@@ -34,7 +34,7 @@
     - mysqli_fetch_assoc()
 
 5. PATH_TRANSLATED server variable is no longer set implicitly under
-   Apache2 SAPI in contrast to the situation in PHP4, where it is set to the
+   Apache2 SAPI in contrast to the situation in PHP 4, where it is set to the
    same value as the SCRIPT_FILENAME server variable when it is not populated
    by Apache.  This change was made to comply with the CGI specification.
    Please refer to bug #23610 for further information.

@@ -1,24 +1,24 @@
-# Microsoft Developer Studio Project File - Name="php4embed" - Package Owner=<4>
+# Microsoft Developer Studio Project File - Name="php5embed" - Package Owner=<4>
 # Microsoft Developer Studio Generated Build File, Format Version 6.00
 # ** DO NOT EDIT **
 
 # TARGTYPE "Win32 (x86) Static Library" 0x0104
 
-CFG=php4embed - Win32 Debug_TS
+CFG=php5embed - Win32 Debug_TS
 !MESSAGE This is not a valid makefile. To build this project using NMAKE,
 !MESSAGE use the Export Makefile command and run
 !MESSAGE 
-!MESSAGE NMAKE /f "php4embed.mak".
+!MESSAGE NMAKE /f "php5embed.mak".
 !MESSAGE 
 !MESSAGE You can specify a configuration when running NMAKE
 !MESSAGE by defining the macro CFG on the command line. For example:
 !MESSAGE 
-!MESSAGE NMAKE /f "php4embed.mak" CFG="php4embed - Win32 Debug_TS"
+!MESSAGE NMAKE /f "php5embed.mak" CFG="php5embed - Win32 Debug_TS"
 !MESSAGE 
 !MESSAGE Possible choices for configuration are:
 !MESSAGE 
-!MESSAGE "php4embed - Win32 Debug_TS" (based on "Win32 (x86) Static Library")
-!MESSAGE "php4embed - Win32 Release_TS" (based on "Win32 (x86) Static Library")
+!MESSAGE "php5embed - Win32 Debug_TS" (based on "Win32 (x86) Static Library")
+!MESSAGE "php5embed - Win32 Release_TS" (based on "Win32 (x86) Static Library")
 !MESSAGE 
 
 # Begin Project
@@ -28,7 +28,7 @@ CFG=php4embed - Win32 Debug_TS
 CPP=cl.exe
 RSC=rc.exe
 
-!IF  "$(CFG)" == "php4embed - Win32 Debug_TS"
+!IF  "$(CFG)" == "php5embed - Win32 Debug_TS"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 1
@@ -49,9 +49,9 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
-# ADD LIB32 /nologo /out:"..\..\Debug_TS\php4embed.lib"
+# ADD LIB32 /nologo /out:"..\..\Debug_TS\php5embed.lib"
 
-!ELSEIF  "$(CFG)" == "php4embed - Win32 Release_TS"
+!ELSEIF  "$(CFG)" == "php5embed - Win32 Release_TS"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 0
@@ -72,14 +72,14 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
-# ADD LIB32 /nologo /out:"..\..\Release_TS\php4embed.lib"
+# ADD LIB32 /nologo /out:"..\..\Release_TS\php5embed.lib"
 
 !ENDIF 
 
 # Begin Target
 
-# Name "php4embed - Win32 Debug_TS"
-# Name "php4embed - Win32 Release_TS"
+# Name "php5embed - Win32 Debug_TS"
+# Name "php5embed - Win32 Release_TS"
 # Begin Group "Source Files"
 
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"

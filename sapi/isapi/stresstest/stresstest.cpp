@@ -529,7 +529,7 @@ int main(int argc, char* argv[])
 		    0,
 		    NULL 
 		);
-		fprintf(stderr,"Error: Dll 'php4isapi.dll' not found -%d\n%s\n", GetLastError(), lpMsgBuf);
+		fprintf(stderr,"Error: Dll 'php5isapi.dll' not found -%d\n%s\n", GetLastError(), lpMsgBuf);
 		free (module);
 		free(filelist);
 		LocalFree( lpMsgBuf );

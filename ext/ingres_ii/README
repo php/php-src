@@ -1,5 +1,5 @@
-Ingres II extension for PHP 4.0
-===============================
+Ingres II extension for PHP
+===========================
 
 This extension provides access to Ingres II servers from PHP 4.0.
 It is still in development and has been only quickly tested on

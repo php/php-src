@@ -24,7 +24,7 @@
 #include "ext/standard/info.h"
 #include "php_variables.h"
 #include "php_ini.h"
-#include "php4activescript.h"
+#include "php5activescript.h"
 
 /* SAPI definitions and DllMain */
 

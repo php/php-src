@@ -1085,9 +1085,9 @@
       win32/crypt_win32.h
       win32/grp.h
       win32/md5crypt.h
-      win32/php4dllts.rc2
-      win32/php4ts.rc2
-      win32/php4ts_cli.rc2
+      win32/php5dllts.rc2
+      win32/php5ts.rc2
+      win32/php5ts_cli.rc2
       win32/pwd.h
       win32/select.h
       win32/syslog.h
@@ -1502,7 +1502,7 @@
 
 2004-01-08  Frank M. Kromann  <frank@kromann.info>
 
-    * win32/php4dllts.dsp:
+    * win32/php5dllts.dsp:
       Adding new com_dotnet source files to project
 
 2004-01-07  Jani Taskinen  <jani.taskinen@kolumbus.fi>

@@ -53,8 +53,8 @@ BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 php4ts.lib libdb31s.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /machine:I386 /out:"..\..\Release_TS/php_dba.dll" /libpath:"..\..\Release_TS" /libpath:"..\..\Release_TS_Inline"
-# ADD LINK32 php4ts.lib libdb31s.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /machine:I386 /out:"..\..\Release_TS/php_dba.dll" /libpath:"..\..\Release_TS" /libpath:"..\..\Release_TS_Inline"
+# ADD BASE LINK32 php5ts.lib libdb31s.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /machine:I386 /out:"..\..\Release_TS/php_dba.dll" /libpath:"..\..\Release_TS" /libpath:"..\..\Release_TS_Inline"
+# ADD LINK32 php5ts.lib libdb31s.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /machine:I386 /out:"..\..\Release_TS/php_dba.dll" /libpath:"..\..\Release_TS" /libpath:"..\..\Release_TS_Inline"
 
 !ELSEIF  "$(CFG)" == "dba - Win32 Debug_TS Berkeley DB3"
 
@@ -80,8 +80,8 @@ BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 php4ts_debug.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /debug /machine:I386 /out:"..\..\Debug_TS/php_dba.dll" /pdbtype:sept /libpath:"..\..\Debug_TS"
-# ADD LINK32 php4ts_debug.lib libdb31s.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /debug /machine:I386 /out:"..\..\Debug_TS/php_dba.dll" /pdbtype:sept /libpath:"..\..\Debug_TS"
+# ADD BASE LINK32 php5ts_debug.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /debug /machine:I386 /out:"..\..\Debug_TS/php_dba.dll" /pdbtype:sept /libpath:"..\..\Debug_TS"
+# ADD LINK32 php5ts_debug.lib libdb31s.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /debug /machine:I386 /out:"..\..\Debug_TS/php_dba.dll" /pdbtype:sept /libpath:"..\..\Debug_TS"
 
 !ENDIF 
 

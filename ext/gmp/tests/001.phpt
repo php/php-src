@@ -15,7 +15,7 @@ echo "gmp extension is available";
   to pass, differences between the output and the
   expected text are interpreted as failure
 
-	see php4/tests/README for further information on
+	see php5/tests/README for further information on
   writing regression tests
 */
 ?>

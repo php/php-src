@@ -88,11 +88,11 @@ static CONST_PREFIX char *php_apache_flag_handler(cmd_parms *cmd, php_per_dir_co
 static CONST_PREFIX char *php_apache_flag_handler_ex(cmd_parms *cmd, HashTable *conf, char *arg1, char *arg2, int mode);
 static CONST_PREFIX char *php_apache_admin_flag_handler(cmd_parms *cmd, php_per_dir_config *conf, char *arg1, char *arg2);
 
-/* ### these should be defined in mod_php4.h or somewhere else */
+/* ### these should be defined in mod_php5.h or somewhere else */
 #define USE_PATH 1
 #define IGNORE_URL 2
 
-module MODULE_VAR_EXPORT php4_module;
+module MODULE_VAR_EXPORT php5_module;
 
 int saved_umask;
 //static int setup_env = 0;
@@ -657,7 +657,7 @@ static int send_php(request_rec *r, int display_source_mode, char *filename)
 			return DECLINED;
 		}
 
-		per_dir_conf = (php_per_dir_config *) get_module_config(r->per_dir_config, &php4_module);
+		per_dir_conf = (php_per_dir_config *) get_module_config(r->per_dir_config, &php5_module);
 		if (per_dir_conf) {
 			zend_hash_apply((HashTable *) per_dir_conf->ini_settings, (apply_func_t) php_apache_alter_ini_entries TSRMLS_CC);
 		}
@@ -931,7 +931,7 @@ static CONST_PREFIX char *php_set_server_handler(server_rec *s, char *arg1, long
 	handler->type = handler_type;
 	handler->stage = handler_stage;
 	handler->name = strdup(arg1);
-	conf = get_module_config(s->module_config, &php4_module);
+	conf = get_module_config(s->module_config, &php5_module);
 	switch(handler_stage) {
 		case AP_URI_TRANS:
 			sapi_stack_push(&conf->uri_handlers, handler);
@@ -1169,7 +1169,7 @@ static int php_xbithack_handler(request_rec * r)
 		r->allowed |= (1 << METHODS) - 1;
 		return DECLINED;
 	}
-	conf = (php_per_dir_config *) get_module_config(r->per_dir_config, &php4_module);
+	conf = (php_per_dir_config *) get_module_config(r->per_dir_config, &php5_module);
 	if (conf) {
 		zend_hash_apply((HashTable *) conf->ini_settings, (apply_func_t) php_apache_alter_ini_entries TSRMLS_CC);
 	}
@@ -1248,7 +1248,7 @@ static int php_run_hook(php_handler *handler, request_rec *r)
 	TSRMLS_FETCH();
 
 	if(!AP(apache_config_loaded)) {
-		conf = (php_per_dir_config *) get_module_config(r->per_dir_config, &php4_module);
+		conf = (php_per_dir_config *) get_module_config(r->per_dir_config, &php5_module);
 		if (conf)
 			   zend_hash_apply((HashTable *)conf->ini_settings, (apply_func_t) php_apache_alter_ini_entries TSRMLS_CC);
 		AP(apache_config_loaded) = 1;
@@ -1280,7 +1280,7 @@ static int php_uri_translation(request_rec *r)
 	php_per_server_config *conf;
 	TSRMLS_FETCH();
 	AP(current_hook) = AP_URI_TRANS;
-	conf = (php_per_server_config *) get_module_config(r->server->module_config, &php4_module);
+	conf = (php_per_server_config *) get_module_config(r->server->module_config, &php5_module);
 	return sapi_stack_apply_with_argument_stop_if_equals(&conf->uri_handlers, 
 			ZEND_STACK_APPLY_BOTTOMUP, 
 			(int (*)(void *element, void *)) php_run_hook, r, OK);
@@ -1291,7 +1291,7 @@ static int php_header_hook(request_rec *r)
 	php_per_dir_config *conf;
 	TSRMLS_FETCH();
 	AP(current_hook) = AP_HEADER_PARSE;
-	conf = (php_per_dir_config *) get_module_config(r->per_dir_config, &php4_module);
+	conf = (php_per_dir_config *) get_module_config(r->per_dir_config, &php5_module);
 	return sapi_stack_apply_with_argument_stop_if_http_error(&conf->headers_handlers,
 			ZEND_STACK_APPLY_BOTTOMUP,
 			(int (*)(void *element, void *)) php_run_hook, r);
@@ -1302,7 +1302,7 @@ static int php_auth_hook(request_rec *r)
 	php_per_dir_config *conf;
 	TSRMLS_FETCH();
 	AP(current_hook) = AP_AUTHENTICATION;
-	conf = (php_per_dir_config *) get_module_config(r->per_dir_config, &php4_module);
+	conf = (php_per_dir_config *) get_module_config(r->per_dir_config, &php5_module);
 	return sapi_stack_apply_with_argument_stop_if_equals(&conf->auth_handlers, 
 			ZEND_STACK_APPLY_BOTTOMUP, 
 			(int (*)(void *element, void *)) php_run_hook, r, OK);
@@ -1314,7 +1314,7 @@ static int php_access_hook(request_rec *r)
 	int status = DECLINED;
 	TSRMLS_FETCH();
 	AP(current_hook) = AP_ACCESS_CONTROL;
-	conf = (php_per_dir_config *) get_module_config(r->per_dir_config, &php4_module);
+	conf = (php_per_dir_config *) get_module_config(r->per_dir_config, &php5_module);
 	status =  sapi_stack_apply_with_argument_stop_if_http_error(&conf->access_handlers,
 			ZEND_STACK_APPLY_BOTTOMUP,
 			(int (*)(void *element, void *)) php_run_hook, r);
@@ -1327,7 +1327,7 @@ static int php_type_hook(request_rec *r)
 	php_per_dir_config *conf;
 	TSRMLS_FETCH();
 	AP(current_hook) = AP_TYPE_CHECKING;
-	conf = (php_per_dir_config *) get_module_config(r->per_dir_config, &php4_module);
+	conf = (php_per_dir_config *) get_module_config(r->per_dir_config, &php5_module);
 	return sapi_stack_apply_with_argument_stop_if_equals(&conf->type_handlers,
 			ZEND_STACK_APPLY_BOTTOMUP,
 			(int (*)(void *element, void *)) php_run_hook,
@@ -1339,7 +1339,7 @@ static int php_fixup_hook(request_rec *r)
 	php_per_dir_config *conf;
 	TSRMLS_FETCH();
 	AP(current_hook) = AP_FIXUP;
-	conf = (php_per_dir_config *) get_module_config(r->per_dir_config, &php4_module);
+	conf = (php_per_dir_config *) get_module_config(r->per_dir_config, &php5_module);
 	return sapi_stack_apply_with_argument_stop_if_http_error(&conf->fixup_handlers,
 			ZEND_STACK_APPLY_BOTTOMUP,
 			(int (*)(void *element, void *)) php_run_hook,
@@ -1351,7 +1351,7 @@ static int php_logger_hook(request_rec *r)
 	php_per_dir_config *conf;
 	TSRMLS_FETCH();
 	AP(current_hook) = AP_LOGGING;
-	conf = (php_per_dir_config *) get_module_config(r->per_dir_config, &php4_module);
+	conf = (php_per_dir_config *) get_module_config(r->per_dir_config, &php5_module);
 	return sapi_stack_apply_with_argument_stop_if_http_error(&conf->logger_handlers,
 			ZEND_STACK_APPLY_BOTTOMUP,
 			(int (*)(void *element, void *)) php_run_hook,
@@ -1364,11 +1364,11 @@ static int php_post_read_hook(request_rec *r)
 	php_per_server_config *svr;
 	TSRMLS_FETCH();
 	AP(current_hook) = AP_POST_READ;
-	svr = get_module_config(r->server->module_config, &php4_module);
+	svr = get_module_config(r->server->module_config, &php5_module);
 	if(ap_is_initial_req(r)) {
 		sapi_stack_apply_with_argument_all(&svr->requires, ZEND_STACK_APPLY_BOTTOMUP, (int (*)(void *element, void *)) php_run_hook, r);
 	}
-	conf = (php_per_dir_config *) get_module_config(r->per_dir_config, &php4_module);
+	conf = (php_per_dir_config *) get_module_config(r->per_dir_config, &php5_module);
 	return sapi_stack_apply_with_argument_stop_if_http_error(&conf->post_read_handlers,
 			ZEND_STACK_APPLY_BOTTOMUP,
 			(int (*)(void *element, void *)) php_run_hook, r);
@@ -1379,7 +1379,7 @@ static int php_response_handler(request_rec *r)
 	php_per_dir_config *conf;
 	TSRMLS_FETCH();
 	AP(current_hook) = AP_RESPONSE;
-	conf = (php_per_dir_config *) get_module_config(r->per_dir_config, &php4_module);
+	conf = (php_per_dir_config *) get_module_config(r->per_dir_config, &php5_module);
 	return sapi_stack_apply_with_argument_all(&conf->response_handlers, ZEND_STACK_APPLY_BOTTOMUP, (int (*)(void *element, void *)) php_run_hook, r);
 }
 
@@ -1430,9 +1430,9 @@ command_rec php_commands[] =
 };
 /* }}} */
 
-/* {{{ module MODULE_VAR_EXPORT php4_module
+/* {{{ module MODULE_VAR_EXPORT php5_module
  */
-module MODULE_VAR_EXPORT php4_module =
+module MODULE_VAR_EXPORT php5_module =
 {
 	STANDARD_MODULE_STUFF,
 	php_init_handler,			/* initializer */

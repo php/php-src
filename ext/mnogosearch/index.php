@@ -12,7 +12,7 @@
  */
 
 if (!extension_loaded('mnogosearch')) {
-	print "<b>This script requires PHP4.0.5+ with mnoGoSearch extension</b>";
+	print "<b>This script requires PHP 4.0.5+ with mnoGoSearch extension</b>";
 	exit;
 }
 
