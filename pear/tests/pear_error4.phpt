@@ -72,6 +72,15 @@ $obj->raiseError("type mismatch");
 $obj->raiseError("syntax error");
 $obj->popExpect();
 
+print "subtest 8\n";
+$obj->expectError(array(1, 2, 3));
+$obj->expectError(array(3, 4, 5));
+$obj->raiseError(4);
+$obj->delExpect(2);
+$obj->raiseError(3);
+$obj->delExpect(1, 3, 4, 5);
+$err = $obj->delExpect(2);
+
 ?>
 --EXPECT--
 subtest 1
@@ -87,3 +96,7 @@ subtest 5
 subtest 6
 subtest 7
 error: type mismatch
+subtest 8
+error: 4
+error: 3
+error: The expected error you submitted does not exist
