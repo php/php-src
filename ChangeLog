@@ -2,6 +2,9 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ??? ?? 1999, Version 4.0 Beta 2
+- updated hyperwave module, made it thread safe
+- updated pdflib module, version 0.6 of pdflib no longer supported
+- updated fdf module
 - Built-in phpinfo() links are now turned off by default.  They can be turned
   on using the allow_builtin_links INI directive (Zeev)
 - Changed phpinfo() to list modules that have no info function (Zeev)

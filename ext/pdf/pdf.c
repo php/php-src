@@ -341,7 +341,7 @@ PHP_FUNCTION(pdf_set_info_keywords) {
 }
 /* }}} */
 
-/* {{{ proto int pdf_open(int filedesc, int info)
+/* {{{ proto int pdf_open(int filedesc)
    Opens a new pdf document */
 PHP_FUNCTION(pdf_open) {
 	pval *file;
