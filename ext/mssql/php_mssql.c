@@ -905,7 +905,7 @@ PHP_FUNCTION(mssql_query)
 
 	num_fields = dbnumcols(mssql_ptr->link);
 	if (num_fields <= 0) {
-		RETURN_FALSE;
+		RETURN_TRUE;
 	}
 
 	result = (mssql_result *) emalloc(sizeof(mssql_result));
