@@ -537,7 +537,8 @@ fi
 if test -n "$ODBC_TYPE"; then
   if test "$ODBC_TYPE" != "dbmaker"; then
     if test "$shared" != "yes"; then
-      EXTRA_LIBS="$EXTRA_LIBS $ODBC_LFLAGS $ODBC_LIBS"
+      EXTRA_LDFLAGS="$EXTRA_LDFLAGS $ODBC_LFLAGS"
+      EXTRA_LIBS="$EXTRA_LIBS $ODBC_LIBS"
     fi
   fi
   AC_DEFINE(HAVE_UODBC,1,[ ])
