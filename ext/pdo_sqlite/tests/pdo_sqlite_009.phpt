@@ -2,49 +2,15 @@
 PDO-SQLite: PDO_FETCH_CLASSTYPE
 --SKIPIF--
 <?php # vim:ft=php
-if (!extension_loaded("pdo_sqlite")) print "skip"; ?>
+require_once('skipif.inc'); ?>
 --FILE--
 <?php
 
-$db =new pdo('sqlite::memory:');
+require_once('connection.inc');
+require_once('prepare.inc');
 
-$db->exec('CREATE TABLE classtypes(id int PRIMARY KEY, name VARCHAR(10) UNIQUE)');
-$db->exec('INSERT INTO classtypes VALUES(0, "stdClass")'); 
-$db->exec('INSERT INTO classtypes VALUES(1, "Test1")'); 
-$db->exec('INSERT INTO classtypes VALUES(2, "Test2")'); 
-$db->exec('CREATE TABLE test(id int PRIMARY KEY, classtype int, val VARCHAR(10))');
-$db->exec('INSERT INTO test VALUES(1, 0, "A")'); 
-$db->exec('INSERT INTO test VALUES(2, 1, "B")'); 
-$db->exec('INSERT INTO test VALUES(3, 2, "C")'); 
-$db->exec('INSERT INTO test VALUES(4, 3, "D")'); 
+require_once($PDO_TESTS . 'pdo_009.inc');
 
-class Test1
-{
-	public function __construct()
-	{
-		echo __METHOD__ . "()\n";
-	}
-}
-
-class Test2
-{
-	public function __construct()
-	{
-		echo __METHOD__ . "()\n";
-	}
-}
-
-class Test3
-{
-	public function __construct()
-	{
-		echo __METHOD__ . "()\n";
-	}
-}
-
-$sql = 'SELECT classtypes.name, test.id AS id, test.val AS val FROM test LEFT JOIN classtypes ON test.classtype=classtypes.id';
-var_dump($db->query($sql)->fetchAll(PDO_FETCH_NUM));
-var_dump($db->query($sql)->fetchAll(PDO_FETCH_CLASS|PDO_FETCH_CLASSTYPE, 'Test3'));
 ?>
 ===DONE===
 <?php exit(0); ?>

@@ -2,38 +2,15 @@
 PDO-SQLite: PDO_FETCH_CLASS
 --SKIPIF--
 <?php # vim:ft=php
-if (!extension_loaded("pdo_sqlite")) print "skip"; ?>
+require_once('skipif.inc'); ?>
 --FILE--
 <?php
 
-$db =new pdo('sqlite::memory:');
+require_once('connection.inc');
+require_once('prepare.inc');
 
-$db->exec('CREATE TABLE test(id int PRIMARY KEY, val VARCHAR(10), val2 VARCHAR(10))');
-$db->exec('INSERT INTO test VALUES(1, "A", "AA")'); 
-$db->exec('INSERT INTO test VALUES(2, "B", "BB")'); 
-$db->exec('INSERT INTO test VALUES(3, "C", "CC")'); 
+require_once($PDO_TESTS . 'pdo_005.inc');
 
-class TestBase
-{
-	public $id;
-	protected $val;
-	private $val2;
-}
-
-class TestDerived extends TestBase
-{
-	protected $row;
-
-	public function __construct(&$row)
-	{
-		echo __METHOD__ . "($row,{$this->id})\n";
-		$this->row = $row++;
-	}
-}
-
-var_dump($db->query('SELECT * FROM test')->fetchAll(PDO_FETCH_CLASS));
-var_dump($db->query('SELECT * FROM test')->fetchAll(PDO_FETCH_CLASS, 'TestBase'));
-var_dump($db->query('SELECT * FROM test')->fetchAll(PDO_FETCH_CLASS, 'TestDerived', array(0)));
 ?>
 ===DONE===
 <?php exit(0); ?>
