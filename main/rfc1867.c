@@ -881,7 +881,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 			if (!filename && param) {
 
 				char *value = multipart_buffer_read_body(mbuff TSRMLS_CC);
-				unsigned int new_val_len;
+				unsigned int new_val_len; /* Dummy variable */
 
 				if (!value) {
 					value = estrdup("");
