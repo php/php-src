@@ -255,22 +255,22 @@ function error_handler($errno, $errmsg, $file, $line, $vars) {
     if (error_reporting() == 0) {
         return; // @silenced error
     }
-	$errortype = array (
-		1   =>  "Error",
-		2   =>  "Warning",
-		4   =>  "Parsing Error",
-		8   =>  "Notice",
-		16  =>  "Core Error",
-		32  =>  "Core Warning",
-		64  =>  "Compile Error",
-		128 =>  "Compile Warning",
-		256 =>  "User Error",
-		512 =>  "User Warning",
-		1024=>  "User Notice"
-	);
-	$prefix = $errortype[$errno];
-	$file = basename($file);
-	print "\n$prefix: $errmsg in $file on line $line\n";
+    $errortype = array (
+        1   =>  "Error",
+        2   =>  "Warning",
+        4   =>  "Parsing Error",
+        8   =>  "Notice",
+        16  =>  "Core Error",
+        32  =>  "Core Warning",
+        64  =>  "Compile Error",
+        128 =>  "Compile Warning",
+        256 =>  "User Error",
+        512 =>  "User Warning",
+        1024=>  "User Notice"
+    );
+    $prefix = $errortype[$errno];
+    $file = basename($file);
+    print "\n$prefix: $errmsg in $file on line $line\n";
 }
 
 
