@@ -3,7 +3,7 @@
 prefix='@prefix@'
 phpdir="$prefix/lib/php/build"
 builddir="`pwd`"
-FILES_BUILD="dynlib.mk fastgen.sh library.mk ltlib.mk program.mk rules.mk rules_pear.mk shtool"
+FILES_BUILD="dynlib.mk fastgen.sh library.mk ltlib.mk program.mk rules.mk rules_common.mk rules_pear.mk shtool"
 FILES="acinclude.m4 dynlib.m4"
 
 if test ! -r config.m4; then
