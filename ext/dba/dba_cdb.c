@@ -12,7 +12,8 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Author: Sascha Schumann <sascha@schumann.cx>                         |
+   | Authors: Sascha Schumann <sascha@schumann.cx>                        |
+   |          Marcus Boerger <helly@php.net>                              |
    +----------------------------------------------------------------------+
  */
 
@@ -54,10 +55,10 @@ DBA_OPEN_FUNC(cdb)
 	switch (info->mode) {
 		case DBA_READER: 
 			gmode = O_RDONLY; break;
-		/* currently not supported: */
+ 		/* currently not supported: */
 #if 0
-		case DBA_WRITER: 
-			gmode = O_RDWR; break;
+	case DBA_WRITER: 
+		gmode = O_RDWR; break;
 #endif
 		default: 
 			return FAILURE;
@@ -68,8 +69,8 @@ DBA_OPEN_FUNC(cdb)
 		return FAILURE;
 	}
 	
-	cdb = malloc(sizeof *cdb);
-	memset(cdb, 0, sizeof *cdb);
+	cdb = emalloc(sizeof(dba_cdb));
+	memset(cdb, 0, sizeof(dba_cdb));
 
 	cdb_init(&cdb->c, fd);
 	cdb->fd = fd;
@@ -85,7 +86,7 @@ DBA_CLOSE_FUNC(cdb)
 	/* cdb_free does not close associated fd */
 	cdb_free(&cdb->c);
 	close(cdb->fd);
-	free(cdb);
+	efree(cdb);
 }
 
 DBA_FETCH_FUNC(cdb)
@@ -96,13 +97,13 @@ DBA_FETCH_FUNC(cdb)
 	
 	if (cdb_find(&cdb->c, key, keylen) == 1) {
 		len = cdb_datalen(&cdb->c);
-		new_entry = emalloc(len);
+		new_entry = emalloc(len+1);
 		
 		if (cdb_read(&cdb->c, new_entry, len, cdb_datapos(&cdb->c)) == -1) {
-			free(new_entry);
+			efree(new_entry);
 			return NULL;
 		}
-		
+		new_entry[len] = 0;
 		if (newlen) 
 			*newlen = len;
 	}
