@@ -19,7 +19,7 @@
  */
 /* $Id$ */
 
-#define _PHP_REGEX_H
+#define NO_REGEX_EXTRA_H
 
 #include "zend.h"
 #include "php.h"
