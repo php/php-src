@@ -27,9 +27,9 @@ ext/standard
 ------------
     * strpad() (Andrei)
 	* comparing arrays semantically (Andrei)
-	* get_loaded_modules()
-      is_module_loaded()
-      get_module_functions() (Andrei)
+	* get_loaded_extensions()
+      extension_loaded()
+      get_extension_funcs() (Andrei)
 	* NOT binary safe:
 		strtok()
 		basename()
