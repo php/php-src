@@ -323,7 +323,7 @@ PHP_FUNCTION(count)
 			/* it the object implements Countable we call its count() method */
 			zval *retval;
 
-			if (instanceof_function(Z_OBJCE_P(array), spl_ce_Countable TSRMLS_CC)) {
+			if (Z_OBJ_HT_P(array)->get_class_entry && instanceof_function(Z_OBJCE_P(array), spl_ce_Countable TSRMLS_CC)) {
 				zend_call_method_with_0_params(&array, NULL, NULL, "count", &retval);
 				RETVAL_LONG(Z_LVAL_P(retval));
 				zval_ptr_dtor(&retval);
@@ -331,7 +331,7 @@ PHP_FUNCTION(count)
 			}
 #endif
 			/* if not we return the number of properties (not taking visibility into account) */
-			if (Z_OBJ_HT(*array)->count_elements) {
+			if (Z_OBJ_HT_P(array)->count_elements) {
 				RETVAL_LONG(1);
 				if (SUCCESS == Z_OBJ_HT(*array)->count_elements(array, &Z_LVAL_P(return_value) TSRMLS_CC)) {
 					return;
