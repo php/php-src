@@ -376,7 +376,7 @@ static void php_apache_request_ctor(ap_filter_t *f, php_struct *ctx TSRMLS_DC)
 	const char *auth;
 	
 	PG(during_request_startup) = 0;
-	SG(sapi_headers).http_response_code = 200;
+	SG(sapi_headers).http_response_code = !f->r->status ? HTTP_OK : f->r->status;
 	SG(request_info).content_type = apr_table_get(f->r->headers_in, "Content-Type");
 #undef safe_strdup
 #define safe_strdup(x) ((x)?strdup((x)):NULL)	
