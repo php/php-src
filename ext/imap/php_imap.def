@@ -1,4 +1,0 @@
-EXPORTS
-	_pctype
-	__mb_cur_max
-	_daylight
