@@ -362,7 +362,7 @@ static zend_class_entry *spl_array_get_ce(zval *object TSRMLS_DC)
 }
 /* }}} */
 
-/* {{{ spl_array_get_ce */
+/* {{{ spl_array_it_get_ce */
 static zend_class_entry *spl_array_it_get_ce(zval *object TSRMLS_DC)
 {
 	return spl_ce_array_it;
