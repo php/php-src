@@ -62,12 +62,13 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 	
 		/* handling for private & protected object properties */
 		if (*key == '\0' && type != NULL) {
+			char *tmp;
+
 			zend_object *zobj = zend_objects_get_address(type TSRMLS_CC);
 			if (zend_check_property_access(zobj, key TSRMLS_CC) != SUCCESS) {
 				/* private or protected property access outside of the class */
 				continue;
 			}
-			char *tmp;
 			zend_unmangle_property_name(key, &tmp, &key);
 			key_len = strlen(key);		
 		}
