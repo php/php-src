@@ -1,6 +1,7 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.0.8-dev
+- Added initial support for SQPane widget. (Markus)
 - Introduced extension version numbers (Stig)
 - Make UDM_PARAM_ISPELL_PREFIXES work under mnogosearch-3.2.x (gluke)
 - Added ldap_start_tls() function (Stig Venaas, patch by kuenne@rentec.com)
