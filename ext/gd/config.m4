@@ -138,13 +138,13 @@ AC_DEFUN(PHP_GD_T1LIB,[
   [  --with-t1lib[=DIR]        GD: Include T1lib support.])
 
   if test "$PHP_T1LIB" != "no"; then
-    for i in /usr/local /usr $PHP_T1LIB; do
+    for i in /usr /usr/local $PHP_T1LIB; do
       if test -f "$i/include/t1lib.h"; then
         T1_DIR=$i
       fi
     done
 
-    if test "$T1_DIR" != "no"; then
+    if test "$T1_DIR"; then
       AC_CHECK_LIB(t1, T1_GetExtend, 
       [
         AC_DEFINE(HAVE_LIBT1,1,[ ])
@@ -152,7 +152,11 @@ AC_DEFUN(PHP_GD_T1LIB,[
         PHP_ADD_LIBRARY_WITH_PATH(t1, "$T1_DIR/lib", GD_SHARED_LIBADD)
       ],[
         AC_MSG_ERROR(Problem with libt1.(a|so). Please check config.log for more information.) 
+      ],[
+        -L$T1_DIR/lib
       ])
+    else
+      AC_MSG_ERROR(Your t1lib distribution is not installed correctly. Please reinstall it.) 
     fi
   fi
 ])
@@ -217,7 +221,7 @@ dnl A whole whack of possible places where these might be
       done
 
       for i in lib/gd1.3 lib/gd lib gd1.3 gd ""; do
-        test -f $PHP_GD/$i/libgd.so -o -f $PHP_GD/$i/libgd.a && GD_LIB=$PHP_GD/$i
+        test -f $PHP_GD/$i/libgd.s? -o -f $PHP_GD/$i/libgd.a && GD_LIB=$PHP_GD/$i
       done
 
       if test -n "$GD_INCLUDE" && test -n "$GD_LIB" ; then
