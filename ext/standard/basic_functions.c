@@ -465,7 +465,9 @@ function_entry basic_functions[] = {
 	PHP_FE(opendir,				NULL)
 	PHP_FE(closedir,			NULL)
 	PHP_FE(chdir,				NULL)
+#if !defined(ZEND_WIN32)&&!defined(ZTS)
 	PHP_FE(chroot,				NULL)
+#endif
 	PHP_FE(getcwd,				NULL)
 	PHP_FE(rewinddir,			NULL)
 	PHP_STATIC_FE("readdir", php_if_readdir, NULL)
