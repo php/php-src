@@ -99,11 +99,11 @@ extern unsigned char second_arg_allow_ref[];
 
 /*
  * This is a fast version of strlcpy which should be used, if you
- * know the maximum size of the destination buffer and if you know
+ * know the size of the destination buffer and if you know
  * the length of the source string.
  *
- * size is the allocated number of bytes
- * src_size is the number of bytes excluding the NUL
+ * size is the allocated number of bytes of dst
+ * src_size is the number of bytes excluding the NUL of src
  */
 
 #define PHP_STRLCPY(dst, src, size, src_size)	\
