@@ -682,6 +682,8 @@ PHP_FUNCTION(mysqli_fetch_field)
 	add_property_string(return_value, "orgtable",(field->org_table ? field->org_table : ""), 1);
 	add_property_string(return_value, "def",(field->def ? field->def : ""), 1);
 	add_property_long(return_value, "max_length", field->max_length);
+	add_property_long(return_value, "length", field->length);
+	add_property_long(return_value, "charsetnr", field->charsetnr);
 	add_property_long(return_value, "flags", field->flags);
 	add_property_long(return_value, "type", field->type);
 	add_property_long(return_value, "decimals", field->decimals);
@@ -724,6 +726,8 @@ PHP_FUNCTION(mysqli_fetch_fields)
 		add_property_string(obj, "orgtable",(field->org_table ? field->org_table : ""), 1);
 		add_property_string(obj, "def",(field->def ? field->def : ""), 1);
 		add_property_long(obj, "max_length", field->max_length);
+		add_property_long(obj, "length", field->length);
+		add_property_long(obj, "charsetnr", field->charsetnr);
 		add_property_long(obj, "flags", field->flags);
 		add_property_long(obj, "type", field->type);
 		add_property_long(obj, "decimals", field->decimals);
@@ -980,12 +984,12 @@ PHP_FUNCTION(mysqli_init)
 {
 	MY_MYSQL *mysql = (MY_MYSQL *)calloc(1, sizeof(MY_MYSQL));
 
-	MYSQLI_RESOURCE *mysqli_resource = (MYSQLI_RESOURCE *)ecalloc (1, sizeof(MYSQLI_RESOURCE));
-
 	if (!(mysql->mysql = mysql_init(NULL))) {
 		efree(mysql);
 		RETURN_FALSE;
 	}
+
+	MYSQLI_RESOURCE *mysqli_resource = (MYSQLI_RESOURCE *)ecalloc (1, sizeof(MYSQLI_RESOURCE));
 	mysqli_resource->ptr = (void *)mysql;
 	MYSQLI_RETURN_RESOURCE(mysqli_resource, mysqli_link_class_entry);	
 }
