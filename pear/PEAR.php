@@ -448,9 +448,6 @@ class PEAR
                 // XXX Used anywhere?
                 //$def_callback = &$GLOBALS['_PEAR_default_error_callback'];
             }
-            if (!isset($def_mode)) {
-                $def_mode = PEAR_ERROR_RETURN;
-            }
             $stack = array();
             $stack[] = array($def_mode, $def_options);
         }
