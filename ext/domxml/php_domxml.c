@@ -4015,18 +4015,18 @@ static xmlDocPtr domxml_document_parser(int mode, int loadtype, char *source, vo
 	ctxt->loadsubset = resolve_externals;
 	ctxt->replaceEntities = substitute_ent;
 
-	if (data != NULL) {
-		ctxt->_private = data;
- 		errorCtxt.valid = &ctxt->vctxt;
-		errorCtxt.errors = data;
-		errorCtxt.parser = ctxt;   
+	/* Always set error handling as threaded libxml doesnt pick up the global handling 
+	set by xmlSetGenericErrorFunc for child threads */
+	ctxt->_private = data;
+ 	errorCtxt.valid = &ctxt->vctxt;
+	errorCtxt.errors = data;
+	errorCtxt.parser = ctxt;   
 
-		ctxt->sax->error = domxml_error_ext;
-		ctxt->sax->warning = domxml_error_ext;
-		ctxt->vctxt.userData= (void *) &errorCtxt;
-		ctxt->vctxt.error    = (xmlValidityErrorFunc) domxml_error_validate;
-		ctxt->vctxt.warning  = (xmlValidityWarningFunc) domxml_error_validate;
-	}
+	ctxt->sax->error = domxml_error_ext;
+	ctxt->sax->warning = domxml_error_ext;
+	ctxt->vctxt.userData= (void *) &errorCtxt;
+	ctxt->vctxt.error    = (xmlValidityErrorFunc) domxml_error_validate;
+	ctxt->vctxt.warning  = (xmlValidityWarningFunc) domxml_error_validate;
 
 	xmlParseDocument(ctxt);
 
