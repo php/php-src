@@ -210,6 +210,33 @@ _comment_handler(void *user, const xmlChar *comment)
 }
 
 static void
+_build_entity(const xmlChar *name, int len, xmlChar **entity, int *entity_len) 
+{
+	*entity_len = len + 2;
+	*entity = xmlMalloc(*entity_len + 1);
+	(*entity)[0] = '&';
+	memcpy(*entity+1, name, len);
+	(*entity)[len+1] = ';';
+	(*entity)[*entity_len] = '\0';
+}
+
+static xmlEntityPtr
+_get_entity(void *user, const xmlChar *name)
+{
+	XML_Parser parser = (XML_Parser) user;
+
+	if (parser->h_default) {
+		xmlChar *entity;
+		int      len;
+		
+		_build_entity(name, xmlStrlen(name), &entity, &len);
+		parser->h_default(parser->user, (const xmlChar *) entity, len);
+	}
+
+	return NULL;
+}
+
+static void
 _external_entity_ref_handler(void *user, const xmlChar *names, int type, const xmlChar *sys_id, const xmlChar *pub_id, xmlChar *content)
 {
 	XML_Parser parser = (XML_Parser) user;
@@ -218,7 +245,7 @@ _external_entity_ref_handler(void *user, const xmlChar *names, int type, const x
 		return;
 	}
 
-	parser->h_external_entity_ref(parser, names, NULL, sys_id, pub_id);
+	parser->h_external_entity_ref(parser, names, "", sys_id, pub_id);
 }
 
 static xmlSAXHandler 
@@ -228,7 +255,7 @@ php_xml_compat_handlers = {
 	NULL, /* hasInternalSubset */
 	NULL, /* hasExternalSubset */
 	NULL, /* resolveEntity */
-	NULL, /* getEntity */
+	_get_entity, /* getEntity */
 	_external_entity_ref_handler, /* entityDecl */
 	_notation_decl_handler,
 	NULL, /* attributeDecl */
