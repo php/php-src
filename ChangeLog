@@ -1,3 +1,101 @@
+1999-11-26  Zeev Suraski  <zeev@php.net>
+
+    * NEWS: *** empty log message ***
+
+1999-11-26  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/basic_functions.c: Kill undefined reference
+
+    * configure.in:
+    Enable _POSIX_THREAD_SEMANTICS for all configurations testwise
+
+    * ext/standard/basic_functions.c: Undefine HAVE_PUTENV, if ZTS is used
+
+    * ext/standard/basic_functions.c: Kill one race.
+
+    * reentrancy.c: unposixfy calls to TSRM
+
+    * reentrancy.c:
+    Define macros only, if one of the locking _r functions is used
+
+    * sapi/aolserver/aolserver.c:
+    Avoid fd leak which appears when using ZEND_HANDLE_FILENAME
+
+    * ext/standard/output.c:
+    Use php_init_output_globals() also in non-ZTS mode
+
+    * reentrancy.c: Fix typo (shutdown -> startup)
+
+    * Makefile.am
+      configure.in
+      php_reentrancy.h
+      reentrancy.c
+      strtok_r.c: - move strtok_r into reentrancy.c
+    - add rand_r()
+
+    * ext/mhash/mhash.c
+      php_reentrancy.h
+      reentrancy.c: Add/update copyright headers
+
+    * php_globals.h: Back out last commit.
+
+    * Makefile.am
+      configure.in
+      php.h
+      php_globals.h
+      php_reentrancy.h
+      reentrancy.c
+      sapi/aolserver/aolserver.c:
+    Add reentrant versions of ctime, localtime, gmtime, asctime.
+
+    These cannot be implemented platform-independent, so we fall back to the native
+    non-reentrant versions, but lock during each access (only if ZTS is used).
+
+    To initialize/destroy the used data structures, you need to call
+    reentrancy_startup() before sapi_startup(), and reentrancy_shutdown() after
+    sapi_shutdown().
+
+    * win32/registry.c
+      sapi/isapi/php4isapi.c
+      ext/ftp/ftp.c
+      ext/hyperwave/hw.c
+      ext/filepro/filepro.c
+      ext/com/COM.c: Convert more source files to use thread-safe functions
+
+    * main.c: Use thread-safe versions of asctime and localtime
+
+    * ext/standard/datetime.c:
+    Use thread-safe versions of localtime and gmtime
+
+1999-11-26  Zeev Suraski  <zeev@php.net>
+
+    * config.guess
+      config.sub
+      ltconfig
+      ltmain.sh: Undo previous bogus commit
+
+    * ext/standard/dl.c
+      config.guess
+      config.sub
+      ltconfig
+      ltmain.sh: *** empty log message ***
+
+1999-11-26  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/session/session.c:
+    (PHP_RINIT(session)) Never return FAILURE on trivial issues from a request
+    startup handler
+
+    * ext/standard/post.c: Replace strtok with strtok_r
+
+    * configure.in
+      strtok_r.c: Add strtok_r replacement function from FreeBSD-current.
+
+    * strlcat.c
+      strlcpy.c:
+    Include php_config.h in both files, otherwise HAVE_STRLCAT/HAVE_STRLCPY
+    will never be defined, even on systems which have these functions.
+
 1999-11-25  Zeev Suraski  <zeev@php.net>
 
     * main.c: *** empty log message ***
