@@ -98,6 +98,7 @@ static inline zval *_get_zval_ptr(znode *node, temp_variable *Ts, int *should_fr
 							zval *str = T->EA.data.str_offset.str;
 
 							if (T->EA.data.str_offset.str->type != IS_STRING
+								|| (T->EA.data.str_offset.offset<0)
 								|| (T->EA.data.str_offset.str->value.str.len <= T->EA.data.str_offset.offset)) {
 								T->tmp_var.value.str.val = empty_string;
 								T->tmp_var.value.str.len = 0;
@@ -263,6 +264,7 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 					temp_variable *T = &Ts[op1->u.var];
 
 					if (T->EA.data.str_offset.str->type == IS_STRING
+						&& (T->EA.data.str_offset.offset >= 0)
 						&& (T->EA.data.str_offset.offset < T->EA.data.str_offset.str->value.str.len)) {
 						zval tmp;
 						zval *final_value = value;
