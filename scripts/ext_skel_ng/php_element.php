@@ -1,7 +1,6 @@
 <?php
 
 class php_element {
-
 	function is_type($name) {
 		$types = array("void"     => "void", 
 									 "bool"     => "bool", 
@@ -48,7 +47,7 @@ class php_element {
 		return "";
 	}
 
-	function docbook_editor_footer($level=3) {
+	function docbook_editor_settings($level=3) {
 		return '
 <!-- Keep this comment at the end of the file
 Local'.' variables:
