@@ -4,6 +4,7 @@ PHP 4                                                                      NEWS
 - Empty entry. Enjoy.
 
 ?? ??? 2002, Version 4.2.0
+- added sybase_ct support to dbx module (Marc)
 - fixed error message handling with PostgreSQL 7.2 (Rui)
 - Added object aggregation capability, see aggregation_*() functions. (Andrei)
 - Added debug_zval_dump(), which works similar to var_dump, yet displays extra
