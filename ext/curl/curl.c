@@ -483,6 +483,21 @@ PHP_FUNCTION(curl_version)
 }
 /* }}} */
 
+static void init_curl_handle(php_curl **ch)
+{
+	*ch                    = emalloc(sizeof(php_curl));
+	(*ch)->handlers        = ecalloc(1, sizeof(php_curl_handlers));
+	(*ch)->handlers->write = ecalloc(1, sizeof(php_curl_write));
+	(*ch)->handlers->read  = ecalloc(1, sizeof(php_curl_read));
+
+	zend_llist_init(&(*ch)->to_free.str, sizeof(char *), 
+	                (void(*)(void *)) curl_free_string, 0);
+	zend_llist_init(&(*ch)->to_free.slist, sizeof(struct curl_slist),
+	                (void(*)(void *)) curl_free_slist, 0);
+	zend_llist_init(&(*ch)->to_free.post, sizeof(struct HttpPost),
+	                (void(*)(void *)) curl_free_post, 0);
+}
+
 /* {{{ proto int curl_init([string url])
    Initialize a CURL session */
 PHP_FUNCTION(curl_init)
@@ -496,19 +511,7 @@ PHP_FUNCTION(curl_init)
 		WRONG_PARAM_COUNT;
 	}
 
-	ch = emalloc(sizeof(php_curl));
-	ch->handlers = emalloc(sizeof(php_curl_handlers));
-	ch->handlers->write    = emalloc(sizeof(php_curl_write));
-	ch->handlers->read     = emalloc(sizeof(php_curl_read));
-	memset(ch->handlers->write, 0, sizeof(php_curl_write));
-	memset(ch->handlers->read,  0, sizeof(php_curl_read));
-
-	zend_llist_init(&ch->to_free.str, sizeof(char *), 
-	                (void(*)(void *)) curl_free_string, 0);
-	zend_llist_init(&ch->to_free.slist, sizeof(struct curl_slist),
-	                (void(*)(void *)) curl_free_slist, 0);
-	zend_llist_init(&ch->to_free.post, sizeof(struct HttpPost),
-	                (void(*)(void *)) curl_free_post, 0);
+	init_curl_handle(&ch);
 
 	ch->cp = curl_easy_init();
 	if (! ch->cp) {
