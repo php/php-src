@@ -150,6 +150,10 @@ LINK32=link.exe
 
 SOURCE=.\java.c
 # End Source File
+# Begin Source File
+
+SOURCE=.\..\..\win32\winutil.c
+# End Source File
 # End Group
 # Begin Group "Header Files"
 
