@@ -41,6 +41,8 @@
  * - change all the lob stuff to work without classes (optional)! 
  * - make sure that the callbacks terminate the strings with \0
  * - cleanup the ociexecute semantics for refcursors
+ * - make $lob->savefile use O_BINARY
+ * - line 2728: ub4 length = -1; needs fixing
  */
 
 /* {{{ includes & stuff */
