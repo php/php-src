@@ -160,6 +160,7 @@ static void _php_session_decode(char *val, int vallen)
 	pval *current;
 	int namelen;
 	int has_value;
+	PSLS_FETCH();
 
 	for(p = q = val; (p < endptr) && (q = strchr(p, '|')); p = q) {
 		if(p[0] == '!') {
@@ -303,6 +304,8 @@ static void _php_session_start(void)
 	_php_session_initialize();
 }
 
+/* {{{ proto string session_name([string newname])
+   return the current session name. if newname is given, the session name is replaced with newname */
 PHP_FUNCTION(session_name)
 {
 	pval *p_name;
@@ -324,7 +327,10 @@ PHP_FUNCTION(session_name)
 	
 	RETVAL_STRING(old, 0);
 }
+/* }}} */
 
+/* {{{ proto string session_module_name([string newname])
+   return the current module name used for accessing session data. if newname is given, the module name is replaced with newname */
 PHP_FUNCTION(session_module_name)
 {
 	pval *p_name;
@@ -357,7 +363,10 @@ PHP_FUNCTION(session_module_name)
 
 	RETVAL_STRING(old, 0);
 }
+/* }}} */
 
+/* {{{ proto string session_save_path([string newname])
+   return the current save path passed to module_name. if newname is given, the save path is replaced with newname */
 PHP_FUNCTION(session_save_path)
 {
 	pval *p_name;
@@ -379,7 +388,10 @@ PHP_FUNCTION(session_save_path)
 	
 	RETVAL_STRING(old, 0);
 }
+/* }}} */
 
+/* {{{ proto string session_id([string newid])
+   return the current session id. if newid is given, the session id is replaced with newid */
 PHP_FUNCTION(session_id)
 {
 	pval *p_name;
@@ -402,7 +414,10 @@ PHP_FUNCTION(session_id)
 	
 	RETVAL_STRING(old, 0);
 }
+/* }}} */
 
+/* {{{ proto session_register(string varname)
+   adds varname to the list of variables which are freezed at the session end */
 PHP_FUNCTION(session_register)
 {
 	pval *p_name;
@@ -418,7 +433,10 @@ PHP_FUNCTION(session_register)
 	if(!PS(nr_open_sessions)) _php_session_start();
 	PS_ADD_VAR(p_name->value.str.val);
 }
+/* }}} */
 
+/* {{{ proto session_unregister(string varname)
+   removes varname from the list of variables which are freezed at the session end */
 PHP_FUNCTION(session_unregister)
 {
 	pval *p_name;
@@ -433,7 +451,10 @@ PHP_FUNCTION(session_unregister)
 	
 	PS_DEL_VAR(p_name->value.str.val);
 }
+/* }}} */
 
+/* {{{ proto string session_encoded()
+   serializes the current setup and returns the serialized representation */
 PHP_FUNCTION(session_encoded)
 {
 	int len;
@@ -442,7 +463,10 @@ PHP_FUNCTION(session_encoded)
 	enc = _php_session_encode(&len);
 	RETVAL_STRINGL(enc, len, 0);
 }
+/* }}} */
 
+/* {{{ proto session_decode(string data)
+   deserializes data and reinitializes the variables */
 PHP_FUNCTION(session_decode)
 {
 	pval *str;
@@ -453,11 +477,15 @@ PHP_FUNCTION(session_decode)
 
 	_php_session_decode(str->value.str.val, str->value.str.len);
 }
+/* }}} */
 
+/* {{{ proto session_start()
+   Begin session - reinitializes freezed variables, registers browsers etc */
 PHP_FUNCTION(session_start)
 {
 	_php_session_start();
 }
+/* }}} */
 
 void php_rinit_globals(php_ps_globals *ps_globals)
 {
