@@ -1,3 +1,207 @@
+2002-03-04  Dan Kalowsky  <dank@deadmime.org>
+
+    * ext/iconv/config.m4
+      ext/iconv/php_iconv.h:
+    Fix for Bug 14423.  Enables FreeBSD to use iconv functionality.
+
+2002-03-04  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/exif/test.txt: - also test TIFF support in GetImageSize
+
+    * ext/exif/exif.c: - Read IsColor for TIFF
+
+2002-03-04  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * win32/php4.dsp
+      win32/php4ts.dsp: Rename Win32 SAPI/CGI binary to php-cgi.exe.
+
+2002-03-04  Jon Parise  <jon@csh.rit.edu>
+
+    * main/php_ticks.c:
+    Silence a warning under Solaris 8 (WorkShop Compilers 5.0 98/12/15 C 5.0).
+
+2002-03-04  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * NEWS:
+    - Update NEWS with changes by Shane for "fix force redirect crash under
+      multithreaded compile". (This is only in the published Windows binaries)
+
+    * php.ini-dist: - MFH for:
+      add stuff here also.
+
+    * sapi/cgi/cgi_main.c: - MFH for:
+      add comment for IIS users
+
+    * php.ini-recommended: - MFH for:
+      document force-redirect in php.ini
+
+    * sapi/cgi/cgi_main.c: - MFH for:
+      This is much better.  With FORCE_CGI_REDIRECT turned on by default for compilation,
+      we can now define this in the ini file.  So it can be turned on for apache, turned
+      off for IIS which does not have a redirect issue.  Alternately, a different 'REDIRECT_STATUS'
+      environment var can be defined in case some web server out there needs it.
+
+      new ini vars
+      cgi.force_redirect 0|1
+      cgi.redirect_status_env ENV_VAR_NAME
+
+    * sapi/cgi/cgi_main.c: - MFH for:
+      fix force redirect crash under multithreaded compile
+
+      should be discused: fix redirect detection to only work with apache or netscape,
+      where we know they set an environment variable regarding redirect.  IIS has
+      no security issue here.  Don't know about other windows web servers.
+
+2002-03-04  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/info.c: Add apparently missing include
+
+2002-03-04  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * main/config.w32.h
+      main/php.h: - MFH for: turn on force redirect for windows
+
+    * main/main.c: - Some more speed (and more consistency)
+
+2002-03-04  Sascha Schumann  <sascha@schumann.cx>
+
+    * main/php_ini.c
+      main/php_main.h
+      main/main.c
+      ext/standard/info.c:
+    Supply php_html_puts which escapes a whole string.. now fully works in ZTS
+    mode, too.
+
+2002-03-04  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ext/standard/image.c: Silence warning.
+
+2002-03-04  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/info.c: revert last commit, puts does more through putc.
+
+    * ext/standard/info.c:
+    Use PHPWRITE to output data.  Because this just outputs diagnostic
+    information, a few spaces won't hurt (and multiple ones are rendered
+    as one by browsers anyway).  Micro-benchmarks which use phpinfo()
+    as a mean to generate output will yield more through-put now
+    (35 req/s vs. 83 req/s in tux).
+
+2002-03-04  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * sapi/apache/config.m4:
+    - Fix for bug #15572 (Patch by Ralf Nyrén <ralf.nyren@educ.umu.se>)
+
+2002-03-04  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * EXTENSIONS:
+    -expose the fact i am working on exif as discussed with Rasmus
+
+    * ext/standard/image.c: - TIFF support for GetImageSize
+     TIFF support for GetImageSize 
+
+    * ext/exif/exif.c: - disabled debug information
+    - added missing width/height from primary ifd for TIFF
+
+2002-03-04  James Cox  <james@awpimajes.com>
+
+    * ext/odbc/php_birdstep.h
+      ext/odbc/php_birstep.h: typos suck.
+
+2002-03-04  Jason Greene  <jason@inetgurus.net>
+
+    * ext/sockets/sockets.c: Style mismatch: Jon's catch
+
+2002-03-04  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/standard/datetime.c: cygwin fix
+
+2002-03-04  Jon Parise  <jon@csh.rit.edu>
+
+    * ext/session/session.c
+      main/output.c:
+    Silence warning under Solaris 8 (WorkShop Compilers 5.0 98/12/15 C 5.0).
+
+2002-03-04  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * makerpm: - Fix a path and remove --with-imap
+
+2002-03-04  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Config.php: PEAR_Config rewrite:
+
+    * Now supports (in theory) an arbitrary number of
+      config "layers" (different sets of configuration data with a defined
+      priority).
+    * Specify the type of config values so different frontends can make
+      user-friendly configuration interfaces.  Valid types are currently
+      "string", "integer", "file", "directory", "set" and "password".  The
+      set type lets you specify a limited set of values that the config
+      values must be selected from.  Password values are stored
+      base64-encoded.
+    * Added phpdoc comments and some docs for config values.
+    * Added singleton method.
+
+2002-03-04  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/exif/exif.c:
+    -addition to last change: php_image.h must be included now
+
+2002-03-04  James Cox  <james@awpimajes.com>
+
+    * ext/odbc/php_velocis.h
+      ext/odbc/setup.stub
+      ext/odbc/velocis.c
+      main/build-defs.h.in
+      ext/odbc/birdstep.c
+      ext/odbc/config.m4
+      ext/odbc/php_birstep.h
+      ext/odbc/php_odbc.c
+      ext/odbc/php_odbc.h:
+    Changing the Velocis extension to now be called Birdstep, due to a product/company change.
+    added aliases for Velocis to the birdstep functions.
+
+2002-03-04  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/url_scanner_ex.c
+      ext/standard/url_scanner_ex.re: Restore use of inline
+
+    * build/build2.mk
+      build/buildcheck.sh: Remove note, suppress warning
+
+    * sapi/tux/php_tux.c: Reduce operations in the ub_write loop.
+
+    * sapi/tux/php_tux.c:
+    Free status line, initialize number_vec, correctly account for
+    the number of bytes in the document, avoid strcpy/strlen.
+
+2002-03-04  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/standard/php_image.h
+      ext/exif/exif.c:
+    Let getimagesize() and read_exif_data() share the same constants to
+    promote a little bit of code reuse here on two very similar problems.
+
+2002-03-04  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/exif/test.php
+      ext/exif/test.txt: -Updated test.txt and provided test.php
+
+    * ext/exif/exif.c: -Added TIFF support
+    -Changed parameters after checking bugdatabase and discussion with
+        Rasmus: 1st=Filename, 2nd=NeededSections
+
+2002-03-04  Jason Greene  <jason@inetgurus.net>
+
+    * ext/sockets/sockets.c:
+    Patch 1 of 3 (2 in 3 still in progress) of sockets rework
+    Abstracted string -> ipv4 value conversion which unifies all functions
+    Standardized Host Lookups
+    Fixed Broken host error values
+    Fixed error detection in sendmsg
+    Added some safety struct zeroing
+    Modified bind to consitentlyy use sockaddr_storage(not just for AF_UNIX)
+
 2002-03-03  Zak Greant  <zak@mysql.com>
 
     * build/buildcheck.sh:
