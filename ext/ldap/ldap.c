@@ -939,7 +939,7 @@ PHP_FUNCTION(ldap_get_values)
 /* }}} */
 
 /* {{{ proto array ldap_get_values_len(int link, int result, string attribute)
-   Get all values from a result entry */
+   Get the lengths for all values from a result entry */
 PHP_FUNCTION(ldap_get_values_len)
 {
 	pval **link, **result_entry, **attr;

@@ -177,7 +177,7 @@ typedef enum {
 } iv_source;
 
 /* {{{ proto string mcrypt_create_iv(int size, int source)
-   create an initializing vector (IV) */
+   Create an initializing vector (IV) */
 PHP_FUNCTION(mcrypt_create_iv)
 {
 	pval **size, **psource;
@@ -226,7 +226,7 @@ PHP_FUNCTION(mcrypt_create_iv)
 /* }}} */
 
 /* {{{ proto string mcrypt_get_cipher_name(int cipher)
-   get the name of cipher */
+   Get the name of cipher */
 PHP_FUNCTION(mcrypt_get_cipher_name)
 {
 	pval **cipher;
@@ -250,7 +250,7 @@ PHP_FUNCTION(mcrypt_get_cipher_name)
 /* }}} */
 
 /* {{{ proto int mcrypt_get_key_size(int cipher)
-   get the key size of cipher */
+   Get the key size of cipher */
 PHP_FUNCTION(mcrypt_get_key_size)
 {
 	pval **cipher;
@@ -266,7 +266,7 @@ PHP_FUNCTION(mcrypt_get_key_size)
 /* }}} */
 
 /* {{{ proto int mcrypt_get_block_size(int cipher)
-   get the block size of cipher */
+   Get the block size of cipher */
 PHP_FUNCTION(mcrypt_get_block_size)
 {
 	pval **cipher;
@@ -282,7 +282,7 @@ PHP_FUNCTION(mcrypt_get_block_size)
 /* }}} */
 
 /* {{{ proto string mcrypt_ofb(int cipher, string key, string data, int mode, string iv)
-   OFB crypt/decrypt data using key key with cipher cipher starting with iv */
+   OFB crypt/decrypt data using key key with cipher cipher starting with IV */
 PHP_FUNCTION(mcrypt_ofb)
 {
 	MCRYPT_ARGS;
@@ -304,7 +304,7 @@ PHP_FUNCTION(mcrypt_ofb)
 /* }}} */
 
 /* {{{ proto string mcrypt_cfb(int cipher, string key, string data, int mode, string iv)
-   CFB crypt/decrypt data using key key with cipher cipher starting with iv */
+   CFB crypt/decrypt data using key key with cipher cipher starting with IV */
 PHP_FUNCTION(mcrypt_cfb)
 {
 	MCRYPT_ARGS;
@@ -326,8 +326,8 @@ PHP_FUNCTION(mcrypt_cfb)
 /* }}} */
 
 
-/* {{{ proto string mcrypt_cbc(int cipher, string key, string data, int mode [,string iv])
-   CBC crypt/decrypt data using key key with cipher cipher using optional iv */
+/* {{{ proto string mcrypt_cbc(int cipher, string key, string data, int mode [, string iv])
+   CBC crypt/decrypt data using key key with cipher cipher using optional IV */
 PHP_FUNCTION(mcrypt_cbc)
 {
 	MCRYPT_ARGS;
