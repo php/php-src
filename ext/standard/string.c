@@ -224,7 +224,7 @@ PHPAPI void php_explode(pval *delim, pval *str, pval *return_value)
 	} else do {
 		add_index_stringl(return_value, i++, p1, p2-p1, 1);
 		p1 = p2 + delim->value.str.len;
-	} while (p2 = php_memnstr(p1, delim->value.str.val, delim->value.str.len, endp));
+	} while ((p2 = php_memnstr(p1, delim->value.str.val, delim->value.str.len, endp)) != NULL);
 
 	if (p1 <= endp) {
 		add_index_stringl(return_value, i++, p1, endp-p1, 1);
