@@ -1700,6 +1700,10 @@ ZEND_API int do_bind_function(zend_op *opline, HashTable *function_table, HashTa
 {
 	zend_function *function;
 
+	if (opline->opcode != ZEND_DECLARE_FUNCTION) {
+		zend_error(E_ERROR, "Internal compiler error.  Please report!");
+	}
+
 	zend_hash_find(function_table, opline->op1.u.constant.value.str.val, opline->op1.u.constant.value.str.len, (void *) &function);
 	if (zend_hash_add(function_table, opline->op2.u.constant.value.str.val, opline->op2.u.constant.value.str.len+1, function, sizeof(zend_function), NULL)==FAILURE) {
 		int error_level = compile_time ? E_COMPILE_ERROR : E_ERROR;
@@ -1788,6 +1792,10 @@ ZEND_API int do_bind_inherited_class(zend_op *opline, HashTable *function_table,
 void zend_do_early_binding(TSRMLS_D)
 {
 	zend_op *opline = &CG(active_op_array)->opcodes[CG(active_op_array)->last-1];
+
+	while (opline->opcode == ZEND_TICKS && opline > CG(active_op_array)->opcodes) {
+		opline--;
+	}
 
 	if (do_bind_function(opline, CG(function_table), CG(class_table), 1) == FAILURE) {
 		return;
