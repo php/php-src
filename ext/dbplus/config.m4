@@ -7,7 +7,7 @@ PHP_ARG_WITH(dbplus, for dbplus support,
 
 if test "$PHP_DBPLUS" != "no"; then
   # --with-dbplus -> check with-path
-  SEARCH_PATH="/usr/dbplus"    
+  SEARCH_PATH="/usr/dbplus /usr/local/dbplus /opt/dbplus"    
   SEARCH_FOR="/include/dbconfig.h"  
   if test -r $PHP_DBPLUS/; then # path given as parameter
     DBPLUS_DIR=$PHP_DBPLUS
