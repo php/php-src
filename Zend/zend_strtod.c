@@ -91,6 +91,12 @@
 
 #include <zend_strtod.h>
 
+#if defined(HAVE_INTTYPES_H)
+#include <inttypes.h>
+#elif defined(HAVE_STDINT_H)
+#include <stdint.h>
+#endif
+
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
@@ -116,15 +122,8 @@
 
 #if defined(_MSC_VER)
 #define int32_t __int32
-#define u_int32_t unsigned __int32
+#define uint32_t unsigned __int32
 #define IEEE_LITTLE_ENDIAN
-#endif
-
-#if defined(__sparc__) || defined(__ppc__) || defined(__sun__) || \
-	defined(__hpux) || defined(__hppa)
-#ifndef __linux__
-#define u_int32_t uint32_t
-#endif
 #endif
 
 #ifdef HAVE_SYS_BITYPES_H
@@ -132,7 +131,7 @@
 #endif
 
 #define Long	int32_t
-#define ULong	u_int32_t
+#define ULong	uint32_t
 
 #ifdef __cplusplus
 #include "malloc.h"
