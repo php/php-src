@@ -1,4 +1,5 @@
 <?php
+	mb_regex_set_options( '' );
 	mb_regex_encoding( 'EUC-JP' );
 
 	function verify_split( $spliton, $str, $count = 0 )

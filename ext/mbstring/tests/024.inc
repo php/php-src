@@ -1,4 +1,6 @@
 <?php
+	mb_regex_set_options( '' );
+
 	$encs = array( 'EUC-JP', 'Shift_JIS', 'SJIS', 'UTF-8' );
 
 	function test_search( $test_enc, $str, $look_for, $opt, $in_enc = 'EUC-JP' ) {
