@@ -4,7 +4,7 @@ srcdir    = @srcdir@
 VPATH     = @srcdir@
 
 LTLIBRARY_NAME    = libmysql_client.la
-LTLIBRARY_SOURCES = \
+LTLIBRARY_SOURCES = libmysql.c errmsg.c net.c violite.c password.c \
 	my_init.c my_static.c my_malloc.c my_realloc.c my_create.c \
 	my_delete.c my_tempnam.c my_open.c mf_casecnv.c my_read.c \
 	my_write.c errors.c my_error.c my_getwd.c my_div.c mf_pack.c \

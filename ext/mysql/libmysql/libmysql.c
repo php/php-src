@@ -1,6 +1,8 @@
 /* Copyright Abandoned 1996 TCX DataKonsult AB & Monty Program KB & Detron HB
    This file is public domain and comes with NO WARRANTY of any kind */
 
+#define PROTOCOL_VERSION 10
+
 #define DONT_USE_RAID
 #if defined(__WIN32__) || defined(WIN32)
 #include <winsock.h>
