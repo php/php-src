@@ -30,8 +30,8 @@
 
 /* $Id$ */
 
-#ifndef _EXEC_H
-#define _EXEC_H
+#ifndef EXEC_H
+#define EXEC_H
 
 PHP_FUNCTION(system);
 PHP_FUNCTION(exec);
@@ -40,4 +40,4 @@ PHP_FUNCTION(passthru);
 PHP_FUNCTION(shell_exec);
 
 char *php_escape_shell_cmd(char *);
-#endif /* _EXEC_H */
+#endif /* EXEC_H */

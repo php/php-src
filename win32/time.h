@@ -9,8 +9,8 @@
  * Modified by Shane Caraveo for PHP
  *
  *****************************************************************************/
-#ifndef _DH_TIME_H
-#define _DH_TIME_H
+#ifndef TIME_H
+#define TIME_H
 
 /* Include stuff ************************************************************ */
 #include <winsock.h>

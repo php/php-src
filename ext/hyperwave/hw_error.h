@@ -24,8 +24,8 @@
 
 
 /* $Id$ */
-#ifndef _HW_ERROR_H
-#define _HW_ERROR_H
+#ifndef HW_ERROR_H
+#define HW_ERROR_H
 
 #if HYPERWAVE
 

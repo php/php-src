@@ -32,8 +32,8 @@
 
 /* $Id$ */
 
-#ifndef _DL_H
-#define _DL_H
+#ifndef DL_H
+#define DL_H
 
 void php_dl(pval *file,int type,pval *return_value);
 
@@ -43,4 +43,4 @@ PHP_FUNCTION(dl);
 
 PHP_MINFO_FUNCTION(dl);
 
-#endif /* _DL_H */
+#endif /* DL_H */

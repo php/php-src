@@ -31,8 +31,8 @@
 
 /* $Id$ */
 
-#ifndef _PHP_GD_H
-#define _PHP_GD_H
+#ifndef PHP_GD_H
+#define PHP_GD_H
 
 #define HAVE_GDIMAGECREATEFROMPNG 1
 
@@ -159,4 +159,4 @@ static void _php_image_output_wbmp(gdImagePtr im, FILE *fp);
 
 #endif
 
-#endif /* _PHP_GD_H */
+#endif /* PHP_GD_H */

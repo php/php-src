@@ -4,8 +4,8 @@
 
 /* Copyright (c) 1997-2000 University of Cambridge */
 
-#ifndef _PCRE_H
-#define _PCRE_H
+#ifndef PCRE_H
+#define PCRE_H
 
 #define PCRE_MAJOR 3
 #define PCRE_MINOR 1

@@ -29,9 +29,9 @@
 
 /* $Id$ */
 
-#ifndef _QUOT_PRINT_H
-#define _QUOT_PRINT_H
+#ifndef QUOT_PRINT_H
+#define QUOT_PRINT_H
 
 PHP_FUNCTION(quoted_printable_decode);
 
-#endif /* _QUOT_PRINT_H */
+#endif /* QUOT_PRINT_H */

@@ -17,6 +17,9 @@
 * -----------------
 *
 * $Log$
+* Revision 1.1  1999/04/21 23:37:47  ssb
+* moved db
+*
 * Revision 1.1.1.1  1999/04/07 21:03:29  zeev
 * PHP 4.0
 *
@@ -49,8 +52,8 @@
 *
 ****************************************************************************/
 
-#ifndef  __DEBUG_H
-#define  __DEBUG_H
+#ifndef  DEBUG_H
+#define  DEBUG_H
 
 #ifdef  DEBUG
 #    define D(x) x
@@ -191,4 +194,4 @@ typedef  int        bool;
 #define  NO      0
 #define  YES      1
 
-#endif  __DEBUG_H
+#endif  /* DEBUG_H */

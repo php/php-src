@@ -29,8 +29,8 @@
  */
 /* $Id$ */
 
-#ifndef _INFO_H
-#define _INFO_H
+#ifndef INFO_H
+#define INFO_H
 
 #define PHP_ENTRY_NAME_COLOR "#CCCCFF"
 #define PHP_CONTENTS_COLOR "#CCCCCC"
@@ -78,4 +78,4 @@ PHPAPI void php_info_print_hr(void);
 
 void register_phpinfo_constants(INIT_FUNC_ARGS);
 
-#endif /* _INFO_H */
+#endif /* INFO_H */

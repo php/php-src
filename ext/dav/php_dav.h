@@ -29,10 +29,10 @@
 
 /* $Id */
 
-#ifndef _PHP_DAV_H
-# define _PHP_DAV_H
+#ifndef PHP_DAV_H
+#define PHP_DAV_H
 
-# if HAVE_MOD_DAV
+#if HAVE_MOD_DAV
 
 typedef struct {
     int foo;
@@ -41,21 +41,21 @@ typedef struct {
 } phpdav_module;
 
 extern zend_module_entry phpdav_module_entry;
-#  define phpdav_module_ptr &phpdav_module_entry
+#define phpdav_module_ptr &phpdav_module_entry
 
 int phpdav_mkcol_test_handler(request_rec *);
 
 PHP_FUNCTION(dav_set_mkcol_handlers);
 
-# else /* !HAVE_MOD_DAV */
+#else /* !HAVE_MOD_DAV */
 
-#  define phpdav_module_ptr NULL
+#define phpdav_module_ptr NULL
 
-# endif /* HAVE_MOD_DAV */
+#endif /* HAVE_MOD_DAV */
 
 #define phpext_dav_ptr phpdav_module_ptr
 
-#endif /* _PHP_DAV_H */
+#endif /* PHP_DAV_H */
 
 
 /*

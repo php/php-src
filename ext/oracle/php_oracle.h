@@ -2,8 +2,8 @@
 
 /* synced with oracle.h,v 1.40 1999/06/01 08:11:04 thies Exp $ */
 
-#ifndef _PHP_ORACLE_H
-#define _PHP_ORACLE_H
+#ifndef PHP_ORACLE_H
+#define PHP_ORACLE_H
 
 #if HAVE_ORACLE
 
@@ -132,7 +132,7 @@ typedef struct {
 
 #endif /* HAVE_ORACLE */
 
-#endif /* _PHP_ORACLE_H */
+#endif /* PHP_ORACLE_H */
 
 /*
  * Local Variables:

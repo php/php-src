@@ -19,8 +19,8 @@
 */
 
 /* $Id$ */
-#ifndef _PHP_SNMP_H
-#define _PHP_SNMP_H
+#ifndef PHP_SNMP_H
+#define PHP_SNMP_H
 
 #if HAVE_SNMP
 #ifndef DLEXPORT
@@ -46,4 +46,4 @@ PHP_MINFO_FUNCTION(snmp);
 
 #define phpext_snmp_ptr snmp_module_ptr
 
-#endif  /* _PHP_SNMP_H */
+#endif  /* PHP_SNMP_H */

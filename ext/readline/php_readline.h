@@ -18,8 +18,8 @@
 
 /* $Id$ */
 
-#ifndef _PHP_READLINE_H
-#define _PHP_READLINE_H
+#ifndef PHP_READLINE_H
+#define PHP_READLINE_H
 
 #if HAVE_LIBREADLINE
 #ifdef ZTS 
@@ -39,5 +39,5 @@ extern zend_module_entry readline_module_entry;
 
 #endif /* HAVE_LIBREADLINE */
 
-#endif /* _PHP_READLINE_H */
+#endif /* PHP_READLINE_H */
 

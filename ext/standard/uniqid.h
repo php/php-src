@@ -29,9 +29,9 @@
 
 /* $Id$ */
 
-#ifndef _UNIQID_H
-#define _UNIQID_H
+#ifndef UNIQID_H
+#define UNIQID_H
 
 PHP_FUNCTION(uniqid);
 
-#endif /* _UNIQID_H */
+#endif /* UNIQID_H */

@@ -31,8 +31,8 @@
 
 /* $Id$ */
 
-#ifndef _PHP_DOMXML_H
-#define _PHP_DOMXML_H
+#ifndef PHP_DOMXML_H
+#define PHP_DOMXML_H
 
 #if HAVE_DOMXML
 #include <libxml/parser.h>

@@ -1,5 +1,5 @@
-#ifndef _PHP_NDBM_H
-#define _PHP_NDBM_H
+#ifndef PHP_NDBM_H
+#define PHP_NDBM_H
 
 #if DBA_NDBM
 

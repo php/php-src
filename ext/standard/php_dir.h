@@ -19,8 +19,8 @@
 
 /* $Id$ */
 
-#ifndef _PHP_DIR_H
-#define _PHP_DIR_H
+#ifndef PHP_DIR_H
+#define PHP_DIR_H
 
 /* directory functions */
 PHP_MINIT_FUNCTION(dir);
@@ -33,4 +33,4 @@ PHP_FUNCTION(rewinddir);
 PHP_FUNCTION(readdir);
 PHP_FUNCTION(getdir);
 
-#endif /* _PHP_DIR_H */
+#endif /* PHP_DIR_H */

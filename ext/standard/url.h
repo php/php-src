@@ -28,8 +28,8 @@
  */
 /* $Id$ */
 
-#ifndef _URL_H
-#define _URL_H
+#ifndef URL_H
+#define URL_H
 
 typedef struct url {
 	char *scheme;
@@ -55,7 +55,7 @@ PHP_FUNCTION(urldecode);
 PHP_FUNCTION(rawurlencode);
 PHP_FUNCTION(rawurldecode);
 
-#endif /* _URL_H */
+#endif /* URL_H */
 
 /*
  * Local variables:

@@ -13,8 +13,8 @@
  *	(c) 1986 John Wiley & Sons, Inc.
  */
 
-#ifndef	_DBF_H_
-#define	_DBF_H_
+#ifndef	DBF_H_
+#define	DBF_H_
 
 #include <stdlib.h>
 #include <string.h>
@@ -91,4 +91,4 @@ typedef struct db_head	dbhead_t;
 #include "dbf_misc.h"
 #include "dbf_rec.h"
 
-#endif	/* _DBF_H_ */
+#endif	/* DBF_H_ */

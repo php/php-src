@@ -1,5 +1,5 @@
-#ifndef _PHP_GDBM_H
-#define _PHP_GDBM_H
+#ifndef PHP_GDBM_H
+#define PHP_GDBM_H
 
 #if DBA_GDBM
 

@@ -28,8 +28,8 @@
  */
 /* $Id$ */ 
 
-#ifndef _PHP_YP_H
-#define _PHP_YP_H
+#ifndef PHP_YP_H
+#define PHP_YP_H
 
 #if HAVE_YP
 
@@ -53,4 +53,4 @@ PHP_MINFO_FUNCTION(yp);
 
 #define phpext_yp_ptr yp_module_ptr
 
-#endif /* _PHP_YP_H */
+#endif /* PHP_YP_H */

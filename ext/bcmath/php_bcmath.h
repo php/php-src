@@ -30,8 +30,8 @@
 
 /* $Id$ */
 
-#ifndef _PHP_BCMATH_H
-#define _PHP_BCMATH_H
+#ifndef PHP_BCMATH_H
+#define PHP_BCMATH_H
 
 #if WITH_BCMATH
 
@@ -56,4 +56,4 @@ PHP_FUNCTION(bcscale);
 
 #endif
 
-#endif /* _PHP_BCMATH_H */
+#endif /* PHP_BCMATH_H */

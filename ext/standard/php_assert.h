@@ -18,8 +18,8 @@
 
 /* $Id$ */
 
-#ifndef _PHP_ASSERT_H
-#define _PHP_ASSERT_H
+#ifndef PHP_ASSERT_H
+#define PHP_ASSERT_H
 
 PHP_MINIT_FUNCTION(assert);
 PHP_MSHUTDOWN_FUNCTION(assert);
@@ -29,4 +29,4 @@ PHP_MINFO_FUNCTION(assert);
 PHP_FUNCTION(assert);
 PHP_FUNCTION(assert_options);
 
-#endif /* _PHP_ASSERT_H */
+#endif /* PHP_ASSERT_H */

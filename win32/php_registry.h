@@ -1,7 +1,7 @@
-#ifndef _PHP_REGISTRY_H
-#define _PHP_REGISTRY_H
+#ifndef PHP_REGISTRY_H
+#define PHP_REGISTRY_H
 
 
 void UpdateIniFromRegistry(char *path);
 
-#endif /* _PHP_REGISTRY_H */
+#endif /* PHP_REGISTRY_H */

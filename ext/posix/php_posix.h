@@ -30,8 +30,8 @@
 
 /* $Id$ */
 
-#ifndef _PHP_POSIX_H
-#define _PHP_POSIX_H
+#ifndef PHP_POSIX_H
+#define PHP_POSIX_H
 
 #if HAVE_POSIX
 #ifndef DLEXPORT
@@ -90,4 +90,4 @@ typedef struct {
 
 #define phpext_posix_ptr posix_module_ptr
 
-#endif /* _PHP_POSIX_H */
+#endif /* PHP_POSIX_H */

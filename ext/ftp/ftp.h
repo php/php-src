@@ -30,8 +30,8 @@
 
 /* $Id$ */
 
-#ifndef	_FTP_H
-#define	_FTP_H
+#ifndef	FTP_H
+#define	FTP_H
 
 #include <stdio.h>
 #ifdef HAVE_NETINET_IN_H

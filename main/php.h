@@ -19,8 +19,8 @@
 
 /* $Id$ */
 
-#ifndef _PHP_H
-#define _PHP_H
+#ifndef PHP_H
+#define PHP_H
 
 #ifdef HAVE_DMALLOC
 #include <dmalloc.h>

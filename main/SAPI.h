@@ -17,8 +17,8 @@
 */
 
 
-#ifndef _NEW_SAPI_H
-#define _NEW_SAPI_H
+#ifndef SAPI_H
+#define SAPI_H
 
 #include "zend.h"
 #include "zend_llist.h"
@@ -208,7 +208,7 @@ SAPI_POST_READER_FUNC(sapi_read_standard_form_data);
 
 #define STANDARD_SAPI_MODULE_PROPERTIES NULL
 
-#endif /* _NEW_SAPI_H */
+#endif /* SAPI_H */
 
 /*
  * Local variables:

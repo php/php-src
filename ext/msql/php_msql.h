@@ -30,8 +30,8 @@
 
 /* $Id$ */
 
-#ifndef _PHP_MSQL_H
-#define _PHP_MSQL_H
+#ifndef PHP_MSQL_H
+#define PHP_MSQL_H
 
 #if HAVE_MSQL
 
@@ -91,4 +91,4 @@ typedef struct {
 
 #define phpext_msql_ptr msql_module_ptr
 
-#endif /* _PHP_MSQL_H */
+#endif /* PHP_MSQL_H */

@@ -1,5 +1,5 @@
-#ifndef _FLOCK_COMPAT_H
-#define _FLOCK_COMPAT_H
+#ifndef FLOCK_COMPAT_H
+#define FLOCK_COMPAT_H
 
 #ifndef HAVE_FLOCK
 #	define LOCK_SH 1
@@ -26,4 +26,4 @@ int flock(int fd, int operation);
 extern int inet_aton(const char *, struct in_addr *);
 #endif
 
-#endif	/* _FLOCK_COMPAT_H */
+#endif	/* FLOCK_COMPAT_H */

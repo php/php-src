@@ -1,5 +1,5 @@
-#ifndef _INCLUDED_SDNCAL_H
-#define _INCLUDED_SDNCAL_H
+#ifndef SDNCAL_H
+#define SDNCAL_H
 /*
  * This code has been modified for use with PHP
  * by Shane Caraveo shane@caraveo.com
@@ -93,4 +93,4 @@ int DayOfWeek(long int sdn);
 extern char *DayNameShort[7];
 extern char *DayNameLong[7];
 
-#endif							/* _INCLUDED_SDNCAL_H */
+#endif							/* SDNCAL_H */

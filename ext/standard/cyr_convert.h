@@ -29,12 +29,12 @@
 
 /* $Id$ */
 
-#ifndef _CYR_CONVERT_H
-#define _CYR_CONVERT_H
+#ifndef CYR_CONVERT_H
+#define CYR_CONVERT_H
 
 PHP_FUNCTION(convert_cyr_string);
 
-#endif /* _CYR_CONVERT_H */
+#endif /* CYR_CONVERT_H */
 
 
 

@@ -25,8 +25,8 @@
 
 /* $Id$ */
 
-#ifndef _HG_COMM_H
-#define _HG_COMM_H
+#ifndef HG_COMM_H
+#define HG_COMM_H
 
 #if HYPERWAVE
 

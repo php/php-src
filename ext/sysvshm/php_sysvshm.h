@@ -30,8 +30,8 @@
 
 /* $Id$ */
 
-#ifndef _PHP_SYSVSHM_H
-#define _PHP_SYSVSHM_H
+#ifndef PHP_SYSVSHM_H
+#define PHP_SYSVSHM_H
 
 #if HAVE_SYSVSHM
 
@@ -94,4 +94,4 @@ extern sysvshm_module php_sysvshm;
 
 #define phpext_sysvshm_ptr sysvshm_module_ptr
 
-#endif /* _PHP_SYSVSHM_H */
+#endif /* PHP_SYSVSHM_H */

@@ -26,8 +26,8 @@
    | Authors: Rasmus Lerdorf <rasmus@lerdorf.on.ca>                       |
    +----------------------------------------------------------------------+
  */
-#ifndef _TYPE_H
-#define _TYPE_H
+#ifndef TYPE_H
+#define TYPE_H
 
 extern int php_check_type(char *str);
 extern int php_check_ident_type(char *str);

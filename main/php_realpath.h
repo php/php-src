@@ -16,8 +16,8 @@
    +----------------------------------------------------------------------+
  */
 
-#ifndef _PHP_REALPATH_H_
-#define _PHP_REALPATH_H_
+#ifndef PHP_REALPATH_H
+#define PHP_REALPATH_H
 
 extern char *php_realpath(const char *path, char resolved_path []);
 
