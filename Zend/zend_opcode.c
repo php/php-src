@@ -215,6 +215,12 @@ zend_op *get_next_op(zend_op_array *op_array CLS_DC)
 	next_op->filename = zend_get_compiled_filename();
 	next_op->result.op_type = IS_UNUSED;
 	next_op->extended_value = 0;
+	next_op->op1.u.EA.var = 0;
+	next_op->op1.u.EA.type = 0;
+	next_op->op2.u.EA.var = 0;
+	next_op->op2.u.EA.type = 0;
+	next_op->result.u.EA.var = 0;
+	next_op->result.u.EA.type = 0;
 
 	return next_op;
 }

@@ -348,9 +348,8 @@ class_variable_decleration:
 	|	T_VARIABLE '=' static_scalar { do_declare_property(&$1, &$3 CLS_CC); }
 ;
 
-	
+
 echo_expr_list:	
-		/* empty */
 	|	echo_expr_list ',' expr { do_echo(&$3 CLS_CC); }
 	|	expr					{ do_echo(&$1 CLS_CC); }
 ;
@@ -358,7 +357,11 @@ echo_expr_list:
 
 for_expr:
 		/* empty */			{ $$.op_type = IS_CONST;  $$.u.constant.type = IS_BOOL;  $$.u.constant.value.lval = 1; }
-	|	for_expr ',' { do_free(&$1 CLS_CC); } expr	{ $$ = $4; }
+	|	non_empty_for_expr { $$ = $1; }
+;
+
+non_empty_for_expr:
+		non_empty_for_expr ',' { do_free(&$1 CLS_CC); } expr	{ $$ = $4; }
 	|	expr				{ $$ = $1; }
 ;
 
