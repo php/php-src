@@ -18,12 +18,16 @@ session_start();
 <fieldset>
 <?php
 
+ob_flush();
+
 ini_set("url_rewriter.tags", "a=href,area=href,frame=src,input=src,form=");
 
 ?>
 <form>
 <fieldset>
 <?php
+
+ob_flush();
 
 ini_set("url_rewriter.tags", "a=href,area=href,frame=src,input=src,form=fakeentry");
 
@@ -32,12 +36,15 @@ ini_set("url_rewriter.tags", "a=href,area=href,frame=src,input=src,form=fakeentr
 <fieldset>
 <?php
 
+ob_flush();
+
 ini_set("url_rewriter.tags", "a=href,fieldset=,area=href,frame=src,input=src");
 
 ?>
 <form>
 <fieldset>
 <?php
+
 session_destroy();
 ?>
 --EXPECT--
