@@ -37,7 +37,6 @@ printf("printf test 25:%-2s\n", "gazonk");
 
 ?>
 --EXPECT--
-
 printf test 1:simple string
 printf test 2:42
 printf test 3:3.333333

@@ -5,9 +5,7 @@ Looped regression test (may take a while)
 --FILE--
 <?php 
 for ($jdk=0; $jdk<50; $jdk++) {
-?>
-
-<html>
+?><html>
 <head>
 <?php /* the point of this file is to intensively test various aspects of the parser.
     * right now, each test focuses in one aspect only (e.g. variable aliasing, arithemtic operator,
@@ -372,11 +370,9 @@ while ($i<5) {
 {
   echo "Tests completed.\n";  # testing some PHP style comment...
 }
-?>
 
-<?php } ?>
+} ?>
 --EXPECT--
-
 <html>
 <head>
 *** Testing assignments and variable aliasing: ***
@@ -602,8 +598,6 @@ and this is PHP code, 2+2=4
 ********************************
 
 Tests completed.
-
-
 <html>
 <head>
 *** Testing assignments and variable aliasing: ***
@@ -829,8 +823,6 @@ and this is PHP code, 2+2=4
 ********************************
 
 Tests completed.
-
-
 <html>
 <head>
 *** Testing assignments and variable aliasing: ***
@@ -1056,8 +1048,6 @@ and this is PHP code, 2+2=4
 ********************************
 
 Tests completed.
-
-
 <html>
 <head>
 *** Testing assignments and variable aliasing: ***
@@ -1283,8 +1273,6 @@ and this is PHP code, 2+2=4
 ********************************
 
 Tests completed.
-
-
 <html>
 <head>
 *** Testing assignments and variable aliasing: ***
@@ -1510,8 +1498,6 @@ and this is PHP code, 2+2=4
 ********************************
 
 Tests completed.
-
-
 <html>
 <head>
 *** Testing assignments and variable aliasing: ***
@@ -1737,8 +1723,6 @@ and this is PHP code, 2+2=4
 ********************************
 
 Tests completed.
-
-
 <html>
 <head>
 *** Testing assignments and variable aliasing: ***
@@ -1964,8 +1948,6 @@ and this is PHP code, 2+2=4
 ********************************
 
 Tests completed.
-
-
 <html>
 <head>
 *** Testing assignments and variable aliasing: ***
@@ -2191,8 +2173,6 @@ and this is PHP code, 2+2=4
 ********************************
 
 Tests completed.
-
-
 <html>
 <head>
 *** Testing assignments and variable aliasing: ***
@@ -2418,8 +2398,6 @@ and this is PHP code, 2+2=4
 ********************************
 
 Tests completed.
-
-
 <html>
 <head>
 *** Testing assignments and variable aliasing: ***
@@ -2645,8 +2623,6 @@ and this is PHP code, 2+2=4
 ********************************
 
 Tests completed.
-
-
 <html>
 <head>
 *** Testing assignments and variable aliasing: ***
@@ -2872,8 +2848,6 @@ and this is PHP code, 2+2=4
 ********************************
 
 Tests completed.
-
-
 <html>
 <head>
 *** Testing assignments and variable aliasing: ***
@@ -3099,8 +3073,6 @@ and this is PHP code, 2+2=4
 ********************************
 
 Tests completed.
-
-
 <html>
 <head>
 *** Testing assignments and variable aliasing: ***
@@ -3326,8 +3298,6 @@ and this is PHP code, 2+2=4
 ********************************
 
 Tests completed.
-
-
 <html>
 <head>
 *** Testing assignments and variable aliasing: ***
@@ -3553,8 +3523,6 @@ and this is PHP code, 2+2=4
 ********************************
 
 Tests completed.
-
-
 <html>
 <head>
 *** Testing assignments and variable aliasing: ***
@@ -3780,8 +3748,6 @@ and this is PHP code, 2+2=4
 ********************************
 
 Tests completed.
-
-
 <html>
 <head>
 *** Testing assignments and variable aliasing: ***
@@ -4007,8 +3973,6 @@ and this is PHP code, 2+2=4
 ********************************
 
 Tests completed.
-
-
 <html>
 <head>
 *** Testing assignments and variable aliasing: ***
@@ -4234,8 +4198,6 @@ and this is PHP code, 2+2=4
 ********************************
 
 Tests completed.
-
-
 <html>
 <head>
 *** Testing assignments and variable aliasing: ***
@@ -4461,8 +4423,6 @@ and this is PHP code, 2+2=4
 ********************************
 
 Tests completed.
-
-
 <html>
 <head>
 *** Testing assignments and variable aliasing: ***
@@ -4688,8 +4648,6 @@ and this is PHP code, 2+2=4
 ********************************
 
 Tests completed.
-
-
 <html>
 <head>
 *** Testing assignments and variable aliasing: ***
@@ -4915,8 +4873,6 @@ and this is PHP code, 2+2=4
 ********************************
 
 Tests completed.
-
-
 <html>
 <head>
 *** Testing assignments and variable aliasing: ***
@@ -5142,8 +5098,6 @@ and this is PHP code, 2+2=4
 ********************************
 
 Tests completed.
-
-
 <html>
 <head>
 *** Testing assignments and variable aliasing: ***
@@ -5369,8 +5323,6 @@ and this is PHP code, 2+2=4
 ********************************
 
 Tests completed.
-
-
 <html>
 <head>
 *** Testing assignments and variable aliasing: ***
@@ -5596,8 +5548,6 @@ and this is PHP code, 2+2=4
 ********************************
 
 Tests completed.
-
-
 <html>
 <head>
 *** Testing assignments and variable aliasing: ***
@@ -5823,8 +5773,6 @@ and this is PHP code, 2+2=4
 ********************************
 
 Tests completed.
-
-
 <html>
 <head>
 *** Testing assignments and variable aliasing: ***
@@ -6050,8 +5998,6 @@ and this is PHP code, 2+2=4
 ********************************
 
 Tests completed.
-
-
 <html>
 <head>
 *** Testing assignments and variable aliasing: ***
@@ -6277,8 +6223,6 @@ and this is PHP code, 2+2=4
 ********************************
 
 Tests completed.
-
-
 <html>
 <head>
 *** Testing assignments and variable aliasing: ***
@@ -6504,8 +6448,6 @@ and this is PHP code, 2+2=4
 ********************************
 
 Tests completed.
-
-
 <html>
 <head>
 *** Testing assignments and variable aliasing: ***
@@ -6731,8 +6673,6 @@ and this is PHP code, 2+2=4
 ********************************
 
 Tests completed.
-
-
 <html>
 <head>
 *** Testing assignments and variable aliasing: ***
@@ -6958,8 +6898,6 @@ and this is PHP code, 2+2=4
 ********************************
 
 Tests completed.
-
-
 <html>
 <head>
 *** Testing assignments and variable aliasing: ***
@@ -7185,8 +7123,6 @@ and this is PHP code, 2+2=4
 ********************************
 
 Tests completed.
-
-
 <html>
 <head>
 *** Testing assignments and variable aliasing: ***
@@ -7412,8 +7348,6 @@ and this is PHP code, 2+2=4
 ********************************
 
 Tests completed.
-
-
 <html>
 <head>
 *** Testing assignments and variable aliasing: ***
@@ -7639,8 +7573,6 @@ and this is PHP code, 2+2=4
 ********************************
 
 Tests completed.
-
-
 <html>
 <head>
 *** Testing assignments and variable aliasing: ***
@@ -7866,8 +7798,6 @@ and this is PHP code, 2+2=4
 ********************************
 
 Tests completed.
-
-
 <html>
 <head>
 *** Testing assignments and variable aliasing: ***
@@ -8093,8 +8023,6 @@ and this is PHP code, 2+2=4
 ********************************
 
 Tests completed.
-
-
 <html>
 <head>
 *** Testing assignments and variable aliasing: ***
@@ -8320,8 +8248,6 @@ and this is PHP code, 2+2=4
 ********************************
 
 Tests completed.
-
-
 <html>
 <head>
 *** Testing assignments and variable aliasing: ***
@@ -8547,8 +8473,6 @@ and this is PHP code, 2+2=4
 ********************************
 
 Tests completed.
-
-
 <html>
 <head>
 *** Testing assignments and variable aliasing: ***
@@ -8774,8 +8698,6 @@ and this is PHP code, 2+2=4
 ********************************
 
 Tests completed.
-
-
 <html>
 <head>
 *** Testing assignments and variable aliasing: ***
@@ -9001,8 +8923,6 @@ and this is PHP code, 2+2=4
 ********************************
 
 Tests completed.
-
-
 <html>
 <head>
 *** Testing assignments and variable aliasing: ***
@@ -9228,8 +9148,6 @@ and this is PHP code, 2+2=4
 ********************************
 
 Tests completed.
-
-
 <html>
 <head>
 *** Testing assignments and variable aliasing: ***
@@ -9455,8 +9373,6 @@ and this is PHP code, 2+2=4
 ********************************
 
 Tests completed.
-
-
 <html>
 <head>
 *** Testing assignments and variable aliasing: ***
@@ -9682,8 +9598,6 @@ and this is PHP code, 2+2=4
 ********************************
 
 Tests completed.
-
-
 <html>
 <head>
 *** Testing assignments and variable aliasing: ***
@@ -9909,8 +9823,6 @@ and this is PHP code, 2+2=4
 ********************************
 
 Tests completed.
-
-
 <html>
 <head>
 *** Testing assignments and variable aliasing: ***
@@ -10136,8 +10048,6 @@ and this is PHP code, 2+2=4
 ********************************
 
 Tests completed.
-
-
 <html>
 <head>
 *** Testing assignments and variable aliasing: ***
@@ -10363,8 +10273,6 @@ and this is PHP code, 2+2=4
 ********************************
 
 Tests completed.
-
-
 <html>
 <head>
 *** Testing assignments and variable aliasing: ***
@@ -10590,8 +10498,6 @@ and this is PHP code, 2+2=4
 ********************************
 
 Tests completed.
-
-
 <html>
 <head>
 *** Testing assignments and variable aliasing: ***
@@ -10817,8 +10723,6 @@ and this is PHP code, 2+2=4
 ********************************
 
 Tests completed.
-
-
 <html>
 <head>
 *** Testing assignments and variable aliasing: ***
@@ -11044,8 +10948,6 @@ and this is PHP code, 2+2=4
 ********************************
 
 Tests completed.
-
-
 <html>
 <head>
 *** Testing assignments and variable aliasing: ***
@@ -11271,8 +11173,6 @@ and this is PHP code, 2+2=4
 ********************************
 
 Tests completed.
-
-
 <html>
 <head>
 *** Testing assignments and variable aliasing: ***
@@ -11498,8 +11398,6 @@ and this is PHP code, 2+2=4
 ********************************
 
 Tests completed.
-
-
 <html>
 <head>
 *** Testing assignments and variable aliasing: ***
@@ -11725,4 +11623,3 @@ and this is PHP code, 2+2=4
 ********************************
 
 Tests completed.
-

@@ -191,7 +191,6 @@ if (strlen($ui1) == strlen($ui2) && strlen($ui1) == 19 && $ui1 != $ui2) {
 
 ?>
 --EXPECT--
-
 Testing strtok: passed
 Testing strstr: passed
 Testing strrchr: passed
