@@ -4190,7 +4190,7 @@ PHP_FUNCTION(str_shuffle)
 	*return_value = **arg;
 	zval_copy_ctor(return_value);
 	if (Z_STRLEN_P(return_value) > 1) { 
-		php_string_shuffle(Z_STRVAL_P(return_value), Z_STRLEN_P(return_value) TSRMLS_CC);
+		php_string_shuffle(Z_STRVAL_P(return_value), (long) Z_STRLEN_P(return_value) TSRMLS_CC);
 	}
 }
 /* }}} */
