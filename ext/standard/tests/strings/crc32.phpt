@@ -6,11 +6,11 @@ crc32() function
 <?php
 $input = array("foo", "bar", "baz", "grldsajkopallkjasd");
 foreach($input AS $i) {
-	echo crc32($i)."\n";
+	printf("%u\n", crc32($i));
 }
 ?>
 --EXPECT--
--1938594527
+2356372769
 1996459178
 2015626392
 824412087
