@@ -381,9 +381,9 @@ PHP_FUNCTION(juliantojd)
 	for example both: year '5' and year '5000' product 'ä'.
 	use the numeric one for calculations. 
  */
-static char* heb_number_to_chars(int n)
+static char* heb_number_to_chars(int n, char **ret)
 {
-	char *p, *old, *ret;
+	char *p, *old;
 
 	p = emalloc(10);
 	old = p;
@@ -392,8 +392,11 @@ static char* heb_number_to_chars(int n)
 	   prevents the option breaking the jewish beliefs, and some other 
 	   critical resources ;)
 	   */
-	if (n > 9999 || n < 1)
+	if (n > 9999 || n < 1) {
+		efree(old);
+		*ret = NULL;
 		return NULL;
+	}	
 
 	/* alafim case */
 	if (n / 1000) {
@@ -438,9 +441,10 @@ static char* heb_number_to_chars(int n)
 	}
 
 	*p = '\0';
-	ret = emalloc((int) (p - old) + 1);
-	strncpy(ret, old, (int) (p - old) + 1);
-	return ret;
+	*ret = estrndup(old, (p - old) + 1);
+	p = *ret;
+	efree(old);
+	return p;
 }
 
 /* {{{ proto string jdtojewish(int juliandaycount)
@@ -450,6 +454,7 @@ PHP_FUNCTION(jdtojewish)
 	long julday, fl;
 	int year, month, day;
 	char date[10], hebdate[25];
+	char *dayp, *yearp;
 	
 	if (ZEND_NUM_ARGS() == 1) {
 		if (zend_parse_parameters(1 TSRMLS_CC,"l", &julday) != SUCCESS) {
@@ -475,11 +480,14 @@ PHP_FUNCTION(jdtojewish)
 			RETURN_FALSE;
 		}
 		
-		sprintf(hebdate, "%s %s %s", \
-				heb_number_to_chars(day), \
-				JewishMonthHebName[month], \
-				heb_number_to_chars(year));
+		sprintf(hebdate, "%s %s %s", heb_number_to_chars(day, &dayp), JewishMonthHebName[month], heb_number_to_chars(year, &yearp));
 		
+		if (dayp) {
+			efree(dayp);
+		}
+		if (yearp) {
+			efree(yearp);	
+		}
 		RETURN_STRING(hebdate, 1);
 		
 	}
