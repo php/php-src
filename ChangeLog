@@ -1,3 +1,44 @@
+2005-02-20  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_5_0)
+      NEWS:
+      - BFN & some
+
+    * (PHP_5_0)
+      ext/mbstring/config.m4
+      ext/mbstring/config.w32
+      ext/mbstring/php_mbregex.c
+      ext/mbstring/tests/bug31911.phpt:
+      - MFH: Update libmbfl
+      - MFH: Update oniguruma to 3.7.0.
+
+    * ext/mbstring/tests/bug31911.phpt:
+      
+      - Update libmbfl (fixes bug #30549 and #31911).
+      - Update oniguruma to 3.7.0
+
+    * ext/mbstring/config.m4
+      ext/mbstring/config.w32
+      ext/mbstring/php_mbregex.c:
+      - Update libmbfl (fixes bug #30549 and #31911).
+      - Update oniguruma to 3.7.0
+
+2005-02-20  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/dom/domexception.c
+      ext/dom/php_dom.h:
+      use new error handling when not throwing exceptions
+
+2005-02-20  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/imap/php_imap.c:
+      Simplify Code.
+
+2005-02-20  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_compile.c:
+      Fixed possible memory corruption
+
 2005-02-19  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
 
     * (PHP_5_0)

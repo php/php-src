@@ -1,3 +1,8 @@
+2005-02-20  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_compile.c:
+      Fixed possible memory corruption
+
 2005-02-19  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
 
     * (PHP_5_0)
