@@ -1303,7 +1303,7 @@ PHP_FUNCTION(mysqli_prepare)
 	MYSQL			*mysql;
 	STMT 			*stmt;
 	PR_MYSQL		*prmysql;
-	PR_STMT			*prstmt;
+	PR_STMT			*prstmt = NULL;
 	char			*query = NULL;
 	unsigned int	query_len;
 	zval			*mysql_link;
@@ -1436,7 +1436,7 @@ PHP_FUNCTION(mysqli_real_connect)
 	MYSQLI_FETCH_RESOURCE(mysql, MYSQL *, prmysql, PR_MYSQL *, &mysql_link, "mysqli_link");
 
 	/* remove some insecure options */
-	$flags ^= CLIENT_MULTI_QUERIES;   // don't allow multi_queries via connect parameter
+	flags ^= CLIENT_MULTI_QUERIES;   // don't allow multi_queries via connect parameter
 	if (PG(open_basedir) && strlen(PG(open_basedir))) {
 		flags ^= CLIENT_LOCAL_FILES;
 	}
