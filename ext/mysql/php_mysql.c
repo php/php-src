@@ -102,6 +102,7 @@ static int le_result, le_link, le_plink;
 
 typedef struct _php_mysql_conn {
 	MYSQL conn;
+	MYSQL_RES *active_result;
 } php_mysql_conn;
 
 
@@ -898,130 +899,21 @@ PHP_FUNCTION(mysql_drop_db)
 /* }}} */
 
 
-/* {{{ proto int mysql_query(string query [, int link_identifier] [, int result_mode])
-   Send an SQL query to MySQL */
-PHP_FUNCTION(mysql_query)
+
+
+static void php_mysql_do_query(zval **query, zval **mysql_link, int link_id, zval **db, int use_store, zval *return_value)
 {
-	zval **query, **mysql_link;
-#if 0
-	zval **store_result;
-#endif
-	int id, use_store=MYSQL_STORE_RESULT;
 	php_mysql_conn *mysql;
 	MYSQL_RES *mysql_result;
 	MySLS_FETCH();
 	
-	switch(ZEND_NUM_ARGS()) {
-		case 1:
-			if (zend_get_parameters_ex(1, &query)==FAILURE) {
-				RETURN_FALSE;
-			}
-			id = php_mysql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU MySLS_CC);
-			CHECK_LINK(id);
-			break;
-		case 2:
-			if (zend_get_parameters_ex(2, &query, &mysql_link)==FAILURE) {
-				RETURN_FALSE;
-			}
-			id = -1;
-			break;
-#if 0 /* need to work more on the mysql_store_result() approach */
-	    case 3:
-			if(zend_get_parameters_ex(3, &query, &mysql_link, &store_result)==FAILURE) {
-				RETURN_FALSE;
-			}
-			convert_to_long_ex(store_result);
-			if(Z_LVAL_PP(store_result) == MYSQL_USE_RESULT) {
-				use_store = MYSQL_USE_RESULT;
-			}
-			id = -1;
-			break;
-#endif
-		default:
-			WRONG_PARAM_COUNT;
-			break;
-	}
+	ZEND_FETCH_RESOURCE2(mysql, php_mysql_conn *, mysql_link, link_id, "MySQL-Link", le_link, le_plink);
 	
-	ZEND_FETCH_RESOURCE2(mysql, php_mysql_conn *, mysql_link, id, "MySQL-Link", le_link, le_plink);
-	
-	convert_to_string_ex(query);
-	/* mysql_query binary unsafe, use mysql_real_query */
-#if MYSQL_VERSION_ID > 32199 
-	if (mysql_real_query(&mysql->conn, (*query)->value.str.val, (*query)->value.str.len)!=0) {
-		RETURN_FALSE;
-	}
-#else
-	if (mysql_query(&mysql->conn, (*query)->value.str.val)!=0) {
-		RETURN_FALSE;
-	}
-#endif
-	if(use_store == MYSQL_USE_RESULT) {
-		mysql_result=mysql_use_result(&mysql->conn);
-	} else {
-		mysql_result=mysql_store_result(&mysql->conn);
-	}
-	if (!mysql_result) {
-		if (PHP_MYSQL_VALID_RESULT(&mysql->conn)) { /* query should have returned rows */
-			php_error(E_WARNING, "MySQL:  Unable to save result set");
+	if (db) {
+		convert_to_string_ex(db);
+		if (mysql_select_db(&mysql->conn, (*db)->value.str.val)!=0) {
 			RETURN_FALSE;
-		} else {
-			RETURN_TRUE;
 		}
-	}
-	ZEND_REGISTER_RESOURCE(return_value, mysql_result, le_result);
-}
-/* }}} */
-
-
-/* {{{ proto int mysql_db_query(string database_name, string query [, int link_identifier] [, int result_mode])
-   Send an SQL query to MySQL */
-PHP_FUNCTION(mysql_db_query)
-{
-	zval **db, **query, **mysql_link;
-#if 0
-	zval **store_result;
-#endif
-	int id, use_store=MYSQL_STORE_RESULT;
-	php_mysql_conn *mysql;
-	MYSQL_RES *mysql_result;
-	MySLS_FETCH();
-	
-	switch(ZEND_NUM_ARGS()) {
-		case 2:
-			if (zend_get_parameters_ex(2, &db, &query)==FAILURE) {
-				RETURN_FALSE;
-			}
-			id = php_mysql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU MySLS_CC);
-			CHECK_LINK(id);
-			break;
-		case 3:
-			if (zend_get_parameters_ex(3, &db, &query, &mysql_link)==FAILURE) {
-				RETURN_FALSE;
-			}
-			id = -1;
-			break;
-#if 0
-	    case 4:
-			if(zend_get_parameters_ex(4, &db, &query, &mysql_link, &store_result)==FAILURE) {
-				RETURN_FALSE;
-			}
-			convert_to_long_ex(store_result);
-			if(Z_LVAL_PP(store_result) == MYSQL_USE_RESULT) {
-				use_store = MYSQL_USE_RESULT;
-			}
-			id = -1;
-			break;
-#endif
-		default:
-			WRONG_PARAM_COUNT;
-			break;
-	}
-	
-	ZEND_FETCH_RESOURCE2(mysql, php_mysql_conn *, mysql_link, id, "MySQL-Link", le_link, le_plink);
-	
-	convert_to_string_ex(db);
-	if (mysql_select_db(&mysql->conn, (*db)->value.str.val)!=0) {
-		RETURN_FALSE;
 	}
 	
 	convert_to_string_ex(query);
@@ -1049,6 +941,93 @@ PHP_FUNCTION(mysql_db_query)
 		}
 	}
 	ZEND_REGISTER_RESOURCE(return_value, mysql_result, le_result);
+}
+
+
+
+
+
+/* {{{ proto int mysql_query(string query [, int link_identifier] [, int result_mode])
+   Send an SQL query to MySQL */
+PHP_FUNCTION(mysql_query)
+{
+	zval **query, **mysql_link;
+	zval **store_result;
+	int id, use_store=MYSQL_STORE_RESULT;
+	MySLS_FETCH();
+	
+	switch(ZEND_NUM_ARGS()) {
+		case 1:
+			if (zend_get_parameters_ex(1, &query)==FAILURE) {
+				RETURN_FALSE;
+			}
+			id = php_mysql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU MySLS_CC);
+			CHECK_LINK(id);
+			break;
+		case 2:
+			if (zend_get_parameters_ex(2, &query, &mysql_link)==FAILURE) {
+				RETURN_FALSE;
+			}
+			id = -1;
+			break;
+	    case 3:
+			if(zend_get_parameters_ex(3, &query, &mysql_link, &store_result)==FAILURE) {
+				RETURN_FALSE;
+			}
+			convert_to_long_ex(store_result);
+			if(Z_LVAL_PP(store_result) == MYSQL_USE_RESULT) {
+				use_store = MYSQL_USE_RESULT;
+			}
+			id = -1;
+			break;
+		default:
+			WRONG_PARAM_COUNT;
+			break;
+	}
+	php_mysql_do_query(query, mysql_link, id, NULL, use_store, return_value);
+}
+/* }}} */
+
+
+/* {{{ proto int mysql_db_query(string database_name, string query [, int link_identifier] [, int result_mode])
+   Send an SQL query to MySQL */
+PHP_FUNCTION(mysql_db_query)
+{
+	zval **db, **query, **mysql_link;
+	zval **store_result;
+	int id, use_store=MYSQL_STORE_RESULT;
+	MySLS_FETCH();
+	
+	switch(ZEND_NUM_ARGS()) {
+		case 2:
+			if (zend_get_parameters_ex(2, &db, &query)==FAILURE) {
+				RETURN_FALSE;
+			}
+			id = php_mysql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU MySLS_CC);
+			CHECK_LINK(id);
+			break;
+		case 3:
+			if (zend_get_parameters_ex(3, &db, &query, &mysql_link)==FAILURE) {
+				RETURN_FALSE;
+			}
+			id = -1;
+			break;
+	    case 4:
+			if(zend_get_parameters_ex(4, &db, &query, &mysql_link, &store_result)==FAILURE) {
+				RETURN_FALSE;
+			}
+			convert_to_long_ex(store_result);
+			if(Z_LVAL_PP(store_result) == MYSQL_USE_RESULT) {
+				use_store = MYSQL_USE_RESULT;
+			}
+			id = -1;
+			break;
+		default:
+			WRONG_PARAM_COUNT;
+			break;
+	}
+	
+	php_mysql_do_query(query, mysql_link, id, db, use_store, return_value);
 }
 /* }}} */
 
