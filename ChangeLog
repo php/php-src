@@ -1,3 +1,218 @@
+2002-10-02  David Reid  <dreid@jetnet.co.uk>
+
+    * ext/standard/file.c: Add more BeOS support...
+
+    * main/safe_mode.c: Add some more BeOS support.
+
+2002-10-02  Daniela Mariaschi  <mariaschi@libero.it>
+
+    * ext/interbase/interbase.c:
+    syntax to avoid error while reading data from file in ibase_blob_import
+
+2002-10-02  Jani Taskinen  <sniper@iki.fi>
+
+    * NEWS: stylissimo
+
+    * tests/lang/.cvsignore
+      tests/strings/.cvsignore
+      pear/tests/.cvsignore
+      tests/.cvsignore
+      tests/basic/.cvsignore
+      tests/classes/.cvsignore
+      tests/func/.cvsignore
+      ext/sysvmsg/tests/.cvsignore
+      ext/xml/tests/.cvsignore
+      ext/xslt/tests/.cvsignore
+      ext/zip/tests/.cvsignore
+      ext/zlib/tests/.cvsignore
+      pear/Console/tests/.cvsignore
+      ext/standard/tests/strings/.cvsignore
+      ext/standard/tests/time/.cvsignore
+      ext/standard/tests/versioning/.cvsignore
+      ext/standard/tests/general_functions/.cvsignore
+      ext/standard/tests/math/.cvsignore
+      ext/standard/tests/reg/.cvsignore
+      ext/standard/tests/serialize/.cvsignore
+      ext/standard/tests/.cvsignore
+      ext/standard/tests/aggregation/.cvsignore
+      ext/standard/tests/array/.cvsignore
+      ext/standard/tests/assert/.cvsignore
+      ext/standard/tests/file/.cvsignore
+      ext/pspell/tests/.cvsignore
+      ext/session/tests/.cvsignore
+      ext/skeleton/tests/.cvsignore
+      ext/ncurses/tests/.cvsignore
+      ext/openssl/tests/.cvsignore
+      ext/pcntl/tests/.cvsignore
+      ext/pgsql/tests/.cvsignore
+      ext/iconv/tests/.cvsignore
+      ext/interbase/tests/.cvsignore
+      ext/mbstring/tests/.cvsignore
+      ext/mcrypt/tests/.cvsignore
+      ext/mcve/tests/.cvsignore
+      ext/dbx/tests/.cvsignore
+      ext/dio/tests/.cvsignore
+      ext/domxml/tests/.cvsignore
+      ext/exif/tests/.cvsignore
+      ext/gmp/tests/.cvsignore
+      ext/bz2/tests/.cvsignore
+      ext/crack/tests/.cvsignore
+      ext/ctype/tests/.cvsignore
+      ext/cybermut/tests/.cvsignore
+      ext/db/tests/.cvsignore
+      run-tests.php:
+    unify these files to conform with the new files created by run-tests.php
+
+2002-10-02  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/session/session.c:
+    Fix harmless memory leaks and simplify track_vars_init.
+
+2002-10-02  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * NEWS: Notes about additions to Apache 2 sapi.
+
+2002-10-02  Stig Bakken  <ssb@fast.no>
+
+    * pear/package-PEAR.xml:
+    * we're releasing 1.0 along with PHP 4.3, so this is 1.0RC1
+
+    * pear/PEAR/Command/Remote.php
+      pear/PEAR/Common.php
+      pear/PEAR/Remote.php:
+    * add support for http proxy authorization (thanks Arnaud)
+
+2002-10-02  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * sapi/apache2filter/php_functions.c:
+    Added apache_response_headers(), apache_note(), apache_getenv() and
+    apache_setenv() functions.
+    The getallheaders() is renamed to apache_request_headers() and an
+    getallheaders() is aliased to it.
+    Added a better error reporting mechanism to apache_lookup_uri() and virtual().
+
+2002-10-02  Andrey Hristov  <andrey@webgate.bg>
+
+    * ext/standard/string.c
+      ext/standard/tests/strings/002.phpt: Making strrchr() binary safe.
+    Test case added.
+
+    * ext/standard/string.c: Making strstr() binary safe.
+
+    * ext/standard/string.c:
+    Ws fix. Forgot to add this in the previous commit.
+
+    * ext/standard/string.c: ws fixes.
+
+2002-10-02  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/curl/curl.c:
+    - Added CURLOPT_FTP_USE_EPSV option. (Patch by Alex Howansky
+      <alex@wankwood.com>)
+
+2002-10-02  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * NEWS: Better...
+
+    * main/output.c
+      NEWS: Fix implicit_flush
+
+    * main/output.c:
+    Modified get_status(): Display chunk_size allways and size which is in
+    most cases initial_size as well as block_size only when used.
+
+    * ext/zlib/zlib.c
+      main/output.c:
+    Revisted Wez patch: chunk_size 0 means cahce the whole output. So
+    we must apply the default before calling php_enable_output_compression().
+    I have left the default setting in the rinit function even though i do think
+    it is not necessary.
+
+2002-10-02  Colin Viebrock  <colin@easydns.com>
+
+    * ext/standard/info.c:
+    Fix for SRM module (and maybe others).  Header rows are now not HTML
+    escaped, so make sure you do this yourself in the modules.
+
+2002-10-02  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * main/streams.c: Another missing variable init
+
+    * main/streams.c: Missing variable init
+
+2002-10-02  Harald Radi  <harald.radi+coding.php@nme.at>
+
+    * ext/com/COM.c: fixes bugs #19156 and #19544
+
+2002-10-02  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * acinclude.m4
+      configure.in: Check for C99 conformance of snprintf.
+
+2002-10-02  Sascha Schumann  <sascha@schumann.cx>
+
+    * acinclude.m4:
+    Another Linux x86 system returns ELIMIT so we need to check errno as well
+    before assuming that pread/pwrite work.
+
+    * NEWS: Reflect actual stance wrt cli/cgi
+
+2002-10-02  Yasuo Ohgaki  <yohgaki@ohgaki.net>
+
+    * ext/pgsql/pgsql.c: Fixed pg_escape_typea()
+
+    * ext/pgsql/pgsql.c: Clean up a little.
+
+2002-10-02  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/session/config.m4
+      ext/session/mod_files.c
+      acinclude.m4:
+    The pread/pwrite macros check for a bug in the Linux glibc now.
+    The bug causes the kernel not to return -1/EAGAIN. The new test case
+    has been borrowed from the Linux Test Project.
+
+    This also fixes a bug which apparently caused HAVE_PREAD/WRITE to be
+    defined even if the more complex checks failed (ac_cv_func_NAME=no
+    was set albeit with no difference).
+
+2002-10-02  Yasuo Ohgaki  <yohgaki@ohgaki.net>
+
+    * tests/func/006.phpt:
+    Improve test to show output bufferring bypass bug clearly.
+
+    * ext/pgsql/pgsql.c
+      NEWS: Added pg_unescape_bytea(). Fixed pg_data_seek().
+    php_pgsql_unescape_bytea(PQunescapeBytea) is shamelessly stolen from PostgreSQL 7.3 :)
+
+    * ext/pgsql/mysql_users.php: Add some example functions for mysql users.
+
+    * NEWS: pg_data_seek()
+
+    * ext/pgsql/php_pgsql.h
+      ext/pgsql/pgsql.c: Added pg_data_seek().
+    pg_result_seek() woudl be better name, but there is mysql_data_seek()...
+
+    * ext/pgsql/pgsql.c
+      ext/pgsql/php_pgsql.h
+      NEWS: Added pg_ping()
+
+    * ext/pgsql/php_pgsql.h
+      ext/pgsql/tests/11pg_meta_data.phpt
+      ext/pgsql/tests/11pg_metadata.phpt
+      ext/pgsql/tests/pg_meta_data.inc
+      ext/pgsql/tests/pg_metadata.inc
+      NEWS
+      ext/pgsql/pgsql.c:
+    Rename pg_metadata() to pg_meta_data() to confirm naming standard
+
+2002-10-02  Jani Taskinen  <sniper@iki.fi>
+
+    * run-tests.php:
+    - Run ext/* tests only for those modules that are actually compiled
+      into the php binary. (faster)
+    - Skip search of .phpt files if they are passed as parameters
+
 2002-10-01  Stefan Esser  <s.esser@e-matters.de>
 
     * ext/standard/filestat.c: repairing the chaos
