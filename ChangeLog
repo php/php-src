@@ -2,7 +2,9 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? 1999, Version 4.0 Beta 3
-- Small fix in deserializing objects (Thies)
+- Added "wddx" serialization handler for session module (Sascha)
+  (automatically enabled, if you compile with --with-wddx)
+- Fixed deserializing objects (Thies)
 - PHP4 now serialized Objects as 'O' (not understood by PHP3), but deserializes
   PHP3 serialized objects as expected. (Thies)
 - Made serialize/unserialize work on classes. If the class is known at 
