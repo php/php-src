@@ -36,7 +36,7 @@
 #define USE_ORIGINAL_MANAGER_FUNCS
 
 #include "php_pspell.h"
-#include <pspell/pspell.h>
+#include <pspell.h>
 #include "ext/standard/info.h"
 
 #define PSPELL_FAST 1L
