@@ -1090,7 +1090,7 @@ PHP_FUNCTION(odbc_exec)
 }
 /* }}} */
 
-/* {{{ proto int odbc_fetch_into(int result_id, array result_array [, int rownumber])
+/* {{{ proto int odbc_fetch_into(int result_id [, int rownumber], array result_array)
    Fetch one result row into an array */ 
 PHP_FUNCTION(odbc_fetch_into)
 {
