@@ -84,8 +84,8 @@ PHP_RSHUTDOWN_FUNCTION(readline)
 }
 
 /* }}} */
-/* {{{ proto string readline([string prompt]) */
-
+/* {{{ proto string readline([string prompt]) 
+   Reads a line */
 PHP_FUNCTION(readline)
 {
 	char *result;
@@ -108,8 +108,8 @@ PHP_FUNCTION(readline)
 }
 
 /* }}} */
-/* {{{ proto array|long|string readline_info([string varname][, string newvalue ]) 
- gets/sets various internal readline variables. */
+/* {{{ proto mixed readline_info([string varname] [, string newvalue]) 
+   Gets/sets various internal readline variables. */
 
 #define SAFE_STRING(s) ((s)?(s):"")
 
@@ -199,8 +199,8 @@ PHP_FUNCTION(readline_info)
 }
 
 /* }}} */
-/* {{{ proto void readline_add_history([string prompt]) */
-
+/* {{{ proto void readline_add_history([string prompt]) 
+   Adds a line to the history */
 PHP_FUNCTION(readline_add_history)
 {
 	pval **arg;
@@ -217,8 +217,8 @@ PHP_FUNCTION(readline_add_history)
 }
 
 /* }}} */
-/* {{{ proto void readline_clear_history() */
-
+/* {{{ proto void readline_clear_history(void) 
+   Clears the history */
 PHP_FUNCTION(readline_clear_history)
 {
 	int ac = ARG_COUNT(ht);
@@ -233,8 +233,8 @@ PHP_FUNCTION(readline_clear_history)
 }
 
 /* }}} */
-/* {{{ proto array readline_list_history() */
-
+/* {{{ proto array readline_list_history(void) 
+   Lists the history */
 PHP_FUNCTION(readline_list_history)
 {
 	HIST_ENTRY **history;
@@ -257,8 +257,8 @@ PHP_FUNCTION(readline_list_history)
 }
 
 /* }}} */
-/* {{{ proto int readline_read_history([string filename][,int from][,int to]) */
-
+/* {{{ proto int readline_read_history([string filename] [, int from] [,int to]) 
+   Reads the history */
 PHP_FUNCTION(readline_read_history)
 {
 	pval **arg;
@@ -284,8 +284,8 @@ PHP_FUNCTION(readline_read_history)
 }
 
 /* }}} */
-/* {{{ proto int readline_write_history([string filename]) */
-
+/* {{{ proto int readline_write_history([string filename]) 
+   Writes the history */
 PHP_FUNCTION(readline_write_history)
 {
 	pval **arg;
@@ -309,9 +309,9 @@ PHP_FUNCTION(readline_write_history)
 }
 
 /* }}} */
-/* {{{ proto void readline_completion_function(string funcname) */
-
-char *test[] = { "bleibt", "da", "helfen", "keine", "pillen", "und" , "heissen", "umsclaege","hallo", "pallo", "thies", "ist", "doof", "tubu", "tata",0 };
+/* {{{ proto void readline_completion_function(string funcname) 
+   Readline completion function? */
+char *test[] = { "bleibt", "da", "helfen", "keine", "pillen", "und" , "heissen", "umschlaege","hallo", "pallo", "egon", "thies", "ist", "doof", "tubu", "tata", 0 };
 
 static char *_readline_command_generator(char *text,int state)
 {
