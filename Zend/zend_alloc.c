@@ -326,7 +326,7 @@ ZEND_API void start_memory_manager(void)
 ZEND_API void shutdown_memory_manager(int silent, int clean_cache)
 {
 	mem_header *p, *t;
-#ifdef ZEND_DEBUG
+#if ZEND_DEBUG
 	int had_leaks=0;
 #endif
 	ALS_FETCH();

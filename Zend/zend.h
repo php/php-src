@@ -47,7 +47,7 @@
 #include "config.unix.h"
 #endif
 
-#ifdef ZEND_DEBUG
+#if ZEND_DEBUG
 #define ZEND_FILE_LINE_D				char *__zend_filename, uint __zend_lineno
 #define ZEND_FILE_LINE_DC				, ZEND_FILE_LINE_D
 #define ZEND_FILE_LINE_ORIG_D			char *__zend_orig_filename, uint __zend_orig_lineno

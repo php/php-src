@@ -78,15 +78,9 @@ ZEND_API int zend_get_resource_handle();
 #define ZTS_V 0
 #endif
 
-#ifdef ZEND_DEBUG
-#define ZEND_DEBUG_V 1
-#else
-#define ZEND_DEBUG_V 0
-#endif
-
 
 #define ZEND_EXTENSION()	\
-	ZEND_EXT_API zend_extension_version_info extension_version_info = { ZEND_EXTENSION_API_NO, "0.90", ZTS_V, ZEND_DEBUG_V }
+	ZEND_EXT_API zend_extension_version_info extension_version_info = { ZEND_EXTENSION_API_NO, "0.90", ZTS_V, ZEND_DEBUG }
 
 #define STANDARD_ZEND_EXTENSION_PROPERTIES NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, -1
 
