@@ -143,6 +143,7 @@ static int mysql_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len, 
 	S->H = H;
 	stmt->driver_data = S;
 	stmt->methods = &mysql_stmt_methods;
+	stmt->supports_placeholders = PDO_PLACEHOLDER_NONE;
 	
 	return 1;
 }
@@ -287,7 +288,6 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 	H->attached = 1;
 
 	dbh->alloc_own_columns = 1;
-	dbh->supports_placeholders = 0;
 	dbh->max_escaped_char_length = 2;
 	dbh->methods = &mysql_methods;
 

@@ -315,7 +315,8 @@ static PHP_METHOD(PDOStatement, execute)
 		}
 	}
 
-	if (!stmt->dbh->supports_placeholders) {
+	/* TODO: handle the non-native types too... doh. */
+	if (PDO_PLACEHOLDER_NONE == stmt->supports_placeholders) {
 		int error_pos;
 		/* handle the emulated parameter binding,
          * stmt->active_query_string holds the query with binds expanded and 

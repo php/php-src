@@ -91,6 +91,7 @@ static int dblib_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len, 
 	S->H = H;
 	stmt->driver_data = S;
 	stmt->methods = &dblib_stmt_methods;
+	stmt->supports_placeholders = PDO_PLACEHOLDER_NONE;
 	S->err.sqlstate = stmt->error_code;
 
 	return 1;
@@ -220,7 +221,6 @@ static int pdo_dblib_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 	}
 
 	ret = 1;
-	dbh->supports_placeholders = 0;
 	dbh->max_escaped_char_length = 2;
 	dbh->alloc_own_columns = 1;
 

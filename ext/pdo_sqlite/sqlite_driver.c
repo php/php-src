@@ -122,6 +122,7 @@ static int sqlite_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len,
 	S->H = H;
 	stmt->driver_data = S;
 	stmt->methods = &sqlite_stmt_methods;
+	stmt->supports_placeholders = PDO_PLACEHOLDER_POSITIONAL;
 
 	if (PDO_CURSOR_FWDONLY != pdo_attr_lval(driver_options, PDO_ATTR_CURSOR, PDO_CURSOR_FWDONLY TSRMLS_CC)) {
 		H->einfo.errcode = SQLITE_ERROR;
@@ -356,7 +357,6 @@ static int pdo_sqlite_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS
 	sqlite3_busy_timeout(H->db, timeout * 1000);
 
 	dbh->alloc_own_columns = 1;
-	dbh->supports_placeholders = PDO_PLACEHOLDER_POSITIONAL;
 	dbh->max_escaped_char_length = 2;
 
 	ret = 1;

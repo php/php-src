@@ -35,7 +35,7 @@ struct pdo_bound_param_data;
 # define FALSE 0
 #endif
 
-#define PDO_DRIVER_API	20050111
+#define PDO_DRIVER_API	20050117
 
 enum pdo_param_type {
 	PDO_PARAM_NULL,
@@ -326,6 +326,12 @@ typedef int (*pdo_stmt_get_attr_func)(pdo_stmt_t *stmt, long attr, zval *val TSR
  */
 typedef int (*pdo_stmt_get_column_meta_func)(pdo_stmt_t *stmt, long colno, zval *return_value TSRMLS_DC);
 
+/* advances the statement to the next rowset of the batch.
+ * If it returns 1, PDO will tear down its idea of columns
+ * and meta data.  If it returns 0, PDO will indicate an error
+ * to the caller. */
+typedef int (*pdo_stmt_next_rowset_func)(pdo_stmt_t *stmt TSRMLS_DC);
+
 struct pdo_stmt_methods {
 	pdo_stmt_dtor_func			dtor;
 	pdo_stmt_execute_func		executer;
@@ -336,6 +342,7 @@ struct pdo_stmt_methods {
 	pdo_stmt_set_attr_func		set_attribute;
 	pdo_stmt_get_attr_func		get_attribute;
 	pdo_stmt_get_column_meta_func get_column_meta;
+	pdo_stmt_next_rowset_func		next_rowset;
 };
 
 /* }}} */
@@ -382,11 +389,6 @@ struct _pdo_dbh_t {
 	 * the columns that are returned */
 	unsigned alloc_own_columns:1;
 
-	/* if true, the driver supports placeholders and can implement
-	 * bindParam() for its prepared statements, if false, PDO should
-	 * emulate prepare and bind on its behalf */
-	unsigned supports_placeholders:2;
-
 	/* if true, commit or rollBack is allowed to be called */
 	unsigned in_txn:1;
 
@@ -398,7 +400,7 @@ struct _pdo_dbh_t {
 
 	/* the sum of the number of bits here and the bit fields preceeding should
 	 * equal 32 */
-	unsigned _reserved_flags:21;
+	unsigned _reserved_flags:23;
 
 	/* data source string used to open this handle */
 	const char *data_source;
@@ -456,7 +458,12 @@ struct _pdo_stmt_t {
 	/* if true, we've already successfully executed this statement at least
 	 * once */
 	unsigned executed:1;
-	unsigned _reserved:31;
+	/* if true, the statement supports placeholders and can implement
+	 * bindParam() for its prepared statements, if false, PDO should
+	 * emulate prepare and bind on its behalf */
+	unsigned supports_placeholders:2;
+
+	unsigned _reserved:29;
 
 	/* the number of columns in the result set; not valid until after
 	 * the statement has been executed at least once.  In some cases, might

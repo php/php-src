@@ -171,6 +171,7 @@ static int odbc_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len, p
 	
 	stmt->driver_data = S;
 	stmt->methods = &odbc_stmt_methods;
+	stmt->supports_placeholders = PDO_PLACEHOLDER_POSITIONAL;
 	
 	return 1;
 }
@@ -357,7 +358,6 @@ static int pdo_odbc_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_D
 
 	dbh->methods = &odbc_methods;
 	dbh->alloc_own_columns = 1;
-	dbh->supports_placeholders = PDO_PLACEHOLDER_POSITIONAL;
 	
 	return 1;
 }
