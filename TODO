@@ -21,6 +21,8 @@ global
       they should print a warning or be not even defined!
     * banish the legacy of php3_ prefixes
     * implement javadoc based function docs template system
+    * use thread-safe resolver functions (either require BIND 8 or adns)
+    * provide optional IPv6 support
 
 documentation
 -------------
