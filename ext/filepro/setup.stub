@@ -1,5 +1,0 @@
-# $Source$
-# $Id$
-
-define_option with-filepro 'filePro support? ' yesno no \
-'    Whether to use the bundled filePro library.  Read-access only.'

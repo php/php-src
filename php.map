@@ -1,4 +1,0 @@
-PHP4 {
-global: php4_module;
-local: *;
-};
