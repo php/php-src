@@ -824,12 +824,11 @@ PHP_FUNCTION(putenv)
 		PLS_FETCH();
 		
 		pe.putenv_string = estrndup((*str)->value.str.val,(*str)->value.str.len);
-		pe.key = (*str)->value.str.val;
+		pe.key = estrndup((*str)->value.str.val, (*str)->value.str.len);
 		if ((p=strchr(pe.key,'='))) { /* nullify the '=' if there is one */
 			*p='\0';
 		}
 		pe.key_len = strlen(pe.key);
-		pe.key = estrndup(pe.key,pe.key_len);
 		
 		if (PG(safe_mode)) {
 			/* Check the protected list */
