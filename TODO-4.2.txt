@@ -11,6 +11,9 @@
 
 * Clean up "$instance = &new object" syntax (default to the =& behaviour?).
 
+* Allow to set a default value for call-by-reference-parameters. eg:
+  function hallo (&$pallo = NULL) {}
+
 * Change PHP error messages, so that they point to pages or sections in the
   PHP Manual.
 
