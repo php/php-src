@@ -1043,7 +1043,7 @@ static int php_sybase_fetch_result_row (sybase_result *result, int numrows)
 			result->data = (zval **) erealloc(result->data, sizeof(zval *)*SYBASE_ROWS_BLOCK*(++result->blocks_initialized));
 		}
 		if (result->store || 1 == result->num_rows) {
-			result->data[i] = (zval *) emalloc(sizeof(zval)*result->num_fields);
+			result->data[i] = (zval *) safe_emalloc(sizeof(zval), result->num_fields, 0);
 		}
 
 		for (j=0; j<result->num_fields; j++) {
@@ -1104,7 +1104,7 @@ static sybase_result * php_sybase_fetch_result_set (sybase_link *sybase_ptr, int
 	}
 	
 	result = (sybase_result *) emalloc(sizeof(sybase_result));
-	result->data = (zval **) emalloc(sizeof(zval *)*SYBASE_ROWS_BLOCK);
+	result->data = (zval **) safe_emalloc(sizeof(zval *), SYBASE_ROWS_BLOCK, 0);
 	result->fields = NULL;
 	result->sybase_ptr = sybase_ptr;
 	result->cur_field=result->cur_row=result->num_rows=0;
@@ -1112,12 +1112,12 @@ static sybase_result * php_sybase_fetch_result_set (sybase_link *sybase_ptr, int
 	result->last_retcode = 0;
 	result->store= store;
 	result->blocks_initialized= 1;
-	result->tmp_buffer = (char **) emalloc(sizeof(char *)*num_fields);
-	result->lengths = (CS_INT *) emalloc(sizeof(CS_INT)*num_fields);
-	result->indicators = (CS_SMALLINT *) emalloc(sizeof(CS_INT)*num_fields);
-	result->datafmt = (CS_DATAFMT *) emalloc(sizeof(CS_DATAFMT)*num_fields);
-	result->numerics = (unsigned char *) emalloc(sizeof(unsigned char)*num_fields);
-	result->types = (CS_INT *) emalloc(sizeof(CS_INT)*num_fields);
+	result->tmp_buffer = (char **) safe_emalloc(sizeof(char *), num_fields, 0);
+	result->lengths = (CS_INT *) safe_emalloc(sizeof(CS_INT), num_fields, 0);
+	result->indicators = (CS_SMALLINT *) safe_emalloc(sizeof(CS_INT), num_fields, 0);
+	result->datafmt = (CS_DATAFMT *) safe_emalloc(sizeof(CS_DATAFMT), num_fields, 0);
+	result->numerics = (unsigned char *) safe_emalloc(sizeof(unsigned char), num_fields, 0);
+	result->types = (CS_INT *) safe_emalloc(sizeof(CS_INT), num_fields, 0);
 	
 	for (i=0; i<num_fields; i++) {
 		ct_describe(sybase_ptr->cmd, i+1, &result->datafmt[i]);
@@ -1181,7 +1181,7 @@ static sybase_result * php_sybase_fetch_result_set (sybase_link *sybase_ptr, int
 		ct_bind(sybase_ptr->cmd, i+1, &result->datafmt[i], result->tmp_buffer[i], &result->lengths[i], &result->indicators[i]);
 	}
 
-	result->fields = (sybase_field *) emalloc(sizeof(sybase_field)*num_fields);
+	result->fields = (sybase_field *) safe_emalloc(sizeof(sybase_field), num_fields, 0);
 	j=0;
 	for (i=0; i<num_fields; i++) {
 		char computed_buf[16];
@@ -1334,7 +1334,7 @@ static void php_sybase_query (INTERNAL_FUNCTION_PARAMETERS, int buffered)
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Sybase:  Cannot read results");
 			RETURN_FALSE;
 		}
-    
+
 		switch ((int) restype) {
 			case CS_CMD_FAIL:
 			default:
@@ -1478,7 +1478,7 @@ static void php_sybase_query (INTERNAL_FUNCTION_PARAMETERS, int buffered)
 	}
 
 	/* Indicate we have data in case of buffered queries */
-    id= ZEND_REGISTER_RESOURCE(return_value, result, le_result);
+	id = ZEND_REGISTER_RESOURCE(return_value, result, le_result);
 	sybase_ptr->active_result_index= buffered ? id : 0;
 }
 
@@ -2057,7 +2057,7 @@ PHP_FUNCTION(sybase_set_message_handler)
 		WRONG_PARAM_COUNT;
 	}
 	
-	params = emalloc(sizeof(zval **) * argc);
+	params = safe_emalloc(sizeof(zval **), argc, 0);
 
 	if (zend_get_parameters_array_ex(argc, params) == FAILURE) {
 		efree(params);
