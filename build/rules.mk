@@ -49,7 +49,7 @@ clean-modules:
 
 clean-x:
 	rm -f $(targets) *.lo *.slo *.la *.o $(CLEANFILES)
-	rm -rf .libs libs
+	rm -rf .libs libs/*
 
 distclean: distclean-recursive clean-x
 	rm -f config.cache config.log config.status config_vars.mk libtool \
