@@ -1,3 +1,55 @@
+2003-10-13  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * (PHP_4_3)
+      ext/gmp/gmp.c:
+      Unintialized variable fix from Joe Orton.
+
+    * ext/gmp/gmp.c:
+      unintialized variable.
+      Patch by Joe Orton
+
+    * ext/openssl/openssl.c:
+      Fix unintialized variable.
+      Patch by Joe Orton.
+
+    * (PHP_4_3)
+      ext/openssl/openssl.c:
+      Fix uninitialized value.
+      Patch from Joe Orton.
+
+2003-10-13  Derick Rethans  <php@derickrethans.nl>
+
+    * EXTENSIONS
+      EXTENSIONS
+      ext/mcrypt/mcrypt.c
+      ext/mcrypt/mcrypt.c
+      ext/mcrypt/php_mcrypt.h
+      ext/mcrypt/php_mcrypt.h:
+      - Email address change
+
+2003-10-13  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      ext/standard/url.c
+      ext/standard/tests/strings/url_t.phpt:
+      MFH: Fixed bug #25800 (parse_url() could not parse urls with empty port).
+
+    * ext/standard/url.c
+      ext/standard/tests/strings/url_t.phpt:
+      Fixed bug #25800 (parse_url() could not parse urls with empty port).
+
+    * ext/standard/mail.c:
+      Remove sendmail patch check.
+
+2003-10-13  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/com_dotnet/com_handlers.c
+      ext/com_dotnet/php_com_dotnet_internal.h:
+      Fix possible segfault (this one came up when a method could not be found).
+      Add a couple of headers used by another file that is not yet ready to
+      commit.
+
 2003-10-12  Jani Taskinen  <jani.taskinen@kolumbus.fi>
 
     * (PHP_4_3)
