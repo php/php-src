@@ -1,3 +1,48 @@
+2002-02-21  Stefan Esser  <s.esser@e-matters.de>
+
+    * main/rfc1867.c: fixing boundary check before someone other does it...
+
+2002-02-21  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * ext/standard/math.c
+      ext/standard/php_math.h
+      ext/standard/basic_functions.c: Added fmod() function
+
+2002-02-21  Mika Tuupola  <tuupola@appelsiini.net>
+
+    * pear/File/Find.php:
+    * Update PHPDoc.
+
+2002-02-21  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * win32/php4dllts.dsp
+      win32/php4dll.dsp: Add aggregation to Win32 build.
+
+2002-02-21  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/standard/basic_functions.h
+      ext/standard/php_standard.h
+      ext/standard/tests/aggregation/.cvsignore
+      ext/standard/tests/aggregation/aggregate.lib.php
+      ext/standard/tests/aggregation/aggregate.phpt
+      ext/standard/tests/aggregation/aggregate_methods.phpt
+      ext/standard/tests/aggregation/aggregate_methods_by_list.phpt
+      ext/standard/tests/aggregation/aggregate_methods_by_regexp.phpt
+      ext/standard/tests/aggregation/aggregate_properties.phpt
+      ext/standard/tests/aggregation/aggregate_properties_by_list.phpt
+      ext/standard/tests/aggregation/aggregate_properties_by_regexp.phpt
+      ext/standard/tests/aggregation/aggregation_info.phpt
+      ext/standard/tests/aggregation/deaggregate.phpt
+      ext/standard/aggregation.c
+      ext/standard/aggregation.h
+      ext/standard/basic_functions.c
+      ext/standard/Makefile.in
+      NEWS: Adding object aggregation capability along with tests.
+
+2002-02-21  Sean Bright  <elixer@erols.com>
+
+    * acinclude.m4: Fix for bug #15605
+
 2002-02-20  Christian Stocker  <chregu@phant.ch>
 
     * ext/domxml/php_domxml.c: "o|a|b" is not valid ZE code. changed to "o|ab"
