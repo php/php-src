@@ -1570,12 +1570,24 @@ PHP_FUNCTION(stripos)
    Finds position of last occurrence of a string within another string */
 PHP_FUNCTION(strrpos)
 {
+	zval *zneedle;
 	char *needle, *haystack;
 	int needle_len, haystack_len, offset = 0;
-	char *p, *e;
+	char *p, *e, ord_needle[2];
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|l", &haystack, &haystack_len, &needle, &needle_len, &offset) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz|l", &haystack, &haystack_len, &zneedle, &offset) == FAILURE) {
 		RETURN_FALSE;
+	}
+
+	if (Z_TYPE_P(zneedle) == IS_STRING) {
+		needle = Z_STRVAL_P(zneedle);
+		needle_len = Z_STRLEN_P(zneedle);
+	} else {
+		convert_to_long(zneedle);
+		ord_needle[0] = (char)(Z_LVAL_P(zneedle) & 0xFF);
+		ord_needle[1] = '\0';
+		needle = ord_needle;
+		needle_len = 1;
 	}
 
 	if ((haystack_len == 0) || (needle_len == 0)) {
@@ -1609,13 +1621,25 @@ PHP_FUNCTION(strrpos)
    Finds position of last occurrence of a string within another string */
 PHP_FUNCTION(strripos)
 {
+	zval *zneedle;
 	char *needle, *haystack;
 	int needle_len, haystack_len, offset = 0;
-	char *p, *e;
+	char *p, *e, ord_needle[2];
 	char *needle_dup, *haystack_dup;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|l", &haystack, &haystack_len, &needle, &needle_len, &offset) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz|l", &haystack, &haystack_len, &zneedle, &offset) == FAILURE) {
 		RETURN_FALSE;
+	}
+
+	if (Z_TYPE_P(zneedle) == IS_STRING) {
+		needle = Z_STRVAL_P(zneedle);
+		needle_len = Z_STRLEN_P(zneedle);
+	} else {
+		convert_to_long(zneedle);
+		ord_needle[0] = (char)(Z_LVAL_P(zneedle) & 0xFF);
+		ord_needle[1] = '\0';
+		needle = ord_needle;
+		needle_len = 1;
 	}
 
 	if ((haystack_len == 0) || (needle_len == 0)) {
