@@ -1676,7 +1676,6 @@ PHPAPI int php_stream_context_set_option(php_stream_context *context,
 			return FAILURE;
 		}
 
-		ZVAL_ADDREF(optionvalue);
 		wrapperhash = &category;
 	}
 	return zend_hash_update(Z_ARRVAL_PP(wrapperhash), (char*)optionname, strlen(optionname)+1, (void**)&copied_val, sizeof(zval *), NULL);

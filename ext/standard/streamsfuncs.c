@@ -650,7 +650,6 @@ static int parse_context_options(php_stream_context *context, zval *options)
 			while (SUCCESS == zend_hash_get_current_data_ex(Z_ARRVAL_PP(wval), (void**)&oval, &opos)) {
 
 				if (HASH_KEY_IS_STRING == zend_hash_get_current_key_ex(Z_ARRVAL_PP(wval), &okey, &okey_len, NULL, 0, &opos)) {
-					ZVAL_ADDREF(*oval);
 					php_stream_context_set_option(context, wkey, okey, *oval);
 				}
 				zend_hash_move_forward_ex(Z_ARRVAL_PP(wval), &opos);
