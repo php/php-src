@@ -846,7 +846,6 @@ ZEND_API int zend_set_hash_symbol(zval *symbol, char *name, int name_length,
     if (num_symbol_tables <= 0) return FAILURE;
 
     symbol->is_ref = is_ref;
-    symbol->refcount = 0;
 
     va_start(symbol_table_list, num_symbol_tables);
     while(num_symbol_tables-- > 0) {
