@@ -2681,7 +2681,6 @@ PHP_FUNCTION(array_splice)
 {
 	zval	   **args,				/* Function arguments array */
 				*array;				/* Input array */
-	HashTable	*removed = NULL,	/* Hash for removed elements */
 				*new_hash = NULL;	/* Output array's hash */
 	int			 argc,				/* Number of function arguments */
 				 offset,
