@@ -96,7 +96,19 @@ SOURCE=.\mbfilter.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\mbfilter_cn.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\mbfilter_ja.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\mbfilter_kr.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\mbfilter_tw.c
 # End Source File
 # Begin Source File
 
@@ -124,7 +136,19 @@ SOURCE=.\mbfilter.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\mbfilter_cn.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\mbfilter_ja.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\mbfilter_kr.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\mbfilter_tw.h
 # End Source File
 # Begin Source File
 
@@ -137,6 +161,18 @@ SOURCE=.\mbstring.h
 # Begin Source File
 
 SOURCE=.\unicode_table.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\unicode_table_cn.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\unicode_table_kr.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\unicode_table_tw.h
 # End Source File
 # End Group
 # End Target
