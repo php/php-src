@@ -23,7 +23,8 @@
 #define _PHP_DIR_H
 
 /* directory functions */
-extern PHP_MINIT_FUNCTION(dir);
+PHP_MINIT_FUNCTION(dir);
+PHP_RINIT_FUNCTION(dir);
 PHP_FUNCTION(opendir);
 PHP_FUNCTION(closedir);
 PHP_FUNCTION(chdir);
