@@ -1,3 +1,17 @@
+2002-09-19  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * zend_ini.c: - Make Colin happy
+
+2002-09-19  Zeev Suraski  <zeev@zend.com>
+
+    * zend.c
+      zend.h
+      zend_execute_API.c: MFZE1 - connection_status() fix
+
+    * zend.c: Fix non ZTS build
+
+    * zend.c: Fix that obscure crash in Debug_TS mode
+
 2002-09-18  Zeev Suraski  <zeev@zend.com>
 
     * zend.c:

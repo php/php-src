@@ -1,3 +1,85 @@
+2002-09-19  Colin Viebrock  <colin@easydns.com>
+
+    * sapi/apache/php_apache.c
+      ext/standard/config.m4
+      ext/standard/css.c
+      ext/standard/css.h
+      ext/standard/info.c
+      main/php_ini.c
+      sapi/aolserver/aolserver.c:
+    Change phpinfo() to use CSS styling instead of HTML code.
+
+    It doesn't render as nicely as it used to on older browsers, but it
+    does result in smaller files, and opens the door to using your own CSS
+    to style it differently.
+
+    There is a patch to Zend/zend_ini.c, but I don't have enough Karma, so
+    Derick has the patch.
+
+    * ext/calendar/cal_unix.c
+      ext/calendar/calendar.c
+      ext/calendar/easter.c: change my email address
+
+2002-09-19  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/sysvmsg/config.m4: Fixed bug #19504
+    Alligned 'Enable sysvmsg support' message.
+
+2002-09-19  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/exif/config.m4
+      ext/hwapi/config.m4
+      ext/mbstring/config.m4
+      ext/mime_magic/config.m4: - Align configure --help messages
+
+2002-09-19  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/exec.c
+      ext/standard/exec.h: Fixed bug #19313
+    Fixed argument count check for system/exec/passthru functions
+    Added a check to system/exec/passthru functions to make sure execution
+    parameter is not blank before attempting to execute it.
+
+    * ext/standard/datetime.c: Fixed bug #19414
+
+2002-09-19  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * EXTENSIONS: - Add fribidi extension
+
+    * ext/imap/php_imap.c: - Fix typo
+
+2002-09-19  Zeev Suraski  <zeev@zend.com>
+
+    * ext/standard/basic_functions.c:
+    Fix the last part of bug #13982 (ignore_user_abort() settings were 'leaking'
+    between requests)
+
+    * main/main.c: Fix connection_status()
+
+2002-09-19  Dan Kalowsky  <dank@deadmime.org>
+
+    * TODO: adding ODBC todo's
+
+2002-09-19  Adam Dickmeiss  <adam@indexdata.dk>
+
+    * ext/yaz/php_yaz.c:
+    Remove compatibility for old YAZ versions (use ZOOM API only)
+
+    * ext/yaz/php_yaz.c: New option for yaz_connect: charset
+
+2002-09-19  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/dba/config.m4
+      ext/dba/dba_cdb.c
+      ext/dba/install_cdb.sh: Add support for cdb-0.75
+
+    The install_cdb.sh script fills the gap of installing header files and
+    creating a cdb library which programs can link against.
+
+2002-09-19  Dan Kalowsky  <dank@deadmime.org>
+
+    * ext/imap/php_imap.c: white space fix
+
 2002-09-18  Zeev Suraski  <zeev@zend.com>
 
     * win32/php4dllts.dsp:
