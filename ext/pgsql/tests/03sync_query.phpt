@@ -38,8 +38,14 @@ pg_result_error_field($result, PGSQL_DIAG_MESSAGE_PRIMARY);
 pg_result_error_field($result, PGSQL_DIAG_MESSAGE_DETAIL);
 pg_result_error_field($result, PGSQL_DIAG_MESSAGE_HINT);
 pg_result_error_field($result, PGSQL_DIAG_STATEMENT_POSITION);
-pg_result_error_field($result, PGSQL_DIAG_INTERNAL_POSITION);
-pg_result_error_field($result, PGSQL_DIAG_INTERNAL_QUERY);
+if (defined('PGSQL_DIAG_INTERNAL_POSITION'))
+{
+	pg_result_error_field($result, PGSQL_DIAG_INTERNAL_POSITION);
+}
+if (defined('PGSQL_DIAG_INTERNAL_QUERY'))
+{
+	pg_result_error_field($result, PGSQL_DIAG_INTERNAL_QUERY);
+}
 pg_result_error_field($result, PGSQL_DIAG_CONTEXT);
 pg_result_error_field($result, PGSQL_DIAG_SOURCE_FILE);
 pg_result_error_field($result, PGSQL_DIAG_SOURCE_LINE);
