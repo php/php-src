@@ -76,15 +76,11 @@ sure that you also export these variables to the build process.
 
 Specific examples:
 
-Solaris + gcc: Set LDFLAGS to
-'-L/usr/local/egcs/lib/gcc-lib/sparc-sun-solaris2.7/egcs-2.91.66
- -L/usr/local/egcs/lib' (your paths may vary)
-EXTRA_LIBS should be '-lgcc'
+Solaris + gcc:
+Ensure you run ./configure with the `--enable-libgcc' parameter. You
+may need to set LDFLAGS to '-L/usr/local/egcs/lib' (path depends on
+your gcc installation)
 
-FreeBSD 4.0 + gcc: Set EXTRA_LIBS to '-lc_r_p -lgcc'
-
-Linux/Alpha: Set EXTRA_LIBS to '-lstdc++-3-libc6.1-2-2.10.0'
-             (change as appropriate to the stdc++ in /usr/lib)
 
 
 For more information and help with Zeus, please visit our website:
