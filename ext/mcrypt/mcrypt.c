@@ -1184,7 +1184,7 @@ PHP_FUNCTION(mcrypt_get_cipher_name)
 /* }}} */
 
 
-static void php_mcrypt_do_crypt (char* cipher, zval **key, zval **data, char *mode, zval **iv, int argc, int dencrypt, zval* return_value)
+static void php_mcrypt_do_crypt (char* cipher, zval **key, zval **data, char *mode, zval **iv, int argc, int dencrypt, zval* return_value TSRMLS_DC)
 {
 	char *cipher_dir_string;
 	char *module_dir_string;
@@ -1194,7 +1194,7 @@ static void php_mcrypt_do_crypt (char* cipher, zval **key, zval **data, char *mo
 	char *key_s = NULL, *iv_s;
 	char *data_s;
 	MCRYPT td;
-
+	
 	MCRYPT_GET_INI
 
 	td = mcrypt_module_open (
@@ -1309,7 +1309,7 @@ PHP_FUNCTION(mcrypt_encrypt)
 
 	MCRYPT_CONVERT;
 
-	php_mcrypt_do_crypt (Z_STRVAL_PP(cipher), key, data, Z_STRVAL_PP(mode), iv, argc, MCRYPT_ENCRYPT, return_value);
+	php_mcrypt_do_crypt (Z_STRVAL_PP(cipher), key, data, Z_STRVAL_PP(mode), iv, argc, MCRYPT_ENCRYPT, return_value TSRMLS_CC);
 }
 /* }}} */
 
@@ -1327,7 +1327,7 @@ PHP_FUNCTION(mcrypt_decrypt)
 
 	MCRYPT_CONVERT;
 
-	php_mcrypt_do_crypt (Z_STRVAL_PP(cipher), key, data, Z_STRVAL_PP(mode), iv, argc, MCRYPT_DECRYPT, return_value);
+	php_mcrypt_do_crypt (Z_STRVAL_PP(cipher), key, data, Z_STRVAL_PP(mode), iv, argc, MCRYPT_DECRYPT, return_value TSRMLS_CC);
 }
 /* }}} */
 
@@ -1346,7 +1346,7 @@ PHP_FUNCTION(mcrypt_ecb)
 	MCRYPT_CONVERT_WO_MODE;
 	convert_to_long_ex(mode);
 
-	php_mcrypt_do_crypt (Z_STRVAL_PP(cipher), key, data, "ecb", iv, argc, Z_LVAL_PP(mode), return_value);
+	php_mcrypt_do_crypt (Z_STRVAL_PP(cipher), key, data, "ecb", iv, argc, Z_LVAL_PP(mode), return_value TSRMLS_CC);
 }
 /* }}} */
 
@@ -1365,7 +1365,7 @@ PHP_FUNCTION(mcrypt_cbc)
 	MCRYPT_CONVERT_WO_MODE;
 	convert_to_long_ex(mode);
 
-	php_mcrypt_do_crypt (Z_STRVAL_PP(cipher), key, data, "cbc", iv, argc, Z_LVAL_PP(mode), return_value);
+	php_mcrypt_do_crypt (Z_STRVAL_PP(cipher), key, data, "cbc", iv, argc, Z_LVAL_PP(mode), return_value TSRMLS_CC);
 }
 /* }}} */
 
@@ -1384,7 +1384,7 @@ PHP_FUNCTION(mcrypt_cfb)
 	MCRYPT_CONVERT_WO_MODE;
 	convert_to_long_ex(mode);
 
-	php_mcrypt_do_crypt (Z_STRVAL_PP(cipher), key, data, "cfb", iv, argc, Z_LVAL_PP(mode), return_value);
+	php_mcrypt_do_crypt (Z_STRVAL_PP(cipher), key, data, "cfb", iv, argc, Z_LVAL_PP(mode), return_value TSRMLS_CC);
 }
 /* }}} */
 
@@ -1403,7 +1403,7 @@ PHP_FUNCTION(mcrypt_ofb)
 	MCRYPT_CONVERT_WO_MODE;
 	convert_to_long_ex(mode);
 
-	php_mcrypt_do_crypt (Z_STRVAL_PP(cipher), key, data, "ofb", iv, argc, Z_LVAL_PP(mode), return_value);
+	php_mcrypt_do_crypt (Z_STRVAL_PP(cipher), key, data, "ofb", iv, argc, Z_LVAL_PP(mode), return_value TSRMLS_CC);
 }
 /* }}} */
 
