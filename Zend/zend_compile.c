@@ -166,6 +166,43 @@ static zend_uint get_temporary_variable(zend_op_array *op_array)
 }
 
 
+void zend_do_fold_binary_op(zend_uchar op, znode *result, znode *op1, znode *op2 TSRMLS_DC)
+{
+	int (*do_op)(zval *, zval *, zval *);
+	zend_op *opline;
+
+	if (op == ZEND_SL) {
+		do_op = shift_left_function;
+	} else if (op == ZEND_SR) {
+		do_op = shift_right_function;
+	} else if (op == ZEND_BW_OR) {
+		do_op = bitwise_or_function;
+	} else if (op == ZEND_BW_AND) {
+		do_op = bitwise_and_function;
+	} else if (op == ZEND_BW_XOR) {
+		do_op = bitwise_xor_function;
+	} else if (op == ZEND_CONCAT) {
+		do_op = concat_function;
+	} else if (op == ZEND_ADD) {
+		do_op = add_function;
+	} else if (op == ZEND_SUB) {
+		do_op = sub_function;
+	} else if (op == ZEND_MUL) {
+		do_op = mul_function;
+	} else if (op == ZEND_DIV) {
+		do_op = div_function;
+	} else if (op == ZEND_MOD) {
+		do_op = mod_function;
+	} else if (op == ZEND_BW_NOT) {
+		bitwise_not_function(&result->u.constant, &op1->u.constant);
+		return;
+	} else if (op == ZEND_BOOL_XOR) {
+		do_op = boolean_xor_function;
+	}
+
+	do_op(&result->u.constant, &op1->u.constant, &op2->u.constant);
+}
+
 void zend_do_binary_op(zend_uchar op, znode *result, znode *op1, znode *op2 TSRMLS_DC)
 {
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
@@ -2518,6 +2555,23 @@ void zend_do_end_new_object(znode *result, znode *new_token, znode *argument_lis
 	*result = CG(active_op_array)->opcodes[new_token->u.opline_num].op1;
 }
 
+void zend_do_fold_constant(znode *result, znode *constant_name TSRMLS_DC)
+{
+	zval **zresult;
+	
+	if (zend_hash_find(&CG(active_class_entry)->constants_table, constant_name->u.constant.value.str.val,
+	                   constant_name->u.constant.value.str.len+1, (void **) &zresult) != SUCCESS) {
+		if (zend_get_constant(constant_name->u.constant.value.str.val, constant_name->u.constant.value.str.len, &result->u.constant)) {
+			return;
+		} else {
+			zend_error(E_COMPILE_ERROR, "Cannot find %s constant in class %s\n", 
+			           constant_name->u.constant.value.str.val, CG(active_class_entry)->name);
+		}
+	}
+
+	result->u.constant = **zresult;
+	zval_copy_ctor(&result->u.constant);
+}
 
 void zend_do_fetch_constant(znode *result, znode *constant_container, znode *constant_name, int mode TSRMLS_DC)
 {

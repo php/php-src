@@ -274,6 +274,7 @@ int zend_get_zendleng(TSRMLS_D);
 
 
 /* parser-driven code generators */
+void zend_do_fold_binary_op(zend_uchar op, znode *result, znode *op1, znode *op2 TSRMLS_DC);
 void zend_do_binary_op(zend_uchar op, znode *result, znode *op1, znode *op2 TSRMLS_DC);
 void zend_do_unary_op(zend_uchar op, znode *result, znode *op1 TSRMLS_DC);
 void zend_do_binary_assign_op(zend_uchar op, znode *result, znode *op1, znode *op2 TSRMLS_DC);
