@@ -577,19 +577,6 @@ class PEAR_Installer extends PEAR_Common
             $this->ui->outputData(rtrim($data), 'build');
         }
     }
-    function _buildCallback($what, $params = null)
-    {
-        switch ($what) {
-            case 'saveas':
-                $this->log(1, "downloading $params ...");
-                break;
-            case 'done':
-                $this->log(1, '...done: ' . number_format($params, 0, '', ',') . ' bytes');
-                break;
-        }
-        if (method_exists($this->ui, '_downloadCallback'))
-            $this->ui->_downloadCallback($what, $params);
-    }
 
     // }}}
 }
