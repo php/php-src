@@ -2,6 +2,7 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2004, PHP 5.0.1
 - Fixed bug #29119 (html_entity_decode() misbehaves with UTF-8). (Moriyoshi)
+- Fixed bug #28895 (ReflectionClass::isAbstract always returns false). (Marcus)
 - Fixed bug #28829 (Thread-unsafety in bcmath elementary values). (Sara)
 - Fixed bug #28464 (catch() does not catch exceptions by interfaces). (Marcus)
 - Fixed ReflectionClass::getMethod() and ReflectionClass::getProperty() to
@@ -16,7 +17,6 @@ PHP                                                                        NEWS
 - Fixed bug #29008 (array_combine() does not handle non-numeric/string keys).
   (Ilia)
 - Fixed bug #28999 (fixed behaviour of exec() to work as it did in 4.X). (Ilia)
-- Fixed bug #28895 (ReflectionClass::isAbstract always returns false). (Marcus)
 - Fixed bug #28868 (Internal filter registry not thread safe). (Sara)
 - Fixed bug #28851 (call_user_func_array has typo in error message). (Marcus)
 - Fixed bug #28831 (ArrayObject::offsetGet() does the work of offsetUnset()). 
