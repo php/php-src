@@ -18,4 +18,6 @@ fi
 
 TSRM_PTHREAD
 
+AC_DEFINE(ZTS,1,[ ])
+
 AC_OUTPUT(Makefile)
