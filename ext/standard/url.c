@@ -140,7 +140,7 @@ url *url_parse(char *string)
 		}
 		efree(result);
 	}
-	else if (!strcmp(ret->scheme, "http")) {
+	else if (ret->scheme && !strcmp(ret->scheme, "http")) {
 		STR_FREE(ret->scheme);
 		STR_FREE(ret->path);
 		STR_FREE(ret->query);
