@@ -183,10 +183,10 @@ void net_clear(NET *net)
 
 	/* Flush write_buffer if not empty. */
 
-int net_flush(NET *net)
+int my_net_flush(NET *net)
 {
   int error=0;
-  DBUG_ENTER("net_flush");
+  DBUG_ENTER("my_net_flush");
   if (net->buff != net->write_pos)
   {
     error=net_real_write(net,(char*) net->buff,
@@ -231,7 +231,7 @@ net_write_command(NET *net,uchar command,const char *packet,ulong len)
   buff[4]=command;
   if (net_write_buff(net,(char*) buff,5))
     return 1;
-  return test(net_write_buff(net,packet,len) || net_flush(net));
+  return test(net_write_buff(net,packet,len) || my_net_flush(net));
 }
 
 

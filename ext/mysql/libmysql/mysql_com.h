@@ -146,7 +146,7 @@ extern unsigned long net_buffer_length;
 int	my_net_init(NET *net, Vio* vio);
 void	net_end(NET *net);
 void	net_clear(NET *net);
-int	net_flush(NET *net);
+int	my_net_flush(NET *net);
 int	my_net_write(NET *net,const char *packet,unsigned long len);
 int	net_write_command(NET *net,unsigned char command,const char *packet,
 			  unsigned long len);

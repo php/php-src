@@ -1510,7 +1510,7 @@ mysql_real_connect(MYSQL *mysql,const char *host, const char *user,
   /* without encryption? */
   if (client_flag & CLIENT_SSL)
   {
-    if (my_net_write(net,buff,(uint) (2)) || net_flush(net))
+    if (my_net_write(net,buff,(uint) (2)) || my_net_flush(net))
       goto error;
     /* Do the SSL layering. */
     DBUG_PRINT("info", ("IO layer change in progress..."));
@@ -1543,7 +1543,7 @@ mysql_real_connect(MYSQL *mysql,const char *host, const char *user,
     mysql->db=my_strdup(db,MYF(MY_WME));
     db=0;
   }
-  if (my_net_write(net,buff,(uint) (end-buff)) || net_flush(net) ||
+  if (my_net_write(net,buff,(uint) (end-buff)) || my_net_flush(net) ||
       net_safe_read(mysql) == packet_error)
     goto error;
   if (client_flag & CLIENT_COMPRESS)		/* We will use compression */
@@ -1808,7 +1808,7 @@ send_file_to_server(MYSQL *mysql, const char *filename)
     mysql->net.last_errno=EE_FILENOTFOUND;
     sprintf(buf,EE(mysql->net.last_errno),tmp_name,errno);
     strmake(mysql->net.last_error,buf,sizeof(mysql->net.last_error)-1);
-    my_net_write(&mysql->net,"",0); net_flush(&mysql->net);
+    my_net_write(&mysql->net,"",0); my_net_flush(&mysql->net);
     my_free(tmp_name,MYF(0));
     DBUG_RETURN(-1);
   }
@@ -1827,7 +1827,7 @@ send_file_to_server(MYSQL *mysql, const char *filename)
   }
   (void) my_close(fd,MYF(0));
   /* Send empty packet to mark end of file */
-  if (my_net_write(&mysql->net,"",0) || net_flush(&mysql->net))
+  if (my_net_write(&mysql->net,"",0) || my_net_flush(&mysql->net))
   {
     mysql->net.last_errno=CR_SERVER_LOST;
     sprintf(mysql->net.last_error,ER(mysql->net.last_errno),socket_errno);
