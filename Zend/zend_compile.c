@@ -836,7 +836,6 @@ static void generate_free_switch_expr(zend_switch_entry *switch_entry CLS_DC)
 {
 	zend_op *opline = get_next_op(CG(active_op_array) CLS_CC);
 
-	return;
 	opline->opcode = ZEND_SWITCH_FREE;
 	opline->op1 = switch_entry->cond;
 	SET_UNUSED(opline->op2);
