@@ -71,12 +71,6 @@
 #endif
 #endif
 
-#ifdef ZTS
-int zlib_globals_id;
-#else
-static php_zlib_globals zlib_globals;
-#endif
-
 #define OS_CODE			0x03 /* FIXME */
 #define CODING_GZIP		1
 #define CODING_DEFLATE	2
@@ -113,10 +107,6 @@ function_entry php_zlib_functions[] = {
 };
 /* }}} */
 
-PHP_INI_BEGIN()
-    STD_PHP_INI_BOOLEAN("zlib.output_compression",   "0",    PHP_INI_ALL,     OnUpdateInt,        output_compression,   php_zlib_globals,     zlib_globals)
-PHP_INI_END()
-
 /* {{{ php_zlib_module_entry
  */
 zend_module_entry php_zlib_module_entry = {
@@ -131,9 +121,15 @@ zend_module_entry php_zlib_module_entry = {
 };
 /* }}} */
 
+ZEND_DECLARE_MODULE_GLOBALS(zlib)
+
 #ifdef COMPILE_DL_ZLIB
 ZEND_GET_MODULE(php_zlib)
 #endif
+
+PHP_INI_BEGIN()
+    STD_PHP_INI_BOOLEAN("zlib.output_compression",   "0",    PHP_INI_ALL,     OnUpdateInt,        output_compression,   zend_zlib_globals,     zlib_globals)
+PHP_INI_END()
 
 /* {{{ phpi_destructor_gzclose
  */
@@ -147,7 +143,7 @@ static void phpi_destructor_gzclose(zend_rsrc_list_entry *rsrc)
 #ifdef ZTS
 /* {{{ php_zlib_init_globals
  */
-static void php_zlib_init_globals(php_zlib_globals *zlib_globals_p TSRMLS_DC)
+static void php_zlib_init_globals(zend_zlib_globals *zlib_globals_p TSRMLS_DC)
 {
 	ZLIBG(gzgetss_state) = 0;
 }
@@ -159,7 +155,7 @@ static void php_zlib_init_globals(php_zlib_globals *zlib_globals_p TSRMLS_DC)
 PHP_MINIT_FUNCTION(zlib)
 {
 #ifdef ZTS
-	ts_allocate_id(&zlib_globals_id, sizeof(php_zlib_globals), (ts_allocate_ctor) php_zlib_init_globals, NULL);
+	ts_allocate_id(&zlib_globals_id, sizeof(zend_zlib_globals), (ts_allocate_ctor) php_zlib_init_globals, NULL);
 #else
 	ZLIBG(gzgetss_state)=0;
 #endif
