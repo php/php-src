@@ -27,7 +27,7 @@ if test "$PHP_DBPLUS" != "no"; then
   fi
 
   # --with-dbplus -> add include path
-  AC_ADD_INCLUDE($DBPLUS_DIR/include)
+  PHP_ADD_INCLUDE($DBPLUS_DIR/include)
 
   # --with-dbplus -> chech for lib and symbol presence 
   LIBNAME=Ddb
