@@ -26,8 +26,9 @@
 #include "php_ming.h"
 
 static zend_function_entry ming_functions[] = {
-  PHP_FALIAS(ming_setcubicthreshold,  ming_setCubicThreshold,      NULL)
-  PHP_FALIAS(swfbutton_keypress,  swfbutton_keypress,      NULL)
+  PHP_FALIAS(ming_setcubicthreshold,  ming_setCubicThreshold,  NULL)
+  PHP_FALIAS(ming_setscale,           ming_setScale,           NULL)
+  PHP_FALIAS(swfbutton_keypress,      swfbutton_keypress,      NULL)
   { NULL, NULL, NULL }
 };
 
@@ -35,13 +36,24 @@ PHP_FUNCTION(ming_setCubicThreshold)
 {
   zval **num;
 
-  if(ZEND_NUM_ARGS() != 1 ||
-     zend_get_parameters_ex(1, &num) == FAILURE)
+  if(ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &num) == FAILURE)
     WRONG_PARAM_COUNT;
 
   convert_to_long_ex(num);
 
   Ming_setCubicThreshold(Z_LVAL_PP(num));
+}
+
+PHP_FUNCTION(ming_setScale)
+{
+  zval **num;
+
+  if(ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &num) == FAILURE)
+    WRONG_PARAM_COUNT;
+
+  convert_to_double_ex(num);
+
+  Ming_setScale(Z_DVAL_PP(num));
 }
 
 static int le_swfmoviep;
@@ -141,12 +153,11 @@ SWFCharacter getCharacter(zval *id)
 
 static zend_function_entry swfaction_functions[] = {
   PHP_FALIAS(swfaction,              swfaction_init,         NULL)
-  PHP_FALIAS(add,                    swfaction_add,          NULL)
   { NULL, NULL, NULL }
 };
 
-/* {{{ proto object swfaction_init([string])
-   returns a new SWFAction object, optionally compiling the given script */
+/* {{{ proto object swfaction_init(string)
+   returns a new SWFAction object, compiling the given script */
 
 PHP_FUNCTION(swfaction_init)
 {
@@ -154,27 +165,16 @@ PHP_FUNCTION(swfaction_init)
   zval **script;
   int ret;
 
-  if(ZEND_NUM_ARGS() == 0)
-  {
-    action = newSWFAction();
-  }
-  if(ZEND_NUM_ARGS() == 1)
-  {
-    SWFOutput out;
-
-    if(zend_get_parameters_ex(1, &script) == FAILURE)
-      WRONG_PARAM_COUNT;
-
-    convert_to_string_ex(script);
-
-    /* XXX - need to deal with compiler errors */
-    action = compileSWFActionCode(Z_STRVAL_PP(script));
-
-    if(!action)
-      php_error(E_ERROR, "Couldn't compile code.  And I'm not smart enough to tell you why, sorry.");
-  }
-  else
+  if(ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &script) == FAILURE)
     WRONG_PARAM_COUNT;
+
+  convert_to_string_ex(script);
+
+  /* XXX - need to deal with compiler errors */
+  action = compileSWFActionCode(Z_STRVAL_PP(script));
+
+  if(!action)
+    php_error(E_ERROR, "Couldn't compile code.  And I'm not smart enough to tell you why, sorry.");
 
   ret = zend_list_insert(action, le_swfactionp);
 
@@ -196,16 +196,6 @@ static inline SWFAction getAction(zval *id)
     php_error(E_ERROR, "called object is not an SWFAction!");
 
   return (SWFAction)action;
-}
-
-/* }}} */
-/* {{{ proto void swfaction_add(action, [args..])
-   adds the given action (and optional args) to this SWFAction */
-
-PHP_FUNCTION(swfaction_add)
-{
-  SWFAction action = getAction(getThis());
-  /* XXX - etc. */
 }
 
 /* }}} */
@@ -324,7 +314,7 @@ PHP_FUNCTION(swfbitmap_getWidth)
   if(ZEND_NUM_ARGS() != 0)
     WRONG_PARAM_COUNT;
 
-  RETURN_LONG(SWFBitmap_getWidth(getBitmap(getThis())));
+  RETURN_DOUBLE(SWFBitmap_getWidth(getBitmap(getThis())));
 }
 
 /* }}} */
@@ -336,7 +326,7 @@ PHP_FUNCTION(swfbitmap_getHeight)
   if(ZEND_NUM_ARGS() != 0)
     WRONG_PARAM_COUNT;
 
-  RETURN_LONG(SWFBitmap_getHeight(getBitmap(getThis())));
+  RETURN_DOUBLE(SWFBitmap_getHeight(getBitmap(getThis())));
 }
 
 /* }}} */
@@ -596,10 +586,10 @@ PHP_FUNCTION(swfdisplayitem_moveTo)
   if(ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &x, &y) == FAILURE)
     WRONG_PARAM_COUNT;
 
-  convert_to_long_ex(x);
-  convert_to_long_ex(y);
+  convert_to_double_ex(x);
+  convert_to_double_ex(y);
 
-  SWFDisplayItem_moveTo(getDisplayItem(getThis()), Z_LVAL_PP(x), Z_LVAL_PP(y));
+  SWFDisplayItem_moveTo(getDisplayItem(getThis()), Z_DVAL_PP(x), Z_DVAL_PP(y));
 }
 
 /* }}} */
@@ -613,10 +603,10 @@ PHP_FUNCTION(swfdisplayitem_move)
   if(ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &x, &y) == FAILURE)
     WRONG_PARAM_COUNT;
 
-  convert_to_long_ex(x);
-  convert_to_long_ex(y);
+  convert_to_double_ex(x);
+  convert_to_double_ex(y);
 
-  SWFDisplayItem_move(getDisplayItem(getThis()), Z_LVAL_PP(x), Z_LVAL_PP(y));
+  SWFDisplayItem_move(getDisplayItem(getThis()), Z_DVAL_PP(x), Z_DVAL_PP(y));
 }
 
 /* }}} */
@@ -968,10 +958,10 @@ PHP_FUNCTION(swffill_moveTo)
   if(ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &x, &y) == FAILURE)
     WRONG_PARAM_COUNT;
 
-  convert_to_long_ex(x);
-  convert_to_long_ex(y);
+  convert_to_double_ex(x);
+  convert_to_double_ex(y);
 
-  SWFFill_moveTo(getFill(getThis()), Z_LVAL_PP(x), Z_LVAL_PP(y));
+  SWFFill_moveTo(getFill(getThis()), Z_DVAL_PP(x), Z_DVAL_PP(y));
 }
 
 /* }}} */
@@ -1129,7 +1119,7 @@ static void destroy_SWFFont_resource(zend_rsrc_list_entry *resource)
 PHP_FUNCTION(swffont_getWidth)
 {
   zval **zstring;
-  int width;
+  float width;
 
   if(ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &zstring) == FAILURE)
     WRONG_PARAM_COUNT;
@@ -1138,7 +1128,7 @@ PHP_FUNCTION(swffont_getWidth)
 
   width = SWFFont_getStringWidth(getFont(getThis()), Z_STRVAL_PP(zstring));
 
-  RETURN_LONG(width);
+  RETURN_DOUBLE(width);
 }
 
 /* }}} */
@@ -1150,7 +1140,7 @@ PHP_FUNCTION(swffont_getAscent)
   if(ZEND_NUM_ARGS() != 0)
     WRONG_PARAM_COUNT;
 
-  RETURN_LONG(SWFFont_getAscent(getFont(getThis())));
+  RETURN_DOUBLE(SWFFont_getAscent(getFont(getThis())));
 }
 
 /* }}} */
@@ -1162,7 +1152,7 @@ PHP_FUNCTION(swffont_getDescent)
   if(ZEND_NUM_ARGS() != 0)
     WRONG_PARAM_COUNT;
 
-  RETURN_LONG(SWFFont_getDescent(getFont(getThis())));
+  RETURN_DOUBLE(SWFFont_getDescent(getFont(getThis())));
 }
 
 /* }}} */
@@ -1174,7 +1164,7 @@ PHP_FUNCTION(swffont_getLeading)
   if(ZEND_NUM_ARGS() != 0)
     WRONG_PARAM_COUNT;
 
-  RETURN_LONG(SWFFont_getLeading(getFont(getThis())));
+  RETURN_DOUBLE(SWFFont_getLeading(getFont(getThis())));
 }
 
 /* }}} */
@@ -1590,10 +1580,10 @@ PHP_FUNCTION(swfmovie_setDimension)
   if((ZEND_NUM_ARGS() != 2) || zend_get_parameters_ex(2, &x, &y) == FAILURE)
     WRONG_PARAM_COUNT;
 
-  convert_to_long_ex(x);
-  convert_to_long_ex(y);
+  convert_to_double_ex(x);
+  convert_to_double_ex(y);
 
-  SWFMovie_setDimension(movie, Z_LVAL_PP(x), Z_LVAL_PP(y));
+  SWFMovie_setDimension(movie, Z_DVAL_PP(x), Z_DVAL_PP(y));
 }
 
 /* }}} */
@@ -1628,9 +1618,6 @@ PHP_FUNCTION(swfmovie_streamMp3)
   if((*zfile)->type == IS_RESOURCE)
   {
     ZEND_FETCH_RESOURCE(file, FILE *, zfile, -1,"File-Handle",php_file_le_fopen());
-
-    RETURN_LONG(SWFMovie_output(getMovie(getThis()),
-				&phpFileOutputMethod, file));
   }
   else
   {
@@ -1957,7 +1944,7 @@ PHP_FUNCTION(swfshape_setrightfill)
 }
 
 /* }}} */
-/* {{{ proto void swfshape_movepento(int x, int y)
+/* {{{ proto void swfshape_movepento(double x, double y)
    Moves the pen to shape coordinates (x,y) */
 
 PHP_FUNCTION(swfshape_movepento)
@@ -1967,15 +1954,15 @@ PHP_FUNCTION(swfshape_movepento)
   if((ZEND_NUM_ARGS() != 2) || zend_get_parameters_ex(2, &x, &y) == FAILURE)
     WRONG_PARAM_COUNT;
 
-  convert_to_long_ex(x);
-  convert_to_long_ex(y);
+  convert_to_double_ex(x);
+  convert_to_double_ex(y);
 
   SWFShape_movePenTo(getShape(getThis()),
-		     Z_LVAL_PP(x), Z_LVAL_PP(y));
+		     Z_DVAL_PP(x), Z_DVAL_PP(y));
 }
 
 /* }}} */
-/* {{{ proto void swfshape_movepen(int x, int y)
+/* {{{ proto void swfshape_movepen(double x, double y)
    Moves the pen from its current location by vector (x,y) */
 
 PHP_FUNCTION(swfshape_movepen)
@@ -1985,15 +1972,15 @@ PHP_FUNCTION(swfshape_movepen)
   if((ZEND_NUM_ARGS() != 2) || zend_get_parameters_ex(2, &x, &y) == FAILURE)
     WRONG_PARAM_COUNT;
 
-  convert_to_long_ex(x);
-  convert_to_long_ex(y);
+  convert_to_double_ex(x);
+  convert_to_double_ex(y);
 
   SWFShape_movePen(getShape(getThis()),
-		   Z_LVAL_PP(x), Z_LVAL_PP(y));
+		   Z_DVAL_PP(x), Z_DVAL_PP(y));
 }
 
 /* }}} */
-/* {{{ proto void swfshape_drawlineto(int x, int y)
+/* {{{ proto void swfshape_drawlineto(double x, double y)
    Draws a line from the current pen position to shape coordinates (x,y)
    in the current line style */
 
@@ -2004,14 +1991,14 @@ PHP_FUNCTION(swfshape_drawlineto)
   if ((ZEND_NUM_ARGS() != 2) || zend_get_parameters_ex(2, &x, &y) == FAILURE)
     WRONG_PARAM_COUNT;
 
-  convert_to_long_ex(x);
-  convert_to_long_ex(y);
+  convert_to_double_ex(x);
+  convert_to_double_ex(y);
 
-  SWFShape_drawLineTo(getShape(getThis()), Z_LVAL_PP(x), Z_LVAL_PP(y));
+  SWFShape_drawLineTo(getShape(getThis()), Z_DVAL_PP(x), Z_DVAL_PP(y));
 }
 
 /* }}} */
-/* {{{ proto void swfshape_drawline(int dx, int dy)
+/* {{{ proto void swfshape_drawline(double dx, double dy)
    Draws a line from the current pen position (x,y) to the point (x+dx,y+dy)
    in the current line style */
 
@@ -2022,16 +2009,18 @@ PHP_FUNCTION(swfshape_drawline)
   if ((ZEND_NUM_ARGS() != 2) || zend_get_parameters_ex(2, &x, &y) == FAILURE)
     WRONG_PARAM_COUNT;
 
-  convert_to_long_ex(x);
-  convert_to_long_ex(y);
+  convert_to_double_ex(x);
+  convert_to_double_ex(y);
 
-  SWFShape_drawLine(getShape(getThis()), Z_LVAL_PP(x), Z_LVAL_PP(y));
+  SWFShape_drawLine(getShape(getThis()), Z_DVAL_PP(x), Z_DVAL_PP(y));
 }
 
 /* }}} */
-/* {{{ proto void swfshape_drawcurveto(int cx, int cy, int ax, int ay)
-   Draws a curve from the current pen position (x,y) to the point (ax,ay)
-   in the current line style, using point (cx,cy) as a control point */
+/* {{{ proto void swfshape_drawcurveto(double ax, double ay, double bx, double by [, double dx, double dy])
+   Draws a curve from the current pen position (x,y) to the point (bx,by)
+   in the current line style, using point (ax,ay) as a control point.
+   Or draws a cubic bezier to point (dx,dy) with control points (ax,ay) and (bx,by)
+*/
 
 PHP_FUNCTION(swfshape_drawcurveto)
 {
@@ -2042,14 +2031,14 @@ PHP_FUNCTION(swfshape_drawcurveto)
     if(zend_get_parameters_ex(4, &cx, &cy, &ax, &ay) == FAILURE)
       WRONG_PARAM_COUNT;
 
-    convert_to_long_ex(cx);
-    convert_to_long_ex(cy);
-    convert_to_long_ex(ax);
-    convert_to_long_ex(ay);
+    convert_to_double_ex(cx);
+    convert_to_double_ex(cy);
+    convert_to_double_ex(ax);
+    convert_to_double_ex(ay);
 
     SWFShape_drawCurveTo(getShape(getThis()),
-			 Z_LVAL_PP(cx), Z_LVAL_PP(cy),
-			 Z_LVAL_PP(ax), Z_LVAL_PP(ay));
+			 Z_DVAL_PP(cx), Z_DVAL_PP(cy),
+			 Z_DVAL_PP(ax), Z_DVAL_PP(ay));
   }
   else if(ZEND_NUM_ARGS() == 6)
   {
@@ -2058,26 +2047,29 @@ PHP_FUNCTION(swfshape_drawcurveto)
     if(zend_get_parameters_ex(6, &bx, &by, &cx, &cy, &dx, &dy) == FAILURE)
       WRONG_PARAM_COUNT;
 
-    convert_to_long_ex(bx);
-    convert_to_long_ex(by);
-    convert_to_long_ex(cx);
-    convert_to_long_ex(cy);
-    convert_to_long_ex(dx);
-    convert_to_long_ex(dy);
+    convert_to_double_ex(bx);
+    convert_to_double_ex(by);
+    convert_to_double_ex(cx);
+    convert_to_double_ex(cy);
+    convert_to_double_ex(dx);
+    convert_to_double_ex(dy);
 
     RETURN_LONG(SWFShape_drawCubicTo(getShape(getThis()),
-				     Z_LVAL_PP(bx), Z_LVAL_PP(by),
-				     Z_LVAL_PP(cx), Z_LVAL_PP(cy),
-				     Z_LVAL_PP(dx), Z_LVAL_PP(dy)));
+				     Z_DVAL_PP(bx), Z_DVAL_PP(by),
+				     Z_DVAL_PP(cx), Z_DVAL_PP(cy),
+				     Z_DVAL_PP(dx), Z_DVAL_PP(dy)));
   }
   else
     WRONG_PARAM_COUNT;
 }
 
 /* }}} */
-/* {{{ proto void swfshape_drawcurve(int cdx, int cdy, int adx, int ady)
-   Draws a curve from the current pen position (x,y) to the point (x+adx,y+ady)
-   in the current line style, using point (x+cdx,y+cdy) as a control point */
+/* {{{ proto void swfshape_drawcurve(double adx, double ady, double bdx, double bdy [, double cdx, double cdy])
+   Draws a curve from the current pen position (x,y) to the point (x+bdx,y+bdy)
+   in the current line style, using point (x+adx,y+ady) as a control point
+   Or draws a cubic bezier to point (x+cdx,x+cdy) with control points
+   (x+adx,y+ady) and (x+bdx,y+bdy)
+*/
 
 PHP_FUNCTION(swfshape_drawcurve)
 {
@@ -2088,14 +2080,14 @@ PHP_FUNCTION(swfshape_drawcurve)
     if(zend_get_parameters_ex(4, &cx, &cy, &ax, &ay) == FAILURE)
       WRONG_PARAM_COUNT;
 
-    convert_to_long_ex(cx);
-    convert_to_long_ex(cy);
-    convert_to_long_ex(ax);
-    convert_to_long_ex(ay);
+    convert_to_double_ex(cx);
+    convert_to_double_ex(cy);
+    convert_to_double_ex(ax);
+    convert_to_double_ex(ay);
 
     SWFShape_drawCurve(getShape(getThis()),
-		       Z_LVAL_PP(cx), Z_LVAL_PP(cy),
-		       Z_LVAL_PP(ax), Z_LVAL_PP(ay));
+		       Z_DVAL_PP(cx), Z_DVAL_PP(cy),
+		       Z_DVAL_PP(ax), Z_DVAL_PP(ay));
   }
   else if(ZEND_NUM_ARGS() == 6)
   {
@@ -2104,17 +2096,17 @@ PHP_FUNCTION(swfshape_drawcurve)
     if(zend_get_parameters_ex(6, &bx, &by, &cx, &cy, &dx, &dy) == FAILURE)
       WRONG_PARAM_COUNT;
 
-    convert_to_long_ex(bx);
-    convert_to_long_ex(by);
-    convert_to_long_ex(cx);
-    convert_to_long_ex(cy);
-    convert_to_long_ex(dx);
-    convert_to_long_ex(dy);
+    convert_to_double_ex(bx);
+    convert_to_double_ex(by);
+    convert_to_double_ex(cx);
+    convert_to_double_ex(cy);
+    convert_to_double_ex(dx);
+    convert_to_double_ex(dy);
 
     RETURN_LONG(SWFShape_drawCubic(getShape(getThis()),
-				   Z_LVAL_PP(bx), Z_LVAL_PP(by),
-				   Z_LVAL_PP(cx), Z_LVAL_PP(cy),
-				   Z_LVAL_PP(dx), Z_LVAL_PP(dy)));
+				   Z_DVAL_PP(bx), Z_DVAL_PP(by),
+				   Z_DVAL_PP(cx), Z_DVAL_PP(cy),
+				   Z_DVAL_PP(dx), Z_DVAL_PP(dy)));
   }
   else
     WRONG_PARAM_COUNT;
@@ -2150,9 +2142,9 @@ PHP_FUNCTION(swfshape_drawcircle)
   if((ZEND_NUM_ARGS() != 1) || zend_get_parameters_ex(1, &r) == FAILURE)
     WRONG_PARAM_COUNT;
 
-  convert_to_long_ex(r);
+  convert_to_double_ex(r);
 
-  SWFShape_drawCircle(getShape(getThis()), Z_LVAL_PP(r));
+  SWFShape_drawCircle(getShape(getThis()), Z_DVAL_PP(r));
 }
 
 /* }}} */
@@ -2168,17 +2160,17 @@ PHP_FUNCTION(swfshape_drawarc)
      zend_get_parameters_ex(3, &r, &start, &end) == FAILURE)
     WRONG_PARAM_COUNT;
 
-  convert_to_long_ex(r);
+  convert_to_double_ex(r);
   convert_to_double_ex(start);
   convert_to_double_ex(end);
 
   /* convert angles to radians, since that's what php uses elsewhere */
-  SWFShape_drawArc(getShape(getThis()), Z_LVAL_PP(r),
+  SWFShape_drawArc(getShape(getThis()), Z_DVAL_PP(r),
 		   Z_DVAL_PP(start)*M_PI/180, Z_DVAL_PP(end)*M_PI/180);
 }
 
 /* }}} */
-/* {{{ proto void swfshape_drawcubic(int bx, int by, int cx, int cy, int dx, int dy)
+/* {{{ proto void swfshape_drawcubic(double bx, double by, double cx, double cy, double dx, double dy)
    Draws a cubic bezier curve using the current position and the three given
    points as control points */
 
@@ -2190,21 +2182,21 @@ PHP_FUNCTION(swfshape_drawcubic)
      zend_get_parameters_ex(6, &bx, &by, &cx, &cy, &dx, &dy) == FAILURE)
     WRONG_PARAM_COUNT;
 
-  convert_to_long_ex(bx);
-  convert_to_long_ex(by);
-  convert_to_long_ex(cx);
-  convert_to_long_ex(cy);
-  convert_to_long_ex(dx);
-  convert_to_long_ex(dy);
+  convert_to_double_ex(bx);
+  convert_to_double_ex(by);
+  convert_to_double_ex(cx);
+  convert_to_double_ex(cy);
+  convert_to_double_ex(dx);
+  convert_to_double_ex(dy);
 
   RETURN_LONG(SWFShape_drawCubic(getShape(getThis()),
-				 Z_LVAL_PP(bx), Z_LVAL_PP(by),
-				 Z_LVAL_PP(cx), Z_LVAL_PP(cy),
-				 Z_LVAL_PP(dx), Z_LVAL_PP(dy)));
+				 Z_DVAL_PP(bx), Z_DVAL_PP(by),
+				 Z_DVAL_PP(cx), Z_DVAL_PP(cy),
+				 Z_DVAL_PP(dx), Z_DVAL_PP(dy)));
 }
 
 /* }}} */
-/* {{{ proto void swfshape_drawcubic(int bx, int by, int cx, int cy, int dx, int dy)
+/* {{{ proto void swfshape_drawcubic(double bx, double by, double cx, double cy, double dx, double dy)
    Draws a cubic bezier curve using the current position and the three given
    points as control points */
 
@@ -2216,17 +2208,17 @@ PHP_FUNCTION(swfshape_drawcubicto)
      zend_get_parameters_ex(6, &bx, &by, &cx, &cy, &dx, &dy) == FAILURE)
     WRONG_PARAM_COUNT;
 
-  convert_to_long_ex(bx);
-  convert_to_long_ex(by);
-  convert_to_long_ex(cx);
-  convert_to_long_ex(cy);
-  convert_to_long_ex(dx);
-  convert_to_long_ex(dy);
+  convert_to_double_ex(bx);
+  convert_to_double_ex(by);
+  convert_to_double_ex(cx);
+  convert_to_double_ex(cy);
+  convert_to_double_ex(dx);
+  convert_to_double_ex(dy);
 
   RETURN_LONG(SWFShape_drawCubicTo(getShape(getThis()),
-				   Z_LVAL_PP(bx), Z_LVAL_PP(by),
-				   Z_LVAL_PP(cx), Z_LVAL_PP(cy),
-				   Z_LVAL_PP(dx), Z_LVAL_PP(dy)));
+				   Z_DVAL_PP(bx), Z_DVAL_PP(by),
+				   Z_DVAL_PP(cx), Z_DVAL_PP(cy),
+				   Z_DVAL_PP(dx), Z_DVAL_PP(dy)));
 }
 
 /* }}} */
@@ -2440,7 +2432,7 @@ PHP_FUNCTION(swftext_setFont)
 }
 
 /* }}} */
-/* {{{ proto void swftext_setHeight(int height)
+/* {{{ proto void swftext_setHeight(double height)
    Sets this SWFText object's current height to given height */
 
 PHP_FUNCTION(swftext_setHeight)
@@ -2451,9 +2443,9 @@ PHP_FUNCTION(swftext_setHeight)
   if(ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &height) == FAILURE)
     WRONG_PARAM_COUNT;
 
-  convert_to_long_ex(height);
+  convert_to_double_ex(height);
 
-  SWFText_setHeight(text, Z_LVAL_PP(height));
+  SWFText_setHeight(text, Z_DVAL_PP(height));
 }
 
 /* }}} */
@@ -2512,7 +2504,7 @@ PHP_FUNCTION(swftext_setColor)
 }
 
 /* }}} */
-/* {{{ proto void swftext_moveTo(int x, int y)
+/* {{{ proto void swftext_moveTo(double x, double y)
    Moves this SWFText object's current pen position to (x,y) in text
    coordinates */
 
@@ -2524,10 +2516,10 @@ PHP_FUNCTION(swftext_moveTo)
   if(ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &x, &y) == FAILURE)
     WRONG_PARAM_COUNT;
 
-  convert_to_long_ex(x);
-  convert_to_long_ex(y);
+  convert_to_double_ex(x);
+  convert_to_double_ex(y);
 
-  SWFText_setXY(text, Z_LVAL_PP(x), Z_LVAL_PP(y));
+  SWFText_setXY(text, Z_DVAL_PP(x), Z_DVAL_PP(y));
 }
 
 /* }}} */
@@ -2549,7 +2541,7 @@ PHP_FUNCTION(swftext_addString)
 }
 
 /* }}} */
-/* {{{ proto int swftext_getWidth(string)
+/* {{{ proto double swftext_getWidth(string)
    calculates the width of the given string in this text objects current font and size */
 
 PHP_FUNCTION(swftext_getWidth)
@@ -2564,11 +2556,11 @@ PHP_FUNCTION(swftext_getWidth)
 
   width = SWFText_getStringWidth(getText(getThis()), Z_STRVAL_PP(zstring));
 
-  RETURN_LONG(width);
+  RETURN_DOUBLE(width);
 }
 
 /* }}} */
-/* {{{ proto int swftext_getAscent()
+/* {{{ proto double swftext_getAscent()
    returns the ascent of the current font at its current size, or 0 if not available */
 
 PHP_FUNCTION(swftext_getAscent)
@@ -2576,11 +2568,11 @@ PHP_FUNCTION(swftext_getAscent)
   if(ZEND_NUM_ARGS() != 0)
     WRONG_PARAM_COUNT;
 
-  RETURN_LONG(SWFText_getAscent(getText(getThis())));
+  RETURN_DOUBLE(SWFText_getAscent(getText(getThis())));
 }
 
 /* }}} */
-/* {{{ proto int swftext_getDescent()
+/* {{{ proto double swftext_getDescent()
    returns the descent of the current font at its current size, or 0 if not available */
 
 PHP_FUNCTION(swftext_getDescent)
@@ -2588,11 +2580,11 @@ PHP_FUNCTION(swftext_getDescent)
   if(ZEND_NUM_ARGS() != 0)
     WRONG_PARAM_COUNT;
 
-  RETURN_LONG(SWFText_getDescent(getText(getThis())));
+  RETURN_DOUBLE(SWFText_getDescent(getText(getThis())));
 }
 
 /* }}} */
-/* {{{ proto int swftext_getLeading()
+/* {{{ proto double swftext_getLeading()
    returns the leading of the current font at its current size, or 0 if not available */
 
 PHP_FUNCTION(swftext_getLeading)
@@ -2600,7 +2592,7 @@ PHP_FUNCTION(swftext_getLeading)
   if(ZEND_NUM_ARGS() != 0)
     WRONG_PARAM_COUNT;
 
-  RETURN_LONG(SWFText_getLeading(getText(getThis())));
+  RETURN_DOUBLE(SWFText_getLeading(getText(getThis())));
 }
 
 /* }}} */
@@ -2684,7 +2676,7 @@ PHP_FUNCTION(swftextfield_setFont)
 }
 
 /* }}} */
-/* {{{ proto void swftextfield_setBounds(int width, int height)
+/* {{{ proto void swftextfield_setBounds(double width, double height)
    sets the width and height of this textfield */
 
 PHP_FUNCTION(swftextfield_setBounds)
@@ -2695,10 +2687,10 @@ PHP_FUNCTION(swftextfield_setBounds)
   if(ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &width, &height) == FAILURE)
     WRONG_PARAM_COUNT;
 
-  convert_to_long_ex(width);
-  convert_to_long_ex(height);
+  convert_to_double_ex(width);
+  convert_to_double_ex(height);
 
-  SWFTextField_setBounds(field, Z_LVAL_PP(width), Z_LVAL_PP(height));
+  SWFTextField_setBounds(field, Z_DVAL_PP(width), Z_DVAL_PP(height));
 }
 
 /* }}} */
@@ -2719,8 +2711,8 @@ PHP_FUNCTION(swftextfield_align)
 }
 
 /* }}} */
-/* {{{ proto void swftextfield_setHeight(int)
-   sets the height of this textfield */
+/* {{{ proto void swftextfield_setHeight(double height)
+   sets the font height of this textfield */
 
 PHP_FUNCTION(swftextfield_setHeight)
 {
@@ -2730,13 +2722,13 @@ PHP_FUNCTION(swftextfield_setHeight)
   if(ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &height) == FAILURE)
     WRONG_PARAM_COUNT;
 
-  convert_to_long_ex(height);
+  convert_to_double_ex(height);
 
-  SWFTextField_setHeight(field, Z_LVAL_PP(height));
+  SWFTextField_setHeight(field, Z_DVAL_PP(height));
 }
 
 /* }}} */
-/* {{{ proto void swftextfield_setLeftMargin(int)
+/* {{{ proto void swftextfield_setLeftMargin(double)
    sets the left margin of this textfield */
 
 PHP_FUNCTION(swftextfield_setLeftMargin)
@@ -2747,13 +2739,13 @@ PHP_FUNCTION(swftextfield_setLeftMargin)
   if(ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &margin) == FAILURE)
     WRONG_PARAM_COUNT;
 
-  convert_to_long_ex(margin);
+  convert_to_double_ex(margin);
 
-  SWFTextField_setLeftMargin(field, Z_LVAL_PP(margin));
+  SWFTextField_setLeftMargin(field, Z_DVAL_PP(margin));
 }
 
 /* }}} */
-/* {{{ proto void swftextfield_setRightMargin(int)
+/* {{{ proto void swftextfield_setRightMargin(double)
    sets the right margin of this textfield */
 
 PHP_FUNCTION(swftextfield_setRightMargin)
@@ -2764,13 +2756,13 @@ PHP_FUNCTION(swftextfield_setRightMargin)
   if(ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &margin) == FAILURE)
     WRONG_PARAM_COUNT;
 
-  convert_to_long_ex(margin);
+  convert_to_double_ex(margin);
 
-  SWFTextField_setRightMargin(field, Z_LVAL_PP(margin));
+  SWFTextField_setRightMargin(field, Z_DVAL_PP(margin));
 }
 
 /* }}} */
-/* {{{ proto void swftextfield_setMargins(int left, int right)
+/* {{{ proto void swftextfield_setMargins(double left, double right)
    sets both margins of this textfield */
 
 PHP_FUNCTION(swftextfield_setMargins)
@@ -2782,15 +2774,15 @@ PHP_FUNCTION(swftextfield_setMargins)
      zend_get_parameters_ex(2, &left, &right) == FAILURE)
     WRONG_PARAM_COUNT;
 
-  convert_to_long_ex(left);
-  convert_to_long_ex(right);
+  convert_to_double_ex(left);
+  convert_to_double_ex(right);
 
-  SWFTextField_setLeftMargin(field, Z_LVAL_PP(left));
-  SWFTextField_setRightMargin(field, Z_LVAL_PP(right));
+  SWFTextField_setLeftMargin(field, Z_DVAL_PP(left));
+  SWFTextField_setRightMargin(field, Z_DVAL_PP(right));
 }
 
 /* }}} */
-/* {{{ proto void swftextfield_setIndentation(int)
+/* {{{ proto void swftextfield_setIndentation(double)
    sets the indentation of the first line of this textfield */
 
 PHP_FUNCTION(swftextfield_setIndentation)
@@ -2801,13 +2793,13 @@ PHP_FUNCTION(swftextfield_setIndentation)
   if(ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &indent) == FAILURE)
     WRONG_PARAM_COUNT;
 
-  convert_to_long_ex(indent);
+  convert_to_double_ex(indent);
 
-  SWFTextField_setIndentation(field, Z_LVAL_PP(indent));
+  SWFTextField_setIndentation(field, Z_DVAL_PP(indent));
 }
 
 /* }}} */
-/* {{{ proto void swftextfield_setLineSpacing(int)
+/* {{{ proto void swftextfield_setLineSpacing(double)
    sets the line spacing of this textfield */
 
 PHP_FUNCTION(swftextfield_setLineSpacing)
@@ -2818,13 +2810,13 @@ PHP_FUNCTION(swftextfield_setLineSpacing)
   if(ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &spacing) == FAILURE)
     WRONG_PARAM_COUNT;
 
-  convert_to_long_ex(spacing);
+  convert_to_double_ex(spacing);
 
-  SWFTextField_setIndentation(field, Z_LVAL_PP(spacing));
+  SWFTextField_setLineSpacing(field, Z_DVAL_PP(spacing));
 }
 
 /* }}} */
-/* {{{ proto void swftextfield_setColor(int)
+/* {{{ proto void swftextfield_setColor(int r, int g, int b [, int a])
    sets the color of this textfield */
 
 PHP_FUNCTION(swftextfield_setColor)
@@ -2963,6 +2955,7 @@ PHP_MINIT_FUNCTION(ming)
   CONSTANT("SWFTEXTFIELD_WORDWRAP",       SWFTEXTFIELD_WORDWRAP);
   CONSTANT("SWFTEXTFIELD_DRAWBOX",        SWFTEXTFIELD_DRAWBOX);
   CONSTANT("SWFTEXTFIELD_NOSELECT",       SWFTEXTFIELD_NOSELECT);
+  CONSTANT("SWFTEXTFIELD_HTML",           SWFTEXTFIELD_HTML);
 
   /* flags for SWFTextField_align */
   CONSTANT("SWFTEXTFIELD_ALIGN_LEFT",     SWFTEXTFIELD_ALIGN_LEFT);
