@@ -211,8 +211,6 @@ PHP_FUNCTION(dom_xpath_query)
 		RETURN_FALSE;
 	}
 
-	MAKE_STD_ZVAL(retval);
-	array_init(retval);
 
 	if (xpathobjp->type ==  XPATH_NODESET) {
 		int i;
@@ -222,6 +220,9 @@ PHP_FUNCTION(dom_xpath_query)
 			xmlXPathFreeObject (xpathobjp);
 			RETURN_FALSE;
 		}
+
+		MAKE_STD_ZVAL(retval);
+		array_init(retval);
 
 		for (i = 0; i < nodesetp->nodeNr; i++) {
 			xmlNodePtr node = nodesetp->nodeTab[i];
