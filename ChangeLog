@@ -1,3 +1,47 @@
+2002-08-02  jflemer  <jflemer@pb1.pair.com>
+
+    * ext/standard/exec.c: Fix typo in #if. Bug #17538.
+
+2002-08-02  helly  <helly@pb1.pair.com>
+
+    * ext/mbstring/mbfilter.c
+      ext/mbstring/mbfilter.h
+      ext/mbstring/mbregex.c
+      ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.h
+      main/rfc1867.c: -use const to clarify code
+    -fix tsrmls build (therefore rfc1867.c)
+
+2002-08-02  hholzgra  <hholzgra@pb1.pair.com>
+
+    * ext/standard/basic_functions.c
+      ext/standard/config.m4
+      ext/standard/php_string.h
+      ext/standard/string.c: added money_format() function
+    this is similar to C-libs strfmon(), using the same format string
+    semantics but a different function prototype, so i decided to
+    give it a more speaking name similar to number_format()
+
+2002-08-02  gluke  <gluke@pb1.pair.com>
+
+    * ext/mnogosearch/php_mnogo.c:
+    - UDM_PARAM_WORD_MATCH icorrect behavior has been fixed in
+      mnogosearch extension
+
+2002-08-02  hirokawa  <hirokawa@pb1.pair.com>
+
+    * ext/standard/string.c
+      main/SAPI.c
+      main/SAPI.h
+      main/main.c
+      main/php_content_types.c
+      main/php_main.h
+      main/php_variables.c
+      main/rfc1867.c
+      ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.h:
+    made sapi_register_treat_data() to support multibyte input encoding translation without MBSTR_ENC_TRANS and changed php_treat_data to php_default_treat_data.
+
 2002-08-01  sr  <sr@pb1.pair.com>
 
     * main/SAPI.c: Fixed wrong usage of strncmp.
