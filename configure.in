@@ -242,7 +242,7 @@ AC_CHECK_LIB(nsl, gethostname, [
 
 fi
 
-AC_CHECK_LIB(dl, dlopen,[PHP_ADD_LIBRARY(dl)])
+AC_CHECK_LIB(dl, dlopen,[LIBS="-ldl $LIBS"])
 
 dnl The sin may be in a library which need not be specifed
 dnl as well as res_search resides in libsocket
