@@ -77,6 +77,13 @@ static void build_runtime_defined_function_key(zval *result, zval *name, zend_op
 }
 
 
+static int zend_open_file_dtor_wrapper(zend_file_handle *fh)
+{
+	zend_open_file_dtor(fh);
+	return 1;
+}
+
+
 void init_compiler(CLS_D ELS_DC)
 {
 	zend_stack_init(&CG(bp_stack));
@@ -95,7 +102,7 @@ void init_compiler(CLS_D ELS_DC)
 	init_resource_list(ELS_C);
 	CG(unclean_shutdown) = 0;
 	zend_llist_init(&CG(open_files), sizeof(zend_file_handle), (void (*)(void *)) zend_open_file_dtor, 0);
-	zend_hash_init(&CG(used_files), 5, NULL, NULL , 0);
+	zend_hash_init(&CG(used_files), 5, NULL, (int (*)(void *)) zend_open_file_dtor_wrapper, 0);
 }
 
 
