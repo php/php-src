@@ -1277,7 +1277,7 @@ php_mbstr_encoding_handler(zval *arg, char *res, char *separator TSRMLS_DC)
 			val_list[n] = val;
 			len_list[n] = php_url_decode(val, strlen(val));
 		} else {
-			val_list[n] = NULL;
+			val_list[n] = "";
 			len_list[n] = 0;
 		}
 		n++;
