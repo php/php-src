@@ -1161,10 +1161,20 @@ ZEND_API int add_property_zval_ex(zval *arg, char *key, uint key_len, zval *valu
 ZEND_API int zend_startup_module(zend_module_entry *module)
 {
 	if (module) {
+		int name_len;
+		char *lcname;
+		TSRMLS_FETCH();
+
+		name_len = strlen(module->name);
+		lcname = zend_str_tolower_dup(module->name, name_len);
+		if (zend_hash_exists(&module_registry, lcname, name_len+1)) {
+			efree(lcname);
+			zend_error(E_CORE_WARNING, "Module '%s' already loaded", module->name);
+			return FAILURE;
+		}
+		efree(lcname);
 		module->module_number = zend_next_free_module();
 		if (module->module_startup_func) {
-			TSRMLS_FETCH();
-
 			EG(current_module) = module;
 			if (module->module_startup_func(MODULE_PERSISTENT, module->module_number TSRMLS_CC)==FAILURE) {
 				zend_error(E_CORE_ERROR,"Unable to start %s module", module->name);
@@ -1360,17 +1370,26 @@ ZEND_API int zend_register_module(zend_module_entry *module)
 	int retval, name_len;
 	char *lcname;
 	TSRMLS_FETCH();
-
+	
 #if 0
 	zend_printf("%s:  Registering module %d\n", module->name, module->module_number);
 #endif
+	name_len = strlen(module->name);
+	lcname = zend_str_tolower_dup(module->name, name_len);
+
+	if (zend_hash_exists(&module_registry, lcname, name_len+1)) {
+		efree(lcname);
+		zend_error(E_CORE_WARNING, "Module '%s' already loaded", module->name);
+		return FAILURE;
+	}
+
 	if (module->functions && zend_register_functions(NULL, module->functions, NULL, module->type TSRMLS_CC)==FAILURE) {
 		zend_error(E_CORE_WARNING,"%s:  Unable to register functions, unable to load", module->name);
+		efree(lcname);
 		return FAILURE;
 	}
 	module->module_started=1;
-	name_len = strlen(module->name);
-	lcname = zend_str_tolower_dup(module->name, name_len);
+
 	retval = zend_hash_add(&module_registry, lcname, name_len+1, (void *)module, sizeof(zend_module_entry), NULL);
 	efree(lcname);
 	return retval;
