@@ -462,6 +462,11 @@ SAPI_API int sapi_send_headers()
 		return SUCCESS;
 	}
 
+	/* Success-oriented.  We set headers_sent to 1 here to avoid an infinite loop
+	 * in case of an error situation.
+	 */
+	SG(headers_sent) = 1;
+
 	if (sapi_module.send_headers) {
 		retval = sapi_module.send_headers(&SG(sapi_headers) SLS_CC);
 	} else {
@@ -470,7 +475,6 @@ SAPI_API int sapi_send_headers()
 
 	switch (retval) {
 		case SAPI_HEADER_SENT_SUCCESSFULLY:
-			SG(headers_sent) = 1;
 			ret = SUCCESS;
 			break;
 		case SAPI_HEADER_DO_SEND:
@@ -490,10 +494,10 @@ SAPI_API int sapi_send_headers()
 				sapi_free_header(&default_header);
 			}
 			sapi_module.send_header(NULL, SG(server_context));
-			SG(headers_sent) = 1;
 			ret = SUCCESS;
 			break;
 		case SAPI_HEADER_SEND_FAILED:
+			SG(headers_sent) = 0;
 			ret = FAILURE;
 			break;
 	}
