@@ -34,11 +34,13 @@
   </description>
   <license>PHP</license>
   <release>
-    <state>beta</state>
-    <version>0.9-c</version>
-    <date>2003-06-05</date>
+    <state>stable</state>
+    <version>1.0</version>
+    <date>2003-06-21</date>
 	<notes>
 		Added:
+			sqlite_udf_encode_binary() and sqlite_udf_decode_binary() for
+			handling binary data in UDF callbacks.
 			sqlite_popen() for persistent db connections.
 			sqlite_unbuffered_query() for high performance queries.
 			sqlite_last_error() returns error code from last operation.
@@ -55,10 +57,6 @@
 		Fixed some build issues for thread-safe builds.
 
 		Increase the default busy timeout interval to 60 seconds.
-		
-		API is considered stabilized for 4.3.x; this is a pre-release before
-		announcing stable version 1.0.
-
     </notes>
     <filelist>
       <file role="src" name="config.m4"/>
@@ -83,6 +81,9 @@
       <file role="test" name="tests/sqlite_012.phpt"/>
       <file role="test" name="tests/sqlite_013.phpt"/>
       <file role="test" name="tests/sqlite_014.phpt"/>
+      <file role="test" name="tests/sqlite_015.phpt"/>
+      <file role="test" name="tests/sqlite_016.phpt"/>
+      <file role="test" name="tests/sqlite_017.phpt"/>
       <file role="test" name="tests/blankdb.inc"/>
 
 	  <dir name="libsqlite">
