@@ -640,9 +640,6 @@ PHP_FUNCTION(checkdate)
 	m = (*month)->value.lval;
 	d = (*day)->value.lval;
 
-	if (y < 100)
-		y += 1900;
-
 	if (y < 0 || y > 32767) {
 		RETURN_FALSE;
 	}
