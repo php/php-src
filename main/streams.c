@@ -1829,29 +1829,30 @@ PHPAPI void php_stream_notification_free(php_stream_notifier *notifier)
 }
 
 PHPAPI int php_stream_context_get_option(php_stream_context *context,
-		const char *wrappername, const char *optionname, zval **optionvalue)
+		const char *wrappername, const char *optionname, zval ***optionvalue)
 {
 	zval **wrapperhash;
 	
 	if (FAILURE == zend_hash_find(Z_ARRVAL_P(context->options), (char*)wrappername, strlen(wrappername)+1, (void**)&wrapperhash))
 		return FAILURE;
-
-	return zend_hash_find(Z_ARRVAL_PP(wrapperhash), (char*)optionname, strlen(optionname)+1, (void**)&optionvalue);
+	return zend_hash_find(Z_ARRVAL_PP(wrapperhash), (char*)optionname, strlen(optionname)+1, (void**)optionvalue);
 }
 
 PHPAPI int php_stream_context_set_option(php_stream_context *context,
 		const char *wrappername, const char *optionname, zval *optionvalue)
 {
 	zval **wrapperhash;
+	zval *category;
 
 	if (FAILURE == zend_hash_find(Z_ARRVAL_P(context->options), (char*)wrappername, strlen(wrappername)+1, (void**)&wrapperhash)) {
 		
-		MAKE_STD_ZVAL(*wrapperhash);
-		array_init(*wrapperhash);
-		if (FAILURE == zend_hash_update(Z_ARRVAL_P(context->options), (char*)wrappername, strlen(wrappername)+1, (void**)wrapperhash, sizeof(zval *), NULL))
+		MAKE_STD_ZVAL(category);
+		array_init(category);
+		if (FAILURE == zend_hash_update(Z_ARRVAL_P(context->options), (char*)wrappername, strlen(wrappername)+1, (void**)&category, sizeof(zval *), NULL))
 			return FAILURE;
 
 		ZVAL_ADDREF(optionvalue);
+		wrapperhash = &category;
 	}
 	return zend_hash_update(Z_ARRVAL_PP(wrapperhash), (char*)optionname, strlen(optionname)+1, (void**)&optionvalue, sizeof(zval *), NULL);
 }
