@@ -251,6 +251,7 @@ static void register_standard_class(void)
 	zend_standard_class_def.name = zend_strndup("stdClass", zend_standard_class_def.name_length);
 	zend_standard_class_def.parent = NULL;
 	zend_hash_init_ex(&zend_standard_class_def.default_properties, 0, NULL, ZVAL_PTR_DTOR, 1, 0);
+	zend_hash_init_ex(&zend_standard_class_def.static_members, 0, NULL, ZVAL_PTR_DTOR, 1, 0);
 	zend_hash_init_ex(&zend_standard_class_def.function_table, 0, NULL, ZEND_FUNCTION_DTOR, 1, 0);
 	zend_standard_class_def.constructor = NULL;
 	zend_standard_class_def.handle_function_call = NULL;

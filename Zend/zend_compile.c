@@ -254,6 +254,19 @@ void fetch_simple_variable(znode *result, znode *varname, int bp TSRMLS_DC)
 	fetch_simple_variable_ex(result, varname, bp, ZEND_FETCH_W TSRMLS_CC);
 }
 
+void zend_do_fetch_static_member(znode *class  TSRMLS_DC)
+{
+	zend_llist *fetch_list_ptr;
+	zend_llist_element *le;
+	zend_op *opline_ptr;
+
+	zend_stack_top(&CG(bp_stack), (void **) &fetch_list_ptr);
+	le = fetch_list_ptr->head;
+
+	opline_ptr = (zend_op *)le->data;
+	opline_ptr->op2 = *class;
+	opline_ptr->extended_value = ZEND_FETCH_STATIC_MEMBER;
+}
 
 void fetch_array_begin(znode *result, znode *varname, znode *first_dim TSRMLS_DC)
 {
@@ -1251,6 +1264,8 @@ void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent_ce)
 
 	/* Perform inheritance */
 	zend_hash_merge(&ce->default_properties, &parent_ce->default_properties, (void (*)(void *)) zval_add_ref, (void *) &tmp, sizeof(zval *), 0);
+	/* STATIC_MEMBERS_FIXME */
+	zend_hash_merge(&ce->static_members, &parent_ce->static_members, (void (*)(void *)) zval_add_ref, (void *) &tmp, sizeof(zval *), 0);
 	zend_hash_merge(&ce->function_table, &parent_ce->function_table, (void (*)(void *)) function_add_ref, &tmp_zend_function, sizeof(zend_function), 0);
 	ce->parent = parent_ce;
 	if (!ce->handle_property_get)
@@ -1357,6 +1372,7 @@ ZEND_API int do_bind_function_or_class(zend_op *opline, HashTable *function_tabl
 					(*ce->refcount)--;
 					zend_hash_destroy(&ce->function_table);
 					zend_hash_destroy(&ce->default_properties);
+					zend_hash_destroy(&ce->static_members);
 					return FAILURE;
 				}
 				return SUCCESS;
@@ -1688,6 +1704,7 @@ void zend_do_begin_class_declaration(znode *class_token, znode *class_name, znod
 	zend_hash_init(&new_class_entry.function_table, 10, NULL, ZEND_FUNCTION_DTOR, 0);
 	zend_hash_init(&new_class_entry.class_table, 10, NULL, ZEND_CLASS_DTOR, 0);
 	zend_hash_init(&new_class_entry.default_properties, 10, NULL, ZVAL_PTR_DTOR, 0);
+	zend_hash_init(&new_class_entry.static_members, 10, NULL, ZVAL_PTR_DTOR, 0);
 
 	new_class_entry.constructor = NULL;
 
@@ -1711,6 +1728,9 @@ void zend_do_begin_class_declaration(znode *class_token, znode *class_name, znod
 
 			/* copy default properties */
 			zend_hash_copy(&new_class_entry.default_properties, &parent_class->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
+
+			/* copy static members */
+			zend_hash_copy(&new_class_entry.static_members, &parent_class->static_members, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
 
 			new_class_entry.constructor = parent_class->constructor;
 
