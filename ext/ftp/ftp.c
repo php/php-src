@@ -1550,6 +1550,8 @@ ftp_async_continue_write(ftpbuf_t *ftp)
 	int			size;
 	char			*ptr;
 	int 			ch;
+	TSRMLS_FETCH();
+
 
 	/* check if we can write more data */
 	if (!data_writeable(ftp, ftp->data->fd)) {
