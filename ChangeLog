@@ -2,6 +2,7 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ??? ?? 1999, Version 4.0 Beta 2
+- Fixed a bug in implode() that caused it to corrupt its arguments (Zeev)
 - Added get_class($obj), get_parent_class($obj) and method_exists($obj,"name")
   (Andi & Zeev)
 - Fixed various inheritance problems (Andi & Zeev, libzend)
