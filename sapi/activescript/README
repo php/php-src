@@ -4,7 +4,6 @@ This is the ActiveScript SAPI for PHP.
 Once registered on your system (using regsvr32), you will be able to use
 PHP script in any ActiveScript compliant host.  The list includes:
 
-o. Client-side script in Internet Explorer
 o. Windows Script Host
 o. ASP and ASP.NET
 o. Windows Script Components / Behaviours
@@ -24,12 +23,6 @@ Build and install it somewhere; then register the engine like this:
 Usage.
 ======
 
-o. Client-side script in Internet Explorer
-
-  <script language="ActivePHP5">
-  	$window->alert("Hello");
-  </script>
-
 o. Windows Script Host
 
   Create a .wsf file like this:
@@ -38,7 +31,7 @@ o. Windows Script Host
     <script language="ActivePHP5">
 	  $WScript->Echo("Hello");
 	</script>
-  </script>
+  </job>
 
 o. ASP and ASP.NET
 
