@@ -10,7 +10,7 @@ PHP_ARG_ENABLE(xslt, whether to enable xslt support,
 [  --enable-xslt           Enable xslt support.])
 
 PHP_ARG_WITH(xslt-sablot, for XSLT Sablotron backend,
-[  --with-xslt-sablot        XSLT: Enable the sablotron backend.])
+[  --with-xslt-sablot=DIR    XSLT: Enable the sablotron backend.])
 
 PHP_ARG_WITH(expat-dir, libexpat dir for Sablotron XSL support,
 [  --with-expat-dir=DIR      XSLT: libexpat dir for Sablotron 0.50])
