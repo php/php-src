@@ -17,22 +17,22 @@ encode defaultEncoding[] = {
 
 	{{XSD_STRING, XSD_STRING_STRING, XSD_NAMESPACE, NULL}, to_zval_string, to_xml_string},
 	{{XSD_BOOLEAN, XSD_BOOLEAN_STRING, XSD_NAMESPACE, NULL}, to_zval_bool, to_xml_bool},
-	{{XSD_DECIMAL, XSD_DECIMAL_STRING, XSD_NAMESPACE, NULL}, to_zval_string, to_xml_string},
+	{{XSD_DECIMAL, XSD_DECIMAL_STRING, XSD_NAMESPACE, NULL}, to_zval_stringc, to_xml_string},
 	{{XSD_FLOAT, XSD_FLOAT_STRING, XSD_NAMESPACE, NULL}, to_zval_double, to_xml_double},
 	{{XSD_DOUBLE, XSD_DOUBLE_STRING, XSD_NAMESPACE, NULL}, to_zval_double, to_xml_double},
 
-	{{XSD_DATETIME, XSD_DATETIME_STRING, XSD_NAMESPACE, NULL}, to_zval_string, to_xml_datetime},
-	{{XSD_TIME, XSD_TIME_STRING, XSD_NAMESPACE, NULL}, to_zval_string, to_xml_time},
-	{{XSD_DATE, XSD_DATE_STRING, XSD_NAMESPACE, NULL}, to_zval_string, to_xml_date},
-	{{XSD_GYEARMONTH, XSD_GYEARMONTH_STRING, XSD_NAMESPACE, NULL}, to_zval_string, to_xml_gyearmonth},
-	{{XSD_GYEAR, XSD_GYEAR_STRING, XSD_NAMESPACE, NULL}, to_zval_string, to_xml_gyear},
-	{{XSD_GMONTHDAY, XSD_GMONTHDAY_STRING, XSD_NAMESPACE, NULL}, to_zval_string, to_xml_gmonthday},
-	{{XSD_GDAY, XSD_GDAY_STRING, XSD_NAMESPACE, NULL}, to_zval_string, to_xml_gday},
-	{{XSD_GMONTH, XSD_GMONTH_STRING, XSD_NAMESPACE, NULL}, to_zval_string, to_xml_gmonth},
-	{{XSD_DURATION, XSD_DURATION_STRING, XSD_NAMESPACE, NULL}, to_zval_string, to_xml_duration},
+	{{XSD_DATETIME, XSD_DATETIME_STRING, XSD_NAMESPACE, NULL}, to_zval_stringc, to_xml_datetime},
+	{{XSD_TIME, XSD_TIME_STRING, XSD_NAMESPACE, NULL}, to_zval_stringc, to_xml_time},
+	{{XSD_DATE, XSD_DATE_STRING, XSD_NAMESPACE, NULL}, to_zval_stringc, to_xml_date},
+	{{XSD_GYEARMONTH, XSD_GYEARMONTH_STRING, XSD_NAMESPACE, NULL}, to_zval_stringc, to_xml_gyearmonth},
+	{{XSD_GYEAR, XSD_GYEAR_STRING, XSD_NAMESPACE, NULL}, to_zval_stringc, to_xml_gyear},
+	{{XSD_GMONTHDAY, XSD_GMONTHDAY_STRING, XSD_NAMESPACE, NULL}, to_zval_stringc, to_xml_gmonthday},
+	{{XSD_GDAY, XSD_GDAY_STRING, XSD_NAMESPACE, NULL}, to_zval_stringc, to_xml_gday},
+	{{XSD_GMONTH, XSD_GMONTH_STRING, XSD_NAMESPACE, NULL}, to_zval_stringc, to_xml_gmonth},
+	{{XSD_DURATION, XSD_DURATION_STRING, XSD_NAMESPACE, NULL}, to_zval_stringc, to_xml_duration},
 
-	{{XSD_HEXBINARY, XSD_HEXBINARY_STRING, XSD_NAMESPACE, NULL}, to_zval_string, to_xml_stringl},
-	{{XSD_BASE64BINARY, XSD_BASE64BINARY_STRING, XSD_NAMESPACE, NULL}, to_zval_string, to_xml_stringl},
+	{{XSD_HEXBINARY, XSD_HEXBINARY_STRING, XSD_NAMESPACE, NULL}, to_zval_stringc, to_xml_stringl},
+	{{XSD_BASE64BINARY, XSD_BASE64BINARY_STRING, XSD_NAMESPACE, NULL}, to_zval_stringc, to_xml_stringl},
 
 	{{XSD_LONG, XSD_LONG_STRING, XSD_NAMESPACE, NULL}, to_zval_long, to_xml_long},
 	{{XSD_INT, XSD_INT_STRING, XSD_NAMESPACE, NULL}, to_zval_long, to_xml_long},
@@ -48,6 +48,20 @@ encode defaultEncoding[] = {
   {{XSD_UNSIGNEDLONG, XSD_UNSIGNEDLONG_STRING, XSD_NAMESPACE, NULL}, to_zval_ulong, to_xml_ulong}, 
 
 	{{XSD_ANYTYPE, XSD_ANYTYPE_STRING, XSD_NAMESPACE, NULL}, guess_zval_convert, guess_xml_convert},
+	{{XSD_ANYURI, XSD_ANYURI_STRING, XSD_NAMESPACE, NULL}, to_zval_stringc, to_xml_string},
+	{{XSD_QNAME, XSD_QNAME_STRING, XSD_NAMESPACE, NULL}, to_zval_stringc, to_xml_string},
+	{{XSD_NOTATION, XSD_NOTATION_STRING, XSD_NAMESPACE, NULL}, to_zval_stringc, to_xml_string},
+	{{XSD_NORMALIZEDSTRING, XSD_NORMALIZEDSTRING_STRING, XSD_NAMESPACE, NULL}, to_zval_stringr, to_xml_string},
+	{{XSD_TOKEN, XSD_TOKEN_STRING, XSD_NAMESPACE, NULL}, to_zval_stringc, to_xml_string},
+	{{XSD_LANGUAGE, XSD_LANGUAGE_STRING, XSD_NAMESPACE, NULL}, to_zval_stringc, to_xml_string},
+	{{XSD_NMTOKEN, XSD_NMTOKEN_STRING, XSD_NAMESPACE, NULL}, to_zval_stringc, to_xml_string},
+	{{XSD_NAME, XSD_NAME_STRING, XSD_NAMESPACE, NULL}, to_zval_stringc, to_xml_string},
+	{{XSD_NCNAME, XSD_NCNAME_STRING, XSD_NAMESPACE, NULL}, to_zval_stringc, to_xml_string},
+	{{XSD_ID, XSD_ID_STRING, XSD_NAMESPACE, NULL}, to_zval_stringc, to_xml_string},
+	{{XSD_IDREF, XSD_IDREF_STRING, XSD_NAMESPACE, NULL}, to_zval_stringc, to_xml_string},
+	{{XSD_IDREFS, XSD_IDREFS_STRING, XSD_NAMESPACE, NULL}, to_zval_stringc, to_xml_string},
+	{{XSD_ENTITY, XSD_ENTITY_STRING, XSD_NAMESPACE, NULL}, to_zval_stringc, to_xml_string},
+	{{XSD_ENTITIES, XSD_ENTITIES_STRING, XSD_NAMESPACE, NULL}, to_zval_stringc, to_xml_string},
 
 	{{APACHE_MAP, APACHE_MAP_STRING, APACHE_NAMESPACE, NULL}, to_zval_map, to_xml_map},
 
@@ -57,7 +71,7 @@ encode defaultEncoding[] = {
 	/* support some of the 1999 data types */
 	{{XSD_STRING, XSD_STRING_STRING, XSD_1999_NAMESPACE, NULL}, to_zval_string, to_xml_string},
 	{{XSD_BOOLEAN, XSD_BOOLEAN_STRING, XSD_1999_NAMESPACE, NULL}, to_zval_bool, to_xml_bool},
-	{{XSD_DECIMAL, XSD_DECIMAL_STRING, XSD_1999_NAMESPACE, NULL}, to_zval_string, to_xml_string},
+	{{XSD_DECIMAL, XSD_DECIMAL_STRING, XSD_1999_NAMESPACE, NULL}, to_zval_stringc, to_xml_string},
 	{{XSD_FLOAT, XSD_FLOAT_STRING, XSD_1999_NAMESPACE, NULL}, to_zval_double, to_xml_double},
 	{{XSD_DOUBLE, XSD_DOUBLE_STRING, XSD_1999_NAMESPACE, NULL}, to_zval_double, to_xml_double},
 
@@ -65,10 +79,48 @@ encode defaultEncoding[] = {
 	{{XSD_INT, XSD_INT_STRING, XSD_1999_NAMESPACE, NULL}, to_zval_long, to_xml_long},
 	{{XSD_SHORT, XSD_SHORT_STRING, XSD_1999_NAMESPACE, NULL}, to_zval_long, to_xml_long},
 	{{XSD_BYTE, XSD_BYTE_STRING, XSD_1999_NAMESPACE, NULL}, to_zval_long, to_xml_long},
-	{{XSD_1999_TIMEINSTANT, XSD_1999_TIMEINSTANT_STRING, XSD_1999_NAMESPACE, NULL}, to_zval_string, to_xml_string},
+	{{XSD_1999_TIMEINSTANT, XSD_1999_TIMEINSTANT_STRING, XSD_1999_NAMESPACE, NULL}, to_zval_stringc, to_xml_string},
 
 	{{END_KNOWN_TYPES, NULL, NULL, NULL}, guess_zval_convert, guess_xml_convert}
 };
+
+void whiteSpace_replace(char* str)
+{
+	while (*str != '\0') {
+	  if (*str == '\x9' || *str == '\xA' || *str == '\xD') {
+	    *str = ' ';
+	  }
+	  str++;
+	}
+}
+
+void whiteSpace_collapse(char* str)
+{	
+  char *orig = str;
+	char *tmp = do_alloca(strlen(str)+1);
+	char *pos;
+	char old;
+
+	whiteSpace_replace(str);
+	while (*str == ' ') {
+	  str++;
+	}
+	pos = tmp; old = '\0';
+	while (*str != '\0') {
+		if (*str != ' ' || old != ' ') {
+		  *pos = *str;
+		  pos++;
+		}
+		old = *str;
+		str++;
+	}
+	if (old == ' ') {
+	  --pos;
+	}
+	*pos = '\0';
+	memcpy(orig,tmp,(pos-tmp)+1);
+	free_alloca(tmp);
+}
 
 xmlNodePtr master_to_xml(encodePtr encode, zval *data, int style)
 {
@@ -235,15 +287,30 @@ zval *to_zval_string(encodeType type, xmlNodePtr data)
 	return ret;
 }
 
-zval *to_zval_stringl(encodeType type, xmlNodePtr data)
+zval *to_zval_stringr(encodeType type, xmlNodePtr data)
 {
 	zval *ret;
 	MAKE_STD_ZVAL(ret);
 	FIND_XML_NULL(data, ret);
 	if(data && data->children && data->children->content) {
-		ZVAL_STRINGL(ret, data->children->content, xmlStrlen(data->children->content), 1);
+		whiteSpace_replace(data->children->content);
+		ZVAL_STRING(ret, data->children->content, 1);
 	} else {
-		ZVAL_EMPTY_STRING(ret)
+		ZVAL_EMPTY_STRING(ret);
+	}
+	return ret;
+}
+
+zval *to_zval_stringc(encodeType type, xmlNodePtr data)
+{
+	zval *ret;
+	MAKE_STD_ZVAL(ret);
+	FIND_XML_NULL(data, ret);
+	if(data && data->children && data->children->content) {
+		whiteSpace_collapse(data->children->content);
+		ZVAL_STRING(ret, data->children->content, 1);
+	} else {
+		ZVAL_EMPTY_STRING(ret);
 	}
 	return ret;
 }
@@ -309,6 +376,7 @@ zval *to_zval_double(encodeType type, xmlNodePtr data)
 	FIND_XML_NULL(data, ret);
 
 	if (data && data->children && data->children->content) {
+	  whiteSpace_collapse(data->children->content);
 		ZVAL_DOUBLE(ret, atof(data->children->content));
 	} else {
 		ZVAL_NULL(ret);
@@ -323,6 +391,7 @@ zval *to_zval_long(encodeType type, xmlNodePtr data)
 	FIND_XML_NULL(data, ret);
 
 	if (data && data->children && data->children->content) {
+	  whiteSpace_collapse(data->children->content);
 		ZVAL_LONG(ret, atol(data->children->content));
 	} else {
 		ZVAL_NULL(ret);
@@ -337,6 +406,7 @@ zval *to_zval_ulong(encodeType type, xmlNodePtr data)
 	FIND_XML_NULL(data, ret);
 
 	if (data && data->children && data->children->content) {
+	  whiteSpace_collapse(data->children->content);
 	  /* TODO: long overflow */
 		ZVAL_LONG(ret, atol(data->children->content));
 	} else {
@@ -419,6 +489,7 @@ zval *to_zval_bool(encodeType type, xmlNodePtr data)
 	FIND_XML_NULL(data, ret);
 
 	if (data && data->children && data->children->content) {
+		whiteSpace_collapse(data->children->content);
 		if(stricmp(data->children->content,"true") == 0 ||
 			stricmp(data->children->content,"t") == 0 ||
 			strcmp(data->children->content,"1") == 0)

@@ -7,7 +7,10 @@ General
 SOAP
 ----
 + SOAP versioning model
+- SOAP message must not contain a Document Type Declaration
+- SOAP message MUST NOT contain Processing Instructions
 - support for SOAP headers
+  - actor attribute
   - mustUnderstend attribute
 - make sure soap 1.1 and 1.2 are supported fully
 
@@ -50,6 +53,10 @@ Encoding
   ? arrays of arrays
   - encoding of arrays with holes
 - full support for structures???  
+- references (id,href)
+- references to external resources
+- default values
+- root attribute
 ? provide schema 1999/2001 support???
 ? make internal refrences for soap encoding (use seralization logic)???
 ? provide user space overriding of serialization certin objects and types???
@@ -110,11 +117,13 @@ Error Handling
 Transport
 ---------
 + support for https://
-- support for persistent HTTP connections (keep_alive)
++ support for persistent HTTP connections (keep_alive)
 - support for HTTP compression (gzip,x-gzip,defalte)
 + support for HTTP authentication
 - support for HTTP proxies
 - transport abstraction layer
+? SoapAction HTTP header field
+? HTTP status codes
 
 UDDI
 ----

@@ -75,8 +75,8 @@
 #define XSD_IDREFS_STRING "IDREFS"
 #define XSD_ENTITY 128
 #define XSD_ENTITY_STRING "ENTITY"
-#define XSD_ENTITYS 129
-#define XSD_ENTITYS_STRING "ENTITYS"
+#define XSD_ENTITIES 129
+#define XSD_ENTITIES_STRING "ENTITYS"
 #define XSD_INTEGER 130
 #define XSD_INTEGER_STRING "integer"
 #define XSD_NONPOSITIVEINTEGER 131
@@ -168,6 +168,9 @@ zval *to_zval_user(encodeType type, xmlNodePtr node);
 zval *to_zval_after_user(encodeType type, zval *data);
 #endif
 
+void whiteSpace_replace(char* str);
+void whiteSpace_collapse(char* str);
+
 /* zval type decode */
 zval *to_zval_double(encodeType type, xmlNodePtr data);
 zval *to_zval_long(encodeType type, xmlNodePtr data);
@@ -175,6 +178,8 @@ zval *to_zval_ulong(encodeType type, xmlNodePtr data);
 zval *to_zval_bool(encodeType type, xmlNodePtr data);
 zval *to_zval_object(encodeType type, xmlNodePtr data);
 zval *to_zval_string(encodeType type, xmlNodePtr data);
+zval *to_zval_stringr(encodeType type, xmlNodePtr data);
+zval *to_zval_stringc(encodeType type, xmlNodePtr data);
 zval *to_zval_array(encodeType type, xmlNodePtr data);
 zval *to_zval_map(encodeType type, xmlNodePtr data);
 zval *to_zval_null(encodeType type, xmlNodePtr data);

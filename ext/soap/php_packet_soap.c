@@ -5,7 +5,7 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 {
 	char* envelope_ns;
 	xmlDocPtr response;
-	xmlNodePtr trav, /*trav2,*/ env, body, resp, cur, fault;
+	xmlNodePtr trav, env, head, body, resp, cur, fault;
 	int param_count = 0;
 
 	ZVAL_NULL(return_value);
@@ -23,22 +23,16 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 	trav = response->children;
 	while (trav != NULL) {
 		if (trav->type == XML_ELEMENT_NODE) {
-			if (node_is_equal_ex(trav,"Envelope",SOAP_1_1_ENV)) {
-		  	if (env != NULL) {
-					add_soap_fault(this_ptr, "SOAP-ENV:Client", "looks like we got XML with several \"Envelope\" elements\n", NULL, NULL TSRMLS_CC);
-					xmlFreeDoc(response);
-					return FALSE;
-		  	}
+	  	if (env == NULL && node_is_equal_ex(trav,"Envelope",SOAP_1_1_ENV)) {
 		  	env = trav;
 		  	envelope_ns = SOAP_1_1_ENV;
-		  } else if (node_is_equal_ex(trav,"Envelope",SOAP_1_2_ENV)) {
-		  	if (env != NULL) {
-					add_soap_fault(this_ptr, "SOAP-ENV:Client", "looks like we got XML with several \"Envelope\" elements\n", NULL, NULL TSRMLS_CC);
-					xmlFreeDoc(response);
-					return FALSE;
-		  	}
+		  } else if (env == NULL && node_is_equal_ex(trav,"Envelope",SOAP_1_2_ENV)) {
 		  	env = trav;
 		  	envelope_ns = SOAP_1_2_ENV;
+		  } else {
+				add_soap_fault(this_ptr, "SOAP-ENV:Client", "looks like we got bad SOAP response\n", NULL, NULL TSRMLS_CC);
+				xmlFreeDoc(response);
+				return FALSE;
 		  }
 	  }
 	  trav = trav->next;
@@ -49,18 +43,28 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 		return FALSE;
 	}
 
+	/* Get <Header> element */
+	head = NULL;
+	trav = env->children;
+	while (trav != NULL && trav->type != XML_ELEMENT_NODE) {
+	  trav = trav->next;
+	}
+	if (trav != NULL && node_is_equal_ex(trav,"Header",envelope_ns)) {
+	  head = trav;
+	  trav = trav->next;
+	}
+
 	/* Get <Body> element */
 	body = NULL;
-	trav = env->children;
 	while (trav != NULL) {
-		if (trav->type == XML_ELEMENT_NODE &&
-		    node_is_equal_ex(trav,"Body",envelope_ns)) {
-	  	if (body != NULL) {
-				add_soap_fault(this_ptr, "SOAP-ENV:Client", "looks like we got \"Envelope\" with several \"Body\" elements\n", NULL, NULL TSRMLS_CC);
+		if (trav->type == XML_ELEMENT_NODE) {
+  		if (body == NULL && node_is_equal_ex(trav,"Body",envelope_ns)) {
+		  	body = trav;
+		  } else {
+				add_soap_fault(this_ptr, "SOAP-ENV:Client", "looks like we got bad SOAP response\n", NULL, NULL TSRMLS_CC);
 				xmlFreeDoc(response);
 				return FALSE;
-	  	}
-	  	body = trav;
+		  }
 	  }
 	  trav = trav->next;
 	}
@@ -142,6 +146,9 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 						val = get_node(cur->children, param->paramName);
 						if (val == NULL && res_count == 1) {
 							val = get_node(cur->children, "return");
+						}
+						if (val == NULL && res_count == 1) {
+							val = get_node(cur->children, "result");
 						}
 					}
 				}
