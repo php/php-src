@@ -1,3 +1,12 @@
+2002-06-10  Harald Radi  <harald.radi@nme.at>
+
+    * zend_ts_hash.h
+      zend_ts_hash.c: added TS_HASH macro
+
+2002-06-10  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_execute.c: Fix leak
+
 2002-06-09  Harald Radi  <harald.radi@nme.at>
 
     * zend_API.h
