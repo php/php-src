@@ -1,3 +1,63 @@
+2003-01-08  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/standard/filters.c:
+      Reimplemented base64 filter to use iconv()-like facility for flexibility.
+
+2003-01-08  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/fbsql/php_fbsql.h
+      ext/mssql/php_mssql.c
+      ext/mssql/php_mssql.h:
+      Changed global data type to avoid problems with initialization
+
+2003-01-08  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/image.c
+      ext/standard/php_image.h:
+      Added support for WBMP images.
+
+    * ext/gd/gd.c
+      ext/gd/libgd/gd_io_dp.c:
+      Fixed bug #21518.
+      Fixed memory in leak ImageCreateFromString().
+      Fixed a bug that prevented proper identification of WBMP images and thus
+      prevented ImageCreateFromString() from working on those images.
+
+    * (PHP_4_3)
+      NEWS:
+      Bug fixing news.
+
+2003-01-08  Zeev Suraski  <zeev@zend.com>
+
+    * ext/session/session.c:
+      Fix UMR
+
+2003-01-08  Georg Richter  <georg.richter@phpev.de>
+
+    * (PHP_4_3)
+      ext/mysql/php_mysql.c:
+      fixed bug 21498
+
+    * ext/mysql/php_mysql.c:
+      fixed bug #21498
+
+2003-01-08  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/mcrypt/mcrypt.c:
+      Removed unused variable.
+
+    * main/main.c:
+      Fixed bug #21499 (more descriptive message in the event of require/include
+      failure).
+
+    * sapi/cgi/cgi_main.c
+      sapi/cli/php_cli.c:
+      Fixed bug #21297. The fix also fixes miscalculation of lines numbers by 1
+      due the previously mentioned bug.
+
+    * ext/odbc/php_odbc.c:
+      Version is char ;).
+
 2003-01-07  Christian Dickmann  <chrisdicki@gmx.de>
 
     * pear/PEAR/Config.php:

@@ -1,3 +1,13 @@
+2003-01-08  James Cox  <james@imajes.info>
+
+    * zend.h:
+      cvs is dev not alpha.
+
+2003-01-08  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * zend_builtin_functions.c:
+      MFZE2
+
 2003-01-05  Zeev Suraski  <zeev@zend.com>
 
     * zend_compile.c
