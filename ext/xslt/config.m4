@@ -31,7 +31,7 @@ if test "$PHP_XSLT" != "no"; then
   fi
 
   if test -z "$XSLT_BACKEND_NAME"; then
-    AC_MSG_ERROR(No backend specified for XSLT extension.)
+    AC_MSG_ERROR([No backend specified for XSLT extension.])
   fi
 
   condition="$XSLT_CHECK_DIR$XSLT_TEST_FILE"
@@ -50,12 +50,12 @@ if test "$PHP_XSLT" != "no"; then
   fi
 
   if test -z "$XSLT_DIR"; then
-    AC_MSG_ERROR(not found. Please re-install the $XSLT_BACKEND_NAME distribution)
+    AC_MSG_ERROR([not found. Please re-install the $XSLT_BACKEND_NAME distribution.])
   fi
 					
   if test "$PHP_XSLT_SABLOT" != "no"; then
     found_expat=no
-    for i in $PHP_EXPAT_DIR $XSLT_DIR; do
+    for i in /usr/local /usr $PHP_EXPAT_DIR $XSLT_DIR; do
       if test -f $i/lib/libexpat.a -o -f $i/lib/libexpat.$SHLIB_SUFFIX_NAME; then
         AC_DEFINE(HAVE_LIBEXPAT2, 1, [ ])
         PHP_ADD_INCLUDE($i/include)
@@ -65,32 +65,42 @@ if test "$PHP_XSLT" != "no"; then
     done
 
     if test "$found_expat" = "no"; then
-      PHP_ADD_LIBRARY(xmlparse)
-      PHP_ADD_LIBRARY(xmltok)
+      AC_MSG_ERROR([expat not found. To build sablotron you need the expat library.])
     fi
 
     if test "$PHP_ICONV" = "no"; then
       PHP_ICONV=yes
     fi
+
     PHP_SETUP_ICONV(XSLT_SHARED_LIBADD, [], [
-      AC_MSG_ERROR([iconv not found, in order to build sablotron you need the iconv library])
+      AC_MSG_ERROR([iconv not found. To build sablotron you need the iconv library.])
     ])
      
     if test "$PHP_SABLOT_JS" != "no"; then
-      found_js=no
-      AC_CHECK_LIB(js, JS_GetRuntime, found_js=yes)
-      if test "$found_js" = "yes"; then
-        PHP_ADD_LIBRARY(js)
-      fi
+      for i in /usr/local /usr $PHP_SABLOT_JS; do
+        if test -f $i/lib/libjs.a -o -f $i/lib/libjs.$SHLIB_SUFFIX_NAME; then
+          PHP_SABLOT_JS_DIR=$i
+        fi
+      done
+
+      PHP_CHECK_LIBRARY(js, JS_GetRuntime,
+      [
+        PHP_ADD_LIBRARY_WITH_PATH(js, $PHP_SABLOT_JS_DIR/lib, XSLT_SHARED_LIBADD)
+      ], [
+        AC_MSG_ERROR([libjs not found. Please check config.log for more information.])
+      ], [
+        -L$PHP_SABLOT_JS_DIR/lib
+      ])
     fi
 
+    PHP_CHECK_LIBRARY(sablot, SablotSetEncoding,
+    [
+      AC_DEFINE(HAVE_SABLOT_SET_ENCODING, 1, [ ])
+    ], [], [
+      -L$XSLT_DIR/lib
+    ])
+
     AC_DEFINE(HAVE_SABLOT_BACKEND, 1, [ ])
-    if test "$found_expat" = "yes"; then
-     old_LIBS=$LIBS
-     LIBS="$LIBS -lexpat"
-     AC_CHECK_LIB(sablot, SablotSetEncoding, AC_DEFINE(HAVE_SABLOT_SET_ENCODING, 1, [ ]))
-     LIBS=$old_LIBS
-    fi
   fi
 
   PHP_ADD_INCLUDE($XSLT_DIR/include)
