@@ -29,6 +29,7 @@
 #include "pdo/php_pdo_driver.h"
 #include "php_pdo_mysql.h"
 #include "php_pdo_mysql_int.h"
+#include "zend_exceptions.h"
 
 int _pdo_mysql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *file, int line TSRMLS_DC) /* {{{ */
 {
