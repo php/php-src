@@ -127,10 +127,10 @@ if test "$PHP_IMAP" != "no"; then
     old_CPPFLAGS=$CPPFLAGS
     CPPFLAGS=-I$IMAP_INC_DIR
     AC_EGREP_CPP(this_is_true, [
-      #include "imap4r1.h"
-      #if defined(IMAPSSLPORT)
+#include "imap4r1.h"
+#if defined(IMAPSSLPORT)
       this_is_true
-      #endif
+#endif
     ],[
       AC_DEFINE(HAVE_IMAP2001, 1, [ ])
     ],[])
