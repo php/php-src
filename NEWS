@@ -1,9 +1,11 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2002, Version 4.3.0
+- Added __FUNCTION__ and __CLASS__ constants. (Jani, Zend Engine)
 - Added pg_metadate(), pg_convert(), pg_insert(), pg_select(), pg_update()
   and pg_delete(). (Yasuo)
-- Added 2nd parameter for pg_result_status() to specify return type. (Yasuo)
+- Added optional 2nd parameter for pg_result_status() to specify return type. 
+  (Yasuo)
 - Added "ignore_repeated_errors" and "ignore_repeated_source" php.ini options
   which can be used to disable logging of repeated error messages. (Marcus)
 - Made pg_last_notice() work correctly. (Yasuo)
