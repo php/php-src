@@ -80,6 +80,7 @@ function_entry vpopmail_functions[] = {
 	PHP_FE(vpopmail_alias_add, NULL)
 	PHP_FE(vpopmail_alias_del, NULL)
 	PHP_FE(vpopmail_alias_del_domain, NULL)
+	PHP_FE(vpopmail_alias_get, NULL)
 #endif
 	/* error handling */
 	PHP_FE(vpopmail_error, NULL)
@@ -761,7 +762,6 @@ PHP_FUNCTION(vpopmail_alias_add)
 			|| zend_get_parameters_ex(ZEND_NUM_ARGS(), &user, &domain, &alias) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-
 	convert_to_string_ex(user);
 	convert_to_string_ex(domain);
 	convert_to_string_ex(alias);
@@ -796,7 +796,6 @@ PHP_FUNCTION(vpopmail_alias_del)
 			|| zend_get_parameters_ex(ZEND_NUM_ARGS(), &user, &domain) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-
 	convert_to_string_ex(user);
 	convert_to_string_ex(domain);
 
@@ -827,7 +826,6 @@ PHP_FUNCTION(vpopmail_alias_del_domain)
 			|| zend_get_parameters_ex(ZEND_NUM_ARGS(), &domain) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-
 	convert_to_string_ex(domain);
 
 	VPOPMAILLS_FETCH();
@@ -845,6 +843,40 @@ PHP_FUNCTION(vpopmail_alias_del_domain)
 	}
 }
 /* }}} */
+
+/* {{{ proto bool vpopmail_alias_get(string alias, string domain)
+   get all lines of an alias for a domain */
+PHP_FUNCTION(vpopmail_alias_get)
+{
+	zval **alias;
+	zval **domain;
+	int retval;
+	char *talias;
+	uint index=0;
+
+	if (ZEND_NUM_ARGS() != 2
+			|| zend_get_parameters_ex(ZEND_NUM_ARGS(), &alias, &domain) == FAILURE)
+		WRONG_PARAM_COUNT;
+
+	convert_to_string_ex(alias);
+	convert_to_string_ex(domain);
+
+	VPOPMAILLS_FETCH();
+	VPOPMAILG(vpopmail_open) = 1;
+
+	if (array_init(return_value)!=SUCCESS) {
+		zend_error(E_ERROR,"unable to create array");
+		RETURN_FALSE;
+	}
+
+	talias=valias_select(Z_STRVAL_PP(alias), Z_STRVAL_PP(domain));
+	while (talias) {
+		add_index_string(return_value,index++,talias,1);
+		talias=valias_select_next();
+	}
+}
+/* }}} */
+
 #endif
 
 /*

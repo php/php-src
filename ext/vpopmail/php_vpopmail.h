@@ -57,6 +57,7 @@ PHP_FUNCTION(vpopmail_auth_user);
 PHP_FUNCTION(vpopmail_alias_add);
 PHP_FUNCTION(vpopmail_alias_del);
 PHP_FUNCTION(vpopmail_alias_del_domain);
+PHP_FUNCTION(vpopmail_alias_get);
 /* error handling */
 PHP_FUNCTION(vpopmail_error);
 
