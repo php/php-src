@@ -252,6 +252,39 @@ php_sprintf_appenddouble(char **buffer, int *pos,
 	} else if (precision > MAX_FLOAT_PRECISION) {
 		precision = MAX_FLOAT_PRECISION;
 	}
+	
+	if(
+#if defined(HAVE_ISNAN)
+	isnan(number)
+#elif defined(NAN)
+	number == NAN
+#else 
+	0
+#endif
+	) {
+		sign = (number<0);
+		php_sprintf_appendstring(buffer, pos, size, "NaN", 3, 0, padding,
+								 alignment, precision, sign, 0);
+		return;
+	}
+
+	if(
+#if defined(HAVE_ISISINF)
+	isinf(number)
+#elif defined(HAVE_ISFINITE)
+	!isfinite(number)
+#elif defined(HAVE_FINITE)
+	!finite(number)
+#else
+	0
+#endif
+	) {
+		sign = (number<0);
+		php_sprintf_appendstring(buffer, pos, size, "INF", 3, 0, padding,
+								 alignment, precision, sign, 0);
+		return;
+	}
+
 	cvt = php_convert_to_decimal(number, precision, &decpt, &sign, (fmt == 'e'));
 
 	if (sign) {
