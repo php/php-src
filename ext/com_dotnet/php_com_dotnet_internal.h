@@ -83,7 +83,7 @@ void php_com_object_enable_event_sink(php_com_dotnet_object *obj, int enable TSR
 
 /* com_saproxy.c */
 zend_object_iterator *php_com_saproxy_iter_get(zend_class_entry *ce, zval *object TSRMLS_DC);
-int php_com_saproxy_create(zval *com_object, zval *proxy_out, long index TSRMLS_DC);
+int php_com_saproxy_create(zval *com_object, zval *proxy_out, zval *index TSRMLS_DC);
 
 /* com_olechar.c */
 PHPAPI char *php_com_olestring_to_string(OLECHAR *olestring,

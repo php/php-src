@@ -20,7 +20,9 @@
 
 /* This module implements a SafeArray proxy which is used internally
  * by the engine when resolving multi-dimensional array accesses on
- * SafeArray types
+ * SafeArray types.
+ * In addition, the proxy is now able to handle properties of COM objects
+ * that smell like PHP arrays.
  * */
 
 #ifdef HAVE_CONFIG_H
@@ -43,7 +45,7 @@ typedef struct {
 	LONG dimensions;
 	
 	/* this is an array whose size_is(dimensions) */
-	LONG *indices;
+	zval **indices;
 
 } php_com_saproxy;
 
@@ -57,6 +59,17 @@ typedef struct {
 } php_com_saproxy_iter;
 
 #define SA_FETCH(zv)			(php_com_saproxy*)zend_object_store_get_object(zv TSRMLS_CC)
+
+static inline void clone_indices(php_com_saproxy *dest, php_com_saproxy *src, int ndims)
+{
+	int i;
+
+	for (i = 0; i < ndims; i++) {
+		MAKE_STD_ZVAL(dest->indices[i]);
+		*dest->indices[i] = *src->indices[i];
+		zval_copy_ctor(dest->indices[i]);
+	}
+}
 
 static zval *saproxy_property_read(zval *object, zval *member, int type TSRMLS_DC)
 {
@@ -82,15 +95,50 @@ static zval *saproxy_read_dimension(zval *object, zval *offset, int type TSRMLS_
 	UINT dims;
 	SAFEARRAY *sa;
 	LONG ubound, lbound;
+	int i;
+	HRESULT res;
 	
 	MAKE_STD_ZVAL(return_value);
 	ZVAL_NULL(return_value);
 	
-	if (!V_ISARRAY(&proxy->obj->v)) {
-		php_com_throw_exception(E_INVALIDARG, "proxied object is no longer a safe array!" TSRMLS_CC);
+	if (V_VT(&proxy->obj->v) == VT_DISPATCH) {
+		VARIANT v;
+		zval **args;
+
+		/* prop-get using first dimension as the property name,
+		 * all subsequent dimensions and the offset as parameters */
+
+		args = safe_emalloc(proxy->dimensions + 1, sizeof(zval *), 0);
+
+		for (i = 1; i < proxy->dimensions; i++) {
+			args[i-1] = proxy->indices[i];
+		}
+		args[i-1] = offset;
+
+		convert_to_string(proxy->indices[0]);
+		VariantInit(&v);
+
+		res = php_com_do_invoke(proxy->obj, Z_STRVAL_P(proxy->indices[0]),
+			   	Z_STRLEN_P(proxy->indices[0]), DISPATCH_METHOD|DISPATCH_PROPERTYGET, &v,
+			   	proxy->dimensions, args TSRMLS_CC);
+
+		if (res == SUCCESS) {
+			php_com_zval_from_variant(return_value, &v, proxy->obj->code_page TSRMLS_CC);
+			VariantClear(&v);
+		} else if (res == DISP_E_BADPARAMCOUNT) {
+			/* return another proxy */
+			php_com_saproxy_create(object, return_value, offset TSRMLS_CC);
+		}
+
+		return return_value;
+
+	} else if (!V_ISARRAY(&proxy->obj->v)) {
+		php_com_throw_exception(E_INVALIDARG, "invalid read from com proxy object" TSRMLS_CC);
 		return return_value;
 	}
 
+	/* the SafeArray case */
+	
 	/* offset/index must be an integer */
 	convert_to_long(offset);
 	
@@ -123,7 +171,10 @@ static zval *saproxy_read_dimension(zval *object, zval *offset, int type TSRMLS_
 		indices = do_alloca(dims * sizeof(LONG));
 
 		/* copy indices from proxy */
-		memcpy(indices, proxy->indices, (dims-1) * sizeof(LONG));
+		for (i = 0; i < dims; i++) {
+			convert_to_long(proxy->indices[i]);
+			indices[i] = Z_LVAL_P(proxy->indices[i]);
+		}
 
 		/* add user-supplied index */
 		indices[dims-1] = Z_LVAL_P(offset);
@@ -148,7 +199,7 @@ static zval *saproxy_read_dimension(zval *object, zval *offset, int type TSRMLS_
 		
 	} else {
 		/* return another proxy */
-		php_com_saproxy_create(object, return_value, Z_LVAL_P(offset) TSRMLS_CC);
+		php_com_saproxy_create(object, return_value, offset TSRMLS_CC);
 	}
 
 	return return_value;
@@ -156,7 +207,41 @@ static zval *saproxy_read_dimension(zval *object, zval *offset, int type TSRMLS_
 
 static void saproxy_write_dimension(zval *object, zval *offset, zval *value TSRMLS_DC)
 {
-	php_com_throw_exception(E_NOTIMPL, "writing to safearray not yet implemented" TSRMLS_CC);
+	php_com_saproxy *proxy = SA_FETCH(object);
+	UINT dims;
+	SAFEARRAY *sa;
+	LONG ubound, lbound;
+	int i;
+	HRESULT res;
+	VARIANT v;
+	
+	if (V_VT(&proxy->obj->v) == VT_DISPATCH) {
+		/* We do a prop-set using the first dimension as the property name,
+		 * all subsequent dimensions and offset as parameters, with value as
+		 * the final value */
+		zval **args = safe_emalloc(proxy->dimensions + 2, sizeof(zval *), 0);
+
+		for (i = 1; i < proxy->dimensions; i++) {
+			args[i-1] = proxy->indices[i];
+		}
+		args[i-1] = offset;
+		args[i] = value;
+
+		convert_to_string(proxy->indices[0]);
+		VariantInit(&v);
+		if (SUCCESS == php_com_do_invoke(proxy->obj, Z_STRVAL_P(proxy->indices[0]),
+					Z_STRLEN_P(proxy->indices[0]), DISPATCH_PROPERTYPUT, &v, proxy->dimensions + 1,
+					args TSRMLS_CC)) {
+			VariantClear(&v);
+		}
+
+		efree(args);
+		
+	} else if (V_ISARRAY(&proxy->obj->v)) {
+		php_com_throw_exception(E_NOTIMPL, "writing to safearray not yet implemented" TSRMLS_CC);
+	} else {
+		php_com_throw_exception(E_NOTIMPL, "invalid write to com proxy object" TSRMLS_CC);
+	}
 }
 
 static void saproxy_object_set(zval **property, zval *value TSRMLS_DC)
@@ -262,6 +347,13 @@ zend_object_handlers php_com_saproxy_handlers = {
 static void saproxy_free_storage(void *object TSRMLS_DC)
 {
 	php_com_saproxy *proxy = (php_com_saproxy *)object;
+	int i;
+
+	for (i = 0; i < proxy->dimensions; i++) {
+		if (proxy->indices) {
+				FREE_ZVAL(proxy->indices[i]);
+		}
+	}
 
 	zval_ptr_dtor(&proxy->zobj);
 	efree(proxy->indices);
@@ -272,43 +364,45 @@ static void saproxy_clone(void *object, void **clone_ptr TSRMLS_DC)
 {
 	php_com_saproxy *proxy = (php_com_saproxy *)object;
 	php_com_saproxy *cloneproxy;
+	int i;
 
 	cloneproxy = emalloc(sizeof(*cloneproxy));
 	memcpy(cloneproxy, proxy, sizeof(*cloneproxy));
 
 	ZVAL_ADDREF(cloneproxy->zobj);
-	cloneproxy->indices = safe_emalloc(cloneproxy->dimensions, sizeof(LONG), 0);
-	memcpy(cloneproxy->indices, proxy->indices, cloneproxy->dimensions * sizeof(LONG));
+	cloneproxy->indices = safe_emalloc(cloneproxy->dimensions, sizeof(zval *), 0);
+	clone_indices(cloneproxy, proxy, proxy->dimensions);
 
 	*clone_ptr = cloneproxy;
 }
 
-int php_com_saproxy_create(zval *com_object, zval *proxy_out, long index TSRMLS_DC)
+int php_com_saproxy_create(zval *com_object, zval *proxy_out, zval *index TSRMLS_DC)
 {
 	php_com_saproxy *proxy, *rel = NULL;
-	php_com_dotnet_object *obj;
 
 	proxy = ecalloc(1, sizeof(*proxy));
 	proxy->dimensions = 1;
 
 	if (Z_OBJCE_P(com_object) == php_com_saproxy_class_entry) {
 		rel = SA_FETCH(com_object);
-		obj = rel->obj;
+		proxy->obj = rel->obj;
 		proxy->zobj = rel->zobj;
 		proxy->dimensions += rel->dimensions;
 	} else {
-		obj = CDNO_FETCH(com_object);
+		proxy->obj = CDNO_FETCH(com_object);
 		proxy->zobj = com_object;
 	}
 
 	ZVAL_ADDREF(proxy->zobj);
-	proxy->indices = safe_emalloc(proxy->dimensions, sizeof(LONG), 0);
+	proxy->indices = safe_emalloc(proxy->dimensions, sizeof(zval *), 0);
 
 	if (rel) {
-		memcpy(proxy->indices, rel->indices, (proxy->dimensions-1) * sizeof(LONG));
+		clone_indices(proxy, rel, rel->dimensions);
 	}
 
-	proxy->indices[proxy->dimensions-1] = index;
+	MAKE_STD_ZVAL(proxy->indices[proxy->dimensions-1]);
+	*proxy->indices[proxy->dimensions-1] = *index;
+	zval_copy_ctor(proxy->indices[proxy->dimensions-1]);
 
 	Z_TYPE_P(proxy_out) = IS_OBJECT;
 	Z_OBJ_HANDLE_P(proxy_out) = zend_objects_store_put(proxy, NULL, saproxy_free_storage, saproxy_clone TSRMLS_CC);
@@ -406,6 +500,7 @@ zend_object_iterator *php_com_saproxy_iter_get(zend_class_entry *ce, zval *objec
 {
 	php_com_saproxy *proxy = SA_FETCH(object);
 	php_com_saproxy_iter *I;
+	int i;
 
 	I = ecalloc(1, sizeof(*I));
 	I->iter.funcs = &saproxy_iter_funcs;
@@ -416,7 +511,10 @@ zend_object_iterator *php_com_saproxy_iter_get(zend_class_entry *ce, zval *objec
 	ZVAL_ADDREF(I->proxy_obj);
 
 	I->indices = safe_emalloc(proxy->dimensions + 1, sizeof(LONG), 0);
-	memcpy(I->indices, proxy->indices, proxy->dimensions * sizeof(LONG));
+	for (i = 0; i < proxy->dimensions; i++) {
+		convert_to_long(proxy->indices[i]);
+		I->indices[i] = Z_LVAL_P(proxy->indices[i]);
+	}
 
 	SafeArrayGetLBound(V_ARRAY(&proxy->obj->v), proxy->dimensions, &I->imin);
 	SafeArrayGetUBound(V_ARRAY(&proxy->obj->v), proxy->dimensions, &I->imax);
