@@ -1576,7 +1576,6 @@ PHP_FUNCTION(sybase_unbuffered_query)
 	php_sybase_query(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 
-
 /* {{{ proto bool sybase_free_result(int result)
    Free result memory */
 PHP_FUNCTION(sybase_free_result)
@@ -1595,7 +1594,7 @@ PHP_FUNCTION(sybase_free_result)
 	ZEND_FETCH_RESOURCE(result, sybase_result *, sybase_result_index, -1, "Sybase result", le_result);
 	
 	/* Did we fetch up until the end? */
-	if (result->last_retcode != CS_END_DATA) {
+	if (result->last_retcode != CS_END_DATA && result->last_retcode != CS_END_RESULTS) {
 		/* php_error_docref(NULL TSRMLS_CC, E_WARNING, "Sybase:  Cancelling the rest of the results\n"); */
 		ct_cancel(NULL, result->sybase_ptr->cmd, CS_CANCEL_ALL);
 		php_sybase_finish_results(result);
