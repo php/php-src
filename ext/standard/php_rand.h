@@ -58,8 +58,8 @@
 
 /* FIXME: that '_php_randgen_entry' needed, or not? */
 typedef struct _php_randgen_entry {
-	void (*srand)(long seed);
-	long (*rand)(void);
+	void (*srand)(long seed TSRMLS_DC);
+	long (*rand)(TSRMLS_D);
 	long randmax;
 	char *ini_str;
 } php_randgen_entry;
@@ -99,10 +99,10 @@ PHP_FUNCTION(mt_srand);
 PHP_FUNCTION(mt_rand);
 PHP_FUNCTION(mt_getrandmax);
 
-PHPAPI long   php_rand(void);
+PHPAPI long   php_rand(TSRMLS_D);
 PHPAPI long   php_rand_range(long min, long max TSRMLS_DC);
-PHPAPI double php_drand(void);
-PHPAPI long   php_randmax(void);
+PHPAPI double php_drand(TSRMLS_D);
+PHPAPI long   php_randmax(TSRMLS_D);
 
 #endif	/* PHP_RAND_H */
 

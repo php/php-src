@@ -38,8 +38,8 @@
 php_randgen_entry *php_randgen_entries[PHP_RAND_NUMRANDS];
 
 #define PHP_HAS_SRAND(which)	(php_randgen_entries[which] && php_randgen_entries[which]->srand)
-#define PHP_SRAND(which,seed)	((*(php_randgen_entries[which]->srand))(seed))
-#define PHP_RAND(which)			((*(php_randgen_entries[which]->rand))())
+#define PHP_SRAND(which,seed)	((*(php_randgen_entries[which]->srand))(seed TSRMLS_CC))
+#define PHP_RAND(which)			((*(php_randgen_entries[which]->rand))(TSRMLS_C))
 #define PHP_RANDMAX(which)		(php_randgen_entries[which]->randmax)
 #define PHP_RAND_INISTR(which)	(php_randgen_entries[which]->ini_str)
 
@@ -51,6 +51,8 @@ PHP_MINIT_FUNCTION(rand)
 	PHP_MINIT(rand_mt)(INIT_FUNC_ARGS_PASSTHRU);
 	/* lcg not yet implemented */
 	php_randgen_entries[PHP_RAND_LCG] = NULL;
+
+	return SUCCESS;
 }
 
 /* TODO: check that this function is called on the start of each script
@@ -72,6 +74,8 @@ PHP_RINIT_FUNCTION(rand)
 			PHP_SRAND(i,SRAND_A_RANDOM_SEED);
 		}
 	}
+
+	return SUCCESS;
 }
 
 /* INI */
@@ -128,7 +132,6 @@ PHP_FUNCTION(name)							\
 {											\
 	zval **seed;								\
 	zval **alg;								\
-	TSRMLS_FETCH();							\
 											\
 	switch (ZEND_NUM_ARGS()) {						\
 		case 0:										\
@@ -177,7 +180,7 @@ pim_srand_common(mt_srand,PHP_RAND_MT)
 /* rand */
 
 /* {{{ PHPAPI long php_rand(void) */
-PHPAPI long php_rand(void)
+PHPAPI long php_rand(TSRMLS_D)
 {
 	return PHP_RAND(CURR_GEN);
 }
@@ -185,9 +188,9 @@ PHPAPI long php_rand(void)
 
 /* {{{ PHPAPI double php_drand(void) 
  *      returns a double in the range [0,1) */
-PHPAPI double php_drand(void)
+PHPAPI double php_drand(TSRMLS_D)
 {
-	return  (double)php_rand() /
+	return  (double)php_rand(TSRMLS_C) /
 			(double)(PHP_RANDMAX(CURR_GEN)+1.0);
 }
 /* }}} */
@@ -279,7 +282,7 @@ PHP_FUNCTION_RAND(mt_rand,PHP_RAND_MT)
 
 /* {{{ PHPAPI long php_randmax(void)
    Returns the maximum value a random number can have */
-PHPAPI long php_randmax(void)
+PHPAPI long php_randmax(TSRMLS_D)
 {
 	return PHP_RANDMAX(CURR_GEN);
 }
@@ -293,7 +296,7 @@ PHP_FUNCTION(getrandmax)
 		WRONG_PARAM_COUNT;
 	}
 
-	RETURN_LONG( php_randmax());
+	RETURN_LONG( php_randmax(TSRMLS_C));
 }
 /* }}} */
 
@@ -305,7 +308,7 @@ PHP_FUNCTION(mt_getrandmax)
 		WRONG_PARAM_COUNT;
 	}
 
-	RETURN_LONG( php_randmax() );
+	RETURN_LONG( php_randmax(TSRMLS_C) );
 }
 /* }}} */
 

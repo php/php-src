@@ -21,21 +21,19 @@
 
 #include <stdlib.h>
 
-#include "php.h"
+#include "php_reentrancy.h"
 #include "php_rand.h"
-
 #include "basic_functions.h"
 
-
 /* rand() & co (thread safe this time!): */
-static void _php_srand_sys(long seed) 
+static void _php_srand_sys(long seed TSRMLS_DC) 
 {
 	BG(rand_sys_seed) = (unsigned int) seed;
 }
 
-static long _php_rand_sys(void)
+static long _php_rand_sys(TSRMLS_D)
 {
-	return (long) rand_r(&BG(rand_sys_seed));
+	return (long) php_rand_r(&BG(rand_sys_seed));
 }
 
 PHP_MINIT_FUNCTION(rand_sys)
@@ -67,6 +65,7 @@ PHP_MINIT_FUNCTION(rand_sys)
 	php_randgen_entries[PHP_RAND_LRAND48] = NULL;
 #endif
 
+	return SUCCESS;
 }
 
 /*
