@@ -47,6 +47,7 @@ PHP_FUNCTION(apache_child_terminate);
 PHP_FUNCTION(apache_setenv);
 PHP_FUNCTION(apache_get_version);
 PHP_FUNCTION(apache_get_modules);
+PHP_FUNCTION(apache_reset_timeout);
 
 PHP_MINFO_FUNCTION(apache);
 
@@ -533,6 +534,20 @@ PHP_FUNCTION(apache_get_modules)
 			add_next_index_string(return_value, s, 1);
 		}	
 	}
+}
+/* }}} */
+
+/* {{{ proto array apache_reset_timeout(void)
+   Reset the Apache write timer */
+PHP_FUNCTION(apache_reset_timeout)
+{
+	if (PG(safe_mode)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot reset the Apache timeout in safe mode");
+		RETURN_FALSE;
+	}
+
+	ap_reset_timeout((request_rec *)SG(server_context));
+	RETURN_TRUE;
 }
 /* }}} */
 
