@@ -596,6 +596,32 @@ Changes in the Zend Engine 2.0
       If you derive your exception classes from this Exception base class
       your exceptions will be nicely shown in the builtin handler for 
       uncaught exceptions.
+      
+      Note: The method getMessage() is a final read only access method to 
+      the private proeprty message that is set in the constructor. If you
+      feel a need to overwrite the exception display then overload method
+      __toString() in your derived class or implement your own extneral 
+      exception display function to accomplish your desired formatting.
+      
+      Example:
+      
+      <?php
+      function display_exception(Exception $ex)
+      {
+          echo 'Exception: ' . $ex->getMessage() . 'with backtrace: <pre>';
+          echo $ex->getTrace();
+          echo '</pre>';
+      }
+      
+      try
+      {
+          // your code here
+      }
+      catch (Exception $ex)
+      {
+          display_exeption($ex);
+      }
+      ?>
 
     * Dereferencing objects returned from functions.
 
