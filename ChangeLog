@@ -1,3 +1,239 @@
+2003-01-03  Alex Waugh  <alex@alexwaugh.com>
+
+    * acinclude.m4:
+      Provide alternative for glibc brokenness test when cross compiling
+
+2003-01-03  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * sapi/apache/php_apache.c
+      sapi/apache/php_apache.c:
+      - Fix docrefs
+
+    * sapi/apache/php_apache.c:
+      - Fix typo (patch by Joseph Tate)
+
+2003-01-03  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/iconv/tests/iconv_mime_decode.phpt:
+      Added test case for iconv_mime_decode()
+
+    * ext/iconv/tests/iconv_strpos.phpt
+      ext/iconv/tests/iconv_strrpos.phpt:
+      Added test cases for iconv_strpos() and iconv_strrpos()
+
+    * ext/iconv/iconv.c:
+      Fixed an iconv_strrpos() bug that the function doesn't return accurate
+      position of last occurrence
+
+2003-01-03  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/mcrypt/TODO:
+      - Update todo
+
+    * ext/mcrypt/config.m4
+      ext/mcrypt/mcrypt.c
+      ext/mcrypt/php_mcrypt.h:
+      - Removed support for libmcrypt 2.2.x to allow cleaner code. Another reason
+        to upgrade libmcrypt to a 2.5.x series as the older ones have too much
+      bugs
+        to be safely used with PHP.
+      - Updated macro's, php_errors and parameter parsing.
+
+2003-01-03  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/file.c:
+      Fixed a bug that would cause flock() to never set the 3rd argument.
+      CS fixes & switched to new parameter parsing API.
+
+    * (PHP_4_3)
+      ext/standard/http_fopen_wrapper.c:
+      MFH (fix for bug #21267 & memory leak fix on reidrects).
+
+    * ext/standard/http_fopen_wrapper.c:
+      Fixed a memory leak that occurs if the location specified by redirect
+      header
+      cannot be opened.
+
+    * ext/standard/http_fopen_wrapper.c:
+      Further fixes related to bug #21267.
+
+2003-01-03  Anantha Kesari H Y  <hyanantha@novell.com>
+
+    * sapi/apache2filter/php_apache.h
+      sapi/apache2filter/sapi_apache2.c:
+      Modifications for NetWare.
+
+    * netware/phplib.imp
+      netware/phplib.mak
+      netware/sendmail.c
+      netware/sendmail.h:
+      Some existing files modified and a couple of files removed for NetWare.
+
+    * win32/sendmail.c
+      win32/sendmail.h:
+      NetWare related changes/modifications.
+
+2003-01-03  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/iconv/iconv.c:
+      Added offset validity check for iconv_strpos()
+
+2003-01-03  Anantha Kesari H Y  <hyanantha@novell.com>
+
+    * ext/xml/xml.mak
+      netware/geterrnoptr.c
+      netware/sendmail_nw.h
+      sapi/apache/libpre.c:
+      New file added for NetWare.
+
+    * ext/ftp/ftp.c
+      ext/ldap/ldap.mak
+      ext/ldap/ldap.mak
+      ext/mysql/mysql.mak
+      ext/mysql/mysql.mak
+      ext/session/mod_files.c
+      ext/session/session.c
+      ext/standard/exec.c
+      ext/standard/exec.c
+      ext/standard/file.c
+      ext/standard/filestat.c
+      ext/standard/html.c
+      ext/standard/syslog.c
+      ext/xml/xml.mak
+      netware/buildlib.bat
+      netware/phplib.mak:
+      Modified for NetWare.
+
+    * main/config.nw.h
+      main/internal_functions_nw.c
+      main/php.h
+      main/php_sprintf.c
+      main/user_streams.c:
+      A new file added and some old files modified for NetWare.
+
+2003-01-03  Edin Kadribasic  <edink@proventum.net>
+
+    * netware/ApacheCore.imp
+      netware/BisonExtStandard.bat
+      netware/BisonFlexZend.bat:
+      Checking in files for Ananth Kesari <hyanantha@novell.com>
+
+2003-01-03  Anantha Kesari H Y  <hyanantha@novell.com>
+
+    * netware/ZendEngine2.mak
+      netware/grp.h
+      netware/libpq.imp
+      netware/mktemp.c
+      netware/param.h
+      netware/php-nw.bat
+      netware/php4apache.mak
+      netware/php4apache2filter.mak
+      netware/php4cli.mak
+      netware/phplib.imp
+      netware/phplib.mak
+      netware/phptest.ncf
+      netware/pipe.c
+      netware/pipe.h
+      netware/postgres_ext.h
+      netware/pwd.c
+      netware/pwd.h
+      netware/start.c
+      netware/sysexits.h
+      netware/time_nw.c
+      netware/time_nw.h
+      netware/tsrm.mak
+      netware/wfile.c
+      netware/wfile.h
+      netware/zend.mak:
+      A few New files added and some old files modified for NetWare.
+
+    * netware/libpq-fe.h
+      netware/libpq-fs.h:
+      New files added for NetWare.
+
+    * netware/common.mif
+      netware/sys/stat.h:
+      File modified for NetWare.
+
+2003-01-03  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/credits_sapi.h:
+      - Update this one as well
+
+    * ext/standard/credits_ext.h
+      scripts/credits:
+      - Remove double "Win32 COM" functions line
+
+    * README.PARAMETER_PARSING_API:
+      - Whitespace
+
+    * (PHP_4_3)
+      NEWS:
+      Bugfixing news
+
+2003-01-03  Sara Golemon  <php@alphaweb.net>
+
+    * ext/standard/basic_functions.c
+      ext/standard/file.c
+      ext/standard/file.h:
+      Added stream_get_wrappers()
+
+2003-01-03  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/iconv/tests/iconv_strlen.phpt
+      ext/iconv/tests/iconv_substr.phpt:
+      Added test cases for iconv_strlen() and iconv_substr()
+
+    * ext/iconv/iconv.c:
+      Fixed iconv_mime_decode() so it would give more awareness to stateful
+      codesets
+
+    * ext/iconv/iconv.c:
+      Fixed infinite loop of iconv_mime_encode() in case the specified line
+      length is too short to contain a proper mime-encoded string
+
+    * ext/iconv/iconv.c:
+      Give mo' shift-sequence awareness to iconv_mime_encode
+
+    * ext/iconv/iconv.c:
+      More shift-sequence awareness for iconv_substr()
+
+    * ext/iconv/iconv.c:
+      Added missing casting operators
+
+    * ext/iconv/tests/eucjp2iso2022jp.phpt:
+      MFB
+
+    * (PHP_4_3)
+      ext/iconv/tests/eucjp2iso2022jp.phpt:
+      Updated the test so it reflects the recent change on iconv.c
+
+    * ext/iconv/iconv.c:
+      MFB: fixed shift-out sequence unawareness issue
+
+    * (PHP_4_3)
+      ext/iconv/iconv.c:
+      Fixed shift-out sequence unawareness issue
+
+    * ext/standard/array.c:
+      Fixed small leaks in array_map() in case the first parameter is NULL like
+      array_map(NULL, array(...));
+
+2003-01-03  Harald Radi  <harald.radi+coding.php@nme.at>
+
+    * pear/scripts/pear.bat:
+      fixing typo
+
+2003-01-03  Jani Taskinen  <sniper@iki.fi>
+
+    * NEWS:
+      - Removed entries that are going to 4.3.1
+      - Grouped the entries a bit.
+
+    * (PHP_4_3)
+      NEWS:
+      Group these entries a bit to make NEWS easier to read.
+
 2003-01-02  Stig Bakken  <ssb@fast.no>
 
     * pear/PEAR/Config.php:
