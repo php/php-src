@@ -506,7 +506,9 @@ class PEAR_Installer extends PEAR_Common
                 case 'delete':
                     break;
                 case 'installed_as':
-                    unset($this->pkginfo['filelist'][$data[0]]['installed_as']);
+                    if (isset($this->pkginfo['filelist'])) {
+                        unset($this->pkginfo['filelist'][$data[0]]['installed_as']);
+                    }
                     if (isset($this->pkginfo['filelist']['dirtree'][dirname($data[1])])) {
                         unset($this->pkginfo['filelist']['dirtree'][dirname($data[1])]);
                         while(!empty($data[3]) && $data[3] != '/' && $data[3] != '\\'
