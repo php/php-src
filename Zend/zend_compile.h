@@ -272,7 +272,7 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 void zend_do_end_function_declaration(znode *function_token TSRMLS_DC);
 void zend_do_receive_arg(int op, znode *var, znode *offset, znode *initialization, unsigned char pass_type TSRMLS_DC);
 int zend_do_begin_function_call(znode *function_name TSRMLS_DC);
-void zend_do_begin_method_call(znode *object, znode *function_name TSRMLS_DC);
+void zend_do_begin_method_call(znode *left_bracket TSRMLS_DC);
 void zend_do_begin_dynamic_function_call(znode *function_name TSRMLS_DC);
 void do_fetch_class(znode *result, znode *class_entry, znode *class_name TSRMLS_DC);
 void do_fetch_class_name(znode *result, znode *class_entry, znode *class_name TSRMLS_DC);
@@ -542,6 +542,8 @@ int zendlex(znode *zendlval TSRMLS_DC);
 
 #define ZEND_NAMESPACE				109
 #define ZEND_FETCH_CLASS			110
+
+#define ZEND_CLONE					111
 /* end of block */
 
 

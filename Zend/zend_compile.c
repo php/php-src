@@ -879,7 +879,7 @@ int zend_do_begin_function_call(znode *function_name TSRMLS_DC)
 
 
 
-void zend_do_begin_method_call(znode *object, znode *function_name TSRMLS_DC)
+void zend_do_begin_method_call(znode *left_bracket TSRMLS_DC)
 {
 	zend_op *last_op;
 	int last_op_number;
@@ -890,8 +890,18 @@ void zend_do_begin_method_call(znode *object, znode *function_name TSRMLS_DC)
  
 	last_op_number = get_next_op_number(CG(active_op_array))-1;
 	last_op = &CG(active_op_array)->opcodes[last_op_number];
+
+	if ((last_op->op2.op_type == IS_CONST) && (last_op->op2.u.constant.value.str.len == sizeof("_clone")-1)
+		&& !memcmp(last_op->op2.u.constant.value.str.val, "_clone", sizeof("_clone"))) {
+		last_op->opcode = ZEND_CLONE;
+		left_bracket->u.constant.value.lval = ZEND_CLONE;
+		zend_stack_push(&CG(function_call_stack), (void *) &ptr, sizeof(zend_function *));
+		zend_do_extended_fcall_begin(TSRMLS_C); 
+		return;
+	}
 	last_op->opcode = ZEND_INIT_FCALL_BY_NAME;
 	last_op->extended_value = ZEND_MEMBER_FUNC_CALL;
+	left_bracket->u.constant.value.lval = ZEND_INIT_FCALL_BY_NAME;
 
 	/*opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 	opline->opcode = ZEND_INIT_FCALL_BY_NAME;
@@ -1004,8 +1014,20 @@ void zend_do_begin_class_member_function_call(znode *class_name, znode *function
 
 void zend_do_end_function_call(znode *function_name, znode *result, znode *argument_list, int is_method, int is_dynamic_fcall TSRMLS_DC)
 {
-	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+	zend_op *opline;
 	
+	if (is_method && function_name && function_name->u.constant.value.lval == ZEND_CLONE) {
+		if (argument_list->u.constant.value.lval > 0) {
+			zend_error(E_ERROR, "Can't pass arguments to _clone()");
+		}
+		/* FIXME: throw_list */
+		zend_stack_del_top(&CG(function_call_stack));
+		*result = CG(active_op_array)->opcodes[get_next_op_number(CG(active_op_array))-1].result;
+		return;
+	}
+
+	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+
 	if (!is_method && !is_dynamic_fcall && function_name->op_type==IS_CONST) {
 		opline->opcode = ZEND_DO_FCALL;
 		opline->op1 = *function_name;
