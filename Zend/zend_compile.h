@@ -352,7 +352,6 @@ ZEND_API void zend_do_implement_interface(zend_class_entry *ce, zend_class_entry
 void zend_do_implements_interface(znode *interface_znode TSRMLS_DC);
 
 void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent_ce);
-void zend_do_implement_interface(zend_class_entry *ce, zend_class_entry *iface);
 void zend_do_early_binding(TSRMLS_D);
 
 void zend_do_pass_param(znode *param, zend_uchar op, int offset TSRMLS_DC);
