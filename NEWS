@@ -2,6 +2,11 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 200?, Version 4.0.5
+- When using the ob_gzhandler() PHP now automagically also sets the
+  Content-Lengh correctly which enables browsers to use the HTTP
+  Keep-Alive feature. (Thies)
+- UDM_PARAM_CHARSET parameter in Udm_Set_Agent_Param() has been added to
+  set local charset you are using. Example updated also. (gluke)
 - Improved handling of preg_replace() /F modifier so that it's possible to
   specify array($obj, 'method') construct as a replacement function. (Andrei)
 - Added mysql_get_client_info(), mysql_get_server_info(),
