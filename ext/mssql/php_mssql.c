@@ -1271,7 +1271,7 @@ PHP_FUNCTION(mssql_fetch_object)
 {
 	php_mssql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, MSSQL_ASSOC);
 	if (Z_TYPE_P(return_value)==IS_ARRAY) {
-		object_and_properties_init(return_value, &zend_standard_class_def, Z_ARRVAL_P(return_value));
+		object_and_properties_init(return_value, ZEND_STANDARD_CLASS_DEF_PTR, Z_ARRVAL_P(return_value));
 	}
 }
 
