@@ -352,6 +352,15 @@ dnl Checks for types
 AC_TYPE_SIZE_T
 AC_TYPE_UID_T
 
+dnl Check for struct sockaddr_storage
+AC_CACHE_CHECK([for struct sockaddr_storage], ac_cv_sockaddr_storage,
+[AC_TRY_COMPILE([ #include <sys/types.h>
+#include <sys/socket.h>], [struct sockaddr_storage s; s],
+  ac_cv_sockaddr_storage=yes, ac_cv_sockaddr_storage=no)])
+if test "$ac_cv_sockaddr_storage" = yes; then
+  AC_DEFINE(HAVE_SOCKADDR_STORAGE,1,[Whether you have struct sockaddr_storage])
+fi
+
 dnl Check for IPv6 support
 AC_CACHE_CHECK([for IPv6 support], ac_cv_ipv6_support,
 [AC_TRY_COMPILE([ #include <sys/types.h>

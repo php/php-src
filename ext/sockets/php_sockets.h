@@ -103,11 +103,6 @@ typedef struct {
 } php_fd_set;
 
 typedef struct {
-	long family;
-	char info[256];
-} php_sockaddr_storage;
-
-typedef struct {
 	zend_bool	use_system_read;
 } php_sockets_globals;
 

@@ -26,6 +26,7 @@
 #endif
 
 #include "php.h"
+#include "php_network.h"
 
 #if HAVE_SOCKETS
 
