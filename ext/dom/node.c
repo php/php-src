@@ -874,6 +874,11 @@ PHP_FUNCTION(dom_node_insert_before)
 	}
 
 	DOM_GET_OBJ(parentp, id, xmlNodePtr, intern);
+
+	if (dom_node_children_valid(parentp) == FAILURE) {
+		RETURN_FALSE;
+	}
+
 	DOM_GET_OBJ(child, node, xmlNodePtr, childobj);
 
 	new_child = NULL;
@@ -896,6 +901,11 @@ PHP_FUNCTION(dom_node_insert_before)
 		RETURN_FALSE;
 	}
 
+	if (child->type == XML_DOCUMENT_FRAG_NODE && child->children == NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Document Fragment is empty");
+		RETURN_FALSE;
+	}
+
 	if (child->doc == NULL && parentp->doc != NULL) {
 		childobj->document = intern->document;
 		php_libxml_increment_doc_ref((php_libxml_node_object *)childobj, NULL TSRMLS_CC);
@@ -912,25 +922,25 @@ PHP_FUNCTION(dom_node_insert_before)
 			xmlUnlinkNode(child);
 		}
 
-		if (child->type == XML_TEXT_NODE) {
-			if (refp->type == XML_TEXT_NODE) {
-				xmlChar *tmp;
+		if (child->type == XML_TEXT_NODE && (refp->type == XML_TEXT_NODE || 
+			(refp->prev != NULL && refp->prev->type == XML_TEXT_NODE))) {
+			if (child->doc == NULL) {
+				xmlSetTreeDoc(child, parentp->doc);
+			}
+			new_child = child;
+			new_child->parent = refp->parent;
+			new_child->next = refp;
+			new_child->prev = refp->prev;
+			refp->prev = new_child;
+			if (new_child->prev != NULL) {
+				new_child->prev->next = new_child;
+			}
+			if (new_child->parent != NULL) {
+				if (new_child->parent->children == refp) {
+					new_child->parent->children = new_child;
+				}
+			}
 
-				tmp = xmlStrdup(child->content);
-				tmp = xmlStrcat(tmp, refp->content);
-				xmlNodeSetContent(refp, tmp);
-				xmlFree(tmp);
-				php_libxml_node_free_resource(child TSRMLS_CC);
-				DOM_RET_OBJ(rv, refp, &ret, intern);
-				return;
-			}
-			if ((refp->prev != NULL) && (refp->prev->type == XML_TEXT_NODE)
-				&& (refp->name == refp->prev->name)) {
-				xmlNodeAddContent(refp->prev, child->content);
-				php_libxml_node_free_resource(child TSRMLS_CC);
-				DOM_RET_OBJ(rv, refp->prev, &ret, intern);
-				return;
-			}
 		} else if (child->type == XML_ATTRIBUTE_NODE) {
 			xmlAttrPtr lastattr;
 
@@ -947,29 +957,56 @@ PHP_FUNCTION(dom_node_insert_before)
 					return;
 				}
 			}
+		} else if (child->type == XML_DOCUMENT_FRAG_NODE) {
+			xmlNodePtr fragment;
 
+			fragment = child;
+			new_child = child->children;
+			child = new_child;
+			while (child->next != NULL) {
+				child->parent = parentp;
+				if (child->doc != parentp->doc) {
+					xmlSetTreeDoc(child, parentp->doc);
+				}
+				child = child->next;
+			}
+			child->parent = parentp;
+			if (child->doc != parentp->doc) {
+				xmlSetTreeDoc(child, parentp->doc);
+			}
+
+			if (refp->prev != NULL) {
+				refp->prev->next = new_child;
+			} else {
+				parentp->children = new_child;
+			}
+			new_child->prev = refp->prev;
+			refp->prev = child;
+			child->next = refp;
+			fragment->children = NULL;
 		}
-		new_child = xmlAddPrevSibling(refp, child);
+
+		if (new_child == NULL) {
+			new_child = xmlAddPrevSibling(refp, child);
+		}
 	} else {
 		if (child->parent == parentp){
 			xmlUnlinkNode(child);
 		}
-		if (child->type == XML_TEXT_NODE) {
-			if ((parentp->type == XML_TEXT_NODE) &&
-			(parentp->content != NULL) &&
-			(parentp != child)) {
-				xmlNodeAddContent(parentp, child->content);
-				php_libxml_node_free_resource(child TSRMLS_CC);
-				DOM_RET_OBJ(rv, parentp, &ret, intern);
-				return;
+		if (child->type == XML_TEXT_NODE && parentp->last != NULL && parentp->last->type == XML_TEXT_NODE) {
+			child->parent = parentp;
+			if (child->doc == NULL) {
+				xmlSetTreeDoc(child, parentp->doc);
 			}
-			if ((parentp->last != NULL) && (parentp->last->type == XML_TEXT_NODE) &&
-			(parentp->last->name == child->name) &&
-			(parentp->last != child)) {
-				xmlNodeAddContent(parentp->last, child->content);
-				php_libxml_node_free_resource(child TSRMLS_CC);
-				DOM_RET_OBJ(rv, parentp->last, &ret, intern);
-				return;
+			new_child = child;
+			if (parentp->children == NULL) {
+				parentp->children = child;
+				parentp->last = child;
+			} else {
+				child = parentp->last;
+				child->next = new_child;
+				new_child->prev = child;
+				parentp->last = new_child;
 			}
 		} else 	if (child->type == XML_ATTRIBUTE_NODE) {
 			xmlAttrPtr lastattr;
@@ -987,15 +1024,37 @@ PHP_FUNCTION(dom_node_insert_before)
 					return;
 				}
 			}
-		} else 	if (child->type == XML_DOCUMENT_FRAG_NODE) {
-			new_child = xmlAddChildList(parentp, child->children);
-			if (new_child != NULL) {
-				child->children = NULL;
+		} else if (child->type == XML_DOCUMENT_FRAG_NODE) {
+			xmlNodePtr fragment;
+
+			fragment = child;
+
+			new_child = child->children;
+			if (parentp->children == NULL) {
+				parentp->children = new_child;
+			} else {
+				child = parentp->last;
+				child->next = new_child;
+				new_child->prev = child;
 			}
-			DOM_RET_OBJ(rv, new_child, &ret, intern);
-			return;
+			child = new_child;
+			while (child->next != NULL) {
+				child->parent = parentp;
+				if (child->doc != parentp->doc) {
+					xmlSetTreeDoc(child, parentp->doc);
+				}
+				child = child->next;
+			}
+			child->parent = parentp;
+			if (child->doc != parentp->doc) {
+				xmlSetTreeDoc(child, parentp->doc);
+			}
+			parentp->last = child;
+			fragment->children = NULL;
 		}
-		new_child = xmlAddChild(parentp, child);
+		if (new_child == NULL) {
+			new_child = xmlAddChild(parentp, child);
+		}
 	}
 
 	if (NULL == new_child) {
@@ -1186,6 +1245,11 @@ PHP_FUNCTION(dom_node_append_child)
 		RETURN_FALSE;
 	}
 
+	if (child->type == XML_DOCUMENT_FRAG_NODE && child->children == NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Document Fragment is empty");
+		RETURN_FALSE;
+	}
+
 	if (child->doc == NULL && nodep->doc != NULL) {
 		childobj->document = intern->document;
 		php_libxml_increment_doc_ref((php_libxml_node_object *)childobj, NULL TSRMLS_CC);
@@ -1195,20 +1259,20 @@ PHP_FUNCTION(dom_node_append_child)
 		xmlUnlinkNode(child);
 	}
 
-	if (child->type == XML_TEXT_NODE) {
-		if ((nodep->type == XML_TEXT_NODE) &&
-		(nodep->content != NULL)) {
-			xmlNodeAddContent(nodep, child->content);
-			php_libxml_node_free_resource(child TSRMLS_CC);
-			DOM_RET_OBJ(rv, nodep, &ret, intern);
-			return;
+	if (child->type == XML_TEXT_NODE && nodep->last != NULL && nodep->last->type == XML_TEXT_NODE) {
+		child->parent = nodep;
+		if (child->doc == NULL) {
+			xmlSetTreeDoc(child, nodep->doc);
 		}
-		if ((nodep->last != NULL) && (nodep->last->type == XML_TEXT_NODE) &&
-		(nodep->last->name == child->name)) {
-			xmlNodeAddContent(nodep->last, child->content);
-			php_libxml_node_free_resource(child TSRMLS_CC);
-			DOM_RET_OBJ(rv, nodep->last, &ret, intern);
-			return;
+		new_child = child;
+		if (nodep->children == NULL) {
+			nodep->children = child;
+			nodep->last = child;
+		} else {
+			child = nodep->last;
+			child->next = new_child;
+			new_child->prev = child;
+			nodep->last = new_child;
 		}
 	} else 	if (child->type == XML_ATTRIBUTE_NODE) {
 		xmlAttrPtr lastattr;
@@ -1223,20 +1287,40 @@ PHP_FUNCTION(dom_node_append_child)
 				php_libxml_node_free_resource((xmlNodePtr) lastattr TSRMLS_CC);
 			}
 		}
-	} else 	if (child->type == XML_DOCUMENT_FRAG_NODE) {
-		new_child = xmlAddChildList(nodep, child->children);
-		if (new_child != NULL) {
-			child->children = NULL;
+	} else if (child->type == XML_DOCUMENT_FRAG_NODE) {
+		xmlNodePtr fragment;
+
+		fragment = child;
+		new_child = child->children;
+		if (nodep->children == NULL) {
+			nodep->children = new_child;
+		} else {
+			child = nodep->last;
+			child->next = new_child;
+			new_child->prev = child;
 		}
-		DOM_RET_OBJ(rv, new_child, &ret, intern);
-		return;
+		child = new_child;
+		while (child->next != NULL) {
+			child->parent = nodep;
+			if (child->doc != nodep->doc) {
+				xmlSetTreeDoc(child, nodep->doc);
+			}
+			child = child->next;
+		}
+		child->parent = nodep;
+		if (child->doc != nodep->doc) {
+			xmlSetTreeDoc(child, nodep->doc);
+		}
+		nodep->last = child;
+		fragment->children = NULL;
 	}
 
-	new_child = xmlAddChild(nodep, child);
-
 	if (new_child == NULL) {
-		php_error(E_WARNING, "Couldn't append node");
-		RETURN_FALSE;
+		new_child = xmlAddChild(nodep, child);
+		if (new_child == NULL) {
+			php_error(E_WARNING, "Couldn't append node");
+			RETURN_FALSE;
+		}
 	}
 
 	dom_reconcile_ns(nodep->doc, new_child);
