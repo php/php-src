@@ -1,3 +1,85 @@
+2001-08-06  Adam Daniel  <adaniel2@cinci.rr.com>
+
+    * pear/HTML/Table.php: fixed problem with spanning cells
+
+    * pear/HTML/Table.php: fixed typo in _updateSpanGrid
+
+2001-08-06  Jani Taskinen  <sniper@iki.fi>
+
+    * configure.in:
+    Fix bug: #12604. Also made the configure script shown a little nicer in phpinfo()
+
+2001-08-06  Frank M. Kromann  <frank@frontbase.com>
+
+    * ext/exif/exif.c: Adding missing TSRM macros.
+    Kill signed/unsigned compiler warning
+
+    * sapi/isapi/php4isapi.c: Adding missing TSRMLS_CC
+
+2001-08-06  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/imap/php_imap.c:
+    - This is not supposed to be used, from c-client docs (formats.txt):
+
+
+    * ext/imap/php_imap.c:
+    Some cleanup. Removed unnecessary duplicate #ifndef's.
+
+    * ext/curl/config.m4: Fixed bug: #12597.
+
+    * ext/imap/php_imap.c:
+    removed unused function. (seems like a copy of imap_body)
+
+2001-08-06  Thies C. Arntzen  <thies@thieso.net>
+
+    * ext/standard/basic_functions.c
+      ext/standard/incomplete_class.c
+      ext/standard/php_incomplete_class.h
+      ext/standard/var.c
+      ext/wddx/wddx.c:
+    we can no longer register internal-classes once the script is started.
+    therefore the "incomplete class" is now registered at MINIT time.
+
+2001-08-06  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/dbase/dbase.c
+      ext/dbase/dbf_head.c
+      ext/dbase/dbf_head.h: Fix TSRM problem.
+
+    * ext/dba/dba_db2.c: Another TSRM fix.
+
+    * ext/imap/.cvsignore: missing entry
+
+    * acinclude.m4: Fixed bug: #12563 (and possibly other similar one's too..)
+
+2001-08-06  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/ircg.c: support room keys
+
+    * ext/sybase_ct/php_sybase_ct.c
+      ext/zlib/zlib.c
+      main/php_variables.c
+      ext/standard/exec.c
+      ext/standard/file.c
+      ext/standard/lcg.c
+      ext/standard/php_lcg.h
+      ext/standard/php_string.h
+      ext/standard/string.c
+      ext/standard/uniqid.c
+      ext/sybase/php_sybase_db.c
+      ext/pgsql/pgsql.c
+      ext/session/session.c
+      ext/standard/array.c
+      ext/standard/crypt.c
+      ext/mysql/php_mysql.c
+      ext/pcre/php_pcre.c
+      ext/interbase/interbase.c
+      ext/msql/php_msql.c
+      ext/mssql/php_mssql.c
+      ext/db/db.c
+      ext/db/php_db.h
+      ext/ingres_ii/ii.c: more tsrm cleanup
+
 2001-08-05  Jeroen van Wolffelaar  <jeroen@A-Eskwadraat.nl>
 
     * ext/standard/string.c: Removed some duplicate code out of addclashes
