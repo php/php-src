@@ -59,4 +59,5 @@ if test "$PHP_XSL" != "no"; then
   AC_DEFINE(HAVE_XSL,1,[ ])
   PHP_NEW_EXTENSION(xsl, php_xsl.c xsltprocessor.c, $ext_shared)
   PHP_SUBST(XSL_SHARED_LIBADD)
+  PHP_ADD_EXTENSION_DEP(xsl, libxml)
 fi
