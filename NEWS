@@ -1,7 +1,6 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 2002, Version 4.3.0
-- Added dbx_escape_string function to dbx module. (Marc)
 - ATTENTION! "make install" will *by default* install the CLI SAPI binary in 
   {PREFIX}/bin/php. If you don't disable the CGI binary, it will be
   installed as {PREFIX}/bin/php-cgi.
@@ -26,6 +25,7 @@ PHP 4                                                                      NEWS
 - Fixed bug #20108 (segmentation fault on printf("%1.1s", "string")). (Ilia)
 - Added dba_handlers() that returns an array of installed handlers and
   dba_list() that returns an associative array of open database files. (Marcus)
+- Added dbx_escape_string() function to dbx module. (Marc)
 - Added Oracle (oci8) support to dbx module. (Marc)
 - Updated FDF extension to work with Adode fdftk 5.0. (Hartmut)
 - Made raw POST data to be available also as "php://input" stream. (Hartmut)
