@@ -78,7 +78,6 @@ distclean-recursive depend-recursive clean-recursive all-recursive install-recur
 			ok=yes; \
 			target="$$target-p"; \
 		fi; \
-		if test ! -f $$i/.deps; then touch $$i/.deps; fi; \
 		(cd $$i && $(MAKE) $$target) || exit 1; \
 	done; \
 	if test "$$otarget" = "all" && test -z '$(targets)'; then ok=yes; fi; \

@@ -23,7 +23,7 @@
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 ##############################################################################
-# $Id: fastgen.sh,v 1.4 2000-05-04 16:08:10 sas Exp $ 
+# $Id: fastgen.sh,v 1.5 2000-05-04 17:50:32 sas Exp $ 
 #
 
 srcdir=$1
@@ -55,5 +55,7 @@ builddir     = $top_builddir/$dir
 VPATH        = $top_srcdir/$dir
 EOF
 )| cat - $top_srcdir/$makefile.in > $makefile
+  
+  test -z "$dir" || touch $dir/.deps
 
 done
