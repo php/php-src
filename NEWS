@@ -12,6 +12,7 @@ PHP 4                                                                      NEWS
   is used for background color. (Pierre-Alain Joye)
 - Fixed a bug that under certain circumstances could invalidate safe_mode.
   (Ilia)
+- Fixed bug #24783 (foreach($ar as $key => $val), $key not binary safe). (Zeev)
 - Fixed bug #24752 (Unhandled "uniqueidentifier" field type). 
   (Ilia, s.sonnenberg[at]coolspot.de)
 - Fixed bug #24710 (Crash when $obj->{0} is used). (Zeev)
@@ -49,6 +50,7 @@ PHP 4                                                                      NEWS
   (Jani)
 - Fixed bug #21855 (Threading issue on HP-UX). (Roshan Naik, Andi, Moriyoshi)
 - Fixed bug #21074 (Apache2: "ErrorDocument xxx /error.php" broken). (Jani)
+- Fixed bug #19613 (putenv("VAR=") does not empty VAR on win32). (Zeev)
 - Fixed bug #11924 (ibase_query(), ibase_execute() mangled passed parameters).
   (Jani)
   
