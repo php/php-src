@@ -59,18 +59,56 @@ static void spl_init_globals(zend_spl_globals *spl_globals)
 }
 /* }}} */
 
+static zend_class_entry * spl_find_ce_by_name(char *name, int len, zend_bool autoload TSRMLS_DC)
+{
+	zend_class_entry **ce;
+	int found;
+	if (!autoload) {
+		char *lc_name;
+
+		lc_name = do_alloca(len + 1);
+		zend_str_tolower_copy(lc_name, name, len);
+
+		found = zend_hash_find(EG(class_table), lc_name, len +1, (void **) &ce);
+		free_alloca(lc_name);
+	} else {
+ 		found = zend_lookup_class(name, len, &ce TSRMLS_CC);
+ 	}
+ 	if (found != SUCCESS) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Class %s does not exist%s", name, autoload ? " and could not be loaded" : "");
+		return NULL;
+	}
+	
+	return *ce;
+}
+
 /* {{{ array class_parents(object instance)
  Return an array containing the names of all parent classes */
 PHP_FUNCTION(class_parents)
 {
 	zval *obj;
-	zend_class_entry *parent_class;
+	zend_class_entry *parent_class, *ce;
+	zend_bool autoload = 1;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o", &obj) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|b", &obj, &autoload) == FAILURE) {
 		RETURN_FALSE;
 	}
+	
+	if (Z_TYPE_P(obj) != IS_OBJECT && Z_TYPE_P(obj) != IS_STRING) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "object or string expected");
+		RETURN_FALSE;
+	}
+	
+	if (Z_TYPE_P(obj) == IS_STRING) {
+		if (NULL == (ce = spl_find_ce_by_name(Z_STRVAL_P(obj), Z_STRLEN_P(obj), autoload TSRMLS_CC))) {
+			RETURN_FALSE;
+		}
+	} else {
+		ce = Z_OBJCE_P(obj);
+	}
+	
 	array_init(return_value);
-	parent_class = Z_OBJCE_P(obj)->parent;
+	parent_class = ce->parent;
 	while (parent_class) {
 		spl_add_class_name(return_value, parent_class, 0, 0 TSRMLS_CC);
 		parent_class = parent_class->parent;
@@ -78,17 +116,32 @@ PHP_FUNCTION(class_parents)
 }
 /* }}} */
 
-/* {{{ proto array class_implements()
+/* {{{ proto array class_implements(mixed what [, bool autoload ])
  Return all classes and interfaces implemented by SPL */
 PHP_FUNCTION(class_implements)
 {
 	zval *obj;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o", &obj) == FAILURE) {
+	zend_bool autoload = 1;
+	zend_class_entry *ce;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|b", &obj, &autoload) == FAILURE) {
 		RETURN_FALSE;
 	}
+	if (Z_TYPE_P(obj) != IS_OBJECT && Z_TYPE_P(obj) != IS_STRING) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "object or string expected");
+		RETURN_FALSE;
+	}
+	
+	if (Z_TYPE_P(obj) == IS_STRING) {
+		if (NULL == (ce = spl_find_ce_by_name(Z_STRVAL_P(obj), Z_STRLEN_P(obj), autoload TSRMLS_CC))) {
+			RETURN_FALSE;
+		}
+	} else {
+		ce = Z_OBJCE_P(obj);
+	}
+	
 	array_init(return_value);
-	spl_add_interfaces(return_value, Z_OBJCE_P(obj), 1, ZEND_ACC_INTERFACE TSRMLS_CC);
+	spl_add_interfaces(return_value, ce, 1, ZEND_ACC_INTERFACE TSRMLS_CC);
 }
 /* }}} */
 
