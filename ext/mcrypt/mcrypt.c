@@ -874,7 +874,6 @@ PHP_FUNCTION(mcrypt_get_key_size)
 	int   cipher_len, module_len; 
 	char *cipher_dir_string;
 	char *module_dir_string;
-	long key_size;
 	MCRYPT td;
 
 	MCRYPT_GET_INI
