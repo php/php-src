@@ -1,3 +1,40 @@
+2002-09-02  Jan Lehnardt  <jan@dasmoped.net>
+
+    * sapi/cli/php_cli.c:
+     - prepare non-html phpinfo output for zend extensions
+
+2002-09-02  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * main/config.w32.h:
+    - MFH as suggested by Derick, see HEAD commit for more on this
+
+
+    * main/config.w32.h.in: - Enable strcoll() for win32 build
+
+2002-09-02  Zeev Suraski  <zeev@zend.com>
+
+    * main/php_version.h
+      configure.in: Make it stick - please do not revert
+
+    * LICENSE: Backport license from 4.3
+
+2002-09-02  Jani Taskinen  <sniper@iki.fi>
+
+    * configure.in
+      main/php_version.h:
+    reset version to 4.2.3-dev (why is the change committed anyway?)
+
+2002-09-02  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/file.c:
+    - Fix the segmentation fault when magic_quotes_runtime was disabled as
+      introduced in http://news.php.net/article.php?group=php.cvs&article=13690
+
+2002-09-02  Zeev Suraski  <zeev@zend.com>
+
+    * main/php_version.h
+      configure.in: Go RC2
+
 2002-09-01  Sergey Kartashoff  <gluke@biosys.net>
 
     * ext/mnogosearch/php_mnogo.c:
