@@ -105,6 +105,6 @@ struct _sapi_module_struct {
 #define SAPI_HEADER_DO_SEND				2
 #define SAPI_HEADER_SEND_FAILED			3
 
-#define DEFAULT_CONTENT_TYPE "Content-Type: text/html"
+#define SAPI_DEFAULT_CONTENT_TYPE "Content-Type: text/html"
 
 #endif /* _NEW_SAPI_H */
