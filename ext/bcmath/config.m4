@@ -1,16 +1,14 @@
 dnl $Id$
 
-PHP_ARG_ENABLE(bcmath,whether to enable bc style precision math functions,
-[  --enable-bcmath         Compile with bc style precision math functions.
-                          Read README-BCMATH for instructions on how to
-                          get this module installed. ])
+PHP_ARG_WITH(bcmath, for bc style precision math functions,
+[  --disable-bcmath         Compile without bc style precision math functions. ], yes)
 
 if test "$PHP_BCMATH" != "no"; then
   AC_DEFINE(WITH_BCMATH, 1, [Whether you have bcmath])
   PHP_EXTENSION(bcmath, $ext_shared)
-  if test ! -f $ext_srcdir/number.c || grep "Dummy File" $ext_srcdir/number.c >/dev/null; then
-    AC_MSG_ERROR(You do not have the bcmath package. Please read the README.BCMATH file.)
-  fi
+  PHP_FAST_OUTPUT($ext_builddir/libbcmath/Makefile $ext_builddir/libbcmath/src/Makefile)
+  LIB_BUILD($ext_builddir/libbcmath,$ext_shared,yes)
+  LIB_BUILD($ext_builddir/libbcmath/src,$ext_shared,yes)
 fi
 
 dnl ## Local Variables:

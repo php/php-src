@@ -51,9 +51,9 @@ char
   /* Allocate the string memory. */
   signch = ( num->n_sign == PLUS ? 0 : 1 );  /* Number of sign chars. */
   if (num->n_scale > 0)
-    str = (char *) malloc (num->n_len + num->n_scale + 2 + signch);
+    str = (char *) emalloc (num->n_len + num->n_scale + 2 + signch);
   else
-    str = (char *) malloc (num->n_len + 1 + signch);
+    str = (char *) emalloc (num->n_len + 1 + signch);
   if (str == NULL) bc_out_of_memory();
 
   /* The negative sign if needed. */

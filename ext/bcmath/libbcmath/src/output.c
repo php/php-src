@@ -176,7 +176,7 @@ bc_out_num (num, o_base, out_char, leading_zero)
 		  (*out_char) (ref_str[ (int) temp->digit]);
 		else
 		  bc_out_long (temp->digit, max_o_digit->n_len, 1, out_char);
-		free (temp);
+		efree (temp);
 	      }
 	  }
 

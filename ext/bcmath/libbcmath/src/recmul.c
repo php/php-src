@@ -61,7 +61,7 @@ new_sub_num (length, scale, value)
     temp = _bc_Free_list;
     _bc_Free_list = temp->n_next;
   } else {
-    temp = (bc_num) malloc (sizeof(bc_struct));
+    temp = (bc_num) emalloc (sizeof(bc_struct));
     if (temp == NULL) bc_out_of_memory ();
   }
   temp->n_sign = PLUS;
