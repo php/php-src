@@ -36,6 +36,7 @@ PHP                                                                        NEWS
 - Fixed bug #32011 (Fragments which replaced Nodes are not globaly useable).
   (Rob)
 - Fixed bug #31980 (Unicode exif data not available on Windows). (Edin)
+- Fixed bug #31792 (getrusage() does not provide ru_nswap value). (Ilia)
 - Fixed bug #31960 (msql_fetch_row() and msql_fetch_array() dropping columns
   with NULL values). (Daniel Convissor)
 - Fixed bug #31878 (Segmentation fault using clone keyword on nodes). (Rob)
