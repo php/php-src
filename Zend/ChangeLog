@@ -1,3 +1,29 @@
+2003-10-22  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * zend.c:
+      Fixed bug #25922 (Crash in error handler when 5th argument is modified).
+
+2003-10-22  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_default_classes.c
+      zend_interfaces.c
+      zend_interfaces.h:
+      Impement userspace iterator interfaces and tests. See tests for details
+      on the names.
+
+    * zend.h
+      zend_API.c
+      zend_API.h
+      zend_compile.c
+      zend_compile.h
+      zend_execute.c:
+      Expand Interface C API.
+      In short: zend_class_entry->interface_gets_implemented()  allows to modify
+      the class entry of a class when an interface gets implemented.
+
+    * zend_default_classes.c:
+      The string conversion method should be named __toString()
+
 2003-10-21  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ZEND_CHANGES:

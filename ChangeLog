@@ -1,3 +1,70 @@
+2003-10-22  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      tests/lang/bug25922.phpt:
+      News & test regarding bug #25922
+
+    * (PHP_4_3)
+      Zend/zend.c:
+      MFH: Fixed bug #25922 (Crash in error handler when 5th argument is
+      modified)
+      This also fixes bug #25547 in PHP 4.3.X
+
+    * tests/lang/bug25922.phpt:
+      
+      Fixed bug #25922 (Crash in error handler when 5th argument is modified).
+
+    * ZendEngine2/zend.c:
+      Fixed bug #25922 (Crash in error handler when 5th argument is modified).
+
+    * configure.in:
+      Don't forget to compile zend_interfaces.c
+
+2003-10-22  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_default_classes.c
+      ZendEngine2/zend_interfaces.c
+      ZendEngine2/zend_interfaces.h
+      tests/classes/iterators_001.phpt
+      tests/classes/iterators_002.phpt
+      tests/classes/iterators_003.phpt
+      tests/classes/iterators_004.phpt
+      tests/classes/iterators_005.phpt:
+      Impement userspace iterator interfaces and tests. See tests for details
+      on the names.
+
+    * ZendEngine2/zend.h
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_execute.c:
+      Expand Interface C API.
+      In short: zend_class_entry->interface_gets_implemented()  allows to modify
+      the class entry of a class when an interface gets implemented.
+
+    * ZendEngine2/zend_default_classes.c:
+      The string conversion method should be named __toString()
+
+2003-10-22  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/ircg.c:
+      No empty args here, some servers don't like that
+
+2003-10-22  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.h
+      main/rfc1867.c:
+      name/value in multipart/form-date will be converted into internal encoding
+      when mbstring.encoding_translation is On.
+
+2003-10-22  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/mbstring/mbstring.c:
+      Fixed compile warnings.
+
 2003-10-21  Jani Taskinen  <jani.taskinen@kolumbus.fi>
 
     * sapi/apache2handler/config.m4
