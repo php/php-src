@@ -5,7 +5,7 @@ A static abstrcat method may not be called
 --FILE--
 <?php
 
-class fail {
+abstract class fail {
 	abstract static function show();
 }
 
