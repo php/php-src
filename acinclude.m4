@@ -459,16 +459,14 @@ AC_DEFUN(PHP_LIBGCC_LIBPATH,[
   changequote([,])
 ])
 
-AC_DEFUN(PHP_ARG_ANALYZE,[
+AC_DEFUN(PHP_ARG_ANALYZE_EX,[
+ext_output="yes, shared"
+ext_shared=yes
 case [$]$1 in
 shared,*)
-  ext_output="yes, shared"
-  ext_shared=yes
   $1=`echo "[$]$1"|sed 's/^shared,//'`
   ;;
 shared)
-  ext_output="yes, shared"
-  ext_shared=yes
   $1=yes
   ;;
 no)
@@ -481,12 +479,11 @@ no)
   ;;
 esac
 
-if test "$php_always_shared" = "yes"; then
-  ext_output="yes, shared"
-  ext_shared=yes
-  test "[$]$1" = "no" && $1=yes
-fi
+PHP_ALWAYS_SHARED([$1])
+])
 
+AC_DEFUN(PHP_ARG_ANALYZE,[
+PHP_ARG_ANALYZE_EX([$1])
 ifelse([$2],,,[AC_MSG_RESULT([$ext_output])])
 ])
 
@@ -1181,22 +1178,9 @@ dnl and sets $shared to "yes" or "no", and removes "shared,?" stuff
 dnl from $withval.
 dnl
 AC_DEFUN(PHP_WITH_SHARED,[
-    case $withval in
-	shared)
-	    shared=yes
-	    withval=yes
-	    ;;
-	shared,*)
-	    shared=yes
-	    withval=`echo $withval | sed -e 's/^shared,//'`      
-	    ;;
-	*)
-	    shared=no
-	    ;;
-    esac
-    if test -n "$php_always_shared"; then
-		shared=yes
-	fi
+  PHP_ARG_ANALYZE_EX(withval)
+  shared=$ext_shared
+  unset ext_shared ext_output
 ])
 
 dnl The problem is that the default compilation flags in Solaris 2.6 won't
