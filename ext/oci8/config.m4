@@ -2,6 +2,22 @@ dnl
 dnl $Id$
 dnl
 
+AC_DEFUN(PHP_OCI_IF_DEFINED,[
+  old_CPPFLAGS=$CPPFLAGS
+  CPPFLAGS=$3
+  AC_EGREP_CPP(yes,[
+#include <oci.h>
+#if defined($1)
+    yes
+#endif
+  ],[
+    CPPFLAGS=$old_CPPFLAGS
+    $2
+  ],[
+    CPPFLAGS=$old_CPPFLAGS
+  ])
+])
+
 AC_DEFUN(AC_OCI8_VERSION,[
   AC_MSG_CHECKING([Oracle version])
   if test -s "$OCI8_DIR/orainst/unix.rgs"; then
@@ -40,15 +56,19 @@ if test "$PHP_OCI8" != "no"; then
 
   if test -d "$OCI8_DIR/rdbms/public"; then
     PHP_ADD_INCLUDE($OCI8_DIR/rdbms/public)
+    OCI8_INCLUDES="$OCI8_INCLUDES -I$OCI8_DIR/rdbms/public"
   fi
   if test -d "$OCI8_DIR/rdbms/demo"; then
     PHP_ADD_INCLUDE($OCI8_DIR/rdbms/demo)
+    OCI8_INCLUDES="$OCI8_INCLUDES -I$OCI8_DIR/rdbms/demo"
   fi
   if test -d "$OCI8_DIR/network/public"; then
     PHP_ADD_INCLUDE($OCI8_DIR/network/public)
+    OCI8_INCLUDES="$OCI8_INCLUDES -I$OCI8_DIR/network/public"
   fi
   if test -d "$OCI8_DIR/plsql/public"; then
     PHP_ADD_INCLUDE($OCI8_DIR/plsql/public)
+    OCI8_INCLUDES="$OCI8_INCLUDES -I$OCI8_DIR/plsql/public"
   fi
 
   if test -f "$OCI8_DIR/lib/sysliblist"; then
@@ -72,8 +92,12 @@ if test "$PHP_OCI8" != "no"; then
         PHP_ADD_LIBRARY(ocijdbc8, 1, OCI8_SHARED_LIBADD)
       fi
       PHP_ADD_LIBPATH($OCI8_DIR/lib, OCI8_SHARED_LIBADD)
+
+      dnl 
+      dnl OCI_ATTR_STATEMENT is not always available
+      dnl 
+      PHP_OCI_IF_DEFINED(OCI_ATTR_STATEMENT, [AC_DEFINE(HAVE_OCI8_ATTR_STATEMENT,1,[ ])], $OCI8_INCLUDES)
       AC_DEFINE(HAVE_OCI8_TEMP_LOB,1,[ ])
-      AC_DEFINE(HAVE_OCI8_ATTR_STATEMENT,1,[ ])
       ;;
 
     *)
