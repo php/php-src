@@ -277,7 +277,7 @@ static void _php_ibase_error(TSRMLS_D)
 		strcat(IBG(errmsg), " ");
 		s = IBG(errmsg) + strlen(IBG(errmsg));
 	}
-	php_error(E_WARNING, "%s(): %s", get_active_function_name(TSRMLS_C), IBG(errmsg));
+	php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", IBG(errmsg));
 }
 /* }}} */
 
@@ -293,7 +293,7 @@ static void _php_ibase_module_error(char *msg, ...)
 	vsnprintf(IBG(errmsg), MAX_ERRMSG, msg, ap);
 	va_end(ap);
 	
-	php_error(E_WARNING, "%s(): %s", get_active_function_name(TSRMLS_C), IBG(errmsg));
+	php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", IBG(errmsg));
 }
 /* }}} */
 
@@ -467,7 +467,7 @@ static void _php_ibase_free_blob(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 
 	if (ib_blob->bl_handle != NULL) { /* blob open*/
 		if (isc_cancel_blob(IB_STATUS, &ib_blob->bl_handle)) {
-			php_error(E_ERROR, "You can lose data. Close any blob after reading of writing it. Use ibase_blob_close() before calling ibase_close()");
+			php_error_docref(NULL TSRMLS_CC, E_ERROR, "You can lose data. Close any blob after reading of writing it. Use ibase_blob_close() before calling ibase_close()");
 		}
 	}
 	efree(ib_blob);
@@ -1616,7 +1616,7 @@ static void _php_ibase_trans_end(INTERNAL_FUNCTION_PARAMETERS, int commit)
 	}
 
 	if (ib_link->trans[trans_n] == NULL) {
-		php_error(E_WARNING, "Trying to commit or rollback an already handled transaction");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Trying to commit or rollback an already handled transaction");
 		RETURN_FALSE;
 	}
 
@@ -2585,18 +2585,18 @@ PHP_FUNCTION(ibase_blob_create)
    Open blob for retriving data parts */
 PHP_FUNCTION(ibase_blob_open)
 {
-	pval *blob_arg;
+	zval **blob_arg;
 	ibase_blob_handle *ib_blob, *ib_blob_id;
 
 	RESET_ERRMSG;
 
-	if (ZEND_NUM_ARGS()!=1 || getParameters(ht, 1, &blob_arg)==FAILURE) {
+	if (ZEND_NUM_ARGS() !=1 || zend_get_parameters_ex(1, &blob_arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
 	ib_blob = (ibase_blob_handle *) emalloc(sizeof(ibase_blob_handle));
 
-	GET_BLOB_ID_ARG(blob_arg, ib_blob_id);
+	GET_BLOB_ID_ARG(*blob_arg, ib_blob_id);
 
 	if (ib_blob_id == NULL) { /* blob IS NULL or argument unset */
 		RETURN_FALSE;
@@ -2621,20 +2621,20 @@ PHP_FUNCTION(ibase_blob_open)
    Add data into created blob */
 PHP_FUNCTION(ibase_blob_add)
 {
-	pval *blob_arg, *string_arg;
+	zval **blob_arg, **string_arg;
 	ibase_blob_handle *ib_blob;
 
 	RESET_ERRMSG;
 
-	if (ZEND_NUM_ARGS()!=2 || getParameters(ht, 2, &blob_arg, &string_arg)==FAILURE) {
+	if (ZEND_NUM_ARGS() !=2 || zend_get_parameters_ex(2, &blob_arg, &string_arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	GET_BLOB_HANDLE_ARG(blob_arg, ib_blob);
+	GET_BLOB_HANDLE_ARG(*blob_arg, ib_blob);
 	
-	convert_to_string(string_arg);
+	convert_to_string_ex(string_arg);
 
-	if (isc_put_segment(IB_STATUS, &ib_blob->bl_handle, (unsigned short) Z_STRLEN_P(string_arg), Z_STRVAL_P(string_arg))) {
+	if (isc_put_segment(IB_STATUS, &ib_blob->bl_handle, (unsigned short) Z_STRLEN_PP(string_arg), Z_STRVAL_PP(string_arg))) {
 		_php_ibase_error(TSRMLS_C);
 		RETURN_FALSE;
 	}
@@ -2646,7 +2646,7 @@ PHP_FUNCTION(ibase_blob_add)
    Get len bytes data from open blob */
 PHP_FUNCTION(ibase_blob_get)
 {
-	pval *blob_arg, *len_arg;
+	zval **blob_arg, **len_arg;
 	int stat;
 	char *bl_data;
 	unsigned short max_len = 0, cur_len, seg_len;
@@ -2654,14 +2654,14 @@ PHP_FUNCTION(ibase_blob_get)
 
 	RESET_ERRMSG;
 
-	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &blob_arg, &len_arg) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &blob_arg, &len_arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(len_arg);
-	max_len = (unsigned short) Z_LVAL_P(len_arg);
+	convert_to_long_ex(len_arg);
+	max_len = (unsigned short) Z_LVAL_PP(len_arg);
 
-	GET_BLOB_HANDLE_ARG(blob_arg, ib_blob);
+	GET_BLOB_HANDLE_ARG(*blob_arg, ib_blob);
 
 	if (ib_blob->bl_qd.gds_quad_high || ib_blob->bl_qd.gds_quad_low) { /*not null ?*/
 		
@@ -2697,16 +2697,16 @@ PHP_FUNCTION(ibase_blob_get)
 /* Close or Cancel created or Close open blob */
 static void _php_ibase_blob_end(INTERNAL_FUNCTION_PARAMETERS, int bl_end)
 {
-	pval *blob_arg;
+	zval *blob_arg;
 	ibase_blob_handle *ib_blob;
 
 	RESET_ERRMSG;
 	
-	if (ZEND_NUM_ARGS()!=1 || getParameters(ht, 1, &blob_arg)==FAILURE) {
+	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &blob_arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	GET_BLOB_HANDLE_ARG(blob_arg, ib_blob);
+	GET_BLOB_HANDLE_ARG(*blob_arg, ib_blob);
 
 	if (bl_end == BLOB_CLOSE) { /* return id here */
 		if (ib_blob->bl_qd.gds_quad_high || ib_blob->bl_qd.gds_quad_low) { /*not null ?*/
@@ -2750,17 +2750,17 @@ PHP_FUNCTION(ibase_blob_cancel)
    Return blob length and other useful info */
 PHP_FUNCTION(ibase_blob_info)
 {
-	pval *blob_arg, *result_var;
+	zval **blob_arg, **result_var;
 	ibase_blob_handle *ib_blob_id;
 	IBASE_BLOBINFO bl_info;
 
 	RESET_ERRMSG;
 
-	if (ZEND_NUM_ARGS()!=1 || getParameters(ht, 1, &blob_arg)==FAILURE) {
+	if (ZEND_NUM_ARGS() !=1 || zend_get_parameters_ex(1, &blob_arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
-	GET_BLOB_ID_ARG(blob_arg, ib_blob_id);
+	GET_BLOB_ID_ARG(*blob_arg, ib_blob_id);
 
 	if (array_init(return_value)==FAILURE){
 		RETURN_FALSE;
@@ -2823,18 +2823,18 @@ PHP_FUNCTION(ibase_blob_info)
    Output blob contents to browser */
 PHP_FUNCTION(ibase_blob_echo)
 {
-	pval *blob_arg;
+	zval *blob_arg;
 	char bl_data[IBASE_BLOB_SEG];
 	unsigned short seg_len;
 	ibase_blob_handle *ib_blob_id;
 
 	RESET_ERRMSG;
 
-	if (ZEND_NUM_ARGS()!=1 || getParameters(ht, 1, &blob_arg)==FAILURE) {
+	if (ZEND_NUM_ARGS() !=1 || zend_get_parameters_ex(1, &blob_arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	GET_BLOB_ID_ARG(blob_arg, ib_blob_id);
+	GET_BLOB_ID_ARG(*blob_arg, ib_blob_id);
 	
 	if (ib_blob_id) { /*not null ?*/
 		
