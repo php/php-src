@@ -663,7 +663,7 @@ int main(int argc, char *argv[])
 				php_cli_usage(argv[0]);
 				php_end_ob_buffers(1 TSRMLS_CC);
 				exit_status=1;
-				goto out_err;
+				goto err;
 
 
 			case 'i': /* php info & quit */
@@ -685,7 +685,7 @@ int main(int argc, char *argv[])
 				php_printf("\n");
 				php_end_ob_buffers(1 TSRMLS_CC);
 				exit_status=1;
-				goto out_err;
+				goto err;
 
 			case 'v': /* show php version & quit */
 				if (php_request_startup(TSRMLS_C)==FAILURE) {
