@@ -1939,7 +1939,7 @@ binary_assign_op_addr_obj:
 					}
 
 					if(EX(fbc)->type == ZEND_USER_FUNCTION) {
-						EX(calling_scope) = Z_OBJCE_P(EX(object));
+						EX(calling_scope) = EX(fbc)->common.scope;
 					} else {
 						EX(calling_scope) = NULL;
 					}
