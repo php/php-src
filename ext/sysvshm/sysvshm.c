@@ -201,7 +201,7 @@ PHP_FUNCTION(shm_remove)
 
 
 
-/* {{{ proto int shm_put(int id, int key, object *variable)
+/* {{{ proto int shm_put_var(int id, int key, object *variable)
    Insert a variable into shared memory */
 PHP_FUNCTION(shm_put_var)
 {
