@@ -1,3 +1,24 @@
+2004-02-21  Sara Golemon  <php@alphaweb.net>
+
+    * ext/ftp/ftp.c:
+      Avoid use of memcpy(), reply on struct in_addr to be right sized instead
+
+2004-02-21  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/gd/gd.c:
+      Set correct default threshold for image2wbmp().
+
+2004-02-21  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ext/mysqli/config.w32:
+      Can't test whether it works (no current >=mysql-4.1.2 available on
+      Windows), but it should.
+
+2004-02-21  Georg Richter  <phpinfo@t-online.de>
+
+    * ext/mysqli/mysqli_fe.c:
+      fixed typo in method alias
+
 2004-02-20  Sara Golemon  <php@alphaweb.net>
 
     * ext/ftp/ftp.c:
