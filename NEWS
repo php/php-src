@@ -6,21 +6,27 @@ PHP                                                                        NEWS
 - Changed foreach() to throw an exception if IteratorAggregate::getIterator()
   does not return an Iterator. (Marcus)
 - Changed phpize not to require libtool. (Jani)
+- Updated bundled oniguruma library (used for multibyte regular expression)
+  to 3.7.0. (Moriyoshi)
 - Fixed a bug in mysql_affected_rows and mysql_stmt_affected_rows when the
   api function returns -1 (Georg)
 - Fixed several leaks in ext/browscap and sapi/embed. (Andrei)
 - Fixed several leaks in ext/filepro. (Tony)
 - Fixed build system to always use bundled libtool files. (Jani)
-- Fixed a bug in mysqli_stmt_execute() (type conversion with NULL values). (Georg)
+- Fixed a bug in mysqli_stmt_execute() (type conversion with NULL values).
+  (Georg)
 - Fixed segfault in mysqli_fetch_field_direct() when invalid field offset 
   is passed. (Tony)
 - Fixed posix_getsid() & posix_getpgid() to return sid & pgid instead 
   of true. (Tony)
 - Fixed bug #32021 (Crash caused by range('', 'z')). (Derick)
-- Fixed bug #32011 (Fragments which replaced Nodes are not globaly useable). (Rob)
+- Fixed bug #32011 (Fragments which replaced Nodes are not globaly useable).
+  (Rob)
 - Fixed bug #31980 (Unicode exif data not available on Windows). (Edin)
 - Fixed bug #31960 (msql_fetch_row() and msql_fetch_array() dropping columns
   with NULL values). (Daniel Convissor)
+- Fixed bug #31911 (mb_decode_mimeheader() is case-sensitive to hex escapes).
+  (Moriyoshi)
 - Fixed bug #31878 (Segmentation fault using clone keyword on nodes). (Rob)
 - Fixed bug #31858 (--disable-cli does not force --without-pear). (Jani)
 - Fixed bug #31842 (*date('r') does not return RFC2822 conforming date string).
@@ -96,6 +102,8 @@ PHP                                                                        NEWS
 - Fixed bug #30726 (-.1 like numbers are not being handled correctly). (Ilia)
 - Fixed bug #30725 (PHP segfaults when an exception is thrown in getIterator() 
   within foreach). (Marcus)
+- Fixed bug #30549 (incorrect character translations for some ISO8859
+  charsets). (Moriyoshi)
 - Fixed bug #30446 (apache2handler: virtual() includes files out of sequence)
 - Fixed bug #30430 (odbc_next_result() doesn't bind values and that results 
   in segfault). (pdan-php at esync dot org, Tony)
