@@ -29,20 +29,20 @@
 #include "php_dbx.h"
 #include "ext/standard/info.h"
 
-/*/ defines for supported databases /*/
+/* defines for supported databases */
 #define DBX_UNKNOWN 0
 #define DBX_MYSQL 1
 #define DBX_ODBC 2
 #define DBX_PGSQL 3
 #define DBX_MSSQL 4
-/*/ includes for supported databases /*/
+/* includes for supported databases */
 #include "dbx.h"
 #include "dbx_mysql.h"
 #include "dbx_odbc.h"
 #include "dbx_pgsql.h"
 #include "dbx_mssql.h"
 
-/*/ support routines /*/
+/* support routines */
 int module_exists(char * module_name) {
     zend_module_entry * zme;
     int r;
@@ -78,7 +78,7 @@ int split_dbx_handle_object(zval ** dbx_object, zval *** pdbx_handle, zval *** p
     return 1;
     }
 
-/*/ from dbx.h, to be used in support-files (dbx_mysql.c etc...) /*/
+/* from dbx.h, to be used in support-files (dbx_mysql.c etc...) */
 void dbx_call_any_function(INTERNAL_FUNCTION_PARAMETERS, char * function_name, zval ** returnvalue, int number_of_arguments, zval *** params) {
     zval * zval_function_name;
     MAKE_STD_ZVAL(zval_function_name);
@@ -86,36 +86,36 @@ void dbx_call_any_function(INTERNAL_FUNCTION_PARAMETERS, char * function_name, z
     if (call_user_function_ex(EG(function_table), NULL, zval_function_name, returnvalue, number_of_arguments, params, 0, NULL) == FAILURE) {
         zend_error(E_ERROR, "function '%s' not found", zval_function_name->value.str.val);
         }
-    zval_dtor(zval_function_name); /*/ to free stringvalue memory /*/
+    zval_dtor(zval_function_name); /* to free stringvalue memory */
     FREE_ZVAL(zval_function_name);
     }
 
-/*/ switch_dbx functions declarations
-/ / each must be supported in the x/dbx_module files as dbx_module_function,
-/ /   e.g. switch_dbx_connect expects a dbx_mysql_connect in de x/dbx_mysql files
-/ /   all params except the dbx_module param are passed on
-/ / each must return the expected zval * 's in the rv parameter, which are passed on unmodified
-/ / do NOT use the return_value parameter from INTERNAL_FUNCTION_PARAMETERS
-/ / you can additionally return 0 or 1 for failure or success which will also be returned by the switches
-/*/
+/* switch_dbx functions declarations
+ * each must be supported in the dbx_module files as dbx_module_function,
+ *   e.g. switch_dbx_connect expects a dbx_mysql_connect in de dbx_mysql files
+ *   all params except the dbx_module param are passed on
+ * each must return the expected zval * 's in the rv parameter, which are passed on unmodified
+ * do NOT use the return_value parameter from INTERNAL_FUNCTION_PARAMETERS
+ * you can additionally return 0 or 1 for failure or success which will also be returned by the switches
+ */
 int switch_dbx_connect(zval ** rv, zval ** host, zval ** db, zval ** username, zval ** password, INTERNAL_FUNCTION_PARAMETERS, zval ** dbx_module);
-    /*/ returns connection handle as resource on success or 0 as long on failure /*/
+    /* returns connection handle as resource on success or 0 as long on failure */
 int switch_dbx_pconnect(zval ** rv, zval ** host, zval ** db, zval ** username, zval ** password, INTERNAL_FUNCTION_PARAMETERS, zval ** dbx_module);
-    /*/ returns persistent connection handle as resource on success or 0 as long on failure /*/
+    /* returns persistent connection handle as resource on success or 0 as long on failure */
 int switch_dbx_close(zval ** rv, zval ** dbx_handle, INTERNAL_FUNCTION_PARAMETERS, zval ** dbx_module);
-    /*/ returns 1 as long on success or 0 as long on failure /*/
+    /* returns 1 as long on success or 0 as long on failure */
 int switch_dbx_query(zval ** rv, zval ** dbx_handle, zval ** db_name, zval ** sql_statement, INTERNAL_FUNCTION_PARAMETERS, zval ** dbx_module);
-    /*/ returns 1 as long or result identifier as resource on success or 0 as long on failure /*/
+    /* returns 1 as long or result identifier as resource on success or 0 as long on failure */
 int switch_dbx_getcolumncount(zval ** rv, zval ** result_handle, INTERNAL_FUNCTION_PARAMETERS, zval ** dbx_module);
-    /*/ returns column-count as long on success or 0 as long on failure /*/
+    /* returns column-count as long on success or 0 as long on failure */
 int switch_dbx_getcolumnname(zval ** rv, zval ** result_handle, long column_index, INTERNAL_FUNCTION_PARAMETERS, zval ** dbx_module);
-    /*/ returns column-name as string on success or 0 as long on failure /*/
+    /* returns column-name as string on success or 0 as long on failure */
 int switch_dbx_getcolumntype(zval ** rv, zval ** result_handle, long column_index, INTERNAL_FUNCTION_PARAMETERS, zval ** dbx_module);
-    /*/ returns column-type as string on success or 0 as long on failure /*/
+    /* returns column-type as string on success or 0 as long on failure */
 int switch_dbx_getrow(zval ** rv, zval ** result_handle, long row_number, INTERNAL_FUNCTION_PARAMETERS, zval ** dbx_module);
-    /*/ returns array[0..columncount-1] as strings on success or 0 as long on failure /*/
+    /* returns array[0..columncount-1] as strings on success or 0 as long on failure */
 int switch_dbx_error(zval ** rv, zval ** dbx_handle, INTERNAL_FUNCTION_PARAMETERS, zval ** dbx_module);
-    /*/ returns string /*/
+    /* returns string */
 
 /* Every user visible function must have an entry in dbx_functions[].
 */
@@ -126,8 +126,7 @@ function_entry dbx_functions[] = {
     ZEND_FE(dbx_error,	    NULL)
 
     ZEND_FE(dbx_sort,    NULL)
-    ZEND_FE(dbx_cmp_asc,    NULL)
-    ZEND_FE(dbx_cmp_desc,    NULL)
+    ZEND_FE(dbx_compare,    NULL)
 
 	{NULL, NULL, NULL}	/* Must be the last line in dbx_functions[] */
     };
@@ -149,26 +148,28 @@ ZEND_GET_MODULE(dbx)
 
 ZEND_MINIT_FUNCTION(dbx)
 {
-/*/	REGISTER_INI_ENTRIES(); /*/
-
     REGISTER_LONG_CONSTANT("DBX_MYSQL", DBX_MYSQL, CONST_CS | CONST_PERSISTENT);
     REGISTER_LONG_CONSTANT("DBX_ODBC", DBX_ODBC, CONST_CS | CONST_PERSISTENT);
     REGISTER_LONG_CONSTANT("DBX_PGSQL", DBX_PGSQL, CONST_CS | CONST_PERSISTENT);
     REGISTER_LONG_CONSTANT("DBX_MSSQL", DBX_MSSQL, CONST_CS | CONST_PERSISTENT);
 
     REGISTER_LONG_CONSTANT("DBX_PERSISTENT", DBX_PERSISTENT, CONST_CS | CONST_PERSISTENT);
+
     REGISTER_LONG_CONSTANT("DBX_RESULT_INFO", DBX_RESULT_INFO, CONST_CS | CONST_PERSISTENT);
     REGISTER_LONG_CONSTANT("DBX_RESULT_INDEX", DBX_RESULT_INDEX, CONST_CS | CONST_PERSISTENT);
     REGISTER_LONG_CONSTANT("DBX_RESULT_ASSOC", DBX_RESULT_ASSOC, CONST_CS | CONST_PERSISTENT);
+
+    REGISTER_LONG_CONSTANT("DBX_CMP_NATIVE", DBX_CMP_NATIVE, CONST_CS | CONST_PERSISTENT);
     REGISTER_LONG_CONSTANT("DBX_CMP_TEXT", DBX_CMP_TEXT, CONST_CS | CONST_PERSISTENT);
     REGISTER_LONG_CONSTANT("DBX_CMP_NUMBER", DBX_CMP_NUMBER, CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT("DBX_CMP_ASC", DBX_CMP_ASC, CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT("DBX_CMP_DESC", DBX_CMP_DESC, CONST_CS | CONST_PERSISTENT);
 
     return SUCCESS;
     }
 
 ZEND_MSHUTDOWN_FUNCTION(dbx)
 {
-/*/    UNREGISTER_INI_ENTRIES(); /*/
 	return SUCCESS;
 }
     
@@ -186,23 +187,19 @@ ZEND_MINFO_FUNCTION(dbx)
 {
     php_info_print_table_start();
     php_info_print_table_row(2, "dbx support", "enabled");
-    php_info_print_table_row(2, "dbx support for MySQL", "enabled");
-    php_info_print_table_row(2, "dbx support for ODBC", "enabled");
-    php_info_print_table_row(2, "dbx support for PostgreSQL", "enabled");
-    php_info_print_table_row(2, "dbx support for Microsoft SQL Server", "enabled");
+    php_info_print_table_row(2, "dbx version", "1.0.0");
+    php_info_print_table_row(2, "supported databases", "MySQL<br />ODBC<br />PostgreSQL<br />Microsoft SQL Server");
     php_info_print_table_end();
-/*/    DISPLAY_INI_ENTRIES(); /*/
 }
-/*/
-/ /
-/ / actual implementation of the dbx functions
-/ /
-/ /
-/ /
-/ /
-/*/
-/* {{{ proto dbx_handle_object dbx_connect(string module_name, string host, string db, string username, string password [, bool persistent])
-   returns a dbx_handle_object on success
+
+/*
+
+    actual implementation of the dbx functions
+
+*/
+
+/* {{{ proto dbx_link_object dbx_connect(string module_name, string host, string db, string username, string password [, bool persistent])
+   returns a dbx_link_object on success
    returns 0 on failure
 */
 ZEND_FUNCTION(dbx_connect)
@@ -263,6 +260,7 @@ ZEND_FUNCTION(dbx_connect)
         }
     if (!result) {
         FREE_ZVAL(dbx_module);
+        zval_dtor(db_name); /* to free stringvalue memory */
         FREE_ZVAL(db_name);
         FREE_ZVAL(rv_dbx_handle);
         RETURN_LONG(0);
@@ -271,6 +269,7 @@ ZEND_FUNCTION(dbx_connect)
     if (object_init(return_value) != SUCCESS) {
         zend_error(E_ERROR, "dbx: unable to create resulting object...");
         FREE_ZVAL(dbx_module);
+        zval_dtor(db_name); /* to free stringvalue memory */
         FREE_ZVAL(db_name);
         FREE_ZVAL(rv_dbx_handle);
         RETURN_LONG(0);
@@ -282,8 +281,9 @@ ZEND_FUNCTION(dbx_connect)
 }
 /* }}} */
 
-/* {{{ proto bool dbx_close(dbx_handle_object dbx_handle)
-   Returns success or failure */
+/* {{{ proto bool dbx_close(dbx_link_object dbx_link)
+   Returns success or failure 
+*/
 ZEND_FUNCTION(dbx_close)
 {
     int number_of_arguments=1;
@@ -316,11 +316,10 @@ ZEND_FUNCTION(dbx_close)
 }
 /* }}} */
 
-/* {{{ proto data[rowinfo+rows][colinfo+cols] dbx_query(dbx_handle_object dbx_handle, string sql_statement [, long flags])
-   Returns results combined with query-information or false for failure or true for success on execution query
-   flags parameters is not implemented yet and if specified generates a WRONG_PARAM_COUNT 
-   it will be used to indicate what column info should be returned, and if fieldnames should be used
-   as assoc column indicators in the result-set */
+/* {{{ proto dbx_result_object dbx_query(dbx_link_object dbx_link, string sql_statement [, long flags])
+   returns a dbx_link_object on success
+   returns 0 on failure
+*/
 ZEND_FUNCTION(dbx_query)
 {
     int min_number_of_arguments=2;
@@ -338,6 +337,9 @@ ZEND_FUNCTION(dbx_query)
     zval * info;
     long info_flags;
     zval * data;
+    zval * dummy;
+    zval ** row_ptr;
+    zval ** inforow_ptr;
 
     if (ZEND_NUM_ARGS()<min_number_of_arguments || ZEND_NUM_ARGS()>number_of_arguments || zend_get_parameters_array_ex(ZEND_NUM_ARGS(), arguments) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -346,13 +348,13 @@ ZEND_FUNCTION(dbx_query)
         zend_error(E_WARNING, "dbx_query: not a valid dbx_handle-object...");
         RETURN_LONG(0);
         }
-    /*/ default values /*/
+    /* default values */
     info_flags = DBX_RESULT_INFO | DBX_RESULT_INDEX | DBX_RESULT_ASSOC;
-    /*/ parameter overrides /*/
+    /* parameter overrides */
     if (ZEND_NUM_ARGS()>2) {
         convert_to_long_ex(arguments[2]);
         info_flags = (*arguments[2])->value.lval;
-        /*/ fieldnames are needed for association! /*/
+        /* fieldnames are needed for association! */
         if (info_flags & DBX_RESULT_ASSOC) {
             info_flags |= DBX_RESULT_INFO;
             }
@@ -361,24 +363,24 @@ ZEND_FUNCTION(dbx_query)
     ZVAL_LONG(rv_result_handle, 0);
     convert_to_string_ex(arguments[1]);
     result = switch_dbx_query(&rv_result_handle, dbx_handle, dbx_database, arguments[1], INTERNAL_FUNCTION_PARAM_PASSTHRU, dbx_module);
-    /*/ boolean return value means either failure for any query or success for queries that don't return anything  /*/
+    /* boolean return value means either failure for any query or success for queries that don't return anything  */
     if (!result || (rv_result_handle && rv_result_handle->type==IS_BOOL)) {
         result = (result && rv_result_handle->value.lval)?1:0;
         FREE_ZVAL(rv_result_handle);
         RETURN_LONG(result?1:0);
         }
-    /*/ if you get here, the query succeeded and returned results, so we'll return them
-    / / rv_result_handle holds a resource
-    /*/
-    /*/ init return_value as object (of rows) /*/
+    /* if you get here, the query succeeded and returned results, so we'll return them
+     * rv_result_handle holds a resource
+     */
+    /* init return_value as object (of rows) */
     if (object_init(return_value) != SUCCESS) {
         zend_error(E_ERROR, "dbx_query: unable to create resulting object...");
         FREE_ZVAL(rv_result_handle);
         RETURN_LONG(0);
         }
-    /*/ add result_handle property to return_value /*/
+    /* add result_handle property to return_value */
     zend_hash_update(return_value->value.obj.properties, "handle", 7, (void *)&(rv_result_handle), sizeof(zval *), NULL);
-    /*/ init info property as array and add to return_value as a property /*/
+    /* init info property as array and add to return_value as a property */
     if (info_flags & DBX_RESULT_INFO) {
         MAKE_STD_ZVAL(info); 
         if (array_init(info) != SUCCESS) {
@@ -388,7 +390,7 @@ ZEND_FUNCTION(dbx_query)
             }
         zend_hash_update(return_value->value.obj.properties, "info", 5, (void *)&(info), sizeof(zval *), NULL);
         }
-    /*/ init data property as array and add to return_value as a property /*/
+    /* init data property as array and add to return_value as a property */
     MAKE_STD_ZVAL(data); 
     if (array_init(data) != SUCCESS) {
         zend_error(E_ERROR, "dbx_query: unable to create data-array for results...");
@@ -396,7 +398,7 @@ ZEND_FUNCTION(dbx_query)
         RETURN_LONG(0);
         }
     zend_hash_update(return_value->value.obj.properties, "data", 5, (void *)&(data), sizeof(zval *), NULL);
-    /*/ get columncount and add to returnvalue as property /*/
+    /* get columncount and add to returnvalue as property */
     MAKE_STD_ZVAL(rv_column_count); 
     ZVAL_LONG(rv_column_count, 0);
     result = switch_dbx_getcolumncount(&rv_column_count, &rv_result_handle, INTERNAL_FUNCTION_PARAM_PASSTHRU, dbx_module);
@@ -406,53 +408,52 @@ ZEND_FUNCTION(dbx_query)
         RETURN_LONG(0); 
         }
     zend_hash_update(return_value->value.obj.properties, "cols", 5, (void *)&(rv_column_count), sizeof(zval *), NULL);
-    /*/ fill the info array with columnnames (only indexed (maybe assoc)) /*/
+    /* fill the info array with columnnames and types (indexed and assoc) */
     if (info_flags & DBX_RESULT_INFO) {
-        zval * info_row;
-        MAKE_STD_ZVAL(info_row);
-        if (array_init(info_row) != SUCCESS) {
-            zend_error(E_ERROR, "dbx_query: unable to create info_row-array for results...");
-            FREE_ZVAL(info_row);
+        zval * info_row_name;
+        zval * info_row_type;
+        MAKE_STD_ZVAL(info_row_name);
+        MAKE_STD_ZVAL(info_row_type);
+        if (array_init(info_row_name) != SUCCESS) {
+            zend_error(E_ERROR, "dbx_query: unable to create info_row_name-array for results...");
+            FREE_ZVAL(info_row_name);
+            FREE_ZVAL(info_row_type);
+            RETURN_LONG(0);
+            }
+        if (array_init(info_row_type) != SUCCESS) {
+            zend_error(E_ERROR, "dbx_query: unable to create info_row_type-array for results...");
+            FREE_ZVAL(info_row_name);
+            FREE_ZVAL(info_row_type);
             RETURN_LONG(0);
             }
         for (col_index=0; col_index<rv_column_count->value.lval; ++col_index) {
             zval * rv_column_name;
+            zval * rv_column_type;
+            /* get name */
             MAKE_STD_ZVAL(rv_column_name);
             ZVAL_LONG(rv_column_name, 0);
             result = switch_dbx_getcolumnname(&rv_column_name, &rv_result_handle, col_index, INTERNAL_FUNCTION_PARAM_PASSTHRU, dbx_module);
             if (result) { 
-                zend_hash_index_update(info_row->value.ht, col_index, (void *)&(rv_column_name), sizeof(zval *), NULL);
+                zend_hash_index_update(info_row_name->value.ht, col_index, (void *)&(rv_column_name), sizeof(zval *), NULL);
                 }
             else {
                 FREE_ZVAL(rv_column_name);
                 }
-            }
-        zend_hash_update(info->value.ht, "name", 5, (void *) &info_row, sizeof(zval *), NULL);
-        }
-    /*/ fill the info array with columntypes (indexed and assoc) /*/
-    if (info_flags & DBX_RESULT_INFO) {
-        zval * info_row;
-        MAKE_STD_ZVAL(info_row);
-        if (array_init(info_row) != SUCCESS) {
-            zend_error(E_ERROR, "dbx_query: unable to create info_row-array for results...");
-            FREE_ZVAL(info_row);
-            RETURN_LONG(0);
-            }
-        for (col_index=0; col_index<rv_column_count->value.lval; ++col_index) {
-            zval * rv_column_type;
+            /* get type */
             MAKE_STD_ZVAL(rv_column_type);
             ZVAL_LONG(rv_column_type, 0);
             result = switch_dbx_getcolumntype(&rv_column_type, &rv_result_handle, col_index, INTERNAL_FUNCTION_PARAM_PASSTHRU, dbx_module);
             if (result) { 
-                zend_hash_index_update(info_row->value.ht, col_index, (void *)&(rv_column_type), sizeof(zval *), NULL);
+                zend_hash_index_update(info_row_type->value.ht, col_index, (void *)&(rv_column_type), sizeof(zval *), NULL);
                 }
             else {
                 FREE_ZVAL(rv_column_type);
                 }
             }
-        zend_hash_update(info->value.ht, "type", 5, (void *) &info_row, sizeof(zval *), NULL);
+        zend_hash_update(info->value.ht, "name", 5, (void *) &info_row_name, sizeof(zval *), (void **) &inforow_ptr);
+        zend_hash_update(info->value.ht, "type", 5, (void *) &info_row_type, sizeof(zval *), NULL);
         }
-    /*/ fill each row array with fieldvalues (indexed and assoc) /*/
+    /* fill each row array with fieldvalues (indexed (and assoc)) */
     row_count=0;
     result=1;
     while (result) {
@@ -461,36 +462,44 @@ ZEND_FUNCTION(dbx_query)
         ZVAL_LONG(rv_row, 0);
         result = switch_dbx_getrow(&rv_row, &rv_result_handle, row_count, INTERNAL_FUNCTION_PARAM_PASSTHRU, dbx_module);
         if (result) {
-                zval ** row_ptr;
-                zend_hash_index_update(data->value.ht, row_count, (void *)&(rv_row), sizeof(zval *), (void **) &row_ptr);
-                /*/ associate results with fieldnames /*/
-                if (info_flags & DBX_RESULT_ASSOC) {
-                    zval **columnname_ptr, **actual_ptr, **reference_ptr;
-                    zval *dummy, **inforow_ptr;
-                    ALLOC_ZVAL(dummy);
-                    INIT_ZVAL(*dummy);	
-                    zend_hash_find(info->value.ht, "name", 5, (void **) &inforow_ptr);
-                    for (col_index=0; col_index<rv_column_count->value.lval; ++col_index) {
-                        zend_hash_index_find((*inforow_ptr)->value.ht, col_index, (void **) &columnname_ptr);
-                        zend_hash_index_find((*row_ptr)->value.ht, col_index, (void **) &actual_ptr);
-                        zend_hash_update((*row_ptr)->value.ht, (*columnname_ptr)->value.str.val, (*columnname_ptr)->value.str.len + 1, &dummy, sizeof(zval *), (void **) &reference_ptr);
-                        zend_assign_to_variable_reference(NULL, reference_ptr, actual_ptr, NULL ELS_CC);
-                        }
+            zend_hash_index_update(data->value.ht, row_count, (void *)&(rv_row), sizeof(zval *), (void **) &row_ptr);
+            /* associate results with fieldnames */
+            if (info_flags & DBX_RESULT_ASSOC) {
+                zval **columnname_ptr, **actual_ptr, **reference_ptr;
+                for (col_index=0; col_index<rv_column_count->value.lval; ++col_index) {
+                    MAKE_STD_ZVAL(dummy);
+                    zend_hash_index_find((*inforow_ptr)->value.ht, col_index, (void **) &columnname_ptr);
+                    zend_hash_index_find((*row_ptr)->value.ht, col_index, (void **) &actual_ptr);
+                    zend_hash_update((*row_ptr)->value.ht, (*columnname_ptr)->value.str.val, (*columnname_ptr)->value.str.len + 1, &dummy, sizeof(zval *), (void **) &reference_ptr);
+                    zend_assign_to_variable_reference(NULL, reference_ptr, actual_ptr, NULL ELS_CC);
                     }
+                }
             ++row_count;
             }
         else {
             FREE_ZVAL(rv_row);
             }
         }
-    /*/ add row_count property /*/
+    /* add row_count property */
     add_property_long(return_value, "rows", row_count);
-    /*/ thank you for watching. /*/
+    /* free original resultset /
+    {
+    int number_of_arguments=1;
+    zval ** arguments[1];
+    zval * returned_zval=NULL;
+
+    arguments[0]=&rv_result_handle;
+    dbx_call_any_function(INTERNAL_FUNCTION_PARAM_PASSTHRU, "mysql_free_result", &returned_zval, number_of_arguments, arguments);
+    if (!returned_zval || returned_zval->type!=IS_RESOURCE) {
+        if (returned_zval) zval_ptr_dtor(&returned_zval);
+        }
+    }*/
 }
 /* }}} */
 
-/* {{{ proto void dbx_error()
-   Returns success or failure */
+/* {{{ proto void dbx_error(dbx_link_object dbx_link)
+   Returns success or failure 
+*/
 ZEND_FUNCTION(dbx_error)
 {
     int number_of_arguments=1;
@@ -521,18 +530,20 @@ ZEND_FUNCTION(dbx_error)
 }
 /* }}} */
 
-/*/
-/ /       dbx functions that are database independent... like sorting result_objects!
-/*/
-/* {{{ proto long dbx_cmp_asc(array row_x, array row_y, string columnname)
-   returns row_x[columnname] - row_y[columnname], converted to -1, 0 or 1
+/*
+ *      dbx functions that are database independent... like sorting result_objects!
+ */
+
+/* {{{ proto long dbx_compare(array row_x, array row_y, string columnname [, flags])
+   returns row_y[columnname] - row_x[columnname], converted to -1, 0 or 1
 */
-ZEND_FUNCTION(dbx_cmp_asc)
+ZEND_FUNCTION(dbx_compare)
 {
     int min_number_of_arguments=3;
     int max_number_of_arguments=4;
     int number_of_arguments=-1;
-    long comparison_type;
+    long comparison_direction=DBX_CMP_ASC;
+    long comparison_type=DBX_CMP_NATIVE;
     double dtemp;
     long ltemp;
     zval ** arguments[4];
@@ -549,11 +560,28 @@ ZEND_FUNCTION(dbx_cmp_asc)
         zend_error(E_WARNING, "Wrong argument type for compare");
         RETURN_LONG(0);
         }
-    convert_to_string_ex(arguments[2]); /*/ field name /*/
-    comparison_type = DBX_CMP_TEXT;
+    convert_to_string_ex(arguments[2]); /* field name */
+    comparison_type = DBX_CMP_NATIVE;
+    comparison_direction = DBX_CMP_ASC;
     if (number_of_arguments>3) {
-        convert_to_long_ex(arguments[3]); /*/ comparison type /*/
-        comparison_type=(*arguments[3])->value.lval;
+        convert_to_long_ex(arguments[3]); /* comparison type and direction*/
+        /* direction */
+        if ((*arguments[3])->value.lval & DBX_CMP_DESC) {
+            comparison_direction=DBX_CMP_DESC;
+            }
+        if ((*arguments[3])->value.lval & DBX_CMP_ASC) {
+            comparison_direction=DBX_CMP_ASC;
+            }
+        /* type */
+        if ((*arguments[3])->value.lval & DBX_CMP_NUMBER) {
+            comparison_type=DBX_CMP_NUMBER;
+            }
+        if ((*arguments[3])->value.lval & DBX_CMP_TEXT) {
+            comparison_type=DBX_CMP_TEXT;
+            }
+        if ((*arguments[3])->value.lval & DBX_CMP_NATIVE) {
+            comparison_type=DBX_CMP_NATIVE;
+            }
         }
 
     if (zend_hash_find((*arguments[0])->value.ht, (*arguments[2])->value.str.val, (*arguments[2])->value.str.len+1, (void **) &zv_a)==FAILURE
@@ -566,83 +594,39 @@ ZEND_FUNCTION(dbx_cmp_asc)
         case DBX_CMP_TEXT:
             convert_to_string_ex(zv_a);
             convert_to_string_ex(zv_b);
-            ltemp = strcmp((*zv_a)->value.str.val, (*zv_b)->value.str.val);
-            result = (ltemp==0?0: (ltemp>0?1:-1));
             break;
         case DBX_CMP_NUMBER:
             convert_to_double_ex(zv_a);
             convert_to_double_ex(zv_b);
+            break;
+        }
+    switch ((*zv_a)->type) {
+        case IS_NULL:
+            result=0;
+            break;
+        case IS_BOOL:
+        case IS_LONG:
+        case IS_CONSTANT:
+            ltemp = (*zv_a)->value.lval - (*zv_b)->value.lval;
+            result = (ltemp==0?0: (ltemp>0?1:-1));
+            break;
+        case IS_DOUBLE:
             dtemp = ((*zv_a)->value.dval - (*zv_b)->value.dval);
             result = (dtemp==0?0: (dtemp>0?1:-1));
             break;
-        default:
-            result=0;
-            break;
-        }
-
-    RETURN_LONG(result);
-}
-
-/* {{{ proto long dbx_cmp_desc(array row_x, array row_y, string columnname)
-   returns row_y[columnname] - row_x[columnname], converted to -1, 0 or 1
-*/
-ZEND_FUNCTION(dbx_cmp_desc)
-{
-    int min_number_of_arguments=3;
-    int max_number_of_arguments=4;
-    int number_of_arguments=-1;
-    long comparison_type;
-    double dtemp;
-    long ltemp;
-    zval ** arguments[4];
-    zval ** zv_a;
-    zval ** zv_b;
-    int result=0;
-    number_of_arguments=ZEND_NUM_ARGS();
-    if (number_of_arguments<min_number_of_arguments || number_of_arguments>max_number_of_arguments || zend_get_parameters_array_ex(number_of_arguments, arguments) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	    }
-
-    if ((*arguments[0])->type != IS_ARRAY
-    || (*arguments[1])->type != IS_ARRAY) {
-        zend_error(E_WARNING, "Wrong argument type for compare");
-        RETURN_LONG(0);
-        }
-    convert_to_string_ex(arguments[2]); /*/ field name /*/
-    comparison_type = DBX_CMP_TEXT;
-    if (number_of_arguments>3) {
-        convert_to_long_ex(arguments[3]); /*/ comparison type /*/
-        comparison_type=(*arguments[3])->value.lval;
-        }
-
-    if (zend_hash_find((*arguments[0])->value.ht, (*arguments[2])->value.str.val, (*arguments[2])->value.str.len+1, (void **) &zv_a)==FAILURE
-    || zend_hash_find((*arguments[1])->value.ht, (*arguments[2])->value.str.val, (*arguments[2])->value.str.len+1, (void **) &zv_b)==FAILURE)  {
-        zend_error(E_WARNING, "Field '%s' not available in result-object", (*arguments[2])->value.str.val);
-        RETURN_LONG(0);
-        }
-
-    switch (comparison_type) {
-        case DBX_CMP_TEXT:
-            convert_to_string_ex(zv_a);
-            convert_to_string_ex(zv_b);
-            ltemp = strcmp((*zv_b)->value.str.val, (*zv_a)->value.str.val);
+        case IS_STRING:
+            ltemp = strcmp((*zv_a)->value.str.val, (*zv_b)->value.str.val);
             result = (ltemp==0?0: (ltemp>0?1:-1));
             break;
-        case DBX_CMP_NUMBER:
-            convert_to_double_ex(zv_a);
-            convert_to_double_ex(zv_b);
-            dtemp = ((*zv_b)->value.dval - (*zv_a)->value.dval);
-            result = (dtemp==0?0: (dtemp>0?1:-1));
-            break;
-        default:
-            result=0;
-            break;
+        default: result=0;
         }
 
+    if (comparison_direction==DBX_CMP_DESC) RETURN_LONG(-result);
     RETURN_LONG(result);
 }
 
-/* {{{ proto long dbx_sort(dbx_result_object stn_search_keywords_result, string compare_function_name)
+
+/* {{{ proto long dbx_sort(dbx_result_object dbx_result, string compare_function_name)
    returns 0 on failure, 1 on success
 */
 ZEND_FUNCTION(dbx_sort)
@@ -678,11 +662,11 @@ ZEND_FUNCTION(dbx_sort)
 
 /***********************************/
 
-/*/
-/ / switch_dbx functions
-/*/
+/*
+ * switch_dbx functions
+ */
 int switch_dbx_connect(zval ** rv, zval ** host, zval ** db, zval ** username, zval ** password, INTERNAL_FUNCTION_PARAMETERS, zval ** dbx_module) {
-    /*/ returns connection handle as resource on success or 0 as long on failure /*/
+    /* returns connection handle as resource on success or 0 as long on failure */
     switch ((*dbx_module)->value.lval) {
         case DBX_MYSQL: return dbx_mysql_connect(rv, host, db, username, password, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
         case DBX_ODBC: return dbx_odbc_connect(rv, host, db, username, password, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
@@ -694,7 +678,7 @@ int switch_dbx_connect(zval ** rv, zval ** host, zval ** db, zval ** username, z
     }
 
 int switch_dbx_pconnect(zval ** rv, zval ** host, zval ** db, zval ** username, zval ** password, INTERNAL_FUNCTION_PARAMETERS, zval ** dbx_module) {
-    /*/ returns persistent connection handle as resource on success or 0 as long on failure /*/
+    /* returns persistent connection handle as resource on success or 0 as long on failure */
     switch ((*dbx_module)->value.lval) {
         case DBX_MYSQL: return dbx_mysql_pconnect(rv, host, db, username, password, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
         case DBX_ODBC: return dbx_odbc_pconnect(rv, host, db, username, password, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
@@ -706,7 +690,7 @@ int switch_dbx_pconnect(zval ** rv, zval ** host, zval ** db, zval ** username, 
     }
 
 int switch_dbx_close(zval ** rv, zval ** dbx_handle, INTERNAL_FUNCTION_PARAMETERS, zval ** dbx_module) {
-    /*/ returns 1 as long on success or 0 as long on failure /*/
+    /* returns 1 as long on success or 0 as long on failure */
     switch ((*dbx_module)->value.lval) {
         case DBX_MYSQL: return dbx_mysql_close(rv, dbx_handle, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
         case DBX_ODBC: return dbx_odbc_close(rv, dbx_handle, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
@@ -718,7 +702,7 @@ int switch_dbx_close(zval ** rv, zval ** dbx_handle, INTERNAL_FUNCTION_PARAMETER
     }
 
 int switch_dbx_query(zval ** rv, zval ** dbx_handle, zval ** db_name, zval ** sql_statement, INTERNAL_FUNCTION_PARAMETERS, zval ** dbx_module) {
-    /*/ returns 1 as long or result identifier as resource on success or 0 as long on failure /*/
+    /* returns 1 as long or result identifier as resource on success or 0 as long on failure */
     switch ((*dbx_module)->value.lval) {
         case DBX_MYSQL: return dbx_mysql_query(rv, dbx_handle, db_name, sql_statement, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
         case DBX_ODBC: return dbx_odbc_query(rv, dbx_handle, db_name, sql_statement, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
@@ -730,7 +714,7 @@ int switch_dbx_query(zval ** rv, zval ** dbx_handle, zval ** db_name, zval ** sq
     }
 
 int switch_dbx_getcolumncount(zval ** rv, zval ** result_handle, INTERNAL_FUNCTION_PARAMETERS, zval ** dbx_module) {
-    /*/ returns column-count as long on success or 0 as long on failure /*/
+    /* returns column-count as long on success or 0 as long on failure */
     switch ((*dbx_module)->value.lval) {
         case DBX_MYSQL: return dbx_mysql_getcolumncount(rv, result_handle, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
         case DBX_ODBC: return dbx_odbc_getcolumncount(rv, result_handle, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
@@ -742,7 +726,7 @@ int switch_dbx_getcolumncount(zval ** rv, zval ** result_handle, INTERNAL_FUNCTI
     }
 
 int switch_dbx_getcolumnname(zval ** rv, zval ** result_handle, long column_index, INTERNAL_FUNCTION_PARAMETERS, zval ** dbx_module) {
-    /*/ returns column-name as string on success or 0 as long on failure /*/
+    /* returns column-name as string on success or 0 as long on failure */
     switch ((*dbx_module)->value.lval) {
         case DBX_MYSQL: return dbx_mysql_getcolumnname(rv, result_handle, column_index, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
         case DBX_ODBC: return dbx_odbc_getcolumnname(rv, result_handle, column_index, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
@@ -754,7 +738,7 @@ int switch_dbx_getcolumnname(zval ** rv, zval ** result_handle, long column_inde
     }
 
 int switch_dbx_getcolumntype(zval ** rv, zval ** result_handle, long column_index, INTERNAL_FUNCTION_PARAMETERS, zval ** dbx_module) {
-    /*/ returns column-type as string on success or 0 as long on failure /*/
+    /* returns column-type as string on success or 0 as long on failure */
     switch ((*dbx_module)->value.lval) {
         case DBX_MYSQL: return dbx_mysql_getcolumntype(rv, result_handle, column_index, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
         case DBX_ODBC: return dbx_odbc_getcolumntype(rv, result_handle, column_index, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
@@ -766,7 +750,7 @@ int switch_dbx_getcolumntype(zval ** rv, zval ** result_handle, long column_inde
     }
 
 int switch_dbx_getrow(zval ** rv, zval ** result_handle, long row_number, INTERNAL_FUNCTION_PARAMETERS, zval ** dbx_module) {
-    /*/ returns array[0..columncount-1] as strings on success or 0 as long on failure /*/
+    /* returns array[0..columncount-1] as strings on success or 0 as long on failure */
     switch ((*dbx_module)->value.lval) {
         case DBX_MYSQL: return dbx_mysql_getrow(rv, result_handle, row_number, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
         case DBX_ODBC: return dbx_odbc_getrow(rv, result_handle, row_number, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
@@ -778,7 +762,7 @@ int switch_dbx_getrow(zval ** rv, zval ** result_handle, long row_number, INTERN
     }
 
 int switch_dbx_error(zval ** rv, zval ** dbx_handle, INTERNAL_FUNCTION_PARAMETERS, zval ** dbx_module) {
-    /*/ returns string /*/
+    /* returns string */
     switch ((*dbx_module)->value.lval) {
         case DBX_MYSQL: return dbx_mysql_error(rv, dbx_handle, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
         case DBX_ODBC: return dbx_odbc_error(rv, dbx_handle, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
