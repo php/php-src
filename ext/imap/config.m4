@@ -1,6 +1,10 @@
 dnl $Id$
 
 AC_DEFUN(IMAP_INC_CHK,[if test -r $i$1/rfc822.h; then IMAP_DIR=$i; IMAP_INC_DIR=$i$1])
+AC_DEFUN(IMAP_LIB_CHK,[if test "$IMAP_DIR/$1/lib$lib*" != '$IMAP_DIR/$1/lib$lib*'; then
+		IMAP_LIB_DIR=$IMAP_DIR/$1
+		break
+		])
 
 RESULT=no
 AC_MSG_CHECKING(for IMAP support)
@@ -29,14 +33,8 @@ AC_ARG_WITH(imap,
 
     for lib in imap c-client c-client4; do
       IMAP_LIB=$lib
-      if eval test -r "$IMAP_DIR/lib/lib$lib*"; then
-        IMAP_LIB_DIR=$IMAP_DIR/lib
-        break
-      fi
-      if eval test -r "$IMAP_DIR/c-client/lib$lib*"; then
-        IMAP_LIB_DIR=$IMAP_DIR/c-client
-        break 2
-      fi
+      IMAP_LIB_CHK(lib)
+      IMAP_LIB_CHK(c-client)
     done
 
     if test -z "$IMAP_LIB_DIR"; then
