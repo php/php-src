@@ -27,6 +27,9 @@
 
 #if HAVE_MNOGOSEARCH
 
+#include <udm_config.h>
+#include <udmsearch.h>
+
 extern zend_module_entry mnogosearch_module_entry;
 #define mnogosearch_module_ptr &mnogosearch_module_entry
 
@@ -64,6 +67,10 @@ DLEXPORT PHP_FUNCTION(udm_get_res_param);
 
 DLEXPORT PHP_FUNCTION(udm_free_res);
 DLEXPORT PHP_FUNCTION(udm_free_agent);
+
+#if UDM_VERSION_ID > 30110
+DLEXPORT PHP_FUNCTION(udm_get_doc_count);
+#endif
 
 #else
 

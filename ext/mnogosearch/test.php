@@ -24,6 +24,8 @@
 
 	$udm=Udm_Alloc_Agent("mysql://udm:udm@localhost/udm/",'single');	
 	
+	print  "Total number of urls in database: ".Udm_Get_Doc_Count($udm)."<br>\n";
+	
 // Stage 2: set search parameters
 
 	$page_size=10;
