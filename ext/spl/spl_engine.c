@@ -49,7 +49,7 @@ int spl_instanciate_arg_ex2(zend_class_entry *pce, zval **retval, zval *arg1, zv
 	
 	retval = &EG(uninitialized_zval_ptr);
 	
-	spl_call_method(&object, NULL, pce->constructor->common.function_name, strlen(pce->constructor->common.function_name), retval, NULL TSRMLS_CC, 2, arg1, arg2);
+	spl_call_method(&object, pce, &pce->constructor, pce->constructor->common.function_name, strlen(pce->constructor->common.function_name), retval, NULL TSRMLS_CC, 2, arg1, arg2);
 	*retval = object;
 	return 0;
 }
@@ -136,17 +136,6 @@ zval * spl_get_zval_ptr(znode *node, temp_variable *Ts, zval **should_free TSRML
 }
 /* }}} */
 
-/* {{{ */
-inline zend_class_entry *spl_get_class_entry(zval *obj TSRMLS_DC)
-{
-	if (obj && Z_TYPE_P(obj) == IS_OBJECT && Z_OBJ_HT_P(obj)->get_class_entry) {
-		return Z_OBJ_HT_P(obj)->get_class_entry(obj TSRMLS_CC);
-	} else {
-		return NULL;
-	}
-}
-/* }}} */
-
 /* {{{ spl_is_instance_of */
 int spl_is_instance_of(zval **obj, zend_class_entry *ce TSRMLS_DC)
 {
@@ -190,7 +179,7 @@ int spl_implements(zval **obj, zend_class_entry *ce TSRMLS_DC)
 #define EX(element) execute_data.element
 
 /* {{{ spl_call_method */
-int spl_call_method(zval **object_pp, zend_function **fn_proxy, char *function_name, int fname_len, zval **retval, HashTable *symbol_table TSRMLS_DC, int param_count, ...)
+int spl_call_method(zval **object_pp, zend_class_entry *obj_ce, zend_function **fn_proxy, char *function_name, int fname_len, zval **retval, HashTable *symbol_table TSRMLS_DC, int param_count, ...)
 {
 	int i;
 	zval **original_return_value;
@@ -206,10 +195,9 @@ int spl_call_method(zval **object_pp, zend_function **fn_proxy, char *function_n
 	zval *current_this;
 	zend_namespace *current_namespace = EG(active_namespace);
 	zend_execute_data execute_data;
-	zend_class_entry *obj_ce;
 	va_list args;
 
-	if (!object_pp || (obj_ce = spl_get_class_entry(*object_pp TSRMLS_CC)) == NULL) {
+	if (!object_pp || (!obj_ce && (obj_ce = spl_get_class_entry(*object_pp TSRMLS_CC)) == NULL)) {
 		return FAILURE;
 	}
 
@@ -220,7 +208,7 @@ int spl_call_method(zval **object_pp, zend_function **fn_proxy, char *function_n
 	EX(opline) = NULL;
 
 	EX(object) = *object_pp;
-	calling_scope = Z_OBJCE_PP(object_pp);
+	calling_scope = obj_ce;
 
 	original_function_state_ptr = EG(function_state_ptr);
 	if (fn_proxy && *fn_proxy) {
