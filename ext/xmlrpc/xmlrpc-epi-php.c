@@ -776,7 +776,7 @@ PHP_FUNCTION(xmlrpc_decode)
       zval* retval = decode_request_worker(arg1, arg2, NULL);
       if(retval) {
          *return_value = *retval;
-         zval_copy_ctor(return_value);
+		 FREE_ZVAL(retval);
       }
    }
 }

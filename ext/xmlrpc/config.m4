@@ -10,6 +10,8 @@ sinclude(libxmlrpc/xmlrpc.m4)
 PHP_ARG_WITH(xmlrpc, for XMLRPC-EPI support,
 [  --with-xmlrpc[=DIR]     Include XMLRPC-EPI support.])
 
+xmlrpc_ext_shared=$ext_shared
+
 PHP_ARG_WITH(expat-dir, libexpat dir for XMLRPC-EPI,
 [  --with-expat-dir=DIR      XMLRPC-EPI: libexpat dir for XMLRPC-EPI.])
 
@@ -48,7 +50,7 @@ if test "$PHP_XMLRPC" = "yes"; then
           libxmlrpc/xmlrpc_introspection.c libxmlrpc/encodings.c \
           libxmlrpc/system_methods.c libxmlrpc/xml_to_xmlrpc.c \
           libxmlrpc/queue.c libxmlrpc/xml_element.c libxmlrpc/xmlrpc.c \
-          libxmlrpc/xml_to_soap.c,$ext_shared,,
+          libxmlrpc/xml_to_soap.c,$xmlrpc_ext_shared,,
           -I@ext_srcdir@/libxmlrpc -DVERSION="0.50")
   PHP_ADD_BUILD_DIR($ext_builddir/libxmlrpc)
   XMLRPC_MODULE_TYPE=builtin
