@@ -3280,7 +3280,8 @@ void zend_do_begin_namespace(znode *ns_token, znode *ns_name TSRMLS_DC)
 		ns = *pns;
 		if(ns->type != ZEND_NAMESPACE || ns == CG(active_namespace)) {
 			zend_error(E_COMPILE_ERROR, "Cannot redefine namespace '%s' - class or namespace with this name already defined", ns->name);
-		} 
+		}
+		FREE_PNODE(ns_name);
 	} else {
 		ns = emalloc(sizeof(zend_namespace));
 		ns->name = ns_name->u.constant.value.str.val;
