@@ -137,9 +137,12 @@ ANCHOR *fnAddAnchor(DLIST *pAnchorList,
 {
 	ANCHOR *cur_ptr;
 
+#ifdef newlist
+#else
 	if((cur_ptr = (ANCHOR *) dlst_newnode(sizeof(ANCHOR))) == NULL) {
 		return NULL;
 	}
+#endif
 
 	memset(cur_ptr, 0, sizeof(ANCHOR));
 	cur_ptr->start = start;
@@ -155,7 +158,12 @@ ANCHOR *fnAddAnchor(DLIST *pAnchorList,
 	cur_ptr->keyword = NULL;
 	cur_ptr->fragment = NULL;
 
+#ifdef newlist
+	zend_llist_prepend_element(pAnchorList, cur_ptr);
+	free(cur_ptr);
+#else
 	dlst_insertafter(pAnchorList, cur_ptr, PHP_DLST_HEAD(pAnchorList));
+#endif
 
 	return(cur_ptr);
 }
@@ -180,7 +188,11 @@ void fnDeleteAnchor(ANCHOR *ptr)
 	if(ptr->keyword) efree(ptr->keyword);
 	if(ptr->fragment) efree(ptr->fragment);
 
+#ifdef newlist
+	free(ptr);
+#else
 	dlst_freenode(ptr);
+#endif
 }
 
 /***********************************************************************
@@ -230,7 +242,12 @@ DLIST *fnCreateAnchorList(hw_objectID objID, char **anchors, char **docofanchorr
 {
 	int start, end, i, destid, anchordestid, objectID;
 	ANCHOR *cur_ptr = NULL;
+#ifdef newlist
+	zend_llist *pAnchorList;
+	zend_llist_init(pAnchorList, sizeof(char *), fnDeleteAnchor, 0);
+#else
 	DLIST *pAnchorList = dlst_init();
+#endif
 
 	for(i=ancount-1; i>=0; i--) {
 		char *object = NULL;
@@ -492,9 +509,14 @@ char *fnInsAnchorsIntoText(char *text, DLIST *pAnchorList, char **bodytag, char 
 
 	newtext = text;
 	bgstr[0] = '\0';
+#ifdef newlist
+	zend_llist_sort(pAnchorList, fnCmpAnchors);
+	cur_ptr = (ANCHOR *) zend_llist_get_last(pAnchorList);
+#else
 	dlst_mergesort(pAnchorList, fnCmpAnchors);
-
 	cur_ptr = (ANCHOR *) dlst_last(pAnchorList);
+#endif
+
 	while(NULL != cur_ptr) {
 		istr[0] = '\0';
 		if(cur_ptr->tanchor == 1) { /* Src Anchor */
@@ -583,7 +605,11 @@ char *fnInsAnchorsIntoText(char *text, DLIST *pAnchorList, char **bodytag, char 
 			offset += strlen(istr) + 4;
 			laststart = cur_ptr->start;
 		}
+#if newlist
 		cur_ptr = (ANCHOR *) dlst_prev(cur_ptr);
+#else
+		cur_ptr = (ANCHOR *) zend_llist_get_prev(pAnchorList);
+#endif
 	}
 	snprintf(istr, BUFFERLEN, "<BODY %s>", bgstr);
 	*bodytag = estrdup(istr);
@@ -1908,7 +1934,11 @@ int send_gettext(int sockfd, hw_objectID objectID, int mode, int rootid, char **
 				char *body;
 
 				newtext = fnInsAnchorsIntoText(*text, pAnchorList, &body, urlprefix);
+#ifdef newlist
+				zend_llist_destroy(pAnchorList)
+#else
 				dlst_kill(pAnchorList, fnDeleteAnchor);
+#endif
 				*bodytag = strdup(body);
 				efree(body);
 				*text = newtext;
@@ -4246,7 +4276,11 @@ int send_pipedocument(int sockfd, char *host, hw_objectID objectID, int mode, in
 				char *body;
 
 				newtext = fnInsAnchorsIntoText(*text, pAnchorList, &body, urlprefix);
+#ifdef newlist
+				zend_llist_destroy(pAnchorList)
+#else
 				dlst_kill(pAnchorList, fnDeleteAnchor);
+#endif
 				*bodytag = strdup(body);
 				efree(body);
 				*text = newtext;
