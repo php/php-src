@@ -23,6 +23,21 @@ if test "$PHP_CURL" != "no"; then
     easy.h should be in <curl-dir>/include/curl/)
   fi
 
+  CURL_CONFIG="curl-config"
+  AC_MSG_CHECKING(for cURL greater than 7.7.3)
+
+  if ${CURL_DIR}/bin/curl-config --libs print > /dev/null 2>&1; then
+    CURL_CONFIG=${CURL_DIR}/bin/curl-config
+  fi
+
+  curl_version_full=`$CURL_CONFIG --version`
+  curl_version=`echo ${curl_version_full} | sed -e 's/libcurl //' | awk 'BEGIN { FS = "."; } { printf "%d", ($1 * 1000 + $2) * 1000 + $3;}'`
+  if test "$curl_version" -ge 7007003; then
+    AC_MSG_RESULT($curl_version_full)
+  else
+    AC_MSG_ERROR(cURL version 7.7.3 or later is required to compile php with cURL support)
+  fi
+
   PHP_ADD_INCLUDE($CURL_DIR/include)
 
   PHP_SUBST(CURL_SHARED_LIBADD)

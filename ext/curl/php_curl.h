@@ -57,6 +57,7 @@ typedef struct {
 	FILE         *fp;
 	smart_str     buf;
 	int           method;
+	int           type;
 } php_curl_write;
 
 typedef struct {
