@@ -302,8 +302,14 @@ static int zend_implement_traversable(zend_class_entry *interface, zend_class_en
 /* {{{ zend_implement_aggregate */
 static int zend_implement_aggregate(zend_class_entry *interface, zend_class_entry *class_type TSRMLS_DC)
 {
-	if (class_type->get_iterator && class_type->get_iterator != zend_user_get_new_iterator) {
-		return FAILURE;
+	if (class_type->get_iterator) {
+		if (class_type->type == ZEND_INTERNAL_CLASS) {
+			/* inheritance ensures the class has necessary userland methods */
+			return SUCCESS;
+		} else if (class_type->get_iterator != zend_user_get_new_iterator) {
+			/* c-level get_iterator cannot be changed */
+			return FAILURE;
+		}
 	}
 	class_type->iterator_funcs.zf_new_iterator = NULL;
 	class_type->get_iterator = zend_user_get_new_iterator;
@@ -315,7 +321,13 @@ static int zend_implement_aggregate(zend_class_entry *interface, zend_class_entr
 static int zend_implement_iterator(zend_class_entry *interface, zend_class_entry *class_type TSRMLS_DC)
 {
 	if (class_type->get_iterator && class_type->get_iterator != zend_user_get_iterator) {
-		return FAILURE;
+		if (class_type->type == ZEND_INTERNAL_CLASS) {
+			/* inheritance ensures the class has the necessary userland methods */
+			return SUCCESS;
+		} else if (class_type->get_iterator != zend_user_get_new_iterator) {
+			/* c-level get_iterator cannot be changed */
+			return FAILURE;
+		}
 	}
 	class_type->get_iterator = zend_user_get_iterator;
 	class_type->iterator_funcs.zf_has_more = NULL;
