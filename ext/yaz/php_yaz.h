@@ -23,6 +23,10 @@
 
 #if HAVE_YAZ
 
+#ifdef ZTS
+#include "TSRM.h"
+#endif
+
 extern zend_module_entry yaz_module_entry;
 #define yaz_module_ptr &yaz_module_entry
 
