@@ -596,6 +596,11 @@ sendmail_from = me@localhost.com
 ; For Unix only.  You may supply arguments as well (default: "sendmail -t -i").
 ;sendmail_path =
 
+; Force the addition of the specified parameters to be passed as extra parameters
+; to the sendmail binary. These parameters will always replace the value of 
+; the 5th parameter to mail(), even in safe mode.
+;mail.force_extra_paramaters = 
+
 [Java]
 ;java.class.path = .\php_java.jar
 ;java.home = c:\jdk
