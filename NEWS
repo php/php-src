@@ -7,6 +7,8 @@ PHP                                                                        NEWS
   strings). (Ilia, Tony)
 - Fixed bug #29368 (The destructor is called when an exception is thrown from 
   the constructor). (Marcus)
+- Fixed bug #29342 (strtotime() does not handle empty date string properly).
+  (Ilia)
 - Fixed bug #29335 (fetch functions now use MYSQLI_BOTH as default) (Georg)
 - Fixed bug #29291 (get_class_vars() return names with NULLs). (Marcus)
 - Fixed bug #29119 (html_entity_decode() misbehaves with UTF-8). (Moriyoshi)
