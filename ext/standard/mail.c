@@ -46,25 +46,16 @@
    Calculate EZMLM list hash value. */
 PHP_FUNCTION(ezmlm_hash)
 {
-	pval **pstr = NULL;
 	char *str=NULL;
 	unsigned long h = 5381L;
-	int j, l;
+	int j, str_len;
 	
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &pstr) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s",
+							  &str, &str_len) == FAILURE) {
+		return;
 	}
 
-	convert_to_string_ex(pstr);
-	if (Z_STRVAL_PP(pstr)) {
-		str = Z_STRVAL_PP(pstr);
-	} else {
-		php_error(E_WARNING, "Must give string parameter to ezmlm_hash()");
-		RETURN_FALSE;
-	}
-	
-	l = strlen(str);
-	for (j=0; j<l; j++) {
+	for (j=0; j<str_len; j++) {
 		h = (h + (h<<5)) ^ (unsigned long) (unsigned char) tolower(str[j]);
 	}
 	
@@ -78,57 +69,39 @@ PHP_FUNCTION(ezmlm_hash)
    Send an email message */
 PHP_FUNCTION(mail)
 {
-	pval **argv[5];
 	char *to=NULL, *message=NULL, *headers=NULL, *subject=NULL, *extra_cmd=NULL;
-	int argc;
+	int to_len,message_len,headers_len,subject_len,extra_cmd_len;
 	
-	argc = ZEND_NUM_ARGS();
-	if (argc < 3 || argc > 5 || zend_get_parameters_array_ex(argc, argv) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
-	/* To: */
-	convert_to_string_ex(argv[0]);
-	if (Z_STRVAL_PP(argv[0])) {
-		to = Z_STRVAL_PP(argv[0]);
-	} else {
-		php_error(E_WARNING, "No to field in mail command");
-		RETURN_FALSE;
-	}
-
-	/* Subject: */
-	convert_to_string_ex(argv[1]);
-	if (Z_STRVAL_PP(argv[1])) {
-		subject = Z_STRVAL_PP(argv[1]);
-	} else {
-		php_error(E_WARNING, "No subject field in mail command");
-		RETURN_FALSE;
-	}
-
-	/* message body */
-	convert_to_string_ex(argv[2]);
-	if (Z_STRVAL_PP(argv[2])) {
-		message = Z_STRVAL_PP(argv[2]);
-	} else {
-		/* this is not really an error, so it is allowed. */
-		php_error(E_WARNING, "No message string in mail command");
-		message = NULL;
-	}
-
-	if (argc >= 4) {			/* other headers */
-		convert_to_string_ex(argv[3]);
-		headers = Z_STRVAL_PP(argv[3]);
-	}
 	
-	if (argc == 5) {			/* extra options that get passed to the mailer */
-		convert_to_string_ex(argv[4]);
-		extra_cmd = php_escape_shell_arg(Z_STRVAL_PP(argv[4]));
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sss|ss",
+							  &to, &to_len,
+							  &subject, &subject_len,
+							  &message, &message_len,
+							  &headers, &headers_len,
+							  &extra_cmd, &extra_cmd_len
+							  ) == FAILURE) {
+		return;
 	}
+
+	for(to_len--;to_len;to_len--) {
+		if(!isspace(to[to_len]))break;
+		to[to_len]='\0';
+	}
+
+	for(subject_len--;subject_len;subject_len--) {
+		if(!isspace(subject[subject_len]))break;
+		subject[subject_len]='\0';
+	}
+
+	if(extra_cmd)
+		extra_cmd = php_escape_shell_arg(extra_cmd);
 	
 	if (php_mail(to, subject, message, headers, extra_cmd)) {
 		RETVAL_TRUE;
 	} else {
 		RETVAL_FALSE;
 	}
+
 	if (extra_cmd) efree (extra_cmd);
 }
 /* }}} */
