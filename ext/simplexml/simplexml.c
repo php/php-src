@@ -227,7 +227,7 @@ next_iter:
 static zval *
 sxe_property_read(zval *object, zval *member, zend_bool silent TSRMLS_DC)
 {
-	return sxe_prop_dim_read(object, member, 1, 1, silent TSRMLS_CC);
+	return sxe_prop_dim_read(object, member, 1, 0, silent TSRMLS_CC);
 }
 /* }}} */
 
@@ -634,6 +634,7 @@ simplexml_ce_xpath_search(INTERNAL_FUNCTION_PARAMETERS)
 	char              *query;
 	int                query_len;
 	int                i;
+	xmlXPathObjectPtr  retval;
 	xmlNodeSetPtr      result;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &query, &query_len) == FAILURE) {
@@ -650,7 +651,13 @@ simplexml_ce_xpath_search(INTERNAL_FUNCTION_PARAMETERS)
 
 	sxe->xpath->node = sxe->node->node;
 
-	result = xmlXPathEval(query, sxe->xpath)->nodesetval;
+	retval = xmlXPathEval(query, sxe->xpath);
+	if (!retval) {
+		RETURN_FALSE;
+	}
+
+	
+	result = retval->nodesetval;
 	if (!result) {
 		RETURN_FALSE;
 	}
