@@ -257,7 +257,9 @@ static void real_result_dtor(struct php_sqlite_result *res TSRMLS_DC)
 		efree(res->col_names);
 	}
 
-	zend_list_delete(res->db->rsrc_id);
+	if (res->db) {
+		zend_list_delete(res->db->rsrc_id);
+	}
 	efree(res);
 }
 
