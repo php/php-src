@@ -1610,7 +1610,6 @@ PHP_FUNCTION(call_user_func)
 	pval ***params;
 	pval *retval_ptr;
 	int arg_count=ZEND_NUM_ARGS();
-	CLS_FETCH();
 
 	if (arg_count<1) {
 		WRONG_PARAM_COUNT;
@@ -1627,11 +1626,10 @@ PHP_FUNCTION(call_user_func)
 		convert_to_string_ex(params[0]);
 	}
 
-	if (call_user_function_ex(CG(function_table), NULL, *params[0], &retval_ptr, arg_count-1, params+1, 1, NULL)==SUCCESS
-		&& retval_ptr) {
+	if (call_user_function_ex(EG(function_table), NULL, *params[0], &retval_ptr, arg_count-1, params+1, 0, NULL)==SUCCESS && retval_ptr) {
 		COPY_PZVAL_TO_ZVAL(*return_value, retval_ptr);
 	} else {
-		php_error(E_WARNING,"Unable to call %s() - function does not exist", Z_TYPE_PP(params[0]) == IS_STRING ? Z_STRVAL_PP(params[0]) : "");
+		php_error(E_WARNING,"Unable to call %s()", Z_TYPE_PP(params[0]) == IS_STRING ? Z_STRVAL_PP(params[0]) : "");
 	}
 	efree(params);
 }
@@ -1648,7 +1646,6 @@ PHP_FUNCTION(call_user_func_array)
     HashTable *params_ar;
     int num_elems,
         element = 0;
-	CLS_FETCH();
 
     if (ZEND_NUM_ARGS() != 2 ||
         zend_get_parameters_ex(2, &func_name, &params) == FAILURE) {
@@ -1673,11 +1670,10 @@ PHP_FUNCTION(call_user_func_array)
          zend_hash_move_forward(params_ar))
          element++;
 
-    if (call_user_function_ex(CG(function_table), NULL, *func_name, &retval_ptr, num_elems, func_args, 1, NULL) == SUCCESS
-        && retval_ptr) {
+    if (call_user_function_ex(EG(function_table), NULL, *func_name, &retval_ptr, num_elems, func_args, 0, NULL) == SUCCESS && retval_ptr) {
         COPY_PZVAL_TO_ZVAL(*return_value, retval_ptr);
     } else {
-        php_error(E_WARNING, "Unable to call %s() - function does not exist", Z_TYPE_PP(func_name) == IS_STRING ? Z_STRVAL_PP(func_name) : "");
+        php_error(E_WARNING, "Unable to call %s()", Z_TYPE_PP(func_name) == IS_STRING ? Z_STRVAL_PP(func_name) : "");
     }
 
     efree(func_args);
@@ -1691,7 +1687,6 @@ PHP_FUNCTION(call_user_method)
 	pval ***params;
 	pval *retval_ptr;
 	int arg_count=ZEND_NUM_ARGS();
-	CLS_FETCH();
 
 	if (arg_count<2) {
 		WRONG_PARAM_COUNT;
@@ -1709,11 +1704,10 @@ PHP_FUNCTION(call_user_method)
 	}
 	SEPARATE_ZVAL(params[0]);
 	convert_to_string(*params[0]);
-	if (call_user_function_ex(CG(function_table), params[1], *params[0], &retval_ptr, arg_count-2, params+2, 1, NULL)==SUCCESS
-		&& retval_ptr) {
+	if (call_user_function_ex(EG(function_table), params[1], *params[0], &retval_ptr, arg_count-2, params+2, 0, NULL)==SUCCESS && retval_ptr) {
 		COPY_PZVAL_TO_ZVAL(*return_value, retval_ptr);
 	} else {
-		php_error(E_WARNING,"Unable to call %s() - function does not exist", Z_STRVAL_PP(params[0]));
+		php_error(E_WARNING,"Unable to call %s()", Z_STRVAL_PP(params[0]));
 	}
 	efree(params);
 }
@@ -1731,7 +1725,6 @@ PHP_FUNCTION(call_user_method_array)
 	HashTable *params_ar;
 	int num_elems,
 	    element = 0;
-	CLS_FETCH();
 
     if (ZEND_NUM_ARGS() != 3 ||
         zend_get_parameters_ex(3, &method_name, &obj, &params) == FAILURE) {
@@ -1757,11 +1750,10 @@ PHP_FUNCTION(call_user_method_array)
 	     zend_hash_move_forward(params_ar))
 		element++;
 
-    if (call_user_function_ex(CG(function_table), obj, *method_name, &retval_ptr, num_elems, method_args, 1, NULL) == SUCCESS
-        && retval_ptr) {
+    if (call_user_function_ex(EG(function_table), obj, *method_name, &retval_ptr, num_elems, method_args, 0, NULL) == SUCCESS && retval_ptr) {
         COPY_PZVAL_TO_ZVAL(*return_value, retval_ptr);
     } else {
-        php_error(E_WARNING, "Unable to call %s() - function does not exist", Z_STRVAL_PP(method_name));
+        php_error(E_WARNING, "Unable to call %s()", Z_STRVAL_PP(method_name));
     }
 
 	efree(method_args);
@@ -1791,9 +1783,8 @@ void user_tick_function_dtor(user_tick_function_entry *tick_function_entry)
 static int user_shutdown_function_call(php_shutdown_function_entry *shutdown_function_entry)
 {
 	zval retval;
-	CLS_FETCH();
 
-	if (call_user_function(CG(function_table), NULL, shutdown_function_entry->arguments[0], &retval, shutdown_function_entry->arg_count-1, shutdown_function_entry->arguments+1)==SUCCESS) {
+	if (call_user_function(EG(function_table), NULL, shutdown_function_entry->arguments[0], &retval, shutdown_function_entry->arg_count-1, shutdown_function_entry->arguments+1)==SUCCESS) {
 		zval_dtor(&retval);
 	} else {
 		php_error(E_WARNING,"Unable to call %s() - function does not exist",
@@ -1806,9 +1797,8 @@ static void user_tick_function_call(user_tick_function_entry *tick_fe)
 {
 	zval retval;
 	zval *function = tick_fe->arguments[0];
-	CLS_FETCH();
 
-	if (call_user_function(CG(function_table), NULL, function, &retval,
+	if (call_user_function(EG(function_table), NULL, function, &retval,
 						   tick_fe->arg_count - 1, tick_fe->arguments + 1) == SUCCESS) {
 		zval_dtor(&retval);
 	} else {
