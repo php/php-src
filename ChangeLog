@@ -1,3 +1,57 @@
+2000-08-08  Brendan W. McAdams  <brendan@plexmedia.com>
+
+    * ext/ccvs/Makefile.in
+      ext/ccvs/ccvs.c
+      ext/ccvs/ccvs.h
+      ext/ccvs/config.m4:
+    Had some issues with apache build.  PHP Was passing a -llibccvs inadvertantly.  Seemed to be an issue with the autoconf file.  Fixed. I'll get back to cleaning up that AutoConf later.
+
+    * ext/ccvs/.cvsignore
+      ext/ccvs/Makefile.in
+      ext/ccvs/ccvs.c
+      ext/ccvs/ccvs.h
+      ext/ccvs/config.m4:
+    First commit of these files.  We have had them working for about 3 weeks, very well, as a DL.  The straight compile-into PHP support should work fine; I've got it compiling on my Slackware 7 i386 box with Apache 1.3.12 + mod_ssl.  Documentation, module info and example code are forthcoming.
+
+2000-08-08  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/imap/php_imap.c: Added missing 'subject'-key in envelope.
+
+2000-08-08  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/gettext/gettext.c
+      ext/ftp/php_ftp.c: Beautified some protos.
+
+2000-08-08  Vlad Krupin  <phpdevel@echospace.com>
+
+    * ext/pspell/README:
+    Added instructions on how to use personalized dictionaries
+
+    * ext/pspell/php_pspell.h
+      ext/pspell/pspell.c: added support for personalized dictionaries.
+    new functions: pspell_new_personal(), pspell_save_wordlist().
+
+    pspell_save_wordlist() needs to be changed to return error-codes
+    once pspell library gets fixed
+
+2000-08-08  Stanislav Malyshev  <stas@zend.com>
+
+    * main/fopen-wrappers.c
+      main/fopen-wrappers.h:
+    Standartize full path handling - everything now goes via expand_filepath
+    Add errno to open_basedir checking function
+
+    * main/php_virtual_cwd.c: fix return code for virtual_file_ex
+
+    * ext/standard/pageinfo.c:
+    Fix possible crash when stat information is not available
+
+2000-08-08  Martin Kraemer  <Martin.Kraemer@Mch.SNI.De>
+
+    * ext/standard/url.c: Bug #6016: Fix EBCDIC logic error in urlencode()
+    (a strchr() test was used backwards)
+    Reported by: dumbunny@tivo.com
+
 2000-08-07  Danny Heijl  <Danny.Heijl@cevi.be>
 
     * ext/informix/ifx.ec:
