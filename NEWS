@@ -11,10 +11,11 @@ PHP 4                                                                      NEWS
   . Disallow configuring of more than one Berkeley db handler. 
 - Added --clean option into phpize. (Jani)
 - Added --ldflags option into php-config. (Jani)
+- Added zlib_get_coding_type() function. Returns the coding type used for 
+  output compression. (Moriyoshi)
 - Added OCIPasswordChange() which allows renewing expired Oracle users. (Maxim)
-- Added memory_get_usage(). Defined only when PHP is compiled with
-  --enable-memory-limit. Returns the number of bytes allocated by the Zend's
-  memory routines. (Andrey)
+- Added memory_get_usage(). Only available when PHP is configured with 
+  --enable-memory-limit. (Andrey)
 - Fixed bug #22141 (removed undocumented Boyer str_replace() method). (Sara)
 - Fixed bug #22103 (Added gdImageEllipse and replaced old gdImageFilledEllipse
   with a better implementation). (Pierre)
