@@ -1,3 +1,91 @@
+2004-03-31  Sara Golemon  <php@alphaweb.net>
+
+    * NEWS
+      ext/standard/tests/file/bug27619.phpt
+      main/streams/filter.c
+      main/streams/php_stream_filter_api.h
+      main/streams/streams.c:
+      BugFix#27619
+      Filters not applied to pre-buffered stream data.
+      (esp. http:// streams)
+
+2004-03-31  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS:
+      Bug fixing news.
+
+    * (PHP_4_3)
+      Zend/zend_execute.c:
+      MFH: Fixed bug #25547 (error_handler and array index with function call).
+      
+
+2004-03-31  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/mysqli/config.m4:
+      - Align help output for configure.
+
+2004-03-31  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      ext/ftp/ftp.c:
+      MFH: Fixed bug #27809 (ftp_systype returns null on some ftp servers).
+
+    * ext/ftp/ftp.c:
+      Fixed bug #27809 (ftp_systype returns null on some ftp servers).
+
+2004-03-31  Hartmut Holzgraefe  <hartmut@php-groupies.de>
+
+    * ext/standard/datetime.c:
+      disallow negative timestamps on windows only
+
+2004-03-31  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/dom/attr.c
+      ext/dom/cdatasection.c
+      ext/dom/comment.c
+      ext/dom/document.c
+      ext/dom/documentfragment.c
+      ext/dom/dom_fe.h
+      ext/dom/element.c
+      ext/dom/entityreference.c
+      ext/dom/nodelist.c
+      ext/dom/processinginstruction.c
+      ext/dom/text.c
+      ext/dom/xpath.c:
+      use new style constructors
+      fix return for nodelist item
+
+2004-03-31  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      sapi/cgi/cgi_main.c:
+      MFH: Fixed bug #27802 (default number of children to 8 when
+      PHP_FCGI_CHILDREN is not defined).
+
+    * sapi/cgi/cgi_main.c:
+      Fixed bug #27802 (default number of children to 8 when PHP_FCGI_CHILDREN is
+      not defined).
+
+2004-03-31  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_execute.c:
+      Fixed BUG in zend_post_incdec_property
+
+2004-03-31  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend_reflection_api.c:
+      - Fix typo
+
+2004-03-31  Ard Biesheuvel  <a.k.biesheuvel@ewi.tudelft.nl>
+
+    * ext/standard/tests/time/003.phpt
+      ext/standard/tests/time/bug27719.phpt
+      ext/standard/tests/time/mktime.phpt:
+      Make time tests more robust against differences in implementation
+
 2004-03-30  Ilia Alshanetsky  <ilia@prohost.org>
 
     * run-tests.php:

@@ -1,3 +1,13 @@
+2004-03-31  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_execute.c:
+      Fixed BUG in zend_post_incdec_property
+
+2004-03-31  Andi Gutmans  <andi@zend.com>
+
+    * zend_reflection_api.c:
+      - Fix typo
+
 2004-03-30  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * tests/bug26695.phpt:
