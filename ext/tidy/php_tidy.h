@@ -91,6 +91,7 @@ TIDY_NODE_METHOD(isPhp);
 
 ZEND_BEGIN_MODULE_GLOBALS(tidy)
 	char *default_config;
+    zval *inst;
 ZEND_END_MODULE_GLOBALS(tidy)
 
 #ifdef ZTS
