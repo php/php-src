@@ -200,33 +200,6 @@ static void destroy_SWFInput_resource(zend_rsrc_list_entry *resource TSRMLS_DC)
   destroySWFInput((SWFInput)resource->ptr);
 }
 
-#define SOCKBUF_INCREMENT 10240
-
-/* turn a socket into an SWFInput by copying everything to a buffer. */
-/* not pretty, but it works */
-
-static SWFInput newSWFInput_sock(int socket)
-{
-  char *buffer = NULL;
-  int l, offset = 0, alloced = 0;
-
-  do
-  {
-    if(offset <= alloced)
-    {
-      alloced += SOCKBUF_INCREMENT;
-      buffer = realloc(buffer, alloced);
-    }
-
-    l = SOCK_FREAD(buffer+offset, SOCKBUF_INCREMENT, socket);
-
-    offset += l;
-  }
-  while(l > 0);
-
-  return newSWFInput_allocedBuffer(buffer, offset);
-}
-
 static SWFInput getInput(zval **zfile TSRMLS_DC)
 {
   FILE *file;
@@ -236,7 +209,7 @@ static SWFInput getInput(zval **zfile TSRMLS_DC)
 
   what =  zend_fetch_resource(zfile TSRMLS_CC, -1, "File-Handle", &type, 1, php_file_le_stream());
 
-  if (!php_stream_cast((php_stream*)what, PHP_STREAM_AS_STDIO_FILE, (void*)&file, REPORT_ERRORS))	{
+  if (!php_stream_cast((php_stream*)what, PHP_STREAM_AS_STDIO, (void*)&file, REPORT_ERRORS))	{
 	return NULL;
   }
   
@@ -1170,7 +1143,6 @@ SWFFont getFont(zval *id TSRMLS_DC)
 
 PHP_FUNCTION(swffont_init)
 {
-  FILE *file;
   zval **zfile;
   SWFFont font;
   int ret;
@@ -1182,13 +1154,23 @@ PHP_FUNCTION(swffont_init)
 
   if(strcmp(Z_STRVAL_PP(zfile)+Z_STRLEN_PP(zfile)-4, ".fdb") == 0)
   {
-    file = VCWD_FOPEN(Z_STRVAL_PP(zfile), "rb");
+    php_stream * stream;
+	FILE * file;
+	
+    stream = php_stream_open_wrapper(Z_STRVAL_PP(zfile), "rb", REPORT_ERRORS|ENFORCE_SAFE_MODE, NULL, TSRMLS_CC);
 
-    if(!file)
-      php_error(E_ERROR, "Couldn't find FDB file %s", Z_STRVAL_PP(zfile));
+    if(stream == NULL) {
+		RETURN_FALSE;
+	}
 
+	if (FAILURE = php_stream_cast(stream, PHP_STREAM_AS_STDIO, (void*)&file, REPORT_ERRORS))
+	{
+		php_stream_close(stream);
+		RETURN_FALSE;
+	}
+	
     font = loadSWFFontFromFile(file);
-    fclose(file);
+    php_stream_close(stream);
   }
   else
     font = newSWFBrowserFont(Z_STRVAL_PP(zfile));
@@ -1626,8 +1608,6 @@ PHP_FUNCTION(swfmovie_save)
 
   retval = SWFMovie_output(getMovie(getThis() TSRMLS_CC),
 			      &phpStreamOutputMethod, (void *)stream);
-
-  fclose(file);
 
   RETURN_LONG(retval);
 }
