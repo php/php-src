@@ -127,6 +127,8 @@ ZEND_API int zend_std_cast_object_tostring(zval *readobj, zval *writeobj, int ty
 
 ZEND_API int zend_check_protected(zend_class_entry *ce, zend_class_entry *scope);
 
+ZEND_API int zend_check_property_access(zend_object *zobj, char *prop_info_name TSRMLS_DC);
+
 #endif
 
 /*

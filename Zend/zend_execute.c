@@ -3639,12 +3639,33 @@ int zend_fe_fetch_handler(ZEND_OPCODE_HANDLER_ARGS)
 		case ZEND_ITER_PLAIN_ARRAY:
 			/* good old fashioned foreach on an array */
 			fe_ht = HASH_OF(array);
-			if (zend_hash_get_current_data(fe_ht, (void **) &value)==FAILURE) {
-				/* reached end of iteration */
-				EX(opline) = op_array->opcodes+EX(opline)->op2.u.opline_num;
-				return 0; /* CHECK_ME */
+			if (Z_TYPE_P(array) == IS_OBJECT) {
+				char *class_name, *prop_name;
+				zend_object *zobj = zend_objects_get_address(array TSRMLS_CC);
+
+				do {
+					if (zend_hash_get_current_data(fe_ht, (void **) &value)==FAILURE) {
+						/* reached end of iteration */
+						EX(opline) = op_array->opcodes+EX(opline)->op2.u.opline_num;
+						return 0; /* CHECK_ME */
+					}
+					key_type = zend_hash_get_current_key_ex(fe_ht, &str_key, &str_key_len, &int_key, 0, NULL);
+
+					zend_hash_move_forward(fe_ht);
+				} while (zend_check_property_access(zobj, str_key TSRMLS_CC) != SUCCESS);
+				unmangle_property_name(str_key, &class_name, &prop_name);
+				str_key_len = strlen(prop_name);
+				str_key = estrndup(prop_name, str_key_len);
+				str_key_len++;
+			} else {
+				if (zend_hash_get_current_data(fe_ht, (void **) &value)==FAILURE) {
+					/* reached end of iteration */
+					EX(opline) = op_array->opcodes+EX(opline)->op2.u.opline_num;
+					return 0; /* CHECK_ME */
+				}
+				key_type = zend_hash_get_current_key_ex(fe_ht, &str_key, &str_key_len, &int_key, 1, NULL);
+				zend_hash_move_forward(fe_ht);
 			}
-			key_type = zend_hash_get_current_key_ex(fe_ht, &str_key, &str_key_len, &int_key, 1, NULL);
 			break;
 
 		case ZEND_ITER_OBJECT:
@@ -3695,10 +3716,6 @@ int zend_fe_fetch_handler(ZEND_OPCODE_HANDLER_ARGS)
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 	zend_hash_index_update(result->value.ht, 1, &key, sizeof(zval *), NULL);
-
-	if (!iter) {
-		zend_hash_move_forward(fe_ht);
-	}
 
 	NEXT_OPCODE();
 }
