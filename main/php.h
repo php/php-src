@@ -55,10 +55,16 @@
 #	define PHPAPI __declspec(dllimport)
 #	endif
 #define PHP_DIR_SEPARATOR '\\'
+#define PHP_EOL "\r\n"
 #else
 #define PHPAPI
 #define THREAD_LS
 #define PHP_DIR_SEPARATOR '/'
+#if defined(__MacOSX__)
+#define PHP_EOL "\r"
+#else 
+#define PHP_EOL "\n"
+#endif
 #endif
 
 #ifdef NETWARE
