@@ -36,12 +36,19 @@ int shm_type;
 /* Every user visible function must have an entry in shmop_functions[].
 */
 function_entry shmop_functions[] = {
-	PHP_FE(shm_open, NULL)
-	PHP_FE(shm_read, NULL)
-	PHP_FE(shm_close, NULL)
-	PHP_FE(shm_size, NULL)
-	PHP_FE(shm_write, NULL)
-	PHP_FE(shm_delete, NULL)
+	PHP_FE(shmop_open, NULL)
+	PHP_FE(shmop_read, NULL)
+	PHP_FE(shmop_close, NULL)
+	PHP_FE(shmop_size, NULL)
+	PHP_FE(shmop_write, NULL)
+	PHP_FE(shmop_delete, NULL)
+
+	PHP_FALIAS(shm_open, shmop_open, NULL)
+	PHP_FALIAS(shm_read, shmop_read, NULL)
+	PHP_FALIAS(shm_close, shmop_close, NULL)
+	PHP_FALIAS(shm_size, shmop_size, NULL)
+	PHP_FALIAS(shm_write, shmop_write, NULL)
+	PHP_FALIAS(shm_delete, shmop_delete, NULL)
 	{NULL, NULL, NULL}	/* Must be the last line in shmop_functions[] */
 };
 
@@ -87,9 +94,9 @@ PHP_MINFO_FUNCTION(shmop)
 	php_info_print_table_end();
 }
 
-/* {{{ proto int shm_open (int key, int flags, int mode, int size)
-   shm_open - gets and attaches a shared memory segment */
-PHP_FUNCTION(shm_open)
+/* {{{ proto int shmop_open (int key, int flags, int mode, int size)
+   shmop_open - gets and attaches a shared memory segment */
+PHP_FUNCTION(shmop_open)
 {
 	zval **key, **flags, **mode, **size;
 	struct php_shmop *shmop;	
@@ -154,9 +161,9 @@ PHP_FUNCTION(shm_open)
 /* }}} */
 
 
-/* {{{ proto string shm_read (int shmid, int start, int count)
-   shm_read - reads from a shm segment */
-PHP_FUNCTION(shm_read)
+/* {{{ proto string shmop_read (int shmid, int start, int count)
+   shmop_read - reads from a shm segment */
+PHP_FUNCTION(shmop_read)
 {
 	zval **shmid, **start, **count;
 	struct php_shmop *shmop;
@@ -206,9 +213,9 @@ PHP_FUNCTION(shm_read)
 /* }}} */
 
 
-/* {{{ proto void shm_close (int shmid)
-   shm_close - closes a shared memory segment */
-PHP_FUNCTION(shm_close)
+/* {{{ proto void shmop_close (int shmid)
+   shmop_close - closes a shared memory segment */
+PHP_FUNCTION(shmop_close)
 {
 	zval **shmid;
 	struct php_shmop *shmop;
@@ -231,9 +238,9 @@ PHP_FUNCTION(shm_close)
 /* }}} */
 
 
-/* {{{ proto int shm_size (int shmid)
-   shm_size - returns the shm size */
-PHP_FUNCTION(shm_size)
+/* {{{ proto int shmop_size (int shmid)
+   shmop_size - returns the shm size */
+PHP_FUNCTION(shmop_size)
 {
 	zval **shmid;
 	struct php_shmop *shmop;
@@ -257,9 +264,9 @@ PHP_FUNCTION(shm_size)
 /* }}} */
 
 
-/* {{{ proto int shm_write (int shmid, string data, int offset)
-   shm_write - writes to a shared memory segment */
-PHP_FUNCTION(shm_write)
+/* {{{ proto int shmop_write (int shmid, string data, int offset)
+   shmop_write - writes to a shared memory segment */
+PHP_FUNCTION(shmop_write)
 {
 	zval **shmid, **data, **offset;
 	struct php_shmop *shmop;
@@ -294,9 +301,9 @@ PHP_FUNCTION(shm_write)
 /* }}} */
 
 
-/* {{{ proto bool shm_delete (int shmid)
-   shm_delete - mark segment for deletion */
-PHP_FUNCTION(shm_delete)
+/* {{{ proto bool shmop_delete (int shmid)
+   shmop_delete - mark segment for deletion */
+PHP_FUNCTION(shmop_delete)
 {
 	zval **shmid;
 	struct php_shmop *shmop;
