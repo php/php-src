@@ -73,42 +73,10 @@ function_entry apache_functions[] = {
 };
 
 
-static PHP_INI_MH(OnChangeApacheInt)
-{
-	long *p;
-	char *base = (char *) &php_apache_info;
-
-	p = (long *) (base+(size_t) mh_arg1);
-
-	if (new_value) {
-		*p = atoi(new_value);
-		return SUCCESS;
-	} else {
-		return FAILURE;
-	}
-}
-
-
-static PHP_INI_MH(OnChangeApacheString)
-{
-	char **p;
-	char *base = (char *) &php_apache_info;
-
-	p = (char **) (base+(size_t) mh_arg1);
-
-	if (new_value) {
-		*p = new_value;
-		return SUCCESS;
-	} else {
-		return FAILURE;
-	}
-}
-
 PHP_INI_BEGIN()
-	PHP_INI_ENTRY1("xbithack",			"0",				PHP_INI_ALL,		OnChangeApacheInt,		(void *) XtOffsetOf(php_apache_info_struct, xbithack))
-	PHP_INI_ENTRY1("engine",				"1",				PHP_INI_ALL,		OnChangeApacheInt,		(void *) XtOffsetOf(php_apache_info_struct, engine))
-	PHP_INI_ENTRY1("last_modified",		"0",				PHP_INI_ALL,		OnChangeApacheInt,		(void *) XtOffsetOf(php_apache_info_struct, last_modified))
-	PHP_INI_ENTRY1("dav_script",			NULL,				PHP_INI_ALL,		OnChangeApacheString,	(void *) XtOffsetOf(php_apache_info_struct, dav_script))
+	STD_PHP_INI_ENTRY("xbithack",			"0",				PHP_INI_ALL,		OnUpdateInt,		xbithack, php_apache_info_struct, php_apache_info)
+	STD_PHP_INI_ENTRY("engine",				"1",				PHP_INI_ALL,		OnUpdateInt,		engine, php_apache_info_struct, php_apache_info)
+	STD_PHP_INI_ENTRY("last_modified",		"0",				PHP_INI_ALL,		OnUpdateInt,		last_modified, php_apache_info_struct, php_apache_info)
 PHP_INI_END()
 
 
