@@ -3,6 +3,7 @@ PHP 4.0                                                                    NEWS
 
 ?? ?? 1999, Version 4.0 Beta 3
 
+- unserialize() now gives a notice when passed invalid data. (Thies)
 - Fixed shuffle() so that it no longer breaks on Solaris. (Andrei)
 - Added is_resource(), is_bool() functions. (Thies)
 - Cleaned up File-Module (Thies)
