@@ -790,26 +790,29 @@ ftp_readline(ftpbuf_t *ftp)
 int
 ftp_getresp(ftpbuf_t *ftp)
 {
-	char		*buf;
+	char *buf;
 
-	if (ftp == NULL)
-		return 0;
+	if (ftp == NULL) return 0;
 	buf = ftp->inbuf;
 	ftp->resp = 0;
 
-
 	while (1) {
-		if (!ftp_readline(ftp))
+
+		if (!ftp_readline(ftp)) {
 			return 0;
-		if (ftp->inbuf[3] == '-')
-			continue;
-		else if (ftp->inbuf[3] != ' ')
-			return 0;
-		break;
+		}
+
+		/* Break out when the end-tag is found */
+		if (isdigit(ftp->inbuf[0]) && 
+			isdigit(ftp->inbuf[1]) && 
+			isdigit(ftp->inbuf[2]) && 
+			ftp->inbuf[3] == ' ') {
+			break;
+		}
 	}
 
 	/* translate the tag */
-	if (	!isdigit(ftp->inbuf[0]) ||
+	if (!isdigit(ftp->inbuf[0]) ||
 		!isdigit(ftp->inbuf[1]) ||
 		!isdigit(ftp->inbuf[2]))
 	{
