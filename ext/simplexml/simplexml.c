@@ -783,12 +783,13 @@ sxe_object_dtor(void *object, zend_object_handle handle TSRMLS_DC)
 
 	sxe = (php_sxe_object *) object;
 
-	FREE_HASHTABLE(sxe->zo.properties);
-
-	if (--sxe->document->refcount <= 0) {
-		xmlFreeDoc(sxe->document->ptr);
+	if (--sxe->document->refcount > 0) {
+		return;
 	}
 	
+	xmlFreeDoc(sxe->document->ptr);
+	FREE_HASHTABLE(sxe->zo.properties);
+
 	if (sxe->xpath) {
 		xmlXPathFreeContext(sxe->xpath);
 	}
