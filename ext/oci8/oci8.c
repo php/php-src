@@ -2538,7 +2538,7 @@ PHP_FUNCTION(oci8_freedesc)
 #if PHP_API_VERSION < 19990421       
 	if (getThis(&id) == SUCCESS) {
 #else
-	if (id = getThis()) {
+	if ((id = getThis()) != 0) {
 #endif
         if (_php3_hash_find(id->value.ht, "connection", sizeof("connection"), (void **)&conn) == FAILURE) {
             php3_error(E_WARNING, "unable to find my statement property");
@@ -2581,7 +2581,7 @@ PHP_FUNCTION(oci8_savedesc)
 #if PHP_API_VERSION < 19990421       
 	if (getThis(&id) == SUCCESS) {
 #else
-	if (id = getThis()) {
+	if ((id = getThis()) != 0) {
 #endif
    		if (_php3_hash_find(id->value.ht, "connection", sizeof("connection"), (void **)&conn) == FAILURE) {
 			php3_error(E_WARNING, "unable to find my statement property");
@@ -2665,7 +2665,7 @@ PHP_FUNCTION(oci8_loaddesc)
 #if PHP_API_VERSION < 19990421       
 	if (getThis(&id) == SUCCESS) {
 #else
-	if (id = getThis()) {
+	if ((id = getThis()) != 0) {
 #endif
    		if (_php3_hash_find(id->value.ht, "connection", sizeof("connection"), (void **)&conn) == FAILURE) {
 			php3_error(E_WARNING, "unable to find my statement property");
@@ -3159,7 +3159,6 @@ PHP_FUNCTION(oci8_fetchinto)
 	element = emalloc(sizeof(pval));
 #endif
 
-
 	for (i = 0; i < statement->ncolumns; i++) {
 		column = oci8_get_col(statement, i + 1, 0, "OCIFetchInto");
 		if (column == NULL) { /* should not happen... */
@@ -3170,15 +3169,13 @@ PHP_FUNCTION(oci8_fetchinto)
 			continue;
 		}
 
-#if PHP_API_VERSION >= 19990421
-		element = emalloc(sizeof(pval));
-#endif
-
 		if ((mode & OCI_NUM) || (! (mode & OCI_ASSOC))) { /* OCI_NUM is default */
+#if PHP_API_VERSION >= 19990421
+			MAKE_STD_ZVAL(element);
+#endif
 			oci8_make_pval(element,statement,column, "OCIFetchInto",mode);
 
 #if PHP_API_VERSION >= 19990421
-			INIT_PZVAL(element);
 			_php3_hash_index_update(array->value.ht, i, (void *)&element, sizeof(pval*), NULL);
 #else
 			_php3_hash_index_update(array->value.ht, i, (void *)element, sizeof(pval), NULL);
@@ -3186,10 +3183,12 @@ PHP_FUNCTION(oci8_fetchinto)
 		}
 
 		if (mode & OCI_ASSOC) {
+#if PHP_API_VERSION >= 19990421
+			MAKE_STD_ZVAL(element);
+#endif
 			oci8_make_pval(element,statement,column, "OCIFetchInto",mode);
 
 #if PHP_API_VERSION >= 19990421
-			INIT_PZVAL(element);
 		  	_php3_hash_update(array->value.ht, column->name, column->name_len+1, (void *)&element, sizeof(pval*), NULL);
 #else
 		  	_php3_hash_update(array->value.ht, column->name, column->name_len+1, (void *)element, sizeof(pval), NULL);
@@ -3261,15 +3260,10 @@ PHP_FUNCTION(oci8_fetchstatement)
 		columns[ i ] = oci8_get_col(statement, i + 1, 0, "OCIFetchStatement");
 
 #if PHP_API_VERSION >= 19990421
-		tmp = emalloc(sizeof(pval));
-		INIT_PZVAL(tmp);
+		MAKE_STD_ZVAL(tmp);
 #endif
 
 		array_init(tmp);
-
-#if PHP_API_VERSION >= 19990421
-		INIT_PZVAL(tmp);
-#endif
 
 		memcpy(namebuf,columns[ i ]->name, columns[ i ]->name_len);
 		namebuf[ columns[ i ]->name_len ] = 0;
@@ -3292,15 +3286,13 @@ PHP_FUNCTION(oci8_fetchstatement)
 	while (oci8_fetch(statement, nrows, "OCIFetchStatement")) {
 		for (i = 0; i < statement->ncolumns; i++) {
 #if PHP_API_VERSION >= 19990421
-			element = emalloc(sizeof(pval));
+			MAKE_STD_ZVAL(element);
 #endif
-
 			oci8_make_pval(element,statement,columns[ i ], "OCIFetchStatement",OCI_RETURN_LOBS);
 
 #if PHP_API_VERSION < 19990421
 			_php3_hash_index_update(outarrs[ i ]->value.ht, rows, (void *)element, sizeof(pval), NULL);
 #else
-			INIT_PZVAL(element);
 			_php3_hash_index_update((*(outarrs[ i ]))->value.ht, rows, (void *)&element, sizeof(pval*), NULL);
 #endif
 		}
