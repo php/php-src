@@ -1156,7 +1156,7 @@ ZEND_API int is_identical_function(zval *result, zval *op1, zval *op2)
 			}
 			break;
 		case IS_ARRAY:
-			if (zend_hash_compare(op1->value.ht, op2->value.ht, hash_zval_identical_function, 1)==0) {
+			if (zend_hash_compare(op1->value.ht, op2->value.ht, (compare_func_t) hash_zval_identical_function, 1)==0) {
 				result->value.lval = 1;
 			} else {
 				result->value.lval = 0;
@@ -1166,7 +1166,7 @@ ZEND_API int is_identical_function(zval *result, zval *op1, zval *op2)
 			if (op1->value.obj.ce != op2->value.obj.ce) {
 				result->value.lval = 0;
 			} else {
-				if (zend_hash_compare(op1->value.obj.properties, op2->value.obj.properties, hash_zval_identical_function, 1)==0) {
+				if (zend_hash_compare(op1->value.obj.properties, op2->value.obj.properties, (compare_func_t) hash_zval_identical_function, 1)==0) {
 					result->value.lval = 1;
 				} else {
 					result->value.lval = 0;
@@ -1549,7 +1549,7 @@ static int hash_zval_compare_function(const zval **z1, const zval **z2)
 ZEND_API void zend_compare_symbol_tables(zval *result, HashTable *ht1, HashTable *ht2)
 {
 	result->type = IS_LONG;
-	result->value.lval = zend_hash_compare(ht1, ht2, hash_zval_compare_function, 0);
+	result->value.lval = zend_hash_compare(ht1, ht2, (compare_func_t) hash_zval_compare_function, 0);
 }
 
 
