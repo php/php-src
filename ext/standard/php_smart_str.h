@@ -22,7 +22,9 @@
 #include "php_smart_str_public.h"
 
 #include <stdlib.h>
+#ifndef SMART_STR_USE_REALLOC
 #include <zend.h>
+#endif
 
 #define smart_str_0(x) do { if ((x)->c) { (x)->c[(x)->len] = '\0'; } } while (0)
 
@@ -30,11 +32,17 @@
 #define SMART_STR_PREALLOC 128
 #endif
 
+#ifdef SMART_STR_USE_REALLOC
+#define SMART_STR_REALLOC(a,b,c) realloc((a),(b))
+#else
+#define SMART_STR_REALLOC(a,b,c) perealloc((a),(b),(c))
+#endif
+
 #define smart_str_alloc(d, n, what) {\
 	if (!d->c) d->len = d->a = 0; \
 	newlen = d->len + n; \
 	if (newlen >= d->a) {\
-		d->c = perealloc(d->c, newlen + SMART_STR_PREALLOC + 1, what); \
+		d->c = SMART_STR_REALLOC(d->c, newlen + SMART_STR_PREALLOC + 1, what); \
 		d->a = newlen + SMART_STR_PREALLOC; \
 	}\
 }
