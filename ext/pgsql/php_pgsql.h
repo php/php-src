@@ -58,8 +58,8 @@ extern zend_module_entry pgsql_module_entry;
 #define PHP_PGSQL_API
 #endif
 
-extern PHP_MINIT_FUNCTION(pgsql);;
-extern int php3_rinit_pgsql(INIT_FUNC_ARGS);
+PHP_MINIT_FUNCTION(pgsql);
+PHP_RINIT_FUNCTION(pgsql);
 PHP_FUNCTION(pgsql_connect);
 PHP_FUNCTION(pgsql_pconnect);
 PHP_FUNCTION(pgsql_close);
@@ -93,13 +93,13 @@ PHP_FUNCTION(pgsql_lo_read);
 PHP_FUNCTION(pgsql_lo_write);
 PHP_FUNCTION(pgsql_lo_readall);
 
-void php3_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent);
-int php3_pgsql_get_default_link(INTERNAL_FUNCTION_PARAMETERS);
-void php3_pgsql_get_link_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type);
-void php3_pgsql_get_result_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type);
+void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent);
+int php_pgsql_get_default_link(INTERNAL_FUNCTION_PARAMETERS);
+void php_pgsql_get_link_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type);
+void php_pgsql_get_result_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type);
 char *get_field_name(PGconn *pgsql, Oid oid, HashTable *list);
-void php3_pgsql_get_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type);
-void php3_pgsql_data_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type);
+void php_pgsql_get_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type);
+void php_pgsql_data_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type);
 
 
 typedef struct pgLofp {
@@ -107,7 +107,7 @@ typedef struct pgLofp {
 	int lofd;
 } pgLofp;
 
-typedef struct _php3_pgsql_result_handle {
+typedef struct _php_pgsql_result_handle {
 	PGconn *conn;
 	PGresult *result;
 } pgsql_result_handle;
@@ -120,7 +120,6 @@ typedef struct {
 	int le_lofp,le_string;
 } php_pgsql_globals;
 
-/* extern pgsql_module php3_pgsql_module; */
 
 #ifdef ZTS
 # define PGLS_D	php_pgsql_globals *pgsql_globals

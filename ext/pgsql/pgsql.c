@@ -39,43 +39,43 @@
 
 
 function_entry pgsql_functions[] = {
-	{"pg_connect",		php3_pgsql_connect,			NULL},
-	{"pg_pconnect",		php3_pgsql_pconnect,		NULL},
-	{"pg_close",		php3_pgsql_close,			NULL},
-	{"pg_cmdtuples",	php3_pgsql_cmdtuples,		NULL},
-	{"pg_dbname",		php3_pgsql_dbname,			NULL},
-	{"pg_errormessage",	php3_pgsql_error_message,	NULL},
-	{"pg_options",		php3_pgsql_options,			NULL},
-	{"pg_port",			php3_pgsql_port,			NULL},
-	{"pg_tty",			php3_pgsql_tty,				NULL},
-	{"pg_host",			php3_pgsql_host,			NULL},
-	{"pg_exec",			php3_pgsql_exec,			NULL},
-	{"pg_numrows",		php3_pgsql_num_rows,		NULL},
-	{"pg_numfields",	php3_pgsql_num_fields,		NULL},
-	{"pg_fieldname",	php3_pgsql_field_name,		NULL},
-	{"pg_fieldsize",	php3_pgsql_field_size,		NULL},
-	{"pg_fieldtype",	php3_pgsql_field_type,		NULL},
-	{"pg_fieldnum",		php3_pgsql_field_number,	NULL},
-	{"pg_result",		php3_pgsql_result,			NULL},
-	{"pg_fetch_row",	php3_pgsql_fetch_row,		NULL},
-	{"pg_fetch_array",	php3_pgsql_fetch_array,		NULL},
-	{"pg_fetch_object",	php3_pgsql_fetch_object,	NULL},
-	{"pg_fieldprtlen",	php3_pgsql_data_length,		NULL},
-	{"pg_fieldisnull",	php3_pgsql_data_isnull,		NULL},
-	{"pg_freeresult",	php3_pgsql_free_result,		NULL},
-	{"pg_getlastoid",	php3_pgsql_last_oid,		NULL},
-	{"pg_locreate",		php3_pgsql_lo_create,		NULL},
-	{"pg_lounlink", 	php3_pgsql_lo_unlink,		NULL},
-	{"pg_loopen",		php3_pgsql_lo_open,			NULL},
-	{"pg_loclose",		php3_pgsql_lo_close,		NULL},
-	{"pg_loread",		php3_pgsql_lo_read,			NULL},
-	{"pg_lowrite",		php3_pgsql_lo_write,		NULL},
-	{"pg_loreadall",	php3_pgsql_lo_readall,		NULL},
+	PHP_FE(pg_connect,		NULL)
+	PHP_FE(pg_pconnect,		NULL)
+	PHP_FE(pg_close,		NULL)
+	PHP_FE(pg_cmdtuples,	NULL)
+	PHP_FE(pg_dbname,		NULL)
+	PHP_FE(pg_errormessage,	NULL)
+	PHP_FE(pg_options,		NULL)
+	PHP_FE(pg_port,			NULL)
+	PHP_FE(pg_tty,			NULL)
+	PHP_FE(pg_host,			NULL)
+	PHP_FE(pg_exec,			NULL)
+	PHP_FE(pg_numrows,		NULL)
+	PHP_FE(pg_numfields,	NULL)
+	PHP_FE(pg_fieldname,	NULL)
+	PHP_FE(pg_fieldsize,	NULL)
+	PHP_FE(pg_fieldtype,	NULL)
+	PHP_FE(pg_fieldnum,		NULL)
+	PHP_FE(pg_result,		NULL)
+	PHP_FE(pg_fetch_row,	NULL)
+	PHP_FE(pg_fetch_array,	NULL)
+	PHP_FE(pg_fetch_object,	NULL)
+	PHP_FE(pg_fieldprtlen,	NULL)
+	PHP_FE(pg_fieldisnull,	NULL)
+	PHP_FE(pg_freeresult,	NULL)
+	PHP_FE(pg_getlastoid,	NULL)
+	PHP_FE(pg_locreate,		NULL)
+	PHP_FE(pg_lounlink,		NULL)
+	PHP_FE(pg_loopen,		NULL)
+	PHP_FE(pg_loclose,		NULL)
+	PHP_FE(pg_loread,		NULL)
+	PHP_FE(pg_write,		NULL)
+	PHP_FE(pg_loreadall,	NULL)
 	{NULL, NULL, NULL}
 };
 
 zend_module_entry pgsql_module_entry = {
-	"PostgreSQL", pgsql_functions, php3_minit_pgsql, NULL, php3_rinit_pgsql, NULL, NULL, STANDARD_MODULE_PROPERTIES
+	"PostgreSQL", pgsql_functions, PHP_MINIT(pgsql), NULL, PHP_RINIT(pgsql), NULL, NULL, STANDARD_MODULE_PROPERTIES
 };
 
 #if COMPILE_DL
@@ -160,7 +160,7 @@ PHP_MINIT_FUNCTION(pgsql)
 }
 
 
-int php3_rinit_pgsql(INIT_FUNC_ARGS)
+PHP_RINIT_FUNCTION(pgsql)
 {
 	PGLS_FETCH();
 
@@ -170,7 +170,7 @@ int php3_rinit_pgsql(INIT_FUNC_ARGS)
 }
 
 
-void php3_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
+void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 {
 	char *host=NULL,*port=NULL,*options=NULL,*tty=NULL,*dbname=NULL,*connstring=NULL;
 	char *hashed_details;
@@ -376,13 +376,13 @@ void php3_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 }
 
 
-int php3_pgsql_get_default_link(INTERNAL_FUNCTION_PARAMETERS)
+int php_pgsql_get_default_link(INTERNAL_FUNCTION_PARAMETERS)
 {
 	PGLS_FETCH();
 
 	if (PGG(default_link)==-1) { /* no link opened yet, implicitly open one */
 		ht = 0;
-		php3_pgsql_do_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU,0);
+		php_pgsql_do_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU,0);
 	}
 	return PGG(default_link);
 }
@@ -392,7 +392,7 @@ int php3_pgsql_get_default_link(INTERNAL_FUNCTION_PARAMETERS)
    Open a PostgreSQL connection */
 PHP_FUNCTION(pgsql_connect)
 {
-	php3_pgsql_do_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU,0);
+	php_pgsql_do_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU,0);
 }
 /* }}} */
 
@@ -400,7 +400,7 @@ PHP_FUNCTION(pgsql_connect)
    Open a persistent PostgreSQL connection */
 PHP_FUNCTION(pgsql_pconnect)
 {
-	php3_pgsql_do_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU,1);
+	php_pgsql_do_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU,1);
 }
 /* }}} */
 
@@ -441,14 +441,14 @@ PHP_FUNCTION(pgsql_close)
 /* }}} */
 
 
-#define PHP3_PG_DBNAME 1
-#define PHP3_PG_ERROR_MESSAGE 2
-#define PHP3_PG_OPTIONS 3
-#define PHP3_PG_PORT 4
-#define PHP3_PG_TTY 5
-#define PHP3_PG_HOST 6
+#define PHP_PG_DBNAME 1
+#define PHP_PG_ERROR_MESSAGE 2
+#define PHP_PG_OPTIONS 3
+#define PHP_PG_PORT 4
+#define PHP_PG_TTY 5
+#define PHP_PG_HOST 6
 
-void php3_pgsql_get_link_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
+void php_pgsql_get_link_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 {
 	pval *pgsql_link;
 	int id,type;
@@ -478,22 +478,22 @@ void php3_pgsql_get_link_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 	}
 	
 	switch(entry_type) {
-		case PHP3_PG_DBNAME:
+		case PHP_PG_DBNAME:
 			return_value->value.str.val = PQdb(pgsql);
 			break;
-		case PHP3_PG_ERROR_MESSAGE:
+		case PHP_PG_ERROR_MESSAGE:
 			return_value->value.str.val = PQerrorMessage(pgsql);
 			break;
-		case PHP3_PG_OPTIONS:
+		case PHP_PG_OPTIONS:
 			return_value->value.str.val = PQoptions(pgsql);
 			break;
-		case PHP3_PG_PORT:
+		case PHP_PG_PORT:
 			return_value->value.str.val = PQport(pgsql);
 			break;
-		case PHP3_PG_TTY:
+		case PHP_PG_TTY:
 			return_value->value.str.val = PQtty(pgsql);
 			break;
-		case PHP3_PG_HOST:
+		case PHP_PG_HOST:
 			return_value->value.str.val = PQhost(pgsql);
 			break;
 		default:
@@ -508,7 +508,7 @@ void php3_pgsql_get_link_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
    Get the database name */ 
 PHP_FUNCTION(pgsql_dbname)
 {
-	php3_pgsql_get_link_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP3_PG_DBNAME);
+	php_pgsql_get_link_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP_PG_DBNAME);
 }
 /* }}} */
 
@@ -516,7 +516,7 @@ PHP_FUNCTION(pgsql_dbname)
    Get the error message string */
 PHP_FUNCTION(pgsql_error_message)
 {
-	php3_pgsql_get_link_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP3_PG_ERROR_MESSAGE);
+	php_pgsql_get_link_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP_PG_ERROR_MESSAGE);
 }
 /* }}} */
 
@@ -524,7 +524,7 @@ PHP_FUNCTION(pgsql_error_message)
    Get the options associated with the connection */
 PHP_FUNCTION(pgsql_options)
 {
-	php3_pgsql_get_link_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP3_PG_OPTIONS);
+	php_pgsql_get_link_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP_PG_OPTIONS);
 }
 /* }}} */
 
@@ -532,7 +532,7 @@ PHP_FUNCTION(pgsql_options)
    Return the port number associated with the connection */
 PHP_FUNCTION(pgsql_port)
 {
-	php3_pgsql_get_link_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP3_PG_PORT);
+	php_pgsql_get_link_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP_PG_PORT);
 }
 /* }}} */
 
@@ -540,7 +540,7 @@ PHP_FUNCTION(pgsql_port)
    Return the tty name associated with the connection */
 PHP_FUNCTION(pgsql_tty)
 {
-	php3_pgsql_get_link_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP3_PG_TTY);
+	php_pgsql_get_link_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP_PG_TTY);
 }
 /* }}} */
 
@@ -548,7 +548,7 @@ PHP_FUNCTION(pgsql_tty)
    Returns the host name associated with the connection */
 PHP_FUNCTION(pgsql_host)
 {
-	php3_pgsql_get_link_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP3_PG_HOST);
+	php_pgsql_get_link_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP_PG_HOST);
 }
 /* }}} */
 
@@ -623,11 +623,11 @@ PHP_FUNCTION(pgsql_exec)
 }
 /* }}} */
 
-#define PHP3_PG_NUM_ROWS 1
-#define PHP3_PG_NUM_FIELDS 2
-#define PHP3_PG_CMD_TUPLES 3
+#define PHP_PG_NUM_ROWS 1
+#define PHP_PG_NUM_FIELDS 2
+#define PHP_PG_CMD_TUPLES 3
 
-void php3_pgsql_get_result_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
+void php_pgsql_get_result_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 {
 	pval *result;
 	PGresult *pgsql_result;
@@ -649,13 +649,13 @@ void php3_pgsql_get_result_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 	pgsql_result = pg_result->result;
 	
 	switch (entry_type) {
-		case PHP3_PG_NUM_ROWS:
+		case PHP_PG_NUM_ROWS:
 			return_value->value.lval = PQntuples(pgsql_result);
 			break;
-		case PHP3_PG_NUM_FIELDS:
+		case PHP_PG_NUM_FIELDS:
 			return_value->value.lval = PQnfields(pgsql_result);
 			break;
-		case PHP3_PG_CMD_TUPLES:
+		case PHP_PG_CMD_TUPLES:
 #if HAVE_PQCMDTUPLES
 			return_value->value.lval = atoi(PQcmdTuples(pgsql_result));
 #else
@@ -673,7 +673,7 @@ void php3_pgsql_get_result_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
    Return the number of rows in the result */
 PHP_FUNCTION(pgsql_num_rows)
 {
-	php3_pgsql_get_result_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP3_PG_NUM_ROWS);
+	php_pgsql_get_result_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP_PG_NUM_ROWS);
 }
 /* }}} */
 
@@ -681,7 +681,7 @@ PHP_FUNCTION(pgsql_num_rows)
    Return the number of fields in the result */
 PHP_FUNCTION(pgsql_num_fields)
 {
-	php3_pgsql_get_result_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP3_PG_NUM_FIELDS);
+	php_pgsql_get_result_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP_PG_NUM_FIELDS);
 }
 /* }}} */
 
@@ -689,7 +689,7 @@ PHP_FUNCTION(pgsql_num_fields)
    Returns the number of affected tuples */
 PHP_FUNCTION(pgsql_cmdtuples)
 {
-	php3_pgsql_get_result_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP3_PG_CMD_TUPLES);
+	php_pgsql_get_result_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP_PG_CMD_TUPLES);
 }
 /* }}} */
 
@@ -740,11 +740,11 @@ char *get_field_name(PGconn *pgsql, Oid oid, HashTable *list)
 }
 			
 
-#define PHP3_PG_FIELD_NAME 1
-#define PHP3_PG_FIELD_SIZE 2
-#define PHP3_PG_FIELD_TYPE 3
+#define PHP_PG_FIELD_NAME 1
+#define PHP_PG_FIELD_SIZE 2
+#define PHP_PG_FIELD_TYPE 3
 
-void php3_pgsql_get_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
+void php_pgsql_get_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 {
 	pval *result,*field;
 	PGresult *pgsql_result;
@@ -772,17 +772,17 @@ void php3_pgsql_get_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 	}
 	
 	switch (entry_type) {
-		case PHP3_PG_FIELD_NAME:
+		case PHP_PG_FIELD_NAME:
 			return_value->value.str.val = PQfname(pgsql_result,field->value.lval);
 			return_value->value.str.len = strlen(return_value->value.str.val);
 			return_value->value.str.val = estrndup(return_value->value.str.val,return_value->value.str.len);
 			return_value->type = IS_STRING;
 			break;
-		case PHP3_PG_FIELD_SIZE:
+		case PHP_PG_FIELD_SIZE:
 			return_value->value.lval = PQfsize(pgsql_result,field->value.lval);
 			return_value->type = IS_LONG;
 			break;
-		case PHP3_PG_FIELD_TYPE:
+		case PHP_PG_FIELD_TYPE:
 			return_value->value.str.val = get_field_name(pg_result->conn,PQftype(pgsql_result,field->value.lval),list);
 			return_value->value.str.len = strlen(return_value->value.str.val);
 			return_value->type = IS_STRING;
@@ -796,7 +796,7 @@ void php3_pgsql_get_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
    Returns the name of the field */
 PHP_FUNCTION(pgsql_field_name)
 {
-	php3_pgsql_get_field_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP3_PG_FIELD_NAME);
+	php_pgsql_get_field_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP_PG_FIELD_NAME);
 }
 /* }}} */
 
@@ -804,7 +804,7 @@ PHP_FUNCTION(pgsql_field_name)
    Returns the internal size of the field */ 
 PHP_FUNCTION(pgsql_field_size)
 {
-	php3_pgsql_get_field_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP3_PG_FIELD_SIZE);
+	php_pgsql_get_field_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP_PG_FIELD_SIZE);
 }
 /* }}} */
 
@@ -812,7 +812,7 @@ PHP_FUNCTION(pgsql_field_size)
    Returns the type name for the given field */
 PHP_FUNCTION(pgsql_field_type)
 {
-	php3_pgsql_get_field_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP3_PG_FIELD_TYPE);
+	php_pgsql_get_field_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP_PG_FIELD_TYPE);
 }
 /* }}} */
 
@@ -893,7 +893,7 @@ PHP_FUNCTION(pgsql_result)
 /* }}} */
 
 
-static void php3_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
+static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 {
 	pval *result, *row, *arg3;
 	PGresult *pgsql_result;
@@ -976,7 +976,7 @@ static void php3_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
    Get a row as an enumerated array */ 
 PHP_FUNCTION(pgsql_fetch_row)
 {
-	php3_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, PGSQL_NUM);
+	php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, PGSQL_NUM);
 }
 /* }}} */
 
@@ -985,7 +985,7 @@ PHP_FUNCTION(pgsql_fetch_row)
    Fetch a row as an array */
 PHP_FUNCTION(pgsql_fetch_array)
 {
-	php3_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+	php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
 
@@ -993,7 +993,7 @@ PHP_FUNCTION(pgsql_fetch_array)
    Fetch a row as an object */
 PHP_FUNCTION(pgsql_fetch_object)
 {
-	php3_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+	php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 	if (return_value->type==IS_ARRAY) {
 		return_value->type=IS_OBJECT;
 		return_value->value.obj.properties = return_value->value.ht;
@@ -1002,10 +1002,10 @@ PHP_FUNCTION(pgsql_fetch_object)
 }
 /* }}} */
 
-#define PHP3_PG_DATA_LENGTH 1
-#define PHP3_PG_DATA_ISNULL 2
+#define PHP_PG_DATA_LENGTH 1
+#define PHP_PG_DATA_ISNULL 2
 
-void php3_pgsql_data_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
+void php_pgsql_data_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 {
 	pval *result,*row,*field;
 	PGresult *pgsql_result;
@@ -1045,10 +1045,10 @@ void php3_pgsql_data_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 	}
 	
 	switch (entry_type) {
-		case PHP3_PG_DATA_LENGTH:
+		case PHP_PG_DATA_LENGTH:
 			return_value->value.lval = PQgetlength(pgsql_result,row->value.lval,field_offset);
 			break;
-		case PHP3_PG_DATA_ISNULL:
+		case PHP_PG_DATA_ISNULL:
 			return_value->value.lval = PQgetisnull(pgsql_result,row->value.lval,field_offset);
 			break;
 	}
@@ -1059,7 +1059,7 @@ void php3_pgsql_data_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
    Returns the printed length */
 PHP_FUNCTION(pgsql_data_length)
 {
-	php3_pgsql_data_info(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP3_PG_DATA_LENGTH);
+	php_pgsql_data_info(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_PG_DATA_LENGTH);
 }
 /* }}} */
 
@@ -1067,7 +1067,7 @@ PHP_FUNCTION(pgsql_data_length)
    Test if a field is NULL */
 PHP_FUNCTION(pgsql_data_isnull)
 {
-	php3_pgsql_data_info(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP3_PG_DATA_ISNULL);
+	php_pgsql_data_info(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_PG_DATA_ISNULL);
 }
 /* }}} */
 
