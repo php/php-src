@@ -113,8 +113,7 @@ class Soap12test {
 	}
 }
 
-$server = new soapserver("http://example.org/ts-tests", SOAP_1_2, "http://example.org/ts-tests/C");
-$server->bind(dirname(__FILE__)."/soap12-test.wsdl");
+$server = new soapserver(dirname(__FILE__)."/soap12-test.wsdl", array('soap_version'=>SOAP_1_2,'actor'=>"http://example.org/ts-tests/C"));
 $server->setClass("Soap12test");
 
 $server->handle();

@@ -1,11 +1,10 @@
 General
 -------
-- rename soapobject to soapclient
 - make sure soapserver.map(), soap_encode_to_xml() and soap_encode_to_zval() are really need
 - reimplement SoapObject::__getfunctions() and SoapObject::__gettypes()
   to return structures instead of strings
 - memory leaks (libxml and WSDL/Schema use malloc to cache WSDL)
-
+- error handling???
 
 SOAP
 ----
@@ -89,10 +88,6 @@ Schema
 ? support for user defined complex types
   ? full support for content model encoding/decoding
 
-Error Handling
---------------
-- ???
-
 Transport
 ---------
 ? HTTP status codes
@@ -100,11 +95,10 @@ Transport
 - support for HTTP compression (gzip,x-gzip,defalte)
 - transport abstraction layer???
 
-UDDI
-----
-- ???
-
 Interop Testing
 ---------------
-- more rounds/groups
+- more introp rounds/groups
+
+UDDI
+----
 - ???

@@ -52,8 +52,7 @@ class SOAP_Interop_GroupB {
     }
 }
 
-$server = new SoapServer("http://soapinterop.org/");
-$server->bind((isset($_SERVER['HTTPS'])?"https://":"http://").$_SERVER['HTTP_HOST'].dirname($_SERVER['PHP_SELF'])."/interopB.wsdl.php");
+$server = new SoapServer((isset($_SERVER['HTTPS'])?"https://":"http://").$_SERVER['HTTP_HOST'].dirname($_SERVER['PHP_SELF'])."/interopB.wsdl.php");
 $server->setClass("SOAP_Interop_GroupB");
 $server->handle();
 ?>

@@ -14,7 +14,7 @@ function Sum($a) {
   return $sum;
 }
 
-$server = new soapserver("http://testuri.org");
+$server = new soapserver(null,array('uri'=>"http://testuri.org"));
 $server->addfunction("Sum");
 
 $HTTP_RAW_POST_DATA = <<<EOF

@@ -8,7 +8,7 @@ function Add($x,$y) {
   return $x+$y;
 }
 
-$server = new soapserver("http://testuri.org");
+$server = new soapserver(null,array('uri'=>"http://testuri.org"));
 $server->addfunction("Add");
 
 $HTTP_RAW_POST_DATA = <<<EOF
