@@ -241,12 +241,11 @@ PHP_INI_MH(OnUpdateInt)
 {
 	long *p;
 #ifndef ZTS
-	char *base = (char *) &core_globals;
+	char *base = (char *) mh_arg2;
 #else
 	char *base;
-	PLS_FETCH();
 
-	base = (char *) core_globals;
+	base = (char *) ts_resource(*((int *) mh_arg2));
 #endif
 
 	p = (long *) (base+(size_t) mh_arg1);
@@ -260,12 +259,11 @@ PHP_INI_MH(OnUpdateReal)
 {
 	double *p;
 #ifndef ZTS
-	char *base = (char *) &core_globals;
+	char *base = (char *) mh_arg2;
 #else
 	char *base;
-	PLS_FETCH();
 
-	base = (char *) core_globals;
+	base = (char *) ts_resource(*((int *) mh_arg2));
 #endif
 
 	p = (double *) (base+(size_t) mh_arg1);
@@ -279,12 +277,11 @@ PHP_INI_MH(OnUpdateString)
 {
 	char **p;
 #ifndef ZTS
-	char *base = (char *) &core_globals;
+	char *base = (char *) mh_arg2;
 #else
 	char *base;
-	PLS_FETCH();
 
-	base = (char *) core_globals;
+	base = (char *) ts_resource(*((int *) mh_arg2));
 #endif
 
 	p = (char **) (base+(size_t) mh_arg1);
@@ -298,12 +295,11 @@ PHP_INI_MH(OnUpdateStringUnempty)
 {
 	char **p;
 #ifndef ZTS
-	char *base = (char *) &core_globals;
+	char *base = (char *) mh_arg2;
 #else
 	char *base;
-	PLS_FETCH();
 
-	base = (char *) core_globals;
+	base = (char *) ts_resource(*((int *) mh_arg2));
 #endif
 
 	if (new_value && !new_value[0]) {

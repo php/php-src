@@ -185,51 +185,51 @@ static PHP_INI_MH(OnUpdateErrorReporting)
 #else
 #	define DEFAULT_SENDMAIL_PATH NULL
 #endif
-
 PHP_INI_BEGIN()
-	PHP_INI_ENTRY1("short_open_tag",		"1",		PHP_INI_ALL,		OnUpdateInt,			(void *) XtOffsetOf(php_core_globals, short_tags))
-	PHP_INI_ENTRY1("asp_tags",			"0",		PHP_INI_ALL,		OnUpdateInt,			(void *) XtOffsetOf(php_core_globals, asp_tags))
+	STD_PHP_INI_ENTRY("short_open_tag",		"1",		PHP_INI_ALL,		OnUpdateInt,		short_tags,		php_core_globals,	core_globals)
+	STD_PHP_INI_ENTRY("asp_tags",			"0",		PHP_INI_ALL,		OnUpdateInt,		asp_tags,		php_core_globals,	core_globals)
 	PHP_INI_ENTRY1("precision",			"14",		PHP_INI_ALL,		OnSetPrecision,	NULL)
 
 	PHP_INI_ENTRY1("highlight.comment",	HL_COMMENT_COLOR,	PHP_INI_ALL,		NULL,			NULL)
 	PHP_INI_ENTRY1("highlight.default",	HL_DEFAULT_COLOR,	PHP_INI_ALL,		NULL,			NULL)
-	PHP_INI_ENTRY1("highlight.html",		HL_HTML_COLOR,		PHP_INI_ALL,		NULL,			NULL)
+	PHP_INI_ENTRY1("highlight.html",	HL_HTML_COLOR,		PHP_INI_ALL,		NULL,			NULL)
 	PHP_INI_ENTRY1("highlight.string",	HL_STRING_COLOR,	PHP_INI_ALL,		NULL,			NULL)
 	PHP_INI_ENTRY1("highlight.bg",		HL_BG_COLOR,		PHP_INI_ALL,		NULL,			NULL)
 	PHP_INI_ENTRY1("highlight.keyword",	HL_KEYWORD_COLOR,	PHP_INI_ALL,		NULL,			NULL)
 
-	PHP_INI_ENTRY1("magic_quotes_gpc",		"1",			PHP_INI_ALL,		OnUpdateInt,	(void *) XtOffsetOf(php_core_globals, magic_quotes_gpc))
-	PHP_INI_ENTRY1("magic_quotes_runtime",	"0",			PHP_INI_ALL,		OnUpdateInt,	(void *) XtOffsetOf(php_core_globals, magic_quotes_runtime))
-	PHP_INI_ENTRY1("magic_quotes_sybase",	"0",			PHP_INI_ALL,		OnUpdateInt,	(void *) XtOffsetOf(php_core_globals, magic_quotes_sybase))
+	STD_PHP_INI_ENTRY("magic_quotes_gpc",		"1",	PHP_INI_ALL,		OnUpdateInt,		magic_quotes_gpc,		php_core_globals,	core_globals)
+	STD_PHP_INI_ENTRY("magic_quotes_runtime",	"0",	PHP_INI_ALL,		OnUpdateInt,		magic_quotes_runtime,	php_core_globals,	core_globals)
+	STD_PHP_INI_ENTRY("magic_quotes_sybase",	"0",	PHP_INI_ALL,		OnUpdateInt,		magic_quotes_sybase,	php_core_globals,	core_globals)
 
-	PHP_INI_ENTRY1("safe_mode",				"0",			PHP_INI_SYSTEM,		OnUpdateInt,	(void *) XtOffsetOf(php_core_globals, safe_mode))
-	PHP_INI_ENTRY1("sql.safe_mode",			"0",			PHP_INI_SYSTEM,		OnUpdateInt,	(void *) XtOffsetOf(php_core_globals, sql_safe_mode))
-	PHP_INI_ENTRY1("safe_mode_exec_dir",		SAFE_MODE_EXEC_DIR,		PHP_INI_SYSTEM,	OnUpdateString,	(void *) XtOffsetOf(php_core_globals, safe_mode_exec_dir))
-	PHP_INI_ENTRY1("enable_dl",				"1",			PHP_INI_SYSTEM,		OnUpdateInt,	(void *) XtOffsetOf(php_core_globals, enable_dl))
+	STD_PHP_INI_ENTRY("safe_mode",		"0",		PHP_INI_SYSTEM,			OnUpdateInt,		safe_mode,				php_core_globals,	core_globals)
+	STD_PHP_INI_ENTRY("sql.safe_mode",	"0",		PHP_INI_SYSTEM,			OnUpdateInt,		sql_safe_mode,			php_core_globals,	core_globals)
+	STD_PHP_INI_ENTRY("safe_mode_exec_dir",	"1",	PHP_INI_SYSTEM,			OnUpdateString,	safe_mode_exec_dir,		php_core_globals,	core_globals)
+	STD_PHP_INI_ENTRY("enable_dl",		"1",		PHP_INI_SYSTEM,			OnUpdateInt,		enable_dl,				php_core_globals,	core_globals)
 
 	PHP_INI_ENTRY1("SMTP",			"localhost",			PHP_INI_ALL,		NULL,		NULL)
 	PHP_INI_ENTRY1("sendmail_path",	DEFAULT_SENDMAIL_PATH,	PHP_INI_SYSTEM,		NULL,		NULL)
 	PHP_INI_ENTRY1("sendmail_from",	NULL,					PHP_INI_ALL,		NULL,		NULL)
 
 	PHP_INI_ENTRY1("error_reporting",	NULL,				PHP_INI_ALL,		OnUpdateErrorReporting,		NULL)
-	PHP_INI_ENTRY1("display_errors",		"1",				PHP_INI_ALL,		OnUpdateInt,	(void *) XtOffsetOf(php_core_globals, display_errors))
-	PHP_INI_ENTRY1("track_errors",		"0",				PHP_INI_ALL,		OnUpdateInt,	(void *) XtOffsetOf(php_core_globals, track_errors))
-	PHP_INI_ENTRY1("log_errors",			"0",				PHP_INI_ALL,		OnUpdateInt,	(void *) XtOffsetOf(php_core_globals, log_errors))
-	PHP_INI_ENTRY1("error_log",			NULL,				PHP_INI_ALL,		OnUpdateString,	(void *) XtOffsetOf(php_core_globals, error_log))
+	STD_PHP_INI_ENTRY("display_errors",		"1",			PHP_INI_ALL,		OnUpdateInt,		display_errors,		php_core_globals,	core_globals)
+	STD_PHP_INI_ENTRY("track_errors",		"0",			PHP_INI_ALL,		OnUpdateInt,		track_errors,		php_core_globals,	core_globals)
+	STD_PHP_INI_ENTRY("log_errors",			"0",			PHP_INI_ALL,		OnUpdateInt,		log_errors,			php_core_globals,	core_globals)
+	STD_PHP_INI_ENTRY("error_log",			NULL,			PHP_INI_ALL,		OnUpdateString,	error_log,			php_core_globals,	core_globals)
 
-	PHP_INI_ENTRY1("auto_prepend_file",	NULL,				PHP_INI_ALL,		OnUpdateString,	(void *) XtOffsetOf(php_core_globals, auto_prepend_file))
-	PHP_INI_ENTRY1("auto_append_file",	NULL,				PHP_INI_ALL,		OnUpdateString,	(void *) XtOffsetOf(php_core_globals, auto_append_file))
 
-	PHP_INI_ENTRY1("y2k_compliance",		"0",				PHP_INI_ALL,		OnUpdateInt,	(void *) XtOffsetOf(php_core_globals, y2k_compliance))
+	STD_PHP_INI_ENTRY("auto_prepend_file",	NULL,			PHP_INI_ALL,		OnUpdateString,	auto_prepend_file,	php_core_globals,	core_globals)
+	STD_PHP_INI_ENTRY("auto_append_file",	NULL,			PHP_INI_ALL,		OnUpdateString,	auto_append_file,	php_core_globals,	core_globals)
 
-	PHP_INI_ENTRY1("doc_root",			NULL,				PHP_INI_SYSTEM,		OnUpdateStringUnempty,	(void *) XtOffsetOf(php_core_globals, doc_root))
-	PHP_INI_ENTRY1("user_dir",			NULL,				PHP_INI_SYSTEM,		OnUpdateStringUnempty,	(void *) XtOffsetOf(php_core_globals, user_dir))
-	PHP_INI_ENTRY1("include_path",		NULL,				PHP_INI_ALL,		OnUpdateStringUnempty,	(void *) XtOffsetOf(php_core_globals, include_path))
-	PHP_INI_ENTRY1("open_basedir",		NULL,				PHP_INI_SYSTEM,		OnUpdateStringUnempty,	(void *) XtOffsetOf(php_core_globals, open_basedir))
-	PHP_INI_ENTRY1("extension_dir",		NULL,				PHP_INI_SYSTEM,		OnUpdateStringUnempty,	(void *) XtOffsetOf(php_core_globals, extension_dir))
+	STD_PHP_INI_ENTRY("y2k_compliance",		"0",			PHP_INI_ALL,		OnUpdateInt,		y2k_compliance,		php_core_globals,	core_globals)
 
-	PHP_INI_ENTRY1("upload_tmp_dir",			NULL,			PHP_INI_SYSTEM,		OnUpdateStringUnempty,	(void *) XtOffsetOf(php_core_globals, upload_tmp_dir))
-	PHP_INI_ENTRY1("upload_max_filesize",	"2097152",		PHP_INI_ALL,		OnUpdateInt,			(void *) XtOffsetOf(php_core_globals, upload_max_filesize))
+	STD_PHP_INI_ENTRY("doc_root",			NULL,			PHP_INI_SYSTEM,		OnUpdateStringUnempty,	doc_root,		php_core_globals,	core_globals)
+	STD_PHP_INI_ENTRY("user_dir",			NULL,			PHP_INI_SYSTEM,		OnUpdateStringUnempty,	user_dir,		php_core_globals,	core_globals)
+	STD_PHP_INI_ENTRY("include_path",		NULL,			PHP_INI_ALL,		OnUpdateStringUnempty,	include_path,	php_core_globals,	core_globals)
+	STD_PHP_INI_ENTRY("open_basedir",		NULL,			PHP_INI_SYSTEM,		OnUpdateStringUnempty,	open_basedir,	php_core_globals,	core_globals)
+	STD_PHP_INI_ENTRY("extension_dir",		NULL,			PHP_INI_SYSTEM,		OnUpdateStringUnempty,	extension_dir,	php_core_globals,	core_globals)
+
+	STD_PHP_INI_ENTRY("upload_tmp_dir",			NULL,			PHP_INI_SYSTEM,		OnUpdateStringUnempty,	upload_tmp_dir,			php_core_globals,	core_globals)
+	STD_PHP_INI_ENTRY("upload_max_filesize",	"2097152",		PHP_INI_ALL,		OnUpdateInt,				upload_max_filesize,	php_core_globals,	core_globals)
 
 	PHP_INI_ENTRY1("browscap",			NULL,				PHP_INI_SYSTEM,		NULL,			NULL)
 
@@ -238,9 +238,9 @@ PHP_INI_BEGIN()
 	PHP_INI_ENTRY1("max_execution_time",		"30",			PHP_INI_ALL,		OnChangeMaxExecutionTime,		NULL)
 	PHP_INI_ENTRY1("memory_limit",			"8388608",		PHP_INI_ALL,		OnChangeMemoryLimit,			NULL)
 
-	PHP_INI_ENTRY1("track_vars",				"0",			PHP_INI_ALL,		OnUpdateInt,			(void *) XtOffsetOf(php_core_globals, track_vars))
-	PHP_INI_ENTRY1("gpc_order",				"GPC",			PHP_INI_ALL,		OnUpdateStringUnempty,	(void *) XtOffsetOf(php_core_globals, gpc_order))
-	PHP_INI_ENTRY1("arg_separator",			"&",			PHP_INI_ALL,		OnUpdateStringUnempty,	(void *) XtOffsetOf(php_core_globals, arg_separator))
+	STD_PHP_INI_ENTRY("track_vars",				"0",			PHP_INI_ALL,		OnUpdateInt,				track_vars,		php_core_globals,	core_globals)
+	STD_PHP_INI_ENTRY("gpc_order",				"GPC",			PHP_INI_ALL,		OnUpdateStringUnempty,	gpc_order,		php_core_globals,	core_globals)
+	STD_PHP_INI_ENTRY("arg_separator",			"&",			PHP_INI_ALL,		OnUpdateStringUnempty,	arg_separator,	php_core_globals,	core_globals)
 PHP_INI_END()
 
 
