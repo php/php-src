@@ -199,13 +199,11 @@ ZEND_API void _efree(void *ptr ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 	DECLARE_CACHE_VARS
 	ALS_FETCH();
 
-#ifdef ZTS
+#if defined(ZTS) && ZEND_DEBUG
 	if (p->thread_id != tsrm_thread_id()) {
-# if ZEND_DEBUG
 		tsrm_error(TSRM_ERROR_LEVEL_ERROR, "Memory block allocated at %s:(%d) on thread %x freed at %s:(%d) on thread %x, ignoring",
 			p->filename, p->lineno, p->thread_id,
 			__zend_filename, __zend_lineno, tsrm_thread_id());
-# endif
 		return;
 	}
 #endif
@@ -270,15 +268,13 @@ ZEND_API void *_erealloc(void *ptr, size_t size, int allow_failure ZEND_FILE_LIN
 		return _emalloc(size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 	}
 
-#ifdef ZTS
+#if defined(ZTS) && ZEND_DEBUG
 	if (p->thread_id != tsrm_thread_id()) {
 		void *new_p;
 
-# if ZEND_DEBUG
 		tsrm_error(TSRM_ERROR_LEVEL_ERROR, "Memory block allocated at %s:(%d) on thread %x reallocated at %s:(%d) on thread %x, duplicating",
 			p->filename, p->lineno, p->thread_id,
 			__zend_filename, __zend_lineno, tsrm_thread_id());
-# endif
 		new_p = _emalloc(size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 		memcpy(new_p, ptr, p->size);
 		return new_p;
