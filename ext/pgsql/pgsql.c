@@ -1501,7 +1501,7 @@ PHP_FUNCTION(pg_trace)
 	int id = -1;
 	PGconn *pgsql;
 	char *mode = "w";
-	FILE *fp;
+	FILE *fp = NULL;
 	php_stream *stream;
 	id = PGG(default_link);
 
