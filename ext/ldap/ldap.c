@@ -38,6 +38,8 @@
 #include "php.h"
 #include "php_ini.h"
 
+#include <stddef.h>
+
 #include "ext/standard/dl.h"
 #include "php_ldap.h"
 
