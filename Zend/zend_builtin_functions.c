@@ -1537,9 +1537,8 @@ ZEND_FUNCTION(debug_print_backtrace)
 }
 
 /* }}} */
-/* {{{ proto void debug_backtrace(void)
-   Prints out a backtrace */
-ZEND_FUNCTION(debug_backtrace)
+
+ZEND_API void zend_fetch_debug_backtrace(zval *return_value TSRMLS_DC)
 {
 	zend_execute_data *ptr;
 	int lineno;
@@ -1553,10 +1552,6 @@ ZEND_FUNCTION(debug_backtrace)
 	void **args = cur_arg_pos;
 	int arg_stack_consistent = 0;
 	int frames_on_stack = 0;
-
-	if (ZEND_NUM_ARGS()) {
-		ZEND_WRONG_PARAM_COUNT();
-	}
 
 	while (--args >= EG(argument_stack).elements) {
 		if (*args--) {
@@ -1679,6 +1674,18 @@ ZEND_FUNCTION(debug_backtrace)
 }
 /* }}} */
 
+
+/* {{{ proto array debug_backtrace(void)
+   Return backtrace as array */
+ZEND_FUNCTION(debug_backtrace)
+{
+	if (ZEND_NUM_ARGS()) {
+		ZEND_WRONG_PARAM_COUNT();
+	}
+	
+	zend_fetch_debug_backtrace(return_value TSRMLS_CC);
+}
+/* }}} */
 
 /* {{{ proto bool extension_loaded(string extension_name)
    Returns true if the named extension is loaded */
