@@ -88,7 +88,7 @@ match_ns(php_sxe_object *sxe, xmlNodePtr node, xmlChar *name)
 	
 	prefix = xmlHashLookup(sxe->nsmap, node->ns->href);
 	if (prefix == NULL) {
-		prefix = node->ns->prefix;
+		prefix = (xmlChar*)node->ns->prefix;
 	}
 
 	if (prefix == NULL) {
@@ -801,7 +801,7 @@ sxe_object_get(zval *property TSRMLS_DC)
 }
 
 
-static zend_object_handlers sxe_object_handlers[] = {
+static zend_object_handlers sxe_object_handlers = {
 	ZEND_OBJECTS_STORE_HANDLERS,
 	sxe_property_read,
 	sxe_property_write,
