@@ -54,6 +54,12 @@
 #include <winsock.h>
 #endif
 
+#ifdef ZTS
+#define IFX_THRD_ID tsrm_thread_id()
+#else
+#define IFX_THRD_ID 0
+#endif
+
 #if HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
@@ -542,7 +548,7 @@ EXEC SQL END DECLARE SECTION;
 			/* create the link */
 			ifx = (char *) malloc(sizeof(IFX));
 			IFXG(connectionid)++;
-			sprintf(ifx, "%s%x", SAFE_STRING(user), IFXG(connectionid));
+			sprintf(ifx, "%s%x_%x", SAFE_STRING(user), IFX_THRD_ID,IFXG(connectionid));
 			
 			EXEC SQL CONNECT TO :host AS :ifx USER :user USING :passwd WITH CONCURRENT TRANSACTION;  
 	
@@ -645,7 +651,7 @@ EXEC SQL END DECLARE SECTION;
 
 		ifx = (char *) emalloc(sizeof(IFX));
 		IFXG(connectionid)++;
-		sprintf(ifx, "connec%x", IFXG(connectionid));
+		sprintf(ifx, "connec%x_%x", IFX_THRD_ID, IFXG(connectionid));
 		
 		EXEC SQL CONNECT TO :host AS :ifx USER :user USING :passwd WITH CONCURRENT TRANSACTION;
 
@@ -818,10 +824,10 @@ EXEC SQL END DECLARE SECTION;
 	statement = Z_STRVAL_PP(query);
 
 	IFXG(cursorid)++;
-	sprintf(statemid, "statem%x", IFXG(cursorid)); 
-	sprintf(cursorid, "cursor%x", IFXG(cursorid)); 
-	sprintf(descrpid, "descrp%x", IFXG(cursorid)); 
-	sprintf(i_descrpid, "i_descrp%x", IFXG(cursorid));
+	sprintf(statemid, "statem%x_%x", IFX_THRD_ID, IFXG(cursorid));
+	sprintf(cursorid, "cursor%x_%x", IFX_THRD_ID, IFXG(cursorid));
+	sprintf(descrpid, "descrp%x_%x", IFX_THRD_ID, IFXG(cursorid));
+	sprintf(i_descrpid, "i_descrp%x_%x", IFX_THRD_ID,IFXG(cursorid));
 
 	EXEC SQL set connection :ifx;
 	PHP_IFX_CHECK_CONNECTION(ifx);
@@ -1242,10 +1248,10 @@ EXEC SQL END DECLARE SECTION;
 	statement = Z_STRVAL_PP(query);
 
 	IFXG(cursorid)++;
-	sprintf(statemid, "statem%x", IFXG(cursorid)); 
-	sprintf(cursorid, "cursor%x", IFXG(cursorid)); 
-	sprintf(descrpid, "descrp%x", IFXG(cursorid)); 
-	sprintf(i_descrpid, "i_descrp%x", IFXG(cursorid));
+	sprintf(statemid, "statem%x_%x", IFX_THRD_ID, IFXG(cursorid));
+	sprintf(cursorid, "cursor%x_%x", IFX_THRD_ID, IFXG(cursorid));
+	sprintf(descrpid, "descrp%x_%x", IFX_THRD_ID, IFXG(cursorid));
+	sprintf(i_descrpid, "i_descrp%x_%x", IFX_THRD_ID,IFXG(cursorid));
 
 	EXEC SQL set connection :ifx;
 	PHP_IFX_CHECK_CONNECTION(ifx);
