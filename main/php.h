@@ -33,6 +33,8 @@
 #ifndef _PHP_H
 #define _PHP_H
 
+#define PHP_API_VERSION 19990421
+
 #define YYDEBUG 0
 
 #define CGI_BINARY (!APACHE && !USE_SAPI && !FHTTPD)
