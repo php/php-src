@@ -50,8 +50,8 @@ static MH_ERROR _php_sablot_error(void *userData, SablotHandle p, MH_ERROR code,
 
 /* PHP Utility Functions */
 static void m_convert_to_string_ex(int argc, ...);
-static zval *_php_xslt_string_zval(const char *str);
-static zval *_php_xslt_resource_zval(long value);
+static zval *_php_sablot_string_zval(const char *str);
+static zval *_php_sablot_resource_zval(long value);
 
 /* Free macros */
 #define S_FREE(var) if (var) efree(var);
@@ -369,12 +369,6 @@ PHP_FUNCTION(xslt_create)
 	SablotHandle p;
 	int ret;
 	SABLOTLS_FETCH();
-
-	if (SABLOTG(current_processor)) {
-		Z_TYPE_P(return_value) = IS_RESOURCE;
-		Z_LVAL_P(return_value) = SABLOTG(current_processor);
-		return;
-	}
 	
 	ret = SablotCreateProcessor(&p);
 	
@@ -409,7 +403,6 @@ PHP_FUNCTION(xslt_create)
 	
 	ZEND_REGISTER_RESOURCE(return_value, handle, SABLOTG(le_sablot));
 	handle->index = Z_LVAL_P(return_value);
-	SABLOTG(current_processor) = Z_LVAL_P(return_value);
 }
 /* }}} */
 
@@ -843,7 +836,7 @@ static SAX_RETURN _php_sablot_sax_startDoc(void *userData)
 
 	if (handle->startDocHandler) {
 		zval *args[1];
-		args[0] = _php_xslt_resource_zval(handle->index);
+		args[0] = _php_sablot_resource_zval(handle->index);
 
 		_php_sablot_call_handler_function(handle->startDocHandler, 1, args, "start document");
 	}
@@ -858,8 +851,8 @@ static SAX_RETURN _php_sablot_sax_startElement(void *userData, const char *name,
 	if (handle->startElementHandler) {
 		zval *args[3];
 		
-		args[0] = _php_xslt_resource_zval(handle->index);
-		args[1] = _php_xslt_string_zval(name);
+		args[0] = _php_sablot_resource_zval(handle->index);
+		args[1] = _php_sablot_string_zval(name);
 
 		MAKE_STD_ZVAL(args[2]);
 		if (array_init(args[2]) == FAILURE) {
@@ -869,7 +862,7 @@ static SAX_RETURN _php_sablot_sax_startElement(void *userData, const char *name,
 
 		while (attributes && *attributes) {
 			char *key = (char *)attributes[0];
-			zval *value = _php_xslt_string_zval(attributes[1]);
+			zval *value = _php_sablot_string_zval(attributes[1]);
 			
 			add_assoc_string(args[2], key, Z_STRVAL_P(value), 0);
 			attributes += 2;
@@ -888,8 +881,8 @@ static SAX_RETURN _php_sablot_sax_endElement(void *userData, const char *name)
 	if (handle->endElementHandler) {
 		zval *args[2];
 		
-		args[0] = _php_xslt_resource_zval(handle->index);
-		args[1] = _php_xslt_string_zval(name);
+		args[0] = _php_sablot_resource_zval(handle->index);
+		args[1] = _php_sablot_string_zval(name);
 		
 		_php_sablot_call_handler_function(handle->endElementHandler, 2, args, "end element");
 	}
@@ -904,9 +897,9 @@ static SAX_RETURN _php_sablot_sax_startNamespace(void *userData, const char *pre
 	if (handle->startNamespaceHandler) {
 		zval *args[3];
 		
-		args[0] = _php_xslt_resource_zval(handle->index);
-		args[1] = _php_xslt_string_zval(prefix);
-		args[2] = _php_xslt_string_zval(uri);
+		args[0] = _php_sablot_resource_zval(handle->index);
+		args[1] = _php_sablot_string_zval(prefix);
+		args[2] = _php_sablot_string_zval(uri);
 		
 		_php_sablot_call_handler_function(handle->startNamespaceHandler, 3, args, "start namespace");
 	}
@@ -921,8 +914,8 @@ static SAX_RETURN _php_sablot_sax_endNamespace(void *userData, const char *prefi
 	if (handle->endNamespaceHandler) {
 		zval *args[2];
 		
-		args[0] = _php_xslt_resource_zval(handle->index);
-		args[1] = _php_xslt_string_zval(prefix);
+		args[0] = _php_sablot_resource_zval(handle->index);
+		args[1] = _php_sablot_string_zval(prefix);
 		
 		_php_sablot_call_handler_function(handle->endNamespaceHandler, 2, args, "end namespace");
 	}
@@ -937,8 +930,8 @@ static SAX_RETURN _php_sablot_sax_comment(void *userData, const char *contents)
 	if (handle->commentHandler) {
 		zval *args[2];
 		
-		args[0] = _php_xslt_resource_zval(handle->index);
-		args[1] = _php_xslt_string_zval(contents);
+		args[0] = _php_sablot_resource_zval(handle->index);
+		args[1] = _php_sablot_string_zval(contents);
 		
 		_php_sablot_call_handler_function(handle->commentHandler, 2, args, "comment");
 	}
@@ -953,9 +946,9 @@ static SAX_RETURN _php_sablot_sax_PI(void *userData, const char *target, const c
 	if (handle->PIHandler) {
 		zval *args[3];
 		
-		args[0] = _php_xslt_resource_zval(handle->index);
-		args[1] = _php_xslt_string_zval(target);
-		args[2] = _php_xslt_string_zval(contents);
+		args[0] = _php_sablot_resource_zval(handle->index);
+		args[1] = _php_sablot_string_zval(target);
+		args[2] = _php_sablot_string_zval(contents);
 		
 		_php_sablot_call_handler_function(handle->PIHandler, 3, args, "PI Handler");
 	}
@@ -970,8 +963,8 @@ static SAX_RETURN _php_sablot_sax_characters(void *userData, const char *content
 	if (handle->charactersHandler) {
 		zval *args[2];
 		
-		args[0] = _php_xslt_resource_zval(handle->index);
-		args[1] = _php_xslt_string_zval(contents);
+		args[0] = _php_sablot_resource_zval(handle->index);
+		args[1] = _php_sablot_string_zval(contents);
 		
 		_php_sablot_call_handler_function(handle->charactersHandler, 2, args, "characters");
 	}
@@ -986,7 +979,7 @@ static SAX_RETURN _php_sablot_sax_endDoc(void *userData)
 	if (handle->endDocHandler) {
 		zval *args[1];
 		
-		args[0] = _php_xslt_resource_zval(handle->index);
+		args[0] = _php_sablot_resource_zval(handle->index);
 		
 		_php_sablot_call_handler_function(handle->endDocHandler, 1, args, "end document");
 	}
@@ -1086,7 +1079,6 @@ static void _php_sablot_free_processor(php_sablot *handle)
 		SablotUnregHandler(handle->p, HLR_SAX, NULL, NULL);
 		SablotDestroyProcessor(handle->p);
 	}
-	SABLOTG(current_processor) = 0;
 	
 	FUNCH_FREE(handle->startDocHandler);
 	FUNCH_FREE(handle->startElementHandler);
@@ -1108,8 +1100,8 @@ static void _php_sablot_free_processor(php_sablot *handle)
 		}
 		S_FREE(handle->errors);
 	}
-	S_FREE(handle);
 #endif
+	S_FREE(handle);
 }
 /* }}} */
 
@@ -1136,9 +1128,9 @@ static void m_convert_to_string_ex(int argc, ...)
 }
 /* }}} */
 
-/* {{{ _php_xslt_string_zval()
+/* {{{ _php_sablot_string_zval()
    Converts a Sablotron string to a zval */
-static zval *_php_xslt_string_zval(const char *str)
+static zval *_php_sablot_string_zval(const char *str)
 {
 	zval *ret;
 	int len = strlen(str);
@@ -1151,9 +1143,9 @@ static zval *_php_xslt_string_zval(const char *str)
 }
 /* }}} */
 
-/* {{{ _php_xslt_resource_zval()
+/* {{{ _php_sablot_resource_zval()
    Converts a long identifier to a resource id */
-static zval *_php_xslt_resource_zval(long value)
+static zval *_php_sablot_resource_zval(long value)
 {
 	zval *ret;
 	MAKE_STD_ZVAL(ret);
