@@ -87,6 +87,29 @@ Changes in the Zend Engine 2.0
       Old code that does not take advantage of namespaces will run
       without modifications.
 
+    * Static member variables of static classes can now be
+      initialized.
+
+        <?php
+          class foo
+          {
+            static $my_static = 5;
+          }
+
+          print foo::$my_static;
+        ?>
+
+    * Class constants.
+
+        <?php
+          class foo
+          {
+            const hey = "hello";
+          }
+        
+          print foo::hey;
+        ?>
+
 Changes in the Zend Engine 1.0
 
   The Zend Engine was designed from the ground up for increased speed,
