@@ -576,21 +576,21 @@ static void php_oci_init_globals(php_oci_globals *oci_globals_p TSRMLS_DC)
 	);
 }
 
-static int _sessions_pcleanup(zend_llist *session_list TSRMLS_DC)
+static int _sessions_pcleanup(zend_llist *session_list)
 {
 	zend_llist_destroy(session_list);
 
 	return 1;
 }
 
-static int _session_pcleanup(oci_session *session TSRMLS_DC)
+static int _session_pcleanup(oci_session *session)
 {
 	_oci_close_session(session);
 
 	return 1;
 }
 
-static int _server_pcleanup(oci_server *server TSRMLS_DC)
+static int _server_pcleanup(oci_server *server)
 {
 	_oci_close_server(server);
 
