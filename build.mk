@@ -11,6 +11,8 @@
 #
 # $Id$ 
 
+LT_TARGETS = ltconfig ltmain.sh config.guess config.sub
+
 SUBDIRS = libzend TSRM
 
 makefile_am_files = Makefile.am $(shell find ext sapi regex -name Makefile.am)
@@ -61,8 +63,10 @@ acconfig.h: $(acconfig_h_SOURCES)
 
 $(makefile_in_files): $(makefile_am_files) aclocal.m4
 	@echo rebuilding Makefile.in\'s
+	@for i in $(LT_TARGETS); do mv $$i $$i.bak; done
 	@automake -a -i $(AMFLAGS) $(makefile_files) 2>&1 \
 		| grep -v PHP_OUTPUT_FILES || true >&2
+	@for i in $(LT_TARGETS); do mv $$i.bak $$i; done
 
 aclocal.m4: configure.in acinclude.m4
 	aclocal
