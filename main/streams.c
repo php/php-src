@@ -2370,7 +2370,7 @@ PHPAPI int _php_stream_make_seekable(php_stream *origstream, php_stream **newstr
 
 	*newstream = NULL;
 	
-	if ((flags & PHP_STREAM_FORCE_CONVERSION == 0) && origstream->ops->seek != NULL) {
+	if (((flags & PHP_STREAM_FORCE_CONVERSION) == 0) && origstream->ops->seek != NULL) {
 		*newstream = origstream;
 		return PHP_STREAM_UNCHANGED;
 	}
