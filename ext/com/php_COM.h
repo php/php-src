@@ -10,22 +10,30 @@ BEGIN_EXTERN_C()
 PHP_MINIT_FUNCTION(COM);
 PHP_MSHUTDOWN_FUNCTION(COM);
 
-PHPAPI HRESULT php_COM_invoke(comval *obj, DISPID dispIdMember, WORD wFlags, DISPPARAMS FAR*  pDispParams, VARIANT FAR* pVarResult);
-PHPAPI HRESULT php_COM_get_ids_of_names(comval *obj, OLECHAR FAR* FAR* rgszNames, DISPID FAR* rgDispId);
-PHPAPI HRESULT php_COM_release(comval *obj);
-PHPAPI HRESULT php_COM_addref(comval *obj);
-PHPAPI HRESULT php_COM_set(comval *obj, IDispatch FAR* pDisp, int cleanup);
-PHPAPI HRESULT php_COM_clone(comval *obj, comval *clone, int cleanup);
+PHP_FUNCTION(com_load);
+PHP_FUNCTION(com_invoke);
+PHP_FUNCTION(com_addref);
+PHP_FUNCTION(com_release);
+PHP_FUNCTION(com_propget);
+PHP_FUNCTION(com_propput);
+PHP_FUNCTION(com_load_typelib);
+PHP_FUNCTION(com_isenum);
 
-int php_COM_get_le_comval();
+PHPAPI HRESULT php_COM_invoke(comval *obj, DISPID dispIdMember, WORD wFlags, DISPPARAMS FAR*  pDispParams, VARIANT FAR* pVarResult, char **ErrString TSRMLS_DC);
+PHPAPI HRESULT php_COM_get_ids_of_names(comval *obj, OLECHAR FAR* FAR* rgszNames, DISPID FAR* rgDispId TSRMLS_DC);
+PHPAPI HRESULT php_COM_release(comval *obj TSRMLS_DC);
+PHPAPI HRESULT php_COM_addref(comval *obj TSRMLS_DC);
+PHPAPI HRESULT php_COM_destruct(comval *obj TSRMLS_DC);
+PHPAPI HRESULT php_COM_set(comval *obj, IDispatch FAR* FAR* pDisp, int cleanup TSRMLS_DC);
+PHPAPI HRESULT php_COM_clone(comval *obj, comval *clone, int cleanup TSRMLS_DC);
+PHPAPI char *php_COM_error_message(HRESULT hr TSRMLS_DC);
+PHPAPI int php_COM_get_le_comval();
+PHPAPI int php_COM_set_property_handler(zend_property_reference *property_reference, pval *value);
+PHPAPI pval php_COM_get_property_handler(zend_property_reference *property_reference);
+PHPAPI void php_COM_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_property_reference *property_reference);
 
 zend_module_entry COM_module_entry;
-zend_class_entry com_class_entry;
-
-pval php_COM_get_property_handler(zend_property_reference *property_reference);
-int php_COM_set_property_handler(zend_property_reference *property_reference, pval *value);
-char *php_COM_error_message(HRESULT hr);
-void php_COM_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_property_reference *property_reference);
+zend_class_entry COM_class_entry;
 
 #ifdef DEBUG
 	extern int resourcecounter;

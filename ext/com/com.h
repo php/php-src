@@ -3,7 +3,9 @@
 
 #if PHP_WIN32
 
-#include "oleauto.h"
+BEGIN_EXTERN_C()
+
+#include <oleauto.h>
 
 typedef struct comval_ {
 #ifdef _DEBUG
@@ -19,6 +21,8 @@ typedef struct comval_ {
 	} i;
 } comval;
 
+END_EXTERN_C()
+
 #define ZVAL_COM(z,o) {																\
 			zval *handle;															\
 			HashTable *properties;													\
@@ -32,14 +36,18 @@ typedef struct comval_ {
 																					\
 			zval_copy_ctor(handle);													\
 			zend_hash_index_update(properties, 0, &handle, sizeof(zval *), NULL);	\
-			object_and_properties_init(z, &com_class_entry, properties);			\
+			object_and_properties_init(z, &COM_class_entry, properties);			\
 		}
 
-#define RETVAL_COM(o)	ZVAL_COM(&return_value, o)
+#define RETVAL_COM(o)	ZVAL_COM(&return_value, o);
 #define RETURN_COM(o)	RETVAL_COM(o)												\
 						return;
 
-#define ALLOC_COM(z)	(z) = (comval *) emalloc(sizeof(comval))
+#define ALLOC_COM(z)	(z) = (comval *) emalloc(sizeof(comval));					\
+						C_REFCOUNT(z) = 0;
+
+#define FREE_COM(z)		efree(z);
+
 #define IS_COM			php_COM_get_le_comval()
 
 #define C_HASTLIB(x)	((x)->typelib)

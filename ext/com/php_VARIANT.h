@@ -3,14 +3,19 @@
 
 #if PHP_WIN32
 
-#include "variant.h"
+BEGIN_EXTERN_C()
 
-extern int php_VARIANT_get_le_variant();
+#include "conversion.h"
+#include "variant.h"
 
 PHP_MINIT_FUNCTION(VARIANT);
 PHP_MSHUTDOWN_FUNCTION(VARIANT);
 
-extern zend_module_entry VARIANT_module_entry;
+PHPAPI int php_VARIANT_get_le_variant();
+
+zend_module_entry VARIANT_module_entry;
+
+END_EXTERN_C()
 
 #define VARIANT_module_ptr &VARIANT_module_entry
 
