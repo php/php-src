@@ -92,7 +92,7 @@ typedef struct {
 	int module_number;
 	int cache_expire;
 	const struct ps_serializer_struct *serializer;
-	zval *http_state_vars;
+	zval *http_session_vars;
 } php_ps_globals;
 
 extern zend_module_entry session_module_entry;
