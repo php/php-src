@@ -163,36 +163,6 @@ More than one package may be specified at once.
     }
 
     // }}}
-    // {{{ getHelp()
-
-    function getHelp($command)
-    {
-        switch ($command) {
-            case 'install':
-                $ret = array('<pear package>',
-                             'Installs a PEAR package created by the "package" command');
-                break;
-            case 'uninstall':
-                $ret = array('<package>',
-                             'Uninstalls a previously installed PEAR package');
-                break;
-            case 'upgrade':
-                $ret = array('<pear package>',
-                             'Upgrades a PEAR package installed in the system');
-                break;
-        }
-        $ret[0] = "[-f] [-n] [-r] [-s] [-Z] {$ret[0]}";
-        $ret[1] = "{$ret[1]}\n" .
-                  "   -f    forces the installation of the package\n".
-                  "         when it is already installed\n".
-                  "   -n    do not take care of package dependencies\n".
-                  "   -r    only (un)register package, do not (un)install files\n".
-                  "   -s    soft update: install or upgrade only if needed\n".
-                  "   -Z    no compression: download plain .tar files";
-        return $ret;
-    }
-
-    // }}}
     // {{{ run()
 
     function run($command, $options, $params)
