@@ -1,3 +1,8 @@
+2003-11-17  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_interfaces.c:
+      Correct destruction
+
 2003-11-13  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
 
     * zend_operators.c:
