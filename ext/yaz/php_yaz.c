@@ -1545,7 +1545,19 @@ PHP_MINFO_FUNCTION(yaz)
 {
 	char version_str[20];
 
+#if WIN32
+	HINSTANCE h = LoadLibrary("yaz");
+	unsigned long (__cdecl *p)(char *version_str, char *sys_str) = 0;
+	strcpy(version_str, "unknown");
+
+	if (h && (p = (unsigned long(__cdecl*)(char*,char*))
+				GetProcAddress(h, "yaz_version")))
+		p(version_str, 0);
+	if (h)
+		FreeLibrary(h);
+#else
 	yaz_version(version_str, 0);
+#endif
 	php_info_print_table_start();
 	php_info_print_table_row(2, "YAZ Support", "enabled");
 	php_info_print_table_row(2, "YAZ Version", version_str);
