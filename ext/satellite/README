@@ -80,7 +80,7 @@ How to install ORBit from CVS
 
 (2) Set the environment variable CERTIFIED_GNOMIE to whatever you like.
 
-(3) Run ./autogen.sh, gmake och gmake install
+(3) Run ./autogen.sh, gmake and gmake install
 
 
 How to install ORBit from snapshot
