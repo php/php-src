@@ -110,7 +110,7 @@ static zend_function_entry domxml_functions[] = {
 
 
 static function_entry php_domxmldoc_class_functions[] = {
-//	PHP_FALIAS(domdocument, xmldoc, NULL)
+/*	PHP_FALIAS(domdocument, xmldoc, NULL) */
 	{"domdocument", PHP_FN(xmldoc), NULL},
 	PHP_FALIAS(doctype, domxml_doc_doctype,	NULL)
 	PHP_FALIAS(implementation, domxml_doc_implementation,	NULL)
@@ -493,8 +493,8 @@ void *php_dom_get_object(zval *wrapper, int rsrc_type1, int rsrc_type2)
 	  php_error(E_ERROR, "Underlying object missing");
 	}
 	obj = zend_list_find(Z_LVAL_PP(handle), &type);
-// The following test should be replaced with search in all parents
-	if (!obj) { // || ((type != rsrc_type1) && (type != rsrc_type2))) {
+/* The following test should be replaced with search in all parents */
+	if (!obj) { /* || ((type != rsrc_type1) && (type != rsrc_type2))) { */
 		php_error(E_ERROR, "Underlying object missing or of invalid type");
 	} 
 
@@ -1737,9 +1737,10 @@ PHP_FUNCTION(domxml_doc_implementation)
 		RETURN_FALSE;
 	}
 
-//	rv = php_domobject_new(node, &ret);
-//	SEPARATE_ZVAL(&rv);
-//	*return_value = *rv;
+/*	rv = php_domobject_new(node, &ret);
+	SEPARATE_ZVAL(&rv);
+	*return_value = *rv;
+*/
 }
 /* }}} */
 
@@ -2101,7 +2102,7 @@ PHP_FUNCTION(domxml_node_text_concat)
 }
 /* }}} */
 
-/* {{{ proto object domxml_add_root([int doc_handle,] string name)
+/* {{{ proto object domxml_add_root(string name)
    Adds root node to document */
 PHP_FUNCTION(domxml_add_root)
 {
@@ -2110,19 +2111,20 @@ PHP_FUNCTION(domxml_add_root)
 	xmlNode *nodep;
 	int ret;
 	
-	if (ZEND_NUM_ARGS() == 1 || getParameters(ht, 1, &name)) {
-		id = getThis();
-		docp = php_dom_get_object(id, le_domxmldocp, 0);
-	} else {
+	if (ZEND_NUM_ARGS() != 1 || getParameters(ht, 1, &name)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
+
+	id = getThis();
+	docp = php_dom_get_object(id, le_domxmldocp, 0);
 	convert_to_string(name);
-		
+
 	nodep = xmlNewDocNode(docp, NULL, name->value.str.val, NULL);
 	if (!nodep) {
 		RETURN_FALSE;
 	}
-//	xmlDocSetRootElement(docp, nodep);
+	
+	xmlDocSetRootElement(docp, nodep); 
 	rv = php_domobject_new(nodep, &ret);
 	SEPARATE_ZVAL(&rv);
 	*return_value = *rv;
@@ -2177,13 +2179,13 @@ static int node_namespace(zval **attributes, xmlNode *nodep)
 
 		pattr = php_domobject_new((xmlNodePtr) ns, &ret);
 		SEPARATE_ZVAL(&pattr);
-//		if(!ret) {
+/*		if(!ret) { */
 			if(ns->href)
 				add_property_stringl(pattr, "href", (char *) ns->href, strlen(ns->href), 1);
 			if(ns->prefix)
 				add_property_stringl(pattr, "prefix", (char *) ns->prefix, strlen(ns->prefix), 1);
 			add_property_long(pattr, "type", ns->type);
-//		}
+/*		} */
 		zend_hash_next_index_insert((*attributes)->value.ht, &pattr, sizeof(zval *), NULL);
 		ns = ns->next;
 	}
@@ -2205,7 +2207,7 @@ static int node_attributes(zval **attributes, xmlNode *nodep)
 	if (!attr) {
 		return -1;
 	}
-//	MAKE_STD_ZVAL(*attributes); /* could be a problem when node_attribute() is called from domxml_attributes */
+/*	MAKE_STD_ZVAL(*attributes); */ /* could be a problem when node_attribute() is called from domxml_attributes */ 
 
 	/* create an php array for the children */
 /*	MAKE_STD_ZVAL(*attributes); *//* Don't do this if *attributes are the return_value */
@@ -2218,10 +2220,10 @@ static int node_attributes(zval **attributes, xmlNode *nodep)
 		int ret;
 
 		pattr = php_domobject_new((xmlNodePtr) attr, &ret);
-//		if(0 <= (n = node_children(&children, attr->children))) {
-//			zend_hash_update(pattr->value.obj.properties, "children", sizeof("children"), (void *) &children, sizeof(zval *), NULL);
-//		}
-		add_property_string(pattr, "name", (char *) (attr->name), 1);
+/*		if(0 <= (n = node_children(&children, attr->children))) {
+			zend_hash_update(pattr->value.obj.properties, "children", sizeof("children"), (void *) &children, sizeof(zval *), NULL);
+		}
+*/		add_property_string(pattr, "name", (char *) (attr->name), 1);
 		add_property_string(pattr, "value", xmlNodeGetContent((xmlNodePtr) attr), 1);
 		zend_hash_next_index_insert((*attributes)->value.ht, &pattr, sizeof(zval *), NULL);
 		attr = attr->next;
@@ -2316,7 +2318,7 @@ PHP_FUNCTION(xmltree)
 		zend_hash_update(return_value->value.obj.properties, "children", sizeof("children"), (void *) &children, sizeof(zval *), NULL);
 
 	}
-//	xmlFreeDoc(docp);
+/*	xmlFreeDoc(docp); */
 }
 /* }}} */
 
