@@ -1,13 +1,13 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2002, Version 4.3.0
-- A project has been added to the crack extension to allow it to be compiled
-  under Win32.  Cracklib libraries for Win32 are available from
-  http://www.jtatesoftware.com/cracklib/.
-- Added two new functions: mysql_list_processes and mysql_stat. (Georg)
-- Added file_get_contents($filename), which will return the contents of a file
-  as a string.  It can be used with URL wrappers. (Wez)
-- All special fopen wrappers ('php://', 'bz2://' and 'zlib://') now require the
+- Made crack extension available to Win32. Cracklib libraries for Win32 are 
+  available from http://www.jtatesoftware.com/cracklib/. (jtate)
+- Added mysql_info() function. (Jan)
+- Added mysql_list_processes() and mysql_stat() functions. (Georg)
+- Added file_get_contents($filename), which returns the contents of a file
+  as a string. It also supports URL wrappers. (Wez)
+- Changed fopen wrappers ('php://', 'bz2://' and 'zlib://') to require the
   '://' separator (instead of simply 'php:', 'bz2:' and 'zlib:') to avoid
   ambiguities when filenames have ':' characters. (Wez)
 - Added URL-wrapper support to exif. (Marcus)
