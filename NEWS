@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 27 May 2004, PHP 5 Release Candidate 3
+- Changed user error handler mechanism to relay to built-in error handler if it
+  returns false. (Andrei)
 - Moved the PDFLib extension to PECL. (Wez)
 - Added support for dumping private/protected properties to var_dump().
   (Andrey)
