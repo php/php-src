@@ -1,5 +1,7 @@
 dnl config.m4 for PHP MCVE Extension
 
+AC_PROG_EGREP
+
 PHP_ARG_WITH(mcve, for MCVE support,
 [  --with-mcve[=DIR]       Include MCVE support. libmcve >= 3.2.2 or libmonetra >= 4.0 required])
 
@@ -10,7 +12,7 @@ if test "$PHP_MCVE" != "no"; then
 
   if test "$PHP_OPENSSL_DIR" != "no"; then
     PHP_OPENSSL=$PHP_OPENSSL_DIR
-    PHP_SETUP_OPENSSL(SNMP_SHARED_LIBADD, [], [
+    PHP_SETUP_OPENSSL(MCVE_SHARED_LIBADD, [], [
       AC_MSG_ERROR([MCVE: OpenSSL check failed. Please check config.log for more information.])
     ])
   else
