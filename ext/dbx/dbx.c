@@ -85,7 +85,7 @@ int get_module_identifier(char *module_name)
 	return DBX_UNKNOWN;
 }
 
-int split_dbx_handle_object(zval **dbx_object, zval ***pdbx_handle, zval ***pdbx_module, zval ***pdbx_database)
+int split_dbx_handle_object(zval **dbx_object, zval ***pdbx_handle, zval ***pdbx_module, zval ***pdbx_database TSRMLS_DC)
 {
 	convert_to_object_ex(dbx_object);
 	if (zend_hash_find(Z_OBJPROP_PP(dbx_object), "handle", 7, (void **) pdbx_handle)==FAILURE
@@ -334,7 +334,7 @@ ZEND_FUNCTION(dbx_close)
 	if (ZEND_NUM_ARGS() !=number_of_arguments || zend_get_parameters_array_ex(number_of_arguments, arguments) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	if (!split_dbx_handle_object(arguments[0], &dbx_handle, &dbx_module, &dbx_database)) {
+	if (!split_dbx_handle_object(arguments[0], &dbx_handle, &dbx_module, &dbx_database TSRMLS_CC)) {
 		zend_error(E_WARNING, "dbx_close: not a valid dbx_handle-object...");
 		RETURN_LONG(0);
 	}
@@ -386,7 +386,7 @@ ZEND_FUNCTION(dbx_query)
 	if (ZEND_NUM_ARGS()<min_number_of_arguments || ZEND_NUM_ARGS()>number_of_arguments || zend_get_parameters_array_ex(ZEND_NUM_ARGS(), arguments) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	if (!split_dbx_handle_object(arguments[0], &dbx_handle, &dbx_module, &dbx_database)) {
+	if (!split_dbx_handle_object(arguments[0], &dbx_handle, &dbx_module, &dbx_database TSRMLS_CC)) {
 		zend_error(E_WARNING, "dbx_query: not a valid dbx_handle-object...");
 		RETURN_LONG(0);
 	}
@@ -560,7 +560,7 @@ ZEND_FUNCTION(dbx_error)
 	if (ZEND_NUM_ARGS() !=number_of_arguments || zend_get_parameters_array_ex(number_of_arguments, arguments) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	if (!split_dbx_handle_object(arguments[0], &dbx_handle, &dbx_module, &dbx_database)) {
+	if (!split_dbx_handle_object(arguments[0], &dbx_handle, &dbx_module, &dbx_database TSRMLS_CC)) {
 		zend_error(E_WARNING, "dbx_error: not a valid dbx_handle-object...");
 		RETURN_LONG(0);
 	}
@@ -593,7 +593,7 @@ ZEND_FUNCTION(dbx_escape_string)
 	if (ZEND_NUM_ARGS() !=number_of_arguments || zend_get_parameters_array_ex(number_of_arguments, arguments) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	if (!split_dbx_handle_object(arguments[0], &dbx_handle, &dbx_module, &dbx_database)) {
+	if (!split_dbx_handle_object(arguments[0], &dbx_handle, &dbx_module, &dbx_database TSRMLS_CC)) {
 		zend_error(E_WARNING, "dbx_esc: not a valid dbx_handle-object...");
 		RETURN_NULL();
 	}
