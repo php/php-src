@@ -99,8 +99,8 @@ php_stream *php_stream_gzopen(char *path, char *mode, int options, char **opened
 	
 	self = emalloc(sizeof(*self));
 
-	if (strncmp("zlib:", path, 5) == 0)
-		path += 5;
+	if (strncasecmp("zlib://", path, 7) == 0)
+		path += 7;
 	
 	self->stream = php_stream_open_wrapper(path, mode, STREAM_MUST_SEEK|options, opened_path);
 	
