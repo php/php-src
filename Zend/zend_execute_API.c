@@ -573,7 +573,11 @@ static LRESULT CALLBACK zend_timeout_WndProc(HWND hWnd, UINT message, WPARAM wPa
 			break;
 		case WM_REGISTER_ZEND_TIMEOUT:
 			/* wParam is the thread id pointer, lParam is the timeout amount in seconds */
-			SetTimer(timeout_window, wParam, lParam*1000, NULL);
+			if (lParam==0) {
+				KillTimer(timeout_window, wParam);
+			} else {
+				SetTimer(timeout_window, wParam, lParam*1000, NULL);
+			}
 			break;
 		case WM_UNREGISTER_ZEND_TIMEOUT:
 			/* wParam is the thread id pointer */
