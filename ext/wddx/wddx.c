@@ -746,7 +746,6 @@ static void php_wddx_pop_element(void *user_data, const char *name)
 			unsigned char *new_str;
 
 			new_str = php_base64_decode(Z_STRVAL_P(ent1->data), Z_STRLEN_P(ent1->data), &new_len);
-			efree(Z_STRVAL_P(ent1->data));
 			Z_STRVAL_P(ent1->data) = new_str;
 			Z_STRLEN_P(ent1->data) = new_len;
 		}
