@@ -38,9 +38,9 @@ ZEND_API int getParametersArrayEx(int param_count, zval ***argument_array);
 ZEND_API int getThis(zval **this);
 ZEND_API int ParameterPassedByReference(int ht, uint n);
 
-int register_functions(zend_function_entry *functions);
-void unregister_functions(zend_function_entry *functions, int count);
-ZEND_API int register_module(zend_module_entry *module_entry);
+int zend_register_functions(zend_function_entry *functions);
+void zend_unregister_functions(zend_function_entry *functions, int count);
+ZEND_API int zend_register_module(zend_module_entry *module_entry);
 zend_class_entry *register_internal_class(zend_class_entry *class_entry);
 
 ZEND_API void wrong_param_count(void);

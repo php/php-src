@@ -23,6 +23,14 @@
 #include "zend_constants.h"
 #include "zend_list.h"
 
+#ifdef ZTS
+#	define GLOBAL_FUNCTION_TABLE	global_function_table
+#	define GLOBAL_CLASS_TABLE		global_class_table
+#else
+#	define GLOBAL_FUNCTION_TABLE	CG(function_table)
+#	define GLOBAL_CLASS_TABLE		CG(class_table)
+#endif
+
 /* true multithread-shared globals */
 zend_class_entry standard_class;
 ZEND_API int (*zend_printf)(const char *format, ...);
@@ -32,6 +40,13 @@ void (*zend_message_dispatcher)(long message, void *data);
 FILE *(*zend_fopen)(const char *filename);
 void (*zend_block_interruptions)();
 void (*zend_unblock_interruptions)();
+#ifdef ZTS
+int compiler_globals_id;
+int executor_globals_id;
+int alloc_globals_id;
+HashTable *global_function_table;
+HashTable *global_class_table;
+#endif
 
 zend_utility_values zend_uv;
 
@@ -80,6 +95,7 @@ static void print_hash(HashTable *ht, int indent)
 	}
 	ZEND_PUTS(")\n");
 }
+
 
 ZEND_API int zend_print_zval(zval *expr, int indent)
 {
@@ -145,6 +161,8 @@ static FILE *zend_fopen_wrapper(const char *filename)
 
 static void register_standard_class()
 {
+	CLS_FETCH();
+
 	standard_class.type = ZEND_INTERNAL_CLASS;
 	standard_class.name_length = sizeof("stdClass") - 1;
 	standard_class.name = zend_strndup("stdClass", standard_class.name_length);
@@ -156,8 +174,31 @@ static void register_standard_class()
 	standard_class.handle_property_set = NULL;
 	standard_class.refcount = (int *) malloc(sizeof(int));
 	*standard_class.refcount = 1;
-	zend_hash_add(CG(class_table), "stdClass", sizeof("stdClass"), &standard_class, sizeof(zend_class_entry), NULL);
+	zend_hash_add(GLOBAL_CLASS_TABLE, "stdClass", sizeof("stdClass"), &standard_class, sizeof(zend_class_entry), NULL);
 }
+
+
+#ifdef ZTS
+static void compiler_globals_ctor(zend_compiler_globals *compiler_globals)
+{
+	compiler_globals->function_table = (HashTable *) malloc(sizeof(HashTable));
+	zend_hash_init(compiler_globals->function_table, 100, NULL, (void (*)(void *)) destroy_zend_function, 1);
+	zend_hash_copy(compiler_globals->function_table, global_function_table, NULL, NULL, 0);
+
+	compiler_globals->class_table = (HashTable *) malloc(sizeof(HashTable));
+	zend_hash_init(compiler_globals->class_table, 10, NULL, (void (*)(void *)) destroy_zend_class, 1);
+	zend_hash_copy(compiler_globals->class_table, global_class_table, NULL, NULL, 0);
+}
+
+
+static void compiler_globals_dtor(zend_compiler_globals *compiler_globals)
+{
+	zend_hash_destroy(compiler_globals->function_table);
+	free(compiler_globals->function_table);
+	zend_hash_destroy(compiler_globals->class_table);
+	free(compiler_globals->class_table);
+}
+#endif
 
 
 int zend_startup(zend_utility_functions *utility_functions, char **extensions)
@@ -185,15 +226,24 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions)
 	zend_version_info_length = sizeof(ZEND_CORE_VERSION_INFO)-1;
 
 	/* Prepare data structures */
+#ifndef ZTS
 	zend_startup_constants();
-	CG(function_table) = (HashTable *) malloc(sizeof(HashTable));
-	CG(class_table) = (HashTable *) malloc(sizeof(HashTable));
-	zend_hash_init(CG(function_table), 100, NULL, (void (*)(void *)) destroy_zend_function, 1);
-	zend_hash_init(CG(class_table), 10, NULL, (void (*)(void *)) destroy_zend_class, 1);
+#endif
+	GLOBAL_FUNCTION_TABLE = (HashTable *) malloc(sizeof(HashTable));
+	GLOBAL_CLASS_TABLE = (HashTable *) malloc(sizeof(HashTable));
+	zend_hash_init(GLOBAL_FUNCTION_TABLE, 100, NULL, (void (*)(void *)) destroy_zend_function, 1);
+	zend_hash_init(GLOBAL_CLASS_TABLE, 10, NULL, (void (*)(void *)) destroy_zend_class, 1);
 	register_standard_class();
 	zend_hash_init(&module_registry, 50, NULL, (void (*)(void *)) module_destructor, 1);
 	init_resource_plist();
 	zend_hash_init(&list_destructors, 50, NULL, NULL, 1);
+
+#ifdef ZTS
+	tsrm_startup(1,1,0);
+	compiler_globals_id = ts_allocate_id(sizeof(zend_compiler_globals), (void (*)(void *)) compiler_globals_ctor, (void (*)(void *)) compiler_globals_dtor);
+	executor_globals_id = ts_allocate_id(sizeof(zend_executor_globals), NULL, NULL);
+	alloc_globals_id = ts_allocate_id(sizeof(zend_alloc_globals), NULL, NULL);
+#endif
 
 	return SUCCESS;
 }
@@ -204,13 +254,15 @@ void zend_shutdown()
 	destroy_resource_plist();
 	zend_hash_destroy(&list_destructors);
 	zend_hash_destroy(&module_registry);
-	zend_hash_destroy(CG(function_table));
-	free(CG(function_table));
-	zend_hash_destroy(CG(class_table));
-	free(CG(class_table));
+	zend_hash_destroy(GLOBAL_FUNCTION_TABLE);
+	free(GLOBAL_FUNCTION_TABLE);
+	zend_hash_destroy(GLOBAL_CLASS_TABLE);
+	free(GLOBAL_CLASS_TABLE);
 	zend_shutdown_extensions();
 	free(zend_version_info);
+#ifndef ZTS
 	zend_shutdown_constants();
+#endif
 }
 
 

@@ -33,11 +33,15 @@ HashTable list_destructors, module_registry;
 /* this function doesn't check for too many parameters */
 ZEND_API int getParameters(int ht, int param_count,...)
 {
-	void **p = EG(argument_stack).top_element-1;
-	int arg_count = (ulong) *p;
+	void **p;
+	int arg_count;
 	va_list ptr;
 	zval **param, *param_ptr;
 	ELS_FETCH();
+	ALS_FETCH();
+
+	p = EG(argument_stack).top_element-1;
+	arg_count = (ulong) *p;
 
 	if (param_count>arg_count) {
 		return FAILURE;
@@ -71,10 +75,13 @@ ZEND_API int getParameters(int ht, int param_count,...)
 
 ZEND_API int getParametersArray(int ht, int param_count, zval **argument_array)
 {
-	void **p = EG(argument_stack).top_element-1;
-	int arg_count = (ulong) *p;
+	void **p;
+	int arg_count;
 	zval *param_ptr;
 	ELS_FETCH();
+
+	p = EG(argument_stack).top_element-1;
+	arg_count = (ulong) *p;
 
 	if (param_count>arg_count) {
 		return FAILURE;
@@ -109,11 +116,14 @@ ZEND_API int getParametersArray(int ht, int param_count, zval **argument_array)
 /* this function doesn't check for too many parameters */
 ZEND_API int getParametersEx(int param_count,...)
 {
-	void **p = EG(argument_stack).top_element-1;
-	int arg_count = (ulong) *p;
+	void **p;
+	int arg_count;
 	va_list ptr;
 	zval ***param;
 	ELS_FETCH();
+
+	p = EG(argument_stack).top_element-1;
+	arg_count = (ulong) *p;
 
 	if (param_count>arg_count) {
 		return FAILURE;
@@ -132,9 +142,12 @@ ZEND_API int getParametersEx(int param_count,...)
 
 ZEND_API int getParametersArrayEx(int param_count, zval ***argument_array)
 {
-	void **p = EG(argument_stack).top_element-1;
-	int arg_count = (ulong) *p;
+	void **p;
+	int arg_count;
 	ELS_FETCH();
+
+	p = EG(argument_stack).top_element-1;
+	arg_count = (ulong) *p;
 
 	if (param_count>arg_count) {
 		return FAILURE;
@@ -166,10 +179,13 @@ ZEND_API int getThis(zval **this)
 
 ZEND_API int ParameterPassedByReference(int ht, uint n)
 {
-	void **p = EG(argument_stack).elements+EG(argument_stack).top-1;
-	ulong arg_count = (ulong) *p;
+	void **p;
+	ulong arg_count;
 	zval *arg;
 	ELS_FETCH();
+
+	p = EG(argument_stack).elements+EG(argument_stack).top-1;
+	arg_count = (ulong) *p;
 
 	if (n>arg_count) {
 		return FAILURE;
@@ -566,7 +582,7 @@ int zend_startup_module(zend_module_entry *module)
 			}
 		}
 		module->type = MODULE_PERSISTENT;
-		register_module(module);
+		zend_register_module(module);
 	}
 	return SUCCESS;
 }
@@ -593,7 +609,7 @@ ZEND_API int _register_list_destructors(void (*list_destructor)(void *), void (*
 
 
 /* registers all functions in *library_functions in the function hash */
-int register_functions(zend_function_entry *functions)
+int zend_register_functions(zend_function_entry *functions)
 {
 	zend_function_entry *ptr = functions;
 	zend_internal_function internal_function;
@@ -608,7 +624,7 @@ int register_functions(zend_function_entry *functions)
 		internal_function.function_name = ptr->fname;
 		if (!internal_function.handler) {
 			zend_error(E_CORE_WARNING,"Null function defined as active function");
-			unregister_functions(functions,count);
+			zend_unregister_functions(functions,count);
 			return FAILURE;
 		}
 		if (zend_hash_add(CG(function_table), ptr->fname, strlen(ptr->fname)+1, &internal_function, sizeof(zend_internal_function), NULL) == FAILURE) {
@@ -625,7 +641,7 @@ int register_functions(zend_function_entry *functions)
 			}
 			ptr++;
 		}
-		unregister_functions(functions,count);
+		zend_unregister_functions(functions,count);
 		return FAILURE;
 	}
 	return SUCCESS;
@@ -634,7 +650,7 @@ int register_functions(zend_function_entry *functions)
 /* count=-1 means erase all functions, otherwise, 
  * erase the first count functions
  */
-void unregister_functions(zend_function_entry *functions,int count)
+void zend_unregister_functions(zend_function_entry *functions,int count)
 {
 	zend_function_entry *ptr = functions;
 	int i=0;
@@ -654,12 +670,12 @@ void unregister_functions(zend_function_entry *functions,int count)
 }
 
 
-ZEND_API int register_module(zend_module_entry *module)
+ZEND_API int zend_register_module(zend_module_entry *module)
 {
 #if 0
 	zend_printf("%s:  Registering module %d\n",module->name, module->module_number);
 #endif
-	if (register_functions(module->functions)==FAILURE) {
+	if (zend_register_functions(module->functions)==FAILURE) {
 		zend_error(E_CORE_WARNING,"%s:  Unable to register functions, unable to load",module->name);
 		return FAILURE;
 	}
@@ -689,7 +705,7 @@ void module_destructor(zend_module_entry *module)
 		module->module_shutdown_func(module->type, module->module_number);
 	}
 	module->module_started=0;
-	unregister_functions(module->functions,-1);
+	zend_unregister_functions(module->functions,-1);
 
 #if HAVE_LIBDL
 	if (module->handle) {

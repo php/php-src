@@ -128,7 +128,7 @@
 %% /* Rules */
 
 statement_list:	
-		statement_list  { do_extended_info(CLS_C); } statement { HANDLE_INTERACTIVE(); }
+		statement_list  { do_extended_info(CLS_C); } statement { ELS_FETCH(); HANDLE_INTERACTIVE(); }
 	|	/* empty */
 ;
 
@@ -169,7 +169,7 @@ statement:
 	|	REQUIRE CONSTANT_ENCAPSED_STRING ';'			{ require_filename($2.u.constant.value.str.val CLS_CC); zval_dtor(&$2.u.constant); }
 	|	REQUIRE '(' CONSTANT_ENCAPSED_STRING ')' ';'	{ require_filename($3.u.constant.value.str.val CLS_CC); zval_dtor(&$3.u.constant); }
 	|	ZEND_UNSET '(' r_cvar ')' ';' { do_unset(&$3 CLS_CC); }
-	|	ZEND_FOREACH '(' expr ZEND_AS { do_foreach_begin(&$1, &$3, &$2, &$4); } w_cvar foreach_optional_arg ')' { do_foreach_cont(&$6, &$7, &$4 CLS_CC); } foreach_statement { do_foreach_end(&$1, &$2 CLS_CC); }
+	|	ZEND_FOREACH '(' expr ZEND_AS { do_foreach_begin(&$1, &$3, &$2, &$4 CLS_CC); } w_cvar foreach_optional_arg ')' { do_foreach_cont(&$6, &$7, &$4 CLS_CC); } foreach_statement { do_foreach_end(&$1, &$2 CLS_CC); }
 	|	';'		/* empty statement */
 ;
 
@@ -511,7 +511,7 @@ cvar_without_objects:
 
 reference_variable:
 		dim_list ']' { $$ = $1; }
-	|	compound_variable		{ do_fetch_globals(&$1); do_begin_variable_parse(CLS_C); fetch_simple_variable(&$$, &$1, 1 CLS_CC); }
+	|	compound_variable		{ do_fetch_globals(&$1 CLS_CC); do_begin_variable_parse(CLS_C); fetch_simple_variable(&$$, &$1, 1 CLS_CC); }
 ;
 	
 
@@ -523,7 +523,7 @@ compound_variable:
 
 dim_list:
 		dim_list ']' '[' dim_offset	{ fetch_array_dim(&$$, &$1, &$4 CLS_CC); }
-	|	compound_variable  { do_fetch_globals(&$1); do_begin_variable_parse(CLS_C); } '[' dim_offset		{ fetch_array_begin(&$$, &$1, &$4 CLS_CC); }
+	|	compound_variable  { do_fetch_globals(&$1 CLS_CC); do_begin_variable_parse(CLS_C); } '[' dim_offset		{ fetch_array_begin(&$$, &$1, &$4 CLS_CC); }
 ;
 
 
@@ -599,15 +599,15 @@ encaps_list:
 	|	encaps_list '{'		{ $2.u.constant.value.chval = '{'; do_add_char(&$$, &$1, &$2 CLS_CC); }
 	|	encaps_list '}'		{ $2.u.constant.value.chval = '}'; do_add_char(&$$, &$1, &$2 CLS_CC); }
 	|	encaps_list ZEND_OBJECT_OPERATOR  { znode tmp;  $2.u.constant.value.chval = '-';  do_add_char(&tmp, &$1, &$2 CLS_CC);  $2.u.constant.value.chval = '>'; do_add_char(&$$, &tmp, &$2 CLS_CC); }
-	|	/* empty */			{ do_init_string(&$$); }
+	|	/* empty */			{ do_init_string(&$$ CLS_CC); }
 
 ;
 
 
 
 encaps_var:
-		VARIABLE { do_fetch_globals(&$1); do_begin_variable_parse(CLS_C); fetch_simple_variable(&$$, &$1, 1 CLS_CC); }
-	|	VARIABLE '[' { do_begin_variable_parse(CLS_C); } encaps_var_offset ']'	{ do_fetch_globals(&$1);  fetch_array_begin(&$$, &$1, &$4 CLS_CC); }
+		VARIABLE { do_fetch_globals(&$1 CLS_CC); do_begin_variable_parse(CLS_C); fetch_simple_variable(&$$, &$1, 1 CLS_CC); }
+	|	VARIABLE '[' { do_begin_variable_parse(CLS_C); } encaps_var_offset ']'	{ do_fetch_globals(&$1 CLS_CC);  fetch_array_begin(&$$, &$1, &$4 CLS_CC); }
 	|	VARIABLE ZEND_OBJECT_OPERATOR STRING { do_begin_variable_parse(CLS_C); fetch_simple_variable(&$2, &$1, 1 CLS_CC); do_fetch_property(&$$, &$2, &$3 CLS_CC); }
 	|	DOLLAR_OPEN_CURLY_BRACES expr '}' { do_begin_variable_parse(CLS_C);  fetch_simple_variable(&$$, &$2, 1 CLS_CC); }
 	|	DOLLAR_OPEN_CURLY_BRACES STRING '[' expr ']' '}' { do_begin_variable_parse(CLS_C);  fetch_array_begin(&$$, &$2, &$4 CLS_CC); }

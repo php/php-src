@@ -59,15 +59,17 @@ void init_op_array(zend_op_array *op_array, int initial_ops_size)
 {
 	op_array->type = ZEND_USER_FUNCTION;
 #if SUPPORT_INTERACTIVE
-	CLS_FETCH();
+	{
+		ELS_FETCH();
 
-	op_array->start_op_number = op_array->end_op_number = op_array->last_executed_op_number = 0;
-	op_array->backpatch_count = 0;
-	if (EG(interactive)) {
-		/* We must avoid a realloc() on the op_array in interactive mode, since pointers to constants
-		 * will become invalid
-		 */
-		initial_ops_size = 8192;
+		op_array->start_op_number = op_array->end_op_number = op_array->last_executed_op_number = 0;
+		op_array->backpatch_count = 0;
+		if (EG(interactive)) {
+			/* We must avoid a realloc() on the op_array in interactive mode, since pointers to constants
+			 * will become invalid
+			 */
+			initial_ops_size = 8192;
+		}
 	}
 #endif
 
@@ -218,7 +220,7 @@ zend_brk_cont_element *get_next_brk_cont_element(zend_op_array *op_array)
 }
 
 
-static void zend_update_extended_info(zend_op_array *op_array)
+static void zend_update_extended_info(zend_op_array *op_array CLS_DC)
 {
 	zend_op *opline = op_array->opcodes, *end=opline+op_array->last;
 
@@ -238,7 +240,7 @@ static void zend_update_extended_info(zend_op_array *op_array)
 		}
 		opline++;
 	}
-	opline = get_next_op(op_array);
+	opline = get_next_op(op_array CLS_CC);
 	opline->opcode = ZEND_EXT_STMT;
 	opline->op1.op_type = IS_UNUSED;
 	opline->op2.op_type = IS_UNUSED;
@@ -266,7 +268,7 @@ int pass_two(zend_op_array *op_array)
 		return 0;
 	}
 	if (CG(extended_info)) {
-		zend_update_extended_info(op_array);
+		zend_update_extended_info(op_array CLS_CC);
 	}
 	if (CG(handle_op_arrays)) {
 		zend_llist_apply_with_argument(&zend_extensions, (void (*)(void *, void *)) zend_extension_op_array_handler, op_array);

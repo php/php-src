@@ -86,8 +86,6 @@ static zend_alloc_globals alloc_globals;
 	p->pLast = (mem_header *) NULL;
 
 
-/* used by ISAPI and NSAPI */
-
 #if ZEND_DEBUG
 ZEND_API void *_emalloc(size_t size, char *filename, uint lineno)
 #else
@@ -95,6 +93,7 @@ ZEND_API void *_emalloc(size_t size)
 #endif
 {
 	mem_header *p;
+	ALS_FETCH();
 
 	HANDLE_BLOCK_INTERRUPTIONS();
 
@@ -143,6 +142,7 @@ ZEND_API void _efree(void *ptr)
 #endif
 {
 	mem_header *p = (mem_header *) ((char *)ptr - sizeof(mem_header) - PLATFORM_PADDING);
+	ALS_FETCH();
 
 #if ZEND_DEBUG
 	_mem_block_check(ptr, 1, filename, lineno);
@@ -202,6 +202,7 @@ ZEND_API void *_erealloc(void *ptr, size_t size)
 {
 	mem_header *p = (mem_header *) ((char *)ptr-sizeof(mem_header)-PLATFORM_PADDING);
 	mem_header *orig = p;
+	ALS_FETCH();
 
 	if (!ptr) {
 #if ZEND_DEBUG
@@ -319,6 +320,8 @@ ZEND_API int zend_set_memory_limit(unsigned int memory_limit)
 
 ZEND_API void start_memory_manager(void)
 {
+	ALS_FETCH();
+
 	AG(phead) = AG(head) = NULL;
 	
 #if MEMORY_LIMIT
@@ -334,6 +337,7 @@ ZEND_API void start_memory_manager(void)
 ZEND_API void shutdown_memory_manager(int silent, int clean_cache)
 {
 	mem_header *p, *t;
+	ALS_FETCH();
 
 	p=AG(head);
 	t=AG(head);
@@ -464,8 +468,12 @@ ZEND_API int _mem_block_check(void *ptr, int silent, char *filename, int lineno)
 
 ZEND_API void _full_mem_check(int silent, char *filename, uint lineno)
 {
-	mem_header *p = AG(head);
+	mem_header *p;
 	int errors=0;
+	ALS_FETCH();
+
+	p = AG(head);
+	
 
 	fprintf(stderr,"------------------------------------------------\n");
 	fprintf(stderr,"Full Memory Check at %s:%d\n", filename, lineno);
@@ -489,6 +497,7 @@ ZEND_API void _persist_alloc(void *ptr)
 #endif
 {
 	mem_header *p = (mem_header *) ((char *)ptr-sizeof(mem_header)-PLATFORM_PADDING);
+	ALS_FETCH();
 
 #if ZEND_DEBUG
 	_mem_block_check(ptr, 1, filename, lineno);

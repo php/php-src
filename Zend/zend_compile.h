@@ -202,7 +202,7 @@ void do_assign_ref(znode *result, znode *lvar, znode *rvar CLS_DC);
 void fetch_simple_variable(znode *result, znode *varname, int bp CLS_DC);
 void do_indirect_references(znode *result, znode *num_references, znode *variable CLS_DC);
 void do_fetch_global_or_static_variable(znode *varname, znode *static_assignment, int fetch_type CLS_DC);
-void do_fetch_globals(znode *varname);
+void do_fetch_globals(znode *varname CLS_DC);
 
 void fetch_array_begin(znode *result, znode *varname, znode *first_dim CLS_DC);
 void fetch_array_dim(znode *result, znode *parent, znode *dim CLS_DC);
@@ -233,7 +233,7 @@ void do_end_variable_parse(int type CLS_DC);
 
 void do_free(znode *op1 CLS_DC);
 
-void do_init_string(znode *result);
+void do_init_string(znode *result CLS_DC);
 void do_add_char(znode *result, znode *op1, znode *op2 CLS_DC);
 void do_add_string(znode *result, znode *op1, znode *op2 CLS_DC);
 void do_add_variable(znode *result, znode *op1, znode *op2 CLS_DC);
@@ -320,7 +320,7 @@ void do_extended_fcall_end(CLS_D);
 ZEND_API int require_file(zend_file_handle *file_handle CLS_DC);	
 ZEND_API int require_filename(char *filename CLS_DC);				
 ZEND_API zend_op_array *compile_files(int mark_as_ref CLS_DC, int file_count, ...);
-ZEND_API zend_op_array *v_compile_files(int mark_as_ref ELS_DC, int file_count, va_list files);
+ZEND_API zend_op_array *v_compile_files(int mark_as_ref CLS_DC, int file_count, va_list files);
 ZEND_API zend_op_array *compile_string(zval *source_string CLS_DC);	
 ZEND_API zend_op_array *compile_filename(zval *filename CLS_DC);
 inline int open_file_for_scanning(zend_file_handle *file_handle CLS_DC);
