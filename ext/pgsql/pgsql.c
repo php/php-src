@@ -1480,7 +1480,7 @@ PHP_FUNCTION(pg_last_oid)
 	zval **result;
 	PGresult *pgsql_result;
 	pgsql_result_handle *pg_result;
-	uint oid;
+	Oid oid;
 	char *oid_str;
 	
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &result)==FAILURE) {
@@ -1496,20 +1496,15 @@ PHP_FUNCTION(pg_last_oid)
 	} else if (oid > LONG_MAX) {
 		oid_str = (char *)emalloc(PGSQL_MAX_LENGTH_OF_LONG+1);
 		sprintf(oid_str, "%l", oid);
-		RETVAL_STRING(oid_str, 0);
+		RETURN_STRING(oid_str, 0);
 	}
-	else {
-		RETVAL_LONG((long)oid);
-	}
+	RETURN_LONG((long)oid);
 #else
 	Z_STRVAL_P(return_value) = (char *) PQoidStatus(pgsql_result);
-	Z_TYPE_P(return_value) = IS_STRING;
 	if (Z_STRVAL_P(return_value)) {
-		Z_STRLEN_P(return_value) = strlen(Z_STRVAL_P(return_value));
-		Z_STRVAL_P(return_value) = estrndup(Z_STRVAL_P(return_value), Z_STRLEN_P(return_value));
-	} else {
-		Z_STRVAL_P(return_value) = empty_string;
+		RETURN_STRING((Z_STRVAL_P(return_value), 1);
 	}
+	RETURN_STRING(empty_string, 0);
 #endif
 }
 /* }}} */
@@ -1608,6 +1603,7 @@ PHP_FUNCTION(pg_lo_create)
   	zval **pgsql_link = NULL;
 	PGconn *pgsql;
 	Oid pgsql_oid;
+	char *oid_str;
 	int id = -1;
 
 	switch(ZEND_NUM_ARGS()) {
@@ -1635,14 +1631,17 @@ PHP_FUNCTION(pg_lo_create)
 	   the object, probably (?) overrides this. (Jouni) 
 	*/
 
-	if ((pgsql_oid = lo_creat(pgsql, INV_READ|INV_WRITE))==0) {
+	if ((pgsql_oid = lo_creat(pgsql, INV_READ|INV_WRITE)) == InvalidOid) {
 		php_error(E_WARNING, "%s() unable to create PostgreSQL large object",
 				  get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
 	}
-
-	Z_LVAL_P(return_value) = pgsql_oid;
-	Z_TYPE_P(return_value) = IS_LONG;
+	if (pgsql_oid > LONG_MAX) {
+		oid_str = (char *)emalloc(PGSQL_MAX_LENGTH_OF_LONG+1);
+		sprintf(oid_str, "%l", pgsql_oid);
+		RETURN_STRING(oid_str, 0);
+	}
+	RETURN_LONG((long)pgsql_oid);
 }
 /* }}} */
 
@@ -1747,7 +1746,6 @@ PHP_FUNCTION(pg_lo_open)
 		}
 	}
 
-
 	pgsql_lofp = (pgLofp *) emalloc(sizeof(pgLofp));
 
 	if ((pgsql_lofd = lo_open(pgsql, pgsql_oid, pgsql_mode)) == -1) {
@@ -1786,10 +1784,6 @@ PHP_FUNCTION(pg_lo_open)
 		pgsql_lofp->conn = pgsql;
 		pgsql_lofp->lofd = pgsql_lofd;
 		ZEND_REGISTER_RESOURCE(return_value, pgsql_lofp, le_lofp);
-		/*
-		  Z_LVAL_P(return_value) = zend_list_insert(pgsql_lofp, le_lofp);
-		  Z_TYPE_P(return_value) = IS_LONG;
-		*/
 	}
 }
 /* }}} */
@@ -1822,7 +1816,7 @@ PHP_FUNCTION(pg_lo_close)
 		RETVAL_TRUE;
 	}
 
-	zend_list_delete(Z_LVAL_PP(pgsql_lofp));
+	zend_list_delete(Z_RESVAL_PP(pgsql_lofp));
 	return;
 }
 /* }}} */
@@ -1854,7 +1848,7 @@ PHP_FUNCTION(pg_lo_read)
 		RETURN_FALSE;
 	}
 
-	buf[nbytes] = 0;
+	buf[nbytes] = '\0';
 	RETURN_STRINGL(buf, nbytes, 0);
 }
 /* }}} */
@@ -1934,7 +1928,7 @@ PHP_FUNCTION(pg_lo_read_all)
 PHP_FUNCTION(pg_lo_import)
 {
 	zval *pgsql_link = NULL;
-	char *file_in;
+	char *file_in, *oid_str;
 	int id = -1, name_len;
 	int argc = ZEND_NUM_ARGS();
 	PGconn *pgsql;
@@ -1965,11 +1959,15 @@ PHP_FUNCTION(pg_lo_import)
 
 	oid = lo_import(pgsql, file_in);
 
-	if (oid > 0) {
-		RETURN_LONG((int)oid);
-	} else {
+	if (oid == InvalidOid) {
 		RETURN_FALSE;
+	} 
+	if (oid > LONG_MAX) {
+		oid_str = (char *)emalloc(PGSQL_MAX_LENGTH_OF_LONG+1);
+		sprintf(oid_str, "%l", oid);
+		RETURN_STRING(oid_str, 0);
 	}
+	RETURN_LONG((long)oid);
 }
 /* }}} */
 
