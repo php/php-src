@@ -1869,7 +1869,7 @@ ZEND_API void php_get_highlight_struct(zend_syntax_highlighter_ini *syntax_highl
 	syntax_highlighter_ini->highlight_string  = INI_STR("highlight.string");
 }
 
-/* {{{ proto bool highlight_file(string file_name)
+/* {{{ proto bool highlight_file(string file_name [, int return] )
    Syntax highlight a source file */
 PHP_FUNCTION(highlight_file)
 {
