@@ -477,7 +477,7 @@ static void load_wsdl_ex(char *struri, sdlCtx *ctx, int include)
 			} else if (strcmp(trav->name,"binding") == 0) {
 				xmlAttrPtr name = get_attribute(trav->properties, "name");
 				if (name && name->children && name->children->content) {
-					if (zend_hash_add(&ctx->bindings, name->children->content, strlen(name->children->content)+1,&trav, sizeof(xmlNodePtr), NULL) != NULL) {
+					if (zend_hash_add(&ctx->bindings, name->children->content, strlen(name->children->content)+1,&trav, sizeof(xmlNodePtr), NULL) != SUCCESS) {
 						php_error(E_ERROR,"SOAP-ERROR: Parsing WSDL (binding '%s' already defined)",name->children->content);
 					}
 				} else {
