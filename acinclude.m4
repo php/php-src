@@ -924,7 +924,7 @@ AC_DEFUN(PHP_ADD_LIBRARY_SKELETON,[
   case $1 in
   c|c_r|pthread*) ;;
   *) ifelse($3,,[
-    PHP_X_ADD_LIBRARY($1,$2,LIBS)
+    PHP_X_ADD_LIBRARY($1,$2,$5)
   ],[
     if test "$ext_shared" = "yes"; then
       PHP_X_ADD_LIBRARY($1,$2,$3)
@@ -942,7 +942,7 @@ dnl
 dnl add a library to the link line
 dnl
 AC_DEFUN(PHP_ADD_LIBRARY,[
-  PHP_ADD_LIBRARY_SKELETON([$1],[$2],[$3],[PHP_ADD_LIBRARY])
+  PHP_ADD_LIBRARY_SKELETON([$1],[$2],[$3],[PHP_ADD_LIBRARY],[LIBS])
 ])
 
 dnl
@@ -951,9 +951,9 @@ dnl
 dnl add a library to the link line (deferred)
 dnl
 AC_DEFUN(PHP_ADD_LIBRARY_DEFER,[
-  PHP_ADD_LIBRARY_SKELETON([$1],[$2],[$3],[PHP_ADD_LIBRARY_DEFER])
+  PHP_ADD_LIBRARY_SKELETON([$1],[$2],[$3],[PHP_ADD_LIBRARY_DEFER],[DLIBS])
 ])
-  
+
 dnl
 dnl PHP_ADD_LIBRARY_WITH_PATH(library, path[, shared-libadd])
 dnl
