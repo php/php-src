@@ -682,7 +682,6 @@ void do_receive_arg(int op, znode *var, znode *offset, znode *initialization, un
 
 void do_begin_function_call(znode *function_name CLS_DC)
 {
-	zend_op *opline ;
 	zend_function *function;
 	
 	zend_str_tolower(function_name->u.constant.value.str.val, function_name->u.constant.value.str.len);
@@ -694,8 +693,6 @@ void do_begin_function_call(znode *function_name CLS_DC)
 		return;
 	}
 	
-	opline = get_next_op(CG(active_op_array) CLS_CC);
-
 	switch (function->type) {
 		case ZEND_USER_FUNCTION:	{
 				zend_op_array *op_array = (zend_op_array *) function;
@@ -710,9 +707,6 @@ void do_begin_function_call(znode *function_name CLS_DC)
 			}
 			break;
 	}
-	opline->opcode = ZEND_INIT_FCALL;
-	SET_UNUSED(opline->op1);
-	SET_UNUSED(opline->op2);
 }
 
 
@@ -756,7 +750,11 @@ void do_end_function_call(znode *function_name, znode *result, znode *argument_l
 	zend_op *opline = get_next_op(CG(active_op_array) CLS_CC);
 	ELS_FETCH();
 	
-	opline->opcode = ZEND_DO_FCALL;
+	if (function_name->op_type==IS_CONST && !is_method) {
+		opline->opcode = ZEND_DO_FCALL;
+	} else {
+		opline->opcode = ZEND_DO_FCALL_BY_NAME;
+	}
 	opline->op1 = *function_name;
 	opline->result.u.var = get_temporary_variable(CG(active_op_array));
 	opline->result.op_type = IS_TMP_VAR;
@@ -779,8 +777,10 @@ void do_pass_param(znode *param, int op, int offset CLS_DC)
 	function_ptr = *function_ptr_ptr;
 	if (function_ptr) {
 		arg_types = function_ptr->common.arg_types;
+		opline->extended_value = ZEND_DO_FCALL;
 	} else {
 		arg_types = NULL;
+		opline->extended_value = ZEND_DO_FCALL_BY_NAME;
 	}
 
 	if (op == ZEND_SEND_VAL) {
@@ -1350,11 +1350,6 @@ void do_shell_exec(znode *result, znode *cmd CLS_DC)
 {
 	zend_op *opline = get_next_op(CG(active_op_array) CLS_CC);
 
-	opline->opcode = ZEND_INIT_FCALL;
-	SET_UNUSED(opline->op1);
-	SET_UNUSED(opline->op2);
-
-	opline = get_next_op(CG(active_op_array) CLS_CC);
 	switch (cmd->op_type) {
 		case IS_TMP_VAR:
 			opline->opcode = ZEND_SEND_VAL;
@@ -1365,6 +1360,7 @@ void do_shell_exec(znode *result, znode *cmd CLS_DC)
 	}
 	opline->op1 = *cmd;
 	opline->op2.u.opline_num = 0;
+	opline->extended_value = ZEND_DO_FCALL;
 	SET_UNUSED(opline->op2);
 
 	opline = get_next_op(CG(active_op_array) CLS_CC);
