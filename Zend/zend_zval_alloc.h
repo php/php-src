@@ -25,19 +25,14 @@
 #include "zend_globals_macros.h"
 #include "zend_alloc.h"
 
-#if ZEND_DEBUG
-
-# define ALLOC_ZVAL(z)	(z) = emalloc(sizeof(zval))
-# define FREE_ZVAL(z)	efree(z)
-
-#else /* !ZEND_DEBUG */
-
-extern zend_alloc_globals alloc_globals;
-
 typedef struct _zend_zval_list_entry {
 	struct _zend_zval_list_entry *next;
 } zend_zval_list_entry;
 
+
+#ifndef ZTS
+extern zend_alloc_globals alloc_globals;
+#endif
 
 #define ALLOC_ZVAL(z)									\
 	{													\
@@ -51,14 +46,14 @@ typedef struct _zend_zval_list_entry {
 	}
 
 
-#define FREE_ZVAL(z)											\
-	{															\
+#define FREE_ZVAL(z)												\
+	{																\
+		ALS_FETCH();												\
+																	\
 		((zend_zval_list_entry *) (z))->next = AG(zval_list_head);	\
 		AG(zval_list_head) = (zend_zval_list_entry *) (z);			\
 	}
 
-
-#endif /* !ZEND_DEBUG */
 
 #endif
 
