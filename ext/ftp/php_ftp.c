@@ -28,6 +28,8 @@
    +----------------------------------------------------------------------+
  */
 
+/* $Id$ */
+
 #include "php.h"
 
 #if HAVE_FTP
@@ -99,24 +101,39 @@ int PHP_MINIT_FUNCTION(INIT_FUNC_ARGS)
 	return SUCCESS;
 }
 
-/* {{{ proto int ftp_connect(string host)
+/* {{{ proto int ftp_connect(string host [, int port])
    Open a FTP stream */
 PHP_FUNCTION(ftp_connect)
 {
-	pval		*arg1;
+	pval		*arg1, *arg2;
 	int		id;
 	ftpbuf_t	*ftp;
+	short		port = 0;
 
 	/* arg1 - hostname
+	 * arg2 - [port]
 	 */
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
+	switch (ARG_COUNT(ht)) {
+	case 1:
+		if (getParameters(ht, 1, &arg1) == FAILURE) {
+			WRONG_PARAM_COUNT;
+		}
+		break;
+	case 2:
+		if (getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
+			WRONG_PARAM_COUNT;
+		}
+		convert_to_long(arg2);
+		port = arg2->value.lval;
+		break;
+	default:
 		WRONG_PARAM_COUNT;
 	}
 
 	convert_to_string(arg1);
 
 	/* connect */
-	ftp = ftp_open(arg1->value.str.val, 0);
+	ftp = ftp_open(arg1->value.str.val, htons(port));
 	if (ftp == NULL)
 		RETURN_FALSE;
 
