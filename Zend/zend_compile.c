@@ -915,6 +915,7 @@ ZEND_API int do_bind_function_or_class(zend_op *opline, HashTable *function_tabl
 				zend_hash_index_find(class_table, opline->op1.u.constant.value.lval, (void **) &ce);
 				(*ce->refcount)++;
 				if (zend_hash_add(class_table, opline->op2.u.constant.value.str.val, opline->op2.u.constant.value.str.len+1, ce, sizeof(zend_class_entry), NULL)==FAILURE) {
+					(*ce->refcount)--;
 					if (!compile_time) {
 						zend_error(E_ERROR, "Cannot redeclare class %s", opline->op2.u.constant.value.str.val);
 					}
@@ -1306,6 +1307,7 @@ void do_begin_class_declaration(znode *class_name, znode *parent_class_name CLS_
 			zval_dtor(&parent_class_name->u.constant);
 		} else {
 			runtime_inheritence = 1;
+			CG(class_entry).parent = NULL;
 		}
 	} else {
 		CG(class_entry).parent = NULL;
