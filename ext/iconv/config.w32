@@ -1,10 +1,11 @@
 // $Id$
 // vim: ft=javascript
 
-ARG_WITH("iconv", "iconv support", "no");
+ARG_WITH("iconv", "iconv support", "yes");
 
 if (PHP_ICONV != "no") {
-	if (CHECK_LIB("iconv.lib", "iconv", PHP_ICONV) && CHECK_HEADER_ADD_INCLUDE("iconv.h", "CFLAGS_ICONV", PHP_ICONV)) {
+	if (/*CHECK_LIB("iconv.lib", "iconv", PHP_ICONV) &&*/
+		   	CHECK_HEADER_ADD_INCLUDE("iconv.h", "CFLAGS_ICONV", PHP_ICONV)) {
 		EXTENSION("iconv", "iconv.c");
 		
 		AC_DEFINE("HAVE_ICONV", 1, "Define if iconv extension is enabled");

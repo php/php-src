@@ -5,9 +5,9 @@ ARG_WITH("xsl", "xsl support", "no");
 
 if (PHP_XSL != "no") {
 	if (PHP_DOM == "yes" && PHP_LIBXML == "yes") {
-		if (CHECK_LIB("libxslt.lib", "xsl", PHP_XSL) && 
-				CHECK_LIB("libxml2.lib", "xsl") &&
+		if (CHECK_LIB("libxslt_a.lib;libxslt.lib", "xsl", PHP_XSL) && 
 				CHECK_HEADER_ADD_INCLUDE("libxslt\\xslt.h", "CFLAGS_XSL")) {
+
 			EXTENSION("xsl", "php_xsl.c xsltprocessor.c", PHP_XSL_SHARED);
 			AC_DEFINE("HAVE_XSL", 1, "Define if xsl extension is enabled");
 			if (! PHP_XSL_SHARED) {
