@@ -1810,8 +1810,8 @@ static int _php_ibase_var_pval(pval *val, void *data, int type, int len, int sca
 				sprintf(dt, "%%0.%df", -scale);
 				val->value.str.len = sprintf (string_data, dt, number/f );
 			} else {
-				val->value.str.len = sprintf (string_data, "%Ld",
-					(ISC_INT64) (*((ISC_INT64 *)data)));
+				val->value.str.len = sprintf (string_data, "%.0f",
+								(double)(ISC_INT64) (*((ISC_INT64 *)data)));
 			}
 
 			val->value.str.val = estrdup(string_data);
