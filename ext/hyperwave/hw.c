@@ -904,7 +904,7 @@ PHP_FUNCTION(hw_connect)
 }
 /* }}} */
 
-/* {{{ proto int hw_pconnect(string host, int port [string username [, string password]])
+/* {{{ proto int hw_pconnect(string host, int port [, string username [, string password]])
    Connect to the Hyperwave server persistent */
 PHP_FUNCTION(hw_pconnect)
 {

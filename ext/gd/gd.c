@@ -1689,7 +1689,7 @@ PHP_FUNCTION(imagecopy)
 }
 /* }}} */
 
-/* {{{ proto int imagecopyresized(int dst_im, int src_im, int dst_x, int dst_y, int src_x, int src_y, int dst_w, int dst_h, int src_w, int src_h);
+/* {{{ proto int imagecopyresized(int dst_im, int src_im, int dst_x, int dst_y, int src_x, int src_y, int dst_w, int dst_h, int src_w, int src_h)
    Copy and resize part of an image */
 PHP_FUNCTION(imagecopyresized)
 {
