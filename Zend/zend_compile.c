@@ -1650,10 +1650,6 @@ void zend_do_begin_new_object(znode *new_token, znode *class_name CLS_DC)
 	opline->op1 = *class_name;
 	SET_UNUSED(opline->op2);
 
-	/* *result = opline->result;
-	zend_do_assign(result, variable, &opline->result CLS_CC); */
-	
-
 	new_token->u.opline_num = get_next_op_number(CG(active_op_array));
 	opline = get_next_op(CG(active_op_array) CLS_CC);
 	opline->opcode = ZEND_JMP_NO_CTOR;
