@@ -1,0 +1,469 @@
+/*
+   +----------------------------------------------------------------------+
+   | PHP version 4.0                                                      |
+   +----------------------------------------------------------------------+
+   | Copyright (c) 1997, 1998, 1999, 2000 The PHP Group                   |
+   +----------------------------------------------------------------------+
+   | This source file is subject to version 2.02 of the PHP license,      |
+   | that is bundled with this package in the file LICENSE, and is        |
+   | available at through the world-wide-web at                           |
+   | http://www.php.net/license/2_02.txt.                                 |
+   | If you did not receive a copy of the PHP license and are unable to   |
+   | obtain it through the world-wide-web, please send a note to          |
+   | license@php.net so we can mail you a copy immediately.               |
+   +----------------------------------------------------------------------+
+   | Authors: Brendan W. McAdams <brendan@plexmedia.com>                  |
+   |              Doug DeJulio <ddj@redhat.com>                           |
+   +----------------------------------------------------------------------+
+ */ 
+/* 
+*	cvvs.c $Revision$ - PHP4 Interface to the RedHat CCVS API
+*	 -------
+*	 Interfaces RedHat's CCVS [Credit Card Verification System] <http://www.redhat.com/products/ccvs/>
+*	 This code is ported from an original php3 interface written by RedHat's Doug DeJulio <ddj@redhat.com>
+*	 The code was subsequently ported to the Zend API by Brendan W. McAdams <brendan@plexmedia.com>
+*	 -------
+*/
+
+/* 
+*	Code started on 2000.07.24@09.04.EST by Brendan W. McAdams <brendan@plexmedia.com>
+*	$Revision$
+*/
+
+static char const cvsid[] = "$Id$";
+
+#include <php.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ccvs.h>
+
+/* Full Functions (The actual CCVS functions and any internal php hooked functions such as MINFO) */
+
+ZEND_FUNCTION(ccvs_init) /* cv_init() */
+{
+  zval **name;
+  void *vsess;
+  char *p;
+  
+  if ((ZEND_NUM_ARGS() != 1) || (zend_get_parameters_ex(1, &name) != SUCCESS)) 
+  /* accept only SUCCESS in case something weird gets returned instead of 'FAILURE' on fail */
+    {
+      WRONG_PARAM_COUNT;
+    }
+
+  convert_to_string_ex(name);
+
+  vsess = cv_init((*name)->value.str.val);  
+  
+  /* 
+  *		-- In the case that we don't run error checking on the return value... -- 
+  *		On 32 bit systems a failure of the cv_init call returns 0,0,0,0 ; on 64 bit systems its 0,0,0,0,0,0,0,0 
+  *		This unconsistent error (not to mention a string of comma seperated zeros in and of itself) is hard to
+  * 	Trap for in PHP (or any language).  However, we can also grab cv_init to return CV_SESS_BAD on 
+  *		failure at the C API level, and return a set, fixed error code to the user which the user then knows to 
+  *		trap for... e.g. a NULL Value which PHP can then trap by:
+  *		if (!($string = cv_init($config)) { or some such...
+  */
+  	
+  if (vsess == CV_SESS_BAD) /* if the cv_init() call failed... */
+  { 
+  	
+  		p = ""; /* set p, the value we will return, to NULL */
+  	
+  } 
+  else /* we got a valid session returned, which means it worked */
+  {
+  
+  p = hks_ptr_ptrtostring(vsess);   /* Convert the (void*) into a string representation. */
+	
+  }
+  
+  RETVAL_STRING(p, 1);
+  
+  free(p);
+  return;
+}
+
+ZEND_FUNCTION(ccvs_done) /* cv_done() */
+{
+  zval **sess;
+  void *vsess;
+
+  if ((ZEND_NUM_ARGS() != 1) || (zend_get_parameters_ex(1, &sess) != SUCCESS)) /* accept only SUCCESS in case something weird gets returned instead of 'FAILURE' on fail */
+    {
+      WRONG_PARAM_COUNT;
+    }
+
+  convert_to_string_ex(sess);
+
+  /* Convert from the string representation back to a (void*) */
+  vsess = hks_ptr_stringtoptr((*sess)->value.str.val);
+  cv_done(vsess);
+
+  RETURN_STRING("OK", 1);
+}
+
+ZEND_FUNCTION(ccvs_new) /* cv_new() */
+{
+  zval **psess;
+  zval **pinvoice;
+  void *sess;
+  char *invoice;
+  int r;
+
+  if ((ZEND_NUM_ARGS() != 2) || (zend_get_parameters_ex(2, &psess, &pinvoice) != SUCCESS)) /* accept only SUCCESS in case something weird gets returned instead of 'FAILURE' on fail */
+  {
+    WRONG_PARAM_COUNT;
+  }
+
+  convert_to_string_ex(psess);
+  sess = hks_ptr_stringtoptr((*psess)->value.str.val);
+
+  convert_to_string_ex(pinvoice);
+  invoice = (*pinvoice)->value.str.val;
+
+  r = cv_new(sess, invoice);
+
+  RETURN_STRING(cv_ret2str(r), 1);
+}
+
+ZEND_FUNCTION(ccvs_add) /* cv_add() */
+{
+  zval **psess;
+  zval **pinvoice;
+  zval **pargtype;
+  zval **pargval;
+  void *sess;
+  char *invoice;
+  int argtype;
+  char *argval;
+  register int r;
+
+  if ((ZEND_NUM_ARGS() != 4) || (zend_get_parameters_ex(4, &psess, &pinvoice, &pargtype, &pargval) != SUCCESS)) /* accept only SUCCESS in case something weird gets returned instead of 'FAILURE' on fail */
+  {
+    WRONG_PARAM_COUNT;
+  }
+
+  /* Get meaningful arguments. */
+  convert_to_string_ex(psess);
+  convert_to_string_ex(pinvoice);
+  convert_to_string_ex(pargtype);
+  convert_to_string_ex(pargval);
+  sess = hks_ptr_stringtoptr((*psess)->value.str.val);
+  invoice = (*pinvoice)->value.str.val;
+  argtype = cv_str2arg((*pargtype)->value.str.val);
+  argval = (*pargval)->value.str.val;
+
+  r = cv_add(sess, invoice, argtype, argval);
+
+  RETURN_STRING(cv_ret2str(r), 1);
+}
+
+/*
+*	cv_create can't be implemented because of vararg limits in PHP3's C API. 
+*	(COMMENT BY DDJ [from original code])
+*
+*	BWM: I looked into this, checking in on what cv_create was; it is a deprecated function left in for 
+*	backwards compatibility according
+*  to the CCVS C API ref.  I didn't try to implement it for that reason.  If anyone needs it, they can add it in
+*	themselves I'm sure.
+*/
+ZEND_FUNCTION(ccvs_delete) /* cv_delete() */
+{
+  zval **psess;
+  zval **pinvoice;
+  void *sess;
+  char *invoice;
+  register int r;
+
+  if ((ZEND_NUM_ARGS() != 2) || (zend_get_parameters_ex(2, &psess, &pinvoice) != SUCCESS)) /* accept only SUCCESS in case something weird gets returned instead of 'FAILURE' on fail */
+  {
+    WRONG_PARAM_COUNT;
+  }
+
+  convert_to_string_ex(psess);
+  convert_to_string_ex(pinvoice);
+  invoice = (*pinvoice)->value.str.val;
+  sess = hks_ptr_stringtoptr((*psess)->value.str.val);
+
+  r = cv_delete(sess, invoice);
+
+  RETURN_STRING(cv_ret2str(r), 1);
+}
+
+ZEND_FUNCTION(ccvs_auth) /* cv_auth() */
+{
+  zval **psess;
+  zval **pinvoice;
+  void *sess;
+  char *invoice;
+  register int r;
+
+  if ((ZEND_NUM_ARGS() != 2) || (zend_get_parameters_ex(2, &psess, &pinvoice) != SUCCESS))  /* accept only SUCCESS in case something weird gets returned instead of 'FAILURE' on fail */
+  {
+    WRONG_PARAM_COUNT;
+  }
+
+  convert_to_string_ex(psess);
+  convert_to_string_ex(pinvoice);
+  invoice = (*pinvoice)->value.str.val;
+  sess = hks_ptr_stringtoptr((*psess)->value.str.val);
+
+  r = cv_auth(sess, invoice);
+
+  RETURN_STRING(cv_ret2str(r), 1);
+}
+
+ZEND_FUNCTION(ccvs_return) /* cv_return() */
+{
+  zval **psess;
+  zval **pinvoice;
+  void *sess;
+  char *invoice;
+  register int r;
+
+  if ((ZEND_NUM_ARGS() != 2) || (zend_get_parameters_ex(2, &psess, &pinvoice) != SUCCESS))  /* accept only SUCCESS in case something weird gets returned instead of 'FAILURE' on fail */
+  {
+    WRONG_PARAM_COUNT;
+  }
+
+  convert_to_string_ex(psess);
+  convert_to_string_ex(pinvoice);
+  invoice = (*pinvoice)->value.str.val;
+  sess = hks_ptr_stringtoptr((*psess)->value.str.val);
+
+  r = cv_return(sess, invoice);
+
+  RETURN_STRING(cv_ret2str(r), 1);
+}
+
+ZEND_FUNCTION(ccvs_reverse) /* cv_reverse() */
+{
+  zval **psess;
+  zval **pinvoice;
+  void *sess;
+  char *invoice;
+  register int r;
+
+  if ((ZEND_NUM_ARGS() != 2) || (zend_get_parameters_ex(2, &psess, &pinvoice)  != SUCCESS))  /* accept only SUCCESS in case something weird gets returned instead of 'FAILURE' on fail */
+  {
+    WRONG_PARAM_COUNT;
+  }
+
+  convert_to_string_ex(psess);
+  convert_to_string_ex(pinvoice);
+  invoice = (*pinvoice)->value.str.val;
+  sess = hks_ptr_stringtoptr((*psess)->value.str.val);
+
+  r = cv_reverse(sess, invoice);
+
+  RETURN_STRING(cv_ret2str(r), 1);
+}
+
+ZEND_FUNCTION(ccvs_sale) /* cv_sale() */
+{
+  zval **psess;
+  zval **pinvoice;
+  void *sess;
+  char *invoice;
+  register int r;
+
+  if ((ZEND_NUM_ARGS() != 2) || (zend_get_parameters_ex(ht, 2, &psess, &pinvoice) != SUCCESS))  /* accept only SUCCESS in case something weird gets returned instead of 'FAILURE' on fail */
+  {
+    WRONG_PARAM_COUNT;
+  }
+
+  convert_to_string_ex(psess);
+  convert_to_string_ex(pinvoice);
+  invoice = (*pinvoice)->value.str.val;
+  sess = hks_ptr_stringtoptr((*psess)->value.str.val);
+
+  r = cv_sale(sess, invoice);
+
+  RETURN_STRING(cv_ret2str(r), 1);
+}
+
+ZEND_FUNCTION(ccvs_void) /* cv_void() */
+{
+  zval **psess;
+  zval **pinvoice;
+  void *sess;
+  char *invoice;
+  register int r;
+
+  if ((ZEND_NUM_ARGS() != 2) || (zend_get_parameters_ex(2, &psess, &pinvoice) != SUCCESS))  /* accept only SUCCESS in case something weird gets returned instead of 'FAILURE' on fail */
+  {
+    WRONG_PARAM_COUNT;
+  }
+
+  convert_to_string_ex(psess);
+  convert_to_string_ex(pinvoice);
+  invoice = (*pinvoice)->value.str.val;
+  sess = hks_ptr_stringtoptr((*psess)->value.str.val);
+
+  r = cv_void(sess, invoice);
+
+  RETURN_STRING(cv_ret2str(r), 1);
+}
+
+ZEND_FUNCTION(ccvs_status) /* cv_status() */
+{
+  zval **psess;
+  zval **pinvoice;
+  void *sess;
+  char *invoice;
+  register int r;
+
+  if ((ZEND_NUM_ARGS() != 2) || (zend_get_parameters_ex(2, &psess, &pinvoice) != SUCCESS))  /* accept only SUCCESS in case something weird gets returned instead of 'FAILURE' on fail */
+  {
+    WRONG_PARAM_COUNT;
+  }
+
+  convert_to_string_ex(psess);
+  convert_to_string_ex(pinvoice);
+  invoice = (*pinvoice)->value.str.val;
+  sess = hks_ptr_stringtoptr((*psess)->value.str.val);
+
+  r = cv_status(sess, invoice);
+
+  RETURN_STRING(cv_stat2str(r), 1);
+}
+
+ZEND_FUNCTION(ccvs_count) /* cv_count() */
+{
+  zval **psess;
+  zval **ptype;
+  void *sess;
+  int type;
+  register int r;
+
+  if ((ZEND_NUM_ARGS() != 2) || (zend_get_parameters_ex(2, &psess, &ptype) != SUCCESS))  /* accept only SUCCESS in case something weird gets returned instead of 'FAILURE' on fail */
+  {
+    WRONG_PARAM_COUNT;
+  }
+
+  convert_to_string_ex(psess);
+  convert_to_string_ex(ptype);
+  type = cv_str2stat((*ptype)->value.str.val);
+  sess = hks_ptr_stringtoptr((*psess)->value.str.val);
+
+  r = cv_count(sess, type);
+
+  RETURN_LONG(r);
+}
+
+ZEND_FUNCTION(ccvs_lookup) /* cv_lookup() */
+{
+  zval **psess;
+  zval **ptype;
+  zval **pinum;
+  void *sess;
+  int type;
+  long inum;
+  register int r;
+
+  if ((ZEND_NUM_ARGS() != 3) || (zend_get_parameters_ex(3, &psess, &ptype, &pinum) != SUCCESS))  /* accept only SUCCESS in case something weird gets returned instead of 'FAILURE' on fail */
+  {
+    WRONG_PARAM_COUNT;
+  }
+
+  convert_to_string_ex(psess);
+  sess = hks_ptr_stringtoptr((*psess)->value.str.val);
+  convert_to_string_ex(ptype);
+  type = cv_str2stat((*ptype)->value.str.val);
+  convert_to_long_ex(pinum);
+  inum = (*pinum)->value.lval;
+
+  r = cv_lookup(sess, type, inum);
+
+  RETURN_STRING(cv_textvalue(sess), 1);
+}
+
+ZEND_FUNCTION(ccvs_report) /* cv_report() */
+{
+  zval **psess;
+  zval **ptype;
+  void *sess;
+  int type;
+  long inum;
+  register int r;
+
+  if ((ZEND_NUM_ARGS() != 2) || (zend_get_parameters_ex(2, &psess, &ptype) != SUCCESS))  /* accept only SUCCESS in case something weird gets returned instead of 'FAILURE' on fail */
+  {
+    WRONG_PARAM_COUNT;
+  }
+
+  convert_to_string_ex(psess);
+  sess = hks_ptr_stringtoptr((*psess)->value.str.val);
+  convert_to_string_ex(ptype);
+  type = cv_str2rep((*ptype)->value.str.val);
+
+  r = cv_report(sess, type);
+
+  RETURN_STRING(cv_stat2str(r), 1);
+}
+
+ZEND_FUNCTION(ccvs_command) /* cv_command() */
+{
+  zval **psess;
+  zval **ptype;
+  zval **pargval;
+  void *sess;
+  int type;
+  register int r;
+  char *argval;
+
+  if ((ZEND_NUM_ARGS() != 3) || (zend_get_parameters_ex(3, &psess, &ptype, &pargval) != SUCCESS))  /* accept only SUCCESS in case something weird gets returned instead of 'FAILURE' on fail */
+  {
+    WRONG_PARAM_COUNT;
+  }
+
+  convert_to_string_ex(psess);
+  sess = hks_ptr_stringtoptr((*psess)->value.str.val);
+  convert_to_string_ex(ptype);
+  type = cv_str2cmd((*ptype)->value.str.val);
+  convert_to_string_ex(pargval);
+  argval = (*pargval)->value.str.val;
+
+  r = cv_command(sess, type, argval);
+
+  RETURN_STRING(cv_stat2str(r), 1);
+}
+
+ZEND_FUNCTION(ccvs_textvalue) /* cv_textvalue() */
+{
+  zval **psess;
+  void *sess;
+
+  if ((ZEND_NUM_ARGS() != 1) || (zend_get_parameters_ex(1, &psess) != SUCCESS))  /* accept only SUCCESS in case something weird gets returned instead of 'FAILURE' on fail */
+  {
+    WRONG_PARAM_COUNT;
+  }
+
+  convert_to_string_ex(psess);
+  sess = hks_ptr_stringtoptr((*psess)->value.str.val);
+
+  RETURN_STRING(cv_textvalue(sess), 1);
+}
+
+/*
+*	Our Info Function which reports info on this module out to PHP's phpinfo() function 
+*	Brendan W. McAdams <brendan@plexmedia.com> on 2000.07.26@16:22.EST
+*/
+
+PHP_MINFO_FUNCTION(ccvs)
+{
+    php_info_print_table_start();
+    php_info_print_table_header(2, "RedHat CCVS support", "enabled");
+    php_info_print_table_row(2,"CCVS Support by","Brendan W. McAdams &lt;brendan@plexmedia.com&gt;");
+    php_info_print_table_row(2,"Release ID",cvsid);
+    php_info_print_table_end();  
+    
+    /*  DISPLAY_INI_ENTRIES(); */
+    
+    /*
+    *	In the future, we will probably have entries in php.ini for runtime config, in which case we will
+    *  Uncomment the DISPLAY_INI_ENTRIES call...
+    */
+    
+}
