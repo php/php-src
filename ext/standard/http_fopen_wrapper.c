@@ -271,11 +271,28 @@ FILE *php_fopen_url_wrap_http(const char *path, char *mode, int options, int *is
 	if (!reqok) {
 		SOCK_FCLOSE(*socketd);
 		*socketd = 0;
-		php_url_free(resource);
 		if (location[0] != '\0') {
 			zval **response_header_new, *entry, **entryp;
+			char new_path[512];
 
-			fp = php_fopen_url_wrap_http(location, mode, options, issock, socketd, opened_path TSRMLS_CC);
+			*new_path='\0';
+			if (strlen(location)<8 || strncasecmp(location, "http://", 7)) {
+				strcpy(new_path, "http://");
+				strncat(new_path, resource->host, sizeof(new_path)-strlen(new_path)-1);
+				if (resource->port != 80) {
+					snprintf(new_path+strlen(new_path), sizeof(new_path)-strlen(new_path)-1, ":%d", resource->port);
+				}
+				if (*location != '/') {
+					php_dirname(resource->path, strlen(resource->path));
+					snprintf (new_path+strlen(new_path), sizeof(new_path)-strlen(new_path)-1, "%s/", resource->path);
+				}
+				strncat(new_path, location, sizeof(new_path)-strlen(new_path)-1);
+			}
+			else {
+				strncpy(new_path, location, sizeof(new_path));
+			}
+			php_url_free(resource);
+			fp = php_fopen_url_wrap_http(new_path, mode, options, issock, socketd, opened_path TSRMLS_CC);
 			if (zend_hash_find(EG(active_symbol_table), "http_response_header", sizeof("http_response_header"), (void **) &response_header_new) == SUCCESS) {
 				entryp = &entry;
 				MAKE_STD_ZVAL(entry);
@@ -290,6 +307,7 @@ FILE *php_fopen_url_wrap_http(const char *path, char *mode, int options, int *is
 			}
 			goto out;
 		} else {
+			php_url_free(resource);
 			fp = NULL;
 			goto out;
 		}
