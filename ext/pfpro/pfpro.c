@@ -107,7 +107,7 @@ PHP_RSHUTDOWN_FUNCTION(pfpro)
 	PFPROLS_FETCH();
 
 	if (PFPROG(initialized) == 1) {
-		PNCleanup();
+		pfproCleanup();
 	}
 
     return SUCCESS;
@@ -119,7 +119,7 @@ PHP_MINFO_FUNCTION(pfpro)
 {
 	php_info_print_table_start();
 	php_info_print_table_header(2, "Verisign Payflow Pro support", "enabled");
-	php_info_print_table_row(2, "libpfpro version", PNVersion());
+	php_info_print_table_row(2, "libpfpro version", pfproVersion());
 	php_info_print_table_end();
 
 	DISPLAY_INI_ENTRIES();
@@ -134,12 +134,12 @@ PHP_FUNCTION(pfpro_version)
 		WRONG_PARAM_COUNT;
 	}
 
-	RETURN_STRING(PNVersion(), 1);
+	RETURN_STRING((char *)pfproVersion(), 1);
 }
 /* }}} */
 
 /* {{{ proto void pfpro_init()
-   Initialises the Payflow Pro library */
+   Initializes the Payflow Pro library */
 PHP_FUNCTION(pfpro_init)
 {
 	PFPROLS_FETCH();
@@ -148,7 +148,7 @@ PHP_FUNCTION(pfpro_init)
 		WRONG_PARAM_COUNT;
 	}
 
-	PNInit();
+	pfproInit();
 
 	PFPROG(initialized) = 1;
 
@@ -166,7 +166,7 @@ PHP_FUNCTION(pfpro_cleanup)
 		WRONG_PARAM_COUNT;
 	}
 
-	PNCleanup();
+	pfproCleanup();
 
 	PFPROG(initialized) = 0;
 
@@ -180,7 +180,7 @@ PHP_FUNCTION(pfpro_process_raw)
 {
 	zval ***args;
 
-	char *parmlist;
+	char *parmlist = NULL;
 	char *address = NULL;
 	int port = PFPROG(defaultport);
 	int timeout = PFPROG(defaulttimeout);
@@ -191,10 +191,12 @@ PHP_FUNCTION(pfpro_process_raw)
 
 	int freeaddress = 0;
 
-	/* No, I don't like that Signio tell you to use a
-	   fixed length buffer either */
-
+#if PFPRO_VERSION < 3
 	char response[512] = "";
+#else
+	int context;
+	char *response;
+#endif
 
 	PFPROLS_FETCH();
 
@@ -269,20 +271,28 @@ PHP_FUNCTION(pfpro_process_raw)
 	printf("Proxy password: >%s<\n", proxyPassword);
 #endif
 
+#if PFPRO_VERSION < 3
 	/* Blank the response buffer */
-
 	memset(response, 0, sizeof(response));
+#endif
 
-	/* Initialise the library if needed */
+	/* Initialize the library if needed */
 
 	if (PFPROG(initialized) == 0) {
-		PNInit();
+		pfproInit();
 		PFPROG(initialized) = 1;
 	}
 
 	/* Perform the transaction */
 
+#if PFPRO_VERSION < 3
 	ProcessPNTransaction(address, port, proxyAddress, proxyPort, proxyLogon, proxyPassword, parmlist, strlen(parmlist), timeout, response);
+#else
+	pfproCreateContext(&context, address, port, timeout, proxyAddress, proxyPort, proxyLogon, proxyPassword);
+	pfproSubmitTransaction(context, parmlist, strlen(parmlist), &response);
+	//pfproCompleteTransaction(response);
+	pfproDestroyContext(context);
+#endif
 
 	if (freeaddress) {
 		efree(address);
@@ -304,6 +314,7 @@ PHP_FUNCTION(pfpro_process)
 	zval **entry;
 	int pass;
 
+	char *parmlist = NULL;
 	char *address = NULL;
 	int port = PFPROG(defaultport);
 	int timeout = PFPROG(defaulttimeout);
@@ -312,22 +323,21 @@ PHP_FUNCTION(pfpro_process)
 	char *proxyLogon = PFPROG(proxylogon);
 	char *proxyPassword = PFPROG(proxypassword);
 
+	int parmlength = 0;
 	int freeaddress = 0;
 
-	char *parmlist = NULL;
-	int parmlength = 0;
-
-	/* No, I don't like that Signio tell you to use a
-	   fixed length buffer either */
-
+#if PFPRO_VERSION < 3
 	char response[512] = "";
+#else
+	int context;
+	char *response;
+#endif
 
 	char tmpbuf[128];
-	char *rsppos, *valpos;
 
     char buf[128], sbuf[128];
     char *p1, *p2, *p_end,          /* Pointers for string manipulation */
-        *sp1, *sp2, *sp_end,
+        *sp1, *sp2,
         *pdelim1="&", *pdelim2="=";
 
 	PFPROLS_FETCH();
@@ -514,41 +524,32 @@ PHP_FUNCTION(pfpro_process)
 		RETURN_FALSE;
 	}
 
+#if PFPRO_VERSION < 3
 	/* Blank the response buffer */
-
 	memset(response, 0, sizeof(response));
+#endif
 
-	/* Initialise the library if needed */
+	/* Initialize the library if needed */
 
 	if (PFPROG(initialized) == 0) {
-		PNInit();
+		pfproInit();
 		PFPROG(initialized) = 1;
 	}
 
 	/* Perform the transaction */
 
-	ProcessPNTransaction(address, port, proxyAddress, proxyPort, proxyLogon, proxyPassword, parmlist, parmlength, timeout, response);
+#if PFPRO_VERSION < 3
+	ProcessPNTransaction(address, port, proxyAddress, proxyPort, proxyLogon, proxyPassword, parmlist, strlen(parmlist), timeout, response);
+#else
+	pfproCreateContext(&context, address, port, timeout, proxyAddress, proxyPort, proxyLogon, proxyPassword);
+	pfproSubmitTransaction(context, parmlist, strlen(parmlist), &response);
+	//pfproCompleteTransaction(response);
+	pfproDestroyContext(context);
+#endif
 
 	if (freeaddress) {
 		efree(address);
 	}
-
-
-#if 0
-	/* Decode the response back into a PHP array */
-
-	rsppos = strtok(response, "&");
-
-	do {
-		valpos = strchr(rsppos, '=');
-		if (valpos) {
-			strncpy(tmpbuf, rsppos, valpos - rsppos);
-			tmpbuf[valpos - rsppos] = 0;
-			add_assoc_string(return_value, tmpbuf, valpos + 1, 1);
-		}
-
-	} while (rsppos = strtok(NULL, "&"));
-#else
 
 
 	/* This final chunk of code is to walk the string returned by Signio
@@ -606,7 +607,6 @@ PHP_FUNCTION(pfpro_process)
 		add_assoc_string(return_value, &buf[0], &sbuf[0], 1);
 	}
 
-#endif
 
 }
 /* }}} */
