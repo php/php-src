@@ -240,9 +240,6 @@ ZEND_API int add_property_stringl(zval *arg, char *key, char *str, uint length, 
 																										\
 		if (zend_hash_find(symtable, (name), (name_length), (void **) &orig_var)==SUCCESS				\
 			&& PZVAL_IS_REF(*orig_var)) {																\
-			int locks = (*orig_var)->EA.locks;															\
-			int refcount = (*orig_var)->refcount;														\
-																										\
 			var->refcount = (*orig_var)->refcount;														\
 			var->EA.locks = (*orig_var)->EA.locks;														\
 			var->EA.is_ref = 1;																			\
