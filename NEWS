@@ -7,7 +7,6 @@ PHP 4                                                                      NEWS
 - Fixed a buffer overflow in the RFC-1867 file upload code (Stefan)
 - Fixed a crash in the session module (Yasuo)
 - Fixed a crash in the pspell module (Yasuo)
-- Fixed configuration problem as shared extension for fdf (Rui)
 - Changed the default output encoding of mbstring 'pass' to fix 
   initialization problem (Rui)
 
