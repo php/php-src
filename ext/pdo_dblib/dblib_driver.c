@@ -48,7 +48,7 @@ static int dblib_fetch_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *info TSRMLS
 	if (einfo->dberr == SYBESMSG && einfo->lastmsg) {
 		msg = einfo->lastmsg;
 	} else {
-		msg = einfo->dberr;
+		msg = einfo->dberrstr;
 	}
 
 	spprintf(&message, 0, "%s [%d] (severity %d)",
