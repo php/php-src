@@ -963,12 +963,14 @@ static void _php_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		 * and add a pointer to it with hashed_details as the key.
 		 */
 		if ( (zend_hash_find(&EG(regular_list), hashed_details, hashed_details_length + 1, (void *) &index_ptr) == SUCCESS) ) {
-			int type, xlink;
+			int type;
+			long xlink;
 			void *ptr;
+			
 			if (Z_TYPE_P(index_ptr) != le_index_ptr) {
 				RETURN_FALSE;
 			}
-			xlink = (int) index_ptr->ptr;
+			xlink = (long) index_ptr->ptr;
 			ptr = zend_list_find(xlink, &type);	 /* check if the xlink is still there */
 			if (ptr && (type == le_link || type == le_plink)) {
 				zend_list_addref(xlink);
