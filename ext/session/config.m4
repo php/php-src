@@ -31,6 +31,7 @@ if test "$PHP_TRANS_SID" = "yes"; then
 fi
 
 if test "$PHP_SESSION" != "no"; then
+  AC_CHECK_FUNCS(pread pwrite)
   PHP_EXTENSION(session,$ext_shared)
   PHP_SUBST(SESSION_SHARED_LIBADD)
 fi
