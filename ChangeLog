@@ -1,3 +1,37 @@
+2001-09-23  Andi Gutmans  <andi@zend.com>
+
+    * main/rfc1867.c:
+    - Commit fix for bug #11998 by Ralf Bolte <r.bolte@gmx.net>
+
+2001-09-23  Jeroen van Wolffelaar  <jeroen@A-Eskwadraat.nl>
+
+    * ext/cybercash/cyberlib.php
+      ext/standard/basic_functions.c
+      ext/standard/php_string.h
+      ext/standard/string.c:
+    Make chop the alias and rtrim the main function, in order to get automagically
+    generated alias-listings correct.
+
+2001-09-23  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/mcrypt/mcrypt.c:
+    - Don't return from the function, so that mcrypt get properly initialized
+      (fix for bug #13399)
+
+    * ext/mcrypt/mcrypt.c
+      ext/mcrypt/php_mcrypt.h:
+    - Added mcrypt_generic_deinit and added a warning about mcrypt_generic_end
+      being deprecated.
+    - Reordened constants, and added MCRYPT_3DES to the 2.4 set of constants
+
+2001-09-23  Rui Hirokawa  <louis@cityfujisawa.ne.jp>
+
+    * ext/mbstring/EXPERIMENTAL: mbstring is no more in experimental status.
+
+2001-09-23  Martin Jansen  <mail@martin-jansen.de>
+
+    * pear/Cache/Graphics.php: * fixed bug when generating JPEG image
+
 2001-09-22  Jani Taskinen  <sniper@iki.fi>
 
     * ext/mcrypt/config.m4:
