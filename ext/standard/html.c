@@ -128,11 +128,11 @@ static entity_table_t ent_uni_338_402[] = {
 static entity_table_t ent_uni_spacing[] = {
 	/* 710 */
 	"circ",
-	/* 711 - 731 */
+	/* 711 - 730 */
 	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
 	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-	/* 732 */
-	"tilde",
+	/* 731 - 732 */
+	NULL, "tilde"
 };
 
 static entity_table_t ent_uni_greek[] = {
@@ -397,7 +397,7 @@ static const struct html_entity_map entity_map[] = {
 	{ cs_8859_15, 		0xa0, 0xff, ent_iso_8859_15 },
 	{ cs_utf_8, 		0xa0, 0xff, ent_iso_8859_1 },
 	{ cs_utf_8, 		338,  402,  ent_uni_338_402 },
-	{ cs_utf_8, 		710,  731,  ent_uni_spacing },
+	{ cs_utf_8, 		710,  732,  ent_uni_spacing },
 	{ cs_utf_8, 		913,  982,  ent_uni_greek },
 	{ cs_utf_8, 		8194, 8260, ent_uni_punct },
 	{ cs_utf_8, 		8364, 8364, ent_uni_euro }, 
