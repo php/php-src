@@ -70,23 +70,23 @@ void php3_aspell_close(aspell *sc)
    Load a dictionary */
 PHP_FUNCTION(aspell_new)
 {
-	pval *master, *personal;
+	pval **master,**personal;
 	int argc;
 	aspell *sc;
 	int ind;
 	
 	argc = ARG_COUNT(ht);
-	if (argc < 1 || argc > 2 || getParameters(ht, argc, &master,&personal) == FAILURE) {
+	if (argc < 1 || argc > 2 || getParametersEx(argc,&master,&personal) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_string(master);
+	convert_to_string_ex(master);
 	if(argc==2)
 	  {
-		convert_to_string(personal) ;
-	sc=aspell_new(master->value.str.val,personal->value.str.val);
+		convert_to_string_ex(personal) ;
+		sc=aspell_new((*master)->value.str.val,(*personal)->value.str.val);
 	  }
 	else
-	  sc=aspell_new(master->value.str.val,"");
+	  sc=aspell_new((*master)->value.str.val,"");
 
 	ind = php3_list_insert(sc, le_aspell);
 	RETURN_LONG(ind);
@@ -98,7 +98,7 @@ PHP_FUNCTION(aspell_new)
    Return array of Suggestions */
 PHP_FUNCTION(aspell_suggest)
 {
-	pval *scin, *word;
+	pval **scin, **word;
 	int argc;
 	aspell *sc;
 	int ind,type;
@@ -107,15 +107,15 @@ PHP_FUNCTION(aspell_suggest)
 
 	
 	argc = ARG_COUNT(ht);
-	if (argc != 2 || getParameters(ht, argc, &scin,&word) == FAILURE) {
+	if (argc != 2 || getParametersEx(argc, &scin,&word) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(scin);
-	convert_to_string(word);
-	sc= (aspell *) php3_list_find(scin->value.lval, &type);
+	convert_to_long_ex(scin);
+	convert_to_string_ex(word);
+	sc = (aspell *)php3_list_find((*scin)->value.lval, &type);
 	if(!sc)
 	  {
-		php_error(E_WARNING, "%d is not a ASPELL result index", scin->value.lval);
+		php_error(E_WARNING, "%d is not an ASPELL result index",(*scin)->value.lval);
 		RETURN_FALSE;
 	  }
 
@@ -123,7 +123,7 @@ PHP_FUNCTION(aspell_suggest)
                 RETURN_FALSE;
 	}
 
-	sug = aspell_suggest(sc, word->value.str.val);
+	sug = aspell_suggest(sc, (*word)->value.str.val);
 	  for (i = 0; i != sug->size; ++i) {
                 add_next_index_string(return_value,(char *)sug->data[i],1);
 	  }
@@ -136,23 +136,23 @@ PHP_FUNCTION(aspell_suggest)
 PHP_FUNCTION(aspell_check)
 {
    int type;
-   pval *scin,*word;
+   pval **scin,**word;
    aspell *sc;
 
    int argc;
     argc = ARG_COUNT(ht);
-    if (argc != 2 || getParameters(ht, argc, &scin,&word) == FAILURE) {
+    if (argc != 2 || getParametersEx(argc, &scin,&word) == FAILURE) {
         WRONG_PARAM_COUNT;
     }
-    convert_to_long(scin);
-    convert_to_string(word);
-    sc= (aspell *) php3_list_find(scin->value.lval, &type);
+    convert_to_long_ex(scin);
+    convert_to_string_ex(word);
+    sc= (aspell *) php3_list_find((*scin)->value.lval, &type);
     if(!sc)
       {
-        php_error(E_WARNING, "%d is not a ASPELL result index", scin->value.lval);
+        php_error(E_WARNING, "%d is not an ASPELL result index",(*scin)->value.lval);
         RETURN_FALSE;
       }
-    if (aspell_check(sc, word->value.str.val)) 
+    if (aspell_check(sc, (*word)->value.str.val)) 
       {
 	RETURN_TRUE;
       }
@@ -167,24 +167,24 @@ PHP_FUNCTION(aspell_check)
    Return if word is valid, ignoring case or trying to trim it in any way*/
 PHP_FUNCTION(aspell_check_raw)
 {
-  pval *scin,*word;
+  pval **scin,**word;
   int type;
   int argc;
   aspell *sc;
 
     argc = ARG_COUNT(ht);
-    if (argc != 2 || getParameters(ht, argc, &scin,&word) == FAILURE) {
+    if (argc != 2 || getParametersEx(argc, &scin,&word) == FAILURE) {
         WRONG_PARAM_COUNT;
     }
-    convert_to_long(scin);
-    convert_to_string(word);
-    sc= (aspell *) php3_list_find(scin->value.lval, &type);
+    convert_to_long_ex(scin);
+    convert_to_string_ex(word);
+    sc = (aspell *)php3_list_find((*scin)->value.lval, &type);
     if(!sc)
       {
-        php_error(E_WARNING, "%d is not a ASPELL result index", scin->value.lval);
+        php_error(E_WARNING, "%d is not an ASPELL result index",(*scin)->value.lval);
         RETURN_FALSE;
       }
-	if (aspell_check_raw(sc, word->value.str.val)) 
+	if (aspell_check_raw(sc, (*word)->value.str.val)) 
 	  {
 	    RETURN_TRUE;
 	  }
