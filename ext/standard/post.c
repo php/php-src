@@ -212,7 +212,7 @@ void _php3_parse_gpc_data(char *val, char *var, pval *track_vars_array)
 
 	val_len = strlen(val);
 	if (PG(magic_quotes_gpc)) {
-		val = _php3_addslashes(val, val_len, NULL, 0);
+		val = _php3_addslashes(val, val_len, &val_len, 0);
 	} else {
 		val = estrndup(val, val_len);
 	}
