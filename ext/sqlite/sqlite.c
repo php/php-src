@@ -48,18 +48,18 @@ static int le_sqlite_db, le_sqlite_result, le_sqlite_pdb;
 
 static inline void php_sqlite_strtoupper(char *s)
 {
-  while (*s!='\0') {
-    *s = toupper(*s);
-    s++;
-  }
+	while (*s!='\0') {
+		*s = toupper(*s);
+		s++;
+	}
 }
 
 static inline void php_sqlite_strtolower(char *s)
 {
-  while (*s!='\0') {
-    *s = tolower(*s);
-    s++;
-  }
+	while (*s!='\0') {
+		*s = tolower(*s);
+		s++;
+	}
 }
 
 /* {{{ PHP_INI
@@ -804,7 +804,7 @@ PHP_FUNCTION(sqlite_close)
 }
 /* }}} */
 
-/* {{{ */
+/* {{{ php_sqlite_fetch */
 int php_sqlite_fetch(struct php_sqlite_result *rres TSRMLS_DC)
 {
 	const char **rowdata, **colnames;
@@ -863,13 +863,6 @@ next_row:
 			ret = SQLITE_OK;
 			break;
 
-		case SQLITE_BUSY:
-		case SQLITE_ERROR:
-		case SQLITE_MISUSE:
-		default:
-			/* fall through to finalize */
-			;
-
 		case SQLITE_DONE:
 			if (rres->vm) {
 				ret = sqlite_finalize(rres->vm, &errtext);
@@ -880,6 +873,14 @@ next_row:
 				sqlite_freemem(errtext);
 			}
 			break;
+
+		case SQLITE_BUSY:
+		case SQLITE_ERROR:
+		case SQLITE_MISUSE:
+		default:
+			/* fall through to finalize */
+			;
+
 	}
 	return ret;
 }
