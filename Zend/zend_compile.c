@@ -567,6 +567,27 @@ void do_end_variable_parse(int type, int arg_offset CLS_DC)
 }
 
 
+zend_bool is_method_call(CLS_D)
+{
+	zend_llist *fetch_list_ptr;
+	zend_llist_element *cur;
+	zend_op *cur_opline;
+
+	zend_stack_top(&CG(bp_stack), (void **) &fetch_list_ptr);
+
+	cur = fetch_list_ptr->head;
+	/* There is always at least one node in the list */
+	while (cur->next) {
+		cur = cur->next;
+	}
+	cur_opline = (zend_op *)cur->data;
+	if (cur_opline->opcode == ZEND_FETCH_OBJ_R) {
+			return 1;
+	}
+	return 0;
+}
+
+
 void do_init_string(znode *result CLS_DC)
 {
 	zend_op *opline = get_next_op(CG(active_op_array) CLS_CC);
@@ -815,6 +836,7 @@ int do_begin_function_call(znode *function_name CLS_DC)
 			}
 			break;
 	}
+	do_extended_fcall_begin(CLS_C); 
 	return 0;
 }
 
@@ -822,29 +844,28 @@ int do_begin_function_call(znode *function_name CLS_DC)
 void do_begin_dynamic_function_call(znode *function_name CLS_DC)
 {
 	unsigned char *ptr = NULL;
-	int last_op_number = get_next_op_number(CG(active_op_array))-1;
-	zend_op *last_op = &CG(active_op_array)->opcodes[last_op_number];
+	int last_op_number;
+	zend_op *last_op;
 
-	if ((last_op_number >= 1) && (last_op->opcode == ZEND_EXT_FCALL_BEGIN) && ((last_op-1)->opcode == ZEND_FETCH_OBJ_R)) {
-		zend_op tmp;
-
-		tmp = *last_op;
-		*last_op = *(last_op-1);
-		*(last_op-1) = tmp;
-		last_op->opcode = ZEND_INIT_FCALL_BY_NAME;
-                last_op->extended_value = ZEND_MEMBER_FUNC_CALL;
-	} else if (last_op_number>=0 && last_op->opcode == ZEND_FETCH_OBJ_R) {
+	if (function_name->op_type != IS_CONST && is_method_call(CLS_C)) {
+		do_end_variable_parse(BP_VAR_W, 0 CLS_CC);
+		last_op_number = get_next_op_number(CG(active_op_array))-1;
+		last_op = &CG(active_op_array)->opcodes[last_op_number];
 		last_op->opcode = ZEND_INIT_FCALL_BY_NAME;
 		last_op->extended_value = ZEND_MEMBER_FUNC_CALL;
 	} else {
-		zend_op *opline = get_next_op(CG(active_op_array) CLS_CC);
-	
+		zend_op *opline;
+
+		do_end_variable_parse(BP_VAR_R, 0 CLS_CC);
+
+		opline = get_next_op(CG(active_op_array) CLS_CC);
 		opline->opcode = ZEND_INIT_FCALL_BY_NAME;
 		opline->op2 = *function_name;
 		opline->extended_value = 0;
 		SET_UNUSED(opline->op1);
 	}
 	zend_stack_push(&CG(function_call_stack), (void *) &ptr, sizeof(zend_function *));
+	do_extended_fcall_begin(CLS_C); 
 }
 
 
