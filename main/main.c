@@ -679,6 +679,7 @@ int php_request_startup(CLS_D ELS_DC PLS_DC SLS_DC)
 	php_output_startup();
 
 	/* initialize global variables */
+	PG(modules_activated) = 0;
 	PG(header_is_being_sent) = 0;
 	PG(connection_status) = PHP_CONNECTION_NORMAL;
 	
@@ -728,6 +729,9 @@ void php_request_shutdown(void *dummy)
 	php_ini_rshutdown();
 	EG(error_reporting) = PG(error_reporting);
 
+	if (PG(modules_activated)) {
+		zend_deactivate_modules();
+	}
 	zend_deactivate(CLS_C ELS_CC);
 	sapi_deactivate(SLS_C);
 
@@ -1166,6 +1170,9 @@ PHPAPI void php_execute_script(zend_file_handle *primary_file CLS_DC ELS_DC PLS_
 
 	php_hash_environment(ELS_C SLS_CC PLS_CC);
 
+	zend_activate_modules();
+	PG(modules_activated)=1;
+
 	if (SG(request_info).query_string && SG(request_info).query_string[0]=='=' 
 		&& PG(expose_php)) {
 		if (!strcmp(SG(request_info).query_string+1, PHP_LOGO_GUID)) {
@@ -1186,10 +1193,8 @@ PHPAPI void php_execute_script(zend_file_handle *primary_file CLS_DC ELS_DC PLS_
 		}
 	}
 
-	zend_activate_modules();
 
 	if (setjmp(EG(bailout))!=0) {
-		zend_deactivate_modules();
 		return;
 	}
 
@@ -1218,7 +1223,6 @@ PHPAPI void php_execute_script(zend_file_handle *primary_file CLS_DC ELS_DC PLS_
 		EG(active_op_array) = EG(main_op_array);
 		zend_execute(EG(main_op_array) ELS_CC);
 	}
-	zend_deactivate_modules();
 }
 
 #ifdef PHP_WIN32

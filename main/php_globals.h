@@ -67,8 +67,8 @@ struct _php_core_globals {
 
 	zend_bool safe_mode;
 	zend_bool sql_safe_mode;
-	char *safe_mode_exec_dir;
 	zend_bool enable_dl;
+	char *safe_mode_exec_dir;
 
 	long memory_limit;
 
@@ -97,14 +97,6 @@ struct _php_core_globals {
 	char *gpc_order;
 	char *variables_order;
 
-	zend_bool expose_php;
-
-	zend_bool track_vars;
-	zend_bool register_globals;
-	zend_bool register_argc_argv;
-
-	zend_bool y2k_compliance;
-
 	short connection_status;
 	short ignore_user_abort;
 
@@ -115,6 +107,16 @@ struct _php_core_globals {
 	zend_llist tick_functions;
 
 	php_http_globals http_globals;
+
+	zend_bool expose_php;
+
+	zend_bool track_vars;
+	zend_bool register_globals;
+	zend_bool register_argc_argv;
+
+	zend_bool y2k_compliance;
+
+	zend_bool modules_activated;
 };
 
 
