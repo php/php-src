@@ -172,7 +172,8 @@ END {
 		"   <refsect1>\n" \
 		"    <title>Description</title>\n" \
 		"    <funcsynopsis>\n" \
-		"     <funcdef>" types[i] " <function>" funcs[i] "</function></funcdef>\n"
+		"     <funcprototype>\n" \
+		"      <funcdef>" types[i] " <function>" funcs[i] "</function></funcdef>\n"
 
 		if (maxargs[i]) {
 			zvals = "\tzval "
@@ -275,6 +276,7 @@ END {
 				"\t\t\tbreak;\n" check_argc "\t}"
 		}
 		xmlstr = xmlstr xmlparams \
+			"     </funcprototype>\n" \
 			"    </funcsynopsis>\n" \
 			"    <para>\n" \
 			"    </para>\n" \
