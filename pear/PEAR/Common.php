@@ -445,7 +445,7 @@ class PEAR_Common extends PEAR
             case 'dep':
                 // dependencies array index
                 if (!$this->in_changelog) {
-                    $this->d_i = (isset($this->d_i)) ? $this->d_i + 1 : 0;
+                    $this->d_i++;
                     $this->pkginfo['release_deps'][$this->d_i] = $attribs;
                 }
                 break;
@@ -546,7 +546,8 @@ class PEAR_Common extends PEAR
                 $this->lib_sources[] = $data;
                 break;
             case 'dep':
-                if ($data = trim($data)) {
+                if ($data && !$this->in_changelog) {
+                    echo "D:: $data\n";
                     $this->pkginfo['release_deps'][$this->d_i]['name'] = $data;
                 }
                 break;
@@ -633,6 +634,7 @@ class PEAR_Common extends PEAR
         array_pop($this->element_stack);
         $spos = sizeof($this->element_stack) - 1;
         $this->current_element = ($spos > 0) ? $this->element_stack[$spos] : '';
+        $this->cdata = '';
     }
 
     // }}}
@@ -759,6 +761,8 @@ class PEAR_Common extends PEAR
         $this->filelist =& $this->pkginfo['filelist'];
         $this->dir_names = array();
         $this->in_changelog = false;
+        $this->d_i = 0;
+        $this->cdata = '';
 
         if (!xml_parse($xp, $data, 1)) {
             $code = xml_get_error_code($xp);
