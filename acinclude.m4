@@ -1748,20 +1748,9 @@ dnl
 AC_DEFUN([PHP_PROG_SED],
 [AC_MSG_CHECKING([for a sed that does not truncate output])
 AC_CACHE_VAL(ac_cv_path_sed,
-[# Loop through the user's path and test for sed and gsed.
-# Then use that list of sed's as ones to test for truncation.
-as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in $PATH; do
-  IFS=$as_save_IFS
-  test -z "$as_dir" && as_dir=.
-  for ac_prog in sed gsed; do
-    if test -x "$as_dir/$ac_prog"; then
-      _sed_list="$_sed_list $as_dir/$ac_prog"
-    fi
-  done
-done
+[
 
-  # Create a temporary directory, and hook for its removal unless debugging.
+# Create a temporary directory, and hook for its removal unless debugging.
 $debug ||
 {
   trap 'exit_status=$?; rm -rf $tmp && exit $exit_status' 0
@@ -1784,16 +1773,19 @@ $debug ||
 }
   _max=0
   _count=0
-  for _sed in $_sed_list; do
-    test ! -f ${_sed} && break
+
+  # Use the sed found in PATH, skip the rest
+  _sed=`which sed`
+
+  test ! -f ${_sed} && break
+
+  # Check for GNU sed and select it if it is found.
+  if "${_sed}" --version 2>&1 < /dev/null | egrep '(GNU)' > /dev/null; then
+    ac_cv_path_sed=${_sed}
+  else
     cat /dev/null > "$tmp/sed.in"
     _count=0
     echo -n "0123456789" >"$tmp/sed.in"
-    # Check for GNU sed and select it if it is found.
-    if "${_sed}" --version 2>&1 < /dev/null | egrep '(GNU)' > /dev/null; then
-      ac_cv_path_sed=${_sed}
-      break;
-    fi
     while true; do
       cat "$tmp/sed.in" "$tmp/sed.in" >"$tmp/sed.tmp"
       mv "$tmp/sed.tmp" "$tmp/sed.in"
@@ -1806,10 +1798,10 @@ $debug ||
       _count=`expr $_count + 1`
       if test $_count -gt $_max; then
         _max=$_count
-        ac_cv_path_sed=$_sed
+        ac_cv_path_sed=${_sed}
       fi
     done
-  done
+  fi
   rm -rf "$tmp"
 ])
 if test -z "$ac_cv_path_sed"; then
