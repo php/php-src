@@ -83,14 +83,20 @@ static int sapi_thttpd_send_headers(sapi_headers_struct *sapi_headers SLS_DC)
 
 static void sapi_thttpd_send_header(sapi_header_struct *sapi_header, void *server_context)
 {
+	struct iovec vec[2];
+	int n = 0;
 	TLS_FETCH();
 
 	if (sapi_header) {
-		send(TG(hc)->conn_fd, sapi_header->header, sapi_header->header_len, 0);
+		vec[n].iov_base = sapi_header->header;
+		vec[n++].iov_len = sapi_header->header_len;
 		TG(hc)->bytes += sapi_header->header_len;
 	}
-	send(TG(hc)->conn_fd, "\r\n", sizeof("\r\n") - 1, 0);
+	vec[n].iov_base = "\r\n";
+	vec[n++].iov_len = 2;
 	TG(hc)->bytes += 2;
+	
+	writev(TG(hc)->conn_fd, vec, n);
 }
 
 static int sapi_thttpd_read_post(char *buffer, uint count_bytes SLS_DC)
