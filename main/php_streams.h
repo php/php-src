@@ -265,7 +265,7 @@ PHPAPI int _php_stream_stat(php_stream *stream, php_stream_statbuf *ssb TSRMLS_D
 #define php_stream_stat(stream, ssb)	_php_stream_stat((stream), (ssb) TSRMLS_CC)
 
 PHPAPI int _php_stream_stat_path(char *path, php_stream_statbuf *ssb TSRMLS_DC);
-#define php_stream_stat_path(path, ssb)	_php_stream_stat((path), (ssb) TSRMLS_CC)
+#define php_stream_stat_path(path, ssb)	_php_stream_stat_path((path), (ssb) TSRMLS_CC)
 
 PHPAPI php_stream *_php_stream_opendir(char *path, int options, php_stream_context *context STREAMS_DC TSRMLS_DC);
 #define php_stream_opendir(path, options, context)	_php_stream_opendir((path), (options), (context) STREAMS_CC TSRMLS_CC)
