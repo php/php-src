@@ -134,10 +134,6 @@ typedef unsigned long int uint32_t;
 #define IEEE_LITTLE_ENDIAN
 #endif
 
-#ifdef HAVE_SYS_BITYPES_H
-#include <sys/bitypes.h>
-#endif
-
 #define Long	int32_t
 #define ULong	uint32_t
 
