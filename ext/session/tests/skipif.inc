@@ -10,4 +10,13 @@ if (!extension_loaded("session")) {
 if (!file_exists(ini_get("session.save_path"))) {
 	die("skip Session save_path doesn't exist");
 }
+$save_path = ini_get("session.save_path");
+if (!@is_writable($save_path)) {
+	if (($p = strpos($save_path, ';')) !== false) {
+		$save_path = substr($save_path, ++$p);
+	}
+	if (!@is_writable($save_path)) {
+		die("skip\n");
+	}
+}
 ?>
