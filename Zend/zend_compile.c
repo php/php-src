@@ -932,6 +932,7 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 	op_array.function_name = name;
 	op_array.return_reference = return_reference;
 	op_array.fn_flags = fn_flags;
+	op_array.pass_rest_by_reference = 0;
 
 	op_array.scope = CG(active_class_entry);
 	op_array.prototype = NULL;
@@ -1606,7 +1607,15 @@ static zend_bool zend_do_perform_implementation_check(zend_function *fe)
 	}
 
 	for (i=0; i< fe->common.num_args; i++) {
-		if (strcmp(fe->common.arg_info[i].class_name, fe->common.prototype->common.arg_info[i].class_name)!=0) {
+		if (fe->common.arg_info[i].class_name) {
+			if (fe->common.prototype->common.arg_info[i].class_name) {
+				if (strcmp(fe->common.arg_info[i].class_name, fe->common.prototype->common.arg_info[i].class_name)!=0) {
+					return 0;
+				}
+			} else {
+				return 0;
+			}
+		} else if (fe->common.prototype->common.arg_info[i].class_name) {
 			return 0;
 		}
 		if (fe->common.arg_info[i].pass_by_reference != fe->common.prototype->common.arg_info[i].pass_by_reference) {
