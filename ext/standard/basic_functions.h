@@ -136,7 +136,8 @@ typedef struct {
 	zval **array_walk_func_name;
 	zval **user_compare_func_name;
 	
-	HashTable protected_env_vars;
+	HashTable sm_protected_env_vars;
+	char *sm_allowed_env_vars;
 
 	/* pageinfo.c */
 	long page_uid;
@@ -184,6 +185,7 @@ typedef struct {
 
 /* Values are comma-delimited
  */
-#define SAFE_MODE_PROTECTED_ENV_VARS "LD_LIBRARY_PATH"
+#define SAFE_MODE_PROTECTED_ENV_VARS	"LD_LIBRARY_PATH"
+#define SAFE_MODE_ALLOWED_ENV_VARS		"PHP_"
 
 #endif /* _BASIC_FUNCTIONS_H */

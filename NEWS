@@ -2,8 +2,8 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? ????, Version 4.0 Beta 4
-- Added the ability to prevent the user from overriding certain environment
-  variables in Safe Mode (Zeev)
+- Added the ability to control the environment variables the user is allowed
+  to change in Safe Mode, using INI directives (Zeev)
 - Fixed a crash bug in strtr() working on large input strings (Zeev)
 - Ora_GetColumn()/Ora_FetchInto() now return NULL for NULL-Columns. (Thies)
 - OCI8 now supports binding of NULL-values. Module cleanups. (Thies)

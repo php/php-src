@@ -314,11 +314,11 @@ static PHP_INI_MH(OnUpdateSafeModeProtectedEnvVars)
 	BLS_FETCH();
 
 	protected_vars = estrndup(new_value, new_value_length);
-	zend_hash_clean(&BG(protected_env_vars));
+	zend_hash_clean(&BG(sm_protected_env_vars));
 
 	protected_var=strtok(protected_vars, ", ");
 	while (protected_var) {
-		zend_hash_update(&BG(protected_env_vars), protected_var, strlen(protected_var), &dummy, sizeof(int), NULL);
+		zend_hash_update(&BG(sm_protected_env_vars), protected_var, strlen(protected_var), &dummy, sizeof(int), NULL);
 		protected_var=strtok(NULL, ", ");
 	}
 	efree(protected_vars);
@@ -326,8 +326,21 @@ static PHP_INI_MH(OnUpdateSafeModeProtectedEnvVars)
 }
 
 
+static PHP_INI_MH(OnUpdateSafeModeAllowedEnvVars)
+{
+	BLS_FETCH();
+
+	if (BG(sm_allowed_env_vars)) {
+		free(BG(sm_allowed_env_vars));
+	}
+	BG(sm_allowed_env_vars) = zend_strndup(new_value, new_value_length);
+	return SUCCESS;
+}
+
+
 PHP_INI_BEGIN()
-	PHP_INI_ENTRY_EX("safe_mode_protected_env_vars",	SAFE_MODE_PROTECTED_ENV_VARS,	PHP_INI_SYSTEM,		OnUpdateSafeModeProtectedEnvVars,		NULL)
+	PHP_INI_ENTRY_EX("safe_mode_sm_protected_env_vars",	SAFE_MODE_PROTECTED_ENV_VARS,	PHP_INI_SYSTEM,		OnUpdateSafeModeProtectedEnvVars,		NULL)
+	PHP_INI_ENTRY_EX("safe_mode_allowed_env_vars",		SAFE_MODE_ALLOWED_ENV_VARS,		PHP_INI_SYSTEM,		OnUpdateSafeModeAllowedEnvVars,			NULL)
 PHP_INI_END()
 
 
@@ -377,12 +390,16 @@ static void basic_globals_ctor(BLS_D)
 {
 	BG(next) = NULL;
 	BG(left) = -1;
-	zend_hash_init(&BG(protected_env_vars), 5, NULL, NULL, 1);
+	zend_hash_init(&BG(sm_protected_env_vars), 5, NULL, NULL, 1);
+	BG(sm_allowed_env_vars) = NULL;
 }
 
 static void basic_globals_dtor(BLS_D)
 {
-	zend_hash_destroy(&BG(protected_env_vars));
+	zend_hash_destroy(&BG(sm_protected_env_vars));
+	if (BG(sm_allowed_env_vars)) {
+		free(BG(sm_allowed_env_vars));
+	}
 }
 
 
@@ -536,7 +553,7 @@ PHP_FUNCTION(putenv)
 		PLS_FETCH();
 		
 		if (PG(safe_mode)) {
-			/* check the protected_env_vars table */
+			/* check the sm_protected_env_vars table */
 		}
 
 		pe.putenv_string = estrndup((*str)->value.str.val,(*str)->value.str.len);
@@ -547,12 +564,36 @@ PHP_FUNCTION(putenv)
 		pe.key_len = strlen(pe.key);
 		pe.key = estrndup(pe.key,pe.key_len);
 		
-		if (PG(safe_mode)
-			&& zend_hash_exists(&BG(protected_env_vars), pe.key, pe.key_len)) {
-			php_error(E_WARNING, "Safe Mode:  Cannot override protected environment variable '%s'", pe.key);
-			efree(pe.putenv_string);
-			efree(pe.key);
-			RETURN_FALSE;
+		if (PG(safe_mode)) {
+			/* Check the protected list */
+			if (zend_hash_exists(&BG(sm_protected_env_vars), pe.key, pe.key_len)) {
+				php_error(E_WARNING, "Safe Mode:  Cannot override protected environment variable '%s'", pe.key);
+				efree(pe.putenv_string);
+				efree(pe.key);
+				RETURN_FALSE;
+			}
+
+			/* Check the allowed list */
+			if (BG(sm_allowed_env_vars) && *BG(sm_allowed_env_vars)) {
+				char *allowed_env_vars = estrdup(BG(sm_allowed_env_vars));
+				char *allowed_prefix = strtok(allowed_env_vars, ", ");
+				zend_bool allowed=0;
+
+				while (allowed_prefix) {
+					if (!strncmp(allowed_prefix, pe.key, strlen(allowed_prefix))) {
+						allowed=1;
+						break;
+					}
+					allowed_prefix = strtok(NULL, ", ");
+				}
+				efree(allowed_env_vars);
+				if (!allowed) {
+					php_error(E_WARNING, "Safe Mode:  Cannot set environment variable '%s' - it's not in the allowed list", pe.key);
+					efree(pe.putenv_string);
+					efree(pe.key);
+					RETURN_FALSE;
+				}
+			}
 		}
 
 		zend_hash_del(&BG(putenv_ht),pe.key,pe.key_len+1);
