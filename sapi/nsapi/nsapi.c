@@ -148,7 +148,7 @@ sapi_nsapi_ub_write(const char *str, unsigned int str_length TSRMLS_DC)
 }
 
 static int
-sapi_nsapi_header_handler(sapi_header_struct *sapi_header, sapi_headers_struct *sapi_headers SLS_DC)
+sapi_nsapi_header_handler(sapi_header_struct *sapi_header, sapi_headers_struct *sapi_headers TSRMLS_DC)
 {
 	char *header_name, *header_content, *p;
 	nsapi_request_context *rc = (nsapi_request_context *)SG(server_context);
@@ -181,7 +181,7 @@ sapi_nsapi_header_handler(sapi_header_struct *sapi_header, sapi_headers_struct *
 }
 
 static int
-sapi_nsapi_send_headers(sapi_headers_struct *sapi_headers SLS_DC)
+sapi_nsapi_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 {
 	int retval;
 	nsapi_request_context *rc = (nsapi_request_context *)SG(server_context);
@@ -204,7 +204,7 @@ sapi_nsapi_send_headers(sapi_headers_struct *sapi_headers SLS_DC)
 }
 
 static int
-sapi_nsapi_read_post(char *buffer, uint count_bytes SLS_DC)
+sapi_nsapi_read_post(char *buffer, uint count_bytes TSRMLS_DC)
 {
 	nsapi_request_context *rc = (nsapi_request_context *)SG(server_context);
 	char *read_ptr = buffer, *content_length_str = NULL;
@@ -266,8 +266,7 @@ sapi_nsapi_read_post(char *buffer, uint count_bytes SLS_DC)
 	return bytes_read;
 }
 
-static char *
-sapi_nsapi_read_cookies(SLS_D)
+static char *sapi_nsapi_read_cookies(TSRMLS_D)
 {
 	char *cookie_string;
 	nsapi_request_context *rc = (nsapi_request_context *)SG(server_context);
@@ -277,7 +276,7 @@ sapi_nsapi_read_cookies(SLS_D)
 }
 
 static void
-sapi_nsapi_register_server_variables(zval *track_vars_array TSRMLS_DC SLS_DC TSRMLS_DC)
+sapi_nsapi_register_server_variables(zval *track_vars_array TSRMLS_DC)
 {
 	nsapi_request_context *rc = (nsapi_request_context *)SG(server_context);
 	size_t i;
@@ -391,7 +390,7 @@ nsapi_free(void *addr)
 }
 
 static void
-nsapi_request_ctor(NSLS_D SLS_DC)
+nsapi_request_ctor(NSLS_D TSRMLS_DC)
 {
 	char *query_string = pblock_findval("query", NSG(rq)->reqpb);
 	char *uri = pblock_findval("uri", NSG(rq)->reqpb);
@@ -432,7 +431,7 @@ nsapi_request_ctor(NSLS_D SLS_DC)
 }
 
 static void
-nsapi_request_dtor(NSLS_D SLS_DC)
+nsapi_request_dtor(NSLS_D TSRMLS_DC)
 {
 	nsapi_free(SG(request_info).query_string);
 	nsapi_free(SG(request_info).request_uri);
@@ -442,11 +441,9 @@ nsapi_request_dtor(NSLS_D SLS_DC)
 }
 
 int 
-nsapi_module_main(NSLS_D SLS_DC)
+nsapi_module_main(NSLS_D TSRMLS_DC)
 {
-	int result;
 	zend_file_handle file_handle;
-	TSRMLS_FETCH();
 
 	if (php_request_startup(TSRMLS_C) == FAILURE) {
 		return FAILURE;
@@ -512,9 +509,9 @@ php4_execute(pblock *pb, Session *sn, Request *rq)
 
 	SG(server_context) = request_context;
 
-	nsapi_request_ctor(NSLS_C SLS_CC);
-	retval = nsapi_module_main(NSLS_C SLS_CC);
-	nsapi_request_dtor(NSLS_C SLS_CC);
+	nsapi_request_ctor(NSLS_C TSRMLS_CC);
+	retval = nsapi_module_main(NSLS_C TSRMLS_CC);
+	nsapi_request_dtor(NSLS_C TSRMLS_CC);
 
 	FREE(request_context);
 
