@@ -20,6 +20,7 @@
 
 /* 
  * md5.c - Copyright 1997 Lachlan Roche 
+ * md5_file() added by Alessandro Astarita <aleast@capri.it>
  */
 
 #include <stdio.h>
@@ -27,16 +28,26 @@
 
 #include "md5.h"
 
+static void make_digest(char *md5str, unsigned char *digest)
+{
+	int i;
+
+	for (i = 0; i < 16; i++) {
+		sprintf(md5str, "%02x", digest[i]);
+		md5str += 2;
+	}
+
+	*md5str = '\0';
+}
+
 /* {{{ proto string md5(string str)
    Calculate the md5 hash of a string */
 PHP_NAMED_FUNCTION(php_if_md5)
 {
-	pval **arg;
+	zval **arg;
 	char md5str[33];
 	PHP_MD5_CTX context;
 	unsigned char digest[16];
-	int i;
-	char *r;
 	
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -47,10 +58,59 @@ PHP_NAMED_FUNCTION(php_if_md5)
 	PHP_MD5Init(&context);
 	PHP_MD5Update(&context, Z_STRVAL_PP(arg), Z_STRLEN_PP(arg));
 	PHP_MD5Final(digest, &context);
-	for (i = 0, r = md5str; i < 16; i++, r += 2) {
-		sprintf(r, "%02x", digest[i]);
+	make_digest(md5str, digest);
+	RETVAL_STRING(md5str, 1);
+}
+/* }}} */
+
+/* {{{ proto string md5sum(string filename)
+   Calculate the md5 hash of given filename */
+PHP_NAMED_FUNCTION(php_if_md5_file)
+{
+	zval          **arg;
+	char          md5str[33];
+	unsigned char buf[1024];
+	unsigned char digest[16];
+	PHP_MD5_CTX   context;
+	int           n;
+	FILE          *fp;
+
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg) == FAILURE) {
+		WRONG_PARAM_COUNT;
 	}
-	*r = '\0';
+
+	convert_to_string_ex(arg);
+
+	if (PG(safe_mode) && (!php_checkuid(Z_STRVAL_PP(arg), NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
+		RETURN_FALSE;
+	}
+
+	if (php_check_open_basedir(Z_STRVAL_PP(arg) TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+
+	if ((fp = VCWD_FOPEN(Z_STRVAL_PP(arg), "rb")) == NULL) {
+		php_error(E_WARNING, "md5_file(): Unable to open file");
+		RETURN_FALSE;
+	}
+
+	PHP_MD5Init(&context);
+
+	while ((n = fread(buf, 1, sizeof(buf), fp)) > 0) {
+		PHP_MD5Update(&context, buf, n);
+	}
+
+	PHP_MD5Final(digest, &context);
+
+	if (ferror(fp)) {
+		fclose(fp);
+		RETURN_FALSE;
+	}
+
+	fclose(fp);
+
+	make_digest(md5str, digest);
+
 	RETVAL_STRING(md5str, 1);
 }
 /* }}} */
