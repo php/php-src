@@ -98,7 +98,7 @@ int inet_aton(const char *, struct in_addr *);
 
 #include "ext/standard/file.h"
 
-#if HAVE_OPENSSL_EXT
+#ifdef HAVE_OPENSSL_EXT
 static int handle_ssl_error(php_stream *stream, int nr_bytes TSRMLS_DC);
 #endif
 
@@ -700,7 +700,7 @@ PHPAPI php_stream *_php_stream_sock_open_unix(const char *path, int pathlen, con
 #endif
 }
 
-#if HAVE_OPENSSL_EXT
+#ifdef HAVE_OPENSSL_EXT
 PHPAPI int php_stream_sock_ssl_activate_with_method(php_stream *stream, int activate, SSL_METHOD *method, php_stream *session_stream TSRMLS_DC)
 {
 	php_netstream_data_t *sock = (php_netstream_data_t*)stream->abstract;
@@ -813,7 +813,7 @@ PHPAPI int php_set_sock_blocking(int socketd, int block TSRMLS_DC)
       return ret;
 }
 
-#if HAVE_OPENSSL_EXT
+#ifdef HAVE_OPENSSL_EXT
 
 static void php_ERR_error_string_n(int code, char *buf, size_t size)
 {
@@ -914,7 +914,7 @@ static size_t php_sockop_write(php_stream *stream, const char *buf, size_t count
 	php_netstream_data_t *sock = (php_netstream_data_t*)stream->abstract;
 	int didwrite;
 	
-#if HAVE_OPENSSL_EXT
+#ifdef HAVE_OPENSSL_EXT
 	if (sock->ssl_active) {
 		int retry = 1;
 
@@ -997,7 +997,7 @@ static size_t php_sockop_read(php_stream *stream, char *buf, size_t count TSRMLS
 	php_netstream_data_t *sock = (php_netstream_data_t*)stream->abstract;
 	int nr_bytes = 0;
 
-#if HAVE_OPENSSL_EXT
+#ifdef HAVE_OPENSSL_EXT
 	if (sock->ssl_active) {
 		int retry = 1;
 
@@ -1057,7 +1057,7 @@ static int php_sockop_close(php_stream *stream, int close_handle TSRMLS_DC)
 #endif
 
 	if (close_handle) {
-#if HAVE_OPENSSL_EXT
+#ifdef HAVE_OPENSSL_EXT
 		if (sock->ssl_active) {
 			SSL_shutdown(sock->ssl_handle);
 			sock->ssl_active = 0;
@@ -1156,7 +1156,7 @@ int _php_network_is_stream_alive(php_stream *stream)
 	if (select(fd+1, &rfds, NULL, NULL, &tv) > 0) {
 
 		if (FD_ISSET(fd, &rfds)) {
-#if HAVE_OPENSSL_EXT
+#ifdef HAVE_OPENSSL_EXT
 			if (sock->ssl_active) {
 				int n;
 			
@@ -1205,7 +1205,7 @@ static int php_sockop_cast(php_stream *stream, int castas, void **ret TSRMLS_DC)
 
 	switch(castas)	{
 		case PHP_STREAM_AS_STDIO:
-#if HAVE_OPENSSL_EXT
+#ifdef HAVE_OPENSSL_EXT
 			if (sock->ssl_active) {
 				return FAILURE;
 			}
@@ -1220,7 +1220,7 @@ static int php_sockop_cast(php_stream *stream, int castas, void **ret TSRMLS_DC)
 			return SUCCESS;
 		case PHP_STREAM_AS_FD:
 		case PHP_STREAM_AS_SOCKETD:
-#if HAVE_OPENSSL_EXT
+#ifdef HAVE_OPENSSL_EXT
 			if (sock->ssl_active) {
 				return FAILURE;
 			}

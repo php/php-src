@@ -165,7 +165,7 @@ ftp_close(ftpbuf_t *ftp)
 	if (ftp->data) 
 		data_close(ftp, ftp->data);
 	if (ftp->fd != -1) {
-#if HAVE_OPENSSL_EXT
+#ifdef HAVE_OPENSSL_EXT
 		if (ftp->ssl_active) {
 			SSL_shutdown(ftp->ssl_handle);
 		}
@@ -224,13 +224,13 @@ ftp_quit(ftpbuf_t *ftp)
 int
 ftp_login(ftpbuf_t *ftp, const char *user, const char *pass TSRMLS_DC)
 {
-#if HAVE_OPENSSL_EXT
+#ifdef HAVE_OPENSSL_EXT
 	SSL_CTX	*ctx = NULL;
 #endif
 	if (ftp == NULL)
 		return 0;
 
-#if HAVE_OPENSSL_EXT
+#ifdef HAVE_OPENSSL_EXT
 	if (ftp->use_ssl && !ftp->ssl_active) {
 		if (!ftp_putcmd(ftp, "AUTH", "TLS"))
 			return 0;
@@ -1089,7 +1089,7 @@ my_send(ftpbuf_t *ftp, int s, void *buf, size_t len)
 			return -1;
 		}
 
-#if HAVE_OPENSSL_EXT
+#ifdef HAVE_OPENSSL_EXT
 		if (ftp->use_ssl && ftp->fd == s && ftp->ssl_active) {
 			sent = SSL_write(ftp->ssl_handle, buf, size);
 		} else
@@ -1133,7 +1133,7 @@ my_recv(ftpbuf_t *ftp, int s, void *buf, size_t len)
 		return -1;
 	}
 
-#if HAVE_OPENSSL_EXT
+#ifdef HAVE_OPENSSL_EXT
 	if (ftp->use_ssl && ftp->fd == s && ftp->ssl_active) {
 		nr_bytes = SSL_read(ftp->ssl_handle, buf, len);
 	} else
@@ -1354,7 +1354,7 @@ data_accept(databuf_t *data, ftpbuf_t *ftp)
 	php_sockaddr_storage addr;
 	socklen_t			size;
 
-#if HAVE_OPENSSL_EXT
+#ifdef HAVE_OPENSSL_EXT
 	SSL_CTX		*ctx;
 	TSRMLS_FETCH();	
 #endif
@@ -1373,7 +1373,7 @@ data_accept(databuf_t *data, ftpbuf_t *ftp)
 	}
 
 data_accepted:
-#if HAVE_OPENSSL_EXT
+#ifdef HAVE_OPENSSL_EXT
 	
 	/* now enable ssl if we need to */
 	if (ftp->use_ssl && ftp->use_ssl_for_data) {
@@ -1420,7 +1420,7 @@ data_close(ftpbuf_t *ftp, databuf_t *data)
 	if (data == NULL)
 		return NULL;
 	if (data->listener != -1) {
-#if HAVE_OPENSSL_EXT
+#ifdef HAVE_OPENSSL_EXT
 		if (data->ssl_active) {
 			SSL_shutdown(data->ssl_handle);
 			data->ssl_active = 0;
@@ -1429,7 +1429,7 @@ data_close(ftpbuf_t *ftp, databuf_t *data)
 		closesocket(data->listener);
 	}	
 	if (data->fd != -1) {
-#if HAVE_OPENSSL_EXT
+#ifdef HAVE_OPENSSL_EXT
 		if (data->ssl_active) {
 			SSL_shutdown(data->ssl_handle);
 			data->ssl_active = 0;

@@ -38,7 +38,7 @@
 
 
 /* HAVE_OPENSSL would include SSL MySQL stuff */
-#if HAVE_OPENSSL_EXT
+#ifdef HAVE_OPENSSL_EXT
 extern zend_module_entry openssl_module_entry;
 #define phpext_openssl_ptr &openssl_module_entry
 

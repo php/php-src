@@ -217,7 +217,7 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 				break;
 			}
 		}
-#if !HAVE_OPENSSL_EXT
+#ifndef HAVE_OPENSSL_EXT
 		if (ssl_flags != php_ssl_none) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "no SSL support in this build");
 		}
@@ -234,7 +234,7 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			php_stream_context_set(stream, context);
 		}
 		
-#if HAVE_OPENSSL_EXT
+#ifdef HAVE_OPENSSL_EXT
 		if (stream && ssl_flags != php_ssl_none) {
 			int ssl_ret = FAILURE;
 			switch(ssl_flags)	{
