@@ -1,24 +1,24 @@
 #! /bin/sh
 
-# $Id: genif.sh,v 1.2 2001-03-30 14:02:20 sas Exp $
+# $Id: genif.sh,v 1.3 2002-03-22 10:22:41 sas Exp $
 # replacement for genif.pl
 
-infile="$1"
+infile=$1
 shift
-srcdir="$1"
+srcdir=$1
 shift
-extra_module_ptrs="$1"
+extra_module_ptrs=$1
 shift
-awk="$1"
+awk=$1
 shift
 
-if test "$infile" = "" -o "$srcdir" = ""; then
+if test -z "$infile" || test -z "$srcdir"; then
 	echo "please supply infile and srcdir"
 	exit 1
 fi
 
-module_ptrs="$extra_module_ptrs"
-header_list=""
+module_ptrs=$extra_module_ptrs
+header_list=
 olddir=`pwd`
 cd $srcdir
 
