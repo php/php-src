@@ -1671,6 +1671,7 @@ ZEND_API int do_bind_function_or_class(zend_op *opline, HashTable *function_tabl
 				int parent_name_length;
 				char *class_name, *parent_name;
 				int found_ce;
+				int retval;
 
 				found_ce = zend_hash_find(class_table, opline->op1.u.constant.value.str.val, opline->op1.u.constant.value.str.len, (void **) &pce);
 
@@ -1692,7 +1693,14 @@ ZEND_API int do_bind_function_or_class(zend_op *opline, HashTable *function_tabl
 				/* Obtain parent class */
 				parent_name_length = class_name - opline->op2.u.constant.value.str.val - 1;
 				parent_name = estrndup(opline->op2.u.constant.value.str.val, parent_name_length);
-				if (zend_hash_find(class_table, parent_name, parent_name_length+1, (void **) &parent_pce)==FAILURE) {
+				if (!compile_time) {
+					TSRMLS_FETCH();
+
+					retval = zend_lookup_class(parent_name, parent_name_length, &parent_pce TSRMLS_CC);
+				} else {
+					retval = zend_hash_find(class_table, parent_name, parent_name_length+1, (void **) &parent_pce);
+				}
+				if (retval == FAILURE) {
 					if (!compile_time) {
 						zend_error(E_ERROR, "Class %s:  Cannot inherit from undefined class %s", class_name, parent_name);
 					}
