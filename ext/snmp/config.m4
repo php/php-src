@@ -101,8 +101,15 @@ if test "$PHP_SNMP" != "no"; then
     SNMP_LIBNAME=snmp
   fi
 
-  AC_CHECK_FUNCS(snmp_parse_oid)
+  dnl Check whether snmp_parse_oid() exists.
+  PHP_CHECK_LIBRARY($SNMP_LIBNAME, snmp_parse_oid,
+  [
+    AC_DEFINE(HAVE_SNMP_PARSE_OID, 1, [ ])
+  ], [], [
+    $SNMP_SHARED_LIBADD
+  ])
 
+  dnl Test build.
   PHP_CHECK_LIBRARY($SNMP_LIBNAME, init_snmp,
   [
     AC_DEFINE(HAVE_SNMP,1,[ ])
