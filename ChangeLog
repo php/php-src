@@ -1,3 +1,40 @@
+2003-09-07  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_4_3)
+      ext/exif/exif.c:
+      MFH: Allow to search for section FILE with 2nd parameter (found by Derick)
+
+    * ext/exif/exif.c:
+      Allow to search for section FILE with 2nd parameter (found by Derick)
+
+    * ZendEngine2/zend_execute.c:
+      Fix foreach() called with non array
+
+2003-09-07  Ard Biesheuvel  <a.k.biesheuvel@its.tudelft.nl>
+
+    * ext/interbase/interbase.rc:
+      Zero-terminate strings
+      Add fileflags for DEBUG build
+
+    * ext/interbase/interbase.c
+      ext/interbase/interbase.dsp
+      ext/interbase/interbase.rc:
+      Add version info to Windows DLL
+
+2003-09-07  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * ext/ming/ming.c:
+      Fixed ming to work with new OO stuff. Patch by tony2001 at phpclub dot net
+
+2003-09-07  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_4_3)
+      Zend/Zend.m4:
+      check for mach-o/dyld.h - needed for non-PHP ZE builds
+
+    * ZendEngine2/Zend.m4:
+      check for mach-o/dyld.h - needed for non-PHP ZE build
+
 2003-09-06  Jani Taskinen  <jani.taskinen@kolumbus.fi>
 
     * (PHP_4_3)

@@ -1,3 +1,13 @@
+2003-09-07  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_execute.c:
+      Fix foreach() called with non array
+
+2003-09-07  Stanislav Malyshev  <stas@zend.com>
+
+    * Zend.m4:
+      check for mach-o/dyld.h - needed for non-PHP ZE build
+
 2003-09-06  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_default_classes.c:
