@@ -32,6 +32,7 @@
 
 #include "php_version.h"
 #include "zend.h"
+#include "php_compat.h"
 
 /* automake defines PACKAGE and VERSION for Zend too */
 #ifdef PACKAGE
