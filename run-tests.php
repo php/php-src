@@ -44,7 +44,9 @@ if (getenv('TEST_PHP_SRCDIR')) {
 
 $cwd = getcwd();
 set_time_limit(0);
-ob_implicit_flush();
+while(ob_get_level()) {
+	ob_end_clean();
+}
 error_reporting(E_ALL);
 ini_set('magic_quotes_runtime',0); // this would break tests by modifying EXPECT sections
 
