@@ -48,6 +48,12 @@ if ($test == "003333.33") {
 
 echo sprintf("%.2f\n", "99.00");
 echo sprintf("%.2f\n", 99.00);
+
+echo sprintf("%e\n", 1.234E-18);
+echo sprintf("%e\n", 1.234E+18);
+echo sprintf("%e\n", 9843243.12);
+echo sprintf("%e\n", -9843243.12);
+
 ?>
 --EXPECT--
 sprintf string truncate test:   passed
@@ -57,3 +63,7 @@ sprintf octal binary test:      passed
 sprintf float test:             passed
 99.00
 99.00
+1.23400e-18
+1.23400e+18
+9.84324e+6
+-9.84324e+6
