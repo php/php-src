@@ -438,7 +438,6 @@ expr_without_variable:
 		T_LIST '(' { zend_do_list_init(TSRMLS_C); } assignment_list ')' '=' expr { zend_do_list_end(&$$, &$7 TSRMLS_CC); }
 	|	cvar '=' expr		{ zend_do_end_variable_parse(BP_VAR_W, 0 TSRMLS_CC); zend_do_assign(&$$, &$1, &$3 TSRMLS_CC); }
 	|	cvar '=' '&' w_cvar	{ zend_do_end_variable_parse(BP_VAR_W, 0 TSRMLS_CC); zend_do_assign_ref(&$$, &$1, &$4 TSRMLS_CC); }
-	|	cvar '=' '&' function_call { zend_do_end_variable_parse(BP_VAR_W, 0 TSRMLS_CC); zend_do_assign_ref(&$$, &$1, &$4 TSRMLS_CC); }
 	|	cvar '=' '&' T_NEW new_class_entry { zend_do_extended_fcall_begin(TSRMLS_C); zend_do_begin_new_object(&$4, &$5 TSRMLS_CC); } ctor_arguments { zend_do_end_new_object(&$3, &$4, &$7 TSRMLS_CC); zend_do_extended_fcall_end(TSRMLS_C); zend_do_end_variable_parse(BP_VAR_W, 0 TSRMLS_CC); zend_do_assign_ref(&$$, &$1, &$3 TSRMLS_CC); }
 	|	T_NEW new_class_entry { zend_do_extended_fcall_begin(TSRMLS_C); zend_do_begin_new_object(&$1, &$2 TSRMLS_CC); } ctor_arguments { zend_do_end_new_object(&$$, &$1, &$4 TSRMLS_CC); zend_do_extended_fcall_end(TSRMLS_C);}
 	|	cvar T_PLUS_EQUAL expr 	{ zend_do_end_variable_parse(BP_VAR_RW, 0 TSRMLS_CC); zend_do_binary_assign_op(ZEND_ASSIGN_ADD, &$$, &$1, &$3 TSRMLS_CC); }
@@ -488,7 +487,6 @@ expr_without_variable:
 	|	expr '?' { zend_do_begin_qm_op(&$1, &$2 TSRMLS_CC); }
 		expr ':' { zend_do_qm_true(&$4, &$2, &$5 TSRMLS_CC); }
 		expr	 { zend_do_qm_false(&$$, &$7, &$2, &$5 TSRMLS_CC); }
-	|	function_call { $$ = $1; }
 	|	internal_functions_in_yacc { $$ = $1; }
 	|	T_INT_CAST expr 	{ zend_do_cast(&$$, &$2, IS_LONG TSRMLS_CC); }
 	|	T_DOUBLE_CAST expr 	{ zend_do_cast(&$$, &$2, IS_DOUBLE TSRMLS_CC); }
@@ -605,7 +603,7 @@ non_empty_static_array_pair_list:
 
 expr:
 		r_cvar					{ $$ = $1; }
-	|	expr_without_variable	{ $$ = $1; }
+	|	expr_without_variable		{ $$ = $1; }
 ;
 
 
@@ -624,35 +622,51 @@ rw_cvar:
 ;
 
 r_cvar_without_static_member:
-	variable { zend_do_end_variable_parse(BP_VAR_R, 0 TSRMLS_CC); $$ = $1; }
+		cvar_without_objects { zend_do_end_variable_parse(BP_VAR_R, 0 TSRMLS_CC); $$ = $1; }
 ;
+
 
 cvar:
-		variable { $$ = $1; }
-	|	static_member {$$ = $1; }
+		base_cvar_without_objects T_OBJECT_OPERATOR { zend_do_push_object(&$1 TSRMLS_CC); } object_property { zend_do_push_object(&$4 TSRMLS_CC); } method_or_not
+			variable_properties { zend_do_pop_object(&$$ TSRMLS_CC); }
+	|	base_cvar_without_objects { $$ = $1; }
 ;
 
-static_member:
-	parse_class_entry variable { $$ = $2; zend_do_fetch_static_member(&$1 TSRMLS_CC); }
+
+variable_properties:
+		variable_properties variable_property
+	|	/* empty */
 ;
 
-variable:
-		variable_property '(' { zend_do_begin_method_call(NULL, &$1 TSRMLS_CC); }
-			function_call_parameter_list ')' { zend_do_end_function_call(&$1, &$$, &$4, 0, 1 TSRMLS_CC); zend_do_extended_fcall_end(TSRMLS_C);}
-	|	variable_property { $$ = $1; }
-	|	cvar_without_objects { $$ = $1; }
-;
 
 variable_property:
-	variable T_OBJECT_OPERATOR { zend_do_push_object(&$1 TSRMLS_CC); } object_property { $$ = $4; }
+		T_OBJECT_OPERATOR object_property { zend_do_push_object(&$2 TSRMLS_CC); } method_or_not
 ;
 
+method_or_not:
+		'(' { zend_do_pop_object(&$1 TSRMLS_CC); zend_do_begin_method_call(NULL, &$1 TSRMLS_CC); }
+				function_call_parameter_list ')' 
+			{ zend_do_end_function_call(&$1, &$$, &$3, 0, 1 TSRMLS_CC); zend_do_extended_fcall_end(TSRMLS_C);
+			  zend_do_push_object(&$$ TSRMLS_CC); }
+	|	/* empty */
+;
 
 cvar_without_objects:
 		reference_variable { $$ = $1; }
 	|	simple_indirect_reference reference_variable { zend_do_indirect_references(&$$, &$1, &$2 TSRMLS_CC); }
 ;
 
+static_member:
+	parse_class_entry cvar_without_objects { $$ = $2; zend_do_fetch_static_member(&$1 TSRMLS_CC); }
+;
+
+
+base_cvar_without_objects:
+		reference_variable { $$ = $1; }
+	|	simple_indirect_reference reference_variable { zend_do_indirect_references(&$$, &$1, &$2 TSRMLS_CC); }
+	|	static_member { $$ = $1; }
+	|	function_call { zend_do_begin_variable_parse(TSRMLS_C); $$ = $1; }
+;
 
 reference_variable:
 		reference_variable '[' dim_offset ']'	{ fetch_array_dim(&$$, &$1, &$3 TSRMLS_CC); }
@@ -687,7 +701,6 @@ variable_name:
 		T_STRING		{ $$ = $1; }
 	|	'{' expr '}'	{ $$ = $2; }
 ;
-
 
 simple_indirect_reference:
 		'$' { $$.u.constant.value.lval = 1; }
