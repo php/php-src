@@ -350,7 +350,7 @@ PHP_FUNCTION(ftp_rawlist)
 	ftpbuf_t	*ftp;
 	char		**llist, **ptr, *dir;
 	int			dir_len;
-	zend_bool	recursive;
+	zend_bool	recursive = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs|b", &z_ftp, &dir, &dir_len, &recursive) == FAILURE) {
 		return;
