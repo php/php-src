@@ -487,7 +487,7 @@ ZEND_API inline void zend_assign_to_variable_reference(znode *result, zval **var
 	if (variable_ptr == EG(error_zval_ptr) || value_ptr==EG(error_zval_ptr)) {
 		variable_ptr_ptr = &EG(uninitialized_zval_ptr);
 /*	} else if (variable_ptr==&EG(uninitialized_zval) || variable_ptr!=value_ptr) { */
-	} else if (*variable_ptr_ptr != *value_ptr_ptr) {
+	} else if (variable_ptr_ptr != value_ptr_ptr) {
 		variable_ptr->refcount--;
 		if (variable_ptr->refcount==0) {
 			zendi_zval_dtor(*variable_ptr);
@@ -510,7 +510,10 @@ ZEND_API inline void zend_assign_to_variable_reference(znode *result, zval **var
 		*variable_ptr_ptr = value_ptr;
 		value_ptr->refcount++;
 	} else {
-		/* nothing to do */
+		if (variable_ptr->refcount>1) { /* we need to break away */
+			SEPARATE_ZVAL(variable_ptr_ptr);
+		}
+		(*variable_ptr_ptr)->is_ref = 1;
 	}
 
 	if (result && (result->op_type != IS_UNUSED)) {
