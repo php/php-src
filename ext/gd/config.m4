@@ -224,31 +224,29 @@ dnl Various checks for GD features
   PHP_GD_FREETYPE1
   PHP_GD_T1LIB
 
-  case $PHP_GD in
-    yes)
-      PHP_ADD_LIBRARY(gd,, GD_SHARED_LIBADD)
-      PHP_GD_CHECK_VERSION
-      AC_DEFINE(HAVE_LIBGD,1,[ ])
-	;;
-    *)
-dnl A whole whack of possible places where these might be
-      for i in include/gd1.3 include/gd include gd1.3 gd ""; do
-        test -f $PHP_GD/$i/gd.h && GD_INCLUDE=$PHP_GD/$i
-      done
+  if test "$PHP_GD" = "yes"; then
+    GD_SEARCH_PATHS="/usr/local /usr"
+  else
+    GD_SEARCH_PATHS=$PHP_GD
+  fi
 
-      for i in lib/gd1.3 lib/gd lib gd1.3 gd ""; do
-        test -f $PHP_GD/$i/libgd.$SHLIB_SUFFIX_NAME -o -f $PHP_GD/$i/libgd.a && GD_LIB=$PHP_GD/$i
-      done
+  for j in $GD_SEARCH_PATHS; do
+    for i in include/gd1.3 include/gd include gd1.3 gd ""; do
+      test -f $j/$i/gd.h && GD_INCLUDE=$j/$i
+    done
 
-      if test -n "$GD_INCLUDE" -a -n "$GD_LIB" ; then
-        PHP_ADD_LIBRARY_WITH_PATH(gd, $GD_LIB, GD_SHARED_LIBADD)
-        AC_DEFINE(HAVE_LIBGD,1,[ ])
-        PHP_GD_CHECK_VERSION
-      else
-        AC_MSG_ERROR([Unable to find libgd.(a|so) anywhere under $withval])
-      fi 
-    ;;
-  esac
+    for i in lib/gd1.3 lib/gd lib gd1.3 gd ""; do
+      test -f $j/$i/libgd.$SHLIB_SUFFIX_NAME -o -f $j/$i/libgd.a && GD_LIB=$j/$i
+    done
+  done
+
+  if test -n "$GD_INCLUDE" -a -n "$GD_LIB" ; then
+    PHP_ADD_LIBRARY_WITH_PATH(gd, $GD_LIB, GD_SHARED_LIBADD)
+    AC_DEFINE(HAVE_LIBGD,1,[ ])
+    PHP_GD_CHECK_VERSION
+  else
+    AC_MSG_ERROR([Unable to find libgd.(a|so) anywhere under $withval])
+  fi 
 
 dnl NetBSD package structure
   if test -f /usr/pkg/include/gd/gd.h -a -z "$GD_INCLUDE" ; then
