@@ -76,6 +76,7 @@
       <dir name="scripts">
         <file baseinstalldir="/" role="script" install-as="pear" name="pear.in">
           <replace from="@php_bin@" to="php_bin" type="pear-config"/>
+          <replace from="@php_dir@" to="php_dir" type="pear-config"/>
           <replace from="@pear_version@" to="version" type="package-info"/>
           <replace from="@include_path@" to="php_dir" type="pear-config"/>
         </file>
