@@ -363,7 +363,8 @@ xml_set_handler(char **nameBufp, pval *data)
 		if (*nameBufp != NULL) {
 			efree(*nameBufp);
 		}
-		*nameBufp = php3i_pval_strdup(data);
+		convert_to_string(data);
+		*nameBufp = estrndup(data->value.str.val, data->value.str.len);
 	} else {
 		if (*nameBufp != NULL) {
 			efree(*nameBufp);
@@ -378,18 +379,18 @@ xml_set_handler(char **nameBufp, pval *data)
 static pval *
 xml_call_handler(xml_parser *parser, char *funcName, int argc, pval **argv)
 {
+	ELS_FETCH();
+
 	if (parser && funcName) {
 		pval *retval, *func;
 		int i;
-		HashTable *function_table;
 
 		func = php3i_string_pval(funcName);
 		retval = emalloc(sizeof(pval));
 		/* We cannot call internal variables from a function module as
 		   it breaks any chance of compiling it as a module on windows.
 		   Instead, we create a callback function. */
-		function_table=php3i_get_function_table();
-		if (call_user_function(function_table, NULL, func, retval, argc, argv) == FAILURE) {
+		if (call_user_function(EG(function_table), NULL, func, retval, argc, argv) == FAILURE) {
 			php3tls_pval_destructor(retval);
 			efree(retval);
 			return NULL;
