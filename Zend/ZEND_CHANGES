@@ -159,7 +159,7 @@ Changes in the Zend Engine 2.0
       to access a class's local symbols you can use the self:: class
       accessor, for example, you can do self::$my_static_name = "Hello".
       You can also use the class's name such as
-      MyClass::$my_static_name = "Hello". WIth both constants and
+      MyClass::$my_static_name = "Hello". With both constants and
       functions, if you don't specify a class context the current class
       will be searched first and if the search fails then the global
       scope will be searched. If you want to force PHP to only check the
