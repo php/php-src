@@ -1,3 +1,39 @@
+2004-10-11  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_0)
+      NEWS
+      ext/standard/streamsfuncs.c
+      main/streams/streams.c:
+      MFH: Fixed bug #30362 (stream_get_line() not handling end string correctly)
+
+    * ext/standard/streamsfuncs.c
+      main/streams/streams.c:
+      Fixed bug #30362 (stream_get_line() not handling end string correctly).
+
+    * (PHP_5_0)
+      NEWS
+      ext/calendar/calendar.c:
+      MFH: Fixed bug #30375 (cal_info() does not work without a parameter).
+
+    * ext/calendar/calendar.c:
+      Fixed bug #30375 (cal_info() does not work without a parameter).
+
+2004-10-11  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * (PHP_5_0)
+      NEWS:
+      BFN
+
+    * main/streams/transports.c:
+      Fix the return value check too
+
+    * (PHP_5_0)
+      main/streams/transports.c:
+      MFH: Fix #30387: wrong flag used for async connection
+
+    * main/streams/transports.c:
+      check the correct flag for async connect
+
 2004-10-10  Sebastian Bergmann  <sb@sebastian-bergmann.de>
 
     * (PHP_4_3)
