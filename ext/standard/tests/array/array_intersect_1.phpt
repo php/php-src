@@ -91,55 +91,55 @@ begin ------------ array_intersect() ----------------------------
 $a=array (
   '0.1' => 
   class cr {
-    var $ = 9;
-    var $public_member = 9;
+    private $priv_member = 9;
+    public $public_member = 9;
   },
   '0.5' => 
   class cr {
-    var $ = 12;
-    var $public_member = 12;
+    private $priv_member = 12;
+    public $public_member = 12;
   },
   0 => 
   class cr {
-    var $ = 23;
-    var $public_member = 23;
+    private $priv_member = 23;
+    public $public_member = 23;
   },
   1 => 
   class cr {
-    var $ = 4;
-    var $public_member = 4;
+    private $priv_member = 4;
+    public $public_member = 4;
   },
   2 => 
   class cr {
-    var $ = -15;
-    var $public_member = -15;
+    private $priv_member = -15;
+    public $public_member = -15;
   },
 );
 $b=array (
   '0.2' => 
   class cr {
-    var $ = 9;
-    var $public_member = 9;
+    private $priv_member = 9;
+    public $public_member = 9;
   },
   '0.5' => 
   class cr {
-    var $ = 22;
-    var $public_member = 22;
+    private $priv_member = 22;
+    public $public_member = 22;
   },
   0 => 
   class cr {
-    var $ = 3;
-    var $public_member = 3;
+    private $priv_member = 3;
+    public $public_member = 3;
   },
   1 => 
   class cr {
-    var $ = 4;
-    var $public_member = 4;
+    private $priv_member = 4;
+    public $public_member = 4;
   },
   2 => 
   class cr {
-    var $ = -15;
-    var $public_member = -15;
+    private $priv_member = -15;
+    public $public_member = -15;
   },
 );
 var_dump(array_intersect($a, $b);
@@ -150,55 +150,55 @@ begin ------------ array_uintersect() ---------------------------
 $a=array (
   '0.1' => 
   class cr {
-    var $ = 9;
-    var $public_member = 9;
+    private $priv_member = 9;
+    public $public_member = 9;
   },
   '0.5' => 
   class cr {
-    var $ = 12;
-    var $public_member = 12;
+    private $priv_member = 12;
+    public $public_member = 12;
   },
   0 => 
   class cr {
-    var $ = 23;
-    var $public_member = 23;
+    private $priv_member = 23;
+    public $public_member = 23;
   },
   1 => 
   class cr {
-    var $ = 4;
-    var $public_member = 4;
+    private $priv_member = 4;
+    public $public_member = 4;
   },
   2 => 
   class cr {
-    var $ = -15;
-    var $public_member = -15;
+    private $priv_member = -15;
+    public $public_member = -15;
   },
 );
 $b=array (
   '0.2' => 
   class cr {
-    var $ = 9;
-    var $public_member = 9;
+    private $priv_member = 9;
+    public $public_member = 9;
   },
   '0.5' => 
   class cr {
-    var $ = 22;
-    var $public_member = 22;
+    private $priv_member = 22;
+    public $public_member = 22;
   },
   0 => 
   class cr {
-    var $ = 3;
-    var $public_member = 3;
+    private $priv_member = 3;
+    public $public_member = 3;
   },
   1 => 
   class cr {
-    var $ = 4;
-    var $public_member = 4;
+    private $priv_member = 4;
+    public $public_member = 4;
   },
   2 => 
   class cr {
-    var $ = -15;
-    var $public_member = -15;
+    private $priv_member = -15;
+    public $public_member = -15;
   },
 );
 var_dump(array_uintersect($a, $b, "comp_func_cr"));
@@ -224,55 +224,55 @@ begin ------------ array_intersect_assoc() ----------------------
 $a=array (
   '0.1' => 
   class cr {
-    var $ = 9;
-    var $public_member = 9;
+    private $priv_member = 9;
+    public $public_member = 9;
   },
   '0.5' => 
   class cr {
-    var $ = 12;
-    var $public_member = 12;
+    private $priv_member = 12;
+    public $public_member = 12;
   },
   0 => 
   class cr {
-    var $ = 23;
-    var $public_member = 23;
+    private $priv_member = 23;
+    public $public_member = 23;
   },
   1 => 
   class cr {
-    var $ = 4;
-    var $public_member = 4;
+    private $priv_member = 4;
+    public $public_member = 4;
   },
   2 => 
   class cr {
-    var $ = -15;
-    var $public_member = -15;
+    private $priv_member = -15;
+    public $public_member = -15;
   },
 );
 $b=array (
   '0.2' => 
   class cr {
-    var $ = 9;
-    var $public_member = 9;
+    private $priv_member = 9;
+    public $public_member = 9;
   },
   '0.5' => 
   class cr {
-    var $ = 22;
-    var $public_member = 22;
+    private $priv_member = 22;
+    public $public_member = 22;
   },
   0 => 
   class cr {
-    var $ = 3;
-    var $public_member = 3;
+    private $priv_member = 3;
+    public $public_member = 3;
   },
   1 => 
   class cr {
-    var $ = 4;
-    var $public_member = 4;
+    private $priv_member = 4;
+    public $public_member = 4;
   },
   2 => 
   class cr {
-    var $ = -15;
-    var $public_member = -15;
+    private $priv_member = -15;
+    public $public_member = -15;
   },
 );
 var_dump(array_intersect_assoc($a, $b));
@@ -283,55 +283,55 @@ begin ------------ array_uintersect_assoc() ---------------------
 $a=array (
   '0.1' => 
   class cr {
-    var $ = 9;
-    var $public_member = 9;
+    private $priv_member = 9;
+    public $public_member = 9;
   },
   '0.5' => 
   class cr {
-    var $ = 12;
-    var $public_member = 12;
+    private $priv_member = 12;
+    public $public_member = 12;
   },
   0 => 
   class cr {
-    var $ = 23;
-    var $public_member = 23;
+    private $priv_member = 23;
+    public $public_member = 23;
   },
   1 => 
   class cr {
-    var $ = 4;
-    var $public_member = 4;
+    private $priv_member = 4;
+    public $public_member = 4;
   },
   2 => 
   class cr {
-    var $ = -15;
-    var $public_member = -15;
+    private $priv_member = -15;
+    public $public_member = -15;
   },
 );
 $b=array (
   '0.2' => 
   class cr {
-    var $ = 9;
-    var $public_member = 9;
+    private $priv_member = 9;
+    public $public_member = 9;
   },
   '0.5' => 
   class cr {
-    var $ = 22;
-    var $public_member = 22;
+    private $priv_member = 22;
+    public $public_member = 22;
   },
   0 => 
   class cr {
-    var $ = 3;
-    var $public_member = 3;
+    private $priv_member = 3;
+    public $public_member = 3;
   },
   1 => 
   class cr {
-    var $ = 4;
-    var $public_member = 4;
+    private $priv_member = 4;
+    public $public_member = 4;
   },
   2 => 
   class cr {
-    var $ = -15;
-    var $public_member = -15;
+    private $priv_member = -15;
+    public $public_member = -15;
   },
 );
 var_dump(array_uintersect_assoc($a, $b, "comp_func_cr"));
@@ -352,55 +352,55 @@ begin ------------ array_intersect_uassoc() ---------------------
 $a=array (
   '0.1' => 
   class cr {
-    var $ = 9;
-    var $public_member = 9;
+    private $priv_member = 9;
+    public $public_member = 9;
   },
   '0.5' => 
   class cr {
-    var $ = 12;
-    var $public_member = 12;
+    private $priv_member = 12;
+    public $public_member = 12;
   },
   0 => 
   class cr {
-    var $ = 23;
-    var $public_member = 23;
+    private $priv_member = 23;
+    public $public_member = 23;
   },
   1 => 
   class cr {
-    var $ = 4;
-    var $public_member = 4;
+    private $priv_member = 4;
+    public $public_member = 4;
   },
   2 => 
   class cr {
-    var $ = -15;
-    var $public_member = -15;
+    private $priv_member = -15;
+    public $public_member = -15;
   },
 );
 $b=array (
   '0.2' => 
   class cr {
-    var $ = 9;
-    var $public_member = 9;
+    private $priv_member = 9;
+    public $public_member = 9;
   },
   '0.5' => 
   class cr {
-    var $ = 22;
-    var $public_member = 22;
+    private $priv_member = 22;
+    public $public_member = 22;
   },
   0 => 
   class cr {
-    var $ = 3;
-    var $public_member = 3;
+    private $priv_member = 3;
+    public $public_member = 3;
   },
   1 => 
   class cr {
-    var $ = 4;
-    var $public_member = 4;
+    private $priv_member = 4;
+    public $public_member = 4;
   },
   2 => 
   class cr {
-    var $ = -15;
-    var $public_member = -15;
+    private $priv_member = -15;
+    public $public_member = -15;
   },
 );
 var_dump(array_intersect_uassoc($a, $b, "comp_func"));
@@ -411,55 +411,55 @@ begin ------------ array_uintersect_uassoc() with ordinary func -
 $a=array (
   '0.1' => 
   class cr {
-    var $ = 9;
-    var $public_member = 9;
+    private $priv_member = 9;
+    public $public_member = 9;
   },
   '0.5' => 
   class cr {
-    var $ = 12;
-    var $public_member = 12;
+    private $priv_member = 12;
+    public $public_member = 12;
   },
   0 => 
   class cr {
-    var $ = 23;
-    var $public_member = 23;
+    private $priv_member = 23;
+    public $public_member = 23;
   },
   1 => 
   class cr {
-    var $ = 4;
-    var $public_member = 4;
+    private $priv_member = 4;
+    public $public_member = 4;
   },
   2 => 
   class cr {
-    var $ = -15;
-    var $public_member = -15;
+    private $priv_member = -15;
+    public $public_member = -15;
   },
 );
 $b=array (
   '0.2' => 
   class cr {
-    var $ = 9;
-    var $public_member = 9;
+    private $priv_member = 9;
+    public $public_member = 9;
   },
   '0.5' => 
   class cr {
-    var $ = 22;
-    var $public_member = 22;
+    private $priv_member = 22;
+    public $public_member = 22;
   },
   0 => 
   class cr {
-    var $ = 3;
-    var $public_member = 3;
+    private $priv_member = 3;
+    public $public_member = 3;
   },
   1 => 
   class cr {
-    var $ = 4;
-    var $public_member = 4;
+    private $priv_member = 4;
+    public $public_member = 4;
   },
   2 => 
   class cr {
-    var $ = -15;
-    var $public_member = -15;
+    private $priv_member = -15;
+    public $public_member = -15;
   },
 );
 var_dump(array_uintersect_uassoc($a, $b, "comp_func_cr", "comp_func"));
@@ -480,55 +480,55 @@ begin ------------ array_uintersect_uassoc() with method --------
 $a=array (
   '0.1' => 
   class cr {
-    var $ = 9;
-    var $public_member = 9;
+    private $priv_member = 9;
+    public $public_member = 9;
   },
   '0.5' => 
   class cr {
-    var $ = 12;
-    var $public_member = 12;
+    private $priv_member = 12;
+    public $public_member = 12;
   },
   0 => 
   class cr {
-    var $ = 23;
-    var $public_member = 23;
+    private $priv_member = 23;
+    public $public_member = 23;
   },
   1 => 
   class cr {
-    var $ = 4;
-    var $public_member = 4;
+    private $priv_member = 4;
+    public $public_member = 4;
   },
   2 => 
   class cr {
-    var $ = -15;
-    var $public_member = -15;
+    private $priv_member = -15;
+    public $public_member = -15;
   },
 );
 $b=array (
   '0.2' => 
   class cr {
-    var $ = 9;
-    var $public_member = 9;
+    private $priv_member = 9;
+    public $public_member = 9;
   },
   '0.5' => 
   class cr {
-    var $ = 22;
-    var $public_member = 22;
+    private $priv_member = 22;
+    public $public_member = 22;
   },
   0 => 
   class cr {
-    var $ = 3;
-    var $public_member = 3;
+    private $priv_member = 3;
+    public $public_member = 3;
   },
   1 => 
   class cr {
-    var $ = 4;
-    var $public_member = 4;
+    private $priv_member = 4;
+    public $public_member = 4;
   },
   2 => 
   class cr {
-    var $ = -15;
-    var $public_member = -15;
+    private $priv_member = -15;
+    public $public_member = -15;
   },
 );
 var_dump(array_uintersect_uassoc($a, $b, array("cr", "comp_func_cr"), "comp_func"));
