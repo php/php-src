@@ -1,3 +1,49 @@
+2002-07-29  Sterling Hughes  <sterling@pb1.pair.com>
+
+    * ext/xslt/sablot.c: add sablotron version, patch by Christian Stocker...
+
+2002-07-29  dickmeiss  <dickmeiss@pb1.pair.com>
+
+    * ext/yaz/php_yaz.c: Make PHP part of Z39.50 implementation name
+
+    * ext/yaz/php_yaz.c: Use type ext rather than raw for ZOOM record fetch
+
+2002-07-29  kalowsky  <kalowsky@pb1.pair.com>
+
+    * NEWS: updating the NEWS file
+
+2002-07-29  chregu  <chregu@pb1.pair.com>
+
+    * ext/domxml/php_domxml.c:
+    - nodename is not always set, check if it really is.
+    - make force_ref for aliases as well
+
+2002-07-29  edink  <edink@pb1.pair.com>
+
+    * win32/php4dllts.dsp:
+    Fixed windows build by adding sha1.c and sha1.h to the project file.
+
+    * ext/standard/dir.c: Fixed bug #14657 (patch by Steph Fox)
+
+    * win32/readdir.c
+      win32/readdir.h: Fixed bug #11214 (patch by Steph Fox)
+
+    * main/php_ini.c:
+    First try to open php-SAPI.ini and if it fails fall back to regular
+    php.ini file. For example cli version of PHP will first try to open
+    php-cli.ini in the usual ini file search path and only if it fails
+    will it try to open php.ini using the same path.
+
+2002-07-29  Sascha Schumann  <sas@pb1.pair.com>
+
+    * NEWS: style police
+
+2002-07-29  sniper  <sniper@pb1.pair.com>
+
+    * sapi/apache/config.m4
+      sapi/apache2filter/config.m4
+      acinclude.m4: MFH: Fix for Apache version check.
+
 2002-07-28  sniper  <sniper@pb1.pair.com>
 
     * ext/mbstring/mbstring.c: MFH
