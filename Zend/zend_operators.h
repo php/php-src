@@ -206,18 +206,21 @@ ZEND_API void zend_compare_objects(zval *result, zval *o1, zval *o2);
 
 
 #define Z_LVAL(zval)		(zval).value.lval
+#define Z_BVAL(zval)		((zend_bool)(zval).value.lval)
 #define Z_DVAL(zval)		(zval).value.dval
 #define Z_STRVAL(zval)		(zval).value.str.val
 #define Z_STRLEN(zval)		(zval).value.str.len
 #define Z_ARRVAL(zval)		(zval).value.ht
 
 #define Z_LVAL_P(zval_p)		Z_LVAL(*zval_p)
+#define Z_BVAL_P(zval_p)		Z_BVAL(*zval_p)
 #define Z_DVAL_P(zval_p)		Z_DVAL(*zval_p)
 #define Z_STRVAL_P(zval_p)		Z_STRVAL(*zval_p)
 #define Z_STRLEN_P(zval_p)		Z_STRLEN(*zval_p)
 #define Z_ARRVAL_P(zval_p)		Z_ARRVAL(*zval_p)
 
 #define Z_LVAL_PP(zval_pp)		Z_LVAL(**zval_pp)
+#define Z_BVAL_PP(zval_pp)		Z_BVAL(**zval_pp)
 #define Z_DVAL_PP(zval_pp)		Z_DVAL(**zval_pp)
 #define Z_STRVAL_PP(zval_pp)	Z_STRVAL(**zval_pp)
 #define Z_STRLEN_PP(zval_pp)	Z_STRLEN(**zval_pp)
