@@ -96,6 +96,7 @@ struct _zend_compiler_globals {
 
 	zend_llist filenames_list;
 
+	zend_bool in_compilation;
 	zend_bool short_tags;
 	zend_bool asp_tags;
 	zend_bool allow_call_time_pass_reference;
@@ -162,6 +163,8 @@ struct _zend_executor_globals {
 	long precision;
 
 	int ticks_count;
+
+	zend_bool in_execution;
 
 	/* for extended information support */
 	zend_bool no_extensions;

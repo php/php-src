@@ -108,6 +108,7 @@ void init_compiler(CLS_D ELS_DC)
 	CG(asp_tags) = ZEND_UV(asp_tags);
 	CG(allow_call_time_pass_reference) = ZEND_UV(allow_call_time_pass_reference);
 	CG(handle_op_arrays) = 1;
+	CG(in_compilation) = 0;
 	init_resource_list(ELS_C);
 	CG(unclean_shutdown) = 0;
 	zend_llist_init(&CG(open_files), sizeof(zend_file_handle), (void (*)(void *)) zend_open_file_dtor, 0);
@@ -150,11 +151,24 @@ ZEND_API void zend_restore_compiled_filename(char *original_compiled_filename)
 	CG(compiled_filename) = original_compiled_filename;
 }
 
-ZEND_API char *zend_get_compiled_filename()
+
+ZEND_API char *zend_get_compiled_filename(CLS_D)
+{
+	return CG(compiled_filename);
+}
+
+
+ZEND_API int zend_get_compiled_lineno(CLS_D)
+{
+	return CG(zend_lineno);
+}
+
+
+ZEND_API zend_bool zend_is_compiling()
 {
 	CLS_FETCH();
 
-	return CG(compiled_filename);
+	return CG(in_compilation);
 }
 
 

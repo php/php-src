@@ -65,6 +65,7 @@ void execute_new_code(CLS_D);
 ZEND_API char *get_active_function_name(void);
 ZEND_API char *zend_get_executed_filename(ELS_D);
 ZEND_API uint zend_get_executed_lineno(ELS_D);
+ZEND_API zend_bool zend_is_executing(void);
 
 #define zendi_zval_copy_ctor(p) zval_copy_ctor(&(p))
 #define zendi_zval_dtor(p) zval_dtor(&(p))

@@ -208,7 +208,8 @@ void shutdown_scanner(CLS_D);
 
 ZEND_API char *zend_set_compiled_filename(char *new_compiled_filename);
 ZEND_API void zend_restore_compiled_filename(char *original_compiled_filename);
-ZEND_API char *zend_get_compiled_filename(void);
+ZEND_API char *zend_get_compiled_filename(CLS_D);
+ZEND_API int zend_get_compiled_lineno(CLS_D);
 
 #ifdef ZTS
 const char *zend_get_zendtext(CLS_D);
@@ -382,6 +383,7 @@ void print_op_array(zend_op_array *op_array, int optimizations);
 int pass_two(zend_op_array *op_array);
 void pass_include_eval(zend_op_array *op_array);
 zend_brk_cont_element *get_next_brk_cont_element(zend_op_array *op_array);
+ZEND_API zend_bool zend_is_compiling(void);
 
 int zendlex(znode *zendlval CLS_DC);
 
