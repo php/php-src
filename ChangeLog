@@ -1,3 +1,122 @@
+2001-05-20  Sascha Schumann  <sascha@schumann.cx>
+
+    * acinclude.m4
+      ext/session/config.m4
+      main/php.h:
+    Add support for systems where p{read|write} take a off64_t without
+    being properly prototyped.
+
+2001-05-20  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/domxml/config.m4
+      ext/gd/config.m4
+      ext/pdf/config.m4
+      ext/zlib/zlib.m4: MFH
+
+    * ext/gd/config.m4
+      ext/pdf/config.m4
+      ext/domxml/config.m4
+      ext/zlib/config0.m4:
+    A few modifications to make the ZLIB checks work better.
+
+2001-05-20  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/xml/expat/Makefile.in
+      ext/xml/Makefile.in:
+    Whoops, the expat directory needs the XML_BYTE_ORDER macro
+
+    * ext/xml/Makefile.in
+      ext/xml/config.m4: Don't add -DXML_BYTE_ORDER to global CPPFLAGS
+
+    * NEWS: looks promising
+
+    * build/fastgen.sh: Fix path to alternate mkdir
+
+    * acinclude.m4: Fix irix-time_r test
+
+    * acinclude.m4: remove fi
+
+    * acinclude.m4
+      main/php_reentrancy.h
+      main/reentrancy.c: Support for IRIX-style asctime_r/ctime_r.
+
+    * acinclude.m4: Catch 'mkdir -p' brokeness on IRIX
+
+2001-05-20  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * pear/Cache/URL.php: Oops.
+
+2001-05-20  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/standard/file.c:
+    MFH of patch that fixes copy() ignoring safe_mode open_basedir setting.
+
+2001-05-20  Wez Furlong  <wez.php@thebrainroom.com>
+
+    * ext/mailparse/mailparse.c:
+    fixed a bug in mailparse_stream_encode which would default to a random encoding (usually base64)
+
+2001-05-20  Sascha Schumann  <sascha@schumann.cx>
+
+    * NEWS: refining
+
+2001-05-20  Wez Furlong  <wez.php@thebrainroom.com>
+
+    * ext/mailparse/tests/001.phpt
+      ext/mailparse/tests/002.phpt
+      ext/mailparse/rfc822_getaddrs.c
+      ext/mailparse/try.php
+      ext/mailparse/mailparse_rfc822.h
+      ext/mailparse/php_mailparse.h
+      ext/mailparse/rfc2045.c
+      ext/mailparse/rfc2045.h
+      ext/mailparse/rfc2045acchk.c
+      ext/mailparse/rfc2045acprep.c
+      ext/mailparse/rfc2045appendurl.c
+      ext/mailparse/rfc2045cdecode.c
+      ext/mailparse/rfc2045decode.c
+      ext/mailparse/rfc2045find.c
+      ext/mailparse/rfc822.c
+      ext/mailparse/rfc822_getaddr.c
+      ext/mailparse/CREDITS
+      ext/mailparse/EXPERIMENTAL
+      ext/mailparse/Makefile.in
+      ext/mailparse/README
+      ext/mailparse/config.m4
+      ext/mailparse/libs.mk
+      ext/mailparse/mailparse.c: Imported mailparse extension
+
+2001-05-20  Stig Bakken  <ssb@fast.no>
+
+    * pear/pear.m4: MFH
+
+    * pear/pear.m4:
+    Define HAVE_CONFIG_H when building standalone DSO extensions 
+
+2001-05-20  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/standard/info.c: MFH
+
+    * ext/standard/info.c: This looks better.
+
+2001-05-20  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/pcre/php_pcre.c: Properly free callback_name only when necessary.
+
+2001-05-20  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/basic_functions.c
+      ext/standard/formatted_print.c:
+    - Fix for bug #9698/#10681 (patch by kettler@gmx.net)
+    - Added the 'u' modifier to printf/sprintf which prints unsigned longs.
+      
+
+    * ext/standard/basic_functions.c
+      ext/standard/formatted_print.c: - Reversed 'fix' for #9698
+    - Fix for bug #9698/#10681 (patch by kettler@gmx.net)
+    - Added the 'u' modifier to printf/sprintf which prints unsigned longs.
+      
+
 2001-05-19  Rasmus Lerdorf  <rasmus@php.net>
 
     * ext/standard/file.c: Fix bug #9526
