@@ -373,8 +373,10 @@ function_entry basic_functions[] = {
 	/* functions from browscap.c */
 	PHP_FE(get_browser,			NULL)
 
+#if HAVE_CRYPT
 	/* functions from crypt.c */
 	PHP_FE(crypt,				NULL)
+#endif
 
 	/* functions from dir.c */
 	PHP_FE(opendir,				NULL)
@@ -604,7 +606,11 @@ PHP_MINIT_FUNCTION(basic)
 	PHP_MINIT(fsock)(INIT_FUNC_ARGS_PASSTHRU);
 	PHP_MINIT(pack)(INIT_FUNC_ARGS_PASSTHRU);
 	PHP_MINIT(browscap)(INIT_FUNC_ARGS_PASSTHRU);
+
+#if HAVE_CRYPT
 	PHP_MINIT(crypt)(INIT_FUNC_ARGS_PASSTHRU);
+#endif
+
 	PHP_MINIT(dir)(INIT_FUNC_ARGS_PASSTHRU);
 	PHP_MINIT(syslog)(INIT_FUNC_ARGS_PASSTHRU);
 	PHP_MINIT(array)(INIT_FUNC_ARGS_PASSTHRU);
