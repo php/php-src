@@ -71,12 +71,6 @@
 #if HAVE_SESSION
 #include "ext/session/php_session.h"
 #endif
-#if HAVE_XML
-#include "ext/xml/php_xml.h"
-#endif
-#if HAVE_XML && HAVE_WDDX
-#include "ext/wddx/php_wddx.h"
-#endif
 #if HAVE_MYSQL
 #include "ext/mysql/php_mysql.h"
 #endif
@@ -89,6 +83,21 @@
 #if HAVE_ZLIB
 #include "ext/zlib/php_zlib.h"
 #endif
+#if HAVE_LIBXML
+#if HAVE_DOM
+#include "ext/dom/php_dom.h"
+#endif
+#if HAVE_SIMPLEXML
+#include "ext/simplexml/php_simplexml.h"
+#endif
+#endif
+#if HAVE_XML
+#include "ext/xml/php_xml.h"
+#endif
+#if HAVE_XML && HAVE_WDDX
+#include "ext/wddx/php_wddx.h"
+#endif
+
 /* }}} */
 
 /* {{{ php_builtin_extensions[]
@@ -125,14 +134,22 @@ zend_module_entry *php_builtin_extensions[] = {
 #if HAVE_TOKENIZER
 	,phpext_tokenizer_ptr
 #endif
+#if HAVE_ZLIB
+	,phpext_zlib_ptr
+#endif
+#if HAVE_LIBXML
+#if HAVE_DOM
+	,phpext_dom_ptr
+#endif
+#if HAVE_SIMPLEXML
+	,phpext_simplexml_ptr
+#endif
+#endif
 #if HAVE_XML
 	,phpext_xml_ptr
 #endif
 #if HAVE_XML && HAVE_WDDX
 	,phpext_wddx_ptr
-#endif
-#if HAVE_ZLIB
-	,phpext_zlib_ptr
 #endif
 };
 /* }}} */
