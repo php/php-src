@@ -186,7 +186,7 @@ BEGIN_EXTERN_C()
 ZEND_API void zend_open_file_dtor(void *f)
 {
 #ifdef ZTS
-	delete *((istream **) f);
+	delete *((ifstream **) f);
 #else
 	fclose(*((FILE **) f));
 #endif
