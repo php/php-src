@@ -2,6 +2,8 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? ????, Version 4.0 Beta 4
+- mktime interprets years in the range 0-70 now as 2000-2070. You can
+  continue to specify the complete year (i.e. 1920) (Sascha)
 - Added the ability to control the environment variables the user is allowed
   to change in Safe Mode, using INI directives (Zeev)
 - Fixed a crash bug in strtr() working on large input strings (Zeev)
