@@ -20,14 +20,6 @@ install-pdo-headers:
 			echo "hmmm"; \
 		fi \
 	done;
-	@echo ""
-	@echo ""
-	@echo "You're now ready to install PDO drivers for your database"
-	@echo "If you'd like to have PDO show up in the list of installed"
-	@echo "packages when you run \"pear list\", you may now run"
-	@echo "\"sudo pear install package.xml\""
-	@echo "this time, when prompted to press enter, you should type"
-	@echo "\"no\" and press enter instead."
 
 # mini hack
 install: $(all_targets) $(install_targets) install-pdo-headers
