@@ -27,6 +27,7 @@ typedef void (*php_output_handler_func_t)(char *output, uint output_len, char **
 
 PHPAPI void php_output_startup(void);
 PHPAPI void php_output_activate(void);
+PHPAPI void php_output_set_status(zend_bool status);
 void php_output_register_constants(void);
 PHPAPI int  php_body_write(const char *str, uint str_length);
 PHPAPI int  php_header_write(const char *str, uint str_length);
@@ -69,8 +70,9 @@ typedef struct _php_output_globals {
 	char *output_start_filename;
 	int output_start_lineno;
 	zend_stack ob_buffers;
-	int nesting_level;
-	zend_bool lock;
+	int ob_nesting_level;
+	zend_bool ob_lock;
+	zend_bool disable_output;
 } php_output_globals;
 
 

@@ -690,6 +690,8 @@ void php_request_shutdown(void *dummy)
 	SLS_FETCH();
 	PLS_FETCH();
 
+	php_output_set_status(0);
+
 	if (setjmp(EG(bailout))==0) {
 		php_end_ob_buffers((zend_bool)(SG(request_info).headers_only?0:1));
 	}
