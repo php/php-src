@@ -117,6 +117,7 @@ static oid objid_mib[] = {1, 3, 6, 1, 2, 1};
  */
 function_entry snmp_functions[] = {
 	PHP_FE(snmpget, NULL)
+	PHP_FE(snmpgetnext, NULL)
 	PHP_FE(snmpwalk, NULL)
 	PHP_FE(snmprealwalk, NULL)
 	PHP_FALIAS(snmpwalkoid, snmprealwalk, NULL)
@@ -129,6 +130,7 @@ function_entry snmp_functions[] = {
 	PHP_FE(snmpset, NULL)
 
 	PHP_FE(snmp3_get, NULL)
+	PHP_FE(snmp3_getnext, NULL)
 	PHP_FE(snmp3_walk, NULL)
 	PHP_FE(snmp3_real_walk, NULL)
 	PHP_FE(snmp3_set, NULL)
@@ -307,9 +309,10 @@ static void php_snmp_getvalue(struct variable_list *vars, zval *snmpval TSRMLS_D
 * Generic SNMP object fetcher (for both v3 and v1)
 *
 * st=1   snmpget()  - query an agent and return a single value.
-* st=2   snmpwalk() - walk the mib and return a single dimensional array 
+* st=2   snmpget()  - query an agent and return the next single value.
+* st=3   snmpwalk() - walk the mib and return a single dimensional array 
 *                     containing the values.
-* st=3   snmprealwalk() and snmpwalkoid() - walk the mib and return an 
+* st=4   snmprealwalk() and snmpwalkoid() - walk the mib and return an 
 *                                           array of oid,value pairs.
 * st=5-8 ** Reserved **
 * st=11  snmpset()  - query an agent and set a single value
@@ -336,7 +339,7 @@ static void php_snmp_internal(INTERNAL_FUNCTION_PARAMETERS, int st,
 	char *err;
 	zval *snmpval;
 
-	if (st >= 2) { /* walk */
+	if (st >= 3) { /* walk */
 		rootlen = MAX_NAME_LEN;
 		if (strlen(objid)) { /* on a walk, an empty string means top of tree - no error */
 			if (read_objid(objid, root, &rootlen)) {
@@ -360,12 +363,12 @@ static void php_snmp_internal(INTERNAL_FUNCTION_PARAMETERS, int st,
 		RETURN_FALSE;
 	}
 
-	if (st >= 2) {
+	if (st >= 3) {
 		memmove((char *)name, (char *)root, rootlen * sizeof(oid));
 		name_length = rootlen;
 		switch(st) {
-			case 2:
 			case 3:
+			case 4:
 				array_init(return_value);
 				break;
 			default:
@@ -376,8 +379,8 @@ static void php_snmp_internal(INTERNAL_FUNCTION_PARAMETERS, int st,
 
 	while (keepwalking) {
 		keepwalking = 0;
-		if (st == 1) {
-			pdu = snmp_pdu_create(SNMP_MSG_GET);
+		if ((st == 1) || (st == 2)) {
+			pdu = snmp_pdu_create((st == 1) ? SNMP_MSG_GET : SNMP_MSG_GETNEXT);
 			name_length = MAX_OID_LEN;
 			if (!snmp_parse_oid(objid, name, &name_length)) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid object identifier: %s", objid);
@@ -397,7 +400,7 @@ static void php_snmp_internal(INTERNAL_FUNCTION_PARAMETERS, int st,
 				snmp_close(ss);
 				RETURN_FALSE;
 			}
-		} else if (st >= 2) {
+		} else if (st >= 3) {
 			pdu = snmp_pdu_create(SNMP_MSG_GETNEXT);
 			snmp_add_null_var(pdu, name, name_length);
 		}
@@ -407,7 +410,7 @@ retry:
 		if (status == STAT_SUCCESS) {
 			if (response->errstat == SNMP_ERR_NOERROR) {
 				for (vars = response->variables; vars; vars = vars->next_variable) {
-					if (st >= 2 && st != 11 && 
+					if (st >= 3 && st != 11 && 
 						(vars->name_length < rootlen || memcmp(root, vars->name, rootlen * sizeof(oid)))) {
 						continue;       /* not part of this subtree */
 					}
@@ -422,8 +425,12 @@ retry:
 						zval_copy_ctor(return_value);
 						return;
 					} else if (st == 2) {
+						*return_value = *snmpval;
+						zval_copy_ctor(return_value);
+						return;
+					} else if (st == 3) {
 						add_next_index_zval(return_value,snmpval); /* Add to returned array */
-					} else if (st == 3)  {
+					} else if (st == 4)  {
 #ifdef HAVE_NET_SNMP
 						snprint_objid(buf2, sizeof(buf2), vars->name, vars->name_length);
 #else
@@ -431,7 +438,7 @@ retry:
 #endif
 						add_assoc_zval(return_value,buf2,snmpval);
 					}
-					if (st >= 2 && st != 11) {
+					if (st >= 3 && st != 11) {
 						if (vars->type != SNMP_ENDOFMIBVIEW && 
 							vars->type != SNMP_NOSUCHOBJECT && vars->type != SNMP_NOSUCHINSTANCE) {
 							memmove((char *)name, (char *)vars->name,vars->name_length * sizeof(oid));
@@ -441,7 +448,7 @@ retry:
 					}
 				}	
 			} else {
-				if (st != 2 || response->errstat != SNMP_ERR_NOSUCHNAME) {
+				if (st != 3 || response->errstat != SNMP_ERR_NOSUCHNAME) {
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error in packet: %s", snmp_errstring(response->errstat));
 					if (response->errstat == SNMP_ERR_NOSUCHNAME) {
 						for (count=1, vars = response->variables; vars && count != response->errindex;
@@ -463,7 +470,7 @@ retry:
 						if ((pdu = snmp_fix_pdu(response, SNMP_MSG_SET)) != NULL) {
 							goto retry;
 						}
-					} else if (st >= 2) {
+					} else if (st >= 2) { /* Here we do both getnext and walks. */
 						if ((pdu = snmp_fix_pdu(response, SNMP_MSG_GETNEXT)) != NULL) {
 							goto retry;
 						}
@@ -474,14 +481,14 @@ retry:
 			}
 		} else if (status == STAT_TIMEOUT) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "No response from %s", session->peername);
-			if (st == 2 || st == 3) {
+			if (st == 3 || st == 4) {
 				zval_dtor(return_value);
 			}
 			snmp_close(ss);
 			RETURN_FALSE;
 		} else {    /* status == STAT_ERROR */
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "An error occurred, quitting");
-			if (st == 2 || st == 3) {
+			if (st == 3 || st == 4) {
 				zval_dtor(return_value);
 			}
 			snmp_close(ss);
@@ -502,9 +509,10 @@ retry:
 * The object fetcher is shared with SNMPv3.
 *
 * st=1   snmpget() - query an agent and return a single value.
-* st=2   snmpwalk() - walk the mib and return a single dimensional array 
+* st=2   snmpgetnext() - query an agent and return the next single value.
+* st=3   snmpwalk() - walk the mib and return a single dimensional array 
 *          containing the values.
-* st=3 snmprealwalk() and snmpwalkoid() - walk the mib and return an 
+* st=4 snmprealwalk() and snmpwalkoid() - walk the mib and return an 
 *          array of oid,value pairs.
 * st=5-8 ** Reserved **
 * st=11  snmpset() - query an agent and set a single value
@@ -603,11 +611,19 @@ PHP_FUNCTION(snmpget)
 }
 /* }}} */
 
+/* {{{ proto string snmpgetnext(string host, string community, string object_id [, int timeout [, int retries]]) 
+   Fetch a SNMP object */
+PHP_FUNCTION(snmpgetnext)
+{
+	php_snmp(INTERNAL_FUNCTION_PARAM_PASSTHRU,2);
+}
+/* }}} */
+
 /* {{{ proto array snmpwalk(string host, string community, string object_id [, int timeout [, int retries]]) 
    Return all objects under the specified object id */
 PHP_FUNCTION(snmpwalk)
 {
-	php_snmp(INTERNAL_FUNCTION_PARAM_PASSTHRU,2);
+	php_snmp(INTERNAL_FUNCTION_PARAM_PASSTHRU,3);
 }
 /* }}} */
 
@@ -615,7 +631,7 @@ PHP_FUNCTION(snmpwalk)
    Return all objects including their respective object id withing the specified one */
 PHP_FUNCTION(snmprealwalk)
 {
-	php_snmp(INTERNAL_FUNCTION_PARAM_PASSTHRU,3);
+	php_snmp(INTERNAL_FUNCTION_PARAM_PASSTHRU,4);
 }
 /* }}} */
 
@@ -851,9 +867,10 @@ static int netsnmp_session_gen_sec_key(struct snmp_session *s, u_char *pass TSRM
 * From here is passed on the the common internal object fetcher.
 *
 * st=1   snmp3_get() - query an agent and return a single value.
-* st=2   snmp3_walk() - walk the mib and return a single dimensional array 
+* st=2   snmp3_getnext() - query an agent and return the next single value.
+* st=3   snmp3_walk() - walk the mib and return a single dimensional array 
 *                       containing the values.
-* st=3   snmp3_real_walk() - walk the mib and return an 
+* st=4   snmp3_real_walk() - walk the mib and return an 
 *                            array of oid,value pairs.
 * st=11  snmp3_set() - query an agent and set a single value
 *
@@ -976,12 +993,21 @@ PHP_FUNCTION(snmp3_get)
 }
 /* }}} */
 
+/* {{{ proto int snmp3_getnext(string host, string sec_name, string sec_level, string auth_protocol, string auth_passphrase, string priv_protocol, string priv_passphrase, string object_id [, int timeout [, int retries]])
+   Fetch the value of a SNMP object */
+PHP_FUNCTION(snmp3_getnext)
+{
+	php_snmpv3(INTERNAL_FUNCTION_PARAM_PASSTHRU, 2);
+}
+/* }}} */
+
+/* {{{ proto int snmp3_walk(string host, string sec_name, string sec_level, string auth_protocol, string auth_passphrase, string priv_protocol, string priv_passphrase, string object_id [, int timeout [, int retries]])
 
 /* {{{ proto int snmp3_walk(string host, string sec_name, string sec_level, string auth_protocol, string auth_passphrase, string priv_protocol, string priv_passphrase, string object_id [, int timeout [, int retries]])
    Fetch the value of a SNMP object */
 PHP_FUNCTION(snmp3_walk)
 {
-	php_snmpv3(INTERNAL_FUNCTION_PARAM_PASSTHRU, 2);
+	php_snmpv3(INTERNAL_FUNCTION_PARAM_PASSTHRU, 3);
 }
 /* }}} */
 
@@ -989,7 +1015,7 @@ PHP_FUNCTION(snmp3_walk)
    Fetch the value of a SNMP object */
 PHP_FUNCTION(snmp3_real_walk)
 {
-	php_snmpv3(INTERNAL_FUNCTION_PARAM_PASSTHRU, 3);
+	php_snmpv3(INTERNAL_FUNCTION_PARAM_PASSTHRU, 4);
 }
 /* }}} */
 

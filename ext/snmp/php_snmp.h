@@ -42,6 +42,7 @@ PHP_MINIT_FUNCTION(snmp);
 PHP_MINFO_FUNCTION(snmp);
 
 PHP_FUNCTION(snmpget);
+PHP_FUNCTION(snmpgetnext);
 PHP_FUNCTION(snmpwalk);
 PHP_FUNCTION(snmprealwalk);
 PHP_FUNCTION(snmp_get_quick_print);
@@ -51,6 +52,7 @@ PHP_FUNCTION(snmp_set_oid_numeric_print);
 PHP_FUNCTION(snmpset);
 
 PHP_FUNCTION(snmp3_get);
+PHP_FUNCTION(snmp3_getnext);
 PHP_FUNCTION(snmp3_walk);
 PHP_FUNCTION(snmp3_real_walk);
 PHP_FUNCTION(snmp3_set);
