@@ -327,6 +327,7 @@ function_entry basic_functions[] = {
 	PHP_FE(call_user_func,							NULL)
 	PHP_FE(call_user_func_array,                    NULL)
 	PHP_FE(call_user_method,						NULL)
+	PHP_FE(call_user_method_array,                  NULL)
 
 	PHP_FE(var_dump,								NULL)
 	PHP_FE(serialize,								first_arg_allow_ref)
@@ -1624,6 +1625,48 @@ PHP_FUNCTION(call_user_method)
 		php_error(E_WARNING,"Unable to call %s() - function does not exist", Z_STRVAL_PP(params[0]));
 	}
 	efree(params);
+}
+/* }}} */
+
+/* {{{ proto mixed call_user_method_array(object obj, string methodname, array params)
+   Call a user method using a parameter array */
+PHP_FUNCTION(call_user_method_array)
+{
+	zval **method_name,
+	     **obj, 
+	     **params,
+	     ***method_args = NULL,
+	     *retval_ptr;
+	HashTable *params_ar;
+	int num_elems,
+	    element = 0;
+	CLS_FETCH();
+    
+    if (ZEND_NUM_ARGS() != 3 ||
+        zend_get_parameters_ex(3, &method_name, &obj, &params) == FAILURE) {
+        WRONG_PARAM_COUNT;
+    }
+	convert_to_string_ex(method_name);
+	convert_to_object_ex(obj);
+	convert_to_array_ex(params);
+    
+    params_ar = HASH_OF(*params);
+    num_elems = zend_hash_num_elements(params_ar);
+    method_args = (zval ***)emalloc(sizeof(zval **) * num_elems);
+
+	for (zend_hash_internal_pointer_reset(params_ar);
+	     zend_hash_get_current_data(params_ar, (void **)&(method_args[element])) == SUCCESS;
+	     zend_hash_move_forward(params_ar))
+		element++;
+    
+    if (call_user_function_ex(CG(function_table), *obj, *method_name, &retval_ptr, num_elems, method_args, 1, NULL) == SUCCESS
+        && retval_ptr) {
+        COPY_PZVAL_TO_ZVAL(*return_value, retval_ptr);
+    } else {
+        php_error(E_WARNING, "Unable to call %s() - function does not exist", Z_STRVAL_PP(method_name));
+    }
+    
+	efree(method_args);
 }
 /* }}} */
 
