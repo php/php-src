@@ -1360,6 +1360,7 @@ PHP_FUNCTION(ncurses_border)
    */
 PHP_FUNCTION(ncurses_assume_default_colors)
 {
+#ifdef HAVE_NCURSES_ASSUME_DEFAULT_COLORS
   zval **i1,**i2;
 
   if(ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &i1, &i2) == FAILURE) {
@@ -1370,6 +1371,10 @@ PHP_FUNCTION(ncurses_assume_default_colors)
   convert_to_long_ex(i2);
 
   RETURN_LONG(assume_default_colors(_INT(i1),_INT(i2)));
+#else
+  php_error(E_WARNING,"%s not supported in this build");
+  RETURN_FALSE;
+#endif  
 }
 /* }}} */
 
