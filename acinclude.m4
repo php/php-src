@@ -245,6 +245,8 @@ AC_DEFUN(PHP_MISSING_PREAD_DECL,[
       ],[
         ac_cv_pread=no
       ])
+    ],[
+      ac_cv_pread=no
     ])
   ])
   ])
@@ -279,6 +281,8 @@ AC_DEFUN(PHP_MISSING_PWRITE_DECL,[
       ],[
         ac_cv_pwrite=no
       ])
+    ],[
+      ac_cv_pwrite=no
     ])
   ])
   ])
