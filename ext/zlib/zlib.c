@@ -874,7 +874,7 @@ PHP_FUNCTION(gzdeflate)
 	stream.next_in = (Bytef*) (*data)->value.str.val;
 	stream.avail_in = (*data)->value.str.len;
 
-	stream.avail_out = stream.avail_in + (stream.avail_in/1000) + 15;
+	stream.avail_out = stream.avail_in + (stream.avail_in/1000) + 15 + 1; /* room for \0 */
 	s2 = (char *) emalloc(stream.avail_out);
 	if(!s2) RETURN_FALSE;
 	stream.next_out = s2;
@@ -894,7 +894,9 @@ PHP_FUNCTION(gzdeflate)
 		}
 	}
 
-	if(status==Z_OK) {
+	if (status==Z_OK) {
+		s2 = erealloc(s2,stream.total_out+1); /* resize to buffer to the "right" size */
+		s2[ stream.total_out ] = '\0';
 		RETURN_STRINGL(s2, stream.total_out, 0);
 	} else {
 		efree(s2);
@@ -909,7 +911,7 @@ PHP_FUNCTION(gzdeflate)
 PHP_FUNCTION(gzinflate)
 {
 	zval **data, **zlimit = NULL;
-	int status,factor=1,maxfactor=8;
+	int status,factor=1,maxfactor=16;
 	unsigned long plength=0,length;
 	char *s1=NULL,*s2=NULL;
 	z_stream stream;
@@ -938,10 +940,11 @@ PHP_FUNCTION(gzinflate)
 	/*
 	  stream.avail_out wants to know the output data length
 	  if none was given as a parameter
-	  we try from input length * 2 up to input length * 2^8
+	  we try from input length * 2 up to input length * 2^16
 	  doubling it whenever it wasn't big enough
 	  that should be enaugh for all real life cases	
 	*/
+
 	stream.zalloc = (alloc_func) Z_NULL;
 	stream.zfree = (free_func) Z_NULL;
 
@@ -974,7 +977,8 @@ PHP_FUNCTION(gzinflate)
 	} while((status==Z_BUF_ERROR)&&(!plength)&&(factor<maxfactor));
 
 	if(status==Z_OK) {
-		s2 = erealloc(s2, stream.total_out);
+		s2 = erealloc(s2, stream.total_out + 1); /* room for \0 */
+		s2[ stream.total_out ] = '\0';
 		RETURN_STRINGL(s2, stream.total_out, 0);
 	} else {
 		efree(s2);
