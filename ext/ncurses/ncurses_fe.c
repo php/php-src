@@ -145,3 +145,12 @@ function_entry ncurses_functions[] = {
   PHP_FE(ncurses_keyok, NULL)
   {NULL, NULL, NULL}  /* Must be the last line in ncurses_functions[] */
 };
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
+ */
