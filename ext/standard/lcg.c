@@ -57,6 +57,8 @@ static php_lcg_globals lcg_globals;
 
 #define MODMULT(a, b, c, m, s) q = s/a;s=b*(s-a*q)-c*q;if(s<0)s+=m
 
+static void lcg_seed(TSRMLS_D);
+
 PHPAPI double php_combined_lcg(TSRMLS_D)
 {
 	php_int32 q;
