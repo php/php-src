@@ -1,5 +1,5 @@
 <?
-  $id = 188178;       // A plain/text document
+  $id     = 188178;    // A plain/text document
   $collid = 169828;   // A collection
   $query = "Name=m*";      // Search query for test_9
   $host = "gehtnix";
