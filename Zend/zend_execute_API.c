@@ -359,6 +359,21 @@ ZEND_API void _zval_ptr_dtor(zval **zval_ptr ZEND_FILE_LINE_DC)
 }
 
 
+ZEND_API void _zval_internal_ptr_dtor(zval **zval_ptr ZEND_FILE_LINE_DC)
+{
+#if DEBUG_ZEND>=2
+	printf("Reducing refcount for %x (%x):  %d->%d\n", *zval_ptr, zval_ptr, (*zval_ptr)->refcount, (*zval_ptr)->refcount-1);
+#endif
+	(*zval_ptr)->refcount--;
+	if ((*zval_ptr)->refcount==0) {
+		zval_internal_dtor(*zval_ptr);
+		free(*zval_ptr);
+	} else if ((*zval_ptr)->refcount == 1) {
+		(*zval_ptr)->is_ref = 0;
+	}
+}
+
+
 ZEND_API int zend_is_true(zval *op)
 {
 	return i_zend_is_true(op);

@@ -29,21 +29,31 @@ BEGIN_EXTERN_C()
 ZEND_API int _zval_copy_ctor(zval *zvalue ZEND_FILE_LINE_DC);
 ZEND_API void _zval_dtor(zval *zvalue ZEND_FILE_LINE_DC);
 ZEND_API void _zval_ptr_dtor(zval **zval_ptr ZEND_FILE_LINE_DC);
+ZEND_API void _zval_internal_dtor(zval *zvalue ZEND_FILE_LINE_DC);
+ZEND_API void _zval_internal_ptr_dtor(zval **zvalue ZEND_FILE_LINE_DC);
 #define zval_copy_ctor(zvalue) _zval_copy_ctor((zvalue) ZEND_FILE_LINE_CC)
 #define zval_dtor(zvalue) _zval_dtor((zvalue) ZEND_FILE_LINE_CC)
 #define zval_ptr_dtor(zval_ptr) _zval_ptr_dtor((zval_ptr) ZEND_FILE_LINE_CC)
+#define zval_internal_dtor(zvalue) _zval_internal_dtor((zvalue) ZEND_FILE_LINE_CC)
+#define zval_internal_ptr_dtor(zvalue) _zval_internal_ptr_dtor((zvalue) ZEND_FILE_LINE_CC)
 
 #if ZEND_DEBUG
 ZEND_API int _zval_copy_ctor_wrapper(zval *zvalue);
 ZEND_API void _zval_dtor_wrapper(zval *zvalue);
 ZEND_API void _zval_ptr_dtor_wrapper(zval **zval_ptr);
+ZEND_API void _zval_internal_dtor_wrapper(zval *zvalue);
+ZEND_API void _zval_internal_ptr_dtor_wrapper(zval **zvalue);
 #define zval_copy_ctor_wrapper _zval_copy_ctor_wrapper
 #define zval_dtor_wrapper _zval_dtor_wrapper
 #define zval_ptr_dtor_wrapper _zval_ptr_dtor_wrapper
+#define zval_internal_dtor_wrapper _zval_internal_dtor_wrapper
+#define zval_internal_ptr_dtor_wrapper _zval_internal_ptr_dtor_wrapper
 #else
 #define zval_copy_ctor_wrapper _zval_copy_ctor
 #define zval_dtor_wrapper _zval_dtor
 #define zval_ptr_dtor_wrapper _zval_ptr_dtor
+#define zval_internal_dtor_wrapper _zval_internal_dtor
+#define zval_internal_ptr_dtor_wrapper _zval_internal_ptr_dtor
 #endif
 
 END_EXTERN_C()
@@ -53,6 +63,8 @@ ZEND_API void zval_add_ref(zval **p);
 
 #define ZVAL_DESTRUCTOR (void (*)(void *)) zval_dtor_wrapper
 #define ZVAL_PTR_DTOR (void (*)(void *)) zval_ptr_dtor_wrapper
+#define ZVAL_INTERNAL_DTOR (void (*)(void *)) zval_internal_dtor_wrapper
+#define ZVAL_INTERNAL_PTR_DTOR (void (*)(void *)) zval_internal_ptr_dtor_wrapper
 #define ZVAL_COPY_CTOR (void (*)(void *)) zval_copy_ctor_wrapper
 
 #endif

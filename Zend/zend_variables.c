@@ -80,6 +80,32 @@ ZEND_API void _zval_dtor(zval *zvalue ZEND_FILE_LINE_DC)
 }
 
 
+ZEND_API void _zval_internal_dtor(zval *zvalue ZEND_FILE_LINE_DC)
+{
+	switch (zvalue->type & ~IS_CONSTANT_INDEX) {
+		case IS_STRING:
+		case IS_CONSTANT:
+			CHECK_ZVAL_STRING_REL(zvalue);
+			if (zvalue->value.str.val != empty_string) {
+				free(zvalue->value.str.val);
+			}
+			break;
+		case IS_ARRAY:
+		case IS_CONSTANT_ARRAY:
+		case IS_OBJECT:
+		case IS_RESOURCE:
+			zend_error(E_CORE_ERROR, "Internal zval's can't be arrays, objects or resources");
+			break;
+		case IS_LONG:
+		case IS_DOUBLE:
+		case IS_BOOL:
+		case IS_NULL:
+		default:
+			break;
+	}
+}
+
+
 ZEND_API void zval_add_ref(zval **p)
 {
 	(*p)->refcount++;
@@ -159,10 +185,21 @@ ZEND_API void _zval_dtor_wrapper(zval *zvalue)
 }
 
 
+ZEND_API void _zval_internal_dtor_wrapper(zval *zvalue)
+{
+	zval_internal_dtor(zvalue);
+}
+
 
 ZEND_API void _zval_ptr_dtor_wrapper(zval **zval_ptr)
 {
 	zval_ptr_dtor(zval_ptr);
+}
+
+
+ZEND_API void _zval_internal_ptr_dtor_wrapper(zval **zval_ptr)
+{
+	zval_internal_ptr_dtor(zval_ptr);
 }
 #endif
 
