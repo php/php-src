@@ -147,6 +147,10 @@ SOURCE=.\ext\standard\quot_print.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\reentrancy.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\request_info.c
 # End Source File
 # Begin Source File
@@ -268,6 +272,10 @@ SOURCE=.\win95nt.h
 # Begin Source File
 
 SOURCE=.\ext\apache\apache.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\ext\standard\array.c
 # End Source File
 # Begin Source File
 
@@ -811,7 +819,8 @@ InputPath=".\configuration-parser.y"
 
 BuildCmds= \
 	if not "X%CYGWIN%"=="X" bison --output=configuration-parser.c -v -d -S "%CYGWIN%\share\bison.simple" -p cfg configuration-parser.y \
-	if "X%CYGWIN%"=="X" bison --output=configuration-parser.c -v -d -S "C:\Program Files\Cygnus\share\bison.simple" -p cfg configuration-parser.y
+	if "X%CYGWIN%"=="X" bison --output=configuration-parser.c -v -d -S "C:\Program Files\Cygnus\share\bison.simple" -p cfg configuration-parser.y \
+	
 
 "configuration-parser.c" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
    $(BuildCmds)
@@ -827,7 +836,8 @@ InputPath=".\configuration-parser.y"
 
 BuildCmds= \
 	if not"X%CYGWIN%"=="X" bison --output=configuration-parser.c -v -d -S "%CYGWIN%\share\bison.simple" -p cfg configuration-parser.y \
-	if "X%CYGWIN%"=="X" bison --output=configuration-parser.c -v -d -S "C:\Program Files\Cygnus\share\bison.simple" -p cfg configuration-parser.y
+	if "X%CYGWIN%"=="X" bison --output=configuration-parser.c -v -d -S "C:\Program Files\Cygnus\share\bison.simple" -p cfg configuration-parser.y \
+	
 
 "configuration-parser.c" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
    $(BuildCmds)
@@ -850,7 +860,7 @@ InputPath=.\ext\standard\parsedate.y
 
 "ext\standard\parsedate.c" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	cd ext\standard 
-	if not "X%CYGWIN%"=="X" bison --output=parsedate.c -v -d -S "%CYGWIN%\share\bison.simple" parsedate.y  \
+	if not "X%CYGWIN%"=="X" bison --output=parsedate.c -v -d -S "%CYGWIN%\share\bison.simple" parsedate.y 
 	if "X%CYGWIN%"=="X" bison --output=parsedate.c -v -d -S "C:\Program Files\Cygnus\share\bison.simple" parsedate.y 
 	
 # End Custom Build
