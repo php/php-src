@@ -92,7 +92,6 @@ bc_raisemod (bc_num base, bc_num expo, bc_num mod, bc_num *result, int scale TSR
   bc_free_num (&power);
   bc_free_num (&exponent);
   bc_free_num (result);
-  bc_free_num (&parity);
   *result = temp;
   return 0;	/* Everything is OK. */
 }
