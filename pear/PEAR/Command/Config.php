@@ -61,12 +61,12 @@ just specified.
             'shortcut' => 'cs',
             'options' => array(),
             'doc' => '<parameter> <value> [layer]
-Sets the value of one configuration parameter.  The first
-argument is the name of the parameter, the second argument is the new value.
-Some parameters are be subject to validation, and the command will fail with
-an error message if the new value does not make sense.  An optional third
-argument may be used to specify which layer to set the configuration parameter
-in.  The default layer is "user".
+Sets the value of one configuration parameter.  The first argument is
+the name of the parameter, the second argument is the new value.  Some
+parameters are subject to validation, and the command will fail with
+an error message if the new value does not make sense.  An optional
+third argument may be used to specify in which layer to set the
+configuration parameter.  The default layer is "user".
 ',
             ),
         'config-help' => array(
