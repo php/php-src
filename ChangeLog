@@ -1,3 +1,34 @@
+2004-06-12  Ard Biesheuvel  <a.k.biesheuvel@ewi.tudelft.nl>
+
+    * ext/interbase/ibase_query.c
+      ext/interbase/php_interbase.h:
+      Revert
+
+2004-06-12  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/PEAR/Common.php:
+      fix bug #1610: pear package doesn't validate deps
+      
+      It was never validating deps at all!
+
+    * (PHP_4_3)
+      pear/PEAR/ErrorStack.php
+      pear/PEAR/Installer.php:
+      MFH: Installer and ErrorStack bugfixes/ErrorStack features
+
+    * pear/PEAR/Installer.php:
+      fix bug #1615: installer must create extension dir if it doesn't exist,
+      patch by Tomas
+
+    * pear/PEAR/ErrorStack.php:
+      fix bug #1617, exception never returned from PEAR_ErrorStack->push()
+
+2004-06-12  Ard Biesheuvel  <a.k.biesheuvel@ewi.tudelft.nl>
+
+    * ext/interbase/ibase_query.c
+      ext/interbase/php_interbase.h:
+      Added export macros
+
 2004-06-10  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/standard/math.c:
