@@ -2,6 +2,7 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 200?, Version 4.0.5
+- Fix crash bug in highlight_string() (Rasmus)
 - Added URL support for getimagesize() function (Jani)
 - Added xslt_set_scheme_handler() function (carmelo@akooe.com)
 - Added the pg_lolseek and pg_lotell functions (Derick)
