@@ -242,24 +242,55 @@ fprintf(stderr, "stream_alloc: %s:%p persistent=%s\n", ops->label, ret, persiste
 PHPAPI int _php_stream_free(php_stream *stream, int close_options TSRMLS_DC) /* {{{ */
 {
 	int ret = 1;
+	int remove_rsrc = 1;
+	int preserve_handle = close_options & PHP_STREAM_FREE_PRESERVE_HANDLE ? 1 : 0;
+	int release_cast = 1;
 
 #if STREAM_DEBUG
 fprintf(stderr, "stream_free: %s:%p[%s] in_free=%d opts=%08x\n", stream->ops->label, stream, stream->__orig_path, stream->in_free, close_options);
 #endif
 	
+	/* recursion protection */
 	if (stream->in_free)
 		return 1;
 
 	stream->in_free++;
 
-	_php_stream_flush(stream, 1 TSRMLS_CC);
+	/* if we are releasing the stream only (and preserving the underlying handle),
+	 * we need to do things a little differently.
+	 * We are only ever called like this when the stream is cast to a FILE*
+	 * for include (or other similar) purposes.
+	 * */
+	if (preserve_handle) {
+		if (stream->fclose_stdiocast == PHP_STREAM_FCLOSE_FOPENCOOKIE) {
+			/* If the stream was fopencookied, we must NOT touch anything
+			 * here, as the cookied stream relies on it all.
+			 * Instead, mark the stream as OK to auto-clean */
+			php_stream_auto_cleanup(stream);
+			stream->in_free--;
+			return 0;
+		}
+		/* otherwise, make sure that we don't close the FILE* from a cast */
+		release_cast = 0;
+	}
+
+#if STREAM_DEBUG
+fprintf(stderr, "stream_free: %s:%p[%s] preserve_handle=%d release_cast=%d remove_rsrc=%d\n",
+		stream->ops->label, stream, stream->__orig_path, preserve_handle, release_cast, remove_rsrc);
+#endif
 	
-	if ((close_options & PHP_STREAM_FREE_RSRC_DTOR) == 0) {
-		/* Remove entry from the resource list */
+	/* make sure everything is saved */
+	_php_stream_flush(stream, 1 TSRMLS_CC);
+		
+	/* If not called from the resource dtor, remove the stream
+     * from the resource list.
+	 * */
+	if ((close_options & PHP_STREAM_FREE_RSRC_DTOR) == 0 && remove_rsrc) {
 		zend_list_delete(stream->rsrc_id);
 	}
+	
 	if (close_options & PHP_STREAM_FREE_CALL_DTOR) {
-		if (stream->fclose_stdiocast == PHP_STREAM_FCLOSE_FOPENCOOKIE) {
+		if (release_cast && stream->fclose_stdiocast == PHP_STREAM_FCLOSE_FOPENCOOKIE) {
 			/* calling fclose on an fopencookied stream will ultimately
 				call this very same function.  If we were called via fclose,
 				the cookie_closer unsets the fclose_stdiocast flags, so
@@ -271,13 +302,14 @@ fprintf(stderr, "stream_free: %s:%p[%s] in_free=%d opts=%08x\n", stream->ops->la
 			return fclose(stream->stdiocast);
 		}
 
-		ret = stream->ops->close(stream, close_options & PHP_STREAM_FREE_PRESERVE_HANDLE ? 0 : 1 TSRMLS_CC);
+		ret = stream->ops->close(stream, preserve_handle ? 0 : 1 TSRMLS_CC);
 		stream->abstract = NULL;
 
 		/* tidy up any FILE* that might have been fdopened */
-		if (stream->fclose_stdiocast == PHP_STREAM_FCLOSE_FDOPEN && stream->stdiocast) {
+		if (release_cast && stream->fclose_stdiocast == PHP_STREAM_FCLOSE_FDOPEN && stream->stdiocast) {
 			fclose(stream->stdiocast);
 			stream->stdiocast = NULL;
+			stream->fclose_stdiocast = PHP_STREAM_FCLOSE_NONE;
 		}
 	}
 
@@ -1878,8 +1910,8 @@ PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show
 						rewind((FILE*)*ret);
 					
 					/* do some specialized cleanup */
-					if (flags & PHP_STREAM_CAST_RELEASE) {
-						php_stream_free(stream, PHP_STREAM_FREE_PRESERVE_HANDLE);
+					if ((flags & PHP_STREAM_CAST_RELEASE)) {
+						php_stream_free(stream, PHP_STREAM_FREE_CLOSE_CASTED);
 					}
 
 					return retcode;
@@ -1927,16 +1959,7 @@ exit_success:
 		stream->stdiocast = *ret;
 	
 	if (flags & PHP_STREAM_CAST_RELEASE) {
-		/* Something other than php_stream_close will be closing
-		 * the underlying handle, so we should free the stream handle/data
-		 * here now.  The stream may not be freed immediately (in the case
-		 * of fopencookie), but the caller should still not touch their
-		 * original stream pointer in any case. */
-		if (stream->fclose_stdiocast != PHP_STREAM_FCLOSE_FOPENCOOKIE) {
-			/* ask the implementation to release resources other than
-			 * the underlying handle */
-			php_stream_free(stream, PHP_STREAM_FREE_PRESERVE_HANDLE);
-		}
+		php_stream_free(stream, PHP_STREAM_FREE_CLOSE_CASTED);
 	}
 
 	return SUCCESS;
