@@ -10,7 +10,9 @@ PHP 4                                                                      NEWS
   . ext/cybercash
   . ext/icap
   . sapi/fhttpd
-- Moved ext/vpopmail to PECL. (James)
+- To PECL moved extensions: (James, Derick)
+  . ext/vpopmail
+  . ext/cybermut
 - Added "neutral" language entry to mbstring spec. (Moriyoshi) 
 - Modified log() to accept multiple bases. (Jason)
 - Added gd_info() which returns an array of gd support information. (Marcus)
