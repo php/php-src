@@ -26,10 +26,7 @@ ext/oci8
 ext/standard
 ------------
     * strpad() (Andrei)
-	* comparing arrays semantically (Andrei)
-	* get_loaded_extensions()
-      extension_loaded()
-      get_extension_funcs() (Andrei)
+	* comparing arrays semantically (like Python) (Andrei)
 	* NOT binary safe:
 		strtok()
 		basename()

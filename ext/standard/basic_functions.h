@@ -103,6 +103,10 @@ PHP_FUNCTION(getservbyport);
 PHP_FUNCTION(getprotobyname);
 PHP_FUNCTION(getprotobynumber);
 
+PHP_FUNCTION(get_loaded_extensions);
+PHP_FUNCTION(extension_loaded);
+PHP_FUNCTION(get_extension_funcs);
+
 #if MSVC5
 typedef unsigned int php_stat_len;
 #else
