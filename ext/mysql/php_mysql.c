@@ -158,9 +158,6 @@ PHP_MYSQL_API php_mysql_globals mysql_globals;
 DLEXPORT zend_module_entry *get_module(void) { return &mysql_module_entry; }
 #endif
 
-#if APACHE
-void timeout(int sig);
-#endif
 
 #define CHECK_LINK(link) { if (link==-1) { php_error(E_WARNING,"MySQL:  A link to the server could not be established"); RETURN_FALSE; } }
 
@@ -187,41 +184,18 @@ static void php_mysql_set_default_link(int id)
 
 static void _close_mysql_link(MYSQL *link)
 {
-#if APACHE
-	void (*handler) (int);
-#endif
 	MySLS_FETCH();
 
-#if APACHE
-	handler = signal(SIGPIPE, SIG_IGN);
-#endif
-
 	mysql_close(link);
-
-#if APACHE
-	signal(SIGPIPE,handler);
-#endif
-
 	efree(link);
 	MySG(num_links)--;
 }
 
 static void _close_mysql_plink(MYSQL *link)
 {
-#if APACHE
-	void (*handler) (int);
-#endif
 	MySLS_FETCH();
 
-#if APACHE
-	handler = signal(SIGPIPE, SIG_IGN);
-#endif
-
 	mysql_close(link);
-
-#if APACHE
-	signal(SIGPIPE,handler);
-#endif
 
 	free(link);
 	MySG(num_persistent)--;
@@ -338,9 +312,6 @@ PHP_MINFO_FUNCTION(mysql)
 
 static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 {
-#if APACHE
-	void (*handler) (int);
-#endif
 	char *user,*passwd,*host,*socket=NULL,*tmp;
 	char *hashed_details;
 	int hashed_details_length,port = MYSQL_PORT;
@@ -478,17 +449,11 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 				RETURN_FALSE;
 			}
 			/* ensure that the link did not die */
-#if APACHE
-			handler=signal(SIGPIPE,SIG_IGN);
-#endif
 #if defined(HAVE_MYSQL_ERRNO) && defined(CR_SERVER_GONE_ERROR)
 			mysql_stat(le->ptr);
 			if (mysql_errno((MYSQL *)le->ptr) == CR_SERVER_GONE_ERROR) {
 #else
 			if (!strcasecmp(mysql_stat(le->ptr),"mysql server has gone away")) { /* the link died */
-#endif
-#if APACHE
-				signal(SIGPIPE,handler);
 #endif
 #if MYSQL_VERSION_ID > 32199 /* this lets us set the port number */
 				if (mysql_real_connect(le->ptr,host,user,passwd,NULL,port,socket,0)==NULL) {
@@ -501,9 +466,6 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 					RETURN_FALSE;
 				}
 			}
-#if APACHE
-			signal(SIGPIPE,handler);
-#endif
 			mysql = (MYSQL *) le->ptr;
 		}
 		ZEND_REGISTER_RESOURCE(return_value, mysql, le_plink);

@@ -208,7 +208,6 @@ PHPAPI FILE *php_fopen_wrapper(char *path, char *mode, int options, int *issock,
 	}
 }
 
-#if CGI_BINARY || FHTTPD || USE_SAPI
 
 PHPAPI FILE *php_fopen_primary_script(void)
 {
@@ -307,7 +306,6 @@ PHPAPI FILE *php_fopen_primary_script(void)
 	return fp;
 }
 
-#endif							/* CGI_BINARY || USE_SAPI */
 
 /*
  * Tries to open a file with a PATH-style list of directories.

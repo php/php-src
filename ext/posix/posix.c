@@ -132,10 +132,6 @@ zend_module_entry posix_module_entry = {
 DLEXPORT zend_module_entry *get_module(void) { return &posix__module_entry; }
 #endif
 
-#if APACHE
-void timeout(int sig);
-#endif
-
 static PHP_MINFO_FUNCTION(posix)
 {
     PUTS("$Revision$\n");

@@ -26,8 +26,6 @@ PHPAPI php_request_info request_info;
 #if CGI_BINARY
 int php_init_request_info(void *conf)
 {
-	request_info.current_user = NULL;
-	request_info.current_user_length = 0;
 	request_info.script_name = getenv("SCRIPT_NAME");
 	request_info.script_filename = getenv("SCRIPT_FILENAME");
 	/* Hack for annoying servers that do not set SCRIPT_FILENAME for us */
@@ -79,8 +77,6 @@ int php_init_request_info(void *conf)
 	SLS_FETCH();
 
 	r = ((request_rec *) SG(server_context));
-	request_info.current_user = NULL;
-	request_info.current_user_length = 0;
 
 	return SUCCESS;
 }
@@ -95,8 +91,18 @@ int php_destroy_request_info(void *conf)
 	return SUCCESS;
 }
 #endif
-/*
- * Local variables:
+
+
+int php_init_request_info(void *conf)
+{
+    request_info.current_user = NULL;
+    request_info.current_user_length = 0;
+	return SUCCESS;
+}
+
+
+
+/* * Local variables:
  * tab-width: 4
  * c-basic-offset: 4
  * End:

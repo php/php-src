@@ -20,7 +20,6 @@
 #define _REQUEST_INFO_H_
 
 typedef struct {
-	char *script_name;
 	char *current_user;
 	int current_user_length;
 	const char *script_filename;

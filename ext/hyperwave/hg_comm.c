@@ -1137,7 +1137,7 @@ static int hg_read(int sockfd, char *buf, int size)
 			if ( (errno == EAGAIN) || (errno == EWOULDBLOCK) )  {
 				if ( ++try > 5 )
 					return(-1);
-				sleep(1);
+				php_sleep(1);
 			} 
 			else return(-1);
 		} 
@@ -1159,7 +1159,7 @@ static int hg_write(int sockfd, char *buf, int size)
 			if ( (errno == EAGAIN) || (errno == EWOULDBLOCK) )  {
 				if ( ++try > 5 )
 					return(-1);
-				sleep(1);
+				php_sleep(1);
 			} 
 			else return(-1);
 		} 

@@ -25,16 +25,6 @@
 
 extern int php_init_mime(INIT_FUNC_ARGS);
 
-#if 0
-#if APACHE
-extern zend_module_entry apache_module_entry;
-#define phpext_apache_ptr &apache_module_entry
-extern void php_virtual(INTERNAL_FUNCTION_PARAMETERS);
-#else
-#define phpext_apache_ptr NULL
-#endif
-#endif
-
 /* environment functions */
 extern int php_init_environment(void);
 

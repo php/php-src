@@ -5,10 +5,9 @@
  * REGEX means:
  * 0.. system regex
  * 1.. bundled regex
- * 2.. Apache's regex
  */
 
-#if REGEX == 1
+#if REGEX
 /* get aliases */
 #include "regex/regex_extra.h"
 #include "regex/regex.h"

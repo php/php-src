@@ -17,6 +17,7 @@
  */
 
 #include "php.h"
+#include "php_regex.h"
 #include "php_browscap.h"
 #include "php_ini.h"
 

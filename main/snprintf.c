@@ -55,7 +55,6 @@
 
 #include "php.h"
 
-#if !defined(APACHE) || (!APACHE)
 #if !defined(HAVE_SNPRINTF) || !defined(HAVE_VSNPRINTF)
 
 #include <stdio.h>
@@ -69,9 +68,9 @@
 
 #ifdef HAVE_GCVT
 
-#define ap_ecvt ecvt
-#define ap_fcvt fcvt
-#define ap_gcvt gcvt
+#define ap_php_ecvt ecvt
+#define ap_php_fcvt fcvt
+#define ap_php_gcvt gcvt
 
 #else
 
@@ -81,7 +80,7 @@
  */
 
 /*
- *    ap_ecvt converts to decimal
+ *    ap_php_ecvt converts to decimal
  *      the number of digits is specified by ndigit
  *      decpt is set to the position of the decimal point
  *      sign is set to 0 for positive, 1 for negative
@@ -90,7 +89,7 @@
 #define	NDIG	80
 
 static char *
- ap_cvt(double arg, int ndigits, int *decpt, int *sign, int eflag)
+ ap_php_cvt(double arg, int ndigits, int *decpt, int *sign, int eflag)
 {
 	register int r2;
 	double fi, fj;
@@ -164,30 +163,30 @@ static char *
 }
 
 static char *
- ap_ecvt(double arg, int ndigits, int *decpt, int *sign)
+ ap_php_ecvt(double arg, int ndigits, int *decpt, int *sign)
 {
-	return (ap_cvt(arg, ndigits, decpt, sign, 1));
+	return (ap_php_cvt(arg, ndigits, decpt, sign, 1));
 }
 
 static char *
- ap_fcvt(double arg, int ndigits, int *decpt, int *sign)
+ ap_php_fcvt(double arg, int ndigits, int *decpt, int *sign)
 {
-	return (ap_cvt(arg, ndigits, decpt, sign, 0));
+	return (ap_php_cvt(arg, ndigits, decpt, sign, 0));
 }
 
 /*
- * ap_gcvt  - Floating output conversion to
+ * ap_php_gcvt  - Floating output conversion to
  * minimal length string
  */
 
 static char *
- ap_gcvt(double number, int ndigit, char *buf)
+ ap_php_gcvt(double number, int ndigit, char *buf)
 {
 	int sign, decpt;
 	register char *p1, *p2;
 	register i;
 
-	p1 = ap_ecvt(number, ndigit, &decpt, &sign);
+	p1 = ap_php_ecvt(number, ndigit, &decpt, &sign);
 	p2 = buf;
 	if (sign)
 		*p2++ = '-';
@@ -413,9 +412,9 @@ static char *
 	int decimal_point;
 
 	if (format == 'f')
-		p = ap_fcvt(num, precision, &decimal_point, is_negative);
+		p = ap_php_fcvt(num, precision, &decimal_point, is_negative);
 	else						/* either e or E format */
-		p = ap_ecvt(num, precision + 1, &decimal_point, is_negative);
+		p = ap_php_ecvt(num, precision + 1, &decimal_point, is_negative);
 
 	/*
 	 * Check for Infinity and NaN
@@ -765,7 +764,7 @@ static int format_converter(register buffy * odp, const char *fmt,
 					/*
 					 * * We use &num_buf[ 1 ], so that we have room for the sign
 					 */
-					s = ap_gcvt(va_arg(ap, double), precision, &num_buf[1]);
+					s = ap_php_gcvt(va_arg(ap, double), precision, &num_buf[1]);
 					if (*s == '-')
 						prefix_char = *s++;
 					else if (print_sign)
@@ -910,7 +909,7 @@ static void strx_printv(int *ccp, char *buf, size_t len, const char *format,
 }
 
 
-int ap_snprintf(char *buf, size_t len, const char *format,...)
+int ap_php_snprintf(char *buf, size_t len, const char *format,...)
 {
 	int cc;
 	va_list ap;
@@ -922,7 +921,7 @@ int ap_snprintf(char *buf, size_t len, const char *format,...)
 }
 
 
-int ap_vsnprintf(char *buf, size_t len, const char *format, va_list ap)
+int ap_php_vsnprintf(char *buf, size_t len, const char *format, va_list ap)
 {
 	int cc;
 
@@ -931,4 +930,3 @@ int ap_vsnprintf(char *buf, size_t len, const char *format, va_list ap)
 }
 
 #endif							/* HAVE_SNPRINTF */
-#endif							/* APACHE */

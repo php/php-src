@@ -22,6 +22,7 @@
 #include "zend.h"
 #include "php.h"
 #include "php_variables.h"
+#include "SAPI.h"
 
 #include "httpd.h"
 #include "http_config.h"
@@ -299,6 +300,7 @@ static int php_apache_sapi_activate(SLS_D)
 	block_alarms();
 	register_cleanup(((request_rec *) SG(server_context))->pool, NULL, php_request_shutdown, php_request_shutdown_for_exec);
 	unblock_alarms();
+	return SUCCESS;
 }
 
 
@@ -310,9 +312,7 @@ static struct stat *php_apache_get_stat(SLS_D)
 
 static char *php_apache_getenv(char *name, int name_len SLS_DC)
 {
-	char *value;
-
-	return (char *) table_get(((request_rec *) SG(server_context))->subprocess_env, name));
+	return (char *) table_get(((request_rec *) SG(server_context))->subprocess_env, name);
 }
 
 

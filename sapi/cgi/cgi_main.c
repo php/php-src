@@ -25,8 +25,6 @@
 
 #include "SAPI.h"
 
-#if CGI_BINARY
-
 #include <stdio.h>
 #include "php.h"
 #ifdef MSVC5
@@ -138,7 +136,7 @@ static void sapi_cgi_register_variables(zval *track_vars_array ELS_DC SLS_DC PLS
 		char *val;
 		int l=0;
 
-		sn = request_info.script_name;
+		sn = getenv("SCRIPT_NAME");
 		pi = SG(request_info).request_uri;
 		if (sn)
 			l += strlen(sn);
@@ -574,5 +572,3 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 	return SUCCESS;
 }
 
-
-#endif
