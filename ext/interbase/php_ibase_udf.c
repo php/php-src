@@ -19,10 +19,10 @@
 /* $Id$ */
 
 /**
-* This UDF library adds the ability to call PHP functions from your SQL
-* statement. You will have to declare a different external function for 
+* This UDF library adds the ability to call PHP functions from SQL
+* statements. You will have to declare a different external function for 
 * each number of parameters you require. Currently, only string arguments
-* are supported as both input arguments as well as the result.
+* are supported as input, the output can be numeric as well.
 * 
 * Declare the functions like this:
 * 
@@ -32,16 +32,17 @@
 *         ENTRY_POINT 'udf_call_php1' MODULE_NAME 'php_ibase_udf'
 * 
 *     DECLARE EXTERNAL FUNCTION CALL_PHP2
-*         CSTRING(xx),<type> BY DESCRIPTOR, CSTRING(xx),CSTRING(xx) 
+*         CSTRING(xx),<type> BY DESCRIPTOR, CSTRING(xx), CSTRING(xx)
 *         RETURNS PARAMETER 2
 *         ENTRY_POINT 'udf_call_php2' MODULE_NAME 'php_ibase_udf'
 * 
 *     ... and so on.
 * 
-* The first input parameter contains the function you want to call. The second
-* argument is the result, and should not be passed as an argument. Subsequent
-* arguments are passed to the called function. The lengths of the input strings can
-* have any value >1. The type and length of the output depends on its declaration.
+* The first input parameter contains the function you want to call. The
+* second argument is the result, and should not be passed as an argument.
+* Subsequent arguments are passed to the called function. The lengths of
+* the input strings can have any value >1. The type and length of the
+* output depends on its declaration.
 * 
 * The declared functions can be called from SQL like:
 * 
@@ -52,9 +53,11 @@
 * NOT SUPPORTED. 
 * 
 * Compile with:
-*     gcc -shared `php-config --includes` `php-config --ldflags` -o php_ibase_udf.so php_ibase_udf.c
+*     gcc -shared `php-config --includes` `php-config --ldflags` \
+*         -o php_ibase_udf.so php_ibase_udf.c
 * 
-* and copy the resulting file to the folder where your database expects to find it.
+* and copy the resulting file to the folder where your database expects
+* to find its UDFs.
 */
 
 #include "zend.h"
@@ -62,6 +65,7 @@
 #include "php.h"
 
 #include "stdarg.h"
+#include "ib_util.h"
 #include "ibase.h"
 
 #ifdef ZTS
@@ -70,7 +74,7 @@
 
 #define min(a,b) ((a)<(b)?(a):(b))
 
-static PARAMDSC *call_php(char *name, PARAMDSC *r, int argc, ...)
+static void call_php(char *name, PARAMDSC *r, int argc, ...)
 {
 	zval callback, args[4], *argp[4], return_value;
 	va_list va;
@@ -104,46 +108,31 @@ static PARAMDSC *call_php(char *name, PARAMDSC *r, int argc, ...)
 			break;
 		}
 	
-		switch (r->dsc_dtype) {
+		switch (Z_TYPE(return_value)) {
 
-			case dtype_cstring:
-				convert_to_string(&return_value);
-				memcpy(r->dsc_address, Z_STRVAL(return_value), min(r->dsc_length,Z_STRLEN(return_value)));
-				r->dsc_length = min(r->dsc_length,Z_STRLEN(return_value));
-				r->dsc_address[r->dsc_length] = 0;
+			case IS_LONG:
+				r->dsc_dtype = dtype_long;
+				*(long*)r->dsc_address = Z_LVAL(return_value);
+				r->dsc_length = sizeof(long);
 				break;
 
-			case dtype_text:
-				convert_to_string(&return_value);
-				memcpy(r->dsc_address, Z_STRVAL(return_value), min(r->dsc_length,Z_STRLEN(return_value)));
-				r->dsc_length = min(r->dsc_length,Z_STRLEN(return_value));
+			case IS_DOUBLE:
+				r->dsc_dtype = dtype_double;
+				*(double*)r->dsc_address = Z_DVAL(return_value);
+				r->dsc_length = sizeof(double);
 				break;
 
-			case dtype_varying:
+			default:
 				convert_to_string(&return_value);
-				memcpy(res->vary_string, Z_STRVAL(return_value), min(r->dsc_length-2,Z_STRLEN(return_value)));
-				res->vary_length = min(r->dsc_length-2,Z_STRLEN(return_value));
+
+			case IS_STRING:
+				r->dsc_dtype = dtype_varying;
+				memcpy(res->vary_string, Z_STRVAL(return_value),
+					(res->vary_length = min(r->dsc_length-2,Z_STRLEN(return_value))));
 				r->dsc_length = res->vary_length+2;
 				break;
-
-			case dtype_short:
-				convert_to_long(&return_value);
-				*(short*)r->dsc_address = Z_LVAL(return_value);
-				break;
-
-			case dtype_long:
-				convert_to_long(&return_value);
-				*(ISC_LONG*)r->dsc_address = Z_LVAL(return_value);
-				break;
-
-			case dtype_int64:
-				convert_to_long(&return_value);
-				*(ISC_INT64*)r->dsc_address = Z_LVAL(return_value);
-				break;
-
 		}
 				
-	
 		zval_dtor(&return_value);
 
 		return;
@@ -157,23 +146,23 @@ static PARAMDSC *call_php(char *name, PARAMDSC *r, int argc, ...)
 	php_error_docref(NULL, E_WARNING, "Error calling function '%s' from database", name);
 }
 
-PARAMDSC *udf_call_php1(char *name, PARAMDSC *r, char *arg1)
+void udf_call_php1(char *name, PARAMDSC *r, char *arg1)
 {
-	return call_php(name, r, 1, arg1);
+	call_php(name, r, 1, arg1);
 }
 
-PARAMDSC *udf_call_php2(char *name, PARAMDSC *r, char *arg1, char *arg2)
+void udf_call_php2(char *name, PARAMDSC *r, char *arg1, char *arg2)
 {
-	return call_php(name, r, 2, arg1, arg2);
+	call_php(name, r, 2, arg1, arg2);
 }
 
-PARAMDSC *udf_call_php3(char *name, PARAMDSC *r, char *arg1, char *arg2, char *arg3)
+void udf_call_php3(char *name, PARAMDSC *r, char *arg1, char *arg2, char *arg3)
 {
-	return call_php(name, r, 3, arg1, arg2, arg3);
+	call_php(name, r, 3, arg1, arg2, arg3);
 }
 
-PARAMDSC *udf_call_php4(char *name, PARAMDSC *r, char *arg1, char *arg2, char *arg3, char *arg4)
+void udf_call_php4(char *name, PARAMDSC *r, char *arg1, char *arg2, char *arg3, char *arg4)
 {
-	return call_php(name, r, 4, arg1, arg2, arg3, arg4);
+	call_php(name, r, 4, arg1, arg2, arg3, arg4);
 }
 
