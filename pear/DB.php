@@ -135,7 +135,7 @@ define('DB_GETMODE_FLIPPED', DB_FETCHMODE_FLIPPED);
 /**
  * these are constants for the tableInfo-function
  * they are bitwised or'ed. so if there are more constants to be defined
- * in the future, adjust DB_TABLEINFO_FULL accordingly 
+ * in the future, adjust DB_TABLEINFO_FULL accordingly
  */
 
 define('DB_TABLEINFO_ORDER', 1);
@@ -579,29 +579,36 @@ class DB_result
     }
 
     /**
-     * Fetch and return a row of data.
+     * Fetch and return a row of data (it uses fetchInto for that)
+     * @param   $fetchmode  format of fetched row array
+     * @param   $rownum     the absolute row number to fetch
+     *
      * @return  array   a row of data, or false on error
      */
-    function fetchRow($fetchmode = DB_FETCHMODE_DEFAULT)
+    function fetchRow($fetchmode = DB_FETCHMODE_DEFAULT, $rownum=0)
     {
-        if ($fetchmode == DB_FETCHMODE_DEFAULT) {
-            $fetchmode = $this->dbh->fetchmode;
+        $res = $this->fetchInto ($arr, $fetchmode, $rownum);
+        if ($res !== DB_OK) {
+            return $res;
         }
-        return $this->dbh->fetchRow($this->result, $fetchmode);
+        return $arr;
     }
 
     /**
      * Fetch a row of data into an existing array.
      *
-     * @param   $arr    reference to data array
+     * @param   $arr                reference to data array
+     * @param   $fetchmode  format of fetched row array
+     * @param   $rownum     the absolute row number to fetch
+     *
      * @return  int     error code
      */
-    function fetchInto(&$arr, $fetchmode = DB_FETCHMODE_DEFAULT)
+    function fetchInto(&$arr, $fetchmode = DB_FETCHMODE_DEFAULT, $rownum=0)
     {
         if ($fetchmode == DB_FETCHMODE_DEFAULT) {
             $fetchmode = $this->dbh->fetchmode;
         }
-        return $this->dbh->fetchInto($this->result, $arr, $fetchmode);
+        return $this->dbh->fetchInto($this->result, $arr, $fetchmode, $rownum=0);
     }
 
     /**
