@@ -1,3 +1,8 @@
+2003-02-15  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * zend_ini_scanner.l:
+      Added feature #19645 (ini parser can now handle quoted multi-line values).
+
 2003-02-14  Thies C. Arntzen  <thies@thieso.net>
 
     * zend_execute_API.c:
