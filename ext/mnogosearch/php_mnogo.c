@@ -118,6 +118,7 @@
 #define UDM_PARAM_SEARCHTIME	259
 #define UDM_PARAM_FIRST_DOC	260
 #define UDM_PARAM_LAST_DOC	261
+#define UDM_PARAM_WORDINFO_ALL	262
 
 /* udm_load_ispell_data constants */
 #define UDM_ISPELL_TYPE_AFFIX	1
@@ -135,19 +136,20 @@ static int le_link,le_res;
  */
 function_entry mnogosearch_functions[] = {
 	PHP_FE(udm_api_version,		NULL)
+
 #if UDM_VERSION_ID >= 30200			
 	PHP_FE(udm_check_charset,	NULL)
-#endif
-
-#if UDM_VERSION_ID >= 30203
-	PHP_FE(udm_crc32,	NULL)
+#if UDM_VERSION_ID == 30203
 	PHP_FE(udm_open_stored,	NULL)
 	PHP_FE(udm_check_stored,NULL)
 	PHP_FE(udm_close_stored,NULL)
 #endif
-
+#if UDM_VERSION_ID >= 30203
+	PHP_FE(udm_crc32,	NULL)
+#endif
 #if UDM_VERSION_ID >= 30204
 	PHP_FE(udm_parse_query_string,NULL)
+#endif
 #endif
 
 	PHP_FE(udm_alloc_agent,		NULL)
@@ -201,14 +203,24 @@ ZEND_GET_MODULE(mnogosearch)
 static void _free_udm_agent(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	UDM_AGENT * Agent = (UDM_AGENT *)rsrc->ptr;
+#if UDM_VERSION_ID >= 30204
+	UdmEnvFree(Agent->Conf);
+	UdmAgentFree(Agent);
+#else
 	UdmFreeEnv(Agent->Conf);
 	UdmFreeAgent(Agent);
+#endif
 }
 
 static void _free_udm_res(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	UDM_RESULT * Res = (UDM_RESULT *)rsrc->ptr;
-	UdmFreeResult(Res);	
+
+#if UDM_VERSION_ID >= 30204	
+	UdmResultFree(Res);
+#else
+	UdmFreeResult(Res);
+#endif
 }
 
 /* {{{ PHP_MINIT_FUNCTION
@@ -294,6 +306,7 @@ DLEXPORT PHP_MINIT_FUNCTION(mnogosearch)
 	REGISTER_LONG_CONSTANT("UDM_PARAM_FOUND",	UDM_PARAM_FOUND,CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("UDM_PARAM_NUM_ROWS",	UDM_PARAM_NUM_ROWS,CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("UDM_PARAM_WORDINFO",	UDM_PARAM_WORDINFO,CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("UDM_PARAM_WORDINFO_ALL",UDM_PARAM_WORDINFO_ALL,CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("UDM_PARAM_WORD_INFO",	UDM_PARAM_WORDINFO,CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("UDM_PARAM_SEARCHTIME",	UDM_PARAM_SEARCHTIME,CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("UDM_PARAM_SEARCH_TIME",	UDM_PARAM_SEARCHTIME,CONST_CS | CONST_PERSISTENT);
@@ -1318,7 +1331,9 @@ DLEXPORT PHP_FUNCTION(udm_crc32)
 	RETURN_STRING(buf,1);
 }
 /* }}} */
+#endif
 
+#if UDM_VERSION_ID == 30203
 /* {{{ proto int udm_open_stored(int agent, string storedaddr)
    Open connection to stored  */
 DLEXPORT PHP_FUNCTION(udm_open_stored)
@@ -1634,9 +1649,73 @@ DLEXPORT PHP_FUNCTION(udm_get_res_param)
 			RETURN_LONG(Res->total_found);
 			break;
 		
-		case UDM_PARAM_WORDINFO: 	
+		case UDM_PARAM_WORDINFO: 
+#if UDM_VERSION_ID >= 30204
+			{
+			    int len,i;
+			    for(len = i = 0; i < Res->WWList.nwords; i++) 
+				len += Res->WWList.Word[i].len;
+			    {	
+				size_t wsize=(1+len*15)*sizeof(char);
+				char *wordinfo = (char*) malloc(wsize);
+				int corder = -1, ccount = 0;
+	  
+				*wordinfo = '\0';
+	  
+				for(i = 0; i < Res->WWList.nwords; i++){
+				    if ((Res->WWList.Word[i].count > 0) || (Res->WWList.Word[i].origin == UDM_WORD_ORIGIN_QUERY)) {
+				    if(wordinfo[0]) strcat(wordinfo,", ");
+					sprintf(UDM_STREND(wordinfo)," %s : %d", Res->WWList.Word[i].word, Res->WWList.Word[i].count);
+				    } else if (Res->WWList.Word[i].origin == UDM_WORD_ORIGIN_STOP) {
+					if(wordinfo[0]) strcat(wordinfo,", ");
+					sprintf(UDM_STREND(wordinfo)," %s : stopword", Res->WWList.Word[i].word);
+				    }
+				}
+				RETURN_STRING(wordinfo,1);
+			    }
+			}
+#else
 			RETURN_STRING((Res->wordinfo)?(Res->wordinfo):"",1);
+#endif
 			break;
+
+#if UDM_VERSION_ID >= 30204
+		case UDM_PARAM_WORDINFO_ALL: 
+			{
+			    int len,i;
+			    for(len = i = 0; i < Res->WWList.nwords; i++) 
+				len += Res->WWList.Word[i].len;
+			    {	
+				size_t wsize=(1+len*15)*sizeof(char);
+				char *wordinfo = (char*) malloc(wsize);
+				int corder = -1, ccount = 0;
+	  
+				*wordinfo = '\0';
+				
+				for(i = 0; i < Res->WWList.nwords; i++){
+				    if (Res->WWList.Word[i].order != corder) {
+					if(wordinfo[0]) {
+					    sprintf(UDM_STREND(wordinfo)," / %d, ", ccount);
+					}
+					ccount = Res->WWList.Word[i].count;
+					if (Res->WWList.Word[i].origin == UDM_WORD_ORIGIN_STOP) {
+					    sprintf(UDM_STREND(wordinfo)," %s : stopword", Res->WWList.Word[i].word);
+					} else {
+					    sprintf(UDM_STREND(wordinfo)," %s : %d", Res->WWList.Word[i].word, Res->WWList.Word[i].count);
+					    corder = Res->WWList.Word[i].order; 
+					}
+				    } else {
+					ccount += Res->WWList.Word[i].count;
+				    }
+				}
+				if (Res->WWList.nwords) {
+				    sprintf(UDM_STREND(wordinfo)," / %d", ccount);
+				}
+				RETURN_STRING(wordinfo,1);
+			    }
+			}
+			break;
+#endif
 			
 		case UDM_PARAM_SEARCHTIME: 	
 			RETURN_DOUBLE(((double)Res->work_time)/1000);
@@ -1724,7 +1803,11 @@ DLEXPORT PHP_FUNCTION(udm_errno)
 			break;
 	}
 	ZEND_FETCH_RESOURCE(Agent, UDM_AGENT *, yyagent, -1, "mnoGoSearch-Agent", le_link);
+#if UDM_VERSION_ID >= 30204
+	RETURN_LONG(UdmDBErrorCode(Agent->Conf->db));
+#else
 	RETURN_LONG(UdmDBErrorCode(Agent->db));
+#endif
 }
 /* }}} */
 
@@ -1747,7 +1830,11 @@ DLEXPORT PHP_FUNCTION(udm_error)
 			break;
 	}
 	ZEND_FETCH_RESOURCE(Agent, UDM_AGENT *, yyagent, -1, "mnoGoSearch-Agent", le_link);
+#if UDM_VERSION_ID >= 30204
+	RETURN_STRING((UdmDBErrorMsg(Agent->Conf->db))?(UdmDBErrorMsg(Agent->Conf->db)):"",1);
+#else
 	RETURN_STRING((UdmDBErrorMsg(Agent->db))?(UdmDBErrorMsg(Agent->db)):"",1);
+#endif
 }
 /* }}} */
 

@@ -57,17 +57,17 @@ DLEXPORT PHP_MINFO_FUNCTION(mnogosearch);
 DLEXPORT PHP_FUNCTION(udm_api_version);
 #if UDM_VERSION_ID >= 30200
 DLEXPORT PHP_FUNCTION(udm_check_charset);
-#endif
-
-#if UDM_VERSION_ID >= 30203
-DLEXPORT PHP_FUNCTION(udm_crc32);
+#if UDM_VERSION_ID == 30203
 DLEXPORT PHP_FUNCTION(udm_open_stored);
 DLEXPORT PHP_FUNCTION(udm_check_stored);
 DLEXPORT PHP_FUNCTION(udm_close_stored);
 #endif
-
+#if UDM_VERSION_ID >= 30203
+DLEXPORT PHP_FUNCTION(udm_crc32);
+#endif
 #if UDM_VERSION_ID >= 30204
 DLEXPORT PHP_FUNCTION(udm_parse_query_string);
+#endif
 #endif
 
 DLEXPORT PHP_FUNCTION(udm_alloc_agent);
