@@ -57,16 +57,17 @@ AC_DEFUN(PHP_TIME_R_TYPE,[
 AC_CACHE_CHECK(for time_r type, ac_cv_time_r_type,[
 AC_TRY_RUN([
 #include <time.h>
+#include <stdlib.h>
 
 main() {
 char buf[27];
 struct tm t;
 time_t old = 0;
-int r;
+int r, s;
 
-gmtime_r(&old, &t);
+s = gmtime_r(&old, &t);
 r = (int) asctime_r(&t, buf, 26);
-if (r == -1 || (r > 0 && r <= 26)) exit(0);
+if (r == s && s == 0) exit(0);
 exit(1);
 }
 ],[
