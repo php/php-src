@@ -21,6 +21,14 @@ PHP                                                                        NEWS
   . virtual path handling by adding a realpath() cache. (Andi)
   . variable fetches. (Andi)
   . magic method invocations. (Marcus)
+- Added interface Serializeable. (Stanislav, Marcus)
+- Improved extension SPL (Marcus).
+  . added standard hierarchy of Exception classes
+  . added interface Countable
+  . added interfaces Subject and Observer
+  . added spl_autoload*() functions
+  . converted several 5.0 examples into c code
+  . added class File
 - Added pg_field_type_oid() PostgreSQL function. (mauroi at digbang dot com)
 - Added zend_declare_property_...() and zend_update_property_...()
   API functions for bool, double and binary safe strings. (Hartmut)
