@@ -1,3 +1,26 @@
+2004-03-05  Andi Gutmans  <andi@zend.com>
+
+    * zend_compile.c:
+      - Fix some small problems I introduce in last patch.
+
+    * zend_compile.c:
+      - Finally fix the following:
+      $xml_mem =
+      simplexml_load_string('<bookbody><part><chapter><page>1</page></chapter></part></bookbody>');
+      /* The following works fine */
+      foreach ($xml_mem->part as $part) {
+        foreach($part->chapter->page as $page) {
+       print $page;
+        }
+      }
+      /* The following segfaults */
+      foreach ($xml_mem->part as $part) {
+        foreach($part->chapter as $chapter) { // Difference here from previous
+      example
+       print $chapter;
+        }
+      }
+
 2004-03-04  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
 
     * zend_language_scanner.l:
