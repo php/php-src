@@ -221,7 +221,7 @@ PHP_FUNCTION(ocicloselob);
 #endif
 #ifdef WITH_COLLECTIONS
 PHP_FUNCTION(ocinewcollection);
-PHP_FUNCTION(ocifreecoll);
+PHP_FUNCTION(ocifreecollection);
 PHP_FUNCTION(ocicollappend);
 PHP_FUNCTION(ocicollgetelem);
 PHP_FUNCTION(ocicollassignelem);
@@ -309,7 +309,7 @@ static zend_function_entry php_oci_functions[] = {
     PHP_FE(ocinewdescriptor, NULL)
     PHP_FE(ocisetprefetch,   NULL)
 #ifdef WITH_COLLECTIONS
-    PHP_FE(ocifreecoll,      NULL)
+    PHP_FE(ocifreecollection,NULL)
     PHP_FE(ocicollappend,    NULL)
     PHP_FE(ocicollgetelem,   NULL)
     PHP_FE(ocicollassignelem,NULL)
@@ -347,7 +347,7 @@ static zend_function_entry php_oci_coll_class_functions[] = {
     PHP_FALIAS(size,          ocicollsize,    NULL)
     PHP_FALIAS(max,           ocicollmax,     NULL)
     PHP_FALIAS(trim,          ocicolltrim,    NULL)
-    PHP_FALIAS(free,          ocifreecoll,    NULL)
+    PHP_FALIAS(free,          ocifreecollection, NULL)
     {NULL,NULL,NULL}
 };
 #endif
@@ -4293,10 +4293,10 @@ static oci_collection *oci_get_coll(int ind)
 
 
 
-/* {{{ proto string ocifreecoll(object lob)
+/* {{{ proto string ocifreecollection(object lob)
    Deletes collection object*/
 
-PHP_FUNCTION(ocifreecoll)
+PHP_FUNCTION(ocifreecollection)
 {
     zval *id;
     int inx;
@@ -4312,7 +4312,7 @@ PHP_FUNCTION(ocifreecoll)
 			 * 
 			 */
 			connection = coll->conn;
-            oci_debug("OCIfreecoll: coll=%d",inx);
+            oci_debug("OCIfreecollection: coll=%d",inx);
 			connection->error = OCIObjectFree(OCI(pEnv),
 											  connection->pError,
 											  (dvoid *)coll->coll,
