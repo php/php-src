@@ -1,6 +1,7 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Jan 2004, Version 4.3.5
+- Changed allow_url_fopen ini option to be PHP_INI_STSTEM. (Sara)
 - Improved the sybase_ct module: (Timm)
   . Added ability to define a message handler not only globally, but also per 
     connection.
@@ -12,6 +13,7 @@ PHP 4                                                                      NEWS
   (Ilia)
 - Fixed bug #27040 (passing an array of form-fields to CURLOPT_POSTFIELDS
   does not work). (Ilia, Jani)
+- Fixed bug #27037 (fixed possible crash in apache2handler output code). (Ilia)
 - Fixed bug #27011 (64bit int/long confusion in preg_match*() functions).
   (Ilia)
 - Fixed bug #26974 (rename() doesn't check the destination file against 
@@ -41,7 +43,6 @@ PHP 4                                                                      NEWS
 - Fixed bug #22403 (PHP crashes when executing a sql procedure without
   parameters). (Timm)
 - Fixed bug #21513 (shutdown functions not executed if timed out). (Zeev)
-- Changed allow_url_fopen ini option to be PHP_INI_STSTEM. (Sara)
 
 12 Jan 2004, Version 4.3.5RC1
 - Synchronized bundled GD library with GD 2.0.17
