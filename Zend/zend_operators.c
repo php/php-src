@@ -23,6 +23,7 @@
 #include <stdlib.h>
 #include <limits.h>
 #include <ctype.h>
+#include <math.h>
 
 #include "zend.h"
 #include "zend_operators.h"
@@ -1361,6 +1362,11 @@ ZEND_API inline int is_numeric_string(char *str, int length, long *lval, double 
 	errno=0;
 	local_dval = strtod(str, &end_ptr);
 	if (errno!=ERANGE && end_ptr == str+length) { /* floating point string */
+		if (local_dval==HUGE_VAL || local_dval==-HUGE_VAL) {
+			/* "inf" */
+			return 0;
+		}
+
 		if (dval) {
 			*dval = local_dval;
 		}
