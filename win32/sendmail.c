@@ -218,7 +218,7 @@ static char *php_win32_mail_trim_header(char *header TSRMLS_DC)
 //
 //  See SendText() for additional args!
 //********************************************************************/
-int TSendMail(char *host, int *error, char **error_message,
+PHPAPI int TSendMail(char *host, int *error, char **error_message,
 			  char *headers, char *Subject, char *mailTo, char *data,
 			  char *mailCc, char *mailBcc, char *mailRPath)
 {
@@ -323,7 +323,7 @@ int TSendMail(char *host, int *error, char **error_message,
 // Author/Date:  jcar 20/9/96
 // History:
 //********************************************************************/
-void TSMClose()
+PHPAPI void TSMClose()
 {
 	Post("QUIT\r\n");
 	Ack(NULL);
@@ -352,7 +352,7 @@ void TSMClose()
 // Author/Date:  jcar 20/9/96
 // History:
 //*******************************************************************/
-char *GetSMErrorText(int index)
+PHPAPI char *GetSMErrorText(int index)
 {
 	if (MIN_ERROR_INDEX <= index && index < MAX_ERROR_INDEX) {
 		return (ErrorMessages[index]);
