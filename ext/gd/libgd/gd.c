@@ -7,9 +7,6 @@
 
 #include "php.h"
 
-/* 2.0.12: this now checks the clipping rectangle */
-#define gdImageBoundsSafeMacro(im, x, y) (!((((y) < (im)->cy1) || ((y) > (im)->cy2)) || (((x) < (im)->cx1) || ((x) > (im)->cx2))))
-
 #ifdef _MSC_VER
 # if _MSC_VER >= 1300
 /* in MSVC.NET the these are available but only for __cplusplus and not _MSC_EXTENSIONS */
@@ -895,7 +892,7 @@ static void gdImageAntiAliasedApply (gdImagePtr im, int px, int py)
 	 * 2.0.14: typo fixed. 2.0.15: moved down below declarations
 	 * to satisfy non-C++ compilers.
 	 */
-	if (!gdImageBoundsSafeMacro(im, px, py)) {
+	if (!gdImageBoundsSafe(im, px, py)) {
 		return;
 	}
 
