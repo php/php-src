@@ -41,62 +41,6 @@
 #include "ext/standard/basic_functions.h"
 #include "ext/standard/php_filestat.h"
 
-/* forward declaration for all methods use (class-name, method-name) */
-SPL_METHOD(DirectoryIterator, __construct);
-SPL_METHOD(DirectoryIterator, rewind);
-SPL_METHOD(DirectoryIterator, hasMore);
-SPL_METHOD(DirectoryIterator, key);
-SPL_METHOD(DirectoryIterator, current);
-SPL_METHOD(DirectoryIterator, next);
-SPL_METHOD(DirectoryIterator, getPath);
-SPL_METHOD(DirectoryIterator, getFilename);
-SPL_METHOD(DirectoryIterator, getPathname);
-SPL_METHOD(DirectoryIterator, isDot);
-SPL_METHOD(DirectoryIterator, isDir);
-
-SPL_METHOD(RecursiveDirectoryIterator, rewind);
-SPL_METHOD(RecursiveDirectoryIterator, next);
-SPL_METHOD(RecursiveDirectoryIterator, key);
-SPL_METHOD(RecursiveDirectoryIterator, hasChildren);
-SPL_METHOD(RecursiveDirectoryIterator, getChildren);
-
-
-/* declare method parameters */
-/* supply a name and default to call by parameter */
-static
-ZEND_BEGIN_ARG_INFO(arginfo_dir___construct, 0) 
-	ZEND_ARG_INFO(0, path)  /* parameter name */
-ZEND_END_ARG_INFO();
-
-
-/* the method table */
-/* each method can have its own parameters and visibility */
-static zend_function_entry spl_ce_dir_class_functions[] = {
-	SPL_ME(DirectoryIterator, __construct,   arginfo_dir___construct, ZEND_ACC_PUBLIC)
-	SPL_ME(DirectoryIterator, rewind,        NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(DirectoryIterator, hasMore,       NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(DirectoryIterator, key,           NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(DirectoryIterator, current,       NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(DirectoryIterator, next,          NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(DirectoryIterator, getPath,       NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(DirectoryIterator, getFilename,   NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(DirectoryIterator, getPathname,   NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(DirectoryIterator, isDot,         NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(DirectoryIterator, isDir,         NULL, ZEND_ACC_PUBLIC)
-	SPL_MA(DirectoryIterator, __toString, DirectoryIterator, getFilename, NULL, ZEND_ACC_PUBLIC)
-	{NULL, NULL, NULL}
-};
-
-static zend_function_entry spl_ce_dir_tree_class_functions[] = {
-	SPL_ME(RecursiveDirectoryIterator, rewind,        NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(RecursiveDirectoryIterator, next,          NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(RecursiveDirectoryIterator, key,           NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(RecursiveDirectoryIterator, hasChildren,   NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(RecursiveDirectoryIterator, getChildren,   NULL, ZEND_ACC_PUBLIC)
-	{NULL, NULL, NULL}
-};
-
-
 /* declare the class handlers */
 static zend_object_handlers spl_ce_dir_handlers;
 
@@ -120,6 +64,9 @@ static void spl_ce_dir_object_dtor(void *object, zend_object_handle handle TSRML
 	}
 	if (intern->dirp) {
 		php_stream_close(intern->dirp);
+	}
+	if (intern->path_name) {
+		efree(intern->path_name);
 	}
 	efree(object);
 }
@@ -297,6 +244,10 @@ SPL_METHOD(DirectoryIterator, next)
 	if (!intern->dirp || !php_stream_readdir(intern->dirp, &intern->entry)) {
 		intern->entry.d_name[0] = '\0';
 	}
+	if (intern->path_name) {
+		efree(intern->path_name);
+		intern->path_name = NULL;
+	}
 }
 /* }}} */
 
@@ -333,6 +284,13 @@ SPL_METHOD(DirectoryIterator, getFilename)
 }
 /* }}} */
 
+static inline void spl_dir_get_path_name(spl_ce_dir_object *intern)
+{
+	if (!intern->path_name) {
+		intern->path_name_len = spprintf(&intern->path_name, 0, "%s/%s", intern->path, intern->entry.d_name);
+	}
+}
+
 /* {{{ proto string DirectoryIterator::getPathname()
    Return path and filename of current dir entry */
 SPL_METHOD(DirectoryIterator, getPathname)
@@ -341,9 +299,8 @@ SPL_METHOD(DirectoryIterator, getPathname)
 	spl_ce_dir_object *intern = (spl_ce_dir_object*)zend_object_store_get_object(object TSRMLS_CC);
 
 	if (intern->entry.d_name[0]) {
-		char *filename;
-		int filename_len = spprintf(&filename, 0, "%s/%s", intern->path, intern->entry.d_name);
-		RETURN_STRINGL(filename, filename_len, 0);
+		spl_dir_get_path_name(intern);
+		RETURN_STRINGL(intern->path_name, intern->path_name_len, 1);
 	} else {
 		RETURN_BOOL(0);
 	}
@@ -357,9 +314,8 @@ SPL_METHOD(RecursiveDirectoryIterator, key)
 	zval *object = getThis();
 	spl_ce_dir_object *intern = (spl_ce_dir_object*)zend_object_store_get_object(object TSRMLS_CC);
 
-	char *filename;
-	int filename_len = spprintf(&filename, 0, "%s/%s", intern->path, intern->entry.d_name);
-	RETURN_STRINGL(filename, filename_len, 0);
+	spl_dir_get_path_name(intern);
+	RETURN_STRINGL(intern->path_name, intern->path_name_len, 1);
 }
 /* }}} */
 
@@ -374,20 +330,90 @@ SPL_METHOD(DirectoryIterator, isDot)
 }
 /* }}} */
 
-/* {{{ proto bool DirectoryIterator::isDir()
-   Returns whether current entry is a directory  */
-SPL_METHOD(DirectoryIterator, isDir)
-{
-	zval *object = getThis();
-	spl_ce_dir_object *intern = (spl_ce_dir_object*)zend_object_store_get_object(object TSRMLS_CC);
-	char *filename;
-	
-	php_stat_len filename_len = spprintf(&filename, 0, "%s/%s", intern->path, intern->entry.d_name);
-
-	php_stat(filename, filename_len, /*funcnum*/FS_IS_DIR, return_value TSRMLS_CC);
-
-	efree(filename);
+/* {{{ FileFunction */
+#define FileFunction(func_name, func_num) \
+SPL_METHOD(DirectoryIterator, func_name) \
+{ \
+	spl_ce_dir_object *intern = (spl_ce_dir_object*)zend_object_store_get_object(getThis() TSRMLS_CC); \
+ \
+	spl_dir_get_path_name(intern); \
+	php_stat(intern->path_name, intern->path_name_len, func_num, return_value TSRMLS_CC); \
 }
+/* }}} */
+
+/* {{{ proto int DirectoryIterator::filePerms()
+   Get file permissions */
+FileFunction(getPerms, FS_PERMS)
+/* }}} */
+
+/* {{{ proto int DirectoryIterator::fileInode()
+   Get file inode */
+FileFunction(getInode, FS_INODE)
+/* }}} */
+
+/* {{{ proto int DirectoryIterator::fileSize()
+   Get file size */
+FileFunction(getSize, FS_SIZE)
+/* }}} */
+
+/* {{{ proto int DirectoryIterator::fileOwner()
+   Get file owner */
+FileFunction(getOwner, FS_OWNER)
+/* }}} */
+
+/* {{{ proto int DirectoryIterator::fileGroup()
+   Get file group */
+FileFunction(getGroup, FS_GROUP)
+/* }}} */
+
+/* {{{ proto int DirectoryIterator::fileATime()
+   Get last access time of file */
+FileFunction(getATime, FS_ATIME)
+/* }}} */
+
+/* {{{ proto int DirectoryIterator::fileMTime()
+   Get last modification time of file */
+FileFunction(getMTime, FS_MTIME)
+/* }}} */
+
+/* {{{ proto int DirectoryIterator::fileCTime()
+   Get inode modification time of file */
+FileFunction(getCTime, FS_CTIME)
+/* }}} */
+
+/* {{{ proto string DirectoryIterator::fileType()
+   Get file type */
+FileFunction(getType, FS_TYPE)
+/* }}} */
+
+/* {{{ proto bool DirectoryIterator::isWritable()
+   Returns true if file can be written */
+FileFunction(isWritable, FS_IS_W)
+/* }}} */
+
+/* {{{ proto bool DirectoryIterator::isReadable()
+   Returns true if file can be read */
+FileFunction(isReadable, FS_IS_R)
+/* }}} */
+
+/* {{{ proto bool DirectoryIterator::isExecutable()
+   Returns true if file is executable */
+FileFunction(isExecutable, FS_IS_X)
+/* }}} */
+
+/* {{{ proto bool DirectoryIterator::isFile()
+   Returns true if file is a regular file */
+FileFunction(isFile, FS_IS_FILE)
+/* }}} */
+
+/* {{{ proto bool DirectoryIterator::isDir()
+   Returns true if file is directory */
+FileFunction(isDir, FS_IS_DIR)
+/* }}} */
+
+/* {{{ proto bool DirectoryIterator::isLink()
+   Returns true if file is symbolic link */
+FileFunction(isLink, FS_IS_LINK)
 /* }}} */
 
 /* {{{ proto void RecursiveDirectoryIterator::rewind()
@@ -422,6 +448,10 @@ SPL_METHOD(RecursiveDirectoryIterator, next)
 			intern->entry.d_name[0] = '\0';
 		}
 	} while (!strcmp(intern->entry.d_name, ".") || !strcmp(intern->entry.d_name, ".."));
+	if (intern->path_name) {
+		efree(intern->path_name);
+		intern->path_name = NULL;
+	}
 }
 /* }}} */
 
@@ -435,11 +465,8 @@ SPL_METHOD(RecursiveDirectoryIterator, hasChildren)
 	if (!strcmp(intern->entry.d_name, ".") || !strcmp(intern->entry.d_name, "..")) {
 		RETURN_BOOL(0);
 	} else {
-		char *filename;
-		php_stat_len filename_len = spprintf(&filename, 0, "%s/%s", intern->path, intern->entry.d_name);
-
-		php_stat(filename, filename_len, FS_IS_DIR, return_value TSRMLS_CC);
-    	efree(filename);
+		spl_dir_get_path_name(intern);
+		php_stat(intern->path_name, intern->path_name_len, FS_IS_DIR, return_value TSRMLS_CC);
     }
 }
 /* }}} */
@@ -451,14 +478,12 @@ SPL_METHOD(RecursiveDirectoryIterator, getChildren)
 	zval *object = getThis(), zpath;
 	spl_ce_dir_object *intern = (spl_ce_dir_object*)zend_object_store_get_object(object TSRMLS_CC);
 	
-	char *path;
-	int path_len = spprintf(&path, 0, "%s/%s", intern->path, intern->entry.d_name);
+	spl_dir_get_path_name(intern);
 
 	INIT_PZVAL(&zpath);
-	ZVAL_STRINGL(&zpath, path, path_len, 0);
+	ZVAL_STRINGL(&zpath, intern->path_name, intern->path_name_len, 0);
 
 	spl_instantiate_arg_ex1(spl_ce_RecursiveDirectoryIterator, &return_value, 0, &zpath TSRMLS_CC);
-	zval_dtor(&zpath);
 }
 /* }}} */
 
@@ -563,6 +588,10 @@ static void spl_ce_dir_it_move_forward(zend_object_iterator *iter TSRMLS_DC)
 	if (!object->dirp || !php_stream_readdir(object->dirp, &object->entry)) {
 		object->entry.d_name[0] = '\0';
 	}
+	if (object->path_name) {
+		efree(object->path_name);
+		object->path_name = NULL;
+	}
 }
 /* }}} */
 
@@ -590,7 +619,9 @@ static int spl_ce_dir_tree_it_current_key(zend_object_iterator *iter, char **str
 	spl_ce_dir_it       *iterator = (spl_ce_dir_it *)iter;
 	spl_ce_dir_object   *object   = iterator->object;
 	
-	*str_key_len = spprintf(str_key, 0, "%s/%s", object->path, object->entry.d_name) + 1;
+	spl_dir_get_path_name(object);
+	*str_key_len = object->path_name_len + 1;
+	*str_key = estrndup(object->path_name, object->path_name_len);
 	return HASH_KEY_IS_STRING;
 }
 /* }}} */
@@ -608,6 +639,10 @@ static void spl_ce_dir_tree_it_move_forward(zend_object_iterator *iter TSRMLS_DC
 			object->entry.d_name[0] = '\0';
 		}
 	} while (!strcmp(object->entry.d_name, ".") || !strcmp(object->entry.d_name, ".."));
+	if (object->path_name) {
+		efree(object->path_name);
+		object->path_name = NULL;
+	}
 }
 /* }}} */
 
@@ -675,6 +710,56 @@ static int spl_ce_dir_cast(zval *readobj, zval *writeobj, int type, int should_f
 	return FAILURE;
 }
 /* }}} */
+
+/* declare method parameters */
+/* supply a name and default to call by parameter */
+static
+ZEND_BEGIN_ARG_INFO(arginfo_dir___construct, 0) 
+	ZEND_ARG_INFO(0, path)  /* parameter name */
+ZEND_END_ARG_INFO();
+
+
+/* the method table */
+/* each method can have its own parameters and visibility */
+static zend_function_entry spl_ce_dir_class_functions[] = {
+	SPL_ME(DirectoryIterator, __construct,   arginfo_dir___construct, ZEND_ACC_PUBLIC)
+	SPL_ME(DirectoryIterator, rewind,        NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(DirectoryIterator, hasMore,       NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(DirectoryIterator, key,           NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(DirectoryIterator, current,       NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(DirectoryIterator, next,          NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(DirectoryIterator, getPath,       NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(DirectoryIterator, getFilename,   NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(DirectoryIterator, getPathname,   NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(DirectoryIterator, getPerms,      NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(DirectoryIterator, getInode,      NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(DirectoryIterator, getSize,       NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(DirectoryIterator, getOwner,      NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(DirectoryIterator, getGroup,      NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(DirectoryIterator, getATime,      NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(DirectoryIterator, getMTime,      NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(DirectoryIterator, getCTime,      NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(DirectoryIterator, getType,       NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(DirectoryIterator, isWritable,    NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(DirectoryIterator, isReadable,    NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(DirectoryIterator, isExecutable,  NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(DirectoryIterator, isFile,        NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(DirectoryIterator, isDir,         NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(DirectoryIterator, isLink,        NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(DirectoryIterator, isDot,         NULL, ZEND_ACC_PUBLIC)
+	SPL_MA(DirectoryIterator, __toString, DirectoryIterator, getFilename, NULL, ZEND_ACC_PUBLIC)
+	{NULL, NULL, NULL}
+};
+
+static zend_function_entry spl_ce_dir_tree_class_functions[] = {
+	SPL_ME(RecursiveDirectoryIterator, rewind,        NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveDirectoryIterator, next,          NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveDirectoryIterator, key,           NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveDirectoryIterator, hasChildren,   NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveDirectoryIterator, getChildren,   NULL, ZEND_ACC_PUBLIC)
+	{NULL, NULL, NULL}
+};
+
 
 /* {{{ PHP_MINIT_FUNCTION(spl_directory)
  */
