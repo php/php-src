@@ -121,6 +121,7 @@ typedef struct _zend_function_entry {
 		class_container.destructor = NULL;						\
 		class_container.clone = NULL;							\
 		class_container.create_object = NULL;	 				\
+		class_container.interface_gets_implemented = NULL;		\
 		class_container.__call = handle_fcall;	\
 		class_container.__get = handle_propget;	\
 		class_container.__set = handle_propset;	\
@@ -160,6 +161,7 @@ ZEND_API int zend_register_module(zend_module_entry *module_entry);
 
 ZEND_API zend_class_entry *zend_register_internal_class(zend_class_entry *class_entry TSRMLS_DC);
 ZEND_API zend_class_entry *zend_register_internal_class_ex(zend_class_entry *class_entry, zend_class_entry *parent_ce, char *parent_name TSRMLS_DC);
+ZEND_API zend_class_entry *zend_register_internal_interface(zend_class_entry *orig_class_entry TSRMLS_DC);
 ZEND_API void zend_class_implements(zend_class_entry *class_entry TSRMLS_DC, int num_interfaces, ...);
 
 ZEND_API int zend_disable_function(char *function_name, uint function_name_length TSRMLS_DC);

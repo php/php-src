@@ -1419,6 +1419,26 @@ int zend_next_free_module(void)
 	return ++module_count;
 }
 
+static zend_class_entry *do_register_internal_class(zend_class_entry *orig_class_entry, zend_uint ce_flags TSRMLS_DC)
+{
+	zend_class_entry *class_entry = malloc(sizeof(zend_class_entry));
+	char *lowercase_name = malloc(orig_class_entry->name_length + 1);
+	*class_entry = *orig_class_entry;
+
+	class_entry->type = ZEND_INTERNAL_CLASS;
+	zend_initialize_class_data(class_entry, 0 TSRMLS_CC);
+	class_entry->ce_flags = ce_flags;
+
+	if (class_entry->builtin_functions) {
+		zend_register_functions(class_entry, class_entry->builtin_functions, &class_entry->function_table, MODULE_PERSISTENT TSRMLS_CC);
+	}
+
+	zend_str_tolower_copy(lowercase_name, orig_class_entry->name, class_entry->name_length);
+	zend_hash_update(CG(class_table), lowercase_name, class_entry->name_length+1, &class_entry, sizeof(zend_class_entry *), NULL);
+	free(lowercase_name);
+	return class_entry;
+}
+
 /* If parent_ce is not NULL then it inherits from parent_ce
  * If parent_ce is NULL and parent_name isn't then it looks for the parent and inherits from it
  * If both parent_ce and parent_name are NULL it does a regular class registration
@@ -1440,7 +1460,7 @@ ZEND_API zend_class_entry *zend_register_internal_class_ex(zend_class_entry *cla
 	register_class = zend_register_internal_class(class_entry TSRMLS_CC);
 
 	if (parent_ce) {
-		zend_do_inheritance(register_class, parent_ce);
+		zend_do_inheritance(register_class, parent_ce TSRMLS_CC);
 	}
 	return register_class;
 }
@@ -1460,28 +1480,21 @@ ZEND_API void zend_class_implements(zend_class_entry *class_entry TSRMLS_DC, int
 	while (num_interfaces--) {
 		interface_entry = va_arg(interface_list, zend_class_entry *);
 		class_entry->interfaces[class_entry->num_interfaces++] = interface_entry;
-		zend_do_implement_interface(class_entry, interface_entry);
+		zend_do_implement_interface(class_entry, interface_entry TSRMLS_CC);
 	}
 	va_end(interface_list);
 }
 
+/* A class that contains at least one abstract method automatically becomes an abstract class.
+ */
 ZEND_API zend_class_entry *zend_register_internal_class(zend_class_entry *orig_class_entry TSRMLS_DC)
 {
-	zend_class_entry *class_entry = malloc(sizeof(zend_class_entry));
-	char *lowercase_name = malloc(orig_class_entry->name_length + 1);
-	*class_entry = *orig_class_entry;
+	return do_register_internal_class(orig_class_entry, 0 TSRMLS_CC);
+}
 
-	class_entry->type = ZEND_INTERNAL_CLASS;
-	zend_initialize_class_data(class_entry, 0 TSRMLS_CC);
-
-	if (class_entry->builtin_functions) {
-		zend_register_functions(class_entry, class_entry->builtin_functions, &class_entry->function_table, MODULE_PERSISTENT TSRMLS_CC);
-	}
-
-	zend_str_tolower_copy(lowercase_name, orig_class_entry->name, class_entry->name_length);
-	zend_hash_update(CG(class_table), lowercase_name, class_entry->name_length+1, &class_entry, sizeof(zend_class_entry *), NULL);
-	free(lowercase_name);
-	return class_entry;
+ZEND_API zend_class_entry *zend_register_internal_interface(zend_class_entry *orig_class_entry TSRMLS_DC)
+{
+	return do_register_internal_class(orig_class_entry, ZEND_ACC_ABSTRACT|ZEND_ACC_INTERFACE TSRMLS_CC);
 }
 
 ZEND_API int zend_set_hash_symbol(zval *symbol, char *name, int name_length,
