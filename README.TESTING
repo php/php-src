@@ -101,8 +101,8 @@ prompt the tester for any user input.
 
 Normally, the exit status of "make test" is zero, regardless of the results
 of independant tests. Set the environment variable REPORT_EXIT_STATUS to 1,
-to make "make test' set the exit statis ("$?") to non-zero, when a test has
-failed.
+and "make test" will set the exit status ("$?") to non-zero, when an
+individual test has failed.
 
 NOTE: the exit status of run-tests.php will be 1 when
 REPORT_EXIT_STATUS is set. The result of "make test" may be higher
