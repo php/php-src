@@ -774,11 +774,17 @@ PHP_FUNCTION(odbc_prepare)
 	}
 #endif
 
-	if ((rc = SQLPrepare(result->stmt, query, SQL_NTS)) != SQL_SUCCESS) {
-		odbc_sql_error(conn->henv, conn->hdbc, result->stmt, "SQLPrepare");
-		SQLFreeStmt(result->stmt, SQL_DROP);
-		RETURN_FALSE;
-	}
+    rc = SQLPrepare(result->stmt, query, SQL_NTS);
+    switch (rc) {
+    case SQL_SUCCESS:
+        break;
+    case SQL_SUCCESS_WITH_INFO:
+        odbc_sql_error(conn->henv, conn->hdbc, result->stmt, "SQLPrepare");
+        break;
+    default:
+        odbc_sql_error(conn->henv, conn->hdbc, result->stmt, "SQLPrepare");
+        RETURN_FALSE;
+    }
 	
 	SQLNumParams(result->stmt, &(result->numparams));
     SQLNumResultCols(result->stmt, &(result->numcols));
@@ -933,10 +939,16 @@ PHP_FUNCTION(odbc_execute)
 			}
 		}
 	} else {
-		if (rc != SQL_SUCCESS) {
-			odbc_sql_error(result->conn_ptr->henv, result->conn_ptr->hdbc, result->stmt, "SQLExecute");
-			RETVAL_FALSE;
-		}
+        switch (rc) {
+        case SQL_SUCCESS:
+            break;
+        case SQL_NO_DATA_FOUND:
+        case SQL_SUCCESS_WITH_INFO:
+            odbc_sql_error(result->conn_ptr->henv, result->conn_ptr->hdbc, result->stmt, "SQLExecute");
+            break;
+        default:
+            RETVAL_FALSE;
+        }
 	}	
 	
 	if (result->numparams > 0) {
@@ -948,7 +960,8 @@ PHP_FUNCTION(odbc_execute)
 		efree(params);
 	}
 
-	if (rc == SQL_SUCCESS) {
+	if (rc == SQL_SUCCESS || rc == SQL_SUCCESS_WITH_INFO 
+        || rc == SQL_NO_DATA_FOUND) {
 		RETVAL_TRUE;
 	}
 
@@ -986,7 +999,7 @@ PHP_FUNCTION(odbc_cursor)
 
 	rc = SQLGetInfo(result->conn_ptr->hdbc,SQL_MAX_CURSOR_NAME_LEN,
 					(void *)&max_len,0,&len);
-	if (rc != SQL_SUCCESS) {
+	if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
 		RETURN_FALSE;
 	}
 	
@@ -997,7 +1010,7 @@ PHP_FUNCTION(odbc_cursor)
 			RETURN_FALSE;
 		}
 		rc = SQLGetCursorName(result->stmt,cursorname,(SWORD)max_len,&len);
-		if (rc != SQL_SUCCESS) {
+		if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
 			char    state[6];     /* Not used */
 	 		SDWORD  error;        /* Not used */
 			char    errormsg[255];
@@ -1102,7 +1115,9 @@ PHP_FUNCTION(odbc_exec)
 #endif
 
 	rc = SQLExecDirect(result->stmt, query, SQL_NTS);
-	if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
+	if (rc != SQL_SUCCESS 
+        && rc != SQL_SUCCESS_WITH_INFO
+        && rc != SQL_NO_DATA_FOUND) { 
 		/* XXX FIXME we should really check out SQLSTATE with SQLError
 		 * in case rc is SQL_SUCCESS_WITH_INFO here.
 		 */
