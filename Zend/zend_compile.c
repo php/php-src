@@ -1136,11 +1136,6 @@ void zend_do_receive_arg(zend_uchar op, znode *var, znode *offset, znode *initia
 	opline->result = *var;
 	opline->op1 = *offset;
 	if (op == ZEND_RECV_INIT) {
-		if ((CG(active_class_entry) && CG(active_class_entry)->ce_flags & ZEND_ACC_INTERFACE)
-			|| CG(active_op_array)->fn_flags & ZEND_ACC_ABSTRACT) {
-			CG(active_op_array)->num_args--; /* invalidate the current arg_info entry */
-			zend_error(E_COMPILE_ERROR, "Abstract methods cannot have default values for arguments");
-		}
 		opline->op2 = *initialization;
 	} else {
 		CG(active_op_array)->required_num_args = CG(active_op_array)->num_args;
@@ -1723,7 +1718,7 @@ static zend_bool zend_do_perform_implementation_check(zend_function *fe)
 	}
 
 	/* check number of arguments */
-	if (proto->common.num_args < fe->common.required_num_args
+	if (proto->common.required_num_args != fe->common.required_num_args
 		|| proto->common.num_args > fe->common.num_args) {
 		return 0;
 	}
@@ -1768,6 +1763,7 @@ static zend_bool do_inherit_method_check(HashTable *child_function_table, zend_f
 	zend_uint child_flags;
 	zend_uint parent_flags = parent->common.fn_flags;
 	zend_function *child;
+	TSRMLS_FETCH();
 
 	if (zend_hash_quick_find(child_function_table, hash_key->arKey, hash_key->nKeyLength, hash_key->h, (void **) &child)==FAILURE) {
 		if (parent_flags & ZEND_ACC_ABSTRACT) {
@@ -1818,15 +1814,22 @@ static zend_bool do_inherit_method_check(HashTable *child_function_table, zend_f
 		}
 	}
 
-	if (parent_flags & ZEND_ACC_ABSTRACT) {
+	if (EG(ze1_compatibility_mode)) {
+		if (parent_flags & ZEND_ACC_ABSTRACT) {
+			child->common.prototype = parent;
+			child->common.fn_flags |= ZEND_ACC_IMPLEMENTED_ABSTRACT;
+		} else {
+			child->common.prototype = parent->common.prototype;
+		}
+	} else {
 		child->common.prototype = parent;
-		child->common.fn_flags |= ZEND_ACC_IMPLEMENTED_ABSTRACT;
-	} else if (parent->common.prototype) {
-		child->common.prototype = parent->common.prototype;
+		if (parent_flags & ZEND_ACC_ABSTRACT) {
+			child->common.fn_flags |= ZEND_ACC_IMPLEMENTED_ABSTRACT;
+		}
 	}
 
 	if (!zend_do_perform_implementation_check(child)) {
-		zend_error(E_COMPILE_ERROR, "Declaration of %s::%s() must be the same as %s::%s()", ZEND_FN_SCOPE_NAME(child), child->common.function_name, ZEND_FN_SCOPE_NAME(child->common.prototype), child->common.prototype->common.function_name);
+		zend_error(E_COMPILE_ERROR, "Declaration of %s::%s() must be compatible with that of %s::%s()", ZEND_FN_SCOPE_NAME(child), child->common.function_name, ZEND_FN_SCOPE_NAME(child->common.prototype), child->common.prototype->common.function_name);
 	}
 
 	return 0;

@@ -382,7 +382,7 @@ static inline void zend_assign_to_object(znode *result, zval **object_ptr, znode
 	}
 	
 	/* here we are sure we are dealing with an object */
-	if (EG(implicit_clone)) {
+	if (EG(ze1_compatibility_mode)) {
 		SEPARATE_ZVAL_IF_NOT_REF(object_ptr);
 		object = *object_ptr;
 	}
@@ -2401,7 +2401,7 @@ int zend_init_ctor_call_handler(ZEND_OPCODE_HANDLER_ARGS)
 
 	/* We are not handling overloaded classes right now */
 	EX(object) = get_zval_ptr(&opline->op1, EX(Ts), &EG(free_op1), BP_VAR_R);
-	if (!PZVAL_IS_REF(EX(object)) || !EG(implicit_clone)) {
+	if (!PZVAL_IS_REF(EX(object)) || !EG(ze1_compatibility_mode)) {
 		EX(object)->refcount++; /* For $this pointer */
 	} else {
 		zval *this_ptr;
@@ -2459,7 +2459,7 @@ int zend_init_method_call_handler(ZEND_OPCODE_HANDLER_ARGS)
 	if (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) {
 		EX(object) = NULL;
 	} else {
-		if (!PZVAL_IS_REF(EX(object)) || !EG(implicit_clone)) {
+		if (!PZVAL_IS_REF(EX(object)) || !EG(ze1_compatibility_mode)) {
 			EX(object)->refcount++; /* For $this pointer */
 		} else {
 			zval *this_ptr;

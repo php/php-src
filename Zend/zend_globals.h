@@ -193,7 +193,7 @@ struct _zend_executor_globals {
 	zend_bool in_autoload;
 	zend_bool bailout_set;
 	zend_bool full_tables_cleanup;
-	zend_bool implicit_clone;
+	zend_bool ze1_compatibility_mode;
 
 	/* for extended information support */
 	zend_bool no_extensions;

@@ -73,20 +73,9 @@ static ZEND_INI_MH(OnUpdateErrorReporting)
 }
 
 
-static ZEND_INI_MH(OnUpdateImplicitClone)
-{
-	if (!new_value) {
-		EG(implicit_clone) = 0;
-	} else {
-		EG(implicit_clone) = atoi(new_value) ? 1 : 0;
-	}
-	return SUCCESS;
-}
-
-
 ZEND_INI_BEGIN()
-	ZEND_INI_ENTRY("error_reporting",			NULL,		ZEND_INI_ALL,		OnUpdateErrorReporting)
-	ZEND_INI_ENTRY("zend2.implicit_clone",		NULL,		ZEND_INI_ALL,		OnUpdateImplicitClone)
+	ZEND_INI_ENTRY("error_reporting",				NULL,		ZEND_INI_ALL,		OnUpdateErrorReporting)
+	STD_ZEND_INI_BOOLEAN("zend.ze1_compatibility_mode",	"0",	ZEND_INI_ALL,		OnUpdateBool,	ze1_compatibility_mode,	zend_executor_globals,	executor_globals)
 ZEND_INI_END()
 
 
@@ -643,7 +632,6 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions, i
 	if (start_builtin_functions) {
 		zend_startup_builtin_functions(TSRMLS_C);
 	}
-	zend_register_default_classes(TSRMLS_C);
 
 	zend_ini_startup(TSRMLS_C);
 
