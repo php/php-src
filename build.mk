@@ -63,7 +63,7 @@ acconfig.h: $(acconfig_h_SOURCES)
 
 $(makefile_in_files): $(makefile_am_files) aclocal.m4
 	@echo rebuilding Makefile.in\'s
-	@for i in $(LT_TARGETS); do mv $$i $$i.bak; done
+	@for i in $(LT_TARGETS); do test -f $$i && mv $$i $$i.bak; done
 	@automake -a -i $(AMFLAGS) $(makefile_files) 2>&1 \
 		| grep -v PHP_OUTPUT_FILES || true >&2
 	@for i in $(LT_TARGETS); do mv $$i.bak $$i; done
