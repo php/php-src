@@ -27,11 +27,9 @@ PHP 4.0                                                                    NEWS
 - Added connection error support to mysql_error() and mysql_errno(). (Jason)
 - Added support to getimagesize to return dimensions of BMP and PSD
   files. (Derick)
-- Added suppress option to ircg_msg() (Sascha)
-- Added heuristic to kill stale IRC connections to IRCG (Sascha)
-- Added message scanner caching to IRCG (Sascha)
-- Added nickname escaping to IRCG (Sascha)
-- Added statistics to IRCG phpinfo() output (Sascha)
+- Added heuristic to kill stale IRC connections, message scanner caching, and
+  nickname escaping to IRCG, suppress option to ircg_msg(), and statistics to
+  IRCG phpinfo() output. (Sascha)
 - Added Japanese multibyte string functions support. (Rui)
 - Added Mac OS X "\r" line ending support. (Andi, Zend Engine)
 - Fixed a bug regarding the $PHP_SELF being incorrectly registered when
