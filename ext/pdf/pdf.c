@@ -2342,7 +2342,7 @@ PHP_FUNCTION(pdf_open_file)
 
 /* }}} */
 
-/* {{{ proto int pdf_get_buffer(int pdfdoc)
+/* {{{ proto string pdf_get_buffer(int pdfdoc)
    Fetches the full buffer containig the generated PDF data */
 PHP_FUNCTION(pdf_get_buffer)
 {
