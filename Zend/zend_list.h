@@ -18,6 +18,7 @@
 #define _LIST_H
 
 #include "zend_hash.h"
+#include "zend_globals.h"
 
 extern HashTable list_destructors;
 
