@@ -11,6 +11,7 @@ PHP                                                                        NEWS
   (Ilia)
 - Fixed bug #26680 (Added version check in mysqli_report_index) (Georg)
 - Fixed bug #26675 (Segfault on ArrayAccess use). (Marcus)
+- Fixed bug #26065 (Crash when nesting classes). (Marcus)
 - Fixed bug #25038 (call_user_func issues warning if function throws 
   exception). (Marcus)
 
