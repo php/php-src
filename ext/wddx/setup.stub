@@ -1,6 +1,0 @@
-# $Source$
-# $Id$
-
-define_option with-wddx 'wddx support?' yesnodir no \
-'    Whether to build the wddx extension.'
-	
