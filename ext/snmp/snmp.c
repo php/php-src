@@ -575,7 +575,6 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st)
 	strcpy (hostname, Z_STRVAL_PP(a1));
 	if ((pptr = strchr (hostname, ':'))) {
 		remote_port = strtol (pptr + 1, NULL, 0);
-		*pptr = 0;
 	}
 
 	session.peername = hostname;
@@ -892,7 +891,6 @@ static void php_snmpv3(INTERNAL_FUNCTION_PARAMETERS, int st)
 	strcpy(hostname, Z_STRVAL_PP(a1));
 	if ((pptr = strchr (hostname, ':'))) {
 		remote_port = strtol (pptr + 1, NULL, 0);
-		*pptr = 0;
 	}
 	session.peername = hostname;
 	session.remote_port = remote_port;
