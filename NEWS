@@ -4,6 +4,7 @@ PHP 4                                                                      NEWS
 - Fixed a bug in addslashes() handling of the '\0' character. (Ilia)
 - Backported Marcus' foreach() speedup patch from PHP 5.x. (Derick)
 - Fixed potential problems with unserializing invalid serialize data. (Marcus)
+- Fixed bug #30442 (segfault when parsing ?getvariable[][ ). (Tony)
 - Fixed bug #30282 (segfault when using unknown/unsupported
   session.save_handler and/or session.serialize_handler). (Tony)
 - Fixed bug #30281 (Prevent non-wbmp images from being detected as such).
