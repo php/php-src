@@ -121,6 +121,7 @@ ZEND_API void zend_make_printable_zval(zval *expr, zval *expr_copy, int *use_cop
 		case IS_NULL:
 			expr_copy->value.str.len = 0;
 			expr_copy->value.str.val = empty_string;
+			break;
 		case IS_BOOL:
 #if 1
 			if (expr->value.lval) {
