@@ -1880,7 +1880,7 @@ PHP_FUNCTION(mysql_data_seek)
 
 	convert_to_long_ex(offset);
 	if (Z_LVAL_PP(offset)<0 || Z_LVAL_PP(offset)>=(int)mysql_num_rows(mysql_result)) {
-		php_error(E_WARNING, "Offset %d is invalid for MySQL result index %d", Z_LVAL_PP(offset), Z_LVAL_PP(result));
+		php_error(E_WARNING, "Offset %d is invalid for MySQL result index %d (or the query data is unbuffered)", Z_LVAL_PP(offset), Z_LVAL_PP(result));
 		RETURN_FALSE;
 	}
 	mysql_data_seek(mysql_result, Z_LVAL_PP(offset));
