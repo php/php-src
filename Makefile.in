@@ -41,7 +41,7 @@ include $(topsrcdir)/build/library.mk
 include $(topsrcdir)/build/program.mk
 
 install-local:
-	@$(LIBTOOL) --silent --mode=install install libphp4.la $(phptempdir)/libphp4.la >/dev/null 2>&1
+	@$(LIBTOOL) --silent --mode=install cp libphp4.la $(phptempdir)/libphp4.la >/dev/null 2>&1
 	-@$(mkinstalldirs) $(bindir)
 	$(INSTALL_IT)
 
