@@ -770,7 +770,7 @@ int pdo_hash_methods(pdo_dbh_t *dbh, int kind TSRMLS_DC)
 		return 0;
 	}
 	funcs =	dbh->methods->get_driver_methods(dbh,
-			PDO_DBH_DRIVER_METHOD_KIND_DBH TSRMLS_DC);
+			PDO_DBH_DRIVER_METHOD_KIND_DBH TSRMLS_CC);
 	if (!funcs) {
 		return 0;
 	}
@@ -882,8 +882,6 @@ static zend_class_entry *dbh_get_ce(zval *object TSRMLS_DC)
 
 static int dbh_get_classname(zval *object, char **class_name, zend_uint *class_name_len, int parent TSRMLS_DC)
 {
-	pdo_dbh_t *dbh = zend_object_store_get_object(object TSRMLS_CC);
-
 	*class_name = estrndup("PDO", sizeof("PDO")-1);
 	*class_name_len = sizeof("PDO")-1;
 	return 0;
