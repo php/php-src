@@ -51,7 +51,7 @@ bc_sqrt (num, scale)
   bc_num guess, guess1, point5, diff;
 
   /* Initial checks. */
-  cmp_res = bc_compare (*num, BCG(_zero_));
+  cmp_res = bc_compare (*num, _zero_);
   if (cmp_res < 0)
     return 0;		/* error */
   else
@@ -59,15 +59,15 @@ bc_sqrt (num, scale)
       if (cmp_res == 0)
 	{
 	  bc_free_num (num);
-	  *num = bc_copy_num (BCG(_zero_));
+	  *num = bc_copy_num (_zero_);
 	  return 1;
 	}
     }
-  cmp_res = bc_compare (*num, BCG(_one_));
+  cmp_res = bc_compare (*num, _one_);
   if (cmp_res == 0)
     {
       bc_free_num (num);
-      *num = bc_copy_num (BCG(_one_));
+      *num = bc_copy_num (_one_);
       return 1;
     }
 
@@ -84,7 +84,7 @@ bc_sqrt (num, scale)
   if (cmp_res < 0)
     {
       /* The number is between 0 and 1.  Guess should start at 1. */
-      guess = bc_copy_num (BCG(_one_));
+      guess = bc_copy_num (_one_);
       cscale = (*num)->n_scale;
     }
   else
@@ -121,7 +121,7 @@ bc_sqrt (num, scale)
 
   /* Assign the number and clean up. */
   bc_free_num (num);
-  bc_divide (guess,BCG(_one_),num,rscale);
+  bc_divide (guess,_one_,num,rscale);
   bc_free_num (&guess);
   bc_free_num (&guess1);
   bc_free_num (&point5);

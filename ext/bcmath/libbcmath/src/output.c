@@ -138,7 +138,7 @@ bc_out_num (num, o_base, out_char, leading_zero)
 	/* The number is some other base. */
 	digits = NULL;
 	bc_init_num (&int_part);
-	bc_divide (num, BCG(_one_), &int_part, 0);
+	bc_divide (num, _one_, &int_part, 0);
 	bc_init_num (&frac_part);
 	bc_init_num (&cur_dig);
 	bc_init_num (&base);
@@ -185,7 +185,7 @@ bc_out_num (num, o_base, out_char, leading_zero)
 	  {
 	    (*out_char) ('.');
 	    pre_space = 0;
-	    t_num = bc_copy_num (BCG(_one_));
+	    t_num = bc_copy_num (_one_);
 	    while (t_num->n_len <= num->n_scale) {
 	      bc_multiply (frac_part, base, &frac_part, num->n_scale);
 	      fdigit = bc_num2long (frac_part);
