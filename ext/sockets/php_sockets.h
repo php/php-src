@@ -87,7 +87,7 @@ typedef int SOCKET;
 #endif
 
 typedef struct {
-	SOCKET	socket;
+	SOCKET	  bsd_socket;
 	int		type;
 } php_socket;
 

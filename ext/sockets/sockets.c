@@ -33,9 +33,6 @@
 #define _XPG4_2
 #define __EXTENSIONS__
 
-#ifndef __PRAGMA_REDEFINE_EXTNAME
-#define __PRAGMA_REDEFINE_EXTNAME
-#endif
 
 #include "ext/standard/info.h"
 #include "php_ini.h"
@@ -55,14 +52,14 @@
 # include <fcntl.h>
 # include <signal.h>
 # include <sys/uio.h>
-# define IS_INVALID_SOCKET(a)	(a->socket < 0)
+# define IS_INVALID_SOCKET(a)	(a->bsd_socket < 0)
 # define set_errno(a) (errno = a)
 # define set_h_errno(a) (h_errno = a)
 #else /* windows */
 # include <winsock.h>
 # include "php_sockets.h"
 # include "php_sockets_win.h"
-# define IS_INVALID_SOCKET(a)	(a->socket == INVALID_SOCKET)
+# define IS_INVALID_SOCKET(a)	(a->bsd_socket == INVALID_SOCKET)
 #endif
 
 #ifdef ZTS
@@ -199,7 +196,7 @@ static void destroy_socket(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	php_socket *php_sock = (php_socket *) rsrc->ptr;
 
-	close(php_sock->socket);
+	close(php_sock->bsd_socket);
 	efree(php_sock);
 }
 
@@ -224,7 +221,7 @@ static php_socket *open_listen_sock(int port, int backlog)
 	la.sin_family = hp->h_addrtype;
 	la.sin_port = htons((unsigned short) port);
 
-	php_sock->socket = socket(PF_INET, SOCK_STREAM, 0);
+	php_sock->bsd_socket = socket(PF_INET, SOCK_STREAM, 0);
 	php_sock->type = PF_INET;
 	if (IS_INVALID_SOCKET(php_sock)) {
 		php_error(E_WARNING, "Couldn't allocate a new socket from open_listen_sock()");
@@ -232,16 +229,16 @@ static php_socket *open_listen_sock(int port, int backlog)
 		return NULL;
 	}
 
-	if (bind(php_sock->socket, (struct sockaddr *)&la, sizeof(la)) < 0) {
+	if (bind(php_sock->bsd_socket, (struct sockaddr *)&la, sizeof(la)) < 0) {
 		php_error(E_WARNING, "Couldn't bind socket to given address from open_listen_sock()");
-		close(php_sock->socket);
+		close(php_sock->bsd_socket);
 		efree(php_sock);
 		return NULL;
 	}
 
-	if (listen(php_sock->socket, backlog) < 0) {
-		php_error(E_WARNING, "Couldn't listen on socket %d from open_listen_sock()", php_sock->socket);
-		close(php_sock->socket);
+	if (listen(php_sock->bsd_socket, backlog) < 0) {
+		php_error(E_WARNING, "Couldn't listen on socket %d from open_listen_sock()", php_sock->bsd_socket);
+		close(php_sock->bsd_socket);
 		efree(php_sock);
 		return NULL;
 	}
@@ -258,7 +255,7 @@ static php_socket *accept_connect(php_socket *php_sock, struct sockaddr *la)
 
 	m = sizeof(*la);
 
-	retval->socket = accept(php_sock->socket, la, &m);
+	retval->bsd_socket = accept(php_sock->bsd_socket, la, &m);
 	if (IS_INVALID_SOCKET(retval)) {
 		php_error(E_WARNING, "Couldn't accept incoming connection in accept_connect()");
 		efree(retval);
@@ -269,14 +266,14 @@ static php_socket *accept_connect(php_socket *php_sock, struct sockaddr *la)
 }
 
 /* {{{ php_read -- wrapper around read() so that it only reads to a \r or \n. */
-int php_read(int socket, void *buf, int maxlen)
+int php_read(int bsd_socket, void *buf, int maxlen)
 {
 	int m = 0, n = 0;
 	int no_read = 0;
 	int nonblock = 0;
 	char *t = (char *) buf;
 
-	m = fcntl(socket, F_GETFL);
+	m = fcntl(bsd_socket, F_GETFL);
 	if (m < 0) {
 		return m;
 	}
@@ -306,7 +303,7 @@ int php_read(int socket, void *buf, int maxlen)
 		}
 		 
 		if (n < maxlen) {
-			m = read(socket, (void *) t, 1);
+			m = read(bsd_socket, (void *) t, 1);
 		}
 		 
 		if (errno != 0 && errno != ESPIPE && errno != EAGAIN) {
@@ -446,14 +443,14 @@ PHP_FUNCTION(socket_fd_set)
 		zend_hash_internal_pointer_reset(Z_ARRVAL_PP(arg2));
 		while (zend_hash_get_current_data(Z_ARRVAL_PP(arg2), (void**)&tmp) == SUCCESS) {
 			ZEND_FETCH_RESOURCE(php_sock, php_socket*, tmp, -1, le_socket_name, le_socket);
-			FD_SET(php_sock->socket, &(php_fd->set));
-			max_fd = (php_sock->socket > max_fd) ? php_sock->socket : max_fd;
+			FD_SET(php_sock->bsd_socket, &(php_fd->set));
+			max_fd = (php_sock->bsd_socket > max_fd) ? php_sock->bsd_socket : max_fd;
 			zend_hash_move_forward(Z_ARRVAL_PP(arg2));
 		}
 	} else if (Z_TYPE_PP(arg2) == IS_RESOURCE) {
 		ZEND_FETCH_RESOURCE(php_sock, php_socket*, arg2, -1, le_socket_name, le_socket);
-		FD_SET(php_sock->socket, &(php_fd->set));
-		max_fd = php_sock->socket;
+		FD_SET(php_sock->bsd_socket, &(php_fd->set));
+		max_fd = php_sock->bsd_socket;
 	} else {
 		php_error(E_ERROR, "expecting variable of type array or resource in %s()", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
@@ -482,12 +479,12 @@ PHP_FUNCTION(socket_fd_clear)
 		zend_hash_internal_pointer_reset(Z_ARRVAL_PP(arg2));
 		while (zend_hash_get_current_data(Z_ARRVAL_PP(arg2), (void**)&tmp) == SUCCESS) {
 			ZEND_FETCH_RESOURCE(php_sock, php_socket*, tmp, -1, le_socket_name, le_socket);
-			FD_CLR(php_sock->socket, &(php_fd->set));
+			FD_CLR(php_sock->bsd_socket, &(php_fd->set));
 			zend_hash_move_forward(Z_ARRVAL_PP(arg2));
 		}
 	} else if (Z_TYPE_PP(arg2) == IS_RESOURCE) {
 		ZEND_FETCH_RESOURCE(php_sock, php_socket*, arg2, -1, le_socket_name, le_socket);
-		FD_CLR(php_sock->socket, &(php_fd->set));
+		FD_CLR(php_sock->bsd_socket, &(php_fd->set));
 	} else {
 		php_error(E_ERROR, "expecting variable of type array or resource in %s()", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
@@ -513,7 +510,7 @@ PHP_FUNCTION(socket_fd_isset)
 	ZEND_FETCH_RESOURCE(php_fd, php_fd_set*, arg1, -1, le_destroy_name, le_destroy);
 	ZEND_FETCH_RESOURCE(php_sock, php_socket*, arg2, -1, le_socket_name, le_socket);
 
-	if (FD_ISSET(php_sock->socket, &(php_fd->set))) {
+	if (FD_ISSET(php_sock->bsd_socket, &(php_fd->set))) {
 		RETURN_TRUE;
 	}
 
@@ -656,7 +653,7 @@ PHP_FUNCTION(socket_set_nonblock)
 	
 	ZEND_FETCH_RESOURCE(php_sock, php_socket *, arg1, -1, le_socket_name, le_socket);
 
-	if (fcntl(php_sock->socket, F_SETFL, O_NONBLOCK) == 0) {
+	if (fcntl(php_sock->bsd_socket, F_SETFL, O_NONBLOCK) == 0) {
 		RETURN_TRUE;
 	}
 
@@ -685,7 +682,7 @@ PHP_FUNCTION(socket_listen)
 		backlog = Z_LVAL_PP(arg2);
 	}
 
-	if (listen(php_sock->socket, backlog) == 0) {
+	if (listen(php_sock->bsd_socket, backlog) == 0) {
 		RETURN_FALSE;
 	}
 	
@@ -737,13 +734,13 @@ PHP_FUNCTION(socket_write)
 	}
 
 #ifndef PHP_WIN32
-	retval = write(php_sock->socket, Z_STRVAL_PP(arg2), length);
+	retval = write(php_sock->bsd_socket, Z_STRVAL_PP(arg2), length);
 #else
-	retval = send(php_sock->socket, Z_STRVAL_PP(arg2), length, 0);
+	retval = send(php_sock->bsd_socket, Z_STRVAL_PP(arg2), length, 0);
 #endif
 
 	if (retval <= 0) {
-		php_error(E_WARNING, "Unable to write to socket %d [%d]: %s", php_sock->socket, errno, strerror(errno));
+		php_error(E_WARNING, "Unable to write to socket %d [%d]: %s", php_sock->bsd_socket, errno, strerror(errno));
 		RETURN_FALSE;
 	}
 
@@ -782,14 +779,14 @@ PHP_FUNCTION(socket_read)
 	tmpbuf = emalloc(Z_LVAL_PP(arg2) + 1);
 
 #ifndef PHP_WIN32
-	retval = (*read_function)(php_sock->socket, tmpbuf, Z_LVAL_PP(arg2));
+	retval = (*read_function)(php_sock->bsd_socket, tmpbuf, Z_LVAL_PP(arg2));
 #else
-	retval = recv(php_sock->socket, tmpbuf, Z_LVAL_PP(arg2), 0);
+	retval = recv(php_sock->bsd_socket, tmpbuf, Z_LVAL_PP(arg2), 0);
 #endif
 
 	if (retval <= 0) {
 		php_error(E_WARNING, "Couldn't read %d bytes from socket %d [%d]: %s",
-		          Z_LVAL_PP(arg2), php_sock->socket, errno, strerror(errno));
+		          Z_LVAL_PP(arg2), php_sock->bsd_socket, errno, strerror(errno));
 		efree(tmpbuf);
 		RETURN_FALSE;
 	}
@@ -822,7 +819,7 @@ PHP_FUNCTION(socket_getsockname)
 
 	sa = (struct sockaddr *) &sa_storage;
 
-	if (getsockname(php_sock->socket, sa, &salen) != 0) {
+	if (getsockname(php_sock->bsd_socket, sa, &salen) != 0) {
 		php_error(E_WARNING, "unable to retrieve socket name, %i", errno);
 		RETURN_FALSE;
 	} else {
@@ -881,7 +878,7 @@ PHP_FUNCTION(socket_getpeername)
 
 	sa = (struct sockaddr *) &sa_storage;
 
-	if (getpeername(php_sock->socket, sa, &salen) < 0) {
+	if (getpeername(php_sock->bsd_socket, sa, &salen) < 0) {
 		php_error(E_WARNING, "Unable to retrieve peername [%d]: %s", errno, strerror(errno));
 		RETURN_FALSE;
 	}
@@ -943,7 +940,7 @@ PHP_FUNCTION(socket_create)
 		Z_LVAL_PP(arg2) = SOCK_STREAM;
 	}
 	
-	php_sock->socket = socket(Z_LVAL_PP(arg1), Z_LVAL_PP(arg2), Z_LVAL_PP(arg3));
+	php_sock->bsd_socket = socket(Z_LVAL_PP(arg1), Z_LVAL_PP(arg2), Z_LVAL_PP(arg3));
 	php_sock->type = Z_LVAL_PP(arg1);
 	if (IS_INVALID_SOCKET(php_sock)) {
 		RETURN_FALSE;
@@ -1002,12 +999,12 @@ PHP_FUNCTION(socket_connect)
 			q[3] = host_struct->h_addr_list[0][3];
 		}
 	
-		retval = connect(php_sock->socket, (struct sockaddr *)&sin, sizeof(struct sockaddr_in));
+		retval = connect(php_sock->bsd_socket, (struct sockaddr *)&sin, sizeof(struct sockaddr_in));
 		break;
 	case AF_UNIX:
 		s_un.sun_family = AF_UNIX;
 		snprintf(s_un.sun_path, 108, "%s", Z_STRVAL_PP(arg2));
-		retval = connect(php_sock->socket, (struct sockaddr *) &s_un, SUN_LEN(&s_un));
+		retval = connect(php_sock->bsd_socket, (struct sockaddr *) &s_un, SUN_LEN(&s_un));
 		break;
 	default:
 		RETURN_FALSE;
@@ -1094,7 +1091,7 @@ PHP_FUNCTION(socket_bind)
 		memset(sa, 0, sizeof(sa_storage));
 		sa->sun_family = AF_UNIX;
 		snprintf(sa->sun_path, 108, "%s", Z_STRVAL_PP(arg2));
-		retval = bind(php_sock->socket, (struct sockaddr *) sa, SUN_LEN(sa));
+		retval = bind(php_sock->bsd_socket, (struct sockaddr *) sa, SUN_LEN(sa));
 	} else if (php_sock->type == AF_INET) {
 		struct sockaddr_in sa;
 		struct hostent *hp;
@@ -1111,7 +1108,7 @@ PHP_FUNCTION(socket_bind)
 		memcpy((char *)&sa.sin_addr, hp->h_addr, hp->h_length);
 		sa.sin_family	= hp->h_addrtype;
 		sa.sin_port		= htons((unsigned short)Z_LVAL_PP(arg3));
-		retval = bind(php_sock->socket, (struct sockaddr *)&sa, sizeof(sa));
+		retval = bind(php_sock->bsd_socket, (struct sockaddr *)&sa, sizeof(sa));
 
 	} else {
 		php_error(E_WARNING,"the specified port is not supported");
@@ -1317,7 +1314,7 @@ PHP_FUNCTION(socket_readv)
 	ZEND_FETCH_RESOURCE(php_sock, php_socket*, arg1, -1, "Socket", le_socket);
 	ZEND_FETCH_RESOURCE(vector, php_iovec_t *, arg2, -1, "IO vector table", le_iov);
 
-	if (readv(php_sock->socket, vector->iov_array, vector->count) != 0) {
+	if (readv(php_sock->bsd_socket, vector->iov_array, vector->count) != 0) {
 		php_error(E_WARNING, "unable to read, %i", errno);
 		RETURN_FALSE;
 	}
@@ -1341,7 +1338,7 @@ PHP_FUNCTION(socket_writev)
 	ZEND_FETCH_RESOURCE(php_sock, php_socket*, arg1, -1, "Socket", le_socket);
 	ZEND_FETCH_RESOURCE(vector, php_iovec_t *, arg2, -1, "IO vector table", le_iov);
 
-	if (writev(php_sock->socket, vector->iov_array, vector->count) != 0) {
+	if (writev(php_sock->bsd_socket, vector->iov_array, vector->count) != 0) {
 		php_error(E_WARNING, "unable to write, %i", errno);
 		RETURN_FALSE;
 	}
@@ -1370,7 +1367,7 @@ PHP_FUNCTION(socket_recv)
 	recv_buf = emalloc(Z_LVAL_PP(arg2) + 2);
 	memset(recv_buf, 0, Z_LVAL_PP(arg2) + 2);
 
-	retval = recv(php_sock->socket, recv_buf, Z_LVAL_PP(arg2), Z_LVAL_PP(arg3));
+	retval = recv(php_sock->bsd_socket, recv_buf, Z_LVAL_PP(arg2), Z_LVAL_PP(arg3));
 
 	if (retval == 0) {
 		efree(recv_buf);
@@ -1399,7 +1396,7 @@ PHP_FUNCTION(socket_send)
 	convert_to_long_ex(arg4);
 	convert_to_string_ex(arg2);
 
-	retval = send(php_sock->socket, Z_STRVAL_PP(arg2), (Z_STRLEN_PP(arg2) < Z_LVAL_PP(arg3) ? Z_STRLEN_PP(arg2) : Z_LVAL_PP(arg3)), Z_LVAL_PP(arg4));
+	retval = send(php_sock->bsd_socket, Z_STRVAL_PP(arg2), (Z_STRLEN_PP(arg2) < Z_LVAL_PP(arg3) ? Z_STRLEN_PP(arg2) : Z_LVAL_PP(arg3)), Z_LVAL_PP(arg4));
 	
 	RETURN_LONG(retval);
 }
@@ -1441,7 +1438,7 @@ PHP_FUNCTION(socket_recvfrom)
 	case AF_UNIX:
 		slen = sizeof(s_un);
 		s_un.sun_family = AF_UNIX;
-		retval = recvfrom(php_sock->socket, recv_buf, Z_LVAL_PP(arg3), Z_LVAL_PP(arg4),
+		retval = recvfrom(php_sock->bsd_socket, recv_buf, Z_LVAL_PP(arg3), Z_LVAL_PP(arg4),
 			(struct sockaddr *)&s_un, (socklen_t *)&slen);
 			
 		if (retval < 0) {
@@ -1468,7 +1465,7 @@ PHP_FUNCTION(socket_recvfrom)
 			WRONG_PARAM_COUNT;
 		}
 				
-		retval = recvfrom(php_sock->socket, recv_buf, Z_LVAL_PP(arg3), Z_LVAL_PP(arg4),
+		retval = recvfrom(php_sock->bsd_socket, recv_buf, Z_LVAL_PP(arg3), Z_LVAL_PP(arg4),
 			(struct sockaddr *)&sin, (socklen_t *)&slen);
 			
 		if (retval < 0) {
@@ -1527,14 +1524,14 @@ PHP_FUNCTION(socket_sendto)
 	}
 
 
-	switch ( php_sock->socket ) {
+	switch ( php_sock->bsd_socket ) {
 		case AF_UNIX:
 			memset(&s_un, 0, sizeof(s_un));
 			s_un.sun_family = AF_UNIX;
 			snprintf(s_un.sun_path, 108, "%s", Z_STRVAL_PP(arg5));
 
 			which = (Z_STRLEN_PP(arg2) > Z_LVAL_PP(arg3)) ? 1 : 0;
-			retval = sendto(php_sock->socket, Z_STRVAL_PP(arg2), (which ? Z_LVAL_PP(arg3) : Z_STRLEN_PP(arg2)),
+			retval = sendto(php_sock->bsd_socket, Z_STRVAL_PP(arg2), (which ? Z_LVAL_PP(arg3) : Z_STRLEN_PP(arg2)),
 			Z_LVAL_PP(arg4), (struct sockaddr *) &s_un, SUN_LEN(&s_un));
 
 		case AF_INET:
@@ -1561,7 +1558,7 @@ PHP_FUNCTION(socket_sendto)
 
 			sin.sin_port = htons((unsigned short)Z_LVAL_PP(arg6));
 			which = (Z_STRLEN_PP(arg2) > Z_LVAL_PP(arg3)) ? 1 : 0;
-			retval = sendto(php_sock->socket, Z_STRVAL_PP(arg2), (which ? Z_LVAL_PP(arg3) : Z_STRLEN_PP(arg2)),
+			retval = sendto(php_sock->bsd_socket, Z_STRVAL_PP(arg2), (which ? Z_LVAL_PP(arg3) : Z_STRLEN_PP(arg2)),
 				Z_LVAL_PP(arg4), (struct sockaddr *) &sin, sizeof(sin));
 
 		default:
@@ -1606,7 +1603,7 @@ PHP_FUNCTION(socket_recvmsg)
 			break;
 	}
 
-	if (getsockname(php_sock->socket, sa, &salen) != 0) {
+	if (getsockname(php_sock->bsd_socket, sa, &salen) != 0) {
 		php_error(E_WARNING, "unable to recvms, %i", errno);
 		RETURN_FALSE;
 	}
@@ -1632,7 +1629,7 @@ PHP_FUNCTION(socket_recvmsg)
 			hdr.msg_controllen = ctl_buf ? Z_LVAL_PP(arg4) : 0;
 			hdr.msg_flags = 0;
 	
-			if (recvmsg(php_sock->socket, &hdr, Z_LVAL_PP(arg5)) != 0) {
+			if (recvmsg(php_sock->bsd_socket, &hdr, Z_LVAL_PP(arg5)) != 0) {
 				php_error(E_WARNING, "unable to recvmsg, %i", errno);
 				RETURN_FALSE;
 			} else {
@@ -1688,7 +1685,7 @@ PHP_FUNCTION(socket_recvmsg)
 
 		hdr.msg_flags = 0;
 	
-		if (recvmsg(php_sock->socket, &hdr, Z_LVAL_PP(arg5)) != 0) {
+		if (recvmsg(php_sock->bsd_socket, &hdr, Z_LVAL_PP(arg5)) != 0) {
 			php_error(E_WARNING, "unable to recvmsg, %i", errno);
 			RETURN_FALSE;
 		} else {
@@ -1750,7 +1747,7 @@ PHP_FUNCTION(socket_sendmsg)
 	}
 
 	salen = sizeof(sa);
-	if (getsockname(php_sock->socket, &sa, &salen) != 0) {
+	if (getsockname(php_sock->bsd_socket, &sa, &salen) != 0) {
 		php_error(E_WARNING, "unable to sendmsg, %i", errno);
 		RETURN_FALSE;
 	}
@@ -1781,7 +1778,7 @@ PHP_FUNCTION(socket_sendmsg)
 
 				sin->sin_port = htons((unsigned short)Z_LVAL_PP(arg5));
 				
-				if (sendmsg(php_sock->socket, &hdr, Z_LVAL_PP(arg3)) != 0) {
+				if (sendmsg(php_sock->bsd_socket, &hdr, Z_LVAL_PP(arg3)) != 0) {
 					php_error(E_WARNING, "unable to sendmsg, %i", errno);
 				}
 
@@ -1803,7 +1800,7 @@ PHP_FUNCTION(socket_sendmsg)
 
 				hdr.msg_namelen = SUN_LEN(s_un);
 
-				if (sendmsg(php_sock->socket, &hdr, Z_LVAL_PP(arg3)) != 0) {
+				if (sendmsg(php_sock->bsd_socket, &hdr, Z_LVAL_PP(arg3)) != 0) {
 					php_error(E_WARNING, "unable to sendmsg, %i", errno);
 					RETURN_FALSE;
 				}
@@ -1838,7 +1835,7 @@ PHP_FUNCTION(socket_getopt)
 	if (Z_LVAL_PP(arg2) == SO_LINGER) {
 		optlen = sizeof(struct linger);
 
-		if (getsockopt(php_sock->socket, Z_LVAL_PP(arg2), Z_LVAL_PP(arg3), (char*)&linger_val, &optlen) != 0) {
+		if (getsockopt(php_sock->bsd_socket, Z_LVAL_PP(arg2), Z_LVAL_PP(arg3), (char*)&linger_val, &optlen) != 0) {
 			php_error(E_WARNING, "unable to retrieve socket option, %i", errno);
 			RETURN_FALSE;
 		}
@@ -1852,7 +1849,7 @@ PHP_FUNCTION(socket_getopt)
 	} else {
 		optlen = sizeof(other_val);
 		
-		if (getsockopt(php_sock->socket, Z_LVAL_PP(arg2), Z_LVAL_PP(arg3), (char*)&other_val, &optlen) != 0) {
+		if (getsockopt(php_sock->bsd_socket, Z_LVAL_PP(arg2), Z_LVAL_PP(arg3), (char*)&other_val, &optlen) != 0) {
 			php_error(E_WARNING, "unable to retrieve socket option, %i", errno);
 			RETURN_FALSE;
 		}
@@ -1906,7 +1903,7 @@ PHP_FUNCTION(socket_setopt)
 
 		optlen = sizeof(lv);
 		
-		retval = setsockopt(php_sock->socket, Z_LVAL_PP(arg2), Z_LVAL_PP(arg3), (char*)&lv, optlen);
+		retval = setsockopt(php_sock->bsd_socket, Z_LVAL_PP(arg2), Z_LVAL_PP(arg3), (char*)&lv, optlen);
 
 	} else {
 		convert_to_long_ex(arg4);
@@ -1914,7 +1911,7 @@ PHP_FUNCTION(socket_setopt)
 		optlen = sizeof(ov);
 		ov = Z_LVAL_PP(arg3);
 
-		retval = setsockopt(php_sock->socket, Z_LVAL_PP(arg2), Z_LVAL_PP(arg3), (char*)&ov, optlen);
+		retval = setsockopt(php_sock->bsd_socket, Z_LVAL_PP(arg2), Z_LVAL_PP(arg3), (char*)&ov, optlen);
 	}
 
 	if (retval != 0) {
@@ -1970,8 +1967,8 @@ PHP_FUNCTION(socket_create_pair)
 	MAKE_STD_ZVAL(retval[0]);
 	MAKE_STD_ZVAL(retval[1]);
 
-	php_sock[0]->socket = fds_array[0];
-	php_sock[1]->socket = fds_array[1];
+	php_sock[0]->bsd_socket = fds_array[0];
+	php_sock[1]->bsd_socket = fds_array[1];
 	php_sock[0]->type = Z_LVAL_PP(arg1);
 	php_sock[1]->type = Z_LVAL_PP(arg1);	
 
@@ -2004,7 +2001,7 @@ PHP_FUNCTION(socket_shutdown)
 		how_shutdown = Z_LVAL_PP(arg2);
 	}
 	
-	if (shutdown(php_sock->socket, how_shutdown) != 0) {
+	if (shutdown(php_sock->bsd_socket, how_shutdown) != 0) {
 		php_error(E_WARNING, "unable to shutdown socket, %i", errno);
 		RETURN_FALSE;
 	}
