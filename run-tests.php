@@ -139,6 +139,9 @@ if (isset($argc) && $argc > 1) {
 				$test_results[$name] = run_test($php,$name);
 			}
 		}
+		if(getenv('REPORT_EXIT_STATUS') == 1 and ereg('FAILED( |$)', implode(' ', $test_results))) {
+			exit(1);
+		}
 		exit(0);
 	}
 }
@@ -248,8 +251,8 @@ Time taken      : " . sprintf("%4d seconds", $end_time - $start_time) . "
 define('PHP_QA_EMAIL', 'php-qa@lists.php.net');
 define('QA_SUBMISSION_PAGE', 'http://qa.php.net/buildtest-process.php');
 
-/* We got failed Tests, offer the user to send and e-mail to QA team */
-if ($sum_results['FAILED'] && !getenv("DONT_ASK_QA")) {
+/* We got failed Tests, offer the user to send and e-mail to QA team, unless NO_INTERACTION is set */
+if ($sum_results['FAILED'] && !getenv('NO_INTERACTION')) {
 	$fp = fopen("php://stdin", "r+");
 	fwrite($fp, "Some tests have failed, would you like to send the\nreport to PHP's QA team? [Yn]: ");
 	fflush($fp);
@@ -299,6 +302,10 @@ if ($sum_results['FAILED'] && !getenv("DONT_ASK_QA")) {
 	}
 }
  
+if(getenv('REPORT_EXIT_STATUS') == 1 and $sum_results['FAILED']) {
+	exit(1);
+}
+
 //
 // Send Email to QA Team
 //
