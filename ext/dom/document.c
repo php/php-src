@@ -27,6 +27,10 @@
 #if HAVE_LIBXML && HAVE_DOM
 #include "php_dom.h"
 #include <libxml/SAX.h>
+#ifdef LIBXML_SCHEMAS_ENABLED
+#include <libxml/relaxng.h>
+#include <libxml/xmlschemas.h>
+#endif
 
 typedef struct _idsIterator idsIterator;
 struct _idsIterator {
@@ -83,6 +87,12 @@ zend_function_entry php_dom_document_class_functions[] = {
 	PHP_FALIAS(saveHTML, dom_document_save_html, NULL)
 	PHP_FALIAS(saveHTMLFile, dom_document_save_html_file, NULL)
 #endif  /* defined(LIBXML_HTML_ENABLED) */
+#if defined(LIBXML_SCHEMAS_ENABLED)
+	PHP_FALIAS(schemaValidate, dom_document_schema_validate_file, NULL)
+	PHP_FALIAS(schemaValidateSource, dom_document_schema_validate_xml, NULL)
+	PHP_FALIAS(relaxNGValidate, dom_document_relaxNG_validate_file, NULL)
+	PHP_FALIAS(relaxNGValidateSource, dom_document_relaxNG_validate_xml, NULL)
+#endif
 	{NULL, NULL, NULL}
 };
 
@@ -1204,6 +1214,56 @@ PHP_FUNCTION(dom_document_document)
 }
 /* }}} end dom_document_document */
 
+char *_dom_get_valid_file_path(char *source, char *resolved_path, int resolved_path_len  TSRMLS_DC) {
+	xmlURI *uri;
+	xmlChar *escsource;
+	char *file_dest;
+	int isFileUri = 0;
+
+	uri = xmlCreateURI();
+	escsource = xmlURIEscapeStr(source, ":");
+	xmlParseURIReference(uri, escsource);
+	xmlFree(escsource);
+
+	if (uri->scheme != NULL) {
+		/* absolute file uris - libxml only supports localhost or empty host */
+		if (strncasecmp(source, "file:///",8) == 0) {
+			isFileUri = 1;
+#ifdef PHP_WIN32
+			source += 8;
+#else
+			source += 7;
+#endif
+		} else if (strncasecmp(source, "file://localhost/",17) == 0) {
+			isFileUri = 1;
+#ifdef PHP_WIN32
+			source += 17;
+#else
+			source += 16;
+#endif
+		}
+	}
+
+	file_dest = source;
+
+	if ((uri->scheme == NULL || isFileUri)) {
+		/* XXX possible buffer overflow if VCWD_REALPATH does not know size of resolved_path */
+		if (! VCWD_REALPATH(source, resolved_path)) {
+			expand_filepath(source, resolved_path TSRMLS_CC);
+		}
+		file_dest = resolved_path;
+	}
+
+	xmlFreeURI(uri);
+
+	if ((PG(safe_mode) && (!php_checkuid(file_dest, NULL, CHECKUID_CHECK_FILE_AND_DIR))) || php_check_open_basedir(file_dest TSRMLS_CC)) {
+		return NULL;
+	} else {
+		return file_dest;
+	}
+}
+
+
 /* {{{ */
 static xmlDocPtr dom_document_parser(zval *id, int mode, char *source TSRMLS_DC) {
     xmlDocPtr ret;
@@ -1235,50 +1295,8 @@ static xmlDocPtr dom_document_parser(zval *id, int mode, char *source TSRMLS_DC)
 	keep_blanks = xmlKeepBlanksDefault(keep_blanks);
 
 	if (mode == DOM_LOAD_FILE) {
-
-		xmlURI *uri;
-		xmlChar *escsource;
-		char *file_dest;
-		int isFileUri = 0;
-
-		uri = xmlCreateURI();
-		escsource = xmlURIEscapeStr(source, ":");
-		xmlParseURIReference(uri, escsource);
-		xmlFree(escsource);
-
-		if (uri->scheme != NULL) {
-			/* absolute file uris - libxml only supports localhost or empty host */
-			if (strncasecmp(source, "file:///",8) == 0) {
-				isFileUri = 1;
-#ifdef PHP_WIN32
-				source += 8;
-#else
-				source += 7;
-#endif
-			} else if (strncasecmp(source, "file://localhost/",17) == 0) {
-				isFileUri = 1;
-#ifdef PHP_WIN32
-				source += 17;
-#else
-				source += 16;
-#endif
-			}
-		}
-
-		file_dest = source;
-
-		if ((uri->scheme == NULL || isFileUri)) {
-			if (! VCWD_REALPATH(source, resolved_path)) {
-				expand_filepath(source, resolved_path TSRMLS_CC);
-			}
-			file_dest = resolved_path;
-		}
-
-		xmlFreeURI(uri);
-
-		if ((PG(safe_mode) && (!php_checkuid(file_dest, NULL, CHECKUID_CHECK_FILE_AND_DIR))) || php_check_open_basedir(file_dest TSRMLS_CC)) {
-			ctxt = NULL;
-		} else {
+		char *file_dest = _dom_get_valid_file_path(source, resolved_path, MAXPATHLEN  TSRMLS_CC);
+		if (file_dest) {
 			ctxt = xmlCreateFileParserCtxt(file_dest);
 		}
 	} else {
@@ -1293,11 +1311,11 @@ static xmlDocPtr dom_document_parser(zval *id, int mode, char *source TSRMLS_DC)
 
 	/* If loading from memory, we need to set the base directory for the document */
 	if (mode != DOM_LOAD_FILE) {
-		#if HAVE_GETCWD
-			directory = VCWD_GETCWD(resolved_path, MAXPATHLEN);
-		#elif HAVE_GETWD
-			directory = VCWD_GETWD(resolved_path);
-		#endif
+#if HAVE_GETCWD
+		directory = VCWD_GETCWD(resolved_path, MAXPATHLEN);
+#elif HAVE_GETWD
+		directory = VCWD_GETWD(resolved_path);
+#endif
 		if (directory) {
 			if(ctxt->directory != NULL) {
 				xmlFree((char *) ctxt->directory);
@@ -1531,6 +1549,173 @@ PHP_FUNCTION(dom_document_validate)
 }
 /* }}} end dom_document_validate */
 
+#if defined(LIBXML_SCHEMAS_ENABLED)
+static void
+_dom_document_schema_validate(INTERNAL_FUNCTION_PARAMETERS, int type)
+{
+	zval *id;
+	xmlDoc *docp;
+	dom_object *intern;
+	char *source = NULL, *valid_file = NULL, *directory = NULL;
+	int source_len = 0;
+	xmlSchemaParserCtxtPtr  parser;
+	xmlSchemaPtr            sptr;
+	xmlSchemaValidCtxtPtr   vptr;
+	int                     is_valid;
+	char resolved_path[MAXPATHLEN + 1];
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &source, &source_len) == FAILURE) {
+		return;
+	}
+
+	DOM_GET_THIS_OBJ(docp, id, xmlDocPtr, intern);
+
+	switch (type) {
+	case DOM_LOAD_FILE:
+		valid_file = _dom_get_valid_file_path(source, resolved_path, MAXPATHLEN  TSRMLS_CC);
+		if (!valid_file) {
+			php_error(E_WARNING, "Invalid Schema file source");
+			RETURN_FALSE;
+		}
+		parser = xmlSchemaNewParserCtxt(valid_file);
+		break;
+	case DOM_LOAD_STRING:
+		parser = xmlSchemaNewMemParserCtxt(source, source_len);
+		/* If loading from memory, we need to set the base directory for the document 
+		   but it is not apparent how to do that for schema's */
+		break;
+	}
+
+	xmlSchemaSetParserErrors(parser,
+		(xmlSchemaValidityErrorFunc) php_dom_validate_error,
+		(xmlSchemaValidityWarningFunc) php_dom_validate_error,
+		parser);
+	sptr = xmlSchemaParse(parser);
+	xmlSchemaFreeParserCtxt(parser);
+	if (!sptr) {
+		php_error(E_WARNING, "Invalid Schema");
+		RETURN_FALSE;
+	}
+
+	docp = (xmlDocPtr) dom_object_get_node(intern);
+
+	vptr = xmlSchemaNewValidCtxt(sptr);
+	if (!vptr) {
+		xmlSchemaFree(sptr);
+		php_error(E_ERROR, "Invalid Schema Validation Context");
+		RETURN_FALSE;
+	}
+
+	xmlSchemaSetValidErrors(vptr, php_dom_validate_error, php_dom_validate_error, vptr);
+	is_valid = xmlSchemaValidateDoc(vptr, docp);
+	xmlSchemaFree(sptr);
+	xmlSchemaFreeValidCtxt(vptr);
+
+	if (is_valid == 0) {
+		RETURN_TRUE;
+	} else {
+		RETURN_FALSE;
+	}
+}
+
+/* {{{ proto boolean domnode _dom_document_schema_validate(string filename); */
+PHP_FUNCTION(dom_document_schema_validate_file)
+{
+	_dom_document_schema_validate(INTERNAL_FUNCTION_PARAM_PASSTHRU, DOM_LOAD_FILE);
+}
+/* }}} end _dom_document_schema_validate */
+
+/* {{{ proto boolean domnode _dom_document_schema_validate(string source); */
+PHP_FUNCTION(dom_document_schema_validate_xml)
+{
+	_dom_document_schema_validate(INTERNAL_FUNCTION_PARAM_PASSTHRU, DOM_LOAD_STRING);
+}
+/* }}} end _dom_document_schema_validate */
+
+
+static void
+_dom_document_relaxNG_validate(INTERNAL_FUNCTION_PARAMETERS, int type)
+{
+	zval *id;
+	xmlDoc *docp;
+	dom_object *intern;
+	char *source = NULL, *valid_file = NULL, *directory = NULL;
+	int source_len = 0;
+	xmlRelaxNGParserCtxtPtr parser;
+	xmlRelaxNGPtr           sptr;
+	xmlRelaxNGValidCtxtPtr  vptr;
+	int                     is_valid;
+	char resolved_path[MAXPATHLEN + 1];
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &source, &source_len) == FAILURE) {
+		return;
+	}
+
+	DOM_GET_THIS_OBJ(docp, id, xmlDocPtr, intern);
+
+	switch (type) {
+	case DOM_LOAD_FILE:
+		valid_file = _dom_get_valid_file_path(source, resolved_path, MAXPATHLEN  TSRMLS_CC);
+		if (!valid_file) {
+			php_error(E_WARNING, "Invalid RelaxNG file source");
+			RETURN_FALSE;
+		}
+		parser = xmlRelaxNGNewParserCtxt(valid_file);
+		break;
+	case DOM_LOAD_STRING:
+		parser = xmlRelaxNGNewMemParserCtxt(source, source_len);
+		/* If loading from memory, we need to set the base directory for the document 
+		   but it is not apparent how to do that for schema's */
+		break;
+	}
+
+	xmlRelaxNGSetParserErrors(parser,
+		(xmlRelaxNGValidityErrorFunc) php_dom_validate_error,
+		(xmlRelaxNGValidityWarningFunc) php_dom_validate_error,
+		parser);
+	sptr = xmlRelaxNGParse(parser);
+	xmlRelaxNGFreeParserCtxt(parser);
+	if (!sptr) {
+		php_error(E_WARNING, "Invalid RelaxNG");
+		RETURN_FALSE;
+	}
+
+	docp = (xmlDocPtr) dom_object_get_node(intern);
+
+	vptr = xmlRelaxNGNewValidCtxt(sptr);
+	if (!vptr) {
+		xmlRelaxNGFree(sptr);
+		php_error(E_ERROR, "Invalid RelaxNG Validation Context");
+		RETURN_FALSE;
+	}
+
+	xmlRelaxNGSetValidErrors(vptr, php_dom_validate_error, php_dom_validate_error, vptr);
+	is_valid = xmlRelaxNGValidateDoc(vptr, docp);
+	xmlRelaxNGFree(sptr);
+	xmlRelaxNGFreeValidCtxt(vptr);
+
+	if (is_valid == 0) {
+		RETURN_TRUE;
+	} else {
+		RETURN_FALSE;
+	}
+}
+
+/* {{{ proto boolean domnode dom_document_relaxNG_validate_file(string filename); */
+PHP_FUNCTION(dom_document_relaxNG_validate_file)
+{
+	_dom_document_relaxNG_validate(INTERNAL_FUNCTION_PARAM_PASSTHRU, DOM_LOAD_FILE);
+}
+/* }}} end dom_document_relaxNG_validate_file */
+
+/* {{{ proto boolean domnode dom_document_relaxNG_validate_xml(string source); */
+PHP_FUNCTION(dom_document_relaxNG_validate_xml)
+{
+	_dom_document_relaxNG_validate(INTERNAL_FUNCTION_PARAM_PASSTHRU, DOM_LOAD_STRING);
+}
+/* }}} end dom_document_relaxNG_validate_xml */
+
+#endif
 
 #if defined(LIBXML_HTML_ENABLED)
 

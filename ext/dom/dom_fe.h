@@ -134,6 +134,13 @@ PHP_FUNCTION(dom_document_save_html);
 PHP_FUNCTION(dom_document_save_html_file);
 #endif  /* defined(LIBXML_HTML_ENABLED) */
 
+#if defined(LIBXML_SCHEMAS_ENABLED)
+PHP_FUNCTION(dom_document_schema_validate_file);
+PHP_FUNCTION(dom_document_schema_validate_xml);
+PHP_FUNCTION(dom_document_relaxNG_validate_file);
+PHP_FUNCTION(dom_document_relaxNG_validate_xml);
+#endif
+
 /* domnode methods */
 PHP_FUNCTION(dom_node_insert_before);
 PHP_FUNCTION(dom_node_replace_child);

@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"> 
+
+    <xsd:element       name="shipOrder" type="order"/> 
+    
+    <xsd:complexType   name="order">
+        <xsd:all>
+            <xsd:element   name="shipTo"    type="shipAddress"/>
+            <xsd:element   name="items"     type="cdItems"/>
+        </xsd:all>
+    </xsd:complexType> 
+    
+    <xsd:complexType   name="shipAddress">
+        <xsd:all>
+            <xsd:element   name="name"      type="xsd:string"/>
+            <xsd:element   name="street"    type="xsd:string"/>
+            <xsd:element   name="address"   type="xsd:string"/>
+            <xsd:element   name="country"   type="xsd:string"/>
+        </xsd:all>
+    </xsd:complexType> 
+    
+    <xsd:complexType   name="cdItems">
+        <xsd:sequence>
+            <xsd:element   name="item"      type="cdItem"  maxOccurs="unbounded" minOccurs="1"/>
+        </xsd:sequence>
+    </xsd:complexType> 
+    
+    <xsd:complexType   name="cdItem">
+        <xsd:all>
+            <xsd:element   name="title"     type="xsd:string"/>
+            <xsd:element   name="quantity"  type="xsd:positiveInteger"/>
+            <xsd:element   name="price"     type="xsd:decimal"/>
+        </xsd:all>
+    </xsd:complexType> 
+
+</xsd:schema>
