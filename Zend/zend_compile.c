@@ -700,13 +700,13 @@ void do_begin_function_call(znode *function_name CLS_DC)
 		case ZEND_USER_FUNCTION:	{
 				zend_op_array *op_array = (zend_op_array *) function;
 				
-				zend_stack_push(&CG(function_call_stack), (void *) &op_array->arg_types, sizeof(unsigned char *));
+				zend_stack_push(&CG(function_call_stack), (void *) &op_array, sizeof(zend_function *));
 			}
 			break;
 		case ZEND_INTERNAL_FUNCTION: {
 				zend_internal_function *internal_function = (zend_internal_function *) function;
 				
-				zend_stack_push(&CG(function_call_stack), (void *) &internal_function->arg_types, sizeof(unsigned char *));
+				zend_stack_push(&CG(function_call_stack), (void *) &internal_function, sizeof(zend_function *));
 			}
 			break;
 	}
@@ -732,7 +732,7 @@ void do_begin_dynamic_function_call(znode *function_name CLS_DC)
 		opline->extended_value = 0;
 		SET_UNUSED(opline->op1);
 	}
-	zend_stack_push(&CG(function_call_stack), (void *) &ptr, sizeof(unsigned char *));
+	zend_stack_push(&CG(function_call_stack), (void *) &ptr, sizeof(zend_function *));
 }
 
 
@@ -747,7 +747,7 @@ void do_begin_class_member_function_call(znode *class_name, znode *function_name
 	opline->op2 = *function_name;
 	opline->extended_value = ZEND_MEMBER_FUNC_CALL;
 	zval_copy_ctor(&opline->op2.u.constant);
-	zend_stack_push(&CG(function_call_stack), (void *) &ptr, sizeof(unsigned char *));
+	zend_stack_push(&CG(function_call_stack), (void *) &ptr, sizeof(zend_function *));
 }
 
 
@@ -771,11 +771,17 @@ void do_end_function_call(znode *function_name, znode *result, znode *argument_l
 void do_pass_param(znode *param, int op, int offset CLS_DC)
 {
 	zend_op *opline = get_next_op(CG(active_op_array) CLS_CC);
-	unsigned char **arg_types_ptr, *arg_types;
+	unsigned char *arg_types;
 	int original_op=op;
+	zend_function **function_ptr_ptr, *function_ptr;
 
-	zend_stack_top(&CG(function_call_stack), (void **) &arg_types_ptr);
-	arg_types = *arg_types_ptr;
+	zend_stack_top(&CG(function_call_stack), (void **) &function_ptr_ptr);
+	function_ptr = *function_ptr_ptr;
+	if (function_ptr) {
+		arg_types = function_ptr->common.arg_types;
+	} else {
+		arg_types = NULL;
+	}
 
 	if (op == ZEND_SEND_VAL) {
 		switch (param->op_type) {
@@ -804,7 +810,11 @@ void do_pass_param(znode *param, int op, int offset CLS_DC)
 	if (original_op==ZEND_SEND_VAR) {
 		switch(op) {
 			case ZEND_SEND_VAR:
-				do_end_variable_parse(BP_VAR_R CLS_CC);
+				if (function_ptr) {
+					do_end_variable_parse(BP_VAR_R CLS_CC);
+				} else {
+					do_end_variable_parse(BP_VAR_W CLS_CC);
+				}
 				break;
 			case ZEND_SEND_REF:
 				do_end_variable_parse(BP_VAR_W CLS_CC);
