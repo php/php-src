@@ -212,11 +212,41 @@ ZEND_API int zend_get_constant(char *name, uint name_len, zval *result TSRMLS_DC
 	zend_constant *c;
 	char *lookup_name;
 	int retval = 1;
+	char *colon;
 
+	if((colon = memchr(name, ':', name_len)) && colon[1] == ':') {
+		/* class constant */
+		zend_class_entry **ce;
+		int class_name_len = colon-name;
+		int const_name_len = name_len - class_name_len - 2;
+		char *constant_name = colon+2;
+		zval **ret_constant;
+			
+		lookup_name = do_alloca(class_name_len+1);
+		zend_str_tolower_copy(lookup_name, name, class_name_len);
+		lookup_name[class_name_len] = '\0';
+		if(zend_lookup_class(lookup_name, class_name_len, &ce) != SUCCESS) {
+			retval = 0;
+		} else {
+			if (zend_hash_find(&((*ce)->constants_table), constant_name, const_name_len+1, (void **) &ret_constant) != SUCCESS) {
+				retval = 0;
+			}
+
+		}
+
+		if(retval) {
+			*result = **ret_constant;
+			zval_copy_ctor(result);
+		}
+		
+		free_alloca(lookup_name);
+		return retval;
+	}
+	
 	if (zend_hash_find(EG(zend_constants), name, name_len+1, (void **) &c) == FAILURE) {
 		lookup_name = do_alloca(name_len+1);
 		zend_str_tolower_copy(lookup_name, name, name_len);
-
+		
 		if (zend_hash_find(EG(zend_constants), lookup_name, name_len+1, (void **) &c)==SUCCESS) {
 			if ((c->flags & CONST_CS) && memcmp(c->name, name, name_len)!=0) {
 				retval=0;
