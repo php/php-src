@@ -1376,7 +1376,7 @@ PHPAPI PHP_FUNCTION(fgets)
 		ZVAL_STRINGL(return_value, buf, line_len, 0);
 		/* resize buffer if it's much larger than the result.
 		 * Only needed if the user requested a buffer size. */
-		if (argc > 1 && (int)Z_STRLEN_P(return_value) < len / 2) {
+		if (argc > 1 && Z_STRLEN_P(return_value) < len / 2) {
 			Z_STRVAL_P(return_value) = erealloc(buf, line_len + 1);
 		}
 	}
@@ -1559,7 +1559,7 @@ PHPAPI PHP_FUNCTION(fwrite)
 		}
 		convert_to_string_ex(arg2);
 		convert_to_long_ex(arg3);
-		num_bytes = MIN(Z_LVAL_PP(arg3), (int)Z_STRLEN_PP(arg2));
+		num_bytes = MIN(Z_LVAL_PP(arg3), Z_STRLEN_PP(arg2));
 		break;
 	default:
 		WRONG_PARAM_COUNT;

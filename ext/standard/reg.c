@@ -605,7 +605,7 @@ PHPAPI PHP_FUNCTION(sql_regcase)
 	
 	tmp = emalloc((Z_STRLEN_PP(string) * 4) + 1);
 	
-	for (i = j = 0; i < (int)Z_STRLEN_PP(string); i++) {
+	for (i = j = 0; i < Z_STRLEN_PP(string); i++) {
 		c = (unsigned char) Z_STRVAL_PP(string)[i];
 		if(isalpha(c)) {
 			tmp[j++] = '[';
