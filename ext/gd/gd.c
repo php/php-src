@@ -162,7 +162,6 @@ function_entry gd_functions[] = {
 	PHP_FE(imagepalettecopy,						NULL)
 	PHP_FE(imagecreatefromstring,					NULL)
 #endif
-	PHP_FE(imageistruecolor,						NULL)
 	PHP_FE(imagecolorclosest,						NULL)
 #if HAVE_COLORCLOSESTHWB
 	PHP_FE(imagecolorclosesthwb,					NULL)
@@ -183,6 +182,7 @@ function_entry gd_functions[] = {
 	PHP_FE(imagecreate,								NULL)
 #if HAVE_LIBGD20
 	PHP_FE(imagecreatetruecolor,					NULL)
+	PHP_FE(imageistruecolor,					NULL)
 	PHP_FE(imagetruecolortopalette,					NULL)
 	PHP_FE(imagesetthickness,						NULL)
 	PHP_FE(imagefilledarc,							NULL)
@@ -773,6 +773,23 @@ PHP_FUNCTION(imagecreatetruecolor)
 	im = gdImageCreateTrueColor(Z_LVAL_PP(x_size), Z_LVAL_PP(y_size));
 
 	ZEND_REGISTER_RESOURCE(return_value, im, le_gd);
+}
+/* }}} */
+
+/* {{{ proto int imageistruecolor(int im)
+   return true if the image uses truecolor */
+PHP_FUNCTION(imageistruecolor)
+{
+	zval **IM;
+	gdImagePtr im;
+
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &IM) == FAILURE) {
+		ZEND_WRONG_PARAM_COUNT();
+	}
+	
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
+
+	RETURN_BOOL(im->trueColor);
 }
 /* }}} */
 
@@ -1755,22 +1772,6 @@ PHP_FUNCTION(imagedestroy)
 }
 /* }}} */
 
-/* {{{ proto int imagecolorallocate(int im, int red, int green, int blue)
-   Allocate a color for an image */
-PHP_FUNCTION(imageistruecolor)
-{
-	zval **IM;
-	gdImagePtr im;
-
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &IM) == FAILURE) {
-		ZEND_WRONG_PARAM_COUNT();
-	}
-	
-	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
-
-	RETURN_BOOL(im->trueColor);
-}
-/* }}} */
 
 /* {{{ proto int imagecolorallocate(int im, int red, int green, int blue)
    Allocate a color for an image */
