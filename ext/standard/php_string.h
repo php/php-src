@@ -80,6 +80,12 @@ PHP_FUNCTION(substr_count);
 PHP_FUNCTION(str_pad);
 PHP_FUNCTION(sscanf);
 
+
+#if defined(HAVE_LOCALECONV) && defined(ZTS)
+PHP_MINIT_FUNCTION(localeconv);
+PHP_MSHUTDOWN_FUNCTION(localeconv);
+#endif
+
 #define strnatcmp(a, b) \
 	strnatcmp_ex(a, strlen(a), b, strlen(b), 0)
 #define strnatcasecmp(a, b) \
