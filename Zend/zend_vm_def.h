@@ -3172,14 +3172,22 @@ ZEND_VM_HELPER_EX(zend_isset_isempty_dim_prop_obj_handler, VAR|UNUSED|CV, CONST|
 				result = Z_OBJ_HT_P(*container)->has_dimension(*container, offset, (opline->extended_value == ZEND_ISEMPTY) TSRMLS_CC);
 			}
 		} else if ((*container)->type == IS_STRING) { /* string offsets */
+			zval tmp_offset;
+
+			if (Z_TYPE_P(offset) != IS_LONG) {
+				tmp_offset = *offset;
+				zval_copy_ctor(&tmp_offset);
+				convert_to_long(&tmp_offset);
+				offset = &tmp_offset;
+			}
 			switch (opline->extended_value) {
 				case ZEND_ISSET:
-					if (offset->value.lval < Z_STRLEN_PP(container)) {
+					if (offset->value.lval >= 0 && offset->value.lval < Z_STRLEN_PP(container)) {
 						result = 1;
 					}
 					break;
 				case ZEND_ISEMPTY:
-					if (offset->value.lval < Z_STRLEN_PP(container) && Z_STRVAL_PP(container)[offset->value.lval] != '0') {
+					if (offset->value.lval >= 0 && offset->value.lval < Z_STRLEN_PP(container) && Z_STRVAL_PP(container)[offset->value.lval] != '0') {
 						result = 1;
 					}
 					break;

@@ -8988,14 +8988,22 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_VAR_CONST(int prop_dim, 
 				result = Z_OBJ_HT_P(*container)->has_dimension(*container, offset, (opline->extended_value == ZEND_ISEMPTY) TSRMLS_CC);
 			}
 		} else if ((*container)->type == IS_STRING) { /* string offsets */
+			zval tmp_offset;
+
+			if (Z_TYPE_P(offset) != IS_LONG) {
+				tmp_offset = *offset;
+				zval_copy_ctor(&tmp_offset);
+				convert_to_long(&tmp_offset);
+				offset = &tmp_offset;
+			}
 			switch (opline->extended_value) {
 				case ZEND_ISSET:
-					if (offset->value.lval < Z_STRLEN_PP(container)) {
+					if (offset->value.lval >= 0 && offset->value.lval < Z_STRLEN_PP(container)) {
 						result = 1;
 					}
 					break;
 				case ZEND_ISEMPTY:
-					if (offset->value.lval < Z_STRLEN_PP(container) && Z_STRVAL_PP(container)[offset->value.lval] != '0') {
+					if (offset->value.lval >= 0 && offset->value.lval < Z_STRLEN_PP(container) && Z_STRVAL_PP(container)[offset->value.lval] != '0') {
 						result = 1;
 					}
 					break;
@@ -10296,14 +10304,22 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_VAR_TMP(int prop_dim, ZE
 				result = Z_OBJ_HT_P(*container)->has_dimension(*container, offset, (opline->extended_value == ZEND_ISEMPTY) TSRMLS_CC);
 			}
 		} else if ((*container)->type == IS_STRING) { /* string offsets */
+			zval tmp_offset;
+
+			if (Z_TYPE_P(offset) != IS_LONG) {
+				tmp_offset = *offset;
+				zval_copy_ctor(&tmp_offset);
+				convert_to_long(&tmp_offset);
+				offset = &tmp_offset;
+			}
 			switch (opline->extended_value) {
 				case ZEND_ISSET:
-					if (offset->value.lval < Z_STRLEN_PP(container)) {
+					if (offset->value.lval >= 0 && offset->value.lval < Z_STRLEN_PP(container)) {
 						result = 1;
 					}
 					break;
 				case ZEND_ISEMPTY:
-					if (offset->value.lval < Z_STRLEN_PP(container) && Z_STRVAL_PP(container)[offset->value.lval] != '0') {
+					if (offset->value.lval >= 0 && offset->value.lval < Z_STRLEN_PP(container) && Z_STRVAL_PP(container)[offset->value.lval] != '0') {
 						result = 1;
 					}
 					break;
@@ -11625,14 +11641,22 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_VAR_VAR(int prop_dim, ZE
 				result = Z_OBJ_HT_P(*container)->has_dimension(*container, offset, (opline->extended_value == ZEND_ISEMPTY) TSRMLS_CC);
 			}
 		} else if ((*container)->type == IS_STRING) { /* string offsets */
+			zval tmp_offset;
+
+			if (Z_TYPE_P(offset) != IS_LONG) {
+				tmp_offset = *offset;
+				zval_copy_ctor(&tmp_offset);
+				convert_to_long(&tmp_offset);
+				offset = &tmp_offset;
+			}
 			switch (opline->extended_value) {
 				case ZEND_ISSET:
-					if (offset->value.lval < Z_STRLEN_PP(container)) {
+					if (offset->value.lval >= 0 && offset->value.lval < Z_STRLEN_PP(container)) {
 						result = 1;
 					}
 					break;
 				case ZEND_ISEMPTY:
-					if (offset->value.lval < Z_STRLEN_PP(container) && Z_STRVAL_PP(container)[offset->value.lval] != '0') {
+					if (offset->value.lval >= 0 && offset->value.lval < Z_STRLEN_PP(container) && Z_STRVAL_PP(container)[offset->value.lval] != '0') {
 						result = 1;
 					}
 					break;
@@ -13087,14 +13111,22 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_VAR_CV(int prop_dim, ZEN
 				result = Z_OBJ_HT_P(*container)->has_dimension(*container, offset, (opline->extended_value == ZEND_ISEMPTY) TSRMLS_CC);
 			}
 		} else if ((*container)->type == IS_STRING) { /* string offsets */
+			zval tmp_offset;
+
+			if (Z_TYPE_P(offset) != IS_LONG) {
+				tmp_offset = *offset;
+				zval_copy_ctor(&tmp_offset);
+				convert_to_long(&tmp_offset);
+				offset = &tmp_offset;
+			}
 			switch (opline->extended_value) {
 				case ZEND_ISSET:
-					if (offset->value.lval < Z_STRLEN_PP(container)) {
+					if (offset->value.lval >= 0 && offset->value.lval < Z_STRLEN_PP(container)) {
 						result = 1;
 					}
 					break;
 				case ZEND_ISEMPTY:
-					if (offset->value.lval < Z_STRLEN_PP(container) && Z_STRVAL_PP(container)[offset->value.lval] != '0') {
+					if (offset->value.lval >= 0 && offset->value.lval < Z_STRLEN_PP(container) && Z_STRVAL_PP(container)[offset->value.lval] != '0') {
 						result = 1;
 					}
 					break;
@@ -14146,14 +14178,22 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_UNUSED_CONST(int prop_di
 				result = Z_OBJ_HT_P(*container)->has_dimension(*container, offset, (opline->extended_value == ZEND_ISEMPTY) TSRMLS_CC);
 			}
 		} else if ((*container)->type == IS_STRING) { /* string offsets */
+			zval tmp_offset;
+
+			if (Z_TYPE_P(offset) != IS_LONG) {
+				tmp_offset = *offset;
+				zval_copy_ctor(&tmp_offset);
+				convert_to_long(&tmp_offset);
+				offset = &tmp_offset;
+			}
 			switch (opline->extended_value) {
 				case ZEND_ISSET:
-					if (offset->value.lval < Z_STRLEN_PP(container)) {
+					if (offset->value.lval >= 0 && offset->value.lval < Z_STRLEN_PP(container)) {
 						result = 1;
 					}
 					break;
 				case ZEND_ISEMPTY:
-					if (offset->value.lval < Z_STRLEN_PP(container) && Z_STRVAL_PP(container)[offset->value.lval] != '0') {
+					if (offset->value.lval >= 0 && offset->value.lval < Z_STRLEN_PP(container) && Z_STRVAL_PP(container)[offset->value.lval] != '0') {
 						result = 1;
 					}
 					break;
@@ -15088,14 +15128,22 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_UNUSED_TMP(int prop_dim,
 				result = Z_OBJ_HT_P(*container)->has_dimension(*container, offset, (opline->extended_value == ZEND_ISEMPTY) TSRMLS_CC);
 			}
 		} else if ((*container)->type == IS_STRING) { /* string offsets */
+			zval tmp_offset;
+
+			if (Z_TYPE_P(offset) != IS_LONG) {
+				tmp_offset = *offset;
+				zval_copy_ctor(&tmp_offset);
+				convert_to_long(&tmp_offset);
+				offset = &tmp_offset;
+			}
 			switch (opline->extended_value) {
 				case ZEND_ISSET:
-					if (offset->value.lval < Z_STRLEN_PP(container)) {
+					if (offset->value.lval >= 0 && offset->value.lval < Z_STRLEN_PP(container)) {
 						result = 1;
 					}
 					break;
 				case ZEND_ISEMPTY:
-					if (offset->value.lval < Z_STRLEN_PP(container) && Z_STRVAL_PP(container)[offset->value.lval] != '0') {
+					if (offset->value.lval >= 0 && offset->value.lval < Z_STRLEN_PP(container) && Z_STRVAL_PP(container)[offset->value.lval] != '0') {
 						result = 1;
 					}
 					break;
@@ -16030,14 +16078,22 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_UNUSED_VAR(int prop_dim,
 				result = Z_OBJ_HT_P(*container)->has_dimension(*container, offset, (opline->extended_value == ZEND_ISEMPTY) TSRMLS_CC);
 			}
 		} else if ((*container)->type == IS_STRING) { /* string offsets */
+			zval tmp_offset;
+
+			if (Z_TYPE_P(offset) != IS_LONG) {
+				tmp_offset = *offset;
+				zval_copy_ctor(&tmp_offset);
+				convert_to_long(&tmp_offset);
+				offset = &tmp_offset;
+			}
 			switch (opline->extended_value) {
 				case ZEND_ISSET:
-					if (offset->value.lval < Z_STRLEN_PP(container)) {
+					if (offset->value.lval >= 0 && offset->value.lval < Z_STRLEN_PP(container)) {
 						result = 1;
 					}
 					break;
 				case ZEND_ISEMPTY:
-					if (offset->value.lval < Z_STRLEN_PP(container) && Z_STRVAL_PP(container)[offset->value.lval] != '0') {
+					if (offset->value.lval >= 0 && offset->value.lval < Z_STRLEN_PP(container) && Z_STRVAL_PP(container)[offset->value.lval] != '0') {
 						result = 1;
 					}
 					break;
@@ -17094,14 +17150,22 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_UNUSED_CV(int prop_dim, 
 				result = Z_OBJ_HT_P(*container)->has_dimension(*container, offset, (opline->extended_value == ZEND_ISEMPTY) TSRMLS_CC);
 			}
 		} else if ((*container)->type == IS_STRING) { /* string offsets */
+			zval tmp_offset;
+
+			if (Z_TYPE_P(offset) != IS_LONG) {
+				tmp_offset = *offset;
+				zval_copy_ctor(&tmp_offset);
+				convert_to_long(&tmp_offset);
+				offset = &tmp_offset;
+			}
 			switch (opline->extended_value) {
 				case ZEND_ISSET:
-					if (offset->value.lval < Z_STRLEN_PP(container)) {
+					if (offset->value.lval >= 0 && offset->value.lval < Z_STRLEN_PP(container)) {
 						result = 1;
 					}
 					break;
 				case ZEND_ISEMPTY:
-					if (offset->value.lval < Z_STRLEN_PP(container) && Z_STRVAL_PP(container)[offset->value.lval] != '0') {
+					if (offset->value.lval >= 0 && offset->value.lval < Z_STRLEN_PP(container) && Z_STRVAL_PP(container)[offset->value.lval] != '0') {
 						result = 1;
 					}
 					break;
@@ -19570,14 +19634,22 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_CV_CONST(int prop_dim, Z
 				result = Z_OBJ_HT_P(*container)->has_dimension(*container, offset, (opline->extended_value == ZEND_ISEMPTY) TSRMLS_CC);
 			}
 		} else if ((*container)->type == IS_STRING) { /* string offsets */
+			zval tmp_offset;
+
+			if (Z_TYPE_P(offset) != IS_LONG) {
+				tmp_offset = *offset;
+				zval_copy_ctor(&tmp_offset);
+				convert_to_long(&tmp_offset);
+				offset = &tmp_offset;
+			}
 			switch (opline->extended_value) {
 				case ZEND_ISSET:
-					if (offset->value.lval < Z_STRLEN_PP(container)) {
+					if (offset->value.lval >= 0 && offset->value.lval < Z_STRLEN_PP(container)) {
 						result = 1;
 					}
 					break;
 				case ZEND_ISEMPTY:
-					if (offset->value.lval < Z_STRLEN_PP(container) && Z_STRVAL_PP(container)[offset->value.lval] != '0') {
+					if (offset->value.lval >= 0 && offset->value.lval < Z_STRLEN_PP(container) && Z_STRVAL_PP(container)[offset->value.lval] != '0') {
 						result = 1;
 					}
 					break;
@@ -20878,14 +20950,22 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_CV_TMP(int prop_dim, ZEN
 				result = Z_OBJ_HT_P(*container)->has_dimension(*container, offset, (opline->extended_value == ZEND_ISEMPTY) TSRMLS_CC);
 			}
 		} else if ((*container)->type == IS_STRING) { /* string offsets */
+			zval tmp_offset;
+
+			if (Z_TYPE_P(offset) != IS_LONG) {
+				tmp_offset = *offset;
+				zval_copy_ctor(&tmp_offset);
+				convert_to_long(&tmp_offset);
+				offset = &tmp_offset;
+			}
 			switch (opline->extended_value) {
 				case ZEND_ISSET:
-					if (offset->value.lval < Z_STRLEN_PP(container)) {
+					if (offset->value.lval >= 0 && offset->value.lval < Z_STRLEN_PP(container)) {
 						result = 1;
 					}
 					break;
 				case ZEND_ISEMPTY:
-					if (offset->value.lval < Z_STRLEN_PP(container) && Z_STRVAL_PP(container)[offset->value.lval] != '0') {
+					if (offset->value.lval >= 0 && offset->value.lval < Z_STRLEN_PP(container) && Z_STRVAL_PP(container)[offset->value.lval] != '0') {
 						result = 1;
 					}
 					break;
@@ -22207,14 +22287,22 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_CV_VAR(int prop_dim, ZEN
 				result = Z_OBJ_HT_P(*container)->has_dimension(*container, offset, (opline->extended_value == ZEND_ISEMPTY) TSRMLS_CC);
 			}
 		} else if ((*container)->type == IS_STRING) { /* string offsets */
+			zval tmp_offset;
+
+			if (Z_TYPE_P(offset) != IS_LONG) {
+				tmp_offset = *offset;
+				zval_copy_ctor(&tmp_offset);
+				convert_to_long(&tmp_offset);
+				offset = &tmp_offset;
+			}
 			switch (opline->extended_value) {
 				case ZEND_ISSET:
-					if (offset->value.lval < Z_STRLEN_PP(container)) {
+					if (offset->value.lval >= 0 && offset->value.lval < Z_STRLEN_PP(container)) {
 						result = 1;
 					}
 					break;
 				case ZEND_ISEMPTY:
-					if (offset->value.lval < Z_STRLEN_PP(container) && Z_STRVAL_PP(container)[offset->value.lval] != '0') {
+					if (offset->value.lval >= 0 && offset->value.lval < Z_STRLEN_PP(container) && Z_STRVAL_PP(container)[offset->value.lval] != '0') {
 						result = 1;
 					}
 					break;
@@ -23669,14 +23757,22 @@ static int zend_isset_isempty_dim_prop_obj_handler_SPEC_CV_CV(int prop_dim, ZEND
 				result = Z_OBJ_HT_P(*container)->has_dimension(*container, offset, (opline->extended_value == ZEND_ISEMPTY) TSRMLS_CC);
 			}
 		} else if ((*container)->type == IS_STRING) { /* string offsets */
+			zval tmp_offset;
+
+			if (Z_TYPE_P(offset) != IS_LONG) {
+				tmp_offset = *offset;
+				zval_copy_ctor(&tmp_offset);
+				convert_to_long(&tmp_offset);
+				offset = &tmp_offset;
+			}
 			switch (opline->extended_value) {
 				case ZEND_ISSET:
-					if (offset->value.lval < Z_STRLEN_PP(container)) {
+					if (offset->value.lval >= 0 && offset->value.lval < Z_STRLEN_PP(container)) {
 						result = 1;
 					}
 					break;
 				case ZEND_ISEMPTY:
-					if (offset->value.lval < Z_STRLEN_PP(container) && Z_STRVAL_PP(container)[offset->value.lval] != '0') {
+					if (offset->value.lval >= 0 && offset->value.lval < Z_STRLEN_PP(container) && Z_STRVAL_PP(container)[offset->value.lval] != '0') {
 						result = 1;
 					}
 					break;
@@ -30726,14 +30822,22 @@ static int zend_isset_isempty_dim_prop_obj_handler(int prop_dim, ZEND_OPCODE_HAN
 				result = Z_OBJ_HT_P(*container)->has_dimension(*container, offset, (opline->extended_value == ZEND_ISEMPTY) TSRMLS_CC);
 			}
 		} else if ((*container)->type == IS_STRING) { /* string offsets */
+			zval tmp_offset;
+
+			if (Z_TYPE_P(offset) != IS_LONG) {
+				tmp_offset = *offset;
+				zval_copy_ctor(&tmp_offset);
+				convert_to_long(&tmp_offset);
+				offset = &tmp_offset;
+			}
 			switch (opline->extended_value) {
 				case ZEND_ISSET:
-					if (offset->value.lval < Z_STRLEN_PP(container)) {
+					if (offset->value.lval >= 0 && offset->value.lval < Z_STRLEN_PP(container)) {
 						result = 1;
 					}
 					break;
 				case ZEND_ISEMPTY:
-					if (offset->value.lval < Z_STRLEN_PP(container) && Z_STRVAL_PP(container)[offset->value.lval] != '0') {
+					if (offset->value.lval >= 0 && offset->value.lval < Z_STRLEN_PP(container) && Z_STRVAL_PP(container)[offset->value.lval] != '0') {
 						result = 1;
 					}
 					break;
