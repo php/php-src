@@ -693,6 +693,9 @@ class PEAR_Common extends PEAR
         }
         $tmpdir = System::mkTemp('-d pear');
         $this->addTempFile($tmpdir);
+        if (!is_array($xml)) {
+            $xml = array($xml);
+        }
         if (!$xml || !$tar->extractList($xml, $tmpdir)) {
             return $this->raiseError('could not extract the package.xml file');
         }
