@@ -793,9 +793,7 @@ int php_module_startup(sapi_module_struct *sf)
 #endif
 
 	global_lock_init();
-	SG(server_context) = NULL;
-	SG(request_info).request_method = NULL;
-	SG(request_info).auth_user = SG(request_info).auth_password = NULL;
+	sapi_initialize_empty_request(SLS_C);
 	sapi_activate(SLS_C);
 
 	if (module_initialized) {
@@ -859,7 +857,7 @@ int php_module_startup(sapi_module_struct *sf)
 	zuv.allow_call_time_pass_reference = PG(allow_call_time_pass_reference);
 	zuv.import_use_extension = ".php";
 	zend_set_utility_values(&zuv);
-	php_startup_SAPI_content_types();
+	php_startup_sapi_content_types();
 
     REGISTER_MAIN_STRINGL_CONSTANT("PHP_VERSION", PHP_VERSION, sizeof(PHP_VERSION)-1, CONST_PERSISTENT | CONST_CS);
     REGISTER_MAIN_STRINGL_CONSTANT("PHP_OS", php_os, strlen(php_os), CONST_PERSISTENT | CONST_CS);

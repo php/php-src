@@ -38,10 +38,7 @@
 
 SAPI_POST_READER_FUNC(sapi_read_standard_form_data);
 
-#define DEFAULT_POST_CONTENT_TYPE "application/x-www-form-urlencoded"
-
-static sapi_post_content_type_reader supported_post_content_types[] = {
-	{ DEFAULT_POST_CONTENT_TYPE,	sizeof(DEFAULT_POST_CONTENT_TYPE)-1,	sapi_read_standard_form_data },
+static sapi_post_entry supported_post_entries[] = {
 #if HAVE_FDFLIB
 	{ "application/vnd.fdf",	sizeof("application/vnd.fdf")-1,	sapi_read_standard_form_data },
 #endif
@@ -71,7 +68,7 @@ SAPI_API void sapi_startup(sapi_module_struct *sf)
 	sapi_module = *sf;
 	zend_hash_init(&known_post_content_types, 5, NULL, NULL, 1);
 
-	sapi_register_post_readers(supported_post_content_types);
+	sapi_register_post_entries(supported_post_entries);
 
 #ifdef ZTS
 	sapi_globals_id = ts_allocate_id(sizeof(sapi_globals_struct), NULL, NULL);
@@ -95,14 +92,24 @@ SAPI_API void sapi_free_header(sapi_header_struct *sapi_header)
 }
 
 
+SAPI_API void sapi_handle_post(void *arg SLS_DC)
+{
+	if (SG(request_info).post_entry) {
+		SG(request_info).post_entry->post_handler(SG(request_info).content_type_dup, arg SLS_CC);
+		efree(SG(request_info).post_data);
+		efree(SG(request_info).content_type_dup);
+		SG(request_info).content_type_dup = NULL;
+	}
+}
+
 static void sapi_read_post_data(SLS_D)
 {
-	sapi_post_content_type_reader *post_content_type_reader;
+	sapi_post_entry *post_entry;
 	uint content_type_length = strlen(SG(request_info).content_type);
 	char *content_type = estrndup(SG(request_info).content_type, content_type_length);
 	char *p;
 	char oldchar=0;
-	void (*post_reader_func)(char *content_type_dup SLS_DC);
+	void (*post_reader_func)(SLS_D);
 
 
 	/* dedicated implementation for increased performance:
@@ -124,20 +131,22 @@ static void sapi_read_post_data(SLS_D)
 		}
 	}
 
-	if (zend_hash_find(&known_post_content_types, content_type, content_type_length+1, (void **) &post_content_type_reader)==SUCCESS) {
-		post_reader_func = post_content_type_reader->post_reader;
+	if (zend_hash_find(&known_post_content_types, content_type, content_type_length+1, (void **) &post_entry)==SUCCESS) {
+		SG(request_info).post_entry = post_entry;
+		post_reader_func = post_entry->post_reader;
 	} else {
 		if (!sapi_module.default_post_reader) {
 			sapi_module.sapi_error(E_COMPILE_ERROR, "Unsupported content type:  '%s'", content_type);
 			return;
 		}
+		SG(request_info).post_entry = NULL;
 		post_reader_func = sapi_module.default_post_reader;
 	}
 	if (oldchar) {
 		*(p-1) = oldchar;
 	}
-	post_reader_func(content_type SLS_CC);
-	efree(content_type);
+	post_reader_func(SLS_C);
+	SG(request_info).content_type_dup = content_type;
 }
 
 
@@ -213,6 +222,9 @@ SAPI_API void sapi_deactivate(SLS_D)
 	if (SG(request_info).auth_password) {
 		efree(SG(request_info).auth_password);
 	}
+	if (SG(request_info).content_type_dup) {
+		efree(SG(request_info).content_type_dup);
+	}
 	if (SG(request_info).current_user) {
 		efree(SG(request_info).current_user);
 	}
@@ -220,6 +232,16 @@ SAPI_API void sapi_deactivate(SLS_D)
 		sapi_module.deactivate(SLS_C);
 	}
 }
+
+
+SAPI_API void sapi_initialize_empty_request(SLS_D)
+{
+	SG(server_context) = NULL;
+	SG(request_info).request_method = NULL;
+	SG(request_info).auth_user = SG(request_info).auth_password = NULL;
+	SG(request_info).content_type_dup = NULL;
+}
+
 
 static int sapi_extract_response_code(const char *header_line)
 {
@@ -351,12 +373,12 @@ SAPI_API int sapi_send_headers()
 }
 
 
-SAPI_API int sapi_register_post_readers(sapi_post_content_type_reader *post_content_type_readers)
+SAPI_API int sapi_register_post_entries(sapi_post_entry *post_entries)
 {
-	sapi_post_content_type_reader *p=post_content_type_readers;
+	sapi_post_entry *p=post_entries;
 
 	while (p->content_type) {
-		if (sapi_register_post_reader(p)==FAILURE) {
+		if (sapi_register_post_entry(p)==FAILURE) {
 			return FAILURE;
 		}
 		p++;
@@ -365,19 +387,19 @@ SAPI_API int sapi_register_post_readers(sapi_post_content_type_reader *post_cont
 }
 
 
-SAPI_API int sapi_register_post_reader(sapi_post_content_type_reader *post_content_type_reader)
+SAPI_API int sapi_register_post_entry(sapi_post_entry *post_entry)
 {
-	return zend_hash_add(&known_post_content_types, post_content_type_reader->content_type, post_content_type_reader->content_type_len+1, (void *) post_content_type_reader, sizeof(sapi_post_content_type_reader), NULL);
+	return zend_hash_add(&known_post_content_types, post_entry->content_type, post_entry->content_type_len+1, (void *) post_entry, sizeof(sapi_post_entry), NULL);
 }
 
 
-SAPI_API void sapi_unregister_post_reader(sapi_post_content_type_reader *post_content_type_reader)
+SAPI_API void sapi_unregister_post_entry(sapi_post_entry *post_entry)
 {
-	zend_hash_del(&known_post_content_types, post_content_type_reader->content_type, post_content_type_reader->content_type_len+1);
+	zend_hash_del(&known_post_content_types, post_entry->content_type, post_entry->content_type_len+1);
 }
 
 
-SAPI_API int sapi_register_default_post_reader(void (*default_post_reader)(char *content_type_dup SLS_DC))
+SAPI_API int sapi_register_default_post_reader(void (*default_post_reader)(SLS_D))
 {
 	sapi_module.default_post_reader = default_post_reader;
 	return SUCCESS;

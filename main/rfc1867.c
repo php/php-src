@@ -33,7 +33,7 @@
 /*
  * Split raw mime stream up into appropriate components
  */
-static void php_mime_split(char *buf, int cnt, char *boundary)
+static void php_mime_split(char *buf, int cnt, char *boundary, zval *array_ptr)
 {
 	char *ptr, *loc, *loc2, *s, *name, *filename, *u, *fn;
 	int len, state = 0, Done = 0, rem, urem;
@@ -42,17 +42,8 @@ static void php_mime_split(char *buf, int cnt, char *boundary)
 	char *namebuf=NULL, *filenamebuf=NULL, *lbuf=NULL;
 	FILE *fp;
 	int itype;
-	zval *http_post_vars=NULL;
 	ELS_FETCH();
 	PLS_FETCH();
-
-	if (PG(track_vars)) {
-		ALLOC_ZVAL(http_post_vars);
-		array_init(http_post_vars);
-		INIT_PZVAL(http_post_vars);
-		
-		zend_hash_add(&EG(symbol_table), "HTTP_POST_VARS", sizeof("HTTP_POST_VARS"), &http_post_vars, sizeof(pval *), NULL);
-	}
 
 	ptr = buf;
 	rem = cnt;
@@ -164,7 +155,7 @@ static void php_mime_split(char *buf, int cnt, char *boundary)
 				*(loc - 4) = '\0';
 
 				/* Magic function that figures everything out */
-				php_register_variable(namebuf, ptr, http_post_vars ELS_CC PLS_CC);
+				php_register_variable(namebuf, ptr, array_ptr ELS_CC PLS_CC);
 
 				/* And a little kludge to pick out special MAX_FILE_SIZE */
 				itype = php_check_ident_type(namebuf);
@@ -243,10 +234,11 @@ static void php_mime_split(char *buf, int cnt, char *boundary)
 }
 
 
-SAPI_POST_READER_FUNC(rfc1867_post_reader)
+SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 {
 	char *boundary;
 	uint boundary_len;
+	zval *array_ptr = (zval *) arg;
 
 	boundary = strstr(content_type_dup, "boundary");
 	if (!boundary || !(boundary=strchr(boundary, '='))) {
@@ -256,11 +248,8 @@ SAPI_POST_READER_FUNC(rfc1867_post_reader)
 	boundary++;
 	boundary_len = strlen(boundary);
 
-	sapi_read_standard_form_data(content_type_dup SLS_CC);
 	if (SG(request_info).post_data) {
-		php_mime_split(SG(request_info).post_data, SG(request_info).post_data_length, boundary);
-		efree(SG(request_info).post_data);
-		SG(request_info).post_data = NULL;
+		php_mime_split(SG(request_info).post_data, SG(request_info).post_data_length, boundary, array_ptr);
 	}
 }
 
