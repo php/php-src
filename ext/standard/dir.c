@@ -158,7 +158,6 @@ static void _php_do_opendir(INTERNAL_FUNCTION_PARAMETERS, int createobject)
 		object_init_ex(return_value, dir_class_entry_ptr);
 		add_property_stringl(return_value, "path", Z_STRVAL_PP(arg), Z_STRLEN_PP(arg), 1);
 		add_property_resource(return_value, "handle", dirp->rsrc_id);
-		zend_list_addref(dirp->rsrc_id); /* might not be needed */
 		php_stream_auto_cleanup(dirp); /* so we don't get warnings under debug */
 	} else {
 		php_stream_to_zval(dirp, return_value);
