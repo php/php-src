@@ -42,8 +42,8 @@
 
 static int le_result, le_link, le_plink, le_statement;
 
-static void php_mssql_get_column_content_with_type(mssql_link *mssql_ptr,int offset,zval *result, int column_type);
-static void php_mssql_get_column_content_without_type(mssql_link *mssql_ptr,int offset,zval *result, int column_type);
+static void php_mssql_get_column_content_with_type(mssql_link *mssql_ptr,int offset,zval *result, int column_type TSRMLS_DC);
+static void php_mssql_get_column_content_without_type(mssql_link *mssql_ptr,int offset,zval *result, int column_type TSRMLS_DC);
 
 static void _mssql_bind_hash_dtor(void *data);
 static unsigned char a3_arg_force_ref[] = { 3, BYREF_NONE, BYREF_NONE, BYREF_FORCE };
@@ -134,6 +134,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY_EX("mssql.textsize",   			"-1",	PHP_INI_ALL,	OnUpdateInt,	textsize,					zend_mssql_globals,		mssql_globals,	display_text_size)
 	STD_PHP_INI_ENTRY_EX("mssql.textlimit",   			"-1",	PHP_INI_ALL,	OnUpdateInt,	textlimit,					zend_mssql_globals,		mssql_globals,	display_text_size)
 	STD_PHP_INI_ENTRY_EX("mssql.batchsize",   			"0",	PHP_INI_ALL,	OnUpdateInt,	batchsize,					zend_mssql_globals,		mssql_globals,	display_link_numbers)
+	STD_PHP_INI_BOOLEAN("mssql.datetimeconvert",  		"1",	PHP_INI_ALL,	OnUpdateBool,	datetimeconvert,			zend_mssql_globals,		mssql_globals)
 PHP_INI_END()
 
 /* error handler */
@@ -736,7 +737,7 @@ PHP_FUNCTION(mssql_select_db)
 
 /* }}} */
 
-static void php_mssql_get_column_content_with_type(mssql_link *mssql_ptr,int offset,zval *result, int column_type)
+static void php_mssql_get_column_content_with_type(mssql_link *mssql_ptr,int offset,zval *result, int column_type  TSRMLS_DC)
 {
 	if (dbdatlen(mssql_ptr->link,offset) == 0) {
 		ZVAL_NULL(result);
@@ -793,13 +794,28 @@ static void php_mssql_get_column_content_with_type(mssql_link *mssql_ptr,int off
 		default: {
 			if (dbwillconvert(column_type,SQLCHAR)) {
 				char *res_buf;
+				DBDATEREC dateinfo;	
 				int res_length = dbdatlen(mssql_ptr->link,offset);
-				if (column_type == SQLDATETIM4) res_length += 14;
-				if (column_type == SQLDATETIME) res_length += 10;
-			
-				res_buf = (char *) emalloc(res_length + 1);
-				res_length = dbconvert(NULL,column_type,dbdata(mssql_ptr->link,offset), res_length,SQLCHAR,res_buf,-1);
 
+			
+				if ((column_type != SQLDATETIME) || MS_SQL_G(datetimeconvert)) {
+
+					if (column_type == SQLDATETIM4) res_length += 14;
+					if (column_type == SQLDATETIME) res_length += 10;
+			
+					res_buf = (unsigned char *) emalloc(res_length + 1);
+					res_length = dbconvert(NULL,coltype(offset),dbdata(mssql_ptr->link,offset), res_length, SQLCHAR,res_buf,-1);
+
+				} else {
+
+					dbdatecrack(mssql_ptr->link, &dateinfo, (DBDATETIME *) dbdata(mssql_ptr->link,offset));
+			
+					res_length = 20;
+					res_buf = (unsigned char *) emalloc(res_length + 1);
+
+					sprintf(res_buf, "%d-%02d-%02d %02d:%02d:%02d" , dateinfo.year, dateinfo.month, dateinfo.day, dateinfo.hour, dateinfo.minute, dateinfo.second);
+				}
+		
 				Z_STRVAL_P(result) = res_buf;
 				Z_STRLEN_P(result) = res_length;
 				Z_TYPE_P(result) = IS_STRING;
@@ -811,7 +827,7 @@ static void php_mssql_get_column_content_with_type(mssql_link *mssql_ptr,int off
 	}
 }
 
-static void php_mssql_get_column_content_without_type(mssql_link *mssql_ptr,int offset,zval *result, int column_type)
+static void php_mssql_get_column_content_without_type(mssql_link *mssql_ptr,int offset,zval *result, int column_type  TSRMLS_DC)
 {
 	if (dbdatlen(mssql_ptr->link,offset) == 0) {
 		ZVAL_NULL(result);
@@ -835,12 +851,26 @@ static void php_mssql_get_column_content_without_type(mssql_link *mssql_ptr,int 
 	}
 	else if  (dbwillconvert(coltype(offset),SQLCHAR)) {
 		unsigned char *res_buf;
+		DBDATEREC dateinfo;	
 		int res_length = dbdatlen(mssql_ptr->link,offset);
-		if (column_type == SQLDATETIM4) res_length += 14;
-		if (column_type == SQLDATETIME) res_length += 10;
-		
-		res_buf = (unsigned char *) emalloc(res_length + 1);
-		res_length = dbconvert(NULL,coltype(offset),dbdata(mssql_ptr->link,offset), res_length, SQLCHAR,res_buf,-1);
+
+		if ((column_type != SQLDATETIME) || MS_SQL_G(datetimeconvert)) {
+
+			if (column_type == SQLDATETIM4) res_length += 14;
+			if (column_type == SQLDATETIME) res_length += 10;
+			
+			res_buf = (unsigned char *) emalloc(res_length + 1);
+			res_length = dbconvert(NULL,coltype(offset),dbdata(mssql_ptr->link,offset), res_length, SQLCHAR,res_buf,-1);
+
+		} else {
+
+			dbdatecrack(mssql_ptr->link, &dateinfo, (DBDATETIME *) dbdata(mssql_ptr->link,offset));
+			
+			res_length = 20;
+			res_buf = (unsigned char *) emalloc(res_length + 1);
+
+			sprintf(res_buf, "%d-%02d-%02d %02d:%02d:%02d" , dateinfo.year, dateinfo.month, dateinfo.day, dateinfo.hour, dateinfo.minute, dateinfo.second);
+		}
 
 		Z_STRVAL_P(result) = res_buf;
 		Z_STRLEN_P(result) = res_length;
@@ -913,7 +943,7 @@ static int _mssql_fetch_batch(mssql_link *mssql_ptr, mssql_result *result, int r
 		result->data[i] = (zval *) emalloc(sizeof(zval)*result->num_fields);
 		for (j=0; j<result->num_fields; j++) {
 			INIT_ZVAL(result->data[i][j]);
-			MS_SQL_G(get_column_content(mssql_ptr, j+1, &result->data[i][j], column_types[j]));
+			MS_SQL_G(get_column_content(mssql_ptr, j+1, &result->data[i][j], column_types[j] TSRMLS_CC));
 		}
 		if (i<result->batchsize || result->batchsize==0) {
 			i++;
