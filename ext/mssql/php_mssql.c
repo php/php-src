@@ -784,9 +784,11 @@ static void php_mssql_get_column_content_with_type(mssql_link *mssql_ptr,int off
 			char *data = charcol(offset);
 
 			length=dbdatlen(mssql_ptr->link,offset);
+#if ilia_0
 			while (length>0 && data[length-1] == ' ') { /* nuke trailing whitespace */
 				length--;
 			}
+#endif
 			Z_STRVAL_P(result) = estrndup(data,length);
 			Z_STRLEN_P(result) = length;
 			Z_TYPE_P(result) = IS_STRING;

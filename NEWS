@@ -12,6 +12,7 @@ PHP 4                                                                      NEWS
 - Fixed bug #25800 (parse_url() could not parse urls with empty port). (Ilia)
 - Fixed bug #25780 (ext/session: invalid "session.cookie_lifetime" makes 
   session_start() to crash in win32). (Jani)
+- Fixed bug #25777 (Do not rtrim() of text fields fetched from mssql). (Ilia)
 - Fixed bug #25770 (Segfault with PHP and bison 1.875). (eggert@gnu.org, Marcus)
 - Fixed bug #25764 (ldap_get_option() crashes with unbound ldap link). (Jani)
 - Fixed bug #25758 (var_export does not escape ' & \ inside array keys). (Ilia)
