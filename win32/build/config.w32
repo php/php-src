@@ -19,8 +19,11 @@ PATH_PROG('lemon');
 PATH_PROG('mc', WshShell.Environment("Process").Item("PATH"));
 
 ARG_ENABLE('debug', 'Compile with debugging symbols', "no");
+ARG_ENABLE('debug-pack', 'Release binaries with external debug symbols (--enable-debug must not be specified)', 'no');
+if (PHP_DEBUG == "yes" && PHP_DEBUG_PACK == "yes") {
+	ERROR("Use of both --enable-debug and --enable-debug-pack not allowed.");
+}
 ARG_ENABLE('zts', 'Thread safety', 'yes');
-
 // Configures the hard-coded installation dir
 ARG_ENABLE('prefix', 'where PHP will be installed', '');
 if (PHP_PREFIX == '') {
@@ -64,6 +67,11 @@ if (PHP_DEBUG == "yes") {
 	// version of the libc
 	ADD_FLAG("PHP_LDFLAGS", "/nodefaultlib:msvcrt");
 } else {
+	// Generate external debug files when --enable-debug-pack is specified
+	if (PHP_DEBUG_PACK == "yes") {
+		ADD_FLAG("CFLAGS", "/Zi");
+		ADD_FLAG("LDFLAGS", "/incremental:no /debug /opt:ref,icf");
+	}
 	// Equivalent to Release_TSInline build -> best optimization
 	ADD_FLAG("CFLAGS", "/LD /MD /W3 /Ox /D NDebug /D NDEBUG \
 /D ZEND_WIN32_FORCE_INLINE /GB /GF /D ZEND_DEBUG=0");
