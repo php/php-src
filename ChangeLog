@@ -1,3 +1,101 @@
+1999-11-24  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/gd/gd.c:
+    I'm dreaming that someone else can format this when he/she is looking at it.
+
+1999-11-24  Sander Steffann  <steffann@nederland.net>
+
+    * ext/gd/config.h.stub
+      ext/gd/config.m4
+      ext/gd/gd.c:
+    Some patched versions of GD support both GIF and PNG. The GD module now
+    checks for both instead of assuming that PNG support means that there is no
+    GIF support anymore.
+
+    * ext/gd/config.m4:
+    Removed an empty -L from LDFLAGS which caused errors in configure when
+    running it with --with-gd (without path). Because of this configure detected
+    every GD as GD-1.2.
+
+1999-11-24  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/exec.c
+      ext/standard/file.c
+      ext/standard/info.c
+      main.c
+      request_info.c: Killing some unused variable warnings
+
+    * sapi/aolserver/aolserver.c: some cosmetical changes
+
+1999-11-24  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/domxml/domxml.c:
+    Descriptions should be different for different function names.
+
+1999-11-24  Thies C. Arntzen  <thies@digicol.de>
+
+    * acinclude.m4: fix typo
+
+1999-11-24  David Hedbor  <david@hedbor.org>
+
+    * sapi/roxen/roxen.c: Removed some forgotten C++ style comments
+
+    * sapi/roxen/config.m4: Now actually correctly checks for Pike paths etc.
+
+1999-11-24  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/domxml/Makefile.am
+      ext/domxml/config.h.stub
+      ext/domxml/config.m4
+      ext/domxml/domxml.c
+      ext/domxml/php3_domxml.h: - new xml parser with dom support
+
+1999-11-24  Evan Klinger  <evan715@sirius.com>
+
+    * ext/standard/file.c: Freeing the memory would be a good idea...
+
+    * NEWS: Mention new select(), fd_set() and fd_isset() functions
+
+1999-11-24  Andrei Zmievski  <zmievski@ispi.net>
+
+    * NEWS: Cleaning up remnants of ChangeLog manipulations.
+
+1999-11-24  Evan Klinger  <evan715@sirius.com>
+
+    * ext/standard/file.c
+      ext/standard/file.h: Can't forget fd_isset()
+
+1999-11-24  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/aolserver/config.h.stub
+      sapi/aolserver/config.m4
+      acconfig.h.in
+      acinclude.m4: - add PHP_BUILD_THREAD_SAFE
+    - move #undef HAVE_AOLSERVER into its own config.h.stub
+
+1999-11-24  Evan Klinger  <evan715@sirius.com>
+
+    * ext/standard/file.c
+      ext/standard/file.h: First attempt at fd_set() and select()
+
+1999-11-24  David Hedbor  <david@hedbor.org>
+
+    * sapi/roxen/roxen.c:
+    - Added a couple of static for functions that don't need to be public.
+    - Removed some unused code.
+    - Started writing better comments.
+
+    * sapi/roxen/phpmod.pike:
+    Don't create a new thread for each php-script - use the handler thread.
+
+    * acconfig.h.in
+      sapi/roxen/config.h.stub: Moved HAVE_ROXEN to sapi/roxen/config.h.stub
+
+    * sapi/roxen/.cvsignore: Added .cvsignore
+
+    * sapi/roxen/Makefile
+      sapi/roxen/Makefile.am: Added the wrong file.
+
 1999-11-23  David Hedbor  <david@hedbor.org>
 
     * acconfig.h.in: Added HAVE_ROXEN for the Roxen sapi module
