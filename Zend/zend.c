@@ -283,10 +283,10 @@ ZEND_API void zend_print_flat_zval_r(zval *expr TSRMLS_DC)
 			if (Z_OBJ_HANDLER_P(expr, get_class_name)) {
 				Z_OBJ_HANDLER_P(expr, get_class_name)(expr, &class_name, &clen, 0 TSRMLS_CC);
 			}
-			if (class_name == NULL) {
-				class_name = "Unknown Class";
+			zend_printf("%s Object (", class_name?class_name:"Unknown Class");
+			if(class_name) {
+				efree(class_name);
 			}
-			zend_printf("%s Object (", class_name);
 			if (Z_OBJ_HANDLER_P(expr, get_properties)) {
 				properties = Z_OBJPROP_P(expr);
 			}
@@ -336,10 +336,10 @@ ZEND_API void zend_print_zval_r_ex(zend_write_func_t write_func, zval *expr, int
 				if (Z_OBJ_HANDLER_P(expr, get_class_name)) {
 					Z_OBJ_HANDLER_P(expr, get_class_name)(expr, &class_name, &clen, 0 TSRMLS_CC);
 				}
-				if (class_name == NULL) {
-					class_name = "Unknown Class";
+				zend_printf("%s Object\n", class_name?class_name:"Unknown Class");
+				if(class_name) {
+					efree(class_name);
 				}
-				zend_printf("%s Object\n", class_name);
 				if (Z_OBJ_HANDLER_P(expr, get_properties)) {
 					properties = Z_OBJPROP_P(expr);
 				}
