@@ -942,14 +942,14 @@ restore:
  */
 PHPAPI char *php_strtoupper(char *s, size_t len)
 {
-	char *c;
-	int ch;
-	size_t i;
-
+	char *c, *e;
+	
 	c = s;
-	for (i=0; i<len; i++) {
-		ch = toupper((unsigned char)*c);
-		*c++ = ch;
+	e = c+len;
+
+	while (c<e) {
+		*c = toupper(*c);
+		c++;
 	}
 	return s;
 }
@@ -976,14 +976,14 @@ PHP_FUNCTION(strtoupper)
  */
 PHPAPI char *php_strtolower(char *s, size_t len)
 {
-	register int ch;
-	char *c;
-	size_t i;
-
+	char *c, *e;
+	
 	c = s;
-	for (i=0; i<len; i++) {
-		ch = tolower((unsigned char)*c);
-		*c++ = ch;
+	e = c+len;
+
+	while (c<e) {
+		*c = tolower(*c);
+		c++;
 	}
 	return s;
 }
