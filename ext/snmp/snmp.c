@@ -189,7 +189,7 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st)
     char *value = (char *) 0;
 	char hostname[MAX_NAME_LEN];
 	int remote_port = 161;
-	char *pptr;
+	char *pptr, *err;
 
 	if (myargc < 3 || myargc > 7 ||
 		zend_get_parameters_ex(myargc, &a1, &a2, &a3, &a4, &a5, &a6, &a7) == FAILURE) {
@@ -240,7 +240,7 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st)
 			if (read_objid(objid, root, &rootlen)) {
 				gotroot = 1;
 			} else {
-				php_error(E_WARNING,"Invalid object identifier: %s\n", objid);
+				php_error(E_WARNING,"Invalid object identifier: %s", objid);
 			}
 		}
 
@@ -283,7 +283,9 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st)
 #endif
 
 	if ((ss = snmp_open(&session)) == NULL) {
-		php_error(E_WARNING,"Could not open snmp\n");
+		snmp_error(&session, NULL, NULL, &err);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not open snmp connection: %s", err);
+		free(err);
 		RETURN_FALSE;
 	}
 
@@ -293,11 +295,7 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st)
 		switch(st) {
 			case 2:
 			case 3:
-				if (array_init(return_value) == FAILURE) {
-					php_error(E_WARNING, "Cannot prepare result array");
-					snmp_close(ss);
-					RETURN_FALSE;
-				}
+				array_init(return_value);
 				break;
 			default:
 				RETVAL_TRUE;
@@ -309,9 +307,9 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st)
 		keepwalking = 0;
 		if (st == 1) {
 			pdu = snmp_pdu_create(SNMP_MSG_GET);
-			name_length = MAX_NAME_LEN;
-			if (!read_objid(objid, name, &name_length)) {
-				php_error(E_WARNING,"Invalid object identifier: %s\n", objid);
+			name_length = MAX_OID_LEN;
+			if (!snmp_parse_oid(objid, name, &name_length)) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid object identifier: %s", objid);
 				snmp_close(ss);
 				RETURN_FALSE;
 			}
@@ -319,7 +317,7 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st)
 		} else if (st == 11) {
 			pdu = snmp_pdu_create(SNMP_MSG_SET);
 			if (snmp_add_var(pdu, name, name_length, type, value)) {
-				php_error(E_WARNING,"Could not add variable: %s\n", name);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not add variable: %s", name);
 				snmp_close(ss);
 				RETURN_FALSE;
 			}
@@ -369,7 +367,7 @@ retry:
 				}	
 			} else {
 				if (st != 2 || response->errstat != SNMP_ERR_NOSUCHNAME) {
-					php_error(E_WARNING,"Error in packet.\nReason: %s\n", snmp_errstring(response->errstat));
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error in packet: %s", snmp_errstring(response->errstat));
 					if (response->errstat == SNMP_ERR_NOSUCHNAME) {
 						for (count=1, vars = response->variables; vars && count != response->errindex;
 						vars = vars->next_variable, count++);
@@ -380,7 +378,7 @@ retry:
 							sprint_objid((struct sbuf *)buf,vars->name, vars->name_length);
 #endif
 						}
-						php_error(E_WARNING,"This name does not exist: %s\n",buf);
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "This name does not exist: %s",buf);
 					}
 					if (st == 1) {
 						if ((pdu = snmp_fix_pdu(response, SNMP_MSG_GET)) != NULL) {
@@ -400,11 +398,17 @@ retry:
 				}
 			}
 		} else if (status == STAT_TIMEOUT) {
-			php_error(E_WARNING,"No Response from %s\n", Z_STRVAL_PP(a1));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "No Response from %s", Z_STRVAL_PP(a1));
+			if (st == 2 || st == 3) {
+				zval_dtor(return_value);
+			}
 			snmp_close(ss);
 			RETURN_FALSE;
 		} else {    /* status == STAT_ERROR */
-			php_error(E_WARNING,"An error occurred, Quitting...\n");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "An error occurred, Quitting.");
+			if (st == 2 || st == 3) {
+				zval_dtor(return_value);
+			}
 			snmp_close(ss);
 			RETURN_FALSE;
 		}
