@@ -108,6 +108,10 @@ ZEND_API
 		ZEND_ARG_PASS_INFO(1)
 	ZEND_END_ARG_INFO();
 
+ZEND_API
+	ZEND_BEGIN_ARG_INFO(all_args_by_ref, 1)
+	ZEND_END_ARG_INFO();
+
 static zend_function_entry builtin_functions[] = {
 	ZEND_FE(zend_version,		NULL)
 	ZEND_FE(func_num_args,		NULL)
