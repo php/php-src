@@ -347,6 +347,12 @@ ZEND_API void _convert_to_string(zval *op ZEND_FILE_LINE_DC)
 				op->value.str.len = 0;
 			}
 			break;
+		case IS_RESOURCE: {
+			long tmp = op->value.lval;
+			op->value.str.val = (char *) emalloc(sizeof("Resource id #")-1 + MAX_LENGTH_OF_LONG);
+			op->value.str.len = sprintf(op->value.str.val, "Resource id #%ld", tmp);
+			break;
+		}
 		case IS_LONG:
 			lval = op->value.lval;
 
