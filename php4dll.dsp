@@ -415,6 +415,10 @@ SOURCE=.\ext\standard\lcg.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\ext\standard\levenshtein.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\ext\standard\link.c
 # End Source File
 # Begin Source File
@@ -492,6 +496,10 @@ SOURCE=.\ext\standard\rand.c
 # Begin Source File
 
 SOURCE=.\ext\standard\reg.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\ext\standard\scanf.c
 # End Source File
 # Begin Source File
 
@@ -656,6 +664,10 @@ SOURCE=.\functions\phpmath.h
 # Begin Source File
 
 SOURCE=.\ext\standard\reg.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\ext\standard\scanf.h
 # End Source File
 # Begin Source File
 

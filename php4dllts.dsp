@@ -482,6 +482,10 @@ SOURCE=.\ext\standard\reg.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\ext\standard\scanf.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\ext\session\session.c
 # End Source File
 # Begin Source File
@@ -655,6 +659,10 @@ SOURCE=.\functions\phpmath.h
 # Begin Source File
 
 SOURCE=.\ext\standard\reg.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\ext\standard\scanf.h
 # End Source File
 # Begin Source File
 
