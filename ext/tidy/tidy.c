@@ -912,8 +912,6 @@ PHP_FUNCTION(tidy_diagnose)
 {
 	TIDY_FETCH_OBJECT;
 
-	TIDY_PARSED_REPAIR_CHECK(obj);
-
 	if (tidyRunDiagnostics(obj->ptdoc->doc) >= 0) {
 		tidy_doc_update_properties(obj TSRMLS_CC);
 		RETURN_TRUE;
@@ -1329,7 +1327,7 @@ PHP_FUNCTION(tidy_getopt)
 	optval = php_tidy_get_opt_val(obj->ptdoc, opt, &optt TSRMLS_CC);
 	switch (optt) {
 		case TidyString:
-			RETVAL_STRING((char *)optval, 0);
+			RETURN_STRING((char *)optval, 0);
 			break;
 
 		case TidyInteger:
