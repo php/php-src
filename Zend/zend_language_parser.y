@@ -208,7 +208,7 @@ unticked_statement:
 	|	T_TRY { zend_do_try(&$1 TSRMLS_CC); } '{' inner_statement_list '}'
 			T_CATCH '(' T_VARIABLE ')' { zend_do_begin_catch(&$1, &$8 TSRMLS_CC); } '{' inner_statement_list '}' { zend_do_end_catch(&$1 TSRMLS_CC); }
 	|	T_THROW expr ';' { zend_do_throw(&$2 TSRMLS_CC); }
-	|	T_DELETE cvar	';' { zend_do_end_variable_parse(BP_VAR_UNSET, 0 TSRMLS_CC); zend_do_unset(&$1, ZEND_UNSET_OBJ TSRMLS_CC); }
+	|	T_DELETE '(' cvar ')'	';' { zend_do_end_variable_parse(BP_VAR_UNSET, 0 TSRMLS_CC); zend_do_unset(&$1, ZEND_UNSET_OBJ TSRMLS_CC); }
 	|	T_NAMESPACE namespace_class_entry  ';' { do_namespace(&$2 TSRMLS_CC); }
 	|	T_NAMESPACE ';' { do_namespace(NULL TSRMLS_CC); }
 ;
