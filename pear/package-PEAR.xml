@@ -47,21 +47,20 @@
     </maintainer>
   </maintainers>
   <release>
-    <version>1.3</version>
-    <date>2004-02-20</date>
-    <state>stable</state>
+    <version>1.3.1dev</version>
+    <date>2004-03-18</date>
+    <state>devel</state>
     <notes>
 PEAR Installer:
 
-* Bug #171 --alldeps with a rel=&quot;eq&quot; should install the required version, if possible
-* Bug #249 installing from an url doesnt work
-* Bug #248 --force command does not work as expected
-* Bug #293 [Patch] PEAR_Error not calling static method callbacks for error-handler
-* Bug #324 pear -G gives Fatal Error (PHP-GTK not installed, but error is at engine level)
-* Bug #594 PEAR_Common::analyzeSourceCode fails on string with $var and {
-* Bug #521 Incorrect filename in naming warnings
-* Moved download code into its own class
-* Fully unit tested the installer, packager, downloader, and PEAR_Common
+ * Bug #933  CMD Usability Patch 
+ * Bug #1008 safe mode raises warning
+
+PEAR_ErrorStack:
+
+ * Added experimental error handling, designed to eventually replace
+   PEAR_Error.  It should be considered experimental until explicitly marked
+   stable.  require_once 'PEAR/ErrorStack.php' to use.
 
     </notes>
     <provides type="class" name="OS_Guess" />
@@ -90,6 +89,7 @@ PEAR Installer:
         <file role="php" name="Config.php"/>
         <file role="php" name="Dependency.php"/>
         <file role="php" name="Downloader.php"/>
+        <file role="php" name="ErrorStack.php"/>
         <dir name="Frontend">
           <file role="php" name="CLI.php"/>
         </dir>
@@ -131,4 +131,25 @@ PEAR Installer:
       <dep type="ext" rel="has">pcre</dep>
     </deps>
   </release>
+  <changelog>
+  <release>
+    <version>1.3</version>
+    <date>2004-02-20</date>
+    <state>stable</state>
+    <notes>
+PEAR Installer:
+
+* Bug #171 --alldeps with a rel=&quot;eq&quot; should install the required version, if possible
+* Bug #249 installing from an url doesnt work
+* Bug #248 --force command does not work as expected
+* Bug #293 [Patch] PEAR_Error not calling static method callbacks for error-handler
+* Bug #324 pear -G gives Fatal Error (PHP-GTK not installed, but error is at engine level)
+* Bug #594 PEAR_Common::analyzeSourceCode fails on string with $var and {
+* Bug #521 Incorrect filename in naming warnings
+* Moved download code into its own class
+* Fully unit tested the installer, packager, downloader, and PEAR_Common
+
+    </notes>
+   </release>
+  </changelog>
 </package>
