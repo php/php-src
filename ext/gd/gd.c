@@ -2664,7 +2664,12 @@ PHP_FUNCTION(image2wbmp)
 PHP_FUNCTION(jpeg2wbmp)
 {
 #ifdef HAVE_GD_JPG
+#ifdef HAVE_GD_WBMP
 	_php_image_convert (INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_JPG);
+#else /* HAVE_GD_WBMP */
+	php_error(E_WARNING, "jpeg2wbmp: No WBMP support in this PHP build");
+	RETURN_FALSE;
+#endif /* HAVE_GD_WBMP */
 #else /* HAVE_GD_JPG */
 	php_error(E_WARNING, "jpeg2wbmp: No JPG support in this PHP build");
 	RETURN_FALSE;
@@ -2677,7 +2682,12 @@ PHP_FUNCTION(jpeg2wbmp)
 PHP_FUNCTION(png2wbmp)
 {
 #ifdef HAVE_GD_PNG
+#ifdef HAVE_GD_WBMP
 	_php_image_convert (INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_PNG);
+#else /* HAVE_GD_WBMP */
+	php_error(E_WARNING, "png2wbmp: No WBMP support in this PHP build");
+	RETURN_FALSE;
+#endif /* HAVE_GD_WBMP */
 #else /* HAVE_GD_PNG */
 	php_error(E_WARNING, "png2wbmp: No PNG support in this PHP build");
 	RETURN_FALSE;
@@ -2686,6 +2696,8 @@ PHP_FUNCTION(png2wbmp)
 /* }}} */
 
 
+
+#ifdef HAVE_GD_WBMP
 /* It converts a gd Image to bw using a threshold value */
 static void _php_image_bw_convert( gdImagePtr im_org, int threshold, FILE *out) {
 	gdImagePtr im_dest;
@@ -2907,6 +2919,8 @@ static void _php_image_convert(INTERNAL_FUNCTION_PARAMETERS, int image_type ) {
 	}
 	WRONG_PARAM_COUNT;
 }
+#endif /* HAVE_GD_WBMP */
+
 
 #endif	/* HAVE_LIBGD */
 
