@@ -4,16 +4,14 @@
 	if (!sizeof(dba_handlers())) die('skip no handlers installed');
 	if (!isset($handler)) {
 		$handlers = dba_handlers();
-		$handler  = false;
-		$acceptable = array('flatfile','db4','db3','db2','gdbm','ndbm','dbm','inifile');
-		foreach($acceptable as $hnd) {
-			if (in_array($hnd, $handlers)) {
-				$handler = $hnd;
-				break;
+		if (in_array('flatfile', $handlers)) {
+			$handler = 'flatfile';
+		} else {
+			$handler = array_diff($handler, array('cdb', 'cdb_make')); /* these can only read OR write */
+			if (count($handler)==0) {
+				die('skip no handler available that can be used for the test');
 			}
-		}
-		if ($handler === false) {
-			die('skip No acceptable handler found');
+			$handler = array_shift($handler);
 		}
 	} else {
 		if (!in_array($handler, dba_handlers())) {
