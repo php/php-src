@@ -41,6 +41,15 @@ AC_ARG_ENABLE(fastcgi,
   PHP_ENABLE_FASTCGI=no
 ])
 
+AC_ARG_ENABLE(path-info-check,
+[  --disable-path-info-check  If this is disabled, paths such as
+                          /info.php/test?a=b will fail to work.],
+[
+  PHP_ENABLE_PATHINFO_CHECK=$enableval
+],[
+  PHP_ENABLE_PATHINFO_CHECK=yes
+])
+
 AC_DEFUN(PHP_TEST_WRITE_STDOUT,[
   AC_CACHE_CHECK(whether writing to stdout works,ac_cv_write_stdout,[
     AC_TRY_RUN([
@@ -100,6 +109,15 @@ if test "$PHP_SAPI" = "default"; then
     fi
     AC_DEFINE_UNQUOTED(DISCARD_PATH, $DISCARD_PATH, [ ])
     AC_MSG_RESULT($PHP_DISCARD_PATH)
+
+    AC_MSG_CHECKING(whether to enable path info checking)
+    if test "$PHP_ENABLE_PATHINFO_CHECK" = "yes"; then
+      ENABLE_PATHINFO_CHECK=1
+    else
+      ENABLE_PATHINFO_CHECK=0
+    fi
+    AC_DEFINE_UNQUOTED(ENABLE_PATHINFO_CHECK, $ENABLE_PATHINFO_CHECK, [ ])
+    AC_MSG_RESULT($PHP_ENABLE_PATHINFO_CHECK)
 
     AC_MSG_CHECKING(whether to enable fastcgi support)
     PHP_LIBFCGI_DIR="$abs_srcdir/sapi/cgi/libfcgi"
