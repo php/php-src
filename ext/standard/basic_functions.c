@@ -769,6 +769,7 @@ function_entry basic_functions[] = {
 	PHP_FE(array_reduce,													NULL)
 	PHP_FE(array_pad,														NULL)
 	PHP_FE(array_flip,														NULL)
+	PHP_FE(array_change_key_case,											NULL)
 	PHP_FE(array_rand,														NULL)
 	PHP_FE(array_unique,													NULL)
 	PHP_FE(array_intersect,													NULL)
