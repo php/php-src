@@ -885,7 +885,7 @@ PHP_RINIT_FUNCTION(mbstring)
 		}
 	}
 #if HAVE_MBREGEX
-	MBSTRG(regex_default_options) = 0;
+	MBSTRG(regex_default_options) = MBRE_OPTION_POSIXLINE;
 #endif
 
 	return SUCCESS;
