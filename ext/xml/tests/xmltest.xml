@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE phptest SYSTEM "notfound.dtd" [
+<!ENTITY % incent SYSTEM "inc.ent">
+%incent;
+]>
+<root id="elem1">
+ Plain text.
+ <elem1>
+  <!-- comment -->
+  <elem2>
+   <![CDATA[CDATA block]]>
+   <elem3>
+    &included-entity;
+    <elem4>
+     <?test processing instruction ?>
+    </elem4>
+   </elem3>
+  </elem2>
+ </elem1>
+</root>
