@@ -9,5 +9,5 @@ if (PHP_COM_DOTNET == "yes") {
 		com_typeinfo.c com_variant.c");
 	AC_DEFINE('HAVE_COM_DOTNET', 1, 'Have COM_DOTNET support');
 	// TODO: do a header check for this
-	AC_DEFINE('HAVE_MSCOREE_H', 0, 'Have .net headers');
+	CHECK_HEADER_ADD_INCLUDE('mscoree.h', 'CFLAGS_COM_DOTNET');
 }
