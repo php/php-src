@@ -2247,7 +2247,6 @@ DLEXPORT PHP_FUNCTION(udm_get_res_param)
 				    } else if (Res->WWList.Word[i].origin == UDM_WORD_ORIGIN_QUERY) {
 					sprintf(UDM_STREND(wordinfo),"%s%s : %d / %d", (*wordinfo) ? ", " : "", Res->WWList.Word[i].word, Res->WWList.Word[i].count, ccount);
 				    } else continue;
-				    sprintf(UDM_STREND(wordinfo)," / %d", ccount);
 				}
 				RETURN_STRING(wordinfo,1);
 			    }
