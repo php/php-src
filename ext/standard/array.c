@@ -118,25 +118,44 @@ PHP_RINIT_FUNCTION(array)
 	
 static int array_key_compare(const void *a, const void *b)
 {
-	Bucket *first;
-	Bucket *second;
-	int min, r;
+	Bucket *f;
+	Bucket *s;
+	pval result;
+	pval first;
+	pval second;
+ 
+	f = *((Bucket **) a);
+	s = *((Bucket **) b);
 
-	first = *((Bucket **) a);
-	second = *((Bucket **) b);
-
-	if (first->nKeyLength == 0 && second->nKeyLength == 0) {
-		return (first->h - second->h);
-	} else if (first->nKeyLength == 0) {
-		return -1;
-	} else if (second->nKeyLength == 0) {
-		return 1;
-	}
-	min = MIN(first->nKeyLength, second->nKeyLength);
-	if ((r = memcmp(first->arKey, second->arKey, min)) == 0) {
-		return (first->nKeyLength - second->nKeyLength);
+	if (f->nKeyLength == 0) {
+		first.type = IS_LONG;
+		first.value.lval = f->h;
 	} else {
-		return r;
+		first.type = IS_STRING;
+		first.value.str.val = f->arKey;
+		first.value.str.len = f->nKeyLength;
+	}
+
+	if (s->nKeyLength == 0) {
+		second.type = IS_LONG;
+		second.value.lval = s->h;
+	} else {
+		second.type = IS_STRING;
+		second.value.str.val = s->arKey;
+		second.value.str.len = s->nKeyLength;
+	}
+ 
+    if (compare_function(&result, &first, &second) == FAILURE) {
+        return 0;
+    } 
+
+	convert_to_long(&result);
+	if (result.value.lval < 0) {
+		return -1;
+	} else if (result.value.lval > 0) {
+		return 1;
+	} else {
+		return 0;
 	}
 }
 
