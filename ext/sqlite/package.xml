@@ -129,6 +129,7 @@ Fixed column name mangling bug
 			<file role="src" name="sqliteInt.h"/>
 			<file role="src" name="sqlite.w32.h"/>
 			<file role="src" name="vdbe.h"/>
+			<file role="src" name="vdbeInt.h"/>
 		</dir>
 	  </dir>
     </filelist>
