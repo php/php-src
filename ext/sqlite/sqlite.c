@@ -1725,7 +1725,7 @@ PHP_FUNCTION(sqlite_fetch_object)
 		fci.symbol_table = NULL;
 		fci.object_pp = &return_value;
 		fci.retval_ptr_ptr = &retval_ptr;
-		if (ctor_params) {
+		if (ctor_params && Z_TYPE_P(ctor_params) != IS_NULL) {
 			if (Z_TYPE_P(ctor_params) == IS_ARRAY) {
 				HashTable *ht = Z_ARRVAL_P(ctor_params);
 				Bucket *p;
