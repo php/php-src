@@ -519,8 +519,10 @@ PHPAPI size_t _php_stream_read(php_stream *stream, char *buf, size_t size TSRMLS
 		didread += toread;
 	}
 
-	if (size == 0)
+	if (size == 0) {
+		stream->position += didread;
 		return didread;
+	}
 	
 	if (stream->flags & PHP_STREAM_FLAG_NO_BUFFER || stream->chunk_size == 1) {
 		if (stream->filterhead) {
