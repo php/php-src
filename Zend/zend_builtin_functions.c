@@ -53,6 +53,7 @@ static ZEND_FUNCTION(get_included_files);
 static ZEND_FUNCTION(is_subclass_of);
 static ZEND_FUNCTION(get_class_vars);
 static ZEND_FUNCTION(get_object_vars);
+static ZEND_FUNCTION(get_class_methods);
 
 unsigned char first_arg_force_ref[] = { 1, BYREF_FORCE };
 unsigned char first_arg_allow_ref[] = { 1, BYREF_ALLOW };
@@ -86,6 +87,7 @@ static zend_function_entry builtin_functions[] = {
 	ZEND_FE(is_subclass_of,		NULL)
 	ZEND_FE(get_class_vars,		NULL)
 	ZEND_FE(get_object_vars,	NULL)
+	ZEND_FE(get_class_methods,	NULL)
 	{ NULL, NULL, NULL }
 };
 
@@ -500,6 +502,46 @@ ZEND_FUNCTION(get_object_vars)
 	array_init(return_value);
 	zend_hash_copy(return_value->value.ht, (*obj)->value.obj.properties,
 				   (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
+}
+/* }}} */
+
+/* {{{ proto array get_class_methods(string class_name)
+   Returns an array of class methods' names */
+ZEND_FUNCTION(get_class_methods)
+{
+	zval **class_name;
+	zval *method_name;
+	char *lcname;
+	zend_class_entry *ce;
+	char *string_key;
+	ulong num_key;
+	int key_type;
+	CLS_FETCH();
+
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &class_name)==FAILURE) {
+		RETURN_FALSE;
+	}
+
+	convert_to_string_ex(class_name);
+	lcname = estrndup((*class_name)->value.str.val, (*class_name)->value.str.len);
+	zend_str_tolower(lcname, (*class_name)->value.str.len);
+
+	if (zend_hash_find(CG(class_table), lcname, (*class_name)->value.str.len+1, (void **)&ce)==FAILURE) {
+		efree(lcname);
+		RETURN_NULL;
+	} else {
+		efree(lcname);
+		array_init(return_value);
+		zend_hash_internal_pointer_reset(&ce->function_table);
+		while ((key_type = zend_hash_get_current_key(&ce->function_table, &string_key, &num_key)) != HASH_KEY_NON_EXISTANT) {
+			if (key_type == HASH_KEY_IS_STRING) {
+				MAKE_STD_ZVAL(method_name);
+				ZVAL_STRING(method_name, string_key, 0);
+				zend_hash_next_index_insert(return_value->value.ht, &method_name, sizeof(zval *), NULL);
+			}
+			zend_hash_move_forward(&ce->function_table);
+		}
+	}
 }
 /* }}} */
 
