@@ -411,7 +411,7 @@ PHP_FUNCTION(pow)
 		/* pow(?, float), this is the ^^ case */
 		convert_to_double_ex(zbase);
 
-		if ( Z_DVAL_PP(zbase) <= 0.0 ) {
+		if (Z_DVAL_PP(zbase) < 0.0) {
 			/* Note that with the old behaviour, php pow() returned bogus
 			   results. Try pow(-1, 2.5) in PHP <= 4.0.6 ... */
 			php_error(E_WARNING, "Trying to raise a nonpositive value to a broken power");
