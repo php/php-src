@@ -385,43 +385,30 @@ class System
     /**
     * Get the path of the temporal directory set in the system
     * by looking in its environments variables.
+    * Note: php.ini-recommended removes the "E" from the variables_order setting,
+    * making unavaible the $_ENV array, that s why we do tests with _ENV
     *
     * @return string The temporal directory on the system
     */
     function tmpdir()
     {
         if (OS_WINDOWS) {
-            if (($var=$_ENV['TEMP']) || $var=getenv('TEMP')) {
-                 return $var;
+            if ($var = isset($_ENV['TEMP']) ? $_ENV['TEMP'] : getenv('TEMP')) {
+                return $var;
             }
-            if (($var=$_ENV['TMP']) || $var=getenv('TMP')) {
-                 return $var;
+            if ($var = isset($_ENV['TMP']) ? $_ENV['TMP'] : getenv('TMP')) {
+                return $var;
             }
-            if (($var=$_ENV['windir']) || $var=getenv('windir')) {
-                 return $var;
+            if ($var = isset($_ENV['windir']) ? $_ENV['windir'] : getenv('windir')) {
+                return $var;
             }
             return getenv('SystemRoot') . '\temp';
         }
-        if (($var=$_ENV['TMPDIR']) || $var=getenv('TMPDIR')) {
-             return $var;
+        if ($var = isset($_ENV['TMPDIR']) ? $_ENV['TMPDIR'] : getenv('TMPDIR')) {
+            return $var;
         }
         return '/tmp';
     }
-
-    /**
-    * (pajoye) Removed, problem with php.ini-recommanded, E removed
-    *
-    * (cox) I always get $_ENV empty in both Windows and Linux
-    * with all PHP version <= 4.2.1
-
-    function _myenv($var)
-    {
-        if (!empty($_ENV)) {
-            return isset($_ENV[$var]) ? $_ENV[$var] : false;
-        }
-        return getenv($var);
-    }
-    */
 
     /**
     * The "type" command (show the full path of a command)
