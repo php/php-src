@@ -107,7 +107,7 @@ List all depencies the package has.'
 Signs a package distribution (.tar or .tgz) file with GnuPG.',
             ),
         'makerpm' => array(
-            'summary' => 'Builds an RPM package from a PEAR package',
+            'summary' => 'Builds an RPM spec file from a PEAR package',
             'function' => 'doMakeRPM',
             'shortcut' => 'rpm',
             'options' => array(

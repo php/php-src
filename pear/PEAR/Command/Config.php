@@ -46,7 +46,8 @@ configuration layers are "user", "system" and "default".
             'function' => 'doConfigGet',
             'shortcut' => 'cg',
             'options' => array(),
-            'doc' => 'Displays the value of one configuration parameter.  The
+            'doc' => '<parameter> [layer]
+Displays the value of one configuration parameter.  The
 first argument is the name of the parameter, an optional second argument
 may be used to tell which configuration layer to look in.  Valid configuration
 layers are "user", "system" and "default".  If no layer is specified, a value
@@ -59,12 +60,13 @@ just specified.
             'function' => 'doConfigSet',
             'shortcut' => 'cs',
             'options' => array(),
-            'doc' => 'Sets the value of one configuration parameter.  The first
-argument is the name of the parameter, the second argument is the new value.
-Some parameters are be subject to validation, and the command will fail with
-an error message if the new value does not make sense.  An optional third
-argument may be used to specify which layer to set the configuration parameter
-in.  The default layer is "user".
+            'doc' => '<parameter> <value> [layer]
+Sets the value of one configuration parameter.  The first argument is
+the name of the parameter, the second argument is the new value.  Some
+parameters are subject to validation, and the command will fail with
+an error message if the new value does not make sense.  An optional
+third argument may be used to specify in which layer to set the
+configuration parameter.  The default layer is "user".
 ',
             ),
         'config-help' => array(

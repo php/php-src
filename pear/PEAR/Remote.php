@@ -114,7 +114,9 @@ class PEAR_Remote extends PEAR
         
         if (extension_loaded("xmlrpc")) {
             $result = call_user_func_array(array(&$this, 'call_epi'), $args);
-            $this->saveCache($_args, $result);
+            if (!PEAR::isError($result)) {
+                $this->saveCache($_args, $result);
+            };
             return $result;
         }
         if (!@include_once("XML/RPC.php")) {
