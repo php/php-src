@@ -306,7 +306,7 @@ AC_ARG_WITH(dbm,
     done
 
     if test -n "$THIS_INCLUDE"; then
-      for LIB in gdbm dbm c; do
+      for LIB in dbm c gdbm; do
         PHP_TEMP_LDFLAGS(-L$THIS_PREFIX/lib,[
           AC_CHECK_LIB($LIB, dbminit, [
             AC_MSG_CHECKING(for DBM using GDBM)
