@@ -22,6 +22,7 @@ typedef struct _cwd_state {
 typedef int (*verify_path_func)(const cwd_state *);
 
 void virtual_cwd_startup();
+void virtual_cwd_shutdown();
 char *virtual_getcwd_ex(int *length);
 char *virtual_getcwd(char *buf, size_t size);
 int virtual_chdir(char *path);

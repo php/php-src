@@ -123,6 +123,11 @@ static void cwd_globals_ctor(zend_cwd_globals *cwd_globals)
 	CWD_STATE_COPY(&cwd_globals->cwd, &main_cwd_state);
 }
 
+static void cwd_globals_dtor(zend_cwd_globals *cwd_globals)
+{
+	CWD_STATE_FREE(&cwd_globals->cwd);
+}
+
 void virtual_cwd_startup()
 {
 	char cwd[1024]; /* Should probably use system define here */
@@ -135,7 +140,15 @@ void virtual_cwd_startup()
 	main_cwd_state.cwd = strdup(cwd);
 	main_cwd_state.cwd_length = strlen(cwd);
 
-	ZEND_INIT_MODULE_GLOBALS(cwd, cwd_globals_ctor, NULL);
+	ZEND_INIT_MODULE_GLOBALS(cwd, cwd_globals_ctor, cwd_globals_dtor);
+}
+
+void virtual_cwd_shutdown()
+{
+#ifndef ZTS
+	cwd_globals_dtor(&cwd_globals);
+#endif
+	free(main_cwd_state.cwd); /* Don't use CWD_STATE_FREE because the non global states will probably use emalloc()/efree() */
 }
 
 char *virtual_getcwd_ex(int *length)
@@ -291,7 +304,7 @@ int virtual_chdir_file(char *path)
 	int length = strlen(path);
 
 	if (length == 0) {
-		return 1; /* Can't CD to empty string */
+		return 1; /* Can't cd to empty string */
 	}	
 	while(--length >= 0 && !IS_SLASH(path[length])) {
 	}
