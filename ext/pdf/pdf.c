@@ -325,8 +325,9 @@ static void pdf_efree(PDF *p, void *mem)
  */
 static size_t pdf_flushwrite(PDF *p, void *data, size_t size)
 {
-	return(php_write(data, size));
-	return 0;
+	TSRMLS_FETCH();
+
+	return(php_write(data, size TSRMLS_CC));
 }
 /* }}} */
 

@@ -269,7 +269,9 @@ JNIEXPORT void JNICALL Java_net_php_servlet_startup
 JNIEXPORT void JNICALL Java_net_php_servlet_shutdown
 	(JNIEnv *jenv, jobject self)
 {
-	php_module_shutdown();
+	TSRMLS_FETCH();
+
+	php_module_shutdown(TSRMLS_C);
 #ifdef ZTS
 	tsrm_shutdown();
 #endif
@@ -361,7 +363,7 @@ JNIEXPORT void JNICALL Java_net_php_servlet_send
 		
 		if (retval == FAILURE) {
 			php_request_shutdown((void *) 0);
-			php_module_shutdown();
+			php_module_shutdown(TSRMLS_C);
 			ThrowIOException(jenv, file_handle.filename);
 			return;
 		}

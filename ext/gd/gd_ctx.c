@@ -5,12 +5,14 @@
 	
 static void _php_image_output_putc(struct gdIOCtx *ctx, int c)
 {
-	php_write(&c, 1);
+	TSRMLS_FETCH();
+	php_write(&c, 1 TSRMLS_CC);
 }
 
 static int _php_image_output_putbuf(struct gdIOCtx *ctx, const void* buf, int l)
 {
-	return php_write((void *)buf, l);
+	TSRMLS_FETCH();
+	return php_write((void *)buf, l TSRMLS_CC);
 }
 
 static void _php_image_output_ctxfree(struct gdIOCtx *ctx)

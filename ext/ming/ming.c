@@ -1489,7 +1489,9 @@ PHP_FUNCTION(swfmovie_remove)
 
 void phpByteOutputMethod(byte b, void *data)
 {
-  php_write(&b, 1);
+  TSRMLS_FETCH();
+
+  php_write(&b, 1 TSRMLS_CC);
 }
 
 PHP_FUNCTION(swfmovie_output)
