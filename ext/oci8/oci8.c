@@ -5098,8 +5098,7 @@ PHP_FUNCTION(ocicollsize)
 /* }}} */
 
 /* {{{ proto string ocicollmax(object collection)
-   Return the max value of a collection.  For a 
-   varray this is the maximum length of the array */
+   Return the max value of a collection.  For a varray this is the maximum length of the array */
 
 PHP_FUNCTION(ocicollmax)
 {
