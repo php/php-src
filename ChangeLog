@@ -1,3 +1,112 @@
+2001-08-20  Yavor Shahpasov  <yavo@itenasolutions.com>
+
+    * pear/Date/Calc.php: - Fixed getMonthFromFullName() method
+
+    * pear/Date/Calc.php:
+    - Added getMonthNames and getWeekDays methods to get month and week day names in the current locale.
+    - Replaced all literal occurences of month names and week days with getMonthNames and getWeekDays
+
+    * pear/Date/Calc.php: Fixed spelling of december
+
+2001-08-20  Jeroen van Wolffelaar  <jeroen@A-Eskwadraat.nl>
+
+    * ext/mysql/php_mysql.c: Proto fix
+
+2001-08-20  Yavor Shahpasov  <yavo@itenasolutions.com>
+
+    * pear/Date/Calc.php:
+    Added a function getMonthFromFullName to return a month number from a month name.
+
+2001-08-20  Doug MacEachern  <dougm@covalent.net>
+
+    * sapi/apache2filter/sapi_apache2.c:
+    automatically add php input/output filters when give the standard 1.x config:
+         AddType application/x-httpd-php .php
+    with that, no longer need "Set{In,Out}putFilter PHP" configuration for 2.0
+
+2001-08-20  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/README.txt: whoops, fix loophole
+
+    * ext/ircg/README.txt:
+    Add a warning concerning non-interoperability with Apache and other servers
+
+    * ext/standard/php_smart_str.h: MFH
+
+2001-08-20  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/standard/tests/serialize/001.phpt: MFH
+
+2001-08-20  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/php_smart_str.h: Improved fix
+
+2001-08-20  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/standard/php_smart_str.h: MFH
+
+    * ext/standard/php_smart_str.h: Fix long printing in smart_str_print_long
+
+    * ext/standard/tests/serialize/001.phpt: test big numbers too
+
+2001-08-20  Jani Taskinen  <sniper@iki.fi>
+
+    * configure.in
+      ext/snmp/Makefile.in
+      ext/snmp/config.m4: MFH
+
+    * ext/snmp/Makefile.in
+      ext/snmp/config.m4:
+    Cleaning. And made the check for SSL support in SNMP to really work.
+
+    * configure.in: Keep crypt() working even if SNMP needs OpenSSL.
+
+2001-08-20  Harald Radi  <h.radi@nme.at>
+
+    * ext/com/COM.c
+      ext/com/VARIANT.c
+      ext/com/conversion.c: MFH
+
+    * ext/com/conversion.c: catch date conversion errors
+
+    * ext/com/COM.c: hum, wasn't $foo->bar 's property type OE_IS_METHOD ?
+
+2001-08-20  Sergey Kartashoff  <gluke@biosys.net>
+
+    * ext/mnogosearch/php_mnogo.c
+      ext/mnogosearch/php_mnogo.h:
+2001-08-20  Shane Caraveo  <shane@php.net>
+
+    * win32/php4.dsp
+      win32/php4.dsw
+      win32/php4dll.dsp: non-ts compile work, add fastcgi module.
+
+    * sapi/fastcgi/fastcgi.c
+      sapi/fastcgi/fastcgi.dsp
+      sapi/fastcgi/windows.txt:
+    Windows compilation of fast cgi now working.  See windows.txt for info.
+
+2001-08-20  Dave Hayden  <dave@opaque.net>
+
+    * ext/ming/ming.c: Added flags for SWFDisplayItem_addAction
+    Added Ming RINIT function
+    Added error handler for reporting Ming errors in PHP environment
+    Added size arg to drawGlyph function
+    Added swfdisplayitem_addAction function
+    Added ming_useSWFVersion function for selecting SWF 4 compatibility
+    Added SWFBitmap object
+    Added hacky SWFInput object for loading data from file/network/process
+
+    * ext/ming/config.m4:
+    changed version check to look for function Ming_useSWFVersion, indicating
+    Ming 0.2a
+
+    * ext/ming/php_ming.h: added function prototypes:
+
+      PHP_RINIT_FUNCTION(ming)
+      PHP_FUNCTION(swfdisplayitem_addAction)
+      PHP_FUNCTION(ming_useSWFVersion)
+
 2001-08-19  Shane Caraveo  <shane@php.net>
 
     * win32/php4dll.dsp: fix for non-TS compile
