@@ -111,6 +111,15 @@ class Soap12test {
 	function echoResolvedRef($ref) {
 	  return $ref->RelativeReference->base.$ref->RelativeReference->href;
 	}
+
+	function validateCountryCode($code) {
+		if (strlen($code) != 2) {
+		  return new SoapFault("Client", "Not a valid country code", NULL, NULL, NULL, new SoapHeader("http://example.org/ts-tests", "validateCountryCodeFault", "Country code must be 2 letters."));
+		} else {
+			return "OK";
+		}
+	}
+
 }
 
 $server = new soapserver(dirname(__FILE__)."/soap12-test.wsdl", array('soap_version'=>SOAP_1_2,'actor'=>"http://example.org/ts-tests/C"));

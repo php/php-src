@@ -50,7 +50,7 @@ WSDL
 ----
 ? server part support for "document" style encoding
 ? support for <fault>, <soap:fault>
-- <soap:headerfault>
+? <soap:headerfault>
 - <soap:body> parts attribute (with MIME/DIME binding)
 - MIME binding
 - DIME binding
@@ -59,6 +59,7 @@ WSDL
 - function/method overloading/redeclaration (test(int); test(string))
 - wsdl auto generation
 - HTTP GET/POST binding
+- SOAP security extension
 
 Schema
 ------

@@ -315,9 +315,117 @@ static void load_wsdl_ex(char *struri, sdlCtx *ctx, int include)
 	}
 }
 
+static sdlSoapBindingFunctionHeaderPtr wsdl_soap_binding_header(sdlCtx* ctx, xmlNodePtr header, char* wsdl_soap_namespace, int fault)
+{
+	xmlAttrPtr tmp;
+	xmlNodePtr *message, part;
+	char *ctype;
+	sdlSoapBindingFunctionHeaderPtr h;
+
+	tmp = get_attribute(header->properties, "message");
+	if (!tmp) {
+		php_error(E_ERROR, "SOAP-ERROR: Parsing WSDL: Missing message attribute for <header>");
+	}
+
+	ctype = strrchr(tmp->children->content,':');
+	if (ctype == NULL) {
+		ctype = tmp->children->content;
+	} else {
+		++ctype;
+	}
+	if (zend_hash_find(&ctx->messages, ctype, strlen(ctype)+1, (void**)&message) != SUCCESS) {
+		php_error(E_ERROR, "SOAP-ERROR: Parsing WSDL: Missing <message> with name '%s'", tmp->children->content);
+	}
+
+	tmp = get_attribute(header->properties, "part");
+	if (!tmp) {
+		php_error(E_ERROR, "SOAP-ERROR: Parsing WSDL: Missing part attribute for <header>");
+	}
+	part = get_node_with_attribute_ex((*message)->children, "part", WSDL_NAMESPACE, "name", tmp->children->content, NULL);
+	if (!part) {
+		php_error(E_ERROR, "SOAP-ERROR: Parsing WSDL: Missing part '%s' in <message>",tmp->children->content);
+	}
+
+	h = emalloc(sizeof(sdlSoapBindingFunctionHeader));
+	memset(h, 0, sizeof(sdlSoapBindingFunctionHeader));
+	h->name = estrdup(tmp->children->content);
+
+	tmp = get_attribute(header->properties, "use");
+	if (tmp && !strncmp(tmp->children->content, "encoded", sizeof("encoded"))) {
+		h->use = SOAP_ENCODED;
+	} else {
+		h->use = SOAP_LITERAL;
+	}
+
+	tmp = get_attribute(header->properties, "namespace");
+	if (tmp) {
+		h->ns = estrdup(tmp->children->content);
+	}
+
+	if (h->use == SOAP_ENCODED) {
+		tmp = get_attribute(header->properties, "encodingStyle");
+		if (tmp) {
+			if (strncmp(tmp->children->content,SOAP_1_1_ENC_NAMESPACE,sizeof(SOAP_1_1_ENC_NAMESPACE)) == 0) {
+				h->encodingStyle = SOAP_ENCODING_1_1;
+			} else if (strncmp(tmp->children->content,SOAP_1_2_ENC_NAMESPACE,sizeof(SOAP_1_2_ENC_NAMESPACE)) == 0) {
+				h->encodingStyle = SOAP_ENCODING_1_2;
+			} else {
+				php_error(E_ERROR, "SOAP-ERROR: Parsing WSDL: Unknown encodingStyle '%s'",tmp->children->content);
+			}
+		} else {
+			php_error(E_ERROR, "SOAP-ERROR: Parsing WSDL: Unspecified encodingStyle");
+		}
+	}
+
+	tmp = get_attribute(part->properties, "type");
+	if (tmp != NULL) {
+		h->encode = get_encoder_from_prefix(ctx->sdl, part, tmp->children->content);
+	} else {
+		tmp = get_attribute(part->properties, "element");
+		if (tmp != NULL) {
+			h->element = get_element(ctx->sdl, part, tmp->children->content);
+			if (h->element) {
+				h->encode = h->element->encode;
+				if (!h->ns && h->element->namens) {
+					h->ns = estrdup(h->element->namens);
+				}
+			}
+		}
+	}
+	if (!fault) {
+		xmlNodePtr trav = header->children;
+		while (trav != NULL) {
+			if (node_is_equal_ex(trav, "headerfault", wsdl_soap_namespace)) {
+				sdlSoapBindingFunctionHeaderPtr hf = wsdl_soap_binding_header(ctx, trav, wsdl_soap_namespace, 1);
+				smart_str key = {0};
+
+				if (h->headerfaults == NULL) {
+					h->headerfaults = emalloc(sizeof(HashTable));
+					zend_hash_init(h->headerfaults, 0, NULL, delete_header, 0);
+				}
+
+				if (hf->ns) {
+					smart_str_appends(&key,hf->ns);
+					smart_str_appendc(&key,':');
+				}
+				smart_str_appends(&key,hf->name);
+				smart_str_0(&key);
+				if (zend_hash_add(h->headerfaults, key.c, key.len+1, (void**)&hf, sizeof(sdlSoapBindingFunctionHeaderPtr), NULL) != SUCCESS) {
+					delete_header((void**)&hf);
+				}
+				smart_str_free(&key);
+			} else if (is_wsdl_element(trav) && !node_is_equal(trav,"documentation")) {
+				php_error(E_ERROR,"SOAP-ERROR: Parsing WSDL: Unexpected WSDL element <%s>",trav->name);
+			}
+			trav = trav->next;
+		}
+	}
+	return h;
+}
+
 static void wsdl_soap_binding_body(sdlCtx* ctx, xmlNodePtr node, char* wsdl_soap_namespace, sdlSoapBindingFunctionBody *binding, HashTable* params)
 {
-	xmlNodePtr body, trav, header;
+	xmlNodePtr body, trav;
 	xmlAttrPtr tmp;
 
 	trav = node->children;
@@ -358,83 +466,8 @@ static void wsdl_soap_binding_body(sdlCtx* ctx, xmlNodePtr node, char* wsdl_soap
 				}
 			}
 		} else if (node_is_equal_ex(trav, "header", wsdl_soap_namespace)) {
-			xmlAttrPtr tmp;
-			xmlNodePtr *message, part;
-			char *ctype;
-			sdlSoapBindingFunctionHeaderPtr h;
+			sdlSoapBindingFunctionHeaderPtr h = wsdl_soap_binding_header(ctx, trav, wsdl_soap_namespace, 0);
 			smart_str key = {0};
-
-			header = trav;
-			tmp = get_attribute(header->properties, "message");
-			if (!tmp) {
-				php_error(E_ERROR, "SOAP-ERROR: Parsing WSDL: Missing message attribute for <header>");
-			}
-
-			ctype = strrchr(tmp->children->content,':');
-			if (ctype == NULL) {
-				ctype = tmp->children->content;
-			} else {
-				++ctype;
-			}
-			if (zend_hash_find(&ctx->messages, ctype, strlen(ctype)+1, (void**)&message) != SUCCESS) {
-				php_error(E_ERROR, "SOAP-ERROR: Parsing WSDL: Missing <message> with name '%s'", tmp->children->content);
-			}
-
-			tmp = get_attribute(header->properties, "part");
-			if (!tmp) {
-				php_error(E_ERROR, "SOAP-ERROR: Parsing WSDL: Missing part attribute for <header>");
-			}
-			part = get_node_with_attribute_ex((*message)->children, "part", WSDL_NAMESPACE, "name", tmp->children->content, NULL);
-			if (!part) {
-				php_error(E_ERROR, "SOAP-ERROR: Parsing WSDL: Missing part '%s' in <message>",tmp->children->content);
-			}
-
-			h = emalloc(sizeof(sdlSoapBindingFunctionHeader));
-			memset(h, 0, sizeof(sdlSoapBindingFunctionHeader));
-			h->name = estrdup(tmp->children->content);
-
-			tmp = get_attribute(header->properties, "use");
-			if (tmp && !strncmp(tmp->children->content, "encoded", sizeof("encoded"))) {
-				h->use = SOAP_ENCODED;
-			} else {
-				h->use = SOAP_LITERAL;
-			}
-
-			tmp = get_attribute(header->properties, "namespace");
-			if (tmp) {
-				h->ns = estrdup(tmp->children->content);
-			}
-
-			if (h->use == SOAP_ENCODED) {
-				tmp = get_attribute(header->properties, "encodingStyle");
-				if (tmp) {
-					if (strncmp(tmp->children->content,SOAP_1_1_ENC_NAMESPACE,sizeof(SOAP_1_1_ENC_NAMESPACE)) == 0) {
-						h->encodingStyle = SOAP_ENCODING_1_1;
-					} else if (strncmp(tmp->children->content,SOAP_1_2_ENC_NAMESPACE,sizeof(SOAP_1_2_ENC_NAMESPACE)) == 0) {
-						h->encodingStyle = SOAP_ENCODING_1_2;
-					} else {
-						php_error(E_ERROR, "SOAP-ERROR: Parsing WSDL: Unknown encodingStyle '%s'",tmp->children->content);
-					}
-				} else {
-					php_error(E_ERROR, "SOAP-ERROR: Parsing WSDL: Unspecified encodingStyle");
-				}
-			}
-
-			tmp = get_attribute(part->properties, "type");
-			if (tmp != NULL) {
-				h->encode = get_encoder_from_prefix(ctx->sdl, part, tmp->children->content);
-			} else {
-				tmp = get_attribute(part->properties, "element");
-				if (tmp != NULL) {
-					h->element = get_element(ctx->sdl, part, tmp->children->content);
-					if (h->element) {
-						h->encode = h->element->encode;
-						if (!h->ns && h->element->namens) {
-							h->ns = estrdup(h->element->namens);
-						}
-					}
-				}
-			}
 
 			if (binding->headers == NULL) {
 				binding->headers = emalloc(sizeof(HashTable));
@@ -471,7 +504,7 @@ static HashTable* wsdl_message(sdlCtx *ctx, char* message_name)
 		++ctype;
 	}
 	if (zend_hash_find(&ctx->messages, ctype, strlen(ctype)+1, (void**)&tmp) != SUCCESS) {
-		php_error(E_ERROR, "SOAP-ERROR: Parsing WSDL: Missing <message> with name '%s'", message->children->content);
+		php_error(E_ERROR, "SOAP-ERROR: Parsing WSDL: Missing <message> with name '%s'", message_name);
 	}
 	message = *tmp;
 
@@ -960,7 +993,7 @@ static sdlPtr load_wsdl(char *struri)
 	return ctx.sdl;
 }
 
-#define WSDL_CACHE_VERSION 0x08
+#define WSDL_CACHE_VERSION 0x09
 
 #define WSDL_CACHE_GET(ret,type,buf)   memcpy(&ret,*buf,sizeof(type)); *buf += sizeof(type);
 #define WSDL_CACHE_GET_INT(ret,buf)    ret = ((unsigned char)(*buf)[0])|((unsigned char)(*buf)[1]<<8)|((unsigned char)(*buf)[2]<<16)|((int)(*buf)[3]<<24); *buf += 4;
@@ -1198,7 +1231,7 @@ static void sdl_deserialize_encoder(encodePtr enc, sdlTypePtr *types, char **in)
 
 static void sdl_deserialize_soap_body(sdlSoapBindingFunctionBodyPtr body, encodePtr *encoders, sdlTypePtr *types, char **in)
 {
-	int i, n;
+	int i, j, n;
 
 	WSDL_CACHE_GET_1(body->use, sdlEncodingUse, in);
 	if (body->use == SOAP_ENCODED) {
@@ -1214,6 +1247,7 @@ static void sdl_deserialize_soap_body(sdlSoapBindingFunctionBodyPtr body, encode
 		zend_hash_init(body->headers, i, NULL, delete_header, 0);
 		while (i > 0) {
 			sdlSoapBindingFunctionHeaderPtr tmp = emalloc(sizeof(sdlSoapBindingFunctionHeader));
+			memset(tmp, 0, sizeof(sdlSoapBindingFunctionHeader));
 			sdl_deserialize_key(body->headers, tmp, in);
 			WSDL_CACHE_GET_1(tmp->use, sdlEncodingUse, in);
 			if (tmp->use == SOAP_ENCODED) {
@@ -1228,6 +1262,29 @@ static void sdl_deserialize_soap_body(sdlSoapBindingFunctionBodyPtr body, encode
 			WSDL_CACHE_GET_INT(n, in);
 			tmp->element = types[n];
 			--i;
+			WSDL_CACHE_GET_INT(j, in);
+			if (j > 0) {
+				tmp->headerfaults = emalloc(sizeof(HashTable));
+				zend_hash_init(tmp->headerfaults, i, NULL, delete_header, 0);
+				while (j > 0) {
+					sdlSoapBindingFunctionHeaderPtr tmp2 = emalloc(sizeof(sdlSoapBindingFunctionHeader));
+					memset(tmp2, 0, sizeof(sdlSoapBindingFunctionHeader));
+					sdl_deserialize_key(tmp->headerfaults, tmp2, in);
+					WSDL_CACHE_GET_1(tmp2->use, sdlEncodingUse, in);
+					if (tmp2->use == SOAP_ENCODED) {
+						WSDL_CACHE_GET_1(tmp2->encodingStyle, sdlRpcEncodingStyle, in);
+					} else {
+						tmp2->encodingStyle = SOAP_ENCODING_DEFAULT;
+					}
+					tmp2->name = sdl_deserialize_string(in);
+					tmp2->ns = sdl_deserialize_string(in);
+					WSDL_CACHE_GET_INT(n, in);
+					tmp->encode = encoders[n];
+					WSDL_CACHE_GET_INT(n, in);
+					tmp->element = types[n];
+					--j;
+				}
+			}
 		}
 	}
 }
@@ -1776,7 +1833,7 @@ static void sdl_serialize_parameters(HashTable *ht, HashTable *tmp_encoders, Has
 
 static void sdl_serialize_soap_body(sdlSoapBindingFunctionBodyPtr body, HashTable *tmp_encoders, HashTable *tmp_types, smart_str *out)
 {
-	int i;
+	int i, j;
 
 	WSDL_CACHE_PUT_1(body->use, out);
 	if (body->use == SOAP_ENCODED) {
@@ -1803,6 +1860,28 @@ static void sdl_serialize_soap_body(sdlSoapBindingFunctionBodyPtr body, HashTabl
 			sdl_serialize_string((*tmp)->ns, out);
 			sdl_serialize_encoder_ref((*tmp)->encode, tmp_encoders, out);
 			sdl_serialize_type_ref((*tmp)->element, tmp_types, out);
+			if ((*tmp)->headerfaults) {
+				j = zend_hash_num_elements((*tmp)->headerfaults);
+			} else {
+				j = 0;
+			}
+			WSDL_CACHE_PUT_INT(j, out);
+			if (j > 0) {
+				sdlSoapBindingFunctionHeaderPtr *tmp2;
+				zend_hash_internal_pointer_reset((*tmp)->headerfaults);
+				while (zend_hash_get_current_data((*tmp)->headerfaults, (void**)&tmp2) == SUCCESS) {
+					sdl_serialize_key((*tmp)->headerfaults, out);
+					WSDL_CACHE_PUT_1((*tmp2)->use, out);
+					if ((*tmp2)->use == SOAP_ENCODED) {
+						WSDL_CACHE_PUT_1((*tmp2)->encodingStyle, out);
+					}
+					sdl_serialize_string((*tmp2)->name, out);
+					sdl_serialize_string((*tmp2)->ns, out);
+					sdl_serialize_encoder_ref((*tmp2)->encode, tmp_encoders, out);
+					sdl_serialize_type_ref((*tmp2)->element, tmp_types, out);
+					zend_hash_move_forward((*tmp)->headerfaults);
+				}
+			}
 			zend_hash_move_forward(body->headers);
 		}
 	}
@@ -2260,6 +2339,10 @@ static void delete_header(void *data)
 	}
 	if (hdr->ns) {
 		efree(hdr->ns);
+	}
+	if (hdr->headerfaults) {
+		zend_hash_destroy(hdr->headerfaults);
+		efree(hdr->headerfaults);
 	}
 	efree(hdr);
 }

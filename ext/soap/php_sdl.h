@@ -97,6 +97,7 @@ typedef struct _sdlSoapBindingFunctionHeader {
 	sdlTypePtr           element;
 	encodePtr            encode;
 	sdlRpcEncodingStyle  encodingStyle; /* not implemented yet */
+	HashTable           *headerfaults;  /* array of sdlSoapBindingFunctionHeaderPtr */
 } sdlSoapBindingFunctionHeader, *sdlSoapBindingFunctionHeaderPtr;
 
 typedef struct _sdlSoapBindingFunctionFault {
