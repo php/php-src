@@ -50,7 +50,6 @@ static void php_output_init_globals(OLS_D)
 	OG(implicit_flush) = 0;
 	OG(output_start_filename) = NULL;
 	OG(output_start_lineno) = 0;
-	OG(lock) = 0;
 }
 
 
@@ -73,6 +72,7 @@ PHPAPI void php_output_startup()
 	OG(php_body_write) = php_ub_body_write;
 	OG(php_header_write) = sapi_module.ub_write;
 	OG(nesting_level) = 0;
+	OG(lock) = 0;
 }
 
 PHPAPI int php_body_write(const char *str, uint str_length)
