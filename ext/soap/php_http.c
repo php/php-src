@@ -21,6 +21,7 @@
 
 #include "php_soap.h"
 #include "ext/standard/base64.h"
+#include "ext/standard/md5.h"
 
 static char *get_http_header_value(char *headers, char *type);
 static int get_http_body(php_stream *socketd, int close, char *headers,  char **response, int *out_size TSRMLS_DC);
@@ -126,7 +127,7 @@ static php_stream* http_connect(zval* this_ptr, php_url *phpurl, int use_ssl, in
 		STREAM_XPORT_CLIENT | STREAM_XPORT_CONNECT,
 		NULL /*persistent_id*/,
 		NULL /*timeout*/,
-		context, 
+		context,
 		NULL, NULL);
 	efree(name);
 #else
@@ -199,13 +200,13 @@ static int in_domain(const char *host, const char *domain)
   }
 }
 
-int make_http_soap_request(zval  *this_ptr, 
+int make_http_soap_request(zval  *this_ptr,
                            char  *buf,
                            int    buf_size,
-                           char  *location, 
-                           char  *soapaction, 
+                           char  *location,
+                           char  *soapaction,
                            int    soap_version,
-                           char **buffer, 
+                           char **buffer,
                            int   *buffer_len TSRMLS_DC)
 {
 	char *request;
@@ -286,7 +287,7 @@ int make_http_soap_request(zval  *this_ptr,
 		phpurl = php_url_parse(location);
 	}
 
-try_again:	
+try_again:
 	if (phpurl == NULL || phpurl->host == NULL) {
 	  if (phpurl != NULL) {php_url_free(phpurl);}
 		if (request != buf) {efree(request);}
@@ -427,23 +428,164 @@ try_again:
 		smart_str_append_const(&soap_headers, "\r\n");
 
 		/* HTTP Authentication */
-		if (zend_hash_find(Z_OBJPROP_P(this_ptr), "_login", sizeof("_login"), (void **)&login) == SUCCESS) {
-			char* buf;
-			int len;
+		if (zend_hash_find(Z_OBJPROP_P(this_ptr), "_login", sizeof("_login"), (void **)&login) == SUCCESS &&
+		    Z_TYPE_PP(login) == IS_STRING) {
+			zval **digest;
 
-			smart_str auth = {0};
-			smart_str_appendl(&auth, Z_STRVAL_PP(login), Z_STRLEN_PP(login));
-			smart_str_appendc(&auth, ':');
-			if (zend_hash_find(Z_OBJPROP_P(this_ptr), "_password", sizeof("_password"), (void **)&password) == SUCCESS) {
-				smart_str_appendl(&auth, Z_STRVAL_PP(password), Z_STRLEN_PP(password));
+			if (zend_hash_find(Z_OBJPROP_P(this_ptr), "_digest", sizeof("_digest"), (void **)&digest) == SUCCESS) {
+				if (Z_TYPE_PP(digest) == IS_ARRAY) {
+					char          HA1[33], HA2[33], response[33], cnonce[33], nc[9];
+					PHP_MD5_CTX   md5ctx;
+					unsigned char hash[16];
+
+					PHP_MD5Init(&md5ctx);
+					sprintf(cnonce, "%d", rand());
+					PHP_MD5Update(&md5ctx, cnonce, strlen(cnonce));
+					PHP_MD5Final(hash, &md5ctx);
+					make_digest(cnonce, hash);
+
+					if (zend_hash_find(Z_ARRVAL_PP(digest), "nc", sizeof("nc"), (void **)&tmp) == SUCCESS &&
+					    Z_TYPE_PP(tmp) == IS_LONG) {
+						Z_LVAL_PP(tmp)++;
+						sprintf(nc, "%08ld", Z_LVAL_PP(tmp));
+					} else {
+						add_assoc_long(*digest, "nc", 1);
+						strcpy(nc, "00000001");
+					}
+
+					PHP_MD5Init(&md5ctx);
+					PHP_MD5Update(&md5ctx, Z_STRVAL_PP(login), Z_STRLEN_PP(login));
+					PHP_MD5Update(&md5ctx, ":", 1);
+					if (zend_hash_find(Z_ARRVAL_PP(digest), "realm", sizeof("realm"), (void **)&tmp) == SUCCESS &&
+					    Z_TYPE_PP(tmp) == IS_STRING) {
+						PHP_MD5Update(&md5ctx, Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp));
+					}
+					PHP_MD5Update(&md5ctx, ":", 1);
+					if (zend_hash_find(Z_OBJPROP_P(this_ptr), "_password", sizeof("_password"), (void **)&password) == SUCCESS &&
+					    Z_TYPE_PP(password) == IS_STRING) {
+						PHP_MD5Update(&md5ctx, Z_STRVAL_PP(password), Z_STRLEN_PP(password));
+					}
+					PHP_MD5Final(hash, &md5ctx);
+					make_digest(HA1, hash);
+					if (zend_hash_find(Z_ARRVAL_PP(digest), "algorithm", sizeof("algorithm"), (void **)&tmp) == SUCCESS &&
+					    Z_TYPE_PP(tmp) == IS_STRING &&
+					    Z_STRLEN_PP(tmp) == sizeof("md5-sess")-1 &&
+					    stricmp(Z_STRVAL_PP(tmp), "md5-sess") == 0) {
+						PHP_MD5Init(&md5ctx);
+						PHP_MD5Update(&md5ctx, HA1, 32);
+						PHP_MD5Update(&md5ctx, ":", 1);
+						if (zend_hash_find(Z_ARRVAL_PP(digest), "nonce", sizeof("nonce"), (void **)&tmp) == SUCCESS &&
+						    Z_TYPE_PP(tmp) == IS_STRING) {
+							PHP_MD5Update(&md5ctx, Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp));
+						}
+						PHP_MD5Update(&md5ctx, ":", 1);
+						PHP_MD5Update(&md5ctx, cnonce, 8);
+						PHP_MD5Final(hash, &md5ctx);
+						make_digest(HA1, hash);
+					}
+
+					PHP_MD5Init(&md5ctx);
+					PHP_MD5Update(&md5ctx, "POST:", sizeof("POST:")-1);
+					if (phpurl->path) {
+						PHP_MD5Update(&md5ctx, phpurl->path, strlen(phpurl->path));
+					}
+					if (phpurl->query) {
+						PHP_MD5Update(&md5ctx, "?", 1);
+						PHP_MD5Update(&md5ctx, phpurl->query, strlen(phpurl->query));
+					}
+
+					/* TODO: Support for qop="auth-int" */
+/*
+					if (zend_hash_find(Z_ARRVAL_PP(digest), "qop", sizeof("qop"), (void **)&tmp) == SUCCESS &&
+					    Z_TYPE_PP(tmp) == IS_STRING &&
+					    Z_STRLEN_PP(tmp) == sizeof("auth-int")-1 &&
+					    stricmp(Z_STRVAL_PP(tmp), "auth-int") == 0) {
+						PHP_MD5Update(&md5ctx, ":", 1);
+						PHP_MD5Update(&md5ctx, HEntity, HASHHEXLEN);
+					}
+*/
+					PHP_MD5Final(hash, &md5ctx);
+					make_digest(HA2, hash);
+
+					PHP_MD5Init(&md5ctx);
+					PHP_MD5Update(&md5ctx, HA1, 32);
+					PHP_MD5Update(&md5ctx, ":", 1);
+					if (zend_hash_find(Z_ARRVAL_PP(digest), "nonce", sizeof("nonce"), (void **)&tmp) == SUCCESS &&
+					    Z_TYPE_PP(tmp) == IS_STRING) {
+						PHP_MD5Update(&md5ctx, Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp));
+					}
+					PHP_MD5Update(&md5ctx, ":", 1);
+					if (zend_hash_find(Z_ARRVAL_PP(digest), "qop", sizeof("qop"), (void **)&tmp) == SUCCESS &&
+					    Z_TYPE_PP(tmp) == IS_STRING) {
+						PHP_MD5Update(&md5ctx, nc, 8);
+						PHP_MD5Update(&md5ctx, ":", 1);
+						PHP_MD5Update(&md5ctx, cnonce, 8);
+						PHP_MD5Update(&md5ctx, ":", 1);
+						/* TODO: Support for qop="auth-int" */
+						PHP_MD5Update(&md5ctx, "auth", sizeof("auth")-1);
+						PHP_MD5Update(&md5ctx, ":", 1);
+					}
+					PHP_MD5Update(&md5ctx, HA2, 32);
+					PHP_MD5Final(hash, &md5ctx);
+					make_digest(response, hash);
+	
+					smart_str_append_const(&soap_headers, "Authorization: Digest username=\"");
+					smart_str_appendl(&soap_headers, Z_STRVAL_PP(login), Z_STRLEN_PP(login));
+					if (zend_hash_find(Z_ARRVAL_PP(digest), "realm", sizeof("realm"), (void **)&tmp) == SUCCESS &&
+					    Z_TYPE_PP(tmp) == IS_STRING) {
+						smart_str_append_const(&soap_headers, "\", realm=\"");
+						smart_str_appendl(&soap_headers, Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp));
+					}
+					if (zend_hash_find(Z_ARRVAL_PP(digest), "nonce", sizeof("nonce"), (void **)&tmp) == SUCCESS &&
+					    Z_TYPE_PP(tmp) == IS_STRING) {
+						smart_str_append_const(&soap_headers, "\", nonce=\"");
+						smart_str_appendl(&soap_headers, Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp));
+					}
+					smart_str_append_const(&soap_headers, "\", uri=\"");
+					if (phpurl->path) {
+						smart_str_appends(&soap_headers, phpurl->path);
+					}
+					if (phpurl->query) {
+						smart_str_appendc(&soap_headers, '?');
+						smart_str_appends(&soap_headers, phpurl->query);
+					}
+					if (zend_hash_find(Z_ARRVAL_PP(digest), "qop", sizeof("qop"), (void **)&tmp) == SUCCESS &&
+					    Z_TYPE_PP(tmp) == IS_STRING) {
+					/* TODO: Support for qop="auth-int" */
+						smart_str_append_const(&soap_headers, "\", qop=\"auth");
+						smart_str_append_const(&soap_headers, "\", nc=\"");
+						smart_str_appendl(&soap_headers, nc, 8);
+						smart_str_append_const(&soap_headers, "\", cnonce=\"");
+						smart_str_appendl(&soap_headers, cnonce, 8);
+					}
+					smart_str_append_const(&soap_headers, "\", response=\"");
+					smart_str_appendl(&soap_headers, response, 32);
+					if (zend_hash_find(Z_ARRVAL_PP(digest), "opaque", sizeof("opaque"), (void **)&tmp) == SUCCESS &&
+					    Z_TYPE_PP(tmp) == IS_STRING) {
+						smart_str_append_const(&soap_headers, "\", opaque=\"");
+						smart_str_appendl(&soap_headers, Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp));
+					}
+					smart_str_append_const(&soap_headers, "\"\r\n");
+				}
+			} else {
+				char* buf;
+				int len;
+
+				smart_str auth = {0};
+				smart_str_appendl(&auth, Z_STRVAL_PP(login), Z_STRLEN_PP(login));
+				smart_str_appendc(&auth, ':');
+				if (zend_hash_find(Z_OBJPROP_P(this_ptr), "_password", sizeof("_password"), (void **)&password) == SUCCESS &&
+				    Z_TYPE_PP(password) == IS_STRING) {
+					smart_str_appendl(&auth, Z_STRVAL_PP(password), Z_STRLEN_PP(password));
+				}
+				smart_str_0(&auth);
+				buf = php_base64_encode(auth.c, auth.len, &len);
+				smart_str_append_const(&soap_headers, "Authorization: Basic ");
+				smart_str_appendl(&soap_headers, buf, len);
+				smart_str_append_const(&soap_headers, "\r\n");
+				efree(buf);
+				smart_str_free(&auth);
 			}
-			smart_str_0(&auth);
-			buf = php_base64_encode(auth.c, auth.len, &len);
-			smart_str_append_const(&soap_headers, "Authorization: Basic ");
-			smart_str_appendl(&soap_headers, buf, len);
-			smart_str_append_const(&soap_headers, "\r\n");
-			efree(buf);
-			smart_str_free(&auth);
 		}
 
 		/* Proxy HTTP Authentication */
@@ -543,48 +685,6 @@ try_again:
 			http_status = atoi(tmp);
 		}
 		efree(http_version);
-
-		/* Process HTTP status codes */
-		if (http_status >= 200 && http_status < 300) {
-		} else if (http_status >= 300 && http_status < 400) {
-			char *loc;
-
-			if ((loc = get_http_header_value(http_headers,"Location: ")) != NULL) {
-			  php_url *new_url  = php_url_parse(loc);
-			  char *body;
-			  int body_size;
-
-				if (new_url != NULL) {
-					if (get_http_body(stream, !http_1_1, http_headers, &body, &body_size TSRMLS_CC)) {
-						efree(body);
-					} else {
-						php_stream_close(stream);
-						zend_hash_del(Z_OBJPROP_P(this_ptr), "httpsocket", sizeof("httpsocket"));
-						stream = NULL;
-					}
-					efree(http_headers);
-					efree(loc);
-					if (new_url->scheme == NULL && new_url->path != NULL) {						
-					  new_url->scheme = estrdup(phpurl->scheme);
-					  new_url->host = estrdup(phpurl->host);
-					  new_url->port = phpurl->port;
-						if (new_url->path && new_url->path[0] != '/') {
-						  char *t = phpurl->path?phpurl->path:"/";
-						  char *p = strrchr(t, '/');
-						  char *s = emalloc((p - t) + strlen(new_url->path) + 2);
-
-						  strncpy(s, t, (p - t) + 1);
-						  s[(p - t) + 1] = 0;
-						  strcat(s, new_url->path);
-						  efree(new_url->path);
-						  new_url->path = s;
-						} 
-					}
-					phpurl = new_url;
-					goto try_again;
-				}
-			}
-		}
 
 		/* Try and get headers again */
 		if (http_status == 100) {
@@ -723,6 +823,127 @@ try_again:
 		php_stream_close(stream);
 		zend_hash_del(Z_OBJPROP_P(this_ptr), "httpsocket", sizeof("httpsocket"));
 		zend_hash_del(Z_OBJPROP_P(this_ptr), "_use_proxy", sizeof("_use_proxy"));
+	}
+
+	/* Process HTTP status codes */
+	if (http_status >= 300 && http_status < 400) {
+		char *loc;
+
+		if ((loc = get_http_header_value(http_headers,"Location: ")) != NULL) {
+			php_url *new_url  = php_url_parse(loc);
+			char *body;
+			int body_size;
+
+			if (new_url != NULL) {
+				if (get_http_body(stream, !http_1_1, http_headers, &body, &body_size TSRMLS_CC)) {
+					efree(body);
+				} else {
+					php_stream_close(stream);
+					zend_hash_del(Z_OBJPROP_P(this_ptr), "httpsocket", sizeof("httpsocket"));
+					stream = NULL;
+				}
+				efree(http_headers);
+				efree(http_body);
+				efree(loc);
+				if (new_url->scheme == NULL && new_url->path != NULL) {
+					new_url->scheme = estrdup(phpurl->scheme);
+					new_url->host = estrdup(phpurl->host);
+					new_url->port = phpurl->port;
+					if (new_url->path && new_url->path[0] != '/') {
+						char *t = phpurl->path?phpurl->path:"/";
+						char *p = strrchr(t, '/');
+						char *s = emalloc((p - t) + strlen(new_url->path) + 2);
+
+						strncpy(s, t, (p - t) + 1);
+						s[(p - t) + 1] = 0;
+						strcat(s, new_url->path);
+						efree(new_url->path);
+						new_url->path = s;
+					}
+				}
+				phpurl = new_url;
+
+				goto try_again;
+			}
+		}
+	} else if (http_status == 401) {
+		/* Digest authentication */
+		zval **digest, **login, **password;
+		char *auth = get_http_header_value(http_headers, "WWW-Authenticate: ");
+
+		if (auth &&
+				strstr(auth, "Digest") == auth &&
+		    (zend_hash_find(Z_OBJPROP_P(this_ptr), "_digest", sizeof("_digest"), (void **)&digest) == FAILURE ||
+		     Z_TYPE_PP(digest) != IS_ARRAY) &&
+		    zend_hash_find(Z_OBJPROP_P(this_ptr), "_login", sizeof("_login"), (void **)&login) == SUCCESS &&
+		    Z_TYPE_PP(login) == IS_STRING &&
+		    zend_hash_find(Z_OBJPROP_P(this_ptr), "_password", sizeof("_password"), (void **)&password) == SUCCESS &&
+		    Z_TYPE_PP(password) == IS_STRING) {
+			char *s;
+			zval *digest = NULL;
+
+			s = auth + sizeof("Digest")-1;
+			while (*s != '\0') {
+				char *name, *val;
+				while (*s == ' ') ++s;
+				name = s;
+				while (*s != '\0' && *s != '=') ++s;
+				if (*s == '=') {
+					*s = '\0';
+					++s;
+					if (*s == '"') {
+						++s;
+						val = s;
+						while (*s != '\0' && *s != '"') ++s;
+					} else {
+						val = s;
+						while (*s != '\0' && *s != ' ' && *s != ',') ++s;
+					}
+					if (*s != '\0') {
+						if (*s != ',') {
+							*s = '\0';
+							++s;
+							while (*s != '\0' && *s != ',') ++s;
+							if (*s != '\0') ++s;
+						} else {
+							*s = '\0';
+							++s;
+						}
+					}
+					if (digest == NULL) {
+						ALLOC_INIT_ZVAL(digest);
+						array_init(digest);
+					}
+					add_assoc_string(digest, name, val ,1);
+				}
+			}
+
+			if (digest != NULL) {
+				php_url *new_url  = emalloc(sizeof(php_url));
+
+#ifdef ZEND_ENGINE_2
+				digest->refcount--;
+#endif
+				add_property_zval_ex(this_ptr, "_digest", sizeof("_digest"), digest TSRMLS_CC);
+
+				*new_url = *phpurl;
+				if (phpurl->scheme) phpurl->scheme = estrdup(phpurl->scheme);
+				if (phpurl->user) phpurl->user = estrdup(phpurl->user);
+				if (phpurl->pass) phpurl->pass = estrdup(phpurl->pass);
+				if (phpurl->host) phpurl->host = estrdup(phpurl->host);
+				if (phpurl->path) phpurl->path = estrdup(phpurl->path);
+				if (phpurl->query) phpurl->query = estrdup(phpurl->query);
+				if (phpurl->fragment) phpurl->fragment = estrdup(phpurl->fragment);
+				phpurl = new_url;
+
+				efree(auth);
+				efree(http_headers);
+				efree(http_body);
+
+				goto try_again;
+			}
+		}
+		if (auth) efree(auth);
 	}
 
 	/* Check and see if the server even sent a xml document */
