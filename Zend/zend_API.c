@@ -1187,7 +1187,7 @@ ZEND_API int zend_register_module_ex(zend_module_entry *module TSRMLS_DC)
 
 	if (!module->module_started && module->module_startup_func) {
 		EG(current_module) = module;
-		if (module->module_startup_func(Z_TYPE_P(module), module->module_number TSRMLS_CC)==FAILURE) {
+		if (module->module_startup_func(module->type, module->module_number TSRMLS_CC)==FAILURE) {
 			zend_error(E_CORE_ERROR,"Unable to start %s module", module->name);
 			EG(current_module) = NULL;
 			return FAILURE;
