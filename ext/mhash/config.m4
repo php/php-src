@@ -8,7 +8,7 @@ AC_ARG_WITH(mhash,
                           install directory.],
 [
   if test "$withval" != "no"; then
-    for i in /usr/local /usr $withval; do
+    for i in /usr/local /usr /opt/mhash $withval; do
       if test -f $i/include/mhash.h; then
         MHASH_DIR=$i
       fi
