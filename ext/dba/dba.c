@@ -642,15 +642,20 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			lock_mode = (lock_flag & DBA_LOCK_WRITER) ? LOCK_EX : 0;
 			file_mode = "r+b";
 			break;
-		case 'n':
-			modenr = DBA_TRUNC;
-			lock_mode = (lock_flag & DBA_LOCK_TRUNC) ? LOCK_EX : 0;
-			file_mode = "w+b";
-			break;
 		case 'c': 
 			modenr = DBA_CREAT; 
 			lock_mode = (lock_flag & DBA_LOCK_CREAT) ? LOCK_EX : 0;
 			file_mode = "a+b";
+			if (!lock_mode || !lock_dbf) {
+				break;
+			}
+			/* When we lock the db file it will be created before the handler
+			 * even tries to open it, hence we must change to truncate mode.
+			 */
+		case 'n':
+			modenr = DBA_TRUNC;
+			lock_mode = (lock_flag & DBA_LOCK_TRUNC) ? LOCK_EX : 0;
+			file_mode = "w+b";
 			break;
 		default:
 			modenr = 0;
