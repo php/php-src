@@ -29,7 +29,9 @@
 #include "SAPI.h"
 
 PHPAPI int php_request_startup(TSRMLS_D);
+PHPAPI int php_request_startup_for_hook(TSRMLS_D);
 PHPAPI void php_request_shutdown(void *dummy);
+PHPAPI void php_request_shutdown_for_hook(void *dummy);
 PHPAPI void php_request_shutdown_for_exec(void *dummy);
 PHPAPI int php_module_startup(sapi_module_struct *sf);
 PHPAPI void php_module_shutdown(TSRMLS_D);
@@ -39,6 +41,7 @@ PHPAPI int php_module_shutdown_wrapper(sapi_module_struct *sapi_globals);
 PHPAPI int php_startup_extensions(zend_module_entry **ptr, int count);
 
 PHPAPI int php_execute_script(zend_file_handle *primary_file TSRMLS_DC);
+PHPAPI int php_execute_simple_script(zend_file_handle *primary_file, zval **ret TSRMLS_DC);
 PHPAPI int php_handle_special_queries(TSRMLS_D);
 PHPAPI int php_lint_script(zend_file_handle *file TSRMLS_DC);
 

@@ -32,6 +32,8 @@ typedef struct {
 	long xbithack;
 	long terminate_child;
 	zend_bool in_request;
+	zend_bool apache_config_loaded;
+	char *uri_handler;
 } php_apache_info_struct;
 
 extern zend_module_entry apache_module_entry;

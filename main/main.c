@@ -692,6 +692,35 @@ int php_request_startup(TSRMLS_D)
 }
 /* }}} */
 
+/* {{{ php_request_startup_for_hook
+ */
+int php_request_startup_for_hook(TSRMLS_D)
+{
+	int retval = SUCCESS;
+
+#if PHP_SIGCHILD
+	signal(SIGCHLD, sigchld_handler);
+#endif
+
+	zend_try {
+		PG(during_request_startup) = 1;
+		PG(modules_activated) = 0;
+		PG(header_is_being_sent) = 0;
+		PG(connection_status) = PHP_CONNECTION_NORMAL;
+		zend_activate(TSRMLS_C);
+		sapi_activate(TSRMLS_C);
+		zend_set_timeout(EG(timeout_seconds));
+		php_hash_environment(TSRMLS_C);
+		zend_activate_modules(TSRMLS_C);
+		PG(modules_activated)=1;
+	} zend_catch {
+		retval = FAILURE;
+	} zend_end_try();
+
+	return retval;
+}
+/* }}} */
+
 /* {{{ php_request_shutdown_for_exec
  */
 void php_request_shutdown_for_exec(void *dummy)
@@ -699,6 +728,44 @@ void php_request_shutdown_for_exec(void *dummy)
 	/* used to close fd's in the 3..255 range here, but it's problematic
 	 */
 	shutdown_memory_manager(1, 1);
+}
+/* }}} */
+
+/* {{{ php_request_shutdown_for_hook
+ */
+void php_request_shutdown_for_hook(void *dummy)
+{
+	TSRMLS_FETCH();
+
+	if (PG(modules_activated)) zend_try {
+		php_call_shutdown_functions();
+	} zend_end_try();
+	
+	if (PG(modules_activated)) {
+		zend_deactivate_modules(TSRMLS_C);
+	}
+
+	zend_try {
+		int i;
+
+		for (i=0; i<NUM_TRACK_VARS; i++) {
+			zval_ptr_dtor(&PG(http_globals)[i]);
+		}
+	} zend_end_try();
+
+	zend_deactivate(TSRMLS_C);
+
+	zend_try {
+		sapi_deactivate(TSRMLS_C);
+	} zend_end_try();
+
+	zend_try { 
+		shutdown_memory_manager(CG(unclean_shutdown), 0);
+	} zend_end_try();
+
+	zend_try { 
+		zend_unset_timeout(TSRMLS_C);
+	} zend_end_try();
 }
 /* }}} */
 
@@ -1308,6 +1375,40 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file TSRMLS_DC)
 			append_file_p = NULL;
 		}
 		zend_execute_scripts(ZEND_REQUIRE TSRMLS_CC, NULL, 3, prepend_file_p, primary_file, append_file_p);
+	} zend_end_try();
+
+	if (old_cwd[0] != '\0') {
+		VCWD_CHDIR(old_cwd);
+	}
+	free_alloca(old_cwd);
+	return EG(exit_status);
+}
+/* }}} */
+
+/* {{{ php_execute_simple_script
+ */
+PHPAPI int php_execute_simple_script(zend_file_handle *primary_file, zval **ret TSRMLS_DC)
+{
+	char *old_cwd;
+
+	EG(exit_status) = 0;
+#define OLD_CWD_SIZE 4096
+	old_cwd = do_alloca(OLD_CWD_SIZE);
+	old_cwd[0] = '\0';
+
+	zend_try {
+#ifdef PHP_WIN32
+		UpdateIniFromRegistry(primary_file->filename TSRMLS_CC);
+#endif
+
+		PG(during_request_startup) = 0;
+
+		if (primary_file->type == ZEND_HANDLE_FILENAME 
+				&& primary_file->filename) {
+			VCWD_GETCWD(old_cwd, OLD_CWD_SIZE-1);
+			VCWD_CHDIR_FILE(primary_file->filename);
+		}
+		zend_execute_scripts(ZEND_REQUIRE TSRMLS_CC, ret, 1, primary_file);
 	} zend_end_try();
 
 	if (old_cwd[0] != '\0') {

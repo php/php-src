@@ -415,9 +415,8 @@ void php_restore_umask(void)
 
 /* {{{ init_request_info
  */
-static void init_request_info(TSRMLS_D)
+static void init_request_info(request_rec *r TSRMLS_DC)
 {
-	request_rec *r = ((request_rec *) SG(server_context));
 	char *content_length = (char *) table_get(r->subprocess_env, "CONTENT_LENGTH");
 	const char *authorization=NULL;
 	char *tmp;
@@ -514,9 +513,12 @@ static int send_php(request_rec *r, int display_source_mode, char *filename)
 			return DECLINED;
 		}
 
-		per_dir_conf = (HashTable *) get_module_config(r->per_dir_config, &php4_module);
-		if (per_dir_conf) {
-			zend_hash_apply((HashTable *) per_dir_conf, (apply_func_t) php_apache_alter_ini_entries TSRMLS_CC);
+		if(!AP(apache_config_loaded)) {
+			per_dir_conf = (HashTable *) get_module_config(r->per_dir_config, &php4_module);
+			if (per_dir_conf) {
+				zend_hash_apply((HashTable *) per_dir_conf, (apply_func_t) php_apache_alter_ini_entries TSRMLS_CC);
+			}
+			AP(apache_config_loaded) = 1;
 		}
 
 		/* If PHP parser engine has been turned off with an "engine off"
@@ -571,7 +573,7 @@ static int send_php(request_rec *r, int display_source_mode, char *filename)
 		add_common_vars(r);
 		add_cgi_vars(r);
 
-		init_request_info(TSRMLS_C);
+		init_request_info(r TSRMLS_CC);
 		apache_php_module_main(r, display_source_mode TSRMLS_CC);
 
 		/* Done, restore umask, turn off timeout, close file and return */
@@ -771,14 +773,21 @@ CONST_PREFIX char *php_apache_admin_flag_handler(cmd_parms *cmd, HashTable *conf
  */
 int php_xbithack_handler(request_rec * r)
 {
-	php_apache_info_struct *conf;
+    HashTable *conf;
 
-	conf = (php_apache_info_struct *) get_module_config(r->per_dir_config, &php4_module);
+	if(!AP(apache_config_loaded)) {
+		conf = (HashTable *) get_module_config(r->per_dir_config, &php4_module);
+		if (conf) {
+			zend_hash_apply((HashTable *)conf, (apply_func_t) php_apache_alter_ini_entries TSRMLS_CC);
+		}
+		AP(apache_config_loaded) = 1;
+	}
+
 	if (!(r->finfo.st_mode & S_IXUSR)) {
 		r->allowed |= (1 << METHODS) - 1;
 		return DECLINED;
 	}
-	if (conf->xbithack == 0) {
+	if (!AP(xbithack)) {
 		r->allowed |= (1 << METHODS) - 1;
 		return DECLINED;
 	}
@@ -868,7 +877,51 @@ command_rec php_commands[] =
 };
 /* }}} */
 
-/* {{{ odule MODULE_VAR_EXPORT php4_module
+static int php_uri_translation(request_rec *r)
+{
+	char *handler = NULL;
+	zval *ret = NULL;
+    HashTable *conf;
+	TSRMLS_FETCH();
+
+	if(!AP(apache_config_loaded)) {
+		conf = (HashTable *) get_module_config(r->per_dir_config, &php4_module);
+		if (conf) {
+			zend_hash_apply((HashTable *)conf, (apply_func_t) php_apache_alter_ini_entries TSRMLS_CC);
+		}
+		AP(apache_config_loaded) = 1;
+	}
+
+	handler = AP(uri_handler);
+
+	if(handler) {
+		hard_timeout("send", r);
+		SG(server_context) = r;
+		php_save_umask();
+		add_common_vars(r);
+		add_cgi_vars(r);
+		init_request_info(r TSRMLS_CC);
+		apache_php_module_hook(r, handler, &ret TSRMLS_CC);
+		php_restore_umask();
+		kill_timeout(r);
+		convert_to_string(ret);
+		if(Z_STRLEN_P(ret)) {
+			if (strchr(Z_STRVAL_P(ret), ':')) {
+				ap_table_setn(r->headers_out, "Location", Z_STRVAL_P(ret));
+				return REDIRECT;
+			} else {
+				r->filename = ap_pstrdup(r->pool, Z_STRVAL_P(ret));
+			}
+			return OK;
+		} else {
+			return DECLINED;
+		}
+	} else {
+		return DECLINED;
+	}
+}
+
+/* {{{ module MODULE_VAR_EXPORT php4_module
  */
 module MODULE_VAR_EXPORT php4_module =
 {
@@ -880,7 +933,7 @@ module MODULE_VAR_EXPORT php4_module =
 	NULL, 						/* merge server config */
 	php_commands,				/* command table */
 	php_handlers,				/* handlers */
-	NULL,						/* filename translation */
+	php_uri_translation,		/* filename translation */
 	NULL,						/* check_user_id */
 	NULL,						/* check auth */
 	NULL,						/* check access */
