@@ -540,14 +540,13 @@ static PHP_METHOD(PDOStatement, fetchAll)
 static int register_bound_param(INTERNAL_FUNCTION_PARAMETERS, pdo_stmt_t *stmt, int is_param)
 {
 	struct pdo_bound_param_data param = {0};
-	int name_strlen;
 
 	param.paramno = -1;
 	param.param_type = PDO_PARAM_STR;
 
 	if (FAILURE == zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET,
 				ZEND_NUM_ARGS() TSRMLS_CC, "sz|llz!",
-				&param.name, &name_strlen, &param.parameter, &param.param_type,
+				&param.name, &param.namelen, &param.parameter, &param.param_type,
 				&param.max_value_len,
 				&param.driver_params)) {
 		if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lz|llz!", &param.paramno,
@@ -826,15 +825,20 @@ static zval *row_prop_or_dim_read(zval *object, zval *member, int type TSRMLS_DC
 	int colno = -1;
 
 	MAKE_STD_ZVAL(return_value);
-	convert_to_string(member);
-
-	/* look up the column */
-	/* TODO: replace this with a hash of available column names to column
-	 * numbers */
-	for (colno = 0; colno < stmt->column_count; colno++) {
-		if (strcmp(stmt->columns[colno].name, Z_STRVAL_P(member)) == 0) {
-			fetch_value(stmt, return_value, colno TSRMLS_CC);
-			break;
+		
+	if (Z_TYPE_P(member) == IS_LONG) {
+		if (Z_LVAL_P(member) >= 0 && Z_LVAL_P(member) < stmt->column_count) {
+			fetch_value(stmt, return_value, Z_LVAL_P(member) TSRMLS_CC);
+		}
+	} else {
+		convert_to_string(member);
+		/* TODO: replace this with a hash of available column names to column
+		 * numbers */
+		for (colno = 0; colno < stmt->column_count; colno++) {
+			if (strcmp(stmt->columns[colno].name, Z_STRVAL_P(member)) == 0) {
+				fetch_value(stmt, return_value, colno TSRMLS_CC);
+				break;
+			}
 		}
 	}
 	
@@ -851,13 +855,17 @@ static int row_prop_or_dim_exists(zval *object, zval *member, int check_empty TS
 	pdo_stmt_t * stmt = (pdo_stmt_t *) zend_object_store_get_object(object TSRMLS_CC);
 	int colno = -1;
 
-	convert_to_string(member);
+	if (Z_TYPE_P(member) == IS_LONG) {
+		return Z_LVAL_P(member) >= 0 && Z_LVAL_P(member) < stmt->column_count;
+	} else {
+		convert_to_string(member);
 
-	/* TODO: replace this with a hash of available column names to column
-	 * numbers */
-	for (colno = 0; colno < stmt->column_count; colno++) {
-		if (strcmp(stmt->columns[colno].name, Z_STRVAL_P(member)) == 0) {
-			return 1;
+		/* TODO: replace this with a hash of available column names to column
+		 * numbers */
+		for (colno = 0; colno < stmt->column_count; colno++) {
+			if (strcmp(stmt->columns[colno].name, Z_STRVAL_P(member)) == 0) {
+				return 1;
+			}
 		}
 	}
 
