@@ -1,3 +1,64 @@
+2000-02-22  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/session/session.c: Revert part of the last commit
+
+2000-02-22  Andrew Skalski  <askalski@chek.com>
+
+    * ext/ftp/ftp.c
+      ext/ftp/ftp.h
+      ext/ftp/php_ftp.c
+      ext/ftp/php_ftp.h: added the ftp_site() function
+
+2000-02-22  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/domxml/domxml.c: - added support for namespaces
+    - made entities in attributes possible
+
+2000-02-22  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/standard/exec.c: (PHP exec) Return last line of output properly.
+
+2000-02-22  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * tests/testdom: - some tiny changes to the test routine
+
+    * ext/domxml/domxml.c:
+    - dom tree isn't editable anymore. Will probably change back in the future
+
+2000-02-22  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/imap/imap.c
+      ext/gd/gdt1.c
+      ext/hyperwave/hw.c
+      ext/dav/dav.c
+      ext/bcmath/bcmath.c: More protos.
+
+2000-02-22  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/session/session.c:
+    Print out a warning, if writing the session data failed. This might
+    happen in a request shutdown handler; php_error() worked for me in the
+    CGI version.
+
+2000-02-22  Sam Ruby  <rubys@us.ibm.com>
+
+    * sapi/servlet/servlet.dsp: add proper dependencies
+
+2000-02-22  Andrei Zmievski  <andrei@ispi.net>
+
+    * pear/Makefile.in
+      pear/phpextdist:
+    Added phpextdist script for making external extension packages.
+
+    * build/library.mk: Use 'cp' instead of 'install'.
+
+    * ext/session/session.c: Typo.
+
+2000-02-22  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/oci8/oci8.c:
+    - Fixed OCI8 crash when returning cursors from stored-procedures. 
+
 2000-02-21  MySQL Team  <mysql-all@mysql.com>
 
     * ext/mysql/libmysql/.cvsignore: Ignore more
