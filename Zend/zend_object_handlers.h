@@ -90,7 +90,7 @@ typedef struct _zend_object_handlers {
 	zend_object_add_ref_t					add_ref;
 	zend_object_del_ref_t					del_ref;
 	zend_object_delete_obj_t				delete_obj;
-	zend_object_clone_obj_t					clone_obj;	
+	zend_object_clone_obj_t					clone_obj;
 	/* individual object functions */
 	zend_object_read_property_t				read_property;
 	zend_object_write_property_t			write_property;
