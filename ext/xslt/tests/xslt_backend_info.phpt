@@ -22,23 +22,21 @@ if("No information available." == xslt_backend_info()) {
  * not be available depending on what has been linked into the backend.
  */
 
-$tmp = explode("\n", xslt_backend_info());
-$info = array();
-foreach($tmp AS $line) {
-	list($key, $value) = explode(": ", $line, 2);
-	$info[strtolower($key)] = $value;
+$libs = '';
+if (preg_match('!Libs: ([^:]+)i!', xslt_backend_info(), $m)) {
+	$libs = $m[1];
 }
 
-if(FALSE === strstr($info['libs'], " -lexpat")) {
+if(FALSE === strstr($libs, " -lexpat")) {
 	die("You're configuration is missing expat, which conflicts with sanity.");
 }
 
-if(FALSE === strstr($info['libs'], " -liconv")) {
+if(FALSE === strstr($libs, " -liconv")) {
 	echo("You don't have iconv support\n");
 } else {
 	echo("You have iconv support\n");
 }
-if(FALSE === strstr($info['libs'], " -ljs")) {
+if(FALSE === strstr($libs, " -ljs")) {
 	echo("You don't have JavaScript support\n");
 } else {
 	echo("You have JavaScript support\n");
