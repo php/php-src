@@ -662,14 +662,25 @@ void do_free(znode *op1 CLS_DC)
 			&& opline->result.u.var == op1->u.var) {
 			opline->result.u.EA.type |= EXT_TYPE_UNUSED;
 		} else {
-			/* This should be an object instanciation
-			 * Find JMP_NO_CTOR, mark the preceding ASSIGN and the
-			 * proceeding INIT_FCALL_BY_NAME as unused
-			 */
 			while (opline>CG(active_op_array)->opcodes) {
+				/* This should be an object instanciation
+				 * Find JMP_NO_CTOR, mark the preceding ASSIGN and the
+				 * proceeding INIT_FCALL_BY_NAME as unused
+				 */
 				if (opline->opcode == ZEND_JMP_NO_CTOR) {
 					(opline-1)->result.u.EA.type |= EXT_TYPE_UNUSED;
 					(opline+1)->op1.u.EA.type |= EXT_TYPE_UNUSED;
+					break;
+				} else if (opline->opcode == ZEND_FETCH_DIM_R
+							&& opline->op1.op_type == IS_VAR
+							&& opline->op1.u.var == op1->u.var) {
+					/* This should the end of a list() construct
+					 * Mark its result as unused
+					 */
+					opline->extended_value = ZEND_FETCH_STANDARD;
+					break;
+				} else if (opline->result.op_type==IS_VAR
+					&& opline->result.u.var == op1->u.var) {
 					break;
 				}
 				opline--;
@@ -1796,11 +1807,7 @@ void do_list_end(znode *result, znode *expr CLS_DC)
 			opline->op2.u.constant.type = IS_LONG;
 			opline->op2.u.constant.value.lval = *((int *) dimension->data);
 			INIT_PZVAL(&opline->op2.u.constant);
-			if (le == CG(list_llist).tail) {
-				opline->extended_value = ZEND_FETCH_STANDARD;
-			} else {
-				opline->extended_value = ZEND_FETCH_ADD_LOCK;
-			}
+			opline->extended_value = ZEND_FETCH_ADD_LOCK;
 			last_container = opline->result;
 			dimension = dimension->next;
 		}
