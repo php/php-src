@@ -1,3 +1,61 @@
+2002-09-18  Zeev Suraski  <zeev@zend.com>
+
+    * win32/php4dllts.dsp:
+    Fix debug build options (looks like VC doesn't maintain indentation in the
+    .dsp...  Sorry Sebastian :)
+
+    * sapi/webjames/webjames.c
+      sapi/roxen/roxen.c
+      sapi/servlet/servlet.c
+      sapi/thttpd/thttpd.c
+      sapi/tux/php_tux.c
+      sapi/nsapi/nsapi.c
+      sapi/phttpd/phttpd.c
+      sapi/pi3web/pi3web_sapi.c
+      sapi/fastcgi/fastcgi.c
+      sapi/isapi/php4isapi.c
+      sapi/cgi/cgi_main.c
+      sapi/cli/php_cli.c
+      sapi/apache2filter/sapi_apache2.c
+      sapi/caudium/caudium.c
+      sapi/aolserver/aolserver.c
+      sapi/apache/mod_php4.c
+      sapi/apache2filter/php_functions.c
+      main/main.c
+      main/php_main.h
+      sapi/activescript/php4activescript.c:
+    another startup initialization fix - only ISAPI and CGI SAPI's tested,
+    minor compile buglets might occur in other SAPIs, but should be trivial
+    to fix...
+
+2002-09-18  James Cox  <james@blog.at>
+
+    * ext/standard/info.c: white background please
+
+2002-09-18  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/datetime.c: Fixed bug #19446
+
+    * ext/standard/image.c:
+    Added additional handlers for compressed swf files, which require
+    entire file to be downloaded for successful decompression.
+
+2002-09-18  Dan Kalowsky  <dank@deadmime.org>
+
+    * ext/imap/php_imap.c:
+    Patch for Bug #19402 provided by Kevin Way (kevin.way@overtone.org)
+
+2002-09-18  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/standard/tests/file/userstreams.phpt
+      main/user_streams.c: Tidy up some user stream code.
+    Add a small test case (not yet complete).
+
+2002-09-18  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/standard/string.c:
+    setlocale() will now accept multiple locale arguments, first match wins
+
 2002-09-17  Tal Peer  <tal@kaktos.co.il>
 
     * ext/fribidi/fribidi.c:
