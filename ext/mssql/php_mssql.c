@@ -2130,8 +2130,6 @@ PHP_FUNCTION(mssql_execute)
 				dbcanquery(mssql_ptr->link);
 				retval_results = dbresults(mssql_ptr->link);
 			} while (retval_results == SUCCEED);
-
-			_mssql_get_sp_result(mssql_ptr, statement TSRMLS_CC);
 		}
 		else {
 			/* Skip results not returning any columns */
@@ -2154,7 +2152,7 @@ PHP_FUNCTION(mssql_execute)
 			}
 		}
 	}
-	else if (retval_results == NO_MORE_RESULTS || retval_results == NO_MORE_RPC_RESULTS) {
+	if (retval_results == NO_MORE_RESULTS || retval_results == NO_MORE_RPC_RESULTS) {
 		_mssql_get_sp_result(mssql_ptr, statement TSRMLS_CC);
 	}
 	
