@@ -1,3 +1,127 @@
+2003-01-09  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/file.c:
+      CS fixes
+
+    * ext/standard/file.c:
+      Fixed a memory corruption that occurs when an unterminated " is encountered
+      this bug maybe be related to #21556.
+
+2003-01-09  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/mssql/config.m4:
+      Adding extended checks for where FreeTDS is installed
+
+2003-01-09  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * main/safe_mode.c:
+      Fixed compiler warnings.
+
+2003-01-09  Sara Golemon  <php@alphaweb.net>
+
+    * ext/standard/filestat.c
+      main/safe_mode.c
+      main/safe_mode.h:
+      Bug #21531   file_exists() and other filestat functions throw errors when
+      in safe mode and file/directory does not exist.
+      Extended php_checkuid function to add "flags" field via rename to
+      php_checkuid_ex with alias for BC in functions that do want safe mode
+      errors thrown.
+
+2003-01-09  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/ctype/ctype.c:
+      Fixed typo
+
+2003-01-09  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/standard/basic_functions.c
+      ext/standard/basic_functions.h
+      ext/standard/formatted_print.c
+      tests/strings/002.phpt:
+      Implement fprintf() and vfprintf().
+      Add a couple of tests.
+
+2003-01-09  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * (PHP_4_3)
+      main/.cvsignore
+      main/config.w32.h
+      main/config.w32.h.in
+      win32/php4dll.dsp
+      win32/php4dllts.dsp:
+      MFH: Revert config.w32.h.in -> config.w32.h build step.
+
+2003-01-09  Jani Taskinen  <sniper@iki.fi>
+
+    * configure.in:
+      Fix bug: #21511, config.status warning
+
+2003-01-09  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/standard/math.c
+      ext/standard/tests/math/bug21523.phpt:
+      Fix Bug #21523 - number_format could cause a memory allocation for a
+      negative memory size in situations where the sprintf implementation of the
+      host system generated less decimal places than were requested.
+      
+      Resolved this issue by making number_format examine the string returned
+      by spprintf and have it pad to the correct number of decimal places.
+      
+      Added a test-case based on the bug report; the length of decimal places
+      required to trigger this bug is sprintf implementation dependent; as the
+      implementation is now using spprintf (provided by PHP), that number is
+      78 digits (NDIG - 2).
+      
+      
+
+2003-01-09  Stig Bakken  <ssb@fast.no>
+
+    * (RELEASE_1_0_1)
+      pear/PEAR.php:
+      - added debug_backtrace() support to PEAR errors
+
+    * (RELEASE_1_0_1)
+      pear/System.php:
+      - System::which() now checks .exe .bat .cmd and .com on Windows
+
+    * (RELEASE_1_0_1)
+      pear/PEAR/Frontend/CLI.php:
+      - cleanups
+
+2003-01-09  Zeev Suraski  <zeev@zend.com>
+
+    * configure.in
+      main/php_version.h:
+      Time for an update
+
+2003-01-09  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/mssql/php_mssql.c:
+      Use the correct link when checking for more results on stored procedures
+
+    * ext/mssql/php_mssql.c
+      ext/mssql/php_mssql.h:
+      Restire BC for mssql_execute(). This will not break the new feature for
+      handling
+      multiple results from a single stired procedure.
+      Adding mssql_free_statement()
+
+2003-01-09  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/fsock.c:
+      Fixed bug #21529 (memory corruption by fsockopen()).
+
+2003-01-09  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/mssql/php_mssql.c:
+      changed from LVAL to RESVAL macro
+
+2003-01-09  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/standard/image.c:
+      Fix the ZTS build.
+
 2003-01-08  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
 
     * ext/standard/filters.c:
