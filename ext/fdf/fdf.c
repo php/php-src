@@ -46,7 +46,6 @@ SAPI_POST_HANDLER_FUNC(fdf_post_handler);
 /* {{{ fdf_functions[]
  */
 function_entry fdf_functions[] = {
-	PHP_FE(fdf_add_doc_javascript,                  NULL)
 	PHP_FE(fdf_add_template,						NULL)
 	PHP_FE(fdf_close,								NULL)
 	PHP_FE(fdf_create,								NULL)
@@ -54,7 +53,6 @@ function_entry fdf_functions[] = {
 	PHP_FE(fdf_errno,        						NULL)
 	PHP_FE(fdf_error,        						NULL)
 	PHP_FE(fdf_get_ap,								NULL)
-	PHP_FE(fdf_get_attachment,                      NULL)
 	PHP_FE(fdf_get_encoding,						NULL)
 	PHP_FE(fdf_get_file,							NULL)
 	PHP_FE(fdf_get_flags,							NULL)
@@ -73,14 +71,18 @@ function_entry fdf_functions[] = {
 	PHP_FE(fdf_set_file,							NULL)
 	PHP_FE(fdf_set_flags,							NULL)
 	PHP_FE(fdf_set_javascript_action,				NULL)
-	PHP_FE(fdf_set_on_import_javascript,            NULL)
 	PHP_FE(fdf_set_opt,								NULL)
 	PHP_FE(fdf_set_status,							NULL)
 	PHP_FE(fdf_set_submit_form_action,				NULL)
-	PHP_FE(fdf_set_target_frame,                    NULL)
 	PHP_FE(fdf_set_value,							NULL)
-	PHP_FE(fdf_set_version,                         NULL)
 	PHP_FE(fdf_header,                              NULL)
+#ifdef HAVE_FDFTK_5
+	PHP_FE(fdf_add_doc_javascript,                  NULL)
+	PHP_FE(fdf_get_attachment,                      NULL)
+	PHP_FE(fdf_set_on_import_javascript,            NULL)
+	PHP_FE(fdf_set_target_frame,                    NULL)
+	PHP_FE(fdf_set_version,                         NULL)
+#endif
 	{NULL, NULL, NULL}
 };
 /* }}} */
@@ -336,17 +338,25 @@ PHP_FUNCTION(fdf_get_value)
 
 	buffer = emalloc(size);
 	if(which >= 0) {
+#if HAVE_FDFTK_5
 		err = FDFGetNthValue(fdf, fieldname, which, buffer, size-2, &nr);
+#else
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "the optional 'which' parameter requires FDF toolkit 5.0 or above, it will be ignored for now");
+		which = -1;
+#endif
 	} else {
 		err = FDFGetValue(fdf, fieldname, buffer, size-2, &nr);
 	}
 	if(err == FDFErcBufTooShort && nr > 0 ) {
 		buffer = erealloc(buffer, nr+2); 
 		if(which >= 0) {
+#if HAVE_FDFTK_5
 			err = FDFGetNthValue(fdf, fieldname, which, buffer, nr, &nr);
+#endif
 		} else {
 			err = FDFGetValue(fdf, fieldname, buffer, nr, &nr);
 		} 
+#if HAVE_FDFTK_5
 	} else if((err == FDFErcValueIsArray) && (which == -1)) {
 		if (array_init(return_value) == FAILURE) {
 			efree(buffer);
@@ -367,6 +377,7 @@ PHP_FUNCTION(fdf_get_value)
 		if(err == FDFErcNoValue) err = FDFErcOK;
 		efree(buffer); 
 		buffer = NULL;
+#endif
 	}
 
 	if(err != FDFErcOK) {
@@ -411,6 +422,7 @@ PHP_FUNCTION(fdf_set_value)
 	convert_to_string_ex(fieldname);
 
 	if (Z_TYPE_PP(value) == IS_ARRAY) {
+#ifdef HAVE_FDFTK_5
 		ASInt32 nValues = zend_hash_num_elements(Z_ARRVAL_PP(value));
 		char **newValues = ecalloc(nValues, sizeof(char *)), **next;
 		HashPosition   pos;
@@ -427,12 +439,15 @@ PHP_FUNCTION(fdf_set_value)
 		}
 
 		err = FDFSetValues(fdf, Z_STRVAL_PP(fieldname), nValues, (const char **)newValues);
-
 		
 		for(next = newValues; nValues; nValues--) {
 			efree(*next++);
 		}
 		efree(newValues);
+#else
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "setting array values is only possible with FDF toolkit 5.0 and above");
+		RETURN_FALSE;
+#endif
 	} else {
 		convert_to_string_ex(value);
 		
@@ -696,10 +711,14 @@ PHP_FUNCTION(fdf_set_file)
 		FDF_FAILURE(err);
 	}
 	if(target_frame) {
+#ifdef HAVE_FDFTK_5
 		err = FDFSetTargetFrame(fdf, target_frame);
 		if(err != FDFErcOK) {
 			FDF_FAILURE(err);
 		}
+#else
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "setting the target frame is only possible with FDF toolkit 5.0 and above, ignoring it for now");
+#endif
 	}
 
 	FDF_SUCCESS;
@@ -1228,6 +1247,7 @@ PHP_FUNCTION(fdf_error) {
 		RETURN_STRING("The field has no /AP key", 1);
 	case FDFErcIncompatibleFDF: 
 		RETURN_STRING("An attempt to mix classic and template-based FDF files was made", 1);
+#ifdef HAVE_FDFTK_5
 	case FDFErcNoAppendSaves: 
 		RETURN_STRING("The FDF does not include a /Difference key", 1);
 	case FDFErcValueIsArray: 
@@ -1238,6 +1258,7 @@ PHP_FUNCTION(fdf_error) {
 		RETURN_STRING("Returned by FDFOpenFromEmbedded when parameter iWhich >= the number of embedded FDFs (including the case when the passed FDF does not contain any embedded FDFs)", 1);
 	case FDFErcInvalidPassword: 
 		RETURN_STRING("Returned by FDFOpenFromEmbedded when the embedded FDF is encrypted, and you did not provide the correct password", 1);
+#endif
 	case FDFErcLast: 
 		RETURN_STRING("Reserved for future use", 1);
 	default: 
@@ -1257,12 +1278,16 @@ PHP_FUNCTION(fdf_get_version) {
 	}
 
 	if(r_fdf) {
+#if HAVE_FDFTK_5
 		const char *fdf_version; 
 		FDFDoc fdf;
 
 		ZEND_FETCH_RESOURCE(fdf, FDFDoc *, &r_fdf, -1, "fdf", le_fdf);
 		fdf_version = FDFGetFDFVersion(fdf);
 		RETURN_STRING((char *)fdf_version, 1);
+#else
+		RETURN_STRING("1.2",1);
+#endif
 	} else {
 		const char *api_version = FDFGetVersion();
 		RETURN_STRING((char *)api_version, 1);
@@ -1270,6 +1295,7 @@ PHP_FUNCTION(fdf_get_version) {
 }
 /* }}} */
 
+#ifdef HAVE_FDFTK_5
 /* {{{ proto bool fdf_set_version(resourece fdfdoc, string version)
    Sets FDF version for a file*/
 PHP_FUNCTION(fdf_set_version) {
@@ -1377,6 +1403,7 @@ PHP_FUNCTION(fdf_set_target_frame) {
 	FDF_SUCCESS;
 } 
 /* }}} */
+#endif
 
 /* {{{ proto bool fdf_remove_item(resource fdfdoc, string fieldname, int item)
    Sets target frame for form */
@@ -1406,6 +1433,7 @@ PHP_FUNCTION(fdf_remove_item) {
 } 
 /* }}} */
 
+#ifdef HAVE_FDFTK_5
 /* {{{ proto array fdf_get_attachment(resource fdfdoc, string fieldname, string savepath)
    Get attached uploaded file */
 PHP_FUNCTION(fdf_get_attachment) {
@@ -1450,6 +1478,7 @@ PHP_FUNCTION(fdf_get_attachment) {
 	add_assoc_long(return_value, "size", statBuf.st_size);
 }
 /* }}} */
+#endif 
 
 /* {{{ enum_values_callback */
   static ASBool enum_values_callback(char *name, char *value, void *userdata) {
