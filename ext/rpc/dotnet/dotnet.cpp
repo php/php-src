@@ -209,9 +209,7 @@ PHP_MINIT_FUNCTION(DOTNET)
 {
 	HRESULT hr;
 
-	CoInitialize(0);
-	hr = dotnet_init();
-	if (FAILED(hr)) {
+	if (FAILED(hr = dotnet_init())) {
 		return hr;
 	}
 
@@ -223,7 +221,6 @@ PHP_MINIT_FUNCTION(DOTNET)
 PHP_MSHUTDOWN_FUNCTION(DOTNET)
 {
 	dotnet_term();
-	CoUninitialize();
 	return SUCCESS;
 }
 

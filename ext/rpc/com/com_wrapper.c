@@ -380,7 +380,7 @@ static PHP_INI_MH(OnTypelibFileChange)
 		ITypeLib *pTL;
 		char *typelib_name;
 		char *modifier, *ptr;
-		int mode = CONST_CS | CONST_PERSISTENT;
+		int mode = CONST_CS | CONST_PERSISTENT;	/* CONST_PERSISTENT is ok here */
 
 		if (typelib_name_buffer[0]==';') {
 			continue;
@@ -448,7 +448,7 @@ PHP_FUNCTION(com_load)
 	comval *obj;
 	char *error_message;
 	char *clsid_str;
-	int mode = 0; /* CONST_PERSISTENT; */
+	int mode = 0;
 	ITypeLib *pTL;
 
 
@@ -508,7 +508,7 @@ PHP_FUNCTION(com_load)
 		IMoniker *pMoniker;
 		ULONG ulEaten;
 
-		/* TODO: if (server_name) */
+		/* @todo if (server_name) */
 
 		if (!server_name) {
 			if (SUCCEEDED(hr = CreateBindCtx(0, &pBindCtx))) {
@@ -577,6 +577,7 @@ PHP_FUNCTION(com_load)
 		if (INI_INT("com.autoregister_typelib")) {
 			unsigned int idx;
 
+			/* @todo check if typlib isn't already loaded */
 			if (C_TYPEINFO_VT(obj)->GetContainingTypeLib(C_TYPEINFO(obj), &pTL, &idx) == S_OK) {
 				php_COM_load_typelib(pTL, mode TSRMLS_CC);
 				pTL->lpVtbl->Release(pTL);
@@ -667,9 +668,10 @@ int do_COM_invoke(comval *obj, pval *function_name, VARIANT *var_result, pval **
 				return FAILURE;
 			}
 		}
+
 		/* return a single element if next() was called without count */
 		if ((arg_count == 0) && (count == 1)) {
-			long index[] = {1};
+			long index[] = {0};
 
 			SafeArrayGetElement(pSA, index, var_result);
 			SafeArrayDestroy(pSA);
@@ -1085,7 +1087,7 @@ PHP_FUNCTION(com_load_typelib)
 {
 	pval *arg_typelib, *arg_cis;
 	ITypeLib *pTL;
-	int mode = CONST_CS; /* CONST_PERSISTENT|CONST_CS; */
+	int mode = CONST_CS;
 
 	switch (ZEND_NUM_ARGS()) {
 		case 1:
@@ -1651,7 +1653,6 @@ static void php_register_COM_class(TSRMLS_D)
 
 PHP_MINIT_FUNCTION(COM)
 {
-	CoInitialize(NULL);
 	le_comval = zend_register_list_destructors_ex(php_comval_destructor, NULL, "COM", module_number);
 	php_register_COM_class(TSRMLS_C);
 	REGISTER_INI_ENTRIES();
@@ -1661,7 +1662,6 @@ PHP_MINIT_FUNCTION(COM)
 
 PHP_MSHUTDOWN_FUNCTION(COM)
 {
-	CoUninitialize();
 	UNREGISTER_INI_ENTRIES();
 	return SUCCESS;
 }
