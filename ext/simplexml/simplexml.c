@@ -592,8 +592,17 @@ sxe_properties_get(zval *object TSRMLS_DC)
 		node = node->children;
 
 		while (node) {
-			SKIP_TEXT(node);
-
+			if (node->children != NULL || node->prev != NULL || node->next != NULL) {
+				SKIP_TEXT(node);
+			} else {
+				if (node->type == XML_TEXT_NODE) {
+					MAKE_STD_ZVAL(value);
+					ZVAL_STRING(value, xmlNodeListGetString(node->doc, node, 1), 1);
+					zend_hash_next_index_insert(rv, &value, sizeof(zval *), NULL);
+					goto next_iter;
+				}
+			}
+			
 			name = (char *) node->name;
 			if (!name) {
 				goto next_iter;
