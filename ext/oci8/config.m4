@@ -88,14 +88,7 @@ if test "$PHP_OCI8" != "no"; then
 
     8.1)
       PHP_ADD_LIBRARY(clntsh, 1, OCI8_SHARED_LIBADD)
-
-dnl This breaks build on some systems (AIX at least).
-dnl   if test -f $OCI8_DIR/lib/libocijdbc8.so ; then
-dnl     PHP_ADD_LIBRARY(ocijdbc8, 1, OCI8_SHARED_LIBADD)
-dnl   fi
-
       PHP_ADD_LIBPATH($OCI8_DIR/lib, OCI8_SHARED_LIBADD)
-      AC_DEFINE(HAVE_OCI8_TEMP_LOB,1,[ ])
       AC_DEFINE(HAVE_OCI8_SHARED_MODE,1,[ ])
 
       dnl 
@@ -106,14 +99,7 @@ dnl   fi
 
     9.0)
       PHP_ADD_LIBRARY(clntsh, 1, OCI8_SHARED_LIBADD)
-
-dnl This breaks build on some systems (AIX at least)
-dnl if test -f $OCI8_DIR/lib/libocijdbc8.so ; then
-dnl   PHP_ADD_LIBRARY(ocijdbc8, 1, OCI8_SHARED_LIBADD)
-dnl fi
-
       PHP_ADD_LIBPATH($OCI8_DIR/lib, OCI8_SHARED_LIBADD)
-      AC_DEFINE(HAVE_OCI8_TEMP_LOB,1,[ ])
       AC_DEFINE(HAVE_OCI8_ATTR_STATEMENT,1,[ ])
       AC_DEFINE(HAVE_OCI8_SHARED_MODE,1,[ ])
       AC_DEFINE(HAVE_OCI9,1,[ ])
@@ -123,6 +109,25 @@ dnl fi
       AC_MSG_ERROR(Unsupported Oracle version!)
       ;;
   esac
+
+  dnl
+  dnl Check if we need to add -locijdbc8 
+  dnl
+  PHP_CHECK_LIBRARY(clntsh, OCILobIsTemporary,
+  [
+    AC_DEFINE(HAVE_OCI8_TEMP_LOB,1,[ ])
+  ], [
+    unset ac_cv_func_ocilobistemporary
+    PHP_CHECK_LIBRARY(ocijdbc8, OCILobIsTemporary,
+    [
+      PHP_ADD_LIBRARY(ocijdbc8, 1, OCI8_SHARED_LIBADD)
+      AC_DEFINE(HAVE_OCI8_TEMP_LOB,1,[ ])
+    ], [], [
+      $OCI8_SHARED_LIBADD
+    ])
+  ], [
+    $OCI8_SHARED_LIBADD
+  ])
 
   PHP_NEW_EXTENSION(oci8, oci8.c, $ext_shared)
   AC_DEFINE(HAVE_OCI8,1,[ ])
