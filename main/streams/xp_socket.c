@@ -93,7 +93,7 @@ retry:
 			} while (err == EINTR);
 		}
 		estr = php_socket_strerror(err, NULL, 0);
-		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "send of %ld bytes failed with errno=%d %s",
+		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "send of %ld bytes failed with errno=%ld %s",
 				(long)count, err, estr);
 		efree(estr);
 	}
