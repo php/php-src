@@ -14,11 +14,7 @@
 #define TSRM_H
 
 #ifdef HAVE_CONFIG_H
-# undef PACKAGE
-# undef VERSION
 # include "tsrm_config.h"
-# undef PACKAGE
-# undef VERSION
 #endif
 
 /* Only compile multi-threading functions if we're in ZTS mode */

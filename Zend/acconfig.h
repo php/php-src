@@ -3,10 +3,6 @@
 
 @TOP@
 
-/* these are defined by automake */
-#undef PACKAGE
-#undef VERSION
-
 #undef uint
 #undef ulong
 
