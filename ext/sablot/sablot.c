@@ -80,14 +80,18 @@ static zval *_php_sablot_resource_zval(long);
 /* ERROR Macros */
 
 #define SABLOT_FREE_ERROR_HANDLE(__handle)                \
-    if ((__handle).errors) {                              \
-        (__handle).errors = (__handle).errors_start.next; \
-        while ((__handle).errors) {                       \
-            S_FREE((__handle).errors->key);               \
-            S_FREE((__handle).errors->value);             \
-            (__handle).errors = (__handle).errors->next;  \
+    if ((__handle).errors) { \
+		struct _php_sablot_error *current = (__handle).errors; \
+		struct _php_sablot_error *next; \
+		\
+        current = (__handle).errors_start.next; \
+        while (current != NULL) {                       \
+			next = current->next; \
+            S_FREE(current->key);               \
+            S_FREE(current->value);             \
+			S_FREE(current); \
+            current = next;  \
         }                                                 \
-        S_FREE((__handle).errors);                        \
     }
 
 
@@ -542,19 +546,21 @@ PHP_FUNCTION(xslt_process)
         RETURN_FALSE;
     }
     
-    SablotGetResultArg(SABLOT_BASIC_HANDLE, "arg:/_output", &tRes);
+    ret = SablotGetResultArg(SABLOT_BASIC_HANDLE, "arg:/_output", &tRes);
     if (ret) {
         SABLOTG(last_errno) = ret;
-        RETURN_FALSE;
         
         if (tRes)
             SablotFree(tRes);
+
+		RETURN_FALSE;
     }
     
     if (tRes) {
         ZVAL_STRING(*result, tRes, 1);
         SablotFree(tRes);
     }
+
     RETURN_TRUE;
 }
 /* }}} */
