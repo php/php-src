@@ -46,7 +46,7 @@ SPL_METHOD(RecursiveIteratorIterator, hasMore);
 SPL_METHOD(RecursiveIteratorIterator, key);
 SPL_METHOD(RecursiveIteratorIterator, current);
 SPL_METHOD(RecursiveIteratorIterator, next);
-SPL_METHOD(RecursiveIteratorIterator, getLevel);
+SPL_METHOD(RecursiveIteratorIterator, getDepth);
 SPL_METHOD(RecursiveIteratorIterator, getSubIterator);
 
 static
@@ -57,8 +57,7 @@ ZEND_END_ARG_INFO();
 
 static
 ZEND_BEGIN_ARG_INFO(arginfo_recursive_it_getSubIterator, 0) 
-	ZEND_ARG_INFO(0, iterator)
-	ZEND_ARG_INFO(0, mode)
+	ZEND_ARG_INFO(0, level)
 ZEND_END_ARG_INFO();
 
 static zend_function_entry spl_funcs_RecursiveIteratorIterator[] = {
@@ -68,7 +67,7 @@ static zend_function_entry spl_funcs_RecursiveIteratorIterator[] = {
 	SPL_ME(RecursiveIteratorIterator, key,           NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(RecursiveIteratorIterator, current,       NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(RecursiveIteratorIterator, next,          NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(RecursiveIteratorIterator, getLevel,      NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveIteratorIterator, getDepth,      NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(RecursiveIteratorIterator, getSubIterator,arginfo_recursive_it_getSubIterator, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
@@ -321,6 +320,7 @@ SPL_METHOD(RecursiveIteratorIterator, __construct)
 	intern->mode = mode;
 	ce_iterator = Z_OBJCE_P(iterator); /* respect inheritance, don't use spl_ce_RecursiveIterator */
 	intern->iterators[0].iterator = ce_iterator->get_iterator(ce_iterator, iterator TSRMLS_CC);
+	iterator->refcount++;
 	intern->iterators[0].zobject = iterator;
 	intern->iterators[0].ce = ce_iterator;
 	intern->iterators[0].state = RS_START;
@@ -378,7 +378,7 @@ SPL_METHOD(RecursiveIteratorIterator, next)
 	spl_recursive_it_move_forward_ex(object TSRMLS_CC);
 }
 
-SPL_METHOD(RecursiveIteratorIterator, getLevel)
+SPL_METHOD(RecursiveIteratorIterator, getDepth)
 {
 	spl_recursive_it_object   *object = (spl_recursive_it_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 	
@@ -388,10 +388,10 @@ SPL_METHOD(RecursiveIteratorIterator, getLevel)
 SPL_METHOD(RecursiveIteratorIterator, getSubIterator)
 {
 	spl_recursive_it_object   *object = (spl_recursive_it_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
-	int  level;
+	int  level = object->level;
 	zval *zobject;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &level) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &level) == FAILURE) {
 		return;
 	}
 	if (level < 0 || level > object->level) {
