@@ -20,6 +20,9 @@
 #ifndef URI_SCANNER_H
 #define URI_SCANNER_H
 
+PHP_RINIT_FUNCTION(url_scanner);
+PHP_RSHUTDOWN_FUNCTION(url_scanner);
+
 char *url_adapt(const char *src, size_t srclen, const char *data, size_t *newlen);
 
 enum url_state { 
