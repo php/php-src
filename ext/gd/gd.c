@@ -1691,8 +1691,7 @@ PHP_FUNCTION(imagecolordeallocate)
 		gdImageColorDeallocate(im, col);
 		RETURN_TRUE;
 	} else {
-		php_error(E_WARNING, "%s(): Color index %d out of range",
-				  get_active_function_name(TSRMLS_C), col);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Color index %d out of range",	col);
 		RETURN_FALSE;
 	}
 }
@@ -1808,8 +1807,7 @@ PHP_FUNCTION(imagecolorsforindex)
 	}
 #endif
 	else {
-		php_error(E_WARNING, "%s(): Color index %d out of range",
-				  get_active_function_name(TSRMLS_C), col);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Color index %d out of range", col);
 		RETURN_FALSE;
 	}
 }
@@ -2907,7 +2905,7 @@ PHP_FUNCTION(imagepscopyfont)
 	of_ind = zend_list_find(Z_LVAL_PP(fnt), &type);
 
 	if (type != le_ps_font) {
-		php_error(E_WARNING, "%d is not a Type 1 font index", Z_LVAL_PP(fnt));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%d is not a Type 1 font index", Z_LVAL_PP(fnt));
 		RETURN_FALSE;
 	}
 
@@ -2919,19 +2917,19 @@ PHP_FUNCTION(imagepscopyfont)
 		efree(nf_ind);
 		switch (l_ind) {
 		case -1:
-			php_error(E_WARNING, "FontID %d is not loaded in memory", l_ind);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "FontID %d is not loaded in memory", l_ind);
 			RETURN_FALSE;
 			break;
 		case -2:
-			php_error(E_WARNING, "Tried to copy a logical font");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Tried to copy a logical font");
 			RETURN_FALSE;
 			break;
 		case -3:
-			php_error(E_WARNING, "Memory allocation fault in t1lib");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Memory allocation fault in t1lib");
 			RETURN_FALSE;
 			break;
 		default:
-			php_error(E_WARNING, "An unknown error occurred in t1lib");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "An unknown error occurred in t1lib");
 			RETURN_FALSE;
 			break;
 		}
@@ -3333,18 +3331,18 @@ static void _php_image_bw_convert( gdImagePtr im_org, gdIOCtx *out, int threshol
 	
 	im_dest = gdImageCreate (dest_width, dest_height);
 	if (im_dest == NULL) {
-		php_error (E_WARNING, "%s(): Unable to allocate temporary buffer", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to allocate temporary buffer");
 		return;
 	}
 	white = gdImageColorAllocate (im_dest, 255, 255, 255);
 	if( white == -1) {
-		php_error (E_WARNING, "%s(): Unable to allocate the colors for the destination buffer", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to allocate the colors for the destination buffer");
 		return;
 	}
 
 	black = gdImageColorAllocate (im_dest, 0, 0, 0);
 	if (black == -1) {
-		php_error (E_WARNING, "%s(): Unable to allocate the colors for the destination buffer", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to allocate the colors for the destination buffer");
 		return;
 	}
 
@@ -3407,33 +3405,33 @@ static void _php_image_convert(INTERNAL_FUNCTION_PARAMETERS, int image_type )
 
 	/* Check threshold value */
 	if( int_threshold < 0 || int_threshold > 8 ) {
-		php_error (E_WARNING, "%s(): Invalid threshold value '%d'", get_active_function_name(TSRMLS_C), int_threshold);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid threshold value '%d'", int_threshold);
 		RETURN_FALSE;
 	}
 
 	/* Check origin file */
 	if (!fn_org || fn_org == empty_string || php_check_open_basedir(fn_org TSRMLS_CC)) {
-		php_error (E_WARNING, "%s(): Invalid origin filename '%s'", get_active_function_name(TSRMLS_C), fn_org);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid origin filename '%s'", fn_org);
 		RETURN_FALSE;
 	}
 
 	/* Check destination file */
 	if (!fn_dest || fn_dest == empty_string || php_check_open_basedir(fn_dest TSRMLS_CC)) {
-		php_error (E_WARNING, "%s(): Invalid destination filename '%s'", get_active_function_name(TSRMLS_C), fn_dest);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid destination filename '%s'", fn_dest);
 		RETURN_FALSE;
 	}
 
 	/* Open origin file */
 	org = VCWD_FOPEN(fn_org, "rb");
 	if (!org) {
-		php_error (E_WARNING, "%s(): Unable to open '%s' for reading", get_active_function_name(TSRMLS_C), fn_org);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to open '%s' for reading", fn_org);
 		RETURN_FALSE;
 	}
 
 	/* Open destination file */
 	dest = VCWD_FOPEN(fn_dest, "wb");
 	if (!dest) {
-		php_error (E_WARNING, "%s(): Unable to open '%s' for writing", get_active_function_name(TSRMLS_C), fn_dest);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to open '%s' for writing", fn_dest);
 		RETURN_FALSE;
 	}
 
@@ -3442,7 +3440,7 @@ static void _php_image_convert(INTERNAL_FUNCTION_PARAMETERS, int image_type )
 		case PHP_GDIMG_TYPE_GIF:
 			im_org = gdImageCreateFromGif (org);
 			if (im_org == NULL) {
-				php_error (E_WARNING, "%s(): Unable to open '%s' Not a valid GIF file", get_active_function_name(TSRMLS_C), fn_dest);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s(): Unable to open '%s' Not a valid GIF file", fn_dest);
 				RETURN_FALSE;
 			}
 			break;
@@ -3452,7 +3450,7 @@ static void _php_image_convert(INTERNAL_FUNCTION_PARAMETERS, int image_type )
 		case PHP_GDIMG_TYPE_JPG:
 			im_org = gdImageCreateFromJpeg (org);
 			if (im_org == NULL) {
-				php_error (E_WARNING, "%s(): Unable to open '%s' Not a valid JPEG file", get_active_function_name(TSRMLS_C), fn_dest);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to open '%s' Not a valid JPEG file", fn_dest);
 				RETURN_FALSE;
 			}
 			break;
@@ -3463,7 +3461,7 @@ static void _php_image_convert(INTERNAL_FUNCTION_PARAMETERS, int image_type )
 		case PHP_GDIMG_TYPE_PNG:
 			im_org = gdImageCreateFromPng(org);
 			if (im_org == NULL) {
-				php_error (E_WARNING, "%s(): Unable to open '%s' Not a valid PNG file", get_active_function_name(TSRMLS_C), fn_dest);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to open '%s' Not a valid PNG file", fn_dest);
 				RETURN_FALSE;
 			}
 			break;
