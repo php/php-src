@@ -100,6 +100,7 @@ PEAR_FILES = \
 	Numbers/Roman.php \
 	PEAR.php \
 	PEAR/Common.php \
+	PEAR/Config.php \
 	PEAR/Installer.php \
 	PEAR/Packager.php \
 	PEAR/Uploader.php \

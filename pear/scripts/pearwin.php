@@ -38,19 +38,19 @@ foreach ($opts as $opt) {
             break;
         case 'e':
             if ($param{0} != getenv('DIRECTORY_SEPARATOR')) {
-                usage (new PEAR_Error("no absolute path (ej. /usr/lib/php)\n"));
+                usage (new PEAR_Error("no absolute path (eg. /usr/lib/php)\n"));
             }
             $ext_dir = $param;
             break;
         case 'p':
             if ($param{0} != getenv('DIRECTORY_SEPARATOR')) {
-                usage (new PEAR_Error("no absolute path (ej. /usr/lib/php)\n"));
+                usage (new PEAR_Error("no absolute path (eg. /usr/lib/php)\n"));
             }
             $script_dir = $param;
             break;
         case 'd':
             if ($param{0} != getenv('DIRECTORY_SEPARATOR')) {
-                usage (new PEAR_Error("no absolute path (ej. /usr/lib/php)\n"));
+                usage (new PEAR_Error("no absolute path (eg. /usr/lib/php)\n"));
             }
             $doc_dir = $param;
             break;
