@@ -884,6 +884,7 @@ PHP_FUNCTION(domxml_new_xmldoc)
    Returns list of children nodes */
 static int node_attributes(zval **attributes, xmlNode *nodep)
 {
+	zval *children;
 	xmlAttr *attr;
 	int ret;
 
@@ -902,14 +903,18 @@ static int node_attributes(zval **attributes, xmlNode *nodep)
 	while(attr) {
 		zval *pattr;
 		MAKE_STD_ZVAL(pattr);
-		ret = zend_list_insert(attr, le_domxmlattrp);
+//		ret = zend_list_insert(attr, le_domxmlattrp);
 
 		/* construct an object with some methods */
 		object_init_ex(pattr, domxmlattr_class_entry_ptr);
-		add_property_resource(pattr, "attribute", ret);
+//		add_property_resource(pattr, "attribute", ret);
 		add_property_stringl(pattr, "name", (char *) attr->name, strlen(attr->name), 1);
 		if(attr->val->content)
 			add_property_stringl(pattr, "value", (char *) attr->val->content, strlen(attr->val->content), 1);
+		else if(attr->val->childs) {
+			if(0 == node_children(&children, attr))
+				zend_hash_update(pattr->value.obj.properties, "children", strlen("children")+1, (void *) &children, sizeof(zval *), NULL);
+		}
 		zend_hash_next_index_insert((*attributes)->value.ht, &pattr, sizeof(zval *), NULL);
 		attr = attr->next;
 	}
@@ -941,14 +946,14 @@ static int node_children(zval **children, xmlNode *nodep)
 
 		/* Each child is a node object */
 		MAKE_STD_ZVAL(child);
-		ret = zend_list_insert(last, le_domxmlnodep);
+//		ret = zend_list_insert(last, le_domxmlnodep);
 
 		/* construct a node object for each child */
 		object_init_ex(child, domxmlnode_class_entry_ptr);
 		add_property_stringl(child, "name", (char *) last->name, strlen(last->name), 1);
 		if(last->content)
 			add_property_stringl(child, "content", (char *) last->content, strlen(last->content), 1);
-		add_property_resource(child, "node", ret);
+//		add_property_resource(child, "node", ret);
 		add_property_long(child, "type", last->type);
 		/* Add the node object to the array of children */
 		zend_hash_next_index_insert((*children)->value.ht, &child, sizeof(zval *), NULL);
@@ -984,30 +989,31 @@ PHP_FUNCTION(xmltree)
 	if (!docp) {
 		RETURN_FALSE;
 	}
-	ret = zend_list_insert(docp, le_domxmldocp);
+//	ret = zend_list_insert(docp, le_domxmldocp);
 
 	/* construct the document is a php object for return */
 	object_init_ex(return_value, domxmldoc_class_entry_ptr);
-	add_property_resource(return_value, "doc", ret);
+//	add_property_resource(return_value, "doc", ret);
 	add_property_stringl(return_value, "version", (char *) docp->version, strlen(docp->version), 1);
 	zend_list_addref(ret);
 
 	/* get the root and add as a property to the document */
 	root = docp->root;
 	if (!root) {
+		xmlFreeDoc(docp);
 		RETURN_FALSE;
 	}
-	ret1 = zend_list_insert(root, le_domxmlnodep);
-//	add_property_resource(return_value, "root", ret1);
+//	ret1 = zend_list_insert(root, le_domxmlnodep);
 
 	/* construct an object with some methods */
 	MAKE_STD_ZVAL(proot);
 	object_init_ex(proot, domxmlnode_class_entry_ptr);
-	add_property_resource(proot, "node", ret1);
+//	add_property_resource(proot, "node", ret1);
 	add_property_long(proot, "type", root->type);
 	add_property_stringl(proot, "name", (char *) root->name, strlen(root->name), 1);
 	if(root->content)
 		add_property_stringl(proot, "content", (char *) root->content, strlen(root->content), 1);
+
 	/* Get the array of children of the root and add as property children */
 	if(0 == node_children(&children, root))
 		zend_hash_update(proot->value.obj.properties, "children", strlen("children")+1, (void *) &children, sizeof(zval *), NULL);
@@ -1016,6 +1022,7 @@ PHP_FUNCTION(xmltree)
 	zend_list_addref(ret1);
 	/* add the new root object to the document */
 	zend_hash_update(return_value->value.obj.properties, "root", strlen("root")+1, (void *) &proot, sizeof(zval *), NULL);
+	xmlFreeDoc(docp);
 }
 /* }}} */
 
