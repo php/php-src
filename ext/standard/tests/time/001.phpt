@@ -1,7 +1,10 @@
 --TEST--
 microtime() function
 --SKIPIF--
-<?php if (!function_exists('microtime'))  die('skip microtime() not available'); ?>
+<?php 
+	if (!function_exists('microtime'))  die('skip microtime() not available');
+	die('warn system dependent');
+?>
 --FILE--
 <?php
 $passed = 0;
