@@ -77,20 +77,24 @@
 
 9. get_class() starting PHP 5 returns the name of the class as it was
    declared which may lead to problems in older scripts that rely on
-   the previous behaviour - the class name is lowercased.
+   the previous behaviour - the class name is lowercased. Expect the
+   same behaviour from get_parent_class() when applicable.
    Example :
    <?php
    class FooBar {
    }
+   class ExtFooBar extends FooBar{}
    $a = new FooBar();
-   var_dump(get_class($a));
+   var_dump(get_class($a), get_parent_class($a));
    ?>
 
    Output (PHP 4):
    string(6) "foobar"
+   string(9) "extfoobar"
 
    Output (PHP 5):
    string(6) "FooBar"
+   string(9) "ExtFooBar"
    ----------------------------------------------------------------------
    Example code that will break :
    //....
@@ -101,7 +105,51 @@
      //...
    }
    //...
-   Possible solution is to search for get_class() in all your scripts and
-   use strtolower().
+   Possible solution is to search for get_class() and get_parent_class() in
+   all your scripts and use strtolower().
 
-   
+10. get_class_methods() returns the names of the methods of a class as they
+   declared. In PHP4 the names are all lowercased.
+   Example code :
+   <?php
+   class Foo{
+     function doFoo(){}
+     function hasFoo(){}
+   }
+   var_dump(get_class_methods("Foo")); 
+   ?>
+   Output (PHP4):
+   array(2) {
+     [0]=>
+     string(5) "dofoo"
+     [1]=>
+     string(6) "hasfoo"
+   }
+   Output (PHP5):
+   array(2) {
+     [0]=>
+     string(5) "doFoo"
+     [1]=>
+     string(6) "hasFoo"
+   }
+
+11. Assignment $this is impossible. Starting PHP 5.0.0 $this has special
+    meaning in class methods and is recognized by the PHP parser. The latter
+    will generate a parse error when assignment to $this is found
+    Example code :
+    <?php
+    class Foo {
+      function assignNew($obj) {
+        $this = $obj;
+      }
+    }
+    $a = new Foo();
+    $b = new Foo();
+    $a->assignNew($b);
+    echo "I was executed\n";
+    ?>
+    Output (PHP 4):
+    I was executed
+    Output (PHP 5):
+    PHP Fatal error:  Cannot re-assign $this in /tmp/this_ex.php on line 4
+
