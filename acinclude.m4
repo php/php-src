@@ -1692,6 +1692,10 @@ AC_DEFUN([PHP_SETUP_ICONV], [
   found_iconv=no
   unset ICONV_DIR
 
+  # Create the directories for a VPATH build:
+  test -d ext || mkdir ext
+  test -d ext/iconv || mkdir ext/iconv
+
   echo > ext/iconv/php_have_libiconv.h
   echo > ext/iconv/php_have_iconv.h
 
