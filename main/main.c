@@ -244,7 +244,7 @@ void php3_apache_puts(const char *s)
 	
 	if (SG(server_context)) {
 		if(rputs(s, (request_rec *) SG(server_context))==-1) {
-			PG(connection_status) = PHP_CONNECTION_ABORTED;
+			PG(connection_status) |= PHP_CONNECTION_ABORTED;
 		}
 	} else {
 		fputs(s, stdout);
@@ -257,7 +257,7 @@ void php3_apache_putc(char c)
 	
 	if (SG(server_context)) {
 		if(rputc(c, (request_rec *) SG(server_context))!=c) {
-			PG(connection_status) = PHP_CONNECTION_ABORTED;
+			PG(connection_status) |= PHP_CONNECTION_ABORTED;
 		}
 	} else {
 		fputc(c, stdout);
@@ -853,7 +853,7 @@ int php_module_startup(sapi_module_struct *sf)
 	
 	PG(header_is_being_sent) = 0;
 	SG(request_info).headers_only = 0;
-	PG(connection_status) = PHP_CONNECTION_NORMAL;
+	PG(connection_status) |= PHP_CONNECTION_NORMAL;
 
 #if HAVE_SETLOCALE
 	setlocale(LC_CTYPE, "");
