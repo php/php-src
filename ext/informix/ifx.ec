@@ -2170,7 +2170,7 @@ $endif;
                 EXEC SQL GET DESCRIPTOR :descrpid VALUE :i :*locator_b = DATA;
                 /* work around for ESQL/C bug with NULL values and BLOBS */                
                 if ((locator_b->loc_status < 0) && (locator_b->loc_bufsize == 0)){
-                  locator_b->loc_indicator == -1;
+                  locator_b->loc_indicator = -1;
                 }      
                 /* normal check for NULL values */
                 if (locator_b->loc_indicator == -1) { 
@@ -2535,7 +2535,7 @@ $endif;
                                             :*locator_b = DATA;
                     /* work around for ESQL/C bug with NULL values and BLOBS */                
                     if ((locator_b->loc_status < 0) && (locator_b->loc_bufsize == 0)){
-                    locator_b->loc_indicator == -1;
+                      locator_b->loc_indicator = -1;
                     }      
                     /* normal check for NULL values */
                     if (locator_b->loc_indicator == -1) {
