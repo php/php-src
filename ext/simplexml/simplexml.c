@@ -368,15 +368,6 @@ sxe_property_exists(zval *object, zval *member, int check_empty TSRMLS_DC)
 	GET_NODE(sxe, node);
 
 	if (node) {
-		attr = node->properties;
-		while (attr) {
-			if (!xmlStrcmp(attr->name, name)) {
-				return 1;
-			}
-
-			attr = attr->next;
-		}
-
 		node = node->children;
 		while (node) {
 			SKIP_TEXT(node);
