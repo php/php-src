@@ -119,7 +119,7 @@ php_stream *php_stream_gzopen(php_stream_wrapper *wrapper, char *path, char *mod
 				gzclose(self->gz_file);
 			}
 			if (options & REPORT_ERRORS)
-				php_errordocref(NULL TSRMLS_CC, E_WARNING, "gzopen failed");
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "gzopen failed");
 		}
 	}
 	if (stream)
