@@ -588,9 +588,9 @@ static zval *php_xpathcontext_new(xmlXPathContextPtr obj, int *found TSRMLS_DC)
 	zval *wrapper;
 	int rsrc_type;
 
-    if (! found) {
-        *found = 0;
-    }
+	if (! found) {
+	    *found = 0;
+	}
 
 	if (!obj) {
 		MAKE_STD_ZVAL(wrapper);
@@ -666,9 +666,9 @@ static zval *php_domobject_new(xmlNodePtr obj, int *found TSRMLS_DC)
 	char *content;
 	int rsrc_type;
 
-    if (! found) {
-        *found = 0;
-    }
+	if (! found) {
+	    *found = 0;
+	}
 
 	if (!obj) {
 		MAKE_STD_ZVAL(wrapper);
