@@ -1361,8 +1361,9 @@ static int _php_ibase_bind(XSQLDA *sqlda, zval **b_vars, BIND_BUF *buf, ibase_qu
 							efree(ib_blob);
 							return FAILURE;
 						}
-						ib_blob_id = ib_blob;
-						var->sqldata = (void ISC_FAR *) &ib_blob_id->bl_qd;
+						buf[i].val.qval = ib_blob->bl_qd;
+						var->sqldata = (void ISC_FAR *) &buf[i].val.qval;
+						efree(ib_blob);
 /*
 						_php_ibase_module_error("Invalid blob id string");
 						return FAILURE;
@@ -2698,6 +2699,7 @@ PHP_FUNCTION(ibase_blob_open)
 	
 	RETURN_LONG(zend_list_insert(ib_blob, le_blob));
 }
+/* }}} */
 
 /* {{{ proto bool ibase_blob_add(int blob_id, string data)
    Add data into created blob */
