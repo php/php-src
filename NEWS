@@ -1,6 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.2.0-dev
+- Made wordwrap() significantly faster. (Jim)
+- Fixed pow(), and added finite(), isinf(), and isnan(). (Jim)
 - Fixed segfault in wordwrap() when wrapping to zero width and using
   multi-character break or trying to force cut (bug #12768). (Jim)
 - Fixed several bugs in dbase extension (dbase_pack() truncate file to right
