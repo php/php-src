@@ -453,8 +453,20 @@ int main(int argc, char *argv[])
 		ap_php_optarg = orig_optarg;
 	}
 
+
+#ifdef ZTS
+	compiler_globals = ts_resource(compiler_globals_id);
+	executor_globals = ts_resource(executor_globals_id);
+	core_globals = ts_resource(core_globals_id);
+	sapi_globals = ts_resource(sapi_globals_id);
+	tsrm_ls = ts_resource(0);
+#endif
+
 	/* startup after we get the above ini override se we get things right */
 	if (php_module_startup(&cgi_sapi_module)==FAILURE) {
+#ifdef ZTS
+	        tsrm_shutdown();
+#endif
 		return FAILURE;
 	}
 
@@ -467,7 +479,13 @@ int main(int argc, char *argv[])
 		 * http://www.koehntopp.de/php.
 		 *   -- kk@netuse.de
 		 */
-		if (!getenv("REDIRECT_STATUS") && !getenv ("HTTP_REDIRECT_STATUS")) {
+		if (!getenv("REDIRECT_STATUS") && !getenv ("HTTP_REDIRECT_STATUS")
+#ifdef PHP_WIN32
+                    /* IIS doesn't set anything, look to see if php.exe is in the script_name */
+                    && (strstr(getenv("SERVER_SOFTWARE"),"Apache") || 
+                        strstr(getenv("SERVER_SOFTWARE"),"iPlanet"))
+#endif
+                    ) {
 			PUTS("<b>Security Alert!</b>  PHP CGI cannot be accessed directly.\n\
 \n\
 <P>This PHP CGI binary was compiled with force-cgi-redirect enabled.  This\n\
@@ -484,19 +502,15 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 \n");
 
 			/* remove that detailed explanation some time */
+#ifdef ZTS
+	                tsrm_shutdown();
+#endif
 
 			return FAILURE;
 		}
 	}
 #endif							/* FORCE_CGI_REDIRECT */
 
-#ifdef ZTS
-	compiler_globals = ts_resource(compiler_globals_id);
-	executor_globals = ts_resource(executor_globals_id);
-	core_globals = ts_resource(core_globals_id);
-	sapi_globals = ts_resource(sapi_globals_id);
-	tsrm_ls = ts_resource(0);
-#endif
 
 	zend_first_try {
 		if (!cgi) {
