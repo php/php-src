@@ -156,6 +156,7 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 		if (EACCES == errno) {
 			php_error(E_WARNING, "%s() permission denied; unable to execute shell to run mail delivery binary",
 					  get_active_function_name(TSRMLS_C));
+			pclose(sendmail);
 			return 0;
 		}
 #endif
