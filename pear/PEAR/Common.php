@@ -148,12 +148,6 @@ class PEAR_Common extends PEAR
      * @access private
      */
     var $_packageSortTree;
-    /**
-     * Temporary variable used to store the current package name
-     * @var string
-     * @access private
-     */
-    var $_validPackageName;
 
     // }}}
 
