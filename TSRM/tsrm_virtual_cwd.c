@@ -847,7 +847,7 @@ CWD_API int virtual_stat(const char *path, struct stat *buf TSRMLS_DC)
 	return retval;
 }
 
-#if !defined(TSRM_WIN32) && !defined(NETWARE)
+#if !defined(TSRM_WIN32)
 CWD_API int virtual_lstat(const char *path, struct stat *buf TSRMLS_DC)
 {
 	cwd_state new_state;
