@@ -79,7 +79,11 @@
 #define DB_DBM_HSEARCH 1
 #include <db.h>
 #else
+#ifdef HAVE_DB1_NDBM_H
+#include <db1/ndbm.h>
+#else
 #include <ndbm.h>
+#endif
 #endif
 
 #define DBM_TYPE DBM *

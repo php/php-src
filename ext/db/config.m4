@@ -4,6 +4,8 @@ dnl don't forget to call PHP_EXTENSION(db)
 
 divert(1)
 
+AC_CHECK_HEADERS(db1/ndbm.h)
+
 # Checks for libraries.
 # Prefer gdbm, Berkeley DB and ndbm/dbm, in that order
 AC_DEFUN(AC_PREFERRED_DB_LIB,[
