@@ -816,7 +816,7 @@ ZEND_API void zend_hash_merge(HashTable *target, HashTable *source, copy_ctor_fu
 }
 
 
-static int zend_hash_replace_checker_wrapper(HashTable *target, void *source_data, Bucket *p, void *pParam, merge_checker_func_t merge_checker_func)
+static zend_bool zend_hash_replace_checker_wrapper(HashTable *target, void *source_data, Bucket *p, void *pParam, merge_checker_func_t merge_checker_func)
 {
 	zend_hash_key hash_key;
 
