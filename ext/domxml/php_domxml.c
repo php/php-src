@@ -2453,19 +2453,14 @@ PHP_FUNCTION(domxml_node_insert_before)
 	DOMXML_GET_OBJ(child, node, le_domxmlnodep);
 	DOMXML_GET_OBJ(refp, ref, le_domxmlnodep);
 
-	if (NULL == (new_child = xmlCopyNode(child, 1))) {
-		php_error(E_WARNING, "%s(): unable to clone node", get_active_function_name(TSRMLS_C));
-		RETURN_FALSE;
-	}
+	new_child = xmlAddPrevSibling(refp, child);
 
-	child = xmlAddPrevSibling(refp, new_child);
-
-	if (NULL == child) {
+	if (NULL == new_child) {
 		php_error(E_WARNING, "%s(): couldn't add newnode as the previous sibling of refnode", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
 	}
 
-	DOMXML_RET_OBJ(rv, child, &ret);
+	DOMXML_RET_OBJ(rv, new_child, &ret);
 }
 /* }}} */
 
