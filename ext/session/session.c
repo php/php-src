@@ -526,7 +526,7 @@ CACHE_LIMITER_FUNC(private)
 	char buf[MAX_STR + 1];
 	
 	ADD_COOKIE("Expires: Thu, 19 Nov 1981 08:52:00 GMT");
-	sprintf(buf, "Cache-Control: private, max-age=%d", PS(cache_expire) * 60);
+	sprintf(buf, "Cache-Control: private, max-age=%d, pre-check=%d", PS(cache_expire) * 60, PS(cache_expire) * 60);
 	ADD_COOKIE(buf);
 
 	last_modified();
@@ -535,8 +535,8 @@ CACHE_LIMITER_FUNC(private)
 CACHE_LIMITER_FUNC(nocache)
 {
 	ADD_COOKIE("Expires: Thu, 19 Nov 1981 08:52:00 GMT");
-	/* For HTTP/1.1 conforming clients */
-	ADD_COOKIE("Cache-Control: no-cache");
+	/* For HTTP/1.1 conforming clients and the rest (MSIE 5) */
+	ADD_COOKIE("Cache-Control: no-cache, post-check=0, pre-check=0");
 	/* For HTTP/1.0 conforming clients */
 	ADD_COOKIE("Pragma: no-cache");
 }
