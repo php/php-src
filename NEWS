@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2004, PHP 5 RC1
+- Added stream_lock() method to userspace streams interface. (Hartmut, Wez)
 - Added xsltprocessor->registerPHPFunctions(). (Christian)
 - Bundled new SPL extension. (Marcus, Derick)
 - Upgraded SQLite library to version 2.8.11. (Ilia, Wez)
