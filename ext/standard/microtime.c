@@ -89,13 +89,12 @@ PHP_FUNCTION(microtime)
 PHP_FUNCTION(gettimeofday)
 {
 	zend_bool get_as_float = 0;
+	struct timeval tp;
+	struct timezone tz;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|b", &get_as_float) == FAILURE) {
 		return;
 	}
-
-	struct timeval tp;
-	struct timezone tz;
 	
 	memset(&tp, 0, sizeof(tp));
 	memset(&tz, 0, sizeof(tz));
