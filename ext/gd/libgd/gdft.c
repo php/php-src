@@ -63,7 +63,7 @@ gdImageStringFT (gdImage * im, int *brect, int fg, char *fontlist,
 #include "gdcache.h"
 #include <ft2build.h>
 #include FT_FREETYPE_H
-#include "freetype/ftglyph.h"
+#include FT_GLYPH_H
 
 /* number of fonts cached before least recently used is replaced */
 #define FONTCACHESIZE 6
