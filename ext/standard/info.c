@@ -178,6 +178,12 @@ PHPAPI void php_print_info(int flag)
 			php_info_print_table_row(2, "Server API", sapi_module.name );
 		}
 
+#ifdef VIRTUAL_DIR
+		php_info_print_table_row(2, "Virtual Directory Support", "enabled" );
+#else
+		php_info_print_table_row(2, "Virtual Directory Support", "disabled" );
+#endif
+
 		php_info_print_table_row(2, "Configuration File (php.ini) Path", CONFIGURATION_FILE_PATH );
 
 #if ZEND_DEBUG
