@@ -43,7 +43,7 @@ if test "$PHP_PDFLIB" != "no"; then
         [  --with-jpeg-dir[=DIR]     PDFLIB: define libjpeg install directory])
 
         if test "$PHP_JPEG_DIR" != "no"; then
-          AC_CHECK_LIB(jpeg,jpeg_read_header, 
+          PHP_CHECK_LIBRARY(jpeg,jpeg_read_header, 
           [
             PHP_ADD_LIBRARY_WITH_PATH(jpeg, $PHP_JPEG_DIR/lib, PDFLIB_SHARED_LIBADD)
           ],[
@@ -65,7 +65,7 @@ if test "$PHP_PDFLIB" != "no"; then
         [  --with-png-dir[=DIR]      PDFLIB: define libpng install directory])
         
         if test "$PHP_PNG_DIR" != "no"; then
-          AC_CHECK_LIB(png,png_create_info_struct, 
+          PHP_CHECK_LIBRARY(png,png_create_info_struct, 
           [
             PHP_ADD_LIBRARY_WITH_PATH(png, $PHP_PNG_DIR/lib, PDFLIB_SHARED_LIBADD)
           ],[
@@ -87,7 +87,7 @@ if test "$PHP_PDFLIB" != "no"; then
         [  --with-tiff-dir[=DIR]     PDFLIB: define libtiff install directory])
 
         if test "$PHP_TIFF_DIR" != "no"; then
-          AC_CHECK_LIB(tiff,TIFFOpen, 
+          PHP_CHECK_LIBRARY(tiff,TIFFOpen, 
           [
             PHP_ADD_LIBRARY_WITH_PATH(tiff, $PHP_TIFF_DIR/lib, PDFLIB_SHARED_LIBADD)
           ],[
@@ -105,7 +105,7 @@ if test "$PHP_PDFLIB" != "no"; then
         fi
 
 
-        AC_CHECK_LIB(pdf, PDF_show_boxed, 
+        PHP_CHECK_LIBRARY(pdf, PDF_show_boxed, 
         [
           AC_DEFINE(HAVE_PDFLIB,1,[ ]) 
           PHP_ADD_LIBRARY_WITH_PATH(pdf, $PHP_PDFLIB/lib, PDFLIB_SHARED_LIBADD)

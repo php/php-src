@@ -12,7 +12,7 @@ AC_DEFUN(PHP_GD_JPEG,[
       test -f "$i/lib/libjpeg.s?" -o -f "$i/lib/libjpeg.a" && GD_JPEG_DIR=$i
     done
 
-    AC_CHECK_LIB(jpeg,jpeg_read_header,
+    PHP_CHECK_LIBRARY(jpeg,jpeg_read_header,
     [
       PHP_ADD_LIBRARY_WITH_PATH(jpeg, $GD_JPEG_DIR/lib, GD_SHARED_LIBADD)
     ],[
@@ -39,7 +39,7 @@ AC_DEFUN(PHP_GD_PNG,[
       AC_MSG_ERROR(PNG support requires ZLIB. Use --with-zlib-dir=<DIR>)
     fi
     
-    AC_CHECK_LIB(png,png_info_init,
+    PHP_CHECK_LIBRARY(png,png_info_init,
     [
       PHP_ADD_LIBRARY_WITH_PATH(z, $PHP_ZLIB_DIR/lib, GD_SHARED_LIBADD)
       PHP_ADD_LIBRARY_WITH_PATH(png, $GD_PNG_DIR/lib, GD_SHARED_LIBADD)
@@ -48,6 +48,7 @@ AC_DEFUN(PHP_GD_PNG,[
     ],[
       -L$PHP_ZLIB_DIR/lib -lz -L$GD_PNG_DIR/lib
     ])
+
   else 
     AC_MSG_RESULT(If configure fails try --with-png-dir=<DIR> and --with-zlib-dir=<DIR>)
   fi
@@ -62,7 +63,7 @@ AC_DEFUN(PHP_GD_XPM,[
       test -f "$i/lib/libXpm.s?" -o -f "$i/lib/libXpm.a" && GD_XPM_DIR=$i
     done
 
-    AC_CHECK_LIB(Xpm,XpmFreeXpmImage, 
+    PHP_CHECK_LIBRARY(Xpm,XpmFreeXpmImage, 
     [
       PHP_ADD_LIBRARY_WITH_PATH(Xpm, $GD_XPM_DIR/lib, GD_SHARED_LIBADD)
       PHP_ADD_LIBRARY_WITH_PATH(X11, $GD_XPM_DIR/lib, GD_SHARED_LIBADD)
@@ -143,7 +144,7 @@ AC_DEFUN(PHP_GD_T1LIB,[
     done
 
     if test -n "$T1_DIR"; then
-      AC_CHECK_LIB(t1, T1_LoadFont, 
+      PHP_CHECK_LIBRARY(t1, T1_LoadFont, 
       [
         AC_DEFINE(HAVE_LIBT1,1,[ ])
         PHP_ADD_INCLUDE("$T1_DIR/include")
