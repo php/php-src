@@ -875,7 +875,6 @@ AC_DEFINE_UNQUOTED(PHP_OS,"$PHP_OS")
 
 AC_OUTPUT(Makefile libphp4.module
           scripts/mkextlib regex/Makefile ext/Makefile
-		  ext/pcre/pcrelib/Makefile
           @@EXT_MAKEFILES@@ build-defs.h, [
 ], [
 
