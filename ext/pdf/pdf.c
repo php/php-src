@@ -2134,7 +2134,7 @@ PHP_FUNCTION(pdf_put_image) {
 	PDF_TLS_VARS;
 	
 #if PDFLIB_MINORVERSION > 0
-	php_printf(E_WARNING, "Version 2.01 of pdflib does not need the pdf_put_image() anymore, check the docs!");
+	php_error(E_WARNING, "Version 2.01 of pdflib does not need the pdf_put_image() anymore, check the docs!");
 #else
 	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -2173,7 +2173,7 @@ PHP_FUNCTION(pdf_execute_image) {
 	PDF_TLS_VARS;
 
 #if PDFLIB_MINORVERSION >= 01
-	php_printf(E_WARNING, "Version 2.01 of pdflib does not need the pdf_execute_image() anymore, check the docs!");
+	php_error(E_WARNING, "Version 2.01 of pdflib does not need the pdf_execute_image() anymore, check the docs!");
 #else
 	if (ARG_COUNT(ht) != 5 || getParameters(ht, 5, &arg1, &arg2, &arg3, &arg4, &arg5) == FAILURE) {
 		WRONG_PARAM_COUNT;
