@@ -1,24 +1,41 @@
-1. strr(i)pos() now uses the full needle when searching - be aware that code that previous have run now can stop working.
+1. strrpos() and strripos() now use the entire string as a needle.
+   Be aware that the existing scripts may no longer work as you expect.
+
    EX :
    <?php
    var_dump(strrpos("ABCDEF","DEF"));
    var_dump(strrpos("ABCDEF","DAF"));
    ?>
-   Will give you differents results. The diffence is in the second cal to strrpos(). The same applies and for strripos().
 
-2. Change illegal use of string offset from E_WARNING to E_ERROR
+   Will give you different results. The former returns 3 while the latter
+   returns false rather than the position of the last occurrence of 'D'.
+   The same applies to strripos().
+
+2. Illegal use of string offsets causes E_ERROR instead of E_WARNING.
+
    EX :
-   marcus@zaphod /usr/src/php5 $ sapi/cli/php -r '$a = "foo"; unset($a[0][1][2]);'
-   Fatal error: Cannot use string offset as an array in Command line code on line 1
+   <?php
+   $a = "foo";
+   unset($a[0][1][2]);
+   ?>
 
-3. array_merge() accepts only arrays. If non-array is passed a E_WARNING for every non-array
-   parameter will be throwed. Be careful because your code may start emitting E_WARNING out of the blue.
+   Fatal error: Cannot use string offset as an array in ... on line 1
 
-4. Be careful when porting from ext/mysql to ext/mysqli. mysqli_fetch_row()/mysqli_fetch_array()/mysql_fetch_assoc()
-   return NULL when there is no more data in the result set (ext/mysql's functions return FALSE).
+3. array_merge() was changed to accept only arrays. If a non-array variable is
+   passed, a E_WARNING will be thrown for every such parameter. Be careful
+   because your code may start emitting E_WARNING out of the blue.
+
+4. Be careful when porting from ext/mysql to ext/mysqli. The following
+   functions return NULL when no more data is available in the result set
+   (ext/mysql's functions return FALSE).
+
+    - mysqli_fetch_row()
+    - mysqli_fetch_array()
+    - mysqli_fetch_assoc()
 
 5. PATH_TRANSLATED server variable is no longer set implicitly under
    Apache2 SAPI in contrast to the situation in PHP4, where it is set to the
    same value as the SCRIPT_FILENAME server variable when it is not populated
    by Apache.  This change was made to comply with the CGI specification.
    Please refer to bug #23610 for further information.
+
