@@ -1439,6 +1439,7 @@ PHP_FUNCTION(swfmovie_output)
 	SWFMovie movie = getMovie(getThis() TSRMLS_CC);
 
 	switch (ZEND_NUM_ARGS()) {
+#ifdef MING_HAVE_ZLIB
 	case 1:
 		if (zend_get_parameters_ex(1, &zlimit) == FAILURE)
 			WRONG_PARAM_COUNT;
@@ -1449,9 +1450,16 @@ PHP_FUNCTION(swfmovie_output)
 			RETURN_FALSE;
 		}
 		break;
+#endif
+	default:
+		WRONG_PARAM_COUNT;
 	}
 
+#ifdef MING_HAVE_ZLIB
 	RETURN_LONG(SWFMovie_output(movie, &phpByteOutputMethod, NULL, limit));
+#else
+	RETURN_LONG(SWFMovie_output(movie, &phpByteOutputMethod, NULL));
+#endif
 }
 /* }}} */
 
@@ -1477,6 +1485,7 @@ PHP_FUNCTION(swfmovie_saveToFile)
 		if (zend_get_parameters_ex(1, &x) == FAILURE)
 			WRONG_PARAM_COUNT;
 		break;
+#ifdef MING_HAVE_ZLIB
 	case 2:
 		if (zend_get_parameters_ex(2, &x, &zlimit) == FAILURE)
 			WRONG_PARAM_COUNT;
@@ -1487,12 +1496,17 @@ PHP_FUNCTION(swfmovie_saveToFile)
 			RETURN_FALSE;
 		}
 		break;
+#endif
 	default:
 		WRONG_PARAM_COUNT;
 	}
 
 	ZEND_FETCH_RESOURCE(what, php_stream *, x, -1,"File-Handle",php_file_le_stream());
+#ifdef MING_HAVE_ZLIB
 	RETURN_LONG(SWFMovie_output(movie, &phpStreamOutputMethod, what, limit));
+#else
+	RETURN_LONG(SWFMovie_output(movie, &phpStreamOutputMethod, what));
+#endif
 }
 /* }}} */
 
@@ -1510,6 +1524,7 @@ PHP_FUNCTION(swfmovie_save)
 		if (zend_get_parameters_ex(1, &x) == FAILURE)
 			WRONG_PARAM_COUNT;
 		break;
+#ifdef MING_HAVE_ZLIB
 	case 2:
 		if (zend_get_parameters_ex(2, &x, &zlimit) == FAILURE)
 			WRONG_PARAM_COUNT;
@@ -1520,13 +1535,18 @@ PHP_FUNCTION(swfmovie_save)
 			RETURN_FALSE;
 		}
 		break;
+#endif
 	default:
 		WRONG_PARAM_COUNT;
 	}
 		  
 	if (Z_TYPE_PP(x) == IS_RESOURCE) {
 		ZEND_FETCH_RESOURCE(stream, php_stream *, x, -1,"File-Handle",php_file_le_stream());
+#ifdef MING_HAVE_ZLIB
 		RETURN_LONG(SWFMovie_output(getMovie(getThis() TSRMLS_CC), &phpStreamOutputMethod, stream, limit));
+#else
+		RETURN_LONG(SWFMovie_output(getMovie(getThis() TSRMLS_CC), &phpStreamOutputMethod, stream));
+#endif
 	}
 
 	convert_to_string_ex(x);
@@ -1536,7 +1556,11 @@ PHP_FUNCTION(swfmovie_save)
 		RETURN_FALSE;
 	}
 	
+#ifdef MING_HAVE_ZLIB
 	retval = SWFMovie_output(getMovie(getThis() TSRMLS_CC), &phpStreamOutputMethod, (void *)stream, limit);
+#else
+	retval = SWFMovie_output(getMovie(getThis() TSRMLS_CC), &phpStreamOutputMethod, (void *)stream);
+#endif
 	php_stream_close(stream);
 	RETURN_LONG(retval);
 }
