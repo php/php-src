@@ -575,6 +575,7 @@ DWORD WINAPI HttpExtensionProc(LPEXTENSION_CONTROL_BLOCK lpECB)
 		file_handle.filename = sapi_globals->request_info.path_translated;
 		file_handle.free_filename = 0;
 		file_handle.type = ZEND_HANDLE_FILENAME;
+		file_handle.opened_path = NULL;
 
 		php_request_startup(CLS_C ELS_CC PLS_CC SLS_CC);
 		php_execute_script(&file_handle CLS_CC ELS_CC PLS_CC);

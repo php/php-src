@@ -514,6 +514,7 @@ nsapi_module_main(NSLS_D SLS_DC)
 	file_handle.type = ZEND_HANDLE_FILENAME;
 	file_handle.filename = SG(request_info).path_translated;
 	file_handle.free_filename = 0;
+	file_handle.opened_path = NULL;
 
 #if defined(NSAPI_DEBUG)
 	log_error(LOG_INFORM, "nsapi_module_main", NSG(sn), NSG(rq),

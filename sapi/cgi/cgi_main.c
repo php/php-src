@@ -641,6 +641,7 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 	file_handle.filename = "-";
 	file_handle.type = ZEND_HANDLE_FP;
 	file_handle.handle.fp = stdin;
+	file_handle.opened_path = NULL;
 
 	/* This actually destructs the elements of the list - ugly hack */
 	zend_llist_apply(&global_vars, (llist_apply_func_t) php_register_command_line_global_vars);

@@ -1978,17 +1978,14 @@ send_by_ref:
 
 								file_handle.handle.fp = zend_fopen(inc_filename->value.str.val, &opened_path);
 								file_handle.type = ZEND_HANDLE_FP;
-								if (opened_path) {
-									file_handle.filename = opened_path;
-									file_handle.free_filename = 0;
-								} else {
-									file_handle.filename = inc_filename->value.str.val;
-									file_handle.free_filename = 0;
-								}
-								
+								file_handle.filename = inc_filename->value.str.val;
+								file_handle.opened_path = opened_path;
+								file_handle.free_filename = 0;
+
 								if (file_handle.handle.fp) {
 									if (!opened_path || zend_hash_add(&EG(included_files), opened_path, strlen(opened_path)+1, (void *)&dummy, sizeof(int), NULL)==SUCCESS) {
 										new_op_array = zend_compile_file(&file_handle CLS_CC);
+										zend_destroy_file_handle(&file_handle CLS_CC);
 										if (!new_op_array) {
 											fclose(file_handle.handle.fp);
 										}

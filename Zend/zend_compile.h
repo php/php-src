@@ -382,8 +382,8 @@ ZEND_API int zend_execute_scripts(int type CLS_DC ELS_DC, int file_count, ...);
 ZEND_API int open_file_for_scanning(zend_file_handle *file_handle CLS_DC);
 ZEND_API void init_op_array(zend_op_array *op_array, int type, int initial_ops_size CLS_DC);
 ZEND_API void destroy_op_array(zend_op_array *op_array);
-ZEND_API void zend_close_file_handle(zend_file_handle *file_handle CLS_DC);
-ZEND_API void zend_open_file_dtor(zend_file_handle *fh);
+ZEND_API void zend_destroy_file_handle(zend_file_handle *file_handle CLS_DC);
+ZEND_API void zend_file_handle_dtor(zend_file_handle *fh);
 
 ZEND_API void destroy_zend_function(zend_function *function);
 ZEND_API void destroy_zend_class(zend_class_entry *ce);
