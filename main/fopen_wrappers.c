@@ -333,7 +333,6 @@ PHPAPI FILE *php_fopen_primary_script(void)
 #else
 		if (IS_SLASH(*PG(doc_root))) {
 #endif
-			length = strlen(PG(doc_root));
 			filename = emalloc(length + strlen(path_info) + 2);
 			if (filename) {
 				memcpy(filename, PG(doc_root), length);
