@@ -54,6 +54,7 @@
 #include "ext/standard/php3_syslog.h"
 #include "ext/standard/php_lcg.h"
 #include "ext/standard/php_metaphone.h"
+#include "ext/standard/php_output.h"
 @EXT_INCLUDE_CODE@
 
 /* SNMP has to be moved to ext */
@@ -79,6 +80,7 @@ zend_module_entry *php3_builtin_modules[] = {
 	phpext_syslog_ptr,
 	phpext_lcg_ptr,
 	phpext_metaphone_ptr,
+	phpext_output_ptr,
 @EXT_MODULE_PTRS@
 };
 

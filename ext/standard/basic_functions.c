@@ -304,11 +304,6 @@ function_entry basic_functions[] = {
 	PHP_NAMED_FE(show_source, php3_highlight_file, NULL)
 	PHP_FE(highlight_string,			NULL)
 	
-	PHP_FE(ob_start,					NULL)
-	PHP_FE(ob_end_flush,				NULL)
-	PHP_FE(ob_end_clean,				NULL)
-	PHP_FE(ob_get_contents,				NULL)
-
 	PHP_FE(ini_get,						NULL)
 	PHP_FE(ini_alter,					NULL)
 	PHP_FE(ini_restore,					NULL)
@@ -1970,32 +1965,6 @@ void test_class_startup()
 								test_class_set_property);
 
 	register_internal_class(&test_class_entry);
-}
-
-
-PHP_FUNCTION(ob_start)
-{
-	php_start_ob_buffering();
-}
-
-
-PHP_FUNCTION(ob_end_flush)
-{
-	php_end_ob_buffering(1);
-}
-
-
-PHP_FUNCTION(ob_end_clean)
-{
-	php_end_ob_buffering(0);
-}
-
-
-PHP_FUNCTION(ob_get_contents)
-{
-	if (php_ob_get_buffer(return_value)==FAILURE) {
-		RETURN_FALSE;
-	}
 }
 
 

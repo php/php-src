@@ -104,11 +104,6 @@ PHP_FUNCTION(highlight_file);
 PHP_FUNCTION(highlight_string);
 ZEND_API void php_get_highlight_struct(zend_syntax_highlighter_ini *syntax_highlighter_ini);
 
-PHP_FUNCTION(ob_start);
-PHP_FUNCTION(ob_end_flush);
-PHP_FUNCTION(ob_end_clean);
-PHP_FUNCTION(ob_get_contents);
-
 PHP_FUNCTION(ini_get);
 PHP_FUNCTION(ini_alter);
 PHP_FUNCTION(ini_restore);
