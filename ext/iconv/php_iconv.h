@@ -33,13 +33,13 @@
 #endif
 
 #ifdef PHP_ATOM_INC
-#include "php_have_iconv.h"
-#include "php_have_libiconv.h"
-#include "php_have_glibc_iconv.h"
-#include "php_have_bsd_iconv.h"
-#include "php_iconv_supports_errno.h"
-#include "php_php_iconv_impl.h"
-#include "php_php_iconv_h_path.h"
+#include "ext/iconv/php_have_iconv.h"
+#include "ext/iconv/php_have_libiconv.h"
+#include "ext/iconv/php_have_glibc_iconv.h"
+#include "ext/iconv/php_have_bsd_iconv.h"
+#include "ext/iconv/php_iconv_supports_errno.h"
+#include "ext/iconv/php_php_iconv_impl.h"
+#include "ext/iconv/php_php_iconv_h_path.h"
 #endif
 
 

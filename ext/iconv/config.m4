@@ -65,23 +65,26 @@ if test "$PHP_ICONV" != "no"; then
       esac
     fi 
 
+    echo > ext/iconv/php_have_bsd_iconv.h
+    echo > ext/iconv/php_have_glibc_iconv.h
+
     case "$iconv_impl_name" in
       gnu_libiconv [)]
-        PHP_DEFINE([PHP_ICONV_IMPL],[\"libiconv\"])
+        PHP_DEFINE([PHP_ICONV_IMPL],[\"libiconv\"],[ext/iconv])
         AC_DEFINE([PHP_ICONV_IMPL],["libiconv"],[Which iconv implementation to use])
         ;;
 
       bsd [)]
-        PHP_DEFINE([HAVE_BSD_ICONV],1)
+        PHP_DEFINE([HAVE_BSD_ICONV],1,[ext/iconv])
         AC_DEFINE([HAVE_BSD_ICONV],1,[Konstantin Chugeuv's iconv implementation])
-        PHP_DEFINE([PHP_ICONV_IMPL],[\"BSD iconv\"])
+        PHP_DEFINE([PHP_ICONV_IMPL],[\"BSD iconv\"],[ext/iconv])
         AC_DEFINE([PHP_ICONV_IMPL],["BSD iconv"],[Which iconv implementation to use])
         ;;
 
       glibc [)]
-        PHP_DEFINE([HAVE_GLIBC_ICONV],1)
+        PHP_DEFINE([HAVE_GLIBC_ICONV],1,[ext/iconv])
         AC_DEFINE([HAVE_GLIBC_ICONV],1,[glibc's iconv implementation])
-        PHP_DEFINE([PHP_ICONV_IMPL],[\"glibc\"])
+        PHP_DEFINE([PHP_ICONV_IMPL],[\"glibc\"],[ext/iconv])
         AC_DEFINE([PHP_ICONV_IMPL],["glibc"],[Which iconv implementation to use])
         ;;
     esac
@@ -106,11 +109,11 @@ int main() {
 }
     ],[
       AC_MSG_RESULT(yes)
-      PHP_DEFINE([ICONV_SUPPORTS_ERRNO],1)
+      PHP_DEFINE([ICONV_SUPPORTS_ERRNO],1,[ext/iconv])
       AC_DEFINE([ICONV_SUPPORTS_ERRNO],1,[Whether iconv supports error no or not])
     ],[
       AC_MSG_RESULT(no)
-      PHP_DEFINE([ICONV_SUPPORTS_ERRNO],0)
+      PHP_DEFINE([ICONV_SUPPORTS_ERRNO],0,[ext/iconv])
       AC_DEFINE([ICONV_SUPPORTS_ERRNO],0,[Whether iconv supports error no or not])
     ])
 
@@ -120,7 +123,7 @@ int main() {
 #include FOO
     ], [], [
       AC_MSG_RESULT([yes])
-      PHP_DEFINE([PHP_ICONV_H_PATH], [<$PHP_ICONV_H_PATH>])
+      PHP_DEFINE([PHP_ICONV_H_PATH], [<$PHP_ICONV_H_PATH>],[ext/iconv])
       AC_DEFINE_UNQUOTED([PHP_ICONV_H_PATH], [<$PHP_ICONV_H_PATH>], [Path to iconv.h])
     ], [
       AC_MSG_RESULT([no])

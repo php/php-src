@@ -20,12 +20,12 @@ AC_DEFUN(PHP_PROG_RE2C,[
   AC_CHECK_PROG(RE2C, re2c, re2c, [exit 0;])
 ])
 
-dnl PHP_DEFINE(WHAT[, value])
+dnl PHP_DEFINE(WHAT[, value[, directory]])
 dnl
 dnl Creates builddir/include/what.h and in there #define WHAT value
 dnl
 AC_DEFUN([PHP_DEFINE],[
-  [echo "#define ]$1[]ifelse([$2],,[ 1],[ $2])[" > include/php_]translit($1,A-Z,a-z)[.h]
+  [echo "#define ]$1[]ifelse([$2],,[ 1],[ $2])[" > ]ifelse([$3],,[include],[$3])[/php_]translit($1,A-Z,a-z)[.h]
 ])
 
 dnl PHP_INIT_BUILD_SYSTEM
@@ -1699,16 +1699,19 @@ AC_DEFUN([PHP_SETUP_ICONV], [
   found_iconv=no
   unset ICONV_DIR
 
+  echo > ext/iconv/php_have_libiconv.h
+  echo > ext/iconv/php_have_iconv.h
+
   dnl
   dnl Check libc first if no path is provided in --with-iconv
   dnl
   if test "$PHP_ICONV" = "yes"; then
     AC_CHECK_FUNC(iconv, [
-      PHP_DEFINE(HAVE_ICONV)
+      PHP_DEFINE(HAVE_ICONV,1,[ext/iconv])
       found_iconv=yes
     ],[
       AC_CHECK_FUNC(libiconv,[
-        PHP_DEFINE(HAVE_LIBICONV)
+        PHP_DEFINE(HAVE_LIBICONV,1,[ext/iconv])
         found_iconv=yes
       ])
     ])
@@ -1741,11 +1744,11 @@ AC_DEFUN([PHP_SETUP_ICONV], [
     then
       PHP_CHECK_LIBRARY($iconv_lib_name, libiconv, [
         found_iconv=yes
-        PHP_DEFINE(HAVE_LIBICONV)
+        PHP_DEFINE(HAVE_LIBICONV,1,[ext/iconv])
       ], [
         PHP_CHECK_LIBRARY($iconv_lib_name, iconv, [
           found_iconv=yes
-          PHP_DEFINE(HAVE_ICONV)
+          PHP_DEFINE(HAVE_ICONV,1,[ext/iconv])
         ], [], [
           -L$ICONV_DIR/lib
         ])
