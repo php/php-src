@@ -667,7 +667,7 @@ void do_free(znode *op1 CLS_DC)
 }
 
 
-void do_begin_function_declaration(znode *function_token, znode *function_name, int is_method CLS_DC)
+void do_begin_function_declaration(znode *function_token, znode *function_name, int is_method, int return_reference  CLS_DC)
 {
 	zend_op_array op_array;
 	char *name = function_name->u.constant.value.str.val;
@@ -678,8 +678,10 @@ void do_begin_function_declaration(znode *function_token, znode *function_name, 
 	zend_str_tolower(name, name_len);
 
 	init_op_array(&op_array, INITIAL_OP_ARRAY_SIZE);
+
 	op_array.function_name = name;
 	op_array.arg_types = NULL;
+	op_array.return_reference = return_reference;
 
 	if (is_method) {
 		zend_hash_update(&CG(active_class_entry)->function_table, name, name_len+1, &op_array, sizeof(zend_op_array), (void **) &CG(active_op_array));
@@ -948,7 +950,7 @@ static int generate_free_foreach_copy(znode *foreach_copy CLS_DC)
 	return 0;
 }
 
-void do_return(znode *expr, int return_reference CLS_DC)
+void do_return(znode *expr CLS_DC)
 {
 	zend_op *opline;
 	
@@ -963,7 +965,7 @@ void do_return(znode *expr, int return_reference CLS_DC)
 	opline = get_next_op(CG(active_op_array) CLS_CC);
 
 	opline->opcode = ZEND_RETURN;
-	opline->extended_value = return_reference;
+	
 	if (expr) {
 		opline->op1 = *expr;
 	} else {

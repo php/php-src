@@ -115,6 +115,7 @@ struct _zend_op_array {
 	int last_executed_op_number;
 	int backpatch_count;
 #endif
+	zend_bool return_reference;
 
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
 };
@@ -260,14 +261,14 @@ void do_add_char(znode *result, znode *op1, znode *op2 CLS_DC);
 void do_add_string(znode *result, znode *op1, znode *op2 CLS_DC);
 void do_add_variable(znode *result, znode *op1, znode *op2 CLS_DC);
 
-void do_begin_function_declaration(znode *function_token, znode *function_name, int is_method CLS_DC);
+void do_begin_function_declaration(znode *function_token, znode *function_name, int is_method, int return_reference CLS_DC);
 void do_end_function_declaration(znode *function_token CLS_DC);
 void do_receive_arg(int op, znode *var, znode *offset, znode *initialization, unsigned char pass_type CLS_DC);
 int do_begin_function_call(znode *function_name CLS_DC);
 void do_begin_dynamic_function_call(znode *function_name CLS_DC);
 void do_begin_class_member_function_call(znode *class_name, znode *function_name CLS_DC);
 void do_end_function_call(znode *function_name, znode *result, znode *argument_list, int is_method, int is_dynamic_fcall CLS_DC);
-void do_return(znode *expr, int return_reference CLS_DC);
+void do_return(znode *expr CLS_DC);
 ZEND_API int do_bind_function_or_class(zend_op *opline, HashTable *function_table, HashTable *class_table, int compile_time);
 void do_early_binding(CLS_D);
 
@@ -611,5 +612,8 @@ int zendlex(znode *zendlval CLS_DC);
 			)														\
 		)															\
 	)
+
+#define ZEND_RETURN_VAL 0
+#define ZEND_RETURN_REF 1
 
 #endif /* _COMPILE_H */

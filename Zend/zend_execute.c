@@ -1549,7 +1549,10 @@ do_fcall_common:
 					zval *retval_ptr;
 					zval **retval_ptr_ptr;
 					
-					if (opline->extended_value) {
+					if ((EG(active_op_array)->return_reference == ZEND_RETURN_REF) &&
+						(opline->op1.op_type != IS_CONST) && 
+						(opline->op1.op_type != IS_TMP_VAR)) {
+						
 						retval_ptr_ptr = get_zval_ptr_ptr(&opline->op1, Ts, BP_VAR_R);
 
 						if (!PZVAL_IS_REF(*retval_ptr_ptr)) {
