@@ -2,6 +2,7 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 200?, Version 4.0.5
+- ctype functions now follow the extension naming conventions (Hartmut)
 - Added iconv() function (using libc or libiconv) (Stig)
 - Added ODBC_TYPE constant (Stig)
 - Added the call_user_method_array function which allows you to call a method
