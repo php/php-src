@@ -18,6 +18,10 @@ EXTENSION:           informix
 PRIMARY MAINTAINER:  Danny Heijl <Danny.Heijl@cevi.be>
 STATUS:              Maintained
 --------------------------------------------------------------------------------
+EXTENSION:           mhash
+PRIMARY MAINTAINER:  Sascha Schumann <sascha@schumann.cx>
+STATUS:              Maintained
+--------------------------------------------------------------------------------
 EXTENSION:           oci8
 PRIMARY MAINTAINER:  Thies C. Arntzen <thies@digicol.de>
 STATUS:              Maintained
