@@ -76,7 +76,7 @@ foreach ($install_files as $package => $instfile) {
                 }
                 $ui->displayLine(sprintf("[PEAR] %-15s- installed: %s", $package, $new_ver));
             } else {
-                $ui->displayLine(sprintf("[PEAR] %-15s- not installed (already have %s)", $package, $old_ver));
+                $ui->displayLine(sprintf("[PEAR] %-15s- already installed: %s", $package, $old_ver));
             }
         }
     } else {
