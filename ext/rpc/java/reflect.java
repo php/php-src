@@ -102,22 +102,30 @@ class reflect {
   //
   public static void CreateObject(String name, Object args[], long result) {
     try {
+      Vector matches = new Vector();
+
       Constructor cons[] = Class.forName(name).getConstructors();
       for (int i=0; i<cons.length; i++) {
         if (cons[i].getParameterTypes().length == args.length) {
-          setResult(result, cons[i].newInstance(args));
+          matches.addElement(cons[i]);
+        }
+      }
+
+      Constructor selected = (Constructor)select(matches, args);
+
+      if (selected == null) {
+        if (args.length > 0) {
+          throw new InstantiationException("No matching constructor found");
+        } else {
+          // for classes which have no visible constructor, return the class
+          // useful for classes like java.lang.System and java.util.Calendar.
+          setResult(result, Class.forName(name));
           return;
         }
       }
 
-      // for classes which have no visible constructor, return the class
-      // useful for classes like java.lang.System and java.util.Calendar.
-      if (args.length == 0) {
-        setResult(result, Class.forName(name));
-        return;
-      }
-
-      throw new InstantiationException("No matching constructor found");
+      Object coercedArgs[] = coerce(selected.getParameterTypes(), args);
+      setResult(result, selected.newInstance(coercedArgs));
 
     } catch (Exception e) {
       setException(result, e);
@@ -127,16 +135,20 @@ class reflect {
   //
   // Select the best match from a list of methods
   //
-  private static Method select(Vector methods, Object args[]) {
-    if (methods.size() == 1) return (Method) methods.firstElement();
+  private static Object select(Vector methods, Object args[]) {
+    if (methods.size() == 1) return methods.firstElement();
 
-    Method selected = null;
+    Object selected = null;
     int best = Integer.MAX_VALUE;
 
     for (Enumeration e = methods.elements(); e.hasMoreElements(); ) {
-      Method method = (Method)e.nextElement();
+      Object element = e.nextElement();
       int weight=0;
-      Class parms[] = method.getParameterTypes();
+
+      Class parms[] = (element instanceof Method) ?
+        ((Method)element).getParameterTypes() : 
+        ((Constructor)element).getParameterTypes();
+
       for (int i=0; i<parms.length; i++) {
         if (parms[i].isInstance(args[i])) {
 	  for (Class c=parms[i]; (c=c.getSuperclass()) != null; ) {
@@ -168,9 +180,9 @@ class reflect {
       } 
 
       if (weight < best) {
-        if (weight == 0) return method;
+        if (weight == 0) return element;
         best = weight;
-        selected = method;
+        selected = element;
       }
     }
 
@@ -178,11 +190,13 @@ class reflect {
   }
 
   //
-  // Select the best match from a list of methods
+  // Coerce arguments when possible to conform to the argument list.
+  // Java's reflection will automatically do widening conversions,
+  // unfortunately PHP only supports wide formats, so to be practical
+  // some (possibly lossy) conversions are required.
   //
-  private static Object[] coerce(Method method, Object args[]) {
+  private static Object[] coerce(Class parms[], Object args[]) {
     Object result[] = args;
-    Class parms[] = method.getParameterTypes();
     for (int i=0; i<args.length; i++) {
       if (parms[i].isInstance(args[i])) continue;
       if (args[i] instanceof Number && parms[i].isPrimitive()) {
@@ -238,10 +252,10 @@ class reflect {
         if (!(object instanceof Class) || (jclass==object)) break;
       }
 
-      Method selected = select(matches, args);
+      Method selected = (Method)select(matches, args);
       if (selected == null) throw new NoSuchMethodException(method);
 
-      Object coercedArgs[] = coerce(selected, args);
+      Object coercedArgs[] = coerce(selected.getParameterTypes(), args);
       setResult(result, selected.invoke(object, coercedArgs));
 
     } catch (Exception e) {
@@ -258,6 +272,18 @@ class reflect {
     try {
 
       for (Class jclass = object.getClass();;jclass=(Class)object) {
+        while (!Modifier.isPublic(jclass.getModifiers())) {
+          // OK, some joker gave us an instance of a non-public class
+          // Substitute the first public interface in its place,
+          // and barring that, try the superclass
+          Class interfaces[] = jclass.getInterfaces();
+          jclass=jclass.getSuperclass();
+          for (int i=interfaces.length; i-->0;) {
+            if (Modifier.isPublic(interfaces[i].getModifiers())) {
+              jclass=interfaces[i];
+            }
+          }
+        }
         BeanInfo beanInfo = Introspector.getBeanInfo(jclass);
         PropertyDescriptor props[] = beanInfo.getPropertyDescriptors();
         for (int i=0; i<props.length; i++) {
