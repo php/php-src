@@ -1,6 +1,9 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2002, Version 4.3.0
+- The second parameter of gzencode() now is the compression level
+  like in the documentation. The encoding mode is a third (optional)
+- parameter. (Stefan)
 - The second parameter of gzencode() now is the compression level like
   in the documentation. The encoding mode is a third (optional)
   parameter. (Stefan)
