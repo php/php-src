@@ -295,7 +295,7 @@ dbm_info *php_dbm_open(char *filename, char *mode TSRMLS_DC)
 	DBM_MODE_TYPE imode;
 
 	if (filename == NULL) {
-		php_error(E_WARNING, "%s(): NULL filename passed", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "NULL filename passed");
 		return NULL;
 	}
 
@@ -341,7 +341,7 @@ dbm_info *php_dbm_open(char *filename, char *mode TSRMLS_DC)
 			lockfd = open(lockfn, O_RDWR|O_CREAT, 0644);
 			close(lockfd);
 		} else {
-			php_error(E_WARNING, "%s(): File appears to be locked [%s]", get_active_function_name(TSRMLS_C), lockfn);
+			php_error_docref1(NULL TSRMLS_CC, filename, E_WARNING, "File appears to be locked [%s]", lockfn);
 			return -1;
 		}
 #else /* NFS_HACK */
@@ -352,7 +352,7 @@ dbm_info *php_dbm_open(char *filename, char *mode TSRMLS_DC)
 			flock(lockfd, LOCK_EX);
 			close(lockfd);
 		} else {
-			php_error(E_WARNING, "%s(): Unable to establish lock: %s", get_active_function_name(TSRMLS_C), filename);
+			php_error_docref1(NULL TSRMLS_CC, filename, E_WARNING, "Unable to establish lock");
 		}
 #endif /* else NFS_HACK */
 
@@ -369,7 +369,7 @@ dbm_info *php_dbm_open(char *filename, char *mode TSRMLS_DC)
 	if (dbf) {
 		info = (dbm_info *)emalloc(sizeof(dbm_info));
 		if (!info) {
-			php_error(E_ERROR, "%s(): problem allocating memory!", get_active_function_name(TSRMLS_C));
+			php_error_docref1(NULL TSRMLS_CC, filename, E_ERROR, "Oroblem allocating memory!");
 			return NULL;
 		}
 
@@ -381,7 +381,7 @@ dbm_info *php_dbm_open(char *filename, char *mode TSRMLS_DC)
 		return info;
 	} else {
 #if GDBM 
-		php_error(E_WARNING, "%s(%s): %d [%s], %d [%s]", get_active_function_name(TSRMLS_C), filename, gdbm_errno, gdbm_strerror(gdbm_errno), errno, strerror(errno));
+		php_error_docref1(NULL TSRMLS_CC, filename, E_WARNING, "%d [%s], %d [%s]", gdbm_errno, gdbm_strerror(gdbm_errno), errno, strerror(errno));
 		if (gdbm_errno)
 			ret = gdbm_errno;
 		else if (errno)
@@ -391,13 +391,13 @@ dbm_info *php_dbm_open(char *filename, char *mode TSRMLS_DC)
 #else 
 #if NDBM 
 #if PHP_DEBUG
-		php_error(E_WARNING, "%s(%s): errno = %d [%s]\n", get_active_function_name(TSRMLS_C), filename, errno, strerror(errno));
+		php_error_docref1(NULL TSRMLS_CC, filename, E_WARNING, "errno = %d [%s]\n", errno, strerror(errno));
 #endif
 		if (errno) ret=errno;
 		else ret = -1;
 #else
 #if PHP_DEBUG
-		php_error(E_WARNING, "%s(%s): errno = %d [%s]\n", get_active_function_name(TSRMLS_C), filename, errno, strerror(errno));
+		php_error1(NULL TSRMLS_CC, filename, E_WARNING, "errno = %d [%s]\n", errno, strerror(errno));
 #endif
 		if (errno) ret=errno;
 		else ret = -1;
@@ -439,7 +439,6 @@ PHP_FUNCTION(dbmclose)
  */
 void php_dbm_close(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
-	int ret = 0;
 	dbm_info *info = (dbm_info *)rsrc->ptr;
 	DBM_TYPE dbf;
 	int lockfd;
@@ -487,7 +486,7 @@ PHP_FUNCTION(dbminsert)
 
 	info = php_find_dbm(id TSRMLS_CC);
 	if (!info) {
-		php_error(E_WARNING, "%s(): not a valid database identifier %d", get_active_function_name(TSRMLS_C), Z_LVAL_P(id));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid database identifier %d", Z_LVAL_P(id));
 		RETURN_FALSE;
 	}
 	
@@ -513,7 +512,7 @@ PHP_FUNCTION(dbmreplace)
 
 	info = php_find_dbm(id TSRMLS_CC);
 	if (!info) {
-		php_error(E_WARNING, "%s(): not a valid database identifier %d", get_active_function_name(TSRMLS_C), Z_LVAL_P(id));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid database identifier %d", Z_LVAL_P(id));
 		RETURN_FALSE;
 	}
 	
@@ -549,7 +548,7 @@ int php_dbm_insert_replace(dbm_info *info, char *key, char *value, int replace_m
 
 	dbf = info->dbf;
 	if (!dbf) {
-		php_error(E_WARNING, "%s(): Unable to locate dbm file", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to locate dbm file");
 		ret = 1;
 	} else {
 		if (!replace_mode) {
@@ -581,7 +580,7 @@ PHP_FUNCTION(dbmfetch)
 
 	info = php_find_dbm(id TSRMLS_CC);
 	if (!info) {
-		php_error(E_WARNING, "%s(): not a valid database identifier %d", get_active_function_name(TSRMLS_C), Z_LVAL_P(id));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid database identifier %d", Z_LVAL_P(id));
 		RETURN_FALSE;
 	}
 
@@ -612,7 +611,7 @@ char *php_dbm_fetch(dbm_info *info, char *key TSRMLS_DC)
 
 	dbf = info->dbf;
 	if (!dbf) {
-		php_error(E_WARNING, "%s(): Unable to locate dbm file", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to locate dbm file");
 		return(NULL);
 	}
 
@@ -657,7 +656,7 @@ PHP_FUNCTION(dbmexists)
 
 	info = php_find_dbm(id TSRMLS_CC);
 	if (!info) {
-		php_error(E_WARNING, "%s(): not a valid database identifier %d", get_active_function_name(TSRMLS_C), Z_LVAL_P(id));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid database identifier %d", Z_LVAL_P(id));
 		RETURN_FALSE;
 	}
 
@@ -681,7 +680,7 @@ int php_dbm_exists(dbm_info *info, char *key TSRMLS_DC) {
 
 	dbf = info->dbf;
 	if (!dbf) {
-		php_error(E_WARNING, "%s(): Unable to locate dbm file", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to locate dbm file");
 		return(0);
 	}
 
@@ -706,7 +705,7 @@ PHP_FUNCTION(dbmdelete)
 
 	info = php_find_dbm(id TSRMLS_CC);
 	if (!info) {
-		php_error(E_WARNING, "%s(): not a valid database identifier %d", get_active_function_name(TSRMLS_C), Z_LVAL_P(id));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid database identifier %d", Z_LVAL_P(id));
 		RETURN_FALSE;
 	}
 
@@ -730,7 +729,7 @@ int php_dbm_delete(dbm_info *info, char *key TSRMLS_DC) {
 
 	dbf = info->dbf;
 	if (!dbf) {
-		php_error(E_WARNING, "%s(): Unable to locate dbm file", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to locate dbm file");
 		return(0);
 	}
 
@@ -753,7 +752,7 @@ PHP_FUNCTION(dbmfirstkey)
 
 	info = php_find_dbm(id TSRMLS_CC);
 	if (!info) {
-		php_error(E_WARNING, "%s(): not a valid database identifier %d", get_active_function_name(TSRMLS_C), Z_LVAL_P(id));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid database identifier %d", Z_LVAL_P(id));
 		RETURN_FALSE;
 	}
 
@@ -775,7 +774,7 @@ char *php_dbm_first_key(dbm_info *info TSRMLS_DC) {
 
 	dbf = info->dbf;
 	if (!dbf) {
-		php_error(E_WARNING, "%s(): Unable to locate dbm file", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to locate dbm file");
 		return(NULL);
 	}
 
@@ -815,7 +814,7 @@ PHP_FUNCTION(dbmnextkey)
 
 	info = php_find_dbm(id TSRMLS_CC);
 	if (!info) {
-		php_error(E_WARNING, "%s(): not a valid database identifier %d", get_active_function_name(TSRMLS_C), Z_LVAL_P(id));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid database identifier %d", Z_LVAL_P(id));
 		RETURN_FALSE;
 	}
 
@@ -844,7 +843,7 @@ char *php_dbm_nextkey(dbm_info *info, char *key TSRMLS_DC)
 
 	dbf = info->dbf;
 	if (!dbf) {
-		php_error(E_WARNING, "%s(): Unable to locate dbm file", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to locate dbm file");
 		return(NULL);
 	}
 
