@@ -40,6 +40,5 @@
 
 void php_treat_data(int arg, char *str ELS_DC PLS_DC SLS_DC);
 void php_parse_gpc_data(char *val, char *var, pval *track_vars_array ELS_DC PLS_DC);
-void php_parse_gpc_data2(char *val, char *var, pval *track_vars_array ELS_DC PLS_DC);
 
 #endif
