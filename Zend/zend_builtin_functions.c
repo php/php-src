@@ -691,7 +691,12 @@ ZEND_FUNCTION(get_class_vars)
 ZEND_FUNCTION(get_object_vars)
 {
 	zval **obj;
-	zval *tmp;
+	zval **value;
+	HashTable *properties;
+	HashPosition pos;
+	char *key;
+	uint key_len;
+	ulong num_index;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &obj) == FAILURE) {
 		ZEND_WRONG_PARAM_COUNT();
@@ -705,8 +710,16 @@ ZEND_FUNCTION(get_object_vars)
 	}
 
 	array_init(return_value);
-	zend_hash_copy(return_value->value.ht, Z_OBJ_HT_PP(obj)->get_properties(*obj TSRMLS_CC),
-				   (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
+
+	properties = Z_OBJ_HT_PP(obj)->get_properties(*obj TSRMLS_CC);
+	zend_hash_internal_pointer_reset_ex(properties, &pos);
+
+	while (zend_hash_get_current_data_ex(properties, (void **) &value, &pos) == SUCCESS) {
+		if (zend_hash_get_current_key_ex(properties, &key, &key_len, &num_index, 0, &pos) == HASH_KEY_IS_STRING && key[0]) {
+			add_assoc_zval_ex(return_value, key, key_len, *value);
+		}
+		zend_hash_move_forward_ex(properties, &pos);
+	}
 }
 /* }}} */
 
