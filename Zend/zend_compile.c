@@ -978,6 +978,7 @@ void do_do_while_end(znode *do_token, znode *expr CLS_DC)
 	opline->opcode = ZEND_JMPNZ;
 	opline->op1 = *expr;
 	opline->op2.u.opline_num = do_token->u.opline_num;
+	SET_UNUSED(opline->op2);
 
 	do_end_loop(do_token->u.opline_num CLS_CC);
 
