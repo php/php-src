@@ -977,14 +977,12 @@ find_best_colors (gdImagePtr im, my_cquantize_ptr cquantize,
  * find the distance from a colormap entry to successive cells in the box.
  */
 {
-  int ic0, ic1, ic2, ic3;
+  int ic0, ic1, ic2;
   int i, icolor;
   register int *bptr;		/* pointer into bestdist[] array */
   int *cptr;			/* pointer into bestcolor[] array */
   int dist0, dist1, dist2;	/* initial distance values */
-  register int dist3;		/* current distance in inner loop */
   int xx0, xx1, xx2;		/* distance increments */
-  register int xx3;
   int inc0, inc1, inc2, inc3;	/* initial values for increments */
   /* This array holds the distance to the nearest-so-far color for each cell */
   int bestdist[BOX_C0_ELEMS * BOX_C1_ELEMS * BOX_C2_ELEMS * BOX_C3_ELEMS];
@@ -1005,59 +1003,56 @@ find_best_colors (gdImagePtr im, my_cquantize_ptr cquantize,
 #define STEP_C2  ((1 << C2_SHIFT) * C2_SCALE)
 #define STEP_C3  ((1 << C3_SHIFT) * C3_SCALE)
 
-  for (i = 0; i < numcolors; i++)
-    {
-      icolor = colorlist[i];
-      /* Compute (square of) distance from minc0/c1/c2 to this color */
-      inc0 = (minc0 - (im->red[icolor])) * C0_SCALE;
-      dist0 = inc0 * inc0;
-      inc1 = (minc1 - (im->green[icolor])) * C1_SCALE;
-      dist0 += inc1 * inc1;
-      inc2 = (minc2 - (im->blue[icolor])) * C2_SCALE;
-      dist0 += inc2 * inc2;
-      inc3 = (minc3 - (im->alpha[icolor])) * C3_SCALE;
-      dist0 += inc3 * inc3;
-      /* Form the initial difference increments */
-      inc0 = inc0 * (2 * STEP_C0) + STEP_C0 * STEP_C0;
-      inc1 = inc1 * (2 * STEP_C1) + STEP_C1 * STEP_C1;
-      inc2 = inc2 * (2 * STEP_C2) + STEP_C2 * STEP_C2;
-      inc3 = inc3 * (2 * STEP_C3) + STEP_C3 * STEP_C3;
-      /* Now loop over all cells in box, updating distance per Thomas method */
-      bptr = bestdist;
-      cptr = bestcolor;
-      xx0 = inc0;
-      for (ic0 = BOX_C0_ELEMS - 1; ic0 >= 0; ic0--)
-	{
-	  dist1 = dist0;
-	  xx1 = inc1;
-	  for (ic1 = BOX_C1_ELEMS - 1; ic1 >= 0; ic1--)
-	    {
-	      dist2 = dist1;
-	      xx2 = inc2;
-	      for (ic2 = BOX_C2_ELEMS - 1; ic2 >= 0; ic2--)
-		{
-		  for (ic3 = BOX_C3_ELEMS - 1; ic3 >= 0; ic3--)
-		    {
-		      if (dist3 < *bptr)
-			{
-			  *bptr = dist3;
-			  *cptr = icolor;
+	for (i = 0; i < numcolors; i++)	{
+		icolor = colorlist[i];
+		/* Compute (square of) distance from minc0/c1/c2 to this color */
+		inc0 = (minc0 - (im->red[icolor])) * C0_SCALE;
+		dist0 = inc0 * inc0;
+		inc1 = (minc1 - (im->green[icolor])) * C1_SCALE;
+		dist0 += inc1 * inc1;
+		inc2 = (minc2 - (im->blue[icolor])) * C2_SCALE;
+		dist0 += inc2 * inc2;
+		inc3 = (minc3 - (im->alpha[icolor])) * C3_SCALE;
+		dist0 += inc3 * inc3;
+		/* Form the initial difference increments */
+		inc0 = inc0 * (2 * STEP_C0) + STEP_C0 * STEP_C0;
+		inc1 = inc1 * (2 * STEP_C1) + STEP_C1 * STEP_C1;
+		inc2 = inc2 * (2 * STEP_C2) + STEP_C2 * STEP_C2;
+		inc3 = inc3 * (2 * STEP_C3) + STEP_C3 * STEP_C3;
+		/* Now loop over all cells in box, updating distance per Thomas method */
+		bptr = bestdist;
+		cptr = bestcolor;
+		xx0 = inc0;
+		for (ic0 = BOX_C0_ELEMS - 1; ic0 >= 0; ic0--) {
+			dist1 = dist0;
+			xx1 = inc1;
+			for (ic1 = BOX_C1_ELEMS - 1; ic1 >= 0; ic1--) {
+				dist2 = dist1;
+				xx2 = inc2;
+				for (ic2 = BOX_C2_ELEMS - 1; ic2 >= 0; ic2--) {
+					register int dist3 = dist2;		/* current distance in inner loop */
+					register int xx3 = inc3;
+					register int ic3;
+					for (ic3 = BOX_C3_ELEMS - 1; ic3 >= 0; ic3--) {
+						if (dist3 < *bptr) {
+							*bptr = dist3;
+							*cptr = icolor;
+						}
+						dist3 += xx3;
+						xx3 += 2 * STEP_C3 * STEP_C3;
+						bptr++;
+						cptr++;
+					}
+					dist2 += xx2;
+					xx2 += 2 * STEP_C2 * STEP_C2;
+				}
+				dist1 += xx1;
+				xx1 += 2 * STEP_C1 * STEP_C1;
 			}
-		      dist3 += xx3;
-		      xx3 += 2 * STEP_C3 * STEP_C3;
-		      bptr++;
-		      cptr++;
-		    }
-		  dist2 += xx2;
-		  xx2 += 2 * STEP_C2 * STEP_C2;
+			dist0 += xx0;
+			xx0 += 2 * STEP_C0 * STEP_C0;
 		}
-	      dist1 += xx1;
-	      xx1 += 2 * STEP_C1 * STEP_C1;
-	    }
-	  dist0 += xx0;
-	  xx0 += 2 * STEP_C0 * STEP_C0;
 	}
-    }
 }
 
 
