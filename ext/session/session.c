@@ -1338,6 +1338,7 @@ static void php_rinit_session_globals(TSRMLS_D)
 	PS(id) = NULL;
 	PS(session_status) = php_session_none;
 	PS(mod_data) = NULL;
+	PS(http_session_vars) = NULL;
 }
 
 static void php_rshutdown_session_globals(TSRMLS_D)
