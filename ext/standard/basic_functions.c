@@ -1852,47 +1852,66 @@ ZEND_API void php_get_highlight_struct(zend_syntax_highlighter_ini *syntax_highl
    Syntax highlight a source file */
 PHP_FUNCTION(highlight_file)
 {
-	pval **filename;
+	zval *filename;
 	zend_syntax_highlighter_ini syntax_highlighter_ini;
+	long i = 0;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &filename) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|l", &filename, &i) == FAILURE) {
+		return;
 	}
-	convert_to_string_ex(filename);
+
+	if (i) {
+		php_start_ob_buffer (NULL, 0 TSRMLS_CC);
+	}
 
 	php_get_highlight_struct(&syntax_highlighter_ini);
 
-	if (highlight_file(Z_STRVAL_PP(filename), &syntax_highlighter_ini TSRMLS_CC) == FAILURE) {
+	if (highlight_file(Z_STRVAL_P(filename), &syntax_highlighter_ini TSRMLS_CC) == FAILURE) {
 		RETURN_FALSE;
 	}
-	RETURN_TRUE;
+
+	if (i) {
+		php_ob_get_buffer (return_value TSRMLS_CC);
+		php_end_ob_buffer (0, 0 TSRMLS_CC);
+	} else {
+		RETURN_TRUE;
+	}
 }
 /* }}} */
 
-/* {{{ proto bool highlight_string(string string)
-   Syntax highlight a string */
+/* {{{ proto bool highlight_string(string string [, int return] )
+   Syntax highlight a string or optionally return it */
 PHP_FUNCTION(highlight_string)
 {
-	pval **expr;
+	zval *expr;
 	zend_syntax_highlighter_ini syntax_highlighter_ini;
 	char *hicompiled_string_description;
+	long  i = 0;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &expr) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|l", &expr, &i) == FAILURE) {
+		return;
 	}
 
-	convert_to_string_ex(expr);
+	if (i) {
+		php_start_ob_buffer (NULL, 0 TSRMLS_CC);
+	}
 
 	php_get_highlight_struct(&syntax_highlighter_ini);
 
 	hicompiled_string_description = zend_make_compiled_string_description("highlighted code" TSRMLS_CC);
 
-	if (highlight_string(*expr, &syntax_highlighter_ini, hicompiled_string_description TSRMLS_CC) == FAILURE) {
+	if (highlight_string(expr, &syntax_highlighter_ini, hicompiled_string_description TSRMLS_CC) == FAILURE) {
 		efree(hicompiled_string_description);
 		RETURN_FALSE;
 	}
 	efree(hicompiled_string_description);
-	RETURN_TRUE;
+
+	if (i) {
+		php_ob_get_buffer (return_value TSRMLS_CC);
+		php_end_ob_buffer (0, 0 TSRMLS_CC);
+	} else {
+		RETURN_TRUE;
+	}
 }
 /* }}} */
 
