@@ -2610,10 +2610,16 @@ int zend_do_fcall_common_helper(ZEND_OPCODE_HANDLER_ARGS)
 		}
 	}
 
-	if (should_change_scope) {
-		if (EG(This)) {
+	if (EG(This)) {
+		if (EG(exception) && EX(fbc)->common.fn_flags&ZEND_ACC_CTOR) {
+			EG(This)->refcount = 1;
+			zval_ptr_dtor(&EG(This));
+		} else if (should_change_scope) {
 			zval_ptr_dtor(&EG(This));
 		}
+	}
+
+	if (should_change_scope) {
 		EG(This) = current_this;
 		EG(scope) = current_scope;
 	}

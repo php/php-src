@@ -2252,6 +2252,13 @@ void zend_do_end_class_declaration(znode *class_token, znode *parent_token TSRML
 
 	do_inherit_parent_constructor(ce);
 
+	if (ce->constructor) {
+		ce->constructor->common.fn_flags |= ZEND_ACC_CTOR;
+	}
+	if (ce->destructor) {
+		ce->destructor->common.fn_flags |= ZEND_ACC_DTOR;
+	}
+
 	ce->line_end = zend_get_compiled_lineno(TSRMLS_C);
 
 	/* Inherit interfaces */
