@@ -1,3 +1,81 @@
+2003-11-17  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/mssql/php_mssql.c:
+      MFB: Fix for bug #25817
+      Check for a return value from a stored procedure right after fetching rows
+      Replace code with some Z_ macros
+
+    * (PHP_4_3)
+      ext/mssql/php_mssql.c:
+      Fix for bug #25817
+      Check for a return value from a stored procedure right after fetching rows
+
+2003-11-17  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      NEWS
+      ext/tokenizer/Makefile.frag:
+      MFH: - Fixed bug #26253 (ext/tokenizer: build as shared extension fails)
+
+    * ext/tokenizer/Makefile.frag:
+      - Fixed bug #26253 (ext/tokenizer: build as shared extension fails)
+
+2003-11-17  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * sapi/servlet/.cvsignore
+      sapi/servlet/CREDITS
+      sapi/servlet/EXPERIMENTAL
+      sapi/servlet/Makefile.frag
+      sapi/servlet/README
+      sapi/servlet/config.m4
+      sapi/servlet/cookies.php
+      sapi/servlet/date.php
+      sapi/servlet/formatter.java
+      sapi/servlet/jinfo.php
+      sapi/servlet/jver.php
+      sapi/servlet/reqheaders.php
+      sapi/servlet/reqinfo.php
+      sapi/servlet/reqparams.php
+      sapi/servlet/servlet.c
+      sapi/servlet/servlet.dsp
+      sapi/servlet/servlet.java
+      sapi/servlet/sessions.php
+      sapi/servlet/web.xml:
+      SAPI/Servlet has been moved to PECL.
+
+2003-11-17  Martin Jansen  <mail@martin-jansen.de>
+
+    * pear/PEAR/Command/Remote.php:
+      - Fix potential warning
+
+2003-11-17  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/PEAR/Installer.php:
+      necessary refinement
+
+    * pear/package-PEAR.xml
+      pear/PEAR/Installer.php:
+      fix bug #248, --force does not work as expected
+
+    * pear/package-PEAR.xml
+      pear/PEAR/Installer.php:
+      fix bug #249
+
+2003-11-17  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/curl/streams.c:
+      Silence warning.
+
+2003-11-17  Stig Bakken  <ssb@trd.fast.no>
+
+    * pear/Archive/Tar.php:
+      - "chmod +x" when extracting archived executable files
+
+2003-11-17  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_interfaces.c:
+      Correct destruction
+
 2003-11-16  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/sqlite/CREDITS:
