@@ -39,7 +39,7 @@ extern PHPAPI int core_globals_id;
 # define PLS_CC
 # define PG(v) (core_globals.v)
 # define PLS_FETCH()
-extern ZEND_API php_core_globals core_globals;
+extern ZEND_API struct _php_core_globals core_globals;
 #endif
 
 
