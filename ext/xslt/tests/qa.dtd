@@ -1,8 +1,7 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="ISO-8859-1"?>
 <!ELEMENT qa (test+)>
-
 <!ELEMENT test (#PCDATA)>
 <!ATTLIST test
 	type CDATA #IMPLIED
 >
-<!ENTITY reg    "&#174;">
+<!ENTITY reg "&#174;">
