@@ -1894,7 +1894,15 @@ PHP_FUNCTION(copy)
 		RETURN_FALSE;
 	}
 
+	if (php_check_open_basedir((*source)->value.str.val)) {
+		RETURN_FALSE;
+	}
+
 	if (PG(safe_mode) &&(!php_checkuid((*target)->value.str.val, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
+		RETURN_FALSE;
+	}
+
+	if (php_check_open_basedir((*target)->value.str.val)) {
 		RETURN_FALSE;
 	}
 
