@@ -182,10 +182,10 @@ static int mcheck(union VALUETYPE *, struct magic *);
 static void mprint(union VALUETYPE *, struct magic *);
 static int mconvert(union VALUETYPE *, struct magic *);
 static int magic_rsl_get(char **, char **);
-static int magic_process(char *);
+static int magic_process(char * TSRMLS_DC);
 
 static long from_oct(int, char *);
-static int fsmagic(char *fn);
+static int fsmagic(char *fn TSRMLS_DC);
 
 
 #if HAVE_ZLIB
@@ -305,7 +305,7 @@ PHP_FUNCTION(mime_content_type)
 
 	MIME_MAGIC_G(req_dat) = magic_set_config();
 
-	if(MIME_MAGIC_OK != magic_process(filename)) {
+	if(MIME_MAGIC_OK != magic_process(filename TSRMLS_CC)) {
 		RETVAL_FALSE;
 	} else if(MIME_MAGIC_OK != magic_rsl_get(&content_type, &content_encoding)) {
 		RETVAL_FALSE;
@@ -943,18 +943,17 @@ static char *rsl_strdup(int start_frag, int start_pos, int len)
  * (formerly called "process" in file command, prefix added for clarity) Opens
  * the file and reads a fixed-size buffer to begin processing the contents.
  */
-static int magic_process(char *filename)
+static int magic_process(char *filename TSRMLS_DC)
 {
 	php_stream *stream;
     unsigned char buf[HOWMANY + 1];	/* one extra for terminating '\0' */
     int nbytes = 0;		/* number of bytes read from a datafile */
     int result;
-    TSRMLS_FETCH();
 
     /*
      * first try judging the file based on its filesystem status
      */
-    switch ((result = fsmagic(filename))) {
+    switch ((result = fsmagic(filename TSRMLS_CC))) {
     case MIME_MAGIC_DONE:
 		magic_rsl_putchar('\n');
 		return MIME_MAGIC_OK;
@@ -1033,10 +1032,9 @@ static void tryit(unsigned char *buf, int nb, int checkzmagic)
  * return MIME_MAGIC_OK to indicate it's a regular file still needing handling
  * other returns indicate a failure of some sort
  */
-static int fsmagic(char *filename)
+static int fsmagic(char *filename TSRMLS_DC)
 {
 	php_stream_statbuf stat_ssb;
-	TSRMLS_FETCH();
 
 	if(!php_stream_stat_path(filename, &stat_ssb)) {
 		return MIME_MAGIC_OK;
