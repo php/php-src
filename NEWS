@@ -1,6 +1,7 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2002, Version 4.3.0
+- Added pg_fetch_all() that fetch all rows in result. (Yasuo)
 - Changed "session.use_trans_sid" to be disabled by default in php.ini. (Yasuo)
 - Added safe_mode & open_basedir checks for pg_lo_export(). (Yasuo)
 - Added open_basedir check for pg_lo_import(). (Yasuo)
