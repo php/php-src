@@ -141,7 +141,7 @@ PHP_FUNCTION(dom_text_split_text)
 	xmlFree(cur);
 
 	xmlNodeSetContentLen(node, first, offset);
-	nnode = xmlNewText(second);
+	nnode = xmlNewDocText(node->doc, second);
 	
 	xmlFree(first);
 	xmlFree(second);
