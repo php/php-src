@@ -3284,62 +3284,56 @@ PHP_FUNCTION(imagepsslantfont)
    Rasterize a string over an image */
 PHP_FUNCTION(imagepstext)
 {
-	zval **img, **str, **fnt, **sz, **fg, **bg, **sp, **px, **py, **aas, **wd, **ang;
-	int i, j, x, y;
-	int space;
+	zval *img, *fnt;
+	int i, j;
+	int _fg, _bg, x, y, size, space = 0, aa_steps = 4, width = 0;
 	int *f_ind;
 	int h_lines, v_lines, c_ind;
-	int rd, gr, bl, fg_rd, fg_gr, fg_bl, bg_rd, bg_gr, bg_bl, _fg, _bg;
+	int rd, gr, bl, fg_rd, fg_gr, fg_bl, bg_rd, bg_gr, bg_bl;
 #if HAVE_LIBGD20
 	int fg_al, bg_al, al;
 #endif
-	int aa[16], aa_steps;
-	int width, amount_kern, add_width;
-	double angle, extend;
+	int aa[16];
+	int amount_kern, add_width;
+	double angle = 0.0, extend;
 	unsigned long aa_greys[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
 	gdImagePtr bg_img;
 	GLYPH *str_img;
 	T1_OUTLINE *char_path, *str_path;
 	T1_TMATRIX *transform = NULL;
 	char *_str;
+	int _str_len;
+	int argc = ZEND_NUM_ARGS();
 	
-	switch(ZEND_NUM_ARGS()) {
-	case 8:
-		if (zend_get_parameters_ex(8, &img, &str, &fnt, &sz, &fg, &bg, &px, &py) == FAILURE) {
-			RETURN_FALSE;
-		}
-		space = 0;
-		aa_steps = 4;
-		width = 0;
-		angle = 0;
-		break;
-	case 12:
-		if (zend_get_parameters_ex(12, &img, &str, &fnt, &sz, &fg, &bg, &px, &py, &sp, &wd, &ang, &aas) == FAILURE) {
-			RETURN_FALSE;
-		}
-		convert_to_long_ex(sp);
-		convert_to_long_ex(wd);
-		convert_to_double_ex(ang);
-		convert_to_long_ex(aas);
-		space = Z_LVAL_PP(sp);
-		width = Z_LVAL_PP(wd);
-		angle = Z_DVAL_PP(ang);
-		aa_steps = Z_LVAL_PP(aas);
-		break;
-	default:
+	if (argc != 8 && argc != 12) {
 		ZEND_WRONG_PARAM_COUNT();
 	}
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rsrlllll|lldl", &img, &_str, &_str_len, &fnt, &size, &_fg, &_bg, &x, &y, &space, &width, &angle, &aa_steps) == FAILURE) {
+		return;
+	}
 
-	convert_to_string_ex(str);
-	convert_to_long_ex(sz);
+	ZEND_FETCH_RESOURCE(bg_img, gdImagePtr, &img, -1, "Image", le_gd);
+	ZEND_FETCH_RESOURCE(f_ind, int *, &fnt, -1, "Type 1 font", le_ps_font);
 
-	ZEND_FETCH_RESOURCE(bg_img, gdImagePtr, img, -1, "Image", le_gd);
-	ZEND_FETCH_RESOURCE(f_ind, int *, fnt, -1, "Type 1 font", le_ps_font);
+	/* Ensure that the provided colors are valid */
+#if HAVE_LIBGD20
+	if (_fg < 0 || (!gdImageTrueColor(bg_img) && _fg > gdImageColorsTotal(bg_img))) {
+#else
+	if (_fg < 0 || _fg > gdImageColorsTotal(bg_img)) {
+#endif	
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Foreground color index %d out of range", _fg);
+		RETURN_FALSE;
+	}
 
-	x = Z_LVAL_PP(px);
-	y = Z_LVAL_PP(py);
-	_fg = Z_LVAL_PP(fg);
-	_bg = Z_LVAL_PP(bg);
+#if HAVE_LIBGD20
+	if (_bg < 0 || (!gdImageTrueColor(bg_img) && _fg > gdImageColorsTotal(bg_img))) {
+#else
+	if (_bg < 0 || _bg > gdImageColorsTotal(bg_img)) {
+#endif	
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Background color index %d out of range", _bg);
+		RETURN_FALSE;
+	}
 	
 	fg_rd = gdImageRed  (bg_img, _fg);
 	fg_gr = gdImageGreen(bg_img, _fg);
@@ -3371,49 +3365,45 @@ PHP_FUNCTION(imagepstext)
 	T1_AASetBitsPerPixel(8);
 
 	switch (aa_steps) {
-	case 4:
-		T1_AASetGrayValues(0, 1, 2, 3, 4);
-		T1_AASetLevel(T1_AA_LOW);
-		break;
-	case 16:
-		T1_AAHSetGrayValues(aa_greys);
-		T1_AASetLevel(T1_AA_HIGH);
-		break;
-	default:
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid value %d as number of steps for antialiasing", aa_steps);
-		RETURN_FALSE;
+		case 4:
+			T1_AASetGrayValues(0, 1, 2, 3, 4);
+			T1_AASetLevel(T1_AA_LOW);
+			break;
+		case 16:
+			T1_AAHSetGrayValues(aa_greys);
+			T1_AASetLevel(T1_AA_HIGH);
+			break;
+		default:
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid value %d as number of steps for antialiasing", aa_steps);
+			RETURN_FALSE;
 	}
 
 	if (angle) {
 		transform = T1_RotateMatrix(NULL, angle);
 	}
 
-	_str = Z_STRVAL_PP(str);
+	extend = T1_GetExtend(*f_ind);
+	str_path = T1_GetCharOutline(*f_ind, _str[0], size, transform);
 
-	{
-		extend = T1_GetExtend(*f_ind);
-		str_path = T1_GetCharOutline(*f_ind, _str[0], Z_LVAL_PP(sz), transform);
-
-		if (!str_path) {
-			if (T1_errno) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "libt1 returned error %d", T1_errno);
-			}	
-			RETURN_FALSE;
-		}
-
-		for (i = 1; i < Z_STRLEN_PP(str); i++) {
-			amount_kern = (int) T1_GetKerning(*f_ind, _str[i-1], _str[i]);
-			amount_kern += _str[i-1] == ' ' ? space : 0;
-			add_width = (int) (amount_kern+width)/extend;
-
-			char_path = T1_GetMoveOutline(*f_ind, add_width, 0, 0, Z_LVAL_PP(sz), transform);
-			str_path = T1_ConcatOutlines(str_path, char_path);
-
-			char_path = T1_GetCharOutline(*f_ind, _str[i], Z_LVAL_PP(sz), transform);
-			str_path = T1_ConcatOutlines(str_path, char_path);
-		}
-		str_img = T1_AAFillOutline(str_path, 0);
+	if (!str_path) {
+		if (T1_errno) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "libt1 returned error %d", T1_errno);
+		}	
+		RETURN_FALSE;
 	}
+
+	for (i = 1; i < _str_len; i++) {
+		amount_kern = (int) T1_GetKerning(*f_ind, _str[i-1], _str[i]);
+		amount_kern += _str[i-1] == ' ' ? space : 0;
+		add_width = (int) (amount_kern+width)/extend;
+
+		char_path = T1_GetMoveOutline(*f_ind, add_width, 0, 0, size, transform);
+		str_path = T1_ConcatOutlines(str_path, char_path);
+
+		char_path = T1_GetCharOutline(*f_ind, _str[i], size, transform);
+		str_path = T1_ConcatOutlines(str_path, char_path);
+	}
+	str_img = T1_AAFillOutline(str_path, 0);
 
 	if (T1_errno) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "libt1 returned error %d", T1_errno);
@@ -3426,11 +3416,12 @@ PHP_FUNCTION(imagepstext)
 	for (i = 0; i < v_lines; i++) {
 		for (j = 0; j < h_lines; j++) {
 			switch (str_img->bits[j*v_lines+i]) {
-			case 0:
-				break;
-			default:
-				c_ind = aa[str_img->bits[j*v_lines+i]-1];
-				gdImageSetPixel(bg_img, x+str_img->metrics.leftSideBearing+i, y-str_img->metrics.ascent+j, c_ind);
+				case 0:
+					break;
+				default:
+					c_ind = aa[str_img->bits[j*v_lines+i]-1];
+					gdImageSetPixel(bg_img, x+str_img->metrics.leftSideBearing+i, y-str_img->metrics.ascent+j, c_ind);
+					break;
 			}
 		}
 	}
@@ -3443,6 +3434,7 @@ PHP_FUNCTION(imagepstext)
 	add_next_index_long(return_value, str_img->metrics.ascent);
 }
 /* }}} */
+
 
 /* {{{ proto array imagepsbbox(string text, int font, int size [, int space, int tightness, int angle])
    Return the bounding box needed by a string if rasterized */
