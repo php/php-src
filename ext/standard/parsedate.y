@@ -151,7 +151,7 @@ typedef union _date_ll {
 %}
 
 /* This grammar has 14 shift/reduce conflicts. */
-%expect 14
+%expect 17
 %pure_parser
 
 %token	tAGO tDAY tDAY_UNIT tDAYZONE tDST tHOUR_UNIT tID
