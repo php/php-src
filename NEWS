@@ -13,6 +13,8 @@ PHP                                                                        NEWS
   is passed. (Tony)
 - Fixed posix_getsid() & posix_getpgid() to return sid & pgid instead 
   of true. (Tony)
+- Fixed bug #31732 (mb_get_info() causes segfault when no parameters 
+  specified). (Tony)
 - Fixed bug #31710 (Wrong return values for mysqli_autocommit/commit/rollback).
   (Georg)
 - Fixed bug #31705 (parse_url() does not recognize http://foo.com#bar). (Ilia)
