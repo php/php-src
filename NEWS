@@ -2,6 +2,7 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 200?, Version 4.0.6
+- Made WDDX extension enabled by default. (Andrei)
 - Added -C command-line option to avoid chdir to the script's directory (Stig)
 - Fixed a bug with /e modifier in preg_replace(), that would not correctly
   replace two-digit references if single digit references were present
