@@ -693,7 +693,7 @@ fetch_string_dim:
 							zval *new_zval = &EG(uninitialized_zval);
 
 							new_zval->refcount++;
-							zend_hash_update(ht, offset_key, offset_key_length+1, &new_zval, sizeof(zval *), (void **) &retval);
+							zend_symtable_update(ht, offset_key, offset_key_length+1, &new_zval, sizeof(zval *), (void **) &retval);
 						}
 						break;
 				}
