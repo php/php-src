@@ -84,7 +84,7 @@ void php_dl(pval *file,int type,pval *return_value)
 	PLS_FETCH();
 	ELS_FETCH();
 
-	if (PG(extension_dir) && PG(extension_dir)[0]){
+	if (PG(extension_dir) && PG(extension_dir)[0] && (file->value.str.val[0] != '/')){
 		int extension_dir_len = strlen(PG(extension_dir));
 
 		libpath = emalloc(extension_dir_len+file->value.str.len+2);
