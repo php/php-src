@@ -1411,48 +1411,60 @@ PHP_FUNCTION(array_fill)
 }
 /* }}} */
 
-/* {{{ proto array range(mixed low, mixed high)
+/* {{{ proto array range(mixed low, mixed high[, int step])
    Create an array containing the range of integers or characters from low to high (inclusive) */
 PHP_FUNCTION(range)
 {
-	zval **zlow, **zhigh;
-	
-	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &zlow, &zhigh) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	zval *zlow, *zhigh;
+	long step = 1;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zz|l", &zlow,
+							  &zhigh, &step) == FAILURE) {
+		RETURN_FALSE;
 	}
 
-	/* allocate an array for return */
+	/* We only want positive step values. */
+	if (step < 0) {
+		step *= -1;
+	}
+
+	/* Initialize the return_value as an array. */
 	if (array_init(return_value) == FAILURE) {
 		RETURN_FALSE;
 	}
 
-	if (Z_TYPE_PP(zlow)==IS_STRING && Z_TYPE_PP(zhigh)==IS_STRING) {
+	/* If the range is given as strings, generate an array of characters. */
+	if (Z_TYPE_P(zlow) == IS_STRING && Z_TYPE_P(zhigh) == IS_STRING) {
 		char *low, *high;
-		convert_to_string_ex(zlow);
-		convert_to_string_ex(zhigh);
-		low = Z_STRVAL_PP(zlow);
-		high = Z_STRVAL_PP(zhigh);
-		if (*low>*high) {
-			for (; *low >= *high; (*low)--) {
+
+		convert_to_string_ex(&zlow);
+		convert_to_string_ex(&zhigh);
+		low = Z_STRVAL_P(zlow);
+		high = Z_STRVAL_P(zhigh);
+
+		if (*low > *high) {		/* Negative steps */
+			for (; *low >= *high; (*low) -= step) {
 				add_next_index_stringl(return_value, low, 1, 1);
-			}	
-		} else {
-			for (; *low <= *high; (*low)++) {
+			}
+		} else {				/* Positive steps */
+			for (; *low <= *high; (*low) += step) {
 				add_next_index_stringl(return_value, low, 1, 1);
-			}	
+			}
 		}
 	} else {
 		int low, high;
-		convert_to_long_ex(zlow);
-		convert_to_long_ex(zhigh);
-		low = Z_LVAL_PP(zlow);
-		high = Z_LVAL_PP(zhigh);
-		if (low > high) { 
-			for (; low >= high; low--) {
+
+		convert_to_long_ex(&zlow);
+		convert_to_long_ex(&zhigh);
+		low = Z_LVAL_P(zlow);
+		high = Z_LVAL_P(zhigh);
+
+		if (low > high) { 		/* Negative steps */
+			for (; low >= high; low -= step) {
 				add_next_index_long(return_value, low);
 			}	
-		} else {
-			for (; low <= high; low++) {
+		} else {				/* Positive steps */
+			for (; low <= high; low += step) {
 				add_next_index_long(return_value, low);
 			}	
 		}
