@@ -493,6 +493,7 @@ static int _php_image_type (char data[8])
 	}
 	else if (!memcmp(data, php_sig_gif, 3))
 		return PHP_GDIMG_TYPE_GIF;
+#ifdef HAVE_GD_WMBP
 	else {
 		gdIOCtx *io_ctx;
 		io_ctx = gdNewDynamicCtx (8, data);
@@ -504,6 +505,7 @@ static int _php_image_type (char data[8])
 				io_ctx->free(io_ctx);
 		}
 	}
+#endif
 	return -1;
 }
 
