@@ -85,6 +85,13 @@
   function   CDATA #REQUIRED
   searchpath CDATA #IMPLIED
 >
+<!ELEMENT header (#PCDATA)>
+<!ATTLIST header
+  name       CDATA #REQUIRED
+  function   CDATA #IMPLIED
+  searchpath CDATA #IMPLIED
+  prepend  (yes|no) "no"
+>
 
 <!ELEMENT resources (resource)*>
 <!ELEMENT resource (description?, destruct?)>
