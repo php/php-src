@@ -21,7 +21,7 @@
 
 #include "php_apache_http.h"
 
-#ifdef PHP_WIN32
+#if defined(PHP_WIN32) || defined(NETWARE)
 #include "zend.h"
 #include "ap_compat.h"
 #else
