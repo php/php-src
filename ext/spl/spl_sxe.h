@@ -24,7 +24,7 @@
 
 extern zend_class_entry *spl_ce_SimpleXMLIterator;
 
-ZEND_API PHP_MINIT_FUNCTION(spl_sxe);
+SPL_API PHP_MINIT_FUNCTION(spl_sxe);
 
 #endif /* SPL_SXE_H */
 
