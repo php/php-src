@@ -2380,21 +2380,21 @@ int zend_fetch_class_handler(ZEND_OPCODE_HANDLER_ARGS)
 
 		if (class_name->type == IS_OBJECT) {
 			ce = Z_OBJCE_P(class_name);
-		} else {
+		} else if (class_name->value.str.val && class_name->value.str.len) {
 			class_name_strval = zend_str_tolower_dup(class_name->value.str.val, class_name->value.str.len);
 			class_name_strlen = class_name->value.str.len;
 			free_class_name = 1;
+		} else {
+			class_name_strval = "";
+			class_name_strlen = 0;
 		}
 	}
 	
 	if (!ce) {
-		int retval;
-
-		if (EX(opline)->op1.op_type == IS_UNUSED) {
-			retval = zend_lookup_class(class_name_strval, class_name_strlen, &pce TSRMLS_CC);
-		}
-		if (retval==SUCCESS) {
-			ce = *pce;
+		if (EX(opline)->op1.op_type == IS_UNUSED && class_name->value.str.val && class_name->value.str.len) {
+			if (zend_lookup_class(class_name_strval, class_name_strlen, &pce TSRMLS_CC) == SUCCESS) {
+				ce = *pce;
+			}
 		}
 	}
 
