@@ -649,7 +649,7 @@ static int php_sybase_get_default_link(INTERNAL_FUNCTION_PARAMETERS)
 
 
 /* {{{ proto int sybase_connect([string host [, string user [, string password [, string charset]]]])
-    Open Sybase server connection */
+   Open Sybase server connection */
 PHP_FUNCTION(sybase_connect)
 {
 	php_sybase_do_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
@@ -658,7 +658,7 @@ PHP_FUNCTION(sybase_connect)
 /* }}} */
 
 /* {{{ proto int sybase_pconnect([string host [, string user [, string password [, string charset]]]])
-    Open persistent Sybase connection */
+   Open persistent Sybase connection */
 PHP_FUNCTION(sybase_pconnect)
 {
 	php_sybase_do_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
@@ -668,7 +668,7 @@ PHP_FUNCTION(sybase_pconnect)
 
 
 /* {{{ proto bool sybase_close([int link_id])
-    Close Sybase connection */
+   Close Sybase connection */
 PHP_FUNCTION(sybase_close)
 {
 	pval *sybase_link_index = 0;
@@ -786,7 +786,7 @@ static int exec_cmd(sybase_link *sybase_ptr, char *cmdbuf)
 
 
 /* {{{ proto bool sybase_select_db(string database [, int link_id])
-    Select Sybase database */
+   Select Sybase database */
 PHP_FUNCTION(sybase_select_db)
 {
 	pval *db,*sybase_link_index;
@@ -997,7 +997,7 @@ static sybase_result * php_sybase_fetch_result_set (sybase_link *sybase_ptr)
 
 
 /* {{{ proto int sybase_query(string query [, int link_id])
-    Send Sybase query */
+   Send Sybase query */
 PHP_FUNCTION(sybase_query)
 {
 	pval **query, **sybase_link_index=NULL;
@@ -1209,7 +1209,7 @@ PHP_FUNCTION(sybase_query)
 /* }}} */
 
 /* {{{ proto bool sybase_free_result(int result)
-    Free result memory */
+   Free result memory */
 PHP_FUNCTION(sybase_free_result)
 {
 	pval *sybase_result_index;
@@ -1244,7 +1244,7 @@ PHP_FUNCTION(sybase_get_last_message)
 /* }}} */
 
 /* {{{ proto int sybase_num_rows(int result)
-    Get number of rows in result */
+   Get number of rows in result */
 PHP_FUNCTION(sybase_num_rows)
 {
 	pval *sybase_result_index;
@@ -1264,7 +1264,7 @@ PHP_FUNCTION(sybase_num_rows)
 /* }}} */
 
 /* {{{ proto int sybase_num_fields(int result)
-    Get number of fields in result */
+   Get number of fields in result */
 PHP_FUNCTION(sybase_num_fields)
 {
 	pval *sybase_result_index;
@@ -1284,7 +1284,7 @@ PHP_FUNCTION(sybase_num_fields)
 /* }}} */
 
 /* {{{ proto array sybase_fetch_row(int result)
-    Get row as enumerated array */
+   Get row as enumerated array */
 PHP_FUNCTION(sybase_fetch_row)
 {
 	pval *sybase_result_index;
@@ -1357,7 +1357,7 @@ static void php_sybase_fetch_hash(INTERNAL_FUNCTION_PARAMETERS)
 
 
 /* {{{ proto object sybase_fetch_object(int result)
-    Fetch row as object */
+   Fetch row as object */
 PHP_FUNCTION(sybase_fetch_object)
 {
 	php_sybase_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU);
@@ -1370,7 +1370,7 @@ PHP_FUNCTION(sybase_fetch_object)
 /* }}} */
 
 /* {{{ proto array sybase_fetch_array(int result)
-    Fetch row as array */
+   Fetch row as array */
 PHP_FUNCTION(sybase_fetch_array)
 {
 	php_sybase_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU);
@@ -1378,7 +1378,7 @@ PHP_FUNCTION(sybase_fetch_array)
 /* }}} */
 
 /* {{{ proto bool sybase_data_seek(int result, int offset)
-    Move internal row pointer */
+   Move internal row pointer */
 PHP_FUNCTION(sybase_data_seek)
 {
 	pval *sybase_result_index,*offset;
@@ -1448,7 +1448,7 @@ static char *php_sybase_get_field_name(CS_INT type)
 
 
 /* {{{ proto object sybase_fetch_field(int result [, int offset])
-    Get field information */
+   Get field information */
 PHP_FUNCTION(sybase_fetch_field)
 {
 	pval *sybase_result_index,*offset;
@@ -1502,7 +1502,7 @@ PHP_FUNCTION(sybase_fetch_field)
 
 
 /* {{{ proto bool sybase_field_seek(int result, int offset)
-    Set field offset */
+   Set field offset */
 PHP_FUNCTION(sybase_field_seek)
 {
 	pval *sybase_result_index,*offset;
@@ -1531,7 +1531,7 @@ PHP_FUNCTION(sybase_field_seek)
 
 
 /* {{{ proto string sybase_result(int result, int row, mixed field)
-    Get result data */
+   Get result data */
 PHP_FUNCTION(sybase_result)
 {
 	pval *row, *field, *sybase_result_index;
@@ -1585,7 +1585,7 @@ PHP_FUNCTION(sybase_result)
 
 
 /* {{{ proto int sybase_affected_rows([int link_id])
-    Get number of affected rows in last query */
+   Get number of affected rows in last query */
 PHP_FUNCTION(sybase_affected_rows)
 {
 	pval *sybase_link_index;
@@ -1651,7 +1651,7 @@ PHP_FUNCTION(sybase_min_client_severity)
 
 
 /* {{{ proto void sybase_min_server_severity(int severity)
-    Sets minimum server severity */
+   Sets minimum server severity */
 PHP_FUNCTION(sybase_min_server_severity)
 {
 	pval *severity;
