@@ -830,6 +830,9 @@ static int php_xbithack_handler(request_rec * r)
 	}
 	if(!AP(xbithack)) {
 		r->allowed |= (1 << METHODS) - 1;
+		zend_try {
+			zend_ini_deactivate(TSRMLS_C);
+		} zend_end_try();
 		return DECLINED;
 	}
 	return send_parsed_php(r);
