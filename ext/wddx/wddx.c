@@ -835,7 +835,7 @@ PHP_FUNCTION(wddx_serialize_value)
 /* }}} */
 
 
-/* {{{ proto string wddx_serialize_vars(mixed var_name [, ...])
+/* {{{ proto string wddx_serialize_vars(mixed var_name [, mixed ...])
    Creates a new packet and serializes given variables into a struct */
 PHP_FUNCTION(wddx_serialize_vars)
 {
@@ -953,7 +953,7 @@ PHP_FUNCTION(wddx_packet_end)
 /* }}} */
 
 
-/* {{{ proto int wddx_add_vars(int packet_id [, mixed var_names [, ...]])
+/* {{{ proto int wddx_add_vars(int packet_id [, mixed var_names [, mixed ...]])
    Serializes given variables and adds them to packet given by packet_id */
 PHP_FUNCTION(wddx_add_vars)
 {
