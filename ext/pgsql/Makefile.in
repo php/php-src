@@ -5,5 +5,5 @@ LTLIBRARY_SHARED_NAME   = pgsql.la
 LTLIBRARY_SHARED_LIBADD = $(PGSQL_SHARED_LIBADD)
 
 EXTRA_INCLUDES = $(PGSQL_INCLUDE)
-	
+
 include $(top_srcdir)/build/dynlib.mk
