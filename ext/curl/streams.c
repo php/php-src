@@ -362,7 +362,8 @@ static php_stream_wrapper_ops php_curl_wrapper_ops = {
 	NULL, /* stat url */
 	NULL, /* opendir */
 	NULL, /* label */
-	NULL  /* unlink */
+	NULL, /* unlink */
+	NULL  /* rename */
 };
 
 php_stream_wrapper php_curl_wrapper = {

@@ -542,7 +542,8 @@ static php_stream_wrapper_ops http_stream_wops = {
 	NULL, /* stat_url */
 	NULL, /* opendir */
 	"HTTP",
-	NULL /* unlink */
+	NULL, /* unlink */
+	NULL, /* rename */
 };
 
 PHPAPI php_stream_wrapper php_stream_http_wrapper =	{

@@ -34,6 +34,7 @@ struct php_user_stream_wrapper {
 static php_stream *user_wrapper_opener(php_stream_wrapper *wrapper, char *filename, char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC);
 static int user_wrapper_stat_url(php_stream_wrapper *wrapper, char *url, int flags, php_stream_statbuf *ssb, php_stream_context *context TSRMLS_DC);
 static int user_wrapper_unlink(php_stream_wrapper *wrapper, char *url, int options, php_stream_context *context TSRMLS_DC);
+static int user_wrapper_rename(php_stream_wrapper *wrapper, char *url_from, char *url_to, int options, php_stream_context *context TSRMLS_DC);
 static php_stream *user_wrapper_opendir(php_stream_wrapper *wrapper, char *filename, char *mode,
 		int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC);
 
@@ -44,7 +45,8 @@ static php_stream_wrapper_ops user_stream_wops = {
 	user_wrapper_stat_url,
 	user_wrapper_opendir,
 	"user-space",
-	user_wrapper_unlink
+	user_wrapper_unlink,
+	user_wrapper_rename
 };
 
 
@@ -95,6 +97,7 @@ typedef struct _php_userstream_data php_userstream_data_t;
 #define USERSTREAM_STAT		"stream_stat"
 #define USERSTREAM_STATURL	"url_stat"
 #define USERSTREAM_UNLINK	"unlink"
+#define USERSTREAM_RENAME	"rename"
 #define USERSTREAM_DIR_OPEN		"dir_opendir"
 #define USERSTREAM_DIR_READ		"dir_readdir"
 #define USERSTREAM_DIR_REWIND	"dir_rewinddir"
@@ -154,6 +157,11 @@ typedef struct _php_userstream_data php_userstream_data_t;
 	}
 
 	function unlink(string $url)
+	{
+		return true / false;
+	}
+
+	function rename(string $from, string $to)
 	{
 		return true / false;
 	}
@@ -787,6 +795,69 @@ static int user_wrapper_unlink(php_stream_wrapper *wrapper, char *url, int optio
 	
 	zval_ptr_dtor(&zfuncname);
 	zval_ptr_dtor(&zfilename);
+
+	return ret;
+}
+
+static int user_wrapper_rename(php_stream_wrapper *wrapper, char *url_from, char *url_to, int options, php_stream_context *context TSRMLS_DC)
+{
+	struct php_user_stream_wrapper *uwrap = (struct php_user_stream_wrapper*)wrapper->abstract;
+	zval *zold_name, *znew_name, *zfuncname, *zretval, *zcontext;
+	zval **args[2];
+	int call_result;
+	zval *object;
+	int ret = 0;
+
+	/* create an instance of our class */
+	ALLOC_ZVAL(object);
+	object_init_ex(object, uwrap->ce);
+	ZVAL_REFCOUNT(object) = 1;
+	PZVAL_IS_REF(object) = 1;
+
+	if (context) {
+		MAKE_STD_ZVAL(zcontext);
+		php_stream_context_to_zval(context, zcontext);
+		add_property_zval(object, "context", zcontext);
+		/* The object property should be the only reference,
+		   'get rid' of our local reference. */
+		zval_ptr_dtor(&zcontext);
+	} else {
+		add_property_null(object, "context");
+	}
+
+	/* call the rename method */
+	MAKE_STD_ZVAL(zold_name);
+	ZVAL_STRING(zold_name, url_from, 1);
+	args[0] = &zold_name;
+
+	MAKE_STD_ZVAL(znew_name);
+	ZVAL_STRING(znew_name, url_to, 1);
+	args[1] = &znew_name;
+
+	MAKE_STD_ZVAL(zfuncname);
+	ZVAL_STRING(zfuncname, USERSTREAM_RENAME, 1);
+	
+	call_result = call_user_function_ex(NULL,
+			&object,
+			zfuncname,
+			&zretval,
+			2, args,
+			0, NULL	TSRMLS_CC);
+
+	if (call_result == SUCCESS && zretval && Z_TYPE_P(zretval) == IS_BOOL) {
+		ret = Z_LVAL_P(zretval);
+	} else if (call_result == FAILURE) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s::" USERSTREAM_RENAME " is not implemented!", uwrap->classname);
+ 	}
+
+	/* clean up */
+	zval_ptr_dtor(&object);
+	if (zretval)
+		zval_ptr_dtor(&zretval);
+	
+	zval_ptr_dtor(&zfuncname);
+	zval_ptr_dtor(&zold_name);
+	zval_ptr_dtor(&znew_name);
 
 	return ret;
 }

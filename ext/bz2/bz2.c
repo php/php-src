@@ -226,7 +226,8 @@ static php_stream_wrapper_ops bzip2_stream_wops = {
 	NULL, /* stat */
 	NULL, /* opendir */
 	"BZip2",
-	NULL  /* unlink */
+	NULL, /* unlink */
+	NULL  /* rename */
 };
 
 php_stream_wrapper php_stream_bzip2_wrapper = {
