@@ -7,6 +7,8 @@ PHP 4                                                                      NEWS
   . Added "sybct.packet_size" php.ini option.
   . Changed "sybct.login_timeout" php.ini option changeable at runtime.
   . Fixed memory leak in sybase_set_message_handler().
+- Fixed bug #27056 (ints used instead of longs inside some GD functions).
+  (Ilia)
 - Fixed bug #27040 (passing an array of form-fields to CURLOPT_POSTFIELDS
   does not work). (Ilia, Jani)
 - Fixed bug #26974 (rename() doesn't check the destination file against 
