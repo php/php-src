@@ -112,6 +112,9 @@ php_file_globals file_globals;
 #endif
 
 #ifdef HAVE_FNMATCH
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE
+#endif
 #include <fnmatch.h>
 #endif
 
