@@ -410,13 +410,13 @@ if test "$ac_cv_sockaddr_storage" = yes; then
 fi
 
 dnl Check if sockaddr data structure includes an "sa_len" member
-AC_CHECK_MEMBER([struct sockaddr.sa_len],
-  [AC_DEFINE(HAVE_SOCKADDR_LEN,1,[Whether sockaddr struct has sa_len])],
-  [],
-[
+
+AC_TRY_COMPILE([
 #include <sys/types.h>
 #include <sys/socket.h>
-])
+], [static struct sockaddr sa; int n = (int) sa.sa_len; return n],
+[AC_DEFINE(HAVE_SOCKADDR_LEN,1,[Whether sockaddr struct has sa_len])],
+[])
 
 dnl Check for IPv6 support
 AC_CACHE_CHECK([for IPv6 support], ac_cv_ipv6_support,
