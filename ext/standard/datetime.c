@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 4                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2003 The PHP Group                                |
+   | Copyright (c) 1997-2004 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.02 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -18,9 +18,7 @@
    +----------------------------------------------------------------------+
  */
 
-
 /* $Id$ */
-
 
 #include "php.h"
 #include "zend_operators.h"
@@ -35,22 +33,21 @@
 
 #include "php_parsedate.h"
 
-char *mon_full_names[] =
-{
+char *mon_full_names[] = {
 	"January", "February", "March", "April",
 	"May", "June", "July", "August",
 	"September", "October", "November", "December"
 };
-char *mon_short_names[] =
-{
+
+char *mon_short_names[] = {
 	"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
 };
-char *day_full_names[] =
-{
+
+char *day_full_names[] = {
 	"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"
 };
-char *day_short_names[] =
-{
+
+char *day_short_names[] = {
 	"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"
 };
 
@@ -62,13 +59,12 @@ extern time_t timezone;
 extern int daylight;
 #endif
 
-static int phpday_tab[2][12] =
-{
+static int phpday_tab[2][12] = {
 	{31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31},
 	{31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}
 };
 
-#define isleap(year) (((year%4) == 0 && (year%100)!=0) || (year%400)==0)
+#define isleap(year) (((year % 4) == 0 && (year % 100) != 0) || (year % 400)==0)
 #define YEAR_BASE 1900
 
 /* {{{ proto int time(void)
@@ -87,7 +83,8 @@ void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gm)
 	struct tm *ta, tmbuf;
 	time_t t, seconds;
 	int i, gmadjust, arg_count = ZEND_NUM_ARGS();
-	int is_dst = -1, val, chgsecs = 0;
+	int is_dst = -1, chgsecs = 0;
+	long val;
 
 	if (arg_count > 7 || zend_get_parameters_array_ex(arg_count, arguments) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -192,11 +189,11 @@ void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gm)
 		/* fall-through */ 
 	case 1: /* hour */
 		val = (*arguments[0])->value.lval; 
-		/* 
-		   We don't use 1 here to work around problems in some mktime implementations
-		   when it comes to daylight savings time.  Setting it to 4 and working back from
-		   there with the chgsecs offset makes us immune to these problems.  
-		   See http://bugs.php.net/27533 for more info.
+		/*
+		   We avoid midnight and a couple of hours after midnight here to work around
+		   various OS-level bugs in mktime and specifically daylight savings time issues
+		   in many mktime implementation.
+		   See bugs #27533 and #27719 for more info.
 		*/
 		if (val < 4) { 
 			chgsecs += (4-val) * 60*60; val = 4; 
@@ -218,16 +215,26 @@ void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gm)
 
 	seconds = t - chgsecs;
 
+	/*
+	   Here we check to see if the chgsecs fuzz factor we applied caused us to
+	   move from dst to non-dst or vice-versa.  If so we adjust accordingly to
+	   avoid being off by an hour on the dst changeover date.
+	*/
 	if (is_dst == -1) {
 		struct tm t1, t2;
 		t1 = *localtime(&t);
 		t2 = *localtime(&seconds);
 
-		if(t1.tm_isdst != t2.tm_isdst) {
+		if (t1.tm_isdst != t2.tm_isdst) {
 			seconds += (t1.tm_isdst == 1) ? 3600 : -3600;
 			ta = localtime(&seconds);
 		}
 
+		/*
+		   If the user didn't specify whether the timestamp passed in was dst or not
+		   then we fill it in based on the dst setting at the evaluated timestamp
+		   at the current TZ
+		*/
 		is_dst = ta->tm_isdst; 
 	}
 	
@@ -274,8 +281,7 @@ PHP_FUNCTION(gmmktime)
 
 /* {{{ php_date
  */
-static void
-php_date(INTERNAL_FUNCTION_PARAMETERS, int gm)
+static void php_date(INTERNAL_FUNCTION_PARAMETERS, int gm)
 {
 	pval **format, **timestamp;
 	time_t the_time;
@@ -398,7 +404,7 @@ php_date(INTERNAL_FUNCTION_PARAMETERS, int gm)
 				size += 2;
 				break;
 			case '\\':
-				if(i < Z_STRLEN_PP(format)-1) {
+				if (i < Z_STRLEN_PP(format) - 1) {
 					i++;
 				}
 				size ++;
@@ -418,9 +424,9 @@ php_date(INTERNAL_FUNCTION_PARAMETERS, int gm)
 	for (i = 0; i < Z_STRLEN_PP(format); i++) {
 		switch (Z_STRVAL_PP(format)[i]) {
 			case '\\':
-				if(i < Z_STRLEN_PP(format)-1) {
+				if (i < Z_STRLEN_PP(format) - 1) {
 					char ch[2];
-					ch[0]=Z_STRVAL_PP(format)[i+1];
+					ch[0]=Z_STRVAL_PP(format)[i + 1];
 					ch[1]='\0';
 					strcat(Z_STRVAL_P(return_value), ch);
 					i++;
@@ -572,8 +578,8 @@ php_date(INTERNAL_FUNCTION_PARAMETERS, int gm)
 				strcat(Z_STRVAL_P(return_value), tmp_buff);
 				break;
 			case 'r':
-#if HAVE_TM_GMTOFF				
-				sprintf(tmp_buff, "%3s, %2d %3s %04d %02d:%02d:%02d %c%02d%02d", 
+#if HAVE_TM_GMTOFF
+				sprintf(tmp_buff, "%3s, %2d %3s %04d %02d:%02d:%02d %c%02d%02d",
 					day_short_names[ta->tm_wday],
 					ta->tm_mday,
 					mon_short_names[ta->tm_mon],
@@ -586,7 +592,7 @@ php_date(INTERNAL_FUNCTION_PARAMETERS, int gm)
 					abs( (ta->tm_gmtoff % 3600) / 60 )
 				);
 #else
-				sprintf(tmp_buff, "%3s, %2d %3s %04d %02d:%02d:%02d %c%02d%02d", 
+				sprintf(tmp_buff, "%3s, %2d %3s %04d %02d:%02d:%02d %c%02d%02d",
 					day_short_names[ta->tm_wday],
 					ta->tm_mday,
 					mon_short_names[ta->tm_mon],
@@ -602,7 +608,7 @@ php_date(INTERNAL_FUNCTION_PARAMETERS, int gm)
 				strcat(Z_STRVAL_P(return_value), tmp_buff);
 				break;
 			case 'W':		/* ISO-8601 week number of year, weeks starting on Monday */
-				wd = ta->tm_wday==0 ? 6 : ta->tm_wday-1;/* weekday */
+				wd = ta->tm_wday == 0 ? 6 : ta->tm_wday - 1; /* weekday */
 				yd = ta->tm_yday + 1;					/* days since January 1st */
 
 				fd = (7 + wd - yd % 7+ 1) % 7;			/* weekday (1st January) */	
@@ -759,11 +765,10 @@ PHP_FUNCTION(getdate)
 
 /* {{{ php_std_date
    Return date string in standard format for http headers */
-char *php_std_date(time_t t)
+char *php_std_date(time_t t TSRMLS_DC)
 {
 	struct tm *tm1, tmbuf;
 	char *str;
-	TSRMLS_FETCH();
 
 	tm1 = php_gmtime_r(&t, &tmbuf);
 	str = emalloc(81);
@@ -772,18 +777,18 @@ char *php_std_date(time_t t)
 				day_short_names[tm1->tm_wday],
 				tm1->tm_mday,
 				mon_short_names[tm1->tm_mon],
-				tm1->tm_year+1900,
+				tm1->tm_year + 1900,
 				tm1->tm_hour, tm1->tm_min, tm1->tm_sec);
 	} else {
 		snprintf(str, 80, "%s, %02d-%s-%02d %02d:%02d:%02d GMT",
 				day_short_names[tm1->tm_wday],
 				tm1->tm_mday,
 				mon_short_names[tm1->tm_mon],
-				((tm1->tm_year)%100),
+				((tm1->tm_year) % 100),
 				tm1->tm_hour, tm1->tm_min, tm1->tm_sec);
 	}
 	
-	str[79]=0;
+	str[79] = 0;
 	return (str);
 }
 /* }}} */
@@ -854,11 +859,13 @@ void _php_strftime(INTERNAL_FUNCTION_PARAMETERS, int gm)
 	while ((real_len=strftime(buf, buf_len, format, ta))==buf_len || real_len==0) {
 		buf_len *= 2;
 		buf = (char *) erealloc(buf, buf_len);
-		if(!--max_reallocs) break;
+		if (!--max_reallocs) {
+			break;
+		}
 	}
 	
-	if(real_len && real_len != buf_len) {
-		buf = (char *) erealloc(buf, real_len+1);
+	if (real_len && real_len != buf_len) {
+		buf = (char *) erealloc(buf, real_len + 1);
 		RETURN_STRINGL(buf, real_len, 0);
 	}
 	efree(buf);

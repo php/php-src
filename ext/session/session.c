@@ -863,7 +863,7 @@ static void php_session_send_cookie(TSRMLS_D)
 		t = tv.tv_sec + PS(cookie_lifetime);
 		
 		if (t > 0) {
-			date_fmt = php_std_date(t);
+			date_fmt = php_std_date(t TSRMLS_CC);
 			smart_str_appends(&ncookie, COOKIE_EXPIRES);
 			smart_str_appends(&ncookie, date_fmt);
 			efree(date_fmt);
