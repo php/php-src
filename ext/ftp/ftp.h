@@ -49,6 +49,8 @@ typedef struct databuf
 	int		fd;			/* data connection */
 	ftptype_t	type;			/* transfer type */
 	char		buf[FTP_BUFSIZE];	/* data buffer */
+	SSL		*ssl_handle;	/* ssl handle */
+	int		ssl_active;		/* flag if ssl is active or not */
 } databuf_t;
 
 typedef struct ftpbuf
@@ -74,6 +76,14 @@ typedef struct ftpbuf
 	int				lastch;		/* last char of previous call */
 	int				direction;	/* recv = 0 / send = 1 */
 	int				closestream;/* close or not close stream */
+#if HAVE_OPENSSL_EXT
+	int				use_ssl; /* enable(1) or disable(0) ssl */
+	int				use_ssl_for_data; /* en/disable ssl for the dataconnection */
+	int				old_ssl;	/* old mode = forced data encryption */
+	SSL				*ssl_handle;      /* handle for control connection */
+	int				ssl_active;		  /* ssl active on control conn */
+#endif
+
 } ftpbuf_t;
 
 

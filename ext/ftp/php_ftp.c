@@ -48,6 +48,9 @@ static int	le_ftpbuf;
 
 function_entry php_ftp_functions[] = {
 	PHP_FE(ftp_connect,			NULL)
+#if HAVE_OPENSSL_EXT
+	PHP_FE(ftp_ssl_connect,		NULL)
+#endif	
 	PHP_FE(ftp_login,			NULL)
 	PHP_FE(ftp_pwd,				NULL)
 	PHP_FE(ftp_cdup,			NULL)
@@ -162,10 +165,49 @@ PHP_FUNCTION(ftp_connect)
 
 	/* autoseek for resuming */
 	ftp->autoseek = FTP_DEFAULT_AUTOSEEK;
+#if HAVE_OPENSSL_EXT
+	/* disable ssl */
+	ftp->use_ssl = 0;
+#endif
 
 	ZEND_REGISTER_RESOURCE(return_value, ftp, le_ftpbuf);
 }
 /* }}} */
+
+#if HAVE_OPENSSL_EXT
+/* {{{ proto resource ftp_ssl_connect(string host [, int port [, int timeout)]])
+   Opens a FTP-SSL stream */
+PHP_FUNCTION(ftp_ssl_connect)
+{
+	ftpbuf_t	*ftp;
+	char		*host;
+	int			host_len, port = 0;
+	long		timeout_sec = FTP_DEFAULT_TIMEOUT;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|ll", &host, &host_len, &port, &timeout_sec) == FAILURE) {
+		return;
+	}
+
+	if (timeout_sec <= 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Timeout has to be greater than 0");
+		RETURN_FALSE;
+	}
+
+	/* connect */
+	ftp = ftp_open(host, (short)port, timeout_sec TSRMLS_CC);
+	if (ftp == NULL) {
+		RETURN_FALSE;
+	}
+
+	/* autoseek for resuming */
+	ftp->autoseek = FTP_DEFAULT_AUTOSEEK;
+	/* enable ssl */
+	ftp->use_ssl = 1;
+
+	ZEND_REGISTER_RESOURCE(return_value, ftp, le_ftpbuf);
+}
+/* }}} */
+#endif
 
 /* {{{ proto bool ftp_login(resource stream, string username, string password)
    Logs into the FTP server */
