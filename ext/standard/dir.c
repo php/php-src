@@ -1,4 +1,4 @@
-/*
+e/*
    +----------------------------------------------------------------------+
    | PHP version 4.0                                                      |
    +----------------------------------------------------------------------+
@@ -190,7 +190,7 @@ PHP_FUNCTION(opendir)
 
 /* }}} */
 /* {{{ proto class dir(string directory)
-Directory class with properties, handle and class and methods read, rewind and close */
+   Directory class with properties, handle and class and methods read, rewind and close */
 
 PHP_FUNCTION(getdir)
 {
@@ -199,7 +199,7 @@ PHP_FUNCTION(getdir)
 
 /* }}} */
 /* {{{ proto void closedir([int dir_handle])
-Close directory connection identified by the dir_handle */
+   Close directory connection identified by the dir_handle */
 
 PHP_FUNCTION(closedir)
 {
@@ -237,7 +237,7 @@ PHP_FUNCTION(chdir)
 }
 
 /* }}} */
-/* {{{ proto string getcwd()
+/* {{{ proto string getcwd(void)
    Gets the current directory */
 
 PHP_FUNCTION(getcwd)
@@ -269,7 +269,7 @@ PHP_FUNCTION(getcwd)
 
 /* }}} */
 /* {{{ proto void rewinddir([int dir_handle])
-Rewind dir_handle back to the start */
+   Rewind dir_handle back to the start */
 
 PHP_FUNCTION(rewinddir)
 {
@@ -283,7 +283,7 @@ PHP_FUNCTION(rewinddir)
 }
 /* }}} */
 /* {{{ proto string readdir([int dir_handle])
-Read directory entry from dir_handle */
+   Read directory entry from dir_handle */
 
 PHP_FUNCTION(readdir)
 {
