@@ -191,15 +191,15 @@ Changes in the Zend Engine 2.0
 
       This means that
 
-        function foo(Class $object) {
+        function foo(ClassName $object) {
           // ...
         }
 
       is equivalent to
 
-        function foo(Class $object) {
-          if (!($object instanceof Class)) {
-            die('Argument 1 must be an instance of Class');
+        function foo($object) {
+          if (!($object instanceof ClassName)) {
+            die('Argument 1 must be an instance of ClassName');
           }
         }
 
