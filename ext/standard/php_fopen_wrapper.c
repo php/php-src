@@ -21,7 +21,9 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#if HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 
 #include "php.h"
 #include "php_globals.h"
