@@ -25,6 +25,22 @@
  * - do not test PEAR components if base class and/or component class cannot be instanciated
  */
 
+if (ini_get('safe_mode')) {
+	echo <<<SAFE_MODE_WARNING
+
++-----------------------------------------------------------+
+|                       ! WARNING !                         |
+| You are running the test-suite with "safe_mode" ENABLED ! |
+|                                                           |
+| Chances are high that no test will work at all,           |
+| depending on how you configured "safe_mode" !             |
++-----------------------------------------------------------+
+
+
+SAFE_MODE_WARNING;
+}
+
+
 set_time_limit(0);
 
 ob_implicit_flush();
