@@ -282,7 +282,8 @@ static zend_function_entry domxml_functions[] = {
 	PHP_FE(domxml_xslt_stylesheet_doc,									NULL)
 	PHP_FE(domxml_xslt_stylesheet_file,									NULL)
 	PHP_FE(domxml_xslt_process,											NULL)
-	PHP_FE(domxml_xslt_dump_mem,						  			NULL)
+	PHP_FE(domxml_xslt_dump_mem,							  			NULL)
+	PHP_FE(domxml_xslt_dump_file,							  			NULL)
 #endif
 
 	PHP_FALIAS(domxml_add_root,			domxml_doc_add_root,			NULL)
@@ -523,6 +524,7 @@ static zend_function_entry php_domxsltstylesheet_class_functions[] = {
 /* TODO: maybe some more methods? */
 	PHP_FALIAS(process, 				domxml_xslt_process, 			NULL)
 	PHP_FALIAS(dump_mem, 			domxml_xslt_dump_mem, 		NULL)
+	PHP_FALIAS(dump_file, 			domxml_xslt_dump_file, 		NULL)
 	{NULL, NULL, NULL}
 };
 #endif
@@ -4208,6 +4210,44 @@ PHP_FUNCTION(domxml_xslt_dump_mem)
 	}
 
 	RETURN_STRINGL(doc_txt_ptr, doc_txt_len, 1);
+}
+/* }}} */
+
+/* {{{ proto int domxml_xslt_dump_file(object xslstylesheet, object xmldoc, string filename[, int compression])
+   output XSLT result to File */
+PHP_FUNCTION(domxml_xslt_dump_file)
+{
+	zval *rv, *idxsl, *idxml;
+	xsltStylesheetPtr xsltstp;
+	xmlDocPtr xmldocp;
+	xmlDocPtr docp;
+	xmlChar *doc_txt_ptr;
+	char *filename;
+	int doc_txt_len, filename_len;
+	int ret, compression = 0;
+
+	DOMXML_GET_THIS(idxsl);
+
+	xsltstp = php_xsltstylesheet_get_object(idxsl, le_domxsltstylesheetp, 0 TSRMLS_CC);
+	if (!xsltstp) {
+		php_error(E_WARNING, "%s(): underlying object missing",
+			  get_active_function_name(TSRMLS_C));
+		RETURN_FALSE;
+	}
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "os|l", &idxml, &filename, &filename_len, &compression) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	DOMXML_GET_OBJ(xmldocp, idxml, le_domxmldocp);
+
+	ret = xsltSaveResultToFilename(filename, xmldocp, xsltstp, compression);
+
+	if (ret) {
+		RETURN_FALSE;
+	}
+
+	RETURN_LONG(ret);
 }
 /* }}} */
 
