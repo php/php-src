@@ -227,10 +227,12 @@ class PEAR_Installer extends PEAR_Common
             }
             $this->log(2, "+ created dir $dest_dir");
         }
+        $orig_perms = fileperms($file);
         if (!@copy($file, $dest_file)) {
             $this->log(0, "failed to copy $file to $dest_file");
             return false;
         }
+        chmod($dest_file, $orig_perms);
         $this->log(2, "+ copy $file to $dest_file");
         // FIXME Update Package database here
         //$this->updatePackageListFrom("$d/$file");
