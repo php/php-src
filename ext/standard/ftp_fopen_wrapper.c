@@ -116,8 +116,7 @@ static int php_stream_ftp_stream_close(php_stream_wrapper *wrapper,
 /* {{{ php_ftp_fopen_connect
  */
 static php_stream *php_ftp_fopen_connect(php_stream_wrapper *wrapper, char *path, char *mode, int options, char **opened_path, php_stream_context *context,
-									 php_stream **preuseid, php_url **presource, int *puse_ssl, int *puse_ssl_on_data
-									 STREAMS_DC TSRMLS_DC)
+									 php_stream **preuseid, php_url **presource, int *puse_ssl, int *puse_ssl_on_data TSRMLS_DC)
 {
 	php_stream *stream = NULL, *reuseid = NULL;
 	php_url *resource = NULL;
@@ -281,7 +280,7 @@ static php_stream *php_ftp_fopen_connect(php_stream_wrapper *wrapper, char *path
 
 /* {{{ php_fopen_do_pasv
  */
-static unsigned short php_fopen_do_pasv(php_stream *stream, char *ip, int ip_size, char **phoststart STREAMS_DC TSRMLS_DC)
+static unsigned short php_fopen_do_pasv(php_stream *stream, char *ip, int ip_size, char **phoststart TSRMLS_DC)
 {
 	char tmp_line[512];
 	int result, i;
@@ -406,7 +405,7 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, char *path, ch
 		return NULL;
 	}
 
-	stream = php_ftp_fopen_connect(wrapper, path, mode, options, opened_path, context, &reuseid, &resource, &use_ssl, &use_ssl_on_data STREAMS_CC TSRMLS_CC);
+	stream = php_ftp_fopen_connect(wrapper, path, mode, options, opened_path, context, &reuseid, &resource, &use_ssl, &use_ssl_on_data TSRMLS_CC);
 	if (!stream) {
 		goto errexit;
 	}
@@ -464,7 +463,7 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, char *path, ch
 	}
 
 	/* set up the passive connection */
-	portno = php_fopen_do_pasv(stream, ip, sizeof(ip), &hoststart STREAMS_CC TSRMLS_CC);
+	portno = php_fopen_do_pasv(stream, ip, sizeof(ip), &hoststart TSRMLS_CC);
 
 	if (!portno) {
 		goto errexit;
@@ -622,7 +621,7 @@ php_stream * php_stream_ftp_opendir(php_stream_wrapper *wrapper, char *path, cha
 	char ip[sizeof("123.123.123.123")];
 	unsigned short portno;
 
-	stream = php_ftp_fopen_connect(wrapper, path, mode, options, opened_path, context, &reuseid, &resource, &use_ssl, &use_ssl_on_data STREAMS_CC TSRMLS_CC);
+	stream = php_ftp_fopen_connect(wrapper, path, mode, options, opened_path, context, &reuseid, &resource, &use_ssl, &use_ssl_on_data TSRMLS_CC);
 
 	/* set the connection to be ascii */
 	php_stream_write_string(stream, "TYPE A\r\n");
@@ -631,7 +630,7 @@ php_stream * php_stream_ftp_opendir(php_stream_wrapper *wrapper, char *path, cha
 		goto opendir_errexit;
 
 	/* set up the passive connection */
-	portno = php_fopen_do_pasv(stream, ip, sizeof(ip), &hoststart STREAMS_CC TSRMLS_CC);
+	portno = php_fopen_do_pasv(stream, ip, sizeof(ip), &hoststart TSRMLS_CC);
 
 	if (!portno) {
 		goto opendir_errexit;
@@ -701,11 +700,56 @@ php_stream * php_stream_ftp_opendir(php_stream_wrapper *wrapper, char *path, cha
 }
 /* }}} */
 
+/* {{{ php_stream_ftp_url_stat
+ */
+static int php_stream_ftp_url_stat(php_stream_wrapper *wrapper, char *url, php_stream_statbuf *ssb TSRMLS_DC)
+{
+	php_stream *stream = NULL;
+	php_url *resource;
+	int result;
+	char tmp_line[512];
+
+	/* If ssb is NULL then someone is misbehaving */
+	if (!ssb) return -1;
+	memset(ssb, 0, sizeof(php_stream_statbuf));
+
+	stream = php_ftp_fopen_connect(wrapper, url, "r", 0, NULL, NULL, NULL, &resource, NULL, NULL TSRMLS_CC);
+	if (!stream) {
+		goto stat_errexit;
+	}
+
+	/* Size is the only reliable attribute returned by FTP */
+	php_stream_write_string(stream, "SIZE ");
+	if (resource->path != NULL) {
+		php_stream_write_string(stream, resource->path);
+	} else {
+		php_stream_write_string(stream, "/");
+	}
+	php_stream_write_string(stream, "\r\n");
+
+	result = GET_FTP_RESULT(stream);
+	if (result < 200 || result > 299) {
+		goto stat_errexit;
+	}
+
+	sscanf(tmp_line + 4, "%d", &(ssb->sb.st_size));
+
+	php_stream_close(stream);
+	return 0;
+
+ stat_errexit:
+	if (stream) {
+		php_stream_close(stream);
+	}
+	return -1;
+}
+/* }}} */
+
 static php_stream_wrapper_ops ftp_stream_wops = {
 	php_stream_url_wrap_ftp,
 	php_stream_ftp_stream_close, /* stream_close */
 	php_stream_ftp_stream_stat,
-	NULL, /* stat_url */
+	php_stream_ftp_url_stat, /* stat_url */
 	php_stream_ftp_opendir, /* opendir */
 	"FTP"
 };
