@@ -2,8 +2,9 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? ????, Version 4.0 Beta 4
- Fixed a leak when using automatic output buffering (Zeev)
-Introduced PECL - PHP Extension and Code Library (prounounced "picke")
+- Fixed a leak when using automatic output buffering (Zeev)
+- Introduced PECL - PHP Extension and Code Library
+  (prounounced "pickle") (Stig)
 - Fixed inconsistencies in the implementation of here-docs (Andi & Zeev, Zend 
   library)
 - Fixed a problem with constant class-member initializations (Andi & Zeev,
