@@ -106,6 +106,8 @@ PHP_MINIT_FUNCTION(curl)
 	le_curl = zend_register_list_destructors_ex(_php_curl_close, NULL, "curl", module_number);
 	
 	/* Constants for curl_setopt() */
+	REGISTER_CURL_CONSTANT(CURLOPT_DNS_USE_GLOBAL_CACHE);
+	REGISTER_CURL_CONSTANT(CURLOPT_DNS_CACHE_TIMEOUT);
 	REGISTER_CURL_CONSTANT(CURLOPT_PORT);
 	REGISTER_CURL_CONSTANT(CURLOPT_FILE);
 	REGISTER_CURL_CONSTANT(CURLOPT_INFILE);
@@ -592,6 +594,9 @@ PHP_FUNCTION(curl_init)
 	curl_easy_setopt(ch->cp, CURLOPT_INFILE,            (void *) ch);
 	curl_easy_setopt(ch->cp, CURLOPT_HEADERFUNCTION,    curl_write_header);
 	curl_easy_setopt(ch->cp, CURLOPT_WRITEHEADER,       (void *) ch);
+	curl_easy_setopt(ch->cp, CURLOPT_DNS_USE_GLOBAL_CACHE, 1);
+	curl_easy_setopt(ch->cp, CURLOPT_DNS_CACHE_TIMEOUT, 120);
+
 	if (argc > 0) {
 		char *urlcopy;
 		convert_to_string_ex(url);
@@ -611,8 +616,8 @@ PHP_FUNCTION(curl_init)
 PHP_FUNCTION(curl_setopt)
 {
 	zval       **zid, 
-	           **zoption, 
-	           **zvalue;
+		**zoption, 
+		**zvalue;
 	php_curl    *ch;
 	CURLcode     error=CURLE_OK;
 	int          option;
@@ -626,254 +631,255 @@ PHP_FUNCTION(curl_setopt)
 
 	option = Z_LVAL_PP(zoption);
 	switch (option) {
-	case CURLOPT_INFILESIZE:
-	case CURLOPT_VERBOSE:
-	case CURLOPT_HEADER:
-	case CURLOPT_NOPROGRESS:
-	case CURLOPT_NOBODY:
-	case CURLOPT_FAILONERROR:
-	case CURLOPT_UPLOAD:
-	case CURLOPT_POST:
-	case CURLOPT_FTPLISTONLY:
-	case CURLOPT_FTPAPPEND:
-	case CURLOPT_NETRC:
-	case CURLOPT_FOLLOWLOCATION:
-	case CURLOPT_PUT:
-	case CURLOPT_MUTE:
-	case CURLOPT_TIMEOUT:
-	case CURLOPT_LOW_SPEED_LIMIT:
-	case CURLOPT_SSLVERSION:
-	case CURLOPT_LOW_SPEED_TIME:
-	case CURLOPT_RESUME_FROM:
-	case CURLOPT_TIMEVALUE:
-	case CURLOPT_TIMECONDITION:
-	case CURLOPT_TRANSFERTEXT:
-	case CURLOPT_HTTPPROXYTUNNEL:
-	case CURLOPT_FILETIME:
-	case CURLOPT_MAXREDIRS:
-	case CURLOPT_MAXCONNECTS:
-	case CURLOPT_CLOSEPOLICY:
-	case CURLOPT_FRESH_CONNECT:
-	case CURLOPT_FORBID_REUSE:
-	case CURLOPT_CONNECTTIMEOUT:
-	case CURLOPT_SSL_VERIFYHOST:
-	case CURLOPT_SSL_VERIFYPEER:
-		convert_to_long_ex(zvalue);
-		error = curl_easy_setopt(ch->cp, option, Z_LVAL_PP(zvalue));
-		break;
-	case CURLOPT_URL:
-	case CURLOPT_PROXY:
-	case CURLOPT_USERPWD:
-	case CURLOPT_PROXYUSERPWD:
-	case CURLOPT_RANGE:
-	case CURLOPT_CUSTOMREQUEST:
-	case CURLOPT_USERAGENT:
-	case CURLOPT_FTPPORT:
-	case CURLOPT_COOKIE:
-	case CURLOPT_SSLCERT:
-	case CURLOPT_SSLCERTPASSWD:
-	case CURLOPT_COOKIEFILE:
-	case CURLOPT_REFERER:
-	case CURLOPT_INTERFACE:
-	case CURLOPT_KRB4LEVEL: 
-	case CURLOPT_RANDOM_FILE:
-	case CURLOPT_EGDSOCKET:
-	case CURLOPT_CAINFO: 
-	case CURLOPT_COOKIEJAR:
-	case CURLOPT_SSL_CIPHER_LIST: {
-		char *copystr = NULL;
+		case CURLOPT_INFILESIZE:
+		case CURLOPT_VERBOSE:
+		case CURLOPT_HEADER:
+		case CURLOPT_NOPROGRESS:
+		case CURLOPT_NOBODY:
+		case CURLOPT_FAILONERROR:
+		case CURLOPT_UPLOAD:
+		case CURLOPT_POST:
+		case CURLOPT_FTPLISTONLY:
+		case CURLOPT_FTPAPPEND:
+		case CURLOPT_NETRC:
+		case CURLOPT_FOLLOWLOCATION:
+		case CURLOPT_PUT:
+		case CURLOPT_MUTE:
+		case CURLOPT_TIMEOUT:
+		case CURLOPT_LOW_SPEED_LIMIT:
+		case CURLOPT_SSLVERSION:
+		case CURLOPT_LOW_SPEED_TIME:
+		case CURLOPT_RESUME_FROM:
+		case CURLOPT_TIMEVALUE:
+		case CURLOPT_TIMECONDITION:
+		case CURLOPT_TRANSFERTEXT:
+		case CURLOPT_HTTPPROXYTUNNEL:
+		case CURLOPT_FILETIME:
+		case CURLOPT_MAXREDIRS:
+		case CURLOPT_MAXCONNECTS:
+		case CURLOPT_CLOSEPOLICY:
+		case CURLOPT_FRESH_CONNECT:
+		case CURLOPT_FORBID_REUSE:
+		case CURLOPT_CONNECTTIMEOUT:
+		case CURLOPT_SSL_VERIFYHOST:
+		case CURLOPT_SSL_VERIFYPEER:
+		case CURLOPT_DNS_USE_GLOBAL_CACHE:
+			convert_to_long_ex(zvalue);
+			error = curl_easy_setopt(ch->cp, option, Z_LVAL_PP(zvalue));
+			break;
+		case CURLOPT_URL:
+		case CURLOPT_PROXY:
+		case CURLOPT_USERPWD:
+		case CURLOPT_PROXYUSERPWD:
+		case CURLOPT_RANGE:
+		case CURLOPT_CUSTOMREQUEST:
+		case CURLOPT_USERAGENT:
+		case CURLOPT_FTPPORT:
+		case CURLOPT_COOKIE:
+		case CURLOPT_SSLCERT:
+		case CURLOPT_SSLCERTPASSWD:
+		case CURLOPT_COOKIEFILE:
+		case CURLOPT_REFERER:
+		case CURLOPT_INTERFACE:
+		case CURLOPT_KRB4LEVEL: 
+		case CURLOPT_RANDOM_FILE:
+		case CURLOPT_EGDSOCKET:
+		case CURLOPT_CAINFO: 
+		case CURLOPT_COOKIEJAR:
+		case CURLOPT_SSL_CIPHER_LIST: {
+			char *copystr = NULL;
 	
-		convert_to_string_ex(zvalue);
-		copystr = estrndup(Z_STRVAL_PP(zvalue), Z_STRLEN_PP(zvalue));
+			convert_to_string_ex(zvalue);
+			copystr = estrndup(Z_STRVAL_PP(zvalue), Z_STRLEN_PP(zvalue));
 
-		error = curl_easy_setopt(ch->cp, option, copystr);
-		zend_llist_add_element(&ch->to_free.str, &copystr);
+			error = curl_easy_setopt(ch->cp, option, copystr);
+			zend_llist_add_element(&ch->to_free.str, &copystr);
 
-		break;
-	}
-	case CURLOPT_FILE:
-	case CURLOPT_INFILE: 
-	case CURLOPT_WRITEHEADER:
-	case CURLOPT_STDERR: {
-		FILE *fp = NULL;
-		int type;
-		void * what;
-		
-		what = zend_fetch_resource(zvalue TSRMLS_CC, -1, "File-Handle", &type, 1, php_file_le_stream());
-		ZEND_VERIFY_RESOURCE(what);
-
-		if (FAILURE == php_stream_cast((php_stream *) what, 
-									   PHP_STREAM_AS_STDIO, 
-									   (void *) &fp, 
-									   REPORT_ERRORS)) {
-			RETURN_FALSE;
+			break;
 		}
-
-		if (!fp) {
-			RETURN_FALSE;
-		}
-
-		error = CURLE_OK;
-		switch (option) {
 		case CURLOPT_FILE:
-			ch->handlers->write->fp = fp;
-			ch->handlers->write->method = PHP_CURL_FILE;
-			break;
+		case CURLOPT_INFILE: 
 		case CURLOPT_WRITEHEADER:
-			ch->handlers->write_header->fp = fp;
-			ch->handlers->write_header->method = PHP_CURL_FILE;
-			break;
-		case CURLOPT_INFILE:
-			zend_list_addref(Z_LVAL_PP(zvalue));
-			ch->handlers->read->fp = fp;
-			ch->handlers->read->fd = Z_LVAL_PP(zvalue);
-			break;
-		default:
-			error = curl_easy_setopt(ch->cp, option, fp);
-			break;
-		}
+		case CURLOPT_STDERR: {
+			FILE *fp = NULL;
+			int type;
+			void * what;
+		
+			what = zend_fetch_resource(zvalue TSRMLS_CC, -1, "File-Handle", &type, 1, php_file_le_stream());
+			ZEND_VERIFY_RESOURCE(what);
 
-		break;
-	}
-	case CURLOPT_RETURNTRANSFER:
-		convert_to_long_ex(zvalue);
-
-		if (Z_LVAL_PP(zvalue)) {
-			ch->handlers->write->method = PHP_CURL_RETURN;
-		}
-		break;
-	case CURLOPT_BINARYTRANSFER:
-		convert_to_long_ex(zvalue);	
-
-		if (Z_LVAL_PP(zvalue)) {
-			ch->handlers->write->type = PHP_CURL_BINARY;
-		}
-		break;
-	case CURLOPT_WRITEFUNCTION:
-		zval_add_ref(zvalue);
-		ch->handlers->write->func   = *zvalue;
-		ch->handlers->write->method = PHP_CURL_USER;
-		break;
-	case CURLOPT_READFUNCTION:
-		zval_add_ref(zvalue);
-		ch->handlers->read->func   = *zvalue;
-		ch->handlers->read->method = PHP_CURL_USER;
-		break;
-	case CURLOPT_HEADERFUNCTION:
-		zval_add_ref(zvalue);
-		ch->handlers->write_header->func   = *zvalue;
-		ch->handlers->write_header->method = PHP_CURL_USER;
-		break;
-	case CURLOPT_PASSWDFUNCTION:
-		zval_add_ref(zvalue);
-		ch->handlers->passwd = *zvalue;
-		error = curl_easy_setopt(ch->cp, CURLOPT_PASSWDFUNCTION, curl_passwd);
-		error = curl_easy_setopt(ch->cp, CURLOPT_PASSWDDATA,     (void *) ch);
-		break;
-	case CURLOPT_POSTFIELDS:
-		if (Z_TYPE_PP(zvalue) == IS_ARRAY || Z_TYPE_PP(zvalue) == IS_OBJECT) {
-			zval            **current;
-			HashTable        *postfields;
-			struct HttpPost  *first = NULL;
-			struct HttpPost  *last  = NULL;
-			char             *postval;
-			char             *string_key = NULL;
-			ulong             num_key;
-			uint              string_key_len;
-
-			postfields = HASH_OF(*zvalue);
-			if (! postfields) {
-				php_error(E_WARNING, 
-						  "%s(): Couldn't get HashTable in CURLOPT_POSTFIELDS", 
-						  get_active_function_name(TSRMLS_C));
+			if (FAILURE == php_stream_cast((php_stream *) what, 
+										   PHP_STREAM_AS_STDIO, 
+										   (void *) &fp, 
+										   REPORT_ERRORS)) {
 				RETURN_FALSE;
 			}
 
-			for (zend_hash_internal_pointer_reset(postfields);
-			     zend_hash_get_current_data(postfields, (void **) &current) == SUCCESS;
-			     zend_hash_move_forward(postfields)) {
+			if (!fp) {
+				RETURN_FALSE;
+			}
+
+			error = CURLE_OK;
+			switch (option) {
+				case CURLOPT_FILE:
+					ch->handlers->write->fp = fp;
+					ch->handlers->write->method = PHP_CURL_FILE;
+					break;
+				case CURLOPT_WRITEHEADER:
+					ch->handlers->write_header->fp = fp;
+					ch->handlers->write_header->method = PHP_CURL_FILE;
+					break;
+				case CURLOPT_INFILE:
+					zend_list_addref(Z_LVAL_PP(zvalue));
+					ch->handlers->read->fp = fp;
+					ch->handlers->read->fd = Z_LVAL_PP(zvalue);
+					break;
+				default:
+					error = curl_easy_setopt(ch->cp, option, fp);
+					break;
+			}
+
+			break;
+		}
+		case CURLOPT_RETURNTRANSFER:
+			convert_to_long_ex(zvalue);
+
+			if (Z_LVAL_PP(zvalue)) {
+				ch->handlers->write->method = PHP_CURL_RETURN;
+			}
+			break;
+		case CURLOPT_BINARYTRANSFER:
+			convert_to_long_ex(zvalue);	
+
+			if (Z_LVAL_PP(zvalue)) {
+				ch->handlers->write->type = PHP_CURL_BINARY;
+			}
+			break;
+		case CURLOPT_WRITEFUNCTION:
+			zval_add_ref(zvalue);
+			ch->handlers->write->func   = *zvalue;
+			ch->handlers->write->method = PHP_CURL_USER;
+			break;
+		case CURLOPT_READFUNCTION:
+			zval_add_ref(zvalue);
+			ch->handlers->read->func   = *zvalue;
+			ch->handlers->read->method = PHP_CURL_USER;
+			break;
+		case CURLOPT_HEADERFUNCTION:
+			zval_add_ref(zvalue);
+			ch->handlers->write_header->func   = *zvalue;
+			ch->handlers->write_header->method = PHP_CURL_USER;
+			break;
+		case CURLOPT_PASSWDFUNCTION:
+			zval_add_ref(zvalue);
+			ch->handlers->passwd = *zvalue;
+			error = curl_easy_setopt(ch->cp, CURLOPT_PASSWDFUNCTION, curl_passwd);
+			error = curl_easy_setopt(ch->cp, CURLOPT_PASSWDDATA,     (void *) ch);
+			break;
+		case CURLOPT_POSTFIELDS:
+			if (Z_TYPE_PP(zvalue) == IS_ARRAY || Z_TYPE_PP(zvalue) == IS_OBJECT) {
+				zval            **current;
+				HashTable        *postfields;
+				struct HttpPost  *first = NULL;
+				struct HttpPost  *last  = NULL;
+				char             *postval;
+				char             *string_key = NULL;
+				ulong             num_key;
+				uint              string_key_len;
+
+				postfields = HASH_OF(*zvalue);
+				if (! postfields) {
+					php_error(E_WARNING, 
+							  "%s(): Couldn't get HashTable in CURLOPT_POSTFIELDS", 
+							  get_active_function_name(TSRMLS_C));
+					RETURN_FALSE;
+				}
+
+				for (zend_hash_internal_pointer_reset(postfields);
+					 zend_hash_get_current_data(postfields, (void **) &current) == SUCCESS;
+					 zend_hash_move_forward(postfields)) {
+
+					SEPARATE_ZVAL(current);
+					convert_to_string_ex(current);
+
+					zend_hash_get_current_key_ex(postfields, &string_key, &string_key_len, &num_key, 0, NULL);
+				
+					postval = Z_STRVAL_PP(current);
+					if (*postval == '@') {
+						error = curl_formadd(&first, &last, 
+											 CURLFORM_COPYNAME, string_key,
+											 CURLFORM_NAMELENGTH, string_key_len - 1,
+											 CURLFORM_FILE, ++postval, 
+											 CURLFORM_END);
+					}
+					else {
+						error = curl_formadd(&first, &last, 
+											 CURLFORM_COPYNAME, string_key,
+											 CURLFORM_NAMELENGTH, string_key_len - 1,
+											 CURLFORM_PTRCONTENTS, postval, 
+											 CURLFORM_CONTENTSLENGTH, Z_STRLEN_PP(current),
+											 CURLFORM_END);
+					}
+				}
+
+				SAVE_CURL_ERROR(ch, error);
+				if (error != CURLE_OK) {
+					RETURN_FALSE;
+				}
+
+				zend_llist_add_element(&ch->to_free.post, &first);
+				error = curl_easy_setopt(ch->cp, CURLOPT_HTTPPOST, first);
+			}
+			else {
+				char *post = NULL;
+
+				convert_to_string_ex(zvalue);
+				post = estrndup(Z_STRVAL_PP(zvalue), Z_STRLEN_PP(zvalue));
+				zend_llist_add_element(&ch->to_free.str, &post);
+
+				error = curl_easy_setopt(ch->cp, CURLOPT_POSTFIELDS, post);
+				error = curl_easy_setopt(ch->cp, CURLOPT_POSTFIELDSIZE, Z_STRLEN_PP(zvalue));
+			}
+
+			break;
+		case CURLOPT_HTTPHEADER: 
+		case CURLOPT_QUOTE:
+		case CURLOPT_POSTQUOTE: {
+			zval              **current;
+			HashTable          *ph;
+			struct curl_slist  *slist = NULL;
+
+			ph = HASH_OF(*zvalue);
+			if (!ph) {
+				php_error(E_WARNING, 
+						  "%s(): You must pass either an object or an array with the CURLOPT_HTTPHEADER, "
+						  "CURLOPT_QUOTE and CURLOPT_POSTQUOTE arguments", get_active_function_name(TSRMLS_C));
+				RETURN_FALSE;
+			}
+
+			for (zend_hash_internal_pointer_reset(ph);
+				 zend_hash_get_current_data(ph, (void **) &current) == SUCCESS;
+				 zend_hash_move_forward(ph)) {
+				char *indiv = NULL;
 
 				SEPARATE_ZVAL(current);
 				convert_to_string_ex(current);
 
-				zend_hash_get_current_key_ex(postfields, &string_key, &string_key_len, &num_key, 0, NULL);
-				
-				postval = Z_STRVAL_PP(current);
-				if (*postval == '@') {
-					error = curl_formadd(&first, &last, 
-										 CURLFORM_COPYNAME, string_key,
-										 CURLFORM_NAMELENGTH, string_key_len - 1,
-										 CURLFORM_FILE, ++postval, 
-										 CURLFORM_END);
+				indiv = estrndup(Z_STRVAL_PP(current), Z_STRLEN_PP(current) + 1);
+				slist = curl_slist_append(slist, indiv);
+				if (! slist) {
+					efree(indiv);
+					php_error(E_WARNING, "%s(): Couldn't build curl_slist", get_active_function_name(TSRMLS_C));
+					RETURN_FALSE;
 				}
-				else {
-					error = curl_formadd(&first, &last, 
-										 CURLFORM_COPYNAME, string_key,
-										 CURLFORM_NAMELENGTH, string_key_len - 1,
-										 CURLFORM_PTRCONTENTS, postval, 
-										 CURLFORM_CONTENTSLENGTH, Z_STRLEN_PP(current),
-										 CURLFORM_END);
-				}
+				zend_llist_add_element(&ch->to_free.str, &indiv);
 			}
+			zend_llist_add_element(&ch->to_free.slist, &slist);
 
-			SAVE_CURL_ERROR(ch, error);
-			if (error != CURLE_OK) {
-				RETURN_FALSE;
-			}
+			error = curl_easy_setopt(ch->cp, option, slist);
 
-			zend_llist_add_element(&ch->to_free.post, &first);
-			error = curl_easy_setopt(ch->cp, CURLOPT_HTTPPOST, first);
+			break;
 		}
-		else {
-			char *post = NULL;
-
-			convert_to_string_ex(zvalue);
-			post = estrndup(Z_STRVAL_PP(zvalue), Z_STRLEN_PP(zvalue));
-			zend_llist_add_element(&ch->to_free.str, &post);
-
-			error = curl_easy_setopt(ch->cp, CURLOPT_POSTFIELDS, post);
-			error = curl_easy_setopt(ch->cp, CURLOPT_POSTFIELDSIZE, Z_STRLEN_PP(zvalue));
-		}
-
-		break;
-	case CURLOPT_HTTPHEADER: 
-	case CURLOPT_QUOTE:
-	case CURLOPT_POSTQUOTE: {
-		zval              **current;
-		HashTable          *ph;
-		struct curl_slist  *slist = NULL;
-
-		ph = HASH_OF(*zvalue);
-		if (!ph) {
-			php_error(E_WARNING, 
-			          "%s(): You must pass either an object or an array with the CURLOPT_HTTPHEADER, "
-					  "CURLOPT_QUOTE and CURLOPT_POSTQUOTE arguments", get_active_function_name(TSRMLS_C));
-			RETURN_FALSE;
-		}
-
-		for (zend_hash_internal_pointer_reset(ph);
-		     zend_hash_get_current_data(ph, (void **) &current) == SUCCESS;
-		     zend_hash_move_forward(ph)) {
-			char *indiv = NULL;
-
-			SEPARATE_ZVAL(current);
-			convert_to_string_ex(current);
-
-			indiv = estrndup(Z_STRVAL_PP(current), Z_STRLEN_PP(current) + 1);
-			slist = curl_slist_append(slist, indiv);
-			if (! slist) {
-				efree(indiv);
-				php_error(E_WARNING, "%s(): Couldn't build curl_slist", get_active_function_name(TSRMLS_C));
-				RETURN_FALSE;
-			}
-			zend_llist_add_element(&ch->to_free.str, &indiv);
-		}
-		zend_llist_add_element(&ch->to_free.slist, &slist);
-
-		error = curl_easy_setopt(ch->cp, option, slist);
-
-		break;
-	}
 	}
 
 	SAVE_CURL_ERROR(ch, error);
