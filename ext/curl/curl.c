@@ -649,7 +649,7 @@ PHP_FUNCTION(curl_exec)
 			memcpy(ret_data + pos, buf, b);
 			pos += b;
 		}
-		ret_data[stat_sb.st_size - 1] = '\0';
+		ret_data[stat_sb.st_size] = '\0';
 		
 		if (is_temp_file)
 			fclose(fp);
