@@ -22,6 +22,7 @@ PHP 4                                                                      NEWS
 - Fixed bug #23888 (Missing input validation for flags parameter). (Ilia)
 - Fixed bug #23779 (mysql_connect(): disable local infile option if php.ini
   option "open_basedir" is set). (Georg)
+- Fixed bug #23285 (Potential Stack overflow in zendlex). (Wez)
  
 29 May 2003, Version 4.3.2
 - Syncronized bundled GD library with GD 2.0.12. (Ilia)
