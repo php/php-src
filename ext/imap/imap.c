@@ -30,6 +30,7 @@
 #endif
 
 #include "php.h"
+#include "php_ini.h"
 
 #ifdef COMPILE_DL_IMAP
 #include "dl/phpdl.h"
@@ -79,6 +80,7 @@ void *fs_get (size_t size);
 static int add_assoc_object(pval *arg, char *key, pval *tmp);
 int add_next_index_object(pval *arg, pval *tmp);
 void imap_add_body( pval *arg, BODY *body );
+int imap_mail(char *to, char *subject, char *message, char *headers, char *cc, char *bcc, char *rpath);
 
 typedef struct php_imap_le_struct {
 	MAILSTREAM *imap_stream;
@@ -173,8 +175,12 @@ function_entry imap_functions[] = {
 	PHP_FE(imap_alerts,			NULL)
 	PHP_FE(imap_errors,			NULL)
 	PHP_FE(imap_last_error,			NULL)
+#if !(WIN32|WINNT)
+	PHP_FE(imap_mail,               NULL)
+#endif
 	PHP_FE(imap_search,			NULL)
-	PHP_FE(imap_utf8,			NULL)
+	PHP_FE(imap_utf7_decode,		NULL)
+	PHP_FE(imap_utf7_encode,		NULL)
 	{NULL, NULL, NULL}
 };
 
@@ -1487,13 +1493,14 @@ PHP_FUNCTION(imap_listscan)
 /* }}} */
 
 /* {{{ proto object imap_check(int stream_id)
+
    Get mailbox properties */
 PHP_FUNCTION(imap_check)
 {
 	pval *streamind;
 	int ind, ind_type;
 	pils *imap_le_struct;
-	char date[50];
+	char date[100];
 
 	if (ARG_COUNT(ht)!=1 || getParameters(ht,1,&streamind) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -2344,7 +2351,7 @@ PHP_FUNCTION(imap_binary)
 PHP_FUNCTION(imap_mailboxmsginfo)
 {
 	pval *streamind;
-	char date[50];
+	char date[100];
 	int ind, ind_type;
 	unsigned int msgno;
 	pils *imap_le_struct;
@@ -2455,7 +2462,7 @@ PHP_FUNCTION(imap_rfc822_parse_adrlist)
 
 
 /* {{{ proto string imap_utf8(string string)
-   Convert a string to UTF8 */
+   Convert a string to UTF-8 */
 PHP_FUNCTION(imap_utf8)
 {
        pval *string;
@@ -2476,6 +2483,311 @@ PHP_FUNCTION(imap_utf8)
 	RETURN_STRINGL(dest.data,strlen(dest.data),1);
 }
 /* }}} */
+
+
+/* macros for the modified utf7 conversion functions */
+/* author: Andrew Skalski <askalski@chek.com> */
+
+/* tests `c' and returns true if it is a special character */
+#define SPECIAL(c) ((c) <= 0x1f || (c) >= 0x7f)
+/* validate a modified-base64 character */
+#define B64CHAR(c) (isalnum(c) || (c) == '+' || (c) == ',')
+/* map the low 64 bits of `n' to the modified-base64 characters */
+#define B64(n)  ("ABCDEFGHIJKLMNOPQRSTUVWXYZ" \
+                "abcdefghijklmnopqrstuvwxyz0123456789+,"[(n) & 0x3f])
+/* map the modified-base64 character `c' to its 64 bit value */
+#define UNB64(c)        ((c) == '+' ? 62 : (c) == ',' ? 63 : (c) >= 'a' ? \
+                        (c) - 71 : (c) >= 'A' ? (c) - 65 : (c) + 4)
+
+/* {{{ proto string imap_utf7_decode(string buf)
+   Decode a modified UTF-7 string */
+PHP_FUNCTION(imap_utf7_decode)
+{
+	/* author: Andrew Skalski <askalski@chek.com> */
+	int			argc;
+	pval			*arg;
+	const unsigned char	*in, *inp, *endp;
+	unsigned char		*out, *outp;
+	int			inlen, outlen;
+	enum {	ST_NORMAL,	/* printable text */
+		ST_DECODE0,	/* encoded text rotation... */
+		ST_DECODE1,
+		ST_DECODE2,
+		ST_DECODE3
+	}			state;
+
+	/* collect arguments */
+	argc = ARG_COUNT(ht);
+	if (argc != 1 || getParameters(ht, argc, &arg) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	convert_to_string(arg);
+	in = (const unsigned char*) arg->value.str.val;
+	inlen = arg->value.str.len;
+
+	/* validate and compute length of output string */
+	outlen = 0;
+	state = ST_NORMAL;
+	for (endp = (inp = in) + inlen; inp < endp; inp++) {
+		if (state == ST_NORMAL) {
+			/* process printable character */
+			if (SPECIAL(*inp)) {
+				php_error(E_WARNING, "imap_utf7_decode: "
+					"Invalid modified UTF-7 character: "
+					"`%c'", *inp);
+				RETURN_FALSE;
+			}
+			else if (*inp != '&') {
+				outlen++;
+			}
+			else if (inp + 1 == endp) {
+				php_error(E_WARNING, "imap_utf7_decode: "
+					"Unexpected end of string");
+				RETURN_FALSE;
+			}
+			else if (inp[1] != '-') {
+				state = ST_DECODE0;
+			}
+			else {
+				outlen++;
+				inp++;
+			}
+		}
+		else if (*inp == '-') {
+			/* return to NORMAL mode */
+			if (state == ST_DECODE1) {
+				php_error(E_WARNING, "imap_utf7_decode: "
+					"Stray modified base64 character: "
+					"`%c'", *--inp);
+				RETURN_FALSE;
+			}
+			state = ST_NORMAL;
+		}
+		else if (!B64CHAR(*inp)) {
+			php_error(E_WARNING, "imap_utf7_decode: "
+				"Invalid modified base64 character: "
+				"`%c'", *inp);
+			RETURN_FALSE;
+		}
+		else {
+			switch (state) {
+			case ST_DECODE3:
+				outlen++;
+				state = ST_DECODE0;
+				break;
+			case ST_DECODE2:
+			case ST_DECODE1:
+				outlen++;
+			case ST_DECODE0:
+				state++;
+			case ST_NORMAL:
+			}
+		}
+	}
+
+	/* enforce end state */
+	if (state != ST_NORMAL) {
+		php_error(E_WARNING, "imap_utf7_decode: "
+			"Unexpected end of string");
+		RETURN_FALSE;
+	}
+
+	/* allocate output buffer */
+	if ((out = emalloc(outlen + 1)) == NULL) {
+		php_error(E_WARNING, "imap_utf7_decode: "
+			"Unable to allocate result string");
+		RETURN_FALSE;
+	}
+
+	/* decode input string */
+	outp = out;
+	state = ST_NORMAL;
+	for (endp = (inp = in) + inlen; inp < endp; inp++) {
+		if (state == ST_NORMAL) {
+			if (*inp == '&' && inp[1] != '-') {
+				state = ST_DECODE0;
+			}
+			else if ((*outp++ = *inp) == '&') {
+				inp++;
+			}
+		}
+		else if (*inp == '-') {
+			state = ST_NORMAL;
+		}
+		else {
+			/* decode input character */
+			switch (state) {
+			case ST_DECODE0:
+				*outp = UNB64(*inp) << 2;
+				state = ST_DECODE1;
+				break;
+			case ST_DECODE1:
+				outp[1] = UNB64(*inp);
+				*outp++ |= outp[1] >> 4;
+				*outp <<= 4;
+				state = ST_DECODE2;
+				break;
+			case ST_DECODE2:
+				outp[1] = UNB64(*inp);
+				*outp++ |= outp[1] >> 2;
+				*outp <<= 6;
+				state = ST_DECODE3;
+				break;
+			case ST_DECODE3:
+				*outp++ |= UNB64(*inp);
+				state = ST_DECODE0;
+			case ST_NORMAL:
+			}
+		}
+	}
+
+	*outp = 0;
+
+#if DEBUG
+	/* warn if we computed outlen incorrectly */
+	if (outp - out != outlen) {
+		php_error(E_WARNING,
+			"imap_utf7_decode: outp - out [%d] != outlen [%d]",
+			outp - out, outlen);
+	}
+#endif
+
+	RETURN_STRINGL(out, outlen, 0);
+}
+/* }}} */
+
+/* {{{ proto string imap_utf7_encode(string buf)
+   Encode a string in modified UTF-7 */
+PHP_FUNCTION(imap_utf7_encode)
+{
+	/* author: Andrew Skalski <askalski@chek.com> */
+	int			argc;
+	pval			*arg;
+	const unsigned char	*in, *inp, *endp;
+	unsigned char		*out, *outp;
+	int			inlen, outlen;
+	enum {	ST_NORMAL,	/* printable text */
+		ST_ENCODE0,	/* encoded text rotation... */
+		ST_ENCODE1,
+		ST_ENCODE2
+	}			state;
+
+	/* collect arguments */
+	argc = ARG_COUNT(ht);
+	if (argc != 1 || getParameters(ht, argc, &arg) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	convert_to_string(arg);
+	in = (const unsigned char*) arg->value.str.val;
+	inlen = arg->value.str.len;
+
+	/* compute the length of the result string */
+	outlen = 0;
+	state = ST_NORMAL;
+	endp = (inp = in) + inlen;
+	while (inp < endp) {
+		if (state == ST_NORMAL) {
+			if (SPECIAL(*inp)) {
+				state = ST_ENCODE0;
+				outlen++;
+			}
+			else if (*inp++ == '&') {
+				outlen++;
+			}
+			outlen++;
+		}
+		else if (!SPECIAL(*inp)) {
+			state = ST_NORMAL;
+		}
+		else {
+			/* ST_ENCODE0 -> ST_ENCODE1	- two chars
+			 * ST_ENCODE1 -> ST_ENCODE2	- one char
+			 * ST_ENCODE2 -> ST_ENCODE0	- one char
+			 */
+			if (state == ST_ENCODE2) {
+				state = ST_ENCODE0;
+			}
+			else if (state++ == ST_ENCODE0) {
+				outlen++;
+			}
+			outlen++;
+			inp++;
+		}
+	}
+
+	/* allocate output buffer */
+	if ((out = emalloc(outlen + 1)) == NULL) {
+		php_error(E_WARNING, "imap_utf7_encode: "
+			"Unable to allocate result string");
+		RETURN_FALSE;
+	}
+
+	/* encode input string */
+	outp = out;
+	state = ST_NORMAL;
+	endp = (inp = in) + inlen;
+	while (inp < endp || state != ST_NORMAL) {
+		if (state == ST_NORMAL) {
+			if (SPECIAL(*inp)) {
+				/* begin encoding */
+				*outp++ = '&';
+				state = ST_ENCODE0;
+			}
+			else if ((*outp++ = *inp++) == '&') {
+				*outp++ = '-';
+			}
+		}
+		else if (inp == endp || !SPECIAL(*inp)) {
+			/* flush overflow and terminate region */
+			if (state != ST_ENCODE0) {
+				*outp++ = B64(*outp);
+			}
+			*outp++ = '-';
+			state = ST_NORMAL;
+		}
+		else {
+			/* encode input character */
+			switch (state) {
+			case ST_ENCODE0:
+				*outp++ = B64(*inp >> 2);
+				*outp = *inp++ << 4;
+				state = ST_ENCODE1;
+				break;
+			case ST_ENCODE1:
+				*outp++ = B64(*outp | *inp >> 4);
+				*outp = *inp++ << 2;
+				state = ST_ENCODE2;
+				break;
+			case ST_ENCODE2:
+				*outp++ = B64(*outp | *inp >> 6);
+				*outp++ = B64(*inp++);
+				state = ST_ENCODE0;
+			case ST_NORMAL:
+			}
+		}
+	}
+
+	*outp = 0;
+
+#if DEBUG
+	/* warn if we computed outlen incorrectly */
+	if (outp - out != outlen) {
+		php_error(E_WARNING,
+			"imap_utf7_encode: outp - out [%d] != outlen [%d]",
+			outp - out, outlen);
+	}
+#endif
+
+	RETURN_STRINGL(out, outlen, 0);
+}
+/* }}} */
+
+#undef SPECIAL
+#undef B64CHAR
+#undef B64
+#undef UNB64
+
+
 
 /* {{{ proto int imap_setflag_full(int stream_id, string sequence, string flag [, int options])
    Sets flags on messages */
@@ -3126,6 +3438,123 @@ PHP_FUNCTION(imap_mail_compose)
 }
 /* }}} */
 
+#if !(WIN32|WINNT)
+int _php_imap_mail(char *to, char *subject, char *message, char *headers, char *cc, char *bcc, char* rpath)
+{
+#if MSVC5
+	int tsm_err;
+#else
+	FILE *sendmail;
+	int ret;
+#endif
+
+#if MSVC5
+	if (imap_TSendMail(INI_STR("smtp"),&tsm_err,headers,subject,to,message,cc,bcc,rpath) != SUCCESS){
+		php_error(E_WARNING, GetSMErrorText(tsm_err));
+		return 0;
+	}
+#else
+	if (!INI_STR("sendmail_path")) {
+		return 0;
+	}
+	sendmail = popen(INI_STR("sendmail_path"), "w");
+	if (sendmail) {
+		fprintf(sendmail, "To: %s\n", to);
+		if (cc && cc[0]) fprintf(sendmail, "Cc: %s\n", cc);
+		if (bcc && bcc[0]) fprintf(sendmail, "Bcc: %s\n", bcc);
+		fprintf(sendmail, "Subject: %s\n", subject);
+		if (headers != NULL) {
+			fprintf(sendmail, "%s\n", headers);
+		}
+		fprintf(sendmail, "\n%s\n", message);
+		ret = pclose(sendmail);
+		if (ret == -1) {
+			return 0;
+		} else {
+			return 1;
+		}
+	} else {
+		php_error(E_WARNING, "Could not execute mail delivery program");
+		return 0;
+	}
+#endif
+	return 1;
+}
+
+/* {{{ proto int imap_mail(string to, string subject, string message [, string additional_headers [, string cc [, string bcc [, string rpath]]]])
+   Send an email message */
+PHP_FUNCTION(imap_mail)
+{
+	pval *argv[6];
+	char *to=NULL, *message=NULL, *headers=NULL, *subject=NULL, *cc=NULL, *bcc=NULL, *rpath=NULL;
+	int argc;
+	
+	argc = ARG_COUNT(ht);
+	if (argc < 3 || argc > 7 || getParametersArray(ht, argc, argv) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	/* To: */
+	convert_to_string(argv[0]);
+	if (argv[0]->value.str.val) {
+		to = argv[0]->value.str.val;
+	} else {
+		php_error(E_WARNING, "No to field in mail command");
+		RETURN_FALSE;
+	}
+
+	/* Subject: */
+	convert_to_string(argv[1]);
+	if (argv[1]->value.str.val) {
+		subject = argv[1]->value.str.val;
+	} else {
+		php_error(E_WARNING, "No subject field in mail command");
+		RETURN_FALSE;
+	}
+
+	/* message body */
+	convert_to_string(argv[2]);
+	if (argv[2]->value.str.val) {
+		message = argv[2]->value.str.val;
+	} else {
+		/* this is not really an error, so it is allowed. */
+		php_error(E_WARNING, "No message string in mail command");
+		message = NULL;
+	}
+
+	/* other headers */
+	if (argc > 3) {
+		convert_to_string(argv[3]);
+		headers = argv[3]->value.str.val;
+	}
+	
+	/* cc */
+	if (argc > 4) {
+		convert_to_string(argv[4]);
+		cc = argv[4]->value.str.val;
+	}
+
+	/* bcc */
+	if (argc > 5) {
+		convert_to_string(argv[5]);
+		bcc = argv[5]->value.str.val;
+	}
+
+	/* rpath */
+	if (argc > 6) {
+		convert_to_string(argv[6]);
+		rpath = argv[6]->value.str.val;
+	}
+
+	if (_php_imap_mail(to, subject, message, headers, cc, bcc, rpath)){
+		RETURN_TRUE;
+	} else {
+		RETURN_FALSE;
+	}
+}
+/* }}} */
+
+#endif
+
 /* {{{ proto array imap_search(int stream_id, string criteria [, long flags])
    Return a list of messages matching the criteria */
 PHP_FUNCTION(imap_search)
@@ -3178,6 +3607,10 @@ PHP_FUNCTION(imap_search)
 
 /* {{{ proto array imap_alerts(void)
    Returns an array of all IMAP alerts that have been generated */
+/* Returns an array of all IMAP alerts that have been generated either
+   since the last page load, or since the last imap_alerts() call,
+   whichever came last. The alert stack is cleared after imap_alerts()
+   is called. */
 /* Author: CJH */
 PHP_FUNCTION(imap_alerts)
 {
@@ -3207,6 +3640,9 @@ PHP_FUNCTION(imap_alerts)
 
 /* {{{ proto array imap_errors(void)
    Returns an array of all IMAP errors generated */
+/* Returns an array of all IMAP errors generated either since the last
+   page load, or since the last imap_errors() call, whichever came
+   last. The error stack is cleared after imap_errors() is called. */
 /* Author: CJH */
 PHP_FUNCTION(imap_errors)
 {
