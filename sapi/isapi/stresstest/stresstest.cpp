@@ -315,6 +315,25 @@ BOOL GetTestFiles(const char *path)
 	return IsapiFileList.GetSize() > 0;
 }
 
+void DeleteTempFiles(const char *mask)
+{
+	char FindPath[MAX_PATH];
+	WIN32_FIND_DATA fd;
+	memset(&fd, 0, sizeof(WIN32_FIND_DATA));
+
+	_snprintf(FindPath, sizeof(FindPath)-1, "%s\\%s",temppath, mask);
+	HANDLE fh = FindFirstFile(FindPath, &fd);
+	if (fh != INVALID_HANDLE_VALUE) {
+		do {
+			char NewFindPath[MAX_PATH];
+			_snprintf(NewFindPath, sizeof(NewFindPath)-1, "%s\\%s",temppath, fd.cFileName);
+			DeleteFile(NewFindPath);
+			memset(&fd, 0, sizeof(WIN32_FIND_DATA));
+		} while (FindNextFile(fh, &fd) != 0);
+		FindClose(fh);
+	}
+}
+
 void DoTestFiles(const char *filelist, const char *environment)
 {
 	if (!GetTestFiles(filelist)) {
@@ -335,6 +354,12 @@ void DoTestFiles(const char *filelist, const char *environment)
 		TResults result = Results.GetAt(i);
 		printf("%s\r\nOK: %d FAILED: %d\r\n", TestNames.GetAt(i), result.ok, result.bad);
 	}
+
+	// delete temp files
+	printf("Deleting Temp Files\r\n");
+	DeleteTempFiles("exp.*");
+	DeleteTempFiles("pht.*");
+	printf("Done\r\n");
 }
 
 int main(int argc, char* argv[]) {
