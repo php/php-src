@@ -92,7 +92,7 @@ static zend_bool satellite_zval_to_namedvalue_long(const zval * pSource,
 	if (pSource == NULL)
 		return TRUE;
 	
-	/*convert_to_long(pSource);*/
+	convert_to_long((zval*)pSource);	/* so long "const" */
 	if (pSource->type != IS_LONG)
 		return FALSE;
 
