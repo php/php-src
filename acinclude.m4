@@ -1617,6 +1617,7 @@ AC_DEFUN([PHP_SETUP_OPENSSL],[
       if test -r $i/lib/libssl.a -o -r $i/lib/libssl.$SHLIB_SUFFIX_NAME; then
         OPENSSL_LIBDIR=$i/lib
       fi
+      test -n "$OPENSSL_INCDIR" && test -n "$OPENSSL_LIBDIR" && break
     done
 
     if test -z "$OPENSSL_INCDIR"; then
@@ -1645,12 +1646,12 @@ AC_DEFUN([PHP_SETUP_OPENSSL],[
     PHP_CHECK_LIBRARY(crypto, CRYPTO_free, [
       PHP_CHECK_LIBRARY(ssl, SSL_CTX_set_ssl_version, [
         found_openssl=yes
-        OPENSSL_LIBS=-L$OPENSSL_LIBDIR -lcrypto -lssl
+        OPENSSL_LIBS="-L$OPENSSL_LIBDIR -lssl -lcrypto"
         OPENSSL_INCS=-I$OPENSSL_INCDIR
       ], [
         AC_MSG_ERROR([libssl not found!])
       ],[
-        -L$OPENSSL_LIBDIR -lcrypto
+        -L$OPENSSL_LIBDIR -lssl -lcrypto
       ])
     ], [
       AC_MSG_ERROR([libcrypto not found!])
