@@ -1,3 +1,65 @@
+2001-08-19  Shane Caraveo  <shane@php.net>
+
+    * win32/php4dll.dsp: fix for non-TS compile
+
+    * ext/com/VARIANT.c: Fixes for non-TS compilation
+
+2001-08-19  Doug MacEachern  <dougm@covalent.net>
+
+    * sapi/apache2filter/sapi_apache2.c:
+    php_input_filter needs to ignore proxy requests
+    else it swallows POST data that needs to be sent to the downstream server
+
+2001-08-19  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * sapi/apache2filter/sapi_apache2.c:
+    Pass on proxy requests (fix by Doug MacEachern <dougm@covalent.net>)
+
+2001-08-19  Stig Bakken  <ssb@fast.no>
+
+    * pear/scripts/.cvsignore: * ignore phptar
+
+2001-08-19  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/PEAR/Packager.php:
+    The "pear package" command will try to open "./package.xml" if no more
+    params are given.
+
+    * pear/PEAR/Packager.php: better error hanlding
+
+    * pear/PEAR/Installer.php
+      pear/PEAR/Packager.php: maintain original file perms
+
+2001-08-19  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/fribidi/CREDITS
+      ext/fribidi/README
+      ext/fribidi/config.m4
+      ext/fribidi/fribidi.c
+      ext/fribidi/php_fribidi.h: MFH
+
+    * ext/fribidi/CREDITS
+      ext/fribidi/README
+      ext/fribidi/php_fribidi.h: Added some missing information.
+
+    * ext/fribidi/config.m4
+      ext/fribidi/fribidi.c: Fixed bug: #11232. Now we require Fribidi 0.9.0.
+
+    * ext/ingres_ii/ii.c: ws fix.
+
+2001-08-19  Stig Bakken  <ssb@fast.no>
+
+    * pear/Experimental/Archive/Tar.php: * comment out second constructor
+
+    * pear/Makefile.in
+      configure.in
+      pear/scripts/phptar.in:
+    Added "phptar" command as proof that the Archive_Tar class works.
+
+2001-08-19  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/iconv/iconv.c: ws
+
 2001-08-18  Jani Taskinen  <sniper@iki.fi>
 
     * ext/xml/xml.c: null terminate the returned string in here too.
