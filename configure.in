@@ -66,7 +66,7 @@ if test $? -ne 0 ; then
     rm -f php_version.h && mv php_version.h.new php_version.h && \
     echo 'Updated php_version.h'
 else
-	rm -f php_version.h.new
+    rm -f php_version.h.new
 fi
 
 
@@ -160,27 +160,29 @@ dnl AC_PROG_CXXCPP
 dnl check for -R, etc. switch
 AC_MSG_CHECKING([whether compiler supports -R])
 AC_CACHE_VAL(php_cv_cc_dashr,[
-	SAVE_LIBS=$LIBS
-	LIBS="-R /usr/lib $LIBS"
-	AC_TRY_LINK([], [], php_cv_cc_dashr=yes, php_cv_cc_dashr=no)
-	LIBS=$SAVE_LIBS])
+  SAVE_LIBS=$LIBS
+  LIBS="-R /usr/lib $LIBS"
+  AC_TRY_LINK([], [], php_cv_cc_dashr=yes, php_cv_cc_dashr=no)
+  LIBS=$SAVE_LIBS
+])
 AC_MSG_RESULT([$php_cv_cc_dashr])
 if test $php_cv_cc_dashr = "yes"; then
-	ld_runpath_switch=-R
+  ld_runpath_switch=-R
 else
-	AC_MSG_CHECKING([whether compiler supports -Wl,-rpath,])
-	AC_CACHE_VAL(php_cv_cc_rpath,[
-		SAVE_LIBS=$LIBS
-		LIBS="-Wl,-rpath,/usr/lib $LIBS"
-		AC_TRY_LINK([], [], php_cv_cc_rpath=yes, php_cv_cc_rpath=no)
-		LIBS=$SAVE_LIBS])
-	AC_MSG_RESULT([$php_cv_cc_rpath])
-	if test $php_cv_cc_rpath = "yes"; then
-		ld_runpath_switch=-Wl,-rpath,
-	else
-		dnl something innocuous
-		ld_runpath_switch=-L
-	fi
+  AC_MSG_CHECKING([whether compiler supports -Wl,-rpath,])
+  AC_CACHE_VAL(php_cv_cc_rpath, [
+    SAVE_LIBS=$LIBS
+    LIBS="-Wl,-rpath,/usr/lib $LIBS"
+    AC_TRY_LINK([], [], php_cv_cc_rpath=yes, php_cv_cc_rpath=no)
+    LIBS=$SAVE_LIBS
+  ])
+  AC_MSG_RESULT([$php_cv_cc_rpath])
+  if test $php_cv_cc_rpath = "yes"; then
+    ld_runpath_switch=-Wl,-rpath,
+  else
+    dnl something innocuous
+    ld_runpath_switch=-L
+  fi
 fi
 AC_PROG_RANLIB
 AC_PROG_LN_S
@@ -373,9 +375,9 @@ AC_HEADER_STDC
 
 dnl In QNX opendir resides in libc but dirent.h is still required
 if test "`uname -s 2>/dev/null`" != "QNX"; then
-	AC_HEADER_DIRENT
+  AC_HEADER_DIRENT
 else
-	AC_CHECK_HEADERS(dirent.h)
+  AC_CHECK_HEADERS(dirent.h)
 fi
 PHP_MISSING_FCLOSE_DECL
 dnl QNX requires unix.h to allow functions in libunix to work properly
@@ -443,10 +445,10 @@ AC_STRUCT_ST_BLKSIZE
 dnl AC_STRUCT_ST_BLOCKS will screw QNX because fileblocks.o does not exists
 dnl The WARNING_LEVEL required because cc in QNX hates -w option without an argument
 if test "`uname -s 2>/dev/null`" != "QNX"; then
-	AC_STRUCT_ST_BLOCKS
+  AC_STRUCT_ST_BLOCKS
 else
-    AC_MSG_WARN([warnings level for cc set to 0])
-	WARNING_LEVEL=0
+  AC_MSG_WARN([warnings level for cc set to 0])
+  WARNING_LEVEL=0
 fi
 AC_STRUCT_ST_RDEV
 
@@ -670,20 +672,20 @@ AC_ARG_WITH(exec-dir,
                           defaults to /usr/local/php/bin],
 [
   if test "$withval" != "no"; then
-  	if test "$withval" = "yes"; then
-		AC_DEFINE(PHP_SAFE_MODE_EXEC_DIR,"/usr/local/php/bin", [ ])
-    	AC_MSG_RESULT([/usr/local/php/bin])
-   	else
-		AC_DEFINE_UNQUOTED(PHP_SAFE_MODE_EXEC_DIR,"$withval", [ ])
-    	AC_MSG_RESULT([$withval])
-   	fi
+    if test "$withval" = "yes"; then
+      AC_DEFINE(PHP_SAFE_MODE_EXEC_DIR,"/usr/local/php/bin", [ ])
+      AC_MSG_RESULT([/usr/local/php/bin])
+    else
+      AC_DEFINE_UNQUOTED(PHP_SAFE_MODE_EXEC_DIR,"$withval", [ ])
+      AC_MSG_RESULT([$withval])
+    fi
   else
-	AC_DEFINE(PHP_SAFE_MODE_EXEC_DIR,"/usr/local/php/bin", [ ])
-   	AC_MSG_RESULT([/usr/local/php/bin])
+    AC_DEFINE(PHP_SAFE_MODE_EXEC_DIR,"/usr/local/php/bin", [ ])
+    AC_MSG_RESULT([/usr/local/php/bin])
   fi
 ],[
-	AC_DEFINE(PHP_SAFE_MODE_EXEC_DIR,"/usr/local/php/bin", [ ])
-   	AC_MSG_RESULT([/usr/local/php/bin])
+  AC_DEFINE(PHP_SAFE_MODE_EXEC_DIR,"/usr/local/php/bin", [ ])
+  AC_MSG_RESULT([/usr/local/php/bin])
 ])
 
 PHP_ARG_WITH(openssl,for OpenSSL support,
@@ -912,16 +914,16 @@ if test -z "$EXTENSION_DIR"; then
       part2=non-zts
     fi
     extbasedir=$part1-$part2-$extbasedir
-  	EXTENSION_DIR=$libdir/extensions/$extbasedir
+    EXTENSION_DIR=$libdir/extensions/$extbasedir
   else
-  	if test "$enable_experimental_zts" = "yes"; then
-  	  extbasedir=$extbasedir-zts
-  	fi
-  	
-  	if test "$PHP_DEBUG" = "1"; then
-  	  extbasedir=$extbasedir-debug
-  	fi
-  	EXTENSION_DIR=$libdir/$extbasedir
+    if test "$enable_experimental_zts" = "yes"; then
+      extbasedir=$extbasedir-zts
+    fi
+    
+    if test "$PHP_DEBUG" = "1"; then
+      extbasedir=$extbasedir-debug
+    fi
+    EXTENSION_DIR=$libdir/$extbasedir
   fi
 fi
 
@@ -1095,7 +1097,7 @@ PHP_ADD_SOURCES(/main, internal_functions_cli.c,, cli)
 
 PHP_ADD_SOURCES(/Zend,  zend_language_parser.c zend_language_scanner.c \
     zend_ini_parser.c zend_ini_scanner.c)
-	
+
 PHP_ADD_SOURCES(Zend, \
     zend_alloc.c zend_compile.c zend_constants.c zend_dynamic_array.c \
     zend_execute_API.c zend_highlight.c zend_llist.c \
@@ -1144,10 +1146,10 @@ if test "\$CONFIG_FILES" = "$ALL_OUTPUT_FILES" || test -z "\$CONFIG_FILES"; then
 fi
 
 if test ! -f $srcdir/ext/bcmath/number.c; then
-	echo "creating number.c"
-	echo "/* Dummy File */" > $srcdir/ext/bcmath/number.c
-	echo "creating number.h"
-	echo "/* Dummy File */" > $srcdir/ext/bcmath/number.h
+  echo "creating number.c"
+  echo "/* Dummy File */" > $srcdir/ext/bcmath/number.c
+  echo "creating number.h"
+  echo "/* Dummy File */" > $srcdir/ext/bcmath/number.h
 fi
 
 ################################################################
