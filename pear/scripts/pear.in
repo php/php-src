@@ -140,7 +140,7 @@ if ($fetype == 'Gtk') {
     $cmd = PEAR_Command::factory($command, $config);
     PEAR::popErrorHandling();
     if (PEAR::isError($cmd)) {
-        usage(null, @$options[1][0]);
+        usage(null, @$options[1][1]);
     }
 
     $short_args = $long_args = null;
