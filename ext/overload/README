@@ -1,0 +1,72 @@
+This extension is experimental.
+
+That's all I'm required to say, as you should know the consequences, but
+I'll go ahead and add a few more notes.
+
+The purpose of this extension is to allow user-space overloading of object
+property access and method calls. It has only one function, overload() which
+takes the name of the class that should have this functionality enabled. But
+the class has to define appropriate methods if it wants to have this
+functionality: __get(), __set(), and __call(). So, overloading can be
+selective.
+
+Inside each handler the overloading is disabled so you can access object
+properties normally.
+
+
+Usage
+-----
+class OO {
+    var $a = 111;
+    var $elem = array('b' => 9, 'c' => 42);
+
+    function __get($prop_name, &$prop_value)
+    {
+        if (isset($this->elem[$prop_name])) {
+            $prop_value = $this->elem[$prop_name];
+            return true;
+        } else
+           return false;
+    }
+
+    function __set($prop_name, $prop_value)
+    {
+        $this->elem[$prop_name] = $prop_value;
+        return true;
+    }
+}
+
+overload('OO');
+
+$o = new OO;
+print "\$o->a: $o->a\n";
+print "\$o->b: $o->b\n";
+print "\$o->c: $o->c\n";
+print "\$o->d: $o->d\n";
+
+$val = new stdclass;
+$val->prop = 555;
+
+$o->a = array($val);
+var_dump($o->a[0]->prop);
+
+
+What works
+----------
+Whatever you can get it to do.
+
+
+What doesn't work
+-----------------
+__call() support.
+Invoking original overloading handlers, if the class had any.
+__set() only works to one level of property access, no chains yet
+Whatever I am forgetting about here.
+
+
+What might change
+-----------------
+Hell, anything, even the name of extension and its function.
+
+
+Feedback, please.
