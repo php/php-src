@@ -2506,6 +2506,9 @@ PHP_FUNCTION(odbc_tables)
 		RETURN_FALSE;
 	}
 
+	/* This hack is needed to access table information in Access databases (fmk) */
+	if (table && strlen(table) && schema && !strlen(schema)) schema = NULL;
+
 	rc = SQLTables(result->stmt, 
             cat, SAFE_SQL_NTS(cat), 
             schema, SAFE_SQL_NTS(schema),
