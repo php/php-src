@@ -1,0 +1,9 @@
+- Implement safe-mode checks on the filename when opening/creating the
+  database.
+
+- Implement a generic php function handler for use in SQL statements and
+  triggers etc.
+
+- Create a package.xml and make a release
+
+vim:tw=78

@@ -1,0 +1,14 @@
+This is an extension for the SQLite Embeddable SQL Database Engine.
+http://www.sqlite.org/
+
+SQLite is a C library that implements an embeddable SQL database engine.
+Programs that link with the SQLite library can have SQL database access
+without running a separate RDBMS process.
+
+SQLite is not a client library used to connect to a big database server.
+SQLite is the server. The SQLite library reads and writes directly to and from
+the database files on disk
+
+
+
+vim:tw=78:et
