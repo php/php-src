@@ -1952,13 +1952,13 @@ ZEND_API void zend_compare_objects(zval *result, zval *o1, zval *o2 TSRMLS_DC)
 {
 	result->type = IS_LONG;
 
-	if (Z_OBJ_HT_P(o1)->compare_objects == NULL) {
-		if (Z_OBJ_HANDLE_P(o1) == Z_OBJ_HANDLE_P(o2)) {
-			result->value.lval = 0;
-		} else {
-			result->value.lval = 1;
-		}			
+	if (Z_OBJ_HANDLE_P(o1) == Z_OBJ_HANDLE_P(o2)) {
+		result->value.lval = 0;
 		return;
+	}
+
+	if (Z_OBJ_HT_P(o1)->compare_objects == NULL) {
+		result->value.lval = 1;
 	} else {
 		result->value.lval = Z_OBJ_HT_P(o1)->compare_objects(o1, o2 TSRMLS_CC);
 	}
