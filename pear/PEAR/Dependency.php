@@ -141,7 +141,7 @@ class PEAR_Dependency
                 }
                 return false;
             case 'not':
-                if (!$this->registry->packageExists($name)) {
+                if ($this->registry->packageExists($name)) {
                     $errmsg = "conflicts with package `$name'";
                     return PEAR_DEPENDENCY_CONFLICT;
                 }
