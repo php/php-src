@@ -2410,10 +2410,6 @@ enclosure:
 				goto enclosure;
 			}
 		} else {
-			while (e < re && e > s && *(e - 1) == enclosure) {
-				e--;
-			}
-
 			buf2 = erealloc(buf2, buf2_len + (e - s) + 1);
 			memcpy(buf2 + buf2_len, s, (e - s));
 			buf2_len += e - s;
