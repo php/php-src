@@ -43,3 +43,5 @@
    ext/tokenizer extension. If error_reporting is set to E_ALL notices will
    be produced. Instead of T_ML_CONSTANT for /* */ the T_COMMENT constant 
    is used, thus both // and /* */ are resolved as the T_COMMENT constant.
+   However the PHPDoc style comments /** */ ,which starting PHP5 are parsed
+   by PHP, are recongnized as T_DOC_COMMENT.
