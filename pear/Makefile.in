@@ -88,7 +88,6 @@ PEAR_FILES = \
 	Net/Curl.php \
 	Net/Dig.php \
 	Net/SMTP.php \
-	Net/Socket.php \
 	Schedule/At.php
 
 install-data-local:
