@@ -1245,7 +1245,6 @@ dnl ---------------------------------------------- Static module
     PHP_ADD_SOURCES(PHP_EXT_DIR($1),$2,$ac_extra,)
     EXT_STATIC="$EXT_STATIC $1"
     if test "$3" != "nocli"; then
-      EXT_CLI_LTLIBS="$EXT_CLI_LTLIBS $abs_builddir/$ext_builddir/lib$1.la"
       EXT_CLI_STATIC="$EXT_CLI_STATIC $1"
     fi
   else
@@ -1265,7 +1264,6 @@ dnl ---------------------------------------------- CLI static module
     else
       PHP_ADD_SOURCES(PHP_EXT_DIR($1),$2,$ac_extra,cli)
     fi
-    EXT_CLI_LTLIBS="$EXT_CLI_LTLIBS $abs_builddir/$ext_builddir/lib$1.la"
     EXT_CLI_STATIC="$EXT_CLI_STATIC $1"
   fi
   PHP_ADD_BUILD_DIR($ext_builddir)
