@@ -247,7 +247,7 @@ SAPI_API size_t sapi_apply_default_charset(char **mimetype, size_t len SLS_DC)
 	if (*charset && strncmp(*mimetype, "text/", 5) == 0 && strstr(*mimetype, "charset=") == NULL) {
 		newlen = len + (sizeof(";charset=")-1) + strlen(charset);
 		newtype = emalloc(newlen + 1);
-		PHP_STRLCPY(newtype, *mimetype, newlen + 1, len);
+ 		PHP_STRLCPY(newtype, *mimetype, newlen + 1, len);
 		strlcat(newtype, ";charset=", newlen + 1);
 		if (*mimetype != NULL) {
 			efree(*mimetype);

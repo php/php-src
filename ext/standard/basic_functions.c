@@ -2228,6 +2228,41 @@ PHP_FUNCTION(is_uploaded_file)
 	}
 }
 
+
+PHP_FUNCTION(move_uploaded_file)
+{
+	zval **path, **new_path;
+	SLS_FETCH();
+
+	if (!SG(rfc1867_uploaded_files)) {
+		RETURN_FALSE;
+	}
+
+	if (ZEND_NUM_ARGS()!=2 || zend_get_parameters_ex(2, &path, &new_path)!=SUCCESS) {
+		ZEND_WRONG_PARAM_COUNT();
+	}
+	convert_to_string_ex(path);
+	convert_to_string_ex(new_path);
+
+	if (!zend_hash_exists(SG(rfc1867_uploaded_files), Z_STRVAL_PP(path), Z_STRLEN_PP(path)+1)) {
+		RETURN_FALSE;
+	}
+
+	if (rename(Z_STRVAL_PP(path), Z_STRVAL_PP(new_path))==0) {
+		RETURN_TRUE;
+	}
+
+	if (php_copy_file(Z_STRVAL_PP(path), Z_STRVAL_PP(new_path))==SUCCESS) {
+		unlink(Z_STRVAL_PP(path));
+		RETURN_TRUE;
+	}
+
+	php_error(E_WARNING, "Unable to move '%s' to '%s'", Z_STRVAL_PP(path), Z_STRVAL_PP(new_path));
+
+	RETURN_FALSE;
+}
+
+
 /*
  * Local variables:
  * tab-width: 4
