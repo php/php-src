@@ -185,6 +185,9 @@ static dba_handler handler[] = {
 #if DBA_DB3
 	DBA_HND(db3)
 #endif
+#if DBA_FLATFILE
+	DBA_HND(flatfile)
+#endif
 	{ NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL }
 };
 
