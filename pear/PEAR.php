@@ -225,7 +225,7 @@ class PEAR
      * @param   mixed $data   the value to test
      * @param   int   $code   if $data is an error object, return true
      *                        only if $code is a string and
-     *                        $obj->getMessage() == $code or 
+     *                        $obj->getMessage() == $code or
      *                        $code is an integer and $obj->getCode() == $code
      * @access  public
      * @return  bool    true if parameter is an error
@@ -621,6 +621,10 @@ class PEAR
     function loadExtension($ext)
     {
         if (!extension_loaded($ext)) {
+            // if either returns true dl() will produce a FATAL error, stop that
+            if ((ini_get('enable_dl') != 1) || (ini_get('safe_mode') == 1)) {
+                return false;
+            }
             if (OS_WINDOWS) {
                 $suffix = '.dll';
             } elseif (PHP_OS == 'HP-UX') {
