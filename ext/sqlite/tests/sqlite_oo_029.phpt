@@ -1,7 +1,7 @@
 --TEST--
 sqlite-oo: call method with $this
 --FILE--
-<?php 
+<?php
 include "blankdb_oo.inc";
 
 $db->query("CREATE TABLE strings(key VARCHAR(10), var VARCHAR(10))");
@@ -29,7 +29,7 @@ class sqlite_help
 	{
 		unset($this->db);
 	}
-	
+
 	function __destruct()
 	{
 		echo "DESTRUCTED\n";
@@ -37,7 +37,7 @@ class sqlite_help
 }
 
 $obj = new sqlite_help($db);
-echo $obj->get_single('foo')."\n";;
+echo $obj->get_single('foo')."\n";
 $obj->free();
 unset($obj);
 
