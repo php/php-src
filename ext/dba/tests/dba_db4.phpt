@@ -8,7 +8,7 @@ DBA DB4 handler test
 --FILE--
 <?php
 	require_once('test.inc');
-	$handler = ini_get('dba.default_handler');//'db4';
+	$handler = 'db4';
 	require_once('dba_handler.inc');
 ?>
 --EXPECT--

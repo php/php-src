@@ -44,6 +44,7 @@
 #include "php_cdb.h"
 #include "php_db2.h"
 #include "php_db3.h"
+#include "php_db4.h"
 #include "php_flatfile.h"
 
 /* {{{ dba_functions[]
@@ -70,6 +71,7 @@ function_entry dba_functions[] = {
 /* }}} */
 
 PHP_MINIT_FUNCTION(dba);
+PHP_MSHUTDOWN_FUNCTION(dba);
 PHP_MINFO_FUNCTION(dba);
 
 zend_module_entry dba_module_entry = {
@@ -77,7 +79,7 @@ zend_module_entry dba_module_entry = {
 	"dba",
 	dba_functions, 
 	PHP_MINIT(dba), 
-	NULL,
+	PHP_MSHUTDOWN(dba),
 	NULL,
 	NULL,
 	PHP_MINFO(dba),
@@ -88,21 +90,6 @@ zend_module_entry dba_module_entry = {
 #ifdef COMPILE_DL_DBA
 ZEND_GET_MODULE(dba)
 #endif
-
-typedef struct dba_handler {
-	char *name; /* handler name */
-	int flags; /* whether and how dba does locking and other flags*/
-	int (*open)(dba_info *, char **error TSRMLS_DC);
-	void (*close)(dba_info * TSRMLS_DC);
-	char* (*fetch)(dba_info *, char *, int, int, int * TSRMLS_DC);
-	int (*update)(dba_info *, char *, int, char *, int, int TSRMLS_DC);
-	int (*exists)(dba_info *, char *, int TSRMLS_DC);
-	int (*delete)(dba_info *, char *, int TSRMLS_DC);
-	char* (*firstkey)(dba_info *, int * TSRMLS_DC);
-	char* (*nextkey)(dba_info *, int * TSRMLS_DC);
-	int (*optimize)(dba_info * TSRMLS_DC);
-	int (*sync)(dba_info * TSRMLS_DC);
-} dba_handler;
 
 /* {{{ macromania */
 
@@ -156,14 +143,14 @@ typedef struct dba_handler {
 
 /* a DBA handler must have specific routines */
 
-#define DBA_NAMED_HND(name, x, flags) \
+#define DBA_NAMED_HND(alias, name, flags) \
 {\
-	#name, flags, dba_open_##x, dba_close_##x, dba_fetch_##x, dba_update_##x, \
-	dba_exists_##x, dba_delete_##x, dba_firstkey_##x, dba_nextkey_##x, \
-	dba_optimize_##x, dba_sync_##x \
+	#alias, flags, dba_open_##name, dba_close_##name, dba_fetch_##name, dba_update_##name, \
+	dba_exists_##name, dba_delete_##name, dba_firstkey_##name, dba_nextkey_##name, \
+	dba_optimize_##name, dba_sync_##name \
 },
 
-#define DBA_HND(x, flags) DBA_NAMED_HND(x, x, flags)
+#define DBA_HND(name, flags) DBA_NAMED_HND(name, name, flags)
 
 /* check whether the user has write access */
 #define DBA_WRITE_CHECK \
@@ -198,6 +185,9 @@ static dba_handler handler[] = {
 #if DBA_DB3
 	DBA_HND(db3, DBA_LOCK_ALL) /* No lock in lib */
 #endif
+#if DBA_DB4
+	DBA_HND(db4, DBA_LOCK_ALL) /* No lock in lib */
+#endif
 #if DBA_FLATFILE
 	DBA_HND(flatfile, DBA_STREAM_OPEN|DBA_LOCK_ALL) /* No lock in lib */
 #endif
@@ -231,7 +221,7 @@ static void dba_close(dba_info *info TSRMLS_DC)
 static void dba_close_rsrc(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	dba_info *info = (dba_info *)rsrc->ptr; 
-
+	
 	dba_close(info TSRMLS_CC);
 }
 /* }}} */
@@ -357,7 +347,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	int i;
 	int lock_mode, lock_flag, lock_dbf = 0;
 	char *file_mode;
-	char mode[4], *pmode, *lock_file_mode;
+	char mode[4], *pmode, *lock_file_mode = NULL;
 	
 	if(ac < 3) {
 		WRONG_PARAM_COUNT;
@@ -429,6 +419,10 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		switch (pmode[1]) {
 		case 'd':
 			lock_dbf = 1;
+			if ((hptr->flags & DBA_LOCK_ALL) == 0) {
+				lock_flag = (hptr->flags & DBA_LOCK_ALL);
+				break;
+			}
 			/* no break */
 		case 'l':
 			lock_flag = DBA_LOCK_ALL;
@@ -583,7 +577,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 
 	if (error || hptr->open(info, &error TSRMLS_CC) != SUCCESS) {
 		dba_close(info TSRMLS_CC);
-		php_error_docref2(NULL TSRMLS_CC, Z_STRVAL_PP(args[0]), Z_STRVAL_PP(args[1]), E_WARNING, "Driver initialization failed for handler: %s%s%s", Z_STRVAL_PP(args[2]), error?": ":"", error?error:"");
+		php_error_docref2(NULL TSRMLS_CC, Z_STRVAL_PP(args[0]), Z_STRVAL_PP(args[1]), E_WARNING, "Driver initialization failed for handler: %s%s%s", hptr->name, error?": ":"", error?error:"");
 		FREENOW;
 		RETURN_FALSE;
 	}
@@ -807,7 +801,7 @@ PHP_FUNCTION(dba_list)
 }
 /* }}} */
 
-#endif
+#endif /* HAVE_DBA */
 
 /*
  * Local variables:

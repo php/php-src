@@ -68,6 +68,21 @@ typedef struct dba_info {
 extern zend_module_entry dba_module_entry;
 #define dba_module_ptr &dba_module_entry
 
+typedef struct dba_handler {
+	char *name; /* handler name */
+	int flags; /* whether and how dba does locking and other flags*/
+	int (*open)(dba_info *, char **error TSRMLS_DC);
+	void (*close)(dba_info * TSRMLS_DC);
+	char* (*fetch)(dba_info *, char *, int, int, int * TSRMLS_DC);
+	int (*update)(dba_info *, char *, int, char *, int, int TSRMLS_DC);
+	int (*exists)(dba_info *, char *, int TSRMLS_DC);
+	int (*delete)(dba_info *, char *, int TSRMLS_DC);
+	char* (*firstkey)(dba_info *, int * TSRMLS_DC);
+	char* (*nextkey)(dba_info *, int * TSRMLS_DC);
+	int (*optimize)(dba_info * TSRMLS_DC);
+	int (*sync)(dba_info * TSRMLS_DC);
+} dba_handler;
+
 /* common prototypes which must be supplied by modules */
 
 #define DBA_OPEN_FUNC(x) \
