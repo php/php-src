@@ -1,11 +1,10 @@
 --TEST--
 Test 1: Accessing single node
+--INI--
+report_memleaks=0
 --SKIPIF--
 <?php if(!extension_loaded("domxml")) print "skip"; ?>
---POST--
---GET--
 --FILE--
-
 <?php
 require_once("domxml_test.inc");
 
