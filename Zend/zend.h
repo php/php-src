@@ -440,7 +440,7 @@ ZEND_API int zend_get_configuration_directive(char *name, uint name_length, zval
 	(*ppzv_dest)->refcount = refcount;			\
 }
 
-#define ZEND_MAX_RESERVED_RESOURCES	2
+#define ZEND_MAX_RESERVED_RESOURCES	4
 
 #ifdef ZEND_WIN32
 /* Only use this macro if you know for sure that all of the switches values
