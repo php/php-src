@@ -470,7 +470,8 @@ PHP_FUNCTION(pow)
 			if (lexp == 1) {
 				RETURN_LONG(LONG_MIN);
 			} else {
-				RETURN_DOUBLE(exp(log(-(double)LONG_MIN) * (double)lexp));
+				dval = exp(log(-(double)LONG_MIN) * (double)lexp);
+				RETURN_DOUBLE(lexp&1 ? -dval : dval);
 			}
 		default:
 			/* abs(lbase) > 1 */
