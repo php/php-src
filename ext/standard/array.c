@@ -1709,9 +1709,6 @@ static void _phpi_pop(INTERNAL_FUNCTION_PARAMETERS, int off_the_end)
 			zend_hash_rehash(Z_ARRVAL_PP(stack));
 		}
 		HANDLE_UNBLOCK_INTERRUPTIONS();
-	} else {
-		Z_ARRVAL_PP(stack)->nNextFreeElement--;
-		zend_hash_rehash(Z_ARRVAL_PP(stack));
 	}
 }
 /* }}} */
