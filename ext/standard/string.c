@@ -3095,7 +3095,7 @@ PHP_FUNCTION(strip_tags)
 	}
 	convert_to_string_ex(str);
 	buf = estrndup(Z_STRVAL_PP(str), Z_STRLEN_PP(str));
-	php_strip_tags(buf, Z_STRLEN_PP(str), 0, allowed_tags, allowed_tags_len);
+	php_strip_tags(buf, Z_STRLEN_PP(str), NULL, allowed_tags, allowed_tags_len);
 	RETURN_STRING(buf, 0);
 }
 /* }}} */
@@ -3286,10 +3286,14 @@ int php_tag_find(char *tag, int len, char *set) {
 	swm: Added ability to strip <?xml tags without assuming it PHP
 	code.
 */
-PHPAPI void php_strip_tags(char *rbuf, int len, int state, char *allow, int allow_len)
+PHPAPI void php_strip_tags(char *rbuf, int len, int *stateptr, char *allow, int allow_len)
 {
 	char *tbuf, *buf, *p, *tp, *rp, c, lc;
 	int br, i=0;
+	int state;
+
+	if (stateptr)
+		state = *stateptr;
 
 	buf = estrndup(rbuf, len);
 	c = *buf;
@@ -3417,6 +3421,8 @@ PHPAPI void php_strip_tags(char *rbuf, int len, int state, char *allow, int allo
 	*rp = '\0';
 	efree(buf);
 	if(allow) efree(tbuf);
+	if (stateptr)
+		*stateptr = state;
 }
 /* }}} */
 

@@ -124,7 +124,6 @@ PHPAPI int php_file_le_stream(void)
 static void file_globals_ctor(php_file_globals *file_globals_p TSRMLS_DC)
 {
 	zend_hash_init(&FG(ht_persistent_socks), 0, NULL, NULL, 1);
-	FG(fgetss_state) = 0;
 	FG(pclose_ret) = 0;
 	FG(def_chunk_size) = PHP_SOCK_CHUNK_SIZE;
 }
@@ -592,7 +591,6 @@ PHP_NAMED_FUNCTION(php_if_fopen)
 	if (stream == NULL)	{
 		RETURN_FALSE;
 	}
-	FG(fgetss_state) = 0;
 
 	php_stream_to_zval(stream, return_value);
 
@@ -973,7 +971,7 @@ PHP_FUNCTION(fgetss)
 	zval **fd, **bytes, **allow=NULL;
 	int len, type;
 	char *buf;
-	void *what;
+	php_stream *stream;
 	char *allowed_tags=NULL;
 	int allowed_tags_len=0;
 
@@ -997,8 +995,8 @@ PHP_FUNCTION(fgetss)
 		break;
 	}
 
-	what = zend_fetch_resource(fd TSRMLS_CC, -1, "File-Handle", &type, 1, le_stream);
-	ZEND_VERIFY_RESOURCE(what);
+	stream = zend_fetch_resource(fd TSRMLS_CC, -1, "File-Handle", &type, 1, le_stream);
+	ZEND_VERIFY_RESOURCE(stream);
 
 	convert_to_long_ex(bytes);
 	len = Z_LVAL_PP(bytes);
@@ -1011,13 +1009,13 @@ PHP_FUNCTION(fgetss)
 	/*needed because recv doesnt set null char at end*/
 	memset(buf, 0, len + 1);
 
-	if (php_stream_gets((php_stream *) what, buf, len) == NULL)	{
+	if (php_stream_gets(stream, buf, len) == NULL)	{
 		efree(buf);
 		RETURN_FALSE;
 	}
 
 	/* strlen() can be used here since we are doing it on the return of an fgets() anyway */
-	php_strip_tags(buf, strlen(buf), FG(fgetss_state), allowed_tags, allowed_tags_len);
+	php_strip_tags(buf, strlen(buf), &stream->fgetss_state, allowed_tags, allowed_tags_len);
 
 	RETURN_STRING(buf, 0);
 }

@@ -118,6 +118,7 @@ struct _php_stream  {
 	void *wrapperthis;		/* convenience pointer for a instance of a wrapper */
 	zval *wrapperdata;		/* fgetwrapperdata retrieves this */
 
+	int fgetss_state;		/* for fgetss to handle multiline tags */
 	int is_persistent;
 	char mode[16];			/* "rwb" etc. ala stdio */
 	int rsrc_id;			/* used for auto-cleanup */
