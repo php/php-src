@@ -340,9 +340,15 @@ ZEND_METHOD(exception, __toString)
 
 	zend_call_function(&fci, NULL TSRMLS_CC);
 
-	len = zend_spprintf(&str, 0, "exception '%s' with message '%s' in %s:%ld\nStack trace:\n%s", 
-		Z_OBJCE_P(getThis())->name, Z_STRVAL_P(message), Z_STRVAL_P(file), Z_LVAL_P(line), 
-		Z_STRLEN_P(trace) ? Z_STRVAL_P(trace) : "#0 {main}\n");
+	if (Z_STRLEN_P(message) > 0) {
+		len = zend_spprintf(&str, 0, "exception '%s' with message '%s' in %s:%ld\nStack trace:\n%s", 
+							Z_OBJCE_P(getThis())->name, Z_STRVAL_P(message), Z_STRVAL_P(file), Z_LVAL_P(line), 
+							Z_STRLEN_P(trace) ? Z_STRVAL_P(trace) : "#0 {main}\n");
+	} else {
+		len = zend_spprintf(&str, 0, "exception '%s' in %s:%ld\nStack trace:\n%s", 
+							Z_OBJCE_P(getThis())->name, Z_STRVAL_P(file), Z_LVAL_P(line), 
+							Z_STRLEN_P(trace) ? Z_STRVAL_P(trace) : "#0 {main}\n");
+	}
 
 	/* We store the result in the private property string so we can access
 	 * the result in uncaught exception handlers without memleaks. */
@@ -385,7 +391,7 @@ static void zend_register_default_exception(TSRMLS_D)
 	memcpy(&default_exception_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	default_exception_handlers.clone_obj = NULL;
 
-	zend_declare_property_string(default_exception_ptr, "message", sizeof("message")-1, "none", ZEND_ACC_PROTECTED TSRMLS_CC);
+	zend_declare_property_string(default_exception_ptr, "message", sizeof("message")-1, "", ZEND_ACC_PROTECTED TSRMLS_CC);
 	zend_declare_property_string(default_exception_ptr, "string", sizeof("string")-1, "", ZEND_ACC_PRIVATE TSRMLS_CC);
 	zend_declare_property_long(default_exception_ptr, "code", sizeof("code")-1, 0, ZEND_ACC_PROTECTED TSRMLS_CC);
 	zend_declare_property_null(default_exception_ptr, "file", sizeof("file")-1, ZEND_ACC_PROTECTED TSRMLS_CC);
