@@ -156,14 +156,14 @@ class PEAR_Config extends PEAR
             'type' => 'string',
             'default' => '',
             'doc' => '(maintainers) your PEAR account name',
-            'prompt' => 'PEAR username (for package maintainers)',
+            'prompt' => 'PEAR username (for maintainers)',
             'group' => 'Maintainers',
             ),
         'password' => array(
             'type' => 'password',
             'default' => '',
             'doc' => '(maintainers) your PEAR account password',
-            'prompt' => 'PEAR password (for package maintainers)',
+            'prompt' => 'PEAR password (for maintainers)',
             'group' => 'Maintainers',
             ),
         // Advanced
