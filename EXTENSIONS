@@ -176,8 +176,7 @@ MAINTENANCE:         Unknown
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           oci8
-PRIMARY MAINTAINER:  Thies C. Arntzen <thies@thieso.net>
-MAINTENANCE:         Maintained
+MAINTENANCE:         Orphaned
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           odbc
@@ -187,8 +186,7 @@ STATUS:              Working
 COMMENT:             Working 
 -------------------------------------------------------------------------------
 EXTENSION:           oracle
-PRIMARY MAINTAINER:  Thies C. Arntzen <thies@thieso.net>
-MAINTENANCE:         Maintained
+MAINTENANCE:         Orphaned
 STATUS:              Working
 COMMENT:             Using the new OCI8 driver is encouraged where possible.
 -------------------------------------------------------------------------------
