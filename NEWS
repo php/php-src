@@ -4,8 +4,8 @@ PHP 4                                                                      NEWS
 - Renamed:
     socket_set_timeout()  -> stream_set_timeout()
     socket_set_blocking() -> stream_set_blocking()
-	set_file_buffer()     -> stream_set_write_buffer()
-	socket_get_status()   -> stream_get_meta_data()
+    set_file_buffer()     -> stream_set_write_buffer()
+    socket_get_status()   -> stream_get_meta_data()
   As these functions can (in theory) work on any type of stream. (Wez)
 - Added stream_context_create(), stream_context_set_params() and
   stream_context_set_option and added an optional fourth parameter to
