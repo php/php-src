@@ -919,7 +919,7 @@ int zend_do_verify_access_types(znode *current_access_type, znode *new_modifier)
 }
 
 
-void zend_do_begin_function_declaration(znode *function_token, znode *function_name, int is_method, int return_reference, zend_uint fn_flags  TSRMLS_DC)
+void zend_do_begin_function_declaration(znode *function_token, znode *function_name, int is_method, int return_reference, zend_uint fn_flags TSRMLS_DC)
 {
 	zend_op_array op_array;
 	char *name = function_name->u.constant.value.str.val;
@@ -960,8 +960,13 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 				zend_error(E_COMPILE_ERROR, "Cannot redeclare %s()", name);
 			}
 		}
+
 		if (fn_flags & ZEND_ACC_ABSTRACT) {
 			CG(active_class_entry)->ce_flags |= ZEND_ACC_ABSTRACT;
+		}
+
+		if (!(fn_flags & ZEND_ACC_PPP_MASK)) {
+			fn_flags |= ZEND_ACC_PUBLIC;
 		}
 
 		if ((short_class_name_length == name_len) && (!memcmp(short_class_name, name, name_len))) {
@@ -2194,6 +2199,10 @@ void zend_do_declare_property(znode *var_name, znode *value, zend_uint access_ty
 
 	if (access_type & ZEND_ACC_ABSTRACT) {
 		zend_error(E_COMPILE_ERROR, "Properties cannot be declared abstract");
+	}
+
+	if (!(access_type & ZEND_ACC_PPP_MASK)) {
+		access_type |= ZEND_ACC_PUBLIC;
 	}
 
 	if (zend_hash_find(&CG(active_class_entry)->properties_info, var_name->u.constant.value.str.val, var_name->u.constant.value.str.len+1, (void **) &existing_property_info)==SUCCESS) {
