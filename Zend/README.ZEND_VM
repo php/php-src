@@ -1,0 +1,87 @@
+ZEND_VM
+=======
+
+ZEND_VM architecture allows specializing opcode handlers according to op_type
+fields and using different execution methods (call threading, switch threading
+and direct threading). As a result ZE2 got more then 20% speedup on raw PHP
+code execution (with specialized executor and direct threading execution
+method). As most in most PHP applications raw execution speed isn't the
+limiting factor but system calls and database callls are, your mileage with
+this patch will vary.
+
+Most parts of the old zend_execute.c go into zend_vm_handlers.h. Here you can
+find opcode handlers and helpers. The typical opcode handler template looks
+like this:
+
+#define <OPCODE>_SPEC() OPDEF(<OPCODE>, <OP1_TYPES>, <OP2_TYPES>)
+#if HAVE_OP(<OPCODE>)
+ZEND_VM_HANDLER(<OPCODE>)
+{
+	<HANDLER'S CODE>
+}
+#endif
+
+<OPCODE> is an opcode name (ZEN_NOP, ZEND_ADD, :)
+<OP1_TYPES> & <OP2_TYPES> are masks for allowed operand op_types. Specializer
+will generate code only for defined combination of types. You can also use
+M_ANY mask to disable specialization according operand's op_type.
+<HANDLER'S CODE> is a handler's code itself. For most handlers it stills the
+same as in old zend_execute.c, but now it uses macros to access opcode operands
+and some internal executor data.
+
+You can see the conformity of new macros to old code in the following list:
+
+EXECUTE_DATA
+	execute_data
+ZEND_VM_DISPATCH_TO_HANDLER(<OP>)
+	return <OP>_helper(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU)
+ZEND_VM_DISPATCH_TO_HELPER(<NAME>) 
+	return <NAME>(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU)
+ZEND_VM_DISPATCH_TO_HELPER_EX(<NAME>,<PARAM>,<VAL>) 
+	return <NAME>(<VAL>, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU)
+ZEND_VM_CONTINUE()
+	return 0
+ZEND_VM_NEXT_OPCOD()
+	NEXT_OPCODE()
+ZEND_VM_SET_OPCODE(<TARGET>
+	SET_OPCODE(<TARGET>
+ZEND_VM_INC_OPCODE()
+	INC_OPCOD()
+ZEND_VM_RETURN_FROM_EXECUTE_LOOP()
+	RETURN_FROM_EXECUTE_LOOP()
+ZEND_VM_C_LABEL(<LABEL>):
+	<LABEL>:
+ZEND_VM_C_GOTO(<LABEL>)
+	goto <LABEL>
+OP<X>_TYPE
+	opline->op<X>.op_type
+GET_OP<X>_ZVAL_PTR(<TYPE>)
+	get_zval_ptr(&opline->op<X>, EX(Ts), &free_op<X>, <TYPE>)
+GET_OP<X>_ZVAL_PTR_PTR(<TYPE>)
+	get_zval_ptr_ptr(&opline->op<X>, EX(Ts), &free_op<X>, <TYPE>)
+GET_OP<X>_OBJ_ZVAL_PTR(<TYPE>)
+	get_obj_zval_ptr(&opline->op<X>, EX(Ts), &free_op<X>, <TYPE>)
+GET_OP<X>_OBJ_ZVAL_PTR_PTR(<TYPE>)
+	get_obj_zval_ptr_ptr(&opline->op<X>, EX(Ts), &free_op<X>, <TYPE>)
+IS_OP<X>_TMP_FREE()
+	IS_TMP_FREE(free_op<X>)
+FREE_OP<X>()
+	FREE_OP(free_op<X>)
+FREE_OP<X>_IF_VAR()
+	FREE_VAR(free_op<X>)
+FREE_OP<X>_VAR_PTR()
+	FREE_VAR_PTR(free_op<X>)
+
+If handler can receive control form some other handler it should be defined
+with macro ZEND_VM_HANDLER_EX() instead of ZEND_VM_HANDLER().
+
+The additional parameters of helpers (see ZEND_VM_DISPATCH_TO_HELPER_EX) mast
+be defined in the start of execute() function inside ZEND_VM_HELPER_VAR() macro.
+
+zend_vm.h and zend_vm_spec.h are used for abstraction of execution method and
+operands specialization. They mainly contain macros that are used for
+compile-time specialization.
+
+You can switch specialization on/off with define/undefined of the ZEND_VM_SPEC
+in the start of zend.vm.h and select execution method by defining ZEND_VM_KIND
+in the same place.
