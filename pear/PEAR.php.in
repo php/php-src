@@ -212,9 +212,9 @@ class PEAR
 
             case PEAR_ERROR_CALLBACK:
                 $setmode = $mode;
-                if (is_string($options) ||
-                    (is_array($options) && sizeof($options) == 2 &&
-                     is_object($options[0]) && is_string($options[1]))) {
+                if ((is_string($options) && function_exists($options)) ||
+                    (is_array($options) && method_exists(@$options[0], @$options[1])))
+                {
                     $setcallback = $options;
                 } else {
                     trigger_error("invalid error callback", E_USER_WARNING);
