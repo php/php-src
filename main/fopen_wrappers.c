@@ -132,11 +132,13 @@ PHPAPI int php_check_specific_open_basedir(const char *basedir, const char *path
 	if ((expand_filepath(path, resolved_name TSRMLS_CC) != NULL) && (expand_filepath(local_open_basedir, resolved_basedir TSRMLS_CC) != NULL)) {
 		/* Handler for basedirs that end with a / */
 		resolved_basedir_len = strlen(resolved_basedir);
-		if (resolved_basedir[resolved_basedir_len -1] != PHP_DIR_SEPARATOR) {
-			resolved_basedir[resolved_basedir_len] = PHP_DIR_SEPARATOR;
-			resolved_basedir[++resolved_basedir_len] = '\0';
+		if (basedir[strlen(basedir) - 1] == PHP_DIR_SEPARATOR) {
+			if (resolved_basedir[resolved_basedir_len - 1] == '/') {
+				resolved_basedir[resolved_basedir_len - 1] = PHP_DIR_SEPARATOR;
+				resolved_basedir[++resolved_basedir_len] = '\0';
+			}
 		}
-		
+
 		if (path[strlen(path)-1] == PHP_DIR_SEPARATOR) {
 			resolved_name_len = strlen(resolved_name);
 			if (resolved_name[resolved_name_len - 1] != PHP_DIR_SEPARATOR) {

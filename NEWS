@@ -11,6 +11,7 @@ PHP 4                                                                      NEWS
 - Fixed bug #27590 (crash during shutdown when freeing persistent resources
   in ZTS mode). (Ilia)
 - Fixed bug #27582 (possible crashes in imagefilltoborder()). (Pierre)
+- Fixed bug #27559 (Corrected open_basedir resolving logic). (Ilia)
 - Fixed bug #27530 (broken http auth when safe_mode is on and PCRE is
   disabled). (Ilia)
 - Fixed bug #27509 (broken getaddrinfo() causes fsockopen() error). (Sara)
