@@ -1,3 +1,10 @@
+2004-01-15  Zeev Suraski  <zeev@zend.com>
+
+    * zend.c:
+      Nice patch Christian, but it wasn't at all enabled? :)
+      
+      Fix bug #26883
+
 2004-01-14  Zeev Suraski  <zeev@zend.com>
 
     * zend_compile.c:
