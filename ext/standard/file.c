@@ -82,7 +82,6 @@ extern int fclose(FILE *);
 #define MAP_FAILED ((void *) -1)
 #endif
 
-#include "php_realpath.h"
 #include "scanf.h"
 #include "zend_API.h"
 
