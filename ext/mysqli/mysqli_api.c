@@ -1272,7 +1272,7 @@ PHP_FUNCTION(mysqli_real_connect)
 	}
 	php_mysqli_set_error(mysql_errno(mysql), (char *)mysql_error(mysql) TSRMLS_CC);
 
-	mysql->reconnect = 0;
+	mysql->reconnect = MyG(reconnect);
 	
 	if (object) {
 		((mysqli_object *) zend_object_store_get_object(object TSRMLS_CC))->valid = 1;

@@ -701,6 +701,37 @@ mysql.connect_timeout = 60
 ; SQL-Erros will be displayed.
 mysql.trace_mode = Off
 
+[MySQLI]
+
+; Maximum number of links.  -1 means no limit.
+mysqli.max_links = -1
+
+; Default port number for mysqli_connect().  If unset, mysqli_connect() will use
+; the $MYSQL_TCP_PORT or the mysql-tcp entry in /etc/services or the
+; compile-time value defined MYSQL_PORT (in that order).  Win32 will only look
+; at MYSQL_PORT.
+mysqli.default_port = 3306
+
+; Default socket name for local MySQL connects.  If empty, uses the built-in
+; MySQL defaults.
+mysqli.default_socket =
+
+; Default host for mysql_connect() (doesn't apply in safe mode).
+mysqli.default_host =
+
+; Default user for mysql_connect() (doesn't apply in safe mode).
+mysqli.default_user =
+
+; Default password for mysqli_connect() (doesn't apply in safe mode).
+; Note that this is generally a *bad* idea to store passwords in this file.
+; *Any* user with PHP access can run 'echo get_cfg_var("mysqli.default_password")
+; and reveal this password!  And of course, any users with read access to this
+; file will be able to reveal the password as well.
+mysqli.default_password =
+
+; Allow or prevent reconnect
+mysqli.reconnect = Off
+
 [mSQL]
 ; Allow or prevent persistent links.
 msql.allow_persistent = On

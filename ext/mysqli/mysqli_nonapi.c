@@ -83,7 +83,7 @@ PHP_FUNCTION(mysqli_connect)
 	/* clear error */
 	php_mysqli_set_error(mysql_errno(mysql), (char *) mysql_error(mysql) TSRMLS_CC);
 
-	mysql->reconnect = 0;
+	mysql->reconnect = MyG(reconnect);
 
 	mysqli_resource = (MYSQLI_RESOURCE *)ecalloc (1, sizeof(MYSQLI_RESOURCE));
 	mysqli_resource->ptr = (void *)mysql;
