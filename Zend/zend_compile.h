@@ -33,7 +33,6 @@
 #define DEBUG_ZEND 0
 
 #define FREE_PNODE(znode)	zval_dtor(&znode->u.constant);
-#define FREE_OP(Ts, op, should_free) if (should_free) zval_dtor(should_free);
 
 #define SET_UNUSED(op)  (op).op_type = IS_UNUSED
 
@@ -68,8 +67,8 @@ typedef struct _znode {
 
 typedef struct _zend_execute_data zend_execute_data;
 
-#define ZEND_OPCODE_HANDLER_ARGS zend_execute_data *execute_data, zend_op *opline, zend_op_array *op_array TSRMLS_DC
-#define ZEND_OPCODE_HANDLER_ARGS_PASSTHRU execute_data, opline, op_array TSRMLS_CC
+#define ZEND_OPCODE_HANDLER_ARGS zend_execute_data *execute_data TSRMLS_DC
+#define ZEND_OPCODE_HANDLER_ARGS_PASSTHRU execute_data TSRMLS_CC
 
 typedef int (*opcode_handler_t) (ZEND_OPCODE_HANDLER_ARGS);
 
@@ -801,14 +800,6 @@ int zendlex(znode *zendlval TSRMLS_DC);
 
 #define ZEND_ARG_SEND_BY_REF (1<<0)
 #define ZEND_ARG_COMPILE_TIME_BOUND (1<<1)
-
-#define AI_USE_PTR(ai) \
-	if ((ai).ptr_ptr) { \
-		(ai).ptr = *((ai).ptr_ptr); \
-		(ai).ptr_ptr = &((ai).ptr); \
-	} else { \
-		(ai).ptr = NULL; \
-	}
 
 /* Lost In Stupid Parentheses */
 #define ARG_SHOULD_BE_SENT_BY_REF(zf, arg_num)											\
