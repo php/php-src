@@ -1558,7 +1558,7 @@ gdImageTrueColorToPalette (gdImagePtr im, int dither, int colorsWanted)
   /* Do the work! */
   zeroHistogram (cquantize->histogram);
   prescan_quantize (im, cquantize);
-  select_colors (im, cquantize, 256);
+  select_colors (im, cquantize, colorsWanted);
   /* TBB HACK REMOVE */
 #if 0
   {
