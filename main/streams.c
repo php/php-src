@@ -501,61 +501,63 @@ static void php_stream_fill_read_buffer(php_stream *stream, size_t size TSRMLS_D
 
 PHPAPI size_t _php_stream_read(php_stream *stream, char *buf, size_t size TSRMLS_DC)
 {
-	size_t toread, didread = 0;
+	size_t toread = 0, didread = 0;
 	
-	if (size == 0)
-		return 0;
-	
-	/* take from the read buffer first.
-	 * It is possible that a buffered stream was switched to non-buffered, so we
-	 * drain the remainder of the buffer before using the "raw" read mode for
-	 * the excess */
-	if (stream->writepos > stream->readpos) {
-		
-		toread = stream->writepos - stream->readpos;
-		if (toread > size)
-			toread = size;
+	while (size > 0) {
 
-		memcpy(buf, stream->readbuf + stream->readpos, toread);
-		stream->readpos += toread;
-		size -= toread;
-		buf += toread;
-		didread += toread;
-	}
+		/* take from the read buffer first.
+		 * It is possible that a buffered stream was switched to non-buffered, so we
+		 * drain the remainder of the buffer before using the "raw" read mode for
+		 * the excess */
+		if (stream->writepos > stream->readpos) {
 
-	if (size == 0) {
-		stream->position += didread;
+			toread = stream->writepos - stream->readpos;
+			if (toread > size)
+				toread = size;
 
-		if (didread == 0)
-			stream->eof = 1;
-		
-		return didread;
-	}
-	
-	if (stream->flags & PHP_STREAM_FLAG_NO_BUFFER || stream->chunk_size == 1) {
-		if (stream->filterhead) {
-			didread += stream->filterhead->fops->read(stream, stream->filterhead,
-					buf, size
-					TSRMLS_CC);
+			memcpy(buf, stream->readbuf + stream->readpos, toread);
+			stream->readpos += toread;
+			size -= toread;
+			buf += toread;
+			didread += toread;
+		}
+
+		if (size == 0) {
+			break;
+		}
+
+		if (stream->flags & PHP_STREAM_FLAG_NO_BUFFER || stream->chunk_size == 1) {
+			if (stream->filterhead) {
+				toread = stream->filterhead->fops->read(stream, stream->filterhead,
+						buf, size
+						TSRMLS_CC);
+			} else {
+				toread = stream->ops->read(stream, buf, size TSRMLS_CC);
+			}
 		} else {
-			didread += stream->ops->read(stream, buf, size TSRMLS_CC);
-		}
-	} else {
-		php_stream_fill_read_buffer(stream, size TSRMLS_CC);
+			php_stream_fill_read_buffer(stream, size TSRMLS_CC);
 
-		if ((off_t)size > stream->writepos - stream->readpos)
-			size = stream->writepos - stream->readpos;
-		
-		if (size) {
-			memcpy(buf, stream->readbuf + stream->readpos, size);
-			stream->readpos += size;
-			didread += size;
+			toread = stream->writepos - stream->readpos;
+			if (toread > size)
+				toread = size;
+
+			if (toread) {
+				memcpy(buf, stream->readbuf + stream->readpos, toread);
+				stream->readpos += toread;
+			}
+		}
+		if (toread > 0) {
+			didread += toread;
+			buf += toread;
+			size -= toread;
+		} else {
+			/* EOF, or temporary end of data (for non-blocking mode). */
+			break;
 		}
 	}
-	stream->position += size;
 
-	if (didread == 0)
-		stream->eof = 1;
+	if (didread > 0)
+		stream->position += didread;
 
 	return didread;
 }
