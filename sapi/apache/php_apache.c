@@ -80,7 +80,7 @@ static void php_apache_globals_ctor(php_apache_info_struct *apache_globals TSRML
 static PHP_MINIT_FUNCTION(apache)
 {
 #ifdef ZTS
-	ts_allocate_id(&php_apache_info_id, sizeof(php_apache_info_struct), php_apache_globals_ctor, NULL);
+	ts_allocate_id(&php_apache_info_id, sizeof(php_apache_info_struct), (ts_allocate_ctor) php_apache_globals_ctor, NULL);
 #else
 	php_apache_globals_ctor(&php_apache_info TSRMLS_CC);
 #endif
