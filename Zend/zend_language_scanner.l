@@ -87,16 +87,7 @@
 #  define MY_INPUT input
 #endif
 
-#if defined(ZTS) && !defined(HAVE_CLASS_ISTDIOSTREAM)
-class istdiostream : public istream
-{
-private:
-	stdiobuf _file;
-public:
-	istdiostream (FILE* __f) : istream(), _file(__f) { init(&_file); }
-	stdiobuf* rdbuf()/* const */ { return &_file; }
-};
-#endif
+#include "zend_istdiostream.h"
 
 #define YY_FATAL_ERROR zend_fatal_scanner_error
 
