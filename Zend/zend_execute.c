@@ -688,7 +688,7 @@ static inline void zend_fetch_dimension_address(znode *result, znode *op1, znode
 						convert_to_long(&tmp);
 						offset = &tmp;
 					}
-					if (!container->is_ref && type!=BP_VAR_R) {
+					if (!container->is_ref && type!=BP_VAR_R && type!=BP_VAR_IS) {
 						SEPARATE_ZVAL(container_ptr);
 					}
 					container = *container_ptr;
