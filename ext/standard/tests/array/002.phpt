@@ -42,7 +42,7 @@ array(8) {
   int(27)
   [1000]=>
   string(4) "test"
-  ["-1000"]=>
+  [-1000]=>
   array(2) {
     [0]=>
     string(6) "banana"
@@ -58,7 +58,7 @@ array(8) {
  -- Testing arsort() -- 
 No second argument:
 array(8) {
-  ["-1000"]=>
+  [-1000]=>
   array(2) {
     [0]=>
     string(6) "banana"
@@ -82,7 +82,7 @@ array(8) {
 }
 Using SORT_REGULAR:
 array(8) {
-  ["-1000"]=>
+  [-1000]=>
   array(2) {
     [0]=>
     string(6) "banana"
@@ -108,7 +108,7 @@ Using SORT_NUMERIC:
 array(8) {
   ["test"]=>
   int(27)
-  ["-1000"]=>
+  [-1000]=>
   array(2) {
     [0]=>
     string(6) "banana"
@@ -140,7 +140,7 @@ array(8) {
   string(27) "PHP: Hypertext Preprocessor"
   [0]=>
   string(3) "PHP"
-  ["-1000"]=>
+  [-1000]=>
   array(2) {
     [0]=>
     string(6) "banana"
@@ -170,7 +170,7 @@ array(8) {
   string(4) "test"
   ["test"]=>
   int(27)
-  ["-1000"]=>
+  [-1000]=>
   array(2) {
     [0]=>
     string(6) "banana"
@@ -194,7 +194,7 @@ array(8) {
   string(4) "test"
   ["test"]=>
   int(27)
-  ["-1000"]=>
+  [-1000]=>
   array(2) {
     [0]=>
     string(6) "banana"
@@ -216,7 +216,7 @@ array(8) {
   string(27) "PHP: Hypertext Preprocessor"
   [0]=>
   string(3) "PHP"
-  ["-1000"]=>
+  [-1000]=>
   array(2) {
     [0]=>
     string(6) "banana"
@@ -232,7 +232,7 @@ array(8) {
   float(-0.33333333333333)
   ["test"]=>
   int(27)
-  ["-1000"]=>
+  [-1000]=>
   array(2) {
     [0]=>
     string(6) "banana"
@@ -268,7 +268,7 @@ array(8) {
   int(27)
   [0]=>
   string(3) "PHP"
-  ["-1000"]=>
+  [-1000]=>
   array(2) {
     [0]=>
     string(6) "banana"
@@ -292,7 +292,7 @@ array(8) {
   string(3) "PHP"
   ["test"]=>
   int(27)
-  ["-1000"]=>
+  [-1000]=>
   array(2) {
     [0]=>
     string(6) "banana"
@@ -316,7 +316,7 @@ array(8) {
   int(27)
   [0]=>
   string(3) "PHP"
-  ["-1000"]=>
+  [-1000]=>
   array(2) {
     [0]=>
     string(6) "banana"
@@ -340,7 +340,7 @@ array(8) {
   string(4) "test"
   [0]=>
   string(3) "PHP"
-  ["-1000"]=>
+  [-1000]=>
   array(2) {
     [0]=>
     string(6) "banana"
@@ -352,7 +352,7 @@ array(8) {
  -- Testing ksort() -- 
 No second argument:
 array(8) {
-  ["-1000"]=>
+  [-1000]=>
   array(2) {
     [0]=>
     string(6) "banana"
@@ -376,7 +376,7 @@ array(8) {
 }
 Using SORT_REGULAR:
 array(8) {
-  ["-1000"]=>
+  [-1000]=>
   array(2) {
     [0]=>
     string(6) "banana"
@@ -400,7 +400,7 @@ array(8) {
 }
 Using SORT_NUMERIC:
 array(8) {
-  ["-1000"]=>
+  [-1000]=>
   array(2) {
     [0]=>
     string(6) "banana"
@@ -424,7 +424,7 @@ array(8) {
 }
 Using SORT_STRING
 array(8) {
-  ["-1000"]=>
+  [-1000]=>
   array(2) {
     [0]=>
     string(6) "banana"
