@@ -849,6 +849,18 @@ void execute(zend_op_array *op_array ELS_DC)
 	 */
 	function_state.function_symbol_table = NULL;
 #endif
+	
+	if (op_array->uses_globals) {
+		zval *globals = (zval *) emalloc(sizeof(zval));
+
+		globals->refcount=1;
+		globals->is_ref=1;
+		globals->type = IS_ARRAY;
+		globals->value.ht = &EG(symbol_table);
+		if (zend_hash_add(EG(active_symbol_table), "GLOBALS", sizeof("GLOBALS"), &globals, sizeof(zval *), NULL)==FAILURE) {
+			efree(globals);
+		}
+	}
 
 	while (opline<end) {
 		switch(opline->opcode) {
@@ -1888,16 +1900,6 @@ send_by_ref:
 				break;
 			case ZEND_DECLARE_FUNCTION_OR_CLASS:
 				do_bind_function_or_class(opline, EG(function_table), EG(class_table));
-				break;
-			case ZEND_INIT_GLOBALS: {
-					zval *globals = (zval *) emalloc(sizeof(zval));
-
-					globals->refcount=1;
-					globals->is_ref=1;
-					globals->type = IS_ARRAY;
-					globals->value.ht = &EG(symbol_table);
-					zend_hash_add(EG(active_symbol_table), "GLOBALS", sizeof("GLOBALS"), &globals, sizeof(zval *), NULL);
-				}
 				break;
 			case ZEND_EXT_NOP:
 			case ZEND_NOP:

@@ -102,7 +102,7 @@ struct _zend_op_array {
 	zend_brk_cont_element *brk_cont_array;
 	int last_brk_cont;
 	int current_brk_cont;
-	unsigned char initialized_globals;
+	unsigned char uses_globals;
 
 	/* static variables support */
 	HashTable *static_variables;
@@ -482,12 +482,10 @@ int zendlex(znode *zendlval CLS_DC);
 
 #define ZEND_DECLARE_FUNCTION_OR_CLASS	91
 
-#define ZEND_INIT_GLOBALS			92
-
-#define ZEND_EXT_STMT				93
-#define ZEND_EXT_FCALL_BEGIN		94
-#define ZEND_EXT_FCALL_END			95
-#define ZEND_EXT_NOP				96
+#define ZEND_EXT_STMT				92
+#define ZEND_EXT_FCALL_BEGIN		93
+#define ZEND_EXT_FCALL_END			94
+#define ZEND_EXT_NOP				95
 
 /* end of block */
 
