@@ -2148,8 +2148,10 @@ PHP_METHOD(swfmovie, save)
 	
 	retval = SWFMovie_output(getMovie(getThis() TSRMLS_CC), &phpStreamOutputMethod, (void *)stream);
 	php_stream_close(stream);
+#ifdef HAVE_MING_ZLIB
     if(oldval >= -1 && oldval <=9)
 		Ming_setSWFCompression(oldval);
+#endif
     
 	RETURN_LONG(retval);
 }
