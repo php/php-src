@@ -40,6 +40,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 $GLOBALS['_PEAR_default_error_mode']     = PEAR_ERROR_RETURN;
 $GLOBALS['_PEAR_default_error_options']  = E_USER_NOTICE;
 $GLOBALS['_PEAR_destructor_object_list'] = array();
+$GLOBALS['_PEAR_error_handler_stack']    = array();
 
 /**
  * Base class for other PEAR classes.  Provides rudimentary
@@ -416,17 +417,14 @@ class PEAR
     function pushErrorHandling($mode, $options = null)
     {
         $stack = &$GLOBALS['_PEAR_error_handler_stack'];
-        if (!is_array($stack)) {
-            if (isset($this)) {
-                $def_mode = &$this->_default_error_mode;
-                $def_options = &$this->_default_error_options;
-            } else {
-                $def_mode = &$GLOBALS['_PEAR_default_error_mode'];
-                $def_options = &$GLOBALS['_PEAR_default_error_options'];
-            }
-            $stack = array();
-            $stack[] = array($def_mode, $def_options);
+        if (isset($this)) {
+            $def_mode    = &$this->_default_error_mode;
+            $def_options = &$this->_default_error_options;
+        } else {
+            $def_mode    = &$GLOBALS['_PEAR_default_error_mode'];
+            $def_options = &$GLOBALS['_PEAR_default_error_options'];
         }
+        $stack[] = array($def_mode, $def_options);
 
         if (isset($this)) {
             $this->setErrorHandling($mode, $options);
