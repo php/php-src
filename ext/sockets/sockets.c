@@ -364,7 +364,7 @@ static char *php_strerror(int error TSRMLS_DC)
 
 		if (FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM |	FORMAT_MESSAGE_IGNORE_INSERTS,
 				  NULL, error, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPTSTR) &tmp, 0, NULL)) {
-			SOCKETS_G(strerror_buf) = estrndup(tmp);
+			SOCKETS_G(strerror_buf) = estrdup(tmp);
 			LocalFree(tmp);
 		
 			buf = SOCKETS_G(strerror_buf);
