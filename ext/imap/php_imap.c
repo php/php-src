@@ -3576,6 +3576,34 @@ PHP_FUNCTION(imap_mime_header_decode)
 }
 /* }}} */
 
+/* {{{ _php_rfc822_len
+ * Calculate string length based on imap's rfc822_cat function.
+ */	
+static int _php_rfc822_len(char *str)
+{
+	int len;
+	char *p;
+
+	if (!str || !*str) {
+		return 0;
+	}
+
+	/* strings with special characters will need to be quoted, as a safety measure we
+	 * add 2 bytes for the quotes just in case.
+	 */
+	len = strlen(str) + 2;
+	p = str;
+	/* rfc822_cat() will escape all " and \ characters, therefor we need to increase
+	 * our buffer length to account for these characters.
+	 */
+	while ((p = strpbrk(p, "\\\""))) {
+		p++;
+		len++;
+	}
+
+	return len;
+}
+/* }}} */
 
 /* Support Functions */
 /* {{{ _php_imap_get_address_size
@@ -3588,10 +3616,10 @@ static int _php_imap_address_size (ADDRESS *addresslist)
 	tmp = addresslist;
 
 	if (tmp) do {
-		ret += (tmp->personal) ? strlen(tmp->personal) : 0;
-		ret += (tmp->adl)      ? strlen(tmp->adl)      : 0;
-		ret += (tmp->mailbox)  ? strlen(tmp->mailbox)  : 0;
-		ret += (tmp->host)     ? strlen(tmp->host)     : 0;
+		ret += _php_rfc822_len(tmp->personal);
+		ret += _php_rfc822_len(tmp->adl);
+		ret += _php_rfc822_len(tmp->mailbox);
+		ret += _php_rfc822_len(tmp->host);
 		num_ent++;
 	} while ((tmp = tmp->next));
 
