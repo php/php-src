@@ -258,8 +258,6 @@ static int _close_oracur(oraCursor *cur)
 #ifdef ZTS
 static void php_ora_init_globals(php_ora_globals *ora_globals)
 {
-	ELS_FETCH();
-
 	if (cfg_get_long("oracle.allow_persistent",
 			 &ORA(allow_persistent))
 		== FAILURE) {
