@@ -27,57 +27,6 @@
 #if HAVE_LIBXML && HAVE_DOM
 #include "php_dom.h"
 
-typedef struct _nodeIterator nodeIterator;
-struct _nodeIterator {
-	int cur;
-	int index;
-	xmlNode *node;
-};
-
-typedef struct _notationIterator notationIterator;
-struct _notationIterator {
-	int cur;
-	int index;
-	xmlNotation *notation;
-};
-
-static void itemHashScanner (void *payload, void *data, xmlChar *name) {
-	nodeIterator *priv = (nodeIterator *)data;
-
-	if(priv->cur < priv->index) {
-		priv->cur++;
-	} else {
-		if(priv->node == NULL) {
-			priv->node = (xmlNode *)payload;
-		}
-	}
-}
-
-/* {{{ static xmlEntityPtr create_notation(const xmlChar *name, 
-				const xmlChar *ExternalID, const xmlChar *SystemID) */
-static xmlNodePtr create_notation(const xmlChar *name, 
-									const xmlChar *ExternalID, const xmlChar *SystemID) {
-	xmlEntityPtr ret;
-
-	ret = (xmlEntityPtr) xmlMalloc(sizeof(xmlEntity));
-    memset(ret, 0, sizeof(xmlEntity));
-    ret->type = XML_NOTATION_NODE;
-    ret->name = xmlStrdup(name);
-	ret->ExternalID = xmlStrdup(ExternalID);
-	ret->SystemID = xmlStrdup(SystemID);
-	ret->length = 0;
-	ret->content = NULL;
-	ret->URI = NULL;
-	ret->orig = NULL;
-	ret->children = NULL;
-	ret->parent = NULL;
-	ret->doc = NULL;
-	ret->_private = NULL;
-	ret->last = NULL;
-	ret->prev = NULL;
-	return((xmlNodePtr) ret);
-}
-
 /*
 * class domdocumenttype extends domnode 
 *
@@ -120,36 +69,18 @@ int dom_documenttype_entities_read(dom_object *obj, zval **retval TSRMLS_DC)
 {
 	xmlDtdPtr doctypep;
 	xmlHashTable *entityht;
-	nodeIterator *iter;
-	xmlNode *nodep = NULL;
-	int ret, htsize, index = 0;
+	dom_object *intern;
 
 	doctypep = (xmlDtdPtr) dom_object_get_node(obj);
 
-	ALLOC_ZVAL(*retval);
-	array_init(*retval);
+	MAKE_STD_ZVAL(*retval);
+	php_dom_create_interator(*retval, DOM_NAMEDNODEMAP TSRMLS_CC);
 
 	entityht = (xmlHashTable *) doctypep->entities;
-	if (entityht) {
-		if ((htsize = xmlHashSize(entityht)) > 0) {
-			iter = emalloc(sizeof(nodeIterator));
-			while (index < htsize) {
-				iter->cur = 0;
-				iter->index = index;
-				iter->node = NULL;
-				xmlHashScan(entityht, itemHashScanner, iter);
-				index++;
-				nodep = iter->node;
-				if (nodep != NULL) {
-					zval *child;
-					MAKE_STD_ZVAL(child);
-					child = php_dom_create_object(nodep, &ret, NULL, child, obj TSRMLS_CC);
-					add_assoc_zval(*retval, (char *) nodep->name, child);
-				}
-			}
-			efree(iter);
-		}
-	}
+
+	intern = (dom_object *)zend_objects_get_address(*retval TSRMLS_CC);
+	dom_namednode_iter(obj, XML_ENTITY_NODE, intern, entityht, NULL, NULL);
+
 	return SUCCESS;
 }
 
@@ -166,38 +97,14 @@ int dom_documenttype_notations_read(dom_object *obj, zval **retval TSRMLS_DC)
 {
 	xmlDtdPtr doctypep;
 	xmlHashTable *notationht;
-	notationIterator *iter;
-	xmlNotationPtr notep = NULL;
-	xmlNode *nodep = NULL;
-	int ret, htsize, index = 0;
+	dom_object *intern;
 
 	doctypep = (xmlDtdPtr) dom_object_get_node(obj);
-
-	MAKE_STD_ZVAL(*retval);
-	array_init(*retval);
-
 	notationht = (xmlHashTable *) doctypep->notations;
-	if (notationht) {
-		if ((htsize = xmlHashSize(notationht)) > 0) {
-			iter = emalloc(sizeof(nodeIterator));
-			while (index < htsize) {
-				iter->cur = 0;
-				iter->index = index;
-				iter->notation = NULL;
-				xmlHashScan(notationht, itemHashScanner, iter);
-				index++;
-				notep = iter->notation;
-				if (notep != NULL) {
-					zval *child;
-					nodep = create_notation(notep->name, notep->PublicID, notep->SystemID);
-					MAKE_STD_ZVAL(child);
-					child = php_dom_create_object(nodep, &ret, NULL, child, obj TSRMLS_CC);
-					add_assoc_zval(*retval, (char *) nodep->name, child);
-				}
-			}
-			efree(iter);
-		}
-	}
+
+	intern = (dom_object *)zend_objects_get_address(*retval TSRMLS_CC);
+	dom_namednode_iter(obj, XML_NOTATION_NODE, intern, notationht, NULL, NULL);
+
 	return SUCCESS;
 }
 

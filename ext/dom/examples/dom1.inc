@@ -24,7 +24,7 @@ function print_node($node)
 {
   print "Node Name: " . $node->nodeName;
   print "\nNode Type: " . $node->nodeType;
-  $child_count = count($node->childNodes);
+  $child_count = $node->childNodes->length;
   print "\nNum Children: " . $child_count;
   if($child_count <= 1){
     print "\nNode Content: " . $node->nodeValue;

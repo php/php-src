@@ -27,7 +27,6 @@
 #if HAVE_LIBXML && HAVE_DOM
 #include "php_dom.h"
 
-
 /*
 * class domnode 
 *
@@ -280,31 +279,13 @@ Since:
 */
 int dom_node_child_nodes_read(dom_object *obj, zval **retval TSRMLS_DC)
 {
-	xmlNodePtr nodep, last;
-	int ret;
+	dom_object *intern;
 
-	nodep = dom_object_get_node(obj);
+	ALLOC_ZVAL(*retval);
+	php_dom_create_interator(*retval, DOM_NODELIST TSRMLS_CC);
 
-	if (dom_node_children_valid(nodep) == SUCCESS) {
-		if ((nodep->type == XML_DOCUMENT_NODE) || (nodep->type == XML_HTML_DOCUMENT_NODE)) {
-			last = ((xmlDoc *) nodep)->children;
-		} else {
-			last = nodep->children;
-		}
-	} else {
-		last = NULL;
-	}
-
-	MAKE_STD_ZVAL(*retval);
-	array_init(*retval);
-	
-	while (last) {
-		zval *child;
-		MAKE_STD_ZVAL(child);
-		child = php_dom_create_object(last, &ret, NULL, child, obj TSRMLS_CC);
-		add_next_index_zval(*retval, child);
-		last = last->next;
-	}
+	intern = (dom_object *)zend_objects_get_address(*retval TSRMLS_CC);
+	dom_namednode_iter(obj, XML_ELEMENT_NODE, intern, NULL, NULL, NULL);
 
 	return SUCCESS;
 }
@@ -446,28 +427,13 @@ Since:
 */
 int dom_node_attributes_read(dom_object *obj, zval **retval TSRMLS_DC)
 {
-	xmlNodePtr nodep;
-	xmlAttr *attr;
-	int ret;
-
-	nodep = dom_object_get_node(obj);
+	dom_object *intern;
 
 	ALLOC_ZVAL(*retval);
+	php_dom_create_interator(*retval, DOM_NAMEDNODEMAP TSRMLS_CC);
 
-	if (nodep->type == XML_ELEMENT_NODE) {
-		attr = nodep->properties;
-		array_init(*retval);
-	
-		while (attr) {
-			zval *curattr;
-			MAKE_STD_ZVAL(curattr);
-			curattr = php_dom_create_object((xmlNodePtr) attr, &ret, NULL, curattr, obj TSRMLS_CC);
-			add_assoc_zval(*retval, (char *) attr->name, curattr);
-			attr = attr->next;
-		}
-	 } else {
-		ZVAL_NULL(*retval);
-	 }
+	intern = (dom_object *)zend_objects_get_address(*retval TSRMLS_CC);
+	dom_namednode_iter(obj, XML_ATTRIBUTE_NODE, intern, NULL, NULL, NULL);
 
 	return SUCCESS;
 }
