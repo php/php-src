@@ -27,14 +27,22 @@
 # $Id$
 #
 
-#old_IFS="$IFS"
-#IFS=.
-#eval set `bison -V|sed "s/GNU Bison version //"`
-#if test "$1" = "1" && test "28" -gt "$2"; then
-#  echo "Please use Bison 1.28 or higher"
-#  exit 10
-#fi
-#IFS="$old_IFS"
+if test "$#" != "2"; then
+    echo "Usage: makedist <package> <version>" >&2
+    exit 1
+fi
+
+PKG=$1 ; shift
+VER=$1 ; shift
+
+old_IFS="$IFS"
+IFS=.
+eval set `bison -V|sed "s/GNU Bison version //"`
+if test "$1" = "1" && test "28" -gt "$2"; then
+  echo "Please use Bison 1.28 or higher"
+  exit 10
+fi
+IFS="$old_IFS"
 
 PHPROOT=:pserver:cvsread@cvs.php.net:/repository
 ZENDROOT=:pserver:cvsread@cvs.zend.com:/repository
@@ -51,14 +59,6 @@ else
     ECHO_N="echo"
     ECHO_C='\c'
 fi
-
-if test "$#" != "2"; then
-    echo "Usage: makedist <package> <version>" >&2
-    exit 1
-fi
-
-PKG=$1 ; shift
-VER=$1 ; shift
 
 MY_OLDPWD=`pwd`
 
