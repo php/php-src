@@ -153,9 +153,16 @@ static zend_function_entry domxml_functions[] = {
 	PHP_FE(domxml_version,												NULL)
 	PHP_FE(xmldoc,														NULL)
 	PHP_FE(xmldocfile,													NULL)
+#if defined(LIBXML_HTML_ENABLED)
+	PHP_FE(htmldoc,														NULL)
+	PHP_FE(htmldocfile,													NULL)
+#endif
 	PHP_FE(xmltree,														NULL)
 	PHP_FE(domxml_add_root,												NULL)
 	PHP_FE(domxml_dumpmem,												NULL)
+#if defined(LIBXML_HTML_ENABLED)
+	PHP_FE(domxml_htmldumpmem,												NULL)
+#endif
 	PHP_FE(domxml_node_attributes,										NULL)
 	PHP_FE(domxml_elem_get_attribute,									NULL)
 	PHP_FE(domxml_elem_set_attribute,									NULL)
@@ -174,6 +181,10 @@ static zend_function_entry domxml_functions[] = {
 #if defined(LIBXML_XPTR_ENABLED)
 	PHP_FE(xptr_new_context,											NULL)
 	PHP_FE(xptr_eval,													NULL)
+#endif
+#if HAVE_DOMXSLT
+	PHP_FE(domxml_xslt_version,											NULL)
+	PHP_FE(domxml_xslt_process,													NULL)
 #endif
 
 	PHP_FALIAS(domxml_root,				domxml_doc_document_element,	NULL)
@@ -211,6 +222,9 @@ static function_entry php_domxmldoc_class_functions[] = {
 	PHP_FALIAS(imported_node,			domxml_doc_imported_node,		NULL)
 	PHP_FALIAS(dtd,						domxml_intdtd,					NULL)
 	PHP_FALIAS(dumpmem,					domxml_dumpmem,					NULL)
+#if defined(LIBXML_HTML_ENABLED)
+	PHP_FALIAS(htmldumpmem,					domxml_htmldumpmem,					NULL)
+#endif
 #if defined(LIBXML_XPATH_ENABLED)
 	PHP_FALIAS(xpath_init,				xpath_init,						NULL)
 	PHP_FALIAS(xpath_new_context,		xpath_new_context,				NULL)
@@ -859,8 +873,10 @@ static zval *php_domobject_new(xmlNodePtr obj, int *found TSRMLS_DC)
 		}
 
 		case XML_DOCUMENT_NODE:
+		case XML_HTML_DOCUMENT_NODE:
 		{
 			xmlDocPtr docp = (xmlDocPtr) obj;
+
 			object_init_ex(wrapper, domxmldoc_class_entry);
 			rsrc_type = le_domxmldocp;
 			if (docp->name)
@@ -871,7 +887,10 @@ static zval *php_domobject_new(xmlNodePtr obj, int *found TSRMLS_DC)
 				add_property_stringl(wrapper, "url", (char *) docp->URL, strlen(docp->URL), 1);
 			else
 				add_property_stringl(wrapper, "url", "", 0, 1);
-			add_property_stringl(wrapper, "version", (char *) docp->version, strlen(docp->version), 1);
+			if (docp->version)
+				add_property_stringl(wrapper, "version", (char *) docp->version, strlen(docp->version), 1);
+    			else
+				add_property_stringl(wrapper, "version", "", 0, 1);
 			if (docp->encoding)
 				add_property_stringl(wrapper, "encoding", (char *) docp->encoding, strlen(docp->encoding), 1);
 			add_property_long(wrapper, "standalone", docp->standalone);
@@ -916,6 +935,17 @@ static zval *php_domobject_new(xmlNodePtr obj, int *found TSRMLS_DC)
 
 	php_dom_set_object(wrapper, (void *) obj, rsrc_type);
 	return (wrapper);
+}
+
+
+static void domxml_error(void *ctx, const char *msg, ...)
+{
+	char buf[1024];
+	va_list ap;
+	va_start(ap, msg);
+	vsnprintf(buf, 1024, msg, ap);
+	va_end(ap);
+	php_error(E_WARNING, buf);
 }
 
 
@@ -1048,6 +1078,11 @@ PHP_MINIT_FUNCTION(domxml)
 	REGISTER_LONG_CONSTANT("XPATH_USERS",				XPATH_USERS,				CONST_CS | CONST_PERSISTENT);
 #endif
 
+	xmlSetGenericErrorFunc(xmlGenericErrorContext, (xmlGenericErrorFunc)domxml_error);
+#if HAVE_DOMXSLT
+	xsltSetGenericErrorFunc(xsltGenericErrorContext, (xmlGenericErrorFunc)domxml_error);
+#endif
+
 	return SUCCESS;
 }
 
@@ -1073,11 +1108,18 @@ PHP_MINFO_FUNCTION(domxml)
 	php_info_print_table_start();
 	php_info_print_table_row(2, "DOM/XML", "enabled");
 	php_info_print_table_row(2, "libxml Version", LIBXML_DOTTED_VERSION);
+#if defined(LIBXML_HTML_ENABLED)
+	php_info_print_table_row(2, "HTML Support", "enabled");
+#endif
 #if defined(LIBXML_XPATH_ENABLED)
 	php_info_print_table_row(2, "XPath Support", "enabled");
 #endif
 #if defined(LIBXML_XPTR_ENABLED)
 	php_info_print_table_row(2, "XPointer Support", "enabled");
+#endif
+#if HAVE_DOMXSLT
+	php_info_print_table_row(2, "DOM/XSLT", "enabled");
+	php_info_print_table_row(2, "libxslt Version", LIBXSLT_DOTTED_VERSION);
 #endif
 	php_info_print_table_end();
 }
@@ -1566,7 +1608,7 @@ PHP_FUNCTION(domxml_node_children)
 	/* Even if the nodep is a XML_DOCUMENT_NODE the type is at the
 	   same position.
 	 */
-	if (Z_TYPE_P(nodep) == XML_DOCUMENT_NODE)
+	if ((Z_TYPE_P(nodep) == XML_DOCUMENT_NODE) || (Z_TYPE_P(nodep) == XML_HTML_DOCUMENT_NODE))
 		last = ((xmlDoc *) nodep)->children;
 	else
 		last = nodep->children;
@@ -2436,6 +2478,92 @@ PHP_FUNCTION(xmldocfile)
 }
 /* }}} */
 
+#if defined(LIBXML_HTML_ENABLED)
+/* {{{ proto string domxml_htmldumpmem([int doc_handle])
+   Dumps document into string */
+PHP_FUNCTION(domxml_htmldumpmem)
+{
+	zval *id;
+	xmlDoc *docp;
+	xmlChar *mem;
+	int size;
+
+	DOMXML_PARAM_NONE(docp, id, le_domxmldocp);
+
+	htmlDocDumpMemory(docp, &mem, &size);
+	if (!size) {
+		RETURN_FALSE;
+	}
+	RETURN_STRINGL(mem, size, 1);
+}
+/* }}} */
+
+/* {{{ proto object htmldoc(string htmldoc)
+   Creates DOM object of HTML document */
+PHP_FUNCTION(htmldoc)
+{
+	zval *rv;
+	xmlDoc *docp;
+	int ret;
+	char *buffer;
+	int buffer_len;
+	zend_bool from_file = 0;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|b", &buffer, &buffer_len, &from_file) == FAILURE) {
+		return;
+	}
+
+	if (from_file) {
+		docp = htmlParseFile(buffer, NULL);
+	} else {
+		docp = htmlParseDoc(buffer, NULL);
+	}
+	if (!docp)
+		RETURN_FALSE;
+
+	DOMXML_RET_OBJ(rv, (xmlNodePtr) docp, &ret);
+}
+/* }}} */
+
+/* {{{ proto object htmldocfile(string filename)
+   Creates DOM object of HTML document in file*/
+PHP_FUNCTION(htmldocfile)
+{
+	zval *rv;
+	xmlDoc *docp;
+	int ret, file_len;
+	char *file;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &file, &file_len) == FAILURE) {
+		return;
+	}
+
+	docp = htmlParseFile(file, NULL);
+	if (!docp) {
+		RETURN_FALSE;
+	}
+
+	DOMXML_RET_OBJ(rv, (xmlNodePtr) docp, &ret);
+
+	add_property_resource(return_value, "doc", ret);
+	if (docp->name)
+		add_property_stringl(return_value, "name", (char *) docp->name, strlen(docp->name), 1);
+	if (docp->URL)
+		add_property_stringl(return_value, "url", (char *) docp->URL, strlen(docp->URL), 1);
+	if (docp->version)
+		add_property_stringl(return_value, "version", (char *) docp->version, strlen(docp->version), 1);
+/*	add_property_stringl(return_value, "version", (char *) docp->version, strlen(docp->version), 1);*/
+	if (docp->encoding)
+		add_property_stringl(return_value, "encoding", (char *) docp->encoding, strlen(docp->encoding), 1);
+	add_property_long(return_value, "standalone", docp->standalone);
+	add_property_long(return_value, "type", Z_TYPE_P(docp));
+	add_property_long(return_value, "compression", docp->compression);
+	add_property_long(return_value, "charset", docp->charset);
+	zend_list_addref(ret);
+}
+/* }}} */
+#endif  /* defined(LIBXML_HTML_ENABLED) */
+
 /* {{{ proto bool domxml_node_text_concat(string content)
    Add string tocontent of a node */
 PHP_FUNCTION(domxml_node_text_concat)
@@ -2893,6 +3021,117 @@ PHP_FUNCTION(domxml_version)
 	RETURN_STRING(LIBXML_DOTTED_VERSION, 1);
 }
 /* }}} */
+
+#if HAVE_DOMXSLT
+/* {{{ _php_libxslt_ht_char()
+   Translates a PHP array to a libxslt character array */
+static void _php_libxslt_ht_char(HashTable *php, char **arr)
+{
+    zval **value;
+    char *string_key = NULL;
+    ulong num_key;
+    int i = 0;
+    
+    for (zend_hash_internal_pointer_reset(php);
+         zend_hash_get_current_data(php, (void **)&value) == SUCCESS;
+         zend_hash_move_forward(php)) {
+
+	SEPARATE_ZVAL(value);
+	convert_to_string_ex(value);
+
+	if (zend_hash_get_current_key(php, &string_key, &num_key, 1) != HASH_KEY_IS_STRING) {
+	    php_error(E_WARNING, "Not a string key in the parameters array");
+	}
+	else
+	{
+            arr[i++] = string_key;
+            arr[i++] = Z_STRVAL_PP(value);
+        }
+    }
+    arr[i++] = NULL;
+}
+
+
+/* {{{ proto object domxml_xslt_process(int xsldoc_handle, int xmldoc_handle, [array xslt_parameters])
+   Perform an XSLT transformation */
+PHP_FUNCTION(domxml_xslt_process)
+{
+/* TODO:
+    - add functions for dealing with xsltStylesheet objects
+    - split this function: domxml_xslt_process will receive:
+	- a handle to the xsltStylesheet object
+        - a handle to the xmlDoc object
+	- an optional array of parameters
+    - memory deallocation
+*/
+	zval *rv, *idxsl, *idxml, *idvars = NULL;
+	xmlDocPtr xsldocp, xmldocp, docp;
+	char **params = NULL;
+	xsltStylesheetPtr xsltstp;
+	int ret, parsize;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "oo|a", &idxsl, &idxml, &idvars) == FAILURE) {
+		return;
+	}
+
+	DOMXML_GET_OBJ(xsldocp, idxsl, le_domxmldocp);
+	DOMXML_GET_OBJ(xmldocp, idxml, le_domxmldocp);
+
+	xsltstp = xsltParseStylesheetDoc(xsldocp);
+	if (!xsltstp) {
+		RETURN_FALSE;
+	}
+	if (xsltstp->errors) {
+/*	    	xsltFreeStylesheet(xsltstp);*/
+		RETURN_FALSE;
+	}
+
+	if (idvars)
+	{
+	    HashTable *parht = HASH_OF(idvars);
+	    parsize = (2 * zend_hash_num_elements(parht) + 1) * sizeof(char *);
+            params = (char **)emalloc(parsize);
+            memset((char *)params, 0, parsize);
+            _php_libxslt_ht_char(parht, params);
+	}
+
+	docp = xsltApplyStylesheet(xsltstp, xmldocp, (const char**)params);
+
+/*	xsltFreeStylesheet(xsltstp);
+	efree(params);*/
+	
+	if (!docp) {
+		RETURN_FALSE;
+	}
+
+	DOMXML_RET_OBJ(rv, (xmlNodePtr) docp, &ret);
+
+	add_property_resource(return_value, "doc", ret);
+	if(docp->name)
+		add_property_stringl(return_value, "name", (char *) docp->name, strlen(docp->name), 1);
+	if(docp->URL)
+		add_property_stringl(return_value, "url", (char *) docp->name, strlen(docp->name), 1);
+/*	add_property_stringl(return_value, "version", (char *) docp->version, strlen(docp->version), 1);*/
+	if(docp->version)
+	    add_property_stringl(return_value, "version", (char *) docp->version, strlen(docp->version), 1);
+	if(docp->encoding)
+		add_property_stringl(return_value, "encoding", (char *) docp->encoding, strlen(docp->encoding), 1);
+	add_property_long(return_value, "standalone", docp->standalone);
+	add_property_long(return_value, "type", docp->type);
+	add_property_long(return_value, "compression", docp->compression);
+	add_property_long(return_value, "charset", docp->charset);
+	zend_list_addref(ret);
+}
+/* }}} */
+
+/* {{{ proto string domxslt_version(void)
+   Get XSLT library version */
+PHP_FUNCTION(domxml_xslt_version)
+{
+	RETURN_STRING(LIBXSLT_DOTTED_VERSION, 1);
+}
+/* }}} */
+#endif /* HAVE_DOMXSLT */
 
 #endif /* HAVE_DOMXML */
 

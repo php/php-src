@@ -23,11 +23,21 @@
 
 #if HAVE_DOMXML
 #include <libxml/parser.h>
+#include <libxml/tree.h>
+#if defined(LIBXML_HTML_ENABLED)
+#include <libxml/HTMLparser.h>
+#include <libxml/HTMLtree.h>
+#endif
 #if defined(LIBXML_XPATH_ENABLED)
 #include <libxml/xpath.h>
 #endif
 #if defined(LIBXML_XPTR_ENABLED)
 #include <libxml/xpointer.h>
+#endif
+#if HAVE_DOMXSLT
+#include <libxslt/xsltInternals.h>
+#include <libxslt/xsltutils.h>
+#include <libxslt/transform.h>
 #endif
 
 extern zend_module_entry domxml_module_entry;
@@ -40,6 +50,10 @@ PHP_MINFO_FUNCTION(domxml);
 PHP_FUNCTION(domxml_version);
 PHP_FUNCTION(xmldoc);
 PHP_FUNCTION(xmldocfile);
+#if defined(LIBXML_HTML_ENABLED)
+PHP_FUNCTION(htmldoc);
+PHP_FUNCTION(htmldocfile);
+#endif
 PHP_FUNCTION(xmltree);
 PHP_FUNCTION(domxml_new_xmldoc);
 
@@ -58,6 +72,9 @@ PHP_FUNCTION(domxml_doc_imported_node);
 PHP_FUNCTION(domxml_add_root);
 PHP_FUNCTION(domxml_intdtd);
 PHP_FUNCTION(domxml_dumpmem);
+#if defined(LIBXML_HTML_ENABLED)
+PHP_FUNCTION(domxml_htmldumpmem);
+#endif
 
 /* Class DocumentType methods */
 PHP_FUNCTION(domxml_doctype_name);
@@ -141,6 +158,12 @@ PHP_FUNCTION(xptr_new_context);
 PHP_FUNCTION(xptr_eval);
 #endif
 PHP_FUNCTION(domxml_test);
+
+/* DOMXSLT functions */
+#if HAVE_DOMXSLT
+PHP_FUNCTION(domxml_xslt_version);
+PHP_FUNCTION(domxml_xslt_process);
+#endif
 
 #else
 #define domxml_module_ptr NULL
