@@ -97,7 +97,7 @@ PHPAPI void php_print_credits(int flag)
 	if (flag & PHP_CREDITS_QA) {
 		php_info_print_table_start();
 		php_info_print_table_header(1, "PHP Quality Assurance Team");
-		php_info_print_table_row(1, "Andre Langhorst, Hellekin O. Wolf, Jalal Pushman, James Moore, Jani Taskinen, Joey Smith, Olivier Cahagne, Phil Driscoll, Sebastian Bergmann, Zak Greant");
+		php_info_print_table_row(1, "Andre Langhorst, Derick Rethans, Hellekin O. Wolf, Jalal Pushman, James Moore, Jani Taskinen, Joey Smith, Olivier Cahagne, Phil Driscoll, Sebastian Bergmann, Zak Greant");
 		php_info_print_table_end();
 	}
 
@@ -105,7 +105,7 @@ PHPAPI void php_print_credits(int flag)
 		/* Website Team */
 		php_info_print_table_start();
 		php_info_print_table_header(1, "PHP Website Team");
-		php_info_print_table_row(1, "Hojtsy Gabor, Colin Viebrock, Jim Winstead");
+		php_info_print_table_row(1, "Gabor Hojtsy, Colin Viebrock, Jim Winstead");
 		php_info_print_table_end();
 	}
 
