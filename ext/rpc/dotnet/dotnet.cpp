@@ -34,15 +34,15 @@
 #include <math.h>
 #include <comdef.h>
 
-extern "C" {  /* this should be included in the includes itself !! */
-
+extern "C"
+{
 #include "php.h"
 #include "ext/standard/info.h"
-
 }
 
-#include "../com/conversion.h"
-#include "../com/php_COM.h"
+#include "ext/com/conversion.h"
+#include "ext/com/php_COM.h"
+
 #include "Mscoree.h"
 #include "mscorlib.h"
 
@@ -76,7 +76,7 @@ HRESULT dotnet_init() {
   return ERROR_SUCCESS;
 }
 
-HRESULT dotnet_create(OLECHAR *assembly, OLECHAR *datatype, comval *obj) {
+HRESULT dotnet_create(OLECHAR *assembly, OLECHAR *datatype, comval *obj TSRMLS_DC) {
   HRESULT hr;
 
   _ObjectHandle *pHandle;
@@ -89,7 +89,7 @@ HRESULT dotnet_create(OLECHAR *assembly, OLECHAR *datatype, comval *obj) {
   pHandle->Release();
   if (FAILED(hr)) return hr;
  
-  php_COM_set(obj, unwrapped.pdispVal, TRUE);
+  php_COM_set(obj, &unwrapped.pdispVal, TRUE TSRMLS_CC);
   return ERROR_SUCCESS;
 }
   
@@ -129,20 +129,20 @@ PHP_FUNCTION(dotnet_load)
 	}
 
 	convert_to_string(assembly_name);
-	assembly = php_char_to_OLECHAR(Z_STRVAL_P(assembly_name), Z_STRLEN_P(assembly_name), codepage);
+	assembly = php_char_to_OLECHAR(Z_STRVAL_P(assembly_name), Z_STRLEN_P(assembly_name), codepage TSRMLS_CC);
 
 	convert_to_string(datatype_name);
-	datatype = php_char_to_OLECHAR(Z_STRVAL_P(datatype_name), Z_STRLEN_P(datatype_name), codepage);
+	datatype = php_char_to_OLECHAR(Z_STRVAL_P(datatype_name), Z_STRLEN_P(datatype_name), codepage TSRMLS_CC);
 
 	ALLOC_COM(obj);
 
 	/* obtain IDispatch */
-	hr = dotnet_create(assembly, datatype, obj);
+	hr = dotnet_create(assembly, datatype, obj TSRMLS_CC);
 	efree(assembly);
 	efree(datatype);
 	if (FAILED(hr)) {
 		char *error_message;
-		error_message = php_COM_error_message(hr);
+		error_message = php_COM_error_message(hr TSRMLS_CC);
 		php_error(E_WARNING,"Error obtaining .Net class for %s in assembly %s: %s",datatype_name->value.str.val,assembly_name->value.str.val,error_message);
 		LocalFree(error_message);
 		efree(obj);
@@ -169,8 +169,8 @@ void php_DOTNET_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_propert
 		pval *object_handle;
 
 		PHP_FN(dotnet_load)(INTERNAL_FUNCTION_PARAM_PASSTHRU);
-		if (!zend_is_true(return_value)) {
-			var_reset(object);
+		if (!Z_LVAL_P(return_value)) {
+			ZVAL_FALSE(object);
 			return;
 		}
 		ALLOC_ZVAL(object_handle);
