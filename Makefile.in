@@ -68,7 +68,7 @@ OBJS = main.o internal_functions.o snprintf.o php3_sprintf.o \
        safe_mode.o fopen-wrappers.o php3_realpath.o alloca.o output.o \
        php_ini.o
 
-PHPLIBS = -L@top_srcdir@/libzend -lzend -L@top_srcdir@/ext -lphpext
+PHPLIBS = -L@top_srcdir@/libzend -lzend -Lext -lphpext
 LIBS = $(PHPLIBS) $(EXTRA_LIBS) @LIBS@
 
 all: $(BINNAME)
