@@ -49,7 +49,7 @@ ZEND_API int zend_stream_open(const char *filename, zend_file_handle *handle TSR
 	return (handle->handle.fp) ? SUCCESS : FAILURE;
 }
 
-int zend_stream_fixup(zend_file_handle *file_handle TSRMLS_DC)
+ZEND_API int zend_stream_fixup(zend_file_handle *file_handle TSRMLS_DC)
 {
 	switch (file_handle->type) {
 		case ZEND_HANDLE_FILENAME:
@@ -90,7 +90,7 @@ int zend_stream_fixup(zend_file_handle *file_handle TSRMLS_DC)
 	return SUCCESS;
 }
 
-size_t zend_stream_read(zend_file_handle *file_handle, char *buf, size_t len TSRMLS_DC)
+ZEND_API size_t zend_stream_read(zend_file_handle *file_handle, char *buf, size_t len TSRMLS_DC)
 {
 	if (file_handle->handle.stream.interactive) {
 		int c = '*', n; 
@@ -105,7 +105,7 @@ size_t zend_stream_read(zend_file_handle *file_handle, char *buf, size_t len TSR
 	return file_handle->handle.stream.reader(file_handle->handle.stream.handle, buf, len TSRMLS_CC);
 }
 
-int zend_stream_getc(zend_file_handle *file_handle TSRMLS_DC)
+ZEND_API int zend_stream_getc(zend_file_handle *file_handle TSRMLS_DC)
 {
 	char buf;
 
@@ -115,7 +115,7 @@ int zend_stream_getc(zend_file_handle *file_handle TSRMLS_DC)
 	return EOF;
 }
 
-int zend_stream_ferror(zend_file_handle *file_handle TSRMLS_DC)
+ZEND_API int zend_stream_ferror(zend_file_handle *file_handle TSRMLS_DC)
 {
 	return 0;
 }
