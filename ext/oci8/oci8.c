@@ -83,7 +83,6 @@ static zend_class_entry *oci_lob_class_entry_ptr;
 
 #include <fcntl.h>
 
-#include "snprintf.h"
 
 /* }}} */
 /* {{{ thread safety stuff */

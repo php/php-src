@@ -48,7 +48,6 @@
 #include <pwd.h>
 #endif
 #endif
-#include "snprintf.h"
 #if HAVE_ZLIB
 #if defined(HAVE_UNISTD_H) && defined(PHP_WIN32)
 #undef HAVE_UNISTD_H

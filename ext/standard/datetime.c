@@ -25,7 +25,6 @@
 #include "php.h"
 #include "zend_operators.h"
 #include "datetime.h"
-#include "snprintf.h"
 #include "php_globals.h"
 
 #include <time.h>

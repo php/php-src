@@ -40,7 +40,6 @@
 #include <errno.h>
 
 #include "microtime.h"
-#include "snprintf.h"
 
 #define NUL  '\0'
 #define MICRO_IN_SEC 1000000.00

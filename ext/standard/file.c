@@ -65,7 +65,6 @@
 #include <netdb.h>
 #include <arpa/inet.h>
 #endif
-#include "snprintf.h"
 #include "fsock.h"
 #include "fopen-wrappers.h"
 #include "php_globals.h"
