@@ -37,14 +37,15 @@ top_builddir = .
 
 ZEND_DIR = $(srcdir)/libzend
 TSRM_DIR = @TSRM_DIR@
-SUBDIRS=libzend ext $(TSRM_DIR)
+SUBDIRS=libzend ext $(TSRM_DIR) sapi
 
 PACKAGE = @PACKAGE@
 VERSION = @VERSION@
 LN_S = @LN_S@
 CC = @CC@
 AR = ar rc
-BINNAME = @BINNAME@
+PHP_SAPI = @PHP_SAPI@
+SAPI_TARGET = @SAPI_TARGET@
 INSTALL_IT = @INSTALL_IT@
 EXTRA_LIBS = @EXTRA_LIBS@
 EXT_LIBS = @EXT_LIBS@
@@ -56,9 +57,11 @@ LDFLAGS_SHLIB = @LDFLAGS_SHLIB@
 LDFLAGS_SHLIB_EXPORT = @LDFLAGS_SHLIB_EXPORT@
 CPPFLAGS = @CPPFLAGS@
 DEFS = @DEFS@
+VERSION_SCRIPT = @VERSION_SCRIPT@
+RPATHS = @RPATHS@
 CFLAGS = @CFLAGS@ @DEBUG_CFLAGS@ $(PROF_CFLAGS)
 COMPILE = $(CC) $(CFLAGS) $(CFLAGS_SHLIB) $(CPPFLAGS) $(INCLUDE) $(DEFS) @STRONGHOLD@ 
-LDFLAGS = @VERSION_SCRIPT@ @RPATHS@ @LDFLAGS@ $(LDFLAGS_SHLIB) $(LDFLAGS_SHLIB_EXPORT) -L$(ZEND_DIR)
+LDFLAGS = $(VERSION_SCRIPT) $(RPATHS) @LDFLAGS@ $(LDFLAGS_SHLIB) $(LDFLAGS_SHLIB_EXPORT) -L$(ZEND_DIR)
 REGCFLAGS = $(CFLAGS)
 RANLIB = @RANLIB@
 YACC = @YACC@
@@ -70,18 +73,20 @@ WARNING_LEVEL = @WARNING_LEVEL@
 LEX_CFLAGS = -w$(WARNING_LEVEL) @LEX_CFLAGS@
 EXT_SHARED = @EXT_SHARED@
 LIBOBJS=@LIBOBJS@
+REGEX_LIB=@REGEX_LIB@
+FHTTPD_LIB=@FHTTPD_LIB@
+TSRM_LIB=@TSRM_LIB@
 
 SOURCE = main.c internal_functions.c snprintf.c php3_sprintf.c \
        configuration-parser.c configuration-scanner.c request_info.c \
        safe_mode.c fopen-wrappers.c php3_realpath.c alloca.c output.c \
-       php_ini.c SAPI.c cgi_main.c rfc1867.c dlist.c php_content_types.c \
-       aolserver.c
+       php_ini.c SAPI.c rfc1867.c dlist.c php_content_types.c
 
 OBJS = $(SOURCE:.c=.o) $(LIBOBJS)
 PHPLIBS = -Llibzend -lzend -Lext -lphpext
 LIBS = $(PHPLIBS) $(EXTRA_LIBS) @LIBS@
 
-all: $(BINNAME)
+all: $(SAPI_TARGET)
 
 all-recursive clean-recursive distclean-recursive \
 maintainer-clean-depend-recursive:
@@ -92,33 +97,8 @@ maintainer-clean-depend-recursive:
 		(cd $$subdir && $(MAKE) $$target) || fail=yes; \
 	done && test -z "$$fail"
 
-# CGI binary or fhttpd module
-php: all-recursive $(OBJS) @REGEX_LIB@ @FHTTPD_LIB@
-	$(CC) $(CFLAGS) -o $(BINNAME) $(LDFLAGS) $(OBJS) $(LIBS)
+include sapi/$(PHP_SAPI)/Makefile.inc
 
-# Apache modules
-libphp4.a libmodphp4.a: all-recursive $(OBJS) @REGEX_LIB@
-	$(AR) $@.tmp $(OBJS)
-	$(srcdir)/scripts/armerge $@ $@.tmp ext/libphpext.a libzend/libzend.a @TSRM_LIB@
-	@rm -f $@.tmp
-	$(RANLIB) $(BINNAME)
-
-# Apache modules
-libmodphp4-so.a: all-recursive $(OBJS) @REGEX_LIB@
-	$(AR) $@.tmp $(OBJS)
-	$(srcdir)/scripts/armerge $@ $@.tmp ext/libphpext.a libzend/libzend.a @TSRM_LIB@
-	@rm -f $@.tmp
-	$(RANLIB) libmodphp4-so.a
-
-# Apache 1.3 shared module
-libphp4.so: $(srcdir)/mod_php4.c libmodphp4-so.a @REGEX_LIB@
-	-@test -f ./mod_php4.c || test -L ./mod_php4.c || $(LN_S) $(srcdir)/mod_php4.c ./mod_php4.c
-	-@test -f ./mod_php4.c || test -h ./mod_php4.c || $(LN_S) $(srcdir)/mod_php4.c ./mod_php4.c
-	$(APXS) $(INCLUDE) -c -o libphp4.so @VERSION_SCRIPT@ @RPATHS@ ./mod_php4.c libmodphp4-so.a $(APXS_LDFLAGS) $(APXS_EXP)
-
-php4_aol.so: libmodphp4-so.a
-	g++ $(LDFLAGS) -shared aolserver.o -o $@ libmodphp4-so.a $(LIBS)
-	
 regex/libregex.a:
 	(cd regex; $(MAKE) lib)
 
@@ -179,12 +159,12 @@ distdir:
 
 maintainer-clean-depend: maintainer-clean-depend-recursive
 
-bench: $(BINNAME)
-	./$(BINNAME) -c. tests/bench.phtml
+bench: php
+	./php -c. tests/bench.phtml
 
 # can't use a single rule for this because 'test' is a directory
 test: regression
-regression check: $(BINNAME)
+regression check: php
 	cd test && ./testall
 
 config.status: configure
@@ -208,7 +188,7 @@ php_config.h.in: @MAINT@ stamp-h.in
 stamp-h.in: configure.in aclocal.m4 acconfig.h
 	cd ${srcdir} && autoheader && touch ${srcdir}/stamp-h.in
 
-install: install-recursive $(BINNAME)
+install: install-recursive $(SAPI_TARGET)
 	$(INSTALL_IT)
 
 install-recursive:

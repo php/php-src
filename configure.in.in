@@ -1,18 +1,9 @@
-dnl $Id$ -*- sh -*-
-dnl Process this file with autoconf to produce a configure script.
+dnl ## $Id$ -*- sh -*-
+dnl ## Process this file with autoconf to produce a configure script.
 
 divert(0)
+
 AC_INIT(main.c)
-recurse=yes
-for arg in $@; do
-	case $arg in
-		## This is to prevent "./config.status --recheck" from
-		## running configure in libzend again.
-		--no-recursion) recurse=no;;
-		--enable-thread-safety) threadsafe=yes;;
-		*) ;;
-	esac
-done
 
 if test "$with_shared_apache" != "no" && test -n "$with_shared_apache" ; then
   echo ""
@@ -21,13 +12,12 @@ if test "$with_shared_apache" != "no" && test -n "$with_shared_apache" ; then
   exit 1
 fi
 
-cwd=`pwd`
-cachefile=$cwd/config.cache
-
-if test "$recurse" = "yes"; then
-	(set -x; test -d libzend || mkdir libzend ; cd libzend; $cwd/$srcdir/libzend/configure --cache-file=$cachefile $@) || exit 1
-	if test "$threadsafe" = "yes"; then
-		(set -x; test -d TSRM || mkdir TSRM; cd TSRM; $cwd/$srcdir/TSRM/configure --cache-file=$cachefile $@) || exit 1
+if test "$no_recursion" != "yes"; then
+	cwd=`pwd`
+	cachefile=$cwd/config.cache
+	(set -x; cd libzend; $cwd/$srcdir/libzend/configure --cache-file=$cachefile $@) || exit 1
+	if test "$enable_thread_safety" = "yes"; then
+		(set -x; cd TSRM && $cwd/$srcdir/TSRM/configure --cache-file=$cachefile $@) || exit 1
 	fi
 	(set -x; cd $srcdir; sh ltconfig --disable-static --enable-dlopen --cache-file=$cachefile ltmain.sh)
 fi
@@ -124,11 +114,6 @@ if test "$ac_cv_prog_gcc" = "yes" -a "`uname -s`" = "Rhapsody"; then
   CPPFLAGS="$CPPFLAGS -traditional-cpp"
 fi
 
-if test "`uname -sv`" = "AIX 4" -a "$GCC" != "yes"; then
-	APXS_EXP="-bE:mod_php4.exp"
-fi
-AC_SUBST(APXS_EXP)
-	
 dnl Ugly hack to get around a problem with gcc on AIX.
 if test "$CC" = "gcc" -a "$ac_cv_prog_cc_g" = "yes" -a \
    "`uname -sv`" = "AIX 4"; then
@@ -426,44 +411,6 @@ abs_builddir=`pwd`
 AC_SUBST(abs_srcdir)
 AC_SUBST(abs_builddir)
 
-AC_MSG_CHECKING(for Apache module support via DSO through APXS)
-AC_ARG_WITH(apxs,
-[  --with-apxs[=FILE]      Build shared Apache module.  FILE is the optional
-                          pathname to the Apache apxs tool; defaults to "apxs".
-                          (This option needs Perl installed)],
-[
-    if test "$withval" = "yes"; then
-        withval=apxs
-    fi
-    AC_EXPAND_PATH($withval, APXS)
-    APXS_LDFLAGS="@SYBASE_LFLAGS@ @SYBASE_LIBS@ @SYBASE_CT_LFLAGS@ @SYBASE_CT_LIBS@"
-    APXS_INCLUDEDIR=`$APXS -q INCLUDEDIR`
-	if test -d "$APXS_INCLUDEDIR/xml" ; then
-	  XML_INCLUDE="$APXS_INCLUDEDIR/xml"
-	fi
-	APACHE_INCLUDE="-I$APXS_INCLUDEDIR"
-    BINNAME=libphp4.so
-    INSTALL_IT="\$(APXS) -i -a -n php4 $BINNAME"
-    CFLAGS_SHLIB=`perl -V:cccdlflags | cut -d\' -f2`
-    LDFLAGS_SHLIB=`perl -V:lddlflags | cut -d\' -f2`
-    LDFLAGS_SHLIB_EXPORT=`perl -V:ccdlflags | cut -d\' -f2`
-    PHP_LIBS=
-    STRONGHOLD=
-    INCLUDES="$INCLUDES $APACHE_INCLUDE"
-    AC_DEFINE(APACHE)
-    AC_SUBST(APXS)
-    AC_SUBST(APXS_LDFLAGS)
-    AC_SUBST(BINNAME)
-    AC_SUBST(INSTALL_IT)
-    AC_SUBST(PHP_LIBS)
-    AC_SUBST(APACHE_INCLUDE)
-    AC_DEFINE(HAVE_AP_CONFIG_H)
-	AC_DEFINE(HAVE_AP_COMPAT_H)
-    AC_MSG_RESULT(yes)
-],[
-    AC_MSG_RESULT(no)
-])
-
 versioning="no"
 AC_MSG_CHECKING(whether to enable versioning)
 AC_ARG_ENABLE(versioning,
@@ -488,160 +435,6 @@ AC_ARG_ENABLE(versioning,
 ])
 AC_MSG_RESULT($versioning)
 AC_SUBST(VERSION_SCRIPT)
-
-
-APACHE_INSTALL_FILES="$srcdir/mod_php4.* libphp4.module"
-
-if test "$BINNAME" != "libmodphp4-so.a"; then
-if test "$BINNAME" != "libphp4.so"; then
-AC_MSG_CHECKING(for Apache module support)
-AC_ARG_WITH(apache,
-[  --with-apache[=DIR]     Build Apache module.  DIR is the top-level Apache
-                          build directory, defaults to /usr/local/etc/httpd.],
-[
-	if test "$withval" = "yes"; then
-	  # Apache's default directory
-	  withval=/usr/local/etc/httpd
-	fi
-	if test "$withval" != "no"; then
-# For Apache 1.2.x
-      AC_EXPAND_PATH($withval, withval)
-	  if test -f $withval/src/httpd.h; then 
-	    APACHE_INCLUDE=-I$withval/src
-	    APACHE_TARGET=$withval/src
-	    BINNAME=libphp4.a
-	    INSTALL_IT="mkdir -p $APACHE_TARGET; cp $BINNAME $APACHE_INSTALL_FILES $APACHE_TARGET"
-	    PHP_LIBS="-L. -lphp3"
-	    AC_DEFINE(APACHE)
-	    AC_MSG_RESULT(yes - Apache 1.2.x)
-		STRONGHOLD=
-		if test -f $withval/src/ap_config.h; then
-		AC_DEFINE(HAVE_AP_CONFIG_H)
-		fi
-# For Apache 1.3.x
-	  elif test -f $withval/src/main/httpd.h; then
-	    APACHE_INCLUDE="-I$withval/src/main -I$withval/src/os/unix -I$withval/src/ap"
-	    APACHE_TARGET=$withval/src/modules/php4
-		if test ! -d $APACHE_TARGET; then
-			mkdir $APACHE_TARGET
-		fi
-	    BINNAME=libmodphp4.a
-	    INSTALL_IT="mkdir -p $APACHE_TARGET; cp $BINNAME $APACHE_INSTALL_FILES $APACHE_TARGET; cp $srcdir/apMakefile.tmpl $APACHE_TARGET/Makefile.tmpl; cp $srcdir/apMakefile.libdir $APACHE_TARGET/Makefile.libdir"
-	    PHP_LIBS="-Lmodules/php4 -L../modules/php4 -L../../modules/php4 -lmodphp4"
-	    AC_DEFINE(APACHE)
-	    AC_MSG_RESULT(yes - Apache 1.3.x)
-		STRONGHOLD=
-		if test -f $withval/src/include/ap_config.h; then
-		AC_DEFINE(HAVE_AP_CONFIG_H)
-		fi
-		if test -f $withval/src/include/ap_compat.h; then
-		AC_DEFINE(HAVE_AP_COMPAT_H)
-		if test ! -f $withval/src/include/ap_config_auto.h; then
-    	AC_MSG_ERROR(Please run Apache's configure or src/Configure program once and try again)
-		fi
-		else
-		if test -f $withval/src/include/compat.h; then
-		AC_DEFINE(HAVE_OLD_COMPAT_H)
-		fi
-		fi
-# Also for Apache 1.3.x
-	  elif test -f $withval/src/include/httpd.h; then
-	    APACHE_INCLUDE="-I$withval/src/include -I$withval/src/os/unix"
-	    APACHE_TARGET=$withval/src/modules/php4
-	    if test -d $withval/src/lib/expat-lite ; then
-		  XML_INCLUDE=$withval/src/lib/expat-lite
-		fi
-		if test ! -d $APACHE_TARGET; then
-			mkdir $APACHE_TARGET
-		fi
-	    BINNAME=libmodphp4.a
-	    PHP_LIBS="-Lmodules/php4 -L../modules/php4 -L../../modules/php4 -lmodphp4"
-	    INSTALL_IT="mkdir -p $APACHE_TARGET; cp $BINNAME $APACHE_INSTALL_FILES $APACHE_TARGET; cp $srcdir/apMakefile.tmpl $APACHE_TARGET/Makefile.tmpl; cp $srcdir/apMakefile.libdir $APACHE_TARGET/Makefile.libdir"
-	    AC_DEFINE(APACHE)
-	    AC_MSG_RESULT(yes - Apache 1.3.x)
-		STRONGHOLD=
-		if test -f $withval/src/include/ap_config.h; then
-		AC_DEFINE(HAVE_AP_CONFIG_H)
-		fi
-		if test -f $withval/src/include/ap_compat.h; then
-		AC_DEFINE(HAVE_AP_COMPAT_H)
-		if test ! -f $withval/src/include/ap_config_auto.h; then
-    	AC_MSG_ERROR(Please run Apache's configure or src/Configure program once and try again)
-		fi
-		else
-		if test -f $withval/src/include/compat.h; then
-		AC_DEFINE(HAVE_OLD_COMPAT_H)
-		fi
-		fi
-# For StrongHold 2.2
-	  elif test -f $withval/apache/httpd.h; then
-	    APACHE_INCLUDE=-"I$withval/apache -I$withval/ssl/include"
-	    APACHE_TARGET=$withval/apache
-	    BINNAME=libmodphp4.a
-	    PHP_LIBS="-Lmodules/php4 -L../modules/php4 -L../../modules/php4 -lmodphp4"
-	    INSTALL_IT="mkdir -p $APACHE_TARGET; cp $BINNAME $APACHE_INSTALL_FILES $APACHE_TARGET"
-		STRONGHOLD=-DSTRONGHOLD=1
-	    AC_DEFINE(APACHE)
-		AC_MSG_RESULT(yes - StrongHold)
-		if test -f $withval/apache/ap_config.h; then
-		AC_DEFINE(HAVE_AP_CONFIG_H)
-		fi
-		if test -f $withval/src/ap_compat.h; then
-		AC_DEFINE(HAVE_AP_COMPAT_H)
-		if test ! -f $withval/src/include/ap_config_auto.h; then
-    	AC_MSG_ERROR(Please run Apache's configure or src/Configure program once and try again)
-		fi
-		else
-		if test -f $withval/src/compat.h; then
-		AC_DEFINE(HAVE_OLD_COMPAT_H)
-		fi
-		fi
-	  else
-	    AC_MSG_RESULT(no)
-	    AC_MSG_ERROR(Invalid Apache directory - unable to find httpd.h under $withval)
-	  fi
-	else
-	  AC_MSG_RESULT(no)
-	  BINNAME=php
-	fi
-],[
-	AC_MSG_RESULT(no)
-	BINNAME=php
-])
-
-if test "$BINNAME" = "php" ; then
-  INSTALL_IT="\$(SHELL) \$(srcdir)/install-sh -m 0755 $BINNAME \$(bindir)/$BINNAME"
-fi
-
-INCLUDES="$INCLUDES $APACHE_INCLUDE"
-dnl## AC_SUBST(APACHE_INCLUDE)
-AC_SUBST(APACHE_TARGET)
-AC_SUBST(INSTALL_IT)
-AC_SUBST(BINNAME)
-AC_SUBST(STRONGHOLD)
-AC_SUBST(PHP_LIBS)
-fi
-fi
-
-RESULT=no
-AC_MSG_CHECKING(for AOLserver support)
-AC_ARG_WITH(aolserver,
-[  --with-aolserver=DIR],
-[
-  if test ! -d $withval ; then
-    AC_MSG_ERROR(You did not specify a directory)
-  fi
-  if test "$enable_thread_safety" != "yes"; then
-    AC_MSG_ERROR(AOLserver must be compiled using --enable-thread-safety)
-  fi
-  NS_DIR=$withval
-  AC_ADD_INCLUDE($NS_DIR/include)
-  AC_DEFINE(HAVE_AOLSERVER)
-  BINNAME=php4_aol.so
-  INSTALL_IT="\$(SHELL) \$(srcdir)/install-sh -m 0755 $BINNAME $NS_DIR/root/bin/$BINNAME"
-  RESULT=yes
-])
-AC_MSG_RESULT($RESULT)
 
 AC_MSG_CHECKING(whether to use bundled regex library)
 AC_ARG_WITH(system-regex,
@@ -685,49 +478,6 @@ fi
 
 AC_SUBST(REGEX_LIB)
 AC_SUBST(HSREGEX)
-
-AC_MSG_CHECKING(for mod_charset compatibility option)
-AC_ARG_WITH(mod_charset,
-[  --with-mod_charset      Enable transfer tables for mod_charset (Rus Apache).],
-[
-	AC_MSG_RESULT(yes)
-    AC_DEFINE(USE_TRANSFER_TABLES)
-],[
-	AC_MSG_RESULT(no)
-])
-
-AC_MSG_CHECKING(for fhttpd module support)
-AC_ARG_WITH(fhttpd,
-[  --with-fhttpd[=DIR]     Build fhttpd module.  DIR is the fhttpd sources
-                          directory, defaults to /usr/local/src/fhttpd.],
-[
-	if test "$withval" = "yes"; then
-	  # fhttpd source directory
-	  withval=/usr/local/src/fhttpd
-	fi
-	if test "$withval" != "no"; then
-# For fhttpd 0.3.x
-	  if test -f $withval/servproc.h; then 
-	    FHTTPD_INCLUDE=-I$withval/
-            FHTTPD_LIB=$withval/servproc.o
-	    FHTTPD_TARGET=$withval/
-	    BINNAME=php
-	    AC_DEFINE(FHTTPD)
-	    AC_MSG_RESULT(yes - fhttpd 0.3.x)
-	  else
-	    AC_MSG_RESULT(no)
-	    AC_MSG_ERROR(Invalid fhttpd directory - unable to find servproc.h under $withval)
-	  fi
-	else
-	  AC_MSG_RESULT(no)
-	fi
-],[
-	AC_MSG_RESULT(no)
-])
-INCLUDES="$INCLUDES $FHTTPD_INCLUDE"
-dnl## AC_SUBST(FHTTPD_INCLUDE)
-AC_SUBST(FHTTPD_LIB)
-AC_SUBST(FHTTPD_TARGET)
 
 
 AC_MSG_CHECKING(whether to use a configuration file)
@@ -889,68 +639,6 @@ AC_ARG_ENABLE(rpath,
 ])
 AC_MSG_RESULT($enable_rpath)
 
-dnl AC_MSG_CHECKING(whether to enable PHP RPC support)
-dnl AC_ARG_ENABLE(php-rpc,
-dnl [  --enable-php-rpc        Compile with PHP RPC support.],
-dnl [
-dnl   if test "$enableval" = "yes"; then
-dnl 	AC_DEFINE(PHP_RPC, 1)
-dnl 	AC_MSG_RESULT(yes)
-dnl   else
-dnl 	AC_DEFINE(PHP_RPC, 0)
-dnl 	AC_MSG_RESULT(no)
-dnl   fi
-dnl ],[
-dnl   AC_DEFINE(PHP_RPC, 0)
-dnl   AC_MSG_RESULT(no)
-dnl ])
-
-if test "$BINNAME" = "php"; then
-AC_MSG_CHECKING(whether to force Apache CGI redirect)
-AC_ARG_ENABLE(force-cgi-redirect,
-[  --enable-force-cgi-redirect
-                          Enable the security check for internal server
-                          redirects.  You should use this if you are
-                          running the CGI version with Apache. ],
-[
-  if test "$enableval" = "yes"; then
-    AC_DEFINE(FORCE_CGI_REDIRECT, 1)
-    AC_MSG_RESULT(yes)
-    REDIRECT=1
-  else
-    AC_DEFINE(FORCE_CGI_REDIRECT, 0)
-    AC_MSG_RESULT(no)
-    REDIRECT=0
-  fi
-],[
-  AC_DEFINE(FORCE_CGI_REDIRECT, 0)
-  AC_MSG_RESULT(no)
-  REDIRECT=0
-]) 
-
-AC_MSG_CHECKING(whether to discard path_info + path_translated)
-AC_ARG_ENABLE(discard_path,
-[  --enable-discard-path   If this is enabled, the PHP CGI binary
-                          can safely be placed outside of the
-                          web tree and people will not be able
-                          to circumvent .htaccess security. ],
-[
-  if test "$enableval" = "yes"; then
-    AC_DEFINE(DISCARD_PATH, 1)
-    AC_MSG_RESULT(yes)
-    DISCARD_PATH=1
-  else
-    AC_DEFINE(DISCARD_PATH, 0)
-    AC_MSG_RESULT(no)
-    DISCARD_PATH=0
-  fi
-],[
-  AC_DEFINE(DISCARD_PATH, 0)
-  AC_MSG_RESULT(no)
-  DISCARD_PATH=0
-]) 
-fi
-
 AC_MSG_CHECKING(whether to enable short tags by default)
 AC_ARG_ENABLE(short-tags,
 [  --disable-short-tags    Disable the short-form <? start tag by default.],
@@ -999,16 +687,22 @@ AC_ARG_ENABLE(dmalloc,
 ])
 AC_MSG_RESULT($DMALLOC_RESULT)
 
+dnl ## This is the default server API.
+PHP_SAPI=cgi
+SAPI_TARGET=php
+
+esyscmd(./scripts/config-stubs sapi)
+
 divert(3)
 
 AC_SUBST(EXTRA_LIBS)
 
 # reading config stubs
-esyscmd(./scripts/config-stubs)
+esyscmd(./scripts/config-stubs ext)
 
 divert(4)
 
-dnl If we're using gcc and the user hasn't specified CFLAGS, add -O2.
+dnl If we are using gcc and the user has not specified CFLAGS, add -O2.
 test -n "$auto_cflags" && test -n "$GCC" && CFLAGS="$CFLAGS -O2"
 
 dnl *** Commented out - generates slow code and consumes a lot of 
@@ -1036,6 +730,10 @@ PHP_UNAME=`uname -a`
 AC_DEFINE_UNQUOTED(PHP_UNAME,"$PHP_UNAME")
 PHP_OS=`uname`
 AC_DEFINE_UNQUOTED(PHP_OS,"$PHP_OS")
+
+AC_SUBST(PHP_LIBS)
+AC_SUBST(PHP_SAPI)
+AC_SUBST(SAPI_TARGET)
 
 AC_OUTPUT(Makefile libphp4.module php4.spec
           scripts/mkextlib regex/Makefile
@@ -1066,7 +764,7 @@ if test "" = ""; then
   fi
 
   # Warn about CGI version with no extra security options.
-  if test "$BINNAME" = "php"; then
+  if test "$SAPI_TARGET" = "php"; then
     if test "$REDIRECT" = "0"; then
       if test "$DISCARD_PATH" = "0"; then
         echo "+--------------------------------------------------------------------+"

@@ -24,7 +24,7 @@
 #include "php_globals.h"
 #include "php_ini.h"
 #include "SAPI.h"
-#include "mod_php4.h"
+#include "sapi/apache/mod_php4.h"
 #include "ext/standard/info.h"
 
 #include <stdlib.h>

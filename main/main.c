@@ -1172,53 +1172,6 @@ PHPAPI void php_execute_script(zend_file_handle *primary_file CLS_DC ELS_DC PLS_
 	}
 }
 
-
-
-/* some systems are missing these from their header files */
-
-#if APACHE
-PHPAPI int apache_php_module_main(request_rec *r, int fd, int display_source_mode SLS_DC)
-{
-	zend_file_handle file_handle;
-#ifdef ZTS
-	zend_compiler_globals cg;
-	zend_executor_globals eg;
-	php_core_globals pcg;
-	zend_compiler_globals *compiler_globals=&cg;
-	zend_executor_globals *executor_globals=&eg;
-	php_core_globals *core_globals=&pcg;
-#endif
-	SLS_FETCH();
-
-	if (php_request_startup(CLS_C ELS_CC PLS_CC SLS_CC) == FAILURE) {
-		return FAILURE;
-	}
-	file_handle.type = ZEND_HANDLE_FD;
-	file_handle.handle.fd = fd;
-	file_handle.filename = SG(request_info).path_translated;
-
-	if (display_source_mode) {
-		zend_syntax_highlighter_ini syntax_highlighter_ini;
-
-		if (open_file_for_scanning(&file_handle CLS_CC)==SUCCESS) {
-			php_get_highlight_struct(&syntax_highlighter_ini);
-			zend_highlight(&syntax_highlighter_ini);
-			fclose(file_handle.handle.fp);
-			return OK;
-		} else {
-			return NOT_FOUND;
-		}
-	} else {
-		(void) php_execute_script(&file_handle CLS_CC ELS_CC);
-	}
-	
-	php3_header();			/* Make sure headers have been sent */
-	php_end_ob_buffering(1);
-	return (OK);
-}
-#endif							/* APACHE */
-
-
 #if WIN32||WINNT
 /* just so that this symbol gets exported... */
 PHPAPI void dummy_indent()
