@@ -15,7 +15,7 @@
    | Authors: Rasmus Lerdorf <rasmus@php.net>                             |
    +----------------------------------------------------------------------+
  */
-#ifdef COMPILE_DL
+#ifdef COMPILE_DL || COMPILE_DL_EXIF
 # undef PHP_EXIF
 # define PHP_EXIF 1
 #endif
