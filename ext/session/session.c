@@ -934,8 +934,15 @@ PHP_RINIT_FUNCTION(session)
 	}
 
 	if(INI_INT("session.auto_start")) {
+		php_error(E_ERROR, "session.auto_start is not available in this version. Disable it in your configuration.");
+		return FAILURE;
+	}
+	
+#if 0
+	if(INI_INT("session.auto_start")) {
 		_php_session_start(PSLS_C);
 	}
+#endif
 
 	return SUCCESS;
 }
