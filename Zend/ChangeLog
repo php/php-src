@@ -1,3 +1,32 @@
+2004-07-20  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * zend_alloc.c
+      zend_alloc.h:
+      - Add safe_pemalloc()
+
+2004-07-20  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_reflection_api.c:
+      - Fixed bug 28895 again (long live the dead)
+
+2004-07-20  Zeev Suraski  <zeev@zend.com>
+
+    * zend_exceptions.c:
+      Fix prototypes
+
+    * zend_exceptions.c:
+      Add descriptions
+
+2004-07-20  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_compile.c:
+      add todo
+
+    * (PHP_5_0)
+      zend_ini.h
+      zend_ini_parser.y:
+      export ini parser
+
 2004-07-19  Sebastian Bergmann  <sb@sebastian-bergmann.de>
 
     * zend_reflection_api.c:
