@@ -1248,22 +1248,17 @@ static php_iconv_err_t _php_iconv_mime_decode(smart_str *pretval, const char *st
 
 			case 1:
 				if (*p1 != '?') {
-					if ((mode & PHP_ICONV_MIME_DECODE_CONTINUE_ON_ERROR)) {
-						err = _php_iconv_appendl(pretval, encoded_word, (size_t)((p1 + 1) - encoded_word), cd_pl); 
-						if (err != PHP_ICONV_ERR_SUCCESS) {
-							goto out;
-						}
-						encoded_word = NULL;
-						if ((mode & PHP_ICONV_MIME_DECODE_STRICT)) {
-							scan_stat = 12;
-						} else {
-							scan_stat = 0;
-						}
-						break;
-					} else {
-						err = PHP_ICONV_ERR_MALFORMED;
+					err = _php_iconv_appendl(pretval, encoded_word, (size_t)((p1 + 1) - encoded_word), cd_pl); 
+					if (err != PHP_ICONV_ERR_SUCCESS) {
 						goto out;
 					}
+					encoded_word = NULL;
+					if ((mode & PHP_ICONV_MIME_DECODE_STRICT)) {
+						scan_stat = 12;
+					} else {
+						scan_stat = 0;
+					}
+					break;
 				}
 				csname = p1 + 1;
 				scan_stat = 2;
@@ -1596,6 +1591,8 @@ static php_iconv_err_t _php_iconv_mime_decode(smart_str *pretval, const char *st
 						encoded_word = NULL;
 						if ((mode & PHP_ICONV_MIME_DECODE_STRICT)) {
 							scan_stat = 12;
+						} else {
+							scan_stat = 0;
 						}
 						break;
 				}
