@@ -57,10 +57,11 @@ PHP 4                                                                      NEWS
 - Fixed bug #23792 (imagerotate() problems with limited platte, the function
   will always return true color image from now on). (Pierre-Alain Joye)
 - Fixed bug #23664 (FastCGI socket listenting). (Shane)
-- Fixed bug #22690 (ob_start() did not work with create_function() callbacks).
-  (Marcus)
 - Fixed bug #23685 (fake values returned when OID value is an empty string).
   (Jani)
+- Fixed bug #22836 (memory corruption with references to NULL). (Ilia)
+- Fixed bug #22690 (ob_start() did not work with create_function() callbacks).
+  (Marcus)
 - Fixed bug #21855 (Threading issue on HP-UX). (Roshan Naik, Andi, Moriyoshi)
 - Fixed bug #21074 (Apache2: "ErrorDocument xxx /error.php" broken). (Jani)
 - Fixed bug #19613 (putenv("VAR=") does not empty VAR on win32). (Zeev)
