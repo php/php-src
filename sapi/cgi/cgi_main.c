@@ -875,7 +875,7 @@ consult the installation file that came with this distribution, or visit \n\
 							SG(headers_sent) = 1;
 							SG(request_info).no_headers = 1;
 						}
-						php_printf("%s\n", PHP_VERSION);
+						php_printf("%s (%s)\n", PHP_VERSION, sapi_module.name);
 						php_end_ob_buffers(1 TSRMLS_CC);
 						exit(1);
 						break;
