@@ -1,3 +1,33 @@
+2002-10-16  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * zend_execute.c: Fix ZTS build.
+
+2002-10-16  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_compile.c
+      zend_execute.c: Fix class static members: now the following code works:
+    <?php
+
+    class Foo {
+             static $c = "Parent";
+    }
+
+    class Child extends Foo {
+    }
+
+    Foo::$c = "Hello";
+
+    var_dump(Child::$c);
+    ?>
+    and returns "Hello" (class statics are not copied anymore, but looked up in
+    runtime)
+
+    * zend_compile.c
+      zend_compile.h
+      zend_execute.c: Fix and generalize $this handling.
+    ZEND_FETCH_FROM_THIS is removed, IS_UNUSED type on class variables will be
+    used instead as the sign that it's a fetch from $this
+
 2002-10-14  Ilia Alshanetsky  <ilia@prohost.org>
 
     * zend_ini_parser.y
