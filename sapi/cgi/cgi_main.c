@@ -1279,6 +1279,9 @@ consult the installation file that came with this distribution, or visit \n\
   				case 'f': /* parse file */
 						script_file = estrdup(ap_php_optarg);
 						no_headers = 1;
+						/* arguments after the file are considered script args */
+						SG(request_info).argc = argc - (ap_php_optind-1);
+						SG(request_info).argv = &argv[ap_php_optind-1];
 						break;
 
   				case 'g': /* define global variables on command line */
@@ -1385,6 +1388,9 @@ consult the installation file that came with this distribution, or visit \n\
 			}
 
 			if (!SG(request_info).path_translated && argc > ap_php_optind) {
+				/* arguments after the file are considered script args */
+				SG(request_info).argc = argc - ap_php_optind;
+				SG(request_info).argv = &argv[ap_php_optind];
 				/* file is on command line, but not in -f opt */
 				SG(request_info).path_translated = estrdup(argv[ap_php_optind++]);
 			}
@@ -1398,7 +1404,7 @@ consult the installation file that came with this distribution, or visit \n\
 			   test.php "v1=test&v2=hello world!"
 			   test.php v1=test "v2=hello world!"
 			*/
-			if (!SG(request_info).query_string) {
+			if (!SG(request_info).query_string && argc > ap_php_optind) {
 				len = 0;
 				for (i = ap_php_optind; i < argc; i++) {
 					len += strlen(argv[i]) + 1;
