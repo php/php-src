@@ -33,7 +33,7 @@ generated_lists:
 	@echo makefile_am_files = Zend/Makefile.am \
 		TSRM/Makefile.am > $@
 	@echo config_h_files = Zend/acconfig.h TSRM/acconfig.h >> $@
-	@echo config_m4_files = Zend/Zend.m4 TSRM/tsrm.m4 \
+	@echo config_m4_files = Zend/Zend.m4 TSRM/tsrm.m4 TSRM/threads.m4 \
 		Zend/acinclude.m4 ext/*/config*.m4 sapi/*/config.m4 >> $@
 
 $(STAMP): build/buildcheck.sh
