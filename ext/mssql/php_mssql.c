@@ -518,6 +518,7 @@ static void php_mssql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 				RETURN_FALSE;
 			}
 
+#ifndef HAVE_FREETDS
 			if (MS_SQL_G(textlimit) != -1) {
 				sprintf(buffer, "%li", MS_SQL_G(textlimit));
 				if (DBSETOPT(mssql.link, DBTEXTLIMIT, buffer)==FAIL) {
@@ -527,6 +528,7 @@ static void php_mssql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 					RETURN_FALSE;
 				}
 			}
+#endif
 			if (MS_SQL_G(textsize) != -1) {
 				sprintf(buffer, "SET TEXTSIZE %li", MS_SQL_G(textsize));
 				dbcmd(mssql.link, buffer);
