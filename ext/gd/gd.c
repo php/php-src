@@ -554,7 +554,7 @@ PHP_FUNCTION(imagecreatetruecolor)
 /* }}} */
 
 /* {{{ void ImageTrueColorToPalette(resource im, bool ditherFlag, int colorsWanted)
-	Convert a true colour image to a palette based image with a number of colours, optionally using dithering. */
+   Convert a true colour image to a palette based image with a number of colours, optionally using dithering. */
 PHP_FUNCTION(imagetruecolortopalette)
 {
 #if HAVE_LIBGD20
@@ -580,7 +580,7 @@ PHP_FUNCTION(imagetruecolortopalette)
 /* }}} */
 
 /* {{{ proto void imagesetthickness(resource im, int thickness)
-	Set line thickness for drawing lines, ellipses, rectangles, polygons etc. */
+   Set line thickness for drawing lines, ellipses, rectangles, polygons etc. */
 PHP_FUNCTION(imagesetthickness)
 {
 #if HAVE_LIBGD20
@@ -605,7 +605,7 @@ PHP_FUNCTION(imagesetthickness)
 /* }}} */
 
 /* {{{ proto void imageellipse(resource im, int cx, int cy, int w, int h, int color)
-	Draw an ellipse */
+   Draw an ellipse */
 PHP_FUNCTION(imageellipse)
 {
 #if 0 && HAVE_LIBGD20 /* this function is missing from GD 2.0.1 */
@@ -634,7 +634,7 @@ PHP_FUNCTION(imageellipse)
 /* }}} */
 
 /* {{{ proto void imagefilledellipse(resource im, int cx, int cy, int w, int h, int color)
-	Draw an ellipse */
+   Draw an ellipse */
 PHP_FUNCTION(imagefilledellipse)
 {
 #if HAVE_LIBGD20
@@ -752,7 +752,7 @@ PHP_FUNCTION(imagecolorresolvealpha)
 /* }}} */
 
 /* {{{ proto int imagecolorclosestalpha(resource im, int red, int green, int blue, int alpha)
-	Find the closest matching colour with alpha transparency */
+   Find the closest matching colour with alpha transparency */
 PHP_FUNCTION(imagecolorclosestalpha)
 {
 #if HAVE_LIBGD20
@@ -778,7 +778,7 @@ PHP_FUNCTION(imagecolorclosestalpha)
 /* }}} */
 
 /* {{{ proto int imagecolorexactalpha(resource im, int red, int green, int blue, int alpha)
-	Find exact match for colour with transparency */
+   Find exact match for colour with transparency */
 PHP_FUNCTION(imagecolorexactalpha)
 {
 #if HAVE_LIBGD20
@@ -847,7 +847,7 @@ PHP_FUNCTION(imagecopyresampled)
 /* }}} */	
 
 /* {{{ proto int imagesettile(resource image, resource tile)
-	Set the tile image to $tile when filling $image with the "IMG_COLOR_TILED" color */
+   Set the tile image to $tile when filling $image with the "IMG_COLOR_TILED" color */
 PHP_FUNCTION(imagesettile)
 {
 #if HAVE_GD_IMAGESETTILE
@@ -871,7 +871,7 @@ PHP_FUNCTION(imagesettile)
 /* }}} */
 
 /* {{{ proto int imagesetbrush(resource image, resource brush)
-	Set the brush image to $brush when filling $image with the "IMG_COLOR_BRUSHED" color */
+   Set the brush image to $brush when filling $image with the "IMG_COLOR_BRUSHED" color */
 PHP_FUNCTION(imagesetbrush)
 {
 #if HAVE_GD_IMAGESETBRUSH
