@@ -994,35 +994,37 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 			fn_flags |= ZEND_ACC_PUBLIC;
 		}
 
-		short_class_name = do_alloca(short_class_name_length + 1);
-		zend_str_tolower_copy(short_class_name, CG(active_class_entry)->name, short_class_name_length);
-		/* Improve after RC: cache the lowercase class name */
+		if (!(CG(active_class_entry)->ce_flags & ZEND_ACC_INTERFACE)) {
+			short_class_name = do_alloca(short_class_name_length + 1);
+			zend_str_tolower_copy(short_class_name, CG(active_class_entry)->name, short_class_name_length);
+			/* Improve after RC: cache the lowercase class name */
 
-		if ((short_class_name_length == name_len) && (!memcmp(short_class_name, lcname, name_len))) {
-			if (CG(active_class_entry)->constructor) {
-				zend_error(E_STRICT, "Redefining already defined constructor for class %s", CG(active_class_entry)->name);
-			} else {
+			if ((short_class_name_length == name_len) && (!memcmp(short_class_name, lcname, name_len)) && !(CG(active_class_entry)->ce_flags & ZEND_ACC_INTERFACE)) {
+				if (CG(active_class_entry)->constructor) {
+					zend_error(E_STRICT, "Redefining already defined constructor for class %s", CG(active_class_entry)->name);
+				} else {
+					CG(active_class_entry)->constructor = (zend_function *) CG(active_op_array);
+				}
+			} else if ((name_len == sizeof(ZEND_CONSTRUCTOR_FUNC_NAME)-1) && (!memcmp(lcname, ZEND_CONSTRUCTOR_FUNC_NAME, sizeof(ZEND_CONSTRUCTOR_FUNC_NAME)))) {
+				if (CG(active_class_entry)->constructor) {
+					zend_error(E_STRICT, "Redefining already defined constructor for class %s", CG(active_class_entry)->name);
+				}
 				CG(active_class_entry)->constructor = (zend_function *) CG(active_op_array);
+			} else if ((name_len == sizeof(ZEND_DESTRUCTOR_FUNC_NAME)-1) && (!memcmp(lcname, ZEND_DESTRUCTOR_FUNC_NAME, sizeof(ZEND_DESTRUCTOR_FUNC_NAME)))) {
+				CG(active_class_entry)->destructor = (zend_function *) CG(active_op_array);
+			} else if ((name_len == sizeof(ZEND_CLONE_FUNC_NAME)-1) && (!memcmp(lcname, ZEND_CLONE_FUNC_NAME, sizeof(ZEND_CLONE_FUNC_NAME)))) {
+				CG(active_class_entry)->clone = (zend_function *) CG(active_op_array);
+			} else if ((name_len == sizeof(ZEND_CALL_FUNC_NAME)-1) && (!memcmp(lcname, ZEND_CALL_FUNC_NAME, sizeof(ZEND_CALL_FUNC_NAME)))) {
+				CG(active_class_entry)->__call = (zend_function *) CG(active_op_array);
+			} else if ((name_len == sizeof(ZEND_GET_FUNC_NAME)-1) && (!memcmp(lcname, ZEND_GET_FUNC_NAME, sizeof(ZEND_GET_FUNC_NAME)))) {
+				CG(active_class_entry)->__get = (zend_function *) CG(active_op_array);
+			} else if ((name_len == sizeof(ZEND_SET_FUNC_NAME)-1) && (!memcmp(lcname, ZEND_SET_FUNC_NAME, sizeof(ZEND_SET_FUNC_NAME)))) {
+				CG(active_class_entry)->__set = (zend_function *) CG(active_op_array);
+			} else if (!(fn_flags & ZEND_ACC_STATIC)) {
+				CG(active_op_array)->fn_flags |= ZEND_ACC_ALLOW_STATIC;
 			}
-		} else if ((name_len == sizeof(ZEND_CONSTRUCTOR_FUNC_NAME)-1) && (!memcmp(lcname, ZEND_CONSTRUCTOR_FUNC_NAME, sizeof(ZEND_CONSTRUCTOR_FUNC_NAME)))) {
-			if (CG(active_class_entry)->constructor) {
-				zend_error(E_STRICT, "Redefining already defined constructor for class %s", CG(active_class_entry)->name);
-			}
-			CG(active_class_entry)->constructor = (zend_function *) CG(active_op_array);
-		} else if ((name_len == sizeof(ZEND_DESTRUCTOR_FUNC_NAME)-1) && (!memcmp(lcname, ZEND_DESTRUCTOR_FUNC_NAME, sizeof(ZEND_DESTRUCTOR_FUNC_NAME)))) {
-			CG(active_class_entry)->destructor = (zend_function *) CG(active_op_array);
-		} else if ((name_len == sizeof(ZEND_CLONE_FUNC_NAME)-1) && (!memcmp(lcname, ZEND_CLONE_FUNC_NAME, sizeof(ZEND_CLONE_FUNC_NAME)))) {
-			CG(active_class_entry)->clone = (zend_function *) CG(active_op_array);
-		} else if ((name_len == sizeof(ZEND_CALL_FUNC_NAME)-1) && (!memcmp(lcname, ZEND_CALL_FUNC_NAME, sizeof(ZEND_CALL_FUNC_NAME)))) {
-			CG(active_class_entry)->__call = (zend_function *) CG(active_op_array);
-		} else if ((name_len == sizeof(ZEND_GET_FUNC_NAME)-1) && (!memcmp(lcname, ZEND_GET_FUNC_NAME, sizeof(ZEND_GET_FUNC_NAME)))) {
-			CG(active_class_entry)->__get = (zend_function *) CG(active_op_array);
-		} else if ((name_len == sizeof(ZEND_SET_FUNC_NAME)-1) && (!memcmp(lcname, ZEND_SET_FUNC_NAME, sizeof(ZEND_SET_FUNC_NAME)))) {
-			CG(active_class_entry)->__set = (zend_function *) CG(active_op_array);
-		} else if (!(fn_flags & ZEND_ACC_STATIC)) {
-			CG(active_op_array)->fn_flags |= ZEND_ACC_ALLOW_STATIC;
+			free_alloca(short_class_name);
 		}
-		free_alloca(short_class_name);
 
 		efree(lcname);
 	} else {
@@ -1694,9 +1696,11 @@ static void do_inherit_parent_constructor(zend_class_entry *ce)
 		if (!zend_hash_exists(&ce->function_table, lc_class_name, ce->name_length+1)) {
 			lc_parent_class_name = zend_str_tolower_dup(ce->parent->name, ce->parent->name_length);
 			if (zend_hash_find(&ce->parent->function_table, lc_parent_class_name, ce->parent->name_length+1, (void **)&function)==SUCCESS) {
-				/* inherit parent's constructor */
-				zend_hash_update(&ce->function_table, lc_class_name, ce->name_length+1, function, sizeof(zend_function), NULL);
-				function_add_ref(function);
+				if (function->common.fn_flags & ZEND_ACC_CTOR) {
+					/* inherit parent's constructor */
+					zend_hash_update(&ce->function_table, lc_class_name, ce->name_length+1, function, sizeof(zend_function), NULL);
+					function_add_ref(function);
+				}
 			}
 			efree(lc_parent_class_name);
 		}
