@@ -493,7 +493,7 @@ PHPAPI char *php_strip_url_passwd(char *url)
 	register char *p, *url_start;
 	
 	if (url == NULL) {
-		return NULL;
+		return "";
 	}
 	
 	p = url;
