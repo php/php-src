@@ -3,6 +3,8 @@ PHP 4                                                                      NEWS
 ?? ??? 2003, Version 4.3.5
 - Fixed header handler in NSAPI SAPI module (header->replace was ignored,
   send_default_content_type now sends value from php.ini). (Uwe Schindler)
+- Fixed bug #26148 (Print the notice before modifying variable on type
+  mismatch). (morten-bugs dot php dot net at afdelingp dot dk, Ilia)
 - Fixed bug #26128 (mbstring prints out wrong information on phpinfo()).
   (Moriyoshi)
 - Fixed bug #26113 (remove leftover local file when ftp_get/ftp_nb_get fails).
