@@ -629,6 +629,26 @@ int php_request_startup(CLS_D ELS_DC PLS_DC SLS_DC)
 	init_executor(CLS_C ELS_CC);
 	startup_scanner(CLS_C);
 
+	if (SG(request_info).auth_user) {
+		zval *auth_user;
+
+		MAKE_STD_ZVAL(auth_user);
+		auth_user->type = IS_STRING;
+		auth_user->value.str.val = SG(request_info).auth_user;
+		auth_user->value.str.len = strlen(auth_user->value.str.val);
+
+		zend_hash_update(&EG(symbol_table), "PHP_AUTH_USER", sizeof("PHP_AUTH_USER"), &auth_user, sizeof(zval *), NULL);
+	}
+	if (SG(request_info).auth_user) {
+		zval *auth_password;
+
+		MAKE_STD_ZVAL(auth_password);
+		auth_password->type = IS_STRING;
+		auth_password->value.str.val = SG(request_info).auth_password;
+		auth_password->value.str.len = strlen(auth_password->value.str.val);
+
+		zend_hash_update(&EG(symbol_table), "PHP_AUTH_PW", sizeof("PHP_AUTH_PW"), &auth_password, sizeof(zval *), NULL);
+	}
 	return SUCCESS;
 }
 

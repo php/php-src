@@ -111,14 +111,6 @@ SAPI_API void sapi_deactivate(SLS_D)
 	if (SG(request_info).post_data) {
 		efree(SG(request_info).post_data);
 	}
-	if (SG(server_context)) {
-		if (SG(request_info).auth_user) {
-			efree(SG(request_info).auth_user);
-		}
-		if (SG(request_info).auth_password) {
-			efree(SG(request_info).auth_password);
-		}
-	}
 }
 
 
