@@ -1,5 +1,9 @@
 --TEST--
 Memory leaks occur within an overloaded method that returns a reference
+--SKIPIF--
+<?php
+	if (!function_exists('overload')) die('SKIP overload() not avaliable');
+?>
 --FILE--
 <?php
 class foo {
