@@ -1562,17 +1562,18 @@ PHP_FUNCTION(imagecreatefromgd2part)
  */
 static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char *tn, void (*func_p)()) 
 {
-	zval **imgind, **file, **quality;
+	zval **imgind, **file, **quality, **type;
 	gdImagePtr im;
 	char *fn = NULL;
 	FILE *fp;
 	int argc = ZEND_NUM_ARGS();
-	int q = -1, i;
+	int q = -1, i, t = 1;
 
 	/* The quality parameter for Wbmp stands for the threshold when called from image2wbmp() */
 	/* When called from imagewbmp() the quality parameter stands for the foreground color. Default: black. */
+	/* The quality parameter for gd2 stands for chunk size */
 
-	if (argc < 1 || argc > 3 || zend_get_parameters_ex(argc, &imgind, &file, &quality) == FAILURE) {
+	if (argc < 1 || argc > 4 || zend_get_parameters_ex(argc, &imgind, &file, &quality, &type) == FAILURE) {
 		ZEND_WRONG_PARAM_COUNT();
 	}
 
@@ -1584,6 +1585,10 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
 		if (argc == 3) {
 			convert_to_long_ex(quality);
 			q = Z_LVAL_PP(quality);
+		}
+		if (argc == 4) {
+			convert_to_long_ex(type);
+			t = Z_LVAL_PP(type);
 		}
 	}
 
@@ -1622,7 +1627,10 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
 				break;
 #endif				
 			default:
-				(*func_p)(im, fp);
+				if (q == -1) {
+					q = 128;
+				}
+				(*func_p)(im, fp, q, t);
 				break;
 		}
 		fflush(fp);
@@ -1749,7 +1757,7 @@ PHP_FUNCTION(imagegd)
 /* }}} */
 
 #ifdef HAVE_GD_GD2
-/* {{{ proto int imagegd2(int im [, string filename])
+/* {{{ proto int imagegd2(int im [, string filename, [, int chunk_size, [, int type]]])
    Output GD2 image to browser or file */
 PHP_FUNCTION(imagegd2)
 {
