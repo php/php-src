@@ -39,6 +39,29 @@ ZEND_API zend_compiler_globals compiler_globals;
 ZEND_API zend_executor_globals executor_globals;
 #endif
 
+static void zend_duplicate_property_info(zend_property_info *property_info)
+{
+	property_info->name = estrndup(property_info->name, property_info->name_length);
+}
+
+
+static void zend_duplicate_property_info_internal(zend_property_info *property_info)
+{
+	property_info->name = zend_strndup(property_info->name, property_info->name_length);
+}
+
+
+static void zend_destroy_property_info(zend_property_info *property_info)
+{
+	efree(property_info->name);
+}
+
+
+static void zend_destroy_property_info_internal(zend_property_info *property_info)
+{
+	free(property_info->name);
+}
+
 static void build_runtime_defined_function_key(zval *result, char *name, int name_length, zend_op *opline TSRMLS_DC)
 {
 	char lineno_buf[32];
@@ -1779,7 +1802,7 @@ void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent_ce)
 
 	/* Inherit properties */
 	zend_hash_merge(&ce->default_properties, &parent_ce->default_properties, (void (*)(void *)) zval_add_ref, NULL, sizeof(zval *), 0);
-	zend_hash_merge_ex(&ce->properties_info, &parent_ce->properties_info, (copy_ctor_func_t) zend_duplicate_property_info, sizeof(zend_property_info), (merge_checker_func_t) do_inherit_property_access_check, ce);
+	zend_hash_merge_ex(&ce->properties_info, &parent_ce->properties_info, (copy_ctor_func_t) (ce->type & ZEND_INTERNAL_CLASS ? zend_duplicate_property_info_internal : zend_duplicate_property_info), sizeof(zend_property_info), (merge_checker_func_t) do_inherit_property_access_check, ce);
 
 	/* STATIC_MEMBERS_FIXME */
 /*	zend_hash_merge(ce->static_members, parent_ce->static_members, (void (*)(void *)) zval_add_ref, (void *) &tmp, sizeof(zval *), 0); */
@@ -2285,13 +2308,13 @@ void zend_do_implements_interface(znode *interface_znode TSRMLS_DC)
 }
 
 
-void mangle_property_name(char **dest, int *dest_length, char *src1, int src1_length, char *src2, int src2_length)
+void mangle_property_name(char **dest, int *dest_length, char *src1, int src1_length, char *src2, int src2_length, int internal)
 {
 	char *prop_name;
 	int prop_name_length;
         
 	prop_name_length = 1 + src1_length + 1 + src2_length;
-	prop_name = emalloc(prop_name_length+1);
+	prop_name = internal ? malloc(prop_name_length + 1) : emalloc(prop_name_length + 1);
 	prop_name[0] = '\0';
 	memcpy(prop_name + 1, src1, src1_length+1);
 	memcpy(prop_name + 1 + src1_length + 1, src2, src2_length+1);
@@ -3383,16 +3406,21 @@ again:
 }
 
 
-void zend_duplicate_property_info(zend_property_info *property_info)
+static void zval_ptr_dtor_internal(zval **zval_ptr)
 {
-	property_info->name = estrndup(property_info->name, property_info->name_length);
+#if DEBUG_ZEND>=2
+	printf("Reducing refcount for %x (%x):  %d->%d\n", *zval_ptr, zval_ptr, (*zval_ptr)->refcount, (*zval_ptr)->refcount-1);
+#endif
+	(*zval_ptr)->refcount--;
+	if ((*zval_ptr)->refcount==0) {
+		zval_dtor(*zval_ptr);
+		free(*zval_ptr);
+	} else if ((*zval_ptr)->refcount == 1) {
+		(*zval_ptr)->is_ref = 0;
+	}
 }
 
-
-void zend_destroy_property_info(zend_property_info *property_info)
-{
-	efree(property_info->name);
-}
+#define ZVAL_PTR_DTOR_INTERNAL (void (*)(void *)) zval_ptr_dtor_internal
 
 void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify_handlers TSRMLS_DC)
 {
@@ -3405,8 +3433,8 @@ void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify_handlers
 	ce->doc_comment = NULL;
 	ce->doc_comment_len = 0;
 
-	zend_hash_init_ex(&ce->default_properties, 0, NULL, ZVAL_PTR_DTOR, persistent_hashes, 0);
-	zend_hash_init_ex(&ce->properties_info, 0, NULL, (dtor_func_t) zend_destroy_property_info, persistent_hashes, 0);
+	zend_hash_init_ex(&ce->default_properties, 0, NULL, persistent_hashes ? ZVAL_PTR_DTOR_INTERNAL : ZVAL_PTR_DTOR, persistent_hashes, 0);
+	zend_hash_init_ex(&ce->properties_info, 0, NULL, (dtor_func_t) (persistent_hashes ? zend_destroy_property_info_internal : zend_destroy_property_info), persistent_hashes, 0);
 
 	if (persistent_hashes) {
 		ce->static_members = (HashTable *) malloc(sizeof(HashTable));

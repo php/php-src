@@ -1632,7 +1632,7 @@ ZEND_API int zend_declare_property(zend_class_entry *ce, char *name, int name_le
 				char *priv_name;
 				int priv_name_length;
 
-				mangle_property_name(&priv_name, &priv_name_length, ce->name, ce->name_length, name, name_length);
+				mangle_property_name(&priv_name, &priv_name_length, ce->name, ce->name_length, name, name_length, ce->type & ZEND_INTERNAL_CLASS);
 				zend_hash_update(target_symbol_table, priv_name, priv_name_length+1, &property, sizeof(zval *), NULL);
 				property_info.name = priv_name;
 				property_info.name_length = priv_name_length;
@@ -1642,7 +1642,7 @@ ZEND_API int zend_declare_property(zend_class_entry *ce, char *name, int name_le
 				char *prot_name;
 				int prot_name_length;
 
-				mangle_property_name(&prot_name, &prot_name_length, "*", 1, name, name_length);
+				mangle_property_name(&prot_name, &prot_name_length, "*", 1, name, name_length, ce->type & ZEND_INTERNAL_CLASS);
 				zend_hash_update(target_symbol_table, prot_name, prot_name_length+1, &property, sizeof(zval *), NULL);
 				property_info.name = prot_name;
 				property_info.name_length = prot_name_length;
@@ -1650,7 +1650,7 @@ ZEND_API int zend_declare_property(zend_class_entry *ce, char *name, int name_le
 			break;
 		case ZEND_ACC_PUBLIC:
 			zend_hash_update(target_symbol_table, name, name_length+1, &property, sizeof(zval *), NULL);
-			property_info.name = estrndup(name, name_length);
+			property_info.name = ce->type & ZEND_INTERNAL_CLASS ? zend_strndup(name, name_length) : estrndup(name, name_length);
 			property_info.name_length = name_length;
 			break;
 	}
@@ -1661,6 +1661,83 @@ ZEND_API int zend_declare_property(zend_class_entry *ce, char *name, int name_le
 
 	return SUCCESS;
 }
+
+ZEND_API int zend_declare_property_null(zend_class_entry *ce, char *name, int name_length, int access_type)
+{
+	zval *property;
+	
+	if (ce->type & ZEND_INTERNAL_CLASS) {
+		property = malloc(sizeof(zval));
+	} else {
+		ALLOC_ZVAL(property);
+	}
+	INIT_ZVAL(*property);
+	return zend_declare_property(ce, name, name_length, property, access_type);
+}
+
+ZEND_API int zend_declare_property_long(zend_class_entry *ce, char *name, int name_length, long value, int access_type)
+{
+	zval *property;
+	
+	if (ce->type & ZEND_INTERNAL_CLASS) {
+		property = malloc(sizeof(zval));
+	} else {
+		ALLOC_ZVAL(property);
+	}
+	INIT_PZVAL(property);
+	ZVAL_LONG(property, value);
+	return zend_declare_property(ce, name, name_length, property, access_type);
+}
+
+ZEND_API void zend_update_property(zend_class_entry *scope, zval *object, char *name, int name_length, zval *value TSRMLS_DC)
+{
+	zval property;
+	zend_class_entry *old_scope = EG(scope);
+	
+	EG(scope) = scope;
+
+	if (!Z_OBJ_HT_P(object)->write_property) {
+		zend_error(E_CORE_ERROR, "Property %s of class %s cannot be updated", Z_OBJCE_P(object)->name, name);
+	}
+	ZVAL_STRINGL(&property, name, name_length, 0);
+	Z_OBJ_HT_P(object)->write_property(object, &property, value TSRMLS_CC);
+
+	EG(scope) = old_scope;
+}
+
+ZEND_API void zend_update_property_null(zend_class_entry *scope, zval *object, char *name, int name_length TSRMLS_DC)
+{
+	zval *tmp;
+
+	ALLOC_ZVAL(tmp);
+	tmp->is_ref = 0;
+	tmp->refcount = 0;
+	ZVAL_NULL(tmp);
+	zend_update_property(scope, object, name, name_length, tmp TSRMLS_CC);
+}
+
+ZEND_API void zend_update_property_long(zend_class_entry *scope, zval *object, char *name, int name_length, long value TSRMLS_DC)
+{
+	zval *tmp;
+	
+	ALLOC_ZVAL(tmp);
+	tmp->is_ref = 0;
+	tmp->refcount = 0;
+	ZVAL_LONG(tmp, value);
+	zend_update_property(scope, object, name, name_length, tmp TSRMLS_CC);
+}
+
+ZEND_API void zend_update_property_string(zend_class_entry *scope, zval *object, char *name, int name_length, char *value TSRMLS_DC)
+{
+	zval *tmp;
+	
+	ALLOC_ZVAL(tmp);
+	tmp->is_ref = 0;
+	tmp->refcount = 0;
+	ZVAL_STRING(tmp, value, 1);
+	zend_update_property(scope, object, name, name_length, tmp TSRMLS_CC);
+}
+
 /*
  * Local variables:
  * tab-width: 4
