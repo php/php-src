@@ -39,6 +39,9 @@
 /* should be added to runtime config*/
 #define PHP_URL_FOPEN 1
 
+/* set to enable overload extension */
+#define HAVE_OVERLOAD 1
+
 #define STDIN_FILENO 0
 #define STDOUT_FILENO 1
 #define STDERR_FILENO 2
