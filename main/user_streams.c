@@ -209,7 +209,7 @@ PHP_FUNCTION(file_register_wrapper)
 	}
 
 	if (!PG(allow_url_fopen)) {
-		zend_error(E_WARNING, "%s(): fopen wrappers have been disabled", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "fopen wrappers have been disabled");
 		RETURN_FALSE;
 	}
 	
@@ -230,7 +230,7 @@ PHP_FUNCTION(file_register_wrapper)
 			RETURN_TRUE;
 		}
 	} else {
-		zend_error(E_WARNING, "%s(): class '%s' is undefined", get_active_function_name(TSRMLS_C),
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "class '%s' is undefined",
 				classname);
 	}
 
@@ -272,7 +272,7 @@ static size_t php_userstreamop_write(php_stream *stream, const char *buf, size_t
 
 	/* don't allow strange buffer overruns due to bogus return */
 	if (didwrite > count) {
-		zend_error(E_WARNING, "%s::" USERSTREAM_WRITE " - wrote %d bytes more data than requested (%d written, %d max)",
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s::" USERSTREAM_WRITE " - wrote %d bytes more data than requested (%d written, %d max)",
 				us->wrapper->classname,
 				didwrite - count, didwrite, count);
 		didwrite = count;
@@ -328,7 +328,7 @@ static size_t php_userstreamop_read(php_stream *stream, char *buf, size_t count 
 		if (retval && Z_TYPE_P(retval) == IS_STRING) {
 			didread = Z_STRLEN_P(retval);
 			if (didread > count) {
-				zend_error(E_WARNING, "%s::" USERSTREAM_READ " - read %d bytes more data than requested (%d read, %d max) - excess data will be lost",
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s::" USERSTREAM_READ " - read %d bytes more data than requested (%d read, %d max) - excess data will be lost",
 						us->wrapper->classname, didread - count, didread, count);
 				didread = count;
 			}
@@ -484,7 +484,7 @@ static char *php_userstreamop_gets(php_stream *stream, char *buf, size_t size TS
 	if (retval && Z_TYPE_P(retval) == IS_STRING) {
 		didread = Z_STRLEN_P(retval);
 		if (didread > size) {
-			zend_error(E_WARNING, "%s::" USERSTREAM_GETS " - read more data than requested; some data will be lost",
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s::" USERSTREAM_GETS " - read more data than requested; some data will be lost",
 					us->wrapper->classname);
 			didread = size;
 		}
