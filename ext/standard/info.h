@@ -32,15 +32,27 @@
 #ifndef _INFO_H
 #define _INFO_H
 
-#define PHP_ENTRY_NAME_COLOR "#999999"
+#define PHP_ENTRY_NAME_COLOR "#FFFFFF"
 #define PHP_CONTENTS_COLOR "#DDDDDD"
-#define PHP_HEADER_COLOR "#00DDDD"
+#define PHP_HEADER_COLOR "#FFFF99"
+
+#define PHP_INFO_GENERAL			(1<<0)
+#define PHP_INFO_CREDITS			(1<<1)
+#define PHP_INFO_CONFIGURATION		(1<<2)
+#define PHP_INFO_MODULES			(1<<3)
+#define PHP_INFO_ENVIRONMENT		(1<<4)
+#define PHP_INFO_VARIABLES			(1<<5)
+#define PHP_INFO_LICENSE			(1<<6)
+
+#define PHP_INFO_ALL		0xFFFFFFFF
 
 PHP_FUNCTION(version);
 PHP_FUNCTION(info);
-PHPAPI void _php3_info(void);
+PHPAPI void _php3_info(int flag);
 
 PHPAPI void php_info_print_table_header(int num_cols, ...);
 PHPAPI void php_info_print_table_row(int num_cols, ...);
+
+void register_phpinfo_constants(INIT_FUNC_ARGS);
 
 #endif /* _INFO_H */

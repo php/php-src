@@ -381,6 +381,7 @@ int php3_minit_basic(INIT_FUNC_ARGS)
 	test_class_startup();
 	REGISTER_INI_ENTRIES();
 
+	register_phpinfo_constants(INIT_FUNC_ARGS_PASSTHRU);
 	return SUCCESS;
 }
 

@@ -172,7 +172,57 @@ void php3_info_apache(ZEND_MODULE_INFO_FUNC_ARGS)
 	SLS_FETCH();
 
 	serv = ((request_rec *) SG(server_context))->server;
-	
+
+	{
+		register int i;
+		array_header *arr;
+		table_entry *elts;
+		request_rec *r;
+		SLS_FETCH();
+
+		r = ((request_rec *) SG(server_context));
+		arr = table_elts(r->subprocess_env);
+		elts = (table_entry *)arr->elts;
+		
+		SECTION("Apache Environment");	
+		PUTS("<table border=5 width=\"600\">\n");
+		php_info_print_table_header(2, "Variable", "Value");
+		for (i=0; i < arr->nelts; i++) {
+			php_info_print_table_row(2, elts[i].key, elts[i].val);
+		}
+		PUTS("</table>\n");
+	}
+
+	{
+		array_header *env_arr;
+		table_entry *env;
+		int i;
+		request_rec *r;
+		SLS_FETCH();
+		
+		r = ((request_rec *) SG(server_context));
+		SECTION("HTTP Headers Information");
+		PUTS("<table border=5 width=\"600\">\n");
+		PUTS(" <tr><th colspan=2 bgcolor=\"" PHP_HEADER_COLOR "\">HTTP Request Headers</th></tr>\n");
+		php_info_print_table_row(2, "HTTP Request", r->the_request);
+		env_arr = table_elts(r->headers_in);
+		env = (table_entry *)env_arr->elts;
+		for (i = 0; i < env_arr->nelts; ++i) {
+			if (env[i].key) {
+				php_info_print_table_row(2, env[i].key, env[i].val);
+			}
+		}
+		PUTS(" <tr><th colspan=2  bgcolor=\"" PHP_HEADER_COLOR "\">HTTP Response Headers</th></tr>\n");
+		env_arr = table_elts(r->headers_out);
+		env = (table_entry *)env_arr->elts;
+		for(i = 0; i < env_arr->nelts; ++i) {
+			if (env[i].key) {
+				php_info_print_table_row(2, env[i].key, env[i].val);
+			}
+		}
+		PUTS("</table>\n\n");
+	}
+
     PUTS("<table border=5 width=\"600\">\n");
     php_info_print_table_header(2, "Entry", "Value");
 #if WIN32|WINNT

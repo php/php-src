@@ -310,7 +310,7 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 					}
 					cgi_started=1;
 					php3_TreatHeaders();
-					_php3_info();
+					_php3_info(0xFFFFFFFF);
 					exit(1);
 					break;
 				case 's':
