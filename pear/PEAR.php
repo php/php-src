@@ -432,7 +432,7 @@ class PEAR
 
     /**
     * Push a new error handler on top of the error handler options stack. With this
-    * you can easely override the actual error handler for some code and restore
+    * you can easily override the actual error handler for some code and restore
     * it later with popErrorHandling.
     *
     * @param $mode mixed (same as setErrorHandling)
