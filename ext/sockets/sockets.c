@@ -781,6 +781,7 @@ PHP_FUNCTION(socket_read)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl|l", &arg1, &length, &type) == FAILURE)
 		return;
 
+	if(length<0) RETURN_FALSE;
 	tmpbuf = emalloc(length + 1);
 	
 	ZEND_FETCH_RESOURCE(php_sock, php_socket *, &arg1, -1, le_socket_name, le_socket);
@@ -1120,9 +1121,11 @@ PHP_FUNCTION(socket_iovec_alloc)
 
 	for (i = 0, j = 1; i < num_vectors; i++, j++) {
 		convert_to_long_ex(args[j]);
-		
-		vector_array[i].iov_base	= (char*)emalloc(Z_LVAL_PP(args[j]));
-		vector_array[i].iov_len		= Z_LVAL_PP(args[j]);
+	
+		if(Z_LVAL_PP(args[j])>0) {
+			vector_array[i].iov_base	= (char*)emalloc(Z_LVAL_PP(args[j]));
+			vector_array[i].iov_len		= Z_LVAL_PP(args[j]);
+		}
 	}
 	
 	efree(args);
@@ -1330,6 +1333,8 @@ PHP_FUNCTION(socket_recv)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rzll", &php_sock_res, &buf, &len, &flags) == FAILURE)
 		return;
 
+	if(len<0) RETURN_FALSE;
+
 	ZEND_FETCH_RESOURCE(php_sock, php_socket *, &php_sock_res, -1, le_socket_name, le_socket);
 
 	recv_buf = emalloc(len + 1);
@@ -1403,6 +1408,8 @@ PHP_FUNCTION(socket_recvfrom)
 		return;
 
 	ZEND_FETCH_RESOURCE(php_sock, php_socket *, &arg1, -1, le_socket_name, le_socket);
+
+	if(arg3<0) RETURN_FALSE;
 
 	recv_buf = emalloc(arg3 + 2);
 	memset(recv_buf, 0, arg3 + 2);
@@ -1539,6 +1546,8 @@ PHP_FUNCTION(socket_recvmsg)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rrzzzz|z", &arg1, &arg2, &arg3, &arg4, &arg5, &arg6, &arg7) == FAILURE)
 		return;
+
+	if(Z_LVAL_P(arg4)<0) RETURN_FALSE;
 
 	ZEND_FETCH_RESOURCE(php_sock, php_socket *, &arg1, -1, le_socket_name, le_socket);
 	ZEND_FETCH_RESOURCE(iov, php_iovec_t *, &arg2, -1, le_iov_name, le_iov);
