@@ -1,3 +1,81 @@
+2004-05-12  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_API.c:
+      - Centralize register and hash operations for startup/register_module
+        in new zend_register_module_ex().
+
+    * ZendEngine2/zend_API.c:
+      - Revert to 1.249
+
+    * TSRM/TSRM.c:
+      - More work on ts_free_id() but still keep it out
+
+    * TSRM/TSRM.c:
+      ifdef out the ts_free_id until php 5.1 and until it is complete
+
+2004-05-12  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      ext/imap/php_imap.c:
+      MFH: Fixed various possible memory leaks.
+
+    * ext/imap/php_imap.c:
+      Fixed various possible memory leaks.
+
+    * (PHP_4_3)
+      NEWS
+      ext/pgsql/pgsql.c:
+      MFH: Fixed bug #28374 (Possible unterminated loop inside
+      _php_pgsql_trim_message()).
+
+    * ext/pgsql/pgsql.c:
+      Fixed bug #28374 (Possible unterminated loop inside
+      _php_pgsql_trim_message()).
+
+2004-05-12  Ard Biesheuvel  <a.k.biesheuvel@ewi.tudelft.nl>
+
+    * ext/interbase/ibase_query.c:
+      Fixed a couple of inconsistencies in param binding
+
+    * ext/interbase/config.m4
+      ext/interbase/config.w32
+      ext/interbase/ibase_query.c
+      ext/interbase/ibase_service.c
+      ext/interbase/interbase.c
+      ext/interbase/php_ibase_includes.h
+      ext/interbase/php_interbase.h:
+      Dropped support for ancient Interbase versions (< 6)
+
+    * ext/interbase/interbase.c:
+      Made ibase_timefmt() check its args more thoroughly and nuked a pointless
+      malloc()
+
+    * ext/interbase/interbase.c:
+      Made ibase_gen_id() bail out on incorrect args
+
+2004-05-12  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * (PHP_4_3)
+      main/streams.c:
+      Avoid Bug #28363 by not seeking if we don't have a read buffer
+
+2004-05-12  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * TSRM/TSRM.c:
+      - Implement ts_free_id()
+
+    * ext/standard/url_scanner_ex.c:
+      - Touch
+
+    * ext/standard/basic_functions.c
+      ext/standard/url_scanner_ex.re:
+      - Move hash table destruction to proper location
+
+    * ext/bcmath/bcmath.c
+      ext/ldap/ldap.c
+      ext/sqlite/sqlite.c:
+      - Added missing UNREGISTER_INI_ENTRIES
+
 2004-05-11  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_4_3)
