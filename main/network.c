@@ -581,19 +581,24 @@ PHPAPI int php_stream_sock_ssl_activate_with_method(php_stream *stream, int acti
 	php_netstream_data_t *sock = (php_netstream_data_t*)stream->abstract;
 	SSL_CTX *ctx = NULL;
 
-	if (!php_stream_is(stream, PHP_STREAM_IS_SOCKET))
+	if (!php_stream_is(stream, PHP_STREAM_IS_SOCKET)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "php_stream_sock_ssl_activate_with_method: stream is not a network stream");
 		return FAILURE;
+	}
 	
 	if (activate == sock->ssl_active)
 		return SUCCESS;	/* already in desired mode */
 	
 	if (activate && sock->ssl_handle == NULL)	{
 		ctx = SSL_CTX_new(method);
-		if (ctx == NULL)
+		if (ctx == NULL) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "php_stream_sock_ssl_activate_with_method: failed to create an SSL context");
 			return FAILURE;
+		}
 
 		sock->ssl_handle = SSL_new(ctx);
 		if (sock->ssl_handle == NULL)	{
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "php_stream_sock_ssl_activate_with_method: failed to create an SSL handle");
 			SSL_CTX_free(ctx);
 			return FAILURE;
 		}
@@ -603,6 +608,7 @@ PHPAPI int php_stream_sock_ssl_activate_with_method(php_stream *stream, int acti
 
 	if (activate)	{
 		if (SSL_connect(sock->ssl_handle) <= 0)	{
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "php_stream_sock_ssl_activate_with_method: SSL handshake/connection failed");
 			SSL_shutdown(sock->ssl_handle);
 			return FAILURE;
 		}
