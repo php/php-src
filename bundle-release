@@ -1,6 +1,6 @@
 #!/bin/sh
 
-EXTS=`cat .bundle`
+EXTS=`cat bundle`
 PEAR=`which pear`
 
 for i in $EXTS; do
