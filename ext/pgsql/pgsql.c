@@ -486,7 +486,11 @@ PHP_FUNCTION(pg_close)
 	}
 	
 	ZEND_FETCH_RESOURCE2(pgsql, PGconn *, pgsql_link, id, "PostgreSQL link", le_link, le_plink);
-	zend_list_delete(id);
+	zend_list_delete(Z_RESVAL_PP(pgsql_link));
+	if (Z_RESVAL_PP(pgsql_link)==PGG(default_link)) {
+		zend_list_delete(PGG(default_link));
+	}
+
 	RETURN_TRUE;
 }
 /* }}} */
