@@ -11,10 +11,10 @@ AC_ARG_ENABLE(bcmath,
     AC_MSG_RESULT(yes)
     PHP_EXTENSION(bcmath)
   else
-    AC_DEFINE(WITH_BCMATH, 0)
+    AC_DEFINE(WITH_BCMATH, 0,[ ])
     AC_MSG_RESULT(no)
   fi
 ],[
-  AC_DEFINE(WITH_BCMATH, 0)
+  AC_DEFINE(WITH_BCMATH, 0,[ ])
   AC_MSG_RESULT(no)
 ]) 
