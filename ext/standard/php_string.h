@@ -123,12 +123,18 @@ static inline char *
 php_memnstr(char *haystack, char *needle, int needle_len, char *end)
 {
 	char *p = haystack;
-	char *s = NULL;
+	char first = *needle;
 
-	for(; p <= end - needle_len && 
-			(s = (char*)memchr(p, *needle, end - p - needle_len + 1)); p = s + 1) {
-		if(memcmp(s, needle, needle_len) == 0)
-			return s;
+	/* let end point to the last character where needle may start */
+	end -= needle_len;
+	
+	while (p <= end) {
+		while (*p != first)
+			if (++p > end)
+				return NULL;
+		if (memcmp(p, needle, needle_len) == 0)
+			return p;
+		p++;
 	}
 	return NULL;
 }
