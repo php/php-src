@@ -37,8 +37,12 @@
 #include "ext/standard/php_standard.h"
 #include "ext/standard/head.h"
 #include <math.h>
-#if HAVE_LIBGD13
-#include <gd.h>
+#if HAVE_GD_BUNDLED
+# include "../gd/libgd/gd.h"
+#else
+# if HAVE_LIBGD13
+#  include <gd.h>
+# endif
 #endif
 
 #ifdef HAVE_UNISTD_H
