@@ -273,15 +273,24 @@ void php_set_session_var(char *name, size_t namelen, zval *state_val, php_unseri
 
 int php_get_session_var(char *name, size_t namelen, zval ***state_var TSRMLS_DC)
 {
+	/*
+	 * If register_globals is set, the global variable is preferred.
+	 *
+	 * If it is not set and track vars are available, track vars are used.
+	 */
+	
+	if (PG(register_globals)) {
+		return zend_hash_find(&EG(symbol_table), name, namelen+1, (void **) state_var);
+	}
+	
 	if (PS(http_session_vars)) {
 		if (zend_hash_find(Z_ARRVAL_P(PS(http_session_vars)), name, namelen+1, (void **) state_var)==SUCCESS) {
 			return SUCCESS;
 		}
 	} else if (!PG(register_globals)) {
 		/* register_globals is disabled, but we don't have http_session_vars */
-		return HASH_KEY_NON_EXISTANT;
+		return FAILURE;
 	}	
-	return zend_hash_find(&EG(symbol_table), name, namelen+1, (void **) state_var);
 }
 
 #define PS_BIN_NR_OF_BITS 8
