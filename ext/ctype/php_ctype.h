@@ -40,18 +40,17 @@ PHP_RINIT_FUNCTION(ctype);
 PHP_RSHUTDOWN_FUNCTION(ctype);
 PHP_MINFO_FUNCTION(ctype);
 
-PHP_FUNCTION(confirm_ctype_compiled);	/* For testing, remove later. */
-PHP_FUNCTION(isalnum);
-PHP_FUNCTION(isalpha);
-PHP_FUNCTION(iscntrl);
-PHP_FUNCTION(isdigit);
-PHP_FUNCTION(islower);
-PHP_FUNCTION(isgraph);
-PHP_FUNCTION(isprint);
-PHP_FUNCTION(ispunct);
-PHP_FUNCTION(isspace);
-PHP_FUNCTION(isupper);
-PHP_FUNCTION(isxdigit);
+PHP_FUNCTION(ctype_alnum);
+PHP_FUNCTION(ctype_alpha);
+PHP_FUNCTION(ctype_cntrl);
+PHP_FUNCTION(ctype_digit);
+PHP_FUNCTION(ctype_lower);
+PHP_FUNCTION(ctype_graph);
+PHP_FUNCTION(ctype_print);
+PHP_FUNCTION(ctype_punct);
+PHP_FUNCTION(ctype_space);
+PHP_FUNCTION(ctype_upper);
+PHP_FUNCTION(ctype_xdigit);
 
 /* 
   	Declare any global variables you may need between the BEGIN
