@@ -277,7 +277,7 @@ static gzFile *php3_gzopen_with_path(char *filename, char *mode, char *path, cha
 /* {{{ proto array gzfile(string filename [, int use_include_path])
 Read und uncompress entire .gz-file into an array */
 PHP_FUNCTION(gzfile) {
-	pval *filename, *arg2;
+	pval **filename, **arg2;
 	gzFile zp;
 	char *slashed, buf[8192];
 	register int i=0;
@@ -287,25 +287,25 @@ PHP_FUNCTION(gzfile) {
 	/* check args */
 	switch (ARG_COUNT(ht)) {
 	case 1:
-		if (getParameters(ht,1,&filename) == FAILURE) {
+		if (getParametersEx(1,&filename) == FAILURE) {
 			WRONG_PARAM_COUNT;
 		}
 		break;
 	case 2:
-		if (getParameters(ht,2,&filename,&arg2) == FAILURE) {
+		if (getParametersEx(2,&filename,&arg2) == FAILURE) {
 			WRONG_PARAM_COUNT;
 		}
-		convert_to_long(arg2);
-		use_include_path = arg2->value.lval;
+		convert_to_long_ex(arg2);
+		use_include_path = (*arg2)->value.lval;
 		break;
 	default:
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_string(filename);
+	convert_to_string_ex(filename);
 
-	zp = php3_gzopen_wrapper(filename->value.str.val,"r", use_include_path|ENFORCE_SAFE_MODE);
+	zp = php3_gzopen_wrapper((*filename)->value.str.val,"r", use_include_path|ENFORCE_SAFE_MODE);
 	if (!zp) {
-		php_error(E_WARNING,"gzFile(\"%s\") - %s",filename->value.str.val,strerror(errno));
+		php_error(E_WARNING,"gzFile(\"%s\") - %s",(*filename)->value.str.val,strerror(errno));
 		RETURN_FALSE;
 	}
 
@@ -333,7 +333,7 @@ PHP_FUNCTION(gzfile) {
 /* {{{ proto int gzopen(string filename, string mode [, int use_include_path])
 Open a .gz-file and return a .gz-file pointer */
 PHP_FUNCTION(gzopen) {
-	pval *arg1, *arg2, *arg3;
+	pval **arg1, **arg2, **arg3;
 	gzFile *zp;
 	char *p;
 	int use_include_path = 0;
@@ -341,32 +341,32 @@ PHP_FUNCTION(gzopen) {
 	
 	switch(ARG_COUNT(ht)) {
 	case 2:
-		if (getParameters(ht,2,&arg1,&arg2) == FAILURE) {
+		if (getParametersEx(2,&arg1,&arg2) == FAILURE) {
 			WRONG_PARAM_COUNT;
 		}
 		break;
 	case 3:
-		if (getParameters(ht,3,&arg1,&arg2,&arg3) == FAILURE) {
+		if (getParametersEx(3,&arg1,&arg2,&arg3) == FAILURE) {
 			WRONG_PARAM_COUNT;
 		}
-		convert_to_long(arg3);
-		use_include_path = arg3->value.lval;
+		convert_to_long_ex(arg3);
+		use_include_path = (*arg3)->value.lval;
 		break;
 	default:
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_string(arg1);
-	convert_to_string(arg2);
-	p = estrndup(arg2->value.str.val,arg2->value.str.len);
+	convert_to_string_ex(arg1);
+	convert_to_string_ex(arg2);
+	p = estrndup((*arg2)->value.str.val,(*arg2)->value.str.len);
 
 	/*
 	 * We need a better way of returning error messages from
 	 * php3_gzopen_wrapper().
 	 */
-	zp = php3_gzopen_wrapper(arg1->value.str.val, p, use_include_path|ENFORCE_SAFE_MODE);
+	zp = php3_gzopen_wrapper((*arg1)->value.str.val, p, use_include_path|ENFORCE_SAFE_MODE);
 	if (!zp) {
 		php_error(E_WARNING,"gzopen(\"%s\",\"%s\") - %s",
-					arg1->value.str.val, p, strerror(errno));
+					(*arg1)->value.str.val, p, strerror(errno));
 		efree(p);
 		RETURN_FALSE;
 	}
@@ -379,14 +379,14 @@ PHP_FUNCTION(gzopen) {
 /* {{{ proto int gzclose(int zp)
 Close an open .gz-file pointer */
 PHP_FUNCTION(gzclose) {
-	pval *arg1;
+	pval **arg1;
 	gzFile *zp;
 
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	ZEND_FETCH_RESOURCE(zp, gzFile *, &arg1, -1, "Zlib file", le_zp);
-	zend_list_delete(arg1->value.lval);
+	ZEND_FETCH_RESOURCE(zp, gzFile *, arg1, -1, "Zlib file", le_zp);
+	zend_list_delete((*arg1)->value.lval);
 	RETURN_TRUE;
 }
 /* }}} */
@@ -394,13 +394,13 @@ PHP_FUNCTION(gzclose) {
 /* {{{ proto int gzeof(int zp)
 Test for end-of-file on a .gz-file pointer */
 PHP_FUNCTION(gzeof) {
-	pval *arg1;
+	pval **arg1;
 	gzFile *zp;
 	
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	ZEND_FETCH_RESOURCE(zp, gzFile *, &arg1, -1, "Zlib file", le_zp);
+	ZEND_FETCH_RESOURCE(zp, gzFile *, arg1, -1, "Zlib file", le_zp);
 
 	if ((gzeof(zp))) {
 		RETURN_TRUE;
@@ -413,19 +413,19 @@ PHP_FUNCTION(gzeof) {
 /* {{{ proto string gzgets(int zp, int length)
 Get a line from .gz-file pointer */
 PHP_FUNCTION(gzgets) {
-	pval *arg1, *arg2;
+	pval **arg1, **arg2;
 	gzFile *zp;
 	int len;
 	char *buf;
 	PLS_FETCH();
 	
-	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
+	if (ARG_COUNT(ht) != 2 || getParametersEx(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(arg2);
-	len = arg2->value.lval;
+	convert_to_long_ex(arg2);
+	len = (*arg2)->value.lval;
 
-	ZEND_FETCH_RESOURCE(zp, gzFile *, &arg1, -1, "Zlib file", le_zp);
+	ZEND_FETCH_RESOURCE(zp, gzFile *, arg1, -1, "Zlib file", le_zp);
 
 	buf = emalloc(sizeof(char) * (len + 1));
 	/* needed because recv doesnt put a null at the end*/
@@ -449,16 +449,16 @@ PHP_FUNCTION(gzgets) {
 /* {{{ proto string gzgetc(int zp)
 Get a character from .gz-file pointer */
 PHP_FUNCTION(gzgetc) {
-	pval *arg1;
+	pval **arg1;
 	gzFile *zp;
 	int c;
 	char *buf;
 	
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	ZEND_FETCH_RESOURCE(zp, gzFile *, &arg1, -1, "Zlib file", le_zp);
+	ZEND_FETCH_RESOURCE(zp, gzFile *, arg1, -1, "Zlib file", le_zp);
 
 	buf = emalloc(sizeof(char) * 2);
 	if ((c=gzgetc(zp)) == (-1)) {
@@ -480,7 +480,7 @@ PHP_FUNCTION(gzgetc) {
 Get a line from file pointer and strip HTML tags */
 PHP_FUNCTION(gzgetss)
 {
-	pval *fd, *bytes, *allow=NULL;
+	pval **fd, **bytes, **allow=NULL;
 	gzFile *zp;
 	int len;
 	char *buf;
@@ -488,15 +488,15 @@ PHP_FUNCTION(gzgetss)
 	
 	switch(ARG_COUNT(ht)) {
 		case 2:
-			if(getParameters(ht, 2, &fd, &bytes) == FAILURE) {
+			if(getParametersEx(2, &fd, &bytes) == FAILURE) {
 				RETURN_FALSE;
 			}
 			break;
 		case 3:
-			if(getParameters(ht, 3, &fd, &bytes, &allow) == FAILURE) {
+			if(getParametersEx(3, &fd, &bytes, &allow) == FAILURE) {
 				RETURN_FALSE;
 			}
-			convert_to_string(allow);
+			convert_to_string_ex(allow);
 			break;
 		default:
 			WRONG_PARAM_COUNT;
@@ -504,11 +504,11 @@ PHP_FUNCTION(gzgetss)
 			break;
 	}
 
-	convert_to_long(bytes);
+	convert_to_long_ex(bytes);
 
-	len = bytes->value.lval;
+	len = (*bytes)->value.lval;
 
-	ZEND_FETCH_RESOURCE(zp, gzFile *, &fd, -1, "Zlib file", le_zp);
+	ZEND_FETCH_RESOURCE(zp, gzFile *, fd, -1, "Zlib file", le_zp);
 
 	buf = emalloc(sizeof(char) * (len + 1));
 	/*needed because recv doesnt set null char at end*/
@@ -519,7 +519,7 @@ PHP_FUNCTION(gzgetss)
 	}
 
 	/* strlen() can be used here since we are doing it on the return of an fgets() anyway */
-	_php3_strip_tags(buf, strlen(buf), ZLIBG(gzgetss_state), allow?allow->value.str.val:NULL);
+	_php3_strip_tags(buf, strlen(buf), ZLIBG(gzgetss_state), allow?(*allow)->value.str.val:NULL);
 	RETURN_STRING(buf, 0);
 	
 }
@@ -528,7 +528,7 @@ PHP_FUNCTION(gzgetss)
 /* {{{ proto int gzwrite(int zp, string str [, int length])
 Binary-safe .gz-file write */
 PHP_FUNCTION(gzwrite) {
-	pval *arg1, *arg2, *arg3=NULL;
+	pval **arg1, **arg2, **arg3=NULL;
 	gzFile *zp;
 	int ret;
 	int num_bytes;
@@ -536,33 +536,33 @@ PHP_FUNCTION(gzwrite) {
 
 	switch (ARG_COUNT(ht)) {
 		case 2:
-			if (getParameters(ht, 2, &arg1, &arg2)==FAILURE) {
+			if (getParametersEx(2, &arg1, &arg2)==FAILURE) {
 				RETURN_FALSE;
 			}
-			convert_to_string(arg2);
-			num_bytes = arg2->value.str.len;
+			convert_to_string_ex(arg2);
+			num_bytes = (*arg2)->value.str.len;
 			break;
 		case 3:
-			if (getParameters(ht, 3, &arg1, &arg2, &arg3)==FAILURE) {
+			if (getParametersEx(3, &arg1, &arg2, &arg3)==FAILURE) {
 				RETURN_FALSE;
 			}
-			convert_to_string(arg2);
-			convert_to_long(arg3);
-			num_bytes = MIN(arg3->value.lval, arg2->value.str.len);
+			convert_to_string_ex(arg2);
+			convert_to_long_ex(arg3);
+			num_bytes = MIN((*arg3)->value.lval, (*arg2)->value.str.len);
 			break;
 		default:
 			WRONG_PARAM_COUNT;
 			/* NOTREACHED */
 			break;
 	}				
-	ZEND_FETCH_RESOURCE(zp, gzFile *, &arg1, -1, "Zlib file", le_zp);
+	ZEND_FETCH_RESOURCE(zp, gzFile *, arg1, -1, "Zlib file", le_zp);
 
 	/* strip slashes only if the length wasn't specified explicitly */
 	if (!arg3 && PG(magic_quotes_runtime)) {
-		php_stripslashes(arg2->value.str.val,&num_bytes);
+		php_stripslashes((*arg2)->value.str.val,&num_bytes);
 	}
 
-	ret = gzwrite(zp, arg2->value.str.val,num_bytes);
+	ret = gzwrite(zp, (*arg2)->value.str.val,num_bytes);
 	RETURN_LONG(ret);
 }	
 /* }}} */
@@ -574,14 +574,14 @@ PHP_FUNCTION(gzwrite) {
 /* {{{ proto int gzrewind(int zp)
 Rewind the position of a .gz-file pointer */
 PHP_FUNCTION(gzrewind) {
-	pval *arg1;
+	pval **arg1;
 	gzFile *zp;
 	
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	ZEND_FETCH_RESOURCE(zp, gzFile *, &arg1, -1, "Zlib file", le_zp);
+	ZEND_FETCH_RESOURCE(zp, gzFile *, arg1, -1, "Zlib file", le_zp);
 
 	gzrewind(zp);
 	RETURN_TRUE;
@@ -591,15 +591,15 @@ PHP_FUNCTION(gzrewind) {
 /* {{{ proto int gztell(int zp)
 Get .gz-file pointer's read/write position */
 PHP_FUNCTION(gztell) {
-	pval *arg1;
+	pval **arg1;
 	long pos;
 	gzFile *zp;
 	
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	ZEND_FETCH_RESOURCE(zp, gzFile *, &arg1, -1, "Zlib file", le_zp);
+	ZEND_FETCH_RESOURCE(zp, gzFile *, arg1, -1, "Zlib file", le_zp);
 
 	pos = gztell(zp);
 	RETURN_LONG(pos);
@@ -609,20 +609,18 @@ PHP_FUNCTION(gztell) {
 /* {{{ proto int gzseek(int zp, int offset)
 Seek on a file pointer */
 PHP_FUNCTION(gzseek) {
-	pval *arg1, *arg2;
+	pval **arg1, **arg2;
 	int ret;
-	long pos;
 	gzFile *zp;
 	
-	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
+	if (ARG_COUNT(ht) != 2 || getParametersEx(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(arg2);
-	pos = arg2->value.lval;
+	convert_to_long_ex(arg2);
 
-	ZEND_FETCH_RESOURCE(zp, gzFile *, &arg1, -1, "Zlib file", le_zp);
+	ZEND_FETCH_RESOURCE(zp, gzFile *, arg1, -1, "Zlib file", le_zp);
 
- 	ret = gzseek(zp,pos,SEEK_SET);
+ 	ret = gzseek(zp, (*arg2)->value.lval, SEEK_SET);
 	RETURN_LONG(ret);
 }
 /* }}} */
@@ -633,7 +631,7 @@ PHP_FUNCTION(gzseek) {
 /* {{{ proto int readgzfile(string filename [, int use_include_path])
 Output a .gz-file */
 PHP_FUNCTION(readgzfile) {
-	pval *arg1, *arg2;
+	pval **arg1, **arg2;
 	char buf[8192];
 	gzFile *zp;
 	int b, size;
@@ -643,29 +641,29 @@ PHP_FUNCTION(readgzfile) {
 	/* check args */
 	switch (ARG_COUNT(ht)) {
 	case 1:
-		if (getParameters(ht,1,&arg1) == FAILURE) {
+		if (getParametersEx(1,&arg1) == FAILURE) {
 			WRONG_PARAM_COUNT;
 		}
 		break;
 	case 2:
-		if (getParameters(ht,2,&arg1,&arg2) == FAILURE) {
+		if (getParametersEx(2,&arg1,&arg2) == FAILURE) {
 			WRONG_PARAM_COUNT;
 		}
-		convert_to_long(arg2);
-		use_include_path = arg2->value.lval;
+		convert_to_long_ex(arg2);
+		use_include_path = (*arg2)->value.lval;
 		break;
 	default:
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_string(arg1);	
+	convert_to_string_ex(arg1);
 
 	/*
 	 * We need a better way of returning error messages from
 	 * php3_gzopen_wrapper().
 	 */
-	zp = php3_gzopen_wrapper(arg1->value.str.val,"r", use_include_path|ENFORCE_SAFE_MODE);
+	zp = php3_gzopen_wrapper((*arg1)->value.str.val,"r", use_include_path|ENFORCE_SAFE_MODE);
 	if (!zp){
-		php_error(E_WARNING,"ReadGzFile(\"%s\") - %s",arg1->value.str.val,strerror(errno));
+		php_error(E_WARNING,"ReadGzFile(\"%s\") - %s",(*arg1)->value.str.val,strerror(errno));
 		RETURN_FALSE;
 	}
 	size= 0;
@@ -684,16 +682,16 @@ PHP_FUNCTION(readgzfile) {
 /* {{{ proto int gzpassthru(int zp)
 Output all remaining data from a .gz-file pointer */
 PHP_FUNCTION(gzpassthru) {
-	pval *arg1;
+	pval **arg1;
 	gzFile *zp;
 	char buf[8192];
 	int size, b;
 	
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	ZEND_FETCH_RESOURCE(zp, gzFile *, &arg1, -1, "Zlib file", le_zp);
+	ZEND_FETCH_RESOURCE(zp, gzFile *, arg1, -1, "Zlib file", le_zp);
 
 	size = 0;
 	while((b = gzread(zp, buf, sizeof(buf))) > 0) {
@@ -701,7 +699,7 @@ PHP_FUNCTION(gzpassthru) {
 		size += b ;
 	}
 /*  gzclose(zp); */
-	zend_list_delete(arg1->value.lval);
+	zend_list_delete((*arg1)->value.lval);
 	RETURN_LONG(size);
 }
 /* }}} */
@@ -710,18 +708,18 @@ PHP_FUNCTION(gzpassthru) {
 Binary-safe file read */
 PHP_FUNCTION(gzread)
 {
-	pval *arg1, *arg2;
+	pval **arg1, **arg2;
 	gzFile *zp;
 	int len;
 	PLS_FETCH();
 	
-	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
+	if (ARG_COUNT(ht) != 2 || getParametersEx(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(arg2);
-	len = arg2->value.lval;
+	convert_to_long_ex(arg2);
+	len = (*arg2)->value.lval;
 
-	ZEND_FETCH_RESOURCE(zp, gzFile *, &arg1, -1, "Zlib file", le_zp);
+	ZEND_FETCH_RESOURCE(zp, gzFile *, arg1, -1, "Zlib file", le_zp);
 
 	return_value->value.str.val = emalloc(sizeof(char) * (len + 1));
 	/* needed because recv doesnt put a null at the end*/
