@@ -1,3 +1,32 @@
+2003-08-29  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_API.c
+      zend_API.h:
+      - Add zend_merge_properties() which is designed to serve *_fetch_object().
+      - Explain drawbacks of object_and_properties_init and
+      zend_merge_properties.
+
+    * zend_reflection_api.c:
+      - Use zend_fcall_info_cache in invoke() to improve speed.
+
+2003-08-29  Zeev Suraski  <zeev@zend.com>
+
+    * zend_compile.c:
+      Fix a problem in implicit public properties and inheritance
+
+2003-08-29  Sascha Schumann  <sascha@schumann.cx>
+
+    * zend_hash.c:
+      improve a number of zend_debug format strings
+
+2003-08-29  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_builtin_functions.c
+      zend_builtin_functions.h
+      zend_default_classes.c:
+      Need to tell zend_fetch_debug_backtrace() whether to skip top function or
+      not.
+
 2003-08-28  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_default_classes.c:
