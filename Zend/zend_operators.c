@@ -127,7 +127,10 @@ ZEND_API void convert_scalar_to_number(zval *op)
 				break;
 		}
 		STR_FREE(strval);
-	} else if (op->type==IS_BOOL || op->type==IS_RESOURCE) {
+	} else if (op->type==IS_BOOL) {
+		op->type = IS_LONG;
+	} else if (op->type==IS_RESOURCE) {
+		zend_list_delete(op->value.lval);
 		op->type = IS_LONG;
 	} else if (op->type==IS_NULL) {
 		op->type = IS_LONG;
@@ -152,7 +155,12 @@ ZEND_API void convert_scalar_to_number(zval *op)
 				break;												\
 		}															\
 		(op) = &(holder);											\
-	} else if ((op)->type==IS_BOOL || (op)->type==IS_RESOURCE) {	\
+	} else if ((op)->type==IS_BOOL) {								\
+		(holder).value.lval = (op)->value.lval;						\
+		(holder).type = IS_LONG;									\
+		(op) = &(holder);											\
+	} else if ((op)->type==IS_RESOURCE) {							\
+		zend_list_delete((op)->value.lval);							\
 		(holder).value.lval = (op)->value.lval;						\
 		(holder).type = IS_LONG;									\
 		(op) = &(holder);											\
@@ -167,7 +175,12 @@ ZEND_API void convert_scalar_to_number(zval *op)
 #define zendi_convert_to_long(op, holder, result)					\
 	if (op==result) {												\
 		convert_to_long(op);										\
-	} else if ((op)->type==IS_BOOL || (op)->type==IS_RESOURCE) {	\
+	} else if ((op)->type==IS_BOOL)	{								\
+		(holder).value.lval = (op)->value.lval;						\
+		(holder).type = IS_LONG;									\
+		(op) = &(holder);											\
+	} else if ((op)->type==IS_RESOURCE) {							\
+		zend_list_delete((op)->value.lval);							\
 		(holder).value.lval = (op)->value.lval;						\
 		(holder).type = IS_LONG;									\
 		(op) = &(holder);											\
@@ -207,6 +220,8 @@ ZEND_API void convert_scalar_to_number(zval *op)
 				(holder).value.lval = 0;							\
 				break;												\
 			case IS_RESOURCE:										\
+				zend_list_delete((op)->value.lval);					\
+				/* break missing intentionally */					\
 			case IS_LONG:											\
 				(holder).value.lval = ((op)->value.lval ? 1 : 0);	\
 				break;												\
@@ -252,6 +267,8 @@ ZEND_API void convert_to_long_base(zval *op, int base)
 			op->value.lval = 0;
 			break;
 		case IS_RESOURCE:
+			zend_list_delete(op->value.lval);
+			/* break missing intentionally */
 		case IS_BOOL:
 		case IS_LONG:
 			break;
@@ -294,6 +311,8 @@ ZEND_API void convert_to_double(zval *op)
 			op->value.dval = 0.0;
 			break;
 		case IS_RESOURCE:
+			zend_list_delete(op->value.lval);
+			/* break missing intentionally */
 		case IS_BOOL:
 		case IS_LONG:
 			op->value.dval = (double) op->value.lval;
@@ -345,6 +364,8 @@ ZEND_API void convert_to_boolean(zval *op)
 			op->value.lval = 0;
 			break;
 		case IS_RESOURCE:
+			zend_list_delete(op->value.lval);
+			/* break missing intentionally */
 		case IS_LONG:
 			op->value.lval = (op->value.lval ? 1 : 0);
 			break;
@@ -405,6 +426,8 @@ ZEND_API void _convert_to_string(zval *op ZEND_FILE_LINE_DC)
 			break;
 		case IS_RESOURCE: {
 			long tmp = op->value.lval;
+
+			zend_list_delete(op->value.lval);
 			op->value.str.val = (char *) emalloc(sizeof("Resource id #")-1 + MAX_LENGTH_OF_LONG);
 			op->value.str.len = sprintf(op->value.str.val, "Resource id #%ld", tmp);
 			break;
