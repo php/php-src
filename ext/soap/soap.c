@@ -236,6 +236,7 @@ PHP_METHOD(SoapClient, __getFunctions);
 PHP_METHOD(SoapClient, __getTypes);
 PHP_METHOD(SoapClient, __doRequest);
 PHP_METHOD(SoapClient, __setCookie);
+PHP_METHOD(SoapClient, __setLocation);
 
 /* SoapVar Functions */
 PHP_METHOD(SoapVar, SoapVar);
@@ -323,6 +324,7 @@ static zend_function_entry soap_client_functions[] = {
 	PHP_ME(SoapClient, __getTypes, NULL, 0)
 	PHP_ME(SoapClient, __doRequest, NULL, 0)
 	PHP_ME(SoapClient, __setCookie, NULL, 0)
+	PHP_ME(SoapClient, __setLocation, NULL, 0)
 	{NULL, NULL, NULL}
 };
 
@@ -1975,14 +1977,6 @@ PHP_METHOD(SoapClient, SoapClient)
 
 		if (wsdl == NULL) {
 			/* Fetching non-WSDL mode options */
-			if (zend_hash_find(ht, "location", sizeof("location"), (void**)&tmp) == SUCCESS &&
-			    Z_TYPE_PP(tmp) == IS_STRING) {
-				add_property_stringl(this_ptr, "location", Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp), 1);
-			} else {
-				php_error_docref(NULL TSRMLS_CC, E_ERROR, "'location' option is requred in nonWSDL mode");
-				return;
-			}
-
 			if (zend_hash_find(ht, "uri", sizeof("uri"), (void**)&tmp) == SUCCESS &&
 			    Z_TYPE_PP(tmp) == IS_STRING) {
 				add_property_stringl(this_ptr, "uri", Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp), 1);
@@ -2002,6 +1996,14 @@ PHP_METHOD(SoapClient, SoapClient)
 					(Z_LVAL_PP(tmp) == SOAP_LITERAL || Z_LVAL_PP(tmp) == SOAP_ENCODED)) {
 				add_property_long(this_ptr, "use", Z_LVAL_PP(tmp));
 			}
+		}
+
+		if (zend_hash_find(ht, "location", sizeof("location"), (void**)&tmp) == SUCCESS &&
+		    Z_TYPE_PP(tmp) == IS_STRING) {
+			add_property_stringl(this_ptr, "location", Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp), 1);
+		} else if (wsdl == NULL) {
+			php_error_docref(NULL TSRMLS_CC, E_ERROR, "'location' option is requred in nonWSDL mode");
+			return;
 		}
 
 		if (zend_hash_find(ht, "soap_version", sizeof("soap_version"), (void**)&tmp) == SUCCESS) {
@@ -2190,6 +2192,7 @@ static void do_soap_call(zval* this_ptr,
                          int arg_count,
                          zval** real_args,
                          zval* return_value,
+                         char* location,
                          char* soap_action,
                          char* call_uri,
                          HashTable* soap_headers,
@@ -2222,6 +2225,13 @@ static void do_soap_call(zval* this_ptr,
 		soap_version = SOAP_1_1;
 	}
 
+	if (location == NULL) {
+		if (zend_hash_find(Z_OBJPROP_P(this_ptr), "location", sizeof("location"),(void **) &tmp) == SUCCESS &&
+		    Z_TYPE_PP(tmp) == IS_STRING) {
+		  location = Z_STRVAL_PP(tmp);
+		}
+	}
+
 	if (FIND_SDL_PROPERTY(this_ptr,tmp) != FAILURE) {
 		FETCH_SDL_RES(sdl,tmp);
 	}
@@ -2250,13 +2260,16 @@ static void do_soap_call(zval* this_ptr,
  		fn = get_function(sdl, function);
  		if (fn != NULL) {
 			sdlBindingPtr binding = fn->binding;
+			if (location == NULL) {
+				location = binding->location;
+			}
 			if (binding->bindingType == BINDING_SOAP) {
 				sdlSoapBindingFunctionPtr fnb = (sdlSoapBindingFunctionPtr)fn->bindingAttributes;
  				request = serialize_function_call(this_ptr, fn, NULL, fnb->input.ns, real_args, arg_count, soap_version, soap_headers TSRMLS_CC);
- 				ret = do_request(this_ptr, request, binding->location, fnb->soapAction, soap_version, &response TSRMLS_CC);
+ 				ret = do_request(this_ptr, request, location, fnb->soapAction, soap_version, &response TSRMLS_CC);
  			}	else {
  				request = serialize_function_call(this_ptr, fn, NULL, sdl->target_ns, real_args, arg_count, soap_version, soap_headers TSRMLS_CC);
- 				ret = do_request(this_ptr, request, binding->location, NULL, soap_version, &response TSRMLS_CC);
+ 				ret = do_request(this_ptr, request, location, NULL, soap_version, &response TSRMLS_CC);
  			}
 
 			xmlFreeDoc(request);
@@ -2277,12 +2290,12 @@ static void do_soap_call(zval* this_ptr,
 			smart_str_free(&error);
 		}
 	} else {
-		zval **uri, **location;
+		zval **uri;
 		smart_str action = {0};
 
 		if (zend_hash_find(Z_OBJPROP_P(this_ptr), "uri", sizeof("uri"), (void *)&uri) == FAILURE) {
 			add_soap_fault(this_ptr, "Client", "Error finding \"uri\" property", NULL, NULL TSRMLS_CC);
-		} else if (zend_hash_find(Z_OBJPROP_P(this_ptr), "location", sizeof("location"),(void **) &location) == FAILURE) {
+		} else if (location == NULL) {
 			add_soap_fault(this_ptr, "Client", "Error could not find \"location\" property", NULL, NULL TSRMLS_CC);
 		} else {
 			if (call_uri == NULL) {
@@ -2299,7 +2312,7 @@ static void do_soap_call(zval* this_ptr,
 			}
 			smart_str_0(&action);
 
-			ret = do_request(this_ptr, request, Z_STRVAL_PP(location), action.c, soap_version, &response TSRMLS_CC);
+			ret = do_request(this_ptr, request, location, action.c, soap_version, &response TSRMLS_CC);
 
 	 		smart_str_free(&action);
 			xmlFreeDoc(request);
@@ -2356,7 +2369,7 @@ static void do_soap_call(zval* this_ptr,
    Calls a SOAP function */
 PHP_METHOD(SoapClient, __call)
 {
-	char *function, *soap_action = NULL, *uri = NULL;
+	char *function, *location=NULL, *soap_action = NULL, *uri = NULL;
 	int function_len, i = 0;
 	HashTable* soap_headers = NULL;
 	zval *options = NULL;
@@ -2378,6 +2391,11 @@ PHP_METHOD(SoapClient, __call)
 		if (Z_TYPE_P(options) == IS_ARRAY) {
 			HashTable *ht = Z_ARRVAL_P(options);
 			zval **tmp;
+
+			if (zend_hash_find(ht, "location", sizeof("location"), (void**)&tmp) == SUCCESS &&
+			    Z_TYPE_PP(tmp) == IS_STRING) {
+				location = Z_STRVAL_PP(tmp);
+			}
 
 			if (zend_hash_find(ht, "soapaction", sizeof("soapaction"), (void**)&tmp) == SUCCESS &&
 			    Z_TYPE_PP(tmp) == IS_STRING) {
@@ -2430,7 +2448,7 @@ PHP_METHOD(SoapClient, __call)
 	if (output_headers) {
 		array_init(output_headers);
 	}
-	do_soap_call(this_ptr, function, function_len, arg_count, real_args, return_value, soap_action, uri, soap_headers, output_headers TSRMLS_CC);
+	do_soap_call(this_ptr, function, function_len, arg_count, real_args, return_value, location, soap_action, uri, soap_headers, output_headers TSRMLS_CC);
 	if (arg_count > 0) {
 		efree(real_args);
 	}
@@ -2590,6 +2608,7 @@ PHP_METHOD(SoapClient, __setCookie)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|s",
 	    &name, &name_len, &val, &val_len) == FAILURE) {
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid parameters");
 	  RETURN_NULL();
 	}
 
@@ -2616,6 +2635,37 @@ PHP_METHOD(SoapClient, __setCookie)
 }
 /* }}} */
 
+/* {{{ proto string SoapClient::__setLocation([string new_location])
+   Sets the location option (the endpoint URL that will be touched by the 
+   following SOAP requests).
+   If new_location is not specified or null then SoapClient will use endpoint
+   from WSDL file. 
+   The function returns old value of location options. */
+PHP_METHOD(SoapClient, __setLocation)
+{
+	char *location = NULL;
+	int  location_len;
+	zval **tmp;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s",
+	    &location, &location_len) == FAILURE) {
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid parameters");
+	  RETURN_NULL();
+	}
+	if (zend_hash_find(Z_OBJPROP_P(this_ptr), "location", sizeof("location"),(void **) &tmp) == SUCCESS &&
+	    Z_TYPE_PP(tmp) == IS_STRING) {
+	  RETVAL_STRINGL(Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp), 1);
+	} else {
+	  RETVAL_NULL();
+	}
+	if (location && location_len) {
+		add_property_stringl(this_ptr, "location", location, location_len, 1);
+	} else {
+		zend_hash_del(Z_OBJPROP_P(this_ptr), "location", sizeof("location"));
+	}
+}
+/* }}} */
+
 #ifndef ZEND_ENGINE_2
 static void soap_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_property_reference *property_reference)
 {
@@ -2635,7 +2685,7 @@ static void soap_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_proper
 		zval **arguments = (zval **) safe_emalloc(sizeof(zval *), arg_count, 0);
 
 		zend_get_parameters_array(ht, arg_count, arguments);
-		do_soap_call(this_ptr, function, Z_STRLEN(function_name->element) + 1, arg_count, arguments, return_value, NULL, NULL, NULL, NULL TSRMLS_CC);
+		do_soap_call(this_ptr, function, Z_STRLEN(function_name->element) + 1, arg_count, arguments, return_value, NULL, NULL, NULL, NULL, NULL TSRMLS_CC);
 		efree(arguments);
 	}
 	zval_dtor(&function_name->element);
