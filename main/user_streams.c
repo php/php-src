@@ -382,15 +382,15 @@ static size_t php_userstreamop_write(php_stream *stream, const char *buf, size_t
 	int call_result;
 	php_userstream_data_t *us = (php_userstream_data_t *)stream->abstract;
 	zval **args[1];
-	zval zbuff, *zbufptr;
+	zval *zbufptr;
 	size_t didwrite = 0;
 
 	assert(us != NULL);
 
 	ZVAL_STRINGL(&func_name, USERSTREAM_WRITE, sizeof(USERSTREAM_WRITE)-1, 0);
 
-	ZVAL_STRINGL(&zbuff, (char*)buf, count, 0);
-	zbufptr = &zbuff;
+	MAKE_STD_ZVAL(zbufptr);
+	ZVAL_STRINGL(zbufptr, (char*)buf, count, 1);
 	args[0] = &zbufptr;
 
 	call_result = call_user_function_ex(NULL,
@@ -400,6 +400,8 @@ static size_t php_userstreamop_write(php_stream *stream, const char *buf, size_t
 			1, args,
 			0, NULL TSRMLS_CC);
 
+	zval_ptr_dtor(&zbufptr);
+	
 	didwrite = 0;
 	if (call_result == SUCCESS && retval != NULL) {
 		convert_to_long(retval);
