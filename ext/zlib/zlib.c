@@ -177,10 +177,25 @@ static PHP_INI_MH(OnUpdate_zlib_output_compression_level)
 }
 /* }}} */
 
+/* {{{ OnUpdate_zlib_output_handler */
+static PHP_INI_MH(OnUpdate_zlib_output_handler)
+{
+	if (stage == PHP_INI_STAGE_RUNTIME && SG(headers_sent) && !SG(request_info).no_headers) {
+		php_error(E_WARNING, "Cannot change zlib.output_handler - headers already sent");
+		return FAILURE;
+	}
+
+	OnUpdateString(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
+
+	return SUCCESS;
+}
+/* }}} */
+
 
 PHP_INI_BEGIN()
     STD_PHP_INI_BOOLEAN("zlib.output_compression", "0", PHP_INI_ALL, OnUpdate_zlib_output_compression, output_compression, zend_zlib_globals, zlib_globals)
 	STD_PHP_INI_ENTRY("zlib.output_compression_level", "-1", PHP_INI_ALL, OnUpdate_zlib_output_compression_level, output_compression_level, zend_zlib_globals, zlib_globals)
+	STD_PHP_INI_ENTRY("zlib.output_handler", "", PHP_INI_ALL, OnUpdate_zlib_output_handler, output_handler, zend_zlib_globals, zlib_globals)
 PHP_INI_END()
 
 #ifdef ZTS
@@ -1000,6 +1015,9 @@ int php_enable_output_compression(int buffer_size TSRMLS_DC)
 
 	php_start_ob_buffer(NULL, buffer_size, 0 TSRMLS_CC);
 	php_ob_set_internal_handler(php_gzip_output_handler, buffer_size*1.5, "zlib output compression", 0 TSRMLS_CC);
+	if (ZLIBG(output_handler) && strlen(ZLIBG(output_handler))) {
+		php_start_ob_buffer_named(ZLIBG(output_handler), 0, 1 TSRMLS_CC);
+	}
 	return SUCCESS;
 }
 /* }}} */

@@ -33,6 +33,7 @@ ZEND_BEGIN_MODULE_GLOBALS(zlib)
 	int ob_gzip_coding;
 	int output_compression;
 	int output_compression_level;
+	char *output_handler;
 ZEND_END_MODULE_GLOBALS(zlib)
 
 extern zend_module_entry php_zlib_module_entry;

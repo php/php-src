@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
    | Authors: Zeev Suraski <zeev@zend.com>                                |
    |          Thies C. Arntzen <thies@thieso.net>                         |
+   |          Marcus Boerger <helly@php.net>                              |
    +----------------------------------------------------------------------+
 */
 
@@ -30,7 +31,7 @@ static int php_ub_body_write(const char *str, uint str_length TSRMLS_DC);
 static int php_ub_body_write_no_header(const char *str, uint str_length TSRMLS_DC);
 static int php_b_body_write(const char *str, uint str_length TSRMLS_DC);
 
-static void php_ob_init(uint initial_size, uint block_size, zval *output_handler, uint chunk_size, zend_bool erase TSRMLS_DC);
+static int php_ob_init(uint initial_size, uint block_size, zval *output_handler, uint chunk_size, zend_bool erase TSRMLS_DC);
 static void php_ob_append(const char *text, uint text_length TSRMLS_DC);
 #if 0
 static void php_ob_prepend(const char *text, uint text_length);
@@ -114,16 +115,39 @@ PHPAPI int php_header_write(const char *str, uint str_length TSRMLS_DC)
  * Start output buffering */
 PHPAPI int php_start_ob_buffer(zval *output_handler, uint chunk_size, zend_bool erase TSRMLS_DC)
 {
+	uint initial_size, block_size;
+
 	if (OG(ob_lock)) {
+		php_error(E_ERROR, "%s() Cannot use output buffering in output buffering display handlers", get_active_function_name(TSRMLS_C));
 		return FAILURE;
 	}
 	if (chunk_size) {
-		php_ob_init((chunk_size*3/2), chunk_size/2, output_handler, chunk_size, erase TSRMLS_CC);
+		initial_size = (chunk_size*3/2);
+		block_size = chunk_size/2;
 	} else {
-		php_ob_init(40*1024, 10*1024, output_handler, chunk_size, erase TSRMLS_CC);
+		initial_size = 40*1024;
+		block_size = 10*1024;
 	}
-	OG(php_body_write) = php_b_body_write;
-	return SUCCESS;
+	return php_ob_init(initial_size, block_size, output_handler, chunk_size, erase TSRMLS_CC);
+}
+/* }}} */
+
+
+/* {{{ php_start_ob_buffer_named
+ * Start output buffering */
+PHPAPI int php_start_ob_buffer_named(const char *output_handler_name, uint chunk_size, zend_bool erase TSRMLS_DC)
+{
+	zval *output_handler;
+	int result;
+
+	ALLOC_INIT_ZVAL(output_handler);
+	Z_STRLEN_P(output_handler) = strlen(output_handler_name);	/* this can be optimized */
+	Z_STRVAL_P(output_handler) = estrndup(output_handler_name, Z_STRLEN_P(output_handler));
+	Z_TYPE_P(output_handler) = IS_STRING;
+	result = php_start_ob_buffer(output_handler, chunk_size, erase TSRMLS_CC);
+	zval_dtor(output_handler);
+	FREE_ZVAL(output_handler);
+	return result;
 }
 /* }}} */
 
@@ -333,10 +357,43 @@ static inline void php_ob_allocate(TSRMLS_D)
 }
 /* }}} */
 
-/* {{{ php_ob_init
+/* {{{ php_ob_init_conflict
+ * Returns 1 if handler_set is already used and generates error message
  */
-static void php_ob_init(uint initial_size, uint block_size, zval *output_handler, uint chunk_size, zend_bool erase TSRMLS_DC)
+static int php_ob_init_conflict(char *handler_new, char *handler_set TSRMLS_DC)
 {
+	if (php_ob_handler_used(handler_set TSRMLS_CC))
+	{
+		php_error(E_WARNING, "%s() output handler '%s' conflicts with '%s'", get_active_function_name(TSRMLS_C), handler_new, handler_set);
+		return 1;
+	}
+	return 0;
+}
+/* }}} */
+
+/* {{{ php_ob_init_named
+ */
+static int php_ob_init_named(uint initial_size, uint block_size, char *handler_name, zval *output_handler, uint chunk_size, zend_bool erase TSRMLS_DC)
+{
+	int   handler_gz, handler_mb, handler_ic;
+
+	/* check for specific handlers where rules apply */
+	handler_gz = strcmp(handler_name, "ob_gzhandler");
+	handler_mb = strcmp(handler_name, "mb_output_handler");
+	handler_ic = strcmp(handler_name, "ob_iconv_handler");
+	/* apply rules */
+	if (!handler_gz || !handler_mb || !handler_ic) {
+		if (php_ob_handler_used(handler_name TSRMLS_CC)) {
+			php_error(E_WARNING, "%s() output handler '%s' cannot be used twice", get_active_function_name(TSRMLS_C), handler_name);
+			return FAILURE;
+		}
+		if (!handler_gz && php_ob_init_conflict(handler_name, "zlib output compression" TSRMLS_CC))
+			return FAILURE;
+		if (!handler_mb && php_ob_init_conflict(handler_name, "ob_iconv_handler" TSRMLS_CC))
+			return FAILURE;
+		if (!handler_ic && php_ob_init_conflict(handler_name, "mb_output_handler" TSRMLS_CC))
+			return FAILURE;
+	}
 	if (OG(ob_nesting_level)>0) {
 		if (OG(ob_nesting_level)==1) { /* initialize stack */
 			zend_stack_init(&OG(ob_buffers));
@@ -352,37 +409,95 @@ static void php_ob_init(uint initial_size, uint block_size, zval *output_handler
 	OG(active_ob_buffer).chunk_size = chunk_size;
 	OG(active_ob_buffer).status = 0;
 	OG(active_ob_buffer).internal_output_handler = NULL;
+	OG(active_ob_buffer).handler_name = estrdup(handler_name&&handler_name[0]?handler_name:"default output handler");
+	OG(active_ob_buffer).erase = erase;	
+	OG(php_body_write) = php_b_body_write;
+	return SUCCESS;
+}
+/* }}} */
+
+/* {{{ php_ob_handler_from_string
+ * Create zval output handler from string 
+ */
+static zval* php_ob_handler_from_string(const char *handler_name TSRMLS_DC)
+{
+	zval *output_handler;
+
+	ALLOC_INIT_ZVAL(output_handler);
+	Z_STRLEN_P(output_handler) = strlen(handler_name);	/* this can be optimized */
+	Z_STRVAL_P(output_handler) = estrndup(handler_name, Z_STRLEN_P(output_handler));
+	Z_TYPE_P(output_handler) = IS_STRING;
+	return output_handler;
+}
+/* }}} */
+
+/* {{{ php_ob_init
+ */
+static int php_ob_init(uint initial_size, uint block_size, zval *output_handler, uint chunk_size, zend_bool erase TSRMLS_DC)
+{
+	int res, result, len;
+	char *handler_name, *next_handler_name;
+	HashPosition pos;
+	zval **tmp;
+	zval *handler_zval;
+
 	if (output_handler && output_handler->type == IS_STRING) {
-		OG(active_ob_buffer).handler_name = estrndup(Z_STRVAL_P(output_handler), Z_STRLEN_P(output_handler));
+		result = 0;
+		handler_name = Z_STRVAL_P(output_handler);
+		while ((next_handler_name=strchr(handler_name, ',')) != NULL) {
+			len = next_handler_name-handler_name;
+			next_handler_name = estrndup(handler_name, len);
+			handler_zval = php_ob_handler_from_string(next_handler_name TSRMLS_CC);
+			res = php_ob_init_named(initial_size, block_size, next_handler_name, handler_zval, chunk_size, erase TSRMLS_CC);
+			result &= res;
+			if (!res==SUCCESS) {
+				zval_dtor(handler_zval);
+				FREE_ZVAL(handler_zval);
+			}
+			handler_name += len+1;
+			efree(next_handler_name);
+		}
+		handler_zval = php_ob_handler_from_string(handler_name TSRMLS_CC);
+		res = php_ob_init_named(initial_size, block_size, handler_name, handler_zval, chunk_size, erase TSRMLS_CC);
+		result &= res;
+		if (!res==SUCCESS) {
+			zval_dtor(handler_zval);
+			FREE_ZVAL(handler_zval);
+		}
+		result = result ? SUCCESS : FAILURE;
 	}
 	else if (output_handler && output_handler->type == IS_ARRAY) {
-		/* FIXME: Array type is not supported yet.
-		   See call_user_function_ex() for detials. */
-		OG(active_ob_buffer).handler_name = estrdup("array is not supported yet");
+		result = 0;
+		zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(output_handler), &pos);
+		while (zend_hash_get_current_data_ex(Z_ARRVAL_P(output_handler), (void **)&tmp, &pos) == SUCCESS) {
+			result &= php_ob_init(initial_size, block_size, *tmp, chunk_size, erase TSRMLS_CC);
+			zend_hash_move_forward_ex(Z_ARRVAL_P(output_handler), &pos);
+		}
+		result = result ? SUCCESS : FAILURE;
 	}
 	else {
-		OG(active_ob_buffer).handler_name = estrdup("default output handler");
+		if (output_handler) {
+			SEPARATE_ZVAL(&output_handler);
+			output_handler->refcount++;
+		}
+		result = php_ob_init_named(initial_size, block_size, "default output handler", output_handler, chunk_size, erase TSRMLS_CC);
 	}
-	OG(active_ob_buffer).erase = erase;	
+	return result;
 }
 /* }}} */
 
 /* {{{ php_ob_list_each
  */
-
 static int php_ob_list_each(php_ob_buffer *ob_buffer, zval *ob_handler_array) 
 {
-	if (!strcmp(ob_buffer->handler_name, "zlib output compression") && ob_buffer->internal_output_handler) {
-		add_next_index_string(ob_handler_array, "ob_gzhandler", 1);
-	} else {
-		add_next_index_string(ob_handler_array, ob_buffer->handler_name, 1);
-	}
+	add_next_index_string(ob_handler_array, ob_buffer->handler_name, 1);
 	return 0;
 }
 /* }}} */
 
 /* {{{ proto array ob_list_handlers()
-   List all output_buffers in an array */
+ *  List all output_buffers in an array 
+ */
 PHP_FUNCTION(ob_list_handlers)
 {
 	if (ZEND_NUM_ARGS()!=0) {
@@ -404,12 +519,11 @@ PHP_FUNCTION(ob_list_handlers)
 /* }}} */
 
 /* {{{ php_ob_used_each
-   Sets handler_name to NULL is found
+ *  Sets handler_name to NULL is found
  */
 static int php_ob_handler_used_each(php_ob_buffer *ob_buffer, char **handler_name) 
 {
-	if ((!strcmp(ob_buffer->handler_name, "zlib output compression") && ob_buffer->internal_output_handler && !strcmp("ob_gzhandler", *handler_name))
-	  || !strcmp(ob_buffer->handler_name, *handler_name))
+	if (!strcmp(ob_buffer->handler_name, *handler_name))
 	{
 		*handler_name = NULL;
 		return 1;
@@ -419,7 +533,7 @@ static int php_ob_handler_used_each(php_ob_buffer *ob_buffer, char **handler_nam
 /* }}} */
 
 /* {{{ php_ob_used
-   returns 1 if given handler_name is used as output_handler
+ * returns 1 if given handler_name is used as output_handler
  */
 PHPAPI int php_ob_handler_used(char *handler_name TSRMLS_DC)
 {
@@ -574,7 +688,7 @@ static int php_ub_body_write(const char *str, uint str_length TSRMLS_DC)
  * HEAD support
  */
 
-/* {{{ proto void ob_start([ string user_function [, int chunk_size [, bool erase]]])
+/* {{{ proto boolean ob_start([ string|array user_function [, int chunk_size [, bool erase]]])
    Turn on Output Buffering (specifying an optional output handler). */
 PHP_FUNCTION(ob_start)
 {
@@ -585,20 +699,9 @@ PHP_FUNCTION(ob_start)
 	
 	if (zend_parse_parameters(argc TSRMLS_CC, "|zlb", &output_handler, 
 							  &chunk_size, &erase) == FAILURE)
-		return;
+		RETURN_FALSE;
 
-	if (output_handler) {
-		SEPARATE_ZVAL(&output_handler);
-		output_handler->refcount++;
-	}	
 	if (php_start_ob_buffer(output_handler, chunk_size, erase TSRMLS_CC)==FAILURE) {
-		if (SG(headers_sent) && !SG(request_info).headers_only) {
-			OG(php_body_write) = php_ub_body_write_no_header;
-		} else {
-			OG(php_body_write) = php_ub_body_write;
-		}
-		OG(ob_nesting_level) = 0;
-		php_error(E_ERROR, "Cannot use output buffering in output buffering display handlers");
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -754,41 +857,29 @@ static int php_ob_buffer_status(php_ob_buffer *ob_buffer, zval *result)
 }
 
 
-/* {{{ proto array ob_get_status([bool full_status])
-   Return the nesting level of the output buffer */
+/* {{{ proto false|array ob_get_status([bool full_status])
+   Return the status of the active or all output buffers */
 PHP_FUNCTION(ob_get_status)
 {
 	int argc = ZEND_NUM_ARGS();
 	zend_bool full_status = 0;
 	
 	if (zend_parse_parameters(argc TSRMLS_CC, "|b", &full_status) == FAILURE )
-			return;
+		RETURN_FALSE;
 	
 	if (array_init(return_value) == FAILURE) {
 		RETURN_FALSE;
 	}
 
 	if (full_status) {
-		zval *elem;
-
-		zend_stack_apply_with_argument(&OG(ob_buffers), ZEND_STACK_APPLY_BOTTOMUP, (int (*)(void *elem, void *))php_ob_buffer_status, return_value);
-
-		MAKE_STD_ZVAL(elem);
-		if (array_init(elem))
+		if (OG(ob_nesting_level)>1) {
+			zend_stack_apply_with_argument(&OG(ob_buffers), ZEND_STACK_APPLY_BOTTOMUP, (int (*)(void *elem, void *))php_ob_buffer_status, return_value);
+		}
+		if (OG(ob_nesting_level)>0 && php_ob_buffer_status(&OG(active_ob_buffer), return_value)==FAILURE) {
 			RETURN_FALSE;
-	
-		if (OG(active_ob_buffer).internal_output_handler) {
-			add_assoc_long(elem, "type", PHP_OUTPUT_HANDLER_INTERNAL);
 		}
-		else {
-			add_assoc_long(elem, "type", PHP_OUTPUT_HANDLER_USER);
-		}
-		add_assoc_long(elem, "status", OG(active_ob_buffer).status);
-		add_assoc_string(elem, "name", OG(active_ob_buffer).handler_name, 1);
-		add_assoc_bool(elem, "del", OG(active_ob_buffer).erase);
-		add_next_index_zval(return_value, elem);
 	}
-	else {
+	else if (OG(ob_nesting_level)>0) {
 		add_assoc_long(return_value, "level", OG(ob_nesting_level));
 		if (OG(active_ob_buffer).internal_output_handler) {
 			add_assoc_long(return_value, "type", PHP_OUTPUT_HANDLER_INTERNAL);

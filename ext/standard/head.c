@@ -126,9 +126,7 @@ PHPAPI int php_setcookie(char *name, int name_len, char *value, int value_len, t
 	ctr.line_len = strlen(cookie);
 
 	result = sapi_header_op(SAPI_HEADER_ADD, &ctr TSRMLS_CC);
-	if (result == FAILURE) {
-		efree(cookie);
-	}
+	efree(cookie);
 	return result;
 }
 

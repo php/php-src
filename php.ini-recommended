@@ -111,15 +111,21 @@ output_buffering = 4096
 : is doing.
 ; NOTE: You cannot use both "mb_output_handler" with "ob_inconv_handler"
 ; and you cannot use both "ob_gzhandler" and "zlib.output_compression". 
-output_handler =
+;output_handler =
 
 ; Transparent output compression using the zlib library
 ; Valid values for this option are 'off', 'on', or a specific buffer size
 ; to be used for compression (default is 4KB)
 ;
 ; Note: output_handler must be empty if this is set 'On' !!!!
+;       Instead you must use zlib.output_handler.
 ;
 zlib.output_compression = Off
+
+; You cannot specify additional output handlers if zlib.output_compression
+; is activated here. This setting does the same as output_handler but in
+; a different order.
+;zlib.output_handler =
 
 ; Implicit flush tells PHP to tell the output layer to flush itself
 ; automatically after every output block.  This is equivalent to calling the
