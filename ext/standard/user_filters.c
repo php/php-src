@@ -232,7 +232,7 @@ static php_stream_filter_ops userfilter_ops = {
 };
 
 static php_stream_filter *user_filter_factory_create(const char *filtername,
-		const char *filterparams, int filterparamslen, int persistent TSRMLS_DC)
+		zval *filterparams, int persistent TSRMLS_DC)
 {
 	struct php_user_filter_data *fdat = NULL;
 	php_stream_filter *filter;
@@ -294,7 +294,7 @@ static php_stream_filter *user_filter_factory_create(const char *filtername,
 	
 	/* and the parameters, if any */
 	if (filterparams) {
-		add_property_stringl(obj, "params", (char*)filterparams, filterparamslen, 1);
+		add_property_zval(obj, "params", filterparams);
 	} else {
 		add_property_null(obj, "params");
 	}
