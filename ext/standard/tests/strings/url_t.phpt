@@ -56,7 +56,12 @@ $sample_urls = array (
 'http://secret@hideout@www.php.net:80/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123',
 'http://secret:hid:out@www.php.net:80/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123',
 'nntp://news.php.net',
-'ftp://ftp.gnu.org/gnu/glic/glibc.tar.gz'
+'ftp://ftp.gnu.org/gnu/glic/glibc.tar.gz',
+'zlib:http://foo@bar',
+'zlib:filename.txt',
+'zlib:/path/to/my/file/file.txt',
+'foo://foo@bar',
+'mailto:me@mydomain.com'
 );
 
     foreach ($sample_urls as $url) {
@@ -440,13 +445,15 @@ array(5) {
   ["fragment"]=>
   string(16) "some_page_ref123"
 }
-array(6) {
+array(7) {
   ["scheme"]=>
   string(4) "http"
   ["host"]=>
   string(11) "www.php.net"
   ["port"]=>
   int(80)
+  ["user"]=>
+  string(6) "secret"
   ["path"]=>
   string(10) "/index.php"
   ["query"]=>
@@ -500,13 +507,15 @@ array(7) {
   ["fragment"]=>
   string(16) "some_page_ref123"
 }
-array(6) {
+array(7) {
   ["scheme"]=>
   string(4) "http"
   ["host"]=>
   string(19) "hideout@www.php.net"
   ["port"]=>
   int(80)
+  ["user"]=>
+  string(6) "secret"
   ["path"]=>
   string(10) "/index.php"
   ["query"]=>
@@ -545,4 +554,36 @@ array(3) {
   string(11) "ftp.gnu.org"
   ["path"]=>
   string(22) "/gnu/glic/glibc.tar.gz"
+}
+array(2) {
+  ["scheme"]=>
+  string(4) "zlib"
+  ["path"]=>
+  string(14) "http://foo@bar"
+}
+array(2) {
+  ["scheme"]=>
+  string(4) "zlib"
+  ["path"]=>
+  string(12) "filename.txt"
+}
+array(2) {
+  ["scheme"]=>
+  string(4) "zlib"
+  ["path"]=>
+  string(25) "/path/to/my/file/file.txt"
+}
+array(3) {
+  ["scheme"]=>
+  string(3) "foo"
+  ["host"]=>
+  string(3) "bar"
+  ["user"]=>
+  string(3) "foo"
+}
+array(2) {
+  ["scheme"]=>
+  string(6) "mailto"
+  ["path"]=>
+  string(15) "me@mydomain.com"
 }
