@@ -1,3 +1,42 @@
+2005-01-04  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/gmp/config.w32:
+      Allow gmp to compile under Win32
+
+2005-01-04  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/standard/streamsfuncs.c:
+      Fix #31408: memory leak in stream_socket_recvfrom
+
+2005-01-04  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      main/network.c
+      main/php_network.h:
+      - Fix bug #31403 (php_hostconnect not defined as PHPAPI)
+
+    * (PHP_4_3)
+      NEWS
+      NEWS:
+      BFN
+
+    * (PHP_4_3)
+      ext/gd/config.m4
+      ext/gd/gd.c:
+      MFH: - Fixed bug #31396 (compile fails with gd 2.0.33 without freetype)
+
+    * ext/gd/config.m4
+      ext/gd/config.m4
+      ext/gd/gd.c
+      ext/gd/gd.c:
+      - Fixed bug #31396 (compile fails with gd 2.0.33 without freetype)
+
+2005-01-04  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_0)
+      ext/openssl/xp_ssl.c:
+      Fixed compiler warning resulting from an unused variable.
+
 2005-01-03  Stanislav Malyshev  <stas@zend.com>
 
     * ext/sqlite/libsqlite/src/auth.c
