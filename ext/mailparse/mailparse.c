@@ -31,6 +31,7 @@
 #include "mailparse_rfc822.h"
 #include "ext/standard/info.h"
 #include "main/php_output.h"
+#include "php_open_temporary_file.h"
 
 /* just in case the config check doesn't enable mbstring automatically */
 #if !HAVE_MBSTRING
@@ -59,6 +60,7 @@ function_entry mailparse_functions[] = {
 	PHP_FE(mailparse_rfc822_parse_addresses,		NULL)
 	PHP_FE(mailparse_determine_best_xfer_encoding, NULL)
 	PHP_FE(mailparse_stream_encode,						NULL)
+	PHP_FE(mailparse_uudecode_all,					NULL)
 
 	{NULL, NULL, NULL}
 };
@@ -137,6 +139,123 @@ static void mailparse_rfc822t_errfunc(const char * msg, int num)
 
 	php_error(E_WARNING, "%s(): %s %d", get_active_function_name(TSRMLS_C), msg, num);
 }
+
+#define UUDEC(c)	(char)(((c)-' ')&077)
+#define UU_NEXT(v)	v = fgetc(infp); if (v == EOF) break; v = UUDEC(v)
+static void mailparse_do_uudecode(FILE * infp, FILE * outfp)
+{
+	int A, B, C, D, n;
+
+	while(!feof(infp))	{
+		UU_NEXT(n);
+
+		while(n != 0)	{
+			UU_NEXT(A);
+			UU_NEXT(B);
+			UU_NEXT(C);
+			UU_NEXT(D);
+
+			if (n-- > 0)
+				fputc( (A << 2) | (B >> 4), outfp);
+			if (n-- > 0)
+				fputc( (B << 4) | (C >> 2), outfp);
+			if (n-- > 0)
+				fputc( (C << 6) | D, outfp);
+		}
+		/* skip newline */
+		fgetc(infp);
+	}
+}
+
+
+/* {{{ proto array mailparse_uudecode_all(resource fp)
+	Scan the data from fp and extract each embedded uuencoded file. Returns an array listing filename information
+*/
+PHP_FUNCTION(mailparse_uudecode_all)
+{
+	zval * file, * item;
+	FILE *infp, *outfp=NULL, *partfp=NULL;
+	int type;
+	char * buffer = NULL;
+	char * outpath = NULL;
+	int nparts = 0;
+
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "r", &file))
+		return;
+
+	infp = (FILE*)zend_fetch_resource(&file TSRMLS_CC, -1, "File-Handle", &type, 1, php_file_le_fopen());
+	ZEND_VERIFY_RESOURCE(infp);
+
+	outfp = php_open_temporary_file(NULL, "mailparse", &outpath TSRMLS_CC);
+	if (outfp == NULL)	{
+		zend_error(E_WARNING, "%s(): unable to open temp file", get_active_function_name(TSRMLS_CC));
+		RETURN_FALSE;
+	}
+
+	rewind(infp);
+	
+	buffer = emalloc(4096);
+	while(fgets(buffer, 4096, infp))	{
+		/* Look for the "begin " sequence that identifies a uuencoded file */
+		if (strncmp(buffer, "begin ", 6) == 0)	{
+			char * origfilename;
+			int len;
+			/* parse out the file name.
+			 * The next 4 bytes are an octal number for perms; ignore it */
+			origfilename = &buffer[10];
+			/* NUL terminate the filename */
+			len = strlen(origfilename);
+			while(isspace(origfilename[len-1]))
+				origfilename[--len] = '\0';
+		
+			/* make the return an array */
+			if (nparts == 0)	{
+				array_init(return_value);
+				/* create an initial item representing the file with all uuencoded parts
+				 * removed */
+				MAKE_STD_ZVAL(item);
+				array_init(item);
+				add_assoc_string(item, "filename", outpath, 0);
+				add_next_index_zval(return_value, item);
+			}
+			
+			/* add an item */
+			MAKE_STD_ZVAL(item);
+			array_init(item);
+			add_assoc_string(item, "origfilename", origfilename, 1);
+
+			/* create a temp file for the data */
+			partfp = php_open_temporary_file(NULL, "mailparse", &outpath TSRMLS_CC);
+			if (partfp)	{
+				nparts++;
+				add_assoc_string(item, "filename", outpath, 0);
+				add_next_index_zval(return_value, item);
+
+				/* decode it */
+				mailparse_do_uudecode(infp, partfp);
+				fclose(partfp);
+			}
+		}
+		else	{
+			/* write to the output file */
+			fputs(buffer, outfp);
+		}
+	}
+	fclose(outfp);
+	rewind(infp);
+	efree(buffer);
+
+	if (nparts == 0)	{
+		/* delete temporary file */
+		unlink(outpath);
+		efree(outpath);
+		RETURN_FALSE;
+	}
+}
+/* }}} */
+
+
+
 
 /* {{{ proto array mailparse_rfc822_parse_addresses(string addresses)
 	parse addresses and return a hash containing that data
