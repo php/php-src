@@ -740,7 +740,6 @@ PHP_FUNCTION(proc_open)
 	if (pipes != NULL) {
 		zval_dtor(pipes);
 	}
-	MAKE_STD_ZVAL(pipes);
 	array_init(pipes);
 
 	/* clean up all the child ends and then open streams on the parent
