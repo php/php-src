@@ -1268,6 +1268,7 @@ static int php_run_hook(php_handler *handler, request_rec *r)
 
 static int php_uri_translation(request_rec *r)
 {	
+	TSRMLS_FETCH();
 	php_per_server_config *conf;
 	AP(current_hook) = AP_URI_TRANS;
 	conf = (php_per_server_config *) get_module_config(r->server->module_config, &php4_module);
@@ -1278,6 +1279,7 @@ static int php_uri_translation(request_rec *r)
 
 static int php_header_hook(request_rec *r)
 {
+	TSRMLS_FETCH();
 	php_per_dir_config *conf;
 	AP(current_hook) = AP_HEADER_PARSE;
 	conf = (php_per_dir_config *) get_module_config(r->per_dir_config, &php4_module);
@@ -1288,6 +1290,7 @@ static int php_header_hook(request_rec *r)
 
 static int php_auth_hook(request_rec *r)
 {
+	TSRMLS_FETCH();
 	php_per_dir_config *conf;
 	AP(current_hook) = AP_AUTHENTICATION;
 	conf = (php_per_dir_config *) get_module_config(r->per_dir_config, &php4_module);
@@ -1298,6 +1301,7 @@ static int php_auth_hook(request_rec *r)
 
 static int php_access_hook(request_rec *r)
 {
+	TSRMLS_FETCH();
 	php_per_dir_config *conf;
 	AP(current_hook) = AP_ACCESS_CONTROL;
 	conf = (php_per_dir_config *) get_module_config(r->per_dir_config, &php4_module);
@@ -1309,6 +1313,7 @@ static int php_access_hook(request_rec *r)
 
 static int php_type_hook(request_rec *r)
 {
+	TSRMLS_FETCH();
 	php_per_dir_config *conf;
 	AP(current_hook) = AP_TYPE_CHECKING;
 	conf = (php_per_dir_config *) get_module_config(r->per_dir_config, &php4_module);
@@ -1320,6 +1325,7 @@ static int php_type_hook(request_rec *r)
 
 static int php_fixup_hook(request_rec *r)
 {
+	TSRMLS_FETCH();
 	php_per_dir_config *conf;
 	AP(current_hook) = AP_FIXUP;
 	conf = (php_per_dir_config *) get_module_config(r->per_dir_config, &php4_module);
@@ -1331,6 +1337,7 @@ static int php_fixup_hook(request_rec *r)
 
 static int php_logger_hook(request_rec *r)
 {
+	TSRMLS_FETCH();
 	php_per_dir_config *conf;
 	AP(current_hook) = AP_LOGGING;
 	conf = (php_per_dir_config *) get_module_config(r->per_dir_config, &php4_module);
@@ -1342,6 +1349,7 @@ static int php_logger_hook(request_rec *r)
  
 static int php_post_read_hook(request_rec *r)
 {
+	TSRMLS_FETCH();
 	php_per_dir_config *conf;
 	php_per_server_config *svr;
 	AP(current_hook) = AP_POST_READ;
@@ -1357,6 +1365,7 @@ static int php_post_read_hook(request_rec *r)
 
 static int php_response_handler(request_rec *r)
 {
+	TSRMLS_FETCH();
 	php_per_dir_config *conf;
 	AP(current_hook) = AP_RESPONSE;
 	conf = (php_per_dir_config *) get_module_config(r->per_dir_config, &php4_module);
