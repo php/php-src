@@ -255,7 +255,7 @@ time	: tUNUMBER tMERIDIAN {
 	    yySeconds = $5;
 	    yyMeridian = MER24;
 	    yyHaveZone++;
-		if ($6 < -100 || $6 > 100) {
+		if ($6 <= -100 || $6 >= 100) {
 			yyTimezone =  -$6 % 100 + (-$6 / 100) * 60;
 		} else {
 			yyTimezone =  -$6 * 60;
