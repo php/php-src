@@ -21,7 +21,6 @@
 
 typedef struct php_struct {
 	int state;
-	apr_bucket_brigade *bb;
 	ap_filter_t *f;
 	/* Length of post_data buffer */
 	int post_len;
@@ -29,6 +28,8 @@ typedef struct php_struct {
 	int post_idx;
 	/* Buffer for request body filter */
 	char *post_data;
+	/* Whether or not we've processed PHP in the output filters yet. */
+	int request_processed;
 } php_struct;
 
 int php_apache_register_module(void);
