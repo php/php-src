@@ -1538,6 +1538,31 @@ binary_assign_op_addr: {
 					}
 					NEXT_OPCODE();
 				}
+			case ZEND_INIT_CTOR_CALL:
+				{
+					zend_ptr_stack_n_push(&EG(arg_types_stack), 2, EX(fbc), EX(object).ptr);
+
+					if (EX(opline)->op1.op_type == IS_VAR) {
+						SELECTIVE_PZVAL_LOCK(*EX(Ts)[EX(opline)->op1.u.var].var.ptr_ptr, &EX(opline)->op1);
+					}
+
+					/* We are not handling overloaded classes right now */
+					EX(object).ptr = get_zval_ptr(&EX(opline)->op1, EX(Ts), &EG(free_op1), BP_VAR_R);
+					if (!PZVAL_IS_REF(EX(object).ptr)) {
+						EX(object).ptr->refcount++; /* For $this pointer */
+					} else {
+						zval *this_ptr;
+
+						ALLOC_ZVAL(this_ptr);
+						*this_ptr = *EX(object).ptr;
+						INIT_PZVAL(this_ptr);
+						zval_copy_ctor(this_ptr);
+						EX(object).ptr = this_ptr;
+					}
+					EX(fbc) = Z_OBJCE_P(EX(object).ptr)->constructor;
+					EX(calling_namespace) = Z_OBJCE_P(EX(object).ptr);
+					NEXT_OPCODE();
+				}
 			case ZEND_INIT_FCALL_BY_NAME: {
 					zval *function_name;
 					zend_function *function;
@@ -1545,29 +1570,7 @@ binary_assign_op_addr: {
 					zval tmp;
 
 					zend_ptr_stack_n_push(&EG(arg_types_stack), 2, EX(fbc), EX(object).ptr);
-					if (EX(opline)->extended_value & ZEND_CTOR_CALL) {
-						/* constructor call */
 
-						if (EX(opline)->op1.op_type == IS_VAR) {
-							SELECTIVE_PZVAL_LOCK(*EX(Ts)[EX(opline)->op1.u.var].var.ptr_ptr, &EX(opline)->op1);
-						}
-
-						/* We are not handling overloaded classes right now */
-						EX(object).ptr = get_zval_ptr(&EX(opline)->op1, EX(Ts), &EG(free_op1), BP_VAR_R);
-						if (!PZVAL_IS_REF(EX(object).ptr)) {
-							EX(object).ptr->refcount++; /* For $this pointer */
-						} else {
-							zval *this_ptr;
-							ALLOC_ZVAL(this_ptr);
-							*this_ptr = *EX(object).ptr;
-							INIT_PZVAL(this_ptr);
-							zval_copy_ctor(this_ptr);
-							EX(object).ptr = this_ptr;
-						}
-						EX(fbc) = Z_OBJCE_P(EX(object).ptr)->constructor;
-						EX(calling_namespace) = Z_OBJCE_P(EX(object).ptr);
-						NEXT_OPCODE();
-					}
 					function_name = get_zval_ptr(&EX(opline)->op2, EX(Ts), &EG(free_op2), BP_VAR_R);
 
 					tmp = *function_name;
@@ -1577,8 +1580,9 @@ binary_assign_op_addr: {
 					zend_str_tolower(tmp.value.str.val, tmp.value.str.len);
 					
 					EX(calling_namespace) = EG(namespace);
+
 					if (EX(opline)->op1.op_type != IS_UNUSED) {
-						if (EX(opline)->op1.op_type==IS_CONST) { /* used for class::function() */
+						if (EX(opline)->op1 .op_type==IS_CONST) { /* used for class::function() */
 							zval **object_ptr_ptr;
 
 							if (zend_hash_find(EG(active_symbol_table), "this", sizeof("this"), (void **) &object_ptr_ptr)==FAILURE) {

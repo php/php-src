@@ -2037,10 +2037,9 @@ void zend_do_begin_new_object(znode *new_token, znode *class_type TSRMLS_DC)
 	SET_UNUSED(opline->op2);
 
 	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
-	opline->opcode = ZEND_INIT_FCALL_BY_NAME;
+	opline->opcode = ZEND_INIT_CTOR_CALL;
 	opline->op1 = (opline-2)->result;
 	SET_UNUSED(opline->op2);
-	opline->extended_value = ZEND_MEMBER_FUNC_CALL | ZEND_CTOR_CALL;
 
 	zend_stack_push(&CG(function_call_stack), (void *) &ptr, sizeof(unsigned char *));
 }

@@ -544,6 +544,8 @@ int zendlex(znode *zendlval TSRMLS_DC);
 #define ZEND_FETCH_CLASS			110
 
 #define ZEND_CLONE					111
+
+#define ZEND_INIT_CTOR_CALL			112
 /* end of block */
 
 
@@ -619,7 +621,6 @@ int zendlex(znode *zendlval TSRMLS_DC);
 #define ZEND_FETCH_ADD_LOCK		1
 
 #define ZEND_MEMBER_FUNC_CALL	1<<0
-#define ZEND_CTOR_CALL			1<<1
 
 #define ZEND_ARG_SEND_BY_REF (1<<0)
 #define ZEND_ARG_COMPILE_TIME_BOUND (1<<1)
