@@ -21,29 +21,13 @@ If you have any problems, please check the support site for more
 up-to-date information and advice.
 
 
-Quick guide to installing FastCGI with Zeus
--------------------------------------------
+Quick guide to installing CGI/FastCGI with Zeus
+-----------------------------------------------
 
-Step 1 - obtain and install FastCGI development kit.
-
-Grab the package from:
-http://www.fastcgi.com/dist/devkit_2.2.0.tar.gz
-
-Extract the package and follow the instructions:
-        ./configure
-        make
-        make export
-(run the last as root)
-
-This will install to /usr/local/lib/libfcgi.a
-                and  /usr/local/include/*fcgi*
-
-
-
-Step 2 - Compile PHP as FastCGI.
+Step 1 - Compile PHP as FastCGI.
 
 Compile as follows:
-        ./configure --with-fastcgi
+        ./configure --enable-fastcgi
         make
 
 Note that PHP has many options to the configure script -
@@ -55,7 +39,7 @@ program called 'php'. Copy this into your document root, under a
 dedicated FastCGI directory (e.g. $DOCROOT/fcgi-bin/php)
 
 
-Step 3 - configure Zeus
+Step 2 - configure Zeus
 
 Four stages:
         -  enable FastCGI
@@ -98,7 +82,7 @@ Click 'update' to commit these changes
 Finally restart your virtual server for these changes to take effect.
 
 
-Step 4 - start PHP as a FastCGI runner
+Step 3 - start PHP as a FastCGI runner
 
 When you start PHP, it will pre-fork a given number of child processes
 to handle incoming PHP requests. Each process will handle a given
@@ -106,8 +90,10 @@ number of requests before exiting (and being replaced by a newly
 forked process). You can control these two parameters by setting the
 following environment variables BEFORE starting the FastCGI runner:
 
-PHP_FCGI_CHILDREN - the number of child processes to pre-fork. If not
-set, defaults to 8.
+PHP_FCGI_CHILDREN - the number of child processes to pre-fork. This
+variable MUST be set, if not then the PHP will not run as a FastCGI.
+We recommend a value of 8 for a fairly busy site. If you have many,
+long-running PHP scripts, then you may need to increase this further.
 
 PHP_FCGI_MAX_REQUESTS - the number of requests each PHP child process
 handles before exiting. If not set, defaults to 500.
