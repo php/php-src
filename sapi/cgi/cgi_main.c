@@ -27,7 +27,7 @@
 
 #include <stdio.h>
 #include "php.h"
-#ifdef MSVC5
+#if PHP_WIN32
 #include "win32/time.h"
 #include "win32/signal.h"
 #include <process.h>

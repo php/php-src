@@ -29,7 +29,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#if MSVC5
+#if PHP_WIN32
 #include <windows.h>
 #include <winsock.h>
 #define O_RDONLY _O_RDONLY
@@ -45,7 +45,7 @@
 #include "zend_compile.h"
 
 #if HAVE_PWD_H
-#if MSVC5
+#if PHP_WIN32
 #include "win32/pwd.h"
 #else
 #include <pwd.h>
@@ -61,7 +61,7 @@
 #define S_ISREG(mode)	(((mode)&S_IFMT) == S_IFREG)
 #endif
 
-#if MSVC5
+#if PHP_WIN32
 #include <winsock.h>
 #else
 #include <netinet/in.h>
@@ -69,7 +69,7 @@
 #include <arpa/inet.h>
 #endif
 
-#if MSVC5
+#if PHP_WIN32
 #undef AF_UNIX
 #endif
 
