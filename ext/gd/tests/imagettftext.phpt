@@ -12,7 +12,7 @@ imagettftext() function test
 --FILE--
 <?php
 	$cwd = dirname(__FILE__);
-	$fontfile_8859 = "$cwd/zendn___.ttf";
+	$fontfile_8859 = "$cwd/test8859.ttf";
 
 	function testrun($im, $fontfile) {
 		$sx = imagesx($im);
@@ -49,5 +49,5 @@ imagettftext() function test
 	imagedestroy($im);
 */
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
