@@ -140,6 +140,8 @@ static int le_csr;
 static void php_pkey_free(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	EVP_PKEY *pkey = (EVP_PKEY *)rsrc->ptr;
+
+	assert(pkey != NULL);
 	
 	EVP_PKEY_free(pkey);
 }
@@ -188,7 +190,7 @@ static X509_REQ * php_openssl_csr_from_zval(zval ** val, int makeresource, long 
 static EVP_PKEY * php_openssl_generate_private_key(struct php_x509_request * req TSRMLS_DC);
 
 
-static void add_assoc_name_entry(zval * val, char * key, X509_NAME * name, int shortname)
+static void add_assoc_name_entry(zval * val, char * key, X509_NAME * name, int shortname TSRMLS_DC)
 {
 	zval * subitem;
 	int i;
@@ -816,8 +818,15 @@ PHP_FUNCTION(openssl_x509_parse)
 		add_assoc_string(return_value, "name", cert->name, 1);
 /*	add_assoc_bool(return_value, "valid", cert->valid); */
 
-	add_assoc_name_entry(return_value, "subject", 		X509_get_subject_name(cert), useshortnames);
-	add_assoc_name_entry(return_value, "issuer", 		X509_get_issuer_name(cert), useshortnames);
+	add_assoc_name_entry(return_value, "subject", 		X509_get_subject_name(cert), useshortnames TSRMLS_CC);
+	/* hash as used in CA directories to lookup cert by subject name */
+	{
+		char buf[32];
+		snprintf(buf, sizeof(buf), "%08lx", X509_subject_name_hash(cert));
+		add_assoc_string(return_value, "hash", buf, 1);
+	}
+	
+	add_assoc_name_entry(return_value, "issuer", 		X509_get_issuer_name(cert), useshortnames TSRMLS_CC);
 	add_assoc_long(return_value, "version", 			X509_get_version(cert));
 	add_assoc_long(return_value, "serialNumber", 		ASN1_INTEGER_get(X509_get_serialNumber(cert)));
 
@@ -1098,7 +1107,7 @@ PHP_FUNCTION(openssl_x509_free)
 /* {{{ x509 CSR functions */
 
 /* {{{ php_openssl_make_REQ */
-static int php_openssl_make_REQ(struct php_x509_request * req, X509_REQ * csr, zval * dn, zval * attribs)
+static int php_openssl_make_REQ(struct php_x509_request * req, X509_REQ * csr, zval * dn, zval * attribs TSRMLS_DC)
 {
 	STACK_OF(CONF_VALUE) * dn_sk, *attr_sk = NULL;
 	char * str, *dn_sect, *attr_sect;
@@ -1251,7 +1260,7 @@ static int php_openssl_make_REQ(struct php_x509_request * req, X509_REQ * csr, z
 static X509_REQ * php_openssl_csr_from_zval(zval ** val, int makeresource, long * resourceval TSRMLS_DC)
 {
 	X509_REQ * csr = NULL;
-	char * filename;
+	char * filename = NULL;
 	BIO * in;
 	
 	if (resourceval)
@@ -1377,7 +1386,7 @@ PHP_FUNCTION(openssl_csr_sign)
 	long num_days;
 	X509 * cert = NULL, *new_cert = NULL;
 	X509_REQ * csr;
-	EVP_PKEY * key, *priv_key;
+	EVP_PKEY * key = NULL, *priv_key;
 	long csr_resource, certresource, keyresource;
 	int i;
 	struct php_x509_request req;
@@ -1530,7 +1539,7 @@ PHP_FUNCTION(openssl_csr_new)
 		else	{
 			csr = X509_REQ_new();
 			if (csr)	{
-				if (php_openssl_make_REQ(&req, csr, dn, attribs) == SUCCESS)	{
+				if (php_openssl_make_REQ(&req, csr, dn, attribs TSRMLS_CC) == SUCCESS)	{
 					X509V3_CTX ext_ctx;
 
 					X509V3_set_ctx(&ext_ctx, NULL, NULL, csr, NULL, 0);
@@ -1929,7 +1938,7 @@ PHP_FUNCTION(openssl_pkey_get_private)
    Verifys that the data block is intact, the signer is who they say they are, and returns the CERTs of the signers */
 PHP_FUNCTION(openssl_pkcs7_verify)
 {
-	X509_STORE * store;
+	X509_STORE * store = NULL;
 	zval * cainfo = NULL;
 	STACK_OF(X509) *signers= NULL;
 	STACK_OF(X509) *others = NULL;
@@ -2358,7 +2367,7 @@ PHP_FUNCTION(openssl_private_decrypt)
 	zval *key, *crypted;
 	EVP_PKEY *pkey;
 	int cryptedlen;
-	unsigned char *cryptedbuf;
+	unsigned char *cryptedbuf = NULL;
 	unsigned char *crypttemp;
 	int successful = 0;
 	long padding = RSA_PKCS1_PADDING;
@@ -2395,7 +2404,8 @@ PHP_FUNCTION(openssl_private_decrypt)
 			}
 			break;
 		default:
-			zend_error(E_WARNING, "%s(): key type not supported in this PHP build!");
+			zend_error(E_WARNING, "%s(): key type not supported in this PHP build!",
+					get_active_function_name(TSRMLS_C));
 	}
 
 	efree(crypttemp);
@@ -2453,7 +2463,8 @@ PHP_FUNCTION(openssl_public_encrypt)
 						padding) == cryptedlen);
 			break;
 		default:
-			zend_error(E_WARNING, "%s(): key type not supported in this PHP build!");
+			zend_error(E_WARNING, "%s(): key type not supported in this PHP build!",
+					get_active_function_name(TSRMLS_C));
 
 	}
 
@@ -2478,7 +2489,7 @@ PHP_FUNCTION(openssl_public_decrypt)
 	zval *key, *crypted;
 	EVP_PKEY *pkey;
 	int cryptedlen;
-	unsigned char *cryptedbuf;
+	unsigned char *cryptedbuf = NULL;
 	unsigned char *crypttemp;
 	int successful = 0;
 	long keyresource = -1;
@@ -2516,7 +2527,8 @@ PHP_FUNCTION(openssl_public_decrypt)
 			break;
 			
 		default:
-			zend_error(E_WARNING, "%s(): key type not supported in this PHP build!");
+			zend_error(E_WARNING, "%s(): key type not supported in this PHP build!",
+					get_active_function_name(TSRMLS_C));
 		 
 	}
 
