@@ -332,7 +332,7 @@ ZEND_FUNCTION(each)
 	entry->refcount++;
 
 	/* add the key elements */
-	switch (zend_hash_get_current_key(target_hash, &string_key, &num_key)) {
+	switch (zend_hash_get_current_key(target_hash, &string_key, &num_key, 1)) {
 		case HASH_KEY_IS_STRING:
 			add_get_index_string(return_value,0,string_key,(void **) &inserted_pointer,0);
 			break;
@@ -589,7 +589,7 @@ ZEND_FUNCTION(get_class_methods)
 		efree(lcname);
 		array_init(return_value);
 		zend_hash_internal_pointer_reset(&ce->function_table);
-		while ((key_type = zend_hash_get_current_key(&ce->function_table, &string_key, &num_key)) != HASH_KEY_NON_EXISTANT) {
+		while ((key_type = zend_hash_get_current_key(&ce->function_table, &string_key, &num_key, 1)) != HASH_KEY_NON_EXISTANT) {
 			if (key_type == HASH_KEY_IS_STRING) {
 				MAKE_STD_ZVAL(method_name);
 				ZVAL_STRING(method_name, string_key, 0);
@@ -731,7 +731,7 @@ ZEND_FUNCTION(get_included_files)
 
 	array_init(return_value);
 	zend_hash_internal_pointer_reset(&EG(included_files));
-	while(zend_hash_get_current_key(&EG(included_files), &entry,NULL) == HASH_KEY_IS_STRING) {
+	while(zend_hash_get_current_key(&EG(included_files), &entry, NULL, 1) == HASH_KEY_IS_STRING) {
 		add_next_index_string(return_value,entry,0);
 		zend_hash_move_forward(&EG(included_files));
 	}

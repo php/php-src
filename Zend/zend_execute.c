@@ -2221,7 +2221,7 @@ send_by_ref:
 
 					ALLOC_ZVAL(key);
 					INIT_PZVAL(key);
-					switch (zend_hash_get_current_key(fe_ht, &str_key, &int_key)) {
+					switch (zend_hash_get_current_key(fe_ht, &str_key, &int_key, 1)) {
 						case HASH_KEY_IS_STRING:
 							key->value.str.val = str_key;
 							key->value.str.len = strlen(str_key);
