@@ -1,3 +1,95 @@
+2002-09-27  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/standard/basic_functions.c
+      ext/standard/file.c
+      ext/standard/file.h:
+    Implement stream_select() which works just like socket_select, but only on
+    streams.
+
+    * ext/ncurses/ncurses.c
+      ext/ncurses/ncurses_fe.c
+      ext/ncurses/ncurses_functions.c
+      ext/ncurses/php_ncurses.h
+      ext/ncurses/php_ncurses_fe.h: More ncurses functions and constants.
+
+    * ext/ncurses/config.m4
+      ext/ncurses/ncurses.c
+      ext/ncurses/ncurses_fe.c
+      ext/ncurses/ncurses_functions.c
+      ext/ncurses/php_ncurses.h
+      ext/ncurses/php_ncurses_fe.h:
+    Implement some more window routines, add pad functions.
+    Add panel functions when libpanel is also detected.
+    Register STDSCR constant during ncurses_init().
+
+2002-09-27  Colin Viebrock  <colin@easydns.com>
+
+    * ext/standard/info.c: fix formating by breaking on to separate lines
+
+2002-09-27  Edin Kadribasic  <edink@proventum.net>
+
+    * ext/gd/gd.dsp
+      ext/gd/gd_bundled.dsp:       (Edin)
+    Fixed bug #19595 (Missing functions for GD2 format handling).
+
+2002-09-27  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/standard/dir.c: ws
+
+2002-09-27  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/standard/dir.c: /tmp/cvsmLUuXQ
+
+2002-09-27  Edin Kadribasic  <edink@proventum.net>
+
+    * ext/standard/credits_ext.h
+      ext/standard/credits_sapi.h: Update credits.
+
+    * sapi/cli/CREDITS: Those two have enough credits already :)
+
+2002-09-27  Tal Peer  <tal@twisthost.com>
+
+    * ext/fribidi/CREDITS: - Fixed case in extension name
+
+2002-09-27  Jani Taskinen  <sniper@iki.fi>
+
+    * NEWS: style polizei
+
+2002-09-27  Yasuo Ohgaki  <yohgaki@ohgaki.net>
+
+    * ext/standard/dir.c: No need to define GLOB_NOMATCH.
+
+2002-09-27  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/ldap/config.m4:
+    - Fix for bug #19633 (wrong directories in ext/ldap/config.m4). 
+    - Fix for bug #19633 (wrong directories in ext/ldap/config.m4).
+
+2002-09-27  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/sysvsem/sysvsem.c:
+    Really *really* fix the segfault bug #17274 and bug #19627 this time.
+
+2002-09-27  Jan Lehnardt  <jan@dasmoped.net>
+
+    * ext/standard/info.c:  - be more conservative ;)
+
+2002-09-27  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * NEWS: And a couple more.
+
+    * NEWS: Add some bug #'s to make Markus happier :-)
+
+    * EXTENSIONS: Typo
+
+2002-09-27  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * NEWS: - Update.
+
+2002-09-27  Dan Kalowsky  <dank@deadmime.org>
+
+    * EXTENSIONS: They seem to be working...
+
 2002-09-26  Colin Viebrock  <colin@easydns.com>
 
     * NEWS: document changes
