@@ -302,6 +302,7 @@ static void php_pgsql_init_globals(php_pgsql_globals *pgsql_globals_p TSRMLS_DC)
 {
 	PGG(num_persistent) = 0;
 	PGG(ignore_notices) = 0;
+	PGG(auto_reset_persistent) = 0;
 }
 /* }}} */
 
