@@ -37,6 +37,7 @@
 #include "php_wddx_api.h"
 #define PHP_XML_INTERNAL
 #include "ext/xml/php_xml.h"
+#include "ext/standard/php_incomplete_class.h"
 
 #define WDDX_BUF_LEN			256
 #define PHP_CLASS_NAME_VAR		"php_class_name"
@@ -398,13 +399,19 @@ static void php_wddx_serialize_object(wddx_packet *packet, zval *obj)
 	 */
 	if (call_user_function_ex(CG(function_table), obj, fname, &retval, 0, 0, 1, NULL) == SUCCESS) {
 		if (retval && HASH_OF(retval)) {
+			PHP_CLASS_ATTRIBUTES;
+			
+			PHP_SET_CLASS_ATTRIBUTES(obj);
+
 			php_wddx_add_chunk_static(packet, WDDX_STRUCT_S);
 			sprintf(tmp_buf, WDDX_VAR_S, PHP_CLASS_NAME_VAR);
 			php_wddx_add_chunk(packet, tmp_buf);
 			php_wddx_add_chunk_static(packet, WDDX_STRING_S);
-			php_wddx_add_chunk_ex(packet, obj->value.obj.ce->name, obj->value.obj.ce->name_length);
+			php_wddx_add_chunk_ex(packet, class_name, name_len);
 			php_wddx_add_chunk_static(packet, WDDX_STRING_E);
 			php_wddx_add_chunk_static(packet, WDDX_VAR_E);
+
+			PHP_CLEANUP_CLASS_ATTRIBUTES();
 			
 			for (zend_hash_internal_pointer_reset(HASH_OF(retval));
 				 zend_hash_get_current_data(HASH_OF(retval), (void **)&varname) == SUCCESS;
@@ -422,13 +429,20 @@ static void php_wddx_serialize_object(wddx_packet *packet, zval *obj)
 			php_wddx_add_chunk_static(packet, WDDX_STRUCT_E);
 		}
 	} else {
+		PHP_CLASS_ATTRIBUTES;
+
+		PHP_SET_CLASS_ATTRIBUTES(obj);
+
 		php_wddx_add_chunk_static(packet, WDDX_STRUCT_S);
 		sprintf(tmp_buf, WDDX_VAR_S, PHP_CLASS_NAME_VAR);
 		php_wddx_add_chunk(packet, tmp_buf);
 		php_wddx_add_chunk_static(packet, WDDX_STRING_S);
-		php_wddx_add_chunk_ex(packet, obj->value.obj.ce->name, obj->value.obj.ce->name_length);
+		php_wddx_add_chunk_ex(packet, class_name, name_len);
 		php_wddx_add_chunk_static(packet, WDDX_STRING_E);
 		php_wddx_add_chunk_static(packet, WDDX_VAR_E);
+
+		PHP_CLEANUP_CLASS_ATTRIBUTES();
+		
 		for (zend_hash_internal_pointer_reset(HASH_OF(obj));
 			 zend_hash_get_current_data(HASH_OF(obj), (void**)&ent) == SUCCESS;
 			 zend_hash_move_forward(HASH_OF(obj))) {
@@ -736,11 +750,14 @@ static void php_wddx_pop_element(void *user_data, const char *name)
 				if (ent1->varname) {
 					if (!strcmp(ent1->varname, PHP_CLASS_NAME_VAR) &&
 						ent1->data->type == IS_STRING && ent1->data->value.str.len) {
+						zend_bool incomplete_class = 0;
 
 						if (zend_hash_find(EG(class_table), ent1->data->value.str.val,
 										   ent1->data->value.str.len+1, (void **) &ce)==FAILURE) {
-							php_error(E_NOTICE, "Deserializing non-existant class: %s! No methods will be available!", ent1->data->value.str.val);
-							ce = &zend_standard_class_def;
+							BLS_FETCH();
+
+							incomplete_class = 1;
+							ce = PHP_IC_ENTRY_READ;
 						}
 
 						/* Initialize target object */
@@ -753,6 +770,9 @@ static void php_wddx_pop_element(void *user_data, const char *name)
 										ent2->data->value.ht,
 										(void (*)(void *)) zval_add_ref,
 										(void *) &tmp, sizeof(zval *), 0);
+
+						if (incomplete_class)
+							php_store_class_name(obj, ent1->data->value.str.val, ent1->data->value.str.len);
 
 						/* Clean up old array entry */
 						zval_dtor(ent2->data);
