@@ -2,10 +2,10 @@
 Session Object Deserialization
 --SKIPIF--
 <?php include('skipif.inc'); ?>
+--INI--
+register_globals=1
 --FILE--
 <?php
-
-ini_set("register_globals", 1);
 
 class foo {
 	var $bar = "ok";
