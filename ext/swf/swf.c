@@ -287,7 +287,7 @@ PHP_FUNCTION(swf_modifyobject)
 }
 /* }}} */
 
-/* {{{ swf_removeobject(int depth)
+/* {{{ proto void swf_removeobject(int depth)
    Removes the object at the specified depth */
 PHP_FUNCTION(swf_removeobject)
 {
@@ -990,7 +990,7 @@ PHP_FUNCTION(swf_viewport)
 }
 /* }}} */
 
-/* {{{ void swf_ortho2(double xmin, double xmax, double ymin, double ymax)
+/* {{{ proto void swf_ortho2(double xmin, double xmax, double ymin, double ymax)
    Defines a 2-D orthographic mapping of user coordinates onto the current viewport */ 
 PHP_FUNCTION(swf_ortho2)
 {
