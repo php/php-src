@@ -2,6 +2,10 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.0 Release
+- InterBase module finally ported from PHP3 to PHP4. Full support for
+  InterBase 6. (Jouni)
+- Add swf_definepoly for drawing polygons to the SWF functions. (Sterling)
+- Port imagegammacorrect from PHP3 to PHP4. (Sterling)
 - Added array_rand() function. (Andrei)
 
 8 May 2000, Version 4.0 Release Candidate 2
