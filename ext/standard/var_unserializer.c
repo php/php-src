@@ -241,14 +241,14 @@ static inline int process_nested_data(UNSERIALIZE_PARAMETER, HashTable *ht, int 
 
 		switch (Z_TYPE_P(key)) {
 			case IS_LONG:
-				if (zend_hash_index_find(ht, Z_LVAL_P(key), (void **)&old_data)) {
-					var_replace(var_hash, old_data, rval);
+				if (zend_hash_index_find(ht, Z_LVAL_P(key), (void **)&old_data)==SUCCESS) {
+					var_push_dtor(var_hash, old_data);
 				}
 				zend_hash_index_update(ht, Z_LVAL_P(key), &data, sizeof(data), NULL);
 				break;
 			case IS_STRING:
-				if (zend_hash_find(ht, Z_STRVAL_P(key), Z_STRLEN_P(key) + 1, (void **)&old_data)) {
-					var_replace(var_hash, old_data, rval);
+				if (zend_hash_find(ht, Z_STRVAL_P(key), Z_STRLEN_P(key) + 1, (void **)&old_data)==SUCCESS) {
+					var_push_dtor(var_hash, old_data);
 				}
 				zend_hash_update(ht, Z_STRVAL_P(key), Z_STRLEN_P(key) + 1, &data, sizeof(data), NULL);
 				break;
