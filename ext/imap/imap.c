@@ -419,6 +419,8 @@ PHP_MINFO_FUNCTION(imap)
 
 PHP_MINIT_FUNCTION(imap)
 {
+	ELS_FETCH();
+
 	unsigned long sa_all =	SA_MESSAGES | SA_RECENT | SA_UNSEEN |
 				SA_UIDNEXT | SA_UIDVALIDITY;
 
