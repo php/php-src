@@ -3367,7 +3367,7 @@ PHP_FUNCTION(hw_identify) {
 }
 /* }}} */
 
-/* {{{ proto array hw_objrec2array(string objrec)
+/* {{{ proto array hw_objrec2array(string objrec, [array format])
    Returns object array of object record */
 PHP_FUNCTION(hw_objrec2array) {
 	zval **arg1, **arg2;
