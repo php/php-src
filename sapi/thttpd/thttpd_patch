@@ -1,6 +1,6 @@
 diff -ur thttpd-2.21b/Makefile.in thttpd-2.21b-cool/Makefile.in
---- thttpd-2.21b/Makefile.in	Thu Mar 29 20:36:21 2001
-+++ thttpd-2.21b-cool/Makefile.in	Mon Sep 23 17:37:36 2002
+--- thttpd-2.21b/Makefile.in	2001-03-29 20:36:22.000000000 +0200
++++ thttpd-2.21b-cool/Makefile.in	2002-10-13 13:33:24.000000000 +0200
 @@ -46,13 +46,15 @@
  
  # You shouldn't need to edit anything below here.
@@ -28,19 +28,19 @@ diff -ur thttpd-2.21b/Makefile.in thttpd-2.21b-cool/Makefile.in
  
  OBJ =		$(SRC:.c=.o) @LIBOBJS@
  
-@@ -151,6 +153,9 @@
- 
+@@ -152,6 +154,9 @@
  tags:
  	ctags -wtd *.c *.h
-+
+ 
 +php_thttpd.o: php_thttpd.c
 +	$(CC) $(PHP_CFLAGS) $(CFLAGS) -c php_thttpd.c
- 
++
  tar:
  	@name=`sed -n -e '/SERVER_SOFTWARE/!d' -e 's,.*thttpd/,thttpd-,' -e 's, .*,,p' version.h` ; \
+ 	  rm -rf $$name ; \
 diff -ur thttpd-2.21b/config.h thttpd-2.21b-cool/config.h
---- thttpd-2.21b/config.h	Mon Apr  9 23:57:36 2001
-+++ thttpd-2.21b-cool/config.h	Sun Sep 22 22:44:56 2002
+--- thttpd-2.21b/config.h	2001-04-09 23:57:36.000000000 +0200
++++ thttpd-2.21b-cool/config.h	2002-10-13 13:33:24.000000000 +0200
 @@ -82,6 +82,11 @@
  */
  #define IDLE_READ_TIMELIMIT 60
@@ -63,8 +63,8 @@ diff -ur thttpd-2.21b/config.h thttpd-2.21b-cool/config.h
  /* CONFIGURE: If this is defined then thttpd will automatically generate
  ** index pages for directories that don't have an explicit index file.
 diff -ur thttpd-2.21b/fdwatch.c thttpd-2.21b-cool/fdwatch.c
---- thttpd-2.21b/fdwatch.c	Fri Apr 13 07:36:08 2001
-+++ thttpd-2.21b-cool/fdwatch.c	Mon Sep 23 17:38:03 2002
+--- thttpd-2.21b/fdwatch.c	2001-04-13 07:36:08.000000000 +0200
++++ thttpd-2.21b-cool/fdwatch.c	2002-10-13 13:47:42.000000000 +0200
 @@ -460,7 +460,7 @@
  
      ridx = 0;
@@ -86,18 +86,22 @@ diff -ur thttpd-2.21b/fdwatch.c thttpd-2.21b-cool/fdwatch.c
  	}
      }
 diff -ur thttpd-2.21b/libhttpd.c thttpd-2.21b-cool/libhttpd.c
---- thttpd-2.21b/libhttpd.c	Tue Apr 24 00:42:40 2001
-+++ thttpd-2.21b-cool/libhttpd.c	Mon Sep 23 17:29:24 2002
-@@ -85,6 +85,8 @@
+--- thttpd-2.21b/libhttpd.c	2001-04-24 00:42:40.000000000 +0200
++++ thttpd-2.21b-cool/libhttpd.c	2002-10-13 13:41:38.000000000 +0200
+@@ -85,6 +85,12 @@
  #include "match.h"
  #include "tdate_parse.h"
  
 +#include "php_thttpd.h"
 +
++#ifdef __CYGWIN__
++# define timezone _timezone
++#endif
++
  #ifndef STDIN_FILENO
  #define STDIN_FILENO 0
  #endif
-@@ -242,6 +244,8 @@
+@@ -242,6 +248,8 @@
  	free( (void*) hs->cwd );
      if ( hs->cgi_pattern != (char*) 0 )
  	free( (void*) hs->cgi_pattern );
@@ -106,7 +110,7 @@ diff -ur thttpd-2.21b/libhttpd.c thttpd-2.21b-cool/libhttpd.c
      if ( hs->charset != (char*) 0 )
  	free( (void*) hs->charset );
      if ( hs->url_pattern != (char*) 0 )
-@@ -249,6 +253,7 @@
+@@ -249,6 +257,7 @@
      if ( hs->local_pattern != (char*) 0 )
  	free( (void*) hs->local_pattern );
      free( (void*) hs );
@@ -114,7 +118,7 @@ diff -ur thttpd-2.21b/libhttpd.c thttpd-2.21b-cool/libhttpd.c
      }
  
  
-@@ -312,6 +317,7 @@
+@@ -312,6 +321,7 @@
  	}
  
      hs->port = port;
@@ -122,7 +126,7 @@ diff -ur thttpd-2.21b/libhttpd.c thttpd-2.21b-cool/libhttpd.c
      if ( cgi_pattern == (char*) 0 )
  	hs->cgi_pattern = (char*) 0;
      else
-@@ -385,6 +391,8 @@
+@@ -385,6 +395,8 @@
  	return (httpd_server*) 0;
  	}
  
@@ -131,7 +135,7 @@ diff -ur thttpd-2.21b/libhttpd.c thttpd-2.21b-cool/libhttpd.c
      /* Done initializing. */
      if ( hs->binding_hostname == (char*) 0 )
  	syslog( LOG_INFO, "%.80s starting on port %d", SERVER_SOFTWARE, hs->port );
-@@ -582,6 +590,9 @@
+@@ -582,6 +594,9 @@
      /* And send it, if necessary. */
      if ( hc->responselen > 0 )
  	{
@@ -141,7 +145,7 @@ diff -ur thttpd-2.21b/libhttpd.c thttpd-2.21b-cool/libhttpd.c
  	(void) write( hc->conn_fd, hc->response, hc->responselen );
  	hc->responselen = 0;
  	}
-@@ -657,9 +668,9 @@
+@@ -657,9 +672,9 @@
  	(void) my_snprintf(
  	    fixed_type, sizeof(fixed_type), type, hc->hs->charset );
  	(void) my_snprintf( buf, sizeof(buf),
@@ -153,7 +157,7 @@ diff -ur thttpd-2.21b/libhttpd.c thttpd-2.21b-cool/libhttpd.c
  	add_response( hc, buf );
  	if ( encodings[0] != '\0' )
  	    {
-@@ -681,6 +692,14 @@
+@@ -681,6 +696,14 @@
  		"Content-Length: %d\r\n", length );
  	    add_response( hc, buf );
  	    }
@@ -168,7 +172,7 @@ diff -ur thttpd-2.21b/libhttpd.c thttpd-2.21b-cool/libhttpd.c
  	if ( extraheads[0] != '\0' )
  	    add_response( hc, extraheads );
  	add_response( hc, "\r\n" );
-@@ -1603,6 +1622,61 @@
+@@ -1603,6 +1626,61 @@
  
  
  int
@@ -230,7 +234,7 @@ diff -ur thttpd-2.21b/libhttpd.c thttpd-2.21b-cool/libhttpd.c
  httpd_get_conn( httpd_server* hs, int listen_fd, httpd_conn* hc )
      {
      httpd_sockaddr sa;
-@@ -1657,53 +1731,12 @@
+@@ -1657,53 +1735,12 @@
      hc->hs = hs;
      memset( &hc->client_addr, 0, sizeof(hc->client_addr) );
      memcpy( &hc->client_addr, &sa, sockaddr_len( &sa ) );
@@ -290,7 +294,7 @@ diff -ur thttpd-2.21b/libhttpd.c thttpd-2.21b-cool/libhttpd.c
      }
  
  
-@@ -1720,6 +1753,9 @@
+@@ -1720,6 +1757,9 @@
      {
      char c;
  
@@ -300,7 +304,7 @@ diff -ur thttpd-2.21b/libhttpd.c thttpd-2.21b-cool/libhttpd.c
      for ( ; hc->checked_idx < hc->read_idx; ++hc->checked_idx )
  	{
  	c = hc->read_buf[hc->checked_idx];
-@@ -1912,8 +1948,11 @@
+@@ -1912,8 +1952,11 @@
  	    eol = strpbrk( protocol, " \t\n\r" );
  	    if ( eol != (char*) 0 )
  		*eol = '\0';
@@ -313,7 +317,7 @@ diff -ur thttpd-2.21b/libhttpd.c thttpd-2.21b-cool/libhttpd.c
  	    }
  	}
      /* Check for HTTP/1.1 absolute URL. */
-@@ -2129,6 +2168,7 @@
+@@ -2129,6 +2172,7 @@
  		cp = &buf[11];
  		cp += strspn( cp, " \t" );
  		if ( strcasecmp( cp, "keep-alive" ) == 0 )
@@ -321,7 +325,7 @@ diff -ur thttpd-2.21b/libhttpd.c thttpd-2.21b-cool/libhttpd.c
  		    hc->keep_alive = 1;
  		}
  #ifdef LOG_UNKNOWN_HEADERS
-@@ -2168,6 +2208,9 @@
+@@ -2168,6 +2212,9 @@
  	    }
  	}
  
@@ -331,7 +335,7 @@ diff -ur thttpd-2.21b/libhttpd.c thttpd-2.21b-cool/libhttpd.c
      if ( hc->one_one )
  	{
  	/* Check that HTTP/1.1 requests specify a host, as required. */
-@@ -2177,14 +2220,14 @@
+@@ -2177,14 +2224,14 @@
  	    return -1;
  	    }
  
@@ -353,7 +357,7 @@ diff -ur thttpd-2.21b/libhttpd.c thttpd-2.21b-cool/libhttpd.c
  	}
  
      /* Ok, the request has been parsed.  Now we resolve stuff that
-@@ -2349,15 +2392,24 @@
+@@ -2349,15 +2396,24 @@
  
  
  void
@@ -382,7 +386,7 @@ diff -ur thttpd-2.21b/libhttpd.c thttpd-2.21b-cool/libhttpd.c
      if ( hc->conn_fd >= 0 )
  	{
  	(void) close( hc->conn_fd );
-@@ -3026,11 +3078,9 @@
+@@ -3026,11 +3082,9 @@
  post_post_garbage_hack( httpd_conn* hc )
      {
      char buf[2];
@@ -396,7 +400,7 @@ diff -ur thttpd-2.21b/libhttpd.c thttpd-2.21b-cool/libhttpd.c
      }
  
  
-@@ -3313,6 +3363,11 @@
+@@ -3313,6 +3367,11 @@
      int r;
      ClientData client_data;
  
@@ -408,7 +412,7 @@ diff -ur thttpd-2.21b/libhttpd.c thttpd-2.21b-cool/libhttpd.c
      if ( hc->method == METHOD_GET || hc->method == METHOD_POST )
  	{
  	httpd_clear_ndelay( hc->conn_fd );
-@@ -3369,6 +3424,7 @@
+@@ -3369,6 +3428,7 @@
      int expnlen, indxlen;
      char* cp;
      char* pi;
@@ -416,7 +420,7 @@ diff -ur thttpd-2.21b/libhttpd.c thttpd-2.21b-cool/libhttpd.c
  
      expnlen = strlen( hc->expnfilename );
  
-@@ -3561,6 +3617,11 @@
+@@ -3561,6 +3621,11 @@
  	 match( hc->hs->cgi_pattern, hc->expnfilename ) )
  	return cgi( hc );
  
@@ -428,7 +432,7 @@ diff -ur thttpd-2.21b/libhttpd.c thttpd-2.21b-cool/libhttpd.c
      /* It's not CGI.  If it's executable or there's pathinfo, someone's
      ** trying to either serve or run a non-CGI file as CGI.   Either case
      ** is prohibited.
-@@ -3594,6 +3655,8 @@
+@@ -3594,6 +3659,8 @@
  	hc->end_byte_loc = hc->sb.st_size - 1;
  
      figure_mime( hc );
@@ -437,7 +441,7 @@ diff -ur thttpd-2.21b/libhttpd.c thttpd-2.21b-cool/libhttpd.c
  
      if ( hc->method == METHOD_HEAD )
  	{
-@@ -3601,7 +3664,7 @@
+@@ -3601,7 +3668,7 @@
  	    hc, 200, ok200title, hc->encodings, "", hc->type, hc->sb.st_size,
  	    hc->sb.st_mtime );
  	}
@@ -446,7 +450,7 @@ diff -ur thttpd-2.21b/libhttpd.c thttpd-2.21b-cool/libhttpd.c
  	 hc->if_modified_since >= hc->sb.st_mtime )
  	{
  	hc->method = METHOD_HEAD;
-@@ -3611,14 +3674,25 @@
+@@ -3611,14 +3678,25 @@
  	}
      else
  	{
@@ -475,8 +479,8 @@ diff -ur thttpd-2.21b/libhttpd.c thttpd-2.21b-cool/libhttpd.c
  	}
  
 diff -ur thttpd-2.21b/libhttpd.h thttpd-2.21b-cool/libhttpd.h
---- thttpd-2.21b/libhttpd.h	Tue Apr 24 00:36:50 2001
-+++ thttpd-2.21b-cool/libhttpd.h	Sun Sep 22 22:44:56 2002
+--- thttpd-2.21b/libhttpd.h	2001-04-24 00:36:50.000000000 +0200
++++ thttpd-2.21b-cool/libhttpd.h	2002-10-13 13:38:28.000000000 +0200
 @@ -69,6 +69,7 @@
      char* server_hostname;
      int port;
@@ -504,8 +508,8 @@ diff -ur thttpd-2.21b/libhttpd.h thttpd-2.21b-cool/libhttpd.h
  /* Call this to de-initialize a connection struct and *really* free the
  ** mallocced strings.
 diff -ur thttpd-2.21b/mime_encodings.txt thttpd-2.21b-cool/mime_encodings.txt
---- thttpd-2.21b/mime_encodings.txt	Wed May 10 03:22:28 2000
-+++ thttpd-2.21b-cool/mime_encodings.txt	Sun Sep 22 22:44:56 2002
+--- thttpd-2.21b/mime_encodings.txt	2000-05-10 03:22:28.000000000 +0200
++++ thttpd-2.21b-cool/mime_encodings.txt	2002-10-13 13:33:24.000000000 +0200
 @@ -3,6 +3,6 @@
  # A list of file extensions followed by the corresponding MIME encoding.
  # Extensions not found in the table proceed to the mime_types table.
@@ -516,8 +520,8 @@ diff -ur thttpd-2.21b/mime_encodings.txt thttpd-2.21b-cool/mime_encodings.txt
 +gz	gzip
  uu	x-uuencode
 diff -ur thttpd-2.21b/mime_types.txt thttpd-2.21b-cool/mime_types.txt
---- thttpd-2.21b/mime_types.txt	Sat Apr 14 04:53:30 2001
-+++ thttpd-2.21b-cool/mime_types.txt	Sun Sep 22 22:44:56 2002
+--- thttpd-2.21b/mime_types.txt	2001-04-14 04:53:30.000000000 +0200
++++ thttpd-2.21b-cool/mime_types.txt	2002-10-13 13:33:24.000000000 +0200
 @@ -1,135 +1,138 @@
 -# mime_types.txt
 -#
@@ -767,8 +771,8 @@ diff -ur thttpd-2.21b/mime_types.txt thttpd-2.21b-cool/mime_types.txt
 +movie	video/x-sgi-movie
 +ice	x-conference/x-cooltalk
 diff -ur thttpd-2.21b/mmc.c thttpd-2.21b-cool/mmc.c
---- thttpd-2.21b/mmc.c	Fri Apr 13 23:02:15 2001
-+++ thttpd-2.21b-cool/mmc.c	Sun Sep 22 22:44:56 2002
+--- thttpd-2.21b/mmc.c	2001-04-13 23:02:16.000000000 +0200
++++ thttpd-2.21b-cool/mmc.c	2002-10-13 13:33:24.000000000 +0200
 @@ -70,6 +70,7 @@
      unsigned int hash;
      int hash_idx;
@@ -839,8 +843,8 @@ diff -ur thttpd-2.21b/mmc.c thttpd-2.21b-cool/mmc.c
  	    m->reftime = nowP->tv_sec;
  	else
 diff -ur thttpd-2.21b/mmc.h thttpd-2.21b-cool/mmc.h
---- thttpd-2.21b/mmc.h	Fri Apr 13 07:36:54 2001
-+++ thttpd-2.21b-cool/mmc.h	Sun Sep 22 22:44:56 2002
+--- thttpd-2.21b/mmc.h	2001-04-13 07:36:54.000000000 +0200
++++ thttpd-2.21b-cool/mmc.h	2002-10-13 13:33:24.000000000 +0200
 @@ -31,8 +31,9 @@
  /* Returns an mmap()ed area for the given file, or (void*) 0 on errors.
  ** If you have a stat buffer on the file, pass it in, otherwise pass 0.
@@ -853,8 +857,8 @@ diff -ur thttpd-2.21b/mmc.h thttpd-2.21b-cool/mmc.h
  /* Done with an mmap()ed area that was returned by mmc_map().
  ** If you have a stat buffer on the file, pass it in, otherwise pass 0.
 diff -ur thttpd-2.21b/thttpd.c thttpd-2.21b-cool/thttpd.c
---- thttpd-2.21b/thttpd.c	Tue Apr 24 00:41:57 2001
-+++ thttpd-2.21b-cool/thttpd.c	Mon Sep 23 17:38:03 2002
+--- thttpd-2.21b/thttpd.c	2001-04-24 00:41:58.000000000 +0200
++++ thttpd-2.21b-cool/thttpd.c	2002-10-13 13:47:42.000000000 +0200
 @@ -95,6 +95,7 @@
      httpd_conn* hc;
      int tnums[MAXTHROTTLENUMS];         /* throttle indexes */
@@ -912,7 +916,22 @@ diff -ur thttpd-2.21b/thttpd.c thttpd-2.21b-cool/thttpd.c
  
  static void
  handle_term( int sig )
-@@ -566,15 +577,17 @@
+@@ -454,12 +465,14 @@
+     /* If we're root, try to become someone else. */
+     if ( getuid() == 0 )
+ 	{
++#ifndef __CYGWIN__
+ 	/* Set aux groups to null. */
+ 	if ( setgroups( 0, (const gid_t*) 0 ) < 0 )
+ 	    {
+ 	    syslog( LOG_CRIT, "setgroups - %m" );
+ 	    exit( 1 );
+ 	    }
++#endif
+ 	/* Set primary group. */
+ 	if ( setgid( gid ) < 0 )
+ 	    {
+@@ -566,15 +579,17 @@
  	    if ( c == (connecttab*) 0 )
  		continue;
  	    hc = c->hc;
@@ -939,7 +958,7 @@ diff -ur thttpd-2.21b/thttpd.c thttpd-2.21b-cool/thttpd.c
  	    }
  	tmr_run( &tv );
  
-@@ -1196,8 +1209,10 @@
+@@ -1196,8 +1211,10 @@
      logstats( &tv );
      for ( cnum = 0; cnum < maxconnects; ++cnum )
  	{
@@ -951,7 +970,7 @@ diff -ur thttpd-2.21b/thttpd.c thttpd-2.21b-cool/thttpd.c
  	if ( connects[cnum].hc != (httpd_conn*) 0 )
  	    {
  	    httpd_destroy_conn( connects[cnum].hc );
-@@ -1285,6 +1300,7 @@
+@@ -1285,6 +1302,7 @@
  	c->linger_timer = (Timer*) 0;
  	c->bytes_sent = 0;
  	c->numtnums = 0;
@@ -959,7 +978,7 @@ diff -ur thttpd-2.21b/thttpd.c thttpd-2.21b-cool/thttpd.c
  
  	/* Set the connection file descriptor to no-delay mode. */
  	httpd_set_ndelay( c->hc->conn_fd );
-@@ -1297,12 +1313,40 @@
+@@ -1297,12 +1315,40 @@
  	}
      }
  
@@ -1001,7 +1020,7 @@ diff -ur thttpd-2.21b/thttpd.c thttpd-2.21b-cool/thttpd.c
      httpd_conn* hc = c->hc;
  
      /* Is there room in our buffer to read more bytes? */
-@@ -1311,7 +1355,7 @@
+@@ -1311,7 +1357,7 @@
  	if ( hc->read_size > 5000 )
  	    {
  	    httpd_send_err( hc, 400, httpd_err400title, "", httpd_err400form, "" );
@@ -1010,7 +1029,7 @@ diff -ur thttpd-2.21b/thttpd.c thttpd-2.21b-cool/thttpd.c
  	    return;
  	    }
  	httpd_realloc_str(
-@@ -1327,29 +1371,69 @@
+@@ -1327,29 +1373,69 @@
      ** EWOULDBLOCK; however, this apparently can happen if a packet gets
      ** garbled.
      */
@@ -1088,7 +1107,7 @@ diff -ur thttpd-2.21b/thttpd.c thttpd-2.21b-cool/thttpd.c
  	return;
  	}
  
-@@ -1358,7 +1442,7 @@
+@@ -1358,7 +1444,7 @@
  	{
  	httpd_send_err(
  	    hc, 503, httpd_err503title, "", httpd_err503form, hc->encodedurl );
@@ -1097,7 +1116,7 @@ diff -ur thttpd-2.21b/thttpd.c thttpd-2.21b-cool/thttpd.c
  	return;
  	}
  
-@@ -1366,7 +1450,7 @@
+@@ -1366,7 +1452,7 @@
      if ( httpd_start_request( hc, tvP ) < 0 )
  	{
  	/* Something went wrong.  Close down the connection. */
@@ -1106,7 +1125,7 @@ diff -ur thttpd-2.21b/thttpd.c thttpd-2.21b-cool/thttpd.c
  	return;
  	}
  
-@@ -1384,37 +1468,26 @@
+@@ -1384,37 +1470,26 @@
  	{
  	/* No file address means someone else is handling it. */
  	c->bytes_sent = hc->bytes_sent;
@@ -1153,7 +1172,7 @@ diff -ur thttpd-2.21b/thttpd.c thttpd-2.21b-cool/thttpd.c
  static void
  handle_send( connecttab* c, struct timeval* tvP )
      {
-@@ -1443,6 +1516,9 @@
+@@ -1443,6 +1518,9 @@
  	iv[1].iov_base = &(hc->file_address[c->bytes_sent]);
  	iv[1].iov_len = MIN( c->bytes_to_send - c->bytes_sent, c->limit );
  	sz = writev( hc->conn_fd, iv, 2 );
@@ -1163,7 +1182,7 @@ diff -ur thttpd-2.21b/thttpd.c thttpd-2.21b-cool/thttpd.c
  	}
  
      if ( sz == 0 ||
-@@ -1486,7 +1562,7 @@
+@@ -1486,7 +1564,7 @@
  	*/
  	if ( errno != EPIPE && errno != EINVAL && errno != ECONNRESET )
  	    syslog( LOG_ERR, "write - %m sending %.80s", hc->encodedurl );
@@ -1172,7 +1191,7 @@ diff -ur thttpd-2.21b/thttpd.c thttpd-2.21b-cool/thttpd.c
  	return;
  	}
  
-@@ -1500,7 +1576,7 @@
+@@ -1500,7 +1578,7 @@
  	    {
  	    /* Yes; move the unwritten part to the front of the buffer. */
  	    int newlen = hc->responselen - sz;
@@ -1181,7 +1200,7 @@ diff -ur thttpd-2.21b/thttpd.c thttpd-2.21b-cool/thttpd.c
  	    hc->responselen = newlen;
  	    sz = 0;
  	    }
-@@ -1519,7 +1595,7 @@
+@@ -1519,7 +1597,7 @@
      if ( c->bytes_sent >= c->bytes_to_send )
  	{
  	/* This conection is finished! */
@@ -1190,7 +1209,7 @@ diff -ur thttpd-2.21b/thttpd.c thttpd-2.21b-cool/thttpd.c
  	return;
  	}
  
-@@ -1560,6 +1636,9 @@
+@@ -1560,6 +1638,9 @@
      char buf[1024];
      int r;
  
@@ -1200,7 +1219,7 @@ diff -ur thttpd-2.21b/thttpd.c thttpd-2.21b-cool/thttpd.c
      /* In lingering-close mode we just read and ignore bytes.  An error
      ** or EOF ends things, otherwise we go until a timeout.
      */
-@@ -1569,6 +1648,37 @@
+@@ -1569,6 +1650,37 @@
      }
  
  
@@ -1238,7 +1257,7 @@ diff -ur thttpd-2.21b/thttpd.c thttpd-2.21b-cool/thttpd.c
  static int
  check_throttles( connecttab* c )
      {
-@@ -1635,12 +1745,17 @@
+@@ -1635,12 +1747,17 @@
  
  
  static void
@@ -1258,7 +1277,7 @@ diff -ur thttpd-2.21b/thttpd.c thttpd-2.21b-cool/thttpd.c
  
      if ( c->idle_read_timer != (Timer*) 0 )
  	{
-@@ -1669,13 +1784,45 @@
+@@ -1669,13 +1786,45 @@
      ** circumstances that make a lingering close necessary.  If the flag
      ** isn't set we do the real close now.
      */
@@ -1306,7 +1325,7 @@ diff -ur thttpd-2.21b/thttpd.c thttpd-2.21b-cool/thttpd.c
  	client_data.p = c;
  	c->linger_timer = tmr_create(
  	    tvP, linger_clear_connection, client_data, LINGER_TIME * 1000L, 0 );
-@@ -1684,9 +1831,19 @@
+@@ -1684,9 +1833,19 @@
  	    syslog( LOG_CRIT, "tmr_create(linger_clear_connection) failed" );
  	    exit( 1 );
  	    }
@@ -1327,7 +1346,7 @@ diff -ur thttpd-2.21b/thttpd.c thttpd-2.21b-cool/thttpd.c
      }
  
  
-@@ -1716,11 +1873,13 @@
+@@ -1716,11 +1875,13 @@
      c->idle_read_timer = (Timer*) 0;
      if ( c->conn_state != CNST_FREE )
  	{
@@ -1346,7 +1365,7 @@ diff -ur thttpd-2.21b/thttpd.c thttpd-2.21b-cool/thttpd.c
  	}
      }
  
-@@ -1737,7 +1896,7 @@
+@@ -1737,7 +1898,7 @@
  	syslog( LOG_INFO,
  	    "%.80s connection timed out sending",
  	    httpd_ntoa( &c->hc->client_addr ) );
