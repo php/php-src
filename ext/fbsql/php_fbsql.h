@@ -99,7 +99,7 @@ PHP_FUNCTION(fbsql_password);
 PHP_FUNCTION(fbsql_warnings);
 
 PHP_FUNCTION(fbsql_get_autostart_info);
-//PHP_FUNCTION(fbsql_set_autostart_info);
+/* PHP_FUNCTION(fbsql_set_autostart_info); */
 
 static void php_fbsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type);
 static void php_fbsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent);
@@ -130,15 +130,15 @@ ZEND_END_MODULE_GLOBALS(fbsql)
 # define FB_SQL_G(v)	(fbsql_globals.v)
 #endif
 
-//#ifndef ZTS  // No need for external definitions
-//extern fbsql_module* phpfbModule;
-//#endif
+/*#ifndef ZTS  /* No need for external definitions */
+/*extern fbsql_module* phpfbModule; */
+/*#endif */
 
-#else  //  HAVE_FBSQL
+#else  /*  HAVE_FBSQL */
 
 #define fbsql_module_ptr NULL
 #error not ok
-#endif //  HAVE_FBSQL
+#endif /*  HAVE_FBSQL */
 
 #define phpext_fbsql_ptr fbsql_module_ptr
 
