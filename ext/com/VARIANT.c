@@ -205,7 +205,7 @@ static pval php_VARIANT_get_property_handler(zend_property_reference *property_r
 
 			case OE_IS_OBJECT:
 				if (!strcmp(overloaded_property->element.value.str.val, "value")) {
-					php_variant_to_pval(var_arg, &result, 0, codepage TSRMLS_CC);
+					php_variant_to_pval(var_arg, &result, codepage TSRMLS_CC);
 				} else if (!strcmp(Z_STRVAL(overloaded_property->element), "type")) {
 					ZVAL_LONG(&result, V_VT(var_arg))
 				} else {
