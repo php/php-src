@@ -883,7 +883,7 @@ static void php_session_send_cookie(TSRMLS_D)
 
 	smart_str_0(&ncookie);
 	
-	sapi_add_header_ex(ncookie.c, ncookie.len, 0, 0);
+	sapi_add_header_ex(ncookie.c, ncookie.len, 0, 0 TSRMLS_CC);
 }
 
 static ps_module *_php_find_ps_module(char *name TSRMLS_DC)
