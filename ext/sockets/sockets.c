@@ -82,6 +82,7 @@ ZEND_DECLARE_MODULE_GLOBALS(sockets)
 #define PF_INET AF_INET
 #endif
 
+static char *php_strerror(int error TSRMLS_DC);
 
 #define PHP_NORMAL_READ 0x0001
 #define PHP_BINARY_READ 0x0002
