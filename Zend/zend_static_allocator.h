@@ -21,7 +21,10 @@
 
 #define ALLOCATOR_BLOCK_SIZE 400000
 
+/* Temporary */
 typedef unsigned int zend_uint;
+#define emalloc(s) malloc(s)
+#define efree(p) free(p)
 
 typedef struct _Block {
 	char *bp;
@@ -38,11 +41,5 @@ typedef struct _StaticAllocator {
 int static_allocator_init(StaticAllocator *sa);
 char *static_allocator_allocate(StaticAllocator *sa, zend_uint size);
 void static_allocator_destroy(StaticAllocator *sa);
-
-/* Temporary */
-#define emalloc(s) malloc(s)
-#define efree(p) free(p)
-#define SUCCESS 0
-#define FAILURE -1
 
 #endif /* _STATIC_ALLOCATOR_H */
