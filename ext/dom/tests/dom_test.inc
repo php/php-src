@@ -24,7 +24,11 @@ function print_node($node)
 {
   print "Node Name: " . $node->nodeName;
   print "\nNode Type: " . $node->nodeType;
-  $child_count = $node->childNodes->length;
+  if ($node->nodeType != 3) {
+      $child_count = $node->childNodes->length;
+  } else {
+      $child_count = 0;
+  }
   print "\nNum Children: " . $child_count;
   if($child_count <= 1){
     print "\nNode Content: " . $node->nodeValue;
