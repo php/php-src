@@ -223,8 +223,8 @@ PHP_FUNCTION(strcspn)
 	convert_to_string_ex(s2);
 
 	RETURN_LONG(php_strcspn(Z_STRVAL_PP(s1), Z_STRVAL_PP(s2),
-				            Z_STRVAL_PP(s1) + Z_STRLEN_PP(s1),
-							Z_STRVAL_PP(s2) + Z_STRLEN_PP(s2)));
+	                        Z_STRVAL_PP(s1) + Z_STRLEN_PP(s1),
+	                        Z_STRVAL_PP(s2) + Z_STRLEN_PP(s2)));
 }
 /* }}} */
 
