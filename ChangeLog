@@ -1,3 +1,45 @@
+2001-12-27  Dan Kalowsky  <dank@deadmime.org>
+
+    * ext/standard/dns.c: Making PHP compile again on MacOSX 10.1
+
+2001-12-27  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/Date/Calc.php: Hope to be the right fix for bug #13975
+
+    * pear/DB/mssql.php:
+    mssql_get_last_message() has been reportered that always is returning
+    data, so don't use it as a test for errors in fetchInto
+
+    * pear/DB/ifx.php: enhance freeResult
+
+    * pear/DB/ibase.php: implemented freeResult()
+
+    * pear/DB/oci8.php: Changes to modifyLimitQuery:
+    - Don't move the ORDER BY clausule it may alter the final result
+    - Restrict the first subquery to speed up the row fetching
+    - Introduce the FIRST_ROWS Oracle query optimizer (yet disabled)
+    (thanks to John Lim for the recommendations)
+
+    * pear/PEAR/Common.php:
+    switch to use the xml end tag function for correct handling
+    of multiline tag contents
+
+2001-12-27  Georg Richter  <georg.richter@phpev.de>
+
+    * ext/ncurses/ncurses_fe.c
+      ext/ncurses/ncurses_functions.c
+      ext/ncurses/php_ncurses_fe.h:
+    Added new functions: ncurses_waddstr, ncurses_wnoutrefresh, ncurses_wclear,
+    ncurses_wcolorset, ncurses_wgetch, ncurses_keypad, ncurses_wmove
+
+    minor changes in protos.
+
+    Special Thanx to Mathieu Kooiman for submitting his patches!
+
+2001-12-27  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * main/config.w32.h: - MFH fix for crash in get_defined_constants().
+
 2001-12-26  Stig Venaas  <venaas@uninett.no>
 
     * ext/ldap/ldap.c: unbreak parallel search
