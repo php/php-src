@@ -87,11 +87,11 @@ class Console_Getopt {
             if ($arg{0} != '-' || ($arg{1} == '-' && !$long_options)) {
                 $non_opts[] = $arg;
             } else if ($arg{1} == '-') {
-                $error = Getopt::_parseLongOption(substr($arg, 2), $long_options, $opts, $args);
+                $error = Console_Getopt::_parseLongOption(substr($arg, 2), $long_options, $opts, $args);
                 if (PEAR::isError($error))
                     return $error;
             } else {
-                $error = Getopt::_parseShortOption(substr($arg, 1), $short_options, $opts, $args);
+                $error = Console_Getopt::_parseShortOption(substr($arg, 1), $short_options, $opts, $args);
                 if (PEAR::isError($error))
                     return $error;
             }
