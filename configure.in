@@ -383,6 +383,7 @@ sysexits.h \
 sys/file.h \
 sys/mman.h \
 sys/mount.h \
+sys/poll.h \
 sys/resource.h \
 sys/select.h \
 sys/socket.h \
@@ -1063,7 +1064,7 @@ PHP_ADD_SOURCES(main, main.c snprintf.c php_sprintf.c \
        php_ini.c SAPI.c rfc1867.c php_content_types.c strlcpy.c \
        strlcat.c mergesort.c reentrancy.c php_variables.c php_ticks.c \
        streams.c network.c php_open_temporary_file.c php_logos.c \
-       output.c memory_streams.c)
+       output.c memory_streams.c user_streams.c)
 PHP_ADD_SOURCES(/main, internal_functions.c,, sapi)
 PHP_ADD_SOURCES(/main, internal_functions_cli.c,, cli)
 
