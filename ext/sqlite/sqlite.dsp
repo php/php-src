@@ -129,6 +129,7 @@ SOURCE=.\libsqlite\src\copy.c
 # Begin Source File
 
 SOURCE=.\libsqlite\src\date.c
+# SUBTRACT CPP /I "..\..\..\php4\win32"
 # End Source File
 # Begin Source File
 
