@@ -56,11 +56,11 @@
 # include <sys/time.h>
 #endif
 #if WIN32|WINNT
-# include <winsock.h>
+#include <winsock.h>
 #else
-# include <netinet/in.h>
-# include <netdb.h>
-# include <arpa/inet.h>
+#include <netinet/in.h>
+#include <netdb.h>
+#include <arpa/inet.h>
 #endif
 #include "snprintf.h"
 #include "fsock.h"
@@ -68,11 +68,15 @@
 #include "php_globals.h"
 
 #ifdef HAVE_SYS_FILE_H
-# include <sys/file.h>
+#include <sys/file.h>
 #endif
 
 #if MISSING_FCLOSE_DECL
 extern int fclose();
+#endif
+
+#ifdef HAVE_SYS_MMAN_H
+#include <sys/mman.h>
 #endif
 
 static void _php3_closesocket(int *);
@@ -1212,16 +1216,56 @@ PHP_FUNCTION(rmdir)
 }
 /* }}} */	
 
+static size_t php_passthru_fd(int socketd, FILE *fp, int issock)
+{
+	size_t bcount = 0;
+	int ready = 0;
+	
+#ifdef HAVE_MMAP 
+	if(!issock) {
+		int fd;
+		struct stat sbuf;
+		off_t off;
+		void *p;
+		size_t len;
+
+		fd = fileno(fp);
+		off = ftell(fp);
+		fstat(fd, &sbuf);
+	
+		len = sbuf.st_size - off;
+		
+		p = mmap(0, len, PROT_READ, MAP_PRIVATE, fd, off);
+		if(p!=MAP_FAILED) {
+			PHPWRITE(p, len);
+			munmap(p, len);
+			bcount += len;
+			ready = 1;
+		}
+	}
+#endif
+
+	if(!ready) {
+		char buf[8192];
+		int b;
+
+		while ((b = FP_FREAD(buf, sizeof(buf), socketd, fp, issock)) > 0) {
+			PHPWRITE(buf, b);
+			bcount += b;
+		}
+	}
+		
+	return bcount;
+}
 
 /* {{{ proto int readfile(string filename [, int use_include_path])
 Output a file or a URL */
 PHP_FUNCTION(readfile)
 {
 	pval *arg1, *arg2;
-	char buf[8192];
 	FILE *fp;
-	int b, size;
-	int use_include_path = 0;
+	int size=0;
+	int use_include_path=0;
 	int issock=0, socketd=0;
 	
 	/* check args */
@@ -1255,10 +1299,8 @@ PHP_FUNCTION(readfile)
 		}
 		RETURN_FALSE;
 	}
-	size = 0;
-	while ((b = FP_FREAD(buf, sizeof(buf), socketd, fp, issock)) > 0) {
-		PHPWRITE(buf, b);
-		size += b;
+	if(php3_header()) {
+		size = php_passthru_fd(socketd, fp, issock);
 	}
 	if (issock) {
 		SOCK_FCLOSE(socketd);
@@ -1304,8 +1346,7 @@ PHP_FUNCTION(fpassthru)
 {
 	pval *arg1;
 	FILE *fp;
-	char buf[8192];
-	int id, size, b, type;
+	int id, size, type;
 	int issock=0;
 	int socketd=0, *sock;
 	
@@ -1326,10 +1367,7 @@ PHP_FUNCTION(fpassthru)
 	}
 	size = 0;
 	if (php3_header()) { /* force headers if not already sent */
-		while ((b = FP_FREAD(buf, sizeof(buf), socketd, fp, issock)) > 0) {
-			PHPWRITE(buf,b);
-			size += b ;
-		}
+		size = php_passthru_fd(socketd, fp, issock);
 	}
 	php3_list_delete(id);
 	RETURN_LONG(size);
