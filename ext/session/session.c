@@ -962,8 +962,10 @@ PHPAPI void php_session_start(TSRMLS_D)
 
 	PS(define_sid) = 1;
 	PS(send_cookie) = 1;
-	if (PS(session_status) != php_session_none) 
+	if (PS(session_status) != php_session_none) {
+		php_error(E_NOTICE, "A session had already been started - ignoring session_start()");
 		return;
+	}
 
 	lensess = strlen(PS(session_name));
 	
