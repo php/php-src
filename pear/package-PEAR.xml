@@ -48,13 +48,15 @@
   </maintainers>
   <release>
     <version>1.3b2</version>
-    <date>2003-09-29</date>
+    <date>2003-10-02</date>
     <state>beta</state>
     <notes>
 PEAR Installer:
 
 * Updated deps for Archive_Tar and Console_Getopt
 * Fixed #45 preferred_state works incorrectly
+* Fixed optional dependency attrib removed from
+  package.xml, making them a requirement
 
     </notes>
     <provides type="class" name="OS_Guess" />
