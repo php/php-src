@@ -161,6 +161,7 @@ PHP_FUNCTION(ncurses_waddch);
 PHP_FUNCTION(ncurses_wborder);
 PHP_FUNCTION(ncurses_whline);
 PHP_FUNCTION(ncurses_wvline);
+PHP_FUNCTION(ncurses_getyx);
 #if HAVE_NCURSES_PANEL
 PHP_FUNCTION(ncurses_update_panels);
 PHP_FUNCTION(ncurses_panel_window);
