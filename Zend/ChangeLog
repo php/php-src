@@ -1,3 +1,27 @@
+2002-07-15  derick  <derick@pb1.pair.com>
+
+    * zend_operators.c: - MFH of the crap removal
+
+2002-07-15  Andi Gutmans  <andi@pb1.pair.com>
+
+    * ZEND_CHANGES
+      zend.c
+      zend.h
+      zend_API.c
+      zend_compile.c
+      zend_language_parser.y
+      zend_language_scanner.l
+      zend_opcode.c:
+    - Commit patch to support protected member variables (by Timm Friebe w/
+    - some fixes by me).
+    - You can't access protected variables from outside the object. If you want
+    - to see a protected member from your ancestors you need to declare the
+    - member as protected in the class you want to use it in. You can't
+    - redeclare a protected variable as private nor the other way around.
+
+    * zend_operators.c:
+    - Really implement bool increment/decrement as flip-flop.
+
 2002-07-14  Andi Gutmans  <andi@pb1.pair.com>
 
     * zend_compile.c
