@@ -219,8 +219,16 @@ if (isset($argc) && $argc > 1) {
 	if (count($test_files)) {
 		usort($test_files, "test_sort");
 		echo "Running selected tests.\n";
+		$start_time = time();
 		foreach($test_files AS $name) {
 			$test_results[$name] = run_test($php,$name);
+		}
+		$end_time = time();
+		if (count($test_files) > 1) {
+			echo "
+=====================================================================";
+			compute_summary();
+			echo get_summary(false);
 		}
 		if(getenv('REPORT_EXIT_STATUS') == 1 and ereg('FAILED( |$)', implode(' ', $test_results))) {
 			exit(1);
@@ -312,56 +320,14 @@ if (0 == count($test_results)) {
 	return;
 }
 
-$n_total = count($test_results);
-$n_total += $ignored_by_ext;
-
-$sum_results = array('PASSED'=>0, 'SKIPPED'=>0, 'FAILED'=>0);
-foreach ($test_results as $v) {
-	$sum_results[$v]++;
-}
-$sum_results['SKIPPED'] += $ignored_by_ext;
-$percent_results = array();
-while (list($v,$n) = each($sum_results)) {
-	$percent_results[$v] = (100.0 * $n) / $n_total;
-}
+compute_summary();
 
 echo "
 =====================================================================
 TIME END " . date('Y-m-d H:i:s', $end_time);
 
-$summary = "
-=====================================================================
-TEST RESULT SUMMARY
----------------------------------------------------------------------
-Exts skipped    : " . sprintf("%4d",$exts_skipped) . "
-Exts tested     : " . sprintf("%4d",$exts_tested) . "
----------------------------------------------------------------------
-Number of tests : " . sprintf("%4d",$n_total) . "
-Tests skipped   : " . sprintf("%4d (%2.1f%%)",$sum_results['SKIPPED'],$percent_results['SKIPPED']) . "
-Tests failed    : " . sprintf("%4d (%2.1f%%)",$sum_results['FAILED'],$percent_results['FAILED']) . "
-Tests passed    : " . sprintf("%4d (%2.1f%%)",$sum_results['PASSED'],$percent_results['PASSED']) . "
----------------------------------------------------------------------
-Time taken      : " . sprintf("%4d seconds", $end_time - $start_time) . "
-=====================================================================
-";
+$summary = get_summary(true);
 echo $summary;
-
-$failed_test_summary = '';
-if (count($PHP_FAILED_TESTS)) {
-	$failed_test_summary .= "
-=====================================================================
-FAILED TEST SUMMARY
----------------------------------------------------------------------
-";
-	foreach ($PHP_FAILED_TESTS as $failed_test_data) {
-		$failed_test_summary .=  $failed_test_data['test_name'] . "\n";
-	}
-	$failed_test_summary .=  "=====================================================================\n";
-}
-
-if ($failed_test_summary && !getenv('NO_PHPTEST_SUMMARY')) {
-	echo $failed_test_summary;
-}
 
 define('PHP_QA_EMAIL', 'php-qa@lists.php.net');
 define('QA_SUBMISSION_PAGE', 'http://qa.php.net/buildtest-process.php');
@@ -872,6 +838,68 @@ function settings2params(&$ini_settings)
 	} else {
 		$ini_settings = '';
 	}
+}
+
+function compute_summary()
+{
+	global $n_total, $test_results, $ignored_by_ext, $sum_results, $percent_results;
+
+	$n_total = count($test_results);
+	$n_total += $ignored_by_ext;
+	
+	$sum_results = array('PASSED'=>0, 'SKIPPED'=>0, 'FAILED'=>0);
+	foreach ($test_results as $v) {
+		$sum_results[$v]++;
+	}
+	$sum_results['SKIPPED'] += $ignored_by_ext;
+	$percent_results = array();
+	while (list($v,$n) = each($sum_results)) {
+		$percent_results[$v] = (100.0 * $n) / $n_total;
+	}
+}
+
+function get_summary($show_ext_summary)
+{
+	global $exts_skipped, $exts_tested, $n_total, $sum_results, $percent_results, $end_time, $start_time, $failed_test_summary, $PHP_FAILED_TESTS;
+
+	$summary = "";
+	if ($show_ext_summary) {
+		$summary .= "
+=====================================================================
+TEST RESULT SUMMARY
+---------------------------------------------------------------------
+Exts skipped    : " . sprintf("%4d",$exts_skipped) . "
+Exts tested     : " . sprintf("%4d",$exts_tested) . "
+---------------------------------------------------------------------
+";
+	}
+	$summary .= "
+Number of tests : " . sprintf("%4d",$n_total) . "
+Tests skipped   : " . sprintf("%4d (%2.1f%%)",$sum_results['SKIPPED'],$percent_results['SKIPPED']) . "
+Tests failed    : " . sprintf("%4d (%2.1f%%)",$sum_results['FAILED'],$percent_results['FAILED']) . "
+Tests passed    : " . sprintf("%4d (%2.1f%%)",$sum_results['PASSED'],$percent_results['PASSED']) . "
+---------------------------------------------------------------------
+Time taken      : " . sprintf("%4d seconds", $end_time - $start_time) . "
+=====================================================================
+";
+	$failed_test_summary = '';
+	if (count($PHP_FAILED_TESTS)) {
+		$failed_test_summary .= "
+=====================================================================
+FAILED TEST SUMMARY
+---------------------------------------------------------------------
+";
+	foreach ($PHP_FAILED_TESTS as $failed_test_data) {
+		$failed_test_summary .=  $failed_test_data['test_name'] . "\n";
+	}
+	$failed_test_summary .=  "=====================================================================\n";
+	}
+	
+	if ($failed_test_summary && !getenv('NO_PHPTEST_SUMMARY')) {
+		$summary .= $failed_test_summary;
+	}
+
+	return $summary;
 }
 
 /*
