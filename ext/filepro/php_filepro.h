@@ -41,6 +41,8 @@ PHP_FUNCTION(filepro_fieldcount);
 PHP_FUNCTION(filepro_retrieve);
 
 PHP_MINIT_FUNCTION(filepro);
+PHP_RINIT_FUNCTION(filepro);
+PHP_RSHUTDOWN_FUNCTION(filepro);
 PHP_MSHUTDOWN_FUNCTION(filepro);
 #else
 #define phpext_filepro_ptr NULL
