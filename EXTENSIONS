@@ -174,7 +174,7 @@ EXTENSION:           odbc
 PRIMARY MAINTAINER:  Daniel R. Kalowsky <kalowsky@php.net>
 MAINTENANCE:         Maintained
 STATUS:              Working
-COMMENT:             Working except for persistent connections
+COMMENT:             Working 
 -------------------------------------------------------------------------------
 EXTENSION:           oracle
 PRIMARY MAINTAINER:  Thies C. Arntzen <thies@thieso.net>
