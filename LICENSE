@@ -1,5 +1,5 @@
 -------------------------------------------------------------------- 
-                  The PHP License, version 2.01
+                  The PHP License, version 2.02
 Copyright (c) 1999, 2000 The PHP Group. All rights reserved.
 -------------------------------------------------------------------- 
 
@@ -37,12 +37,17 @@ are met:
      "This product includes PHP, freely available from
      http://www.php.net/".
 
-  6. Permission to freely distribute and use Zend as an integrated
-     part of PHP is granted, under the conditions of version 0.92
-     of the Zend License.
-     The license is bundled with the Zend engine, and is available
-     at http://www.zend.com/license/0_92.txt, or by contacting
-     license@zend.com.
+  6. The software incorporates the Zend Engine, a product of Zend
+     Technologies, Ltd. ("Zend").  Zend Engine is licensed to the
+     PHP Association (pursuant to a grant from Zend that can be
+     found at http://www.php.net/license/ZendGrant.txt) for
+     distribution to you under this license agreement, only as a
+     part of PHP.  In the event that you separate the Zend Engine
+     (or any portion thereof) from the rest of the software, or
+     modify the Zend Engine, or any portion thereof, your use of
+     the separated or modified Zend Engine software shall not be
+     governed by this license, and instead shall be governed by
+     the license set forth at www.zend.com/license/ZendLicense.txt. 
 
 
 
