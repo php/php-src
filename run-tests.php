@@ -490,8 +490,8 @@ TEST $file
 		"open_basedir=",
 		"disable_functions=",
 		"error_reporting=2047",
-		"display_errors=0",
-		"log_errors=1",
+		"display_errors=1",
+		"log_errors=0",
 		"html_errors=0",
 		"track_errors=1",
 		"error_log=",
@@ -510,6 +510,7 @@ TEST $file
 			$name = trim(strtolower($setting[0]));
 			$value = trim($setting[1]);
 			$ini_settings[$name] = $value;
+			echo "$name::<$value>\n";
 		}
 	}
 
