@@ -1,3 +1,13 @@
+2004-09-19  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_reflection_api.c:
+      Bugfix #30146 (ReflectionProperty->getValue() requires instance for static
+      property)
+
+    * zend_reflection_api.c:
+      Bugfix #30148 (ReflectionMethod->isConstructor() fails for inherited
+      classes)
+
 2004-09-17  Stanislav Malyshev  <stas@zend.com>
 
     * zend_execute_API.c
