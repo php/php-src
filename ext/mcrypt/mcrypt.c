@@ -251,7 +251,7 @@ PHP_INI_BEGIN()
 PHP_INI_END()
 #endif
 
-static void php_mcrypt_module_dtor(zend_rsrc_list_entry *rsrc)
+static void php_mcrypt_module_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 #if HAVE_LIBMCRYPT24
 	MCRYPT td = (MCRYPT) rsrc->ptr;
@@ -531,18 +531,20 @@ PHP_FUNCTION(mcrypt_generic)
 	if (mcrypt_enc_is_block_mode (td) == 1) { /* It's a block algorithm */
 		block_size = mcrypt_enc_get_block_size (td);
 		data_size = (((Z_STRLEN_PP(data) - 1) / block_size) + 1) * block_size;
-		data_s = emalloc (data_size);
+		printf ("strlen(data): %lu; data size: %lu\n", Z_STRLEN_PP(data), data_size);
+		data_s = emalloc (data_size + 1);
 		memset (data_s, 0, data_size);
 		memcpy (data_s, Z_STRVAL_PP(data), Z_STRLEN_PP(data));
 	}
 	else { /* It's not a block algorithm */
 		data_size = Z_STRLEN_PP(data);
-		data_s = emalloc (data_size);
+		data_s = emalloc (data_size + 1);
 		memset (data_s, 0, data_size);
 		memcpy (data_s, Z_STRVAL_PP(data), Z_STRLEN_PP(data));
 	}
 	
 	mcrypt_generic (td, data_s, data_size);
+	data_s[data_size] = '\0';
 
 	RETVAL_STRINGL (data_s, data_size, 1);
 	efree (data_s);
@@ -571,13 +573,13 @@ PHP_FUNCTION(mdecrypt_generic)
 	if (mcrypt_enc_is_block_mode (td) == 1) { /* It's a block algorithm */
 		block_size = mcrypt_enc_get_block_size (td);
 		data_size = (((Z_STRLEN_PP(data) - 1) / block_size) + 1) * block_size;
-		data_s = emalloc (data_size);
+		data_s = emalloc (data_size + 1);
 		memset (data_s, 0, data_size);
 		memcpy (data_s, Z_STRVAL_PP(data), Z_STRLEN_PP(data));
 	}
 	else { /* It's not a block algorithm */
 		data_size = Z_STRLEN_PP(data);
-		data_s = emalloc (data_size);
+		data_s = emalloc (data_size + 1);
 		memset (data_s, 0, data_size);
 		memcpy (data_s, Z_STRVAL_PP(data), Z_STRLEN_PP(data));
 	}
@@ -1456,56 +1458,53 @@ PHP_FUNCTION(mcrypt_ofb)
 #endif
 
 /* {{{ proto string mcrypt_create_iv(int size, int source)
-   Create an initializing vector (IV) */
+   Create an initialization vector (IV) */
 PHP_FUNCTION(mcrypt_create_iv)
 {
-	zval **size, **psource;
 	char *iv;
-	iv_source source;
-	int i;
+	iv_source source = RANDOM;
+	long size;
 	int n = 0;
 
-	if(ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &size, &psource) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l|l", &size, &source) == FAILURE) {
+		return;
 	}
 
-	convert_to_long_ex(size);
-	convert_to_long_ex(psource);
-	
-	source = Z_LVAL_PP(psource);
-	i = Z_LVAL_PP(size);
-	
-	if(i <= 0) {
+	if (size <= 0) {
 		php_error(E_WARNING, "can not create an IV with size 0 or smaller");
 		RETURN_FALSE;
 	}
 	
-	iv = ecalloc(i, 1);
+	iv = ecalloc(size + 1, 1);
 	
-	if(source == RANDOM || source == URANDOM) {
-		int fd;
+	if (source == RANDOM || source == URANDOM) {
+		int    fd;
 		size_t read_bytes = 0;
 
 		fd = open(source == RANDOM ? "/dev/random" : "/dev/urandom",
 				O_RDONLY);
-		if(fd < 0) {
+		if (fd < 0) {
 			efree(iv);
 			php_error(E_WARNING, "cannot open source device");
 			RETURN_FALSE;
 		}
-		while (read_bytes < i) {
-			n = read(fd, iv + read_bytes, i - read_bytes);
+		while (read_bytes < size) {
+			n = read(fd, iv + read_bytes, size - read_bytes);
 			if (n < 0)
 				break;
 			read_bytes += n;
 		}
 		n = read_bytes;
 		close(fd);
-	} else {
-		while(i) {
-			iv[--i] = 255.0 * rand() / RAND_MAX;
+		if (n < size) {
+			php_error(E_WARNING, "could not gather sufficient random data");
+			RETURN_FALSE;
 		}
-		n = Z_LVAL_PP(size);
+	} else {
+		n = size;
+		while (size) {
+			iv[--size] = 255.0 * rand() / RAND_MAX;
+		}
 	}
 	RETURN_STRINGL(iv, n, 0);
 }
