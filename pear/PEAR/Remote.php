@@ -108,7 +108,7 @@ class PEAR_Remote extends PEAR
         $this->cache = $this->getCache($args);
         $cachettl = $this->config->get('cache_ttl');
         // If cache is newer than $cachettl seconds, we use the cache!
-        if ($this->cache !== null && $this->cache['age'] < $cachettl && is_array($this->cache['content'])) {
+        if ($this->cache !== null && $this->cache['age'] < $cachettl) {
             return $this->cache['content'];
         };
         
