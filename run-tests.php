@@ -351,8 +351,10 @@ define('QA_SUBMISSION_PAGE', 'http://qa.php.net/buildtest-process.php');
 /* We got failed Tests, offer the user to send and e-mail to QA team, unless NO_INTERACTION is set */
 if (!getenv('NO_INTERACTION')) {
 	$fp = fopen("php://stdin", "r+");
-	echo "\nPlease allow this report to be send to the PHP QA\nteam. This will give us a better understanding in how\n";
-	echo "PHP's test cases are doing.\n";
+	echo "\nPlease allow this report to be sent to the PHP QA\nteam. This will give us a better understanding in how\n";
+	echo "PHP's test cases are doing.  Note that the report will include\ndetailed configuration data about your system\n";
+	echo "so if you are worried about exposing sensitive data,\nsave this to a file first and remove any sensitive data\n";
+	echo "and then send this file to php-qa@lists.php.net.\n";
 	echo "(choose \"s\" to just save the results to a file)? [Yns]: ";
 	flush();
 	$user_input = fgets($fp, 10);
