@@ -60,7 +60,7 @@ require_once "PEAR/Installer.php";
 // no UI is needed for these tests
 $ui = false;
 $installer = new PEAR_Installer($ui);
-$installer->debug = 3; // hack debugging in
+$installer->debug = 2; // hack debugging in
 $curdir = getcwd();
 chdir(dirname(__FILE__));
 
@@ -71,6 +71,45 @@ echo 'Returned PEAR_Error?';
 echo (get_class($err) == 'pear_error' ? " yes\n" : " no\n");
 if (get_class($err) == 'pear_error') {
     echo $err->getMessage() . "\n";
+}
+echo 'count($installer->file_operations) = ';
+var_dump(count($installer->file_operations));
+echo "Do valid addFileOperation() delete\n";
+touch($temp_path . DIRECTORY_SEPARATOR . 'tmp' . DIRECTORY_SEPARATOR . 'installertestfooblah.phpt');
+$installer->addFileOperation('delete', array($temp_path . DIRECTORY_SEPARATOR .
+    'tmp' . DIRECTORY_SEPARATOR . 'installertestfooblah.phpt'));
+echo 'count($installer->file_operations) = ';
+var_dump(count($installer->file_operations));
+
+echo "test valid commitFileTransaction():\n";
+if ($installer->commitFileTransaction()) {
+    echo "worked\n";
+} else {
+    echo "didn't work!\n";
+}
+
+echo "Do valid addFileOperation() delete with non-existing file\n";
+$installer->addFileOperation('delete', array('gloober62456.phpt'));
+echo 'count($installer->file_operations) = ';
+var_dump(count($installer->file_operations));
+
+echo "test invalid commitFileTransaction():\n";
+if ($installer->commitFileTransaction()) {
+    echo "worked\n";
+} else {
+    echo "didn't work!\n";
+}
+
+echo "Do valid addFileOperation() rename with non-existing file\n";
+$installer->addFileOperation('rename', array('gloober62456.phpt', 'faber.com'));
+echo 'count($installer->file_operations) = ';
+var_dump(count($installer->file_operations));
+
+echo "test invalid commitFileTransaction():\n";
+if ($installer->commitFileTransaction()) {
+    echo "worked\n";
+} else {
+    echo "didn't work!\n";
 }
 
 //cleanup
@@ -94,3 +133,23 @@ test addFileOperation():
 invalid input to addFileOperation():
 Returned PEAR_Error? yes
 Internal Error: $data in addFileOperation must be an array, was integer
+count($installer->file_operations) = int(0)
+Do valid addFileOperation() delete
+count($installer->file_operations) = int(1)
+test valid commitFileTransaction():
+about to commit 1 file operations
+successfully committed 1 file operations
+worked
+Do valid addFileOperation() delete with non-existing file
+count($installer->file_operations) = int(1)
+test invalid commitFileTransaction():
+about to commit 1 file operations
+warning: file gloober62456.phpt doesn't exist, can't be deleted
+successfully committed 1 file operations
+worked
+Do valid addFileOperation() rename with non-existing file
+count($installer->file_operations) = int(1)
+test invalid commitFileTransaction():
+about to commit 1 file operations
+cannot rename file gloober62456.phpt, doesn't exist
+didn't work!
