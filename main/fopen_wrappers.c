@@ -360,7 +360,7 @@ PHPAPI FILE *php_fopen_primary_script(void)
 PHPAPI FILE *php_fopen_with_path(char *filename, char *mode, char *path, char **opened_path)
 {
 	char *pathbuf, *ptr, *end;
-	char trypath[MAXPATHLEN + 1];
+	char trypath[MAXPATHLEN];
 	struct stat sb;
 	FILE *fp;
 	int filename_length;
@@ -513,7 +513,7 @@ PHPAPI char *php_strip_url_passwd(char *url)
 PHPAPI char *expand_filepath(const char *filepath, char *real_path)
 {
 	cwd_state new_state;
-	char cwd[MAXPATHLEN+1];
+	char cwd[MAXPATHLEN];
 	char *result;
 
 	result = V_GETCWD(cwd, MAXPATHLEN);	
