@@ -179,24 +179,40 @@ inline int zend_verify_property_access(zend_property_info *property_info, zend_c
 
 static inline zend_property_info *zend_get_property_info(zend_object *zobj, zval *member TSRMLS_DC)
 {
-	zend_property_info *property_info;
-	zend_bool found_info_in_object = 0;
+	zend_property_info *property_info = NULL;
+	zend_property_info *scope_property_info;
+	zend_bool denied_access = 0;
+
 
 	ulong h = zend_get_hash_value(Z_STRVAL_P(member), Z_STRLEN_P(member)+1);
 	if (zend_hash_quick_find(&zobj->ce->properties_info, Z_STRVAL_P(member), Z_STRLEN_P(member)+1, h, (void **) &property_info)==SUCCESS) {
 		if (zend_verify_property_access(property_info, zobj->ce TSRMLS_CC)) {
-			return property_info;
+			if (property_info->flags & ZEND_ACC_CHANGED
+				&& !(property_info->flags & ZEND_ACC_PRIVATE)) {
+				/* We still need to make sure that we're not in a context
+				 * where the right property is a different 'statically linked' private
+				 * continue checking below...
+				 */
+			} else {
+				return property_info;
+			}
 		} else {
-			found_info_in_object = 1;
+			/* Try to look in the scope instead */
+			denied_access = 1;
 		}
 	}
-	if (EG(scope)
-		&& zend_hash_quick_find(&EG(scope)->properties_info, Z_STRVAL_P(member), Z_STRLEN_P(member)+1, h, (void **) &property_info)==SUCCESS
-		&& property_info->flags & ZEND_ACC_PRIVATE) {
-		/* ok */
-	} else if (found_info_in_object) {
-		/* Information was available, but we were denied access.  Error out. */
-		zend_error(E_ERROR, "Cannot access %s property %s::$%s", zend_visibility_string(property_info->flags), zobj->ce->name, Z_STRVAL_P(member));
+	if (EG(scope) != zobj->ce
+		&& EG(scope)
+		&& zend_hash_quick_find(&EG(scope)->properties_info, Z_STRVAL_P(member), Z_STRLEN_P(member)+1, h, (void **) &scope_property_info)==SUCCESS
+		&& scope_property_info->flags & ZEND_ACC_PRIVATE) {
+		return scope_property_info;
+	} else if (property_info) {
+		if (denied_access) {
+			/* Information was available, but we were denied access.  Error out. */
+			zend_error(E_ERROR, "Cannot access %s property %s::$%s", zend_visibility_string(property_info->flags), zobj->ce->name, Z_STRVAL_P(member));
+		} else {
+			/* fall through, return property_info... */
+		}
 	} else {
 		EG(std_property_info).flags = ZEND_ACC_PUBLIC;
 		EG(std_property_info).name = Z_STRVAL_P(member);
