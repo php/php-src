@@ -244,7 +244,9 @@ class Config  {
             $totaldata = array();
             foreach ($files as $datasrc)
             {
-                $this->container->parseInput($datasrc,$feature);
+                if (Pear::isError($error = $this->container->parseInput($datasrc,$feature)))
+                   return $error;
+         
                 $totaldata = $this->array_merge_clobber($totaldata,$this->container->data);
                 unset ($this->data);
                 $this->datasrc = $datasrc;
@@ -253,7 +255,9 @@ class Config  {
         }
         else
         {
-            $this->container->parseInput($files,$feature);
+            if (Pear::isError($error = $this->container->parseInput($files,$feature)))
+                 return $error;
+
             $this->data = $this->container->data;
             $this->datasrc = $files;
         }
