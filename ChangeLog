@@ -1,3 +1,17 @@
+2000-09-15  Chris Vandomelen  <chrisv@b0rked.dhs.org>
+
+    * ext/sockets/sockets.c: Changed assignment in read() to be more sane.
+
+2000-09-15  Joey Smith  <joey@joeysmith.com>
+
+    * ext/sybase_ct/php_sybase_ct.h:
+    Remove CVS conflict. Zeev, I assume you wanted context inside the globals?
+
+2000-09-15  Sam Ruby  <rubys@us.ibm.com>
+
+    * ext/java/README:
+    Indicate the Sun's JDK 1.2.2 now works...and complete a sentence.
+
 2000-09-14  Chris Vandomelen  <chrisv@b0rked.dhs.org>
 
     * ext/sockets/sockets.c: Corrected memory leak in read().
