@@ -1080,27 +1080,139 @@ PHPAPI char *php_strtr(char *string, int len, char *str_from,
 	return string;
 }
 
+static void php_strtr_array(zval *return_value,char *str,int slen,HashTable *hash)
+{
+	zval *entry;
+	char *string_key;
+	zval **trans;
+	zval ctmp;
+	ulong num_key;
+	int minlen = 128*1024;
+	int maxlen = 0, pos, len, newpos, newlen, found;
+	char *newstr, *key;
+	
+	zend_hash_internal_pointer_reset(hash);
+	while (zend_hash_get_current_data(hash, (void **)&entry) == SUCCESS) {
+		switch (zend_hash_get_current_key(hash, &string_key, &num_key)) {
+		case HASH_KEY_IS_STRING:
+			len = strlen(string_key);
+			if (len > maxlen) maxlen = len;
+			if (len < minlen) minlen = len;
+			efree(string_key);
+			break; 
+			
+		case HASH_KEY_IS_LONG:
+			ctmp.type = IS_LONG;
+			ctmp.value.lval = num_key;
+			
+			convert_to_string(&ctmp);
+			len = ctmp.value.str.len;
+			zval_dtor(&ctmp);
+
+			if (len > maxlen) maxlen = len;
+			if (len < minlen) minlen = len;
+			break;
+		}
+		zend_hash_move_forward(hash);
+	}
+	
+	key = emalloc(maxlen+1);
+	newstr = emalloc(8192);
+	newlen = 8192;
+	newpos = pos = 0;
+
+	while (pos < slen) {
+		if ((pos + maxlen) > slen) {
+			maxlen = slen - pos;
+		}
+			
+		found = 0;
+
+		for (len = maxlen; len >= minlen; len--) {
+			memcpy(key,str+pos,len);
+			key[ len ]=0;
+			
+			if (zend_hash_find(hash,key,len+1,(void**)&trans) == SUCCESS) {
+				char *tval;
+				int tlen;
+				zval tmp;
+
+				if ((*trans)->type != IS_STRING) {
+					tmp = **trans;
+					zval_copy_ctor(&tmp);
+					convert_to_string(&tmp);
+					tval = tmp.value.str.val;
+					tlen = tmp.value.str.len;
+				} else {
+					tval = (*trans)->value.str.val;
+					tlen = (*trans)->value.str.len;
+				}
+
+				if ((newpos + tlen + 1) > newlen) {
+					newlen = newpos + tlen + 1 + 8192;
+					newstr = realloc(newstr,newlen);
+				}
+				
+				memcpy(newstr+newpos,tval,tlen);
+				newpos += tlen;
+				pos += len;
+				found = 1;
+
+				if ((*trans)->type != IS_STRING) {
+					zval_dtor(&tmp);
+				}
+				break;
+			} 
+		}
+
+		if (! found) {
+			if ((newpos + 1) > newlen) {
+				newlen = newpos + 1 + 8192;
+				newstr = realloc(newstr,newlen);
+			}
+			
+			newstr[ newpos++ ] = str[ pos++ ];
+		}
+	}
+
+	efree(key);
+	newstr[ newpos ] = 0;
+	RETURN_STRINGL(newstr,newpos,0);
+}
+
 /* {{{ proto string strtr(string str, string from, string to)
    Translate characters in str using given translation tables */
 PHP_FUNCTION(strtr)
 {								/* strtr(STRING,FROM,TO) */
 	pval **str, **from, **to;
-	
-	if (ARG_COUNT(ht) != 3 || getParametersEx(3, &str, &from, &to) ==
-		FAILURE) {
+	int ac = ARG_COUNT(ht);
+
+	if (ac < 2 || ac > 3 || getParametersEx(ac, &str, &from, &to) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_string_ex(str);
-	convert_to_string_ex(from);
-	convert_to_string_ex(to);
+	
+	if (ac == 2 && (*from)->type != IS_ARRAY) {
+		php_error(E_WARNING,"arg2 must be passed an array");
+		RETURN_FALSE;
+	}
 
-	*return_value=**str;
-	zval_copy_ctor(return_value);                                                                                        
-	php_strtr(return_value->value.str.val,
-			  return_value->value.str.len,
-			  (*from)->value.str.val,
-			  (*to)->value.str.val,
-			  MIN((*from)->value.str.len,(*to)->value.str.len));
+	convert_to_string_ex(str);
+
+	if (ac == 2) {
+		php_strtr_array(return_value,(*str)->value.str.val,(*str)->value.str.len,HASH_OF(*from));
+	} else {
+		convert_to_string_ex(from);
+		convert_to_string_ex(to);
+
+		*return_value=**str;
+		zval_copy_ctor(return_value);
+		
+		php_strtr(return_value->value.str.val,
+				  return_value->value.str.len,
+				  (*from)->value.str.val,
+				  (*to)->value.str.val,
+				  MIN((*from)->value.str.len,(*to)->value.str.len));
+	}
 }
 /* }}} */
 
