@@ -78,24 +78,11 @@ static int odbc_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 	rc = SQLExecute(S->stmt);	
 
 	while (rc == SQL_NEED_DATA) {
-		int param_no;
 		struct pdo_bound_param_data *param;
-
-		rc = SQLParamData(S->stmt, (SQLPOINTER*)&param_no);
+		rc = SQLParamData(S->stmt, (SQLPOINTER*)&param);
 		if (rc == SQL_NEED_DATA) {
 			php_stream *stm;
 			int len;
-
-			if (FAILURE == zend_hash_index_find(stmt->bound_params, param_no, (void **)&param)) {
-				/* shouldn't happen! */
-				pdo_odbc_stmt_error("while looking up LOB for input");
-clean_out:
-				SQLCancel(S->stmt);
-				if (buf) {
-					efree(buf);
-				}
-				return 0;
-			}
 
 			if (Z_TYPE_P(param->parameter) != IS_RESOURCE) {
 				/* they passed in a string */
@@ -107,7 +94,11 @@ clean_out:
 			if (!stm) {
 				/* shouldn't happen either */
 				pdo_odbc_stmt_error("input LOB is no longer a stream");
-				goto clean_out;
+				SQLCancel(S->stmt);
+				if (buf) {
+					efree(buf);
+				}
+				return 0;
 			}
 
 			/* now suck data from the stream and stick it into the database */
@@ -212,6 +203,9 @@ static int odbc_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *p
 				} else {
 					P->paramtype = SQL_PARAM_OUTPUT;
 				}
+				if (P->paramtype != SQL_PARAM_INPUT && PDO_PARAM_TYPE(param->param_type) != PDO_PARAM_LOB && param->max_value_len > Z_STRLEN_P(param->parameter)) {
+					Z_STRVAL_P(param->parameter) = erealloc(Z_STRVAL_P(param->parameter), param->max_value_len + 1);
+				}
 
 				if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_LOB && P->paramtype != SQL_PARAM_INPUT) {
 					pdo_odbc_stmt_error("Can bind a lob for output");
@@ -255,7 +249,7 @@ static int odbc_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *p
 						}
 					} else {
 						convert_to_string(param->parameter);
-						P->len = Z_STRLEN_P(param->parameter);
+						P->len = SQL_LEN_DATA_AT_EXEC(Z_STRLEN_P(param->parameter));
 					}
 				} else {
 					P->len = Z_STRLEN_P(param->parameter);
@@ -263,7 +257,12 @@ static int odbc_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *p
 				return 1;
 			
 			case PDO_PARAM_EVT_EXEC_POST:
-				break;
+				if (Z_TYPE_P(param->parameter) == IS_STRING) {
+					P = param->driver_data;
+					Z_STRLEN_P(param->parameter) = P->len;
+					Z_STRVAL_P(param->parameter)[P->len] = '\0';
+				}
+				return 1;
 		}
 	}
 	return 1;
