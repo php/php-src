@@ -1,5 +1,5 @@
 
-LTLIBRARY_SHARED_NAME  = libphp_java.la
+LTLIBRARY_SHARED_NAME  = java.la
 LTLIBRARY_SOURCES      = java.c
 LTLIBRARY_DEPENDENCIES = php_java.jar
 
