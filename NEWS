@@ -1,6 +1,12 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 2002, Version 4.3.0
+- Changed regression tests produce selectable error reports. The tests now
+  recognize environment variable TEST_PHP_LOG_FORMAT which can
+  contain O and E for old style .out and .exp files, L for new .log format and
+  D for an internal diff format that does not require systems diff. (Marcus)
+- Use escape_shell_cmd() to allow multiple extra parameters to the
+  invocation of the mailer as used in the fifth parameter to mail(). (Derick)
 - PHP's cURL extention now requires cURL version 7.9.8 (Derick)
 - Added zend_execute_internal which is called like zend_execute but for
   internal functions. (Thies)
