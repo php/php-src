@@ -1,9 +1,9 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.0.8-dev
-- Fixed a crash in dbase_replace_record (Patch by robin.marlow@dps-int.com).
 
 ?? ??? 200?, Version 4.0.7
+- Fixed a crash in dbase_replace_record (Patch by robin.marlow@dps-int.com)
 - Fixed a crash in msql_result() (Zeev)
 - Added support for single dimensional SafeArrays and Enumerations.
   Added an is_enum() function to check if a component implements an
