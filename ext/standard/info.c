@@ -322,7 +322,7 @@ PHPAPI void php_print_info(int flag)
 		php_info_print_box_end();
 	}
 
-  PUTS("</BODY></HTML>");
+	PUTS("</BODY></HTML>");
 }
 
 
