@@ -30,10 +30,6 @@
 #include "zend_API.h"
 #include "zend_multiply.h"
 
-#if 0&&HAVE_BCMATH
-#include "ext/bcmath/number.h"
-#endif
-
 #define LONG_SIGN_MASK (1L << (8*sizeof(long)-1))
 
 ZEND_API int zend_atoi(const char *str, int str_len)
