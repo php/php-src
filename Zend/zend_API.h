@@ -32,16 +32,32 @@
 
 
 BEGIN_EXTERN_C()
-#define ZEND_FN(name) zif_##name
-#define ZEND_NAMED_FUNCTION(name) void name(INTERNAL_FUNCTION_PARAMETERS)
-#define ZEND_FUNCTION(name) ZEND_NAMED_FUNCTION(ZEND_FN(name))
-#define ZEND_METHOD(class, name) ZEND_NAMED_FUNCTION(ZEND_FN(class##_##name))
 
-#define ZEND_NAMED_FE(zend_name, name, arg_types) { #zend_name, name, arg_types },
-#define ZEND_FE(name, arg_types) ZEND_NAMED_FE(name, ZEND_FN(name), arg_types)
-#define ZEND_FALIAS(name, alias, arg_types) ZEND_NAMED_FE(name, ZEND_FN(alias), arg_types)
-#define ZEND_STATIC_FE(name, impl_name, arg_types) { name, impl_name, arg_types },
-#define ZEND_ME(class, name, arg_types) ZEND_NAMED_FE(name, ZEND_FN(class##_##name), arg_types)
+typedef struct _zend_function_entry {
+	char *fname;
+	void (*handler)(INTERNAL_FUNCTION_PARAMETERS);
+	struct _zend_arg_info *arg_info;
+	zend_uint num_args;
+	zend_uint flags;
+} zend_function_entry;
+
+#define ZEND_FN(name) zif_##name
+#define ZEND_NAMED_FUNCTION(name)		void name(INTERNAL_FUNCTION_PARAMETERS)
+#define ZEND_FUNCTION(name)				ZEND_NAMED_FUNCTION(ZEND_FN(name))
+#define ZEND_METHOD(classname, name)	ZEND_NAMED_FUNCTION(ZEND_FN(classname##_##name))
+
+#define ZEND_NAMED_FE(zend_name, name, arg_info)	{ #zend_name, name, arg_info, sizeof(arg_info)/sizeof(struct _zend_arg_info)-1, 0 },
+#define ZEND_FE(name, arg_info)						ZEND_NAMED_FE(name, ZEND_FN(name), arg_info)
+#define ZEND_FALIAS(name, alias, arg_info)			ZEND_NAMED_FE(name, ZEND_FN(alias), arg_info)
+#define ZEND_ME(classname, name, arg_info, flags)	{ #name, ZEND_FN(classname##_##name), arg_info, sizeof(arg_info)/sizeof(struct _zend_arg_info)-1, flags },
+
+#define ZEND_ARG_INFO(pass_by_ref, name)							{ #name, sizeof(#name)-1, NULL, 0, 0, pass_by_ref },
+#define ZEND_ARG_PASS_INFO(pass_by_ref)								{ NULL, 0, NULL, 0, 0, pass_by_ref },
+#define ZEND_ARG_OBJ_INFO(pass_by_ref, name, classname, allow_null) { #name, sizeof(#name)-1, #classname, sizeof(#classname)-1, allow_null, pass_by_ref },
+#define ZEND_BEGIN_ARG_INFO(name, pass_rest_by_reference)					\
+	zend_arg_info name[] = {									\
+		ZEND_ARG_PASS_INFO(pass_rest_by_reference)
+#define ZEND_END_ARG_INFO()		};
 
 /* Name macros */
 #define ZEND_MODULE_STARTUP_N(module)       zm_startup_##module
@@ -249,9 +265,9 @@ ZEND_API int add_property_zval_ex(zval *arg, char *key, uint key_len, zval *valu
 #define add_property_stringl(__arg, __key, __str, __length, __duplicate) add_property_stringl_ex(__arg, __key, strlen(__key)+1, __str, __length, __duplicate TSRMLS_CC)
 #define add_property_zval(__arg, __key, __value) add_property_zval_ex(__arg, __key, strlen(__key)+1, __value TSRMLS_CC)       
 
-ZEND_API int call_user_function(HashTable *function_table, zval **object_pp, zval *function_name, zval *retval_ptr, int param_count, zval *params[] TSRMLS_DC);
-ZEND_API int call_user_function_ex(HashTable *function_table, zval **object_pp, zval *function_name, zval **retval_ptr_ptr, int param_count, zval **params[], int no_separation, HashTable *symbol_table TSRMLS_DC);
-ZEND_API int fast_call_user_function(HashTable *function_table, zval **object_pp, zval *function_name, zval **retval_ptr_ptr, int param_count, zval **params[], int no_separation, HashTable *symbol_table, zend_function **function_pointer TSRMLS_DC);
+ZEND_API int call_user_function(HashTable *function_table, zval **object_pp, zval *function_name, zval *retval_ptr, zend_uint param_count, zval *params[] TSRMLS_DC);
+ZEND_API int call_user_function_ex(HashTable *function_table, zval **object_pp, zval *function_name, zval **retval_ptr_ptr, zend_uint param_count, zval **params[], int no_separation, HashTable *symbol_table TSRMLS_DC);
+ZEND_API int fast_call_user_function(HashTable *function_table, zval **object_pp, zval *function_name, zval **retval_ptr_ptr, zend_uint param_count, zval **params[], int no_separation, HashTable *symbol_table, zend_function **function_pointer TSRMLS_DC);
 
 ZEND_API int zend_set_hash_symbol(zval *symbol, char *name, int name_length,
                                   zend_bool is_ref, int num_symbol_tables, ...);

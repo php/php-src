@@ -1621,7 +1621,7 @@ ZEND_FUNCTION(reflection_class_getinterfaces)
 	array_init(return_value);
 
 	if (ce->num_interfaces) {
-		int i;
+		zend_uint i;
 
 	   	for (i=0; i < ce->num_interfaces; i++) {
 			zval *interface;

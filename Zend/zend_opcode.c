@@ -77,7 +77,8 @@ void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_siz
     op_array->doc_comment = NULL;
     op_array->doc_comment_len = 0;
 
-	op_array->arg_types = NULL;
+	op_array->arg_info = NULL;
+	op_array->num_args = 0;
 
 	op_array->scope = NULL;
 
@@ -190,6 +191,7 @@ ZEND_API void destroy_op_array(zend_op_array *op_array TSRMLS_DC)
 {
 	zend_op *opline = op_array->opcodes;
 	zend_op *end = op_array->opcodes+op_array->last;
+	zend_uint i;
 
 	if (op_array->static_variables) {
 		zend_hash_destroy(op_array->static_variables);
@@ -224,14 +226,18 @@ ZEND_API void destroy_op_array(zend_op_array *op_array TSRMLS_DC)
     if (op_array->doc_comment) {
         efree(op_array->doc_comment);
     }
-	if (op_array->arg_types) {
-		efree(op_array->arg_types);
-	}
 	if (op_array->brk_cont_array) {
 		efree(op_array->brk_cont_array);
 	}
 	if (op_array->done_pass_two) {
 		zend_llist_apply_with_argument(&zend_extensions, (llist_apply_with_arg_func_t) zend_extension_op_array_dtor_handler, op_array TSRMLS_CC);
+	}
+	if (op_array->arg_info) {
+		for (i=0; i<op_array->num_args; i++) {
+			efree(op_array->arg_info[i].name);
+			efree(op_array->arg_info[i].class_name);
+		}
+		efree(op_array->arg_info);
 	}
 }
 

@@ -80,9 +80,33 @@ static ZEND_FUNCTION(zend_thread_id);
 #endif
 #endif
 
-ZEND_API unsigned char first_arg_force_ref[] = { 1, BYREF_FORCE };
-ZEND_API unsigned char second_arg_force_ref[] = { 2, BYREF_NONE, BYREF_FORCE };
-ZEND_API unsigned char third_arg_force_ref[] = { 3, BYREF_NONE, BYREF_NONE, BYREF_FORCE };
+ZEND_API
+	ZEND_BEGIN_ARG_INFO(first_arg_force_ref, 0)
+		ZEND_ARG_PASS_INFO(1)
+	ZEND_END_ARG_INFO();
+
+
+ZEND_API
+	ZEND_BEGIN_ARG_INFO(second_arg_force_ref, 0)
+		ZEND_ARG_PASS_INFO(0)
+		ZEND_ARG_PASS_INFO(1)
+	ZEND_END_ARG_INFO();
+
+ZEND_API
+	ZEND_BEGIN_ARG_INFO(third_arg_force_ref, 0)
+		ZEND_ARG_PASS_INFO(0)
+		ZEND_ARG_PASS_INFO(0)
+		ZEND_ARG_PASS_INFO(1)
+	ZEND_END_ARG_INFO();
+
+
+ZEND_API
+	ZEND_BEGIN_ARG_INFO(fourth_arg_force_ref, 0)
+		ZEND_ARG_PASS_INFO(0)
+		ZEND_ARG_PASS_INFO(0)
+		ZEND_ARG_PASS_INFO(0)
+		ZEND_ARG_PASS_INFO(1)
+	ZEND_END_ARG_INFO();
 
 static zend_function_entry builtin_functions[] = {
 	ZEND_FE(zend_version,		NULL)
@@ -1711,6 +1735,7 @@ ZEND_FUNCTION(get_extension_funcs)
 	}
 }
 /* }}} */
+
 
 /*
  * Local variables:

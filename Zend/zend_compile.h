@@ -121,14 +121,25 @@ typedef struct _zend_property_info {
 } zend_property_info;
 
 
+typedef struct _zend_arg_info {
+	char *name;
+	zend_uint name_len;
+	char *class_name;
+	zend_uint class_name_len;
+	zend_bool allow_null;
+	zend_bool pass_by_reference;
+} zend_arg_info;
+
 struct _zend_op_array {
 	/* Common elements */
 	zend_uchar type;
-	zend_uchar *arg_types;
 	char *function_name;		
 	zend_class_entry *scope;
 	zend_uint fn_flags;
 	union _zend_function *prototype;
+	zend_uint num_args;
+	zend_arg_info *arg_info;
+	zend_bool pass_rest_by_reference;
 	/* END of common elements */
 
 	zend_uint *refcount;
@@ -165,11 +176,13 @@ struct _zend_op_array {
 typedef struct _zend_internal_function {
 	/* Common elements */
 	zend_uchar type;
-	zend_uchar *arg_types;
 	char *function_name;		
 	zend_class_entry *scope;
 	zend_uint fn_flags;	
 	union _zend_function *prototype;
+	zend_uint num_args;
+	zend_arg_info *arg_info;
+	zend_bool pass_rest_by_reference;
 	/* END of common elements */
 
 	void (*handler)(INTERNAL_FUNCTION_PARAMETERS);
@@ -182,11 +195,13 @@ typedef union _zend_function {
 
 	struct {
 		zend_uchar type;  /* never used */
-		zend_uchar *arg_types;
 		char *function_name;
 		zend_class_entry *scope;
 		zend_uint fn_flags;
 		union _zend_function *prototype;
+		zend_uint num_args;
+		zend_arg_info *arg_info;
+		zend_bool pass_rest_by_reference;
 	} common;
 	
 	zend_op_array op_array;
@@ -320,7 +335,7 @@ void zend_do_add_variable(znode *result, znode *op1, znode *op2 TSRMLS_DC);
 int zend_do_verify_access_types(znode *current_access_type, znode *new_modifier);
 void zend_do_begin_function_declaration(znode *function_token, znode *function_name, int is_method, int return_reference, znode *fn_flags_znode TSRMLS_DC);
 void zend_do_end_function_declaration(znode *function_token TSRMLS_DC);
-void zend_do_receive_arg(zend_uchar op, znode *var, znode *offset, znode *initialization, znode *class_type, zend_uchar pass_type TSRMLS_DC);
+void zend_do_receive_arg(zend_uchar op, znode *var, znode *offset, znode *initialization, znode *class_type, znode *varname, zend_bool pass_by_reference TSRMLS_DC);
 int zend_do_begin_function_call(znode *function_name TSRMLS_DC);
 void zend_do_begin_method_call(znode *left_bracket TSRMLS_DC);
 void zend_do_begin_dynamic_function_call(znode *function_name TSRMLS_DC);
@@ -653,7 +668,6 @@ int zendlex(znode *zendlval TSRMLS_DC);
 
 
 #define ZEND_ADD_INTERFACE			144
-#define ZEND_VERIFY_INSTANCEOF		145
 #define ZEND_VERIFY_ABSTRACT_CLASS	146
 
 #define ZEND_ASSIGN_DIM				147
@@ -751,22 +765,23 @@ int zendlex(znode *zendlval TSRMLS_DC);
 	}
 
 /* Lost In Stupid Parentheses */
-#define ARG_SHOULD_BE_SENT_BY_REF(offset, conduct_check, arg_types)	\
-	(																\
-		conduct_check												\
-		&& arg_types												\
-		&&															\
-		(															\
-			(														\
-				offset<=arg_types[0]								\
-				&& arg_types[offset]==BYREF_FORCE					\
-			)														\
-		||	(														\
-				offset>=arg_types[0]								\
-				&& arg_types[arg_types[0]]==BYREF_FORCE_REST		\
-			)														\
-		)															\
+#define ARG_SHOULD_BE_SENT_BY_REF(zf, arg_num)											\
+	(																					\
+		zf																				\
+		&& ((zend_function *) zf)->common.arg_info										\
+		&&																				\
+		(																				\
+			(																			\
+				arg_num<=((zend_function *) zf)->common.num_args						\
+				&& ((zend_function *) zf)->common.arg_info[arg_num-1].pass_by_reference	\
+			)																			\
+		||	(																			\
+				arg_num>((zend_function *) zf)->common.num_args							\
+				&& ((zend_function *) zf)->common.pass_rest_by_reference				\
+			)																			\
+		)																				\
 	)
+
 
 #define ZEND_RETURN_VAL 0
 #define ZEND_RETURN_REF 1

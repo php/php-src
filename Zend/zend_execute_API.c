@@ -459,10 +459,10 @@ ZEND_API int zval_update_constant(zval **pp, void *arg TSRMLS_DC)
 }
 
 
-int call_user_function(HashTable *function_table, zval **object_pp, zval *function_name, zval *retval_ptr, int param_count, zval *params[] TSRMLS_DC)
+int call_user_function(HashTable *function_table, zval **object_pp, zval *function_name, zval *retval_ptr, zend_uint param_count, zval *params[] TSRMLS_DC)
 {
 	zval ***params_array = (zval ***) emalloc(sizeof(zval **)*param_count);
-	int i;
+	zend_uint i;
 	int ex_retval;
 	zval *local_retval_ptr;
 
@@ -479,16 +479,18 @@ int call_user_function(HashTable *function_table, zval **object_pp, zval *functi
 	return ex_retval;
 }
 
-int call_user_function_ex(HashTable *function_table, zval **object_pp, zval *function_name, zval **retval_ptr_ptr, int param_count, zval **params[], int no_separation, HashTable *symbol_table TSRMLS_DC)
+
+int call_user_function_ex(HashTable *function_table, zval **object_pp, zval *function_name, zval **retval_ptr_ptr, zend_uint param_count, zval **params[], int no_separation, HashTable *symbol_table TSRMLS_DC)
 {
 	zend_function *function_pointer = NULL;
 
 	return fast_call_user_function(function_table, object_pp, function_name, retval_ptr_ptr, param_count, params, no_separation, symbol_table, &function_pointer TSRMLS_CC);
 }
 
-int fast_call_user_function(HashTable *function_table, zval **object_pp, zval *function_name, zval **retval_ptr_ptr, int param_count, zval **params[], int no_separation, HashTable *symbol_table, zend_function **function_pointer TSRMLS_DC)
+
+int fast_call_user_function(HashTable *function_table, zval **object_pp, zval *function_name, zval **retval_ptr_ptr, zend_uint param_count, zval **params[], int no_separation, HashTable *symbol_table, zend_function **function_pointer TSRMLS_DC)
 {
-	int i;
+	zend_uint i;
 	zval **original_return_value;
 	HashTable *calling_symbol_table;
 	zend_function_state *original_function_state_ptr;
@@ -611,9 +613,7 @@ int fast_call_user_function(HashTable *function_table, zval **object_pp, zval *f
 	for (i=0; i<param_count; i++) {
 		zval *param;
 
-		if (EX(function_state).function->common.arg_types
-			&& i<EX(function_state).function->common.arg_types[0]
-			&& EX(function_state).function->common.arg_types[i+1]==BYREF_FORCE
+		if (ARG_SHOULD_BE_SENT_BY_REF(EX(function_state).function, i+1)
 			&& !PZVAL_IS_REF(*params[i])) {
 			if ((*params[i])->refcount>1) {
 				zval *new_zval;

@@ -281,6 +281,49 @@ static inline zval *get_obj_zval_ptr(znode *op, temp_variable *Ts, zval **freeop
 	return get_zval_ptr(op, Ts, freeop, type);
 }
 
+
+static inline void zend_verify_arg_type(zend_function *zf, zend_uint arg_num, zval *arg TSRMLS_DC)
+{
+	zend_arg_info *cur_arg_info;
+
+	if (!zf->common.arg_info
+		|| arg_num>zf->common.num_args) {
+		return;
+	}
+
+	cur_arg_info = &zf->common.arg_info[arg_num-1];
+
+	if (cur_arg_info->class_name) {
+		if (!arg) {
+			zend_error(E_ERROR, "Argument %d must be an object of class %s", arg_num, cur_arg_info->class_name);
+		}
+		switch (Z_TYPE_P(arg)) {
+			case IS_NULL:
+				if (!cur_arg_info->allow_null) {
+					zend_error(E_ERROR, "Argument %d must not be null", arg_num);
+				}
+				break;
+			case IS_OBJECT: {
+					zend_class_entry *ce = zend_fetch_class(cur_arg_info->class_name, cur_arg_info->class_name_len, ZEND_FETCH_CLASS_AUTO TSRMLS_CC);
+					if (!instanceof_function(Z_OBJCE_P(arg), ce TSRMLS_CC)) {
+						char *error_msg;
+
+						if (ce->ce_flags & ZEND_ACC_INTERFACE) {
+							error_msg = "implement interface";
+						} else {
+							error_msg = "be an instance of";
+						}
+						zend_error(E_ERROR, "Argument %d must %s %s", arg_num, error_msg, ce->name);
+					}
+				}
+				break;
+			default:
+				zend_error(E_ERROR, "Argument %d must be an object of class %s", arg_num, cur_arg_info->class_name);
+				break;
+		}
+	}	
+}
+
 static inline void zend_assign_to_object(znode *result, zval **object_ptr, znode *op2, znode *value_op, temp_variable *Ts, int opcode TSRMLS_DC)
 {
 	zval *object;
@@ -1784,7 +1827,7 @@ int zend_fetch_rw_handler(ZEND_OPCODE_HANDLER_ARGS)
 
 int zend_fetch_func_arg_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
-	if (ARG_SHOULD_BE_SENT_BY_REF(EX(opline)->extended_value, EX(fbc), EX(fbc)->common.arg_types)) {
+	if (ARG_SHOULD_BE_SENT_BY_REF(EX(fbc), EX(opline)->extended_value)) {
 		/* Behave like FETCH_W */
 		zend_fetch_var_address(EX(opline), EX(Ts), BP_VAR_W TSRMLS_CC);
 	} else {
@@ -1851,7 +1894,7 @@ int zend_fetch_dim_is_handler(ZEND_OPCODE_HANDLER_ARGS)
 
 int zend_fetch_dim_func_arg_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
-	if (ARG_SHOULD_BE_SENT_BY_REF(EX(opline)->extended_value, EX(fbc), EX(fbc)->common.arg_types)) {
+	if (ARG_SHOULD_BE_SENT_BY_REF(EX(fbc), EX(opline)->extended_value)) {
 		/* Behave like FETCH_DIM_W */
 		zend_fetch_dimension_address(&EX(opline)->result, &EX(opline)->op1, &EX(opline)->op2, EX(Ts), BP_VAR_W TSRMLS_CC);
 	} else {
@@ -1912,7 +1955,7 @@ int zend_fetch_obj_is_handler(ZEND_OPCODE_HANDLER_ARGS)
 
 int zend_fetch_obj_func_arg_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
-	if (ARG_SHOULD_BE_SENT_BY_REF(EX(opline)->extended_value, EX(fbc), EX(fbc)->common.arg_types)) {
+	if (ARG_SHOULD_BE_SENT_BY_REF(EX(fbc), EX(opline)->extended_value)) {
 		/* Behave like FETCH_OBJ_W */
 		zend_fetch_property_address(&EX(opline)->result, &EX(opline)->op1, &EX(opline)->op2, EX(Ts), BP_VAR_W TSRMLS_CC);
 	} else {
@@ -2453,6 +2496,19 @@ int zend_do_fcall_common_helper(ZEND_OPCODE_HANDLER_ARGS)
 		ALLOC_ZVAL(EX_T(EX(opline)->result.u.var).var.ptr);
 		INIT_ZVAL(*(EX_T(EX(opline)->result.u.var).var.ptr));
 
+		if (EX(function_state).function->common.arg_info) {
+			zend_uint i=0;
+			zval **p;
+			ulong arg_count;
+
+			p = (zval **) EG(argument_stack).top_element-2;
+			arg_count = (ulong) *p;
+
+			while (arg_count>0) {
+				zend_verify_arg_type(EX(function_state).function, ++i, *(p-arg_count) TSRMLS_CC);
+				arg_count--;
+			}
+		}
 		if (!zend_execute_internal) {
 			/* saves one function call if zend_execute_internal is not used */
 			((zend_internal_function *) EX(function_state).function)->handler(EX(opline)->extended_value, EX_T(EX(opline)->result.u.var).var.ptr, EX(object), return_value_used TSRMLS_CC);
@@ -2702,7 +2758,7 @@ exception_should_be_taken:
 int zend_send_val_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
 	if (EX(opline)->extended_value==ZEND_DO_FCALL_BY_NAME
-		&& ARG_SHOULD_BE_SENT_BY_REF(EX(opline)->op2.u.opline_num, EX(fbc), EX(fbc)->common.arg_types)) {
+		&& ARG_SHOULD_BE_SENT_BY_REF(EX(fbc), EX(opline)->op2.u.opline_num)) {
 			zend_error(E_ERROR, "Cannot pass parameter %d by reference", EX(opline)->op2.u.opline_num);
 	}
 	{
@@ -2755,7 +2811,7 @@ int zend_send_var_no_ref_handler(ZEND_OPCODE_HANDLER_ARGS)
 		if (!(EX(opline)->extended_value & ZEND_ARG_SEND_BY_REF)) {
 			return zend_send_by_var_helper(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 		}
-	} else if (!ARG_SHOULD_BE_SENT_BY_REF(EX(opline)->op2.u.opline_num, EX(fbc), EX(fbc)->common.arg_types)) {
+	} else if (!ARG_SHOULD_BE_SENT_BY_REF(EX(fbc), EX(opline)->op2.u.opline_num)) {
 		return zend_send_by_var_helper(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 	{
@@ -2796,7 +2852,7 @@ int zend_send_ref_handler(ZEND_OPCODE_HANDLER_ARGS)
 int zend_send_var_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
 	if ((EX(opline)->extended_value == ZEND_DO_FCALL_BY_NAME)
-		&& ARG_SHOULD_BE_SENT_BY_REF(EX(opline)->op2.u.opline_num, EX(fbc), EX(fbc)->common.arg_types)) {
+		&& ARG_SHOULD_BE_SENT_BY_REF(EX(fbc), EX(opline)->op2.u.opline_num)) {
 		return zend_send_ref_handler(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 	return zend_send_by_var_helper(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
@@ -2806,16 +2862,21 @@ int zend_send_var_handler(ZEND_OPCODE_HANDLER_ARGS)
 int zend_recv_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zval **param;
+	zend_uint arg_num = EX(opline)->op1.u.constant.value.lval;
 
-	if (zend_ptr_stack_get_arg(EX(opline)->op1.u.constant.value.lval, (void **) &param TSRMLS_CC)==FAILURE) {
+	if (zend_ptr_stack_get_arg(arg_num, (void **) &param TSRMLS_CC)==FAILURE) {
+		zend_verify_arg_type((zend_function *) EG(active_op_array), arg_num, NULL TSRMLS_CC);
 		zend_error(E_WARNING, "Missing argument %d for %s()\n", EX(opline)->op1.u.constant.value.lval, get_active_function_name(TSRMLS_C));
 		if (EX(opline)->result.op_type == IS_VAR) {
 			PZVAL_UNLOCK(*EX_T(EX(opline)->result.u.var).var.ptr_ptr);
 		}
-	} else if (PZVAL_IS_REF(*param)) {
-		zend_assign_to_variable_reference(&EX(opline)->result, get_zval_ptr_ptr(&EX(opline)->result, EX(Ts), BP_VAR_W), param, NULL TSRMLS_CC);
 	} else {
-		zend_assign_to_variable(&EX(opline)->result, &EX(opline)->result, NULL, *param, IS_VAR, EX(Ts) TSRMLS_CC);
+		zend_verify_arg_type((zend_function *) EG(active_op_array), arg_num, *param TSRMLS_CC);
+		if (PZVAL_IS_REF(*param)) {
+			zend_assign_to_variable_reference(&EX(opline)->result, get_zval_ptr_ptr(&EX(opline)->result, EX(Ts), BP_VAR_W), param, NULL TSRMLS_CC);
+		} else {
+			zend_assign_to_variable(&EX(opline)->result, &EX(opline)->result, NULL, *param, IS_VAR, EX(Ts) TSRMLS_CC);
+		}
 	}
 
 	NEXT_OPCODE();
@@ -2825,8 +2886,9 @@ int zend_recv_handler(ZEND_OPCODE_HANDLER_ARGS)
 int zend_recv_init_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zval **param, *assignment_value;
+	zend_uint arg_num = EX(opline)->op1.u.constant.value.lval;
 
-	if (zend_ptr_stack_get_arg(EX(opline)->op1.u.constant.value.lval, (void **) &param TSRMLS_CC)==FAILURE) {
+	if (zend_ptr_stack_get_arg(arg_num, (void **) &param TSRMLS_CC)==FAILURE) {
 		if (EX(opline)->op2.u.constant.type == IS_CONSTANT || EX(opline)->op2.u.constant.type==IS_CONSTANT_ARRAY) {
 			zval *default_value;
 
@@ -2845,9 +2907,11 @@ int zend_recv_init_handler(ZEND_OPCODE_HANDLER_ARGS)
 			param = NULL;
 			assignment_value = &EX(opline)->op2.u.constant;
 		}
+		zend_verify_arg_type((zend_function *) EG(active_op_array), arg_num, assignment_value TSRMLS_CC);
 		zend_assign_to_variable(&EX(opline)->result, &EX(opline)->result, NULL, assignment_value, IS_VAR, EX(Ts) TSRMLS_CC);
 	} else {
 		assignment_value = *param;
+		zend_verify_arg_type((zend_function *) EG(active_op_array), arg_num, assignment_value TSRMLS_CC);
 		if (PZVAL_IS_REF(assignment_value)) {
 			zend_assign_to_variable_reference(&EX(opline)->result, get_zval_ptr_ptr(&EX(opline)->result, EX(Ts), BP_VAR_W), param, NULL TSRMLS_CC);
 		} else {
@@ -3847,27 +3911,6 @@ int zend_add_interface_handler(ZEND_OPCODE_HANDLER_ARGS)
 }
 
 
-int zend_verify_instanceof_handler(ZEND_OPCODE_HANDLER_ARGS)
-{
-	zval *arg = get_zval_ptr(&EX(opline)->op2, EX(Ts), &EG(free_op2), BP_VAR_R);
-	zend_class_entry *ce = EX_T(EX(opline)->op1.u.var).EA.class_entry;
-
-	if ((Z_TYPE_P(arg) != IS_OBJECT)
-		|| !instanceof_function(Z_OBJCE_P(arg), ce TSRMLS_CC)) {
-		char *error_msg;
-
-		if (ce->ce_flags & ZEND_ACC_INTERFACE) {
-			error_msg = "implement interface";
-		} else {
-			error_msg = "be an instance of";
-		}
-		zend_error(E_ERROR, "Argument %d must %s %s", EX(opline)->extended_value, error_msg, ce->name);
-	}
-
-	NEXT_OPCODE();
-}
-
-
 #define MAX_ABSTRACT_INFO_CNT 3
 #define MAX_ABSTRACT_INFO_FMT "%s%s%s%s"
 
@@ -4075,7 +4118,6 @@ void zend_init_opcodes_handlers()
 	zend_opcode_handlers[ZEND_RAISE_ABSTRACT_ERROR] = zend_raise_abstract_error_handler;
 
 	zend_opcode_handlers[ZEND_ADD_INTERFACE] = zend_add_interface_handler;
-	zend_opcode_handlers[ZEND_VERIFY_INSTANCEOF] = zend_verify_instanceof_handler;
 	zend_opcode_handlers[ZEND_VERIFY_ABSTRACT_CLASS] = zend_verify_abstract_class_handler;
 
 	zend_opcode_handlers[ZEND_ASSIGN_DIM] = zend_assign_dim_handler;
