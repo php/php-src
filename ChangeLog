@@ -1,3 +1,55 @@
+2000-04-21  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/standard/info.c: add VDIR info
+
+    * php_modules.dsw: add oracle and oci8
+
+    * ext/oracle/oracle.dsp: .
+
+    * ext/oracle/oracle.c
+      ext/oracle/oracle.dsp
+      ext/oracle/oracle.dsw
+      ext/oracle/php_oracle.h: oracle compiles now on win32 - untested!
+
+    * ext/oci8/oci8.dsp
+      ext/oci8/oci8.dsw: *** empty log message ***
+
+2000-04-21  Zeev Suraski  <zeev@php.net>
+
+    * php_virtual_cwd.c: - Missed second argument
+
+2000-04-21  Andi Gutmans  <andi@php.net>
+
+    * php_virtual_cwd.c: - Fix last fix for Windows
+
+2000-04-21  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/oci8/oci8.c: make it compile on Win32
+
+2000-04-21  Andi Gutmans  <andi@php.net>
+
+    * php_virtual_cwd.c:
+    - Small fix to virtual_Chdir_file() to include the trailing slash when
+      the file is in the root directory.
+
+2000-04-21  Frank M. Kromann  <fmk@swwwing.com>
+
+    * ext/ftp/ftp.dsp
+      ext/mssql/mssql.dsp: Moving output modules
+
+    * ext/zlib/zlib.dsp
+      ext/zlib/zlib_win32_howto.txt:
+    Adding a short WIN32_HOWTO and moving library and header files to php_build
+
+2000-04-21  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/oci8/oci8.c:
+    - OCIBindByName() will no longer complain about bindlength beeing zero. 
+
+2000-04-21  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/gd/gd.c: createfrom* fixes
+
 2000-04-20  Zeev Suraski  <zeev@php.net>
 
     * ext/imap/php_imap.c: Compile fixes
