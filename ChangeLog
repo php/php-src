@@ -1,3 +1,57 @@
+2004-07-23  Andi Gutmans  <andi@zend.com>
+
+    * ext/standard/tests/time/001.phpt:
+      - There's no reason why gettimeofday() shouldn''t return the same time in
+      successive calls; this test fails spuriously on Linux/x86_64 (which has
+      a particularly fast gettimeofday() implementation).
+      - Joe Orton <jorton@redhat>
+
+2004-07-23  Georg Richter  <georg@mysql.com>
+
+    * (PHP_5_0)
+      ext/mysqli/mysqli_fe.c
+      ext/mysqli/tests/bug29311.phpt:
+      fixed bug #29311
+
+    * NEWS
+      ext/mysqli/mysqli.c
+      ext/mysqli/mysqli_fe.c
+      ext/mysqli/tests/bug29311.phpt:
+      fixed bug #29311
+      added support for Cursors (MySQL 5.0.x)
+
+2004-07-23  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_execute.c:
+      Fix 0 Byte leak after alloca to emalloc change
+
+2004-07-23  Edin Kadribasic  <edink@emini.dk>
+
+    * (PHP_4_3)
+      ext/gd/gd.dsp:
+      Fix .dsp
+
+    * (PHP_5_0)
+      ext/gd/gd.c:
+      MFB: Updated version number
+
+    * ext/gd/gd.c:
+      Updated version number
+
+2004-07-23  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      ext/standard/url_scanner_ex.c
+      ext/standard/url_scanner_ex.c
+      ext/standard/url_scanner_ex.re
+      ext/standard/url_scanner_ex.re:
+      MFH: Fixed bug #29333 (output_buffering + trans_sess_id can corrupt output)
+
+    * ext/standard/url_scanner_ex.c
+      ext/standard/url_scanner_ex.re:
+      Fixed bug #29333 (output_buffering + trans_sess_id can corrupt output).
+
 2004-07-22  Stefan Esser  <sesser@suspekt.org>
 
     * ext/gd/gd.dsp:

@@ -1,3 +1,8 @@
+2004-07-23  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_execute.c:
+      Fix 0 Byte leak after alloca to emalloc change
+
 2004-07-22  Zeev Suraski  <zeev@zend.com>
 
     * zend_object_handlers.c:
