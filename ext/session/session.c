@@ -44,7 +44,6 @@
 #include "ext/standard/url_scanner_ex.h"
 #include "ext/standard/php_rand.h"                   /* for RAND_MAX */
 #include "ext/standard/info.h"
-
 #include "ext/standard/php_smart_str.h"
 
 #include "mod_files.h"
@@ -57,24 +56,24 @@
 /* {{{ session_functions[]
  */
 function_entry session_functions[] = {
-	PHP_FE(session_name, NULL)
-	PHP_FE(session_module_name, NULL)
-	PHP_FE(session_save_path, NULL)
-	PHP_FE(session_id, NULL)
-	PHP_FE(session_decode, NULL)
-	PHP_FE(session_register, NULL)
-	PHP_FE(session_unregister, NULL)
-	PHP_FE(session_is_registered, NULL)
-	PHP_FE(session_encode, NULL)
-	PHP_FE(session_start, NULL)
-	PHP_FE(session_destroy, NULL)
-	PHP_FE(session_unset, NULL)
-	PHP_FE(session_set_save_handler, NULL)
-	PHP_FE(session_cache_limiter, NULL)
-	PHP_FE(session_cache_expire, NULL)
+	PHP_FE(session_name,              NULL)
+	PHP_FE(session_module_name,       NULL)
+	PHP_FE(session_save_path,         NULL)
+	PHP_FE(session_id,                NULL)
+	PHP_FE(session_decode,            NULL)
+	PHP_FE(session_register,          NULL)
+	PHP_FE(session_unregister,        NULL)
+	PHP_FE(session_is_registered,     NULL)
+	PHP_FE(session_encode,            NULL)
+	PHP_FE(session_start,             NULL)
+	PHP_FE(session_destroy,           NULL)
+	PHP_FE(session_unset,             NULL)
+	PHP_FE(session_set_save_handler,  NULL)
+	PHP_FE(session_cache_limiter,     NULL)
+	PHP_FE(session_cache_expire,      NULL)
 	PHP_FE(session_set_cookie_params, NULL)
 	PHP_FE(session_get_cookie_params, NULL)
-	PHP_FE(session_write_close, NULL)
+	PHP_FE(session_write_close,       NULL)
 	{NULL, NULL, NULL} 
 };
 /* }}} */
@@ -101,7 +100,6 @@ static PHP_INI_MH(OnUpdateSaveHandler)
 	return SUCCESS;
 }
 
-
 static PHP_INI_MH(OnUpdateSerializer)
 {
 	PS(serializer) = _php_find_ps_serializer(new_value TSRMLS_CC);
@@ -123,25 +121,26 @@ static PHP_INI_MH(OnUpdateSerializer)
 /* {{{ PHP_INI
  */
 PHP_INI_BEGIN()
-	STD_PHP_INI_ENTRY("session.save_path",			"/tmp",			PHP_INI_ALL, OnUpdateString,		save_path,			php_ps_globals,	ps_globals)
-	STD_PHP_INI_ENTRY("session.name",				"PHPSESSID",	PHP_INI_ALL, OnUpdateString,		session_name,		php_ps_globals,	ps_globals)
-	PHP_INI_ENTRY("session.save_handler",			"files",		PHP_INI_ALL, OnUpdateSaveHandler)
-	STD_PHP_INI_BOOLEAN("session.auto_start",		"0",			PHP_INI_ALL, OnUpdateBool,			auto_start,			php_ps_globals,	ps_globals)
-	STD_PHP_INI_ENTRY("session.gc_probability",		"1",			PHP_INI_ALL, OnUpdateInt,			gc_probability,		php_ps_globals,	ps_globals)
-	STD_PHP_INI_ENTRY("session.gc_maxlifetime",		"1440",			PHP_INI_ALL, OnUpdateInt,			gc_maxlifetime,		php_ps_globals,	ps_globals)
-	PHP_INI_ENTRY("session.serialize_handler",		"php",			PHP_INI_ALL, OnUpdateSerializer)
-	STD_PHP_INI_ENTRY("session.cookie_lifetime",	"0",			PHP_INI_ALL, OnUpdateInt,			cookie_lifetime,	php_ps_globals,	ps_globals)
-	STD_PHP_INI_ENTRY("session.cookie_path",		"/",			PHP_INI_ALL, OnUpdateString,		cookie_path,		php_ps_globals,	ps_globals)
-	STD_PHP_INI_ENTRY("session.cookie_domain",		"",				PHP_INI_ALL, OnUpdateString,		cookie_domain,		php_ps_globals,	ps_globals)
-	STD_PHP_INI_BOOLEAN("session.cookie_secure",		"",				PHP_INI_ALL, OnUpdateBool,		cookie_secure,		php_ps_globals,	ps_globals)
-	STD_PHP_INI_BOOLEAN("session.use_cookies",		"1",			PHP_INI_ALL, OnUpdateBool,			use_cookies,		php_ps_globals,	ps_globals)
-	STD_PHP_INI_BOOLEAN("session.use_only_cookies",		"0",		PHP_INI_ALL, OnUpdateBool,			use_only_cookies,	php_ps_globals,	ps_globals)
-	STD_PHP_INI_ENTRY("session.referer_check",		"",				PHP_INI_ALL, OnUpdateString,		extern_referer_chk,	php_ps_globals,	ps_globals)
-	STD_PHP_INI_ENTRY("session.entropy_file",		"",				PHP_INI_ALL, OnUpdateString,		entropy_file,		php_ps_globals,	ps_globals)
-	STD_PHP_INI_ENTRY("session.entropy_length",		"0",			PHP_INI_ALL, OnUpdateInt,			entropy_length,		php_ps_globals,	ps_globals)
-	STD_PHP_INI_ENTRY("session.cache_limiter",		"nocache",		PHP_INI_ALL, OnUpdateString,		cache_limiter,		php_ps_globals,	ps_globals)
-	STD_PHP_INI_ENTRY("session.cache_expire",		"180",			PHP_INI_ALL, OnUpdateInt,			cache_expire,		php_ps_globals,	ps_globals)
-	STD_PHP_INI_ENTRY("session.use_trans_sid",		"1",			PHP_INI_ALL, OnUpdateBool,			use_trans_sid,		php_ps_globals,	ps_globals)
+	STD_PHP_INI_ENTRY("session.save_path",          "/tmp",      PHP_INI_ALL, OnUpdateString, save_path,          php_ps_globals,    ps_globals)
+	STD_PHP_INI_ENTRY("session.name",               "PHPSESSID", PHP_INI_ALL, OnUpdateString, session_name,       php_ps_globals,    ps_globals)
+	PHP_INI_ENTRY("session.save_handler",           "files",     PHP_INI_ALL, OnUpdateSaveHandler)
+	STD_PHP_INI_BOOLEAN("session.auto_start",       "0",         PHP_INI_ALL, OnUpdateBool,   auto_start,         php_ps_globals,    ps_globals)
+	STD_PHP_INI_ENTRY("session.gc_probability",     "1",         PHP_INI_ALL, OnUpdateInt,    gc_probability,     php_ps_globals,    ps_globals)
+	STD_PHP_INI_ENTRY("session.gc_maxlifetime",     "1440",      PHP_INI_ALL, OnUpdateInt,    gc_maxlifetime,     php_ps_globals,    ps_globals)
+	PHP_INI_ENTRY("session.serialize_handler",      "php",       PHP_INI_ALL, OnUpdateSerializer)
+	STD_PHP_INI_ENTRY("session.cookie_lifetime",    "0",         PHP_INI_ALL, OnUpdateInt,    cookie_lifetime,    php_ps_globals,    ps_globals)
+	STD_PHP_INI_ENTRY("session.cookie_path",        "/",         PHP_INI_ALL, OnUpdateString, cookie_path,        php_ps_globals,    ps_globals)
+	STD_PHP_INI_ENTRY("session.cookie_domain",      "",          PHP_INI_ALL, OnUpdateString, cookie_domain,      php_ps_globals,    ps_globals)
+	STD_PHP_INI_BOOLEAN("session.cookie_secure",    "",          PHP_INI_ALL, OnUpdateBool,   cookie_secure,      php_ps_globals,    ps_globals)
+	STD_PHP_INI_BOOLEAN("session.use_cookies",      "1",         PHP_INI_ALL, OnUpdateBool,   use_cookies,        php_ps_globals,    ps_globals)
+	STD_PHP_INI_BOOLEAN("session.use_only_cookies", "0",         PHP_INI_ALL, OnUpdateBool,   use_only_cookies,   php_ps_globals,    ps_globals)
+	STD_PHP_INI_ENTRY("session.referer_check",      "",          PHP_INI_ALL, OnUpdateString, extern_referer_chk, php_ps_globals,    ps_globals)
+	STD_PHP_INI_ENTRY("session.entropy_file",       "",          PHP_INI_ALL, OnUpdateString, entropy_file,       php_ps_globals,    ps_globals)
+	STD_PHP_INI_ENTRY("session.entropy_length",     "0",         PHP_INI_ALL, OnUpdateInt,    entropy_length,     php_ps_globals,    ps_globals)
+	STD_PHP_INI_ENTRY("session.cache_limiter",      "nocache",   PHP_INI_ALL, OnUpdateString, cache_limiter,      php_ps_globals,    ps_globals)
+	STD_PHP_INI_ENTRY("session.cache_expire",       "180",       PHP_INI_ALL, OnUpdateInt,    cache_expire,       php_ps_globals,    ps_globals)
+	STD_PHP_INI_BOOLEAN("session.use_trans_sid",    "1",         PHP_INI_ALL, OnUpdateBool,   use_trans_sid,      php_ps_globals,    ps_globals)
+
 	/* Commented out until future discussion */
 	/* PHP_INI_ENTRY("session.encode_sources", "globals,track", PHP_INI_ALL, NULL) */
 PHP_INI_END()
@@ -218,7 +217,7 @@ zend_module_entry session_module_entry = {
 	PHP_MINIT(session), PHP_MSHUTDOWN(session),
 	PHP_RINIT(session), PHP_RSHUTDOWN(session),
 	PHP_MINFO(session),
-    NO_VERSION_YET,
+	NO_VERSION_YET,
 	STANDARD_MODULE_PROPERTIES
 };
 
@@ -867,7 +866,7 @@ PHPAPI void php_session_start(TSRMLS_D)
 
 	/* check the REQUEST_URI symbol for a string of the form
 	   '<session-name>=<session-id>' to allow URLs of the form
-       http://yoursite/<session-name>=<session-id>/script.php */
+	   http://yoursite/<session-name>=<session-id>/script.php */
 
 	if (!PS(use_only_cookies) && !PS(id) &&
 			zend_hash_find(&EG(symbol_table), "REQUEST_URI",
@@ -970,12 +969,12 @@ static zend_bool php_session_destroy(TSRMLS_D)
    Set session cookie parameters */
 PHP_FUNCTION(session_set_cookie_params)
 {
-    zval **lifetime, **path, **domain, **secure;
+	zval **lifetime, **path, **domain, **secure;
 
 	if (!PS(use_cookies))
 		return;
 
-    if (ZEND_NUM_ARGS() < 1 || ZEND_NUM_ARGS() > 4 ||
+	if (ZEND_NUM_ARGS() < 1 || ZEND_NUM_ARGS() > 4 ||
 		zend_get_parameters_ex(ZEND_NUM_ARGS(), &lifetime, &path, &domain, &secure) == FAILURE)
 		WRONG_PARAM_COUNT;
 
