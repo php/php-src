@@ -1,5 +1,7 @@
 --TEST--
-idate() function
+date_sunrise() and date_sunset() functions
+--INI--
+precision = 14
 --FILE--
 <?
 for($a=1;$a<=12;$a++){
