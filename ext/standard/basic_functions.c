@@ -3255,7 +3255,7 @@ PHP_FUNCTION(array_pad)
 	
 	/* Populate the pads array */
 	num_pads = pad_size_abs - input_size;
-	pads = (zval **)emalloc(num_pads * sizeof(zval **));
+	pads = (zval ***)emalloc(num_pads * sizeof(zval **));
 	for (i = 0; i < num_pads; i++)
 		pads[i] = pad_value;
 	
