@@ -24,6 +24,8 @@ libzend_la_LDFLAGS = @EXTRA_LIBS@
 	
 # automake isn't too clever about "non-standard" use of lex and yacc
 
+zend-scanner.l: zend-parser.h
+
 zend-scanner.c: zend-scanner.l
 	$(LEX) -Pzend -o$@ -i $<
 
