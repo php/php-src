@@ -338,7 +338,14 @@ ZEND_API zend_op_array *v_compile_files(int mark_as_ref CLS_DC, int file_count, 
 	int i;
 	int compiler_result;
 	int compiled_files=0;
+	znode retval_znode;
 	zend_bool original_in_compilation = CG(in_compilation);
+
+	retval_znode.op_type = IS_CONST;
+	retval_znode.u.constant.type = IS_LONG;
+	retval_znode.u.constant.value.lval = 1;
+	retval_znode.u.constant.is_ref = 0;
+	retval_znode.u.constant.refcount = 1;
 
 	init_op_array(op_array, INITIAL_OP_ARRAY_SIZE);
 	save_lexical_state(&original_lex_state CLS_CC);
@@ -356,6 +363,9 @@ ZEND_API zend_op_array *v_compile_files(int mark_as_ref CLS_DC, int file_count, 
 			CG(active_op_array) = op_array;
 			compiler_result = zendparse(CLS_C);
 			zend_close_file_handle(file_handle CLS_CC);
+			if (i == file_count-1) {
+				do_return(&retval_znode, 0 CLS_CC);
+			}
 			restore_lexical_state(&original_lex_state CLS_CC);
 			CG(in_compilation) = original_in_compilation;
 			if (compiler_result==1) { /* parser error */
@@ -369,14 +379,6 @@ ZEND_API zend_op_array *v_compile_files(int mark_as_ref CLS_DC, int file_count, 
 
 	if (retval) {
 		if (compiled_files>0) {
-			znode retval_znode;
-
-			retval_znode.op_type = IS_CONST;
-			retval_znode.u.constant.type = IS_LONG;
-			retval_znode.u.constant.value.lval = 1;
-			retval_znode.u.constant.is_ref = 0;
-			retval_znode.u.constant.refcount = 1;
-			do_return(&retval_znode, 0 CLS_CC);
 			CG(active_op_array) = original_active_op_array;
 			pass_two(op_array);
 			if (mark_as_ref) {
