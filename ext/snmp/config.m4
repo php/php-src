@@ -1,5 +1,37 @@
 dnl $Id$
 
+AC_ARG_WITH(openssl,
+[  --with-openssl[=DIR]    Include OpenSSL support in SNMP.],[
+  PHP_OPENSSL=$withval
+],[
+  PHP_OPENSSL=no
+])
+
+AC_DEFUN(PHP_SETUP_OPENSSL,[
+  for i in /usr/local/ssl /usr/local /usr /usr/local/openssl $PHP_OPENSSL; do
+    if test -r $i/include/openssl/evp.h; then
+      OPENSSL_DIR=$i
+      OPENSSL_INC=$i/include/openssl
+    elif test -r $i/include/evp.h; then
+      OPENSSL_DIR=$i
+      OPENSSL_INC=$i/include
+    fi
+  done
+
+  AC_MSG_CHECKING(for OpenSSL)
+
+  if test -z "$OPENSSL_DIR"; then
+    AC_MSG_ERROR(Cannot find OpenSSL's <evp.h>)
+  fi
+
+  AC_MSG_RESULT($OPENSSL_DIR, Include files in $OPENSSL_INC)
+
+  AC_ADD_LIBPATH($OPENSSL_DIR/lib)
+  AC_ADD_LIBRARY(ssl, yes)
+  AC_ADD_LIBRARY(crypto, yes)
+  AC_ADD_INCLUDE($OPENSSL_INC)
+])
+
 AC_MSG_CHECKING(for SNMP support)
 AC_ARG_WITH(snmp,
 [  --with-snmp[=DIR]       Include SNMP support.  DIR is the SNMP base
@@ -51,7 +83,27 @@ AC_ARG_WITH(snmp,
       AC_ADD_INCLUDE($SNMP_INCDIR)
       SNMP_STATIC="libphpext_snmp.la"
     fi
-    PHP_EXTENSION(snmp,$shared)
+	old_CPPFLAGS="$CPPFLAGS"
+	CPPFLAGS="$INCLUDES $CPPFLAGS"
+	AC_CHECK_HEADERS(default_store.h)
+	if test "$ac_cv_header_default_store_h" = "yes"; then
+		dnl UCD SNMP 4.1.x
+		AC_TRY_RUN([
+#include <ucd-snmp-config.h>
+main() { exit(USE_OPENSSL != 1); }
+		],[
+			SNMP_SSL=yes
+		],[
+			SNMP_SSL=no
+		],[
+			SNMP_SSL=no
+		])
+		if test "$SNMP_SSL" = "yes"; then
+			PHP_SETUP_OPENSSL
+		fi
+	fi
+	CPPFLAGS="$old_CPPFLAGS"
+	PHP_EXTENSION(snmp,$shared)
 	AC_CHECK_LIB(kstat, kstat_read, [
 	  if test "$shared" = yes; then
 	    KSTAT_LIBS="-lkstat"
