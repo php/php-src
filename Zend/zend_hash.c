@@ -381,7 +381,7 @@ ZEND_API int zend_hash_quick_add_or_update(HashTable *ht, char *arKey, uint nKey
 
 ZEND_API int zend_hash_add_empty_element(HashTable *ht, char *arKey, uint nKeyLength)
 {
-	void *dummy=NULL;
+	void *dummy = (void *) 1;
 
 	return zend_hash_add(ht, arKey, nKeyLength, &dummy, sizeof(void *), NULL);
 }
