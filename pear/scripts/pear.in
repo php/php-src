@@ -18,6 +18,30 @@
 // |          Tomas V.V.Cox <cox@idecnet.com>                             |
 // +----------------------------------------------------------------------+
 //
+
+
+/*
+
+command structure:
+
+* remote queries:
+** list available packages
+** list not-installed packages
+** list upgrades
+
+** list packages by author
+** list packages by category
+** list packages by state
+
+* operations on package files:
+
+* installation commands:
+
+* package generation commands:
+
+
+
+ */
 require_once 'PEAR.php';
 require_once 'PEAR/Common.php';
 require_once 'PEAR/Config.php';
@@ -191,9 +215,9 @@ switch ($command) {
     }
 
     // }}}
-    // {{{ list
+    // {{{ list-installed
 
-    case 'list': {
+    case 'list-installed': {
         $reg = new PEAR_Registry;
         $installed = $reg->packageInfo();
         $i = $j = 0;
@@ -205,9 +229,8 @@ switch ($command) {
                 }
                 printf("%-20s %-10s %s\n",
                        "Package", "Version", "State");
-                print str_repeat("=", 75)."\n";
+                print str_repeat("-", 75)."\n";
             }
-            $stable = $package['stable'];
             printf("%-20s %-10s %s\n", $package['package'],
                    $package['version'], $package['release_state']);
         }
@@ -215,9 +238,9 @@ switch ($command) {
     }
 
     // }}}
-    // {{{ list-remote
+    // {{{ list-available
 
-    case 'list-remote': {
+    case 'list-available': {
         $remote = new PEAR_Remote($config);
         $result = $remote->call('package.listAll');
         $i = $j = 0;
@@ -229,7 +252,7 @@ switch ($command) {
                 }
                 printf("%-20s %-10s %-15s %s\n",
                        "Package", "Stable", "Lead", "Category");
-                print str_repeat("=", 75)."\n";
+                print str_repeat("-", 75)."\n";
             }
             $stable = $package['stable'];
             printf("%-20s %-10s %-15s %s\n", $package['name'],
@@ -293,8 +316,9 @@ function usage($error = null)
           "Commands:\n".
           "   install <package file>\n".
           "   package [package info file]\n".
-          "   list\n".
-          "   list-remote\n".
+          "   list-installed\n".
+          "   list-available\n".
+          "   info\n".
           "   show-config\n".
           "\n");
     fclose($stderr);
@@ -302,6 +326,7 @@ function usage($error = null)
 }
 
 // }}}
+// {{{ present_array()
 
 function present_array(&$arr, $keys = null)
 {
@@ -319,6 +344,8 @@ function present_array(&$arr, $keys = null)
         printf($format_string, $k, $v);
     }
 }
+
+// }}}
 
 
 /*
