@@ -1071,11 +1071,6 @@ int php_deflate_string(const char *str, uint str_length, char **newstr, uint *ne
 				return FAILURE;
 			}
 		
-			/*
-			sapi_add_header("Content-Encoding: gzip", sizeof("Content-Encoding: gzip") - 1, 1);
-			sapi_send_headers();
-			*/
-
 			/* Write a very simple .gz header: */
 			sprintf(header_buffer, "%c%c%c%c%c%c%c%c%c%c", gz_magic[0],
 						gz_magic[1], Z_DEFLATED, 0 /*flags*/,
@@ -1087,9 +1082,6 @@ int php_deflate_string(const char *str, uint str_length, char **newstr, uint *ne
 				/* TODO: print out error */
 				return FAILURE;
 			}
-			/*
-			sapi_add_header("Content-Encoding: deflate", sizeof("Content-Encoding: deflate") - 1, 1);
-			*/
 			break;		
 	}
 
@@ -1167,6 +1159,7 @@ PHP_FUNCTION(ob_gzhandler)
 	int coding;
 	zval **zv_string;
 	zval **data, **a_encoding;
+	zend_bool return_original=0;
 
 	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &zv_string)==FAILURE) {
 		ZEND_WRONG_PARAM_COUNT();
@@ -1192,13 +1185,27 @@ PHP_FUNCTION(ob_gzhandler)
 		Z_TYPE_P(return_value) = IS_STRING;
 		switch (coding) {
 			case CODING_GZIP:
-				sapi_add_header("Content-Encoding: gzip", sizeof("Content-Encoding: gzip") - 1, 1);
+				if (sapi_add_header("Content-Encoding: gzip", sizeof("Content-Encoding: gzip") - 1, 1)==FAILURE) {
+					return_original = 1;
+				}
 				break;
 			case CODING_DEFLATE:
-				sapi_add_header("Content-Encoding: deflate", sizeof("Content-Encoding: deflate") - 1, 1);
+				if (sapi_add_header("Content-Encoding: deflate", sizeof("Content-Encoding: deflate") - 1, 1)==FAILURE) {
+					return_original = 1;
+				}
+				break;
+			default:
+				return_original = 1;
 				break;
 		}
+		if (return_original) {
+			zval_dtor(return_value);
+		}
 	} else {
+		return_original = 1;
+	}
+
+	if (return_original) {
 		/* return the original string */
 		*return_value = **zv_string;
 		zval_copy_ctor(return_value);
