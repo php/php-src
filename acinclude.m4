@@ -762,10 +762,10 @@ AC_DEFUN(PHP_BUILD_PROGRAM,[
   OVERALL_TARGET=php
   php_c_pre='$(CC)'
   php_c_meta='$(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)'
-  php_c_post=' && > $[@]'
+  php_c_post=' && echo > $[@]'
   php_cxx_pre='$(CXX)'
   php_cxx_meta='$(COMMON_FLAGS) $(CXXFLAGS_CLEAN) $(EXTRA_CXXFLAGS)'
-  php_cxx_post=' && > $[@]'
+  php_cxx_post=' && echo > $[@]'
   php_lo=o
   
   shared_c_pre='$(LIBTOOL) --mode=compile $(CC)'
