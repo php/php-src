@@ -1,7 +1,11 @@
 --TEST--
 PEAR_Installer test #2
 --SKIPIF--
-skip
+<?php
+if (!getenv('PHP_PEAR_RUNTESTS')) {
+    echo 'skip';
+}
+?>
 --FILE--
 <?php
 $temp_path = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'testinstallertemp';
@@ -154,18 +158,26 @@ $err = $installer->_installFile('installer2.phpt.testfile.php', array('role' => 
     $temp_path . DIRECTORY_SEPARATOR . 'tmp', array());
 echo 'returned PEAR_Error: ' . (get_class($err) == 'pear_error' ? "yes\n" : "no\n");
 if (is_object($err)) {
-    echo 'message: ' . $err->getMessage() . "\n";
+    echo 'message: ' . ($err->getMessage() == 'bad md5sum for file ' . $temp_path . DIRECTORY_SEPARATOR . 'bin' .
+    DIRECTORY_SEPARATOR . 'installer2.phpt.testfile.php' ? 'match' : 'no match') . "\n";
 }
 echo 'file bin/.tmpinstaller2.phpt.testfile.php exists? => ';
 echo (file_exists($temp_path . DIRECTORY_SEPARATOR . 'bin' . DIRECTORY_SEPARATOR .
     '.tmpinstaller2.phpt.testfile.php') ? "yes\n" : "no\n");
 
 echo "test invalid md5sum with --force:\n";
+ob_start();
 $err = $installer->_installFile('installer2.phpt.testfile.php', array('role' => 'script', 'md5sum' => md5('oops stuff')),
     $temp_path . DIRECTORY_SEPARATOR . 'tmp', array('force' => true));
+$warning = ob_get_contents();
+ob_end_clean();
+echo 'warning : ';
+echo ($warning == 'warning : bad md5sum for file ' . $temp_path . DIRECTORY_SEPARATOR . 'bin' .
+    DIRECTORY_SEPARATOR . "installer2.phpt.testfile.php\n" ? "match\n" : "no match\n");
 echo 'returned PEAR_Error: ' . (get_class($err) == 'pear_error' ? "yes\n" : "no\n");
 if (is_object($err)) {
-    echo 'message: ' . $err->getMessage() . "\n";
+    echo 'message: ' . ($err->getMessage() == 'bad md5sum for file ' . $temp_path . DIRECTORY_SEPARATOR . 'bin' .
+    DIRECTORY_SEPARATOR . 'installer2.phpt.testfile.php' ? 'match' : 'no match') . "\n";
 }
 echo 'file bin/.tmpinstaller2.phpt.testfile.php exists? => ';
 echo (file_exists($temp_path . DIRECTORY_SEPARATOR . 'bin' . DIRECTORY_SEPARATOR .
@@ -351,10 +363,10 @@ int(1)
 file bin/.tmpinstaller2.phpt.testfile.php exists? => yes
 test invalid md5sum:
 returned PEAR_Error: yes
-message: bad md5sum for file c:\web pages\chiara\testinstallertemp\bin\installer2.phpt.testfile.php
+message: match
 file bin/.tmpinstaller2.phpt.testfile.php exists? => no
 test invalid md5sum with --force:
-warning : bad md5sum for file c:\web pages\chiara\testinstallertemp\bin\installer2.phpt.testfile.php
+warning : match
 returned PEAR_Error: no
 file bin/.tmpinstaller2.phpt.testfile.php exists? => yes
 
