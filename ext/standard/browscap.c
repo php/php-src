@@ -157,6 +157,8 @@ PHP_MINIT_FUNCTION(browscap)
 		}
 
 		fh.handle.fp = VCWD_FOPEN(browscap, "r");
+		fh.opened_path = NULL;
+		fh.free_filename = 0;
 		if (!fh.handle.fp) {
 			php_error_docref(NULL TSRMLS_CC, E_CORE_WARNING, "Cannot open '%s' for reading", browscap);
 			return FAILURE;
