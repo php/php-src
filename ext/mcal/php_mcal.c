@@ -23,8 +23,7 @@
    | If you did not, or have any questions about PHP licensing, please    |
    | contact core@php.net.                                                |
    +----------------------------------------------------------------------+
-   | Authors:                                                             |
-   |          Mark Musone         <musone@chek.com>                  |
+   | Authors: Mark Musone <musone@chek.com>                               |
    +----------------------------------------------------------------------+
  */
 
@@ -64,7 +63,7 @@ CALSTREAM *cal_close_it ();
 CALSTREAM *cal_close_full ();
 
 
-typedef struct php3_mcal_le_struct {
+typedef struct _php_mcal_le_struct {
   CALSTREAM *mcal_stream;
   long public;
   CALEVENT *event;
@@ -125,15 +124,15 @@ PHP_FE(mcal_fetch_current_stream_event,NULL)
 };
 
 #ifdef ZEND_VERSION
-zend_module_entry php3_mcal_module_entry = {
+zend_module_entry php_mcal_module_entry = {
 	CALVER, mcal_functions, PHP_MINIT(mcal), NULL, NULL, NULL, PHP_MINFO(mcal), 0, 0, 0, NULL
 };
 #else
-zend_module_entry php3_mcal_module_entry = {"mcal", mcal_functions, PHP_MINIT_FUNCTION, NULL, NULL, NULL, PHP_MINFO_FUNCTION, 0, 0, 0, NULL};
+zend_module_entry php_mcal_module_entry = {"mcal", mcal_functions, PHP_MINIT_FUNCTION, NULL, NULL, NULL, PHP_MINFO_FUNCTION, 0, 0, 0, NULL};
 #endif
 
 #if COMPILE_DL
-DLEXPORT zend_module_entry *get_module(void) { return &php3_mcal_module_entry; }
+DLEXPORT zend_module_entry *get_module(void) { return &php_mcal_module_entry; }
 #endif
 
 /* 
@@ -239,7 +238,7 @@ static int add_assoc_object(pval *arg, char *key, pval tmp)
 }
 
 
-void php3_mcal_do_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
+void php_mcal_do_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 {
 	pval *calendar;
 	pval *user;
@@ -285,7 +284,7 @@ void php3_mcal_do_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 
 /* {{{ proto int mcal_close(int stream_id [, int options])
    Close an MCAL stream */
-void php3_mcal_close(INTERNAL_FUNCTION_PARAMETERS)
+void PHP_FUNCTION(mcal_close)
 {
         pval *options, *streamind;
         int ind, ind_type;
@@ -322,16 +321,16 @@ void php3_mcal_close(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int mcal_open(string calendar, string user, string password [, int options])
    Open an MCAL stream to a calendar */
-void php3_mcal_open(INTERNAL_FUNCTION_PARAMETERS)
+void PHP_FUNCTION(mcal_open)
 {
-	php3_mcal_do_open(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+	php_mcal_do_open(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
 
 
 /* {{{ proto int mcal_reopen(int stream_id, string calendar [, int options])
    Reopen MCAL stream to new calendar */
-void php3_mcal_reopen(INTERNAL_FUNCTION_PARAMETERS)
+void PHP_FUNCTION(mcal_reopen)
 {
 	pval *streamind;
 	pval *calendar;
@@ -372,7 +371,7 @@ void php3_mcal_reopen(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int mcal_expunge(int stream_id)
    Delete all messages marked for deletion */
-void php3_mcal_expunge(INTERNAL_FUNCTION_PARAMETERS)
+void PHP_FUNCTION(mcal_expunge)
 {
 	pval *streamind;
 	int ind, ind_type;
@@ -401,7 +400,7 @@ void php3_mcal_expunge(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int mcal_fetch_event(int stream_id,int eventid, [int options])
    Fetch an event*/
-void php3_mcal_fetch_event(INTERNAL_FUNCTION_PARAMETERS)
+void PHP_FUNCTION(mcal_fetch_event)
 {
 	pval *streamind,*eventid,*options=NULL;
 	int ind, ind_type;
@@ -437,7 +436,7 @@ void php3_mcal_fetch_event(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto object mcal_fetch_current_stream_event(int stream_id)
    Fetch the current event stored in the stream's event structure*/
-void php3_mcal_fetch_current_stream_event(INTERNAL_FUNCTION_PARAMETERS)
+void PHP_FUNCTION(mcal_fetch_current_stream_event)
 {
 	pval *streamind;
 	int ind, ind_type;
@@ -531,7 +530,7 @@ void make_event_object(pval *mypvalue,CALEVENT *event)
 
 /* {{{ proto array mcal_list_events(int stream_id,object begindate, [object enddate])
    Returns list of UIDs for that day or range of days */
-void php3_mcal_list_events(INTERNAL_FUNCTION_PARAMETERS)
+void PHP_FUNCTION(mcal_list_events)
 {
 	pval *streamind,*startyear,*startmonth,*startday;
 	pval *endyear,*endmonth,*endday;
@@ -601,7 +600,7 @@ void php3_mcal_list_events(INTERNAL_FUNCTION_PARAMETERS)
 /* {{{ proto string mcal_create_calendar(int stream_id, string calendar)
    Create a new calendar*/
 
-void php3_mcal_create_calendar(INTERNAL_FUNCTION_PARAMETERS)
+void PHP_FUNCTION(mcal_create_calendar)
 {
 	pval *streamind, *calendar;
 	int ind, ind_type;
@@ -636,7 +635,7 @@ void php3_mcal_create_calendar(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto string mcal_rename(int stream_id, string src_calendar, string dest_calendar)
    Rename a calendar*/
-void php3_mcal_rename_calendar(INTERNAL_FUNCTION_PARAMETERS)
+void PHP_FUNCTION(mcal_rename_calendar)
 {
 	pval *streamind, *src_calendar,*dest_calendar;
 	int ind, ind_type;
@@ -668,7 +667,7 @@ void php3_mcal_rename_calendar(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int mcal_reopen(int stream_id, array date, array time)
    list alarms for a given time */
-void php3_mcal_list_alarms(INTERNAL_FUNCTION_PARAMETERS)
+void PHP_FUNCTION(mcal_list_alarms)
 {
   pval *streamind, *year,*month,*day,*hour,*min,*sec;
 #ifdef ZEND_VERSION
@@ -729,7 +728,7 @@ void php3_mcal_list_alarms(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto string mcal_delete_calendar(int stream_id, string calendar)
    Delete calendar*/
-void php3_mcal_delete_calendar(INTERNAL_FUNCTION_PARAMETERS)
+void PHP_FUNCTION(mcal_delete_calendar)
 {
 	pval *streamind, *calendar;
 	int ind, ind_type;
@@ -764,7 +763,7 @@ void php3_mcal_delete_calendar(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto string mcal_delete_event(int stream_id, int uid)
    Delete event*/
-void php3_mcal_delete_event(INTERNAL_FUNCTION_PARAMETERS)
+void PHP_FUNCTION(mcal_delete_event)
 {
 	pval *streamind, *uid;
 	int ind, ind_type;
@@ -795,13 +794,13 @@ void php3_mcal_delete_event(INTERNAL_FUNCTION_PARAMETERS)
 /* }}} */
 
 
-void php3_mcal_popen(INTERNAL_FUNCTION_PARAMETERS){
+void PHP_FUNCTION(mcal_popen){
 }
 
 
 /* {{{ proto string mcal_store_event(int stream_id, object event)
    Store an  event*/
-void php3_mcal_store_event(INTERNAL_FUNCTION_PARAMETERS)
+void PHP_FUNCTION(mcal_store_event)
 {
 	pval *streamind,*storeobject;
 	int ind, ind_type;
@@ -840,7 +839,7 @@ void php3_mcal_store_event(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto string mcal_snooze(int stream_id, int uid)
    Snooze an alarm*/
-void php3_mcal_snooze(INTERNAL_FUNCTION_PARAMETERS)
+void PHP_FUNCTION(mcal_snooze)
 {
 	pval *streamind,*uid;
 	int ind, ind_type;
@@ -879,7 +878,7 @@ void php3_mcal_snooze(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto string mcal_event_set_category(int stream_id, string category)
    attach a category to an event*/
-void php3_mcal_event_set_category(INTERNAL_FUNCTION_PARAMETERS)
+void PHP_FUNCTION(mcal_event_set_category)
 {
 	pval *streamind,*category;
 	int ind, ind_type;
@@ -907,7 +906,7 @@ void php3_mcal_event_set_category(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto string mcal_event_set_title(int stream_id, string title)
    attach a title to an event*/
-void php3_mcal_event_set_title(INTERNAL_FUNCTION_PARAMETERS)
+void PHP_FUNCTION(mcal_event_set_title)
 {
 	pval *streamind,*title;
 	int ind, ind_type;
@@ -935,7 +934,7 @@ void php3_mcal_event_set_title(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto string mcal_event_set_description(int stream_id, string description)
    attach a description to an event*/
-void php3_mcal_event_set_description(INTERNAL_FUNCTION_PARAMETERS)
+void PHP_FUNCTION(mcal_event_set_description)
 {
 	pval *streamind,*description;
 	int ind, ind_type;
@@ -963,7 +962,7 @@ void php3_mcal_event_set_description(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto string mcal_event_set_start(int stream_id, int year,int month, int day, [[[int hour],int min],int sec])
    attach a start datetime to an event*/
-void php3_mcal_event_set_start(INTERNAL_FUNCTION_PARAMETERS)
+void PHP_FUNCTION(mcal_event_set_start)
 {
 	pval *streamind,*year,*month,*date,*hour,*min,*sec;
 	int ind, ind_type;
@@ -1005,7 +1004,7 @@ void php3_mcal_event_set_start(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto string mcal_event_set_end(int stream_id, int year,int month, int day, [[[int hour],int min],int sec])
    attach an end datetime to an event*/
-void php3_mcal_event_set_end(INTERNAL_FUNCTION_PARAMETERS)
+void PHP_FUNCTION(mcal_event_set_end)
 {
 	pval *streamind,*year,*month,*date,*hour,*min,*sec;
 	int ind, ind_type;
@@ -1046,7 +1045,7 @@ void php3_mcal_event_set_end(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int mcal_event_set_alarm(int stream_id, int alarm)
    add an alarm to the streams global event */
-void php3_mcal_event_set_alarm(INTERNAL_FUNCTION_PARAMETERS)
+void PHP_FUNCTION(mcal_event_set_alarm)
 {
 	pval *streamind,*alarm;
 	int ind, ind_type;
@@ -1074,7 +1073,7 @@ void php3_mcal_event_set_alarm(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int mcal_event_init(int stream_id)
    initialize a streams global event */
-void php3_mcal_event_init(INTERNAL_FUNCTION_PARAMETERS)
+void PHP_FUNCTION(mcal_event_init)
 {
 	pval *streamind;
 	int ind, ind_type;
@@ -1095,11 +1094,11 @@ void php3_mcal_event_init(INTERNAL_FUNCTION_PARAMETERS)
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
-	php3_event_init(mcal_le_struct);
+	php_mcal_event_init(mcal_le_struct);
 }
 	/* }}} */
 
-void php3_event_init(struct php3_mcal_le_struct *mystruct)
+void php_mcal_event_init(struct _php_mcal_le_struct *mystruct)
 {
   calevent_free(mystruct->event);
   mystruct->event=calevent_new();
@@ -1108,7 +1107,7 @@ void php3_event_init(struct php3_mcal_le_struct *mystruct)
 
 /* {{{ proto int mcal_event_set_class(int stream_id, int class)
    add an class to the streams global event */
-void php3_mcal_event_set_class(INTERNAL_FUNCTION_PARAMETERS)
+void PHP_FUNCTION(mcal_event_set_class)
 {
 	pval *streamind,*class;
 	int ind, ind_type;
@@ -1138,7 +1137,7 @@ void php3_mcal_event_set_class(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto bool mcal_is_leap_year(int year)
    returns true if year is a leap year, false if not */
-void php3_mcal_is_leap_year(INTERNAL_FUNCTION_PARAMETERS)
+void PHP_FUNCTION(mcal_is_leap_year)
 {
 	pval *year;
 	int myargc;
@@ -1160,7 +1159,7 @@ void php3_mcal_is_leap_year(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int mcal_days_in_month(int month,bool leap_year)
    returns the number of days in the given month, needs to know if the year is a leap year or not */
-void php3_mcal_days_in_month(INTERNAL_FUNCTION_PARAMETERS)
+void PHP_FUNCTION(mcal_days_in_month)
 {
 	pval *month,*leap;
 	int myargc;
@@ -1178,7 +1177,7 @@ void php3_mcal_days_in_month(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto bool mcal_date_valid(int year,int month,int day)
    returns true if the date is a valid date */
-void php3_mcal_date_valid(INTERNAL_FUNCTION_PARAMETERS)
+void PHP_FUNCTION(mcal_date_valid)
 {
 	pval *year,*month,*day;
 	int myargc;
@@ -1204,7 +1203,7 @@ void php3_mcal_date_valid(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto bool mcal_time_valid(int hour,int min,int sec)
    returns true if the time is a valid time */
-void php3_mcal_time_valid(INTERNAL_FUNCTION_PARAMETERS)
+void PHP_FUNCTION(mcal_time_valid)
 {
 	pval *hour,*min,*sec;
 	int myargc;
@@ -1228,7 +1227,7 @@ void php3_mcal_time_valid(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int mcal_day_of_week(int year,int month,int day)
    returns the day of the week of the given date */
-void php3_mcal_day_of_week(INTERNAL_FUNCTION_PARAMETERS)
+void PHP_FUNCTION(mcal_day_of_week)
 {
 	pval *year,*month,*day;
 	int myargc;
@@ -1249,7 +1248,7 @@ void php3_mcal_day_of_week(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int mcal_day_of_year(int year,int month,int day)
    returns the day of the year of the given date */
-void php3_mcal_day_of_year(INTERNAL_FUNCTION_PARAMETERS)
+void PHP_FUNCTION(mcal_day_of_year)
 {
 	pval *year,*month,*day;
 	int myargc;
@@ -1272,7 +1271,7 @@ void php3_mcal_day_of_year(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int mcal_day_of_week(int ayear,int amonth,int aday,int byear,int bmonth,int bday)
  returns <0, 0, >0 if a<b, a==b, a>b respectively  */
-void php3_mcal_date_compare(INTERNAL_FUNCTION_PARAMETERS)
+void PHP_FUNCTION(mcal_date_compare)
 {
 	pval *ayear,*amonth,*aday;
 	pval *byear,*bmonth,*bday;
@@ -1305,7 +1304,7 @@ void php3_mcal_date_compare(INTERNAL_FUNCTION_PARAMETERS)
    after the supplied date.  Returns empty date field if event does not
   occur or something is invalid.
  */
-void php3_mcal_next_recurrence(INTERNAL_FUNCTION_PARAMETERS)
+void PHP_FUNCTION(mcal_next_recurrence)
 {
 	pval *streamind,*weekstart,*next,*pvalue;
 	int ind, ind_type;
@@ -1384,7 +1383,7 @@ void php3_mcal_next_recurrence(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto string mcal_event_set_recur_daily(int stream_id,int year,int month,int day,int hour,int min,int sec,int interval
    create a daily recurrence */
-void php3_mcal_event_set_recur_daily(INTERNAL_FUNCTION_PARAMETERS)
+void PHP_FUNCTION(mcal_event_set_recur_daily)
 {
 	pval *streamind,*year,*month,*day,*hour,*min,*sec,*interval;
 	int ind, ind_type;
@@ -1423,7 +1422,7 @@ void php3_mcal_event_set_recur_daily(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto string mcal_event_set_recur_weekly(int stream_id,int year,int month,int day,int hour,int min,int sec,int interval, int weekdays)
 create a weekly recurrence */
-void php3_mcal_event_set_recur_weekly(INTERNAL_FUNCTION_PARAMETERS)
+void PHP_FUNCTION(mcal_event_set_recur_weekly)
 {
 	pval *streamind,*year,*month,*day,*hour,*min,*sec,*interval,*weekdays;
 	int ind, ind_type;
@@ -1462,7 +1461,7 @@ void php3_mcal_event_set_recur_weekly(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto string mcal_event_set_recur_monthly_mday(int stream_id,int year,int month,int day,int hour,int min,int sec,int interval)
  create a monthly by day recurrence */
-void php3_mcal_event_set_recur_monthly_mday(INTERNAL_FUNCTION_PARAMETERS)
+void PHP_FUNCTION(mcal_event_set_recur_monthly_mday)
 {
 	pval *streamind,*year,*month,*day,*hour,*min,*sec,*interval;
 	int ind, ind_type;
@@ -1501,7 +1500,7 @@ void php3_mcal_event_set_recur_monthly_mday(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto string mcal_event_set_recur_monthly_wday(int stream_id,int year,int month,int day,int hour,int min,int sec,int interval)
    create a monthy by week recurrence */
-void php3_mcal_event_set_recur_monthly_wday(INTERNAL_FUNCTION_PARAMETERS)
+void PHP_FUNCTION(mcal_event_set_recur_monthly_wday)
 {
 	pval *streamind,*year,*month,*day,*hour,*min,*sec,*interval;
 	int ind, ind_type;
@@ -1540,7 +1539,7 @@ void php3_mcal_event_set_recur_monthly_wday(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto string mcal_event_set_recur_yearly(int stream_id,int year,int month,int day,int hour,int min,int sec,int interval)
    create a yearly recurrence */
-void php3_mcal_event_set_recur_yearly(INTERNAL_FUNCTION_PARAMETERS)
+void PHP_FUNCTION(mcal_event_set_recur_yearly)
 {
 	pval *streamind,*year,*month,*day,*hour,*min,*sec,*interval;
 	int ind, ind_type;
