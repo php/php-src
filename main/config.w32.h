@@ -27,6 +27,12 @@
 #define PHP_MD5_CRYPT 0
 #define PHP_BLOWFISH_CRYPT 0
 
+/* Enable / Disable CALENDAR extension (default: enabled) */
+#define HAVE_CALENDAR 1
+
+/* Enable / Disable COM extension (default: enabled) */
+#define HAVE_COM 1
+
 /* Enable / Disable FTP extension (default: enabled) */
 #define HAVE_FTP 1
 
@@ -42,6 +48,12 @@
 /* Enable / Disable PCRE extension (default: enabled) */
 #define HAVE_BUNDLED_PCRE	1
 #define HAVE_PCRE 1
+
+/* Enable / Disable SESSION extension (default: enabled) */
+#define HAVE_SESSION 1
+
+/* Enable / Disable TOKENIZER extension (default: enabled) */
+#define HAVE_TOKENIZER 1
 
 /* Enable / Disable WDDX extension (default: enabled) */
 #define HAVE_WDDX 1
