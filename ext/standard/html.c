@@ -66,10 +66,6 @@ PHPAPI char *php_escape_html_entities(unsigned char *old, int oldlen, int *newle
 		} else if (34 == *old) {
 			memcpy (new + len, "&quot;", 6);
 			len += 6;
-		} else if (39 == *old) {
-			/* single quote (') */
-			memcpy (new + len, "&#039;",6);
-			len += 6;		
 		} else if (60 == *old) {
 			memcpy (new + len, "&lt;", 4);
 			len += 4;
