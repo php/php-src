@@ -564,6 +564,7 @@ PHP_FUNCTION(split)
 
 	/* churn through str, generating array entries as we go */
 	while ((count == -1 || count > 0) && !(err = regexec(&re, strp, 1, subs, 0))) {
+		printf("In the loop...\n");
 		if (subs[0].rm_so == 0 && subs[0].rm_eo) {
 			/* match is at start of string, return empty string */
 			add_next_index_stringl(return_value, empty_string, 0, 1);
@@ -591,7 +592,9 @@ PHP_FUNCTION(split)
 
 		/* if we're only looking for a certain number of points,
 		   stop looking once we hit it */
-		if (count != -1) count--;
+		if (count != -1) {
+			count--;
+		}
 	}
 
 	/* see if we encountered an error */
@@ -604,7 +607,7 @@ PHP_FUNCTION(split)
 	}
 
 	/* otherwise we just have one last element to add to the array */
-	if (count == -1) {
+	if (count == -1 || err==REG_NOMATCH) {
 		size = endp - strp;
 	
 		add_next_index_stringl(return_value, strp, size, 1);
