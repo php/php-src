@@ -1,7 +1,5 @@
 --TEST--
 array_count_values()
---POST--
---GET--
 --FILE--
 <?php
 $arrays = array (

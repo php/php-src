@@ -1,7 +1,5 @@
 --TEST--
 count
---POST--
---GET--
 --FILE--
 <?php
 print "Testing NULL...\n";

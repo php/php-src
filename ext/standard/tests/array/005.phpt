@@ -1,7 +1,5 @@
 --TEST--
 Test array_shift behaviour
---POST--
---GET--
 --FILE--
 <?php
 

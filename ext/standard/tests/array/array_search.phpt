@@ -1,7 +1,5 @@
 --TEST--
 search_array and in_array (including bug 13567)
---POST--
---GET--
 --FILE--
 <?php
 

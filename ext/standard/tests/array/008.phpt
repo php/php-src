@@ -1,7 +1,5 @@
 --TEST--
 Test array_intersect and array_intersect_assoc behaviour
---POST--
---GET--
 --FILE--
 <?php
 //-=-=-=-=--=-=-=-=-=-=-=-=-=-=-=-=- TEST 1 -=-=-=-=-

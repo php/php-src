@@ -1,7 +1,5 @@
 --TEST--
 Test array_pop behaviour
---POST--
---GET--
 --FILE--
 <?php
 
