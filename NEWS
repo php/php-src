@@ -1,8 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2003, Version 4.3.5
-- Updated PostgreSQL client library that is bundled in Windows
-  distribution to 7.4 (Edin)
+- Updated bundled PostgreSQL library to version 7.4 in Windows distribution.
+  (Edin)
 - Added support for --program-prefix and --program-suffix configure options.
   (Jani)
 - Fixed header handler in NSAPI SAPI module (header->replace was ignored,
