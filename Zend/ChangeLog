@@ -1,3 +1,21 @@
+2003-08-02  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_API.c:
+      Initialize all struct members: Necessary for reflection
+
+    * zend_reflection_api.c:
+      Show interfaces
+
+2003-08-02  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * zend_API.c:
+      fix usage of instanceof here too
+
+2003-08-02  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_execute.c:
+      Fix warning
+
 2003-08-01  Wez Furlong  <wez.php@thebrainroom.net>
 
     * zend_API.c:
