@@ -114,7 +114,7 @@ ZEND_API void convert_scalar_to_number(zval *op TSRMLS_DC)
 				char *strval;
 
 				strval = op->value.str.val;
-				switch ((op->type=is_numeric_string(strval, op->value.str.len, &op->value.lval, &op->value.dval))) {
+				switch ((op->type=is_numeric_string(strval, op->value.str.len, &op->value.lval, &op->value.dval, 1))) {
 					case IS_DOUBLE:
 					case IS_LONG:
 						break;
@@ -152,7 +152,7 @@ ZEND_API void convert_scalar_to_number(zval *op TSRMLS_DC)
 		switch ((op)->type) {										\
 			case IS_STRING:											\
 				{													\
-					switch (((holder).type=is_numeric_string((op)->value.str.val, (op)->value.str.len, &(holder).value.lval, &(holder).value.dval))) {	\
+					switch (((holder).type=is_numeric_string((op)->value.str.val, (op)->value.str.len, &(holder).value.lval, &(holder).value.dval, 1))) {	\
 						case IS_DOUBLE:															\
 						case IS_LONG:															\
 							break;																\
@@ -1456,7 +1456,7 @@ ZEND_API int increment_function(zval *op1)
 				double dval;
 				char *strval = op1->value.str.val;
 
-				switch (is_numeric_string(strval, op1->value.str.len, &lval, &dval)) {
+				switch (is_numeric_string(strval, op1->value.str.len, &lval, &dval, 0)) {
 					case IS_LONG:
 						op1->value.lval = lval+1;
 						op1->type = IS_LONG;
@@ -1502,7 +1502,7 @@ ZEND_API int decrement_function(zval *op1)
 				op1->value.lval = -1;
 				op1->type = IS_LONG;
 				break;
-			} else if (is_numeric_string(op1->value.str.val, op1->value.str.len, &lval, NULL)==IS_LONG) { /* long */
+			} else if (is_numeric_string(op1->value.str.val, op1->value.str.len, &lval, NULL, 0)==IS_LONG) { /* long */
 				STR_FREE(op1->value.str.val);
 				op1->value.lval = lval-1;
 				op1->type = IS_LONG;
@@ -1627,8 +1627,8 @@ ZEND_API void zendi_smart_strcmp(zval *result, zval *s1, zval *s2)
 	long lval1, lval2;
 	double dval1, dval2;
 	
-	if ((ret1=is_numeric_string(s1->value.str.val, s1->value.str.len, &lval1, &dval1)) &&
-		(ret2=is_numeric_string(s2->value.str.val, s2->value.str.len, &lval2, &dval2))) {
+	if ((ret1=is_numeric_string(s1->value.str.val, s1->value.str.len, &lval1, &dval1, 0)) &&
+		(ret2=is_numeric_string(s2->value.str.val, s2->value.str.len, &lval2, &dval2, 0))) {
 #if 0&&WITH_BCMATH
 		if ((ret1==FLAG_IS_BC) || (ret2==FLAG_IS_BC)) {
 			bc_num first, second;
@@ -1703,83 +1703,3 @@ ZEND_API void zend_compare_objects(zval *result, zval *o1, zval *o2 TSRMLS_DC)
 	}
 	zend_compare_symbol_tables(result, Z_OBJPROP_P(o1), Z_OBJPROP_P(o2) TSRMLS_CC);
 }
-
-
-/* returns 0 for non-numeric string
- * returns IS_DOUBLE for floating point string, and assigns the value to *dval (if it's not NULL)
- * returns IS_LONG for integer strings, and assigns the value to *lval (if it's not NULL)
- * returns FLAG_IS_BC if the number might lose accuracy when converted to a double
- */
- 
-#if 0
-
-static inline int is_numeric_string(char *str, int length, long *lval, double *dval)
-{
-	register char *p=str, *end=str+length;
-	unsigned char had_period=0, had_exponent=0;
-	char *end_ptr;
-	
-	if (!length) {
-		return 0;
-	}
-	switch (*p) {
-		case '-':
-		case '+':
-			while (*++p==' ');  /* ignore spaces after the sign */
-			break;
-		default:
-			break;
-	}
-	while (p<end) {
-		if (isdigit((int)(unsigned char)*p)) {
-			p++;
-		} else if (*p=='.') {
-			if (had_period) {
-				return 0;
-			} else {
-				had_period=1;
-				p++;
-			}
-		} else if (*p=='e' || *p=='E') {
-			p++;
-			if (is_numeric_string(p, length - (int) (p-str), NULL, NULL)==IS_LONG) { /* valid exponent */
-				had_exponent=1;
-				break;
-			} else {
-				return 0;
-			}
-		} else {
-			return 0;
-		}
-	}
-	errno=0;
-	if (had_period || had_exponent) { /* floating point number */
-		double local_dval;
-		
-		local_dval = strtod(str, &end_ptr);
-		if (errno==ERANGE || end_ptr != str+length) { /* overflow or bad string */
-			return 0;
-		} else {
-			if (dval) {
-				*dval = local_dval;
-			}
-			return IS_DOUBLE;
-		}
-	} else {
-		long local_lval;
-		
-		local_lval = strtol(str, &end_ptr, 10);
-		if (errno==ERANGE || end_ptr != str+length) { /* overflow or bad string */
-			return 0;
-		} else {
-			if (lval) {
-				*lval = local_lval;
-			}
-			return IS_LONG;
-		}
-	}
-}
-
-
-
-#endif

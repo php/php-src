@@ -58,11 +58,11 @@ ZEND_API int is_not_equal_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 ZEND_API int is_smaller_function(zval *result, zval *op1, zval *op2 TSRMLS_DC);
 ZEND_API int is_smaller_or_equal_function(zval *result, zval *op1, zval *op2 TSRMLS_DC);
 
-static inline int is_numeric_string(char *str, int length, long *lval, double *dval)
+static inline int is_numeric_string(char *str, int length, long *lval, double *dval, zend_bool allow_errors)
 {
 	long local_lval;
 	double local_dval;
-	char *end_ptr;
+	char *end_ptr_long, *end_ptr_double;
 	int conv_base=10;
 
 	if (!length) {
@@ -74,12 +74,16 @@ static inline int is_numeric_string(char *str, int length, long *lval, double *d
 		conv_base=16;
 	}
 	errno=0;
-	local_lval = strtol(str, &end_ptr, conv_base);
-	if (errno!=ERANGE && end_ptr == str+length) { /* integer string */
-		if (lval) {
-			*lval = local_lval;
+	local_lval = strtol(str, &end_ptr_long, conv_base);
+	if (errno!=ERANGE) {
+		if (end_ptr_long == str+length) { /* integer string */
+			if (lval) {
+				*lval = local_lval;
+			}
+			return IS_LONG;
 		}
-		return IS_LONG;
+	} else {
+		end_ptr_long=NULL;
 	}
 
 	if (conv_base==16) { /* hex string, under UNIX strtod() messes it up */
@@ -87,40 +91,52 @@ static inline int is_numeric_string(char *str, int length, long *lval, double *d
 	}
 
 	errno=0;
-	local_dval = strtod(str, &end_ptr);
-	if (errno!=ERANGE && end_ptr == str+length) { /* floating point string */
-		if (! zend_finite(local_dval)) {
-			/* "inf","nan" and maybe other weird ones */
-			return 0;
-		}
-
-		if (dval) {
-			*dval = local_dval;
-		}
-#if 0&&WITH_BCMATH
-		if (length>16) {
-			register char *ptr=str, *end=str+length;
-			
-			while (ptr<end) {
-				switch(*ptr++) {
-					case 'e':
-					case 'E':
-						/* scientific notation, not handled by the BC library */
-						return IS_DOUBLE;
-						break;
-					default:
-						break;
-				}
+	local_dval = strtod(str, &end_ptr_double);
+	if (errno!=ERANGE) {
+		if (end_ptr_double == str+length) { /* floating point string */
+			if (! zend_finite(local_dval)) {
+				/* "inf","nan" and maybe other weird ones */
+				return 0;
 			}
-			return FLAG_IS_BC;
-		} else {
-			return IS_DOUBLE;
-		}
+
+			if (dval) {
+				*dval = local_dval;
+			}
+#if 0&&WITH_BCMATH
+			if (length>16) {
+				register char *ptr=str, *end=str+length;
+				
+				while (ptr<end) {
+					switch(*ptr++) {
+						case 'e':
+						case 'E':
+							/* scientific notation, not handled by the BC library */
+							return IS_DOUBLE;
+							break;
+						default:
+							break;
+					}
+				}
+				return FLAG_IS_BC;
+			} else {
+				return IS_DOUBLE;
+			}
 #else
-		return IS_DOUBLE;
+			return IS_DOUBLE;
 #endif
+		}
+	} else {
+		end_ptr_double=NULL;
 	}
-	
+	if (allow_errors) {
+		if (end_ptr_double>end_ptr_long && dval) {
+			*dval = local_dval;
+			return IS_DOUBLE;
+		} else if (end_ptr_long && lval) {
+			*lval = local_lval;
+			return IS_LONG;
+		}
+	}
 	return 0;
 }
 
