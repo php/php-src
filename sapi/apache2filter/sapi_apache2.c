@@ -60,7 +60,7 @@ php_apache_sapi_ub_write(const char *str, uint str_length)
 	while (str_length > 0) {
 		now = MIN(str_length, 4096);
 		b = apr_bucket_transient_create(str, now);
-		AP_BRIGADE_INSERT_TAIL(bb, b);
+		APR_BRIGADE_INSERT_TAIL(bb, b);
 		str += now;
 		str_length -= now;
 	}
@@ -171,7 +171,7 @@ php_apache_sapi_flush(void *server_context)
 	
 	bb = apr_brigade_create(ctx->f->r->pool);
 	b = apr_bucket_flush_create();
-	AP_BRIGADE_INSERT_TAIL(bb, b);
+	APR_BRIGADE_INSERT_TAIL(bb, b);
 	if (ap_pass_brigade(ctx->f->next, bb) != APR_SUCCESS) {
 		php_handle_aborted_connection();
 	}
@@ -184,7 +184,7 @@ static void php_apache_sapi_log_message(char *msg)
 
 	ctx = SG(server_context);
 
-	apr_puts(msg, ctx->f->r->server->error_log);
+	apr_file_puts(msg, ctx->f->r->server->error_log);
 }
 
 static sapi_module_struct apache2_sapi_module = {
@@ -339,7 +339,7 @@ static int php_output_filter(ap_filter_t *f, apr_bucket_brigade *bb)
 	/* If we have received all data from the previous filters,
 	 * we "flatten" the buckets by creating a single string buffer.
 	 */
-	if (ctx->state == 1 && apr_bucket_IS_EOS(AP_BRIGADE_LAST(ctx->bb))) {
+	if (ctx->state == 1 && APR_BUCKET_IS_EOS(APR_BRIGADE_LAST(ctx->bb))) {
 		int fd;
 		zend_file_handle zfd;
 		smart_str content = {0};
@@ -401,18 +401,18 @@ static int php_output_filter(ap_filter_t *f, apr_bucket_brigade *bb)
 skip_execution:
 #define NO_DATA "php_filter did not get ANY data"
 		eos = apr_bucket_transient_create(NO_DATA, sizeof(NO_DATA)-1);
-		AP_BRIGADE_INSERT_HEAD(bb, eos);
+		APR_BRIGADE_INSERT_HEAD(bb, eos);
 ok:
 		php_apache_request_dtor(f SLS_CC);
 
 		SG(server_context) = 0;
 		/* Pass EOS bucket to next filter to signal end of request */
 		eos = apr_bucket_eos_create();
-		AP_BRIGADE_INSERT_TAIL(bb, eos);
+		APR_BRIGADE_INSERT_TAIL(bb, eos);
 		
 		return ap_pass_brigade(f->next, bb);
 	} else
-		ap_brigade_destroy(bb);
+		apr_brigade_destroy(bb);
 
 	return APR_SUCCESS;
 }
@@ -432,7 +432,7 @@ php_apache_server_startup(apr_pool_t *pchild, server_rec *s)
 	tsrm_startup(1, 1, 0, NULL);
 	sapi_startup(&apache2_sapi_module);
 	apache2_sapi_module.startup(&apache2_sapi_module);
-	apr_register_cleanup(pchild, NULL, php_apache_server_shutdown, NULL);
+	apr_pool_cleanup_register(pchild, NULL, php_apache_server_shutdown, NULL);
 	php_apache_register_module();
 }
 
