@@ -111,7 +111,7 @@ PHPAPI int php_checkuid(const char *fn, int mode) {
 PHPAPI char *php_get_current_user()
 {
 	struct passwd *pwd;
-	int uid;
+	struct stat *pstat;
 	SLS_FETCH();
 
 	if (request_info.current_user) {
@@ -122,13 +122,13 @@ PHPAPI char *php_get_current_user()
 	USE_SAPI is defined, because cgi will also be
 	interfaced in USE_SAPI */
 
-	uid = sapi_get_uid();
+	pstat = sapi_get_stat();
 
-	if (uid==-1) {
+	if (!pstat) {
 		return empty_string;
 	}
 
-	if ((pwd=getpwuid(uid))==NULL) {
+	if ((pwd=getpwuid(pstat->st_uid))==NULL) {
 		return empty_string;
 	}
 	request_info.current_user_length = strlen(pwd->pw_name);

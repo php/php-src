@@ -23,6 +23,7 @@
 #include "zend.h"
 #include "zend_llist.h"
 #include "zend_operators.h"
+#include <sys/stat.h>
 
 #define SAPI_POST_BLOCK_SIZE 4000
 
@@ -84,6 +85,7 @@ typedef struct {
 	sapi_headers_struct sapi_headers;
 	uint read_post_bytes;
 	unsigned char headers_sent;
+	struct stat global_stat;
 } sapi_globals_struct;
 
 
@@ -127,7 +129,7 @@ SAPI_API void sapi_unregister_post_reader(sapi_post_content_type_reader *post_co
 SAPI_API int sapi_register_default_post_reader(void (*default_post_reader)(char *content_type_dup SLS_DC));
 
 SAPI_API int sapi_flush();
-SAPI_API int sapi_get_uid();
+SAPI_API struct stat *sapi_get_stat();
 SAPI_API char *sapi_getenv(char *name, int name_len);
 
 struct _sapi_module_struct {
@@ -141,7 +143,7 @@ struct _sapi_module_struct {
 
 	int (*ub_write)(const char *str, unsigned int str_length);
 	void (*flush)(void *server_context);
-	int (*get_uid)(SLS_D);
+	struct stat *(*get_stat)(SLS_D);
 	char *(*getenv)(char *name, int name_len SLS_DC);
 
 	void (*sapi_error)(int type, const char *error_msg, ...);

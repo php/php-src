@@ -300,9 +300,9 @@ static int php_apache_sapi_activate(SLS_D)
 }
 
 
-static int php_apache_get_uid(SLS_D)
+static struct stat *php_apache_get_stat(SLS_D)
 {
-	return ((request_rec *) SG(server_context))->finfo.st_uid;
+	return &((request_rec *) SG(server_context))->finfo;
 }
 
 
@@ -325,7 +325,7 @@ static sapi_module_struct sapi_module = {
 
 	sapi_apache_ub_write,			/* unbuffered write */
 	sapi_apache_flush,				/* flush */
-	php_apache_get_uid,				/* get uid */
+	php_apache_get_stat,			/* get uid */
 	php_apache_getenv,				/* getenv */
 
 	php_error,						/* error handler */
