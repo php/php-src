@@ -522,7 +522,7 @@ static void php_register_command_line_global_vars(char **arg TSRMLS_DC)
 int main(int argc, char *argv[])
 {
 	int exit_status = SUCCESS;
-	int cgi = 0, c, i, len;
+	int cgi = 0, c, i, len, testmode = 0;
 	zend_file_handle file_handle;
 	int retval = FAILURE;
 	char *s;
@@ -573,6 +573,10 @@ int main(int argc, char *argv[])
 #endif
 #endif
 
+#ifndef PHP_FASTCGI
+	s = getenv("USER_AGENT");
+	if(s && !strcmp(s, "run-tests.php")) testmode = 1;
+#endif
 
 #ifdef ZTS
 	tsrm_startup(1, 1, 0, NULL);
@@ -875,11 +879,11 @@ consult the installation file that came with this distribution, or visit \n\
 
 		zend_llist_init(&global_vars, sizeof(char *), NULL, 0);
 
-		if (!cgi
+		if ( testmode || (!cgi
 #ifdef PHP_FASTCGI
 			&& !fastcgi
 #endif
-			) {					/* never execute the arguments if you are a CGI */
+			)) { /* never execute the arguments if you are a CGI unless in testmode*/	
 			if (SG(request_info).argv0) {
 				free(SG(request_info).argv0);
 				SG(request_info).argv0 = NULL;
