@@ -67,11 +67,11 @@ class PEAR_Command_Package extends PEAR_Command_Common
      */
     function getCommands()
     {
-        return array('package',
-                     'package-info',
-                     'package-list',
-                     'package-validate',
-                     'cvstag');
+        return array('package' => 'Build Package',
+                     'package-info' => 'Show Package Info',
+                     'package-list' => 'List Files in Package',
+                     'package-validate' => 'Validate Package',
+                     'cvstag' => 'Set CVS Release Tag');
     }
 
     // }}}

@@ -51,7 +51,8 @@ class PEAR_Command_Auth extends PEAR_Command_Common
      */
     function getCommands()
     {
-        return array('login', 'logout');
+        return array('login' => 'Log In',
+                     'logout' => 'Log Out');
     }
 
     // }}}

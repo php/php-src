@@ -48,7 +48,8 @@ class PEAR_Command_Registry extends PEAR_Command_Common
      */
     function getCommands()
     {
-        return array('list-installed', 'shell-test');
+        return array('list-installed' => 'List Installed Packages',
+                     'shell-test' => 'Shell Script Test');
     }
 
     function getHelp($command)
