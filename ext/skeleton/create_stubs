@@ -180,7 +180,7 @@ END {
 			"     <funcprototype>\n" \
 			"      <funcdef>" types[i] " <function>" funcs[i] "</function></funcdef>\n"
 
-		fetchargs = "\tif (zend_parse_parameters(ZEND_NUM_ARGS, " specs[i] ", "
+		fetchargs = "\tif (zend_parse_parameters(ZEND_NUM_ARGS(), " specs[i] ", "
 
 		for (j = 0; j < maxargs[i]; j++) {
 
