@@ -118,9 +118,9 @@ PHP_FUNCTION(solid_fetch_prev);
 #define HAVE_SQL_EXTENDED_FETCH 1
 #include <odbc.h>
 
-#elif HAVE_DB2 /* DB2 CLI */
+#elif HAVE_IBMDB2 /* DB2 CLI */
 
-#define ODBC_TYPE "DB2 CLI"
+#define ODBC_TYPE "IBM DB2 CLI"
 #define HAVE_SQL_EXTENDED_FETCH 1
 #include <sqlcli1.h>
 #ifdef DB268K
@@ -189,7 +189,7 @@ PHP_FUNCTION(odbc_statistics);
 PHP_FUNCTION(odbc_tableprivileges);
 
 typedef struct odbc_connection {
-#if defined( HAVE_DB2 ) || defined( HAVE_UNIXODBC )
+#if defined( HAVE_IBMDB2 ) || defined( HAVE_UNIXODBC )
 	SQLHANDLE henv;
 	SQLHANDLE hdbc;
 #else
@@ -208,7 +208,7 @@ typedef struct odbc_result_value {
 } odbc_result_value;
 
 typedef struct odbc_result {
-#if defined( HAVE_DB2 ) || defined( HAVE_UNIXODBC )
+#if defined( HAVE_IBMDB2 ) || defined( HAVE_UNIXODBC )
 	SQLHANDLE stmt;
 #else
 	HSTMT stmt;
@@ -249,7 +249,7 @@ odbc_connection *odbc_get_conn(HashTable *list, int count);
 void odbc_del_conn(HashTable *list, int ind);
 
 #define ODBC_SQL_ERROR odbc_sql_error
-#if defined( HAVE_DB2 ) || defined( HAVE_UNIXODBC )
+#if defined( HAVE_IBMDB2 ) || defined( HAVE_UNIXODBC )
 void odbc_sql_error(SQLHANDLE henv, SQLHANDLE conn, SQLHANDLE stmt, char *func);
 #else
 void odbc_sql_error(HENV henv, HDBC conn, HSTMT stmt, char *func);
