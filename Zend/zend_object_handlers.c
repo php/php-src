@@ -457,8 +457,8 @@ static zval **zend_std_get_property_ptr_ptr(zval *object, zval *member TSRMLS_DC
 	if (zend_hash_quick_find(zobj->properties, property_info->name, property_info->name_length+1, property_info->h, (void **) &retval) == FAILURE) {
 		zval *new_zval;
 
-		if (!zobj->ce->__get) {
-			/* we don't have getter - will just add it */
+		if (!zobj->ce->__get && !zobj->ce->__set) {
+			/* we don't have access controls - will just add it */
 			new_zval = &EG(uninitialized_zval);
 
 /* 			zend_error(E_NOTICE, "Undefined property: %s", Z_STRVAL_P(member)); */
