@@ -47,7 +47,8 @@ DBA_OPEN_FUNC(db2)
 	int gmode = 0;
 	int filemode = 0644;
 	struct stat check_stat;
-
+	TSRMLS_FETCH();
+	
 	type =  info->mode == DBA_READER ? DB_UNKNOWN :
 		info->mode == DBA_TRUNC ? DB_BTREE :
 		VCWD_STAT(info->path, &check_stat) ? DB_BTREE : DB_UNKNOWN;
