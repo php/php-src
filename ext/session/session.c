@@ -644,6 +644,8 @@ PHP_FUNCTION(session_start)
 	PSLS_FETCH();
 
 	_php_session_start(PSLS_C);
+
+	RETURN_TRUE;
 }
 /* }}} */
 
