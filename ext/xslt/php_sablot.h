@@ -51,17 +51,17 @@ extern zend_module_entry xslt_module_entry;
 PHP_MINIT_FUNCTION(xslt);
 PHP_MINFO_FUNCTION(xslt);
 
-PHP_FUNCTION(xslt_create);
-PHP_FUNCTION(xslt_set_sax_handlers);
-PHP_FUNCTION(xslt_set_scheme_handlers);
-PHP_FUNCTION(xslt_set_error_handler);
-PHP_FUNCTION(xslt_set_base);
-PHP_FUNCTION(xslt_set_encoding);
-PHP_FUNCTION(xslt_set_log);
-PHP_FUNCTION(xslt_process);
+PHP_FUNCTION(xslt_sax_create);
+PHP_FUNCTION(xslt_sax_set_sax_handlers);
+PHP_FUNCTION(xslt_sax_set_scheme_handlers);
+PHP_FUNCTION(xslt_sax_set_error_handler);
+PHP_FUNCTION(xslt_sax_set_base);
+PHP_FUNCTION(xslt_sax_set_encoding);
+PHP_FUNCTION(xslt_sax_set_log);
+PHP_FUNCTION(xslt_sax_process);
+PHP_FUNCTION(xslt_sax_free);
 PHP_FUNCTION(xslt_error);
 PHP_FUNCTION(xslt_errno);
-PHP_FUNCTION(xslt_free);
 
 struct scheme_handlers {
 	zval *get_all;
