@@ -187,7 +187,7 @@ AC_ARG_WITH(apache,
       fi
     # For StrongHold 2.2
     elif test -f $withval/apache/httpd.h; then
-      APACHE_INCLUDE=-"I$withval/apache -I$withval/ssl/include"
+      APACHE_INCLUDE="-I$withval/apache -I$withval/ssl/include"
       APACHE_TARGET=$withval/apache
       PHP_SELECT_SAPI(apache, static, sapi_apache.c mod_php5.c php_apache.c, $APACHE_INCLUDE)
       PHP_LIBS="-Lmodules/php5 -L../modules/php5 -L../../modules/php5 -lmodphp5"
