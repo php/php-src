@@ -333,7 +333,7 @@ PHP_FUNCTION(msg_receive)
 		if (do_unserialize)	{
 			php_unserialize_data_t var_hash;
 			zval *tmp = NULL;
-			const char *p = (const char *) messagebuffer->mtext;
+			const unsigned char *p = (const unsigned char *) messagebuffer->mtext;
 
 			MAKE_STD_ZVAL(tmp);
 			PHP_VAR_UNSERIALIZE_INIT(var_hash);
