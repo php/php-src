@@ -27,7 +27,7 @@
 
 typedef struct {
 	zval *data[VAR_ENTRIES_MAX];
-	int used_slots;
+	long used_slots;
 	void *next;
 } var_entries;
 
@@ -80,7 +80,7 @@ static inline void var_push_dtor(php_unserialize_data_t *var_hashx, zval **rval)
 
 PHPAPI void var_replace(php_unserialize_data_t *var_hashx, zval *ozval, zval **nzval)
 {
-	int i;
+	long i;
 	var_entries *var_hash = var_hashx->first;
 	
 	while (var_hash) {
@@ -94,7 +94,7 @@ PHPAPI void var_replace(php_unserialize_data_t *var_hashx, zval *ozval, zval **n
 	}
 }
 
-static int var_access(php_unserialize_data_t *var_hashx, int id, zval ***store)
+static int var_access(php_unserialize_data_t *var_hashx, long id, zval ***store)
 {
 	var_entries *var_hash = var_hashx->first;
 	
@@ -115,7 +115,7 @@ static int var_access(php_unserialize_data_t *var_hashx, int id, zval ***store)
 PHPAPI void var_destroy(php_unserialize_data_t *var_hashx)
 {
 	void *next;
-	int i;
+	long i;
 	var_entries *var_hash = var_hashx->first;
 	
 	while (var_hash) {
@@ -213,7 +213,7 @@ static inline size_t parse_uiv(const unsigned char *p)
 #define UNSERIALIZE_PARAMETER zval **rval, const unsigned char **p, const unsigned char *max, php_unserialize_data_t *var_hash TSRMLS_DC
 #define UNSERIALIZE_PASSTHRU rval, p, max, var_hash TSRMLS_CC
 
-static inline int process_nested_data(UNSERIALIZE_PARAMETER, HashTable *ht, int elements)
+static inline int process_nested_data(UNSERIALIZE_PARAMETER, HashTable *ht, long elements)
 {
 	while (elements-- > 0) {
 		zval *key, *data, **old_data;
@@ -282,7 +282,7 @@ static inline int finish_nested_data(UNSERIALIZE_PARAMETER)
 
 static inline int object_common1(UNSERIALIZE_PARAMETER, zend_class_entry *ce)
 {
-	int elements;
+	long elements;
 
 	elements = parse_iv2((*p) + 2, p);
 
@@ -292,7 +292,7 @@ static inline int object_common1(UNSERIALIZE_PARAMETER, zend_class_entry *ce)
 	return elements;
 }
 
-static inline int object_common2(UNSERIALIZE_PARAMETER, int elements)
+static inline int object_common2(UNSERIALIZE_PARAMETER, long elements)
 {
 	zval *retval_ptr = NULL;
 	zval fname;
@@ -332,7 +332,7 @@ PHPAPI int php_var_unserialize(UNSERIALIZE_PARAMETER)
 /*!re2c
 
 "R:" iv ";"		{
-	int id;
+	long id;
 
  	*p = YYCURSOR;
 	if (!var_hash) return 0;
@@ -353,7 +353,7 @@ PHPAPI int php_var_unserialize(UNSERIALIZE_PARAMETER)
 }
 
 "r:" iv ";"		{
-	int id;
+	long id;
 
  	*p = YYCURSOR;
 	if (!var_hash) return 0;
@@ -414,7 +414,7 @@ PHPAPI int php_var_unserialize(UNSERIALIZE_PARAMETER)
 "d:" (iv | nv | nvexp) ";"	{
 	*p = YYCURSOR;
 	INIT_PZVAL(*rval);
-	ZVAL_DOUBLE(*rval, zend_strtod(start + 2, NULL));
+	ZVAL_DOUBLE(*rval, zend_strtod((const char *)start + 2, NULL));
 	return 1;
 }
 
@@ -447,9 +447,13 @@ PHPAPI int php_var_unserialize(UNSERIALIZE_PARAMETER)
 }
 
 "a:" uiv ":" "{" {
-	int elements = parse_iv(start + 2);
-
+	long elements = parse_iv(start + 2);
+	/* use iv() not uiv() in order to check data range */
 	*p = YYCURSOR;
+
+	if (elements < 0) {
+		return 0;
+	}
 
 	if (elements < 0) {
 		return 0;
@@ -478,7 +482,7 @@ PHPAPI int php_var_unserialize(UNSERIALIZE_PARAMETER)
 
 "O:" uiv ":" ["]	{
 	size_t len, len2, len3, maxlen;
-	int elements;
+	long elements;
 	char *class_name;
 	zend_class_entry *ce;
 	zend_class_entry **pce;
