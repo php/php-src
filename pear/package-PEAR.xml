@@ -47,9 +47,9 @@
     </maintainer>
   </maintainers>
   <release>
-    <version>1.3b6</version>
-    <date>2004-01-26</date>
-    <state>beta</state>
+    <version>1.3</version>
+    <date>2004-02-20</date>
+    <state>stable</state>
     <notes>
 PEAR Installer:
 * Bug #171 --alldeps with a rel=&quot;eq&quot; should install the required version, if possible
