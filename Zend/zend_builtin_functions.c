@@ -724,6 +724,7 @@ ZEND_FUNCTION(get_included_files)
 		add_next_index_string(return_value, entry, 0);
 		zend_hash_move_forward(&EG(included_files));
 	}
+}
 /* }}} */
 
 
