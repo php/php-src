@@ -3079,6 +3079,7 @@ PHP_FUNCTION(domxml_doc_get_elements_by_tagname)
 	xmlXPathObjectPtr xpathobjp;
 	xmlNode *contextnodep;
 	int name_len;
+	int free_context = 0;
 	char *str,*name;
 
 	contextnode = NULL;
@@ -3089,6 +3090,7 @@ PHP_FUNCTION(domxml_doc_get_elements_by_tagname)
 	/* if no xpath_context was submitted, create a new one */
 	if (ctxpin == NULL) {
 		ctxp = xmlXPathNewContext(docp);
+		free_context = 1;
 	} else {
 		DOMXML_GET_OBJ(ctxp, ctxpin, le_xpathctxp);
 	}
@@ -3119,6 +3121,10 @@ PHP_FUNCTION(domxml_doc_get_elements_by_tagname)
 
 			if (NULL == (nodesetp = xpathobjp->nodesetval)) {
 				zval_dtor(rv);
+				xmlXPathFreeObject (xpathobjp);
+				if (free_context) {
+					xmlXPathFreeContext(ctxp);
+				}
 				RETURN_FALSE;
 			}
 
@@ -3138,6 +3144,10 @@ PHP_FUNCTION(domxml_doc_get_elements_by_tagname)
 			break;
 	}
 
+	xmlXPathFreeObject(xpathobjp);
+	if (free_context) {
+		xmlXPathFreeContext(ctxp);
+	}
 	*return_value = *rv;
 	FREE_ZVAL(rv);
 }
@@ -3215,6 +3225,7 @@ PHP_FUNCTION(domxml_elem_get_elements_by_tagname)
 			zend_hash_next_index_insert(Z_ARRVAL_P(rv), &child, sizeof(zval *), NULL);
 		}
 	}
+	xmlXPathFreeNodeSet(nodesetp);
 	*return_value = *rv;
 	FREE_ZVAL(rv);
 
