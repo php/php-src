@@ -377,6 +377,127 @@ HRESULT php_com_get_id_of_name(php_com_dotnet_object *obj, char *name,
 }
 
 /* the core of COM */
+int php_com_do_invoke_byref(php_com_dotnet_object *obj, char *name, int namelen,
+		WORD flags,	VARIANT *v, int nargs, zval ***args TSRMLS_DC)
+{
+	DISPID dispid, altdispid;
+	DISPPARAMS disp_params;
+	HRESULT hr;
+	VARIANT *vargs = NULL, *byref_vals = NULL;
+	int i, byref_count = 0, j;
+	zend_internal_function *f = (zend_internal_function*)EG(function_state_ptr)->function;
+
+	/* assumption: that the active function (f) is the function we generated for the engine */
+	if (!f || f->type != ZEND_OVERLOADED_FUNCTION_TEMPORARY || f->arg_info == NULL) {
+	   f = NULL;
+	}
+	
+	hr = php_com_get_id_of_name(obj, name, namelen, &dispid TSRMLS_CC);
+
+	if (FAILED(hr)) {
+		char *winerr = NULL;
+		char *msg = NULL;
+		winerr = php_win_err(hr);
+		spprintf(&msg, 0, "Unable to lookup `%s': %s", name, winerr);
+		LocalFree(winerr);
+		php_com_throw_exception(hr, msg TSRMLS_CC);
+		efree(msg);
+		return FAILURE;
+	}
+
+
+	if (nargs) {
+		vargs = (VARIANT*)safe_emalloc(sizeof(VARIANT), nargs, 0);
+	}
+
+	if (f) {
+		for (i = 0; i < nargs; i++) {
+			if (f->arg_info[nargs - i - 1].pass_by_reference) {
+				byref_count++;
+			}
+		}
+	}
+
+	if (byref_count) {
+		byref_vals = (VARIANT*)safe_emalloc(sizeof(VARIANT), byref_count, 0);
+		for (j = 0, i = 0; i < nargs; i++) {
+			if (f->arg_info[nargs - i - 1].pass_by_reference) {
+				/* put the value into byref_vals instead */
+				php_com_variant_from_zval(&byref_vals[j], *args[nargs - i - 1], obj->code_page TSRMLS_CC);
+
+				/* if it is already byref, "move" it into the vargs array, otherwise
+				 * make vargs a reference to this value */
+				if (V_VT(&byref_vals[j]) & VT_BYREF) {
+					memcpy(&vargs[i], &byref_vals[j], sizeof(vargs[i]));
+					VariantInit(&byref_vals[j]); /* leave the variant slot empty to simplify cleanup */
+				} else {
+					VariantInit(&vargs[i]);
+					V_VT(&vargs[i]) = V_VT(&byref_vals[j]) | VT_BYREF;
+					/* union magic ensures that this works out */
+					vargs[i].byref = &V_UINT(&byref_vals[j]);
+				}
+				j++;
+			} else {
+				php_com_variant_from_zval(&vargs[i], *args[nargs - i - 1], obj->code_page TSRMLS_CC);
+			}
+		}
+		
+	} else {
+		/* Invoke'd args are in reverse order */
+		for (i = 0; i < nargs; i++) {
+			php_com_variant_from_zval(&vargs[i], *args[nargs - i - 1], obj->code_page TSRMLS_CC);
+		}
+	}
+
+	disp_params.cArgs = nargs;
+	disp_params.cNamedArgs = 0;
+	disp_params.rgvarg = vargs;
+	disp_params.rgdispidNamedArgs = NULL;
+
+	if (flags & DISPATCH_PROPERTYPUT) {
+		altdispid = DISPID_PROPERTYPUT;
+		disp_params.rgdispidNamedArgs = &altdispid;
+		disp_params.cNamedArgs = 1;
+	}
+
+	/* this will create an exception if needed */
+	hr = php_com_invoke_helper(obj, dispid, flags, &disp_params, v TSRMLS_CC);	
+
+	/* release variants */
+	if (vargs) {
+		for (i = 0, j = 0; i < nargs; i++) {
+			/* if this was byref, update the zval */
+			if (f && f->arg_info[nargs - i - 1].pass_by_reference) {
+				SEPARATE_ZVAL_IF_NOT_REF(args[nargs - i - 1]);
+
+				/* if the variant is pointing at the byref_vals, we need to map
+				 * the pointee value as a zval; otherwise, the value is pointing
+				 * into an existing PHP variant record */
+				if (V_VT(&vargs[i]) & VT_BYREF) {
+					if (vargs[i].byref == &V_UINT(&byref_vals[j])) {
+						/* copy that value */
+						php_com_zval_from_variant(*args[nargs - i - 1], &byref_vals[j],
+							obj->code_page TSRMLS_CC);
+					}
+				} else {
+					/* not sure if this can ever happen; the variant we marked as BYREF
+					 * is no longer BYREF - copy its value */
+					php_com_zval_from_variant(*args[nargs - i - 1], &vargs[i],
+						obj->code_page TSRMLS_CC);
+				}
+				VariantClear(&byref_vals[j]);
+				j++;
+			}	
+			VariantClear(&vargs[i]);
+		}
+		efree(vargs);
+	}
+
+	return SUCCEEDED(hr) ? SUCCESS : FAILURE;
+}
+
+
+
 int php_com_do_invoke_by_id(php_com_dotnet_object *obj, DISPID dispid,
 		WORD flags,	VARIANT *v, int nargs, zval **args TSRMLS_DC)
 {

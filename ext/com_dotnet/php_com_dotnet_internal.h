@@ -103,6 +103,8 @@ int php_com_do_invoke_by_id(php_com_dotnet_object *obj, DISPID dispid,
 		WORD flags,	VARIANT *v, int nargs, zval **args TSRMLS_DC);
 int php_com_do_invoke(php_com_dotnet_object *obj, char *name, int namelen,
 		WORD flags,	VARIANT *v, int nargs, zval **args TSRMLS_DC);
+int php_com_do_invoke_byref(php_com_dotnet_object *obj, char *name, int namelen,
+		WORD flags,	VARIANT *v, int nargs, zval ***args TSRMLS_DC);
 
 /* com_wrapper.c */
 int php_com_wrapper_minit(INIT_FUNC_ARGS);
