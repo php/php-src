@@ -6974,6 +6974,9 @@ mbfl_strimwidth(
 				}
 				mbfl_convert_filter_flush(encoder);
 			}
+		} else if (pc.status != 0) {
+			pc.device.pos = pc.endpos;
+			mbfl_convert_filter_copy(pc.decoder_backup, pc.decoder);
 		}
 		mbfl_convert_filter_flush(pc.decoder);
 	}
