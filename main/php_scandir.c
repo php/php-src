@@ -19,12 +19,6 @@
 
 /* $Id$ */
 
-#ifdef PHP_WIN32
-#include "config.w32.h"
-#else
-#include "php_config.h"
-#endif
-
 #include "php_scandir.h"
 
 #ifdef HAVE_SYS_TYPES_H
