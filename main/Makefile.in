@@ -5,8 +5,8 @@ LTLIBRARY_SOURCES = \
        safe_mode.c fopen_wrappers.c alloca.c \
        php_ini.c SAPI.c rfc1867.c php_content_types.c strlcpy.c \
        strlcat.c mergesort.c reentrancy.c php_variables.c php_ticks.c \
-		 streams.c \
-       network.c php_open_temporary_file.c php_logos.c
+       streams.c network.c php_open_temporary_file.c php_logos.c \
+       output.c
 
 include $(top_srcdir)/build/ltlib.mk
 
