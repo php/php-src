@@ -297,6 +297,7 @@ static zval overload_get_property(zend_property_reference *property_reference)
 			/* Trying to access a property on a non-object. */
 			if (Z_TYPE(object) != IS_OBJECT) {
 				CLEANUP_OO_CHAIN();
+				zval_dtor(&object);
 				return result;
 			}
 
@@ -307,19 +308,22 @@ static zval overload_get_property(zend_property_reference *property_reference)
 				result = **real_prop;
 				/* printf("is_ref: %d, refcount: %d\n", (*real_prop)->is_ref, (*real_prop)->refcount); */
 				/* REPLACE_ZVAL_VALUE(&result_ptr, *real_prop, 1); */
-			} else if (!call_get_handler(&object,
-										 &overloaded_property->element,
-										 &result_ptr TSRMLS_CC)) {
+			} else if (Z_OBJCE(object)->handle_property_get == overload_get_property &&
+					   call_get_handler(&object,
+										&overloaded_property->element,
+										&result_ptr TSRMLS_CC)) {
+				got_prop = 1;
+			} else {
 				php_error(E_NOTICE, "Undefined property: %s", Z_STRVAL(overloaded_property->element));	
 				CLEANUP_OO_CHAIN();
+				zval_dtor(&object);
 				return result;
-			} else {
-				got_prop = 1;
 			}
 		} else if (Z_TYPE_P(overloaded_property) == OE_IS_ARRAY) {
 			/* Trying to access index on a non-array. */
 			if (Z_TYPE(object) != IS_ARRAY) {
 				CLEANUP_OO_CHAIN();
+				zval_dtor(&object);
 				return result;
 			}
 
@@ -329,6 +333,7 @@ static zval overload_get_property(zend_property_reference *property_reference)
 								   Z_STRLEN(overloaded_property->element)+1,
 								   (void **)&real_prop) == FAILURE) {
 					CLEANUP_OO_CHAIN();
+					zval_dtor(&object);
 					return result;
 				}
 			} else if (Z_TYPE(overloaded_property->element) == IS_LONG) {
@@ -336,6 +341,7 @@ static zval overload_get_property(zend_property_reference *property_reference)
 										  Z_LVAL(overloaded_property->element),
 										  (void **)&real_prop) == FAILURE) {
 					CLEANUP_OO_CHAIN();
+					zval_dtor(&object);
 					return result;
 				}
 			}
@@ -397,14 +403,16 @@ static int overload_set_property(zend_property_reference *property_reference, zv
 					return SUCCESS;
 				}
 
-				if (!call_get_handler(*object,
-									  &overloaded_property->element,
-									  &result_ptr TSRMLS_CC)) {
+				if (Z_OBJCE_PP(object)->handle_property_get == overload_get_property &&
+					call_get_handler(*object,
+									 &overloaded_property->element,
+									 &result_ptr TSRMLS_CC)) {
+					object = &result_ptr;
+				} else {
 					php_error(E_NOTICE, "Undefined property: %s", Z_STRVAL(overloaded_property->element));	
 					CLEANUP_OO_CHAIN();
 					return FAILURE;
-				} else
-					object = &result_ptr;
+				}
 			}
 		} else if (Z_TYPE_P(overloaded_property) == OE_IS_ARRAY) {
 		}
