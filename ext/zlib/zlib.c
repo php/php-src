@@ -80,7 +80,6 @@
 #define GZIP_FOOTER_LENGTH		8
 
 /* True globals, no need for thread safety */
-static int le_zp;
 static int gz_magic[2] = {0x1f, 0x8b};	/* gzip magic header */
 
 /* {{{ php_zlib_functions[]
@@ -166,16 +165,6 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("zlib.output_compression_level", "-1", PHP_INI_ALL, OnUpdate_zlib_output_compression_level, output_compression_level, zend_zlib_globals, zlib_globals)
 PHP_INI_END()
 
-/* {{{ phpi_destructor_gzclose
- */
-static void phpi_destructor_gzclose(zend_rsrc_list_entry *rsrc TSRMLS_DC)
-{
-	gzFile *zp = (gzFile *)rsrc->ptr;
-
-	(void)gzclose(zp);
-}
-/* }}} */
-
 #ifdef ZTS
 /* {{{ php_zlib_init_globals
  */
@@ -192,8 +181,6 @@ PHP_MINIT_FUNCTION(zlib)
 #ifdef ZTS
 	ts_allocate_id(&zlib_globals_id, sizeof(zend_zlib_globals), (ts_allocate_ctor) php_zlib_init_globals, NULL);
 #endif
-	le_zp = zend_register_list_destructors_ex(phpi_destructor_gzclose, NULL, "zlib", module_number);
-
 	if(PG(allow_url_fopen)) {
 		php_register_url_stream_wrapper("zlib", &php_stream_gzip_wrapper TSRMLS_CC);
 	}
