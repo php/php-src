@@ -1149,8 +1149,18 @@ ZEND_API int do_bind_function_or_class(zend_op *opline, HashTable *function_tabl
 				zend_hash_find(function_table, opline->op1.u.constant.value.str.val, opline->op1.u.constant.value.str.len, (void *) &function);
 				if (zend_hash_add(function_table, opline->op2.u.constant.value.str.val, opline->op2.u.constant.value.str.len+1, function, sizeof(zend_function), NULL)==FAILURE) {
 					int error_level = compile_time ? E_COMPILE_ERROR : E_ERROR;
+					zend_function *function;
 
-					zend_error(error_level, "Cannot redeclare %s()", opline->op2.u.constant.value.str.val);
+					if (zend_hash_find(function_table, opline->op2.u.constant.value.str.val, opline->op2.u.constant.value.str.len+1, (void *) &function)==SUCCESS
+						&& function->type==ZEND_USER_FUNCTION
+						&& ((zend_op_array *) function)->last>0) {
+						zend_error(error_level, "Cannot redeclare %s() (previously declared in %s:%d)",
+									opline->op2.u.constant.value.str.val,
+									((zend_op_array *) function)->filename,
+									((zend_op_array *) function)->opcodes[0].lineno);
+					} else {
+						zend_error(error_level, "Cannot redeclare %s()", opline->op2.u.constant.value.str.val);
+					}
 					return FAILURE;
 				} else {
 					(*function->op_array.refcount)++;
