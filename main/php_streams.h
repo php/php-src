@@ -69,7 +69,7 @@
 	
 #define php_stream_open_wrapper_rel(path, mode, options, opened) _php_stream_open_wrapper((path), (mode), (options), (opened) STREAMS_REL_CC TSRMLS_CC)
 
-#define php_stream_make_seekable_rel(origstream, newstream) _php_stream_make_seekable(origstream, newstream STREAMS_REL_CC TSRMLS_CC)
+#define php_stream_make_seekable_rel(origstream, newstream, flags) _php_stream_make_seekable((origstream), (newstream), (flags) STREAMS_REL_CC TSRMLS_CC)
 
 /* }}} */
 	
@@ -266,8 +266,10 @@ PHPAPI php_stream *_php_stream_open_wrapper(char *path, char *mode, int options,
 #define PHP_STREAM_FAILED		2 /* an error occurred while attempting conversion */
 #define PHP_STREAM_CRITICAL		3 /* an error occurred; origstream is in an unknown state; you should close origstream */
 /* DO NOT call this on streams that are referenced by resources! */
-PHPAPI int _php_stream_make_seekable(php_stream *origstream, php_stream **newstream STREAMS_DC TSRMLS_DC);
-#define php_stream_make_seekable(origstream, newstream)	_php_stream_make_seekable(origstream, newstream STREAMS_CC TSRMLS_CC)
+#define PHP_STREAM_NO_PREFERENCE	0
+#define PHP_STREAM_PREFER_STDIO		1
+PHPAPI int _php_stream_make_seekable(php_stream *origstream, php_stream **newstream, int flags STREAMS_DC TSRMLS_DC);
+#define php_stream_make_seekable(origstream, newstream, flags)	_php_stream_make_seekable((origstream), (newstream), (flags) STREAMS_CC TSRMLS_CC)
 
 
 /* for user-space streams */

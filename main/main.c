@@ -565,13 +565,15 @@ static FILE *php_fopen_wrapper_for_zend(const char *filename, char **opened_path
 {
 	FILE *retval = NULL;
 	php_stream *stream;
+	size_t old_chunk_size;
 	TSRMLS_FETCH();
 
+	old_chunk_size = FG(def_chunk_size);
+	FG(def_chunk_size) = 1;
 	stream = php_stream_open_wrapper((char *)filename, "rb", USE_PATH|IGNORE_URL_WIN|REPORT_ERRORS, opened_path);
+	FG(def_chunk_size) = old_chunk_size;
+	
 	if (stream)	{
-		/* no need for us to check the stream type here */
-		php_stream_sock_set_chunk_size(stream, 1 TSRMLS_CC);
-
 		/* when this succeeds, stream either has or will be freed automatically */
 		if (php_stream_cast(stream, PHP_STREAM_AS_STDIO|PHP_STREAM_CAST_TRY_HARD|PHP_STREAM_CAST_RELEASE,
 					(void**)&retval, REPORT_ERRORS) == FAILURE)
