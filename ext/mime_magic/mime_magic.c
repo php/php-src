@@ -1954,9 +1954,8 @@ static int magic_rsl_get(char **content_type, char **content_encoding)
     }
 
     /* detect memory allocation errors */
-    if (!content_type ||
-		(state == rsl_encoding && !*content_encoding)) {
-		return MIME_MAGIC_ERROR;
+    if (!content_type || !(*content_type) || (state == rsl_encoding && !*content_encoding)) {
+	return MIME_MAGIC_ERROR;
     }
 
     /* success! */
