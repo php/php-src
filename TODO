@@ -83,7 +83,7 @@ ext/bz2
     * Add ini setting for decompression buffer size. The default 4k is to small
       for big files and takes ages to decompress. However, 40k which perform
       quite good with big files may be to much under certain environments as
-      default setting. There should be consideren different default sizes for
+      default setting. There should be considered different default sizes for
       different SAPIS (e.g. apache and cli).
 
 ext/curl
