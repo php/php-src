@@ -148,7 +148,7 @@ LINK32=link.exe
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 # Begin Source File
 
-SOURCE=..\..\ext\java\java.c
+SOURCE=..\..\ext\rpc\java\java.c
 # End Source File
 # Begin Source File
 
@@ -168,7 +168,7 @@ SOURCE=.\servlet.java
 
 !IF  "$(CFG)" == "servlet - Win32 Release"
 
-USERDEP__SERVL="..\..\ext\java\reflect.java"	
+USERDEP__SERVL="..\..\ext\rpc\java\reflect.java"	
 # Begin Custom Build
 OutDir=.\..\..\Release
 InputPath=.\servlet.java
@@ -177,7 +177,7 @@ InputPath=.\servlet.java
 	if not exist net mkdir net 
 	if not exist net\php mkdir net\php 
 	copy *.java net\php > nul 
-	copy ..\..\ext\java\reflect.java net\php > nul 
+	copy ..\..\ext\rpc\java\reflect.java net\php > nul 
 	echo library=phpsrvlt>net/php/reflect.properties 
 	echo library=phpsrvlt>net/php/servlet.properties 
 	cd net\php 
@@ -194,7 +194,7 @@ InputPath=.\servlet.java
 
 !ELSEIF  "$(CFG)" == "servlet - Win32 Debug"
 
-USERDEP__SERVL="..\..\ext\java\reflect.java"	
+USERDEP__SERVL="..\..\ext\rpc\java\reflect.java"	
 # Begin Custom Build
 OutDir=.\..\..\Debug
 InputPath=.\servlet.java
@@ -203,7 +203,7 @@ InputPath=.\servlet.java
 	if not exist net mkdir net 
 	if not exist net\php mkdir net\php 
 	copy *.java net\php > nul 
-	copy ..\..\ext\java\reflect.java net\php > nul 
+	copy ..\..\ext\rpc\java\reflect.java net\php > nul 
 	echo library=phpsrvlt>net/php/reflect.properties 
 	echo library=phpsrvlt>net/php/servlet.properties 
 	cd net\php 
@@ -220,7 +220,7 @@ InputPath=.\servlet.java
 
 !ELSEIF  "$(CFG)" == "servlet - Win32 Debug_TS"
 
-USERDEP__SERVL="..\..\ext\java\reflect.java"	
+USERDEP__SERVL="..\..\ext\rpc\java\reflect.java"	
 # Begin Custom Build
 OutDir=.\..\..\Debug_TS
 InputPath=.\servlet.java
@@ -229,7 +229,7 @@ InputPath=.\servlet.java
 	if not exist net mkdir net 
 	if not exist net\php mkdir net\php 
 	copy *.java net\php > nul 
-	copy ..\..\ext\java\reflect.java net\php > nul 
+	copy ..\..\ext\rpc\java\reflect.java net\php > nul 
 	echo library=phpsrvlt>net/php/reflect.properties 
 	echo library=phpsrvlt>net/php/servlet.properties 
 	cd net\php 
@@ -246,7 +246,7 @@ InputPath=.\servlet.java
 
 !ELSEIF  "$(CFG)" == "servlet - Win32 Release_TS"
 
-USERDEP__SERVL="..\..\ext\java\reflect.java"	
+USERDEP__SERVL="..\..\ext\rpc\java\reflect.java"	
 # Begin Custom Build
 OutDir=.\..\..\Release_TS
 InputPath=.\servlet.java
@@ -255,7 +255,7 @@ InputPath=.\servlet.java
 	if not exist net mkdir net 
 	if not exist net\php mkdir net\php 
 	copy *.java net\php > nul 
-	copy ..\..\ext\java\reflect.java net\php > nul 
+	copy ..\..\ext\rpc\java\reflect.java net\php > nul 
 	echo library=phpsrvlt>net/php/reflect.properties 
 	echo library=phpsrvlt>net/php/servlet.properties 
 	cd net\php 
