@@ -13,6 +13,7 @@
  * @brief   Interface to access the current inner iteraor of iterator wrappers
  * @author  Marcus Boerger
  * @version 1.0
+ * @since PHP 5.1
  */
 interface OuterIterator extends Iterator
 {

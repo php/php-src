@@ -16,6 +16,7 @@ define('CIT_CATCH_GET_CHILD', 2);
  * @brief   Cached iteration over another Iterator
  * @author  Marcus Boerger
  * @version 1.1
+ * @since PHP 5.0
  *
  * This iterator wrapper does a one ahead iteration. This way it knows whether
  * the inner iterator has one more element.

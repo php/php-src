@@ -13,6 +13,7 @@
  * @brief   Interface for recursive iteration with RecursiveIteratorIterator
  * @author  Marcus Boerger
  * @version 1.0
+ * @since PHP 5.0
  */
 interface RecursiveIterator implements Iterator
 {

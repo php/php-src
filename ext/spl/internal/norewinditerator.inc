@@ -13,7 +13,7 @@
  * @brief   An Iterator wrapper that doesn't call rewind
  * @author  Marcus Boerger
  * @version 1.1
- *
+ * @since PHP 5.1
  */
 class NoRewindIterator extends IteratorIterator
 {

@@ -17,6 +17,7 @@ define('RIT_CHILD_FIRST', 2);
  * @brief   Iterates through recursive iterators
  * @author  Marcus Boerger
  * @version 1.1
+ * @since PHP 5.0
  *
  * The objects of this class are created by instances of RecursiveIterator. 
  * Elements of those iterators may be traversable themselves. If so these 
