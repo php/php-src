@@ -268,6 +268,7 @@ void php_print_credits(int flag)
 		CREDIT_LINE("Apache SAPI Module", "Rasmus Lerdorf, Zeev Suraski");
 		CREDIT_LINE("ISAPI SAPI Module", "Andi Gutmans, Zeev Suraski");
 		CREDIT_LINE("CGI SAPI Module", "Rasmus Lerdorf, Stig Sather Bakken");
+		CREDIT_LINE("Overall Work", "Sascha Schumann, Andrey Zmievski, Thies C. Arntzen, and others");
 		PUTS("</table>\n");
 	}
 
@@ -301,7 +302,7 @@ void php_print_credits(int flag)
 		CREDIT_LINE("Perl Compatible Regexps", "Andrey Zmievski");
 		CREDIT_LINE("PDF", "Uwe Steinmann");
 		CREDIT_LINE("PostgreSQL", "Jouni Ahto, Zeev Suraski");
-		CREDIT_LINE("Sessions", "Sascha Schumann");
+		CREDIT_LINE("Sessions", "Sascha Schumann, Andrey Zmievski");
 		CREDIT_LINE("SNMP", "Rasmus Lerdorf");
 		CREDIT_LINE("Sybase", "Zeev Suraski");
 		CREDIT_LINE("System V Shared Memory", "Christian Cartus");
