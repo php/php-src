@@ -105,7 +105,7 @@ int php3_init_request_info(void *conf)
 
 	request_info.filename = r->filename;
 	SG(request_info).request_method = r->method;
-	request_info.content_type = table_get(r->subprocess_env, "CONTENT_TYPE");
+	SG(request_info).content_type = table_get(r->subprocess_env, "CONTENT_TYPE");
 
 	buf = table_get(r->subprocess_env, "CONTENT_LENGTH");
 	SG(request_info).content_length = (buf ? atoi(buf) : 0);

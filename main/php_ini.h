@@ -102,7 +102,7 @@ PHPAPI PHP_INI_DISP(php_ini_color_displayer_cb);
 
 #define REGISTER_INI_ENTRIES() php_register_ini_entries(ini_entries, module_number)
 #define UNREGISTER_INI_ENTRIES() php_unregister_ini_entries(module_number)
-#define DISPLAY_INI_ENTRIES() display_ini_entries(module)
+#define DISPLAY_INI_ENTRIES() display_ini_entries(zend_module)
 
 #define REGISTER_INI_DISPLAYER(name, displayer) php_ini_register_displayer((name), sizeof(name), displayer)
 #define REGISTER_INI_BOOLEAN(name) REGISTER_INI_DISPLAYER(name, php_ini_boolean_displayer_cb)

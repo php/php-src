@@ -42,7 +42,7 @@
  * This reads the post form data into a string.
  * Remember to free this pointer when done with it.
  */
-#if APACHE
+#if 0
 static char *php3_getpost(pval *http_post_vars PLS_DC)
 {
 	char *buf = NULL;

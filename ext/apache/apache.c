@@ -154,7 +154,8 @@ void php3_apache_note(INTERNAL_FUNCTION_PARAMETERS)
 }
 /* }}} */
 
-void php3_info_apache(ZEND_MODULE_INFO_FUNC_ARGS) {
+void php3_info_apache(ZEND_MODULE_INFO_FUNC_ARGS)
+{
 	module *modp = NULL;
 #if !defined(WIN32) && !defined(WINNT)
 	char name[64];
