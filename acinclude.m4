@@ -323,7 +323,6 @@ AC_DEFUN(PHP_TIME_R_TYPE,[
 AC_CACHE_CHECK(for type of reentrant time-related functions, ac_cv_time_r_type,[
 AC_TRY_RUN([
 #include <time.h>
-#include <stdlib.h>
 
 main() {
 char buf[27];
@@ -333,19 +332,37 @@ int r, s;
 
 s = gmtime_r(&old, &t);
 r = (int) asctime_r(&t, buf, 26);
-if (r == s && s == 0) exit(0);
-exit(1);
+if (r == s && s == 0) return (0);
+return (1);
 }
 ],[
   ac_cv_time_r_type=hpux
 ],[
-  ac_cv_time_r_type=POSIX
+  AC_TRY_RUN([
+#include <time.h>
+main() {
+  struct tm t, *s;
+  time_t old = 0;
+  char buf[27], *p;
+  
+  s = gmtime_r(&old, &t);
+  p = asctime_r(&t, buf, 26);
+  if (p == buf && s == t) return (0);
+  return (1);
+}
+  ],[
+    ac_cv_time_r_type=irix
+  ],[
+    ac_cv_time_r_type=POSIX
+  ])
 ],[
   ac_cv_time_r_type=POSIX
 ])
 ])
-if test "$ac_cv_time_r_type" = "hpux"; then
-  AC_DEFINE(PHP_HPUX_TIME_R,1,[Whether you have HP-UX 10.x])
+  case $ac_cv_time_r_type in
+  hpux) AC_DEFINE(PHP_HPUX_TIME_R,1,[Whether you have HP-UX 10.x]) ;;
+  irix) AC_DEFINE(PHP_IRIX_TIME_R,1,[Whether you have IRIX-style functions]) ;;
+  esac
 fi
 ])
 
