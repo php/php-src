@@ -1,26 +1,26 @@
 # Microsoft Developer Studio Project File - Name="php4dllts" - Package Owner=<4>
 # Microsoft Developer Studio Generated Build File, Format Version 6.00
-# ** DO NOT EDIT **
+# ** NICHT BEARBEITEN **
 
 # TARGTYPE "Win32 (x86) Dynamic-Link Library" 0x0102
 
 CFG=php4dllts - Win32 Debug_TS
-!MESSAGE This is not a valid makefile. To build this project using NMAKE,
-!MESSAGE use the Export Makefile command and run
+!MESSAGE Dies ist kein gültiges Makefile. Zum Erstellen dieses Projekts mit NMAKE
+!MESSAGE verwenden Sie den Befehl "Makefile exportieren" und führen Sie den Befehl
 !MESSAGE 
 !MESSAGE NMAKE /f "php4dllts.mak".
 !MESSAGE 
-!MESSAGE You can specify a configuration when running NMAKE
-!MESSAGE by defining the macro CFG on the command line. For example:
+!MESSAGE Sie können beim Ausführen von NMAKE eine Konfiguration angeben
+!MESSAGE durch Definieren des Makros CFG in der Befehlszeile. Zum Beispiel:
 !MESSAGE 
 !MESSAGE NMAKE /f "php4dllts.mak" CFG="php4dllts - Win32 Debug_TS"
 !MESSAGE 
-!MESSAGE Possible choices for configuration are:
+!MESSAGE Für die Konfiguration stehen zur Auswahl:
 !MESSAGE 
-!MESSAGE "php4dllts - Win32 Debug_TS" (based on "Win32 (x86) Dynamic-Link Library")
-!MESSAGE "php4dllts - Win32 Release_TS" (based on "Win32 (x86) Dynamic-Link Library")
-!MESSAGE "php4dllts - Win32 Release_TS_inline" (based on "Win32 (x86) Dynamic-Link Library")
-!MESSAGE "php4dllts - Win32 Release_TSDbg" (based on "Win32 (x86) Dynamic-Link Library")
+!MESSAGE "php4dllts - Win32 Debug_TS" (basierend auf  "Win32 (x86) Dynamic-Link Library")
+!MESSAGE "php4dllts - Win32 Release_TS" (basierend auf  "Win32 (x86) Dynamic-Link Library")
+!MESSAGE "php4dllts - Win32 Release_TS_inline" (basierend auf  "Win32 (x86) Dynamic-Link Library")
+!MESSAGE "php4dllts - Win32 Release_TSDbg" (basierend auf  "Win32 (x86) Dynamic-Link Library")
 !MESSAGE 
 
 # Begin Project
@@ -885,126 +885,6 @@ SOURCE=..\ext\wddx\php_wddx_api.h
 
 SOURCE=..\ext\xml\php_xml.h
 # End Source File
-# End Group
-# Begin Group "expat"
-
-# PROP Default_Filter ""
-# Begin Group "Source Files No. 5"
-
-# PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat;for;f90"
-# Begin Source File
-
-SOURCE=..\ext\xml\expat\xmlparse\hashtable.c
-# ADD CPP /I "..\ext\xml\expat\xmltok"
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\xml\expat\xmlparse\xmlparse.c
-# ADD CPP /I "..\ext\xml\expat\xmltok"
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\xml\expat\xmltok\xmlrole.c
-# ADD CPP /I "..\ext\xml\expat\xmltok"
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\xml\expat\xmltok\xmltok.c
-# ADD CPP /I "..\ext\xml\expat\xmltok"
-# End Source File
-# End Group
-# Begin Group "Header Files No. 5"
-
-# PROP Default_Filter "h;hpp;hxx;hm;inl;fi;fd"
-# Begin Source File
-
-SOURCE=..\ext\xml\expat\xmltok\asciitab.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\xml\expat\xmltok\iasciitab.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\xml\expat\xmltok\latin1tab.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\xml\expat\xmltok\nametab.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\xml\expat\xmltok\utf8tab.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\xml\expat\xmltok\xmldef.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\xml\expat\xmlparse\xmlparse.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\xml\expat\xmltok\xmlrole.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\xml\expat\xmltok\xmltok.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\xml\expat\xmltok\xmltok_impl.c
-
-!IF  "$(CFG)" == "php4dllts - Win32 Debug_TS"
-
-# PROP Exclude_From_Build 1
-
-!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS"
-
-# PROP Exclude_From_Build 1
-
-!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS_inline"
-
-# PROP Exclude_From_Build 1
-
-!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TSDbg"
-
-# PROP BASE Exclude_From_Build 1
-# PROP Exclude_From_Build 1
-
-!ENDIF 
-
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\xml\expat\xmltok\xmltok_impl.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\xml\expat\xmltok\xmltok_ns.c
-
-!IF  "$(CFG)" == "php4dllts - Win32 Debug_TS"
-
-# PROP Exclude_From_Build 1
-
-!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS"
-
-# PROP Exclude_From_Build 1
-
-!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS_inline"
-
-# PROP Exclude_From_Build 1
-
-!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TSDbg"
-
-# PROP BASE Exclude_From_Build 1
-# PROP Exclude_From_Build 1
-
-!ENDIF 
-
-# End Source File
-# End Group
 # End Group
 # End Group
 # Begin Group "FTP"
