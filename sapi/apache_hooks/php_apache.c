@@ -36,6 +36,9 @@ php_apache_info_struct php_apache_info;
 
 #define SECTION(name)  PUTS("<H2 align=\"center\">" name "</H2>\n")
 
+#undef offsetof
+#define offsetof(s_type,field) ((size_t)&(((s_type*)0)->field))
+
 extern module *top_module;
 static int le_apachereq;
 static zend_class_entry *apacherequest_class_entry;
