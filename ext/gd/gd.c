@@ -1753,7 +1753,8 @@ PHP_FUNCTION(imagecopy)
 }
 /* }}} */
 
-
+/* {{{ proto int imagecopymerge(int src_im, int dst_im, int dst_x, int dst_y, int src_x, int src_y, int src_w, int src_h, int pct)
+    */
 PHP_FUNCTION(imagecopymerge)
 {
 	zval **SIM, **DIM, **SX, **SY, **SW, **SH, **DX, **DY, **PCT;
@@ -1789,6 +1790,7 @@ PHP_FUNCTION(imagecopymerge)
 	gdImageCopyMerge(im_dst, im_src, dstX, dstY, srcX, srcY, srcW, srcH, pct);
 	RETURN_TRUE;
 }
+/* }}} */
 
 /* {{{ proto int imagecopyresized(int dst_im, int src_im, int dst_x, int dst_y, int src_x, int src_y, int dst_w, int dst_h, int src_w, int src_h)
    Copy and resize part of an image */
