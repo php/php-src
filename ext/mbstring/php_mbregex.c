@@ -619,7 +619,7 @@ _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, int option)
 					p += 2;
 					i += 2;
 				} else {
-					_php_mb_regex_strbuf_ncat(pdevice, (const unsigned char *)p, 1);
+					_php_mb_regex_strbuf_ncat(pdevice, (const unsigned char *)p, fwd);
 					p += fwd;
 					i += fwd;
 				}
