@@ -69,7 +69,7 @@ php3_module_entry php3_ftp_module_entry = {
 #ifdef ZEND_VERSION
 	PHP_MINIT(ftp),
 #else
-	PHP_MINIT_FUNCTION,
+	php3_minit_ftp,
 #endif
 	NULL,
 	NULL,
@@ -83,10 +83,10 @@ static void ftp_destructor_ftpbuf(ftpbuf_t *ftp)
 	ftp_close(ftp);
 }
 
-#ifdef ZEND_VERSION
-PHP_MINIT_FUNCTION(ftp)
+#ifndef ZEND_VERSION
+int php3_minit_ftp(INIT_FUNC_ARGS)
 #else
-int PHP_MINIT_FUNCTION(INIT_FUNC_ARGS)
+PHP_MINIT_FUNCTION(ftp)
 #endif
 {
 	le_ftpbuf = register_list_destructors(ftp_destructor_ftpbuf, NULL);
