@@ -42,7 +42,7 @@
  <release>
   <state>beta</state>
   <version>0.3</version>
-  <date>2005-03-08</date>
+  <date>2005-03-09</date>
 
   <notes>
 You need to install a PDO database driver to make use of PDO,
