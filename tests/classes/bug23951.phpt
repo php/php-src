@@ -22,7 +22,8 @@ $a = new A;
 $b = new B;
 
 print_r($a);
-print_r($b);
+print_r($b->a_var);
+print_r($b->b_var);
 
 ?>
 --EXPECT--
@@ -35,13 +36,9 @@ a Object
         )
 
 )
-b Object
+Array
 (
-    [a_var] => Array
-        (
-            [1] => foo1_value
-            [2] => foo2_value
-        )
-
-    [b_var] => foo
+    [1] => foo1_value
+    [2] => foo2_value
 )
+foo
