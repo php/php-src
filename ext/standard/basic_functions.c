@@ -2221,6 +2221,8 @@ PHPAPI PHP_FUNCTION(warn_not_available)
 }
 
 
+/* {{{ proto boolean is_uploaded_file(string path)
+   check if file was created by rfc1867 upload  */
 PHP_FUNCTION(is_uploaded_file)
 {
 	zval **path;
@@ -2241,8 +2243,11 @@ PHP_FUNCTION(is_uploaded_file)
 		RETURN_FALSE;
 	}
 }
+/* }}} */
 
 
+/* {{{ proto boolean move_uploaded_file(string path, string new_path)
+   move a file if and only if it was created by an upload */
 PHP_FUNCTION(move_uploaded_file)
 {
 	zval **path, **new_path;
@@ -2278,6 +2283,7 @@ PHP_FUNCTION(move_uploaded_file)
 	}
 	RETURN_BOOL(successful);
 }
+/* }}} */
 
 
 /*
