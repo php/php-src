@@ -21,13 +21,13 @@ function baz($param = NULL) {
 	return $param;
 }
 
-var_dump($db->single_query("select php('baz')", 1));
-var_dump($db->single_query("select php('baz', 1)", 1));
-var_dump($db->single_query("select php('baz', \"PHP\")", 1));
-var_dump($db->single_query("select php('foo::bar')", 1));
-var_dump($db->single_query("select php('foo::bar', 1)", 1));
-var_dump($db->single_query("select php('foo::bar', \"PHP\")", 1));
-var_dump($db->single_query("select php('foo::bar(\"PHP\")')", 1));
+var_dump($db->querySingle("select php('baz')", 1));
+var_dump($db->querySingle("select php('baz', 1)", 1));
+var_dump($db->querySingle("select php('baz', \"PHP\")", 1));
+var_dump($db->querySingle("select php('foo::bar')", 1));
+var_dump($db->querySingle("select php('foo::bar', 1)", 1));
+var_dump($db->querySingle("select php('foo::bar', \"PHP\")", 1));
+var_dump($db->querySingle("select php('foo::bar(\"PHP\")')", 1));
 
 ?>
 ===DONE===

@@ -22,20 +22,20 @@ foreach ($data as $str) {
 }
 
 echo "unbuffered twice\n";
-$r = $db->unbuffered_query("SELECT a from strings", SQLITE_NUM);
-var_dump($r->fetch_all());
-var_dump($r->fetch_all());
+$r = $db->queryUnbuffered("SELECT a from strings", SQLITE_NUM);
+var_dump($r->fetchAll());
+var_dump($r->fetchAll());
 
 echo "unbuffered with fetch_array\n";
-$r = $db->unbuffered_query("SELECT a from strings", SQLITE_NUM);
-var_dump($r->fetch_array());
-var_dump($r->fetch_all());
+$r = $db->queryUnbuffered("SELECT a from strings", SQLITE_NUM);
+var_dump($r->fetch());
+var_dump($r->fetchAll());
 
 echo "buffered\n";
 $r = $db->query("SELECT a from strings", SQLITE_NUM);
-var_dump($r->fetch_all());
-var_dump($r->fetch_array());
-var_dump($r->fetch_all());
+var_dump($r->fetchAll());
+var_dump($r->fetch());
+var_dump($r->fetchAll());
 
 echo "DONE!\n";
 ?>
@@ -59,7 +59,7 @@ array(3) {
   }
 }
 
-Notice: sqlite_ub_query::fetch_all(): One or more rowsets were already returned in %ssqlite_oo_014.php on line %d
+Notice: sqlite_ub_query::fetchAll(): One or more rowsets were already returned in %ssqlite_oo_014.php on line %d
 array(0) {
 }
 unbuffered with fetch_array

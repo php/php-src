@@ -13,14 +13,14 @@ $db->query("INSERT INTO strings VALUES('foo', 'foo')");
 
 class sqlite_help
 {
-	function sqlite_help($db){
+	function __construct($db){
 		$this->db = $db;
-		$this->db->create_function('link_keywords', array(&$this, 'linkers'), 1);
+		$this->db->createFunction('link_keywords', array(&$this, 'linkers'), 1);
 	}
 
-	function get_single($key)
+	function getSingle($key)
 	{
-		return $this->db->single_query('SELECT link_keywords(var) FROM strings WHERE key=\''.$key.'\'', 1);
+		return $this->db->querySingle('SELECT link_keywords(var) FROM strings WHERE key=\''.$key.'\'', 1);
 	}
 
 	function linkers($str)
@@ -41,7 +41,7 @@ class sqlite_help
 }
 
 $obj = new sqlite_help($db);
-echo $obj->get_single('foo')."\n";
+echo $obj->getSingle('foo')."\n";
 $obj->free();
 unset($obj);
 
