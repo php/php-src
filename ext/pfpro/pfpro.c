@@ -328,14 +328,14 @@ PHP_FUNCTION(pfpro_process)
 	args = (zval ***) emalloc(sizeof(zval **) * ZEND_NUM_ARGS());
 
 	if (zend_get_parameters_array_ex(ZEND_NUM_ARGS(), args) == FAILURE) {
+		efree(args);
 		php_error(E_ERROR, "Unable to read parameters in pfpro_process()");
- 		efree(args);
 		RETURN_FALSE;
 	}
 
 	if (Z_TYPE_PP(args[0]) != IS_ARRAY) {
+		efree(args);
 		php_error(E_ERROR, "First parameter to pfpro_process() must be an array");
- 		efree(args);
 		RETURN_FALSE;
 	}
 
@@ -418,11 +418,11 @@ PHP_FUNCTION(pfpro_process)
 					break;
 
 				default:
-					php_error(E_ERROR, "pfpro_process() array keys must be strings or integers");
 					if (parmlist) {
 						efree(parmlist);
 					}
 					efree(args);
+					php_error(E_ERROR, "pfpro_process() array keys must be strings or integers");
 					RETURN_FALSE;
 			}
 
@@ -464,11 +464,11 @@ PHP_FUNCTION(pfpro_process)
 					break;
 
 				default:
-					php_error(E_ERROR, "pfpro_process() array values must be strings, ints or floats");
 					if (parmlist) {
 						efree(parmlist);
 					}
 					efree(args);
+					php_error(E_ERROR, "pfpro_process() array values must be strings, ints or floats");
 					RETURN_FALSE;
 			}
 			zend_hash_move_forward(target_hash);
