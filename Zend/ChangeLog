@@ -1,3 +1,44 @@
+2004-03-09  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZEND_CHANGES:
+      Rename hasMore() to valid() as discussed. (Part VI)
+
+    * zend_API.c
+      zend_compile.c
+      zend_compile.h
+      zend_execute.c
+      zend_execute_API.c
+      zend_interfaces.c
+      zend_language_parser.y
+      zend_reflection_api.c:
+      Clearify the different method/class flags (as discussed with Andi).
+
+    * zend.h:
+      No longer needed
+
+2004-03-09  Andi Gutmans  <andi@zend.com>
+
+    * zend_constants.c:
+      - Fix crash:
+      <?php
+      class ResourceFormat
+      {
+           const IMG           = 1;
+      }
+      
+      class Image
+      {
+           const RESOURCE_FORMAT   = ResourceFormat::IMG;
+      }
+      
+      print_r(constant('Image::RESOURCE_FORMAT'));
+      ?>
+
+    * zend_compile.c
+      zend_compile.h
+      zend_execute.c:
+      - Nuke unused code.
+
 2004-03-08  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_execute.c

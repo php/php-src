@@ -1,3 +1,127 @@
+2004-03-09  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * (PHP_4_3)
+      ext/curl/curl.c
+      ext/curl/interface.c:
+      Make curl_setopt($ch,CURLOPT_RETURNTRANSFER,0) reset the RETURNTRANSFER to
+      stdout as is implied in the documentation.  Currently it simply does
+      absolutely nothing and there is no way to reset it to stdout.
+
+2004-03-09  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/ZEND_CHANGES:
+      Rename hasMore() to valid() as discussed. (Part VI)
+
+    * tests/classes/constants_scope_001.phpt:
+      Update test
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_interfaces.c
+      ZendEngine2/zend_language_parser.y
+      ZendEngine2/zend_reflection_api.c:
+      Clearify the different method/class flags (as discussed with Andi).
+
+    * ZendEngine2/zend.h:
+      No longer needed
+
+2004-03-09  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend_constants.c:
+      - Fix crash:
+      <?php
+      class ResourceFormat
+      {
+           const IMG           = 1;
+      }
+      
+      class Image
+      {
+           const RESOURCE_FORMAT   = ResourceFormat::IMG;
+      }
+      
+      print_r(constant('Image::RESOURCE_FORMAT'));
+      ?>
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_execute.c:
+      - Nuke unused code.
+
+2004-03-09  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/curl/multi.c:
+      Fixed memory leak with curl_multi_init() de-initialization.
+
+    * TSRM/tsrm_virtual_cwd.c:
+      Fixed define.
+
+    * NEWS
+      TSRM/tsrm_virtual_cwd.c:
+      Fixed bug #27338 (memory leak inside tsrm_virtual_cwd.c on win32).
+
+2004-03-09  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * run-tests.php:
+      Make run-tests.php work with xdebug being loaded.
+
+    * ext/pgsql/tests/02connection.phpt:
+      Show the connect result
+
+    * ext/mysqli/mysqli.c:
+      Missing buffer->val change
+
+2004-03-09  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      ext/standard/tests/strings/bug27457.phpt:
+      test for bug #27457
+
+    * ext/standard/tests/strings/bug27457.phpt:
+      
+      test for bug #27457
+
+    * (PHP_4_3)
+      NEWS:
+      order
+
+2004-03-09  Georg Richter  <phpinfo@t-online.de>
+
+    * ext/mysqli/config.m4
+      ext/mysqli/mysqli_api.c
+      ext/mysqli/mysqli_fe.c
+      ext/mysqli/php_mysqli.h:
+      fixed memleaks in bind functions
+      added 4.1.2 support (renamed functions)
+
+2004-03-09  Derick Rethans  <php@derickrethans.nl>
+
+    * tests/lang/bug27535.phpt:
+      - Added test for bug #27535 (Objects pointing to each other cause Apache to
+        crash).
+
+2004-03-09  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      main/SAPI.c:
+      MFH: Fixed bug #27530 (broken http auth when safe_mode is on and PCRE is
+      disabled).
+
+    * main/SAPI.c:
+      Fixed bug #27530 (broken http auth when safe_mode is on and PCRE is
+      disabled).
+
+    * ext/sqlite/libsqlite/src/sqlite.h.in:
+      Fix function declaration.
+
+    * ext/sqlite/sqlite.c:
+      Change float operations to safe_emalloc().
+      Original idea by Sascha (see sess_sqlite.c)
+
 2004-03-08  Ard Biesheuvel  <a.k.biesheuvel@ewi.tudelft.nl>
 
     * ext/sqlite/libsqlite/src/main.c
