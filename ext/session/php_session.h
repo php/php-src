@@ -156,6 +156,8 @@ int php_session_register_serializer(const char *name,
 	        int (*encode)(PS_SERIALIZER_ENCODE_ARGS),
 	        int (*decode)(PS_SERIALIZER_DECODE_ARGS));
 
+PHPAPI void php_session_set_id(char *id TSRMLS_DC);
+
 #define PS_ADD_VARL(name,namelen) \
 	zend_hash_add_empty_element(&PS(vars), name, namelen + 1)
 

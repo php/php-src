@@ -211,6 +211,15 @@ int php_session_register_module(ps_module *ptr)
 	return ret;
 }
 
+PHPAPI void php_session_set_id(char *id TSRMLS_DC)
+{
+	if (PS(id))
+		efree(PS(id));
+
+	PS(id) = estrdup(id);
+}
+
+
 PHP_MINIT_FUNCTION(session);
 PHP_RINIT_FUNCTION(session);
 PHP_MSHUTDOWN_FUNCTION(session);
@@ -955,7 +964,6 @@ static zend_bool php_session_destroy(TSRMLS_D)
 	return retval;
 }
 
-
 /* {{{ proto void session_set_cookie_params(int lifetime [, string path [, string domain [, bool secure]]])
    Set session cookie parameters */
 PHP_FUNCTION(session_set_cookie_params)
@@ -1132,8 +1140,7 @@ PHP_FUNCTION(session_id)
 
 	if (ac == 1) {
 		convert_to_string_ex(p_name);
-		if (PS(id)) efree(PS(id));
-		PS(id) = estrndup(Z_STRVAL_PP(p_name), Z_STRLEN_PP(p_name));
+		php_session_set_id(Z_STRVAL_PP(p_name) TSRMLS_CC);
 	}
 	
 	RETVAL_STRING(old, 0);
