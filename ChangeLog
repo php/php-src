@@ -1,3 +1,30 @@
+2001-02-09  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/gd/gd.c: make _php_image_convert configuration-aware
+
+    * ext/gd/gd.c: libjpeg-not-installed protection
+
+2001-02-09  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/standard/reg.c: Stray ]
+
+    * ext/standard/datetime.c
+      ext/standard/file.c:
+    What the heck is CUT?  Assume someone meant UTC here.  And fix a
+    warning.
+
+2001-02-09  Sergey Kartashoff  <gluke@biosys.net>
+
+    * ext/mnogosearch/php_mnogo.c
+      ext/mnogosearch/test.php:
+    Added UDM_PARAM_FIRST_DOC and UDM_PARAM_LAST_DOC mnoGoSearch extenstion
+    result parameters. Example updated.
+
+2001-02-09  David Hedbor  <david@hedbor.org>
+
+    * sapi/caudium/caudium.c:
+    Fixed PHP authentication and some other minor things.
+
 2001-02-08  Boian Bonev  <boian@bonev.com>
 
     * ext/vpopmail/php_vpopmail.c:
