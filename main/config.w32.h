@@ -72,6 +72,9 @@
 /* Enable / Disable ZLIB extension (default: enabled) */
 #define HAVE_ZLIB 1
 
+/* Enable / Disable SQLite extension (default: enabled) */
+#define HAVE_SQLITE 1
+
 /* PHP Runtime Configuration */
 #define FORCE_CGI_REDIRECT 1
 #define PHP_URL_FOPEN 1
