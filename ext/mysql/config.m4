@@ -17,31 +17,35 @@ AC_DEFUN(MYSQL_LIB_CHK, [
   done
 ])
 
-AC_DEFUN(PHP_MYSQL_SOCKET_SEARCH, [
-  for i in  \
-    /var/run/mysqld/mysqld.sock \
-    /var/tmp/mysql.sock \
-    /var/run/mysql/mysql.sock \
-    /var/lib/mysql/mysql.sock \
-    /var/mysql/mysql.sock \
-    /usr/local/mysql/var/mysql.sock \
-    /Private/tmp/mysql.sock \
-    /tmp/mysql.sock \
-  ; do
+AC_DEFUN(PHP_AC_MYSQL_SOCK,[
+  AC_MSG_CHECKING(for default MySQL UNIX socket)
+    for i in  \
+      /var/run/mysqld/mysqld.sock \
+      /var/tmp/mysql.sock \
+      /var/run/mysql/mysql.sock \
+      /var/lib/mysql/mysql.sock \
+      /var/mysql/mysql.sock \
+      /usr/local/mysql/var/mysql.sock \
+      /Private/tmp/mysql.sock \
+      /tmp/mysql.sock \
+      ; do
     if test -r $i; then
       MYSQL_SOCK=$i
-      break 2
+      break
     fi
   done
-  
+  if test "$MYSQL_SOCK" = ""; then
+    MYSQL_SOCK=/var/lib/mysql/mysql.sock	
+  fi
+
   AC_DEFINE_UNQUOTED(MYSQL_UNIX_ADDR, "$MYSQL_SOCK", [ ])
   AC_MSG_RESULT([$MYSQL_SOCK])
 ])
 
 
 PHP_ARG_WITH(mysql, for MySQL support,
-[  --with-mysql[=DIR]      Include MySQL support. DIR is the MySQL base directory.
-                          If unspecified, the bundled MySQL library will be used.], yes)
+[  --with-mysql[=DIR]      Include MySQL support. DIR is the MySQL base dir.
+                          If unspecified, the bundled MySQL library is used.], yes)
 
 PHP_ARG_WITH(mysql-sock, for specified location of the MySQL UNIX socket,
 [  --with-mysql-sock[=DIR] Location of the MySQL unix socket pointer.
@@ -58,6 +62,21 @@ if test "$PHP_MYSQL" != "no"; then
       AC_MSG_RESULT([$MYSQL_SOCK])
   else 
     PHP_MYSQL_SOCKET_SEARCH
+  fi
+fi
+
+if test "$PHP_MYSQL" != "no"; then
+  PHP_ARG_WITH(mysql-sock, location of the MySQL socket,
+  [  --with-mysql-sock[=PATH] Optionally reference the name of the MySQL Socket.
+                          If unspecified, it will search default locations.], no)
+  
+  if test "$PHP_MYSQL_SOCK" != "no"; then
+    MYSQL_SOCK=$PHP_MYSQL_SOCK
+    AC_MSG_CHECKING(for specified MySQL UNIX socket)
+    AC_DEFINE_UNQUOTED(MYSQL_UNIX_ADDR, "$MYSQL_SOCK", [ ])
+    AC_MSG_RESULT($MYSQL_SOCK)
+  else
+    PHP_AC_MYSQL_SOCK
   fi
 fi
 
