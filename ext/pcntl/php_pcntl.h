@@ -53,10 +53,6 @@ PHP_FUNCTION(pcntl_exec);
 PHP_FUNCTION(pcntl_getpriority);
 PHP_FUNCTION(pcntl_setpriority);
 
-static void pcntl_signal_handler(int);
-static void pcntl_tick_handler();
-
-
 ZEND_BEGIN_MODULE_GLOBALS(pcntl)
 	HashTable php_signal_table;
 	zend_llist php_signal_queue;
