@@ -275,6 +275,8 @@ function_entry basic_functions[] = {
 	PHP_FE(htmlentities,													NULL)
 	PHP_FE(html_entity_decode,												NULL)
 	PHP_FE(get_html_translation_table,										NULL)
+	PHP_FE(sha1,															NULL)
+	PHP_FE(sha1_file,														NULL)
 	PHP_NAMED_FE(md5,php_if_md5,											NULL)
 	PHP_NAMED_FE(md5_file,php_if_md5_file,									NULL)
 	PHP_NAMED_FE(crc32,php_if_crc32,										NULL)
