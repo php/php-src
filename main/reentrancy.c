@@ -124,7 +124,7 @@ void reentrancy_startup(void)
 	int i;
 
 	for (i = 0; i < NUMBER_OF_LOCKS; i++) {
-		tsrm_mutex_init(reentrant_locks[i]);
+		reentrant_locks[i] = tsrm_mutex_alloc();
 	}
 }
 
@@ -133,7 +133,7 @@ void reentrancy_shutdown(void)
 	int i;
 
 	for (i = 0; i < NUMBER_OF_LOCKS; i++) {
-		tsrm_mutex_destroy(reentrant_locks[i]);
+		tsrm_mutex_free(reentrant_locks[i]);
 	}
 }
 
