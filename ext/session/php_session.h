@@ -96,6 +96,8 @@ typedef struct _php_ps_globals {
 	zend_bool output_handler_registered;
 } php_ps_globals;
 
+typedef php_ps_globals zend_ps_globals;
+
 extern zend_module_entry session_module_entry;
 #define phpext_session_ptr &session_module_entry
 
@@ -190,12 +192,7 @@ PHPAPI void php_session_start(TSRMLS_D);
 		} 														\
 	}
 
-#ifdef ZTS
-extern int ps_globals_id;
-#else
-extern php_ps_globals ps_globals;
-#endif
-
+ZEND_EXTERN_MODULE_GLOBALS(ps);
 
 void php_session_auto_start(void *data);
 void php_session_shutdown(void *data);
