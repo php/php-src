@@ -36,8 +36,6 @@
 #include "zend_extensions.h"
 
 
-#define SELECTIVE_PZVAL_LOCK(pzv, pzn)		if (!((pzn)->u.EA.type & EXT_TYPE_UNUSED)) { PZVAL_LOCK(pzv); }
-
 #define get_zval_ptr(node, Ts, should_free, type) _get_zval_ptr(node, Ts, should_free ELS_CC)
 #define get_zval_ptr_ptr(node, Ts, type) _get_zval_ptr_ptr(node, Ts ELS_CC)
 
@@ -1691,7 +1689,9 @@ send_by_ref:
 			case ZEND_SWITCH_FREE:
 				switch (opline->op1.op_type) {
 					case IS_VAR:
-						get_zval_ptr(&opline->op1, Ts, &free_op1, BP_VAR_R);
+						if (!Ts[opline->op1.u.var].var) {
+							get_zval_ptr(&opline->op1, Ts, &free_op1, BP_VAR_R);
+						}
 						FREE_OP(&opline->op1, free_op1);
 						break;
 					case IS_TMP_VAR:
