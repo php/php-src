@@ -1187,7 +1187,7 @@ PHP_FUNCTION(mssql_free_result)
 	/* Release remaining results */
 	do {
 		retvalue = dbresults(result->mssql_ptr->link);
-	} while (retvalue != NO_MORE_RESULTS && retvalue != FAIL);
+	} while (retvalue == SUCCEED);
 
 	zend_list_delete(Z_RESVAL_PP(mssql_result_index));
 	RETURN_TRUE;
@@ -2020,11 +2020,12 @@ PHP_FUNCTION(mssql_bind)
 }
 /* }}} */
 
-/* {{{ proto int mssql_execute(int stmt)
+/* {{{ proto int mssql_execute(int stmt [, bool skip_results = false])
    Executes a stored procedure on a MS-SQL server database */
 PHP_FUNCTION(mssql_execute)
 {
-	zval **stmt;
+	zval **stmt, **skip;
+	zend_bool skip_results = 0;
 	int retvalue,retval_results;
 	mssql_link *mssql_ptr;
 	mssql_statement *statement;
@@ -2035,9 +2036,12 @@ PHP_FUNCTION(mssql_execute)
 	int ac = ZEND_NUM_ARGS();
 
 	batchsize = MS_SQL_G(batchsize);
-	if (ac !=1 || zend_get_parameters_ex(1, &stmt)==FAILURE) {
+	if (ac < 1 || ac > 2 || zend_get_parameters_ex(1, &stmt, &skip)==FAILURE) {
         WRONG_PARAM_COUNT;
     }
+	if (ac == 2) {
+		retval_results = Z_BVAL_PP(skip);
+	}
 
 	ZEND_FETCH_RESOURCE(statement, mssql_statement *, stmt, -1, "MS SQL-Statement", le_statement);
 
@@ -2059,7 +2063,7 @@ PHP_FUNCTION(mssql_execute)
 	 *	set into the row buffer. 
  	 */
 	result=NULL;
-	if (retval_results==SUCCEED) {
+	if (retval_results == SUCCEED) {
 		if ( (retvalue=(dbnextrow(mssql_ptr->link)))!=NO_MORE_ROWS ) {
 			num_fields = dbnumcols(mssql_ptr->link);
 			if (num_fields <= 0) {
@@ -2078,11 +2082,17 @@ PHP_FUNCTION(mssql_execute)
 			result->num_rows = _mssql_fetch_batch(mssql_ptr, result, retvalue TSRMLS_CC);
 			result->statement = statement;
 		}
+		if (retval_results) {
+			do {
+				retval_results = dbresults(statement->link->link);
+			} while (retval_results == SUCCEED);
+
+			_mssql_get_sp_result(mssql_ptr, statement TSRMLS_CC);
+		}
 	}
-	/* Try to get output parameters.  Won't work if there are more record sets
-	 *  in the batch until they are all retrieved with mssql_next_result().
-	 */
-	_mssql_get_sp_result(mssql_ptr, statement TSRMLS_CC);
+	else if (retval_results == NO_MORE_RESULTS || retval_results == NO_MORE_RPC_RESULTS) {
+		_mssql_get_sp_result(mssql_ptr, statement  TSRMLS_CC);
+	}
 	
 	if (result==NULL) {
 		RETURN_TRUE;	/* no recordset returned ...*/
@@ -2113,7 +2123,7 @@ PHP_FUNCTION(mssql_free_statement)
 	/* Release remaining results */
 	do {
 		retvalue = dbresults(statement->link->link);
-	} while (retvalue != NO_MORE_RESULTS && retvalue != FAIL);
+	} while (retvalue == SUCCEED);
 
 	zend_list_delete(Z_RESVAL_PP(mssql_statement_index));
 	RETURN_TRUE;
