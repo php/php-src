@@ -53,8 +53,8 @@
 #define BSD2 0
 #define HAVE_CRYPT 0
 #define HAVE_ORACLE 0
-#define HAVE_ADABAS 0
-#define HAVE_SOLID 0
+#undef HAVE_ADABAS
+#undef HAVE_SOLID
 #define HAVE_MSQL 0
 #define HAVE_PGSQL 0
 #define HAVE_SYBASE 0
@@ -108,7 +108,7 @@
 
 #define DISCARD_PATH 1
 #undef HAVE_SETITIMER
-#define HAVE_IODBC 0 /*getting rid of old odbc*/
+#undef HAVE_IODBC
 #define HAVE_UODBC 1
 #define HAVE_LIBDL 1
 #define HAVE_SENDMAIL 1
