@@ -1446,6 +1446,7 @@ send_by_ref:
 					if (!varptr->is_ref) {
 						/* code to break away this variable */
 						if (varptr->refcount>1) {
+							varptr->refcount--;
 							*varptr_ptr = (zval *) emalloc(sizeof(zval));
 							**varptr_ptr = *varptr;
 							varptr = *varptr_ptr;
