@@ -449,6 +449,8 @@ class PEAR_Frontend_CLI extends PEAR
                                       1 => array('wrap' => 20),
                                       2 => array('wrap' => 35)
                         );
+                    } else {
+                        $opts = null;
                     }
                     if (isset($data['headline']) && is_array($data['headline'])) {
                         $this->_tableRow($data['headline'],

@@ -242,7 +242,10 @@ function cmdHelp($command)
         return $ret;
 
     } elseif ($command == "version") {
-        return "PEAR Version: ".$GLOBALS['pear_package_version']."\nPHP Version: ".phpversion()."\nZend Engine Version: ".zend_version();
+        return "PEAR Version: ".$GLOBALS['pear_package_version'].
+               "\nPHP Version: ".phpversion().
+               "\nZend Engine Version: ".zend_version().
+               "\nRunning on: ".php_uname();
 
     } elseif ($help = PEAR_Command::getHelp($command)) {
         if (is_string($help)) {

@@ -5,10 +5,10 @@ REM PHP version 4.0
 REM ----------------------------------------------------------------------
 REM Copyright (c) 1997-2002 The PHP Group
 REM ----------------------------------------------------------------------
-REM  This source file is subject to version 2.02 of the PHP license,
+REM  This source file is subject to version 3.0 of the PHP license, 
 REM  that is bundled with this package in the file LICENSE, and is
 REM  available at through the world-wide-web at
-REM  http://www.php.net/license/2_02.txt.
+REM  http://www.php.net/license/3_0.txt. 
 REM  If you did not receive a copy of the PHP license and are unable to
 REM  obtain it through the world-wide-web, please send a note to
 REM  license@php.net so we can mail you a copy immediately.
@@ -16,7 +16,7 @@ REM ----------------------------------------------------------------------
 REM  Authors:     Alexander Merz (alexmerz@php.net)
 REM ----------------------------------------------------------------------
 REM
-REM  $Id: pear.bat,v 1.14 2003/04/03 23:21:30 ssb Exp $
+REM  $Id: pear.bat,v 1.15 2003/06/10 20:03:44 imajes Exp $
 
 REM change this lines to match the paths of your system
 REM -------------------

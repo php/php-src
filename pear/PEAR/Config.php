@@ -26,6 +26,11 @@ require_once 'System.php';
  * @var object
  */
 $GLOBALS['_PEAR_Config_instance'] = null;
+if (!defined('PEAR_INSTALL_DIR') || !PEAR_INSTALL_DIR) {
+    $PEAR_INSTALL_DIR = PHP_LIBDIR . DIRECTORY_SEPARATOR . 'pear';
+} else {
+    $PEAR_INSTALL_DIR = PEAR_INSTALL_DIR;
+}
 
 // Below we define constants with default values for all configuration
 // parameters except username/password.  All of them can have their
@@ -61,11 +66,11 @@ if (getenv('PHP_PEAR_HTTP_PROXY')) {
 if (getenv('PHP_PEAR_INSTALL_DIR')) {
     define('PEAR_CONFIG_DEFAULT_PHP_DIR', getenv('PHP_PEAR_INSTALL_DIR'));
 } else {
-    if (@is_dir(PEAR_INSTALL_DIR.DIRECTORY_SEPARATOR.'lib')) {
+    if (@is_dir($PEAR_INSTALL_DIR.DIRECTORY_SEPARATOR.'lib')) {
         define('PEAR_CONFIG_DEFAULT_PHP_DIR',
-               PEAR_INSTALL_DIR.DIRECTORY_SEPARATOR.'lib');
+               $PEAR_INSTALL_DIR.DIRECTORY_SEPARATOR.'lib');
     } else {
-        define('PEAR_CONFIG_DEFAULT_PHP_DIR', PEAR_INSTALL_DIR);
+        define('PEAR_CONFIG_DEFAULT_PHP_DIR', $PEAR_INSTALL_DIR);
     }
 }
 
@@ -73,7 +78,7 @@ if (getenv('PHP_PEAR_INSTALL_DIR')) {
 if (getenv('PHP_PEAR_EXTENSION_DIR')) {
     define('PEAR_CONFIG_DEFAULT_EXT_DIR', getenv('PHP_PEAR_EXTENSION_DIR'));
 } else {
-    if (!ini_get('extension_dir')) {
+    if (ini_get('extension_dir')) {
         define('PEAR_CONFIG_DEFAULT_EXT_DIR', ini_get('extension_dir'));
     } elseif (defined('PEAR_EXTENSION_DIR') && @is_dir(PEAR_EXTENSION_DIR)) {
         define('PEAR_CONFIG_DEFAULT_EXT_DIR', PEAR_EXTENSION_DIR);
@@ -89,7 +94,7 @@ if (getenv('PHP_PEAR_DOC_DIR')) {
     define('PEAR_CONFIG_DEFAULT_DOC_DIR', getenv('PHP_PEAR_DOC_DIR'));
 } else {
     define('PEAR_CONFIG_DEFAULT_DOC_DIR',
-           PEAR_INSTALL_DIR.DIRECTORY_SEPARATOR.'docs');
+           $PEAR_INSTALL_DIR.DIRECTORY_SEPARATOR.'docs');
 }
 
 // Default for bin_dir
@@ -104,7 +109,7 @@ if (getenv('PHP_PEAR_DATA_DIR')) {
     define('PEAR_CONFIG_DEFAULT_DATA_DIR', getenv('PHP_PEAR_DATA_DIR'));
 } else {
     define('PEAR_CONFIG_DEFAULT_DATA_DIR',
-           PEAR_INSTALL_DIR.DIRECTORY_SEPARATOR.'data');
+           $PEAR_INSTALL_DIR.DIRECTORY_SEPARATOR.'data');
 }
 
 // Default for test_dir
@@ -112,7 +117,7 @@ if (getenv('PHP_PEAR_TEST_DIR')) {
     define('PEAR_CONFIG_DEFAULT_TEST_DIR', getenv('PHP_PEAR_TEST_DIR'));
 } else {
     define('PEAR_CONFIG_DEFAULT_TEST_DIR',
-           PEAR_INSTALL_DIR.DIRECTORY_SEPARATOR.'tests');
+           $PEAR_INSTALL_DIR.DIRECTORY_SEPARATOR.'tests');
 }
 
 // Default for cache_dir
@@ -1004,6 +1009,7 @@ class PEAR_Config extends PEAR
     {
         if (isset($this->configuration[$layer])) {
             unset($this->configuration[$layer]);
+            $this->layers = array_keys($this->configuration);
             return true;
         }
         return false;
