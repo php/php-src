@@ -38,7 +38,7 @@ $xmlstr = "<?xml version='1.0'?>
 <!DOCTYPE chapter SYSTEM '/share/sgml/Norman_Walsh/db3xml10/db3xml10.dtd'>
 <chapter language='en'><title language='en'>Title</title>
 <para language='ge'>
-<informaltable language='sp'>
+<informaltable language='&sp;'>
 <tgroup cols='3'>
 <tbody>
 <row><entry>a1</entry><entry morerows='1'>b1</entry><entry>c1</entry></row>
