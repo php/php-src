@@ -38,30 +38,16 @@ PHP_RINIT_FUNCTION(pfpro);
 PHP_RSHUTDOWN_FUNCTION(pfpro);
 PHP_MINFO_FUNCTION(pfpro);
 
-PHP_FUNCTION(pfpro_version);	        /* Return library version */
-PHP_FUNCTION(pfpro_init);
-PHP_FUNCTION(pfpro_cleanup);
-PHP_FUNCTION(pfpro_process_raw);
-PHP_FUNCTION(pfpro_process);
+PHP_FUNCTION(pfpro_version);	        /* Return library version     */
+PHP_FUNCTION(pfpro_init);               /* Initialise pfpro gateway   */
+PHP_FUNCTION(pfpro_cleanup);            /* Shut down cleanly          */
+PHP_FUNCTION(pfpro_process_raw);        /* Raw transaction processing */
+PHP_FUNCTION(pfpro_process);            /* Transaction processing     */
 
-/* Fill in this structure and use entries in it
-   for thread safety instead of using true globals.
-*/
 typedef struct {
-	/* You can use the next one as type if your module registers any
-	   resources. Oh, you can of course rename it to something more
-	   suitable, add list entry types or remove it if it not needed.
-	   It's just an example.
-	*/
 	int le_pfpro;
+	int initialised;
 } php_pfpro_globals;
-
-/* In every function that needs to use variables in php_pfpro_globals,
-   do call PFPROLS_FETCH(); after declaring other variables used by
-   that function, and always refer to them as PFPROG(variable).
-   You are encouraged to rename these macros something shorter, see
-   examples in any other php module directory.
-*/
 
 #ifdef ZTS
 #define PFPROG(v) (pfpro_globals->v)
