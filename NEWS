@@ -25,6 +25,7 @@ PHP                                                                        NEWS
 - Added bz2 stream filter support. (Sara)
 - Added support of parameter->value arrays to xsl_xsltprocessor_set_parameter() 
   (Tony)
+- Fixed bug with raw_post_data not getting set (Brian)
 - Fixed bug in mysql->client_version (Georg)
 - Fixed ZTS destruction. (Marcus)
 - Fixed bug #29737 (ip2long should return -1 if IP is 255.255.255.255 and FALSE on error). (Tony)
