@@ -8,11 +8,10 @@ $test = "
 	<tr><td>second cell before < second cell after</td></tr>
 </table>";
 
-	var_dump(strip_tags($test));
+	echo strip_tags($test);
 ?>
 --EXPECT--
-string(80) "
+
 
 	first cell before < first cell after
 	second cell before < second cell after
-"
