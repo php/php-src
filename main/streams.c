@@ -644,8 +644,8 @@ PHPAPI char *php_stream_locate_eol(php_stream *stream, char *buf, size_t buf_len
 	if (stream->flags & PHP_STREAM_FLAG_DETECT_EOL) {
 		cr = memchr(readptr, '\r', avail);
 		lf = memchr(readptr, '\n', avail);
-
-		if (cr && lf != cr + 1) {
+	
+		if (cr && lf != cr + 1 && !(lf && lf < cr)) {
 			/* mac */
 			stream->flags ^= PHP_STREAM_FLAG_DETECT_EOL;
 			stream->flags |= PHP_STREAM_FLAG_EOL_MAC;
