@@ -1078,10 +1078,17 @@ DLEXPORT PHP_FUNCTION(udm_load_ispell_data)
 	}
 	
 	if (flag) {
+#if UDM_VERSION_ID >= 30204
+		if(Agent->Conf->Spells.nspell) {
+			UdmSortDictionary(&Agent->Conf->Spells);
+		  	UdmSortAffixes(&Agent->Conf->Affixes,&Agent->Conf->Spells);
+		}
+#else
 		if(Agent->Conf->nspell) {
 			UdmSortDictionary(Agent->Conf);
 		  	UdmSortAffixes(Agent->Conf);
 		}
+#endif
 	}
 	
 	RETURN_TRUE;
@@ -1106,8 +1113,11 @@ DLEXPORT PHP_FUNCTION(udm_free_ispell_data)
 			break;
 	}
 	ZEND_FETCH_RESOURCE(Agent, UDM_AGENT *, yyagent, -1, "mnoGoSearch-Agent", le_link);
-	
-#if UDM_VERSION_ID > 30111
+
+#if UDM_VERSION_ID >= 30204
+	UdmSpellListFree(&Agent->Conf->Spells);
+	UdmAffixListFree(&Agent->Conf->Affixes);
+#elif UDM_VERSION_ID > 30111
 	UdmFreeIspell(Agent->Conf);
 #endif
 	
@@ -1145,26 +1155,40 @@ DLEXPORT PHP_FUNCTION(udm_add_search_limit)
 	
 	switch(var){
 		case UDM_LIMIT_URL: 
+#if UDM_VERSION_ID >= 30204			
+			UdmVarListAddStr(&Agent->Conf->Vars,"ul",val);
+#else
 			UdmAddURLLimit(Agent->Conf,val);
-		
+#endif		
 			break;
 			
 		case UDM_LIMIT_TAG: 
+#if UDM_VERSION_ID >= 30204			
+			UdmVarListAddStr(&Agent->Conf->Vars,"t",val);
+#else
 			UdmAddTagLimit(Agent->Conf,val);
-		
+#endif		
 			break;
 
 		case UDM_LIMIT_LANG: 
+#if UDM_VERSION_ID >= 30204			
+			UdmVarListAddStr(&Agent->Conf->Vars,"lang",val);
+#else
 			UdmAddLangLimit(Agent->Conf,val);
-			
+#endif			
 			break;
 
 		case UDM_LIMIT_CAT: 
+#if UDM_VERSION_ID >= 30204
+			UdmVarListAddStr(&Agent->Conf->Vars,"cat",val);
+#else
 			UdmAddCatLimit(Agent->Conf,val);
-			
+#endif			
 			break;
 			
-		case UDM_LIMIT_DATE: {
+		case UDM_LIMIT_DATE: 
+#if UDM_VERSION_ID < 30200			
+			{
 			struct udm_stl_info_t stl_info = { 0, 0, 0 };
 			
 			if (val[0] == '>') {
@@ -1178,9 +1202,9 @@ DLEXPORT PHP_FUNCTION(udm_add_search_limit)
 			
 			stl_info.t1=(time_t)(atol(val+1));
 			UdmAddTimeLimit(Agent->Conf,&stl_info);
-			
-			break;
 			}
+#endif
+			break;
 		default:
 			php_error(E_WARNING,"Udm_Add_Search_Limit: Unknown search limit parameter");
 			RETURN_FALSE;
@@ -1196,6 +1220,8 @@ DLEXPORT PHP_FUNCTION(udm_clear_search_limits)
 {
 	pval ** yyagent;
 	UDM_AGENT * Agent;
+	int i;
+	
 	switch(ZEND_NUM_ARGS()){
 		case 1: {
 				if (zend_get_parameters_ex(1, &yyagent)==FAILURE) {
@@ -1208,9 +1234,20 @@ DLEXPORT PHP_FUNCTION(udm_clear_search_limits)
 			break;
 	}
 	ZEND_FETCH_RESOURCE(Agent, UDM_AGENT *, yyagent, -1, "mnoGoSearch-Agent", le_link);
-	
+#if UDM_VERSION_ID >= 30204	
+	for(i=0;i<Agent->Conf->Vars.nvars;i++){
+		if ((!strcasecmp("ul",Agent->Conf->Vars.Var[i].name))||
+		    (!strcasecmp("cat",Agent->Conf->Vars.Var[i].name))||
+		    (!strcasecmp("t",Agent->Conf->Vars.Var[i].name))||
+		    (!strcasecmp("lang",Agent->Conf->Vars.Var[i].name))) {
+		    UDM_FREE(Agent->Conf->Vars.Var[i].name);
+		    UDM_FREE(Agent->Conf->Vars.Var[i].val);
+		    Agent->Conf->Vars.nvars--;
+		}
+	}
+#else
 	UdmClearLimits(Agent->Conf);
-	
+#endif	
 	RETURN_TRUE;
 }
 /* }}} */
