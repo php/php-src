@@ -76,7 +76,6 @@ void xsl_objects_clone(void *object, void **object_clone TSRMLS_DC)
 /* {{{ xsl_objects_dtor */
 void xsl_objects_dtor(void *object, zend_object_handle handle TSRMLS_DC)
 {
-	/* TODO */
 	xsl_object *intern = (xsl_object *)object;
 
 	zend_hash_destroy(intern->std.properties);
@@ -89,14 +88,6 @@ void xsl_objects_dtor(void *object, zend_object_handle handle TSRMLS_DC)
 		/* free wrapper */
 		if (((xsltStylesheetPtr) intern->ptr)->_private != NULL) {
 			((xsltStylesheetPtr) intern->ptr)->_private = NULL;   
-		}
-		if (intern->document != NULL) {
-			if (--intern->document->refcount == 0) {
-				xmlFreeDoc((xmlDocPtr) intern->document->ptr);
-				efree(intern->document);
-			}
-			((xsltStylesheetPtr) intern->ptr)->doc = NULL;
-			intern->document = NULL;
 		}
 
 		xsltFreeStylesheet((xsltStylesheetPtr) intern->ptr);
@@ -119,7 +110,6 @@ zend_object_value xsl_objects_new(zend_class_entry *class_type TSRMLS_DC)
 	intern->ptr = NULL;
 	intern->prop_handler = NULL;
 	intern->parameter = NULL;
-	intern->document = NULL;
 
 	ALLOC_HASHTABLE(intern->std.properties);
 	zend_hash_init(intern->std.properties, 0, NULL, ZVAL_PTR_DTOR, 0);
