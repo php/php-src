@@ -167,6 +167,7 @@ AC_DEFUN([PHP_MBSTRING_SETUP_LIBMBFL], [
      libmbfl/nls/nls_uni.c
      libmbfl/nls/nls_zh.c
     ])
+    PHP_MBSTRING_ADD_CFLAG([-DHAVE_CONFIG_H])
   else
     dnl
     dnl External libmfl
