@@ -3,6 +3,19 @@ PHP                                                                        NEWS
 ?? ??? 200?, Version 5.0.0
 
 ?? ??? 2003, PHP 5 Beta 2
+- Improved the Interbase extension: (Ard Biesheuvel)
+  . Added support for multiple databases into ibase_trans()
+  . Added support for CREATE DATABASE and SET TRANSACTION statements 
+    into ibase_query()
+  . Added ibase_commit_ret()
+  . Added ibase_rollback_ret()
+  . Added ibase_drop_db() 
+  . Added ibase_name_result()
+  . Added ibase_errcode() 
+  . Added ibase_affected_rows()
+  . Added ibase_num_rows()
+  . Added ibase_num_params()
+  . Added ibase_param_info()
 - Added misc. new functions:
   . pg_version(). (Marcus)
   . dbase_get_header_info(). (Zak)
