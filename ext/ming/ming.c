@@ -2041,7 +2041,7 @@ PHP_FUNCTION(swfshape_setrightfill)
 }
 
 /* }}} */
-/* {{{ proto void swfshape_movepento(double x, double y)
+/* {{{ proto void swfshape_movepento(float x, float y)
    Moves the pen to shape coordinates (x,y) */
 
 PHP_FUNCTION(swfshape_movepento)
@@ -2059,7 +2059,7 @@ PHP_FUNCTION(swfshape_movepento)
 }
 
 /* }}} */
-/* {{{ proto void swfshape_movepen(double x, double y)
+/* {{{ proto void swfshape_movepen(float x, float y)
    Moves the pen from its current location by vector (x,y) */
 
 PHP_FUNCTION(swfshape_movepen)
@@ -2077,7 +2077,7 @@ PHP_FUNCTION(swfshape_movepen)
 }
 
 /* }}} */
-/* {{{ proto void swfshape_drawlineto(double x, double y)
+/* {{{ proto void swfshape_drawlineto(float x, float y)
    Draws a line from the current pen position to shape coordinates (x,y)
    in the current line style */
 
@@ -2095,7 +2095,7 @@ PHP_FUNCTION(swfshape_drawlineto)
 }
 
 /* }}} */
-/* {{{ proto void swfshape_drawline(double dx, double dy)
+/* {{{ proto void swfshape_drawline(float dx, float dy)
    Draws a line from the current pen position (x,y) to the point (x+dx,y+dy)
    in the current line style */
 
@@ -2113,7 +2113,7 @@ PHP_FUNCTION(swfshape_drawline)
 }
 
 /* }}} */
-/* {{{ proto void swfshape_drawcurveto(double ax, double ay, double bx, double by [, double dx, double dy])
+/* {{{ proto void swfshape_drawcurveto(float ax, float ay, float bx, float by [, float dx, float dy])
    Draws a curve from the current pen position (x,y) to the point (bx,by)
    in the current line style, using point (ax,ay) as a control point.
    Or draws a cubic bezier to point (dx,dy) with control points (ax,ay) and (bx,by)
@@ -2161,7 +2161,7 @@ PHP_FUNCTION(swfshape_drawcurveto)
 }
 
 /* }}} */
-/* {{{ proto void swfshape_drawcurve(double adx, double ady, double bdx, double bdy [, double cdx, double cdy])
+/* {{{ proto void swfshape_drawcurve(float adx, float ady, float bdx, float bdy [, float cdx, float cdy])
    Draws a curve from the current pen position (x,y) to the point (x+bdx,y+bdy)
    in the current line style, using point (x+adx,y+ady) as a control point
    Or draws a cubic bezier to point (x+cdx,x+cdy) with control points
@@ -2279,7 +2279,7 @@ PHP_FUNCTION(swfshape_drawarc)
 }
 
 /* }}} */
-/* {{{ proto void swfshape_drawcubic(double bx, double by, double cx, double cy, double dx, double dy)
+/* {{{ proto void swfshape_drawcubic(float bx, float by, float cx, float cy, float dx, float dy)
    Draws a cubic bezier curve using the current position and the three given
    points as control points */
 
@@ -2305,7 +2305,7 @@ PHP_FUNCTION(swfshape_drawcubic)
 }
 
 /* }}} */
-/* {{{ proto void swfshape_drawcubic(double bx, double by, double cx, double cy, double dx, double dy)
+/* {{{ proto void swfshape_drawcubic(float bx, float by, float cx, float cy, float dx, float dy)
    Draws a cubic bezier curve using the current position and the three given
    points as control points */
 
@@ -2545,7 +2545,7 @@ PHP_FUNCTION(swftext_setFont)
 }
 
 /* }}} */
-/* {{{ proto void swftext_setHeight(double height)
+/* {{{ proto void swftext_setHeight(float height)
    Sets this SWFText object's current height to given height */
 
 PHP_FUNCTION(swftext_setHeight)
@@ -2617,7 +2617,7 @@ PHP_FUNCTION(swftext_setColor)
 }
 
 /* }}} */
-/* {{{ proto void swftext_moveTo(double x, double y)
+/* {{{ proto void swftext_moveTo(float x, float y)
    Moves this SWFText object's current pen position to (x,y) in text
    coordinates */
 
@@ -2654,7 +2654,7 @@ PHP_FUNCTION(swftext_addString)
 }
 
 /* }}} */
-/* {{{ proto double swftext_getWidth(string)
+/* {{{ proto float swftext_getWidth(string)
    calculates the width of the given string in this text objects current font and size */
 
 PHP_FUNCTION(swftext_getWidth)
@@ -2673,7 +2673,7 @@ PHP_FUNCTION(swftext_getWidth)
 }
 
 /* }}} */
-/* {{{ proto double swftext_getAscent()
+/* {{{ proto float swftext_getAscent()
    returns the ascent of the current font at its current size, or 0 if not available */
 
 PHP_FUNCTION(swftext_getAscent)
@@ -2685,7 +2685,7 @@ PHP_FUNCTION(swftext_getAscent)
 }
 
 /* }}} */
-/* {{{ proto double swftext_getDescent()
+/* {{{ proto float swftext_getDescent()
    returns the descent of the current font at its current size, or 0 if not available */
 
 PHP_FUNCTION(swftext_getDescent)
@@ -2697,7 +2697,7 @@ PHP_FUNCTION(swftext_getDescent)
 }
 
 /* }}} */
-/* {{{ proto double swftext_getLeading()
+/* {{{ proto float swftext_getLeading()
    returns the leading of the current font at its current size, or 0 if not available */
 
 PHP_FUNCTION(swftext_getLeading)
@@ -2791,7 +2791,7 @@ PHP_FUNCTION(swftextfield_setFont)
 }
 
 /* }}} */
-/* {{{ proto void swftextfield_setBounds(double width, double height)
+/* {{{ proto void swftextfield_setBounds(float width, float height)
    sets the width and height of this textfield */
 
 PHP_FUNCTION(swftextfield_setBounds)
@@ -2826,7 +2826,7 @@ PHP_FUNCTION(swftextfield_align)
 }
 
 /* }}} */
-/* {{{ proto void swftextfield_setHeight(double height)
+/* {{{ proto void swftextfield_setHeight(float height)
    sets the font height of this textfield */
 
 PHP_FUNCTION(swftextfield_setHeight)
@@ -2843,7 +2843,7 @@ PHP_FUNCTION(swftextfield_setHeight)
 }
 
 /* }}} */
-/* {{{ proto void swftextfield_setLeftMargin(double)
+/* {{{ proto void swftextfield_setLeftMargin(float)
    sets the left margin of this textfield */
 
 PHP_FUNCTION(swftextfield_setLeftMargin)
@@ -2860,7 +2860,7 @@ PHP_FUNCTION(swftextfield_setLeftMargin)
 }
 
 /* }}} */
-/* {{{ proto void swftextfield_setRightMargin(double)
+/* {{{ proto void swftextfield_setRightMargin(float)
    sets the right margin of this textfield */
 
 PHP_FUNCTION(swftextfield_setRightMargin)
@@ -2877,7 +2877,7 @@ PHP_FUNCTION(swftextfield_setRightMargin)
 }
 
 /* }}} */
-/* {{{ proto void swftextfield_setMargins(double left, double right)
+/* {{{ proto void swftextfield_setMargins(float left, float right)
    sets both margins of this textfield */
 
 PHP_FUNCTION(swftextfield_setMargins)
@@ -2897,7 +2897,7 @@ PHP_FUNCTION(swftextfield_setMargins)
 }
 
 /* }}} */
-/* {{{ proto void swftextfield_setIndentation(double)
+/* {{{ proto void swftextfield_setIndentation(float)
    sets the indentation of the first line of this textfield */
 
 PHP_FUNCTION(swftextfield_setIndentation)
@@ -2914,7 +2914,7 @@ PHP_FUNCTION(swftextfield_setIndentation)
 }
 
 /* }}} */
-/* {{{ proto void swftextfield_setLineSpacing(double)
+/* {{{ proto void swftextfield_setLineSpacing(float)
    sets the line spacing of this textfield */
 
 PHP_FUNCTION(swftextfield_setLineSpacing)

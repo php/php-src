@@ -1296,7 +1296,7 @@ PHP_FUNCTION(intval)
 }
 /* }}} */
 
-/* {{{ proto double floatval(mixed var)
+/* {{{ proto float floatval(mixed var)
    Get the float value of a variable */
 PHP_FUNCTION(floatval)
 {
