@@ -954,7 +954,7 @@
       ext/pcntl/php_signal.c
       ext/pcntl/php_signal.h: Removed space type-o
     Fixed WS
-    Added $Id$ tags
+    Added CVS Id tags
     Removed already completed TODO from README
 
 2001-07-30  Jani Taskinen  <sniper@iki.fi>
