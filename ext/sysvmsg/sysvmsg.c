@@ -243,7 +243,7 @@ PHP_FUNCTION(msg_get_queue)
 		/* doesn't already exist; create it */
 		mq->id = msgget(key, IPC_CREAT | IPC_EXCL | perms);
 		if (mq->id < 0)	{
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed for key 0x%x: %s", key, strerror(errno));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed for key 0x%lx: %s", key, strerror(errno));
 			efree(mq);
 			RETURN_FALSE;
 		}
