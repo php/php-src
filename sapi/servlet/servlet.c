@@ -63,7 +63,7 @@
 #include "zend_indent.h"
 
 JNIEXPORT void JNICALL Java_net_php_reflect_setEnv
-  (JNIEnv *newJenv, jclass self);
+  (JNIEnv *newJenv, jclass self TSRMLS_DC);
 
 typedef struct {
 	JNIEnv *jenv;
@@ -371,7 +371,7 @@ JNIEXPORT void JNICALL Java_net_php_servlet_send
 		/*
 		 * Execute the request
 		 */
-		Java_net_php_reflect_setEnv(jenv, 0);
+		Java_net_php_reflect_setEnv(jenv, 0 TSRMLS_CC);
 
 		if (display_source_mode) {
 			zend_syntax_highlighter_ini syntax_highlighter_ini;
