@@ -58,7 +58,7 @@ AC_DEFUN(TSRM_CHECK_ST,[
     CPPFLAGS="$CPPFLAGS -I$1"
     LDFLAGS="$LDFLAGS -L$1"
   fi
-  AC_CHECK_HEADERS(st.h,[ ],[
+  AC_CHECK_HEADERS(st.h,[],[
     AC_MSG_ERROR([Sorry[,] I was unable to locate the State Threads header file.  Please specify the prefix using --with-tsrm-st=/prefix])
   ])
   LIBS="$LIBS -lst"
