@@ -2087,6 +2087,18 @@ send_by_ref:
 					EX(Ts)[EX(opline)->result.u.var].var.ptr->is_ref=1;
 				}
 				NEXT_OPCODE();
+			case ZEND_CLONE:
+				{
+					zval *obj = get_zval_ptr(&EX(opline)->op1, EX(Ts), &EG(free_op1), BP_VAR_R);
+
+					EX(Ts)[EX(opline)->result.u.var].var.ptr_ptr = &EX(Ts)[EX(opline)->result.u.var].var.ptr;
+					ALLOC_ZVAL(EX(Ts)[EX(opline)->result.u.var].var.ptr);
+					EX(Ts)[EX(opline)->result.u.var].var.ptr->value.obj = obj->value.obj.handlers->clone_obj(obj->value.obj.handle);
+					EX(Ts)[EX(opline)->result.u.var].var.ptr->type = IS_OBJECT;
+					EX(Ts)[EX(opline)->result.u.var].var.ptr->refcount=1;
+					EX(Ts)[EX(opline)->result.u.var].var.ptr->is_ref=1;
+					NEXT_OPCODE();
+				}
 			case ZEND_FETCH_CONSTANT:
 				{
 					zend_class_entry *ce;
