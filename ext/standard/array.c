@@ -1376,8 +1376,11 @@ PHP_FUNCTION(range)
 /* }}} */
 
 
-static int array_data_shuffle(const void *a, const void*b) {
-	return php_rand_range(0,1) ? 1 : -1;
+static int array_data_shuffle(const void *a, const void*b)
+{
+	TSRMLS_FETCH();
+
+	return php_rand_range(0,1 TSRMLS_CC) ? 1 : -1;
 }
 
 
