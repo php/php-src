@@ -679,7 +679,7 @@ int zend_register_functions(zend_function_entry *functions, HashTable *function_
 {
 	zend_function_entry *ptr = functions;
 	zend_function function;
-	zend_internal_function *internal_function = &function;
+	zend_internal_function *internal_function = (zend_internal_function *)&function;
 	int count=0,unload=0;
 	HashTable *target_function_table = function_table;
 	CLS_FETCH();
