@@ -3321,6 +3321,7 @@ void zend_do_isset_or_isempty(int type, znode *result, znode *variable TSRMLS_DC
 		}
 	}
 	last_op->result.op_type = IS_TMP_VAR;
+	last_op->result.u.var = get_temporary_variable(CG(active_op_array));
 	last_op->extended_value = type;
 
 	*result = last_op->result;
