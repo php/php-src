@@ -326,7 +326,7 @@ ZEND_API void convert_to_string(zval *op)
 		case IS_STRING:
 			break;
 		case IS_BOOL:
-			op->value.str.val = (op->value.lval?estrndup("1",1):estrndup("0",0));
+			op->value.str.val = (op->value.lval?estrndup("1",1):estrndup("0",1));
 			op->value.str.len = 1;
 			break;
 		case IS_LONG:
