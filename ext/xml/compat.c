@@ -33,6 +33,7 @@ typedef struct _php_xml_ns {
 	((__ns) != NULL && strlen(__ns) == 5 && *(__ns) == 'x' && *((__ns)+1) == 'm' && \
 	 *((__ns)+2) == 'l' && *((__ns)+3) == 'n' && *((__ns)+4) == 's')
 
+#if LIBXML_VERSION >= 20600 
 static void 
 _qualify_namespace(XML_Parser parser, const xmlChar *name, const xmlChar *URI, xmlChar **qualified)
 {
@@ -45,6 +46,7 @@ _qualify_namespace(XML_Parser parser, const xmlChar *name, const xmlChar *URI, x
 		*qualified = xmlStrdup(name);
 	}
 }
+#endif
 
 static void
 _start_element_handler(void *user, const xmlChar *name, const xmlChar **attributes)
