@@ -100,7 +100,7 @@ static char *_ps_files_path_create(char *buf, size_t buflen, ps_files *data, con
 			(strlen(data->basedir) + 2 * data->dirdepth + keylen + 5 + sizeof(FILE_PREFIX))) 
 		return NULL;
 	p = key;
-	n = zend_sprintf(buf, "%s/", data->basedir);
+	n = sprintf(buf, "%s/", data->basedir);
 	for(i = 0; i < data->dirdepth; i++) {
 		buf[n++] = *p++;
 		buf[n++] = DIR_DELIMITER;
