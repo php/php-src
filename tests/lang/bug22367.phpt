@@ -67,4 +67,56 @@ bool(false)
 
 Notice: Undefined offset:  %d in %s on line %d
 
-Fatal error: Only variables or references can be returned by reference in %s on line %d
+Strict Standards: Only variable references should be returned by reference in %s on line %d
+bool(false)
+array(5) {
+  [0]=>
+  int(0)
+  [1]=>
+  int(1)
+  [2]=>
+  int(2)
+  [3]=>
+  int(3)
+  [4]=>
+  int(4)
+}
+array(5) {
+  [0]=>
+  int(0)
+  [1]=>
+  int(1)
+  [2]=>
+  int(2)
+  [3]=>
+  int(3)
+  [4]=>
+  int(4)
+}
+int(2)
+bool(true)
+bool(true)
+array(5) {
+  [0]=>
+  int(0)
+  [1]=>
+  int(1)
+  [2]=>
+  int(2)
+  [3]=>
+  int(3)
+  [4]=>
+  int(4)
+}
+array(5) {
+  [0]=>
+  int(0)
+  [1]=>
+  int(1)
+  [2]=>
+  int(2)
+  [3]=>
+  int(3)
+  [4]=>
+  int(4)
+}
