@@ -491,6 +491,12 @@ Changes in the Zend Engine 2.0
 
     * Static methods (TBD)
 
+    * static function variables
+      statics are now treated at compile-time which allows developers
+      to assign variables to statics by reference. This change also
+      greatly improves their performance but means that indirect
+      references to statics will not work anymore.
+
     * Parameters that are passed by reference to a function
       may now have default values.
 
