@@ -50,7 +50,15 @@ AC_ARG_WITH(apxs2,
     AC_MSG_ERROR([Please note that Apache version >= 2.0.40 is required.])
   fi
 
-  INSTALL_IT="\$(mkinstalldirs) \"\$(INSTALL_ROOT)`$APXS -q LIBEXECDIR`\" && $APXS -S LIBEXECDIR=\"\$(INSTALL_ROOT)`$APXS -q LIBEXECDIR`\" -i `[ -d \`$APXS -q SYSCONFDIR\` ] || echo -a` -n php4"
+  APXS_LIBEXECDIR='$(INSTALL_ROOT)'`$APXS -q LIBEXECDIR`
+  if test -z `$APXS -q SYSCONFDIR`; then
+    optarg=-a
+  else
+    optarg=
+  fi
+
+  INSTALL_IT='$(mkinstalldirs) '"$APXS_LIBEXECDIR && \
+$APXS -S LIBEXECDIR='$APXS_LIBEXECDIR' -i ${optarg}-n php4"
 
   case $host_alias in
   *aix*)
