@@ -2,6 +2,7 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? 1999, Version 4.0 Beta 3
+- Fixed persistency of MHASH_* constants (Sascha)
 - Oracle is now ZTS-Save (Thies)
 - Fixed flushing of cached information to disk in DBA's DB2 module (Sascha)
 - OCI8 is now ZTS-Save (Thies)
