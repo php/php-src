@@ -23,7 +23,9 @@
 #ifndef PHP_LDAP_H
 #define PHP_LDAP_H
 
+#ifndef HAVE_ORALDAP
 #include <lber.h>
+#endif
 #include <ldap.h>
 
 extern zend_module_entry ldap_module_entry;
