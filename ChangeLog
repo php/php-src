@@ -1,3 +1,56 @@
+2003-03-01  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * main/network.c:
+      Reverted my previous commit
+
+2003-03-01  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * main/streams/plain_wrapper.c:
+      Ensure that all fields are initialized to NULL.
+
+2003-03-01  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * main/network.c:
+      Fixed build
+
+2003-03-01  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/xmlrpc/xmlrpc-epi-php.c:
+      Fix two crash bugs when optional parameters are not specified.
+      Fix folding markers.
+
+    * main/streams/xp_socket.c:
+      Don't shutdown() unix sockets.
+      It causes the server end to close down/break.
+
+    * main/streams/memory.c:
+      Folding fixes
+
+    * scripts/Makefile.frag:
+      Add streams headers to those used for shared extensions.
+
+    * NEWS:
+      New!
+
+2003-03-01  Pierre-Alain Joye  <paj@pearfr.org>
+
+    * ext/gd/CREDITS:
+      update credits (ilia,myself)
+
+2003-03-01  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/standard/basic_functions.c
+      ext/standard/streamsfuncs.c
+      ext/standard/streamsfuncs.h:
+      Expose php_stream_copy_to_stream as stream_copy_to_stream(); a high
+      performance alternative to looping reads and writes.
+
+2003-03-01  Pierre-Alain Joye  <paj@pearfr.org>
+
+    * (PHP_4_3)
+      ext/gd/CREDITS:
+      Update credits
+
 2003-02-28  Wez Furlong  <wez.php@thebrainroom.net>
 
     * ext/ftp/ftp.c
