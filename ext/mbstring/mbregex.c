@@ -305,38 +305,26 @@ init_syntax_once()
 {
 	register int c;
 	static int done = 0;
-	char *s = emalloc(10240), *sp;
-	int ch;
-	TSRMLS_FETCH();
 
 	if (done) {
-		efree(s);
 		return;
 	}
 
-   memset(re_syntax_table, 0, sizeof(re_syntax_table));
+	memset(re_syntax_table, 0, sizeof(re_syntax_table));
 
-   for (c=0; c<=0x7f; c++)
-     if (isalnum(c)) 
-       re_syntax_table[c] = Sword;
-   re_syntax_table['_'] = Sword;
-
-   for (c=0x80; c<=0xff; c++)
-     if (isalnum(c)) 
-       re_syntax_table[c] = Sword2;
-   done = 1;
-   
-   
-	sp = s;
-	sprintf(sp, "static const char re_syntax_table[256] = {\n");
-	for(ch =0; ch < 256;) {
-		sp = s+strlen(s);
-		sprintf(sp, "\t% 2d,% 2d,% 2d,% 2d,% 2d,% 2d,% 2d,% 2d,% 2d,% 2d,% 2d,% 2d,% 2d,% 2d,% 2d,% 2d,\n", rt[ch+0], rt[ch+1], rt[ch+2], rt[ch+3], rt[ch+4], rt[ch+5], rt[ch+6], rt[ch+7], rt[ch+8], rt[ch+9], rt[ch+10], rt[ch+11], rt[ch+12], rt[ch+13], rt[ch+14], rt[ch+15]);
-		ch += 16;
+	for (c=0; c<=0x7f; c++) {
+		if (isalnum(c)) { 
+			re_syntax_table[c] = Sword;
+		}
 	}
-	sprintf(sp, "};");
-/*	php_error_docref(NULL TSRMLS_CC, E_NOTICE, "reverse_table:\n%s", s); */
-	efree(s);
+	re_syntax_table['_'] = Sword;
+
+	for (c=0x80; c<=0xff; c++) {
+		if (isalnum(c)) { 
+			re_syntax_table[c] = Sword2;
+		}
+	}
+	done = 1;
 }
 
 void
