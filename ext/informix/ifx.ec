@@ -2120,7 +2120,10 @@ $ifdef HAVE_IFX_IUS;
             	ifx_var_flag(&lvar_tmp,1);
                 EXEC SQL GET DESCRIPTOR :descrpid VALUE :i :lvar_tmp = DATA;
 
-		fieldleng=ifx_var_getlen(&lvar_tmp);
+        		fieldleng=ifx_var_getlen(&lvar_tmp);
+ 
+                if (fieldleng > 2) fieldleng -= 2; /* fix by Alan Sheperd */
+
                 if ((char_data = (char *)emalloc(fieldleng + 1)) == NULL) {
                     php_error(E_WARNING, "Out of memory");
                     RETURN_FALSE;
@@ -2467,7 +2470,10 @@ $ifdef HAVE_IFX_IUS;
 	            	ifx_var_flag(&lvar_tmp,1);
         	        EXEC SQL GET DESCRIPTOR :descrpid VALUE :i :lvar_tmp = DATA;
 
-			fieldleng=ifx_var_getlen(&lvar_tmp);
+			        fieldleng=ifx_var_getlen(&lvar_tmp);
+ 
+                    if (fieldleng > 2) fieldleng -= 2; /* fix by Alan Sheperd */
+
         	        if ((char_data = (char *)emalloc(fieldleng + 1)) == NULL) {
                 	    php_error(E_WARNING, "Out of memory");
             	        RETURN_FALSE;
