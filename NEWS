@@ -13,6 +13,8 @@ PHP 4                                                                      NEWS
 - Moved extensions to PECL (http://pear.php.net/): (James, Derick)
   . ext/vpopmail
   . ext/cybermut
+- Fixed bug #19689 (absolute paths like /test/dir/ not working correctly).
+  (Ilia)
 - Fixed bug #20424 (stream_get_meta_data craches on a normal file stream).
   (Derick, Wez)
 - Added "neutral" language entry to mbstring spec. (Moriyoshi) 
