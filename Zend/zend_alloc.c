@@ -206,6 +206,34 @@ ZEND_API void *_emalloc(size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 	return (void *)((char *)p + sizeof(zend_mem_header) + MEM_HEADER_PADDING);
 }
 
+#include "zend_multiply.h"
+
+ZEND_API void *_safe_emalloc(size_t nmemb, size_t size, size_t offset ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
+{
+
+	if (nmemb < LONG_MAX
+			&& size < LONG_MAX
+			&& offset < LONG_MAX
+			&& nmemb >= 0
+			&& size >= 0
+			&& offset >= 0) {
+		long lval;
+		double dval;
+		int use_dval;
+
+		ZEND_SIGNED_MULTIPLY_LONG(nmemb, size, lval, dval, use_dval);
+
+		if (!use_dval
+				&& lval < LONG_MAX - offset) {
+			return emalloc_rel(lval + offset);
+		}
+	}
+
+	zend_error(E_ERROR, "Possible integer overflow in memory allocation (%ld * %ld + %ld)", nmemb, size, offset);
+	return 0;
+}
+
+
 
 ZEND_API void _efree(void *ptr ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
