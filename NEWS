@@ -105,7 +105,7 @@ PHP 4                                                                      NEWS
 - Have rand() and mt_rand() seed automatically if srand() or mt_srand() has
   not been called. (Sterling)
 - Added array_change_key_case() function that returns array with
-  with all string keys lowercased or uppercased. (EdinK)
+  with all string keys lowercased or uppercased. (Edin)
 - Added parameter to ircg_pconnect to suppress treating non-fatal errors
   as fatal, and added conversion of Windows quotes to &quot;. (Sascha)
 - Added pcntl_exec() function which behaves similar to the system execve.
