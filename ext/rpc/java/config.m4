@@ -16,15 +16,27 @@ AC_ARG_WITH(java,
       AIX) java_libext=libjava.a ;;
       HP-UX) java_libext=libjava.sl ;;
     esac  
-    # substitute zip for systems which don't have jar in the PATH
-    if JAVA_JAR=`which jar 2>/dev/null`; then
-      JAVA_JAR="$JAVA_JAR cf"
+
+    if test "$withval" = "yes"; then
+      if JAVA_JAR=`which jar 2>/dev/null`; then
+        JAVA_JAR="$JAVA_JAR cf"
+      else
+        JAVA_JAR=
+      fi
+      withval=`cd \`dirname \\\`which javac\\\`\`/..;pwd`
     else
+      test -x $withval/bin/jar && JAVA_JAR="$withval/bin/jar cf"
+    fi
+    
+    # substitute zip for systems which don't have jar
+    if test -z "$JAVA_JAR"; then
       JAVA_JAR='zip -q0'
     fi
 
-    if test "$withval" = "yes"; then
-      withval=`cd \`dirname \\\`which javac\\\`\`/..;pwd`
+    if test -x $withval/bin/javac; then
+      JAVA_C=$withval/bin/javac
+    else
+      AC_MSG_ERROR([Can not find the javac binary under $withval/bin/])
     fi
 
     if test -d $withval/lib/kaffe; then
@@ -119,3 +131,4 @@ PHP_SUBST(JAVA_CLASSPATH)
 PHP_SUBST(JAVA_INCLUDE)
 PHP_SUBST(JAVA_SHARED)
 PHP_SUBST(JAVA_JAR)
+PHP_SUBST(JAVA_C)
