@@ -23,6 +23,8 @@
 #include <ctype.h>
 #include "php_string.h"
 
+#define LEVENSHTEIN_MAX_LENTH 255
+
 /* reference implementation, only optimized for memory usage, not speed */
 static int reference_levdist(const char *s1, int l1, 
 														 const char *s2, int l2, 
@@ -34,8 +36,16 @@ static int reference_levdist(const char *s1, int l1,
 	if(l1==0) return l2*cost_ins;
 	if(l2==0) return l1*cost_del;
 
-	p1=malloc(l2*sizeof(int));
-	p2=malloc(l2*sizeof(int));
+	if((l1>LEVENSHTEIN_MAX_LENTH)||(l2>LEVENSHTEIN_MAX_LENTH))
+		return -1;
+
+	if(!(p1=emalloc(l2*sizeof(int)))) {
+		return -2;
+	}
+	if(!(p2=emalloc(l2*sizeof(int)))) {
+		free(p1);
+		return -2;
+	}
 
 	p1[0]=(s1[0]==s2[0])?0:cost_rep;
 
@@ -57,8 +67,8 @@ static int reference_levdist(const char *s1, int l1,
 
 	c0=p1[l2-1];
 
-	free(p1);
-	free(p2);
+	efree(p1);
+	efree(p2);
 
 	return c0;
 }
