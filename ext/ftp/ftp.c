@@ -52,6 +52,12 @@
 
 #include "ftp.h"
 
+/* define closesocket macro for portability */
+#if !defined(WIN32) && !defined(WINNT)
+#undef closesocket
+#define closesocket close
+#endif
+
 /* sends an ftp command, returns true on success, false on error.
  * it sends the string "cmd args\r\n" if args is non-null, or
  * "cmd\r\n" if args is null
@@ -156,7 +162,7 @@ ftp_open(const char *host, short port)
 
 bail:
 	if (fd != -1)
-		close(fd);
+		closesocket(fd);
 	free(ftp);
 	return NULL;
 }
@@ -168,7 +174,7 @@ ftp_close(ftpbuf_t *ftp)
 	if (ftp == NULL)
 		return NULL;
 	if (ftp->fd != -1)
-		close(ftp->fd);
+		closesocket(ftp->fd);
 	ftp_gc(ftp);
 	free(ftp);
 	return NULL;
@@ -981,7 +987,7 @@ ftp_getdata(ftpbuf_t *ftp)
 			sizeof(ftp->pasvaddr)) == -1)
 		{
 			perror("connect");
-			close(fd);
+			closesocket(fd);
 			free(data);
 			return NULL;
 		}
@@ -1034,7 +1040,7 @@ ftp_getdata(ftpbuf_t *ftp)
 
 bail:
 	if (fd != -1)
-		close(fd);
+		closesocket(fd);
 	free(data);
 	return NULL;
 }
@@ -1051,7 +1057,7 @@ data_accept(databuf_t *data)
 
 	size = sizeof(addr);
 	data->fd = my_accept(data->listener, (struct sockaddr*) &addr, &size);
-	close(data->listener);
+	closesocket(data->listener);
 	data->listener = -1;
 
 	if (data->fd == -1) {
@@ -1069,9 +1075,9 @@ data_close(databuf_t *data)
 	if (data == NULL)
 		return NULL;
 	if (data->listener != -1)
-		close(data->listener);
+		closesocket(data->listener);
 	if (data->fd != -1)
-		close(data->fd);
+		closesocket(data->fd);
 	free(data);
 	return NULL;
 }
