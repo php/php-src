@@ -40,7 +40,6 @@
 
 #include <fcntl.h>
 #include "ext/standard/head.h"
-#include "snprintf.h"
 #include "php_ini.h"
 
 #if WIN32|WINNT

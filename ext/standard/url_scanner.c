@@ -20,7 +20,6 @@
 /* $Id$ */
 
 #include "php.h"
-#include "snprintf.h"
 
 #ifdef TRANS_SID
 

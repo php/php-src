@@ -32,7 +32,6 @@
 # if !(WIN32|WINNT)
 #  include "build-defs.h"
 # endif
-# include "snprintf.h"
 # include "ext/standard/head.h"
 
 /* Short-term TODO list:

@@ -23,7 +23,6 @@
 
 #include "php.h"
 #include "phpmath.h"
-#include "snprintf.h"
 
 #include <math.h>
 

@@ -44,7 +44,6 @@
 # include "build-defs.h"
 #endif
 
-#include "snprintf.h"
 
 #ifndef min
 #define min(a, b) ((a) > (b) ? (b) : (a))

@@ -49,7 +49,6 @@
 #include "main.h"
 #include "fopen-wrappers.h"
 #include "ext/standard/php_standard.h"
-#include "snprintf.h"
 #include "php_variables.h"
 #ifdef PHP_WIN32
 #include <io.h>
