@@ -1260,7 +1260,7 @@ static void php_mysql_do_query_general(zval **query, zval **mysql_link, int link
 		/* check possible error */
 		if (MySG(trace_mode)){
 			if (mysql_errno(&mysql->conn)){
-				php_error_docref("http://www.mysql.com/doc" TSRMLS_CC, E_WARNING, mysql_error(&mysql->conn)); 
+				php_error_docref("http://www.mysql.com/doc" TSRMLS_CC, E_WARNING, "%s", mysql_error(&mysql->conn)); 
 			}
 		}
 		RETURN_FALSE;

@@ -103,7 +103,7 @@ void php_dom_throw_error(int error_code, int strict_error TSRMLS_DC)
 	if (strict_error == 1) {
 		zend_throw_exception(dom_domexception_class_entry, error_message, error_code TSRMLS_CC);
 	} else {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, error_message);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", error_message);
 	}
 }
 /* }}} end php_dom_throw_error */
