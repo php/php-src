@@ -1613,7 +1613,7 @@ PHP_FUNCTION(pg_loclose)
 }
 /* }}} */
 
-/* {{{ proto string pg_loread(int fd[, int len])
+/* {{{ proto string pg_loread(int fd [, int len])
    Read a large object */
 PHP_FUNCTION(pg_loread)
 {
@@ -1645,7 +1645,7 @@ PHP_FUNCTION(pg_loread)
 }
 /* }}} */
 
-/* {{{ proto int pg_lowrite(int fd, string buf[, int len])
+/* {{{ proto int pg_lowrite(int fd, string buf [, int len])
    Write a large object */
 PHP_FUNCTION(pg_lowrite)
 {
