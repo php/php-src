@@ -502,7 +502,7 @@ static int cli_seek_file_begin(zend_file_handle *file_handle, char *script_file,
 	}
 	return SUCCESS;
 }
-/* }} */
+/* }}} */
 
 /* {{{ main
  */
