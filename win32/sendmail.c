@@ -395,7 +395,7 @@ int MailConnect()
 {
 
 	int res;
-	int portnum;
+	short portnum;
 
 	/* Create Socket */
 	if ((sc = socket(PF_INET, SOCK_STREAM, 0)) == INVALID_SOCKET)
@@ -413,7 +413,7 @@ int MailConnect()
 	}
         */
 
-	portnum = INI_INT("sendmail_port");
+	portnum = (short) INI_INT("sendmail_port");
 	if (!portnum) {
 		portnum = 25;
 	}
