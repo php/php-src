@@ -550,11 +550,11 @@ static void copy_per_dir_entry(php_per_dir_entry *per_dir_entry)
 
 static zend_bool should_overwrite_per_dir_entry(php_per_dir_entry *orig_per_dir_entry, php_per_dir_entry *new_per_dir_entry)
 {
-	if (orig_per_dir_entry->type==PHP_INI_SYSTEM
-		&& new_per_dir_entry->type!=PHP_INI_SYSTEM) {
-		return 0;
-	} else {
+	if (new_per_dir_entry->type==PHP_INI_SYSTEM
+		&& orig_per_dir_entry->type!=PHP_INI_SYSTEM) {
 		return 1;
+	} else {
+		return 0;
 	}
 }
 
@@ -582,9 +582,10 @@ static void *php_merge_dir(pool *p, void *basev, void *addv)
 {
 	php_per_dir_entry tmp;
 
-	zend_hash_merge_ex((HashTable *) basev, (HashTable *) addv, (copy_ctor_func_t) copy_per_dir_entry, sizeof(php_per_dir_entry), (zend_bool (*)(void *, void *)) should_overwrite_per_dir_entry);
+	/* This function *must* return addv, and not modify basev */
+	zend_hash_merge_ex((HashTable *) addv, (HashTable *) basev, (copy_ctor_func_t) copy_per_dir_entry, sizeof(php_per_dir_entry), (zend_bool (*)(void *, void *)) should_overwrite_per_dir_entry);
 	/*zend_hash_merge((HashTable *) addv, (HashTable *) basev, (void (*)(void *)) copy_per_dir_entry, &tmp, sizeof(php_per_dir_entry), 0);*/
-	return basev;
+	return addv;
 }
 
 
