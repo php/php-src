@@ -57,16 +57,16 @@ function_entry dba_functions[] = {
 	{NULL,NULL,NULL}
 };
 
-static int php3_minit_dba(INIT_FUNC_ARGS);
-static int php3_mshutdown_dba(SHUTDOWN_FUNC_ARGS);
-static void php3_info_dba(ZEND_MODULES_INFO_FUNC_ARGS);
+static PHP_MINIT_FUNCTION(dba);
+static PHP_MSHUTDOWN_FUNCTION(dba);
+static PHP_MINFO_FUNCTION(dba);
 
 php3_module_entry dba_module_entry = {
 	    "DataBase API", dba_functions, 
-		php3_minit_dba, 
-		php3_mshutdown_dba, 
+		PHP_MINIT(dba), 
+		PHP_MSHUTDOWN(dba), 
 		NULL, NULL,
-		php3_info_dba,
+		PHP_MINFO(dba),
 		STANDARD_MODULE_PROPERTIES
 };
 
@@ -174,7 +174,7 @@ static void dba_close(dba_info *info)
 /* }}} */
 	/* {{{ php3_minit_dba */
 
-static int php3_minit_dba(INIT_FUNC_ARGS)
+static PHP_MINIT_FUNCTION(dba)
 {
 	_php3_hash_init(&ht_keys, 0, NULL, NULL, 1);
 	GLOBAL(le_db) = register_list_destructors(dba_close, NULL);
@@ -184,7 +184,7 @@ static int php3_minit_dba(INIT_FUNC_ARGS)
 /* }}} */
 	/* {{{ php3_mshutdown_dba */
 
-static int php3_mshutdown_dba(SHUTDOWN_FUNC_ARGS)
+static PHP_MSHUTDOWN_FUNCTION(dba)
 {
 	_php3_hash_destroy(&ht_keys);
 	return SUCCESS;
@@ -192,7 +192,7 @@ static int php3_mshutdown_dba(SHUTDOWN_FUNC_ARGS)
 /* }}} */
 	/* {{{ php3_info_dba */
 
-static void php3_info_dba(ZEND_MODULE_INFO_FUNC_ARGS)
+static PHP_MINFO_FUNCTION(dba)
 {
 	dba_handler *hptr;
 	
