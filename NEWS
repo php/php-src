@@ -1,5 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? ??? 2004, PHP 5 RC 1
+- Fixed bug #26675 (Segfault on ArrayAccess use). (Marcus)
+
 21 Dec 2003, PHP 5 Beta 3
 - Bundled new tidy extension (John, Wez)
 - Upgraded PCRE library to version 4.5. (Andrei)

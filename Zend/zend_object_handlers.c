@@ -400,8 +400,13 @@ zval *zend_std_read_dimension(zval *object, zval *offset TSRMLS_DC)
 static void zend_std_write_dimension(zval *object, zval *offset, zval *value TSRMLS_DC)
 {
 	zend_class_entry *ce = Z_OBJCE_P(object);
+	zval tmp;
 	
 	if (instanceof_function_ex(ce, zend_ce_arrayaccess, 1 TSRMLS_CC)) {
+		if (!offset) {
+			INIT_ZVAL(tmp);
+			offset = &tmp;
+		}
 		zend_call_method_with_2_params(&object, ce, NULL, "offsetset", NULL, offset, value);
 	} else {
 		zend_error(E_ERROR, "Cannot use object of type %s as array", ce->name);
