@@ -2,6 +2,7 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 200?, Version 4.0.5
+- Improved OCI8 dead-session detection. (Patch by: George Schlossnagle)
 - Fixed get_meta_tags() multiline bug #4556 (Sean)
 - Prefer random() over *rand48() (JimJag)
 - Sped up WDDX serialization 2x. (Andrei)
