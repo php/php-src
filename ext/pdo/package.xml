@@ -38,15 +38,16 @@
  <license>PHP</license>
  <release>
   <state>alpha</state>
-  <version>0.1.1</version>
-  <date>2004-05-21</date>
+  <version>0.2</version>
+  <date>2005-01-20</date>
 
   <notes>
 Note that PDO on its own is useless.
 You need to install a PDO database driver to make use of it,
 check http://pecl.php.net for a list of available PDO drivers.
 
-It is highly recommended that you update to the latest PHP 5 snapshot before using PDO.
+It is highly recommended that you update to the latest stable PHP 5 snapshot
+before using PDO.
 You can obtain it from http://snaps.php.net.
 
 If you are running on Windows, you should download:
@@ -69,7 +70,7 @@ http://snaps.php.net/win32/PECL_5_0/
    <file role="src" name="php_pdo_int.h"/>
    <file role="src" name="pdo_sql_parser.re"/>
    <file role="src" name="pdo_sql_parser.c"/>
-   <file role="src" name="php_pdo_sql_parser.h"/>
+   <file role="src" name="pdo_sqlstate.c"/>
    <file role="src" name="Makefile.frag"/>
 
    <file role="doc" name="README"/>
@@ -78,7 +79,7 @@ http://snaps.php.net/win32/PECL_5_0/
    <file role="doc" name="CREDITS"/>
   </filelist>
   <deps>
-   <dep type="php" rel="ge" version="5.0.0RC3-dev"/>
+   <dep type="php" rel="ge" version="5.0.0"/>
   </deps>
  </release>
 </package>
