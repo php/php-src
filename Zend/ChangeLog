@@ -1,3 +1,11 @@
+2005-03-20  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * tests/bug31102.phpt:
+      - Added missing description (thanks jani)
+
+    * tests/bug31102.phpt:
+      - Add new test
+
 2005-03-19  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_object_handlers.c:
