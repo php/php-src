@@ -749,6 +749,9 @@ PHP_FUNCTION(sqlite_popen)
 				&filename, &filename_len, &mode, &errmsg)) {
 		return;
 	}
+	if (errmsg) {
+		zval_dtor(errmsg);
+	}
 
 	if (strncmp(filename, ":memory:", sizeof(":memory:") - 1)) {
 		/* resolve the fully-qualified path name to use as the hash key */
@@ -810,6 +813,9 @@ PHP_FUNCTION(sqlite_open)
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|lz/",
 				&filename, &filename_len, &mode, &errmsg)) {
 		return;
+	}
+	if (errmsg) {
+		zval_dtor(errmsg);
 	}
 
 	if (strncmp(filename, ":memory:", sizeof(":memory:") - 1)) {
