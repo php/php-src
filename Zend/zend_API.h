@@ -132,6 +132,8 @@ ZEND_API int call_user_function(HashTable *function_table, zval *object, zval *f
 ZEND_API int call_user_function_ex(HashTable *function_table, zval *object, zval *function_name, zval **retval_ptr_ptr, int param_count, zval **params[], int no_separation);
 
 ZEND_API int add_property_long(zval *arg, char *key, long l);
+ZEND_API int add_property_unset(zval *arg, char *key);
+ZEND_API int add_property_bool(zval *arg, char *key, int b);
 ZEND_API int add_property_resource(zval *arg, char *key, long r);
 ZEND_API int add_property_double(zval *arg, char *key, double d);
 ZEND_API int add_property_string(zval *arg, char *key, char *str, int duplicate);
