@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2004, PHP 5.1.0
+- Added optional offset parameter to stream_get_contents(). (Ilia)
 - Improved performance of:
   . general execution/compilation. (Andi, Thies, Sterling, Dmitry, Marcus)
   . switch statement. (Dmitry)

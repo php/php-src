@@ -354,21 +354,26 @@ PHP_FUNCTION(stream_socket_recvfrom)
 }
 /* }}} */
 
-/* {{{ proto long stream_get_contents(resource source [, long maxlen ])
+/* {{{ proto long stream_get_contents(resource source [, long maxlen [, long offset]])
    Reads all remaining bytes (or up to maxlen bytes) from a stream and returns them as a string. */
 PHP_FUNCTION(stream_get_contents)
 {
 	php_stream *stream;
 	zval *zsrc;
-	long maxlen = PHP_STREAM_COPY_ALL;
+	long maxlen = PHP_STREAM_COPY_ALL, pos = 0;
 	int len, newlen;
 	char *contents = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|l", &zsrc, &maxlen) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|ll", &zsrc, &maxlen, &pos) == FAILURE) {
 		RETURN_FALSE;
 	}
 
 	php_stream_from_zval(stream, &zsrc);
+
+	if (pos > 0 && php_stream_seek(stream, pos, SEEK_SET) < 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to seek to %ld position in the stream.", pos);
+		RETURN_FALSE;
+	}
 
 	if ((len = php_stream_copy_to_mem(stream, &contents, maxlen, 0)) > 0) {
 		
