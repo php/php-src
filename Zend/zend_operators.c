@@ -34,6 +34,8 @@
 #include "ext/bcmath/number.h"
 #endif
 
+#define LONG_SIGN_MASK (1L << (8*sizeof(long)-1))
+
 ZEND_API int zend_atoi(const char *str, int str_len)
 {
 	int retval;
@@ -725,8 +727,8 @@ ZEND_API int add_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 		long lval = op1->value.lval + op2->value.lval;
 		
 		/* check for overflow by comparing sign bits */
-		if ( (op1->value.lval & LONG_MIN) == (op2->value.lval & LONG_MIN) 
-			&& (op1->value.lval & LONG_MIN) != (lval & LONG_MIN)) {
+		if ( (op1->value.lval & LONG_SIGN_MASK) == (op2->value.lval & LONG_SIGN_MASK) 
+			&& (op1->value.lval & LONG_SIGN_MASK) != (lval & LONG_SIGN_MASK)) {
 
 			result->value.dval = (double) op1->value.lval + (double) op2->value.lval;
 			result->type = IS_DOUBLE;
@@ -765,8 +767,8 @@ ZEND_API int sub_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 		long lval = op1->value.lval - op2->value.lval;
 		
 		/* check for overflow by comparing sign bits */
-		if ( (op1->value.lval & LONG_MIN) != (op2->value.lval & LONG_MIN) 
-			&& (op1->value.lval & LONG_MIN) != (lval & LONG_MIN)) {
+		if ( (op1->value.lval & LONG_SIGN_MASK) != (op2->value.lval & LONG_SIGN_MASK) 
+			&& (op1->value.lval & LONG_SIGN_MASK) != (lval & LONG_SIGN_MASK)) {
 
 			result->value.dval = (double) op1->value.lval - (double) op2->value.lval;
 			result->type = IS_DOUBLE;
