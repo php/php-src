@@ -11,6 +11,7 @@ PHP                                                                        NEWS
 - Fixed a file-descriptor leak with phpinfo() and other 'special' URLs (Zeev)
 - Fixed bug #29844 (SOAP doesn't return the result of a valid SOAP request).
   (Dmitry)
+- Fixed bug #29839 (incorrect convert (xml:lang to lang)). (Dmitry)
 - Fixed bug #29830 (SoapServer::setClass() should not export non-public
   methods). (Dmitry)
 - Fixed bug #29821 (Fixed possible crashes in convert_uudecode() on invalid

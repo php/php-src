@@ -239,6 +239,7 @@ typedef struct _sdlExtraAttribute {
 
 struct _sdlAttribute {
 	char      *name;
+	char      *namens;
 	char      *ref;
 	char      *def;
 	char      *fixed;

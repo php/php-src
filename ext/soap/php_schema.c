@@ -1729,6 +1729,7 @@ static int schema_attribute(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrType, sdl
 			if (nsptr != NULL) {
 				smart_str_appends(&key, nsptr->href);
 				smart_str_appendc(&key, ':');
+				newAttr->namens = estrdup(nsptr->href);
 			}
 			smart_str_appends(&key, attr_name);
 			smart_str_0(&key);
@@ -1745,6 +1746,7 @@ static int schema_attribute(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrType, sdl
 			if (ns != NULL) {
 				smart_str_appends(&key, ns->children->content);
 				smart_str_appendc(&key, ':');
+				newAttr->namens = estrdup(ns->children->content);
 			}
 			smart_str_appends(&key, name->children->content);
 			smart_str_0(&key);
@@ -2014,6 +2016,9 @@ static void schema_attribute_fixup(sdlCtx *ctx, sdlAttributePtr attr)
 				if ((*tmp)->name != NULL && attr->name == NULL) {
 					attr->name = estrdup((*tmp)->name);
 				}
+				if ((*tmp)->namens != NULL && attr->namens == NULL) {
+					attr->namens = estrdup((*tmp)->namens);
+				}
 				if ((*tmp)->def != NULL && attr->def == NULL) {
 					attr->def = estrdup((*tmp)->def);
 				}
@@ -2071,6 +2076,7 @@ static void schema_attributegroup_fixup(sdlCtx *ctx, sdlAttributePtr attr, HashT
 							memcpy(newAttr, *tmp_attr, sizeof(sdlAttribute));
 							if (newAttr->def) {newAttr->def = estrdup(newAttr->def);}
 							if (newAttr->fixed) {newAttr->fixed = estrdup(newAttr->fixed);}
+							if (newAttr->namens) {newAttr->namens = estrdup(newAttr->namens);}
 							if (newAttr->name) {newAttr->name = estrdup(newAttr->name);}
 							if (newAttr->extraAttributes) {
 							  xmlNodePtr node;
@@ -2329,6 +2335,9 @@ void delete_attribute(void *attribute)
 	}
 	if (attr->name) {
 		efree(attr->name);
+	}
+	if (attr->namens) {
+		efree(attr->namens);
 	}
 	if (attr->ref) {
 		efree(attr->ref);
