@@ -1838,7 +1838,7 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 				old_error_handler(error_num, error_filename, error_lineno, format, args);
 			} zend_catch {
 			} zend_end_try();
-			PG(display_errors) = 1;
+			PG(display_errors) = old;
 			zend_bailout();
 		} else {
 			old_error_handler(error_num, error_filename, error_lineno, format, args);
