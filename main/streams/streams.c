@@ -1351,7 +1351,7 @@ int php_init_stream_wrappers(int module_number TSRMLS_DC)
 	return (
 			zend_hash_init(&url_stream_wrappers_hash, 0, NULL, NULL, 1) == SUCCESS
 			&& 
-			zend_hash_init(php_get_stream_filters_hash(), 0, NULL, NULL, 1) == SUCCESS
+			zend_hash_init(php_get_stream_filters_hash_global(), 0, NULL, NULL, 1) == SUCCESS
 			&&
 			zend_hash_init(php_stream_xport_get_hash(), 0, NULL, NULL, 1) == SUCCESS
 			&&

@@ -528,7 +528,7 @@ PHP_FUNCTION(stream_filter_register)
 
 	if (zend_hash_add(BG(user_filter_map), filtername, filtername_len, (void*)fdat,
 				sizeof(*fdat) + classname_len, NULL) == SUCCESS &&
-			php_stream_filter_register_factory(filtername, &user_filter_factory TSRMLS_CC) == SUCCESS) {
+			php_stream_filter_register_factory_volatile(filtername, &user_filter_factory TSRMLS_CC) == SUCCESS) {
 		RETVAL_TRUE;
 	}
 

@@ -541,7 +541,9 @@ PHPAPI int _php_stream_make_seekable(php_stream *origstream, php_stream **newstr
 /* Give other modules access to the url_stream_wrappers_hash and stream_filters_hash */
 PHPAPI HashTable *_php_stream_get_url_stream_wrappers_hash(TSRMLS_D);
 #define php_stream_get_url_stream_wrappers_hash()	_php_stream_get_url_stream_wrappers_hash(TSRMLS_C)
-PHPAPI HashTable *php_get_stream_filters_hash();
+PHPAPI HashTable *_php_get_stream_filters_hash(TSRMLS_D);
+#define php_get_stream_filters_hash()	_php_get_stream_filters_hash(TSRMLS_C)
+PHPAPI HashTable *php_get_stream_filters_hash_global();
 END_EXTERN_C()
 #endif
 

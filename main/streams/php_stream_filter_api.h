@@ -141,6 +141,7 @@ typedef struct _php_stream_filter_factory {
 BEGIN_EXTERN_C()
 PHPAPI int php_stream_filter_register_factory(const char *filterpattern, php_stream_filter_factory *factory TSRMLS_DC);
 PHPAPI int php_stream_filter_unregister_factory(const char *filterpattern TSRMLS_DC);
+PHPAPI int php_stream_filter_register_factory_volatile(const char *filterpattern, php_stream_filter_factory *factory TSRMLS_DC);
 PHPAPI php_stream_filter *php_stream_filter_create(const char *filtername, zval *filterparams, int persistent TSRMLS_DC);
 END_EXTERN_C()
 
