@@ -1995,8 +1995,8 @@ send_by_ref:
 								file_handle.handle.fp = zend_fopen(inc_filename->value.str.val, &opened_path);
 								file_handle.type = ZEND_HANDLE_FP;
 								if (opened_path) {
-									file_handle.filename = estrdup(opened_path);
-									file_handle.free_filename = 1;
+									file_handle.filename = opened_path;
+									file_handle.free_filename = 0;
 								} else {
 									file_handle.filename = inc_filename->value.str.val;
 									file_handle.free_filename = 0;
