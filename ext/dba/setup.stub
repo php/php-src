@@ -1,6 +1,0 @@
-# $Source$
-# $Id$
-
-define_option with-dba 'dba support?' yesnodir no \
-'    Whether to build the dba extension.'
-	
