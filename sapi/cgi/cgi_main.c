@@ -13,7 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Authors: Rasmus Lerdorf <rasmus@lerdorf.on.ca>                       |
-   |          Stig Bakken <ssb@fast.no>                                   |
+   |          Stig Bakken <ssb@php.net>                                   |
    |          Zeev Suraski <zeev@zend.com>                                |
    | FastCGI: Ben Mansell <php@slimyhorror.com>                           |
    |          Shane Caraveo <shane@caraveo.com>                           |

@@ -13,7 +13,7 @@
 // | obtain it through the world-wide-web, please send a note to          |
 // | license@php.net so we can mail you a copy immediately.               |
 // +----------------------------------------------------------------------+
-// | Author: Stig Bakken <ssb@fast.no>                                    |
+// | Author: Stig Bakken <ssb@php.net>                                    |
 // |                                                                      |
 // +----------------------------------------------------------------------+
 //
@@ -38,7 +38,7 @@ require_once "PEAR.php";
  * methods, an instance of each class providing separated methods is
  * stored and called every time the aggregated method is called.
  *
- * @author Stig Sæther Bakken <ssb@fast.no>
+ * @author Stig Sæther Bakken <ssb@php.net>
  */
 class PEAR_Autoloader extends PEAR
 {

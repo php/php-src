@@ -18,7 +18,7 @@
    |          Marcus Boerger <helly@php.net>                              |
    |          Derick Rethans <derick@php.net>                             |
    |          Sander Roobol <sander@php.net>                              |
-   | (based on version by: Stig Bakken <ssb@fast.no>)                     |
+   | (based on version by: Stig Bakken <ssb@php.net>)                     |
    | (based on the PHP 3 test framework by Rasmus Lerdorf)                |
    +----------------------------------------------------------------------+
  */
