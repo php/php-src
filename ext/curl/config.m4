@@ -32,10 +32,10 @@ if test "$PHP_CURL" != "no"; then
   CURL_CONFIG="curl-config"
   AC_MSG_CHECKING(for cURL 7.10.5 or greater)
 
-  if ${CURL_DIR}/bin/curl-config --libs print > /dev/null 2>&1; then
+  if ${CURL_DIR}/bin/curl-config --libs > /dev/null 2>&1; then
     CURL_CONFIG=${CURL_DIR}/bin/curl-config
   else
-    if ${CURL_DIR}/curl-config --libs print > /dev/null 2>&1; then
+    if ${CURL_DIR}/curl-config --libs > /dev/null 2>&1; then
        CURL_CONFIG=${CURL_DIR}/curl-config
     fi
   fi
