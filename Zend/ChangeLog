@@ -1,3 +1,20 @@
+2005-03-19  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_object_handlers.c:
+      - More fixes to gracefully act on exception thrown in overload methods
+
+    * zend_object_handlers.c:
+      - Fix #31185
+
+    * zend_execute_API.c:
+      - Fix all incarnations of bug #30266
+
+2005-03-19  Andi Gutmans  <andi@zend.com>
+
+    * zend_interfaces.c
+      zend_interfaces.h:
+      - Fix typos
+
 2005-03-16  Wez Furlong  <wez.php@thebrainroom.net>
 
     * (PHP_5_0)

@@ -1,3 +1,71 @@
+2005-03-19  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_object_handlers.c:
+      - More fixes to gracefully act on exception thrown in overload methods
+
+    * ZendEngine2/zend_object_handlers.c:
+      - Fix #31185
+
+2005-03-19  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * NEWS:
+      less wordy
+
+    * (PHP_5_0)
+      NEWS:
+      reorder
+
+2005-03-19  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * main/main.c:
+      - We don't need to block those here (works as it works with normal error
+        overloading)
+
+    * ZendEngine2/zend_execute_API.c:
+      - Fix all incarnations of bug #30266
+
+    * ext/standard/array.c
+      ext/standard/tests/array/bug30266.phpt:
+      - Check another incarnation of bug #30266
+
+2005-03-19  Antony Dovgal  <tony2001@phpclub.net>
+
+    * ext/bz2/bz2.c:
+      fix #32373 (segfault in bzopen('/wrong/path'))
+
+2005-03-19  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/pgsql/tests/24sync_query_prepared.phpt
+      ext/pgsql/tests/26async_query_prepared.phpt:
+      - Add missing skipif part
+
+    * NEWS:
+      - ext/pgsql was updated
+
+2005-03-19  Christopher Kings-Lynne  <chriskl@users.sourceforge.net>
+
+    * ext/pgsql/pgsql.c:
+      Another oversight - make sure constants related to pg_result_error_field
+      are #if'd as well as the function itself
+
+    * ext/pgsql/tests/02connection.phpt
+      ext/pgsql/tests/03sync_query.phpt:
+      Add regression tests for pg_transaction_status and pg_result_error_field
+
+    * ext/pgsql/pgsql.c:
+      Minor oversight in #if for an internal function
+
+2005-03-19  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * ext/mbstring/php_mbregex.c:
+      oniguruma updated to 3.7.1 and changed UChar to OnigUChar.
+
+2005-03-19  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend_interfaces.c
+      ZendEngine2/zend_interfaces.h:
+      - Fix typos
+
 2005-03-18  Jani Taskinen  <jani.taskinen@kolumbus.fi>
 
     * ext/ingres_ii/config.w32
