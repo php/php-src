@@ -51,18 +51,6 @@ Package=<4>
 
 ###############################################################################
 
-Project: "cybercash"=..\ext\cybercash\cybercash.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-}}}
-
-###############################################################################
-
 Project: "db"=..\ext\db\db.dsp - Package Owner=<4>
 
 Package=<5>
