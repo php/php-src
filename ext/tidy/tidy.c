@@ -985,9 +985,16 @@ static void tidy_add_default_properities(PHPTidyObj *obj, tidy_obj_type type TSR
 			ADD_PROPERITY_STRING(obj->std.properties, value, buf.bp);
 			tidyBufFree(&buf);
 			
+			fprintf(stderr, "type: %d\n",tidyNodeGetType(obj->node)); 
 			ADD_PROPERITY_STRING(obj->std.properties, name, tidyNodeGetName(obj->node));
 			ADD_PROPERITY_LONG(obj->std.properties, type, tidyNodeGetType(obj->node));
-			ADD_PROPERITY_LONG(obj->std.properties, id, tidyNodeGetId(obj->node));
+			switch(tidyNodeGetType(obj->node)) {
+				case TidyNode_Text:
+				case TidyNode_Comment:
+					break;
+				default:
+					ADD_PROPERITY_LONG(obj->std.properties, id, tidyNodeGetId(obj->node));
+			}
 			
             break;
 		case is_attr:
