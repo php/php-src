@@ -338,6 +338,7 @@ static int pdo_pgsql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 	ret = 1;
 	
 cleanup:
+	dbh->methods = &pgsql_methods;
 	if (!ret) {
 		pgsql_handle_closer(dbh TSRMLS_CC);
 	}
