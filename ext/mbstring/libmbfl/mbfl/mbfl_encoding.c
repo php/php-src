@@ -44,7 +44,6 @@
 #include <strings.h>
 #endif
 
-#include "mbfl_compat.h"
 #include "mbfl_encoding.h"
 #include "mbfilter_pass.h"
 #include "mbfilter_8bit.h"
@@ -95,6 +94,13 @@
 #include "filters/mbfilter_ucs4.h"
 #include "filters/mbfilter_ucs2.h"
 #include "filters/mbfilter_htmlent.h"
+
+#ifndef HAVE_STRCASECMP
+#ifdef HAVE_STRICMP
+#define strcasecmp stricmp
+#endif
+#endif 
+
 
 static const char *mbfl_encoding_auto_aliases[] = {"unknown", NULL};
 

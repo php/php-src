@@ -1,8 +1,8 @@
 This is Libmbfl, a streamable multibyte character code filter and
 converter library.
 
-See DISCLAIMER for licensing information.
+See LICENSE and DISCLAIMER for licensing information.
 
-See the file INSTALL for instructions on how to build and install
-libmbfl.
+See the file INSTALL for building and installation instructions.
 
+# $Id: README,v 1.1.2.2 2003/08/24 18:18:51 moriyoshi Exp
