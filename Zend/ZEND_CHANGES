@@ -1,6 +1,6 @@
 Changes in the Zend Engine 2.0
 
-    * New object model.
+    * New Object Model.
 
       The Zend Engine's handling of objects has been completely
       changed in order to allow for new features, but also to increase
@@ -21,16 +21,86 @@ Changes in the Zend Engine 2.0
 
       To simplify migration, the Zend Engine 2.0 supports an optional
       'auto-clone' feature, which performs a cloning of the object
-      whenever it would have been copied in version 1.0. Optionally,
-      it emits an E_NOTICE message whenever such an automatic clone
-      occurs, in order to allow developers to gradually migrate to the
-      version 2.0-style behavior (without automatic clones).
+      whenever it would have been copied in the Zend Engine 1.0.
+      Optionally, it emits an E_NOTICE message whenever such an
+      automatic clone occurs, in order to allow developers to
+      gradually migrate to the behavior of the Zend Engine 2 (without
+      automatic clones).
 
-    * delete statement.
+    * Object Cloning
+
+      The Zend Engine 1.0 offered no way a user could decide what copy
+      constructor to run when an object is duplicated. During
+      duplication, the Zend Engine 1.0 did a bitwise copy making an
+      identical replica of all the object's properties.
+
+      Creating a copy of an object with fully replicated properties is 
+      not always the wanted behavior. A good example of the need for 
+      copy constructors, is if you have an object which represents a 
+      GTK window and the object holds the resource of this GTK window, 
+      when you create a duplicate you might want to create a new 
+      window with the same properties and have the new object hold the 
+      resource of the new window. Another example is if your object 
+      holds a reference to another object which it uses and when you 
+      replicate the parent object you want to create a new instance of 
+      this other object so that the replica has its own separate copy.
+
+      An object copy is created by calling the object's __clone() 
+      method.
+
+      Example:
+
+        <?php
+        $copy_of_object = $object->__clone();
+        ?>
+
+      When the developer asks to create a new copy of an object, the 
+      Zend Engine will check if a __clone() method has been defined or 
+      not. If not, it will call a default __clone() which will copy 
+      all of the object's properties. If a __clone() method is 
+      defined, then it will be responsible to set the necessary 
+      properties in the created object. For convenience, the engine 
+      will supply a function that imports all of the properties from 
+      the source object, so that they can start with a by-value 
+      replica of the source object, and only override properties that 
+      need to be changed.
+
+      Example:
+
+        <?php
+        class MyCloneable {
+          static $id = 0;
+
+          function MyCloneable() {
+            $this->id = self::$id++;
+          }
+
+          function __clone() {
+            $this->name = $clone->name;
+            $this->address = "New York";
+            $this->id = self::$id++;
+          }
+        }
+
+        $obj = new MyCloneable();
+
+        $obj->name    = "Hello";
+        $obj->address = "Tel-Aviv";
+
+        print $obj->id . "\n";
+
+        $obj = $obj->__clone();
+
+        print $obj->id . "\n";
+        print $obj->name . "\n";
+        print $obj->address . "\n";
+        ?>
+
+    * Forced deletion of objects.
 
       The Zend Engine 1.0 had no means to force deletion of an object
       if there are still references to it. The newly introduced delete
-      statement calls the object’s destructor and frees it even if the
+      statement calls the object's destructor and frees it even if the
       object is referenced by some other places in the engine. Other
       references to the deleted object become stale and trying to
       access them results in a fatal error.
@@ -38,46 +108,6 @@ Changes in the Zend Engine 2.0
       Note that if you have a user-defined function delete() in an old
       script, this script will yield a parser error with the Zend
       Engine 2.0, since 'delete' is now a reserved word.
-
-    * Exceptions.
-
-      The Zend Engine 1.0 had no exception handling. The Zend Engine 2.0
-      introduces a exception model similar to that of other programming
-      languages.
-
-        Example
-
-          <?php
-          class MyException {
-            function MyException($_error) {
-              $this->error = $_error;	
-            }
-
-            function getException() {
-              return $this->error;	
-            }
-          }
-
-          function ThrowException() {
-            throw new MyException("'This is an exception!'");	
-          }
-
-          try {
-          } catch ($exception) {
-            print "There was an exception: " . $exception->getException();
-            print "\n";
-          }
-
-          try {
-            ThrowException();	
-          } catch ($exception) {
-            print "There was an exception: " . $exception->getException();
-            print "\n";
-          }
-          ?>
-
-      Old code that does not define user-space functions 'catch', 
-      'throw' and 'try' will run without modifications.
 
     * Namespaces.
 
@@ -99,30 +129,265 @@ Changes in the Zend Engine 2.0
       operator. It is possible to "import" symbols from one namespace
       into another.
 
+      Namespaces and classes are the same with the Zend Engine 2.0, 
+      except that you can't instantiate a namespace with "new". This 
+      essentially also makes a class a namespace, so the scoping rules 
+      for namespaces apply for classes. Some of the consequences of 
+      this are:
+
+        * Classes may contain classes.
+
+          Example:
+
+            <?php
+            class DB::MySQL {
+              var $host = "";
+
+              function db_connect($user) {
+                print "Connecting to MySQL database '$this->host' as $user\n";
+              }
+            }
+
+            class DB::Oracle {
+              var $host = "localhost";
+
+              function db_connect($user) {
+                print "Connecting to Oracle database '$this->host' as $user\n";
+              }
+            }	
+
+            $MySQL_obj = new DB::MySQL();
+            $MySQL_obj->db_connect("Susan");
+
+            $Oracle_obj = new DB::Oracle();
+            $Oracle_obj->db_connect("Barbara");
+            ?>
+
+        * Classes may contain constants.
+
+          Example:
+
+            <?php
+              class foo {
+                const hey = "hello";
+              }
+
+              print foo::hey;
+            ?>
+
+        * Current namespace's symbol tables are searched first for
+          constants and functions.
+
+          Example:
+
+            The following code prints "foobar", not "foo", because
+            the class constant overrides the "global" constant of
+            the same name.
+
+            <?php
+              define("foo", "bar");
+
+              class FooClass {
+                const foo = "foobar";
+
+                function printFoo() {
+                  print foo;
+                }
+              }
+            ?>
+
+        * In the scope of a function, the current namespace is that
+          of the containing class/namespace.
+
+          Example:
+
+            <?php
+              class FooClass {
+                function foo() {
+                  $this->bar();
+                  bar();
+                }
+
+                function bar() {
+                  print "foobar\n";
+                }
+              }
+
+              $obj = new FooClass;
+              $obj->foo();
+              $obj->foo();
+            ?>
+
+          This prints "foobar" two times, since a bar() method exists 
+          in the current namespace.
+
       Old code that does not take advantage of namespaces will run
       without modifications.
+
+    * Unified Constructors.
+
+      The Zend Engine allows developers to declare constructor methods
+      for classes. Classes which have a constructor method call this
+      method on each newly-created object, so it is suitable for any
+      initialization that the object may need before it can be used.
+
+      With the Zend Engine 1.0, constructor methods were class methods
+      that had the same name as the class itself. Since it is very
+      common to call parent constructors from derived classes, the way
+      the Zend Engine 1.0 worked made it a bit cumbersome to move
+      classes around in a large class hierarchy. If a class is moved
+      to reside under a different parent, the constructor name of that
+      parent changes as well, and the code in the derived class that
+      calls the parent constructor has to be modified.
+
+      The Zend Engine 2.0 introduces a standard way of declaring
+      constructor methods by calling them by the name __construct().
+
+      Example:
+
+        <?php
+        class BaseClass {
+          function __construct() {
+            print "In BaseClass constructor\n";	
+          }
+        }
+
+        class SubClass extends BaseClass {
+          function __construct() {
+            parent::__construct();
+            print "In SubClass constructor\n";	
+          }
+        }
+
+        $obj = new BaseClass();
+        $obj = new SubClass();
+        ?>
+
+      For backwards compatibility, if the Zend Engine 2.0 cannot find
+      a __construct() function for a given class, it will search for
+      the old-style constructor function, by the name of the class.
+      Effectively, it means that the only case that would have
+      compatibility issues is if the class had a method named
+      __construct() which was used for different semantics.
+
+    * Destructors.
+
+      Having the ability to define destructors for objects can be very
+      useful. Destructors can log messages for debugging, close
+      database connections and do other clean-up work.
+
+      No mechanism for object destructors existed in the Zend Engine
+      1.0, although PHP had already support for registering functions
+      which should be run on request shutdown.
+
+      The Zend Engine 2.0 introduces a destructor concept similar to
+      that of other object-oriented languages, such as Java: When the
+      last reference to an object is destroyed the object's
+      destructor, which is a class method name __destruct() that
+      recieves no parameters, is called before the object is freed
+      from memory.
+
+      Example:
+
+        <?php
+          class MyDestructableClass {
+            function __construct() {
+              print "In constructor\n";
+              $this->name = "MyDestructableClass";
+            }
+
+            function __destruct() {
+              print "Destroying " . $this->name . "\n";
+            }	
+          }
+
+          $obj = new MyDestructableClass();
+        ?>
+
+      Like constructors, parent destructors will not be called
+      implicitly by the engine. In order to run a parent destructor,
+      one would have to explicitly call parent::__destruct() in the
+      destructor body.
+
+    * Exceptions.
+
+      The Zend Engine 1.0 had no exception handling. The Zend Engine 2.0
+      introduces a exception model similar to that of other programming
+      languages.
+
+      Example:
+
+        <?php
+        class MyException {
+          function MyException($_error) {
+            $this->error = $_error;	
+          }
+
+          function getException() {
+            return $this->error;	
+          }
+        }
+
+        function ThrowException() {
+          throw new MyException("'This is an exception!'");	
+        }
+
+        try {
+        } catch ($exception) {
+          print "There was an exception: " . $exception->getException();
+          print "\n";
+        }
+
+        try {
+          ThrowException();	
+        } catch ($exception) {
+          print "There was an exception: " . $exception->getException();
+          print "\n";
+        }
+        ?>
+
+      Old code that has no user-defined functions 'catch', 'throw' and
+      'try' will run without modifications.
+
+    * Derefencing objects returned from functions.
+
+      Example:
+
+      <?php
+      class Circle {
+        function draw() {
+          print "Circle\n";	
+        }
+      }
+
+      class Square {
+        function draw() {
+          print "Square\n";	
+        }
+      }
+
+      function ShapeFactoryMethod($shape) {
+        switch ($shape) {
+          case "Circle": return new Circle();
+          case "Square": return new Square();
+        }
+      }
+
+      ShapeFactoryMethod("Circle")->draw();
+      ShapeFactoryMethod("Square")->draw();
+      ?>
 
     * Static member variables of static classes can now be
       initialized.
 
+      Example:
+
         <?php
-          class foo
-          {
+          class foo {
             static $my_static = 5;
           }
 
           print foo::$my_static;
-        ?>
-
-    * Class constants.
-
-        <?php
-          class foo
-          {
-            const hey = "hello";
-          }
-        
-          print foo::hey;
         ?>
 
 Changes in the Zend Engine 1.0
