@@ -52,7 +52,7 @@ main() { exit(USE_OPENSSL != 1); }
 	PHP_EXTENSION(snmp,$ext_shared)
 	PHP_SUBST(SNMP_SHARED_LIBADD)
 	AC_CHECK_LIB(kstat, kstat_read, [
-	  PHP_ADD_LIBRARY(kstat,SNMP_SHARED_LIBADD)
+	  PHP_ADD_LIBRARY(kstat,,SNMP_SHARED_LIBADD)
         ])
     SNMP_INCLUDE="-I$SNMP_INCDIR"
   fi
