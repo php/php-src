@@ -1,3 +1,17 @@
+2003-02-12  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * zend_API.c
+      zend_API.h:
+      Removed zend_get_module(), this function is not used by anything and more
+      importantly. it does not work. It tries to find data based on numeric keys
+      in hash table using string keys.
+
+2003-02-12  Zeev Suraski  <zeev@zend.com>
+
+    * zend_compile.c:
+      Fix declaration of class members that don't have an explicit access
+      modifier
+
 2003-02-11  Zeev Suraski  <zeev@zend.com>
 
     * zend_compile.c:
