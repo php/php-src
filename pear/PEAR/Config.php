@@ -128,7 +128,7 @@ class PEAR_Config extends PEAR
             'doc' => 'the installer will prefer releases with this state
 when installing packages without a version or state specified',
             'valid_set' => array(
-                'stable', 'beta', 'alpha', 'devel', 'snapshot'),
+                'stable', 'beta', 'alpha', 'devel', 'snapshot', 'any'),
             ),
 /*
         'testset1' => array(
