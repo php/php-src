@@ -1,6 +1,6 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-????, Version 4.1.1
+22 Dec 2001, Version 4.1.1
 - Fixed several crash bugs in the xslt extension. (Markus, Derick)
 - Fixed problem with dbase not returning very large (larger than long)
   integers properly. (Vlad)
