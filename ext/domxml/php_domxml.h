@@ -105,6 +105,7 @@ PHP_FUNCTION(domxml_dump_mem);
 PHP_FUNCTION(domxml_dump_mem_file);
 PHP_FUNCTION(domxml_dump_node);
 PHP_FUNCTION(domxml_doc_validate);
+PHP_FUNCTION(domxml_doc_xinclude);
 #if defined(LIBXML_HTML_ENABLED)
 PHP_FUNCTION(domxml_html_dump_mem);
 #endif
