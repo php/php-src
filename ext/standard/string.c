@@ -406,22 +406,48 @@ PHP_FUNCTION(strcoll)
 /* {{{ php_charmask
  * Fills a 256-byte bytemask with input. You can specify a range like 'a..z',
  * it needs to be incrementing.  
+ * Returns: FAILURE/SUCCESS wether the input was correct (i.e. no range errors)
  */
-void php_charmask(unsigned char *input, int len, char *mask)
+int php_charmask(unsigned char *input, int len, char *mask)
 {
 	unsigned char *end;
 	unsigned char c;
+	int result = SUCCESS;
 
 	memset(mask, 0, 256);
 	for (end=input+len; input<end; input++) {
 		c=*input; 
-		if (input+3<end && *(input+1) == '.' && *(input+2) == '.' 
-				&& *(input+3) >= c) {
-			memset(mask+c, 1, *(input+3) - c + 1);
+		if (input+3<end && input[1] == '.' && input[2] == '.' 
+				&& input[3] >= c) {
+			memset(mask+c, 1, input[3] - c + 1);
 			input+=3;
-		} else
+		} else if (input+1<end && input[0] == '.' && input[1] == '.') {
+			/* Error, try to be as helpful as possible:
+			   (a range ending/starting with '.' won't be captured here) */
+			if (end-len>=input) { /* there was no 'left' char */
+				php_error(E_WARNING,"Invalid '..'-range passed to %s(), no character to the left of '..'",get_active_function_name(TSRMLS_C));
+				result = FAILURE;
+				continue;
+			}
+			if (input+2>=end) { /* there is no 'right' char */
+				php_error(E_WARNING,"Invalid '..'-range passed to %s(), no character to the right of '..'",get_active_function_name(TSRMLS_C));
+				result = FAILURE;
+				continue;
+			}
+			if (input[-1] > input[2]) { /* wrong order */
+				php_error(E_WARNING,"Invalid '..'-range passed to %s(), '..'-range needs to be incrementing",get_active_function_name(TSRMLS_C));
+				result = FAILURE;
+				continue;
+			} 
+			/* FIXME: better error (a..b..c is the only left possibility?) */
+			php_error(E_WARNING,"Invalid '..'-range passed to %s()",get_active_function_name(TSRMLS_C));
+			result = FAILURE;
+			continue;
+		} else {
 			mask[c]=1;
+		}
 	}
+	return result;
 }
 /* }}} */
 
