@@ -1,3 +1,101 @@
+2001-10-22  Richard Heyes  <richard.heyes@heyes-computing.net>
+
+    * pear/Mail/mimeDecode.php:
+    Bugfix. Some headers were being returned with a preceding space when they
+    shouldn't have.
+
+2001-10-22  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/standard/array.c:
+    Use references instead of making a copy each time in array_init().  About
+    twice as fast for a high number of elements.  2.80 seconds for the copy
+    of 1,000,000 elements and 1.39s for the reference version.  Need to chunk
+    it every 62k or so because refcount is a short.
+
+2001-10-22  Andrei Zmievski  <andrei@ispi.net>
+
+    * README.PARAMETER_PARSING_API: Fix-up.
+
+    * README.PARAMETER_PARSING_API:
+    Adding some docs for new parameter parsing API. They really should be more
+    fleshed out.
+
+    * ext/ctype/ctype.c: Remove redundant conversion.
+
+2001-10-22  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/ctype/ctype.c: new-style parameter parsing
+
+2001-10-22  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * pear/Net/Curl.php: Fix bug 13038
+
+2001-10-22  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/session/php_session.h: Fix build.
+
+    * ext/session/session.c: Fix ZTS build.
+
+    * ext/session/session.c:
+    - Added session_cache_expire() function. (patch from anuradha@gnu.org)
+
+2001-10-22  Jeroen van Wolffelaar  <jeroen@A-Eskwadraat.nl>
+
+    * ext/standard/tests/versioning/.cvsignore
+      ext/standard/tests/array/.cvsignore
+      ext/standard/tests/file/.cvsignore
+      ext/standard/tests/serialize/.cvsignore
+      ext/standard/tests/strings/.cvsignore:
+    .cvsignore now everywhere in ext/standard
+
+    * ext/standard/tests/math/001.phpt
+      ext/standard/tests/math/abs.phpt
+      ext/standard/tests/math/pow.phpt
+      ext/standard/tests/math/round.phpt:
+    MFH (math tests pass now - at least on my system)
+
+    * ext/standard/tests/math/001.phpt
+      ext/standard/tests/math/abs.phpt
+      ext/standard/tests/math/pow.phpt
+      ext/standard/tests/math/round.phpt:
+    Make math tests pass, round & co don't work this way, and there was an error
+    in expected output
+
+2001-10-22  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/zlib/tests/.cvsignore: Yet another missing .cvsignore file
+
+2001-10-22  Frank M. Kromann  <frank@frontbase.com>
+
+    * pear/DB/fbsql.php: Fixing drop table statement.
+    Fixing error in tableInfo()
+
+2001-10-22  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/gmp/tests/.cvsignore
+      ext/mcrypt/tests/.cvsignore
+      ext/satellite/tests/.cvsignore: Missing .cvsignore files added.
+
+    * ext/ctype/tests/001.phpt
+      ext/ctype/tests/002.phpt:
+    Use of deprecated stuff and having error_reporting(E_ALL) made the tests fail.
+
+    * ext/satellite/tests/003.phpt: Deprecated style used
+
+    * main/.cvsignore: Added missing entry.
+
+    * ext/standard/tests/time/002.phpt: MFH
+
+    * ext/standard/tests/time/002.phpt: Fixed bug: #12617
+
+    * ext/iconv/iconv.c
+      ext/iconv/php_iconv.h: MFH
+
+    * ext/iconv/iconv.c
+      ext/iconv/php_iconv.h: Fixed bug: #12443
+
+    * ext/iconv/tests/.cvsignore: Missing .cvsignore file
+
 2001-10-21  Rasmus Lerdorf  <rasmus@php.net>
 
     * main/SAPI.c: MFH
