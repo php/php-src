@@ -360,12 +360,7 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 	fprintf(stderr,"cwd = %s path = %s\n", state->cwd, path);
 #endif
 	if (IS_ABSOLUTE_PATH(path_copy, path_length)) {
-/* COPY_WHEN_ABSOLUTE needs to account for volume name that is unique to NetWare absolute paths */
-#ifndef NETWARE
-		copy_amount = COPY_WHEN_ABSOLUTE;
-#else
         copy_amount = COPY_WHEN_ABSOLUTE(path_copy);
-#endif
 		is_absolute = 1;
 #ifdef TSRM_WIN32
 	} else if (IS_UNC_PATH(path_copy, path_length)) {
@@ -438,12 +433,7 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 		ptr = tsrm_strtok_r(NULL, TOKENIZER_STRING, &tok);
 	}
 
-/* COPY_WHEN_ABSOLUTE needs to account for volume name that is unique to NetWare absolute paths */
-#ifndef NETWARE
-	if (state->cwd_length == COPY_WHEN_ABSOLUTE) {
-#else
 	if (state->cwd_length == COPY_WHEN_ABSOLUTE(state->cwd)) {
-#endif
 		state->cwd = (char *) realloc(state->cwd, state->cwd_length+1+1);
 		state->cwd[state->cwd_length] = DEFAULT_SLASH;
 		state->cwd[state->cwd_length+1] = '\0';
@@ -493,12 +483,7 @@ CWD_API int virtual_chdir_file(const char *path, int (*p_chdir)(const char *path
 		return -1;
 	}
 
-/* COPY_WHEN_ABSOLUTE needs to account for volume name that is unique to NetWare absolute paths */
-#ifndef NETWARE
-	if (length == COPY_WHEN_ABSOLUTE && IS_ABSOLUTE_PATH(path, length+1)) { /* Also use trailing slash if this is absolute */
-#else
 	if (length == COPY_WHEN_ABSOLUTE(path) && IS_ABSOLUTE_PATH(path, length+1)) { /* Also use trailing slash if this is absolute */
-#endif
 		length++;
 	}
 	temp = (char *) tsrm_do_alloca(length+1);
