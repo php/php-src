@@ -521,7 +521,7 @@ PHP_FUNCTION(unpack)
 	inputpos = 0;
 
 	if (array_init(return_value) == FAILURE)
-		return;
+		RETURN_FALSE;
 
 	while (formatlen-- > 0) {
 		char type = *(format++);
@@ -812,6 +812,7 @@ PHP_FUNCTION(unpack)
 				break;
 			} else {
 				php_error(E_WARNING, "pack type %c: not enough input, need %d, have %d", type, size, inputlen - inputpos);
+				zval_dtor(return_value);
 				RETURN_FALSE;
 			}
 		}
