@@ -104,7 +104,6 @@ typedef struct _zend_fast_cache_list_entry {
 
 
 
-
 /* fast cache for zval's */
 #define ALLOC_ZVAL(z)	\
 	ZEND_FAST_ALLOC(z, zval, ZVAL_CACHE_LIST)

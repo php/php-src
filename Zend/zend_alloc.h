@@ -140,7 +140,6 @@ void zend_debug_alloc_output(char *format, ...);
 #define full_mem_check(silent)
 #endif
 
-
 END_EXTERN_C()
 
 #endif

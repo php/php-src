@@ -2451,7 +2451,7 @@ int zend_fetch_class_handler(ZEND_OPCODE_HANDLER_ARGS)
 
 int zend_init_ctor_call_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
-	zend_ptr_stack_n_push(&EG(arg_types_stack), 3, EX(fbc), EX(object), EX(calling_scope));
+	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), EX(calling_scope));
 
 	if (opline->op1.op_type == IS_VAR) {
 		SELECTIVE_PZVAL_LOCK(*EX_T(opline->op1.u.var).var.ptr_ptr, &opline->op1);
@@ -2481,7 +2481,7 @@ int zend_init_method_call_handler(ZEND_OPCODE_HANDLER_ARGS)
 	char *function_name_strval;
 	int function_name_strlen;
 	
-	zend_ptr_stack_n_push(&EG(arg_types_stack), 3, EX(fbc), EX(object), EX(calling_scope));
+	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), EX(calling_scope));
 
 	function_name = get_zval_ptr(&opline->op2, EX(Ts), &EG(free_op2), BP_VAR_R);
 
@@ -2542,7 +2542,7 @@ int zend_init_static_method_call_handler(ZEND_OPCODE_HANDLER_ARGS)
 	zval *function_name;
 	zend_class_entry *ce;
 
-	zend_ptr_stack_n_push(&EG(arg_types_stack), 3, EX(fbc), EX(object), EX(calling_scope));
+	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), EX(calling_scope));
 
 	ce = EX_T(opline->op1.u.var).class_entry;
 	if(opline->op2.op_type != IS_UNUSED) {
@@ -2597,7 +2597,7 @@ int zend_init_fcall_by_name_handler(ZEND_OPCODE_HANDLER_ARGS)
 	char *function_name_strval, *lcname;
 	int function_name_strlen;
 
-	zend_ptr_stack_n_push(&EG(arg_types_stack), 3, EX(fbc), EX(object), EX(calling_scope));
+	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), EX(calling_scope));
 
 	is_const = (opline->op2.op_type == IS_CONST);
 
@@ -2818,7 +2818,7 @@ int zend_do_fcall_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zval *fname = get_zval_ptr(&opline->op1, EX(Ts), &EG(free_op1), BP_VAR_R);
 	
-	zend_ptr_stack_n_push(&EG(arg_types_stack), 3, EX(fbc), EX(object), EX(calling_scope));
+	zend_ptr_stack_3_push(&EG(arg_types_stack), EX(fbc), EX(object), EX(calling_scope));
 
 	if (zend_hash_find(EG(function_table), fname->value.str.val, fname->value.str.len+1, (void **) &EX(function_state).function)==FAILURE) {
 		zend_error(E_ERROR, "Unknown function:  %s()\n", fname->value.str.val);

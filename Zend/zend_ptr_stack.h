@@ -39,6 +39,46 @@ ZEND_API void zend_ptr_stack_destroy(zend_ptr_stack *stack);
 ZEND_API void zend_ptr_stack_apply(zend_ptr_stack *stack, void (*func)(void *));
 ZEND_API void zend_ptr_stack_clean(zend_ptr_stack *stack, void (*func)(void *), zend_bool free_elements);
 ZEND_API int zend_ptr_stack_num_elements(zend_ptr_stack *stack);
+
+
+/*	Not doing this with a macro because of the loop unrolling in the element assignment.
+	Just using a macro for 3 in the body for readability sake. */
+static inline void zend_ptr_stack_3_push(zend_ptr_stack *stack, void *a, void *b, void *c)
+{
+#define ZEND_PTR_STACK_NUM_ARGS 3
+
+	if (stack->top+ZEND_PTR_STACK_NUM_ARGS > stack->max) {		/* we need to allocate more memory */
+		stack->max *= 2;
+		stack->max += ZEND_PTR_STACK_NUM_ARGS; 
+		stack->elements = (void **) erealloc(stack->elements, (sizeof(void *) * (stack->max)));
+		stack->top_element = stack->elements+stack->top;
+	}
+
+	stack->top += ZEND_PTR_STACK_NUM_ARGS;
+	*(stack->top_element++) = a;
+	*(stack->top_element++) = b;
+	*(stack->top_element++) = c;
+
+#undef ZEND_PTR_STACK_NUM_ARGS
+}
+
+/*
+ZEND_API void zend_ptr_stack_n_pop(zend_ptr_stack *stack, int count, ...)
+{
+	va_list ptr;
+	void **elem;
+	
+	va_start(ptr, count);
+	while (count>0) {
+		elem = va_arg(ptr, void **);
+		*elem = *(--stack->top_element);
+		stack->top--;
+		count--;
+	}
+	va_end(ptr);
+}
+*/
+
 END_EXTERN_C()
 
 static inline void zend_ptr_stack_push(zend_ptr_stack *stack, void *ptr)
