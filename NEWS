@@ -3,6 +3,7 @@ PHP 4                                                                      NEWS
 ?? ??? 2003, Version 4.3.5
 - Fixed header handler in NSAPI SAPI module (header->replace was ignored,
   send_default_content_type now sends value from php.ini). (Uwe Schindler)
+- Fixed bug #26105 (Compile failure on gcc version 3.0.X). (Ilia)
 - Fixed bug #26103 (ext/mime_magic causes compile failure in ext/mssql). (Jani)
 - Fixed bug #26097 (gdImageColorClosestAlpha() returns incorrect results).
   (sprice at wisc dot edu, Ilia)
