@@ -372,7 +372,7 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions, i
 void zend_shutdown()
 {
 #ifndef ZTS
-	destroy_rsrc_plist();
+	zend_destroy_rsrc_plist();
 #endif
 	zend_destroy_rsrc_list_dtors();
 	zend_hash_destroy(&module_registry);
