@@ -8,13 +8,13 @@ pear_install_targets = \
 
 peardir=$(PEAR_INSTALLDIR)
 
-PEAR_SUBDIRS = \
-	Archive \
-	Console \
-	PEAR \
-	PEAR/Command \
-	PEAR/Frontend \
-	XML 
+#PEAR_SUBDIRS = \
+#	 Archive \
+#	 Console \
+#	 PEAR \
+#	 PEAR/Command \
+#	 PEAR/Frontend \
+#	 XML 
 
 # These are moving to /pear (in cvs):
 # 	Crypt \
@@ -28,30 +28,30 @@ PEAR_SUBDIRS = \
 # 	Net \
 #	Schedule \
 
-PEAR_FILES = \
-	Archive/Tar.php \
-	Console/Getopt.php \
-	PEAR.php \
-	PEAR/Autoloader.php \
-	PEAR/Command.php \
-	PEAR/Command/Auth.php \
-	PEAR/Command/Common.php \
-	PEAR/Command/Config.php \
-	PEAR/Command/Install.php \
-	PEAR/Command/Package.php \
-	PEAR/Command/Registry.php \
-	PEAR/Command/Remote.php \
-	PEAR/Frontend/CLI.php \
-	PEAR/Frontend/Gtk.php \
-	PEAR/Common.php \
-	PEAR/Config.php \
-	PEAR/Dependency.php \
-	PEAR/Installer.php \
-	PEAR/Packager.php \
-	PEAR/Registry.php \
-	PEAR/Remote.php \
-	System.php \
-	XML/Parser.php 
+#PEAR_FILES = \
+#	 Archive/Tar.php \
+#	 Console/Getopt.php \
+#	 PEAR.php \
+#	 PEAR/Autoloader.php \
+#	 PEAR/Command.php \
+#	 PEAR/Command/Auth.php \
+#	 PEAR/Command/Common.php \
+#	 PEAR/Command/Config.php \
+#	 PEAR/Command/Install.php \
+#	 PEAR/Command/Package.php \
+#	 PEAR/Command/Registry.php \
+#	 PEAR/Command/Remote.php \
+#	 PEAR/Frontend/CLI.php \
+#	 PEAR/Frontend/Gtk.php \
+#	 PEAR/Common.php \
+#	 PEAR/Config.php \
+#	 PEAR/Dependency.php \
+#	 PEAR/Installer.php \
+#	 PEAR/Packager.php \
+#	 PEAR/Registry.php \
+#	 PEAR/Remote.php \
+#	 System.php \
+#	 XML/Parser.php 
 
 # These are moving to /pear (in cvs):
 # 	Crypt/CBC.php \
@@ -95,31 +95,41 @@ PEAR_FILES = \
 #	Net/Socket.php \
 #	Schedule/At.php \
 
-#PEARCMD=$(top_builddir)/sapi/cli/php $(builddir)/scripts/pear
-#
-#install-pear-installer: $(top_builddir)/sapi/cli/php
-#	version=`grep '<version>' $(srcdir)/package-pear.xml|head -1|cut -d\> -f2|cut -d\< -f1`; \
-#	if $(PEARCMD) shell-test PEAR; then
-#	    if ! $(PEARCMD) shell-test PEAR $$version; then \
-#	        $(PEARCMD) upgrade package-pear.xml; \
-#	    fi; \
-#	else; \
-#	    $(PEARCMD) install package-pear.xml; \
-#	fi
+PEARCMD=$(top_builddir)/sapi/cli/php -d include_path=$(top_srcdir)/pear pear/scripts/pear.in
+
+install-pear-installer: $(top_builddir)/sapi/cli/php
+	@if $(PEARCMD) shell-test PEAR; then \
+	    version=`grep '<version>' $(srcdir)/package-pear.xml|head -1|cut -d\> -f2|cut -d\< -f1`; \
+	    if ! $(PEARCMD) shell-test PEAR $$version; then \
+		echo "Found an older version of the PEAR Installer, upgrading..."; \
+	        $(PEARCMD) -q upgrade $(srcdir)/package-pear.xml; \
+	    else \
+		echo "No need to install or upgrade the PEAR Installer..."; \
+	    fi; \
+	else \
+	    echo "PEAR Installer not found, installing..."; \
+	    $(PEARCMD) -q install $(srcdir)/package-pear.xml; \
+	fi
+
+install-pear-packages: # requires cli installed
+	@/bin/ls -1 $(srcdir)/packages | while read package; do \
+	    case $$package in \
+		*.tgz) pkg=$${package%.tgz};; \
+		*.tar) pkg=$${package%.tar};; \
+		*) continue;; \
+	    esac; \
+	    pkgname="$${pkg%-*}"; pkgver="$${pkg#*-}"; \
+	    if $(INSTALL_ROOT)$(bindir)/pear -d php_dir=$(INSTALL_ROOT)$(PEAR_INSTALLDIR) shell-test $$pkgname $$pkgver; then \
+		echo "$$pkgname $$pkgver: already installed"; \
+	    else \
+		$(INSTALL_ROOT)$(bindir)/pear -q -d php_dir=$(INSTALL_ROOT)$(PEAR_INSTALLDIR) -d bin_dir=$(INSTALL_ROOT)$(bindir) -d doc_dir=$(INSTALL_ROOT)$(datadir)/doc/pear -d ext_dir=$(INSTALL_ROOT)$(EXTENSION_DIR) install $(srcdir)/packages/$$package 2>&1 | sed -e "s/^/$$pkgname $$pkgver: /"; \
+	    fi; \
+	done
 
 install-pear:
 	@if $(mkinstalldirs) $(INSTALL_ROOT)$(peardir); then \
-		for i in $(PEAR_SUBDIRS); do \
-			$(mkinstalldirs) $(INSTALL_ROOT)$(peardir)/$$i; \
-		done; \
-		for i in $(PEAR_FILES); do \
-			echo "Installing $$i"; \
-			dir=`echo $$i|sed 's%[^/][^/]*$$%%'`; \
-			$(INSTALL_DATA) $(srcdir)/$$i $(INSTALL_ROOT)$(peardir)/$$dir; \
-		done; \
-		rm -f $(INSTALL_ROOT)$(peardir)/PEAR/Command/Login.php; \
-		rm -f $(INSTALL_ROOT)$(peardir)/PEAR/CommandResponse.php; \
-		rm -f $(INSTALL_ROOT)$(peardir)/PEAR/Uploader.php; \
+		$(MAKE) install-pear-installer; \
+		$(MAKE) install-pear-packages; \
 	else \
 		cat $(srcdir)/install-pear.txt; \
 		exit 5; \
