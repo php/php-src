@@ -308,6 +308,7 @@ AC_ARG_WITH(system-regex,
 	AC_DEFINE(REGEX,0)
 ],[
 	REGEX_LIB=regex/libregex.a
+	EXTRA_LIBS="-Lregex -lregex $EXTRA_LIBS"
 	HSREGEX=yes
  	AC_MSG_RESULT(yes)
     AC_DEFINE(HSREGEX)
@@ -329,7 +330,7 @@ AC_ARG_WITH(apxs,
     APXS_LDFLAGS="@SYBASE_LFLAGS@ @SYBASE_LIBS@ @SYBASE_CT_LFLAGS@ @SYBASE_CT_LIBS@"
     APACHE_INCLUDE="-I`$APXS -q INCLUDEDIR`"
     BINNAME=libphp4.so
-    INSTALL_IT="\$(APXS) -i -a -n php3 $BINNAME"
+    INSTALL_IT="\$(APXS) -i -a -n php4 $BINNAME"
     CFLAGS_SHLIB=`perl -V:cccdlflags | cut -d\' -f2`
     LDFLAGS_SHLIB=`perl -V:lddlflags | cut -d\' -f2`
     LDFLAGS_SHLIB_EXPORT=`perl -V:ccdlflags | cut -d\' -f2`
