@@ -680,11 +680,11 @@ static void php_conv_qprint_encode_dtor(php_conv_qprint_encode *inst)
 }
 
 #define NEXT_CHAR(ps, icnt, lb_ptr, lb_cnt, lbchars) \
-	((lb_cnt) < (lb_ptr) ? (lbchars)[(lb_cnt)] : *(ps)) 
+	((lb_ptr) < (lb_cnt) ? (lbchars)[(lb_ptr)] : *(ps)) 
 
 #define CONSUME_CHAR(ps, icnt, lb_ptr, lb_cnt) \
-	if ((lb_cnt) < (lb_ptr)) { \
-		(lb_cnt)++; \
+	if ((lb_ptr) < (lb_cnt)) { \
+		(lb_ptr)++; \
 	} else { \
 		(lb_cnt) = (lb_ptr) = 0; \
 		--(icnt); \
@@ -703,7 +703,12 @@ static php_conv_err_t php_conv_qprint_encode_convert(php_conv_qprint_encode *ins
 	int opts;
 	static char qp_digits[] = "0123456789ABCDEF";
 
-	if (in_pp == NULL || in_left_p == NULL) {
+	line_ccnt = inst->line_ccnt;
+	opts = inst->opts;
+	lb_ptr = inst->lb_ptr;
+	lb_cnt = inst->lb_cnt;
+
+	if ((in_pp == NULL || in_left_p == NULL) && (lb_ptr >=lb_cnt)) {
 		return PHP_CONV_ERR_SUCCESS;
 	}
 
@@ -711,19 +716,13 @@ static php_conv_err_t php_conv_qprint_encode_convert(php_conv_qprint_encode *ins
 	icnt = *in_left_p;
 	pd = (unsigned char *)(*out_pp);
 	ocnt = *out_left_p;
-	line_ccnt = inst->line_ccnt;
-	opts = inst->opts;
-	lb_ptr = inst->lb_ptr;
-	lb_cnt = inst->lb_cnt;
 
-	while (icnt > 0) {
+	for (;;) {
 		if (!(opts & PHP_CONV_QPRINT_OPT_BINARY) && inst->lbchars != NULL && inst->lbchars_len > 0) {
 			/* look ahead for the line break chars to make a right decision
 			 * how to consume incoming characters */
 
-			if (*ps == inst->lbchars[lb_cnt]) {
-				ps++;
-				icnt--;
+			if (icnt > 0 && *ps == inst->lbchars[lb_cnt]) {
 				lb_cnt++;
 
 				if (lb_cnt >= inst->lbchars_len) {
@@ -742,9 +741,14 @@ static php_conv_err_t php_conv_qprint_encode_convert(php_conv_qprint_encode *ins
 					line_ccnt = inst->line_len;
 					lb_ptr = lb_cnt = 0;
 				}
+				ps++, icnt--;
 				continue;
 			}
 		}
+
+		if (lb_ptr >= lb_cnt && icnt <= 0) {
+			break;
+		} 
 
 		c = NEXT_CHAR(ps, icnt, lb_ptr, lb_cnt, inst->lbchars);
 
