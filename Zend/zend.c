@@ -353,8 +353,6 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions, i
 	zend_compile_file = compile_file;
 	zend_execute = execute;
 
-	zend_startup_extensions();
-
 	/* set up version */
 	zend_version_info = strdup(ZEND_CORE_VERSION_INFO);
 	zend_version_info_length = sizeof(ZEND_CORE_VERSION_INFO)-1;
