@@ -38,7 +38,7 @@ Version: PVERSION
 Release: PRELEASE
 Group: Networking/Daemons
 Source0: http://www.php.net/distributions/php-%{PACKAGE_VERSION}.tar.gz
-Copyright: GPL
+Copyright: PHP License
 BuildRoot: /tmp/php4-root
 Requires: webserver
 
