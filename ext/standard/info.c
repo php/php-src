@@ -427,7 +427,7 @@ void php_print_credits(int flag)
 		CREDIT_LINE("Java", "Sam Ruby");
 		CREDIT_LINE("LDAP", "Amitay Isaacs, Eric Warnke, Rasmus Lerdorf, Gerrit Thomson");
 		CREDIT_LINE("MCAL", "Mark Musone, Chuck Hagenbuch");
-		CREDIT_LINE("mcrypt", "Sascha Schumann");
+		CREDIT_LINE("mcrypt", "Sascha Schumann, Derick Rethans");
 		CREDIT_LINE("mhash", "Sascha Schumann");
 		CREDIT_LINE("MS SQL", "Frank M. Kromann");
 		CREDIT_LINE("mSQL", "Zeev Suraski");
