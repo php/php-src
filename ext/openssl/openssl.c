@@ -1299,7 +1299,7 @@ static X509_REQ * php_openssl_csr_from_zval(zval ** val, int makeresource, long 
 /* }}} */
 
 /* {{{ proto bool openssl_csr_export_to_file(resource csr, string outfilename [, bool notext=true])
-   Exports a CSR to file or a var */
+   Exports a CSR to file */
 PHP_FUNCTION(openssl_csr_export_to_file)
 {
 	X509_REQ * csr;
