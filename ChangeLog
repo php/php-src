@@ -1,3 +1,49 @@
+2000-07-30  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/standard/math.c: fix for bug #5672
+
+2000-07-30  Stig Bakken  <ssb@fast.no>
+
+    * pear/.cvsignore
+      pear/Makefile.in
+      pear/PEAR.php.in
+      pear/PEAR/Installer.php
+      pear/XML/Parser.php
+      pear/XML/RPC.php
+      pear/XML/tests/parser1.r
+      pear/XML/tests/parser1.t
+      pear/XML/tests/parser2.i
+      pear/XML/tests/parser2.r
+      pear/XML/tests/parser2.t
+      pear/XML/tests/parser3.i
+      pear/XML/tests/parser3.r
+      pear/XML/tests/parser3.t
+      pear/run-tests.in
+      pear/tests/PEAR.r
+      pear/tests/PEAR.t
+      pear/tests/PEAR_Error.r
+      pear/tests/PEAR_Error.t:    Also fixed a bug in the PEAR class that was discovered when testing :-)
+
+2000-07-30  Jani Taskinen  <sniper@iki.fi>
+
+    * NEWS:
+2000-07-30  Stanislav Malyshev  <stas@zend.com>
+
+    * main/rfc1867.c: Fix file upload types array handling (#5836)
+
+2000-07-30  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/standard/string.c: Fix bug in strip_tags function as per bug #5857
+
+2000-07-30  Sam Ruby  <rubys@us.ibm.com>
+
+    * sapi/servlet/servlet.java: Refactor in support of subclassing
+
+2000-07-30  Chuck Hagenbuch  <chuck@horde.org>
+
+    * pear/Net/Socket.php:
+    change deprecated call to set_socket_blocking() to socket_set_blocking()
+
 2000-07-29  Rasmus Lerdorf  <rasmus@php.net>
 
     * ext/standard/url.c
