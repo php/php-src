@@ -29,7 +29,9 @@ PHP 4                                                                      NEWS
   . Added bundled cdb support wich can be activated by --with-cdb without a
     path. The bundled version supports cdb_make that allows writing cdb files.
   . Added optional skip parameter to dba_fetch() to support multiple key-value
-    pairs with the same key for cdb handler. (Marcus)
+    pairs with the same key for cdb handler.
+  . Added locking for those handlers that does not have their own locking.
+  . Added flatfile support what finally makes ext/db deprecated.
 - Added imagerotate() which is available only when bundled libgd is used.
   (Pierre-Alain Joye, Ilia)
 - Fixed bug #17497 (mssql extension crashes if magic_quotes_runtime is on).
