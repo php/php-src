@@ -1657,12 +1657,12 @@ PHP_FUNCTION(get_magic_quotes_gpc)
 
 void php3_is_type(INTERNAL_FUNCTION_PARAMETERS,int type)
 {
-	pval *arg;
+	pval **arg;
 	
-	if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &arg)==FAILURE) {
+	if (ARG_COUNT(ht)!=1 || getParametersEx(1, &arg)==FAILURE) {
 		RETURN_FALSE;
 	}
-	if (arg->type == type) {
+	if ((*arg)->type == type) {
 		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;
