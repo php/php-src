@@ -2314,7 +2314,7 @@ void mangle_property_name(char **dest, int *dest_length, char *src1, int src1_le
 	int prop_name_length;
         
 	prop_name_length = 1 + src1_length + 1 + src2_length;
-	prop_name = internal ? malloc(prop_name_length + 1) : emalloc(prop_name_length + 1);
+	prop_name = pemalloc(prop_name_length + 1, internal);
 	prop_name[0] = '\0';
 	memcpy(prop_name + 1, src1, src1_length+1);
 	memcpy(prop_name + 1 + src1_length + 1, src2, src2_length+1);
