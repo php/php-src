@@ -90,4 +90,7 @@
 #define _php3_stripslashes	php_stripslashes
 #define php3_dl             php_dl
 
+#define getParameters		zend_get_parameters
+#define getParametersArray	zend_get_parameters_array
+
 #endif							/* _PHP_COMPAT_H */
