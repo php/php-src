@@ -688,14 +688,14 @@ PHP_FUNCTION(dbmexists)
 		RETURN_FALSE;
 	}
 
-	ret = php_dbm_exists(info, Z_STRVAL_P(key));
+	ret = php_dbm_exists(info, Z_STRVAL_P(key) TSRMLS_CC);
 	RETURN_LONG(ret);
 }
 /* }}} */
 
 /* {{{ php_dbm_exists
  */
-int php_dbm_exists(dbm_info *info, char *key) {
+int php_dbm_exists(dbm_info *info, char *key TSRMLS_DC) {
 	datum key_datum;
 	int ret;
 	DBM_TYPE dbf;
@@ -784,7 +784,7 @@ PHP_FUNCTION(dbmfirstkey)
 		RETURN_FALSE;
 	}
 
-	ret = php_dbm_first_key(info);
+	ret = php_dbm_first_key(info TSRMLS_CC);
 	if (!ret) {
 		RETURN_FALSE;
 	} else {
@@ -795,7 +795,7 @@ PHP_FUNCTION(dbmfirstkey)
 
 /* {{{ php_dbm_first_key
  */
-char *php_dbm_first_key(dbm_info *info) {
+char *php_dbm_first_key(dbm_info *info TSRMLS_DC) {
 	datum ret_datum;
 	char *ret;
 	DBM_TYPE dbf;
