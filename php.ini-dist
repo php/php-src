@@ -67,7 +67,12 @@
 ; Enable the PHP scripting language engine under Apache.
 engine = On
 
-; Allow the <? tag.  Otherwise, only <?php and <script> tags are recognized.
+; Allow the <? tag.  Otherwise, only <?php and <script> tags are recognized.  
+; NOTE: Using short tags should be avoided when developing applications or
+; libraries that are meant for redistribution, or deployment on PHP
+; servers which are not under your control, because short tags may not
+; be supported on the target server. For portable, redistributable code,
+; be sure not to use short tags.
 short_open_tag = On
 
 ; Allow ASP-style <% %> tags.
