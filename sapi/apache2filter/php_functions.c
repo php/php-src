@@ -314,11 +314,17 @@ PHP_FUNCTION(apache_get_version)
 PHP_FUNCTION(apache_get_modules)
 {
 	int n;
+	char *p;
 	
 	array_init(return_value);
 	
 	for (n = 0; ap_loaded_modules[n]; ++n) {
-		add_next_index_string(return_value, (char *) ap_loaded_modules[n]->name, 1);
+		char *s = (char *) ap_loaded_modules[n]->name;
+		if ((p = strchr(s, '.'))) {
+			add_next_index_stringl(return_value, s, (p - s), 1);
+		} else {
+			add_next_index_string(return_value, s, 1);
+		}
 	}
 }
 /* }}} */
@@ -328,9 +334,15 @@ PHP_MINFO_FUNCTION(apache)
 	char *apv = php_apache_get_version();
 	smart_str tmp1 = {0};
 	int n;
+	char *p;
 	
 	for (n = 0; ap_loaded_modules[n]; ++n) {
-		smart_str_appends(&tmp1, ap_loaded_modules[n]->name);
+		char *s = (char *) ap_loaded_modules[n]->name;
+		if ((p = strchr(s, '.'))) {
+			smart_str_appendl(&tmp1, s, (p - s));
+		} else {
+			smart_str_appends(&tmp1, s);
+		}
 		smart_str_appendc(&tmp1, ' ');
 	}
             
@@ -338,7 +350,7 @@ PHP_MINFO_FUNCTION(apache)
 	if (apv && *apv) {
 		php_info_print_table_row(2, "Apache Version", apv);
 	}
-	php_info_print_table_row(2, "Loaded Apache Modules", tmp1.c);
+	php_info_print_table_row(2, "Loaded Modules", tmp1.c);
 	smart_str_free(&tmp1);
 	php_info_print_table_end();
 }
