@@ -133,7 +133,6 @@ static long pgsql_handle_doer(pdo_dbh_t *dbh, const char *sql, long sql_len TSRM
 
 static int pgsql_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, int unquotedlen, char **quoted, int *quotedlen  TSRMLS_DC)
 {
-	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data;
 	*quoted = emalloc(2*unquotedlen + 3);
 	(*quoted)[0] = '\'';
 	*quotedlen = PQescapeString(*quoted + 1, unquoted, unquotedlen);
