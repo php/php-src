@@ -267,7 +267,7 @@ PHP_FUNCTION(gzfile)
 			WRONG_PARAM_COUNT;
 		}
 		convert_to_long_ex(arg2);
-		use_include_path = (*arg2)->value.lval?USE_PATH:0;
+		use_include_path = Z_LVAL_PP(arg2)?USE_PATH:0;
 		break;
 	default:
 		WRONG_PARAM_COUNT;
@@ -321,23 +321,23 @@ PHP_FUNCTION(gzopen)
 			WRONG_PARAM_COUNT;
 		}
 		convert_to_long_ex(arg3);
-		use_include_path = (*arg3)->value.lval?USE_PATH:0;
+		use_include_path = Z_LVAL_PP(arg3)?USE_PATH:0;
 		break;
 	default:
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(arg1);
 	convert_to_string_ex(arg2);
-	p = estrndup((*arg2)->value.str.val,(*arg2)->value.str.len);
+	p = estrndup(Z_STRVAL_PP(arg2),Z_STRLEN_PP(arg2));
 
 	/*
 	 * We need a better way of returning error messages from
 	 * php_gzopen_wrapper().
 	 */
-	zp = php_gzopen_wrapper((*arg1)->value.str.val, p, use_include_path|ENFORCE_SAFE_MODE TSRMLS_CC);
+	zp = php_gzopen_wrapper(Z_STRVAL_PP(arg1), p, use_include_path|ENFORCE_SAFE_MODE TSRMLS_CC);
 	if (!zp) {
 		php_error(E_WARNING,"gzopen(\"%s\",\"%s\") - %s",
-					(*arg1)->value.str.val, p, strerror(errno));
+					Z_STRVAL_PP(arg1), p, strerror(errno));
 		efree(p);
 		RETURN_FALSE;
 	}
@@ -358,7 +358,7 @@ PHP_FUNCTION(gzclose)
 		WRONG_PARAM_COUNT;
 	}
 	ZEND_FETCH_RESOURCE(zp, gzFile *, arg1, -1, "Zlib file", le_zp);
-	zend_list_delete((*arg1)->value.lval);
+	zend_list_delete(Z_LVAL_PP(arg1));
 	RETURN_TRUE;
 }
 /* }}} */
@@ -396,7 +396,7 @@ PHP_FUNCTION(gzgets)
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long_ex(arg2);
-	len = (*arg2)->value.lval;
+	len = Z_LVAL_PP(arg2);
 
 	ZEND_FETCH_RESOURCE(zp, gzFile *, arg1, -1, "Zlib file", le_zp);
 
@@ -517,7 +517,7 @@ PHP_FUNCTION(gzwrite)
 				RETURN_FALSE;
 			}
 			convert_to_string_ex(arg2);
-			num_bytes = (*arg2)->value.str.len;
+			num_bytes = Z_STRLEN_PP(arg2);
 			break;
 		case 3:
 			if (zend_get_parameters_ex(3, &arg1, &arg2, &arg3)==FAILURE) {
@@ -525,7 +525,7 @@ PHP_FUNCTION(gzwrite)
 			}
 			convert_to_string_ex(arg2);
 			convert_to_long_ex(arg3);
-			num_bytes = MIN((*arg3)->value.lval, (*arg2)->value.str.len);
+			num_bytes = MIN(Z_LVAL_PP(arg3), Z_STRLEN_PP(arg2));
 			break;
 		default:
 			WRONG_PARAM_COUNT;
@@ -539,7 +539,7 @@ PHP_FUNCTION(gzwrite)
 		php_stripslashes(Z_STRVAL_PP(arg2), &num_bytes TSRMLS_CC);
 	}
 
-	ret = gzwrite(zp, (*arg2)->value.str.val,num_bytes);
+	ret = gzwrite(zp, Z_STRVAL_PP(arg2),num_bytes);
 	RETURN_LONG(ret);
 }	
 /* }}} */
@@ -600,7 +600,7 @@ PHP_FUNCTION(gzseek)
 
 	ZEND_FETCH_RESOURCE(zp, gzFile *, arg1, -1, "Zlib file", le_zp);
 
- 	ret = gzseek(zp, (*arg2)->value.lval, SEEK_SET);
+ 	ret = gzseek(zp, Z_LVAL_PP(arg2), SEEK_SET);
 	RETURN_LONG(ret);
 }
 /* }}} */
@@ -631,7 +631,7 @@ PHP_FUNCTION(readgzfile)
 			WRONG_PARAM_COUNT;
 		}
 		convert_to_long_ex(arg2);
-		use_include_path = (*arg2)->value.lval?USE_PATH:0;
+		use_include_path = Z_LVAL_PP(arg2)?USE_PATH:0;
 		break;
 	default:
 		WRONG_PARAM_COUNT;
@@ -642,9 +642,9 @@ PHP_FUNCTION(readgzfile)
 	 * We need a better way of returning error messages from
 	 * php_gzopen_wrapper().
 	 */
-	zp = php_gzopen_wrapper((*arg1)->value.str.val,"r", use_include_path|ENFORCE_SAFE_MODE TSRMLS_CC);
+	zp = php_gzopen_wrapper(Z_STRVAL_PP(arg1),"r", use_include_path|ENFORCE_SAFE_MODE TSRMLS_CC);
 	if (!zp){
-		php_error(E_WARNING,"ReadGzFile(\"%s\") - %s",(*arg1)->value.str.val,strerror(errno));
+		php_error(E_WARNING,"ReadGzFile(\"%s\") - %s",Z_STRVAL_PP(arg1),strerror(errno));
 		RETURN_FALSE;
 	}
 	size= 0;
@@ -681,7 +681,7 @@ PHP_FUNCTION(gzpassthru)
 		size += b ;
 	}
 /*  gzclose(zp); */
-	zend_list_delete((*arg1)->value.lval);
+	zend_list_delete(Z_LVAL_PP(arg1));
 	RETURN_LONG(size);
 }
 /* }}} */
@@ -698,7 +698,7 @@ PHP_FUNCTION(gzread)
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long_ex(arg2);
-	len = (*arg2)->value.lval;
+	len = Z_LVAL_PP(arg2);
 
 	ZEND_FETCH_RESOURCE(zp, gzFile *, arg1, -1, "Zlib file", le_zp);
 

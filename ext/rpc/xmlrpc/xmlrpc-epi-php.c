@@ -815,13 +815,13 @@ PHP_FUNCTION(xmlrpc_server_destroy) {
       WRONG_PARAM_COUNT; /* prints/logs a warning and returns */
    }
 
-   if(arg1->type == IS_RESOURCE) {
+   if(Z_TYPE_P(arg1) == IS_RESOURCE) {
       int type;
 
-      xmlrpc_server_data *server = zend_list_find(arg1->value.lval, &type);
+      xmlrpc_server_data *server = zend_list_find(Z_LVAL_P(arg1), &type);
 
       if(server && type == XMLRPCG(le_xmlrpc_server)) {
-         bSuccess = zend_list_delete(arg1->value.lval);
+         bSuccess = zend_list_delete(Z_LVAL_P(arg1));
 
          /* called by hashtable destructor
           * destroy_server_data(server);
@@ -1163,7 +1163,7 @@ PHP_FUNCTION(xmlrpc_parse_method_descriptions)
 
    if(return_value_used) {
       STRUCT_XMLRPC_ERROR err = {0};
-      XMLRPC_VALUE xVal = XMLRPC_IntrospectionCreateDescription(arg1->value.str.val, &err);
+      XMLRPC_VALUE xVal = XMLRPC_IntrospectionCreateDescription(Z_STRVAL_P(arg1), &err);
       if(xVal) {
          retval = XMLRPC_to_PHP(xVal);
 

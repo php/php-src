@@ -119,16 +119,16 @@ void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gm)
 	*/
 	switch(arg_count) {
 	case 7:
-		ta->tm_isdst = is_dst = (*arguments[6])->value.lval;
+		ta->tm_isdst = is_dst = Z_LVAL_PP(arguments[6]);
 		/* fall-through */
 	case 6:
 		/* special case: 
 		   a zero in year, month and day is considered illegal
 		   as it would be interpreted as 30.11.1999 otherwise
 		*/
-		if (  (  (*arguments[5])->value.lval==0)
-			  &&((*arguments[4])->value.lval==0)
-			  &&((*arguments[3])->value.lval==0)
+		if (  (  Z_LVAL_PP(arguments[5])==0)
+			  &&(Z_LVAL_PP(arguments[4])==0)
+			  &&(Z_LVAL_PP(arguments[3])==0)
 			  ) {
 			RETURN_LONG(-1);
 		}
@@ -143,26 +143,26 @@ void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gm)
 		** But it cannot represent ancestral dates prior to year 1001.
 		** Additionally, input parameters of 0..70 are mapped to 100..170
 		*/
-		if ((*arguments[5])->value.lval < 70)
-			ta->tm_year = (*arguments[5])->value.lval + 100;
+		if (Z_LVAL_PP(arguments[5]) < 70)
+			ta->tm_year = Z_LVAL_PP(arguments[5]) + 100;
 		else
-			ta->tm_year = (*arguments[5])->value.lval
-			  - (((*arguments[5])->value.lval > 1000) ? 1900 : 0);
+			ta->tm_year = Z_LVAL_PP(arguments[5])
+			  - ((Z_LVAL_PP(arguments[5]) > 1000) ? 1900 : 0);
 		/* fall-through */
 	case 5:
-		ta->tm_mday = (*arguments[4])->value.lval;
+		ta->tm_mday = Z_LVAL_PP(arguments[4]);
 		/* fall-through */
 	case 4:
-		ta->tm_mon = (*arguments[3])->value.lval - 1;
+		ta->tm_mon = Z_LVAL_PP(arguments[3]) - 1;
 		/* fall-through */
 	case 3:
-		ta->tm_sec = (*arguments[2])->value.lval;
+		ta->tm_sec = Z_LVAL_PP(arguments[2]);
 		/* fall-through */
 	case 2:
-		ta->tm_min = (*arguments[1])->value.lval;
+		ta->tm_min = Z_LVAL_PP(arguments[1]);
 		/* fall-through */
 	case 1:
-		ta->tm_hour = (*arguments[0])->value.lval;
+		ta->tm_hour = Z_LVAL_PP(arguments[0]);
 		/* fall-through */
 	case 0:
 		break;

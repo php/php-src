@@ -89,7 +89,7 @@ static void php_print_gpcse_array(char *name, uint name_length TSRMLS_DC)
 				tmp2 = **tmp;
 				zval_copy_ctor(&tmp2);
 				convert_to_string(&tmp2);
-				zend_html_puts(tmp2.value.str.val, tmp2.value.str.len);
+				zend_html_puts(Z_STRVAL(tmp2), Z_STRLEN(tmp2));
 				zval_dtor(&tmp2);
 			} else {
 				zend_html_puts(Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp));

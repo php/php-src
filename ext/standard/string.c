@@ -3501,8 +3501,8 @@ static void php_strnatcmp(INTERNAL_FUNCTION_PARAMETERS, int fold_case)
 	convert_to_string_ex(s1);
 	convert_to_string_ex(s2);
 
-	RETURN_LONG(strnatcmp_ex((*s1)->value.str.val, (*s1)->value.str.len,
-							 (*s2)->value.str.val, (*s2)->value.str.len,
+	RETURN_LONG(strnatcmp_ex(Z_STRVAL_PP(s1), Z_STRLEN_PP(s1),
+							 Z_STRVAL_PP(s2), Z_STRLEN_PP(s2),
 							 fold_case));
 }
 /* }}} */

@@ -88,8 +88,8 @@ PHP_FUNCTION(mail)
 	}
 	/* To: */
 	convert_to_string_ex(argv[0]);
-	if ((*argv[0])->value.str.val) {
-		to = (*argv[0])->value.str.val;
+	if (Z_STRVAL_PP(argv[0])) {
+		to = Z_STRVAL_PP(argv[0]);
 	} else {
 		php_error(E_WARNING, "No to field in mail command");
 		RETURN_FALSE;
@@ -97,7 +97,7 @@ PHP_FUNCTION(mail)
 
 	/* Subject: */
 	convert_to_string_ex(argv[1]);
-	if ((*argv[1])->value.str.val) {
+	if (Z_STRVAL_PP(argv[1])) {
 		subject = Z_STRVAL_PP(argv[1]);
 	} else {
 		php_error(E_WARNING, "No subject field in mail command");
@@ -106,7 +106,7 @@ PHP_FUNCTION(mail)
 
 	/* message body */
 	convert_to_string_ex(argv[2]);
-	if ((*argv[2])->value.str.val) {
+	if (Z_STRVAL_PP(argv[2])) {
 		message = Z_STRVAL_PP(argv[2]);
 	} else {
 		/* this is not really an error, so it is allowed. */

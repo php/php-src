@@ -230,7 +230,7 @@ PHP_FUNCTION(cpdf_global_set_document_limits)
 	convert_to_long(argv[3]);
 	convert_to_long(argv[4]);
 
-	cpdf_setGlobalDocumentLimits(argv[0]->value.lval, argv[1]->value.lval, argv[2]->value.lval, argv[3]->value.lval, argv[4]->value.lval);
+	cpdf_setGlobalDocumentLimits(Z_LVAL_P(argv[0]), Z_LVAL_P(argv[1]), Z_LVAL_P(argv[2]), Z_LVAL_P(argv[3]), Z_LVAL_P(argv[4]));
 
 	RETURN_TRUE;
 }
@@ -250,14 +250,14 @@ PHP_FUNCTION(cpdf_set_creator)
 
 	convert_to_long(arg1);
 	convert_to_string(arg2);
-	id=arg1->value.lval;
+	id=Z_LVAL_P(arg1);
 	pdf = zend_list_find(id, &type);
 	if (!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
 		php_error(E_WARNING, "Unable to find identifier %d (type=%d)", id, type);
 		RETURN_FALSE;
 	}
 
-	cpdf_setCreator(pdf, arg2->value.str.val);
+	cpdf_setCreator(pdf, Z_STRVAL_P(arg2));
 
 	RETURN_TRUE;
 }
@@ -277,14 +277,14 @@ PHP_FUNCTION(cpdf_set_title)
 
 	convert_to_long(arg1);
 	convert_to_string(arg2);
-	id=arg1->value.lval;
+	id=Z_LVAL_P(arg1);
 	pdf = zend_list_find(id, &type);
 	if (!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
 		php_error(E_WARNING, "Unable to find identifier %d (type=%d)", id, type);
 		RETURN_FALSE;
 	}
 
-	cpdf_setTitle(pdf, arg2->value.str.val);
+	cpdf_setTitle(pdf, Z_STRVAL_P(arg2));
 
 	RETURN_TRUE;
 }
@@ -305,14 +305,14 @@ PHP_FUNCTION(cpdf_set_subject)
 
 	convert_to_long(arg1);
 	convert_to_string(arg2);
-	id=arg1->value.lval;
+	id=Z_LVAL_P(arg1);
 	pdf = zend_list_find(id, &type);
 	if (!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
 		php_error(E_WARNING, "Unable to find identifier %d (type=%d)", id, type);
 		RETURN_FALSE;
 	}
 
-	cpdf_setSubject(pdf, arg2->value.str.val);
+	cpdf_setSubject(pdf, Z_STRVAL_P(arg2));
 
 	RETURN_TRUE;
 }
@@ -332,14 +332,14 @@ PHP_FUNCTION(cpdf_set_keywords)
 
 	convert_to_long(arg1);
 	convert_to_string(arg2);
-	id=arg1->value.lval;
+	id=Z_LVAL_P(arg1);
 	pdf = zend_list_find(id, &type);
 	if (!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
 		php_error(E_WARNING, "Unable to find identifier %d (type=%d)", id, type);
 		RETURN_FALSE;
 	}
 
-	cpdf_setKeywords(pdf, arg2->value.str.val);
+	cpdf_setKeywords(pdf, Z_STRVAL_P(arg2));
 
 	RETURN_TRUE;
 }
@@ -372,42 +372,42 @@ PHP_FUNCTION(cpdf_set_viewer_preferences)
 		RETURN_FALSE;
 	}
 
-	if (zend_hash_find (arg2->value.ht, "pagemode", sizeof ("pagemode"), (void **) &zvalue) == SUCCESS)
+	if (zend_hash_find (Z_ARRVAL_P(arg2), "pagemode", sizeof ("pagemode"), (void **) &zvalue) == SUCCESS)
 	{
 		convert_to_long_ex (zvalue);
 		vP.pageMode = Z_LVAL_PP (zvalue);
 	}
-	if (zend_hash_find (arg2->value.ht, "hidetoolbar", sizeof ("hidetoolbar"), (void **) &zvalue) == SUCCESS)
+	if (zend_hash_find (Z_ARRVAL_P(arg2), "hidetoolbar", sizeof ("hidetoolbar"), (void **) &zvalue) == SUCCESS)
 	{
 		convert_to_long_ex (zvalue);
 		vP.hideToolbar = Z_LVAL_PP (zvalue);
 	}
-	if (zend_hash_find (arg2->value.ht, "hidemenubar", sizeof ("hidemenubar"), (void **) &zvalue) == SUCCESS)
+	if (zend_hash_find (Z_ARRVAL_P(arg2), "hidemenubar", sizeof ("hidemenubar"), (void **) &zvalue) == SUCCESS)
 	{
 		convert_to_long_ex (zvalue);
 		vP.hideMenubar = Z_LVAL_PP (zvalue);
 	}
-	if (zend_hash_find (arg2->value.ht, "hidewindowui", sizeof ("hidewindowui"), (void **) &zvalue) == SUCCESS)
+	if (zend_hash_find (Z_ARRVAL_P(arg2), "hidewindowui", sizeof ("hidewindowui"), (void **) &zvalue) == SUCCESS)
 	{
 		convert_to_long_ex (zvalue);
 		vP.hideWindowUI = Z_LVAL_PP (zvalue);
 	}
-	if (zend_hash_find (arg2->value.ht, "fitwindow", sizeof ("fitwindow"), (void **) &zvalue) == SUCCESS)
+	if (zend_hash_find (Z_ARRVAL_P(arg2), "fitwindow", sizeof ("fitwindow"), (void **) &zvalue) == SUCCESS)
 	{
 		convert_to_long_ex (zvalue);
 		vP.fitWindow = Z_LVAL_PP (zvalue);
 	}
-	if (zend_hash_find (arg2->value.ht, "centerwindow", sizeof ("centerwindow"), (void **) &zvalue) == SUCCESS)
+	if (zend_hash_find (Z_ARRVAL_P(arg2), "centerwindow", sizeof ("centerwindow"), (void **) &zvalue) == SUCCESS)
 	{
 		convert_to_long_ex (zvalue);
 		vP.centerWindow = Z_LVAL_PP (zvalue);
 	}
-	if (zend_hash_find (arg2->value.ht, "pagelayout", sizeof ("pagelayout"), (void **) &zvalue) == SUCCESS)
+	if (zend_hash_find (Z_ARRVAL_P(arg2), "pagelayout", sizeof ("pagelayout"), (void **) &zvalue) == SUCCESS)
 	{
 		convert_to_long_ex (zvalue);
 		vP.pageLayout = Z_LVAL_PP (zvalue);
 	}
-	if (zend_hash_find (arg2->value.ht, "nonfspagemode", sizeof ("nonfspagemode"), (void **) &zvalue) == SUCCESS)
+	if (zend_hash_find (Z_ARRVAL_P(arg2), "nonfspagemode", sizeof ("nonfspagemode"), (void **) &zvalue) == SUCCESS)
 	{
 		convert_to_long_ex (zvalue);
 		vP.nonFSPageMode = Z_LVAL_PP (zvalue);
@@ -453,7 +453,7 @@ PHP_FUNCTION(cpdf_open)
 	cpdf = cpdf_open(0, NULL);
 	if(!cpdf)
 		RETURN_FALSE;
-	if(arg1->value.lval == 1)
+	if(Z_LVAL_P(arg1) == 1)
 		cpdf_enableCompression(cpdf, YES);
 	else
 		cpdf_enableCompression(cpdf, NO);
@@ -461,10 +461,10 @@ PHP_FUNCTION(cpdf_open)
 	if(argc > 1) {
 		convert_to_string(arg2);
 #if APACHE
-		if(strcmp(arg2->value.str.val, "-") == 0)
+		if(strcmp(Z_STRVAL_P(arg2), "-") == 0)
 			php_error(E_WARNING, "Writing to stdout as described in the ClibPDF manual is not possible if php is used as an Apache module. Write to a memory stream and use cpdf_output_buffer() instead.");
 #endif
-		cpdf_setOutputFilename(cpdf, arg2->value.str.val);
+		cpdf_setOutputFilename(cpdf, Z_STRVAL_P(arg2));
 	}
 	cpdf_init(cpdf);
 
@@ -486,7 +486,7 @@ PHP_FUNCTION(cpdf_close)
 	}
 
 	convert_to_long(arg1);
-	id=arg1->value.lval;
+	id=Z_LVAL_P(arg1);
 	pdf = zend_list_find(id, &type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
 		php_error(E_WARNING, "Unable to find identifier %d", id);
@@ -520,11 +520,11 @@ PHP_FUNCTION(cpdf_page_init)
 	convert_to_long(argv[2]);
 	convert_to_long(argv[3]);
 	convert_to_long(argv[4]);
-	id=argv[0]->value.lval;
-	pagenr=argv[1]->value.lval;
-	orientation=argv[2]->value.lval;
-	height = argv[3]->value.lval;
-	width = argv[4]->value.lval;
+	id=Z_LVAL_P(argv[0]);
+	pagenr=Z_LVAL_P(argv[1]);
+	orientation=Z_LVAL_P(argv[2]);
+	height = Z_LVAL_P(argv[3]);
+	width = Z_LVAL_P(argv[4]);
 	pdf = zend_list_find(id, &type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
 		php_error(E_WARNING, "Unable to find identifier %d", id);
@@ -533,8 +533,8 @@ PHP_FUNCTION(cpdf_page_init)
 
 	if(argc > 5) {
 		convert_to_double(argv[5]);
-		if(argv[5]->value.dval > 0.0)
-			cpdf_setDefaultDomainUnit(pdf, argv[5]->value.dval);
+		if(Z_DVAL_P(argv[5]) > 0.0)
+			cpdf_setDefaultDomainUnit(pdf, Z_DVAL_P(argv[5]));
 	}
 	snprintf(buffer, BUFFERLEN, "0 0 %d %d", width, height);
 	cpdf_pageInit(pdf, pagenr, orientation, buffer, buffer);
@@ -558,8 +558,8 @@ PHP_FUNCTION(cpdf_finalize_page)
 
 	convert_to_long(arg1);
 	convert_to_long(arg2);
-	id=arg1->value.lval;
-	pagenr=arg2->value.lval;
+	id=Z_LVAL_P(arg1);
+	pagenr=Z_LVAL_P(arg2);
 	pdf = zend_list_find(id, &type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
 		php_error(E_WARNING, "Unable to find identifier %d", id);
@@ -586,8 +586,8 @@ PHP_FUNCTION(cpdf_set_current_page)
 
 	convert_to_long(arg1);
 	convert_to_long(arg2);
-	id=arg1->value.lval;
-	pagenr=arg2->value.lval;
+	id=Z_LVAL_P(arg1);
+	pagenr=Z_LVAL_P(arg2);
 	pdf = zend_list_find(id, &type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
 		php_error(E_WARNING, "Unable to find identifier %d", id);
@@ -613,7 +613,7 @@ PHP_FUNCTION(cpdf_begin_text)
 	}
 
 	convert_to_long(arg1);
-	id=arg1->value.lval;
+	id=Z_LVAL_P(arg1);
 	pdf = zend_list_find(id, &type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
 		php_error(E_WARNING, "Unable to find identifier %d", id);
@@ -639,7 +639,7 @@ PHP_FUNCTION(cpdf_end_text)
 	}
 
 	convert_to_long(arg1);
-	id=arg1->value.lval;
+	id=Z_LVAL_P(arg1);
 	pdf = zend_list_find(id, &type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
 		php_error(E_WARNING, "Unable to find identifier %d", id);
@@ -666,14 +666,14 @@ PHP_FUNCTION(cpdf_show)
 
 	convert_to_long(arg1);
 	convert_to_string(arg2);
-	id=arg1->value.lval;
+	id=Z_LVAL_P(arg1);
 	pdf = zend_list_find(id, &type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
 		php_error(E_WARNING, "Unable to find identifier %d", id);
 		RETURN_FALSE;
 	}
 
-	cpdf_textShow(pdf, arg2->value.str.val);
+	cpdf_textShow(pdf, Z_STRVAL_P(arg2));
 
 	RETURN_TRUE;
 }
@@ -697,7 +697,7 @@ PHP_FUNCTION(cpdf_show_xy)
 	convert_to_string(argv[1]);
 	convert_to_double(argv[2]);
 	convert_to_double(argv[3]);
-	id=argv[0]->value.lval;
+	id=Z_LVAL_P(argv[0]);
 	pdf = zend_list_find(id, &type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
 		php_error(E_WARNING, "Unable to find identifier %d", id);
@@ -706,12 +706,12 @@ PHP_FUNCTION(cpdf_show_xy)
 
 	if(argc == 5) {
 		convert_to_long(argv[4]);
-		mode = argv[4]->value.lval;
+		mode = Z_LVAL_P(argv[4]);
 	}
 	if(mode == 1)
-		cpdf_rawText(pdf, (float) argv[2]->value.dval, (float) argv[3]->value.dval, 0.0, argv[1]->value.str.val);
+		cpdf_rawText(pdf, (float) Z_DVAL_P(argv[2]), (float) Z_DVAL_P(argv[3]), 0.0, Z_STRVAL_P(argv[1]));
 	else
-		cpdf_text(pdf, (float) argv[2]->value.dval, (float) argv[3]->value.dval, 0.0, argv[1]->value.str.val);
+		cpdf_text(pdf, (float) Z_DVAL_P(argv[2]), (float) Z_DVAL_P(argv[3]), 0.0, Z_STRVAL_P(argv[1]));
 
 	RETURN_TRUE;
 }
@@ -731,14 +731,14 @@ PHP_FUNCTION(cpdf_continue_text)
 
 	convert_to_long(arg1);
 	convert_to_string(arg2);
-	id=arg1->value.lval;
+	id=Z_LVAL_P(arg1);
 	pdf = zend_list_find(id, &type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
 		php_error(E_WARNING, "Unable to find identifier %d", id);
 		RETURN_FALSE;
 	}
 
-	cpdf_textCRLFshow(pdf, arg2->value.str.val);
+	cpdf_textCRLFshow(pdf, Z_STRVAL_P(arg2));
 
 	RETURN_TRUE;
 }
@@ -758,7 +758,7 @@ PHP_FUNCTION(cpdf_text)
 
 	convert_to_long(argv[0]);
 	convert_to_string(argv[1]);
-	id=argv[0]->value.lval;
+	id=Z_LVAL_P(argv[0]);
 	pdf = zend_list_find(id, &type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
 		php_error(E_WARNING, "Unable to find identifier %d", id);
@@ -767,48 +767,48 @@ PHP_FUNCTION(cpdf_text)
 
 	if(argc > 4) {
 		convert_to_long(argv[4]);
-		mode = argv[2]->value.lval;
+		mode = Z_LVAL_P(argv[2]);
 	}
 	switch(argc) {
 		case 2:
-			cpdf_textShow(pdf, argv[1]->value.str.val);
+			cpdf_textShow(pdf, Z_STRVAL_P(argv[1]));
 			break;
 		case 4:
 			convert_to_double(argv[2]);
 			convert_to_double(argv[3]);
-			cpdf_text(pdf, (float) argv[2]->value.dval,
-			          (float) argv[3]->value.dval,
+			cpdf_text(pdf, (float) Z_DVAL_P(argv[2]),
+			          (float) Z_DVAL_P(argv[3]),
 			           0.0,
-			           argv[1]->value.str.val);
+			           Z_STRVAL_P(argv[1]));
 			break;
 		case 5:
 			convert_to_double(argv[2]);
 			convert_to_double(argv[3]);
 			if(mode == 1)
-				cpdf_rawText(pdf, (float) argv[2]->value.dval,
-			             	(float) argv[3]->value.dval,
+				cpdf_rawText(pdf, (float) Z_DVAL_P(argv[2]),
+			             	(float) Z_DVAL_P(argv[3]),
 			             	0.0,
-			              	argv[1]->value.str.val);
+			              	Z_STRVAL_P(argv[1]));
 			else
-				cpdf_text(pdf, (float) argv[2]->value.dval,
-				          (float) argv[3]->value.dval,
+				cpdf_text(pdf, (float) Z_DVAL_P(argv[2]),
+				          (float) Z_DVAL_P(argv[3]),
 				          0.0,
-				          argv[1]->value.str.val);
+				          Z_STRVAL_P(argv[1]));
 			break;
 		case 6:
 			convert_to_double(argv[2]);
 			convert_to_double(argv[3]);
 			convert_to_double(argv[5]);
 			if(mode == 1)
-				cpdf_rawText(pdf, (float) argv[2]->value.dval,
-			             	(float) argv[3]->value.dval,
-			             	(float) argv[5]->value.dval,
-			              	argv[1]->value.str.val);
+				cpdf_rawText(pdf, (float) Z_DVAL_P(argv[2]),
+			             	(float) Z_DVAL_P(argv[3]),
+			             	(float) Z_DVAL_P(argv[5]),
+			              	Z_STRVAL_P(argv[1]));
 			else
-				cpdf_text(pdf, (float) argv[2]->value.dval,
-			             	(float) argv[3]->value.dval,
-			             	(float) argv[5]->value.dval,
-			              	argv[1]->value.str.val);
+				cpdf_text(pdf, (float) Z_DVAL_P(argv[2]),
+			             	(float) Z_DVAL_P(argv[3]),
+			             	(float) Z_DVAL_P(argv[5]),
+			              	Z_STRVAL_P(argv[1]));
 			break;
 		case 7:
 			convert_to_double(argv[2]);
@@ -816,17 +816,17 @@ PHP_FUNCTION(cpdf_text)
 			convert_to_double(argv[5]);
 			convert_to_long(argv[6]);
 			if(mode == 1)
-				cpdf_rawTextAligned(pdf, (float) argv[2]->value.dval,
-			             	(float) argv[3]->value.dval,
-			             	(float) argv[5]->value.dval,
-			             	argv[6]->value.lval,
-			              	argv[1]->value.str.val);
+				cpdf_rawTextAligned(pdf, (float) Z_DVAL_P(argv[2]),
+			             	(float) Z_DVAL_P(argv[3]),
+			             	(float) Z_DVAL_P(argv[5]),
+			             	Z_LVAL_P(argv[6]),
+			              	Z_STRVAL_P(argv[1]));
 			else
-				cpdf_textAligned(pdf, (float) argv[2]->value.dval,
-			             	(float) argv[3]->value.dval,
-			             	(float) argv[5]->value.dval,
-			             	argv[6]->value.lval,
-			              	argv[1]->value.str.val);
+				cpdf_textAligned(pdf, (float) Z_DVAL_P(argv[2]),
+			             	(float) Z_DVAL_P(argv[3]),
+			             	(float) Z_DVAL_P(argv[5]),
+			             	Z_LVAL_P(argv[6]),
+			              	Z_STRVAL_P(argv[1]));
 			break;
 	}
 
@@ -850,19 +850,19 @@ PHP_FUNCTION(cpdf_set_font)
 	convert_to_string(arg2);
 	convert_to_double(arg3);
 	convert_to_string(arg4);
-	id=arg1->value.lval;
+	id=Z_LVAL_P(arg1);
 	pdf = zend_list_find(id, &type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
 		php_error(E_WARNING, "Unable to find identifier %d", id);
 		RETURN_FALSE;
 	}
 	
-/*	if(arg4->value.lval > 6) {
+/*	if(Z_LVAL_P(arg4) > 6) {
 		php_error(E_WARNING, "Font encoding set to 5");
-		arg4->value.lval = 5;
+		Z_LVAL_P(arg4) = 5;
 	}
 */
-	cpdf_setFont(pdf, arg2->value.str.val, arg4->value.str.val, (float) arg3->value.dval);
+	cpdf_setFont(pdf, Z_STRVAL_P(arg2), Z_STRVAL_P(arg4), (float) Z_DVAL_P(arg3));
 
 	RETURN_TRUE;
 }
@@ -883,14 +883,14 @@ PHP_FUNCTION(cpdf_set_font_directories)
 	convert_to_long(arg1);
 	convert_to_string(arg2);
 	convert_to_string(arg3);
-	id=arg1->value.lval;
+	id=Z_LVAL_P(arg1);
 	pdf = zend_list_find(id, &type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
 		php_error(E_WARNING, "Unable to find identifier %d", id);
 		RETURN_FALSE;
 	}
 
-	cpdf_setFontDirectories(pdf, arg2->value.str.val, arg3->value.str.val);
+	cpdf_setFontDirectories(pdf, Z_STRVAL_P(arg2), Z_STRVAL_P(arg3));
 
 	RETURN_TRUE;
 }
@@ -910,14 +910,14 @@ PHP_FUNCTION(cpdf_set_font_map_file)
 
 	convert_to_long(arg1);
 	convert_to_string(arg2);
-	id=arg1->value.lval;
+	id=Z_LVAL_P(arg1);
 	pdf = zend_list_find(id, &type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
 		php_error(E_WARNING, "Unable to find identifier %d", id);
 		RETURN_FALSE;
 	}
 
-	cpdf_setFontMapFile(pdf, arg2->value.str.val);
+	cpdf_setFontMapFile(pdf, Z_STRVAL_P(arg2));
 
 	RETURN_TRUE;
 }
@@ -937,14 +937,14 @@ PHP_FUNCTION(cpdf_set_leading)
 
 	convert_to_long(arg1);
 	convert_to_double(arg2);
-	id=arg1->value.lval;
+	id=Z_LVAL_P(arg1);
 	pdf = zend_list_find(id, &type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
 		php_error(E_WARNING, "Unable to find identifier %d", id);
 		RETURN_FALSE;
 	}
 	
-	cpdf_setTextLeading(pdf, (float) arg2->value.dval);
+	cpdf_setTextLeading(pdf, (float) Z_DVAL_P(arg2));
 
 	RETURN_TRUE;
 }
@@ -964,14 +964,14 @@ PHP_FUNCTION(cpdf_set_text_rendering)
 
 	convert_to_long(arg1);
 	convert_to_long(arg2);
-	id=arg1->value.lval;
+	id=Z_LVAL_P(arg1);
 	pdf = zend_list_find(id, &type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
 		php_error(E_WARNING, "Unable to find identifier %d", id);
 		RETURN_FALSE;
 	}
 	
-	cpdf_setTextRenderingMode(pdf, arg2->value.lval);
+	cpdf_setTextRenderingMode(pdf, Z_LVAL_P(arg2));
 
 	RETURN_TRUE;
 }
@@ -991,14 +991,14 @@ PHP_FUNCTION(cpdf_set_horiz_scaling)
 
 	convert_to_long(arg1);
 	convert_to_double(arg2);
-	id=arg1->value.lval;
+	id=Z_LVAL_P(arg1);
 	pdf = zend_list_find(id, &type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
 		php_error(E_WARNING, "Unable to find identifier %d", id);
 		RETURN_FALSE;
 	}
 	
-	cpdf_setHorizontalScaling(pdf, (float) arg2->value.dval * 100.0);
+	cpdf_setHorizontalScaling(pdf, (float) Z_DVAL_P(arg2) * 100.0);
 
 	RETURN_TRUE;
 }
@@ -1018,14 +1018,14 @@ PHP_FUNCTION(cpdf_set_text_rise)
 
 	convert_to_long(arg1);
 	convert_to_double(arg2);
-	id=arg1->value.lval;
+	id=Z_LVAL_P(arg1);
 	pdf = zend_list_find(id, &type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
 		php_error(E_WARNING, "Unable to find identifier %d", id);
 		RETURN_FALSE;
 	}
 	
-	cpdf_setTextRise(pdf, (float) arg2->value.dval);
+	cpdf_setTextRise(pdf, (float) Z_DVAL_P(arg2));
 
 	RETURN_TRUE;
 }
@@ -1048,8 +1048,8 @@ PHP_FUNCTION(cpdf_set_text_matrix)
 
 	convert_to_long(arg1);
 	convert_to_array(arg2);
-	id=arg1->value.lval;
-	matrix=arg2->value.ht;
+	id=Z_LVAL_P(arg1);
+	matrix=Z_ARRVAL_P(arg2);
 	pdf = zend_list_find(id, &type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
 		php_error(E_WARNING, "Unable to find identifier %d", id);
@@ -1101,7 +1101,7 @@ PHP_FUNCTION(cpdf_set_text_pos)
 	convert_to_long(argv[0]);
 	convert_to_double(argv[1]);
 	convert_to_double(argv[2]);
-	id=argv[0]->value.lval;
+	id=Z_LVAL_P(argv[0]);
 	pdf = zend_list_find(id, &type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
 		php_error(E_WARNING, "Unable to find identifier %d", id);
@@ -1110,12 +1110,12 @@ PHP_FUNCTION(cpdf_set_text_pos)
 	
 	if(argc > 3) {
 		convert_to_long(argv[3]);
-		mode = argv[3]->value.lval;
+		mode = Z_LVAL_P(argv[3]);
 	}
 	if(mode == 1)
-		cpdf_rawSetTextPosition(pdf, (float) argv[1]->value.dval, (float) argv[2]->value.dval);
+		cpdf_rawSetTextPosition(pdf, (float) Z_DVAL_P(argv[1]), (float) Z_DVAL_P(argv[2]));
 	else
-		cpdf_setTextPosition(pdf, (float) argv[1]->value.dval, (float) argv[2]->value.dval);
+		cpdf_setTextPosition(pdf, (float) Z_DVAL_P(argv[1]), (float) Z_DVAL_P(argv[2]));
 
 	RETURN_TRUE;
 }
@@ -1135,14 +1135,14 @@ PHP_FUNCTION(cpdf_rotate_text)
 
 	convert_to_long(arg1);
 	convert_to_double(arg2);
-	id=arg1->value.lval;
+	id=Z_LVAL_P(arg1);
 	pdf = zend_list_find(id, &type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
 		php_error(E_WARNING, "Unable to find identifier %d", id);
 		RETURN_FALSE;
 	}
 
-	cpdf_rotateText(pdf, (float) arg2->value.dval);
+	cpdf_rotateText(pdf, (float) Z_DVAL_P(arg2));
 
 	RETURN_TRUE;
 }
@@ -1162,14 +1162,14 @@ PHP_FUNCTION(cpdf_set_char_spacing)
 
 	convert_to_long(arg1);
 	convert_to_double(arg2);
-	id=arg1->value.lval;
+	id=Z_LVAL_P(arg1);
 	pdf = zend_list_find(id, &type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
 		php_error(E_WARNING, "Unable to find identifier %d", id);
 		RETURN_FALSE;
 	}
 
-	cpdf_setCharacterSpacing(pdf, (float) arg2->value.dval);
+	cpdf_setCharacterSpacing(pdf, (float) Z_DVAL_P(arg2));
 
 	RETURN_TRUE;
 }
@@ -1189,14 +1189,14 @@ PHP_FUNCTION(cpdf_set_word_spacing)
 
 	convert_to_long(arg1);
 	convert_to_double(arg2);
-	id=arg1->value.lval;
+	id=Z_LVAL_P(arg1);
 	pdf = zend_list_find(id, &type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
 		php_error(E_WARNING, "Unable to find identifier %d", id);
 		RETURN_FALSE;
 	}
 
-	cpdf_setWordSpacing(pdf, (float) arg2->value.dval);
+	cpdf_setWordSpacing(pdf, (float) Z_DVAL_P(arg2));
 
 	RETURN_TRUE;
 }
@@ -1217,14 +1217,14 @@ PHP_FUNCTION(cpdf_stringwidth)
 
 	convert_to_long(arg1);
 	convert_to_string(arg2);
-	id=arg1->value.lval;
+	id=Z_LVAL_P(arg1);
 	pdf = zend_list_find(id, &type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
 		php_error(E_WARNING, "Unable to find identifier %d", id);
 		RETURN_FALSE;
 	}
 
-	width = (double) cpdf_stringWidth(pdf, arg2->value.str.val);
+	width = (double) cpdf_stringWidth(pdf, Z_STRVAL_P(arg2));
 
 	RETURN_DOUBLE((double)width);
 }
@@ -1243,7 +1243,7 @@ PHP_FUNCTION(cpdf_save)
 	}
 
 	convert_to_long(arg1);
-	id=arg1->value.lval;
+	id=Z_LVAL_P(arg1);
 	pdf = zend_list_find(id, &type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
 		php_error(E_WARNING, "Unable to find identifier %d", id);
@@ -1269,7 +1269,7 @@ PHP_FUNCTION(cpdf_restore)
 	}
 
 	convert_to_long(arg1);
-	id=arg1->value.lval;
+	id=Z_LVAL_P(arg1);
 	pdf = zend_list_find(id, &type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
 		php_error(E_WARNING, "Unable to find identifier %d", id);
@@ -1297,14 +1297,14 @@ PHP_FUNCTION(cpdf_translate)
 	convert_to_long(arg1);
 	convert_to_double(arg2);
 	convert_to_double(arg3);
-	id=arg1->value.lval;
+	id=Z_LVAL_P(arg1);
 	pdf = zend_list_find(id, &type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
 		php_error(E_WARNING, "Unable to find identifier %d", id);
 		RETURN_FALSE;
 	}
 
-	cpdf_rawTranslate(pdf, (float) arg2->value.dval, (float) arg3->value.dval);
+	cpdf_rawTranslate(pdf, (float) Z_DVAL_P(arg2), (float) Z_DVAL_P(arg3));
 
 	RETURN_TRUE;
 }
@@ -1325,14 +1325,14 @@ PHP_FUNCTION(cpdf_scale)
 	convert_to_long(arg1);
 	convert_to_double(arg2);
 	convert_to_double(arg3);
-	id=arg1->value.lval;
+	id=Z_LVAL_P(arg1);
 	pdf = zend_list_find(id, &type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
 		php_error(E_WARNING, "Unable to find identifier %d", id);
 		RETURN_FALSE;
 	}
 
-	cpdf_scale(pdf, (float) arg2->value.dval, (float) arg3->value.dval);
+	cpdf_scale(pdf, (float) Z_DVAL_P(arg2), (float) Z_DVAL_P(arg3));
 
 	RETURN_TRUE;
 }
@@ -1352,14 +1352,14 @@ PHP_FUNCTION(cpdf_rotate)
 
 	convert_to_long(arg1);
 	convert_to_double(arg2);
-	id=arg1->value.lval;
+	id=Z_LVAL_P(arg1);
 	pdf = zend_list_find(id, &type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
 		php_error(E_WARNING, "Unable to find identifier %d", id);
 		RETURN_FALSE;
 	}
 
-	cpdf_rotate(pdf, (float) arg2->value.dval);
+	cpdf_rotate(pdf, (float) Z_DVAL_P(arg2));
 
 	RETURN_TRUE;
 }
@@ -1379,19 +1379,19 @@ PHP_FUNCTION(cpdf_setflat)
 
 	convert_to_long(arg1);
 	convert_to_double(arg2);
-	id=arg1->value.lval;
+	id=Z_LVAL_P(arg1);
 	pdf = zend_list_find(id, &type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
 		php_error(E_WARNING, "Unable to find identifier %d", id);
 		RETURN_FALSE;
 	}
 
-	if((arg2->value.lval > 100) && (arg2->value.lval < 0)) {
+	if((Z_LVAL_P(arg2) > 100) && (Z_LVAL_P(arg2) < 0)) {
 		php_error(E_WARNING, "Parameter of pdf_setflat() has to between 0 and 100");
 		RETURN_FALSE;
 	}
 
-	cpdf_setflat(pdf, (int) arg2->value.dval);
+	cpdf_setflat(pdf, (int) Z_DVAL_P(arg2));
 
 	RETURN_TRUE;
 }
@@ -1411,19 +1411,19 @@ PHP_FUNCTION(cpdf_setlinejoin)
 
 	convert_to_long(arg1);
 	convert_to_long(arg2);
-	id=arg1->value.lval;
+	id=Z_LVAL_P(arg1);
 	pdf = zend_list_find(id, &type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
 		php_error(E_WARNING, "Unable to find identifier %d", id);
 		RETURN_FALSE;
 	}
 
-	if((arg2->value.lval > 2) && (arg2->value.lval < 0)) {
+	if((Z_LVAL_P(arg2) > 2) && (Z_LVAL_P(arg2) < 0)) {
 		php_error(E_WARNING, "Parameter of pdf_setlinejoin() has to between 0 and 2");
 		RETURN_FALSE;
 	}
 
-	cpdf_setlinejoin(pdf, arg2->value.lval);
+	cpdf_setlinejoin(pdf, Z_LVAL_P(arg2));
 
 	RETURN_TRUE;
 }
@@ -1443,19 +1443,19 @@ PHP_FUNCTION(cpdf_setlinecap)
 
 	convert_to_long(arg1);
 	convert_to_long(arg2);
-	id=arg1->value.lval;
+	id=Z_LVAL_P(arg1);
 	pdf = zend_list_find(id, &type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
 		php_error(E_WARNING, "Unable to find identifier %d", id);
 		RETURN_FALSE;
 	}
 
-	if((arg2->value.lval > 2) && (arg2->value.lval < 0)) {
+	if((Z_LVAL_P(arg2) > 2) && (Z_LVAL_P(arg2) < 0)) {
 		php_error(E_WARNING, "Parameter of pdf_setlinecap() has to be > 0 and =< 2");
 		RETURN_FALSE;
 	}
 
-	cpdf_setlinecap(pdf, arg2->value.lval);
+	cpdf_setlinecap(pdf, Z_LVAL_P(arg2));
 
 	RETURN_TRUE;
 }
@@ -1475,19 +1475,19 @@ PHP_FUNCTION(cpdf_setmiterlimit)
 
 	convert_to_long(arg1);
 	convert_to_double(arg2);
-	id=arg1->value.lval;
+	id=Z_LVAL_P(arg1);
 	pdf = zend_list_find(id, &type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
 		php_error(E_WARNING, "Unable to find identifier %d", id);
 		RETURN_FALSE;
 	}
 
-	if(arg2->value.dval < 1) {
+	if(Z_DVAL_P(arg2) < 1) {
 		php_error(E_WARNING, "Parameter of pdf_setmiterlimit() has to be >= 1");
 		RETURN_FALSE;
 	}
 
-	cpdf_setmiterlimit(pdf, (float) arg2->value.dval);
+	cpdf_setmiterlimit(pdf, (float) Z_DVAL_P(arg2));
 
 	RETURN_TRUE;
 }
@@ -1507,14 +1507,14 @@ PHP_FUNCTION(cpdf_setlinewidth)
 
 	convert_to_long(arg1);
 	convert_to_double(arg2);
-	id=arg1->value.lval;
+	id=Z_LVAL_P(arg1);
 	pdf = zend_list_find(id, &type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
 		php_error(E_WARNING, "Unable to find identifier %d", id);
 		RETURN_FALSE;
 	}
 
-	cpdf_setlinewidth(pdf, (float) arg2->value.dval);
+	cpdf_setlinewidth(pdf, (float) Z_DVAL_P(arg2));
 
 	RETURN_TRUE;
 }
@@ -1537,14 +1537,14 @@ PHP_FUNCTION(cpdf_setdash)
 	convert_to_long(arg1);
 	convert_to_long(arg2);
 	convert_to_long(arg3);
-	id=arg1->value.lval;
+	id=Z_LVAL_P(arg1);
 	pdf = zend_list_find(id, &type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
 		php_error(E_WARNING, "Unable to find identifier %d", id);
 		RETURN_FALSE;
 	}
 
-	snprintf(buffer, BUFFERLEN, "[%d %d] 0", (int) arg2->value.lval, (int) arg3->value.lval);
+	snprintf(buffer, BUFFERLEN, "[%d %d] 0", (int) Z_LVAL_P(arg2), (int) Z_LVAL_P(arg3));
 	cpdf_setdash(pdf, buffer);
 
 	RETURN_TRUE;
@@ -1569,7 +1569,7 @@ PHP_FUNCTION(cpdf_moveto)
 	convert_to_long(argv[0]);
 	convert_to_double(argv[1]);
 	convert_to_double(argv[2]);
-	id=argv[0]->value.lval;
+	id=Z_LVAL_P(argv[0]);
 	pdf = zend_list_find(id, &type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
 		php_error(E_WARNING, "Unable to find identifier %d", id);
@@ -1578,12 +1578,12 @@ PHP_FUNCTION(cpdf_moveto)
 
 	if(argc > 3) {
 		convert_to_long(argv[3]);
-		mode = argv[3]->value.lval;
+		mode = Z_LVAL_P(argv[3]);
 	}
 	if(mode == 1)
-		cpdf_rawMoveto(pdf, (float) argv[1]->value.dval, (float) argv[2]->value.dval);
+		cpdf_rawMoveto(pdf, (float) Z_DVAL_P(argv[1]), (float) Z_DVAL_P(argv[2]));
 	else
-		cpdf_moveto(pdf, (float) argv[1]->value.dval, (float) argv[2]->value.dval);
+		cpdf_moveto(pdf, (float) Z_DVAL_P(argv[1]), (float) Z_DVAL_P(argv[2]));
 
 	RETURN_TRUE;
 }
@@ -1606,7 +1606,7 @@ PHP_FUNCTION(cpdf_rmoveto)
 	convert_to_long(argv[0]);
 	convert_to_double(argv[1]);
 	convert_to_double(argv[2]);
-	id=argv[0]->value.lval;
+	id=Z_LVAL_P(argv[0]);
 	pdf = zend_list_find(id, &type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
 		php_error(E_WARNING, "Unable to find identifier %d", id);
@@ -1615,12 +1615,12 @@ PHP_FUNCTION(cpdf_rmoveto)
 
 	if(argc > 3) {
 		convert_to_long(argv[3]);
-		mode = argv[3]->value.lval;
+		mode = Z_LVAL_P(argv[3]);
 	}
 	if(mode == 1)
-		cpdf_rawRmoveto(pdf, (float) argv[1]->value.dval, (float) argv[2]->value.dval);
+		cpdf_rawRmoveto(pdf, (float) Z_DVAL_P(argv[1]), (float) Z_DVAL_P(argv[2]));
 	else
-		cpdf_rmoveto(pdf, (float) argv[1]->value.dval, (float) argv[2]->value.dval);
+		cpdf_rmoveto(pdf, (float) Z_DVAL_P(argv[1]), (float) Z_DVAL_P(argv[2]));
 
 	RETURN_TRUE;
 }
@@ -1647,7 +1647,7 @@ PHP_FUNCTION(cpdf_curveto)
 	convert_to_double(argv[4]);
 	convert_to_double(argv[5]);
 	convert_to_double(argv[6]);
-	id=argv[0]->value.lval;
+	id=Z_LVAL_P(argv[0]);
 	pdf = zend_list_find(id, &type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
 		php_error(E_WARNING, "Unable to find identifier %d", id);
@@ -1656,22 +1656,22 @@ PHP_FUNCTION(cpdf_curveto)
 
 	if(argc > 7) {
 		convert_to_long(argv[7]);
-		mode = argv[7]->value.lval;
+		mode = Z_LVAL_P(argv[7]);
 	}
 	if(mode == 1)
-		cpdf_rawCurveto(pdf, (float) argv[1]->value.dval,
-	                	(float) argv[2]->value.dval,
-	                	(float) argv[3]->value.dval,
-	                	(float) argv[4]->value.dval,
-	                	(float) argv[5]->value.dval,
-	                	(float) argv[6]->value.dval);
+		cpdf_rawCurveto(pdf, (float) Z_DVAL_P(argv[1]),
+	                	(float) Z_DVAL_P(argv[2]),
+	                	(float) Z_DVAL_P(argv[3]),
+	                	(float) Z_DVAL_P(argv[4]),
+	                	(float) Z_DVAL_P(argv[5]),
+	                	(float) Z_DVAL_P(argv[6]));
 	else
-		cpdf_curveto(pdf, (float) argv[1]->value.dval,
-	                	(float) argv[2]->value.dval,
-	                	(float) argv[3]->value.dval,
-	                	(float) argv[4]->value.dval,
-	                	(float) argv[5]->value.dval,
-	                	(float) argv[6]->value.dval);
+		cpdf_curveto(pdf, (float) Z_DVAL_P(argv[1]),
+	                	(float) Z_DVAL_P(argv[2]),
+	                	(float) Z_DVAL_P(argv[3]),
+	                	(float) Z_DVAL_P(argv[4]),
+	                	(float) Z_DVAL_P(argv[5]),
+	                	(float) Z_DVAL_P(argv[6]));
 
 	RETURN_TRUE;
 }
@@ -1694,7 +1694,7 @@ PHP_FUNCTION(cpdf_lineto)
 	convert_to_long(argv[0]);
 	convert_to_double(argv[1]);
 	convert_to_double(argv[2]);
-	id=argv[0]->value.lval;
+	id=Z_LVAL_P(argv[0]);
 	pdf = zend_list_find(id, &type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
 		php_error(E_WARNING, "Unable to find identifier %d", id);
@@ -1703,12 +1703,12 @@ PHP_FUNCTION(cpdf_lineto)
 
 	if(argc > 3) {
 		convert_to_long(argv[3]);
-		mode = argv[3]->value.lval;
+		mode = Z_LVAL_P(argv[3]);
 	}
 	if(mode == 1)
-		cpdf_rawLineto(pdf, (float) argv[1]->value.dval, (float) argv[2]->value.dval);
+		cpdf_rawLineto(pdf, (float) Z_DVAL_P(argv[1]), (float) Z_DVAL_P(argv[2]));
 	else
-		cpdf_lineto(pdf, (float) argv[1]->value.dval, (float) argv[2]->value.dval);
+		cpdf_lineto(pdf, (float) Z_DVAL_P(argv[1]), (float) Z_DVAL_P(argv[2]));
 
 	RETURN_TRUE;
 }
@@ -1731,7 +1731,7 @@ PHP_FUNCTION(cpdf_rlineto)
 	convert_to_long(argv[0]);
 	convert_to_double(argv[1]);
 	convert_to_double(argv[2]);
-	id=argv[0]->value.lval;
+	id=Z_LVAL_P(argv[0]);
 	pdf = zend_list_find(id, &type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
 		php_error(E_WARNING, "Unable to find identifier %d", id);
@@ -1740,12 +1740,12 @@ PHP_FUNCTION(cpdf_rlineto)
 
 	if(argc > 3) {
 		convert_to_long(argv[3]);
-		mode = argv[3]->value.lval;
+		mode = Z_LVAL_P(argv[3]);
 	}
 	if(mode == 1)
-		cpdf_rawRlineto(pdf, (float) argv[1]->value.dval, (float) argv[2]->value.dval);
+		cpdf_rawRlineto(pdf, (float) Z_DVAL_P(argv[1]), (float) Z_DVAL_P(argv[2]));
 	else
-		cpdf_rlineto(pdf, (float) argv[1]->value.dval, (float) argv[2]->value.dval);
+		cpdf_rlineto(pdf, (float) Z_DVAL_P(argv[1]), (float) Z_DVAL_P(argv[2]));
 
 	RETURN_TRUE;
 }
@@ -1769,7 +1769,7 @@ PHP_FUNCTION(cpdf_circle)
 	convert_to_double(argv[1]);
 	convert_to_double(argv[2]);
 	convert_to_double(argv[3]);
-	id=argv[0]->value.lval;
+	id=Z_LVAL_P(argv[0]);
 	pdf = zend_list_find(id, &type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
 		php_error(E_WARNING, "Unable to find identifier %d", id);
@@ -1778,12 +1778,12 @@ PHP_FUNCTION(cpdf_circle)
 
 	if(argc > 4) {
 		convert_to_long(argv[4]);
-		mode = argv[4]->value.lval;
+		mode = Z_LVAL_P(argv[4]);
 	}
 	if(mode == 1)
-		cpdf_rawCircle(pdf, (float) argv[1]->value.dval, (float) argv[2]->value.dval, (float) argv[3]->value.dval);
+		cpdf_rawCircle(pdf, (float) Z_DVAL_P(argv[1]), (float) Z_DVAL_P(argv[2]), (float) Z_DVAL_P(argv[3]));
 	else
-		cpdf_circle(pdf, (float) argv[1]->value.dval, (float) argv[2]->value.dval, (float) argv[3]->value.dval);
+		cpdf_circle(pdf, (float) Z_DVAL_P(argv[1]), (float) Z_DVAL_P(argv[2]), (float) Z_DVAL_P(argv[3]));
 
 	RETURN_TRUE;
 }
@@ -1809,7 +1809,7 @@ PHP_FUNCTION(cpdf_arc)
 	convert_to_double(argv[3]);
 	convert_to_double(argv[4]);
 	convert_to_double(argv[5]);
-	id=argv[0]->value.lval;
+	id=Z_LVAL_P(argv[0]);
 	pdf = zend_list_find(id, &type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
 		php_error(E_WARNING, "Unable to find identifier %d", id);
@@ -1818,12 +1818,12 @@ PHP_FUNCTION(cpdf_arc)
 
 	if(argc > 6) {
 		convert_to_long(argv[6]);
-		mode = argv[6]->value.lval;
+		mode = Z_LVAL_P(argv[6]);
 	}
 	if(mode == 1)
-		cpdf_rawArc(pdf, (float) argv[1]->value.dval, (float) argv[2]->value.dval, (float) argv[3]->value.dval, (float) argv[4]->value.dval, (float) argv[5]->value.dval, 1);
+		cpdf_rawArc(pdf, (float) Z_DVAL_P(argv[1]), (float) Z_DVAL_P(argv[2]), (float) Z_DVAL_P(argv[3]), (float) Z_DVAL_P(argv[4]), (float) Z_DVAL_P(argv[5]), 1);
 	else
-		cpdf_arc(pdf, (float) argv[1]->value.dval, (float) argv[2]->value.dval, (float) argv[3]->value.dval, (float) argv[4]->value.dval, (float) argv[5]->value.dval, 1);
+		cpdf_arc(pdf, (float) Z_DVAL_P(argv[1]), (float) Z_DVAL_P(argv[2]), (float) Z_DVAL_P(argv[3]), (float) Z_DVAL_P(argv[4]), (float) Z_DVAL_P(argv[5]), 1);
 
 	RETURN_TRUE;
 }
@@ -1848,7 +1848,7 @@ PHP_FUNCTION(cpdf_rect)
 	convert_to_double(argv[2]);
 	convert_to_double(argv[3]);
 	convert_to_double(argv[4]);
-	id=argv[0]->value.lval;
+	id=Z_LVAL_P(argv[0]);
 	pdf = zend_list_find(id, &type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
 		php_error(E_WARNING, "Unable to find identifier %d", id);
@@ -1857,18 +1857,18 @@ PHP_FUNCTION(cpdf_rect)
 
 	if(argc > 5) {
 		convert_to_long(argv[5]);
-		mode = argv[5]->value.lval;
+		mode = Z_LVAL_P(argv[5]);
 	}
 	if(mode == 1)
-		cpdf_rawRect(pdf, (float) argv[1]->value.dval,
-	                	(float) argv[2]->value.dval,
-	                	(float) argv[3]->value.dval,
-	                	(float) argv[4]->value.dval);
+		cpdf_rawRect(pdf, (float) Z_DVAL_P(argv[1]),
+	                	(float) Z_DVAL_P(argv[2]),
+	                	(float) Z_DVAL_P(argv[3]),
+	                	(float) Z_DVAL_P(argv[4]));
 	else
-		cpdf_rect(pdf, (float) argv[1]->value.dval,
-	                	(float) argv[2]->value.dval,
-	                	(float) argv[3]->value.dval,
-	                	(float) argv[4]->value.dval);
+		cpdf_rect(pdf, (float) Z_DVAL_P(argv[1]),
+	                	(float) Z_DVAL_P(argv[2]),
+	                	(float) Z_DVAL_P(argv[3]),
+	                	(float) Z_DVAL_P(argv[4]));
 
 	RETURN_TRUE;
 }
@@ -1887,7 +1887,7 @@ PHP_FUNCTION(cpdf_newpath)
 	}
 
 	convert_to_long(arg1);
-	id=arg1->value.lval;
+	id=Z_LVAL_P(arg1);
 	pdf = zend_list_find(id, &type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
 		php_error(E_WARNING, "Unable to find identifier %d", id);
@@ -1913,7 +1913,7 @@ PHP_FUNCTION(cpdf_closepath)
 	}
 
 	convert_to_long(arg1);
-	id=arg1->value.lval;
+	id=Z_LVAL_P(arg1);
 	pdf = zend_list_find(id, &type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
 		php_error(E_WARNING, "Unable to find identifier %d", id);
@@ -1939,7 +1939,7 @@ PHP_FUNCTION(cpdf_closepath_stroke)
 	}
 
 	convert_to_long(arg1);
-	id=arg1->value.lval;
+	id=Z_LVAL_P(arg1);
 	pdf = zend_list_find(id, &type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
 		php_error(E_WARNING, "Unable to find identifier %d", id);
@@ -1966,7 +1966,7 @@ PHP_FUNCTION(cpdf_stroke)
 	}
 
 	convert_to_long(arg1);
-	id=arg1->value.lval;
+	id=Z_LVAL_P(arg1);
 	pdf = zend_list_find(id, &type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
 		php_error(E_WARNING, "Unable to find identifier %d", id);
@@ -1992,7 +1992,7 @@ PHP_FUNCTION(cpdf_fill)
 	}
 
 	convert_to_long(arg1);
-	id=arg1->value.lval;
+	id=Z_LVAL_P(arg1);
 	pdf = zend_list_find(id, &type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
 		php_error(E_WARNING, "Unable to find identifier %d", id);
@@ -2018,7 +2018,7 @@ PHP_FUNCTION(cpdf_fill_stroke)
 	}
 
 	convert_to_long(arg1);
-	id=arg1->value.lval;
+	id=Z_LVAL_P(arg1);
 	pdf = zend_list_find(id, &type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
 		php_error(E_WARNING, "Unable to find identifier %d", id);
@@ -2045,7 +2045,7 @@ PHP_FUNCTION(cpdf_closepath_fill_stroke)
 	}
 
 	convert_to_long(arg1);
-	id=arg1->value.lval;
+	id=Z_LVAL_P(arg1);
 	pdf = zend_list_find(id, &type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
 		php_error(E_WARNING, "Unable to find identifier %d", id);
@@ -2073,7 +2073,7 @@ PHP_FUNCTION(cpdf_clip)
 	}
 
 	convert_to_long(arg1);
-	id=arg1->value.lval;
+	id=Z_LVAL_P(arg1);
 	pdf = zend_list_find(id, &type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
 		php_error(E_WARNING, "Unable to find identifier %d", id);
@@ -2100,14 +2100,14 @@ PHP_FUNCTION(cpdf_setgray_fill)
 
 	convert_to_long(arg1);
 	convert_to_double(arg2);
-	id=arg1->value.lval;
+	id=Z_LVAL_P(arg1);
 	pdf = zend_list_find(id, &type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
 		php_error(E_WARNING, "Unable to find identifier %d", id);
 		RETURN_FALSE;
 	}
 
-	cpdf_setgrayFill(pdf, (float) arg2->value.dval);
+	cpdf_setgrayFill(pdf, (float) Z_DVAL_P(arg2));
 
 	RETURN_TRUE;
 }
@@ -2127,14 +2127,14 @@ PHP_FUNCTION(cpdf_setgray_stroke)
 
 	convert_to_long(arg1);
 	convert_to_double(arg2);
-	id=arg1->value.lval;
+	id=Z_LVAL_P(arg1);
 	pdf = zend_list_find(id, &type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
 		php_error(E_WARNING, "Unable to find identifier %d", id);
 		RETURN_FALSE;
 	}
 
-	cpdf_setgrayStroke(pdf, (float) arg2->value.dval);
+	cpdf_setgrayStroke(pdf, (float) Z_DVAL_P(arg2));
 
 	RETURN_TRUE;
 }
@@ -2154,14 +2154,14 @@ PHP_FUNCTION(cpdf_setgray)
 
 	convert_to_long(arg1);
 	convert_to_double(arg2);
-	id=arg1->value.lval;
+	id=Z_LVAL_P(arg1);
 	pdf = zend_list_find(id, &type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
 		php_error(E_WARNING, "Unable to find identifier %d", id);
 		RETURN_FALSE;
 	}
 
-	cpdf_setgray(pdf, (float) arg2->value.dval);
+	cpdf_setgray(pdf, (float) Z_DVAL_P(arg2));
 
 	RETURN_TRUE;
 }
@@ -2183,14 +2183,14 @@ PHP_FUNCTION(cpdf_setrgbcolor_fill)
 	convert_to_double(arg2);
 	convert_to_double(arg3);
 	convert_to_double(arg4);
-	id=arg1->value.lval;
+	id=Z_LVAL_P(arg1);
 	pdf = zend_list_find(id, &type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
 		php_error(E_WARNING, "Unable to find identifier %d", id);
 		RETURN_FALSE;
 	}
 
-	cpdf_setrgbcolorFill(pdf, (float) arg2->value.dval, (float) arg3->value.dval, (float) arg4->value.dval);
+	cpdf_setrgbcolorFill(pdf, (float) Z_DVAL_P(arg2), (float) Z_DVAL_P(arg3), (float) Z_DVAL_P(arg4));
 
 	RETURN_TRUE;
 }
@@ -2212,14 +2212,14 @@ PHP_FUNCTION(cpdf_setrgbcolor_stroke)
 	convert_to_double(arg2);
 	convert_to_double(arg3);
 	convert_to_double(arg4);
-	id=arg1->value.lval;
+	id=Z_LVAL_P(arg1);
 	pdf = zend_list_find(id, &type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
 		php_error(E_WARNING, "Unable to find identifier %d", id);
 		RETURN_FALSE;
 	}
 
-	cpdf_setrgbcolorStroke(pdf, (float) arg2->value.dval, (float) arg3->value.dval, (float) arg4->value.dval);
+	cpdf_setrgbcolorStroke(pdf, (float) Z_DVAL_P(arg2), (float) Z_DVAL_P(arg3), (float) Z_DVAL_P(arg4));
 
 	RETURN_TRUE;
 }
@@ -2241,14 +2241,14 @@ PHP_FUNCTION(cpdf_setrgbcolor)
 	convert_to_double(arg2);
 	convert_to_double(arg3);
 	convert_to_double(arg4);
-	id=arg1->value.lval;
+	id=Z_LVAL_P(arg1);
 	pdf = zend_list_find(id, &type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
 		php_error(E_WARNING, "Unable to find identifier %d", id);
 		RETURN_FALSE;
 	}
 
-	cpdf_setrgbcolor(pdf, (float) arg2->value.dval, (float) arg3->value.dval, (float) arg4->value.dval);
+	cpdf_setrgbcolor(pdf, (float) Z_DVAL_P(arg2), (float) Z_DVAL_P(arg3), (float) Z_DVAL_P(arg4));
 
 	RETURN_TRUE;
 }
@@ -2272,15 +2272,15 @@ PHP_FUNCTION(cpdf_set_page_animation)
 	convert_to_double(arg4);
 	convert_to_long(arg5);
 	convert_to_long(arg6);
-	id=arg1->value.lval;
+	id=Z_LVAL_P(arg1);
 	pdf = zend_list_find(id, &type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
 		php_error(E_WARNING, "Unable to find identifier %d", id);
 		RETURN_FALSE;
 	}
 
-	cpdf_setPageTransition(pdf, arg2->value.lval, arg3->value.dval, arg4->value.dval,
-	                       arg5->value.lval, arg6->value.lval);
+	cpdf_setPageTransition(pdf, Z_LVAL_P(arg2), Z_DVAL_P(arg3), Z_DVAL_P(arg4),
+	                       Z_LVAL_P(arg5), Z_LVAL_P(arg6));
 
 	RETURN_TRUE;
 }
@@ -2299,7 +2299,7 @@ PHP_FUNCTION(cpdf_finalize)
 	}
 
 	convert_to_long(arg1);
-	id=arg1->value.lval;
+	id=Z_LVAL_P(arg1);
 	pdf = zend_list_find(id, &type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
 		php_error(E_WARNING, "Unable to find identifier %d", id);
@@ -2326,7 +2326,7 @@ PHP_FUNCTION(cpdf_output_buffer)
 	}
 
 	convert_to_long(arg1);
-	id=arg1->value.lval;
+	id=Z_LVAL_P(arg1);
 	pdf = zend_list_find(id, &type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
 		php_error(E_WARNING, "Unable to find identifier %d", id);
@@ -2355,7 +2355,7 @@ PHP_FUNCTION(cpdf_save_to_file)
 
 	convert_to_long(arg1);
 	convert_to_string(arg2);
-	id=arg1->value.lval;
+	id=Z_LVAL_P(arg1);
 	pdf = zend_list_find(id, &type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
 		php_error(E_WARNING, "Unable to find identifier %d", id);
@@ -2363,11 +2363,11 @@ PHP_FUNCTION(cpdf_save_to_file)
 	}
 
 #if APACHE
-	if(strcmp(arg2->value.str.val, "-") == 0)
+	if(strcmp(Z_STRVAL_P(arg2), "-") == 0)
 		php_error(E_WARNING, "Writing to stdout as described in the ClibPDF manual is not possible if php is used as an Apache module. Use cpdf_output_buffer() instead.");
 #endif
 
-	cpdf_savePDFmemoryStreamToFile(pdf, arg2->value.str.val);
+	cpdf_savePDFmemoryStreamToFile(pdf, Z_STRVAL_P(arg2));
 
 	RETURN_TRUE;
 }
@@ -2394,15 +2394,15 @@ PHP_FUNCTION(cpdf_import_jpeg)
 	convert_to_double(argv[3]);
 	convert_to_double(argv[4]);
 	convert_to_double(argv[5]);
-	width = (float) argv[5]->value.dval;
+	width = (float) Z_DVAL_P(argv[5]);
 	convert_to_double(argv[6]);
-	height = (float) argv[6]->value.dval;
+	height = (float) Z_DVAL_P(argv[6]);
 	convert_to_double(argv[7]);
-	xscale = (float) argv[7]->value.dval;
+	xscale = (float) Z_DVAL_P(argv[7]);
 	convert_to_double(argv[8]);
-	yscale = (float) argv[8]->value.dval;
+	yscale = (float) Z_DVAL_P(argv[8]);
 	convert_to_long(argv[9]);
-	id=argv[0]->value.lval;
+	id=Z_LVAL_P(argv[0]);
 	pdf = zend_list_find(id, &type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
 		php_error(E_WARNING, "Unable to find identifier %d", id);
@@ -2411,30 +2411,30 @@ PHP_FUNCTION(cpdf_import_jpeg)
 
 	if(argc > 10) {
 		convert_to_long(argv[10]);
-		mode = argv[10]->value.lval;
+		mode = Z_LVAL_P(argv[10]);
 	}
 	if(mode == 1)
-		cpdf_rawImportImage(pdf, argv[1]->value.str.val,
+		cpdf_rawImportImage(pdf, Z_STRVAL_P(argv[1]),
 	                	    JPEG_IMG,
-	                	    (float) argv[2]->value.dval,
-	                	    (float) argv[3]->value.dval,
-	                	    (float) argv[4]->value.dval,
+	                	    (float) Z_DVAL_P(argv[2]),
+	                	    (float) Z_DVAL_P(argv[3]),
+	                	    (float) Z_DVAL_P(argv[4]),
 	                	    &width,
 	                	    &height,
 	                	    &xscale,
 	                	    &yscale,
-	                	    argv[9]->value.lval);
+	                	    Z_LVAL_P(argv[9]));
 	else
-		cpdf_rawImportImage(pdf, argv[1]->value.str.val,
+		cpdf_rawImportImage(pdf, Z_STRVAL_P(argv[1]),
 	                	    JPEG_IMG,
-	                	    (float) argv[2]->value.dval,
-	                	    (float) argv[3]->value.dval,
-	                	    (float) argv[4]->value.dval,
+	                	    (float) Z_DVAL_P(argv[2]),
+	                	    (float) Z_DVAL_P(argv[3]),
+	                	    (float) Z_DVAL_P(argv[4]),
 	                	    &width,
 	                	    &height,
 	                	    &xscale,
 	                	    &yscale,
-	                	    argv[9]->value.lval);
+	                	    Z_LVAL_P(argv[9]));
 
 	RETURN_TRUE;
 }
@@ -2466,14 +2466,14 @@ PHP_FUNCTION(cpdf_place_inline_image)
 	convert_to_double(argv[5]);
 	convert_to_double(argv[6]);
 	convert_to_long(argv[7]);
-	id=argv[0]->value.lval;
+	id=Z_LVAL_P(argv[0]);
 	pdf = zend_list_find(id, &type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
 		php_error(E_WARNING, "Unable to find identifier %d", id);
 		RETURN_FALSE;
 	}
 
-	gid=argv[1]->value.lval;
+	gid=Z_LVAL_P(argv[1]);
 	im = zend_list_find(gid, &type);
 	
 	ZEND_GET_RESOURCE_TYPE_ID(CPDF_GLOBAL(le_gd), "gd");
@@ -2489,7 +2489,7 @@ PHP_FUNCTION(cpdf_place_inline_image)
 
 	if(argc > 8) {
 		convert_to_long(argv[8]);
-		mode = argv[8]->value.lval;
+		mode = Z_LVAL_P(argv[8]);
 	}
 
 	count = 3 * im->sx * im->sy;
@@ -2508,24 +2508,24 @@ PHP_FUNCTION(cpdf_place_inline_image)
 
 	if(mode == 1)
 		cpdf_placeInLineImage(pdf, buffer, count,
-	                	    (float) argv[2]->value.dval,
-	                	    (float) argv[3]->value.dval,
-	                	    (float) argv[4]->value.dval,
-	                	    (float) argv[5]->value.dval,
-	                	    (float) argv[6]->value.dval,
+	                	    (float) Z_DVAL_P(argv[2]),
+	                	    (float) Z_DVAL_P(argv[3]),
+	                	    (float) Z_DVAL_P(argv[4]),
+	                	    (float) Z_DVAL_P(argv[5]),
+	                	    (float) Z_DVAL_P(argv[6]),
 	                	    im->sx,
 	                	    im->sy,
-	                	    8, 2, argv[7]->value.lval);
+	                	    8, 2, Z_LVAL_P(argv[7]));
 	else
 		cpdf_rawPlaceInLineImage(pdf, buffer, count,
-	                	    (float) argv[2]->value.dval,
-	                	    (float) argv[3]->value.dval,
-	                	    (float) argv[4]->value.dval,
-	                	    (float) argv[5]->value.dval,
-	                	    (float) argv[6]->value.dval,
+	                	    (float) Z_DVAL_P(argv[2]),
+	                	    (float) Z_DVAL_P(argv[3]),
+	                	    (float) Z_DVAL_P(argv[4]),
+	                	    (float) Z_DVAL_P(argv[5]),
+	                	    (float) Z_DVAL_P(argv[6]),
 	                	    im->sx,
 	                	    im->sy,
-	                	    8, 2, argv[7]->value.lval);
+	                	    8, 2, Z_LVAL_P(argv[7]));
 
 	efree(buffer);
 	RETURN_TRUE;
@@ -2555,7 +2555,7 @@ PHP_FUNCTION(cpdf_add_annotation)
 	convert_to_double(argv[4]);
 	convert_to_string(argv[5]);
 	convert_to_string(argv[6]);
-	id=argv[0]->value.lval;
+	id=Z_LVAL_P(argv[0]);
 	pdf = zend_list_find(id, &type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
 		php_error(E_WARNING, "Unable to find identifier %d", id);
@@ -2570,23 +2570,23 @@ PHP_FUNCTION(cpdf_add_annotation)
 	attrib.b = 1.00;
 	if(argc > 7) {
 		convert_to_long(argv[7]);
-		mode = argv[7]->value.lval;
+		mode = Z_LVAL_P(argv[7]);
 	}
 	if(mode == 1)
-		cpdf_rawSetAnnotation(pdf, (float) argv[1]->value.dval,
-	                	    (float) argv[2]->value.dval,
-	                	    (float) argv[3]->value.dval,
-	                	    (float) argv[4]->value.dval,
-	                	    argv[5]->value.str.val,
-	                	    argv[6]->value.str.val,
+		cpdf_rawSetAnnotation(pdf, (float) Z_DVAL_P(argv[1]),
+	                	    (float) Z_DVAL_P(argv[2]),
+	                	    (float) Z_DVAL_P(argv[3]),
+	                	    (float) Z_DVAL_P(argv[4]),
+	                	    Z_STRVAL_P(argv[5]),
+	                	    Z_STRVAL_P(argv[6]),
 		                    &attrib);
 	else
-		cpdf_setAnnotation(pdf, (float) argv[1]->value.dval,
-	                	    (float) argv[2]->value.dval,
-	                	    (float) argv[3]->value.dval,
-	                	    (float) argv[4]->value.dval,
-	                	    argv[5]->value.str.val,
-	                	    argv[6]->value.str.val,
+		cpdf_setAnnotation(pdf, (float) Z_DVAL_P(argv[1]),
+	                	    (float) Z_DVAL_P(argv[2]),
+	                	    (float) Z_DVAL_P(argv[3]),
+	                	    (float) Z_DVAL_P(argv[4]),
+	                	    Z_STRVAL_P(argv[5]),
+	                	    Z_STRVAL_P(argv[6]),
 		                    &attrib);
 
 	RETURN_TRUE;
@@ -2614,7 +2614,7 @@ PHP_FUNCTION(cpdf_set_action_url)
 	convert_to_double(argv[3]);
 	convert_to_double(argv[4]);
 	convert_to_string(argv[5]);
-	id=argv[0]->value.lval;
+	id=Z_LVAL_P(argv[0]);
 	pdf = zend_list_find(id, &type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
 		php_error(E_WARNING, "Unable to find identifier %d", id);
@@ -2629,21 +2629,21 @@ PHP_FUNCTION(cpdf_set_action_url)
 	attrib.b = 1.00;
 	if(argc > 6) {
 		convert_to_long(argv[6]);
-		mode = argv[6]->value.lval;
+		mode = Z_LVAL_P(argv[6]);
 	}
 	if(mode == 1)
-		cpdf_rawSetActionURL(pdf, (float) argv[1]->value.dval,
-	                	    (float) argv[2]->value.dval,
-	                	    (float) argv[3]->value.dval,
-	                	    (float) argv[4]->value.dval,
-	                	    argv[5]->value.str.val,
+		cpdf_rawSetActionURL(pdf, (float) Z_DVAL_P(argv[1]),
+	                	    (float) Z_DVAL_P(argv[2]),
+	                	    (float) Z_DVAL_P(argv[3]),
+	                	    (float) Z_DVAL_P(argv[4]),
+	                	    Z_STRVAL_P(argv[5]),
 		                    &attrib);
 	else
-		cpdf_setActionURL(pdf, (float) argv[1]->value.dval,
-	                	    (float) argv[2]->value.dval,
-	                	    (float) argv[3]->value.dval,
-	                	    (float) argv[4]->value.dval,
-	                	    argv[5]->value.str.val,
+		cpdf_setActionURL(pdf, (float) Z_DVAL_P(argv[1]),
+	                	    (float) Z_DVAL_P(argv[2]),
+	                	    (float) Z_DVAL_P(argv[3]),
+	                	    (float) Z_DVAL_P(argv[4]),
+	                	    Z_STRVAL_P(argv[5]),
 		                    &attrib);
 
 	RETURN_TRUE;
@@ -2671,14 +2671,14 @@ PHP_FUNCTION(cpdf_add_outline)
 	convert_to_long(argv[3]);
 	convert_to_long(argv[4]);
 	convert_to_string(argv[5]);
-	id=argv[0]->value.lval;
+	id=Z_LVAL_P(argv[0]);
 	pdf = zend_list_find(id, &type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
 		php_error(E_WARNING, "Unable to find identifier %d", id);
 		RETURN_FALSE;
 	}
 
-	oid=argv[1]->value.lval;
+	oid=Z_LVAL_P(argv[1]);
 	lastoutline = zend_list_find(oid, &type);
 	if(!lastoutline || type!=CPDF_GLOBAL(le_outline)) {
 		lastoutline = NULL;
@@ -2687,10 +2687,10 @@ PHP_FUNCTION(cpdf_add_outline)
 	}
 
 	lastoutline = cpdf_addOutlineEntry(pdf, lastoutline,
-	              	     argv[2]->value.lval,
-	              	     argv[3]->value.lval,
-	               	     argv[4]->value.lval,
-	               	     argv[5]->value.str.val,
+	              	     Z_LVAL_P(argv[2]),
+	              	     Z_LVAL_P(argv[3]),
+	               	     Z_LVAL_P(argv[4]),
+	               	     Z_STRVAL_P(argv[5]),
 		             1, 0.0, 0.0, 0.0, 0.0);
 
 	id = zend_list_insert(lastoutline, CPDF_GLOBAL(le_outline));

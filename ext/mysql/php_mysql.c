@@ -1541,7 +1541,7 @@ static void php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type, 
 				RETURN_FALSE;
 			}
 			convert_to_long_ex(arg2);
-			result_type = (*arg2)->value.lval;
+			result_type = Z_LVAL_PP(arg2);
 			break;
 		default:
 			WRONG_PARAM_COUNT;

@@ -64,7 +64,7 @@ DBA_OPEN_FUNC(db3)
 
 	if (info->argc > 0) {
 		convert_to_long_ex(info->argv[0]);
-		filemode = (*info->argv[0])->value.lval;
+		filemode = Z_LVAL_PP(info->argv[0]);
 	}
 
 	if (db_create(&dbp, NULL, 0) == 0 &&

@@ -310,15 +310,15 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	}
 	
 	for(hptr = handler; hptr->name &&
-			strcasecmp(hptr->name, (*args[2])->value.str.val); hptr++);
+			strcasecmp(hptr->name, Z_STRVAL_PP(args[2])); hptr++);
 
 	if(!hptr->name) {
-		php_error(E_WARNING, "no such handler: %s", (*args[2])->value.str.val);
+		php_error(E_WARNING, "no such handler: %s", Z_STRVAL_PP(args[2]));
 		FREENOW;
 		RETURN_FALSE;
 	}
 
-	switch((*args[1])->value.str.val[0]) {
+	switch(Z_STRVAL_PP(args[1])[0]) {
 		case 'c': 
 			modenr = DBA_CREAT; 
 			break;
@@ -332,14 +332,14 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			modenr = DBA_TRUNC;
 			break;
 		default:
-			php_error(E_WARNING, "illegal DBA mode: %s", (*args[1])->value.str.val);
+			php_error(E_WARNING, "illegal DBA mode: %s", Z_STRVAL_PP(args[1]));
 			FREENOW;
 			RETURN_FALSE;
 	}
 			
 	info = malloc(sizeof(*info));
 	memset(info, 0, sizeof(info));
-	info->path = strdup((*args[0])->value.str.val);
+	info->path = strdup(Z_STRVAL_PP(args[0]));
 	info->mode = modenr;
 	info->argc = ac - 3;
 	info->argv = args + 3;

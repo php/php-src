@@ -430,8 +430,8 @@ void ora_do_logon(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	convert_to_string_ex(arg1);
 	convert_to_string_ex(arg2);
   
-	user = (*arg1)->value.str.val;
-	passwd = (*arg2)->value.str.val;
+	user = Z_STRVAL_PP(arg1);
+	passwd = Z_STRVAL_PP(arg2);
 
 	hashed_details_length = sizeof("oracle__")-1+strlen(user)+strlen(passwd);
 	hashed_details = (char *) emalloc(hashed_details_length+1);

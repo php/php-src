@@ -463,17 +463,17 @@ static void php_fbsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistant)
 	if (argc >= 1)
 	{
 		convert_to_string_ex(argv[0]);
-		hostName = (*argv[0])->value.str.val;
+		hostName = Z_STRVAL_PP(argv[0]);
 	}
 	if (argc >= 2)
 	{
 		convert_to_string_ex(argv[1]);
-		userName =  (*argv[1])->value.str.val;
+		userName =  Z_STRVAL_PP(argv[1]);
 	}   
 	if (argc == 3)
 	{
 		convert_to_string_ex(argv[2]);
-		userPassword =  (*argv[2])->value.str.val;
+		userPassword =  Z_STRVAL_PP(argv[2]);
 	}
 
 	if (hostName     == NULL) hostName     = FB_SQL_G(hostName);
@@ -1896,7 +1896,7 @@ PHP_FUNCTION(fbsql_warnings)
 	if (argc >= 1)
 	{
 		convert_to_long_ex(argv[0]);
-		FB_SQL_G(generateWarnings) = (*argv[0])->value.lval != 0;
+		FB_SQL_G(generateWarnings) = Z_LVAL_PP(argv[0]) != 0;
 	}
 	RETURN_BOOL(FB_SQL_G(generateWarnings));
 }

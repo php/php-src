@@ -646,8 +646,8 @@ DLEXPORT PHP_FUNCTION(udm_load_ispell_data)
 			ZEND_FETCH_RESOURCE(Agent, UDM_AGENT *, yyagent, -1, "mnoGoSearch-agent", le_link);
 			var  = Z_LVAL_PP(yyvar);
 			flag = Z_LVAL_PP(yyflag);
-			val1 = (*yyval1)->value.str.val;
-			val2 = (*yyval2)->value.str.val;
+			val1 = Z_STRVAL_PP(yyval1);
+			val2 = Z_STRVAL_PP(yyval2);
 			
 			break;
 			

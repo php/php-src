@@ -101,8 +101,8 @@ PHP_FUNCTION(levenshtein)
 		convert_to_string_ex(str1);
 		convert_to_string_ex(str2);
 
-		distance = reference_levdist((*str1)->value.str.val, (*str1)->value.str.len, 
-																 (*str2)->value.str.val, (*str2)->value.str.len,
+		distance = reference_levdist(Z_STRVAL_PP(str1), Z_STRLEN_PP(str1), 
+																 Z_STRVAL_PP(str2), Z_STRLEN_PP(str2),
 																 1, 1, 1);
 
 		break;
@@ -117,8 +117,8 @@ PHP_FUNCTION(levenshtein)
 		convert_to_long_ex(cost_rep);
 		convert_to_long_ex(cost_del);
 		
-		distance = reference_levdist((*str1)->value.str.val, (*str1)->value.str.len, 
-																 (*str2)->value.str.val, (*str2)->value.str.len,
+		distance = reference_levdist(Z_STRVAL_PP(str1), Z_STRLEN_PP(str1), 
+																 Z_STRVAL_PP(str2), Z_STRLEN_PP(str2),
 																 Z_LVAL_PP(cost_ins),
 																 Z_LVAL_PP(cost_rep),
 																 Z_LVAL_PP(cost_del)
@@ -134,8 +134,8 @@ PHP_FUNCTION(levenshtein)
 		convert_to_string_ex(str2);
 		convert_to_string_ex(callback_name);
 
-		distance = custom_levdist((*str1)->value.str.val
-																, (*str2)->value.str.val
+		distance = custom_levdist(Z_STRVAL_PP(str1)
+																, Z_STRVAL_PP(str2)
 																, Z_STRVAL_PP(callback_name)
 																);
 		break;
