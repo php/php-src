@@ -33,6 +33,7 @@ First package release.  Commands implemented:
    remote-package-info
    list-upgrades
    list-remote-packages
+   download
    config-show
    config-get
    config-set
