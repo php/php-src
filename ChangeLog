@@ -1,3 +1,52 @@
+2002-04-17  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * main/internal_functions_win32.c: Whitespace fixes.
+
+    * main/internal_functions_win32.c:
+    Only include php_bcmath.h when WITH_BCMATH=true.
+
+    * main/internal_functions_win32.c: Give HAVE_MYSQL meaning on Win32.
+
+    * main/internal_functions_win32.c: Give HAVE_UODBC meaning on Win32.
+
+    * main/internal_functions_win32.c:
+    Give HAVE_LIBEXPAT and HAVE_WDDX meaning on Win32.
+
+    * main/internal_functions_win32.c: Give HAVE_FTP meaning on Win32.
+
+    * main/internal_functions_win32.c: Remove bogus includes.
+
+    * main/php_ini.c: Patch by Marcus Börger.
+
+2002-04-17  Mika Tuupola  <tuupola@appelsiini.net>
+
+    * pear/File/Passwd.php:
+    * added lock(), unlock(), isLocked() and getCvsUser() methods.
+
+2002-04-17  Stig Bakken  <ssb@fast.no>
+
+    * pear/scripts/phpize.in: * revert buildv5 changes
+
+    * pear/PEAR/Packager.php: * doooh!
+
+2002-04-17  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/xmlrpc/xmlrpc-epi-php.c: - fixed memory leak
+
+2002-04-17  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * main/internal_functions_win32.c: SPACEs->TAB.
+
+    * ext/overload/overload.c
+      ext/tokenizer/tokenizer.c: Beautify.
+
+    * main/internal_functions_win32.c: Forgot adding phpext_tokenizer_ptr.
+
+    * win32/php4dll.dsp
+      win32/php4dllts.dsp
+      main/internal_functions_win32.c:
+    Enable ext/tokenizer by default on Win32, too. Since there is no HAVE_TOKENIZER flag, it cannot be turned off in config.w32.h.
+
 2002-04-16  Wez Furlong  <wez.php@thebrainroom.com>
 
     * main/php_streams.h
