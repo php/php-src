@@ -1,3 +1,75 @@
+2004-05-21  Timm Friebe  <thekid@thekid.de>
+
+    * ext/sybase_ct/php_sybase_ct.c:
+      - Fixed bug #28354
+
+2004-05-21  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/standard/dl.c:
+      Ok, so we do need to rinit here after all.
+
+    * ext/standard/dl.c:
+      Update to reflect recent changes in dl()
+
+    * pear/PEAR/Common.php:
+      Better error message to save looking in the wrong place.
+
+2004-05-21  Derick Rethans  <php@derickrethans.nl>
+
+    * NEWS:
+      - Fixed order (again)
+
+2004-05-21  Dmitry Stogov  <dmitry@zend.com>
+
+    * NEWS:
+      Fixed bug #28239 (No results returned on SOAP call, no error given)
+
+2004-05-21  Ard Biesheuvel  <a.k.biesheuvel@ewi.tudelft.nl>
+
+    * ext/interbase/ibase_query.c
+      ext/interbase/tests/003.phpt:
+      Removed strcpy() call from most common case
+      Added test for hash index generation
+
+    * ext/interbase/ibase_query.c:
+      Added test for duplicate field names when returning rows as hashes or
+      objects
+
+    * ext/interbase/php_ibase_includes.h:
+      Make sure METADATALENGTH is defined (used by IB 7)
+
+2004-05-21  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_4_3)
+      main/rfc1867.c:
+      - MFH: Fixed TSRM problem in latest commit.
+
+    * main/rfc1867.c:
+      - Fixed TSRM problem in latest commit.
+
+    * (PHP_4_3)
+      NEWS
+      main/rfc1867.c:
+      - MFH: Fixed bug #28456 (Problem with enclosed / in uploaded files).
+
+    * main/rfc1867.c:
+      - Fixed bug #28456 (Problem with enclosed / in uploaded file names)
+
+2004-05-21  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/PEAR/ErrorStack.php:
+      fix missing assignment
+      $this->_errors = array_filter($this->_errors);
+
+    * pear/PEAR/ErrorStack.php:
+      Several issues resolved.
+      fix 1444: PEAR_ErrorStack->push() needs to validate $msg and $code as
+      string/int
+      add error level checking to hasErrors() and getErrors().
+      BC break!!:
+      staticGetErrors adds the parameter $level between $purge and $merge, as it
+      will be as common (or more common) as $purge.
+
 2004-05-20  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/gd/gd.c:
