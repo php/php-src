@@ -434,6 +434,16 @@ Web server configuration
     add execute rights for I_USR_ to the directory that contains
     php-cgi.exe
 
+    !NOTE!: Since 4.1.2, the php.ini setting cgi.force_redirect defaults to '1'
+    which effectively prevents the cgi from working within IIS. You need to set
+    up at least a minimal php.ini file with the following directive:
+
+      cgi.force_redirect = 0
+
+    If it doesn't work immidiately, make sure you have the php.ini file in the
+    right place (%SYSTEMROOT%\php.ini).
+
+
    To use the ISAPI module, do the following:
 
     If you don't want to perform HTTP Authentication using PHP,
@@ -616,7 +626,7 @@ Problems?
 
    Something went wrong when the server tried to run PHP. To get to see a
    sensible error message, from the command line, change to the directory
-   containing php-cgi.exe and run <literal>php-cgi.exe -i</literal>
+   containing php-cgi.exe and run "php-cgi.exe -i" (without quotes).
    If php has any problems running, then a suitable error message will be displayed
    which will give you a clue as to what needs to be done next.
    If you get a screen full of html codes (the output of the phpinfo() function) then
@@ -701,6 +711,19 @@ Problems?
          try this tool.
 
 
+ I'm using IIS/CGI and everytime I try to access a php file I get
+ "Security Alert! The PHP CGI cannot be accessed directly."
+
+  Since 4.1.2, the php.ini setting cgi.force_redirect defaults to '1' which
+  effectively prevents the cgi from working within IIS. You need to set up at
+  least a minimal php.ini file with the following directive:
+
+    cgi.force_redirect = 0
+
+  If it doesn't work immidiately, make sure you have the php.ini file in the
+  right place (%SYSTEMROOT%\php.ini).
+
+
  Other problems
   If you are still stuck, someone on the PHP installation mailing list may be
   able to help you. You should check out the archive first, in case
@@ -724,9 +747,13 @@ Bug reports
 
  If you think you have found a bug in PHP, please report it.  The
  PHP developers probably don't know about it, and unless you
- report it, chances are it won't be fixed. You can report bugs
- using the bug-tracking system at http://bugs.php.net/
+ report it, chances are it won't be fixed.
 
- Read the Bugs-Dos-And-Donts at
- http://bugs.php.net/bugs-dos-and-donts.php
- _BEFORE_ submitting any bug reports!
+ 1) Read about Bugs-Dos-And-Donts
+     http://bugs.php.net/bugs-dos-and-donts.php
+
+ 2) If you think you've found a bug, read
+     http://bugs.php.net/bugs-dos-and-donts.php
+
+ 3) Feel welcome to file a report at
+     http://bugs.php.net/
