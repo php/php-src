@@ -42,8 +42,34 @@ dnl \$Id\$
 dnl config.m4 for extension $extname
 dnl don't forget to call PHP_EXTENSION($extname)
 
-PHP_EXTENSION($extname)
+dnl If your extension references something external, use with:
 
+AC_MSG_CHECKING(whether to include $extname support)
+AC_MSG_WITH($extname,
+dnl Make sure that the comment is aligned:
+[  --with-$extname             Include $extname support.],[
+  PHP_$EXTNAME=\$withval
+],[
+  PHP_$EXTNAME=no
+])
+AC_MSG_RESULT(\$PHP_$EXTNAME)
+
+dnl Otherwise use enable:
+
+AC_MSG_CHECKING(whether to enable $extname)
+AC_MSG_ENABLE($extname,
+dnl Make sure that the comment is aligned:
+[  --enable-$extname           Include $extname support.],[
+  PHP_$EXTNAME=\$enableval
+],[
+  PHP_$EXTNAME=no
+])
+AC_MSG_RESULT(\$PHP_$EXTNAME)
+
+if test "\$PHP_$EXTNAME" != "no"; then
+  dnl Action..
+  PHP_EXTENSION($extname)
+fi
 eof
 
 $ECHO_N " Makefile.in$ECHO_C"
