@@ -2484,6 +2484,7 @@ PHPAPI void php_strip_tags(char *rbuf, int len, int state, char *allow, int allo
 				} else if (state == 2) {
 					if (!br && lc != '\"' && *(p-1)=='?') {
 						state = 0;
+						tp = tbuf;
 					}
 				}
 				break;
