@@ -84,6 +84,7 @@ static php_stream* http_connect(zval* this_ptr, php_url *phpurl, int use_ssl, in
 	zval **proxy_host, **proxy_port;
 	char *host;
 #ifdef ZEND_ENGINE_2
+	php_stream_context *context = NULL;
 	char *name;
 	long namelen;
 #endif
@@ -107,12 +108,26 @@ static php_stream* http_connect(zval* this_ptr, php_url *phpurl, int use_ssl, in
 
 #ifdef ZEND_ENGINE_2
 	namelen = spprintf(&name, 0, "%s://%s:%d", (use_ssl && !*use_proxy)? "ssl" : "tcp", host, port);
+	if (use_ssl) {
+		zval **tmp;
+
+		if (zend_hash_find(Z_OBJPROP_P(this_ptr), "_local_cert", sizeof("_local_cert"), (void **) &tmp) == SUCCESS &&
+		    Z_TYPE_PP(tmp) == IS_STRING) {
+			context = php_stream_context_alloc();
+			php_stream_context_set_option(context, "ssl", "local_cert", *tmp);
+			if (zend_hash_find(Z_OBJPROP_P(this_ptr), "_passphrase", sizeof("_passphrase"), (void **) &tmp) == SUCCESS &&
+			    Z_TYPE_PP(tmp) == IS_STRING) {
+				php_stream_context_set_option(context, "ssl", "passphrase", *tmp);
+			}
+		}
+	}
 	stream = php_stream_xport_create(name, namelen,
 		ENFORCE_SAFE_MODE | REPORT_ERRORS,
 		STREAM_XPORT_CLIENT | STREAM_XPORT_CONNECT,
 		NULL /*persistent_id*/,
 		NULL /*timeout*/,
-		NULL, NULL, NULL);
+		context, 
+		NULL, NULL);
 	efree(name);
 #else
 	stream = php_stream_sock_open_host(host, port, SOCK_STREAM, NULL, NULL);
