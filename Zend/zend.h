@@ -287,18 +287,6 @@ struct _zval_struct {
 	zend_uchar is_ref;
 };
 
-typedef struct _zend_property_reference {
-	int type;  /* read, write or r/w */
-	zval *object;
-	zend_llist *elements_list;
-} zend_property_reference;
-
-
-
-typedef struct _zend_overloaded_element {
-	int type;		/* array offset or object proprety */
-	zval element;
-} zend_overloaded_element;
 
 /* excpt.h on Digital Unix 4.0 defines function_table */
 #undef function_table
@@ -348,13 +336,6 @@ struct _zend_class_entry {
 	zend_uint line_end;
 	char *doc_comment;
 	zend_uint doc_comment_len;
-
-	/* old handlers */
-#if 0
-	void (*handle_function_call)(INTERNAL_FUNCTION_PARAMETERS, zend_property_reference *property_reference);
-	zval (*handle_property_get)(zend_property_reference *property_reference);
-	int (*handle_property_set)(zend_property_reference *property_reference, zval *value);
-#endif
 };
 
 #include "zend_stream.h"
