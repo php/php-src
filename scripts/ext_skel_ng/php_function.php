@@ -1,14 +1,16 @@
 <?php
 
 	class php_function extends php_element {
-	  // all known php types
-		function php_function($name, $summary, $proto, $desc="", $code="", $role="") {
+
+		function __construct($name, $summary, $proto, $desc="", $code="", $role="") {
 			$this->name = $name;
 			$this->summary = $summary;
 			$this->desc = empty($desc) ? "&warn.undocumented.func;" : $desc;
       $this->code = $code;
 			$this->role = empty($role) ? "public" : $role;
-			if($this->role === "public") $this->status = $this->parse_proto($proto);
+			if ($this->role === "public") {
+				$this->status = $this->parse_proto($proto);
+			}
 		} 
 		
 		function parse_proto($proto) {
@@ -16,78 +18,78 @@
 			$len=strlen($proto);
 			$name="";
 			$tokens=array();
-			for($n=0;$n<$len;$n++) {
+			for ($n=0;$n<$len;$n++) {
 				$char = $proto{$n};
-				if(ereg("[a-zA-Z0-9_]",$char)) {
+				if (ereg("[a-zA-Z0-9_]",$char)) {
 					$name.=$char;
 				} else {
-					if($name) $tokens[]=$name;
+					if ($name) $tokens[]=$name;
 					$name="";
-					if(trim($char)) $tokens[]=$char;
+					if (trim($char)) $tokens[]=$char;
 				}
 			}
-			if($name) $tokens[]=$name;
+			if ($name) $tokens[]=$name;
 			
 			$n=0;
 			$opts=0;
 			$params=array();
 			$return_type = ($this->is_type($tokens[$n])) ? $tokens[$n++] : "void";
 			$function_name = $tokens[$n++];
-			if($return_type === "resource" && $tokens[$n] !== "(") {
+			if ($return_type === "resource" && $tokens[$n] !== "(") {
 				$return_subtype = $function_name;
 				$function_name = $tokens[$n++];
 			}
-			if(! $this->is_name($function_name)) {
+			if (! $this->is_name($function_name)) {
 				return("$function_name is not a valid function name");
 			}
-			if($function_name != $this->name) {
+			if ($function_name != $this->name) {
 				return "proto function name is '$function_name' instead of '{$this->name}'";
 			}
 
-			if($tokens[$n]!='(') return("'(' expected instead of '$tokens[$n]'");
-			if($tokens[++$n]!=')') {			
-				for($param=0;$tokens[$n];$n++,$param++) {
-					if($tokens[$n]=='[') {
+			if ($tokens[$n]!='(') return("'(' expected instead of '$tokens[$n]'");
+			if ($tokens[++$n]!=')') {			
+				for ($param=0;$tokens[$n];$n++,$param++) {
+					if ($tokens[$n]=='[') {
 						$params[$param]['optional']=true;
 						$opts++;
 						$n++;
-						if($param>0) { 
+						if ($param>0) { 
 							if ($tokens[$n]!=',') return("',' expected after '[' instead of '$token[$n]'");
 							$n++;
 						}
 					}
-					if(!$this->is_type($tokens[$n])) return("type name expected instead of '$tokens[$n]'");
+					if (!$this->is_type($tokens[$n])) return("type name expected instead of '$tokens[$n]'");
 					$params[$param]['type']=$tokens[$n];
 					$n++;
-					if($this->is_name($tokens[$n])) {
+					if ($this->is_name($tokens[$n])) {
 						$params[$param]['name']=$tokens[$n];
 						$n++;
 					}
-					if($params[$param]['type'] === "resource" && $this->is_name($tokens[$n])) {
+					if ($params[$param]['type'] === "resource" && $this->is_name($tokens[$n])) {
 						$params[$param]['subtype'] = $params[$param]['name'];
 						$params[$param]['name'] = $tokens[$n];
 						$n++;
 					}
-					if($tokens[$n]=='[') {
+					if ($tokens[$n]=='[') {
 						$n--;
 						continue;
 					}
-					if($tokens[$n]==',') continue;
-					if($tokens[$n]==']') break;
-					if($tokens[$n]==')') break;			
+					if ($tokens[$n]==',') continue;
+					if ($tokens[$n]==']') break;
+					if ($tokens[$n]==')') break;			
 				}
 			}
 			$numopts=$opts;
-			while($tokens[$n]==']') {
+			while ($tokens[$n]==']') {
 				$n++;
 				$opts--;
 			}
-			if($opts!=0) return ("'[' / ']' count mismatch");
-			if($tokens[$n] != ')') return("')' expected instead of '$tokens[$n]'");
+			if ($opts!=0) return ("'[' / ']' count mismatch");
+			if ($tokens[$n] != ')') return("')' expected instead of '$tokens[$n]'");
 			
 			$this->name     = $function_name;
 			$this->returns  = $return_type;
-			if(isset($return_subtype)) {
+			if (isset($return_subtype)) {
 				$this->returns .= " $return_subtype";
 			}
 			$this->params   = $params;
@@ -101,57 +103,57 @@
 
 			$returns = explode(" ", $this->returns);
 
-			switch($this->role) {
+			switch ($this->role) {
 			case "public":
 			$code .= "\n/* {{{ proto {$this->returns} {$this->name}(";
-			if(isset($this->params)) {
-				foreach($this->params as $key => $param) {
-					if(!empty($param['optional']))
+			if (isset($this->params)) {
+				foreach ($this->params as $key => $param) {
+					if (!empty($param['optional']))
 						$code.=" [";
-					if($key) 
+					if ($key) 
 						$code.=", ";
 					$code .= $param['type']." ";
-					if(isset($param['subtype'])) {
+					if (isset($param['subtype'])) {
 						$code .= $param['subtype']." ";
 					}
-					if($param['type'] !== 'void') {
+					if ($param['type'] !== 'void') {
 					  $code .= $param['name']; 
           }
 				}
 			}
-			for($n=$this->optional; $n>0; $n--) {
+			for ($n=$this->optional; $n>0; $n--) {
 				$code .= "]";
 			}
 			$code .= ")\n  ";
-			if(!empty($this->summary)) {
+			if (!empty($this->summary)) {
 				$code .= $this->summary;
 			}
 			$code .= " */\n";
 			$code .= "PHP_FUNCTION({$this->name})\n";
 			$code .= "{\n";
 
-			if($returns[0] === "resource" && isset($returns[1])) {
+			if ($returns[0] === "resource" && isset($returns[1])) {
 				$resource = $extension->resources[$returns[1]];
-				if($resource->alloc === "yes") {
+				if ($resource->alloc === "yes") {
 					$payload  = $resource->payload;
 					$code .= "  $payload * return_res = ($payload *)emalloc(sizeof($payload));\n";
 				}
 			}
 
-			if(isset($this->params) && count($this->params)) {
+			if (isset($this->params) && count($this->params)) {
 				$arg_string="";
 				$arg_pointers=array();
 				$optional=false;
 				$res_fetch="";
-				foreach($this->params as $key => $param) {
-          if($param["type"] === "void") continue;
+				foreach ($this->params as $key => $param) {
+          if ($param["type"] === "void") continue;
 					$name = $param['name']; 
 					$arg_pointers[]="&$name";
-					if(isset($param['optional'])&&!$optional) {
+					if (isset($param['optional'])&&!$optional) {
 						$optional=true;
 						$arg_string.="|";
 					}
-					switch($param['type']) {
+					switch ($param['type']) {
 					case "bool":
 						$arg_string.="b";
 						$code .= "  zend_bool $name = 0;\n";
@@ -183,7 +185,7 @@
 						$code .= "  zval * $name = NULL;\n";
 						$code .= "  int {$name}_id = -1;\n";
 						// dummfug?						$arg_pointers[]="&{$name}_id";
-						if(isset($param['subtype'])) {
+						if (isset($param['subtype'])) {
 							$resource = $extension->resources[$param['subtype']];
 							$varname = "res_{$name}";
 							$code .= "  {$resource->payload} * $varname;\n";
@@ -206,20 +208,20 @@
 				}
 			} 
 
-			if(isset($arg_string) && strlen($arg_string)) {
+			if (isset($arg_string) && strlen($arg_string)) {
 				$code .= "  int argc = ZEND_NUM_ARGS();\n\n";
 				$code .= "  if (zend_parse_parameters(argc TSRMLS_CC, \"$arg_string\", ".join(", ",$arg_pointers).") == FAILURE) return;\n";
-						if($res_fetch) $code.="\n$res_fetch\n";
+						if ($res_fetch) $code.="\n$res_fetch\n";
 			} else {
 				$code .= "  if (ZEND_NUM_ARGS()>0) { WRONG_PARAM_COUNT; }\n\n";
 			}
 
-			if($this->code) {
+			if ($this->code) {
 				$code .= "  {\n$this->code  }\n"; // {...} for local variables ...
 			} else {
 				$code .= "  php_error(E_WARNING, \"{$this->name}: not yet implemented\"); RETURN_FALSE;\n\n";
 
-				switch($returns[0]) {
+				switch ($returns[0]) {
 				case "void":
 					break;
 				
@@ -248,7 +250,7 @@
 					break;
 				
 				case "resource":
-					if($returns[1]) {
+					if (isset($returns[1])) {
 						$code .= "  ZEND_REGISTER_RESOURCE(return_value, return_res, le_$returns[1]);\n";
 					} else {
 						$code .= "  /* RETURN_RESOURCE(...); /*\n";
@@ -269,7 +271,7 @@
 			break;
 		  
 			case "internal":
-				if(!empty($this->code)) {
+				if (!empty($this->code)) {
 					$code .= "    {\n";
 					$code .= $this->code."\n";
 					$code .= "    }\n";
@@ -298,11 +300,11 @@
 ';
 
 			$xml .= "      <type>{$this->returns}</type><methodname>{$this->name}</methodname>\n";
-			if(empty($this->params) || $this->params[0]["type"]==="void") {
+			if (empty($this->params) || $this->params[0]["type"]==="void") {
 				$xml .= "      <void/>\n";
 			} else {
-				foreach($this->params as $key => $param) {
-					if(isset($param['optional'])) {
+				foreach ($this->params as $key => $param) {
+					if (isset($param['optional'])) {
 						$xml .= "      <methodparam choice='opt'>";
 					} else {
 						$xml .= "      <methodparam>";
@@ -315,7 +317,7 @@
 
 			$desc = $this->desc;
 
-			if(!strstr($this->desc,"<para>")) {
+			if (!strstr($this->desc,"<para>")) {
 				$desc = "     <para>\n$desc     </para>\n";
 			}
 
