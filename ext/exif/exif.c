@@ -33,26 +33,6 @@
  *  attacker could generate an image with recursive ifd pointers...(Marcus)
  */
 
-/* Fragments of the code in this module were borrowed from the public domain
- * jhead.c package with the author's consent.
- *
- *  The original header from the jhead.c file was:
- *
- * --------------------------------------------------------------------------
- *  Program to pull the information out of various types of EFIF digital
- *  camera files and show it in a reasonably consistent way
- *
- *  Version 0.9
- *
- *  Compiles with MSVC on Windows, or with GCC on Linux
- *
- *  Compileing under linux: Must include math library.
- *  Use: cc -lm -O3 -o jhead jhead.c
- *
- *  Matthias Wandel,  Dec 1999 - April 2000
- * --------------------------------------------------------------------------
- */
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
