@@ -17,6 +17,9 @@
 # include "tsrm_config.h"
 #endif
 
+#ifdef WIN32
+# define TSRM_WIN32
+#endif
 
 #ifdef TSRM_WIN32
 #	ifdef TSRM_EXPORTS
@@ -30,10 +33,6 @@
 
 /* Only compile multi-threading functions if we're in ZTS mode */
 #ifdef ZTS
-
-#ifdef WIN32
-# define TSRM_WIN32
-#endif
 
 #ifdef TSRM_WIN32
 # include <windows.h>
