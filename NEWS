@@ -57,6 +57,8 @@ PHP 4                                                                      NEWS
   system). (Derick)
 - Fixed Bug #26703 (Certain characters inside strings incorrectly treated as
   keywords). (vrana [at] php [dot] net, Ilia)
+- Fixed bug #26699 (mbstring doesn't identify "binary" as a valid encoding).
+  (nirva-php at ishiboo dot com, Moriyoshi)
 - Fixed bug #26667 (Added safety checks to ip2long()). (Ilia)
 - Fixed bug #26639 (mb_convert_variables() clutters variables beyond the
   references). (Moriyoshi)
