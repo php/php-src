@@ -1,3 +1,33 @@
+2002-06-03  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * ext/posix/posix.c:
+    - Move macro code into distinct function for easier debugging as suggested by
+      Andi.
+
+2002-06-03  Harald Radi  <h.radi@nme.at>
+
+    * win32/php4dllts.dsp: fix build
+
+2002-06-03  Rasmus Lerdorf  <rasmus@lerdorf.on.ca>
+
+    * ext/standard/html.c: Make sure len is defined here
+
+2002-06-03  Edin Kadribasic  <edink@proventum.net>
+
+    * NEWS
+      ext/standard/array.c: MFH
+
+    * ext/standard/array.c: Fixed array_rand() on ZTS platforms.
+
+2002-06-03  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * ext/posix/posix.c: - Fix isatty() and ttyname() (Closes #17323, #17333).
+
+    * win32/sendmail.c: - Fix a leak and a crash.
+
+    * win32/install.txt:
+    - Add note about IIS/CGI and cgi.force_redirect gotcha
+
 2002-06-02  Stig Bakken  <ssb@fast.no>
 
     * pear/PEAR/Command.php: * fix bug that was re-introduced during merge
