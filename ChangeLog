@@ -1,3 +1,13 @@
+2001-10-03  Stanislav Malyshev  <stas@zend.com>
+
+    * php.ini-recommended
+      php.ini-dist: Fix typo - comment is ; not '
+
+2001-10-03  Jason Greene  <jason@inetgurus.net>
+
+    * ext/pcntl/pcntl.c: Add cleanup on an exec failure
+    Remove debug comments
+
 2001-10-02  Sascha Schumann  <sascha@schumann.cx>
 
     * sapi/thttpd/README: typo fix by zoot@zotikos.com
