@@ -175,7 +175,7 @@ static int php_iconv_string(const char *in_p, size_t in_len,
 	
 	if (cd == (iconv_t)(-1)) {
 		*err = PHP_ICONV_UNKNOWN;
-		php_error(E_WARNING, "%s(): unknown error, unable to convert from `%s' to `%s'",
+		php_error(E_WARNING, "%s(): Unknown error, unable to convert from `%s' to `%s'",
 				  get_active_function_name(TSRMLS_C), in_charset, out_charset);
 		efree(out_buffer);
 		return FAILURE;
@@ -211,11 +211,11 @@ static int php_iconv_string(const char *in_p, size_t in_len,
 	if (cd == (iconv_t)(-1)) {
 		if (errno == EINVAL) {
 			*err = PHP_ICONV_WRONG_CHARSET;
-			php_error(E_NOTICE, "%s(): wrong charset, cannot convert from `%s' to `%s'",
+			php_error(E_NOTICE, "%s(): Wrong charset, cannot convert from `%s' to `%s'",
 					  get_active_function_name(TSRMLS_C), in_charset, out_charset);
 		} else {
 			*err = PHP_ICONV_CONVERTER;
-			php_error(E_NOTICE, "%s(): cannot open converter",
+			php_error(E_NOTICE, "%s(): Cannot open converter",
 					  get_active_function_name(TSRMLS_C));
 		}
 		return FAILURE;
@@ -252,24 +252,24 @@ static int php_iconv_string(const char *in_p, size_t in_len,
 	if (result == (size_t)(-1)) {
 		switch (errno) {
 			case EINVAL:
-				php_error(E_NOTICE, "%s(): detected incomplete character in input string",
+				php_error(E_NOTICE, "%s(): Detected incomplete character in input string",
 						  get_active_function_name(TSRMLS_C));
 				*err = PHP_ICONV_ILLEGAL_CHAR;
 				break;
 			case EILSEQ:
-				php_error(E_NOTICE, "%s(): detected illegal character in input string",
+				php_error(E_NOTICE, "%s(): Detected illegal character in input string",
 						  get_active_function_name(TSRMLS_C));
 				*err = PHP_ICONV_ILLEGAL_SEQ;
 				break;
 			case E2BIG:
 				/* should not happen */
-				php_error(E_WARNING, "%s(): run out buffer",
+				php_error(E_WARNING, "%s(): Run out buffer",
 						  get_active_function_name(TSRMLS_C));
 				*err = PHP_ICONV_TOO_BIG;
 				break;
 			default:
 				/* other error */
-				php_error(E_NOTICE, "%s(): unknown error (%d)",
+				php_error(E_NOTICE, "%s(): Unknown error (%d)",
 						  get_active_function_name(TSRMLS_C), errno);
 				*err = PHP_ICONV_UNKNOWN;
 				efree(out_buf);
