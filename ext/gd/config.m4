@@ -35,7 +35,7 @@ PHP_ARG_WITH(freetype-dir, for FreeType 2,
 [  --with-freetype-dir[=DIR] GD: Set the path to FreeType 2 install prefix.], no, no)
 
 PHP_ARG_WITH(t1lib, for T1lib support,
-[  --with-t1lib[=DIR]        GD: Include T1lib support.], no, no)
+[  --with-t1lib[=DIR]        GD: Include T1lib support. T1lib version >= 5.0.0 required], no, no)
 
 PHP_ARG_ENABLE(gd-native-ttf, whether to enable truetype string function in GD,
 [  --enable-gd-native-ttf    GD: Enable TrueType string function.], no, no)
@@ -206,7 +206,7 @@ AC_DEFUN(PHP_GD_T1LIB,[
       AC_MSG_ERROR([Your t1lib distribution is not installed correctly. Please reinstall it.]) 
     fi
 
-    PHP_CHECK_LIBRARY(t1, T1_LoadFont, 
+    PHP_CHECK_LIBRARY(t1, T1_StrError,
     [
       AC_DEFINE(HAVE_LIBT1,1,[ ])
       PHP_ADD_INCLUDE($GD_T1_DIR/include)
