@@ -241,8 +241,7 @@ static void sapi_cli_log_message(char *message)
 	TSRMLS_FETCH();
 
 	if (php_header(TSRMLS_C)) {
-		fprintf(stderr, "%s", message);
-		fprintf(stderr, "\n");
+		fprintf(stderr, "%s\n", message);
 	}
 }
 
@@ -265,8 +264,8 @@ static void sapi_cli_send_header(sapi_header_struct *sapi_header, void *server_c
 {
 	if (sapi_header) {
 		PHPWRITE_H(sapi_header->header, sapi_header->header_len);
+		PHPWRITE_H("\r\n", 2);
 	}
-	PHPWRITE_H("\r\n", 2);
 }
 
 
