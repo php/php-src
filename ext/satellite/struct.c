@@ -240,11 +240,11 @@ zend_bool  OrbitStruct_Constructor(OrbitStruct  ** ppStruct,
 	}
 
 	/* validate parameter types */
-	if (ppPZ_TYPE_P(arameters[0]) != IS_STRING)
+	if (Z_TYPE_P(ppParameters[0]) != IS_STRING)
 		goto error;
 	
 	/* initialize struct */
-	if (!OrbitStruct_Initialize(ppPZ_STRVAL_P(arameters[0]), p_struct))
+	if (!OrbitStruct_Initialize(Z_STRVAL_P(ppParameters[0]), p_struct))
 		goto error;
 	
 	*ppStruct = p_struct;
