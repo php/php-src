@@ -302,6 +302,7 @@ static void executor_globals_ctor(zend_executor_globals *executor_globals)
 	zend_init_rsrc_plist(ELS_C);
 	EG(lambda_count)=0;
 	EG(user_error_handler) = NULL;
+	EG(interactive) = 0;
 }
 
 
