@@ -237,7 +237,6 @@ PHP_FUNCTION(checkdnsrr)
 PHP_FUNCTION(getmxrr)
 {
 	pval *host, *mx_list, *weight_list;
-	pval tmp1,tmp2;
 	int need_weight = 0;
 	int count,qdc;
 	u_short type,weight;
@@ -313,14 +312,9 @@ PHP_FUNCTION(getmxrr)
 			RETURN_FALSE;
 		}
 		cp += i;
-		tmp1.value.str.len = strlen(buf);
-		tmp1.value.str.val = estrndup(buf,tmp1.value.str.len);
-		tmp1.type = IS_STRING;
-		_php3_hash_next_index_insert(mx_list->value.ht, (void *)&tmp1, sizeof(pval), NULL);
+		add_next_index_string(mx_list, buf, 1);
 		if ( need_weight ) {
-			tmp2.value.lval = (long)weight;
-			tmp2.type = IS_LONG;
-			_php3_hash_next_index_insert(weight_list->value.ht, (void *)&tmp2, sizeof(pval), NULL);
+			add_next_index_long(weight_list, weight);
 		}
 	}
 	RETURN_TRUE;
