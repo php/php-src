@@ -2344,6 +2344,18 @@ PHP_FUNCTION(ini_set)
 		}
 	}	
 		
+#define _CHECK_SAFEMODE_INI(ini, var) strncmp(ini, Z_STRVAL_PP(var), sizeof(ini))
+		
+	/* checks that ensure the user does not overwrite certain ini settings when safe_mode is enabled */
+	if (PG(safe_mode)) {
+		if (!_CHECK_SAFEMODE_INI("max_execution_time", varname) ||
+			!_CHECK_SAFEMODE_INI("memory_limit", varname) ||
+			!_CHECK_SAFEMODE_INI("child_terminate", varname)) {
+			zval_dtor(return_value);
+			RETURN_FALSE;
+		}	
+	}	
+		
 	if (zend_alter_ini_entry(Z_STRVAL_PP(varname), Z_STRLEN_PP(varname)+1, Z_STRVAL_PP(new_value), Z_STRLEN_PP(new_value),
 								PHP_INI_USER, PHP_INI_STAGE_RUNTIME) == FAILURE) {
 		zval_dtor(return_value);
