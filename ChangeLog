@@ -1,3 +1,46 @@
+2000-03-13  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/gd/gd.c: Fixed some protos.
+
+2000-03-13  Andi Gutmans  <andi@php.net>
+
+    * LICENSE: - Change Zend license version
+
+2000-03-13  Andrei Zmievski  <andrei@ispi.net>
+
+    * NEWS
+      ext/session/php_session.h
+      ext/session/session.c: Changed HTTP_STATE_VARS to HTTP_SESSION_VARS.
+
+2000-03-13  Andreas Karajannis  <Andreas.Karajannis@gmd.de>
+
+    * ext/odbc/php_odbc.c
+      ext/odbc/php_odbc.h: odbc_close() and odbc_close_all() working again
+
+2000-03-13  Sam Ruby  <rubys@us.ibm.com>
+
+    * ext/java/README: remove java.library from the README
+
+2000-03-13  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/gd/gd.c:
+2000-03-13  Andi Gutmans  <andi@php.net>
+
+    * ext/standard/dl.c: - Also check module API number
+
+2000-03-13  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/gd/gd.c
+      ext/gd/php_gd.h
+      ext/pdf/config.m4
+      ext/gd/config.m4: gd-jpeg support
+
+2000-03-13  Sam Ruby  <rubys@us.ibm.com>
+
+    * ext/java/Makefile.in
+      ext/java/config.m4
+      ext/java/java.c: Eliminate java.library ini option in favor of rpath
+
 2000-03-12  Charles Hagenbuch  <chagenbu@wso.williams.edu>
 
     * ext/imap/imap.c
