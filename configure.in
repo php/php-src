@@ -844,7 +844,7 @@ AC_DEFINE_UNQUOTED(PHP_UNAME,"$PHP_UNAME",[uname -a output])
 PHP_OS=`uname`
 AC_DEFINE_UNQUOTED(PHP_OS,"$PHP_OS",[uname output])
 
-if test "$disable_cgi" = "1"; then
+if test "$disable_cli" = "1"; then
   CLI_DIR=
 else
   CLI_DIR=sapi/cli
