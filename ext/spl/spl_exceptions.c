@@ -56,7 +56,7 @@ PHP_MINIT_FUNCTION(spl_exceptions)
     REGISTER_SPL_SUB_CLASS_EX(OutOfRangeException,      LogicException,   NULL, NULL);
 
     REGISTER_SPL_SUB_CLASS_EX(RuntimeException,         Exception,        NULL, NULL);
-    REGISTER_SPL_SUB_CLASS_EX(OutOfBoundsException      RuntimeException, NULL, NULL);
+    REGISTER_SPL_SUB_CLASS_EX(OutOfBoundsException,     RuntimeException, NULL, NULL);
     REGISTER_SPL_SUB_CLASS_EX(OverflowException,        RuntimeException, NULL, NULL);
     REGISTER_SPL_SUB_CLASS_EX(RangeException,           RuntimeException, NULL, NULL);
     REGISTER_SPL_SUB_CLASS_EX(UnderflowException,       RuntimeException, NULL, NULL);
