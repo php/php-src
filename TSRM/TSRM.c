@@ -158,18 +158,12 @@ TSRM_API void tsrm_shutdown(void)
 
 				next_p = p->next;
 				for (j=0; j<p->count; j++) {
-				/*
-					Disabled calling dtors on tsrm_shutdown - calling dtors
-					in tsrm_shutdown makes modules registering TSRM ids 
-					to crash, if they have dtors, since the module is unloaded
-					before tsrm_shutdown is called. Can be re-enabled after 
-					tsrm_free_id is implemented.
-
-					if (resource_types_table && resource_types_table[j].dtor) {
-						resource_types_table[j].dtor(p->storage[j], &p->storage);
+					if (p->storage[j]) {
+						if (resource_types_table && resource_types_table[j].dtor) {
+							resource_types_table[j].dtor(p->storage[j], &p->storage);
+						}
+						free(p->storage[j]);
 					}
-					*/
-					free(p->storage[j]);
 				}
 				free(p->storage);
 				free(p);
@@ -428,6 +422,33 @@ void ts_free_thread(void)
 /* deallocates all occurrences of a given id */
 void ts_free_id(ts_rsrc_id id)
 {
+	int i;
+	int j = TSRM_UNSHUFFLE_RSRC_ID(id);
+
+	tsrm_mutex_lock(tsmm_mutex);
+
+	TSRM_ERROR((TSRM_ERROR_LEVEL_CORE, "Freeing resource id %d", id));
+
+	if (tsrm_tls_table) {
+		for (i=0; i<tsrm_tls_table_size; i++) {
+			tsrm_tls_entry *p = tsrm_tls_table[i], *next_p;
+
+			while (p) {
+				if (p->count > j && p->storage[j]) {
+					if (resource_types_table && resource_types_table[j].dtor) {
+						resource_types_table[j].dtor(p->storage[j], &p->storage);
+					}
+					free(p->storage[j]);
+					p->storage[j] = NULL;
+				}
+				p = p->next;
+			}
+		}
+	}
+
+	tsrm_mutex_unlock(tsmm_mutex);
+
+	TSRM_ERROR((TSRM_ERROR_LEVEL_CORE, "Successfully freed resource id %d", id));
 }
 
 
