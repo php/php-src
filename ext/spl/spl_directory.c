@@ -564,7 +564,7 @@ SPL_METHOD(RecursiveDirectoryIterator, getChildren)
 }
 /* }}} */
 
-/* {{{ proto void RecursiveDirectoryIterator::rewind()
+/* {{{ proto void RecursiveDirectoryIterator::getSubPath()
    Get sub path */
 SPL_METHOD(RecursiveDirectoryIterator, getSubPath)
 {
@@ -575,6 +575,24 @@ SPL_METHOD(RecursiveDirectoryIterator, getSubPath)
 		RETURN_STRINGL(intern->sub_path, intern->sub_path_len, 1);
 	} else {
 		RETURN_STRINGL("", 0, 1);
+	}
+}
+/* }}} */
+
+/* {{{ proto void RecursiveDirectoryIterator::getSubPathname()
+   Get sub path and file name */
+SPL_METHOD(RecursiveDirectoryIterator, getSubPathname)
+{
+	zval *object = getThis();
+	spl_ce_dir_object *intern = (spl_ce_dir_object*)zend_object_store_get_object(object TSRMLS_CC);
+	char *sub_name;
+	int len;
+
+	if (intern->sub_path) {
+		len = spprintf(&sub_name, 0, "%s/%s", intern->sub_path, intern->entry.d_name);
+		RETURN_STRINGL(sub_name, len, 0);
+	} else {
+		RETURN_STRING(intern->entry.d_name, 1);
 	}
 }
 /* }}} */
@@ -848,6 +866,7 @@ static zend_function_entry spl_ce_dir_tree_class_functions[] = {
 	SPL_ME(RecursiveDirectoryIterator, hasChildren,   NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(RecursiveDirectoryIterator, getChildren,   NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(RecursiveDirectoryIterator, getSubPath,    NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveDirectoryIterator, getSubPathname,NULL, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 
