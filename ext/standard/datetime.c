@@ -509,7 +509,6 @@ char *php_std_date(time_t t)
  *  returns True(1) if it is valid date
  *
  */
-#define isleap(year) (((year%4) == 0 && (year%100)!=0) || (year%400)==0)
 PHP_FUNCTION(checkdate)
 {
 	pval **month, **day, **year;
