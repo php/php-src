@@ -1,0 +1,289 @@
+./"    +----------------------------------------------------------------------+
+./"    | PHP Version 4                                                        |
+./"    +----------------------------------------------------------------------+
+./"    | Copyright (c) 1997-2003 The PHP Group                                |
+./"    +----------------------------------------------------------------------+
+./"    | This source file is subject to version 2.02 of the PHP license,      |
+./"    | that is bundled with this package in the file LICENSE, and is        |
+./"    | available at through the world-wide-web at                           |
+./"    | http://www.php.net/license/2_02.txt.                                 |
+./"    | If you did not receive a copy of the PHP license and are unable to   |
+./"    | obtain it through the world-wide-web, please send a note to          |
+./"    | license@php.net so we can mail you a copy immediately.               |
+./"    +----------------------------------------------------------------------+
+./"    | Author: Marcus Boerger <helly@php.net>                               |
+./"    +----------------------------------------------------------------------+
+./" 
+./" $Id$
+./" 
+.TH PHP 1
+.SH NAME
+.TP 15
+.B php
+PHP Command Line Interface 'CLI'
+.SH SYNOPSIS
+.B php
+[options] [
+.B \-f
+]
+.IR file
+[[\-\-] 
+.IR args
+]
+.LP
+.B php
+[options] 
+.B \-r 
+.IR code
+[[\-\-]
+.IR args
+]
+.LP
+.B php
+[options] [\-B 
+.IR code
+] 
+.B \-R 
+.IR code
+[\-E 
+.IR code
+] [[\-\-]
+.IR args
+]
+.LP
+.B php
+[options] [\-B 
+.IR code
+]
+.B \-F 
+.IR file
+[\-E 
+.IR code
+] [[\-\-]
+.IR args
+]
+.LP
+.B php
+[options] \-\- [
+.IR args
+]
+.LP
+.SH DESCRIPTION
+.B PHP
+is a widely\-used general\-purpose scripting language that is especially suited for 
+Web development and can be embedded into HTML. This is the command line interface
+that enables you to the following:
+.P
+You can parse and execute files by using parameter \-f followed by the name of the 
+.IR file 
+to be executed.
+.LP
+Using parameter \-r you can directly execute PHP 
+.IR code 
+simply as you would do inside a .php file when using the 
+.B eval() 
+function.
+.LP
+It is also possible to process the standard input line by line using either
+the parameter \-R or \-F. In this mode each separate input line causes the
+.IR code 
+specified by \-R or the 
+.IR file
+specified by \-F to be executed.
+You can access the input line by \fB$argn\fP. While processing the input lines
+.B $argi 
+contains the number of the actual line being processed. Further more
+the paramters \-B and \-E can be used to execute 
+.IR code
+(see \-r) before and
+after all input lines have been processed respectively.
+.LP
+If none of \-r \-f \-B \-R \-F or \-E is present but a single parameter is given 
+then this parameter is taken as the filename to parse and execute (same as 
+with \-f). If no parameter is present then the standard input is read and 
+executed.
+.SH OPTIONS
+.TP 15
+.B \-a
+Run interactively
+.TP
+.B \-c path|file 
+Look for 
+.B php.ini 
+file in the directory
+.IR path
+or use the specified
+.IR file
+.TP
+.B \-n
+No 
+.B php.ini 
+file will be used
+.TP
+.B \-d foo[=bar]
+Define INI entry 
+.IR foo 
+with value
+.IR bar
+.TP
+.B \-e
+Generate extended information for debugger/profiler
+.TP
+.B \-f file
+Parse and execute 
+.IR file
+.TP
+.B \-h
+This help
+.TP
+.B \-i
+PHP information and configuration
+.TP
+.B \-l
+Syntax check only (lint)
+.TP
+.B \-m
+Show compiled in modules
+.TP
+.B \-r code
+Run PHP 
+.IR code
+without using script tags
+.B '<?..?>'
+.TP
+.B \-B code
+Run PHP 
+.IR code
+before processing input lines
+.TP
+.B \-R code
+Run PHP 
+.IR code
+for every input line
+.TP
+.B \-F file
+Parse and execute 
+.IR file
+for every input line
+.TP
+.B \-E code
+Run PHP 
+.IR code
+after processing all input lines
+.TP
+.B \-s
+Display colour syntax highlighted source
+.TP
+.B \-v
+Version number
+.TP
+.B \-w
+Display source with stripped comments and whitespace
+.TP
+.B \-z file
+Load Zend extension 
+.IR file
+.TP
+.IR args
+Arguments passed to script. Use 
+.B '\-\-'
+.IR args 
+when first argument starts with 
+.B '\-'
+or script is read from stdin
+.SH FILES
+.TP 15
+.B php\-cli.ini
+The configuration file for the CLI version of PHP.
+.TP
+.B php.ini
+The standard configuration file will only be used when 
+.B php\-cli.ini
+cannot not be found.
+.SH EXAMPLES
+.TP 5
+php \-r 'echo "Hello World\\n";'
+This command simply writes the text "Hello World" to stabdard out.
+.TP
+php \-r 'print_r(gd_info());'
+This shows the configuration of your gd extension. You can use this
+to easily check which imag formats you can use. If you have any
+dynamic modules you may want to use the same ini file that php uses
+when executed from your webserver. There are more extensions which
+have such a function. For dba use php \-r 'print_r(dba_handlers(1));'
+.TP
+php \-d html_errors=1 \-i | php \-R 'echo strip_tags($argn)."\\n";'
+This example uses PHP first to generate a HTML output. This is 
+meant to be replaced with any tool that displays HTML (for instance
+you could use 'cat file.html'). The second php command now strips off
+the HTML tags line by line and outputs the result.
+.TP
+php \-E 'echo "Lines: $argi\\n";'
+This command shows the number of lines being input.
+.TP
+php \-R '$l+=count(file($argn));' \-E'echo "Lines:$l\\n";'
+This commands expects each input line beeing a file. It counts all lines 
+of the files specified by each input line and shows the summarized result. 
+You may combine this with tools like find and change the php scriptlet.
+.TP
+php \-R 'echo $argn; fgets(STDIN);'
+Since you have access to STDIN from within \-B \-R and \-F you can skip certain
+input lines with your code. But note that in such cases $argi only counts the
+lines being processed by php itself. Having read this you will guess what the 
+above program does: skipping every second input line.
+.SH TIPS
+You can use a shebang line to automatically invoke php
+from scripts. Only the CLI version of PHP will ignore
+such a first line as shown below:
+.P
+.PD 0
+#!/bin/php
+.P
+<?php
+.P
+ // your script
+.P
+?>
+.PD 1
+.P
+.SH SEE ALSO
+For a more or less complete description of PHP look here:
+.PD 0
+.P
+.B http://www.php.net/manual/
+.PD 1
+.SH BUGS
+You can view the list of known bugs or add any new bug you
+found here:
+.PD 0
+.P
+.B http://bugs.php.net
+.PD 1
+.SH AUTHORS
+The PHP Group: Thies C. Arntzen, Stig Bakken, Andi Gutmans, Rasmus Lerdorf, Sam Ruby, Sascha Schumann, Zeev Suraski, Jim Winstead, Andrei Zmievski.
+.P
+Additional work for the CLI sapi was done by Edin Kadribasic and Marcus Boerger.
+.P
+A List of active developers can be found here:
+.PD 0
+.P
+.B http://www.php.net/credits.php
+.PD 1
+.P
+And last but not least PHP was developed with the help of a huge amount of 
+contributors all around the world.
+.SH COPYRIGHT
+Copyright (c) 1997-2003 The PHP Group
+.LP
+This source file is subject to version 2.02 of the PHP license,
+that is bundled with this package in the file LICENSE, and is
+available at through the world-wide-web at
+.PD 0
+.P
+.B http://www.php.net/license/2_02.txt
+.PD 1
+.P
+If you did not receive a copy of the PHP license and are unable to
+obtain it through the world-wide-web, please send a note to
+.B license@php.net 
+so we can mail you a copy immediately.
