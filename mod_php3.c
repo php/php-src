@@ -108,7 +108,22 @@ static int zend_apache_ub_write(const char *str, uint str_length)
 
 int sapi_apache_read_post(char *buffer, uint count_bytes SLS_DC)
 {
-	return 0;
+	uint total_read_bytes=0, read_bytes;
+	request_rec *r = (request_rec *) SG(server_context);
+	void (*handler)(int);
+
+	handler = signal(SIGPIPE, SIG_IGN);
+	while (total_read_bytes<count_bytes) {
+		hard_timeout("Read POST information", r); /* start timeout timer */
+		read_bytes = get_client_block(r, buffer+total_read_bytes, count_bytes-total_read_bytes);
+		reset_timeout(r);
+		if (read_bytes<=0) {
+			break;
+		}
+		total_read_bytes += read_bytes;
+	}
+	signal(SIGPIPE, handler);	
+	return total_read_bytes;
 }
 
 
