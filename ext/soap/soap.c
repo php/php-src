@@ -394,6 +394,7 @@ static void php_soap_init_globals(zend_soap_globals *soap_globals)
 	zend_hash_add(&soap_globals->defEncNs, XSD_1999_NAMESPACE, sizeof(XSD_1999_NAMESPACE), XSD_NS_PREFIX, sizeof(XSD_NS_PREFIX), NULL);
 	zend_hash_add(&soap_globals->defEncNs, XSD_NAMESPACE, sizeof(XSD_NAMESPACE), XSD_NS_PREFIX, sizeof(XSD_NS_PREFIX), NULL);
 	zend_hash_add(&soap_globals->defEncNs, XSI_NAMESPACE, sizeof(XSI_NAMESPACE), XSI_NS_PREFIX, sizeof(XSI_NS_PREFIX), NULL);
+	zend_hash_add(&soap_globals->defEncNs, XML_NAMESPACE, sizeof(XML_NAMESPACE), XML_NS_PREFIX, sizeof(XML_NS_PREFIX), NULL);
 	zend_hash_add(&soap_globals->defEncNs, SOAP_1_1_ENC_NAMESPACE, sizeof(SOAP_1_1_ENC_NAMESPACE), SOAP_1_1_ENC_NS_PREFIX, sizeof(SOAP_1_1_ENC_NS_PREFIX), NULL);
 	zend_hash_add(&soap_globals->defEncNs, SOAP_1_2_ENC_NAMESPACE, sizeof(SOAP_1_2_ENC_NAMESPACE), SOAP_1_2_ENC_NS_PREFIX, sizeof(SOAP_1_2_ENC_NS_PREFIX), NULL);
 
@@ -2227,7 +2228,7 @@ PHP_METHOD(SoapClient, __call)
 	zval *headers = NULL;
 	zval *output_headers = NULL;
 	zval *args;
-	zval **real_args;
+	zval **real_args = NULL;
 	zval **param;
 	int arg_count;
 
@@ -2282,18 +2283,22 @@ PHP_METHOD(SoapClient, __call)
 
 	arg_count = zend_hash_num_elements(Z_ARRVAL_P(args));
 
-	real_args = safe_emalloc(sizeof(zval *), arg_count, 0);
-	for (zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(args), &pos);
-		zend_hash_get_current_data_ex(Z_ARRVAL_P(args), (void **) &param, &pos) == SUCCESS;
-		zend_hash_move_forward_ex(Z_ARRVAL_P(args), &pos)) {
-			/*zval_add_ref(param);*/
-			real_args[i++] = *param;
+	if (arg_count > 0) {
+		real_args = safe_emalloc(sizeof(zval *), arg_count, 0);
+		for (zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(args), &pos);
+			zend_hash_get_current_data_ex(Z_ARRVAL_P(args), (void **) &param, &pos) == SUCCESS;
+			zend_hash_move_forward_ex(Z_ARRVAL_P(args), &pos)) {
+				/*zval_add_ref(param);*/
+				real_args[i++] = *param;
+		}
 	}
 	if (output_headers) {
 		array_init(output_headers);
 	}
 	do_soap_call(this_ptr, function, function_len, arg_count, real_args, return_value, soap_action, uri, soap_headers, output_headers TSRMLS_CC);
-	efree(real_args);
+	if (arg_count > 0) {
+		efree(real_args);
+	}
 
 	if (soap_headers && ! headers) {
 		zend_hash_destroy(soap_headers);
