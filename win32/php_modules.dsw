@@ -111,18 +111,6 @@ Package=<4>
 
 ###############################################################################
 
-Project: "domxml"=..\ext\domxml\domxml.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-}}}
-
-###############################################################################
-
 Project: "exif"=..\ext\exif\exif.dsp - Package Owner=<4>
 
 Package=<5>
@@ -184,18 +172,6 @@ Package=<4>
 ###############################################################################
 
 Project: "gettext"=..\ext\gettext\gettext.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-}}}
-
-###############################################################################
-
-Project: "hyperwave"=..\ext\hyperwave\hyperwave.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -363,6 +339,18 @@ Package=<4>
 
 ###############################################################################
 
+Project: "mysql"=..\ext\mysql\mysql.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
 Project: "notes"=..\ext\notes\notes.dsp - Package Owner=<4>
 
 Package=<5>
@@ -519,31 +507,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "xslt"=..\ext\xslt\xslt.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-}}}
-
-###############################################################################
-
 Project: "yaz"=..\ext\yaz\yaz.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-}}}
-
-###############################################################################
-
-Project: "zip"=..\ext\zip\zip.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
