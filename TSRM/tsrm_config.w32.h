@@ -3,7 +3,6 @@
 
 #define HAVE_UTIME 1
 #define HAVE_ALLOCA 1
-#define _CRTDBG_MAP_ALLOC
 
 #include <malloc.h>
 #include <stdlib.h>
