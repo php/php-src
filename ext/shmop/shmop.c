@@ -310,7 +310,7 @@ PHP_FUNCTION(shmop_write)
 		RETURN_FALSE;
 	}
 
-	if (offset > shmop->size) {
+	if (offset < 0 || offset > shmop->size) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "offset out of range");
 		RETURN_FALSE;
 	}
