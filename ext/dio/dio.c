@@ -74,6 +74,8 @@ static void _dio_close_fd(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 
 #define RDIOC(c) REGISTER_LONG_CONSTANT(#c, c, CONST_CS | CONST_PERSISTENT)
 
+#define DIO_UNDEF_CONST -1
+
 PHP_MINIT_FUNCTION(dio)
 {
     le_fd = zend_register_list_destructors_ex(_dio_close_fd, NULL, le_fd_name, module_number);
@@ -87,7 +89,9 @@ PHP_MINIT_FUNCTION(dio)
 	RDIOC(O_APPEND);
 	RDIOC(O_NONBLOCK);
 	RDIOC(O_NDELAY);
+#ifdef O_SYNC
 	RDIOC(O_SYNC);
+#endif
 	RDIOC(O_NOCTTY);
 	RDIOC(S_IRWXU);
 	RDIOC(S_IRUSR);
