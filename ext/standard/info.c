@@ -515,7 +515,11 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 		}
 		PUTS("This program makes use of the Zend Scripting Language Engine:");
 		PUTS(PG(html_errors)?"<br />":"\n");
-		zend_html_puts(zend_version, strlen(zend_version) TSRMLS_CC);
+		if (PG(html_errors)) {
+			zend_html_puts(zend_version, strlen(zend_version) TSRMLS_CC);
+		} else {
+			PUTS(zend_version);
+		}
 		php_info_print_box_end();
 		efree(php_uname);
 	}
