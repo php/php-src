@@ -598,9 +598,6 @@ PHP_FUNCTION(mysql_close)
 	}
 	
 	ZEND_FETCH_RESOURCE2(mysql, MYSQL *, mysql_link, id, "MySQL-Link", le_link, le_plink);
-
-	/* XXX shouldn't this be zend_list_delete((*mysql_link)->value.lval)
-	 * if the optional parameter is present? (steinm@php.net) */
 	zend_list_delete(id);
 	RETURN_TRUE;
 }
