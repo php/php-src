@@ -1,3 +1,30 @@
+2004-06-22  Andrei Zmievski  <andreiz@gmail.com>
+
+    * NEWS
+      ext/pcre/php_pcre.c:
+      MFB (better error checking in pcre_fullinfo() calls).
+
+    * (PHP_4_3)
+      NEWS
+      ext/pcre/php_pcre.c:
+      pcre_info() is deprecated. Hence, update to pcre_fullinfo() and do more
+      rigorous checking of return values.
+
+2004-06-22  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/iptc.c:
+      Fixed possible buffer overflow.
+
+2004-06-22  Uwe Schindler  <uwe@thetaphi.de>
+
+    * (PHP_4_3)
+      NEWS
+      sapi/nsapi/nsapi.c:
+      Fix bug #28878: php.ini values in php4_execute
+
+    * sapi/nsapi/nsapi.c:
+      Fix bug #28878: php.ini values in php5_execute
+
 2004-06-21  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/standard/iptc.c:
