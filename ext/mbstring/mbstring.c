@@ -483,6 +483,12 @@ PHP_RSHUTDOWN_FUNCTION(mbstring)
 		MBSTRG(outconv) = NULL;
 	}
 
+	MBSTRG(http_input_identify) = mbfl_no_encoding_invalid;
+	MBSTRG(http_input_identify_post) = mbfl_no_encoding_invalid;
+	MBSTRG(http_input_identify_get) = mbfl_no_encoding_invalid;
+	MBSTRG(http_input_identify_cookie) = mbfl_no_encoding_invalid;
+	MBSTRG(http_input_identify_string) = mbfl_no_encoding_invalid;
+
 	return SUCCESS;
 }
 
