@@ -101,6 +101,9 @@ function_entry pdf_functions[] = {
 	PHP_FE(pdf_set_text_pos, NULL)
 	PHP_FE(pdf_set_char_spacing, NULL)
 	PHP_FE(pdf_set_word_spacing, NULL)
+	PHP_FE(pdf_get_font, NULL)
+	PHP_FE(pdf_get_fontname, NULL)
+	PHP_FE(pdf_get_fontsize, NULL)
 	PHP_FE(pdf_continue_text, NULL)
 	PHP_FE(pdf_stringwidth, NULL)
 	PHP_FE(pdf_save, NULL)
@@ -584,6 +587,86 @@ PHP_FUNCTION(pdf_set_font) {
 	PDF_setfont(pdf, font, (float) arg3->value.dval);
 
 	RETURN_TRUE;
+}
+/* }}} */
+
+/* {{{ proto string pdf_get_font(int pdfdoc)
+   Gets the current font */
+PHP_FUNCTION(pdf_get_font) {
+	pval *arg1;
+	int id, type, font, embed;
+	PDF *pdf;
+	PDF_TLS_VARS;
+
+	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	convert_to_long(arg1);
+	id=arg1->value.lval;
+	pdf = php3_list_find(id,&type);
+	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
+		php3_error(E_WARNING,"Unable to find file identifier %d",id);
+		RETURN_FALSE;
+	}
+	
+	font = PDF_get_font(pdf);
+
+	RETURN_LONG(font);
+}
+/* }}} */
+
+/* {{{ proto string pdf_get_fontname(int pdfdoc)
+   Gets the current font name */
+PHP_FUNCTION(pdf_get_fontname) {
+	pval *arg1;
+	int id, type, embed;
+	char *fontname;
+	PDF *pdf;
+	PDF_TLS_VARS;
+
+	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	convert_to_long(arg1);
+	id=arg1->value.lval;
+	pdf = php3_list_find(id,&type);
+	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
+		php3_error(E_WARNING,"Unable to find file identifier %d",id);
+		RETURN_FALSE;
+	}
+	
+	fontname = (char *) PDF_get_fontname(pdf);
+
+	RETURN_STRING(fontname, 1);
+}
+/* }}} */
+
+/* {{{ proto string pdf_get_fontsize(int pdfdoc)
+   Gets the current font size */
+PHP_FUNCTION(pdf_get_fontsize) {
+	pval *arg1;
+	int id, type, embed;
+	float fontsize;
+	PDF *pdf;
+	PDF_TLS_VARS;
+
+	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	convert_to_long(arg1);
+	id=arg1->value.lval;
+	pdf = php3_list_find(id,&type);
+	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
+		php3_error(E_WARNING,"Unable to find file identifier %d",id);
+		RETURN_FALSE;
+	}
+	
+	fontsize = PDF_get_fontsize(pdf);
+
+	RETURN_DOUBLE(fontsize);
 }
 /* }}} */
 
