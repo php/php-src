@@ -1927,6 +1927,11 @@ static void php_mysql_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 				strcat(buf, "enum ");
 			}
 #endif
+#ifdef SET_FLAG
+			if (mysql_field->flags&SET_FLAG) {
+				strcat(buf, "set ");
+			}
+#endif
 #ifdef AUTO_INCREMENT_FLAG
 			if (mysql_field->flags&AUTO_INCREMENT_FLAG) {
 				strcat(buf, "auto_increment ");
