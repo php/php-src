@@ -2632,12 +2632,15 @@ int zend_do_fcall_common_helper(ZEND_OPCODE_HANDLER_ARGS)
 	if (EX(function_state).function->common.scope) {
 		if (!EG(This) && !(EX(function_state).function->common.fn_flags & ZEND_ACC_STATIC)) {
 			int severity;
+			char *severity_word;
 			if (EX(function_state).function->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
 				severity = E_STRICT;
+				severity_word = "should not";
 			} else {
 				severity = E_ERROR;
+				severity_word = "cannot";
 			}
-			zend_error(severity, "Non-static method %s::%s() cannot be called statically", EX(function_state).function->common.scope->name, EX(function_state).function->common.function_name);
+			zend_error(severity, "Non-static method %s::%s() %s be called statically", EX(function_state).function->common.scope->name, EX(function_state).function->common.function_name, severity_word);
 		}
 	}
 	if (EX(function_state).function->type == ZEND_INTERNAL_FUNCTION) {	
