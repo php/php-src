@@ -37,7 +37,7 @@ install-modules: build-modules
 	$(mkinstalldirs) $(INSTALL_ROOT)$(EXTENSION_DIR) && \
 	echo "Installing shared extensions:     $(INSTALL_ROOT)$(EXTENSION_DIR)/" && \
 	rm -f modules/*.la && \
-	cp modules/* $(INSTALL_ROOT)$(EXTENSION_DIR) >/dev/null 2>&1 || true
+	$(INSTALL) modules/* $(INSTALL_ROOT)$(EXTENSION_DIR) >/dev/null 2>&1 || true
 
 install-tester:
 	@echo "Installing regression tester:     $(INSTALL_ROOT)$(PEAR_INSTALLDIR)/"
