@@ -96,7 +96,7 @@ PHP_FUNCTION(mail)
 	if(extra_cmd)
 		extra_cmd = php_escape_shell_arg(extra_cmd);
 	
-	if (php_mail(to, subject, message, headers, extra_cmd)) {
+	if (php_mail(to, subject, message, headers, extra_cmd TSRMLS_CC)) {
 		RETVAL_TRUE;
 	} else {
 		RETVAL_FALSE;
@@ -108,7 +108,7 @@ PHP_FUNCTION(mail)
 
 /* {{{ php_mail
  */
-PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char *extra_cmd)
+PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char *extra_cmd TSRMLS_DC)
 {
 #ifdef PHP_WIN32
 	int tsm_err;
@@ -122,7 +122,7 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 #ifdef PHP_WIN32
 		/* handle old style win smtp sending */
 		if (TSendMail(INI_STR("SMTP"), &tsm_err, headers, subject, to, message) != SUCCESS){
-			php_error(E_WARNING, GetSMErrorText(tsm_err));
+			php_error(E_WARNING, "%s() %s", get_active_function_name(TSRMLS_C), GetSMErrorText(tsm_err));
 			return 0;
 		}
 		return 1;
@@ -142,12 +142,23 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 #ifdef PHP_WIN32
 	sendmail = popen(sendmail_cmd, "wb");
 #else
+	/* Since popen() doesn't indicate if the internal fork() doesn't work
+	 * (e.g. the shell can't be executed) we explicitely set it to 0 to be
+	 * sure we don't catch any older errno value. */
+	errno = 0;
 	sendmail = popen(sendmail_cmd, "w");
 #endif
 	if (extra_cmd != NULL)
 		efree (sendmail_cmd);
 
 	if (sendmail) {
+#ifndef PHP_WIN32
+		if (EACCES == errno) {
+			php_error(E_WARNING, "%s() permission denied; unable to execute shell to run mail delivery binary",
+					  get_active_function_name(TSRMLS_C));
+			return 0;
+		}
+#endif
 		fprintf(sendmail, "To: %s\n", to);
 		fprintf(sendmail, "Subject: %s\n", subject);
 		if (headers != NULL) {
@@ -170,7 +181,8 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 			return 1;
 		}
 	} else {
-		php_error(E_WARNING, "Could not execute mail delivery program");
+		php_error(E_WARNING, "%s() could not execute mail delivery program",
+				  get_active_function_name(TSRMLS_C));
 		return 0;
 	}
 
