@@ -688,7 +688,7 @@ TEST $file
 	if (array_key_exists('SKIPIF', $section_text)) {
 		if (trim($section_text['SKIPIF'])) {
 			save_text($tmp_skipif, $section_text['SKIPIF']);
-			$output = `$php $info_params $tmp_skipif`;
+			$output = system_with_timeout("$php $info_params $tmp_skipif");
 			@unlink($tmp_skipif);
 			if (eregi("^skip", trim($output))) {
 				echo "SKIP $tested";
