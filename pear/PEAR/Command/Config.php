@@ -57,6 +57,20 @@ class PEAR_Command_Config extends PEAR_Command_Common
     }
 
     // }}}
+
+    function getHelp($command)
+    {
+        switch ($command) {
+            case 'config-show':
+                return array(null, 'Displays the configuration');
+            case 'config-get':
+                return array('<parameter>',
+                             'Displays the value of the given parameter');
+            case 'config-set':
+                return array('<parameter>=<value>',
+                             'Sets the value of a parameter in the config');
+        }
+    }
     // {{{ run()
 
     function run($command, $options, $params)

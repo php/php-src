@@ -32,6 +32,14 @@ class PEAR_Command_Registry extends PEAR_Command_Common
         return array('list-installed');
     }
 
+    function getHelp($command)
+    {
+        switch ($command) {
+            case 'list-installed':
+                return array(null, 'List the installed PEAR packages in the system');
+        }
+    }
+
     // }}}
     // {{{ run()
 

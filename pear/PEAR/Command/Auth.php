@@ -55,6 +55,16 @@ class PEAR_Command_Auth extends PEAR_Command_Common
     }
 
     // }}}
+
+    function getHelp($command)
+    {
+        switch ($command) {
+            case 'login':
+                return array(null, 'Connects to the remote server');
+            case 'logout':
+                return array(null, 'Disconnects from the remote server');
+        }
+    }
     // {{{ run()
 
     /**
