@@ -139,7 +139,7 @@ static FILE *php_do_open_temporary_file(char *path, const char *pfx, char **open
  * This function should do its best to return a file pointer to a newly created
  * unique file, on every platform.
  */
-FILE *php_open_temporary_file(const char *dir, const char *pfx, char **opened_path_p)
+PHPAPI FILE *php_open_temporary_file(const char *dir, const char *pfx, char **opened_path_p)
 {
 	static char path_tmp[] = "/tmp";
 	FILE *fp;

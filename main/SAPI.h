@@ -210,8 +210,8 @@ struct _sapi_post_entry {
 #define SAPI_DEFAULT_CHARSET		""
 #define SAPI_PHP_VERSION_HEADER		"X-Powered-By: PHP/" PHP_VERSION
 
-#define SAPI_POST_READER_FUNC(post_reader) void post_reader(SLS_D)
-#define SAPI_POST_HANDLER_FUNC(post_handler) void post_handler(char *content_type_dup, void *arg SLS_DC)
+#define SAPI_POST_READER_FUNC(post_reader) SAPI_API void post_reader(SLS_D)
+#define SAPI_POST_HANDLER_FUNC(post_handler) SAPI_API void post_handler(char *content_type_dup, void *arg SLS_DC)
 
 SAPI_POST_READER_FUNC(sapi_read_standard_form_data);
 SAPI_POST_READER_FUNC(php_default_post_reader);
