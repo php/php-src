@@ -922,7 +922,7 @@ static inline void php_register_server_variables(ELS_D SLS_DC PLS_DC)
 		ALLOC_ZVAL(array_ptr);
 		array_init(array_ptr);
 		INIT_PZVAL(array_ptr);
-		zend_hash_add(&EG(symbol_table), "HTTP_SERVER_VARS", sizeof("HTTP_SERVER_VARS"), &array_ptr, sizeof(pval *),NULL);
+		zend_hash_add_ptr(&EG(symbol_table), "HTTP_SERVER_VARS", sizeof("HTTP_SERVER_VARS"), array_ptr, sizeof(pval *),NULL);
 	}
 
 	/* Server variables */
@@ -1053,8 +1053,8 @@ static void php_build_argv(char *s, zval *track_vars_array ELS_DC PLS_DC)
 	INIT_PZVAL(argc);
 
 	if (PG(register_globals)) {
-		zend_hash_update(&EG(symbol_table), "argv", sizeof("argv"), &arr, sizeof(pval *), NULL);
-		zend_hash_add(&EG(symbol_table), "argc", sizeof("argc"), &argc, sizeof(pval *), NULL);
+		zend_hash_update_ptr(&EG(symbol_table), "argv", sizeof("argv"), arr, sizeof(pval *), NULL);
+		zend_hash_add_ptr(&EG(symbol_table), "argc", sizeof("argc"), argc, sizeof(pval *), NULL);
 	}
 
 	if (PG(track_vars)) {
@@ -1062,8 +1062,8 @@ static void php_build_argv(char *s, zval *track_vars_array ELS_DC PLS_DC)
 			arr->refcount++;
 			argc->refcount++;
 		}
-		zend_hash_update(track_vars_array->value.ht, "argv", sizeof("argv"), &arr, sizeof(pval *), NULL);
-		zend_hash_update(track_vars_array->value.ht, "argc", sizeof("argc"), &argc, sizeof(pval *), NULL);
+		zend_hash_update_ptr(track_vars_array->value.ht, "argv", sizeof("argv"), arr, sizeof(pval *), NULL);
+		zend_hash_update_ptr(track_vars_array->value.ht, "argc", sizeof("argc"), argc, sizeof(pval *), NULL);
 	}
 
 }
