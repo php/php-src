@@ -1,3 +1,91 @@
+2002-05-14  Frank M. Kromann  <frank@frontbase.com>
+
+    * ext/mssql/php_mssql.h
+      ext/mssql/php_mssql.c: Fixing hanfling of data type REAL.
+    Remove extra bytes allocated by emalloc calls
+
+2002-05-14  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * ext/mbstring/mbfilter_tw.c: fixed a initialization bug in euc-tw.
+
+2002-05-14  Sascha Schumann  <sascha@schumann.cx>
+
+    * configure.in:
+    some versions of autoconf pad CONFIG_FILES with a single space.
+
+    accomodate that
+
+    Thanks to Cliff Woolley
+
+2002-05-14  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * ext/standard/mail.c:
+    - Adjust for improved error messages from win32/sendmail.c
+
+    * win32/sendmail.c
+      win32/sendmail.h:
+    - Improve code so errors returned from the server are reported back to the user.
+
+2002-05-14  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/PEAR/Config.php:
+    Try to create the dir where the conf file resides before trying
+    to write to it
+
+    * pear/scripts/pear.in: Add "\n" after the error in usage()
+
+2002-05-14  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * win32/sendmail.c:
+    - Do not include the Cc: for the first Cc'd recipient (spotted by Richard).
+
+    * win32/sendmail.c
+      win32/sendmail.h: - Convert unix to dos line endings.
+
+    * win32/sendmail.c:
+    - Try to find From: field in header, fallback to sendmail_from php.ini setting
+      (Original patch by Michael Sisolak <msisolak@yahoo.com>, enhanced a bit).
+    - Win32 mail() supports parsing 'From:' field from header (msisolak@yahoo.com, Markus).
+
+    * win32/sendmail.c
+      win32/sendmail.h: - MFH fix for Cc: crash
+
+    * win32/sendmail.h
+      win32/sendmail.c:
+    - Fix win32 sendmail bug with Cc: in custom header not terminated with \r\n
+    - Fix some obvious errors returned by the module, little cleanup.
+
+2002-05-14  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Command/Config.php: * convert to new command setup
+
+    * pear/PEAR/Command/Auth.php: * typo
+
+2002-05-14  Jan Lehnardt  <jan@dasmoped.net>
+
+    * README.CVS-RULES:  - MFH
+
+    * README.CVS-RULES:  - fix typo, thanks to georg for spotting it.
+
+2002-05-14  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Remote.php: * fall back to XML_RPC if xmlrpc-epi is not loaded
+
+    * pear/PEAR/Command/Auth.php:
+    * add command definitions, split run() into one method for each command
+
+    * pear/PEAR/Command/Install.php: * no need for getHelp() here anymore
+
+    * pear/PEAR/Command/Common.php: * moved get{Help,Commands,Options} here
+
+    * pear/scripts/pear.in:
+    * moved the {config xxx} help message substitution to
+      PEAR_Command_Common::getHelp
+
+2002-05-14  Jason Greene  <jason@inetgurus.net>
+
+    * sapi/fastcgi/config.m4: Fix fastcgi build, may need more work
+
 2002-05-13  Marko Karppinen  <karppinen@pobox.com>
 
     * sapi/apache2filter/config.m4:
