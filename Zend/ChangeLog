@@ -1,3 +1,11 @@
+2002-09-01  Andi Gutmans  <andi@zend.com>
+
+    * zend_llist.c: - Fix leak reported by "l0t3k" <cshmoove@hotmail.com>
+
+2002-09-01  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_operators.c: MFZE1
+
 2002-08-28  Thies Arntzen  <thies@pb1.pair.com>
 
     * zend_builtin_functions.c
