@@ -1,3 +1,111 @@
+2002-10-05  Melvyn Sopacua  <msopacua@idg.nl>
+
+    * ext/xslt/README.XSLT-BACKENDS:
+    (xslt dev-doc) Revert 1.6-1.7 - no need to change names on stable ext.
+
+    * ext/xslt/php_sablot.h
+      ext/xslt/sablot.c
+      ext/xslt/xslt.c:
+    (xslt) Introduce revised interaction with Sablotron backend.
+           ATTENTION: interaction with Sablotron backend, now uses the
+                      API prefered by the Ginger Alliance. Test it for BC
+                      issues.
+                      It also changes internals of the abstraction, to resolve
+                      issues that would arrise with invalid argument or
+                      parameter arrays.
+
+           New functions:
+             * xslt_set_object, similar to xml_set_object
+             * xslt_setopt, set global options for a processor instance.
+
+           Introduces new constants, related to the xslt_setopt function.
+           Removes a warning, when skipping argument array with NULL.
+
+2002-10-05  Andrei Zmievski  <andrei@php.net>
+
+    * main/php_version.h
+      configure.in: Change HEAD version to 4.4.0-dev.
+
+2002-10-05  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/tests/strings/url_t.phpt:
+    - Add parse_url() tests (expect will follow later)url_t.phpt
+
+2002-10-05  Andrei Zmievski  <andrei@php.net>
+
+    * NEWS: *** empty log message ***
+
+2002-10-05  Melvyn Sopacua  <msopacua@idg.nl>
+
+    * ext/xslt/tests/005.phpt
+      ext/xslt/tests/006.phpt
+      ext/xslt/tests/007.phpt
+      ext/xslt/tests/args.xsl
+      ext/xslt/tests/param.xsl
+      ext/xslt/tests/qa.dtd
+      ext/xslt/tests/test.xml:
+    (xslt tests) Add test for new backend API (005.phpt), new function
+                 (006.phpt) and a crash test (007.phpt)
+                 006.phpt also tests handling of public entities, which is in
+                 essence new to the extension, since there was no way to turn
+                 it on.
+
+2002-10-05  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/bz2/bz2.c: This got omitted from an earlier commit.
+    EOF related checks for bzip2 streams.
+
+    * NEWS: sp
+
+2002-10-05  Melvyn Sopacua  <msopacua@idg.nl>
+
+    * ext/xslt/tests/004.phpt:
+    (xslt tests) Test for reference to a non-existing scheme handler.
+
+2002-10-05  Bertrand Mansion  <bmansion@mamasam.com>
+
+    * pear/HTML/Select.php: Fix bug for select of type multiple.
+    Thanks to Alan Morey for reporting it.
+
+2002-10-05  Melvyn Sopacua  <msopacua@idg.nl>
+
+    * ext/xslt/sablot.c:
+    (xslt: error_print) Fixes a leak when multiple error messages are issued
+                        during a transformation.
+
+    * NEWS: remove tests entry. Fix patch entry to contain function name
+
+2002-10-05  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/standard/file.c
+      main/php_network.h
+      main/streams.c: EOF related fixes.
+
+    * ext/standard/info.c: Revert.  The problem lies elsewhere.
+
+    * ext/standard/info.c:
+    Fix Win32 build as PHP_CONFIG_FILE_SCAN_DIR is not #defined.
+
+    * ext/standard/tests/file/userstreams.phpt
+      ext/zlib/zlib_fopen_wrapper.c
+      main/memory_streams.c
+      main/network.c
+      main/php_streams.h
+      main/streams.c
+      main/user_streams.c
+      ext/standard/php_fopen_wrapper.c:
+    This seems to resolve the issues with fgets.
+    I've moved EOF detection into the streams layer; a stream reader
+    implementation should set stream->eof when it detects EOF.
+    Fixed test for user streams - it still fails but that is due to an output
+    buffering bug.
+
+2002-10-05  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * ext/mysql/php_mysql.c:
+    - Remove superfluous E_WARNING if mysql_connect() fails; there's already
+      an E_WARNING a few lines above.
+
 2002-10-04  David Viner  <dviner@yahoo-inc.com>
 
     * ext/xslt/php_sablot.h
