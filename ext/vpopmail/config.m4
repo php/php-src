@@ -7,7 +7,7 @@ PHP_ARG_WITH(vpopmail, for vpopmail support,
 
 if test "$PHP_VPOPMAIL" != "no"; then
 	AC_MSG_CHECKING(for vpopmail install directory)
-	for i in ~vpopmail /home/vpopmail /home/popmail /var/qmail/vpopmail /var/qmail/popmail $PHP_VPOPMAIL; do
+	for i in /usr/include/vpopmail /usr/include /usr ~vpopmail /home/vpopmail /home/popmail /var/qmail/vpopmail /var/qmail/popmail $PHP_VPOPMAIL; do
 		if test -r $i/vpopmail.h; then
 			VPOPMAIL_INC_DIR=$i
 			VPOPMAIL_DIR=$i
@@ -31,9 +31,8 @@ if test "$PHP_VPOPMAIL" != "no"; then
 
 	for i in "$VPOPMAIL_INC_DIR/vpopmail.h" "$VPOPMAIL_INC_DIR/vpopmail_config.h" "$VPOPMAIL_LIB_DIR/libvpopmail.a" "$VPOPMAIL_BIN_DIR/vadddomain" "$VPOPMAIL_BIN_DIR/vaddaliasdomain" "$VPOPMAIL_BIN_DIR/vdeldomain" ; do
 		if test ! -r "$i"; then
-			AC_MSG_ERROR(Could not find '$i'. Please make sure you have
-				vpopmail installed. Use
-				./configure --with-vpopmail=<vpopmail-home-dir> if necessary)
+			AC_MSG_ERROR(Could not find '$i'. Please make sure you have vpopmail installed. Use
+./configure --with-vpopmail=<vpopmail-home-dir> if necessary)
 		fi
 	done
 
