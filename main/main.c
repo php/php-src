@@ -1251,7 +1251,7 @@ static void php_build_argv(char *s, zval *track_vars_array TSRMLS_DC)
 	Z_TYPE_P(argc) = IS_LONG;
 	INIT_PZVAL(argc);
 
-	if (PG(register_globals)) {
+	if (PG(register_globals) || SG(request_info).argc) {
 		arr->refcount++;
 		argc->refcount++;
 		zend_hash_update(&EG(symbol_table), "argv", sizeof("argv"), &arr, sizeof(zval *), NULL);
