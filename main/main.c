@@ -1094,7 +1094,7 @@ PHPAPI void php_execute_script(zend_file_handle *primary_file CLS_DC ELS_DC PLS_
 			char *header_line = estrndup(CONTEXT_TYPE_IMAGE_GIF, sizeof(CONTEXT_TYPE_IMAGE_GIF));
 
 			php4i_add_header_information(header_line, sizeof(CONTEXT_TYPE_IMAGE_GIF)-1);
-			PHPWRITE(zendtech_logo, sizeof(zendtech_logo));
+			PHPWRITE(zend_logo, sizeof(zend_logo));
 			return;
 		}
 	}
