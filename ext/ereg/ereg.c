@@ -98,7 +98,11 @@ PHP_MSHUTDOWN_FUNCTION(regex)
 
 PHP_MINFO_FUNCTION(regex)
 {
+#if HSREGEX
 	php_info_print_table_row(2, "Regex Library", "Bundled library enabled");
+#else
+	php_info_print_table_row(2, "Regex Library", "System library enabled");
+#endif
 }
 
 
