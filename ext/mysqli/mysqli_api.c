@@ -643,7 +643,11 @@ PHP_FUNCTION(mysqli_fetch)
 							my_ulonglong lval;
 							memcpy (&lval, stmt->bind[i].buffer, sizeof(my_ulonglong));
 							if (lval != (long)lval) {
-								sprintf((char *)&tmp, "%llu", lval);
+								/* even though lval is declared as unsigned, the value
+								 * may be negative. Therefor we cannot use %llu and must
+								 * user %lld.
+								 */
+								sprintf((char *)&tmp, "%lld", lval);
 								ZVAL_STRING(stmt->vars[i], tmp, 1);
 							} else {
 								ZVAL_LONG(stmt->vars[i], lval);
