@@ -1,3 +1,364 @@
+2002-12-14  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * zend_language_scanner.l:
+      MFZE2
+
+2002-12-10  Zeev Suraski  <zeev@zend.com>
+
+    * zend_compile.c:
+      Fix check to allow for static+access level modifiers
+
+    * zend_compile.c
+      zend_compile.h
+      zend_language_parser.y:
+      - Allow variables to have both 'static' modifier and an access level.
+        NOTE:  This only works at the syntax level right now (parser).  It
+               doesn't actually work as of yet - all statics are considered
+               public for now
+      - Prevent users from putting more restrictions on methods in derived
+      classes
+        (i.e., you cannot make a public method private in a derived class, etc.)
+
+2002-12-09  Andi Gutmans  <andi@zend.com>
+
+    * zend_mm.c:
+      - Fix a bug which I just introduced.
+
+    * zend_mm.c:
+      - Fix typo
+
+    * zend_mm.c:
+      - Improvements
+
+    * zend_mm.c
+      zend_mm.h:
+      - First attempt to improve memory manager during realloc()'s
+
+2002-12-08  Zeev Suraski  <zeev@zend.com>
+
+    * zend_compile.c:
+      Remove comment
+
+    * zend_compile.c
+      zend_compile.h
+      zend_language_parser.y:
+      Treat the absence of an access type just as if 'public' was supplied
+
+    * zend_compile.c:
+      Simplify/fix inheritance checks
+
+    * zend_execute.c:
+      Support private/protected constructors
+
+2002-12-07  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ZEND_CHANGES:
+      Update.
+
+2002-12-07  Zeev Suraski  <zeev@zend.com>
+
+    * zend_execute.c:
+      Fix error messages
+
+    * zend_language_parser.y
+      zend_language_scanner.l:
+      Remove unintentional code
+
+2002-12-07  Andi Gutmans  <andi@zend.com>
+
+    * zend_compile.c:
+      - Dissallow using parent, self and main as class names
+
+2002-12-06  Zeev Suraski  <zeev@zend.com>
+
+    * zend.c
+      zend.h
+      zend_API.c
+      zend_compile.c
+      zend_compile.h
+      zend_execute.c
+      zend_globals.h
+      zend_hash.h
+      zend_language_parser.y
+      zend_language_scanner.l:
+      - Implement public/protected/private methods.
+      - Prevent instantiation of classes with abstract methods.
+      Based in part on Marcus's patch.
+
+2002-12-01  Andi Gutmans  <andi@zend.com>
+
+    * zend_alloc.c:
+      - Allow enabling of memory cache with zend_mm
+
+    * zend.c
+      zend.c
+      zend.h
+      zend.h
+      zend_builtin_functions.c
+      zend_builtin_functions.c:
+      - MFZE1
+
+    * zend.c
+      zend.h
+      zend_builtin_functions.c:
+      - Revert as the patch doesn't compile
+
+    * zend.c
+      zend_API.c
+      zend_builtin_functions.c
+      zend_compile.c
+      zend_execute.c
+      zend_execute_API.c
+      zend_indent.c
+      zend_object_handlers.c
+      zend_opcode.c
+      zend_operators.c
+      zend_operators.h
+      zend_variables.c:
+      h WHitespace
+
+    * zend.c:
+      - Initialize constants_updated (by Marcus)
+
+    * zend_builtin_functions.c:
+      - Nuke use of deprecated macro
+
+    * zend_compile.c
+      zend_compile.h
+      zend_execute.c
+      zend_language_parser.y:
+      - FN_IS_STATIC -> FN_STATIC
+
+    * zend.c:
+      - Fix crash
+
+    * zend_compile.c
+      zend_compile.h:
+      - My personal cleanups
+
+    * zend_API.c
+      zend_API.h
+      zend_builtin_functions.c
+      zend_compile.c
+      zend_compile.h
+      zend_execute.c
+      zend_execute.h
+      zend_language_parser.y
+      zend_object_handlers.c:
+      - Commit Marcus' cleanup of abstract and static inheritance and improve
+      - error messages
+
+2002-11-22  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * zend_API.c:
+      - Initialize all functions to non-static (patch by Marcus Börger
+        <marcus.boerger@t-online.de>.
+
+2002-11-22  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * zend_execute.c:
+      Show class name as well. Patch by Marcus Börger.
+
+    * zend_execute.c:
+      Show the name of the abstract method in the error.
+
+    * zend_compile.h:
+      Fix prototype.
+
+2002-11-20  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * zend_builtin_functions.c:
+      - MFZE1: Disable leak() and crash() when not using debug mode
+
+2002-11-20  Andi Gutmans  <andi@zend.com>
+
+    * ZEND_CHANGES:
+      - Add abstract methods
+
+    * zend_compile.c
+      zend_compile.h
+      zend_execute.c
+      zend_language_parser.y
+      zend_language_scanner.l:
+      - Fix build (thanks Marcus)
+      - Implement abstract methods, syntax:
+      -    abstract function foo($vars);
+      - I don't see any reason why modifiers such as static/public need to be
+      - used with abstract. PHP is weakly typed and there would be no meaning to
+      - this anyway. People who want a strictly typed compiled language are
+      - looking in the wrong place.
+
+2002-11-19  Zeev Suraski  <zeev@zend.com>
+
+    * zend.c
+      zend.h
+      zend_builtin_functions.c
+      zend_execute.c
+      zend_execute_API.c:
+      MFZE1 - error_reporting fix
+
+2002-11-18  Andi Gutmans  <andi@zend.com>
+
+    * zend_language_scanner.l:
+      - MFZE1
+
+2002-11-17  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_execute.c:
+      fix the leak
+
+2002-11-16  Andi Gutmans  <andi@zend.com>
+
+    * zend_language_scanner.l
+      zend_language_scanner.l:
+      - MFZE1
+
+    * Zend.m4
+      configure.in:
+      - MFZE1
+
+    * zend_hash.c:
+      - Commit fix for bug #19566 (I think it's by Marcus :)
+
+2002-11-14  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * zend_llist.h:
+      MFZE1
+
+2002-11-13  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_execute.c:
+      semi-fix string offsets crash - now it doesn't crash, but still leaks
+
+    * zend_object_handlers.c:
+      fix static
+
+2002-11-11  Andi Gutmans  <andi@zend.com>
+
+    * ZEND_CHANGES:
+      - Update with statics
+
+2002-11-11  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * zend_execute.c:
+      Fugbix typo.
+
+2002-11-11  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * zend.h:
+      MFZE1
+
+2002-11-10  Andi Gutmans  <andi@zend.com>
+
+    * zend_compile.c:
+      - MFZE1
+
+2002-11-10  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_compile.c
+      zend_compile.h
+      zend_language_parser.y:
+      fix statics - make it behave like $this (fetch type "static")
+      Side effect: indirect references to statics won't work.
+
+2002-11-06  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * zend_execute.c:
+      Fix ZTS build.
+
+2002-11-06  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_execute.c:
+      fix zend_assign_to_object_op
+
+2002-11-05  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * zend_language_scanner.l:
+      MFZE1
+
+2002-11-05  Andi Gutmans  <andi@zend.com>
+
+    * zend_compile.h:
+      - Shift around zend_op members
+
+    * ZEND_CHANGES:
+      - A couple of updates
+
+    * zend_compile.c
+      zend_compile.h
+      zend_execute.c
+      zend_language_parser.y:
+      - Add support for static methods. Basically methods which are defined as
+      - static don't have $this. That's the whole difference.
+
+    * tests/zend2.php:
+      - $clone -> $that
+
+    * zend_execute_API.c:
+      - Fix bug introduced with type change of free_op1/2
+
+    * zend_language_parser.y
+      zend_language_scanner.l:
+      - ATTENTION: Finally nuke old_function and cfunction. I think it is time
+      - to get rid of these BC notations. This is from the days of the move from
+      - PHP/FI 2 -> PHP 3
+
+2002-11-05  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * zend_hash.c:
+      Revert of previous patch.
+
+2002-11-05  Andi Gutmans  <andi@zend.com>
+
+    * zend_compile.c
+      zend_objects.c:
+      - Change the automatically created variable $clone in __clone() to
+      - $that as discussed at the PHP Conference. If there are any objections
+      - alternative names please let me know. The reason for changing it from
+      - $clone is because $clone sounds as if it's the newly cloned object and
+      - not the old one.
+
+2002-11-05  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_compile.c
+      zend_compile.h:
+      avoid using 'class' in exported functions - it annoys c++
+
+2002-11-05  Stig Bakken  <ssb@fast.no>
+
+    * zend.c:
+      Fixed some special cases that were crashing for the exception default
+      handler.
+
+2002-11-04  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * zend_compile.c:
+      Silence compiler warnings.
+
+    * zend_hash.c:
+      If ordered is not set a random compiler assigned value of *p2 would be
+      used,
+      this patch fixes the problem by initializing *p2 to NULL.
+
+    * zend_operators.c:
+      Silence compile warning, ctype.h is needed for tolower() function.
+
+    * zend_language_scanner.l:
+      MFZE1
+
+2002-11-02  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * zend_language_scanner.l:
+      - Fix segfault when __CLASS__ was used outside a class definition
+
+    * zend.c:
+      - MFZE1
+
+2002-11-02  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * zend_language_scanner.l:
+      MFZE1 (20214).
+
 2002-11-01  Andi Gutmans  <andi@zend.com>
 
     * zend_execute.c: - Fix unset($this->foo)
