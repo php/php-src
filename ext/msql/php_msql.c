@@ -960,9 +960,14 @@ static void php_msql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 				add_assoc_stringl(return_value, msql_field->name, data, data_len, should_copy);
 			}
 		} else {
-			/*
-			add_get_index_stringl(return_value, i, empty_string, 0, (void **) &pval_ptr, 1);
-			*/
+			/* NULL value. */
+			if (result_type & MSQL_NUM) {
+				add_index_null(return_value, i);
+			}
+
+			if (result_type & MSQL_ASSOC) {
+				add_assoc_null(return_value, msql_field->name);
+			}
 		}
 	}
 }
