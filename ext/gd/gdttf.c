@@ -744,9 +744,12 @@ gdttfchar(gdImage *im, int fg, font_t *font,
 			if (tweencolorkey.pixel > 0) {
 				x3 = x2 + col;
 				if (x3 >= im->sx || x3 < 0) continue;
+#if HAVE_LIBGD20
 				if (im->trueColor) {
 					pixel = &im->tpixels[y3][x3];
-				} else {
+				} else
+#endif
+				{
 #if HAVE_LIBGD13
 					pixel = &im->pixels[y3][x3];
 #else
