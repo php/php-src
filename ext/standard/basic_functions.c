@@ -498,6 +498,10 @@ function_entry basic_functions[] = {
 	PHP_FE(putenv,															NULL)
 #endif
 
+#ifdef HAVE_GETOPT
+	PHP_FE(getopt,															NULL)
+#endif
+
 	PHP_FE(microtime,														NULL)
 	PHP_FE(gettimeofday,													NULL)
 
@@ -1337,6 +1341,105 @@ PHP_FUNCTION(putenv)
 			RETURN_FALSE;
 		}
 	}
+}
+/* }}} */
+#endif
+
+#ifdef HAVE_GETOPT
+/* {{{ free_argv
+   Free the memory allocated to an argv array. */
+static void free_argv(char **argv, int argc)
+{
+	int i;
+
+	if (argv) {
+		for (i = 0; i < argc; i++) {
+			if (argv[i]) {
+				efree(argv[i]);
+			}
+		}
+		efree(argv);
+	}
+}
+/* }}} */
+
+/* {{{ proto array getopt(string options)
+   Get options from the command line argument list */
+PHP_FUNCTION(getopt)
+{
+	char *options = NULL, **argv = NULL;
+	char opt[1] = { '\0' };
+	int argc = 0, options_len = 0;
+	zval *val, **args = NULL;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s",
+							  &options, &options_len) == FAILURE) {
+		return;
+	}
+
+	/*
+	 * Get argv from the global symbol table.  We calculate argc ourselves
+	 * in order to be on the safe side, even though it is also available
+	 * from the symbol table.
+	 */
+	if (zend_hash_find(&EG(symbol_table), "argv", sizeof("argv"),
+					   (void **) &args) != FAILURE) {
+		int pos = 0;
+		zval **arg;
+
+		argc = zend_hash_num_elements(Z_ARRVAL_PP(args));
+
+		/* Attempt to allocate enough memory to hold all of the arguments. */
+		if ((argv = (char **) emalloc(argc * sizeof(char *))) == NULL) {
+			RETURN_FALSE;
+		}
+
+		/* Reset the array indexes. */
+		zend_hash_internal_pointer_reset(Z_ARRVAL_PP(args));
+
+		/* Iterate over the hash to construct the argv array. */
+		while (zend_hash_get_current_data(Z_ARRVAL_PP(args),
+										  (void **)&arg) == SUCCESS) {
+			argv[pos++] = estrdup(Z_STRVAL_PP(arg));
+			zend_hash_move_forward(Z_ARRVAL_PP(args));
+		}
+	}
+
+	/* Initialize the return value as an array. */
+	if (array_init(return_value)) {
+		RETURN_FALSE;
+	}
+
+	/* Disable getopt()'s error messages. */
+	opterr = 0;
+
+	/* Invoke getopt(3) on the argument array. */
+	while (getopt(argc, argv, options) != -1) {
+
+		/* Skip unknown arguments. */
+		if (optopt == '?') {
+			continue;
+		}
+
+		/* Prepare the option character and the argument string. */
+		opt[0] = optopt;
+
+		MAKE_STD_ZVAL(val);
+		if (optarg != NULL) {
+			ZVAL_STRING(val, optarg, 1);
+		} else {
+			ZVAL_NULL(val);
+		}
+
+		/* Add this option / argument pair to the result hash. */
+		if (zend_hash_add(HASH_OF(return_value), opt, 1, (void *)&val,
+							 sizeof(zval *), NULL) == FAILURE) {
+			free_argv(argv, argc);
+			RETURN_FALSE;
+		}
+	}
+
+	free_argv(argv, argc);
 }
 /* }}} */
 #endif
