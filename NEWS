@@ -2,6 +2,8 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ???, Version 4.0 Beta 5
+- Cleaned up extension namespace (Stig)
+- OCINLogon() sessions are now closed again. (Thies)
 - Added ip2long() and long2ip(),
   courtesy of Faisal Nasim <faisal@nasim.org> (Andrei)
 - Added ftruncate() and fstat(),
