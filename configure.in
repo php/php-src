@@ -788,12 +788,12 @@ fi
 #
 
 if test -d TSRM; then
-  echo '#include "../php_config.h"' > TSRM/tsrm-config.h
+  echo '#include "../php_config.h"' > TSRM/tsrm_config.h
 fi
 
 cat >Zend/zend_config.h <<FEO
 #include "../php_config.h"
-#ifdef APACHE
+#if defined(APACHE) && defined(PHP_API_VERSION)
 #undef HAVE_DLFCN_H
 #endif
 FEO
