@@ -414,6 +414,7 @@ static sapi_module_struct thttpd_sapi_module = {
 	sapi_thttpd_register_variables,
 	NULL,									/* Log message */
 
+	NULL,									/* php.ini path override */
 	NULL,									/* Block interruptions */
 	NULL,									/* Unblock interruptions */
 
