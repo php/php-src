@@ -1975,7 +1975,6 @@ PHP_FUNCTION(imap_base64)
 	}
 
 	convert_to_string_ex(text);
-	object_init(return_value);
 
 	decode = (char *) rfc822_base64((unsigned char *) Z_STRVAL_PP(text), Z_STRLEN_PP(text), &newlength);
 	RETVAL_STRINGL(decode, newlength, 1);
@@ -1997,7 +1996,6 @@ PHP_FUNCTION(imap_qprint)
 	}
 
 	convert_to_string_ex(text);
-	object_init(return_value);
 
 	decode = (char *) rfc822_qprint((unsigned char *) Z_STRVAL_PP(text), Z_STRLEN_PP(text), &newlength);
 	RETVAL_STRINGL(decode, newlength, 1);
@@ -2019,7 +2017,6 @@ PHP_FUNCTION(imap_8bit)
 	}
 
 	convert_to_string_ex(text);
-	object_init(return_value);
 
 	decode = (char *) rfc822_8bit((unsigned char *) Z_STRVAL_PP(text), Z_STRLEN_PP(text), &newlength);
 	RETVAL_STRINGL(decode, newlength, 1);
