@@ -1,7 +1,7 @@
 --TEST--
 Check for tidy presence
 --SKIPIF--
-<?php if (!extension_loaded("Tidy")) print "skip"; ?>
+<?php if (!extension_loaded("tidy")) print "skip"; ?>
 --POST--
 --GET--
 --INI--
