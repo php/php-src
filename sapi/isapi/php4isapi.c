@@ -136,9 +136,12 @@ static int sapi_isapi_ub_write(const char *str, uint str_length)
 	DWORD num_bytes = str_length;
 	LPEXTENSION_CONTROL_BLOCK ecb;
 	SLS_FETCH();
+	ELS_FETCH();
 	
 	ecb = (LPEXTENSION_CONTROL_BLOCK) SG(server_context);
-	ecb->WriteClient(ecb->ConnID, (char *) str, &num_bytes, HSE_IO_SYNC );
+	if (ecb->WriteClient(ecb->ConnID, (char *) str, &num_bytes, HSE_IO_SYNC ) == FALSE) {
+		longjmp(EG(bailout), 1);
+	}
 	return num_bytes;
 }
 
