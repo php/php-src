@@ -1,13 +1,13 @@
 #!/bin/sh
 ##
 ##  GNU shtool -- The GNU Portable Shell Tool
-##  Copyright (c) 1994-2001 Ralf S. Engelschall <rse@engelschall.com>
+##  Copyright (c) 1994-2002 Ralf S. Engelschall <rse@engelschall.com>
 ##
 ##  See http://www.gnu.org/software/shtool/ for more information.
 ##  See ftp://ftp.gnu.org/gnu/shtool/ for latest version.
 ##
-##  Version:  1.5.4 (14-Jun-2001)
-##  Contents: 3/17 available modules
+##  Version:  1.6.2 (02-Nov-2002)
+##  Contents: 4/19 available modules
 ##
 
 ##
@@ -41,6 +41,7 @@
 ##    echo       Print string with optional construct expansion
 ##    install    Install a program, script or datafile
 ##    mkdir      Make one or more directories
+##    path       Deal with program paths
 ##
 ##  Not available commands (because module was not built-in):
 ##    mdate      Pretty-print modification time of a file or dir
@@ -50,13 +51,14 @@
 ##    mkln       Make link with calculation of relative paths
 ##    mkshadow   Make a shadow tree through symbolic links
 ##    fixperm    Fix file permissions inside a source tree
+##    rotate     Logfile rotation
 ##    tarball    Roll distribution tarballs
+##    subst      Apply sed(1) substitution operations
 ##    guessos    Simple operating system guesser
 ##    arx        Extended archive command
 ##    slo        Separate linker options by library class
 ##    scpp       Sharing C Pre-Processor
 ##    version    Maintain a version information file
-##    path       Deal with program paths
 ##
 
 if [ $# -eq 0 ]; then
@@ -65,8 +67,8 @@ if [ $# -eq 0 ]; then
     exit 1
 fi
 if [ ".$1" = ".-h" -o ".$1" = ".--help" ]; then
-    echo "This is GNU shtool, version 1.5.4 (14-Jun-2001)"
-    echo "Copyright (c) 1994-2001 Ralf S. Engelschall <rse@engelschall.com>"
+    echo "This is GNU shtool, version 1.6.2 (02-Nov-2002)"
+    echo "Copyright (c) 1994-2002 Ralf S. Engelschall <rse@engelschall.com>"
     echo "Report bugs to <bug-shtool@gnu.org>"
     echo ''
     echo "Usage: shtool [<options>] [<cmd-name> [<cmd-options>] [<cmd-args>]]"
@@ -78,38 +80,63 @@ if [ ".$1" = ".-h" -o ".$1" = ".--help" ]; then
     echo '  -r, --recreate  recreate this shtool script via shtoolize'
     echo ''
     echo 'Available <cmd-name> [<cmd-options>] [<cmd-args>]:'
-    echo '  echo     [-n] [-e] [<str> ...]'
-    echo '  install  [-v] [-t] [-c] [-C] [-s] [-m<mode>] [-o<owner>] [-g<group>]'
-    echo '           [-e<sed-cmd>] <file> [<file> ...] <path>'
-    echo '  mkdir    [-t] [-f] [-p] [-m<mode>] <dir> [<dir> ...]'
+    echo '  echo     [-n|--newline] [-e|--expand] [<str> ...]'
+    echo '  install  [-v|--verbose] [-t|--trace] [-d|--mkdir] [-c|--copy]'
+    echo '           [-C|--compare-copy] [-s|--strip] [-m|--mode <mode>]'
+    echo '           [-o|--owner <owner>] [-g|--group <group>] [-e|--exec'
+    echo '           <sed-cmd>] <file> [<file> ...] <path>'
+    echo '  mkdir    [-t|--trace] [-f|--force] [-p|--parents] [-m|--mode'
+    echo '           <mode>] [-o|--owner <owner>] [-g|--group <group>] <dir>'
+    echo '           [<dir> ...]'
+    echo '  path     [-s|--suppress] [-r|--reverse] [-d|--dirname] [-b|--basename]'
+    echo '           [-m|--magic] [-p|--path <path>] <str> [<str> ...]'
     echo ''
     echo 'Not available <cmd-name> (because module was not built-in):'
-    echo '  mdate    [-n] [-z] [-s] [-d] [-f<str>] [-o<spec>] <path>'
-    echo '  table    [-F<sep>] [-w<width>] [-c<cols>] [-s<strip>] <str><sep><str>...'
-    echo '  prop     [-p<str>]'
-    echo '  move     [-v] [-t] [-e] [-p] <src-file> <dst-file>'
-    echo '  mkln     [-t] [-f] [-s] <src-path> [<src-path> ...] <dst-path>'
-    echo '  mkshadow [-v] [-t] [-a] <src-dir> <dst-dir>'
-    echo '  fixperm  [-v] [-t] <path> [<path> ...]'
-    echo '  tarball  [-t] [-v] [-o<tarball>] [-c<prog>] [-d<dir>] [-u<user>]'
-    echo '           [-g<group>] [-e<pattern>] <path> [<path> ...]'
+    echo '  mdate    [-n|--newline] [-z|--zero] [-s|--shorten] [-d|--digits]'
+    echo '           [-f|--field-sep <str>] [-o|--order <spec>] <path>'
+    echo '  table    [-F|--field-sep <sep>] [-w|--width <width>] [-c|--columns'
+    echo '           <cols>] [-s|--strip <strip>] <str><sep><str>...'
+    echo '  prop     [-p|--prefix <str>]'
+    echo '  move     [-v|--verbose] [-t|--trace] [-e|--expand] [-p|--preserve]'
+    echo '           <src-file> <dst-file>'
+    echo '  mkln     [-t|--trace] [-f|--force] [-s|--symbolic] <src-path>'
+    echo '           [<src-path> ...] <dst-path>'
+    echo '  mkshadow [-v|--verbose] [-t|--trace] [-a|--all] <src-dir> <dst-dir>'
+    echo '  fixperm  [-v|--verbose] [-t|--trace] <path> [<path> ...]'
+    echo '  rotate   [-v|--verbose] [-t|--trace] [-f|--force] [-n|--num-files'
+    echo '           <count>] [-s|--size <size>] [-c|--copy] [-r|--remove]'
+    echo '           [-a|--archive-dir <dir>] [-z|--compress [<tool>:]<level>]'
+    echo '           [-b|--background] [-d|--delay] [-p|--pad <len>] [-o|--owner'
+    echo '           <owner>] [-g|--group <group>] [-m|--mode <mode>] [-M|--migrate'
+    echo '           <cmd>] [-P|--prolog <cmd>] [-E|--epilog <cmd>] <file> [...]'
+    echo '  tarball  [-t|--trace] [-v|--verbose] [-o|--output <tarball>]'
+    echo '           [-c|--compress <prog>] [-d|--directory <dir>] [-u|--user'
+    echo '           <user>] [-g|--group <group>] [-e|--exclude <pattern>]'
+    echo '           <path> [<path> ...]'
+    echo '  subst    [-v|--verbose] [-t|--trace] [-n|--nop] [-s|--stealth]'
+    echo '           [-i|--interactive] [-b|--backup <ext>] [-e|--exec <cmd>]'
+    echo '           [-f|--file <cmd-file>] [<file>] [...]'
     echo '  guessos  '
-    echo '  arx      [-t] [-C<cmd>] <op> <archive> [<file> ...]'
-    echo '  slo      [-p<str>] -- -L<dir> -l<lib> [-L<dir> -l<lib> ...]'
-    echo '  scpp     [-v] [-p] [-f<filter>] [-o<ofile>] [-t<tfile>] [-M<mark>]'
-    echo '           [-D<dname>] [-C<cname>] <file> [<file> ...]'
-    echo '  version  [-l<lang>] [-n<name>] [-p<prefix>] [-s<version>] [-e]'
-    echo '           [-i<knob>] [-d<type>] <file>'
-    echo '  path     [-s] [-r] [-d] [-b] [-m] [-p<path>] <str> [<str> ...]'
+    echo '  arx      [-t|--trace] [-C|--command <cmd>] <op> <archive> [<file>'
+    echo '           ...]'
+    echo '  slo      [-p|--prefix <str>] -- -L<dir> -l<lib> [-L<dir> -l<lib>'
+    echo '           ...]'
+    echo '  scpp     [-v|--verbose] [-p|--preserve] [-f|--filter <filter>]'
+    echo '           [-o|--output <ofile>] [-t|--template <tfile>] [-M|--mark'
+    echo '           <mark>] [-D|--define <dname>] [-C|--class <cname>]'
+    echo '           <file> [<file> ...]'
+    echo '  version  [-l|--language <lang>] [-n|--name <name>] [-p|--prefix'
+    echo '           <prefix>] [-s|--set <version>] [-e|--edit] [-i|--increase'
+    echo '           <knob>] [-d|--display <type>] <file>'
     echo ''
     exit 0
 fi
 if [ ".$1" = ".-v" -o ".$1" = ."--version" ]; then
-    echo "GNU shtool 1.5.4 (14-Jun-2001)"
+    echo "GNU shtool 1.6.2 (02-Nov-2002)"
     exit 0
 fi
 if [ ".$1" = ".-r" -o ".$1" = ."--recreate" ]; then
-    shtoolize -ofoo echo install mkdir
+    shtoolize -oshtool echo install mkdir path
     exit 0
 fi
 if [ ".$1" = ".-d" -o ".$1" = ."--debug" ]; then
@@ -118,7 +145,7 @@ if [ ".$1" = ".-d" -o ".$1" = ."--debug" ]; then
 fi
 name=`echo "$0" | sed -e 's;.*/\([^/]*\)$;\1;' -e 's;-sh$;;' -e 's;\.sh$;;'`
 case "$name" in
-    echo|install|mkdir )
+    echo|install|mkdir|path )
         #   implicit tool command selection
         tool="$name"
         ;;
@@ -139,19 +166,22 @@ gen_tmpfile=no
 case $tool in
     echo )
         str_tool="echo"
-        str_usage="[-n] [-e] [<str> ...]"
+        str_usage="[-n|--newline] [-e|--expand] [<str> ...]"
         arg_spec="0+"
         opt_spec="n.e."
+        opt_alias="n:newline,e:expand"
         opt_n=no
         opt_e=no
         ;;
     install )
         str_tool="install"
-        str_usage="[-v] [-t] [-c] [-C] [-s] [-m<mode>] [-o<owner>] [-g<group>] [-e<sed-cmd>] <file> [<file> ...] <path>"
-        arg_spec="2+"
-        opt_spec="v.t.c.C.s.m:o:g:e+"
+        str_usage="[-v|--verbose] [-t|--trace] [-d|--mkdir] [-c|--copy] [-C|--compare-copy] [-s|--strip] [-m|--mode <mode>] [-o|--owner <owner>] [-g|--group <group>] [-e|--exec <sed-cmd>] <file> [<file> ...] <path>"
+        arg_spec="1+"
+        opt_spec="v.t.d.c.C.s.m:o:g:e+"
+        opt_alias="v:verbose,t:trace,d:mkdir,c:copy,C:compare-copy,s:strip,m:mode,o:owner,g:group,e:exec"
         opt_v=no
         opt_t=no
+        opt_d=no
         opt_c=no
         opt_C=no
         opt_s=no
@@ -162,13 +192,30 @@ case $tool in
         ;;
     mkdir )
         str_tool="mkdir"
-        str_usage="[-t] [-f] [-p] [-m<mode>] <dir> [<dir> ...]"
+        str_usage="[-t|--trace] [-f|--force] [-p|--parents] [-m|--mode <mode>] [-o|--owner <owner>] [-g|--group <group>] <dir> [<dir> ...]"
         arg_spec="1+"
-        opt_spec="t.f.p.m:"
+        opt_spec="t.f.p.m:o:g:"
+        opt_alias="t:trace,f:force,p:parents,m:mode,o:owner,g:group"
         opt_t=no
         opt_f=no
         opt_p=no
         opt_m=""
+        opt_o=""
+        opt_g=""
+        ;;
+    path )
+        str_tool="path"
+        str_usage="[-s|--suppress] [-r|--reverse] [-d|--dirname] [-b|--basename] [-m|--magic] [-p|--path <path>] <str> [<str> ...]"
+        gen_tmpfile=yes
+        arg_spec="1+"
+        opt_spec="s.r.d.b.m.p:"
+        opt_alias="s:suppress,r:reverse,d:dirname,b:basename,m:magic,p:path"
+        opt_s=no
+        opt_r=no
+        opt_d=no
+        opt_b=no
+        opt_m=no
+        opt_p="$PATH"
         ;;
     -* )
         echo "$0:Error: unknown option \`$tool'" 2>&1
@@ -185,6 +232,11 @@ esac
 ##
 ##  COMMON UTILITY CODE
 ##
+
+#   commonly used ASCII values
+ASC_TAB="	"
+ASC_NL="
+"
 
 #   determine name of tool
 if [ ".$tool" != . ]; then
@@ -207,6 +259,10 @@ eval `echo $arg_spec |\
 eval `echo h.$opt_spec |\
       sed -e 's/\([a-zA-Z0-9]\)\([.:+]\)/opt_MODE_\1=\2;/g'`
 
+#   parse option alias string
+eval `echo h:help,$opt_alias |\
+      tr 'x-' 'x_' | sed -e 's/\([a-zA-Z0-9]\):\([^,]*\),*/opt_ALIAS_\2=\1;/g'`
+
 #   interate over argument line
 opt_PREV=''
 while [ $# -gt 0 ]; do
@@ -227,6 +283,18 @@ while [ $# -gt 0 ]; do
     else
         #   split argument into option and argument
         case "$1" in
+            --[a-zA-Z0-9]*=*)
+                eval `echo "x$1" |\
+                      sed -e 's/^x--\([a-zA-Z0-9-]*\)=\(.*\)$/opt_OPT="\1";opt_ARG="\2"/'`
+                opt_STR=`echo $opt_OPT | tr 'x-' 'x_'`
+                eval "opt_OPT=\${opt_ALIAS_${opt_STR}-${opt_OPT}}"
+                ;;
+            --[a-zA-Z0-9]*)
+                opt_OPT=`echo "x$1" | cut -c4-`
+                opt_STR=`echo $opt_OPT | tr 'x-' 'x_'`
+                eval "opt_OPT=\${opt_ALIAS_${opt_STR}-${opt_OPT}}"
+                opt_ARG=''
+                ;;
             -[a-zA-Z0-9]*)
                 eval `echo "x$1" |\
                       sed -e 's/^x-\([a-zA-Z0-9]\)/opt_OPT="\1";/' \
@@ -266,17 +334,17 @@ while [ $# -gt 0 ]; do
             ;;
         '+' )
             #   option with argument (multiple occurances append)
-            eval "opt_${opt_OPT}=\"\$opt_${opt_OPT} \$opt_ARG\""
+            eval "opt_${opt_OPT}=\"\$opt_${opt_OPT}\${ASC_NL}\$opt_ARG\""
             ;;
         * )
-            echo "$msgprefix:Error: unknown option: \`-$opt_OPT'" 1>&2
+            echo "$msgprefix:Error: unknown option: \`$opt_OPT'" 1>&2
             echo "$msgprefix:Hint:  run \`$toolcmdhelp -h' or \`man shtool' for details" 1>&2
             exit 1
             ;;
     esac
 done
 if [ ".$opt_PREV" != . ]; then
-    echo "$msgprefix:Error: missing argument to option \`-$opt_PREV'" 1>&2
+    echo "$msgprefix:Error: missing argument to option \`$opt_PREV'" 1>&2
     echo "$msgprefix:Hint:  run \`$toolcmdhelp -h' or \`man shtool' for details" 1>&2
     exit 1
 fi
@@ -329,7 +397,7 @@ case $tool in
 echo )
     ##
     ##  echo -- Print string with optional construct expansion
-    ##  Copyright (c) 1998-2001 Ralf S. Engelschall <rse@engelschall.com>
+    ##  Copyright (c) 1998-2002 Ralf S. Engelschall <rse@engelschall.com>
     ##  Originally written for WML as buildinfo
     ##
     
@@ -362,7 +430,7 @@ echo )
                 term_bold=`awk 'BEGIN { printf("%c%c%c%c", 27, 91, 49, 109); }' </dev/null 2>/dev/null`
                 term_norm=`awk 'BEGIN { printf("%c%c%c", 27, 91, 109); }' </dev/null 2>/dev/null`
                 ;;
-            vt100|vt100*)
+            vt100|vt100*|cygwin)
                 term_bold=`awk 'BEGIN { printf("%c%c%c%c%c%c", 27, 91, 49, 109, 0, 0); }' </dev/null 2>/dev/null`
                 term_norm=`awk 'BEGIN { printf("%c%c%c%c%c", 27, 91, 109, 0, 0); }' </dev/null 2>/dev/null`
                 ;;
@@ -380,7 +448,7 @@ echo )
                                 fi
                             done
                             if [ ".$term_bold" != . ]; then
-                                for seq in sgr0 me rmso reset; do # 'reset' is last
+                                for seq in sgr0 me rmso init reset; do # 'reset' is last
                                     norm="`$dir/$tool $seq 2>/dev/null`"
                                     if [ ".$norm" != . ]; then
                                         term_norm="$norm"
@@ -399,6 +467,8 @@ echo )
         esac
         if [ ".$term_bold" = . -o ".$term_norm" = . ]; then
             echo "$msgprefix:Warning: unable to determine terminal sequence for bold mode" 1>&2
+            term_bold=''
+            term_norm=''
         fi
     fi
     
@@ -498,13 +568,13 @@ echo )
     if [ ".$opt_e" = .yes -a ".`echo $text | egrep '%d'`" != . ]; then
         if [ ".$domainname" = . ]; then
             if [ -f /etc/resolv.conf ]; then
-                domainname="`egrep '^[ 	]*domain' /etc/resolv.conf | head -1 |\
+                domainname="`egrep '^[ 	]*domain' /etc/resolv.conf | sed -e 'q' |\
                              sed -e 's/.*domain//' \
                                  -e 's/^[ 	]*//' -e 's/^ *//' -e 's/^	*//' \
                                  -e 's/^\.//' -e 's/^/./' |\
                              awk '{ printf("%s", $1); }'`"
                 if [ ".$domainname" = . ]; then
-                    domainname="`egrep '^[ 	]*search' /etc/resolv.conf | head -1 |\
+                    domainname="`egrep '^[ 	]*search' /etc/resolv.conf | sed -e 'q' |\
                                  sed -e 's/.*search//' \
                                      -e 's/^[ 	]*//' -e 's/^ *//' -e 's/^	*//' \
                                      -e 's/ .*//' -e 's/	.*//' \
@@ -581,9 +651,31 @@ echo )
 install )
     ##
     ##  install -- Install a program, script or datafile
-    ##  Copyright (c) 1997-2001 Ralf S. Engelschall <rse@engelschall.com>
+    ##  Copyright (c) 1997-2002 Ralf S. Engelschall <rse@engelschall.com>
     ##  Originally written for shtool
     ##
+    
+    #   special case: "shtool install -d <dir> [...]" internally
+    #   maps to "shtool mkdir -f -p -m 755 <dir> [...]"
+    if [ "$opt_d" = yes ]; then
+        cmd="$0 mkdir -f -p -m 755"
+        if [ ".$opt_o" != . ]; then
+            cmd="$cmd -o '$opt_o'"
+        fi
+        if [ ".$opt_g" != . ]; then
+            cmd="$cmd -g '$opt_g'"
+        fi
+        if [ ".$opt_v" = .yes ]; then
+            cmd="$cmd -v"
+        fi
+        if [ ".$opt_t" = .yes ]; then
+            cmd="$cmd -t"
+        fi
+        for dir in "$@"; do
+            eval "$cmd $dir" || exit $?
+        done
+        exit 0
+    fi
     
     #   determine source(s) and destination
     argc=$#
@@ -657,7 +749,9 @@ install )
         #   adjust the target file
         if [ ".$opt_e" != . ]; then
             sed='sed'
-            for e in $opt_e; do
+            OIFS="$IFS"; IFS="$ASC_NL"; set -- $opt_e; IFS="$OIFS"
+            for e
+            do
                 sed="$sed -e '$e'"
             done
             cp $dsttmp $dsttmp.old
@@ -718,7 +812,7 @@ install )
 mkdir )
     ##
     ##  mkdir -- Make one or more directories
-    ##  Copyright (c) 1996-2001 Ralf S. Engelschall <rse@engelschall.com>
+    ##  Copyright (c) 1996-2002 Ralf S. Engelschall <rse@engelschall.com>
     ##  Originally written for public domain by Noah Friedman <friedman@prep.ai.mit.edu>
     ##  Cleaned up and enhanced for shtool
     ##
@@ -741,6 +835,18 @@ mkdir )
                 echo "mkdir $p" 1>&2
             fi
             mkdir $p || errstatus=$?
+            if [ ".$opt_o" != . ]; then
+                if [ ".$opt_t" = .yes ]; then
+                    echo "chown $opt_o $p" 1>&2
+                fi
+                chown $opt_o $p || errstatus=$?
+            fi
+            if [ ".$opt_g" != . ]; then
+                if [ ".$opt_t" = .yes ]; then
+                    echo "chgrp $opt_g $p" 1>&2
+                fi
+                chgrp $opt_g $p || errstatus=$?
+            fi
             if [ ".$opt_m" != . ]; then
                 if [ ".$opt_t" = .yes ]; then
                     echo "chmod $opt_m $p" 1>&2
@@ -766,6 +872,18 @@ mkdir )
                         echo "mkdir $pathcomp" 1>&2
                     fi
                     mkdir $pathcomp || errstatus=$?
+                    if [ ".$opt_o" != . ]; then
+                        if [ ".$opt_t" = .yes ]; then
+                            echo "chown $opt_o $pathcomp" 1>&2
+                        fi
+                        chown $opt_o $pathcomp || errstatus=$?
+                    fi
+                    if [ ".$opt_g" != . ]; then
+                        if [ ".$opt_t" = .yes ]; then
+                            echo "chgrp $opt_g $pathcomp" 1>&2
+                        fi
+                        chgrp $opt_g $pathcomp || errstatus=$?
+                    fi
                     if [ ".$opt_m" != . ]; then
                         if [ ".$opt_t" = .yes ]; then
                             echo "chmod $opt_m $pathcomp" 1>&2
@@ -778,6 +896,147 @@ mkdir )
         fi
     done
     exit $errstatus
+    ;;
+
+path )
+    ##
+    ##  path -- Deal with program paths
+    ##  Copyright (c) 1998-2002 Ralf S. Engelschall <rse@engelschall.com>
+    ##  Originally written for Apache
+    ##
+    
+    namelist="$*"
+    
+    #   check whether the test command supports the -x option
+    if [ -x /bin/sh ] 2>/dev/null; then
+        minusx="-x"
+    else
+        minusx="-r"
+    fi
+    
+    #   split path string
+    paths="`echo $opt_p |\
+            sed -e 's/^:/.:/' \
+                -e 's/::/:.:/g' \
+                -e 's/:$/:./' \
+                -e 's/:/ /g'`"
+    
+    #   SPECIAL REQUEST
+    #   translate forward to reverse path
+    if [ ".$opt_r" = .yes ]; then
+        if [ "x$namelist" = "x." ]; then
+            rp='.'
+        else
+            rp=''
+            for pe in `IFS="$IFS/"; echo $namelist`; do
+                rp="../$rp"
+            done
+        fi
+        echo $rp | sed -e 's:/$::'
+        exit 0
+    fi
+    
+    #   SPECIAL REQUEST
+    #   strip out directory or base name
+    if [ ".$opt_d" = .yes ]; then
+        echo "$namelist" |\
+        sed -e 's;[^/]*$;;' -e 's;\(.\)/$;\1;'
+        exit 0
+    fi
+    if [ ".$opt_b" = .yes ]; then
+        echo "$namelist" |\
+        sed -e 's;.*/\([^/]*\)$;\1;'
+        exit 0
+    fi
+    
+    #   MAGIC SITUATION
+    #   Perl Interpreter (perl)
+    if [ ".$opt_m" = .yes  -a ".$namelist" = .perl ]; then
+        rm -f $tmpfile >/dev/null 2>&1
+        touch $tmpfile
+        found=0
+        pc=99
+        for dir in $paths; do
+            dir=`echo $dir | sed -e 's;/*$;;'`
+            nc=99
+            for name in perl perl5 miniperl; do
+                 if [ $minusx "$dir/$name" -a ! -d "$dir/$name" ]; then
+                     perl="$dir/$name"
+                     pv=`$perl -e 'printf("%.3f", $]);'`
+                     echo "$pv:$pc:$nc:$perl" >>$tmpfile
+                     found=1
+                 fi
+                 nc=`expr $nc - 1`
+            done
+            pc=`expr $pc - 1`
+        done
+        if [ $found = 1 ]; then
+            perl="`cat $tmpfile | sort -r -u | sed -e 'q' | cut -d: -f4`"
+            rm -f $tmpfile >/dev/null 2>&1
+            echo "$perl"
+            exit 0
+        fi
+        rm -f $tmpfile >/dev/null 2>&1
+        exit 1
+    fi
+    
+    #   MAGIC SITUATION
+    #   C pre-processor (cpp)
+    if [ ".$opt_m" = .yes -a ".$namelist" = .cpp ]; then
+        echo >$tmpfile.c "#include <assert.h>"
+        echo >>$tmpfile.c "Syntax Error"
+        #   1. try the standard cc -E approach
+        cpp="${CC-cc} -E"
+        (eval "$cpp $tmpfile.c >/dev/null") 2>$tmpfile.out
+        my_error=`grep -v '^ *+' $tmpfile.out`
+        if [ ".$my_error" != . ]; then
+            #   2. try the cc -E approach and GCC's -traditional-ccp option
+            cpp="${CC-cc} -E -traditional-cpp"
+            (eval "$cpp $tmpfile.c >/dev/null") 2>$tmpfile.out
+            my_error=`grep -v '^ *+' $tmpfile.out`
+            if [ ".$my_error" != . ]; then
+                #   3. try a standalone cpp command in path and lib dirs
+                for path in $paths /lib /usr/lib /usr/local/lib; do
+                    path=`echo $path | sed -e 's;/*$;;'`
+                    if [ $minusx "$path/cpp" -a ! -d "$path/cpp" ]; then
+                        cpp="$path/cpp"
+                        break
+                    fi
+                done
+                if [ ".$cpp" != . ]; then
+                    (eval "$cpp $tmpfile.c >/dev/null") 2>$tmpfile.out
+                    my_error=`grep -v '^ *+' $tmpfile.out`
+                    if [ ".$my_error" != . ]; then
+                        #   ok, we gave up...
+                        cpp=''
+                    fi
+                fi
+            fi
+        fi
+        rm -f $tmpfile >/dev/null 2>&1
+        rm -f $tmpfile.c $tmpfile.out >/dev/null 2>&1
+        if [ ".$cpp" != . ]; then
+            echo "$cpp"
+            exit 0
+        fi
+        exit 1
+    fi
+    
+    #   STANDARD SITUATION
+    #   iterate over names
+    for name in $namelist; do
+        #   iterate over paths
+        for path in $paths; do
+            path=`echo $path | sed -e 's;/*$;;'`
+            if [ $minusx "$path/$name" -a ! -d "$path/$name" ]; then
+                if [ ".$opt_s" != .yes ]; then
+                    echo "$path/$name"
+                fi
+                exit 0
+            fi
+        done
+    done
+    exit 1
     ;;
 
 esac
