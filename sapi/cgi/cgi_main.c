@@ -594,21 +594,13 @@ int main(int argc, char *argv[])
 			    in case some server does something different than above */
 			&& (!redirect_status_env || !getenv(redirect_status_env))
 			) {
-			PUTS("<b>Security Alert!</b>  PHP CGI cannot be accessed directly.\n\
-\n\
-<P>This PHP CGI binary was compiled with force-cgi-redirect enabled.  This\n\
+			PUTS("<b>Security Alert!</b> The PHP CGI cannot be accessed directly.\n\n\
+<p>This PHP CGI binary was compiled with force-cgi-redirect enabled.  This\n\
 means that a page will only be served up if the REDIRECT_STATUS CGI variable is\n\
-set.  This variable is set, for example, by Apache's Action directive redirect.\n\
-<P>You may disable this restriction by recompiling the PHP binary with the\n\
---disable-force-cgi-redirect switch.  If you do this and you have your PHP CGI\n\
-binary accessible somewhere in your web tree, people will be able to circumvent\n\
-.htaccess security by loading files through the PHP parser.  A good way around\n\
-this is to define doc_root in your php.ini file to something other than your\n\
-top-level DOCUMENT_ROOT.  This way you can separate the part of your web space\n\n\
-which uses PHP from the normal part using .htaccess security.  If you do not have\n\
-any .htaccess restrictions anywhere on your site you can leave doc_root undefined.\n\n\n\
-If you are running IIS, you may safely set cgi.force_redirect=0 in php.ini.\n\
-\n");
+set, eg via an Apache Action directive.</p>\n\
+<p>For more information about changing this behaviour or re-enabling this webserver,\n\
+consult the installation file that came with this distribution, or visit \n\
+<a href="http://php.net/install.windows">the manual page</a></p>\n");
 
 			/* remove that detailed explanation some time */
 #ifdef ZTS
