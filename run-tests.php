@@ -245,7 +245,7 @@ function do_testing($argc, &$argv)
     dowriteln(sprintf("Tests passed:     %4d (%s%%)", $passed, $passed_pstr));
     dowriteln("=============================");
     dowriteln("Skipped ".sizeof($skipped_extensions)." extensions.");
-    
+    dowriteln("PHP Version: ".phpversion());
 }
 
 function find_testdirs($dir = '.', $first_pass = true)
