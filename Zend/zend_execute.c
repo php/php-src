@@ -2550,7 +2550,6 @@ int zend_init_static_method_call_handler(ZEND_OPCODE_HANDLER_ARGS)
 	NEXT_OPCODE();
 }
 
-
 int zend_init_fcall_by_name_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zval *function_name;
@@ -2563,7 +2562,10 @@ int zend_init_fcall_by_name_handler(ZEND_OPCODE_HANDLER_ARGS)
 
 	is_const = (EX(opline)->op2.op_type == IS_CONST);
 
-	if (is_const) {
+	if (EX_T(EX(opline)->result.u.var).tmp_var.type == IS_LONG) {
+		function = (zend_function *) EX_T(EX(opline)->result.u.var).tmp_var.value.lval;
+		goto looked_up_fcall;
+	} else if (is_const) {
 		function_name_strval = EX(opline)->op2.u.constant.value.str.val;
 		function_name_strlen = EX(opline)->op2.u.constant.value.str.len;
 	} else {
@@ -2572,39 +2574,30 @@ int zend_init_fcall_by_name_handler(ZEND_OPCODE_HANDLER_ARGS)
 		function_name_strval = zend_str_tolower_dup(function_name->value.str.val, function_name->value.str.len);
 		function_name_strlen = function_name->value.str.len;
 	}
-	
 
-	do {
-		/*
-		if (EG(scope)) {
-			if (zend_hash_find(&EG(scope)->function_table, function_name_strval, function_name_strlen+1, (void **) &function) == SUCCESS) {
-				if ((EX(object) = EG(This))) {
-					EX(object)->refcount++;
-				}
-				EX(calling_scope) = EG(scope);
-				break;
-			}
+	if (zend_hash_find(EG(function_table), function_name_strval, function_name_strlen+1, (void **) &function)==FAILURE) {
+		/* try global space also */
+		if(zend_hash_find(&EG(global_namespace_ptr)->function_table, function_name_strval, function_name_strlen+1, (void **) &function)==FAILURE) {
+			zend_error(E_ERROR, "Call to undefined function:  %s()", function_name_strval);
 		}
-		*/
-		if (zend_hash_find(EG(function_table), function_name_strval, function_name_strlen+1, (void **) &function)==FAILURE) {
-			/* try global space also */
-			if(zend_hash_find(&EG(global_namespace_ptr)->function_table, function_name_strval, function_name_strlen+1, (void **) &function)==FAILURE) {
-				zend_error(E_ERROR, "Call to undefined function:  %s()", function_name_strval);
-			}
-		}
-		EX(calling_scope) = function->common.scope;
-		EX(object) = NULL;
-	} while (0);
-	
+	}
+
 	if (!is_const) {
 		efree(function_name_strval);
 		FREE_OP(EX(Ts), &EX(opline)->op2, EG(free_op2));
+	} else {
+		EX_T(EX(opline)->result.u.var).tmp_var.type = IS_LONG;
+		EX_T(EX(opline)->result.u.var).tmp_var.value.lval = (long) function;
 	}
+
+looked_up_fcall:
+	EX(calling_scope) = function->common.scope;
+	EX(object) = NULL;
+	
 	EX(fbc) = function;
 
 	NEXT_OPCODE();
 }
-
 
 int zend_do_fcall_common_helper(ZEND_OPCODE_HANDLER_ARGS)
 {
