@@ -2097,6 +2097,7 @@ send_by_ref:
 			case ZEND_FE_RESET: {
 					zval *array_ptr;
 					zval **array_ptr_ptr;
+					HashTable *fe_ht;
 					
 					if ((opline->op1.op_type == IS_CONST) || (opline->op1.op_type == IS_TMP_VAR)) {
 						array_ptr = get_zval_ptr(&opline->op1, Ts, &EG(free_op1), BP_VAR_R);
@@ -2123,9 +2124,9 @@ send_by_ref:
 					Ts[opline->result.u.var].var.ptr = array_ptr;
 					Ts[opline->result.u.var].var.ptr_ptr = &Ts[opline->result.u.var].var.ptr;	
 
-					if (array_ptr->type == IS_ARRAY) {
+					if ((fe_ht = HASH_OF(array_ptr)) != NULL) {
 						/* probably redundant */
-						zend_hash_internal_pointer_reset(array_ptr->value.ht);
+						zend_hash_internal_pointer_reset(fe_ht);
 					} else {
 						/* JMP to the end of foreach - TBD */
 					}
@@ -2137,14 +2138,17 @@ send_by_ref:
 					zval **value, *key;
 					char *str_key;
 					ulong int_key;
+					HashTable *fe_ht;
 
 					PZVAL_LOCK(array);
 
-					if (array->type != IS_ARRAY) {
-						zend_error(E_WARNING, "Non array argument supplied for foreach()");
+					fe_ht = HASH_OF(array);
+
+					if (! fe_ht) {
+						zend_error(E_WARNING, "Invalid argument supplied for foreach()");
 						opline = op_array->opcodes+opline->op2.u.opline_num;
 						continue;
-					} else if (zend_hash_get_current_data(array->value.ht, (void **) &value)==FAILURE) {
+					} else if (zend_hash_get_current_data(fe_ht, (void **) &value)==FAILURE) {
 						opline = op_array->opcodes+opline->op2.u.opline_num;
 						continue;
 					}
@@ -2156,7 +2160,7 @@ send_by_ref:
 
 					ALLOC_ZVAL(key);
 					INIT_PZVAL(key);
-					switch (zend_hash_get_current_key(array->value.ht, &str_key, &int_key)) {
+					switch (zend_hash_get_current_key(fe_ht, &str_key, &int_key)) {
 						case HASH_KEY_IS_STRING:
 							key->value.str.val = str_key;
 							key->value.str.len = strlen(str_key);
@@ -2169,7 +2173,7 @@ send_by_ref:
 						EMPTY_SWITCH_DEFAULT_CASE()
 					}
 					zend_hash_index_update(result->value.ht, 1, &key, sizeof(zval *), NULL);
-					zend_hash_move_forward(array->value.ht);
+					zend_hash_move_forward(fe_ht);
 				}
 				NEXT_OPCODE();
 			case ZEND_JMP_NO_CTOR: {
