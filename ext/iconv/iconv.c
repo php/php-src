@@ -423,13 +423,10 @@ php_iconv_err_t php_iconv_string(const char *in_p, size_t in_len,
 				bsz += in_len;
 
 				tmp_buf = (char*) erealloc(out_buf, bsz+1);
-
-				if (tmp_buf != NULL) {
-					out_p = out_buf = tmp_buf;
-					out_p += out_size;
-					out_left = bsz - out_size;
-					continue;	
-				}
+				out_p = out_buf = tmp_buf;
+				out_p += out_size;
+				out_left = bsz - out_size;
+				continue;	
 			}
 		}
 		break;
@@ -448,10 +445,6 @@ php_iconv_err_t php_iconv_string(const char *in_p, size_t in_len,
 			if (errno == E2BIG) {
 				bsz += 16;
 				tmp_buf = (char *) erealloc(out_buf, bsz);
-
-				if (tmp_buf == NULL) {
-					break;
-				}
 				
 				out_p = out_buf = tmp_buf;
 				out_p += out_size;
@@ -1818,9 +1811,7 @@ PHP_FUNCTION(iconv_get_encoding)
 		return;
 
 	if (!strcasecmp("all", type)) {
-		if (array_init(return_value) == FAILURE) {
-			RETURN_FALSE;
-		}
+		array_init(return_value);
 		add_assoc_string(return_value, "input_encoding",    ICONVG(input_encoding), 1);
 		add_assoc_string(return_value, "output_encoding",   ICONVG(output_encoding), 1);
 		add_assoc_string(return_value, "internal_encoding", ICONVG(internal_encoding), 1);

@@ -437,20 +437,12 @@ ZEND_FUNCTION(dbx_query)
 	/* init info property as array and add to return_value as a property */
 	if (result_flags & DBX_RESULT_INFO) {
 		MAKE_STD_ZVAL(info); 
-		if (array_init(info) != SUCCESS) {
-			zend_error(E_ERROR, "dbx_query: unable to create info-array for results...");
-			FREE_ZVAL(info);
-			RETURN_LONG(0);
-		}
+		array_init(info);
 		zend_hash_update(Z_OBJPROP_P(return_value), "info", 5, (void *)&(info), sizeof(zval *), NULL);
 	}
 	/* init data property as array and add to return_value as a property */
 	MAKE_STD_ZVAL(data); 
-	if (array_init(data) != SUCCESS) {
-		zend_error(E_ERROR, "dbx_query: unable to create data-array for results...");
-		FREE_ZVAL(data);
-		RETURN_LONG(0);
-	}
+	array_init(data);
 	zend_hash_update(Z_OBJPROP_P(return_value), "data", 5, (void *)&(data), sizeof(zval *), NULL);
 	/* get columncount and add to returnvalue as property */
 	MAKE_STD_ZVAL(rv_column_count); 
@@ -468,18 +460,8 @@ ZEND_FUNCTION(dbx_query)
 		zval *info_row_type;
 		MAKE_STD_ZVAL(info_row_name);
 		MAKE_STD_ZVAL(info_row_type);
-		if (array_init(info_row_name) != SUCCESS) {
-			zend_error(E_ERROR, "dbx_query: unable to create info_row_name-array for results...");
-			FREE_ZVAL(info_row_name);
-			FREE_ZVAL(info_row_type);
-			RETURN_LONG(0);
-		}
-		if (array_init(info_row_type) != SUCCESS) {
-			zend_error(E_ERROR, "dbx_query: unable to create info_row_type-array for results...");
-			FREE_ZVAL(info_row_name);
-			FREE_ZVAL(info_row_type);
-			RETURN_LONG(0);
-		}
+		array_init(info_row_name);
+		array_init(info_row_type);
 		for (col_index=0; col_index<Z_LVAL_P(rv_column_count); ++col_index) {
 			zval *rv_column_name;
 			zval *rv_column_type;

@@ -233,11 +233,7 @@ int dbx_odbc_getrow(zval **rv, zval **result_handle, long row_number, INTERNAL_F
 	zval_ptr_dtor(&fetch_row_result_zval);
 	/* fill array with field results... */
 	MAKE_STD_ZVAL(returned_zval);
-	if (array_init(returned_zval) != SUCCESS) {
-		zend_error(E_ERROR, "dbx_odbc_getrow: unable to create result-array...");
-		FREE_ZVAL(returned_zval);
-		return 0;
-	}
+	array_init(returned_zval);
 	MAKE_STD_ZVAL(field_index_zval);
 	ZVAL_LONG(field_index_zval, 0);
 	number_of_arguments=2;
