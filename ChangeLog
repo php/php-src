@@ -1,3 +1,84 @@
+2002-06-18  Stig Venaas  <venaas@uninett.no>
+
+    * ext/standard/array.c:
+    Made array_unique() always keep the first occurrences of duplicates,
+    making the behavior easier to understand, and maybe more useful.
+
+2002-06-18  Andi Gutmans  <andi@zend.com>
+
+    * ext/bcmath/bcmath.c
+      ext/bcmath/php_bcmath.h:
+    - Nuke use of persist_alloc(). This can't be used with a new memory manager
+
+2002-06-18  Stefan Esser  <s.esser@e-matters.de>
+
+    * main/SAPI.c:
+    fix: appending the default charset to text/ content types never worked
+    fix: removed double free
+
+2002-06-18  Jan Lehnardt  <jan@dasmoped.net>
+
+    * ext/standard/array.c:  - WS-fixes
+
+2002-06-18  Stefan Esser  <s.esser@e-matters.de>
+
+    * main/SAPI.c: keep fingers away from already freed memory.
+
+2002-06-18  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/standard/file.c:
+    - fixed bug in enclosure handling (was still hardcoded to '"' in one place)
+    - added possibility to pass empty enclosure if you really don't want one
+
+2002-06-18  Sander Roobol  <phy@wanadoo.nl>
+
+    * ext/standard/string.c
+      ext/standard/tests/strings/add-and-stripslashes.phpt:
+    Fixed stripslashes when magic_quotes_sybase is enabled, and add a test for
+    add- and stripslashes().
+
+    * ext/standard/tests/strings/add-and-stripslashes.phpt:
+    Fix stripslashes when magic_quotes_sybase is enabled, and add a test for
+    add- and stripslashes().
+
+2002-06-18  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/var.c: - Fix for bug #16065
+
+2002-06-18  Sander Roobol  <phy@wanadoo.nl>
+
+    * main/SAPI.c:
+    Patch by Michael Sisolak <msisolak@yahoo.com> to make header() honor the
+    replace parameter. Closes #16458.
+
+2002-06-18  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/zlib/zlib.c: - oops... read before commit :)
+
+    * ext/zlib/zlib.c:
+    - It doesn't work from within a script... so we disallow it
+
+2002-06-18  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/package-PEAR.xml: "Release notes"++
+
+2002-06-18  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * ext/dbx/dbx_sybasect.c: - User proper macros as suggested by Marc.
+
+    * ext/domxml/php_domxml.c: - Fix ZTS build.
+
+2002-06-18  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/mbstring/mbstring.c: Fixed bug: #17137, test pass still
+
+2002-06-18  Edin Kadribasic  <edink@proventum.net>
+
+    * ext/standard/math.c: ZTS fix.
+
+    * ext/standard/math.c:
+    Check for +/- infinity in base_convert (bug #14807).
+
 2002-06-17  Sergey Kartashoff  <gluke@biosys.net>
 
     * ext/mnogosearch/php_mnogo.c:
