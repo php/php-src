@@ -22,6 +22,7 @@
 require_once 'PEAR/Common.php';
 require_once 'PEAR/Registry.php';
 require_once 'PEAR/Dependency.php';
+require_once 'System.php';
 
 define('PEAR_INSTALLER_OK',       1);
 define('PEAR_INSTALLER_FAILED',   0);
@@ -332,7 +333,7 @@ class PEAR_Installer extends PEAR_Common
         if ($need_download) {
             $downloaddir = $this->config->get('download_dir');
             if (empty($downloaddir)) {
-                if (PEAR::isError($downloaddir = $this->mkTempDir())) {
+                if (PEAR::isError($downloaddir = System::mktemp('-d'))) {
                     return $downloaddir;
                 }
                 $this->log(2, '+ tmp dir created at ' . $downloaddir);
@@ -357,7 +358,7 @@ class PEAR_Installer extends PEAR_Common
                 chdir($oldcwd);
             }
 
-            if (PEAR::isError($tmpdir = $this->mkTempDir())) {
+            if (PEAR::isError($tmpdir = System::mktemp('-d'))) {
                 return $tmpdir;
             }
             $this->log(2, '+ tmp dir created at ' . $tmpdir);
@@ -412,6 +413,28 @@ class PEAR_Installer extends PEAR_Common
                     $this->log(0, $error);
                 }
                 return $this->raiseError("$pkgname: dependencies failed");
+            }
+        }
+
+        if (empty($options['force'])) {
+            // checks to do when not in "force" mode
+            $test = $this->registry->checkFileMap($pkginfo);
+            if (sizeof($test)) {
+                $tmp = $test;
+                foreach ($tmp as $file => $pkg) {
+                    if ($pkg == $pkgname) {
+                        unset($test[$file]);
+                    }
+                }
+                if (sizeof($test)) {
+                    $msg = "$pkgname: conflicting files found:\n";
+                    $longest = max(array_map("strlen", array_keys($test)));
+                    $fmt = "%${longest}s (%s)\n";
+                    foreach ($test as $file => $pkg) {
+                        $msg .= sprintf($fmt, $file, $pkg);
+                    }
+                    return $this->raiseError($msg);
+                }
             }
         }
 
