@@ -10,7 +10,8 @@ if (PHP_LIBXML == "yes") {
 
 		EXTENSION("libxml", "libxml.c", false /* never shared */);
 		AC_DEFINE("HAVE_LIBXML", 1, "LibXML support");
-		ADD_FLAG("CFLAGS", "/D LIBXML_THREAD_ENABLED /D LIBXML_STATIC ");
+		ADD_FLAG("CFLAGS", "/D LIBXML_THREAD_ENABLED");
+		ADD_FLAG("CFLAGS_LIBXML", "/D LIBXML_STATIC ");
 		if (!PHP_LIBXML_SHARED) {
 			ADD_DEF_FILE("ext\\libxml\\php_libxml2.def");
 		}

@@ -13,6 +13,9 @@ if (PHP_DOM == "yes" && PHP_LIBXML == "yes") {
 		notation.c xpath.c dom_iterators.c typeinfo.c domerror.c \
 		domlocator.c namednodemap.c userdatahandler.c");
 	AC_DEFINE("HAVE_DOM", 1, "DOM support");
+	if (!PHP_DOM_SHARED) {
+		ADD_FLAG("CFLAGS_DOM", "/D LIBXML_STATIC ");
+	}
 }
 
 
