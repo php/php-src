@@ -104,8 +104,9 @@
 #if defined(HAVE_MBSTR_KR)
 #include "mbfilter_kr.h"
 #endif
-#if defined(HAVE_MBSTR_KR)
+#if defined(HAVE_MBSTR_RU)
 #include "mbfilter_ru.h"
+#include "unicode_table_ru.h"
 #endif
 
 #include "zend.h"
@@ -1242,6 +1243,9 @@ static int mbfl_filt_ident_2022kr(int c, mbfl_identify_filter *filter TSRMLS_DC)
 #endif /* HAVE_MBSTR_KR */
 
 #if defined(HAVE_MBSTR_RU)
+static int mbfl_filt_get_rating_cp1251(int c, mbfl_identify_filter *filter TSRMLS_DC);
+static int mbfl_filt_get_rating_cp866(int c, mbfl_identify_filter *filter TSRMLS_DC);
+static int mbfl_filt_get_rating_koi8r(int c, mbfl_identify_filter *filter TSRMLS_DC);
 static int mbfl_filt_ident_cp1251(int c, mbfl_identify_filter *filter TSRMLS_DC);
 static int mbfl_filt_ident_cp866(int c, mbfl_identify_filter *filter TSRMLS_DC);
 static int mbfl_filt_ident_koi8r(int c, mbfl_identify_filter *filter TSRMLS_DC);
@@ -2294,56 +2298,65 @@ static const struct mbfl_identify_vtbl vtbl_identify_ascii = {
 	mbfl_no_encoding_ascii,
 	mbfl_filt_ident_common_ctor,
 	mbfl_filt_ident_common_dtor,
-	mbfl_filt_ident_ascii };
+	mbfl_filt_ident_ascii,
+	NULL };
 
 static const struct mbfl_identify_vtbl vtbl_identify_utf8 = {
 	mbfl_no_encoding_utf8,
 	mbfl_filt_ident_common_ctor,
 	mbfl_filt_ident_common_dtor,
-	mbfl_filt_ident_utf8 };
+	mbfl_filt_ident_utf8,
+	NULL };
 
 static const struct mbfl_identify_vtbl vtbl_identify_utf7 = {
 	mbfl_no_encoding_utf7,
 	mbfl_filt_ident_common_ctor,
 	mbfl_filt_ident_common_dtor,
-	mbfl_filt_ident_utf7 };
+	mbfl_filt_ident_utf7,
+	NULL };
 
 #if defined(HAVE_MBSTR_JA)
 static const struct mbfl_identify_vtbl vtbl_identify_eucjp = {
 	mbfl_no_encoding_euc_jp,
 	mbfl_filt_ident_common_ctor,
 	mbfl_filt_ident_common_dtor,
-	mbfl_filt_ident_eucjp };
+	mbfl_filt_ident_eucjp,
+	NULL };
 
 static const struct mbfl_identify_vtbl vtbl_identify_eucjpwin = {
 	mbfl_no_encoding_eucjp_win,
 	mbfl_filt_ident_common_ctor,
 	mbfl_filt_ident_common_dtor,
-	mbfl_filt_ident_eucjp };
+	mbfl_filt_ident_eucjp,
+	NULL };
 
 static const struct mbfl_identify_vtbl vtbl_identify_sjis = {
 	mbfl_no_encoding_sjis,
 	mbfl_filt_ident_common_ctor,
 	mbfl_filt_ident_common_dtor,
-	mbfl_filt_ident_sjis };
+	mbfl_filt_ident_sjis,
+	NULL };
 
 static const struct mbfl_identify_vtbl vtbl_identify_sjiswin = {
 	mbfl_no_encoding_sjis_win,
 	mbfl_filt_ident_common_ctor,
 	mbfl_filt_ident_common_dtor,
-	mbfl_filt_ident_sjiswin };
+	mbfl_filt_ident_sjiswin,
+	NULL };
 
 static const struct mbfl_identify_vtbl vtbl_identify_jis = {
 	mbfl_no_encoding_jis,
 	mbfl_filt_ident_common_ctor,
 	mbfl_filt_ident_common_dtor,
-	mbfl_filt_ident_jis };
+	mbfl_filt_ident_jis,
+	NULL };
 
 static const struct mbfl_identify_vtbl vtbl_identify_2022jp = {
 	mbfl_no_encoding_2022jp,
 	mbfl_filt_ident_common_ctor,
 	mbfl_filt_ident_common_dtor,
-	mbfl_filt_ident_2022jp };
+	mbfl_filt_ident_2022jp,
+	NULL };
 #endif /* HAVE_MBSTR_JA */
 
 #if defined(HAVE_MBSTR_CN)
@@ -2351,19 +2364,22 @@ static struct mbfl_identify_vtbl vtbl_identify_euccn = {
 	mbfl_no_encoding_euc_cn,
 	mbfl_filt_ident_common_ctor,
 	mbfl_filt_ident_common_dtor,
-	mbfl_filt_ident_euccn };
+	mbfl_filt_ident_euccn,
+	NULL };
 
 static struct mbfl_identify_vtbl vtbl_identify_cp936 = {
 	mbfl_no_encoding_cp936,
 	mbfl_filt_ident_common_ctor,
 	mbfl_filt_ident_common_dtor,
-	mbfl_filt_ident_cp936 };
+	mbfl_filt_ident_cp936,
+	NULL };
 
 static struct mbfl_identify_vtbl vtbl_identify_hz = {
 	mbfl_no_encoding_hz,
 	mbfl_filt_ident_common_ctor,
 	mbfl_filt_ident_common_dtor,
-	mbfl_filt_ident_hz };
+	mbfl_filt_ident_hz,
+	NULL };
 
 #endif /* HAVE_MBSTR_CN */
 
@@ -2372,13 +2388,15 @@ static struct mbfl_identify_vtbl vtbl_identify_euctw = {
 	mbfl_no_encoding_euc_tw,
 	mbfl_filt_ident_common_ctor,
 	mbfl_filt_ident_common_dtor,
-	mbfl_filt_ident_euctw };
+	mbfl_filt_ident_euctw,
+	NULL };
 
 static struct mbfl_identify_vtbl vtbl_identify_big5 = {
 	mbfl_no_encoding_big5,
 	mbfl_filt_ident_common_ctor,
 	mbfl_filt_ident_common_dtor,
-	mbfl_filt_ident_big5 };
+	mbfl_filt_ident_big5,
+	NULL };
 #endif /* HAVE_MBSTR_TW */
 
 #if defined(HAVE_MBSTR_KR)
@@ -2386,19 +2404,22 @@ static struct mbfl_identify_vtbl vtbl_identify_euckr = {
 	mbfl_no_encoding_euc_kr,
 	mbfl_filt_ident_common_ctor,
 	mbfl_filt_ident_common_dtor,
-	mbfl_filt_ident_euckr };
+	mbfl_filt_ident_euckr,
+	NULL };
 
 static struct mbfl_identify_vtbl vtbl_identify_uhc = {
 	mbfl_no_encoding_uhc,
 	mbfl_filt_ident_common_ctor,
 	mbfl_filt_ident_common_dtor,
-	mbfl_filt_ident_uhc };
+	mbfl_filt_ident_uhc,
+	NULL };
 
 static struct mbfl_identify_vtbl vtbl_identify_2022kr = {
 	mbfl_no_encoding_2022kr,
 	mbfl_filt_ident_common_ctor,
 	mbfl_filt_ident_common_dtor,
-	mbfl_filt_ident_2022kr };
+	mbfl_filt_ident_2022kr,
+	NULL };
 
 #endif /* HAVE_MBSTR_KR */
 
@@ -2407,110 +2428,128 @@ static struct mbfl_identify_vtbl vtbl_identify_cp1251 = {
 	mbfl_no_encoding_cp1251,
 	mbfl_filt_ident_common_ctor,
 	mbfl_filt_ident_common_dtor,
-	mbfl_filt_ident_cp1251 };
+	mbfl_filt_ident_cp1251,
+	mbfl_filt_get_rating_cp1251 };
 
 static struct mbfl_identify_vtbl vtbl_identify_cp866 = {
 	mbfl_no_encoding_cp866,
 	mbfl_filt_ident_common_ctor,
 	mbfl_filt_ident_common_dtor,
-	mbfl_filt_ident_cp866 };
+	mbfl_filt_ident_cp866,
+	mbfl_filt_get_rating_cp866 };
 
 static struct mbfl_identify_vtbl vtbl_identify_koi8r = {
 	mbfl_no_encoding_koi8r,
 	mbfl_filt_ident_common_ctor,
 	mbfl_filt_ident_common_dtor,
-	mbfl_filt_ident_koi8r };
+	mbfl_filt_ident_koi8r, 
+	mbfl_filt_get_rating_koi8r };
 #endif /* HAVE_MBSTR_RU */
 
 static const struct mbfl_identify_vtbl vtbl_identify_cp1252 = {
 	mbfl_no_encoding_cp1252,
 	mbfl_filt_ident_common_ctor,
 	mbfl_filt_ident_common_dtor,
-	mbfl_filt_ident_cp1252 };
+	mbfl_filt_ident_cp1252,
+	NULL };
 
 static const struct mbfl_identify_vtbl vtbl_identify_8859_1 = {
 	mbfl_no_encoding_8859_1,
 	mbfl_filt_ident_common_ctor,
 	mbfl_filt_ident_common_dtor,
-	mbfl_filt_ident_true };
+	mbfl_filt_ident_true,
+	NULL };
 
 static const struct mbfl_identify_vtbl vtbl_identify_8859_2 = {
 	mbfl_no_encoding_8859_2,
 	mbfl_filt_ident_common_ctor,
 	mbfl_filt_ident_common_dtor,
-	mbfl_filt_ident_true };
+	mbfl_filt_ident_true,
+	NULL };
 
 static const struct mbfl_identify_vtbl vtbl_identify_8859_3 = {
 	mbfl_no_encoding_8859_3,
 	mbfl_filt_ident_common_ctor,
 	mbfl_filt_ident_common_dtor,
-	mbfl_filt_ident_true };
+	mbfl_filt_ident_true,
+	NULL };
 
 static const struct mbfl_identify_vtbl vtbl_identify_8859_4 = {
 	mbfl_no_encoding_8859_4,
 	mbfl_filt_ident_common_ctor,
 	mbfl_filt_ident_common_dtor,
-	mbfl_filt_ident_true };
+	mbfl_filt_ident_true,
+	NULL };
 
 static const struct mbfl_identify_vtbl vtbl_identify_8859_5 = {
 	mbfl_no_encoding_8859_5,
 	mbfl_filt_ident_common_ctor,
 	mbfl_filt_ident_common_dtor,
-	mbfl_filt_ident_true };
+	mbfl_filt_ident_true,
+	NULL };
 
 static const struct mbfl_identify_vtbl vtbl_identify_8859_6 = {
 	mbfl_no_encoding_8859_6,
 	mbfl_filt_ident_common_ctor,
 	mbfl_filt_ident_common_dtor,
-	mbfl_filt_ident_true };
+	mbfl_filt_ident_true,
+	NULL };
 
 static const struct mbfl_identify_vtbl vtbl_identify_8859_7 = {
 	mbfl_no_encoding_8859_7,
 	mbfl_filt_ident_common_ctor,
 	mbfl_filt_ident_common_dtor,
-	mbfl_filt_ident_true };
+	mbfl_filt_ident_true,
+	NULL };
 
 static const struct mbfl_identify_vtbl vtbl_identify_8859_8 = {
 	mbfl_no_encoding_8859_8,
 	mbfl_filt_ident_common_ctor,
 	mbfl_filt_ident_common_dtor,
-	mbfl_filt_ident_true };
+	mbfl_filt_ident_true,
+	NULL };
 
 static const struct mbfl_identify_vtbl vtbl_identify_8859_9 = {
 	mbfl_no_encoding_8859_9,
 	mbfl_filt_ident_common_ctor,
 	mbfl_filt_ident_common_dtor,
-	mbfl_filt_ident_true };
+	mbfl_filt_ident_true,
+	NULL };
 
 static const struct mbfl_identify_vtbl vtbl_identify_8859_10 = {
 	mbfl_no_encoding_8859_10,
 	mbfl_filt_ident_common_ctor,
 	mbfl_filt_ident_common_dtor,
-	mbfl_filt_ident_true };
+	mbfl_filt_ident_true,
+	NULL };
 
 static const struct mbfl_identify_vtbl vtbl_identify_8859_13 = {
 	mbfl_no_encoding_8859_13,
 	mbfl_filt_ident_common_ctor,
 	mbfl_filt_ident_common_dtor,
-	mbfl_filt_ident_true };
+	mbfl_filt_ident_true,
+	NULL };
 
 static const struct mbfl_identify_vtbl vtbl_identify_8859_14 = {
 	mbfl_no_encoding_8859_14,
 	mbfl_filt_ident_common_ctor,
 	mbfl_filt_ident_common_dtor,
-	mbfl_filt_ident_true };
+	mbfl_filt_ident_true,
+	NULL };
 
 static const struct mbfl_identify_vtbl vtbl_identify_8859_15 = {
 	mbfl_no_encoding_8859_15,
 	mbfl_filt_ident_common_ctor,
 	mbfl_filt_ident_common_dtor,
-	mbfl_filt_ident_true };
+	mbfl_filt_ident_true,
+	NULL };
 
 static const struct mbfl_identify_vtbl vtbl_identify_false = {
 	mbfl_no_encoding_pass,
 	mbfl_filt_ident_false_ctor,
 	mbfl_filt_ident_common_dtor,
-	mbfl_filt_ident_false };
+	mbfl_filt_ident_false,
+	NULL };
 
 static const struct mbfl_identify_vtbl *mbfl_identify_filter_list[] = {
 	&vtbl_identify_utf8,
@@ -6537,6 +6576,30 @@ mbfl_filt_ident_cp1252(int c, mbfl_identify_filter *filter TSRMLS_DC)
 }
 
 #if defined(HAVE_MBSTR_RU)
+static int
+mbfl_filt_get_rating_cp1251(int c, mbfl_identify_filter *filter TSRMLS_DC)
+{
+	if (c >= cp1251_char_ratings_table_min && c < (cp1251_char_ratings_table_min + cp1251_char_ratings_table_len) )
+		return cp1251_char_ratings_table[c - cp1251_char_ratings_table_min];
+	return 0;	
+}
+
+static int
+mbfl_filt_get_rating_cp866(int c, mbfl_identify_filter *filter TSRMLS_DC)
+{
+	if (c >= cp866_char_ratings_table_min && c < (cp866_char_ratings_table_min + cp866_char_ratings_table_len) )
+		return cp866_char_ratings_table[c - cp866_char_ratings_table_min];
+	return 0;	
+}
+
+static int
+mbfl_filt_get_rating_koi8r(int c, mbfl_identify_filter *filter TSRMLS_DC)
+{
+	if (c >= koi8r_char_ratings_table_min && c < (koi8r_char_ratings_table_min + koi8r_char_ratings_table_len) )
+		return koi8r_char_ratings_table[c - koi8r_char_ratings_table_min];
+	return 0;	
+}
+
 // all of this is so ugly now!
 static int
 mbfl_filt_ident_cp1251(int c, mbfl_identify_filter *filter TSRMLS_DC)
@@ -6981,6 +7044,7 @@ mbfl_identify_filter_set_vtbl(mbfl_identify_filter *filter, const struct mbfl_id
 		filter->filter_ctor = vtbl->filter_ctor;
 		filter->filter_dtor = vtbl->filter_dtor;
 		filter->filter_function = vtbl->filter_function;
+		filter->get_rating_function = vtbl->get_rating_function;
 	}
 }
 
@@ -7543,6 +7607,116 @@ mbfl_identify_encoding_name(mbfl_string *string, enum mbfl_no_encoding *elist, i
 	const mbfl_encoding *encoding;
 
 	encoding = mbfl_identify_encoding(string, elist, eliztsz TSRMLS_CC);
+	if (encoding != NULL &&
+	    encoding->no_encoding > mbfl_no_encoding_charset_min &&
+	    encoding->no_encoding < mbfl_no_encoding_charset_max) {
+		return encoding->name;
+	} else {
+		return NULL;
+	}
+}
+
+/*
+ * guess encoding - uses another algorithm for charset detection based on symbols rating
+ */
+const mbfl_encoding *
+mbfl_guess_encoding(mbfl_string *string, enum mbfl_no_encoding *elist, int eliztsz TSRMLS_DC)
+{
+	int i, n, num, num_actual, bad, overflow;
+	unsigned char *p;
+	const struct mbfl_identify_vtbl *vtbl;
+	mbfl_identify_filter *flist, *filter;
+	const mbfl_encoding *encoding;
+	unsigned long *ratings,add_rating,max_rating;
+
+	if (elist == NULL)
+		return NULL;
+
+	/* initialize */
+	flist = (mbfl_identify_filter *)mbfl_calloc(eliztsz, sizeof(mbfl_identify_filter));
+	if (flist == NULL) {
+		return NULL;
+	}
+	i = 0;
+	num = 0;
+	num_actual = 0;
+	if (elist != NULL) {
+		while (i < eliztsz) {
+			vtbl = mbfl_identify_filter_get_vtbl(elist[i]);
+			if (vtbl != NULL) {
+				filter = &flist[num];
+				mbfl_identify_filter_set_vtbl(filter, vtbl);
+				filter->encoding = mbfl_no2encoding(vtbl->encoding);
+				(*filter->filter_ctor)(filter TSRMLS_CC);				
+				num++;
+				if (filter->get_rating_function)
+					num_actual++;
+			}
+			i++;
+		}
+	}
+	if (num_actual == 0) {
+		/* no filters with character rating routines - exit */
+		mbfl_free((void *)flist);		
+		return NULL;
+	}
+
+	ratings = (unsigned long *)mbfl_calloc(eliztsz, sizeof(unsigned long));
+	if (ratings == NULL) {
+		mbfl_free((void *)flist);		
+		return NULL;
+	}
+
+	
+	/* feed data */
+	n = string->len;
+	p = string->val;
+	if (p != NULL) {
+		while (n > 0) {
+			i = 0;
+			bad = 0;
+			overflow = 0;
+			while (i < num) {
+				filter = &flist[i];
+				add_rating=(*filter->get_rating_function)(*p, filter TSRMLS_CC);
+				if ( (ratings[i] + add_rating) < ratings[i] ) 
+					overflow = 1;	
+				ratings[i] += add_rating;
+				i++;
+			}
+			if (overflow)
+				// overflow - enough data now - exit
+				break;
+			p++;
+			n--;
+		}
+	}
+
+	/* judge */
+	max_rating = 0;
+	i = 0;
+	encoding = NULL;
+	while (i < num) {
+		filter = &flist[i];
+		if (ratings[i] > max_rating) {
+			max_rating = ratings[i];
+			encoding = filter->encoding;
+		}
+		(*filter->filter_dtor)(filter TSRMLS_CC);
+		i++;
+	}
+	mbfl_free((void *)ratings);		
+	mbfl_free((void *)flist);
+
+	return encoding;
+}
+
+const char*
+mbfl_guess_encoding_name(mbfl_string *string, enum mbfl_no_encoding *elist, int eliztsz TSRMLS_DC)
+{
+	const mbfl_encoding *encoding;
+
+	encoding = mbfl_guess_encoding(string, elist, eliztsz TSRMLS_CC);
 	if (encoding != NULL &&
 	    encoding->no_encoding > mbfl_no_encoding_charset_min &&
 	    encoding->no_encoding < mbfl_no_encoding_charset_max) {

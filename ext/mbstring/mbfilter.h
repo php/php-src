@@ -389,6 +389,7 @@ struct _mbfl_identify_filter {
 	void (*filter_ctor)(mbfl_identify_filter *filter TSRMLS_DC);
 	void (*filter_dtor)(mbfl_identify_filter *filter TSRMLS_DC);
 	int (*filter_function)(int c, mbfl_identify_filter *filter TSRMLS_DC);
+	int (*get_rating_function)(int c, mbfl_identify_filter *filter TSRMLS_DC);
 	int status;
 	int flag;
 	int score;
@@ -400,6 +401,7 @@ struct mbfl_identify_vtbl {
 	void (*filter_ctor)(mbfl_identify_filter *filter TSRMLS_DC);
 	void (*filter_dtor)(mbfl_identify_filter *filter TSRMLS_DC);
 	int (*filter_function)(int c, mbfl_identify_filter *filter TSRMLS_DC);
+	int (*get_rating_function)(int c, mbfl_identify_filter *filter TSRMLS_DC);
 };
 
 mbfl_identify_filter * mbfl_identify_filter_new(enum mbfl_no_encoding encoding TSRMLS_DC);
@@ -458,6 +460,12 @@ mbfl_convert_encoding(mbfl_string *string, mbfl_string *result, enum mbfl_no_enc
 /*
  * identify encoding
  */
+const mbfl_encoding *
+mbfl_guess_encoding(mbfl_string *string, enum mbfl_no_encoding *elist, int eliztsz TSRMLS_DC);
+
+const char *
+mbfl_guess_encoding_name(mbfl_string *string, enum mbfl_no_encoding *elist, int eliztsz TSRMLS_DC);
+
 const mbfl_encoding *
 mbfl_identify_encoding(mbfl_string *string, enum mbfl_no_encoding *elist, int eliztsz TSRMLS_DC);
 
