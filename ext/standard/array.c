@@ -2809,6 +2809,7 @@ PHP_FUNCTION(array_sum)
 		 **entry;
 	int argc = ZEND_NUM_ARGS();
 	HashPosition pos;
+	double dval;
 	
 	if (argc != 1 || zend_get_parameters_ex(argc, &input) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -2833,12 +2834,15 @@ PHP_FUNCTION(array_sum)
 		convert_scalar_to_number(*entry TSRMLS_CC);
 
 		if (Z_TYPE_PP(entry) == IS_LONG && Z_TYPE_P(return_value) == IS_LONG) {
-			Z_LVAL_P(return_value) += Z_LVAL_PP(entry);
-		} else {
-			convert_to_double(return_value);
-			convert_to_double_ex(entry);
-			Z_DVAL_P(return_value) += Z_DVAL_PP(entry);
+			dval = (double)Z_LVAL_P(return_value) + (double)Z_LVAL_PP(entry);
+			if ( (double)LONG_MIN <= dval && dval <= (double)LONG_MAX ) {
+				Z_LVAL_P(return_value) += Z_LVAL_PP(entry);
+				continue;
+			}
 		}
+		convert_to_double(return_value);
+		convert_to_double_ex(entry);
+		Z_DVAL_P(return_value) += Z_DVAL_PP(entry);
 	}
 }
 
