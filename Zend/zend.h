@@ -71,7 +71,11 @@
 
 # define DL_LOAD(libname)			dlopen(libname, RTLD_LAZY | RTLD_GLOBAL)
 # define DL_UNLOAD					dlclose
-# define DL_FETCH_SYMBOL			dlsym
+# if defined(DLSYM_NEEDS_UNDERSCORE)
+#  define DL_FETCH_SYMBOL(h,s)		dlsym((h), "_" ## s)
+# else
+#  define DL_FETCH_SYMBOL			dlsym
+# endif
 # define DL_HANDLE					void *
 # define ZEND_EXTENSIONS_SUPPORT	1
 #elif defined(ZEND_WIN32)

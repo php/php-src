@@ -21,6 +21,7 @@ AC_REQUIRE([AC_PROG_CC])
 AC_REQUIRE([AC_PROG_CC_C_O])
 AC_REQUIRE([AC_PROG_LEX])
 AC_REQUIRE([AC_HEADER_STDC])
+AC_REQUIRE([AC_PROG_LIBTOOL])
 
 LIBZEND_BISON_CHECK
 
@@ -53,6 +54,19 @@ AC_TYPE_SIGNAL
 
 AC_CHECK_LIB(dl, dlopen, [LIBS="-ldl $LIBS"])
 AC_CHECK_FUNC(dlopen,[AC_DEFINE(HAVE_LIBDL, 1,[ ])])
+
+dnl
+dnl Ugly hack to check if dlsym() requires a leading underscore in symbol name.
+dnl
+AC_MSG_CHECKING([whether dlsym() requires a leading underscode in symbol names])
+_LT_AC_TRY_DLOPEN_SELF([
+  AC_MSG_RESULT(no)
+], [
+  AC_MSG_RESULT(yes)
+  AC_DEFINE(DLSYM_NEEDS_UNDERSCORE, 1, [Define if dlsym() requires a leading underscode in symbol names. ])
+], [
+  AC_MSG_RESULT(no)
+], [])
 
 dnl This is required for QNX and may be some BSD derived systems
 AC_CHECK_TYPE( uint, unsigned int )
