@@ -17,7 +17,7 @@ AC_DEFUN(AC_ZEND_BROKEN_SPRINTF,[
     broken=0
     AC_MSG_RESULT(cannot check, guessing ok)
   ])
-  AC_DEFINE(ZEND_BROKEN_SPRINTF, $broken, [Whether sprintf is broken])
+  AC_DEFINE_UNQUOTED(ZEND_BROKEN_SPRINTF, $broken, [Whether sprintf is broken])
 ])
 
 AC_DEFUN(AM_SET_LIBTOOL_VARIABLE,[
