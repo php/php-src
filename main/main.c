@@ -482,7 +482,9 @@ PHPAPI void php_error(int type, const char *format,...)
 		case E_CORE_ERROR:
 		/*case E_PARSE: the parser would return 1 (failure), we can bail out nicely */
 		case E_COMPILE_ERROR:
-			zend_bailout();
+			if (module_initialized) {
+				zend_bailout();
+			}
 			break;
 	}
 }
