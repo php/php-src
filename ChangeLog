@@ -1,3 +1,19 @@
+2005-04-01  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/PEAR/RunTest.php
+      pear/PEAR/RunTest.php:
+      add missing file
+
+2005-04-01  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * run-tests.php:
+      - Fixed bug #32504 (shtool problem on make test)
+
+2005-04-01  Joe Orton  <jorton@redhat.com>
+
+    * ext/mssql/config.m4:
+      Use PHP_LIBDIR.
+
 2005-03-31  Jani Taskinen  <jani.taskinen@sci.fi>
 
     * ext/session/tests/007.phpt
