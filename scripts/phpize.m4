@@ -44,6 +44,11 @@ PHP_CONFIG_NICE(config.nice)
 AC_PROG_CC
 AC_PROG_CC_C_O
 
+dnl Support systems with system libraries in e.g. /usr/lib64
+AC_ARG_WITH(libdir,
+[  --with-libdir=NAME      Look for libraries in .../NAME rather than .../lib],
+[PHP_LIBDIR=$withval], [PHP_LIBDIR=lib])
+
 PHP_RUNPATH_SWITCH
 PHP_SHLIB_SUFFIX_NAME
 PHP_WITH_PHP_CONFIG
