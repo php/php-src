@@ -424,7 +424,7 @@ PHP_MINFO_FUNCTION(ifx)
         snprintf(maxl,15,"%ld",IFXG(max_links));
         maxl[15]=0;
     }
-    php3_printf("<table cellpadding=5>"
+    php_printf("<table cellpadding=5>"
                 "<tr><td>Allow persistent links:</td><td>%s</td></tr>\n"
                 "<tr><td>Persistent links:</td><td>%d/%s</td></tr>\n"
                 "<tr><td>Total links:</td><td>%d/%s</td></tr>\n"
@@ -539,7 +539,7 @@ static void php3_ifx_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
         list_entry *le;
         
         /* try to find if we already have this link in our persistent list */
-        if (_php3_hash_find(plist, hashed_details, hashed_details_length+1, 
+        if (zend_hash_find(plist, hashed_details, hashed_details_length+1, 
                             (void **) &le)==FAILURE) {  /* we don't */
             list_entry new_le;
 
@@ -583,7 +583,7 @@ static void php3_ifx_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
             /* hash it up */
             new_le.type = IFXG(le_plink);
             new_le.ptr = ifx;
-            if (_php3_hash_update(plist, hashed_details, 
+            if (zend_hash_update(plist, hashed_details, 
                    hashed_details_length+1, 
                    (void *) &new_le, sizeof(list_entry), NULL)==FAILURE) {
                 free(ifx);
@@ -611,7 +611,7 @@ static void php3_ifx_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
                     php3_error(E_WARNING,
                                "Informix:  Link to server lost, unable to reconnect (%s)",
                                ifx_error(ifx));
-                    _php3_hash_del(plist, hashed_details, 
+                    zend_hash_del(plist, hashed_details, 
                                    hashed_details_length+1);
                     efree(hashed_details);
                     RETURN_FALSE;
@@ -629,7 +629,7 @@ static void php3_ifx_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
          * if it doesn't, open a new ifx link, add it to the resource list,
          * and add a pointer to it with hashed_details as the key.
          */
-        if (_php3_hash_find(list,hashed_details,hashed_details_length+1,
+        if (zend_hash_find(list,hashed_details,hashed_details_length+1,
                            (void **) &index_ptr) == SUCCESS) {
             int type,link;
             void *ptr;
@@ -649,7 +649,7 @@ static void php3_ifx_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
                 efree(hashed_details);
                 return;
             } else {
-                _php3_hash_del(list,hashed_details,hashed_details_length+1);
+                zend_hash_del(list,hashed_details,hashed_details_length+1);
             }
         }
         if (IFXG(max_links) != -1 && 
@@ -688,7 +688,7 @@ static void php3_ifx_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 #else
         new_index_ptr.type = le_index_ptr;
 #endif
-        if (_php3_hash_update(list,
+        if (zend_hash_update(list,
                               hashed_details,
                               hashed_details_length+1,
                               (void *) &new_index_ptr, 
@@ -726,9 +726,9 @@ static int php3_ifx_get_default_link(INTERNAL_FUNCTION_PARAMETERS)
     if (IFXG(default_link)==-1) { /* no link opened yet, implicitly open one */
         HashTable tmp;
         
-        _php3_hash_init(&tmp,0,NULL,NULL,0);
+        zend_hash_init(&tmp,0,NULL,NULL,0);
         php3_ifx_do_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU,0);
-        _php3_hash_destroy(&tmp);
+        zend_hash_destroy(&tmp);
     }
     return IFXG(default_link);
 }
@@ -1002,9 +1002,9 @@ EXEC SQL END DECLARE SECTION;
               RETURN_FALSE;
           }
 
-          _php3_hash_internal_pointer_reset(pblobidarr->value.ht);
+          zend_hash_internal_pointer_reset(pblobidarr->value.ht);
           i=1;
-          while (_php3_hash_get_current_data(pblobidarr->value.ht, 
+          while (zend_hash_get_current_data(pblobidarr->value.ht, 
                                            (void **) &tmp) == SUCCESS) {
               convert_to_long(*tmp);
               if ((query_type == SQ_UPDATE) || (query_type == SQ_UPDALL)) {
@@ -1045,7 +1045,7 @@ EXEC SQL END DECLARE SECTION;
               
               
               i++;
-              _php3_hash_move_forward(pblobidarr->value.ht);
+              zend_hash_move_forward(pblobidarr->value.ht);
           }
           Ifx_Result->paramquery=1;  
           EXEC SQL EXECUTE :statemid USING SQL DESCRIPTOR :descrpid;
@@ -1401,9 +1401,9 @@ EXEC SQL END DECLARE SECTION;
               efree(Ifx_Result);
               RETURN_FALSE;
            } 
-           _php3_hash_internal_pointer_reset(pblobidarr->value.ht);
+           zend_hash_internal_pointer_reset(pblobidarr->value.ht);
            i=1;
-           while (_php3_hash_get_current_data(pblobidarr->value.ht, 
+           while (zend_hash_get_current_data(pblobidarr->value.ht, 
                                               (void **) &tmp) == SUCCESS) {
               convert_to_long(*tmp);
               if ((query_type == SQ_UPDATE) || (query_type == SQ_UPDALL)) {
@@ -1442,7 +1442,7 @@ EXEC SQL END DECLARE SECTION;
               }
                
               i++;
-              _php3_hash_move_forward(pblobidarr->value.ht);
+              zend_hash_move_forward(pblobidarr->value.ht);
             } /* while */
       } /* if paramquery */
       Ifx_Result->affected_rows = affected_rows;   /* saved estimated from prepare */
@@ -2365,7 +2365,7 @@ EXEC SQL END DECLARE SECTION;
     }
     
     if(! moredata) {
-        php3_printf("<h2>No rows found</h2>\n");
+        php_printf("<h2>No rows found</h2>\n");
         RETURN_LONG(0);
     }
     num_fields = fieldcount;
@@ -2373,9 +2373,9 @@ EXEC SQL END DECLARE SECTION;
 
     /* start table tag */
     if (table_options == NULL)
-        php3_printf("<table><tr>");
+        php_printf("<table><tr>");
     else
-        php3_printf("<table %s><tr>", table_options);
+        php_printf("<table %s><tr>", table_options);
 
     /* table headings */
     for (i = 1; i <= num_fields; i++) {
@@ -2395,13 +2395,13 @@ EXEC SQL END DECLARE SECTION;
         if (strcmp("(expression)", fieldname) == 0)	/* stored proc */
             sprintf(fieldname, "[Expr_%d]", i);
         
-        php3_printf("<th>%s</th>", fieldname);
+        php_printf("<th>%s</th>", fieldname);
     }    
-    php3_printf("</tr>\n");
+    php_printf("</tr>\n");
     
     /* start spitting out rows untill none left */    
     while (moredata) { 
-        php3_printf("<tr>");
+        php_printf("<tr>");
         locind = 0;
         for (i = 1; i <= num_fields; i++) {
             EXEC SQL GET DESCRIPTOR :descrpid VALUE :i :fieldtype = TYPE,
@@ -2419,7 +2419,7 @@ EXEC SQL END DECLARE SECTION;
                 if(fieldtype==SQLTEXT || fieldtype==SQLBYTES) {
                     ++locind;
                 }
-                php3_printf("<td>%s</td>", nullstr);
+                php_printf("<td>%s</td>", nullstr);
                 continue;
             }
             switch (fieldtype) {
@@ -2428,13 +2428,13 @@ EXEC SQL END DECLARE SECTION;
                     EXEC SQL GET DESCRIPTOR :descrpid VALUE :i :int_data = DATA;
                     long_data = int_data;
                     sprintf(string_data,"%ld", long_data); 
-                    php3_printf("<td>%s</td>", string_data);
+                    php_printf("<td>%s</td>", string_data);
                     break;
                 case SQLSMINT   :
                     EXEC SQL GET DESCRIPTOR :descrpid VALUE :i :short_data = DATA;
                     long_data = short_data;
                     sprintf(string_data,"%ld", long_data); 
-                    php3_printf("<td>%s</td>", string_data);
+                    php_printf("<td>%s</td>", string_data);
                     break;
                 case SQLDECIMAL :
                 case SQLMONEY   :
@@ -2443,40 +2443,40 @@ EXEC SQL END DECLARE SECTION;
                     dectoasc(&dec_data, string_data, 63, -1);
                     for (p =string_data; *p != ' '; ++p) ;
                     *p = 0;                
-                    php3_printf("<td>%s</td>", string_data);
+                    php_printf("<td>%s</td>", string_data);
                     break;
                 case SQLSMFLOAT :
                     EXEC SQL GET DESCRIPTOR :descrpid VALUE :i :float_data = DATA;
                     double_data = float_data;
                     sprintf(string_data,"%17.17g", double_data);
-                    php3_printf("<td>%s</td>", string_data);
+                    php_printf("<td>%s</td>", string_data);
                     break;
                 case SQLFLOAT   :
                     EXEC SQL GET DESCRIPTOR :descrpid VALUE :i :double_data = DATA;
                     sprintf(string_data,"%17.17g", double_data);
-                    php3_printf("<td>%s</td>", string_data);
+                    php_printf("<td>%s</td>", string_data);
                     break;
                 case SQLDATE    :
                     EXEC SQL GET DESCRIPTOR :descrpid VALUE :i :date_data = DATA;
                     rdatestr(date_data, string_data); 
-                    php3_printf("<td>%s</td>", string_data);
+                    php_printf("<td>%s</td>", string_data);
                     break;
                 case SQLDTIME   :
                     EXEC SQL GET DESCRIPTOR :descrpid VALUE :i :dt_data = DATA;
                     dttoasc(&dt_data, string_data); 
-                    php3_printf("<td>%s</td>", string_data);
+                    php_printf("<td>%s</td>", string_data);
                     break;
                 case SQLINTERVAL:
                     EXEC SQL GET DESCRIPTOR :descrpid VALUE :i :intvl_data = DATA;
                     intoasc(&intvl_data, string_data); 
-                    php3_printf("<td>%s</td>", string_data);
+                    php_printf("<td>%s</td>", string_data);
                     break;
 $ifdef HAVE_IFX_IUS;
                 case SQLSERIAL8:
                 case SQLINT8   :
                     EXEC SQL GET DESCRIPTOR :descrpid VALUE :i :int8_var = DATA;
                     ifx_int8toasc(&int8_var,string_data,200);
-                    php3_printf("<td>%s</td>", string_data);
+                    php_printf("<td>%s</td>", string_data);
                     break;
                 case SQLLVARCHAR:
 	            	ifx_var_flag(&lvar_tmp,1);
@@ -2507,7 +2507,7 @@ $endif;
                           && (fieldtype == SQLCHAR || fieldtype == SQLNCHAR)) {
                         ldchar(char_data, fieldleng, char_data);
                     }
-                    php3_printf("<td>%s</td>", char_data);
+                    php_printf("<td>%s</td>", char_data);
                     efree(char_data);
                     char_data = NULL;
                     break;
@@ -2532,7 +2532,7 @@ $endif;
                     lg=php3_intifx_get_blob(bid_b, list, &content);
                  
                     if(content==NULL || lg<0) {
-                        php3_printf("<td>%s</td>", nullstr);
+                        php_printf("<td>%s</td>", nullstr);
                     } else {
                                 /* need an extra byte for string terminator */
                         copy_content = malloc(lg + 1);
@@ -2542,27 +2542,27 @@ $endif;
                         }
                         memcpy(copy_content, content, lg);
                         copy_content[lg]=0;
-                        php3_printf("<td>%s</td>", copy_content);
+                        php_printf("<td>%s</td>", copy_content);
                         free(copy_content);
                     }
                     break;
 
                 case SQLBYTES   : 
                     ++locind;
-                    php3_printf("<td>(BYTE)</td>");
+                    php_printf("<td>(BYTE)</td>");
                     break;                
                 default         :
                      sprintf(string_data,
                              "ESQL/C : %s : unsupported field type[%d]",
                              fieldname,
                              fieldleng);
-                     php3_printf("<td>%s</td>", string_data);
+                     php_printf("<td>%s</td>", string_data);
                      break;
             }
                 
             continue;
         }
-        php3_printf("</tr>\n");    
+        php_printf("</tr>\n");    
         /* fetch next row */ 
         EXEC SQL FETCH :cursorid USING SQL DESCRIPTOR :descrpid;
         switch (ifx_check()) {
@@ -2583,7 +2583,7 @@ $endif;
         Ifx_Result->rowid++;
           
     } /* endwhile (moredata); */    
-    php3_printf("</table>\n");
+    php_printf("</table>\n");
     RETURN_LONG(Ifx_Result->rowid);
 
 }
