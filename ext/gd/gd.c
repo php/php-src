@@ -93,7 +93,7 @@ typedef FILE gdIOCtx;
 #define CTX_PUTC(c,fp) fputc(c, fp)
 #endif
 
-static gdImagePtr _php_image_create_from_string ( zval **Data, char *tn, gdImagePtr (*ioctx_func_p)() );
+static gdImagePtr _php_image_create_from_string (zval **Data, char *tn, gdImagePtr (*ioctx_func_p)() TSRMLS_DC);
 static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type, char *tn, gdImagePtr (*func_p)(), gdImagePtr (*ioctx_func_p)());
 static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char *tn, void (*func_p)());
 static int _php_image_type ( char data[8] );
@@ -400,7 +400,7 @@ PHP_FUNCTION(imageloadfont)
 	int issock=0, socketd=0;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &file) == FAILURE) {
-		WRONG_PARAM_COUNT;
+		ZEND_WRONG_PARAM_COUNT();
 	}
 
 	convert_to_string_ex(file);
@@ -495,9 +495,8 @@ PHP_FUNCTION(imagesetstyle)
 	int index;
 	HashPosition pos;
 
-	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &IM, &styles) == FAILURE) 
-	{
-		WRONG_PARAM_COUNT;
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &IM, &styles) == FAILURE)  {
+		ZEND_WRONG_PARAM_COUNT();
 	}
 
 	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
@@ -535,7 +534,7 @@ PHP_FUNCTION(imagecreatetruecolor)
 	gdImagePtr im;
 
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &x_size, &y_size) == FAILURE) {
-		WRONG_PARAM_COUNT;
+		ZEND_WRONG_PARAM_COUNT();
 	}
 
 	convert_to_long_ex(x_size);
@@ -558,9 +557,8 @@ PHP_FUNCTION(imagetruecolortopalette)
 	zval **IM, **dither, **ncolors;
 	gdImagePtr im;
 
-	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &IM, &dither, &ncolors) == FAILURE) 
-	{
-		WRONG_PARAM_COUNT;
+	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &IM, &dither, &ncolors) == FAILURE)  {
+		ZEND_WRONG_PARAM_COUNT();
 	}
 
 	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
@@ -585,9 +583,8 @@ PHP_FUNCTION(imagesetthickness)
 	zval **IM, **thick;
 	gdImagePtr im;
 
-	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &IM, &thick) == FAILURE) 
-	{
-		WRONG_PARAM_COUNT;
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &IM, &thick) == FAILURE) {
+		ZEND_WRONG_PARAM_COUNT();
 	}
 
 	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
@@ -611,9 +608,8 @@ PHP_FUNCTION(imageellipse)
 	zval **IM, **cx, **cy, **w, **h, **color;
 	gdImagePtr im;
 
-	if (ZEND_NUM_ARGS() != 6 || zend_get_parameters_ex(6, &IM, &cx, &cy, &w, &h, &color) == FAILURE) 
-	{
-		WRONG_PARAM_COUNT;
+	if (ZEND_NUM_ARGS() != 6 || zend_get_parameters_ex(6, &IM, &cx, &cy, &w, &h, &color) == FAILURE) {
+		ZEND_WRONG_PARAM_COUNT();
 	}
 	
 	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
@@ -641,9 +637,8 @@ PHP_FUNCTION(imagefilledellipse)
 	zval **IM, **cx, **cy, **w, **h, **color;
 	gdImagePtr im;
 
-	if (ZEND_NUM_ARGS() != 6 || zend_get_parameters_ex(6, &IM, &cx, &cy, &w, &h, &color) == FAILURE) 
-	{
-		WRONG_PARAM_COUNT;
+	if (ZEND_NUM_ARGS() != 6 || zend_get_parameters_ex(6, &IM, &cx, &cy, &w, &h, &color) == FAILURE) {
+		ZEND_WRONG_PARAM_COUNT();
 	}
 	
 	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
@@ -672,9 +667,8 @@ PHP_FUNCTION(imagefilledarc)
 	gdImagePtr im;
 	int e,st;
 
-	if (ZEND_NUM_ARGS() != 9 || zend_get_parameters_ex(9, &IM, &cx, &cy, &w, &h, &ST, &E, &col, &style) == FAILURE)
-	{
-		WRONG_PARAM_COUNT;
+	if (ZEND_NUM_ARGS() != 9 || zend_get_parameters_ex(9, &IM, &cx, &cy, &w, &h, &ST, &E, &col, &style) == FAILURE) {
+		ZEND_WRONG_PARAM_COUNT();
 	}
 
 	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
@@ -710,9 +704,8 @@ PHP_FUNCTION(imagealphablending)
 	zval **IM, **blend;
 	gdImagePtr im;
 
-	if (ZEND_NUM_ARGS() != 2 ||	zend_get_parameters_ex(2, &IM, &blend) == FAILURE) 
-	{
-		WRONG_PARAM_COUNT;
+	if (ZEND_NUM_ARGS() != 2 ||	zend_get_parameters_ex(2, &IM, &blend) == FAILURE) {
+		ZEND_WRONG_PARAM_COUNT();
 	}
 
 	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
@@ -735,9 +728,8 @@ PHP_FUNCTION(imagecolorresolvealpha)
 	zval **IM, ** red, **green, **blue, **alpha;
 	gdImagePtr im;
 
-	if (ZEND_NUM_ARGS() != 5 || zend_get_parameters_ex(5, &IM, &red, &green, &blue, &alpha) == FAILURE) 
-	{
-		WRONG_PARAM_COUNT;
+	if (ZEND_NUM_ARGS() != 5 || zend_get_parameters_ex(5, &IM, &red, &green, &blue, &alpha) == FAILURE) {
+		ZEND_WRONG_PARAM_COUNT();
 	}
 	
 	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
@@ -763,9 +755,8 @@ PHP_FUNCTION(imagecolorclosestalpha)
 	zval **IM, ** red, **green, **blue, **alpha;
 	gdImagePtr im;
 
-	if (ZEND_NUM_ARGS() != 5 || zend_get_parameters_ex(5, &IM, &red, &green, &blue, &alpha) == FAILURE) 
-	{
-		WRONG_PARAM_COUNT;
+	if (ZEND_NUM_ARGS() != 5 || zend_get_parameters_ex(5, &IM, &red, &green, &blue, &alpha) == FAILURE) {
+		ZEND_WRONG_PARAM_COUNT();
 	}
 	
 	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
@@ -790,9 +781,8 @@ PHP_FUNCTION(imagecolorexactalpha)
 	zval **IM, **red, **green, **blue, **alpha;
 	gdImagePtr im;
 
-	if (ZEND_NUM_ARGS() != 5 || zend_get_parameters_ex(5, &IM, &red, &green, &blue, &alpha) == FAILURE) 
-	{
-		WRONG_PARAM_COUNT;
+	if (ZEND_NUM_ARGS() != 5 || zend_get_parameters_ex(5, &IM, &red, &green, &blue, &alpha) == FAILURE) {
+		ZEND_WRONG_PARAM_COUNT();
 	}
 	
 	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
@@ -819,9 +809,8 @@ PHP_FUNCTION(imagecopyresampled)
 	int srcH, srcW, dstH, dstW, srcY, srcX, dstY, dstX;
 
 	if (ZEND_NUM_ARGS() != 10 ||
-		zend_get_parameters_ex(10, &DIM, &SIM, &DX, &DY, &SX, &SY, &DW, &DH, &SW, &SH) == FAILURE) 
-	{
-		WRONG_PARAM_COUNT;
+		zend_get_parameters_ex(10, &DIM, &SIM, &DX, &DY, &SX, &SY, &DW, &DH, &SW, &SH) == FAILURE) {
+		ZEND_WRONG_PARAM_COUNT();
 	}
 
 	ZEND_FETCH_RESOURCE(im_dst, gdImagePtr, DIM, -1, "Image", le_gd);
@@ -861,9 +850,8 @@ PHP_FUNCTION(imagesettile)
 	zval **IM, **TILE;
 	gdImagePtr im, tile;
 
-	if (ZEND_NUM_ARGS() != 2 ||	zend_get_parameters_ex(2, &IM, &TILE) == FAILURE) 
-	{
-		WRONG_PARAM_COUNT;
+	if (ZEND_NUM_ARGS() != 2 ||	zend_get_parameters_ex(2, &IM, &TILE) == FAILURE) {
+		ZEND_WRONG_PARAM_COUNT();
 	}
 
 	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
@@ -886,9 +874,8 @@ PHP_FUNCTION(imagesetbrush)
 	zval **IM, **TILE;
 	gdImagePtr im, tile;
 
-	if (ZEND_NUM_ARGS() != 2 ||	zend_get_parameters_ex(2, &IM, &TILE) == FAILURE) 
-	{
-		WRONG_PARAM_COUNT;
+	if (ZEND_NUM_ARGS() != 2 ||	zend_get_parameters_ex(2, &IM, &TILE) == FAILURE) {
+		ZEND_WRONG_PARAM_COUNT();
 	}
 
 	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
@@ -911,7 +898,7 @@ PHP_FUNCTION(imagecreate)
 	gdImagePtr im;
 
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &x_size, &y_size) == FAILURE) {
-		WRONG_PARAM_COUNT;
+		ZEND_WRONG_PARAM_COUNT();
 	}
 
 	convert_to_long_ex(x_size);
@@ -985,7 +972,7 @@ static int _php_image_type (char data[8])
 
 /* {{{ _php_image_create_from_string
  */
-gdImagePtr _php_image_create_from_string (zval **data, char *tn, gdImagePtr (*ioctx_func_p)())
+gdImagePtr _php_image_create_from_string(zval **data, char *tn, gdImagePtr (*ioctx_func_p)() TSRMLS_DC)
 {
 #ifdef HAVE_LIBGD15 
 	gdImagePtr im;
@@ -1012,7 +999,7 @@ gdImagePtr _php_image_create_from_string (zval **data, char *tn, gdImagePtr (*io
 
 /* {{{ proto int imagecreatefromstring(string image)
    Create a new image from the image stream in the string */
-PHP_FUNCTION (imagecreatefromstring)
+PHP_FUNCTION(imagecreatefromstring)
 {
 #ifdef HAVE_LIBGD15
 	zval **data;
@@ -1020,9 +1007,8 @@ PHP_FUNCTION (imagecreatefromstring)
 	int imtype;
 	char sig[8];
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &data) == FAILURE)
-	{
-		WRONG_PARAM_COUNT;
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &data) == FAILURE) {
+		ZEND_WRONG_PARAM_COUNT();
 	}
 	
 	convert_to_string_ex(data);
@@ -1033,7 +1019,7 @@ PHP_FUNCTION (imagecreatefromstring)
 	switch (imtype) {
 		case PHP_GDIMG_TYPE_JPG:
 #ifdef HAVE_GD_JPG
-			im = _php_image_create_from_string (data, "JPEG", gdImageCreateFromJpegCtx);
+			im = _php_image_create_from_string (data, "JPEG", gdImageCreateFromJpegCtx TSRMLS_CC);
 #else
 			php_error(E_WARNING, "No JPEG support in this PHP build");
 			RETURN_FALSE;
@@ -1042,7 +1028,7 @@ PHP_FUNCTION (imagecreatefromstring)
 
 		case PHP_GDIMG_TYPE_PNG:
 #ifdef HAVE_GD_PNG
-			im = _php_image_create_from_string (data, "PNG", gdImageCreateFromPngCtx);
+			im = _php_image_create_from_string (data, "PNG", gdImageCreateFromPngCtx TSRMLS_CC);
 #else
 			php_error(E_WARNING, "No PNG support in this PHP build");
 			RETURN_FALSE;
@@ -1051,7 +1037,7 @@ PHP_FUNCTION (imagecreatefromstring)
 			
 		case PHP_GDIMG_TYPE_GIF:
 #ifdef HAVE_GD_GIF
-			im = _php_image_create_from_string (data, "GIF", gdImageCreateFromGifCtx);
+			im = _php_image_create_from_string (data, "GIF", gdImageCreateFromGifCtx TSRMLS_CC);
 #else
 			php_error(E_WARNING, "No GIF support in this PHP build");
 			RETURN_FALSE;
@@ -1060,7 +1046,7 @@ PHP_FUNCTION (imagecreatefromstring)
 
 		case PHP_GDIMG_TYPE_WBM:
 #ifdef HAVE_GD_WBMP
-			im = _php_image_create_from_string (data, "WBMP",gdImageCreateFromWBMPCtx );
+			im = _php_image_create_from_string (data, "WBMP",gdImageCreateFromWBMPCtx TSRMLS_CC);
 #else
 			php_error(E_WARNING, "No WBMP support in this PHP build");
 			RETURN_FALSE;
@@ -1098,9 +1084,8 @@ static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type,
 	int argc=ZEND_NUM_ARGS();
 	
 	if ((image_type == PHP_GDIMG_TYPE_GD2PART && argc != 4) || 
-		argc != 1 || zend_get_parameters_ex(argc, &file, &srcx, &srcy, &width, &height) == FAILURE)
-	{
-		WRONG_PARAM_COUNT;
+		argc != 1 || zend_get_parameters_ex(argc, &file, &srcx, &srcy, &width, &height) == FAILURE) {
+		ZEND_WRONG_PARAM_COUNT();
 	}
 	
 	convert_to_string_ex(file);
@@ -1310,9 +1295,8 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
 	/* The quality parameter for Wbmp stands for the threshold when called from image2wbmp() */
 	/* When called from imagewbmp() the quality parameter stands for the foreground color. Default: black. */
 
-	if (argc < 1 || argc > 3 || zend_get_parameters_ex(argc, &imgind, &file, &quality) == FAILURE) 
-	{
-		WRONG_PARAM_COUNT;
+	if (argc < 1 || argc > 3 || zend_get_parameters_ex(argc, &imgind, &file, &quality) == FAILURE) {
+		ZEND_WRONG_PARAM_COUNT();
 	}
 
 	ZEND_FETCH_RESOURCE(im, gdImagePtr, imgind, -1, "Image", le_gd);
@@ -1504,7 +1488,7 @@ PHP_FUNCTION(imagedestroy)
 	gdImagePtr im;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &IM) == FAILURE) {
-		WRONG_PARAM_COUNT;
+		ZEND_WRONG_PARAM_COUNT();
 	}
 
 	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
@@ -1522,9 +1506,8 @@ PHP_FUNCTION(imagecolorallocate)
 	zval **IM, **red, **green, **blue;
 	gdImagePtr im;
 
-	if (ZEND_NUM_ARGS() != 4 || zend_get_parameters_ex(4, &IM, &red, &green, &blue) == FAILURE) 
-	{
-		WRONG_PARAM_COUNT;
+	if (ZEND_NUM_ARGS() != 4 || zend_get_parameters_ex(4, &IM, &red, &green, &blue) == FAILURE) {
+		ZEND_WRONG_PARAM_COUNT();
 	}
 	
 	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
@@ -1545,9 +1528,8 @@ PHP_FUNCTION(imagepalettecopy)
 	zval **dstim, **srcim;
 	gdImagePtr dst, src;
 
-	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &dstim, &srcim) == FAILURE) 
-	{
-		WRONG_PARAM_COUNT;
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &dstim, &srcim) == FAILURE) {
+		ZEND_WRONG_PARAM_COUNT();
 	}
 	
 	ZEND_FETCH_RESOURCE(dst, gdImagePtr, dstim, -1, "Image", le_gd);
@@ -1568,9 +1550,8 @@ PHP_FUNCTION(imagecolorat)
 	zval **IM, **x, **y;
 	gdImagePtr im;
 
-	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &IM, &x, &y) == FAILURE) 
-	{
-		WRONG_PARAM_COUNT;
+	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &IM, &x, &y) == FAILURE) {
+		ZEND_WRONG_PARAM_COUNT();
 	}
 	
 	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
@@ -1597,9 +1578,8 @@ PHP_FUNCTION(imagecolorclosest)
 	zval **IM, **red, **green, **blue;
 	gdImagePtr im;
 
-	if (ZEND_NUM_ARGS() != 4 || zend_get_parameters_ex(4, &IM, &red, &green, &blue) == FAILURE) 
-	{
-		WRONG_PARAM_COUNT;
+	if (ZEND_NUM_ARGS() != 4 || zend_get_parameters_ex(4, &IM, &red, &green, &blue) == FAILURE) {
+		ZEND_WRONG_PARAM_COUNT();
 	}
 	
 	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
@@ -1620,9 +1600,8 @@ PHP_FUNCTION(imagecolorclosesthwb)
 	zval **IM, **red, **green, **blue;
 	gdImagePtr im;
 	
-	if (ZEND_NUM_ARGS() != 4 ||	zend_get_parameters_ex(4, &IM, &red, &green, &blue) == FAILURE) 
-	{
-		WRONG_PARAM_COUNT;
+	if (ZEND_NUM_ARGS() != 4 ||	zend_get_parameters_ex(4, &IM, &red, &green, &blue) == FAILURE) {
+		ZEND_WRONG_PARAM_COUNT();
 	}
 
 	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
@@ -1647,9 +1626,8 @@ PHP_FUNCTION(imagecolordeallocate)
 	int col;
 	gdImagePtr im;
 
-	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &IM, &index) == FAILURE) 
-	{
-		WRONG_PARAM_COUNT;
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &IM, &index) == FAILURE) {
+		ZEND_WRONG_PARAM_COUNT();
 	}
 
 	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
@@ -1674,9 +1652,8 @@ PHP_FUNCTION(imagecolorresolve)
 	zval **IM, **red, **green, **blue;
 	gdImagePtr im;
 
-	if (ZEND_NUM_ARGS() != 4 || zend_get_parameters_ex(4, &IM, &red, &green, &blue) == FAILURE) 
-	{
-		WRONG_PARAM_COUNT;
+	if (ZEND_NUM_ARGS() != 4 || zend_get_parameters_ex(4, &IM, &red, &green, &blue) == FAILURE) {
+		ZEND_WRONG_PARAM_COUNT();
 	}
 	
 	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
@@ -1696,9 +1673,8 @@ PHP_FUNCTION(imagecolorexact)
 	zval **IM, **red, **green, **blue;
 	gdImagePtr im;
 
-	if (ZEND_NUM_ARGS() != 4 || zend_get_parameters_ex(4, &IM, &red, &green, &blue) == FAILURE) 
-	{
-		WRONG_PARAM_COUNT;
+	if (ZEND_NUM_ARGS() != 4 || zend_get_parameters_ex(4, &IM, &red, &green, &blue) == FAILURE) {
+		ZEND_WRONG_PARAM_COUNT();
 	}
 	
 	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
@@ -1719,9 +1695,8 @@ PHP_FUNCTION(imagecolorset)
 	int col;
 	gdImagePtr im;
 
-	if (ZEND_NUM_ARGS() != 5 || zend_get_parameters_ex(5, &IM, &color, &red, &green, &blue) == FAILURE) 
-	{
-		WRONG_PARAM_COUNT;
+	if (ZEND_NUM_ARGS() != 5 || zend_get_parameters_ex(5, &IM, &color, &red, &green, &blue) == FAILURE) {
+		ZEND_WRONG_PARAM_COUNT();
 	}
 	
 	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
@@ -1751,9 +1726,8 @@ PHP_FUNCTION(imagecolorsforindex)
 	int col;
 	gdImagePtr im;
 
-	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &IM, &index) == FAILURE) 
-	{
-		WRONG_PARAM_COUNT;
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &IM, &index) == FAILURE) {
+		ZEND_WRONG_PARAM_COUNT();
 	}
 	
 	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
@@ -1784,9 +1758,8 @@ PHP_FUNCTION(imagegammacorrect)
 	int i;
 	double input, output;
 
-	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &IM, &inputgamma, &outputgamma) == FAILURE) 
-	{
-		WRONG_PARAM_COUNT;
+	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &IM, &inputgamma, &outputgamma) == FAILURE) {
+		ZEND_WRONG_PARAM_COUNT();
 	}
 
 	convert_to_double_ex(inputgamma);
@@ -1833,9 +1806,8 @@ PHP_FUNCTION(imagesetpixel)
 	zval **IM, **x, **y, **col;
 	gdImagePtr im;
 
-	if (ZEND_NUM_ARGS() != 4 ||	zend_get_parameters_ex(4, &IM, &x, &y, &col) == FAILURE) 
-	{
-		WRONG_PARAM_COUNT;
+	if (ZEND_NUM_ARGS() != 4 ||	zend_get_parameters_ex(4, &IM, &x, &y, &col) == FAILURE) {
+		ZEND_WRONG_PARAM_COUNT();
 	}
 
 	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
@@ -1857,9 +1829,8 @@ PHP_FUNCTION(imageline)
 	zval **IM, **x1, **y1, **x2, **y2, **col;
 	gdImagePtr im;
 
-	if (ZEND_NUM_ARGS() != 6 || zend_get_parameters_ex(6, &IM, &x1, &y1, &x2, &y2, &col) == FAILURE)
-	{
-		WRONG_PARAM_COUNT;
+	if (ZEND_NUM_ARGS() != 6 || zend_get_parameters_ex(6, &IM, &x1, &y1, &x2, &y2, &col) == FAILURE) {
+		ZEND_WRONG_PARAM_COUNT();
 	}
 
 	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
@@ -1882,9 +1853,8 @@ PHP_FUNCTION(imagedashedline)
 	zval **IM, **x1, **y1, **x2, **y2, **col;
 	gdImagePtr im;
 
-	if (ZEND_NUM_ARGS() != 6 || zend_get_parameters_ex(6, &IM, &x1, &y1, &x2, &y2, &col) == FAILURE)
-	{
-		WRONG_PARAM_COUNT;
+	if (ZEND_NUM_ARGS() != 6 || zend_get_parameters_ex(6, &IM, &x1, &y1, &x2, &y2, &col) == FAILURE) {
+		ZEND_WRONG_PARAM_COUNT();
 	}
 
 	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
@@ -1907,9 +1877,8 @@ PHP_FUNCTION(imagerectangle)
 	zval **IM, **x1, **y1, **x2, **y2, **col;
 	gdImagePtr im;
 
-	if (ZEND_NUM_ARGS() != 6 || zend_get_parameters_ex(6, &IM, &x1, &y1, &x2, &y2, &col) == FAILURE)
-	{
-		WRONG_PARAM_COUNT;
+	if (ZEND_NUM_ARGS() != 6 || zend_get_parameters_ex(6, &IM, &x1, &y1, &x2, &y2, &col) == FAILURE) {
+		ZEND_WRONG_PARAM_COUNT();
 	}
 
 	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
@@ -1932,9 +1901,8 @@ PHP_FUNCTION(imagefilledrectangle)
 	zval **IM, **x1, **y1, **x2, **y2, **col;
 	gdImagePtr im;
 
-	if (ZEND_NUM_ARGS() != 6 ||	zend_get_parameters_ex(6, &IM, &x1, &y1, &x2, &y2, &col) == FAILURE)
-	{
-		WRONG_PARAM_COUNT;
+	if (ZEND_NUM_ARGS() != 6 ||	zend_get_parameters_ex(6, &IM, &x1, &y1, &x2, &y2, &col) == FAILURE) {
+		ZEND_WRONG_PARAM_COUNT();
 	}
 
 	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
@@ -1958,9 +1926,8 @@ PHP_FUNCTION(imagearc)
 	gdImagePtr im;
 	int e,st;
 
-	if (ZEND_NUM_ARGS() != 8 ||	zend_get_parameters_ex(8, &IM, &cx, &cy, &w, &h, &ST, &E, &col) == FAILURE)
-	{
-		WRONG_PARAM_COUNT;
+	if (ZEND_NUM_ARGS() != 8 ||	zend_get_parameters_ex(8, &IM, &cx, &cy, &w, &h, &ST, &E, &col) == FAILURE) {
+		ZEND_WRONG_PARAM_COUNT();
 	}
 
 	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
@@ -1991,9 +1958,8 @@ PHP_FUNCTION(imagefilltoborder)
 	zval **IM, **x, **y, **border, **col;
 	gdImagePtr im;
 
-	if (ZEND_NUM_ARGS() != 5 ||	zend_get_parameters_ex(5, &IM, &x, &y, &border, &col) == FAILURE)
-	{
-		WRONG_PARAM_COUNT;
+	if (ZEND_NUM_ARGS() != 5 ||	zend_get_parameters_ex(5, &IM, &x, &y, &border, &col) == FAILURE) {
+		ZEND_WRONG_PARAM_COUNT();
 	}
 
 	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
@@ -2015,9 +1981,8 @@ PHP_FUNCTION(imagefill)
 	zval **IM, **x, **y, **col;
 	gdImagePtr im;
 
-	if (ZEND_NUM_ARGS() != 4 ||	zend_get_parameters_ex(4, &IM, &x, &y, &col) == FAILURE)
-	{
-		WRONG_PARAM_COUNT;
+	if (ZEND_NUM_ARGS() != 4 ||	zend_get_parameters_ex(4, &IM, &x, &y, &col) == FAILURE) {
+		ZEND_WRONG_PARAM_COUNT();
 	}
 
 	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
@@ -2038,9 +2003,8 @@ PHP_FUNCTION(imagecolorstotal)
 	zval **IM;
 	gdImagePtr im;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &IM) == FAILURE) 
-	{
-		WRONG_PARAM_COUNT;
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &IM) == FAILURE) {
+		ZEND_WRONG_PARAM_COUNT();
 	}
 
 	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
@@ -2059,17 +2023,17 @@ PHP_FUNCTION(imagecolortransparent)
 	switch(ZEND_NUM_ARGS()) {
 	case 1:
 		if (zend_get_parameters_ex(1, &IM) == FAILURE) {
-			WRONG_PARAM_COUNT;
+			ZEND_WRONG_PARAM_COUNT();
 		}
 		break;
 	case 2:
 		if (zend_get_parameters_ex(2, &IM, &COL) == FAILURE) {
-			WRONG_PARAM_COUNT;
+			ZEND_WRONG_PARAM_COUNT();
 		}
 		convert_to_long_ex(COL);
 		break;
 	default:
-		WRONG_PARAM_COUNT;
+		ZEND_WRONG_PARAM_COUNT();
 	}
 
 	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
@@ -2092,17 +2056,17 @@ PHP_FUNCTION(imageinterlace)
 	switch(ZEND_NUM_ARGS()) {
 	case 1:
 		if (zend_get_parameters_ex(1, &IM) == FAILURE) {
-			WRONG_PARAM_COUNT;
+			ZEND_WRONG_PARAM_COUNT();
 		}
 		break;
 	case 2:
 		if (zend_get_parameters_ex(2, &IM, &INT) == FAILURE) {
-			WRONG_PARAM_COUNT;
+			ZEND_WRONG_PARAM_COUNT();
 		}
 		convert_to_long_ex(INT);
 		break;
 	default:
-		WRONG_PARAM_COUNT;
+		ZEND_WRONG_PARAM_COUNT();
 	}
 
 	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
@@ -2127,9 +2091,8 @@ static void php_imagepolygon(INTERNAL_FUNCTION_PARAMETERS, int filled)
 	gdPointPtr points;	
 	int npoints, col, nelem, i;
 
-	if (ZEND_NUM_ARGS() != 4 ||	zend_get_parameters_ex(4, &IM, &POINTS, &NPOINTS, &COL) == FAILURE)
-	{
-		WRONG_PARAM_COUNT;
+	if (ZEND_NUM_ARGS() != 4 ||	zend_get_parameters_ex(4, &IM, &POINTS, &NPOINTS, &COL) == FAILURE) {
+		ZEND_WRONG_PARAM_COUNT();
 	}
 
 	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
@@ -2246,9 +2209,8 @@ static void php_imagefontsize(INTERNAL_FUNCTION_PARAMETERS, int arg)
 	zval **SIZE;
 	gdFontPtr font;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &SIZE) == FAILURE) 
-	{
-		WRONG_PARAM_COUNT;
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &SIZE) == FAILURE) {
+		ZEND_WRONG_PARAM_COUNT();
 	}
 	
 	convert_to_long_ex(SIZE);
@@ -2312,9 +2274,8 @@ static void php_imagechar(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	unsigned char *str = NULL;
 	gdFontPtr font;
 
-	if (ZEND_NUM_ARGS() != 6 ||	zend_get_parameters_ex(6, &IM, &SIZE, &X, &Y, &C, &COL) == FAILURE) 
-	{
-		WRONG_PARAM_COUNT;
+	if (ZEND_NUM_ARGS() != 6 ||	zend_get_parameters_ex(6, &IM, &SIZE, &X, &Y, &C, &COL) == FAILURE) {
+		ZEND_WRONG_PARAM_COUNT();
 	}
 
 	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
@@ -2411,9 +2372,8 @@ PHP_FUNCTION(imagecopy)
 	int srcH, srcW, srcY, srcX, dstY, dstX;
 
 	if (ZEND_NUM_ARGS() != 8 ||	
-		zend_get_parameters_ex(8, &DIM, &SIM, &DX, &DY, &SX, &SY, &SW, &SH) == FAILURE) 
-	{
-		WRONG_PARAM_COUNT;
+		zend_get_parameters_ex(8, &DIM, &SIM, &DX, &DY, &SX, &SY, &SW, &SH) == FAILURE) {
+		ZEND_WRONG_PARAM_COUNT();
 	}
 
 	ZEND_FETCH_RESOURCE(im_src, gdImagePtr, SIM, -1, "Image", le_gd);
@@ -2448,9 +2408,8 @@ PHP_FUNCTION(imagecopymerge)
 	int srcH, srcW, srcY, srcX, dstY, dstX, pct;
 
 	if (ZEND_NUM_ARGS() != 9 ||
-		zend_get_parameters_ex(9, &DIM, &SIM, &DX, &DY, &SX, &SY, &SW, &SH, &PCT) == FAILURE) 
-	{
-		WRONG_PARAM_COUNT;
+		zend_get_parameters_ex(9, &DIM, &SIM, &DX, &DY, &SX, &SY, &SW, &SH, &PCT) == FAILURE) {
+		ZEND_WRONG_PARAM_COUNT();
 	}
 
 	ZEND_FETCH_RESOURCE(im_src, gdImagePtr, SIM, -1, "Image", le_gd);
@@ -2491,9 +2450,8 @@ PHP_FUNCTION(imagecopymergegray)
 	int srcH, srcW, srcY, srcX, dstY, dstX, pct;
 
 	if (ZEND_NUM_ARGS() != 9 ||
-		zend_get_parameters_ex(9, &DIM, &SIM, &DX, &DY, &SX, &SY, &SW, &SH, &PCT) == FAILURE) 
-	{
-		WRONG_PARAM_COUNT;
+		zend_get_parameters_ex(9, &DIM, &SIM, &DX, &DY, &SX, &SY, &SW, &SH, &PCT) == FAILURE) {
+		ZEND_WRONG_PARAM_COUNT();
 	}
 
 	ZEND_FETCH_RESOURCE(im_src, gdImagePtr, SIM, -1, "Image", le_gd);
@@ -2533,9 +2491,8 @@ PHP_FUNCTION(imagecopyresized)
 	int srcH, srcW, dstH, dstW, srcY, srcX, dstY, dstX;
 
 	if (ZEND_NUM_ARGS() != 10 ||
-		zend_get_parameters_ex(10, &DIM, &SIM, &DX, &DY, &SX, &SY, &DW, &DH, &SW, &SH) == FAILURE) 
-	{
-		WRONG_PARAM_COUNT;
+		zend_get_parameters_ex(10, &DIM, &SIM, &DX, &DY, &SX, &SY, &DW, &DH, &SW, &SH) == FAILURE) {
+		ZEND_WRONG_PARAM_COUNT();
 	}
 
 	ZEND_FETCH_RESOURCE(im_dst, gdImagePtr, DIM, -1, "Image", le_gd);
@@ -2572,7 +2529,7 @@ PHP_FUNCTION(imagesx)
 	gdImagePtr im;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &IM) == FAILURE) {
-		WRONG_PARAM_COUNT;
+		ZEND_WRONG_PARAM_COUNT();
 	}
 
 	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
@@ -2589,7 +2546,7 @@ PHP_FUNCTION(imagesy)
 	gdImagePtr im;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &IM) == FAILURE) {
-		WRONG_PARAM_COUNT;
+		ZEND_WRONG_PARAM_COUNT();
 	}
 
 	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
@@ -2686,15 +2643,13 @@ void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode, int extende
 
 	if (mode == TTFTEXT_BBOX) {
 		if ((extended && argc != 5) || (!extended && argc != 4) ||
-			  	zend_get_parameters_ex(argc, &PTSIZE, &ANGLE, &FONTNAME, &C, &EXT) == FAILURE)
-	  	{
-			WRONG_PARAM_COUNT;
+			  	zend_get_parameters_ex(argc, &PTSIZE, &ANGLE, &FONTNAME, &C, &EXT) == FAILURE) {
+			ZEND_WRONG_PARAM_COUNT();
 		}
 	} else {
 		if ((extended && argc != 9) || (!extended && argc != 8) ||
-			  	zend_get_parameters_ex(argc, &IM, &PTSIZE, &ANGLE, &X, &Y, &COL, &FONTNAME, &C, &EXT) == FAILURE)
-	  	{
-			WRONG_PARAM_COUNT;
+			  	zend_get_parameters_ex(argc, &IM, &PTSIZE, &ANGLE, &X, &Y, &COL, &FONTNAME, &C, &EXT) == FAILURE) {
+			ZEND_WRONG_PARAM_COUNT();
 		}
 		ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
 	}
@@ -2827,9 +2782,8 @@ PHP_FUNCTION(imagepsloadfont)
 	zval **file;
 	int f_ind, *font;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &file) == FAILURE) 
-	{
-		WRONG_PARAM_COUNT;
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &file) == FAILURE) {
+		ZEND_WRONG_PARAM_COUNT();
 	}
 
 	convert_to_string_ex(file);
@@ -2881,7 +2835,7 @@ PHP_FUNCTION(imagepscopyfont)
 	gd_ps_font *nf_ind, *of_ind;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &fnt) == FAILURE) {
-		WRONG_PARAM_COUNT;
+		ZEND_WRONG_PARAM_COUNT();
 	}
 
 	convert_to_long_ex(fnt);
@@ -2939,7 +2893,7 @@ PHP_FUNCTION(imagepsfreefont)
 	int *f_ind;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &fnt) == FAILURE) {
-		WRONG_PARAM_COUNT;
+		ZEND_WRONG_PARAM_COUNT();
 	}
 
 	ZEND_FETCH_RESOURCE(f_ind, int *, fnt, -1, "Type 1 font", le_ps_font);
@@ -2963,7 +2917,7 @@ PHP_FUNCTION(imagepsencodefont)
 	int *f_ind;
 
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &fnt, &enc) == FAILURE) {
-		WRONG_PARAM_COUNT;
+		ZEND_WRONG_PARAM_COUNT();
 	}
 
 	convert_to_string_ex(enc);
@@ -2999,7 +2953,7 @@ PHP_FUNCTION(imagepsextendfont)
 	int *f_ind;
 
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &fnt, &ext) == FAILURE) {
-		WRONG_PARAM_COUNT;
+		ZEND_WRONG_PARAM_COUNT();
 	}
 
 	convert_to_double_ex(ext);
@@ -3025,7 +2979,7 @@ PHP_FUNCTION(imagepsslantfont)
 	int *f_ind;
 
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &fnt, &slt) == FAILURE) {
-		WRONG_PARAM_COUNT;
+		ZEND_WRONG_PARAM_COUNT();
 	}
 
 	convert_to_double_ex(slt);
@@ -3086,7 +3040,7 @@ PHP_FUNCTION(imagepstext)
 		angle = Z_DVAL_PP(ang);
 		break;
 	default:
-		WRONG_PARAM_COUNT;
+		ZEND_WRONG_PARAM_COUNT();
 	}
 
 	ZEND_FETCH_RESOURCE(bg_img, gdImagePtr, img, -1, "Image", le_gd);
@@ -3227,7 +3181,7 @@ PHP_FUNCTION(imagepsbbox)
 		per_char =  add_width || angle ? 1 : 0;
 		break;
 	default:
-		WRONG_PARAM_COUNT;
+		ZEND_WRONG_PARAM_COUNT();
 	}
 
 	ZEND_FETCH_RESOURCE(f_ind, int *, fnt, -1, "Type 1 font", le_ps_font);
@@ -3423,7 +3377,7 @@ static void _php_image_convert(INTERNAL_FUNCTION_PARAMETERS, int image_type )
 
 	argc = ZEND_NUM_ARGS();
 	if (argc < 1 || argc > 5 || zend_get_parameters_ex(argc, &f_org, &f_dest, &height, &width, &threshold) == FAILURE) {
-		WRONG_PARAM_COUNT;
+		ZEND_WRONG_PARAM_COUNT();
 	}
 
 	if (argc == 5) {
@@ -3593,7 +3547,7 @@ static void _php_image_convert(INTERNAL_FUNCTION_PARAMETERS, int image_type )
 		
 		RETURN_TRUE;
 	}
-	WRONG_PARAM_COUNT;
+	ZEND_WRONG_PARAM_COUNT();
 }
 /* }}} */
 #endif /* HAVE_GD_WBMP */
