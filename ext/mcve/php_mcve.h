@@ -26,7 +26,7 @@ extern zend_module_entry mcve_module_entry;
 #define mcve_module_ptr &mcve_module_entry
 #define phpext_mcve_ptr mcve_module_ptr
 
-#define PHP_MCVE_VERSION	"3.0"
+#define PHP_MCVE_VERSION	"3.2"
 
 #define MCVE_CONST (CONST_CS | CONST_PERSISTENT)
 
@@ -40,6 +40,7 @@ PHP_FUNCTION(mcve_destroyconn);
 PHP_FUNCTION(mcve_setdropfile);
 PHP_FUNCTION(mcve_setip);
 PHP_FUNCTION(mcve_setssl);
+PHP_FUNCTION(mcve_setssl_files);
 PHP_FUNCTION(mcve_setblocking);
 PHP_FUNCTION(mcve_settimeout);
 PHP_FUNCTION(mcve_verifyconnection);
