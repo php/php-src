@@ -28,7 +28,7 @@
 #include "php_dom.h"
 
 /*
-* class domdocumenttype extends domnode 
+* class DOMDocumentType extends DOMNode 
 *
 * URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-412266927
 * Since: 
@@ -37,8 +37,6 @@
 zend_function_entry php_dom_documenttype_class_functions[] = {
 	{NULL, NULL, NULL}
 };
-
-/* {{{ attribute protos, not implemented yet */
 
 /* {{{ proto name	string	
 readonly=yes 
@@ -66,7 +64,7 @@ int dom_documenttype_name_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 
 
-/* {{{ proto entities	namednodemap	
+/* {{{ proto entities	DOMNamedNodeMap	
 readonly=yes 
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-1788794630
 Since: 
@@ -99,7 +97,7 @@ int dom_documenttype_entities_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 
 
-/* {{{ proto notations	namednodemap	
+/* {{{ proto notations	DOMNamedNodeMap	
 readonly=yes 
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-D46829EF
 Since: 
@@ -132,7 +130,7 @@ int dom_documenttype_notations_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 
 
-/* {{{ proto public_id	string	
+/* {{{ proto publicId	string	
 readonly=yes 
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-Core-DocType-publicId
 Since: DOM Level 2
@@ -162,7 +160,7 @@ int dom_documenttype_public_id_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 
 
-/* {{{ proto system_id	string	
+/* {{{ proto systemId	string	
 readonly=yes 
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-Core-DocType-systemId
 Since: DOM Level 2
@@ -191,7 +189,7 @@ int dom_documenttype_system_id_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 
 
-/* {{{ proto internal_subset	string	
+/* {{{ proto internalSubset	string	
 readonly=yes 
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-Core-DocType-internalSubset
 Since: DOM Level 2

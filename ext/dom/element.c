@@ -29,7 +29,7 @@
 
 
 /*
-* class domelement extends domnode 
+* class DOMElement extends DOMNode 
 *
 * URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-745549614
 * Since: 
@@ -58,7 +58,7 @@ zend_function_entry php_dom_element_class_functions[] = {
 	{NULL, NULL, NULL}
 };
 
-/* {{{ proto void DomElement::__construct(string name, [string value], [string uri]); */
+/* {{{ proto void DOMElement::__construct(string name, [string value], [string uri]); */
 PHP_METHOD(domelement, __construct)
 {
 
@@ -135,7 +135,7 @@ PHP_METHOD(domelement, __construct)
 		php_libxml_increment_node_ptr((php_libxml_node_object *)intern, nodep, (void *)intern TSRMLS_CC);
 	}
 }
-/* }}} end DomElement::__construct */
+/* }}} end DOMElement::__construct */
 
 /* {{{ proto tagName	string	
 readonly=yes 
@@ -190,7 +190,7 @@ int dom_element_schema_type_info_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 
 
-/* {{{ proto domstring dom_element_get_attribute(string name);
+/* {{{ proto string dom_element_get_attribute(string name);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-666EE0F9
 Since:
 */
@@ -219,7 +219,7 @@ PHP_FUNCTION(dom_element_get_attribute)
 /* }}} end dom_element_get_attribute */
 
 
-/* {{{ proto dom_void dom_element_set_attribute(string name, string value);
+/* {{{ proto void dom_element_set_attribute(string name, string value);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-F68F082
 Since: 
 */
@@ -265,7 +265,7 @@ PHP_FUNCTION(dom_element_set_attribute)
 /* }}} end dom_element_set_attribute */
 
 
-/* {{{ proto dom_void dom_element_remove_attribute(string name);
+/* {{{ proto void dom_element_remove_attribute(string name);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-6D6AC0F9
 Since:
 */
@@ -308,7 +308,7 @@ PHP_FUNCTION(dom_element_remove_attribute)
 /* }}} end dom_element_remove_attribute */
 
 
-/* {{{ proto domattr dom_element_get_attribute_node(string name);
+/* {{{ proto DOMAttr dom_element_get_attribute_node(string name);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-217A91B8
 Since: 
 */
@@ -337,7 +337,7 @@ PHP_FUNCTION(dom_element_get_attribute_node)
 /* }}} end dom_element_get_attribute_node */
 
 
-/* {{{ proto domattr dom_element_set_attribute_node(attr newAttr);
+/* {{{ proto DOMAttr dom_element_set_attribute_node(DOMAttr newAttr);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-887236154
 Since: 
 */
@@ -395,7 +395,7 @@ PHP_FUNCTION(dom_element_set_attribute_node)
 /* }}} end dom_element_set_attribute_node */
 
 
-/* {{{ proto domattr dom_element_remove_attribute_node(attr oldAttr);
+/* {{{ proto DOMAttr dom_element_remove_attribute_node(DOMAttr oldAttr);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-D589198
 Since: 
 */
@@ -433,7 +433,7 @@ PHP_FUNCTION(dom_element_remove_attribute_node)
 /* }}} end dom_element_remove_attribute_node */
 
 
-/* {{{ proto domnodelist dom_element_get_elements_by_tag_name(string name);
+/* {{{ proto DOMNodeList dom_element_get_elements_by_tag_name(string name);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-1938918D
 Since: 
 */
@@ -460,7 +460,7 @@ PHP_FUNCTION(dom_element_get_elements_by_tag_name)
 /* }}} end dom_element_get_elements_by_tag_name */
 
 
-/* {{{ proto domstring dom_element_get_attribute_ns(string namespaceURI, string localName);
+/* {{{ proto string dom_element_get_attribute_ns(string namespaceURI, string localName);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-ElGetAttrNS
 Since: DOM Level 2
 */
@@ -501,7 +501,7 @@ PHP_FUNCTION(dom_element_get_attribute_ns)
 /* }}} end dom_element_get_attribute_ns */
 
 
-/* {{{ proto dom_void dom_element_set_attribute_ns(string namespaceURI, string qualifiedName, string value);
+/* {{{ proto void dom_element_set_attribute_ns(string namespaceURI, string qualifiedName, string value);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-ElSetAttrNS
 Since: DOM Level 2
 */
@@ -599,7 +599,7 @@ PHP_FUNCTION(dom_element_set_attribute_ns)
 /* }}} end dom_element_set_attribute_ns */
 
 
-/* {{{ proto dom_void dom_element_remove_attribute_ns(string namespaceURI, string localName);
+/* {{{ proto void dom_element_remove_attribute_ns(string namespaceURI, string localName);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-ElRemAtNS
 Since: DOM Level 2
 */
@@ -657,7 +657,7 @@ PHP_FUNCTION(dom_element_remove_attribute_ns)
 /* }}} end dom_element_remove_attribute_ns */
 
 
-/* {{{ proto domattr dom_element_get_attribute_node_ns(string namespaceURI, string localName);
+/* {{{ proto DOMAttr dom_element_get_attribute_node_ns(string namespaceURI, string localName);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-ElGetAtNodeNS
 Since: DOM Level 2
 */
@@ -688,7 +688,7 @@ PHP_FUNCTION(dom_element_get_attribute_node_ns)
 /* }}} end dom_element_get_attribute_node_ns */
 
 
-/* {{{ proto domattr dom_element_set_attribute_node_ns(attr newAttr);
+/* {{{ proto DOMAttr dom_element_set_attribute_node_ns(DOMAttr newAttr);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-ElSetAtNodeNS
 Since: DOM Level 2
 */
@@ -754,7 +754,7 @@ PHP_FUNCTION(dom_element_set_attribute_node_ns)
 
 
 
-/* {{{ proto domnodelist dom_element_get_elements_by_tag_name_ns(string namespaceURI, string localName);
+/* {{{ proto DOMNodeList dom_element_get_elements_by_tag_name_ns(string namespaceURI, string localName);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-A6C90942
 Since: DOM Level 2
 */
@@ -850,7 +850,7 @@ PHP_FUNCTION(dom_element_has_attribute_ns)
 /* }}} end dom_element_has_attribute_ns */
 
 
-/* {{{ proto dom_void dom_element_set_id_attribute(string name, boolean isId);
+/* {{{ proto void dom_element_set_id_attribute(string name, boolean isId);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-ElSetIdAttr
 Since: DOM Level 3
 */
@@ -861,7 +861,7 @@ PHP_FUNCTION(dom_element_set_id_attribute)
 /* }}} end dom_element_set_id_attribute */
 
 
-/* {{{ proto dom_void dom_element_set_id_attribute_ns(string namespaceURI, string localName, boolean isId);
+/* {{{ proto void dom_element_set_id_attribute_ns(string namespaceURI, string localName, boolean isId);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-ElSetIdAttrNS
 Since: DOM Level 3
 */
@@ -872,7 +872,7 @@ PHP_FUNCTION(dom_element_set_id_attribute_ns)
 /* }}} end dom_element_set_id_attribute_ns */
 
 
-/* {{{ proto dom_void dom_element_set_id_attribute_node(attr idAttr, boolean isId);
+/* {{{ proto void dom_element_set_id_attribute_node(attr idAttr, boolean isId);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-ElSetIdAttrNode
 Since: DOM Level 3
 */

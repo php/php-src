@@ -29,7 +29,7 @@
 
 
 /*
-* class domprocessinginstruction extends domnode 
+* class DOMProcessingInstruction extends DOMNode 
 *
 * URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-1004215813
 * Since: 
@@ -40,7 +40,7 @@ zend_function_entry php_dom_processinginstruction_class_functions[] = {
 	{NULL, NULL, NULL}
 };
 
-/* {{{ proto void DomProcessingInstruction::__construct(string name, [string value]); */
+/* {{{ proto void DOMProcessingInstruction::__construct(string name, [string value]); */
 PHP_METHOD(domprocessinginstruction, __construct)
 {
 
@@ -80,7 +80,7 @@ PHP_METHOD(domprocessinginstruction, __construct)
 		php_libxml_increment_node_ptr((php_libxml_node_object *)intern, nodep, (void *)intern TSRMLS_CC);
 	}
 }
-/* }}} end DomProcessingInstruction::__construct */
+/* }}} end DOMProcessingInstruction::__construct */
 
 /* {{{ proto target	string	
 readonly=yes 

@@ -29,7 +29,7 @@
 
 
 /*
-* class domcdatasection extends domtext 
+* class DOMCdataSection extends DOMText 
 *
 * URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-667469212
 * Since: 
@@ -40,7 +40,7 @@ zend_function_entry php_dom_cdatasection_class_functions[] = {
 	{NULL, NULL, NULL}
 };
 
-/* {{{ proto void DomCDataSection::__construct(string value); */
+/* {{{ proto void DOMCdataSection::__construct(string value); */
 PHP_METHOD(domcdatasection, __construct)
 {
 
@@ -73,6 +73,6 @@ PHP_METHOD(domcdatasection, __construct)
 		php_libxml_increment_node_ptr((php_libxml_node_object *)intern, nodep, (void *)intern TSRMLS_CC);
 	}
 }
-/* }}} end DomCDataSection::__construct */
+/* }}} end DOMCdataSection::__construct */
 
 #endif
