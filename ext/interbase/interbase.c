@@ -2796,7 +2796,7 @@ extern int wsa_fp;
 */
 /*to handle reading and writing to windows sockets*/
 
-/* {{{ proto string ibase_blob_import([link_identifier,] file_id)
+/* {{{ proto string ibase_blob_import([link_identifier,] int file_id)
    Create blob, copy file in it, and close it */
 
 PHP_FUNCTION(ibase_blob_import)
