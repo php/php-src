@@ -223,6 +223,10 @@ SOURCE=..\main\php_variables.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\ext\standard\proc_open.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\ext\standard\quot_print.c
 # End Source File
 # Begin Source File
