@@ -65,7 +65,7 @@ static void _close_dbase(dbhead_t *dbhead)
 }
 
 
-int php3_minit_dbase(INIT_FUNC_ARGS)
+PHP_MINIT_FUNCTION(dbase)
 {
 #if defined(THREAD_SAFE)
 	dbase_global_struct *dbase_globals;
@@ -87,7 +87,8 @@ int php3_minit_dbase(INIT_FUNC_ARGS)
 	return SUCCESS;
 }
 
-static int php3_mend_dbase(void){
+static PHP_MSHUTDOWN_FUNCTION(dbase)
+{
 #if defined(THREAD_SAFE)
 	dbase_global_struct *dbase_globals;
 	dbase_globals = TlsGetValue(DbaseTls); 
@@ -707,22 +708,22 @@ PHP_FUNCTION(dbase_create) {
 /* }}} */
 
 function_entry dbase_functions[] = {
-	{"dbase_open",			php3_dbase_open,			NULL},
-	{"dbase_create",		php3_dbase_create,			NULL},
-	{"dbase_close",			php3_dbase_close,			NULL},
-	{"dbase_numrecords",	php3_dbase_numrecords,		NULL},
-	{"dbase_numfields",		php3_dbase_numfields,		NULL},
-	{"dbase_add_record",	php3_dbase_add_record,		NULL},
-	{"dbase_replace_record",	php3_dbase_replace_record,		NULL},
-	{"dbase_get_record",	php3_dbase_get_record,		NULL},
-	{"dbase_get_record_with_names", php3_dbase_get_record_with_names,               NULL},
-	{"dbase_delete_record",	php3_dbase_delete_record,	NULL},
-	{"dbase_pack",			php3_dbase_pack,			NULL},
+	PHP_FUNCTION(dbase_open,								NULL)
+	PHP_FUNCTION(dbase_create,								NULL)
+	PHP_FUNCTION(dbase_close,								NULL)
+	PHP_FUNCTION(dbase_numrecords,							NULL)
+	PHP_FUNCTION(dbase_numfields,							NULL)
+	PHP_FUNCTION(dbase_add_record,							NULL)
+	PHP_FUNCTION(dbase_replace_record,						NULL)
+	PHP_FUNCTION(dbase_get_record,							NULL)
+	PHP_FUNCTION(dbase_get_record_with_names,				NULL)
+	PHP_FUNCTION(dbase_delete_record,						NULL)
+	PHP_FUNCTION(dbase_pack,								NULL)
 	{NULL, NULL, NULL}
 };
 
 php3_module_entry dbase_module_entry = {
-	"DBase", dbase_functions, php3_minit_dbase, php3_mend_dbase, NULL, NULL, NULL, STANDARD_MODULE_PROPERTIES
+	"DBase", dbase_functions, PHP_MINIT(dbase), PHP_MSHUTDOWN(dbase), NULL, NULL, NULL, STANDARD_MODULE_PROPERTIES
 };
 
 
