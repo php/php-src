@@ -109,7 +109,9 @@ static inline size_t sapi_cli_single_write(const char *str, uint str_length)
 	long ret;
 
 	ret = write(STDOUT_FILENO, str, str_length);
-	if (ret <= 0) return 0;
+	if (ret <= 0) {
+		return 0;
+	}
 	return ret;
 #else
 	size_t ret;
@@ -748,8 +750,9 @@ int main(int argc, char *argv[])
 	} zend_end_try();
 
 out:
-	if (module_started)
+	if (module_started) {
 		php_module_shutdown(TSRMLS_C);
+	}
 	sapi_shutdown();
 #ifdef ZTS
 	tsrm_shutdown();
