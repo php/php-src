@@ -1,5 +1,157 @@
 # Local macros for automake & autoconf
 
+AC_DEFUN(MYSQL_FUNCTION_CHECKS,[
+
+# Standard MySQL list
+AC_CHECK_FUNCS(alarm bmove \
+ chsize ftruncate rint finite fpsetmask fpresetsticky\
+ cuserid fcntl fconvert  \
+ getrusage getpwuid getcwd getrlimit getwd index locking longjmp \
+ perror pread realpath rename \
+ socket strnlen madvise \
+ strtoul strtoull snprintf tempnam thr_setconcurrency \
+ gethostbyaddr_r gethostbyname_r getpwnam \
+ bfill bzero bcmp strstr strpbrk strerror\
+ tell atod memcpy memmove \
+ setupterm strcasecmp sighold \
+ vidattr setupterm lrand48 localtime_r \
+ sigset sigthreadmask pthread_sigmask pthread_setprio pthread_setprio_np \
+ pthread_setschedparam pthread_attr_setprio pthread_attr_setschedparam \
+ pthread_attr_create pthread_getsequence_np pthread_attr_setstacksize \
+ pthread_condattr_create rwlock_init \
+ crypt dlopen dlerror fchmod getpass getpassphrase)
+
+# This is special for libmysql
+AC_CHECK_FUNCS(strtok_r)
+
+MYSQL_CHECK_GETHOSTNAME_R
+])
+
+AC_DEFUN(MYSQL_CHECK_GETHOSTNAME_R,[
+# Check definition of gethostbyname_r (glibc2.0.100 is different from Solaris)
+AC_CACHE_CHECK([style of gethostname_r routines], mysql_cv_gethostname_style,
+AC_TRY_COMPILE(
+[#ifndef SCO
+#define _REENTRANT
+#endif
+#include <pthread.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <netdb.h>],
+[int skr;
+
+ int res = gethostbyname_r((const char *) 0,
+  (struct hostent*) 0, (char*) 0, 0, (struct hostent **) 0, &skr);],
+mysql_cv_gethostname_style=glibc2, mysql_cv_gethostname_style=other))
+if test "$mysql_cv_gethostname_style" = "glibc2"
+then
+  AC_DEFINE(HAVE_GLIBC2_STYLE_GETHOSTBYNAME_R,,[ ])
+fi
+])
+
+AC_DEFUN(MYSQL_CHECK_SIGWAIT_STYLE,[
+# Check definition av posix sigwait()
+AC_CACHE_CHECK("style of sigwait", mysql_cv_sigwait,
+AC_TRY_LINK(
+[#ifndef SCO
+#define _REENTRANT
+#endif
+#define _POSIX_PTHREAD_SEMANTICS 
+#include <pthread.h>
+#include <signal.h>],
+[#ifndef _AIX
+sigset_t set;
+int sig;
+sigwait(&set,&sig);
+#endif],
+mysql_cv_sigwait=POSIX, mysql_cv_sigwait=other))
+if test "$mysql_cv_sigwait" = "POSIX"
+then
+  AC_DEFINE(HAVE_SIGWAIT,,[ ])
+fi
+
+if test "$mysql_cv_sigwait" != "POSIX"
+then
+unset mysql_cv_sigwait
+# Check definition av posix sigwait()
+AC_CACHE_CHECK("style of sigwait", mysql_cv_sigwait,
+AC_TRY_LINK(
+[#ifndef SCO
+#define _REENTRANT
+#endif
+#define _POSIX_PTHREAD_SEMANTICS 
+#include <pthread.h>
+#include <signal.h>],
+[sigset_t set;
+int sig;
+sigwait(&set);],
+mysql_cv_sigwait=NONPOSIX, mysql_cv_sigwait=other))
+if test "$mysql_cv_sigwait" = "NONPOSIX"
+then
+  AC_DEFINE(HAVE_NONPOSIX_SIGWAIT,,[ ])
+fi
+fi
+])
+
+AC_DEFUN(MYSQL_CHECK_READDIR_R_ARGS,[
+# Check definition of readdir_r
+AC_CACHE_CHECK("args to readdir_r", mysql_cv_readdir_r,
+AC_TRY_LINK(
+[#ifndef SCO
+#define _REENTRANT
+#endif
+#define _POSIX_PTHREAD_SEMANTICS 
+#include <pthread.h>
+#include <dirent.h>],
+[ int readdir_r(DIR *dirp, struct dirent *entry, struct dirent **result);
+readdir_r((DIR *) NULL, (struct dirent *) NULL, (struct dirent **) NULL); ],
+mysql_cv_readdir_r=POSIX, mysql_cv_readdir_r=other))
+if test "$mysql_cv_readdir_r" = "POSIX"
+then
+  AC_DEFINE(HAVE_READDIR_R,,[ ])
+fi
+])
+
+AC_DEFUN(MYSQL_CHECK_PTHREAD_MUTEX_INIT,[
+  # Check definition of pthread_mutex_init
+  AC_CACHE_CHECK("args to pthread_mutex_init", mysql_cv_mutex_init_args,
+  AC_TRY_COMPILE(
+[#ifndef SCO
+#define _REENTRANT
+#endif
+#define _POSIX_PTHREAD_SEMANTICS 
+#include <pthread.h> ],
+[ 
+  pthread_mutexattr_t attr;
+  pthread_mutex_t mp;
+  pthread_mutex_init(&mp,&attr); ],
+mysql_cv_mutex_init_args=POSIX, mysql_cv_mutex_init_args=other))
+  if test "$mysql_cv_mutex_init_args" = "other"
+  then
+    AC_DEFINE(HAVE_NONPOSIX_PTHREAD_MUTEX_INIT,,[ ])
+  fi
+])
+
+AC_DEFUN(MYSQL_CHECK_PTHREAD_GETSPECIFIC,[
+  # Check definition of pthread_getspecific
+  AC_CACHE_CHECK("args to pthread_getspecific", mysql_cv_getspecific_args,
+  AC_TRY_COMPILE(
+[#ifndef SCO
+#define _REENTRANT
+#endif
+#define _POSIX_PTHREAD_SEMANTICS 
+#include <pthread.h> ],
+[ void *pthread_getspecific(pthread_key_t key);
+pthread_getspecific((pthread_key_t) NULL); ],
+mysql_cv_getspecific_args=POSIX, mysql_cv_getspecific_args=other))
+  if test "$mysql_cv_getspecific_args" = "other"
+  then
+    AC_DEFINE(HAVE_NONPOSIX_PTHREAD_GETSPECIFIC,,[ ])
+  fi
+])
+
 AC_DEFUN(MYSQL_TYPE_ACCEPT,
 [ac_save_CXXFLAGS="$CXXFLAGS"
 AC_CACHE_CHECK([base type of last arg to accept], mysql_cv_btype_last_arg_accept,
@@ -28,7 +180,7 @@ if test $mysql_cv_btype_last_arg_accept = none; then
 mysql_cv_btype_last_arg_accept=int
 fi)
 AC_LANG_RESTORE
-AC_DEFINE_UNQUOTED(SOCKET_SIZE_TYPE, $mysql_cv_btype_last_arg_accept)
+AC_DEFINE_UNQUOTED(SOCKET_SIZE_TYPE, $mysql_cv_btype_last_arg_accept,[ ])
 CXXFLAGS="$ac_save_CXXFLAGS"
 ])
 
@@ -48,7 +200,7 @@ main()
 AC_MSG_RESULT($ac_cv_ulong)
 if test "$ac_cv_ulong" = "yes"
 then
-  AC_DEFINE(HAVE_ULONG)
+  AC_DEFINE(HAVE_ULONG,,[ ])
 fi
 ])
 
@@ -66,7 +218,7 @@ main()
 AC_MSG_RESULT($ac_cv_uchar)
 if test "$ac_cv_uchar" = "yes"
 then
-  AC_DEFINE(HAVE_UCHAR)
+  AC_DEFINE(HAVE_UCHAR,,[ ])
 fi
 ])
 
@@ -84,8 +236,39 @@ main()
 AC_MSG_RESULT($ac_cv_uint)
 if test "$ac_cv_uint" = "yes"
 then
-  AC_DEFINE(HAVE_UINT)
+  AC_DEFINE(HAVE_UINT,,[ ])
 fi
 ])
 
-#---END:
+AC_DEFUN(MYSQL_HEADER_CHECKS,[
+AC_HEADER_STDC
+AC_CHECK_HEADERS(sgtty.h sys/ioctl.h \
+ fcntl.h float.h floatingpoint.h ieeefp.h limits.h \
+ memory.h pwd.h select.h \
+ stdlib.h stddef.h \
+ strings.h string.h synch.h sys/mman.h sys/socket.h \
+ sys/timeb.h sys/types.h sys/un.h sys/vadvise.h sys/wait.h term.h \
+ unistd.h utime.h sys/utime.h termio.h termios.h sched.h crypt.h alloca.h)
+])
+
+AC_DEFUN(MYSQL_TYPE_CHECKS,[
+
+AC_REQUIRE([AC_C_CONST])
+AC_REQUIRE([AC_C_INLINE])
+AC_CHECK_SIZEOF(char, 1)
+
+AC_CHECK_SIZEOF(int, 4)
+AC_CHECK_SIZEOF(long, 4)
+AC_CHECK_SIZEOF(long long, 8)
+AC_TYPE_SIZE_T
+AC_HEADER_TIME
+AC_TYPE_UID_T
+
+MYSQL_CHECK_ULONG
+MYSQL_CHECK_UCHAR
+MYSQL_CHECK_UINT
+
+MYSQL_TYPE_ACCEPT
+
+AC_REQUIRE([AC_TYPE_SIGNAL])
+])
