@@ -1435,7 +1435,7 @@ static MH_ERROR error_print(void *user_data, SablotHandle proc, MH_ERROR code, M
 				char *ptr;  /* Pointer to the location of the ':' (separator) */
 				int   pos;  /* Position of the ':' (separator) */
 				int   len;  /* Length of the string */
-			
+				
 				len = strlen(*fields);
 			
 				/* Grab the separator's position */
@@ -1507,8 +1507,8 @@ static MH_ERROR error_print(void *user_data, SablotHandle proc, MH_ERROR code, M
 				key = emalloc(pos + 1);
 				val = emalloc((len - pos) + 1);
 			
-				strlcpy(key, *fields, pos);
-				strlcpy(val, *fields + pos + 1, len - pos - 1);
+				strlcpy(key, *fields, pos + 1);
+				strlcpy(val, *fields + pos + 1, len - pos);
 			
 				/* Check to see whether or not we want to save the data */
 				if (!strcmp(key, "msg")) {
@@ -1517,7 +1517,7 @@ static MH_ERROR error_print(void *user_data, SablotHandle proc, MH_ERROR code, M
 				else if (!strcmp(key, "line")) {
 					errline = estrdup(val);
 				}
-			
+
 				/* Cleanup */
 				if (key) efree(key);
 				if (val) efree(val);
@@ -1529,6 +1529,10 @@ static MH_ERROR error_print(void *user_data, SablotHandle proc, MH_ERROR code, M
 		
 		if (!errline) {
 			errline = estrndup("none", sizeof("none") - 1);
+		}
+
+		if (!errmsg) {
+			errmsg = estrndup("unkown error", sizeof("unkown error") - 1);
 		}
 
 		/* Allocate the message buffer and copy the data onto it */
