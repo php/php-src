@@ -64,10 +64,10 @@ static ZEND_FUNCTION(get_resource_type);
 static ZEND_FUNCTION(zend_test_func);
 #endif
 
-unsigned char first_arg_force_ref[] = { 1, BYREF_FORCE };
-unsigned char first_arg_allow_ref[] = { 1, BYREF_ALLOW };
-unsigned char second_arg_force_ref[] = { 2, BYREF_NONE, BYREF_FORCE };
-unsigned char second_arg_allow_ref[] = { 2, BYREF_NONE, BYREF_ALLOW };
+ZEND_API unsigned char first_arg_force_ref[] = { 1, BYREF_FORCE };
+ZEND_API unsigned char first_arg_allow_ref[] = { 1, BYREF_ALLOW };
+ZEND_API unsigned char second_arg_force_ref[] = { 2, BYREF_NONE, BYREF_FORCE };
+ZEND_API unsigned char second_arg_allow_ref[] = { 2, BYREF_NONE, BYREF_ALLOW };
 
 static zend_function_entry builtin_functions[] = {
 	ZEND_FE(zend_version,		NULL)

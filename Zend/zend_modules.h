@@ -30,10 +30,10 @@
 #define GINIT_FUNC_ARGS		void
 #define GINIT_FUNC_ARGS_PASSTHRU
 
-extern unsigned char first_arg_force_ref[];
-extern unsigned char first_arg_allow_ref[];
-extern unsigned char second_arg_force_ref[];
-extern unsigned char second_arg_allow_ref[];
+ZEND_API extern unsigned char first_arg_force_ref[];
+ZEND_API extern unsigned char first_arg_allow_ref[];
+ZEND_API extern unsigned char second_arg_force_ref[];
+ZEND_API extern unsigned char second_arg_allow_ref[];
 
 #include "zend.h"
 
