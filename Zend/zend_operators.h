@@ -203,7 +203,7 @@ ZEND_API char *zend_str_tolower_copy(char *dest, const char *source, unsigned in
 static inline char *
 zend_str_tolower_dup(const char *source, unsigned int length)
 {
-	return zend_str_tolower_copy(emalloc(length+1), source, length);
+	return zend_str_tolower_copy((char *)emalloc(length+1), source, length);
 }
 
 ZEND_API int zend_binary_zval_strcmp(zval *s1, zval *s2);
