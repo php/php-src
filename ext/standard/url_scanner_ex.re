@@ -91,7 +91,7 @@ static inline void append_modified_url(smart_str *url, smart_str *dest, smart_st
 {
 	register const char *p, *q;
 	const char *bash = NULL;
-	char sep = '?';
+	const char *sep = "?";
 	
 	q = url->c + url->len;
 	
@@ -101,7 +101,7 @@ static inline void append_modified_url(smart_str *url, smart_str *dest, smart_st
 				smart_str_append(dest, url);
 				return;
 			case '?':
-				sep = *separator;
+				sep = separator;
 				break;
 			case '#':
 				bash = p;
@@ -120,7 +120,7 @@ static inline void append_modified_url(smart_str *url, smart_str *dest, smart_st
 	else
 		smart_str_append(dest, url);
 
-	smart_str_appendc(dest, sep);
+	smart_str_appends(dest, sep);
 	smart_str_append(dest, name);
 	smart_str_appendc(dest, '=');
 	smart_str_append(dest, val);
