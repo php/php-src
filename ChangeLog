@@ -1,3 +1,42 @@
+2000-02-18  Zeev Suraski  <zeev@php.net>
+
+    * ext/standard/info.c
+      ext/standard/info.h
+      sapi/isapi/PWS-php4.reg
+      sapi/isapi/php4isapi.c
+      tests/run.html
+      tests/run.php
+      NEWS:
+    - Fix some issues with the ISAPI module, made it friendlier to non Win32 platforms
+    - Added .reg file for PWS setup
+    - Reordered some stuff in phpinfo()
+
+2000-02-18  Sascha Schumann  <sascha@schumann.cx>
+
+    * php.h
+      sapi/apache/mod_php4.c
+      sapi/apache/php_apache.c
+      sapi/apache/sapi_apache.c:
+    Fix warnings when compiling static Apache module
+
+    * ext/java/Makefile.in: File is found in $(srcdir)
+
+2000-02-18  Charles Hagenbuch  <chagenbu@wso.williams.edu>
+
+    * ext/imap/imap.c:
+    fixing imap_delete. All of the argcount checks were against one integer too
+    high.
+
+2000-02-18  Zeev Suraski  <zeev@php.net>
+
+    * ext/mysql/php_mysql.h
+      ext/pgsql/pgsql.dsp
+      SAPI.c
+      ext/imap/imap.c
+      ext/imap/imap.dsp: - Update .dsp's
+    - Fix a possible crash bug in failed file open error message
+    - Fix SAPI initialization issue that could lead to a crash
+
 2000-02-17  Andrei Zmievski  <andrei@ispi.net>
 
     * TODO: The list grows.
