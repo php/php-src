@@ -289,6 +289,7 @@ ZEND_API int zend_is_true(zval *op)
 	return i_zend_is_true(op);
 }
 
+#include "../TSRM/tsrm_strtok_r.h"
 
 ZEND_API int zval_update_constant(zval **pp, void *arg TSRMLS_DC)
 {
@@ -304,19 +305,52 @@ ZEND_API int zval_update_constant(zval **pp, void *arg TSRMLS_DC)
 
 		refcount = p->refcount;
 
-		if (!zend_get_constant(p->value.str.val, p->value.str.len, &const_value TSRMLS_CC)) {
-			zend_error(E_NOTICE, "Use of undefined constant %s - assumed '%s'",
-						p->value.str.val,
-						p->value.str.val);
-			p->type = IS_STRING;
-			if (!inline_change) {
-				zval_copy_ctor(p);
+		if (strchr(p->value.str.val, ':')) {
+			char *cur, *temp;
+			char *last;
+			zend_class_entry *ce;
+			zval **value;
+
+			last = tsrm_strtok_r(p->value.str.val, ":", &temp);
+
+			if (zend_hash_find(EG(class_table), last, strlen(last)+1, &ce) == FAILURE) {
+				zend_error(E_ERROR, "Invalid class! Improve this error message");
 			}
-		} else {
+
+			for(;;) {
+				cur = tsrm_strtok_r(NULL, ":", &temp);
+				if (!cur) {
+					break;
+				}
+				if (zend_hash_find(EG(class_table), last, strlen(last)+1, &ce) == FAILURE) {
+					zend_error(E_ERROR, "Invalid class! Improve this error message");
+				}
+				last = cur;
+			}
+			if (zend_hash_find(&ce->constants, last, strlen(last)+1, (void **) &value) == FAILURE) {
+				zend_error(E_ERROR, "Invalid class! Improve this error message");
+			}
+			const_value = **value;
+			zval_copy_ctor(&const_value);
 			if (inline_change) {
 				STR_FREE(p->value.str.val);
 			}
 			*p = const_value;
+		} else {
+			if (!zend_get_constant(p->value.str.val, p->value.str.len, &const_value TSRMLS_CC)) {
+				zend_error(E_NOTICE, "Use of undefined constant %s - assumed '%s'",
+							p->value.str.val,
+							p->value.str.val);
+				p->type = IS_STRING;
+				if (!inline_change) {
+					zval_copy_ctor(p);
+				}
+			} else {
+				if (inline_change) {
+					STR_FREE(p->value.str.val);
+				}
+				*p = const_value;
+			}
 		}
 		INIT_PZVAL(p);
 		p->refcount = refcount;

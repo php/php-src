@@ -387,6 +387,7 @@ class_statement_list:
 
 class_statement:
 		class_variable_decleration ';'
+	|	class_constant_decleration ';'
 	|	T_FUNCTION { $1.u.opline_num = CG(zend_lineno); } is_reference T_STRING { zend_do_begin_function_declaration(&$1, &$4, 1, $3.op_type TSRMLS_CC); } '(' 
 			parameter_list ')' '{' inner_statement_list '}' { zend_do_end_function_declaration(&$1 TSRMLS_CC); }
 	|	T_OLD_FUNCTION { $1.u.opline_num = CG(zend_lineno); } is_reference T_STRING { zend_do_begin_function_declaration(&$1, &$4, 1, $3.op_type TSRMLS_CC); }
@@ -409,6 +410,11 @@ class_variable_decleration:
 class_decleration_type:
 		T_VAR		{ $$.op_type = T_VAR; }
 	|	T_STATIC	{ $$.op_type = T_STATIC; }
+;
+
+class_constant_decleration:
+	|	T_CONST ',' T_STRING '=' static_scalar	{ zend_do_declare_property(&$3, &$5, T_CONST TSRMLS_CC); }
+	|	T_CONST T_STRING '=' static_scalar	{ zend_do_declare_property(&$2, &$4, T_CONST TSRMLS_CC); }
 ;
 
 echo_expr_list:	
@@ -515,6 +521,11 @@ parse_class_entry:
 	|	T_STRING T_PAAMAYIM_NEKUDOTAYIM { do_fetch_class(&$$, NULL, &$1 TSRMLS_CC); }
 ;
 
+parse_class_name_entry:
+		parse_class_name_entry T_STRING T_PAAMAYIM_NEKUDOTAYIM { do_fetch_class_name(&$$, &$1, &$2 TSRMLS_CC); }
+	|	T_STRING T_PAAMAYIM_NEKUDOTAYIM { $$ = $1; }
+;
+
 new_class_entry:
 		parse_class_entry static_or_variable_string { do_fetch_class(&$$, &$1, &$2 TSRMLS_CC); }
 	|	static_or_variable_string { do_fetch_class(&$$, NULL, &$1 TSRMLS_CC); }
@@ -550,17 +561,18 @@ common_scalar:
 
 static_scalar: /* compile-time evaluated scalars */
 		common_scalar		{ $$ = $1; }
-	|	T_STRING 		{ zend_do_fetch_constant(&$$, &$1, ZEND_CT TSRMLS_CC); }
+	|	T_STRING 		{ zend_do_fetch_constant(&$$, NULL, &$1, ZEND_CT TSRMLS_CC); }
 	|	'+' static_scalar	{ $$ = $1; }
 	|	'-' static_scalar	{ zval minus_one;  minus_one.type = IS_LONG; minus_one.value.lval = -1;  mul_function(&$2.u.constant, &$2.u.constant, &minus_one TSRMLS_CC);  $$ = $2; }
 	|	T_ARRAY '(' static_array_pair_list ')' { $$ = $3; $$.u.constant.type = IS_CONSTANT_ARRAY; }
+	|	parse_class_name_entry T_STRING { zend_do_fetch_constant(&$$, &$1, &$2, ZEND_CT TSRMLS_CC); }
 ;
 
 
 scalar:
-		T_STRING 				{ zend_do_fetch_constant(&$$, &$1, ZEND_RT TSRMLS_CC); }
+		T_STRING 				{ zend_do_fetch_constant(&$$, NULL, &$1, ZEND_RT TSRMLS_CC); }
 	|	T_STRING_VARNAME		{ $$ = $1; }
-	|	parse_class_entry T_STRING
+	|	parse_class_entry T_STRING { zend_do_fetch_constant(&$$, &$1, &$2, ZEND_RT TSRMLS_CC); }
 	|	common_scalar			{ $$ = $1; }
 	|	'"' encaps_list '"' 	{ $$ = $2; }
 	|	'\'' encaps_list '\''	{ $$ = $2; }
