@@ -1,8 +1,8 @@
 /* 
    +----------------------------------------------------------------------+
-   | PHP HTML Embedded Scripting Language Version 3.0                     |
+   | PHP HTML Embedded Scripting Language Version 4.0                     |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997,1998 PHP Development Team (See Credits file)      |
+   | Copyright (c) 1997-1999 PHP Development Team (See Credits file)      |
    +----------------------------------------------------------------------+
    | This program is free software; you can redistribute it and/or modify |
    | it under the terms of one of the following licenses:                 |
@@ -25,11 +25,10 @@
    +----------------------------------------------------------------------+
    | Authors: Danny Heijl <Danny.Heijl@cevi.be>, initial cut (ODS 7)      |
    |          Christian Cartus <chc@idgruppe.de>, blobs, and IUS 9        |
-   |          Jouni Ahto <jah@guru.cultnet.fi>   : configuration stuff    |
-   | based on mysql code by: Zeev Suraski <zeev@zend.com>      |
+   |          Jouni Ahto <jah@mork.net>   : configuration stuff           |
+   | based on mysql code by: Zeev Suraski <zeev@php.net>                  |
    +----------------------------------------------------------------------+
  */
-
 
 
 #ifndef _PHP3_IFX_H
@@ -73,48 +72,29 @@ PHP_FUNCTION(ifx_free_result);
 PHP_FUNCTION(ifx_htmltbl_result);
 PHP_FUNCTION(ifx_fieldtypes);
 PHP_FUNCTION(ifx_fieldproperties);
+PHP_FUNCTION(ifx_getsqlca);
 
-long php3_intifx_getType(long id, HashTable *list);
 PHP_FUNCTION(ifx_create_blob);
-long php3_intifx_create_blob(long type, long mode, char* param, long len, HashTable *list);
 PHP_FUNCTION(ifx_free_blob) ;
-long php3_intifx_free_blob(long id, HashTable *list);
-long php3_intifx2_free_blob(long id, HashTable *list);
 PHP_FUNCTION(ifx_get_blob);
-long php3_intifx_get_blob(long bid, HashTable *list, char** content);
 PHP_FUNCTION(ifx_update_blob);
-long php3_intifx_update_blob(long bid, char* param, long len, HashTable *list);
-loc_t *php3_intifx_get_blobloc(long bid, HashTable *list);
-char* php3_intifx_create_tmpfile(long bid);
 PHP_FUNCTION(ifx_blobinfile_mode);
 PHP_FUNCTION(ifx_copy_blob);
-long php3_intifx_copy_blob(long bid, HashTable *list);
 PHP_FUNCTION(ifx_textasvarchar);
 PHP_FUNCTION(ifx_byteasvarchar);
 PHP_FUNCTION(ifx_nullformat);
-char* php3_intifx_null();
 
 PHP_FUNCTION(ifx_create_char);
-long php3_intifx_create_char(char* param, long len, HashTable *list);
 PHP_FUNCTION(ifx_free_char) ;
-long php3_intifx_free_char(long id, HashTable *list);
 PHP_FUNCTION(ifx_update_char);
-long php3_intifx_update_char(long bid, char* param, long len, HashTable *list);
 PHP_FUNCTION(ifx_get_char);
-long php3_intifx_get_char(long bid, HashTable *list, char** content);
 
 
 #if HAVE_IFX_IUS
 PHP_FUNCTION(ifxus_create_slob);
-long php3_intifxus_create_slob(long create_mode, HashTable *list);
 PHP_FUNCTION(ifxus_free_slob) ;
-long php3_intifxus_free_slob(long bid, HashTable *list);
 PHP_FUNCTION(ifxus_close_slob) ;
-long php3_intifxus_close_slob(long bid, HashTable *list);
 PHP_FUNCTION(ifxus_open_slob) ;
-long php3_intifxus_open_slob(long bid, long create_mode, HashTable *list);
-long php3_intifxus_new_slob(HashTable *list);
-ifx_lo_t *php3_intifxus_get_slobloc(long bid, HashTable *list);
 PHP_FUNCTION(ifxus_read_slob);
 PHP_FUNCTION(ifxus_write_slob);
 PHP_FUNCTION(ifxus_seek_slob);
@@ -136,6 +116,8 @@ typedef struct {
         long byteasvarchar;  /* 0=as id, 1=as varchar */
         long charasvarchar;  /* 0=don't strip trailing blanks, 1=strip */
         long nullformat;     /* 0=NULL as "", 1= NULL as "NULL" */
+        char *nullvalue;     /* "" */
+        char *nullstring;    /* "NULL" */
 } ifx_module;
 
 #define MAX_RESID          64
@@ -153,6 +135,7 @@ typedef struct ifx_res {
 	int  numcols;
 	int  rowid;
         int  affected_rows;
+        long sqlerrd[6];
         int res_id[MAX_RESID];
 } IFX_RES;
 
@@ -204,7 +187,5 @@ extern ifx_module php3_ifx_module;
 #define ifx_module_ptr NULL
 
 #endif
-
-#define phpext_informix_ptr ifx_module_ptr
 
 #endif /* _PHP3_IFX_H */
