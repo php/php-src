@@ -77,6 +77,7 @@ public class servlet extends HttpServlet {
     String readCookies() {
        reflect.setResult(define("request"), request);
        reflect.setResult(define("response"), response);
+       reflect.setResult(define("PHP_SELF"), request.getRequestURI());
        return request.getHeader("cookie");
     }
 
