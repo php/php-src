@@ -756,7 +756,8 @@ static php_stream_wrapper_ops ftp_stream_wops = {
 	php_stream_ftp_stream_stat,
 	php_stream_ftp_url_stat, /* stat_url */
 	php_stream_ftp_opendir, /* opendir */
-	"FTP"
+	"FTP",
+	NULL /* unlink */
 };
 
 PHPAPI php_stream_wrapper php_stream_ftp_wrapper =	{

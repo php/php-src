@@ -232,7 +232,8 @@ static php_stream_wrapper_ops php_stdio_wops = {
 	NULL, /* fstat */
 	NULL, /* stat */
 	NULL, /* opendir */
-	"PHP"
+	"PHP",
+	NULL /* unlink */
 };
 
 php_stream_wrapper php_stream_php_wrapper =	{

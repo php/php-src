@@ -358,7 +358,9 @@ static php_stream_wrapper_ops php_curl_wrapper_ops = {
 	NULL, /* stream_close: curl streams know how to clean themselves up */
 	NULL, /* stream_stat: curl streams know how to stat themselves */
 	NULL, /* stat url */
-	NULL  /* opendir */
+	NULL, /* opendir */
+	NULL, /* label */
+	NULL  /* unlink */
 };
 
 php_stream_wrapper php_curl_wrapper = {
