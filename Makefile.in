@@ -47,6 +47,9 @@ install-modules:
 	rm -f modules/*.la && \
 	cp modules/* $(moduledir) || true
 
+install-su: install-modules
+	(cd pear && $(MAKE) install)
+
 configuration-parser.h configuration-parser.c: $(srcdir)/configuration-parser.y
 	$(YACC) -p cfg -v -d $< -o configuration-parser.c
 
