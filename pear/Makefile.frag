@@ -9,7 +9,7 @@ pear_install_targets = \
 peardir=$(PEAR_INSTALLDIR)
 
 # Skip all php.ini files altogether
-PEAR_INSTALL_FLAGS = -n
+PEAR_INSTALL_FLAGS = -n -dsafe_mode=0
 
 install-pear-installer: $(top_builddir)/sapi/cli/php
 	@$(top_builddir)/sapi/cli/php $(PEAR_INSTALL_FLAGS) $(srcdir)/install-pear.php $(srcdir)/package-*.xml
