@@ -713,6 +713,11 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	return T_PROTECTED;
 }
 
+<ST_IN_SCRIPTING>"public" {
+	return T_VAR;
+}
+
+
 <ST_IN_SCRIPTING>"unset" {
 	return T_UNSET;
 }
