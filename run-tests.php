@@ -13,7 +13,7 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Ilia Alshanetsky <iliaa@php.net>                             |
+   | Authors: Ilia Alshanetsky <iliaa@php.net>                            |
    |          Preston L. Bannister <pbannister@php.net>                   |
    |          Marcus Boerger <helly@php.net>                              |
    |          Derick Rethans <derick@php.net>                             |
