@@ -1,3 +1,19 @@
+/*
+   +----------------------------------------------------------------------+
+   | Thread Safe Resource Manager                                         |
+   +----------------------------------------------------------------------+
+   | Copyright (c) 1998, 1999 Zeev Suraski                                |
+   +----------------------------------------------------------------------+
+   | This source file is subject to the Zend license, that is bundled     |
+   | with this package in the file LICENSE.  If you did not receive a     |
+   | copy of the Zend license, please mail us at zend@zend.com so we can  |
+   | send you a copy immediately.                                         |
+   +----------------------------------------------------------------------+
+   | Author:  Zeev Suraski <zeev@zend.com>                                |
+   +----------------------------------------------------------------------+
+*/
+
+
 #ifndef _TSRM_H
 #define _TSRM_H
 
