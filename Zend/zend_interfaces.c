@@ -86,8 +86,7 @@ ZEND_API zval* zend_call_method(zval **object_pp, zend_class_entry *obj_ce, zend
 	}
 	if (!retval_ptr_ptr) {
 		if (retval) {
-			zval_dtor(retval);
-			FREE_ZVAL(retval);
+			zval_ptr_dtor(&retval);
 		}
 		return NULL;
 	}
