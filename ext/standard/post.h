@@ -37,7 +37,7 @@
 #define PARSE_STRING 3
 
 void php3_treat_data(int arg, char *str);
-void _php3_parse_gpc_data(char *, char *, pval *track_vars_array);
+void php_parse_gpc_data(char *, char *, pval *track_vars_array);
 PHPAPI void php3_TreatHeaders(void);
 
 #endif

@@ -25,128 +25,6 @@
 
 #include "zend_globals.h"
 
-/*
- * php3_getpost()
- *
- * This reads the post form data into a string.
- * Remember to free this pointer when done with it.
- */
-#if 0
-static char *php3_getpost(pval *http_post_vars PLS_DC)
-{
-	char *buf = NULL;
-	const char *ctype;
-#if MODULE_MAGIC_NUMBER > 19961007
-	char argsbuffer[HUGE_STRING_LEN];
-#else
-	int bytes;
-#endif
-	int length, cnt;
-	int file_upload = 0;
-	char *mb;
-	char boundary[100];
-	SLS_FETCH();
-	
-	ctype = request_info.content_type;
-	if (!ctype) {
-		php_error(E_WARNING, "POST Error: content-type missing");
-		return NULL;
-	}
-	if (strncasecmp(ctype, "application/x-www-form-urlencoded", 33) && strncasecmp(ctype, "multipart/form-data", 19)
-#if HAVE_FDFLIB
- && strncasecmp(ctype, "application/vnd.fdf", 19)
-#endif
-      ) {
-		php_error(E_WARNING, "Unsupported content-type: %s", ctype);
-		return NULL;
-	}
-	if (!strncasecmp(ctype, "multipart/form-data", 19)) {
-		file_upload = 1;
-		mb = strchr(ctype, '=');
-		if (mb) {
-			strncpy(boundary, mb + 1, sizeof(boundary));
-		} else {
-			php_error(E_WARNING, "File Upload Error: No MIME boundary found");
-			php_error(E_WARNING, "There should have been a \"boundary=something\" in the Content-Type string");
-			php_error(E_WARNING, "The Content-Type string was: \"%s\"", ctype);
-			return NULL;
-		}
-	}
-	length = request_info.content_length;
-	cnt = length;
-	buf = (char *) emalloc((length + 1) * sizeof(char));
-	if (!buf) {
-		php_error(E_WARNING, "Unable to allocate memory in php3_getpost()");
-		return NULL;
-	}
-#if FHTTPD
-    memcpy(buf,req->databuffer,length);
-    buf[length]=0;
-#else
-#if MODULE_MAGIC_NUMBER > 19961007
-	if (should_client_block(SG(server_context))) {
-		void (*handler) (int);
-		int dbsize, len_read, dbpos = 0;
-
-		hard_timeout("copy script args", ((request_rec *) SG(server_context)));	/* start timeout timer */
-		handler = signal(SIGPIPE, SIG_IGN);		/* Ignore sigpipes for now */
-		while ((len_read = get_client_block(((request_rec *) SG(server_context)), argsbuffer, HUGE_STRING_LEN)) > 0) {
-			if ((dbpos + len_read) > length)
-				dbsize = length - dbpos;
-			else
-				dbsize = len_read;
-			reset_timeout(((request_rec *) SG(server_context)));	/* Make sure we don't timeout */
-			memcpy(buf + dbpos, argsbuffer, dbsize);
-			dbpos += dbsize;
-		}
-		signal(SIGPIPE, handler);	/* restore normal sigpipe handling */
-		kill_timeout(((request_rec *) SG(server_context)));	/* stop timeout timer */
-	}
-#else
-	cnt = 0;
-	do {
-#if APACHE
-		bytes = read_client_block(((request_rec *) SG(server_context)), buf + cnt, length - cnt);
-#endif
-#if CGI_BINARY
-		bytes = fread(buf + cnt, 1, length - cnt, stdin);
-#endif
-#if USE_SAPI
-		bytes = sapi_rqst->readclient(sapi_rqst->scid,buf + cnt, 1, length - cnt);
-#endif
-		cnt += bytes;
-	} while (bytes && cnt < length);
-#endif
-#endif
-	if (file_upload) {
-		php3_mime_split(buf, cnt, boundary, http_post_vars PLS_CC);
-		efree(buf);
-		return NULL;
-	}
-	buf[cnt] = '\0';
-
-#if HAVE_FDFLIB
-	if (!strncasecmp(ctype, "application/vnd.fdf", 19)) {
-		pval *postdata_ptr = (pval *) emalloc(sizeof(pval));
-		
-		postdata_ptr->type = IS_STRING;
-		postdata_ptr->value.str.val = (char *) estrdup(buf);
-		postdata_ptr->value.str.len = cnt;
-		INIT_PZVAL(postdata_ptr);
-		zend_hash_add(&symbol_table, "HTTP_FDF_DATA", sizeof("HTTP_FDF_DATA"), postdata_ptr, sizeof(pval *),NULL);
-	}
-#endif
-	return (buf);
-}
-#else
-static char *php3_getpost(pval *http_post_vars PLS_DC)
-{
-	SLS_FETCH();
-
-	return SG(request_info).post_data;
-}
-#endif
-
 
 /*
  * parse Get/Post/Cookie string and create appropriate variable
@@ -155,7 +33,7 @@ static char *php3_getpost(pval *http_post_vars PLS_DC)
  * the old TreatData function.  This is a temporary measure filling 
  * the gap until a more flexible parser can be built to do this.
  */
-void _php3_parse_gpc_data(char *val, char *var, pval *track_vars_array)
+void php_parse_gpc_data(char *val, char *var, pval *track_vars_array)
 {
 	int var_type;
 	char *ind, *tmp = NULL, *ret = NULL;
@@ -336,7 +214,7 @@ void php3_treat_data(int arg, char *str)
 	}
 
 	if (arg == PARSE_POST) {			/* POST data */
-		res = php3_getpost(array_ptr PLS_CC);
+		res = SG(request_info).post_data;
 		free_buffer = 0;
 	} else if (arg == PARSE_GET) {		/* GET data */
 		var = SG(request_info).query_string;
@@ -377,7 +255,7 @@ void php3_treat_data(int arg, char *str)
 			/* FIXME: XXX: not binary safe, discards returned length */
 			_php3_urldecode(var, strlen(var));
 			_php3_urldecode(val, strlen(val));
-			_php3_parse_gpc_data(val,var,array_ptr);
+			php_parse_gpc_data(val,var,array_ptr);
 		}
 		if (arg == PARSE_COOKIE) {
 			var = strtok(NULL, ";");
