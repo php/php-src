@@ -198,23 +198,15 @@ ZEND_API char *zend_zval_type_name(zval *arg)
 	}
 }
 
-ZEND_API zend_class_entry **zend_get_class_entry(zval *zobject)
+ZEND_API zend_class_entry *zend_get_class_entry(zval *zobject)
 {
-	zend_class_entry **ce;
-
 	if (Z_OBJ_HT_P(zobject)->get_class_entry) {
 		TSRMLS_FETCH();
-		ce = Z_OBJ_HT_P(zobject)->get_class_entry(zobject TSRMLS_CC);
+		return Z_OBJ_HT_P(zobject)->get_class_entry(zobject TSRMLS_CC);
 	} else {
-		if(!IS_ZEND_STD_OBJECT(*zobject)) {
-			zend_error(E_ERROR, "Class entry required for an object without class");
-			return NULL;
-		}
-
-		ce = &(Z_OBJ_P(zobject)->ce);
+		zend_error(E_ERROR, "Class entry requested for an object without PHP class");
+		return NULL;
 	}
-
-	return ce;
 }
 
 static int zend_check_class(zval *obj, zend_class_entry *expected_ce)
@@ -615,12 +607,12 @@ ZEND_API int _object_and_properties_init(zval *arg, zend_class_entry *class_type
 
 ZEND_API int _object_init_ex(zval *arg, zend_class_entry *class_type ZEND_FILE_LINE_DC TSRMLS_DC)
 {
-	return _object_and_properties_init(arg, class_type, 0 ZEND_FILE_LINE_CC TSRMLS_CC);
+	return _object_and_properties_init(arg, class_type, 0 ZEND_FILE_LINE_RELAY_CC TSRMLS_CC);
 }
 
 ZEND_API int _object_init(zval *arg ZEND_FILE_LINE_DC TSRMLS_DC)
 {
-	return _object_init_ex(arg, zend_standard_class_def ZEND_FILE_LINE_CC TSRMLS_CC);
+	return _object_init_ex(arg, zend_standard_class_def ZEND_FILE_LINE_RELAY_CC TSRMLS_CC);
 }
 
 

@@ -43,7 +43,7 @@ typedef void (*zend_object_del_ref_t)(zval *object TSRMLS_DC);
 typedef void (*zend_object_delete_obj_t)(zval *object TSRMLS_DC);
 typedef zend_object_value (*zend_object_clone_obj_t)(zval *object TSRMLS_DC);
 
-typedef zend_class_entry **(*zend_object_get_class_entry_t)(zval *object TSRMLS_DC);
+typedef zend_class_entry *(*zend_object_get_class_entry_t)(zval *object TSRMLS_DC);
 typedef int (*zend_object_get_class_name_t)(zval *object, char **class_name, zend_uint *class_name_len, int parent TSRMLS_DC);
 typedef int (*zend_object_compare_t)(zval *object1, zval *object2 TSRMLS_DC);
 
