@@ -1,5 +1,7 @@
 --TEST--
 sqlite: aggregate functions
+--INI--
+sqlite.assoc_case=0
 --SKIPIF--
 <?php # vim:ft=php
 if (!extension_loaded("sqlite")) print "skip"; ?>
