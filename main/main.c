@@ -135,15 +135,13 @@ static PHP_INI_MH(OnChangeMemoryLimit)
 
 static PHP_INI_MH(OnUpdateErrorReporting)
 {
-	PLS_FETCH();
 	ELS_FETCH();
 
 	if (!new_value) {
-		PG(error_reporting) = E_ALL & ~E_NOTICE;
+		EG(error_reporting) = E_ALL & ~E_NOTICE;
 	} else {
-		PG(error_reporting) = atoi(new_value);
+		EG(error_reporting) = atoi(new_value);
 	}
-	EG(error_reporting) = PG(error_reporting);
 	return SUCCESS;
 }
 
@@ -194,8 +192,8 @@ PHP_INI_BEGIN()
 	PHP_INI_ENTRY_EX("highlight.keyword",		HL_KEYWORD_COLOR,	PHP_INI_ALL,	NULL,			php_ini_color_displayer_cb)
 	PHP_INI_ENTRY_EX("highlight.string",		HL_STRING_COLOR,	PHP_INI_ALL,	NULL,			php_ini_color_displayer_cb)
 
-	STD_PHP_INI_BOOLEAN("allow_call_time_pass_reference","1",PHP_INI_ALL,		OnUpdateBool,	allow_call_time_pass_reference,	php_core_globals,	core_globals)
-	STD_PHP_INI_BOOLEAN("asp_tags",				"0",		PHP_INI_ALL,		OnUpdateBool,			asp_tags,				php_core_globals,	core_globals)
+	STD_PHP_INI_BOOLEAN("allow_call_time_pass_reference","1",PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnUpdateBool,	allow_call_time_pass_reference,	zend_compiler_globals,	compiler_globals)
+	STD_PHP_INI_BOOLEAN("asp_tags",				"0",		PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnUpdateBool,			asp_tags,				zend_compiler_globals,	compiler_globals)
 	STD_PHP_INI_BOOLEAN("display_errors",		"1",		PHP_INI_ALL,		OnUpdateBool,			display_errors,			php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("enable_dl",			"1",		PHP_INI_SYSTEM,		OnUpdateBool,			enable_dl,				php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("error_append_string",	NULL,		PHP_INI_ALL,		OnUpdateString,			error_append_string,	php_core_globals,	core_globals)
@@ -211,7 +209,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("register_argc_argv",	"1",		PHP_INI_ALL,		OnUpdateBool,			register_argc_argv,		php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("register_globals",		"1",		PHP_INI_ALL,		OnUpdateBool,			register_globals,		php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("safe_mode",			"0",		PHP_INI_SYSTEM,		OnUpdateBool,			safe_mode,				php_core_globals,	core_globals)
-	STD_PHP_INI_BOOLEAN("short_open_tag",		"1",		PHP_INI_ALL,		OnUpdateBool,			short_tags,				php_core_globals,	core_globals)
+	STD_PHP_INI_BOOLEAN("short_open_tag",		"1",		PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnUpdateBool,			short_tags,				zend_compiler_globals,	compiler_globals)
 	STD_PHP_INI_BOOLEAN("sql.safe_mode",		"0",		PHP_INI_SYSTEM,		OnUpdateBool,			sql_safe_mode,			php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("track_errors",			"0",		PHP_INI_ALL,		OnUpdateBool,			track_errors,			php_core_globals,	core_globals)
 #if PHP_TRACK_VARS /* "cc -32" on IRIX 6.4 does not like (PHP_TRACK_VARS?"1":"0") - thies 991004 */								
@@ -696,7 +694,6 @@ void php_request_shutdown(void *dummy)
 	php_call_shutdown_functions();
 	
 	php_ini_rshutdown();
-	EG(error_reporting) = PG(error_reporting);
 
 	if (PG(modules_activated)) {
 		zend_deactivate_modules();
@@ -886,9 +883,6 @@ int php_module_startup(sapi_module_struct *sf)
 
 	REGISTER_INI_ENTRIES();
 
-	zuv.short_tags = (zend_bool) PG(short_tags);
-	zuv.asp_tags = (zend_bool) PG(asp_tags);
-	zuv.allow_call_time_pass_reference = PG(allow_call_time_pass_reference);
 	zuv.import_use_extension = ".php";
 	zend_set_utility_values(&zuv);
 	php_startup_sapi_content_types();

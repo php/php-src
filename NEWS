@@ -2,6 +2,8 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.1
+- Fixed a problem with static variables, default function arguments and class
+  member variables, that contained array values. (Andi & Zeev, Zend Engine)
 - Fix virtual() when used with output buffering (Marc Pohl)
 - Clean up constants in flock() function and add optional 3rd arg which
   is set to true on EWOULDBLOCK (Rasmus)
