@@ -161,6 +161,7 @@ static void *php_tidy_get_opt_val(TidyOption opt, TidyOptionType *type TSRMLS_DC
 static int _php_tidy_set_tidy_opt(char *optname, zval *value TSRMLS_DC)
 {
 	TidyOption opt;
+	zval conv = *value;
 
 	if (!(opt = tidyGetOptionByName(TG(tdoc)->doc, optname))) {
 		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Unknown Tidy Configuration Option '%s'", optname);
@@ -174,22 +175,37 @@ static int _php_tidy_set_tidy_opt(char *optname, zval *value TSRMLS_DC)
 
 	switch(tidyOptGetType(opt)) {
 		case TidyString:
-			convert_to_string_ex(&value);
-			if (tidyOptSetValue(TG(tdoc)->doc, tidyOptGetId(opt), Z_STRVAL_P(value))) {
-				return SUCCESS;
-			}
+			if (Z_TYPE(conv) != IS_STRING) {
+ 				zval_copy_ctor(&conv);
+ 				convert_to_string(&conv);
+ 			}
+ 			if (tidyOptSetValue(TG(tdoc)->doc, tidyOptGetId(opt), Z_STRVAL(conv))) {
+ 				if (Z_TYPE(conv) != Z_TYPE_P(value)) {
+ 					zval_dtor(&conv);
+ 				}
+  				return SUCCESS;
+  			}
+ 			if (Z_TYPE(conv) != Z_TYPE_P(value)) {
+ 				zval_dtor(&conv);
+ 			}
 			break;
 
 		case TidyInteger:
-			convert_to_long_ex(&value);
-			if (tidyOptSetInt(TG(tdoc)->doc, tidyOptGetId(opt), Z_LVAL_P(value))) {
+ 			if (Z_TYPE(conv) != IS_LONG) {
+ 				zval_copy_ctor(&conv);
+ 				convert_to_long(&conv);
+ 			}
+ 			if (tidyOptSetInt(TG(tdoc)->doc, tidyOptGetId(opt), Z_LVAL(conv))) {
 				return SUCCESS;
 			}
 			break;
 
 		case TidyBoolean:
-			convert_to_long_ex(&value);
-			if (tidyOptSetBool(TG(tdoc)->doc,  tidyOptGetId(opt), Z_LVAL_P(value))) {
+			if (Z_TYPE(conv) != IS_LONG) {
+ 				zval_copy_ctor(&conv);
+ 				convert_to_long(&conv);
+ 			}
+ 			if (tidyOptSetBool(TG(tdoc)->doc, tidyOptGetId(opt), Z_LVAL(conv))) {
 				return SUCCESS;
 			}
 			break;
@@ -198,7 +214,7 @@ static int _php_tidy_set_tidy_opt(char *optname, zval *value TSRMLS_DC)
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to determine type of configuration option");
 			break;
 	}	
-	
+
 	return FAILURE;
 }
 
