@@ -13,6 +13,8 @@ PHP 4                                                                      NEWS
   the 'Status: 200' header that is not normally needed). (Ilia)
 - Fixed bug #26758 (FastCGI exits immediately with status 255). (Ilia, 
   tcarter at noggin dot com dot au)
+- Fixed bug #26653 (open_basedir incorrectly resolved on win32). (Ilia,
+  scottmacvicar at ntlworld dot com)
 - Fixed bug #24773 (unsetting string as array causes a crash). (Sara)
 
 03 Feb 2004, Version 4.3.5RC2
