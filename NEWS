@@ -4,6 +4,8 @@ PHP 4                                                                      NEWS
 - Updated PCRE to provide better error handling in certain cases. (Andrei)
 - NSAPI: added "bucket" parameter to list of non-php.ini-keys of php4_execute
   for doing performance stats without warnings in server-log. (Uwe Schindler)
+- Fixed bug #29034 (wordwrap() returns a boolean when passed empty string).
+  (Ilia)
 - Fixed bug #28963 (Missing space for \0 in address allocation). (Ilia)
 - Fixed bug #28897 (ibase: -1 returned as -0.000 for 64-bit scaled int). (Ard)
 - Fixed bug #28879 (Implicit/Explicit array creation inconsistency when using
