@@ -1,3 +1,21 @@
+2003-01-09  Zeev Suraski  <zeev@zend.com>
+
+    * zend_compile.c:
+      Found some more occurences of that elusive bug...
+
+    * zend_compile.c:
+      Fix one lousy, annoying lurking bug (memory corruption)
+      Sebastian - try coWiki again please...
+
+    * zend_API.h:
+      Unify and make it easy to add code into the broken-string error handler
+
+    * zend_language_parser.y:
+      Fix writability checks
+
+    * zend.c:
+      Fix leak
+
 2003-01-08  James Cox  <james@imajes.info>
 
     * zend.h:
