@@ -77,7 +77,7 @@ asp_tags = Off
 precision    =  12
 
 ; Enforce year 2000 compliance (will cause problems with non-compliant browsers)
-y2k_compliance = on
+y2k_compliance = On
 
 ; Output buffering allows you to send header lines (including cookies) even
 ; after you send body content, at the price of slowing PHP's output layer a
