@@ -443,6 +443,10 @@ PHP_MINIT_FUNCTION(imap)
 	mail_link(&newsdriver);      /* link in the news driver */
 	mail_link(&philedriver);     /* link in the phile driver */
 	auth_link(&auth_log);        /* link in the log authenticator */
+#ifdef  HAVE_IMAP_SSL
+	ssl_onceonlyinit ();
+	auth_link (&auth_ssl);       /* link in the ssl authenticator */
+#endif
 #endif
 	mail_link(&dummydriver);     /* link in the dummy driver */
 #else
