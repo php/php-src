@@ -501,8 +501,6 @@ static sapi_module_struct roxen_sapi_module = {
   php_roxen_sapi_read_cookies,		/* read Cookies */
   NULL,					/* register server variables */
   NULL,					/* Log message */
-  NULL,					/* Block interruptions */
-  NULL,					/* Unblock interruptions */
 
   STANDARD_SAPI_MODULE_PROPERTIES
 };

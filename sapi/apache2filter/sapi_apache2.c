@@ -299,11 +299,6 @@ static sapi_module_struct apache2_sapi_module = {
 	php_apache_sapi_register_variables,
 	php_apache_sapi_log_message,			/* Log message */
 
-    NULL,									/* php_ini_path_override */
-
-	NULL,									/* Block interruptions */
-	NULL,									/* Unblock interruptions */
-
 	STANDARD_SAPI_MODULE_PROPERTIES
 };
 

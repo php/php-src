@@ -180,9 +180,6 @@ static sapi_module_struct phttpd_sapi_module = {
 	NULL,									/* register server variables */
 	NULL,									/* Log message */
 
-	NULL,									/* Block interruptions */
-	NULL,									/* Unblock interruptions */
-
     STANDARD_SAPI_MODULE_PROPERTIES
 };
 
