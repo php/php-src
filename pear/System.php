@@ -182,19 +182,19 @@ class System
         if (isset($do_recursive)) {
             $struct = System::_multipleToStruct($opts[1]);
             foreach($struct['files'] as $file) {
-                if (!unlink($file)) {
+                if (!@unlink($file)) {
                     $ret = false;
                 }
             }
             foreach($struct['dirs'] as $dir) {
-                if (!rmdir($dir)) {
+                if (!@rmdir($dir)) {
                     $ret = false;
                 }
             }
         } else {
             foreach ($opts[1] as $file) {
                 $delete = (is_dir($file)) ? 'rmdir' : 'unlink';
-                if (!$delete($file)) {
+                if (!@$delete($file)) {
                     $ret = false;
                 }
             }
