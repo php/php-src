@@ -88,6 +88,7 @@ PHP_FUNCTION(ldap_parse_result);
 PHP_FUNCTION(ldap_first_reference);
 PHP_FUNCTION(ldap_next_reference);
 PHP_FUNCTION(ldap_parse_reference);
+PHP_FUNCTION(ldap_rename);
 #endif
 
 #ifdef STR_TRANSLATION
