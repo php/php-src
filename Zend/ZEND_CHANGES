@@ -392,6 +392,20 @@ Changes in the Zend Engine 2.0
           print foo::$my_static;
         ?>
 
+    * Supporting default values for by-reference function parameters.
+
+      Example:
+
+        <?php
+          function my_function(&$var = null)
+          {
+               if ($var === null) {
+                   die('$var needs to have a value');
+               }
+          }
+        ?>
+
+
 Changes in the Zend Engine 1.0
 
   The Zend Engine was designed from the ground up for increased speed,
