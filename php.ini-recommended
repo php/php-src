@@ -743,7 +743,7 @@ mysql.default_password =
 mysql.connect_timeout = 60
 
 ; Trace mode. When trace_mode is active (=On), warnings for table/index scans and
-; SQL-Erros will be displayed.
+; SQL-Errors will be displayed.
 mysql.trace_mode = Off
 
 [MySQLI]
