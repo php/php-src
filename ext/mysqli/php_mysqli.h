@@ -310,10 +310,8 @@ PHP_FUNCTION(mysqli_info);
 PHP_FUNCTION(mysqli_insert_id);
 PHP_FUNCTION(mysqli_init);
 PHP_FUNCTION(mysqli_kill);
-#ifndef PHP_WIN32
 PHP_FUNCTION(mysqli_set_local_infile_default);
 PHP_FUNCTION(mysqli_set_local_infile_handler);
-#endif
 PHP_FUNCTION(mysqli_master_query);
 PHP_FUNCTION(mysqli_more_results);
 PHP_FUNCTION(mysqli_multi_query);
