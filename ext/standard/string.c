@@ -38,7 +38,7 @@ static char hexconvtab[] = "0123456789abcdef";
 static char *php_bin2hex(const unsigned char *old, const size_t oldlen, size_t *newlen)
 {
 	unsigned char *new = NULL;
-	int i, j;
+	size_t i, j;
 
 	new = (char *) emalloc(oldlen * 2 * sizeof(char));
 	if(!new) {
