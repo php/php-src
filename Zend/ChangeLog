@@ -1,3 +1,8 @@
+2003-11-28  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * zend_API.c:
+      Add removed lcname, it is still needed.
+
 2003-11-27  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_API.c:
