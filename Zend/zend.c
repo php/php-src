@@ -208,15 +208,19 @@ ZEND_API void zend_print_zval_r_ex(zend_write_func_t write_func, zval *expr, int
 			expr->value.ht->nApplyCount--;
 			break;
 		case IS_OBJECT:
-			if (++expr->value.obj.properties->nApplyCount>1) {
-				ZEND_PUTS(" *RECURSION*");
-				expr->value.obj.properties->nApplyCount=0;
-				return;
+			{
+				zend_object *object = Z_OBJ_P(expr);
+
+				if (++object->properties->nApplyCount>1) {
+					ZEND_PUTS(" *RECURSION*");
+					object->properties->nApplyCount=0;
+					return;
+				}
+				zend_printf("%s Object\n", object->ce->name);
+				print_hash(object->properties, indent);
+				object->properties->nApplyCount--;
+				break;
 			}
-			zend_printf("%s Object\n", expr->value.obj.ce->name);
-			print_hash(expr->value.obj.properties, indent);
-			expr->value.obj.properties->nApplyCount--;
-			break;
 		default:
 			zend_print_variable(expr);
 			break;
