@@ -82,6 +82,8 @@ PHP                                                                        NEWS
 - Fixed bug #27123 (Fix crash caused by bug in get_object_vars()). (Andi)
 - Fixed bug #26677 (mbstring compile errors with IRIX compiler).
   (K.Kosako <kosako at sofnec dot co dot jp>, Rui, Moriyoshi)
+- Fixed bug #26206 (register_long_arrays breaks superglobals). (Zeev)
+- Fixed bug #25724 (argv and argc not defined). (Zeev)
 
 12 Feb 2004, PHP 5 Beta 4
 - Changed exceptions so that they must now inherit from the built-in Exception
