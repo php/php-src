@@ -1,3 +1,117 @@
+2004-03-12  Sara Golemon  <php@alphaweb.net>
+
+    * (PHP_4_3)
+      NEWS:
+      BFN
+
+    * configure.in:
+      MFB: Test getaddrinfo() for brokenness. Pretend it doesn't exist if it
+      misbehaves.
+
+2004-03-12  Sterling Hughes  <winnie@edwardbear.org>
+
+    * ext/curl/interface.c:
+      zval **, not a zval *
+
+    * ext/curl/interface.c:
+      avoid a memory leak when a php_curl handle is allocated, but the
+      initialization
+      of a CURL handle fails.
+
+    * ext/curl/interface.c
+      ext/curl/php_curl.h:
+      add the curl_copy_handle() function which will exactly duplicate a cURL
+      handle.
+      Useful when you have multiple "similair" transforms as with a multi handle
+      with
+      only small variances (like the URL)
+
+2004-03-12  Pierre-Alain Joye  <paj@pearfr.org>
+
+    * pear/PEAR/Common.php:
+      - revert previous commit:
+       - Features freeze period
+       - No agreement on this change
+       - Even if an agreement exists, this change is not enough to allow the
+         usage of this new tag
+
+2004-03-12  Martin Jansen  <mail@martin-jansen.de>
+
+    * pear/PEAR/Common.php:
+      - Adding new state "emeritus", which can be used for former maintainers of
+        packages.
+      
+      Submitted by: Daniel Convissor
+      
+
+2004-03-12  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      ext/curl/curl.c:
+      MFH: Add checks of return values from user callback functions.
+
+2004-03-12  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * (PHP_4_3)
+      ext/standard/basic_functions.c:
+      MFH
+        getopt() doesn't work if variables_order does not include "S" because it
+        only looks in $_SERVER for argv.  So, if we don't find argv in $_SERVER
+        fall back to looking in the global symbol table where register_argc_argv
+        would have put it.
+
+2004-03-12  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/curl/interface.c:
+      Simplify check.
+
+    * ext/curl/interface.c:
+      Additional checks of return values from user callback functions.
+
+2004-03-12  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * ext/standard/datetime.c
+      ext/standard/datetime.c:
+      Fix/workaround for http://bugs.php.net/27533
+
+2004-03-12  Sterling Hughes  <winnie@edwardbear.org>
+
+    * ext/curl/interface.c:
+      leave length as -1, no need to strdup()
+
+2004-03-12  John Coggeshall  <john@coggeshall.org>
+
+    * ext/curl/interface.c:
+      Opps. Shouldn't look at the value, just the type
+
+    * ext/curl/interface.c:
+      CURLOPT_INFILE === CURLOPT_READDATA
+
+    * ext/curl/interface.c:
+      Fixed a crash which happens if your READFUNCTION callback doesn't actually
+      return a string as promised.
+
+2004-03-12  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      sapi/cgi/cgi_main.c:
+      MFH: Fixed bug #22127 (Invalid response code when force-cgi-redirect safety
+      mechanism is triggered).
+
+    * sapi/cgi/cgi_main.c:
+      Invalid response code when force-cgi-redirect safety mechanism is triggered
+
+    * ext/mbstring/mbstring.c:
+      Fixed compiler warning.
+
+2004-03-12  Sara Golemon  <php@alphaweb.net>
+
+    * (PHP_4_3)
+      configure.in:
+      Test getaddrinfo() for brokenness.  Pretend it doesn't exist if it
+      misbehaves.
+
 2004-03-11  Frank M. Kromann  <frank@kromann.info>
 
     * ext/ming/config.w32:
