@@ -923,6 +923,29 @@ cat <<X
 X
   fi
 
+  if test "$PHP_PFPRO" != "no" ; then
+cat <<X
++--------------------------------------------------------------------+
+|                        *** WARNING ***                             |
+|                                                                    |
+| The Verisign/Signio Payflow Pro extension may cause an SSL-enabled |
+| webserver to fail to start or behave erratically during operation. |
+| The extension itself is complete and fully operational, but        |
+| Verisign provides a closed SDK which implements its own SSL, which |
+| may or may not cause conflicts with the SSL implementation in your |
+| own webserver.                                                     |
+|                                                                    |
+| Similarly, linking the CURL extension against CURL libraries with  |
+| SSL enabled can result in the same problem.                        |
+|                                                                    |
+| Verisign has been contacted about this problem yet refuses to      |
+| acknowledge it even with a response, let alone a more compliant    |
+| SDK. If you are a Verisign customer and wish to use this extension |
+| in the aforementioned configuration, you are urged to contact them |
+| and press them for a better SDK.                                   |
+X
+  fi
+
   if test "$MYSQL_MODULE_TYPE" = "builtin" ; then
 cat <<X
 +--------------------------------------------------------------------+
