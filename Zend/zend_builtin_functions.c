@@ -280,7 +280,7 @@ ZEND_FUNCTION(each)
 	}
 	zend_hash_index_update(return_value->value.ht, 1, &entry, sizeof(zval *), NULL);
 	entry->refcount++;
-	zend_hash_update_ptr(return_value->value.ht, "value", sizeof("value"), entry, sizeof(zval *), NULL);
+	zend_hash_update(return_value->value.ht, "value", sizeof("value"), &entry, sizeof(zval *), NULL);
 	entry->refcount++;
 
 	/* add the key elements */

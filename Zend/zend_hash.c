@@ -134,11 +134,11 @@ ZEND_API ulong hashpjw(char *arKey, uint nKeyLength)
 
 
 #define UPDATE_DATA(ht, p, pData, nDataSize)								\
-	if (flag & HASH_ADD_PTR) {												\
+	if (nDataSize == sizeof(void*)) {										\
 		if (!(p)->pDataPtr) {												\
 			pefree((p)->pData, (ht)->persistent);							\
 		}																	\
-		(p)->pDataPtr = pData;												\
+		(p)->pDataPtr = *(void **)pData;									\
 		(p)->pData = &(p)->pDataPtr;										\
 	} else {																\
 		if ((p)->pDataPtr) {												\
@@ -149,8 +149,8 @@ ZEND_API ulong hashpjw(char *arKey, uint nKeyLength)
 	}
 
 #define INIT_DATA(ht, p, pData, nDataSize);								\
-	if (flag & HASH_ADD_PTR) {											\
-		(p)->pDataPtr = pData;											\
+	if (nDataSize == sizeof(void*)) {									\
+		(p)->pDataPtr = *(void **)pData;								\
 		(p)->pData = &(p)->pDataPtr;									\
 	} else {															\
 		(p)->pData = (void *) pemalloc(nDataSize, (ht)->persistent);	\
