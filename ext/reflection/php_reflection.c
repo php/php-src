@@ -356,6 +356,12 @@ static void _function_string(string *str, zend_function *fptr, char* indent TSRM
 
 	string_printf(str, fptr->common.scope ? "%sMethod [ " : "%sFunction [ ", indent);
 	string_printf(str, (fptr->type == ZEND_USER_FUNCTION) ? "<user> " : "<internal> ");
+	if (fptr->common.fn_flags & ZEND_ACC_CTOR) {
+		string_printf(str, "<ctor> ");
+	}
+	if (fptr->common.fn_flags & ZEND_ACC_DTOR) {
+		string_printf(str, "<dtor> ");
+	}
 	if (fptr->common.fn_flags & ZEND_ACC_ABSTRACT) {
 		string_printf(str, "abstract ");
 	}
@@ -380,7 +386,7 @@ static void _function_string(string *str, zend_function *fptr, char* indent TSRM
 	}
 
 	string_printf(str, fptr->common.scope ? "method " : "function ");
-	if(fptr->op_array.return_reference) {
+	if (fptr->op_array.return_reference && !(fptr->common.fn_flags & (ZEND_ACC_CTOR|ZEND_ACC_DTOR))) {
 		string_printf(str, "&");
 	}
 	string_printf(str, "%s ] {\n", fptr->common.function_name);
