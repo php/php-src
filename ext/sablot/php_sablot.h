@@ -37,6 +37,9 @@ PHP_MINIT_FUNCTION(sablot);
 PHP_MINFO_FUNCTION(sablot);
 PHP_MSHUTDOWN_FUNCTION(sablot);
 
+/* Request functions */
+PHP_RSHUTDOWN_FUNCTION(sablot);
+
 /* Output transformation functions */
 PHP_FUNCTION(xslt_output_begintransform);
 PHP_FUNCTION(xslt_output_endtransform);
@@ -65,6 +68,7 @@ struct _php_sablot_error {
 	char *value;
 	struct _php_sablot_error *next;
 };
+
 typedef struct _php_sablot_error php_sablot_error;
 
 
@@ -102,6 +106,7 @@ typedef struct {
     php_sablot_error errors_start;
 	char *output_transform_file; /* For output transformations */
 	int last_errno;              /* Global last_errno, if no handle is found */
+	SablotHandle processor;
 } php_sablot_globals;
 
 
@@ -109,10 +114,18 @@ typedef struct {
 #define SABLOTG(v) (sablot_globals->v)
 #define SABLOTLS_FETCH() php_sablot_globals *sablot_globals = ts_resource(sablot_globals_id)
 #define SABLOTG_HANDLE (*sablot_globals)
+#define SABLOTLS_C sablot_globals
+#define SABLOTLS_CC , SABLOTLS_C
+#define SABLOTLS_D php_sablot_globals *sablot_globals
+#define SABLOTLS_DC , SABLOTLS_D
 #else
 #define SABLOTG(v) (sablot_globals.v)
 #define SABLOTG_HANDLE sablot_globals
 #define SABLOTLS_FETCH()
+#define SABLOTLS_C
+#define SABLOTLS_CC
+#define SABLOTLS_D
+#define SABLOTLS_DC
 #endif
 
 #else
