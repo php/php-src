@@ -33,6 +33,8 @@ AC_ARG_WITH(sybase-ct,
               [ $SYBASE_CT_LIBS ])
     AC_CHECK_LIB(insck, insck__getVdate,
               [ AC_ADD_LIBRARY(insck) ])
+    AC_CHECK_LIB(insck, bsd_tcp,
+              [ AC_ADD_LIBRARY(insck) ])
       LDFLAGS=$old_LDFLAGS
   else
     AC_MSG_RESULT(no)
