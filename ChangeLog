@@ -1,3 +1,159 @@
+2003-08-17  Jani Taskinen  <sniper@iki.fi>
+
+    * (PHP_4_3)
+      NEWS:
+      fix typo
+
+2003-08-17  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_API.h
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_operators.c
+      ZendEngine2/zend_reflection_api.c
+      ext/exif/exif.c
+      ext/sqlite/sqlite.c
+      sapi/cli/php_cli.c:
+      Fix warnings
+
+    * sapi/cgi/cgi_main.c:
+      Fix interactive mode
+
+2003-08-17  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/package-PEAR.xml:
+      fixing invalid version number for Pierre :)
+
+    * pear/PEAR/Installer.php:
+      reverting accidental commit of my fix for #25008 - we'll let Tomas review
+      the patch I submitted (oops).  The other stuff was good.
+
+    * pear/package-PEAR.xml
+      pear/PEAR/Installer.php:
+      fixed #25117, updated package-PEAR.xml to the current release level
+
+2003-08-17  Sara Golemon  <php@alphaweb.net>
+
+    * TODO:
+      No more vectors
+
+2003-08-17  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/dba/dba.c:
+      Fix warning
+
+2003-08-17  Ard Biesheuvel  <a.k.biesheuvel@its.tudelft.nl>
+
+    * ext/interbase/interbase.c:
+      Simplify previous fix
+
+    * ext/interbase/tests/004.phpt:
+      Test immediate BLOB inserts
+
+    * ext/interbase/interbase.c:
+      Fixed leak in _php_ibase_bind()
+
+2003-08-17  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/exif/exif.c:
+      kill some warnings
+
+2003-08-17  Ard Biesheuvel  <a.k.biesheuvel@its.tudelft.nl>
+
+    * ext/interbase/tests/004.phpt:
+      Test fetching BLOBs >64k
+
+2003-08-17  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/Makefile.frag:
+      Use explicit rule to create parsedate.c
+
+    * ext/sqlite/libsqlite/src/vdbe.c:
+      Use %p to display a pointer value
+
+    * ext/sqlite/libsqlite/src/table.c:
+      The first element of the array seems to store the members count
+      
+      Add a cast to (long) to quiet the compiler
+
+    * ext/sqlite/libsqlite/src/main.c:
+      The integer timeout is cast to a void *, passed to this function, and
+      cast back.
+      
+      Add a cast to (long) to quiet the compiler
+
+    * ext/sqlite/libsqlite/src/build.c:
+      Fix sizeof(void *) > sizeof(int) issue.
+      
+      n should be ptrdiff_t.
+
+    * ZendEngine2/zend.h
+      main/streams/php_stream_transport.h:
+      One bit fields need to be unsigned, otherwise there is no storage for
+      the sign bit
+      
+      "A signed bit field has a length of 1 bit."
+
+    * ZendEngine2/zend_API.h:
+      explicitly cast size_t to zend_uint to avoid warnings on 64 bit platforms.
+
+2003-08-17  Ard Biesheuvel  <a.k.biesheuvel@its.tudelft.nl>
+
+    * ext/interbase/interbase.c:
+      Fix possible leak in _php_ibase_fetch_hash()
+
+2003-08-17  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_execute.c:
+      Remove unnecessary if
+
+2003-08-17  Ard Biesheuvel  <a.k.biesheuvel@its.tudelft.nl>
+
+    * ext/interbase/interbase.c:
+      Apply fix for ibase_blob_get() to ibase_fetch_*()
+      Apply fix for ibase_blob_add() to ibase_query()/ibase_execute()
+
+2003-08-17  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_execute.c:
+      Put the code where it belongs - fixes a warning and confusion
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_execute.c:
+      Implement a TBD: JMP to the end of foreach
+
+    * ZendEngine2/zend_compile.c:
+      WS
+
+    * tests/classes/singleton_001.phpt:
+      Once is enough
+
+2003-08-17  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/parsedate.y:
+      - Fix the comment too
+
+    * ext/standard/parsedate.y:
+      - This parser contains 17 reduce conflicts
+
+2003-08-17  David Croft  <david@infotrek.co.uk>
+
+    * ext/standard/dl.c:
+      
+
+2003-08-17  Jani Taskinen  <sniper@iki.fi>
+
+    * (PHP_4_3)
+      NEWS:
+      made some entries more meaningful for users..
+
+2003-08-17  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_API.c:
+      - Show class names in error messages when dealing with methods
+      - Mark class as abstract if it gets an abstract method
+
 2003-08-16  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_4_3)
