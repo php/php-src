@@ -295,9 +295,9 @@ MAINTENANCE:         Unknown
 STATUS:              Unknown
 SINCE:               4.0.4
 -------------------------------------------------------------------------------
-extension:           icap
-maintenance:         unknown
-status:              obsolete
+EXTENSION:           icap
+MAINTENANCE:         Unknown
+STATUS:              Obsolete
 -------------------------------------------------------------------------------
 EXTENSION:           iconv
 PRIMARY MAINTAINER:  Moriyoshi Koizumi <moriyoshi@php.net>
