@@ -35,8 +35,8 @@ RSC=rc.exe
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 0
-# PROP BASE Output_Dir "pgsql___Win32_Release"
-# PROP BASE Intermediate_Dir "pgsql___Win32_Release"
+# PROP BASE Output_Dir "Release"
+# PROP BASE Intermediate_Dir "Release"
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 0
@@ -56,19 +56,20 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /machine:I386
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib ws2_32.lib libpqdll.lib php4ts.lib /nologo /dll /machine:I386 /libpath:"..\..\..\PostgreSQL\lib" /libpath:"..\..\Release_TS"
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib ws2_32.lib libpqdll.lib php4ts.lib /nologo /dll /machine:I386 /nodefaultlib:"msvcrt.lib" /out:"../../Release/pgsql.dll" /libpath:"..\..\..\PostgreSQL\lib" /libpath:"..\..\Release_TS"
 
 !ELSEIF  "$(CFG)" == "pgsql - Win32 Debug"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 1
-# PROP BASE Output_Dir "pgsql___Win32_Debug"
-# PROP BASE Intermediate_Dir "pgsql___Win32_Debug"
+# PROP BASE Output_Dir "Debug"
+# PROP BASE Intermediate_Dir "Debug"
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 1
 # PROP Output_Dir "Debug"
 # PROP Intermediate_Dir "Debug"
+# PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "PGSQL_EXPORTS" /YX /FD /GZ /c
 # ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /I "D:\Projects\php_build\postgresql\src\interfaces\libpq" /I "..\..\..\php_build\PostgreSQL\src\include" /I "..\.." /I "..\..\main" /I "..\..\Zend" /I "..\..\..\php_build\postgresql\src\interfaces\libpq" /I "..\..\..\bindlib_w32" /D "_DEBUG" /D "PGSQL_EXPORTS" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "ZEND_WIN32" /D "PHP_WIN32" /D "COMPILE_DL_PGSQL" /D HAVE_PGSQL=1 /D ZEND_DEBUG=1 /YX /FD /GZ /c
@@ -81,14 +82,14 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /debug /machine:I386 /pdbtype:sept
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /debug /machine:I386 /nodefaultlib:"msvcrtd.lib" /out:"../../Debug/pgsql.dll" /pdbtype:sept
 
 !ELSEIF  "$(CFG)" == "pgsql - Win32 Release_TS"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 0
-# PROP BASE Output_Dir "pgsql___Win32_Release_TS"
-# PROP BASE Intermediate_Dir "pgsql___Win32_Release_TS"
+# PROP BASE Output_Dir "Release_TS"
+# PROP BASE Intermediate_Dir "Release_TS"
 # PROP BASE Ignore_Export_Lib 0
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
@@ -110,19 +111,20 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib ws2_32.lib libpqdll.lib php4ts.lib /nologo /dll /machine:I386 /libpath:"..\..\..\PostgreSQL\lib" /libpath:"..\..\Release_TS"
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib ws2_32.lib libpq.lib php4ts.lib /nologo /dll /machine:I386 /out:"Release_TS/php_pgsql.dll" /libpath:"..\..\..\php_build\postgresql\src\interfaces\libpq\Release" /libpath:"..\..\Release_TS"
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib ws2_32.lib libpq.lib php4ts.lib /nologo /dll /machine:I386 /nodefaultlib:"msvcrt.lib" /out:"../../Release_TS/php_pgsql.dll" /libpath:"..\..\..\php_build\postgresql\src\interfaces\libpq\Release" /libpath:"..\..\Release_TS"
 
 !ELSEIF  "$(CFG)" == "pgsql - Win32 Debug_TS"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 1
-# PROP BASE Output_Dir "pgsql___Win32_Debug_TS"
-# PROP BASE Intermediate_Dir "pgsql___Win32_Debug_TS"
+# PROP BASE Output_Dir "Debug_TS"
+# PROP BASE Intermediate_Dir "Debug_TS"
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 1
 # PROP Output_Dir "Debug_TS"
 # PROP Intermediate_Dir "Debug_TS"
+# PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /D "_DEBUG" /D "PGSQL_EXPORTS" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "ZEND_WIN32" /D "PHP_WIN32" /D "COMPILE_DL_PGSQL" /D HAVE_PGSQL=1 /D ZTS=1 /YX /FD /GZ /c
 # ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /I "D:\Projects\php_build\postgresql\src\interfaces\libpq" /I "..\..\..\php_build\PostgreSQL\src\include" /I "..\.." /I "..\..\main" /I "..\..\Zend" /I "..\..\..\php_build\postgresql\src\interfaces\libpq" /I "..\..\..\bindlib_w32" /D "_DEBUG" /D "PGSQL_EXPORTS" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "ZEND_WIN32" /D "PHP_WIN32" /D "COMPILE_DL_PGSQL" /D HAVE_PGSQL=1 /D "ZTS" /D ZEND_DEBUG=1 /YX /FD /GZ /c
@@ -135,7 +137,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /debug /machine:I386 /pdbtype:sept
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib libpq.lib /nologo /dll /debug /machine:I386 /nodefaultlib:"msvcrtd.lib" /nodefaultlib:"libcmtd.lib" /out:"../../Debug_TS/pgsql.dll" /pdbtype:sept
 
 !ENDIF 
 
