@@ -182,7 +182,7 @@ PHP_FUNCTION(yp_first)
 		RETURN_FALSE;
 	}
 	array_init(return_value);
-	add_assoc_stringl_ex(return_value,outkey,outkeylen,outval,outvallen,1);
+	add_assoc_stringl_ex(return_value,outkey,outkeylen+1,outval,outvallen,1);
 
 	/* Deprecated */
 	add_assoc_stringl(return_value,"key",outkey,outkeylen,1);
@@ -212,7 +212,7 @@ PHP_FUNCTION(yp_next)
 	}
 	
 	array_init(return_value);
-	add_assoc_stringl_ex(return_value,outkey,outkeylen,outval,outvallen,1);
+	add_assoc_stringl_ex(return_value,outkey,outkeylen+1,outval,outvallen,1);
 }
 /* }}} */
 
