@@ -96,17 +96,25 @@ if (getenv('TEST_PHP_USER')) {
 	$user_tests = array();
 }
 
+// Get info from php
+$info_file = realpath(dirname(__FILE__)) . '/run-test-info.php';
+@unlink($info_file);
+$php_info = '<?php echo "
+PHP_SAPI    : " . PHP_SAPI . "
+PHP_VERSION : " . phpversion() . "
+PHP_OS      : " . PHP_OS . "
+INI actual  : " . realpath(get_cfg_var("cfg_file_path")) . "
+More .INIs  : " . str_replace("\n","", php_ini_scanned_files()); ?>';
+save_text($info_file, $php_info);
+$php_info = `$php -d 'output_handler=' -d 'zlib.output_compression=' $info_file`;
+@unlink($info_file);
+
 // Write test context information.
 
 echo "
 =====================================================================
 CWD         : $cwd
-PHP         : $php
-PHP_SAPI    : " . PHP_SAPI . "
-PHP_VERSION : " . PHP_VERSION . "
-PHP_OS      : " . PHP_OS . "
-INI actual  : " . realpath(get_cfg_var('cfg_file_path')) . "
-More .INIs  : " . str_replace("\n","", php_ini_scanned_files()) . "
+PHP         : $php $php_info
 Extra dirs  : ";
 foreach ($user_tests as $test_dir) {
 	echo "{$test_dir}\n              ";
