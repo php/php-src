@@ -456,7 +456,7 @@ ZEND_API void shutdown_memory_manager(int silent, int clean_cache)
 	TSRMLS_FETCH();
 
 #if defined(ZEND_WIN32) && !ZEND_DEBUG
-	if (AG(memory_heap)) {
+	if (clean_cache && AG(memory_heap)) {
 		HeapDestroy(AG(memory_heap));
 		return;
 	}
