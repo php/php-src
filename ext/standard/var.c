@@ -342,21 +342,23 @@ void php_var_export(zval **struc, int level TSRMLS_DC)
 PHP_FUNCTION(var_export)
 {
 	zval *var;
-	zend_bool i = 0;
+	zend_bool return_output = 0;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|b", &var, &i) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|b", &var, &return_output) == FAILURE) {
 		return;
 	}
 	
-	if (i) {
+	if (return_output) {
+		php_output_set_status(0 TSRMLS_CC);
 		php_start_ob_buffer (NULL, 0, 1 TSRMLS_CC);
 	}
 	
 	php_var_export(&var, 1 TSRMLS_CC);
 
-	if (i) {
+	if (return_output) {
 		php_ob_get_buffer (return_value TSRMLS_CC);
 		php_end_ob_buffer (0, 0 TSRMLS_CC);
+		php_output_set_status(1 TSRMLS_CC);
 	}
 }
 /* }}} */

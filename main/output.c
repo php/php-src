@@ -591,10 +591,12 @@ static inline void php_ob_append(const char *text, uint text_length TSRMLS_DC)
 	memcpy(target, text, text_length);
 	target[text_length]=0;
 
-	if (OG(active_ob_buffer).chunk_size
-			&& OG(active_ob_buffer).text_length >= OG(active_ob_buffer).chunk_size) {
+ 	/* If implicit_flush is On, send contents to next buffer and return. */
+	if (OG(implicit_flush) || OG(active_ob_buffer).chunk_size
+		&& OG(active_ob_buffer).text_length >= OG(active_ob_buffer).chunk_size)
+	{
 		zval *output_handler = OG(active_ob_buffer).output_handler;
-
+		
 		if (output_handler) {
 			output_handler->refcount++;
 		}
