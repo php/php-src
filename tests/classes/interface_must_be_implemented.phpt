@@ -6,7 +6,7 @@ ZE2 An interface must be implemented
 <?php
 
 interface if_a {
-	abstract function f_a();
+	function f_a();
 }
 	
 class derived_a implements if_a {
