@@ -227,7 +227,7 @@ installed package.'
             return $info;
         }
         if (empty($info)) {
-            $this->ui->displayLine("Nothing found for `$params[0]'");
+            $this->ui->displayError("Nothing found for `$params[0]'");
             return;
         }
         unset($info['filelist']);
