@@ -554,7 +554,7 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 			efree(target);
 		}
 	} else {
-		spprintf(&message, 0, "%s: %s ", origin, buffer);
+		spprintf(&message, 0, "%s: %s", origin, buffer);
 	}
 	efree(buffer);
 	efree(origin);
