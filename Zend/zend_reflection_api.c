@@ -34,6 +34,7 @@ zend_class_entry *reflection_ptr;
 zend_class_entry *reflection_function_ptr;
 zend_class_entry *reflection_parameter_ptr;
 zend_class_entry *reflection_class_ptr;
+zend_class_entry *reflection_object_ptr;
 zend_class_entry *reflection_method_ptr;
 zend_class_entry *reflection_property_ptr;
 zend_class_entry *reflection_extension_ptr;
@@ -62,7 +63,7 @@ zend_class_entry *reflection_extension_ptr;
 	zend_throw_exception(reflection_exception_ptr, msg, 0 TSRMLS_CC);                                                                 \
 	return;                                                                                                 \
 
-/* Smart string macros */
+/* {{{ Smart string functions */
 typedef struct _string {
 	char *string;
 	int len;
@@ -112,6 +113,23 @@ static string *string_write(string *str, char *buf, int len)
 	return str;
 }
 
+static string *string_append(string *str, string *append)
+{
+	if (append->len > 1) {
+		string_write(str, append->string, append->len - 1);
+	}
+	return str;
+}
+
+static void string_free(string *str)
+{
+	efree(str->string);
+	str->len = 0;
+	str->alloced = 0;
+	str->string = NULL;
+}
+/* }}} */
+
 /* Struct for properties */
 typedef struct _property_reference {
 	zend_class_entry *ce;
@@ -129,6 +147,7 @@ typedef struct {
 	zend_object zo;
 	void *ptr;
 	unsigned int free_ptr:1;
+	zval *obj;
 } reflection_object;
 
 static zend_object_handlers reflection_object_handlers;
@@ -160,6 +179,9 @@ static void reflection_objects_dtor(void *object, zend_object_handle handle TSRM
 	if (intern->free_ptr) {
 		efree(intern->ptr);
 	}
+	if (intern->obj) {
+		zval_ptr_dtor(&intern->obj);
+	}
 	zend_objects_destroy_object(object, handle TSRMLS_CC);
 }
 
@@ -175,6 +197,10 @@ static void reflection_objects_clone(void *object, void **object_clone TSRMLS_DC
 	ALLOC_HASHTABLE((*intern_clone)->zo.properties);
 	(*intern_clone)->ptr = intern->ptr;
 	(*intern_clone)->free_ptr = intern->free_ptr;
+	(*intern_clone)->obj = intern->obj;
+	if (intern->obj) {
+		zval_add_ref(&intern->obj);
+	}
 }
 
 ZEND_API zend_object_value reflection_objects_new(zend_class_entry *class_type TSRMLS_DC)
@@ -187,6 +213,7 @@ ZEND_API zend_object_value reflection_objects_new(zend_class_entry *class_type T
 	intern->zo.in_get = 0;
 	intern->zo.in_set = 0;
 	intern->ptr = NULL;
+	intern->obj = NULL;
 
 	ALLOC_HASHTABLE(intern->zo.properties);
 	zend_hash_init(intern->zo.properties, 0, NULL, ZVAL_PTR_DTOR, 0);
@@ -208,13 +235,18 @@ static zval * reflection_instanciate(zend_class_entry *pce, zval *object TSRMLS_
 }
 
 static void _function_string(string *str, zend_function *fptr, char *indent TSRMLS_DC);
-static void _property_string(string *str, zend_property_info *prop, char* indent TSRMLS_DC);
-static void _class_string(string *str, zend_class_entry *ce, char *indent TSRMLS_DC);
+static void _property_string(string *str, zend_property_info *prop, char *prop_name, char* indent TSRMLS_DC);
+static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *indent TSRMLS_DC);
 static void _extension_string(string *str, zend_module_entry *module, char *indent TSRMLS_DC);
 
-static void _class_string(string *str, zend_class_entry *ce, char *indent TSRMLS_DC)
+/* {{{ _class_string */
+static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *indent TSRMLS_DC)
 {
 	int count, count_static_props = 0, count_static_funcs = 0;
+	string sub_indent;
+	
+	string_init(&sub_indent);
+	string_printf(&sub_indent, "%s    ", indent);
 
 	/* TBD: Repair indenting of doc comment (or is this to be done in the parser?) */
 	if (ce->type == ZEND_USER_CLASS && ce->doc_comment) {
@@ -222,7 +254,11 @@ static void _class_string(string *str, zend_class_entry *ce, char *indent TSRMLS
 		string_write(str, "\n", 1);
 	}
 
-	string_printf(str, "%sClass [ ", indent);
+	if (obj) {
+		string_printf(str, "%sObject of class [ ", indent);
+	} else {
+		string_printf(str, "%sClass [ ", indent);
+	}
 	string_printf(str, (ce->type == ZEND_USER_CLASS) ? "<user>  " : "<internal> ");
 	if (ce->ce_flags & ZEND_ACC_ABSTRACT) {
 		string_printf(str, "abstract ");
@@ -307,7 +343,7 @@ static void _class_string(string *str, zend_class_entry *ce, char *indent TSRMLS
 
 			while (zend_hash_get_current_data_ex(&ce->properties_info, (void **) &prop, &pos) == SUCCESS) {
 				if (prop->flags & ZEND_ACC_STATIC) {
-					_property_string(str, prop, "    " TSRMLS_CC);
+					_property_string(str, prop, NULL, sub_indent.string TSRMLS_CC);
 				}
 				zend_hash_move_forward_ex(&ce->properties_info, &pos);
 			}
@@ -344,7 +380,7 @@ static void _class_string(string *str, zend_class_entry *ce, char *indent TSRMLS
 			while (zend_hash_get_current_data_ex(&ce->function_table, (void **) &mptr, &pos) == SUCCESS) {
 				if (mptr->common.fn_flags & ZEND_ACC_STATIC) {
 					string_printf(str, "\n");
-					_function_string(str, mptr, "    " TSRMLS_CC);
+					_function_string(str, mptr, sub_indent.string TSRMLS_CC);
 				}
 				zend_hash_move_forward_ex(&ce->function_table, &pos);
 			}
@@ -366,12 +402,46 @@ static void _class_string(string *str, zend_class_entry *ce, char *indent TSRMLS
 
 			while (zend_hash_get_current_data_ex(&ce->properties_info, (void **) &prop, &pos) == SUCCESS) {
 				if (!(prop->flags & ZEND_ACC_STATIC)) {
-					_property_string(str, prop, "    " TSRMLS_CC);
+					_property_string(str, prop, NULL, sub_indent.string TSRMLS_CC);
 				}
 				zend_hash_move_forward_ex(&ce->properties_info, &pos);
 			}
 		}
 		string_printf(str, "%s  }\n", indent);
+	}
+
+	if (obj && Z_OBJ_HT_P(obj)->get_properties) {
+		string       dyn;
+		HashTable    *properties = Z_OBJ_HT_P(obj)->get_properties(obj TSRMLS_CC);
+		HashPosition pos;
+		zval         **prop;
+
+		string_init(&dyn);
+		count = 0;
+
+		zend_hash_internal_pointer_reset_ex(properties, &pos);
+
+		while (zend_hash_get_current_data_ex(properties, (void **) &prop, &pos) == SUCCESS) {
+			char  *prop_name;
+			uint  prop_name_size;
+			ulong index;
+
+			if (zend_hash_get_current_key_ex(properties, &prop_name, &prop_name_size, &index, 1, &pos) == HASH_KEY_IS_STRING) {
+				if (prop_name_size && prop_name[0]) { /* skip all private and protected properties */
+					if (!zend_hash_quick_exists(&ce->properties_info, prop_name, prop_name_size, zend_get_hash_value(prop_name, prop_name_size))) {
+						count++;
+						_property_string(&dyn, NULL, prop_name, sub_indent.string TSRMLS_CC);	
+					}
+				}
+				efree(prop_name);
+			}
+			zend_hash_move_forward_ex(properties, &pos);
+		}
+
+		string_printf(str, "\n%s  - Dynamic properties [%d] {\n", indent, count);
+		string_append(str, &dyn);
+		string_printf(str, "%s  }\n", indent);
+		string_free(&dyn);
 	}
 
 	/* Non static methods */
@@ -387,7 +457,7 @@ static void _class_string(string *str, zend_class_entry *ce, char *indent TSRMLS
 			while (zend_hash_get_current_data_ex(&ce->function_table, (void **) &mptr, &pos) == SUCCESS) {
 				if (!(mptr->common.fn_flags & ZEND_ACC_STATIC)) {
 					string_printf(str, "\n");
-					_function_string(str, mptr, "    " TSRMLS_CC);
+					_function_string(str, mptr, sub_indent.string TSRMLS_CC);
 				}
 				zend_hash_move_forward_ex(&ce->function_table, &pos);
 			}
@@ -398,8 +468,11 @@ static void _class_string(string *str, zend_class_entry *ce, char *indent TSRMLS
 	}
 	
 	string_printf(str, "%s}\n", indent);
+	string_free(&sub_indent);
 }
+/* }}} */
 
+/* {{{ _parameter_string */
 static void _parameter_string(string *str, struct _zend_arg_info *arg_info, int offset, char* indent TSRMLS_DC)
 {
 	string_printf(str, "Parameter #%d [ ", offset);
@@ -419,7 +492,9 @@ static void _parameter_string(string *str, struct _zend_arg_info *arg_info, int 
 	}
 	string_write(str, " ]", sizeof(" ]")-1);
 }
+/* }}} */
 
+/* {{{ _function_parameter_string */
 static void _function_parameter_string(string *str, zend_function *fptr, char* indent TSRMLS_DC)
 {
 	zend_uint i;
@@ -439,7 +514,9 @@ static void _function_parameter_string(string *str, zend_function *fptr, char* i
 	}
 	string_printf(str, "%s}\n", indent);
 }
+/* }}} */
 
+/* {{{ _function_string */
 static void _function_string(string *str, zend_function *fptr, char* indent TSRMLS_DC)
 {
 	string param_indent;
@@ -498,45 +575,53 @@ static void _function_string(string *str, zend_function *fptr, char* indent TSRM
 	string_init(&param_indent);
 	string_printf(&param_indent, "%s  ", indent);
 	_function_parameter_string(str, fptr, param_indent.string TSRMLS_CC);
-	efree(param_indent.string);
+	string_free(&param_indent);
 	string_printf(str, "%s}\n", indent);
 }
+/* }}} */
 
-static void _property_string(string *str, zend_property_info *prop, char* indent TSRMLS_DC)
+/* {{{ _property_string */
+static void _property_string(string *str, zend_property_info *prop, char *prop_name, char* indent TSRMLS_DC)
 {
-	char *class_name, *prop_name;
+	char *class_name;
 
 	string_printf(str, "%sProperty [ ", indent);
-	if (!(prop->flags & ZEND_ACC_STATIC)) {
-		if (prop->flags & ZEND_ACC_IMPLICIT_PUBLIC) {
-			string_write(str, "<implicit> ", sizeof("<implicit> ") - 1);
-		} else {
-			string_write(str, "<default> ", sizeof("<default> ") - 1);
+	if (!prop) {
+		string_printf(str, "<dynamic> public $%s", prop_name);
+	} else {
+		if (!(prop->flags & ZEND_ACC_STATIC)) {
+			if (prop->flags & ZEND_ACC_IMPLICIT_PUBLIC) {
+				string_write(str, "<implicit> ", sizeof("<implicit> ") - 1);
+			} else {
+				string_write(str, "<default> ", sizeof("<default> ") - 1);
+			}
 		}
-	}
+	
+		/* These are mutually exclusive */
+		switch (prop->flags & ZEND_ACC_PPP_MASK) {
+			case ZEND_ACC_PUBLIC:
+				string_printf(str, "public ");
+				break;
+			case ZEND_ACC_PRIVATE:
+				string_printf(str, "private ");
+				break;
+			case ZEND_ACC_PROTECTED:
+				string_printf(str, "protected ");
+				break;
+		}
+		if(prop->flags & ZEND_ACC_STATIC) {
+			string_printf(str, "static ");
+		}
 
-	/* These are mutually exclusive */
-	switch (prop->flags & ZEND_ACC_PPP_MASK) {
-		case ZEND_ACC_PUBLIC:
-			string_printf(str, "public ");
-			break;
-		case ZEND_ACC_PRIVATE:
-			string_printf(str, "private ");
-			break;
-		case ZEND_ACC_PROTECTED:
-			string_printf(str, "protected ");
-			break;
+		unmangle_property_name(prop->name, &class_name, &prop_name);
+		string_printf(str, "$%s", prop_name);
 	}
-	if(prop->flags & ZEND_ACC_STATIC) {
-		string_printf(str, "static ");
-	}
-
-	unmangle_property_name(prop->name, &class_name, &prop_name);
-	string_printf(str, "$%s", prop_name);
 
 	string_printf(str, " ]\n");
 }
+/* }}} */
 
+/* {{{ _extension_string */
 static void _extension_string(string *str, zend_module_entry *module, char *indent TSRMLS_DC)
 {
 	string_printf(str, "%sExtension [ ", indent);
@@ -570,7 +655,9 @@ static void _extension_string(string *str, zend_module_entry *module, char *inde
 
 	string_printf(str, "%s}\n", indent);
 }
+/* }}} */
 
+/* {{{ _function_check_flag */
 static void _function_check_flag(INTERNAL_FUNCTION_PARAMETERS, int mask)
 {
 	reflection_object *intern;
@@ -580,7 +667,9 @@ static void _function_check_flag(INTERNAL_FUNCTION_PARAMETERS, int mask)
 	GET_REFLECTION_OBJECT_PTR(mptr);
 	RETURN_BOOL(mptr->common.fn_flags & mask);
 }
+/* }}} */
 
+/* {{{ reflection_class_factory */
 void reflection_class_factory(zend_class_entry *ce, zval *object TSRMLS_DC)
 {
 	reflection_object *intern;
@@ -594,7 +683,9 @@ void reflection_class_factory(zend_class_entry *ce, zval *object TSRMLS_DC)
 	intern->free_ptr = 0;
 	zend_hash_update(Z_OBJPROP_P(object), "name", sizeof("name"), (void **) &name, sizeof(zval *), NULL);
 }
+/* }}} */
 
+/* {{{ reflection_parameter_factory */
 void reflection_parameter_factory(struct _zend_arg_info *arg_info, int offset, zval *object TSRMLS_DC)
 {
 	reflection_object *intern;
@@ -616,7 +707,9 @@ void reflection_parameter_factory(struct _zend_arg_info *arg_info, int offset, z
 	intern->free_ptr = 1;
 	zend_hash_update(Z_OBJPROP_P(object), "name", sizeof("name"), (void **) &name, sizeof(zval *), NULL);
 }
+/* }}} */
 
+/* {{{ reflection_function_factory */
 void reflection_function_factory(zend_function *function, zval *object TSRMLS_DC)
 {
 	reflection_object *intern;
@@ -631,7 +724,9 @@ void reflection_function_factory(zend_function *function, zval *object TSRMLS_DC
 	intern->free_ptr = 0;
 	zend_hash_update(Z_OBJPROP_P(object), "name", sizeof("name"), (void **) &name, sizeof(zval *), NULL);
 }
+/* }}} */
 
+/* {{{ reflection_method_factory */
 void reflection_method_factory(zend_class_entry *ce, zend_function *method, zval *object TSRMLS_DC)
 {
 	reflection_object *intern;
@@ -649,7 +744,9 @@ void reflection_method_factory(zend_class_entry *ce, zend_function *method, zval
 	zend_hash_update(Z_OBJPROP_P(object), "name", sizeof("name"), (void **) &name, sizeof(zval *), NULL);
 	zend_hash_update(Z_OBJPROP_P(object), "class", sizeof("class"), (void **) &classname, sizeof(zval *), NULL);
 }
+/* }}} */
 
+/* {{{ reflection_property_factory */
 void reflection_property_factory(zend_class_entry *ce, zend_property_info *prop, zval *object TSRMLS_DC)
 {
 	reflection_object *intern;
@@ -688,7 +785,9 @@ void reflection_property_factory(zend_class_entry *ce, zend_property_info *prop,
 	zend_hash_update(Z_OBJPROP_P(object), "name", sizeof("name"), (void **) &name, sizeof(zval *), NULL);
 	zend_hash_update(Z_OBJPROP_P(object), "class", sizeof("class"), (void **) &classname, sizeof(zval *), NULL);
 }
+/* }}} */
 
+/* {{{ _relection_export */
 void _relection_export(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *ce_ptr, int ctor_argc)
 {
 	zval reflector, *reflector_ptr = &reflector;
@@ -712,7 +811,7 @@ void _relection_export(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *ce_ptr, i
 	}
 
 	/* Create object */
-	if (object_and_properties_init(&reflector, reflection_class_ptr, NULL) == FAILURE) {
+	if (object_and_properties_init(&reflector, ce_ptr, NULL) == FAILURE) {
 		_DO_THROW("Could not create reflector");
 	}
 
@@ -731,8 +830,8 @@ void _relection_export(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *ce_ptr, i
 	fci.no_separation = 1;
 
 	fcc.initialized = 1;
-	fcc.function_handler = reflection_class_ptr->constructor;
-	fcc.calling_scope = reflection_class_ptr;
+	fcc.function_handler = ce_ptr->constructor;
+	fcc.calling_scope = ce_ptr;
 	fcc.object_pp = &reflector_ptr;
 
 	result = zend_call_function(&fci, &fcc TSRMLS_CC);
@@ -816,6 +915,7 @@ ZEND_METHOD(reflection, export)
 		zval_ptr_dtor(&retval_ptr);
 	}
 }
+/* }}} */
 
 /* {{{ proto public static array Reflection::getModifierNames(int modifiers)
    Returns an array of modifier names */
@@ -1642,9 +1742,8 @@ ZEND_METHOD(reflection_class, export)
 }
 /* }}} */
 
-/* {{{ proto public Reflection_Class::__construct(mixed argument) throws Exception
-   Constructor. Takes a string or an instance as an argument */
-ZEND_METHOD(reflection_class, __construct)
+/* {{{ reflection_class_object_ctor */
+void reflection_class_object_ctor(INTERNAL_FUNCTION_PARAMETERS, int is_object)
 {
 	zval *argument;
 	zval *object;
@@ -1652,8 +1751,14 @@ ZEND_METHOD(reflection_class, __construct)
 	char *lcname;
 	zend_class_entry **ce;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &argument) == FAILURE) {
-		return;
+	if (is_object) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &argument) == FAILURE) {
+			return;
+		}
+	} else {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o", &argument) == FAILURE) {
+			return;
+		}
 	}
 
 	object = getThis();
@@ -1669,6 +1774,10 @@ ZEND_METHOD(reflection_class, __construct)
 		ZVAL_STRINGL(name, Z_OBJCE_P(argument)->name, Z_OBJCE_P(argument)->name_length, 1);
 		zend_hash_update(Z_OBJPROP_P(object), "name", sizeof("name"), (void **) &name, sizeof(zval *), NULL);
 		intern->ptr = Z_OBJCE_P(argument);
+		if (is_object) {
+			intern->obj = argument;
+			zval_add_ref(&argument);
+		}
 	} else { 
 		convert_to_string_ex(&argument);
 		zval_add_ref(&argument);
@@ -1684,6 +1793,14 @@ ZEND_METHOD(reflection_class, __construct)
 		intern->ptr = *ce;
 	}
 	intern->free_ptr = 0;
+}
+/* }}} */
+
+/* {{{ proto public Reflection_Class::__construct(mixed argument) throws Exception
+   Constructor. Takes a string or an instance as an argument */
+ZEND_METHOD(reflection_class, __construct)
+{
+	reflection_class_object_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
 
@@ -1713,7 +1830,7 @@ ZEND_METHOD(reflection_class, tostring)
 	METHOD_NOTSTATIC_NUMPARAMS(0);
 	GET_REFLECTION_OBJECT_PTR(ce);
 	string_init(&str);
-	_class_string(&str, ce, "" TSRMLS_CC);
+	_class_string(&str, ce, intern->obj, "" TSRMLS_CC);
 	RETURN_STRINGL(str.string, str.len - 1, 0);
 }
 /* }}} */
@@ -1860,6 +1977,7 @@ ZEND_METHOD(reflection_class, getmethod)
 }
 /* }}} */
 
+/* {{{ _addmethod */
 static int _addmethod(zend_function *mptr, int num_args, va_list args, zend_hash_key *hash_key TSRMLS_DC)
 {
 	zval *method;
@@ -1875,6 +1993,7 @@ static int _addmethod(zend_function *mptr, int num_args, va_list args, zend_hash
 	}
 	return 0;
 }
+/* }}} */
 
 /* {{{ proto public Reflection_Method[] Reflection_Class::getMethods()
    Returns an array of this class' methods */
@@ -1926,6 +2045,7 @@ ZEND_METHOD(reflection_class, getproperty)
 }
 /* }}} */
 
+/* {{{ _addproperty */
 static int _addproperty(zend_property_info *pptr, int num_args, va_list args, zend_hash_key *hash_key TSRMLS_DC)
 {
 	zval *property;
@@ -1941,6 +2061,7 @@ static int _addproperty(zend_property_info *pptr, int num_args, va_list args, ze
 	}
 	return 0;
 }
+/* }}} */
 
 /* {{{ proto public Reflection_Property[] Reflection_Class::getProperties()
    Returns an array of this class' properties */
@@ -2007,6 +2128,7 @@ ZEND_METHOD(reflection_class, getconstant)
 }
 /* }}} */
 
+/* {{{ _class_check_flag */
 static void _class_check_flag(INTERNAL_FUNCTION_PARAMETERS, int mask)
 {
 	reflection_object *intern;
@@ -2016,6 +2138,7 @@ static void _class_check_flag(INTERNAL_FUNCTION_PARAMETERS, int mask)
 	GET_REFLECTION_OBJECT_PTR(ce);
 	RETVAL_BOOL(ce->ce_flags & mask);
 }
+/* }}} */
 
 /* {{{ proto public bool Reflection_Class::isInstantiable()
    Returns whether this class is instantiable */
@@ -2039,7 +2162,6 @@ ZEND_METHOD(reflection_class, isinstantiable)
 	RETURN_BOOL(ce->constructor->common.fn_flags & ZEND_ACC_PUBLIC);
 }
 /* }}} */
-
 
 /* {{{ proto public bool Reflection_Class::isInterface()
    Returns whether this is an interface or a class */
@@ -2219,6 +2341,22 @@ ZEND_METHOD(reflection_class, issubclassof)
 }
 /* }}} */
 
+/* {{{ proto public static mixed Reflection_Object::export(mixed argument, [, bool return]) throws Exception
+   Exports a reflection object. Returns the output if TRUE is specified for return, printing it otherwise. */
+ZEND_METHOD(reflection_object, export)
+{
+	_relection_export(INTERNAL_FUNCTION_PARAM_PASSTHRU, reflection_object_ptr, 1);
+}
+/* }}} */
+
+/* {{{ proto public Reflection_Object::__construct(mixed argument) throws Exception
+   Constructor. Takes an instance as an argument */
+ZEND_METHOD(reflection_object, __construct)
+{
+	reflection_class_object_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
+}
+/* }}} */
+
 /* {{{ proto public static mixed Reflection_Property::export(mixed class, string name, [, bool return]) throws Exception
    Exports a reflection object. Returns the output if TRUE is specified for return, printing it otherwise. */
 ZEND_METHOD(reflection_property, export)
@@ -2326,7 +2464,7 @@ ZEND_METHOD(reflection_property, tostring)
 	METHOD_NOTSTATIC_NUMPARAMS(0);
 	GET_REFLECTION_OBJECT_PTR(ref);
 	string_init(&str);
-	_property_string(&str, ref->prop, "" TSRMLS_CC);
+	_property_string(&str, ref->prop, NULL, "" TSRMLS_CC);
 	RETURN_STRINGL(str.string, str.len - 1, 0);
 }
 /* }}} */
@@ -2765,6 +2903,12 @@ static zend_function_entry reflection_class_functions[] = {
 	{NULL, NULL, NULL}
 };
 
+static zend_function_entry reflection_object_functions[] = {
+	ZEND_ME(reflection_object, export, NULL, ZEND_ACC_STATIC|ZEND_ACC_PUBLIC)
+	ZEND_ME(reflection_object, __construct, NULL, 0)
+	{NULL, NULL, NULL}
+};
+
 static zend_function_entry reflection_property_functions[] = {
 	ZEND_ME(reflection_property, export, NULL, ZEND_ACC_STATIC|ZEND_ACC_PUBLIC)
 	ZEND_ME(reflection_property, __construct, NULL, 0)
@@ -2838,6 +2982,10 @@ ZEND_API void zend_register_reflection_api(TSRMLS_D) {
 	_reflection_entry.create_object = reflection_objects_new;
 	reflection_class_ptr = zend_register_internal_class(&_reflection_entry TSRMLS_CC);
 	reflection_register_implement(reflection_class_ptr, reflector_ptr TSRMLS_CC);
+
+	INIT_CLASS_ENTRY(_reflection_entry, "reflection_object", reflection_object_functions);
+	_reflection_entry.create_object = reflection_objects_new;
+	reflection_object_ptr = zend_register_internal_class_ex(&_reflection_entry, reflection_class_ptr, NULL TSRMLS_CC);
 
 	INIT_CLASS_ENTRY(_reflection_entry, "reflection_property", reflection_property_functions);
 	_reflection_entry.create_object = reflection_objects_new;
