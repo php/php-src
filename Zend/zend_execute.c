@@ -3660,13 +3660,22 @@ int zend_isset_isempty_dim_obj_handler(ZEND_OPCODE_HANDLER_ARGS)
 					}
 					break;
 			}
-		} else {
-			if ((*container)->type == IS_OBJECT) {
-				result = Z_OBJ_HT_P(*container)->has_property(*container, offset, (EX(opline)->extended_value == ZEND_ISEMPTY) TSRMLS_CC);
+		} else if ((*container)->type == IS_OBJECT) {
+			result = Z_OBJ_HT_P(*container)->has_property(*container, offset, (EX(opline)->extended_value == ZEND_ISEMPTY) TSRMLS_CC);
+		} else if ((*container)->type == IS_STRING) { /* string offsets */
+			switch (EX(opline)->extended_value) {
+				case ZEND_ISSET:
+					if (offset->value.lval <= Z_STRLEN_PP(container)) {
+						result = 1;
+					}
+					break;
+				case ZEND_ISEMPTY:
+					if (offset->value.lval <= Z_STRLEN_PP(container) && Z_STRVAL_PP(container)[offset->value.lval] != '0') {
+						result = 1;
+					}
+					break;
 			}
 		}
-	} else {
-		/* string offsets */
 	}
 	
 	EX_T(EX(opline)->result.u.var).tmp_var.type = IS_BOOL;
