@@ -67,7 +67,8 @@ int php3_init_head(INIT_FUNC_ARGS)
 	return SUCCESS;
 }
 
-void php3_noheader(void)
+
+PHPAPI void php3_noheader(void)
 {
 	php3_PrintHeader = 0;
 	header_called = 1;

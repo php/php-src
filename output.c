@@ -43,7 +43,7 @@ static int header_request;
  * Main
  */
 
-void zend_output_startup()
+PHPAPI void zend_output_startup()
 {
 	ob_buffer = NULL;
 	zend_body_write = zend_ub_body_write;

@@ -27,7 +27,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "php4isapi"=.\php4isapi\php4isapi.dsp - Package Owner=<4>
+Project: "php4dllts"=.\php4dllts.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -39,16 +39,13 @@ Package=<4>
     Project_Dep_Name libzendts
     End Project Dependency
     Begin Project Dependency
-    Project_Dep_Name php4libts
-    End Project Dependency
-    Begin Project Dependency
     Project_Dep_Name TSRM
     End Project Dependency
 }}}
 
 ###############################################################################
 
-Project: "php4libts"=.\php4libts.dsp - Package Owner=<4>
+Project: "php4isapi"=.\php4isapi\php4isapi.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -56,6 +53,9 @@ Package=<5>
 
 Package=<4>
 {{{
+    Begin Project Dependency
+    Project_Dep_Name php4dllts
+    End Project Dependency
 }}}
 
 ###############################################################################
@@ -69,13 +69,7 @@ Package=<5>
 Package=<4>
 {{{
     Begin Project Dependency
-    Project_Dep_Name libzendts
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name TSRM
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name php4libts
+    Project_Dep_Name php4dllts
     End Project Dependency
 }}}
 

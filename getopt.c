@@ -12,10 +12,10 @@
 #define OPTERRARG (3)
 
 
-char *optarg;
-int optind = 1;
-int opterr = 1;
-int optopt;
+PHPAPI char *optarg;
+PHPAPI int optind = 1;
+static int opterr = 1;
+static int optopt;
 
 static int
 optiserr(int argc, char * const *argv, int oint, const char *optstr,
@@ -44,8 +44,7 @@ optiserr(int argc, char * const *argv, int oint, const char *optstr,
     return('?');
 }
     
-int
-getopt(int argc, char* const *argv, const char *optstr)
+PHPAPI int getopt(int argc, char* const *argv, const char *optstr)
 {
     static int optchr = 0;
     static int dash = 0; /* have already seen the - */

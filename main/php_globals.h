@@ -12,7 +12,7 @@ typedef struct _php_core_globals php_core_globals;
 # define PLS_CC , PLS_C
 # define PG(v) (core_globals->v)
 # define PLS_FETCH()	php_core_globals *core_globals = ts_resource(core_globals_id)
-extern int core_globals_id;
+PHPAPI extern int core_globals_id;
 #else
 # define PLS_D
 # define PLS_DC

@@ -53,8 +53,6 @@
 #define PHP3_CONF_LONG(directive,value1,value2) \
 	php3_printf("<tr><td bgcolor=\"" ENTRY_NAME_COLOR "\">%s</td><td bgcolor=\"" CONTENTS_COLOR "\">%ld</td><td bgcolor=\"" CONTENTS_COLOR "\">%ld</td></tr>\n",directive,value1,value2);
 
-extern char **environ;
-
 #define SECTION(name)  PUTS("<hr><h2>" name "</h2>\n")
 
 #define ENTRY_NAME_COLOR "#999999"
@@ -76,7 +74,7 @@ static int _display_module_info(php3_module_entry *module)
 }
 
 
-void _php3_info(void)
+PHPAPI void _php3_info(void)
 {
 	char **env,*tmp1,*tmp2;
 	char *php3_uname;

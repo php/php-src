@@ -69,15 +69,15 @@ extern unsigned char second_arg_allow_ref[];
 #if WIN32
 #include "config.w32.h"
 #include "win95nt.h"
-# if defined(COMPILE_DL)
-# define PHPAPI __declspec(dllimport) 
-# else
-# define PHPAPI __declspec(dllexport) 
-# endif
+#	ifdef PHP_EXPORTS
+#	define PHPAPI __declspec(dllexport) 
+#	else
+#	define PHPAPI __declspec(dllimport) 
+#	endif
 #else
-# include "config.h"
-# define PHPAPI
-# define THREAD_LS
+#include "config.h"
+#define PHPAPI
+#define THREAD_LS
 #endif
 
 
@@ -314,12 +314,11 @@ extern PHPAPI int php3_fhttpd_write(char *a,int n);
 
 
 /* global variables */
-#ifndef THREAD_SAFE
 extern pval *data;
-#if (!PHP_ISAPI)
+#if !(WIN32||WINNT)
 extern char **environ;
 #endif
-#endif
+
 extern PHPAPI int le_index_ptr;  /* list entry type for index pointers */
 
 extern void phperror(char *error);

@@ -87,68 +87,10 @@ int saved_umask;
 php_apache_info_struct php_apache_info;		/* active config */
 
 int apache_php3_module_main(request_rec * r, int fd, int display_source_mode);
-extern int php3_module_startup();
-extern void php3_module_shutdown();
-extern void php3_module_shutdown_for_exec();
+int php_module_startup(sapi_functions_struct *sf);
+void php_module_shutdown();
+void php_module_shutdown_for_exec();
 
-extern int tls_create(void);
-extern int tls_destroy(void);
-extern int tls_startup(void);
-extern int tls_shutdown(void);
-
-#if WIN32|WINNT
-
-/* 
-	we will want to change this to the apache api
-	process and thread entry and exit functions
-*/
-BOOL WINAPI DllMain(HANDLE hModule, 
-                      DWORD  ul_reason_for_call, 
-                      LPVOID lpReserved)
-{
-    switch( ul_reason_for_call ) {
-    case DLL_PROCESS_ATTACH:
-		/* 
-		   I should be loading ini vars here 
-		   and doing whatever true global inits
-		   need to be done
-		*/
-		if (!tls_startup())
-			return 0;
-		if (!tls_create())
-			return 0;
-
-		break;
-    case DLL_THREAD_ATTACH:
-		if (!tls_create())
-			return 0;
-		/*		if (php3_module_startup()==FAILURE) {
-			return FAILURE;
-		}
-*/		break;
-    case DLL_THREAD_DETACH:
-		if (!tls_destroy())
-			return 0;
-/*		if (initialized) {
-			php3_module_shutdown();
-			return SUCCESS;
-		} else {
-			return FAILURE;
-		}
-*/		break;
-    case DLL_PROCESS_DETACH:
-		/*
-		    close down anything down in process_attach 
-		*/
-		if (!tls_destroy())
-			return 0;
-		if (!tls_shutdown())
-			return 0;
-		break;
-    }
-    return 1;
-}
-#endif
 
 void php3_save_umask()
 {
@@ -156,10 +98,27 @@ void php3_save_umask()
 	umask(saved_umask);
 }
 
+
+static int zend_apache_ub_write(const char *str, uint str_length)
+{
+	if (php3_rqst) {
+		return rwrite(str, str_length, php3_rqst);
+	} else {
+		return fwrite(str, 1, str_length, stdout);
+	}
+}
+
+
+sapi_functions_struct sapi_functions = {
+	zend_apache_ub_write
+};
+
+
 void php3_restore_umask()
 {
 	umask(saved_umask);
 }
+
 
 int send_php3(request_rec *r, int display_source_mode, char *filename)
 {
@@ -230,15 +189,18 @@ int send_php3(request_rec *r, int display_source_mode, char *filename)
 	return OK;
 }
 
+
 int send_parsed_php3(request_rec * r)
 {
 	return send_php3(r, 0, NULL);
 }
 
+
 int send_parsed_php3_source(request_rec * r)
 {
 	return send_php3(r, 0, NULL);
 }
+
 
 /*
  * Create the per-directory config structure with defaults
@@ -299,10 +261,11 @@ int php3_xbithack_handler(request_rec * r)
 	return send_parsed_php3(r);
 }
 
+
 void php3_init_handler(server_rec *s, pool *p)
 {
-	register_cleanup(p, NULL, php3_module_shutdown, php3_module_shutdown_for_exec);
-	php3_module_startup();
+	register_cleanup(p, NULL, php_module_shutdown, php_module_shutdown_for_exec);
+	php_module_startup(&sapi_functions);
 #if MODULE_MAGIC_NUMBER >= 19980527
 	ap_add_version_component("PHP/" PHP_VERSION);
 #endif

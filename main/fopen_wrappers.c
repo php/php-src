@@ -198,7 +198,7 @@ PHPAPI FILE *php3_fopen_wrapper(char *path, char *mode, int options, int *issock
 
 #if CGI_BINARY || FHTTPD || USE_SAPI
 
-FILE *php3_fopen_for_parser(void)
+PHPAPI FILE *php3_fopen_for_parser(void)
 {
 	FILE *fp;
 	struct stat st;
