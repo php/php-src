@@ -32,15 +32,11 @@
 #include <yaz/tcpip.h>
 #include <yaz/pquery.h>
 
-#ifdef YAZ_DATE
-#if YAZ_DATE >= 20010808L
-#define YAZ_HAS_SORT_SPEC 1
-#endif
+#ifndef YAZ_DATE
+#error YAZ version 1.8 or later must be used.
 #endif
 
-#if YAZ_HAS_SORT_SPEC
 #include <yaz/sortspec.h>
-#endif
 #include <yaz/diagbib1.h>
 #include <yaz/otherinfo.h>
 #include <yaz/marcdisp.h>
@@ -100,7 +96,7 @@ struct Yaz_AssociationInfo {
 	char *addinfo;
 	Yaz_ResultSet resultSets;
 	int persistent;
-		int in_use;
+	int in_use;
 	int order;
 	int state;
 	int mask_select;
@@ -119,8 +115,9 @@ struct Yaz_AssociationInfo {
 	int (*action)(Yaz_Association t);
 	int resultSetStartPoint;
 	int numberOfRecordsRequested;
-	char *elementSetNames;
+	char *elementSetName;
 	char *preferredRecordSyntax;
+	char *schema;
 
 	CCL_parser ccl_parser;
 	char *ill_buf_out;
@@ -164,8 +161,9 @@ static Yaz_Association yaz_association_mk ()
 	p->ill_len_out = 0;
 	p->resultSetStartPoint = 1;
 	p->numberOfRecordsRequested = 10;
-	p->elementSetNames = 0;
+	p->elementSetName = 0;
 	p->preferredRecordSyntax = 0;
+	p->schema = 0;
 	p->ccl_parser = ccl_parser_create();
 	p->ccl_parser->bibset = 0;
 	p->sort_criteria = 0;
@@ -200,8 +198,9 @@ static void yaz_association_destroy (Yaz_Association p)
 	/* buf_in */
 	/* action */
 	xfree (p->ill_buf_out);
-	xfree (p->elementSetNames);
+	xfree (p->elementSetName);
 	xfree (p->preferredRecordSyntax);
+	xfree (p->schema);
 	ccl_qual_rm(&p->ccl_parser->bibset);
 	ccl_parser_destroy(p->ccl_parser);
 }
@@ -267,6 +266,7 @@ function_entry yaz_functions [] = {
 	PHP_FE(yaz_ccl_parse, third_argument_force_ref)
 	PHP_FE(yaz_database, NULL)
 	PHP_FE(yaz_sort, NULL)
+	PHP_FE(yaz_schema, NULL)
 	{NULL, NULL, NULL}
 };
 
@@ -348,7 +348,6 @@ static void response_diag (Yaz_Association t, Z_DiagRec *p)
 		return;
 	}
 	r = p->u.defaultFormat;
-#ifdef ASN_COMPILED
 	switch (r->which)
 	{
 	case Z_DefaultDiagFormat_v2Addinfo:
@@ -358,9 +357,6 @@ static void response_diag (Yaz_Association t, Z_DiagRec *p)
 		addinfo = r->u.v3Addinfo;
 		break;
 	}
-#else
-	addinfo = r->addinfo;
-#endif
 	if (addinfo)
 		t->addinfo = xstrdup (addinfo);
 	t->error = *r->condition;
@@ -417,15 +413,11 @@ static void handle_records (Yaz_Association t, Z_Records *sr,
 {
 	if (sr && sr->which == Z_Records_NSD)
 	{
-#ifdef ASN_COMPILED
 		Z_DiagRec dr, *dr_p = &dr;
 		dr.which = Z_DiagRec_defaultFormat;
 		dr.u.defaultFormat = sr->u.nonSurrogateDiagnostic;
 		
 		response_diag (t, dr_p);
-#else
-		response_diag (t, sr->u.nonSurrogateDiagnostic);
-#endif
 	}
 	else if (sr && sr->which == Z_Records_multipleNSD)
 	{
@@ -775,31 +767,26 @@ static int send_search (Yaz_Association t)
 	/* resultSetPrepare (req, t, req->cur_pa); */
 	if (t->resultSetStartPoint == 1 && t->piggyback	 &&
 			t->numberOfRecordsRequested &&
+		(t->schema == 0 || *t->schema == 0) &&
 		(t->sort_criteria == 0 || *t->sort_criteria == 0) )
 	{
 		sreq->largeSetLowerBound = odr_malloc (t->odr_out, sizeof(int));
 		*sreq->largeSetLowerBound = 9999999;
 		sreq->smallSetUpperBound = &t->numberOfRecordsRequested;
 		sreq->mediumSetPresentNumber = &t->numberOfRecordsRequested;
-		if (t->elementSetNames && *t->elementSetNames)
+		if (t->elementSetName && *t->elementSetName)
 		{
 			Z_ElementSetNames *esn = odr_malloc (t->odr_out, sizeof(*esn));
 			
 			esn->which = Z_ElementSetNames_generic;
-			esn->u.generic = t->elementSetNames;
+			esn->u.generic = t->elementSetName;
 			sreq->mediumSetElementSetNames = esn;
 			sreq->smallSetElementSetNames = esn;
 		}
 		if (t->preferredRecordSyntax && *t->preferredRecordSyntax)
-		{
-			struct oident ident;
-		
-			ident.proto = PROTO_Z3950;
-			ident.oclass = CLASS_RECSYN;
-			ident.value = oid_getvalbyname (t->preferredRecordSyntax);
 			sreq->preferredRecordSyntax =
-				odr_oiddup (t->odr_out, oid_getoidbyent (&ident));
-		}
+				yaz_str_to_z3950oid (t->odr_out, CLASS_RECSYN,
+									 t->preferredRecordSyntax);
 	}
 	sreq->query = r->query;
 	sreq->databaseNames = set_DatabaseNames (t, &sreq->num_databaseNames);
@@ -850,23 +837,58 @@ static int send_present (Yaz_Association t)
 		return 0;
 
 	if (t->preferredRecordSyntax && *t->preferredRecordSyntax)
-	{
-		struct oident ident;
-		
-		ident.proto = PROTO_Z3950;
-		ident.oclass = CLASS_RECSYN;
-		ident.value = oid_getvalbyname (t->preferredRecordSyntax);
 		req->preferredRecordSyntax =
-			odr_oiddup (t->odr_out, oid_getoidbyent (&ident));
-	}
-	
-	if (t->elementSetNames && *t->elementSetNames)
+			yaz_str_to_z3950oid (t->odr_out, CLASS_RECSYN,
+								 t->preferredRecordSyntax);
+	if (t->schema && *t->schema)
 	{
-		Z_ElementSetNames *esn = odr_malloc (t->odr_out, sizeof(*esn));
+		Z_RecordComposition *compo = (Z_RecordComposition *)
+			odr_malloc (t->odr_out, sizeof(*compo));
+
+		req->recordComposition = compo;
+		compo->which = Z_RecordComp_complex;
+		compo->u.complex = (Z_CompSpec *)
+			odr_malloc(t->odr_out, sizeof(*compo->u.complex));
+		compo->u.complex->selectAlternativeSyntax = (bool_t *) 
+			odr_malloc(t->odr_out, sizeof(bool_t));
+		*compo->u.complex->selectAlternativeSyntax = 0;
+
+		compo->u.complex->generic = (Z_Specification *)
+			odr_malloc(t->odr_out, sizeof(*compo->u.complex->generic));
+
+		compo->u.complex->generic->schema = (Odr_oid *)
+			yaz_str_to_z3950oid (t->odr_out, CLASS_SCHEMA, t->schema);
+
+		if (!compo->u.complex->generic->schema)
+		{
+			/* OID wasn't a schema! Try record syntax instead. */
+
+			compo->u.complex->generic->schema = (Odr_oid *)
+				yaz_str_to_z3950oid (t->odr_out, CLASS_RECSYN, t->schema);
+		}
+		if (t->elementSetName && *t->elementSetName)
+		{
+			compo->u.complex->generic->elementSpec = (Z_ElementSpec *)
+				odr_malloc(t->odr_out, sizeof(Z_ElementSpec));
+			compo->u.complex->generic->elementSpec->which =
+				Z_ElementSpec_elementSetName;
+			compo->u.complex->generic->elementSpec->u.elementSetName =
+				odr_strdup (t->odr_out, t->elementSetName);
+		}
+		else
+			compo->u.complex->generic->elementSpec = 0;
+		compo->u.complex->num_dbSpecific = 0;
+		compo->u.complex->dbSpecific = 0;
+		compo->u.complex->num_recordSyntax = 0;
+		compo->u.complex->recordSyntax = 0;
+	}
+	else if (t->elementSetName && *t->elementSetName)
+	{
+			Z_ElementSetNames *esn = odr_malloc (t->odr_out, sizeof(*esn));
 		Z_RecordComposition *compo = odr_malloc (t->odr_out, sizeof(*compo));
 		
 		esn->which = Z_ElementSetNames_generic;
-		esn->u.generic = t->elementSetNames;
+		esn->u.generic = t->elementSetName;
 		compo->which = Z_RecordComp_simple;
 		compo->u.simple = esn;
 		req->recordComposition = compo;
@@ -874,122 +896,6 @@ static int send_present (Yaz_Association t)
 	send_APDU (t, apdu);
 	return 1;
 }
-
-#if YAZ_HAS_SORT_SPEC
-
-#else
-
-static int *odr_intdup(ODR o, int v)
-{
-	int *dst = (int*) odr_malloc (o, sizeof(int));
-	*dst = v;
-	return dst;
-}
-
-static Z_SortKeySpecList *yaz_sort_spec (ODR out, const char *arg)
-{
-	int oid[OID_SIZE];
-	oident bib1;
-	char sort_string_buf[32], sort_flags[32];
-	Z_SortKeySpecList *sksl = (Z_SortKeySpecList *)
-		odr_malloc (out, sizeof(*sksl));
-	int off;
-	
-	sksl->num_specs = 0;
-	sksl->specs = (Z_SortKeySpec **)odr_malloc (out, sizeof(sksl->specs) * 20);
-	
-	bib1.proto = PROTO_Z3950;
-	bib1.oclass = CLASS_ATTSET;
-	bib1.value = VAL_BIB1;
-	while ((sscanf (arg, "%31s %31s%n", sort_string_buf,
-			sort_flags, &off)) == 2	 && off > 1)
-	{
-		int i;
-		char *sort_string_sep;
-		char *sort_string = sort_string_buf;
-		Z_SortKeySpec *sks = (Z_SortKeySpec *)odr_malloc (out, sizeof(*sks));
-		Z_SortKey *sk = (Z_SortKey *)odr_malloc (out, sizeof(*sk));
-	
-		arg += off;
-		sksl->specs[sksl->num_specs++] = sks;
-		sks->sortElement = (Z_SortElement *)
-		odr_malloc (out, sizeof(*sks->sortElement));
-		sks->sortElement->which = Z_SortElement_generic;
-		sks->sortElement->u.generic = sk;
-		
-		if ((sort_string_sep = strchr (sort_string, '=')))
-		{
-			int i = 0;
-			sk->which = Z_SortKey_sortAttributes;
-			sk->u.sortAttributes = (Z_SortAttributes *)
-				odr_malloc (out, sizeof(*sk->u.sortAttributes));
-			sk->u.sortAttributes->id = oid_ent_to_oid(&bib1, oid);
-			sk->u.sortAttributes->list = (Z_AttributeList *)
-				odr_malloc (out, sizeof(*sk->u.sortAttributes->list));
-			sk->u.sortAttributes->list->attributes = (Z_AttributeElement **)
-				odr_malloc (out, 10 * 
-							sizeof(*sk->u.sortAttributes->list->attributes));
-			while (i < 10 && sort_string && sort_string_sep)
-			{
-				Z_AttributeElement *el = (Z_AttributeElement *)
-					odr_malloc (out, sizeof(*el));
-				sk->u.sortAttributes->list->attributes[i] = el;
-				el->attributeSet = 0;
-				el->attributeType = odr_intdup (out, atoi (sort_string));
-				el->which = Z_AttributeValue_numeric;
-				el->value.numeric =
-					odr_intdup (out, atoi (sort_string_sep + 1));
-				i++;
-				sort_string = strchr(sort_string, ',');
-				if (sort_string)
-				{
-					sort_string++;
-					sort_string_sep = strchr (sort_string, '=');
-				}
-			}
-			sk->u.sortAttributes->list->num_attributes = i;
-		}
-		else
-		{
-			sk->which = Z_SortKey_sortField;
-			sk->u.sortField = odr_strdup (out, sort_string);
-		}
-		sks->sortRelation = odr_intdup (out, Z_SortRelation_ascending);
-		sks->caseSensitivity = odr_intdup (out, Z_SortCase_caseSensitive);
-
-		sks->which = Z_SortKeySpec_null;
-		sks->u.null = odr_nullval ();
-	
-		for (i = 0; sort_flags[i]; i++)
-		{
-			switch (sort_flags[i])
-			{
-			case 'd':
-			case 'D':
-			case '>':
-				*sks->sortRelation = Z_SortRelation_descending;
-				break;
-			case 'a':
-			case 'A':
-			case '<':
-				*sks->sortRelation = Z_SortRelation_ascending;
-				break;
-			case 'i':
-			case 'I':
-				*sks->caseSensitivity = Z_SortCase_caseInsensitive;
-				break;
-			case 'S':
-			case 's':
-				*sks->caseSensitivity = Z_SortCase_caseSensitive;
-				break;
-			}
-		}
-	}
-	if (!sksl->num_specs)
-		return 0;
-	return sksl;
-}
-#endif
 
 static int send_sort (Yaz_Association t)
 {
@@ -2019,8 +1925,30 @@ PHP_FUNCTION(yaz_element)
 	if (p)
 	{
 		convert_to_string_ex (pval_element);
-		xfree (p->elementSetNames);
-		p->elementSetNames = xstrdup ((*pval_element)->value.str.val);
+		xfree (p->elementSetName);
+		p->elementSetName = xstrdup ((*pval_element)->value.str.val);
+	}
+	release_assoc (p);
+}
+/* }}} */
+
+/* {{{ proto int yaz_schema(int id, string schema)
+   Set Schema for retrieval */
+PHP_FUNCTION(yaz_schema)
+{
+	pval **pval_id, **pval_element;
+	Yaz_Association p;
+	if (ZEND_NUM_ARGS() != 2 || 
+		zend_get_parameters_ex(2, &pval_id, &pval_element) == FAILURE)
+	{
+		WRONG_PARAM_COUNT;
+	}
+	get_assoc (INTERNAL_FUNCTION_PARAM_PASSTHRU, pval_id, &p);
+	if (p)
+	{
+		convert_to_string_ex (pval_element);
+		xfree (p->schema);
+		p->schema = xstrdup ((*pval_element)->value.str.val);
 	}
 	release_assoc (p);
 }
@@ -2142,11 +2070,7 @@ static Z_ItemOrder *encode_item_order(Yaz_Association t,
 	Z_ItemOrder *req = odr_malloc (t->odr_out, sizeof(*req));
 	const char *str;
 
-#ifdef ASN_COMPILED
 	req->which=Z_IOItemOrder_esRequest;
-#else
-	req->which=Z_ItemOrder_esRequest;
-#endif
 	req->u.esRequest = (Z_IORequest *) 
 	odr_malloc(t->odr_out,sizeof(Z_IORequest));
 
