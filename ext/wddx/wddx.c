@@ -32,6 +32,7 @@
 #include "ext/standard/php_smart_str.h"
 #include "ext/standard/html.h"
 #include "ext/standard/php_string.h"
+#include "ext/standard/php_parsedate.h"
 
 #define WDDX_BUF_LEN			256
 #define PHP_CLASS_NAME_VAR		"php_class_name"
@@ -52,6 +53,7 @@
 #define EL_VERSION				"version"
 #define EL_RECORDSET			"recordset"
 #define EL_FIELD				"field"
+#define EL_DATETIME				"dateTime"
 
 #define php_wddx_deserialize(a,b) \
 	php_wddx_deserialize_ex((a)->value.str.val, (a)->value.str.len, (b))
@@ -77,7 +79,8 @@ typedef struct {
 		ST_BINARY,
 		ST_STRUCT,
 		ST_RECORDSET,
-		ST_FIELD
+		ST_FIELD,
+		ST_DATETIME
 	} type;
 	char *varname;
 } st_entry;
@@ -867,6 +870,14 @@ static void php_wddx_push_element(void *user_data, const char *name, const char 
 		}
 
 		wddx_stack_push((wddx_stack *)stack, &ent, sizeof(st_entry));
+	} else if (!strcmp(name, EL_DATETIME)) {
+		ent.type = ST_DATETIME;
+		SET_STACK_VARNAME;
+		
+		ALLOC_ZVAL(ent.data);
+		INIT_PZVAL(ent.data);
+		Z_TYPE_P(ent.data) = IS_LONG;
+		wddx_stack_push((wddx_stack *)stack, &ent, sizeof(st_entry));
 	}
 }
 /* }}} */
@@ -890,7 +901,8 @@ static void php_wddx_pop_element(void *user_data, const char *name)
 	if (!strcmp(name, EL_STRING) || !strcmp(name, EL_NUMBER) ||
 		!strcmp(name, EL_BOOLEAN) || !strcmp(name, EL_NULL) ||
 	  	!strcmp(name, EL_ARRAY) || !strcmp(name, EL_STRUCT) ||
-		!strcmp(name, EL_RECORDSET) || !strcmp(name, EL_BINARY)) {
+		!strcmp(name, EL_RECORDSET) || !strcmp(name, EL_BINARY) ||
+		!strcmp(name, EL_DATETIME)) {
 		wddx_stack_top(stack, (void**)&ent1);
 
 		if (!strcmp(name, EL_BINARY)) {
@@ -1054,6 +1066,22 @@ static void php_wddx_process_data(void *user_data, const char *s, int len)
 				}
 				break;
 
+			case ST_DATETIME: {
+				char *tmp;
+
+				tmp = do_alloca(len + 1);
+				memcpy(tmp, s, len);
+				tmp[len] = '\0';
+
+				Z_LVAL_P(ent->data) = php_parse_date(tmp, NULL);
+				/* date out of range < 1969 or > 2038 */
+				if (Z_LVAL_P(ent->data) == -1) {
+					Z_TYPE_P(ent->data) = IS_STRING;
+					Z_STRLEN_P(ent->data) = len;
+					Z_STRVAL_P(ent->data) = estrndup(s, len);
+				}
+				free_alloca(tmp);
+			}
 			default:
 				break;
 		}
