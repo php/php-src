@@ -19,5 +19,5 @@ $str = "\x88\xa9\xf0\xee\xf1\xea\xee\xf8\xed\xfb\xe9";
 var_dump($str, htmlentities($str, ENT_QUOTES, ''));
 ?>
 --EXPECT--
-string(11) "И©“ѕ”Ћѕџќў "
-string(63) "&euro;&copy;&#1088;&#1086;&#1089;&#1082;&#1086;&#1096;&#1085;&#1099;&#1081;"
+string(11) "И©роскошный"
+string(75) "&euro;&copy;&#1088;&#1086;&#1089;&#1082;&#1086;&#1096;&#1085;&#1099;&#1081;"
