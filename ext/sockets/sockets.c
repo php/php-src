@@ -437,7 +437,7 @@ PHP_FUNCTION(socket_fd_alloc)
 }
 /* }}} */
 
-/* {{{ proto bool socket_fd_dealloc(resource set)
+/* {{{ proto bool socket_fd_free(resource set)
    Deallocates a file descriptor set */
 PHP_FUNCTION(socket_fd_free)
 {
