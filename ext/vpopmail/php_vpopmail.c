@@ -24,6 +24,10 @@
  * incompat option is specified and work for minimal params
  */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #undef VPOPMAIL_IS_REALLY_OLD
 
 #include <errno.h>

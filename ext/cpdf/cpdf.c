@@ -38,6 +38,10 @@
 #undef THREAD_SAFE
 #endif
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include "php.h"
 #include "php_globals.h"
 #include "zend/zend_list.h"

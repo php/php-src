@@ -24,6 +24,10 @@
 /*
  * Interface to PHP
  */
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <php.h>
 #include <php_ini.h>	 /* for DISPLAY_INI_ENTRIES() */
 #include <ext/standard/info.h>	/* for php_info_print_table_*() */

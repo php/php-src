@@ -28,6 +28,11 @@
  *
  * -----------------------------------------------------------------------
  */
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include "corba.h"
 
 #include "php_config.h"	/* for COMPILE_DL_ORBIT */
