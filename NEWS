@@ -16,6 +16,7 @@ PHP 4                                                                      NEWS
 - Added --clean option into phpize. (Jani)
 - Added --ldflags option into php-config. (Jani)
 - Added imagesavealpha() and imageistruecolor() functions. (Pierre)
+- Added XBM support for bundled GD library. (Marcus)
 - Added session_regenerate_id() function. (Sascha)
 - Added zlib_get_coding_type() function which returns the coding type used for 
   output compression. (Moriyoshi)
