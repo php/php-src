@@ -25,7 +25,7 @@ STATUS:              Maintained
 EXTENSION:           oracle
 PRIMARY MAINTAINER:  Thies C. Arntzen <thies@digicol.de>
 STATUS:              Maintained
-COMMENT:			 Using the new OCI8 driver is encouraged where possible.
+COMMENT:             Using the new OCI8 driver is encouraged where possible.
 --------------------------------------------------------------------------------
 EXTENSION:           pcre
 PRIMARY MAINTAINER:  Andrei Zmievski <andrei@ispi.net>
