@@ -19,8 +19,8 @@ register_shutdown_function("cleanup");
 try {
 	$db = sqlite_factory();
 } catch(sqlite_exception $err) {
-	echo "Message: ".$err->getmessage()."\n";
-	echo "File: ".$err->getfile()."\n";
+	echo "Message: ".$err->getMessage()."\n";
+	echo "File: ".$err->getFile()."\n";
 }
 
 $db = sqlite_factory($dbname);
@@ -37,7 +37,7 @@ foreach ($data as $str) {
 }
 
 $r = $db->unbuffered_query("SELECT a, b from strings");
-while ($r->has_more()) {
+while ($r->hasMore()) {
 	var_dump($r->current(SQLITE_NUM));
 	$r->next();
 }

@@ -22,7 +22,7 @@ foreach ($data as $str) {
 }
 
 $r = $db->unbuffered_query("SELECT a from strings", SQLITE_NUM);
-while ($row = $r->has_more()) {
+while ($row = $r->hasMore()) {
 	var_dump($r->current());
 	$r->next();
 }

@@ -22,7 +22,7 @@ foreach ($data as $str) {
 
 echo "====BUFFERED====\n";
 $r = $db->query("SELECT a, b from strings");
-while ($r->has_more()) {
+while ($r->hasMore()) {
 	var_dump($r->current(SQLITE_NUM));
 	var_dump($r->column(0));
 	var_dump($r->column(1));
@@ -32,7 +32,7 @@ while ($r->has_more()) {
 }
 echo "====UNBUFFERED====\n";
 $r = $db->unbuffered_query("SELECT a, b from strings");
-while ($r->has_more()) {
+while ($r->hasMore()) {
 	var_dump($r->column(0));
 	var_dump($r->column('b'));
 	var_dump($r->column(1));
