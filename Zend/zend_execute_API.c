@@ -672,6 +672,9 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 
 				fci->function_table = &(*ce)->function_table;
 				calling_scope = *ce;
+			} else {
+				zend_error(E_NOTICE, "Non-callable array passed to zend_call_function()");
+				return FAILURE;
 			}
 
 			if (fci->function_table == NULL) {
