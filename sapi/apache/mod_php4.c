@@ -540,7 +540,19 @@ static int send_php(request_rec *r, int display_source_mode, char *filename)
 
 static int send_parsed_php(request_rec * r)
 {
-	return send_php(r, 0, NULL);
+	int result =  send_php(r, 0, NULL);
+
+#if MEMORY_USAGE_INFO
+    {
+        char mem_usage[ 32 ];
+        ALS_FETCH()
+ 
+        sprintf(mem_usage,"%u", (int) AG(max_allocated_memory));
+        ap_table_setn(r->notes, "mod_php_memory_usage", ap_pstrdup(r->pool,mem_usage));
+    }
+#endif
+
+	return result;
 }
 
 
