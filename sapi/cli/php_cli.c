@@ -263,10 +263,6 @@ static char* sapi_cli_read_cookies(TSRMLS_D)
 
 static void sapi_cli_send_header(sapi_header_struct *sapi_header, void *server_context TSRMLS_DC)
 {
-	if (sapi_header) {
-		PHPWRITE_H(sapi_header->header, sapi_header->header_len);
-		PHPWRITE_H("\r\n", 2);
-	}
 }
 
 
@@ -478,8 +474,6 @@ static int cli_seek_file_begin(zend_file_handle *file_handle, char *script_file,
 	*lineno = 1;
 
 	if (!(file_handle->handle.fp = VCWD_FOPEN(script_file, "rb"))) {
-		SG(headers_sent) = 1;
-		SG(request_info).no_headers = 1;
 		php_printf("Could not open input file: %s.\n", script_file);
 		return FAILURE;
 	}
@@ -514,7 +508,6 @@ int main(int argc, char *argv[])
 	zend_file_handle file_handle;
 /* temporary locals */
 	int behavior=PHP_MODE_STANDARD;
-	int no_headers=1;
 	int orig_optind=optind;
 	char *orig_optarg=optarg;
 	char *arg_free=NULL, **arg_excp=&arg_free;
@@ -608,8 +601,6 @@ int main(int argc, char *argv[])
 		EG(uninitialized_zval_ptr) = NULL;
 
 		if (cli_sapi_module.php_ini_path_override && cli_sapi_module.php_ini_ignore) {
-			SG(headers_sent) = 1;
-			SG(request_info).no_headers = 1;
 			PUTS("You cannot use both -n and -c switch. Use -h for help.\n");
 			exit_status=1;
 			goto out_err;
@@ -620,10 +611,8 @@ int main(int argc, char *argv[])
 
 			case 'h': /* help & quit */
 			case '?':
-				no_headers = 1;
 				php_output_startup();
 				php_output_activate(TSRMLS_C);
-				SG(headers_sent) = 1;
 				php_cli_usage(argv[0]);
 				php_end_ob_buffers(1 TSRMLS_CC);
 				exit_status=1;
@@ -634,10 +623,6 @@ int main(int argc, char *argv[])
 				if (php_request_startup(TSRMLS_C)==FAILURE) {
 					goto err;
 				}
-				if (no_headers) {
-					SG(headers_sent) = 1;
-					SG(request_info).no_headers = 1;
-				}
 				php_print_info(0xFFFFFFFF TSRMLS_CC);
 				php_end_ob_buffers(1 TSRMLS_CC);
 				exit_status=1;
@@ -646,7 +631,6 @@ int main(int argc, char *argv[])
 			case 'm': /* list compiled in modules */
 				php_output_startup();
 				php_output_activate(TSRMLS_C);
-				SG(headers_sent) = 1;
 				php_printf("[PHP Modules]\n");
 				print_modules(TSRMLS_C);
 				php_printf("\n[Zend Modules]\n");
@@ -657,13 +641,8 @@ int main(int argc, char *argv[])
 				goto out_err;
 
 			case 'v': /* show php version & quit */
-				no_headers = 1;
 				if (php_request_startup(TSRMLS_C)==FAILURE) {
 					goto err;
-				}
-				if (no_headers) {
-					SG(headers_sent) = 1;
-					SG(request_info).no_headers = 1;
 				}
 				php_printf("PHP %s (%s) (built: %s %s)\nCopyright (c) 1997-2003 The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__, __TIME__, get_zend_version());
 				php_end_ob_buffers(1 TSRMLS_CC);
@@ -716,7 +695,6 @@ int main(int argc, char *argv[])
 				}
 				behavior=PHP_MODE_PROCESS_STDIN;
 				script_file = optarg;
-				no_headers = 1;
 				break;
 
 			case 'f': /* parse file */
@@ -728,7 +706,6 @@ int main(int argc, char *argv[])
 					break;
 				}
 				script_file = optarg;
-				no_headers = 1;
 				break;
 
 			case 'g': /* define global variables on command line */
@@ -743,7 +720,6 @@ int main(int argc, char *argv[])
 				if (behavior != PHP_MODE_STANDARD) {
 					break;
 				}
-				no_headers = 1;
 				behavior=PHP_MODE_LINT;
 				break;
 
@@ -847,8 +823,6 @@ int main(int argc, char *argv[])
 		}
 
 		if (param_error) {
-			SG(headers_sent) = 1;
-			SG(request_info).no_headers = 1;
 			PUTS(param_error);
 			exit_status=1;
 			goto out_err;
@@ -863,7 +837,6 @@ int main(int argc, char *argv[])
 		  && behavior!=PHP_MODE_PROCESS_STDIN 
 		  && strcmp(argv[optind-1],"--")) 
 		{
-			no_headers = 1;
 			script_file=argv[optind];
 			optind++;
 		}
@@ -897,8 +870,6 @@ int main(int argc, char *argv[])
 		if (php_request_startup(TSRMLS_C)==FAILURE) {
 			*arg_excp = arg_free;
 			fclose(file_handle.handle.fp);
-			SG(headers_sent) = 1;
-			SG(request_info).no_headers = 1;
 			php_request_shutdown((void *) 0);
 			PUTS("Could not startup.\n");
 			goto err;
@@ -911,11 +882,6 @@ int main(int argc, char *argv[])
 			for (i = 1; i < argc; i++) {
 				memset(argv[i], 0, strlen(argv[i]));
 			}
-		}
-
-		if (no_headers) {
-			SG(headers_sent) = 1;
-			SG(request_info).no_headers = 1;
 		}
 
 		/* This actually destructs the elements of the list - ugly hack */
