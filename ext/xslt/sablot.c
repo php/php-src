@@ -158,13 +158,15 @@ PHP_MINIT_FUNCTION(xslt)
 	le_xslt = zend_register_list_destructors_ex(free_processor, NULL, le_xslt_name, module_number);
 
 	/* Generic options, which can apply to 'all' xslt processors */
-	REGISTER_LONG_CONSTANT("XSLT_SILENT", SAB_NO_ERROR_REPORTING, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("XSLT_OPT_SILENT", SAB_NO_ERROR_REPORTING, CONST_CS | CONST_PERSISTENT);
 
+	/* Error constants, which are useful in userspace. */
+	REGISTER_LONG_CONSTANT("XSLT_ERR_UNSUPPORTED_SCHEME", SH_ERR_UNSUPPORTED_SCHEME, CONST_CS | CONST_PERSISTENT);
 	/* Sablotron specific options */
-	REGISTER_LONG_CONSTANT("XSLT_SAB_PARSE_PUBLIC_ENTITIES", SAB_PARSE_PUBLIC_ENTITIES, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("XSLT_SAB_DISABLE_ADDING_META", SAB_DISABLE_ADDING_META, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("XSLT_SAB_DISABLE_STRIPPING", SAB_DISABLE_STRIPPING, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("XSLT_SAB_IGNORE_DOC_NOT_FOUND", SAB_IGNORE_DOC_NOT_FOUND, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("XSLT_SABOPT_PARSE_PUBLIC_ENTITIES", SAB_PARSE_PUBLIC_ENTITIES, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("XSLT_SABOPT_DISABLE_ADDING_META", SAB_DISABLE_ADDING_META, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("XSLT_SABOPT_DISABLE_STRIPPING", SAB_DISABLE_STRIPPING, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("XSLT_SABOPT_IGNORE_DOC_NOT_FOUND", SAB_IGNORE_DOC_NOT_FOUND, CONST_CS | CONST_PERSISTENT);
 
 	return SUCCESS;
 }
@@ -1534,10 +1536,7 @@ static MH_ERROR error_log(void *user_data, SablotHandle proc, MH_ERROR code, MH_
 	if (level == MH_LEVEL_WARN  ||
 	    level == MH_LEVEL_ERROR ||
 	    level == MH_LEVEL_CRITICAL) {
-		if (XSLT_ERRSTR(handle))
-			efree(XSLT_ERRSTR(handle));
-		
-		XSLT_ERRSTR(handle) = estrdup(errmsg);
+		XSLT_REG_ERRMSG(errmsg, handle);
 	}
 
 	/* If we haven't allocated and opened the file yet */
@@ -1722,13 +1721,7 @@ static MH_ERROR error_print(void *user_data, SablotHandle proc, MH_ERROR code, M
 		msgbuf = emalloc((sizeof(msgformat) - 4) + strlen(errmsg) + strlen(errline) + 1);
 		sprintf(msgbuf, msgformat, errline, errmsg);
 
-		/* If an old message exists, remove it -> leak */
-		if (XSLT_ERRSTR(handle))
-			efree(XSLT_ERRSTR(handle));
-
-		/* Copy the error message onto the handle for use when 
-		   the xslt_error function is called */
-		XSLT_ERRSTR(handle) = estrdup(errmsg);
+		XSLT_REG_ERRMSG(errmsg, handle);
 
 		/* Output a warning */
 		php_error(E_WARNING, msgbuf);
