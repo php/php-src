@@ -2418,7 +2418,7 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, char *mode, int optio
 	}
 
 	if (stream && stream->ops->seek && (stream->flags & PHP_STREAM_FLAG_NO_SEEK) == 0 && strchr(mode, 'a')) {
-		fpos_t newpos = 0;
+		off_t newpos = 0;
 
 		/* if opened for append, we need to revise our idea of the initial file position */
 		if (0 == stream->ops->seek(stream, 0, SEEK_CUR, &newpos TSRMLS_CC)) {
