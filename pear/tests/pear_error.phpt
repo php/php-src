@@ -9,7 +9,7 @@ PEAR_Error test
 //               - PEAR::isError static method
 // testing PEAR_Error
 
-require_once "PEAR.php";
+require_once "../PEAR.php";
 
 error_reporting(4095);
 
@@ -113,16 +113,16 @@ mode=print: test error[pear_error: message="test error" code=-42 mode=print leve
 mode=callback(function): errorhandler function called, obj=[pear_error: message="test error" code=-42 mode=callback callback=errorhandler prefix="" prepend="" append="" info=""]
 mode=callback(method): errorhandler method called, obj=[pear_error: message="test error" code=-42 mode=callback callback=errorclass::errorhandler prefix="" prepend="" append="" info=""]
 mode=print&trigger: test error<br>
-<b>Notice</b>:  test error in <b>/usr/local/share/php/pear/PEAR.php</b> on line <b>401</b><br>
+<b>Notice</b>:  test error in <b>/home/ssb/cvs/php/php4/pear/PEAR.php</b> on line <b>567</b><br>
 [pear_error: message="test error" code=-42 mode=print|trigger level=notice prefix="" prepend="" append="" info=""]
 mode=trigger: <br>
-<b>Notice</b>:  test error in <b>/usr/local/share/php/pear/PEAR.php</b> on line <b>401</b><br>
+<b>Notice</b>:  test error in <b>/home/ssb/cvs/php/php4/pear/PEAR.php</b> on line <b>567</b><br>
 [pear_error: message="test error" code=-42 mode=trigger level=notice prefix="" prepend="" append="" info=""]
 mode=trigger,level=notice: <br>
-<b>Notice</b>:  test error in <b>/usr/local/share/php/pear/PEAR.php</b> on line <b>401</b><br>
+<b>Notice</b>:  test error in <b>/home/ssb/cvs/php/php4/pear/PEAR.php</b> on line <b>567</b><br>
 [pear_error: message="test error" code=-42 mode=trigger level=notice prefix="" prepend="" append="" info=""]
 mode=trigger,level=warning: <br>
-<b>Warning</b>:  test error in <b>/usr/local/share/php/pear/PEAR.php</b> on line <b>401</b><br>
+<b>Warning</b>:  test error in <b>/home/ssb/cvs/php/php4/pear/PEAR.php</b> on line <b>567</b><br>
 [pear_error: message="test error" code=-42 mode=trigger level=warning prefix="" prepend="" append="" info=""]
 mode=trigger,level=error: <br>
-<b>Fatal error</b>:  test error in <b>/usr/local/share/php/pear/PEAR.php</b> on line <b>401</b><br>
+<b>Fatal error</b>:  test error in <b>/home/ssb/cvs/php/php4/pear/PEAR.php</b> on line <b>567</b><br>
