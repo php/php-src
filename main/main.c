@@ -71,6 +71,7 @@
 
 #include "php_content_types.h"
 #include "php_ticks.h"
+#include "php_logos.h"
 
 #include "SAPI.h"
 
@@ -883,8 +884,8 @@ int php_module_startup(sapi_module_struct *sf)
 	zend_set_utility_values(&zuv);
 	php_startup_sapi_content_types();
 
-    REGISTER_MAIN_STRINGL_CONSTANT("PHP_VERSION", PHP_VERSION, sizeof(PHP_VERSION)-1, CONST_PERSISTENT | CONST_CS);
-    REGISTER_MAIN_STRINGL_CONSTANT("PHP_OS", php_os, strlen(php_os), CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_STRINGL_CONSTANT("PHP_VERSION", PHP_VERSION, sizeof(PHP_VERSION)-1, CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_STRINGL_CONSTANT("PHP_OS", php_os, strlen(php_os), CONST_PERSISTENT | CONST_CS);
 
 	if (php_startup_ticks(PLS_C) == FAILURE) {
 		php_printf("Unable to start PHP ticks\n");
@@ -1135,75 +1136,6 @@ static void php_build_argv(char *s, zval *track_vars_array ELS_DC PLS_DC)
 	zend_hash_update(track_vars_array->value.ht, "argc", sizeof("argc"), &argc, sizeof(pval *), NULL);
 }
 
-
-#include "logos.h"
-
-typedef struct _php_info_logo { 
-	char *mimetype;
-	int mimelen;
-	unsigned char *data; 
-	int size; 
-} php_info_logo;
-
-HashTable phpinfo_logo_hash;
-
-PHPAPI int php_register_info_logo(char *logo_string, char *mimetype, unsigned char *data, int size)
-{
-	php_info_logo *info_logo = (php_info_logo *)malloc(sizeof(php_info_logo));
-
-	if(!info_logo) return FAILURE;
-	info_logo->mimetype = mimetype;
-	info_logo->mimelen  = strlen(mimetype);
-	info_logo->data     = data;
-	info_logo->size     = size;
-
-	return zend_hash_add(&phpinfo_logo_hash, logo_string, strlen(logo_string), info_logo, sizeof(php_info_logo), NULL);
-}
-
-PHPAPI int php_unregister_info_logos(char *logo_string)
-{
-	return zend_hash_del(&phpinfo_logo_hash, logo_string, strlen(logo_string));
-}
-
-int php_init_info_logos(void)
-{
-	if(zend_hash_init(&phpinfo_logo_hash, 0, NULL, NULL, 1)==FAILURE) 
-		return FAILURE;
-
-	php_register_info_logo(PHP_LOGO_GUID    , "image/gif", php_logo    , sizeof(php_logo));
-	php_register_info_logo(PHP_EGG_LOGO_GUID, "image/gif", php_egg_logo, sizeof(php_egg_logo));
-	php_register_info_logo(ZEND_LOGO_GUID   , "image/gif", zend_logo   , sizeof(zend_logo));
-
-	return SUCCESS;
-}
-
-int php_shutdown_info_logos(void)
-{
-	zend_hash_destroy(&phpinfo_logo_hash);
-	return SUCCESS;
-}
-
-#define CONTENT_TYPE_HEADER "Content-Type: "
-static int php_info_logos(char *logo_string)
-{
-	php_info_logo *logo_image;
-	char *content_header;
-	int len;
-
-	if(FAILURE==zend_hash_find(&phpinfo_logo_hash,logo_string,strlen(logo_string),(void **)&logo_image))
-		return 0;
-
-	len=strlen(CONTENT_TYPE_HEADER)+logo_image->mimelen;
-	content_header=malloc(len+1);
-	if(!content_header) return 0;
-	strcpy(content_header,CONTENT_TYPE_HEADER);
-	strcat(content_header,logo_image->mimetype);
-	sapi_add_header(content_header, len, 1);
-	free(content_header);
-
-	PHPWRITE(logo_image->data, logo_image->size);
-	return 1;
-}
 
 PHPAPI int php_handle_special_queries(SLS_D PLS_DC)
 {
