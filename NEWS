@@ -1,6 +1,7 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.2.0-dev
+- Fixed several crash bugs in the xslt extension (Markus, Derick)
 - Fixed problem with dbase not returning very large (larger than long)
 - integers properly. (Vlad)
 - Added concepts to IRCG: bailout-on-trivial issue, write output to
