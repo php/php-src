@@ -166,15 +166,7 @@ static struct pdo_dbh_methods pgsql_methods = {
 static int pdo_pgsql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_DC) /* {{{ */
 {
 	pdo_pgsql_db_handle *H;
-	int i, ret = 0;
-	char *host, *port, *dbname;
-	struct pdo_data_src_parser vars[] = {
-		{ "host", "", 0 },
-		{ "port", "", 0 },
-		{ "dbname", "", 0 },
-	};
-
-	php_pdo_parse_data_source(dbh->data_source, dbh->data_source_len, vars, 3);
+	int ret = 0;
 
 	H = pecalloc(1, sizeof(pdo_pgsql_db_handle), dbh->is_persistent);
 	dbh->driver_data = H;
@@ -182,20 +174,7 @@ static int pdo_pgsql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 	H->einfo.errcode = 0;
 	H->einfo.errmsg = NULL;
 	
-	/* handle for the server */
-	host = vars[0].optval;
-	port = vars[1].optval;
-	dbname = vars[2].optval;
-
-	H->server = 
-		PQsetdbLogin(host,
-					 port,
-					 NULL, /* options */
-					 NULL, /* tty */
-					 dbname,
-					 dbh->username,
-					 dbh->password
-					 );
+	H->server = PQconnectdb(dbh->data_source); 
 	
 	if (PQstatus(H->server) != CONNECTION_OK) {
 		pdo_pgsql_error(dbh, PGRES_FATAL_ERROR);
@@ -215,12 +194,6 @@ static int pdo_pgsql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 	ret = 1;
 	
 cleanup:
-	for (i = 0; i < sizeof(vars)/sizeof(vars[0]); i++) {
-		if (vars[i].freeme) {
-			efree(vars[i].optval);
-		}
-	}
-
 	if (!ret) {
 		pgsql_handle_closer(dbh TSRMLS_CC);
 	}
