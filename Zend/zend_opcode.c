@@ -50,7 +50,7 @@ static void op_array_alloc_ops(zend_op_array *op_array)
 
 
 
-void init_op_array(zend_op_array *op_array, int type, int initial_ops_size)
+void init_op_array(zend_op_array *op_array, int type, int initial_ops_size CLS_DC)
 {
 	op_array->type = type;
 #if SUPPORT_INTERACTIVE
@@ -78,6 +78,7 @@ void init_op_array(zend_op_array *op_array, int type, int initial_ops_size)
 	op_array->T = 0;
 
 	op_array->function_name = NULL;
+	op_array->filename = zend_get_compiled_filename(CLS_C);
 
 	op_array->arg_types = NULL;
 
@@ -188,7 +189,6 @@ void init_op(zend_op *op CLS_DC)
 {
 	memset(&op->result, 0, sizeof(znode));
 	op->lineno = CG(zend_lineno);
-	op->filename = zend_get_compiled_filename(CLS_C);
 	op->result.op_type = IS_UNUSED;
 	op->extended_value = 0;
 	memset(&op->op1, 0, sizeof(znode));
@@ -252,7 +252,6 @@ static void zend_update_extended_info(zend_op_array *op_array CLS_DC)
 					continue;
 				}
 				opline->lineno = (opline+1)->lineno;
-				opline->filename = (opline+1)->filename;
 			} else {
 				opline->opcode = ZEND_NOP;
 			}
@@ -264,7 +263,6 @@ static void zend_update_extended_info(zend_op_array *op_array CLS_DC)
 	opline->op1.op_type = IS_UNUSED;
 	opline->op2.op_type = IS_UNUSED;
 	if (op_array->last>0) {
-		opline->filename = op_array->opcodes[op_array->last-2].filename;
 		opline->lineno= op_array->opcodes[op_array->last-2].lineno;
 	}
 }
@@ -281,6 +279,7 @@ static void zend_extension_op_array_handler(zend_extension *extension, zend_op_a
 
 int pass_two(zend_op_array *op_array)
 {
+	zend_op *opline=op_array->opcodes, *end=opline+op_array->last;
 	CLS_FETCH();
 
 	if (op_array->type!=ZEND_USER_FUNCTION && op_array->type!=ZEND_EVAL_CODE) {
@@ -292,15 +291,6 @@ int pass_two(zend_op_array *op_array)
 	if (CG(handle_op_arrays)) {
 		zend_llist_apply_with_argument(&zend_extensions, (void (*)(void *, void *)) zend_extension_op_array_handler, op_array);
 	}
-	op_array->done_pass_two = 1;
-	return 0;
-}
-
-
-ZEND_API void pass_include_eval(zend_op_array *op_array)
-{
-	zend_op *opline=op_array->opcodes, *end=opline+op_array->last;
-
 	while (opline<end) {
 		if (opline->op1.op_type==IS_CONST) {
 			opline->op1.u.constant.is_ref = 1;
@@ -312,6 +302,8 @@ ZEND_API void pass_include_eval(zend_op_array *op_array)
 		}
 		opline++;
 	}
+	op_array->done_pass_two = 1;
+	return 0;
 }
 
 

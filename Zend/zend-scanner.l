@@ -243,7 +243,7 @@ ZEND_API void zend_close_file_handle(zend_file_handle *file_handle CLS_DC)
 
 ZEND_API int open_file_for_scanning(zend_file_handle *file_handle CLS_DC)
 {
-	char *file_path;
+	char *file_path=NULL;
 
 #ifndef ZTS
 	switch (file_handle->type) {
@@ -324,31 +324,16 @@ ZEND_API int open_file_for_scanning(zend_file_handle *file_handle CLS_DC)
 END_EXTERN_C()
 
 
-ZEND_API zend_op_array *zend_compile_files(int type CLS_DC, int file_count, ...)
-{
-	va_list files;
-	zend_op_array *op_array;
-
-	va_start(files, file_count);
-	op_array = zend_v_compile_files(type CLS_CC, file_count, files);
-	va_end(files);
-	return op_array;
-}
-
-
-ZEND_API zend_op_array *v_compile_files(int type CLS_DC, int file_count, va_list files)
+ZEND_API zend_op_array *compile_file(zend_file_handle *file_handle CLS_DC)
 {
 	zend_lex_state original_lex_state;
 	zend_op_array *op_array = (zend_op_array *) emalloc(sizeof(zend_op_array));
 	zend_op_array *original_active_op_array = CG(active_op_array);
 	zend_op_array *retval=NULL;
-	int i;
 	int compiler_result;
-	int compiled_files=0;
-	int last_file=0;
+	zend_bool compilation_successful=0;
 	znode retval_znode;
 	zend_bool original_in_compilation = CG(in_compilation);
-	zend_file_handle **file_handles = (zend_file_handle **) do_alloca(file_count * sizeof(zend_file_handle *));
 
 	retval_znode.op_type = IS_CONST;
 	retval_znode.u.constant.type = IS_LONG;
@@ -356,55 +341,38 @@ ZEND_API zend_op_array *v_compile_files(int type CLS_DC, int file_count, va_list
 	retval_znode.u.constant.is_ref = 0;
 	retval_znode.u.constant.refcount = 1;
 
-	init_op_array(op_array, ZEND_USER_FUNCTION, INITIAL_OP_ARRAY_SIZE);
 	save_lexical_state(&original_lex_state CLS_CC);
 
 	retval = op_array; /* success oriented */
 
-	for (i=0; i<file_count; i++) {
-		file_handles[i] = va_arg(files, zend_file_handle *);
-		if (file_handles[i]) {
-			last_file = i;
+	if (open_file_for_scanning(file_handle CLS_CC)==FAILURE) {
+		zend_message_dispatcher(ZMSG_FAILED_INCLUDE_FOPEN, file_handle->filename);
+		compilation_successful=0;
+	} else {
+		init_op_array(op_array, ZEND_USER_FUNCTION, INITIAL_OP_ARRAY_SIZE CLS_CC);
+		CG(in_compilation) = 1;
+		CG(active_op_array) = op_array;
+		compiler_result = zendparse(CLS_C);
+		zend_close_file_handle(file_handle CLS_CC);
+		do_return(&retval_znode, 0 CLS_CC);
+		restore_lexical_state(&original_lex_state CLS_CC);
+		CG(in_compilation) = original_in_compilation;
+		if (compiler_result==1) { /* parser error */
+			CG(unclean_shutdown) = 1;
+			retval = NULL;
 		}
-	}
-
-	for (i=0; i<file_count; i++) {
-		if (!file_handles[i]) {
-			continue;
-		}
-		if (open_file_for_scanning(file_handles[i] CLS_CC)==FAILURE) {
-			zend_message_dispatcher(ZMSG_FAILED_INCLUDE_FOPEN, file_handles[i]->filename);
-		} else {
-			CG(in_compilation) = 1;
-			CG(active_op_array) = op_array;
-			compiler_result = zendparse(CLS_C);
-			zend_close_file_handle(file_handles[i] CLS_CC);
-			if (i == last_file) {
-				do_return(&retval_znode, 0 CLS_CC);
-			}
-			restore_lexical_state(&original_lex_state CLS_CC);
-			CG(in_compilation) = original_in_compilation;
-			if (compiler_result==1) { /* parser error */
-				CG(unclean_shutdown) = 1;
-				retval = NULL;
-				break;
-			}
-			compiled_files++;
-		}
+		compilation_successful=1;
 	}
 
 	if (retval) {
-		if (compiled_files>0) {
-			CG(active_op_array) = original_active_op_array;
+		CG(active_op_array) = original_active_op_array;
+		if (compilation_successful) {
 			pass_two(op_array);
 		} else {
-			CG(active_op_array) = original_active_op_array;
-			destroy_op_array(op_array);
 			efree(op_array);
 			retval = NULL;
 		}
 	}
-	free_alloca(file_handles);
 	return retval;
 }
 
@@ -435,7 +403,7 @@ zend_op_array *compile_filename(int type, zval *filename CLS_DC ELS_DC)
 		error_reporting = EG(error_reporting);
 		EG(error_reporting) = 0;
 	}
-	retval = zend_compile_files(type CLS_CC, 1, &file_handle);
+	retval = zend_compile_file(&file_handle CLS_CC);
 
 	if (type==ZEND_REQUIRE) {
 		EG(error_reporting) = error_reporting;
@@ -496,13 +464,12 @@ zend_op_array *compile_string(zval *source_string CLS_DC)
 	convert_to_string(&tmp);
 	source_string = &tmp;
 
-	init_op_array(op_array, ZEND_EVAL_CODE, INITIAL_OP_ARRAY_SIZE);
 	save_lexical_state(&original_lex_state CLS_CC);
 	if (prepare_string_for_scanning(source_string CLS_CC)==FAILURE) {
-		destroy_op_array(op_array);
 		efree(op_array);
 		retval = NULL;
 	} else {
+		init_op_array(op_array, ZEND_EVAL_CODE, INITIAL_OP_ARRAY_SIZE CLS_CC);
 		CG(active_op_array) = op_array;
 #ifndef ZTS
 		BEGIN(ST_IN_SCRIPTING);
@@ -520,7 +487,6 @@ zend_op_array *compile_string(zval *source_string CLS_DC)
 			do_return(NULL, 0 CLS_CC);
 			CG(active_op_array) = original_active_op_array;
 			pass_two(op_array);
-			pass_include_eval(op_array);
 			retval = op_array;
 		}
 	}
@@ -531,87 +497,6 @@ zend_op_array *compile_string(zval *source_string CLS_DC)
 
 
 BEGIN_EXTERN_C()
-int require_filename(char *filename, zend_bool unique CLS_DC)
-{
-	zend_file_handle file_handle;
-
-	file_handle.type = ZEND_HANDLE_FILENAME;
-	file_handle.filename = filename;
-	file_handle.free_filename = 0;
-	if (require_file(&file_handle, unique CLS_CC)==FAILURE) {
-		zend_bailout();
-		return FAILURE; /* will never get here */
-	}
-	return SUCCESS;
-}
-
-
-int use_filename(char *filename, uint filename_length CLS_DC)
-{
-	zend_error(E_COMPILE_ERROR,"use: Not yet supported. Please use include_once() or require_once()");
-	return FAILURE;
-
-#if 0
-	zend_file_handle file_handle;
-
-	file_handle.filename = (char *) emalloc(filename_length + zend_uv.import_use_extension_length);
-	memcpy(file_handle.filename, filename, filename_length);
-	memcpy(file_handle.filename+filename_length, zend_uv.import_use_extension, zend_uv.import_use_extension_length);
-	file_handle.filename[filename_length+zend_uv.import_use_extension_length] = 0;
-	file_handle.free_filename = 1;
-
-	file_handle.type = ZEND_HANDLE_FILENAME;
-	if (require_file(&file_handle, 1 CLS_CC)==FAILURE) {
-		efree(file_handle.filename);
-		zend_bailout();
-		return FAILURE; /* will never get here */
-	}
-	return SUCCESS;
-#endif
-}
-
-
-int require_file(zend_file_handle *file_handle, zend_bool unique CLS_DC)
-{
-	zend_lex_state original_lex_state;
-	int compiler_result;
-
-	save_lexical_state(&original_lex_state CLS_CC);
-	if (open_file_for_scanning(file_handle CLS_CC)==FAILURE) {
-		zend_message_dispatcher(ZMSG_FAILED_REQUIRE_FOPEN, file_handle->filename);
-		return FAILURE;
-	}
-	if (file_handle->opened_path) {
-		if (unique) {
-			zend_file_handle *pfh;
-
-			if (zend_hash_add(&CG(used_files), file_handle->opened_path, strlen(file_handle->opened_path)+1, file_handle, sizeof(zend_file_handle), (void **) &pfh)==FAILURE) {
-				zend_close_file_handle(file_handle CLS_CC);
-				restore_lexical_state(&original_lex_state CLS_CC);
-				return SUCCESS;
-			} else {
-				/* pfh is a copy we only save for get_used_files() */
-				pfh->type = ZEND_HANDLE_FILENAME;
-				if (pfh->filename) {
-					pfh->filename = estrdup(pfh->filename);
-					pfh->free_filename = 1;
-				}
-				if (pfh->opened_path) {
-					pfh->opened_path = strdup(pfh->opened_path);
-				}
-			}
-		}
-	}
-	compiler_result = zendparse(CLS_C);
-	zend_close_file_handle(file_handle CLS_CC);
-	restore_lexical_state(&original_lex_state CLS_CC);
-	if (compiler_result==1) {
-		zend_bailout();
-	}
-	return SUCCESS;
-}
-
-
 int highlight_file(char *filename, zend_syntax_highlighter_ini *syntax_highlighter_ini)
 {
 	zend_lex_state original_lex_state;

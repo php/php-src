@@ -80,7 +80,6 @@ typedef struct _zend_op {
 	znode op1;
 	znode op2;
 	ulong extended_value;
-	char *filename;
 	uint lineno;
 } zend_op;
 
@@ -120,6 +119,8 @@ struct _zend_op_array {
 #endif
 	zend_bool return_reference;
 	zend_bool done_pass_two;
+
+	char *filename;
 
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
 };
@@ -211,7 +212,7 @@ BEGIN_EXTERN_C()
 void init_compiler(CLS_D ELS_DC);
 void shutdown_compiler(CLS_D);
 
-extern ZEND_API zend_op_array *(*zend_v_compile_files)(int type CLS_DC, int file_count, va_list files);
+extern ZEND_API zend_op_array *(*zend_compile_file)(zend_file_handle *file_handle CLS_DC);
 
 void zend_activate(CLS_D ELS_DC);
 void zend_deactivate(CLS_D ELS_DC);
@@ -339,7 +340,6 @@ void do_new_list_end(CLS_D);
 
 void do_cast(znode *result, znode *expr, int type CLS_DC);
 void do_include_or_eval(int type, znode *result, znode *op1 CLS_DC);
-void do_require(znode *filename, zend_bool unique CLS_DC);
 
 void do_unset(znode *variable CLS_DC);
 void do_isset_or_isempty(int type, znode *result, znode *variable CLS_DC);
@@ -375,15 +375,12 @@ ZEND_API void function_add_ref(zend_function *function);
 
 
 /* helper functions in zend-scanner.l */
-ZEND_API int require_file(zend_file_handle *file_handle, zend_bool unique CLS_DC);	
-ZEND_API int require_filename(char *filename, zend_bool unique CLS_DC);
-ZEND_API int use_filename(char *filename, uint filename_length CLS_DC);
-ZEND_API zend_op_array *zend_compile_files(int type CLS_DC, int file_count, ...);
-ZEND_API zend_op_array *v_compile_files(int type CLS_DC, int file_count, va_list files);
+ZEND_API zend_op_array *compile_file(zend_file_handle *file_handle CLS_DC);
 ZEND_API zend_op_array *compile_string(zval *source_string CLS_DC);	
 ZEND_API zend_op_array *compile_filename(int type, zval *filename CLS_DC ELS_DC);
+ZEND_API int zend_execute_scripts(int type CLS_DC ELS_DC, int file_count, ...);
 ZEND_API int open_file_for_scanning(zend_file_handle *file_handle CLS_DC);
-ZEND_API void init_op_array(zend_op_array *op_array, int type, int initial_ops_size);
+ZEND_API void init_op_array(zend_op_array *op_array, int type, int initial_ops_size CLS_DC);
 ZEND_API void destroy_op_array(zend_op_array *op_array);
 ZEND_API void zend_close_file_handle(zend_file_handle *file_handle CLS_DC);
 ZEND_API void zend_open_file_dtor(zend_file_handle *fh);
@@ -401,7 +398,6 @@ int get_next_op_number(zend_op_array *op_array);
 int print_class(zend_class_entry *class_entry);
 void print_op_array(zend_op_array *op_array, int optimizations);
 int pass_two(zend_op_array *op_array);
-ZEND_API void pass_include_eval(zend_op_array *op_array);
 zend_brk_cont_element *get_next_brk_cont_element(zend_op_array *op_array);
 ZEND_API zend_bool zend_is_compiling(void);
 
@@ -572,6 +568,7 @@ int zendlex(znode *zendlval CLS_DC);
 #define ZEND_INCLUDE			(1<<1)
 #define ZEND_INCLUDE_ONCE		(1<<2)
 #define ZEND_REQUIRE			(1<<3)
+#define ZEND_REQUIRE_ONCE		(1<<4)
 
 #define ZEND_ISSET				(1<<0)
 #define ZEND_ISEMPTY			(1<<1)

@@ -1720,6 +1720,7 @@ send_by_ref:
 							if (opline->op2.u.constant.type==IS_CONSTANT_ARRAY) {
 								zval_copy_ctor(default_value);
 							}
+							default_value->refcount=1;
 							zval_update_constant(&default_value, 0);
 							default_value->refcount=0;
 							default_value->is_ref=0;
@@ -1969,7 +1970,8 @@ send_by_ref:
 					return_value_used = RETURN_VALUE_USED(opline);
 
 					switch (opline->op2.u.constant.value.lval) {
-						case ZEND_INCLUDE_ONCE: {
+						case ZEND_INCLUDE_ONCE:
+						case ZEND_REQUIRE_ONCE: {
 								char *opened_path;
 								int dummy = 1;
 								zend_file_handle file_handle;
@@ -1986,17 +1988,19 @@ send_by_ref:
 								
 								if (file_handle.handle.fp) {
 									if (!opened_path || zend_hash_add(&EG(included_files), opened_path, strlen(opened_path)+1, (void *)&dummy, sizeof(int), NULL)==SUCCESS) {
-										new_op_array = zend_compile_files(ZEND_INCLUDE CLS_CC, 1, &file_handle);
-										if (new_op_array) {
-											pass_include_eval(new_op_array);
-										} else {
+										new_op_array = zend_compile_file(&file_handle CLS_CC);
+										if (!new_op_array) {
 											fclose(file_handle.handle.fp);
 										}
 									} else {
 										fclose(file_handle.handle.fp);
 									}
 								} else {
-									zend_message_dispatcher(ZMSG_FAILED_INCLUDE_FOPEN, file_handle.filename);
+									if (opline->opcode==ZEND_INCLUDE_ONCE) {
+										zend_message_dispatcher(ZMSG_FAILED_INCLUDE_FOPEN, file_handle.filename);
+									} else {
+										zend_message_dispatcher(ZMSG_FAILED_REQUIRE_FOPEN, file_handle.filename);
+									}
 								}
 								if (opened_path) {
 									free (opened_path);
@@ -2008,9 +2012,6 @@ send_by_ref:
 						case ZEND_REQUIRE:
 						{
 							new_op_array = compile_filename(opline->op2.u.constant.value.lval, inc_filename CLS_CC ELS_CC);
-							if (new_op_array) {
-								pass_include_eval(new_op_array);
-							}
 							break;
 						}
 						case ZEND_EVAL:
