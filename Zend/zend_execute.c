@@ -2560,7 +2560,7 @@ send_by_ref:
 						EX(Ts)[EX(opline)->result.u.var].tmp_var = **value;
 						zval_copy_ctor(&EX(Ts)[EX(opline)->result.u.var].tmp_var);
 					} else {
-						zend_error(E_ERROR, "Undefined constant. Improve this error message");
+						zend_error(E_ERROR, "Undefined class constant '%s'", EX(opline)->op2.u.constant.value.str.val);
 					}
 				}
 				NEXT_OPCODE();
