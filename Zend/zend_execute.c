@@ -2326,7 +2326,12 @@ send_by_ref:
 		}
 	}
 #if SUPPORT_INTERACTIVE
+	ALLOC_ZVAL(*(EG(return_value_ptr_ptr)));
+	**EG(return_value_ptr_ptr) = *retval_ptr;
+	(*EG(return_value_ptr_ptr))->refcount = 1;
+	(*EG(return_value_ptr_ptr))->is_ref = 0;
 	op_array->last_executed_op_number = opline-op_array->opcodes;
+	EG(in_execution) = original_in_execution;
 	free_alloca(Ts);
 #else
 	zend_error(E_ERROR,"Arrived at end of main loop which shouldn't happen");
