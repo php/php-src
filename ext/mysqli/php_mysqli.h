@@ -372,6 +372,9 @@ PHP_FUNCTION(mysqli_thread_safe);
 PHP_FUNCTION(mysqli_use_result);
 PHP_FUNCTION(mysqli_warning_count);
 
+ZEND_FUNCTION(mysqli_stmt_construct);
+ZEND_FUNCTION(mysqli_result_construct);
+
 ZEND_BEGIN_MODULE_GLOBALS(mysqli)
 	long			default_link;
 	long			num_links;
