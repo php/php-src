@@ -120,6 +120,22 @@ static char *isapi_secure_server_variable_names[] = {
 	"HTTPS_SERVER_ISSUER",
 	"HTTPS_SERVER_SUBJECT",
 	"SERVER_PORT_SECURE",
+#ifdef WITH_ZEUS
+	"SSL_CLIENT_CN",
+	"SSL_CLIENT_EMAIL",
+	"SSL_CLIENT_OU",
+	"SSL_CLIENT_O",
+	"SSL_CLIENT_L",
+	"SSL_CLIENT_ST",
+	"SSL_CLIENT_C",
+	"SSL_CLIENT_I_CN",
+	"SSL_CLIENT_I_EMAIL",
+	"SSL_CLIENT_I_OU",
+	"SSL_CLIENT_I_O",
+	"SSL_CLIENT_I_L",
+	"SSL_CLIENT_I_ST",
+	"SSL_CLIENT_I_C",	
+#endif
 	NULL
 };
 
@@ -341,6 +357,40 @@ static char *sapi_isapi_read_cookies(SLS_D)
 
 
 #ifdef WITH_ZEUS
+
+static void sapi_isapi_register_zeus_ssl_variables(LPEXTENSION_CONTROL_BLOCK lpECB, zval *track_vars_array ELS_DC PLS_DC)
+{
+	char static_variable_buf[ISAPI_SERVER_VAR_BUF_SIZE];
+	DWORD variable_len = ISAPI_SERVER_VAR_BUF_SIZE;
+	char static_cons_buf[ISAPI_SERVER_VAR_BUF_SIZE];
+	/*
+	 * We need to construct the /C=.../ST=...
+	 * DN's for SSL_CLIENT_DN and SSL_CLIENT_I_DN
+	 */
+	strcpy( static_cons_buf, "/C=" );
+	if( lpECB->GetServerVariable( lpECB->ConnID, "SSL_CLIENT_C", static_variable_buf, &variable_len ) && static_variable_buf[0] ) {
+		strcat( static_cons_buf, static_variable_buf );
+	}
+	strcat( static_cons_buf, "/ST=" );
+	variable_len = ISAPI_SERVER_VAR_BUF_SIZE;
+	if( lpECB->GetServerVariable( lpECB->ConnID, "SSL_CLIENT_ST", static_variable_buf, &variable_len ) && static_variable_buf[0] ) {
+		strcat( static_cons_buf, static_variable_buf );
+	}
+	php_register_variable( "SSL_CLIENT_DN", static_cons_buf, track_vars_array ELS_CC PLS_CC );
+	
+	strcpy( static_cons_buf, "/C=" );
+	variable_len = ISAPI_SERVER_VAR_BUF_SIZE;
+	if( lpECB->GetServerVariable( lpECB->ConnID, "SSL_CLIENT_I_C", static_variable_buf, &variable_len ) && static_variable_buf[0] ) {
+		strcat( static_cons_buf, static_variable_buf );
+	}
+	strcat( static_cons_buf, "/ST=" );
+	variable_len = ISAPI_SERVER_VAR_BUF_SIZE;
+	if( lpECB->GetServerVariable( lpECB->ConnID, "SSL_CLIENT_I_ST", static_variable_buf, &variable_len ) && static_variable_buf[0] ) {
+		strcat( static_cons_buf, static_variable_buf );
+	}
+	php_register_variable( "SSL_CLIENT_I_DN", static_cons_buf, track_vars_array ELS_CC PLS_CC );	
+}
+
 static void sapi_isapi_register_zeus_variables(LPEXTENSION_CONTROL_BLOCK lpECB, zval *track_vars_array ELS_DC PLS_DC)
 {
 	char static_variable_buf[ISAPI_SERVER_VAR_BUF_SIZE];
@@ -396,6 +446,17 @@ static void sapi_isapi_register_zeus_variables(LPEXTENSION_CONTROL_BLOCK lpECB, 
 	variable_len = ISAPI_SERVER_VAR_BUF_SIZE;
 	if ( lpECB->GetServerVariable(lpECB->ConnID, "AUTH_TYPE", static_variable_buf, &variable_len) && static_variable_buf[0] )  {
 		php_register_variable( "PHP_AUTH_TYPE", static_variable_buf, track_vars_array ELS_CC PLS_CC );
+	}
+	
+	/* And now, for the SSL variables (if applicable) */
+	variable_len = ISAPI_SERVER_VAR_BUF_SIZE;
+	if ( lpECB->GetServerVariable(lpECB->ConnID, "CERT_COOKIE", static_variable_buf, &variable_len) && static_variable_buf[0] ) {
+		sapi_isapi_register_zeus_ssl_variables( lpECB, track_vars_array ELS_CC PLS_CC );
+	}
+	/* Copy some of the variables we need to meet Apache specs */
+	variable_len = ISAPI_SERVER_VAR_BUF_SIZE;
+	if ( lpECB->GetServerVariable(lpECB->ConnID, "SERVER_SOFTWARE", static_variable_buf, &variable_len) && static_variable_buf[0] )  {
+		php_register_variable( "SERVER_SIGNATURE", static_variable_buf, track_vars_array ELS_CC PLS_CC );
 	}
 }
 #endif
