@@ -1,3 +1,9 @@
+2000-11-25  Sterling Hughes  <Sterling.Hughes@pentap.net>
+
+    * NEWS:
+    Add get_defined_functions() and get_defined_vars().  Clean up constant() entry a bit.
+
+
 2000-11-24  Sterling Hughes  <Sterling.Hughes@pentap.net>
 
     * ext/standard/basic_functions.c
