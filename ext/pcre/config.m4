@@ -19,7 +19,8 @@ if test "$PHP_PCRE_REGEX" != "no"; then
   else
     test -f $PHP_PCRE_REGEX/pcre.h && PCRE_INCDIR=$PHP_PCRE_REGEX
     test -f $PHP_PCRE_REGEX/include/pcre.h && PCRE_INCDIR=$PHP_PCRE_REGEX/include
-    
+    test -f $PHP_PCRE_REGEX/include/pcre/pcre.h && PCRE_INCDIR=$PHP_PCRE_REGEX/include/pcre
+
     if test -z "$PCRE_INCDIR"; then
       AC_MSG_RESULT(Could not find pcre.h in $PHP_PCRE_REGEX)
     fi
@@ -47,7 +48,8 @@ if test "$PHP_PCRE_REGEX" != "no"; then
     PHP_ADD_LIBRARY_WITH_PATH(pcre, $PCRE_LIBDIR, PCRE_SHARED_LIBADD)
     
     AC_DEFINE(HAVE_PCRE, 1, [ ])
-    PHP_NEW_EXTENSION(pcre, php_pcre.c, $ext_shared,,-DSUPPORT_UTF8 -I$PCRE_INCDIR)
+    PHP_ADD_INCLUDE($PCRE_INCDIR)
+    PHP_NEW_EXTENSION(pcre, php_pcre.c, $ext_shared,,-DSUPPORT_UTF8)
   fi
 fi
 PHP_SUBST(PCRE_SHARED_LIBADD)
