@@ -178,7 +178,7 @@ void php_var_serialize(pval *buf, pval **struc, HashTable *var_hash)
 	HashTable *myht;
 	BLS_FETCH();
 
-	if(var_hash != NULL && (*struc)->is_ref && php_add_var_hash(var_hash,*struc,(void *)&var_already) == FAILURE) {
+	if(var_hash != NULL && php_add_var_hash(var_hash,*struc,(void *)&var_already) == FAILURE && (*struc)->is_ref) {
 		slen = sprintf(s,"R:%ld;",*var_already);
 		STR_CAT(buf, s, slen);
 		return;
