@@ -102,7 +102,7 @@ static int le_result, le_link, le_plink;
 
 typedef struct _php_mysql_conn {
 	MYSQL conn;
-	MYSQL_RES *active_result;
+	int active_result_id;
 } php_mysql_conn;
 
 
@@ -114,6 +114,7 @@ function_entry mysql_functions[] = {
 	PHP_FE(mysql_create_db,								NULL)
 	PHP_FE(mysql_drop_db,								NULL)
 	PHP_FE(mysql_query,									NULL)
+	PHP_FE(mysql_unbuffered_query,						NULL)
 	PHP_FE(mysql_db_query,								NULL)
 	PHP_FE(mysql_list_dbs,								NULL)
 	PHP_FE(mysql_list_tables,							NULL)
@@ -194,6 +195,7 @@ void timeout(int sig);
 static void _free_mysql_result(zend_rsrc_list_entry *rsrc)
 {
 	MYSQL_RES *mysql_result = (MYSQL_RES *)rsrc->ptr;
+
 	mysql_free_result(mysql_result);
 }
 
@@ -301,8 +303,6 @@ PHP_MINIT_FUNCTION(mysql)
 	REGISTER_LONG_CONSTANT("MYSQL_NUM", MYSQL_NUM, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MYSQL_BOTH", MYSQL_BOTH, CONST_CS | CONST_PERSISTENT);
 
-	REGISTER_LONG_CONSTANT("MYSQL_USE_RESULT", MYSQL_USE_RESULT, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("MYSQL_STORE_RESULT", MYSQL_STORE_RESULT, CONST_CS | CONST_PERSISTENT);
 	return SUCCESS;
 }
 
@@ -482,6 +482,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			}
 			/* create the link */
 		mysql = (php_mysql_conn *) malloc(sizeof(php_mysql_conn));
+		mysql->active_result_id = 0;
 #if MYSQL_VERSION_ID > 32199 /* this lets us set the port number */
 		mysql_init(&mysql->conn);
 		if (mysql_real_connect(&mysql->conn, host, user, passwd, NULL, port, socket, 0)==NULL) {
@@ -568,6 +569,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		}
 
 		mysql = (php_mysql_conn *) emalloc(sizeof(php_mysql_conn));
+		mysql->active_result_id = 0;
 #if MYSQL_VERSION_ID > 32199 /* this lets us set the port number */
 		mysql_init(&mysql->conn);
 		if (mysql_real_connect(&mysql->conn, host, user, passwd, NULL, port, socket, 0)==NULL) {
@@ -899,9 +901,7 @@ PHP_FUNCTION(mysql_drop_db)
 /* }}} */
 
 
-
-
-static void php_mysql_do_query(zval **query, zval **mysql_link, int link_id, zval **db, int use_store, zval *return_value)
+static void php_mysql_do_query_general(zval **query, zval **mysql_link, int link_id, zval **db, int use_store, zval *return_value)
 {
 	php_mysql_conn *mysql;
 	MYSQL_RES *mysql_result;
@@ -916,6 +916,21 @@ static void php_mysql_do_query(zval **query, zval **mysql_link, int link_id, zva
 		}
 	}
 	
+
+	if (mysql->active_result_id) do {
+		int type;
+		MYSQL_RES *mysql_result;
+
+		mysql_result = (MYSQL_RES *) zend_list_find(mysql->active_result_id, &type);
+		if (mysql_result && type==le_result && !mysql_eof(mysql_result)) {
+			php_error(E_NOTICE, "Called %s() without first fetching all rows from a previous unbuffered query",
+						get_active_function_name());
+			while (mysql_fetch_row(mysql_result));
+			zend_list_delete(mysql->active_result_id);
+			mysql->active_result_id = 0;
+		}
+	} while(0);
+
 	convert_to_string_ex(query);
 	/* mysql_query is binary unsafe, use mysql_real_query */
 #if MYSQL_VERSION_ID > 32199 
@@ -941,19 +956,16 @@ static void php_mysql_do_query(zval **query, zval **mysql_link, int link_id, zva
 		}
 	}
 	ZEND_REGISTER_RESOURCE(return_value, mysql_result, le_result);
+	if (use_store == MYSQL_USE_RESULT) {
+		mysql->active_result_id = Z_LVAL_P(return_value);
+	}
 }
 
 
-
-
-
-/* {{{ proto int mysql_query(string query [, int link_identifier] [, int result_mode])
-   Send an SQL query to MySQL */
-PHP_FUNCTION(mysql_query)
+static void php_mysql_do_query(INTERNAL_FUNCTION_PARAMETERS, int use_store)
 {
 	zval **query, **mysql_link;
-	zval **store_result;
-	int id, use_store=MYSQL_STORE_RESULT;
+	int id;
 	MySLS_FETCH();
 	
 	switch(ZEND_NUM_ARGS()) {
@@ -970,21 +982,28 @@ PHP_FUNCTION(mysql_query)
 			}
 			id = -1;
 			break;
-	    case 3:
-			if(zend_get_parameters_ex(3, &query, &mysql_link, &store_result)==FAILURE) {
-				RETURN_FALSE;
-			}
-			convert_to_long_ex(store_result);
-			if(Z_LVAL_PP(store_result) == MYSQL_USE_RESULT) {
-				use_store = MYSQL_USE_RESULT;
-			}
-			id = -1;
-			break;
 		default:
 			WRONG_PARAM_COUNT;
 			break;
 	}
-	php_mysql_do_query(query, mysql_link, id, NULL, use_store, return_value);
+	php_mysql_do_query_general(query, mysql_link, id, NULL, use_store, return_value);
+}
+
+
+/* {{{ proto int mysql_query(string query [, int link_identifier] [, int result_mode])
+   Send an SQL query to MySQL */
+PHP_FUNCTION(mysql_query)
+{
+	php_mysql_do_query(INTERNAL_FUNCTION_PARAM_PASSTHRU, MYSQL_STORE_RESULT);
+}
+/* }}} */
+
+
+/* {{{ proto int mysql_unbuffered_query(string query [, int link_identifier] [, int result_mode])
+   Send an SQL query to MySQL, without fetching and buffering the result rows */
+PHP_FUNCTION(mysql_unbuffered_query)
+{
+	php_mysql_do_query(INTERNAL_FUNCTION_PARAM_PASSTHRU, MYSQL_USE_RESULT);
 }
 /* }}} */
 
@@ -994,7 +1013,6 @@ PHP_FUNCTION(mysql_query)
 PHP_FUNCTION(mysql_db_query)
 {
 	zval **db, **query, **mysql_link;
-	zval **store_result;
 	int id, use_store=MYSQL_STORE_RESULT;
 	MySLS_FETCH();
 	
@@ -1012,22 +1030,12 @@ PHP_FUNCTION(mysql_db_query)
 			}
 			id = -1;
 			break;
-	    case 4:
-			if(zend_get_parameters_ex(4, &db, &query, &mysql_link, &store_result)==FAILURE) {
-				RETURN_FALSE;
-			}
-			convert_to_long_ex(store_result);
-			if(Z_LVAL_PP(store_result) == MYSQL_USE_RESULT) {
-				use_store = MYSQL_USE_RESULT;
-			}
-			id = -1;
-			break;
 		default:
 			WRONG_PARAM_COUNT;
 			break;
 	}
 	
-	php_mysql_do_query(query, mysql_link, id, db, use_store, return_value);
+	php_mysql_do_query_general(query, mysql_link, id, db, MYSQL_STORE_RESULT, return_value);
 }
 /* }}} */
 
@@ -1972,4 +1980,5 @@ PHP_FUNCTION(mysql_free_result)
  * c-basic-offset: 4
  * End:
  */
+
 
