@@ -1,1 +1,1 @@
-$(builddir)/tokenizer.lo: Zend/zend_language_parser.h
+$(builddir)/tokenizer.lo: $(builddir)/../../Zend/zend_language_parser.h
