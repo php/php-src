@@ -67,14 +67,15 @@ static PHP_MINIT_FUNCTION(mhash)
 	return SUCCESS;
 }
 
-/* proto int mhash_count()
+/* {{{ proto int mhash_count()
    get the number of available hashes */
 PHP_FUNCTION(mhash_count)
 {
 	RETURN_LONG(mhash_count());
 }
+/* }}} */
 
-/* proto int mhash_get_block_size(int hash)
+/* {{{ proto int mhash_get_block_size(int hash)
    get the block size of hash */
 PHP_FUNCTION(mhash_get_block_size)
 {
@@ -88,8 +89,9 @@ PHP_FUNCTION(mhash_get_block_size)
 
 	RETURN_LONG(mhash_get_block_size((*hash)->value.lval));
 }
+/* }}} */
 
-/* proto string mhash_get_hash_name(int hash)
+/* {{{ proto string mhash_get_hash_name(int hash)
    get the name of hash */
 PHP_FUNCTION(mhash_get_hash_name)
 {
@@ -110,8 +112,9 @@ PHP_FUNCTION(mhash_get_hash_name)
 		RETVAL_FALSE;
 	}
 }
+/* }}} */
 
-/* proto string mhash(int hash, string data)
+/* {{{ proto string mhash(int hash, string data)
    hash data with hash */
 PHP_FUNCTION(mhash)
 {
@@ -146,5 +149,6 @@ PHP_FUNCTION(mhash)
 		RETURN_FALSE;
 	}
 }
+/* }}} */
 
 #endif
