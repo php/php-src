@@ -32,7 +32,7 @@
   <license>PHP</license>
   <release>
     <state>beta</state>
-    <version>0.9a</version>
+    <version>0.9b</version>
     <date>2003-04-21</date>
 	<notes>
 		Added:
@@ -42,6 +42,11 @@
 			sqlite_error_string() returns description of error.
 			sqlite_create_aggregate() for registering aggregating SQL functions.
 			sqlite_create_function() for registering regular SQL functions.
+			sqlite_fetch_string() for speedy access to first column of result sets.
+			iteration interface
+
+			sqlite_query() functions accept resource/query string in either order,
+			for compatibility with mysql and postgresql extensions.
 
 		Fixed some build issues for thread-safe builds.
 

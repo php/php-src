@@ -24,7 +24,7 @@
 #include "config.h"
 #endif
 
-#define PHP_SQLITE_MODULE_VERSION	"0.9a"
+#define PHP_SQLITE_MODULE_VERSION	"0.9b"
 
 #include "php.h"
 #include "php_ini.h"
