@@ -111,7 +111,6 @@ EXEC SQL include sqlstype;
 #include <errno.h>
 
 typedef char IFX[128];
-#define SAFE_STRING(s) ((s)?(s):"")
 #define PHP_IFX_CHECK_CONNECTION(ifx)       \
         {                                   \
             if (ifx_check() < 0) {          \
@@ -411,7 +410,6 @@ static void php_ifx_set_default_link(int id TSRMLS_DC)
 
 static void php_ifx_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 {
-	zval **yyhost, **yyuser, **yypasswd;
 	char *hashed_details;
 	int hashed_details_length;
 
@@ -430,55 +428,40 @@ EXEC SQL END DECLARE SECTION;
 		hashed_details = (char *) emalloc(hashed_details_length+1);
 		sprintf(hashed_details,"ifx__%s_",user);
 	} else {
-		host = IFXG(default_host);
-		user = IFXG(default_user);
-		passwd = IFXG(default_password);
+		int host_len = 0, user_len = 0, passwd_len = 0;
+		host = user = passwd = NULL;
 
-		switch(ZEND_NUM_ARGS()) {
-			case 0: /* defaults */
-				break;
-			case 1:	{
-						if (zend_get_parameters_ex(1, &yyhost)==FAILURE) {
-							RETURN_FALSE;
-						}
-						convert_to_string_ex(yyhost);
-						host = Z_STRVAL_PP(yyhost);
-					}
-					break;
-			case 2:	{
-						if (zend_get_parameters_ex(2, &yyhost, &yyuser)==FAILURE) {
-  							RETURN_FALSE;
-						}
-						convert_to_string_ex(yyhost);
-						convert_to_string_ex(yyuser);
-						host = Z_STRVAL_PP(yyhost);
-						user = Z_STRVAL_PP(yyuser);
-					}
-					break;
-			case 3:	{
-						if (zend_get_parameters_ex(3, &yyhost, &yyuser, &yypasswd)==FAILURE) {
-							RETURN_FALSE;
-						}
-						convert_to_string_ex(yyhost);
-						convert_to_string_ex(yyuser);
-						convert_to_string_ex(yypasswd);
-						host   = Z_STRVAL_PP(yyhost);
-						user   = Z_STRVAL_PP(yyuser);
-						passwd = Z_STRVAL_PP(yypasswd);
-					}
-					break;
-			default:
-				WRONG_PARAM_COUNT;
-				break;
+		/* set default values if any are avaliable */
+		if (IFXG(default_host)) {
+			host = IFXG(default_host);
+			host_len = strlen(host);
+		}
+		if (IFXG(default_user)) {
+			user = IFXG(default_user);
+			user_len = strlen(IFXG(default_user));
+		}
+		if (IFXG(default_password)) {
+			passwd = IFXG(default_password);
+			passwd_len = strlen(IFXG(default_password));
 		}
 
-		hashed_details_length = sizeof("ifx___")-1+	strlen(SAFE_STRING(host))+
-													strlen(SAFE_STRING(user))+
-													strlen(SAFE_STRING(passwd));
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "|sss", &host, &host_len, &user, &user_len, &passwd, &passwd_len) == FAILURE) {
+			return;
+		}
+
+		if (!host) {
+			host = "";
+		}
+		if (!user) {
+			user = "";
+		}
+		if (!passwd) {
+			passwd = "";
+		}
+
+		hashed_details_length = sizeof("ifx___") - 1 + host_len + user_len + passwd_len;
 		hashed_details = (char *) emalloc(hashed_details_length+1);
-		sprintf(hashed_details,"ifx_%s_%s_%s",	SAFE_STRING(host), 
-												SAFE_STRING(user), 
-												SAFE_STRING(passwd));
+		sprintf(hashed_details,"ifx_%s_%s_%s", host, user, passwd);
 	}
 
 	IFXG(sv_sqlcode) = 0;
