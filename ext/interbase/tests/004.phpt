@@ -67,14 +67,10 @@ InterBase: BLOB test
     echo "test blob 2\n";
 
     $q = ibase_query("select v_blob from test4 where v_integer = 2");
-    $row = ibase_fetch_object($q);
-    $bl_h = ibase_blob_open($row->V_BLOB);
-	$blob = '';
-    while($piece = ibase_blob_get($bl_h, 1 + rand() % 1024))
-        $blob .= $piece;
-    if($blob != $blob_str)
+    $row = ibase_fetch_object($q,IBASE_TEXT);
+
+    if($row->V_BLOB != $blob_str)
 		echo " BLOB 2 fail\n";
-    ibase_blob_close($bl_h);
     ibase_free_result($q);
     unset($blob);
 
