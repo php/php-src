@@ -60,7 +60,7 @@ typedef struct _znode {
 
 		zend_uint var;
 		zend_uint opline_num; /*  Needs to be signed */
-		zend_uchar fetch_type;
+		zend_uint fetch_type;
 		zend_op_array *op_array;
 		struct {
 			zend_uint var;	/* dummy */
