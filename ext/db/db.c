@@ -463,8 +463,6 @@ void php_dbm_close(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 	if (info->filename) efree(info->filename);
 	if (info->lockfn) efree(info->lockfn);
 	efree(info);
-
-	return(ret);
 }
 /* }}} */
 
