@@ -162,7 +162,10 @@ class PEAR_Dependency
                     $code = $this->codeFromRelation($relation, $version, $req, $opt);
                     if ($opt) {
                         $errmsg = "package `$name' version " . $this->signOperator($relation) .
-                            " $req is recommended to utilize some features.  Installed version is $version";
+                            " $req is recommended to utilize some features.";
+                        if ($version) {
+                            $errmsg .= "  Installed version is $version";
+                        }
                         return $code;
                     }
                     $errmsg = "requires package `$name' " .
