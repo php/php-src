@@ -47,20 +47,20 @@ zend_module_entry metaphone_module_entry =
 /* metaphone -- Breaks english phrases down into their phonemes. */
 PHP_FUNCTION(metaphone)
 {
-	pval *pstr, *pphones;
+	pval **pstr, **pphones;
 	char *result = 0;
 	int phones = 0;
 
-	if (getParameters(ht, 2, &pstr, &pphones) == SUCCESS) {
-		convert_to_long(pphones);
-		phones = pphones->value.lval;
-	} else if (getParameters(ht, 1, &pstr) == FAILURE) {
+	if (getParametersEx(2, &pstr, &pphones) == SUCCESS) {
+		convert_to_long_ex(pphones);
+		phones = (*pphones)->value.lval;
+	} else if (getParametersEx(1, &pstr) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_string(pstr);
+	convert_to_string_ex(pstr);
 
-	if (metaphone(pstr->value.str.val, phones, &result, 1) == 0) {
+	if (metaphone((*pstr)->value.str.val, phones, &result, 1) == 0) {
 		RETVAL_STRING(result, 0);
 	} else {
 		if (result) {
