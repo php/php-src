@@ -2056,8 +2056,8 @@ gdImageCopyResampled (gdImagePtr dst,
 		  pcontribution = xportion * yportion;
 		  p = gdImageGetTrueColorPixel (
 						 src,
-						 (int) sx,
-						 (int) sy);
+						 (int) sx + srcX,
+						 (int) sy + srcY);
 		  red += gdTrueColorGetRed (p) * pcontribution;
 		  green += gdTrueColorGetGreen (p) * pcontribution;
 		  blue += gdTrueColorGetBlue (p) * pcontribution;
