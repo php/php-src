@@ -8,7 +8,6 @@ PHP                                                                        NEWS
   or an object as first parameter. (Andrey) 
 - Fixed potential problems with unserializing invalid serialize data. (Marcus)
 - Fixed bug #30967 (properties in extended mysqli classes don't work). (Georg)
-- Fixed bug #30962 (mssql returns space for NULL columns). (Ilia)
 - Fixed bug #30922 (reflective functions crash PHP when interfaces extend
   themselves). (Tony, Dmitry)
 - Fixed bug #30890 (MySQLi testsuite)
