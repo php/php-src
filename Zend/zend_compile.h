@@ -498,6 +498,7 @@ int zendlex(znode *zendlval CLS_DC);
 #define ZEND_INTERNAL_FUNCTION		1
 #define ZEND_USER_FUNCTION			2
 #define ZEND_OVERLOADED_FUNCTION	3
+#define	ZEND_EVAL_CODE				4
 
 #define ZEND_INTERNAL_CLASS		1
 #define ZEND_USER_CLASS			2

@@ -435,8 +435,9 @@ void execute_new_code(CLS_D)
 	ELS_FETCH();
 
 	if (!EG(interactive)
-		|| CG(active_op_array)->backpatch_count>0) {
-		
+		|| CG(active_op_array)->backpatch_count>0
+		|| CG(active_op_array)->function_name
+		|| CG(active_op_array)->type!=ZEND_USER_FUNCTION) {
 		return;
 	}
 	CG(active_op_array)->start_op_number = CG(active_op_array)->last_executed_op_number;

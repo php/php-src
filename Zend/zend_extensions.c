@@ -83,6 +83,13 @@ int zend_load_extension(char *path)
 					(ZTS_V?"is":"isn't"));
 		DL_UNLOAD(handle);
 		return FAILURE;
+	} else if (ZEND_DEBUG_V!=extension_version_info->debug) {
+		zend_printf("Cannot load %s - it %s debug information, whereas Zend %s\n",
+					new_extension->name,
+					(extension_version_info->debug?"contains":"does not contain"),
+					(ZEND_DEBUG_V?"does":"does not"));
+		DL_UNLOAD(handle);
+		return FAILURE;
 	}
 
 	if (new_extension->startup) {
