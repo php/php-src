@@ -21,7 +21,7 @@
 #ifndef _ZEND_H
 #define _ZEND_H
 
-#define ZEND_VERSION "1.00"
+#define ZEND_VERSION "1.0.1"
 
 #ifdef __cplusplus
 #define BEGIN_EXTERN_C() extern "C" {
