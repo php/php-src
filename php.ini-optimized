@@ -31,6 +31,9 @@
 ;     Input data is no longer escaped with slashes so that it can be sent into
 ;     SQL databases without further manipulation.  Instead, you should use the
 ;     function addslashes() on each input element you wish to send to a database.
+; - variables_order = "GPCS"
+;     The environment variables are not hashed into the $HTTP_ENV_VARS[].  To access
+;     environment variables, you can use getenv() instead.
 
 
 ;;;;;;;;;;;;;;;;;;;;
@@ -147,7 +150,7 @@ warn_plus_overloading	=	Off		; warn if the + operator is used with strings
 ;;;;;;;;;;;;;;;;;
 ; Data Handling ;
 ;;;;;;;;;;;;;;;;;
-variables_order		=	"EGPCS"	; This directive describes the order in which PHP registers
+variables_order		=	"GPCS"	; This directive describes the order in which PHP registers
 								; GET, POST, Cookie, Environment and Built-in variables (G, P,
 								; C, E & S respectively, often referred to as EGPCS or GPC).
 								; Registration is done from left to right, newer values override
