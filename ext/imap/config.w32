@@ -1,0 +1,24 @@
+// $Id$
+// vim:ft=javascript
+
+ARG_WITH("imap", "IMAP Support", "no");
+
+if (PHP_IMAP == "yes") {
+	if (CHECK_LIB("cclient.lib", "imap") &&
+			CHECK_HEADER_ADD_INCLUDE("rfc822.h", "CFLAGS_IMAP")) {
+		CHECK_LIB("winmm.lib", "imap");
+		CHECK_LIB("ws2_32.lib", "imap");
+		CHECK_LIB("Secur32.lib", "imap");
+		CHECK_LIB("crypt32.lib", "imap");
+		EXTENSION("imap", "php_imap.c");
+
+		ADD_FLAG("CFLAGS_IMAP", "/D HAVE_IMAP2000=1");
+		ADD_FLAG("LDFLAGS_IMAP", "/nodefaultlib:LIBCMT");
+		AC_DEFINE('HAVE_IMAP', 1, 'Have IMAP support', true);
+		if (!PHP_IMAP_SHARED) {
+			ADD_DEF_FILE("ext\\imap\\php_imap.def");
+		}
+	} else {
+		WARNING("imap not enabled; libraries and headers not found");
+	}
+}
