@@ -1,7 +1,7 @@
 --TEST--
 Bug #24403 (scope doesn't properly propagate into internal functions)
 --FILE--
-<?
+<?php
 class a
 {
 	var $a = array();
