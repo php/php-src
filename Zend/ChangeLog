@@ -1,3 +1,19 @@
+2004-03-08  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_execute.c
+      zend_interfaces.c
+      zend_iterators.h:
+      Rename hasMore() to valid() as discussed. (Part II)
+
+    * zend_interfaces.c:
+      Rename hasMore() to valid() as discussed. (Part I)
+
+    * zend_execute_API.c:
+      Check count.
+
+    * zend_reflection_api.c:
+      Add another missing conversion
+
 2004-03-05  Andi Gutmans  <andi@zend.com>
 
     * zend_compile.c:
