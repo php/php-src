@@ -659,16 +659,16 @@ static void pdo_dbh_free_storage(zend_object *object TSRMLS_DC)
 	dbh->methods->closer(dbh TSRMLS_CC);
 
 	if (dbh->data_source) {
-		efree((char *)dbh->data_source);
+		pefree((char *)dbh->data_source, dbh->is_persistent);
 	}
 	if (dbh->username) {
-		efree(dbh->username);
+		pefree(dbh->username, dbh->is_persistent);
 	}
 	if (dbh->password) {
-		efree(dbh->password);
+		pefree(dbh->password, dbh->is_persistent);
 	}
 
-	efree(dbh);
+	pefree(dbh, dbh->is_persistent);
 }
 
 zend_object_value pdo_dbh_new(zend_class_entry *ce TSRMLS_DC)
