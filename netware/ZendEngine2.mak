@@ -3,9 +3,7 @@
 PROJECT_ROOT = ..
 
 # Module details
-MODULE_NAME = ZendEngine2
-
-#MODULE_ROOT = $(PROJECT_ROOT)\\$(MODULE_NAME)
+MODULE_NAME = Zend
 
 #include the common settings
 include $(PROJECT_ROOT)/netware/common.mif
@@ -28,6 +26,10 @@ C_SRC = zend.c \
         zend_highlight.c \
         zend_indent.c \
         zend_ini.c \
+        zend_ini_parser.c \
+        zend_ini_scanner.c \
+        zend_language_parser.c \
+        zend_language_scanner.c \
         zend_list.c \
         zend_llist.c \
         zend_multibyte.c \
@@ -41,11 +43,7 @@ C_SRC = zend.c \
         zend_stack.c \
         zend_static_allocator.c \
         zend_ts_hash.c \
-        zend_variables.c \
-        zend_ini_parser.c \
-        zend_ini_scanner.c \
-        zend_language_parser.c \
-        zend_language_scanner.c
+        zend_variables.c
 
 
 # Destination directories and files
@@ -63,15 +61,22 @@ endif
 # Compile flags
 C_FLAGS  = -c -maxerrors 25 -msgstyle std
 C_FLAGS += -wchar_t on -bool on
-C_FLAGS += -processor Pentium -align 1
+C_FLAGS += -processor Pentium
 C_FLAGS += -nostdinc
+C_FLAGS += -relax_pointers	# To remove the type-casting errors
 C_FLAGS += -D__C9X_CMATH_INLINES_DEFINED
-C_FLAGS += -DNETWARE -D__GNUC__
+C_FLAGS += -DNETWARE
 C_FLAGS += -DZTS
 C_FLAGS += -DCLIB_STAT_PATCH
 C_FLAGS += -DTHREAD_SWITCH
+
+# These are required to use dlclose so that the PHP extensions are automatically unloaded
+# when apache is unloaded
+C_FLAGS  += -DHAVE_DLFCN_H -DHAVE_LIBDL
+
 C_FLAGS += -I. -I- -I../netware -I$(SDK_DIR)/include	# ../netware added for special SYS/STAT.H
 C_FLAGS += -I$(MWCIncludes)
+
 
 # Link flags
 LD_FLAGS  = -type library
@@ -80,12 +85,13 @@ LD_FLAGS += -o $(BINARY)
 
 # Extra stuff based on debug / release builds
 ifeq '$(BUILD)' 'debug'
-	C_FLAGS  += -DZEND_DEBUG
+	C_FLAGS  += -DZEND_DEBUG=1
 	C_FLAGS  += -inline smart -sym on -sym codeview4 -sym internal -opt off -opt intrinsics
 	LD_FLAGS += -sym codeview4 -sym internal
 	export MWLibraryFiles=$(SDK_DIR)/imports/libcpre.o;mwcrtld.lib
 else
 	C_FLAGS  += -opt speed -inline on -inline auto -sym off
+	C_FLAGS  += -DZEND_DEBUG=0
 	LD_FLAGS += -sym off
 	export MWLibraryFiles=$(SDK_DIR)/imports/libcpre.o;mwcrtl.lib
 endif
@@ -108,18 +114,6 @@ project: $(BINARY) $(MESSAGE)
 	@echo Build complete.
 
 
-##zend_ini_parser.c zend_ini_parser.h : zend_ini_parser.y
-##	@bison --output=$@ -v -d -p ini_ zend_ini_parser.y
-
-##zend_ini_scanner.c : zend_ini_scanner.l
-##	@flex -i -Pini_ -o$@ zend_ini_scanner.l
-
-##zend_language_parser.c zend_language_parser.h : zend_language_parser.y
-##	@bison --output=$@ -v -d -p zend zend_language_parser.y
-
-##zend_language_scanner.c : zend_language_scanner.l
-##	@flex -i -Pzend -o$@ zend_language_scanner.l
-
 $(OBJ_DIR)/%.d: %.c
 	@echo Building Dependencies for $(<F)
 	@$(CC) -M $< $(C_FLAGS) -o $@
@@ -129,13 +123,13 @@ $(OBJ_DIR)/%.obj: %.c
 	@$(CC) $< $(C_FLAGS) -o $@
 
 
-$(BINARY): $(DEPDS) $(OBJECTS)
+$(BINARY): $(OBJECTS)
 	@echo Linking $@...
 	@$(LINK) $(LD_FLAGS) $(OBJECTS)
 
 
 .PHONY: clean
-clean: cleansrc cleand cleanobj cleanbin
+clean: cleansrc cleanobj cleanbin
 
 .PHONY: cleansrc
 cleansrc:
@@ -164,4 +158,3 @@ cleanobj:
 cleanbin:
 	@echo Deleting binary files...
 	-@del "$(FINAL_DIR)\$(MODULE_NAME).lib"
-
