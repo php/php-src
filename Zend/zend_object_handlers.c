@@ -726,12 +726,7 @@ zval **zend_std_get_static_property(zend_class_entry *ce, char *property_name, i
 		zend_error(E_ERROR, "Cannot access %s property %s::$%s", zend_visibility_string(property_info->flags), ce->name, property_name);
 	}
 
-	while (tmp_ce) {
-		if (zend_hash_quick_find(tmp_ce->static_members, property_info->name, property_info->name_length+1, property_info->h, (void **) &retval)==SUCCESS) {
-			break;
-		}
-		tmp_ce = tmp_ce->parent;
-	}
+	zend_hash_quick_find(tmp_ce->static_members, property_info->name, property_info->name_length+1, property_info->h, (void **) &retval);
 
 	if (!retval) {
 		if (silent) {
@@ -741,7 +736,6 @@ zval **zend_std_get_static_property(zend_class_entry *ce, char *property_name, i
 		}
 	}
 	
-	zval_update_constant(retval, (void *) 1 TSRMLS_CC);
 	return retval;
 }
 

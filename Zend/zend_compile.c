@@ -1768,7 +1768,12 @@ static zend_bool do_inherit_property_access_check(HashTable *target_ht, zend_pro
 
 			mangle_property_name(&prot_name, &prot_name_length, "*", 1, child_info->name, child_info->name_length, ce->type & ZEND_INTERNAL_CLASS);
 			if (child_info->flags & ZEND_ACC_STATIC) {
-				zend_hash_del(ce->static_members, prot_name, prot_name_length+1);
+				zval **prop;
+				if (zend_hash_find(parent_ce->static_members, prot_name, prot_name_length+1, (void**)&prop) == SUCCESS) {
+					(*prop)->refcount++;
+					zend_hash_update(ce->static_members, child_info->name, child_info->name_length+1, (void**)prop, sizeof(zval*), NULL);
+					zend_hash_del(ce->static_members, prot_name, prot_name_length+1);
+				}
 			} else {
 				zend_hash_del(&ce->default_properties, prot_name, prot_name_length+1);
 			}
@@ -1797,6 +1802,13 @@ ZEND_API void zend_do_inherit_interfaces(zend_class_entry *ce, zend_class_entry 
 }
 
 
+static void inherit_sttaic_prop(zval **p)
+{
+	(*p)->refcount++;
+	(*p)->is_ref = 1;
+}
+
+
 void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent_ce)
 {
 	if ((ce->ce_flags & ZEND_ACC_INTERFACE)
@@ -1813,10 +1825,9 @@ void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent_ce)
 
 	/* Inherit properties */
 	zend_hash_merge(&ce->default_properties, &parent_ce->default_properties, (void (*)(void *)) zval_add_ref, NULL, sizeof(zval *), 0);
+	zend_hash_merge(ce->static_members, parent_ce->static_members, (void (*)(void *)) inherit_sttaic_prop, NULL, sizeof(zval *), 0);
 	zend_hash_merge_ex(&ce->properties_info, &parent_ce->properties_info, (copy_ctor_func_t) (ce->type & ZEND_INTERNAL_CLASS ? zend_duplicate_property_info_internal : zend_duplicate_property_info), sizeof(zend_property_info), (merge_checker_func_t) do_inherit_property_access_check, ce);
 
-	/* STATIC_MEMBERS_FIXME */
-/*	zend_hash_merge(ce->static_members, parent_ce->static_members, (void (*)(void *)) zval_add_ref, (void *) &tmp, sizeof(zval *), 0); */
 	zend_hash_merge(&ce->constants_table, &parent_ce->constants_table, (void (*)(void *)) zval_add_ref, NULL, sizeof(zval *), 0);
 	zend_hash_merge_ex(&ce->function_table, &parent_ce->function_table, (copy_ctor_func_t) do_inherit_method, sizeof(zend_function), (merge_checker_func_t) do_inherit_method_check, ce);
 	do_inherit_parent_constructor(ce);
