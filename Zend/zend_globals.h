@@ -181,7 +181,7 @@ struct _zend_executor_globals {
 	int (*unary_op)(zval *result, zval *op1);
 	int (*binary_op)(zval *result, zval *op1, zval *op2);
 
-	zval *garbage[4];
+	zval *garbage[2];
 	int garbage_ptr;
 
 	zval *user_error_handler;
