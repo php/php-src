@@ -71,6 +71,7 @@ static int node_attributes(zval **attributes, xmlNode *nodep);
 static int node_children(zval **children, xmlNode *nodep);
 
 static zend_function_entry domxml_functions[] = {
+	PHP_FE(domxml_version,	NULL)
 	PHP_FE(xmldoc,	NULL)
 	PHP_FE(xmldocfile,	NULL)
 	PHP_FE(xmltree,	NULL)
@@ -2482,6 +2483,15 @@ PHP_FUNCTION(xptr_eval) {
 }
 /* }}} */
 #endif /* LIBXML_XPTR_ENABLED */
+
+/* {{{ proto string domxml_version()
+   Dumps document into string */
+PHP_FUNCTION(domxml_version)
+{
+	
+	RETURN_STRING(LIBXML_DOTTED_VERSION, 1);
+}
+/* }}} */
 
 #endif /* HAVE_DOMXML */
 /*
