@@ -1,3 +1,158 @@
+2004-02-10  Zeev Suraski  <zeev@zend.com>
+
+    * ZendEngine2/tests/bug26698.phpt:
+      Ignore the memleak in this test
+
+    * main/config.w32.h:
+      Clear that up
+
+    * main/main.c:
+      Cleanup
+
+    * main/config.w32.h
+      main/main.c:
+      Fix report_memleaks
+
+2004-02-10  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      sapi/cgi/cgi_main.c:
+      MFH:
+      	Fixed win32 build.
+      	Added missing headers needed for wait().
+      	Removed duplicate signal.h header.
+
+    * sapi/cgi/cgi_main.c
+      sapi/cgi/libfcgi/include/fcgi_config.h:
+      Fixed win32 build.
+      Fixed building of libfcgi when PHP is built from another directory.
+      Added missing headers needed for wait().
+      Removed duplicate signal.h header.
+      Removed unneeded variables.
+
+2004-02-10  Zeev Suraski  <zeev@zend.com>
+
+    * main/main.c:
+      Whitespace
+
+    * ZendEngine2/zend_execute.c:
+      Fix bug #26698 (exceptions handled properly during argument passing to
+      functions)
+
+2004-02-10  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      main/fopen_wrappers.c:
+      MFH: Fixed bug #26653 (open_basedir incorrectly resolved on win32).
+
+    * main/fopen_wrappers.c:
+      Fixed bug #26653 (open_basedir incorrectly resolved on win32).
+
+2004-02-10  Zeev Suraski  <zeev@zend.com>
+
+    * ZendEngine2/zend_default_classes.c:
+      Fix bug #27186
+
+    * ZendEngine2/zend_execute_API.c:
+      Fix bug #26869
+
+2004-02-10  Andi Gutmans  <andi@zend.com>
+
+    * tests/lang/bug22231.phpt
+      tests/lang/bug22510.phpt:
+      Fix a couple of tests
+
+2004-02-10  Zeev Suraski  <zeev@zend.com>
+
+    * ZendEngine2/zend_execute.c:
+      Fix refcounting of ++/+= overloading (fix leak in __get()/__set()
+      based classes)
+
+2004-02-10  Jan Lehnardt  <jan@dasmoped.net>
+
+    * ext/tokenizer/tokenizer.c:
+       - fix #27197 for Greg (cellog@php.net)
+
+2004-02-10  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * tests/lang/bug26866.phpt:
+      Add test case for bug #26866
+
+2004-02-10  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend_compile.c:
+      - Nuke more unused code
+
+2004-02-10  Zeev Suraski  <zeev@zend.com>
+
+    * ZendEngine2/zend_execute.c:
+      Fix handling in assignment using multidimensional array syntax to string
+      offset ($s = "FUBAR"; $s[0][0] = 1;)
+
+2004-02-10  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/ZEND_CHANGES:
+      - We will go with PHP 4 behavior. With the new object model assigning by
+        reference has lost a lot of its importance.
+
+    * ZendEngine2/zend_compile.c:
+      - Remove junk
+
+2004-02-10  Zeev Suraski  <zeev@zend.com>
+
+    * ZendEngine2/zend_execute.c:
+      Fix exception handling in opcodes spanned across multiple oplines (fixes
+      the crash in __set())
+
+    * NEWS:
+      Update NEWS
+
+    * ext/simplexml/simplexml.c:
+      Implement get callback for SimpleXML (it now supports pre/post increment
+      as well as binary-assign-ops)
+
+    * ZendEngine2/zend_execute.c:
+      - Fix pre/post increment for overloaded objects
+      - Fix binary-assign-op for overloaded objects
+      
+      NOTE:  This requires the implementation of the 'get' callback!
+
+2004-02-10  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ZendEngine2/tests/bug22836.phpt:
+      - Correcting test.
+
+2004-02-10  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      NEWS:
+      typos
+
+2004-02-10  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      sapi/cgi/cgi_main.c:
+      MFH: Fixed bug #26758 (FastCGI exits immediately with status 255).
+
+    * sapi/cgi/cgi_main.c:
+      Fixed bug #26758 (FastCGI exits immediately with status 255).
+
+    * (PHP_4_3)
+      NEWS
+      php.ini-dist
+      php.ini-recommended
+      sapi/cgi/cgi_main.c:
+      MFH: Fixed bug #27026 (Added cgi.nph that allows forcing of the Status: 200
+      header that is not normally needed).
+
+    * php.ini-dist
+      php.ini-recommended
+      sapi/cgi/cgi_main.c:
+      Fixed bug #27026 (Added cgi.nph that allows forcing of the Status: 200
+      header that is not normally needed).
+
 2004-02-09  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_4_3)
