@@ -968,7 +968,7 @@ PHP_MINFO_FUNCTION(domxml)
 
 /* {{{ Methods of Class DomAttribute */
 
-/* {{{ proto array domxml_attr_name()
+/* {{{ proto array domxml_attr_name(void)
    Returns list of attribute names */
 PHP_FUNCTION(domxml_attr_name)
 {
@@ -985,7 +985,7 @@ PHP_FUNCTION(domxml_attr_name)
 }
 /* }}} */
 
-/* {{{ proto array domxml_attr_value()
+/* {{{ proto array domxml_attr_value(void)
    Returns list of attribute names */
 PHP_FUNCTION(domxml_attr_value)
 {
@@ -999,7 +999,7 @@ PHP_FUNCTION(domxml_attr_value)
 }
 /* }}} */
 
-/* {{{ proto array domxml_attr_specified()
+/* {{{ proto array domxml_attr_specified(void)
    Returns list of attribute names */
 PHP_FUNCTION(domxml_attr_specified)
 {
@@ -1018,7 +1018,7 @@ PHP_FUNCTION(domxml_attr_specified)
 
 /* {{{ Methods of Class DomProcessingInstruction */
 
-/* {{{ proto array domxml_pi_target()
+/* {{{ proto array domxml_pi_target(void)
    Returns target of pi */
 PHP_FUNCTION(domxml_pi_target)
 {
@@ -1032,7 +1032,7 @@ PHP_FUNCTION(domxml_pi_target)
 }
 /* }}} */
 
-/* {{{ proto array domxml_pi_data()
+/* {{{ proto array domxml_pi_data(void)
    Returns data of pi */
 PHP_FUNCTION(domxml_pi_data)
 {
@@ -1051,7 +1051,7 @@ PHP_FUNCTION(domxml_pi_data)
 
 /* {{{ Methods of Class DomCData */
 
-/* {{{ proto array domxml_cdata_length()
+/* {{{ proto array domxml_cdata_length(void)
    Returns list of attribute names */
 PHP_FUNCTION(domxml_cdata_length)
 {
@@ -1099,7 +1099,7 @@ PHP_FUNCTION(domxml_node)
 }
 /* }}} */
 
-/* {{{ proto object domxml_node_name()
+/* {{{ proto object domxml_node_name(void)
    Returns name of node */
 PHP_FUNCTION(domxml_node_name)
 {
@@ -1156,7 +1156,7 @@ PHP_FUNCTION(domxml_node_name)
 }
 /* }}} */
 
-/* {{{ proto object domxml_node_value()
+/* {{{ proto object domxml_node_value(void)
    Returns name of value */
 PHP_FUNCTION(domxml_node_value)
 {
@@ -1189,7 +1189,7 @@ PHP_FUNCTION(domxml_node_value)
 }
 /* }}} */
 
-/* {{{ proto bool domxml_is_blank_node()
+/* {{{ proto bool domxml_is_blank_node(void)
    Returns true if node is blank */
 PHP_FUNCTION(domxml_is_blank_node)
 {
@@ -1211,8 +1211,8 @@ PHP_FUNCTION(domxml_is_blank_node)
 }
 /* }}} */
 
-/* {{{ proto int domxml_node_type()
-   unknown */
+/* {{{ proto int domxml_node_type(void)
+   unknown ??? */
 PHP_FUNCTION(domxml_node_type)
 {
 	zval *id;
@@ -1228,8 +1228,8 @@ PHP_FUNCTION(domxml_node_type)
 }
 /* }}} */
 
-/* {{{ proto bool domxml_clone_node()
-   clones a node */
+/* {{{ proto bool domxml_clone_node(void)
+   Clones a node */
 PHP_FUNCTION(domxml_clone_node)
 {
 	zval *arg, *rv;
@@ -1265,7 +1265,7 @@ PHP_FUNCTION(domxml_clone_node)
 }
 /* }}} */
 
-/* {{{ proto object domxml_node_first_child()
+/* {{{ proto object domxml_node_first_child(void)
    Returns first child from list of children */
 PHP_FUNCTION(domxml_node_first_child)
 {
@@ -1288,7 +1288,7 @@ PHP_FUNCTION(domxml_node_first_child)
 }
 /* }}} */
 
-/* {{{ proto object domxml_node_last_child()
+/* {{{ proto object domxml_node_last_child(void)
    Returns last child from list of children */
 PHP_FUNCTION(domxml_node_last_child)
 {
@@ -1311,7 +1311,7 @@ PHP_FUNCTION(domxml_node_last_child)
 }
 /* }}} */
 
-/* {{{ proto object domxml_node_next_sibling()
+/* {{{ proto object domxml_node_next_sibling(void)
    Returns next child from list of children */
 PHP_FUNCTION(domxml_node_next_sibling)
 {
@@ -1334,7 +1334,7 @@ PHP_FUNCTION(domxml_node_next_sibling)
 }
 /* }}} */
 
-/* {{{ proto object domxml_node_previous_sibling()
+/* {{{ proto object domxml_node_previous_sibling(void)
    Returns previous child from list of children */
 PHP_FUNCTION(domxml_node_previous_sibling)
 {
@@ -1357,7 +1357,7 @@ PHP_FUNCTION(domxml_node_previous_sibling)
 }
 /* }}} */
 
-/* {{{ proto object domxml_node_owner_document()
+/* {{{ proto object domxml_node_owner_document(void)
    Returns document this node belongs to */
 PHP_FUNCTION(domxml_node_owner_document)
 {
@@ -1381,7 +1381,7 @@ PHP_FUNCTION(domxml_node_owner_document)
 }
 /* }}} */
 
-/* {{{ proto object domxml_node_has_child_nodes()
+/* {{{ proto object domxml_node_has_child_nodes(void)
    Returns true if node has children */
 PHP_FUNCTION(domxml_node_has_child_nodes)
 {
@@ -1399,7 +1399,7 @@ PHP_FUNCTION(domxml_node_has_child_nodes)
 }
 /* }}} */
 
-/* {{{ proto object domxml_node_has_attributes()
+/* {{{ proto object domxml_node_has_attributes(void)
    Returns true if node has attributes */
 PHP_FUNCTION(domxml_node_has_attributes)
 {
@@ -1420,7 +1420,7 @@ PHP_FUNCTION(domxml_node_has_attributes)
 }
 /* }}} */
 
-/* {{{ proto object domxml_node_prefix()
+/* {{{ proto object domxml_node_prefix(void)
    Returns namespace prefix of node */
 PHP_FUNCTION(domxml_node_prefix)
 {
@@ -1444,7 +1444,7 @@ PHP_FUNCTION(domxml_node_prefix)
 }
 /* }}} */
 
-/* {{{ proto object domxml_node_parent()
+/* {{{ proto object domxml_node_parent(void)
    Returns parent of node */
 PHP_FUNCTION(domxml_node_parent)
 {
@@ -1467,7 +1467,7 @@ PHP_FUNCTION(domxml_node_parent)
 }
 /* }}} */
 
-/* {{{ proto array domxml_node_children()
+/* {{{ proto array domxml_node_children(void)
    Returns list of children nodes */
 PHP_FUNCTION(domxml_node_children)
 {
@@ -1502,7 +1502,7 @@ PHP_FUNCTION(domxml_node_children)
 }
 /* }}} */
 
-/* {{{ proto object domxml_node_unlink_node()
+/* {{{ proto object domxml_node_unlink_node(void)
    Deletes node */
 PHP_FUNCTION(domxml_node_unlink_node)
 {
@@ -1626,7 +1626,7 @@ PHP_FUNCTION(domxml_node_set_name)
 }
 /* }}} */
 
-/* {{{ proto array domxml_node_attributes()
+/* {{{ proto array domxml_node_attributes(void)
    Returns list of attributes of node */
 PHP_FUNCTION(domxml_node_attributes)
 {
@@ -1698,7 +1698,7 @@ PHP_FUNCTION(domxml_node_new_child)
 /* }}} */
 
 /* {{{ proto bool domxml_node_set_content(string content)
-   Set content of a node */
+   Sets content of a node */
 PHP_FUNCTION(domxml_node_set_content)
 {
 	zval *id, *content;
@@ -1728,7 +1728,7 @@ PHP_FUNCTION(domxml_node_set_content)
 
 /* {{{ Methods of Class DomNotation */
 
-/* {{{ proto string domxml_notation_public_id()
+/* {{{ proto string domxml_notation_public_id(void)
    Returns public id of notation node */
 PHP_FUNCTION(domxml_notation_public_id)
 {
@@ -1742,8 +1742,8 @@ PHP_FUNCTION(domxml_notation_public_id)
 }
 /* }}} */
 
-/* {{{ proto string domxml_notation_system_id()
-   Returns system id of notation node */
+/* {{{ proto string domxml_notation_system_id(void)
+   Returns system ID of notation node */
 PHP_FUNCTION(domxml_notation_system_id)
 {
 	zval *id;
@@ -1788,7 +1788,7 @@ PHP_FUNCTION(domxml_element)
 
 /* }}} */
 
-/* {{{ proto string domxml_elem_tagname()
+/* {{{ proto string domxml_elem_tagname(void)
    Returns tag name of element node */
 PHP_FUNCTION(domxml_elem_tagname)
 {
@@ -1862,7 +1862,7 @@ PHP_FUNCTION(domxml_elem_set_attribute)
 /* }}} */
 
 /* {{{ proto string domxml_elem_remove_attribute(string attrname)
-   Remove given attribute */
+   Removes given attribute */
 PHP_FUNCTION(domxml_elem_remove_attribute)
 {
 	zval *id, *arg1;
@@ -1952,8 +1952,8 @@ PHP_FUNCTION(domxml_elem_get_element_by_tagname)
 
 /* {{{ Methods of Class DomDocumentType */
 
-/* {{{ proto array domxml_doctype_name()
-   Return name of DocumentType */
+/* {{{ proto array domxml_doctype_name(void)
+   Returns name of DocumentType */
 PHP_FUNCTION(domxml_doctype_name)
 {
 	zval *id;
@@ -1971,7 +1971,7 @@ PHP_FUNCTION(domxml_doctype_name)
 
 /* {{{ Methods of Class DomDocument */
 
-/* {{{ proto object domxml_doc_doctype()
+/* {{{ proto object domxml_doc_doctype(void)
    Returns DomDocumentType */
 PHP_FUNCTION(domxml_doc_doctype)
 {
@@ -1993,7 +1993,7 @@ PHP_FUNCTION(domxml_doc_doctype)
 }
 /* }}} */
 
-/* {{{ proto object domxml_doc_implementation()
+/* {{{ proto object domxml_doc_implementation(void)
    Returns DomeDOMImplementation */
 PHP_FUNCTION(domxml_doc_implementation)
 {
@@ -2014,7 +2014,7 @@ PHP_FUNCTION(domxml_doc_implementation)
 }
 /* }}} */
 
-/* {{{ proto array domxml_doc_document_element()
+/* {{{ proto array domxml_doc_document_element(void)
    Returns root node of document */
 PHP_FUNCTION(domxml_doc_document_element)
 {
@@ -2399,7 +2399,7 @@ PHP_FUNCTION(xmldoc)
 /* }}} */
 
 /* {{{ proto object xmldocfile(string filename)
-   Creates DOM object of XML document in file*/
+   Creates DOM object of XML document in file */
 PHP_FUNCTION(xmldocfile)
 {
 	zval *arg, *rv;
@@ -2562,6 +2562,8 @@ static int node_namespace(zval **attributes, xmlNode *nodep TSRMLS_DC)
 /* }}} */
 #endif
 
+/* We don't have a type zval. **attributes is also very unusual. */
+
 /* {{{ proto int node_attributes(zval **attributes, int node)
    Returns list of children nodes */
 static int node_attributes(zval **attributes, xmlNode *nodep TSRMLS_DC)
@@ -2647,7 +2649,7 @@ static int node_children(zval **children, xmlNode *nodep TSRMLS_DC)
 /* }}} */
 
 /* {{{ proto object xmltree(string xmltree)
-   Create a tree of PHP objects from an XML document */
+   Creates a tree of PHP objects from an XML document */
 PHP_FUNCTION(xmltree)
 {
 	zval *arg, *children, *rv;
@@ -2743,7 +2745,7 @@ static void php_xpathptr_new_context(INTERNAL_FUNCTION_PARAMETERS, int mode)
 /* }}} */
 
 /* {{{ proto string xpath_new_context([int doc_handle])
-   Create new XPath context */
+   Creates new XPath context */
 PHP_FUNCTION(xpath_new_context)
 {
 	php_xpathptr_new_context(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_XPATH);
@@ -2751,7 +2753,7 @@ PHP_FUNCTION(xpath_new_context)
 /* }}} */
 
 /* {{{ proto string xptr_new_context([int doc_handle])
-   Create new XPath context */
+   Creates new XPath context */
 PHP_FUNCTION(xptr_new_context)
 {
 	php_xpathptr_new_context(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_XPTR);
@@ -2894,16 +2896,16 @@ static void php_xpathptr_eval(INTERNAL_FUNCTION_PARAMETERS, int mode, int expr)
 }
 /* }}} */
 
-/* {{{ proto int xpath_eval([int xpathctx_handle, ] string str)
-   Evaluate the XPath Location Path in the given string */
+/* {{{ proto int xpath_eval([int xpathctx_handle,] string str)
+   Evaluates the XPath Location Path in the given string */
 PHP_FUNCTION(xpath_eval)
 {
 	php_xpathptr_eval(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_XPATH, 0);
 }
 /* }}} */
 
-/* {{{ proto int xpath_eval_expression([int xpathctx_handle, ] string str)
-   Evaluate the XPath Location Path in the given string */
+/* {{{ proto int xpath_eval_expression([int xpathctx_handle,] string str)
+   Evaluates the XPath Location Path in the given string */
 PHP_FUNCTION(xpath_eval_expression)
 {
 	php_xpathptr_eval(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_XPATH, 1);
@@ -2912,8 +2914,8 @@ PHP_FUNCTION(xpath_eval_expression)
 #endif	/* defined(LIBXML_XPATH_ENABLED) */
 
 #if defined(LIBXML_XPTR_ENABLED)
-/* {{{ proto int xptr_eval([int xpathctx_handle, ] string str)
-   Evaluate the XPtr Location Path in the given string */
+/* {{{ proto int xptr_eval([int xpathctx_handle,] string str)
+   Evaluates the XPtr Location Path in the given string */
 PHP_FUNCTION(xptr_eval)
 {
 	php_xpathptr_eval(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_XPTR, 0);
@@ -2921,7 +2923,7 @@ PHP_FUNCTION(xptr_eval)
 /* }}} */
 #endif	/* LIBXML_XPTR_ENABLED */
 
-/* {{{ proto string domxml_version()
+/* {{{ proto string domxml_version(void)
    Dumps document into string */
 PHP_FUNCTION(domxml_version)
 {
