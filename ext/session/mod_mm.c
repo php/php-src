@@ -345,7 +345,7 @@ PS_GC_FUNC(mm)
 }
 
 zend_module_entry php_session_mm_module = {
-	"Session MM",
+	"session mm",
 	NULL,
 	PHP_MINIT(ps_mm), PHP_MSHUTDOWN(ps_mm),
 	NULL, NULL,

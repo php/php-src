@@ -48,7 +48,7 @@ function_entry calendar_functions[] = {
 
 
 zend_module_entry calendar_module_entry = {
-  "Calendar", 
+  "calendar", 
   calendar_functions, 
   NULL, /*PHP_MINIT(calendar),*/
   NULL,
