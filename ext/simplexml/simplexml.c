@@ -1475,7 +1475,7 @@ PHP_MINIT_FUNCTION(simplexml)
 	sxe_object_handlers.get_class_entry = zend_get_std_object_handlers()->get_class_entry;
 	sxe_object_handlers.get_class_name = zend_get_std_object_handlers()->get_class_name;
 
-#if HAVE_SPL
+#if HAVE_SPL && !defined(COMPILE_DL_SPL)
 	if (zend_get_module_started("spl") == SUCCESS) {
 		PHP_MINIT(spl_sxe)(INIT_FUNC_ARGS_PASSTHRU);
 	}
