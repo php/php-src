@@ -648,7 +648,6 @@ int phpfbFetchRow(PHPFBResult* result, unsigned int row)
 		rawData = fbcdcFetch(result->link->connection, result->batchSize, result->fetchHandle);
 		if (!fbcrhAddBatch(result->rowHandler, rawData)) result->rowCount = fbcrhRowCount(result->rowHandler);
 	}
-	return 0;
 }
 
 
@@ -2258,6 +2257,24 @@ void phpfbColumnAsString (PHPFBResult* result, int column, void* data , int* len
 			int   v = *((int*)data);
 			char  b[128];
 			sprintf(b, "%d", v);
+			phpfbestrdup(b, length, value);
+		}
+		break;
+
+		case FB_TinyInteger:
+		{ 
+			short int   v = *((short int*)data);
+			char  b[128];
+			sprintf(b, "%d", v);
+			phpfbestrdup(b, length, value);
+		}
+		break;
+
+		case FB_LongInteger:
+		{ 
+			long   v = *((long*)data);
+			char  b[128];
+			sprintf(b, "%li", v);
 			phpfbestrdup(b, length, value);
 		}
 		break;
