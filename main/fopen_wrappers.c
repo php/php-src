@@ -91,7 +91,7 @@ PHPAPI int php_register_url_wrapper(char *protocol, FILE * (*wrapper)(char *path
 	PLS_FETCH();
 
 	if(PG(allow_url_fopen)) {
-		return zend_hash_add(&fopen_url_wrappers_hash, protocol, strlen(protocol)+1, &wrapper, sizeof(wrapper), NULL);
+		return zend_hash_add(&fopen_url_wrappers_hash, protocol, strlen(protocol), &wrapper, sizeof(wrapper), NULL);
 	} else {
 		return FAILURE;
 	}
@@ -102,7 +102,7 @@ PHPAPI int php_unregister_url_wrapper(char *protocol)
 	PLS_FETCH();
 
 	if(PG(allow_url_fopen)) {
-		return zend_hash_del(&fopen_url_wrappers_hash, protocol, strlen(protocol)+1);
+		return zend_hash_del(&fopen_url_wrappers_hash, protocol, strlen(protocol));
 	} else {
 		return SUCCESS;
 	}
@@ -439,16 +439,10 @@ static FILE *php_fopen_url_wrapper(const char *path, char *mode, int options, in
 		
 	if(protocol) {
 		php_fopen_url_wrapper_t *wrapper=NULL;
-		char *protocopy = emalloc(n+1);
 
-		if(protocopy) {
-			strncpy(protocopy,protocol,n);
-			protocopy[n]='\0';
-			if(FAILURE==zend_hash_find(&fopen_url_wrappers_hash, protocopy, n+1,(void **)&wrapper)) {
-				wrapper=NULL;
-				protocol=NULL;
-			}		
-			efree(protocopy);
+		if(FAILURE==zend_hash_find(&fopen_url_wrappers_hash, protocol, n, (void **)&wrapper)) {
+			wrapper=NULL;
+			protocol=NULL;
 		}
 		if(wrapper)
 			return (*wrapper)(path, mode, options, issock, socketd, opened_path);	
