@@ -41,6 +41,7 @@ function_entry mcrypt_functions[] = {
 	PHP_FE(mcrypt_ecb, NULL)
 	PHP_FE(mcrypt_cbc, NULL)
 	PHP_FE(mcrypt_cfb, NULL)
+	PHP_FE(mcrypt_ofb, NULL)
 	PHP_FE(mcrypt_get_block_size, NULL)
 	PHP_FE(mcrypt_get_key_size, NULL)
 	PHP_FE(mcrypt_create_iv, NULL)
@@ -178,6 +179,55 @@ PHP_FUNCTION(mcrypt_get_block_size)
 	convert_to_long(cipher);
 
 	RETURN_LONG(get_block_size(cipher->value.lval));
+}
+
+/* proto mcrypt_ofb(int cipher, string key, string data, int mode, string iv)
+   OFB crypt/decrypt data using key key with cipher cipher starting with iv */
+PHP_FUNCTION(mcrypt_ofb)
+{
+	pval *cipher, *data, *key, *mode, *iv;
+	int td;
+	char *ndata;
+	size_t bsize;
+	size_t nr;
+	size_t nsize;
+
+	if(ARG_COUNT(ht) != 5 || 
+			getParameters(ht, 5, &cipher, &key, &data, &mode, &iv) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	convert_to_long(cipher);
+	convert_to_long(mode);
+	convert_to_string(data);
+	convert_to_string(key);
+	convert_to_string(iv);
+
+	if(iv->value.str.len != bsize) {
+		php3_error(E_WARNING, MCRYPT_IV_WRONG_SIZE);
+		RETURN_FALSE;
+	}
+
+	bsize = get_block_size(cipher->value.lval);
+	nr = (data->value.str.len + bsize - 1) / bsize;
+	nsize = nr * bsize;
+
+	td = init_mcrypt_ofb(cipher->value.lval, key->value.str.val, key->value.str.len, iv->value.str.val);
+	if(td == -1) {
+		php3_error(E_WARNING, MCRYPT_FAILED);
+		RETURN_FALSE;
+	}
+	
+	ndata = ecalloc(nr, bsize);
+	memcpy(ndata, data->value.str.val, data->value.str.len);
+	
+	if(mode->value.lval == 0)
+		mcrypt_ofb(td, ndata, nsize);
+	else
+		mdecrypt_ofb(td, ndata, nsize);
+	
+	end_mcrypt_ofb(td);
+
+	RETURN_STRINGL(ndata, nsize, 0);
 }
 
 /* proto mcrypt_cfb(int cipher, string key, string data, int mode, string iv)
