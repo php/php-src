@@ -19,7 +19,7 @@
 
 /* $Id$ */
 
-/*	ToDos
+/*  ToDos
  *
  *  JIS encoding for comments
  * 	See if example images from http://www.exif.org have illegal
@@ -37,7 +37,7 @@
 /* Fragments of the code in this module were borrowed from the public domain
  * jhead.c package with the author's consent.
  *
- *	The original header from the jhead.c file was:
+ *  The original header from the jhead.c file was:
  *
  * --------------------------------------------------------------------------
  *  Program to pull the information out of various types of EFIF digital
@@ -143,11 +143,11 @@ PHP_MINIT_FUNCTION(exif)
  */
 zend_module_entry exif_module_entry = {
 #if ZEND_MODULE_API_NO >= 20010901
-    STANDARD_MODULE_HEADER,
+	STANDARD_MODULE_HEADER,
 #endif
 	"exif",
 	exif_functions,
-    ZEND_MODULE_STARTUP_N(exif), NULL,
+	ZEND_MODULE_STARTUP_N(exif), NULL,
 	NULL, NULL,
 	PHP_MINFO(exif),
 	EXIF_VERSION,
@@ -178,7 +178,7 @@ static size_t php_strnlen( char* str, size_t maxlen) {
 static const char * EXIF_ERROR_EALLOC    = "Cannot allocate memory for all data";
 static const char * EXIF_ERROR_FILEEOF   = "Unexpected end of file reached";
 static const char * EXIF_ERROR_CORRUPT   = "File structure corrupted";
-static const char *	EXIF_ERROR_THUMBEOF  = "Thumbnail goes IFD boundary or end of file reached";
+static const char * EXIF_ERROR_THUMBEOF  = "Thumbnail goes IFD boundary or end of file reached";
 static const char * EXIF_ERROR_FSREALLOC = "Illegal reallocating of undefined file section";
 
 #define EXIF_ERRLOG_EALLOC     php_error(E_ERROR,EXIF_ERROR_EALLOC);
@@ -240,7 +240,7 @@ static char *exif_get_tagformat(int format)
 #define TAG_TRESHHOLDING                0x0107
 #define TAG_CELL_WIDTH                  0x0108
 #define TAG_CELL_HEIGHT                 0x0109
-#define TAG_STRIP_OFFSETS				0x0111
+#define TAG_STRIP_OFFSETS               0x0111
 #define TAG_FILL_ORDER                  0x010A
 #define TAG_DOCUMENT_NAME               0x010D
 #define TAG_IMAGE_DESCRIPTION           0x010E
@@ -317,7 +317,7 @@ static char *exif_get_tagformat(int format)
 #define TAG_LIGHT_SOURCE                0x9208
 #define TAG_FLASH                       0x9209
 #define TAG_FOCALLENGTH                 0x920A
-#define TAG_MARKER_NOTE				    0x927C
+#define TAG_MARKER_NOTE                 0x927C
 #define TAG_USERCOMMENT                 0x9286
 #define TAG_FLASH_PIX_VERSION           0xA000
 #define TAG_COLOR_SPACE                 0xA001
@@ -342,10 +342,10 @@ static char *exif_get_tagformat(int format)
 #define TAG_COMPUTED_VALUE     			-2
 
 /* Values for TAG_PHOTOMETRIC_INTERPRETATION */
-#define PMI_BLACK_IS_ZERO	    0
-#define PMI_WHITE_IS_ZERO	    1
+#define PMI_BLACK_IS_ZERO       0
+#define PMI_WHITE_IS_ZERO       1
 #define PMI_RGB          	    2
-#define PMI_PALETTE_COLOR	    3
+#define PMI_PALETTE_COLOR       3
 #define PMI_TRANSPARENCY_MASK   4
 #define PMI_SEPARATED           5
 #define PMI_YCBCR               6
@@ -362,132 +362,132 @@ static const struct {
 } TagTable[] = {
   { 0x00FE, "NewSubFile"},
   { 0x00FF, "SubFile"},
-  {	0x0100,	"ImageWidth"},
-  {	0x0101,	"ImageLength"},
-  {	0x0102,	"BitsPerSample"},
-  {	0x0103,	"Compression"},
-  {	0x0106,	"PhotometricInterpretation"},
-  {	0x010A,	"FillOrder"},
-  {	0x010D,	"DocumentName"},
-  {	0x010E,	"ImageDescription"},
-  {	0x010F,	"Make"},
-  {	0x0110,	"Model"},
-  {	0x0111,	"StripOffsets"},
-  {	0x0112,	"Orientation"},
-  {	0x0115,	"SamplesPerPixel"},
-  {	0x0116,	"RowsPerStrip"},
-  {	0x0117,	"StripByteCounts"},
-  {	0x0118,	"MinSampleValue"},
-  {	0x0119,	"MaxSampleValue"},
-  {	0x011A,	"XResolution"},
-  {	0x011B,	"YResolution"},
-  {	0x011C,	"PlanarConfiguration"},
-  {	0x011D,	"PageName"},
-  {	0x011E,	"XPosition"},
-  {	0x011F,	"YPosition"},
-  {	0x0120,	"FreeOffsets"},
-  {	0x0121,	"FreeByteCounts"},
-  {	0x0122,	"GrayResponseUnit"},
-  {	0x0123,	"GrayResponseCurve"},
-  {	0x0124,	"T4Options"},
-  {	0x0125,	"T6Options"},
-  {	0x0128,	"ResolutionUnit"},
-  {	0x0129,	"PageNumber"},
-  {	0x012D,	"TransferFunction"},
-  {	0x0131,	"Software"},
-  {	0x0132,	"DateTime"},
-  {	0x013B,	"Artist"},
-  {	0x013C,	"HostComputer"},
-  {	0x013D,	"Predictor"},
-  {	0x013E,	"WhitePoint"},
-  {	0x013F,	"PrimaryChromaticities"},
-  {	0x0140,	"ColorMap"},
-  {	0x0141,	"HalfToneHints"},
-  {	0x0142,	"TileWidth"},
-  {	0x0143,	"TileLength"},
-  {	0x0144,	"TileOffsets"},
-  {	0x0145,	"TileByteCounts"},
-  {	0x014C,	"InkSet"},
-  {	0x014D,	"InkNames"},
-  {	0x014E,	"NumberOfInks"},
-  {	0x0150,	"DotRange"},
-  {	0x0151,	"TargetPrinter"},
-  {	0x0152,	"ExtraSample"},
-  {	0x0153,	"SampleFormat"},
-  {	0x0154,	"SMinSampleValue"},
-  {	0x0155,	"SMaxSampleValue"},
-  {	0x0156,	"TransferRange"},
-  {	0x0200,	"JPEGProc"},
-  {	0x0201,	"JPEGInterchangeFormat"},
-  {	0x0202,	"JPEGInterchangeFormatLength"},
-  {	0x0203,	"JPEGRestartInterval"},
-  {	0x0205,	"JPEGLosslessPredictors"},
-  {	0x0206,	"JPEGPointTransforms"},
-  {	0x0207,	"JPEGQTables"},
-  {	0x0208,	"JPEGDCTables"},
-  {	0x0209,	"JPEGACTables"},
-  {	0x0211,	"YCbCrCoefficients"},
-  {	0x0212,	"YCbCrSubSampling"},
-  {	0x0213,	"YCbCrPositioning"},
-  {	0x0214,	"ReferenceBlackWhite"},
+  { 0x0100, "ImageWidth"},
+  { 0x0101, "ImageLength"},
+  { 0x0102, "BitsPerSample"},
+  { 0x0103, "Compression"},
+  { 0x0106, "PhotometricInterpretation"},
+  { 0x010A, "FillOrder"},
+  { 0x010D, "DocumentName"},
+  { 0x010E, "ImageDescription"},
+  { 0x010F, "Make"},
+  { 0x0110, "Model"},
+  { 0x0111, "StripOffsets"},
+  { 0x0112, "Orientation"},
+  { 0x0115, "SamplesPerPixel"},
+  { 0x0116, "RowsPerStrip"},
+  { 0x0117, "StripByteCounts"},
+  { 0x0118, "MinSampleValue"},
+  { 0x0119, "MaxSampleValue"},
+  { 0x011A, "XResolution"},
+  { 0x011B, "YResolution"},
+  { 0x011C, "PlanarConfiguration"},
+  { 0x011D, "PageName"},
+  { 0x011E, "XPosition"},
+  { 0x011F, "YPosition"},
+  { 0x0120, "FreeOffsets"},
+  { 0x0121, "FreeByteCounts"},
+  { 0x0122, "GrayResponseUnit"},
+  { 0x0123, "GrayResponseCurve"},
+  { 0x0124, "T4Options"},
+  { 0x0125, "T6Options"},
+  { 0x0128, "ResolutionUnit"},
+  { 0x0129, "PageNumber"},
+  { 0x012D, "TransferFunction"},
+  { 0x0131, "Software"},
+  { 0x0132, "DateTime"},
+  { 0x013B, "Artist"},
+  { 0x013C, "HostComputer"},
+  { 0x013D, "Predictor"},
+  { 0x013E, "WhitePoint"},
+  { 0x013F, "PrimaryChromaticities"},
+  { 0x0140, "ColorMap"},
+  { 0x0141, "HalfToneHints"},
+  { 0x0142, "TileWidth"},
+  { 0x0143, "TileLength"},
+  { 0x0144, "TileOffsets"},
+  { 0x0145, "TileByteCounts"},
+  { 0x014C, "InkSet"},
+  { 0x014D, "InkNames"},
+  { 0x014E, "NumberOfInks"},
+  { 0x0150, "DotRange"},
+  { 0x0151, "TargetPrinter"},
+  { 0x0152, "ExtraSample"},
+  { 0x0153, "SampleFormat"},
+  { 0x0154, "SMinSampleValue"},
+  { 0x0155, "SMaxSampleValue"},
+  { 0x0156, "TransferRange"},
+  { 0x0200, "JPEGProc"},
+  { 0x0201, "JPEGInterchangeFormat"},
+  { 0x0202, "JPEGInterchangeFormatLength"},
+  { 0x0203, "JPEGRestartInterval"},
+  { 0x0205, "JPEGLosslessPredictors"},
+  { 0x0206, "JPEGPointTransforms"},
+  { 0x0207, "JPEGQTables"},
+  { 0x0208, "JPEGDCTables"},
+  { 0x0209, "JPEGACTables"},
+  { 0x0211, "YCbCrCoefficients"},
+  { 0x0212, "YCbCrSubSampling"},
+  { 0x0213, "YCbCrPositioning"},
+  { 0x0214, "ReferenceBlackWhite"},
   { 0x1000, "RelatedImageFileFormat"},
-  {	0x828D,	"CFARepeatPatternDim"},
-  {	0x828E,	"CFAPattern"},
-  {	0x828F,	"BatteryLevel"},
-  {	0x8298,	"Copyright"},
-  {	0x829A,	"ExposureTime"},
-  {	0x829D,	"FNumber"},
-  {	0x83BB,	"IPTC/NAA"},
-  {	0x8769,	"Exif_IFD_Pointer"},
-  {	0x8773,	"InterColorProfile"},
-  {	0x8822,	"ExposureProgram"},
-  {	0x8824,	"SpectralSensitivity"},
-  {	0x8825,	"GPS_IFD_Pointer"},
-  {	0x8827,	"ISOSpeedRatings"},
-  {	0x8828,	"OECF"},
-  {	0x9000,	"ExifVersion"},
-  {	0x9003,	"DateTimeOriginal"},
-  {	0x9004,	"DateTimeDigitized"},
-  {	0x9101,	"ComponentsConfiguration"},
-  {	0x9102,	"CompressedBitsPerPixel"},
-  {	0x9201,	"ShutterSpeedValue"},
-  {	0x9202,	"ApertureValue"},
-  {	0x9203,	"BrightnessValue"},
-  {	0x9204,	"ExposureBiasValue"},
-  {	0x9205,	"MaxApertureValue"},
-  {	0x9206,	"SubjectDistance"},
-  {	0x9207,	"MeteringMode"},
-  {	0x9208,	"LightSource"},
-  {	0x9209,	"Flash"},
-  {	0x920A,	"FocalLength"},
-  {	0x920B,	"FlashEnergy"},			        /* 0xA20B  in JPEG   */
-  {	0x920C,	"SpatialFrequencyResponse"},	/* 0xA20C    -  -    */
-  {	0x920E,	"FocalPlaneXResolution"},    	/* 0xA20E    -  -    */
-  {	0x920F,	"FocalPlaneYResolution"},	    /* 0xA20F    -  -    */
-  {	0x9210,	"FocalPlaneResolutionUnit"},	/* 0xA210    -  -    */
-  {	0x9214,	"SubjectLocation"},		        /* 0xA214    -  -    */
-  {	0x9215,	"ExposureIndex"},		        /* 0xA215    -  -    */
-  {	0x9217,	"SensingMethod"},		        /* 0xA217    -  -    */
-  {	0x927C,	"MakerNote"},
-  {	0x9286,	"UserComment"},
-  {	0x9290,	"SubSecTime"},
-  {	0x9291,	"SubSecTimeOriginal"},
-  {	0x9292,	"SubSecTimeDigitized"},
-  {	0xA000,	"FlashPixVersion"},
-  {	0xA001,	"ColorSpace"},
-  {	0xA002,	"ExifImageWidth"},
-  {	0xA003,	"ExifImageLength"},
-  {	0xA005,	"InteroperabilityOffset"},
-  {	0xA20B,	"FlashEnergy"},			        /* 0x920B in TIFF/EP */
-  {	0xA20C,	"SpatialFrequencyResponse"},	/* 0x920C    -  -    */
-  {	0xA20E,	"FocalPlaneXResolution"},    	/* 0x920E    -  -    */
-  {	0xA20F,	"FocalPlaneYResolution"},	    /* 0x920F    -  -    */
-  {	0xA210,	"FocalPlaneResolutionUnit"},	/* 0x9210    -  -    */
-  {	0xA214,	"SubjectLocation"},		        /* 0x9214    -  -    */
-  {	0xA215,	"ExposureIndex"},		        /* 0x9215    -  -    */
-  {	0xA217,	"SensingMethod"},		        /* 0x9217    -  -    */
-  {	0xA300,	"FileSource"},
-  {	0xA301,	"SceneType"},
+  { 0x828D, "CFARepeatPatternDim"},
+  { 0x828E, "CFAPattern"},
+  { 0x828F, "BatteryLevel"},
+  { 0x8298, "Copyright"},
+  { 0x829A, "ExposureTime"},
+  { 0x829D, "FNumber"},
+  { 0x83BB, "IPTC/NAA"},
+  { 0x8769, "Exif_IFD_Pointer"},
+  { 0x8773, "InterColorProfile"},
+  { 0x8822, "ExposureProgram"},
+  { 0x8824, "SpectralSensitivity"},
+  { 0x8825, "GPS_IFD_Pointer"},
+  { 0x8827, "ISOSpeedRatings"},
+  { 0x8828, "OECF"},
+  { 0x9000, "ExifVersion"},
+  { 0x9003, "DateTimeOriginal"},
+  { 0x9004, "DateTimeDigitized"},
+  { 0x9101, "ComponentsConfiguration"},
+  { 0x9102, "CompressedBitsPerPixel"},
+  { 0x9201, "ShutterSpeedValue"},
+  { 0x9202, "ApertureValue"},
+  { 0x9203, "BrightnessValue"},
+  { 0x9204, "ExposureBiasValue"},
+  { 0x9205, "MaxApertureValue"},
+  { 0x9206, "SubjectDistance"},
+  { 0x9207, "MeteringMode"},
+  { 0x9208, "LightSource"},
+  { 0x9209, "Flash"},
+  { 0x920A, "FocalLength"},
+  { 0x920B, "FlashEnergy"},                 /* 0xA20B  in JPEG   */
+  { 0x920C, "SpatialFrequencyResponse"},    /* 0xA20C    -  -    */
+  { 0x920E, "FocalPlaneXResolution"},       /* 0xA20E    -  -    */
+  { 0x920F, "FocalPlaneYResolution"},       /* 0xA20F    -  -    */
+  { 0x9210, "FocalPlaneResolutionUnit"},    /* 0xA210    -  -    */
+  { 0x9214, "SubjectLocation"},             /* 0xA214    -  -    */
+  { 0x9215, "ExposureIndex"},               /* 0xA215    -  -    */
+  { 0x9217, "SensingMethod"},               /* 0xA217    -  -    */
+  { 0x927C, "MakerNote"},
+  { 0x9286, "UserComment"},
+  { 0x9290, "SubSecTime"},
+  { 0x9291, "SubSecTimeOriginal"},
+  { 0x9292, "SubSecTimeDigitized"},
+  { 0xA000, "FlashPixVersion"},
+  { 0xA001, "ColorSpace"},
+  { 0xA002, "ExifImageWidth"},
+  { 0xA003, "ExifImageLength"},
+  { 0xA005, "InteroperabilityOffset"},
+  { 0xA20B, "FlashEnergy"},                 /* 0x920B in TIFF/EP */
+  { 0xA20C, "SpatialFrequencyResponse"},    /* 0x920C    -  -    */
+  { 0xA20E, "FocalPlaneXResolution"},    	/* 0x920E    -  -    */
+  { 0xA20F, "FocalPlaneYResolution"},       /* 0x920F    -  -    */
+  { 0xA210, "FocalPlaneResolutionUnit"},    /* 0x9210    -  -    */
+  { 0xA214, "SubjectLocation"},             /* 0x9214    -  -    */
+  { 0xA215, "ExposureIndex"},               /* 0x9215    -  -    */
+  { 0xA217, "SensingMethod"},               /* 0x9217    -  -    */
+  { 0xA300, "FileSource"},
+  { 0xA301, "SceneType"},
   {TAG_NONE,           "no tag value"},
   {TAG_COMPUTED_VALUE, "computed value"},
   {      0, ""}  /* Important for exif_get_tagname() IF value != "" functionresult is != false */
@@ -496,7 +496,7 @@ static const struct {
 /* }}} */
 
 /* {{{ exif_get_tagname
-    Get headername for tag_num or NULL if not defined */
+	Get headername for tag_num or NULL if not defined */
 static char * exif_get_tagname(int tag_num, char *ret, int len)
 {
 	int i,t;
@@ -598,12 +598,12 @@ static int php_ifd_get32s(void *value, int motorola_intel)
 {
 	if (motorola_intel) {
 		return  ((( char *)value)[0] << 24)
-		      | (((uchar *)value)[1] << 16)
+			  | (((uchar *)value)[1] << 16)
 			  | (((uchar *)value)[2] << 8 )
 			  | (((uchar *)value)[3]      );
 	} else {
 		return  ((( char *)value)[3] << 24)
-		      | (((uchar *)value)[2] << 16)
+			  | (((uchar *)value)[2] << 16)
 			  | (((uchar *)value)[1] << 8 )
 			  | (((uchar *)value)[0]      );
 	}
@@ -750,37 +750,37 @@ static size_t exif_convert_any_to_int(void *value, int format, int motorola_inte
 #endif
 
 typedef struct {
-	int				num;
-	int				den;
+	int             num;
+	int             den;
 } signed_rational;
 
 typedef struct {
-	unsigned int	num;
-	unsigned int	den;
+	unsigned int    num;
+	unsigned int    den;
 } unsigned_rational;
 
 typedef union _image_info_value {
 	char 				*s;
-	unsigned			u;
+	unsigned            u;
 	int 				i;
-	float				f;
-	double				d;
+	float               f;
+	double              d;
 	signed_rational 	sr;
 	unsigned_rational 	ur;
 	union _image_info_value   *list;
 } image_info_value;
 
 typedef struct {
-	WORD				tag;
-	WORD				format;
-	DWORD				length;
-	DWORD				dummy;  /* value ptr of tiff directory entry */
+	WORD                tag;
+	WORD                format;
+	DWORD               length;
+	DWORD               dummy;  /* value ptr of tiff directory entry */
 	char 				*name;
-	image_info_value	value;
+	image_info_value    value;
 } image_info_data;
 
 typedef struct {
-	int					count;
+	int                 count;
 	image_info_data 	*list;
 } image_info_list;
 /* }}} */
@@ -1018,7 +1018,7 @@ int exif_file_sections_free(image_info_type *ImageInfo)
 */
 void exif_iif_add_value( image_info_type *image_info, int section_index, char *name, int tag, int format, int length, void* value, int motorola_intel)
 {
-	int	index;
+	int index;
 	image_info_value *info_value;
 	image_info_data  *info_data;
 	image_info_data  *list;
@@ -1295,8 +1295,8 @@ void exif_iif_free( image_info_type *image_info, int section_index) {
  * Add image_info to associative array value. */
 void add_assoc_image_info( pval *value, int sub_array, image_info_type *image_info, int section_index)
 {
-	char	buffer[64], *val, *name, uname[64];
-	int		i, ap, l, b, idx=0, done, unknown=0;
+	char    buffer[64], *val, *name, uname[64];
+	int     i, ap, l, b, idx=0, done, unknown=0;
 	image_info_value *info_value;
 	image_info_data  *info_data;
 	pval 			 *tmpi, *array;
@@ -1465,7 +1465,7 @@ void add_assoc_image_info( pval *value, int sub_array, image_info_type *image_in
 */
 
 #define M_TEM   0x01    /* temp for arithmetic coding              */
-#define M_RES	0x02	/* reserved                                */
+#define M_RES   0x02    /* reserved                                */
 #define M_SOF0  0xC0    /* Start Of Frame N                        */
 #define M_SOF1  0xC1    /* N indicates which compression process   */
 #define M_SOF2  0xC2    /* Only SOF0-SOF2 are now in common use    */
@@ -1541,23 +1541,23 @@ void add_assoc_image_info( pval *value, int sub_array, image_info_type *image_in
 /* Markers xF0 - xF7 ISO/IEC 10918-3 */
 /* Markers xF7 - xF8 ISO/IEC 14495-1 */
 /* XY=Main/Tile-header:(R:required, N:not_allowed, O:optional, L:last_marker) */
-#define JC_SOC   0x4F	/* NN, Start of codestream                          */
-#define JC_SIZ   0x51	/* RN, Image and tile size                          */
-#define JC_COD   0x52	/* RO, Codeing style defaulte                       */
-#define JC_COC   0x53	/* OO, Coding style component                       */
-#define JC_TLM   0x55	/* ON, Tile part length main header                 */
-#define JC_PLM   0x57	/* ON, Packet length main header                    */
-#define JC_PLT   0x58	/* NO, Packet length tile part header               */
-#define JC_QCD   0x5C	/* RO, Quantization default                         */
-#define JC_QCC   0x5D	/* OO, Quantization component                       */
-#define JC_RGN   0x5E	/* OO, Region of interest                           */
-#define JC_POD   0x5F	/* OO, Progression order default                    */
-#define JC_PPM   0x60	/* ON, Packed packet headers main header            */
-#define JC_PPT   0x61	/* NO, Packet packet headers tile part header       */
-#define JC_CME   0x64	/* OO, Comment: "LL E <text>" E=0:binary, E=1:ascii */
+#define JC_SOC   0x4F   /* NN, Start of codestream                          */
+#define JC_SIZ   0x51   /* RN, Image and tile size                          */
+#define JC_COD   0x52   /* RO, Codeing style defaulte                       */
+#define JC_COC   0x53   /* OO, Coding style component                       */
+#define JC_TLM   0x55   /* ON, Tile part length main header                 */
+#define JC_PLM   0x57   /* ON, Packet length main header                    */
+#define JC_PLT   0x58   /* NO, Packet length tile part header               */
+#define JC_QCD   0x5C   /* RO, Quantization default                         */
+#define JC_QCC   0x5D   /* OO, Quantization component                       */
+#define JC_RGN   0x5E   /* OO, Region of interest                           */
+#define JC_POD   0x5F   /* OO, Progression order default                    */
+#define JC_PPM   0x60   /* ON, Packed packet headers main header            */
+#define JC_PPT   0x61   /* NO, Packet packet headers tile part header       */
+#define JC_CME   0x64   /* OO, Comment: "LL E <text>" E=0:binary, E=1:ascii */
 #define JC_SOT   0x90   /* NR, Start of tile                                */
-#define JC_SOP   0x91	/* NO, Start of packeter default                    */
-#define JC_EPH   0x92	/* NO, End of packet header                         */
+#define JC_SOP   0x91   /* NO, Start of packeter default                    */
+#define JC_EPH   0x92   /* NO, End of packet header                         */
 #define JC_SOD   0x93   /* NL, Start of data                                */
 #define JC_EOC   0xD9   /* NN, End of codestream                            */
 /* }}} */
@@ -1633,7 +1633,7 @@ static void exif_process_SOFn (uchar *Data, int marker, jpeg_sof_info *result)
 static int exif_process_IFD_in_JPEG(image_info_type *ImageInfo, char *DirStart, char *OffsetBase, unsigned IFDlength, int sub_section_index);
 
 /* {{{ exif_get_markername
-    Get name of marker */
+	Get name of marker */
 //#ifdef EXIF_DEBUG
 char * exif_get_markername(int marker)
 {
@@ -1687,7 +1687,7 @@ char * exif_get_markername(int marker)
 /* }}} */
 
 /* {{{ proto string|false exif_tagname(index)
-    Get headername for index or false if not defined */
+	Get headername for index or false if not defined */
 PHP_FUNCTION(exif_tagname)
 {
 	pval **p_num;
@@ -1712,9 +1712,9 @@ PHP_FUNCTION(exif_tagname)
 /* {{{ exif_ifd_make_value
  * Create a value for an ifd from an info_data pointer */
 static void* exif_ifd_make_value( image_info_data *info_data,int motorola_intel) {
-	size_t	byte_count;
+	size_t  byte_count;
 	char    *value_ptr, *data_ptr;
-	int		i;
+	int     i;
 
 	image_info_value  *info_value;
 
@@ -2122,7 +2122,7 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, cha
 
 			case TAG_STRIP_OFFSETS:
 			case TAG_JPEG_INTERCHANGE_FORMAT:
-			    /* accept both formats */
+				/* accept both formats */
 				ImageInfo->Thumbnail.offset = exif_convert_any_to_int(value_ptr, format, ImageInfo->motorola_intel);
 				break;
 
@@ -2147,7 +2147,7 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, cha
 	} else {
 		switch(tag) {
 			case TAG_COPYRIGHT:
-			    /* check for "<photographer> NUL <editor> NUL" */
+				/* check for "<photographer> NUL <editor> NUL" */
 				if (byte_count>1 && (l=php_strnlen(value_ptr,byte_count)) > 0) {
 					if ( l<byte_count-1) {
 						/* When there are any characters after the first NUL */
@@ -2162,9 +2162,9 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, cha
 						/* format = TAG_FMT_UNDEFINED; this musn't be ASCII         */
 						/* but we are not supposed to change this                   */
 						/* keep in mind that image_info does not store editor value */
-				    } else {
+					} else {
 						ImageInfo->Copyright = estrdup(value_ptr);
-				    }
+					}
 				}
 				break;
 
@@ -2422,12 +2422,11 @@ static void exif_process_APP12(image_info_type *ImageInfo, char *buffer, unsigne
 static int exif_scan_JPEG_header(image_info_type *ImageInfo)
 {
 	int section, sn;
-	int itemlen;
 	int marker = 0, last_marker = M_PSEUDO, comment_correction;
-	int ll, lh, got;
+	int ll, lh;
 	uchar *Data;
-	size_t fpos, size;
-	jpeg_sof_info	sof_info;
+	size_t fpos, size, got, itemlen;
+	jpeg_sof_info  sof_info;
 	TSRMLS_FETCH();
 
 	for(section=0;;section++)
@@ -2680,7 +2679,7 @@ static int exif_process_IFD_in_TIFF(image_info_type *ImageInfo, size_t dir_offse
 		#endif
 		php_stream_seek(ImageInfo->infile,dir_offset,SEEK_SET); /* we do not know the order of sections */
 		php_stream_read(ImageInfo->infile, ImageInfo->file.list[sn].data, 2);
-	    num_entries = php_ifd_get16u(ImageInfo->file.list[sn].data, ImageInfo->motorola_intel);
+		num_entries = php_ifd_get16u(ImageInfo->file.list[sn].data, ImageInfo->motorola_intel);
 		dir_size = 2/*num dir entries*/ +12/*length of entry*/*num_entries +4/* offset to next ifd (points to thumbnail or NULL)*/;
 		if ( ImageInfo->FileSize >= dir_offset+dir_size) {
 			#ifdef EXIF_DEBUG
@@ -2786,8 +2785,8 @@ static int exif_process_IFD_in_TIFF(image_info_type *ImageInfo, size_t dir_offse
 					entry_type   = php_ifd_get16u(dir_entry+2, ImageInfo->motorola_intel);
 					/*entry_length = php_ifd_get32u(dir_entry+4, ImageInfo->motorola_intel);*/
 					if (entry_tag == TAG_EXIF_IFD_POINTER ||
-					    entry_tag == TAG_INTEROP_IFD_POINTER ||
-					    entry_tag == TAG_GPS_IFD_POINTER
+						entry_tag == TAG_INTEROP_IFD_POINTER ||
+						entry_tag == TAG_GPS_IFD_POINTER
 					   )
 					{
 						switch(entry_tag) {
@@ -2866,56 +2865,56 @@ static int exif_process_IFD_in_TIFF(image_info_type *ImageInfo, size_t dir_offse
  * Parse the marker stream until SOS or EOI is seen; */
 static int exif_scan_FILE_header (image_info_type *ImageInfo)
 {
-    unsigned char file_header[8];
-    int ret = FALSE;
+	unsigned char file_header[8];
+	int ret = FALSE;
 	TSRMLS_FETCH();
 
-    ImageInfo->FileType = IMAGE_FILETYPE_UNKNOWN;
+	ImageInfo->FileType = IMAGE_FILETYPE_UNKNOWN;
 
-    if ( ImageInfo->FileSize >= 2) {
+	if ( ImageInfo->FileSize >= 2) {
 		php_stream_seek(ImageInfo->infile, 0, SEEK_SET);
 		php_stream_read(ImageInfo->infile, file_header, 2);
 		if ( (file_header[0]==0xff) && (file_header[1]==M_SOI)) {
-	    	ImageInfo->FileType = IMAGE_FILETYPE_JPEG;
-	    	if (exif_scan_JPEG_header(ImageInfo)) {
-	    		ret = TRUE;
-	    	} else {
+			ImageInfo->FileType = IMAGE_FILETYPE_JPEG;
+			if (exif_scan_JPEG_header(ImageInfo)) {
+				ret = TRUE;
+			} else {
 				php_error(E_WARNING, "Invalid JPEG file: '%s'", ImageInfo->FileName);
-	    	}
+			}
 		} else if ( ImageInfo->FileSize >= 8) {
 			php_stream_read(ImageInfo->infile, file_header+2, 6);
-		    if ( !memcmp(file_header,"II\x2A\x00", 4))
-		    {
-		    	ImageInfo->FileType = IMAGE_FILETYPE_TIFF_II;
-		    	ImageInfo->motorola_intel = 0;
-		    	#ifdef EXIF_DEBUG
-		    	php_error(E_NOTICE,"File(%s) has TIFF/II format", ImageInfo->FileName);
-		    	#endif
+			if ( !memcmp(file_header,"II\x2A\x00", 4))
+			{
+				ImageInfo->FileType = IMAGE_FILETYPE_TIFF_II;
+				ImageInfo->motorola_intel = 0;
+				#ifdef EXIF_DEBUG
+				php_error(E_NOTICE,"File(%s) has TIFF/II format", ImageInfo->FileName);
+				#endif
 				ImageInfo->sections_found |= FOUND_IFD0;
-		    	if (exif_process_IFD_in_TIFF(ImageInfo,php_ifd_get32u(file_header+4,ImageInfo->motorola_intel),SECTION_IFD0)) {
-		    		ret = TRUE;
-		    	} else {
+				if (exif_process_IFD_in_TIFF(ImageInfo,php_ifd_get32u(file_header+4,ImageInfo->motorola_intel),SECTION_IFD0)) {
+					ret = TRUE;
+				} else {
 					php_error(E_WARNING, "Invalid TIFF file: '%s'", ImageInfo->FileName);
-		    	}
-		    }
-		    else
-		    if ( !memcmp(file_header,"MM\x00\x2a", 4))
-		    {
-		    	ImageInfo->FileType = IMAGE_FILETYPE_TIFF_MM;
-		    	ImageInfo->motorola_intel = 1;
-		    	#ifdef EXIF_DEBUG
-		    	php_error(E_NOTICE,"File(%s) has TIFF/MM format", ImageInfo->FileName);
-		    	#endif
+				}
+			}
+			else
+			if ( !memcmp(file_header,"MM\x00\x2a", 4))
+			{
+				ImageInfo->FileType = IMAGE_FILETYPE_TIFF_MM;
+				ImageInfo->motorola_intel = 1;
+				#ifdef EXIF_DEBUG
+				php_error(E_NOTICE,"File(%s) has TIFF/MM format", ImageInfo->FileName);
+				#endif
 				ImageInfo->sections_found |= FOUND_IFD0;
-		    	if (exif_process_IFD_in_TIFF(ImageInfo,php_ifd_get32u(file_header+4,ImageInfo->motorola_intel),SECTION_IFD0)) {
-		    		ret = TRUE;
-		    	} else {
+				if (exif_process_IFD_in_TIFF(ImageInfo,php_ifd_get32u(file_header+4,ImageInfo->motorola_intel),SECTION_IFD0)) {
+					ret = TRUE;
+				} else {
 					php_error(E_WARNING, "Invalid TIFF file: '%s'", ImageInfo->FileName);
-		    	}
-		    } else {
+				}
+			} else {
 				php_error(E_WARNING,"File(%s) not supported", ImageInfo->FileName);
 				return FALSE;
-		    }
+			}
 		}
 	} else {
 		php_error(E_WARNING,"File(%s) to small (%d)", ImageInfo->FileName, ImageInfo->FileSize);
@@ -2975,7 +2974,7 @@ int exif_read_file(image_info_type *ImageInfo, char *FileName, int read_thumbnai
 			/* Store file date/time. */
 			ImageInfo->FileDateTime = st.st_mtime;
 			ImageInfo->FileSize = st.st_size;
-			php_error(E_NOTICE,"open stream is file: %d", ImageInfo->FileSize);
+			/*php_error(E_NOTICE,"open stream is file: %d", ImageInfo->FileSize);*/
 		}
 	} else {
 		if ( !ImageInfo->FileSize) {
@@ -3032,15 +3031,15 @@ PHP_FUNCTION(exif_read_data)
 				sections_needed |= 1<<i;
 			}
 		}
-    	if ( sections_str) efree(sections_str);
-    	/* now see what we need */
-    	#ifdef EXIF_DEBUG
-    	sections_str = exif_get_sectionlist(sections_needed);
-    	if ( !sections_str) {
-    		RETURN_FALSE;
-    	}
-    	php_error(E_NOTICE,"Sections needed: %s", sections_str[0] ? sections_str : "None");
-    	if ( sections_str) efree(sections_str);
+		if ( sections_str) efree(sections_str);
+		/* now see what we need */
+		#ifdef EXIF_DEBUG
+		sections_str = exif_get_sectionlist(sections_needed);
+		if ( !sections_str) {
+			RETURN_FALSE;
+		}
+		php_error(E_NOTICE,"Sections needed: %s", sections_str[0] ? sections_str : "None");
+		if ( sections_str) efree(sections_str);
 		#endif
 	}
 	if(ac >= 3) {
@@ -3259,7 +3258,7 @@ PHP_FUNCTION(exif_imagetype)
 
 	stream = php_stream_open_wrapper(Z_STRVAL_PP(arg1), "rb", IGNORE_PATH|ENFORCE_SAFE_MODE|REPORT_ERRORS, NULL);
 
-	if (stream == NULL)	{
+	if (stream == NULL) {
 		RETURN_FALSE;
 	}
 
