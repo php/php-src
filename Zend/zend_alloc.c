@@ -363,7 +363,6 @@ ZEND_API void start_memory_manager(ALS_D)
 	memset(AG(fast_cache_list_head), 0, sizeof(AG(fast_cache_list_head)));
 	memset(AG(cache_count),0,MAX_CACHED_MEMORY*sizeof(unsigned char));
 
-#if 0 /* FIXME: Need to allocate the right amount of memory now */
 #ifndef ZTS
 	/* Initialize cache, to prevent fragmentation */
 	/* We can't do this in ZTS mode, because calling emalloc() from within start_memory_manager()
@@ -371,7 +370,7 @@ ZEND_API void start_memory_manager(ALS_D)
 	 */
 	for (i=1; i<MAX_CACHED_MEMORY; i++) {
 		for (j=0; j<MAX_CACHED_ENTRIES; j++) {
-			cached_entries[i][j] = emalloc(i);
+			cached_entries[i][j] = emalloc(8*i);
 		}
 	}
 	for (i=1; i<MAX_CACHED_MEMORY; i++) {
@@ -379,7 +378,6 @@ ZEND_API void start_memory_manager(ALS_D)
 			efree(cached_entries[i][j]);
 		}
 	}
-#endif
 #endif
 }
 
