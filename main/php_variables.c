@@ -70,15 +70,15 @@ PHPAPI void php_register_variable_ex(char *var, zval *val, pval *track_vars_arra
 
 	assert(var != NULL);
 	
-	if (PG(register_globals)) {
-		symtable1 = EG(active_symbol_table);
-	}
 	if (track_vars_array) {
+		symtable1 = Z_ARRVAL_P(track_vars_array);
+	}
+	if (PG(register_globals)) {
 		if (symtable1) {
-			symtable2 = Z_ARRVAL_P(track_vars_array);
+			symtable2 = EG(active_symbol_table);
 		} else {
-			symtable1 = Z_ARRVAL_P(track_vars_array);
-		}
+			symtable1 = EG(active_symbol_table);
+		}	
 	}
 	if (!symtable1) {
 		/* Nothing to do */
