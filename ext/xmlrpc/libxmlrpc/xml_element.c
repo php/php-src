@@ -44,6 +44,11 @@ static const char rcsid[] = "#(@) $Id$";
  *   06/2000
  * HISTORY
  *   $Log$
+ *   Revision 1.6  2004/06/01 20:16:06  iliaa
+ *   Fixed bug #28597 (xmlrpc_encode_request() incorrectly encodes chars in
+ *   200-210 range).
+ *   Patch by: fernando dot nemec at folha dot com dot br
+ *
  *   Revision 1.5  2003/12/16 21:00:21  sniper
  *   Fix some compile warnings (patch by Joe Orton)
  *
@@ -105,7 +110,7 @@ static const char rcsid[] = "#(@) $Id$";
 
 #include "xml_element.h"
 #include "queue.h"
-#include "expat.h"
+#include "ext/xml/expat_compat.h"
 #include "encodings.h"
 
 #define my_free(thing)  if(thing) {free(thing); thing = 0;}
@@ -567,7 +572,7 @@ typedef struct _xml_elem_data {
 
 
 /* expat start of element handler */
-static void startElement(void *userData, const char *name, const char **attrs)
+static void _xmlrpc_startElement(void *userData, const char *name, const char **attrs)
 {
    xml_element *c;
    xml_elem_data* mydata = (xml_elem_data*)userData;
@@ -595,7 +600,7 @@ static void startElement(void *userData, const char *name, const char **attrs)
 }
 
 /* expat end of element handler */
-static void endElement(void *userData, const char *name)
+static void _xmlrpc_endElement(void *userData, const char *name)
 {
    xml_elem_data* mydata = (xml_elem_data*)userData;
 
@@ -607,7 +612,7 @@ static void endElement(void *userData, const char *name)
 }
 
 /* expat char data handler */
-static void charHandler(void *userData,
+static void _xmlrpc_charHandler(void *userData,
                         const char *s,
                         int len)
 {
@@ -680,8 +685,8 @@ xml_element* xml_elem_parse_buf(const char* in_buf, int len, XML_ELEM_INPUT_OPTI
       mydata.input_options = options;
       mydata.needs_enc_conversion = options->encoding && strcmp(options->encoding, encoding_utf_8);
 
-      XML_SetElementHandler(parser, startElement, endElement);
-      XML_SetCharacterDataHandler(parser, charHandler);
+      XML_SetElementHandler(parser, _xmlrpc_startElement, _xmlrpc_endElement);
+      XML_SetCharacterDataHandler(parser, _xmlrpc_charHandler);
 
       /* pass the xml_elem_data struct along */
       XML_SetUserData(parser, (void*)&mydata);

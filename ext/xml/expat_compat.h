@@ -21,9 +21,18 @@
 #ifndef PHP_EXPAT_COMPAT_H
 #define PHP_EXPAT_COMPAT_H
 
+#ifdef PHP_WIN32
+#include "config.w32.h"
+#elif defined(NETWARE)
+#include "config.nw.h"
+#else
+#include <php_config.h>
+#endif
+
 #if !defined(HAVE_LIBEXPAT) && defined(HAVE_LIBXML)
 #define LIBXML_EXPAT_COMPAT 1
 
+#include "php.h"
 #include "php_compat.h"
 
 #include <libxml/parser.h>
