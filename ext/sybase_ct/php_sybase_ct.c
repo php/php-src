@@ -635,17 +635,27 @@ static int php_sybase_get_default_link(INTERNAL_FUNCTION_PARAMETERS)
 }
 
 
+/* {{{ proto int sybase_connect([string host [, string user [, string password [, string charset]]]])
+    Open Sybase server connection */
 PHP_FUNCTION(sybase_connect)
 {
 	php_sybase_do_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 
+/* }}} */
+
+/* {{{ proto int sybase_pconnect([string host [, string user [, string password [, string charset]]]])
+    Open persistent Sybase connection */
 PHP_FUNCTION(sybase_pconnect)
 {
 	php_sybase_do_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 
+/* }}} */
 
+
+/* {{{ proto bool sybase_close([int link_id])
+    Close Sybase connection */
 PHP_FUNCTION(sybase_close)
 {
 	pval *sybase_link_index = 0;
@@ -678,6 +688,8 @@ PHP_FUNCTION(sybase_close)
 
 	RETURN_TRUE;
 }
+
+/* }}} */
 	
 
 static int exec_cmd(sybase_link *sybase_ptr, char *cmdbuf)
@@ -756,6 +768,8 @@ static int exec_cmd(sybase_link *sybase_ptr, char *cmdbuf)
 }
 
 
+/* {{{ proto bool sybase_select_db(string database [, int link_id])
+    Select Sybase database */
 PHP_FUNCTION(sybase_select_db)
 {
 	pval *db,*sybase_link_index;
@@ -797,6 +811,8 @@ PHP_FUNCTION(sybase_select_db)
 		RETURN_TRUE;
 	}
 }
+
+/* }}} */
 
 
 static sybase_result * php_sybase_fetch_result_set (sybase_link *sybase_ptr)
@@ -963,6 +979,8 @@ static sybase_result * php_sybase_fetch_result_set (sybase_link *sybase_ptr)
 }
 
 
+/* {{{ proto int sybase_query(string query [, int link_id])
+    Send Sybase query */
 PHP_FUNCTION(sybase_query)
 {
 	pval **query, **sybase_link_index=NULL;
@@ -1171,7 +1189,10 @@ PHP_FUNCTION(sybase_query)
 	ZEND_REGISTER_RESOURCE(return_value, result, le_result);
 }
 
+/* }}} */
 
+/* {{{ proto bool sybase_free_result(int result)
+    Free result memory */
 PHP_FUNCTION(sybase_free_result)
 {
 	pval *sybase_result_index;
@@ -1193,7 +1214,10 @@ PHP_FUNCTION(sybase_free_result)
 	RETURN_TRUE;
 }
 
+/* }}} */
 
+/* {{{ proto int sybase_num_rows(int result)
+    Get number of rows in result */
 PHP_FUNCTION(sybase_num_rows)
 {
 	pval *sybase_result_index;
@@ -1210,7 +1234,10 @@ PHP_FUNCTION(sybase_num_rows)
 	return_value->type = IS_LONG;
 }
 
+/* }}} */
 
+/* {{{ proto int sybase_num_fields(int result)
+    Get number of fields in result */
 PHP_FUNCTION(sybase_num_fields)
 {
 	pval *sybase_result_index;
@@ -1227,7 +1254,10 @@ PHP_FUNCTION(sybase_num_fields)
 	return_value->type = IS_LONG;
 }
 
+/* }}} */
 
+/* {{{ proto array sybase_fetch_row(int result)
+    Get row as enumerated array */
 PHP_FUNCTION(sybase_fetch_row)
 {
 	pval *sybase_result_index;
@@ -1257,6 +1287,7 @@ PHP_FUNCTION(sybase_fetch_row)
 	result->cur_row++;
 }
 
+/* }}} */
 
 static void php_sybase_fetch_hash(INTERNAL_FUNCTION_PARAMETERS)
 {
@@ -1298,6 +1329,8 @@ static void php_sybase_fetch_hash(INTERNAL_FUNCTION_PARAMETERS)
 }
 
 
+/* {{{ proto object sybase_fetch_object(int result)
+    Fetch row as object */
 PHP_FUNCTION(sybase_fetch_object)
 {
 	php_sybase_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU);
@@ -1308,12 +1341,19 @@ PHP_FUNCTION(sybase_fetch_object)
 	}
 }
 
+/* }}} */
 
+/* {{{ proto array sybase_fetch_array(int result)
+    Fetch row as array */
 PHP_FUNCTION(sybase_fetch_array)
 {
 	php_sybase_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
+/* }}} */
+
+/* {{{ proto bool sybase_data_seek(int result, int offset)
+    Move internal row pointer */
 PHP_FUNCTION(sybase_data_seek)
 {
 	pval *sybase_result_index,*offset;
@@ -1337,6 +1377,7 @@ PHP_FUNCTION(sybase_data_seek)
 	RETURN_TRUE;
 }
 
+/* }}} */
 
 static char *php_sybase_get_field_name(CS_INT type)
 {
@@ -1382,6 +1423,8 @@ static char *php_sybase_get_field_name(CS_INT type)
 }
 
 
+/* {{{ proto object sybase_fetch_field(int result [, int offset])
+    Get field information */
 PHP_FUNCTION(sybase_fetch_field)
 {
 	pval *sybase_result_index,*offset;
@@ -1432,7 +1475,11 @@ PHP_FUNCTION(sybase_fetch_field)
 	add_property_string(return_value, "type", php_sybase_get_field_name(result->fields[field_offset].type), 1);
 }
 
+/* }}} */
 
+
+/* {{{ proto bool sybase_field_seek(int result, int offset)
+    Set field offset */
 PHP_FUNCTION(sybase_field_seek)
 {
 	pval *sybase_result_index,*offset;
@@ -1458,7 +1505,11 @@ PHP_FUNCTION(sybase_field_seek)
 	RETURN_TRUE;
 }
 
+/* }}} */
 
+
+/* {{{ proto string sybase_result(int result, int row, mixed field)
+    Get result data */
 PHP_FUNCTION(sybase_result)
 {
 	pval *row, *field, *sybase_result_index;
@@ -1508,6 +1559,8 @@ PHP_FUNCTION(sybase_result)
 	*return_value = result->data[row->value.lval][field_offset];
 	pval_copy_constructor(return_value);
 }
+
+/* }}} */
 
 
 PHP_FUNCTION(sybase_affected_rows)
