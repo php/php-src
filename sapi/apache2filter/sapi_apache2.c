@@ -89,8 +89,12 @@ php_apache_sapi_read_post(char *buf, uint count_bytes SLS_DC)
 static char *
 php_apache_sapi_read_cookies(SLS_D)
 {
+	php_struct *ctx = SG(server_context);
+	const char *http_cookie;
 
-	return 0;
+	http_cookie = apr_table_get(ctx->f->r->headers_in, "cookie");
+
+	return (char *) http_cookie;
 }
 
 static void
@@ -183,6 +187,7 @@ static int php_filter(ap_filter_t *f, ap_bucket_brigade *bb)
 	
 	if (ctx->state == 0) {
 		char *content_type;
+		char *auth;
 		CLS_FETCH();
 		ELS_FETCH();
 		PLS_FETCH();
@@ -203,6 +208,9 @@ static int php_filter(ap_filter_t *f, ap_bucket_brigade *bb)
 		efree(content_type);
 		apr_table_set(f->r->headers_in, "Connection", "close");
 		apr_table_unset(f->r->headers_out, "Content-Length");
+		auth = apr_table_get(f->r->headers_in, "Authorization");
+		if (auth)
+			php_handle_auth_data(auth SLS_CC);
 	}
 
 	/* moves data from bb to ctx->bb */
