@@ -1,2 +1,0 @@
-noinst_LTLIBRARIES=libphpext_cybercash.la
-libphpext_cybercash_la_SOURCES=cybercash.c

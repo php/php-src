@@ -1,2 +1,0 @@
-/* Define if you have the Oracle database client libraries */
-#define HAVE_ORACLE 0

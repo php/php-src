@@ -1,9 +1,0 @@
-#ifndef HAVE_IFX
-#define HAVE_IFX 0
-#endif
-#ifndef HAVE_IFX_IUS
-#define HAVE_IFX_IUS 0
-#endif
-#ifndef IFX_VERSION
-#define IFX_VERSION 0
-#endif
