@@ -3,9 +3,7 @@ PHP 4.0                                                                    NEWS
 
 ?? ?? ????, Version 4.0 Beta 4
 - Fix some warnings when compiling in maintainer-mode (Stig)
-  Made mysql and gd work as shared extensions again (Stig)
-- Made the GET/POST/Cookie and their HTTP_*_VARS[] counterparts be references
-  to each other (Zeev)
+- Made mysql and gd work as shared extensions again (Stig)
 - Make the global GET/POST/Cookie variables and their $HTTP_*_VARS[] counterparts
   be references to each other (Zeev)
 - Added support for the 'use' keyword - behaves like 'require', but will not
