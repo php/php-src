@@ -64,13 +64,6 @@ class PEAR_Remote extends PEAR
             'lastChange' => filemtime($filename),
             'content'    => unserialize(implode('', file($filename))),
             );
-        $proxy_host = $proxy_port = $proxy_user = $proxy_pass = '';
-        if ($proxy = parse_url($this->config->get('http_proxy'))) {
-            $proxy_host = @$proxy['host'];
-            $proxy_port = @$proxy['port'];
-            $proxy_user = @$proxy['user'];
-            $proxy_pass = @$proxy['pass'];
-        }        
         return $result;
     }
     
@@ -123,6 +116,13 @@ class PEAR_Remote extends PEAR
         } else {
             $maxAge = '';
         };
+        $proxy_host = $proxy_port = $proxy_user = $proxy_pass = '';
+        if ($proxy = parse_url($this->config->get('http_proxy'))) {
+            $proxy_host = @$proxy['host'];
+            $proxy_port = @$proxy['port'];
+            $proxy_user = @$proxy['user'];
+            $proxy_pass = @$proxy['pass'];
+        }        
         $c = new XML_RPC_Client('/xmlrpc.php'.$maxAge, $server_host, 80, $proxy_host, $proxy_port, $proxy_user, $proxy_pass);
         if ($username && $password) {
             $c->setCredentials($username, $password);
