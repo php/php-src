@@ -1,3 +1,21 @@
+2000-08-03  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/standard/mail.c:
+    evaluate sendmail exit status, fixes unix side of bug #5630
+
+2000-08-03  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/standard/file.c: Fix fclose prototype (#5930)
+
+    * main/fopen-wrappers.c:
+    If we can't find a protocol in URL wrapper, try it as a filename (fix #5931)
+
+2000-08-03  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/standard/url_scanner.c:
+    will now work again on 1-character urls, spaces before and after '='
+    and urls containing '#' scrolling info
+
 2000-08-02  Rasmus Lerdorf  <rasmus@php.net>
 
     * main/SAPI.c: Leave this initialization in
