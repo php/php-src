@@ -467,7 +467,7 @@ PHP_MINFO_FUNCTION(fbsql)
 
 /*
 	sprintf(buf, "%ld", FB_SQL_G(resultCount));
-	php_info_print_table_row(2, "Active Links", buf);
+	php_info_print_table_row(2, "Active Results", buf);
 */
 
 	php_info_print_table_end();
@@ -639,7 +639,7 @@ int phpfbFetchRow(PHPFBResult* result, int row)
 	for (;;)
 	{
 		void *rawData; 
-		if (row > result->rowCount) return 0;
+		if (row >= result->rowCount && row != 0x7fffffff) return 0;
 		if (fbcrhRowCount(result->rowHandler) > (unsigned int)row) return 1;
 		rawData = fbcdcFetch(result->link->connection, result->batchSize, result->fetchHandle);
 		if (!fbcrhAddBatch(result->rowHandler, rawData)) result->rowCount = fbcrhRowCount(result->rowHandler);
