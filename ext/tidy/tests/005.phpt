@@ -1,7 +1,7 @@
 --TEST--
 tidy_parse_file()
 --SKIPIF--
-<?php if (!extension_loaded("Tidy")) print "skip"; ?>
+<?php if (!extension_loaded("tidy")) print "skip"; ?>
 --POST--
 --GET--
 --INI--
