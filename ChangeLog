@@ -1,3 +1,105 @@
+2003-06-04  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * (PHP_4)
+      ext/standard/aggregation.c:
+      MFB
+
+    * (PHP_4_3)
+      ext/standard/aggregation.c:
+      Fix a couple of aggregation bugs:
+      - Needed to add a reference to a function when copying (#23574)
+      - Due to pecularity of ZE1 object zvals could be re-used, so we always
+        set the new class entry explicitly.
+
+2003-06-04  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      TODO_SEGFAULTS:
+      Updated the todo to reflect the current situation.
+
+    * ext/gd/libgd/gd.c:
+      No need to dupe macro
+
+2003-06-04  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_4_3)
+      NEWS
+      TODO_SEGFAULTS:
+      BFN updates
+
+    * (PHP_4_3)
+      ext/standard/base64.c:
+      MFH(r-1.38): fixed base64_encode() integer overflow issue pointed out in
+      TODO_SEGFAULTS
+
+    * ext/standard/base64.c:
+      Fixed base64_encode() integer overflow issue pointed out in TODO_SEGFAULTS
+
+    * (PHP_4_3)
+      ext/iconv/iconv.c:
+      MFH(r-1.87): fixed ob_iconv_handler() type mismatch issue on 64bit
+      platforms.
+
+    * ext/iconv/iconv.c:
+      Fixed ob_iconv_handler() type mismatch issue on 64bit platforms.
+      Patch by Joe Orton <jorton@redhat.com>
+
+2003-06-04  Hartmut Holzgraefe  <hartmut@php-groupies.de>
+
+    * ext/mime_magic/mime_magic.c:
+      mime_content_type() now also accepts open streams as argument
+      streas have to bee seekable, the stream position is reset to
+      its original value using ftell and fseek after operation
+
+2003-06-04  Sascha Schumann  <sascha@schumann.cx>
+
+    * (PHP_4_3)
+      ext/ircg/ircg_scanner.c:
+      sync
+
+    * (PHP_4_3)
+      ext/ircg/ircg_scanner.re:
+      fix and simplify
+
+2003-06-04  Jani Taskinen  <sniper@iki.fi>
+
+    * (PHP_4_3)
+      NEWS:
+      cleanup + BFN
+
+    * ext/standard/dir.c:
+      No C++ comments and extra tabs.
+
+    * ext/gd/libgd/gd.c:
+      MFB: fix build
+
+    * (PHP_4_3)
+      ext/gd/libgd/gd.c:
+      Fix build
+
+2003-06-04  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/thttpd/thttpd_patch
+      sapi/thttpd/thttpd_patch
+      sapi/thttpd/thttpd_patch:
+      Don't corrupt data during request body handling
+
+    * sapi/thttpd/thttpd.c
+      sapi/thttpd/thttpd.c
+      sapi/thttpd/thttpd.c:
+      Don't return CRLF from broken clients
+
+    * ext/ircg/config.m4:
+      Properly support only giving --with-ircg-config
+      
+      Also fix libpath order and link order
+
+2003-06-04  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/gd/gd.c
+      ext/gd/libgd/gd.c:
+      GD 2.0.15 sync
+
 2003-06-03  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_4_3)

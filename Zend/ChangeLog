@@ -1,3 +1,28 @@
+2003-06-04  Stanislav Malyshev  <stas@zend.com>
+
+    * zend.c:
+      fix non-ZTS build
+
+2003-06-04  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * zend.c:
+      Fix segfault. Again.
+
+2003-06-04  Stanislav Malyshev  <stas@zend.com>
+
+    * zend.c
+      zend.h
+      zend_API.c
+      zend_API.h
+      zend_builtin_functions.c
+      zend_object_handlers.c:
+      rm namespace leftovers
+
+2003-06-04  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * zend.c:
+      Fix segfault. #Hopefully not a Voodoo Fix[TM].
+
 2003-06-02  Sebastian Bergmann  <sb@sebastian-bergmann.de>
 
     * zend.c
