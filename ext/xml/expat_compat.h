@@ -58,8 +58,6 @@ typedef struct _XML_Parser {
 	void *user;
 	xmlParserCtxtPtr parser;
 
-	XML_Memory_Handling_Suite        mem_hdlrs;
-
 	XML_StartElementHandler          h_start_element;
 	XML_EndElementHandler            h_end_element;
 	XML_CharacterDataHandler         h_cdata;
