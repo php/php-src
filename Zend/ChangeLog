@@ -1,3 +1,8 @@
+2002-03-21  Andi Gutmans  <andi@zend.com>
+
+    * zend_language_parser.y:
+    - No idea how this slipped in. Fix delete $obj statement.
+
 2002-03-20  Harald Radi  <h.radi@nme.at>
 
     * ZendTS.dsp

@@ -1,3 +1,248 @@
+2002-03-21  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * configure.in: - Fix #16206.
+
+    * main/streams.c
+      ext/recode/recode.c
+      ext/pgsql/pgsql.c
+      ext/pdf/pdf.c
+      ext/gd/gd.c
+      ext/bz2/bz2.c
+      ext/curl/curl.c: *** empty log message ***
+
+2002-03-21  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/PEAR/Command/Install.php
+      pear/PEAR/Installer.php
+      pear/PEAR/Registry.php
+      pear/scripts/pear.in:
+    - Make the rellocation of packages work as expected if the target
+      dir doesn't exist
+    - The "install -f" now replaces the info in the registry
+
+2002-03-21  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * ext/standard/file.c:
+    - Use proper macros for php_stream_cast() return values (fixes #16211).
+
+2002-03-21  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/standard/http_fopen_wrapper.c:
+    Just in case we do a 4.1.3, MFH the fix for #15667
+
+    * ext/standard/http_fopen_wrapper.c: Fix for bug #15667
+
+2002-03-21  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/pgsql/pgsql.c: - Fix PGSql Compile
+
+2002-03-21  Jani Taskinen  <sniper@iki.fi>
+
+    * configure.in
+      main/php_version.h:
+    The changes to build system and the streams stuff alone are big enough
+    reason to make next release 4.3.0
+
+2002-03-21  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/scripts/pear.in: - Added command level options
+    - Fix error handling for Getopt (it doesn't use raiseError)
+
+    * pear/PEAR/Command.php
+      pear/PEAR/Command/Common.php
+      pear/PEAR/Command/Config.php
+      pear/PEAR/Command/Install.php
+      pear/PEAR/Command/List.php
+      pear/PEAR/Command/Login.php
+      pear/PEAR/Command/Package.php
+      pear/PEAR/Config.php
+      pear/PEAR/Remote.php: - Implement command level options
+    - Removed call pass by reference
+    - Readd $options to command::run() params
+
+2002-03-21  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * main/memory_streams.c: -missing efree in close
+
+2002-03-21  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/iconv/iconv.c
+      acinclude.m4: - MFH iconv fixes.
+
+    * ext/xmlrpc/libxmlrpc/libs.mk:
+    This file is generated and not supposed to be in CVS
+
+    * ext/xmlrpc/libxmlrpc/libs.mk:
+    This file is generated, not supposed to be here.
+
+    * ext/pgsql/tests/.cvsignore: missing file
+
+    * acinclude.m4
+      ext/iconv/iconv.c:
+    - Fixed bug #16165 again. We check libc for iconv functions only if
+      no path is given for --with-iconv.
+
+2002-03-21  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/exif/exif.c: -removed old streams test code
+
+2002-03-21  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/exif/tests/.cvsignore: This file was missing.
+
+2002-03-21  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/exif/exif.c: -fixed memory handling
+
+2002-03-21  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/standard/file.h
+      ext/standard/php_dir.h
+      ext/standard/basic_functions.c
+      ext/standard/config.m4
+      ext/standard/dir.c
+      ext/standard/file.c: added fnmatch() and glob() functions
+    could someone please check if i got the virtual dir stuff right?
+
+2002-03-21  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/PEAR/Common.php: fix a problem handling nested directories
+
+2002-03-21  Sascha Schumann  <sascha@schumann.cx>
+
+    * configure.in:
+    Support systems without NIS functions, but with non-working libnsl
+
+2002-03-21  Wez Furlong  <wez.php@thebrainroom.com>
+
+    * main/streams.c
+      ext/standard/php_fopen_wrapper.c
+      ext/zlib/zlib_fopen_wrapper.c
+      ext/bz2/bz2.c: Require that wrappers use <protocol>://<path> to avoid
+    ambiguities when filenames have ':' characters.
+    This slightly breaks BC with the old style zlib: wrapper.
+
+2002-03-21  Daniela Mariaschi  <mariaschi@libero.it>
+
+    * ext/interbase/interbase.c: fixed numeric number incorrectly rendered
+
+2002-03-21  Sterling Hughes  <sterling@bumblebury.com>
+
+    * ext/bz2/bz2.c: NUL terminate
+
+    * ext/bz2/CREDITS: its Bzip2 not bz2 :)
+
+    * ext/bz2/bz2.c: 1) ws fixes
+    2) un-NUL terminate strings...  Binary Data should not be NUL terminated,
+    PHP *is* binary safe...
+
+2002-03-21  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/xml/xml.c: proto fixes
+
+2002-03-21  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/xslt/config.m4: Minor detail fixed.
+
+2002-03-21  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/standard/aggregation.c
+      ext/standard/basic_functions.c: Fix compilation when PCRE is disabled.
+
+2002-03-21  Ludovico Magnocavallo  <ludo@sumatrasolutions.com>
+
+    * ext/interbase/tests/001.phpt
+      ext/interbase/tests/002.phpt
+      ext/interbase/tests/003.phpt
+      ext/interbase/tests/004.phpt
+      ext/interbase/tests/005.phpt
+      ext/interbase/tests/006.phpt:
+    synched with HEAD, tests 1-2-3-6 pass, 5 fails but ok, 4 needs work
+
+2002-03-21  Sander Roobol  <phy@wanadoo.nl>
+
+    * ext/standard/tests/array/count_recursive.phpt
+      ext/standard/tests/math/pow.phpt: MFH: more tests for pow() and count()
+
+    * ext/standard/tests/math/pow.phpt
+      ext/standard/tests/array/count_recursive.phpt:
+    Added tests for pow()'ing with broken exponents and some additional test
+    for count()'ing arrays.
+
+2002-03-21  Wez Furlong  <wez.php@thebrainroom.com>
+
+    * NEWS: NEWS updates
+
+2002-03-21  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * ext/mbstring/tests/003.inc: fixed POST/GET input processing.
+
+2002-03-21  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/exif/exif.c
+      main/memory_streams.c:
+    * main/memory_streams.c: -fix missing efree
+
+2002-03-21  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/PEAR/Command/List.php: readd the "list" command
+
+    * pear/PEAR/Command/Config.php
+      pear/PEAR/Command/Login.php:
+    Adapt this commands to the new config store mechanism and command params
+
+    * pear/scripts/pear.in:
+    Pass config to command factory and pass the correct command params
+
+    * pear/PEAR/Command.php
+      pear/PEAR/Command/Common.php
+      pear/PEAR/Command/Install.php
+      pear/PEAR/Command/Package.php:
+    - The config object is stored by the factory method
+    - Make install/unistall/package work again (didn't work for me)
+
+    * pear/PEAR/Packager.php: Clean up unused stuff
+
+2002-03-21  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * php.ini-dist
+      php.ini-recommended:
+    MFH: ext/overload is a 'built-in' extension on Win32.
+
+    * php.ini-dist
+      php.ini-recommended: ext/overload is a 'built-in' extension on Win32.
+
+2002-03-21  Wez Furlong  <wez.php@thebrainroom.com>
+
+    * ext/bz2/bz2.c: Added fold markers.
+
+    * ext/bz2/bz2.c
+      ext/bz2/php_bz2.h
+      ext/zlib/zlib_fopen_wrapper.c: Implement bz2 streams and bz2: wrapper.
+    You can now do this:
+    copy("zlib:src.gz", "bz2:dest.bz2");
+    As with zlib, most of the functions with counterparts
+    in file.c are now aliases to those functions.
+
+    * ext/zlib/zlib.c: really nuke it...
+
+    * ext/standard/file.c
+      ext/zlib/php_zlib.h
+      ext/zlib/zlib.c
+      ext/zlib/zlib_fopen_wrapper.c
+      main/php_streams.h
+      main/streams.c:
+    Convert the gzfile related functions into aliases for their equivalents
+    in ext/standard/file.c, so a gzopen()ed file pointer can be used in
+    fread, fseek etc.
+    Improved behaviour of zlib stream.
+    Moved passthru code into streams.c
+    Nuked gzgetss_state as no longer needed.
+
+2002-03-21  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * ext/pgsql/pgsql.c: Show function name in error message.
+
 2002-03-20  Boian Bonev  <boian@bonev.com>
 
     * ext/vpopmail/config.m4: MFH vpopmail 5.2 version compatibility fix
