@@ -190,7 +190,7 @@ disable_functions =
 
 ; Colors for Syntax Highlighting mode.  Anything that's acceptable in
 ; <font color="??????"> would work.
-;highlight.string  = #CC0000
+;highlight.string  = #DD0000
 ;highlight.comment = #FF9900
 ;highlight.keyword = #007700
 ;highlight.bg      = #FFFFFF
