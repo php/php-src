@@ -1,7 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2004, PHP 5 Release Candidate 3
-- Fixed bug #28239 (No results returned on SOAP call, no error given). (Dmitry)
 - Added ability to refer to existing .ini variables from within .ini files, as
   in:
     open_basedir = ${open_basedir} ":/new/dir"
@@ -14,6 +13,7 @@ PHP                                                                        NEWS
 - Fixed bug #28300 (Userspace stream/filter names forced to lowercase). (Sara)
 - Fixed bug #28287 (stream_*_register() not calling __autoload()). (Sara)
 - Fixed bug #28267 (php_image_filter_contrast calls gdImageBrightness). (Ilia)
+- Fixed bug #28239 (No results returned on SOAP call, no error given). (Dmitry)
 - Fixed bug #28161 (COM: Array style properties could not be accessed). (Wez)
 - Fixed bug #28125 (ArrayObject leaks when accessing elements). (Marcus)
 - Fixed bug #28099 (ArrayObject doesn't implement ArrayAccess). (Marcus)
