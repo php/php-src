@@ -19,43 +19,19 @@
  */
 /* $Id$ */
 
-#define NO_REGEX_EXTRA_H
-
-#ifdef WIN32
-#include <winsock2.h>
-#include <stddef.h>
-#endif
-
-#include "php.h"
-#include "ext/standard/head.h"
-#include "php_globals.h"
-#include "php_ini.h"
-#include "SAPI.h"
-#include "mod_php4.h"
-#include "ext/standard/info.h"
-
-#include <stdlib.h>
-#if HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-#include <string.h>
-#include <errno.h>
-#include <ctype.h>
-
 #include "php_apache_http.h"
-#include "http_request.h"
-
-#ifdef ZTS
-int php_apache_info_id;
-#else
-php_apache_info_struct php_apache_info;
-#endif
 
 #ifdef PHP_WIN32
 #include "zend.h"
 #include "ap_compat.h"
 #else
 #include "build-defs.h"
+#endif
+
+#ifdef ZTS
+int php_apache_info_id;
+#else
+php_apache_info_struct php_apache_info;
 #endif
 
 #define SECTION(name)  PUTS("<H2 align=\"center\">" name "</H2>\n")
