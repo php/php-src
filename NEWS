@@ -2,6 +2,7 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.5
+- Made ldap_get_entries() return an array even if there are no entries
 - Empty entry. Enjoy
 
 ?? ??? 2000, Version 4.0.4
