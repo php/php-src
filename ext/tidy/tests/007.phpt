@@ -25,7 +25,7 @@ Verbose tidy_setopt() / tidy_getopt()
     var_dump(tidy_getopt("tab-size"));
 ?>
 --EXPECT--
-Current Value of 'tidy-mark': bool(false)
+Current Value of 'tidy-mark': NULL
 
 New Value of 'tidy-mark': bool(true)
 Current Value of 'error-file': string(0) ""

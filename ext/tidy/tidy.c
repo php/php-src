@@ -158,6 +158,50 @@ static void *php_tidy_get_opt_val(TidyOption opt, TidyOptionType *type TSRMLS_DC
 	return NULL;
 }
 
+static int _php_tidy_set_tidy_opt(char *optname, zval *value TSRMLS_DC)
+{
+	TidyOption opt;
+
+	if (!(opt = tidyGetOptionByName(TG(tdoc)->doc, optname))) {
+		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Unknown Tidy Configuration Option '%s'", optname);
+		return FAILURE;
+	}
+
+	if (tidyOptIsReadOnly(opt)) {
+		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Attempting to set read-only option '%s'", optname);
+		return FAILURE;
+	}
+
+	switch(tidyOptGetType(opt)) {
+		case TidyString:
+			convert_to_string_ex(&value);
+			if (tidyOptSetValue(TG(tdoc)->doc, tidyOptGetId(opt), Z_STRVAL_P(value))) {
+				return SUCCESS;
+			}
+			break;
+
+		case TidyInteger:
+			convert_to_long_ex(&value);
+			if (tidyOptSetInt(TG(tdoc)->doc, tidyOptGetId(opt), Z_LVAL_P(value))) {
+				return SUCCESS;
+			}
+			break;
+
+		case TidyBoolean:
+			convert_to_long_ex(&value);
+			if (tidyOptSetBool(TG(tdoc)->doc,  tidyOptGetId(opt), Z_LVAL_P(value))) {
+				return SUCCESS;
+			}
+			break;
+
+		default:
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to determine type of configuration option");
+			break;
+	}	
+	
+	return FAILURE;
+}
+
 static char *php_tidy_file_to_mem(char *filename, zend_bool use_include_path TSRMLS_DC)
 {
 	php_stream *stream;
@@ -179,11 +223,12 @@ static char *php_tidy_file_to_mem(char *filename, zend_bool use_include_path TSR
 
 static void php_tidy_quick_repair(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_file)
 {
-	char *data=NULL, *cfg_file=NULL, *arg1;
-	int cfg_file_len, arg1_len;
+	char *data=NULL, *arg1;
+	int arg1_len;
 	zend_bool use_include_path = 0;
+	zval *cfg;
 
-	if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|sb", &arg1, &arg1_len, &cfg_file, &cfg_file_len, &use_include_path) == FAILURE) {
+	if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|zb", &arg1, &arg1_len, &cfg, &use_include_path) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -195,13 +240,36 @@ static void php_tidy_quick_repair(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_fil
 		data = arg1;
 	}
 
-	if (cfg_file && cfg_file[0]) {
-		TIDY_SAFE_MODE_CHECK(cfg_file);
-		if(tidyLoadConfig(TG(tdoc)->doc, cfg_file) < 0) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not load configuration file '%s'", cfg_file);
-			RETVAL_FALSE;
+	if(Z_TYPE_P(cfg) == IS_ARRAY) {
+		char *opt_name = NULL;
+		zval **opt_val;
+		ulong opt_indx;
+
+		for (zend_hash_internal_pointer_reset(HASH_OF(cfg)); 
+				zend_hash_get_current_data(HASH_OF(cfg), (void **)&opt_val) == SUCCESS;
+		 		zend_hash_move_forward(HASH_OF(cfg))) {
+		
+			if(zend_hash_get_current_key(HASH_OF(cfg), &opt_name, &opt_indx, FALSE) == FAILURE) {
+				php_error_docref(NULL TSRMLS_CC, E_ERROR, "Could not retrieve key from option array");
+			}
+        
+			if(opt_name) {
+				if (_php_tidy_set_tidy_opt(opt_name, *opt_val TSRMLS_CC) != FAILURE) {
+					TG(used) = 1;	
+				}
+				opt_name = NULL;
+			}
 		}
-		TG(used) = 1;
+	} else {
+		convert_to_string_ex(&cfg);
+		if (Z_STRVAL_P(cfg) && Z_STRVAL_P(cfg)[0]) {
+			TIDY_SAFE_MODE_CHECK(Z_STRVAL_P(cfg));
+			if(tidyLoadConfig(TG(tdoc)->doc, Z_STRVAL_P(cfg)) < 0) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not load configuration file '%s'", Z_STRVAL_P(cfg));
+				RETVAL_FALSE;
+			}
+			TG(used) = 1;
+		}
 	}
 
 	if (data) {
@@ -707,6 +775,7 @@ PHP_FUNCTION(tidy_save_config)
 }
 /* }}} */
 
+
 /* {{{ proto boolean tidy_setopt(string option, mixed newvalue)
     Updates the configuration settings for the specified tidy document. */
 PHP_FUNCTION(tidy_setopt)
@@ -714,48 +783,17 @@ PHP_FUNCTION(tidy_setopt)
 	zval *value;
 	char *optname;
 	int optname_len;
-	TidyOption opt;
 
 	if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz", &optname, &optname_len, &value) == FAILURE) {
 		RETURN_FALSE;
 	}
 
-	opt = tidyGetOptionByName(TG(tdoc)->doc, optname);
-	if (!opt) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown Tidy Configuration Option '%s'", optname);
+	if (_php_tidy_set_tidy_opt(optname, value TSRMLS_CC) == FAILURE) {
 		RETURN_FALSE;
+	} else {
+		TG(used) = 1;
+		RETURN_TRUE;
 	}
-	    
-	switch(tidyOptGetType(opt)) {
-		case TidyString:
-			convert_to_string_ex(&value);
-			if(tidyOptSetValue(TG(tdoc)->doc, tidyOptGetId(opt), Z_STRVAL_P(value))) {
-				TG(used) = 1;
-				RETURN_TRUE;
-			} 
-			break;
-			
-		case TidyInteger:
-			convert_to_long_ex(&value);
-			if(tidyOptSetInt(TG(tdoc)->doc, tidyOptGetId(opt), Z_LVAL_P(value))) {
-				TG(used) = 1;
-				RETURN_TRUE;
-			} 
-			break;
-			
-		case TidyBoolean:
-			convert_to_long_ex(&value);
-			if(tidyOptSetBool(TG(tdoc)->doc,  tidyOptGetId(opt), Z_LVAL_P(value))) {
-				TG(used) = 1;
-				RETURN_TRUE;
-			} 
-			break;
-			
-		default:
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to determine type of Tidy configuration constant to set");
-			break;
-	}
-	RETURN_FALSE;
 }
 /* }}} */
 
@@ -805,5 +843,3 @@ PHP_FUNCTION(tidy_getopt)
 	RETURN_FALSE;
 }
 /* }}} */
-   
-
