@@ -55,6 +55,12 @@ typedef struct msql_global_struct{
 msql_module php3_msql_module;
 #endif
 
+
+#define MSQL_ASSOC		1<<0
+#define MSQL_NUM		1<<1
+#define MSQL_BOTH		(MYSQL_ASSOC|MYSQL_NUM)
+
+
 function_entry msql_functions[] = {
 	{"msql_connect",		php3_msql_connect,			NULL},
 	{"msql_pconnect",		php3_msql_pconnect,			NULL},
@@ -231,6 +237,10 @@ DLEXPORT int php3_minit_msql(INIT_FUNC_ARGS)
 	MSQL_GLOBAL(php3_msql_module).le_plink = register_list_destructors(NULL,_close_msql_plink);
 	
 	msql_module_entry.type = type;
+
+	REGISTER_LONG_CONSTANT("MSQL_ASSOC", MSQL_ASSOC, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("MSQL_NUM", MSQL_NUM, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("MSQL_BOTH", MSQL_BOTH, CONST_CS | CONST_PERSISTENT);
 
 	return SUCCESS;
 }
@@ -1007,44 +1017,10 @@ DLEXPORT PHP_FUNCTION(msql_num_fields)
 }
 /* }}} */
 
-/* {{{ proto array msql_fetch_row(int query)
-   Get a result row as an enumerated array */
-DLEXPORT PHP_FUNCTION(msql_fetch_row)
-{
-	pval *result;
-	m_result *msql_result;
-	m_row msql_row;
-	m_query *msql_query;
-	int type;
-	int num_fields;
-	int i;
-	MSQL_TLS_VARS;
-	
-	if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &result)==FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
-	
-	MSQL_GET_QUERY(result);
-	if (!msql_result ||
-			((msql_row = msqlFetchRow(msql_result)) == NULL) ||
-			(array_init(return_value)==FAILURE)) {
-		RETURN_FALSE;
-	}
-	num_fields = msqlNumFields(msql_result);
-	
-	for (i=0; i<num_fields; i++) {
-		if (msql_row[i]) {
-			add_index_string(return_value, i, msql_row[i], 1);
-		} else {
-			add_index_stringl(return_value, i, empty_string, 0, 1);
-		}
-	}
-}
-/* }}} */
 
-static PHP_FUNCTION(msql_fetch_hash)
+static void php3_msql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 {
-	pval *result;
+	pval *result, *arg2;
 	m_result *msql_result;
 	m_row msql_row;
 	m_field *msql_field;
@@ -1056,8 +1032,25 @@ static PHP_FUNCTION(msql_fetch_hash)
 	PLS_FETCH();
 	MSQL_TLS_VARS;
 	
-	if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &result)==FAILURE) {
-		WRONG_PARAM_COUNT;
+	switch (ARG_COUNT(ht)) {
+		case 1:
+			if (getParameters(ht, 1, &result)==FAILURE) {
+				RETURN_FALSE;
+			}
+			if (!result_type) {
+				result_type = MYSQL_BOTH;
+			}
+			break;
+		case 2:
+			if (getParameters(ht, 2, &result, &arg2)==FAILURE) {
+				RETURN_FALSE;
+			}
+			convert_to_long(arg2);
+			result_type = arg2->value.lval;
+			break;
+		default:
+			WRONG_PARAM_COUNT;
+			break;
 	}
 	
 	MSQL_GET_QUERY(result);
@@ -1074,23 +1067,48 @@ static PHP_FUNCTION(msql_fetch_hash)
 	msqlFieldSeek(msql_result,0);
 	for (msql_field=msqlFetchField(msql_result),i=0; msql_field; msql_field=msqlFetchField(msql_result),i++) {
 		if (msql_row[i]) {
+			char *data;
+			int data_len;
+			int should_copy;
+
 			if (PG(magic_quotes_runtime)) {
-				add_get_index_string(return_value, i, _php3_addslashes(msql_row[i],0,NULL,0), (void **) &pval_ptr, 0);
+				data = _php3_addslashes(msql_row[i], 0, &data_len, 0);
+				should_copy = 0;
 			} else {
-				add_get_index_string(return_value, i, msql_row[i], (void **) &pval_ptr, 1);
+				data = msql_row[i];
+				data_len = strlen(data);
+				should_copy = 1;
+			}
+			
+			if (result_type & MSQL_NUM) {
+				add_index_stringl(return_value, i, data, data_len, should_copy);
+				should_copy = 1;
+			}
+			
+			if (result_type & MSQL_ASSOC) {
+				add_assoc_stringl(return_value, msql_field->name, data, data_len, should_copy);
 			}
 		} else {
-			add_get_index_stringl(return_value, i, empty_string, 0, (void **) &pval_ptr, 1);
+			//add_get_index_stringl(return_value, i, empty_string, 0, (void **) &pval_ptr, 1);
 		}
-		_php3_hash_pointer_update(return_value->value.ht, msql_field->name, strlen(msql_field->name)+1, pval_ptr);
 	}
 }
+
+
+/* {{{ proto array msql_fetch_row(int query)
+   Get a result row as an enumerated array */
+DLEXPORT PHP_FUNCTION(msql_fetch_row)
+{
+	php3_msql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, MSQL_NUM);
+}
+/* }}} */
+
 
 /* {{{ proto object msql_fetch_object(int query)
    Fetch a result row as an object */
 DLEXPORT PHP_FUNCTION(msql_fetch_object)
 {
-	php3_msql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	php3_msql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 	if (return_value->type==IS_ARRAY) {
 		return_value->type=IS_OBJECT;
 		return_value->value.obj.properties = return_value->value.ht;
