@@ -1,3 +1,20 @@
+2002-02-19  David Hedbor  <david@hedbor.org>
+
+    * sapi/caudium/caudium.c: Fixed environment hashing again.
+
+2002-02-19  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * genfiles: - Fix removal of #line lines
+
+    * EXTENSIONS: - Update to note that I'm the mcrypt extension maintainer
+
+2002-02-19  Marc Boeren  <M.Boeren@guidance.nl>
+
+    * EXTENSIONS: changed comment for dbx module
+
+2002-02-19  Dan Kalowsky  <dank@deadmime.org>
+
+    * EXTENSIONS:
 2002-02-18  Martin Jansen  <mail@martin-jansen.de>
 
     * pear/PEAR.php: ='typo'
