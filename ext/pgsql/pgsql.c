@@ -48,6 +48,10 @@
 #define PGSQL_STATUS_LONG     1
 #define PGSQL_STATUS_STRING   2
 
+#define PGSQL_MAX_LENGTH_OF_LONG   30
+#define PGSQL_MAX_LENGTH_OF_DOUBLE 60
+
+
 #if HAVE_PQSETNONBLOCKING
 #define PQ_SETNONBLOCKING(pg_link, flag) PQsetnonblocking(pg_link, flag)
 #else
@@ -1476,6 +1480,8 @@ PHP_FUNCTION(pg_last_oid)
 	zval **result;
 	PGresult *pgsql_result;
 	pgsql_result_handle *pg_result;
+	uint oid;
+	char *oid_str;
 	
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &result)==FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1484,18 +1490,23 @@ PHP_FUNCTION(pg_last_oid)
 	ZEND_FETCH_RESOURCE(pg_result, pgsql_result_handle *, result, -1, "PostgreSQL result", le_result);
 	pgsql_result = pg_result->result;
 #ifdef HAVE_PQOIDVALUE
-	Z_LVAL_P(return_value) = (int) PQoidValue(pgsql_result);
-	if (Z_LVAL_P(return_value) == InvalidOid) {
+	oid = PQoidValue(pgsql_result);
+	if (oid == InvalidOid) {
 		RETURN_FALSE;
-	} else {
-		Z_TYPE_P(return_value) = IS_LONG;
+	} else if (oid > LONG_MAX) {
+		oid_str = (char *)emalloc(PGSQL_MAX_LENGTH_OF_LONG+1);
+		sprintf(oid_str, "%l", oid);
+		RETVAL_STRING(oid_str, 0);
+	}
+	else {
+		RETVAL_LONG((long)oid);
 	}
 #else
 	Z_STRVAL_P(return_value) = (char *) PQoidStatus(pgsql_result);
+	Z_TYPE_P(return_value) = IS_STRING;
 	if (Z_STRVAL_P(return_value)) {
 		Z_STRLEN_P(return_value) = strlen(Z_STRVAL_P(return_value));
 		Z_STRVAL_P(return_value) = estrndup(Z_STRVAL_P(return_value), Z_STRLEN_P(return_value));
-		Z_TYPE_P(return_value) = IS_STRING;
 	} else {
 		Z_STRVAL_P(return_value) = empty_string;
 	}
@@ -3757,9 +3768,6 @@ PHP_FUNCTION(pg_convert)
 	}
 }
 /* }}} */
-
-#define PGSQL_MAX_LENGTH_OF_LONG   30
-#define PGSQL_MAX_LENGTH_OF_DOUBLE 60
 
 /* {{{ php_pgsql_insert
  */
