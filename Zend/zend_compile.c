@@ -741,6 +741,10 @@ void zend_do_free(znode *op1 TSRMLS_DC)
 	}		
 }
 
+#define ZEND_CLONE_FUNC_NAME		"__clone"
+#define ZEND_CONSTRUCTOR_FUNC_NAME	"__construct"
+#define ZEND_DESTRUCTOR_FUNC_NAME	"__destruct"
+
 void zend_do_begin_function_declaration(znode *function_token, znode *function_name, int is_method, int return_reference  TSRMLS_DC)
 {
 	zend_op_array op_array;
@@ -761,11 +765,11 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 		zend_hash_update(&CG(active_class_entry)->function_table, name, name_len+1, &op_array, sizeof(zend_op_array), (void **) &CG(active_op_array));
 		if ((CG(active_class_entry)->name_length == (uint) name_len) && (!memcmp(CG(active_class_entry)->name, name, name_len))) {
 			CG(active_class_entry)->constructor = (zend_function *) CG(active_op_array);
-		} else if ((function_name->u.constant.value.str.len == sizeof("_construct")-1) && (!memcmp(function_name->u.constant.value.str.val, "_construct", sizeof("_construct")))) {
+		} else if ((function_name->u.constant.value.str.len == sizeof(ZEND_CONSTRUCTOR_FUNC_NAME)-1) && (!memcmp(function_name->u.constant.value.str.val, ZEND_CONSTRUCTOR_FUNC_NAME, sizeof(ZEND_CONSTRUCTOR_FUNC_NAME)))) {
 			CG(active_class_entry)->constructor = (zend_function *) CG(active_op_array);
-		} else if ((function_name->u.constant.value.str.len == sizeof("_destruct")-1) && (!memcmp(function_name->u.constant.value.str.val, "_destruct", sizeof("_destruct")))) {
+		} else if ((function_name->u.constant.value.str.len == sizeof(ZEND_DESTRUCTOR_FUNC_NAME)-1) && (!memcmp(function_name->u.constant.value.str.val, ZEND_DESTRUCTOR_FUNC_NAME, sizeof(ZEND_DESTRUCTOR_FUNC_NAME)))) {
 			CG(active_class_entry)->destructor = (zend_function *) CG(active_op_array);
-		} else if ((function_name->u.constant.value.str.len == sizeof("_clone")-1) && (!memcmp(function_name->u.constant.value.str.val, "_clone", sizeof("_clone")))) {
+		} else if ((function_name->u.constant.value.str.len == sizeof(ZEND_CLONE_FUNC_NAME)-1) && (!memcmp(function_name->u.constant.value.str.val, ZEND_CLONE_FUNC_NAME, sizeof(ZEND_CLONE_FUNC_NAME)))) {
 			CG(active_class_entry)->clone = (zend_function *) CG(active_op_array);
 		}
 	} else {
@@ -897,8 +901,8 @@ void zend_do_begin_method_call(znode *left_bracket TSRMLS_DC)
 	last_op_number = get_next_op_number(CG(active_op_array))-1;
 	last_op = &CG(active_op_array)->opcodes[last_op_number];
 
-	if ((last_op->op2.op_type == IS_CONST) && (last_op->op2.u.constant.value.str.len == sizeof("_clone")-1)
-		&& !memcmp(last_op->op2.u.constant.value.str.val, "_clone", sizeof("_clone"))) {
+	if ((last_op->op2.op_type == IS_CONST) && (last_op->op2.u.constant.value.str.len == sizeof(ZEND_CLONE_FUNC_NAME)-1)
+		&& !memcmp(last_op->op2.u.constant.value.str.val, ZEND_CLONE_FUNC_NAME, sizeof(ZEND_CLONE_FUNC_NAME))) {
 		last_op->opcode = ZEND_CLONE;
 		left_bracket->u.constant.value.lval = ZEND_CLONE;
 		zend_stack_push(&CG(function_call_stack), (void *) &ptr, sizeof(zend_function *));
@@ -1019,7 +1023,7 @@ void zend_do_end_function_call(znode *function_name, znode *result, znode *argum
 	
 	if (is_method && function_name && function_name->u.constant.value.lval == ZEND_CLONE) {
 		if (argument_list->u.constant.value.lval > 0) {
-			zend_error(E_ERROR, "Can't pass arguments to _clone()");
+			zend_error(E_ERROR, "Can't pass arguments to __clone()");
 		}
 		/* FIXME: throw_list */
 		zend_stack_del_top(&CG(function_call_stack));
