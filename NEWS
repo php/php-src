@@ -2,6 +2,9 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.1
+- Fix virtual() when used with output buffering (Marc Pohl)
+- Clean up constants in flock() function and add optional 3rd arg which
+  is set to true on EWOULDBLOCK (Rasmus)
 - Added functions pg_loimport(), pg_loexport(). (Jouni)
 - Add SWF support to getimagesize() function (Derick Rethans)
 - Add support for both indexed and non-indexed arrays of file uploads
