@@ -65,8 +65,6 @@
 #define	EL_PACKET				"wddxPacket"
 #define EL_VERSION				"version"
 
-#define HASH_OF(p) ((p)->type==IS_ARRAY ? (p)->value.ht : (((p)->type==IS_OBJECT ? (p)->value.obj.properties : NULL)))
-
 static int le_wddx;
 
 typedef struct {
