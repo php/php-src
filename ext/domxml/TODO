@@ -15,5 +15,5 @@
 	- input (building of dom-tree with sax-events) is almost finished
 	- started with generating of sax-events from file/string (chregu)
 	- generating sax-events from dom-tree is a more tricky one (see mailinglist of libxml2)
-
-
+12) error reporting for xslt methods
+13) add possibility to use relative xpath queries
