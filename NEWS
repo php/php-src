@@ -1,6 +1,7 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2002, Version 4.3.0
+- Made PHP always use the bundled regex functions. (Jani)
 - Added "ignore_repeated_errors" and "ignore_repeated_source" php.ini options
   which can be used to disable logging of repeated error messages. (Marcus)
 - Made pg_last_notice() work correctly. (Yasuo)
