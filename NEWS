@@ -1,13 +1,13 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 200?, Version 4.3.1
-- Fixed bug #21338 (html_entity_decode() crashed when "" is passed). (Ilia)
 - Improved dba extension (Marcus)
   . Added support for internal error handling of Berkeley db libraries.
   . Disallow Berkeley db versions 4.1.0 to 4.1.24 due to locking problems.
   . Disallow linkage of Berkeley db submodules against libraries with
     different major version.
   . Disallow configuring of more than one Berkeley db handler. 
+- Fixed bug #21338 (html_entity_decode() crashed when "" is passed). (Ilia)
 - Fixed bug #21229 (missing 3rd argument to php_module_startup). (Ilia)
 - Fixed bug #21267 (opening URLs that result in redirection to a relative
   path was failing). (Ilia)
