@@ -1,3 +1,26 @@
+2001-10-14  Egon Schmid  <eschmid@s.netic.de>
+
+    * CODING_STANDARDS: Fixed some spelling errors.
+
+2001-10-14  Stig Bakken  <ssb@fast.no>
+
+    * README.EXTENSIONS: MFH
+
+2001-10-14  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * pear/DB.php
+      pear/DB/fbsql.php
+      pear/DB/ibase.php
+      pear/DB/ifx.php
+      pear/DB/msql.php
+      pear/DB/mssql.php
+      pear/DB/mysql.php
+      pear/DB/oci8.php
+      pear/DB/odbc.php
+      pear/DB/pgsql.php
+      pear/DB/sybase.php:
+    Made error returning on missing extensions consistent across all backends
+
 2001-10-13  Sascha Schumann  <sascha@schumann.cx>
 
     * ext/standard/file.c:
