@@ -770,7 +770,7 @@ PHPAPI OLECHAR *php_char_to_OLECHAR(char *C_str, uint strlen, int codepage TSRML
 
 	if (strlen == -1) {
 		/* request needed buffersize */
-		strlen = MultiByteToWideChar(codepage, (codepage == CP_UTF8 ? 0 : MB_PRECOMPOSED) | MB_ERR_INVALID_CHARS, C_str, -1, NULL, 0);
+		strlen = MultiByteToWideChar(codepage, (codepage == CP_UTF8 ? 0 : MB_PRECOMPOSED | MB_ERR_INVALID_CHARS), C_str, -1, NULL, 0);
 	} else {
 		/* \0 terminator */
 		strlen++;
@@ -780,7 +780,7 @@ PHPAPI OLECHAR *php_char_to_OLECHAR(char *C_str, uint strlen, int codepage TSRML
 		unicode_str = (OLECHAR *) emalloc(sizeof(OLECHAR) * strlen);
 
 		/* convert string */
-		error = !MultiByteToWideChar(codepage, (codepage == CP_UTF8 ? 0 : MB_PRECOMPOSED) | MB_ERR_INVALID_CHARS, C_str, strlen, unicode_str, strlen);
+		error = !MultiByteToWideChar(codepage, (codepage == CP_UTF8 ? 0 : MB_PRECOMPOSED | MB_ERR_INVALID_CHARS), C_str, strlen, unicode_str, strlen);
 	} else {
 		/* return a zero-length string */
 		unicode_str = (OLECHAR *) emalloc(sizeof(OLECHAR));
