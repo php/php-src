@@ -44,9 +44,7 @@
 #define XmlGetUtf16InternalEncoding php_XmlGetUtf16InternalEncoding
 #define XmlGetUtf8InternalEncodingNS php_XmlGetUtf8InternalEncodingNS
 #define XmlGetUtf8InternalEncoding php_XmlGetUtf8InternalEncoding
-#define XmlInitEncodingNS php_XmlInitEncodingNS
 #define XmlInitEncoding php_XmlInitEncoding
-#define XmlInitUnknownEncodingNS php_XmlInitUnknownEncodingNS
 #define XmlInitUnknownEncoding php_XmlInitUnknownEncoding
 #define XML_ParseBuffer php_XML_ParseBuffer
 #define XML_Parse php_XML_Parse
@@ -54,7 +52,6 @@
 #define XML_ParserCreateNS php_XML_ParserCreateNS
 #define XML_ParserCreate php_XML_ParserCreate
 #define XML_ParserFree php_XML_ParserFree
-#define XmlParseXmlDeclNS php_XmlParseXmlDeclNS
 #define XmlParseXmlDecl php_XmlParseXmlDecl
 #define XmlPrologStateInitExternalEntity php_XmlPrologStateInitExternalEntity
 #define XmlPrologStateInit php_XmlPrologStateInit
