@@ -117,14 +117,13 @@ static void php_pgsql_set_default_link(int id)
 {   
 	PGLS_FETCH();
 
+        zend_list_addref(id);
+
     if (PGG(default_link) != -1) {
         zend_list_delete(PGG(default_link));
     }
 
-    if (PGG(default_link) != id) {
         PGG(default_link) = id;
-        zend_list_addref(id);
-    }
 }
 
 
@@ -512,8 +511,7 @@ PHP_FUNCTION(pg_pconnect)
 PHP_FUNCTION(pg_close)
 {
 	zval **pgsql_link = NULL;
-	void *ptr;
-	int id, type;
+	int id;
 	PGconn *pgsql;
 	PGLS_FETCH();
 	
@@ -539,10 +537,6 @@ PHP_FUNCTION(pg_close)
 
 	if (id==-1) { /* explicit resource number */
 		zend_list_delete(Z_RESVAL_PP(pgsql_link));
-		ptr = zend_list_find(Z_RESVAL_PP(pgsql_link),&type);
-		if (ptr && (type==le_link || type==le_plink)) {
-			RETURN_TRUE;
-		}                
 	}
 
 	if (id!=-1 
