@@ -2378,22 +2378,29 @@ int zend_fetch_class_handler(ZEND_OPCODE_HANDLER_ARGS)
 	} else {
 		class_name = get_zval_ptr(&EX(opline)->op2, EX(Ts), &EG(free_op2), BP_VAR_R);
 
-		if (class_name->type == IS_OBJECT) {
-			ce = Z_OBJCE_P(class_name);
-		} else if (class_name->value.str.val && class_name->value.str.len) {
-			class_name_strval = zend_str_tolower_dup(class_name->value.str.val, class_name->value.str.len);
-			class_name_strlen = class_name->value.str.len;
-			free_class_name = 1;
-		} else {
-			class_name_strlen = 0;
+		switch (class_name->type) {
+			case IS_OBJECT:
+				ce = Z_OBJCE_P(class_name);
+				break;
+			case IS_STRING:
+				class_name_strval = zend_str_tolower_dup(class_name->value.str.val, class_name->value.str.len);
+				class_name_strlen = class_name->value.str.len;
+				free_class_name = 1;
+				break;
+			default:
+				zend_error(E_ERROR, "Class name must be a valid object or a string");
+				break;
 		}
 	}
 	
 	if (!ce) {
-		if (EX(opline)->op1.op_type == IS_UNUSED && class_name_strlen) {
-			if (zend_lookup_class(class_name_strval, class_name_strlen, &pce TSRMLS_CC) == SUCCESS) {
-				ce = *pce;
-			}
+		int retval;
+
+		if (EX(opline)->op1.op_type == IS_UNUSED) {
+			retval = zend_lookup_class(class_name_strval, class_name_strlen, &pce TSRMLS_CC);
+		}
+		if (retval==SUCCESS) {
+			ce = *pce;
 		}
 	}
 
