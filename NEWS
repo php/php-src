@@ -1,6 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, Version 4.3.11
+- Fixed bug #31120 (mssql_query returns false on successfill inserts and 
+  stored procedures). (Frank)
 - Fixed bug #31111 (Compile failure of zend_strtod.c). (Derick)
 - Fixed bug #31110 (PHP 4.3.10 does not compile on Tru64 UNIX 5.1B). (Derick)
 - Fixed bug #31107 (Compile failure on Solaris 9 (Intel) and gcc 3.4.3). (Derick)
