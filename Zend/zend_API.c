@@ -547,7 +547,7 @@ static int zend_parse_va_args(int num_args, char *type_spec, va_list *va, int fl
 	return SUCCESS;
 }
 
-ZEND_API int zend_parse_parameters_ex(int flags TSRMLS_DC, int num_args, char *type_spec, ...)
+ZEND_API int zend_parse_parameters_ex(int flags, int num_args TSRMLS_DC, char *type_spec, ...)
 {
 	va_list va;
 	int retval;
