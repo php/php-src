@@ -1140,6 +1140,30 @@ ZEND_API int zend_binary_strcmp(zval *s1, zval *s2)
 }
 
 
+ZEND_API int zend_binary_strcasecmp(zval *s1, zval *s2)
+{
+	const unsigned char *p1 = (const unsigned char *)s1->value.str.val;
+	const unsigned char *p2 = (const unsigned char *)s2->value.str.val;
+	unsigned char c1 = 0, c2 = 0;
+	int len1, len2;
+
+	len1 = s1->value.str.len;
+	len2 = s2->value.str.len;
+	if (len1 != len2 || !len1) {
+		return len1 - len2;
+	}
+
+	while (len1--) {
+		c1 = tolower(*p1++);
+		c2 = tolower(*p2++);
+		if (c1 != c2) {
+			break;
+		}
+	}
+
+	return c1 - c2;
+}
+
 ZEND_API void zendi_smart_strcmp(zval *result, zval *s1, zval *s2)
 {
 	int ret1,ret2;
