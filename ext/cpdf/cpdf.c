@@ -428,6 +428,7 @@ PHP_FUNCTION(cpdf_open)
 #endif
 
 		if (php_check_open_basedir(Z_STRVAL_PP(arg2) TSRMLS_CC) || (PG(safe_mode) && !php_checkuid(Z_STRVAL_PP(arg2), "rb+", CHECKUID_CHECK_MODE_PARAM))) {
+			cpdf_close(cpdf);
 			RETURN_FALSE;
 		}
 
