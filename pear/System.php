@@ -289,7 +289,8 @@ class System
         }
         if (isset($mode)) {
             if (!$outputfd = fopen($outputfile, $mode)) {
-                return System::raiseError("Could not open $outputfile");
+                $err = System::raiseError("Could not open $outputfile");
+                return $err;
             }
             $ret = true;
         }
