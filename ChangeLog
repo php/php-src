@@ -1,3 +1,73 @@
+2002-02-27  Rasmus Lerdorf  <rasmus@php.net>
+
+    * php.ini-dist:
+    Drop this default to 12 to avoid some of the .000000000000001 questions.
+    I can't imagine much of a BC issue, and we aren't changing existing php.ini
+    files anyway.  If someone can think of a problem with this, please speak up
+
+2002-02-27  Brad House  <brad@mainstreetsoftworks.com>
+
+    * ext/mcve/CREDITS
+      ext/mcve/Makefile.in
+      ext/mcve/config.m4
+      ext/mcve/mcve.c
+      ext/mcve/mcve.php
+      ext/mcve/php_mcve.h
+      ext/mcve/tests/001.phpt
+      ext/mcve/tests/mcve_simple_test.php
+      ext/mcve/tests/mcve_test1.php
+      ext/mcve/tests/mcve_test2.php:
+    Initial MCVE extension added (Credit Card Processing)
+
+2002-02-27  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/overload/EXPERIMENTAL
+      ext/overload/README: This has been scaring people off.
+
+2002-02-27  Jani Taskinen  <sniper@iki.fi>
+
+    * NEWS: - Missed this one..
+
+2002-02-27  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/basic_functions.c: - Fix proto
+
+2002-02-27  Adam Dickmeiss  <adam@indexdata.dk>
+
+    * ext/yaz/php_yaz.c
+      ext/yaz/php_yaz.h: Implemented yaz_schema. Cleanup. 1.8 YAZ required
+
+2002-02-27  Jani Taskinen  <sniper@iki.fi>
+
+    * configure.in
+      main/php_version.h: Fixed minor typo.
+
+2002-02-27  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * main/php_version.h: - Oops... wishful thinking here :)
+
+    * main/php_version.h
+      configure.in: - Update version number
+
+2002-02-27  James Cox  <james@awpimajes.com>
+
+    * NEWS: correcting grammar so it's readable
+
+2002-02-27  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * NEWS: Add 4.1.2 NEWS entries to HEAD.
+
+2002-02-27  Zeev Suraski  <zeev@zend.com>
+
+    * main/php_version.h
+      NEWS
+      configure.in: Go with 4.1.2
+
+2002-02-27  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * sapi/servlet/servlet.java:
+    URLEncoder.encode(string) is deprecated in the Java 2 SDK 1.4.
+
 2002-02-26  Andi Gutmans  <andi@zend.com>
 
     * main/php_main.h
