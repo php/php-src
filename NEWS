@@ -12,7 +12,7 @@ PHP                                                                        NEWS
   . Added ibase_drop_db() 
   . Added ibase_name_result()
   . Added ibase_errcode() 
-  . Added ibase_affected_rows(), ibase_num_rows() and ibase_num_params()
+  . Added ibase_affected_rows() and ibase_num_params()
   . Added ibase_param_info()
   . Added ibase_wait_event()
   . Added ibase_set_event_handler() and ibase_free_event_handler()
