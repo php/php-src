@@ -29,9 +29,9 @@ AC_DEFUN(PHP_DOM_EXSLT_CHECK_VERSION,[
   yes
 #endif
   ],[
-    AC_MSG_RESULT(>= 1.0.3)
+    AC_MSG_RESULT(>= 1.0.18)
   ],[
-    AC_MSG_ERROR(libxslt version 1.0.3 or greater required.)
+    AC_MSG_ERROR(libxslt version 1.0.18 or greater required.)
   ])
   CPPFLAGS=$old_CPPFLAGS
 ])
@@ -73,7 +73,7 @@ if test "$PHP_DOM_XSLT" != "no"; then
 
   if test -z "$DOMXSLT_DIR"; then
     AC_MSG_RESULT(not found)
-    AC_MSG_ERROR(Please reinstall the libxslt >= 1.0.3 distribution)
+    AC_MSG_ERROR(Please reinstall the libxslt >= 1.0.18 distribution)
   fi
 
   PHP_DOM_XSLT_CHECK_VERSION
@@ -113,7 +113,7 @@ if test "$PHP_DOM_EXSLT" != "no"; then
 
   if test -z "$DOMEXSLT_DIR"; then
     AC_MSG_RESULT(not found)
-    AC_MSG_ERROR(Please reinstall the libxslt >= 1.0.3 distribution)
+    AC_MSG_ERROR(Please reinstall the libxslt >= 1.0.18 distribution)
   fi
 
   PHP_DOM_EXSLT_CHECK_VERSION
