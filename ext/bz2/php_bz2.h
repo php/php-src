@@ -44,16 +44,18 @@ PHP_FUNCTION(bzdecompress);
 
 #ifdef PHP_WIN32
 # ifdef PHP_BZ2_EXPORTS
-# define PHP_BZ2_API __declspec(dllexport)
+#  define PHP_BZ2_API __declspec(dllexport)
+# elif defined(COMPILE_DL_BZ2)
+#  define PHP_BZ2_API __declspec(dllimport)
 # else
-# define PHP_BZ2_API __declspec(dllimport)
+#  define PHP_BZ2_API /* nothing special */
 # endif
 #else
 # define PHP_BZ2_API
 #endif
 
-PHP_BZ2_API PHPAPI php_stream *_php_stream_bz2open(php_stream_wrapper *wrapper, char *path, char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC);
-PHP_BZ2_API PHPAPI php_stream *_php_stream_bz2open_from_BZFILE(BZFILE *bz, char *mode, php_stream *innerstream STREAMS_DC TSRMLS_DC);
+PHP_BZ2_API php_stream *_php_stream_bz2open(php_stream_wrapper *wrapper, char *path, char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC);
+PHP_BZ2_API php_stream *_php_stream_bz2open_from_BZFILE(BZFILE *bz, char *mode, php_stream *innerstream STREAMS_DC TSRMLS_DC);
 
 #define php_stream_bz2open_from_BZFILE(bz, mode, innerstream)	_php_stream_bz2open_from_BZFILE((bz), (mode), (innerstream) STREAMS_CC TSRMLS_CC)
 #define php_stream_bz2open(wrapper, path, mode, options, opened_path)	_php_stream_bz2open((wrapper), (path), (mode), (options), (opened_path), NULL STREAMS_CC TSRMLS_CC)
