@@ -327,14 +327,6 @@ dnl Various checks for GD features
     done
   done
 
-  if test -n "$GD_INCLUDE" -a -n "$GD_LIB" ; then
-    PHP_ADD_LIBRARY_WITH_PATH(gd, $GD_LIB, GD_SHARED_LIBADD)
-    AC_DEFINE(HAVE_LIBGD,1,[ ])
-    PHP_GD_CHECK_VERSION
-  else
-    AC_MSG_ERROR([Unable to find libgd.(a|so) anywhere under $GD_SEARCH_PATHS])
-  fi 
-
 dnl NetBSD package structure
   if test -f /usr/pkg/include/gd/gd.h -a -z "$GD_INCLUDE" ; then
     GD_INCLUDE=/usr/pkg/include/gd
@@ -344,6 +336,16 @@ dnl SuSE 6.x package structure
   if test -f /usr/include/gd/gd.h -a -z "$GD_INCLUDE" ; then
     GD_INCLUDE=/usr/include/gd
   fi
+
+  if test -n "$GD_INCLUDE" -a -n "$GD_LIB" ; then
+    PHP_ADD_LIBRARY_WITH_PATH(gd, $GD_LIB, GD_SHARED_LIBADD)
+    AC_DEFINE(HAVE_LIBGD,1,[ ])
+    PHP_GD_CHECK_VERSION
+  elif test -z "$GD_INCLUDE"; then
+    AC_MSG_ERROR([Unable to find gd.h anywhere under $GD_SEARCH_PATHS])
+  else
+    AC_MSG_ERROR([Unable to find libgd.(a|so) anywhere under $GD_SEARCH_PATHS])
+  fi 
 
   PHP_EXPAND_PATH($GD_INCLUDE, GD_INCLUDE)
   PHP_ADD_INCLUDE($GD_INCLUDE)
