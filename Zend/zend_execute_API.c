@@ -810,7 +810,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 			} else {
 				severity = E_ERROR;
 			}
-			zend_error(E_STRICT, "Non-static method %s::%s() cannot be called statically", calling_scope->name, EX(function_state).function->common.function_name);
+			zend_error(severity, "Non-static method %s::%s() cannot be called statically", calling_scope->name, EX(function_state).function->common.function_name);
 		}
 	}
 
