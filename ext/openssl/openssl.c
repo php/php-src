@@ -1424,12 +1424,13 @@ PHP_FUNCTION(openssl_csr_export)
 }
 /* }}} */
 
-/* {{{ proto resource openssl_csr_sign(mixed csr, mixed x509, mixed priv_key, long days)
+/* {{{ proto resource openssl_csr_sign(mixed csr, mixed x509, mixed priv_key, long days [, array config_args [, long serial]])
    Signs a cert with another CERT */
 PHP_FUNCTION(openssl_csr_sign)
 {
 	zval * zcert = NULL, *zcsr, *zpkey, *args = NULL;
 	long num_days;
+	long serial = 0L;
 	X509 * cert = NULL, *new_cert = NULL;
 	X509_REQ * csr;
 	EVP_PKEY * key = NULL, *priv_key;
@@ -1437,7 +1438,7 @@ PHP_FUNCTION(openssl_csr_sign)
 	int i;
 	struct php_x509_request req;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zz!zl|a!", &zcsr, &zcert, &zpkey, &num_days, &args) == FAILURE)
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zz!zl|a!l", &zcsr, &zcert, &zpkey, &num_days, &args, &serial) == FAILURE)
 		return;
 
 	RETVAL_FALSE;
@@ -1493,11 +1494,10 @@ PHP_FUNCTION(openssl_csr_sign)
 		goto cleanup;
 	}
 	/* Version 3 cert */
-	if (!X509_set_version(new_cert, 3))
+	if (!X509_set_version(new_cert, 2))
 		goto cleanup;
 
-	/* TODO: Allow specifying */
-	ASN1_INTEGER_set(X509_get_serialNumber(new_cert), 0L);
+	ASN1_INTEGER_set(X509_get_serialNumber(new_cert), serial);
 	
 	X509_set_subject_name(new_cert, X509_REQ_get_subject_name(csr));
 
