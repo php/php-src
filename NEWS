@@ -1,6 +1,7 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.0.7-dev
+- Fix a crash in dbase_replace_record (Patch by robin.marlow@dps-int.com).
 - Added support for single dimensional SafeArrays and Enumerations.
   Added an is_enum() function to check if a component implements an
   enumeration. (Alan, Harald)
