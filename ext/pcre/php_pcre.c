@@ -587,8 +587,8 @@ static int preg_do_repl_func(char *function_name, char *subject, int *offsets, i
 		zval_ptr_dtor(&retval_ptr);
 	} else {
 		php_error(E_WARNING, "Unable to call custom replacement function %s()", function_name);
-		*result = empty_string;
-		result_len = 0;
+		result_len = offsets[1] - offsets[0];
+		*result = estrndup(&subject[offsets[0]], result_len);
 	}
 	zval_dtor(subpats);
 	FREE_ZVAL(subpats);
