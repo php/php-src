@@ -2204,7 +2204,7 @@ PHP_FUNCTION(pg_lo_seek)
 
 	ZEND_FETCH_RESOURCE(pgsql, pgLofp *, &pgsql_id, -1, "PostgreSQL large object", le_lofp);
 
-	if (lo_lseek((PGconn *)pgsql->conn, pgsql->lofd, offset, whence )) {
+	if (lo_lseek((PGconn *)pgsql->conn, pgsql->lofd, offset, whence ) > -1) {
 		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;
