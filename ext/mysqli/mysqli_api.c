@@ -29,7 +29,6 @@
 #include "ext/standard/info.h"
 #include "php_mysqli.h"
 
-
 /* {{{ proto mixed mysqli_affected_rows(object link)
    Get number of affected rows in previous MySQL operation */
 PHP_FUNCTION(mysqli_affected_rows)
@@ -709,7 +708,7 @@ PHP_FUNCTION(mysqli_fetch)
 }
 /* }}} */
 
-/* {{{ proto object mysqli_fetch_field (object result)
+/* {{{ proto mixed mysqli_fetch_field (object result)
    Get column information from a result and return as an object */
 PHP_FUNCTION(mysqli_fetch_field) 
 {
@@ -741,7 +740,7 @@ PHP_FUNCTION(mysqli_fetch_field)
 }
 /* }}} */
 
-/* {{{ proto array mysqli_fetch_fields (object result)
+/* {{{ proto mixed mysqli_fetch_fields (object result)
    Return array of objects containing field meta-data */
 PHP_FUNCTION(mysqli_fetch_fields) 
 {
@@ -786,7 +785,7 @@ PHP_FUNCTION(mysqli_fetch_fields)
 }
 /* }}} */
 
-/* {{{ proto array mysqli_fetch_field_direct (object result, int offset)
+/* {{{ proto mixed mysqli_fetch_field_direct (object result, int offset)
    Fetch meta-data for a single field */
 PHP_FUNCTION(mysqli_fetch_field_direct) 
 {
@@ -819,7 +818,7 @@ PHP_FUNCTION(mysqli_fetch_field_direct)
 }
 /* }}} */
 
-/* {{{ proto array mysqli_fetch_lengths (object result)
+/* {{{ proto mixed mysqli_fetch_lengths (object result)
    Get the length of each output in a result */
 PHP_FUNCTION(mysqli_fetch_lengths) 
 {
@@ -1507,11 +1506,10 @@ PHP_FUNCTION(mysqli_send_long_data)
 	}
 	MYSQLI_FETCH_RESOURCE(stmt, STMT *, &mysql_stmt, "mysqli_stmt"); 
 
-	if (!param_nr) {
+	if (param_nr < 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid parameter number");
 		RETURN_FALSE;
 	}
-	param_nr--;
 
 	if (mysql_send_long_data(stmt->stmt, param_nr, data, data_len)) {
 		RETURN_FALSE;
