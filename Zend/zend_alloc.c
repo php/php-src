@@ -145,9 +145,6 @@ ZEND_API void *_emalloc(size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 		p->persistent = 0;
 		p->cached = 0;
 		p->size = size;
-		HANDLE_BLOCK_INTERRUPTIONS();
-		ADD_POINTER_TO_LIST(p);
-		HANDLE_UNBLOCK_INTERRUPTIONS();
 		return (void *)((char *)p + sizeof(zend_mem_header) + PLATFORM_PADDING);
 	} else {
 #if ZEND_DEBUG
@@ -223,9 +220,6 @@ ZEND_API void _efree(void *ptr ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 #if ZEND_DEBUG
 		p->magic = MEM_BLOCK_CACHED_MAGIC;
 #endif
-		HANDLE_BLOCK_INTERRUPTIONS();
-		REMOVE_POINTER_FROM_LIST(p);
-		HANDLE_UNBLOCK_INTERRUPTIONS();
 		return;
 	}
 	HANDLE_BLOCK_INTERRUPTIONS();
@@ -445,7 +439,7 @@ ZEND_API void shutdown_memory_manager(int silent, int clean_cache)
 	p=AG(head);
 	t=AG(head);
 	while (t) {
-		if (!t->cached || clean_cache) {
+		if (!t->cached) {
 #if ZEND_DEBUG
 			if (!t->cached && !t->reported) {
 				zend_mem_header *iterator;
