@@ -16,7 +16,10 @@ if test "$PHP_ICONV" != "no"; then
   
   if test -f $ICONV_DIR/lib/libconv.a -o -f $ICONV_DIR/lib/libiconv.s? ; then
     PHP_ADD_LIBRARY_WITH_PATH(iconv, $ICONV_DIR/lib, ICONV_SHARED_LIBADD)
-    AC_CHECK_LIB(iconv, libiconv_open, AC_DEFINE(HAVE_ICONV, 1, [ ]))
+    AC_CHECK_LIB(iconv, libiconv_open, [
+    	AC_DEFINE(HAVE_ICONV, 1, [ ])
+    	AC_DEFINE(HAVE_LIBICONV, 1, [ ])
+    ])
   else
     AC_CHECK_LIB(c, iconv_open, AC_DEFINE(HAVE_ICONV, 1, [ ]))
   fi
