@@ -1,3 +1,98 @@
+2001-03-19  David Guerizec  <david@guerizec.net>
+
+    * ext/midgard/php_midgard.h.in: deleted unneeded file
+
+    * ext/midgard/config.m4
+      ext/midgard/php_midgard.h: Fixed the build (hope so).
+
+2001-03-19  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/standard/array.c
+      ext/standard/basic_functions.c
+      ext/standard/php_array.h:
+    - Added array_map() function that applies a callback to the elements
+      of given arrays and returns the result. It can also be used with a
+      null callback to transpose arrays. 
+
+2001-03-19  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/bz2/bz2.c: Whitespace fix...
+
+2001-03-19  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/midgard/config.m4: Fix the build. Again.
+
+2001-03-19  Fredrik Öhrn  <ohrn@chl.chalmers.se>
+
+    * ext/yp/yp.c: Removed redundant initialization.
+
+2001-03-19  Alexander Bokovoy  <ab@avilink.net>
+
+    * ext/midgard/config.m4
+      ext/midgard/config.m4.session: 4.0.4pl1 compability finally fixed
+
+2001-03-19  David Guerizec  <david@guerizec.net>
+
+    * ext/midgard/config.m4.session: fixed compilation with php-4.0.4
+
+    * ext/midgard/config.m4: fixed a compatibility problem with 4.0.4
+
+    * ext/midgard/php_midgard.h.in: fixed bad #endif syntax
+
+2001-03-19  Alexander Bokovoy  <ab@avilink.net>
+
+    * ext/midgard/php_midgard.h.in:
+    Incompabilities in SCE build fixed for 4.0.5 and 4.0.4pl1
+
+2001-03-19  Ben Mansell  <ben@zeus.com>
+
+    * sapi/isapi/config.m4
+      README.Zeus:
+    Altered README.Zeus to give instructions on building FastCGI.
+    Changed --with-zeus configure option into --with-isapi, since its more
+    descriptive (and since there are now different ways to configure PHP+Zeus)
+
+    * Makefile.in
+      configure.in
+      sapi/fastcgi/CREDITS
+      sapi/fastcgi/Makefile.in
+      sapi/fastcgi/README.FastCGI
+      sapi/fastcgi/config.m4
+      sapi/fastcgi/fastcgi.c
+      sapi/fastcgi/php.sym
+      sapi/fastcgi/php_fastcgi.h:    New FastCGI server module. Based on the thttpd server module with
+    large chunks of code ripped from the cgi module. Also modifies
+    Makefile.in and configure.in in order to make it build properly.
+
+2001-03-19  Alexander Bokovoy  <ab@avilink.net>
+
+    * ext/midgard/config.m4
+      ext/midgard/config.m4.session: Keep compability with 4.0.4pl1
+
+2001-03-19  Emiliano Heyns  <emile@iris-advies.com>
+
+    * ext/midgard/midgard.c: return userid from mgd_auth_midgard
+
+2001-03-19  Alexander Bokovoy  <ab@avilink.net>
+
+    * ext/midgard/.cvsignore
+      ext/midgard/article.c
+      ext/midgard/attachment.c
+      ext/midgard/config.m4
+      ext/midgard/config.m4.session
+      ext/midgard/midgard.c
+      ext/midgard/php_midgard.h
+      ext/midgard/snippet.c: Bringing fixed code to stable branch
+
+    * ext/midgard/config.m4
+      ext/midgard/config.m4.session: Oops. Substitution code fixed
+
+    * ext/midgard/config.m4
+      ext/midgard/config.m4.session
+      ext/midgard/php_midgard.h.in:
+    Automatically generate correct #include for cases when module
+    build using phpize or within main PHP4 tree
+
 2001-03-18  Fredrik Öhrn  <ohrn@chl.chalmers.se>
 
     * ext/yp/CREDITS
