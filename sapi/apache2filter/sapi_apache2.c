@@ -49,11 +49,11 @@ php_apache_sapi_ub_write(const char *str, uint str_length TSRMLS_DC)
 	apr_bucket *b;
 	apr_bucket_brigade *bb;
 	apr_bucket_alloc_t *ba;
-	ap_filter_t *f; /* output filters */
+	ap_filter_t *f; /* remaining output filters */
 	php_struct *ctx;
 
 	ctx = SG(server_context);
-	f = ctx->r->output_filters;
+	f = ctx->f;
 
 	if (str_length == 0) return 0;
 	
@@ -183,7 +183,7 @@ php_apache_sapi_flush(void *server_context)
 	if (!server_context)
 		return;
     
-	f = ctx->r->output_filters;
+	f = ctx->f;
 
 	/* Send a flush bucket down the filter chain. The current default
 	 * handler seems to act on the first flush bucket, but ignores
@@ -344,6 +344,7 @@ static int php_output_filter(ap_filter_t *f, apr_bucket_brigade *bb)
 	ap_add_cgi_vars(f->r);
 
 	ctx = SG(server_context);
+	ctx->f = f; /* safe whatever filters are after us in the chain. */
 	if (ctx == NULL) {
 		ap_log_rerror(APLOG_MARK, APLOG_ERR|APLOG_NOERRNO, 0, f->r,
 					 "php failed to get server context");
