@@ -172,7 +172,7 @@ static void thttpd_hash_environment(void)
 	snprintf(buf, BUF_SIZE, "/%s", TG(hc)->origfilename);
 	ADD_STRING("SCRIPT_NAME");
 
-	strncpy(buf, inet_ntoa(TG(hc)->client_addr), BUF_SIZE);
+	strncpy(buf, inet_ntoa(TG(hc)->client_addr.sa_in.sin_addr), BUF_SIZE);
 	ADD_STRING("REMOTE_ADDR");
 	ADD_STRING("REMOTE_HOST");
 
