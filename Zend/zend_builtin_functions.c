@@ -1700,17 +1700,20 @@ ZEND_FUNCTION(debug_backtrace)
 ZEND_FUNCTION(extension_loaded)
 {
 	zval **extension_name;
+	char *lcname;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &extension_name)) {
 		ZEND_WRONG_PARAM_COUNT();
 	}
 
 	convert_to_string_ex(extension_name);
-	if (zend_hash_exists(&module_registry, Z_STRVAL_PP(extension_name), Z_STRLEN_PP(extension_name)+1)) {
-		RETURN_TRUE;
+	lcname = zend_str_tolower_dup(Z_STRVAL_PP(extension_name), Z_STRLEN_PP(extension_name));
+	if (zend_hash_exists(&module_registry, lcname, Z_STRLEN_PP(extension_name)+1)) {
+		RETVAL_TRUE;
 	} else {
-		RETURN_FALSE;
+		RETVAL_FALSE;
 	}
+	efree(lcname);
 }
 /* }}} */
 
