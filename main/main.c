@@ -1015,7 +1015,10 @@ static int php_hash_environment(ELS_D SLS_DC PLS_DC)
 	} else {
 		p = PG(gpc_order);
 		have_variables_order=0;
-		php_import_environment_variables(ELS_C PLS_CC);
+		ALLOC_ZVAL(PG(http_globals)[TRACK_VARS_ENV]);
+		array_init(PG(http_globals)[TRACK_VARS_ENV]);
+		INIT_PZVAL(PG(http_globals)[TRACK_VARS_ENV]);
+		php_import_environment_variables(PG(http_globals)[TRACK_VARS_ENV] ELS_CC PLS_CC);
 	}
 
 	while(p && *p) {
@@ -1044,7 +1047,10 @@ static int php_hash_environment(ELS_D SLS_DC PLS_DC)
 			case 'e':
 			case 'E':
 				if (have_variables_order) {
-					php_import_environment_variables(ELS_C PLS_CC);
+					ALLOC_ZVAL(PG(http_globals)[TRACK_VARS_ENV]);
+					array_init(PG(http_globals)[TRACK_VARS_ENV]);
+					INIT_PZVAL(PG(http_globals)[TRACK_VARS_ENV]);
+					php_import_environment_variables(PG(http_globals)[TRACK_VARS_ENV] ELS_CC PLS_CC);
 				} else {
 					php_error(E_WARNING, "Unsupported 'e' element (environment) used in gpc_order - use variables_order instead");
 				}
