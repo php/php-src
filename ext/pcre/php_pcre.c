@@ -720,10 +720,11 @@ char *php_pcre_replace(char *regex,   int regex_len,
 				*walkbuf = '\0';
 				/* increment the result length by how much we've added to the string */
 				*result_len += walkbuf - (result + *result_len);
-
-				if (limit != -1)
-					limit--;
 			}
+
+			if (limit != -1)
+				limit--;
+
 		} else { /* Failed to match */
 			/* If we previously set PCRE_NOTEMPTY after a null match,
 			   this is not necessarily the end. We need to advance
