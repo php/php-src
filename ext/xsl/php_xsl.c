@@ -274,7 +274,7 @@ PHP_MINFO_FUNCTION(xsl)
 {
 	php_info_print_table_start();
 	php_info_print_table_row(2, "XML/XSLT", "enabled");
-   {
+	{
 		char buffer[128];
 		int major, minor, subminor;
 
@@ -289,7 +289,7 @@ PHP_MINFO_FUNCTION(xsl)
 		subminor = (xsltLibxmlVersion - major * 10000 - minor * 100);
 		snprintf(buffer, 128, "%d.%d.%d", major, minor, subminor);
 		php_info_print_table_row(2, "libxslt compiled against libxml Version", buffer);
-	  }
+	}
 	php_info_print_table_end();
 
 	/* Remove comments if you have entries in php.ini
