@@ -332,8 +332,15 @@ fontFetch ( char **error, void *key )
 	short			platform, encoding;
 
 	a = (font_t *)malloc(sizeof(font_t));
+#ifdef VIRTUAL_DIR
+	if (virtual_filepath(b->fontname, &a->fontname)) {
+		*error = "Could not find/open font";
+		return NULL;
+	}
+#else
 	a->fontname = (char *)malloc(strlen(b->fontname) + 1);
 	strcpy(a->fontname,b->fontname);
+#endif
 	a->ptsize = b->ptsize;
 	a->angle = b->angle;
 	a->sin_a = sin(a->angle);
