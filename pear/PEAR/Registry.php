@@ -360,6 +360,7 @@ class PEAR_Registry extends PEAR
             $this->_unlock();
             return false;
         }
+        $info['_lastmodified'] = time();
         fwrite($fp, serialize($info));
         $this->_closePackageFile($fp);
         $this->_unlock();
@@ -401,6 +402,7 @@ class PEAR_Registry extends PEAR
             $this->_unlock();
             return false;
         }
+        $info['_lastmodified'] = time();
         if ($merge) {
             fwrite($fp, serialize(array_merge($oldinfo, $info)));
         } else {
