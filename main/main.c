@@ -662,14 +662,14 @@ static void php_message_handler_for_zend(long message, void *data)
 			}
 			break;
 		case ZMSG_LOG_SCRIPT_NAME: {
-				struct tm *ta;
+				struct tm *ta, tmbuf;
 				time_t curtime;
-				char *datetime_str;
+				char *datetime_str, asctimebuf[52];
 				SLS_FETCH();
 
 				time(&curtime);
-				ta = localtime(&curtime);
-				datetime_str = asctime(ta);
+				ta = localtime_r(&curtime, &tmbuf);
+				datetime_str = asctime_r(ta, asctimebuf);
 				datetime_str[strlen(datetime_str)-1]=0;	/* get rid of the trailing newline */
 				fprintf(stderr, "[%s]  Script:  '%s'\n", datetime_str, SAFE_FILENAME(SG(request_info).path_translated));
 			}
