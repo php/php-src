@@ -1,0 +1,309 @@
+/*
+  +----------------------------------------------------------------------+
+  | PHP Version 5                                                        |
+  +----------------------------------------------------------------------+
+  | Copyright (c) 1997-2004 The PHP Group                                |
+  +----------------------------------------------------------------------+
+  | This source file is subject to version 3.0 of the PHP license,       |
+  | that is bundled with this package in the file LICENSE, and is        |
+  | available through the world-wide-web at the following url:           |
+  | http://www.php.net/license/3_0.txt.                                  |
+  | If you did not receive a copy of the PHP license and are unable to   |
+  | obtain it through the world-wide-web, please send a note to          |
+  | license@php.net so we can mail you a copy immediately.               |
+  +----------------------------------------------------------------------+
+  | Author: Ard Biesheuvel <abies@php.net>                               |
+  +----------------------------------------------------------------------+
+*/
+
+/* $Id$ */
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "php.h"
+#include "php_ini.h"
+#include "ext/standard/info.h"
+#include "pdo/php_pdo.h"
+#include "pdo/php_pdo_driver.h"
+#include "php_pdo_firebird.h"
+#include "php_pdo_firebird_int.h"
+
+static int pdo_firebird_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *info TSRMLS_DC)
+{
+	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
+	ISC_STATUS *s = H->isc_status;
+	char buf[128];
+
+	add_next_index_long(info, isc_sqlcode(s));
+
+	while (isc_interprete(buf,&s)) {
+		add_next_index_string(info, buf, 1);
+	}
+
+	return 1;
+}
+
+static int firebird_handle_closer(pdo_dbh_t *dbh TSRMLS_DC) /* {{{ */
+{
+	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
+	
+	if (dbh->in_txn) {
+		if (dbh->auto_commit) {
+			if (isc_commit_transaction(H->isc_status, &H->tr)) {
+				/* error */
+			}
+		} else {
+			if (isc_rollback_transaction(H->isc_status, &H->tr)) {
+				/* error */
+			}
+		}
+	}
+	
+	if (isc_detach_database(H->isc_status, &H->db)) {
+		/* error */
+	}
+
+	pefree(H, dbh->is_persistent);
+
+	return 0;
+}
+/* }}} */
+
+static int firebird_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len, pdo_stmt_t *stmt,
+	long options, zval *driver_options TSRMLS_DC)
+{
+	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
+	pdo_firebird_stmt *S = NULL;
+
+	do {
+		isc_stmt_handle s = NULL;
+		XSQLDA num_sqlda;
+
+		num_sqlda.version = PDO_FB_SQLDA_VERSION;
+		num_sqlda.sqln = 1;
+
+		/* prepare the statement */
+		if (isc_dsql_prepare(H->isc_status, &H->tr, &s, (short)sql_len, /* sigh */ (char*) sql,
+				PDO_FB_DIALECT, &num_sqlda)) {
+			/* error */
+			break;
+		}
+		
+		/* allocate a statement handle of the right size */
+		S = ecalloc(1, sizeof(*S)-sizeof(XSQLDA) + XSQLDA_LENGTH(num_sqlda.sqld));
+		S->H = H;
+		S->stmt = s;
+		
+		if (isc_dsql_describe(H->isc_status, &s, PDO_FB_SQLDA_VERSION, S->out_sqlda)) {
+			/* error */
+			break;
+		}
+		
+		/* TODO what about input params */		
+		
+		stmt->driver_data = S;
+		stmt->methods = &firebird_stmt_methods;
+	
+		return 1;
+
+	} while (0);
+	
+	if (S) {
+		efree(S);
+	}
+	
+	return 0;
+}
+
+static long firebird_handle_doer(pdo_dbh_t *dbh, const char *sql, long sql_len TSRMLS_DC)
+{
+	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
+	isc_stmt_handle stmt = NULL;
+	static char info_count[] = { isc_info_sql_records };
+	char result[64];
+	int ret = 0;
+		
+	if (dbh->auto_commit && !dbh->in_txn) {
+		if (isc_start_transaction(H->isc_status, &H->tr, 1, &H->db, 0, NULL)) {
+			/* error */
+			return -1;
+		}
+		dbh->in_txn = 1;
+	}
+	
+	/* prepare */
+	if (isc_dsql_prepare(H->isc_status, &H->tr, &stmt, 0, (char*) sql, PDO_FB_DIALECT, NULL)) {
+		/* error */
+		return -1;
+	}
+
+	/* execute */
+	if (isc_dsql_execute2(H->isc_status, &H->tr, &stmt, PDO_FB_SQLDA_VERSION, NULL, NULL)) {
+		/* error */
+		return -1;
+	}
+	
+	/* return the number of affected rows */
+	if (isc_dsql_sql_info(H->isc_status, &stmt, sizeof(info_count), info_count, sizeof(result),
+			result)) {
+		/* error */
+		return -1;
+	}
+
+	if (result[0] == isc_info_sql_records) {
+		unsigned i = 3, result_size = isc_vax_integer(&result[1],2);
+
+		while (result[i] != isc_info_end && i < result_size) {
+			short len = (short)isc_vax_integer(&result[i+1],2);
+			if (result[i] != isc_info_req_select_count) {
+				ret += isc_vax_integer(&result[i+3],len);
+			}
+			i += len+3;
+		}
+	}
+	
+	/* commit? */
+	if (dbh->auto_commit && isc_commit_retaining(H->isc_status, &H->tr)) {
+		/* error */
+	}
+
+	return ret;
+}
+
+static int firebird_handle_commit(pdo_dbh_t *dbh TSRMLS_DC)
+{
+	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
+
+	if (isc_commit_transaction(H->isc_status, &H->tr)) {
+		/* error */
+		return 0;
+	}
+	return 1;
+}
+
+static int firebird_handle_rollback(pdo_dbh_t *dbh TSRMLS_DC)
+{
+	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
+
+	if (isc_rollback_transaction(H->isc_status, &H->tr)) {
+		/* error */
+		return 0;
+	}
+	return 1;
+}
+
+static int firebird_handle_set_attribute(pdo_dbh_t *dbh, long attr, zval *val TSRMLS_DC)
+{
+	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
+
+	switch (attr) {
+
+		case PDO_ATTR_AUTOCOMMIT:
+
+			if (dbh->in_txn) {
+				/* Assume they want to commit whatever is outstanding */
+				if (isc_commit_retaining(H->isc_status, &H->tr)) {
+					/* error */
+					return 0;
+				}
+				dbh->in_txn = 0;
+			}
+			
+			convert_to_long(val);
+	
+			dbh->auto_commit = Z_LVAL_P(val);
+
+			return 1;
+
+		default:
+
+			return 0;
+	}
+}
+
+static struct pdo_dbh_methods firebird_methods = {
+	firebird_handle_closer,
+	firebird_handle_preparer,
+	firebird_handle_doer,
+	NULL,
+	NULL,
+	firebird_handle_commit,
+	firebird_handle_rollback,
+	firebird_handle_set_attribute,
+	NULL,
+	pdo_firebird_fetch_error_func,
+};
+
+static int pdo_firebird_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_DC) /* {{{ */
+{
+	struct pdo_data_src_parser vars[] = {
+		{ "dbname", NULL, 0 },
+		{ "charset",  NULL,	0 },
+		{ "role", NULL,	0 }
+	};
+	int i, ret = 0;
+	pdo_firebird_db_handle *H = dbh->driver_data = pecalloc(1,sizeof(*H),dbh->is_persistent);
+
+	php_pdo_parse_data_source(dbh->data_source, dbh->data_source_len, vars, 2);
+	
+	do {
+		static char const dpb_flags[] = { 
+			isc_dpb_user_name, isc_dpb_password, isc_dpb_lc_ctype, isc_dpb_sql_role_name };
+		char const *dpb_values[] = { dbh->username, dbh->password, vars[1].optval, vars[2].optval };
+		char dpb_buffer[256] = { isc_dpb_version1 }, *dpb;
+		short len;
+		
+		dpb = dpb_buffer + 1; 
+		
+		/* loop through all the provided arguments and set dpb fields accordingly */
+		for (i = 0; i < sizeof(dpb_flags); ++i) {
+			if (dpb_values[i]) {
+				dpb += sprintf(dpb, "%c%c%s", dpb_flags[i], (unsigned char)strlen(dpb_values[i]),
+					dpb_values[i]);
+			}
+		}
+		
+		/* fire it up baby! */
+		if (isc_attach_database(H->isc_status, 0, vars[0].optval, &H->db,(short)(dpb-dpb_buffer),
+				dpb_buffer)) {
+			break;
+		}
+		
+		dbh->methods = &firebird_methods;
+		dbh->alloc_own_columns = 0;
+		dbh->supports_placeholders = PDO_PLACEHOLDER_POSITIONAL;
+		dbh->native_case = PDO_CASE_UPPER;
+
+		ret = 1;
+		
+	} while (0);
+		
+	for (i = 0; i < sizeof(vars)/sizeof(vars[0]); ++i) {
+		if (vars[i].freeme) {
+			efree(vars[i].optval);
+		}
+	}
+
+	if (!ret) {
+		firebird_handle_closer(dbh TSRMLS_CC);
+	}
+
+	return ret;
+}
+/* }}} */
+
+pdo_driver_t pdo_firebird_driver = {
+	PDO_DRIVER_HEADER(firebird),
+	pdo_firebird_handle_factory
+};
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim600: noet sw=4 ts=4 fdm=marker
+ * vim<600: noet sw=4 ts=4
+ */
