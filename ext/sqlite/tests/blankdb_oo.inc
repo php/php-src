@@ -7,5 +7,5 @@ function cleanup() {
 	@unlink($dbname);
 }
 register_shutdown_function("cleanup");
-$db = new sqlite_db($dbname);
+$db = new SQLiteDatabase($dbname);
 ?>

@@ -17,13 +17,13 @@ var_dump($r);
 var_dump($r->fetch());
 ?>
 --EXPECTF--
-object(sqlite_db)#%d (0) {
+object(SQLiteDatabase)#%d (0) {
 }
-object(sqlite_query)#%d (0) {
+object(SQLiteResult)#%d (0) {
 }
-object(sqlite_query)#%d (0) {
+object(SQLiteResult)#%d (0) {
 }
-object(sqlite_query)#%d (0) {
+object(SQLiteResult)#%d (0) {
 }
 array(6) {
   [0]=>
