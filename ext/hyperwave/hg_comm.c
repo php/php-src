@@ -45,7 +45,6 @@
 #endif
 #include <fcntl.h>
 #include <errno.h>
-#include <alloc.h>
 #include "hg_comm.h"
 #include "dlist.h"
 #include "ext/standard/head.h"
@@ -1815,8 +1814,8 @@ int send_gettext(int sockfd, hw_objectID objectID, int mode, int rootid, char **
  	} else {
 		error = *ptr;
 		attributes = NULL;
-		efree(retmsg);
 		efree(retmsg->buf);
+		efree(retmsg);
 		return error;
 	}
 
@@ -1855,20 +1854,20 @@ int send_gettext(int sockfd, hw_objectID objectID, int mode, int rootid, char **
 			memcpy(*text, retmsg->buf+sizeof(int), *count);
 /*			*text[*count] = 0; */
 		} else {
-			efree(retmsg);
 			efree(retmsg->buf);
+			efree(retmsg);
 			lowerror = LE_MALLOC;
 			return(-1);
 		}
  	} else {
 		error = *ptr;
-		efree(retmsg);
 		efree(retmsg->buf);
+		efree(retmsg);
  		*text = NULL;
 		return(error);
  	}
-	efree(retmsg);
 	efree(retmsg->buf);
+	efree(retmsg);
 
 	if((documenttype != NULL) && (strcmp(documenttype, "Image") != 0)) {
 		if(send_getanchorsobj(sockfd, objectID, &anchors, &ancount) == 0) {
@@ -1986,13 +1985,13 @@ int send_getcgi(int sockfd, hw_objectID objectID, char *cgi_env_str, char **obja
 	ptr = (int *) retmsg->buf;
 	if(*ptr == 0) {
 		attributes = estrdup(retmsg->buf+sizeof(int));
-		efree(retmsg);
 		efree(retmsg->buf);
+		efree(retmsg);
  	} else {
 		error = *ptr;
 		attributes = NULL;
-		efree(retmsg);
 		efree(retmsg->buf);
+		efree(retmsg);
 		return error;
 	}
 
@@ -2040,20 +2039,20 @@ int send_getcgi(int sockfd, hw_objectID objectID, char *cgi_env_str, char **obja
 		if(NULL != (*text = malloc(*count + 1))) {
 			memcpy(*text, ptr, *count);
 		} else {
-			efree(retmsg);
 			efree(retmsg->buf);
+			efree(retmsg);
 			lowerror = LE_MALLOC;
 			return(-1);
 		}
  	} else {
 		error = *ptr + 1024;  /* move errors to >2024 */
-		efree(retmsg);
 		efree(retmsg->buf);
+		efree(retmsg);
  		*text = NULL;
 		return(error);
  	}
-	efree(retmsg);
 	efree(retmsg->buf);
+	efree(retmsg);
 
 	return(0);
 }
@@ -2090,13 +2089,13 @@ int send_getremote(int sockfd, hw_objectID objectID, char **objattr, char **text
 	ptr = (int *) retmsg->buf;
 	if(*ptr == 0) {
 		attributes = estrdup(retmsg->buf+sizeof(int));
-		efree(retmsg);
 		efree(retmsg->buf);
+		efree(retmsg);
  	} else {
 		error = *ptr;
 		attributes = NULL;
-		efree(retmsg);
 		efree(retmsg->buf);
+		efree(retmsg);
 		return error;
 	}
 
@@ -2133,20 +2132,20 @@ int send_getremote(int sockfd, hw_objectID objectID, char **objattr, char **text
 			memcpy(*text, ptr+2, *count);
 /*			*text[*count] = 0; */
 		} else {
-			efree(retmsg);
 			efree(retmsg->buf);
+			efree(retmsg);
 			lowerror = LE_MALLOC;
 			return(-1);
 		}
  	} else {
 		error = *ptr + 1024;  /* move errors to >2024 */
-		efree(retmsg);
 		efree(retmsg->buf);
+		efree(retmsg);
  		*text = NULL;
 		return(error);
  	}
-	efree(retmsg);
 	efree(retmsg->buf);
+	efree(retmsg);
 
 	return(0);
 }
@@ -2183,13 +2182,13 @@ int send_getremotechildren(int sockfd, char *attributes, char **text, int **chil
 	ptr = (int *) retmsg->buf;
 	if(*ptr == 0) {
 		attributes = estrdup(retmsg->buf+sizeof(int));
-		efree(retmsg);
 		efree(retmsg->buf);
+		efree(retmsg);
  	} else {
 		error = *ptr;
 		attributes = NULL;
-		efree(retmsg);
 		efree(retmsg->buf);
+		efree(retmsg);
 		return error;
 	}
 */
@@ -2231,8 +2230,8 @@ int send_getremotechildren(int sockfd, char *attributes, char **text, int **chil
 				sum += *ptr;
 			}
 		} else {
-			efree(retmsg);
 			efree(retmsg->buf);
+			efree(retmsg);
 			lowerror = LE_MALLOC;
 			return(-1);
 		}
@@ -2245,8 +2244,8 @@ int send_getremotechildren(int sockfd, char *attributes, char **text, int **chil
 			memcpy(*text, ptr, remlen);
 		} else {
 			efree(childIDs);
-			efree(retmsg);
 			efree(retmsg->buf);
+			efree(retmsg);
 			lowerror = LE_MALLOC;
 			return(-1);
 		}
@@ -2308,9 +2307,9 @@ int send_mvcpdocscollscoll(int sockfd, hw_objectID *objectIDs, int count, int fr
 		return(-1);
 	}
 
-	efree(retmsg);
 	error = *((int *) retmsg->buf);
 	efree(retmsg->buf);
+	efree(retmsg);
 	return(error);
 }
 
@@ -4153,15 +4152,15 @@ int send_pipedocument(int sockfd, char *host, hw_objectID objectID, int mode, in
 	ptr = (int *) retmsg->buf;
 	if((ptr == NULL) || (*ptr != 0)) {
 		error = *ptr;
-		efree(retmsg);
 		if(retmsg->buf) efree(retmsg->buf);
+		efree(retmsg);
 		if(attributes) efree(attributes);
 		HWSOCK_FCLOSE(fd);
 		return(error);
 	}
 
-	efree(retmsg);
 	efree(retmsg->buf);
+	efree(retmsg);
 
 	/* passively open the data connection. The HG server is probably
            already waiting for us.
@@ -4335,15 +4334,15 @@ int send_pipecgi(int sockfd, char *host, hw_objectID objectID, char *cgi_env_str
 
 	ptr = (int *) retmsg->buf;
 	if((ptr == NULL) || (*ptr != 0)) {
-		efree(retmsg);
 		if(retmsg->buf) efree(retmsg->buf);
+		efree(retmsg);
 		if(attributes) efree(attributes);
 		HWSOCK_FCLOSE(fd);
 		return(-1);
 	}
 
-	efree(retmsg);
 	efree(retmsg->buf);
+	efree(retmsg);
 
 	/* passively open the data connection. The HG server is probably
            already waiting for us.
@@ -4433,8 +4432,8 @@ int send_putdocument(int sockfd, char *host, hw_objectID parentID, char *objectR
 		ptr++;
 		*objectID = *ptr;
 	} else {
-		efree(retmsg);
 		if(retmsg->buf) efree(retmsg->buf);
+		efree(retmsg);
 		return(error);
 	}
 
@@ -4540,14 +4539,14 @@ int send_putdocument(int sockfd, char *host, hw_objectID parentID, char *objectR
 
 	ptr = (int *) retmsg->buf;
 	if((ptr == NULL) || (*ptr != 0)) {
-		efree(retmsg);
 		if(retmsg->buf) efree(retmsg->buf);
+		efree(retmsg);
 		HWSOCK_FCLOSE(fd);
 		return(-1);
 	}
 
-	efree(retmsg);
 	efree(retmsg->buf);
+	efree(retmsg);
 
 	return(0);
 }
@@ -4772,8 +4771,8 @@ int send_command(int sockfd, int command, char **answer)
 		return(-1);
 	}
 
-	efree(retmsg);
 	*answer = retmsg->buf;
+	efree(retmsg);
 
 	return(0);
 }
