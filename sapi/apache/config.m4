@@ -3,7 +3,7 @@ dnl ## -*- sh -*-
 AC_MSG_CHECKING(for Apache module support via DSO through APXS)
 AC_ARG_WITH(apxs,
 [  --with-apxs[=FILE]	   Build shared Apache module.	FILE is the optional
-						  pathname to the Apache apxs tool; defaults to "apxs".]
+						  pathname to the Apache apxs tool; defaults to "apxs".],
 [
 	if test "$withval" = "yes"; then
 		withval=apxs
