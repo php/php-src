@@ -408,7 +408,7 @@ PHPAPI int php_ob_init_conflict(char *handler_new, char *handler_set TSRMLS_DC)
  */
 static int php_ob_init_named(uint initial_size, uint block_size, char *handler_name, zval *output_handler, uint chunk_size, zend_bool erase TSRMLS_DC)
 {
-	if (!zend_is_callable(output_handler, 0, NULL)) {
+	if (output_handler && !zend_is_callable(output_handler, 0, NULL)) {
 		return FAILURE;
 	}
 	if (OG(ob_nesting_level)>0) {
