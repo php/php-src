@@ -318,7 +318,6 @@ static zend_function_entry php_domxmlnode_class_functions[] = {
 	PHP_FALIAS(node_value,				domxml_node_value,				NULL)
 	PHP_FALIAS(first_child,				domxml_node_first_child,		NULL)
 	PHP_FALIAS(last_child,				domxml_node_last_child,			NULL)
-	PHP_FALIAS(add_child,				domxml_node_add_child,			NULL)
 	PHP_FALIAS(children,				domxml_node_children,			NULL)
 	PHP_FALIAS(child_nodes,				domxml_node_children,			NULL)
 	PHP_FALIAS(previous_sibling,		domxml_node_previous_sibling,	NULL)
@@ -328,6 +327,7 @@ static zend_function_entry php_domxmlnode_class_functions[] = {
 	PHP_FALIAS(parent_node,				domxml_node_parent,				NULL)
 	PHP_FALIAS(insert_before,			domxml_node_insert_before,		NULL)
 	PHP_FALIAS(append_child,			domxml_node_append_child,		NULL)
+	PHP_FALIAS(remove_child,			domxml_node_remove_child,		NULL)
 	PHP_FALIAS(owner_document,			domxml_node_owner_document,		NULL)
 	PHP_FALIAS(new_child,				domxml_node_new_child,			NULL)
 	PHP_FALIAS(attributes,				domxml_node_attributes,			NULL)
@@ -335,6 +335,7 @@ static zend_function_entry php_domxmlnode_class_functions[] = {
 	PHP_FALIAS(prefix,					domxml_node_prefix,				NULL)
 	PHP_FALIAS(clone_node,				domxml_clone_node,				NULL)
 /* Non DOM functions start here */
+	PHP_FALIAS(add_child,				domxml_node_add_child,			NULL)
 	PHP_FALIAS(node,					domxml_node,					NULL)
 	PHP_FALIAS(unlink,					domxml_node_unlink_node,		NULL)
 	PHP_FALIAS(unlink_node,				domxml_node_unlink_node,		NULL)
@@ -2087,6 +2088,40 @@ PHP_FUNCTION(domxml_node_insert_before)
 	}
 
 	DOMXML_RET_OBJ(rv, child, &ret);
+}
+/* }}} */
+
+/* {{{ proto object domxml_node_remove_child(object domnode)
+   Removes node from list of children */
+PHP_FUNCTION(domxml_node_remove_child)
+{
+	zval *id, *node;
+	xmlNodePtr children, child, nodep;
+	int ret;
+
+	DOMXML_GET_THIS_OBJ(nodep, id, le_domxmlnodep);
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o", &node) == FAILURE) {
+		return;
+	}
+
+	DOMXML_GET_OBJ(child, node, le_domxmlnodep);
+
+	children = nodep->children;
+	if (!children) {
+		RETURN_FALSE;
+	}
+
+	while (children) {
+		if (children == child) {
+			zval *rv;
+			xmlUnlinkNode(child);
+			DOMXML_RET_OBJ(rv, child, &ret);
+			return;
+		}
+		children = children->next;
+	}
+	RETURN_FALSE
 }
 /* }}} */
 
