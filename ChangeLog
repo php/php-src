@@ -1,3 +1,75 @@
+2000-08-07  Danny Heijl  <Danny.Heijl@cevi.be>
+
+    * ext/informix/ifx.ec:
+    - fix for # 5980 (using ifx_connect/ifx_close multiple times for the
+      same database connection) (danny)
+
+2000-08-07  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/wddx/php_wddx_api.h
+      ext/wddx/wddx.c: Add support for <binary> WDDX element.
+
+    * NEWS: .
+
+    * sapi/thttpd/thttpd_patch: Remove some crud from diff output (Only in..).
+
+    * sapi/thttpd/Makefile.in
+      sapi/thttpd/README
+      sapi/thttpd/config.m4
+      sapi/thttpd/stub.c
+      sapi/thttpd/thttpd_patch: Fix building thttpd SAPI module.
+
+    This works now with thttpd 2.19.
+
+    Thanks to Andrzej Borsuk <andrzej.borsuk@alfaelektro.com.pl> for
+    pointing me into the right direction.
+
+    * configure.in:
+    Set abs_srcdir before SAPI modules' configure stuff is run.
+
+2000-08-07  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * EXTENSIONS: - updated those entries I feel responsible for
+
+2000-08-07  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/oci8/oci8.c: fixed binary mode for Win32
+
+2000-08-07  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/domxml/php_domxml.c
+      ext/domxml/php_domxml.h:
+    - got rid of php_ prefix in Modulename and some structs
+
+2000-08-07  Zeev Suraski  <zeev@php.net>
+
+    * sapi/isapi/php4isapi.c: Add DOCUMENT_ROOT
+
+2000-08-07  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/domxml/php_domxml.c: - made compilation as dynamic lib possible
+
+    * ext/fdf/fdf.c
+      ext/fdf/php_fdf.h:
+    - added functions fdf_set_flags(), fdf_set_opt(), fdf_set_submit_form_action()
+      as proposed by <gweisz@l-speed.com>
+
+2000-08-07  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/oci8/oci8.c:
+    - Fixed CLOB handling in OCI8 driver when using variable-width
+      character sets. 
+
+2000-08-07  Rui Hirokawa  <louis@cityfujisawa.ne.jp>
+
+    * ext/ldap/ldap.c: fixed for openldap 2.0beta.
+
+2000-08-07  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/sybase/php_sybase_db.c:
+    Add 4th optional parameter to sybase_[p]connect to specify the charset
+    for the connection
+
 2000-08-06  Zeev Suraski  <zeev@php.net>
 
     * main/main.c:
