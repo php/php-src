@@ -201,14 +201,6 @@ SOURCE=.\bmove_upp.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\ct_init.c
-# End Source File
-# Begin Source File
-
-SOURCE=".\ctype-latin1.c"
-# End Source File
-# Begin Source File
-
 SOURCE=.\dbug.c
 # End Source File
 # Begin Source File
@@ -462,10 +454,6 @@ SOURCE=.\violite.c
 # Begin Source File
 
 SOURCE=.\acconfig.h
-# End Source File
-# Begin Source File
-
-SOURCE=".\config-win32.h"
 # End Source File
 # Begin Source File
 
