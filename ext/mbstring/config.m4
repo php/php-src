@@ -2,14 +2,14 @@ dnl
 dnl $Id$
 dnl
 
-PHP_ARG_ENABLE(mbstr_enc_trans, whether to enable encoding translation,
-[  --enable-mbstr-enc-trans Enable input encoding translation], no)
+PHP_ARG_ENABLE(mbstring, whether to enable multibyte string support,
+[  --disable-mbstring      Disable multibyte string support], yes)
 
 PHP_ARG_ENABLE(mbregex, whether to enable multibyte regex support,
-[  --disable-mbregex        Disable multibyte regex support], yes)
+[  --disable-mbregex         Disable multibyte regex support], yes)
 
-PHP_ARG_ENABLE(mbstring, whether to enable multibyte string support,
-[  --disable-mbstring       Disable multibyte string support], yes)
+PHP_ARG_ENABLE(mbstr_enc_trans, whether to enable encoding translation,
+[  --enable-mbstr-enc-trans  Enable input encoding translation], no)
 
 if test "$PHP_MBSTRING" != "no"; then  
   AC_DEFINE(HAVE_MBSTRING,1,[whether to have multibyte string support])
@@ -41,10 +41,11 @@ else
   PHP_MBSTR_ENC_TRANS=no
 fi
 
+if test "$MBREGEX" != "no" ; then
+  AC_DEFINE(HAVE_MBREGEX, 1, [whether to have multibyte regex support])
+fi
+
 if test "$PHP_MBSTR_ENC_TRANS" != "no" ; then
   AC_DEFINE(MBSTR_ENC_TRANS, 1, [whether to have encoding translation])
 fi
 
-if test "$MBREGEX" != "no" ; then
-  AC_DEFINE(HAVE_MBREGEX, 1, [whether to have multibyte regex support])
-fi
