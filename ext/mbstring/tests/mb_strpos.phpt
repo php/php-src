@@ -64,9 +64,9 @@ $r =   mb_strpos($euc_jp, 0, 40,       'EUC-JP');
 
 // Non-existent
 echo "== NON-EXISTENT ==\n";
-$r = mb_strpos($euc_jp, '´Ú¹ñ¸ì', 'EUC-JP');
+$r = mb_strpos($euc_jp, '´Ú¹ñ¸ì', 0, 'EUC-JP');
 ($r === FALSE) ? print "OK_STR\n"     : print "NG_STR\n";
-$r = mb_strpos($euc_jp, "\n",     'EUC-JP');
+$r = mb_strpos($euc_jp, "\n",     0, 'EUC-JP');
 ($r === FALSE) ? print "OK_NEWLINE\n" : print "NG_NEWLINE\n";
 
 
