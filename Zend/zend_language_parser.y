@@ -427,14 +427,13 @@ non_empty_for_expr:
 	|	expr					{ $$ = $1; }
 ;
 
-
 expr_without_variable:	
 		T_LIST '(' { zend_do_list_init(TSRMLS_C); } assignment_list ')' '=' expr { zend_do_list_end(&$$, &$7 TSRMLS_CC); }
 	|	cvar '=' expr		{ zend_do_end_variable_parse(BP_VAR_W, 0 TSRMLS_CC); zend_do_assign(&$$, &$1, &$3 TSRMLS_CC); }
 	|	cvar '=' '&' w_cvar	{ zend_do_end_variable_parse(BP_VAR_W, 0 TSRMLS_CC); zend_do_assign_ref(&$$, &$1, &$4 TSRMLS_CC); }
 	|	cvar '=' '&' function_call { zend_do_end_variable_parse(BP_VAR_W, 0 TSRMLS_CC); zend_do_assign_ref(&$$, &$1, &$4 TSRMLS_CC); }
-	|	cvar '=' '&' T_NEW parse_class_entry { zend_do_extended_fcall_begin(TSRMLS_C); zend_do_begin_new_object(&$4, &$5 TSRMLS_CC); } ctor_arguments { zend_do_end_new_object(&$3, &$4, &$7 TSRMLS_CC); zend_do_extended_fcall_end(TSRMLS_C); zend_do_end_variable_parse(BP_VAR_W, 0 TSRMLS_CC); zend_do_assign_ref(&$$, &$1, &$3 TSRMLS_CC); }
-	|	T_NEW parse_class_entry { zend_do_extended_fcall_begin(TSRMLS_C); zend_do_begin_new_object(&$1, &$2 TSRMLS_CC); } ctor_arguments { zend_do_end_new_object(&$$, &$1, &$4 TSRMLS_CC); zend_do_extended_fcall_end(TSRMLS_C);}
+	|	cvar '=' '&' T_NEW new_class_entry { zend_do_extended_fcall_begin(TSRMLS_C); zend_do_begin_new_object(&$4, &$5 TSRMLS_CC); } ctor_arguments { zend_do_end_new_object(&$3, &$4, &$7 TSRMLS_CC); zend_do_extended_fcall_end(TSRMLS_C); zend_do_end_variable_parse(BP_VAR_W, 0 TSRMLS_CC); zend_do_assign_ref(&$$, &$1, &$3 TSRMLS_CC); }
+	|	T_NEW new_class_entry { zend_do_extended_fcall_begin(TSRMLS_C); zend_do_begin_new_object(&$1, &$2 TSRMLS_CC); } ctor_arguments { zend_do_end_new_object(&$$, &$1, &$4 TSRMLS_CC); zend_do_extended_fcall_end(TSRMLS_C);}
 	|	cvar T_PLUS_EQUAL expr 	{ zend_do_end_variable_parse(BP_VAR_RW, 0 TSRMLS_CC); zend_do_binary_assign_op(ZEND_ASSIGN_ADD, &$$, &$1, &$3 TSRMLS_CC); }
 	|	cvar T_MINUS_EQUAL expr	{ zend_do_end_variable_parse(BP_VAR_RW, 0 TSRMLS_CC); zend_do_binary_assign_op(ZEND_ASSIGN_SUB, &$$, &$1, &$3 TSRMLS_CC); }
 	|	cvar T_MUL_EQUAL expr		{ zend_do_end_variable_parse(BP_VAR_RW, 0 TSRMLS_CC); zend_do_binary_assign_op(ZEND_ASSIGN_MUL, &$$, &$1, &$3 TSRMLS_CC); }
@@ -503,18 +502,22 @@ function_call:
 		T_STRING	'(' { $2.u.opline_num = zend_do_begin_function_call(&$1 TSRMLS_CC); }
 				function_call_parameter_list
 				')' { zend_do_end_function_call(&$1, &$$, &$4, 0, $2.u.opline_num TSRMLS_CC); zend_do_extended_fcall_end(TSRMLS_C); }
-	|	parse_class_entry T_PAAMAYIM_NEKUDOTAYIM static_or_variable_string '(' { zend_do_extended_fcall_begin(TSRMLS_C); zend_do_begin_class_member_function_call(&$1, &$3 TSRMLS_CC); } 
+	|	parse_class_entry static_or_variable_string '(' { zend_do_extended_fcall_begin(TSRMLS_C); zend_do_begin_class_member_function_call(&$1, &$2 TSRMLS_CC); } 
 											function_call_parameter_list 
-											')' { zend_do_end_function_call(&$3, &$$, &$6, 1, 1 TSRMLS_CC); zend_do_extended_fcall_end(TSRMLS_C);}
+											')' { zend_do_end_function_call(&$2, &$$, &$5, 1, 1 TSRMLS_CC); zend_do_extended_fcall_end(TSRMLS_C);}
 	|	cvar_without_objects  '(' { zend_do_end_variable_parse(BP_VAR_R, 0 TSRMLS_CC); zend_do_begin_dynamic_function_call(&$1 TSRMLS_CC); }
 			function_call_parameter_list ')'
 			{ zend_do_end_function_call(&$1, &$$, &$4, 0, 1 TSRMLS_CC); zend_do_extended_fcall_end(TSRMLS_C);}
 ;
 
 parse_class_entry:
-		parse_class_entry T_PAAMAYIM_NEKUDOTAYIM T_STRING { do_fetch_class(&$$, &$1, &$3 TSRMLS_CC); }
-	|	static_or_variable_string { /* Using static_or_variable_string and not T_STRING because NEW supported $var */
-									do_fetch_class(&$$, NULL, &$1 TSRMLS_CC); }
+		parse_class_entry T_STRING T_PAAMAYIM_NEKUDOTAYIM { do_fetch_class(&$$, &$1, &$2 TSRMLS_CC); }
+	|	T_STRING T_PAAMAYIM_NEKUDOTAYIM { do_fetch_class(&$$, NULL, &$1 TSRMLS_CC); }
+;
+
+new_class_entry:
+		parse_class_entry static_or_variable_string { do_fetch_class(&$$, &$1, &$2 TSRMLS_CC); }
+	|	static_or_variable_string { do_fetch_class(&$$, NULL, &$1 TSRMLS_CC); }
 ;
 
 static_or_variable_string:
@@ -557,6 +560,7 @@ static_scalar: /* compile-time evaluated scalars */
 scalar:
 		T_STRING 				{ zend_do_fetch_constant(&$$, &$1, ZEND_RT TSRMLS_CC); }
 	|	T_STRING_VARNAME		{ $$ = $1; }
+	|	parse_class_entry T_STRING
 	|	common_scalar			{ $$ = $1; }
 	|	'"' encaps_list '"' 	{ $$ = $2; }
 	|	'\'' encaps_list '\''	{ $$ = $2; }
@@ -611,7 +615,7 @@ cvar:
 ;
 
 static_member:
-	parse_class_entry T_PAAMAYIM_NEKUDOTAYIM variable { $$ = $3; zend_do_fetch_static_member(&$1 TSRMLS_CC); }
+	parse_class_entry variable { $$ = $2; zend_do_fetch_static_member(&$1 TSRMLS_CC); }
 ;
 
 variable:
