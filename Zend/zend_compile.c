@@ -1095,7 +1095,10 @@ ZEND_API int do_bind_function_or_class(zend_op *opline, HashTable *function_tabl
 		case ZEND_DECLARE_CLASS: {
 				zend_class_entry *ce;
 
-				zend_hash_find(class_table, opline->op1.u.constant.value.str.val, opline->op1.u.constant.value.str.len, (void **) &ce);
+				if (zend_hash_find(class_table, opline->op1.u.constant.value.str.val, opline->op1.u.constant.value.str.len, (void **) &ce)==FAILURE) {
+					zend_error(E_ERROR, "Internal Zend error - Missing class information for %s", opline->op1.u.constant.value.str.val);
+					return FAILURE;
+				}
 				(*ce->refcount)++;
 				if (zend_hash_add(class_table, opline->op2.u.constant.value.str.val, opline->op2.u.constant.value.str.len+1, ce, sizeof(zend_class_entry), NULL)==FAILURE) {
 					(*ce->refcount)--;
@@ -1113,9 +1116,10 @@ ZEND_API int do_bind_function_or_class(zend_op *opline, HashTable *function_tabl
 				char *class_name, *parent_name;
 				zend_function tmp_zend_function;
 				zval *tmp;
+				int found_ce;
 
-				zend_hash_find(class_table, opline->op1.u.constant.value.str.val, opline->op1.u.constant.value.str.len, (void **) &ce);
-				(*ce->refcount)++;
+				
+				found_ce = zend_hash_find(class_table, opline->op1.u.constant.value.str.val, opline->op1.u.constant.value.str.len, (void **) &ce);
 
 				/* Restore base class / derived class names */
 				parent_name = opline->op2.u.constant.value.str.val;
@@ -1124,6 +1128,13 @@ ZEND_API int do_bind_function_or_class(zend_op *opline, HashTable *function_tabl
 					zend_error(E_CORE_ERROR, "Invalid runtime class entry");
 				}
 				*class_name++ = 0;
+
+				if (found_ce==FAILURE) {
+					zend_error(E_ERROR, "Cannot redeclare class %s", class_name);
+					return FAILURE;
+				}
+
+				(*ce->refcount)++;
 
 				/* Obtain parent class */
 				if (zend_hash_find(class_table, parent_name, strlen(parent_name)+1, (void **) &parent_ce)==FAILURE) {
