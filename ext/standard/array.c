@@ -1330,7 +1330,7 @@ PHP_FUNCTION(compact)
 PHP_FUNCTION(array_init)
 {
 	zval **start_key, **num, **val, *newval;
-	int i;
+	long i;
 
 	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &start_key, &num, &val) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1345,11 +1345,12 @@ PHP_FUNCTION(array_init)
 		case IS_STRING:
 		case IS_LONG:
 		case IS_DOUBLE:
+			if(PZVAL_IS_REF(*val)) {
+				SEPARATE_ZVAL(val);
+			}
 			convert_to_long_ex(start_key);
-			MAKE_STD_ZVAL(newval);
-			*newval = **val;
-			zval_copy_ctor(newval);
-			add_index_zval(return_value, Z_LVAL_PP(start_key), newval);
+			zval_add_ref(val);
+			zend_hash_index_update(Z_ARRVAL_P(return_value), Z_LVAL_PP(start_key), val, sizeof(val), NULL);
 			break;
 		default:
 			php_error(E_WARNING, "Wrong datatype for start key in array_init()");
@@ -1363,11 +1364,15 @@ PHP_FUNCTION(array_init)
 		php_error(E_WARNING, "Number of elements must be positive in array_init()");
 		RETURN_FALSE;
 	}
+	newval = *val;
 	while(i--) {
-		MAKE_STD_ZVAL(newval);
-		*newval = **val;
-		zval_copy_ctor(newval);
-		add_next_index_zval(return_value, newval);
+		if(!(i%62000)) {
+			MAKE_STD_ZVAL(newval);
+			*newval = **val;
+			zval_copy_ctor(newval);
+		}
+		zval_add_ref(&newval);
+		zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &newval, sizeof(zval *), NULL);
 	}
 }
 /* }}} */
