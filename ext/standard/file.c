@@ -137,15 +137,10 @@ static void file_globals_ctor(php_file_globals *file_globals_p TSRMLS_DC)
 	FG(pclose_ret) = 0;
 	FG(user_stream_current_filename) = NULL;
 	FG(def_chunk_size) = PHP_SOCK_CHUNK_SIZE;
-	FG(default_context) = NULL;
 }
 
 static void file_globals_dtor(php_file_globals *file_globals_p TSRMLS_DC)
 {
-	if (FG(default_context)) {
-		/* This is being automagically freed elsewhere */
-		FG(default_context) = NULL;
-	}
 }
 
 

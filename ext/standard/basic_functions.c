@@ -1196,6 +1196,9 @@ PHP_RINIT_FUNCTION(basic)
 	/* Reset magic_quotes_runtime */
 	PG(magic_quotes_runtime) = INI_BOOL("magic_quotes_runtime");
 
+	/* Setup default context */
+	FG(default_context) = NULL;
+
 	return SUCCESS;
 }
 
@@ -1243,6 +1246,11 @@ PHP_RSHUTDOWN_FUNCTION(basic)
 		zend_hash_destroy(BG(user_filter_map));
 		efree(BG(user_filter_map));
 		BG(user_filter_map) = NULL;
+	}
+
+	/* cleanup any default context that was created */
+	if (FG(default_context)) {
+		php_stream_context_free(FG(default_context));
 	}
 	
 	return SUCCESS;
