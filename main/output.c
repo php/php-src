@@ -24,7 +24,7 @@
 #include "ext/standard/head.h"
 #include "ext/standard/basic_functions.h"
 #include "ext/standard/url_scanner_ex.h"
-#ifdef HAVE_ZLIB
+#if HAVE_ZLIB && !defined(COMPILE_DL_ZLIB)
 #include "ext/zlib/php_zlib.h"
 #endif
 #include "SAPI.h"
@@ -408,7 +408,7 @@ PHPAPI int php_ob_init_conflict(char *handler_new, char *handler_set TSRMLS_DC)
 static int php_ob_init_named(uint initial_size, uint block_size, char *handler_name, zval *output_handler, uint chunk_size, zend_bool erase TSRMLS_DC)
 {
 	if (OG(ob_nesting_level)>0) {
-#ifdef HAVE_ZLIB
+#if HAVE_ZLIB && !defined(COMPILE_DL_ZLIB)
 		if (!strncmp(handler_name, "ob_gzhandler", sizeof("ob_gzhandler")) && php_ob_gzhandler_check(TSRMLS_C)) {
 			return FAILURE;
 		}
