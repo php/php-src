@@ -145,7 +145,7 @@ PS_WRITE_FUNC(user)
 	SESS_ZVAL_STRING(key, args[0]);
 	SESS_ZVAL_STRINGN(val, vallen, args[1]);
 
-	retval = ps_call_handler(PSF(write), 2, args);
+	retval = ps_call_handler(PSF(write), 2, args TSRMLS_CC);
 
 	FINISH;
 }
