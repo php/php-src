@@ -153,6 +153,7 @@ static void sapi_cgi_register_variables(zval *track_vars_array ELS_DC SLS_DC PLS
 		val = emalloc(l + 1);
 		php_sprintf(val, "%s%s", (sn ? sn : ""), (pi ? pi : ""));	/* SAFE */
 		php_register_variable(val, "PHP_SELF", track_vars_array ELS_CC PLS_CC);
+		efree(val);
 	}
 #endif
 }

@@ -86,7 +86,8 @@ struct _php_core_globals {
 	zend_bool expose_php;
 
 	zend_bool track_vars;
-	zend_bool gpc_globals;
+	zend_bool register_globals;
+	zend_bool register_argc_argv;
 
 	zend_bool y2k_compliance;
 

@@ -181,10 +181,10 @@ static void php_set_session_var(char *name, size_t namelen,
 	zval_copy_ctor(state_val_copy);
 	state_val_copy->refcount = 0;
 
-	if (PG(gpc_globals) && PG(track_vars)) {
+	if (PG(register_globals) && PG(track_vars)) {
 		zend_set_hash_symbol(state_val_copy, name, namelen, 1, 2, PS(http_state_vars)->value.ht, &EG(symbol_table));
 	} else {
-		if (PG(gpc_globals)) {
+		if (PG(register_globals)) {
 			zend_set_hash_symbol(state_val_copy, name, namelen, 0, 1, &EG(symbol_table));
 		}
 
@@ -639,7 +639,7 @@ static void _php_session_start(PSLS_D)
 	char *p;
 	int send_cookie = 1;
 	int define_sid = 1;
-	zend_bool gpc_globals;
+	zend_bool register_globals;
 	zend_bool track_vars;
 	int module_number = PS(module_number);
 	int nrand;
@@ -650,11 +650,11 @@ static void _php_session_start(PSLS_D)
 
 	lensess = strlen(PS(session_name));
 	
-	gpc_globals = INI_BOOL("gpc_globals");
+	register_globals = INI_BOOL("register_globals");
 	track_vars = INI_BOOL("track_vars");
 
-	if (!gpc_globals && !track_vars) {
-		php_error(E_ERROR, "The sessions module will not work, if you have disabled track_vars and gpc_globals. Enable at least one of them.");
+	if (!register_globals && !track_vars) {
+		php_error(E_ERROR, "The sessions module will not work, if you have disabled track_vars and register_globals. Enable at least one of them.");
 		return;
 	}
 
@@ -669,7 +669,7 @@ static void _php_session_start(PSLS_D)
 	 * cookie.
 	 */
 	
-	if (gpc_globals && 
+	if (register_globals && 
 			!track_vars &&
 			!PS(id) &&
 			zend_hash_find(&EG(symbol_table), PS(session_name),

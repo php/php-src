@@ -40,7 +40,7 @@ PHPAPI void php_register_variable(char *val, char *var, pval *track_vars_array E
 	HashTable *symtable1=NULL;
 	HashTable *symtable2=NULL;
 	
-	if (PG(gpc_globals)) {
+	if (PG(register_globals)) {
 		symtable1 = EG(active_symbol_table);
 	}
 	if (track_vars_array) {

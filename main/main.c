@@ -97,7 +97,7 @@ static MUTEX_T global_lock;
 #endif
  
 
-void _php_build_argv(char * ELS_DC);
+static void php_build_argv(char *s, zval *track_vars_array ELS_DC PLS_DC);
 static void php_timeout(int dummy);
 static void php_set_timeout(long seconds);
 
@@ -250,7 +250,8 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("track_vars",			"0",			PHP_INI_ALL,		OnUpdateBool,				track_vars,		php_core_globals,	core_globals)
 #endif
 
-	STD_PHP_INI_BOOLEAN("register_globals",			"1",			PHP_INI_ALL,		OnUpdateBool,				gpc_globals,	php_core_globals,	core_globals)
+	STD_PHP_INI_BOOLEAN("register_globals",		"1",			PHP_INI_ALL,		OnUpdateBool,			register_globals,	php_core_globals,	core_globals)
+	STD_PHP_INI_BOOLEAN("register_argc_argv",	"1",			PHP_INI_ALL,		OnUpdateBool,			register_argc_argv,	php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("gpc_order",				"GPC",			PHP_INI_ALL,		OnUpdateStringUnempty,	gpc_order,			php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("variables_order",		NULL,			PHP_INI_ALL,		OnUpdateStringUnempty,	variables_order,	php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("arg_separator",			"&",			PHP_INI_ALL,		OnUpdateStringUnempty,	arg_separator,		php_core_globals,	core_globals)
@@ -1007,6 +1008,10 @@ static inline void php_register_server_variables(ELS_D SLS_DC PLS_DC)
 		zend_hash_add(&EG(symbol_table), "HTTP_SERVER_VARS", sizeof("HTTP_SERVER_VARS"), &array_ptr, sizeof(pval *),NULL);
 	}
 	sapi_module.register_server_variables(array_ptr ELS_CC SLS_CC PLS_CC);
+
+	if (PG(register_argc_argv)) {
+		php_build_argv(SG(request_info).query_string, array_ptr ELS_CC PLS_CC);
+	}
 }
 
 
@@ -1070,30 +1075,21 @@ static int php_hash_environment(ELS_D SLS_DC PLS_DC)
 		php_register_server_variables(ELS_C SLS_CC PLS_CC);
 	}
 
-
-	/* need argc/argv support as well */
-	_php_build_argv(SG(request_info).query_string ELS_CC);
-
 	return SUCCESS;
 }
 
 
-void _php_build_argv(char *s ELS_DC)
+static void php_build_argv(char *s, zval *track_vars_array ELS_DC PLS_DC)
 {
-	pval *arr, *tmp;
+	pval *arr, *argc, *tmp;
 	int count = 0;
 	char *ss, *space;
 
 	ALLOC_ZVAL(arr);
-	arr->value.ht = (HashTable *) emalloc(sizeof(HashTable));
-	if (zend_hash_init(arr->value.ht, 0, NULL, ZVAL_PTR_DTOR, 0) == FAILURE) {
-		php_error(E_WARNING, "Unable to create argv array");
-	} else {
-		arr->type = IS_ARRAY;
-		INIT_PZVAL(arr);
-		zend_hash_update(&EG(symbol_table), "argv", sizeof("argv"), &arr, sizeof(pval *), NULL);
-	}
-	/* now pick out individual entries */
+	array_init(arr);
+	INIT_PZVAL(arr);
+
+	/* Prepare argv */
 	ss = s;
 	while (ss) {
 		space = strchr(ss, '+');
@@ -1119,11 +1115,27 @@ void _php_build_argv(char *s ELS_DC)
 			ss = space;
 		}
 	}
-	ALLOC_ZVAL(tmp);
-	tmp->value.lval = count;
-	tmp->type = IS_LONG;
-	INIT_PZVAL(tmp);
-	zend_hash_add(&EG(symbol_table), "argc", sizeof("argc"), &tmp, sizeof(pval *), NULL);
+
+	/* prepare argc */
+	ALLOC_ZVAL(argc);
+	argc->value.lval = count;
+	argc->type = IS_LONG;
+	INIT_PZVAL(argc);
+
+	if (PG(register_globals)) {
+		zend_hash_update(&EG(symbol_table), "argv", sizeof("argv"), &arr, sizeof(pval *), NULL);
+		zend_hash_add(&EG(symbol_table), "argc", sizeof("argc"), &argc, sizeof(pval *), NULL);
+	}
+
+	if (PG(track_vars)) {
+		if (!PG(register_globals)) {
+			arr->refcount++;
+			argc->refcount++;
+		}
+		zend_hash_update(&EG(symbol_table), "argv", sizeof("argv"), &arr, sizeof(pval *), NULL);
+		zend_hash_add(&EG(symbol_table), "argc", sizeof("argc"), &argc, sizeof(pval *), NULL);
+	}
+
 }
 
 
