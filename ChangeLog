@@ -1,3 +1,164 @@
+2002-03-15  Harald Radi  <h.radi@nme.at>
+
+    * ext/rpc/com/com.c
+      ext/rpc/rpc.dsp
+      ext/rpc/rpc.h
+      ext/rpc/tests/test1.php
+      ext/rpc/handler.h
+      ext/rpc/php_rpc.h
+      ext/rpc/rpc.c: ongoing development ...
+
+2002-03-15  Jani Taskinen  <sniper@iki.fi>
+
+    * NEWS: MFH
+
+    * NEWS: This entry belongs under 4.2.0.
+
+2002-03-15  Harald Radi  <h.radi@nme.at>
+
+    * NEWS: MFH
+
+2002-03-15  Wez Furlong  <wez.php@thebrainroom.com>
+
+    * main/php_network.h
+      main/php_streams.h
+      main/streams.c
+      tests/strings/003.phpt
+      main/fopen_wrappers.c
+      main/fopen_wrappers.h
+      main/internal_functions.c.in
+      main/main.c
+      main/network.c
+      ext/zlib/zlib_fopen_wrapper.c
+      ext/standard/http_fopen_wrapper.c
+      ext/standard/image.c
+      ext/standard/info.c
+      ext/standard/php_fopen_wrapper.c
+      ext/standard/php_fopen_wrappers.h
+      ext/standard/php_image.h
+      ext/zlib/php_zlib.h
+      ext/zlib/zlib.c
+      ext/standard/exec.c
+      ext/standard/file.c
+      ext/standard/file.h
+      ext/standard/fsock.c
+      ext/standard/fsock.h
+      ext/standard/ftp_fopen_wrapper.c
+      ext/standard/html.c
+      ext/standard/html.h
+      ext/standard/basic_functions.c
+      ext/pgsql/pgsql.c
+      ext/recode/recode.c
+      ext/ming/ming.c
+      ext/pdf/pdf.c
+      ext/mailparse/mailparse.c
+      ext/hyperwave/hw.c
+      ext/interbase/interbase.c
+      ext/ftp/ftp.c
+      ext/ftp/ftp.h
+      ext/ftp/php_ftp.c
+      ext/gd/gd.c
+      ext/exif/exif.c
+      ext/bz2/bz2.c
+      ext/curl/curl.c
+      configure.in: New PHP streams...
+
+2002-03-15  Harald Radi  <h.radi@nme.at>
+
+    * ext/com/COM.c: MFH
+
+    * ext/com/COM.c:
+     fixed a bug that caused php to crash in php_COM_get_ids_of_names() (Harald, Paul)
+
+2002-03-15  Jani Taskinen  <sniper@iki.fi>
+
+    * NEWS: MFH
+
+    * NEWS: - Corrected these entries. (catched by Derick)
+
+    * NEWS:
+    - Fixed grammar, made some entries make more sense...etc. (proof read please :)
+
+2002-03-15  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/domxml/php_domxml.c: - Fix proto (again)
+
+    * ext/domxml/php_domxml.c: - proto fixes
+
+2002-03-15  jim winstead  <jimw@apache.org>
+
+    * main/php.h: don't redefine NDEBUG if it is already defined. yeesh.
+
+2002-03-15  Daniela Mariaschi  <mariaschi@libero.it>
+
+    * ext/interbase/php_interbase.h
+      ext/interbase/interbase.c: added new ibase_fetch_assoc() php function
+
+2002-03-15  Stig Bakken  <ssb@fast.no>
+
+    * ext/xmlrpc/config.m4
+      ext/xslt/config.m4: * MFH: "new and improved" iconv test
+
+    * ext/iconv/config.m4: * MFH: yet another iconv fix
+
+    * ext/xslt/config.m4
+      ext/xmlrpc/config.m4: * "new and improved" iconv test
+
+2002-03-15  Harald Radi  <h.radi@nme.at>
+
+    * ext/rpc/handler.h
+      ext/rpc/php_rpc.h
+      ext/rpc/rpc.c
+      ext/rpc/rpc.h: fixed HashTable allocation
+
+2002-03-15  Stig Bakken  <ssb@fast.no>
+
+    * ext/dba/config.m4: * fix for db3 from ports on freebsd
+
+2002-03-15  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * sapi/cli/CREDITS:
+2002-03-15  Andi Gutmans  <andi@zend.com>
+
+    * main/php.h:
+    - Revert assert fix until it becomes clear what was wrong with my previous
+    - fix. I don't see any warnings when building with VC++ English.
+
+2002-03-15  Stig Bakken  <ssb@fast.no>
+
+    * ext/iconv/config.m4:
+    * yet another iconv config fix, should be able to handle most or all
+      configurations now (giconv/iconv, static libs only, iconv in libc etc.)
+
+2002-03-15  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * main/php.h: Avoid warnings under VC.
+
+    * NEWS: Added some fix. Clean up a bit.
+
+2002-03-15  Wez Furlong  <wez.php@thebrainroom.com>
+
+    * ext/standard/var.c: it's late; no more commits from me tonight...
+
+    * ext/standard/var.c: should have diffed first...
+
+    * ext/standard/var.c: fix for ZE2 compile
+
+2002-03-15  Harald Radi  <h.radi@nme.at>
+
+    * ext/rpc/.cvsignore
+      ext/rpc/CREDITS
+      ext/rpc/EXPERIMENTAL
+      ext/rpc/README
+      ext/rpc/com/com.c
+      ext/rpc/handler.h
+      ext/rpc/layer.h
+      ext/rpc/php_rpc.h
+      ext/rpc/rpc.c
+      ext/rpc/rpc.dsp
+      ext/rpc/tests/test1.php: rpc apstraction module
+    does only work with ZendEngine2
+
 2002-03-14  Rasmus Lerdorf  <rasmus@php.net>
 
     * main/safe_mode.c: MFH of safe_mode.c typo
