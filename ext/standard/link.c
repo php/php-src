@@ -83,11 +83,7 @@ PHP_FUNCTION(readlink)
 PHP_FUNCTION(linkinfo)
 {
 	zval **filename;
-#if defined(NETWARE) && defined(CLIB_STAT_PATCH)
-	struct stat_libc sb;
-#else
 	struct stat sb;
-#endif
 	int ret;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &filename) == FAILURE) {
