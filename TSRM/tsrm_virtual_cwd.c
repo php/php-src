@@ -31,12 +31,6 @@
 #include "tsrm_virtual_cwd.h"
 #include "tsrm_strtok_r.h"
 
-
-/* Are we doing enough to detect this? */
-#ifndef MAXPATHLEN
-#define MAXPATHLEN 256
-#endif
-
 #ifdef TSRM_WIN32
 #include <io.h>
 #endif
