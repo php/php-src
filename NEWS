@@ -15,6 +15,8 @@ PHP                                                                        NEWS
 - Fixed bug #26680 (Added version check in mysqli_report_index). (Georg)
 - Fixed bug #26675 (Segfault on ArrayAccess use). (Marcus)
 - Fixed bug #26065 (Crash when nesting classes). (Marcus)
+- Fixed bug #25329 (sqlite_create_function with method and reference to $this).
+  (Marcus) 
 - Fixed bug #25038 (call_user_func() issues a warning if function throws an
   exception). (Marcus)
 
