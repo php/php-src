@@ -30,6 +30,12 @@
 #include <dirent.h>
 #endif
 
+#if WIN32||WINNT
+#define NEEDRDH 1
+#include "win32/readdir.h"
+#include <time.h>
+#endif
+
 #include <fcntl.h>
 
 #include "php_session.h"

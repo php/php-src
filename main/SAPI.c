@@ -20,6 +20,7 @@
 
 #include <ctype.h>
 
+#include "php.h"
 #include "SAPI.h"
 #ifdef ZTS
 #include "TSRM.h"

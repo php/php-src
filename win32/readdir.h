@@ -30,8 +30,9 @@ typedef struct {
 } DIR;
 
 /* Function prototypes */
-extern DIR *opendir(const char *);
-extern struct dirent *readdir(DIR *);
-extern int closedir(DIR *);
+DIR *opendir(const char *);
+struct dirent *readdir(DIR *);
+int closedir(DIR *);
+void rewinddir(DIR *);
+
 #endif
-extern void rewinddir(DIR *);
