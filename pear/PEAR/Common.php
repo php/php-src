@@ -168,13 +168,13 @@ class PEAR_Common extends PEAR
 
     /**
      * Create and register a temporary directory.
-     * 
+     *
      * @param string (optional) Directory to use as tmpdir.  Will use
      * system defaults (for example /tmp or c:\windows\temp) if not
      * specified
      *
      * @return string name of created directory
-     * 
+     *
      * @access public
      */
     function mkTempDir($tmpdir = '')
@@ -247,7 +247,7 @@ class PEAR_Common extends PEAR
     function _element_end($xp, $name)
     {
     }
-    
+
     // }}}
 
     // Support for package DTD v1.0:
@@ -713,7 +713,7 @@ class PEAR_Common extends PEAR
         if (!empty($pkginfo['release_notes'])) {
             $ret .= "$indent    <notes>$pkginfo[release_notes]</notes>\n";
         }
-        if (sizeof($pkginfo['release_deps']) > 0) {
+        if (isset($pkginfo['release_deps']) && sizeof($pkginfo['release_deps']) > 0) {
             $ret .= "$indent    <deps>\n";
             foreach ($pkginfo['release_deps'] as $dep) {
                 $ret .= "$indent      <dep type=\"$dep[type]\" rel=\"$dep[rel]\"";
