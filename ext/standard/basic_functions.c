@@ -2454,7 +2454,9 @@ HashTable* _phpi_splice(HashTable *in_hash, int offset, int length,
 		offset = 0;
 	
 	/* ..and the length */
-	if (length < 0 || offset+length > num_in)
+	if (length < 0)
+		length = num_in-offset+length;
+	else if(offset+length > num_in)
 		length = num_in-offset;
 
 	/* Create and initialize output hash */
@@ -2702,14 +2704,14 @@ PHP_FUNCTION(array_splice)
 	}
 	
 	/* Get the next two arguments.  If length is omitted,
-	   it's assumed to be -1 */
+	   it's assumed to be until the end of the array */
 	convert_to_long(args[1]);
 	offset = args[1]->value.lval;
 	if (argc > 2) {
 		convert_to_long(args[2]);
 		length = args[2]->value.lval;
 	} else
-		length = -1;
+		length = zend_hash_num_elements(array->value.ht);
 
 	if (argc == 4) {
 		/* Make sure the last argument, if passed, is an array */
@@ -2782,7 +2784,7 @@ PHP_FUNCTION(array_slice)
 		convert_to_long(length);
 		length_val = length->value.lval;
 	} else
-		length_val = -1;
+		length_val = zend_hash_num_elements(input->value.ht);
 	
 	/* Initialize returned array */
 	array_init(return_value);
@@ -2797,7 +2799,9 @@ PHP_FUNCTION(array_slice)
 		offset_val = 0;
 	
 	/* ..and the length */
-	if (length_val < 0 || offset_val+length_val > num_in)
+	if (length_val < 0)
+		length_val = num_in-offset_val+length_val;
+	else if(offset_val+length_val > num_in)
 		length_val = num_in-offset_val;
 	
 	if (length_val == 0)
