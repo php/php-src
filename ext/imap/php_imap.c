@@ -2100,6 +2100,7 @@ PHP_FUNCTION(imap_rfc822_parse_adrlist)
 		ZEND_WRONG_PARAM_COUNT();
 	}
 
+	SEPARATE_ZVAL(str);
 	convert_to_string_ex(str);
 	convert_to_string_ex(defaulthost);
 
