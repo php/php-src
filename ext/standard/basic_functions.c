@@ -1398,8 +1398,8 @@ PHPAPI int _php_error_log(int opt_err,char *message,char *opt,char *headers){
 	return SUCCESS;
 }
 
-/* {{{ proto mixed call_user_func(mixed params)
-   Call user function which is the first parameter */
+/* {{{ proto mixed call_user_func(string function_name [, mixed parmeter] [, mixed ...])
+   Call a user function which is the first parameter */
 PHP_FUNCTION(call_user_func)
 {
 	pval ***params;
@@ -1427,7 +1427,7 @@ PHP_FUNCTION(call_user_func)
 }
 /* }}} */
 
-/* {{{ proto mixed call_user_method(mixed params)
+/* {{{ proto mixed call_user_method(string method_name, object object [, mixed parameter] [, mixed ...])
    Call a user method, on a specific object where the first argument is the method name, the second argument is the object and the subsequent arguments are the parameters */
 PHP_FUNCTION(call_user_method)
 {
