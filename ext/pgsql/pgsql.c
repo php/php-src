@@ -406,6 +406,7 @@ void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 	}
 	efree(hashed_details);
 	PGG(default_link)=return_value->value.lval;
+	zend_list_addref(return_value->value.lval);
 }
 
 
