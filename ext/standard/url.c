@@ -126,6 +126,12 @@ PHPAPI php_url *php_url_parse(char *str)
 				s = e + 3;
 				if (!strncasecmp("file", ret->scheme, sizeof("file"))) {
 					if (*(e + 3) == '/') {
+						/* support windows drive letters as in:
+						   file:///c:/somedir/file.txt
+						*/
+						if (*(e + 5) == ':') {
+							s = e + 4;
+						}
 						goto nohost;
 					}
 				}
