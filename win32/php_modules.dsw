@@ -39,6 +39,18 @@ Package=<4>
 
 ###############################################################################
 
+Project: "mssql"=.\ext\mssql\mssql.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
 Project: "pgsql"=.\ext\pgsql\pgsql.dsp - Package Owner=<4>
 
 Package=<5>
