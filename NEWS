@@ -2,6 +2,7 @@ PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, Version 4.3.11
 - Added Oracle Instant Client support. (cjbj at hotmail dot com, Tony)
+- Fixed bug #31413 (curl POSTFIELDS crashes on 64-bit platforms). (Joe)
 - Fixed bug #31396 (compile fails with gd 2.0.33 without freetype). (Jani)
 - Fixed bug #31371 (highlight_file() trims new line after heredoc). (Ilia)
 - Fixed bug #31270 (missing safe_mode/open_basedir check in swf_openfile()). (Ilia)

@@ -955,16 +955,16 @@ PHP_FUNCTION(curl_setopt)
 					if (*postval == '@') {
 						error = curl_formadd(&first, &last, 
 											 CURLFORM_COPYNAME, string_key,
-											 CURLFORM_NAMELENGTH, string_key_len - 1,
+											 CURLFORM_NAMELENGTH, (long)string_key_len - 1,
 											 CURLFORM_FILE, ++postval, 
 											 CURLFORM_END);
 					}
 					else {
 						error = curl_formadd(&first, &last, 
 											 CURLFORM_COPYNAME, string_key,
-											 CURLFORM_NAMELENGTH, string_key_len - 1,
+											 CURLFORM_NAMELENGTH, (long)string_key_len - 1,
 											 CURLFORM_COPYCONTENTS, postval, 
-											 CURLFORM_CONTENTSLENGTH, Z_STRLEN_PP(current),
+											 CURLFORM_CONTENTSLENGTH, (long)Z_STRLEN_PP(current),
 											 CURLFORM_END);
 					}
 				}
