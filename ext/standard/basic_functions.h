@@ -116,7 +116,7 @@ PHP_FUNCTION(move_uploaded_file);
 /* From the INI parser */
 PHP_FUNCTION(parse_ini_file);
 
-PHP_FUNCTION(rot13);
+PHP_FUNCTION(str_rot13);
 
 #ifdef PHP_WIN32
 typedef unsigned int php_stat_len;
