@@ -22,23 +22,23 @@
 #include "php_soap.h"
 #include "libxml/uri.h"
 
-static int schema_simpleType(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr simpleType, sdlTypePtr cur_type);
-static int schema_complexType(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr compType, sdlTypePtr cur_type);
-static int schema_list(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr listType, sdlTypePtr cur_type);
-static int schema_union(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr unionType, sdlTypePtr cur_type);
-static int schema_simpleContent(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr simpCompType, sdlTypePtr cur_type);
-static int schema_restriction_simpleContent(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr restType, sdlTypePtr cur_type, int simpleType);
-static int schema_restriction_complexContent(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr restType, sdlTypePtr cur_type);
-static int schema_extension_simpleContent(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr extType, sdlTypePtr cur_type);
-static int schema_extension_complexContent(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr extType, sdlTypePtr cur_type);
-static int schema_sequence(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr seqType, sdlTypePtr cur_type, sdlContentModelPtr model);
-static int schema_all(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr extType, sdlTypePtr cur_type, sdlContentModelPtr model);
-static int schema_choice(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr choiceType, sdlTypePtr cur_type, sdlContentModelPtr model);
-static int schema_group(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr groupType, sdlTypePtr cur_type, sdlContentModelPtr model);
-static int schema_any(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr extType, sdlTypePtr cur_type, sdlContentModelPtr model);
-static int schema_element(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr element, sdlTypePtr cur_type, sdlContentModelPtr model);
-static int schema_attribute(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr attrType, sdlTypePtr cur_type, sdlCtx *ctx);
-static int schema_attributeGroup(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr attrType, sdlTypePtr cur_type, sdlCtx *ctx);
+static int schema_simpleType(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr simpleType, sdlTypePtr cur_type);
+static int schema_complexType(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr compType, sdlTypePtr cur_type);
+static int schema_list(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr listType, sdlTypePtr cur_type);
+static int schema_union(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr unionType, sdlTypePtr cur_type);
+static int schema_simpleContent(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr simpCompType, sdlTypePtr cur_type);
+static int schema_restriction_simpleContent(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr restType, sdlTypePtr cur_type, int simpleType);
+static int schema_restriction_complexContent(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr restType, sdlTypePtr cur_type);
+static int schema_extension_simpleContent(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr extType, sdlTypePtr cur_type);
+static int schema_extension_complexContent(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr extType, sdlTypePtr cur_type);
+static int schema_sequence(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr seqType, sdlTypePtr cur_type, sdlContentModelPtr model);
+static int schema_all(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr extType, sdlTypePtr cur_type, sdlContentModelPtr model);
+static int schema_choice(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr choiceType, sdlTypePtr cur_type, sdlContentModelPtr model);
+static int schema_group(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr groupType, sdlTypePtr cur_type, sdlContentModelPtr model);
+static int schema_any(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr extType, sdlTypePtr cur_type, sdlContentModelPtr model);
+static int schema_element(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr element, sdlTypePtr cur_type, sdlContentModelPtr model);
+static int schema_attribute(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrType, sdlTypePtr cur_type, sdlCtx *ctx);
+static int schema_attributeGroup(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrType, sdlTypePtr cur_type, sdlCtx *ctx);
 
 static int schema_restriction_var_int(xmlNodePtr val, sdlRestrictionIntPtr *valptr);
 
@@ -187,6 +187,10 @@ int load_schema(sdlCtx *ctx,xmlNodePtr schema)
 	}
 
 	tns = get_attribute(schema->properties, "targetNamespace");
+	if (tns == NULL) {
+		tns = xmlSetProp(schema, "targetNamespace", "");
+		xmlNewNs(schema, "", NULL);
+	}
 
 	trav = schema->children;
 	while (trav != NULL) {
@@ -302,14 +306,14 @@ int load_schema(sdlCtx *ctx,xmlNodePtr schema)
   Content: (annotation?, (restriction | list | union))
 </simpleType>
 */
-static int schema_simpleType(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr simpleType, sdlTypePtr cur_type)
+static int schema_simpleType(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr simpleType, sdlTypePtr cur_type)
 {
 	xmlNodePtr trav;
 	xmlAttrPtr name, ns;
 
 	ns = get_attribute(simpleType->properties, "targetNamespace");
 	if (ns == NULL) {
-		ns = tsn;
+		ns = tns;
 	}
 
 	name = get_attribute(simpleType->properties, "name");
@@ -377,15 +381,15 @@ static int schema_simpleType(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr simpleType, 
 	}
 	if (trav != NULL) {
 		if (node_is_equal(trav,"restriction")) {
-			schema_restriction_simpleContent(sdl, tsn, trav, cur_type, 1);
+			schema_restriction_simpleContent(sdl, tns, trav, cur_type, 1);
 			trav = trav->next;
 		} else if (node_is_equal(trav,"list")) {
 			cur_type->kind = XSD_TYPEKIND_LIST;
-			schema_list(sdl, tsn, trav, cur_type);
+			schema_list(sdl, tns, trav, cur_type);
 			trav = trav->next;
 		} else if (node_is_equal(trav,"union")) {
 			cur_type->kind = XSD_TYPEKIND_UNION;
-			schema_union(sdl, tsn, trav, cur_type);
+			schema_union(sdl, tns, trav, cur_type);
 			trav = trav->next;
 		} else {
 			php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: unexpected <%s> in simpleType",trav->name);
@@ -408,7 +412,7 @@ static int schema_simpleType(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr simpleType, 
   Content: (annotation?, (simpleType?))
 </list>
 */
-static int schema_list(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr listType, sdlTypePtr cur_type)
+static int schema_list(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr listType, sdlTypePtr cur_type)
 {
 	xmlNodePtr trav;
 	xmlAttrPtr itemType;
@@ -457,7 +461,7 @@ static int schema_list(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr listType, sdlTypeP
 		memset(newType, 0, sizeof(sdlType));
 
 		newType->name = estrdup("anonymous");
-		newType->namens = estrdup(tsn->children->content);
+		newType->namens = estrdup(tns->children->content);
 
 		if (cur_type->elements == NULL) {
 			cur_type->elements = emalloc(sizeof(HashTable));
@@ -465,7 +469,7 @@ static int schema_list(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr listType, sdlTypeP
 		}
 		zend_hash_next_index_insert(cur_type->elements, &newType, sizeof(sdlTypePtr), (void **)&tmp);
 
-		schema_simpleType(sdl, tsn, trav, newType);
+		schema_simpleType(sdl, tns, trav, newType);
 		trav = trav->next;
 	}
 	if (trav != NULL) {
@@ -482,7 +486,7 @@ static int schema_list(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr listType, sdlTypeP
   Content: (annotation?, (simpleType*))
 </union>
 */
-static int schema_union(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr unionType, sdlTypePtr cur_type)
+static int schema_union(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr unionType, sdlTypePtr cur_type)
 {
 	xmlNodePtr trav;
 	xmlAttrPtr memberTypes;
@@ -549,7 +553,7 @@ static int schema_union(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr unionType, sdlTyp
 			memset(newType, 0, sizeof(sdlType));
 
 			newType->name = estrdup("anonymous");
-			newType->namens = estrdup(tsn->children->content);
+			newType->namens = estrdup(tns->children->content);
 
 			if (cur_type->elements == NULL) {
 				cur_type->elements = emalloc(sizeof(HashTable));
@@ -557,7 +561,7 @@ static int schema_union(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr unionType, sdlTyp
 			}
 			zend_hash_next_index_insert(cur_type->elements, &newType, sizeof(sdlTypePtr), (void **)&tmp);
 
-			schema_simpleType(sdl, tsn, trav, newType);
+			schema_simpleType(sdl, tns, trav, newType);
 
 		} else {
 			php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: unexpected <%s> in union",trav->name);
@@ -577,7 +581,7 @@ static int schema_union(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr unionType, sdlTyp
   Content: (annotation?, (restriction | extension))
 </simpleContent>
 */
-static int schema_simpleContent(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr simpCompType, sdlTypePtr cur_type)
+static int schema_simpleContent(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr simpCompType, sdlTypePtr cur_type)
 {
 	xmlNodePtr trav;
 
@@ -589,11 +593,11 @@ static int schema_simpleContent(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr simpCompT
 	if (trav != NULL) {
 		if (node_is_equal(trav, "restriction")) {
 			cur_type->kind = XSD_TYPEKIND_RESTRICTION;
-			schema_restriction_simpleContent(sdl, tsn, trav, cur_type, 0);
+			schema_restriction_simpleContent(sdl, tns, trav, cur_type, 0);
 			trav = trav->next;
 		} else if (node_is_equal(trav, "extension")) {
 			cur_type->kind = XSD_TYPEKIND_EXTENSION;
-			schema_extension_simpleContent(sdl, tsn, trav, cur_type);
+			schema_extension_simpleContent(sdl, tns, trav, cur_type);
 			trav = trav->next;
 		} else {
 			php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: unexpected <%s> in simpleContent",trav->name);
@@ -622,7 +626,7 @@ simpleContent:<restriction
   Content: (annotation?, (simpleType?, (minExclusive | minInclusive | maxExclusive | maxInclusive | totalDigits | fractionDigits | length | minLength | maxLength | enumeration | whiteSpace | pattern)*)?, ((attribute | attributeGroup)*, anyAttribute?))
 </restriction>
 */
-static int schema_restriction_simpleContent(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr restType, sdlTypePtr cur_type, int simpleType)
+static int schema_restriction_simpleContent(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr restType, sdlTypePtr cur_type, int simpleType)
 {
 	xmlNodePtr trav;
 	xmlAttrPtr base;
@@ -654,7 +658,7 @@ static int schema_restriction_simpleContent(sdlPtr sdl, xmlAttrPtr tsn, xmlNodeP
 		trav = trav->next;
 	}
 	if (trav != NULL && node_is_equal(trav, "simpleType")) {
-		schema_simpleType(sdl, tsn, trav, cur_type);
+		schema_simpleType(sdl, tns, trav, cur_type);
 		trav = trav->next;
 	}
 	while (trav != NULL) {
@@ -697,9 +701,9 @@ static int schema_restriction_simpleContent(sdlPtr sdl, xmlAttrPtr tsn, xmlNodeP
 	if (!simpleType) {
 		while (trav != NULL) {
 			if (node_is_equal(trav,"attribute")) {
-				schema_attribute(sdl, tsn, trav, cur_type, NULL);
+				schema_attribute(sdl, tns, trav, cur_type, NULL);
 			} else if (node_is_equal(trav,"attributeGroup")) {
-				schema_attributeGroup(sdl, tsn, trav, cur_type, NULL);
+				schema_attributeGroup(sdl, tns, trav, cur_type, NULL);
 			} else if (node_is_equal(trav,"anyAttribute")) {
 				/* TODO: <anyAttribute> support */
 				trav = trav->next;
@@ -725,7 +729,7 @@ static int schema_restriction_simpleContent(sdlPtr sdl, xmlAttrPtr tsn, xmlNodeP
   Content: (annotation?, (group | all | choice | sequence)?, ((attribute | attributeGroup)*, anyAttribute?))
 </restriction>
 */
-static int schema_restriction_complexContent(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr restType, sdlTypePtr cur_type)
+static int schema_restriction_complexContent(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr restType, sdlTypePtr cur_type)
 {
 	xmlAttrPtr base;
 	xmlNodePtr trav;
@@ -753,24 +757,24 @@ static int schema_restriction_complexContent(sdlPtr sdl, xmlAttrPtr tsn, xmlNode
 	}
 	if (trav != NULL) {
 		if (node_is_equal(trav,"group")) {
-			schema_group(sdl, tsn, trav, cur_type, NULL);
+			schema_group(sdl, tns, trav, cur_type, NULL);
 			trav = trav->next;
 		} else if (node_is_equal(trav,"all")) {
-			schema_all(sdl, tsn, trav, cur_type, NULL);
+			schema_all(sdl, tns, trav, cur_type, NULL);
 			trav = trav->next;
 		} else if (node_is_equal(trav,"choice")) {
-			schema_choice(sdl, tsn, trav, cur_type, NULL);
+			schema_choice(sdl, tns, trav, cur_type, NULL);
 			trav = trav->next;
 		} else if (node_is_equal(trav,"sequence")) {
-			schema_sequence(sdl, tsn, trav, cur_type, NULL);
+			schema_sequence(sdl, tns, trav, cur_type, NULL);
 			trav = trav->next;
 		}
 	}
 	while (trav != NULL) {
 		if (node_is_equal(trav,"attribute")) {
-			schema_attribute(sdl, tsn, trav, cur_type, NULL);
+			schema_attribute(sdl, tns, trav, cur_type, NULL);
 		} else if (node_is_equal(trav,"attributeGroup")) {
-			schema_attributeGroup(sdl, tsn, trav, cur_type, NULL);
+			schema_attributeGroup(sdl, tns, trav, cur_type, NULL);
 		} else if (node_is_equal(trav,"anyAttribute")) {
 			/* TODO: <anyAttribute> support */
 			trav = trav->next;
@@ -850,7 +854,7 @@ From simpleContent (not supported):
   Content: (annotation?, ((attribute | attributeGroup)*, anyAttribute?))
 </extension>
 */
-static int schema_extension_simpleContent(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr extType, sdlTypePtr cur_type)
+static int schema_extension_simpleContent(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr extType, sdlTypePtr cur_type)
 {
 	xmlNodePtr trav;
 	xmlAttrPtr base;
@@ -878,9 +882,9 @@ static int schema_extension_simpleContent(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr
 	}
 	while (trav != NULL) {
 		if (node_is_equal(trav,"attribute")) {
-			schema_attribute(sdl, tsn, trav, cur_type, NULL);
+			schema_attribute(sdl, tns, trav, cur_type, NULL);
 		} else if (node_is_equal(trav,"attributeGroup")) {
-			schema_attributeGroup(sdl, tsn, trav, cur_type, NULL);
+			schema_attributeGroup(sdl, tns, trav, cur_type, NULL);
 		} else if (node_is_equal(trav,"anyAttribute")) {
 			/* TODO: <anyAttribute> support */
 			trav = trav->next;
@@ -905,7 +909,7 @@ From complexContent:
   Content: (annotation?, ((group | all | choice | sequence)?, ((attribute | attributeGroup)*, anyAttribute?)))
 </extension>
 */
-static int schema_extension_complexContent(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr extType, sdlTypePtr cur_type)
+static int schema_extension_complexContent(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr extType, sdlTypePtr cur_type)
 {
 	xmlNodePtr trav;
 	xmlAttrPtr base;
@@ -933,24 +937,24 @@ static int schema_extension_complexContent(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePt
 	}
 	if (trav != NULL) {
 		if (node_is_equal(trav,"group")) {
-			schema_group(sdl, tsn, trav, cur_type, NULL);
+			schema_group(sdl, tns, trav, cur_type, NULL);
 			trav = trav->next;
 		} else if (node_is_equal(trav,"all")) {
-			schema_all(sdl, tsn, trav, cur_type, NULL);
+			schema_all(sdl, tns, trav, cur_type, NULL);
 			trav = trav->next;
 		} else if (node_is_equal(trav,"choice")) {
-			schema_choice(sdl, tsn, trav, cur_type, NULL);
+			schema_choice(sdl, tns, trav, cur_type, NULL);
 			trav = trav->next;
 		} else if (node_is_equal(trav,"sequence")) {
-			schema_sequence(sdl, tsn, trav, cur_type, NULL);
+			schema_sequence(sdl, tns, trav, cur_type, NULL);
 			trav = trav->next;
 		}
 	}
 	while (trav != NULL) {
 		if (node_is_equal(trav,"attribute")) {
-			schema_attribute(sdl, tsn, trav, cur_type, NULL);
+			schema_attribute(sdl, tns, trav, cur_type, NULL);
 		} else if (node_is_equal(trav,"attributeGroup")) {
-			schema_attributeGroup(sdl, tsn, trav, cur_type, NULL);
+			schema_attributeGroup(sdl, tns, trav, cur_type, NULL);
 		} else if (node_is_equal(trav,"anyAttribute")) {
 			/* TODO: <anyAttribute> support */
 			trav = trav->next;
@@ -975,7 +979,7 @@ static int schema_extension_complexContent(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePt
   Content: (annotation?, element*)
 </all>
 */
-static int schema_all(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr all, sdlTypePtr cur_type, sdlContentModelPtr model)
+static int schema_all(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr all, sdlTypePtr cur_type, sdlContentModelPtr model)
 {
 	xmlNodePtr trav;
 	xmlAttrPtr attr;
@@ -1015,7 +1019,7 @@ static int schema_all(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr all, sdlTypePtr cur
 	}
 	while (trav != NULL) {
 		if (node_is_equal(trav,"element")) {
-			schema_element(sdl, tsn, trav, cur_type, newModel);
+			schema_element(sdl, tns, trav, cur_type, newModel);
 		} else {
 			php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: unexpected <%s> in all",trav->name);
 		}
@@ -1035,7 +1039,7 @@ static int schema_all(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr all, sdlTypePtr cur
   Content: (annotation?)
 </group>
 */
-static int schema_group(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr groupType, sdlTypePtr cur_type, sdlContentModelPtr model)
+static int schema_group(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr groupType, sdlTypePtr cur_type, sdlContentModelPtr model)
 {
 	xmlNodePtr trav;
 	xmlAttrPtr attr;
@@ -1044,7 +1048,7 @@ static int schema_group(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr groupType, sdlTyp
 
 	ns = get_attribute(groupType->properties, "targetNamespace");
 	if (ns == NULL) {
-		ns = tsn;
+		ns = tns;
 	}
 
 	name = get_attribute(groupType->properties, "name");
@@ -1141,21 +1145,21 @@ static int schema_group(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr groupType, sdlTyp
 				php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: group has both 'ref' attribute and subcontent");
 			}
 			newModel->kind = XSD_CONTENT_CHOICE;
-			schema_choice(sdl, tsn, trav, cur_type, newModel);
+			schema_choice(sdl, tns, trav, cur_type, newModel);
 			trav = trav->next;
 		} else if (node_is_equal(trav,"sequence")) {
 			if (ref != NULL) {
 				php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: group has both 'ref' attribute and subcontent");
 			}
 			newModel->kind = XSD_CONTENT_SEQUENCE;
-			schema_sequence(sdl, tsn, trav, cur_type, newModel);
+			schema_sequence(sdl, tns, trav, cur_type, newModel);
 			trav = trav->next;
 		} else if (node_is_equal(trav,"all")) {
 			if (ref != NULL) {
 				php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: group has both 'ref' attribute and subcontent");
 			}
 			newModel->kind = XSD_CONTENT_ALL;
-			schema_all(sdl, tsn, trav, cur_type, newModel);
+			schema_all(sdl, tns, trav, cur_type, newModel);
 			trav = trav->next;
 		} else {
 			php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: unexpected <%s> in group",trav->name);
@@ -1175,7 +1179,7 @@ static int schema_group(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr groupType, sdlTyp
   Content: (annotation?, (element | group | choice | sequence | any)*)
 </choice>
 */
-static int schema_choice(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr choiceType, sdlTypePtr cur_type, sdlContentModelPtr model)
+static int schema_choice(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr choiceType, sdlTypePtr cur_type, sdlContentModelPtr model)
 {
 	xmlNodePtr trav;
 	xmlAttrPtr attr;
@@ -1215,15 +1219,15 @@ static int schema_choice(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr choiceType, sdlT
 	}
 	while (trav != NULL) {
 		if (node_is_equal(trav,"element")) {
-			schema_element(sdl, tsn, trav, cur_type, newModel);
+			schema_element(sdl, tns, trav, cur_type, newModel);
 		} else if (node_is_equal(trav,"group")) {
-			schema_group(sdl, tsn, trav, cur_type, newModel);
+			schema_group(sdl, tns, trav, cur_type, newModel);
 		} else if (node_is_equal(trav,"choice")) {
-			schema_choice(sdl, tsn, trav, cur_type, newModel);
+			schema_choice(sdl, tns, trav, cur_type, newModel);
 		} else if (node_is_equal(trav,"sequence")) {
-			schema_sequence(sdl, tsn, trav, cur_type, newModel);
+			schema_sequence(sdl, tns, trav, cur_type, newModel);
 		} else if (node_is_equal(trav,"any")) {
-			schema_any(sdl, tsn, trav, cur_type, newModel);
+			schema_any(sdl, tns, trav, cur_type, newModel);
 		} else {
 			php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: unexpected <%s> in choice",trav->name);
 		}
@@ -1241,7 +1245,7 @@ static int schema_choice(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr choiceType, sdlT
   Content: (annotation?, (element | group | choice | sequence | any)*)
 </sequence>
 */
-static int schema_sequence(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr seqType, sdlTypePtr cur_type, sdlContentModelPtr model)
+static int schema_sequence(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr seqType, sdlTypePtr cur_type, sdlContentModelPtr model)
 {
 	xmlNodePtr trav;
 	xmlAttrPtr attr;
@@ -1281,15 +1285,15 @@ static int schema_sequence(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr seqType, sdlTy
 	}
 	while (trav != NULL) {
 		if (node_is_equal(trav,"element")) {
-			schema_element(sdl, tsn, trav, cur_type, newModel);
+			schema_element(sdl, tns, trav, cur_type, newModel);
 		} else if (node_is_equal(trav,"group")) {
-			schema_group(sdl, tsn, trav, cur_type, newModel);
+			schema_group(sdl, tns, trav, cur_type, newModel);
 		} else if (node_is_equal(trav,"choice")) {
-			schema_choice(sdl, tsn, trav, cur_type, newModel);
+			schema_choice(sdl, tns, trav, cur_type, newModel);
 		} else if (node_is_equal(trav,"sequence")) {
-			schema_sequence(sdl, tsn, trav, cur_type, newModel);
+			schema_sequence(sdl, tns, trav, cur_type, newModel);
 		} else if (node_is_equal(trav,"any")) {
-			schema_any(sdl, tsn, trav, cur_type, newModel);
+			schema_any(sdl, tns, trav, cur_type, newModel);
 		} else {
 			php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: unexpected <%s> in sequence",trav->name);
 		}
@@ -1298,7 +1302,7 @@ static int schema_sequence(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr seqType, sdlTy
 	return TRUE;
 }
 
-static int schema_any(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr extType, sdlTypePtr cur_type, sdlContentModelPtr model)
+static int schema_any(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr extType, sdlTypePtr cur_type, sdlContentModelPtr model)
 {
 	/* TODO: <any> support */
 	return TRUE;
@@ -1312,7 +1316,7 @@ static int schema_any(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr extType, sdlTypePtr
   Content: (annotation?, (restriction | extension))
 </complexContent>
 */
-static int schema_complexContent(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr compCont, sdlTypePtr cur_type)
+static int schema_complexContent(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr compCont, sdlTypePtr cur_type)
 {
 	xmlNodePtr trav;
 
@@ -1324,11 +1328,11 @@ static int schema_complexContent(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr compCont
 	if (trav != NULL) {
 		if (node_is_equal(trav, "restriction")) {
 			cur_type->kind = XSD_TYPEKIND_RESTRICTION;
-			schema_restriction_complexContent(sdl, tsn, trav, cur_type);
+			schema_restriction_complexContent(sdl, tns, trav, cur_type);
 			trav = trav->next;
 		} else if (node_is_equal(trav, "extension")) {
 			cur_type->kind = XSD_TYPEKIND_EXTENSION;
-			schema_extension_complexContent(sdl, tsn, trav, cur_type);
+			schema_extension_complexContent(sdl, tns, trav, cur_type);
 			trav = trav->next;
 		} else {
 			php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: unexpected <%s> in complexContent",trav->name);
@@ -1355,7 +1359,7 @@ static int schema_complexContent(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr compCont
   Content: (annotation?, (simpleContent | complexContent | ((group | all | choice | sequence)?, ((attribute | attributeGroup)*, anyAttribute?))))
 </complexType>
 */
-static int schema_complexType(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr compType, sdlTypePtr cur_type)
+static int schema_complexType(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr compType, sdlTypePtr cur_type)
 {
 	xmlNodePtr trav;
 	xmlAttrPtr attrs, name, ns;
@@ -1364,7 +1368,7 @@ static int schema_complexType(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr compType, s
 	attrs = compType->properties;
 	ns = get_attribute(attrs, "targetNamespace");
 	if (ns == NULL) {
-		ns = tsn;
+		ns = tns;
 	}
 
 	name = get_attribute(attrs, "name");
@@ -1425,30 +1429,30 @@ static int schema_complexType(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr compType, s
 	}
 	if (trav != NULL) {
 		if (node_is_equal(trav,"simpleContent")) {
-			schema_simpleContent(sdl, tsn, trav, cur_type);
+			schema_simpleContent(sdl, tns, trav, cur_type);
 			trav = trav->next;
 		} else if (node_is_equal(trav,"complexContent")) {
-			schema_complexContent(sdl, tsn, trav, cur_type);
+			schema_complexContent(sdl, tns, trav, cur_type);
 			trav = trav->next;
 		} else {
 			if (node_is_equal(trav,"group")) {
-				schema_group(sdl, tsn, trav, cur_type, NULL);
+				schema_group(sdl, tns, trav, cur_type, NULL);
 				trav = trav->next;
 			} else if (node_is_equal(trav,"all")) {
-				schema_all(sdl, tsn, trav, cur_type, NULL);
+				schema_all(sdl, tns, trav, cur_type, NULL);
 				trav = trav->next;
 			} else if (node_is_equal(trav,"choice")) {
-				schema_choice(sdl, tsn, trav, cur_type, NULL);
+				schema_choice(sdl, tns, trav, cur_type, NULL);
 				trav = trav->next;
 			} else if (node_is_equal(trav,"sequence")) {
-				schema_sequence(sdl, tsn, trav, cur_type, NULL);
+				schema_sequence(sdl, tns, trav, cur_type, NULL);
 				trav = trav->next;
 			}
 			while (trav != NULL) {
 				if (node_is_equal(trav,"attribute")) {
-					schema_attribute(sdl, tsn, trav, cur_type, NULL);
+					schema_attribute(sdl, tns, trav, cur_type, NULL);
 				} else if (node_is_equal(trav,"attributeGroup")) {
-					schema_attributeGroup(sdl, tsn, trav, cur_type, NULL);
+					schema_attributeGroup(sdl, tns, trav, cur_type, NULL);
 				} else if (node_is_equal(trav,"anyAttribute")) {
 					/* TODO: <anyAttribute> support */
 					trav = trav->next;
@@ -1485,7 +1489,7 @@ static int schema_complexType(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr compType, s
   Content: (annotation?, ((simpleType | complexType)?, (unique | key | keyref)*))
 </element>
 */
-static int schema_element(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr element, sdlTypePtr cur_type, sdlContentModelPtr model)
+static int schema_element(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr element, sdlTypePtr cur_type, sdlContentModelPtr model)
 {
 	xmlNodePtr trav;
 	xmlAttrPtr attrs, attr, ns, name, type, ref = NULL;
@@ -1493,7 +1497,7 @@ static int schema_element(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr element, sdlTyp
 	attrs = element->properties;
 	ns = get_attribute(attrs, "targetNamespace");
 	if (ns == NULL) {
-		ns = tsn;
+		ns = tns;
 	}
 
 	name = get_attribute(attrs, "name");
@@ -1657,7 +1661,7 @@ static int schema_element(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr element, sdlTyp
 			} else if (type != NULL) {
 				php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: element has both 'type' attribute and subtype");
 			}
-			schema_simpleType(sdl, tsn, trav, cur_type);
+			schema_simpleType(sdl, tns, trav, cur_type);
 			trav = trav->next;
 		} else if (node_is_equal(trav,"complexType")) {
 			if (ref != NULL) {
@@ -1665,7 +1669,7 @@ static int schema_element(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr element, sdlTyp
 			} else if (type != NULL) {
 				php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: element has both 'type' attribute and subtype");
 			}
-			schema_complexType(sdl, tsn, trav, cur_type);
+			schema_complexType(sdl, tns, trav, cur_type);
 			trav = trav->next;
 		}
 	}
@@ -1699,7 +1703,7 @@ static int schema_element(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr element, sdlTyp
   Content: (annotation?, (simpleType?))
 </attribute>
 */
-static int schema_attribute(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr attrType, sdlTypePtr cur_type, sdlCtx *ctx)
+static int schema_attribute(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrType, sdlTypePtr cur_type, sdlCtx *ctx)
 {
 	sdlAttributePtr newAttr;
 	xmlAttrPtr attr, name, ref = NULL, type = NULL;
@@ -1736,7 +1740,7 @@ static int schema_attribute(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr attrType, sdl
 
 			ns = get_attribute(attrType->properties, "targetNamespace");
 			if (ns == NULL) {
-				ns = tsn;
+				ns = tns;
 			}
 			if (ns != NULL) {
 				smart_str_appends(&key, ns->children->content);
@@ -1868,8 +1872,8 @@ static int schema_attribute(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr attrType, sdl
 			dummy_type = emalloc(sizeof(sdlType));
 			memset(dummy_type, 0, sizeof(sdlType));
 			dummy_type->name = estrdup("anonymous");
-			dummy_type->namens = estrdup(tsn->children->content);
-			schema_simpleType(sdl, tsn, trav, dummy_type);
+			dummy_type->namens = estrdup(tns->children->content);
+			schema_simpleType(sdl, tns, trav, dummy_type);
 			newAttr->encode = dummy_type->encode;
 			delete_type(&dummy_type);
 			trav = trav->next;
@@ -1881,7 +1885,7 @@ static int schema_attribute(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr attrType, sdl
 	return TRUE;
 }
 
-static int schema_attributeGroup(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr attrGroup, sdlTypePtr cur_type, sdlCtx *ctx)
+static int schema_attributeGroup(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrGroup, sdlTypePtr cur_type, sdlCtx *ctx)
 {
 	xmlNodePtr trav;
 	xmlAttrPtr name, ref = NULL;
@@ -1899,7 +1903,7 @@ static int schema_attributeGroup(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr attrGrou
 
 			ns = get_attribute(attrGroup->properties, "targetNamespace");
 			if (ns == NULL) {
-				ns = tsn;
+				ns = tns;
 			}
 			newType = emalloc(sizeof(sdlType));
 			memset(newType, 0, sizeof(sdlType));
@@ -1955,12 +1959,12 @@ static int schema_attributeGroup(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr attrGrou
 			if (ref != NULL) {
 				php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: attributeGroup has both 'ref' attribute and subattribute");
 			}
-			schema_attribute(sdl, tsn, trav, cur_type, NULL);
+			schema_attribute(sdl, tns, trav, cur_type, NULL);
 		} else if (node_is_equal(trav,"attributeGroup")) {
 			if (ref != NULL) {
 				php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: attributeGroup has both 'ref' attribute and subattribute");
 			}
-			schema_attributeGroup(sdl, tsn, trav, cur_type, NULL);
+			schema_attributeGroup(sdl, tns, trav, cur_type, NULL);
 		} else if (node_is_equal(trav,"anyAttribute")) {
 			if (ref != NULL) {
 				php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: attributeGroup has both 'ref' attribute and subattribute");
