@@ -1,3 +1,36 @@
+2000-05-03  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/standard/assert.c:
+    Let's enable assert by default since it's so useful.
+
+2000-05-03  Joey Smith  <joey@samaritan.com>
+
+    * README.CVS-RULES:
+    Add fact that every entry in NEWS has to have a name after it
+
+    * NEWS: Sascha pointed me in the right direction.
+
+2000-05-03  Andrei Zmievski  <andrei@ispi.net>
+
+    * NEWS: We want to have name at the very end.
+
+2000-05-03  Sam Ruby  <rubys@us.ibm.com>
+
+    * config.w32.h: Correct build breakage - win32
+
+2000-05-03  Joey Smith  <joey@samaritan.com>
+
+    * README.BCMATH
+      README-BCMATH: Moving README-BCMATH to README.BCMATH
+
+    * ext/bcmath/config.m4:
+    I am going to move README-BCMATH to README.BCMATH for consistency.
+
+    * Makefile.in: Changed install-local to install-sapi for clarity.
+
+    * ext/bcmath/.cvsignore:
+    Shut up CVS and make cvsclean wipe this file out...
+
 2000-05-02  Sascha Schumann  <sascha@schumann.cx>
 
     * Makefile.in
