@@ -54,7 +54,7 @@ AC_ARG_WITH(java,
       test -f $withval/lib/classes.zip && JAVA_CLASSPATH=$withval/lib/classes.zip
       test -f $withval/lib/jvm.jar     && JAVA_CLASSPATH=$withval/lib/jvm.jar
       for i in $JAVA_INCLUDE/*; do
-	test -f $i/jni_md.h && JAVA_INCLUDE="$JAVA_INCLUDE $i"
+        test -f $i/jni_md.h && JAVA_INCLUDE="$JAVA_INCLUDE $i"
       done
 
     else
@@ -64,7 +64,7 @@ AC_ARG_WITH(java,
         test -f $i/jni_md.h && JAVA_INCLUDE="$JAVA_INCLUDE -I$i"
       done
 
-      for i in `find $withval -type d`; do
+      for i in `find $withval/. -type d`; do
         test -f $i/classes.zip && JAVA_CFLAGS=-DJNI_11
         test -f $i/rt.jar      && JAVA_CFLAGS=-DJNI_12
         test -f $i/classes.zip && JAVA_CLASSPATH=$i/classes.zip
@@ -89,6 +89,9 @@ AC_ARG_WITH(java,
     fi
 
     AC_DEFINE(HAVE_JAVA,1,[ ])
+    if test -z "$JAVA_LIBPATH"; then
+      AC_MSG_ERROR(unable to find Java VM libraries)
+    fi
     PHP_ADD_LIBPATH($JAVA_LIBPATH)
     JAVA_CFLAGS="$JAVA_CFLAGS '-DJAVALIB=\"$JAVA_LIBPATH/$java_libext\"'"
 
