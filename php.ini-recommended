@@ -121,7 +121,7 @@ expose_php	=	On		; Decides whether PHP may expose the fact that it is installed 
 ; Resource Limits ;
 ;;;;;;;;;;;;;;;;;;;
 
-max_execution_time = 30     ; Maximum execution time of each script, in seconds (UNIX only)
+max_execution_time = 30     ; Maximum execution time of each script, in seconds
 memory_limit = 8388608		; Maximum amount of memory a script may consume (8MB)
 
 
