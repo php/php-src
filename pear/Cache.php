@@ -63,7 +63,7 @@ class Cache {
     * @access   public
     */
     var $gc_probability = 1;
-    
+
     /**
     * Storage container object.
     * 
@@ -91,7 +91,7 @@ class Cache {
         $this->garbageCollection();
         
     }
-    
+
     /**
     * Returns the requested dataset it if exists and is not expired
     *  
@@ -110,7 +110,6 @@ class Cache {
         return NULL;            
     } // end func get
 
-    
     /**
     * Stores the given data in the cache.
     * 
@@ -127,8 +126,7 @@ class Cache {
             
         return $this->container->save($id, $data, $expires, $group, "");
     } // end func save
-    
-    
+
     /**
     * Stores a dataset without additional userdefined data.
     * 
@@ -149,7 +147,6 @@ class Cache {
         return $this->container->save($id, $cachedata, $expires, $group, $userdata);
     } // end func extSave
 
-    
     /**
     * Loads the given ID from the cache.
     * 
@@ -164,8 +161,7 @@ class Cache {
             
         return $this->container->load($id, $group);
     } // end func load
-    
-    
+
     /**
     * Returns the userdata field of a cached data set.
     *
@@ -181,8 +177,7 @@ class Cache {
             
         return $this->container->getUserdata($id, $group);
     } // end func getUserdata
-    
-    
+
     /**
     * Removes the specified dataset from the cache.
     * 
@@ -197,8 +192,7 @@ class Cache {
             
         return $this->container->delete($id, $group);
     } // end func delete
-    
-    
+
     /**
     * Flushes the cache - removes all data from it
     * 
@@ -211,8 +205,7 @@ class Cache {
             
         return $this->container->flush($group);
     } // end func flush
-    
-    
+
     /**
     * Checks if a dataset exists.
     * 
@@ -229,8 +222,7 @@ class Cache {
             
         return $this->container->isCached($id, $group);
     } // end func isCached
-    
-    
+
     /**
     * Checks if a dataset is expired
     * 
@@ -251,7 +243,7 @@ class Cache {
             
         return $this->container->isExpired($id, $group, $max_age);
     } // end func isExpired
-    
+
     /**
     * Generates a "unique" ID for the given value
     * 
@@ -286,9 +278,6 @@ class Cache {
             $this->container->garbageCollection();
             $last_run = time();
         }
-        
     } // end func garbageCollection
-
-    
 } // end class cache 
 ?>
