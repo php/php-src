@@ -1,6 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2004, Version 4.3.9
+- Implemented periodic PCRE compiled regexp cache cleanup, to avoid memory
+  exhaustion. (Andrei)
 - Fixed bug with raw_post_data not getting set (Brian)
 - Fixed a file-descriptor leak with phpinfo() and other 'special' URLs (Zeev)
 - Fixed bug #29753 (mcal_fetch_event() allows 2nd argument to be optional).
