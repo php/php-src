@@ -468,6 +468,7 @@ PHP_FUNCTION(file)
 	char *slashed, *target_buf;
 	register int i = 0;
 	int target_len, len;
+	char eol_marker = '\n';
 	zend_bool use_include_path = 0;
 	zend_bool reached_eof = 0;
 	php_stream *stream;
@@ -507,9 +508,14 @@ PHP_FUNCTION(file)
 				reached_eof = 1;
 			}
 		}
+		
+		/* mini-hack because I don't feel like re-writing this whole function */
+		if (stream->flags & PHP_STREAM_FLAG_EOL_MAC)
+			eol_marker = '\r';
+		
 		if (!reached_eof) {
 			target_len += strlen(target_buf+target_len);
-			if (target_buf[target_len-1] != '\n') {
+			if (target_buf[target_len-1] != eol_marker) {
 				continue;
 			}
 		}
