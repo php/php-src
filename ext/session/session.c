@@ -128,6 +128,7 @@ PHP_INI_BEGIN()
 	PHP_INI_ENTRY("session.save_handler",           "files",     PHP_INI_ALL, OnUpdateSaveHandler)
 	STD_PHP_INI_BOOLEAN("session.auto_start",       "0",         PHP_INI_ALL, OnUpdateBool,   auto_start,         php_ps_globals,    ps_globals)
 	STD_PHP_INI_ENTRY("session.gc_probability",     "1",         PHP_INI_ALL, OnUpdateInt,    gc_probability,     php_ps_globals,    ps_globals)
+	STD_PHP_INI_ENTRY("session.gc_dividend",        "100",       PHP_INI_ALL, OnUpdateInt,    gc_dividend,        php_ps_globals,    ps_globals)
 	STD_PHP_INI_ENTRY("session.gc_maxlifetime",     "1440",      PHP_INI_ALL, OnUpdateInt,    gc_maxlifetime,     php_ps_globals,    ps_globals)
 	PHP_INI_ENTRY("session.serialize_handler",      "php",       PHP_INI_ALL, OnUpdateSerializer)
 	STD_PHP_INI_ENTRY("session.cookie_lifetime",    "0",         PHP_INI_ALL, OnUpdateInt,    cookie_lifetime,    php_ps_globals,    ps_globals)
@@ -1035,7 +1036,7 @@ PHPAPI void php_session_start(TSRMLS_D)
 	if (PS(mod_data) && PS(gc_probability) > 0) {
 		int nrdels = -1;
 
-		nrand = (int) (100.0*php_combined_lcg(TSRMLS_C));
+		nrand = (int) ((float) PS(gc_dividend) * php_combined_lcg(TSRMLS_C));
 		if (nrand < PS(gc_probability)) {
 			PS(mod)->gc(&PS(mod_data), PS(gc_maxlifetime), &nrdels TSRMLS_CC);
 #if 0

@@ -105,6 +105,7 @@ typedef struct _php_ps_globals {
 	void *mod_data;
 	php_session_status session_status;
 	long gc_probability;
+	long gc_dividend;
 	long gc_maxlifetime;
 	int module_number;
 	long cache_expire;
