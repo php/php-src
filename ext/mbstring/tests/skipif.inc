@@ -3,7 +3,7 @@
 
 if (!extension_loaded("mbstring") && ini_get("enable_dl")) {
   $dlext = (substr(PHP_OS, 0, 3) == "WIN") ? ".dll" : ".so";
-  @dl("iconv$dlext");
+  @dl("mbstring$dlext");
 }
 if (!extension_loaded("mbstring")) {
     die("skip\n");
