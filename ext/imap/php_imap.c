@@ -136,6 +136,7 @@ function_entry imap_functions[] = {
 	PHP_FE(imap_get_quotaroot,						NULL)
 	PHP_FE(imap_set_quota,							NULL)
  	PHP_FE(imap_setacl,								NULL)
+ 	PHP_FE(imap_getacl,								NULL)
 #endif
 
 	PHP_FE(imap_mail,								NULL)
@@ -360,6 +361,24 @@ void mail_getquota(MAILSTREAM *stream, char *qroot, QUOTALIST *qlist)
 	}
 }
 /* }}} */
+
+
+/* {{{ mail_getquota
+ *
+ * Mail GET_ACL callback
+ * Called via the mail_parameter function in c-client:src/c-client/mail.c
+ */
+void mail_getacl(MAILSTREAM *stream, char *mailbox, ACLLIST *alist)
+{
+	TSRMLS_FETCH();
+
+	/* walk through the ACLLIST */
+	for(; alist; alist = alist->next) {
+		add_assoc_stringl(IMAPG(imap_acl_list), alist->identifier, alist->rights, strlen(alist->rights), 1);
+	}
+}
+/* }}} */
+
 #endif
 
 
@@ -387,6 +406,7 @@ static void php_imap_init_globals(zend_imap_globals *imap_globals)
 	imap_globals->folderlist_style = FLIST_ARRAY;
 #if defined(HAVE_IMAP2000) || defined(HAVE_IMAP2001)
 	imap_globals->quota_return = NIL;
+	imap_globals->imap_acl_list = NIL;
 #endif
 }
 /* }}} */
@@ -943,6 +963,38 @@ PHP_FUNCTION(imap_setacl)
 	convert_to_string_ex(rights);
 
 	RETURN_BOOL(imap_setacl(imap_le_struct->imap_stream, Z_STRVAL_PP(mailbox), Z_STRVAL_PP(id), Z_STRVAL_PP(rights)));
+}
+/* }}} */
+
+
+/* {{{ proto array imap_get_quota(int stream_id, string mailbox)
+	Gets the ACL for a given mailbox */
+PHP_FUNCTION(imap_getacl)
+{
+	zval **streamind, **mailbox;
+	pils *imap_le_struct;
+
+	if(ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &streamind, &mailbox) == FAILURE) {
+		ZEND_WRONG_PARAM_COUNT();
+	}
+
+	ZEND_FETCH_RESOURCE(imap_le_struct, pils *, streamind, -1, "imap", le_imap);
+
+	convert_to_string_ex(mailbox);
+
+	/* initializing the special array for the return values */
+	array_init(return_value);
+
+	IMAPG(imap_acl_list) = return_value;
+
+	/* set the callback for the GET_ACL function */
+	mail_parameters(NIL, SET_ACL, (void *) mail_getacl);
+	if(!imap_getacl(imap_le_struct->imap_stream, Z_STRVAL_PP(mailbox))) {
+		php_error(E_WARNING, "c-client imap_getacl failed");
+		RETURN_FALSE;
+	}
+
+	IMAPG(imap_acl_list) = NIL;
 }
 /* }}} */
 
