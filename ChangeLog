@@ -1,3 +1,80 @@
+2002-05-16  Christian Stocker  <chregu@phant.ch>
+
+    * ext/domxml/php_domxml.h
+      ext/domxml/php_domxml.c:
+    - replaced domxml_doc_document_element implementation do use libxml2 method
+    - renamed domxml_add_root to domxml_doc_add_root (and added alias for BC)
+    - aliased $doc->get_root to domxml_document_element
+     - added domxml_doc_set_root to change the root node (Lukas Schroeder)
+
+2002-05-16  Preston L. Bannister  <preston.bannister@cox.net>
+
+    * tests/lang/031.phpt: More detailed/explanatory output.
+
+    * tests/lang/029.phpt: Make failed case tell you what was different.
+
+    * tests/basic/011.phpt:
+    Make test valid for either "register globals" setting.
+
+    * ext/ctype/tests/002.phpt:
+    Restrict ctype tests to POSIX portable characters (0..127) and add numeric character tests.
+
+    * ext/standard/tests/aggregation/aggregate.phpt
+      ext/standard/tests/aggregation/aggregate_methods.phpt
+      ext/standard/tests/aggregation/aggregate_methods_by_list.phpt
+      ext/standard/tests/aggregation/aggregate_methods_by_regexp.phpt
+      ext/standard/tests/aggregation/aggregate_properties.phpt
+      ext/standard/tests/aggregation/aggregate_properties_by_list.phpt
+      ext/standard/tests/aggregation/aggregate_properties_by_regexp.phpt
+      ext/standard/tests/aggregation/aggregation_info.phpt
+      ext/standard/tests/aggregation/deaggregate.phpt:
+    Remove leading "./" from include filenames as in PHP this defeats include_path.
+
+    * win32/php4ts.dsw:
+    Add "tests" project to invoke run-tests.php (unit tests).
+
+    * run-tests.php:
+    Updated to run cleanly on Win32, and perform a more controlled test.
+
+    * tests/tests.mak: Add TEST_PHP_DETAILED usage for verbose test runs.
+
+    * tests/basic/002.phpt
+      tests/basic/003.phpt
+      tests/basic/004.phpt
+      tests/basic/005.phpt: Fix typo in SKIP clause.
+
+    * ext/standard/string.c:
+    Adjust dirname() on Win32 to match CWD per drive semantics.
+
+    * tests/dirname.phpt: dirname() checks that work for both Unix and Win32.
+
+2002-05-16  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/standard/filestat.c: MFH
+
+2002-05-16  Rasmus Lerdorf  <rasmus@lerdorf.on.ca>
+
+    * ext/standard/string.c: MFH just in case
+
+    * ext/standard/string.c: Grr.. I keep leaving my debug in...
+
+    * ext/standard/string.c: Fix for #17271
+
+2002-05-16  Preston L. Bannister  <preston.bannister@cox.net>
+
+    * ext/mbstring/mbstring.c: Range check arguments to mb_strcut().
+    Test ext/mbstring/013.phpt causes a hard failure w/o this.
+
+    * ext/mbstring/mbregex.h: Proper declaration to suppress compiler warning.
+
+2002-05-16  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/standard/filestat.c
+      ext/standard/tests/file/003.inc
+      ext/standard/tests/file/003.phpt:
+    - Made all is_*() functions to return only boolean values.
+    - Killed the "file not found" error for is_link(). (finally..)
+
 2002-05-15  Preston L. Bannister  <preston.bannister@cox.net>
 
     * tests/tests.dsp
