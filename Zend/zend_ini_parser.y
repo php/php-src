@@ -257,7 +257,7 @@ string_or_value:
 
 var_string_list:
 		var_string_list cfg_var_ref { zend_ini_add_string(&$$, &$1, &$2); free($2.value.str.val); }
-	|	var_string_list TC_ENCAPSULATED_STRING { zend_ini_add_string(&$$, &$1, &$2); }
+	|	var_string_list TC_ENCAPSULATED_STRING { zend_ini_add_string(&$$, &$1, &$2); free($2.value.str.val); }
 	|	var_string_list constant_string { zend_ini_add_string(&$$, &$1, &$2); }
 	|	/* empty */ { zend_ini_init_string(&$$); }
 ;
