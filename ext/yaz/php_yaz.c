@@ -32,10 +32,10 @@
 #include <yaz/marcdisp.h>
 #include <yaz/yaz-util.h>
 #include <yaz/yaz-version.h>
+#include <yaz/yaz-ccl.h>
+#include <yaz/ill.h>
 
 #define MAX_ASSOC 100
-
-#define PHP_YAZ_DEBUG 1
 
 typedef struct Yaz_ResultSetInfo *Yaz_ResultSet;
 typedef struct Yaz_AssociationInfo *Yaz_Association;
@@ -87,6 +87,8 @@ struct Yaz_AssociationInfo {
 	int reconnect_flag;
 	ODR odr_in;
 	ODR odr_out;
+	ODR odr_scan;
+	Z_ScanResponse *scan_response;
 	char *buf_out;
 	int len_out;
 	char *buf_in;
@@ -96,6 +98,10 @@ struct Yaz_AssociationInfo {
 	int numberOfRecordsRequested;
 	char *elementSetNames;
 	char *preferredRecordSyntax;
+
+	CCL_parser ccl_parser;
+	char *ill_buf_out;
+	int ill_len_out;
 };
 
 static Yaz_Association yaz_association_mk ()
@@ -119,15 +125,21 @@ static Yaz_Association yaz_association_mk ()
 	p->reconnect_flag = 0;
 	p->odr_in = odr_createmem (ODR_DECODE);
 	p->odr_out = odr_createmem (ODR_ENCODE);
+	p->odr_scan = odr_createmem (ODR_ENCODE);
+	p->scan_response = 0;
 	p->buf_out = 0;
 	p->len_out = 0;
 	p->buf_in = 0;
 	p->len_in = 0;
 	p->action = 0;
+	p->ill_buf_out = 0;
+	p->ill_len_out = 0;
 	p->resultSetStartPoint = 1;
 	p->numberOfRecordsRequested = 10;
 	p->elementSetNames = 0;
 	p->preferredRecordSyntax = 0;
+	p->ccl_parser = ccl_parser_create();
+	p->ccl_parser->bibset = 0;
 	return p;
 }
 
@@ -150,11 +162,15 @@ static void yaz_association_destroy (Yaz_Association p)
 	xfree (p->addinfo);
 	odr_destroy (p->odr_in);
 	odr_destroy (p->odr_out);
+	odr_destroy (p->odr_scan);
 	/* buf_out */
 	/* buf_in */
 	/* action */
+	xfree (p->ill_buf_out);
 	xfree (p->elementSetNames);
 	xfree (p->preferredRecordSyntax);
+	ccl_qual_rm(&p->ccl_parser->bibset);
+	ccl_parser_destroy(p->ccl_parser);
 }
 
 static Yaz_ResultSet yaz_resultset_mk()
@@ -186,27 +202,6 @@ static MUTEX_T yaz_mutex;
 static Yaz_Association *shared_associations;
 static int order_associations;
 
-/*
-  when id = 0, it means all targes...
-  id = yaz_connect(zurl, user, group, pass);
-  yaz_set_db(id, db)
-  yaz_error(id)
-  yaz_errno(id)
-  yaz_addinfo(id)
-  
-  yaz_wait()
-  yaz_range(id, from, to, syntax, elementset)
-  yaz_search(id, type, query)
-  yaz_hits(id)
-  yaz_record(id, pos)
-  
-  yaz_scan(id)
-  yaz_scan_point(id, scanterm, before, after)
-  yaz_scan_result(id, pos)
-  
-  yaz_close(id)
-*/
-
 function_entry yaz_functions [] = {
 	PHP_FE(yaz_connect, NULL)
 	PHP_FE(yaz_close, NULL)
@@ -220,6 +215,12 @@ function_entry yaz_functions [] = {
 	PHP_FE(yaz_syntax, NULL)
 	PHP_FE(yaz_element, NULL)
 	PHP_FE(yaz_range, NULL)
+	PHP_FE(yaz_itemorder, NULL)
+	PHP_FE(yaz_scan, NULL)
+	PHP_FE(yaz_scan_result, NULL)
+	PHP_FE(yaz_present, NULL)
+	PHP_FE(yaz_ccl_conf, NULL)
+	PHP_FE(yaz_ccl_parse, NULL)
 	{NULL, NULL, NULL}
 };
 
@@ -405,6 +406,58 @@ static void present_response (Yaz_Association t, Z_PresentResponse *pr)
 	handle_records (t, pr->records, 1);
 }
 
+void scan_response (Yaz_Association t, Z_ScanResponse *res)
+{
+	NMEM nmem = odr_extract_mem (t->odr_in);
+    if (res->entries && res->entries->nonsurrogateDiagnostics)
+		response_diag(t, res->entries->nonsurrogateDiagnostics[0]);
+	t->scan_response = res;
+	nmem_transfer (t->odr_scan->mem, nmem);
+	nmem_destroy (nmem);
+}
+
+void es_response (Yaz_Association t,
+				  Z_ExtendedServicesResponse *res)
+{
+#if 0
+    Odr_oct *id = res->referenceId;
+	
+    if (id)
+		html_var_n (req, "refid", id->buf, id->len);
+    else
+		html_var (req, "refid", "");
+	
+    html_var (req, "targetreference", "");
+    if (res->taskPackage && 
+		res->taskPackage->which == Z_External_extendedService)
+    {
+		Z_TaskPackage *taskPackage = res->taskPackage->u.extendedService;
+		Odr_oct *id = taskPackage->targetReference;
+		
+		if (id)
+			html_var_n (req, "targetreference", id->buf, id->len);
+    }
+    switch (*res->operationStatus)
+    {
+    case Z_ExtendedServicesResponse_done:
+		html_dump (req, "es-response done");
+		break;
+    case Z_ExtendedServicesResponse_accepted:
+		html_dump (req, "es-response accepted");
+		break;
+    case Z_ExtendedServicesResponse_failure:
+		html_dump (req, "es-response failure");
+		break;
+    default:
+		html_dump (req, "es-response unknown");
+		break;
+    }
+#endif
+    if (res->diagnostics && res->num_diagnostics > 0)
+		response_diag(t, res->diagnostics[0]);
+}
+
+
 static void handle_apdu (Yaz_Association t, Z_APDU *apdu)
 {
 	Z_InitResponse *initrs;
@@ -429,7 +482,8 @@ static void handle_apdu (Yaz_Association t, Z_APDU *apdu)
 				xfree(t->cookie);
 				t->cookie = xstrdup(cookie);
 			}
-			(*t->action) (t);
+			if (t->action)
+				(*t->action) (t);
 		}
 		break;
 	case Z_APDU_searchResponse:
@@ -440,18 +494,12 @@ static void handle_apdu (Yaz_Association t, Z_APDU *apdu)
 		present_response (t, apdu->u.presentResponse);
 		send_present (t);
 		break;
-#if 0
 	case Z_APDU_scanResponse:
-		zlog (req, t->name, " scan response");
-		scanResponse (req, t, apdu->u.scanResponse);
+		scan_response (t, apdu->u.scanResponse);
 		break;
-#endif
-#if USE_ES
 	case Z_APDU_extendedServicesResponse:
-		zlog (req, t->name, " ES response");
-		esResponse (req, t, apdu->u.extendedServicesResponse);
+		es_response (t, apdu->u.extendedServicesResponse);
 		break;
-#endif
 	case Z_APDU_close:
 		do_close(t);
 		if (t->reconnect_flag)
@@ -505,11 +553,11 @@ static int do_read (Yaz_Association t)
 	return 1;
 }
 
-static int do_write (Yaz_Association t)
+static int do_write_ex (Yaz_Association t, char *buf_out, int len_out)
 {
 	int r;
 	
-	if ((r=cs_put (t->cs, t->buf_out, t->len_out)) < 0)
+	if ((r=cs_put (t->cs, buf_out, len_out)) < 0)
 	{
 		if (t->reconnect_flag)
 		{
@@ -539,33 +587,65 @@ static int do_write (Yaz_Association t)
 	return 0;
 }
 
-
-static int send_APDU (Yaz_Association t, Z_APDU *a)
+static int do_write(Yaz_Association t)
 {
+	return do_write_ex (t, t->buf_out, t->len_out);
+}
+
+static int send_packet (Yaz_Association t)
+{
+	return do_write_ex (t, t->ill_buf_out, t->ill_len_out);
+}
+
+static int encode_APDU(Yaz_Association t, Z_APDU *a, ODR out)
+{
+	char str[120];
+
+	if (a == 0)
+		abort();
+	sprintf (str, "send_APDU t=%p type=%d", t, a->which);
+#if 0
+	php_error (E_WARNING, str);
+#endif
 	if (t->cookie)
 	{
 		Z_OtherInformation **oi;
 		yaz_oi_APDU(a, &oi);
-		yaz_oi_set_string_oidval(oi, t->odr_out, VAL_COOKIE, 1, t->cookie);
+		yaz_oi_set_string_oidval(oi, out, VAL_COOKIE, 1, t->cookie);
 	}
 /* from ZAP */
 #if 0
 	if (req->request->connection)
 	{
 		Z_OtherInformation **oi;
-		zlog (req, t->name, " encoding client_ip");
 		yaz_oi_APDU(a, &oi);
-		yaz_oi_set_string_oidval(oi, t->odr_out, VAL_CLIENT_IP, 1,
+		yaz_oi_set_string_oidval(oi, out, VAL_CLIENT_IP, 1,
 								 req->request->connection->remote_ip);
 	}
 #endif
-	if (!z_APDU(t->odr_out, &a, 0, 0))
+	if (!z_APDU(out, &a, 0, 0))
 	{
+		FILE *outf = fopen("/tmp/apdu.txt", "w");
+		if (outf)
+		{
+			ODR odr_pr = odr_createmem(ODR_PRINT);
+			fprintf (outf, "a=%p\n", a);
+			odr_setprint(odr_pr, outf);
+			z_APDU(odr_pr, &a, 0, 0);
+			odr_destroy(odr_pr);
+			fclose (outf);
+		}
+		php_error (E_WARNING, "YAZ: Couldn't encode APDU");
 		do_close (t);
 		t->error = PHP_YAZ_ERROR_ENCODE;
 		return -1;
 	}
-	/* apdu_log(req, t->odr_print, a); */
+	return 0;
+}
+
+static int send_APDU (Yaz_Association t, Z_APDU *a)
+{
+	encode_APDU(t, a, t->odr_out);
 	t->buf_out = odr_getbuf(t->odr_out, &t->len_out, 0);
 	odr_reset(t->odr_out);
 	do_write (t);
@@ -655,7 +735,7 @@ static int send_search (Yaz_Association t)
 			odr_oiddup (t->odr_out, oid_getoidbyent (&ident));
 	}
 	sreq->databaseNames = set_DatabaseNames (t, &sreq->num_databaseNames);
-	
+
 	send_APDU (t, apdu);
 	return 1;
 }
@@ -666,16 +746,15 @@ static int send_present (Yaz_Association t)
 	Z_PresentRequest *req = apdu->u.presentRequest;
 	int i = 0;
 	
-	if (!t->resultSets->recordList)	  /* no records to retrieve at all .. */
+	if (!t->resultSets)	           /* no result set yet? */
 	{
 		return 0;
 	}
 	
-	while (1)
+	while (t->resultSets->recordList)
 	{
 		if (i >= t->resultSets->recordList->num_records) 
 		{						/* got all records ... */
-			/* searchHits (zreq, t); */
 			return 0;
 		}
 		if (!t->resultSets->recordList->records[i])
@@ -688,8 +767,15 @@ static int send_present (Yaz_Association t)
 	*req->resultSetStartPoint = t->resultSetStartPoint + i;
 	
 	req->numberOfRecordsRequested = odr_malloc (t->odr_out, sizeof(int));
-	*req->numberOfRecordsRequested = t->resultSets->recordList->num_records - i;
-	
+	if (t->resultSets->recordList)
+		*req->numberOfRecordsRequested =
+			t->resultSets->recordList->num_records - i;
+	else
+		*req->numberOfRecordsRequested = t->numberOfRecordsRequested;
+		
+	if (*req->numberOfRecordsRequested <= 0)
+		return 0;
+
 	if (t->preferredRecordSyntax && *t->preferredRecordSyntax)
 	{
 		struct oident ident;
@@ -1011,9 +1097,14 @@ PHP_FUNCTION(yaz_search)
 	pval **id, **type, **query;
 	Yaz_Association p;
 	Yaz_ResultSet r;
-	if (ZEND_NUM_ARGS() != 3)
-		WRONG_PARAM_COUNT;
-	if (zend_get_parameters_ex(3, &id, &type, &query) == FAILURE)
+	if (ZEND_NUM_ARGS() == 3)
+	{
+		if (zend_get_parameters_ex(3, &id, &type, &query) == FAILURE)
+		{
+			WRONG_PARAM_COUNT;
+		}
+	}
+	else
 	{
 		WRONG_PARAM_COUNT;
 	}
@@ -1022,6 +1113,7 @@ PHP_FUNCTION(yaz_search)
 	{
 		RETURN_FALSE;
 	}
+	p->action = 0;
 	convert_to_string_ex (type);
 	type_str = (*type)->value.str.val;
 	convert_to_string_ex (query);
@@ -1044,13 +1136,52 @@ PHP_FUNCTION(yaz_search)
 			RETVAL_TRUE;
 		}
 	}
+	else if (!strcmp(type_str, "ccl"))
+	{
+		r->query->which = Z_Query_type_2;
+		r->query->u.type_2 = odr_malloc (r->odr, sizeof(*r->query->u.type_2));
+		r->query->u.type_2->buf = odr_strdup(r->odr, query_str);
+		r->query->u.type_2->len = strlen(query_str);
+	}
 	else
 	{
 		yaz_resultset_destroy(r);
 		p->resultSets = 0;
 		RETVAL_FALSE;
 	}
+	if (p->resultSets)
+		p->action = send_search;
 	release_assoc (p);
+}
+/* }}} */
+
+
+/* {{{ proto int yaz_present(int id)
+   Retrieve records */
+PHP_FUNCTION(yaz_present)
+{
+	pval **id;
+	Yaz_Association p;
+	if (ZEND_NUM_ARGS() != 1)
+		WRONG_PARAM_COUNT;
+	if (zend_get_parameters_ex(1, &id) == FAILURE)
+	{
+		WRONG_PARAM_COUNT;
+	}
+	p = get_assoc (id);
+	if (!p)
+	{
+		zend_error(E_WARNING, "get_assoc failed for present");
+		RETURN_FALSE;
+	}
+	p->action = 0;
+	if (p->resultSets)
+	{
+		p->resultSets->recordList = 0;
+		p->action = send_present;
+	}
+	release_assoc (p);
+	RETURN_TRUE;
 }
 /* }}} */
 
@@ -1066,9 +1197,8 @@ PHP_FUNCTION(yaz_wait)
 	for (i = 0; i<MAX_ASSOC; i++)
 	{
 		Yaz_Association p = shared_associations[i];
-		if (!p || p->order != order_associations || !p->resultSets)
+		if (!p || p->order != order_associations || !p->action)
 			continue;
-		p->action = send_search;
 		if (!p->cs)
 		{
 			do_connect (p);
@@ -1076,7 +1206,7 @@ PHP_FUNCTION(yaz_wait)
 		else
 		{
 			p->reconnect_flag = 1;
-			send_search (p);
+			(*p->action)(p);
 		}
 	}
 #ifdef ZTS
@@ -1620,12 +1750,505 @@ PHP_FUNCTION(yaz_range)
 	{
 		convert_to_long_ex (pval_start);
 		p->resultSetStartPoint = (*pval_start)->value.lval;
+		if (p->resultSetStartPoint < 1)
+			p->resultSetStartPoint = 1;
 		convert_to_long_ex (pval_number);
 		p->numberOfRecordsRequested = (*pval_number)->value.lval;
 	}
 	release_assoc (p);
 }
 /* }}} */
+
+static const char *array_lookup(HashTable *ht, const char *idx)
+{
+	pval **pvalue;
+
+	if (ht && zend_hash_find(ht, (char*) idx, strlen(idx)+1,
+							 (void**) &pvalue) == SUCCESS)
+	{
+		SEPARATE_ZVAL(pvalue);
+		convert_to_string(*pvalue);
+		return (*pvalue)->value.str.val;
+	}
+	return 0;
+}
+
+static const char *ill_array_lookup (void *clientData, const char *idx)
+{
+	return array_lookup((HashTable *) clientData, idx+4);
+}
+
+static Z_External *encode_ill_request (Yaz_Association t, HashTable *ht)
+{
+    ODR out = t->odr_out;
+    ILL_Request *req;
+    Z_External *r = 0;
+    struct ill_get_ctl ctl;
+	
+    ctl.odr = t->odr_out;
+    ctl.clientData = ht;
+    ctl.f = ill_array_lookup;
+	
+    req = ill_get_ILLRequest(&ctl, "ill", 0);
+	
+    if (!ill_Request (out, &req, 0, 0))
+    {
+		int ill_request_size;
+		char *ill_request_buf = odr_getbuf (out, &ill_request_size, 0);
+		if (ill_request_buf)
+			odr_setbuf (out, ill_request_buf, ill_request_size, 1);
+		php_error(E_WARNING, "yaz_itemorder: Expected array parameter");
+		return 0;
+    }
+    else
+    {
+		oident oid;
+		int illRequest_size = 0;
+		char *illRequest_buf = odr_getbuf (out, &illRequest_size, 0);
+		
+		oid.proto = PROTO_GENERAL;
+		oid.oclass = CLASS_GENERAL;
+		oid.value = VAL_ISO_ILL_1;
+		
+		r = (Z_External *) odr_malloc (out, sizeof(*r));
+		r->direct_reference = odr_oiddup(out,oid_getoidbyent(&oid)); 
+		r->indirect_reference = 0;
+		r->descriptor = 0;
+		r->which = Z_External_single;
+		
+		r->u.single_ASN1_type = (Odr_oct *)
+			odr_malloc (out, sizeof(*r->u.single_ASN1_type));
+		r->u.single_ASN1_type->buf = odr_malloc (out, illRequest_size);
+		r->u.single_ASN1_type->len = illRequest_size;
+		r->u.single_ASN1_type->size = illRequest_size;
+		memcpy (r->u.single_ASN1_type->buf, illRequest_buf, illRequest_size);
+    }
+    return r;
+}
+
+static Z_ItemOrder *encode_item_order(Yaz_Association t,
+									  HashTable *ht)
+{
+    Z_ItemOrder *req = odr_malloc (t->odr_out, sizeof(*req));
+    const char *str;
+
+#ifdef ASN_COMPILED
+    req->which=Z_IOItemOrder_esRequest;
+#else
+    req->which=Z_ItemOrder_esRequest;
+#endif
+    req->u.esRequest = (Z_IORequest *) 
+	odr_malloc(t->odr_out,sizeof(Z_IORequest));
+
+    /* to keep part ... */
+    req->u.esRequest->toKeep = (Z_IOOriginPartToKeep *)
+	odr_malloc(t->odr_out,sizeof(Z_IOOriginPartToKeep));
+    req->u.esRequest->toKeep->supplDescription = 0;
+    req->u.esRequest->toKeep->contact =
+		odr_malloc (t->odr_out, sizeof(*req->u.esRequest->toKeep->contact));
+	
+    str = array_lookup (ht, "contact-name");
+    req->u.esRequest->toKeep->contact->name = str ?
+		nmem_strdup (t->odr_out->mem, str) : 0;
+	
+    str = array_lookup (ht, "contact-phone");
+    req->u.esRequest->toKeep->contact->phone = str ?
+		nmem_strdup (t->odr_out->mem, str) : 0;
+	
+    str = array_lookup (ht, "contact-email");
+    req->u.esRequest->toKeep->contact->email = str ?
+		nmem_strdup (t->odr_out->mem, str) : 0;
+	
+    req->u.esRequest->toKeep->addlBilling = 0;
+	
+    /* not to keep part ... */
+    req->u.esRequest->notToKeep = (Z_IOOriginPartNotToKeep *)
+		odr_malloc(t->odr_out,sizeof(Z_IOOriginPartNotToKeep));
+	
+    req->u.esRequest->notToKeep->resultSetItem = (Z_IOResultSetItem *)
+		odr_malloc(t->odr_out, sizeof(Z_IOResultSetItem));
+    req->u.esRequest->notToKeep->resultSetItem->resultSetId = "default";
+    req->u.esRequest->notToKeep->resultSetItem->item =
+		(int *) odr_malloc(t->odr_out, sizeof(int));
+	
+    str = array_lookup (ht, "itemorder-item");
+	*req->u.esRequest->notToKeep->resultSetItem->item =
+		(str ? atoi(str) : 1);
+	
+    req->u.esRequest->notToKeep->itemRequest = 
+		encode_ill_request(t, ht);
+    
+    return req;
+}
+
+static Z_APDU *encode_es_itemorder (Yaz_Association t, HashTable *ht)
+{
+    Z_APDU *apdu = zget_APDU(t->odr_out, Z_APDU_extendedServicesRequest);
+    Z_ExtendedServicesRequest *req = apdu->u.extendedServicesRequest;
+    const char *str;
+    struct oident oident;
+    int oid[OID_SIZE];
+	Z_External *r = odr_malloc (t->odr_out, sizeof(*r));
+
+	*req->function = Z_ExtendedServicesRequest_create;
+    oident.proto = PROTO_Z3950;
+    oident.oclass = CLASS_EXTSERV;
+	oident.value = VAL_ITEMORDER;
+	req->taskSpecificParameters = r;
+	r->direct_reference =
+	    odr_oiddup(t->odr_out, oid_ent_to_oid(&oident, oid)); 
+	r->indirect_reference = 0;
+	r->descriptor = 0;
+	r->which = Z_External_itemOrder;
+	r->u.itemOrder = encode_item_order (t, ht);
+    req->packageType = odr_oiddup(t->odr_out, oid_ent_to_oid(&oident, oid));
+
+    str = array_lookup(ht, "package-name");
+    if (str && *str)
+        req->packageName = nmem_strdup (t->odr_out->mem, str);
+
+    str = array_lookup(ht, "user-id");
+    if (str)
+		req->userId = nmem_strdup (t->odr_out->mem, str);
+
+    return apdu;
+}
+
+
+/* {{{ proto int yaz_itemorder(int id, array package)
+   Sends Item Order request */
+
+PHP_FUNCTION(yaz_itemorder)
+{
+	pval **pval_id, **pval_package;
+	Yaz_Association p;
+	if (ZEND_NUM_ARGS() != 2 || 
+		zend_get_parameters_ex(2, &pval_id, &pval_package) ==
+		FAILURE)
+	{
+		WRONG_PARAM_COUNT;
+	}
+	if (Z_TYPE_PP(pval_package) != IS_ARRAY)
+	{
+		php_error(E_WARNING, "yaz_itemorder: Expected array parameter");
+		RETURN_FALSE;
+	}
+	p = get_assoc (pval_id);
+	if (p)
+	{
+		Z_APDU *apdu;
+		p->action = 0;
+		apdu = encode_es_itemorder (p, Z_ARRVAL_PP(pval_package));
+		if (apdu)
+		{
+			char *buf;
+			encode_APDU(p, apdu, p->odr_out);
+			buf = odr_getbuf(p->odr_out, &p->ill_len_out, 0);
+			xfree (p->ill_buf_out);
+			p->ill_buf_out = xmalloc (p->ill_len_out);
+			memcpy (p->ill_buf_out, buf, p->ill_len_out);
+			p->action = send_packet;
+		}
+	}
+	release_assoc (p);
+}
+/* }}} */
+
+static Z_APDU *encode_scan (Yaz_Association t, const char *type,
+							const char *query, HashTable *ht)
+{
+    Z_APDU *apdu = zget_APDU(t->odr_out, Z_APDU_scanRequest);
+    Z_ScanRequest *req = apdu->u.scanRequest;
+	const char *val;
+	if (!strcmp(type, "rpn"))
+	{
+		if (!(req->termListAndStartPoint =
+			  p_query_scan(t->odr_out, PROTO_Z3950, &req->attributeSet,
+						   query)))
+		{
+			char str[80];
+			sprintf (str, "YAZ: Bad Scan query: '%.40s'", query);
+			php_error (E_WARNING, str);
+			return 0;
+		}
+	}
+	else 
+	{
+		char str[80];
+		sprintf (str, "YAZ: Bad Scan query type: '%.40s'", type);
+		php_error (E_WARNING, str);
+		return 0;
+	}
+	val = array_lookup(ht, "number");
+	if (val && *val)
+		*req->numberOfTermsRequested = atoi(val);
+	val = array_lookup(ht, "position");
+	if (val && *val)
+	{
+		req->preferredPositionInResponse =
+			odr_malloc (t->odr_out, sizeof(int));
+		*req->preferredPositionInResponse = atoi(val);
+	}
+	val = array_lookup(ht, "stepsize");
+	if (val && *val)
+	{
+		req->stepSize = odr_malloc (t->odr_out, sizeof(int));
+		*req->stepSize = atoi(val);
+	}
+	req->databaseNames = set_DatabaseNames (t, &req->num_databaseNames);
+	return apdu;
+}
+
+/* {{{ proto int yaz_scan(int id, type, query [, flags])
+   Sends Scan Request */
+PHP_FUNCTION(yaz_scan)
+{
+	pval **pval_id, **pval_type, **pval_query, **pval_flags = 0;
+	HashTable *flags_ht = 0;
+	Yaz_Association p;
+	if (ZEND_NUM_ARGS() == 3)
+	{   
+		if (zend_get_parameters_ex(3, &pval_id, &pval_type, &pval_query) ==
+			FAILURE)
+		{
+			WRONG_PARAM_COUNT;
+		}
+	}
+	else if (ZEND_NUM_ARGS() == 4)
+	{
+		if (zend_get_parameters_ex(4, &pval_id, &pval_type, &pval_query,
+								   &pval_flags) ==
+			FAILURE)
+		{
+			WRONG_PARAM_COUNT;
+		}
+		if (Z_TYPE_PP(pval_flags) != IS_ARRAY)
+		{
+			php_error(E_WARNING, "yaz_scan: Bad flags parameter");
+			RETURN_FALSE;
+		}
+		flags_ht = Z_ARRVAL_PP(pval_flags);
+	}
+	else
+	{
+		WRONG_PARAM_COUNT;
+	}
+	convert_to_string_ex (pval_type);
+	convert_to_string_ex (pval_query);
+
+	p = get_assoc (pval_id);
+	if (p)
+	{
+		Z_APDU *apdu;
+		p->action = 0;
+		apdu = encode_scan (p, Z_STRVAL_PP(pval_type), Z_STRVAL_PP(pval_query),
+							flags_ht);
+		if (apdu)
+		{
+			char *buf;
+			odr_reset(p->odr_scan);
+			p->scan_response = 0;
+			encode_APDU(p, apdu, p->odr_out);
+			buf = odr_getbuf(p->odr_out, &p->ill_len_out, 0);
+			xfree (p->ill_buf_out);
+			p->ill_buf_out = xmalloc (p->ill_len_out);
+			memcpy (p->ill_buf_out, buf, p->ill_len_out);
+			p->action = send_packet;
+		}
+	}
+	release_assoc (p);
+}
+/* }}} */
+
+/* {{{ proto int yaz_scan_result(int id, array options)
+   Inspects Scan Result */
+PHP_FUNCTION(yaz_scan_result)
+{
+	pval **pval_id, **pval_opt = 0;
+	Yaz_Association p;
+	if (ZEND_NUM_ARGS() == 2)
+	{   
+		if (zend_get_parameters_ex(2, &pval_id, &pval_opt) == FAILURE)
+		{
+			WRONG_PARAM_COUNT;
+		}
+		if (!ParameterPassedByReference(ht, 2))
+		{
+			WRONG_PARAM_COUNT;
+		}
+	}
+	else if (ZEND_NUM_ARGS() == 1)
+	{
+		if (zend_get_parameters_ex(1, &pval_id) == FAILURE)
+		{
+			WRONG_PARAM_COUNT;
+		}
+	}
+	else
+	{
+		WRONG_PARAM_COUNT;
+	}
+	if (array_init(return_value) == FAILURE)
+	{
+		RETURN_FALSE;
+	}
+	if (pval_opt && array_init(*pval_opt) == FAILURE)
+	{
+		RETURN_FALSE;
+	}
+	p = get_assoc (pval_id);
+	if (p && p->scan_response)
+	{
+		int i;
+		Z_ScanResponse *res = p->scan_response;
+		if (pval_opt)
+		{
+			if (res->numberOfEntriesReturned)
+				add_assoc_long(*pval_opt, "number",
+							   *res->numberOfEntriesReturned);
+			if (res->stepSize)
+				add_assoc_long(*pval_opt, "stepsize", *res->stepSize);
+			if (res->positionOfTerm)
+				add_assoc_long(*pval_opt, "position", *res->positionOfTerm);
+			if (res->scanStatus)
+				add_assoc_long(*pval_opt, "status", *res->scanStatus);
+		}
+		for (i = 0; res->entries && i < res->entries->num_entries; i++)
+		{
+			zval *my_zval;
+			ALLOC_ZVAL(my_zval);
+			array_init(my_zval);
+			INIT_PZVAL(my_zval);
+
+			if (res->entries->entries[i]->which == Z_Entry_termInfo)
+			{
+				Z_TermInfo *t = res->entries->entries[i]->u.termInfo;
+				add_next_index_string(my_zval, "term", 1);
+
+				if (t->term->which == Z_Term_general)
+					add_next_index_stringl (my_zval, t->term->u.general->buf,
+											t->term->u.general->len, 1);
+				else
+					add_next_index_string (my_zval, "?", 1);
+				add_next_index_long (my_zval, t->globalOccurrences ?
+					*t->globalOccurrences : 0);
+			}
+			else
+				add_next_index_string(my_zval, "unknown", 1);
+			
+			zend_hash_next_index_insert (
+				return_value->value.ht, (void *) &my_zval, sizeof(zval *),
+				NULL);
+		}
+
+	}
+	release_assoc (p);
+}
+/* }}} */
+
+/* {{{ proto int yaz_ccl_conf(int id, array package)
+   Configure CCL package */
+
+PHP_FUNCTION(yaz_ccl_conf)
+{
+	pval **pval_id, **pval_package;
+	Yaz_Association p;
+	if (ZEND_NUM_ARGS() != 2 || 
+		zend_get_parameters_ex(2, &pval_id, &pval_package) ==
+		FAILURE)
+	{
+		WRONG_PARAM_COUNT;
+	}
+	if (Z_TYPE_PP(pval_package) != IS_ARRAY)
+	{
+		php_error(E_WARNING, "yaz_ccl_conf: Expected array parameter");
+		RETURN_FALSE;
+	}
+	p = get_assoc (pval_id);
+	if (p)
+	{
+		HashTable *ht = Z_ARRVAL_PP(pval_package);
+		HashPosition pos;
+		zval **ent;
+		char *key;
+
+		ccl_qual_rm(&p->ccl_parser->bibset);
+		p->ccl_parser->bibset = ccl_qual_mk();
+		for(zend_hash_internal_pointer_reset_ex(ht, &pos);
+			zend_hash_get_current_data_ex(ht, (void**) &ent, &pos) == SUCCESS;
+			zend_hash_move_forward_ex(ht, &pos)) 
+		{
+			ulong idx;
+			int type = zend_hash_get_current_key_ex(ht, &key, 0, 
+													&idx, 0, &pos);
+			if (type != HASH_KEY_IS_STRING || Z_TYPE_PP(ent) != IS_STRING)
+				continue;
+			ccl_qual_fitem(p->ccl_parser->bibset, (*ent)->value.str.val, key);
+		}
+	}
+	release_assoc (p);
+}
+/* }}} */
+
+/* {{{ proto int yaz_ccl_parse(int id, string query, array res)
+   Parse a CCL query */
+
+PHP_FUNCTION(yaz_ccl_parse)
+{
+	pval **pval_id, **pval_query, **pval_res;
+	Yaz_Association p;
+	if (ZEND_NUM_ARGS() != 3 || 
+		zend_get_parameters_ex(3, &pval_id, &pval_query, &pval_res) ==
+		FAILURE)
+	{
+		WRONG_PARAM_COUNT;
+	}
+	if (!ParameterPassedByReference(ht, 3))
+	{
+		WRONG_PARAM_COUNT;
+	}
+	if (array_init(*pval_res) == FAILURE)
+	{
+		RETURN_FALSE;
+	}
+	convert_to_string_ex (pval_query);
+	p = get_assoc (pval_id);
+	if (p)
+	{
+		const char *query_str = (*pval_query)->value.str.val;
+		struct ccl_rpn_node *rpn;
+		struct ccl_token *token_list =
+			ccl_parser_tokenize(p->ccl_parser, query_str);
+		rpn = ccl_parser_find(p->ccl_parser, token_list);
+		ccl_token_del(token_list);
+
+		add_assoc_long(*pval_res, "errorcode", p->ccl_parser->error_code);
+		if (p->ccl_parser->error_code)
+		{
+			add_assoc_string(*pval_res, "errorstring",
+							 (char*) ccl_err_msg(p->ccl_parser->error_code),
+							 1);
+			add_assoc_long(*pval_res, "errorpos",
+						   p->ccl_parser->error_pos - query_str);
+			RETVAL_FALSE;
+		}
+		else
+		{
+			WRBUF wrbuf_pqf = wrbuf_alloc();
+			ccl_pquery(wrbuf_pqf, rpn);
+			add_assoc_stringl(*pval_res, "rpn", wrbuf_buf(wrbuf_pqf),
+							  wrbuf_len(wrbuf_pqf),1);
+			wrbuf_free(wrbuf_pqf, 1);
+			RETVAL_TRUE;
+		}
+		ccl_rpn_delete(rpn);
+	}
+	else
+		RETVAL_FALSE;
+	release_assoc (p);
+}
+/* }}} */
+
 
 PHP_MINIT_FUNCTION(yaz)
 {
