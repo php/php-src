@@ -20,7 +20,7 @@
   <license>PHP</license>
   <release>
     <state>beta</state>
-    <version>0.6</version>
+    <version>0.7</version>
     <date>2003-04-18</date>
 	<notes>
 		SQLite is now bundled with the extension; no need to download and build
