@@ -46,8 +46,10 @@ static int pdo_oci_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *info
 		}
 	}
 
-	add_next_index_long(info, einfo->errcode);
-	add_next_index_string(info, einfo->errmsg, 1);
+	if (einfo->errcode) {
+		add_next_index_long(info, einfo->errcode);
+		add_next_index_string(info, einfo->errmsg, 1);
+	}
 
 	return 1;
 }
@@ -382,7 +384,8 @@ static struct pdo_dbh_methods oci_methods = {
 	NULL,
 	pdo_oci_fetch_error_func,
 	NULL,	/* get_attr */
-	NULL	/* check_liveness */
+	NULL,	/* check_liveness */
+	NULL	/* get_driver_methods */
 };
 
 static int pdo_oci_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_DC) /* {{{ */
