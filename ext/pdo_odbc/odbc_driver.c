@@ -32,7 +32,7 @@
 
 static struct {
 	char state[6];
-	enum pdo_error err;
+	enum pdo_error_type err;
 } odbc_to_pdo_err_map[] = {
 	/* this table maps ODBC V3 SQLSTATE codes to PDO_ERR codes */
 	{ "42S01", PDO_ERR_ALREADY_EXISTS },
@@ -71,9 +71,9 @@ void pdo_odbc_init_error_table(void)
 	}
 }
 
-static enum pdo_error pdo_odbc_map_error(char *state)
+static enum pdo_error_type pdo_odbc_map_error(char *state)
 {
-	enum pdo_error *p_err;
+	enum pdo_error_type *p_err;
 	if (SUCCESS == zend_hash_find(&err_hash, state, sizeof(odbc_to_pdo_err_map[0].state), (void**)&p_err)) {
 		return *p_err;
 	}
@@ -110,7 +110,7 @@ void pdo_odbc_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, PDO_ODBC_HSTMT statement, 
 	pdo_odbc_db_handle *H = (pdo_odbc_db_handle*)dbh->driver_data;
 	pdo_odbc_errinfo *einfo = &H->einfo;
 	pdo_odbc_stmt *S = NULL;
-	enum pdo_error *pdo_err = &dbh->error_code;
+	enum pdo_error_type *pdo_err = &dbh->error_code;
 
 	if (stmt) {
 		S = (pdo_odbc_stmt*)stmt->driver_data;
