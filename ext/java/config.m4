@@ -51,7 +51,6 @@ AC_ARG_WITH(java,
 
     AC_DEFINE(HAVE_JAVA)
     PHP_EXTENSION(java, "shared")
-    PHP_BUILD_SHARED
     AC_MSG_RESULT(yes)
   else
     AC_MSG_RESULT(no)
