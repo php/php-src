@@ -58,12 +58,12 @@ install-headers:
 install-programs: $(builddir)/phpize $(builddir)/php-config
 	@echo "Installing helper programs:       $(INSTALL_ROOT)$(bindir)/"
 	@for prog in $(bin_SCRIPTS); do \
-		echo "  program: $$prog"; \
-		$(INSTALL) -m 755 $(builddir)/$$prog $(INSTALL_ROOT)$(bindir)/$$prog; \
+		echo "  program: $(program_prefix)$$prog$(program_suffix)"; \
+		$(INSTALL) -m 755 $(builddir)/$$prog $(INSTALL_ROOT)$(bindir)/$(program_prefix)$$prog$(program_suffix); \
 	done
 	@for prog in $(bin_src_SCRIPTS); do \
-		echo "  program: $$prog"; \
-		$(INSTALL) -m 755 $(top_srcdir)/scripts/$$prog $(INSTALL_ROOT)$(bindir)/$$prog; \
+		echo "  program: $(program_prefix)$$prog$(program_suffix)"; \
+		$(INSTALL) -m 755 $(top_srcdir)/scripts/$$prog $(INSTALL_ROOT)$(bindir)/$(program_prefix)$$prog$(program_suffix); \
 	done
 
 $(builddir)/phpize: $(srcdir)/phpize.in $(top_builddir)/config.status
