@@ -49,8 +49,8 @@
 #include <stdarg.h>
 #include "mcal.h"
 #include "php_mcal.h"
-#include "zend_modules.h"
-#if (WIN32|WINNT)
+#include "modules.h"
+#ifdef PHP_WIN32
 #include "winsock.h"
 #endif
 CALSTREAM *cal_open();

@@ -46,7 +46,7 @@
 #include "imap.h"
 #include "mail.h"
 #include "rfc822.h"
-#include "zend_modules.h"
+#include "modules.h"
 #if (WIN32|WINNT)
 #include "winsock.h"
 MAILSTREAM DEFAULTPROTO;
