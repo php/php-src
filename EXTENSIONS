@@ -262,6 +262,11 @@ PRIMARY MAINTAINER:  Sascha Schumann <sascha@schumann.cx>
 MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
+EXTENSION:           openssl
+PRIMARY MAINTAINER:  Stig Venaas <venaas@php.net>
+MAINTENANCE:         Maintained
+STATUS:              Experimental
+-------------------------------------------------------------------------------
 EXTENSION:           pcre
 PRIMARY MAINTAINER:  Andrei Zmievski <andrei@ispi.net>
 MAINTENANCE:         Maintained
