@@ -281,7 +281,7 @@ static int
 php_ns_startup(sapi_module_struct *sapi_module)
 {
 	if(php_module_startup(sapi_module) == FAILURE
-			|| zend_register_module(&php_aolserver_module) == FAILURE) {
+			|| zend_startup_module(&php_aolserver_module) == FAILURE) {
 		return FAILURE;
 	} else {
 		return SUCCESS;
