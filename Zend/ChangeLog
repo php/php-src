@@ -1,3 +1,9 @@
+2004-06-01  Andi Gutmans  <andi@zend.com>
+
+    * zend.c:
+      - If user error handler returns "false" then we relay to the built in error
+        handler
+
 2004-05-31  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_reflection_api.c:
