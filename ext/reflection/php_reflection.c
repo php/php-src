@@ -999,7 +999,7 @@ ZEND_METHOD(reflection_function, __construct)
 	ZVAL_STRINGL(name, name_str, name_len, 1);
 	zend_hash_update(Z_OBJPROP_P(object), "name", sizeof("name"), (void **) &name, sizeof(zval *), NULL);
 	lcname = do_alloca(name_len + 1);
-	zend_str_tolower_copy(lcname, name_str, name_len+1);
+	zend_str_tolower_copy(lcname, name_str, name_len);
 	if (zend_hash_find(EG(function_table), lcname, name_len + 1, (void **)&fptr) == FAILURE) {
 		free_alloca(lcname);
 		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, 
@@ -1278,7 +1278,7 @@ ZEND_METHOD(reflection_parameter, __construct)
 
 				convert_to_string_ex(&reference);
 				lcname = do_alloca(Z_STRLEN_P(reference) + 1);
-				zend_str_tolower_copy(lcname, Z_STRVAL_P(reference), Z_STRLEN_P(reference) + 1);
+				zend_str_tolower_copy(lcname, Z_STRVAL_P(reference), Z_STRLEN_P(reference));
 				if (zend_hash_find(EG(function_table), lcname, (int) Z_STRLEN_P(reference) + 1, (void**) &fptr) == FAILURE) {
 					free_alloca(lcname);
 					zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, 
@@ -1307,7 +1307,7 @@ ZEND_METHOD(reflection_parameter, __construct)
 				} else {
 					convert_to_string_ex(classref);
 					lcname = do_alloca(Z_STRLEN_PP(classref) + 1);
-					zend_str_tolower_copy(lcname, Z_STRVAL_PP(classref), Z_STRLEN_PP(classref) + 1);
+					zend_str_tolower_copy(lcname, Z_STRVAL_PP(classref), Z_STRLEN_PP(classref));
 					if (zend_hash_find(EG(class_table), lcname, (int) Z_STRLEN_PP(classref) + 1, (void **) &pce) == FAILURE) {
 						zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, 
 							"Class %s does not exist", Z_STRVAL_PP(classref));
@@ -1320,7 +1320,7 @@ ZEND_METHOD(reflection_parameter, __construct)
 				
 				convert_to_string_ex(method);
 				lcname = do_alloca(Z_STRLEN_PP(method) + 1);
-				zend_str_tolower_copy(lcname, Z_STRVAL_PP(method), Z_STRLEN_PP(method) + 1);
+				zend_str_tolower_copy(lcname, Z_STRVAL_PP(method), Z_STRLEN_PP(method));
 				if (zend_hash_find(&ce->function_table, lcname, (int)(Z_STRLEN_PP(method) + 1), (void **) &fptr) == FAILURE) {
 					free_alloca(lcname);
 					zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, 
@@ -1492,7 +1492,7 @@ ZEND_METHOD(reflection_method, __construct)
 		case IS_STRING:
 			convert_to_string_ex(&classname);
 			lcname = do_alloca(name_len + 1);
-			zend_str_tolower_copy(lcname, Z_STRVAL_P(classname), Z_STRLEN_P(classname) + 1);
+			zend_str_tolower_copy(lcname, Z_STRVAL_P(classname), Z_STRLEN_P(classname));
 			if (zend_hash_find(EG(class_table), lcname, (int)(Z_STRLEN_P(classname) + 1), (void **) &pce) == FAILURE) {
 				free_alloca(lcname);
 				zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, 
@@ -1520,7 +1520,7 @@ ZEND_METHOD(reflection_method, __construct)
 	ZVAL_STRINGL(name, name_str, name_len, 1);
 	zend_hash_update(Z_OBJPROP_P(object), "name", sizeof("name"), (void **) &name, sizeof(zval *), NULL);
 	lcname = do_alloca(name_len + 1);
-	zend_str_tolower_copy(lcname, name_str, name_len+1);
+	zend_str_tolower_copy(lcname, name_str, name_len);
 
 	if (zend_hash_find(&ce->function_table, lcname, name_len + 1, (void **) &mptr) == FAILURE) {
 		free_alloca(lcname);
@@ -1800,7 +1800,7 @@ static void reflection_class_object_ctor(INTERNAL_FUNCTION_PARAMETERS, int is_ob
 		zval_add_ref(&argument);
 		zend_hash_update(Z_OBJPROP_P(object), "name", sizeof("name"), (void **) &argument, sizeof(zval *), NULL);
 		lcname = do_alloca(Z_STRLEN_P(argument) + 1);
-		zend_str_tolower_copy(lcname, Z_STRVAL_P(argument), Z_STRLEN_P(argument)+1);
+		zend_str_tolower_copy(lcname, Z_STRVAL_P(argument), Z_STRLEN_P(argument));
 		if (zend_hash_find(EG(class_table), lcname, (int)(Z_STRLEN_P(argument) + 1), (void **)&ce) == FAILURE) {
 			free_alloca(lcname);
 			zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, 
@@ -2543,7 +2543,7 @@ ZEND_METHOD(reflection_property, __construct)
 		case IS_STRING:
 			convert_to_string_ex(&classname);
 			lcname = do_alloca(Z_STRLEN_P(classname) + 1);
-			zend_str_tolower_copy(lcname, Z_STRVAL_P(classname), Z_STRLEN_P(classname) + 1);
+			zend_str_tolower_copy(lcname, Z_STRVAL_P(classname), Z_STRLEN_P(classname));
 			if (zend_hash_find(EG(class_table), lcname, (int)(Z_STRLEN_P(classname) + 1), (void **) &pce) == FAILURE) {
 				free_alloca(lcname);
 				zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, 
@@ -2564,7 +2564,7 @@ ZEND_METHOD(reflection_property, __construct)
 	}
 
 	lcname = do_alloca(name_len + 1);
-	zend_str_tolower_copy(lcname, name_str, name_len + 1);
+	zend_str_tolower_copy(lcname, name_str, name_len);
 
 	if (zend_hash_find(&ce->properties_info, lcname, name_len + 1, (void **) &property_info) == FAILURE) {
 		free_alloca(lcname);
@@ -2825,7 +2825,7 @@ ZEND_METHOD(reflection_extension, __construct)
 	ZVAL_STRINGL(name, name_str, name_len, 1);
 	zend_hash_update(Z_OBJPROP_P(object), "name", sizeof("name"), (void **) &name, sizeof(zval *), NULL);
 	lcname = do_alloca(name_len + 1);
-	zend_str_tolower_copy(lcname, name_str, name_len+1);
+	zend_str_tolower_copy(lcname, name_str, name_len);
 	if (zend_hash_find(&module_registry, lcname, (int)(Z_STRLEN_P(name) + 1), (void **)&module) == FAILURE) {
 		free_alloca(lcname);
 		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, 
