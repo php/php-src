@@ -467,10 +467,21 @@ static inline int php_add_var_hash(HashTable *var_hash, zval *var, void *var_old
 	char id[32], *p;
 	register int len;
 
-	/* relies on "(long)" being a perfect hash function for data pointers */
-	p = smart_str_print_long(id + sizeof(id) - 1, (long) var);
-	len = id + sizeof(id) - 1 - p;
-	
+	/* relies on "(long)" being a perfect hash function for data pointers,
+	   however the actual identity of an object has had to be determined
+	   by its object handle and the class entry since 5.0. */
+	if (Z_TYPE_P(var) == IS_OBJECT) {
+		p = smart_str_print_long(id + sizeof(id) - 1,
+				(((unsigned long)Z_OBJCE_P(var) << 5)
+				| ((unsigned long)Z_OBJCE_P(var) >> (sizeof(long) * 8 - 5)))
+				+ (long) Z_OBJ_HANDLE_P(var));
+		*(--p) = 'O';
+		len = id + sizeof(id) - 1 - p;
+	} else {
+		p = smart_str_print_long(id + sizeof(id) - 1, (long) var);
+		len = id + sizeof(id) - 1 - p;
+	}
+
 	if (var_old && zend_hash_find(var_hash, p, len, var_old) == SUCCESS) {
 		if (!var->is_ref) {
 			/* we still need to bump up the counter, since non-refs will
@@ -588,8 +599,8 @@ static void php_var_serialize_intern(smart_str *buf, zval **struc, HashTable *va
 	ulong *var_already;
 	HashTable *myht;
 
-	if(var_hash 
-	   && php_add_var_hash(var_hash, *struc, (void *) &var_already) == FAILURE) {
+	if (var_hash 
+	    && php_add_var_hash(var_hash, *struc, (void *) &var_already) == FAILURE) {
 		if((*struc)->is_ref) {
 			smart_str_appendl(buf, "R:", 2);
 			smart_str_append_long(buf, *var_already);
@@ -703,7 +714,7 @@ static void php_var_serialize_intern(smart_str *buf, zval **struc, HashTable *va
 					}		
 					
 					switch (i) {
-					  case HASH_KEY_IS_LONG:
+						case HASH_KEY_IS_LONG:
 							php_var_serialize_long(buf, index);
 							break;
 						case HASH_KEY_IS_STRING:
