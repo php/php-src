@@ -6,10 +6,7 @@
  * You will be able to choose a part to view.
  * */
 
-#$filename = "/home/CLIENTWEB/worlddo/mimetests/namib.rfc822";
-$filename = "/home/CLIENTWEB/worlddo/mimetests/uumsg";
-#$filename = "/home/CLIENTWEB/worlddo/mimetests/segblob.txt";
-#$filename = "yourmessage.txt";
+$filename = "yourmessage.txt";
 
 /* parse the message and return a mime message resource */
 $mime = mailparse_msg_parse_file($filename);

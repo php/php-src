@@ -120,7 +120,7 @@ static int php_stream_memory_close(php_stream *stream, int close_handle TSRMLS_D
 	ms = stream->abstract;
 	assert(ms != NULL);
 
-	if (ms->data) {
+	if (ms->data && close_handle && ms->mode != TEMP_STREAM_READONLY) {
 		efree(ms->data);
 	}
 	efree(ms);
@@ -262,13 +262,19 @@ PHPAPI php_stream *_php_stream_memory_open(int mode, char *buf, size_t length ST
 {	php_stream *stream;
 	php_stream_memory_data *ms;
 
-	if ((stream = php_stream_memory_create_rel(TEMP_STREAM_DEFAULT)) != NULL) {
-		if (length) {
-			assert(buf != NULL);
-			php_stream_write(stream, buf, length);
-		}
+	if ((stream = php_stream_memory_create_rel(mode)) != NULL) {
 		ms = stream->abstract;
-		ms->mode = mode;
+		
+		if (mode == TEMP_STREAM_READONLY) {
+			/* use the buffer directly */
+			ms->data = buf;
+			ms->fsize = length;
+		} else {
+			if (length) {
+				assert(buf != NULL);
+				php_stream_write(stream, buf, length);
+			}
+		}
 	}
 	return stream;
 }

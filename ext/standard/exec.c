@@ -35,6 +35,16 @@
 #include <signal.h>
 #endif
 
+#if HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#if HAVE_SYS_STAT_H
+#include <sys/stat.h>
+#endif
+#if HAVE_FCNTL_H
+#include <fcntl.h>
+#endif
+
 /* {{{ php_Exec
  * If type==0, only last line of output is returned (exec)
  * If type==1, all lines will be printed and last lined returned (system)
@@ -474,6 +484,352 @@ PHP_FUNCTION(shell_exec)
 	
 	RETVAL_STRINGL(ret, total_readbytes, 0);
 	Z_STRVAL_P(return_value)[total_readbytes] = '\0';	
+}
+/* }}} */
+
+static int le_proc_open;
+
+static void proc_open_rsrc_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
+{
+#if HAVE_SYS_WAIT
+	int wstatus;
+	pid_t child, wait_pid;
+	
+	child = (pid_t)rsrc->ptr;
+
+	do {
+		wait_pid = waitpid(child, &wstatus, 0);
+	} while (wait_pid == -1 && errno = EINTR);
+	
+	if (wait_pid == -1)
+		FG(pclose_ret) = -1;
+	else
+		FG(pclose_ret) = wstatus;
+#else
+	FG(pclose_ret) = -1;
+#endif
+}
+
+PHP_MINIT_FUNCTION(proc_open)
+{
+	le_proc_open = zend_register_list_destructors_ex(proc_open_rsrc_dtor, NULL, "proc-opened-process", module_number);
+	return SUCCESS;
+}
+
+/* {{{ proto resource proc_open(string command, array descriptorspec, array &pipes)
+   Run a process with more control over it's file descriptors */
+PHP_FUNCTION(proc_open)
+{
+#define MAX_DESCRIPTORS	16
+#define DESC_PIPE		1
+#define DESC_FILE		2
+#define DESC_PARENT_MODE_WRITE	8
+#ifndef O_BINARY
+#define O_BINARY	0
+#endif
+
+#ifdef PHP_WIN32
+	/* NOINHERIT is actually required for pipes to work correctly when inherited;
+	 * see the win32 specific dup call a little further down */
+#define pipe(handles)	_pipe((handles), 512, _O_BINARY | _O_NOINHERIT)
+#endif
+
+	char *command;
+	long command_len;
+	zval *descriptorspec;
+	zval *pipes;
+	struct {
+		int index; /* desired fd number in child process */
+		int parentend, childend; /* fds for pipes in parent/child */
+		int mode;
+	} descriptors[MAX_DESCRIPTORS];
+	int ndesc = 0;
+	int i;
+	zval **descitem = NULL;
+	HashPosition pos;
+#ifdef PHP_WIN32
+	PROCESS_INFORMATION pi;
+	STARTUPINFO si;
+	BOOL newprocok;
+	HANDLE child;
+#else
+	pid_t child;
+#endif
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "saz/", &command,
+				&command_len, &descriptorspec, &pipes) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	memset(descriptors, 0, sizeof(descriptors));
+
+	/* walk the descriptor spec and set up files/pipes */
+	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(descriptorspec), &pos);
+	while (zend_hash_get_current_data_ex(Z_ARRVAL_P(descriptorspec), (void **)&descitem, &pos) == SUCCESS) {
+		char *str_index;
+		ulong nindex;
+		zval **ztype;
+
+		str_index = NULL;
+		zend_hash_get_current_key_ex(Z_ARRVAL_P(descriptorspec), &str_index, NULL, &nindex, 0, &pos);
+
+		if (str_index) {
+			zend_error(E_WARNING, "%s(): descriptor spec must be an integer indexed array",
+					get_active_function_name(TSRMLS_C));
+			RETURN_FALSE;
+		}
+
+		descriptors[ndesc].index = nindex;
+
+		if (Z_TYPE_PP(descitem) == IS_RESOURCE) {
+			/* should be a stream - try and dup the descriptor */
+			php_stream *stream;
+			int fd;
+
+			ZEND_FETCH_RESOURCE(stream, php_stream *, descitem, -1, "File-Handle", php_file_le_stream());
+
+			if (FAILURE == php_stream_cast(stream, PHP_STREAM_AS_FD, (void **)&fd, REPORT_ERRORS)) {
+				RETURN_FALSE;
+			}
+
+			descriptors[ndesc].childend = dup(fd);
+			if (descriptors[ndesc].childend < 0) {
+				zend_error(E_WARNING, "%s(): unable to dup File-Handle for descriptor %d - %s",
+						get_active_function_name(TSRMLS_C), nindex, strerror(errno));
+			}
+			descriptors[ndesc].mode = DESC_FILE;
+
+		} else if (Z_TYPE_PP(descitem) != IS_ARRAY) {
+			zend_error(E_WARNING, "%s(): descriptor item must be either an array or a File-Handle",
+					get_active_function_name(TSRMLS_C));
+			RETURN_FALSE;
+		} else {
+
+			zend_hash_index_find(Z_ARRVAL_PP(descitem), 0, (void **)&ztype);
+			convert_to_string_ex(ztype);
+
+			if (strcmp(Z_STRVAL_PP(ztype), "pipe") == 0) {
+				int newpipe[2];
+				zval **zmode;
+
+				descriptors[ndesc].mode = DESC_PIPE;
+				if (0 != pipe(newpipe)) {
+					zend_error(E_WARNING, "%s(): unable to create pipe %s",
+							get_active_function_name(TSRMLS_C), strerror(errno));
+					RETURN_FALSE;
+				}
+
+				zend_hash_index_find(Z_ARRVAL_PP(descitem), 1, (void **)&zmode);
+				convert_to_string_ex(zmode);
+
+				if (strcmp(Z_STRVAL_PP(zmode), "w") != 0) {
+					descriptors[ndesc].parentend = newpipe[1];
+					descriptors[ndesc].childend = newpipe[0];
+					descriptors[ndesc].mode |= DESC_PARENT_MODE_WRITE;
+				} else {
+					descriptors[ndesc].parentend = newpipe[0];
+					descriptors[ndesc].childend = newpipe[1];
+				}
+
+#ifdef PHP_WIN32
+				{	/* this magic is needed to ensure that pipes work
+					 * correctly in the child */
+					int tmpfd = dup(descriptors[ndesc].childend);
+					close(descriptors[ndesc].childend);
+					descriptors[ndesc].childend = tmpfd;
+				}
+#endif
+
+			} else if (strcmp(Z_STRVAL_PP(ztype), "file") == 0) {
+				zval **zfile, **zmode;
+				int open_flags = 0;
+				const struct {
+					char *modestring;
+					int flags;
+				} modemap[] = {
+					{ "r",		O_RDONLY },
+					{ "rb",		O_RDONLY | O_BINARY },
+					{ "r+",		O_RDWR },
+					{ "rb+",	O_RDWR | O_BINARY },
+					{ "w",		O_WRONLY | O_CREAT | O_TRUNC },
+					{ "wb",		O_WRONLY | O_CREAT | O_TRUNC | O_BINARY},
+					{ "w+",		O_RDWR | O_CREAT | O_TRUNC },
+					{ "wb+",	O_RDWR | O_CREAT | O_TRUNC | O_BINARY},
+					{ "a",		O_WRONLY | O_CREAT | O_APPEND },
+					{ "ab",		O_WRONLY | O_CREAT | O_APPEND | O_BINARY },
+					{ "a+",		O_RDWR | O_CREAT | O_APPEND },
+					{ "ab+",	O_RDWR | O_CREAT | O_APPEND | O_BINARY},
+					{ NULL, 0 }
+				};
+
+				descriptors[ndesc].mode = DESC_FILE;
+
+				zend_hash_index_find(Z_ARRVAL_PP(descitem), 1, (void **)&zfile);
+				convert_to_string_ex(zfile);
+
+				zend_hash_index_find(Z_ARRVAL_PP(descitem), 2, (void **)&zmode);
+				convert_to_string_ex(zmode);
+
+				for (i = 0; modemap[i].modestring != NULL; i++) {
+					if (strcmp(modemap[i].modestring, Z_STRVAL_PP(zmode)) == 0) {
+						open_flags = modemap[i].flags;
+						break;
+					}
+				}
+
+				descriptors[ndesc].childend = VCWD_OPEN_MODE(Z_STRVAL_PP(zfile), open_flags, 0644);
+				if (descriptors[ndesc].childend < 0) {
+
+					if (PG(allow_url_fopen)) {
+						/* try a wrapper */
+						int fd;
+						php_stream *stream;
+						size_t old_size = FG(def_chunk_size);
+
+						FG(def_chunk_size) = 1;
+						stream = php_stream_open_wrapper(Z_STRVAL_PP(zfile), Z_STRVAL_PP(zmode),
+								ENFORCE_SAFE_MODE|REPORT_ERRORS, NULL);
+						FG(def_chunk_size) = old_size;
+
+						if (stream == NULL)
+							RETURN_FALSE;
+
+						/* force into an fd */
+						if (FAILURE == php_stream_cast(stream, PHP_STREAM_CAST_RELEASE|PHP_STREAM_AS_FD, (void **)&fd, REPORT_ERRORS))
+							RETURN_FALSE;
+
+						descriptors[ndesc].childend = fd;
+
+					} else {
+
+						zend_error(E_WARNING, "%s(): unable to open %s with mode %s",
+								get_active_function_name(TSRMLS_C),
+								Z_STRVAL_PP(zfile), Z_STRVAL_PP(zmode));
+						RETURN_FALSE;
+					}
+				}
+			} else {
+				zend_error(E_WARNING, "%s(): %s is not a valid descriptor spec/mode",
+						get_active_function_name(TSRMLS_C), Z_STRVAL_PP(ztype));
+				RETURN_FALSE;
+			}
+		}
+
+		zend_hash_move_forward_ex(Z_ARRVAL_P(descriptorspec), &pos);
+		if (++ndesc == MAX_DESCRIPTORS)
+			break;
+	}
+
+#ifdef PHP_WIN32
+	memset(&si, 0, sizeof(si));
+	si.cb = sizeof(si);
+	
+	/* redirect stdin/stdout/stderr if requested */
+	for (i = 0; i < ndesc; i++) {
+		switch(descriptors[i].index) {
+			case 0:
+				si.hStdInput = (HANDLE)_get_osfhandle(descriptors[i].childend);
+				si.dwFlags |= STARTF_USESTDHANDLES;
+				break;
+			case 1:
+				si.hStdOutput = (HANDLE)_get_osfhandle(descriptors[i].childend);
+				si.dwFlags |= STARTF_USESTDHANDLES;
+				break;
+			case 2:
+				si.hStdError = (HANDLE)_get_osfhandle(descriptors[i].childend);
+				si.dwFlags |= STARTF_USESTDHANDLES;
+				break;
+		}
+	}
+
+	memset(&pi, 0, sizeof(pi));
+	
+	newprocok = CreateProcess(NULL, command, NULL, NULL, TRUE, NORMAL_PRIORITY_CLASS, NULL, NULL, &si, &pi);
+
+	if (FALSE == newprocok) {
+		zend_error(E_WARNING, "%s(): CreateProcess failed", get_active_function_name(TSRMLS_C));
+		RETURN_FALSE;
+	}
+
+	child = pi.hProcess;
+	
+#else
+	/* the unix way */
+
+	child = fork();
+
+	if (child == 0) {
+		/* this is the child process */
+
+		/* close those descriptors that we just opened for the parent stuff,
+		 * dup new descriptors into required descriptors and close the original
+		 * cruft */
+		for (i = 0; i < ndesc; i++) {
+			switch (descriptors[i].mode & ~DESC_PARENT_MODE_WRITE) {
+				case DESC_PIPE:
+					close(descriptors[i].parentend);
+					break;
+			}
+			if (dup2(descriptors[i].childend, descriptors[i].index) < 0)
+				perror("dup2");
+			if (descriptors[i].childend != descriptors[i].index)
+				close(descriptors[i].childend);
+		}
+
+		execl("/bin/sh", "sh", "-c", command, NULL);
+		_exit(127);
+
+	} else if (child < 0) {
+		/* failed to fork() */
+
+		/* clean up all the descriptors */
+		for (i = 0; i < ndesc; i++) {
+			close(descriptors[i].childend);
+			close(descriptors[i].parentend);
+		}
+
+		zend_error(E_WARNING, "%s(): fork failed - %s",
+				get_active_function_name(TSRMLS_C),
+				strerror(errno)
+				);
+
+		RETURN_FALSE;
+
+	}
+#endif
+	/* we forked/spawned and this is the parent */
+
+	array_init(pipes);
+
+	/* clean up all the child ends and then open streams on the parent
+	 * ends, where appropriate */
+	for (i = 0; i < ndesc; i++) {
+		char *stdiomode;
+		FILE *fp;
+		php_stream *stream;
+
+		close(descriptors[i].childend);
+
+		switch (descriptors[i].mode & ~DESC_PARENT_MODE_WRITE) {
+			case DESC_PIPE:
+				stdiomode = descriptors[i].mode & DESC_PARENT_MODE_WRITE ? "w" : "r";
+				fp = fdopen(descriptors[i].parentend, stdiomode);
+				if (fp) {
+					stream = php_stream_fopen_from_file(fp, stdiomode);
+					if (stream) {
+						zval *retfp;
+
+						MAKE_STD_ZVAL(retfp);
+						php_stream_to_zval(stream, retfp);
+						add_index_zval(pipes, descriptors[i].index, retfp);
+					}
+				}
+				break;
+		}
+	}
+
+	ZEND_REGISTER_RESOURCE(return_value, child, le_proc_open);
+
 }
 /* }}} */
 
