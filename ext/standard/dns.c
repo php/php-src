@@ -63,45 +63,52 @@
 #include "dns.h"
 /* }}} */
 
-char *php_gethostbyaddr(char *ip);
-char *php_gethostbyname(char *name);
+static char *php_gethostbyaddr(char *ip);
+static char *php_gethostbyname(char *name);
 
 /* {{{ proto string gethostbyaddr(string ip_address)
    Get the Internet host name corresponding to a given IP address */
 PHP_FUNCTION(gethostbyaddr)
 {
-	pval **arg;
+	zval **arg;
+	char *addr;	
 	
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg) == FAILURE) {
-		WRONG_PARAM_COUNT;
+		ZEND_WRONG_PARAM_COUNT();
 	}
-	convert_to_string_ex(arg);
 
-	RETVAL_STRING(php_gethostbyaddr(Z_STRVAL_PP(arg)), 0);
+	convert_to_string_ex(arg);
+	
+	addr = php_gethostbyaddr(Z_STRVAL_PP(arg));
+
+	if(addr == NULL) {
+		php_error(E_WARNING, "Address is not in a.b.c.d form");
+		RETVAL_FALSE;
+	} else {
+		RETVAL_STRING(addr, 0);
+	}
 }
 /* }}} */
 
 /* {{{ php_gethostbyaddr
  */
-char *php_gethostbyaddr(char *ip)
+static char *php_gethostbyaddr(char *ip)
 {
 	struct in_addr addr;
 	struct hostent *hp;
 
 	addr.s_addr = inet_addr(ip);
+
 	if (addr.s_addr == -1) {
-#if PHP_DEBUG
-		php_error(E_WARNING, "address not in a.b.c.d form");
-#endif
-		return estrdup(ip);
+		return NULL;
 	}
+
 	hp = gethostbyaddr((char *) &addr, sizeof(addr), AF_INET);
+
 	if (!hp) {
-#if PHP_DEBUG
-		php_error(E_WARNING, "Unable to resolve %s\n", ip);
-#endif
 		return estrdup(ip);
 	}
+
 	return estrdup(hp->h_name);
 }
 /* }}} */
@@ -110,11 +117,12 @@ char *php_gethostbyaddr(char *ip)
    Get the IP address corresponding to a given Internet host name */
 PHP_FUNCTION(gethostbyname)
 {
-	pval **arg;
+	zval **arg;
 	
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg) == FAILURE) {
-		WRONG_PARAM_COUNT;
+		ZEND_WRONG_PARAM_COUNT();
 	}
+
 	convert_to_string_ex(arg);
 
 	RETVAL_STRING(php_gethostbyname(Z_STRVAL_PP(arg)), 0);
@@ -125,13 +133,13 @@ PHP_FUNCTION(gethostbyname)
    Return a list of IP addresses that a given hostname resolves to. */
 PHP_FUNCTION(gethostbynamel)
 {
-	pval **arg;
+	zval **arg;
 	struct hostent *hp;
 	struct in_addr in;
 	int i;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg) == FAILURE) {
-		WRONG_PARAM_COUNT;
+		ZEND_WRONG_PARAM_COUNT();
 	}
 	convert_to_string_ex(arg);
 
@@ -141,36 +149,31 @@ PHP_FUNCTION(gethostbynamel)
 
 	hp = gethostbyname(Z_STRVAL_PP(arg));
 	if (hp == NULL || hp->h_addr_list == NULL) {
-#if PHP_DEBUG
-		php_error(E_WARNING, "Unable to resolve %s\n", Z_STRVAL_PP(arg));
-#endif
-		return;
+		RETURN_FALSE;
 	}
 
 	for (i = 0 ; hp->h_addr_list[i] != 0 ; i++) {
 		in = *(struct in_addr *) hp->h_addr_list[i];
 		add_next_index_string(return_value, inet_ntoa(in), 1);
 	}
-
-	return;
 }
 /* }}} */
 
 /* {{{ php_gethostbyname
  */
-char *php_gethostbyname(char *name)
+static char *php_gethostbyname(char *name)
 {
 	struct hostent *hp;
 	struct in_addr in;
 
 	hp = gethostbyname(name);
+
 	if (!hp || !hp->h_addr_list) {
-#if PHP_DEBUG
-		php_error(E_WARNING, "Unable to resolve %s\n", name);
-#endif
 		return estrdup(name);
 	}
+
 	memcpy(&in.s_addr, *(hp->h_addr_list), sizeof(in.s_addr));
+
 	return estrdup(inet_ntoa(in));
 }
 /* }}} */
@@ -181,7 +184,7 @@ char *php_gethostbyname(char *name)
    Check DNS records corresponding to a given Internet host name or IP address */
 PHP_FUNCTION(checkdnsrr)
 {
-	pval **arg1,**arg2;
+	zval **arg1,**arg2;
 	int type,i;
 #ifndef MAXPACKET
 #define MAXPACKET  8192 /* max packet size used internally by BIND */
