@@ -283,15 +283,15 @@ The configuration file for the CLI version of PHP.
 .B php.ini
 The standard configuration file will only be used when 
 .B php\-cli.ini
-cannot not be found.
+cannot be found.
 .SH EXAMPLES
 .TP 5
 \fIphp -r 'echo "Hello World\\n";'\fP
-This command simply writes the text "Hello World" to stabdard out.
+This command simply writes the text "Hello World" to standard out.
 .TP
 \fIphp \-r 'print_r(gd_info());'\fP
 This shows the configuration of your gd extension. You can use this
-to easily check which imag formats you can use. If you have any
+to easily check which image formats you can use. If you have any
 dynamic modules you may want to use the same ini file that php uses
 when executed from your webserver. There are more extensions which
 have such a function. For dba use:
@@ -299,12 +299,12 @@ have such a function. For dba use:
 \fIphp \-r 'print_r(dba_handlers(1));'\fP
 .RE
 .TP
-\fIphp \-R'echo strip_tags($argn)."\\n";\fP
+\fIphp \-R 'echo strip_tags($argn)."\\n";'\fP
 This PHP command strips off the HTML tags line by line and outputs the 
-result. To see how it works you can first look at the following PHP command '
-\fIphp \-d html_errors=1 \-i\fP' which uses PHP to output HTML formatted
+result. To see how it works you can first look at the following PHP command
+\'\fIphp \-d html_errors=1 \-i\fP\' which uses PHP to output HTML formatted
 configuration information. If you then combine those two 
-\'\fIphp \.\.\.|php \.\.\.\fP\' you\'ll see what happens.
+\'\fIphp \.\.\.|php \.\.\.\fP\' you'll see what happens.
 .TP
 \fIphp \-E 'echo "Lines: $argi\\n";'\fP
 Using this PHP command you can count the lines being input.
