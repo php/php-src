@@ -1,28 +1,28 @@
 dnl $Id$
 
-AC_MSG_CHECKING(for PSPELL support)
-AC_ARG_WITH(pspell,
-[  --with-pspell[=DIR]     Include PSPELL support.],
-[
-  if test "$withval" != "no"; then
-    if test "$withval" = "yes"; then
-      PSPELL_DIR=/usr/local
-    else
-      PSPELL_DIR=$withval
-    fi
+PHP_ARG_WITH(pspell,whether to include pspell support,
+[  --with-pspell[=DIR]     Include PSPELL support.])
 
-    AC_ADD_INCLUDE($PSPELL_DIR/include)
-    AC_ADD_LIBRARY_WITH_PATH(pspell, $PSPELL_DIR/lib)
+if test "$PHP_PSPELL" != "no"; then
+	PHP_EXTENSION(pspell, $ext_shared)
+	for i in /usr/local /usr $PHP_PSPELL; do
+		if test -f $i/include/pspell/pspell.h; then
+			PSPELL_DIR=$i
+			PSPELL_INCDIR=$i/include/pspell
+		elif test -f $i/include/pspell.h; then
+			PSPELL_DIR=$i
+			PSPELL_INCDIR=$i
+		fi
+	done
 
-    if test ! -f "$PSPELL_DIR/include/pspell/pspell.h"; then
-      AC_MSG_ERROR(Could not find pspell.h in $PSPELL_DIR/include/pspell - please copy it manually from the pspell sources to $PSPELL_DIR/include/pspell)
-    fi
-    AC_DEFINE(HAVE_PSPELL,1,[Whether you have pspell])
-    AC_MSG_RESULT(yes)
-	PHP_EXTENSION(pspell)
-  else
-    AC_MSG_ERROR(no)
-  fi
-],[
-  AC_MSG_RESULT(no)
-])
+	if test -z "$PSPELL_DIR"; then
+		AC_MSG_ERROR(Cannot find pspell)
+	fi
+
+	PSPELL_LIBDIR=$PSPELL_DIR/lib
+
+	AC_DEFINE(HAVE_PSPELL,1,[ ])
+	PHP_SUBST(PSPELL_SHARED_LIBADD)
+	AC_ADD_LIBRARY_WITH_PATH(pspell, $PSPELL_LIBDIR, PSPELL_SHARED_LIBADD)
+	AC_ADD_INCLUDE($PSPELL_INCDIR)
+fi

@@ -18,11 +18,10 @@
 
 /* $Id$ */
 
+#define IS_EXT_MODULE
+
 #include "php.h"
 
-#ifdef COMPILE_DL_PSPELL
-#include "phpdl.h"
-#endif
 #include <stdlib.h>
 #include <ctype.h>
 #include <stdio.h>

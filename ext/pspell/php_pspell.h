@@ -23,7 +23,7 @@
    | If you did not, or have any questions about PHP licensing, please    |
    | contact core@php.net.                                                |
    +----------------------------------------------------------------------+
-   | Authors: Rasmus Lerdorf <rasmus@lerdorf.on.ca>                       |
+   | Authors: Vlad Krupin <phpdevel@echospace.com>                        |
    +----------------------------------------------------------------------+
  */
 
@@ -36,9 +36,8 @@
 extern zend_module_entry pspell_module_entry;
 #define pspell_module_ptr &pspell_module_entry
 
-extern PHP_MINIT_FUNCTION(pspell);
-extern PHP_MINFO_FUNCTION(pspell);
-
+PHP_MINIT_FUNCTION(pspell);
+PHP_MINFO_FUNCTION(pspell);
 PHP_FUNCTION(pspell_new);
 PHP_FUNCTION(pspell_mode);
 PHP_FUNCTION(pspell_runtogether);
