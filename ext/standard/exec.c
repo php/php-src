@@ -46,7 +46,7 @@
 #endif
 
 /* {{{ php_make_safe_mode_command */
-static int php_make_safe_mode_command(char *cmd, char **safecmd)
+static int php_make_safe_mode_command(char *cmd, char **safecmd TSRMLS_DC)
 {
 	int lcmd, larg0, ldir, len, overflow_limit;
 	char *space, *sep, *arg0;
@@ -678,7 +678,7 @@ PHP_FUNCTION(proc_open)
 		RETURN_FALSE;
 	}
 
-	if (FAILURE == php_make_safe_mode_command(command, &command)) {
+	if (FAILURE == php_make_safe_mode_command(command, &command TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
 
