@@ -57,6 +57,7 @@ PHP                                                                        NEWS
   (daniel dot beet at accuratesoftware dot com, Tony)
 - Fixed bug #31527 (crash in msg_send() when non-string is stored without
   being serialized). (Ilia)
+- Fixed bug #31515 (Improve performance of scandir() by factor of 10 or so). (Ilia)
 - Fixed bug #31514 (open_basedir uses path_translated rather then cwd for .
   translation). (Ilia)
 - Fixed bug #31480 (Possible infinite loop in imap_mail_compose()). (Ilia)

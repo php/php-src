@@ -488,7 +488,7 @@ PHP_FUNCTION(scandir)
 	array_init(return_value);
 
 	for (i = 0; i < n; i++) {
-		add_next_index_string(return_value, namelist[i]->d_name, 0);
+		add_next_index_string(return_value, namelist[i], 0);
 	}
 
 	if (n) {
