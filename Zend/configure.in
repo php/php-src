@@ -2,9 +2,10 @@ dnl $Id$
 dnl Process this file with autoconf to produce a configure script.
 
 AC_INIT(zend.c)
-
-AC_CONFIG_HEADER(config.h)
+AM_INIT_AUTOMAKE(zend, 0.80A)
+AM_CONFIG_HEADER(zend_config.h)
 AM_SANITY_CHECK
+ZEND_VERSION=$VERSION
 
 dnl We want this one before the checks, so the checks can modify CFLAGS.
 test -z "$CFLAGS" && auto_cflags=1
@@ -12,53 +13,24 @@ test -z "$CFLAGS" && auto_cflags=1
 dnl Checks for programs.
 AC_PROG_YACC
 if test "$YACC" != "bison -y"; then
-    AC_MSG_WARN(You will need bison if you'd want to regenerate the PHP 3.0 parsers.)
+    AC_MSG_WARN(You will need bison if you want to regenerate the Zend parser.)
 else
     AC_MSG_CHECKING(bison version)
     set `bison --version| sed -e 's/^GNU Bison version //' -e 's/\./ /'`
     if test "$1" = "1" -a "$2" -lt "25"; then
-        AC_MSG_WARN(You will need bison 1.25 if you'd want to regenerate the PHP 3.0 parsers (found $1.$2).)
+        AC_MSG_WARN(You will need bison 1.25 if you want to regenerate the Zend parser (found $1.$2).)
     fi
     AC_MSG_RESULT($1.$2 (ok))
 fi
 AC_PROG_CC
 AC_PROG_RANLIB
 AC_PROG_CC_C_O
-AC_PATH_PROG(PERL_PATH, perl)
+AM_PROG_LEX
 
 dnl Ugly hack to get around a problem with gcc on AIX.
 if test "$CC" = "gcc" -a "$ac_cv_prog_cc_g" = "yes" -a \
    "`uname -sv`" = "AIX 4"; then
 	CFLAGS=`echo $CFLAGS | sed -e 's/-g//'`
-fi
-
-dnl check for -R, etc. switch
-AC_MSG_CHECKING(if compiler supports -R)
-AC_CACHE_VAL(php_cv_cc_dashr,[
-	SAVE_LIBS="${LIBS}"
-	LIBS="-R /usr/lib ${LIBS}"
-	AC_TRY_LINK([], [], php_cv_cc_dashr=yes, php_cv_cc_dashr=no)
-	LIBS="${SAVE_LIBS}"])
-AC_MSG_RESULT($php_cv_cc_dashr)
-if test $php_cv_cc_dashr = "yes"; then
-	ld_runpath_switch="-R"
-	apxs_runpath_switch="-Wl,-R'"
-else
-	AC_MSG_CHECKING([if compiler supports -Wl,-rpath,])
-	AC_CACHE_VAL(php_cv_cc_rpath,[
-		SAVE_LIBS="${LIBS}"
-		LIBS="-Wl,-rpath,/usr/lib ${LIBS}"
-		AC_TRY_LINK([], [], php_cv_cc_rpath=yes, php_cv_cc_rpath=no)
-		LIBS="${SAVE_LIBS}"])
-	AC_MSG_RESULT($php_cv_cc_rpath)
-	if test $php_cv_cc_rpath = "yes"; then
-		ld_runpath_switch="-Wl,-rpath,"
-		apxs_runpath_switch="-Wl,'-rpath "
-	else
-		dnl something innocuous
-		ld_runpath_switch="-L"
-		apxs_runpath_switch="-L'"
-	fi
 fi
 
 dnl
