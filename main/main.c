@@ -103,10 +103,6 @@ static void php3_set_timeout(long seconds);
 void *gLock;					/*mutex variable */
 
 
-#define PHP_MODE_STANDARD	1
-#define PHP_MODE_HIGHLIGHT	2
-#define PHP_MODE_INDENT		3
-
 /* True globals (no need for thread safety) */
 HashTable configuration_hash;
 PHPAPI char *php3_ini_path = NULL;
@@ -1166,7 +1162,21 @@ PHPAPI int apache_php_module_main(request_rec *r, int fd, int display_source_mod
 	file_handle.type = ZEND_HANDLE_FD;
 	file_handle.handle.fd = fd;
 	file_handle.filename = SG(request_info).path_translated;
-	(void) php_execute_script(&file_handle CLS_CC ELS_CC);
+
+	if (display_source_mode) {
+		zend_syntax_highlighter_ini syntax_highlighter_ini;
+
+		if (open_file_for_scanning(&file_handle CLS_CC)==SUCCESS) {
+			php_get_highlight_struct(&syntax_highlighter_ini);
+			zend_highlight(&syntax_highlighter_ini);
+			fclose(file_handle.handle.fp);
+			return OK;
+		} else {
+			return NOT_FOUND;
+		}
+	} else {
+		(void) php_execute_script(&file_handle CLS_CC ELS_CC);
+	}
 	
 	php3_header();			/* Make sure headers have been sent */
 	zend_end_ob_buffering(1);
