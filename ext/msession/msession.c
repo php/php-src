@@ -104,7 +104,9 @@ function_entry msession_functions[] = {
 };
 
 zend_module_entry msession_module_entry = {
+#if ZEND_MODULE_API_NO >= 20010901
 	STANDARD_MODULE_HEADER,
+#endif
 	"msession",
 	msession_functions,
 	PHP_MINIT(msession),
@@ -112,7 +114,9 @@ zend_module_entry msession_module_entry = {
 	PHP_RINIT(msession),	/* Replace with NULL if there's nothing to do at request start */
 	PHP_RSHUTDOWN(msession),/* Replace with NULL if there's nothing to do at request end */
 	PHP_MINFO(msession),
-        NO_VERSION_YET,
+#if ZEND_MODULE_API_NO >= 20010901
+	NO_VERSION_YET,
+#endif
 	STANDARD_MODULE_PROPERTIES
 };
 
