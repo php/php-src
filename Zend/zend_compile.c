@@ -1984,12 +1984,6 @@ static zend_bool do_inherit_property_access_check(HashTable *target_ht, zend_pro
 				zend_hash_del(&ce->default_properties, prot_name, prot_name_length+1);
 			}
 			pefree(prot_name, ce->type & ZEND_INTERNAL_CLASS);
-		} else if (!(child_info->flags & ZEND_ACC_PRIVATE) && (child_info->flags & ZEND_ACC_STATIC)) {
-			char *prop_name, *tmp;
-
-			zend_unmangle_property_name(child_info->name, &tmp, &prop_name);
-			zend_error(E_COMPILE_ERROR, "Cannot redeclare property static %s %s::$%s in class %s", 
-				zend_visibility_string(child_info->flags), parent_ce->name, prop_name, ce->name);
 		}
 		return 0;	/* Don't copy from parent */
 	} else {
