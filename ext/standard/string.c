@@ -3450,6 +3450,8 @@ PHPAPI size_t php_strip_tags(char *rbuf, int len, int *stateptr, char *allow, in
 			case '-':
 				if (state == 3 && p >= buf + 2 && *(p-1) == '-' && *(p-2) == '!') {
 					state = 4;
+				} else {
+					goto reg_char;
 				}
 				break;
 
