@@ -113,11 +113,11 @@ static int com_iter_move_forwards(zend_object_iterator *iter TSRMLS_DC)
 
 static zend_object_iterator_funcs com_iter_funcs = {
 	com_iter_dtor,
-	NULL, /* rewind */
 	com_iter_has_more,
 	com_iter_get_data,
 	com_iter_get_key,
-	com_iter_move_forwards
+	com_iter_move_forwards,
+	NULL
 };
 
 zend_object_iterator *php_com_iter_get(zend_class_entry *ce, zval *object TSRMLS_DC)
