@@ -1,5 +1,7 @@
 --TEST--
 Simple POST Method test
+--SKIPIF--
+<?php if (php_sapi_name()=='cli') print 'skip';?>
 --POST--
 a=Hello+World
 --GET--
