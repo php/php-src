@@ -6,11 +6,11 @@ PHP 4.0                                                                    NEWS
   memory used by the script. (Thies)
 - fstat() and stat() now return identical output by returning a numerical and
   string indexed array (Jason)
-- Fixed race in writing session files (Sascha)
 - Fixed memory leak upon re-registering constants (Sascha, Zend Engine)
 - Upgraded expat to version 1.95.1. (Thies)
 
 ?? ??? 200?, Version 4.0.6
+- Fixed race in writing session files (Sascha)
 - Fixed a possible crash in the PHP CGI when no input file is
   specified (Zeev)
 - Added is_callable() function that can be used to find out whether
