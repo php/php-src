@@ -9,6 +9,13 @@
 
 #include "php_virtual_cwd.h"
 
+#ifdef ZTS
+#include "TSRM.h"
+CWD_API int cwd_globals_id;
+#else
+cwd_globals_struct cwd_globals;
+#endif
+
 #ifndef PHP_WIN32
 #include <unistd.h>
 #endif

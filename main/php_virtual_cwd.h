@@ -3,6 +3,16 @@
 
 #include "zend.h"
 
+#ifdef PHP_WIN32
+#       ifdef CWD_EXPORTS
+#       define CWD_API __declspec(dllexport)
+#       else
+#       define CWD_API __declspec(dllimport)
+#       endif
+#else
+#define CWD_API
+#endif
+
 typedef struct _cwd_state {
 	char *cwd;
 	int cwd_length;
