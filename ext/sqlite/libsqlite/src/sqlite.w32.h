@@ -28,7 +28,7 @@ extern "C" {
 /*
 ** The version of the SQLite library.
 */
-#define SQLITE_VERSION         "2.8.3"
+#define SQLITE_VERSION         "2.8.9"
 
 /*
 ** The version string is also compiled into the library so that a program
@@ -166,6 +166,7 @@ int sqlite_exec(
 #define SQLITE_NOLFS       22   /* Uses OS features not supported on host */
 #define SQLITE_AUTH        23   /* Authorization denied */
 #define SQLITE_FORMAT      24   /* Auxiliary database format error */
+#define SQLITE_RANGE       25   /* 2nd parameter to sqlite_bind out of range */
 #define SQLITE_ROW         100  /* sqlite_step() has another row ready */
 #define SQLITE_DONE        101  /* sqlite_step() has finished executing */
 
@@ -683,6 +684,77 @@ int sqlite_step(
 ** and the result code returned will be SQLITE_ABORT.
 */
 int sqlite_finalize(sqlite_vm*, char **pzErrMsg);
+
+/*
+** This routine deletes the virtual machine, writes any error message to
+** *pzErrMsg and returns an SQLite return code in the same way as the
+** sqlite_finalize() function.
+**
+** Additionally, if ppVm is not NULL, *ppVm is left pointing to a new virtual
+** machine loaded with the compiled version of the original query ready for
+** execution.
+**
+** If sqlite_reset() returns SQLITE_SCHEMA, then *ppVm is set to NULL.
+**
+******* THIS IS AN EXPERIMENTAL API AND IS SUBJECT TO CHANGE ******
+*/
+int sqlite_reset(sqlite_vm*, char **pzErrMsg);
+
+/*
+** If the SQL that was handed to sqlite_compile contains variables that
+** are represeted in the SQL text by a question mark ('?').  This routine
+** is used to assign values to those variables.
+**
+** The first parameter is a virtual machine obtained from sqlite_compile().
+** The 2nd "idx" parameter determines which variable in the SQL statement
+** to bind the value to.  The left most '?' is 1.  The 3rd parameter is
+** the value to assign to that variable.  The 4th parameter is the number
+** of bytes in the value, including the terminating \000 for strings.
+** Finally, the 5th "copy" parameter is TRUE if SQLite should make its
+** own private copy of this value, or false if the space that the 3rd
+** parameter points to will be unchanging and can be used directly by
+** SQLite.
+**
+** Unbound variables are treated as having a value of NULL.  To explicitly
+** set a variable to NULL, call this routine with the 3rd parameter as a
+** NULL pointer.
+**
+** If the 4th "len" parameter is -1, then strlen() is used to find the
+** length.
+**
+** This routine can only be called immediately after sqlite_compile()
+** or sqlite_reset() and before any calls to sqlite_step().
+**
+******* THIS IS AN EXPERIMENTAL API AND IS SUBJECT TO CHANGE ******
+*/
+int sqlite_bind(sqlite_vm*, int idx, const char *value, int len, int copy);
+
+/*
+** This routine configures a callback function - the progress callback - that
+** is invoked periodically during long running calls to sqlite_exec(),
+** sqlite_step() and sqlite_get_table(). An example use for this API is to keep
+** a GUI updated during a large query.
+**
+** The progress callback is invoked once for every N virtual machine opcodes,
+** where N is the second argument to this function. The progress callback
+** itself is identified by the third argument to this function. The fourth
+** argument to this function is a void pointer passed to the progress callback
+** function each time it is invoked.
+**
+** If a call to sqlite_exec(), sqlite_step() or sqlite_get_table() results 
+** in less than N opcodes being executed, then the progress callback is not
+** invoked.
+** 
+** Calling this routine overwrites any previously installed progress callback.
+** To remove the progress callback altogether, pass NULL as the third
+** argument to this function.
+**
+** If the progress callback returns a result other than 0, then the current 
+** query is immediately terminated and any database changes rolled back. If the
+** query was part of a larger transaction, then the transaction is not rolled
+** back and remains active. The sqlite_exec() call returns SQLITE_ABORT. 
+*/
+void sqlite_progress_handler(sqlite*, int, int(*)(void*), void*);
 
 #ifdef __cplusplus
 }  /* End of the 'extern "C"' block */
