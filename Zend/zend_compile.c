@@ -1580,26 +1580,26 @@ char *zend_visibility_string(zend_uint fn_flags)
 }
 
 
-static void do_inherit_method(zend_function *function, zend_class_entry *ce)
+static void do_inherit_method(zend_function *function)
 {
 	/* The class entry of the derived function intentionally remains the same
 	 * as that of the parent class.  That allows us to know in which context
 	 * we're running, and handle private method calls properly.
 	 */
-	if (function->common.fn_flags & ZEND_ACC_ABSTRACT) {
-		ce->ce_flags |= ZEND_ACC_ABSTRACT;
-	}
 	function_add_ref(function);
 }
 
 
-static zend_bool do_inherit_method_check(HashTable *child_function_table, zend_function *parent, zend_hash_key *hash_key, void *pData)
+static zend_bool do_inherit_method_check(HashTable *child_function_table, zend_function *parent, zend_hash_key *hash_key, zend_class_entry *child_ce)
 {
 	zend_uint child_flags;
 	zend_uint parent_flags = parent->common.fn_flags;
 	zend_function *child;
 
 	if (zend_hash_quick_find(child_function_table, hash_key->arKey, hash_key->nKeyLength, hash_key->h, (void **) &child)==FAILURE) {
+		if (parent_flags & ZEND_ACC_ABSTRACT) {
+			child_ce->ce_flags |= ZEND_ACC_ABSTRACT;
+		}
 		return 1; /* method doesn't exist in child, copy from parent */
 	}
 	child_flags	= child->common.fn_flags;
@@ -1613,8 +1613,7 @@ static zend_bool do_inherit_method_check(HashTable *child_function_table, zend_f
 		}
 	}
 
-	/* Disallow making an inherited method abstract.
-	 */
+	/* Disallow making an inherited method abstract. */
 	if ((child_flags & ZEND_ACC_ABSTRACT) && !(parent_flags & ZEND_ACC_ABSTRACT)) {
 		zend_error(E_COMPILE_ERROR, "Cannot make non abstract method %s::%s() abstract in class %s", ZEND_FN_SCOPE_NAME(parent), child->common.function_name, ZEND_FN_SCOPE_NAME(child));
 	}
