@@ -343,6 +343,7 @@ function_entry basic_functions[] = {
 	PHP_FE(str_shuffle,															NULL)
 	PHP_FE(str_word_count,														NULL)
 	PHP_FE(str_split,														NULL)
+	PHP_FE(strpbrk,															NULL)
 
 #ifdef HAVE_STRCOLL
 	PHP_FE(strcoll,															NULL)
