@@ -1,3 +1,34 @@
+2002-02-04  Jaroslaw Kolakowski  <J.Kolakowski@students.mimuw.edu.pl>
+
+    * ext/domxml/php_domxml.c:
+    Fixed compile error
+
+2002-02-04  Mark L. Woodward  <mlwmohawk@mohawksoft.com>
+
+    * ext/msession/msession.c: More 4.0.6 compatibility.
+
+    * ext/msession/msession.c: Restored backward compatibility to PHP 4.0.6
+
+2002-02-04  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/DB/TESTERS: Added How To Run Tests
+
+2002-02-04  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * ext/crack/crack.c
+      ext/mailparse/mailparse.c: Fix ZTS startup crash
+
+2002-02-04  Thies C. Arntzen  <thies@thieso.net>
+
+    * ext/oracle/config.m4: add oracle 9 detection for oracle-module
+
+2002-02-04  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * ext/mbstring/mbstring.c: Remove TSRMLS_FETCH() does not need
+
+    * ext/msession/msession.c
+      ext/domxml/php_domxml.c: Fix ZTS build
+
 2002-02-03  jim winstead  <jimw@apache.org>
 
     * makedist: don't include old changelogs in distribution, either
