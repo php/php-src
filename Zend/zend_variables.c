@@ -94,7 +94,7 @@ void zval_del_ref(zval **p)
 	(*p)->refcount--;
 	if ((*p)->refcount==0) {
 		zval_dtor(*p);
-		efree(*p);
+		FREE_ZVAL(*p);
 	}
 }                                                                                                                               
 
