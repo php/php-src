@@ -340,9 +340,6 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
         copy_amount = COPY_WHEN_ABSOLUTE(path_copy);
 		is_absolute = 1;
 #ifdef TSRM_WIN32
-	} else if (IS_UNC_PATH(path_copy, path_length)) {
-		copy_amount = 2;
-		is_absolute = 1;
 	} else if (IS_SLASH(path_copy[0])) {
 		copy_amount = 2;
 #endif
