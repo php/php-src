@@ -1,3 +1,13 @@
+2003-06-23  Zeev Suraski  <zeev@zend.com>
+
+    * zend_execute.c:
+      Fix crash :)
+
+2003-06-23  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_execute.c:
+      FIx leak
+
 2003-06-22  Zeev Suraski  <zeev@zend.com>
 
     * zend_execute.c
