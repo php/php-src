@@ -218,7 +218,6 @@ zval *mysqli_read_property(zval *object, zval *member, int type TSRMLS_DC)
 	} else {
 		std_hnd = zend_get_std_object_handlers();
 		retval = std_hnd->read_property(object, member, type TSRMLS_CC);
-		retval->refcount = 1;
 	}
 
 	if (member == &tmp_member) {
@@ -398,6 +397,8 @@ static void php_mysqli_init_globals(zend_mysqli_globals *mysqli_globals)
 PHP_MINIT_FUNCTION(mysqli)
 {
 	zend_class_entry *ce;
+	zend_object_handlers *std_hnd = zend_get_std_object_handlers();
+
 	
 	ZEND_INIT_MODULE_GLOBALS(mysqli, php_mysqli_init_globals, NULL);
 	REGISTER_INI_ENTRIES();
@@ -406,7 +407,7 @@ PHP_MINIT_FUNCTION(mysqli)
 	mysqli_object_handlers.clone_obj = NULL;
 	mysqli_object_handlers.read_property = mysqli_read_property;
 	mysqli_object_handlers.write_property = mysqli_write_property;
-	mysqli_object_handlers.get_property_ptr_ptr = NULL;
+	mysqli_object_handlers.get_property_ptr_ptr = std_hnd->get_property_ptr_ptr;
 	mysqli_object_handlers.get_constructor = php_mysqli_constructor_get;
 
 	zend_hash_init(&classes, 0, NULL, NULL, 1);
