@@ -535,7 +535,7 @@ ZEND_FUNCTION(gmp_div_qr)
 }
 /* }}} */
 
-/* {{{ proto array gmp_div_r(resource a, resource b [, int round])
+/* {{{ proto resource gmp_div_r(resource a, resource b [, int round])
    Divide a by b, returns reminder only */
 ZEND_FUNCTION(gmp_div_r)
 {
@@ -571,7 +571,7 @@ ZEND_FUNCTION(gmp_div_r)
 }
 /* }}} */
 
-/* {{{ proto array gmp_div_q(resource a, resource b [, int round])
+/* {{{ proto resource gmp_div_q(resource a, resource b [, int round])
    Divide a by b, returns quotient only */
 ZEND_FUNCTION(gmp_div_q)
 {
@@ -770,12 +770,12 @@ ZEND_FUNCTION(gmp_perfect_square)
 
 	FETCH_GMP_ZVAL(gmpnum_a, a_arg);
 
-	RETURN_BOOL(mpz_perfect_square_p(*gmpnum_a));
+	RETURN_BOOL((mpz_perfect_square_p(*gmpnum_a)!=0));
 }
 /* }}} */
 
-/* {{{ proto bool gmp_prob_prime(resource a[, int reps])
-   Checks if a is a "probably prime" */
+/* {{{ proto int gmp_prob_prime(resource a[, int reps])
+   Checks if a is "probably prime" */
 ZEND_FUNCTION(gmp_prob_prime)
 {
 	zval **gmpnumber_arg, **reps_arg;
@@ -795,11 +795,11 @@ ZEND_FUNCTION(gmp_prob_prime)
 			reps = Z_LVAL_PP(reps_arg);
 			break;
 		case 1:
-			reps = 25;
+			reps = 10;
 			break;
 	}
 
-	RETURN_BOOL(mpz_probab_prime_p(*gmpnum_a, reps));
+	RETURN_LONG(mpz_probab_prime_p(*gmpnum_a, reps));
 }
 /* }}} */
 
@@ -874,7 +874,7 @@ ZEND_FUNCTION(gmp_invert)
 }
 /* }}} */
 
-/* {{{ proto resource gmp_jacobi(resource a, resource b)
+/* {{{ proto int gmp_jacobi(resource a, resource b)
    Computes Jacobi symbol */
 ZEND_FUNCTION(gmp_jacobi)
 {
@@ -882,7 +882,7 @@ ZEND_FUNCTION(gmp_jacobi)
 }
 /* }}} */
 
-/* {{{ proto resource gmp_legendre(resource a, resource b)
+/* {{{ proto int gmp_legendre(resource a, resource b)
    Computes Legendre symbol */
 ZEND_FUNCTION(gmp_legendre)
 {
