@@ -291,7 +291,7 @@ unticked_class_declaration_statement:
 ;
 
 namespace_declaration_statement:
-		T_NAMESPACE T_STRING '{' { zend_do_begin_namespace(&$1, &$2 TSRMLS_CC); } namespace_statement_list '}' { zend_do_end_namespace(&$1 TSRMLS_CC); }
+		T_NAMESPACE namespace_name '{' { zend_do_begin_namespace(&$1, &$2 TSRMLS_CC); } namespace_statement_list '}' { zend_do_end_namespace(&$1 TSRMLS_CC); }
 ;
 
 namespace_statement_list:
@@ -328,7 +328,7 @@ extends_from:
 ;
 
 declaration_class_name:
-	|	namespace_prefix T_PAAMAYIM_NEKUDOTAYIM T_STRING { do_fetch_class_name(&$$, &$1, &$3, 0 TSRMLS_CC); }
+		namespace_name T_PAAMAYIM_NEKUDOTAYIM T_STRING { do_fetch_class_name(&$$, &$1, &$3, 0 TSRMLS_CC); }
 	|	T_STRING { $$ = $1; zend_str_tolower($$.u.constant.value.str.val, $$.u.constant.value.str.len); }
 ;
 
@@ -629,7 +629,7 @@ parse_class_entry:
 ;
 
 catch_class_entry:
-		namespace_prefix T_PAAMAYIM_NEKUDOTAYIM T_STRING { do_fetch_class(&$$, &$1, &$3 TSRMLS_CC); }
+		namespace_name T_PAAMAYIM_NEKUDOTAYIM T_STRING { do_fetch_class(&$$, &$1, &$3 TSRMLS_CC); }
 	|	T_STRING { do_fetch_class(&$$, NULL, &$1 TSRMLS_CC); }
  ;
 
@@ -639,11 +639,11 @@ import_namespace:
 ;
 
 new_class_entry:
-		namespace_prefix T_PAAMAYIM_NEKUDOTAYIM static_or_variable_string { do_fetch_class(&$$, &$1, &$3 TSRMLS_CC); }
+		namespace_name T_PAAMAYIM_NEKUDOTAYIM static_or_variable_string { do_fetch_class(&$$, &$1, &$3 TSRMLS_CC); }
 	|	static_or_variable_string { do_fetch_class(&$$, NULL, &$1 TSRMLS_CC); }
 ;
 
-namespace_prefix:
+namespace_name:
 		T_NAMESPACE_NAME 	{ $$ = $1; }
 	|	T_STRING 			{ $$ = $1; }
 ;	
@@ -654,7 +654,7 @@ static_or_variable_string:
 ;
 
 instanceof_expr:
-		namespace_prefix T_PAAMAYIM_NEKUDOTAYIM T_STRING { do_fetch_class(&$$, &$1, &$3 TSRMLS_CC); }
+		namespace_name T_PAAMAYIM_NEKUDOTAYIM T_STRING { do_fetch_class(&$$, &$1, &$3 TSRMLS_CC); }
 	|	T_STRING { do_fetch_class(&$$, NULL, &$1 TSRMLS_CC); }
 ;
 
@@ -688,7 +688,7 @@ static_scalar: /* compile-time evaluated scalars */
 	|	'+' static_scalar	{ $$ = $2; }
 	|	'-' static_scalar	{ zval minus_one;  minus_one.type = IS_LONG; minus_one.value.lval = -1;  mul_function(&$2.u.constant, &$2.u.constant, &minus_one TSRMLS_CC);  $$ = $2; }
 	|	T_ARRAY '(' static_array_pair_list ')' { $$ = $3; $$.u.constant.type = IS_CONSTANT_ARRAY; }
-	|	namespace_prefix T_PAAMAYIM_NEKUDOTAYIM T_STRING { zend_do_fetch_constant(&$$, &$1, &$3, ZEND_CT TSRMLS_CC); }
+	|	namespace_name T_PAAMAYIM_NEKUDOTAYIM T_STRING { zend_do_fetch_constant(&$$, &$1, &$3, ZEND_CT TSRMLS_CC); }
 ;
 
 
