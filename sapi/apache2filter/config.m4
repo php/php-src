@@ -57,7 +57,7 @@ AC_ARG_WITH(apxs2,
     INSTALL_IT="$APXS -i -a -n php4 $SAPI_LIBTOOL" 
     ;;
   *darwin*)
-    MH_BUNDLE_FLAGS="-bind_at_load -bundle -bundle_loader $APXS_HTTPD"
+    MH_BUNDLE_FLAGS="-bundle -bundle_loader $APXS_HTTPD"
     PHP_SUBST(MH_BUNDLE_FLAGS)
     PHP_SELECT_SAPI(apache2filter, bundle, sapi_apache2.c apache_config.c php_functions.c)
     SAPI_SHARED=libs/libphp4.so
