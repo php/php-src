@@ -3380,7 +3380,7 @@ int zend_include_or_eval_handler(ZEND_OPCODE_HANDLER_ARGS)
 					}	
 				
 					if (zend_hash_add(&EG(included_files), file_handle.opened_path, strlen(file_handle.opened_path)+1, (void *)&dummy, sizeof(int), NULL)==SUCCESS) {
-						CG(active_namespace) = EG(active_namespace);
+						CG(active_namespace) = EG(global_namespace_ptr);
 						new_op_array = zend_compile_file(&file_handle, (EX(opline)->op2.u.constant.value.lval==ZEND_INCLUDE_ONCE?ZEND_INCLUDE:ZEND_REQUIRE) TSRMLS_CC);
 						zend_destroy_file_handle(&file_handle TSRMLS_CC);
 					} else {
@@ -3399,13 +3399,13 @@ int zend_include_or_eval_handler(ZEND_OPCODE_HANDLER_ARGS)
 			break;
 		case ZEND_INCLUDE:
 		case ZEND_REQUIRE:
-			CG(active_namespace) = EG(active_namespace);
+			CG(active_namespace) = EG(global_namespace_ptr);
 			new_op_array = compile_filename(EX(opline)->op2.u.constant.value.lval, inc_filename TSRMLS_CC);
 			break;
 		case ZEND_EVAL: {
 				char *eval_desc = zend_make_compiled_string_description("eval()'d code" TSRMLS_CC);
 
-				CG(active_namespace) = EG(active_namespace);
+				CG(active_namespace) = EG(global_namespace_ptr);
 				new_op_array = compile_string(inc_filename, eval_desc TSRMLS_CC);
 				efree(eval_desc);
 			}
@@ -3431,12 +3431,12 @@ int zend_include_or_eval_handler(ZEND_OPCODE_HANDLER_ARGS)
 
 		EX(function_state).function = (zend_function *) new_op_array;
 		EX(object) = NULL;
+		EG(active_namespace) = EG(global_namespace_ptr);
 		
 		zend_execute(new_op_array TSRMLS_CC);
 		
-		if(EG(active_namespace) != active_namespace) {
-			zend_switch_namespace(active_namespace TSRMLS_CC);
-		}
+		zend_switch_namespace(active_namespace TSRMLS_CC);
+
 		EX(function_state).function = saved_function;
 		EX(object) = saved_object;
 		
