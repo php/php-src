@@ -1,3 +1,26 @@
+2003-06-11  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/dom/text.c:
+      forgot this: set doc for new text node as current may not be in tree
+
+    * ext/dom/text.c:
+      add isWhitespaceInElementContent()
+      fix splitText for nodes not in tree
+      correct links to specs
+
+    * ext/domxml/config.m4
+      ext/xsl/config.m4:
+      update messages to require libxsl >= 1.0.18
+
+    * ext/dom/characterdata.c:
+      add substringData, insertData, deleteData, replaceData
+      fix reference links to specs
+
+2003-06-11  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/string.c:
+      fixed proto
+
 2003-06-10  Rob Richards  <rrichards@ctindustries.net>
 
     * ext/dom/text.c:
