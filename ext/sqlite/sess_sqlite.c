@@ -24,6 +24,7 @@
 #if HAVE_PHP_SESSION
 
 #include "ext/session/php_session.h"
+#include "ext/standard/php_lcg.h"
 #include <sqlite.h>
 #define SQLITE_RETVAL(__r) ((__r) == SQLITE_OK ? SUCCESS : FAILURE)
 #define PS_SQLITE_DATA sqlite *db = (sqlite*)PS_GET_MOD_DATA()
@@ -173,7 +174,14 @@ PS_GC_FUNC(sqlite)
 	rv = sqlite_exec_printf(db, 
 			"DELETE FROM session_data WHERE (%d - updated) > %d", 
 			NULL, NULL, NULL, t, maxlifetime);
-	
+
+	/* because SQLite does not actually clear the deleted data from the database 
+	 * we need to occassionaly do so manually to prevent the sessions database 
+	 * from endlessly growing.
+	 */
+	if ((int) ((float) PS(gc_divisor) * PS(gc_divisor) * php_combined_lcg(TSRMLS_C)) < PS(gc_probability) {
+		rv = sqlite_exec_printf(db, "VACUUM", NULL, NULL, NULL);
+	}
 	return SQLITE_RETVAL(rv);
 }
 
