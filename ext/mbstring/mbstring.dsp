@@ -43,7 +43,7 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MD /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "MBSTRING_EXPORTS" /YX /FD /c
-# ADD CPP /nologo /MD /W3 /GX /O2 /I "..\.." /I "..\..\main" /I "..\..\Zend" /I "..\..\TSRM" /D "NDEBUG" /D ZEND_DEBUG=0 /D ZTS=1 /D "COMPILE_DL_MBSTRING" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "ZEND_WIN32" /D "PHP_WIN32" /D HAVE_MBSTRING=1 /D "MBSTR_ENC_TRANS" /YX /FD /c
+# ADD CPP /nologo /MD /W3 /GX /O2 /I "..\.." /I "..\..\main" /I "..\..\Zend" /I "..\..\TSRM" /D "NDEBUG" /D ZEND_DEBUG=0 /D ZTS=1 /D "COMPILE_DL_MBSTRING" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "ZEND_WIN32" /D "PHP_WIN32" /D HAVE_MBSTRING=1 /D "MBSTR_ENC_TRANS" /FR /YX /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x407 /d "NDEBUG"
@@ -108,6 +108,10 @@ SOURCE=.\mbfilter_kr.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\mbfilter_ru.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\mbfilter_tw.c
 # End Source File
 # Begin Source File
@@ -145,6 +149,10 @@ SOURCE=.\mbfilter_ja.h
 # Begin Source File
 
 SOURCE=.\mbfilter_kr.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\mbfilter_ru.h
 # End Source File
 # Begin Source File
 
