@@ -52,8 +52,6 @@
 
 ZEND_DECLARE_MODULE_GLOBALS(overload)
 
-/* static int le_overload; */
-
 function_entry overload_functions[] = {
 	PHP_FE(overload,	NULL)
 	{NULL, NULL, NULL}
@@ -181,13 +179,13 @@ static int call_get_handler(zval *object, zval *prop_name, zval **prop_value TSR
 		return 1;
 	}
 
+	zval_ptr_dtor(&retval);
+	zval_dtor(result_ptr);
+
 	if (zend_hash_index_find(&OOG(overloaded_classes), (long)Z_OBJCE_P(object), (void*)&oo_data) == FAILURE) {
 		php_error(E_WARNING, "internal problem trying to get property");
 		return 0;
 	}
-
-	zval_ptr_dtor(&retval);
-	zval_dtor(result_ptr);
 
 	if (!oo_data.handle_property_get) {
 		return 0;
@@ -243,12 +241,12 @@ int call_set_handler(zval *object, zval *prop_name, zval *value TSRMLS_DC)
 		return 1;
 	}
 
+	zval_ptr_dtor(&retval);
+
 	if (zend_hash_index_find(&OOG(overloaded_classes), (long)Z_OBJCE_P(object), (void*)&oo_data) == FAILURE) {
 		php_error(E_WARNING, "internal problem trying to set property");
 		return 0;
 	}
-
-	zval_ptr_dtor(&retval);
 
 	if (!oo_data.handle_property_set) {
 		return 0;
@@ -451,8 +449,9 @@ static void overload_call_method(INTERNAL_FUNCTION_PARAMETERS, zend_property_ref
 	}
 
 	if (use_call_handler) {
-		zval **handler_args[2];
+		zval **handler_args[3];
 		zval *arg_array;
+		zval result, *result_ptr = &result;
 		zend_class_entry temp_ce, *orig_ce;
 		int i;
 
@@ -472,23 +471,38 @@ static void overload_call_method(INTERNAL_FUNCTION_PARAMETERS, zend_property_ref
 			zval_add_ref(args[i]);
 			add_next_index_zval(arg_array, *args[i]);
 		}
+
+		result_ptr->is_ref = 1;
+		result_ptr->refcount = 1;
+		ZVAL_NULL(result_ptr);
 		
 		handler_args[0] = &method_name_ptr;
 		handler_args[1] = &arg_array;
+		handler_args[2] = &result_ptr;
 		call_result = call_user_function_ex(NULL,
 											&object,
 											&call_handler,
 											&retval,
-											2, handler_args,
+											3, handler_args,
 											0, NULL TSRMLS_CC);
 		Z_OBJCE_P(object) = orig_ce;
 		zval_ptr_dtor(&arg_array);
 
 		if (call_result == FAILURE || !retval) {
 			efree(args);
+			zval_dtor(result_ptr);
 			php_error(E_WARNING, "unable to call %s::" CALL_HANDLER "() handler", Z_OBJCE_P(object)->name);
 			return;
 		}
+
+		if (zval_is_true(retval)) {
+			*return_value = *result_ptr;
+			INIT_PZVAL(return_value);
+		} else {
+			zval_dtor(result_ptr);
+			php_error(E_WARNING, "Call to undefined method %s::%s()", Z_OBJCE_P(object)->name, Z_STRVAL(method_name));
+		}
+		zval_ptr_dtor(&retval);
 	} else {
 		ZVAL_STRINGL(&call_handler, Z_STRVAL(method->element), Z_STRLEN(method->element), 0);
 		call_result = call_user_function_ex(NULL,
@@ -503,11 +517,12 @@ static void overload_call_method(INTERNAL_FUNCTION_PARAMETERS, zend_property_ref
 			php_error(E_WARNING, "unable to call %s::%s() method", Z_OBJCE_P(object)->name, Z_STRVAL(method->element));
 			return;
 		}
-	}
 
-	*return_value = *retval;
-	INIT_PZVAL(return_value);
-	FREE_ZVAL(retval);
+		*return_value = *retval;
+		INIT_PZVAL(return_value);
+		FREE_ZVAL(retval);
+	}
+	
 	efree(args);
 	zval_dtor(&method->element);
 }
