@@ -1103,17 +1103,9 @@ binary_assign_op_addr: {
 						opline++;
 						continue;
 					}
-					if (!PZVAL_IS_REF(*var_ptr)) {
-						if ((*var_ptr)->refcount>1) {
-							zval *orig_var=*var_ptr;
-							
-							(*var_ptr)->refcount--;
-							ALLOC_ZVAL(*var_ptr);
-							**var_ptr = *orig_var;
-							zendi_zval_copy_ctor(**var_ptr);
-							(*var_ptr)->refcount=1;
-						}
-					}
+					
+					SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
+
 					EG(binary_op)(*var_ptr, *var_ptr, get_zval_ptr(&opline->op2, Ts, &EG(free_op2), BP_VAR_R));
 					Ts[opline->result.u.var].var.ptr_ptr = var_ptr;
 					SELECTIVE_PZVAL_LOCK(*var_ptr, &opline->result);
@@ -1148,17 +1140,9 @@ binary_assign_op_addr: {
 							zendi_zval_copy_ctor(Ts[opline->result.u.var].tmp_var);
 							break;
 					}
-					if (!PZVAL_IS_REF(*var_ptr)) {
-						if ((*var_ptr)->refcount>1) {
-							zval *orig_var = *var_ptr;
-							
-							(*var_ptr)->refcount--;
-							ALLOC_ZVAL(*var_ptr);
-							**var_ptr = *orig_var;
-							zendi_zval_copy_ctor(**var_ptr);
-							(*var_ptr)->refcount=1;
-						}
-					}
+					
+					SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
+
 					incdec_op(*var_ptr);
 					switch (opline->opcode) {
 						case ZEND_PRE_INC:
@@ -1637,10 +1621,8 @@ do_fcall_common:
 						
 						retval_ptr_ptr = get_zval_ptr_ptr(&opline->op1, Ts, BP_VAR_W);
 
-						if (!PZVAL_IS_REF(*retval_ptr_ptr)) {
-							SEPARATE_ZVAL(retval_ptr_ptr);
-							(*retval_ptr_ptr)->is_ref = 1;
-						}
+						SEPARATE_ZVAL_TO_MAKE_IS_REF(retval_ptr_ptr);
+						
 						(*retval_ptr_ptr)->refcount++;
 						(*EG(return_value_ptr_ptr)) = (*retval_ptr_ptr);
 					} else {
@@ -1723,21 +1705,8 @@ send_by_ref:
 						zend_error(E_ERROR, "Only variables can be passed by reference");
 					}
 
+					SEPARATE_ZVAL_TO_MAKE_IS_REF(varptr_ptr);
 					varptr = *varptr_ptr;
-
-					if (!PZVAL_IS_REF(varptr)) {
-						/* code to break away this variable */
-						if (varptr->refcount>1) {
-							varptr->refcount--;
-							ALLOC_ZVAL(*varptr_ptr);
-							**varptr_ptr = *varptr;
-							varptr = *varptr_ptr;
-							varptr->refcount = 1;
-							zval_copy_ctor(varptr);
-						}
-						varptr->is_ref = 1;
-						/* at the end of this code refcount is always 1 */
-					}
 					varptr->refcount++;
 					zend_ptr_stack_push(&EG(argument_stack), varptr);
 				}
@@ -1931,11 +1900,8 @@ send_by_ref:
 						INIT_PZVAL(expr_ptr);
 					} else {
 						if (opline->extended_value) {
-							if (!PZVAL_IS_REF(expr_ptr)) {
-								SEPARATE_ZVAL(expr_ptr_ptr);
-								expr_ptr = *expr_ptr_ptr;
-								expr_ptr->is_ref = 1;
-							}
+							SEPARATE_ZVAL_TO_MAKE_IS_REF(expr_ptr_ptr);
+							expr_ptr = *expr_ptr_ptr;
 							expr_ptr->refcount++;
 						} else if (PZVAL_IS_REF(expr_ptr)) {
 							zval *new_expr;
