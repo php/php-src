@@ -1,0 +1,2 @@
+/* define if you want to use the ftp extension */
+#define HAVE_FTP 0
