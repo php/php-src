@@ -1511,7 +1511,8 @@ SAPI_POST_HANDLER_FUNC(php_mbstr_post_handler)
 #define IS_SJIS2(c) ((((c)>=0x40 && (c)<=0x7e) || ((c)>=0x80 && (c)<=0xfc)) ? 1 : 0)
 
 /* {{{ PHPAPI char *php_mb_strrchr() */
-PHPAPI char *php_mb_strrchr(const char *s, char c TSRMLS_DC){
+PHPAPI char *php_mb_strrchr(const char *s, char c TSRMLS_DC)
+{
 	unsigned char *p = (unsigned char *)s, *last = NULL;
 	while(*p++) {
 		if (*p == c) {
@@ -1530,10 +1531,11 @@ PHPAPI char *php_mb_strrchr(const char *s, char c TSRMLS_DC){
 /* }}} */
 
 /* {{{ PHPAPI int php_mb_is_mb_leadbyte() */
-PHPAPI int php_mb_is_mb_leadbyte(const char *s TSRMLS_DC){
+PHPAPI int php_mb_is_mb_leadbyte(const char *s TSRMLS_DC)
+{
 	unsigned char *p = (unsigned char *)s;
 	if (MBSTRG(current_language) == mbfl_no_language_japanese 
-		&& IS_SJIS1(*p) && IS_SJIS2(*(p+1))){
+		&& IS_SJIS1(*p) && IS_SJIS2(*(p+1))) {
 		return 1;
 	}
 	return 0;
@@ -2605,7 +2607,6 @@ PHP_FUNCTION(mb_strtoupper)
 {
 	char *str, *from_encoding = (char*)mbfl_no2preferred_mime_name(MBSTRG(current_internal_encoding));
 	long str_len, from_encoding_len;
-	long case_mode = 0;
 	char *newstr;
 	size_t ret_len;
 
@@ -2629,7 +2630,6 @@ PHP_FUNCTION(mb_strtolower)
 {
 	char *str, *from_encoding = (char*)mbfl_no2preferred_mime_name(MBSTRG(current_internal_encoding));
 	long str_len, from_encoding_len;
-	long case_mode = 0;
 	char *newstr;
 	size_t ret_len;
 
