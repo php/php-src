@@ -25,7 +25,8 @@ PEAR_FILES = \
 	HTTP.php \
 	File/Find.php \
 	PEAR.php \
-	PEAR/Installer.php
+	PEAR/Installer.php \
+	Socket.php
 
 install-data-local:
 	@if $(mkinstalldirs) $(peardir); then \
