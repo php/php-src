@@ -48,7 +48,7 @@ static void (*zend_message_dispatcher_p)(long message, void *data);
 static int (*zend_get_ini_entry_p)(char *name, uint name_length, zval *contents);
 
 #if ZEND_NEW_ERROR_HANDLING
-static void (*zend_error_cb)(int type, const char *format, ...);
+static void (*zend_error_cb)(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args);
 #else
 ZEND_API void (*zend_error_cb)(int type, const char *format, ...);
 #endif
@@ -503,54 +503,91 @@ ZEND_API void zend_error(int type, const char *format, ...)
 	zval **params;
 	zval retval;
 	zval error_type, error_message;
+	char *error_filename;
+	uint error_lineno;
 	ELS_FETCH();
 	CLS_FETCH();
 
-	INIT_PZVAL(&error_message);
-	error_message.value.str.val = (char *) emalloc(ZEND_ERROR_BUFFER_SIZE);
-
-	va_start(args, format);
-/*	error_message.value.str.len = vsnprintf(error_message->value.str.val, error_message->value.str.len-1, format, args); */
-	error_message.value.str.len = vsprintf(error_message.value.str.val, format, args);
-	error_message.type = IS_STRING;
-	va_end(args);
-
-	/* if we don't have a user defined error handler */
-	if (!EG(user_error_handler)) {
-		zend_error_cb(type, error_message.value.str.val);
-		efree(error_message.value.str.val);
-		return;
+	/* Obtain relevant filename and lineno */
+	switch (type) {
+		case E_CORE_ERROR:
+		case E_CORE_WARNING:
+			error_filename = NULL;
+			error_lineno = 0;
+			break;
+		case E_PARSE:
+		case E_COMPILE_ERROR:
+		case E_COMPILE_WARNING:
+		case E_ERROR:
+		case E_NOTICE:
+		case E_WARNING:
+		case E_USER_ERROR:
+		case E_USER_WARNING:
+		case E_USER_NOTICE:
+			if (zend_is_compiling()) {
+				error_filename = zend_get_compiled_filename(CLS_C);
+				error_lineno = zend_get_compiled_lineno(CLS_C);
+			} else if (zend_is_executing()) {
+				error_filename = zend_get_executed_filename(ELS_C);
+				error_lineno = zend_get_executed_lineno(ELS_C);
+			} else {
+				error_filename = NULL;
+				error_lineno = 0;
+			}
+			break;
+		default:
+			error_filename = NULL;
+			error_lineno = 0;
+			break;
+	}
+	if (!error_filename) {
+		error_filename = "Unknown";
 	}
 
-	/* or the error may not be safe to handle in user-space */
-	switch (type) {
+
+	va_start(args, format);
+	/* if we don't have a user defined error handler */
+	if (!EG(user_error_handler)) {
+		zend_error_cb(type, error_filename, error_lineno, format, args);
+	} else switch (type) {
 		case E_ERROR:
 		case E_PARSE:
 		case E_CORE_ERROR:
 		case E_CORE_WARNING:
 		case E_COMPILE_ERROR:
 		case E_COMPILE_WARNING:
-			zend_error_cb(type, error_message.value.str.val);
+			/* The error may not be safe to handle in user-space */
+			zend_error_cb(type, error_filename, error_lineno, format, args);
+			break;
+		default:
+			/* Handle the error in user space */
+			INIT_PZVAL(&error_message);
+			INIT_PZVAL(&error_type);
+			error_message.value.str.val = (char *) emalloc(ZEND_ERROR_BUFFER_SIZE);
+
+			/* error_message.value.str.len = vsnprintf(error_message->value.str.val, error_message->value.str.len-1, format, args); */
+			error_message.value.str.len = vsprintf(error_message.value.str.val, format, args);
+			error_message.type = IS_STRING;
+
+			error_type.value.lval = type;
+			error_type.type = IS_LONG;
+
+			params = (zval **) emalloc(sizeof(zval *)*2);
+			params[0] = &error_type;
+			params[1] = &error_message;
+
+			if (call_user_function(CG(function_table), NULL, EG(user_error_handler), &retval, 2, params)==SUCCESS) {
+				zval_dtor(&retval);
+			} else {
+				/* The user error handler failed, use built-in error handler */
+				zend_error_cb(type, error_filename, error_lineno, format, args);
+			}
+			efree(params);
 			efree(error_message.value.str.val);
-			return;
+			break;
 	}
 
-	/* Handle the error in user space */
-
-	error_type.value.lval = type;
-	error_type.type = IS_LONG;
-
-	params = (zval **) emalloc(sizeof(zval *)*2);
-	params[0] = &error_type;
-	params[1] = &error_message;
-
-	if (call_user_function(CG(function_table), NULL, EG(user_error_handler), &retval, 2, params)==SUCCESS) {
-	} else {
-		/* The user error handler failed, use built-in error handler */
-		zend_error_cb(type, error_message.value.str.val);
-	}
-	efree(params);
-	efree(error_message.value.str.val);
+	va_end(args);
 }
 
 #endif
