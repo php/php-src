@@ -1,11 +1,13 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2002, Version 4.3.0
-- Mixing OCIPlogon and OCINLogon no longer leak Oracle-Sessions. (thies)
-- old $node->append_child() is now $node->append_sibling(), since
-  new append_child() now behaves like excepted (= W3C standard) (chregu, uwe)
-- Ini settings for encoding/decoding Unicode/JIS user comments (Marcus)
-- Both 'file' and 'path to php.ini' is allowed for "-c" cli/cgi option. (Yasuo)
+- Fixed mixing OCIPlogon() and OCINLogon() to not leak Oracle-Sessions. (thies)
+- Changed old $node->append_child() to $node->append_sibling() since
+  the new append_child() behaves correctly (= W3C standard). (chregu, uwe)
+- Added php.ini options for EXIF extension to encode and decode Unicode/JIS
+  user comments. (Marcus)
+- Changed "-c" CLI/CGI option to allow both 'filename' and 'path to php.ini'.
+  (Yasuo)
 - Added version info to the dll and exe files created under Windows. (jtate)
 - Added "log_errors_max_len" php.ini option which controls maximum length for 
   error messages. (Marcus)
@@ -21,10 +23,9 @@ PHP 4                                                                      NEWS
 - Added "zlib.output_compression_level" php.ini option. (Stig)
 - Added support for --with-apxs build on Mac OS X / Darwin. (markonen)
 - Added support for dynamically loaded extensions on OS X / Darwin. 
-  (dank, markonen)
   NOTE: Due to the Mach object handling in current version of OS X, the
   dynamically loaded extensions do not work on the apxs build. To get
-  reliable extensions support, build --with-apache.
+  reliable extensions support, build --with-apache. (kalowsky, markonen)
 - Fixed CR/LF processing in quoted_printable_decode() on Win32. (kir)
 - Made crack extension available on Win32. Cracklib libraries for Win32 are
   available at http://www.jtatesoftware.com/cracklib/. (jtate)
@@ -68,7 +69,7 @@ PHP 4                                                                      NEWS
 ?? ??? 2002, Version 4.2.0
 - ATTENTION!! register_globals defaults to 'off' now !!!
 - Moved ext/mailparse to PECL. (Wez/Jim)
-- Modified the mysql extension to disable 'LOAD LOCAL' when safe mode is
+- Modified the mysql extension to disable 'LOAD LOCAL' when safe mode is 
   enabled. (Jason)
 - Added CLI (command line interface) sapi which is more suitable for writing 
   shell scripts. Some of the differences to CGI sapi are: no HTTP headers, 
