@@ -45,6 +45,7 @@ ZEND_API int is_equal_function(zval *result, zval *op1, zval *op2);
 ZEND_API int is_not_equal_function(zval *result, zval *op1, zval *op2);
 ZEND_API int is_smaller_function(zval *result, zval *op1, zval *op2);
 ZEND_API int is_smaller_or_equal_function(zval *result, zval *op1, zval *op2);
+ZEND_API inline int is_numeric_string(char *str, int length, long *lval, double *dval);
 
 ZEND_API int increment_function(zval *op1);
 ZEND_API int decrement_function(zval *op2);
