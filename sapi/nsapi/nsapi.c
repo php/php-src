@@ -38,11 +38,11 @@
  * Ideally, this should be done by the configure script.
  */
 #if !defined(XP_UNIX) && !defined(XP_WIN32)
-	#if defined(WIN32)
-		#define XP_WIN32
-	#else
-		#define XP_UNIX
-	#endif
+#if defined(WIN32)
+#define XP_WIN32
+#else
+#define XP_UNIX
+#endif
 #endif
 
 /*
@@ -73,7 +73,7 @@
  * ZTS needs to be defined for NSAPI to work
  */
 #if !defined(ZTS)
-	#error "NSAPI module needs ZTS to be defined"
+#error "NSAPI module needs ZTS to be defined"
 #endif
 
 /*
