@@ -195,7 +195,8 @@ static void _free_outline(zend_rsrc_list_entry *rsrc)
 	if(outline) efree(outline);
 }
 
-static void custom_errorhandler(PDF *p, int type, const char*shortmsg) {
+static void custom_errorhandler(PDF *p, int type, const char*shortmsg)
+{
 	switch (type){
 		case PDF_NonfatalError:
 			return;
@@ -217,19 +218,23 @@ static void custom_errorhandler(PDF *p, int type, const char*shortmsg) {
 		}
 }
 
-static void *pdf_emalloc(PDF *p, size_t size, const char *caller) {
+static void *pdf_emalloc(PDF *p, size_t size, const char *caller)
+{
 	return(emalloc(size));
 }
 
-static void *pdf_realloc(PDF *p, void *mem, size_t size, const char *caller) {
+static void *pdf_realloc(PDF *p, void *mem, size_t size, const char *caller)
+{
 	return(erealloc(mem, size));
 }
 
-static void pdf_efree(PDF *p, void *mem) {
+static void pdf_efree(PDF *p, void *mem)
+{
 	efree(mem);
 }
 
-static size_t pdf_flushwrite(PDF *p, void *data, size_t size){
+static size_t pdf_flushwrite(PDF *p, void *data, size_t size)
+{
 	if(php_header())
 		return(php_write(data, size));
 	return 0;
