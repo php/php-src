@@ -28,6 +28,18 @@
 #endif
 
 
+static SAPI_POST_READER_FUNC(sapi_read_standard_form_data);
+
+#define DEFAULT_POST_CONTENT_TYPE "application/x-www-form-urlencoded"
+
+static sapi_post_content_type_reader supported_post_content_types[] = {
+	{ DEFAULT_POST_CONTENT_TYPE, sizeof(DEFAULT_POST_CONTENT_TYPE)-1, sapi_read_standard_form_data },
+	{ NULL, 0, NULL }
+};
+
+
+static HashTable known_post_content_types;
+
 SAPI_API void (*sapi_error)(int error_type, const char *message, ...);
 
 
@@ -45,7 +57,14 @@ SAPI_API void (*sapi_error)(int error_type, const char *message, ...);
 
 SAPI_API void sapi_startup(sapi_module_struct *sf)
 {
+	sapi_post_content_type_reader *post_content_type_reader=supported_post_content_types;
+
 	sapi_module = *sf;
+	zend_hash_init(&known_post_content_types, 5, NULL, NULL, 1);
+	while (post_content_type_reader->content_type) {
+		sapi_register_post_reader(post_content_type_reader);
+		post_content_type_reader++;
+	}
 #ifdef ZTS
 	sapi_globals_id = ts_allocate_id(sizeof(sapi_globals_struct), NULL, NULL);
 #endif
@@ -62,6 +81,22 @@ static void sapi_free_header(sapi_header_struct *sapi_header)
 #define SAPI_POST_BLOCK_SIZE 2
 
 static void sapi_read_post_data(SLS_D)
+{
+	sapi_post_content_type_reader *post_content_type_reader;
+	uint content_type_length = strlen(SG(request_info).content_type);
+	char *content_type = estrndup(SG(request_info).content_type, content_type_length);
+
+	zend_str_tolower(content_type, content_type_length);
+
+	if (zend_hash_find(&known_post_content_types, content_type, content_type_length+1, (void **) &post_content_type_reader)==FAILURE) {
+		sapi_module.sapi_error(E_CORE_ERROR, "Unsupported content type:  '%s'", content_type);
+		return;
+	}
+	post_content_type_reader->post_reader(SLS_C);
+}
+
+
+static SAPI_POST_READER_FUNC(sapi_read_standard_form_data)
 {
 	int read_bytes, total_read_bytes=0;
 	int allocated_bytes=SAPI_POST_BLOCK_SIZE+1;
@@ -95,17 +130,19 @@ SAPI_API void sapi_activate(SLS_D)
 	SG(headers_sent) = 0;
 	SG(read_post_bytes) = 0;
 	SG(request_info).post_data = NULL;
+
+	if (SG(request_info).request_method && !strcmp(SG(request_info).request_method, "HEAD")) {
+		SG(request_info).headers_only = 1;
+	} else {
+		SG(request_info).headers_only = 0;
+	}
+
 	if (SG(server_context)) {
 		if (SG(request_info).request_method 
 			&& !strcmp(SG(request_info).request_method, "POST")) {
 			sapi_read_post_data(SLS_C);
 		}
 		SG(request_info).cookie_data = sapi_module.read_cookies(SLS_C);
-	}
-	if (SG(request_info).request_method && !strcmp(SG(request_info).request_method, "HEAD")) {
-		SG(request_info).headers_only = 1;
-	} else {
-		SG(request_info).headers_only = 0;
 	}
 }
 
@@ -215,4 +252,10 @@ SAPI_API int sapi_send_headers()
 			break;
 	}
 	return FAILURE;
+}
+
+
+SAPI_API int sapi_register_post_reader(sapi_post_content_type_reader *post_content_type_reader)
+{
+	return zend_hash_add(&known_post_content_types, post_content_type_reader->content_type, post_content_type_reader->content_type_len+1, (void *) post_content_type_reader, sizeof(sapi_post_content_type_reader), NULL);
 }
