@@ -202,26 +202,27 @@ head_done:
 /* }}} */
 
 
-/* {{{ proto void var_export(mixed var)
-   Dumps a string representation of variable to output */
+/* {{{ proto mixed var_export(mixed var [, int return])
+   Outputs or returns a string representation of avariable */
 PHP_FUNCTION(var_export)
 {
-	zval ***args;
-	int argc;
-	int	i;
+	zval *var;
+	long  i = 0;
 	
-	argc = ZEND_NUM_ARGS();
-	
-	args = (zval ***)emalloc(argc * sizeof(zval **));
-	if (ZEND_NUM_ARGS() == 0 || zend_get_parameters_array_ex(argc, args) == FAILURE) {
-		efree(args);
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|l", &var, &i) == FAILURE) {
+		return;
 	}
 	
-	for (i=0; i<argc; i++)
-		php_var_export(args[i], 1 TSRMLS_CC);
+	if (i) {
+		php_start_ob_buffer (NULL, 0);
+	}
 	
-	efree(args);
+	php_var_export(&var, 1 TSRMLS_CC);
+
+	if (i) {
+		php_ob_get_buffer (return_value);
+		php_end_ob_buffer (0, 0);
+	}
 }
 /* }}} */
 
