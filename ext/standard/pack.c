@@ -167,7 +167,7 @@ PHP_FUNCTION(pack)
 					efree(argv);
 					efree(formatcodes);
 					efree(formatargs);
-					php_error(E_ERROR, "pack type %c: not enough arguments", code);
+					php_error(E_WARNING, "pack type %c: not enough arguments", code);
 					RETURN_FALSE;
 				}
 
@@ -203,13 +203,13 @@ PHP_FUNCTION(pack)
 					efree(argv);
 					efree(formatcodes);
 					efree(formatargs);
-					php_error(E_ERROR, "pack type %c: too few arguments", code);
+					php_error(E_WARNING, "pack type %c: too few arguments", code);
 					RETURN_FALSE;
 				}
 				break;
 
 			default:
-				php_error(E_ERROR, "pack type %c: unknown format code", code);
+				php_error(E_WARNING, "pack type %c: unknown format code", code);
 				RETURN_FALSE;
 		}
 
@@ -808,7 +808,7 @@ PHP_FUNCTION(unpack)
 				/* Reached end of input for '*' repeater */
 				break;
 			} else {
-				php_error(E_ERROR, "pack type %c: not enough input, need %d, have %d", type, size, inputlen - inputpos);
+				php_error(E_WARNING, "pack type %c: not enough input, need %d, have %d", type, size, inputlen - inputpos);
 				RETURN_FALSE;
 			}
 		}
