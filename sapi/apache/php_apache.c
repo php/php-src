@@ -312,15 +312,6 @@ PHP_FUNCTION(virtual)
 		RETURN_FALSE;
 	}
 
-	/* Cannot include another PHP file because of global conflicts */
-	if (rr->content_type &&
-		!strcmp(rr->content_type, PHP_MIME_TYPE)) {
-		php_error(E_WARNING, "Cannot include a PHP file "
-			  "(use <code>&lt;?include \"%s\"&gt;</code> instead)", (*filename)->value.str.val);
-		if (rr) destroy_sub_req (rr);
-		RETURN_FALSE;
-	}
-	
 	php_end_ob_buffers(1);
 	php_header();
 
