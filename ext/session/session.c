@@ -1363,9 +1363,18 @@ PHP_RINIT_FUNCTION(session)
 	php_rinit_session_globals(PSLS_C);
 
 	if (PS(mod) == NULL) {
-		/* current status is unusable */
-		PS(nr_open_sessions) = -1;
-		return SUCCESS;
+		char *value;
+
+		value = zend_ini_string("session.save_handler", sizeof("session.save_handler"), 0);
+		if (value) {
+			PS(mod) = _php_find_ps_module(value PSLS_CC);
+		}
+
+		if (!PS(mod)) {
+			/* current status is unusable */
+			PS(nr_open_sessions) = -1;
+			return SUCCESS;
+		}
 	}
 
 	if (PS(auto_start)) {
