@@ -2704,7 +2704,7 @@ int zend_do_fcall_common_helper(ZEND_OPCODE_HANDLER_ARGS)
 	zend_ptr_stack_clear_multiple(TSRMLS_C);
 
 	if (EG(exception)) {
-		if (return_value_used) {
+		if (return_value_used && EX_T(EX(opline)->result.u.var).var.ptr) {
 			zval_ptr_dtor(&EX_T(EX(opline)->result.u.var).var.ptr);
 		}
 		if (EX(opline)->op2.u.opline_num == -1) {
