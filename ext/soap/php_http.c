@@ -178,24 +178,26 @@ int send_http_soap_request(zval *this_ptr, xmlDoc *doc, char *soapaction TSRMLS_
 		if (zend_hash_find(Z_OBJPROP_P(this_ptr), "_cookies", sizeof("_cookies"), (void **)&cookies) == SUCCESS) {
 			zval **data;
 			char *key;
-			int index, i;
+			int i, n;
 
-			smart_str_append_const(&soap_headers, "Cookie: ");
-			zend_hash_internal_pointer_reset(Z_ARRVAL_PP(cookies));
-			for (i = 0;i < (int)Z_ARRVAL_PP(cookies)->nNumOfElements;i++) {
-				zend_hash_get_current_data(Z_ARRVAL_PP(cookies), (void **)&data);
-				zend_hash_get_current_key(Z_ARRVAL_PP(cookies), &key, (long *)&index, FALSE);
+			n = zend_hash_num_elements(Z_ARRVAL_PP(cookies));
+			if (n > 0) {
+				zend_hash_internal_pointer_reset(Z_ARRVAL_PP(cookies));
+				smart_str_append_const(&soap_headers, "Cookie: ");
+				for (i = 0; i < n; i++) {
+					zend_hash_get_current_data(Z_ARRVAL_PP(cookies), (void **)&data);
+					zend_hash_get_current_key(Z_ARRVAL_PP(cookies), &key, NULL, FALSE);
 
-				smart_str_appendl(&soap_headers, key, strlen(key));
-				smart_str_appendc(&soap_headers, '=');
-				smart_str_appendl(&soap_headers, Z_STRVAL_PP(data), Z_STRLEN_PP(data));
-				smart_str_appendc(&soap_headers, ';');
-				zend_hash_move_forward(Z_ARRVAL_PP(cookies));
+					smart_str_appendl(&soap_headers, key, strlen(key));
+					smart_str_appendc(&soap_headers, '=');
+					smart_str_appendl(&soap_headers, Z_STRVAL_PP(data), Z_STRLEN_PP(data));
+					smart_str_append_const(&soap_headers, ";");
+					zend_hash_move_forward(Z_ARRVAL_PP(cookies));
+				}
+				smart_str_append_const(&soap_headers, "\r\n");
 			}
-			smart_str_append_const(&soap_headers, "\r\n");
 		}
 		smart_str_append_const(&soap_headers, "\r\n");
-
 		smart_str_appendl(&soap_headers, buf, buf_size);
 		smart_str_0(&soap_headers);
 
@@ -369,24 +371,32 @@ int get_http_soap_response(zval *this_ptr, char **buffer, int *buffer_len TSRMLS
 
 		eqpos = strstr(cookie, "=");
 		sempos = strstr(cookie, ";");
+		if (eqpos != NULL && (sempos == NULL || sempos > eqpos)) {
+			int cookie_len;
 
-		smart_str_appendl(&name, cookie, eqpos - cookie);
-		smart_str_0(&name);
+			if (sempos != NULL) {
+				cookie_len = sempos-(eqpos+1);
+			} else {	
+				cookie_len = strlen(cookie)-(eqpos-cookie)-1;
+			}
 
-		smart_str_appendl(&value, eqpos + 1, sempos - (eqpos + 1));
-		smart_str_0(&value);
+			smart_str_appendl(&name, cookie, eqpos - cookie);
+			smart_str_0(&name);
 
-		MAKE_STD_ZVAL(z_cookie);
-		ZVAL_STRINGL(z_cookie, value.c, value.len, 1);
+			smart_str_appendl(&value, eqpos + 1, cookie_len);
+			smart_str_0(&value);
 
-		zend_hash_update(Z_ARRVAL_PP(cookies), name.c, name.len + 1, &z_cookie, sizeof(zval *), NULL);
+			MAKE_STD_ZVAL(z_cookie);
+			ZVAL_STRINGL(z_cookie, value.c, value.len, 1);
+
+			zend_hash_update(Z_ARRVAL_PP(cookies), name.c, name.len + 1, &z_cookie, sizeof(zval *), NULL);
+		}
 
 		cookie_itt = strstr(cookie_itt + sizeof("Set-Cookie: "), "Set-Cookie: ");
 
 		smart_str_free(&value);
 		smart_str_free(&name);
 		efree(cookie);
-		cookie_itt = FALSE;
 	}
 
 	*buffer = http_body;
