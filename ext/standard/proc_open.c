@@ -54,9 +54,11 @@
 
 
 #if HAVE_PTSNAME && HAVE_GRANTPT && HAVE_UNLOCKPT && HAVE_SYS_IOCTL_H && HAVE_TERMIOS_H
-# define PHP_CAN_DO_PTS	1
 # include <sys/ioctl.h>
 # include <termios.h>
+# ifdef TIOCNOTTY
+#  define PHP_CAN_DO_PTS	1
+# endif
 #endif
 
 #include "proc_open.h"
