@@ -1,3 +1,56 @@
+2001-02-08  Boian Bonev  <boian@bonev.com>
+
+    * ext/vpopmail/php_vpopmail.c:
+    fixed SIGSEGV in vpopmail_auth_user when optional arg apop is not set
+
+2001-02-08  Chuck Hagenbuch  <chuck@horde.org>
+
+    * pear/Mail/Sendmail.php:
+    die on backticks in an attempted from address, also.
+
+    * pear/PHPDoc/renderer/html/PhpdocHTMLRenderer.php:
+    fix a type - $templateRoot was meant, not $path.
+
+    * pear/PHPDoc/index.php: the warning referred to here was fixed.
+
+    * pear/HTML/IT.php:
+    The free() method was throwing away too much information for template
+    caching (re-using the same template) to work. So either these arrays need to
+    be kept around (which is what this patch does), or everything using IT needs
+    to not call free() if it wants template caching to work (seemed like more of
+    a pain).
+
+2001-02-08  Andrei Zmievski  <andrei@ispi.net>
+
+    * TODO: *** empty log message ***
+
+2001-02-08  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/apache2filter/apache_config.c: Make fprintf's optional
+
+2001-02-08  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/domxml/php_domxml.c
+      ext/domxml/php_domxml.h: - add domxml_unlink_node(), not tested
+
+2001-02-08  Sergey Kartashoff  <gluke@biosys.net>
+
+    * ext/mnogosearch/php_mnogo.c
+      ext/mnogosearch/test.php: Added UDM_PARAM_SEARCHTIME result parameter.
+    Now at least mnoGoSearch-3.1.10 required to use this module.
+    Added some parameters aliases. Example updated.
+
+    * ext/mnogosearch/CREDITS
+      ext/mnogosearch/php_mnogo.c:
+2001-02-08  Andrei Zmievski  <andrei@ispi.net>
+
+    * TODO
+      ext/pcre/php_pcre.c: Move todo items.
+
+2001-02-08  Sascha Schumann  <sascha@schumann.cx>
+
+    * build/build2.mk: Suppress the other nasty warning
+
 2001-02-07  Chuck Hagenbuch  <chuck@horde.org>
 
     * pear/Mail/Sendmail.php:
