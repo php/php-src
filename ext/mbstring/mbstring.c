@@ -2249,7 +2249,7 @@ PHP_FUNCTION(mb_list_encodings)
 	i = 0;
 	encodings = mbfl_get_supported_encodings();
 	while ((encoding = encodings[i++]) != NULL) {
-		add_next_index_string(return_value, encoding->name, 1);
+		add_next_index_string(return_value, (char *) encoding->name, 1);
 	}
 }
 /* }}} */
