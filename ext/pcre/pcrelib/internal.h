@@ -307,6 +307,7 @@ typedef struct match_data {
   const uschar *end_subject;    /* End of the subject string */
   const uschar *end_match_ptr;  /* Subject position at end match */
   int     end_offset_top;       /* Highwater mark at end of match */
+  char   regprev;		/* Character previous to subject string (Andrey Zmievski) */
 } match_data;
 
 /* Bit definitions for entries in the pcre_ctypes table. */

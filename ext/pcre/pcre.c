@@ -29,8 +29,6 @@
 
 /* $Id$ */
 
-/* Get PCRE library from ftp://ftp.cus.cam.ac.uk/pub/software/programs/pcre/ */
-
 #include "php.h"
 
 #if HAVE_PCRE
@@ -381,7 +379,7 @@ void _pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global)
 	do {
 		/* Execute the regular expression. */
 		count = pcre_exec(re, extra, &subject->value.str.val[subject_offset],
-						  subject->value.str.len-subject_offset,
+						  subject->value.str.len-subject_offset, subject->value.str.val,
 						  (subject_offset ? exoptions|PCRE_NOTBOL : exoptions),
 						  offsets, size_offsets, 0);
 
@@ -548,7 +546,7 @@ char *_php_pcre_replace(char *regex, char *subject, char *replace)
 	while (count >= 0) {
 		/* Execute the regular expression. */
 		count = pcre_exec(re, extra, piece,
-							subject_end-piece,
+							subject_end-piece, subject,
 						  	(piece==subject ? exoptions : exoptions|PCRE_NOTBOL),
 							offsets, size_offsets, (piece == match));
 		
@@ -796,7 +794,7 @@ PHP_FUNCTION(preg_split)
 	/* Get next piece if no limit or limit not yet reached and something matched*/
 	while ((limit_val == -1 || limit_val > 0) && count >= 0) {
 		count = pcre_exec(re, extra, &subject->value.str.val[last_offset],
-						  subject->value.str.len-last_offset,
+						  subject->value.str.len-last_offset, subject->value.str.val,
 						  (last_offset ? exoptions|PCRE_NOTBOL : exoptions),
 						  offsets, size_offsets, 0);
 
