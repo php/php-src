@@ -572,7 +572,7 @@ static inline void node_wrapper_dtor(xmlNodePtr node)
 	zval *wrapper;
 	int refcount = 0;
 	/* FIXME: type check probably unnecessary here? */
-	if (!node || Z_TYPE_P(node) == XML_DTD_NODE)
+	if (!node) /* || Z_TYPE_P(node) == XML_DTD_NODE)*/
 		return;
 
 	wrapper = dom_object_get_data(node);
