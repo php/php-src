@@ -11,13 +11,10 @@ $Id$
 
 Short Term
 ==========
-1. something about arg:/foo and arg:foo that i haven't figured out yet
+1. Add streams support for file paths in 4th and 5th arg of xslt_process
+2. Use zend_parse_parameters and related API's
+3. SDOM_* stuff which does xpath queries.
 	- Melvyn
-	- i think this might be done ?
-2. SDOM_* stuff which does xpath queries.
-	- Melvyn
-3. SablotGetLibs() function
-	-- sorta available.. but i don't know how.
 
 
 Long Term
@@ -28,4 +25,7 @@ Long Term
 actual tsrmls value.
 	- suggested by Marcus Boerger
 
-
+3. Evaluate OO functions, ZE2
+	- All
+4. Prolly an API rewrite, for php5
+	- All
