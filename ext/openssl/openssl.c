@@ -2808,10 +2808,10 @@ PHP_FUNCTION(openssl_seal)
 		RETURN_FALSE;
 	}
 
-	pkeys = emalloc(nkeys * sizeof(*pkeys));
-	eksl = emalloc(nkeys * sizeof(*eksl));
-	eks = emalloc(nkeys * sizeof(*eks));
-	key_resources = emalloc(nkeys * sizeof(long));
+	pkeys = safe_emalloc(nkeys, sizeof(*pkeys), 0);
+	eksl = safe_emalloc(nkeys, sizeof(*eksl), 0);
+	eks = safe_emalloc(nkeys, sizeof(*eks), 0);
+	key_resources = safe_emalloc(nkeys, sizeof(long), 0);
 
 	/* get the public keys we are using to seal this data */
 	zend_hash_internal_pointer_reset_ex(pubkeysht, &pos);
