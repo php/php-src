@@ -1,3 +1,7 @@
+2002-10-13  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * zend_extensions.h: Increased the API number. (re: floats patch)
+
 2002-10-12  Ilia Alshanetsky  <ilia@prohost.org>
 
     * zend_operators.c
