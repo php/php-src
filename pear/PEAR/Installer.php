@@ -261,7 +261,11 @@ class PEAR_Installer extends PEAR_Common
                 }
                 $need_download = true;
             } else {
-                return $this->raiseError("could not open the package file: $pkgfile");
+                if (strlen($pkgfile)) {
+                    return $this->raiseError("Could not open the package file: $pkgfile");
+                } else {
+                    return $this->raiseError("No package file given");
+                }
             }
         }
 
