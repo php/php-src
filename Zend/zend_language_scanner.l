@@ -985,7 +985,11 @@ NAMESPACE_NAME ({LABEL}":")+{LABEL}
 }
 
 <ST_IN_SCRIPTING>"__FUNCTION__" {
-	char *func_name = CG(active_op_array)->function_name;
+	char *func_name = NULL;
+
+	if (CG(active_op_array)) {
+		func_name = CG(active_op_array)->function_name;
+	}
 
 	if (!func_name) {
 		func_name = "";
