@@ -1,6 +1,10 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
+?? ??? 200?, Version 4.0.6
+- Added mysql_unbuffered_query(), which is useful for very large result sets
+  (Zeev)
+
 ?? ??? 200?, Version 4.0.5
 - Added array_reduce(), which allows iterative reduction of an array
   to a single value via a callback function. (Andrei)
