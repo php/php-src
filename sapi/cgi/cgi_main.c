@@ -829,7 +829,8 @@ static void init_request_info(TSRMLS_D)
 				SG(request_info).request_uri = env_script_name;
 			}
 #if !DISCARD_PATH
-			script_path_translated = env_path_translated;
+			if (env_path_translated)
+				script_path_translated = env_path_translated;
 #endif
 #if ENABLE_PATHINFO_CHECK
 		}
