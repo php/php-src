@@ -60,6 +60,8 @@ zend_module_entry shmop_module_entry = {
 ZEND_GET_MODULE(shmop)
 #endif
 
+static void rsclean(struct php_shmop *shmop);
+
 PHP_MINIT_FUNCTION(shmop)
 {
 	shm_type = register_list_destructors(rsclean, NULL);

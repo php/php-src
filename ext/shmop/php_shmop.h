@@ -52,8 +52,6 @@ struct php_shmop
 	int size;
 };
 
-static void rsclean(struct php_shmop *shmop);
-
 typedef struct {
 	int le_shmop;
 } php_shmop_globals;
