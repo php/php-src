@@ -1,3 +1,23 @@
+2003-05-31  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend.c:
+      Fix init shutdown
+
+2003-05-31  Sterling Hughes  <sterling@bumblebury.com>
+
+    * zend_compile.c
+      zend_execute.c:
+      revert the function call caching patch until a new solution is decided
+      upon.
+
+2003-05-31  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_constants.c:
+      Fix constants (noticed by David Brown <dave@codewhore.org>)
+
+    * zend_constants.c:
+      c->name_len already contains the '\0'
+
 2003-05-30  Stanislav Malyshev  <stas@zend.com>
 
     * zend_execute.c:
