@@ -230,10 +230,6 @@ char *strerror(int);
 # endif
 #endif
 
-#include "php_streams.h"
-#include "php_memory_streams.h"
-#include "fopen_wrappers.h"
-
 
 /* global variables */
 extern pval *data;
@@ -346,6 +342,11 @@ PHPAPI int cfg_get_string(char *varname, char **result);
 #ifdef ZTS
 #define VIRTUAL_DIR
 #endif
+
+#include "php_streams.h"
+#include "php_memory_streams.h"
+#include "fopen_wrappers.h"
+
 
 /* Virtual current working directory support */
 #include "tsrm_virtual_cwd.h"

@@ -1076,7 +1076,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	/* initialize stream wrappers registry
 	 * (this uses configuration parameters from php.ini)
 	 */
-	if (php_init_stream_wrappers(TSRMLS_C) == FAILURE)	{
+	if (php_init_stream_wrappers(module_number TSRMLS_CC) == FAILURE)	{
 		php_printf("PHP:  Unable to initialize stream url wrappers.\n");
 		return FAILURE;
 	}
@@ -1192,7 +1192,7 @@ void php_module_shutdown(TSRMLS_D)
 
 	zend_shutdown(TSRMLS_C);
 
-	php_shutdown_stream_wrappers(TSRMLS_C);
+	php_shutdown_stream_wrappers(module_number TSRMLS_CC);
 
 	php_shutdown_info_logos();
 	UNREGISTER_INI_ENTRIES();

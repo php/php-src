@@ -119,7 +119,6 @@ php_file_globals file_globals;
 /* {{{ ZTS-stuff / Globals / Prototypes */
 
 /* sharing globals is *evil* */
-static int le_stream = FAILURE;
 static int le_stream_context = FAILURE;
 
 /* }}} */
@@ -130,29 +129,14 @@ static ZEND_RSRC_DTOR_FUNC(file_context_dtor)
 	php_stream_context_free((php_stream_context*)rsrc->ptr);
 }
 
-static void _file_stream_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
-{
-	php_stream *stream = (php_stream*)rsrc->ptr;
-	/* the stream might be a pipe, so set the return value for pclose */
-	FG(pclose_ret) = php_stream_free(stream, PHP_STREAM_FREE_CLOSE | PHP_STREAM_FREE_RSRC_DTOR);
-}
-
-PHPAPI int php_file_le_stream(void)
-{
-	return le_stream;
-}
-
 static void file_globals_ctor(php_file_globals *file_globals_p TSRMLS_DC)
 {
-	zend_hash_init(&FG(ht_persistent_socks), 0, NULL, NULL, 1);
 	FG(pclose_ret) = 0;
 	FG(def_chunk_size) = PHP_SOCK_CHUNK_SIZE;
 }
 
-
 static void file_globals_dtor(php_file_globals *file_globals_p TSRMLS_DC)
 {
-	zend_hash_destroy(&FG(ht_persistent_socks));
 }
 
 
@@ -164,7 +148,6 @@ PHP_INI_END()
 
 PHP_MINIT_FUNCTION(file)
 {
-	le_stream = zend_register_list_destructors_ex(_file_stream_dtor, NULL, "stream", module_number);
 	le_stream_context = zend_register_list_destructors_ex(file_context_dtor, NULL, "stream-context", module_number);
 
 #ifdef ZTS
@@ -219,17 +202,16 @@ static int flock_values[] = { LOCK_SH, LOCK_EX, LOCK_UN };
 PHP_FUNCTION(flock)
 {
     zval **arg1, **arg2, **arg3;
-    int type, fd, act, ret, arg_count = ZEND_NUM_ARGS();
-	void *what;
+    int fd, act, ret, arg_count = ZEND_NUM_ARGS();
+	php_stream *stream;
 
     if (arg_count > 3 || zend_get_parameters_ex(arg_count, &arg1, &arg2, &arg3) == FAILURE) {
         WRONG_PARAM_COUNT;
     }
 
-	what = zend_fetch_resource(arg1 TSRMLS_CC, -1, "File-Handle", &type, 1, le_stream);
-	ZEND_VERIFY_RESOURCE(what);
+	php_stream_from_zval(stream, arg1);
 
-	if (php_stream_cast((php_stream*)what, PHP_STREAM_AS_FD, (void*)&fd, 1) == FAILURE)	{
+	if (php_stream_cast(stream, PHP_STREAM_AS_FD, (void*)&fd, 1) == FAILURE)	{
 		RETURN_FALSE;
 	}
 
@@ -600,8 +582,7 @@ PHP_FUNCTION(file_get_wrapper_data)
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	stream = (php_stream*)zend_fetch_resource(arg1 TSRMLS_CC, -1, "File-Handle", NULL, 1, le_stream);
-	ZEND_VERIFY_RESOURCE(stream);
+	php_stream_from_zval(stream, arg1);
 
 	if (stream->wrapperdata)	{
 		*return_value = *(stream->wrapperdata);
@@ -707,19 +688,23 @@ static int parse_context_params(php_stream_context *context, zval *params)
 /* given a zval which is either a stream or a context, return the underlying
  * stream_context.  If it is a stream that does not have a context assigned, it
  * will create and assign a context and return that.  */
-static php_stream_context *decode_context_param(zval *contextresource TSRMLS_DC) {
-	php_stream_context *context = NULL; void *what; int type;
+static php_stream_context *decode_context_param(zval *contextresource TSRMLS_DC)
+{
+	php_stream_context *context = NULL;
 
-	what = zend_fetch_resource(&contextresource TSRMLS_CC, -1, "Stream-Context", &type, 2, le_stream_context, le_stream);
+	context = zend_fetch_resource(&contextresource TSRMLS_CC, -1, "Stream-Context", NULL, 1, le_stream_context);
+	if (context == NULL) {
+		php_stream *stream;
 
-	if (what && type == le_stream) {
-		php_stream *stream = (php_stream*)what;
-		context = stream->context;
-		if (context == NULL)
-			context = stream->context = php_stream_context_alloc();
-	} else if (what && type == le_stream_context) {
-		context = (php_stream_context*)what;
+		php_stream_from_zval_no_verify(stream, &contextresource);
+
+		if (stream) {
+			context = stream->context;
+			if (context == NULL)
+				context = stream->context = php_stream_context_alloc();
+		}
 	}
+
 	return context;
 }
 /* }}} */
@@ -829,7 +814,7 @@ static void apply_filter_to_stream(int append, INTERNAL_FUNCTION_PARAMETERS)
 		RETURN_FALSE;
 	}
 
-	ZEND_FETCH_RESOURCE(stream, php_stream*, &zstream, -1, "stream", le_stream);
+	php_stream_from_zval(stream, &zstream);
 	
 	filter = php_stream_filter_create(filtername, filterparams, filterparamslen, php_stream_is_persistent(stream) TSRMLS_CC);
 	if (filter == NULL)
@@ -897,17 +882,15 @@ PHP_NAMED_FUNCTION(php_if_fopen)
 PHPAPI PHP_FUNCTION(fclose)
 {
 	zval **arg1;
-	int type;
-	void *what;
+	php_stream *stream;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	what = zend_fetch_resource(arg1 TSRMLS_CC, -1, "File-Handle", &type, 1, le_stream);
-	ZEND_VERIFY_RESOURCE(what);
+	php_stream_from_zval(stream, arg1);
+	php_stream_close(stream);
 
-	zend_list_delete(Z_LVAL_PP(arg1));
 	RETURN_TRUE;
 }
 
@@ -984,18 +967,15 @@ PHP_FUNCTION(popen)
 PHP_FUNCTION(pclose)
 {
 	zval **arg1;
-	void *what;
-	int type;
+	php_stream *stream;
 	
 	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	what = zend_fetch_resource(arg1 TSRMLS_CC,-1, "File-Handle", &type, 1, le_stream);
-	ZEND_VERIFY_RESOURCE(what);
+	php_stream_from_zval(stream, arg1);
 
-	zend_list_delete(Z_LVAL_PP(arg1));
-	RETURN_LONG(FG(pclose_ret));
+	RETURN_LONG(php_stream_close(stream));
 }
 /* }}} */
 
@@ -1004,22 +984,19 @@ PHP_FUNCTION(pclose)
 PHPAPI PHP_FUNCTION(feof)
 {
 	zval **arg1;
-	int type;
-	void *what;
+	php_stream *stream;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	what = zend_fetch_resource(arg1 TSRMLS_CC, -1, "File-Handle", &type, 1, le_stream);
-	ZEND_VERIFY_RESOURCE(what);
 
-	if (type == le_stream)	{
-		if (php_stream_eof((php_stream *) what)) {
-			RETURN_TRUE;
-		}
+	php_stream_from_zval(stream, arg1);
+
+	if (php_stream_eof(stream)) {
+		RETURN_TRUE;
+	} else {
 		RETURN_FALSE;
 	}
-	RETURN_FALSE;
 }
 /* }}} */
 
@@ -1028,20 +1005,19 @@ PHPAPI PHP_FUNCTION(feof)
 PHP_FUNCTION(socket_set_blocking)
 {
 	zval **arg1, **arg2;
-	int block, type;
-	void *what;
+	int block;
+	php_stream *stream;
 
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	what = zend_fetch_resource(arg1 TSRMLS_CC, -1, "File-Handle", &type, 1, le_stream);
-	ZEND_VERIFY_RESOURCE(what);
+	php_stream_from_zval(stream, arg1);
 
 	convert_to_long_ex(arg2);
 	block = Z_LVAL_PP(arg2);
 
-	if (php_stream_set_option((php_stream*)what, PHP_STREAM_OPTION_BLOCKING, block == 0 ? 0 : 1, NULL) == -1)
+	if (php_stream_set_option(stream, PHP_STREAM_OPTION_BLOCKING, block == 0 ? 0 : 1, NULL) == -1)
 		RETURN_FALSE;
 	RETURN_TRUE;
 }
@@ -1063,17 +1039,15 @@ PHP_FUNCTION(set_socket_blocking)
 PHP_FUNCTION(socket_set_timeout)
 {
 	zval **socket, **seconds, **microseconds;
-	int type;
-	void *what;
 	struct timeval t;
+	php_stream *stream;
 
 	if (ZEND_NUM_ARGS() < 2 || ZEND_NUM_ARGS() > 3 ||
 		zend_get_parameters_ex(ZEND_NUM_ARGS(), &socket, &seconds, &microseconds)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	what = zend_fetch_resource(socket TSRMLS_CC, -1, "File-Handle", &type, 1, le_stream);
-	ZEND_VERIFY_RESOURCE(what);
+	php_stream_from_zval(stream, socket);
 
 	convert_to_long_ex(seconds);
 	t.tv_sec = Z_LVAL_PP(seconds);
@@ -1086,8 +1060,8 @@ PHP_FUNCTION(socket_set_timeout)
 	else
 		t.tv_usec = 0;
 
-	if (php_stream_is((php_stream*)what, PHP_STREAM_IS_SOCKET))	{
-		php_stream_sock_set_timeout((php_stream*)what, &t TSRMLS_CC);
+	if (php_stream_is(stream, PHP_STREAM_IS_SOCKET))	{
+		php_stream_sock_set_timeout(stream, &t TSRMLS_CC);
 		RETURN_TRUE;
 	}
 
@@ -1136,17 +1110,16 @@ PHP_FUNCTION(socket_get_status)
 PHPAPI PHP_FUNCTION(fgets)
 {
 	zval **arg1, **arg2;
-	int len = 1024, type;
+	int len = 1024;
 	char *buf;
-	void *what;
 	int argc = ZEND_NUM_ARGS();
+	php_stream *stream;
 
 	if (argc<1 || argc>2 || zend_get_parameters_ex(argc, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	what = zend_fetch_resource(arg1 TSRMLS_CC, -1, "File-Handle", &type, 1, le_stream);
-	ZEND_VERIFY_RESOURCE(what);
+	php_stream_from_zval(stream, arg1);
 
 	if (argc>1) {
 		convert_to_long_ex(arg2);
@@ -1162,7 +1135,7 @@ PHPAPI PHP_FUNCTION(fgets)
 	/* needed because recv doesnt put a null at the end*/
 	memset(buf, 0, len+1);
 
-	if (php_stream_gets((php_stream *) what, buf, len) == NULL)
+	if (php_stream_gets(stream, buf, len) == NULL)
 		goto exit_failed;
 
 	if (PG(magic_quotes_runtime)) {
@@ -1188,21 +1161,19 @@ exit_failed:
 PHPAPI PHP_FUNCTION(fgetc)
 {
 	zval **arg1;
-	int type;
 	char *buf;
-	void *what;
 	int result;
+	php_stream *stream;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	what = zend_fetch_resource(arg1 TSRMLS_CC, -1, "File-Handle", &type, 1, le_stream);
-	ZEND_VERIFY_RESOURCE(what);
+	php_stream_from_zval(stream, arg1);
 
 	buf = emalloc(2 * sizeof(char));
 
-	result = php_stream_getc((php_stream*)what);
+	result = php_stream_getc(stream);
 
 	if (result == EOF) {
 		efree(buf);
@@ -1221,7 +1192,7 @@ PHPAPI PHP_FUNCTION(fgetc)
 PHPAPI PHP_FUNCTION(fgetss)
 {
 	zval **fd, **bytes, **allow=NULL;
-	int len, type;
+	int len;
 	char *buf;
 	php_stream *stream;
 	char *allowed_tags=NULL;
@@ -1247,8 +1218,7 @@ PHPAPI PHP_FUNCTION(fgetss)
 		break;
 	}
 
-	stream = zend_fetch_resource(fd TSRMLS_CC, -1, "File-Handle", &type, 1, le_stream);
-	ZEND_VERIFY_RESOURCE(stream);
+	php_stream_from_zval(stream, fd);
 
 	convert_to_long_ex(bytes);
 	len = Z_LVAL_PP(bytes);
@@ -1299,7 +1269,8 @@ PHP_FUNCTION(fscanf)
 	file_handle    = args[0];
 	format_string  = args[1];
 
-	what = zend_fetch_resource(file_handle TSRMLS_CC, -1, "File-Handle", &type, 1, le_stream);
+	what = zend_fetch_resource(file_handle TSRMLS_CC, -1, "File-Handle", &type, 2,
+			php_file_le_stream(), php_file_le_pstream());
 
 	/*
 	 * we can't do a ZEND_VERIFY_RESOURCE(what), otherwise we end up
@@ -1340,10 +1311,10 @@ PHP_FUNCTION(fscanf)
 PHPAPI PHP_FUNCTION(fwrite)
 {
 	zval **arg1, **arg2, **arg3=NULL;
-	int ret, type;
+	int ret;
 	int num_bytes;
-	void *what;
 	char *buffer = NULL;
+	php_stream *stream;
 
 	switch (ZEND_NUM_ARGS()) {
 	case 2:
@@ -1367,15 +1338,14 @@ PHPAPI PHP_FUNCTION(fwrite)
 		break;
 	}
 
-	what = zend_fetch_resource(arg1 TSRMLS_CC, -1, "File-Handle", &type, 1, le_stream);
-	ZEND_VERIFY_RESOURCE(what);
+	php_stream_from_zval(stream, arg1);
 
 	if (!arg3 && PG(magic_quotes_runtime)) {
 		buffer = estrndup(Z_STRVAL_PP(arg2), Z_STRLEN_PP(arg2));
 		php_stripslashes(buffer, &num_bytes TSRMLS_CC);
 	}
 
-	ret = php_stream_write((php_stream *) what, buffer ? buffer : Z_STRVAL_PP(arg2), num_bytes);
+	ret = php_stream_write(stream, buffer ? buffer : Z_STRVAL_PP(arg2), num_bytes);
 	if (buffer) {
 		efree(buffer);
 	}
@@ -1389,17 +1359,16 @@ PHPAPI PHP_FUNCTION(fwrite)
 PHPAPI PHP_FUNCTION(fflush)
 {
 	zval **arg1;
-	int ret, type;
-	void *what;
+	int ret;
+	php_stream *stream;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	what = zend_fetch_resource(arg1 TSRMLS_CC,-1, "File-Handle", &type, 1, le_stream);
-	ZEND_VERIFY_RESOURCE(what);
+	php_stream_from_zval(stream, arg1);
 
-	ret = php_stream_flush((php_stream *) what);
+	ret = php_stream_flush(stream);
 	if (ret) {
 		RETURN_FALSE;
 	}
@@ -1412,7 +1381,7 @@ PHPAPI PHP_FUNCTION(fflush)
 PHP_FUNCTION(set_file_buffer)
 {
 	zval **arg1, **arg2;
-	int ret, type;
+	int ret;
 	size_t buff;
 	php_stream *stream;
 
@@ -1428,8 +1397,7 @@ PHP_FUNCTION(set_file_buffer)
 		break;
 	}
 	
-	stream = (php_stream*)zend_fetch_resource(arg1 TSRMLS_CC,-1, "File-Handle", &type, 1, le_stream);
-	ZEND_VERIFY_RESOURCE(stream);
+	php_stream_from_zval(stream, arg1);
 	
 	convert_to_long_ex(arg2);
 	buff = Z_LVAL_PP(arg2);
@@ -1450,17 +1418,15 @@ PHP_FUNCTION(set_file_buffer)
 PHPAPI PHP_FUNCTION(rewind)
 {
 	zval **arg1;
-	void *what;
-	int type;
+	php_stream *stream;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	what = zend_fetch_resource(arg1 TSRMLS_CC,-1, "File-Handle", &type, 1, le_stream);
-	ZEND_VERIFY_RESOURCE(what);
+	php_stream_from_zval(stream, arg1);
 
-	if (-1 == php_stream_rewind((php_stream*)what))	{
+	if (-1 == php_stream_rewind(stream)) {
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -1472,18 +1438,16 @@ PHPAPI PHP_FUNCTION(rewind)
 PHPAPI PHP_FUNCTION(ftell)
 {
 	zval **arg1;
-	void *what;
 	long ret;
-	int type;
+	php_stream *stream;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	what = zend_fetch_resource(arg1 TSRMLS_CC,-1, "File-Handle", &type, 1, le_stream);
-	ZEND_VERIFY_RESOURCE(what);
+	php_stream_from_zval(stream, arg1);
 
-	ret = php_stream_tell((php_stream*)what);
+	ret = php_stream_tell(stream);
 	if (ret == -1)	{
 		RETURN_FALSE;
 	}
@@ -1497,16 +1461,14 @@ PHPAPI PHP_FUNCTION(fseek)
 {
 	zval **arg1, **arg2, **arg3;
 	int argcount = ZEND_NUM_ARGS(), whence = SEEK_SET;
-	void *what;
-	int type;
+	php_stream *stream;
 
 	if (argcount < 2 || argcount > 3 ||
 	    zend_get_parameters_ex(argcount, &arg1, &arg2, &arg3) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	what = zend_fetch_resource(arg1 TSRMLS_CC,-1, "File-Handle", &type, 1, le_stream);
-	ZEND_VERIFY_RESOURCE(what);
+	php_stream_from_zval(stream, arg1);
 
 	convert_to_long_ex(arg2);
 	if (argcount > 2) {
@@ -1514,7 +1476,7 @@ PHPAPI PHP_FUNCTION(fseek)
 		whence = Z_LVAL_PP(arg3);
 	}
 
-	RETURN_LONG(php_stream_seek((php_stream*)what, Z_LVAL_PP(arg2), whence));
+	RETURN_LONG(php_stream_seek(stream, Z_LVAL_PP(arg2), whence));
 }
 
 /* }}} */
@@ -1653,17 +1615,16 @@ PHP_FUNCTION(umask)
 PHPAPI PHP_FUNCTION(fpassthru)
 {
 	zval **arg1;
-	int size, type;
-	void *what;
+	int size;
+	php_stream *stream;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	what = zend_fetch_resource(arg1 TSRMLS_CC,-1, "File-Handle", &type, 1, le_stream);
-	ZEND_VERIFY_RESOURCE(what);
+	php_stream_from_zval(stream, arg1);
 
-	size = php_stream_passthru((php_stream*)what);
+	size = php_stream_passthru(stream);
 	RETURN_LONG(size);
 }
 /* }}} */
@@ -1742,24 +1703,22 @@ PHP_NAMED_FUNCTION(php_if_ftruncate)
 {
 	zval **fp , **size;
 	short int ret;
-	int type;
-	void *what;
 	int fd;
+	php_stream *stream;
 
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &fp, &size) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	what = zend_fetch_resource(fp TSRMLS_CC,-1, "File-Handle", &type, 1, le_stream);
-	ZEND_VERIFY_RESOURCE(what);
+	php_stream_from_zval(stream, fp);
 
 	convert_to_long_ex(size);
 
-	if (php_stream_is((php_stream*)what, PHP_STREAM_IS_SOCKET))	{
+	if (php_stream_is(stream, PHP_STREAM_IS_SOCKET))	{
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can't truncate sockets!");
 		RETURN_FALSE;
 	}
-	if (SUCCESS == php_stream_cast((php_stream*)what, PHP_STREAM_AS_FD, (void*)&fd, 1))	{
+	if (SUCCESS == php_stream_cast(stream, PHP_STREAM_AS_FD, (void*)&fd, 1))	{
 		ret = ftruncate(fd, Z_LVAL_PP(size));
 		RETURN_LONG(ret + 1);
 	}
@@ -1774,7 +1733,6 @@ PHP_NAMED_FUNCTION(php_if_fstat)
 	zval **fp;
 	zval *stat_dev, *stat_ino, *stat_mode, *stat_nlink, *stat_uid, *stat_gid, *stat_rdev,
 	 	*stat_size, *stat_atime, *stat_mtime, *stat_ctime, *stat_blksize, *stat_blocks;
-	int type;
 	php_stream *stream;
 	php_stream_statbuf stat_ssb;
 	
@@ -1785,8 +1743,7 @@ PHP_NAMED_FUNCTION(php_if_fstat)
 		WRONG_PARAM_COUNT;
 	}
 
-	stream = (php_stream *) zend_fetch_resource(fp TSRMLS_CC,-1, "File-Handle", &type, 1, le_stream);
-	ZEND_VERIFY_RESOURCE(stream);
+	php_stream_from_zval(stream, fp);
 
 	if (php_stream_stat(stream, &stat_ssb)) {
 		RETURN_FALSE;
@@ -1915,15 +1872,14 @@ PHPAPI int php_copy_file(char *src, char *dest TSRMLS_DC)
 PHPAPI PHP_FUNCTION(fread)
 {
 	zval **arg1, **arg2;
-	int len, type;
+	int len;
 	php_stream *stream;
 
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	stream = (php_stream*)zend_fetch_resource(arg1 TSRMLS_CC,-1, "File-Handle", &type, 1, le_stream);
-	ZEND_VERIFY_RESOURCE(stream);
+	php_stream_from_zval(stream, arg1);
 
 	convert_to_long_ex(arg2);
 	len = Z_LVAL_PP(arg2);
@@ -1957,7 +1913,7 @@ PHP_FUNCTION(fgetcsv)
 	/* first section exactly as php_fgetss */
 
 	zval **fd, **bytes, **p_delim, **p_enclosure;
-	int len, type;
+	int len;
 	char *buf;
 	php_stream *stream;
 
@@ -2007,8 +1963,7 @@ PHP_FUNCTION(fgetcsv)
 		break;
 	}
 
-	stream = (php_stream*)zend_fetch_resource(fd TSRMLS_CC,-1, "File-Handle", &type, 1, le_stream);
-	ZEND_VERIFY_RESOURCE(stream);
+	php_stream_from_zval(stream, fd);
 
 	convert_to_long_ex(bytes);
 	len = Z_LVAL_PP(bytes);

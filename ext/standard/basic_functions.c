@@ -1136,6 +1136,7 @@ PHP_RSHUTDOWN_FUNCTION(basic)
 	PHP_RSHUTDOWN(syslog) (SHUTDOWN_FUNC_ARGS_PASSTHRU);
 	PHP_RSHUTDOWN(assert) (SHUTDOWN_FUNC_ARGS_PASSTHRU);
 	PHP_RSHUTDOWN(url_scanner_ex) (SHUTDOWN_FUNC_ARGS_PASSTHRU);
+	PHP_RSHUTDOWN(streams) (SHUTDOWN_FUNC_ARGS_PASSTHRU);
 
 	if (BG(user_tick_functions)) {
 		zend_llist_destroy(BG(user_tick_functions));
@@ -1148,7 +1149,7 @@ PHP_RSHUTDOWN_FUNCTION(basic)
 		efree(BG(aggregation_table));
 		BG(aggregation_table) = NULL;
 	}
-
+	
 #ifdef HAVE_MMAP
 	if (BG(mmap_file)) {
 		munmap(BG(mmap_file), BG(mmap_len));
