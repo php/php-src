@@ -210,6 +210,10 @@ static void php_var_serialize_class(smart_str *buf, zval **struc, zval *retval_p
 		ulong index;
 		HashPosition pos;
 		int i;
+		zval nval, *nvalp;
+
+		ZVAL_NULL(&nval);
+		nvalp = &nval;
 
 		zend_hash_internal_pointer_reset_ex(HASH_OF(retval_ptr), &pos);
 	
@@ -230,11 +234,13 @@ static void php_var_serialize_class(smart_str *buf, zval **struc, zval *retval_p
 				continue;
 			}
 
+			php_var_serialize_string(buf, Z_STRVAL_PP(name), Z_STRLEN_PP(name));
+
 			if (zend_hash_find(Z_OBJPROP_PP(struc), Z_STRVAL_PP(name), 
 						Z_STRLEN_PP(name) + 1, (void *) &d) == SUCCESS) {
-				php_var_serialize_string(buf, Z_STRVAL_PP(name), 
-						Z_STRLEN_PP(name));
 				php_var_serialize_intern(buf, d, var_hash TSRMLS_CC);	
+			} else {
+				php_var_serialize_intern(buf, &nvalp, var_hash TSRMLS_CC);
 			}
 		}
 	}
