@@ -4,30 +4,28 @@ PHP 4                                                                      NEWS
 - Added XsltObject->dump_file($result,$filename[,$compression]) for dumping
   xslt-result directly into a file. (chregu)
 - Added XsltObject->dump_mem($result) for returning xslt-result directly
-  into a string (morus.walter@web.de, chregu)
+  into a string. (morus.walter@web.de, chregu)
 - Made mime_magic extension available on win32 platform. (Edin)
 - Added xslt_backend_version() and xslt_backend_name() for getting
   information about the processor backend. (chregu)
 - Added php.ini option "allow_webdav_methods" to allow handling of
   WebDAV http requests within PHP scripts. (chregu)
-- Added ImageColorMatch() and ImageLayerEffect() functions
-  which work with the bundled GD library (ttoohey)
-- Made major improvents to the pcntl extension(Jason):
-- Greatly improved performance, by switching the signal callback mechanism
-  to use ticks
-  Implemented object signal callback ability by using array($obj, $method)
-- Added a restart parameter to pcntl_signal, which allows you to disable
-  the default of system call restarting
-- Added php.ini option "double_buffering" that forces an additional first
+- Added ImageColorMatch() and ImageLayerEffect() functions which are only 
+  available when using the bundled GD library. (ttoohey)
+- Made major improvents to the pcntl extension. (Jason)
+  . Greatly improved performance (signal callback mechanism uses ticks)
+  . Implemented object signal callback ability by using array($obj, $method)
+  . Added a restart parameter to pcntl_signal, which allows you to disable
+    the default of system call restarting
+- Added php.ini option "double_buffering" which forces an additional first
   output buffer and improved handling of buffer sizes. (Marcus)
-- Changed DomNode->next_sibling and DomNode->previous_sibling to return NULL
-  instead of false (W3C specs). (chregu)
+- Changed DomNode->next_sibling() and DomNode->previous_sibling() to return
+  NULL instead of false (W3C specs). (chregu)
 - Changed DomNode->insert_before() and DomNode->append_child() to conform to
   W3C specs (moving not copying nodes, accepting NULL as 2nd param). (chregu)
 - Added DomNode->set_namespace(uri[,prefix]) (chregu)
-- Fixed shuffle() to properly generate all possibilities.  (Patch provided by 
-  Adam <adam@trachtenberg.com> )
-- Transparent sid support is now disabled by default. (Yasuo) 
+- Fixed shuffle() to properly generate all possibilities. (Patch provided by
+  Adam <adam@trachtenberg.com>)
 - Fixed DomNode->insert_before() to behave according to W3C spec
   ie. new_child is moved, not copied. (chregu)
 - Added some namespace support with DomNode->add_namespace(uri, prefix)
@@ -114,8 +112,6 @@ PHP 4                                                                      NEWS
   response code. (Derick)
 - Changed the order of which modules are unloaded to the reverse order of
   which they were loaded. (Derick, Zend Engine)
-- Fixed a crash in ereg_replace() when backreference number was greater
-  than the number of subpatterns. (oliver@billix.franken.de)
 - Added preliminary SAX-Input support. It's now possible to build a DomDocument
   with SAX-Events. (chregu)
 - Bundled GD library 2.0.1 with php (ext/gd/libgd) (Rasmus, Jani, Markus, Edin)
@@ -141,7 +137,6 @@ PHP 4                                                                      NEWS
 - Added STDIN, STDOUT and STDERR constants for CLI sapi reflecting opened
   streams to their respective I/O counterparts. (Edin)
 - Added pctnl_alarm() function. (Edin)
-- Fixed array_rand() on thread-safe platforms such as Windows. (Edin)
 - If zlib.output_compression is enabled and a page is compressed 
   a "Vary: Accept-Encoding" header is now added. (Stefan)
 - Renamed getallheaders() to apache_request_headers() and kept getallheaders() 
@@ -230,6 +225,18 @@ PHP 4                                                                      NEWS
   recursive make with one global Makefile and eases the integration of proper
   dependencies. Automake is only needed for its aclocal tool. The build 
   process is now more portable and less resource-consuming. (Sascha)
+
+?? ??? 2002, Version 4.2.3
+- Lot of other bug fixes. (Various Artists)
+- Transparent sid support is now disabled by default. (Yasuo)
+- Fixed accidental pg_lo_import() API change. (Yasuo)
+- Fixed ereg_replace() crash when the backreference number was greater than the
+  number of captured subpatterns. (oliver@billix.franken.de)
+- Fixed array_rand() on thread-safe platforms such as Windows. (Edin)
+- Report the right exit code after a call to exit(). (Edin)
+
+22 Jul 2002, Version 4.2.2
+- Fixed serious security vulnerability. (Stefan Esser)
 
 13 May 2002, Version 4.2.1
 - Added safe-mode checks to show_source(), parse_ini_file() and rmdir(). Also
