@@ -679,11 +679,13 @@ static int _extension_class_string(zend_class_entry **pce, int num_args, va_list
 	string *str = va_arg(args, string *);
 	char *indent = va_arg(args, char *);
 	struct _zend_module_entry *module = va_arg(args, struct _zend_module_entry*);
+	int *num_classes = va_arg(args, int*);
 
 	if ((*pce)->module && !strcasecmp((*pce)->module->name, module->name)) {
 		TSRMLS_FETCH();
 		string_printf(str, "\n");
 		_class_string(str, *pce, NULL, indent TSRMLS_CC);
+		(*num_classes)++;
 	}
 	return ZEND_HASH_APPLY_KEEP;
 }
@@ -736,13 +738,14 @@ static void _extension_string(string *str, zend_module_entry *module, char *inde
 	{
 		string str_classes;
 		string sub_indent;
+		int num_classes = 0;
 		
 		string_init(&sub_indent);
 		string_printf(&sub_indent, "%s    ", indent);
 		string_init(&str_classes);
-		zend_hash_apply_with_arguments(EG(class_table), (apply_func_args_t) _extension_class_string, 3, &str_classes, sub_indent.string, module TSRMLS_CC);
-		if (str_classes.len > 1) {
-			string_printf(str, "\n - Classes {\n");
+		zend_hash_apply_with_arguments(EG(class_table), (apply_func_args_t) _extension_class_string, 4, &str_classes, sub_indent.string, module, &num_classes TSRMLS_CC);
+		if (num_classes) {
+			string_printf(str, "\n - Classes [%d] {\n", num_classes);
 			string_append(str, &str_classes);
 			string_printf(str, "%s  }\n", indent);
 		}
