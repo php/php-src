@@ -2907,15 +2907,38 @@ PHP_FUNCTION(pdf_end_template) {
 	RETURN_TRUE;
 }
 
-/* {{{ proto void pdf_setcolor(int pdf, string type, string colorspace, double c1, double c2, double c3, double c4);
+/* {{{ proto void pdf_setcolor(int pdf, string type, string colorspace, double c1 [, double c2 [, double c3 [, double c4]]]);
  * Set the current color space and color. */
 PHP_FUNCTION(pdf_setcolor) {
 	zval **arg1, **arg2, **arg3, **arg4, **arg5, **arg6, **arg7;
 	PDF *pdf;
 	double c1;
+	int argc = ZEND_NUM_ARGS();
 
-	if (ZEND_NUM_ARGS() != 7 || zend_get_parameters_ex(7, &arg1, &arg2, &arg3, &arg4, &arg5, &arg6, &arg7) == FAILURE) {
+	if(argc < 4 || argc > 7) {
 		WRONG_PARAM_COUNT;
+	}
+	switch(argc) {
+		case 4:
+			if(zend_get_parameters_ex(4, &arg1, &arg2, &arg3, &arg4) == FAILURE) {
+				WRONG_PARAM_COUNT;
+			}
+			break;
+		case 5:
+			if(zend_get_parameters_ex(5, &arg1, &arg2, &arg3, &arg4, &arg5) == FAILURE) {
+				WRONG_PARAM_COUNT;
+			}
+			break;
+		case 6:
+			if(zend_get_parameters_ex(6, &arg1, &arg2, &arg3, &arg4, &arg5, &arg6) == FAILURE) {
+				WRONG_PARAM_COUNT;
+			}
+			break;
+		case 7:
+			if(zend_get_parameters_ex(6, &arg1, &arg2, &arg3, &arg4, &arg5, &arg6, &arg7) == FAILURE) {
+				WRONG_PARAM_COUNT;
+			}
+			break;
 	}
 
 	ZEND_FETCH_RESOURCE(pdf, PDF *, arg1, -1, "pdf object", le_pdf);
@@ -2923,9 +2946,9 @@ PHP_FUNCTION(pdf_setcolor) {
 	convert_to_string_ex(arg2);
 	convert_to_string_ex(arg3);
 	convert_to_double_ex(arg4);
-	convert_to_double_ex(arg5);
-	convert_to_double_ex(arg6);
-	convert_to_double_ex(arg7);
+	if(argc > 4) convert_to_double_ex(arg5);
+	if(argc > 5) convert_to_double_ex(arg6);
+	if(argc > 6) convert_to_double_ex(arg7);
 
 	if (0 == (strcmp(Z_STRVAL_PP(arg3), "spot"))) {
 	    c1 = Z_DVAL_PP(arg4)-PDFLIB_SPOT_OFFSET;
@@ -2939,9 +2962,9 @@ PHP_FUNCTION(pdf_setcolor) {
 		Z_STRVAL_PP(arg2),
 		Z_STRVAL_PP(arg3),
 		(float) c1,
-		(float) Z_DVAL_PP(arg5),
-		(float) Z_DVAL_PP(arg6),
-		(float) Z_DVAL_PP(arg7));
+		(float) ((argc>4) ? Z_DVAL_PP(arg5):0),
+		(float) ((argc>5) ? Z_DVAL_PP(arg6):0),
+		(float) ((argc>6) ? Z_DVAL_PP(arg7):0));
 
 	RETURN_TRUE;
 }
