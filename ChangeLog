@@ -1,3 +1,65 @@
+2003-09-14  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/tests/pear_installer2.phpt:
+      add testing for md5sum
+
+    * pear/PEAR/Installer.php:
+      found bug in _installFile() thanks to unit testing.
+      - if a bad md5sum was found, and --force wasn't specified, the temporary
+      file was never deleted
+
+    * pear/tests/pear_installer2.phpt:
+      adding test for non-existing file
+
+    * pear/tests/pear_installer2.phpt:
+      adding test for invalid role
+
+2003-09-14  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend.c:
+      Bugfix #25335
+
+2003-09-14  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/tests/pear_installer2.phpt:
+      adding replacements section for _installFile()
+
+2003-09-14  Zeev Suraski  <zeev@zend.com>
+
+    * ZendEngine2/zend_operators.c:
+      Commit 64-bit fixes to the standard operators
+      by Ard Biesheuvel (abies@php.net)
+
+2003-09-14  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * configure.in:
+      Remove this (part from another patch)
+
+    * main/snprintf.c
+      main/snprintf.h
+      main/spprintf.c:
+      Add length modifier L
+
+    * configure.in
+      main/config.w32.h
+      main/snprintf.c
+      main/snprintf.h
+      main/spprintf.c:
+      - Add length modifiers(ll, j, t, h, hh)
+
+2003-09-14  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/tests/pear_installer2.phpt:
+      new test for _installFile() - not yet complete, but what's there works
+
+    * pear/tests/pear_installer1.phpt:
+      simplify test, split into two
+
+2003-09-14  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend.h:
+      Bugfix #25528 (by Ard Biesheuvel)
+
 2003-09-13  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * main/streams/streams.c:
