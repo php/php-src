@@ -113,8 +113,8 @@ three transaction on default link
 
     ibase_free_result($res);
 
-	$tr_1 = ibase_trans();  /* this default transaction also */
-	$tr_2 = ibase_trans(IBASE_READ);
+	$tr_1 = ibase_query("SET TRANSACTION");
+	$tr_2 = ibase_query("SET TRANSACTION READ ONLY");
 	$tr_3 = ibase_trans(IBASE_READ+IBASE_COMMITTED+IBASE_REC_VERSION+IBASE_WAIT);    
 	$tr_4 = ibase_trans(IBASE_READ+IBASE_COMMITTED+IBASE_REC_NO_VERSION+IBASE_NOWAIT);	
     
