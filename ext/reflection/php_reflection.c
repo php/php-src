@@ -660,11 +660,24 @@ void reflection_property_factory(zend_class_entry *ce, zend_property_info *prop,
 
 	unmangle_property_name(prop->name, &class_name, &prop_name);
 
+	if (!(prop->flags & ZEND_ACC_PRIVATE)) {
+		/* we have to seach the class hierarchy for this (implicit) public or protected property */
+		zend_class_entry *tmp_ce = ce->parent;
+		zend_property_info *tmp_info;
+		
+		while (tmp_ce && zend_hash_find(&ce->properties_info, prop_name, strlen(prop_name) + 1, (void **) &tmp_info) == SUCCESS) {
+			ce = tmp_ce;
+			prop = tmp_info;
+			tmp_ce = tmp_ce->parent;
+		}
+	}
+
 	MAKE_STD_ZVAL(name);
 	ZVAL_STRING(name, prop_name, 1);
 
 	MAKE_STD_ZVAL(classname);
 	ZVAL_STRINGL(classname, ce->name, ce->name_length, 1);
+
 	reflection_instanciate(reflection_property_ptr, object TSRMLS_CC);
 	intern = (reflection_object *) zend_object_store_get_object(object TSRMLS_CC);
 	reference = (property_reference*) emalloc(sizeof(property_reference));
@@ -2268,21 +2281,7 @@ ZEND_METHOD(reflection_property, __construct)
 		return;
 	}
 	
-	if (property_info->flags & ZEND_ACC_PRIVATE) {
-		char *class_name, *prop_name;
-
-		unmangle_property_name(property_info->name, &class_name, &prop_name);
-		if (strcmp(lcname, class_name)) {
-			/* this shouldn't happen */
-			if (zend_hash_find(EG(class_table), class_name, strlen(class_name) + 1, (void **) &pce) == FAILURE) {
-				efree(lcname);
-				zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, 
-					"Class %s does not exist", class_name);
-				return;
-			}
-			ce = *pce;
-		}
-	} else {
+	if (!(property_info->flags & ZEND_ACC_PRIVATE)) {
 		/* we have to seach the class hierarchy for this (implicit) public or protected property */
 		zend_class_entry *tmp_ce = ce->parent;
 		zend_property_info *tmp_info;
