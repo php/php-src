@@ -68,6 +68,7 @@ PHP 4                                                                      NEWS
   process is now more portable and less resource-consuming. (Sascha)
 
 03 May 2002, Version 4.2.1
+- Fixed a couple of bugs in array_sum() and array_merge(). (Andrei)
 - Fixed SJIS directory name handling under Windows. (Rui)
 - Fixed empty mb_output_handler() output when Content-Type is specified.
   (Yasuo) 
