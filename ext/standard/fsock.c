@@ -76,7 +76,16 @@ static php_fsock_globals fsock_globals;
 extern int le_fp;
 #endif
 
-#define FREE_SOCK if(socketd >= 0) close(socketd); efree(sock); if (key) efree(key)
+#define CLOSE_SOCK(free_sock)	\
+	if(socketd >= 0) {			\
+		close(socketd);			\
+	}							\
+	if (free_sock) {			\
+		efree(sock);			\
+	}							\
+	if (key) {					\
+		efree(key);				\
+	}
 
 #define SEARCHCR() \
 	p = memchr(READPTR(sock), '\n', MIN(TOREAD(sock), maxlen));
@@ -249,7 +258,7 @@ static void php_fsockopen(INTERNAL_FUNCTION_PARAMETERS, int persistent) {
 	FLS_FETCH();
 	
 	if (arg_count > 5 || arg_count < 2 || zend_get_parameters_array_ex(arg_count,args)==FAILURE) {
-		FREE_SOCK;
+		CLOSE_SOCK(1);
 		WRONG_PARAM_COUNT;
 	}
 	switch(arg_count) {
@@ -285,7 +294,7 @@ static void php_fsockopen(INTERNAL_FUNCTION_PARAMETERS, int persistent) {
 
 	if (persistent && zend_hash_find(&FG(ht_fsock_keys), key, strlen(key) + 1,
 				(void *) &sockp) == SUCCESS) {
-		FREE_SOCK;
+		CLOSE_SOCK(0);
 		*sock = *sockp;
 		ZEND_REGISTER_RESOURCE(return_value,sock,php_file_le_socket());
 		return;
@@ -307,21 +316,21 @@ static void php_fsockopen(INTERNAL_FUNCTION_PARAMETERS, int persistent) {
 		socketd = socket(AF_INET,udp ? SOCK_DGRAM : SOCK_STREAM,0);
 
 		if (socketd == SOCK_ERR) {
-			FREE_SOCK;
+			CLOSE_SOCK(1);
 			RETURN_FALSE;
 		}
 	  
 		server.sin_family = AF_INET;
 		
 		if(lookup_hostname(udp ? &(*args[0])->value.str.val[6] : (*args[0])->value.str.val,&server.sin_addr)) {
-			FREE_SOCK;
+			CLOSE_SOCK(1);
 			RETURN_FALSE;
 		}
   
 		server.sin_port = htons(portno);
   
 		if (connect_nonb(socketd, (struct sockaddr *)&server, sizeof(server), &timeout) == SOCK_CONN_ERR) {
-			FREE_SOCK;
+			CLOSE_SOCK(1);
 			if(arg_count>2) (*args[2])->value.lval = errno;
 			if(arg_count>3) {
 				(*args[3])->value.str.val = estrdup(strerror(errno));
@@ -335,7 +344,7 @@ static void php_fsockopen(INTERNAL_FUNCTION_PARAMETERS, int persistent) {
 		struct  sockaddr_un unix_addr;
 		socketd = socket(AF_UNIX,SOCK_STREAM,0);
 		if (socketd == SOCK_ERR) {
-			FREE_SOCK;
+			CLOSE_SOCK(1);
 			RETURN_FALSE;
 		}
 	  
@@ -344,7 +353,7 @@ static void php_fsockopen(INTERNAL_FUNCTION_PARAMETERS, int persistent) {
 		strcpy(unix_addr.sun_path, (*args[0])->value.str.val);
 
 		if (connect_nonb(socketd, (struct sockaddr *) &unix_addr, sizeof(unix_addr), &timeout) == SOCK_CONN_ERR) {
-			FREE_SOCK;
+			CLOSE_SOCK(1);
 			if(arg_count>2) (*args[2])->value.lval = errno;
 			if(arg_count>3) {
 				(*args[3])->value.str.val = estrdup(strerror(errno));
