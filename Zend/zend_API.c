@@ -566,10 +566,9 @@ ZEND_API int _array_init(zval *arg ZEND_FILE_LINE_DC)
 }
 
 
-ZEND_API int _object_init_ex(zval *arg, zend_class_entry *class_type ZEND_FILE_LINE_DC)
+ZEND_API int _object_init_ex(zval *arg, zend_class_entry *class_type ZEND_FILE_LINE_DC TSRMLS_DC)
 {
 	zval *tmp;
-	TSRMLS_FETCH();
 
 	if (!class_type->constants_updated) {
 		zend_hash_apply_with_argument(&class_type->default_properties, (apply_func_arg_t) zval_update_constant, (void *) 1 TSRMLS_CC);
@@ -585,9 +584,9 @@ ZEND_API int _object_init_ex(zval *arg, zend_class_entry *class_type ZEND_FILE_L
 }
 
 
-ZEND_API int _object_init(zval *arg ZEND_FILE_LINE_DC)
+ZEND_API int _object_init(zval *arg ZEND_FILE_LINE_DC TSRMLS_DC)
 {
-	return _object_init_ex(arg, &zend_standard_class_def ZEND_FILE_LINE_CC);
+	return _object_init_ex(arg, &zend_standard_class_def ZEND_FILE_LINE_CC TSRMLS_CC);
 }
 
 
