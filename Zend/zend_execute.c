@@ -2171,6 +2171,10 @@ do_fcall_common:
 						
 						retval_ptr_ptr = get_zval_ptr_ptr(&EX(opline)->op1, EX(Ts), BP_VAR_W);
 
+						if (!retval_ptr_ptr) {
+							zend_error(E_ERROR, "Cannot return overloaded elements or string offsets by reference");
+						}
+
 						SEPARATE_ZVAL_TO_MAKE_IS_REF(retval_ptr_ptr);
 						(*retval_ptr_ptr)->refcount++;
 						
