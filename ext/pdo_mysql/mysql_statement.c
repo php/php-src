@@ -135,7 +135,7 @@ static int pdo_mysql_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC)
 	return 1;
 }
 
-static int pdo_mysql_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, unsigned long *len TSRMLS_DC)
+static int pdo_mysql_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, unsigned long *len, int *caller_frees TSRMLS_DC)
 {
 	pdo_mysql_stmt *S = (pdo_mysql_stmt*)stmt->driver_data;
 
