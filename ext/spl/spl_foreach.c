@@ -70,7 +70,7 @@ ZEND_EXECUTE_HOOK_FUNCTION(ZEND_FE_RESET)
 	if (is_a & SPL_IS_A_ITERATOR) {
 		spl_unlock_zval_ptr_ptr(&EX(opline)->op1, EX(Ts) TSRMLS_CC);
 		obj_ce = instance_ce;
-		spl_begin_method_call_ex(obj, obj_ce, NULL, "new_iterator", sizeof("new_iterator")-1, &retval);
+		spl_call_method_0(obj, obj_ce, NULL, "new_iterator", sizeof("new_iterator")-1, &retval);
 		instance_ce = spl_get_class_entry(retval TSRMLS_CC);
 		is_a = spl_implements(instance_ce);
 		if (!(is_a & SPL_IS_A_FORWARD)) {
@@ -146,10 +146,10 @@ ZEND_EXECUTE_HOOK_FUNCTION(ZEND_FE_FETCH)
 		obj = &proxy->obj; /* will be optimized out */
 
 		if (proxy->index++) {
-			spl_begin_method_call_no_retval(obj, proxy->obj_ce, &proxy->funcs.next, "next", sizeof("next")-1 TSRMLS_CC);
+			spl_call_method_0(obj, proxy->obj_ce, &proxy->funcs.next, "next", sizeof("next")-1, NULL);
 		} else {
 			if (proxy->is_a & SPL_IS_A_SEQUENCE) {
-				spl_begin_method_call_no_retval(obj, proxy->obj_ce, &proxy->funcs.rewind, "rewind", sizeof("rewind")-1 TSRMLS_CC);
+				spl_call_method_0(obj, proxy->obj_ce, &proxy->funcs.rewind, "rewind", sizeof("rewind")-1, NULL);
 			}
 			/* now this is an optimization trick:
 			   ZEND_SWITCH_FREE receives the array copy or the spl object in op1 and has an unused op2
@@ -158,7 +158,7 @@ ZEND_EXECUTE_HOOK_FUNCTION(ZEND_FE_FETCH)
 			op_array->opcodes[EX(opline)->op2.u.opline_num].op2 = *op1;
 		}
 
-		spl_begin_method_call_ex(obj, proxy->obj_ce, &proxy->funcs.more, "has_more", sizeof("has_more")-1, &more);
+		spl_call_method_0(obj, proxy->obj_ce, &proxy->funcs.more, "has_more", sizeof("has_more")-1, &more);
 		if (!more->type == IS_BOOL && !more->type == IS_LONG) {
 			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Method %s::has_more implements spl_forward::has_more and should return a value of type boolean or int");
 			convert_to_boolean(more);
@@ -168,10 +168,10 @@ ZEND_EXECUTE_HOOK_FUNCTION(ZEND_FE_FETCH)
 			FREE_ZVAL(more);
 			result = &EX_T(EX(opline)->result.u.var).tmp_var;
 
-			spl_begin_method_call_ex(obj, proxy->obj_ce, &proxy->funcs.current, "current", sizeof("current")-1, &value);
+			spl_call_method_0(obj, proxy->obj_ce, &proxy->funcs.current, "current", sizeof("current")-1, &value);
 
 			if (proxy->is_a & SPL_IS_A_ASSOC) {
-				spl_begin_method_call_ex(obj, proxy->obj_ce, &proxy->funcs.key, "key", sizeof("key")-1, &key);
+				spl_call_method_0(obj, proxy->obj_ce, &proxy->funcs.key, "key", sizeof("key")-1, &key);
 			} else {
 				MAKE_STD_ZVAL(key);
 				key->value.lval = proxy->index;

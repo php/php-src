@@ -176,6 +176,7 @@ int spl_call_method(zval **object_pp, zend_class_entry *obj_ce, zend_function **
 	int result;
 	zend_fcall_info fci;
 	zval z_fname;
+	zval *retval;
 
 	zval **params[2];
 
@@ -186,7 +187,7 @@ int spl_call_method(zval **object_pp, zend_class_entry *obj_ce, zend_function **
 	/*fci.function_table = NULL; will be read form zend_class_entry of object if needed */
 	fci.object_pp = object_pp;
 	fci.function_name = &z_fname;
-	fci.retval_ptr_ptr = retval_ptr;
+	fci.retval_ptr_ptr = retval_ptr ? retval_ptr : &retval;
 	fci.param_count = param_count;
 	fci.params = params;
 	fci.no_separation = 1;
@@ -215,6 +216,10 @@ int spl_call_method(zval **object_pp, zend_class_entry *obj_ce, zend_function **
 			fcic.object_pp = object_pp;
 			result = zend_call_function(&fci, &fcic TSRMLS_CC);
 		}
+	}
+	if (!retval_ptr && fci.retval_ptr_ptr) {
+		zval_dtor(*fci.retval_ptr_ptr);
+		FREE_ZVAL(*fci.retval_ptr_ptr);
 	}
 	return result;
 }
