@@ -18,6 +18,7 @@
 /* $Id$ */
 
 #define _XOPEN_SOURCE
+#define __EXTENSIONS__ 1
 #define _BSD_SOURCE
 
 #include "php.h"
