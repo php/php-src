@@ -118,6 +118,9 @@ union _zend_function *zend_std_get_static_method(zend_class_entry *ce, char *fun
 zval **zend_std_get_static_property(zend_class_entry *ce, char *property_name, int property_name_len, zend_bool silent TSRMLS_DC);
 zend_bool zend_std_unset_static_property(zend_class_entry *ce, char *property_name, int property_name_len TSRMLS_DC);
 
+int zend_std_cast_object(zval *readobj, zval *writeobj, int type, int should_free TSRMLS_DC);
+ZEND_API int zend_std_cast_object_tostring(zval *readobj, zval *writeobj, int type, int should_free TSRMLS_DC);
+
 
 #define IS_ZEND_STD_OBJECT(z)  ((z).type == IS_OBJECT && (Z_OBJ_HT((z))->get_class_entry != NULL))
 #define HAS_CLASS_ENTRY(z) (Z_OBJ_HT(z)->get_class_entry != NULL)

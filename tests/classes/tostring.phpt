@@ -10,7 +10,8 @@ class test1 {
 
 class test2 {
     function __toString() {
-        return "Converted";
+    	echo __METHOD__ . "()\n";
+        return "Converted\n";
     }
 }
 
@@ -23,10 +24,26 @@ var_dump($o);
 echo "====test2====\n";
 $o = new test2;
 print_r($o);
-var_dump((string)$o);
+print $o;
 var_dump($o);
-echo "====done!====\n";
+echo "====test3====\n";
+echo $o;
+
+echo "====test4====\n";
+echo "string:".$o;
+
+echo "====test5====\n";
+echo 1 . $o;
+
+echo "====test6====\n";
+echo $o.$o;
+
+echo "====test7====\n";
+$ar = array();
+$ar[$o->__toString()] = "ERROR";
+echo $ar[$o];
 ?>
+====DONE!====
 --EXPECTF--
 ====test1====
 test1 Object
@@ -41,7 +58,26 @@ object(test1)#%d (0) {
 test2 Object
 (
 )
-string(9) "Converted"
+test2::__toString()
+Converted
 object(test2)#%d (0) {
 }
-====done!====
+====test3====
+test2::__toString()
+Converted
+====test4====
+test2::__toString()
+string:Converted
+====test5====
+test2::__toString()
+1Converted
+====test6====
+test2::__toString()
+test2::__toString()
+Converted
+Converted
+====test7====
+test2::__toString()
+
+Warning: Illegal offset type in %stostring.php on line %d
+====DONE!====
