@@ -164,6 +164,7 @@ PHP_MINIT_FUNCTION(spl)
 	REGISTER_SPL_STD_CLASS(spl, array_writer_default, spl_array_writer_default_create);
 	REGISTER_SPL_FUNCTIONS(spl, array_writer_default, spl_array_writer_funcs);
 #endif
+
 	return SUCCESS;
 }
 /* }}} */
@@ -205,6 +206,7 @@ PHP_MSHUTDOWN_FUNCTION(spl)
 #ifdef SPL_ARRAY_WRITE
 	ZEND_EXECUTE_HOOK_RESTORE(ZEND_ASSIGN);
 #endif /* SPL_ARRAY_WRITE */
+
 	return SUCCESS;
 }
 /* }}} */

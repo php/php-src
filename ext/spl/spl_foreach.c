@@ -33,9 +33,6 @@
 
 #define OPTIMIZED_ARRAY_CONSTRUCT
 
-#define ezalloc(size) \
-	memset(emalloc(size), 0, size)
-
 typedef struct {
 	zend_function      *next;
 	zend_function      *rewind;
@@ -81,8 +78,8 @@ ZEND_EXECUTE_HOOK_FUNCTION(ZEND_FE_RESET)
 		PZVAL_LOCK(retval);
 	} else if (is_a & SPL_IS_A_FORWARD) {
 		spl_unlock_zval_ptr_ptr(&EX(opline)->op1, EX(Ts) TSRMLS_CC);
-		(*obj)->refcount += 2; /* lock two times */
 		retval = *obj;
+		retval->refcount += 2; /* lock two times */
 	} else {
 		ZEND_EXECUTE_HOOK_ORIGINAL(ZEND_FE_RESET);
 	}
@@ -98,9 +95,10 @@ ZEND_EXECUTE_HOOK_FUNCTION(ZEND_FE_RESET)
 	/* And pack it into a zval. Since it is nowhere accessible using a 
 	 * zval of type STRING is the fastest approach of storing the proxy.
 	 */
-	ALLOC_INIT_ZVAL(retval);
+	ALLOC_ZVAL(retval);
 	ZVAL_STRINGL(retval, (char*)proxy, sizeof(spl_foreach_proxy)-1, 0);
-	retval->refcount += 2; /* lock two times */
+	retval->is_ref = 0;
+	retval->refcount = 2; /* lock two times */
 	/* return the created proxy container */
 	EX_T(EX(opline)->result.u.var).var.ptr = retval;
 	EX_T(EX(opline)->result.u.var).var.ptr_ptr = &EX_T(EX(opline)->result.u.var).var.ptr;
@@ -140,8 +138,6 @@ ZEND_EXECUTE_HOOK_FUNCTION(ZEND_FE_FETCH)
 	spl_foreach_proxy *proxy;
 
 	if (Z_TYPE_PP(obj) == IS_STRING) {
-		spl_unlock_zval_ptr_ptr(op1, EX(Ts) TSRMLS_CC);
-		PZVAL_LOCK(*obj);
 
 		proxy = (spl_foreach_proxy*)Z_STRVAL_PP(obj);
 		obj = &proxy->obj; /* will be optimized out */
@@ -231,7 +227,6 @@ ZEND_EXECUTE_HOOK_FUNCTION(ZEND_FE_FETCH)
 /* {{{ ZEND_EXECUTE_HOOK_FUNCTION(ZEND_SWITCH_FREE) */
 ZEND_EXECUTE_HOOK_FUNCTION(ZEND_SWITCH_FREE)
 {
-	znode *op1 = &EX(opline)->op1;
 	znode *op2 = &EX(opline)->op2;
 	zval *tmp, **obj = spl_get_zval_ptr_ptr(op2, EX(Ts) TSRMLS_CC);
 	spl_foreach_proxy *proxy;
@@ -241,10 +236,10 @@ ZEND_EXECUTE_HOOK_FUNCTION(ZEND_SWITCH_FREE)
 		tmp = *obj;
 		*obj = proxy->obj; /* restore */
 
-		zval_dtor(tmp);
+		efree(tmp->value.str.val);
 		FREE_ZVAL(tmp);
 
-		spl_unlock_zval_ptr_ptr(op1, EX(Ts) TSRMLS_CC);
+		spl_unlock_zval_ptr_ptr(&EX(opline)->op1, EX(Ts) TSRMLS_CC);
 		PZVAL_LOCK(*obj);
 		
 		SET_UNUSED(*op2);

@@ -184,7 +184,6 @@ int spl_call_method(zval **object_pp, zend_class_entry *obj_ce, zend_function **
 	int (*orig_unary_op)(zval *result, zval *op1);
 	int (*orig_binary_op)(zval *result, zval *op1, zval *op2 TSRMLS_DC);
 	zend_class_entry *current_scope;
-	zend_class_entry *calling_scope = NULL;
 	zval *current_this;
 	zend_execute_data execute_data;
 	va_list args;
@@ -200,7 +199,6 @@ int spl_call_method(zval **object_pp, zend_class_entry *obj_ce, zend_function **
 	EX(opline) = NULL;
 
 	EX(object) = *object_pp;
-	calling_scope = obj_ce;
 
 	original_function_state_ptr = EG(function_state_ptr);
 	if (fn_proxy && *fn_proxy) {
@@ -231,13 +229,15 @@ int spl_call_method(zval **object_pp, zend_class_entry *obj_ce, zend_function **
 				ALLOC_ZVAL(new_zval);
 				*new_zval = *arg;
 				zval_copy_ctor(new_zval);
-				new_zval->refcount = 1;
+				new_zval->refcount = 2;
+				new_zval->is_ref = 1;
 				arg->refcount--;
-				arg = new_zval;
+				param = new_zval;
+			} else {
+				arg->refcount++;
+				arg->is_ref = 1;
+				param = arg;
 			}
-			arg->refcount++;
-			arg->is_ref = 1;
-			param = arg;
 		} else if (arg != &EG(uninitialized_zval)) {
 			arg->refcount++;
 			param = arg;
@@ -250,15 +250,15 @@ int spl_call_method(zval **object_pp, zend_class_entry *obj_ce, zend_function **
 	}
 	va_end(args);
 
-	zend_ptr_stack_n_push(&EG(argument_stack), 2, (void *) (long) param_count, NULL);
+	zend_ptr_stack_push(&EG(argument_stack), (void *) (long) param_count);
+	zend_ptr_stack_push(&EG(argument_stack), NULL);
 
 	EG(function_state_ptr) = &EX(function_state);
 
 	current_scope = EG(scope);
-	EG(scope) = calling_scope;
+	EG(scope) = obj_ce;
 
 	current_this = EG(This);
-
 	EG(This) = *object_pp;
 
 	if (!PZVAL_IS_REF(EG(This))) {
@@ -309,7 +309,7 @@ int spl_call_method(zval **object_pp, zend_class_entry *obj_ce, zend_function **
 		EG(binary_op) = orig_binary_op;
 	} else {
 		ALLOC_INIT_ZVAL(*retval);
-		((zend_internal_function *) EX(function_state).function)->handler(param_count, *retval, (object_pp?*object_pp:NULL), 1 TSRMLS_CC);
+		((zend_internal_function *) EX(function_state).function)->handler(param_count, *retval, *object_pp, 1 TSRMLS_CC);
 		INIT_PZVAL(*retval);
 	}
 	zend_ptr_stack_clear_multiple(TSRMLS_C);
