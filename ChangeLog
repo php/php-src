@@ -2,6 +2,8 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ??? ?? 1999, Version 4.0 Beta 2
+- Fixed a problem with the PHP error handler that could result in a crash
+  on certain operating systems (Zeev)
 - Apache php_flag values only recognized 'On' (case sensitive) - changed
   to case insensitive (Zeev)
 - Fixed a memory leak with switch statement containing return statements
