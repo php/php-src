@@ -496,10 +496,12 @@ _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, int option)
 			break;
 		}
 		if (err >= 0) {
+#if moriyoshi_0
 			if ( regs.beg[0] == regs.end[0] ) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Empty regular expression");
 				break;
 			}
+#endif
 			/* copy the part of the string before the match */
 			_php_mb_regex_strbuf_ncat(&outdev, &string[pos], regs.beg[0] - pos);
 			/* copy replacement and backrefs */
@@ -540,6 +542,7 @@ _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, int option)
 			if (pos < n) {
 				pos = n;
 			} else {
+				_php_mb_regex_strbuf_ncat(&outdev, &string[pos], 1 ); 
 				pos++;
 			}
 		} else { /* nomatch */
