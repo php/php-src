@@ -10,6 +10,7 @@ PHP 4                                                                      NEWS
 - Fixed possible crash in imagerotate() when an invalid color index
   is used for background color. (Pierre-Alain Joye)
 - Fixed bug #24640 (var_export and var_dump can't output large float). (Marcus)
+- Fixed bug #24573 (debug_backtrace() crashes if $this set to null). (Jani)
 - Fixed bug #24537 (apache2 compile misses some include directories). (Jani)
 - Fixed bug #24519 (aggregate_methods_by_list() does not increment refcount).
 - Fixed bug #24313 (file_exist() warning on non-existent files when
