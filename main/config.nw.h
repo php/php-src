@@ -1,13 +1,6 @@
 /* config.nw.h.  Configure file for NetWare platform */
 
 
-/****
-
-Need to carefully look into each constant and either define or undef it w.r.t. NetWare.
-
-****/
-
-
 /* Define if PHP to setup it's own SIGCHLD handler (not needed on NetWare) */
 #define PHP_SIGCHILD 0
 
@@ -27,6 +20,17 @@ Need to carefully look into each constant and either define or undef it w.r.t. N
 
 /* set to enable FTP support */
 #define HAVE_FTP 1
+
+/* set to enable SNMP */
+/*#define HAVE_SNMP 1*/
+
+/* defines for PostgreSQL extension */
+#define HAVE_PGSQL 1
+#define PHP_PGSQL_PRIVATE 1
+#define HAVE_PGSQL_WITH_MULTIBYTE_SUPPORT 1
+#define HAVE_PQCLIENTENCODING 1
+#define HAVE_PQCMDTUPLES 1
+#define HAVE_PQOIDVALUE 1
 
 /* set to enable bundled PCRE library */
 #define HAVE_BUNDLED_PCRE	1
@@ -55,11 +59,6 @@ Need to carefully look into each constant and either define or undef it w.r.t. N
 
 #define PHP_SAFE_MODE 0
 #define MAGIC_QUOTES 0
-/* This is the default configuration file to read */
-#define CONFIGURATION_FILE_PATH "php.ini"
-#define USE_CONFIG_FILE 1
-
-#define PHP_INCLUDE_PATH	NULL
 
 
 /* Undefine if you want stricter XML/SGML compliance by default */
@@ -111,8 +110,13 @@ Need to carefully look into each constant and either define or undef it w.r.t. N
 #define HAVE_UODBC 1
 #define HAVE_LIBDL 1
 #define HAVE_SENDMAIL 1
+
+/* Define if you have the gettimeofday function.  */
 #define HAVE_GETTIMEOFDAY 1
+
+/* Define if you have the putenv function.  */
 #define HAVE_PUTENV 1
+
 #define HAVE_LIMITS_H 1
 
 #define HAVE_TZSET 1
@@ -163,20 +167,14 @@ Need to carefully look into each constant and either define or undef it w.r.t. N
 /* Define if you have the getlogin function.  */
 /* #define HAVE_GETLOGIN 1 */
 
-/* Define if you have the gettimeofday function.  */
-#define HAVE_GETTIMEOFDAY 1
-
 /* Define if you have the memcpy function.  */
 #define HAVE_MEMCPY 1
 
 /* Define if you have the memmove function.  */
 #define HAVE_MEMMOVE 1
 
-/* Define if you have the putenv function.  */
-/* #define HAVE_PUTENV 1 */   /* Why are such things defined in more than one place ? */
-
 /* Define if you have the regcomp function.  */
-/* #define HAVE_REGCOMP 1 */
+#define HAVE_REGCOMP 1
 
 /* Define if you have the setlocale function.  */
 /* #define HAVE_SETLOCALE 1 */    /* LibC doesn't seem to be supporting fully -- hence commenting for now */
@@ -212,7 +210,7 @@ Need to carefully look into each constant and either define or undef it w.r.t. N
 #define HAVE_UTIME 1
 
 /* Define if you have the <dirent.h> header file.  */
-#define HAVE_DIRENT_H
+#define HAVE_DIRENT_H 1
 
 /* Define if you have the <fcntl.h> header file.  */
 #define HAVE_FCNTL_H 1
@@ -230,7 +228,11 @@ Need to carefully look into each constant and either define or undef it w.r.t. N
 #undef HAVE_SYS_FILE_H
 
 /* Define if you have the <sys/socket.h> header file.  */
+#ifdef USE_WINSOCK
+#undef HAVE_SYS_SOCKET_H
+#else
 #define HAVE_SYS_SOCKET_H 1 /* Added '1' for '#if' to work */
+#endif
 
 /* Define if you have the <sys/wait.h> header file.  */
 #undef HAVE_SYS_WAIT_H
@@ -255,14 +257,24 @@ Need to carefully look into each constant and either define or undef it w.r.t. N
 
 #define HAVE_STRFTIME 1
 
+/* Defined since unsetenv function is defined in LibC.
+ * This is used to destroy env values in the function php_putenv_destructor.
+ * If we do not use unsetenv, then the environment variables are directlt manipulated.
+ * This will then result in LibC not being able to do the maintenance
+ * that is required for NetWare.
+ */
+#define HAVE_UNSETENV 1
+
 /* Default directory for loading extensions.  */
 #define PHP_EXTENSION_DIR "sys:/php/ext"
 
 #define SIZEOF_INT 4
 
-/* Define directory constants for php and pear */
+/* Define directory constants for PHP and PEAR */
 
-/* Venkat (20/12/01) */
+/* This is the default configuration file to read */
+#define CONFIGURATION_FILE_PATH "php.ini"
+
 #define APACHE_MODULE_DIR "sys:/apache/modules"
 #define PHP_BINDIR "sys:/php"
 #define PHP_LIBDIR PHP_BINDIR
@@ -271,4 +283,14 @@ Need to carefully look into each constant and either define or undef it w.r.t. N
 #define PHP_LOCALSTATEDIR PHP_BINDIR
 #define PHP_CONFIG_FILE_PATH "sys:/php"
 #define PEAR_INSTALLDIR "sys:/php/pear"
+
+#define PHP_CONFIG_FILE_SCAN_DIR NULL
+#define PHP_EXTENSION_DIR "sys:/php/ext"
+
+#define PHP_INCLUDE_PATH NULL
+
+#define PHP_PREFIX "sys:/php"
+#define PHP_SHLIB_SUFFIX "nlm"
+
+#define USE_CONFIG_FILE 1
 
