@@ -301,15 +301,9 @@ void php_treat_data(int arg, char *str, zval* destArray ELS_DC PLS_DC SLS_DC)
 
 
 
-void php_import_environment_variables(ELS_D PLS_DC)
+void php_import_environment_variables(zval *array_ptr ELS_DC PLS_DC)
 {
 	char **env, *p, *t;
-	zval *array_ptr=NULL;
-
-	ALLOC_ZVAL(array_ptr);
-	array_init(array_ptr);
-	INIT_PZVAL(array_ptr);
-	PG(http_globals)[TRACK_VARS_ENV] = array_ptr;
 
 	for (env = environ; env != NULL && *env != NULL; env++) {
 		p = strchr(*env, '=');
