@@ -33,6 +33,8 @@
 #include "php_calendar.h"
 #include "sdncal.h"
 
+#include <stdio.h>
+ 
 function_entry calendar_functions[] = {
 	PHP_FE(jdtogregorian, NULL)
 	PHP_FE(gregoriantojd, NULL)
@@ -108,6 +110,9 @@ enum	{ CAL_DOW_DAYNO, CAL_DOW_SHORT, CAL_DOW_LONG };
 enum	{ CAL_MONTH_GREGORIAN_SHORT, CAL_MONTH_GREGORIAN_LONG,
 	CAL_MONTH_JULIAN_SHORT, CAL_MONTH_JULIAN_LONG, CAL_MONTH_JEWISH,
 	CAL_MONTH_FRENCH };
+
+/* for heb_number_to_chars */
+char alef_bet[25] = "0אבגדהוזחטיכלמנסעפצקרשת";
 	
 PHP_MINIT_FUNCTION(calendar)
 {
@@ -371,24 +376,111 @@ PHP_FUNCTION(jdtogregorian)
 }
 /* }}} */
 
+/*	
+	caution: the hebrew format product non unique result.
+	for example both: year '5' and year '5000' product 'ה'.
+	use the numeric one for calculations. 
+ */
+char* heb_number_to_chars(int n) {
+		char *p, *old, *ret;
+		
+		p = emalloc(10);
+		old = p;
+
+		/* 
+		   prevents the option breaking the jewish beliefs, and some other 
+		   critical resources ;)
+		*/
+		if (n > 9999 || n < 1) return NULL;
+
+		/* alafim case */
+		if (n / 1000) {
+			*p = alef_bet[n / 1000];
+			p++;
+			n = n % 1000;
+		}
+
+		/* taf-taf case */
+		while (n >= 400) {
+			*p = alef_bet[22];
+			p++;
+			n-=400;
+		}
+		
+		/* meot case */
+		if (n >= 100) { 
+			*p = alef_bet[18+n/100];
+			p++;
+			n = n % 100;
+		}
+		
+		/* tet-vav tet-zain case */
+		if (n == 15 || n == 16) {
+			*p = alef_bet[9];
+			p++;
+			*p = alef_bet[n-9];
+			p++;
+		} else {
+			/* asarot case */
+			if (n >= 10) {       
+				*p = alef_bet[9+n/10];
+				p++;
+				n = n % 10;
+			}
+			
+			/* yeihot case */
+			if (n > 0) {
+				*p = alef_bet[n];
+				p++;
+			}
+		}
+        
+		*p = '\0';
+		ret = emalloc((int) (p - old) + 1);
+		strncpy(ret, old, (int) (p - old) + 1);
+		return ret;
+}
+
 /* {{{ proto string jdtojewish(int juliandaycount)
    Converts a julian day count to a jewish calendar date */
  PHP_FUNCTION(jdtojewish) 
 {
-	pval **julday;
+	long julday, fl;
 	int year, month, day;
-	char date[10];
-
-	if (zend_get_parameters_ex(1, &julday) != SUCCESS) {
+	char date[10], hebdate[25];
+	
+	if (ZEND_NUM_ARGS() == 1) {
+		if (zend_parse_parameters(1 TSRMLS_CC,"l", &julday) != SUCCESS) {
+			RETURN_FALSE;
+		}
+		fl=0;
+	} else if (ZEND_NUM_ARGS() == 2) {
+		if (zend_parse_parameters(2 TSRMLS_CC,"ll", &julday, &fl) != SUCCESS) {
+			RETURN_FALSE;
+		}
+	} else {
 		WRONG_PARAM_COUNT;
 	}
 	
-	convert_to_long_ex(julday);
 	
-	SdnToJewish(Z_LVAL_PP(julday), &year, &month, &day);
-	sprintf(date, "%i/%i/%i", month, day, year);
-
-	RETURN_STRING(date, 1);
+	SdnToJewish(julday, &year, &month, &day);
+	if(!fl) {
+		sprintf(date, "%i/%i/%i", month, day, year);
+		RETURN_STRING(date, 1);
+	} else {
+		if (year <= 0 || year > 9999) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Out of range year.");
+			RETURN_FALSE;
+		}
+		
+		sprintf(hebdate, "%s %s %s", \
+				heb_number_to_chars(day), \
+				JewishMonthHebName[month], \
+				heb_number_to_chars(year));
+		
+		RETURN_STRING(hebdate, 1);
+		
+	}
 }
 /* }}} */
 
