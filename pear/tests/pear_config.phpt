@@ -4,9 +4,8 @@ PEAR_Config
 <?php
 
 error_reporting(E_ALL);
-system("pwd");
 chdir(dirname(__FILE__));
-include dirname(__FILE__)."/../PEAR/Config.php";
+include "../PEAR/Config.php";
 copy("system.input", "system.conf");
 copy("user.input", "user.conf");
 PEAR::setErrorHandling(PEAR_ERROR_DIE, "%s\n");
@@ -15,15 +14,15 @@ dumpall();
 print "creating config object\n";
 $config = new PEAR_Config("user.conf", "system.conf");
 
-// overriding system values
+print "overriding system values\n";
 $config->set("master_server", "pear.localdomain");
-$config->writeConfigFile();
+$config->writeConfigFile(null, "user");
 dumpall();
 var_dump($config->get("master_server"));
 
-// going back to defaults
-$config->toDefault("master_server");
-$config->writeConfigFile();
+print "going back to defaults\n";
+$config->remove("master_server", "user");
+$config->writeConfigFile(null, "user");
 dumpall();
 
 // 
@@ -37,11 +36,9 @@ unlink("system.conf");
 
 function dumpit($file)
 {
-	$fp = fopen($file, "r");
 	print "$file:";
-	$data = unserialize(fread($fp, filesize($file)));
-	fclose($fp);
-	if (!is_array($data)) {
+        $data = PEAR_Config::_readConfigDataFrom($file);
+	if (empty($data)) {
 		print " <empty>\n";
 		return;
 	}
@@ -64,11 +61,13 @@ dumping...
 system.conf: master_server="pear.php.net"
 user.conf: <empty>
 creating config object
+overriding system values
 dumping...
 system.conf: master_server="pear.php.net"
 user.conf: master_server="pear.localdomain"
 string(16) "pear.localdomain"
+going back to defaults
 dumping...
 system.conf: master_server="pear.php.net"
-user.conf:
+user.conf: <empty>
 done
