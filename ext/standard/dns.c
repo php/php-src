@@ -331,8 +331,9 @@ static u_char *php_parserr(u_char *cp, querybuf *answer, int type_to_fetch, int 
 	GETLONG(ttl, cp);
 	GETSHORT(dlen, cp);
 	if (type_to_fetch != T_ANY && type != type_to_fetch) {
-		/* Should never actually occour */
-		return NULL;
+		*subarray = NULL;
+		cp += dlen;
+		return cp;
 	}
 
 	if (!store) {
@@ -576,6 +577,7 @@ PHP_FUNCTION(dns_get_record)
 					zend_hash_next_index_insert(HASH_OF(return_value), (void *)&subarray[current_subarray], sizeof(zval *), NULL);
 				current_subarray++;
 			}
+			res_nclose(&res);
 		}
 	}
 
