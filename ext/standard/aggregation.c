@@ -391,13 +391,16 @@ static void aggregate(INTERNAL_FUNCTION_PARAMETERS, int aggr_what, int aggr_type
 		zend_hash_init(&new_ce->class_table, 10, NULL, ZVAL_PTR_DTOR, 0);
 		zend_hash_copy(&new_ce->class_table, &Z_OBJCE_P(obj)->class_table, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
 
+		/*
 		zend_hash_init(&new_ce->private_properties, 10, NULL, ZVAL_PTR_DTOR, 0);
 		zend_hash_copy(&new_ce->private_properties, &Z_OBJCE_P(obj)->private_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
+		*/
 
 		new_ce->constructor = Z_OBJCE_P(obj)->constructor;
 		new_ce->destructor = Z_OBJCE_P(obj)->destructor;
 		new_ce->clone = Z_OBJCE_P(obj)->clone;
 #endif
+
 		new_ce->builtin_functions = Z_OBJCE_P(obj)->builtin_functions;
 #ifndef ZEND_ENGINE_2
 		new_ce->handle_function_call = Z_OBJCE_P(obj)->handle_function_call;

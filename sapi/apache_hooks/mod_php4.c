@@ -786,8 +786,15 @@ static void copy_per_dir_entry(php_per_dir_entry *per_dir_entry)
 /* {{{ should_overwrite_per_dir_entry
 
  */
-static zend_bool should_overwrite_per_dir_entry(php_per_dir_entry *orig_per_dir_entry, php_per_dir_entry *new_per_dir_entry)
+static zend_bool should_overwrite_per_dir_entry(HashTable *target_ht, php_per_dir_entry *orig_per_dir_entry, zend_hash_key *hash_key, void *pData)
 {
+	php_per_dir_entry *orig_per_dir_entry;
+	php_per_dir_entry *new_per_dir_entry;
+
+	if (zend_hash_find(target_ht, hash_key->arKey, hash_key->nKeyLength, (void **) &new_per_dir_entry)==FAILURE) {
+		return 1; /* does not exist in dest, copy from source */
+	}
+
 	if (new_per_dir_entry->type==PHP_INI_SYSTEM
 		&& orig_per_dir_entry->type!=PHP_INI_SYSTEM) {
 		return 1;
@@ -868,7 +875,7 @@ static void *php_merge_dir(pool *p, void *basev, void *addv)
 	php_per_dir_config *a = (php_per_dir_config *) addv;
 	php_per_dir_config *b = (php_per_dir_config *) basev;
 	/* This function *must* return addv, and not modify basev */
-	zend_hash_merge_ex((HashTable *) a->ini_settings, (HashTable *) b->ini_settings, (copy_ctor_func_t) copy_per_dir_entry, sizeof(php_per_dir_entry), (zend_bool (*)(void *, void *)) should_overwrite_per_dir_entry);
+	zend_hash_merge_ex((HashTable *) a->ini_settings, (HashTable *) b->ini_settings, (copy_ctor_func_t) copy_per_dir_entry, sizeof(php_per_dir_entry), (replace_checker_func_t) should_overwrite_per_dir_entry, NULL);
 	a->headers_handlers = (a->headers_handlers.top)?a->headers_handlers:b->headers_handlers;
 	a->auth_handlers = (a->auth_handlers.top)?a->auth_handlers:b->auth_handlers;
 	a->access_handlers = (a->access_handlers.top)?a->access_handlers:b->access_handlers;
