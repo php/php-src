@@ -18,7 +18,7 @@
 			$this->value = $attr["value"];
 			$this->desc  = $attr["desc"];
 
-			switch ($attr["access"]) {
+			switch (@$attr["access"]) {
 			case "system":
 				$this->access = "PHP_INI_SYSTEM";
 				break;
@@ -70,7 +70,7 @@
 		}
 
 		function c_code($name) {
-			return "  STD_PHP_INI_ENTRY(\"{$name}.$name\", \"{$this->value}\", {$this->access}, {$this->onupdate}, $name, zend_{$name}_globals, {$name}_globals)\n";
+			return "  STD_PHP_INI_ENTRY(\"$name.{$this->name}\", \"{$this->value}\", {$this->access}, {$this->onupdate}, {$this->name}, zend_{$name}_globals, {$name}_globals)\n";
 		}
 
 		static function c_code_footer() {
