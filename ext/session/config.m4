@@ -20,12 +20,7 @@ if test "$PHP_MM" != "no"; then
     AC_MSG_ERROR(cannot find mm library)
   fi
   
-  if test "$ext_shared" = "yes"; then
-    PHP_SUBST(SESSION_LIBADD)
-    SESSION_LIBADD="-R$MM_DIR/lib -L$MM_DIR/lib -lmm"
-  else
-    AC_ADD_LIBRARY_WITH_PATH(mm, $MM_DIR/lib)
-  fi
+  AC_ADD_LIBRARY_WITH_PATH(mm, $MM_DIR/lib, SESSION_SHARED_LIBADD)
   AC_ADD_INCLUDE($MM_DIR/include)
   AC_DEFINE(HAVE_LIBMM, 1, [Whether you have libmm])
   PHP_MODULE_PTR(phpext_ps_mm_ptr)
@@ -37,4 +32,5 @@ fi
 
 if test "$PHP_SESSION" != "no"; then
   PHP_EXTENSION(session,$ext_shared)
+  PHP_SUBST(SESSION_SHARED_LIBADD)
 fi

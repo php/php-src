@@ -54,13 +54,7 @@ elif test "$PHP_MYSQL" != "no"; then
     AC_MSG_ERROR(Cannot find header files under $PHP_MYSQL)
   fi
 
-
-  if test "$ext_shared" = "yes"; then
-    MYSQL_SHARED_LIBADD="-R$MYSQL_DIR/lib/mysql -L$MYSQL_DIR/lib/mysql -lmysqlclient"
-  else
-    AC_ADD_LIBPATH($MYSQL_DIR/lib/mysql) 
-    AC_ADD_LIBRARY(mysqlclient)
-  fi
+  AC_ADD_LIBRARY_WITH_PATH(mysqlclient, $MYSQL_DIR/lib/mysql, MYSQL_SHARED_LIBADD)
 
   AC_ADD_INCLUDE($MYSQL_INC_DIR)
 fi
