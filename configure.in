@@ -65,7 +65,7 @@ else
 	rm -f php_version.h.new
 fi
 
-AM_CONFIG_HEADER(php_config.h)
+AM_CONFIG_HEADER(main/php_config.h)
 AM_MAINTAINER_MODE
 AC_CANONICAL_HOST
 
@@ -199,7 +199,7 @@ if test -d /usr/pkg/include -a -d /usr/pkg/lib ; then
        LDFLAGS="$LDFLAGS -L/usr/pkg/lib"
 fi
 
-INCLUDES="$INCLUDES -I\$(top_builddir)/Zend -I\$(top_srcdir)"
+INCLUDES="$INCLUDES -I\$(top_builddir)/Zend"
 
 
 AC_CHECK_LIB(socket, socket, [
@@ -669,7 +669,7 @@ else
 fi
 
 if test "$abs_srcdir" != "$abs_builddir"; then
-  INCLUDES="$INCLUDES -I\$(top_srcdir)/main -I\$(top_srcdir)/Zend"
+  INCLUDES="$INCLUDES -I\$(top_srcdir)/main -I\$(top_srcdir)/Zend -I\$(top_srcdir)"
   INCLUDES="$INCLUDES -I\$(top_srcdir)/TSRM"
 fi
 
@@ -842,7 +842,7 @@ PHP_CONFIGURE_PART(Generating files)
 
 PHP_GEN_CONFIG_VARS
 
-ALL_OUTPUT_FILES="php4.spec Zend/Makefile build-defs.h $PHP_OUTPUT_FILES"
+ALL_OUTPUT_FILES="php4.spec Zend/Makefile main/build-defs.h $PHP_OUTPUT_FILES"
 
 AC_OUTPUT($ALL_OUTPUT_FILES, [], [
 
@@ -866,11 +866,11 @@ fi
 #
 
 if test -d TSRM; then
-  echo '#include "../php_config.h"' > TSRM/tsrm_config.h
+  echo '#include "../main/php_config.h"' > TSRM/tsrm_config.h
 fi
 
 cat >Zend/zend_config.h <<FEO
-#include "../php_config.h"
+#include "../main/php_config.h"
 #if defined(APACHE) && defined(PHP_API_VERSION)
 #undef HAVE_DLFCN_H
 #endif
