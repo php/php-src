@@ -686,7 +686,6 @@ void zend_shutdown(TSRMLS_D)
 	zend_destroy_rsrc_list(&EG(persistent_list) TSRMLS_CC);
 #endif
 	zend_hash_graceful_reverse_destroy(&module_registry);
-	zend_destroy_rsrc_list_dtors();
 
 	zend_hash_destroy(GLOBAL_FUNCTION_TABLE);
 	zend_hash_destroy(GLOBAL_CLASS_TABLE);
@@ -707,6 +706,7 @@ void zend_shutdown(TSRMLS_D)
 	GLOBAL_CLASS_TABLE = NULL;
 	GLOBAL_AUTO_GLOBALS_TABLE = NULL;
 #endif
+	zend_destroy_rsrc_list_dtors();
 }
 
 
