@@ -1008,11 +1008,15 @@ PHP_FUNCTION(odbc_execute)
 
 				/* Check for safe mode. */
 				if (PG(safe_mode) && (!php_checkuid(filename, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
-						RETURN_FALSE;
-					}
+					efree(filename);
+					efree(params);
+					RETURN_FALSE;
+				}
 
 				/* Check the basedir */
 				if (php_check_open_basedir(filename TSRMLS_CC)) {
+					efree(filename);
+					efree(params);
 					RETURN_FALSE;
 				}
 
