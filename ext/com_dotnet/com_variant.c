@@ -28,6 +28,70 @@
 #include "php_com_dotnet.h"
 #include "php_com_dotnet_internal.h"
 
+/* create an automation SafeArray from a PHP array.
+ * Only creates a single-dimensional array of variants.
+ * The keys of the PHP hash MUST be numeric.  If the array
+ * is sparse, then the gaps will be filled with NULL variants */
+static void safe_array_from_zval(VARIANT *v, zval *z, int codepage TSRMLS_DC)
+{
+	SAFEARRAY *sa = NULL;
+	SAFEARRAYBOUND bound;
+	HashPosition pos;
+	char *strindex;
+	int strindexlen;
+	long intindex;
+	long max_index = 0;
+	VARIANT *va;
+	zval **item;
+
+	/* find the largest array index, and assert that all keys are integers */
+	zend_hash_internal_pointer_reset_ex(HASH_OF(z), &pos);
+	for (;; zend_hash_move_forward_ex(HASH_OF(z), &pos)) {
+		if (HASH_KEY_IS_LONG != zend_hash_get_current_key_ex(HASH_OF(z), &strindex, &strindexlen, &intindex, 0, &pos)) {
+			goto bogus;
+		}
+		if (intindex > max_index) {
+			max_index = intindex;
+		}
+	}
+
+	/* allocate the structure */	
+	bound.lLbound = 0;
+	bound.cElements = intindex;
+	sa = SafeArrayCreate(VT_VARIANT, 1, &bound);
+
+	/* get a lock on the array itself */
+	SafeArrayLock(sa);
+	va = (VARIANT*)sa->pvData;
+	
+	/* now fill it in */
+	zend_hash_internal_pointer_reset_ex(HASH_OF(z), &pos);
+	for (;; zend_hash_move_forward_ex(HASH_OF(z), &pos)) {
+		if (FAILURE == zend_hash_get_current_data_ex(HASH_OF(z), (void**)&item, &pos)) {
+			goto bogus;
+		}
+		zend_hash_get_current_key_ex(HASH_OF(z), &strindex, &strindexlen, &intindex, 0, &pos);
+		php_com_variant_from_zval(&va[intindex], *item, codepage TSRMLS_CC);		
+	}
+
+	/* Unlock it and stuff it into our variant */
+	SafeArrayUnlock(sa);
+	V_VT(v) = VT_ARRAY|VT_VARIANT;
+	V_ARRAY(v) = sa;
+
+	return;
+
+bogus:
+	php_error_docref(NULL TSRMLS_CC, E_WARNING, "COM: converting from PHP array to VARIANT array; only arrays with numeric keys are allowed");
+
+	V_VT(v) = VT_NULL;
+
+	if (sa) {
+		SafeArrayUnlock(sa);
+		SafeArrayDestroy(sa);
+	}
+}
+
 PHPAPI void php_com_variant_from_zval(VARIANT *v, zval *z, int codepage TSRMLS_DC)
 {
 	OLECHAR *olestring;
@@ -66,8 +130,8 @@ PHPAPI void php_com_variant_from_zval(VARIANT *v, zval *z, int codepage TSRMLS_D
 			break;
 			
 		case IS_ARRAY:
-			V_VT(v) = VT_NULL;
-			/* TODO: map as safe array ? */
+			/* map as safe array */
+			safe_array_from_zval(v, z, codepage TSRMLS_CC);
 			break;
 
 		case IS_LONG:
