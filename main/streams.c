@@ -1209,7 +1209,7 @@ PHPAPI size_t _php_stream_copy_to_stream(php_stream *src, php_stream *dest, size
 	if (php_stream_stat(src, &ssbuf) == 0) {
 		/* in the event that the source file is 0 bytes, return 1 to indicate success
 		 * because opening the file to write had already created a copy */
-		if (ssbuf.sb.st_size == 0) {
+		if (ssbuf.sb.st_size == 0 && !S_ISFIFO(ssbuf.sb.st_mode)) {
 			return 1;
 		}
 	}
