@@ -27,7 +27,7 @@
 #endif
 
 #define PHP_API_VERSION 20010901
-#define HAVE_PHP_STREAM 1
+#define PHP_HAVE_STREAMS
 #define YYDEBUG 0
 
 #include "php_version.h"
