@@ -31,8 +31,12 @@ PHP 4                                                                      NEWS
 - Fixed ext/yaz to not log if "yaz.log_file" php.ini option is not set. (Adam)
 - Fixed a bug in bundled libmysql (mysql bug #564). (Georg)
 - Fixed ext/exif to honor "magic_quotes_runtime" php.ini option. (Marcus)
+- Fixed bug #24198 (Invalid recursion detection in array_merge_recurcive()).
+  (Ilia)
 - Fixed bug #24155 (gdImageRotate270 incorrectly use x parameter for y axis).
   (tom@gksystems.com, Ilia)
+- Fixed bug #24150 (crash in imap_fetch_overview() & 
+  imap_rfc822_write_address()). (Ilia)
 - Fixed bug #24060 (ncurses_del_panel() causes segfault). (Georg)
 - Fixed bug #24054 (Integer overflow failure with GCC/x86 for *=). (Sascha)
 - Fixed bug #24007 (Problem with register_globals & arrays). (Ilia)
