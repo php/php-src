@@ -264,6 +264,7 @@ static zend_function_entry domxml_functions[] = {
 	PHP_FE(xpath_eval,													NULL)
 	PHP_FE(xpath_eval_expression,										NULL)
 	PHP_FE(xpath_register_ns,											NULL)
+	PHP_FE(xpath_register_ns_auto,										NULL)	
 	PHP_FE(domxml_doc_get_elements_by_tagname,							NULL)
 #endif
 
@@ -489,6 +490,7 @@ static zend_function_entry php_xpathctx_class_functions[] = {
 	PHP_FALIAS(xpath_eval,				xpath_eval,						NULL)
 	PHP_FALIAS(xpath_eval_expression,	xpath_eval_expression,			NULL)
 	PHP_FALIAS(xpath_register_ns,		xpath_register_ns,				NULL)
+	PHP_FALIAS(xpath_register_ns_auto,	xpath_register_ns_auto,				NULL)			
 	{NULL, NULL, NULL}
 };
 
@@ -4737,7 +4739,6 @@ static void php_xpathptr_eval(INTERNAL_FUNCTION_PARAMETERS, int mode, int expr)
 	xmlNode *contextnodep;
 	int ret, str_len, nsNr;
 	char *str;
-	xmlNsPtr *namespaces;
 	contextnode = NULL;
 	contextnodep = NULL;
 
@@ -4762,26 +4763,6 @@ static void php_xpathptr_eval(INTERNAL_FUNCTION_PARAMETERS, int mode, int expr)
 	}
 	ctxp->node = contextnodep;
   
-	/* automatic namespace definitions registration.
-		it's only done for the context node
-		if you need namespaces defined in other nodes, 
-		you have to specify them explicitely with
-		xpath_register_ns();
-	*/
-	if (contextnodep) {
-		namespaces = xmlGetNsList(ctxp->doc, contextnodep);
-	} else {
-		namespaces = xmlGetNsList(ctxp->doc, xmlDocGetRootElement(ctxp->doc));
-	}
-
-	nsNr = 0;
-	if (namespaces != NULL) {
-		while (namespaces[nsNr] != NULL) {
-			xmlXPathRegisterNs(ctxp, namespaces[nsNr]->prefix, namespaces[nsNr]->href); 
-			nsNr++;
-		}
-	}
-
 #if defined(LIBXML_XPTR_ENABLED)
 	if (mode == PHP_XPTR) {
 		xpathobjp = xmlXPtrEval(BAD_CAST str, ctxp);
@@ -4897,11 +4878,6 @@ PHP_FUNCTION(xpath_eval_expression)
 	Registeres the given namespace in the passed XPath context */
 PHP_FUNCTION(xpath_register_ns)
 {
-	/*
-	TODO:
-	- automagically register all namespaces when creating a new context
-	*/
-
 	int prefix_len, uri_len, result;
 	xmlXPathContextPtr ctxp;
 	char *prefix, *uri;
@@ -4930,6 +4906,45 @@ PHP_FUNCTION(xpath_register_ns)
 	RETURN_FALSE;
 }
 /* }}} */
+
+/* {{{ proto bool xpath_register_ns_auto([object xpathctx_handle,] [object contextnode])
+	Registeres the given namespace in the passed XPath context */
+PHP_FUNCTION(xpath_register_ns_auto)
+{
+	/* automatic namespace definitions registration.
+	it's only done for the context node
+	if you need namespaces defined in other nodes, 
+	you have to specify them explicitely with
+	xpath_register_ns();
+	*/
+
+	zval *contextnode = NULL, *id;
+	xmlXPathContextPtr ctxp;
+	xmlNodePtr contextnodep;
+	xmlNsPtr *namespaces;	
+	int nsNr;
+			
+	DOMXML_PARAM_ONE(ctxp, id, le_xpathctxp, "|o", &contextnode);
+
+	if (contextnode == NULL) {
+		namespaces = xmlGetNsList(ctxp->doc, xmlDocGetRootElement(ctxp->doc));
+	} else {
+		DOMXML_GET_OBJ(contextnodep, contextnode, le_domxmlnodep);
+		namespaces = xmlGetNsList(ctxp->doc, contextnodep);
+	}
+				
+	nsNr = 0;
+	if (namespaces != NULL) {
+		while (namespaces[nsNr] != NULL) {
+			xmlXPathRegisterNs(ctxp, namespaces[nsNr]->prefix, namespaces[nsNr]->href); 
+			nsNr++;
+		}
+	}
+
+	RETURN_TRUE;
+}
+/* }}} */
+
 #endif	/* defined(LIBXML_XPATH_ENABLED) */
 
 #if defined(LIBXML_XPTR_ENABLED)
