@@ -1,3 +1,44 @@
+2002-02-06  Frank M. Kromann  <frank@frontbase.com>
+
+    * ext/fbsql/php_fbsql.c:
+    Convert pLists to output character set before parsing the list
+
+    * ext/fbsql/php_fbsql.c: Added order by clause in fbsql_list_tables().
+    Table names will now be sorted.
+
+    * ext/fbsql/php_fbsql.c
+      ext/fbsql/php_fbsql.h:
+    Adding fbsql_table_name() aliased fbsql_tablename() for compatibility with MySQL
+
+2002-02-06  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/odbc/config.m4: - Fix for bug 15404
+
+2002-02-06  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * ext/mbstring/mbstring.c: Remove unused line
+
+    * ext/mbstring/mbstring.c: Fixed crash with mb_output_handler()
+    When mb_output_hanlder is applied muiltiple times, PHP does not output.
+    This should be fixed also.
+
+2002-02-06  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/System.php:
+    added 'System::type()' (show the full path of a command)
+    Copied almost verbatim from Stig's PEAR_Dependency::checkProgram()
+
+2002-02-06  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * ext/pgsql/pgsql.c
+      ext/pgsql/php_pgsql.h: Clean up code.
+    Removed PHP_PGSQL_API macro.
+    Define pgsql_globals_id
+
+    * ext/pgsql/pgsql.c
+      ext/pgsql/php_pgsql.h: Make module specified functions to static.
+    Added TSRMLS_D/C, get rid of one TSRMLS_FETCH.
+
 2002-02-05  Andi Gutmans  <andi@zend.com>
 
     * ext/wddx/wddx.c
