@@ -319,7 +319,7 @@ int SendText(char *RPath, char *Subject, char *mailTo, char *data, char *headers
 		return (res);
 	}
 
-	sprintf(Buffer, "MAIL FROM:<%s>\r\n", RPath);
+	snprintf(Buffer, MAIL_BUFFER_SIZE, "MAIL FROM:<%s>\r\n", RPath);
 	if ((res = Post(Buffer)) != SUCCESS)
 		return (res);
 	if ((res = Ack(&server_response)) != SUCCESS) {
@@ -333,7 +333,7 @@ int SendText(char *RPath, char *Subject, char *mailTo, char *data, char *headers
 	token = strtok(tempMailTo, ",");
 	while(token != NULL)
 	{
-		sprintf(Buffer, "RCPT TO:<%s>\r\n", token);
+		snprintf(Buffer, MAIL_BUFFER_SIZE, "RCPT TO:<%s>\r\n", token);
 		if ((res = Post(Buffer)) != SUCCESS)
 			return (res);
 		if ((res = Ack(&server_response)) != SUCCESS) {
@@ -496,7 +496,13 @@ int SendText(char *RPath, char *Subject, char *mailTo, char *data, char *headers
 	return (SUCCESS);
 }
 
-
+int addToHeader(char **header_buffer, const char *specifier, char *string) {
+	if (NULL == (*header_buffer = erealloc(*header_buffer, strlen(*header_buffer) + strlen(specifier) + strlen(string) + 1))) {
+		return 0;
+	}
+	sprintf(*header_buffer + strlen(*header_buffer), specifier, string);
+	return 1;
+}
 
 /*********************************************************************
 // Name:  PostHeader
@@ -520,7 +526,7 @@ int PostHeader(char *RPath, char *Subject, char *mailTo, char *xheaders, char *m
 	struct tm *tm = localtime(&tNow);
 	int zoneh = abs(_timezone);
 	int zonem, res;
-	char *p;
+	char *header_buffer;
 	char *headers_lc = NULL;
 	size_t i;
 
@@ -533,12 +539,15 @@ int PostHeader(char *RPath, char *Subject, char *mailTo, char *xheaders, char *m
 		}
 	}
 
-	p = Buffer;
+	if (NULL == (header_buffer = ecalloc(1, MAIL_BUFFER_SIZE))) {
+		efree(headers_lc);
+		return OUT_OF_MEMORY;
+	}
 	zoneh /= (60 * 60);
 	zonem = (abs(_timezone) / 60) - (zoneh * 60);
 
 	if(!xheaders || !strstr(headers_lc, "date:")){
-		p += sprintf(p, "Date: %s, %02d %s %04d %02d:%02d:%02d %s%02d%02d\r\n",
+		sprintf(header_buffer, "Date: %s, %02d %s %04d %02d:%02d:%02d %s%02d%02d\r\n",
 					 days[tm->tm_wday],
 					 tm->tm_mday,
 					 months[tm->tm_mon],
@@ -551,24 +560,36 @@ int PostHeader(char *RPath, char *Subject, char *mailTo, char *xheaders, char *m
 					 zonem);
 	}
 
-	if(!headers_lc || !strstr(headers_lc, "from:")){
-		p += sprintf(p, "From: %s\r\n", RPath);
+	if (!headers_lc || !strstr(headers_lc, "from:")) {
+		if (!addToHeader(&header_buffer, "From: %s\r\n", RPath)) {
+			goto PostHeader_outofmem;
+		}
 	}
-	p += sprintf(p, "Subject: %s\r\n", Subject);
-	p += sprintf(p, "To: %s\r\n", mailTo);
+	if (!addToHeader(&header_buffer, "Subject: %s\r\n", Subject)) {
+		goto PostHeader_outofmem;
+	}
+	if (!addToHeader(&header_buffer, "To: %s\r\n", mailTo)) {
+		goto PostHeader_outofmem;
+	}
 	if (mailCc && *mailCc) {
-		p += sprintf(p, "Cc: %s\r\n", mailCc);
+		if (!addToHeader(&header_buffer, "Cc: %s\r\n", mailCc)) {
+		goto PostHeader_outofmem;
+		}
 	}
 	if(xheaders){
-		p += sprintf(p, "%s\r\n", xheaders);
+		if (!addToHeader(&header_buffer, "%s", xheaders)) {
+			goto PostHeader_outofmem;
+		}
 	}
 
-	if ((res = Post(Buffer)) != SUCCESS) {
+	if ((res = Post(header_buffer)) != SUCCESS) {
+		efree(header_buffer);
 		if (headers_lc) {
 			efree(headers_lc);
 		}
 		return (res);
 	}
+	efree(header_buffer);
 
 	if ((res = Post("\r\n")) != SUCCESS) {
 		if (headers_lc) {
@@ -578,6 +599,10 @@ int PostHeader(char *RPath, char *Subject, char *mailTo, char *xheaders, char *m
 	}
 
 	return (SUCCESS);
+
+PostHeader_outofmem:
+	efree(headers_lc);
+	return OUT_OF_MEMORY;
 }
 
 
