@@ -2393,11 +2393,11 @@ PHP_FUNCTION(imap_clearflag_full)
 }
 /* }}} */
 
-/* {{{ proto array imap_sort(resource stream_id, int criteria, int reverse [, int options [, string search_criteria]])
+/* {{{ proto array imap_sort(resource stream_id, int criteria, int reverse [, int options [, string search_criteria [, string charset]]])
    Sort an array of message headers, optionally including only messages that meet specified criteria. */
 PHP_FUNCTION(imap_sort)
 {
-	zval **streamind, **pgm, **rev, **flags, **criteria;
+	zval **streamind, **pgm, **rev, **flags, **criteria, **charset;
 	pils *imap_le_struct;
 	unsigned long *slst, *sl;
 	char *search_criteria;
@@ -2405,7 +2405,7 @@ PHP_FUNCTION(imap_sort)
 	SEARCHPGM *spg=NIL;
 	int myargc = ZEND_NUM_ARGS();
 	
-	if (myargc < 3 || myargc > 5 || zend_get_parameters_ex(myargc, &streamind, &pgm, &rev, &flags, &criteria) == FAILURE) {
+	if (myargc < 3 || myargc > 6 || zend_get_parameters_ex(myargc, &streamind, &pgm, &rev, &flags, &criteria, &charset) == FAILURE) {
 		ZEND_WRONG_PARAM_COUNT();
 	}
 
@@ -2420,10 +2420,13 @@ PHP_FUNCTION(imap_sort)
 	if (myargc >= 4) {
 		convert_to_long_ex(flags);
 	}
-	if (myargc == 5) {
+	if (myargc >= 5) {
 		search_criteria = estrndup(Z_STRVAL_PP(criteria), Z_STRLEN_PP(criteria));
 		spg = mail_criteria(search_criteria);
 		efree(search_criteria);
+		if (myargc == 6) {
+			convert_to_string_ex(charset);
+		}
 	} else {
 		spg = mail_newsearchpgm();
 	}
@@ -2433,7 +2436,7 @@ PHP_FUNCTION(imap_sort)
 	mypgm->function = (short) Z_LVAL_PP(pgm);
 	mypgm->next = NIL;
 	
-	slst = mail_sort(imap_le_struct->imap_stream, NIL, spg, mypgm, myargc >= 4 ? Z_LVAL_PP(flags) : NIL);
+	slst = mail_sort(imap_le_struct->imap_stream, (myargc == 6 ? Z_STRVAL_PP(charset) : NIL), spg, mypgm, (myargc >= 4 ? Z_LVAL_PP(flags) : NIL));
 
 	if (spg) {
 		mail_free_searchpgm(&spg);
@@ -3381,18 +3384,18 @@ PHP_FUNCTION(imap_mail)
 }
 /* }}} */
 
-/* {{{ proto array imap_search(resource stream_id, string criteria [, int options])
+/* {{{ proto array imap_search(resource stream_id, string criteria [, int options [, string charset]])
    Return a list of messages matching the given criteria */
 PHP_FUNCTION(imap_search)
 {
-	zval **streamind, **criteria, **search_flags;
+	zval **streamind, **criteria, **search_flags, **charset;
 	pils *imap_le_struct;
 	long flags;
 	char *search_criteria;
 	MESSAGELIST *cur;
 	int argc = ZEND_NUM_ARGS();
 
-	if (argc < 2 || argc > 3 || zend_get_parameters_ex(argc, &streamind, &criteria, &search_flags) == FAILURE) {
+	if (argc < 2 || argc > 4 || zend_get_parameters_ex(argc, &streamind, &criteria, &search_flags, &charset) == FAILURE) {
 		ZEND_WRONG_PARAM_COUNT();
 	}
 
@@ -3406,10 +3409,13 @@ PHP_FUNCTION(imap_search)
 	} else {
 		convert_to_long_ex(search_flags);
 		flags = Z_LVAL_PP(search_flags);
+		if (argc == 4) {
+			convert_to_string_ex(charset);
+		}
 	}
 	
 	IMAPG(imap_messages) = IMAPG(imap_messages_tail) = NIL;
-	mail_search_full(imap_le_struct->imap_stream, NIL, mail_criteria(search_criteria), flags);
+	mail_search_full(imap_le_struct->imap_stream, (argc == 4 ? Z_STRVAL_PP(charset) : NIL), mail_criteria(search_criteria), flags);
 	if (IMAPG(imap_messages) == NIL) {
 		efree(search_criteria);
 		RETURN_FALSE;
