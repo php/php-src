@@ -217,6 +217,10 @@ struct _zend_alloc_globals {
 	unsigned int allocated_memory;
 	unsigned char memory_exhausted;
 #endif
+#if MEMORY_USAGE_INFO
+	unsigned int cur_allocated_memory;
+	unsigned int max_allocated_memory;
+#endif
 };
 
 #endif /* ZEND_GLOBALS_H */
