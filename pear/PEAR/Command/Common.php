@@ -55,11 +55,28 @@ class PEAR_Command_Common extends PEAR
 
     // }}}
 
-    // {{{ getHelp()
+    // {{{ getCommands()
 
-    function getHelp($command)
+    /**
+     * Return a list of all the commands defined by this class.
+     * @return array list of commands
+     * @access public
+     */
+    function getCommands()
     {
-        return array(null, 'No help avaible yet');
+        $ret = array();
+        foreach (array_keys($this->commands) as $command) {
+            $ret[$command] = $this->commands[$command]['summary'];
+        }
+        return $ret;
+    }
+
+    // }}}
+    // {{{ getOptions()
+
+    function getOptions($command)
+    {
+        return @$this->commands[$command]['options'];
     }
 
     // }}}
@@ -91,6 +108,15 @@ class PEAR_Command_Common extends PEAR
             }
             $long_args[] = $option . $larg;
         }
+    }
+
+    // }}}
+    // {{{ getHelp()
+
+    function getHelp($command)
+    {
+        $help = preg_replace('/{config\s+([^\}]+)}/e', "\$config->get('\1')", @$this->commands[$command]['doc']);
+        return $help;
     }
 
     // }}}
