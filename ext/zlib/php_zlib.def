@@ -1,0 +1,4 @@
+EXPORTS
+	compress
+	compress2
+	uncompress
