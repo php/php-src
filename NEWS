@@ -1,6 +1,8 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.0.7-dev
+- Fixed race in writing session files (Sascha)
+- Fixed memory leak upon re-registering constants (Sascha, Zend Engine)
 - Upgraded expat to version 1.95.1. (Thies)
 
 ?? ??? 200?, Version 4.0.6
@@ -25,6 +27,11 @@ PHP 4.0                                                                    NEWS
 - Added connection error support to mysql_error() and mysql_errno(). (Jason)
 - Added support to getimagesize to return dimensions of BMP and PSD
   files. (Derick)
+- Added suppress option to ircg_msg() (Sascha)
+- Added heuristic to kill stale IRC connections to IRCG (Sascha)
+- Added message scanner caching to IRCG (Sascha)
+- Added nickname escaping to IRCG (Sascha)
+- Added statistics to IRCG phpinfo() output (Sascha)
 - Added Japanese multibyte string functions support. (Rui)
 - Added Mac OS X "\r" line ending support. (Andi, Zend Engine)
 - Fixed a bug regarding the $PHP_SELF being incorrectly registered when
