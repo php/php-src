@@ -293,7 +293,9 @@ void php3_log_err(char *log_message)
 {
 	FILE *log_file;
 	PLS_FETCH();
+#if APACHE
 	SLS_FETCH();
+#endif
 
 	/* Try to use the specified logging location. */
 	if (PG(error_log) != NULL) {
@@ -626,7 +628,6 @@ static void php_message_handler_for_zend(long message, void *data)
 		case ZMSG_MEMORY_LEAK_DETECTED:
 		case ZMSG_MEMORY_LEAK_REPEATED: {
 				ELS_FETCH();
-				SLS_FETCH();
 
 				if (EG(error_reporting)&E_WARNING) {
 #if ZEND_DEBUG
@@ -786,7 +787,6 @@ void php_request_shutdown(void *dummy)
 {
 	CLS_FETCH();
 	ELS_FETCH();
-	PLS_FETCH();
 	SLS_FETCH();
 
 	sapi_send_headers();
@@ -967,8 +967,6 @@ int php_module_shutdown_wrapper(sapi_module_struct *sapi_globals)
 void php_module_shutdown()
 {
 	int module_number=0;	/* for UNREGISTER_INI_ENTRIES() */
-	CLS_FETCH();
-	ELS_FETCH();
 
 	if (!module_initialized) {
 		return;

@@ -1695,7 +1695,6 @@ PHP_FUNCTION(fd_set)
         }
         else {
                 pval ***args = (pval ***) emalloc(sizeof(pval **) * ARG_COUNT(ht));
-                pval **max, result;
                 int i;
                 if(getParametersArrayEx(ARG_COUNT(ht), args) == FAILURE) {
                         efree(args);

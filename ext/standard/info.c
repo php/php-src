@@ -66,7 +66,6 @@ PHPAPI void php_print_info(int flag)
 	DWORD dwWindowsMinorVersion =  (DWORD)(HIBYTE(LOWORD(dwVersion)));
 #endif
 	ELS_FETCH();
-	PLS_FETCH();
 	SLS_FETCH();
 
 	
