@@ -789,6 +789,7 @@ function_entry basic_functions[] = {
 	/* aliases from array.c */
 	PHP_FALIAS(pos, 				current, 				 first_arg_force_ref)
 	PHP_FALIAS(sizeof, 				count, 									NULL)
+	PHP_FALIAS(key_exists,			array_key_exists,						NULL)
 
 	/* functions from assert.c */
 	PHP_FE(assert,															NULL)
