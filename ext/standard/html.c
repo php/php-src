@@ -136,13 +136,13 @@ static entity_table_t ent_uni_spacing[] = {
 static entity_table_t ent_uni_greek[] = {
 	/* 913 */
 	"Alpha", "Beta", "Gamma", "Delta", "Epsilon", "Zeta", "Eta", "Theta",
-	"Iota", "Kappa", "Lambda", "Mu", "Nu", "X1", "Omicron", "P1", "Rho",
-	NULL, "Sigma", "Tau", "Upsilon", "Ph1", "Ch1", "Ps1", "Omega",
+	"Iota", "Kappa", "Lambda", "Mu", "Nu", "Xi", "Omicron", "Pi", "Rho",
+	NULL, "Sigma", "Tau", "Upsilon", "Phi", "Chi", "Psi", "Omega",
 	/* 938 - 944 are not mapped */
 	NULL, NULL, NULL, NULL, NULL, NULL, NULL,
 	"alpha", "beta", "gamma", "delta", "epsilon", "zeta", "eta", "theta",
-	"iota", "kappa", "lambda", "mu", "nu", "x1", "omicron", "p1", "rho",
-	"sigmaf", "sigma", "tau", "upsilon", "ph1", "ch1", "ps1", "omega",
+	"iota", "kappa", "lambda", "mu", "nu", "xi", "omicron", "pi", "rho",
+	"sigmaf", "sigma", "tau", "upsilon", "phi", "chi", "psi", "omega",
 	/* 970 - 976 are not mapped */
 	NULL, NULL, NULL, NULL, NULL, NULL, NULL,
 	"thetasym", "ups1h",
