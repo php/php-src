@@ -117,12 +117,12 @@ ZEND_API void *zend_fetch_resource(zval **passed_id TSRMLS_DC, int default_id, c
 	if (default_id==-1) { /* use id */
 		if (!passed_id) {
 			if (resource_type_name) {
-				zend_error(E_WARNING, "No %s resource supplied", resource_type_name);
+				zend_error(E_WARNING, "%s(): no %s resource supplied", get_active_function_name(TSRMLS_C), resource_type_name);
 			}
 			return NULL;
 		} else if ((*passed_id)->type != IS_RESOURCE) {
 			if (resource_type_name) {
-				zend_error(E_WARNING, "Supplied argument is not a valid %s resource", resource_type_name);
+				zend_error(E_WARNING, "%s(): supplied argument is not a valid %s resource", get_active_function_name(TSRMLS_C), resource_type_name);
 			}
 			return NULL;
 		}
@@ -134,7 +134,7 @@ ZEND_API void *zend_fetch_resource(zval **passed_id TSRMLS_DC, int default_id, c
 	resource = zend_list_find(id, &actual_resource_type);
 	if (!resource) {
 		if (resource_type_name) {
-			zend_error(E_WARNING, "%d is not a valid %s resource", id, resource_type_name);
+			zend_error(E_WARNING, "%s(): %d is not a valid %s resource", get_active_function_name(TSRMLS_C), id, resource_type_name);
 		}
 		return NULL;
 	}
@@ -152,7 +152,7 @@ ZEND_API void *zend_fetch_resource(zval **passed_id TSRMLS_DC, int default_id, c
 	va_end(resource_types);
 
 	if (resource_type_name) {
-		zend_error(E_WARNING, "Supplied resource is not a valid %s resource", resource_type_name);
+		zend_error(E_WARNING, "%s(): supplied resource is not a valid %s resource", get_active_function_name(TSRMLS_C), resource_type_name);
 	}
 
 	return NULL;
