@@ -838,7 +838,7 @@ static void zend_fetch_property_address(znode *result, znode *op1, znode *op2, t
 	}
 
 	if (container->type == IS_OBJECT
-		&& container->value.obj.ce->handle_property_get) {
+		&& Z_OBJCE_P(container)->handle_property_get) {
 		zend_overloaded_element overloaded_element;
 
 		Ts[result->u.var].EA.data.overloaded_element.object = container;
@@ -891,7 +891,7 @@ static void zend_fetch_property_address(znode *result, znode *op1, znode *op2, t
 		SEPARATE_ZVAL(container_ptr);
 		container = *container_ptr;
 	}
-	*retval = zend_fetch_property_address_inner(container->value.obj.properties, op2, Ts, type TSRMLS_CC);
+	*retval = zend_fetch_property_address_inner(Z_OBJPROP_P(container), op2, Ts, type TSRMLS_CC);
 	SELECTIVE_PZVAL_LOCK(**retval, result);
 }
 
@@ -900,7 +900,7 @@ static zval get_overloaded_property(temp_variable *T TSRMLS_DC)
 {
 	zval result;
 
-	result = (T->EA.data.overloaded_element.object)->value.obj.ce->handle_property_get(&T->EA.data.overloaded_element);
+	result = Z_OBJCE_P(T->EA.data.overloaded_element.object)->handle_property_get(&T->EA.data.overloaded_element);
 
 	zend_llist_destroy(T->EA.data.overloaded_element.elements_list);
 	efree(T->EA.data.overloaded_element.elements_list);
@@ -910,11 +910,13 @@ static zval get_overloaded_property(temp_variable *T TSRMLS_DC)
 
 static void set_overloaded_property(temp_variable *T, zval *value TSRMLS_DC)
 {
-	if ((T->EA.data.overloaded_element.object)->value.obj.ce->handle_property_set) {
-		(T->EA.data.overloaded_element.object)->value.obj.ce->handle_property_set(&T->EA.data.overloaded_element, value);
+	zend_class_entry *ce;
+
+	ce = Z_OBJCE_P(T->EA.data.overloaded_element.object);
+	if (ce->handle_property_set) {
+		ce->handle_property_set(&T->EA.data.overloaded_element, value);
 	} else {
-		zend_error(E_ERROR, "Class '%s' does not support setting overloaded properties",
-			(T->EA.data.overloaded_element.object)->value.obj.ce->name);
+		zend_error(E_ERROR, "Class '%s' does not support setting overloaded properties", ce->name);
 	}
 	zend_llist_destroy(T->EA.data.overloaded_element.elements_list);
 	efree(T->EA.data.overloaded_element.elements_list);
@@ -923,11 +925,13 @@ static void set_overloaded_property(temp_variable *T, zval *value TSRMLS_DC)
 
 static void call_overloaded_function(temp_variable *T, int arg_count, zval *return_value TSRMLS_DC)
 {
-	if ((T->EA.data.overloaded_element.object)->value.obj.ce->handle_function_call) {
-		(T->EA.data.overloaded_element.object)->value.obj.ce->handle_function_call(arg_count, return_value, T->EA.data.overloaded_element.object, 1 TSRMLS_CC, &T->EA.data.overloaded_element);
+	zend_class_entry *ce;
+
+	ce = Z_OBJCE_P(T->EA.data.overloaded_element.object);
+	if (ce->handle_function_call) {
+		ce->handle_function_call(arg_count, return_value, T->EA.data.overloaded_element.object, 1 TSRMLS_CC, &T->EA.data.overloaded_element);
 	} else {
-		zend_error(E_ERROR, "Class '%s' does not support overloaded method calls",
-			(T->EA.data.overloaded_element.object)->value.obj.ce->name);
+		zend_error(E_ERROR, "Class '%s' does not support overloaded method calls", ce->name);
 	}
 	zend_llist_destroy(T->EA.data.overloaded_element.elements_list);
 	efree(T->EA.data.overloaded_element.elements_list);
@@ -944,12 +948,12 @@ static void call_overloaded_function(temp_variable *T, int arg_count, zval *retu
 
 static int zend_check_symbol(zval **pz TSRMLS_DC)
 {
-	if ((*pz)->type>9) {
+	if (Z_TYPE_PP(pz) > 9) {
 		fprintf(stderr, "Warning!  %x has invalid type!\n", *pz);
-	} else if ((*pz)->type==IS_ARRAY) {
-		zend_hash_apply((*pz)->value.ht, (apply_func_t) zend_check_symbol TSRMLS_CC);
-	} else if ((*pz)->type==IS_OBJECT) {
-		zend_hash_apply((*pz)->value.obj.properties, (apply_func_t) zend_check_symbol TSRMLS_CC);
+	} else if (Z_TYPE_PP(pz) == IS_ARRAY) {
+		zend_hash_apply(Z_ARRVAL_PP(pz), (apply_func_t) zend_check_symbol TSRMLS_CC);
+	} else if (Z_TYPE_PP(pz) == IS_OBJECT) {
+		zend_hash_apply(Z_OBJPROP_PP(pz), (apply_func_t) zend_check_symbol TSRMLS_CC);
 	}
 
 	return 0;
