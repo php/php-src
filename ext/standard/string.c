@@ -775,11 +775,6 @@ PHP_FUNCTION(pathinfo)
 		}
 	}
 	
-	if (opt == PHP_PATHINFO_DIRNAME || argc < 2) {
-		ret = php_basename(Z_STRVAL_PP(str), len);
-		add_assoc_string(tmp, "dirname", ret, 1);
-	}			
-	
 	if (argc == 2) {
 		zval **element;
 		zend_hash_get_current_data(Z_ARRVAL_P(tmp), (void **)&element);
@@ -2430,11 +2425,6 @@ PHP_FUNCTION(parse_str)
 		php_treat_data(PARSE_STRING, res, NULL ELS_CC PLS_CC SLS_CC);
 	else
 	{
-		if(!ParameterPassedByReference(ht, 2)){
-			php_error(E_WARNING, "Array not passed by reference in call to parse_str()");
-			return;
-		}
-		
 		/* Clear out the array that was passed in. */
 		zval_dtor(*arrayArg);
 		array_init(*arrayArg);
