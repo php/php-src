@@ -104,6 +104,7 @@ PHP 4                                                                      NEWS
 - Fixed bug #21228 (broken check for ob_gzhandler and made ob_start() return
   the correct value). (Ilia)
 - Fixed bug #21226 (parse_url handling of urls without a path). (Ilia)
+- Fixed bug #21224 (apache configure fails when using --enable-versioning). (Jani)
 - Fixed bug #21169 (Compile Failure and lots of warnings on UnixWare). (Derick)
 - Fixed bug #21131 (fopen() with mode 'a+' and rewind() doesn't work). (Wez)
 - Fixed bug #20857 (snmpset() failed always, patch by: rs@epost.de). (Jani)
