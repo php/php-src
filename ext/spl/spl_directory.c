@@ -535,7 +535,7 @@ SPL_METHOD(RecursiveDirectoryIterator, hasChildren)
 /* }}} */
 
 /* {{{ proto RecursiveDirectoryIterator DirectoryIterator::getChildren()
-   Returns an iterator fo rthe current entry if it is a directory */
+   Returns an iterator for the current entry if it is a directory */
 SPL_METHOD(RecursiveDirectoryIterator, getChildren)
 {
 	zval *object = getThis(), zpath;
@@ -1315,6 +1315,9 @@ SPL_METHOD(File, fpassthru)
 SPL_METHOD(File, fscanf)
 {
 	spl_file_object *intern = (spl_file_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	zval *arg2 = NULL;
+	MAKE_STD_ZVAL(arg2);
+	ZVAL_LONG(arg2, intern->max_line_len);
 
 	FileFunctionCall(fscanf, arg2);
 
