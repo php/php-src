@@ -31,37 +31,36 @@
    Convert a pathname and a project identifier to a System V IPC key */
 PHP_FUNCTION(ftok)
 {
-    pval **pathname, **proj;
+	zval **pathname, **proj;
+	key_t k;
 
-    key_t k;
+	if(ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &pathname, &proj) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
 
-    if(ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &pathname, &proj) == FAILURE) {
-        WRONG_PARAM_COUNT;
-    }
+	convert_to_string_ex(pathname);
+	convert_to_string_ex(proj);
 
-    convert_to_string_ex(pathname);
-    convert_to_string_ex(proj);
+	if (Z_STRLEN_PP(pathname)==0){
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Pathname is invalid");
+		RETURN_LONG(-1);
+	}
 
-    if (Z_STRLEN_PP(pathname)==0){
-        php_error_docref(NULL TSRMLS_CC, E_WARNING, "First argument invalid");
-        RETURN_LONG(-1);
-    }
-
-    if (Z_STRLEN_PP(proj)!=1){
-        php_error_docref(NULL TSRMLS_CC, E_WARNING, "Second argument invalid");
-        RETURN_LONG(-1);
+	if (Z_STRLEN_PP(proj)!=1){
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Project identifier is invalid");
+		RETURN_LONG(-1);
     }
 
 	if ((PG(safe_mode) && (!php_checkuid(Z_STRVAL_PP(pathname), NULL, CHECKUID_CHECK_FILE_AND_DIR))) || php_check_open_basedir(Z_STRVAL_PP(pathname) TSRMLS_CC)) {
 		RETURN_LONG(-1);
 	}
 
-    k = ftok(Z_STRVAL_PP(pathname),Z_STRVAL_PP(proj)[0]);
+	k = ftok(Z_STRVAL_PP(pathname),Z_STRVAL_PP(proj)[0]);
 	if (k == -1) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "ftok() failed - %s", strerror(errno));
 	}
 
-    RETURN_LONG(k);
+	RETURN_LONG(k);
 }
 /* }}} */
 #endif
