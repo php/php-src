@@ -251,15 +251,18 @@ char *php_realpath(char *path, char resolved_path []) {
 	}
 
 	/* Check if the resolved path is a directory */
-	if (V_STAT(path_construction, &filestat) != 0) return NULL;
-	if (S_ISDIR(filestat.st_mode)) {
-		/* It's a directory, append a / if needed */
-		if (*(writepos-1) != '/') {
-			/* Check for overflow */
-			if ((strlen(workpos) + 2) >= MAXPATHLEN) return NULL;
-
-			*writepos++ = '/';
-			*writepos = 0;
+	if (V_STAT(path_construction, &filestat) != 0) {
+		if (errno != ENOENT) return NULL;
+	} else {
+		if (S_ISDIR(filestat.st_mode)) {
+			/* It's a directory, append a / if needed */
+			if (*(writepos-1) != '/') {
+				/* C	heck for overflow */
+				if ((strlen(workpos) + 2) >= MAXPATHLEN) return NULL;
+				
+				*writepos++ = '/';
+				*writepos = 0;
+			}
 		}
 	}
 	
