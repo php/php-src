@@ -639,6 +639,9 @@ Wrote: /usr/src/redhat/RPMS/i386/PEAR::Net_Socket-1.0-1.i386.rpm
         $srcfiles = 0;
         foreach ($info['filelist'] as $name => $attr) {
 
+            if (!isset($attr['role'])) {
+                continue;
+            }
             if ($attr['role'] == 'doc') {
                 $info['doc_files'] .= " $name";
 
@@ -677,6 +680,7 @@ Wrote: /usr/src/redhat/RPMS/i386/PEAR::Net_Socket-1.0-1.i386.rpm
 
                 }
 
+                $name = str_replace('\\', '/', $name);
                 $info['files'] .= "$prefix/$name\n";
 
             }
