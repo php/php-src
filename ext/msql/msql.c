@@ -58,7 +58,7 @@ msql_module php3_msql_module;
 
 #define MSQL_ASSOC		1<<0
 #define MSQL_NUM		1<<1
-#define MSQL_BOTH		(MYSQL_ASSOC|MYSQL_NUM)
+#define MSQL_BOTH		(MSQL_ASSOC|MSQL_NUM)
 
 
 function_entry msql_functions[] = {
@@ -1038,7 +1038,7 @@ static void php3_msql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 				RETURN_FALSE;
 			}
 			if (!result_type) {
-				result_type = MYSQL_BOTH;
+				result_type = MSQL_BOTH;
 			}
 			break;
 		case 2:
