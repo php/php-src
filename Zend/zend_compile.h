@@ -318,7 +318,7 @@ ZEND_API zend_op_array *compile_string(zval *source_string CLS_DC);
 ZEND_API zend_op_array *compile_filename(zval *filename CLS_DC);
 inline int open_file_for_scanning(zend_file_handle *file_handle CLS_DC);
 
-#define INITIAL_OP_ARRAY_SIZE 1024
+#define INITIAL_OP_ARRAY_SIZE 64
 
 
 ZEND_API void init_op_array(zend_op_array *op_array, int initial_ops_size);
