@@ -259,7 +259,7 @@ class DB
      */
     function isManip($query)
     {
-        if (preg_match('/^\s*(INSERT|UPDATE|DELETE)\s+/i', $query)) {
+        if (preg_match('/^\s*(INSERT|UPDATE|DELETE|REPLACE)\s+/i', $query)) {
             return true;
         }
         return false;
