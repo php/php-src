@@ -113,8 +113,6 @@ unsigned int fbaCount();
 struct PHPFBResult
 {
 	PHPFBLink*				link;				/* The link for the result, may be NULL if no link  */
-//	PHPFBDatabase*			database;			/* The database for the result, may be NULL of no database is related to the result */
-//	FBCDatabaseConnection*	connection;			/* The database connection, just a convinience */
 	char*					fetchHandle;		/* The fetch handle, the id used by the server.   */
 	FBCMetaData*			metaData;			/* The metadata describing the result */
 	FBCMetaData*			ResultmetaData;		/* The metadata describing the result */
@@ -271,9 +269,6 @@ static void phpfbReleaseLink (zend_rsrc_list_entry *rsrc)
 			fbcdcClose(link->connection);
 			fbcdcRelease(link->connection);
 		}
-
-//		zend_hash_apply(&EG(regular_list),(int (*)(void *))_clean_invalid_results);
-
 		efree(link);
 		FB_SQL_G(linkCount)--;
 	}
@@ -285,14 +280,17 @@ static void phpfbReleasePLink (zend_rsrc_list_entry *rsrc)
 	FBSQLLS_FETCH();
 	if (link)
 	{
-//		if (link->hostName) efree(link->hostName);
-//		if (link->userName) efree(link->userName);
-//		if (link->userPassword) efree(link->userPassword);
-//		if (link->databasePassword) efree(link->databasePassword);
-		if (link->errorText) {
-			efree(link->errorText);
-			link->errorText = NULL;
+		if (link->hostName) efree(link->hostName);
+		if (link->userName) efree(link->userName);
+		if (link->userPassword) efree(link->userPassword);
+		if (link->databasePassword) efree(link->databasePassword);
+		if (link->databaseName) efree(link->databaseName);
+		if (link->errorText) efree(link->errorText);
+		if (link->connection) {
+			fbcdcClose(link->connection);
+			fbcdcRelease(link->connection);
 		}
+		efree(link);
 		FB_SQL_G(linkCount)--;
 		FB_SQL_G(persistantCount)--;
 	}
@@ -399,7 +397,7 @@ PHP_MINFO_FUNCTION(fbsql)
 	php_info_print_table_start();
 	php_info_print_table_header(2, "FrontBase support", "enabled");
 
-	php_info_print_table_row(2, "Client API version", "2.20");
+	php_info_print_table_row(2, "Client API version", "2.24");
 
 	if (FB_SQL_G(allowPersistent))
 	{
@@ -409,6 +407,11 @@ PHP_MINFO_FUNCTION(fbsql)
 
 	sprintf(buf, "%ld", FB_SQL_G(linkCount));
 	php_info_print_table_row(2, "Active Links", buf);
+
+/*
+	sprintf(buf, "%ld", FB_SQL_G(resultCount));
+	php_info_print_table_row(2, "Active Links", buf);
+*/
 
 	php_info_print_table_end();
 
@@ -450,6 +453,9 @@ static void php_fbsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistant)
 
 	sprintf(name,"fbsql_%s_%s_%s", hostName, userName, userPassword);
 
+	if (!FB_SQL_G(allowPersistent)) {
+		persistant=0;
+	}
 	if (persistant) {
 		if (zend_hash_find(&EG(persistent_list), name, strlen(name) + 1, (void **)&lep) == SUCCESS)
 		{
@@ -461,6 +467,12 @@ static void php_fbsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistant)
 			if ((FB_SQL_G(maxLinks) != -1 && FB_SQL_G(linkCount) == FB_SQL_G(maxLinks)))
 			{
 				php_error(E_WARNING,"FrontBase link limit %d exceeded ", FB_SQL_G(maxLinks));
+				RETURN_FALSE;
+			}
+
+			if ((FB_SQL_G(maxPersistant) != -1 && FB_SQL_G(persistantCount) == FB_SQL_G(maxPersistant)))
+			{
+				php_error(E_WARNING,"FrontBase persistant link limit %d exceeded ", FB_SQL_G(maxPersistant));
 				RETURN_FALSE;
 			}
 
@@ -498,7 +510,14 @@ static void php_fbsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistant)
 	else
 	{
 		list_entry le;
-		if (zend_hash_find(&EG(regular_list), name, strlen(name) + 1, (void **)&lep) == SUCCESS)
+
+		if ((FB_SQL_G(maxLinks) != -1 && FB_SQL_G(linkCount) == FB_SQL_G(maxLinks)))
+		{
+			php_error(E_WARNING,"FrontBase link limit %d exceeded ", FB_SQL_G(maxLinks));
+			RETURN_FALSE;
+		}
+
+			if (zend_hash_find(&EG(regular_list), name, strlen(name) + 1, (void **)&lep) == SUCCESS)
 		{
 			int type, link;
 			void *ptr;
@@ -535,7 +554,7 @@ static void php_fbsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistant)
 
 		le.ptr  = (void *)return_value->value.lval;
 		le.type = le_index_ptr;
-		if (zend_hash_update(persistant?&EG(persistent_list):&EG(regular_list), name, strlen(name) + 1, &le, sizeof(le), NULL)==FAILURE)
+		if (zend_hash_update(&EG(regular_list), name, strlen(name) + 1, &le, sizeof(le), NULL)==FAILURE)
 		{
 			efree(phpLink->hostName);
 			efree(phpLink->userName);
@@ -1350,7 +1369,7 @@ PHP_FUNCTION(fbsql_stop_db)
 	zval	**fbsql_link_index = NULL, **database_name;
 	int id;
 	int i, status;
-	char *databaseName, name[1024];
+	char *databaseName;
 	FBSQLLS_FETCH();
 
 	switch (ZEND_NUM_ARGS()) {
@@ -1395,19 +1414,6 @@ PHP_FUNCTION(fbsql_stop_db)
 		sleep(1);
 #endif
 	}
-
-//	for (i=0; i < phpDatabase->resultCount; i++) if (phpDatabase->results[i])
-//	{
-//		FB_SQL_G(resultCount)--;
-//		zend_list_delete(phpDatabase->results[i]->index);
-//	}
-/*	printf("Database %X %d %d\n",phpDatabase,phpDatabase->index,phpDatabase->retainCount); */
-	sprintf(name,"fbsql_%s@%s:%s",databaseName,phpLink->hostName, phpLink->userName);
-//	zend_list_delete(phpDatabase->index);
-
-	zend_hash_del(&EG(regular_list),name,strlen(name));
-
-/*	printf("After list delete\n"); */
 	RETURN_TRUE;
 }
 /* }}} */
@@ -1614,7 +1620,7 @@ PHP_FUNCTION(fbsql_query)
 /* }}} */
 
 
-/* {{{ proto int fbsql_db_query(string database_name, string query [, int link_identifier])
+/* {{{ proto resource fbsql_db_query(string database_name, string query [, int link_identifier])
 	*/
 PHP_FUNCTION(fbsql_db_query)
 {
@@ -1649,6 +1655,10 @@ PHP_FUNCTION(fbsql_db_query)
 	if (php_fbsql_select_db((*dbname)->value.str.val, phpLink))
 	{
 		phpfbQuery(INTERNAL_FUNCTION_PARAM_PASSTHRU, (*query)->value.str.val, phpLink);
+	}
+	else
+	{
+		RETURN_FALSE;
 	}
 }
 /* }}} */
@@ -1697,7 +1707,6 @@ PHP_FUNCTION(fbsql_list_dbs)
 	phpResult->list        = NULL;
 
 	ZEND_REGISTER_RESOURCE(return_value, phpResult, le_result);
-
 }
 /* }}} */
 
@@ -1746,12 +1755,6 @@ PHP_FUNCTION(fbsql_list_tables)
 	}
 
 	phpfbQuery(INTERNAL_FUNCTION_PARAM_PASSTHRU, sql, phpLink);
-
-	if (return_value->value.lval)
-	{
-//		FB_SQL_G(linkIndex)                   = phpLink->index;
-//		if (phpResult) FB_SQL_G(resultIndex)  = phpResult->index;
-	}
 }
 /* }}} */
 
