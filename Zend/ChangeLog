@@ -1,3 +1,8 @@
+2003-08-06  Zeev Suraski  <zeev@zend.com>
+
+    * zend_execute_API.c:
+      clarify :)
+
 2003-08-05  Jani Taskinen  <sniper@iki.fi>
 
     * zend_execute_API.c:
