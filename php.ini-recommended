@@ -338,9 +338,6 @@ track_errors = Off
 ; Log errors to syslog (Event Log on NT, not valid in Windows 95).
 ;error_log = syslog
 
-; Warn if the + operator is used with strings.
-warn_plus_overloading = Off
-
 
 ;;;;;;;;;;;;;;;;;
 ; Data Handling ;
