@@ -31,12 +31,12 @@ if test "$PHP_CURL" != "no"; then
   fi
 
   curl_version_full=`$CURL_CONFIG --version`
-  curl_version=`$CURL_CONFIG --vernum`
+  curl_version=`$CURL_CONFIG --vernum 2>/dev/null`
   if test "$curl_version" -ge 70800; then
     AC_MSG_RESULT($curl_version_full)
     CURL_LIBS=`$CURL_CONFIG --libs`
   else
-    AC_MSG_ERROR(cURL version 7.7.3 or later is required to compile php with cURL support)
+    AC_MSG_ERROR(cURL version 7.8 or later is required to compile php with cURL support)
   fi
 
   PHP_ADD_INCLUDE($CURL_DIR/include)
