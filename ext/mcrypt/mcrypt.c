@@ -1316,7 +1316,6 @@ static void php_mcrypt_do_crypt (char* cipher, zval **key, zval **data, char *mo
 	if (iv_s != NULL)
 		efree (iv_s);
 	efree (data_s);
-	mcrypt_module_close (td);
 }
 
 /* {{{ proto string mcrypt_encrypt(string cipher, string key, string data, string mode, string iv)
