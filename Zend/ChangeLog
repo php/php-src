@@ -1,3 +1,27 @@
+2004-03-30  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * tests/bug26695.phpt:
+      Fix test
+
+2004-03-30  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * zend_builtin_functions.c:
+      Fixed bug #27782 (Wrong behaviour of next(), prev() and each()).
+
+2004-03-30  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_reflection_api.c:
+      TSRM fix
+
+    * zend.c
+      zend.h
+      zend_API.c
+      zend_API.h
+      zend_globals.h
+      zend_reflection_api.c:
+      - Fix Reflection class names
+      - Add ability to get the extension an internal class was defined in
+
 2004-03-29  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * acconfig.h:
