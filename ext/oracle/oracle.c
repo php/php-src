@@ -191,8 +191,6 @@ DLEXPORT php3_module_entry *get_module() { return &oracle_module_entry; };
 static int _close_oraconn(oraConnection *conn)
 {
 	ORALS_FETCH();
-
-	printf("_close_oraconn\n");fflush(stdout);
 	
 	conn->open = 0;
 
@@ -208,16 +206,10 @@ static int _close_oraconn(oraConnection *conn)
 static int _close_orapconn(oraConnection *conn)
 {
 	ORALS_FETCH();
-  
-	printf("_close_orapconn\n");fflush(stdout);
-	conn->open = 0;
 
-	ologof(&conn->lda);
-	free(conn);
-	ORA(num_links)--;
+	_close_oraconn(conn);
+
 	ORA(num_persistent)--;
-
-	zend_hash_del(ORA(conns),(void*)&conn,sizeof(void*));
 
 	return 1;
 }
