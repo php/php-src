@@ -37,7 +37,7 @@
 #endif /*_OSD_POSIX*/
 
 
-void free_url(url * theurl)
+void free_url(php_url * theurl)
 {
 	if (theurl->scheme)
 		efree(theurl->scheme);
@@ -56,7 +56,7 @@ void free_url(url * theurl)
 	efree(theurl);
 }
 
-url *url_parse(char *str)
+php_url *url_parse(char *str)
 {
 	regex_t re;
 	regmatch_t subs[10];
@@ -64,12 +64,12 @@ url *url_parse(char *str)
 	int length = strlen(str);
 	char *result;
 
-	url *ret = (url *) emalloc(sizeof(url));
+	php_url *ret = (php_url *) emalloc(sizeof(php_url));
 	if (!ret) {
 		/*php_error(E_WARNING,"Unable to allocate memory\n");*/
 		return NULL;
 	}
-	memset(ret, 0, sizeof(url));
+	memset(ret, 0, sizeof(php_url));
 
 	/* from Appendix B of draft-fielding-url-syntax-09,
 	   http://www.ics.uci.edu/~fielding/url/url.txt */
@@ -161,7 +161,7 @@ url *url_parse(char *str)
 PHP_FUNCTION(parse_url)
 {
 	pval **str;
-	url *resource;
+	php_url *resource;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &str) == FAILURE) {
 		WRONG_PARAM_COUNT;

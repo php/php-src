@@ -512,7 +512,7 @@ PHPAPI FILE *php_fopen_with_path(char *filename, char *mode, char *path, char **
 static FILE *php_fopen_url_wrap_http(const char *path, char *mode, int options, int *issock, int *socketd, char **opened_path)
 {
 	FILE *fp=NULL;
-	url *resource=NULL;
+	php_url *resource=NULL;
 	struct sockaddr_in server;
 	char tmp_line[512];
 	char location[512];
@@ -679,7 +679,7 @@ static FILE *php_fopen_url_wrap_http(const char *path, char *mode, int options, 
  static FILE *php_fopen_url_wrap_ftp(const char *path, char *mode, int options, int *issock, int *socketd, char **opened_path)
 {
 	FILE *fp=NULL;
-	url *resource=NULL;
+	php_url *resource=NULL;
 	struct sockaddr_in server;
 	char tmp_line[512];
 	unsigned short portno;
