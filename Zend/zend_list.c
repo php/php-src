@@ -20,7 +20,7 @@
 #include "zend_globals.h"
 
 
-int le_index_ptr;
+ZEND_API int le_index_ptr;
 
 static inline int zend_list_do_insert(HashTable *list,void *ptr, int type)
 {
@@ -70,7 +70,7 @@ static inline void *zend_list_do_find(HashTable *list,int id, int *type)
 }
 
 
-int zend_list_insert(void *ptr, int type)
+ZEND_API int zend_list_insert(void *ptr, int type)
 {
 	ELS_FETCH();
 
@@ -78,7 +78,7 @@ int zend_list_insert(void *ptr, int type)
 }
 
 
-int zend_plist_insert(void *ptr, int type)
+ZEND_API int zend_plist_insert(void *ptr, int type)
 {
 	ELS_FETCH();
 
@@ -86,15 +86,7 @@ int zend_plist_insert(void *ptr, int type)
 }
 
 
-int zend_list_delete(int id)
-{
-	ELS_FETCH();
-
-	return zend_list_do_delete(&EG(regular_list), id);
-}
-
-
-int zend_list_addref(int id)
+ZEND_API int zend_list_addref(int id)
 {
 	list_entry *le;
 	ELS_FETCH();
@@ -108,7 +100,16 @@ int zend_list_addref(int id)
 	}
 }
 
-int zend_plist_delete(int id)
+
+ZEND_API int zend_list_delete(int id)
+{
+	ELS_FETCH();
+
+	return zend_list_do_delete(&EG(regular_list), id);
+}
+
+
+ZEND_API int zend_plist_delete(int id)
 {
 	ELS_FETCH();
 
@@ -116,7 +117,7 @@ int zend_plist_delete(int id)
 }
 
 
-void *zend_list_find(int id, int *type)
+ZEND_API void *zend_list_find(int id, int *type)
 {
 	ELS_FETCH();
 
@@ -124,7 +125,7 @@ void *zend_list_find(int id, int *type)
 }
 
 
-void *zend_plist_find(int id, int *type)
+ZEND_API void *zend_plist_find(int id, int *type)
 {
 	ELS_FETCH();
 

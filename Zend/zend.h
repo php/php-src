@@ -206,7 +206,7 @@ END_EXTERN_C()
 
 void zenderror(char *error);
 
-extern zend_class_entry standard_class;
+extern ZEND_API zend_class_entry zend_standard_class_def;
 extern zend_utility_values zend_uv;
 
 #define ZEND_UV(name) (zend_uv.name)

@@ -32,7 +32,7 @@
 #endif
 
 /* true multithread-shared globals */
-zend_class_entry standard_class;
+ZEND_API zend_class_entry zend_standard_class_def;
 ZEND_API int (*zend_printf)(const char *format, ...);
 ZEND_API int (*zend_write)(const char *str, uint str_length);
 ZEND_API void (*zend_error)(int type, const char *format, ...);
@@ -161,18 +161,18 @@ static FILE *zend_fopen_wrapper(const char *filename)
 
 static void register_standard_class()
 {
-	standard_class.type = ZEND_INTERNAL_CLASS;
-	standard_class.name_length = sizeof("stdClass") - 1;
-	standard_class.name = zend_strndup("stdClass", standard_class.name_length);
-	standard_class.parent = NULL;
-	zend_hash_init(&standard_class.default_properties, 0, NULL, PVAL_PTR_DTOR, 1);
-	zend_hash_init(&standard_class.function_table, 0, NULL, (void (*)(void *)) destroy_zend_function, 1);
-	standard_class.handle_function_call = NULL;
-	standard_class.handle_property_get = NULL;
-	standard_class.handle_property_set = NULL;
-	standard_class.refcount = (int *) malloc(sizeof(int));
-	*standard_class.refcount = 1;
-	zend_hash_add(GLOBAL_CLASS_TABLE, "stdClass", sizeof("stdClass"), &standard_class, sizeof(zend_class_entry), NULL);
+	zend_standard_class_def.type = ZEND_INTERNAL_CLASS;
+	zend_standard_class_def.name_length = sizeof("stdClass") - 1;
+	zend_standard_class_def.name = zend_strndup("stdClass", zend_standard_class_def.name_length);
+	zend_standard_class_def.parent = NULL;
+	zend_hash_init(&zend_standard_class_def.default_properties, 0, NULL, PVAL_PTR_DTOR, 1);
+	zend_hash_init(&zend_standard_class_def.function_table, 0, NULL, (void (*)(void *)) destroy_zend_function, 1);
+	zend_standard_class_def.handle_function_call = NULL;
+	zend_standard_class_def.handle_property_get = NULL;
+	zend_standard_class_def.handle_property_set = NULL;
+	zend_standard_class_def.refcount = (int *) malloc(sizeof(int));
+	*zend_standard_class_def.refcount = 1;
+	zend_hash_add(GLOBAL_CLASS_TABLE, "stdClass", sizeof("stdClass"), &zend_standard_class_def, sizeof(zend_class_entry), NULL);
 }
 
 

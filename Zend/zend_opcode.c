@@ -314,10 +314,10 @@ ZEND_API unary_op_type get_unary_op(int opcode)
 {
 	switch(opcode) {
 		case ZEND_BW_NOT:
-			return bitwise_not_function;
+			return (unary_op_type) bitwise_not_function;
 			break;
 		case ZEND_BOOL_NOT:
-			return boolean_not_function;
+			return (unary_op_type) boolean_not_function;
 			break;
 		default:
 			return (unary_op_type) NULL;
