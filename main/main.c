@@ -795,6 +795,7 @@ int php_module_startup(sapi_functions_struct *sf)
 	main_core_globals = core_globals;
 #endif
 
+	PG(header_is_being_sent) = 0;
 	sapi_startup(sf);
 
 #if HAVE_SETLOCALE
