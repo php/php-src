@@ -13,9 +13,6 @@ Zend
     * Allow to set a default value for call-by-reference-parameters. 
       eg: function hello (&$pallo = NULL) {} 
     * Disallow function(method) redefinition in class.
-    * Add configure test to determine if dlsym() requires underscore and set
-      DLSYM_NEEDS_UNDERSCORE accordingly. Perl and zsh have it in configure, 
-      for example. (DONE?)
 
     For PHP 5.0.0:
     * Native large number support (probably with GNU GMP)
