@@ -254,8 +254,7 @@ static int _close_oracur(oraCursor *cur)
 	return 1;
 }
 
-#ifdef ZTS
-static void php_ora_init_globals(php_ora_globals *ora_globals)
+static void php_ora_init_globals(ORALS_D)
 {
 	if (cfg_get_long("oracle.allow_persistent",
 			 &ORA(allow_persistent))
@@ -278,36 +277,16 @@ static void php_ora_init_globals(php_ora_globals *ora_globals)
 	ORA(conns) = malloc(sizeof(HashTable));
 	zend_hash_init(ORA(conns), 13, NULL, NULL, 1);
 }
-#endif                                                                                                                                     
+
 PHP_MINIT_FUNCTION(oracle)
 {
 
 	ELS_FETCH();
 
 #ifdef ZTS
-	ora_globals_id = ts_allocate_id(sizeof(php_ora_globals), php_ora_init_globals, NULL);
+	ora_globals_id = ts_allocate_id(sizeof(php_ora_globals), (ts_allocate_ctor) php_ora_init_globals, NULL);
 #else
-	if (cfg_get_long("oracle.allow_persistent",
-			 &ORA(allow_persistent))
-		== FAILURE) {
-	  ORA(allow_persistent) = -1;
-	}
-	if (cfg_get_long("oracle.max_persistent",
-					 &ORA(max_persistent))
-	    == FAILURE) {
-		ORA(max_persistent) = -1;
-	}
-	if (cfg_get_long("oracle.max_links",
-					 &ORA(max_links))
-	    == FAILURE) {
-		ORA(max_links) = -1;
-	}
-	
-	ORA(num_persistent) = 0;
-	
-
-	ORA(conns) = malloc(sizeof(HashTable));
-	zend_hash_init(ORA(conns), 13, NULL, NULL, 1);
+	php_ora_init_globals(ORALS_C);
 #endif
 
 	le_cursor = register_list_destructors(_close_oracur, NULL);
