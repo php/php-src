@@ -16,6 +16,7 @@ PEAR_SUBDIRS = \
 	DB \
 	File \
 	HTML \
+	Log \
 	Mail \
 	Net \
 	Payment \
@@ -42,6 +43,13 @@ PEAR_FILES = \
 	File/SearchReplace.php \
 	HTML/Form.php \
 	HTTP.php \
+	Log.php
+	Log/composite.php \
+	Log/file.php \
+	Log/mcal.php \
+	Log/observer.php \
+	Log/sql.php \
+	Log/syslog.php \
 	Mail.php \
 	Mail/sendmail.php \
 	Mail/smtp.php \
