@@ -19,6 +19,8 @@
  */
 /* $Id$ */
 
+#define _PHP_REGEX_H 1
+
 #include "zend.h"
 #include "php.h"
 #include "php_variables.h"

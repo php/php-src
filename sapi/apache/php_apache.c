@@ -17,8 +17,10 @@
    |          David Sklar <sklar@student.net>                             |
    +----------------------------------------------------------------------+
  */
-
 /* $Id$ */
+
+#define _PHP_REGEX_H 1
+
 #include "php.h"
 #include "ext/standard/head.h"
 #include "php_globals.h"

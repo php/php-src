@@ -48,7 +48,7 @@ static int browser_reg_compare(pval *browser)
 	if (found_browser_entry) { /* already found */
 		return 0;
 	}
-	zend_hash_find(browser->value.ht,"browser_name_pattern",sizeof("browser_name_pattern"),(void **) &browser_name);
+	zend_hash_find(browser->value.obj.properties, "browser_name_pattern",sizeof("browser_name_pattern"),(void **) &browser_name);
 	if (!strchr(browser_name->value.str.val,'*')) {
 		return 0;
 	}
@@ -64,7 +64,7 @@ static int browser_reg_compare(pval *browser)
 
 PHP_FUNCTION(get_browser)
 {
-	pval **agent_name,**agent,tmp;
+	pval **agent_name,**agent, tmp;
 
 	if (!INI_STR("browscap")) {
 		RETURN_FALSE;
@@ -104,13 +104,15 @@ PHP_FUNCTION(get_browser)
 	*return_value = **agent;
 	return_value->type = IS_OBJECT;
 	pval_copy_constructor(return_value);
-	return_value->value.ht->pDestructor = ZVAL_DESTRUCTOR;
+	return_value->value.obj.properties->pDestructor = ZVAL_DESTRUCTOR;
 
-	while (zend_hash_find((*agent)->value.ht, "parent",sizeof("parent"), (void **) &agent_name)==SUCCESS) {
+	while (zend_hash_find((*agent)->value.obj.properties, "parent",sizeof("parent"), (void **) &agent_name)==SUCCESS) {
+		zval *tmp_copy;
+
 		if (zend_hash_find(&browser_hash,(*agent_name)->value.str.val, (*agent_name)->value.str.len+1, (void **)&agent)==FAILURE) {
 			break;
 		}
-		zend_hash_merge(return_value->value.ht,(*agent)->value.ht, ZVAL_COPY_CTOR, (void *) &tmp, sizeof(pval), 0);
+		zend_hash_merge(return_value->value.obj.properties,(*agent)->value.obj.properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp_copy, sizeof(pval *), 0);
 	}
 }
 

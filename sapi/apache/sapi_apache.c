@@ -21,6 +21,8 @@
  */
 /* $Id$ */
 
+#define _PHP_REGEX_H 1
+
 #include "php.h"
 
 #include "httpd.h"
