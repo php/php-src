@@ -71,7 +71,6 @@ int apache_php_module_hook(request_rec *r, php_handler *handler, zval **ret TSRM
 	signal(SIGCHLD, sigchld_handler);
 #endif
     if(AP(current_hook) == AP_RESPONSE) {
-        fprintf(stderr, "in Response\n");
         if (php_request_startup_for_hook(TSRMLS_C) == FAILURE)
             return FAILURE;
     }
@@ -104,7 +103,6 @@ int apache_php_module_hook(request_rec *r, php_handler *handler, zval **ret TSRM
                 ZVAL_STRING(class, handler->name, 1);
                 ALLOC_ZVAL(method);
                 ZVAL_STRING(method, tmp +2, 1);
-                fprintf(stderr, "calling coderef %s::%s\n", handler->name, tmp +2);
                 *tmp = ':';
                 call_user_function_ex(EG(function_table), &class, method, ret, 0, NULL, 0, NULL TSRMLS_CC);
                 zval_dtor(&class);
