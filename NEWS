@@ -2,6 +2,7 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.2
+- Fixed dbase_add_record. (Sterling)
 - Added support for libmcrypt 2.4.4 (Derick)
 - Added strncasecmp function (Andi, Zend Engine)
 - Fixed FTP module to accept multiline server replies (Jani)
