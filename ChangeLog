@@ -1,3 +1,109 @@
+2002-11-03  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/gd/libgd/gdft.c: Fix win32 build.
+
+2002-11-03  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/mbstring/tests/mb_output_handler_shift_jis.phpt: Added a new test
+
+    * ext/zlib/zlib.c: Fixed OnUpdate_zlib_output_compression() behaviour
+
+2002-11-03  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * run-tests.php: better use 'Off' here
+
+    * ext/dba/tests/dba_dbm.phpt: missing
+
+2002-11-03  Melvyn Sopacua  <msopacua@idg.nl>
+
+    * ext/xslt/tests/qa.dtd: ws
+
+2002-11-03  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * run-tests.php:
+    without these nearly all tests fail if for example php.ini contains
+    output_handler=mb_string
+    mbstring.http_output=UCS-2LE
+
+    * run-tests.php: force showing progress of test
+
+    * NEWS: info about added functionality in dba
+
+2002-11-03  Jon Parise  <jon@csh.rit.edu>
+
+    * win32/php_modules.dsw: The cybercash extension no longer exists in ext/.
+
+2002-11-03  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/dba/dba_cdb.c: no c++ comments
+
+    * ext/dba/tests/dba_cdb_read.phpt
+      ext/dba/dba.c
+      ext/dba/dba_cdb.c
+      ext/dba/php_dba.h: cdb now allows multiple key-value pairs with same key
+
+2002-11-03  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * run-tests.php:
+    Fixed ini argument parsing. We now support ini options with = in the argument,
+    such as the one being used in session test #21, which is once again working
+    properly.
+
+2002-11-03  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/dba/tests/dba_cdb.phpt
+      ext/dba/tests/dba_cdb_read.phpt
+      ext/dba/tests/skipif.inc
+      ext/dba/tests/test.inc
+      ext/dba/tests/test.cdb: cdb interface is currently readonly
+
+    * ext/dba/dba_cdb.c: -fixed
+    -use *e*malloc
+
+    * ext/standard/tests/image/bug13213.jpg
+      ext/standard/tests/image/bug13213.phpt
+      ext/standard/tests/image/getimagesize.phpt
+      ext/standard/tests/image/image_type_to_mime_type.phpt
+      ext/standard/tests/image/skipif_imagetype.inc
+      ext/standard/tests/image/test1pix.bmp
+      ext/standard/tests/image/test1pix.jpc
+      ext/standard/tests/image/test1pix.jpg
+      ext/standard/tests/image/test2pix.gif
+      ext/standard/tests/image/test4pix.gif
+      ext/standard/tests/image/test4pix.iff
+      ext/standard/tests/image/test4pix.png
+      ext/standard/tests/image/test4pix.psd
+      ext/standard/tests/image/test4pix.tif:
+    add tests for functions in image.c (not requiring gd,zlib or exif)
+
+2002-11-03  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/dio/dio.c: Fix leak when read call fails (see comment in #16635).
+
+2002-11-03  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * run-tests.php: pass params used for info call to skipif also
+
+2002-11-03  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/mbstring/mbstring.c: style keisatsu
+
+    * ext/mbstring/tests/casefold.phpt
+      ext/mbstring/tests/mb_convert_encoding.phpt
+      ext/mbstring/tests/mb_convert_variables.phpt
+      ext/mbstring/tests/mb_ereg.phpt
+      ext/mbstring/tests/mb_ereg_search_xxx.phpt
+      ext/mbstring/tests/mb_strcut.phpt
+      ext/mbstring/tests/mb_strimwidth.phpt
+      ext/mbstring/tests/mb_substr.phpt
+      ext/mbstring/tests/simpletest.phpt
+      ext/standard/tests/strings/htmlentities.phpt
+      ext/standard/tests/strings/htmlentities01.phpt
+      ext/standard/tests/strings/htmlentities02.phpt
+      ext/standard/tests/strings/htmlentities03.phpt
+      ext/standard/tests/strings/htmlentities04.phpt:
+    Disabled output_handler in INI section
+
 2002-11-01  Colin Viebrock  <colin@easydns.com>
 
     * main/logos.h: ahem
