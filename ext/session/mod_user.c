@@ -51,11 +51,10 @@ ps_module ps_mod_user = {
 }
 
 
-static zval *ps_call_handler(zval *func, int argc, zval **argv)
+static zval *ps_call_handler(zval *func, int argc, zval **argv TSRMLS_DC)
 {
 	int i;
 	zval *retval = NULL;
-	TSRMLS_FETCH();
 	
 	MAKE_STD_ZVAL(retval);
 	if (call_user_function(EG(function_table), NULL, func, retval, 
@@ -96,7 +95,7 @@ PS_OPEN_FUNC(user)
 	SESS_ZVAL_STRING(save_path, args[0]);
 	SESS_ZVAL_STRING(session_name, args[1]);
 	
-	retval = ps_call_handler(PSF(open), 2, args);
+	retval = ps_call_handler(PSF(open), 2, args TSRMLS_CC);
 	
 	FINISH;
 }
@@ -106,7 +105,7 @@ PS_CLOSE_FUNC(user)
 	int i;
 	STDVARS;
 
-	retval = ps_call_handler(PSF(close), 0, NULL);
+	retval = ps_call_handler(PSF(close), 0, NULL TSRMLS_CC);
 
 	for (i = 0; i < 6; i++)
 		zval_ptr_dtor(&mdata->names[i]);
@@ -124,7 +123,7 @@ PS_READ_FUNC(user)
 
 	SESS_ZVAL_STRING(key, args[0]);
 
-	retval = ps_call_handler(PSF(read), 1, args);
+	retval = ps_call_handler(PSF(read), 1, args TSRMLS_CC);
 	
 	if (retval) {
 		if (Z_TYPE_P(retval) == IS_STRING) {
@@ -158,7 +157,7 @@ PS_DESTROY_FUNC(user)
 
 	SESS_ZVAL_STRING(key, args[0]);
 
-	retval = ps_call_handler(PSF(destroy), 1, args);
+	retval = ps_call_handler(PSF(destroy), 1, args TSRMLS_CC);
 
 	FINISH;
 }
@@ -170,7 +169,7 @@ PS_GC_FUNC(user)
 
 	SESS_ZVAL_LONG(maxlifetime, args[0]);
 
-	retval = ps_call_handler(PSF(gc), 1, args);
+	retval = ps_call_handler(PSF(gc), 1, args TSRMLS_CC);
 
 	FINISH;
 }
