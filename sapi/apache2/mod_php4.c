@@ -91,6 +91,15 @@ module MODULE_VAR_EXPORT php4_module;
 int saved_umask;
 static unsigned char apache_php_initialized;
 
+/* per-thread globals (when the ZTS stuff gets added) */
+typedef struct {
+	ap_filter_t *server_filter;
+} php_ap_globals_struct;
+
+/* Needs to be per-thread when in threaded mode (per-server for now in pre-fork
+ * mode) */
+static php_ap_globals_struct *php_ap_globals;
+
 typedef struct _php_per_dir_entry {
 	char *key;
 	char *value;
@@ -122,7 +131,7 @@ static int sapi_apache_ub_write(const char *str, uint str_length)
 		bb = ap_brigade_create(r->pool);
 		b = ap_bucket_create_immortal(str, str_length);
 		AP_BRIGADE_INSERT_TAIL(bb, b);
-		ap_pass_brigade(SG(server_filter)->next, bb);
+		ap_pass_brigade((php_ap_globals->server_filter)->next, bb);
 	} else {
 		ret = fwrite(str, 1, str_length, stderr);
 	}
@@ -714,7 +723,8 @@ static int php_filter(ap_filter_t *f, ap_bucket_brigade *bb) {
 	if (ctx == NULL) {
 		f->ctx = ctx = apr_pcalloc(c->pool, sizeof(php_output_filter_ctx_t));
 		ctx->b = ap_brigade_create(c->pool); /* create an initial empty brigade */
-		SG(server_filter) = f;
+		php_ap_globals = palloc(sizeof *php_ap_globals);
+		php_ap_globals->server_filter = f;
 	}
 
 	ap_save_brigade(f, ctx->bb, bb);
