@@ -19,6 +19,35 @@ Changes in the Zend Engine 2.0
       the box or after a very small amount of modifications would be
       high.
 
+    * $this
+
+      Unlike in Zend Engine 1 the pseudo variable $this cannot be 
+      exchanged in Zend Engine 2. You can of course modify or work with 
+      an object by using $this but you cannot replace $this with another 
+      object to change the original object.
+
+      Example:
+
+        <?php
+        class Foo {
+            function replace($other)
+            {
+                $this = $other;
+            }
+        }
+        
+        $object = new Foo;
+        $object->prop = 'Hello';
+
+        $other  = new Foo;
+        $other->prop = 'Bye';
+        
+        $object->replace($other);
+        
+        print $object->prop; // still shows 'Hello'
+        
+        ?>
+
     * Private and Protected Members.
 
       The Zend Engine 2.0 introduces private and protected member 
@@ -717,7 +746,8 @@ Changes in the Zend Engine 2.0
     * Iteration
 
       Objects may be iterated in an overloaded way when used with
-      foreach. The default behavior is to iterate over all properties.
+      foreach. The default behavior is to iterate over all properties
+      with respect to property visibility.
 
       Example:
 
@@ -733,9 +763,6 @@ Changes in the Zend Engine 2.0
                 // using the property
             }
         ?>
-
-      TBD: Respect visibility: Show protected only when inside class
-           method and only otherwise public properties only.
 
       Each class whose instances can be iterated with foreach should 
       implement the empty interface 'Traversable'. Hence any object
@@ -832,7 +859,12 @@ Changes in the Zend Engine 2.0
     * __toString()
 
       The magic method __toString() allows to overload the object to 
-      string conversion.
+      string conversion. This conversion is only done automatically for 
+      printing functions (echo, *printf) but not for other functions 
+      that expect strings. Also the function __toStrign is not used in
+      places where objects are not allowed but strings are like array
+      indices. Note that specialized objects maybe converted to a string
+      in any place but without calling __tostring().
 
       Example:
 
@@ -847,6 +879,10 @@ Changes in the Zend Engine 2.0
             $str = (string) $obj; // call __toString()
             
             echo $obj; // call __toString()
+            
+            $ar = array();
+            $ar[(string)$obj]; // this works
+            $ar[$obj];         // this is not allowed
         ?>
 
     * Reflection API
