@@ -858,23 +858,23 @@ PHP_FUNCTION(chunk_split)
    Return part of a string */
 PHP_FUNCTION(substr)
 {
-	zval **string, **from, **len;
+	zval **str, **from, **len;
 	int argc, l;
 	int f;
 	
 	argc = ARG_COUNT(ht);
 
-	if ((argc == 2 && zend_get_parameters_ex(2, &string, &from) == FAILURE) ||
-		(argc == 3 && zend_get_parameters_ex(3, &string, &from, &len) == FAILURE) ||
+	if ((argc == 2 && zend_get_parameters_ex(2, &str, &from) == FAILURE) ||
+		(argc == 3 && zend_get_parameters_ex(3, &str, &from, &len) == FAILURE) ||
 		argc < 2 || argc > 3) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_string_ex(string);
+	convert_to_string_ex(str);
 	convert_to_long_ex(from);
 	f = (*from)->value.lval;
 
 	if (argc == 2) {
-		l = (*string)->value.str.len;
+		l = (*str)->value.str.len;
 	} else {
 		convert_to_long_ex(len);
 		l = (*len)->value.lval;
@@ -884,7 +884,7 @@ PHP_FUNCTION(substr)
 	 * of the string
 	 */
 	if (f < 0) {
-		f = (*string)->value.str.len + f;
+		f = (*str)->value.str.len + f;
 		if (f < 0) {
 			f = 0;
 		}
@@ -894,21 +894,21 @@ PHP_FUNCTION(substr)
 	 * needed to stop that many chars from the end of the string
 	 */
 	if (l < 0) {
-		l = ((*string)->value.str.len - f) + l;
+		l = ((*str)->value.str.len - f) + l;
 		if (l < 0) {
 			l = 0;
 		}
 	}
 
-	if (f >= (int)(*string)->value.str.len) {
+	if (f >= (int)(*str)->value.str.len) {
 		RETURN_FALSE;
 	}
 
-	if((f+l) > (int)(*string)->value.str.len) {
-		l = (int)(*string)->value.str.len - f;
+	if((f+l) > (int)(*str)->value.str.len) {
+		l = (int)(*str)->value.str.len - f;
 	}
 
-	RETVAL_STRINGL((*string)->value.str.val + f, l, 1);
+	RETVAL_STRINGL((*str)->value.str.val + f, l, 1);
 }
 /* }}} */
 
@@ -917,7 +917,7 @@ PHP_FUNCTION(substr)
    Replace part of a string with another string */
 PHP_FUNCTION(substr_replace)
 {
-    zval**      string;
+    zval**      str;
     zval**      from;
     zval**      len;
     zval**      repl;
@@ -929,19 +929,19 @@ PHP_FUNCTION(substr_replace)
 	
 	argc = ARG_COUNT(ht);
 
-	if ((argc == 3 && zend_get_parameters_ex(3, &string, &repl, &from) == FAILURE) ||
-		(argc == 4 && zend_get_parameters_ex(4, &string, &repl, &from, &len) == FAILURE) ||
+	if ((argc == 3 && zend_get_parameters_ex(3, &str, &repl, &from) == FAILURE) ||
+		(argc == 4 && zend_get_parameters_ex(4, &str, &repl, &from, &len) == FAILURE) ||
 		argc < 3 || argc > 4) {
 		WRONG_PARAM_COUNT;
 	}
 	
-	convert_to_string_ex(string);
+	convert_to_string_ex(str);
 	convert_to_string_ex(repl);
 	convert_to_long_ex(from);
 	f = (*from)->value.lval;
 
 	if (argc == 3) {
-		l = (*string)->value.str.len;
+		l = (*str)->value.str.len;
 	} else {
 		convert_to_long_ex(len);
 		l = (*len)->value.lval;
@@ -951,7 +951,7 @@ PHP_FUNCTION(substr_replace)
 	 * of the string
 	 */
 	if (f < 0) {
-		f = (*string)->value.str.len + f;
+		f = (*str)->value.str.len + f;
 		if (f < 0) {
 			f = 0;
 		}
@@ -961,27 +961,27 @@ PHP_FUNCTION(substr_replace)
 	 * needed to stop that many chars from the end of the string
 	 */
 	if (l < 0) {
-		l = ((*string)->value.str.len - f) + l;
+		l = ((*str)->value.str.len - f) + l;
 		if (l < 0) {
 			l = 0;
 		}
 	}
 
-	if (f >= (int)(*string)->value.str.len) {
-		RETURN_STRINGL((*string)->value.str.val, (*string)->value.str.len, 1);
+	if (f >= (int)(*str)->value.str.len) {
+		RETURN_STRINGL((*str)->value.str.val, (*str)->value.str.len, 1);
 	}
 
-	if((f+l) > (int)(*string)->value.str.len) {
-		l = (int)(*string)->value.str.len - f;
+	if((f+l) > (int)(*str)->value.str.len) {
+		l = (int)(*str)->value.str.len - f;
 	}
 
-	result_len = (*string)->value.str.len - l + (*repl)->value.str.len;
+	result_len = (*str)->value.str.len - l + (*repl)->value.str.len;
 	result = (char *)ecalloc(result_len + 1, sizeof(char *));
 
-	memcpy(result, (*string)->value.str.val, f);
+	memcpy(result, (*str)->value.str.val, f);
 	memcpy(&result[f], (*repl)->value.str.val, (*repl)->value.str.len);
-	memcpy(&result[f + (*repl)->value.str.len], (*string)->value.str.val + f + l,
-          (*string)->value.str.len - f - l);
+	memcpy(&result[f + (*repl)->value.str.len], (*str)->value.str.val + f + l,
+          (*str)->value.str.len - f - l);
 
 	RETVAL_STRINGL(result, result_len, 0);
 }
@@ -1122,14 +1122,14 @@ PHP_FUNCTION(ucwords)
 }
 /* }}} */
 
-PHPAPI char *php_strtr(char *string, int len, char *str_from,
+PHPAPI char *php_strtr(char *str, int len, char *str_from,
 					   char *str_to, int trlen)
 {
 	int i;
 	unsigned char xlat[256];
 
 	if ((trlen < 1) || (len < 1)) {
-		return string;
+		return str;
 	}
 
 	for (i = 0; i < 256; xlat[i] = i, i++);
@@ -1139,10 +1139,10 @@ PHPAPI char *php_strtr(char *string, int len, char *str_from,
 	}
 
 	for (i = 0; i < len; i++) {
-		string[i] = xlat[(unsigned char) string[i]];
+		str[i] = xlat[(unsigned char) str[i]];
 	}
 
-	return string;
+	return str;
 }
 
 static void php_strtr_array(zval *return_value,char *str,int slen,HashTable *hash)
@@ -1387,7 +1387,7 @@ PHP_FUNCTION(similar_text)
 	
 
 /* be careful, this edits the string in-place */
-PHPAPI void php_stripslashes(char *string, int *len)
+PHPAPI void php_stripslashes(char *str, int *len)
 {
 	char *s, *t;
 	int l;
@@ -1401,10 +1401,10 @@ PHPAPI void php_stripslashes(char *string, int *len)
 	if (len != NULL) {
 		l = *len;
 	} else {
-		l = strlen(string);
+		l = strlen(str);
 	}
-	s = string;
-	t = string;
+	s = str;
+	t = str;
 	while (l > 0) {
 		if (*t == escape_char) {
 			t++;				/* skip the slash */

@@ -212,7 +212,7 @@ return 0;
 *************************************************/
 
 int
-regexec(regex_t *preg, const char *string, size_t nmatch,
+regexec(regex_t *preg, const char *str, size_t nmatch,
   regmatch_t pmatch[], int eflags)
 {
 int rc;
@@ -223,7 +223,7 @@ if ((eflags & REG_NOTEOL) != 0) options |= PCRE_NOTEOL;
 
 preg->re_erroffset = (size_t)(-1);   /* Only has meaning after compile */
 
-rc = pcre_exec(preg->re_pcre, NULL, string, (int)strlen(string), 0, options,
+rc = pcre_exec(preg->re_pcre, NULL, str, (int)strlen(str), 0, options,
   (int *)pmatch, nmatch * 2);
 
 if (rc == 0) return 0;    /* All pmatch were filled in */

@@ -31,8 +31,8 @@ static char base64_table[] =
 	};
 static char base64_pad = '=';
 
-unsigned char *php_base64_encode(const unsigned char *string, int length, int *ret_length) {
-	const unsigned char *current = string;
+unsigned char *php_base64_encode(const unsigned char *str, int length, int *ret_length) {
+	const unsigned char *current = str;
 	int i = 0;
 	unsigned char *result = (unsigned char *)emalloc(((length + 3 - length % 3) * 4 / 3 + 1) * sizeof(char));
 
@@ -68,8 +68,8 @@ unsigned char *php_base64_encode(const unsigned char *string, int length, int *r
 }
 
 /* as above, but backwards. :) */
-unsigned char *php_base64_decode(const unsigned char *string, int length, int *ret_length) {
-	const unsigned char *current = string;
+unsigned char *php_base64_decode(const unsigned char *str, int length, int *ret_length) {
+	const unsigned char *current = str;
 	int ch, i = 0, j = 0, k;
 	/* this sucks for threaded environments */
 	static short reverse_table[256];
@@ -142,15 +142,15 @@ unsigned char *php_base64_decode(const unsigned char *string, int length, int *r
 /* {{{ proto string base64_encode(string str)
    Encodes string using MIME base64 algorithm */
 PHP_FUNCTION(base64_encode) {
-	pval **string;
+	pval **str;
 	unsigned char *result;
 	int ret_length;
 
-	if (ARG_COUNT(ht)!=1 || zend_get_parameters_ex(1,&string) == FAILURE) {
+	if (ARG_COUNT(ht)!=1 || zend_get_parameters_ex(1,&str) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_string_ex(string);
-	result = php_base64_encode((*string)->value.str.val, (*string)->value.str.len, &ret_length);
+	convert_to_string_ex(str);
+	result = php_base64_encode((*str)->value.str.val, (*str)->value.str.len, &ret_length);
 	if (result != NULL) {
 		return_value->value.str.val = result;
 		return_value->value.str.len = ret_length;
@@ -165,15 +165,15 @@ PHP_FUNCTION(base64_encode) {
 /* {{{ proto string base64_decode(string str)
    Decodes string using MIME base64 algorithm */
 PHP_FUNCTION(base64_decode) {
-	pval **string;
+	pval **str;
 	unsigned char *result;
 	int ret_length;
 
-	if (ARG_COUNT(ht)!=1 || zend_get_parameters_ex(1,&string) == FAILURE) {
+	if (ARG_COUNT(ht)!=1 || zend_get_parameters_ex(1,&str) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_string_ex(string);
-	result = php_base64_decode((*string)->value.str.val, (*string)->value.str.len, &ret_length);
+	convert_to_string_ex(str);
+	result = php_base64_decode((*str)->value.str.val, (*str)->value.str.len, &ret_length);
 	if (result != NULL) {
 		return_value->value.str.val = result;
 		return_value->value.str.len = ret_length;

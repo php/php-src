@@ -73,7 +73,7 @@ MAILSTREAM DEFAULTPROTO;
    msvc
 */
 void rfc822_date(char *date);
-extern char *cpystr(const char *string);
+extern char *cpystr(const char *str);
 extern unsigned long find_rightmost_bit (unsigned long *valptr);
 void fs_give (void **block);
 void *fs_get (size_t size);
@@ -2430,19 +2430,19 @@ PHP_FUNCTION(imap_rfc822_write_address)
    Parses an address string */
 PHP_FUNCTION(imap_rfc822_parse_adrlist)
 {
-	pval *string,*defaulthost,*tovals;
+	pval *str,*defaulthost,*tovals;
 	ADDRESS *addresstmp;
 	ENVELOPE *env;
 	int argc;
 
 	env=mail_newenvelope();
 	argc=ARG_COUNT(ht);
-	if ( argc != 2 || getParameters( ht, argc, &string,&defaulthost) == FAILURE ) {
+	if ( argc != 2 || getParameters( ht, argc, &str,&defaulthost) == FAILURE ) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_string(string);
+	convert_to_string(str);
 	convert_to_string(defaulthost);
-	rfc822_parse_adrlist(&env->to,string->value.str.val,defaulthost->value.str.val);
+	rfc822_parse_adrlist(&env->to,str->value.str.val,defaulthost->value.str.val);
 	if(array_init(return_value) == FAILURE) {
 		RETURN_FALSE;
 	}
@@ -2465,7 +2465,7 @@ PHP_FUNCTION(imap_rfc822_parse_adrlist)
    Convert a string to UTF-8 */
 PHP_FUNCTION(imap_utf8)
 {
-       pval *string;
+	pval *str;
 	int argc;
 	SIZEDTEXT src,dest;
 	src.data=NULL;
@@ -2474,11 +2474,11 @@ PHP_FUNCTION(imap_utf8)
 	dest.size=0;
 
 	argc=ARG_COUNT(ht);
-	if ( argc != 1 || getParameters( ht, argc, &string) == FAILURE ) {
+	if ( argc != 1 || getParameters( ht, argc, &str) == FAILURE ) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_string(string);
-	cpytxt(&src,string->value.str.val,string->value.str.len);
+	convert_to_string(str);
+	cpytxt(&src,str->value.str.val,str->value.str.len);
 	utf8_mime2text(&src,&dest);
 	RETURN_STRINGL(dest.data,strlen(dest.data),1);
 }
@@ -3739,14 +3739,14 @@ void mm_flags (MAILSTREAM *stream,unsigned long number)
 
 
 /* Author: CJH */
-void mm_notify (MAILSTREAM *stream,char *string, long errflg)
+void mm_notify (MAILSTREAM *stream,char *str, long errflg)
  {
   STRINGLIST *cur = NIL;
   
-  if (strncmp(string, "[ALERT] ", 8) == 0) {
+  if (strncmp(str, "[ALERT] ", 8) == 0) {
     if (imap_alertstack == NIL) {
       imap_alertstack = mail_newstringlist();
-      imap_alertstack->LSIZE = strlen(imap_alertstack->LTEXT = cpystr(string));
+      imap_alertstack->LSIZE = strlen(imap_alertstack->LTEXT = cpystr(str));
       imap_alertstack->next = NIL; 
     } else {
       cur = imap_alertstack;
@@ -3755,7 +3755,7 @@ void mm_notify (MAILSTREAM *stream,char *string, long errflg)
       }
       cur->next = mail_newstringlist ();
       cur = cur->next;
-      cur->LSIZE = strlen(cur->LTEXT = cpystr(string));
+      cur->LSIZE = strlen(cur->LTEXT = cpystr(str));
       cur->next = NIL;
     }
   }
@@ -3871,7 +3871,7 @@ void mm_status (MAILSTREAM *stream,char *mailbox,MAILSTATUS *status)
 #endif
 }
 
-void mm_log (char *string,long errflg)
+void mm_log (char *str,long errflg)
 {
   ERRORLIST *cur = NIL;
   
@@ -3879,7 +3879,7 @@ void mm_log (char *string,long errflg)
   if (errflg != NIL) { /* CJH: maybe put these into a more comprehensive log for debugging purposes? */
     if (imap_errorstack == NIL) {
       imap_errorstack = mail_newerrorlist();
-      imap_errorstack->LSIZE = strlen(imap_errorstack->LTEXT = cpystr(string));
+      imap_errorstack->LSIZE = strlen(imap_errorstack->LTEXT = cpystr(str));
       imap_errorstack->errflg = errflg;
       imap_errorstack->next = NIL; 
     } else {
@@ -3889,14 +3889,14 @@ void mm_log (char *string,long errflg)
       }
       cur->next = mail_newerrorlist ();
       cur = cur->next;
-      cur->LSIZE = strlen(cur->LTEXT = cpystr(string));
+      cur->LSIZE = strlen(cur->LTEXT = cpystr(str));
       cur->errflg = errflg;
       cur->next = NIL;
     }
   }
 }
 
-void mm_dlog (char *string)
+void mm_dlog (char *str)
 {
   /* CJH: this is for debugging; it might be useful to allow setting
      the stream to debug mode and capturing this somewhere - syslog?
@@ -3943,7 +3943,7 @@ long mm_diskerror (MAILSTREAM *stream,long errcode,long serious)
 }
 
 
-void mm_fatal (char *string)
+void mm_fatal (char *str)
 {
 }
 

@@ -12,5 +12,5 @@
 #endif /*_OSD_POSIX*/
 
 char * gdttf(gdImage *im, int *brect, int fg, char *fontname,
-    double ptsize, double angle, int x, int y, char *string);
+    double ptsize, double angle, int x, int y, char *str);
 
