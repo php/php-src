@@ -1,3 +1,20 @@
+2000-04-22  Charles Hagenbuch  <chagenbu@wso.williams.edu>
+
+    * ext/imap/php_imap.c:
+    back off from high-performance api in imap_rfc822_parse_adrlist. if you
+    called it twice on the same string, there were _strange_ side effects. This
+    may be slower, but it works.
+
+2000-04-22  Andi Gutmans  <andi@php.net>
+
+    * ext/standard/php_rand.h
+      ext/standard/rand.c: - In Windows RAND_MAX is defined in stdlib.h
+    - Get rid of comment which is confusing.
+
+    * ext/standard/rand.c:
+    - Hopefully fix mt_rand() functions under Windows. This patch will effect
+      all platforms so I hope it's OK.
+
 2000-04-21  Thies C. Arntzen  <thies@digicol.de>
 
     * ext/standard/info.c: add VDIR info
