@@ -65,6 +65,7 @@ APXS_LDFLAGS = $(EXTRA_LIBS) $(LIBS)
 APXS_EXP = @APXS_EXP@
 WARNING_LEVEL = @WARNING_LEVEL@
 LEX_CFLAGS = -w$(WARNING_LEVEL) @LEX_CFLAGS@
+EXT_SHARED = @EXT_SHARED@
 
 SOURCE = main.c internal_functions.c snprintf.c php3_sprintf.c \
        configuration-parser.c configuration-scanner.c request_info.c \
@@ -170,7 +171,6 @@ distdir:
 	flex -Pcfg -oconfiguration-scanner.c -i configuration-scanner.l ;\
 	bison -p cfg -v -d configuration-parser.y -o configuration-parser.c
 	find $(distdir) -name CVS -o -name .cvsignore | xargs rm -rf
-	
 
 maintainer-clean-depend: maintainer-clean-depend-recursive
 
@@ -203,8 +203,15 @@ php_config.h.in: @MAINT@ stamp-h.in
 stamp-h.in: configure.in aclocal.m4 acconfig.h
 	cd ${srcdir} && autoheader && touch ${srcdir}/stamp-h.in
 
-install: $(BINNAME)
+install: install-recursive $(BINNAME)
 	$(INSTALL_IT)
+
+install-recursive:
+	if test "$(EXT_SHARED)" != ""; then \
+		for dir in $(EXT_SHARED); do \
+			test -d ext/$$dir && (cd ext/$$dir; $(MAKE) install); \
+		done; \
+	fi
 
 indent:	clean
 	indent -v -kr -cli4 -ts4 \

@@ -18,6 +18,12 @@
 
 /* $Id$ */
 #define IS_EXT_MODULE
+
+/* boldly assume that if PIC is defined, we are being compiled dynamically */
+#ifdef PIC
+# define COMPILE_DL 1
+#endif
+
 #if COMPILE_DL
 # if PHP_31
 #  include "../phpdl.h"
