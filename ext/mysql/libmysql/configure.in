@@ -73,6 +73,7 @@ MYSQL_TYPE_ACCEPT
 
 dnl Checks for library functions.
 AC_TYPE_SIGNAL
+# Standard MySQL list
 AC_CHECK_FUNCS(alarm bmove \
  chsize ftruncate rint finite fpsetmask fpresetsticky\
  cuserid fcntl fconvert  \
@@ -91,7 +92,8 @@ AC_CHECK_FUNCS(alarm bmove \
  pthread_condattr_create rwlock_init \
  crypt dlopen dlerror fchmod getpass getpassphrase)
 
-AC_CHECK_FUNCS(access pthread_setschedparamselect strtok_r)
+# This is special for libmysql
+AC_CHECK_FUNCS(strtok_r)
 
 #---START: Used in for client configure
 
