@@ -358,6 +358,12 @@ zval *zend_std_read_dimension(zval *object, zval *offset TSRMLS_DC)
 	
 	if (instanceof_function_ex(ce, zend_ce_arrayaccess, 1 TSRMLS_CC)) {
 		zend_call_method_with_1_params(&object, ce, NULL, "offsetget", &retval, offset);
+		if (!retval) {
+			if (!EG(exception)) {
+				zend_error(E_ERROR, "Undefined offset for object of type %s used as array", ce->name);
+			}
+			return 0;
+		}
 		if (retval->refcount > 0) { /* Should always  be  the case */
 			retval->refcount--;
 		}
