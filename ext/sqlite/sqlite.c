@@ -2820,7 +2820,7 @@ PHP_FUNCTION(sqlite_create_function)
 PHP_FUNCTION(sqlite_udf_encode_binary)
 {
 	char *data = NULL;
-	long datalen;
+	int datalen;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s!", &data, &datalen)) {
 		return;
