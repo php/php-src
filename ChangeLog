@@ -1,3 +1,85 @@
+2004-05-26  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ZendEngine2/zend_object_handlers.c:
+      Fix leak on systems where alloca isn't really alloca.
+
+    * main/streams/filter.c
+      main/streams/php_stream_filter_api.h:
+      Fix silly mistake.
+      Thanks Antony :)
+
+2004-05-26  Andrei Zmievski  <andreiz@gmail.com>
+
+    * (PHP_4_3)
+      Zend/zend_constants.c:
+      Make sure zend_get_constant() result is initialized properly.
+
+    * ZendEngine2/zend_constants.c:
+      Avoid unnecessary and silly copying of constant name when registering.
+
+2004-05-26  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend_alloc.c:
+      - Fix memory manager problem
+
+2004-05-26  Andrei Zmievski  <andreiz@gmail.com>
+
+    * (PHP_4_3)
+      Zend/zend_constants.c:
+      Avoid unnecessary copy when registering a constant.
+
+2004-05-26  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      run-tests.php:
+      MFH: Turn off session.auto_start to prevent test failures.
+
+    * run-tests.php:
+      Turn off session.auto_start to prevent test failures.
+
+2004-05-26  Pierre-Alain Joye  <pierre@dotgeek.org>
+
+    * ext/gd/tests/bug27582_2.phpt:
+      - Remove this test, it still segfaults anyway (less noise in tests :) )
+        Already removed in PHP_4_3 branch
+
+2004-05-26  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      ext/xslt/tests/xslt_backend_info.phpt:
+      Fixed test failure due to incorrect library check.
+
+2004-05-26  Andi Gutmans  <andi@zend.com>
+
+    * ext/standard/basic_functions.c:
+      - Use FREE_HASHTABLE instead of efree()
+
+2004-05-26  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/standard/proc_open.c:
+      Apparently it is better to specify 500 here for unix98 bits and pieces.
+
+    * (PHP_4_3)
+      ext/mcve/config.m4:
+      Fix build
+
+    * ext/mcve/config.m4:
+      Fix build...
+
+2004-05-26  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ZendEngine2/ZEND_CHANGES:
+      Update Reflection API class names. Whitespace fixes.
+
+2004-05-26  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_4_3)
+      ext/sockets/sockets.c:
+      - MFH: Fixed bug #28523 (Typo in ext/sockets/sockets.c)
+
+    * ext/sockets/sockets.c:
+      - Fixed bug #28523 (Typo in ext/sockets/sockets.c)
+
 2004-05-25  Stefan Esser  <sesser@suspekt.org>
 
     * main/SAPI.c:

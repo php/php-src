@@ -1,3 +1,23 @@
+2004-05-26  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * zend_object_handlers.c:
+      Fix leak on systems where alloca isn't really alloca.
+
+2004-05-26  Andrei Zmievski  <andreiz@gmail.com>
+
+    * zend_constants.c:
+      Avoid unnecessary and silly copying of constant name when registering.
+
+2004-05-26  Andi Gutmans  <andi@zend.com>
+
+    * zend_alloc.c:
+      - Fix memory manager problem
+
+2004-05-26  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ZEND_CHANGES:
+      Update Reflection API class names. Whitespace fixes.
+
 2004-05-25  Andi Gutmans  <andi@zend.com>
 
     * zend_objects_API.h:
