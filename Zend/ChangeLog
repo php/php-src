@@ -1,3 +1,11 @@
+2003-08-27  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_reflection_api.c:
+      Nuke unused variable
+
+    * zend_reflection_api.c:
+      Fix reflection_class::newInstance()
+
 2003-08-25  Jani Taskinen  <sniper@iki.fi>
 
     * zend.h:
