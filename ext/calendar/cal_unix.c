@@ -13,7 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Authors: Shane Caraveo             <shane@caraveo.com>               | 
-   |          Colin Viebrock            <cmv@easydns.com>                 |
+   |          Colin Viebrock            <colin@easydns.com>               |
    |          Hartmut Holzgraefe        <hartmut@six.de>                  |
    +----------------------------------------------------------------------+
  */
