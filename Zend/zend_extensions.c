@@ -175,7 +175,7 @@ static void zend_extension_message_dispatcher(zend_extension *extension, int num
 	int message;
 	void *arg;
 
-	if (num_args!=2) {
+	if (!extension->message_handler || num_args!=2) {
 		return;
 	}
 	message = va_arg(args, int);
