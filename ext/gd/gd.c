@@ -1483,13 +1483,13 @@ static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type,
 		/* needs to be malloc (persistent) - GD will free() it later */
 		buff_size = php_stream_copy_to_mem(stream, &buff, PHP_STREAM_COPY_ALL, 1);
 
-		if(!buff_size) {
+		if (!buff_size) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING,"Cannot read image data");
 			goto out_err;
 		}
 
 		io_ctx = gdNewDynamicCtx(buff_size, buff);
-		if(!io_ctx) {
+		if (!io_ctx) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING,"Cannot allocate GD IO context");
 			goto out_err;
 		}
@@ -1678,7 +1678,7 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
 			RETURN_FALSE;
 		}
 
-		switch(image_type) {
+		switch (image_type) {
 			case PHP_GDIMG_CONVERT_WBM:
 				if (q < 0 || q > 255) {
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid threshold value '%d'. It must be between 0 and 255", q);
@@ -1920,7 +1920,7 @@ PHP_FUNCTION(imagecolorat)
 	convert_to_long_ex(y);
 
 #if HAVE_LIBGD20
-	if(gdImageTrueColor(im)) {
+	if (gdImageTrueColor(im)) {
 		if (im->tpixels && gdImageBoundsSafe(im, Z_LVAL_PP(x), Z_LVAL_PP(y))) {
 			RETURN_LONG(gdImageTrueColorPixel(im, Z_LVAL_PP(x), Z_LVAL_PP(y)));
 		} else {
@@ -2732,7 +2732,7 @@ static void php_imagechar(INTERNAL_FUNCTION_PARAMETERS, int mode)
 
 	font = php_find_gd_font(size);
 
-	switch(mode) {
+	switch (mode) {
 		case 0:
 			gdImageChar(im, font, x, y, ch, col);
 			break;
