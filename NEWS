@@ -3,6 +3,7 @@ PHP 4                                                                      NEWS
 ?? ??? 2003, Version 4.3.5
 - Fixed header handler in NSAPI SAPI module (header->replace was ignored,
   send_default_content_type now sends value from php.ini). (Uwe Schindler)
+- Fixed bug #26309 (Fixed argument parsing for imageftbbox()). (Ilia)
 - Fixed bug #26285 (escapeshellarg() uses wrong quotes on windows). (Ilia)
 - Fixed bug #26267 (gmp_random() leaks memory and does not produce random
   numbers). (Jani)
