@@ -94,8 +94,7 @@ class PEAR_Command_Package extends PEAR_Command_Common
                     }
                     switch ($att['role']) {
                         case 'test':
-                            continue 2;
-                            $dest = '-- will not be installed --';
+                            $dest = '-- will not be installed --'; break;
                         case 'doc':
                             $dest = $this->config->get('doc_dir') . DIRECTORY_SEPARATOR .
                                     $dest;
