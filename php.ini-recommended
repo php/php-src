@@ -261,6 +261,9 @@ memory_limit = 8M      ; Maximum amount of memory a script may consume (8MB)
 ;                     intentional (e.g., using an uninitialized variable and
 ;                     relying on the fact it's automatically initialized to an
 ;                     empty string)
+; E_STRICT          - run-time notices, enable to have PHP suggest changes
+;                     to your code which will ensure the best interoperability
+;                     and forward compatability of your code
 ; E_CORE_ERROR      - fatal errors that occur during PHP's initial startup
 ; E_CORE_WARNING    - warnings (non-fatal errors) that occur during PHP's
 ;                     initial startup
@@ -271,6 +274,10 @@ memory_limit = 8M      ; Maximum amount of memory a script may consume (8MB)
 ; E_USER_NOTICE     - user-generated notice message
 ;
 ; Examples:
+;
+;   - Show all errors, except for notices and coding standards warnings
+;
+;error_reporting = E_ALL & ~E_NOTICE & ~E_STRICT
 ;
 ;   - Show all errors, except for notices
 ;
