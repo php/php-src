@@ -35,10 +35,10 @@ function print_xml($xml) {
 }
 
 function print_xml2($xml) {
-  $persons = $xml->count("person");
+  $persons = count($xml->person);
   for ($i=0;$i<$persons;$i++) {
     echo "person: ".$xml->person[$i]['name']."\n";
-    $children = $xml->person[$i]->count("child");
+	$children = count($xml->person[$i]->child);
     for ($j=0;$j<$children;$j++) {
       echo "  child: ".$xml->person[$i]->child[$j]['name']."\n";
     }
