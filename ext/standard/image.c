@@ -89,6 +89,7 @@ PHP_MINIT_FUNCTION(imagetypes)
 	REGISTER_LONG_CONSTANT("IMAGETYPE_IFF",     IMAGE_FILETYPE_IFF,     CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMAGETYPE_WBMP",    IMAGE_FILETYPE_WBMP,    CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMAGETYPE_JPEG2000",IMAGE_FILETYPE_JPC     ,CONST_CS | CONST_PERSISTENT);/* keep alias */
+	REGISTER_LONG_CONSTANT("IMAGETYPE_XBM",     IMAGE_FILETYPE_XBM,     CONST_CS | CONST_PERSISTENT);
 	return SUCCESS;
 }
 /* }}} */
@@ -953,6 +954,73 @@ static struct gfxinfo *php_handle_wbmp(php_stream * stream TSRMLS_DC)
 }
 /* }}} */
 
+/* {{{ php_get_xbm
+ */
+#define MAX_XBM_LINE_SIZE 255
+static int php_get_xbm(php_stream *stream, struct gfxinfo **result TSRMLS_DC)
+{
+    char fline[MAX_XBM_LINE_SIZE];
+    char iname[MAX_XBM_LINE_SIZE];
+    char *type;
+    int value, width = 0, height = 0;
+
+	if (result) {
+		*result = NULL;
+	}
+	if (php_stream_rewind(stream)) {
+		return 0;
+	}
+	while (php_stream_gets(stream, fline, MAX_XBM_LINE_SIZE)) {
+		fline[MAX_XBM_LINE_SIZE-1] = '\0';
+		if (strlen(fline) == MAX_XBM_LINE_SIZE-1) {
+			return 0;
+		}
+	
+		if (sscanf(fline, "#define %s %d", iname, &value) == 2) {
+			if (!(type = strrchr(iname, '_'))) {
+				type = iname;
+			} else {
+				type++;
+			}
+	
+			if (!strcmp("width", type)) {
+				width = (unsigned int) value;
+				if (height) {
+					break;
+				}
+			}
+			if (!strcmp("height", type)) {
+				height = (unsigned int) value;
+				if (width) {
+					break;
+				}
+			}
+		}
+	}
+
+	if (width && height) {
+		if (result) {
+			*result = (struct gfxinfo *) ecalloc(1, sizeof(struct gfxinfo));
+			(*result)->width = width;
+			(*result)->height = height;
+		}
+		return IMAGE_FILETYPE_XBM;
+	}
+
+	return 0;
+}
+/* }}} */
+
+/* {{{ php_handle_xbm
+ */
+static struct gfxinfo *php_handle_xbm(php_stream * stream TSRMLS_DC)
+{
+	struct gfxinfo *result;
+	php_get_xbm(stream, &result TSRMLS_CC);
+	return result;
+}
+/* }}} */
+
 /* {{{ php_image_type_to_mime_type
  * Convert internal image_type to mime type */
 PHPAPI const char * php_image_type_to_mime_type(int image_type)
@@ -982,6 +1050,8 @@ PHPAPI const char * php_image_type_to_mime_type(int image_type)
 			return "application/octet-stream";
 		case IMAGE_FILETYPE_JP2:
 			return "image/jp2";
+		case IMAGE_FILETYPE_XBM:
+			return "image/xbm";
 		default:
 		case IMAGE_FILETYPE_UNKNOWN:
 			return "application/octet-stream"; /* suppose binary format */
@@ -1072,6 +1142,9 @@ PHPAPI int php_getimagetype(php_stream * stream, char *filetype TSRMLS_DC)
 /* AFTER ALL ABOVE FAILED */
 	if (php_get_wbmp(stream, NULL, 1 TSRMLS_CC)) {
 		return IMAGE_FILETYPE_WBMP;
+	}
+	if (php_get_xbm(stream, NULL TSRMLS_CC)) {
+		return IMAGE_FILETYPE_XBM;
 	}
 	return IMAGE_FILETYPE_UNKNOWN;
 }
@@ -1166,6 +1239,9 @@ PHP_FUNCTION(getimagesize)
 			break;
 		case IMAGE_FILETYPE_WBMP:
 			result = php_handle_wbmp(stream TSRMLS_CC);
+			break;
+		case IMAGE_FILETYPE_XBM:
+			result = php_handle_xbm(stream TSRMLS_CC);
 			break;
 		default:
 		case IMAGE_FILETYPE_UNKNOWN:
