@@ -300,6 +300,7 @@ php_date(INTERNAL_FUNCTION_PARAMETERS, int gm)
 				if(i < (*format)->value.str.len-1) {
 					i++;
 				}
+				size ++;
 				break;
 			case 'L':		/* boolean for leap year */
 			case 'w':		/* day of the week, numeric */
