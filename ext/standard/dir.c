@@ -141,7 +141,7 @@ static void _php_do_opendir(INTERNAL_FUNCTION_PARAMETERS, int createobject)
 	
 	dirp = emalloc(sizeof(php_dir));
 
-	dirp->dir = opendir((*arg)->value.str.val);
+	dirp->dir = V_OPENDIR((*arg)->value.str.val);
 	
 	if (! dirp->dir) {
 		efree(dirp);
