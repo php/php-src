@@ -115,7 +115,7 @@ PHP_MINFO_FUNCTION(domxml)
 }
 
 /* {{{ proto string domxml_attrname([int dir_handle])
-Read directory entry from dir_handle */
+   Read directory entry from dir_handle */
 PHP_FUNCTION(domxml_attrname)
 {
 	pval *id, **tmp;
@@ -165,7 +165,7 @@ PHP_FUNCTION(domxml_attrname)
 /* }}} */
 
 /* {{{ proto string domxml_lastchild([int node])
-Read directory entry from dir_handle */
+   Read directory entry from dir_handle */
 PHP_FUNCTION(domxml_lastchild)
 {
 	pval *id, **tmp;
@@ -216,7 +216,7 @@ PHP_FUNCTION(domxml_lastchild)
 /* }}} */
 
 /* {{{ proto string domxml_parent([int node])
-Read directory entry from dir_handle */
+   Read directory entry from dir_handle */
 PHP_FUNCTION(domxml_parent)
 {
 	pval *id, **tmp;
@@ -267,7 +267,7 @@ PHP_FUNCTION(domxml_parent)
 /* }}} */
 
 /* {{{ proto string domxml_children([int node])
-Read directory entry from dir_handle */
+   Read directory entry from dir_handle */
 PHP_FUNCTION(domxml_children)
 {
 	pval *id, **tmp;
@@ -328,8 +328,8 @@ PHP_FUNCTION(domxml_children)
 }
 /* }}} */
 
-/* {{{ proto string domxml_getattr([int node], string attrname)
-Read directory entry from dir_handle */
+/* {{{ proto string domxml_getattr([int node,] string attrname)
+   Read directory entry from dir_handle */
 PHP_FUNCTION(domxml_getattr)
 {
 	pval *id, *arg1, **tmp;
@@ -374,8 +374,8 @@ PHP_FUNCTION(domxml_getattr)
 }
 /* }}} */
 
-/* {{{ proto string domxml_setattr([int node], string attrname, string value)
-Read directory entry from dir_handle */
+/* {{{ proto string domxml_setattr([int node,] string attrname, string value)
+   Read directory entry from dir_handle */
 PHP_FUNCTION(domxml_setattr)
 {
 	pval *id, *arg1, *arg2, **tmp;
@@ -423,7 +423,7 @@ PHP_FUNCTION(domxml_setattr)
 /* }}} */
 
 /* {{{ proto string domxml_attributes([int node])
-Read directory entry from dir_handle */
+   Read directory entry from dir_handle */
 PHP_FUNCTION(domxml_attributes)
 {
 	pval *id, *arg1, **tmp;
@@ -475,7 +475,7 @@ PHP_FUNCTION(domxml_attributes)
 /* }}} */
 
 /* {{{ proto string domxml_root([int dir_handle])
-Read directory entry from dir_handle */
+   Read directory entry from dir_handle */
 PHP_FUNCTION(domxml_root)
 {
 	pval *id, **tmp;
@@ -526,7 +526,7 @@ PHP_FUNCTION(domxml_root)
 /* }}} */
 
 /* {{{ proto string domxml_dtd([int dir_handle])
-Read directory entry from dir_handle */
+   Read directory entry from dir_handle */
 PHP_FUNCTION(domxml_intdtd)
 {
 	pval *id, **tmp;
@@ -576,7 +576,7 @@ PHP_FUNCTION(domxml_intdtd)
 /* }}} */
 
 /* {{{ proto class dom(string directory)
-Directory class with properties, handle and class and methods read, rewind and close */
+   Directory class with properties, handle and class and methods read, rewind and close */
 PHP_FUNCTION(getdom)
 {
 	pval *arg;
