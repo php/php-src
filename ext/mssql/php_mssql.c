@@ -293,7 +293,7 @@ void php_mssql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	mssql_link mssql, *mssql_ptr;
 	char buffer[32];
 	MSSQLLS_FETCH();
-//	PLS_FETCH();
+/*	PLS_FETCH(); */
 
 	switch(ARG_COUNT(ht)) {
 		case 0: /* defaults */
@@ -375,7 +375,7 @@ void php_mssql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	mssql.valid = 1;
 
 	DBSETLVERSION(mssql.login, DBVER60);
-//	DBSETLTIME(mssql.login, TIMEOUT_INFINITE);
+/*	DBSETLTIME(mssql.login, TIMEOUT_INFINITE); */
 
 	if (!MS_SQL_G(allow_persistent)) {
 		persistent=0;
@@ -572,17 +572,26 @@ static int php_mssql_get_default_link(INTERNAL_FUNCTION_PARAMETERS)
 	return MS_SQL_G(default_link);
 }
 
-
+/* {{{ proto int mssql_connect([string servername[, string [username[, string [password]]])
+   Establishes a connection to a mssql server. */
 PHP_FUNCTION(mssql_connect)
 {
 	php_mssql_do_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU,0);
 }
 
+/* }}} */
+
+/* {{{ proto int mssql_pconnect([string servername[, string [username[, string [password]]])
+   Establishes a persistant connection to a mssql server. */
 PHP_FUNCTION(mssql_pconnect)
 {
 	php_mssql_do_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU,1);
 }
 
+/* }}} */
+
+/* {{{ proto int mssql_close([int connectionId])
+   Closes a connection to a mssql server */
 PHP_FUNCTION(mssql_close)
 {
 	zval **mssql_link_index=NULL;
@@ -612,6 +621,10 @@ PHP_FUNCTION(mssql_close)
 	RETURN_TRUE;
 }
 
+/* }}} */
+
+/* {{{ proto bool mssql_select_db(string database_name[, int conn_id])
+   Select a mssql database */
 PHP_FUNCTION(mssql_select_db)
 {
 	zval **db, **mssql_link_index;
@@ -650,6 +663,8 @@ PHP_FUNCTION(mssql_select_db)
 		RETURN_TRUE;
 	}
 }
+
+/* }}} */
 
 static void php_mssql_get_column_content_with_type(mssql_link *mssql_ptr,int offset,zval *result, int column_type)
 {
@@ -733,6 +748,8 @@ static void php_mssql_get_column_content_without_type(mssql_link *mssql_ptr,int 
 	}
 }
 
+/* {{{ proto int mssql_query(string query[, int conn_id])
+   Perform an SQL query on a MSSQL server database */
 PHP_FUNCTION(mssql_query)
 {
 	zval **query, **mssql_link_index;
@@ -868,6 +885,10 @@ PHP_FUNCTION(mssql_query)
 	ZEND_REGISTER_RESOURCE(return_value, result, le_result);
 }
 
+/* }}} */
+
+/* {{{ proto int mssql_free_result(string result_index)
+   Free a MSSQL result index */
 PHP_FUNCTION(mssql_free_result)
 {
 	zval **mssql_result_index;
@@ -884,6 +905,10 @@ PHP_FUNCTION(mssql_free_result)
 	RETURN_TRUE;
 }
 
+/* }}} */
+
+/* {{{ proto string mssql_get_last_message()
+   Gets the last message from the MSSQL server */
 PHP_FUNCTION(mssql_get_last_message)
 {
 	MSSQLLS_FETCH();
@@ -891,6 +916,10 @@ PHP_FUNCTION(mssql_get_last_message)
 	RETURN_STRING(MS_SQL_G(server_message),1);
 }
 
+/* }}} */
+
+/* {{{ proto int mssql_num_rows(int mssql_result_index)
+   Returns the number of rows fetched in from the result id specified */
 PHP_FUNCTION(mssql_num_rows)
 {
 	zval **mssql_result_index;
@@ -908,6 +937,10 @@ PHP_FUNCTION(mssql_num_rows)
 	return_value->type = IS_LONG;
 }
 
+/* }}} */
+
+/* {{{ proto int mssql_num_fields(int mssql_result_index)
+   Returns the number of fields fetched in from the result id specified */
 PHP_FUNCTION(mssql_num_fields)
 {
 	zval **mssql_result_index;
@@ -925,6 +958,11 @@ PHP_FUNCTION(mssql_num_fields)
 	return_value->type = IS_LONG;
 }
 
+/* }}} */
+
+/* {{{ proto array mssql_fetch_row(int result_id)
+   Returns an array of the current row in the result set specified by
+   result_id */
 PHP_FUNCTION(mssql_fetch_row)
 {
 	zval **mssql_result_index;
@@ -952,6 +990,8 @@ PHP_FUNCTION(mssql_fetch_row)
 	}
 	result->cur_row++;
 }
+
+/* }}} */
 
 static void php_mssql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS)
 {
@@ -991,6 +1031,9 @@ static void php_mssql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS)
 	result->cur_row++;
 }
 
+/* {{{ object mssql_fetch_object(int result_id)
+   Returns a psuedo-object of the current row in the result set specified by
+   result_id */
 PHP_FUNCTION(mssql_fetch_object)
 {
 	php_mssql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU);
@@ -999,25 +1042,36 @@ PHP_FUNCTION(mssql_fetch_object)
 	}
 }
 
+/* }}} */
+
+/* {{{ array mssql_fetch_array(int result_id)
+   Returns an associative array of the current row in the result set specified by
+   result_id */
 PHP_FUNCTION(mssql_fetch_array)
 {
 	php_mssql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
+/* }}} */
+
+
+/* {{{ proto int mssql_data_seek(int result_id, int offset)
+   Mssql_data_seek() moves the internal row pointer of the MS SQL result associated
+   with the specified result identifier to pointer to the specifyed row number. */
 PHP_FUNCTION(mssql_data_seek)
 {
-	zval *mssql_result_index, *offset;
+	zval **mssql_result_index, **offset;
 	int type,id;
 	mssql_result *result;
 	MSSQLLS_FETCH();
 
 
-	if (ARG_COUNT(ht)!=2 || getParameters(ht, 2, &mssql_result_index, &offset)==FAILURE) {
+	if (ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &mssql_result_index, &offset)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
-	convert_to_long(mssql_result_index);
-	id = mssql_result_index->value.lval;
+	convert_to_long_ex(mssql_result_index);
+	id = (*mssql_result_index)->value.lval;
 	
 	result = (mssql_result *) zend_list_find(id,&type);
 	if (type!=le_result) {
@@ -1025,15 +1079,17 @@ PHP_FUNCTION(mssql_data_seek)
 		RETURN_FALSE;
 	}
 
-	convert_to_long(offset);
-	if (offset->value.lval<0 || offset->value.lval>=result->num_rows) {
+	convert_to_long_ex(offset);
+	if ((*offset)->value.lval<0 || (*offset)->value.lval>=result->num_rows) {
 		php_error(E_WARNING,"MS SQL:  Bad row offset");
 		RETURN_FALSE;
 	}
 	
-	result->cur_row = offset->value.lval;
+	result->cur_row = (*offset)->value.lval;
 	RETURN_TRUE;
 }
+
+/* }}} */
 
 static char *php_mssql_get_field_name(int type)
 {
@@ -1085,9 +1141,11 @@ static char *php_mssql_get_field_name(int type)
 	}
 }
 
+/* {{{ proto object mssql_fetch_field(int result_id[, int offset])
+   Gets information about certain fields in a query result */
 PHP_FUNCTION(mssql_fetch_field)
 {
-	zval *mssql_result_index,*offset;
+	zval **mssql_result_index, **offset;
 	int type,id,field_offset;
 	mssql_result *result;
 	MSSQLLS_FETCH();
@@ -1095,25 +1153,25 @@ PHP_FUNCTION(mssql_fetch_field)
 
 	switch (ARG_COUNT(ht)) {
 		case 1:
-			if (getParameters(ht, 1, &mssql_result_index)==FAILURE) {
+			if (zend_get_parameters_ex(1, &mssql_result_index)==FAILURE) {
 				RETURN_FALSE;
 			}
 			field_offset=-1;
 			break;
 		case 2:
-			if (getParameters(ht, 2, &mssql_result_index, &offset)==FAILURE) {
+			if (zend_get_parameters_ex(2, &mssql_result_index, &offset)==FAILURE) {
 				RETURN_FALSE;
 			}
-			convert_to_long(offset);
-			field_offset = offset->value.lval;
+			convert_to_long_ex(offset);
+			field_offset = (*offset)->value.lval;
 			break;
 		default:
 			WRONG_PARAM_COUNT;
 			break;
 	}
 	
-	convert_to_long(mssql_result_index);
-	id = mssql_result_index->value.lval;
+	convert_to_long_ex(mssql_result_index);
+	id = (*mssql_result_index)->value.lval;
 	
 	result = (mssql_result *) zend_list_find(id,&type);
 	if (type!=le_result) {
@@ -1143,9 +1201,14 @@ PHP_FUNCTION(mssql_fetch_field)
 	add_property_string(return_value, "type", php_mssql_get_field_name(result->fields[field_offset].type), 1);
 }
 
+/* }}} */
+
+/* {{{ proto int mssql_field_length(int result_id[, int offset])
+   Gets the length of a mssql field with offset, offset and a result set specified
+   by result_id */
 PHP_FUNCTION(mssql_field_length)
 {
-	zval *mssql_result_index,*offset;
+	zval **mssql_result_index, **offset;
 	int type,id,field_offset;
 	mssql_result *result;
 	MSSQLLS_FETCH();
@@ -1153,25 +1216,25 @@ PHP_FUNCTION(mssql_field_length)
 
 	switch (ARG_COUNT(ht)) {
 		case 1:
-			if (getParameters(ht, 1, &mssql_result_index)==FAILURE) {
+			if (zend_get_parameters_ex(1, &mssql_result_index)==FAILURE) {
 				RETURN_FALSE;
 			}
 			field_offset=-1;
 			break;
 		case 2:
-			if (getParameters(ht, 2, &mssql_result_index, &offset)==FAILURE) {
+			if (zend_get_parameters_ex(2, &mssql_result_index, &offset)==FAILURE) {
 				RETURN_FALSE;
 			}
-			convert_to_long(offset);
-			field_offset = offset->value.lval;
+			convert_to_long_ex(offset);
+			field_offset = (*offset)->value.lval;
 			break;
 		default:
 			WRONG_PARAM_COUNT;
 			break;
 	}
 	
-	convert_to_long(mssql_result_index);
-	id = mssql_result_index->value.lval;
+	convert_to_long_ex(mssql_result_index);
+	id = (*mssql_result_index)->value.lval;
 	
 	result = (mssql_result *) zend_list_find(id,&type);
 	if (type!=le_result) {
@@ -1195,9 +1258,14 @@ PHP_FUNCTION(mssql_field_length)
 	return_value->type = IS_LONG;
 }
 
+/* }}} */
+
+/* {{{ proto string mssql_field_name(int result_id[, int offset])
+   Returns the name of the field given by offset in the result set given by
+   result_id */
 PHP_FUNCTION(mssql_field_name)
 {
-	zval *mssql_result_index,*offset;
+	zval **mssql_result_index, **offset;
 	int type,id,field_offset;
 	mssql_result *result;
 	MSSQLLS_FETCH();
@@ -1205,25 +1273,25 @@ PHP_FUNCTION(mssql_field_name)
 
 	switch (ARG_COUNT(ht)) {
 		case 1:
-			if (getParameters(ht, 1, &mssql_result_index)==FAILURE) {
+			if (zend_get_parameters_ex(1, &mssql_result_index)==FAILURE) {
 				RETURN_FALSE;
 			}
 			field_offset=-1;
 			break;
 		case 2:
-			if (getParameters(ht, 2, &mssql_result_index, &offset)==FAILURE) {
+			if (zend_get_parameters_ex(2, &mssql_result_index, &offset)==FAILURE) {
 				RETURN_FALSE;
 			}
-			convert_to_long(offset);
-			field_offset = offset->value.lval;
+			convert_to_long_ex(offset);
+			field_offset = (*offset)->value.lval;
 			break;
 		default:
 			WRONG_PARAM_COUNT;
 			break;
 	}
 	
-	convert_to_long(mssql_result_index);
-	id = mssql_result_index->value.lval;
+	convert_to_long_ex(mssql_result_index);
+	id = (*mssql_result_index)->value.lval;
 	
 	result = (mssql_result *) zend_list_find(id,&type);
 	if (type!=le_result) {
@@ -1248,9 +1316,13 @@ PHP_FUNCTION(mssql_field_name)
 	return_value->type = IS_STRING;
 }
 
+/* }}} */
+
+/* {{{ proto string mssql_field_type(int result_id[, int offset])
+   Returns the type of field at offset, offset in the result set result_id */
 PHP_FUNCTION(mssql_field_type)
 {
-	zval *mssql_result_index,*offset;
+	zval **mssql_result_index, **offset;
 	int type,id,field_offset;
 	mssql_result *result;
 	MSSQLLS_FETCH();
@@ -1258,25 +1330,25 @@ PHP_FUNCTION(mssql_field_type)
 
 	switch (ARG_COUNT(ht)) {
 		case 1:
-			if (getParameters(ht, 1, &mssql_result_index)==FAILURE) {
+			if (zend_get_parameters_ex(1, &mssql_result_index)==FAILURE) {
 				RETURN_FALSE;
 			}
 			field_offset=-1;
 			break;
 		case 2:
-			if (getParameters(ht, 2, &mssql_result_index, &offset)==FAILURE) {
+			if (zend_get_parameters_ex(2, &mssql_result_index, &offset)==FAILURE) {
 				RETURN_FALSE;
 			}
-			convert_to_long(offset);
-			field_offset = offset->value.lval;
+			convert_to_long_ex(offset);
+			field_offset = (*offset)->value.lval;
 			break;
 		default:
 			WRONG_PARAM_COUNT;
 			break;
 	}
 	
-	convert_to_long(mssql_result_index);
-	id = mssql_result_index->value.lval;
+	convert_to_long_ex(mssql_result_index);
+	id = (*mssql_result_index)->value.lval;
 	
 	result = (mssql_result *) zend_list_find(id,&type);
 	if (type!=le_result) {
@@ -1301,20 +1373,24 @@ PHP_FUNCTION(mssql_field_type)
 	return_value->type = IS_STRING;
 }
 
+/* }}} */
+
+/* {{{ proto mssql_field_seek(int result_id[, int offset])
+   Seeks to the specified field offset */
 PHP_FUNCTION(mssql_field_seek)
 {
-	zval *mssql_result_index,*offset;
+	zval **mssql_result_index, **offset;
 	int type,id,field_offset;
 	mssql_result *result;
 	MSSQLLS_FETCH();
 
 
-	if (ARG_COUNT(ht)!=2 || getParameters(ht, 2, &mssql_result_index, &offset)==FAILURE) {
+	if (ARG_COUNT(ht)!=2 || zend_get_parameters_ex(2, &mssql_result_index, &offset)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
-	convert_to_long(mssql_result_index);
-	id = mssql_result_index->value.lval;
+	convert_to_long_ex(mssql_result_index);
+	id = (*mssql_result_index)->value.lval;
 	
 	result = (mssql_result *) zend_list_find(id,&type);
 	if (type!=le_result) {
@@ -1322,8 +1398,8 @@ PHP_FUNCTION(mssql_field_seek)
 		RETURN_FALSE;
 	}
 	
-	convert_to_long(offset);
-	field_offset = offset->value.lval;
+	convert_to_long_ex(offset);
+	field_offset = (*offset)->value.lval;
 	
 	if (field_offset<0 || field_offset >= result->num_fields) {
 		php_error(E_WARNING,"MS SQL:  Bad column offset");
@@ -1334,20 +1410,24 @@ PHP_FUNCTION(mssql_field_seek)
 	RETURN_TRUE;
 }
 
+/* }}} */
+
+/* {{{ proto string mssql_result(int result_id, int row, mixed field)
+   Mssql_result() returns the contents of one cell from a MS SQL result set. */
 PHP_FUNCTION(mssql_result)
 {
-	zval *row, *field, *mssql_result_index;
+	zval **row, **field, **mssql_result_index;
 	int id,type,field_offset=0;
 	mssql_result *result;
 	MSSQLLS_FETCH();
 
 
-	if (ARG_COUNT(ht)!=3 || getParameters(ht, 3, &mssql_result_index, &row, &field)==FAILURE) {
+	if (ARG_COUNT(ht)!=3 || zend_get_parameters_ex(3, &mssql_result_index, &row, &field)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(mssql_result_index);
-	id = mssql_result_index->value.lval;
+	convert_to_long_ex(mssql_result_index);
+	id = (*mssql_result_index)->value.lval;
 	
 	result = (mssql_result *) zend_list_find(id,&type);
 	if (type!=le_result) {
@@ -1355,8 +1435,8 @@ PHP_FUNCTION(mssql_result)
 		RETURN_FALSE;
 	}
 	
-	convert_to_long(row);
-	if (row->value.lval<0 || row->value.lval>=result->num_rows) {
+	convert_to_long_ex(row);
+	if ((*row)->value.lval < 0 || (*row)->value.lval> = result->num_rows) {
 		php_error(E_WARNING,"MS SQL:  Bad row offset (%d)",row->value.lval);
 		RETURN_FALSE;
 	}
@@ -1378,8 +1458,8 @@ PHP_FUNCTION(mssql_result)
 			break;
 		}
 		default:
-			convert_to_long(field);
-			field_offset = field->value.lval;
+			convert_to_long_ex(field);
+			field_offset = (*field)->value.lval;
 			if (field_offset<0 || field_offset>=result->num_fields) {
 				php_error(E_WARNING,"MS SQL:  Bad column offset specified");
 				RETURN_FALSE;
@@ -1387,36 +1467,43 @@ PHP_FUNCTION(mssql_result)
 			break;
 	}
 
-	*return_value = result->data[row->value.lval][field_offset];
+	*return_value = result->data[(*row)->value.lval][field_offset];
 	zval_copy_ctor(return_value);
 }
 
-PHP_FUNCTION(mssql_min_error_severity)
-{
-	zval *severity;
-	MSSQLLS_FETCH();
-
-	
-	if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &severity)==FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
-	convert_to_long(severity);
-	MS_SQL_G(min_error_severity) = severity->value.lval;
-}
-
-PHP_FUNCTION(mssql_min_message_severity)
-{
-	zval *severity;
-	MSSQLLS_FETCH();
-
-	
-	if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &severity)==FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
-	convert_to_long(severity);
-	MS_SQL_G(min_message_severity) = severity->value.lval;
-}
 /* }}} */
 
+/* {{{ proto void mssql_min_error_severity(int severity)
+   Set the minimum error severity */
+PHP_FUNCTION(mssql_min_error_severity)
+{
+	zval **severity;
+	MSSQLLS_FETCH();
+
+	
+	if (ARG_COUNT(ht)!=1 || zend_get_parameters_ex(1, &severity)==FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	convert_to_long_ex(severity);
+	MS_SQL_G(min_error_severity) = (*severity)->value.lval;
+}
+
+/* }}} */
+
+/* {{{ proto void mssql_min_message_severity(int severity)
+   Set the minimum message severity */
+PHP_FUNCTION(mssql_min_message_severity)
+{
+	zval **severity;
+	MSSQLLS_FETCH();
+
+	
+	if (ARG_COUNT(ht)!=1 || zend_get_parameters_ex(1, &severity)==FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	convert_to_long_ex(severity);
+	MS_SQL_G(min_message_severity) = (*severity)->value.lval;
+}
+/* }}} */
 
 #endif
