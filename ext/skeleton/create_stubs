@@ -13,7 +13,7 @@ function convert(i, j, t)
 {
 	type = argtypes[i,j]
 	name = argnames[i,j]
-  opt  = optionals[i,j]
+	opt  = optionals[i,j]
 	tabs = x = ""
 
 	for (i = 0; i < t; i++) { tabs = tabs "\t" }
@@ -54,7 +54,7 @@ function convert(i, j, t)
 		}
 		funcvals = funcvals "\tint " name "_id = -1;\n"
 	} else {
-		x = comment("/* Write your own code here to handle argument " name ". */\n")
+		x = comment(tabs "/* Write your own code here to handle argument " name ". */\n")
 	}
 
 	if (x) return x
@@ -83,9 +83,9 @@ BEGIN {
 	}
 			
 
-  xmlhead = " <reference id=\"ref." extname "\">\n" \
-"  <title> functions</title>\n" \
-"  <titleabbrev></titleabbrev>\n\n"
+	xmlhead = " <reference id=\"ref." extname "\">\n" \
+		"  <title> functions</title>\n" \
+		"  <titleabbrev></titleabbrev>\n\n"
 
 	xmlfoot = " </reference>\n\n" \
 		"<!-- Keep this comment at the end of the file\n" \
@@ -165,14 +165,14 @@ END {
 	 refid = funcs[i]
 	 gsub(/_/, "-", refid)
 	 xmlstr = "  <refentry id=\"function." refid "\">\n" \
-			"   <refnamediv>\n" \
-			"    <refname>" funcs[i] "</refname>\n" \
-			"    <refpurpose></refpurpose>\n" \
-			"   </refnamediv>\n" \
-			"   <refsect1>\n" \
-			"    <title>Description</title>\n" \
-			"    <funcsynopsis>\n" \
-			"     <funcdef>" types[i] " <function>" funcs[i] "</function></funcdef>\n"
+		"   <refnamediv>\n" \
+		"    <refname>" funcs[i] "</refname>\n" \
+		"    <refpurpose></refpurpose>\n" \
+		"   </refnamediv>\n" \
+		"   <refsect1>\n" \
+		"    <title>Description</title>\n" \
+		"    <funcsynopsis>\n" \
+		"     <funcdef>" types[i] " <function>" funcs[i] "</function></funcdef>\n"
 
 		if (maxargs[i]) {
 			zvals = "\tzval "
@@ -180,16 +180,16 @@ END {
 				funcvals = "\tint argc;\n"
 				if (minargs[i]) {
 					fetchargs = "\targc = ZEND_NUM_ARGS();\n\tif (argc < " \
-								minargs[i] " || argc > " maxargs[i] \
-								" || zend_get_parameters_ex(argc, "
+						minargs[i] " || argc > " maxargs[i] \
+						" || zend_get_parameters_ex(argc, "
 				} else {
 					fetchargs = "\targc = ZEND_NUM_ARGS();\n\tif (argc > " \
-								maxargs[i] " || (argc && zend_get_parameters_ex(argc, "
+						maxargs[i] " || (argc && zend_get_parameters_ex(argc, "
 					closefetch = ")"
 				}
 			} else {
 				fetchargs = "\tif (ZEND_NUM_ARGS() != " maxargs[i] \
-								" || zend_get_parameters_ex(" maxargs[i] ", "
+					" || zend_get_parameters_ex(" maxargs[i] ", "
 			}
 		}
 
@@ -223,8 +223,6 @@ END {
 			if (j > 0) proto = proto ", "
 			proto = proto argtypes[i,j] " " argnames[i,j]
 
-#			code = convert(i, j)
-				
 			# Clean up this mess...
 
 			if (useswitch[i]) {
@@ -263,7 +261,7 @@ END {
 			zvals = zvals ";"
 			fetchargs = fetchargs ") == FAILURE)" closefetch "{\n\t\tWRONG_PARAM_COUNT;\n\t}\n"
 		}
-		funcvals = ints doubles floats strings funcvals
+		if (assign_params) funcvals = ints doubles floats strings
 		if (resources) funcvals = funcvals "\t???LS_FETCH();\n"
 		if (useswitch[i]) {
 			if (check_argc_in_switch[i]) {
@@ -285,7 +283,7 @@ END {
 
 		print proto > stubfile
 		if (zvals) print zvals > stubfile
-  	if (funcvals) print funcvals > stubfile
+ 		if (funcvals) print funcvals > stubfile
 		if (fetchargs) print fetchargs > stubfile
 		if (resources) {
 				print resources > stubfile
@@ -323,4 +321,4 @@ END {
 # tab-width: 2
 # c-basic-offset: 2
 # End:
-#
+
