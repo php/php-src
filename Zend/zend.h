@@ -46,7 +46,7 @@
 #include "zend_alloc.h"
 
 /* this is a workaround for a bug in gcc */
-#if SIZEOF_VOID_P == 8 || defined(__arch64__)
+#if SIZEOF_VOID_P == 8 || (1)
 typedef unsigned int zend_bool;
 #else
 typedef unsigned char zend_bool;
