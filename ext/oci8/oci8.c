@@ -1174,7 +1174,7 @@ _oci_make_zval(zval *value,oci_statement *statement,oci_out_column *column, char
         	}
 			
 			if (oci_loadlob(statement->conn,descr,&buffer,&loblen)) {
-				ZVAL_BOOL(value,0); 
+				ZVAL_FALSE(value);
 			} else {
 				ZVAL_STRINGL(value,buffer,loblen,0);
 			} 
@@ -1197,7 +1197,7 @@ _oci_make_zval(zval *value,oci_statement *statement,oci_out_column *column, char
 			
 		default:				
 			/* XXX we SHOULD maybe have a different behaviour for unknown results! */
-			ZVAL_BOOL(value,0); 
+			ZVAL_FALSE(value); 
 			return 0;
 		}
 		

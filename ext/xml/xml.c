@@ -271,7 +271,7 @@ static zval *_xml_xmlchar_zval(const XML_Char *s, int len, const XML_Char *encod
 	MAKE_STD_ZVAL(ret);
 	
 	if (s == NULL) {
-		ZVAL_BOOL(ret, 0);
+		ZVAL_FALSE(ret);
 		return ret;
 	}
 	if (len == 0) {
@@ -375,8 +375,7 @@ xml_call_handler(xml_parser *parser, zval *handler, int argc, zval **argv)
 		int result;
 
 		MAKE_STD_ZVAL(retval);
-		retval->type = IS_BOOL;
-		retval->value.lval = 0;
+		ZVAL_FALSE(retval);
 
 		result = call_user_function(EG(function_table), &parser->object, handler, retval, argc, argv);
 
