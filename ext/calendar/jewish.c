@@ -260,7 +260,7 @@
  *
  **************************************************************************/
 
-#ifdef PHP_WIN32
+#if defined(PHP_WIN32) && _MSC_VER >= 1200
 #pragma setlocale("english")
 #endif
 
