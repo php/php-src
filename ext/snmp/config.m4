@@ -18,14 +18,11 @@ AC_ARG_WITH(snmp,
       test -d $withval/include/ucd-snmp && SNMP_INCDIR=$withval/include/ucd-snmp
       SNMP_LIBDIR=$withval/lib
     fi
-    SNMP_INCLUDE=-I$SNMP_INCDIR
-    SNMP_LFLAGS=-L$SNMP_LIBDIR
-    SNMP_LIBS="-lsnmp"
     AC_DEFINE(HAVE_SNMP)
     AC_MSG_RESULT(yes)
     PHP_EXTENSION(snmp)
-    EXTRA_LIBS="$EXTRA_LIBS $SNMP_LFLAGS $SNMP_LIBS"
-    INCLUDES="$INCLUDES $SNMP_INCLUDE"
+    AC_ADD_LIBRARY_WITH_PATH(snmp, $SNMP_LIBDIR)
+    AC_ADD_INCLUDE($SNMP_INCDIR)
   else
     AC_MSG_RESULT(no)
   fi
