@@ -15,7 +15,7 @@ if test "$PHP_PDFLIB3" != "no"; then
 
   case $PHP_PDFLIB3 in
     yes)
-      AC_CHECK_LIB(pdf, PDF_show_boxed, [
+      PHP_CHECK_LIBRARY(pdf, PDF_show_boxed, [
         AC_DEFINE(HAVE_PDFLIB3,1,[ ])
       ],[
         AC_MSG_ERROR([pdflib3 extension requires at least pdflib 3.x. You may also need libtiff and libjpeg. If so, use the options --with-tiff-dir=<DIR> and --with-jpeg-dir=<DIR>])
@@ -127,36 +127,37 @@ PHP_ARG_WITH(pdflib,whether to include PDFlib support,
                           to build as dl and still specify DIR.])
 
 if test "$PHP_PDFLIB" != "no"; then
+
+  PHP_EXTENSION(pdf, $ext_shared)
+  PHP_SUBST(PDFLIB_SHARED_LIBADD)
+
   case "$PHP_PDFLIB" in
     yes)
-      PHP_EXTENSION(pdf, $ext_shared)
       AC_CHECK_LIB(pdf, PDF_open_pdi, [
         AC_DEFINE(HAVE_PDFLIB,1,[ ])
+        PHP_ADD_LIBRARY(pdf,, PDFLIB_SHARED_LIBADD)
       ],[
-        AC_MSG_ERROR([PDFlib extension requires at least PDFlib 4.x. To build wit
-h PDFlib 3.x you should use --with-pdflib3.])
+        AC_MSG_ERROR([PDFlib extension requires at least PDFlib 4.x. To build with PDFlib 3.x you should use --with-pdflib3.])
       ])
-      AC_SUBST(PDFLIB_SHARED_LIBADD)
-      PHP_ADD_LIBRARY(pdf, PDFLIB_SHARED_LIBADD)
       ;;
     no)
       ;;
     *)
-      test -f $withval/include/pdflib.h && PDFLIB_INCLUDE="$withval/include"
+      test -f $PHP_PDFLIB/include/pdflib.h && PDFLIB_INCLUDE="$PHP_PDFLIB/include"
       if test -n "$PDFLIB_INCLUDE" ; then
-        PHP_EXTENSION(pdf, $ext_shared)
-        old_LIBS=$LIBS
-        LIBS="$LIBS -L$withval/lib"
-        AC_CHECK_LIB(pdf, PDF_open_pdi, [
+        PHP_CHECK_LIBRARY(pdf, PDF_open_pdi, [
           AC_DEFINE(HAVE_PDFLIB,1,[ ])
-          PDFLIB_LIBS="$PDFLIB_LIBS -L$withval/lib -lpdf"
+          PHP_ADD_LIBRARY_WITH_PATH(pdf, $PHP_PDFLIB/lib, PDFLIB_SHARED_LIBADD)
+          PHP_ADD_INCLUDE($PDFLIB_INCLUDE)
         ],[
           AC_MSG_ERROR([PDFlib extension requires PDFlib 4.x.])
+        ],[
+          -L$PHP_PDFLIB/lib
         ])
-        LIBS=$old_LIBS
-        AC_SUBST(PDFLIB_SHARED_LIBADD)
-        PHP_ADD_LIBRARY_WITH_PATH(pdf, $withval/lib, PDFLIB_SHARED_LIBADD)
-        PHP_ADD_INCLUDE($PDFLIB_INCLUDE)
-      fi ;;
+      else
+          AC_MSG_ERROR([pdflib.h not found under $PHP_PDFLIB/include/])
+      fi
+      ;;
   esac
+
 fi
