@@ -1668,19 +1668,24 @@ PHPAPI PHP_FUNCTION(fgetc)
 }
 /* }}} */
 
-/* {{{ proto string fgetss(resource fp, int length [, string allowable_tags])
+/* {{{ proto string fgetss(resource fp [, int length, string allowable_tags])
    Get a line from file pointer and strip HTML tags */
 PHPAPI PHP_FUNCTION(fgetss)
 {
-	zval **fd, **bytes, **allow=NULL;
-	int len;
+	zval **fd, **bytes = NULL, **allow=NULL;
+	size_t len = 0;
 	size_t actual_len, retval_len;
-	char *buf;
+	char *buf = NULL, *retval;
 	php_stream *stream;
 	char *allowed_tags=NULL;
 	int allowed_tags_len=0;
 
 	switch(ZEND_NUM_ARGS()) {
+	case 1:
+		if (zend_get_parameters_ex(1, &fd) == FAILURE) {
+			RETURN_FALSE;
+		}
+		break;
 	case 2:
 		if (zend_get_parameters_ex(2, &fd, &bytes) == FAILURE) {
 			RETURN_FALSE;
@@ -1702,26 +1707,29 @@ PHPAPI PHP_FUNCTION(fgetss)
 
 	php_stream_from_zval(stream, fd);
 
-	convert_to_long_ex(bytes);
-	len = Z_LVAL_PP(bytes);
-    if (len < 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length parameter may not be negative");
-		RETURN_FALSE;
-    }
+	if (bytes != NULL) {
+		convert_to_long_ex(bytes);
+		if (Z_LVAL_PP(bytes) < 0) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length parameter may not be negative");
+			RETURN_FALSE;
+		}
 
-	buf = emalloc(sizeof(char) * (len + 1));
-	/*needed because recv doesnt set null char at end*/
-	memset(buf, 0, len + 1);
+		len = (size_t) Z_LVAL_PP(bytes);
+		buf = emalloc(sizeof(char) * (len + 1));
+		/*needed because recv doesnt set null char at end*/
+		memset(buf, 0, len + 1);
+	}
 
-	if (php_stream_get_line(stream, buf, len, &actual_len) == NULL)	{
-		efree(buf);
+	if ((retval = php_stream_get_line(stream, buf, len, &actual_len)) == NULL)	{
+		if (buf != NULL) {
+			efree(buf);
+		}
 		RETURN_FALSE;
 	}
 
-	/* strlen() can be used here since we are doing it on the return of an fgets() anyway */
-	retval_len = php_strip_tags(buf, actual_len, &stream->fgetss_state, allowed_tags, allowed_tags_len);
+	retval_len = php_strip_tags(retval, actual_len, &stream->fgetss_state, allowed_tags, allowed_tags_len);
 
-	RETURN_STRINGL(buf, retval_len, 0);
+	RETURN_STRINGL(retval, retval_len, 0);
 }
 /* }}} */
 
