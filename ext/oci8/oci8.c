@@ -39,7 +39,6 @@
  * - have one ocifree() call.
  * - make it possible to have persistent statements?
  * - implement connection pooling in ZTS mode.
- * - implement automatic commit *OR* rollback on script end
  * - failover
  * - change all the lob stuff to work without classes (optional)! 
  * - make sure that the callbacks terminate the strings with \0
@@ -51,7 +50,6 @@
  * - add Collection iterator object for INDEX BY tables
  * - make auto-rollabck only happen if we have an outstanding transaction
  * - implement ocidisconnect
- * - add bind patch
  */
 
 /* {{{ includes & stuff */
@@ -804,13 +802,20 @@ _oci_conn_list_dtor(oci_connection *connection TSRMLS_DC)
 	oci_debug("START _oci_conn_list_dtor: id=%d",connection->id);
 
 	if (connection->pServiceContext) {
-		CALL_OCI_RETURN(connection->error,OCITransRollback(
-					connection->pServiceContext,
-					connection->pError,
-					(ub4)0));
- 
-		if (connection->error) {
-			oci_error(connection->pError, "failed to rollback outstanding transactions!", connection->error);
+
+		if (connection->needs_commit) {
+			oci_debug("OCITransRollback");
+			CALL_OCI_RETURN(connection->error,OCITransRollback(
+						connection->pServiceContext,
+						connection->pError,
+						(ub4)0));
+	 
+			if (connection->error) {
+				oci_error(connection->pError, "failed to rollback outstanding transactions!", connection->error);
+			}
+			connection->needs_commit = 0;
+		} else {
+			oci_debug("nothing to do..");
 		}
 
 		CALL_OCI(OCIHandleFree(
@@ -1461,6 +1466,7 @@ oci_execute(oci_statement *statement, char *func,ub4 mode)
 					mode));
 
 		statement->error = oci_error(statement->pError, "OCIStmtExecute", error);
+
 		if (statement->binds) {
 			zend_hash_apply(statement->binds, (apply_func_t) _oci_bind_post_exec TSRMLS_CC);
 		}
@@ -1469,6 +1475,12 @@ oci_execute(oci_statement *statement, char *func,ub4 mode)
 
 		if (statement->error) {
 			return 0;
+		}
+
+		if (mode & OCI_COMMIT_ON_SUCCESS) {
+			statement->conn->needs_commit = 0;
+		} else {
+			statement->conn->needs_commit = 1;
 		}
 	}
 
@@ -3523,10 +3535,16 @@ PHP_FUNCTION(ocirollback)
 
 	OCI_GET_CONN(connection,conn);
 
+    oci_debug("<OCITransRollback");
+
 	CALL_OCI_RETURN(connection->error, OCITransRollback(
 				connection->pServiceContext, 
 				connection->pError, 
 				(ub4) 0));
+
+	connection->needs_commit = 0;
+
+    oci_debug(">OCITransRollback");
 
 	if (connection->error) {
 		oci_error(connection->pError, "OCIRollback", connection->error);
@@ -3559,6 +3577,8 @@ PHP_FUNCTION(ocicommit)
 				connection->pServiceContext, 
 				connection->pError, 
 				(ub4) 0));
+
+	connection->needs_commit = 0;
 
     oci_debug(">OCITransCommit");
 
