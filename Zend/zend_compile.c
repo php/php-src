@@ -966,9 +966,6 @@ int zend_do_verify_access_types(znode *current_access_type, znode *new_modifier)
 	if (((current_access_type->u.constant.value.lval | new_modifier->u.constant.value.lval) & (ZEND_ACC_ABSTRACT | ZEND_ACC_FINAL)) == (ZEND_ACC_ABSTRACT | ZEND_ACC_FINAL)) {
 		zend_error(E_COMPILE_ERROR, "Cannot use the final modifier on an abstract class member");
 	}
-	if (((current_access_type->u.constant.value.lval | new_modifier->u.constant.value.lval) & (ZEND_ACC_PRIVATE | ZEND_ACC_FINAL)) == (ZEND_ACC_PRIVATE | ZEND_ACC_FINAL)) {
-		zend_error(E_COMPILE_ERROR, "Cannot use the final modifier on a private class member");
-	}
 	return (current_access_type->u.constant.value.lval | new_modifier->u.constant.value.lval);
 }
 
