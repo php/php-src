@@ -299,8 +299,30 @@ static void sapi_isapi_register_server_variables(zval *track_vars_array ELS_DC S
 	char *variable;
 	char *strtok_buf = NULL;
 	LPEXTENSION_CONTROL_BLOCK lpECB;
+	char **p = isapi_server_variables;
 
 	lpECB = (LPEXTENSION_CONTROL_BLOCK) SG(server_context);
+
+	/* Register the standard ISAPI variables */
+	while (*p) {
+		variable_len = ISAPI_SERVER_VAR_BUF_SIZE;
+		if (lpECB->GetServerVariable(lpECB->ConnID, *p, static_variable_buf, &variable_len)
+			&& static_variable_buf[0]) {
+			php_register_variable(*p, static_variable_buf, track_vars_array ELS_CC PLS_CC);
+		} else if (GetLastError() == ERROR_INSUFFICIENT_BUFFER) {
+			variable_buf = (char *) emalloc(variable_len);
+			if (lpECB->GetServerVariable(lpECB->ConnID, *p, variable_buf, &variable_len)
+				&& variable_buf[0]) {
+				php_register_variable(*p, variable_buf, track_vars_array ELS_CC PLS_CC);
+			}
+			efree(variable_buf);
+		}
+		p++;
+	}
+
+	/* Register the internal bits of ALL_HTTP */
+
+	variable_len = ISAPI_SERVER_VAR_BUF_SIZE;
 
 	if (lpECB->GetServerVariable(lpECB->ConnID, "ALL_HTTP", static_variable_buf, &variable_len)) {
 		variable_buf = static_variable_buf;

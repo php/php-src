@@ -6,7 +6,7 @@ PHP 4.0                                                                    NEWS
 - Made foreach() work on objects. (Thies, Zend library)
 - Added domxml extension based on libxml, still little functionality (Uwe)
 - Fixed memory corruption in fgetss(), strip_tags() and gzgetss() (Zeev)
-- Updated calendar dynamic library to work with PHP4. (Evan)
+- Updated calendar dynamic library to work with PHP 4. (Evan)
 - Added strncmp() function, courtesy of Walter. (Andrei)
 - Made the output of var_dump() more informative. (Thies)
 - Fixed some OCIBindByName() problems. (Thies)
@@ -209,7 +209,7 @@ November 16 1999, Version 4.0 Beta 3
 - OCI8 connections are now kept open as long as they are referenced (Thies)
 - Cleaned up Directory-Module (Thies)
 - Small fix in Ora_Close (Thies)
-- Ported range() and shuffle() from PHP3 to PHP4 (Andrei)
+- Ported range() and shuffle() from PHP 3 to PHP 4 (Andrei)
 - Fixed header("HTTP/..."); behaviour (Sascha)
 - Improved UNIX build system. Now utilizes libtool (Sascha)
 - Upgrade some more internal functions to use new Zend function API. (Thies, 
