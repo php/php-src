@@ -953,9 +953,6 @@ static int php_array_walk(HashTable *target_hash, zval **userdata TSRMLS_DC)
 	ulong  num_key;
 	HashPosition pos;
 
-	/* Allocate space for key */
-	MAKE_STD_ZVAL(key);
-	
 	/* Set up known arguments */
 	args[1] = &key;
 	args[2] = userdata;
@@ -964,14 +961,15 @@ static int php_array_walk(HashTable *target_hash, zval **userdata TSRMLS_DC)
 
 	/* Iterate through hash */
 	while (zend_hash_get_current_data_ex(target_hash, (void **)&args[0], &pos) == SUCCESS) {
+		/* Allocate space for key */
+		MAKE_STD_ZVAL(key);
+
 		/* Set up the key */
 		if (zend_hash_get_current_key_ex(target_hash, &string_key, &string_key_len, &num_key, 0, &pos) == HASH_KEY_IS_LONG) {
 			Z_TYPE_P(key) = IS_LONG;
 			Z_LVAL_P(key) = num_key;
 		} else {
-			Z_TYPE_P(key) = IS_STRING;
-			Z_STRVAL_P(key) = string_key;
-			Z_STRLEN_P(key) = string_key_len-1;
+			ZVAL_STRINGL(key, string_key, string_key_len-1, 1);
 		}
 		
 		/* Call the userland function */
@@ -992,9 +990,9 @@ static int php_array_walk(HashTable *target_hash, zval **userdata TSRMLS_DC)
 			break;
 		}
 
+		zval_ptr_dtor(&key);
 		zend_hash_move_forward_ex(target_hash, &pos);
 	}
-	zval_ptr_dtor(&key);
 	
 	return 0;
 }
