@@ -120,4 +120,6 @@ extern sybct_module php3_sybct_module;
 
 #endif
 
+#define phpext_sybase_ct_ptr sybct_module_ptr
+
 #endif /* _PHP3_SYBASE_CT_H */

@@ -1,4 +1,4 @@
 /* Define if you have libdnet_stub (used for Sybase support) */
 #define HAVE_LIBDNET_STUB 0
 
-#define HAVE_SYBASE 0
+#define HAVE_SYBASE_CT 0
