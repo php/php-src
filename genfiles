@@ -1,21 +1,12 @@
 #! /bin/sh
 
-STD='make -f Makefile.am LEX="flex -L" YACC="bison -y -l" srcdir=.'
+STD='make -f Makefile.frag LEX="flex -L" YACC="bison -y -l" srcdir=.'
 
-(cd Zend && eval "$STD zend_language_parser.c zend_language_scanner.c zend_ini_parser.c zend_ini_scanner.c")
+(eval "$STD Zend/zend_language_parser.c Zend/zend_language_scanner.c Zend/zend_ini_parser.c Zend/zend_ini_scanner.c")
 
-files="Makefile main/Makefile ext/standard/Makefile"
-sh build/fastgen.sh . yes no $files
-touch .deps main/.deps ext/standard/libs.mk
+YACC="bison -y -l"
 
-cat > config_vars.mk <<EOF
-LEX=flex -L
-YACC=bison -y -l
-EOF
-
-(cd ext/standard && make parsedate.c)
-
-rm config_vars.mk .deps ext/standard/libs.mk $files
+make ext/standard/parsedate.c
 
 for f in ext/standard/url_scanner_ex.c ext/standard/var_unserializer.c; do
   cp $f $f.orig
