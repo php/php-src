@@ -1971,7 +1971,7 @@ PHP_FUNCTION(pdf_open_memory_image)
 	ZEND_FETCH_RESOURCE(im, gdImagePtr, arg2, -1, "Image", le_gd);
 
 	count = 3 * im->sx * im->sy;
-	buffer = (unsigned char *) emalloc(count);
+	buffer = (unsigned char *) safe_emalloc(3 * im->sx, im->sy, 0);
 
 	ptr = buffer;
 	for(i=0; i<im->sy; i++) {
