@@ -221,6 +221,8 @@ PHP_FUNCTION(diskfreespace)
 	RETURN_DOUBLE(bytesfree);
 }
 
+/* {{{ bool chgrp(string filename, mixed group)
+   Change file group */
 PHP_FUNCTION(chgrp)
 {
 #ifndef WINDOWS
@@ -265,8 +267,10 @@ PHP_FUNCTION(chgrp)
 	RETURN_FALSE;
 #endif
 }
+/* }}} */
 
-
+/* {{{ proto bool chgrp(string filename, mixed group)
+   Change file group */
 PHP_FUNCTION(chown)
 {
 #ifndef WINDOWS
@@ -309,8 +313,11 @@ PHP_FUNCTION(chown)
 #endif
 	RETURN_TRUE;
 }
+/* }}} */
 
 
+/* {{{ proto bool chmod(string filename, int mode)
+   Change file mode */
 PHP_FUNCTION(chmod)
 {
 	pval **filename, **mode;
@@ -338,9 +345,12 @@ PHP_FUNCTION(chmod)
 	}
 	RETURN_TRUE;
 }
+/* }}} */
 
 
-PHP_FUNCTION(touch)
+/* {{{ proto bool touch(string filename[, int time])
+   Set modification time of file */
+PHP_FUNCTION(touch) 
 {
 #if HAVE_UTIME
 	pval **filename, **filetime;
@@ -406,8 +416,11 @@ PHP_FUNCTION(touch)
 	}
 #endif
 }
+/* }}} */
 
 
+/* {{{ proto void clearstatcache(void)
+   Clear file stat cache */
 PHP_FUNCTION(clearstatcache)
 {
 	BLS_FETCH();
@@ -417,6 +430,7 @@ PHP_FUNCTION(clearstatcache)
 		BG(CurrentStatFile) = NULL;
 	}
 }
+/* }}} */
 
 
 static void php_stat(const char *filename, int type, pval *return_value)
@@ -599,24 +613,95 @@ void name(INTERNAL_FUNCTION_PARAMETERS) { \
 		php_stat((*filename)->value.str.val, funcnum, return_value); \
 }
 
+/* {{{ proto int fileperms(string filename)
+   Get file permissions */
 FileFunction(PHP_FN(fileperms),0)
+/* }}} */
+
+/* {{{ proto int fileinode(string filename)
+   Get file inode */
 FileFunction(PHP_FN(fileinode),1)
+/* }}} */
+
+/* {{{ proto int filesize(string filename)
+   Get file size */
 FileFunction(PHP_FN(filesize), 2)
+/* }}} */
+
+/* {{{ proto int fileowner(string filename)
+   Get file owner */
 FileFunction(PHP_FN(fileowner),3)
+/* }}} */
+
+/* {{{ proto nt filegroup(string filename)
+   Get file group */
 FileFunction(PHP_FN(filegroup),4)
+/* }}} */
+
+/* {{{ proto int fileatime(string filename)
+   Get last access time of file */
 FileFunction(PHP_FN(fileatime),5)
+/* }}} */
+
+/* {{{ proto int filemtime(string filename)
+   Get last modification time of file */
 FileFunction(PHP_FN(filemtime),6)
+/* }}} */
+
+/* {{{ proto int filectime(string filename)
+   Get inode modification time of file */
 FileFunction(PHP_FN(filectime),7)
+/* }}} */
+
+/* {{{ proto string filetype(string filename)
+   Get file type */
 FileFunction(PHP_FN(filetype), 8)
+/* }}} */
+
+/* {{{ proto int is_writable(string filename)
+   Returns true if file can be written */
 FileFunction(PHP_FN(is_writable), 9)
+/* }}} */
+
+/* {{{ proto int is_readable(string filename)
+   Returns true if file can be read */
 FileFunction(PHP_FN(is_readable),10)
+/* }}} */
+
+/* {{{ proto int is_executable(string filename)
+   Returns true if file is executable */
 FileFunction(PHP_FN(is_executable),11)
+/* }}} */
+
+/* {{{ proto int is_file(string filename)
+   Returns true if file is a regular file */
 FileFunction(PHP_FN(is_file),12)
+/* }}} */
+
+/* {{{ proto int is_dir(string filename)
+   Returns true if file is directory */
 FileFunction(PHP_FN(is_dir),13)
+/* }}} */
+
+/* {{{ proto int is_link(string filename)
+   Returns true if file is symbolic link */
 FileFunction(PHP_FN(is_link),14)
+/* }}} */
+
+/* {{{ proto bool file_exists(string filename)
+   Returns true if filename exists */
 FileFunction(PHP_FN(file_exists),15)
+/* }}} */
+
+/* {{{ proto array lstat(string filename)
+   Give information about a file or symbolic link */
 FileFunction(PHP_FN(lstat),16)
+/* }}} */
+
+/* {{{ proto array stat(string filename)
+   Give information about a file */
 FileFunction(PHP_FN(stat),17)
+/* }}} */
 
 /*
  * Local variables:
