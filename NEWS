@@ -1,12 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2002, Version 4.3.0
-- The second parameter of gzencode() now is the compression level
-  like in the documentation. The encoding mode is a third (optional)
-- parameter. (Stefan)
-- The second parameter of gzencode() now is the compression level like
-  in the documentation. The encoding mode is a third (optional)
-  parameter. (Stefan)
+- Added optional 3rd parameter "int encoding_mode" to gzencode()
+  and fixed parameters to conform documentation. (Stefan)
 - new function exif_imagetype
   exif_thumbnail fupports thumbnails in TIFF format and can return size
   of thumbnail
