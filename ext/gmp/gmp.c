@@ -133,9 +133,9 @@ static void gmp_efree(void *ptr, size_t size)
 }
 /* }}} */
 
-/* {{{ PHP_MINIT_FUNCTION
+/* {{{ ZEND_MINIT_FUNCTION
  */
-PHP_MINIT_FUNCTION(gmp)
+ZEND_MINIT_FUNCTION(gmp)
 {
 /* Remove comments if you have entries in php.ini
 	REGISTER_INI_ENTRIES();
@@ -153,9 +153,9 @@ PHP_MINIT_FUNCTION(gmp)
 }
 /* }}} */
 
-/* {{{ PHP_MSHUTDOWN_FUNCTION
+/* {{{ ZEND_MSHUTDOWN_FUNCTION
  */
-PHP_MSHUTDOWN_FUNCTION(gmp)
+ZEND_MSHUTDOWN_FUNCTION(gmp)
 {
 /* Remove comments if you have entries in php.ini
 	UNREGISTER_INI_ENTRIES();
@@ -164,9 +164,9 @@ PHP_MSHUTDOWN_FUNCTION(gmp)
 }
 /* }}} */
 
-/* {{{ PHP_MINFO_FUNCTION
+/* {{{ ZEND_MINFO_FUNCTION
  */
-PHP_MINFO_FUNCTION(gmp)
+ZEND_MINFO_FUNCTION(gmp)
 {
 	php_info_print_table_start();
 	php_info_print_table_header(2, "gmp support", "enabled");
