@@ -2974,7 +2974,7 @@ void zend_do_foreach_begin(znode *foreach_token, znode *array, znode *open_brack
 	zend_stack_push(&CG(foreach_copy_stack), (void *) &opline->result, sizeof(znode));
 
 	/* save the location of the beginning of the loop (array fetching) */
-	foreach_token->u.opline_num = get_next_op_number(CG(active_op_array));
+	opline->op2.u.opline_num = foreach_token->u.opline_num = get_next_op_number(CG(active_op_array));
 
 	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 	opline->opcode = ZEND_FE_FETCH;
