@@ -1271,9 +1271,9 @@ static php_iconv_err_t _php_iconv_mime_decode(smart_str *pretval, const char *st
 		int eos = 0;
 
 		switch (scan_stat) {
-			case 0:
+			case 0: /* expecting any character */
 				switch (*p1) {
-					case '\r':
+					case '\r': /* part of an EOL sequence? */
 						scan_stat = 7;
 						break;
 
@@ -1281,17 +1281,17 @@ static php_iconv_err_t _php_iconv_mime_decode(smart_str *pretval, const char *st
 						scan_stat = 8;	
 						break;
 
-					case '=':
+					case '=': /* first letter of an encoded chunk */
 						encoded_word = p1;
 						scan_stat = 1;
 						break;
 
-					case ' ': case '\t':
+					case ' ': case '\t': /* a chunk of whitespaces */
 						spaces = p1;
 						scan_stat = 11;
 						break;
 
-					default:
+					default: /* first letter of a non-encoded word */
 						_php_iconv_appendc(pretval, *p1, cd_pl);
 						encoded_word = NULL;
 						if ((mode & PHP_ICONV_MIME_DECODE_STRICT)) {
@@ -1301,7 +1301,7 @@ static php_iconv_err_t _php_iconv_mime_decode(smart_str *pretval, const char *st
 				}
 				break;
 
-			case 1:
+			case 1: /* expecting a delimiter */
 				if (*p1 != '?') {
 					err = _php_iconv_appendl(pretval, encoded_word, (size_t)((p1 + 1) - encoded_word), cd_pl); 
 					if (err != PHP_ICONV_ERR_SUCCESS) {
@@ -1319,13 +1319,13 @@ static php_iconv_err_t _php_iconv_mime_decode(smart_str *pretval, const char *st
 				scan_stat = 2;
 				break;
 			
-			case 2: /* charset name */
+			case 2: /* expecting a charset name */
 				switch (*p1) {
-					case '?':
+					case '?': /* normal delimiter: encoding scheme follows */
 						scan_stat = 3;
 						break;
 
-					case '*':
+					case '*': /* new style delimiter: locale id follows */
 						scan_stat = 10;
 						break;
 				} 
@@ -1396,7 +1396,7 @@ static php_iconv_err_t _php_iconv_mime_decode(smart_str *pretval, const char *st
 				}
 				break;
 
-			case 3:
+			case 3: /* expecting a encoding scheme specifier */
 				switch (*p1) {
 					case 'B':
 						enc_scheme = PHP_ICONV_ENC_SCHEME_BASE64;
@@ -1428,9 +1428,10 @@ static php_iconv_err_t _php_iconv_mime_decode(smart_str *pretval, const char *st
 				}
 				break;
 		
-			case 4:
+			case 4: /* expecting a delimiter */
 				if (*p1 != '?') {
 					if ((mode & PHP_ICONV_MIME_DECODE_CONTINUE_ON_ERROR)) {
+						/* pass the entire chunk through the converter */
 						err = _php_iconv_appendl(pretval, encoded_word, (size_t)((p1 + 1) - encoded_word), cd_pl); 
 						if (err != PHP_ICONV_ERR_SUCCESS) {
 							goto out;
@@ -1451,14 +1452,14 @@ static php_iconv_err_t _php_iconv_mime_decode(smart_str *pretval, const char *st
 				scan_stat = 5;
 				break;
 
-			case 5:
+			case 5: /* expecting an encoded portion */
 				if (*p1 == '?') {
 					encoded_text_len = (size_t)(p1 - encoded_text);
 					scan_stat = 6;
 				}
 				break;
 
-			case 7:
+			case 7: /* expecting a "\n" character */
 				if (*p1 == '\n') {
 					scan_stat = 8;
 				} else {
@@ -1469,7 +1470,8 @@ static php_iconv_err_t _php_iconv_mime_decode(smart_str *pretval, const char *st
 				}
 				break;
 
-			case 8:
+			case 8: /* checking whether the following line is part of a
+					   folded header */
 				if (*p1 != ' ' && *p1 != '\t') {
 					--p1;
 					str_left = 1; /* quit_loop */
@@ -1482,9 +1484,10 @@ static php_iconv_err_t _php_iconv_mime_decode(smart_str *pretval, const char *st
 				scan_stat = 11;
 				break;
 
-			case 6:
+			case 6: /* expecting a End-Of-Chunk character "=" */
 				if (*p1 != '=') {
 					if ((mode & PHP_ICONV_MIME_DECODE_CONTINUE_ON_ERROR)) {
+						/* pass the entire chunk through the converter */
 						err = _php_iconv_appendl(pretval, encoded_word, (size_t)((p1 + 1) - encoded_word), cd_pl); 
 						if (err != PHP_ICONV_ERR_SUCCESS) {
 							goto out;
@@ -1508,11 +1511,20 @@ static php_iconv_err_t _php_iconv_mime_decode(smart_str *pretval, const char *st
 					break;
 				}
 
-			case 9:
+			case 9: /* choice point, seeing what to do next.*/
 				switch (*p1) {
 					default:
+						/* Handle non-RFC-compliant formats
+						 * 
+						 * RFC2047 requires the character that comes right
+						 * after an encoded word (chunk) to be a whitespace,
+						 * while there are lots of broken implementations that
+						 * generate such malformed headers that don't fulfill
+						 * that requirement.
+						 */ 
 						if (!eos) { 
 							if ((mode & PHP_ICONV_MIME_DECODE_STRICT)) {
+								/* pass the entire chunk through the converter */
 								err = _php_iconv_appendl(pretval, encoded_word, (size_t)((p1 + 1) - encoded_word), cd_pl); 
 								if (err != PHP_ICONV_ERR_SUCCESS) {
 									goto out;
@@ -1544,6 +1556,7 @@ static php_iconv_err_t _php_iconv_mime_decode(smart_str *pretval, const char *st
 
 						if (decoded_text == NULL) {
 							if ((mode & PHP_ICONV_MIME_DECODE_CONTINUE_ON_ERROR)) {
+								/* pass the entire chunk through the converter */
 								err = _php_iconv_appendl(pretval, encoded_word, (size_t)((p1 + 1) - encoded_word), cd_pl); 
 								if (err != PHP_ICONV_ERR_SUCCESS) {
 									goto out;
@@ -1566,29 +1579,24 @@ static php_iconv_err_t _php_iconv_mime_decode(smart_str *pretval, const char *st
 
 						if (err != PHP_ICONV_ERR_SUCCESS) {
 							if ((mode & PHP_ICONV_MIME_DECODE_CONTINUE_ON_ERROR)) {
+								/* pass the entire chunk through the converter */
 								err = _php_iconv_appendl(pretval, encoded_word, (size_t)((p1 + 1) - encoded_word), cd_pl); 
 								if (err != PHP_ICONV_ERR_SUCCESS) {
 									goto out;
 								}
 								encoded_word = NULL;
-								if ((mode & PHP_ICONV_MIME_DECODE_STRICT)) {
-									scan_stat = 12;
-								} else {
-									scan_stat = 0;
-								}
-								break;
 							} else {
 								goto out;
 							}
 						}
 
-						if (eos)  {
+						if (eos) { /* reached end-of-string. done. */
 							scan_stat = 0;
 							break;
 						}
 
 						switch (*p1) {
-							case '\r':
+							case '\r': /* part of an EOL sequence? */
 								scan_stat = 7;
 								break;
 
@@ -1596,16 +1604,16 @@ static php_iconv_err_t _php_iconv_mime_decode(smart_str *pretval, const char *st
 								scan_stat = 8;
 								break;
 
-							case '=':
+							case '=': /* first letter of an encoded chunk */
 								scan_stat = 1;
 								break;
 
-							case ' ': case '\t':
+							case ' ': case '\t': /* medial whitespaces */
 								spaces = p1;
 								scan_stat = 11;
 								break;
 
-							default:
+							default: /* first letter of a non-encoded word */
 								_php_iconv_appendc(pretval, *p1, cd_pl);
 								scan_stat = 12;
 								break;
@@ -1614,15 +1622,15 @@ static php_iconv_err_t _php_iconv_mime_decode(smart_str *pretval, const char *st
 				}
 				break;
 
-			case 10: /* language spec */
+			case 10: /* expects a language specifier. dismiss it for now */
 				if (*p1 == '?') {
 					scan_stat = 3;
 				}
 				break;
 
-			case 11:
+			case 11: /* expecting a chunk of whitespaces */
 				switch (*p1) {
-					case '\r':
+					case '\r': /* part of an EOL sequence? */
 						scan_stat = 7;
 						break;
 
@@ -1630,7 +1638,7 @@ static php_iconv_err_t _php_iconv_mime_decode(smart_str *pretval, const char *st
 						scan_stat = 8;	
 						break;
 
-					case '=':
+					case '=': /* first letter of an encoded chunk */
 						if (spaces != NULL && encoded_word == NULL) {
 							_php_iconv_appendl(pretval, spaces, (size_t)(p1 - spaces), cd_pl);
 							spaces = NULL;
@@ -1642,7 +1650,7 @@ static php_iconv_err_t _php_iconv_mime_decode(smart_str *pretval, const char *st
 					case ' ': case '\t':
 						break;
 
-					default: /* beginning of a word delimited by white spaces */
+					default: /* first letter of a non-encoded word */
 						if (spaces != NULL) {
 							_php_iconv_appendl(pretval, spaces, (size_t)(p1 - spaces), cd_pl);
 							spaces = NULL;
@@ -1658,9 +1666,9 @@ static php_iconv_err_t _php_iconv_mime_decode(smart_str *pretval, const char *st
 				}
 				break;
 
-			case 12:
+			case 12: /* expecting a non-encoded word */
 				switch (*p1) {
-					case '\r':
+					case '\r': /* part of an EOL sequence? */
 						scan_stat = 7;
 						break;
 
@@ -1673,6 +1681,14 @@ static php_iconv_err_t _php_iconv_mime_decode(smart_str *pretval, const char *st
 						scan_stat = 11;
 						break;
 
+					case '=': /* first letter of an encoded chunk */
+						if (!(mode & PHP_ICONV_MIME_DECODE_STRICT)) {
+							encoded_word = p1;
+							scan_stat = 1;
+							break;
+						}
+						/* break is omitted intentionally */
+
 					default:
 						_php_iconv_appendc(pretval, *p1, cd_pl);
 						break;
@@ -1680,7 +1696,6 @@ static php_iconv_err_t _php_iconv_mime_decode(smart_str *pretval, const char *st
 				break;
 		}
 	}
-
 	switch (scan_stat) {
 		case 0: case 8: case 11: case 12:
 			break;
