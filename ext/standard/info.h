@@ -63,6 +63,7 @@ PHP_FUNCTION(phpinfo);
 PHP_FUNCTION(phpcredits);
 PHP_FUNCTION(php_logo_guid);
 PHP_FUNCTION(zend_logo_guid);
+PHP_FUNCTION(php_sapi_name);
 PHPAPI void php_print_info(int flag);
 PHPAPI void php_print_credits(int flag);
 PHPAPI void php_print_style(void);
