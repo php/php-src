@@ -9,6 +9,10 @@ AC_DEFUN(AC_CRYPT_CAP,[
 
   AC_CACHE_CHECK(for standard DES crypt, ac_cv_crypt_des,[
   AC_TRY_RUN([
+#if HAVE_CRYPT_H
+#include <crypt.h>
+#endif
+
 main() {
 #if HAVE_CRYPT
     exit (strcmp((char *)crypt("rasmuslerdorf","rl"),"rl.3StKT.4T8M"));
@@ -32,6 +36,10 @@ main() {
 
   AC_CACHE_CHECK(for extended DES crypt, ac_cv_crypt_ext_des,[
   AC_TRY_RUN([
+#if HAVE_CRYPT_H
+#include <crypt.h>
+#endif
+
 main() {
 #if HAVE_CRYPT
     exit (strcmp((char *)crypt("rasmuslerdorf","_J9..rasm"),"_J9..rasmBYk8r9AiWNc"));
@@ -55,6 +63,10 @@ main() {
 
   AC_CACHE_CHECK(for MD5 crypt, ac_cv_crypt_md5,[
   AC_TRY_RUN([
+#if HAVE_CRYPT_H
+#include <crypt.h>
+#endif
+
 main() {
 #if HAVE_CRYPT
     char salt[15], answer[40];
@@ -90,6 +102,10 @@ main() {
 
   AC_CACHE_CHECK(for Blowfish crypt, ac_cv_crypt_blowfish,[
   AC_TRY_RUN([
+#if HAVE_CRYPT_H
+#include <crypt.h>
+#endif
+
 main() {
 #if HAVE_CRYPT
     char salt[25], answer[70];
