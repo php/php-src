@@ -7,6 +7,7 @@ PHP                                                                        NEWS
 - Extended the functionality of is_subclass_of() to accept either a class name
   or an object as first parameter. (Andrey) 
 - Fixed potential problems with unserializing invalid serialize data. (Marcus)
+- Fixed bug #30967 (properties in extended mysqli classes don't work). (Georg)
 - Fixed bug #30962 (mssql returns space for NULL columns). (Ilia)
 - Fixed bug #30856 (ReflectionClass::getStaticProperties segfaults). (Marcus)
 - Fixed bug #30832 ("!" stripped off comments in xml parser). (Rob)
