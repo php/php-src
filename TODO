@@ -48,6 +48,7 @@ ext/pcre
 
 ext/wddx
 --------
+    * implement __sleep() and __wakeup() the way serialize()/unserialize() do.
     * See if we can support the remaining datatypes:
         dateTime
         binary
