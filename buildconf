@@ -11,6 +11,10 @@ else
     echo created or modified aclocal.m4
 fi
 
+autoheader
+
+automake --add-missing --include-deps
+
 mv configure configure.old 2>/dev/null
 autoconf
 if cmp configure.old configure > /dev/null 2>&1; then
@@ -19,9 +23,6 @@ if cmp configure.old configure > /dev/null 2>&1; then
 else
     echo created or modified configure
 fi
-
-autoheader
-automake --add-missing --include-deps
 
 cd libzend; ./buildconf
 
