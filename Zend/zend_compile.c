@@ -958,13 +958,18 @@ void zend_do_begin_dynamic_function_call(znode *function_name TSRMLS_DC)
 
 void do_fetch_class(znode *result, znode *class_entry, znode *class_name TSRMLS_DC)
 {
-	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+	long fetch_class_op_number;
+	zend_op *opline;
+
+	fetch_class_op_number = get_next_op_number(CG(active_op_array));
+	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
 	opline->opcode = ZEND_FETCH_CLASS;
 	if (class_entry) {
 		opline->op1 = *class_entry;
 	} else {
 		SET_UNUSED(opline->op1);
+		CG(catch_begin) = fetch_class_op_number;
 	}
 	zend_str_tolower(class_name->u.constant.value.str.val, class_name->u.constant.value.str.len);
 	if ((class_name->u.constant.value.str.len == (sizeof("self") - 1)) &&
@@ -1261,17 +1266,18 @@ static void throw_list_applier(long *opline_num, long *catch_opline)
 	}
 }
 
-void zend_do_begin_catch(znode *try_token, znode *catch_var TSRMLS_DC)
+void zend_do_begin_catch(znode *try_token, znode *catch_class, znode *catch_var TSRMLS_DC)
 {
 	long catch_op_number = get_next_op_number(CG(active_op_array));
 	zend_op *opline;
 	
 	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 	opline->opcode = ZEND_CATCH;
-	opline->op1 = *catch_var;
-	SET_UNUSED(opline->op2);
+	opline->op1 = *catch_class;
+	SET_UNUSED(opline->op1); /* FIXME: Define IS_CLASS or something like that */
+	opline->op2 = *catch_var;
 
-	zend_llist_apply_with_argument(CG(throw_list), (llist_apply_with_arg_func_t) throw_list_applier, &catch_op_number TSRMLS_CC);
+	zend_llist_apply_with_argument(CG(throw_list), (llist_apply_with_arg_func_t) throw_list_applier, &CG(catch_begin) TSRMLS_CC);
 	zend_llist_destroy(CG(throw_list));
 	efree(CG(throw_list));
 	CG(throw_list) = (void *) try_token->throw_list;
@@ -1281,7 +1287,7 @@ void zend_do_begin_catch(znode *try_token, znode *catch_var TSRMLS_DC)
 
 void zend_do_end_catch(znode *try_token TSRMLS_DC)
 {
-	CG(active_op_array)->opcodes[try_token->u.opline_num].op2.u.opline_num = get_next_op_number(CG(active_op_array));
+	CG(active_op_array)->opcodes[try_token->u.opline_num].extended_value = get_next_op_number(CG(active_op_array));
 }
 
 void zend_do_throw(znode *expr TSRMLS_DC)

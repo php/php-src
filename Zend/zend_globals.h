@@ -111,6 +111,7 @@ struct _zend_compiler_globals {
 	zend_llist open_files;
 
 	zend_llist *throw_list;
+	long catch_begin;
 
 	struct _zend_ini_parser_param *ini_parser_param;
 
