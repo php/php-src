@@ -1,3 +1,154 @@
+2002-12-20  Sascha Schumann  <sascha@schumann.cx>
+
+    * netware/ZendEngine2.mak:
+      test commit
+
+2002-12-20  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/dba/dba.c
+      ext/dba/dba_cdb.c
+      ext/dba/dba_db2.c
+      ext/dba/dba_db3.c
+      ext/dba/dba_dbm.c
+      ext/dba/dba_flatfile.c
+      ext/dba/dba_gdbm.c
+      ext/dba/php_dba.h
+      ext/dba/tests/dba_cdb.phpt
+      ext/dba/tests/dba_handler.inc:
+      MFH: as discussed
+
+2002-12-20  Stefan Esser  <s.esser@e-matters.de>
+
+    * ext/sybase/php_sybase_db.c:
+      MFH
+
+    * ext/sybase/php_sybase_db.c:
+      need more space
+
+2002-12-20  Georg Richter  <georg.richter@phpev.de>
+
+    * ext/mysql/php_mysql.c:
+      fixed some warning when using external 4.x libs
+
+2002-12-20  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/domxml/domxml.dsp
+      win32/php4ts.dsp:
+      MFH
+
+    * ext/domxml/domxml.dsp:
+      Fixing Win32 build by adding missing libraries
+
+2002-12-20  Sara Golemon  <php@alphaweb.net>
+
+    * ext/standard/dns.c:
+      Minor clarification in meaning of bitmask constants
+      /* PHP_DNS_xx = 1<<(T_xx-1) */
+      T_CNAME = 5 ergo PHP_DNS_CNAME should be 0x00000010.
+      T_SOA = 6 ergo PHP_DNS_CNAME should be 0x00000020.
+
+2002-12-20  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/dba/dba.c
+      ext/dba/dba_cdb.c
+      ext/dba/dba_db2.c
+      ext/dba/dba_db3.c
+      ext/dba/dba_db4.c
+      ext/dba/dba_dbm.c
+      ext/dba/dba_flatfile.c
+      ext/dba/dba_gdbm.c
+      ext/dba/php_dba.h
+      ext/dba/tests/dba_cdb.phpt
+      ext/dba/tests/dba_handler.inc:
+      -Fix memory handling of persistent dba connections.
+      -Update tests.
+
+2002-12-20  Frank M. Kromann  <frank@kromann.info>
+
+    * win32/php4ts.dsp:
+      Make sure the debug version is created in the right directory
+
+2002-12-20  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/array.c
+      ext/standard/tests/array/range.phpt:
+      When low & high are the same return an array containing the low value.
+      Added support for float values and handling of numeric values being passed
+      as strings.
+      Added a test case for range().
+
+2002-12-20  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/standard/uniqid.c:
+      
+
+    * ext/standard/uniqid.c:
+      MFB
+
+    * ext/standard/uniqid.c:
+      Avoid compiler warnings
+
+2002-12-20  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ext/dba/dba.c:
+      MFH
+
+    * ext/dba/dba.c:
+      At least this problem exposed some leaks..
+
+2002-12-20  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/standard/basic_functions.c
+      ext/standard/uniqid.c
+      ext/standard/uniqid.h:
+      MFH
+
+    * ext/standard/basic_functions.c
+      ext/standard/uniqid.c
+      ext/standard/uniqid.h:
+      -disable uniqid() when required lib functions not available
+      -emit an error when uniqid() will fail
+      -make more_entropy parameter default to true for CYGWIN
+
+2002-12-20  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * sapi/cli/php_cli.c:
+      MFH
+
+    * sapi/cli/php_cli.c:
+      Recommited the patch
+
+2002-12-20  Sterling Hughes  <sterling@bumblebury.com>
+
+    * ext/sockets/sockets.c:
+      mfh
+
+2002-12-20  Edin Kadribasic  <edink@proventum.net>
+
+    * sapi/cli/config.m4:
+      MFB: Make sure cli install dir is created before trying to install in it.
+
+    * sapi/cli/config.m4:
+      Make sure cli install dir is created before trying to install in it.
+
+2002-12-20  James Cox  <james@imajes.info>
+
+    * INSTALL:
+      testing cvs commit..
+
+2002-12-20  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/gd/libgd/gd.c:
+      MFH
+
+2002-12-20  Melvyn Sopacua  <msopacua@idg.nl>
+
+    * run-tests.php:
+      MFB: libtool detection
+
+    * run-tests.php:
+      Fix libtool detection
+
 2002-12-19  Wez Furlong  <wez.php@thebrainroom.net>
 
     * ext/standard/exec.c
