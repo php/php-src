@@ -2,6 +2,9 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 200?, Version 4.0.6
+- Added small change to php_odbc module, to check for failed SQLDisconnects
+  and to close any outstanding transactions if the call fails, then disconnect
+  again (lurcher)
 - Modified get_parent_class() and get_class_methods() to accept a class name as
   well as a class instance. (Andrei, Zend Engine)
 - Added support for UNC style paths. (\\server\share\file, //server/share/file)
