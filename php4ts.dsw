@@ -3,7 +3,7 @@ Microsoft Developer Studio Workspace File, Format Version 6.00
 
 ###############################################################################
 
-Project: "ApachePHP4"=.\sapi\Apache\ApachePHP4.dsp - Package Owner=<4>
+Project: "php4apache"=.\sapi\apache\php4apache.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -18,7 +18,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "NSAPIPHP4"=.\sapi\nsapi\NSAPIPHP4.dsp - Package Owner=<4>
+Project: "php4nsapi"=.\sapi\nsapi\php4nsapi.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
