@@ -1,6 +1,7 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 2002, Version 4.3.0
+- Added getopt() for parsing command line options and arguments. (Jon)
 - ATTENTION!! "make install" will *always* install the CLI SAPI binary in 
   {PREFIX}/bin/php. If you enable the CGI binary to be built, it will be
   installed as {PREFIX}/bin/php-cgi.
