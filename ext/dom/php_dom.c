@@ -1122,7 +1122,7 @@ void dom_get_elements_by_tag_name_ns_raw(xmlNodePtr nodep, char *ns, char *local
 /* {{{ void dom_normalize (xmlNodePtr nodep TSRMLS_DC) */
 void dom_normalize (xmlNodePtr nodep TSRMLS_DC)
 {
-	xmlNodePtr child, nextp;
+	xmlNodePtr child, nextp, newnextp;
 	xmlAttrPtr attr;
 	xmlChar	*strContent; 
 
@@ -1133,12 +1133,15 @@ void dom_normalize (xmlNodePtr nodep TSRMLS_DC)
 				nextp = child->next;
 				while (nextp != NULL) {
 					if (nextp->type == XML_TEXT_NODE) {
+						newnextp = nextp->next;
 						strContent = xmlNodeGetContent(nextp);
 						xmlNodeAddContent(child, strContent);
 						xmlFree(strContent);
 						xmlUnlinkNode(nextp);
 						node_free_resource(nextp TSRMLS_CC);
-						nextp = child->next;
+						nextp = newnextp;
+					} else {
+						break;
 					}
 				}
 				break;
