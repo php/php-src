@@ -25,8 +25,13 @@
 #include "php.h"
 #include "php_ini.h"
 #include "php_shmop.h"
-#include <sys/ipc.h>
-#include <sys/shm.h>
+# ifndef PHP_WIN32
+# include <sys/ipc.h>
+# include <sys/shm.h>
+#else
+#include "tsrm_win32.h"
+#endif
+
 
 #if HAVE_SHMOP
 
@@ -170,7 +175,7 @@ PHP_FUNCTION(shmop_open)
 	}
 
 	shmop->size = shm.shm_segsz;
-	
+
 	rsid = zend_list_insert(shmop, shm_type);
 	RETURN_LONG(rsid);
 }
@@ -246,8 +251,6 @@ PHP_FUNCTION(shmop_close)
 		RETURN_FALSE;
 	}
 	zend_list_delete((*shmid)->value.lval);
-
-	RETURN_LONG(0);
 }
 /* }}} */
 
