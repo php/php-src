@@ -2878,7 +2878,7 @@ gdImagePtr gdImageRotate (gdImagePtr src, double dAngle, int clrBack)
 {
 	gdImagePtr pMidImg;
 	gdImagePtr rotatedImg;
-	int r,g,b,a;
+
 	if (src == NULL) {
 		return NULL;
 	}
