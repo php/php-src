@@ -570,14 +570,14 @@ static int do_fetch_class_prepare(pdo_stmt_t *stmt TSRMLS_DC)
 	}
 }
 
-static int do_fetch_class_finish(pdo_stmt_t *stmt TSRMLS_DC)
+static int do_fetch_class_finish(pdo_stmt_t *stmt, int free_ctor_agrs TSRMLS_DC)
 {
 	/* fci.size is used to check if it is valid */
 	if (stmt->fetch.cls.fci.size && stmt->fetch.cls.fci.params) {
 		efree(stmt->fetch.cls.fci.params);
 		stmt->fetch.cls.fci.size = 0;
 	}
-	if (stmt->fetch.cls.ctor_args) {
+	if (stmt->fetch.cls.ctor_args && free_ctor_agrs) {
 		FREE_ZVAL(stmt->fetch.cls.ctor_args);
 		stmt->fetch.cls.ctor_args = NULL;
 	}
@@ -590,7 +590,7 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value,
 	enum pdo_fetch_type how, enum pdo_fetch_orientation ori, long offset, zval *return_all TSRMLS_DC)
 {
 	int flags = how & PDO_FETCH_FLAGS;
-	zend_class_entry * ce;
+	zend_class_entry * ce, * old_ce;
 
 	how = how & ~PDO_FETCH_FLAGS;
 	if (how == PDO_FETCH_USE_DEFAULT) {
@@ -607,7 +607,7 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value,
 	}
 
 	if (return_value) {
-		int i;
+		int i = 0;
 
 		if (how == PDO_FETCH_LAZY) {
 			get_lazy_object(stmt, return_value TSRMLS_CC);
@@ -633,6 +633,27 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value,
 				break;
 
 			case PDO_FETCH_CLASS:
+				if (flags & PDO_FETCH_CLASSTYPE) {
+					zval val;
+					zend_class_entry **cep;
+
+					do_fetch_class_finish(stmt, 0 TSRMLS_CC);
+					old_ce = stmt->fetch.cls.ce;
+
+					INIT_PZVAL(&val);
+					fetch_value(stmt, &val, i++ TSRMLS_CC);
+					if (Z_TYPE(val) != IS_NULL) {
+						convert_to_string(&val);
+						if (zend_lookup_class(Z_STRVAL(val), Z_STRLEN(val), &cep TSRMLS_CC) == FAILURE) {
+							stmt->fetch.cls.ce = ZEND_STANDARD_CLASS_DEF_PTR;
+						} else {
+							stmt->fetch.cls.ce = *cep;
+						}
+					}
+
+					do_fetch_class_prepare(stmt TSRMLS_CC);
+					zval_dtor(&val);
+				}
 				ce = stmt->fetch.cls.ce;
 				object_init_ex(return_value, ce);
 				if (!stmt->fetch.cls.fci.size) {
@@ -662,7 +683,7 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value,
 		if (return_all) {
 			zval val, *grp, **pgrp;
 			INIT_PZVAL(&val);
-			fetch_value(stmt, &val, 0 TSRMLS_CC);
+			fetch_value(stmt, &val, i TSRMLS_CC);
 			convert_to_string(&val);
 			if ((flags & PDO_FETCH_UNIQUE) == PDO_FETCH_UNIQUE) {
 				add_assoc_zval(return_all, Z_STRVAL(val), return_value);
@@ -677,9 +698,7 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value,
 				add_next_index_zval(grp, return_value);
 			}
 			zval_dtor(&val);
-			i = 1;
-		} else {
-			i = 0;
+			i++;
 		}
 
 		for (; i < stmt->column_count; i++) {
@@ -733,6 +752,10 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value,
 							zval_ptr_dtor(&stmt->fetch.cls.retval_ptr);
 						}
 					}
+				}
+				if (flags & PDO_FETCH_CLASSTYPE) {
+					do_fetch_class_finish(stmt, 0 TSRMLS_CC);
+					stmt->fetch.cls.ce = old_ce;
 				}
 				break;
 			
@@ -932,7 +955,7 @@ static PHP_METHOD(PDOStatement, fetchAll)
 	stmt->fetch.cls.ce = old_ce;
 	stmt->fetch.cls.ctor_args = old_ctor_args;
 	
-	do_fetch_class_finish(stmt TSRMLS_CC);
+	do_fetch_class_finish(stmt, 1 TSRMLS_CC);
 
 	if (error) {
 		RETURN_FALSE;
@@ -1148,7 +1171,7 @@ int pdo_stmt_setup_fetch_mode(INTERNAL_FUNCTION_PARAMETERS, pdo_stmt_t *stmt, in
 	
 	switch (stmt->default_fetch_type) {
 		case PDO_FETCH_CLASS:
-			do_fetch_class_finish(stmt TSRMLS_CC);
+			do_fetch_class_finish(stmt, 1 TSRMLS_CC);
 			break;
 
 		case PDO_FETCH_INTO:
@@ -1523,7 +1546,7 @@ static void free_statement(pdo_stmt_t *stmt TSRMLS_DC)
 		FREE_HASHTABLE(stmt->bound_columns);
 	}
 	
-	do_fetch_class_finish(stmt TSRMLS_CC);
+	do_fetch_class_finish(stmt, 1 TSRMLS_CC);
 
 	zend_objects_store_del_ref(&stmt->database_object_handle TSRMLS_CC);
 	efree(stmt);
