@@ -422,8 +422,6 @@ PHP_MINIT_FUNCTION(imap)
 	unsigned long sa_all =	SA_MESSAGES | SA_RECENT | SA_UNSEEN |
 				SA_UIDNEXT | SA_UIDVALIDITY;
 
-	ELS_FETCH();
-
 #if !(WIN32|WINNT)
 	mail_link(&unixdriver);   /* link in the unix driver */
 #endif
@@ -689,7 +687,7 @@ void imap_do_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		sprintf(hashed_details, "imap_%s", netmbx.host);
 
 		/* Check for an existing connection. */
-		if (	(_php3_hash_find(plist,
+		if (	(zend_hash_find(&EG(persistent_list),
 					hashed_details,
 					hashed_details_length,
 					(void*) &le) == FAILURE) ||
@@ -745,7 +743,7 @@ void imap_do_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 				free(node);
 				/* delete the hash entry if empty */
 				if (*headp == NULL)
-					_php3_hash_del(plist,
+					zend_hash_del(&EG(persistent_list),
 						hashed_details,
 						hashed_details_length);
  			}
@@ -783,7 +781,7 @@ void imap_do_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		new_le.type = le_pimapchain;
 		new_le.ptr = headp;
 		if (	need_update &&
-			_php3_hash_update(plist, hashed_details,
+			zend_hash_update(&EG(persistent_list), hashed_details,
 				hashed_details_length, &new_le,
 				sizeof(new_le), NULL) == FAILURE)
 		{
