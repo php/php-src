@@ -495,6 +495,7 @@ ZEND_API zend_bool zend_is_auto_global(char *name, uint name_len TSRMLS_DC);
 
 int zendlex(znode *zendlval TSRMLS_DC);
 
+/* BEGIN: OPCODES */
 #define ZEND_NOP					0
 									
 #define ZEND_ADD					1
@@ -682,6 +683,7 @@ int zendlex(znode *zendlval TSRMLS_DC);
 #define ZEND_VERIFY_ABSTRACT_CLASS	146
 
 /* end of block */
+/* END: OPCODES */
 
 
 
