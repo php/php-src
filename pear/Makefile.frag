@@ -1,6 +1,7 @@
+# -*- makefile -*-
 
 pear_install_targets = \
-	install-data-local \
+	install-pear \
 	install-headers \
 	install-build \
 	install-programs
@@ -10,63 +11,26 @@ peardir=$(PEAR_INSTALLDIR)
 PEAR_SUBDIRS = \
 	Archive \
 	Console \
-	Crypt \
-	Date \
-	DB \
-	File \
-	HTML \
-	HTTP \
-	Image \
-	Mail \
-	Net \
 	PEAR \
 	PEAR/Command \
 	PEAR/Frontend \
-	Schedule \
 	XML 
+
+# These are moving to /pear (in cvs):
+# 	Crypt \
+# 	File \
+# 	Date \
+# 	DB \
+# 	HTML \
+# 	HTTP \
+# 	Image \
+# 	Mail \
+# 	Net \
+#	Schedule \
 
 PEAR_FILES = \
 	Archive/Tar.php \
 	Console/Getopt.php \
-	Crypt/CBC.php \
-	Crypt/HCEMD5.php \
-	Date/Calc.php \
-	Date/Human.php \
-	DB.php \
-	DB/common.php \
-	DB/fbsql.php \
-	DB/ibase.php \
-	DB/ifx.php \
-	DB/msql.php \
-	DB/mssql.php \
-	DB/mysql.php \
-	DB/oci8.php \
-	DB/odbc.php \
-	DB/pgsql.php \
-	DB/storage.php \
-	DB/sybase.php \
-	File/Find.php \
-	File/Passwd.php \
-	File/SearchReplace.php \
-	HTML/Common.php \
-	HTML/Form.php \
-	HTML/IT.php \
-	HTML/ITX.php \
-	HTML/IT_Error.php \
-	HTML/Page.php \
-	HTML/Processor.php \
-	HTML/Select.php \
-	HTML/Table.php \
-	HTTP.php \
-	HTTP/Compress.php \
-	Mail.php \
-	Mail/RFC822.php \
-	Mail/sendmail.php \
-	Mail/smtp.php \
-	Net/Curl.php \
-	Net/Dig.php \
-	Net/SMTP.php \
-	Net/Socket.php \
 	PEAR.php \
 	PEAR/Autoloader.php \
 	PEAR/Command.php \
@@ -86,9 +50,54 @@ PEAR_FILES = \
 	PEAR/Registry.php \
 	PEAR/Remote.php \
 	PEAR/Uploader.php \
-	Schedule/At.php \
 	System.php \
 	XML/Parser.php 
+
+# These are moving to /pear (in cvs):
+# 	Crypt/CBC.php \
+# 	Crypt/HCEMD5.php \
+# 	DB.php \
+# 	DB/common.php \
+# 	DB/fbsql.php \
+# 	DB/ibase.php \
+# 	DB/ifx.php \
+# 	DB/msql.php \
+# 	DB/mssql.php \
+# 	DB/mysql.php \
+# 	DB/oci8.php \
+# 	DB/odbc.php \
+# 	DB/pgsql.php \
+# 	DB/storage.php \
+# 	DB/sybase.php \
+# 	Date/Calc.php \
+# 	Date/Human.php \
+# 	File/Find.php \
+# 	File/Passwd.php \
+# 	File/SearchReplace.php \
+# 	HTML/Common.php \
+# 	HTML/Form.php \
+# 	HTML/IT.php \
+# 	HTML/ITX.php \
+# 	HTML/IT_Error.php \
+# 	HTML/Page.php \
+# 	HTML/Processor.php \
+# 	HTML/Select.php \
+# 	HTML/Table.php \
+# 	HTTP.php \
+# 	HTTP/Compress.php \
+# 	Mail.php \
+# 	Mail/RFC822.php \
+# 	Mail/sendmail.php \
+# 	Mail/smtp.php \
+# 	Net/Curl.php \
+# 	Net/Dig.php \
+# 	Net/SMTP.php \
+#	Net/Socket.php \
+#	Schedule/At.php \
+
+PEAR_PACKAGES=\
+	Net_Socket-1.0.tgz
+
 
 install-pear:
 	@if $(mkinstalldirs) $(INSTALL_ROOT)$(peardir); then \
