@@ -48,7 +48,7 @@
  <release>
   <state>beta</state>
   <version>0.2.1</version>
-  <date>2005-02-XX</date>
+  <date>2005-02-10</date>
 
   <notes>
 Note that PDO on its own is useless.
