@@ -128,6 +128,36 @@ ZEND_API ulong hashpjw(char *arKey, uint nKeyLength)
 }
 
 
+#define UPDATE_DATA(ht, p, pData, nDataSize)								\
+	if (flag & HASH_ADD_PTR) {												\
+		if (!(p)->pDataPtr) {												\
+			pefree(p, (ht)->persistent);									\
+		}																	\
+		(p)->pDataPtr = pData;												\
+		(p)->pData = &(p)->pDataPtr;										\
+	} else {																\
+		if ((p)->pDataPtr) {												\
+			(p)->pData = (void *) pemalloc(nDataSize, (ht)->persistent);	\
+			(p)->pDataPtr=NULL;												\
+		}																	\
+		memcpy((p)->pData, pData, nDataSize);								\
+	}
+
+#define INIT_DATA(ht, p, pData, nDataSize);								\
+	if (flag & HASH_ADD_PTR) {											\
+		(p)->pDataPtr = pData;											\
+		(p)->pData = &(p)->pDataPtr;									\
+	} else {															\
+		(p)->pData = (void *) pemalloc(nDataSize, (ht)->persistent);	\
+		if (!(p)->pData) {												\
+			pefree(p, (ht)->persistent);								\
+			return FAILURE;												\
+		}																\
+		memcpy((p)->pData, pData, nDataSize);							\
+		(p)->pDataPtr=NULL;												\
+	}
+
+
 ZEND_API int zend_hash_init(HashTable *ht, uint nSize, hash_func_t pHashFunction, dtor_func_t pDestructor, int persistent)
 {
 	uint i;
@@ -206,19 +236,7 @@ ZEND_API int zend_hash_add_or_update(HashTable *ht, char *arKey, uint nKeyLength
 				if (ht->pDestructor) {
 					ht->pDestructor(p->pData);
 				}
-				if (flag & HASH_ADD_PTR) {
-					if (!p->pDataPtr) {
-						efree(p->pData);
-					}
-					p->pDataPtr = pData;
-					p->pData = &p->pDataPtr;
-				} else {
-					if (p->pDataPtr) {
-						p->pData = (void *) emalloc(nDataSize);
-						p->pDataPtr=NULL;
-					}
-					memcpy(p->pData, pData, nDataSize);
-				}
+				UPDATE_DATA(ht, p, pData, nDataSize);
 				if (pDest) {
 					*pDest = p->pData;
 				}
@@ -235,19 +253,7 @@ ZEND_API int zend_hash_add_or_update(HashTable *ht, char *arKey, uint nKeyLength
 	}
 	memcpy(p->arKey, arKey, nKeyLength);
 	p->nKeyLength = nKeyLength;
-	if (flag & HASH_ADD_PTR) {
-		p->pDataPtr = pData;
-		p->pData = &p->pDataPtr;
-	} else {
-		p->pData = (void *) pemalloc(nDataSize, ht->persistent);
-		if (!p->pData) {
-			pefree(p, ht->persistent);
-			pefree(p->arKey, ht->persistent);
-			return FAILURE;
-		}
-		memcpy(p->pData, pData, nDataSize);
-		p->pDataPtr=NULL;
-	}
+	INIT_DATA(ht, p, pData, nDataSize);
 	p->h = h;
 	CONNECT_TO_BUCKET_DLLIST(p, ht->arBuckets[nIndex]);
 	if (pDest) {
@@ -298,19 +304,7 @@ ZEND_API int zend_hash_quick_add_or_update(HashTable *ht, char *arKey, uint nKey
 				if (ht->pDestructor) {
 					ht->pDestructor(p->pData);
 				}
-				if (flag & HASH_ADD_PTR) {
-					if (!p->pDataPtr) {
-						efree(p->pData);
-					}
-					p->pDataPtr = pData;
-					p->pData = &p->pDataPtr;
-				} else {
-					if (p->pDataPtr) {
-						p->pData = (void *) emalloc(nDataSize);
-						p->pDataPtr=NULL;
-					}
-					memcpy(p->pData, pData, nDataSize);
-				}
+				UPDATE_DATA(ht, p, pData, nDataSize);
 				if (pDest) {
 					*pDest = p->pData;
 				}
@@ -328,20 +322,7 @@ ZEND_API int zend_hash_quick_add_or_update(HashTable *ht, char *arKey, uint nKey
 
 	memcpy(p->arKey, arKey, nKeyLength);
 	p->nKeyLength = nKeyLength;
-	if (flag & HASH_ADD_PTR) {
-		p->pDataPtr = pData;
-		p->pData = &p->pDataPtr;
-	} else {
-		p->pData = (void *) pemalloc(nDataSize, ht->persistent);
-		if (!p->pData) {
-			pefree(p, ht->persistent);
-			pefree(p->arKey, ht->persistent);
-			return FAILURE;
-		}
-		
-		memcpy(p->pData, pData, nDataSize);
-		p->pDataPtr=NULL;
-	}
+	INIT_DATA(ht, p, pData, nDataSize);
 	p->h = h;
 	
 	CONNECT_TO_BUCKET_DLLIST(p, ht->arBuckets[nIndex]);
@@ -390,19 +371,7 @@ ZEND_API int zend_hash_index_update_or_next_insert(HashTable *ht, ulong h, void 
 			if (ht->pDestructor) {
 				ht->pDestructor(p->pData);
 			}
-			if (flag & HASH_ADD_PTR) {
-				if (!p->pDataPtr) {
-					efree(p->pData);
-				}
-				p->pDataPtr = pData;
-				p->pData = &p->pDataPtr;
-			} else {
-				if (p->pDataPtr) {
-					p->pData = (void *) emalloc(nDataSize);
-					p->pDataPtr=NULL;
-				}
-				memcpy(p->pData, pData, nDataSize);
-			}
+			UPDATE_DATA(ht, p, pData, nDataSize);
 			HANDLE_UNBLOCK_INTERRUPTIONS();
 			if (h >= ht->nNextFreeElement) {
 				ht->nNextFreeElement = h + 1;
@@ -420,19 +389,7 @@ ZEND_API int zend_hash_index_update_or_next_insert(HashTable *ht, ulong h, void 
 	}
 	p->nKeyLength = 0;			/*  Numeric indices are marked by making the nKeyLength == 0 */
 	p->h = h;
-	
-	if (flag & HASH_ADD_PTR) {
-		p->pDataPtr = pData;
-		p->pData = &p->pDataPtr;
-	} else {
-		p->pData = (void *) pemalloc(nDataSize, ht->persistent);
-		if (!p->pData) {
-			pefree(p, ht->persistent);
-			return FAILURE;
-		}
-		memcpy(p->pData, pData, nDataSize);
-		p->pDataPtr=NULL;
-	}
+	INIT_DATA(ht, p, pData, nDataSize);
 	if (pDest) {
 		*pDest = p->pData;
 	}
