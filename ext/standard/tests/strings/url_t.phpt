@@ -1,0 +1,66 @@
+--TEST--
+parse_url() function
+--POST--
+--GET--
+--FILE--
+<?php
+$sample_urls = array (
+'',
+'64.246.30.37',
+'http://64.246.30.37',
+'http://64.246.30.37/',
+'64.246.30.37/',
+'64.246.30.37:80/',
+'php.net',
+'php.net/',
+'http://php.net',
+'http://php.net/',
+'www.php.net',
+'www.php.net/',
+'http://www.php.net',
+'http://www.php.net/',
+'www.php.net:80',
+'http://www.php.net:80',
+'http://www.php.net:80/',
+'http://www.php.net/index.php',
+'www.php.net/?',
+'www.php.net:80/?',
+'http://www.php.net/?',
+'http://www.php.net:80/?',
+'http://www.php.net:80/index.php',
+'http://www.php.net:80/foo/bar/index.php',
+'http://www.php.net:80/this/is/a/very/deep/directory/structure/and/file.php',
+'http://www.php.net:80/this/is/a/very/deep/directory/structure/and/file.php?lots=1&of=2&parameters=3&too=4&here=5',
+'http://www.php.net:80/this/is/a/very/deep/directory/structure/and/',
+'http://www.php.net:80/this/is/a/very/deep/directory/structure/and/file.php',
+'http://www.php.net:80/this/../a/../deep/directory',
+'http://www.php.net:80/this/../a/../deep/directory/',
+'http://www.php.net:80/this/is/a/very/deep/directory/../file.php',
+'http://www.php.net:80/index.php',
+'http://www.php.net:80/index.php?',
+'http://www.php.net:80/#foo',
+'http://www.php.net:80/?#',
+'http://www.php.net:80/?test=1',
+'http://www.php.net/?test=1&',
+'http://www.php.net:80/?&',
+'http://www.php.net:80/index.php?test=1&',
+'http://www.php.net/index.php?&',
+'http://www.php.net:80/index.php?foo&',
+'http://www.php.net/index.php?&foo',
+'http://www.php.net:80/index.php?test=1&test2=char&test3=mixesCI',
+'www.php.net:80/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123',
+'http://secret@www.php.net:80/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123',
+'http://secret:@www.php.net/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123',
+'http://:hideout@www.php.net:80/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123',
+'http://secret:hideout@www.php.net/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123',
+'http://secret@hideout@www.php.net:80/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123',
+'http://secret:hid:out@www.php.net:80/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123',
+'nntp://news.php.net',
+'ftp://ftp.gnu.org/gnu/glic/glibc.tar.gz'
+);
+
+    foreach ($sample_urls as $url) {
+        var_dump(@parse_url($url));
+    }
+?>
+--EXPECT--
