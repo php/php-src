@@ -140,6 +140,9 @@ static int _gd2GetHeader(gdIOCtxPtr in, int *sx, int *sy, int *cs, int *vers, in
 		nc = (*ncx) * (*ncy);
 		GD2_DBG(php_gd_error("Reading %d chunk index entries\n", nc));
 		sidx = sizeof(t_chunk_info) * nc;
+		if (sidx <= 0) {
+			goto fail1;
+		}
 		cidx = gdCalloc(sidx, 1);
 		for (i = 0; i < nc; i++) {
 			if (gdGetInt(&cidx[i].offset, in) != 1) {
@@ -273,6 +276,9 @@ gdImagePtr gdImageCreateFromGd2Ctx (gdIOCtxPtr in)
 
 		/* Allocate buffers */
 		chunkMax = cs * bytesPerPixel * cs;
+		if (chunkMax <= 0) {
+			return 0;
+		}
 		chunkBuf = gdCalloc(chunkMax, 1);
 		compBuf = gdCalloc(compMax, 1);
 		
@@ -448,6 +454,10 @@ gdImagePtr gdImageCreateFromGd2PartCtx (gdIOCtx * in, int srcx, int srcy, int w,
 		} else {
 			chunkMax = cs * cs;
 		}
+		if (chunkMax <= 0) {
+			goto fail2;
+		}
+		
 		chunkBuf = gdCalloc(chunkMax, 1);
 		compBuf = gdCalloc(compMax, 1);
 	}
@@ -660,7 +670,11 @@ static void _gdImageGd2 (gdImagePtr im, gdIOCtx * out, int cs, int fmt)
 		compMax = (int)(cs * bytesPerPixel * cs * 1.02f) + 12;
 
 		/* Allocate the buffers.  */
-		chunkData = gdCalloc(cs * bytesPerPixel * cs, 1);
+		chunkData = safe_emalloc(cs * bytesPerPixel, cs, 0);
+		memset(chunkData, 0, cs * bytesPerPixel * cs);
+		if (compMax <= 0) {
+			goto fail;		
+		}
 		compData = gdCalloc(compMax, 1);
 
 		/* Save the file position of chunk index, and allocate enough space for
@@ -671,7 +685,8 @@ static void _gdImageGd2 (gdImagePtr im, gdIOCtx * out, int cs, int fmt)
 		GD2_DBG(php_gd_error("Index size is %d\n", idxSize));
 		gdSeek(out, idxPos + idxSize);
 
-		chunkIdx = gdCalloc(idxSize * sizeof(t_chunk_info), 1);
+		chunkIdx = safe_emalloc(idxSize, sizeof(t_chunk_info), 0);
+		memset(chunkIdx, 0, idxSize * sizeof(t_chunk_info));
 	}
 
 	_gdPutColors (im, out);
@@ -755,7 +770,7 @@ static void _gdImageGd2 (gdImagePtr im, gdIOCtx * out, int cs, int fmt)
 		}
 		gdSeek(out, posSave);
 	}
-
+fail:
 	GD2_DBG(php_gd_error("Freeing memory\n"));
 	if (chunkData) {
 		gdFree(chunkData);

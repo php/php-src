@@ -144,7 +144,8 @@ void gdImageJpegCtx (gdImagePtr im, gdIOCtx * outfile, int quality)
 
 	jpeg_gdIOCtx_dest (&cinfo, outfile);
 
-	row = (JSAMPROW) gdCalloc (1, cinfo.image_width * cinfo.input_components * sizeof (JSAMPLE));
+	row = (JSAMPROW) safe_emalloc(cinfo.image_width * cinfo.input_components, sizeof(JSAMPLE), 0);
+	memset(row, 0, cinfo.image_width * cinfo.input_components * sizeof(JSAMPLE));
 	rowptr[0] = row;
 
 	jpeg_start_compress (&cinfo, TRUE);
@@ -310,7 +311,8 @@ gdImagePtr gdImageCreateFromJpegCtx (gdIOCtx * infile)
 	goto error;
 #endif /* BITS_IN_JSAMPLE == 12 */
 
-	row = gdCalloc (cinfo.output_width * 3, sizeof (JSAMPLE));
+	row = safe_emalloc(cinfo.output_width * 3, sizeof(JSAMPLE), 0);
+	memset(row, 0, cinfo.output_width * 3 * sizeof(JSAMPLE));
 	rowptr[0] = row;
 
 	for (i = 0; i < cinfo.output_height; i++) {
