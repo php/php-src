@@ -1,3 +1,256 @@
+2004-12-04  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * sapi/apache/php_apache.c:
+      Fix proto
+
+2004-12-04  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_5_0)
+      NEWS:
+      BFN
+
+    * (PHP_5_0)
+      ext/dom/php_dom.c
+      ext/dom/tests/bug28817.phpt:
+      MFH: Fixed bug #28817 (Var problem when extending domDocument). (Georg)
+      add test
+
+    * ext/dom/tests/bug28817.phpt:
+      
+      add test
+
+    * ext/dom/php_dom.c:
+      Fixed bug #28817 (Var problem when extending domDocument). (Georg)
+
+2004-12-04  Georg Richter  <georg@mysql.com>
+
+    * (PHP_5_0)
+      NEWS:
+      fixed bug #30890
+
+    * (PHP_5_0)
+      ext/mysqli/mysqli.c
+      ext/mysqli/mysqli_prop.c
+      ext/mysqli/tests/001.phpt
+      ext/mysqli/tests/002.phpt
+      ext/mysqli/tests/003.phpt
+      ext/mysqli/tests/004.phpt
+      ext/mysqli/tests/005.phpt
+      ext/mysqli/tests/006.phpt
+      ext/mysqli/tests/007.phpt
+      ext/mysqli/tests/008.phpt
+      ext/mysqli/tests/009.phpt
+      ext/mysqli/tests/010.phpt
+      ext/mysqli/tests/011.phpt
+      ext/mysqli/tests/012.phpt
+      ext/mysqli/tests/013.phpt
+      ext/mysqli/tests/014.phpt
+      ext/mysqli/tests/015.phpt
+      ext/mysqli/tests/016.phpt
+      ext/mysqli/tests/017.phpt
+      ext/mysqli/tests/018.phpt
+      ext/mysqli/tests/019.phpt
+      ext/mysqli/tests/020.phpt
+      ext/mysqli/tests/021.phpt
+      ext/mysqli/tests/022.phpt
+      ext/mysqli/tests/023.phpt
+      ext/mysqli/tests/024.phpt
+      ext/mysqli/tests/025.phpt
+      ext/mysqli/tests/026.phpt
+      ext/mysqli/tests/027.phpt
+      ext/mysqli/tests/028.phpt
+      ext/mysqli/tests/029.phpt
+      ext/mysqli/tests/030.phpt
+      ext/mysqli/tests/031.phpt
+      ext/mysqli/tests/032.phpt
+      ext/mysqli/tests/033.phpt
+      ext/mysqli/tests/034.phpt
+      ext/mysqli/tests/035.phpt
+      ext/mysqli/tests/036.phpt
+      ext/mysqli/tests/037.phpt
+      ext/mysqli/tests/038.phpt
+      ext/mysqli/tests/039.phpt
+      ext/mysqli/tests/040.phpt
+      ext/mysqli/tests/041.phpt
+      ext/mysqli/tests/042.phpt
+      ext/mysqli/tests/043.phpt
+      ext/mysqli/tests/044.phpt
+      ext/mysqli/tests/045.phpt
+      ext/mysqli/tests/046.phpt
+      ext/mysqli/tests/047.phpt
+      ext/mysqli/tests/048.phpt
+      ext/mysqli/tests/049.phpt
+      ext/mysqli/tests/050.phpt
+      ext/mysqli/tests/051.phpt
+      ext/mysqli/tests/052.phpt
+      ext/mysqli/tests/053.phpt
+      ext/mysqli/tests/054.phpt
+      ext/mysqli/tests/055.phpt
+      ext/mysqli/tests/056.phpt
+      ext/mysqli/tests/057.phpt
+      ext/mysqli/tests/058.phpt
+      ext/mysqli/tests/059.phpt
+      ext/mysqli/tests/060.phpt
+      ext/mysqli/tests/061.phpt
+      ext/mysqli/tests/bug29311.phpt
+      ext/mysqli/tests/bug30967.phpt:
+      MFH:
+      	fix for bug #28817 (properties don't work in extended class)
+      	fix for bug #30890 (testsuite)
+
+    * ext/mysqli/tests/001.phpt
+      ext/mysqli/tests/002.phpt
+      ext/mysqli/tests/003.phpt
+      ext/mysqli/tests/004.phpt
+      ext/mysqli/tests/005.phpt
+      ext/mysqli/tests/006.phpt
+      ext/mysqli/tests/007.phpt
+      ext/mysqli/tests/008.phpt
+      ext/mysqli/tests/009.phpt
+      ext/mysqli/tests/010.phpt
+      ext/mysqli/tests/011.phpt
+      ext/mysqli/tests/012.phpt
+      ext/mysqli/tests/013.phpt
+      ext/mysqli/tests/014.phpt
+      ext/mysqli/tests/015.phpt
+      ext/mysqli/tests/016.phpt
+      ext/mysqli/tests/017.phpt
+      ext/mysqli/tests/018.phpt
+      ext/mysqli/tests/019.phpt
+      ext/mysqli/tests/020.phpt
+      ext/mysqli/tests/021.phpt
+      ext/mysqli/tests/022.phpt
+      ext/mysqli/tests/023.phpt
+      ext/mysqli/tests/024.phpt
+      ext/mysqli/tests/025.phpt
+      ext/mysqli/tests/026.phpt
+      ext/mysqli/tests/027.phpt
+      ext/mysqli/tests/028.phpt
+      ext/mysqli/tests/029.phpt
+      ext/mysqli/tests/030.phpt
+      ext/mysqli/tests/031.phpt
+      ext/mysqli/tests/032.phpt
+      ext/mysqli/tests/033.phpt
+      ext/mysqli/tests/034.phpt
+      ext/mysqli/tests/035.phpt
+      ext/mysqli/tests/036.phpt
+      ext/mysqli/tests/037.phpt
+      ext/mysqli/tests/038.phpt
+      ext/mysqli/tests/039.phpt
+      ext/mysqli/tests/040.phpt
+      ext/mysqli/tests/041.phpt
+      ext/mysqli/tests/042.phpt
+      ext/mysqli/tests/043.phpt
+      ext/mysqli/tests/044.phpt
+      ext/mysqli/tests/045.phpt
+      ext/mysqli/tests/046.phpt
+      ext/mysqli/tests/047.phpt
+      ext/mysqli/tests/048.phpt
+      ext/mysqli/tests/049.phpt
+      ext/mysqli/tests/050.phpt
+      ext/mysqli/tests/051.phpt
+      ext/mysqli/tests/052.phpt
+      ext/mysqli/tests/053.phpt
+      ext/mysqli/tests/054.phpt
+      ext/mysqli/tests/055.phpt
+      ext/mysqli/tests/056.phpt
+      ext/mysqli/tests/057.phpt
+      ext/mysqli/tests/058.phpt
+      ext/mysqli/tests/059.phpt
+      ext/mysqli/tests/060.phpt
+      ext/mysqli/tests/061.phpt
+      ext/mysqli/tests/bug28817.phpt
+      ext/mysqli/tests/bug29311.phpt
+      ext/mysqli/tests/bug30967.phpt
+      ext/mysqli/tests/skipif.inc:
+      added skipif section
+
+    * ext/mysqli/mysqli.c
+      ext/mysqli/mysqli_prop.c
+      ext/mysqli/tests/001.phpt
+      ext/mysqli/tests/002.phpt
+      ext/mysqli/tests/003.phpt
+      ext/mysqli/tests/004.phpt
+      ext/mysqli/tests/005.phpt
+      ext/mysqli/tests/006.phpt
+      ext/mysqli/tests/007.phpt
+      ext/mysqli/tests/008.phpt
+      ext/mysqli/tests/009.phpt
+      ext/mysqli/tests/010.phpt
+      ext/mysqli/tests/011.phpt
+      ext/mysqli/tests/012.phpt
+      ext/mysqli/tests/013.phpt
+      ext/mysqli/tests/014.phpt
+      ext/mysqli/tests/015.phpt
+      ext/mysqli/tests/016.phpt
+      ext/mysqli/tests/017.phpt
+      ext/mysqli/tests/018.phpt
+      ext/mysqli/tests/019.phpt
+      ext/mysqli/tests/020.phpt
+      ext/mysqli/tests/021.phpt
+      ext/mysqli/tests/022.phpt
+      ext/mysqli/tests/023.phpt
+      ext/mysqli/tests/024.phpt
+      ext/mysqli/tests/025.phpt
+      ext/mysqli/tests/026.phpt
+      ext/mysqli/tests/027.phpt
+      ext/mysqli/tests/028.phpt
+      ext/mysqli/tests/029.phpt
+      ext/mysqli/tests/030.phpt
+      ext/mysqli/tests/031.phpt
+      ext/mysqli/tests/032.phpt
+      ext/mysqli/tests/033.phpt
+      ext/mysqli/tests/034.phpt
+      ext/mysqli/tests/035.phpt
+      ext/mysqli/tests/036.phpt
+      ext/mysqli/tests/037.phpt
+      ext/mysqli/tests/038.phpt
+      ext/mysqli/tests/039.phpt
+      ext/mysqli/tests/040.phpt
+      ext/mysqli/tests/041.phpt
+      ext/mysqli/tests/042.phpt
+      ext/mysqli/tests/043.phpt
+      ext/mysqli/tests/044.phpt
+      ext/mysqli/tests/045.phpt
+      ext/mysqli/tests/046.phpt
+      ext/mysqli/tests/047.phpt
+      ext/mysqli/tests/048.phpt
+      ext/mysqli/tests/049.phpt
+      ext/mysqli/tests/050.phpt
+      ext/mysqli/tests/051.phpt
+      ext/mysqli/tests/052.phpt
+      ext/mysqli/tests/053.phpt
+      ext/mysqli/tests/054.phpt
+      ext/mysqli/tests/055.phpt
+      ext/mysqli/tests/056.phpt
+      ext/mysqli/tests/057.phpt
+      ext/mysqli/tests/058.phpt
+      ext/mysqli/tests/059.phpt
+      ext/mysqli/tests/060.phpt
+      ext/mysqli/tests/061.phpt
+      ext/mysqli/tests/bug28817.phpt
+      ext/mysqli/tests/bug29311.phpt
+      ext/mysqli/tests/bug30967.phpt:
+      Fixed bug #30890 (testsuite)
+      Fixed bug #28817 (property problems in extended class)
+
+2004-12-04  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * NEWS
+      sapi/apache/php_apache.c:
+      Add apache_reset_timeout() function for Apache1.  This is needed because
+      Apache1 only resets the write timer, which defaults to 300 seconds, on
+      a successful write.  That is, if the client has gone away and Apache
+      attempts a write which fails it will set the conn->aborted flag but not
+      reset the timeout.  Assuming the PHP script is running in
+      ignore_user_abort
+      mode we ignore the aborted flag, but we'll still get blown out of the
+      water
+      300 seconds after the failed write unless we periodically reset the timer.
+      With set_time_limit(0), ignore_user_abort(true) and periodic
+      apache_reset_timeout() calls we can theoretically run forever which is
+      why I disabled this call in safe mode.
+
 2004-12-03  Antony Dovgal  <tony2001@phpclub.net>
 
     * (PHP_5_0)
