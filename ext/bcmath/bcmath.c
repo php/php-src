@@ -42,7 +42,7 @@ function_entry bcmath_functions[] = {
 	PHP_FE(bcsqrt,									NULL)
 	PHP_FE(bcscale,									NULL)
 	PHP_FE(bccomp,									NULL)
-	PHP_FE(bc_powmod,								NULL)
+	PHP_FE(bcpowmod,								NULL)
 	{NULL, NULL, NULL}
 };
 
@@ -330,9 +330,9 @@ PHP_FUNCTION(bcmod)
 }
 /* }}} */
 
-/* {{{ proto string bc_powmod(string x, string y, string mod [, int scale])
+/* {{{ proto string bcpowmod(string x, string y, string mod [, int scale])
    Returns the value of an arbitrary precision number raised to the power of another reduced by a modulous */
-PHP_FUNCTION(bc_powmod)
+PHP_FUNCTION(bcpowmod)
 {
 	char *left, *right, *modulous;
 	int left_len, right_len, modulous_len;
@@ -340,7 +340,7 @@ PHP_FUNCTION(bc_powmod)
 	int scale=bc_precision;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sss|l", &left, &left_len, &right, &right_len, &modulous, &modulous_len, &scale) == FAILURE) {
-        	WRONG_PARAM_COUNT;
+		WRONG_PARAM_COUNT;
 	}
 
 	bc_init_num(&first TSRMLS_CC);
