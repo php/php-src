@@ -290,7 +290,7 @@ PHPAPI int cfg_get_string(char *varname, char **result);
 #define VIRTUAL_DIR
 #endif
 
-#include "php_virtual_cwd.h"
+#include "tsrm_virtual_cwd.h"
 
 /* Virtual current directory support */
 #ifdef VIRTUAL_DIR
