@@ -1,3 +1,55 @@
+2000-12-11  Jani Taskinen  <sniper@iki.fi>
+
+    * INSTALL: MFH
+
+2000-12-11  Zeev Suraski  <zeev@zend.com>
+
+    * ext/standard/string.c: Fix Win32 build
+
+2000-12-11  Jani Taskinen  <sniper@iki.fi>
+
+    * INSTALL: Added a note about --enable-versioning working with IRIX 6.5
+
+2000-12-11  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/standard/var.c: Fix serializer bug (merge with HEAD)
+
+2000-12-11  Sterling Hughes  <Sterling.Hughes@pentap.net>
+
+    * ext/sablot/php_sablot.h
+      ext/sablot/sablot.c: Merge with HEAD
+
+2000-12-11  Andrei Zmievski  <andrei@ispi.net>
+
+    * NEWS: Formatting.
+
+2000-12-11  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/standard/var.c:
+    Fix serializer bug that prevented serializer from working on any
+    variable that had non-reference copies of the same zval
+
+2000-12-11  Sterling Hughes  <Sterling.Hughes@pentap.net>
+
+    * ext/sablot/php_sablot.h
+      ext/sablot/sablot.c:
+    Fix a crash related to the simple sablotron api. (thies)
+    make sablotron work with zts.
+    fix a leak or two,
+
+2000-12-11  Thies C. Arntzen  <thies@thieso.net>
+
+    * ext/standard/var.c: fix #6348
+
+2000-12-11  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/apache2filter/README: Add TODO note
+
+2000-12-11  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/standard/array.c
+      ext/standard/php_array.h: Make php_array_merge() an API function.
+
 2000-12-10  Sascha Schumann  <sascha@schumann.cx>
 
     * sapi/apache/mod_php4.c
