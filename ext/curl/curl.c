@@ -291,10 +291,6 @@ PHP_FUNCTION(curl_init)
 	}
 	
 	curl_handle = (php_curl *)emalloc(sizeof(php_curl));
-	if (!curl_handle) {
-		php_error(E_WARNING, "Couldn't allocate a CURL Handle");
-		RETURN_FALSE;
-	}
 	memset(curl_handle, 0, sizeof(php_curl));
 
 	zend_llist_init(&curl_handle->to_free, sizeof(char *), (void(*)(void *))curl_free_string, 0);
@@ -440,10 +436,6 @@ PHP_FUNCTION(curl_setopt)
 					val_str = estrndup(Z_STRVAL_PP(current), Z_STRLEN_PP(current));
 					
 					str = emalloc(strlen(string_key) + strlen(val_str) + 1 + 2);
-					if (!str) {
-						php_error(E_WARNING, "Couldn't allocate a post field from %s()", get_active_function_name());
-						RETURN_FALSE;
-					}
 					sprintf(str, "%s=%s", string_key, val_str);
 
 					ret = curl_formparse(str, &first, &last);
