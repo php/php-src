@@ -95,6 +95,7 @@ function_entry pgsql_functions[] = {
 	/* result functions */
 	PHP_FE(pg_fetch_result,	NULL)
 	PHP_FE(pg_fetch_row,	NULL)
+	PHP_FE(pg_fetch_assoc,	NULL)
 	PHP_FE(pg_fetch_array,	NULL)
 	PHP_FE(pg_fetch_object,	NULL)
 	PHP_FE(pg_fetch_all,	NULL)
@@ -1326,6 +1327,18 @@ PHP_FUNCTION(pg_fetch_row)
 }
 /* }}} */
 
+/* {{{ proto array pg_fetch_assoc(resource result [, int row])
+   Fetch a row as an assoc array */
+PHP_FUNCTION(pg_fetch_assoc)
+{
+	/* pg_fetch_assoc() is added from PHP 4.3.0. It should raise error, when
+	   there is 3rd parameter */
+	if (ZEND_NUM_ARGS() > 2)
+		WRONG_PARAM_COUNT;
+	php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, PGSQL_ASSOC);
+}
+/* }}} */
+
 /* {{{ proto array pg_fetch_array(resource result [, int row [, int result_type]])
    Fetch a row as an array */
 PHP_FUNCTION(pg_fetch_array)
@@ -1334,10 +1347,12 @@ PHP_FUNCTION(pg_fetch_array)
 }
 /* }}} */
 
-/* {{{ proto object pg_fetch_object(resource result [, int row[, int result_type]])
+/* {{{ proto object pg_fetch_object(resource result [, int row])
    Fetch a row as an object */
 PHP_FUNCTION(pg_fetch_object)
 {
+	/* pg_fetch_object() allowed result_type used to be. 3rd parameter
+	   must be allowed for compatibility */
 	php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, PGSQL_ASSOC);
 	if (Z_TYPE_P(return_value)==IS_ARRAY) {
 		object_and_properties_init(return_value, ZEND_STANDARD_CLASS_DEF_PTR, Z_ARRVAL_P(return_value));
@@ -3794,7 +3809,7 @@ cleanup:
 }
 /* }}} */
 
-/* {{{ proto bool pg_insert(resource db, string table, array values[, int options])
+/* {{{ proto mixed pg_insert(resource db, string table, array values[, int options])
    Insert values (filed=>value) to table */
 PHP_FUNCTION(pg_insert)
 {
@@ -3943,7 +3958,7 @@ cleanup:
 }
 /* }}} */
 
-/* {{{ proto bool pg_update(resource db, string table, array fields, array ids[, int options])
+/* {{{ proto mixed pg_update(resource db, string table, array fields, array ids[, int options])
    Update table using values (field=>value) and ids (id=>value) */
 PHP_FUNCTION(pg_update)
 {
@@ -4032,7 +4047,7 @@ cleanup:
 }
 /* }}} */
 
-/* {{{ proto bool pg_delete(resource db, string table, array ids[, int options])
+/* {{{ proto mixed pg_delete(resource db, string table, array ids[, int options])
    Delete records has ids (id=>value) */
 PHP_FUNCTION(pg_delete)
 {
@@ -4169,7 +4184,7 @@ cleanup:
 }
 /* }}} */
 
-/* {{{ proto array pg_select(resource db, string table, array ids[, int options])
+/* {{{ proto mixed pg_select(resource db, string table, array ids[, int options])
    Select records that has ids (id=>value) */
 PHP_FUNCTION(pg_select)
 {

@@ -76,6 +76,7 @@ PHP_FUNCTION(pg_query);
 PHP_FUNCTION(pg_send_query);
 PHP_FUNCTION(pg_cancel_query);
 /* result functions */
+PHP_FUNCTION(pg_fetch_assoc);
 PHP_FUNCTION(pg_fetch_array);
 PHP_FUNCTION(pg_fetch_object);
 PHP_FUNCTION(pg_fetch_result);
@@ -142,7 +143,7 @@ PHP_FUNCTION(pg_select);
 #define PGSQL_CONV_IGNORE_NOT_NULL  (1<<3)     /* Ignore NOT NULL constraints */
 #define PGSQL_CONV_OPTS             (PGSQL_CONV_IGNORE_DEFAULT|PGSQL_CONV_FORCE_NULL|PGSQL_CONV_IGNORE_NOT_NULL)
 /* php_pgsql_insert/update/select/delete options */
-#define PGSQL_DML_NO_CONV           (1<<8)     /* Call php_pgsql_convert() */
+#define PGSQL_DML_NO_CONV           (1<<8)     /* Do not call php_pgsql_convert() */
 #define PGSQL_DML_EXEC              (1<<9)     /* Execute query */
 #define PGSQL_DML_ASYNC             (1<<10)    /* Do async query */
 #define PGSQL_DML_STRING            (1<<11)    /* Return query string */
