@@ -1,7 +1,12 @@
 --TEST--
 Core dump when returning FALSE in a handler
 --SKIPIF--
-<?php include("skipif.inc"); ?>
+<?php
+include("skipif.inc");
+if(!defined("XSLT_SABOPT_FILES_TO_HANDLER")) {
+	die("skip Sablotron CVS > 20021031 needed");
+}
+?>
 --INI--
 magic_quotes_runtime=0
 --FILE--
