@@ -429,6 +429,8 @@ static void _function_string(string *str, zend_function *fptr, char* indent TSRM
 
 static void _property_string(string *str, zend_property_info *prop, char* indent TSRMLS_DC)
 {
+	char *class_name, *prop_name;
+
 	string_printf(str, "%sProperty [ %s", indent,
 				  (prop->flags & ZEND_ACC_IMPLICIT_PUBLIC) ? "<implicit> " : "<default> ");
 
@@ -447,15 +449,9 @@ static void _property_string(string *str, zend_property_info *prop, char* indent
 	if(prop->flags & ZEND_ACC_STATIC) {
 		string_printf(str, "static ");
 	}
-	/* Unmangle the property name if necessary */
-	string_printf(str, "$");
-	if (prop->name[0] != 0) {
-		string_write(str, prop->name, prop->name_length);
-	} else {
-		char* tmp;
-		tmp= prop->name + 1;
-		string_printf(str, tmp + strlen(tmp) + 1);
-	}
+
+	unmangle_property_name(prop->name, &class_name, &prop_name);
+	string_printf(str, "$%s", prop_name);
 
 	string_printf(str, " ]\n");
 }
@@ -579,18 +575,13 @@ void reflection_property_factory(zend_class_entry *ce, zend_property_info *prop,
 	zval *name;
 	zval *classname;
 	property_reference *reference;
+	char *class_name, *prop_name;
+
+	unmangle_property_name(prop->name, &class_name, &prop_name);
 
 	MAKE_STD_ZVAL(name);
+	ZVAL_STRING(name, prop_name, 1);
 
-	/* Unmangle the property name if necessary */
-	if (prop->name[0] != 0) {
-		ZVAL_STRINGL(name, prop->name, prop->name_length, 1);
-	} else {
-		char* tmp;
-
-		tmp= prop->name + 1;
-		ZVAL_STRING(name, tmp + strlen(tmp) + 1, 1);
-	}
 	MAKE_STD_ZVAL(classname);
 	ZVAL_STRINGL(classname, ce->name, ce->name_length, 1);
 	reflection_instanciate(reflection_property_ptr, object TSRMLS_CC);
