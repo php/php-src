@@ -18,7 +18,13 @@ for i in $@; do
 		-e '/Copyright.*MySQL.*/,/MA 02111/c\
 /* Copyright Abandoned 1996 TCX DataKonsult AB & Monty Program KB & Detron HB \
    This file is public domain and comes with NO WARRANTY of any kind */' \
-		-e '/Copyright (C) 199.*/,/For a more info/c\
+		-e '/Copyright (C) .*MySQL.*TCX/,/For a more info/c\
+/* Copyright Abandoned 1996 TCX DataKonsult AB & Monty Program KB & Detron HB \
+   This file is public domain and comes with NO WARRANTY of any kind */' \
+		-e '/Copyright (C) .*TCX.*Monty/,/For a more info/c\
+/* Copyright Abandoned 1996 TCX DataKonsult AB & Monty Program KB & Detron HB \
+   This file is public domain and comes with NO WARRANTY of any kind */' \
+		-e '/Copyright (C) .... Monty.*/,/be preserved on all copies/c\
 /* Copyright Abandoned 1996 TCX DataKonsult AB & Monty Program KB & Detron HB \
    This file is public domain and comes with NO WARRANTY of any kind */' \
    < $i > tmp
