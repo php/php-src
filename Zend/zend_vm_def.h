@@ -2930,7 +2930,7 @@ ZEND_VM_HANDLER(78, ZEND_FE_FETCH, VAR, ANY)
 	zend_op *opline = EX(opline);
 	zend_free_op free_op1;
 	zval *array = GET_OP1_ZVAL_PTR(BP_VAR_R);
-	zval **value, *key;
+	zval **value;
 	char *str_key;
 	uint str_key_len;
 	ulong int_key;
@@ -3018,29 +3018,17 @@ ZEND_VM_HANDLER(78, ZEND_FE_FETCH, VAR, ANY)
 	if (opline->extended_value & ZEND_FE_FETCH_BYREF) {
 		SEPARATE_ZVAL_IF_NOT_REF(value);
 		(*value)->is_ref = 1;
+		EX_T(opline->result.u.var).var.ptr_ptr = value;
+		(*value)->refcount++;
+	} else {
+		EX_T(opline->result.u.var).var.ptr_ptr = value;
+		PZVAL_LOCK(*EX_T(opline->result.u.var).var.ptr_ptr);
+		AI_USE_PTR(EX_T(opline->result.u.var).var);
 	}
 
-	if (!use_key) {
-		if (opline->extended_value & ZEND_FE_FETCH_BYREF) {
-			EX_T(opline->result.u.var).var.ptr_ptr = value;
-			(*value)->refcount++;
-		} else {
-			zval *result = &EX_T(opline->result.u.var).tmp_var;
-
-			*result = **value;
-			zval_copy_ctor(result);
-		}
-	} else {
-		zval *result = &EX_T(opline->result.u.var).tmp_var;
-
-		(*value)->refcount++;
-
-		array_init(result);
-
-		zend_hash_index_update(result->value.ht, 0, value, sizeof(zval *), NULL);
-
-		ALLOC_ZVAL(key);
-		INIT_PZVAL(key);
+	if (use_key) {
+		zend_op *op_data = opline+1;
+		zval *key = &EX_T(op_data->result.u.var).tmp_var;
 
 		switch (key_type) {
 			case HASH_KEY_IS_STRING:
@@ -3054,9 +3042,9 @@ ZEND_VM_HANDLER(78, ZEND_FE_FETCH, VAR, ANY)
 				break;
 			EMPTY_SWITCH_DEFAULT_CASE()
 		}
-		zend_hash_index_update(result->value.ht, 1, &key, sizeof(zval *), NULL);
 	}
 
+	ZEND_VM_INC_OPCODE();
 	ZEND_VM_NEXT_OPCODE();
 }
 
