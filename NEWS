@@ -2,6 +2,10 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? ????, Version 4.0 Beta 4
+- Fixed float-compare in min(),max(),a[r]sort(),[r]sort(). (Thies)
+- Implemented get_html_translation_table() function. (Thies)
+- Implemented array_flip() function. Returns input-array with key, value
+  flipped. (Thies)
 - Added Berkeley DB3 support in DBA (Sascha)
 - Implemented 2-Arg version of strtr($str,$translation_array). This can be used
   to revert what htmlspecialchars() did. (Thies)
