@@ -12,6 +12,9 @@ if (PHP_TIDY != "no") {
 			)) {
 		EXTENSION("tidy", "tidy.c");
 		AC_DEFINE('HAVE_TIDY', 1, 'Have TIDY library');
+		if (!PHP_TIDY_SHARED) {
+			ADD_DEF_FILE("ext\\tidy\\php_tidy.def");
+		}
 	} else {
 		WARNING("tidy not enabled; libraries and headers not found");
 	}
