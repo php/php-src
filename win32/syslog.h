@@ -11,8 +11,8 @@
  * that will have to be done later.
  */
 
-#ifndef _SYS_LOG_H
-#define	_SYS_LOG_H
+#ifndef SYSLOG_H
+#define	SYSLOG_H
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
@@ -70,4 +70,4 @@ extern void openlog(const char *, int, int);
 extern void syslog(int, const char *, ...);
 
 
-#endif							/* _SYS_LOG_H */
+#endif							/* SYSLOG_H */

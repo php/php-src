@@ -21,8 +21,8 @@
 /* $Id$ */
 
 
-#ifndef _MAIN_H
-#define _MAIN_H
+#ifndef PHP_MAIN_H
+#define PHP_MAIN_H
 
 #include "zend_globals.h"
 #include "php_globals.h"
