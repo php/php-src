@@ -926,7 +926,7 @@ PHP_FUNCTION(vpopmail_error)
 }
 /* }}} */
 
-#endif /* HAVE_VPOPMAIL */
+#endif
 
 /*
  * Local variables:
