@@ -227,162 +227,162 @@ int imap_init(INIT_FUNC_ARGS)
 	auth_link (&auth_log);        /* link in the log authenticator */
 	/* lets allow NIL */
 
-        REGISTER_MAIN_LONG_CONSTANT("NIL", NIL, CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_LONG_CONSTANT("NIL", NIL, CONST_PERSISTENT | CONST_CS);
 
 
 	/* Open Options */
 
-        REGISTER_MAIN_LONG_CONSTANT("OP_DEBUG", OP_DEBUG, CONST_PERSISTENT | CONST_CS);
-/* debug protocol negotiations */
+	REGISTER_MAIN_LONG_CONSTANT("OP_DEBUG", OP_DEBUG, CONST_PERSISTENT | CONST_CS);
+	/* debug protocol negotiations */
 
-        REGISTER_MAIN_LONG_CONSTANT("OP_READONLY", OP_READONLY, CONST_PERSISTENT | CONST_CS);
-/* read-only open */
+	REGISTER_MAIN_LONG_CONSTANT("OP_READONLY", OP_READONLY, CONST_PERSISTENT | CONST_CS);
+	/* read-only open */
 
-        REGISTER_MAIN_LONG_CONSTANT("OP_ANONYMOUS", OP_ANONYMOUS, CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_LONG_CONSTANT("OP_ANONYMOUS", OP_ANONYMOUS, CONST_PERSISTENT | CONST_CS);
 	/* anonymous open of newsgroup */
 
-        REGISTER_MAIN_LONG_CONSTANT("OP_SHORTCACHE", OP_SHORTCACHE, CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_LONG_CONSTANT("OP_SHORTCACHE", OP_SHORTCACHE, CONST_PERSISTENT | CONST_CS);
 
-/* short (elt-only) caching */
+	/* short (elt-only) caching */
 
-        REGISTER_MAIN_LONG_CONSTANT("OP_SILENT", OP_SILENT, CONST_PERSISTENT | CONST_CS);
-/* don't pass up events (internal use) */
-        REGISTER_MAIN_LONG_CONSTANT("OP_PROTOTYPE", OP_PROTOTYPE, CONST_PERSISTENT | CONST_CS);
-/* return driver prototype */
-        REGISTER_MAIN_LONG_CONSTANT("OP_HALFOPEN", OP_HALFOPEN, CONST_PERSISTENT | CONST_CS);
-/* half-open (IMAP connect but no select) */
+	REGISTER_MAIN_LONG_CONSTANT("OP_SILENT", OP_SILENT, CONST_PERSISTENT | CONST_CS);
+	/* don't pass up events (internal use) */
+	REGISTER_MAIN_LONG_CONSTANT("OP_PROTOTYPE", OP_PROTOTYPE, CONST_PERSISTENT | CONST_CS);
+	/* return driver prototype */
+	REGISTER_MAIN_LONG_CONSTANT("OP_HALFOPEN", OP_HALFOPEN, CONST_PERSISTENT | CONST_CS);
+	/* half-open (IMAP connect but no select) */
 
-        REGISTER_MAIN_LONG_CONSTANT("OP_EXPUNGE", OP_EXPUNGE, CONST_PERSISTENT | CONST_CS);
- /* silently expunge recycle stream */
+	REGISTER_MAIN_LONG_CONSTANT("OP_EXPUNGE", OP_EXPUNGE, CONST_PERSISTENT | CONST_CS);
+	/* silently expunge recycle stream */
 
-       REGISTER_MAIN_LONG_CONSTANT("OP_SECURE", OP_SECURE, CONST_PERSISTENT | CONST_CS);
-/* don't do non-secure authentication */
+	REGISTER_MAIN_LONG_CONSTANT("OP_SECURE", OP_SECURE, CONST_PERSISTENT | CONST_CS);
+	/* don't do non-secure authentication */
 
-/* 
-   PHP re-assigns CL_EXPUNGE a custom value that can be used as part of the imap_open() bitfield
-   because it seems like a good idea to be able to indicate that the mailbox should be 
-   automatically expunged during imap_open in case the script get interrupted and it doesn't get
-   to the imap_close() where this option is normally placed.  If the c-client library adds other
-   options and the value for this one conflicts, simply make PHP_EXPUNGE higher at the top of 
-   this file 
-*/
-        REGISTER_MAIN_LONG_CONSTANT("CL_EXPUNGE", PHP_EXPUNGE, CONST_PERSISTENT | CONST_CS);
-        /* expunge silently */
+	/* 
+	PHP re-assigns CL_EXPUNGE a custom value that can be used as part of the imap_open() bitfield
+	because it seems like a good idea to be able to indicate that the mailbox should be 
+	automatically expunged during imap_open in case the script get interrupted and it doesn't get
+	to the imap_close() where this option is normally placed.  If the c-client library adds other
+	options and the value for this one conflicts, simply make PHP_EXPUNGE higher at the top of 
+	this file 
+	*/
+	REGISTER_MAIN_LONG_CONSTANT("CL_EXPUNGE", PHP_EXPUNGE, CONST_PERSISTENT | CONST_CS);
+	/* expunge silently */
 
 
 	/* Fetch options */
 
-        REGISTER_MAIN_LONG_CONSTANT("FT_UID", FT_UID, CONST_PERSISTENT | CONST_CS);
-         /* argument is a UID */
-        REGISTER_MAIN_LONG_CONSTANT("FT_PEEK", FT_PEEK, CONST_PERSISTENT | CONST_CS);
-       /* peek at data */
-        REGISTER_MAIN_LONG_CONSTANT("FT_NOT", FT_NOT, CONST_PERSISTENT | CONST_CS);
-        /* NOT flag for header lines fetch */
-        REGISTER_MAIN_LONG_CONSTANT("FT_INTERNAL", FT_INTERNAL, CONST_PERSISTENT | CONST_CS);
-    /* text can be internal strings */
-        REGISTER_MAIN_LONG_CONSTANT("FT_PREFETCHTEXT", FT_PREFETCHTEXT, CONST_PERSISTENT | CONST_CS);
-    /* IMAP prefetch text when fetching header */
+	REGISTER_MAIN_LONG_CONSTANT("FT_UID", FT_UID, CONST_PERSISTENT | CONST_CS);
+	/* argument is a UID */
+	REGISTER_MAIN_LONG_CONSTANT("FT_PEEK", FT_PEEK, CONST_PERSISTENT | CONST_CS);
+	/* peek at data */
+	REGISTER_MAIN_LONG_CONSTANT("FT_NOT", FT_NOT, CONST_PERSISTENT | CONST_CS);
+	/* NOT flag for header lines fetch */
+	REGISTER_MAIN_LONG_CONSTANT("FT_INTERNAL", FT_INTERNAL, CONST_PERSISTENT | CONST_CS);
+	/* text can be internal strings */
+	REGISTER_MAIN_LONG_CONSTANT("FT_PREFETCHTEXT", FT_PREFETCHTEXT, CONST_PERSISTENT | CONST_CS);
+	/* IMAP prefetch text when fetching header */
 
 
 	/* Flagging options */
 
-        REGISTER_MAIN_LONG_CONSTANT("ST_UID", ST_UID, CONST_PERSISTENT | CONST_CS);
-         /* argument is a UID sequence */
-        REGISTER_MAIN_LONG_CONSTANT("ST_SILENT", ST_SILENT, CONST_PERSISTENT | CONST_CS);
-     /* don't return results */
-        REGISTER_MAIN_LONG_CONSTANT("ST_SET", ST_SET, CONST_PERSISTENT | CONST_CS);
-     /* set vs. clear */
+	REGISTER_MAIN_LONG_CONSTANT("ST_UID", ST_UID, CONST_PERSISTENT | CONST_CS);
+	/* argument is a UID sequence */
+	REGISTER_MAIN_LONG_CONSTANT("ST_SILENT", ST_SILENT, CONST_PERSISTENT | CONST_CS);
+	/* don't return results */
+	REGISTER_MAIN_LONG_CONSTANT("ST_SET", ST_SET, CONST_PERSISTENT | CONST_CS);
+	/* set vs. clear */
 
-   /* Copy options */
+	/* Copy options */
 
-        REGISTER_MAIN_LONG_CONSTANT("CP_UID", CP_UID, CONST_PERSISTENT | CONST_CS);
-         /* argument is a UID sequence */
-        REGISTER_MAIN_LONG_CONSTANT("CP_MOVE", CP_MOVE, CONST_PERSISTENT | CONST_CS);
-        /* delete from source after copying */
-
-
-   /* Search/sort options */
-
-        REGISTER_MAIN_LONG_CONSTANT("SE_UID", SE_UID, CONST_PERSISTENT | CONST_CS);
-         /* return UID */
-        REGISTER_MAIN_LONG_CONSTANT("SE_FREE", SE_FREE, CONST_PERSISTENT | CONST_CS);
-        /* free search program after finished */
-        REGISTER_MAIN_LONG_CONSTANT("SE_NOPREFETCH", SE_NOPREFETCH, CONST_PERSISTENT | CONST_CS);
-  /* no search prefetching */
-        REGISTER_MAIN_LONG_CONSTANT("SO_FREE", SO_FREE, CONST_PERSISTENT | CONST_CS);
-        /* free sort program after finished */
-        REGISTER_MAIN_LONG_CONSTANT("SO_NOSERVER", SO_NOSERVER, CONST_PERSISTENT | CONST_CS);
-   /* don't do server-based sort */
-
-   /* Status options */
-
-        REGISTER_MAIN_LONG_CONSTANT("SA_MESSAGES",SA_MESSAGES , CONST_PERSISTENT | CONST_CS);
-    /* number of messages */
-        REGISTER_MAIN_LONG_CONSTANT("SA_RECENT", SA_RECENT, CONST_PERSISTENT | CONST_CS);
-      /* number of recent messages */
-        REGISTER_MAIN_LONG_CONSTANT("SA_UNSEEN",SA_UNSEEN , CONST_PERSISTENT | CONST_CS);
-      /* number of unseen messages */
-        REGISTER_MAIN_LONG_CONSTANT("SA_UIDNEXT", SA_UIDNEXT, CONST_PERSISTENT | CONST_CS);
-     /* next UID to be assigned */
-        REGISTER_MAIN_LONG_CONSTANT("SA_UIDVALIDITY",SA_UIDVALIDITY , CONST_PERSISTENT | CONST_CS);
-     /* UID validity value */
+	REGISTER_MAIN_LONG_CONSTANT("CP_UID", CP_UID, CONST_PERSISTENT | CONST_CS);
+	/* argument is a UID sequence */
+	REGISTER_MAIN_LONG_CONSTANT("CP_MOVE", CP_MOVE, CONST_PERSISTENT | CONST_CS);
+	/* delete from source after copying */
 
 
-   /* Bits for mm_list() and mm_lsub() */
+	/* Search/sort options */
 
-        REGISTER_MAIN_LONG_CONSTANT("LATT_NOINFERIORS",LATT_NOINFERIORS , CONST_PERSISTENT | CONST_CS);
-        REGISTER_MAIN_LONG_CONSTANT("LATT_NOSELECT", LATT_NOSELECT, CONST_PERSISTENT | CONST_CS);
-        REGISTER_MAIN_LONG_CONSTANT("LATT_MARKED", LATT_MARKED, CONST_PERSISTENT | CONST_CS);
-        REGISTER_MAIN_LONG_CONSTANT("LATT_UNMARKED",LATT_UNMARKED , CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_LONG_CONSTANT("SE_UID", SE_UID, CONST_PERSISTENT | CONST_CS);
+	/* return UID */
+	REGISTER_MAIN_LONG_CONSTANT("SE_FREE", SE_FREE, CONST_PERSISTENT | CONST_CS);
+	/* free search program after finished */
+	REGISTER_MAIN_LONG_CONSTANT("SE_NOPREFETCH", SE_NOPREFETCH, CONST_PERSISTENT | CONST_CS);
+	/* no search prefetching */
+	REGISTER_MAIN_LONG_CONSTANT("SO_FREE", SO_FREE, CONST_PERSISTENT | CONST_CS);
+	/* free sort program after finished */
+	REGISTER_MAIN_LONG_CONSTANT("SO_NOSERVER", SO_NOSERVER, CONST_PERSISTENT | CONST_CS);
+	/* don't do server-based sort */
+
+	/* Status options */
+
+	REGISTER_MAIN_LONG_CONSTANT("SA_MESSAGES",SA_MESSAGES , CONST_PERSISTENT | CONST_CS);
+	/* number of messages */
+	REGISTER_MAIN_LONG_CONSTANT("SA_RECENT", SA_RECENT, CONST_PERSISTENT | CONST_CS);
+	/* number of recent messages */
+	REGISTER_MAIN_LONG_CONSTANT("SA_UNSEEN",SA_UNSEEN , CONST_PERSISTENT | CONST_CS);
+	/* number of unseen messages */
+	REGISTER_MAIN_LONG_CONSTANT("SA_UIDNEXT", SA_UIDNEXT, CONST_PERSISTENT | CONST_CS);
+	/* next UID to be assigned */
+	REGISTER_MAIN_LONG_CONSTANT("SA_UIDVALIDITY",SA_UIDVALIDITY , CONST_PERSISTENT | CONST_CS);
+	/* UID validity value */
 
 
-   /* Sort functions */
+	/* Bits for mm_list() and mm_lsub() */
 
-        REGISTER_MAIN_LONG_CONSTANT("SORTDATE",SORTDATE , CONST_PERSISTENT | CONST_CS);
-             /* date */
-        REGISTER_MAIN_LONG_CONSTANT("SORTARRIVAL",SORTARRIVAL , CONST_PERSISTENT | CONST_CS);
-          /* arrival date */
-        REGISTER_MAIN_LONG_CONSTANT("SORTFROM",SORTFROM , CONST_PERSISTENT | CONST_CS);
-            /* from */
-        REGISTER_MAIN_LONG_CONSTANT("SORTSUBJECT",SORTSUBJECT , CONST_PERSISTENT | CONST_CS);
-           /* subject */
-        REGISTER_MAIN_LONG_CONSTANT("SORTTO",SORTTO , CONST_PERSISTENT | CONST_CS);
-                /* to */
-        REGISTER_MAIN_LONG_CONSTANT("SORTCC",SORTCC , CONST_PERSISTENT | CONST_CS);
-              /* cc */
-        REGISTER_MAIN_LONG_CONSTANT("SORTSIZE",SORTSIZE , CONST_PERSISTENT | CONST_CS);
-              /* size */
+	REGISTER_MAIN_LONG_CONSTANT("LATT_NOINFERIORS",LATT_NOINFERIORS , CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_LONG_CONSTANT("LATT_NOSELECT", LATT_NOSELECT, CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_LONG_CONSTANT("LATT_MARKED", LATT_MARKED, CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_LONG_CONSTANT("LATT_UNMARKED",LATT_UNMARKED , CONST_PERSISTENT | CONST_CS);
 
-        REGISTER_MAIN_LONG_CONSTANT("TYPETEXT",TYPETEXT , CONST_PERSISTENT | CONST_CS);
-        REGISTER_MAIN_LONG_CONSTANT("TYPEMULTIPART",TYPEMULTIPART , CONST_PERSISTENT | CONST_CS);
-        REGISTER_MAIN_LONG_CONSTANT("TYPEMESSAGE",TYPEMESSAGE , CONST_PERSISTENT | CONST_CS);
-        REGISTER_MAIN_LONG_CONSTANT("TYPEAPPLICATION",TYPEAPPLICATION , CONST_PERSISTENT | CONST_CS);
-        REGISTER_MAIN_LONG_CONSTANT("TYPEAUDIO",TYPEAUDIO , CONST_PERSISTENT | CONST_CS);
-        REGISTER_MAIN_LONG_CONSTANT("TYPEIMAGE",TYPEIMAGE , CONST_PERSISTENT | CONST_CS);
-        REGISTER_MAIN_LONG_CONSTANT("TYPEVIDEO",TYPEVIDEO , CONST_PERSISTENT | CONST_CS);
-        REGISTER_MAIN_LONG_CONSTANT("TYPEOTHER",TYPEOTHER , CONST_PERSISTENT | CONST_CS);
+
+	/* Sort functions */
+
+	REGISTER_MAIN_LONG_CONSTANT("SORTDATE",SORTDATE , CONST_PERSISTENT | CONST_CS);
+	/* date */
+	REGISTER_MAIN_LONG_CONSTANT("SORTARRIVAL",SORTARRIVAL , CONST_PERSISTENT | CONST_CS);
+	/* arrival date */
+	REGISTER_MAIN_LONG_CONSTANT("SORTFROM",SORTFROM , CONST_PERSISTENT | CONST_CS);
+	/* from */
+	REGISTER_MAIN_LONG_CONSTANT("SORTSUBJECT",SORTSUBJECT , CONST_PERSISTENT | CONST_CS);
+	/* subject */
+	REGISTER_MAIN_LONG_CONSTANT("SORTTO",SORTTO , CONST_PERSISTENT | CONST_CS);
+	/* to */
+	REGISTER_MAIN_LONG_CONSTANT("SORTCC",SORTCC , CONST_PERSISTENT | CONST_CS);
+	/* cc */
+	REGISTER_MAIN_LONG_CONSTANT("SORTSIZE",SORTSIZE , CONST_PERSISTENT | CONST_CS);
+	/* size */
+
+	REGISTER_MAIN_LONG_CONSTANT("TYPETEXT",TYPETEXT , CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_LONG_CONSTANT("TYPEMULTIPART",TYPEMULTIPART , CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_LONG_CONSTANT("TYPEMESSAGE",TYPEMESSAGE , CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_LONG_CONSTANT("TYPEAPPLICATION",TYPEAPPLICATION , CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_LONG_CONSTANT("TYPEAUDIO",TYPEAUDIO , CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_LONG_CONSTANT("TYPEIMAGE",TYPEIMAGE , CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_LONG_CONSTANT("TYPEVIDEO",TYPEVIDEO , CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_LONG_CONSTANT("TYPEOTHER",TYPEOTHER , CONST_PERSISTENT | CONST_CS);
 	/*      TYPETEXT                unformatted text
-        TYPEMULTIPART           multiple part
-        TYPEMESSAGE             encapsulated message
-        TYPEAPPLICATION         application data
-        TYPEAUDIO               audio
-        TYPEIMAGE               static image (GIF, JPEG, etc.)
-        TYPEVIDEO               video
-        TYPEOTHER               unknown
+	TYPEMULTIPART           multiple part
+	TYPEMESSAGE             encapsulated message
+	TYPEAPPLICATION         application data
+	TYPEAUDIO               audio
+	TYPEIMAGE               static image (GIF, JPEG, etc.)
+	TYPEVIDEO               video
+	TYPEOTHER               unknown
 	*/
-        REGISTER_MAIN_LONG_CONSTANT("ENC7BIT",ENC7BIT , CONST_PERSISTENT | CONST_CS);
-        REGISTER_MAIN_LONG_CONSTANT("ENC8BIT",ENC8BIT , CONST_PERSISTENT | CONST_CS);
-        REGISTER_MAIN_LONG_CONSTANT("ENCBINARY",ENCBINARY , CONST_PERSISTENT | CONST_CS);
-        REGISTER_MAIN_LONG_CONSTANT("ENCBASE64",ENCBASE64, CONST_PERSISTENT | CONST_CS);
-        REGISTER_MAIN_LONG_CONSTANT("ENCQUOTEDPRINTABLE",ENCQUOTEDPRINTABLE , CONST_PERSISTENT | CONST_CS);
-        REGISTER_MAIN_LONG_CONSTANT("ENCOTHER",ENCOTHER , CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_LONG_CONSTANT("ENC7BIT",ENC7BIT , CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_LONG_CONSTANT("ENC8BIT",ENC8BIT , CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_LONG_CONSTANT("ENCBINARY",ENCBINARY , CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_LONG_CONSTANT("ENCBASE64",ENCBASE64, CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_LONG_CONSTANT("ENCQUOTEDPRINTABLE",ENCQUOTEDPRINTABLE , CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_LONG_CONSTANT("ENCOTHER",ENCOTHER , CONST_PERSISTENT | CONST_CS);
 	/*
-	  ENC7BIT                 7 bit SMTP semantic data
-	  ENC8BIT                 8 bit SMTP semantic data
-	  ENCBINARY               8 bit binary data
-	  ENCBASE64               base-64 encoded data
-	  ENCQUOTEDPRINTABLE      human-readable 8-as-7 bit data
-	  ENCOTHER                unknown
+	ENC7BIT                 7 bit SMTP semantic data
+	ENC8BIT                 8 bit SMTP semantic data
+	ENCBINARY               8 bit binary data
+	ENCBASE64               base-64 encoded data
+	ENCQUOTEDPRINTABLE      human-readable 8-as-7 bit data
+	ENCOTHER                unknown
 	*/
 
     le_imap = register_list_destructors(mail_close_it,NULL);
@@ -490,37 +490,34 @@ PHP_FUNCTION(imap_reopen)
    Append a string message to a specified mailbox */
 PHP_FUNCTION(imap_append)
 {
-  pval *streamind,*folder, *message,*flags;
-  int ind, ind_type;
-  pils *imap_le_struct; 
-  STRING st;
-  int myargc=ARG_COUNT(ht);
+	pval *streamind,*folder, *message,*flags;
+	int ind, ind_type;
+	pils *imap_le_struct; 
+	STRING st;
+	int myargc=ARG_COUNT(ht);
   
-  if ( myargc < 3 || myargc > 4 || getParameters( ht, myargc, &streamind, &folder, &message,&flags) == FAILURE) {
-    WRONG_PARAM_COUNT;
-  }
+	if ( myargc < 3 || myargc > 4 || getParameters( ht, myargc, &streamind, &folder, &message,&flags) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
   
-  convert_to_long(streamind);
-  convert_to_string(folder);
-  convert_to_string(message);
-  if (myargc == 4) convert_to_string(flags);
-  ind = streamind->value.lval;
+	convert_to_long(streamind);
+	convert_to_string(folder);
+	convert_to_string(message);
+	if (myargc == 4) convert_to_string(flags);
+	ind = streamind->value.lval;
   
 	imap_le_struct = (pils *)php3_list_find( ind, &ind_type );
-	
+
 	if ( !imap_le_struct || ind_type != le_imap ) {
-	  php3_error(E_WARNING, "Unable to find stream pointer");
-	  RETURN_FALSE;
+		php3_error(E_WARNING, "Unable to find stream pointer");
+		RETURN_FALSE;
 	}
 	INIT (&st,mail_string,(void *) message->value.str.val,message->value.str.len);
-	if(mail_append_full(imap_le_struct->imap_stream, folder->value.str.val,myargc==4?flags->value.str.val:NIL,NIL,&st))
-	  {
-	  RETURN_TRUE;
-	  }
-	else
-	  {
-	  RETURN_FALSE;
-	  }
+	if(mail_append_full(imap_le_struct->imap_stream, folder->value.str.val,myargc==4?flags->value.str.val:NIL,NIL,&st)) {
+		RETURN_TRUE;
+	} else {
+		RETURN_FALSE;
+	}
 }
 /* }}} */
 
@@ -1125,6 +1122,7 @@ PHP_FUNCTION(imap_headerinfo)
 	ENVELOPE *en;
 	ADDRESS *addresstmp,*addresstmp2;
 	int myargc;
+
 	myargc=ARG_COUNT(ht);
 	if (myargc<2 || myargc>5 || getParameters(ht,myargc,&streamind,&msgno,&fromlength,&subjectlength,&defaulthost)==FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1150,290 +1148,255 @@ PHP_FUNCTION(imap_headerinfo)
 
 
     mystring=mail_fetchheader_full(imap_le_struct->imap_stream,msgno->value.lval,NIL,&length,NIL);
-if(myargc ==5)
-rfc822_parse_msg (&en,NULL,mystring,length,NULL,defaulthost->value.str.val,NIL);
-else
-rfc822_parse_msg (&en,NULL,mystring,length,NULL,"UNKNOWN",NIL);
+	if(myargc ==5)
+		rfc822_parse_msg (&en,NULL,mystring,length,NULL,defaulthost->value.str.val,NIL);
+	else
+		rfc822_parse_msg (&en,NULL,mystring,length,NULL,"UNKNOWN",NIL);
 
-    if(en->remail) add_property_string(return_value,"remail",en->remail,1);
-    if(en->date) add_property_string(return_value,"date",en->date,1);
-    if(en->date) add_property_string(return_value,"Date",en->date,1);
-    if(en->subject)add_property_string(return_value,"subject",en->subject,1);
-    if(en->subject)add_property_string(return_value,"Subject",en->subject,1);
-    if(en->in_reply_to)add_property_string(return_value,"in_reply_to",en->in_reply_to,1);
-    if(en->message_id)add_property_string(return_value,"message_id",en->message_id,1);
-    if(en->newsgroups)add_property_string(return_value,"newsgroups",en->newsgroups,1);
-    if(en->followup_to)add_property_string(return_value,"followup_to",en->followup_to,1);
-    if(en->references)add_property_string(return_value,"references",en->references,1);
+    if (en->remail) add_property_string(return_value,"remail",en->remail,1);
+    if (en->date) add_property_string(return_value,"date",en->date,1);
+    if (en->date) add_property_string(return_value,"Date",en->date,1);
+    if (en->subject)add_property_string(return_value,"subject",en->subject,1);
+    if (en->subject)add_property_string(return_value,"Subject",en->subject,1);
+    if (en->in_reply_to)add_property_string(return_value,"in_reply_to",en->in_reply_to,1);
+    if (en->message_id)add_property_string(return_value,"message_id",en->message_id,1);
+    if (en->newsgroups)add_property_string(return_value,"newsgroups",en->newsgroups,1);
+    if (en->followup_to)add_property_string(return_value,"followup_to",en->followup_to,1);
+    if (en->references)add_property_string(return_value,"references",en->references,1);
 
-if(en->to)
-{
-  int ok=1;
-  addresstmp=en->to;
-  fulladdress[0]=0x00;
+	if(en->to) {
+		int ok=1;
+		addresstmp=en->to;
+		fulladdress[0]=0x00;
 
-  while(ok && addresstmp) /* while length < 1000 and we are not at the end of the list */
-    {
-      addresstmp2=addresstmp->next; /* save the pointer to the next address */
-      addresstmp->next=NULL; /* make this address the only one now. */
-      tempaddress[0]=0x00; /* reset tempaddress buffer */
-      rfc822_write_address(tempaddress,addresstmp); /* ok, write the address into tempaddress string */
-      if((strlen(tempaddress) + strlen(fulladdress)) < 1000) /* is the new address + total address < 1000 */
-	{                /* yes */
-	  if(strlen(fulladdress)) strcat(fulladdress,","); /* put in a comma */ 
-	  strcat(fulladdress,tempaddress); /* put in the new address */
+		while(ok && addresstmp) { /* while length < 1000 and we are not at the end of the list */
+			addresstmp2=addresstmp->next; /* save the pointer to the next address */
+			addresstmp->next=NULL; /* make this address the only one now. */
+			tempaddress[0]=0x00; /* reset tempaddress buffer */
+			rfc822_write_address(tempaddress,addresstmp); /* ok, write the address into tempaddress string */
+			if((strlen(tempaddress) + strlen(fulladdress)) < 1000) { /* is the new address + total address < 1000 */
+				if(strlen(fulladdress)) strcat(fulladdress,","); /* put in a comma */ 
+				strcat(fulladdress,tempaddress); /* put in the new address */
+			} else { /* no */
+				ok=0;  /* stop looping */
+				strcat(fulladdress,", ...");
+			}
+			addresstmp=addresstmp2; /* reset the pointer to the next address first! */
+		}
+
+		if(fulladdress) add_property_string( return_value, "toaddress", fulladdress, 1);
+		addresstmp=en->to;
+		array_init( &to );
+		do {
+			object_init( &tovals);
+			if(addresstmp->personal) add_property_string( &tovals, "personal", addresstmp->personal, 1);
+			if(addresstmp->adl) add_property_string( &tovals, "adl", addresstmp->adl, 1);
+			if(addresstmp->mailbox) add_property_string( &tovals, "mailbox", addresstmp->mailbox, 1);
+			if(addresstmp->host) add_property_string( &tovals, "host", addresstmp->host, 1);
+			add_next_index_object( &to, tovals );
+		} while ( (addresstmp = addresstmp->next) );
+		add_assoc_object( return_value, "to", to );
 	}
-      else        /* no */
-	{
-	ok=0;  /* stop looping */
-	strcat(fulladdress,", ...");
-	}
-      addresstmp=addresstmp2; /* reset the pointer to the next address first! */
-    }
 
-  if(fulladdress) add_property_string( return_value, "toaddress", fulladdress, 1);
-  addresstmp=en->to;
-    array_init( &to );
-    do {
-      object_init( &tovals);
-      if(addresstmp->personal) add_property_string( &tovals, "personal", addresstmp->personal, 1);
-      if(addresstmp->adl) add_property_string( &tovals, "adl", addresstmp->adl, 1);
-      if(addresstmp->mailbox) add_property_string( &tovals, "mailbox", addresstmp->mailbox, 1);
-      if(addresstmp->host) add_property_string( &tovals, "host", addresstmp->host, 1);
-      add_next_index_object( &to, tovals );
-    } while ( (addresstmp = addresstmp->next) );
-    add_assoc_object( return_value, "to", to );
-}
-
-if(en->from)
-{
-  int ok=1;
-  addresstmp=en->from;
-  fulladdress[0]=0x00;
+	if(en->from) {
+		int ok=1;
+		addresstmp=en->from;
+		fulladdress[0]=0x00;
   
-  while(ok && addresstmp) /* while length < 1000 and we are not at the end of the list */
-    {
-      addresstmp2=addresstmp->next; /* save the pointer to the next address */
-      addresstmp->next=NULL; /* make this address the only one now. */
-      tempaddress[0]=0x00; /* reset tempaddress buffer */
-      rfc822_write_address(tempaddress,addresstmp); /* ok, write the address into tempaddress string */
-      if((strlen(tempaddress) + strlen(fulladdress)) < 1000) /* is the new address + total address < 1000 */
-	{                /* yes */
-	  if(strlen(fulladdress)) strcat(fulladdress,","); /* put in a comma */ 
-	  strcat(fulladdress,tempaddress); /* put in the new address */
-	}
-      else        /* no */
-	{
-	ok=0;  /* stop looping */
-	strcat(fulladdress,", ...");
-	}
-      addresstmp=addresstmp2; /* reset the pointer to the next address first! */
-    }
+		while(ok && addresstmp) { /* while length < 1000 and we are not at the end of the list */
+			addresstmp2=addresstmp->next; /* save the pointer to the next address */
+			addresstmp->next=NULL; /* make this address the only one now. */
+			tempaddress[0]=0x00; /* reset tempaddress buffer */
+			rfc822_write_address(tempaddress,addresstmp); /* ok, write the address into tempaddress string */
+			if((strlen(tempaddress) + strlen(fulladdress)) < 1000) { /* is the new address + total address < 1000 */
+				if(strlen(fulladdress)) strcat(fulladdress,","); /* put in a comma */ 
+				strcat(fulladdress,tempaddress); /* put in the new address */
+			} else { /* no */
+				ok=0;  /* stop looping */
+				strcat(fulladdress,", ...");
+			}
+			addresstmp=addresstmp2; /* reset the pointer to the next address first! */
+		}
 
-      if(fulladdress) add_property_string( return_value, "fromaddress", fulladdress, 1);
-  addresstmp=en->from;
-    array_init( &from );
-    do {
-      object_init( &fromvals);
-      if(addresstmp->personal) add_property_string( &fromvals, "personal", addresstmp->personal, 1);
-      if(addresstmp->adl) add_property_string( &fromvals, "adl", addresstmp->adl, 1);
-      if(addresstmp->mailbox) add_property_string( &fromvals, "mailbox", addresstmp->mailbox, 1);
-      if(addresstmp->host) add_property_string( &fromvals, "host", addresstmp->host, 1);
-      add_next_index_object( &from, fromvals );
-    } while ( (addresstmp = addresstmp->next) );
-    add_assoc_object( return_value, "from", from );
-}
+		if(fulladdress) add_property_string( return_value, "fromaddress", fulladdress, 1);
+		addresstmp=en->from;
+		array_init( &from );
+		do {
+			object_init( &fromvals);
+			if(addresstmp->personal) add_property_string( &fromvals, "personal", addresstmp->personal, 1);
+			if(addresstmp->adl) add_property_string( &fromvals, "adl", addresstmp->adl, 1);
+			if(addresstmp->mailbox) add_property_string( &fromvals, "mailbox", addresstmp->mailbox, 1);
+			if(addresstmp->host) add_property_string( &fromvals, "host", addresstmp->host, 1);
+			add_next_index_object( &from, fromvals );
+		} while ( (addresstmp = addresstmp->next) );
+		add_assoc_object( return_value, "from", from );
+	}
 
-if(en->cc)
-{
-  int ok=1;
-  addresstmp=en->cc;
-  fulladdress[0]=0x00;
+	if(en->cc) {
+		int ok=1;
+		addresstmp=en->cc;
+		fulladdress[0]=0x00;
   
-  while(ok && addresstmp) /* while length < 1000 and we are not at the end of the list */
-    {
-      addresstmp2=addresstmp->next; /* save the pointer to the next address */
-      addresstmp->next=NULL; /* make this address the only one now. */
-      tempaddress[0]=0x00; /* reset tempaddress buffer */
-      rfc822_write_address(tempaddress,addresstmp); /* ok, write the address into tempaddress string */
-      if((strlen(tempaddress) + strlen(fulladdress)) < 1000) /* is the new address + total address < 1000 */
-	{                /* yes */
-	  if(strlen(fulladdress)) strcat(fulladdress,","); /* put in a comma */ 
-	  strcat(fulladdress,tempaddress); /* put in the new address */
-	}
-      else        /* no */
-	{
-	ok=0;  /* stop looping */
-        strcat(fulladdress,", ..."); 
-	}
-      addresstmp=addresstmp2; /* reset the pointer to the next address first! */
-    }
+		while(ok && addresstmp) { /* while length < 1000 and we are not at the end of the list */
+			addresstmp2=addresstmp->next; /* save the pointer to the next address */
+			addresstmp->next=NULL; /* make this address the only one now. */
+			tempaddress[0]=0x00; /* reset tempaddress buffer */
+			rfc822_write_address(tempaddress,addresstmp); /* ok, write the address into tempaddress string */
+			if((strlen(tempaddress) + strlen(fulladdress)) < 1000) { /* is the new address + total address < 1000 */
+				if(strlen(fulladdress)) strcat(fulladdress,","); /* put in a comma */ 
+				strcat(fulladdress,tempaddress); /* put in the new address */
+			} else { /* no */
+				ok=0;  /* stop looping */
+				strcat(fulladdress,", ..."); 
+			}
+			addresstmp=addresstmp2; /* reset the pointer to the next address first! */
+		}
 
-      if(fulladdress) add_property_string( return_value, "ccaddress", fulladdress, 1);
-  addresstmp=en->cc;
-    array_init( &cc );
-    do {
-      object_init( &ccvals);
-      if(addresstmp->personal) add_property_string( &ccvals, "personal", addresstmp->personal, 1);
-      if(addresstmp->adl) add_property_string( &ccvals, "adl", addresstmp->adl, 1);
-      if(addresstmp->mailbox) add_property_string( &ccvals, "mailbox", addresstmp->mailbox, 1);
-      if(addresstmp->host) add_property_string( &ccvals, "host", addresstmp->host, 1);
-      add_next_index_object( &cc, ccvals );
-    } while ( (addresstmp = addresstmp->next) );
-    add_assoc_object( return_value, "cc", cc );
-}
+		if(fulladdress) add_property_string( return_value, "ccaddress", fulladdress, 1);
+		addresstmp=en->cc;
+		array_init( &cc );
+		do {
+			object_init( &ccvals);
+			if(addresstmp->personal) add_property_string( &ccvals, "personal", addresstmp->personal, 1);
+			if(addresstmp->adl) add_property_string( &ccvals, "adl", addresstmp->adl, 1);
+			if(addresstmp->mailbox) add_property_string( &ccvals, "mailbox", addresstmp->mailbox, 1);
+			if(addresstmp->host) add_property_string( &ccvals, "host", addresstmp->host, 1);
+			add_next_index_object( &cc, ccvals );
+		} while ( (addresstmp = addresstmp->next) );
+		add_assoc_object( return_value, "cc", cc );
+	}
 
-if(en->bcc)
-{
-  int ok=1;
-  addresstmp=en->bcc;
-  fulladdress[0]=0x00;
-  while(ok && addresstmp) /* while length < 1000 and we are not at the end of the list */
-    {
-      addresstmp2=addresstmp->next; /* save the pointer to the next address */
-      addresstmp->next=NULL; /* make this address the only one now. */
-      tempaddress[0]=0x00; /* reset tempaddress buffer */
-      rfc822_write_address(tempaddress,addresstmp); /* ok, write the address into tempaddress string */
-      if((strlen(tempaddress) + strlen(fulladdress)) < 1000) /* is the new address + total address < 1000 */
-	{                /* yes */
-	  if(strlen(fulladdress)) strcat(fulladdress,","); /* put in a comma */ 
-	  strcat(fulladdress,tempaddress); /* put in the new address */
-	}
-      else        /* no */
-	{
-	ok=0;  /* stop looping */
-        strcat(fulladdress,", ..."); 
-	}
-      addresstmp=addresstmp2; /* reset the pointer to the next address first! */
-    }
+	if(en->bcc) {
+		int ok=1;
+		addresstmp=en->bcc;
+		fulladdress[0]=0x00;
+		while(ok && addresstmp) { /* while length < 1000 and we are not at the end of the list */
+			addresstmp2=addresstmp->next; /* save the pointer to the next address */
+			addresstmp->next=NULL; /* make this address the only one now. */
+			tempaddress[0]=0x00; /* reset tempaddress buffer */
+			rfc822_write_address(tempaddress,addresstmp); /* ok, write the address into tempaddress string */
+			if((strlen(tempaddress) + strlen(fulladdress)) < 1000) { /* is the new address + total address < 1000 */
+				if(strlen(fulladdress)) strcat(fulladdress,","); /* put in a comma */ 
+				strcat(fulladdress,tempaddress); /* put in the new address */
+			} else { /* no */
+				ok=0;  /* stop looping */
+				strcat(fulladdress,", ..."); 
+			}
+			addresstmp=addresstmp2; /* reset the pointer to the next address first! */
+		}
 
-      if(fulladdress) add_property_string( return_value, "bccaddress", fulladdress, 1);
-  addresstmp=en->bcc;
-    array_init( &bcc );
-    do {
-      object_init( &bccvals);
-      if(addresstmp->personal) add_property_string( &bccvals, "personal", addresstmp->personal, 1);
-      if(addresstmp->adl) add_property_string( &bccvals, "adl", addresstmp->adl, 1);
-      if(addresstmp->mailbox) add_property_string( &bccvals, "mailbox", addresstmp->mailbox, 1);
-      if(addresstmp->host) add_property_string( &bccvals, "host", addresstmp->host, 1);
-      add_next_index_object( &bcc, bccvals );
-    } while ( (addresstmp = addresstmp->next) );
-    add_assoc_object( return_value, "bcc", bcc );
-}
+		if(fulladdress) add_property_string( return_value, "bccaddress", fulladdress, 1);
+		addresstmp=en->bcc;
+		array_init( &bcc );
+		do {
+			object_init( &bccvals);
+			if(addresstmp->personal) add_property_string( &bccvals, "personal", addresstmp->personal, 1);
+			if(addresstmp->adl) add_property_string( &bccvals, "adl", addresstmp->adl, 1);
+			if(addresstmp->mailbox) add_property_string( &bccvals, "mailbox", addresstmp->mailbox, 1);
+			if(addresstmp->host) add_property_string( &bccvals, "host", addresstmp->host, 1);
+			add_next_index_object( &bcc, bccvals );
+		} while ( (addresstmp = addresstmp->next) );
+		add_assoc_object( return_value, "bcc", bcc );
+	}
 
-if(en->reply_to)
-{
-  int ok=1;
-  addresstmp=en->reply_to;
-  fulladdress[0]=0x00;
-  while(ok && addresstmp) /* while length < 1000 and we are not at the end of the list */
-    {
-      addresstmp2=addresstmp->next; /* save the pointer to the next address */
-      addresstmp->next=NULL; /* make this address the only one now. */
-      tempaddress[0]=0x00; /* reset tempaddress buffer */
-      rfc822_write_address(tempaddress,addresstmp); /* ok, write the address into tempaddress string */
-      if((strlen(tempaddress) + strlen(fulladdress)) < 1000) /* is the new address + total address < 1000 */
-	{                /* yes */
-	  if(strlen(fulladdress)) strcat(fulladdress,","); /* put in a comma */ 
-	  strcat(fulladdress,tempaddress); /* put in the new address */
-	}
-      else        /* no */
-	{
-	ok=0;  /* stop looping */
-        strcat(fulladdress,", ..."); 
-	}
-      addresstmp=addresstmp2; /* reset the pointer to the next address first! */
-    }
+	if(en->reply_to) {
+		int ok=1;
+		addresstmp=en->reply_to;
+		fulladdress[0]=0x00;
+		while(ok && addresstmp) { /* while length < 1000 and we are not at the end of the list */
+			addresstmp2=addresstmp->next; /* save the pointer to the next address */
+			addresstmp->next=NULL; /* make this address the only one now. */
+			tempaddress[0]=0x00; /* reset tempaddress buffer */
+			rfc822_write_address(tempaddress,addresstmp); /* ok, write the address into tempaddress string */
+			if((strlen(tempaddress) + strlen(fulladdress)) < 1000) { /* is the new address + total address < 1000 */
+				if(strlen(fulladdress)) strcat(fulladdress,","); /* put in a comma */ 
+				strcat(fulladdress,tempaddress); /* put in the new address */
+			} else { /* no */
+				ok=0;  /* stop looping */
+				strcat(fulladdress,", ..."); 
+			}
+			addresstmp=addresstmp2; /* reset the pointer to the next address first! */
+		}
 
-      if(fulladdress) add_property_string( return_value, "reply_toaddress", fulladdress, 1);
-  addresstmp=en->reply_to;
-    array_init( &reply_to );
-    do {
-      object_init( &reply_tovals);
-      if(addresstmp->personal) add_property_string( &reply_tovals, "personal", addresstmp->personal, 1);
-      if(addresstmp->adl) add_property_string( &reply_tovals, "adl", addresstmp->adl, 1);
-      if(addresstmp->mailbox) add_property_string( &reply_tovals, "mailbox", addresstmp->mailbox, 1);
-      if(addresstmp->host) add_property_string( &reply_tovals, "host", addresstmp->host, 1);
-      add_next_index_object( &reply_to, reply_tovals );
-    } while ( (addresstmp = addresstmp->next) );
-    add_assoc_object( return_value, "reply_to", reply_to );
-}
+		if(fulladdress) add_property_string( return_value, "reply_toaddress", fulladdress, 1);
+		addresstmp=en->reply_to;
+		array_init( &reply_to );
+		do {
+			object_init( &reply_tovals);
+			if(addresstmp->personal) add_property_string( &reply_tovals, "personal", addresstmp->personal, 1);
+			if(addresstmp->adl) add_property_string( &reply_tovals, "adl", addresstmp->adl, 1);
+			if(addresstmp->mailbox) add_property_string( &reply_tovals, "mailbox", addresstmp->mailbox, 1);
+			if(addresstmp->host) add_property_string( &reply_tovals, "host", addresstmp->host, 1);
+			add_next_index_object( &reply_to, reply_tovals );
+		} while ( (addresstmp = addresstmp->next) );
+		add_assoc_object( return_value, "reply_to", reply_to );
+	}
 
-if(en->sender)
-{
-  int ok=1;
-  addresstmp=en->sender;
-  fulladdress[0]=0x00;
-  while(ok && addresstmp) /* while length < 1000 and we are not at the end of the list */
-    {
-      addresstmp2=addresstmp->next; /* save the pointer to the next address */
-      addresstmp->next=NULL; /* make this address the only one now. */
-      tempaddress[0]=0x00; /* reset tempaddress buffer */
-      rfc822_write_address(tempaddress,addresstmp); /* ok, write the address into tempaddress string */
-      if((strlen(tempaddress) + strlen(fulladdress)) < 1000) /* is the new address + total address < 1000 */
-	{                /* yes */
-	  if(strlen(fulladdress)) strcat(fulladdress,","); /* put in a comma */ 
-	  strcat(fulladdress,tempaddress); /* put in the new address */
-	}
-      else        /* no */
-	{
-	  ok=0;  /* stop looping */
-	  strcat(fulladdress,", ..."); 
-	}
-      addresstmp=addresstmp2; /* reset the pointer to the next address first! */
-    }
+	if(en->sender) {
+		int ok=1;
+		addresstmp=en->sender;
+		fulladdress[0]=0x00;
+		while(ok && addresstmp) { /* while length < 1000 and we are not at the end of the list */
+			addresstmp2=addresstmp->next; /* save the pointer to the next address */
+			addresstmp->next=NULL; /* make this address the only one now. */
+			tempaddress[0]=0x00; /* reset tempaddress buffer */
+			rfc822_write_address(tempaddress,addresstmp); /* ok, write the address into tempaddress string */
+			if((strlen(tempaddress) + strlen(fulladdress)) < 1000) { /* is the new address + total address < 1000 */
+				if(strlen(fulladdress)) strcat(fulladdress,","); /* put in a comma */ 
+				strcat(fulladdress,tempaddress); /* put in the new address */
+			} else { /* no */
+				ok=0;  /* stop looping */
+				strcat(fulladdress,", ..."); 
+			}
+			addresstmp=addresstmp2; /* reset the pointer to the next address first! */
+		}
 
-      if(fulladdress) add_property_string( return_value, "senderaddress", fulladdress, 1);
-  addresstmp=en->sender;
-    array_init( &sender );
-    do {
-      object_init( &sendervals);
-      if(addresstmp->personal) add_property_string( &sendervals, "personal", addresstmp->personal, 1);
-      if(addresstmp->adl) add_property_string( &sendervals, "adl", addresstmp->adl, 1);
-      if(addresstmp->mailbox) add_property_string( &sendervals, "mailbox", addresstmp->mailbox, 1);
-      if(addresstmp->host) add_property_string( &sendervals, "host", addresstmp->host, 1);
-      add_next_index_object( &sender, sendervals );
-    } while ( (addresstmp = addresstmp->next) );
-    add_assoc_object( return_value, "sender", sender );
-}
+		if(fulladdress) add_property_string( return_value, "senderaddress", fulladdress, 1);
+		addresstmp=en->sender;
+		array_init( &sender );
+		do {
+			object_init( &sendervals);
+			if(addresstmp->personal) add_property_string( &sendervals, "personal", addresstmp->personal, 1);
+			if(addresstmp->adl) add_property_string( &sendervals, "adl", addresstmp->adl, 1);
+			if(addresstmp->mailbox) add_property_string( &sendervals, "mailbox", addresstmp->mailbox, 1);
+			if(addresstmp->host) add_property_string( &sendervals, "host", addresstmp->host, 1);
+			add_next_index_object( &sender, sendervals );
+		} while ( (addresstmp = addresstmp->next) );
+		add_assoc_object( return_value, "sender", sender );
+	}
 
-if(en->return_path)
-{
-  int ok=1;
-  addresstmp=en->return_path;
-  fulladdress[0]=0x00;
-  while(ok && addresstmp) /* while length < 1000 and we are not at the end of the list */
-    {
-      addresstmp2=addresstmp->next; /* save the pointer to the next address */
-      addresstmp->next=NULL; /* make this address the only one now. */
-      tempaddress[0]=0x00; /* reset tempaddress buffer */
-      rfc822_write_address(tempaddress,addresstmp); /* ok, write the address into tempaddress string */
-      if((strlen(tempaddress) + strlen(fulladdress)) < 1000) /* is the new address + total address < 1000 */
-	{                /* yes */
-	  if(strlen(fulladdress)) strcat(fulladdress,","); /* put in a comma */ 
-	  strcat(fulladdress,tempaddress); /* put in the new address */
-	}
-      else        /* no */
-	{
-	  ok=0;  /* stop looping */
-	  strcat(fulladdress,", ..."); 
-	}
-      addresstmp=addresstmp2; /* reset the pointer to the next address first! */
-    }
+	if(en->return_path) {
+		int ok=1;
+		addresstmp=en->return_path;
+		fulladdress[0]=0x00;
+		while(ok && addresstmp) { /* while length < 1000 and we are not at the end of the list */
+			addresstmp2=addresstmp->next; /* save the pointer to the next address */
+			addresstmp->next=NULL; /* make this address the only one now. */
+			tempaddress[0]=0x00; /* reset tempaddress buffer */
+			rfc822_write_address(tempaddress,addresstmp); /* ok, write the address into tempaddress string */
+			if((strlen(tempaddress) + strlen(fulladdress)) < 1000) { /* is the new address + total address < 1000 */
+				if(strlen(fulladdress)) strcat(fulladdress,","); /* put in a comma */ 
+				strcat(fulladdress,tempaddress); /* put in the new address */
+			} else { /* no */
+				ok=0;  /* stop looping */
+				strcat(fulladdress,", ..."); 
+			}
+			addresstmp=addresstmp2; /* reset the pointer to the next address first! */
+		}
   
-  if(fulladdress) add_property_string( return_value, "return_pathaddress", fulladdress, 1);
-  addresstmp=en->return_path;
-    array_init( &return_path );
-    do {
-      object_init( &return_pathvals);
-      if(addresstmp->personal) add_property_string( &return_pathvals, "personal", addresstmp->personal, 1);
-      if(addresstmp->adl) add_property_string( &return_pathvals, "adl", addresstmp->adl, 1);
-      if(addresstmp->mailbox) add_property_string( &return_pathvals, "mailbox", addresstmp->mailbox, 1);
-      if(addresstmp->host) add_property_string( &return_pathvals, "host", addresstmp->host, 1);
-      add_next_index_object( &return_path, return_pathvals );
-    } while ( (addresstmp = addresstmp->next) );
-    add_assoc_object( return_value, "return_path", return_path );
-}
+		if(fulladdress) add_property_string( return_value, "return_pathaddress", fulladdress, 1);
+		addresstmp=en->return_path;
+		array_init( &return_path );
+		do {
+			object_init( &return_pathvals);
+			if(addresstmp->personal) add_property_string( &return_pathvals, "personal", addresstmp->personal, 1);
+			if(addresstmp->adl) add_property_string( &return_pathvals, "adl", addresstmp->adl, 1);
+			if(addresstmp->mailbox) add_property_string( &return_pathvals, "mailbox", addresstmp->mailbox, 1);
+			if(addresstmp->host) add_property_string( &return_pathvals, "host", addresstmp->host, 1);
+			add_next_index_object( &return_path, return_pathvals );
+		} while ( (addresstmp = addresstmp->next) );
+		add_assoc_object( return_value, "return_path", return_path );
+	}
 	add_property_string(return_value,"Recent",cache->recent ? (cache->seen ? "R": "N") : " ",1);
 	add_property_string(return_value,"Unseen",(cache->recent | cache->seen) ? " " : "U",1);
 	add_property_string(return_value,"Flagged",cache->flagged ? "F" : " ",1);
@@ -1444,23 +1407,22 @@ if(en->return_path)
 	mail_date (dummy,cache);
 	add_property_string(return_value,"MailDate",dummy,1);
 	sprintf (dummy,"%ld",cache->rfc822_size); 
-    add_property_string(return_value,"Size",dummy,1);
-    add_property_long(return_value,"udate",mail_longdate(cache));
+	add_property_string(return_value,"Size",dummy,1);
+	add_property_long(return_value,"udate",mail_longdate(cache));
  
-if(en->from && fromlength)
-{
-fulladdress[0]=0x00;
-mail_fetchfrom(fulladdress,imap_le_struct->imap_stream,msgno->value.lval,fromlength->value.lval);
-add_property_string(return_value,"fetchfrom",fulladdress,1);
-}
-if(en->subject && subjectlength)
-{
-fulladdress[0]=0x00;
-mail_fetchsubject(fulladdress,imap_le_struct->imap_stream,msgno->value.lval,subjectlength->value.lval);
-add_property_string(return_value,"fetchsubject",fulladdress,1);
-}
+	if(en->from && fromlength) {
+		fulladdress[0]=0x00;
+		mail_fetchfrom(fulladdress,imap_le_struct->imap_stream,msgno->value.lval,fromlength->value.lval);
+		add_property_string(return_value,"fetchfrom",fulladdress,1);
+	}
+	if(en->subject && subjectlength) {
+		fulladdress[0]=0x00;
+		mail_fetchsubject(fulladdress,imap_le_struct->imap_stream,msgno->value.lval,subjectlength->value.lval);
+		add_property_string(return_value,"fetchsubject",fulladdress,1);
+	}
 }
 /* }}} */
+
 
 /* KMLANG */
 /* {{{ proto array imap_lsub(int stream_id, string ref, string pattern)
@@ -2308,214 +2270,239 @@ PHP_FUNCTION(imap_fetch_overview)
    Create a MIME message based on given envelope and body sections */
 PHP_FUNCTION(imap_mail_compose)
 {
-  pval *envelope, *body;
-  char *key;
-  pval *data,*pvalue;
-  ulong ind;
-  char *cookie = NIL;
-  ENVELOPE *env;
-  BODY *bod=NULL,*topbod=NULL;
-  PART *mypart=NULL,*toppart=NULL,*part;
-  PARAMETER *param;
-  char tmp[8*MAILTMPLEN],*mystring=NULL,*t,*tempstring;
-  int myargc=ARG_COUNT(ht);
-  if (myargc != 2 || getParameters(ht,myargc,&envelope,&body) == FAILURE) {
-    WRONG_PARAM_COUNT;
-  }
-  convert_to_array(envelope);
-  convert_to_array(body);
-  env=mail_newenvelope();
-  if(_php3_hash_find(envelope->value.ht,"remail",sizeof("remail"),(void **) &pvalue)== SUCCESS){
-    convert_to_string(pvalue);
-    env->remail=cpystr(pvalue->value.str.val);
-  }
-  
-  if(_php3_hash_find(envelope->value.ht,"return_path",sizeof("return_path"),(void **) &pvalue)== SUCCESS){
-    convert_to_string(pvalue);
-    rfc822_parse_adrlist (&env->return_path,pvalue->value.str.val,"NO HOST");
-  }
-  if(_php3_hash_find(envelope->value.ht,"date",sizeof("date"),(void **) &pvalue)== SUCCESS){
-    convert_to_string(pvalue);
-    env->date=cpystr(pvalue->value.str.val);
-  }
-  if(_php3_hash_find(envelope->value.ht,"from",sizeof("from"),(void **) &pvalue)== SUCCESS){
-    convert_to_string(pvalue);
-    rfc822_parse_adrlist (&env->from,pvalue->value.str.val,"NO HOST");
-  }
-  if(_php3_hash_find(envelope->value.ht,"reply_to",sizeof("reply_to"),(void **) &pvalue)== SUCCESS){
-    convert_to_string(pvalue);
-    rfc822_parse_adrlist (&env->reply_to,pvalue->value.str.val,"NO HOST");
-  }
-  if(_php3_hash_find(envelope->value.ht,"to",sizeof("to"),(void **) &pvalue)== SUCCESS){
-    convert_to_string(pvalue);
-    rfc822_parse_adrlist (&env->to,pvalue->value.str.val,"NO HOST");
-  }
-  if(_php3_hash_find(envelope->value.ht,"cc",sizeof("cc"),(void **) &pvalue)== SUCCESS){
-    convert_to_string(pvalue);
-    rfc822_parse_adrlist (&env->cc,pvalue->value.str.val,"NO HOST");
-  }
-  if(_php3_hash_find(envelope->value.ht,"bcc",sizeof("bcc"),(void **) &pvalue)== SUCCESS){
-    convert_to_string(pvalue);
-    rfc822_parse_adrlist (&env->bcc,pvalue->value.str.val,"NO HOST");
-  }
- if(_php3_hash_find(envelope->value.ht,"message_id",sizeof("message_id"),(void **) &pvalue)== SUCCESS){
-   convert_to_string(pvalue);
-   env->message_id=cpystr(pvalue->value.str.val);
- }
+	pval *envelope, *body;
+	char *key;
+	pval *data,**pvalue;
+	ulong ind;
+	char *cookie = NIL;
+	ENVELOPE *env;
+	BODY *bod=NULL,*topbod=NULL;
+	PART *mypart=NULL,*toppart=NULL,*part;
+	PARAMETER *param;
+	char tmp[8*MAILTMPLEN],*mystring=NULL,*t,*tempstring;
+	int myargc=ARG_COUNT(ht);
+
+	if (myargc != 2 || getParameters(ht,myargc,&envelope,&body) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	convert_to_array(envelope);
+	convert_to_array(body);
+	env=mail_newenvelope();
+	if(_php3_hash_find(envelope->value.ht,"remail",sizeof("remail"),(void **) &pvalue)== SUCCESS){
+		SEPARATE_ZVAL(pvalue);
+		convert_to_string(*pvalue);
+		env->remail=cpystr((*pvalue)->value.str.val);
+	}
+
+	if(_php3_hash_find(envelope->value.ht,"return_path",sizeof("return_path"),(void **) &pvalue)== SUCCESS){
+		SEPARATE_ZVAL(pvalue);
+		convert_to_string(*pvalue);
+		rfc822_parse_adrlist (&env->return_path,(*pvalue)->value.str.val,"NO HOST");
+	}
+	if(_php3_hash_find(envelope->value.ht,"date",sizeof("date"),(void **) &pvalue)== SUCCESS){
+		SEPARATE_ZVAL(pvalue);
+		convert_to_string(*pvalue);
+		env->date=cpystr((*pvalue)->value.str.val);
+	}
+	if(_php3_hash_find(envelope->value.ht,"from",sizeof("from"),(void **) &pvalue)== SUCCESS){
+		SEPARATE_ZVAL(pvalue);
+		convert_to_string(*pvalue);
+		rfc822_parse_adrlist (&env->from,(*pvalue)->value.str.val,"NO HOST");
+	}
+	if(_php3_hash_find(envelope->value.ht,"reply_to",sizeof("reply_to"),(void **) &pvalue)== SUCCESS){
+		SEPARATE_ZVAL(pvalue);
+		convert_to_string(pvalue);
+		rfc822_parse_adrlist (&env->reply_to,(*pvalue)->value.str.val,"NO HOST");
+	}
+	if(_php3_hash_find(envelope->value.ht,"to",sizeof("to"),(void **) &pvalue)== SUCCESS){
+		SEPARATE_ZVAL(pvalue);
+		convert_to_string(*pvalue);
+		rfc822_parse_adrlist (&env->to,(*pvalue)->value.str.val,"NO HOST");
+	}
+	if(_php3_hash_find(envelope->value.ht,"cc",sizeof("cc"),(void **) &pvalue)== SUCCESS){
+		SEPARATE_ZVAL(pvalue);
+		convert_to_string(*pvalue);
+		rfc822_parse_adrlist (&env->cc,(*pvalue)->value.str.val,"NO HOST");
+	}
+	if(_php3_hash_find(envelope->value.ht,"bcc",sizeof("bcc"),(void **) &pvalue)== SUCCESS){
+		SEPARATE_ZVAL(pvalue);
+		convert_to_string(*pvalue);
+		rfc822_parse_adrlist (&env->bcc,(*pvalue)->value.str.val,"NO HOST");
+	}
+	if(_php3_hash_find(envelope->value.ht,"message_id",sizeof("message_id"),(void **) &pvalue)== SUCCESS){
+		SEPARATE_ZVAL(pvalue);
+		convert_to_string(*pvalue);
+		env->message_id=cpystr((*pvalue)->value.str.val);
+	}
  
- _php3_hash_internal_pointer_reset(body->value.ht);
- _php3_hash_get_current_key(body->value.ht, &key, &ind);
- _php3_hash_get_current_data(body->value.ht, (void **) &data);
- if(data->type == IS_ARRAY)
-   {
-     bod=mail_newbody();
-     topbod=bod;
-     if(_php3_hash_find(data->value.ht,"type",sizeof("type"),(void **) &pvalue)== SUCCESS){
-       convert_to_long(pvalue);
-       bod->type=pvalue->value.lval;
-     }
-     if(_php3_hash_find(data->value.ht,"encoding",sizeof("encoding"),(void **) &pvalue)== SUCCESS){
-       convert_to_long(pvalue);
-       bod->encoding=pvalue->value.lval;
-     }
-     if(_php3_hash_find(data->value.ht,"subtype",sizeof("subtype"),(void **) &pvalue)== SUCCESS){
-       convert_to_string(pvalue);
-       bod->subtype=cpystr(pvalue->value.str.val);
-     }
-     if(_php3_hash_find(data->value.ht,"id",sizeof("id"),(void **) &pvalue)== SUCCESS){
-       convert_to_string(pvalue);
-       bod->id=cpystr(pvalue->value.str.val);
-     }
-     if(_php3_hash_find(data->value.ht,"contents.data",sizeof("contents.data"),(void **) &pvalue)== SUCCESS){
-       convert_to_string(pvalue);     
-       bod->contents.text.data=(char *)fs_get(pvalue->value.str.len);
-       memcpy(bod->contents.text.data,pvalue->value.str.val,pvalue->value.str.len+1);
-       bod->contents.text.size=pvalue->value.str.len;
-     }
-     if(_php3_hash_find(data->value.ht,"lines",sizeof("lines"),(void **) &pvalue)== SUCCESS){
-       convert_to_long(pvalue);
-       bod->size.lines=pvalue->value.lval;
-     }
-     if(_php3_hash_find(data->value.ht,"bytes",sizeof("bytes"),(void **) &pvalue)== SUCCESS){
-       convert_to_long(pvalue);
-       bod->size.bytes=pvalue->value.lval;
-     }
-     if(_php3_hash_find(data->value.ht,"md5",sizeof("md5"),(void **) &pvalue)== SUCCESS){
-       convert_to_string(pvalue);
-       bod->md5=cpystr(pvalue->value.str.val);
-     }
-   }
- _php3_hash_move_forward(body->value.ht);
- while(_php3_hash_get_current_data(body->value.ht, (void **) &data)==SUCCESS)
-   {
-     _php3_hash_get_current_key(body->value.ht, &key, &ind);
-     if(data->type == IS_ARRAY)
-       {
-	 if(!toppart)
-	   {		     
-	     bod->nested.part=mail_newbody_part();
-	     mypart=bod->nested.part;
-	     toppart=mypart;
-	     bod=&mypart->body;
-	   }
-	 else
-	   {
-	     mypart->next=mail_newbody_part();
-	     mypart=mypart->next;
-	     bod=&mypart->body;
-	   }
-	 if(_php3_hash_find(data->value.ht,"type",sizeof("type"),(void **) &pvalue)== SUCCESS){
-	   convert_to_long(pvalue);
-	   bod->type=pvalue->value.lval;
-	 }
-	 if(_php3_hash_find(data->value.ht,"encoding",sizeof("encoding"),(void **) &pvalue)== SUCCESS){
-	   convert_to_long(pvalue);
-	   bod->encoding=pvalue->value.lval;
-	 }
-	 if(_php3_hash_find(data->value.ht,"subtype",sizeof("subtype"),(void **) &pvalue)== SUCCESS){
-	   convert_to_string(pvalue);
-	   bod->subtype=cpystr(pvalue->value.str.val);
-	 }
-	 if(_php3_hash_find(data->value.ht,"id",sizeof("id"),(void **) &pvalue)== SUCCESS){
-	   convert_to_string(pvalue);
-	   bod->id=cpystr(pvalue->value.str.val);
-	 }
-	 if(_php3_hash_find(data->value.ht,"contents.data",sizeof("contents.data"),(void **) &pvalue)== SUCCESS){
-	   convert_to_string(pvalue);     
-	   bod->contents.text.data=(char *)fs_get(pvalue->value.str.len);
-	   memcpy(bod->contents.text.data,pvalue->value.str.val,pvalue->value.str.len+1);
-	   bod->contents.text.size=pvalue->value.str.len;
-	 }
-	 if(_php3_hash_find(data->value.ht,"lines",sizeof("lines"),(void **) &pvalue)== SUCCESS){
-	   convert_to_long(pvalue);
-	   bod->size.lines=pvalue->value.lval;
-	 }
-	 if(_php3_hash_find(data->value.ht,"bytes",sizeof("bytes"),(void **) &pvalue)== SUCCESS){
-	   convert_to_long(pvalue);
-	   bod->size.bytes=pvalue->value.lval;
-	 }
-	 if(_php3_hash_find(data->value.ht,"md5",sizeof("md5"),(void **) &pvalue)== SUCCESS){
-	   convert_to_string(pvalue);
-	   bod->md5=cpystr(pvalue->value.str.val);
-	 }
-	 _php3_hash_move_forward(body->value.ht);
-       }
-   }
+	_php3_hash_internal_pointer_reset(body->value.ht);
+	_php3_hash_get_current_key(body->value.ht, &key, &ind);
+	_php3_hash_get_current_data(body->value.ht, (void **) &data);
+	if(data->type == IS_ARRAY) {
+		bod=mail_newbody();
+		topbod=bod;
+		if(_php3_hash_find(data->value.ht,"type",sizeof("type"),(void **) &pvalue)== SUCCESS) {
+			SEPARATE_ZVAL(pvalue);
+			convert_to_long(*pvalue);
+			bod->type = (*pvalue)->value.lval;
+		}
+		if(_php3_hash_find(data->value.ht,"encoding",sizeof("encoding"),(void **) &pvalue)== SUCCESS){
+			SEPARATE_ZVAL(pvalue);
+			convert_to_long(*pvalue);
+			bod->encoding = (*pvalue)->value.lval;
+		}
+		if(_php3_hash_find(data->value.ht,"subtype",sizeof("subtype"),(void **) &pvalue)== SUCCESS){
+			SEPARATE_ZVAL(pvalue);
+			convert_to_string(*pvalue);
+			bod->subtype = cpystr((*pvalue)->value.str.val);
+		}
+		if(_php3_hash_find(data->value.ht,"id",sizeof("id"),(void **) &pvalue)== SUCCESS){
+			SEPARATE_ZVAL(pvalue);
+			convert_to_string(*pvalue);
+			bod->id = cpystr((*pvalue)->value.str.val);
+		}
+		if(_php3_hash_find(data->value.ht,"contents.data",sizeof("contents.data"),(void **) &pvalue)== SUCCESS){
+			SEPARATE_ZVAL(pvalue);
+			convert_to_string(*pvalue);     
+			bod->contents.text.data=(char *)fs_get((*pvalue)->value.str.len);
+			memcpy(bod->contents.text.data,(*pvalue)->value.str.val,(*pvalue)->value.str.len+1);
+			bod->contents.text.size = (*pvalue)->value.str.len;
+		}
+		if(_php3_hash_find(data->value.ht,"lines",sizeof("lines"),(void **) &pvalue)== SUCCESS){
+			SEPARATE_ZVAL(pvalue);
+			convert_to_long(*pvalue);
+			bod->size.lines = (*pvalue)->value.lval;
+		}
+		if(_php3_hash_find(data->value.ht,"bytes",sizeof("bytes"),(void **) &pvalue)== SUCCESS){
+			SEPARATE_ZVAL(pvalue);
+			convert_to_long(*pvalue);
+			bod->size.bytes = (*pvalue)->value.lval;
+		}
+		if(_php3_hash_find(data->value.ht,"md5",sizeof("md5"),(void **) &pvalue)== SUCCESS){
+			SEPARATE_ZVAL(pvalue);
+			convert_to_string(*pvalue);
+			bod->md5 = cpystr((*pvalue)->value.str.val);
+		}
+	}
+	_php3_hash_move_forward(body->value.ht);
+	while(_php3_hash_get_current_data(body->value.ht, (void **) &data)==SUCCESS) {
+		_php3_hash_get_current_key(body->value.ht, &key, &ind);
+		if(data->type == IS_ARRAY) {
+			if(!toppart) {
+				bod->nested.part=mail_newbody_part();
+				mypart=bod->nested.part;
+				toppart=mypart;
+				bod=&mypart->body;
+			} else {
+				 mypart->next=mail_newbody_part();
+				 mypart=mypart->next;
+				 bod=&mypart->body;
+			}
+			if(_php3_hash_find(data->value.ht,"type",sizeof("type"),(void **) &pvalue)== SUCCESS) {
+				SEPARATE_ZVAL(pvalue);
+				convert_to_long(pvalue);
+				bod->type = (*pvalue)->value.lval;
+			}
+			if(_php3_hash_find(data->value.ht,"encoding",sizeof("encoding"),(void **) &pvalue)== SUCCESS){
+				SEPARATE_ZVAL(pvalue);
+				convert_to_long(*pvalue);
+				bod->encoding = (*pvalue)->value.lval;
+			}
+			if(_php3_hash_find(data->value.ht,"subtype",sizeof("subtype"),(void **) &pvalue)== SUCCESS){
+				SEPARATE_ZVAL(pvalue);
+				convert_to_string(*pvalue);
+				bod->subtype=cpystr((*pvalue)->value.str.val);
+			}
+			if(_php3_hash_find(data->value.ht,"id",sizeof("id"),(void **) &pvalue)== SUCCESS){
+				SEPARATE_ZVAL(pvalue);
+				convert_to_string(*pvalue);
+				bod->id=cpystr((*pvalue)->value.str.val);
+			}
+			if(_php3_hash_find(data->value.ht,"contents.data",sizeof("contents.data"),(void **) &pvalue)== SUCCESS){
+				SEPARATE_ZVAL(pvalue);
+				convert_to_string(*pvalue);     
+				bod->contents.text.data=(char *)fs_get((*pvalue)->value.str.len);
+				memcpy(bod->contents.text.data,(*pvalue)->value.str.val,(*pvalue)->value.str.len+1);
+				bod->contents.text.size=(*pvalue)->value.str.len;
+			}
+			if(_php3_hash_find(data->value.ht,"lines",sizeof("lines"),(void **) &pvalue)== SUCCESS){
+				SEPARATE_ZVAL(pvalue);
+				convert_to_long(*pvalue);
+				bod->size.lines=(*pvalue)->value.lval;
+			}
+			if(_php3_hash_find(data->value.ht,"bytes",sizeof("bytes"),(void **) &pvalue)== SUCCESS){
+				SEPARATE_ZVAL(pvalue);
+				convert_to_long(*pvalue);
+				bod->size.bytes=(*pvalue)->value.lval;
+			}
+			if(_php3_hash_find(data->value.ht,"md5",sizeof("md5"),(void **) &pvalue)== SUCCESS){
+				SEPARATE_ZVAL(pvalue);
+				convert_to_string(*pvalue);
+				bod->md5=cpystr((*pvalue)->value.str.val);
+			}
+			_php3_hash_move_forward(body->value.ht);
+		}
+	}
 
-  rfc822_encode_body_7bit (env,topbod); 
-  rfc822_header (tmp,env,topbod);  
-  mystring=emalloc(strlen(tmp)+1);
-  strcpy(mystring,tmp);
+	rfc822_encode_body_7bit (env,topbod); 
+	rfc822_header (tmp,env,topbod);  
+	mystring=emalloc(strlen(tmp)+1);
+	strcpy(mystring,tmp);
 
-  bod=topbod;
-  switch (bod->type) {
-  case TYPEMULTIPART:           /* multipart gets special handling */
-    part = bod->nested.part;   /* first body part */
-                                /* find cookie */
-    for (param = bod->parameter; param && !cookie; param = param->next)
-      if (!strcmp (param->attribute,"BOUNDARY")) cookie = param->value;
-    if (!cookie) cookie = "-";  /* yucky default */
-    do {                        /* for each part */
-                                /* build cookie */
-      sprintf (t=tmp,"--%s\015\012",cookie);
-                                /* append mini-header */
-      rfc822_write_body_header (&t,&part->body);
-      strcat (t,"\015\012");    /* write terminating blank line */
-                                /* output cookie, mini-header, and contents */
-      tempstring=emalloc(strlen(mystring)+strlen(tmp)+1);
-      strcpy(tempstring,mystring);
-      efree(mystring);
-      mystring=tempstring;
-      strcat(mystring,tmp);
+	bod=topbod;
+	switch (bod->type) {
+		case TYPEMULTIPART:           /* multipart gets special handling */
+			part = bod->nested.part;   /* first body part */
+										/* find cookie */
+			for (param = bod->parameter; param && !cookie; param = param->next) {
+				if (!strcmp (param->attribute,"BOUNDARY")) {
+					cookie = param->value;
+				}
+			}
+			if (!cookie) {
+				cookie = "-";  /* yucky default */
+			}
+			do {                        /* for each part */
+                    /* build cookie */
+				sprintf (t=tmp,"--%s\015\012",cookie);
+										/* append mini-header */
+				rfc822_write_body_header (&t,&part->body);
+				strcat (t,"\015\012");    /* write terminating blank line */
+										/* output cookie, mini-header, and contents */
+				tempstring=emalloc(strlen(mystring)+strlen(tmp)+1);
+				strcpy(tempstring,mystring);
+				efree(mystring);
+				mystring=tempstring;
+				strcat(mystring,tmp);
 
-      bod=&part->body;
+				bod=&part->body;
 
-      tempstring=emalloc(strlen(bod->contents.text.data)+strlen(mystring)+1);
-      strcpy(tempstring,mystring);
-      efree(mystring);
-      mystring=tempstring;
-      strcat(mystring,bod->contents.text.data);
+				tempstring=emalloc(strlen(bod->contents.text.data)+strlen(mystring)+1);
+				strcpy(tempstring,mystring);
+				efree(mystring);
+				mystring=tempstring;
+				strcat(mystring,bod->contents.text.data);
 
-    } while ((part = part->next));/* until done */
-                                /* output trailing cookie */
+			} while ((part = part->next));/* until done */
+            /* output trailing cookie */
 
-    sprintf(tmp,"--%s--",cookie);
-    tempstring=emalloc(strlen(tmp)+strlen(mystring)+1);
-    strcpy(tempstring,mystring);
-    efree(mystring);
-    mystring=tempstring;
-    strcat(mystring,tmp);
-    break;
-  default:                      /* all else is text now */
-    tempstring=emalloc(strlen(bod->contents.text.data)+strlen(mystring)+1);
-    strcpy(tempstring,mystring);
-    efree(mystring);
-    mystring=tempstring;
-    strcat(mystring,bod->contents.text.data);
-    break;
-  }
-  
-  RETURN_STRINGL(mystring,strlen(mystring),1);  
+			sprintf(tmp,"--%s--",cookie);
+			tempstring=emalloc(strlen(tmp)+strlen(mystring)+1);
+			strcpy(tempstring,mystring);
+			efree(mystring);
+			mystring=tempstring;
+			strcat(mystring,tmp);
+			break;
+		default:                      /* all else is text now */
+			tempstring=emalloc(strlen(bod->contents.text.data)+strlen(mystring)+1);
+			strcpy(tempstring,mystring);
+			efree(mystring);
+			mystring=tempstring;
+			strcat(mystring,bod->contents.text.data);
+			break;
+	}
+
+	RETURN_STRINGL(mystring,strlen(mystring),1);  
 }
 /* }}} */
 
