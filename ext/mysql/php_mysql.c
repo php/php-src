@@ -60,7 +60,7 @@ static int le_result, le_link, le_plink;
 # else
 #  include <mysql.h>
 # endif
-#ifdef HAVE_MYSQL_REAL_CONNECT
+
 #ifdef HAVE_ERRMSG_H
 #include <errmsg.h>
 #endif
@@ -117,8 +117,10 @@ function_entry mysql_functions[] = {
 	PHP_FE(mysql_pconnect,								NULL)
 	PHP_FE(mysql_close,									NULL)
 	PHP_FE(mysql_select_db,								NULL)
+#if MYSQL_VERSION_ID < 40000
 	PHP_FE(mysql_create_db,								NULL)
 	PHP_FE(mysql_drop_db,								NULL)
+#endif
 	PHP_FE(mysql_query,									NULL)
 	PHP_FE(mysql_unbuffered_query,						NULL)
 	PHP_FE(mysql_db_query,								NULL)
@@ -164,8 +166,10 @@ function_entry mysql_functions[] = {
 	PHP_FALIAS(mysql_fieldtype,		mysql_field_type,	NULL)
 	PHP_FALIAS(mysql_fieldflags,	mysql_field_flags,	NULL)
 	PHP_FALIAS(mysql_selectdb,		mysql_select_db,	NULL)
+#if MYSQL_VERSION_ID < 40000
 	PHP_FALIAS(mysql_createdb,		mysql_create_db,	NULL)
 	PHP_FALIAS(mysql_dropdb,		mysql_drop_db,		NULL)
+#endif
 	PHP_FALIAS(mysql_freeresult,	mysql_free_result,	NULL)
 	PHP_FALIAS(mysql_numfields,		mysql_num_fields,	NULL)
 	PHP_FALIAS(mysql_numrows,		mysql_num_rows,		NULL)
@@ -332,6 +336,12 @@ ZEND_MODULE_STARTUP_D(mysql)
 	REGISTER_LONG_CONSTANT("MYSQL_USE_RESULT", MYSQL_USE_RESULT, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MYSQL_STORE_RESULT", MYSQL_STORE_RESULT, CONST_CS | CONST_PERSISTENT);
 
+#ifdef ZTS
+# if MYSQL_VERSION_ID >= 40000
+	mysql_thread_init();
+# endif
+#endif
+
 	return SUCCESS;
 }
 /* }}} */
@@ -340,6 +350,12 @@ ZEND_MODULE_STARTUP_D(mysql)
  */
 PHP_MSHUTDOWN_FUNCTION(mysql)
 {
+#ifdef ZTS
+# if MYSQL_VERSION_ID >= 40000
+	mysql_thread_end();
+# endif
+#endif
+
 	UNREGISTER_INI_ENTRIES();
 	return SUCCESS;
 }
@@ -874,6 +890,7 @@ PHP_FUNCTION(mysql_get_server_info)
 
 #endif
 
+#if MYSQL_VERSION_ID < 40000
 /* {{{ proto int mysql_create_db(string database_name [, int link_identifier])
    Create a MySQL database */
 PHP_FUNCTION(mysql_create_db)
@@ -950,6 +967,7 @@ PHP_FUNCTION(mysql_drop_db)
 	}
 }
 /* }}} */
+#endif
 
 /* {{{ php_mysql_do_query_general
  */
@@ -2034,7 +2052,6 @@ PHP_FUNCTION(mysql_free_result)
 	RETURN_TRUE;
 }
 /* }}} */
-#endif
 
 
 /*
