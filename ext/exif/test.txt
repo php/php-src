@@ -205,15 +205,25 @@ if (function_exists('read_exif_data')) {
 	$num = 0;
 	foreach($possible as $idx => $file) {
 		$num++;
-		$res   = '';
-		$len   = 2;
+		$error = '';
+		$len   = 4;
+		$size  = GetImageSize($file);
+		$error = error_msg();// clear message
+		if ( $image === false) {
+		    $getimagesize = '<b style="color:red">GetImageSize returned false</b><br>'.$error;
+		} else {
+			$getimagesize = "[ $size[0], $size[1], $size[2], $size[3] ]";
+		}
+		/**/
 		error_log("exif_read_data($file,'COMMENT,IFD0,EXIF,APP12');",0);
 		$image = exif_read_data($file,'COMMENT,IFD0,EXIF,APP12');
-		$error = error_msg();
+		$error = error_msg();// clear message
 		//error_log("exif_read_data($file)",0);
+		$res   = '';
 		if ( $image === false) {
 		    $error = '<b style="color:red">exif_read_data returned false</b><br>'.$error;
 		} else {
+			// ah no!$error = error_msg(); // force o.k.
 			foreach($image as $Name => $Value) {
 				if ( $Name!='Thumbnail') {
 					if ( is_array($Value)) {
@@ -230,7 +240,11 @@ if (function_exists('read_exif_data')) {
 				}
 			}
 		}
-		echo "<tr><td rowspan='$len' valign='top'>$num</td></tr><tr><th>$file</th><td>$error</td></tr>\n$res";
+		echo "<tr><td rowspan='$len' valign='top'>$num</td></tr>\n";
+		echo "<tr><th colspan='2'>$file</th></tr>\n";
+		echo "<tr><td><b>GetImageSize</b></td><td>$getimagesize</td></tr>\n";
+		echo "<tr><td><b>exif_read_data</b></td><td>$error</td></tr>\n";
+		echo $res;
 	}
 } else {
 	echo "<tr><td>function exif_read_data is not supported</td></tr>\n";
