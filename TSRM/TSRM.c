@@ -94,6 +94,8 @@ static FILE *tsrm_error_file;
 static pthread_key_t tls_key;
 #elif defined(TSRM_ST)
 static int tls_key;
+#elif defined(TSRM_WIN32)
+static DWORD tls_key;
 #endif
 
 
@@ -107,6 +109,8 @@ TSRM_API int tsrm_startup(int expected_threads, int expected_resources, int debu
 #elif defined(TSRM_ST)
 	st_init();
 	st_key_create(&tls_key, 0);
+#elif defined(TSRM_WIN32)
+	tls_key = TlsAlloc();
 #endif
 
 	tsrm_error_file = stderr;
@@ -175,7 +179,9 @@ TSRM_API void tsrm_shutdown(void)
 #if defined(GNUPTH)
 	pth_kill();
 #elif defined(PTHREADS)
-	pthread_key_delete( tls_key );
+	pthread_key_delete(tls_key);
+#elif defined(TSRM_WIN32)
+	TlsFree(tls_key);
 #endif
 }
 
@@ -248,9 +254,11 @@ static void allocate_new_resource(tsrm_tls_entry **thread_resources_ptr, THREAD_
 
 #if defined(PTHREADS)
 	/* Set thread local storage to this new thread resources structure */
-	pthread_setspecific( tls_key, (void *)*thread_resources_ptr );
+	pthread_setspecific(tls_key, (void *) *thread_resources_ptr);
 #elif defined(TSRM_ST)
 	st_thread_setspecific(tls_key, (void *) *thread_resources_ptr);
+#elif defined(TSRM_WIN32)
+	TlsSetValue(tls_key, (void *) *thread_resources_ptr);
 #endif
 
 	if (tsrm_new_thread_begin_handler) {
@@ -288,6 +296,8 @@ TSRM_API void *ts_resource_ex(ts_rsrc_id id, THREAD_T *th_id)
 		thread_resources = pthread_getspecific(tls_key);
 #elif defined(TSRM_ST)
 		thread_resources = st_thread_getspecific(tls_key);
+#elif defined(TSRM_WIN32)
+		thread_resources = TlsGetValue(tls_key);
 #else
 		thread_resources = NULL;
 #endif
@@ -370,6 +380,8 @@ void ts_free_thread(void)
 			}
 #if defined(PTHREADS)
 			pthread_setspecific(tls_key, 0);
+#elif defined(TSRM_WIN32)
+			TlsSetValue(tls_key, 0);
 #endif
 			free(thread_resources);
 			break;
