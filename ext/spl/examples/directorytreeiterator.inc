@@ -2,8 +2,9 @@
 
 class DirectoryTreeIterator extends RecursiveIteratorIterator
 {
-	function __construct($path)
+	function __construct($path, $mode)
 	{
+		// ignore $mode
 		parent::__construct(new CachingRecursiveIterator(new RecursiveDirectoryIterator($path), CIT_CALL_TOSTRING|CIT_CATCH_GET_CHILD), 1);
 	}
 	
