@@ -130,7 +130,7 @@ typedef struct dba_handler {
 /* check whether the user has write access */
 #define DBA_WRITE_CHECK \
 	if(info->mode != DBA_WRITER && info->mode != DBA_TRUNC && info->mode != DBA_CREAT) { \
-		php_error(E_WARNING, "%s(): you cannot perform a modification to a database without proper access", get_active_function_name(TSRMLS_C)); \
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "You cannot perform a modification to a database without proper access"); \
 		RETURN_FALSE; \
 	}
 
@@ -313,7 +313,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	for (hptr = handler; hptr->name && strcasecmp(hptr->name, Z_STRVAL_PP(args[2])); hptr++);
 
 	if (!hptr->name) {
-		php_error(E_WARNING, "%s(): no such handler: %s", get_active_function_name(TSRMLS_C), Z_STRVAL_PP(args[2]));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "No such handler: %s", Z_STRVAL_PP(args[2]));
 		FREENOW;
 		RETURN_FALSE;
 	}
@@ -332,7 +332,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			modenr = DBA_TRUNC;
 			break;
 		default:
-			php_error(E_WARNING, "%s(): illegal DBA mode: %s", get_active_function_name(TSRMLS_C), Z_STRVAL_PP(args[1]));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Illegal DBA mode: %s", Z_STRVAL_PP(args[1]));
 			FREENOW;
 			RETURN_FALSE;
 	}
@@ -347,7 +347,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 
 	if (hptr->open(info TSRMLS_CC) != SUCCESS) {
 		dba_close(info);
-		php_error(E_WARNING, "%s(): driver initialization failed", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Driver initialization failed for handler: %s", Z_STRVAL_PP(args[2]));
 		FREENOW;
 		RETURN_FALSE;
 	}
