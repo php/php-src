@@ -35,7 +35,7 @@ while test $# -gt 0; do
   case $1 in
     --extname=?*)
 	extname=$optarg
-	EXTNAME=`echo $extname | tr a-z A-Z`
+	EXTNAME=`echo $extname | tr [a-z] [A-Z]`
 	;;
     --proto=?*)
 	proto=$optarg
