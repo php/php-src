@@ -918,19 +918,19 @@ static HW_API_replace_In *make_HW_API_replace_In(zval *arg1) {
 				ce = zend_get_class_entry(*keydata);
 				if(!strcmp(key, "object")) {
 //					if(!((*keydata)->value.obj.ce->name, "hw_api_object")) {
-					if(!(ce->name, "hw_api_object")) {
+					if(!strcmp(ce->name, "hw_api_object")) {
 						HW_API_Object *obj;
 						obj = (HW_API_Object *) php_hwapi_get_object(*keydata, le_hwapi_objectp);
 						in->setObject(*obj);
 					}
 				} else if(!strcmp(key, "parameters")) {
-					if(!(ce->name, "hw_api_object")) {
+					if(!strcmp(ce->name, "hw_api_object")) {
 						HW_API_Object *obj;
 						obj = (HW_API_Object *) php_hwapi_get_object(*keydata, le_hwapi_objectp);
 						in->setParameters(*obj);
 					}
 				} else if(!strcmp(key, "content")) {
-					if(!(ce->name, "hw_api_content")) {
+					if(!strcmp(ce->name, "hw_api_content")) {
 						HW_API_Content *obj;
 						obj = (HW_API_Content *) php_hwapi_get_object(*keydata, le_hwapi_contentp);
 						in->setContent(*obj);
