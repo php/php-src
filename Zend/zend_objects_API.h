@@ -29,7 +29,6 @@ typedef void (*zend_objects_store_clone_t)(void *object, void **object_clone TSR
 
 typedef struct _zend_object_store_bucket {
 	zend_bool destructor_called;
-	zend_bool valid;
 	union _store_bucket {
 		struct _store_object {
 			void *object;
