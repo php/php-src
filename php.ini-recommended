@@ -113,14 +113,6 @@ output_buffering = 4096
 ;       and you cannot use both "ob_gzhandler" and "zlib.output_compression". 
 ;output_handler =
 
-; Normally you won't use an additional first output buffer when using any 
-; special output handler but you can enforce this since it can help to reduce 
-; memory used by output buffering when huge output chunks and total server 
-; throughput are preferred. This value can either be set 'On' in which case the
-; additional buffer is four times the size of all other output buffers or any
-; greater size.
-;double_buffering = Off
-
 ; Transparent output compression using the zlib library
 ; Valid values for this option are 'off', 'on', or a specific buffer size
 ; to be used for compression (default is 4KB)

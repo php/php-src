@@ -31,7 +31,6 @@ PHPAPI int  php_body_write(const char *str, uint str_length TSRMLS_DC);
 PHPAPI int  php_header_write(const char *str, uint str_length TSRMLS_DC);
 PHPAPI int php_start_ob_buffer(zval *output_handler, uint chunk_size, zend_bool erase TSRMLS_DC);
 PHPAPI int php_start_ob_buffer_named(const char *output_handler_name, uint chunk_size, zend_bool erase TSRMLS_DC);
-PHPAPI int php_start_ob_buffer_ibc(zval *output_handler, uint initial_size, uint block_size, uint chunk_size, zend_bool erase TSRMLS_DC);
 PHPAPI void php_end_ob_buffer(zend_bool send_buffer, zend_bool just_flush TSRMLS_DC);
 PHPAPI void php_end_ob_buffers(zend_bool send_buffer TSRMLS_DC);
 PHPAPI int php_ob_get_buffer(zval *p TSRMLS_DC);
@@ -42,7 +41,6 @@ PHPAPI char *php_get_output_start_filename(TSRMLS_D);
 PHPAPI int php_get_output_start_lineno(TSRMLS_D);
 PHPAPI void php_ob_set_internal_handler(php_output_handler_func_t internal_output_handler, uint buffer_size, char *handler_name, zend_bool erase TSRMLS_DC);
 PHPAPI int php_ob_handler_used(char *handler_name TSRMLS_DC);
-PHPAPI int php_ob_default_buffer_size(TSRMLS_D);
 
 PHP_FUNCTION(ob_start);
 PHP_FUNCTION(ob_flush);
