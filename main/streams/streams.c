@@ -1881,7 +1881,7 @@ PHPAPI int _php_stream_scandir(char *dirname, php_stream_dirent **namelist[], in
 			vector = (php_stream_dirent **) erealloc(vector, vector_size * sizeof(php_stream_dirent *));
 		}
 
-		vector[nfiles++] = (php_stream_dirent*)estrndup(&sdp, sizeof(php_stream_dirent) + ((strlen(sdp.d_name) + 1) * sizeof(char)));
+		vector[nfiles++] = (php_stream_dirent*)estrndup((const char *)&sdp, sizeof(php_stream_dirent) + ((strlen(sdp.d_name) + 1) * sizeof(char)));
 	}
 	php_stream_closedir(stream);
 
