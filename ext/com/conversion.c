@@ -188,9 +188,9 @@ static void pval_to_variant_ex(pval *pval_arg, VARIANT *var_arg, int type, int c
 			case VT_BOOL:
 				convert_to_boolean_ex(&pval_arg);
 				if (Z_LVAL_P(pval_arg)) {
-					V_BOOL(var_arg) = VT_TRUE;
+					V_BOOL(var_arg) = TRUE;
 				} else {
-					V_BOOL(var_arg) = VT_FALSE;
+					V_BOOL(var_arg) = FALSE;
 				}
 				break;
 
@@ -288,9 +288,9 @@ static void pval_to_variant_ex(pval *pval_arg, VARIANT *var_arg, int type, int c
 				/* emalloc or malloc ? */
 				V_BOOLREF(var_arg) = (short FAR*) pemalloc(sizeof(short), 1);
 				if (Z_LVAL_P(pval_arg)) {
-					*V_BOOLREF(var_arg) = VT_TRUE;
+					*V_BOOLREF(var_arg) = TRUE;
 				} else {
-					*V_BOOLREF(var_arg) = VT_TRUE;
+					*V_BOOLREF(var_arg) = FALSE;
 				}
 				break;
 
