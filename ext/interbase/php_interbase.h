@@ -63,7 +63,9 @@ PHP_FUNCTION(ibase_timefmt);
 
 PHP_FUNCTION(ibase_num_fields);
 PHP_FUNCTION(ibase_num_params);
+#if abies_0
 PHP_FUNCTION(ibase_num_rows);
+#endif
 PHP_FUNCTION(ibase_affected_rows);
 PHP_FUNCTION(ibase_field_info);
 PHP_FUNCTION(ibase_param_info);
