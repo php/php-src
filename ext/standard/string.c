@@ -450,10 +450,9 @@ PHP_FUNCTION(nl_langinfo)
 	convert_to_long_ex(item);
 
 	value = nl_langinfo(Z_LVAL_PP(item));
-	if (value == NULL)	{
+	if (value == NULL) {
 		RETURN_FALSE;
-	}
-	else	{
+	} else {
 		RETURN_STRING(value, 1);
 	}
 }
