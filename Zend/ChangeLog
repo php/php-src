@@ -1,3 +1,8 @@
+2004-04-15  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_execute.c:
+      Handle failure in get_current_data
+
 2004-04-14  Andi Gutmans  <andi@zend.com>
 
     * zend_extensions.h:

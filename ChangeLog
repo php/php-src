@@ -1,3 +1,59 @@
+2004-04-15  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * main/snprintf.c:
+      Bugfix #28012, now for snprintf
+
+    * main/spprintf.c:
+      Bugfix #28012 spprintf() output inconsistent for %p
+
+    * ZendEngine2/zend_execute.c:
+      Handle failure in get_current_data
+
+2004-04-15  Andi Gutmans  <andi@zend.com>
+
+    * ext/mysqli/mysqli.c:
+      - Temporary fix for bug #27869
+      - George, you need to implement clone in order for "clone" and
+      - compatibility mode to work.
+
+2004-04-15  Hartmut Holzgraefe  <hartmut@php-groupies.de>
+
+    * README.TESTING:
+      typo
+
+    * README.TESTING:
+      be a bit more explanatory ...
+
+2004-04-15  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      ext/session/tests/bug26862.phpt:
+      MFH: Fixed test failure if session.use_trans_sid is enabled.
+
+    * ext/session/tests/bug26862.phpt:
+      Fixed test failure if session.use_trans_sid is enabled.
+
+2004-04-15  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * NEWS:
+      Remove duplicate entries
+
+2004-04-15  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/sysvmsg/EXPERIMENTAL
+      ext/sysvmsg/package.xml:
+      been stable for a long time now
+
+2004-04-15  Dmitry Stogov  <dmitry@zend.com>
+
+    * NEWS:
+      Fixed bug #27681 (soap extension fails without HAVE_TM_GMTOFF).
+
+2004-04-15  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * NEWS:
+      reorder..is this so hard..? :)
+
 2004-04-14  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * NEWS:
