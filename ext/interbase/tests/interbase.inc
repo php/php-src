@@ -8,7 +8,7 @@ srand((double)microtime()*1000000);
 $test_base = dirname(__FILE__)."/ibase_test.tmp";
 @unlink($test_base);
 
-$name = dirname(__FILE__).tempnam("","CREATEDB");
+$name = tempnam(dirname(__FILE__), "CREATEDB");
 $ftmp = fopen($name,"w");
 fwrite($ftmp, 
 "
