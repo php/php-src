@@ -225,7 +225,7 @@ PHP_FUNCTION(mb_regex_encoding)
 	if (ZEND_NUM_ARGS() == 0) {
 		const char *retval = php_mbregex_mbctype2name(MBSTRG(current_mbctype));
 		if ( retval != NULL ) {
-			RETVAL_STRING((char *)retval);
+			RETVAL_STRING((char *)retval, 1);
 		} else {
 			RETVAL_FALSE;
 		}
