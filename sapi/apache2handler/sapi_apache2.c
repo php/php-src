@@ -20,8 +20,6 @@
 
 /* $Id$ */
 
-#include <fcntl.h>
-
 #define ZEND_INCLUDE_FULL_WINDOWS_HEADERS
 
 #include "php.h"
@@ -29,6 +27,8 @@
 #include "php_ini.h"
 #include "php_variables.h"
 #include "SAPI.h"
+
+#include <fcntl.h>
 
 #include "ext/standard/php_smart_str.h"
 #ifndef NETWARE

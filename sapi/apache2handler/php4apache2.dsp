@@ -44,7 +44,7 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "PHP_APACHE2_EXPORTS" /YX /FD /c
-# ADD CPP /nologo /MD /W3 /GX /O2 /I "...\..\include" /I "..\..\win32" /I "..\..\Zend" /I "..\.." /I "..\..\..\bindlib_w32" /I "..\..\main" /I "..\..\TSRM" /D ZEND_DEBUG=0 /D "NDEBUG" /D "ZTS" /D "ZEND_WIN32" /D "PHP_WIN32" /D "_WINDOWS" /D "_USRDLL" /D "WIN32" /D "_MBCS" /D "_WINSOCK2API_" /D "_MSWSOCK_" /YX /FD /c
+# ADD CPP /nologo /MD /W3 /GX /O2 /I "...\..\include" /I "..\..\win32" /I "..\..\Zend" /I "..\.." /I "..\..\..\bindlib_w32" /I "..\..\main" /I "..\..\TSRM" /D ZEND_DEBUG=0 /D "NDEBUG" /D "ZTS" /D "ZEND_WIN32" /D "PHP_WIN32" /D "_WINDOWS" /D "_USRDLL" /D "WIN32" /D "_MBCS" /YX /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x407 /d "NDEBUG"
@@ -70,7 +70,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "PHP_APACHE2_EXPORTS" /YX /FD /c
-# ADD CPP /nologo /MD /W3 /GX /O2 /I "...\..\include" /I "..\..\win32" /I "..\..\Zend" /I "..\.." /I "..\..\..\bindlib_w32" /I "..\..\main" /I "..\..\TSRM" /D ZEND_DEBUG=0 /D "ZEND_WIN32_FORCE_INLINE" /D "NDEBUG" /D "ZTS" /D "ZEND_WIN32" /D "PHP_WIN32" /D "_WINDOWS" /D "_USRDLL" /D "WIN32" /D "_MBCS" /D "_WINSOCK2API_" /D "_MSWSOCK_" /YX /FD /c
+# ADD CPP /nologo /MD /W3 /GX /O2 /I "...\..\include" /I "..\..\win32" /I "..\..\Zend" /I "..\.." /I "..\..\..\bindlib_w32" /I "..\..\main" /I "..\..\TSRM" /D ZEND_DEBUG=0 /D "ZEND_WIN32_FORCE_INLINE" /D "NDEBUG" /D "ZTS" /D "ZEND_WIN32" /D "PHP_WIN32" /D "_WINDOWS" /D "_USRDLL" /D "WIN32" /D "_MBCS" /YX /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x407 /d "NDEBUG"
@@ -95,7 +95,7 @@ LINK32=link.exe
 # PROP Intermediate_Dir "Debug_TS"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "PHP_APACHE2_EXPORTS" /YX /FD /GZ  /c
-# ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /I "...\..\include" /I "..\..\win32" /I "..\..\Zend" /I "..\.." /I "..\..\..\bindlib_w32" /I "..\..\main" /I "..\..\TSRM" /D "_DEBUG" /D ZEND_DEBUG=1 /D "ZTS" /D "ZEND_WIN32" /D "PHP_WIN32" /D "_WINDOWS" /D "_USRDLL" /D "WIN32" /D "_MBCS" /D "_WINSOCK2API_" /D "_MSWSOCK_" /YX /FD /GZ  /c
+# ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /I "...\..\include" /I "..\..\win32" /I "..\..\Zend" /I "..\.." /I "..\..\..\bindlib_w32" /I "..\..\main" /I "..\..\TSRM" /D "_DEBUG" /D ZEND_DEBUG=1 /D "ZTS" /D "ZEND_WIN32" /D "PHP_WIN32" /D "_WINDOWS" /D "_USRDLL" /D "WIN32" /D "_MBCS" /YX /FD /GZ  /c
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x407 /d "_DEBUG"
