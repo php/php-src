@@ -2,6 +2,8 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? ????, Version 4.0 Beta 4
+- Added support for the 'use' keyword - behaves like 'require', but will not
+  use the same file more than once (Andi & Zeev, Zend library)
 - Added check to see if a persistent connection is still valid with the
   ODBC interface before reusing (nick@easysoft.com)
 - Added DBMaker support (patch by Pax Tsai <paxtsai@lion.syscom.com.tw>)
