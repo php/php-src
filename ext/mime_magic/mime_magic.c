@@ -18,7 +18,7 @@
   $Id$ 
 
   This module contains a lot of stuff taken from Apache mod_mime_magic,
-  so the lincense section is a little bit longer than usual:
+  so the license section is a little bit longer than usual:
 
   ====================================================================
  * The Apache Software License, Version 1.1
