@@ -75,6 +75,12 @@ PHP_FUNCTION(clearstatcache);
 #define getuid() 1
 #endif
 
+#ifdef PHP_WIN32
+typedef unsigned int php_stat_len;
+#else
+typedef int php_stat_len;
+#endif
+
 PHPAPI void php_stat(const char *filename, php_stat_len filename_length, int type, pval *return_value TSRMLS_DC);
 
 /* Switches for various filestat functions: */
