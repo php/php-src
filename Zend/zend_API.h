@@ -120,7 +120,7 @@ ZEND_API zend_module_entry *zend_get_module(int module_number);
 ZEND_API int zend_disable_function(char *function_name, uint function_name_length);
 
 ZEND_API void wrong_param_count(void);
-ZEND_API zend_bool zend_is_callable(zval *function);
+ZEND_API zend_bool zend_is_callable(zval *callable, zend_bool syntax_only, char **callable_name);
 
 #define getThis() (this_ptr)
 
