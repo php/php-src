@@ -678,7 +678,7 @@ PHP_FUNCTION(krsort)
 		php_error(E_WARNING, "Wrong datatype in krsort() call");
 		return;
 	}
-	if (zend_hash_sort(target_hash, array_reverse_key_compare,0) == FAILURE) {
+	if (zend_hash_sort(target_hash, qsort, array_reverse_key_compare, 0) == FAILURE) {
 		return;
 	}
 	RETURN_TRUE;
@@ -697,7 +697,7 @@ PHP_FUNCTION(ksort)
 		php_error(E_WARNING, "Wrong datatype in ksort() call");
 		return;
 	}
-	if (zend_hash_sort(target_hash, array_key_compare,0) == FAILURE) {
+	if (zend_hash_sort(target_hash, qsort, array_key_compare,0) == FAILURE) {
 		return;
 	}
 	RETURN_TRUE;
@@ -794,7 +794,7 @@ PHP_FUNCTION(asort)
 		php_error(E_WARNING, "Wrong datatype in asort() call");
 		return;
 	}
-	if (zend_hash_sort(target_hash, array_data_compare,0) == FAILURE) {
+	if (zend_hash_sort(target_hash, qsort, array_data_compare,0) == FAILURE) {
 		return;
 	}
 	RETURN_TRUE;
@@ -813,7 +813,7 @@ PHP_FUNCTION(arsort)
 		php_error(E_WARNING, "Wrong datatype in arsort() call");
 		return;
 	}
-	if (zend_hash_sort(target_hash, array_reverse_data_compare,0) == FAILURE) {
+	if (zend_hash_sort(target_hash, qsort, array_reverse_data_compare,0) == FAILURE) {
 		return;
 	}
 	RETURN_TRUE;
@@ -832,7 +832,7 @@ PHP_FUNCTION(sort)
 		php_error(E_WARNING, "Wrong datatype in sort() call");
 		return;
 	}
-	if (zend_hash_sort(target_hash, array_data_compare,1) == FAILURE) {
+	if (zend_hash_sort(target_hash, qsort, array_data_compare,1) == FAILURE) {
 		return;
 	}
 	RETURN_TRUE;
@@ -851,7 +851,7 @@ PHP_FUNCTION(rsort)
 		php_error(E_WARNING, "Wrong datatype in rsort() call");
 		return;
 	}
-	if (zend_hash_sort(target_hash, array_reverse_data_compare,1) == FAILURE) {
+	if (zend_hash_sort(target_hash, qsort, array_reverse_data_compare,1) == FAILURE) {
 		return;
 	}
 	RETURN_TRUE;
@@ -899,7 +899,7 @@ PHP_FUNCTION(usort)
 		return;
 	}
 	convert_to_string_ex(user_compare_func_name);
-	if (zend_hash_sort(target_hash, array_user_compare, 1) == FAILURE) {
+	if (zend_hash_sort(target_hash, qsort, array_user_compare, 1) == FAILURE) {
 		user_compare_func_name = old_compare_func;
 		return;
 	}
@@ -925,7 +925,7 @@ PHP_FUNCTION(uasort)
 		return;
 	}
 	convert_to_string_ex(user_compare_func_name);
-	if (zend_hash_sort(target_hash, array_user_compare, 0) == FAILURE) {
+	if (zend_hash_sort(target_hash, qsort, array_user_compare, 0) == FAILURE) {
 		user_compare_func_name = old_compare_func;
 		return;
 	}
@@ -1001,7 +1001,7 @@ PHP_FUNCTION(uksort)
 		return;
 	}
 	convert_to_string_ex(user_compare_func_name);
-	if (zend_hash_sort(target_hash, array_user_key_compare, 0) == FAILURE) {
+	if (zend_hash_sort(target_hash, qsort, array_user_key_compare, 0) == FAILURE) {
 		user_compare_func_name = old_compare_func;
 		return;
 	}
@@ -2445,7 +2445,7 @@ PHP_FUNCTION(shuffle)
 		php_error(E_WARNING, "Wrong datatype in shuffle() call");
 		return;
 	}
-	if (zend_hash_sort((*array)->value.ht, array_data_shuffle, 1) == FAILURE) {
+	if (zend_hash_sort((*array)->value.ht, qsort, array_data_shuffle, 1) == FAILURE) {
 		return;
 	}
 	RETURN_TRUE;
