@@ -17,7 +17,7 @@
   +----------------------------------------------------------------------+
 */
 
-// $Id: confutils.js,v 1.50 2005-01-18 22:37:12 fmk Exp $
+// $Id: confutils.js,v 1.51 2005-01-20 03:24:50 wez Exp $
 
 var STDOUT = WScript.StdOut;
 var STDERR = WScript.StdErr;
@@ -708,7 +708,7 @@ function OLD_CHECK_LIB(libnames, target, path_to_check)
 
 }
 
-function CHECK_FUNC_IN_HEADER(header_name, func_name, path_to_check)
+function CHECK_FUNC_IN_HEADER(header_name, func_name, path_to_check, add_to_flag)
 {
 	var c = false;
 	var sym;
@@ -720,7 +720,11 @@ function CHECK_FUNC_IN_HEADER(header_name, func_name, path_to_check)
 	sym = func_name.toUpperCase();
 	sym = sym.replace(new RegExp("[\\\\/\.-]", "g"), "_");
 
-	AC_DEFINE("HAVE_" + sym, c ? 1 : 0);
+	if (typeof(add_to_flag) == "undefined") {
+		AC_DEFINE("HAVE_" + sym, c ? 1 : 0);
+	} else {
+		ADD_FLAG(add_to_flag, "/DHAVE_" + sym + "=" + (c ? "1" : "0"));
+	}
 
 	if (c) {
 		STDOUT.WriteLine("OK");
@@ -766,7 +770,7 @@ function GREP_HEADER(header_name, regex, path_to_check)
 	return false;
 }
 
-function CHECK_HEADER_ADD_INCLUDE(header_name, flag_name, path_to_check, use_env, add_dir_part)
+function CHECK_HEADER_ADD_INCLUDE(header_name, flag_name, path_to_check, use_env, add_dir_part, add_to_flag_only)
 {
 	var dir_part_to_add = "";
 	
@@ -810,7 +814,11 @@ function CHECK_HEADER_ADD_INCLUDE(header_name, flag_name, path_to_check, use_env
 	sym = header_name.toUpperCase();
 	sym = sym.replace(new RegExp("[\\\\/\.-]", "g"), "_");
 
-	AC_DEFINE("HAVE_" + sym, have);
+	if (typeof(add_to_flag_only) != "undefined") {
+		ADD_FLAG(flag_name, "/DHAVE_" + sym + "=" + have);
+	} else {
+		AC_DEFINE("HAVE_" + sym, have);
+	}
 
 	return p;
 }
@@ -963,6 +971,7 @@ function EXTENSION(extname, file_list, shared, cflags, dllname, obj_dir)
 {
 	var objs = null;
 	var EXT = extname.toUpperCase();
+	var extname_for_printing;
 
 	if (shared == null) {
 		eval("shared = PHP_" + EXT + "_SHARED;");
@@ -971,12 +980,18 @@ function EXTENSION(extname, file_list, shared, cflags, dllname, obj_dir)
 		cflags = "";
 	}
 
+	if (typeof(obj_dir) == "undefined") {
+		extname_for_printing = configure_module_dirname;
+	} else {
+		extname_for_printing = configure_module_dirname + " (via " + obj_dir + ")";
+	}
+
 	if (shared) {
-		STDOUT.WriteLine("Enabling extension " + configure_module_dirname + " [shared]");
+		STDOUT.WriteLine("Enabling extension " + extname_for_printing + " [shared]");
 		cflags = "/D COMPILE_DL_" + EXT + " /D " + EXT + "_EXPORTS=1 " + cflags;
 		ADD_FLAG("CFLAGS_PHP", "/D COMPILE_DL_" + EXT);
 	} else {
-		STDOUT.WriteLine("Enabling extension " + configure_module_dirname);
+		STDOUT.WriteLine("Enabling extension " + extname_for_printing);
 	}
 
 	MFO.WriteBlankLines(1);
