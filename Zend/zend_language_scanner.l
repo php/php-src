@@ -1445,7 +1445,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	}
 }
 
-<ST_IN_SCRIPTING>"/**" {
+<ST_IN_SCRIPTING>"/**"WHITESPACE {
 	CG(comment_start_line) = CG(zend_lineno);
 	BEGIN(ST_DOC_COMMENT);
 	yymore();
