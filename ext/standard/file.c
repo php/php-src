@@ -1624,8 +1624,10 @@ PHP_NAMED_FUNCTION(php_if_fstat)
 	add_assoc_long ( return_value , "uid" , stat_sb.st_uid );
 	add_assoc_long ( return_value , "gid" , stat_sb.st_gid );
 
-#ifdef HAVE_ST_BLKSIZE
+#ifdef HAVE_ST_RDEV
 	add_assoc_long ( return_value, "rdev" , stat_sb.st_rdev );
+#endif
+#ifdef HAVE_ST_BLKSIZE
 	add_assoc_long ( return_value , "blksize" , stat_sb.st_blksize );
 #endif
 	
