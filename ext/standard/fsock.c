@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
    | Authors: Paul Panotzki - Bunyip Information Systems                  |
    |          Jim Winstead (jimw@php.net)                                 |
+   |          Sascha Schumann <sascha@schumann.cx>                        |
    +----------------------------------------------------------------------+
 */
 
@@ -68,7 +69,10 @@
 #include "url.h"
 #include "fsock.h"
 
-#ifndef ZTS
+#ifdef ZTS
+static int fsock_globals_id;
+#else
+static php_fsock_globals fsock_globals;
 extern int le_fp;
 #endif
 
@@ -104,8 +108,6 @@ struct php3i_sockbuf {
 	char is_blocked;
 	size_t chunk_size;
 };
-
-static struct php3i_sockbuf *phpsockbuf;
 
 typedef struct php3i_sockbuf php3i_sockbuf;
 
@@ -387,17 +389,15 @@ PHP_FUNCTION(pfsockopen)
 		if(sock->readbuf) pefree(sock->readbuf, sock->persistent); \
 		if(sock->prev) sock->prev->next = sock->next; \
 		if(sock->next) sock->next->prev = sock->prev; \
-		if(sock == phpsockbuf) \
-			phpsockbuf = sock->next; \
+		if(sock == FG(phpsockbuf)) \
+			FG(phpsockbuf) = sock->next; \
 		pefree(sock, sock->persistent)
 
-static size_t def_chunk_size = CHUNK_SIZE;
-
-static void php_cleanup_sockbuf(int persistent)
+static void php_cleanup_sockbuf(int persistent FLS_DC)
 {
 	php3i_sockbuf *now, *next;
 
-	for(now = phpsockbuf; now; now = next) {
+	for(now = FG(phpsockbuf); now; now = next) {
 		next = now->next;
 		if(now->persistent == persistent) {
 			SOCK_DESTROY(now);
@@ -410,14 +410,15 @@ static void php_cleanup_sockbuf(int persistent)
 #define WRITEPTR(sock) ((sock)->readbuf + (sock)->writepos)
 #define SOCK_FIND(sock,socket) \
       php3i_sockbuf *sock; \
-      sock = _php3_sock_find(socket); \
-      if(!sock) sock = _php3_sock_create(socket)
+      FLS_FETCH(); \
+      sock = _php3_sock_find(socket FLS_CC); \
+      if(!sock) sock = _php3_sock_create(socket FLS_CC)
 
-static php3i_sockbuf *_php3_sock_find(int socket)
+static php3i_sockbuf *_php3_sock_find(int socket FLS_DC)
 {
 	php3i_sockbuf *buf = NULL, *tmp;
 
-	for(tmp = phpsockbuf; tmp; tmp = tmp->next) 
+	for(tmp = FG(phpsockbuf); tmp; tmp = tmp->next) 
 		if(tmp->socket == socket) {
 			buf = tmp;
 			break;
@@ -426,19 +427,19 @@ static php3i_sockbuf *_php3_sock_find(int socket)
 	return buf;
 }
 
-static php3i_sockbuf *_php3_sock_create(int socket)
+static php3i_sockbuf *_php3_sock_create(int socket FLS_DC)
 {
 	php3i_sockbuf *sock;
 	int persistent = _php3_is_persistent_sock(socket);
 
 	sock = pecalloc(sizeof(*sock), 1, persistent);
 	sock->socket = socket;
-	if((sock->next = phpsockbuf)) 
-		phpsockbuf->prev = sock;
+	if((sock->next = FG(phpsockbuf))) 
+		FG(phpsockbuf)->prev = sock;
 	sock->persistent = persistent;
 	sock->is_blocked = 1;
-	sock->chunk_size = def_chunk_size;
-	phpsockbuf = sock;
+	sock->chunk_size = FG(def_chunk_size);
+	FG(phpsockbuf) = sock;
 
 	return sock;
 }
@@ -446,11 +447,12 @@ static php3i_sockbuf *_php3_sock_create(int socket)
 size_t _php3_sock_set_def_chunk_size(size_t size)
 {
 	size_t old;
+	FLS_FETCH();
 
-	old = def_chunk_size;
+	old = FG(def_chunk_size);
 
 	if(size <= CHUNK_SIZE || size > 0) 
-		def_chunk_size = size;
+		FG(def_chunk_size) = size;
 
 	return old;
 }
@@ -459,8 +461,9 @@ int _php3_sock_destroy(int socket)
 {
 	int ret = 0;
 	php3i_sockbuf *sock;
+	FLS_FETCH();
 
-	sock = _php3_sock_find(socket);
+	sock = _php3_sock_find(socket FLS_CC);
 	if(sock) {
 		ret = 1;
 		SOCK_DESTROY(sock);
@@ -485,8 +488,9 @@ int _php3_sock_close(int socket)
 {
 	int ret = 0;
 	php3i_sockbuf *sock;
+	FLS_FETCH();
 
-	sock = _php3_sock_find(socket);
+	sock = _php3_sock_find(socket FLS_CC);
 	if(sock) {
 		if(!sock->persistent) {
 			SOCK_CLOSE(sock->socket);
@@ -709,11 +713,27 @@ int php_msock_destroy(int *data)
 /* }}} */
 	/* {{{ php3_minit_fsock */
 
+static void fsock_globals_ctor(FLS_D)
+{
+	zend_hash_init(&FG(ht_fsock_keys), 0, NULL, NULL, 1);
+	zend_hash_init(&FG(ht_fsock_socks), 0, NULL, (int (*)(void *))php_msock_destroy, 1);
+	FG(def_chunk_size) = CHUNK_SIZE;
+	FG(phpsockbuf) = NULL;
+}
+
+static void fsock_globals_dtor(FLS_D)
+{
+	zend_hash_destroy(&FG(ht_fsock_socks));
+	zend_hash_destroy(&FG(ht_fsock_keys));
+	php_cleanup_sockbuf(1 FLS_CC);
+}
+
 PHP_MINIT_FUNCTION(fsock)
 {
-#ifndef ZTS
-	zend_hash_init(&PG(ht_fsock_keys), 0, NULL, NULL, 1);
-	zend_hash_init(&PG(ht_fsock_socks), 0, NULL, (int (*)(void *))php_msock_destroy, 1);
+#ifdef ZTS
+	fsock_globals_id = ts_allocate_id(sizeof(php_fsock_globals), fsock_globals_ctor, fsock_globals_dtor);
+#else
+	fsock_globals_ctor(FLS_C);
 #endif
 	return SUCCESS;
 }
@@ -723,10 +743,8 @@ PHP_MINIT_FUNCTION(fsock)
 PHP_MSHUTDOWN_FUNCTION(fsock)
 {
 #ifndef ZTS
-	zend_hash_destroy(&PG(ht_fsock_socks));
-	zend_hash_destroy(&PG(ht_fsock_keys));
+	fsock_globals_dtor(FLS_C);
 #endif
-	php_cleanup_sockbuf(1);
 	return SUCCESS;
 }
 /* }}} */
@@ -734,7 +752,9 @@ PHP_MSHUTDOWN_FUNCTION(fsock)
 
 PHP_RSHUTDOWN_FUNCTION(fsock)
 {
-	php_cleanup_sockbuf(0);
+	FLS_FETCH();
+
+	php_cleanup_sockbuf(0 FLS_CC);
 	return SUCCESS;
 }
 
