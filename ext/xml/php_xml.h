@@ -38,7 +38,7 @@ extern zend_module_entry xml_module_entry;
 #include <xmltok.h>
 #include <xmlparse.h>
 
-#if WIN32||WINNT
+#ifdef PHP_WIN32
 #define PHP_XML_API __declspec(dllexport)
 #else
 #define PHP_XML_API

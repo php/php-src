@@ -50,7 +50,7 @@
 #endif
 #endif
 
-#if WIN32|WINNT
+#ifdef PHP_WIN32
 #ifdef JNI_12
 #pragma comment(lib,"jvm.lib")
 #else
@@ -106,7 +106,7 @@ void jvm_destroy() {
     (*jvm)->DestroyJavaVM(jvm);
     jvm = 0;
   }
-#if !(WIN32||WINNT)
+#ifndef PHP_WIN32
   if (javadl) dlclose(javadl);
 #endif
   php_reflect = 0;
@@ -148,7 +148,7 @@ static int jvm_create() {
 
   if (!classpath) classpath = getenv("CLASSPATH");
 
-#if !(WIN32||WINNT)
+#ifndef PHP_WIN32
   if (!libpath)   libpath   = getenv("LD_LIBRARY_PATH");
   if (javalib) {
     javadl = dlopen(javalib, RTLD_GLOBAL | RTLD_LAZY);

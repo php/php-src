@@ -33,7 +33,7 @@
 #define HYPERWAVE 1
 #endif
 
-#if WIN32||WINNT
+#ifdef PHP_WIN32
 #define PHP_HW_API __declspec(dllexport)
 #else
 #define PHP_HW_API

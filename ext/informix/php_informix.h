@@ -40,7 +40,7 @@
 #define HAVE_IFX 1
 #endif
 
-#if WIN32||WINNT
+#ifdef PHP_WIN32
 #define PHP_IFX_API __declspec(dllexport)
 #else
 #define PHP_IFX_API

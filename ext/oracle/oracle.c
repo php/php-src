@@ -50,7 +50,7 @@
 #define min(a, b) ((a) > (b) ? (b) : (a))
 #endif
 
-#if WIN32||WINNT
+#ifdef PHP_WIN32
 #define PHP_ORA_API __declspec(dllexport)
 #else
 #define PHP_ORA_API
@@ -1513,7 +1513,7 @@ PHP_FUNCTION(ora_errorcode)
 
 PHP_MINFO_FUNCTION(oracle)
 {
-#if !(WIN32|WINNT)
+#ifndef PHP_WIN32
 	php_printf("Oracle version: %s<br>\n"
 			    "Compile-time ORACLE_HOME: %s<br>\n"
 			    "Libraries used: %s",

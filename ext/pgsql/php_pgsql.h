@@ -52,7 +52,7 @@ extern zend_module_entry pgsql_module_entry;
 #include <libpq/libpq-fs.h>
 #endif
 
-#if WIN32||WINNT
+#ifdef PHP_WIN32
 #define PHP_PGSQL_API __declspec(dllexport)
 #else
 #define PHP_PGSQL_API

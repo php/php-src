@@ -8,7 +8,7 @@
 
 #if HAVE_IMAP
 
-#if !(WIN32||WINNT)
+#ifndef PHP_WIN32
 #include "build-defs.h"
 #endif
 
@@ -74,7 +74,7 @@ PHP_FUNCTION(imap_mail_compose);
 PHP_FUNCTION(imap_alerts);
 PHP_FUNCTION(imap_errors);
 PHP_FUNCTION(imap_last_error);
-#if !(WIN32|WINNT)
+#ifndef PHP_WIN32
 PHP_FUNCTION(imap_mail);
 #endif
 PHP_FUNCTION(imap_search);
