@@ -646,22 +646,12 @@ PHP_FUNCTION(stream_get_meta_data)
 #endif
 	
 	add_assoc_long(return_value, "unread_bytes", stream->writepos - stream->readpos);
-	
-#if 0
-	if (php_stream_is(stream, PHP_STREAM_IS_SOCKET))	{
-		php_netstream_data_t *sock = PHP_NETSTREAM_DATA_FROM_STREAM(stream);
 
-		add_assoc_bool(return_value, "timed_out", sock->timeout_event);
-		add_assoc_bool(return_value, "blocked", sock->is_blocked);
-		add_assoc_bool(return_value, "eof", stream->eof);
-	} else {
-#endif
+	if (!php_stream_populate_meta_data(stream, return_value)) {
 		add_assoc_bool(return_value, "timed_out", 0);
 		add_assoc_bool(return_value, "blocked", 1);
 		add_assoc_bool(return_value, "eof", php_stream_eof(stream));
-#if 0
 	}
-#endif
 
 }
 /* }}} */
