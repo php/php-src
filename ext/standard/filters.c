@@ -1500,15 +1500,15 @@ static php_stream_filter_status_t strfilter_convert_filter(
 
 			switch (err) {
 				case PHP_CONV_ERR_UNKNOWN:
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "stream filter (%s): unknown error", inst->filtername, err);
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "stream filter (%s): unknown error", inst->filtername);
 					goto out_failure;
 
 				case PHP_CONV_ERR_INVALID_SEQ:
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "stream filter (%s): invalid base64 sequence", inst->filtername, err);
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "stream filter (%s): invalid base64 sequence", inst->filtername);
 					goto out_failure;
 
 				case PHP_CONV_ERR_UNEXPECTED_EOS:
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "stream filter (%s): unexpected end of stream", inst->filtername, err);
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "stream filter (%s): unexpected end of stream", inst->filtername);
 					goto out_failure;
 
 				default:
@@ -1573,15 +1573,15 @@ static php_stream_filter_status_t strfilter_convert_filter(
 
 				switch (err) {
 					case PHP_CONV_ERR_UNKNOWN:
-						php_error_docref(NULL TSRMLS_CC, E_WARNING, "stream filter (%s): unknown error", inst->filtername, err);
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "stream filter (%s): unknown error", inst->filtername);
 						goto out_failure;
 
 					case PHP_CONV_ERR_INVALID_SEQ:
-						php_error_docref(NULL TSRMLS_CC, E_WARNING, "stream filter (%s): invalid base64 sequence", inst->filtername, err);
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "stream filter (%s): invalid base64 sequence", inst->filtername);
 						goto out_failure;
 
 					case PHP_CONV_ERR_UNEXPECTED_EOS:
-						php_error_docref(NULL TSRMLS_CC, E_WARNING, "stream filter (%s): unexpected end of stream", inst->filtername, err);
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "stream filter (%s): unexpected end of stream", inst->filtername);
 						goto out_failure;
 
 					default:

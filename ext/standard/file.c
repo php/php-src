@@ -547,7 +547,7 @@ PHP_FUNCTION(file_put_contents)
 			break;
 
 		default:
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "The 2nd parameter should be either a string or an array.", flags);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "The 2nd parameter should be either a string or an array.");
 			numbytes = -1;
 			break;
 	
@@ -588,7 +588,7 @@ PHP_FUNCTION(file)
 		return;
 	}
 	if (flags < 0 || flags > (PHP_FILE_USE_INCLUDE_PATH | PHP_FILE_IGNORE_NEW_LINES | PHP_FILE_SKIP_EMPTY_LINES | PHP_FILE_NO_DEFAULT_CONTEXT)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "'%d' flag is not supported.", flags);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "'%ld' flag is not supported.", flags);
 		RETURN_FALSE;
 	}
 	
