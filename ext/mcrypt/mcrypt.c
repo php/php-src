@@ -188,8 +188,8 @@ PHP_FUNCTION(mcrypt_create_iv)
 		read(fd, iv, i);
 		close(fd);
 	} else {
-		while(i--) {
-			iv[i] = rand();
+		while(i) {
+			iv[--i] = rand();
 		}
 	}
 	RETURN_STRINGL(iv, size->value.lval, 0);
