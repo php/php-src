@@ -1010,7 +1010,8 @@ PHP_FUNCTION(preg_grep)
 {
 	zval			*regex,				/* Regular expression */
 					*input,				/* Input array */
-			   	   **entry;				/* An entry in the input array */
+					*entry,				/* A copy of the entry in the input array */
+			   	   **entry_ptr;			/* An entry in the input array */
 	pcre			*re = NULL;			/* Compiled regular expression */
 	pcre_extra		*extra = NULL;		/* Holds results of studying */
 	int			 	 preg_options = 0;	/* Custom preg options */
@@ -1045,48 +1046,56 @@ PHP_FUNCTION(preg_grep)
 	
 	/* Initialize return array */
 	array_init(return_value);
-	
+
+	/* Allocate entry storage */
+	entry = (zval *)emalloc(sizeof(zval));
+		
 	/* Go through the input array */
 	zend_hash_internal_pointer_reset(input->value.ht);
-	while(zend_hash_get_current_data(input->value.ht, (void **)&entry) == SUCCESS) {
+	while(zend_hash_get_current_data(input->value.ht, (void **)&entry_ptr) == SUCCESS) {
 
-		/* Only match against strings */
-		if ((*entry)->type == IS_STRING) {
-			/* Perform the match */
-			count = pcre_exec(re, extra, (*entry)->value.str.val,
-							  (*entry)->value.str.len, (*entry)->value.str.val,
-							  0, offsets, size_offsets, 0);
+		/* Copy entry and convert to string */
+		*entry = **entry_ptr;
+		zval_copy_ctor(entry);
+		convert_to_string(entry);
+		
+		/* Perform the match */
+		count = pcre_exec(re, extra, entry->value.str.val,
+						  entry->value.str.len, entry->value.str.val,
+						  0, offsets, size_offsets, 0);
 
-			/* Check for too many substrings condition. */
-			if (count == 0) {
-				zend_error(E_NOTICE, "Matched, but too many substrings\n");
-				count = size_offsets/3;
-			}
+		/* Check for too many substrings condition. */
+		if (count == 0) {
+			zend_error(E_NOTICE, "Matched, but too many substrings\n");
+			count = size_offsets/3;
+		}
 
-			/* If something matched */
-			if (count > 0) {
-				(*entry)->refcount++;
-				
-				/* Add to return array */
-				switch(zend_hash_get_current_key(input->value.ht, &string_key, &num_key))
-				{
-					case HASH_KEY_IS_STRING:
-						zend_hash_update(return_value->value.ht, string_key,
-										 strlen(string_key)+1, entry, sizeof(zval *), NULL);
-						efree(string_key);
-						break;
-					
-					case HASH_KEY_IS_LONG:
-						zend_hash_next_index_insert(return_value->value.ht, entry,
-													sizeof(zval *), NULL);
-						break;
-				}
+		/* If something matched */
+		if (count > 0) {
+			(*entry_ptr)->refcount++;
+
+			/* Add to return array */
+			switch(zend_hash_get_current_key(input->value.ht, &string_key, &num_key))
+			{
+				case HASH_KEY_IS_STRING:
+					zend_hash_update(return_value->value.ht, string_key,
+									 strlen(string_key)+1, entry_ptr, sizeof(zval *), NULL);
+					efree(string_key);
+					break;
+
+				case HASH_KEY_IS_LONG:
+					zend_hash_next_index_insert(return_value->value.ht, entry_ptr,
+												sizeof(zval *), NULL);
+					break;
 			}
 		}
 		
+		zval_dtor(entry);
 		zend_hash_move_forward(input->value.ht);
 	}
 	
+	/* Clean up */
+	efree(entry);
 	efree(offsets);
 }
 /* }}} */
