@@ -54,6 +54,7 @@ function_entry ii_functions[] = {
   PHP_FE(ii_fetch_object,     NULL)
   PHP_FE(ii_rollback,         NULL)
   PHP_FE(ii_commit,           NULL)
+  PHP_FE(ii_autocommit,       NULL)
   {NULL, NULL, NULL}	/* Must be the last line in ii_functions[] */
 };
 
@@ -1281,6 +1282,44 @@ PHP_FUNCTION(ii_commit)
   }
   
   ii_link->tranHandle = NULL;
+  RETURN_TRUE;
+}
+/* }}} */
+
+/* {{{ proto bool ii_autocommit([resource link])
+   Switch autocommit on or off */
+PHP_FUNCTION(ii_autocommit)
+{
+  zval **link;
+  int argc;
+  int link_id = -1;
+  II_LINK *ii_link;
+  IIAPI_AUTOPARM autoParm;
+  IILS_FETCH();
+  
+  argc = ZEND_NUM_ARGS();
+  if (argc > 1 || (argc && zend_get_parameters_ex(argc, &link) == FAILURE)){
+    WRONG_PARAM_COUNT;
+  }
+  
+  if (argc == 0) {
+    link_id = IIG(default_link);
+  }
+  ZEND_FETCH_RESOURCE2(ii_link, II_LINK *, link, link_id, "Ingres II Link", le_ii_link, le_ii_plink);
+
+  autoParm.ac_genParm.gp_callback = NULL;
+  autoParm.ac_genParm.gp_closure = NULL;
+  autoParm.ac_connHandle = ii_link->connHandle;
+  autoParm.ac_tranHandle = ii_link->tranHandle;
+
+  IIapi_autocommit(&autoParm);
+  ii_sync(&(autoParm.ac_genParm));
+
+  if(ii_success(&(autoParm.ac_genParm))==II_FAIL) {
+    RETURN_FALSE;
+  }
+  
+  ii_link->tranHandle = autoParm.ac_tranHandle;
   RETURN_TRUE;
 }
 /* }}} */

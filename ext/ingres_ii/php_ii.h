@@ -55,6 +55,7 @@ PHP_FUNCTION(ii_fetch_row);
 PHP_FUNCTION(ii_fetch_object);
 PHP_FUNCTION(ii_rollback);
 PHP_FUNCTION(ii_commit);
+PHP_FUNCTION(ii_autocommit);
 
 ZEND_BEGIN_MODULE_GLOBALS(ii)
 	long allow_persistent;
