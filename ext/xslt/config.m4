@@ -48,9 +48,9 @@ if test "$PHP_XSLT" != "no"; then
       condition="$i$XSLT_TEST_FILE"
       if test -r $condition; then
         XSLT_DIR=$i
-        AC_MSG_RESULT(found $XSLT_BACKEND_NAME in $i)
       fi
     done
+    AC_MSG_RESULT(found in $XSLT_DIR)
   fi
 
   if test -z "$XSLT_DIR"; then
