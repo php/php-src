@@ -121,13 +121,13 @@ typedef struct {
 	OCIDefine *pDefine;
     char *name;
     ub4 name_len;
-    ub2 type;
-    ub4 size4;
+    ub2 data_type;
+    ub2 data_size;
     ub4 storage_size4;
-	ub2 size2;
 	sb2 indicator;
 	ub2 retcode;
-	ub4 rlen;
+	ub2 retlen;
+	ub4 cb_retlen;
 	ub2 is_descr;
 	ub2 is_cursor;
     int descr;
