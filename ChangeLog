@@ -1,3 +1,26 @@
+1999-10-30  Rasmus Lerdorf  <rasmus@php.net>
+
+    * php_regex.h: typing in the dark
+
+    * php_regex.h:
+    Damn, can't see underscores correctly on this silly terminal I am on
+
+    * sapi/apache/mod_php4.c
+      sapi/apache/sapi_apache.c
+      ext/standard/browscap.c
+      ext/standard/reg.c
+      ext/standard/url.c
+      php_regex.h
+      php.h:
+    Clean up regex header file mess.  php.h now explicitly includes php_regex.h
+    and php_regex.h figures out which regex header files to include and
+    defines symbols that prevents other stuff from including the wrong versions
+    of regex header files.
+
+1999-10-30  changelog  <changelog@www>
+
+    * ChangeLog: ChangeLog update
+
 1999-10-29  Rasmus Lerdorf  <rasmus@php.net>
 
     * ext/imap/imap.c: Fix typo found by hholzgra@media-engineering.de
