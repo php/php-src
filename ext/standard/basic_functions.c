@@ -59,7 +59,9 @@
 #endif
 
 static unsigned char second_and_third_args_force_ref[] = { 3, BYREF_NONE, BYREF_FORCE, BYREF_FORCE };
+/* uncomment this if/when we actually need it - tired of seeing the warning
 static unsigned char third_and_fourth_args_force_ref[] = { 4, BYREF_NONE, BYREF_NONE, BYREF_FORCE, BYREF_FORCE };
+*/
 static pval *user_compare_func_name;
 static HashTable *user_shutdown_function_names;
 
