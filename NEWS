@@ -82,32 +82,31 @@ PHP 4                                                                      NEWS
 - Improved support for autoconf-2.50+/libtool 1.4b+. (Jan Kneschke, Sascha)
 
 10 Dec 2001, Version 4.1.0
-- Fixed a bug which caused set_time_limit() to affect all requests to an
-  Apache child. (Zeev)
-- Fixed a bug in WDDX deserialization that would sometimes corrupt the root
-  element if it was a scalar one. (Andrei)
+- Worked around a bug in the MySQL client library that could cause PHP to hang
+  when using unbuffered queries. (Zeev)
+- Fixed a bug which caused set_time_limit() to affect all subsequent requests
+  to running Apache child process. (Zeev)
 - Removed the sablotron extension in favor of the new XSLT extension.
   (Sterling)
-- Fixed a bug preg_match_all() that would return results under improper indices
-  in certain cases. (Andrei)
+- Fixed a bug in WDDX deserialization that would sometimes corrupt the root
+  element if it was a scalar one. (Andrei)
+- Make ImageColorAt() and ImageColorsForIndex() work with TrueColor images.
+  (Rasmus)
+- Fixed a bug in preg_match_all() that would return results under improper 
+  indices in certain cases. (Andrei)
 - Fixed a crash in str_replace() that would happen if search parameter was an
-  array and one of the replacements results in subject string being empty.
+  array and one of the replacements resulted in subject string being empty.
   (Andrei)
 - Fixed MySQL extension to work with MySQL 4.0. (Jani)
 - Fixed a crash bug within Cobalt systems. Patch by tomc@tripac.com. (Jani)
-- Now bundling Dan Libby's xmlrpc-epi extension
+- Bundled Dan Libby's xmlrpc-epi extension.
 - Introduced extension version numbers. (Stig)
 - Added version_compare() function. (Stig)
-- Fixed boolean incompatibility (1 vs. -1) in VARIANT conversion functions.
-  (Harald)
-- Fixed pg_last_notice() (could cause random crashes in PostgreSQL applications,
-  even if they didn't use pg_last_notice()). (Zeev)
-- Fixed DOM-XML's error reporting, so E_WARNING errors are given instead of 
+- Fixed pg_last_notice() (could cause random crashes in PostgreSQL
+  applications, even if they didn't use pg_last_notice()). (Zeev)
+- Fixed DOM-XML's error reporting, so E_WARNING errors are given instead of
   E_ERROR error's, this allows you to trap errors thrown by DOMXML functions.
   (Sterling)
-- Fixed a conversion bug in the VARIANT class of the COM extension. (Harald)
-- Fixed a crash when a COM handle got passed as parameter to another
-  component. (Harald)
 - Fixed a bug in the mcrypt extension, where list destructors were not
   properly being allocated. (Sterling)
 - Better Interbase blob, null and error handling. (Patch by Jeremy Bettis)
@@ -116,14 +115,9 @@ PHP 4                                                                      NEWS
   its keys are preserved in the resulting array. (Andrei)
 - Fixed a crash in dbase_replace_record. (Patch by robin.marlow@dps-int.com)
 - Fixed a crash in msql_result(). (Zeev)
-- Changed com_*() functions to return oo handles to be able to mix functional
-  and oo approach. (Harald)
-- Fixed a crash when accessing a property using oo syntax in the COM
-  extension. (Harald)
 - Added support for single dimensional SafeArrays and Enumerations.
   Added an is_enum() function to check if a component implements an
   enumeration. (Alan, Harald)
-- Added advanced error information to the COM extension. (Alan)
 - Fixed a bug in dbase_get_record() and dbase_get_record_with_names().
   boolean fields are now returned correctly.
   Patch by Lawrence E. Widman <widman@cardiothink.com> (Jani)
@@ -134,7 +128,7 @@ PHP 4                                                                      NEWS
   infrastructure, a tokenizer to speed up message processing, and fixed
   a lot of bugs in the IRCG extension. (Sascha)
 - Improved speed of the serializer/deserializer. (Thies, Sascha)
-- Floating point numbers are better detected when converting from strings
+- Floating point numbers are better detected when converting from strings.
   (Zeev, Zend Engine)
 - Replaced php.ini-optimized with php.ini-recommended.  As the name implies,
   it's warmly recommended to use this file as the basis for your PHP
@@ -220,10 +214,10 @@ PHP 4                                                                      NEWS
 - Fixed references in sessions. This doesn't work when using the WDDX
   session-serializer. Also improved speed of sessions. (Thies)
 - Added new experimental module pcntl (Process Control). (Jason)
-- Fixed a bug when com.allow_dcom is set to false. (Harald)
+- Fixed a bug when com.allow_dcom is set to false. (phanto)
 - Added a further parameter to the constructor to load typelibs from file when
   instantiating components (e.g. DCOM Components without local registration).
-  (Harald)
+  (phanto)
 - Added the possibility to specify typelibs by full name in the typelib file
   (Alan Brown)
 - Renamed the ZZiplib extension to the Zip extension, function names have also
@@ -275,8 +269,8 @@ PHP 4                                                                      NEWS
   functions/methods that accepted parameters by reference. (Andrei)
 - Added com_release($obj) and com_addref($obj) functions and the related class
   members $obj->Release() and $obj->AddRef() to gain more control over the used
-  COM components. (Harald)
-- Added an additional parameter to dotnet_load to specify the codepage (Harald)
+  COM components. (phanto)
+- Added an additional parameter to dotnet_load to specify the codepage (phanto)
 - Added peak memory logging. Use --enable-memory-limit to create a new Apache
   1.x logging directive "{mod_php_memory_usage}n" which will log the peak
   amount of memory used by the script. (Thies)
