@@ -1,3 +1,39 @@
+2001-12-09  Zeev Suraski  <zeev@zend.com>
+
+    * NEWS: Go with 4.1.0
+
+2001-12-09  Stig Bakken  <ssb@fast.no>
+
+    * ext/overload/overload.c: * use macros in error messages
+
+2001-12-09  Zeev Suraski  <zeev@zend.com>
+
+    * ext/mysql/php_mysql.c: MFH - fix unbuffered queries
+
+2001-12-09  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/overload/CREDITS: *** empty log message ***
+
+    * ext/overload/README: Adjust to account for latest changes.
+
+    * ext/overload/overload.c:
+    - Only destroy the current object if it was received from the __get() handler.
+    - Changed the way method arguments are passed to __call() handler. They are
+      now encapsulated inside of an array, which makes it easier to pass them
+      to call_user_func_array().
+
+2001-12-09  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/xslt/sablot.c: Fixed a typo.
+
+2001-12-09  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/xslt/sablot.c
+      ext/xslt/xslt.c: Align comments in xslt.c
+    First try at fixing funny resource free'ing problems with objects, don't
+    perform a zval seperation when we're directly saving a pointer to the SAX
+    or Scheme handlers
+
 2001-12-08  Derick Rethans  <d.rethans@jdimedia.nl>
 
     * ext/standard/var.c: - Remove debug code
