@@ -990,6 +990,12 @@ ZEND_API int zend_execute_scripts(int type TSRMLS_DC, zval **retval, int file_co
 			EG(return_value_ptr_ptr) = retval ? retval : &local_retval;
 			zend_execute(EG(active_op_array) TSRMLS_CC);
 			if (EG(exception)) {
+				char ex_class_name[128];
+				if(Z_TYPE_P(EG(exception)) == IS_OBJECT) {
+					snprintf(ex_class_name, 127, "%s", Z_OBJ_CLASS_NAME_P(EG(exception)));
+				} else {
+					strcpy(ex_class_name, "Unknown Exception");
+				}
 #if 1 /* support set_exception_handler() */
 				if (EG(user_exception_handler)) {
 					zval *orig_user_exception_handler;
@@ -1004,7 +1010,7 @@ ZEND_API int zend_execute_scripts(int type TSRMLS_DC, zval **retval, int file_co
 					} else {
 						zval_ptr_dtor(&EG(exception));
 						EG(exception) = NULL;
-						zend_error(E_ERROR, "Uncaught exception!");
+						zend_error(E_ERROR, "Uncaught exception '%s'!", ex_class_name);
 					}
 					efree(params);
 					zval_ptr_dtor(&EG(exception));
@@ -1012,7 +1018,7 @@ ZEND_API int zend_execute_scripts(int type TSRMLS_DC, zval **retval, int file_co
 				} else {
 					zval_ptr_dtor(&EG(exception));
 					EG(exception) = NULL;
-					zend_error(E_ERROR, "Uncaught exception!");
+					zend_error(E_ERROR, "Uncaught exception '%s'!", ex_class_name);
 				}
 				if (retval == NULL && *EG(return_value_ptr_ptr) != NULL) {
 					zval_ptr_dtor(EG(return_value_ptr_ptr));
@@ -1020,7 +1026,7 @@ ZEND_API int zend_execute_scripts(int type TSRMLS_DC, zval **retval, int file_co
 				}
 #else
 				zval_ptr_dtor(&EG(exception));
-				zend_error(E_ERROR, "Uncaught exception!");
+				zend_error(E_ERROR, "Uncaught exception '%s'!", ex_class_name);
 #endif
 			} else if (!retval) {
 				zval_ptr_dtor(EG(return_value_ptr_ptr));
