@@ -376,6 +376,10 @@ void gdImageJpegCtx(gdImagePtr im, gdIOCtx *out, int quality);
 /* Best to free this memory with gdFree(), not free() */
 void *gdImageJpegPtr(gdImagePtr im, int *size, int quality);
 
+gdImagePtr gdImageCreateFromGif(FILE *fd);
+gdImagePtr gdImageCreateFromGifCtx(gdIOCtxPtr in);
+gdImagePtr gdImageCreateFromGifSource(gdSourcePtr in);
+
 /* A custom data sink. For backwards compatibility. Use
 	gdIOCtx instead. */
 /* The sink function must return -1 on error, otherwise the number
