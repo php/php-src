@@ -552,7 +552,7 @@ static pval _java_getset_property
   zend_hash_index_find(property_reference->object->value.obj.properties,
     0, (void **) &pobject);
   obj = zend_list_find((*pobject)->value.lval,&type);
-  (pval*)(long)result = &presult;
+  result = (jlong)(long) &presult;
   var_uninit(&presult);
 
   if (!obj || (type!=le_jobject)) {
