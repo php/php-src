@@ -380,8 +380,7 @@ PHPAPI void php_pval_to_variant_ex2(pval *pval_arg, VARIANT *var_arg, int type, 
 			/*
 				should be, but isn't :)
 
-				if (V_VT(var_arg) != (VT_VARIANT|VT_BYREF))
-				{
+				if (V_VT(var_arg) != (VT_VARIANT|VT_BYREF)) {
 					VariantInit(var_arg);
 				}
 			*/
@@ -631,31 +630,20 @@ PHPAPI int php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int codepage TS
 			break;
 
 		case VT_BSTR:
-			if (V_ISBYREF(var_arg)) 
-			{
-				if (*V_BSTR(var_arg)) 
-				{
+			Z_TYPE_P(pval_arg) = IS_STRING;
+
+			if (V_ISBYREF(var_arg)) {
+				if (*V_BSTR(var_arg)) {
 					Z_STRVAL_P(pval_arg) = php_OLECHAR_to_char(*V_BSTRREF(var_arg), &Z_STRLEN_P(pval_arg), codepage TSRMLS_CC);
-					Z_TYPE_P(pval_arg) = IS_STRING;
-				} 
-				else
-				{
+				} else {
 					ZVAL_NULL(pval_arg);
-					Z_TYPE_P(pval_arg) = IS_NULL;
 				}
 				efree(V_BSTRREF(var_arg));
-			}
-			else
-			{
-				if (V_BSTR(var_arg)) 
-				{
+			} else {
+				if (V_BSTR(var_arg)) {
 					Z_STRVAL_P(pval_arg) = php_OLECHAR_to_char(V_BSTR(var_arg), &Z_STRLEN_P(pval_arg), codepage TSRMLS_CC);
-					Z_TYPE_P(pval_arg) = IS_STRING;
-				}
-				else
-				{
+				} else {
 					ZVAL_NULL(pval_arg);
-					Z_TYPE_P(pval_arg) = IS_NULL;
 				}
 			}
 
@@ -699,8 +687,7 @@ PHPAPI int php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int codepage TS
 
 				hr = V_UNKNOWN(var_arg)->lpVtbl->QueryInterface(var_arg->punkVal, &IID_IDispatch, &V_DISPATCH(var_arg));
 
-				if (FAILED(hr))
-				{
+				if (FAILED(hr)) {
 					char *error_message;
 
 					error_message = php_COM_error_message(hr TSRMLS_CC);
