@@ -62,7 +62,10 @@ PHP_FUNCTION(sqlite_field_name);
 PHP_FUNCTION(sqlite_seek);
 PHP_FUNCTION(sqlite_rewind);
 PHP_FUNCTION(sqlite_next);
+PHP_FUNCTION(sqlite_prev);
+
 PHP_FUNCTION(sqlite_has_more);
+PHP_FUNCTION(sqlite_has_prev);
 
 PHP_FUNCTION(sqlite_libversion);
 PHP_FUNCTION(sqlite_libencoding);
