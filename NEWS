@@ -9,6 +9,8 @@ PHP                                                                        NEWS
 - Updated bundled oniguruma library (used for multibyte regular expression)
   to 3.7.0. (Moriyoshi)
 - Updated bundled libmbfl library (used for multibyte functions). (Moriyoshi)
+- Fixed bug preventing from building oci8 as shared. 
+  (stanislav dot voroniy at portavita dot nl, Tony)
   Fixed bugs:
   . Bug #32063 (mb_convert_encoding ignores named entity 'alpha')
   . Bug #31911 (mb_decode_mimeheader() is case-sensitive to hex escapes)
