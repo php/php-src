@@ -91,16 +91,16 @@ static void php_apache_globals_ctor(php_apache_info_struct *apache_globals TSRML
 										RETURN_FALSE; \
 									}
 #define APREQ_GET_REQUEST(ZVAL, R)	APREQ_GET_THIS(ZVAL); \
-									R = get_apache_request(ZVAL)
+									R = get_apache_request(ZVAL TSRMLS_CC)
 
 static void php_apache_request_free(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	zval *z = (zval *)rsrc->ptr;
-	fprintf(stderr, "%s() %p\n", __FUNCTION__, z);
+/*	fprintf(stderr, "%s() %p\n", __FUNCTION__, z); */
 	zval_ptr_dtor(&z);
 }
 
-static request_rec *get_apache_request(pval *z)
+static request_rec *get_apache_request(pval *z TSRMLS_DC)
 {
 	request_rec *r;
 	zval **addr;
@@ -132,7 +132,7 @@ static request_rec *get_apache_request(pval *z)
 /* {{{ php_apache_request_new(request_rec *r)
  * create a new zval-instance for ApacheRequest that wraps request_rec
  */
-PHPAPI zval *php_apache_request_new(request_rec *r)
+zval *php_apache_request_new(request_rec *r TSRMLS_DC)
 {
 	zval *req;
 	zval *addr;
@@ -1022,8 +1022,6 @@ PHP_FUNCTION(apache_request_send_error_response)
     request_rec *r;
     int rec;
 
-    TSRMLS_FETCH();
-
     switch(ARG_COUNT(ht)) {
         case 0:
             rec = 0;
@@ -1049,7 +1047,6 @@ PHP_FUNCTION(apache_request_set_content_length)
     zval *id;
     request_rec *r;
 
-    TSRMLS_FETCH();
     if(ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &length) == FAILURE) {
         WRONG_PARAM_COUNT;
     }
@@ -1086,7 +1083,6 @@ PHP_FUNCTION(apache_request_rputs)
     zval **buffer;
     zval *id;
     request_rec *r;
-    TSRMLS_FETCH();
 
     if(ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &buffer) == FAILURE) {
         WRONG_PARAM_COUNT;
@@ -1131,7 +1127,6 @@ PHP_FUNCTION(apache_request_log_error)
     request_rec *r;
     int facility = APLOG_ERR;
 
-    TSRMLS_FETCH();
     switch(ARG_COUNT(ht)) {
         case 1:
             if(zend_get_parameters_ex(1, &z_errstr) == FAILURE) {
@@ -1166,7 +1161,6 @@ PHP_FUNCTION(apache_request_sub_req_lookup_uri)
     zval *id;
     zval **file;
     request_rec *r, *sub_r;
-    TSRMLS_FETCH();
     if(ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &file) == FAILURE) {
         WRONG_PARAM_COUNT;
     }
@@ -1189,7 +1183,7 @@ PHP_FUNCTION(apache_request_sub_req_lookup_file)
     zval *id;
     zval **file;
     request_rec *r, *sub_r;
-    TSRMLS_FETCH();
+
     if(ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &file) == FAILURE) {
         WRONG_PARAM_COUNT;
     }
@@ -1212,7 +1206,7 @@ PHP_FUNCTION(apache_request_sub_req_method_uri)
     zval *id;
     zval **file, **method;
     request_rec *r, *sub_r;
-    TSRMLS_FETCH();
+
     if(ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &method, &file) == FAILURE) {
         WRONG_PARAM_COUNT;
     }
@@ -1237,7 +1231,6 @@ PHP_FUNCTION(apache_request_run)
     request_rec *r;
     int status;
 
-    TSRMLS_FETCH();
     APREQ_GET_REQUEST(id, r);
     if(!r || ap_is_initial_req(r))
         RETURN_FALSE;
@@ -1252,7 +1245,7 @@ PHP_FUNCTION(apache_request_internal_redirect)
     zval *id;
     zval **new_uri;
     request_rec *r;
-    TSRMLS_FETCH();
+
     if(ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &new_uri) == FAILURE) {
         WRONG_PARAM_COUNT;
     }
@@ -1268,7 +1261,6 @@ PHP_FUNCTION(apache_request_send_header_field)
     zval *id;
     request_rec *r;
 
-    TSRMLS_FETCH();
     if(ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &fieldname, &fieldval) == FAILURE) {
         WRONG_PARAM_COUNT;
     }
