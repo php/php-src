@@ -504,6 +504,13 @@ static void my_endthread()
 #endif
 }
 
+// ___except can only call a function, so we have to do this
+// to retrieve the pointer.
+BOOL exceptionhandler(LPEXCEPTION_POINTERS *e,LPEXCEPTION_POINTERS ep)
+{
+	*e=ep;
+	return TRUE;
+}
 
 DWORD WINAPI HttpExtensionProc(LPEXTENSION_CONTROL_BLOCK lpECB)
 {
@@ -513,6 +520,7 @@ DWORD WINAPI HttpExtensionProc(LPEXTENSION_CONTROL_BLOCK lpECB)
 	CLS_FETCH();
 	ELS_FETCH();
 	PLS_FETCH();
+	LPEXCEPTION_POINTERS e;
 
 	if (setjmp(EG(bailout))!=0) {
 		php_request_shutdown(NULL);
@@ -532,8 +540,10 @@ DWORD WINAPI HttpExtensionProc(LPEXTENSION_CONTROL_BLOCK lpECB)
 		if (SG(request_info).cookie_data) {
 			efree(SG(request_info).cookie_data);
 		}
-	} __except(EXCEPTION_EXECUTE_HANDLER) {
+	} __except(exceptionhandler(&e,GetExceptionInformation())) {
+//	} __except(EXCEPTION_EXECUTE_HANDLER) {
 #ifdef PHP_WIN32
+		char buf[1024];
 		if (_exception_code()==EXCEPTION_STACK_OVERFLOW) {
 			LPBYTE lpPage;
 			static SYSTEM_INFO si;
@@ -562,17 +572,17 @@ DWORD WINAPI HttpExtensionProc(LPEXTENSION_CONTROL_BLOCK lpECB)
 			}
 
 			CG(unclean_shutdown)=1;
-			php_isapi_report_exception("Stack overflow", sizeof("Stack overflow")-1 SLS_CC);
+			_snprintf(buf,sizeof(buf)-1,"PHP has encountered a Stack overflow");
 		} else if (_exception_code()==EXCEPTION_ACCESS_VIOLATION) {
-			php_isapi_report_exception("Access violation", sizeof("Access violation")-1 SLS_CC);
+			_snprintf(buf,sizeof(buf)-1,"PHP has encountered an Access Violation at %p",e->ExceptionRecord->ExceptionAddress);
 			my_endthread();
 		} else {
-			php_isapi_report_exception("Unknown fatal exception", sizeof("Unknown fatal exception")-1 SLS_CC);
+			_snprintf(buf,sizeof(buf)-1,"PHP has encountered an Unhandled Exception Code %d at %p",e->ExceptionRecord->ExceptionCode , e->ExceptionRecord->ExceptionAddress);
 			my_endthread();
 		}
+		php_isapi_report_exception(buf, strlen(buf) SLS_CC);
 #endif
 	}
-
 	__try {
 		php_request_shutdown(NULL);
 	} __except(EXCEPTION_EXECUTE_HANDLER) {
