@@ -310,7 +310,7 @@ PHP_FUNCTION(xslt_output_endtransform)
      * Make sure that we don't have more than one output buffer going on
      * at the same time.
      */
-    if (OG(nesting_level) == 0) {
+    if (OG(ob_nesting_level) == 0) {
         RETURN_NULL();
     }
 
