@@ -169,7 +169,7 @@ PHP_FUNCTION(mysqli_query) {
 	}
 
 	if (!mysql_field_count(mysql)) {
-		RETURN_FALSE;
+		RETURN_TRUE;
 	}
 
 	/* profiler result information */
