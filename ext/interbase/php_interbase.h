@@ -186,17 +186,17 @@ enum php_interbase_option {
 	PHP_IBASE_DATE 				= 2,
 	PHP_IBASE_TIME 				= 4,
 	/* transaction access mode */	
-	PHP_IBASE_WRITE 			= 0, /* default */
-	PHP_IBASE_READ 				= 1,
+	PHP_IBASE_WRITE 			= 1,
+	PHP_IBASE_READ 				= 2,
 	/* transaction isolation level */
-	PHP_IBASE_CONCURRENCY 		= 0, /* default */
-	PHP_IBASE_COMMITTED 		= 2,
-	  PHP_IBASE_REC_NO_VERSION 	= 0, /* default */
-	  PHP_IBASE_REC_VERSION 	= 4,
-	PHP_IBASE_CONSISTENCY 		= 8,
+	PHP_IBASE_CONCURRENCY 		= 4,
+	PHP_IBASE_COMMITTED 		= 8,
+	  PHP_IBASE_REC_NO_VERSION 	= 32,
+	  PHP_IBASE_REC_VERSION 	= 64,
+	PHP_IBASE_CONSISTENCY 		= 16,
 	/* transaction lock resolution */
-	PHP_IBASE_WAIT 				= 0, /* default */
-	PHP_IBASE_NOWAIT 			= 16
+	PHP_IBASE_WAIT 				= 128,
+	PHP_IBASE_NOWAIT 			= 256
 };
 
 #ifdef ZTS

@@ -2068,7 +2068,7 @@ PHP_FUNCTION(ibase_trans)
 				convert_to_long_ex(args[i]);
 				trans_argl = Z_LVAL_PP(args[i]);
 
-				if (trans_argl) {
+				if (trans_argl != PHP_IBASE_DEFAULT) {
 					last_tpb[tpb_len++] = isc_tpb_version3;
 
 					/* access mode */
