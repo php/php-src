@@ -1416,15 +1416,15 @@ ZEND_API zend_class_entry *zend_register_internal_ns_class(zend_class_entry *cla
 
 	if (EG(active_namespace) != ns) {
 		restore_orig = 1;
-		orig_namespace = EG(active_namespace);
-		EG(active_namespace) = ns;
+		orig_namespace = CG(active_namespace);
+		CG(active_namespace) = ns;
 		orig_class_table = CG(class_table);
 		CG(class_table) = &ns->class_table;
 	}
 	class_entry->ns = ns;
 	register_class = zend_register_internal_class_ex(class_entry, parent_ce, NULL TSRMLS_CC);
 	if (restore_orig) {
-		EG(active_namespace) = orig_namespace;
+		CG(active_namespace) = orig_namespace;
 		CG(class_table) = orig_class_table;
 	}
 	
