@@ -343,9 +343,6 @@ PHP_MINIT_FUNCTION(mysqli)
 	mysqli_object_handlers.read_property = mysqli_read_property;
 	mysqli_object_handlers.write_property = mysqli_write_property;
 	mysqli_object_handlers.get_property_ptr_ptr = NULL;
-//	mysqli_object_handlers.call_method = php_mysqli_connect;
-
-/* todo: call method */
 
 	zend_hash_init(&classes, 0, NULL, NULL, 1);
 
@@ -464,6 +461,8 @@ PHP_MINIT_FUNCTION(mysqli)
 PHP_MSHUTDOWN_FUNCTION(mysqli)
 {
 	zend_hash_destroy(&mysqli_link_properties);
+	zend_hash_destroy(&mysqli_result_properties);
+	zend_hash_destroy(&mysqli_stmt_properties);
 	zend_hash_destroy(&classes);
 
 	UNREGISTER_INI_ENTRIES();
