@@ -63,6 +63,7 @@
 #if HAVE_OVERLOAD
 #include "ext/overload/php_overload.h"
 #endif
+#include "ext/tokenizer/php_tokenizer.h"
 /* }}} */
 
 /* {{{ php_builtin_extensions[]
