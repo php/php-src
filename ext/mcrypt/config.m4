@@ -19,19 +19,23 @@ if test "$PHP_MCRYPT" != "no"; then
 
   AC_ADD_INCLUDE($MCRYPT_DIR/include)
   PHP_SUBST(MCRYPT_SHARED_LIBADD)
-  AC_CHECK_LIB(mcrypt, init_mcrypt, [ AC_DEFINE(HAVE_LIBMCRYPT22,1,[ ]) ])
+  old_LDFLAGS="$LDFLAGS"
+  LDFLAGS="$ld_runpath_switch$MCRYPT_DIR/lib -L$MCRYPT_DIR/lib"
+  AC_CHECK_LIB(mcrypt, init_mcrypt)
   old_LIBS=$LIBS
   LIBS="$LIBS -lltdl"
   AC_CHECK_LIB(mcrypt, mcrypt_module_open, [LIBS="$LIBS -lltdl"],[ ],)
   LIBS=$old_LIBS
-  AC_ADD_LIBRARY_WITH_PATH(mcrypt, $MCRYPT_DIR/lib, MCRYPT_SHARED_LIBADD)
+  LDFLAGS="$old_LDFLAGS"
   if test "$ac_cv_lib_mcrypt_init_mcrypt" = "yes"; then
 	AC_DEFINE(HAVE_LIBMCRYPT22,1,[ ])
-  fi
-  if test "$ac_cv_lib_mcrypt_mcrypt_module_open" = "yes"; then
+  elif test "$ac_cv_lib_mcrypt_mcrypt_module_open" = "yes"; then
     AC_ADD_LIBRARY(ltdl)
 	AC_DEFINE(HAVE_LIBMCRYPT24,1,[ ])
+  else
+    AC_MSG_ERROR(Sorry, I was not able to diagnose which libmcrypt version you have installed.)
   fi
+  AC_ADD_LIBRARY_WITH_PATH(mcrypt, $MCRYPT_DIR/lib, MCRYPT_SHARED_LIBADD)
   AC_DEFINE(HAVE_LIBMCRYPT,1,[ ])
 
   PHP_EXTENSION(mcrypt, $ext_shared)
