@@ -709,26 +709,6 @@ ZEND_FUNCTION(crash)
 #endif
 
 
-static int copy_import_use_file(zend_file_handle *fh, zval *array)
-{
-	if (fh->filename) {
-		char *extension_start;
-
-		extension_start = strstr(fh->filename, zend_uv.import_use_extension);
-		if (extension_start) {
-			*extension_start = 0;
-			if (fh->opened_path) {
-				add_assoc_string(array, fh->filename, fh->opened_path, 1);
-			} else {
-				add_assoc_stringl(array, fh->filename, "N/A", sizeof("N/A")-1, 1);
-			}
-			*extension_start = zend_uv.import_use_extension[0];
-		}
-	}
-	return 0;
-}
-
-
 /* {{{ proto array get_included_files(void)
    Returns an array with the file names that were include_once()'d */
 ZEND_FUNCTION(get_included_files)
@@ -741,12 +721,9 @@ ZEND_FUNCTION(get_included_files)
 	array_init(return_value);
 	zend_hash_internal_pointer_reset(&EG(included_files));
 	while (zend_hash_get_current_key(&EG(included_files), &entry, NULL, 1) == HASH_KEY_IS_STRING) {
-		add_next_index_string(return_value,entry,0);
+		add_next_index_string(return_value, entry, 0);
 		zend_hash_move_forward(&EG(included_files));
 	}
-
-	/*	zend_hash_apply_with_argument(&EG(included_files), (apply_func_arg_t) copy_import_use_file, return_value); */
-}
 /* }}} */
 
 
