@@ -8,11 +8,11 @@ AC_DEFUN(PHP_LDAP_CHECKS, [
     LDAP_INCDIR=$1/include
     LDAP_LIBDIR=$1/lib
   elif test -f $1/include/umich-ldap/ldap.h; then
-    LDAP_DIR=$i
+    LDAP_DIR=$1
     LDAP_INCDIR=$1/include/umich-ldap
     LDAP_LIBDIR=$1/lib
   elif test -f $1/ldap/public/ldap.h; then
-    LDAP_DIR=$i
+    LDAP_DIR=$1
     LDAP_INCDIR=$1/ldap/public
     LDAP_LIBDIR=$1/lib
   fi
