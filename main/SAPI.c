@@ -260,16 +260,16 @@ SAPI_API size_t sapi_apply_default_charset(char **mimetype, size_t len TSRMLS_DC
 	size_t newlen;
 	charset = SG(default_charset) ? SG(default_charset) : SAPI_DEFAULT_CHARSET;
 
-	if (*charset && strncmp(*mimetype, "text/", 5) == 0 && strstr(*mimetype, "charset=") == NULL) {
-		newlen = len + (sizeof(";charset=")-1) + strlen(charset);
-		newtype = emalloc(newlen + 1);
- 		PHP_STRLCPY(newtype, *mimetype, newlen + 1, len);
-		strlcat(newtype, ";charset=", newlen + 1);
-		if (*mimetype != NULL) {
+	if (*mimetype != NULL) {
+		if (*charset && strncmp(*mimetype, "text/", 5) == 0 && strstr(*mimetype, "charset=") == NULL) {
+			newlen = len + (sizeof(";charset=")-1) + strlen(charset);
+			newtype = emalloc(newlen + 1);
+	 		PHP_STRLCPY(newtype, *mimetype, newlen + 1, len);
+			strlcat(newtype, ";charset=", newlen + 1);
 			efree(*mimetype);
+			*mimetype = newtype;
+			return newlen;
 		}
-		*mimetype = newtype;
-		return newlen;
 	}
 	return 0;
 }
@@ -344,10 +344,6 @@ static void sapi_send_headers_free(TSRMLS_D)
 		efree(SG(sapi_headers).http_status_line);
 		SG(sapi_headers).http_status_line = NULL;
 	}
-	if (SG(sapi_headers).mimetype) {
-		efree(SG(sapi_headers).mimetype);
-		SG(sapi_headers).mimetype = NULL;
-	}
 }
 	
 SAPI_API void sapi_deactivate(TSRMLS_D)
@@ -373,6 +369,10 @@ SAPI_API void sapi_deactivate(TSRMLS_D)
 	}
 	if (SG(rfc1867_uploaded_files)) {
 		destroy_uploaded_files_hash(TSRMLS_C);
+	}
+	if (SG(sapi_headers).mimetype) {
+		efree(SG(sapi_headers).mimetype);
+		SG(sapi_headers).mimetype = NULL;
 	}
 	sapi_send_headers_free(TSRMLS_C);
 }
