@@ -646,7 +646,7 @@ static void xbuf_format_converter(smart_str *xbuf, const char *fmt, va_list ap)
 						ui_num = (u_wide_int)((size_t) va_arg(ap, char *));
 						s = ap_php_conv_p2(ui_num, 4, 'x', 
 								&num_buf[NUM_BUF_SIZE], &s_len);
-						if (i_num != 0) {
+						if (ui_num != 0) {
 							*--s = 'x';
 							*--s = '0';
 							s_len += 2;
