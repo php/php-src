@@ -1,6 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2002, Version 4.3.0
+- Change the order of which modules are unloaded to the reverse order of
+  which they were loaded. (Derick, Zend Engine)
 - Fixed a crash in ereg_replace() when backreference number was greater
   than the number of subpatterns. (oliver@billix.franken.de)
 - Added preliminary SAX-Input support. It's now possible to build a DomDocument
