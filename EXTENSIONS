@@ -140,8 +140,8 @@ MAINTENANCE:         Unknown
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           pgsql
-PRIMARY MAINTAINER:  Jouni Ahto <jouni.ahto@exdec.fi>
-MAINTENANCE:         Odd fixes
+PRIMARY MAINTAINER:  Yasuo Ohgaki <yohgaki@php.net>
+MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           sybase
