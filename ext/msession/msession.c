@@ -71,7 +71,7 @@ static REQB *	g_reqb=NULL;
 	if(!g_reqb) { RETURN_NULL(); }
 
 /* Every user visible function must have an entry in msession_functions[].
-*/
+ */
 function_entry msession_functions[] = {
 	PHP_FE(confirm_msession_compiled,	NULL)		/* For testing, remove later. */
 	PHP_FE(msession_connect,NULL)
@@ -107,7 +107,7 @@ zend_module_entry msession_module_entry = {
 	PHP_RINIT(msession),	/* Replace with NULL if there's nothing to do at request start */
 	PHP_RSHUTDOWN(msession),/* Replace with NULL if there's nothing to do at request end */
 	PHP_MINFO(msession),
-        NO_VERSION_YET,
+	NO_VERSION_YET,
 	STANDARD_MODULE_PROPERTIES
 };
 
@@ -115,16 +115,16 @@ zend_module_entry msession_module_entry = {
 ZEND_GET_MODULE(msession)
 #endif
 
-/* Remove comments and fill if you need to have entries in php.ini
-PHP_INI_BEGIN()
-PHP_INI_END()
-*/
+		 /* Remove comments and fill if you need to have entries in php.ini
+				PHP_INI_BEGIN()
+				PHP_INI_END()
+		 */
 
-PHP_MINIT_FUNCTION(msession)
+		 PHP_MINIT_FUNCTION(msession)
 {
-/* Remove comments if you have entries in php.ini
-	REGISTER_INI_ENTRIES();
-*/
+	/* Remove comments if you have entries in php.ini
+		 REGISTER_INI_ENTRIES();
+	*/
 	g_conn = NULL;
 	g_host = g_defhost;
 	
@@ -137,9 +137,9 @@ PHP_MINIT_FUNCTION(msession)
 
 PHP_MSHUTDOWN_FUNCTION(msession)
 {
-/* Remove comments if you have entries in php.ini
-	UNREGISTER_INI_ENTRIES();
-*/
+	/* Remove comments if you have entries in php.ini
+		 UNREGISTER_INI_ENTRIES();
+	*/
 	return SUCCESS;
 }
 
@@ -153,16 +153,16 @@ PHP_RINIT_FUNCTION(msession)
 PHP_RSHUTDOWN_FUNCTION(msession)
 {
 	if(g_conn)
-	{
-		CloseReqConn(g_conn);
-		g_conn = NULL;
-	}
+		{
+			CloseReqConn(g_conn);
+			g_conn = NULL;
+		}
 
 	if(g_reqb)
-	{
-		FreeRequestBuffer(g_reqb);
-		g_reqb=NULL;
-	}
+		{
+			FreeRequestBuffer(g_reqb);
+			g_reqb=NULL;
+		}
 	return SUCCESS;
 }
 
@@ -173,7 +173,7 @@ PHP_MINFO_FUNCTION(msession)
 	php_info_print_table_end();
 
 	/* Remove comments if you have entries in php.ini
-	DISPLAY_INI_ENTRIES();
+		 DISPLAY_INI_ENTRIES();
 	*/
 }
 
@@ -189,12 +189,13 @@ PHP_FUNCTION(confirm_msession_compiled)
 	convert_to_string_ex(arg);
 
 	len = sprintf(string, "(%s) Module %s is compiled into PHP, g_host:%s, g_port:%d", 
-		__TIME__,
-		Z_STRVAL_PP(arg),
-		g_host,
-		g_port);
+								__TIME__,
+								Z_STRVAL_PP(arg),
+								g_host,
+								g_port);
 	RETURN_STRINGL(string, len, 1);
 }
+
 int PHPMsessionConnect(const char *szhost, int nport)
 {
 	if(!g_reqb)
@@ -204,28 +205,28 @@ int PHPMsessionConnect(const char *szhost, int nport)
 		return 0;
 
 	if(g_conn)
-	{
-		CloseReqConn(g_conn);
-		php_log_err("Call to connect with non-null g_conn");
-	}
+		{
+			CloseReqConn(g_conn);
+			php_log_err("Call to connect with non-null g_conn");
+		}
 	if(strcmp(g_host, szhost))
-	{
-		if(g_host != g_defhost)
-			free(g_host);
-		g_host = strdup(szhost);
-	}
+		{
+			if(g_host != g_defhost)
+				free(g_host);
+			g_host = strdup(szhost);
+		}
 	if(nport)
 		g_port = nport;
 
 	g_conn = OpenReqConn(g_host, g_port);
 
 #ifdef ERR_DEBUG
-{
-	char buffer[256];
-	sprintf(buffer,"Connect: %s [%d] = %d (%X)\n", 
-		g_host, g_port, (g_conn != NULL), (unsigned)g_conn);
-	php_log_err(buffer);
-}
+	{
+		char buffer[256];
+		sprintf(buffer,"Connect: %s [%d] = %d (%X)\n", 
+						g_host, g_port, (g_conn != NULL), (unsigned)g_conn);
+		php_log_err(buffer);
+	}
 #endif
 	return (g_conn) ? 1 : 0;
 }
@@ -233,15 +234,15 @@ int PHPMsessionConnect(const char *szhost, int nport)
 void PHPMsessionDisconnect()
 {
 	if(g_conn)
-	{
-		CloseReqConn(g_conn);
-		g_conn = NULL;
-	}
+		{
+			CloseReqConn(g_conn);
+			g_conn = NULL;
+		}
 	if(g_reqb)
-	{
-		FreeRequestBuffer(g_reqb);
-		g_reqb = NULL;
-	}
+		{
+			FreeRequestBuffer(g_reqb);
+			g_reqb = NULL;
+		}
 }
 
 char *PHPMsessionGetData(const char *session)
@@ -256,9 +257,9 @@ char *PHPMsessionGetData(const char *session)
 	}
 #endif
 	if(!g_reqb) 
-	{ 
-		return NULL ;
-	}
+		{ 
+			return NULL ;
+		}
 	
 	FormatRequest(&g_reqb, REQ_DATAGET, session,"","",0);
 	DoRequest(g_conn, &g_reqb);
@@ -278,9 +279,9 @@ int PHPMsessionSetData(const char *session, const char *data)
 	}
 #endif
 	if(!g_reqb) 
-	{ 
-		return  0;
-	}
+		{ 
+			return  0;
+		}
 	FormatRequest(&g_reqb, REQ_DATASET, session,"",data,0);
 	DoRequest(g_conn,&g_reqb);
 	ret = (g_reqb->req.stat==REQ_OK);
@@ -291,9 +292,9 @@ int PHPMsessionDestroy(const char *session)
 {
 	int ret=0;
 	if(!g_reqb) 
-	{ 
-		return  0;
-	}
+		{ 
+			return  0;
+		}
 	FormatRequest(&g_reqb, REQ_DROP, session, "","",0);
 	DoRequest(g_conn,&g_reqb);
 	ret = (g_reqb->req.stat==REQ_OK);
@@ -308,9 +309,9 @@ PHP_FUNCTION(msession_connect)
 	zval **zport;
 
 	if(ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &zhost, &zport) == FAILURE)
- 	{
-                WRONG_PARAM_COUNT;
-        }
+		{
+			WRONG_PARAM_COUNT;
+		}
 	
 	convert_to_string_ex(zhost);
 	convert_to_string_ex(zport);
@@ -319,13 +320,13 @@ PHP_FUNCTION(msession_connect)
 	nport = atoi(Z_STRVAL_PP(zport));
 
 	if(PHPMsessionConnect(szhost,nport))
-	{
-		RETURN_TRUE;
-	}
+		{
+			RETURN_TRUE;
+		}
 	else
-	{
-		RETURN_FALSE;
-	}
+		{
+			RETURN_FALSE;
+		}
 }
 PHP_FUNCTION(msession_disconnect)
 {
@@ -336,16 +337,16 @@ PHP_FUNCTION(msession_disconnect)
 PHP_FUNCTION(msession_count)
 {
 	if(g_conn)
-	{
-		int count;
-		GET_REQB
-		FormatRequest(&g_reqb, REQ_COUNT, "", "","",0);
-		DoRequest(g_conn,&g_reqb);
+		{
+			int count;
+			GET_REQB
+				FormatRequest(&g_reqb, REQ_COUNT, "", "","",0);
+			DoRequest(g_conn,&g_reqb);
 		
-		count = (g_reqb->req.stat == REQ_OK) ? g_reqb->req.param : 0;
+			count = (g_reqb->req.stat == REQ_OK) ? g_reqb->req.param : 0;
 
-		RETURN_LONG(count);
-	}
+			RETURN_LONG(count);
+		}
 	RETURN_NULL();
 }
 
@@ -355,14 +356,14 @@ PHP_FUNCTION(msession_create)
 	zval **session;
 	GET_REQB
 	
-	if(ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &session) == FAILURE)
- 	{
-                WRONG_PARAM_COUNT;
-        }
+		if(ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &session) == FAILURE)
+			{
+				WRONG_PARAM_COUNT;
+			}
 	if(!g_conn)
-	{
-		RETURN_FALSE;
-	}
+		{
+			RETURN_FALSE;
+		}
 
 	convert_to_string_ex(session);
 
@@ -370,13 +371,13 @@ PHP_FUNCTION(msession_create)
 	DoRequest(g_conn,&g_reqb);
 	stat = (g_reqb->req.stat==REQ_OK);
 	if(stat)
-	{
-		RETURN_TRUE;
-	}
+		{
+			RETURN_TRUE;
+		}
 	else
-	{
-		RETURN_FALSE;
-	}
+		{
+			RETURN_FALSE;
+		}
 }
 
 PHP_FUNCTION(msession_destroy)
@@ -384,13 +385,13 @@ PHP_FUNCTION(msession_destroy)
 	zval **session;
 	
 	if(ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &session) == FAILURE)
- 	{
-                WRONG_PARAM_COUNT;
-        }
+		{
+			WRONG_PARAM_COUNT;
+		}
 	if(!g_conn)
-	{
-		RETURN_FALSE;
-	}
+		{
+			RETURN_FALSE;
+		}
 	convert_to_string_ex(session);
 
 	PHPMsessionDestroy(Z_STRVAL_PP(session));
@@ -403,14 +404,14 @@ PHP_FUNCTION(msession_lock)
 	zval **session;
 	GET_REQB
 	
-	if(ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &session) == FAILURE)
- 	{
-                WRONG_PARAM_COUNT;
-        }
+		if(ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &session) == FAILURE)
+			{
+				WRONG_PARAM_COUNT;
+			}
 	if(!g_conn)
-	{
-		RETURN_FALSE;
-	}
+		{
+			RETURN_FALSE;
+		}
 	convert_to_string_ex(session);
 
 	FormatRequest(&g_reqb, REQ_SLOCK, Z_STRVAL_PP(session), "","",0);
@@ -427,14 +428,14 @@ PHP_FUNCTION(msession_unlock)
 	zval **key;
 	GET_REQB
 	
-	if(ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &session, &key) == FAILURE)
- 	{
-                WRONG_PARAM_COUNT;
-        }
+		if(ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &session, &key) == FAILURE)
+			{
+				WRONG_PARAM_COUNT;
+			}
 	if(!g_conn)
-	{
-		RETURN_FALSE;
-	}
+		{
+			RETURN_FALSE;
+		}
 	convert_to_string_ex(session);
 	convert_to_long_ex(key);
 
@@ -453,14 +454,14 @@ PHP_FUNCTION(msession_set)
 	zval **value;
 	GET_REQB
 	
-	if(ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &session, &name, &value) == FAILURE)
- 	{
-                WRONG_PARAM_COUNT;
-        }
+		if(ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &session, &name, &value) == FAILURE)
+			{
+				WRONG_PARAM_COUNT;
+			}
 	if(!g_conn)
-	{
-		RETURN_FALSE;
-	}
+		{
+			RETURN_FALSE;
+		}
 	convert_to_string_ex(session);
 	convert_to_string_ex(name);
 	convert_to_string_ex(value);
@@ -469,13 +470,13 @@ PHP_FUNCTION(msession_set)
 	DoRequest(g_conn,&g_reqb);
 
 	if(g_reqb->req.stat==REQ_OK)
-	{
-		RETURN_TRUE;
-	}
+		{
+			RETURN_TRUE;
+		}
 	else
-	{
-		RETURN_FALSE;
-	}
+		{
+			RETURN_FALSE;
+		}
 
 }
 PHP_FUNCTION(msession_get)
@@ -486,14 +487,14 @@ PHP_FUNCTION(msession_get)
 	zval **value;
 	GET_REQB
 	
-	if(ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &session, &name, &value) == FAILURE)
- 	{
-                WRONG_PARAM_COUNT;
-        }
+		if(ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &session, &name, &value) == FAILURE)
+			{
+				WRONG_PARAM_COUNT;
+			}
 	if(!g_conn)
-	{
-		RETURN_FALSE;
-	}
+		{
+			RETURN_FALSE;
+		}
 
 	convert_to_string_ex(session);
 	convert_to_string_ex(name);
@@ -508,21 +509,21 @@ PHP_FUNCTION(msession_get)
 		val = safe_estrdup(g_reqb->req.datum);
 
 	RETURN_STRING(val, 0)
-}
+		}
 PHP_FUNCTION(msession_uniq)
 {
 	long val;
 	zval **param;
 	GET_REQB
 	
-	if(ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1,&param) == FAILURE)
- 	{
-                WRONG_PARAM_COUNT;
-	}
+		if(ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1,&param) == FAILURE)
+			{
+				WRONG_PARAM_COUNT;
+			}
 	if(!g_conn)
-	{
-		RETURN_FALSE;
-	}
+		{
+			RETURN_FALSE;
+		}
 
 	convert_to_long_ex(param);
 	val = Z_LVAL_PP(param);
@@ -531,14 +532,14 @@ PHP_FUNCTION(msession_uniq)
 	DoRequest(g_conn, &g_reqb);
 
 	if(g_reqb->req.stat==REQ_OK)
-	{
-		char *szval = safe_estrdup(g_reqb->req.datum);
-		RETURN_STRING(szval, 0)
-	}
+		{
+			char *szval = safe_estrdup(g_reqb->req.datum);
+			RETURN_STRING(szval, 0)
+				}
 	else
-	{
-		RETURN_NULL();
-	}
+		{
+			RETURN_NULL();
+		}
 }
 PHP_FUNCTION(msession_randstr)
 {
@@ -546,14 +547,14 @@ PHP_FUNCTION(msession_randstr)
 	zval **param;
 	GET_REQB
 	
-	if(ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1,&param) == FAILURE)
- 	{
-                WRONG_PARAM_COUNT;
-	}
+		if(ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1,&param) == FAILURE)
+			{
+				WRONG_PARAM_COUNT;
+			}
 	if(!g_conn)
-	{
-		RETURN_FALSE;
-	}
+		{
+			RETURN_FALSE;
+		}
 
 	convert_to_long_ex(param);
 	val = Z_LVAL_PP(param);
@@ -562,14 +563,14 @@ PHP_FUNCTION(msession_randstr)
 	DoRequest(g_conn, &g_reqb);
 
 	if(g_reqb->req.stat==REQ_OK)
-	{
-		char *szval = safe_estrdup(g_reqb->req.datum);
-		RETURN_STRING(szval, 0)
-	}
+		{
+			char *szval = safe_estrdup(g_reqb->req.datum);
+			RETURN_STRING(szval, 0)
+				}
 	else
-	{
-		RETURN_NULL();
-	}
+		{
+			RETURN_NULL();
+		}
 }
 PHP_FUNCTION(msession_find)
 {
@@ -577,14 +578,14 @@ PHP_FUNCTION(msession_find)
 	zval **value;
 	GET_REQB
 	
-	if(ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &name, &value) == FAILURE)
- 	{
-                WRONG_PARAM_COUNT;
-        }
+		if(ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &name, &value) == FAILURE)
+			{
+				WRONG_PARAM_COUNT;
+			}
 	if(!g_conn)
-	{
-		RETURN_FALSE;
-	}
+		{
+			RETURN_FALSE;
+		}
 
 	convert_to_string_ex(name);
 	convert_to_string_ex(value);
@@ -593,54 +594,54 @@ PHP_FUNCTION(msession_find)
 	DoRequest(g_conn,&g_reqb);
 
 	if(g_reqb->req.stat==REQ_OK && g_reqb->req.param)
-	{
-		int i;
-		char *str = g_reqb->req.datum;
-		array_init(return_value);
-
-		for(i=0; i < g_reqb->req.param; i++)
 		{
-			int element_len = strlen(str);
-			char *data = safe_estrdup(str);
-			add_index_string(return_value, i, data, 0);
-			str += (element_len+1);
+			int i;
+			char *str = g_reqb->req.datum;
+			array_init(return_value);
+
+			for(i=0; i < g_reqb->req.param; i++)
+				{
+					int element_len = strlen(str);
+					char *data = safe_estrdup(str);
+					add_index_string(return_value, i, data, 0);
+					str += (element_len+1);
+				}
 		}
-	}
 	else
-	{
-		RETURN_NULL();
-	}
+		{
+			RETURN_NULL();
+		}
 }
 PHP_FUNCTION(msession_list)
 {
 	GET_REQB
 	
-	if(!g_conn)
-	{
-		RETURN_FALSE;
-	}
+		if(!g_conn)
+			{
+				RETURN_FALSE;
+			}
 
 	FormatRequest(&g_reqb, REQ_LIST, "", "", "",0);
 	DoRequest(g_conn,&g_reqb);
 
 	if(g_reqb->req.stat==REQ_OK && g_reqb->req.param)
-	{
-		int i;
-		char *str = g_reqb->req.datum;
-		array_init(return_value);
-
-		for(i=0; i < g_reqb->req.param; i++)
 		{
-			int element_len = strlen(str);
-			char *data = safe_estrdup(str);
-			add_index_string(return_value, i, data, 0);
-			str += (element_len+1);
+			int i;
+			char *str = g_reqb->req.datum;
+			array_init(return_value);
+
+			for(i=0; i < g_reqb->req.param; i++)
+				{
+					int element_len = strlen(str);
+					char *data = safe_estrdup(str);
+					add_index_string(return_value, i, data, 0);
+					str += (element_len+1);
+				}
 		}
-	}
 	else
-	{
-		RETURN_NULL();
-	}
+		{
+			RETURN_NULL();
+		}
 }
 
 PHP_FUNCTION(msession_get_array)
@@ -648,14 +649,14 @@ PHP_FUNCTION(msession_get_array)
 	zval **session;
 	GET_REQB
 	
-	if(ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &session) == FAILURE)
- 	{
-                WRONG_PARAM_COUNT;
-        }
+		if(ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &session) == FAILURE)
+			{
+				WRONG_PARAM_COUNT;
+			}
 	if(!g_conn)
-	{
-		RETURN_FALSE;
-	}
+		{
+			RETURN_FALSE;
+		}
 
 	convert_to_string_ex(session);
 
@@ -665,28 +666,28 @@ PHP_FUNCTION(msession_get_array)
 	array_init(return_value);
 
 	if(g_reqb->req.stat == REQ_OK)
-	{
-		int i;
-		char *str = g_reqb->req.datum;
-		int num = g_reqb->req.param*2;
-
-		for(i=0; i < num; i+=2)
 		{
-			int value_len;
-			int name_len;
-			char *value_data;
-			char *name_data;
+			int i;
+			char *str = g_reqb->req.datum;
+			int num = g_reqb->req.param*2;
 
-			name_len = strlen(str);
-			name_data = safe_estrndup(str,name_len);
-			str += (name_len+1);
+			for(i=0; i < num; i+=2)
+				{
+					int value_len;
+					int name_len;
+					char *value_data;
+					char *name_data;
 
-			value_len = strlen(str);
-			value_data = safe_estrndup(str,value_len);
-			str += (value_len+1);
-			add_assoc_string(return_value, name_data, value_data, 0);
+					name_len = strlen(str);
+					name_data = safe_estrndup(str,name_len);
+					str += (name_len+1);
+
+					value_len = strlen(str);
+					value_data = safe_estrndup(str,value_len);
+					str += (value_len+1);
+					add_assoc_string(return_value, name_data, value_data, 0);
+				}
 		}
-	}
 }
 PHP_FUNCTION(msession_set_array)
 {
@@ -706,16 +707,16 @@ PHP_FUNCTION(msession_set_array)
 	
 	GET_REQB
 	
-	ELOG("msession_set_array");
+		ELOG("msession_set_array");
 
 	if(ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &session, &tuples) == FAILURE)
- 	{
-                WRONG_PARAM_COUNT;
-        }
+		{
+			WRONG_PARAM_COUNT;
+		}
 	if(!g_conn)
-	{
-		RETURN_FALSE;
-	}
+		{
+			RETURN_FALSE;
+		}
 	htTuples = Z_ARRVAL_PP(tuples);
 
 	countpair = zend_hash_num_elements(htTuples);
@@ -723,10 +724,10 @@ PHP_FUNCTION(msession_set_array)
 	pairs = (char **)emalloc(sizeof(char *) * countpair * 2);
 
 	if(!pairs)
-	{
-		ELOG("no pairs");
-		RETURN_FALSE;
-	}
+		{
+			ELOG("no pairs");
+			RETURN_FALSE;
+		}
 
 	ELOG("have pairs");
 
@@ -736,28 +737,28 @@ PHP_FUNCTION(msession_set_array)
 	ELOG("reset pointer");
 
 	for(i=0; i < countpair; i++)
-	{
-		if(zend_hash_get_current_data_ex(htTuples, (void **)&entry, &pos) != SUCCESS) 
-			break;
-
-		if(entry)
 		{
-			convert_to_string_ex(entry);
-        		if(zend_hash_get_current_key_ex(htTuples,&key,&keylen,&numndx,0,&pos)== HASH_KEY_IS_STRING)
-			{
-#ifdef ERR_DEBUG
+			if(zend_hash_get_current_data_ex(htTuples, (void **)&entry, &pos) != SUCCESS) 
+				break;
+
+			if(entry)
 				{
-					char buffer [256];
-					sprintf(buffer, "%s=%s\n", key, Z_STRVAL_PP(entry));
-					ELOG(buffer);
-				}
+					convert_to_string_ex(entry);
+					if(zend_hash_get_current_key_ex(htTuples,&key,&keylen,&numndx,0,&pos)== HASH_KEY_IS_STRING)
+						{
+#ifdef ERR_DEBUG
+							{
+								char buffer [256];
+								sprintf(buffer, "%s=%s\n", key, Z_STRVAL_PP(entry));
+								ELOG(buffer);
+							}
 #endif
-				pairs[ndx++] = key;
-				pairs[ndx++] = Z_STRVAL_PP(entry);
-			}
+							pairs[ndx++] = key;
+							pairs[ndx++] = Z_STRVAL_PP(entry);
+						}
+				}
+			zend_hash_move_forward_ex(htTuples, &pos);
 		}
-		zend_hash_move_forward_ex(htTuples, &pos);
-	}
 
 	ELOG("FormatMulti");
 	FormatRequestMulti(&g_reqb, REQ_SETVAL, Z_STRVAL_PP(session), countpair, pairs,0);
@@ -770,14 +771,14 @@ PHP_FUNCTION(msession_listvar)
 	zval **name;
 	GET_REQB
 	
-	if(ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &name) == FAILURE)
- 	{
-                WRONG_PARAM_COUNT;
-        }
+		if(ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &name) == FAILURE)
+			{
+				WRONG_PARAM_COUNT;
+			}
 	if(!g_conn)
-	{
-		RETURN_FALSE;
-	}
+		{
+			RETURN_FALSE;
+		}
 
 	convert_to_string_ex(name);
 
@@ -787,28 +788,28 @@ PHP_FUNCTION(msession_listvar)
 	array_init(return_value);
 
 	if(g_reqb->req.stat == REQ_OK)
-	{
-		int i;
-		char *str = g_reqb->req.datum;
-		int num = g_reqb->req.param*2;
-
-		for(i=0; i < num; i+=2)
 		{
-			int value_len;
-			int name_len;
-			char *value_data;
-			char *name_data;
+			int i;
+			char *str = g_reqb->req.datum;
+			int num = g_reqb->req.param*2;
 
-			name_len = strlen(str);
-			name_data = safe_estrndup(str,name_len);
-			str += (name_len+1);
+			for(i=0; i < num; i+=2)
+				{
+					int value_len;
+					int name_len;
+					char *value_data;
+					char *name_data;
 
-			value_len = strlen(str);
-			value_data = safe_estrndup(str,value_len);
-			str += (value_len+1);
-			add_assoc_string(return_value, name_data, value_data, 0);
+					name_len = strlen(str);
+					name_data = safe_estrndup(str,name_len);
+					str += (name_len+1);
+
+					value_len = strlen(str);
+					value_data = safe_estrndup(str,value_len);
+					str += (value_len+1);
+					add_assoc_string(return_value, name_data, value_data, 0);
+				}
 		}
-	}
 }
 
 PHP_FUNCTION(msession_timeout)
@@ -820,38 +821,38 @@ PHP_FUNCTION(msession_timeout)
 	GET_REQB
 	
 	
-	if(ac == 1)
-	{
-		zstat = zend_get_parameters_ex(1, &session);
-	}
-	else if(ac == 2)
-	{
-		zval **param;
-		zstat = zend_get_parameters_ex(2, &session, &param);
-		convert_to_long_ex(param);
-		timeout = Z_LVAL_PP(param);
-	}
+		if(ac == 1)
+			{
+				zstat = zend_get_parameters_ex(1, &session);
+			}
+		else if(ac == 2)
+			{
+				zval **param;
+				zstat = zend_get_parameters_ex(2, &session, &param);
+				convert_to_long_ex(param);
+				timeout = Z_LVAL_PP(param);
+			}
 	if(zstat == FAILURE)
-	{
-                WRONG_PARAM_COUNT;
-	}
+		{
+			WRONG_PARAM_COUNT;
+		}
 	if(!g_conn)
-	{
-		RETURN_FALSE;
-	}
+		{
+			RETURN_FALSE;
+		}
 	convert_to_string_ex(session);
 
 	FormatRequest(&g_reqb, REQ_TIMEOUT, Z_STRVAL_PP(session), "","",timeout);
 	DoRequest(g_conn,&g_reqb);
 
 	if(g_reqb->req.stat == REQ_OK)
-	{
-		RETURN_LONG( g_reqb->req.param);
-	}
+		{
+			RETURN_LONG( g_reqb->req.param);
+		}
 	else
-	{
-		RETURN_NULL();
-	}
+		{
+			RETURN_NULL();
+		}
 }
 PHP_FUNCTION(msession_inc)
 {
@@ -860,14 +861,14 @@ PHP_FUNCTION(msession_inc)
 	zval **name;
 	GET_REQB
 	
-	if(ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &session, &name) == FAILURE)
- 	{
-                WRONG_PARAM_COUNT;
-        }
+		if(ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &session, &name) == FAILURE)
+			{
+				WRONG_PARAM_COUNT;
+			}
 	if(!g_conn)
-	{
-		RETURN_FALSE;
-	}
+		{
+			RETURN_FALSE;
+		}
 
 	convert_to_string_ex(session);
 	convert_to_string_ex(name);
@@ -876,14 +877,14 @@ PHP_FUNCTION(msession_inc)
 	DoRequest(g_conn, &g_reqb);
 
 	if(g_reqb->req.stat==REQ_OK)
-	{
-		val = safe_estrdup(g_reqb->req.datum);
-		RETURN_STRING(val, 0)
-	}
+		{
+			val = safe_estrdup(g_reqb->req.datum);
+			RETURN_STRING(val, 0)
+				}
 	else
-	{
-		RETURN_FALSE;
-	}
+		{
+			RETURN_FALSE;
+		}
 }
 PHP_FUNCTION(msession_getdata)
 {
@@ -891,26 +892,26 @@ PHP_FUNCTION(msession_getdata)
 	zval **session;
 	
 	if(ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &session) == FAILURE)
- 	{
-                WRONG_PARAM_COUNT;
-        }
+		{
+			WRONG_PARAM_COUNT;
+		}
 	if(!g_conn)
-	{
-		RETURN_FALSE;
-	}
+		{
+			RETURN_FALSE;
+		}
 
 	convert_to_string_ex(session);
 
 	val = PHPMsessionGetData(Z_STRVAL_PP(session));
 
 	if(val)
-	{
-		RETURN_STRING(val, 0)
-	}
+		{
+			RETURN_STRING(val, 0)
+				}
 	else
-	{
-		RETURN_NULL();
-	}
+		{
+			RETURN_NULL();
+		}
 
 }
 
@@ -920,24 +921,24 @@ PHP_FUNCTION(msession_setdata)
 	zval **value;
 	
 	if(ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &session, &value) == FAILURE)
- 	{
-                WRONG_PARAM_COUNT;
-        }
+		{
+			WRONG_PARAM_COUNT;
+		}
 	if(!g_conn)
-	{
-		RETURN_FALSE;
-	}
+		{
+			RETURN_FALSE;
+		}
 	convert_to_string_ex(session);
 	convert_to_string_ex(value);
 
 	if(PHPMsessionSetData(Z_STRVAL_PP(session),Z_STRVAL_PP(value)))
-	{
-		RETURN_TRUE;
-	}
+		{
+			RETURN_TRUE;
+		}
 	else
-	{
-		RETURN_FALSE;
-	}
+		{
+			RETURN_FALSE;
+		}
 }
 PHP_FUNCTION(msession_plugin)
 {
@@ -948,27 +949,27 @@ PHP_FUNCTION(msession_plugin)
 	zval **param=NULL;
 	GET_REQB
 	
-	if(ZEND_NUM_ARGS() == 3)
-	{
-		ret = zend_get_parameters_ex(3, &session, &val, &param);
-		convert_to_string_ex(param);
-	}
-	else if(ZEND_NUM_ARGS() == 2)
-	{
-		ret = zend_get_parameters_ex(2, &session, &val);
-	}
-	else
- 	{
-                WRONG_PARAM_COUNT;
-        }
+		if(ZEND_NUM_ARGS() == 3)
+			{
+				ret = zend_get_parameters_ex(3, &session, &val, &param);
+				convert_to_string_ex(param);
+			}
+		else if(ZEND_NUM_ARGS() == 2)
+			{
+				ret = zend_get_parameters_ex(2, &session, &val);
+			}
+		else
+			{
+				WRONG_PARAM_COUNT;
+			}
 	if(ret == FAILURE)
-	{
-                WRONG_PARAM_COUNT;
-	}
+		{
+			WRONG_PARAM_COUNT;
+		}
 	if(!g_conn)
-	{
-		RETURN_FALSE;
-	}
+		{
+			RETURN_FALSE;
+		}
 
 	convert_to_string_ex(session);
 	convert_to_string_ex(val);
@@ -979,15 +980,15 @@ PHP_FUNCTION(msession_plugin)
 	DoRequest(g_conn, &g_reqb);
 
 	if(g_reqb->req.stat==REQ_OK && g_reqb->req.len)
-	{
-		retval = safe_estrdup(g_reqb->req.datum);
-		RETURN_STRING(retval, 0)
-	}
+		{
+			retval = safe_estrdup(g_reqb->req.datum);
+			RETURN_STRING(retval, 0)
+				}
 	else
-	{
-		RETURN_FALSE;
+		{
+			RETURN_FALSE;
 		
-	}
+		}
 }
 
 #ifdef HAVE_PHP_SESSION
@@ -1011,15 +1012,15 @@ PS_READ_FUNC(msession)
 	ELOG( "ps_read_msession");
 	*val = PHPMsessionGetData(key);
 	if(*val)
-	{
-		*vallen = strlen(*val);
-	}
+		{
+			*vallen = strlen(*val);
+		}
 	else
-	{
-		*val = emalloc(1);
-		**val=0;
-		*vallen = 0;
-	}
+		{
+			*val = emalloc(1);
+			**val=0;
+			*vallen = 0;
+		}
 	return SUCCESS;
 }
 
@@ -1042,3 +1043,12 @@ PS_GC_FUNC(msession)
 }
 #endif /* HAVE_PHP_SESSION */
 #endif	/* HAVE_MSESSION */
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim600: noet sw=4 ts=4 fdm=marker
+ * vim<600: noet sw=4 ts=4
+ */
