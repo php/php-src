@@ -4220,10 +4220,10 @@ static char *php_domxslt_string_to_xpathexpr(const char *str TSRMLS_DC)
 					  get_active_function_name(TSRMLS_C));
 			return NULL;
 		}
-		value = (xmlChar*) emalloc (str_len * sizeof(xmlChar *) );
+		value = (xmlChar*) emalloc (str_len * sizeof(xmlChar) );
 		snprintf(value, str_len, "'%s'", string);
 	} else {
-		value = (xmlChar*) emalloc (str_len * sizeof(xmlChar *) );
+		value = (xmlChar*) emalloc (str_len * sizeof(xmlChar) );
 		snprintf(value, str_len, "\"%s\"", string);
 	}
 
