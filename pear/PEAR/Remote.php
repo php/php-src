@@ -91,7 +91,7 @@ class PEAR_Remote extends PEAR
         $filename = $cachedir.'/xmlrpc_cache_'.$id;
 
         $fp = @fopen($filename, "wb");
-        if ($fp !== null) {
+        if (!$fp) {
             fwrite($fp, serialize($data));
             fclose($fp);
         };
