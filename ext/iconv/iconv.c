@@ -52,6 +52,7 @@
 
 #include "ext/standard/php_smart_str.h"
 #include "ext/standard/base64.h"
+#include "ext/standard/quot_print.h"
 
 #ifdef HAVE_LIBICONV
 #define LIBICONV_PLUG
@@ -229,75 +230,6 @@ PHP_MINFO_FUNCTION(miconv)
 	zval_dtor(&iconv_ver);
 }
 /* }}} */
-
-unsigned char *php_quot_print_decode(const unsigned char *str, size_t length, size_t *ret_length)
-{
-	register unsigned int i;
-	register unsigned const char *p1;
-	register unsigned char *p2;
-	register unsigned int h_nbl, l_nbl;
-
-	size_t decoded_len;
-	unsigned char *retval;
-
-	static unsigned int hexval_tbl[256] = {
-		16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16,
-		16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16,
-		16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16,
-		 0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 16, 16, 16, 16, 16, 16,
-		16, 10, 11, 12, 13, 14, 15, 16, 16, 16, 16, 16, 16, 16, 16, 16,
-		16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16,
-		16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16,
-		16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16,
-		16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16,
-		16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16,
-		16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16,
-		16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16,
-		16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16,
-		16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16,
-		16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16,
-		16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16
-	};
-
-	i = length, p1 = str; decoded_len = length;
-
-	while (i > 0 && *p1 != '\0') {
-		if (*p1 == '=') {
-			decoded_len -= 2;
-			p1 += 2;
-			i -= 2;
-		}
-		p1++;
-		i--;
-	}
-
-	retval = emalloc(decoded_len + 1);
-	i = length; p1 = str; p2 = retval;
-
-	while (i > 0 && *p1 != '\0') {
-		if (*p1 == '=') {
-			if (i < 2 ||
-				(h_nbl = hexval_tbl[p1[1]]) > 15 ||
-				(l_nbl = hexval_tbl[p1[2]]) > 15) { 
-
-				efree(retval);
-				return NULL;
-			}
-
-			*(p2++) = (h_nbl << 4) | l_nbl;
-			i -= 3;
-			p1 += 3;
-		} else {
-			*(p2++) = *p1;
-			i--;
-			p1++;
-		}
-	}
-
-	*p2 = '\0';
-	*ret_length = decoded_len;
-	return retval;
-}
 
 /* {{{ _php_iconv_appendl() */
 static php_iconv_err_t _php_iconv_appendl(smart_str *d, const char *s, size_t l, iconv_t cd)
