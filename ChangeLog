@@ -1,3 +1,86 @@
+1999-12-05  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/session/session.c: Give it a nicer looking module name
+
+    * ext/informix/ifx.ec: php3_* => php_*
+
+    * ext/informix/Makefile.am
+      ext/informix/config.m4: Create helper library during configure time
+
+    * acinclude.m4: Allow AC_ADD_LIBRARY to append library
+
+    * acinclude.m4
+      configure.in: Add rpaths to LDFLAGS during configure, drop them later.
+
+1999-12-05  Evan Klinger  <evan715@sirius.com>
+
+    * ext/informix/config.m4: Revert changes.
+
+    * ext/informix/config.m4:    Fix --with-informix. Was adding wrong library.
+
+1999-12-05  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/xml/xml.c:
+    Thies, can you provide some docs? I need something to show to my German translators.
+    Is the &obj correct?
+
+1999-12-05  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/xml/php_xml.h
+      ext/xml/xml.c:    (XML_Set_Object) new function.
+
+1999-12-05  Sascha Schumann  <sascha@schumann.cx>
+
+    * SAPI.h
+      mergesort.c
+      php_content_types.c
+      php_content_types.h
+      sapi/cgi/cgi_main.c
+      ext/standard/dir.c
+      ext/standard/file.c
+      ext/standard/fsock.c
+      ext/standard/lcg.c
+      ext/standard/reg.c
+      ext/session/session.c
+      ext/pgsql/pgsql.c
+      SAPI.c
+      ext/pcre/php_pcre.c
+      main.c
+      rfc1867.c: Fix some warnings
+
+    * acinclude.m4
+      configure.in: Prepend added libraries and separate LDFLAGS handling
+
+1999-12-05  Rasmus Lerdorf  <rasmus@php.net>
+
+    * sapi/apache/mod_php4.c
+      php_content_types.h
+      ext/xml/php_xml.h
+      ext/standard/basic_functions.c
+      ext/standard/lcg.c
+      ext/standard/output.c
+      ext/standard/parsedate.y
+      ext/standard/php_filestat.h
+      ext/standard/string.c
+      main.c
+      main.h: More maintainer-mode cleanups
+
+    * ext/standard/lcg.c
+      ext/standard/php_lcg.h: Fix a maintainer-mode warning
+
+1999-12-05  Stig Bakken  <ssb@fast.no>
+
+    * ext/standard/fsock.h
+      ext/standard/php_array.h
+      ext/standard/php_metaphone.h
+      pear/Makefile.am
+      ext/pcre/php_pcre.h
+      ext/session/php_session.h
+      ext/session/session.c
+      ext/mysql/php_mysql.c
+      main.h:    Fix warnings compiling in maintainer mode.
+    Install DB/common.php and DB/mysql.php on "make install".
+
 1999-12-04  Zeev Suraski  <zeev@php.net>
 
     * php4dllts.dsp: Win32 .dsp update
