@@ -58,14 +58,20 @@
 #endif
 
 #if defined(HAVE_LIBDL) && defined(RTLD_NOW)
-# define DL_LOAD(libname)	dlopen(libname, RTLD_NOW)
-# define DL_UNLOAD		dlclose
-# define DL_FETCH_SYMBOL	dlsym
-# define DL_HANDLE		void *
-# define ZEND_EXTENSIONS_SUPPORT 1
+# define DL_LOAD(libname)			dlopen(libname, RTLD_NOW)
+# define DL_UNLOAD					dlclose
+# define DL_FETCH_SYMBOL			dlsym
+# define DL_HANDLE					void *
+# define ZEND_EXTENSIONS_SUPPORT	1
+#elif (WIN32||WINNT)
+# define DL_LOAD(libname)			LoadLibrary(libname)
+# define DL_FETCH_SYMBOL			GetProcAddress
+# define DL_UNLOAD					FreeLibrary
+# define DL_HANDLE					HMODULE
+# define ZEND_EXTENSIONS_SUPPORT	1
 #else
-# define DL_HANDLE		void *
-# define ZEND_EXTENSIONS_SUPPORT 0
+# define DL_HANDLE					void *
+# define ZEND_EXTENSIONS_SUPPORT	0
 #endif
 
 #if ZEND_DEBUG
