@@ -35,23 +35,15 @@ NULL
 bool(false)
 PDOStatementAggregate::__construct
 PDOStatementAggregate::getIterator
-array(4) {
-  ["val"]=>
-  string(1) "A"
+array(2) {
   [0]=>
   string(1) "A"
-  ["grp"]=>
-  string(6) "Group1"
   [1]=>
   string(6) "Group1"
 }
-array(4) {
-  ["val"]=>
-  string(1) "B"
+array(2) {
   [0]=>
   string(1) "B"
-  ["grp"]=>
-  string(6) "Group2"
   [1]=>
   string(6) "Group2"
 }
