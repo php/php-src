@@ -63,7 +63,6 @@ PHPAPI int apache_php_module_main(request_rec *r, int fd, int display_source_mod
 	zend_executor_globals *executor_globals=&eg;
 	php_core_globals *core_globals=&pcg;
 #endif
-	SLS_FETCH();
 
 	if (php_request_startup(CLS_C ELS_CC PLS_CC SLS_CC) == FAILURE) {
 		return FAILURE;
@@ -84,7 +83,7 @@ PHPAPI int apache_php_module_main(request_rec *r, int fd, int display_source_mod
 			return NOT_FOUND;
 		}
 	} else {
-		(void) php_execute_script(&file_handle CLS_CC ELS_CC);
+		(void) php_execute_script(&file_handle CLS_CC ELS_CC PLS_CC);
 	}
 	
 	php3_header();			/* Make sure headers have been sent */
