@@ -27,6 +27,7 @@
 
 static zend_class_entry *default_exception_ptr;
 static zend_object_handlers default_exception_handlers;
+ZEND_API void zend_throw_exception(zend_class_entry *exception_ce, char *message, long code TSRMLS_DC);
 
 static zend_object_value zend_default_exception_new(zend_class_entry *class_type TSRMLS_DC)
 {
@@ -53,10 +54,10 @@ static zend_object_value zend_default_exception_new(zend_class_entry *class_type
 	return obj.value.obj;
 }
 
-ZEND_METHOD(reflection, __clone)
+ZEND_METHOD(exception, __clone)
 {
 	/* Should never be executable */
-	_DO_THROW("Cannot clone object using __clone()");
+	zend_throw_exception(NULL, "Cannot clone object using __clone()", 0 TSRMLS_CC);
 }
 
 ZEND_METHOD(exception, __construct)
