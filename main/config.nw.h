@@ -1,14 +1,7 @@
 /* config.nw.h.  Configure file for NetWare platform */
 
 
-/****
-
-Need to carefully look into each constant and either define or undef it w.r.t. NetWare.
-
-****/
-
-
-/* Define if PHP to setup it's own SIGCHLD handler (not needed on NetWare) */
+/* Define if PHP to setup it's own SIGCHLD handler (not needed on Win32) */
 #define PHP_SIGCHILD 0
 
 /* dns functions found in resolv.lib */
@@ -25,6 +18,14 @@ Need to carefully look into each constant and either define or undef it w.r.t. N
 /* set to enable mysql */
 #define HAVE_MYSQL 1
 
+/* defines for PostgreSQL extension */
+#define HAVE_PGSQL 1
+#define PHP_PGSQL_PRIVATE 1
+#define HAVE_PGSQL_WITH_MULTIBYTE_SUPPORT 1
+#define HAVE_PQCLIENTENCODING 1
+#define HAVE_PQCMDTUPLES 1
+#define HAVE_PQOIDVALUE 1
+
 /* set to enable FTP support */
 #define HAVE_FTP 1
 
@@ -32,18 +33,27 @@ Need to carefully look into each constant and either define or undef it w.r.t. N
 #define HAVE_BUNDLED_PCRE	1
 
 /* set to enable bundled expat library */
-/* #define HAVE_LIBEXPAT 1 */ /* For now */
-#define HAVE_WDDX 0
+/*#define HAVE_LIBEXPAT 1*/		/* Commented for now */
+#define HAVE_WDDX 0		/* Instead of 1 */
 
 /* set to enable the crypt command */
-/* #define HAVE_CRYPT 1 */
-/* #define HAVE_CRYPT_H 1 */
+/*
+#define HAVE_CRYPT 1
+#define PHP_STD_DES_CRYPT 1
+#define PHP_EXT_DES_CRYPT 0
+#define PHP_MD5_CRYPT 0
+#define PHP_BLOWFISH_CRYPT 0
+#define HAVE_CRYPT_H 1
+*/
 
 /* set to enable force cgi redirect */
-#define FORCE_CGI_REDIRECT 0
+#define FORCE_CGI_REDIRECT 1
 
 /* should be added to runtime config*/
 #define PHP_URL_FOPEN 1
+
+/* set to enable overload extension */
+#define HAVE_OVERLOAD 0
 
 #define STDIN_FILENO 0
 #define STDOUT_FILENO 1
@@ -79,7 +89,7 @@ Need to carefully look into each constant and either define or undef it w.r.t. N
 
 /* ----------------------------------------------------------------
    The following may or may not be (or need to be) ported to the
-   windows environment.
+   NetWare environment.
    ---------------------------------------------------------------*/
 
 /* Define if you have the link function.  */
@@ -92,7 +102,7 @@ Need to carefully look into each constant and either define or undef it w.r.t. N
 #undef HAVE_USLEEP
 
 #define HAVE_GETCWD 1
-/* #define HAVE_POSIX_READDIR_R 1 */  /* We will use readdir() from LibC */
+/*#define HAVE_POSIX_READDIR_R 1*/		/* We will use readdir() from LibC */
 
 #define NEED_ISBLANK 1
 
@@ -111,8 +121,13 @@ Need to carefully look into each constant and either define or undef it w.r.t. N
 #define HAVE_UODBC 1
 #define HAVE_LIBDL 1
 #define HAVE_SENDMAIL 1
+
+/* Define if you have the gettimeofday function.  */
 #define HAVE_GETTIMEOFDAY 1
+
+/* Define if you have the putenv function.  */
 #define HAVE_PUTENV 1
+
 #define HAVE_LIMITS_H 1
 
 #define HAVE_TZSET 1
@@ -123,7 +138,7 @@ Need to carefully look into each constant and either define or undef it w.r.t. N
 
 /* Define if you have alloca, as a function or macro.  */
 /* Though we have alloca(), this seems to be causing some problem with the stack pointer -- hence not using it */
-/* #define HAVE_ALLOCA 1 */
+/*#define HAVE_ALLOCA 1*/
 
 /* Define if you have <sys/time.h> */
 #undef HAVE_SYS_TIME_H
@@ -132,10 +147,10 @@ Need to carefully look into each constant and either define or undef it w.r.t. N
 #define HAVE_SIGNAL_H 1
 
 /* Define if your struct stat has st_blksize.  */
-#define HAVE_ST_BLKSIZE
+#undef HAVE_ST_BLKSIZE
 
 /* Define if your struct stat has st_blocks.  */
-#define HAVE_ST_BLOCKS
+#undef HAVE_ST_BLOCKS
 
 /* Define if your struct stat has st_rdev.  */
 #define HAVE_ST_RDEV 1
@@ -158,13 +173,10 @@ Need to carefully look into each constant and either define or undef it w.r.t. N
 #define HAVE_LDAP 1
 
 /* Define if you have the gcvt function.  */
-/* #define HAVE_GCVT 1 */
+/*#define HAVE_GCVT 1*/
 
 /* Define if you have the getlogin function.  */
-/* #define HAVE_GETLOGIN 1 */
-
-/* Define if you have the gettimeofday function.  */
-#define HAVE_GETTIMEOFDAY 1
+/*#define HAVE_GETLOGIN 1*/
 
 /* Define if you have the memcpy function.  */
 #define HAVE_MEMCPY 1
@@ -172,14 +184,11 @@ Need to carefully look into each constant and either define or undef it w.r.t. N
 /* Define if you have the memmove function.  */
 #define HAVE_MEMMOVE 1
 
-/* Define if you have the putenv function.  */
-/* #define HAVE_PUTENV 1 */   /* Why are such things defined in more than one place ? */
-
 /* Define if you have the regcomp function.  */
-/* #define HAVE_REGCOMP 1 */
+#define HAVE_REGCOMP 1
 
 /* Define if you have the setlocale function.  */
-/* #define HAVE_SETLOCALE 1 */    /* LibC doesn't seem to be supporting fully -- hence commenting for now */
+/*#define HAVE_SETLOCALE 1*/    /* Doesn't seem to be supporting fully -- hence commenting for now */
 
 #define HAVE_LOCALECONV 1
 
@@ -212,7 +221,7 @@ Need to carefully look into each constant and either define or undef it w.r.t. N
 #define HAVE_UTIME 1
 
 /* Define if you have the <dirent.h> header file.  */
-#define HAVE_DIRENT_H
+#define HAVE_DIRENT_H 1		/* Defined and then added '1' for '#if' to work */
 
 /* Define if you have the <fcntl.h> header file.  */
 #define HAVE_FCNTL_H 1
@@ -230,16 +239,20 @@ Need to carefully look into each constant and either define or undef it w.r.t. N
 #undef HAVE_SYS_FILE_H
 
 /* Define if you have the <sys/socket.h> header file.  */
+#ifdef USE_WINSOCK
+#undef HAVE_SYS_SOCKET_H
+#else
 #define HAVE_SYS_SOCKET_H 1 /* Added '1' for '#if' to work */
+#endif
 
 /* Define if you have the <sys/wait.h> header file.  */
 #undef HAVE_SYS_WAIT_H
 
 /* Define if you have the <syslog.h> header file.  */
-/* #define HAVE_SYSLOG_H 1 */
+/*#define HAVE_SYSLOG_H 1*/ /* Commented for now */
 
 /* Define if you have the <unistd.h> header file.  */
-#define HAVE_UNISTD_H 1 /* Added '1' for '#if' to work */
+#define HAVE_UNISTD_H 1		/* Defined and then added '1' for '#if' to work */
 
 /* Define if you have the dl library (-ldl).  */
 #define HAVE_LIBDL 1
@@ -261,14 +274,12 @@ Need to carefully look into each constant and either define or undef it w.r.t. N
 #define SIZEOF_INT 4
 
 /* Define directory constants for php and pear */
-
-/* Venkat (20/12/01) */
 #define APACHE_MODULE_DIR "sys:/apache/modules"
 #define PHP_BINDIR "sys:/php"
 #define PHP_LIBDIR PHP_BINDIR
 #define PHP_DATADIR PHP_BINDIR
 #define PHP_SYSCONFDIR PHP_BINDIR
 #define PHP_LOCALSTATEDIR PHP_BINDIR
-#define PHP_CONFIG_FILE_PATH "sys:/php"
+#define PHP_CONFIG_FILE_PATH "sys:/php" /* No need to keep in SYSTEM folder */
 #define PEAR_INSTALLDIR "sys:/php/pear"
 
