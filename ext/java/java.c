@@ -288,7 +288,7 @@ static jobject _java_makeObject(pval* arg TSRMLS_DC)
       break;
 
     case IS_OBJECT:
-      zend_hash_index_find(arg->value.obj.properties, 0, (void*)&handle);
+      zend_hash_index_find(Z_OBJPROP_P(arg), 0, (void*)&handle);
       result = zend_list_find((*handle)->value.lval, &type);
       break;
 
@@ -455,7 +455,7 @@ void java_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_property_refe
 
     jmethodID invoke = (*jenv)->GetMethodID(jenv, JG(reflect_class), "Invoke",
       "(Ljava/lang/Object;Ljava/lang/String;[Ljava/lang/Object;J)V");
-    zend_hash_index_find(object->value.obj.properties, 0, (void**) &handle);
+    zend_hash_index_find(Z_OBJPROP_P(object), 0, (void**) &handle);
     obj = zend_list_find((*handle)->value.lval, &type);
     method = (*jenv)->NewStringUTF(jenv, function_name->element.value.str.val);
     result = (jlong)(long)return_value;
@@ -529,7 +529,7 @@ static pval _java_getset_property
   propName = (*jenv)->NewStringUTF(jenv, property->element.value.str.val);
 
   /* get the object */
-  zend_hash_index_find(property_reference->object->value.obj.properties,
+  zend_hash_index_find(Z_OBJPROP_P(property_reference->object),
     0, (void **) &pobject);
   obj = zend_list_find((*pobject)->value.lval, &type);
   result = (jlong)(long) &presult;
@@ -691,13 +691,10 @@ JNIEXPORT void JNICALL Java_net_php_reflect_setResultFromObject
   pval *handle;
 
   if (presult->type != IS_OBJECT) {
-    presult->type=IS_OBJECT;
-    presult->value.obj.ce=&java_class_entry;
-    ALLOC_HASHTABLE(presult->value.obj.properties);
-    presult->is_ref=1;
+	object_init_ex(presult, &java_class_entry);
+	presult->is_ref=1;
     presult->refcount=1;
-    zend_hash_init(presult->value.obj.properties, 0, NULL, ZVAL_PTR_DTOR, 0);
-  };
+  }
 
   ALLOC_ZVAL(handle);
   handle->type = IS_LONG;
@@ -705,8 +702,7 @@ JNIEXPORT void JNICALL Java_net_php_reflect_setResultFromObject
     zend_list_insert((*jenv)->NewGlobalRef(jenv, value), le_jobject);
   pval_copy_constructor(handle);
   INIT_PZVAL(handle);
-  zend_hash_index_update(presult->value.obj.properties, 0,
-    &handle, sizeof(pval *), NULL);
+  zend_hash_index_update(Z_OBJPROP_P(presult), 0, &handle, sizeof(pval *), NULL);
 }
 
 JNIEXPORT void JNICALL Java_net_php_reflect_setResultFromArray
