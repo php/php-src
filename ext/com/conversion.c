@@ -519,9 +519,9 @@ PHPAPI int php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int codepage TS
 
 		case VT_UI1:
 			if (V_ISBYREF(var_arg)) {
-				ZVAL_LONG(pval_arg, (long)*V_UI4REF(var_arg));
+				ZVAL_LONG(pval_arg, (long)*V_UI1REF(var_arg));
 			} else {
-				ZVAL_LONG(pval_arg, (long)V_UI4(var_arg));
+				ZVAL_LONG(pval_arg, (long)V_UI1(var_arg));
 			}
 			break;
 
