@@ -1174,7 +1174,7 @@ PHP_FUNCTION(preg_quote)
 			*out_str,		/* Output string with quoted characters */
 		 	*p,				/* Iterator for input string */
 			*q,				/* Iterator for output string */
-			 delim_char,	/* Delimiter character to be quoted */
+			 delim_char=0,	/* Delimiter character to be quoted */
 		 	 c;				/* Current character */
 	zend_bool quote_delim = 0; /* Whether to quote additional delim char */
 	
@@ -1199,8 +1199,6 @@ PHP_FUNCTION(preg_quote)
 		if (Z_STRLEN_PP(delim) > 0) {
 			delim_char = Z_STRVAL_PP(delim)[0];
 			quote_delim = 1;
-		} else {
-			delim_char = 0;
 		}
 	}
 	
