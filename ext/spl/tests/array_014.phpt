@@ -16,8 +16,10 @@ var_dump($it->current());
 $it->seek(12);
 var_dump($it->current());
 
+$pos = 0;
 foreach($it as $v)
 {
+	$it->seek($pos++);
 	var_dump($v);
 }
 

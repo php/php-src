@@ -1,5 +1,7 @@
 --TEST--
 Bug #28822: ArrayObject::offsetExists() works inverted
+--SKIPIF--
+<?php if (!extension_loaded("spl")) print "skip"; ?>
 --FILE--
 <?php
 
