@@ -637,9 +637,9 @@ char *_php_math_number_format(double d,int dec,char dec_point,char thousand_sep)
 	}
 
 	if (dec) {
-		reslen = dec+1 + (tmplen-dec-1) + (tmplen-1-dec-1)/3;
+		reslen = dec+1 + (tmplen-dec-1) + ((thousand_sep) ? (tmplen-1-dec-1)/3 : 0);
 	} else {
-		reslen = tmplen+(tmplen-1)/3;
+		reslen = tmplen+((thousand_sep) ? (tmplen-1)/3 : 0);
 	}
 	if (is_negative) {
 		reslen++;
@@ -660,7 +660,7 @@ char *_php_math_number_format(double d,int dec,char dec_point,char thousand_sep)
 	
 	while(s>=tmpbuf) {
 		*t-- = *s--;
-		if ((++count%3)==0 && s>=tmpbuf) {
+		if (thousand_sep && (++count%3)==0 && s>=tmpbuf) {
 			*t-- = thousand_sep;
 		}
 	}
@@ -709,6 +709,8 @@ PHP_FUNCTION(number_format)
 		}
 		if ((*t_s)->value.str.len==1) {
 			thousand_sep=(*t_s)->value.str.val[0];
+		} else if((*t_s)->value.str.len==0) {
+			thousand_sep=0;	
 		}
 		RETURN_STRING(_php_math_number_format((*num)->value.dval,(*dec)->value.lval,dec_point,thousand_sep),0);
 		break;
