@@ -6,6 +6,11 @@ PHP 4                                                                      NEWS
 - Fix ImageCopy() in bundled GD2 library to handle copying from truecolor to
   palette-based.  (Wez, Rasmus)
 - Read-only GIF support for bundled GD2 library. (Rasmus)
+- Made several adjustments to xslt extension (David Viner, Lehnar, Melvyn)
+  . Added xslt_set_object and xslt_setopt function
+  . Changed backend interaction with Sablotron library
+  . Fixed leak with error_print
+  . Make xslt_make_array always set NULL on last index to signal array end.
 - Make the glue argument to implode() optional, if it is not specified
   default to using "". (Sterling)
 - Fixed fields argument to contain correct info for xslt_set_error_handler.
