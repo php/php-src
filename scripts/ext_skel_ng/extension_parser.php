@@ -68,7 +68,7 @@
 		}
 
 		function handle_extension_description($attr) {
-			$this->description = $this->cdata;
+			$this->description = $this->_trimdata();
 		}
 
 		function handle_extension_logo($attr) {
@@ -168,11 +168,11 @@
 	// {{{   resources
 
 	function handle_resources_resource_destruct($attr) {
-		$this->resource_destruct = $this->cdata;
+		$this->resource_destruct = $this->_trimdata();
 	}
 
 	function handle_resources_resource_description($attr) {
-		$this->resource_description = $this->cdata;		
+		$this->resource_description = $this->_trimdata();		
 	}
 
 	function handle_resources_resource($attr) {
@@ -197,20 +197,26 @@
 			$this->func_summary = trim($this->cdata);
 		}
 
+    function _trimdata() {
+      $text = preg_replace('|^\s*\n|m','', $this->cdata);
+      $text = preg_replace('|\n\s*$|m',"\n", $text);
+      return $text;
+    }
+
 		function handle_functions_function_proto($attr) {
 			$this->func_proto = trim($this->cdata);
 		}
 
 		function handle_functions_function_description($attr) {
-			$this->func_desc = trim($this->cdata);
+			$this->func_desc = $this->_trimdata();
 		}
 
 		function handle_functions_function_code($attr) {
-			$this->func_code = $this->cdata;
+			$this->func_code = $this->_trimdata();
 		}
 
 		function handle_code($attr) {
-			$this->code[$attr["role"]][] = $this->cdata;
+			$this->code[$attr["role"]][] = $this->_trimdata();
 		}
 
 		function handle_functions_function($attr) {
@@ -306,7 +312,6 @@
 		function generate_documentation() {
 			$id_name = str_replace('_', '-', $this->name);
 
-			system("rm -rf {$this->name}/manual");
 			mkdir("{$this->name}/manual");
 
 			$docdir = "{$this->name}/manual/$id_name";
