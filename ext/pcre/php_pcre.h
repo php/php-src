@@ -44,6 +44,7 @@ extern int php_rinit_pcre(INIT_FUNC_ARGS);
 PHP_FUNCTION(preg_match);
 PHP_FUNCTION(preg_match_all);
 PHP_FUNCTION(preg_replace);
+PHP_FUNCTION(preg_split);
 
 extern zend_module_entry pcre_module_entry;
 #define pcre_module_ptr &pcre_module_entry

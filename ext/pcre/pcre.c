@@ -48,6 +48,7 @@ function_entry pcre_functions[] = {
 	PHP_FE(preg_match,		third_arg_force_ref)
 	PHP_FE(preg_match_all,	third_arg_force_ref)
 	PHP_FE(preg_replace,	NULL)
+	PHP_FE(preg_split,		NULL)
 	{NULL, 		NULL, 		NULL}
 };
 
@@ -354,8 +355,9 @@ void _pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global)
 	}
 
 	/* Compile regex or get it from cache. */
-	if ((re = _pcre_get_compiled_regex(regex->value.str.val, extra)) == NULL)
-		return;
+	if ((re = _pcre_get_compiled_regex(regex->value.str.val, extra)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	/* Calculate the size of the offsets array, and allocate memory for it. */
 	num_subpats = pcre_info(re, NULL, NULL) + 1;
@@ -470,7 +472,7 @@ PHP_FUNCTION(preg_match)
 /* }}} */
 
 
-/* {{{ proto preg_match_all(string pattern, string subject, array subpatterns, integer order)
+/* {{{ proto preg_match_all(string pattern, string subject, array subpatterns [, int order ])
    Perform a Perl-style global regular expression match */
 PHP_FUNCTION(preg_match_all)
 {
@@ -516,8 +518,9 @@ char *_php_pcre_replace(char *regex, char *subject, char *replace)
 					*walk;				/* Used to walk the replacement string */
 
 	/* Compile regex or get it from cache. */
-	if ((re = _pcre_get_compiled_regex(regex, extra)) == NULL)
+	if ((re = _pcre_get_compiled_regex(regex, extra)) == NULL) {
 		return NULL;
+	}
 
 	/* Calculate the size of the offsets array, and allocate memory for it. */
 	size_offsets = (pcre_info(re, NULL, NULL) + 1) * 3;
@@ -742,10 +745,102 @@ PHP_FUNCTION(preg_replace)
 		}
 	}
 	else {	/* if subject is not an array */
-		result = _php_replace_in_subject(regex, replace, subject);
-		RETVAL_STRING(result, 1);
-		efree(result);
+		if ((result = _php_replace_in_subject(regex, replace, subject)) != NULL) {
+			RETVAL_STRING(result, 1);
+			efree(result);
+		}
 	}	
+}
+/* }}} */
+
+
+/* {{{ proto preg_split(string pattern, string subject [, int limit ]) */
+PHP_FUNCTION(preg_split)
+{
+	zval			*regex,				/* Regular expression to split by */
+					*subject,			/* Subject string to split */
+					*limit;				/* Number of pieces to return */
+	pcre			*re = NULL;			/* Compiled regular expression */
+	pcre_extra		*extra = NULL;		/* Holds results of studying */
+	int			 	*offsets;			/* Array of subpattern offsets */
+	int			 	 size_offsets;		/* Size of the offsets array */
+	int				 exoptions = 0;		/* Execution options */
+	int				 argc;				/* Argument count */
+	int				 limit_val;			/* Integer value of limit */
+	int				 count = 0;			/* Count of matched subpatterns */
+	int				 last_offset;		/* Holds the offset of the last match */
+
+	/* Get function parameters and do error checking */	
+	argc = ARG_COUNT(ht);
+	if (argc < 1 || argc > 3 || getParameters(ht, argc, &regex, &subject, &limit) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	
+	if (argc == 3) {
+		convert_to_long(limit);
+		limit_val = limit->value.lval;
+	}
+	else
+		limit_val = -1;
+	
+	/* Make sure we're dealing with strings */
+	convert_to_string(regex);
+	convert_to_string(subject);
+	
+	/* Compile regex or get it from cache. */
+	if ((re = _pcre_get_compiled_regex(regex->value.str.val, extra)) == NULL) {
+		RETURN_FALSE;
+	}
+	
+	/* Initialize return value */
+	array_init(return_value);
+
+	/* Calculate the size of the offsets array, and allocate memory for it. */
+	size_offsets = (pcre_info(re, NULL, NULL) + 1) * 3;
+	offsets = (int *)emalloc(size_offsets * sizeof(int));
+	
+	/* Start at the beginning of the string */
+	last_offset = 0;
+	
+	/* Get next piece if no limit or limit not yet reached and something matched*/
+	while ((limit_val == -1 || limit_val > 0) && count >= 0) {
+		count = pcre_exec(re, extra, &subject->value.str.val[last_offset],
+						  subject->value.str.len-last_offset,
+						  (last_offset ? exoptions|PCRE_NOTBOL : exoptions),
+						  offsets, size_offsets);
+
+		/* Check for too many substrings condition. */
+		if (count == 0) {
+			zend_error(E_NOTICE, "Matched, but too many substrings\n");
+			count = size_offsets/3;
+		}
+
+		/* If something matched */
+		if (count > 0) {
+			/* Add the piece to the return value */
+			add_next_index_stringl(return_value,
+								  &subject->value.str.val[last_offset],
+								  offsets[0], 1);
+			
+			/* Advance to next position */
+			last_offset += offsets[1];
+			
+			/* One less left to do */
+			if (limit_val != -1)
+				limit_val--;
+		}
+		else { /* if no match */
+			/* Add the last piece to the return value, if there
+			   were matches before */
+			if (last_offset > 0)
+				add_next_index_stringl(return_value,
+									  &subject->value.str.val[last_offset],
+									  subject->value.str.len - last_offset, 1);
+		}
+	}
+	
+	/* Clean up */
+	efree(offsets);
 }
 /* }}} */
 
