@@ -330,6 +330,7 @@ static void sapi_isapi_register_server_variables(zval *track_vars_array ELS_DC S
 	}
 
 	/* PHP_SELF support */
+	variable_len = ISAPI_SERVER_VAR_BUF_SIZE;
 #ifdef WITH_ZEUS
 	if (lpECB->GetServerVariable(lpECB->ConnID, "PATH_INFO", static_variable_buf, &variable_len)
 #else
