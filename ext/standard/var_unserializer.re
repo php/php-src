@@ -278,6 +278,27 @@ PHPAPI int php_var_unserialize(UNSERIALIZE_PARAMETER)
 	return 1;
 }
 
+"r:" iv ";"		{
+	int id;
+
+ 	*p = YYCURSOR;
+	if (!var_hash) return 0;
+
+	id = parse_iv(start + 2) - 1;
+	if (id == -1 || var_access(var_hash, id, &rval_ref) != SUCCESS) {
+		return 0;
+	}
+
+	if (*rval != NULL) {
+		zval_ptr_dtor(rval);
+	}
+	*rval = *rval_ref;
+	(*rval)->refcount++;
+	(*rval)->is_ref = 0;
+	
+	return 1;
+}
+
 "N;"	{
 	*p = YYCURSOR;
 	INIT_PZVAL(*rval);
