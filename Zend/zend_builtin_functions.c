@@ -850,7 +850,7 @@ ZEND_FUNCTION(function_exists)
 {
 	zval **function_name;
 	zend_function *func;
-	char *lcname, *func_name_end;
+	char *lcname;
 	zend_bool retval;
 	
 	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &function_name)==FAILURE) {
@@ -859,7 +859,6 @@ ZEND_FUNCTION(function_exists)
 	convert_to_string_ex(function_name);
 	lcname = zend_str_tolower_dup((*function_name)->value.str.val, (*function_name)->value.str.len);
 
-	func_name_end = lcname + (*function_name)->value.str.len;
 	retval = (zend_hash_find(EG(function_table), lcname, (*function_name)->value.str.len+1, (void **)&func) == SUCCESS);
 	
 	efree(lcname);
