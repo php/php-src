@@ -183,7 +183,11 @@ PHP_FUNCTION(headers_sent)
 		ZVAL_LONG(arg2, line);
 	case 1:
 		zval_dtor(arg1);
-		ZVAL_STRING(arg1, file, 1);
+		if (file) { 
+			ZVAL_STRING(arg1, file, 1);
+		} else {
+			ZVAL_STRING(arg1, "", 1);
+		}	
 		break;
 	}
 
