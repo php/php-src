@@ -38,13 +38,13 @@ int dbx_pgsql_connect(zval **rv, zval **host, zval **db, zval **username, zval *
 	MAKE_STD_ZVAL(conn_zval);
 	ZVAL_LONG(conn_zval, 0);
 
-	if (Z_STRLEN_PP(username)>0 && Z_STRLEN_PP(password)>0) {
+	if (Z_STRLEN_PP(username)>0) {
 		int len;
 
 		len = Z_STRLEN_PP(host)+Z_STRLEN_PP(db)+strlen(port);
-		len += Z_STRLEN_PP(username)+Z_STRLEN_PP(password)+35;
+		len += Z_STRLEN_PP(username)+Z_STRLEN_PP(password)+45;
 		connstring = (char *)emalloc(len+1);
-		sprintf(connstring, "host=%s port=%s dbname=%s user=%s password=%s",
+		sprintf(connstring, "host='%s' port='%s' dbname='%s' user='%s' password='%s'",
 				Z_STRVAL_PP(host), port, Z_STRVAL_PP(db),
 				Z_STRVAL_PP(username), Z_STRVAL_PP(password));
 		ZVAL_STRING(conn_zval, connstring, 1);
@@ -83,13 +83,13 @@ int dbx_pgsql_pconnect(zval **rv, zval **host, zval **db, zval **username, zval 
 	MAKE_STD_ZVAL(conn_zval);
 	ZVAL_LONG(conn_zval, 0);
 
-	if (Z_STRLEN_PP(username)>0 && Z_STRLEN_PP(password)>0) {
+	if (Z_STRLEN_PP(username)>0) {
 		int len;
 
 		len = Z_STRLEN_PP(host)+Z_STRLEN_PP(db)+strlen(port);
-		len += Z_STRLEN_PP(username)+Z_STRLEN_PP(password)+35;
+		len += Z_STRLEN_PP(username)+Z_STRLEN_PP(password)+45;
 		connstring = (char *)emalloc(len+1);
-		sprintf(connstring, "host=%s port=%s dbname=%s user=%s password=%s",
+		sprintf(connstring, "host='%s' port='%s' dbname='%s' user='%s' password='%s'",
 				Z_STRVAL_PP(host), port, Z_STRVAL_PP(db),
 				Z_STRVAL_PP(username), Z_STRVAL_PP(password));
 		ZVAL_STRING(conn_zval, connstring, 1);
@@ -139,7 +139,7 @@ int dbx_pgsql_query(zval **rv, zval **dbx_handle, zval **db_name, zval **sql_sta
 	   or 0 as long on failure */
 	int nargs=2;
 	zval **args[2];
-	zval *returned_zval=NULL, *num_rows_zval=NULL;
+	zval *returned_zval=NULL;
 
 	/* db_name is not used in this function */
 	args[0]=dbx_handle;
