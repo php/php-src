@@ -34,7 +34,7 @@
 #define _PHP_ODBC_H
 
 #if HAVE_UODBC
-
+#define ODBCVER 0x0250
 /*#ifndef MSVC5
 #define FAR
 #endif
@@ -54,7 +54,9 @@
 PHP_FUNCTION(solid_fetch_prev);
 #define SQLSMALLINT SWORD
 #define SQLUSMALLINT UWORD
+#ifndef SQL_SUCCEEDED
 #define SQL_SUCCEEDED(rc) (((rc)&(~1))==0)
+#endif
 
 #elif defined(HAVE_EMPRESS) /* Empress */
 
@@ -84,7 +86,9 @@ PHP_FUNCTION(solid_fetch_prev);
 #define SQL_SO_DYNAMIC          0x00000004L
 #define SQL_LEN_DATA_AT_EXEC_OFFSET  (-100)
 #define SQL_LEN_DATA_AT_EXEC(length) (-(length)+SQL_LEN_DATA_AT_EXEC_OFFSET)
+#ifndef SQL_SUCCEEDED
 #define SQL_SUCCEEDED(rc) (((rc)&(~1))==0)
+#endif
 
 #elif defined(HAVE_UNIXODBC) /* unixODBC library */
 
@@ -175,6 +179,7 @@ PHP_FUNCTION(odbc_execute);
 PHP_FUNCTION(odbc_fetch_into);
 PHP_FUNCTION(odbc_fetch_row);
 PHP_FUNCTION(odbc_field_len);
+PHP_FUNCTION(odbc_field_scale);
 PHP_FUNCTION(odbc_field_name);
 PHP_FUNCTION(odbc_field_type);
 PHP_FUNCTION(odbc_field_num);
@@ -187,10 +192,6 @@ PHP_FUNCTION(odbc_result_all);
 PHP_FUNCTION(odbc_rollback);
 PHP_FUNCTION(odbc_binmode);
 PHP_FUNCTION(odbc_longreadlen);
-/* 
- * PHP_FUNCTION(odbc_bind_param);
- * PHP_FUNCTION(odbc_define);
-*/
 PHP_FUNCTION(odbc_tables);
 PHP_FUNCTION(odbc_columns);
 #if !defined(HAVE_DBMAKER) && !defined(HAVE_SOLID)    /* not supported now */
