@@ -570,6 +570,10 @@ static void php_session_save_current_state(TSRMLS_D)
 		return;
 	}
 		
+	if (PS(http_session_vars) && PS(http_session_vars)->type!=IS_ARRAY) {
+		return;
+	}
+		
 	if (PS(http_session_vars)) {
 		for (zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(PS(http_session_vars)), &pos);
 				zend_hash_get_current_key_ex(Z_ARRVAL_P(PS(http_session_vars)), &variable, &variable_len, &num_key, 0, &pos) == HASH_KEY_IS_STRING;
