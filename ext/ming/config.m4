@@ -19,9 +19,9 @@ if test "$PHP_MING" != "no"; then
   PHP_CHECK_LIBRARY(ming, Ming_useSWFVersion, [
     AC_DEFINE(HAVE_MING,1,[ ])
   ],[
-    AC_MSG_ERROR(Ming library 0.2a or greater required.)
+    AC_MSG_ERROR([Ming library 0.2a or greater required.])
   ],[
-    -L$MING_DIR/lib -lm -ldl"
+    -L$MING_DIR/lib -lm -ldl
   ])
 
   PHP_ADD_INCLUDE($MING_DIR/include)
