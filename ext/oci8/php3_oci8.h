@@ -24,6 +24,7 @@
    | contact core@php.net.                                                |
    +----------------------------------------------------------------------+
    | Authors: Stig Sæther Bakken <ssb@fast.no>                            |
+   |          Thies C. Arntzen <thies@digicol.de>                         |
    |                                                                      |
    | Initial work sponsored by Thies Arntzen <thies@digicol.de> of        |
    | Digital Collections, http://www.digicol.de/                          |
@@ -56,10 +57,7 @@ typedef struct {
 	int num;
 	int persistent;
 	int open;
-	char *hashed_details;
-	int hashed_details_length;
-	char dbname[ 64 ];
-    OCIError *pError;
+	char *dbname;
     OCIServer *pServer;
 	OCIFocbkStruct failover;
 } oci8_server;
@@ -68,10 +66,7 @@ typedef struct {
 	int num;
 	int persistent;
 	int open;
-	char *hashed_details;
-	int hashed_details_length;
 	oci8_server *server;
-    OCIError *pError;
 	OCISession *pSession;
 } oci8_session;
 
@@ -80,16 +75,11 @@ typedef struct {
 	int open;
 	oci8_session *session;
     OCISvcCtx *pServiceContext;
+	sword error;
     OCIError *pError;
 	HashTable *descriptors;
 	int descriptors_count;
 } oci8_connection;
-
-typedef struct {
-	int id;
-	oci8_session *session;
-	OCITrans *pTrans;
-} oci8_xa;
 
 typedef struct {
 	dvoid *ocidescr;
@@ -107,9 +97,10 @@ typedef struct {
 typedef struct {
 	int id;
 	oci8_connection *conn;
+	sword error;
     OCIError *pError;
     OCIStmt *pStmt;
-	text *last_query;
+	char *last_query;
 	HashTable *columns;
 	int ncolumns;
 	HashTable *binds;
@@ -121,6 +112,7 @@ typedef struct {
 	OCIBind *pBind;
 	pval *value;
 	dvoid *descr;		/* used for binding of LOBS etc */
+    OCIStmt *pStmt;     /* used for binding REFCURSORs */
 	ub4 maxsize;
 	sb2 indicator;
 	ub2 retcode;
@@ -139,13 +131,17 @@ typedef struct {
 	ub2 retcode;
 	ub4 rlen;
 	ub2 is_descr;
+	ub2 is_cursor;
     int descr;
     oci8_descriptor *pdescr;
+    oci8_statement *pstmt;
+	int stmtid;
 	void *data;
 	oci8_define *define;
 } oci8_out_column;
 
 typedef struct {
+	sword error;
     OCIError *pError;
     char *default_username;
     char *default_password;
@@ -175,7 +171,6 @@ typedef struct {
 
 extern php3_module_entry oci8_module_entry;
 #define oci8_module_ptr &oci8_module_entry
-#define phpext_oci8_ptr &oci8_module_entry
 
 #define OCI8_MAX_NAME_LEN 64
 #define OCI8_MAX_DATA_SIZE 2097152 /* two megs */
