@@ -149,11 +149,13 @@ static int sapi_apache_ub_write(const char *str, uint str_length)
 
 static void sapi_apache_flush(void *server_context)
 {
+	if (server_context) {
 #if MODULE_MAGIC_NUMBER > 19970110
-	rflush((request_rec *) server_context);
+		rflush((request_rec *) server_context);
 #else
-	bflush((request_rec *) server_context->connection->client);
+		bflush((request_rec *) server_context->connection->client);
 #endif
+	}
 }
 
 
