@@ -126,9 +126,13 @@ void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gm)
 		** This function is then Y2K ready, and accepts a wide range of
 		** dates including the whole gregorian calendar.
 		** But it cannot represent ancestral dates prior to year 1001.
+		** Additionally, input parameters of 0..70 are mapped to 100..170
 		*/
-		ta->tm_year = (*arguments[5])->value.lval
-		  - (((*arguments[5])->value.lval > 1000) ? 1900 : 0);
+		if ((*arguments[5])->value.lval < 70)
+			ta->tm_year = (*arguments[5])->value.lval + 100;
+		else
+			ta->tm_year = (*arguments[5])->value.lval
+			  - (((*arguments[5])->value.lval > 1000) ? 1900 : 0);
 		/* fall-through */
 	case 5:
 		ta->tm_mday = (*arguments[4])->value.lval;
