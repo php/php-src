@@ -36,6 +36,10 @@
 #define SID_LEN 32
 #endif
 
+/* Uncomment to get debugging messages */
+/* #define ERR_DEBUG */
+
+
 #ifdef ERR_DEBUG
 #define ELOG( str )	php_log_err( str )
 #else
@@ -47,10 +51,11 @@
 #define	IFCONNECT_BEGIN		if(s_reqb && s_conn) {
 #define IFCONNECT_ENDVAL(V) 	} else { php_error(E_WARNING, s_szNoInit); return V; }
 #define IFCONNECT_END		} else { php_error(E_WARNING, s_szNoInit); RETURN_FALSE; }
-	
-/* Uncomment to get debugging messages */
-/* #define ERR_DEBUG */
 
+#if (PHP_SESSION_API >= 20020330)
+#define HAVE_PHP_SESSION_CREATESID
+#endif
+	
 /* This sets the PHP API version used in the file. */
 /* If this module does not compile on the version of PHP you are using, look for */
 /* this value in Zend/zend_modules.h, and set appropriately */
@@ -58,6 +63,7 @@
 #if (ZEND_MODULE_API_NO <=  20001222)
 #define PHP_4_0
 #define TSRMLS_CC
+#define TSRMLS_DC
 #define TSRMLS_FETCH()
 /* Comment out this line if you wish to have msession without php sessions */
 #define HAVE_PHP_SESSION
@@ -260,10 +266,6 @@ char *PHPMsessionGetData(const char *session)
 
 	if(s_reqb->req.stat==REQ_OK)
 		ret = safe_estrdup(s_reqb->req.datum);
-#if 0 // If there is a session, there may no be data yet, which is valid.
-	else if(s_reqb->req.param !=  REQE_NOSESSION)
-		php_error(E_WARNING, s_szErrFmt, ReqErr(s_reqb->req.param));
-#endif
 	IFCONNECT_ENDVAL(0)
 	
 	return ret;
@@ -1165,7 +1167,7 @@ PS_GC_FUNC(msession)
 }
 
 #ifdef HAVE_PHP_SESSION_CREATESID
-PS_CREATESID_FUNC(msession)
+PS_CREATE_SID_FUNC(msession)
 {
 	if(s_reqb && s_conn) 
 	{
