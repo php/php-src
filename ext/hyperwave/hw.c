@@ -2513,8 +2513,8 @@ PHP_FUNCTION(hw_output_document) {
 		RETURN_FALSE;
 	}
 
-	php3_header();
-	php3_write(ptr->data, ptr->size);
+	if(php3_header())
+		php3_write(ptr->data, ptr->size);
 
 	RETURN_TRUE;
 }
