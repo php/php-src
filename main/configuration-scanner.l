@@ -120,8 +120,12 @@ void init_cfg_scanner()
 	return TC_ENCAPSULATED_STRING;
 }
 
+<INITIAL>[&|~()] {
+	return yytext[0];
+}
 
-<INITIAL>[^=\n\r\t;"]+ {
+
+<INITIAL>[^=\n\r\t;|&~()"]+ {
 	/* STRING */
 	register int i;
 
