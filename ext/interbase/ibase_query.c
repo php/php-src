@@ -1279,7 +1279,7 @@ PHP_FUNCTION(ibase_num_rows)
 #endif
 /* }}} */
 
-FB_API int _php_ibase_var_zval(zval *val, void *data, int type, int len, /* {{{ */
+static int _php_ibase_var_zval(zval *val, void *data, int type, int len, /* {{{ */
 	int scale, int flag TSRMLS_DC)
 {
 	static ISC_INT64 const scales[] = { 1, 10, 100, 1000, 10000, 100000, 1000000, 100000000, 1000000000, 
