@@ -12,7 +12,7 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Sascha Schumann <ss@2ns.de>                                 |
+   | Authors: Sascha Schumann <ss@schumann.cx>                            |
    |          Andrei Zmievski <andrei@ispi.net>                           |
    +----------------------------------------------------------------------+
  */
@@ -143,6 +143,7 @@ PS_SERIALIZER_ENCODE_FUNC(php)
 	pval **struc;
 	char *key;
 	char strbuf[MAX_STR + 1];
+	ulong num_key;
 	ELS_FETCH();
 
 	buf = ecalloc(sizeof(*buf), 1);
@@ -150,7 +151,7 @@ PS_SERIALIZER_ENCODE_FUNC(php)
 	buf->refcount++;
 
 	for(zend_hash_internal_pointer_reset(&PS(vars));
-			zend_hash_get_current_key(&PS(vars), &key, NULL) == HASH_KEY_IS_STRING;
+			zend_hash_get_current_key(&PS(vars), &key, &num_key) == HASH_KEY_IS_STRING;
 			zend_hash_move_forward(&PS(vars))) {
 		if(zend_hash_find(&EG(symbol_table), key, strlen(key) + 1, (void **) &struc) 
 				== SUCCESS) {
@@ -216,6 +217,7 @@ PS_SERIALIZER_ENCODE_FUNC(wddx)
 {
 	wddx_packet *packet;
 	char *key;
+	ulong num_key;
 	zval **struc;
 	ELS_FETCH();
 
@@ -226,7 +228,7 @@ PS_SERIALIZER_ENCODE_FUNC(wddx)
 	_php_wddx_add_chunk(packet, WDDX_STRUCT_S);
 	
 	for(zend_hash_internal_pointer_reset(&PS(vars));
-			zend_hash_get_current_key(&PS(vars), &key, NULL) == HASH_KEY_IS_STRING;
+			zend_hash_get_current_key(&PS(vars), &key, &num_key) == HASH_KEY_IS_STRING;
 			zend_hash_move_forward(&PS(vars))) {
 		if(zend_hash_find(&EG(symbol_table), key, strlen(key) + 1, (void **) &struc) == SUCCESS) {
 			_php_wddx_serialize_var(packet, *struc, key);
@@ -726,22 +728,58 @@ PHP_FUNCTION(session_id)
 }
 /* }}} */
 
-/* {{{ proto bool session_register(string varname)
-   adds varname to the list of variables which are freezed at the session end */
+
+/* {{{ static void php_register_var(zval** entry PSLS_DC) */
+static void php_register_var(zval** entry PSLS_DC)
+{
+	zval**   value;
+	
+	if ((*entry)->type == IS_ARRAY) {
+		zend_hash_internal_pointer_reset((*entry)->value.ht);
+
+		while(zend_hash_get_current_data((*entry)->value.ht, (void**)&value) == SUCCESS) {
+			php_register_var(value);
+			zend_hash_move_forward((*entry)->value.ht);
+		}
+	} else {
+		convert_to_string_ex(entry);
+		
+		PS_ADD_VARL((*entry)->value.str.val, (*entry)->value.str.len);
+	}
+}
+/* }}} */
+
+
+/* {{{ proto bool session_register(string var_name | array var_names [, ... ])
+   adds varname(s) to the list of variables which are freezed at the session end */
 PHP_FUNCTION(session_register)
 {
-	pval **p_name;
-	int ac = ARG_COUNT(ht);
+	zval***  args;
+	int      argc = ARG_COUNT(ht);
+	int      i;
 	PSLS_FETCH();
 
-	if(ac != 1 || getParametersEx(ac, &p_name) == FAILURE) {
+	if (argc <= 0) {
+		RETURN_FALSE;
+	} else
+		args = (zval ***)emalloc(argc * sizeof(zval **));
+	
+	if (getParametersArrayEx(argc, args) == FAILURE) {
+		efree(args);
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_string_ex(p_name);
-	
 	if(!PS(nr_open_sessions)) _php_session_start(PSLS_C);
-	PS_ADD_VAR((*p_name)->value.str.val);
+
+	for (i=0; i<argc; i++)
+	{
+		if ((*args[i])->type == IS_ARRAY) {
+			SEPARATE_ZVAL(args[i]);
+		}
+		php_register_var(args[i] PSLS_CC);
+	}	
+	
+	efree(args);
 	
 	RETURN_TRUE;
 }
@@ -868,11 +906,12 @@ PHP_FUNCTION(session_unset)
 {
 	zval	**tmp;
 	char	 *variable;
+	ulong     num_key;
 	ELS_FETCH();
 	PSLS_FETCH();
 	
 	for(zend_hash_internal_pointer_reset(&PS(vars));
-			zend_hash_get_current_key(&PS(vars), &variable, NULL) == HASH_KEY_IS_STRING;
+			zend_hash_get_current_key(&PS(vars), &variable, &num_key) == HASH_KEY_IS_STRING;
 			zend_hash_move_forward(&PS(vars))) {
 		if(zend_hash_find(&EG(symbol_table), variable, strlen(variable) + 1, (void **) &tmp)
 				== SUCCESS) {
