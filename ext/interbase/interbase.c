@@ -2880,6 +2880,8 @@ PHP_FUNCTION(ibase_blob_import)
 	char bl_data[IBASE_BLOB_SEG]; /* FIXME? blob_seg_size parameter?	 */
 	FILE *fp;
 	IBLS_FETCH();
+	void * what;
+	int type;
 
 	RESET_ERRMSG;
 
@@ -2907,8 +2909,12 @@ PHP_FUNCTION(ibase_blob_import)
 		RETURN_FALSE;
 	}
 
-	ZEND_FETCH_RESOURCE(fp, FILE *, file_arg, -1, "File-Handle", php_file_le_fopen());
+	what = zend_fetch_resource(arg1, -1, "File-Handle", &type, 2, php_file_le_fopen(), php_file_le_stream());
+	ZEND_VERIFY_RESOURCE(what);
 
+	if (type == php_file_le_fopen())
+		fp = (FILE*)what;
+	
 	ib_blob.link = ib_link->link;
 	ib_blob.trans_handle = ib_link->trans[trans_n];
 	ib_blob.bl_handle = NULL;
@@ -2921,6 +2927,21 @@ PHP_FUNCTION(ibase_blob_import)
 	}
 
 	size = 0;
+
+#if HAVE_PHP_STREAM
+	if (type == php_file_le_stream())	{
+		while(b = php_stream_read((php_stream*)what, bl_data, 1, sizeof(bl_data)) > 0)	{
+			if (isc_put_segment(IB_STATUS, &ib_blob.bl_handle, b, bl_data)) {
+				_php_ibase_error();
+				RETURN_FALSE;
+			}
+			size += b;
+
+		}
+	}
+	else	{
+#endif
+	/* Can't see much use for the issock stuff here, it should be nuked --Wez */
 	while (issock?(b=SOCK_FREAD(bl_data,sizeof(bl_data),socketd)):(b = fread(bl_data, 1, sizeof(bl_data), fp)) > 0) {
 		if (isc_put_segment(IB_STATUS, &ib_blob.bl_handle, b, bl_data)) {
 			_php_ibase_error();
@@ -2928,6 +2949,10 @@ PHP_FUNCTION(ibase_blob_import)
 		}
 		size += b;
 	}
+	
+#if HAVE_PHP_STREAM
+	}
+#endif
 	
 	if (isc_close_blob(IB_STATUS, &ib_blob.bl_handle)) {
 		_php_ibase_error();
