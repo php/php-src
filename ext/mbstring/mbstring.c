@@ -1006,6 +1006,7 @@ PHP_MINFO_FUNCTION(mbstring)
 {
 	php_info_print_table_start();
 	php_info_print_table_row(2, "Multibyte Support", "enabled");
+	php_info_print_table_colspan_header(2, "mbstring extension makes use of \"streamable kanji code filter and converter\", which is distributed under the GNU Lesser General Public License version 2.1.");
 #if defined(HAVE_MBSTR_JA)
 	php_info_print_table_row(2, "Japanese support", "enabled");	
 #endif
