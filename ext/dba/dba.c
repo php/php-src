@@ -206,21 +206,23 @@ static PHP_MSHUTDOWN_FUNCTION(dba)
 	return SUCCESS;
 }
 
+#include "ext/standard/php_smart_str.h"
 
 static PHP_MINFO_FUNCTION(dba)
 {
 	dba_handler *hptr;
-	static char handlers[80], tmp[5];
+	smart_str handlers = {0};
 
 	for(hptr = handler; hptr->name; hptr++) {
-		sprintf(tmp, "%s ", hptr->name);
-		strcat(handlers, tmp);
+		smart_str_appends(&handlers, hptr->name);
+		smart_str_appendc(&handlers, ' ');
  	}
 
 	php_info_print_table_start();
  	php_info_print_table_row(2, "DBA support", "enabled");
-	php_info_print_table_row(2, "Supported handlers", handlers);
+	php_info_print_table_row(2, "Supported handlers", handlers.c);
 	php_info_print_table_end();
+	smart_str_free(&handlers);
 }
                                 
 
