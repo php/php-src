@@ -163,11 +163,12 @@ class DB {
 	 * error
 	 */
     function &factory($type) {
-		if (!@include_once("DB/${type}.php")) {
-			return DB_ERROR_NOT_FOUND;
-		}
+		@include_once("DB/${type}.php");
 		$classname = 'DB_' . $type;
-		$obj = new $classname;
+		$obj = @new $classname;
+		if (!$obj) {
+			return new DB_Error(DB_ERROR_NOT_FOUND);
+		}
 		return $obj;
     }
 
@@ -192,11 +193,12 @@ class DB {
 
 		$dsninfo = DB::parseDSN($dsn);
 		$type = $dsninfo['phptype'];
-		if (!@include_once("DB/${type}.php")) {
-			return DB_ERROR_NOT_FOUND;
-		}
+		@include_once("DB/${type}.php");
 		$classname = 'DB_' . $type;
-		$obj = new $classname;
+		$obj = @new $classname;
+		if (!$obj) {
+			return new DB_Error(DB_ERROR_NOT_FOUND);
+		}
 		$err = $obj->connect(&$dsninfo, $persistent);
 		if (DB::isError($err)) {
 			return $err;
