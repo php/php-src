@@ -520,7 +520,7 @@ void zend_debug_alloc_output(char *format, ...)
 #ifdef ZEND_WIN32
 	OutputDebugString(output_buf);
 #else
-	fprintf(stderr, output_buf);
+	fprintf(stderr, "%s", output_buf);
 #endif
 }
 
