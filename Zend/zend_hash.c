@@ -723,6 +723,33 @@ ZEND_API void zend_hash_apply_with_arguments(HashTable *ht, apply_func_args_t de
 }
 
 
+ZEND_API void zend_hash_reverse_apply(HashTable *ht, apply_func_t apply_func TSRMLS_DC)
+{
+	Bucket *p, *q;
+
+	IS_CONSISTENT(ht);
+
+	HASH_PROTECT_RECURSION(ht);
+	p = ht->pListTail;
+	while (p != NULL) {
+		int result = apply_func(p->pData TSRMLS_CC);
+
+		q = p;
+		p = p->pListLast;
+		if (result & ZEND_HASH_APPLY_REMOVE) {
+			if (q->nKeyLength>0) {
+				zend_hash_del(ht, q->arKey, q->nKeyLength);
+			} else {
+				zend_hash_index_del(ht, q->h);
+			}
+		}
+		if (result & ZEND_HASH_APPLY_STOP) {
+			break;
+		}
+	}
+	HASH_UNPROTECT_RECURSION(ht);
+}
+
 
 ZEND_API void zend_hash_copy(HashTable *target, HashTable *source, copy_ctor_func_t pCopyConstructor, void *tmp, uint size)
 {
