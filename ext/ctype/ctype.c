@@ -79,10 +79,6 @@ zend_module_entry ctype_module_entry = {
 ZEND_GET_MODULE(ctype)
 #endif
 
-#ifndef PHP_EXPERIMENTAL
-#define PHP_EXPERIMENTAL(x, y)
-#endif 
-
 /* {{{ PHP_MINFO_FUNCTION
  */
 PHP_MINFO_FUNCTION(ctype)
@@ -123,13 +119,12 @@ static int ctype(int (*iswhat)(int), zval **c)
    Checks for alphanumeric character(s) */
 PHP_FUNCTION(ctype_alnum)
 {
-	PHP_EXPERIMENTAL("4.0.4dev", NULL)
-	zval **c;
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &c) == FAILURE){
-		WRONG_PARAM_COUNT;
-	}
+	zval *c;
 	
-	if(ctype(isalnum, c)) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &c) == FAILURE)
+		return;
+	
+	if(ctype(isalnum, &c)) {
 	   RETURN_TRUE;
 	}
 
@@ -141,13 +136,12 @@ PHP_FUNCTION(ctype_alnum)
    Checks for alphabetic character(s) */
 PHP_FUNCTION(ctype_alpha)
 {
-	PHP_EXPERIMENTAL("4.0.4dev", NULL)
-	zval **c;
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &c) == FAILURE){
-		WRONG_PARAM_COUNT;
-	}
+	zval *c;
 
-	if(ctype(isalpha, c)) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &c) == FAILURE)
+		return;
+	
+	if(ctype(isalpha, &c)) {
 	   RETURN_TRUE;
 	}
 
@@ -159,13 +153,12 @@ PHP_FUNCTION(ctype_alpha)
    Checks for control character(s) */
 PHP_FUNCTION(ctype_cntrl)
 {
-	PHP_EXPERIMENTAL("4.0.4dev", NULL)
-	zval **c;
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &c) == FAILURE){
-		WRONG_PARAM_COUNT;
-	}
+	zval *c;
 
-	if(ctype(iscntrl, c)) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &c) == FAILURE)
+		return;
+	
+	if(ctype(iscntrl, &c)) {
 	   RETURN_TRUE;
 	}
 
@@ -177,13 +170,12 @@ PHP_FUNCTION(ctype_cntrl)
    Checks for numeric character(s) */
 PHP_FUNCTION(ctype_digit)
 {
-	PHP_EXPERIMENTAL("4.0.4dev", NULL)
-	zval **c;
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &c) == FAILURE){
-		WRONG_PARAM_COUNT;
-	}
+	zval *c;
 
-	if(ctype(isdigit, c)) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &c) == FAILURE)
+		return;
+	
+	if(ctype(isdigit, &c)) {
 	   RETURN_TRUE;
 	}
 
@@ -195,13 +187,12 @@ PHP_FUNCTION(ctype_digit)
    Checks for lowercase character(s)  */
 PHP_FUNCTION(ctype_lower)
 {
-	PHP_EXPERIMENTAL("4.0.4dev", NULL)
-	zval **c;
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &c) == FAILURE){
-		WRONG_PARAM_COUNT;
-	}
+	zval *c;
 
-	if(ctype(islower, c)) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &c) == FAILURE)
+		return;
+	
+	if(ctype(islower, &c)) {
 	   RETURN_TRUE;
 	}
 
@@ -213,13 +204,12 @@ PHP_FUNCTION(ctype_lower)
    Checks for any printable character(s) except space */
 PHP_FUNCTION(ctype_graph)
 {
-	PHP_EXPERIMENTAL("4.0.4dev", NULL)
-	zval **c;
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &c) == FAILURE){
-		WRONG_PARAM_COUNT;
-	}
+	zval *c;
 
-	if(ctype(isgraph, c)) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &c) == FAILURE)
+		return;
+	
+	if(ctype(isgraph, &c)) {
 	   RETURN_TRUE;
 	}
 
@@ -231,13 +221,12 @@ PHP_FUNCTION(ctype_graph)
    Checks for printable character(s) */
 PHP_FUNCTION(ctype_print)
 {
-	PHP_EXPERIMENTAL("4.0.4dev", NULL)
-	zval **c;
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &c) == FAILURE){
-		WRONG_PARAM_COUNT;
-	}
+	zval *c;
 
-	if(ctype(isprint, c)) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &c) == FAILURE)
+		return;
+	
+	if(ctype(isprint, &c)) {
 	   RETURN_TRUE;
 	}
 
@@ -249,13 +238,12 @@ PHP_FUNCTION(ctype_print)
    Checks for any printable character which is not whitespace or an alphanumeric character */
 PHP_FUNCTION(ctype_punct)
 {
-	PHP_EXPERIMENTAL("4.0.4dev", NULL)
-	zval **c;
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &c) == FAILURE){
-		WRONG_PARAM_COUNT;
-	}
+	zval *c;
 
-	if(ctype(ispunct, c)) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &c) == FAILURE)
+		return;
+	
+	if(ctype(ispunct, &c)) {
 	   RETURN_TRUE;
 	}
 
@@ -267,13 +255,12 @@ PHP_FUNCTION(ctype_punct)
    Checks for whitespace character(s)*/
 PHP_FUNCTION(ctype_space)
 {
-	PHP_EXPERIMENTAL("4.0.4dev", NULL)
-	zval **c;
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &c) == FAILURE){
-		WRONG_PARAM_COUNT;
-	}
+	zval *c;
 
-	if(ctype(isspace, c)) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &c) == FAILURE)
+		return;
+	
+	if(ctype(isspace, &c)) {
 	   RETURN_TRUE;
 	}
 
@@ -285,13 +272,12 @@ PHP_FUNCTION(ctype_space)
    Checks for uppercase character(s) */
 PHP_FUNCTION(ctype_upper)
 {
-	PHP_EXPERIMENTAL("4.0.4dev", NULL)
-	zval **c;
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &c) == FAILURE){
-		WRONG_PARAM_COUNT;
-	}
+	zval *c;
 
-	if(ctype(isupper, c)) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &c) == FAILURE)
+		return;
+	
+	if(ctype(isupper, &c)) {
 	   RETURN_TRUE;
 	}
 
@@ -303,13 +289,12 @@ PHP_FUNCTION(ctype_upper)
    Checks for character(s) representing a hexadecimal digit */
 PHP_FUNCTION(ctype_xdigit)
 {
-	PHP_EXPERIMENTAL("4.0.4dev", NULL)
-	zval **c;
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &c) == FAILURE){
-		WRONG_PARAM_COUNT;
-	}
+	zval *c;
 
-	if(ctype(isxdigit, c)) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &c) == FAILURE)
+		return;
+	
+	if(ctype(isxdigit, &c)) {
 	   RETURN_TRUE;
 	}
 
