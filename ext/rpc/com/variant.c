@@ -161,7 +161,7 @@ void php_VARIANT_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_proper
 
 		if(!zend_is_true(return_value))
 		{
-			var_reset(object);
+			ZVAL_RESET(object);
 			return;
 		}
 
@@ -189,7 +189,7 @@ pval php_VARIANT_get_property_handler(zend_property_reference *property_referenc
 
 	if(!var_arg || (type != IS_VARIANT))
 	{
-		var_reset(&result);
+		ZVAL_RESET(&result);
 	}
 	else
 	{
@@ -197,7 +197,7 @@ pval php_VARIANT_get_property_handler(zend_property_reference *property_referenc
 		switch(overloaded_property->type)
 		{
 			case OE_IS_ARRAY:
-				var_reset(&result);
+				ZVAL_RESET(&result);
 				break;
 
 			case OE_IS_OBJECT:
@@ -211,12 +211,12 @@ pval php_VARIANT_get_property_handler(zend_property_reference *property_referenc
 				}
 				else
 				{
-					var_reset(&result);
+					ZVAL_RESET(&result);
 					php_error(E_WARNING, "Unknown member.");
 				}
 				break;
 			case OE_IS_METHOD:
-				var_reset(&result);
+				ZVAL_RESET(&result);
 				php_error(E_WARNING, "Unknown method.");
 				break;
 

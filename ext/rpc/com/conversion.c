@@ -127,7 +127,7 @@ PHPAPI void php_pval_to_variant(pval *pval_arg, VARIANT *var_arg, int codepage)
 				if(NULL == safeArray)
 				{
 					php_error( E_WARNING,"Unable to convert php array to VARIANT array - %s", numberOfElements ? "" : "(Empty input array)");
-					var_reset(pval_arg);
+					ZVAL_RESET(pval_arg);
 				}
 				else
 				{
@@ -473,7 +473,7 @@ PHPAPI int php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int persistent,
 		if (1 != (Dims = SafeArrayGetDim(array)))
 		{
 			php_error(E_WARNING,"Unsupported: multi-dimensional (%d) SafeArrays", Dims);
-			var_reset(pval_arg);
+			ZVAL_RESET(pval_arg);
 			return FAILURE;
 		}
         SafeArrayLock( array);
