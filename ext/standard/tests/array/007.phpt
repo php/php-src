@@ -309,23 +309,17 @@ $b=array (
 var_dump(array_udiff_uassoc($a, $b, "comp_func_cr", "comp_func"));
 array(3) {
   ["0.1"]=>
-  object(cr)#%d (%d) {
-    [""]=>
-    int(9)
+  object(cr)#1 (2) {
     ["public_member"]=>
     int(9)
   }
   ["0.5"]=>
-  object(cr)#%d (%d) {
-    [""]=>
-    int(12)
+  object(cr)#2 (2) {
     ["public_member"]=>
     int(12)
   }
   [0]=>
-  object(cr)#%d (%d) {
-    [""]=>
-    int(23)
+  object(cr)#3 (2) {
     ["public_member"]=>
     int(23)
   }
@@ -387,23 +381,17 @@ $b=array (
 var_dump(array_udiff_uassoc($a, $b, array("cr", "comp_func_cr"), "comp_func"));
 array(3) {
   ["0.1"]=>
-  object(cr)#%d (%d) {
-    [""]=>
-    int(9)
+  object(cr)#1 (2) {
     ["public_member"]=>
     int(9)
   }
   ["0.5"]=>
-  object(cr)#%d (%d) {
-    [""]=>
-    int(12)
+  object(cr)#2 (2) {
     ["public_member"]=>
     int(12)
   }
   [0]=>
-  object(cr)#%d (%d) {
-    [""]=>
-    int(23)
+  object(cr)#3 (2) {
     ["public_member"]=>
     int(23)
   }
@@ -465,37 +453,27 @@ $b=array (
 var_dump(array_diff_assoc($a, $b));
 array(5) {
   ["0.1"]=>
-  object(cr)#%d (%d) {
-    [""]=>
-    int(9)
+  object(cr)#1 (2) {
     ["public_member"]=>
     int(9)
   }
   ["0.5"]=>
-  object(cr)#%d (%d) {
-    [""]=>
-    int(12)
+  object(cr)#2 (2) {
     ["public_member"]=>
     int(12)
   }
   [0]=>
-  object(cr)#%d (%d) {
-    [""]=>
-    int(23)
+  object(cr)#3 (2) {
     ["public_member"]=>
     int(23)
   }
   [1]=>
-  object(cr)#%d (%d) {
-    [""]=>
-    int(4)
+  object(cr)#4 (2) {
     ["public_member"]=>
     int(4)
   }
   [2]=>
-  object(cr)#%d (%d) {
-    [""]=>
-    int(-15)
+  object(cr)#5 (2) {
     ["public_member"]=>
     int(-15)
   }
@@ -557,16 +535,12 @@ $b=array (
 var_dump(array_udiff($a, $b, "comp_func_cr"));
 array(2) {
   ["0.5"]=>
-  object(cr)#%d (%d) {
-    [""]=>
-    int(12)
+  object(cr)#2 (2) {
     ["public_member"]=>
     int(12)
   }
   [0]=>
-  object(cr)#%d (%d) {
-    [""]=>
-    int(23)
+  object(cr)#3 (2) {
     ["public_member"]=>
     int(23)
   }
@@ -628,23 +602,17 @@ $b=array (
 var_dump(array_udiff_assoc($a, $b, "comp_func_cr"));
 array(3) {
   ["0.1"]=>
-  object(cr)#%d (%d) {
-    [""]=>
-    int(9)
+  object(cr)#1 (2) {
     ["public_member"]=>
     int(9)
   }
   ["0.5"]=>
-  object(cr)#%d (%d) {
-    [""]=>
-    int(12)
+  object(cr)#2 (2) {
     ["public_member"]=>
     int(12)
   }
   [0]=>
-  object(cr)#%d (%d) {
-    [""]=>
-    int(23)
+  object(cr)#3 (2) {
     ["public_member"]=>
     int(23)
   }
