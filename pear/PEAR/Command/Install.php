@@ -251,6 +251,7 @@ package if needed.
 
     function doInstall($command, $options, $params)
     {
+        require_once 'PEAR/Downloader.php';
         if (empty($this->installer)) {
             $this->installer = &new PEAR_Installer($this->ui);
         }
@@ -260,7 +261,7 @@ package if needed.
         if ($command == 'upgrade-all') {
             include_once "PEAR/Remote.php";
             $options['upgrade'] = true;
-            $remote = new PEAR_Remote($this->config);
+            $remote = &new PEAR_Remote($this->config);
             $state = $this->config->get('preferred_state');
             if (empty($state) || $state == 'any') {
                 $latest = $remote->call("package.listLatestReleases");
@@ -288,21 +289,18 @@ package if needed.
                 $this->ui->outputData(array('data' => "Will upgrade $package"), $command);
             }
         }
+        $this->downloader = &new PEAR_Downloader($this->ui, $options, $this->config);
         $errors = array();
         $downloaded = array();
-        $this->installer->download($params, $options, $this->config, $downloaded,
-                                   $errors);
-        if ($command != 'upgrade-all') {
-            for ($i = 0; $i < count($params); $i++) {
-                $params[$i] = $this->installer->extractDownloadFileName($params[$i], $_tmp);
-            }
-        }
+        $this->downloader->download($params);
+        $errors = $this->downloader->getErrorMsgs();
         if (count($errors)) {
             $err['data'] = array($errors);
             $err['headline'] = 'Install Errors';
             $this->ui->outputData($err);
             return $this->raiseError("$command failed");
         }
+        $downloaded = $this->downloader->getDownloadedPackages();
         $this->installer->sortPkgDeps($downloaded);
         foreach ($downloaded as $pkg) {
             $bn = basename($pkg['file']);
@@ -346,7 +344,7 @@ package if needed.
                 $newparams[] = $info;
             }
         }
-        PEAR_Common::sortPkgDeps($newparams, true);
+        $this->installer->sortPkgDeps($newparams, true);
         $params = array();
         foreach($newparams as $info) {
             $params[] = $info['info']['package'];
@@ -377,7 +375,7 @@ package if needed.
     function doBundle($command, $options, $params)
     {
         if (empty($this->installer)) {
-            $this->installer = &new PEAR_Installer($this->ui);
+            $this->installer = &new PEAR_Downloader($this->ui);
         }
         $installer = &$this->installer;
         if (sizeof($params) < 1) {
@@ -460,6 +458,8 @@ package if needed.
         $this->ui->outputData("Package ready at '$dest'");
     // }}}
     }
+
+    // }}}
 
 }
 ?>
