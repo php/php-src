@@ -83,8 +83,8 @@ PHP_MINIT_FUNCTION(cyrus)
 	le_cyrus = zend_register_list_destructors_ex(cyrus_free, NULL, 
 	                                             le_cyrus_name, module_number);
 
-	REGISTER_LONG_CONSTANT("CYRUS_CONN_NOSYNCLITERAL", 
-	                       IMCLIENT_CONN_NOSYNCLITERAL,
+	REGISTER_LONG_CONSTANT("CYRUS_CONN_NONSYNCLITERAL", 
+	                       IMCLIENT_CONN_NONSYNCLITERAL,
 	                       CONST_CS_ | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CYRUS_CONN_INITIALRESPONSE", 
 	                       IMCLIENT_CONN_INITIALRESPONSE,
@@ -266,13 +266,13 @@ PHP_FUNCTION(cyrus_authenticate)
 	}
 	else {
 		/* XXX: UGLY, but works, determines the username to use */
-		user = sapi_getenv("USER", 4);
+		user = (char *) sapi_getenv("USER", 4);
 		if (! user) {
-		user = getenv("USER");
+		user = (char *) getenv("USER");
 		if (! user) {
-			user = sapi_getenv("LOGNAME", 7);
+			user = (char *) sapi_getenv("LOGNAME", 7);
 			if (! user) {
-			user = getenv("LOGNAME");
+			user = (char *) getenv("LOGNAME");
 			if (! user) {
 				struct passwd *pwd = getpwuid(getuid());
 				if (! pwd) {
@@ -462,8 +462,7 @@ PHP_FUNCTION(cyrus_query)
 	ZEND_FETCH_RESOURCE(conn, php_cyrus *, z_conn, -1, le_cyrus_name, le_cyrus);
 	convert_to_string_ex(query);
 
-	if (imclient_send(conn->client, NULL, NULL, Z_STRVAL_PP(query)) != 0) 
-		RETURN_FALSE;
+	imclient_send(conn->client, NULL, NULL, Z_STRVAL_PP(query)); 
 
 	RETURN_TRUE;
 }
