@@ -738,12 +738,18 @@ sxe_object_cast(zval *readobj, zval *writeobj, int type, int should_free TSRMLS_
 		zval_dtor(writeobj);
 	}
 
+	if (!sxe->node) {
+		if (sxe->document) {
+			sxe->node = xmlDocGetRootElement((xmlDocPtr) sxe->document->ptr);
+		}
+	}
+
 	if (sxe->node) {
 		contents = xmlNodeListGetString((xmlDocPtr) sxe->document->ptr, sxe->node->children, 1);
 		if (!xmlIsBlankNode(sxe->node->children) && contents) {
 			cast_object(writeobj, type, NULL TSRMLS_CC);
 		}
-	}
+	} 
 
 	cast_object(writeobj, type, contents TSRMLS_CC);
 
