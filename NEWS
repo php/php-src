@@ -1,6 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2002, Version 4.3.0
+- Added optional 3rd parameter to mysql_select_db() which makes it return
+  the previously selected database name. (Jani)
 - If possible set Content-Length header in zlib.output_compression mode. (thies)
 - Major update of domxml. New functions and better DOM compliance. (Uwe)
 - Added large OID value (2^31 to 2^32) support for pg_lo_import(),
