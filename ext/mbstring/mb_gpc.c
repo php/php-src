@@ -218,14 +218,13 @@ enum mbfl_no_encoding _php_mb_encoding_handler_ex(const php_mb_encoding_handler_
 	const char *s1, *s2;
 	char *strtok_buf = NULL, **val_list = NULL;
 	zval *array_ptr = (zval *) arg;
-	int n, num, *len_list = NULL, *elist, elistsz;
+	int n, num, *len_list = NULL;
 	unsigned int val_len, new_val_len;
 	mbfl_string string, resvar, resval;
 	enum mbfl_no_encoding from_encoding = mbfl_no_encoding_invalid;
 	mbfl_encoding_detector *identd = NULL; 
 	mbfl_buffer_converter *convd = NULL;
 	int prev_rg_state = 0;
-	int retval = 0;
 
 	mbfl_string_init_set(&string, info->to_language, info->to_encoding);
 	mbfl_string_init_set(&resvar, info->to_language, info->to_encoding);
