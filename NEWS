@@ -3,11 +3,26 @@ PHP                                                                        NEWS
 ?? ??? 200?, Version 5.0.0
 
 ?? ??? 2003, PHP 5 Beta 2
+- Added function dbase_get_header_info. (Zak)
+- Add SQLite support to DBX .(Marc)
+- Added reflection API. (Andrei, George, Timm)
 - Added snmp_read_mib() which reads a MIB file into the active MIB tree. (Jani)
 - Fixed support for <![CDATA[]]> fields within XML documents in ext/xml. 
   (Sterling)
-- Fixed bug 24729 ($obj = new $className; causes crash when $className is not 
+- Fix visibility of __construct and __clone. (Marcus)
+- Fixed bug #24729 ($obj = new $className; causes crash when $className is not 
   set). (Marcus)
+- Fixed bug #24445 (get_parent_class returns different values). (Sterling, 
+  Stanislav)
+- Fixed bug #24403 (preg_replace problem: Using $this when not in object 
+  context). (Zeev)
+- Fixed bug #24399 (PEAR DB isError crash [instanceof_function fault?]). 
+  (Sterling, Marcus)
+- Fixed bug #24396 (foreach ($k=>$v), the key $k is missing). (Zeev)
+- Fixed bug #24279 (__get() crash when no value is returned). (Ilia)
+- Fixed bug #22367 (undefined variable has a value). (Zeev)
+- Fixed bug #19859 (allow fast_call_user_function to support __call). 
+  (Stanislav)
 
 29 Jun 2003, PHP 5 Beta 1 
 - Removed the bundled MySQL client library. (Sterling)
