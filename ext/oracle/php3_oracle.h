@@ -77,6 +77,7 @@ extern php3_module_entry oracle_module_entry;
 
 typedef struct {
 	int open;
+	int persistent;
 	Lda_Def lda;
 	ub1 hda[HDA_SIZE];
 } oraConnection;
