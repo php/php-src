@@ -236,7 +236,7 @@ static void _php_session_save_current_state(void)
 	PS(nr_open_sessions)--;
 }
 
-#define COOKIE_FMT "Set-cookie: %s=%s\r\n"
+#define COOKIE_FMT "Set-cookie: %s=%s"
 
 static void _php_session_send_cookie(void)
 {
