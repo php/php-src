@@ -78,9 +78,9 @@ static long mem_block_end_magic = MEM_BLOCK_END_MAGIC;
 									if (AG(memory_limit)+1048576 > AG(allocated_memory) - rs) { \
 										AG(memory_limit) = AG(allocated_memory) + 1048576; \
 										if (file) { \
-											zend_error(E_ERROR,"Allowed memory size of %d bytes exhausted (tried to allocate %d bytes)", php_mem_limit, s); \
-										} else { \
 											zend_error(E_ERROR,"Allowed memory size of %d bytes exhausted at %s:%d (tried to allocate %d bytes)", php_mem_limit, file, lineno, s); \
+										} else { \
+											zend_error(E_ERROR,"Allowed memory size of %d bytes exhausted (tried to allocate %d bytes)", php_mem_limit, s); \
 										} \
 									} else { \
 										if (file) { \
