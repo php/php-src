@@ -107,7 +107,7 @@ done
 # generate some files so people don't need bison, flex and autoconf
 # to install
 set -x
-./buildconf
+./buildconf --copy
 cd libzend
 bison -p zend -d zend-parser.y -o zend-parser.c
 flex -Pzend -ozend-scanner.c -i zend-scanner.l
