@@ -838,7 +838,7 @@ PHP_FUNCTION(unserialize)
 		}
 		PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
 	} else {
-		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Argument is not an string");
+		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Argument is not a string");
 		RETURN_FALSE;
 	}
 }
