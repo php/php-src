@@ -8,7 +8,7 @@ iconv.internal_charset=iso-8859-1
 <?php
 $header = <<< HERE
 Subject: =?ISO-8859-1?Q?Pr=FCfung?=
-	=?ISO-8859-1?Q?=20Pr=FCfung?= 
+	=?ISO-8859-1*de_DE?Q?=20Pr=FCfung?= 
  	 =?ISO-8859-2?Q?k=F9=D4=F1=D3let?=
 HERE;
 $result = iconv_mime_decode($header, "UTF-8");
