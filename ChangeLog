@@ -1,3 +1,54 @@
+2002-08-06  kalowsky  <kalowsky@pb1.pair.com>
+
+    * ext/java/java.c: A folding we will go, a folding we will go,
+    adding the fold and vim lines to make this easier to follow
+
+2002-08-06  markonen  <markonen@pb1.pair.com>
+
+    * Makefile.global
+      acinclude.m4
+      configure.in: Fix the framework support
+
+    * ext/iconv/iconv.c:
+    Updated proto to match the function (fix compile bustage on osx)
+
+    * Makefile.global
+      sapi/cgi/config.m4
+      sapi/cli/config.m4:
+    The link lines don't need any of $DEFS, $INCLUDES, $EXTRA_INCLUDES or
+    $CPPFLAGS, right? Removed them. Added frameworks to $COMMON_FLAGS.
+
+2002-08-06  bradmssw  <bradmssw@pb1.pair.com>
+
+    * ext/mcve/mcve.c
+      ext/mcve/php_mcve.h: sync to libmcve-3.0
+
+2002-08-06  Tomas V.V.Cox  <cox@pb1.pair.com>
+
+    * pear/PEAR/Registry.php:
+    Changed Windows 9x detection code (reported by Alex Merz)
+
+2002-08-06  markonen  <markonen@pb1.pair.com>
+
+    * sapi/cgi/config.m4
+      sapi/cli/config.m4
+      Makefile.global
+      acinclude.m4
+      configure.in:
+    Support compiling and linking against Darwin / Mac OS X frameworks
+
+2002-08-06  kalowsky  <kalowsky@pb1.pair.com>
+
+    * ext/exif/exif.c: Keeping function prototype variables the same
+
+2002-08-06  helly  <helly@pb1.pair.com>
+
+    * ext/exif/exif.c: datatype inconsistency found by Dan Kalowsky
+
+2002-08-06  Sascha Schumann  <sas@pb1.pair.com>
+
+    * ext/standard/var_unserializer.c: Touch file
+
 2002-08-05  phanto  <phanto@pb1.pair.com>
 
     * ext/com/COM.c:
