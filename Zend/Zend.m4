@@ -209,7 +209,7 @@ int main()
   }
 
   fp = fopen("conftest.zend", "w");
-  fprintf(fp, "%d %d", ZEND_MM_ALIGNMENT, zeros);  
+  fprintf(fp, "%d %d\n", ZEND_MM_ALIGNMENT, zeros);  
   fclose(fp);
 
   exit(0);
