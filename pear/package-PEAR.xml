@@ -123,6 +123,7 @@ PEAR Installer:
       <dep type="pkg" rel="ge" version="1.0">Console_Getopt</dep>
       <dep type="pkg" rel="ge" version="1.0.4">XML_RPC</dep>
       <dep type="ext" rel="has" optional="yes">xmlrpc</dep>
+      <dep type="ext" rel="has">xml</dep>
     </deps>
   </release>
 </package>
