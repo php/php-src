@@ -101,16 +101,7 @@ SOURCE=".\configuration-scanner.c"
 # End Source File
 # Begin Source File
 
-SOURCE=.\functions\cyr_convert.c
-
-!IF  "$(CFG)" == "php4 - Win32 Release"
-
-# SUBTRACT CPP /YX /Yc /Yu
-
-!ELSEIF  "$(CFG)" == "php4 - Win32 Debug"
-
-!ENDIF 
-
+SOURCE=.\ext\standard\cyr_convert.c
 # End Source File
 # Begin Source File
 
@@ -142,7 +133,7 @@ SOURCE=.\php_ini.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\functions\quot_print.c
+SOURCE=.\ext\standard\quot_print.c
 # End Source File
 # Begin Source File
 
@@ -174,7 +165,7 @@ SOURCE=.\control_structures.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\functions\cyr_convert.h
+SOURCE=.\ext\standard\cyr_convert.h
 # End Source File
 # Begin Source File
 
@@ -218,7 +209,7 @@ SOURCE=.\php_ini.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\functions\quot_print.h
+SOURCE=.\ext\standard\quot_print.h
 # End Source File
 # Begin Source File
 
@@ -246,11 +237,11 @@ SOURCE=.\functions\apache.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\functions\base64.c
+SOURCE=.\ext\standard\base64.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\functions\basic_functions.c
+SOURCE=.\ext\standard\basic_functions.c
 # End Source File
 # Begin Source File
 
@@ -258,15 +249,15 @@ SOURCE=.\functions\bcmath.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\functions\browscap.c
+SOURCE=.\ext\standard\browscap.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\functions\datetime.c
+SOURCE=.\ext\standard\datetime.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\functions\dir.c
+SOURCE=.\ext\standard\dir.c
 # End Source File
 # Begin Source File
 
@@ -274,27 +265,27 @@ SOURCE=.\functions\dl.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\functions\dns.c
+SOURCE=.\ext\standard\dns.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\functions\exec.c
+SOURCE=.\ext\standard\exec.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\functions\file.c
+SOURCE=.\ext\standard\file.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\functions\filestat.c
+SOURCE=.\ext\standard\filestat.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\functions\formatted_print.c
+SOURCE=.\ext\standard\formatted_print.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\functions\fsock.c
+SOURCE=.\ext\standard\fsock.c
 # End Source File
 # Begin Source File
 
@@ -302,39 +293,39 @@ SOURCE=.\functions\head.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\functions\html.c
+SOURCE=.\ext\standard\html.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\functions\image.c
+SOURCE=.\ext\standard\image.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\functions\info.c
+SOURCE=.\ext\standard\info.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\functions\iptc.c
+SOURCE=.\ext\standard\iptc.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\functions\link.c
+SOURCE=.\ext\standard\link.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\functions\mail.c
+SOURCE=.\ext\standard\mail.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\functions\math.c
+SOURCE=.\ext\standard\math.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\functions\md5.c
+SOURCE=.\ext\standard\md5.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\functions\microtime.c
+SOURCE=.\ext\standard\microtime.c
 # End Source File
 # Begin Source File
 
@@ -346,11 +337,11 @@ SOURCE=.\functions\number.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\functions\pack.c
+SOURCE=.\ext\standard\pack.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\functions\pageinfo.c
+SOURCE=.\ext\standard\pageinfo.c
 # End Source File
 # Begin Source File
 
@@ -358,27 +349,27 @@ SOURCE=.\functions\post.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\functions\rand.c
+SOURCE=.\ext\standard\rand.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\functions\reg.c
+SOURCE=.\ext\standard\reg.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\functions\soundex.c
+SOURCE=.\ext\standard\soundex.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\functions\string.c
+SOURCE=.\ext\standard\string.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\functions\syslog.c
+SOURCE=.\ext\standard\syslog.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\functions\type.c
+SOURCE=.\ext\standard\type.c
 # End Source File
 # Begin Source File
 
@@ -386,15 +377,15 @@ SOURCE=.\functions\unified_odbc.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\functions\uniqid.c
+SOURCE=.\ext\standard\uniqid.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\functions\url.c
+SOURCE=.\ext\standard\url.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\functions\var.c
+SOURCE=.\ext\standard\var.c
 # End Source File
 # End Group
 # Begin Group "Header Files No. 1"
@@ -402,15 +393,15 @@ SOURCE=.\functions\var.c
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=.\functions\base64.h
+SOURCE=.\ext\standard\base64.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\functions\basic_functions.h
+SOURCE=.\ext\standard\basic_functions.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\functions\datetime.h
+SOURCE=.\ext\standard\datetime.h
 # End Source File
 # Begin Source File
 
@@ -418,15 +409,19 @@ SOURCE=.\functions\dl.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\functions\dns.h
+SOURCE=.\ext\standard\dns.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\functions\exec.h
+SOURCE=.\ext\standard\exec.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\functions\file.h
+SOURCE=.\ext\standard\file.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\ext\standard\fsock.h
 # End Source File
 # Begin Source File
 
@@ -438,15 +433,11 @@ SOURCE=.\functions\head.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\functions\html.h
+SOURCE=.\ext\standard\html.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\functions\mail.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\functions\md5.h
+SOURCE=.\ext\standard\md5.h
 # End Source File
 # Begin Source File
 
@@ -458,7 +449,7 @@ SOURCE=.\functions\number.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\functions\pageinfo.h
+SOURCE=.\ext\standard\pageinfo.h
 # End Source File
 # Begin Source File
 
@@ -478,6 +469,14 @@ SOURCE=.\functions\php3_ldap.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\ext\standard\php3_mail.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\ext\standard\php3_string.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\functions\php3_string.h
 # End Source File
 # Begin Source File
@@ -494,23 +493,23 @@ SOURCE=.\functions\phpmath.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\functions\phpstring.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\functions\post.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\functions\reg.h
+SOURCE=.\ext\standard\reg.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\functions\type.h
+SOURCE=.\ext\standard\type.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\functions\url.h
+SOURCE=.\ext\standard\uniqid.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\ext\standard\url.h
 # End Source File
 # End Group
 # Begin Group "Regular Expressions"
@@ -554,6 +553,10 @@ SOURCE=.\win32\readdir.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\win32\registry.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\win32\sendmail.c
 # End Source File
 # Begin Source File
@@ -587,6 +590,10 @@ SOURCE=.\win32\grp.h
 # Begin Source File
 
 SOURCE=.\win32\param.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\win32\php_registry.h
 # End Source File
 # Begin Source File
 

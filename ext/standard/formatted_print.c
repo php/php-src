@@ -34,7 +34,7 @@
 #include "tls.h"
 #endif
 #include "php.h"
-#include "head.h"
+#include "functions/head.h"
 #include "php3_string.h"
 #include "zend_execute.h"
 #include <stdio.h>

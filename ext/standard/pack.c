@@ -46,7 +46,7 @@
 #else
 #include <sys/param.h>
 #endif
-#include "head.h"
+#include "functions/head.h"
 #include "safe_mode.h"
 #include "php3_string.h"
 #include "pack.h"

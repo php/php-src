@@ -32,7 +32,17 @@
 #ifndef _FSOCK_H
 #define _FSOCK_H
 
+#if WIN32|WINNT
+#	ifndef WINNT
+#	define WINNT 1
+#	endif
+#undef FD_SETSIZE
+#include "arpa/inet.h"
+#endif
+
+#if HAVE_NETINET_IN_H
 #include <netinet/in.h>
+#endif
 
 extern php3_module_entry fsock_module_entry;
 #define fsock_module_ptr &fsock_module_entry

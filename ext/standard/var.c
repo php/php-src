@@ -36,7 +36,7 @@
 #include "php.h"
 #include "fopen-wrappers.h"
 #include "reg.h"
-#include "post.h"
+#include "functions/post.h"
 #include "php3_string.h"
 #if HAVE_SETLOCALE
 #include <locale.h>
