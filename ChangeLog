@@ -1,3 +1,66 @@
+2002-01-27  Jon Parise  <jon@csh.rit.edu>
+
+    * ext/standard/math.c:
+    zend_isinf() is already defined in Zend/zend_config.w32.h for Win32.
+
+2002-01-27  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/bz2/bz2.c: fix proto's for Herr. Holzraefe.  int -> resource
+
+2002-01-27  Chuck Hagenbuch  <chuck@horde.org>
+
+    * pear/Net/SMTP.php: command spacing
+
+2002-01-27  fabrice aeschbacher  <fabrice.aeschbacher@laposte.net>
+
+    * ext/interbase/php_interbase.h
+      ext/interbase/interbase.c:
+    add ibase_add_user(), ibase_modify_user(), ibase_delete_use()
+
+2002-01-27  Jon Parise  <jon@csh.rit.edu>
+
+    * ext/standard/math.c:
+    Use the zend_* versions of finite(), isinf(), and isnan(), as defined
+    in php_config.h.  Redefine the zend_* versions in the case of Win32.
+
+    This fixes the build on systems that don't provide a native version of,
+    say, isinf() (e.g. Solaris).
+
+    * sapi/cgi/getopt.c
+      sapi/cli/getopt.c
+      ext/xml/xml.c: Add a note that this statement will never be reached.
+
+    * ext/standard/mail.c:
+    Add a comment indicating that this return statement will never be reached.
+
+
+    * ext/sockets/sockets.c: Use socklen_t (instead of int) where appropriate.
+
+    * ext/sockets/sockets.c:
+    Because php_network.h includes <sys/socket.h>, it must be included after
+    _XPG4_2 is defined.
+
+    This fixes the build under Solaris 8.
+
+2002-01-27  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/standard/pack.c: don't throw fatal errors, throw E_WARNING instead.
+
+    * ext/curl/curl.c: hopefully fix --with-openssl issues
+
+    * ext/bz2/bz2.c: Source code cleanup
+
+    * ext/bz2/bz2.c:
+    Update code to last working version to avoid recent breaks.
+
+
+2002-01-27  Marko Karppinen  <karppinen@pobox.com>
+
+    * acinclude.m4:
+    Enable developers to use PHP_ARG_ENABLE and PHP_ARG_WITH silently
+    to maintain legacy configure options without clutter in the
+    configure help and checking output.
+
 2002-01-26  Marko Karppinen  <karppinen@pobox.com>
 
     * configure.in:
