@@ -72,6 +72,9 @@ If you get an error telling you that the apxs script could not be found,
 look for it on your system and if you find it, provide the full path to it
 as: --with-apxs=/path/to/apxs
 
+Make sure you specify the version of apxs that is actually installed on
+your system and NOT the one that is in the apache source tarball.
+
 Next you must copy php.ini-dist to the appropriate place (normally
 /usr/local/lib/php.ini) and edit it as necessary to set PHP options.
 
@@ -160,6 +163,9 @@ Installing PHP can be done in four simple steps:
    look for it on your system and if you find it, provide the full path to it
    as: --with-apxs=/path/to/apxs
 
+   Make sure you specify the version of apxs that is actually installed on
+   your system and NOT the one that is in the apache source tarball.
+   
    You might also want other flags on this configure line.  --with-mysql
    is just an example.  
 
