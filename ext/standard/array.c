@@ -969,9 +969,7 @@ static int php_array_walk(HashTable *target_hash, zval **userdata TSRMLS_DC)
 			Z_TYPE_P(key) = IS_LONG;
 			Z_LVAL_P(key) = num_key;
 		} else {
-			Z_TYPE_P(key) = IS_STRING;
-			Z_STRVAL_P(key) = string_key;
-			Z_STRLEN_P(key) = string_key_len-1;
+			ZVAL_STRINGL(key, string_key, string_key_len-1, 1);
 		}
 		
 		/* Call the userland function */
