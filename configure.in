@@ -800,7 +800,6 @@ FEO
 
 # run this only when generating all the files?
 if true; then
-  chmod +x scripts/mkextlib
   # Hacking while airborne considered harmful.
   #
   echo "creating internal_functions.c"
