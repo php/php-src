@@ -42,6 +42,7 @@ function_entry bcmath_functions[] = {
 	PHP_FE(bcsqrt,									NULL)
 	PHP_FE(bcscale,									NULL)
 	PHP_FE(bccomp,									NULL)
+	PHP_FE(bc_powmod,								NULL)
 	{NULL, NULL, NULL}
 };
 
@@ -324,6 +325,38 @@ PHP_FUNCTION(bcmod)
 	}
 	bc_free_num(&first);
 	bc_free_num(&second);
+	bc_free_num(&result);
+	return;
+}
+/* }}} */
+
+/* {{{ proto string bc_powmod(string x, string y, string mod [, int scale])
+   Returns the value of an arbitrary precision number raised to the power of another reduced by a modulous */
+PHP_FUNCTION(bc_powmod)
+{
+	char *left, *right, *modulous;
+	int left_len, right_len, modulous_len;
+	bc_num first, second, mod, result;
+	int scale=bc_precision;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_C, "sss|l", &left, &left_len, &right, &right_len, &modulous, &modulous_len, &scale) == FAILURE) {
+        	WRONG_PARAM_COUNT;
+	}
+
+	bc_init_num(&first TSRMLS_CC);
+	bc_init_num(&second TSRMLS_CC);
+	bc_init_num(&mod TSRMLS_CC);
+	bc_init_num(&result TSRMLS_CC);
+	bc_str2num(&first, left, scale TSRMLS_CC);
+	bc_str2num(&second, right, scale TSRMLS_CC);
+	bc_str2num(&mod, modulous, scale TSRMLS_CC);
+	bc_raisemod(first, second, mod, &result, scale TSRMLS_CC);
+	Z_STRVAL_P(return_value) = bc_num2str(result);
+	Z_STRLEN_P(return_value) = strlen(Z_STRVAL_P(return_value));
+	Z_TYPE_P(return_value) = IS_STRING;
+	bc_free_num(&first);
+	bc_free_num(&second);
+	bc_free_num(&mod);
 	bc_free_num(&result);
 	return;
 }
