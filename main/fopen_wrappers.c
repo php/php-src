@@ -1003,6 +1003,7 @@ static FILE *php_fopen_url_wrapper(const char *path, char *mode, int options, in
 			protocopy[n]='\0';
 			if(FAILURE==zend_hash_find(&fopen_url_wrappers_hash, protocopy, n+1,(void **)&wrapper)) {
 				wrapper=NULL;
+				protocol=NULL;
 			}		
 			efree(protocopy);
 		}
