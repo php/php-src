@@ -20,6 +20,7 @@
 /* $Id$ */
 
 #include <stdio.h>
+#include <ctype.h>
 #include "php.h"
 #include "php_string.h"
 #include "reg.h"
@@ -340,13 +341,10 @@ PHPAPI char *php_reg_replace(const char *pattern, const char *replace, const cha
 			new_l = strlen(buf) + subs[0].rm_so; /* part before the match */
 			walk = replace;
 			while (*walk)
-				if ('\\' == *walk
-					&& '0' <= walk[1] && '9' >= walk[1]
-					&& walk[1] - '0' <= ((char) re.re_nsub)
-					&& subs[walk[1] - '0'].rm_so > -1
-					&& subs[walk[1] - '0'].rm_eo > -1) {
-					new_l += subs[walk[1] - '0'].rm_eo
-						- subs[walk[1] - '0'].rm_so;
+				if ('\\' == *walk && isdigit(walk[1]) && walk[1] - '0' <= ((char) re.re_nsub)) {
+					if (subs[walk[1] - '0'].rm_so > -1 && subs[walk[1] - '0'].rm_eo > -1) {
+						new_l += subs[walk[1] - '0'].rm_eo - subs[walk[1] - '0'].rm_so;
+					}    
 					walk += 2;
 				} else {
 					new_l++;
@@ -368,22 +366,19 @@ PHPAPI char *php_reg_replace(const char *pattern, const char *replace, const cha
 			walkbuf = &buf[tmp + subs[0].rm_so];
 			walk = replace;
 			while (*walk)
-				if ('\\' == *walk
-					&& '0' <= walk[1] && '9' >= walk[1]
-					&& walk[1] - '0' <= re.re_nsub
-					&& subs[walk[1] - '0'].rm_so > -1
-					&& subs[walk[1] - '0'].rm_eo > -1
-					/* this next case shouldn't happen. it does. */
-					&& subs[walk[1] - '0'].rm_so <= subs[walk[1] - '0'].rm_eo) {
-					tmp = subs[walk[1] - '0'].rm_eo
-						- subs[walk[1] - '0'].rm_so;
-					memcpy (walkbuf,
-							&string[pos + subs[walk[1] - '0'].rm_so],
-							tmp);
-					walkbuf += tmp;
+				if ('\\' == *walk && isdigit(walk[1]) && walk[1] - '0' <= re.re_nsub) {
+					if (subs[walk[1] - '0'].rm_so > -1 && subs[walk[1] - '0'].rm_eo > -1
+						/* this next case shouldn't happen. it does. */
+						&& subs[walk[1] - '0'].rm_so <= subs[walk[1] - '0'].rm_eo) {
+						
+						tmp = subs[walk[1] - '0'].rm_eo - subs[walk[1] - '0'].rm_so;
+						memcpy (walkbuf, &string[pos + subs[walk[1] - '0'].rm_so], tmp);
+						walkbuf += tmp;
+					}
 					walk += 2;
-				} else
+				} else {
 					*walkbuf++ = *walk++;
+				}	
 			*walkbuf = '\0';
 
 			/* and get ready to keep looking for replacements */
