@@ -26,7 +26,6 @@
 
 #include "php.h"
 #include "php_globals.h"
-#include "ext/standard/php_standard.h"
 #include "php_mysql.h"
 #include "php_globals.h"
 
