@@ -1,6 +1,14 @@
 News about PCRE releases
 ------------------------
 
+Release 3.3 01-Aug-00
+---------------------
+
+There is some support for UTF-8 character strings. This is incomplete and
+experimental. The documentation describes what is and what is not implemented.
+Otherwise, this is just a bug-fixing release.
+
+
 Release 3.0 01-Feb-00
 ---------------------
 

@@ -66,6 +66,16 @@ not be set greater than 200. */
 #define BRASTACK_SIZE 200
 
 
+/* The number of bytes in a literal character string above which we can't add
+any more is different when UTF-8 characters may be encountered. */
+
+#ifdef SUPPORT_UTF8
+#define MAXLIT 250
+#else
+#define MAXLIT 255
+#endif
+
+
 /* Min and max values for the common repeats; for the maxima, 0 => infinity */
 
 static const char rep_min[] = { 0, 0, 1, 1, 0, 0 };
@@ -176,6 +186,64 @@ void  (*pcre_free)(void *) = free;
 
 
 
+/*************************************************
+*    Macros and tables for character handling    *
+*************************************************/
+
+/* When UTF-8 encoding is being used, a character is no longer just a single
+byte. The macros for character handling generate simple sequences when used in
+byte-mode, and more complicated ones for UTF-8 characters. */
+
+#ifndef SUPPORT_UTF8
+#define GETCHARINC(c, eptr) c = *eptr++;
+#define GETCHARLEN(c, eptr, len) c = *eptr;
+#define BACKCHAR(eptr)
+
+#else   /* SUPPORT_UTF8 */
+
+/* Get the next UTF-8 character, advancing the pointer */
+
+#define GETCHARINC(c, eptr) \
+  c = *eptr++; \
+  if (md->utf8 && (c & 0xc0) == 0xc0) \
+    { \
+    int a = utf8_table4[c & 0x3f];  /* Number of additional bytes */ \
+    int s = 6 - a;                  /* Amount to shift next byte */  \
+    c &= utf8_table3[a];            /* Low order bits from first byte */ \
+    while (a-- > 0) \
+      { \
+      c |= (*eptr++ & 0x3f) << s; \
+      s += 6; \
+      } \
+    }
+
+/* Get the next UTF-8 character, not advancing the pointer, setting length */
+
+#define GETCHARLEN(c, eptr, len) \
+  c = *eptr; \
+  len = 1; \
+  if (md->utf8 && (c & 0xc0) == 0xc0) \
+    { \
+    int i; \
+    int a = utf8_table4[c & 0x3f];  /* Number of additional bytes */ \
+    int s = 6 - a;                  /* Amount to shift next byte */  \
+    c &= utf8_table3[a];            /* Low order bits from first byte */ \
+    for (i = 1; i <= a; i++) \
+      { \
+      c |= (eptr[i] & 0x3f) << s; \
+      s += 6; \
+      } \
+    len += a; \
+    }
+
+/* If the pointer is not at the start of a character, move it back until
+it is. */
+
+#define BACKCHAR(eptr) while((*eptr & 0xc0) == 0x80) eptr--;
+
+#endif
+
+
 
 /*************************************************
 *             Default character tables           *
@@ -188,6 +256,66 @@ whenever the caller of pcre_compile() does not provide an alternate set of
 tables. */
 
 #include "chartables.c"
+
+
+
+#ifdef SUPPORT_UTF8
+/*************************************************
+*           Tables for UTF-8 support             *
+*************************************************/
+
+/* These are the breakpoints for different numbers of bytes in a UTF-8
+character. */
+
+static int utf8_table1[] = { 0x7f, 0x7ff, 0xffff, 0x1fffff, 0x3ffffff, 0x7fffffff};
+
+/* These are the indicator bits and the mask for the data bits to set in the
+first byte of a character, indexed by the number of additional bytes. */
+
+static int utf8_table2[] = { 0,    0xc0, 0xe0, 0xf0, 0xf8, 0xfc};
+static int utf8_table3[] = { 0xff, 0x1f, 0x0f, 0x07, 0x03, 0x01};
+
+/* Table of the number of extra characters, indexed by the first character
+masked with 0x3f. The highest number for a valid UTF-8 character is in fact
+0x3d. */
+
+static uschar utf8_table4[] = {
+  1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+  1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+  2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
+  3,3,3,3,3,3,3,3,4,4,4,4,5,5,5,5 };
+
+
+/*************************************************
+*       Convert character value to UTF-8         *
+*************************************************/
+
+/* This function takes an integer value in the range 0 - 0x7fffffff
+and encodes it as a UTF-8 character in 0 to 6 bytes.
+
+Arguments:
+  cvalue     the character value
+  buffer     pointer to buffer for result - at least 6 bytes long
+
+Returns:     number of characters placed in the buffer
+*/
+
+static int
+ord2utf8(int cvalue, uschar *buffer)
+{
+register int i, j;
+for (i = 0; i < sizeof(utf8_table1)/sizeof(int); i++)
+  if (cvalue <= utf8_table1[i]) break;
+*buffer++ = utf8_table2[i] | (cvalue & utf8_table3[i]);
+cvalue >>= 6 - i;
+for (j = 0; j < i; j++)
+  {
+  *buffer++ = 0x80 | (cvalue & 0x3f);
+  cvalue >>= 6;
+  }
+return i + 1;
+}
+#endif
 
 
 
@@ -349,9 +477,9 @@ while (length-- > 0)
 
 /* This function is called when a \ has been encountered. It either returns a
 positive value for a simple escape such as \n, or a negative value which
-encodes one of the more complicated things such as \d. On entry, ptr is
-pointing at the \. On exit, it is on the final character of the escape
-sequence.
+encodes one of the more complicated things such as \d. When UTF-8 is enabled,
+a positive value greater than 255 may be returned. On entry, ptr is pointing at
+the \. On exit, it is on the final character of the escape sequence.
 
 Arguments:
   ptrptr     points to the pattern position pointer
@@ -373,7 +501,9 @@ check_escape(const uschar **ptrptr, const char **errorptr, int bracount,
 const uschar *ptr = *ptrptr;
 int c, i;
 
-c = *(++ptr) & 255;   /* Ensure > 0 on signed-char systems */
+/* If backslash is at the end of the pattern, it's an error. */
+
+c = *(++ptr);
 if (c == 0) *errorptr = ERR1;
 
 /* Digits or letters may have special meaning; all others are literals. */
@@ -433,18 +563,46 @@ else
       }
 
     /* \0 always starts an octal number, but we may drop through to here with a
-    larger first octal digit */
+    larger first octal digit. */
 
     case '0':
     c -= '0';
     while(i++ < 2 && (cd->ctypes[ptr[1]] & ctype_digit) != 0 &&
       ptr[1] != '8' && ptr[1] != '9')
         c = c * 8 + *(++ptr) - '0';
+    c &= 255;     /* Take least significant 8 bits */
     break;
 
-    /* Special escapes not starting with a digit are straightforward */
+    /* \x is complicated when UTF-8 is enabled. \x{ddd} is a character number
+    which can be greater than 0xff, but only if the ddd are hex digits. */
 
     case 'x':
+#ifdef SUPPORT_UTF8
+    if (ptr[1] == '{' && (options & PCRE_UTF8) != 0)
+      {
+      const uschar *pt = ptr + 2;
+      register int count = 0;
+      c = 0;
+      while ((cd->ctypes[*pt] & ctype_xdigit) != 0)
+        {
+        count++;
+        c = c * 16 + cd->lcc[*pt] -
+          (((cd->ctypes[*pt] & ctype_digit) != 0)? '0' : 'W');
+        pt++;
+        }
+      if (*pt == '}')
+        {
+        if (c < 0 || count > 8) *errorptr = ERR34;
+        ptr = pt;
+        break;
+        }
+      /* If the sequence of hex digits does not end with '}', then we don't
+      recognize this construct; fall through to the normal \x handling. */
+      }
+#endif
+
+    /* Read just a single hex char */
+
     c = 0;
     while (i++ < 2 && (cd->ctypes[ptr[1]] & ctype_xdigit) != 0)
       {
@@ -453,6 +611,8 @@ else
         (((cd->ctypes[*ptr] & ctype_digit) != 0)? '0' : 'W');
       }
     break;
+
+    /* Other special escapes not starting with a digit are straightforward */
 
     case 'c':
     c = *(++ptr);
@@ -591,12 +751,13 @@ if the length is fixed. This is needed for dealing with backward assertions.
 
 Arguments:
   code     points to the start of the pattern (the bracket)
+  options  the compiling options
 
 Returns:   the fixed length, or -1 if there is no fixed length
 */
 
 static int
-find_fixedlength(uschar *code)
+find_fixedlength(uschar *code, int options)
 {
 int length = -1;
 
@@ -617,7 +778,7 @@ for (;;)
     case OP_BRA:
     case OP_ONCE:
     case OP_COND:
-    d = find_fixedlength(cc);
+    d = find_fixedlength(cc, options);
     if (d < 0) return -1;
     branchlength += d;
     do cc += (cc[1] << 8) + cc[2]; while (*cc == OP_ALT);
@@ -671,10 +832,17 @@ for (;;)
     cc++;
     break;
 
-    /* Handle char strings */
+    /* Handle char strings. In UTF-8 mode we must count characters, not bytes.
+    This requires a scan of the string, unfortunately. We assume valid UTF-8
+    strings, so all we do is reduce the length by one for byte whose bits are
+    10xxxxxx. */
 
     case OP_CHARS:
     branchlength += *(++cc);
+#ifdef SUPPORT_UTF8
+    for (d = 1; d <= *cc; d++)
+      if ((cc[d] & 0xc0) == 0x80) branchlength--;
+#endif
     cc += *cc + 1;
     break;
 
@@ -1054,7 +1222,17 @@ for (;; ptr++)
             goto FAILED;
             }
           }
-        /* Fall through if single character */
+
+        /* Fall through if single character, but don't at present allow
+        chars > 255 in UTF-8 mode. */
+
+#ifdef SUPPORT_UTF8
+        if (c > 255)
+          {
+          *errorptr = ERR33;
+          goto FAILED;
+          }
+#endif
         }
 
       /* A single character may be followed by '-' to form a range. However,
@@ -1074,17 +1252,29 @@ for (;; ptr++)
           }
 
         /* The second part of a range can be a single-character escape, but
-        not any of the other escapes. */
+        not any of the other escapes. Perl 5.6 treats a hyphen as a literal
+        in such circumstances. */
 
         if (d == '\\')
           {
+          const uschar *oldptr = ptr;
           d = check_escape(&ptr, errorptr, *brackets, options, TRUE, cd);
+
+#ifdef SUPPORT_UTF8
+          if (d > 255)
+            {
+            *errorptr = ERR33;
+            goto FAILED;
+            }
+#endif
+          /* \b is backslash; any other special means the '-' was literal */
+
           if (d < 0)
             {
             if (d == -ESC_b) d = '\b'; else
               {
-              *errorptr = ERR7;
-              goto FAILED;
+              ptr = oldptr - 2;
+              goto SINGLE_CHARACTER;  /* A few lines below */
               }
             }
           }
@@ -1111,6 +1301,8 @@ for (;; ptr++)
 
       /* Handle a lone single character - we can get here for a normal
       non-escape char, or after \ that introduces a single character. */
+
+      SINGLE_CHARACTER:
 
       class [c/8] |= (1 << (c&7));
       if ((options & PCRE_CASELESS) != 0)
@@ -1562,6 +1754,11 @@ for (;; ptr++)
           {
           condref = *ptr - '0';
           while (*(++ptr) != ')') condref = condref*10 + *ptr - '0';
+          if (condref == 0)
+            {
+            *errorptr = ERR35;
+            goto FAILED;
+            }
           ptr++;
           }
         else ptr--;
@@ -1829,6 +2026,20 @@ for (;; ptr++)
         tempptr = ptr;
         c = check_escape(&ptr, errorptr, *brackets, options, FALSE, cd);
         if (c < 0) { ptr = tempptr; break; }
+
+        /* If a character is > 127 in UTF-8 mode, we have to turn it into
+        two or more characters in the UTF-8 encoding. */
+
+#ifdef SUPPORT_UTF8
+        if (c > 127 && (options & PCRE_UTF8) != 0)
+          {
+          uschar buffer[8];
+          int len = ord2utf8(c, buffer);
+          for (c = 0; c < len; c++) *code++ = buffer[c];
+          length += len;
+          continue;
+          }
+#endif
         }
 
       /* Ordinary character or single-char escape */
@@ -1839,7 +2050,7 @@ for (;; ptr++)
 
     /* This "while" is the end of the "do" above. */
 
-    while (length < 255 && (cd->ctypes[c = *(++ptr)] & ctype_meta) == 0);
+    while (length < MAXLIT && (cd->ctypes[c = *(++ptr)] & ctype_meta) == 0);
 
     /* Update the last character and the count of literals */
 
@@ -1851,7 +2062,7 @@ for (;; ptr++)
     the next state. */
 
     previous[1] = length;
-    if (length < 255) ptr--;
+    if (length < MAXLIT) ptr--;
     break;
     }
   }                   /* end of big loop */
@@ -1889,7 +2100,7 @@ Argument:
   ptrptr      -> the address of the current pattern pointer
   errorptr    -> pointer to error message
   lookbehind  TRUE if this is a lookbehind assertion
-  condref     > 0 for OPT_CREF setting at start of conditional group
+  condref     >= 0 for OPT_CREF setting at start of conditional group
   reqchar     -> place to put the last required character, or a negative number
   countlits   -> place to put the shortest literal count of any branch
   cd          points to the data block with tables pointers
@@ -1917,7 +2128,7 @@ code += 3;
 /* At the start of a reference-based conditional group, insert the reference
 number as an OP_CREF item. */
 
-if (condref > 0)
+if (condref >= 0)
   {
   *code++ = OP_CREF;
   *code++ = condref;
@@ -1989,7 +2200,7 @@ for (;;)
   if (lookbehind)
     {
     *code = OP_END;
-    length = find_fixedlength(last_branch);
+    length = find_fixedlength(last_branch, options);
     DPRINTF(("fixed length = %d\n", length));
     if (length < 0)
       {
@@ -2278,6 +2489,16 @@ uschar bralenstack[BRASTACK_SIZE];
 
 #ifdef DEBUG
 uschar *code_base, *code_end;
+#endif
+
+/* Can't support UTF8 unless PCRE has been compiled to include the code. */
+
+#ifndef SUPPORT_UTF8
+if ((options & PCRE_UTF8) != 0)
+  {
+  *errorptr = ERR32;
+  return NULL;
+  }
 #endif
 
 /* We can't pass back an error message if errorptr is NULL; I guess the best we
@@ -2775,6 +2996,16 @@ while ((c = *(++ptr)) != 0)
           &compile_block);
         if (*errorptr != NULL) goto PCRE_ERROR_RETURN;
         if (c < 0) { ptr = saveptr; break; }
+
+#ifdef SUPPORT_UTF8
+        if (c > 127 && (options & PCRE_UTF8) != 0)
+          {
+          int i;
+          for (i = 0; i < sizeof(utf8_table1)/sizeof(int); i++)
+            if (c <= utf8_table1[i]) break;
+          runlength += i;
+          }
+#endif
         }
 
       /* Ordinary character or single-char escape */
@@ -2784,7 +3015,7 @@ while ((c = *(++ptr)) != 0)
 
     /* This "while" is the end of the "do" above. */
 
-    while (runlength < 255 &&
+    while (runlength < MAXLIT &&
       (compile_block.ctypes[c = *(++ptr)] & ctype_meta) == 0);
 
     ptr--;
@@ -3429,10 +3660,21 @@ for (;;)
 
     /* Move the subject pointer back. This occurs only at the start of
     each branch of a lookbehind assertion. If we are too close to the start to
-    move back, this match function fails. */
+    move back, this match function fails. When working with UTF-8 we move
+    back a number of characters, not bytes. */
 
     case OP_REVERSE:
+#ifdef SUPPORT_UTF8
+    c = (ecode[1] << 8) + ecode[2];
+    for (i = 0; i < c; i++)
+      {
+      eptr--;
+      BACKCHAR(eptr)
+      }
+#else
     eptr -= (ecode[1] << 8) + ecode[2];
+#endif
+
     if (eptr < md->start_subject) return FALSE;
     ecode += 3;
     break;
@@ -3752,6 +3994,10 @@ for (;;)
     if ((ims & PCRE_DOTALL) == 0 && eptr < md->end_subject && *eptr == '\n')
       return FALSE;
     if (eptr++ >= md->end_subject) return FALSE;
+#ifdef SUPPORT_UTF8
+    if (md->utf8)
+      while (eptr < md->end_subject && (*eptr & 0xc0) == 0x80) eptr++;
+#endif
     ecode++;
     break;
 
@@ -3953,7 +4199,13 @@ for (;;)
       for (i = 1; i <= min; i++)
         {
         if (eptr >= md->end_subject) return FALSE;
-        c = *eptr++;
+        GETCHARINC(c, eptr)         /* Get character; increment eptr */
+
+#ifdef SUPPORT_UTF8
+        /* We do not yet support class members > 255 */
+        if (c > 255) return FALSE;
+#endif
+
         if ((data[c/8] & (1 << (c&7))) != 0) continue;
         return FALSE;
         }
@@ -3973,7 +4225,12 @@ for (;;)
           if (match(eptr, ecode, offset_top, md, ims, eptrb, 0))
             return TRUE;
           if (i >= max || eptr >= md->end_subject) return FALSE;
-          c = *eptr++;
+          GETCHARINC(c, eptr)       /* Get character; increment eptr */
+
+#ifdef SUPPORT_UTF8
+          /* We do not yet support class members > 255 */
+          if (c > 255) return FALSE;
+#endif
           if ((data[c/8] & (1 << (c&7))) != 0) continue;
           return FALSE;
           }
@@ -3985,17 +4242,29 @@ for (;;)
       else
         {
         const uschar *pp = eptr;
-        for (i = min; i < max; eptr++, i++)
+        int len = 1;
+        for (i = min; i < max; i++)
           {
           if (eptr >= md->end_subject) break;
-          c = *eptr;
-          if ((data[c/8] & (1 << (c&7))) != 0) continue;
-          break;
+          GETCHARLEN(c, eptr, len)  /* Get character, set length if UTF-8 */
+
+#ifdef SUPPORT_UTF8
+          /* We do not yet support class members > 255 */
+          if (c > 255) break;
+#endif
+          if ((data[c/8] & (1 << (c&7))) == 0) break;
+          eptr += len;
           }
 
         while (eptr >= pp)
+          {
           if (match(eptr--, ecode, offset_top, md, ims, eptrb, 0))
             return TRUE;
+
+#ifdef SUPPORT_UTF8
+          BACKCHAR(eptr)
+#endif
+          }
         return FALSE;
         }
       }
@@ -4315,13 +4584,29 @@ for (;;)
 
     /* First, ensure the minimum number of matches are present. Use inline
     code for maximizing the speed, and do the type test once at the start
-    (i.e. keep it out of the loop). Also test that there are at least the
-    minimum number of characters before we start. */
+    (i.e. keep it out of the loop). Also we can test that there are at least
+    the minimum number of bytes before we start, except when doing '.' in
+    UTF8 mode. Leave the test in in all cases; in the special case we have
+    to test after each character. */
 
     if (min > md->end_subject - eptr) return FALSE;
     if (min > 0) switch(ctype)
       {
       case OP_ANY:
+#ifdef SUPPORT_UTF8
+      if (md->utf8)
+        {
+        for (i = 1; i <= min; i++)
+          {
+          if (eptr >= md->end_subject ||
+             (*eptr++ == '\n' && (ims & PCRE_DOTALL) == 0))
+            return FALSE;
+          while (eptr < md->end_subject && (*eptr & 0xc0) == 0x80) eptr++;
+          }
+        break;
+        }
+#endif
+      /* Non-UTF8 can be faster */
       if ((ims & PCRE_DOTALL) == 0)
         { for (i = 1; i <= min; i++) if (*eptr++ == '\n') return FALSE; }
       else eptr += min;
@@ -4379,6 +4664,10 @@ for (;;)
           {
           case OP_ANY:
           if ((ims & PCRE_DOTALL) == 0 && c == '\n') return FALSE;
+#ifdef SUPPORT_UTF8
+          if (md->utf8)
+            while (eptr < md->end_subject && (*eptr & 0xc0) == 0x80) eptr++;
+#endif
           break;
 
           case OP_NOT_DIGIT:
@@ -4418,6 +4707,33 @@ for (;;)
       switch(ctype)
         {
         case OP_ANY:
+
+        /* Special code is required for UTF8, but when the maximum is unlimited
+        we don't need it. */
+
+#ifdef SUPPORT_UTF8
+        if (md->utf8 && max < INT_MAX)
+          {
+          if ((ims & PCRE_DOTALL) == 0)
+            {
+            for (i = min; i < max; i++)
+              {
+              if (eptr >= md->end_subject || *eptr++ == '\n') break;
+              while (eptr < md->end_subject && (*eptr & 0xc0) == 0x80) eptr++;
+              }
+            }
+          else
+            {
+            for (i = min; i < max; i++)
+              {
+              eptr++;
+              while (eptr < md->end_subject && (*eptr & 0xc0) == 0x80) eptr++;
+              }
+            }
+          break;
+          }
+#endif
+        /* Non-UTF8 can be faster */
         if ((ims & PCRE_DOTALL) == 0)
           {
           for (i = min; i < max; i++)
@@ -4490,8 +4806,14 @@ for (;;)
         }
 
       while (eptr >= pp)
+        {
         if (match(eptr--, ecode, offset_top, md, ims, eptrb, 0))
           return TRUE;
+#ifdef SUPPORT_UTF8
+        if (md->utf8)
+          while (eptr > pp && (*eptr & 0xc0) == 0x80) eptr--;
+#endif
+        }
       return FALSE;
       }
     /* Control never gets here */
@@ -4572,6 +4894,7 @@ match_block.end_subject = match_block.start_subject + length;
 end_subject = match_block.end_subject;
 
 match_block.endonly = (re->options & PCRE_DOLLAR_ENDONLY) != 0;
+match_block.utf8 = (re->options & PCRE_UTF8) != 0;
 
 match_block.notbol = (options & PCRE_NOTBOL) != 0;
 match_block.noteol = (options & PCRE_NOTEOL) != 0;

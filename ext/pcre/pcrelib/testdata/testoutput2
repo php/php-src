@@ -1,4 +1,4 @@
-PCRE version 3.2 12-May-2000
+PCRE version 3.4 22-Aug-2000
 
 /(a)b|/
 Capturing subpattern count = 1
@@ -93,9 +93,6 @@ Failed: missing terminating ] for character class at offset 5
 
 /[\B]/
 Failed: invalid escape sequence in character class at offset 2
-
-/[a-\w]/
-Failed: invalid escape sequence in character class at offset 4
 
 /[z-a]/
 Failed: range out of order in character class at offset 3
@@ -2064,7 +2061,13 @@ No match
     AB        
 No match
 
-/ End of test input /
+/[\200-\410]/
+Failed: range out of order in character class at offset 9
+
+/^(?(0)f|b)oo/
+Failed: invalid condition (?(0) at offset 5
+
+/ End of testinput2 /
 Capturing subpattern count = 0
 No options
 First char = ' '

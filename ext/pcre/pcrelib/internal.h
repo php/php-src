@@ -109,7 +109,7 @@ time, run time or study time, respectively. */
 
 #define PUBLIC_OPTIONS \
   (PCRE_CASELESS|PCRE_EXTENDED|PCRE_ANCHORED|PCRE_MULTILINE| \
-   PCRE_DOTALL|PCRE_DOLLAR_ENDONLY|PCRE_EXTRA|PCRE_UNGREEDY)
+   PCRE_DOTALL|PCRE_DOLLAR_ENDONLY|PCRE_EXTRA|PCRE_UNGREEDY|PCRE_UTF8)
 
 #define PUBLIC_EXEC_OPTIONS \
   (PCRE_ANCHORED|PCRE_NOTBOL|PCRE_NOTEOL|PCRE_NOTEMPTY)
@@ -278,6 +278,10 @@ just to accommodate the POSIX wrapper. */
 #define ERR29 "(?p must be followed by )"
 #define ERR30 "unknown POSIX class name"
 #define ERR31 "POSIX collating elements are not supported"
+#define ERR32 "this version of PCRE is not compiled with PCRE_UTF8 support"
+#define ERR33 "characters with values > 255 are not yet supported in classes"
+#define ERR34 "character value in \\x{...} sequence is too large"
+#define ERR35 "invalid condition (?(0)"
 
 /* All character handling must be done as unsigned characters. Otherwise there
 are problems with top-bit-set characters and functions such as isspace().
@@ -334,6 +338,7 @@ typedef struct match_data {
   BOOL   offset_overflow;       /* Set if too many extractions */
   BOOL   notbol;                /* NOTBOL flag */
   BOOL   noteol;                /* NOTEOL flag */
+  BOOL   utf8;                  /* UTF8 flag */
   BOOL   endonly;               /* Dollar not before final \n */
   BOOL   notempty;              /* Empty string match not wanted */
   const uschar *start_pattern;  /* For use when recursing */

@@ -2,6 +2,46 @@ ChangeLog for PCRE
 ------------------
 
 
+Version 3.4 22-Aug-00
+---------------------
+
+1. Fixed typo in pcre.h: unsigned const char * changed to const unsigned char *.
+
+2. Diagnose condition (?(0) as an error instead of crashing on matching.
+
+
+Version 3.3 01-Aug-00
+---------------------
+
+1. If an octal character was given, but the value was greater than \377, it
+was not getting masked to the least significant bits, as documented. This could
+lead to crashes in some systems.
+
+2. Perl 5.6 (if not earlier versions) accepts classes like [a-\d] and treats
+the hyphen as a literal. PCRE used to give an error; it now behaves like Perl.
+
+3. Added the functions pcre_free_substring() and pcre_free_substring_list().
+These just pass their arguments on to (pcre_free)(), but they are provided
+because some uses of PCRE bind it to non-C systems that can call its functions,
+but cannot call free() or pcre_free() directly.
+
+4. Add "make test" as a synonym for "make check". Corrected some comments in
+the Makefile.
+
+5. Add $(DESTDIR)/ in front of all the paths in the "install" target in the
+Makefile.
+
+6. Changed the name of pgrep to pcregrep, because Solaris has introduced a
+command called pgrep for grepping around the active processes.
+
+7. Added the beginnings of support for UTF-8 character strings.
+
+8. Arranged for the Makefile to pass over the settings of CC, CFLAGS, and
+RANLIB to ./ltconfig so that they are used by libtool. I think these are all
+the relevant ones. (AR is not passed because ./ltconfig does its own figuring
+out for the ar command.)
+
+
 Version 3.2 12-May-00
 ---------------------
 

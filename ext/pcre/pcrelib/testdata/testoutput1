@@ -1,4 +1,4 @@
-PCRE version 3.2 12-May-2000
+PCRE version 3.4 22-Aug-2000
 
 /the quick brown fox/
     the quick brown fox
@@ -2921,5 +2921,46 @@ No match
  0: 
  0: 
 
-/ End of test input /
+/<tr([\w\W\s\d][^<>]{0,})><TD([\w\W\s\d][^<>]{0,})>([\d]{0,}\.)(.*)((<BR>([\w\W\s\d][^<>]{0,})|[\s]{0,}))<\/a><\/TD><TD([\w\W\s\d][^<>]{0,})>([\w\W\s\d][^<>]{0,})<\/TD><TD([\w\W\s\d][^<>]{0,})>([\w\W\s\d][^<>]{0,})<\/TD><\/TR>/is
+  <TR BGCOLOR='#DBE9E9'><TD align=left valign=top>43.<a href='joblist.cfm?JobID=94 6735&Keyword='>Word Processor<BR>(N-1286)</a></TD><TD align=left valign=top>Lega lstaff.com</TD><TD align=left valign=top>CA - Statewide</TD></TR>
+ 0: <TR BGCOLOR='#DBE9E9'><TD align=left valign=top>43.<a href='joblist.cfm?JobID=94 6735&Keyword='>Word Processor<BR>(N-1286)</a></TD><TD align=left valign=top>Lega lstaff.com</TD><TD align=left valign=top>CA - Statewide</TD></TR>
+ 1:  BGCOLOR='#DBE9E9'
+ 2:  align=left valign=top
+ 3: 43.
+ 4: <a href='joblist.cfm?JobID=94 6735&Keyword='>Word Processor<BR>(N-1286)
+ 5: 
+ 6: 
+ 7: <unset>
+ 8:  align=left valign=top
+ 9: Lega lstaff.com
+10:  align=left valign=top
+11: CA - Statewide
+
+/a[^a]b/
+    acb
+ 0: acb
+    a\nb
+ 0: a\x0ab
+    
+/a.b/
+    acb
+ 0: acb
+    *** Failers 
+No match
+    a\nb   
+No match
+    
+/a[^a]b/s
+    acb
+ 0: acb
+    a\nb  
+ 0: a\x0ab
+    
+/a.b/s
+    acb
+ 0: acb
+    a\nb  
+ 0: a\x0ab
+
+/ End of testinput1 /
 

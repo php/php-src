@@ -20,7 +20,21 @@ restrictions:
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 2. The origin of this software must not be misrepresented, either by
-   explicit claim or by omission.
+   explicit claim or by omission. In practice, this means that if you use
+   PCRE in software which you distribute to others, commercially or
+   otherwise, you must put a sentence like this
+
+     Regular expression support is provided by the PCRE library package,
+     which is open source software, written by Philip Hazel, and copyright
+     by the University of Cambridge, England.
+
+   somewhere reasonably visible in your documentation and in any relevant
+   files or online help data or similar. A reference to the ftp site for
+   the source, that is, to
+
+     ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/
+
+   should also be given in the documentation.
 
 3. Altered versions must be plainly marked as such, and must not be
    misrepresented as being the original software.

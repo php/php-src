@@ -202,9 +202,10 @@ Forward assertions are just like other subpatterns, but starting with one of
 the opcodes OP_ASSERT or OP_ASSERT_NOT. Backward assertions use the opcodes
 OP_ASSERTBACK and OP_ASSERTBACK_NOT, and the first opcode inside the assertion
 is OP_REVERSE, followed by a two byte count of the number of characters to move
-back the pointer in the subject string. A separate count is present in each
-alternative of a lookbehind assertion, allowing them to have different fixed
-lengths.
+back the pointer in the subject string. When operating in UTF-8 mode, the count
+is a character count rather than a byte count. A separate count is present in
+each alternative of a lookbehind assertion, allowing them to have different
+fixed lengths.
 
 
 Once-only subpatterns
@@ -239,4 +240,4 @@ the compiled data.
 
 
 Philip Hazel
-February 2000
+August 2000
