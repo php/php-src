@@ -6,9 +6,9 @@ phpdir="$prefix/lib/php/build"
 includedir="$prefix/include/php"
 builddir="`pwd`"
 
-FILES_BUILD="mkdep.awk scan_makefile_in.awk shtool"
-FILES="acinclude.m4 Makefile.global"
-CLEAN_FILES="$FILES *.lo *.la *.o .deps .libs/ build/ include/ modules/ install-sh \
+FILES_BUILD="mkdep.awk scan_makefile_in.awk shtool libtool.m4"
+FILES="acinclude.m4 Makefile.global config.sub config.guess ltmain.sh"
+CLEAN_FILES="$FILES *.o *.lo *.la .deps .libs/ build/ include/ modules/ install-sh \
     mkinstalldirs missing config.nice config.sub config.guess configure configure.in \
 	aclocal.m4 config.h config.h.in conftest* ltmain.sh libtool config.cache \
 	config.log config.status Makefile Makefile.fragments Makefile.objects confdefs.h"
@@ -101,15 +101,9 @@ phpize_replace_prefix()
 
 phpize_autotools()
 {
-  aclocal    || exit 1
+  cat acinclude.m4 ./build/libtool.m4 > aclocal.m4 || exit 1
   autoconf   || exit 1
   autoheader || exit 1
-}
-
-phpize_libtoolize()
-{
-  libtoolize=`$builddir/build/shtool path glibtoolize libtoolize`
-  $libtoolize -f -c || exit 1
 }
 
 # Main script
@@ -150,7 +144,6 @@ case "$1" in
 
      phpize_check_shtool
 
-     phpize_libtoolize
      ;;
 esac
 
