@@ -72,7 +72,7 @@ CREDIT_LINE("Recode", "Kristian Köhntopp");
 CREDIT_LINE("Sessions", "Sascha Schumann, Andrei Zmievski");
 CREDIT_LINE("Shared Memory Operations", "Slava Poliakov, Ilia Alshanetsky");
 CREDIT_LINE("simplexml", "Sterling Hughes");
-CREDIT_LINE("SNMP", "Rasmus Lerdorf");
+CREDIT_LINE("SNMP", "Rasmus Lerdorf, Harrie Hazewinkel, Mike Jackson, Steven Lawrance, Johann Hanne");
 CREDIT_LINE("Sockets", "Chris Vandomelen, Sterling Hughes, Daniel Beulshausen, Jason Greene");
 CREDIT_LINE("sqlite", "Wez Furlong, Tal Peer, Marcus Börger");
 CREDIT_LINE("Sybase-CT", "Zeev Suraski, Tom May, Timm Friebe");
