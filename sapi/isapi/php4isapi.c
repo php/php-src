@@ -257,7 +257,7 @@ static int sapi_isapi_read_post(char *buffer, uint count_bytes SLS_DC)
 	DWORD read_from_input=0;
 	DWORD total_read=0;
 
-	if (SG(read_post_bytes) < lpECB->cbAvailable) {
+	if ((DWORD) SG(read_post_bytes) < lpECB->cbAvailable) {
 		read_from_buf = MIN(lpECB->cbAvailable-SG(read_post_bytes), count_bytes);
 		memcpy(buffer, lpECB->lpbData+SG(read_post_bytes), read_from_buf);
 		total_read += read_from_buf;
@@ -276,7 +276,6 @@ static int sapi_isapi_read_post(char *buffer, uint count_bytes SLS_DC)
 		}
 		total_read += cbRead;
 	}
-	SG(read_post_bytes) += total_read;
 	return total_read;
 }
 
