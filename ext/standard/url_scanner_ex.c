@@ -32,6 +32,7 @@
 #include "php_globals.h"
 #define STATE_TAG SOME_OTHER_STATE_TAG
 #include "basic_functions.h"
+#include "url.h"
 #undef STATE_TAG
 
 #define url_scanner url_scanner_ex
