@@ -27,8 +27,6 @@
 #include "zend_API.h"
 #include "zend_fast_cache.h"
 
-#define IN_NAMESPACE() (CG(active_namespace) != &CG(global_namespace))
-
 ZEND_API zend_op_array *(*zend_compile_file)(zend_file_handle *file_handle, int type TSRMLS_DC);
 
 
@@ -83,7 +81,6 @@ void zend_init_compiler_data_structures(TSRMLS_D)
 	zend_stack_init(&CG(object_stack));
 	zend_stack_init(&CG(declare_stack));
 	CG(active_class_entry) = NULL;
-	CG(active_namespace) = &CG(global_namespace);
 	zend_llist_init(&CG(list_llist), sizeof(list_llist_element), NULL, 0);
 	zend_llist_init(&CG(dimension_llist), sizeof(int), NULL, 0);
 	zend_stack_init(&CG(list_stack));
@@ -1008,7 +1005,6 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 	op_array.fn_flags = fn_flags;
 
 	op_array.scope = CG(active_class_entry);
-	op_array.ns = CG(active_namespace);
 	op_array.prototype = NULL;
 
 	op_array.line_start = zend_get_compiled_lineno(TSRMLS_C);
@@ -1059,10 +1055,6 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 			CG(active_class_entry)->__get = (zend_function *) CG(active_op_array);
 		} else if ((function_name->u.constant.value.str.len == sizeof(ZEND_SET_FUNC_NAME)-1) && (!memcmp(function_name->u.constant.value.str.val, ZEND_SET_FUNC_NAME, sizeof(ZEND_SET_FUNC_NAME)))) {
 			CG(active_class_entry)->__set = (zend_function *) CG(active_op_array);
-		}
-	} else if(IN_NAMESPACE()) {
-		if (zend_hash_add(&CG(active_namespace)->function_table, name, name_len+1, &op_array, sizeof(zend_op_array), (void **) &CG(active_op_array)) == FAILURE) {
-			zend_error(E_COMPILE_ERROR, "Cannot redeclare %s::%s()", CG(active_namespace)->name, name);
 		}
 	} else {
 		zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
@@ -1253,7 +1245,7 @@ void zend_do_begin_dynamic_function_call(znode *function_name TSRMLS_DC)
 }
 
 
-void zend_do_fetch_class(znode *result, znode *namespace_name, znode *class_name, zend_bool global_namespace TSRMLS_DC)
+void zend_do_fetch_class(znode *result, znode *class_name TSRMLS_DC)
 {
 	long fetch_class_op_number;
 	zend_op *opline;
@@ -1262,15 +1254,8 @@ void zend_do_fetch_class(znode *result, znode *namespace_name, znode *class_name
 	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
 	opline->opcode = ZEND_FETCH_CLASS;
-	if (namespace_name) {
-		zend_str_tolower(namespace_name->u.constant.value.str.val, namespace_name->u.constant.value.str.len);
-		opline->op1 = *namespace_name;
-	} else {
-		SET_UNUSED(opline->op1);
-		if (global_namespace) {
-			opline->extended_value = ZEND_FETCH_CLASS_GLOBAL;
-		}
-	}
+	SET_UNUSED(opline->op1);
+	opline->extended_value = ZEND_FETCH_CLASS_GLOBAL;
 	CG(catch_begin) = fetch_class_op_number;
 	if (class_name->op_type == IS_CONST) {
 		zend_str_tolower(class_name->u.constant.value.str.val, class_name->u.constant.value.str.len);
@@ -3422,166 +3407,6 @@ void zend_destroy_property_info(zend_property_info *property_info)
 	efree(property_info->name);
 }
 
-void zend_init_namespace(zend_namespace *ns TSRMLS_DC)
-{
-	zend_bool persistent_hashes = (ns->type == ZEND_INTERNAL_NAMESPACE) ? 1 : 0;
-
-	ns->refcount = 1;
-	ns->constants_updated = 0;
-	ns->ce_flags = 0;
-
-	ns->filename = NULL;
-	ns->doc_comment = NULL;
-	ns->doc_comment_len = 0;
-
-	if (persistent_hashes) {
-		ns->static_members = (HashTable *) malloc(sizeof(HashTable));
-	} else {
-		ALLOC_HASHTABLE(ns->static_members);
-	}
-	zend_hash_init_ex(ns->static_members, 0, NULL, ZVAL_PTR_DTOR, persistent_hashes, 0);
-	zend_hash_init_ex(&ns->function_table, 10, NULL, ZEND_FUNCTION_DTOR, persistent_hashes, 0);
-	zend_hash_init_ex(&ns->class_table, 10, NULL, ZEND_CLASS_DTOR, persistent_hashes, 0);
-	zend_hash_init_ex(&ns->constants_table, 10, NULL, ZVAL_PTR_DTOR, persistent_hashes, 0);
-
-	ns->parent = NULL;
-	ns->num_interfaces = 0;
-	ns->interfaces = NULL;
-	ns->ns = NULL;
-	ns->constructor = NULL;
-	ns->destructor = NULL;
-	ns->clone = NULL;
-	ns->__get = NULL;
-	ns->__set = NULL;
-	ns->__call = NULL;
-	ns->create_object = NULL;
-}
-
-void zend_do_begin_namespace(znode *ns_token, znode *ns_name TSRMLS_DC)
-{
-	zend_namespace *ns, **pns;
-	zend_op *opline;
-	
-	zend_str_tolower(ns_name->u.constant.value.str.val, ns_name->u.constant.value.str.len);
-
-	if(zend_hash_find(&CG(global_namespace).class_table, ns_name->u.constant.value.str.val, ns_name->u.constant.value.str.len+1, (void **)&pns) == SUCCESS) {
-		ns = *pns;
-		if(ns->type != ZEND_USER_NAMESPACE || ns == CG(active_namespace)) {
-			zend_error(E_COMPILE_ERROR, "Cannot redefine namespace '%s' - class or namespace with this name already defined", ns->name);
-		}
-		FREE_PNODE(ns_name);
-	} else {
-		ns = emalloc(sizeof(zend_namespace));
-		ns->name = ns_name->u.constant.value.str.val;
-		ns->name_length = ns_name->u.constant.value.str.len;
-		ns->type = ZEND_USER_NAMESPACE;
-		zend_hash_add(&CG(global_namespace).class_table, ns->name, ns->name_length+1, (void **)&ns, sizeof(zend_namespace *), NULL);
-		zend_init_namespace(ns TSRMLS_CC);
-		ns->line_start = zend_get_compiled_lineno(TSRMLS_C);
-	}
-
-	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
-
-	opline->opcode = ZEND_START_NAMESPACE;
-	opline->op1.op_type = IS_CONST;
-	opline->op1.u.constant.type = IS_STRING;
-	opline->op1.u.constant.value.str.val = estrndup(ns->name, ns->name_length);
-	opline->op1.u.constant.value.str.len = ns->name_length;
-	opline->op1.u.constant.refcount = 1;
-	SET_UNUSED(opline->op2);
-
-
-	ns_token->u.previously_active_namespace = CG(active_namespace);	
-	CG(active_namespace) = ns;
-
-	if (CG(doc_comment)) {
-		/*
-		 * Do not overwrite previously declared doc comment in case the namespace is
-		 * split over several parts.
-		 */
-	    if (CG(active_namespace)->doc_comment == NULL) {
-			CG(active_namespace)->doc_comment = estrndup(CG(doc_comment), CG(doc_comment_len));
-			CG(active_namespace)->doc_comment_len = CG(doc_comment_len);
-		}
-		RESET_DOC_COMMENT();
-	}
-
-	/* new symbol tables */
-	CG(class_table) = &ns->class_table;
-	CG(function_table) = &ns->function_table;
-}
-
-void zend_do_end_namespace(znode *ns_token TSRMLS_DC)
-{
-	zend_namespace *ns = ns_token->u.previously_active_namespace;
-	zend_op *opline;
-
-	/*
-	 * If the filename field has not been initialized yet, it means that we are
-	 * on the first definition of namespace and should capture the definition
-	 * information.
-	 */
-	if (CG(active_namespace)->filename == NULL) {
-		CG(active_namespace)->filename = zend_get_compiled_filename(TSRMLS_C);
-		CG(active_namespace)->line_end = zend_get_compiled_lineno(TSRMLS_C);
-	}
-
-	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
-
-	opline->opcode = ZEND_START_NAMESPACE;
-	if(ns != &CG(global_namespace)) {
-		opline->op1.op_type = IS_CONST;
-		opline->op1.u.constant.type = IS_STRING;
-		opline->op1.u.constant.value.str.val = estrndup(ns->name, ns->name_length);
-		opline->op1.u.constant.value.str.len = ns->name_length;
-		opline->op1.u.constant.refcount = 1;
-	} else {
-		SET_UNUSED(opline->op1);
-	}
-	SET_UNUSED(opline->op2);
-	
-	CG(active_namespace) = ns;
-    /* restore symbol tables */
-	CG(class_table) = &CG(active_namespace)->class_table;
-	CG(function_table) = &CG(active_namespace)->function_table;
-}
-
-void zend_do_declare_namespace_var(znode *var_name, znode *value TSRMLS_DC)
-{
-	zval *var;
-
-	ALLOC_ZVAL(var);
-
-	if (value) {
-		*var = value->u.constant;
-	} else {
-		INIT_PZVAL(var);
-		var->type = IS_NULL;
-	}
-
-	zend_hash_update(CG(active_namespace)->static_members, var_name->u.constant.value.str.val, var_name->u.constant.value.str.len+1, &var, sizeof(zval *), NULL);
-
-	FREE_PNODE(var_name);
-}
-
-void zend_do_declare_namespace_constant(znode *var_name, znode *value TSRMLS_DC)
-{
-	zval *var;
-
-	ALLOC_ZVAL(var);
-
-	if (value) {
-		*var = value->u.constant;
-	} else {
-		INIT_PZVAL(var);
-		var->type = IS_NULL;
-	}
-
-	zend_hash_update(&CG(active_namespace)->constants_table, var_name->u.constant.value.str.val, var_name->u.constant.value.str.len+1, &var, sizeof(zval *), NULL);
-
-	FREE_PNODE(var_name);
-}
-
 void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify_handlers TSRMLS_DC)
 {
 	zend_bool persistent_hashes = (ce->type == ZEND_INTERNAL_CLASS) ? 1 : 0;
@@ -3619,7 +3444,6 @@ void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify_handlers
 	ce->parent = NULL;
 	ce->num_interfaces = 0;
 	ce->interfaces = NULL;
-	ce->ns = CG(active_namespace);
 }
 
 /*

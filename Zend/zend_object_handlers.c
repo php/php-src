@@ -651,32 +651,28 @@ zval **zend_std_get_static_property(zend_class_entry *ce, char *property_name, i
 	zend_property_info *property_info;
 	zend_property_info std_property_info;
 
-	if (ce->type == ZEND_USER_NAMESPACE || ce->type == ZEND_INTERNAL_NAMESPACE) {
-		zend_hash_find(ce->static_members, property_name, property_name_len+1, (void **) &retval);
-	} else {
-		if (zend_hash_find(&ce->properties_info, property_name, property_name_len+1, (void **) &property_info)==FAILURE) {
-			std_property_info.flags = ZEND_ACC_PUBLIC;
-			std_property_info.name = property_name;
-			std_property_info.name_length = property_name_len;
-			std_property_info.h = zend_get_hash_value(std_property_info.name, std_property_info.name_length+1);
-			property_info = &std_property_info;
-		}
+	if (zend_hash_find(&ce->properties_info, property_name, property_name_len+1, (void **) &property_info)==FAILURE) {
+		std_property_info.flags = ZEND_ACC_PUBLIC;
+		std_property_info.name = property_name;
+		std_property_info.name_length = property_name_len;
+		std_property_info.h = zend_get_hash_value(std_property_info.name, std_property_info.name_length+1);
+		property_info = &std_property_info;
+	}
 
 #if 1&&DEBUG_OBJECT_HANDLERS
-		zend_printf("Access type for %s::%s is %s\n", ce->name, property_name, zend_visibility_string(property_info->flags));
+	zend_printf("Access type for %s::%s is %s\n", ce->name, property_name, zend_visibility_string(property_info->flags));
 #endif
 
-		if (!zend_verify_property_access(property_info, ce TSRMLS_CC)) {
-			zend_error(E_ERROR, "Cannot access %s property %s::$%s", zend_visibility_string(property_info->flags), ce->name, property_name);
-		}
+	if (!zend_verify_property_access(property_info, ce TSRMLS_CC)) {
+		zend_error(E_ERROR, "Cannot access %s property %s::$%s", zend_visibility_string(property_info->flags), ce->name, property_name);
+	}
 
-		while (tmp_ce) {
-			if (zend_hash_quick_find(tmp_ce->static_members, property_info->name, property_info->name_length+1, property_info->h, (void **) &retval)==SUCCESS) {
-				statics_table = tmp_ce->static_members;
-				break;
-			}
-			tmp_ce = tmp_ce->parent;
+	while (tmp_ce) {
+		if (zend_hash_quick_find(tmp_ce->static_members, property_info->name, property_info->name_length+1, property_info->h, (void **) &retval)==SUCCESS) {
+			statics_table = tmp_ce->static_members;
+			break;
 		}
+		tmp_ce = tmp_ce->parent;
 	}
 
 	if (!retval) {

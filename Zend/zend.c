@@ -30,14 +30,15 @@
 #include "zend_ini.h"
 
 #ifdef ZTS
-#	define GLOBAL_FUNCTION_TABLE	&global_namespace.function_table
-#	define GLOBAL_CLASS_TABLE		&global_namespace.class_table
-#	define GLOBAL_CONSTANTS_TABLE	&global_namespace.constants_table
-#	define GLOBAL_AUTO_GLOBALS_TABLE	global_auto_globals_table
+#   define GLOBAL_FUNCTION_TABLE    global_function_table
+#   define GLOBAL_CLASS_TABLE       global_class_table
+#   define GLOBAL_CONSTANTS_TABLE   global_constants_table
+#   define GLOBAL_AUTO_GLOBALS_TABLE    global_auto_globals_table
 #else
-#	define GLOBAL_FUNCTION_TABLE	CG(function_table)
-#	define GLOBAL_CLASS_TABLE		CG(class_table)
-#	define GLOBAL_AUTO_GLOBALS_TABLE	CG(auto_globals)
+#   define GLOBAL_FUNCTION_TABLE    CG(function_table)
+#   define GLOBAL_CLASS_TABLE       CG(class_table)
+#   define GLOBAL_CONSTANTS_TABLE   CG(zend_constants)
+#   define GLOBAL_AUTO_GLOBALS_TABLE    CG(auto_globals)
 #endif
 
 #if defined(ZEND_WIN32) && ZEND_DEBUG
@@ -94,7 +95,9 @@ ZEND_API int compiler_globals_id;
 ZEND_API int executor_globals_id;
 ZEND_API int alloc_globals_id;
 zend_class_entry global_main_class;
-zend_namespace global_namespace;
+HashTable *global_function_table;
+HashTable *global_class_table;
+HashTable *global_constants_table;
 HashTable *global_auto_globals_table;
 #endif
 
@@ -412,13 +415,13 @@ static void compiler_globals_ctor(zend_compiler_globals *compiler_globals TSRMLS
 
 	compiler_globals->compiled_filename = NULL;
 
-	compiler_globals->function_table = &compiler_globals->global_namespace.function_table;
-	zend_hash_init_ex(compiler_globals->function_table, 100, NULL, ZEND_FUNCTION_DTOR, 1, 0);
-	zend_hash_copy(compiler_globals->function_table, GLOBAL_FUNCTION_TABLE, NULL, &tmp_func, sizeof(zend_function));
+	compiler_globals->function_table = (HashTable *) malloc(sizeof(HashTable));
+    zend_hash_init_ex(compiler_globals->function_table, 100, NULL, ZEND_FUNCTION_DTOR, 1, 0);
+    zend_hash_copy(compiler_globals->function_table, global_function_table, NULL, &tmp_func, sizeof(zend_function));
 
-	compiler_globals->class_table = &compiler_globals->global_namespace.class_table;
-	zend_hash_init_ex(compiler_globals->class_table, 10, NULL, ZEND_CLASS_DTOR, 1, 0);
-	zend_hash_copy(compiler_globals->class_table, GLOBAL_CLASS_TABLE, (copy_ctor_func_t) zend_class_add_ref, &tmp_class, sizeof(zend_class_entry *));
+    compiler_globals->class_table = (HashTable *) malloc(sizeof(HashTable));
+    zend_hash_init_ex(compiler_globals->class_table, 10, NULL, ZEND_CLASS_DTOR, 1, 0);
+    zend_hash_copy(compiler_globals->class_table, global_class_table, (copy_ctor_func_t) zend_class_add_ref, &tmp_class, sizeof(zend_class_entry));
 
 	zend_set_default_compile_time_values(TSRMLS_C);
 
@@ -455,7 +458,6 @@ static void executor_globals_ctor(zend_executor_globals *executor_globals TSRMLS
 	EG(user_exception_handler) = NULL;
 	EG(in_execution) = 0;
 	EG(current_execute_data) = NULL;
-	EG(active_namespace) = NULL;
 }
 
 
@@ -563,12 +565,9 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions, i
 	zend_version_info = strdup(ZEND_CORE_VERSION_INFO);
 	zend_version_info_length = sizeof(ZEND_CORE_VERSION_INFO)-1;
 
-#ifndef ZTS
-	GLOBAL_FUNCTION_TABLE = &compiler_globals.global_namespace.function_table;
-	GLOBAL_CLASS_TABLE = &compiler_globals.global_namespace.class_table;
-	compiler_globals.global_namespace.static_members = NULL;
-#endif
-	GLOBAL_AUTO_GLOBALS_TABLE = (HashTable *) malloc(sizeof(HashTable));
+    GLOBAL_FUNCTION_TABLE = (HashTable *) malloc(sizeof(HashTable));
+    GLOBAL_CLASS_TABLE = (HashTable *) malloc(sizeof(HashTable));
+ 	GLOBAL_AUTO_GLOBALS_TABLE = (HashTable *) malloc(sizeof(HashTable));
 	zend_hash_init_ex(GLOBAL_FUNCTION_TABLE, 100, NULL, ZEND_FUNCTION_DTOR, 1, 0);
 	zend_hash_init_ex(GLOBAL_CLASS_TABLE, 10, NULL, ZEND_CLASS_DTOR, 1, 0);
 
@@ -775,11 +774,6 @@ void zend_deactivate(TSRMLS_D)
 	EG(opline_ptr) = NULL;
 	EG(active_symbol_table) = NULL;
 
-	/* restore namespace to global */
-	zend_switch_namespace(EG(global_namespace_ptr) TSRMLS_CC);
-	CG(function_table) = EG(function_table);
-	CG(class_table) = EG(class_table);
-	
 	zend_try {
 		shutdown_scanner(TSRMLS_C);
 	} zend_end_try();

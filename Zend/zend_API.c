@@ -1146,8 +1146,7 @@ int zend_register_functions(zend_class_entry *scope, zend_function_entry *functi
 	int error_type;
 	zend_function *ctor = NULL, *dtor = NULL, *clone = NULL;
 	char *lowercase_name;
-	int fname_len, is_namespace = 0;
-	zend_namespace *scope_namespace;
+	int fname_len;
 
 	if (type==MODULE_PERSISTENT) {
 		error_type = E_CORE_WARNING;
@@ -1160,20 +1159,12 @@ int zend_register_functions(zend_class_entry *scope, zend_function_entry *functi
 	}
 	internal_function->type = ZEND_INTERNAL_FUNCTION;
 
-	if(scope) {
-		scope_namespace = scope->ns;
-		is_namespace = (scope->type == ZEND_INTERNAL_NAMESPACE || scope->type == ZEND_USER_NAMESPACE) ? 1 : 0;
-	} else {
-		scope_namespace = EG(active_namespace);
-	}
-	
 	while (ptr->fname) {
 		internal_function->handler = ptr->handler;
 		internal_function->arg_types = ptr->func_arg_types;
 		internal_function->function_name = ptr->fname;
 		internal_function->scope = scope;
 		internal_function->fn_flags = ZEND_ACC_PUBLIC;
-		internal_function->ns = scope_namespace;
 		internal_function->prototype = NULL;
 		if (!internal_function->handler) {
 			zend_error(error_type, "Null function defined as active function");
@@ -1189,23 +1180,18 @@ int zend_register_functions(zend_class_entry *scope, zend_function_entry *functi
 			break;
 		}
 		if (scope) {
-			if (is_namespace) {
-				/* if namespace all methods must be "static final" */
-				reg_function->common.fn_flags = ZEND_ACC_FINAL | ZEND_ACC_STATIC;
-			} else {
-				/* if class not namespace then look for ctor, dtor, clone
-				 * If it's an old-style constructor, store it only if we don't have
-				 * a constructor already.
-				 */
-				if (!strcmp(ptr->fname, scope->name) && !ctor) {
-					ctor = reg_function;
-				} else if (!strcmp(ptr->fname, ZEND_CONSTRUCTOR_FUNC_NAME)) {
-					ctor = reg_function;
-				} else if (!strcmp(ptr->fname, ZEND_DESTRUCTOR_FUNC_NAME)) {
-					dtor = reg_function;
-				} else if (!strcmp(ptr->fname, ZEND_CLONE_FUNC_NAME)) {
-					clone = reg_function;
-				}
+			/* Look for ctor, dtor, clone
+			 * If it's an old-style constructor, store it only if we don't have
+			 * a constructor already.
+			 */
+			if (!strcmp(ptr->fname, scope->name) && !ctor) {
+				ctor = reg_function;
+			} else if (!strcmp(ptr->fname, ZEND_CONSTRUCTOR_FUNC_NAME)) {
+				ctor = reg_function;
+			} else if (!strcmp(ptr->fname, ZEND_DESTRUCTOR_FUNC_NAME)) {
+				dtor = reg_function;
+			} else if (!strcmp(ptr->fname, ZEND_CLONE_FUNC_NAME)) {
+				clone = reg_function;
 			}
 		}
 		ptr++;
@@ -1390,64 +1376,6 @@ ZEND_API zend_class_entry *zend_register_internal_class(zend_class_entry *orig_c
 	zend_hash_update(CG(class_table), lowercase_name, class_entry->name_length+1, &class_entry, sizeof(zend_class_entry *), NULL);
 	free(lowercase_name);
 	return class_entry;
-}
-
-ZEND_API zend_class_entry *zend_register_internal_ns_class(zend_class_entry *class_entry, zend_class_entry *parent_ce, zend_namespace *ns, char *ns_name TSRMLS_DC)
-{
-	zend_class_entry *register_class;
-	zend_namespace *orig_namespace = NULL;
-	HashTable *orig_class_table = NULL;
-	int restore_orig = 0;
-
-	if (!ns && ns_name) {
-		zend_namespace **pns;
-		size_t ns_name_length = strlen(ns_name);
-		char *lowercase_name = malloc(ns_name_length + 1);
-		zend_str_tolower_copy(lowercase_name, ns_name, ns_name_length);
-		if (zend_hash_find(&CG(global_namespace).class_table, lowercase_name, ns_name_length+1, (void **)&pns) == FAILURE) {
-			free(lowercase_name);
-			return NULL;
-		} else {
-			ns = *pns;
-		}
-		free(lowercase_name);
-	}
-
-	if (EG(active_namespace) != ns) {
-		restore_orig = 1;
-		orig_namespace = CG(active_namespace);
-		CG(active_namespace) = ns;
-		orig_class_table = CG(class_table);
-		CG(class_table) = &ns->class_table;
-	}
-	class_entry->ns = ns;
-	register_class = zend_register_internal_class_ex(class_entry, parent_ce, NULL TSRMLS_CC);
-	if (restore_orig) {
-		CG(active_namespace) = orig_namespace;
-		CG(class_table) = orig_class_table;
-	}
-	
-	return register_class;
-}
-
-ZEND_API zend_namespace *zend_register_internal_namespace(zend_namespace *orig_ns TSRMLS_DC)
-{
-	zend_namespace *ns = malloc(sizeof(zend_namespace));
-	char *lowercase_name = malloc(orig_ns->name_length + 1);
-	*ns = *orig_ns;
-
-	ns->type = ZEND_INTERNAL_NAMESPACE;
-	zend_init_namespace(ns TSRMLS_CC);
-
-	zend_str_tolower_copy(lowercase_name, orig_ns->name, orig_ns->name_length);
-	zend_hash_update(&CG(global_namespace).class_table, lowercase_name, ns->name_length+1, &ns, sizeof(zend_namespace *), NULL);
-	free(lowercase_name);
-
-	if (ns->builtin_functions) {
-		zend_register_functions(ns, ns->builtin_functions, &ns->function_table, MODULE_PERSISTENT TSRMLS_CC);
-	}
-
-	return ns;
 }
 
 ZEND_API int zend_set_hash_symbol(zval *symbol, char *name, int name_length,

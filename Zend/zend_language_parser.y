@@ -129,7 +129,6 @@
 %token T_FUNC_C
 %token T_LINE
 %token T_FILE
-%token T_NAMESPACE_C
 %token T_COMMENT
 %token T_DOC_COMMENT
 %token T_OPEN_TAG
@@ -141,9 +140,6 @@
 %token T_DOLLAR_OPEN_CURLY_BRACES
 %token T_CURLY_OPEN
 %token T_PAAMAYIM_NEKUDOTAYIM
-%token T_IMPORT T_FROM
-%token T_NAMESPACE_NAME
-%token T_NAMESPACE
 
 %% /* Rules */
 
@@ -161,7 +157,6 @@ top_statement:
 		statement
 	|	function_declaration_statement	{ zend_do_early_binding(TSRMLS_C); }
 	|	class_declaration_statement
-	|   namespace_declaration_statement
 ;
 
 
@@ -220,28 +215,8 @@ unticked_statement:
 		T_CATCH '(' fully_qualified_class_name T_VARIABLE ')' { zend_do_begin_catch(&$1, &$8, &$9, 1 TSRMLS_CC); } '{' inner_statement_list '}' { zend_do_end_catch(&$1 TSRMLS_CC); }
 		additional_catches
 	|	T_THROW expr ';' { zend_do_throw(&$2 TSRMLS_CC); }
-	|	T_IMPORT { zend_do_begin_import(TSRMLS_C); } import_rule T_FROM import_namespace { zend_do_end_import(&$5 TSRMLS_CC); } ';'
 ;
 
-
-import_rule:
-		'*'	{ zend_do_import(T_FUNCTION, NULL TSRMLS_CC); zend_do_import(T_CLASS, NULL TSRMLS_CC); zend_do_import(T_CONST, NULL TSRMLS_CC); }
-	|	import_commands
-;
-
-import_commands:
-		import_commands ',' import_command
-	|	import_command
-;
-
-import_command:
-		T_FUNCTION T_STRING { zend_do_import(T_FUNCTION, &$2 TSRMLS_CC); }
-	|	T_CLASS	T_STRING	{ zend_do_import(T_CLASS, &$2 TSRMLS_CC); }
-	|	T_CONST	T_STRING	{ zend_do_import(T_CONST, &$2 TSRMLS_CC); }
-	|	T_FUNCTION '*'		{ zend_do_import(T_FUNCTION, NULL TSRMLS_CC); }
-	|	T_CLASS	'*'			{ zend_do_import(T_CLASS, NULL TSRMLS_CC); }
-	|	T_CONST	'*'			{ zend_do_import(T_CONST, NULL TSRMLS_CC); }
-;
 
 additional_catches:
 		non_empty_additional_catches
@@ -303,37 +278,6 @@ class_entry_type:
 		T_CLASS			{  $$.u.constant.value.lval = 0; }
 	|	T_ABSTRACT T_CLASS { $$.u.constant.value.lval = ZEND_ACC_ABSTRACT_CLASS; }
 	|	T_INTERFACE		{ $$.u.constant.value.lval = ZEND_ACC_INTERFACE; }
-;
-
-namespace_declaration_statement:
-		T_NAMESPACE namespace_name '{' { zend_do_begin_namespace(&$1, &$2 TSRMLS_CC); } namespace_statement_list '}' { zend_do_end_namespace(&$1 TSRMLS_CC); }
-;
-
-namespace_statement_list:
-		namespace_statement_list namespace_statement
-	|	/* empty */
-;
-
-namespace_statement:
-		T_VAR namespace_var_declaration_list ';'
-	|	namespace_const_declaration ';'
-	|	function_declaration_statement
-	|	class_declaration_statement
-;
-
-namespace_var_declaration_list:
-		namespace_var_declaration_list ',' namespace_var_declaration
-	|	namespace_var_declaration
-;
-
-namespace_var_declaration:
-		T_VARIABLE { zend_do_declare_namespace_var(&$1, NULL TSRMLS_CC); }
-	|	T_VARIABLE '=' static_scalar { zend_do_declare_namespace_var(&$1, &$3 TSRMLS_CC); }
-;
-
-namespace_const_declaration:
-		namespace_const_declaration ',' T_STRING '=' const_scalar_expr	{ zend_do_declare_namespace_constant(&$3, &$5 TSRMLS_CC); }
-	|	T_CONST T_STRING '=' const_scalar_expr	{ zend_do_declare_namespace_constant(&$2, &$4 TSRMLS_CC); }
 ;
 
 extends_from:
@@ -640,7 +584,7 @@ function_call:
 		T_STRING	'(' { $2.u.opline_num = zend_do_begin_function_call(&$1 TSRMLS_CC); }
 				function_call_parameter_list
 				')' { zend_do_end_function_call(&$1, &$$, &$4, 0, $2.u.opline_num TSRMLS_CC); zend_do_extended_fcall_end(TSRMLS_C); }
-	|	class_or_namespace_constant '(' { zend_do_begin_class_member_function_call(TSRMLS_C); zend_do_extended_fcall_begin(TSRMLS_C); } 
+	|	class_constant '(' { zend_do_begin_class_member_function_call(TSRMLS_C); zend_do_extended_fcall_begin(TSRMLS_C); } 
 											function_call_parameter_list 
 											')' { zend_do_end_function_call(NULL, &$$, &$4, 1, 1 TSRMLS_CC); zend_do_extended_fcall_end(TSRMLS_C);}
 	|	variable_without_objects  '(' { zend_do_end_variable_parse(BP_VAR_R, 0 TSRMLS_CC); zend_do_begin_dynamic_function_call(&$1 TSRMLS_CC); }
@@ -649,26 +593,12 @@ function_call:
 ;
 
 fully_qualified_class_name:
-		namespace_name T_PAAMAYIM_NEKUDOTAYIM T_STRING { zend_do_fetch_class(&$$, &$1, &$3, 0 TSRMLS_CC); }
-	|	T_PAAMAYIM_NEKUDOTAYIM T_STRING { zend_do_fetch_class(&$$, NULL, &$2, 1 TSRMLS_CC);  }
-	|	T_STRING { zend_do_fetch_class(&$$, NULL, &$1, 0 TSRMLS_CC); }
-;
-
-import_namespace:
-		T_NAMESPACE_NAME { zend_do_fetch_class(&$$, NULL, &$1, 0 TSRMLS_CC); }
-	|	T_STRING { zend_do_fetch_class(&$$, NULL, &$1, 0 TSRMLS_CC); }
+		T_STRING { zend_do_fetch_class(&$$, &$1 TSRMLS_CC); }
 ;
 
 dynamic_class_name:
-		namespace_name T_PAAMAYIM_NEKUDOTAYIM static_or_variable_string { zend_do_fetch_class(&$$, &$1, &$3, 0 TSRMLS_CC); }
-	|	T_PAAMAYIM_NEKUDOTAYIM static_or_variable_string { zend_do_fetch_class(&$$, NULL, &$2, 1 TSRMLS_CC); }
-	|	static_or_variable_string { zend_do_fetch_class(&$$, NULL, &$1, 0 TSRMLS_CC); }
+		static_or_variable_string { zend_do_fetch_class(&$$, &$1 TSRMLS_CC); }
 ;
-
-namespace_name:
-		T_NAMESPACE_NAME 	{ $$ = $1; }
-	|	T_STRING 			{ $$ = $1; }
-;	
 
 static_or_variable_string:
 		T_STRING	{ $$ = $1; }
@@ -697,7 +627,6 @@ common_scalar:
 	|	T_FILE 						{ $$ = $1; }
 	|	T_CLASS_C					{ $$ = $1; }
 	|	T_FUNC_C					{ $$ = $1; }
-	|	T_NAMESPACE_C				{ $$ = $1; }
 ;
 
 
@@ -729,7 +658,7 @@ const_scalar:
 	|	'+' const_scalar { $$ = $2; }
 	|	'-' const_scalar { zval minus_one; minus_one.type = IS_LONG; minus_one.value.lval = -1; mul_function(&$2.u.constant, &$2.u.constant, &minus_one TSRMLS_CC); $$ = $2; }
 	|	T_ARRAY '(' static_array_pair_list ')' { $$ = $3; $$.u.constant.type = IS_CONSTANT_ARRAY; }
-	|	class_or_namespace_constant { /* FIXME */ }
+	|	class_constant { /* FIXME */ }
 ;
 
 static_scalar: /* compile-time evaluated scalars */
@@ -738,13 +667,13 @@ static_scalar: /* compile-time evaluated scalars */
 	|	'+' static_scalar	{ $$ = $2; }
 	|	'-' static_scalar	{ zval minus_one;  minus_one.type = IS_LONG; minus_one.value.lval = -1;  mul_function(&$2.u.constant, &$2.u.constant, &minus_one TSRMLS_CC);  $$ = $2; } 
 	|	T_ARRAY '(' static_array_pair_list ')' { $$ = $3; $$.u.constant.type = IS_CONSTANT_ARRAY; }
-	|   class_or_namespace_constant { /* FIXME */ }
+	|   class_constant { /* FIXME */ }
 ;
 
 scalar:
 		T_STRING 				{ zend_do_fetch_constant(&$$, NULL, &$1, ZEND_RT TSRMLS_CC); }
 	|	T_STRING_VARNAME		{ $$ = $1; }
-	|	class_or_namespace_constant	{ $$ = $1; }
+	|	class_constant	{ $$ = $1; }
 	|	common_scalar			{ $$ = $1; }
 	|	'"' encaps_list '"' 	{ $$ = $2; }
 	|	'\'' encaps_list '\''	{ $$ = $2; }
@@ -826,9 +755,7 @@ variable_without_objects:
 ;
 
 static_member:
-		T_PAAMAYIM_NEKUDOTAYIM T_STRING T_PAAMAYIM_NEKUDOTAYIM variable_without_objects { $$ = $4; zend_do_fetch_class(&$1, NULL, &$2, 1 TSRMLS_CC); zend_do_fetch_static_member(&$1 TSRMLS_CC); }
-	|	namespace_name T_PAAMAYIM_NEKUDOTAYIM variable_without_objects { $$ = $3; zend_do_fetch_class(&$2, NULL, &$1, 0 TSRMLS_CC);  zend_do_fetch_static_member(&$2 TSRMLS_CC); }
-	|	namespace_name T_PAAMAYIM_NEKUDOTAYIM T_STRING T_PAAMAYIM_NEKUDOTAYIM variable_without_objects { $$ = $5; zend_do_fetch_class(&$4, &$1, &$3, 0 TSRMLS_CC); zend_do_fetch_static_member(&$4 TSRMLS_CC); }
+		fully_qualified_class_name T_PAAMAYIM_NEKUDOTAYIM variable_without_objects { $$ = $3; zend_do_fetch_static_member(&$1 TSRMLS_CC); }
 ;
 
 
@@ -957,11 +884,8 @@ isset_variables:
 	|	isset_variables ',' { zend_do_boolean_and_begin(&$1, &$2 TSRMLS_CC); } variable { znode tmp; zend_do_isset_or_isempty(ZEND_ISSET, &tmp, &$4 TSRMLS_CC); zend_do_boolean_and_end(&$$, &$1, &tmp, &$2 TSRMLS_CC); }
 ;	
 
-class_or_namespace_constant:
-		T_PAAMAYIM_NEKUDOTAYIM namespace_name { zend_do_fetch_constant(&$$, NULL, &$2, ZEND_RT TSRMLS_CC); }
-	|	T_PAAMAYIM_NEKUDOTAYIM T_STRING T_PAAMAYIM_NEKUDOTAYIM T_STRING { zend_do_fetch_class(&$1, NULL, &$2, 1 TSRMLS_CC); zend_do_fetch_constant(&$$, &$1, &$4, ZEND_RT TSRMLS_CC); }
-	|	namespace_name T_PAAMAYIM_NEKUDOTAYIM T_STRING { zend_do_fetch_class(&$2, NULL, &$1, 0 TSRMLS_CC); zend_do_fetch_constant(&$$, &$2, &$3, ZEND_RT TSRMLS_CC); }
-	|	namespace_name T_PAAMAYIM_NEKUDOTAYIM T_STRING T_PAAMAYIM_NEKUDOTAYIM T_STRING { zend_do_fetch_class(&$4, &$1, &$3, 0 TSRMLS_CC); zend_do_fetch_constant(&$$, &$4, &$5, ZEND_RT TSRMLS_CC); }
+class_constant:
+		fully_qualified_class_name T_PAAMAYIM_NEKUDOTAYIM T_STRING { zend_do_fetch_constant(&$$, &$1, &$3, ZEND_RT TSRMLS_CC); }
 ;
 
 %%
