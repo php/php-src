@@ -149,6 +149,7 @@ ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini
 				case T_OPEN_TAG_WITH_ECHO:
 				case T_CLOSE_TAG:
 				case T_WHITESPACE:
+				case T_COMMENT:
 					break;
 				default:
 					efree(token.value.str.val);
