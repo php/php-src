@@ -155,7 +155,7 @@ php_sprintf_appendchar(char **buffer, int *pos, int *size, char add TSRMLS_DC)
 inline static void
 php_sprintf_appendstring(char **buffer, int *pos, int *size, char *add,
 						   int min_width, int max_width, char padding,
-						   int alignment, int len, int sign, int expprec)
+						   int alignment, int len, int neg, int expprec, int always_sign)
 {
 	register int npad;
 	int req_size;
@@ -181,8 +181,8 @@ php_sprintf_appendstring(char **buffer, int *pos, int *size, char *add,
 		*buffer = erealloc(*buffer, *size);
 	}
 	if (alignment == ALIGN_RIGHT) {
-		if (sign && padding=='0') {
-			(*buffer)[(*pos)++] = '-';
+		if ((neg || always_sign) && padding=='0') {
+			(*buffer)[(*pos)++] = (neg) ? '-' : '+';
 			add++;
 			len--;
 			copy_len--;
@@ -241,13 +241,13 @@ php_sprintf_appendint(char **buffer, int *pos, int *size, long number,
 				  number, &numbuf[i], i));
 	php_sprintf_appendstring(buffer, pos, size, &numbuf[i], width, 0,
 							 padding, alignment, (NUM_BUF_SIZE - 1) - i,
-							 neg, 0);
+							 neg, 0, always_sign);
 }
 
 inline static void
 php_sprintf_appenduint(char **buffer, int *pos, int *size,
 					   unsigned long number,
-					   int width, char padding, int alignment, int always_sign)
+					   int width, char padding, int alignment)
 {
 	char numbuf[NUM_BUF_SIZE];
 	register unsigned long magn, nmagn;
@@ -269,11 +269,9 @@ php_sprintf_appenduint(char **buffer, int *pos, int *size,
 		magn = nmagn;
 	} while (magn > 0 && i > 0);
 
-	if (always_sign)
-		numbuf[--i] = '+';
 	PRINTF_DEBUG(("sprintf: appending %d as \"%s\", i=%d\n", number, &numbuf[i], i));
 	php_sprintf_appendstring(buffer, pos, size, &numbuf[i], width, 0,
-							 padding, alignment, (NUM_BUF_SIZE - 1) - i, 0, 0);
+							 padding, alignment, (NUM_BUF_SIZE - 1) - i, 0, 0, 0);
 }
 
 inline static void
@@ -302,14 +300,14 @@ php_sprintf_appenddouble(char **buffer, int *pos,
 	if (zend_isnan(number)) {
 		sign = (number<0);
 		php_sprintf_appendstring(buffer, pos, size, "NaN", 3, 0, padding,
-								 alignment, precision, sign, 0);
+								 alignment, precision, sign, 0, always_sign);
 		return;
 	}
 
 	if (zend_isinf(number)) {
 		sign = (number<0);
 		php_sprintf_appendstring(buffer, pos, size, "INF", 3, 0, padding,
-								 alignment, precision, sign, 0);
+								 alignment, precision, sign, 0, always_sign);
 		return;
 	}
 
@@ -382,7 +380,7 @@ php_sprintf_appenddouble(char **buffer, int *pos,
 		width += (precision + 1);
 	}
 	php_sprintf_appendstring(buffer, pos, size, numbuf, width, 0, padding,
-							 alignment, i, sign, 0);
+							 alignment, i, sign, 0, always_sign);
 }
 
 
@@ -412,7 +410,7 @@ php_sprintf_append2n(char **buffer, int *pos, int *size, long number,
 
 	php_sprintf_appendstring(buffer, pos, size, &numbuf[i], width, 0,
 							 padding, alignment, (NUM_BUF_SIZE - 1) - i,
-							 0, expprec);
+							 0, expprec, 0);
 }
 
 
@@ -647,7 +645,7 @@ php_formatted_print(int ht, int *len, int use_array, int format_offset TSRMLS_DC
 											 width, precision, padding,
 											 alignment,
 											 Z_STRLEN_P(var),
-											 0, expprec);
+											 0, expprec, 0);
 					if (use_copy) {
 						zval_dtor(&var_copy);
 					}
@@ -666,8 +664,7 @@ php_formatted_print(int ht, int *len, int use_array, int format_offset TSRMLS_DC
 					convert_to_long(tmp);
 					php_sprintf_appenduint(&result, &outpos, &size,
 										  Z_LVAL_P(tmp),
-										  width, padding, alignment,
-										  always_sign);
+										  width, padding, alignment);
 					break;
 
 				case 'e':
