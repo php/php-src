@@ -1,3 +1,39 @@
+2000-10-01  James Moore  <James@phpuk.org>
+
+    * INSTALL:
+    Adding note about having to make install if you do not have apache already installed (IE there is no apache dir to copy httpd binary to)
+
+2000-10-01  Andi Gutmans  <andi@zend.com>
+
+    * main/fopen-wrappers.c: - Remove unneeded IS_SLASH() definition.
+
+2000-10-01  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/shmop/.cvsignore
+      ext/shmop/Makefile.in
+      ext/shmop/README
+      ext/shmop/config.m4
+      ext/shmop/php_shmop.h
+      ext/shmop/setup.stub
+      ext/shmop/shmop.c:
+    - Added the shmop extension. It allows more general ways of shared memory
+      access. (thanks to Ilia Alshanestky <iliaa@home.com> and Slava Poliakov
+      <slavapl@mailandnews.com> 
+
+2000-10-01  Sterling Hughes  <stirling@bestweb.net>
+
+    * NEWS:
+    It seems these entries were truncated in my commit, perhaps it was due to
+    the multiple NEWS entries in the same commit.
+
+2000-10-01  Andi Gutmans  <andi@zend.com>
+
+    * NEWS:
+    - Fixed conflicts. Those first two lines with the XXX need to be fixed.
+      I'm not sure if they were meant to be in the Changelog or NEWS file, in
+      any case they are broken. Whoever, commited them can you please fix it?
+      I couldn't find who commited them in the CVS commit messages
+
 2000-09-30  Daniel Beulshausen  <daniel@php4win.de>
 
     * php_modules.dsw: added filepro & snmp
