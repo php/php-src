@@ -86,11 +86,6 @@ typedef unsigned char uchar;
 	#define FALSE 0
 #endif
 
-#ifndef MB_CUR_MAX
-	#define MB_CUR_MAX 8
-	/* Should be a library constant */
-#endif
-
 #ifndef max
 	#define max(a,b) ((a)>(b) ? (a) : (b))
 #endif
@@ -1946,6 +1941,23 @@ static int exif_process_undefined(char **result,char *value,size_t byte_count) {
 }
 /* }}} */
 
+/* {{{ exif_process_string_raw
+ * Copy a string in Exif header to a character string returns length of allocated buffer if any. */
+static int exif_process_string_raw(char **result,char *value,size_t byte_count) {
+	/* we cannot use strlcpy - here the problem is that we have to copy NUL
+	 * chars up to byte_count, we also have to add a single NUL character to
+	 * force end of string.
+	 */
+	if (byte_count) {
+		(*result) = emalloc(byte_count+1);
+		memcpy(*result, value, byte_count);
+		(*result)[byte_count] = '\0';
+		return byte_count+1;
+	}
+	return 0;
+}
+/* }}} */
+
 /* {{{ exif_process_string
  * Copy a string in Exif header to a character string and return length of allocated buffer if any.
  * In contrast to exif_process_undefined this function does allways return a string buffer */
@@ -1973,33 +1985,15 @@ static int exif_process_string(char **result,char *value,size_t byte_count) {
  * Process UserComment in IFD. */
 static int exif_process_user_comment(char **pszInfoPtr,char **szEncoding,char *szValuePtr,int ByteCount)
 {
-	int   a,l;
-	char  mbBuffer[MB_CUR_MAX];
+	int   a;
 
 	/* Copy the comment */
 	if ( ByteCount>=8) {
 		if (!memcmp(szValuePtr, "UNICODE\0", 8)) {
-			/* treat JIS encoding as if it where UNICODE */
 			*szEncoding= estrdup((const char*)szValuePtr);
 			szValuePtr = szValuePtr+8;
 			ByteCount -= 8;
-			l = 0;
-			a = 0;
-			while(((wchar_t*)szValuePtr)[a]) {
-				l += (int)wctomb( mbBuffer, *((wchar_t*)szValuePtr));
-				if (sizeof(wchar_t)*a++ >= ByteCount) break; /* avoiding problems with corrupt headers */
-			}
-			if (l>1) {
-				*pszInfoPtr = emalloc(l+1);
-				if ( !*pszInfoPtr) {
-					EXIF_ERRLOG_EALLOC
-					return 0;
-				}
-				wcstombs(*pszInfoPtr, (wchar_t*)(szValuePtr), l+1);
-				(*pszInfoPtr)[l] = '\0';
-				return l+1;
-			}
-			return 0;
+			return exif_process_string_raw(pszInfoPtr, szValuePtr, ByteCount);
 		} else
 		if ( !memcmp(szValuePtr, "ASCII\0\0\0", 8)) {
 			*szEncoding= estrdup((const char*)szValuePtr);
@@ -2011,6 +2005,7 @@ static int exif_process_user_comment(char **pszInfoPtr,char **szEncoding,char *s
 			*szEncoding= estrdup((const char*)szValuePtr);
 			szValuePtr = szValuePtr+8;
 			ByteCount -= 8;
+			return exif_process_string_raw(pszInfoPtr, szValuePtr, ByteCount);
 		} else
 		if ( !memcmp(szValuePtr,"\0\0\0\0\0\0\0\0",8)) {
 			/* 8 NULL means undefined and should be ASCII... */
@@ -2024,7 +2019,7 @@ static int exif_process_user_comment(char **pszInfoPtr,char **szEncoding,char *s
 	if (ByteCount>0) for (a=ByteCount-1;a && szValuePtr[a]==' ';a--) (szValuePtr)[a] = '\0';
 
 	/* normal text without encoding */
-	return exif_process_string(pszInfoPtr,szValuePtr,ByteCount);
+	return exif_process_string(pszInfoPtr, szValuePtr, ByteCount);
 }
 /* }}} */
 
