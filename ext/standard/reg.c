@@ -33,6 +33,7 @@
 #include <stdio.h>
 #include "php.h"
 #include "php3_string.h"
+#include "php_regex.h"
 #include "reg.h"
 
 unsigned char third_argument_force_ref[] = { 3, BYREF_NONE, BYREF_NONE, BYREF_FORCE };

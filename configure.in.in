@@ -57,7 +57,7 @@ else
 fi
 AC_SUBST(PHP_VERSION)
 
-AM_CONFIG_HEADER(config.h)
+AM_CONFIG_HEADER(php_config.h)
 AM_MAINTAINER_MODE
 
 dnl We want this one before the checks, so the checks can modify CFLAGS.
@@ -348,8 +348,12 @@ AC_ARG_WITH(apxs,
 ])
 
 
-APACHE_INSTALL_FILES="$srcdir/mod_php3.* $srcdir/php_version.h libphp3.module $srcdir/SAPI.h"
+APACHE_INSTALL_FILES="$srcdir/mod_php3.* libphp3.module"
 
+abs_srcdir=`(cd $srcdir; pwd)`
+abs_builddir=`pwd`
+AC_SUBST(abs_srcdir)
+AC_SUBST(abs_builddir)
 
 AC_MSG_CHECKING(for Apache module support via DSO through APACI)
 AC_ARG_WITH(shared-apache,
@@ -876,7 +880,7 @@ chmod +x scripts/mkextlib
 echo "creating internal_functions.c"
 extensions=\`grep '^s.@EXT_SUBDIRS@' \$0|sed -e 's/^.*@% *//' -e 's/%.*$//'\`
 mv -f internal_functions.c internal_functions.c.old 2>/dev/null
-sh $srcdir/genif.sh $srcdir/internal_functions.c.in \$srcdir \$extensions > internal_functions.c
+sh $srcdir/genif.sh $srcdir/internal_functions.c.in $srcdir \$extensions > internal_functions.c
 if cmp internal_functions.c.old internal_functions.c > /dev/null 2>&1; then
     echo "internal_functions.c is unchanged"
     mv internal_functions.c.old internal_functions.c

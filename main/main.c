@@ -921,6 +921,7 @@ int _php3_hash_environment(PLS_D ELS_DC)
 			case 'g':
 			case 'G':
 				if (!_gpc_flags[2]) {
+					printf("Parsing GET data:  '%s'\n", SG(request_info).query_string);
 					php3_treat_data(PARSE_GET, NULL);	/* GET Data */
 					_gpc_flags[2]=1;
 				}
@@ -1188,7 +1189,7 @@ PHPAPI void php_execute_script(zend_file_handle *primary_file CLS_DC ELS_DC PLS_
 /* some systems are missing these from their header files */
 
 #if APACHE
-PHPAPI int apache_php3_module_main(request_rec *r, int fd, int display_source_mode)
+PHPAPI int apache_php3_module_main(request_rec *r, int fd, int display_source_mode SLS_DC)
 {
 	zend_file_handle file_handle;
 #ifdef ZTS
@@ -1200,8 +1201,6 @@ PHPAPI int apache_php3_module_main(request_rec *r, int fd, int display_source_mo
 	php_core_globals *core_globals=&pcg;
 #endif
 	SLS_FETCH();
-
-	SG(server_context) = r;
 
 	if (php_request_startup(CLS_C ELS_CC PLS_CC SLS_CC) == FAILURE) {
 		return FAILURE;

@@ -32,7 +32,7 @@
 #if WIN32|WINNT
 #include "win95nt.h"
 #else
-#include "config.h"
+#include "php_config.h"
 #endif
 
 #if HYPERWAVE

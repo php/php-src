@@ -31,7 +31,7 @@
 #include <stdlib.h>
 
 #if !(WIN32|WINNT)
-#include "config.h"
+#include "php_config.h"
 #endif
 #include "php.h"
 #include "ext/standard/head.h"

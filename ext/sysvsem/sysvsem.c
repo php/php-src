@@ -36,7 +36,7 @@
  */
 
 #ifndef MSVC5
-#include "config.h"
+#include "php_config.h"
 #endif
 
 #if HAVE_SYSVSEM

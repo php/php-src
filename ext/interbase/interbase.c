@@ -32,7 +32,7 @@
 
 /* TODO: A lot... */
 
-#include "config.h"
+#include "php_config.h"
 #include "php.h"
 #include "php3_interbase.h"
 

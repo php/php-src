@@ -320,7 +320,7 @@ void php3_treat_data(int arg, char *str)
 {
 	char *res = NULL, *var, *val;
 	pval *array_ptr;
-	int free_buffer;
+	int free_buffer=0;
 	ELS_FETCH();
 	PLS_FETCH();
 	SLS_FETCH();

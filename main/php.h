@@ -75,7 +75,7 @@ extern unsigned char second_arg_allow_ref[];
 #	define PHPAPI __declspec(dllimport) 
 #	endif
 #else
-#include "config.h"
+#include "php_config.h"
 #define PHPAPI
 #define THREAD_LS
 #endif
@@ -150,16 +150,6 @@ typedef zval pval;
 
 #define pval_copy_constructor	zval_copy_ctor
 #define pval_destructor			zval_dtor
-
-#if REGEX
-#include "regex/regex.h"
-#define _REGEX_H 1				/* this should stop Apache from loading the system version of regex.h */
-#define _RX_H 1				  	/* Try defining these for Linux to	*/
-#define __REGEXP_LIBRARY_H__ 1 	/* avoid Apache including regex.h	*/
-#define _H_REGEX 1              /* This one is for AIX */
-#else
-#include <regex.h>
-#endif
 
 #if STDC_HEADERS
 # include <string.h>

@@ -3,5 +3,5 @@ ConfigStart
 	RULE_WANTHSREGEX=@HSREGEX@
 	LIBS="@PHP_LIBS@ @EXTRA_LIBS@ @LIBS@ @RDYNAMIC_LFLAGS@ $LIBS"
 	RULE_HIDE=yes
+	CFLAGS="$CFLAGS -I@abs_srcdir@ -I@abs_srcdir@/libzend -I@abs_builddir@"
 ConfigEnd
-

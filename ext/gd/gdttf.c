@@ -7,7 +7,7 @@
 #if WIN32|WINNT
 #include "config.w32.h"
 #else
-#include "config.h"
+#include "php_config.h"
 #endif
 #if HAVE_LIBTTF
 #include <stdio.h>
