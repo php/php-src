@@ -1403,6 +1403,23 @@ EOF
     hardcode_shlibpath_var=no
     ;;
 
+  linux*)
+    if $LD --help 2>&1 | egrep ': supported targets:.* elf' > /dev/null; then
+      archive_cmds='$CC -shared $libobjs $deplibs $compiler_flags ${wl}-soname $wl$soname -o $lib'
+      archive_expsym_cmds='echo "{" > $output_objdir/$libname.ver;
+        echo "global:" >> $output_objdir/$libname.ver;
+       cat $export_symbols | while read symbol; do
+         echo "  \$symbol;" >> $output_objdir/$libname.ver;
+       done;
+        echo "local: *;" >> $output_objdir/$libname.ver;
+        echo "};" >> $output_objdir/$libname.ver~
+        $CC -shared $libobjs $deplibs $compiler_flags ${wl}-soname $wl$soname ${wl}-version-script ${wl}$output_objdir/$libname.ver -o $lib~
+        rm -f $output_objdir/$libname.ver'
+    else
+      ld_shlibs=no
+    fi
+    ;;
+
   *)
     if $LD --help 2>&1 | egrep ': supported targets:.* elf' > /dev/null; then
       archive_cmds='$CC -shared $libobjs $deplibs $compiler_flags ${wl}-soname $wl$soname -o $lib'
