@@ -1,3 +1,159 @@
+2004-02-04  Zeev Suraski  <zeev@zend.com>
+
+    * ZendEngine2/zend_execute_API.c:
+      Fix exceptions happening inside internal functions called through
+      zend_user_function()
+
+    * ZendEngine2/zend_execute_API.c:
+      Remove double initialization
+
+2004-02-04  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      sapi/cli/php_cli.c:
+      MFH: Parse command line ini directives passed using -d before -i, to ensure
+      correct settings output.
+
+    * sapi/cli/php_cli.c:
+      Parse command line ini directives passed using -d before -i, to ensure
+      correct settings output.
+
+2004-02-04  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * main/streams/streams.c
+      main/streams/transports.c
+      main/streams/xp_socket.c:
+      Fix a bug in the persistent socket liveness checks and feof(); they were
+      using the default socket timeout of 60 seconds before returning the socket
+      to the calling script.  The reason they were using that value is that the
+      same code is used for feof(), so the fix is allowing the caller to
+      indicate the timeout value for liveness checks.
+      
+      A possible remaining issue now is that 0 second timeout[1] for pfsockopen
+      is possibly too short; it's impossible to specify a sane value for all
+      possible uses, so maybe we need a stream context or an .ini option to
+      control this, or maybe use the timeout value that was passed to
+      pfsockopen().
+      
+
+2004-02-04  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_objects.h:
+      Add new prototype
+
+    * ZendEngine2/zend_reflection_api.c:
+      Fix reflection
+
+    * tests/classes/this.phpt:
+      Add test
+
+    * tests/lang/030.phpt:
+      The &new is no longer needed, prevent E_STRICT message
+
+2004-02-04  Andi Gutmans  <andi@zend.com>
+
+    * NEWS:
+      - Added recent stuff to NEWS
+
+2004-02-04  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/xsl/php_xsl.c:
+      Fix Warning
+
+    * ZendEngine2/zend_iterators.c:
+      Fix warnings
+
+2004-02-04  Zeev Suraski  <zeev@zend.com>
+
+    * ZendEngine2/zend_compile.c:
+      Fixlet
+
+    * ZendEngine2/zend_compile.c:
+      Fix handling of $this in some cases
+
+    * tests/lang/bug24573.phpt:
+      Update test (reason: can no longer assign to $this)
+
+    * tests/classes/final_redeclare.phpt:
+      Update test (reason: early binding changes its behavior)
+
+    * tests/classes/class_final.phpt:
+      Update test (reason:  early binding changes its behavior)
+
+    * ZendEngine2/zend_compile.c:
+      Handle additional cases
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute.h
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_language_parser.y:
+      Reinstate early-binding for classes.
+      
+      Note that this is available for downwards compatibility only - and it
+      doesn't
+      work if you use new features (namely, interfaces).  Generally, people
+      should
+      declare their classes before using them, but we just didn't want hell to
+      break
+      loose (c)
+
+    * ZendEngine2/zend_opcode.c:
+      Optimize
+
+    * ZendEngine2/zend_compile.c:
+      - Improve $this assignment detection and generalize some code in
+      zend_compile.c
+
+2004-02-04  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/dom/php_dom.c:
+      Fixed compile warnings.
+
+2004-02-04  Zeev Suraski  <zeev@zend.com>
+
+    * ZendEngine2/zend_compile.c:
+      -Error out when trying to re-assign $this
+
+    * ext/sqlite/sqlite.c:
+      kill warning
+
+    * ZendEngine2/zend_objects_API.c
+      ZendEngine2/zend_objects_API.h:
+      The valid bit was necessary after all - restored
+
+    * ZendEngine2/zend_objects_API.c:
+      Fixlets
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_objects.c:
+      - Small fixes
+
+    * ZendEngine2/zend_execute.c:
+      - Improve wording
+
+    * ext/com_dotnet/com_handlers.c
+      ext/com_dotnet/com_misc.c
+      ext/com_dotnet/com_saproxy.c
+      ext/com_dotnet/php_com_dotnet_internal.h
+      ext/dom/php_dom.c
+      ext/mono/php_mono.c
+      ext/mysqli/mysqli.c
+      ext/simplexml/simplexml.c
+      ext/sqlite/sqlite.c
+      ext/xsl/php_xsl.c
+      ext/xsl/php_xsl.h:
+      - Update with new destructor code
+
+    * ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_iterators.c
+      ZendEngine2/zend_objects.c
+      ZendEngine2/zend_objects_API.c
+      ZendEngine2/zend_objects_API.h
+      ZendEngine2/zend_reflection_api.c:
+      Change destructor implementation (details will follow on internals@)
+
 2004-02-03  Greg Beaver  <greg@chiaraquartet.net>
 
     * pear/scripts/pear.bat:

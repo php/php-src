@@ -1,3 +1,82 @@
+2004-02-04  Zeev Suraski  <zeev@zend.com>
+
+    * zend_execute_API.c:
+      Fix exceptions happening inside internal functions called through
+      zend_user_function()
+
+    * zend_execute_API.c:
+      Remove double initialization
+
+2004-02-04  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_objects.h:
+      Add new prototype
+
+    * zend_reflection_api.c:
+      Fix reflection
+
+    * zend_iterators.c:
+      Fix warnings
+
+2004-02-04  Zeev Suraski  <zeev@zend.com>
+
+    * zend_compile.c:
+      Fixlet
+
+    * zend_compile.c:
+      Fix handling of $this in some cases
+
+    * zend_compile.c:
+      Handle additional cases
+
+    * zend_compile.c
+      zend_compile.h
+      zend_execute.c
+      zend_execute.h
+      zend_execute_API.c
+      zend_language_parser.y:
+      Reinstate early-binding for classes.
+      
+      Note that this is available for downwards compatibility only - and it
+      doesn't
+      work if you use new features (namely, interfaces).  Generally, people
+      should
+      declare their classes before using them, but we just didn't want hell to
+      break
+      loose (c)
+
+    * zend_opcode.c:
+      Optimize
+
+    * zend_compile.c:
+      - Improve $this assignment detection and generalize some code in
+      zend_compile.c
+
+    * zend_compile.c:
+      -Error out when trying to re-assign $this
+
+    * zend_objects_API.c
+      zend_objects_API.h:
+      The valid bit was necessary after all - restored
+
+    * zend_objects_API.c:
+      Fixlets
+
+    * zend_compile.c
+      zend_objects.c:
+      - Small fixes
+
+    * zend_execute.c:
+      - Improve wording
+
+    * zend_execute_API.c
+      zend_iterators.c
+      zend_objects.c
+      zend_objects_API.c
+      zend_objects_API.h
+      zend_reflection_api.c:
+      Change destructor implementation (details will follow on internals@)
+
 2004-02-03  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * tests/bug24884.phpt:
