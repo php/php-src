@@ -92,21 +92,23 @@ output_buffering = Off
 ; example, if you set output_handler to "mb_output_handler", character
 ; encoding will be transparently converted to the specified encoding.
 ; Setting any output handler automatically turns on output buffering.
-; NOTE: People who wrote portable scripts should not depend on this ini
-; directive. Instead, explicitly set the output handler using ob_start().
-; Using this ini directive may cause problems unless you know what script 
-: is doing.
-; NOTE: You cannot use both "mb_output_handler" with "ob_inconv_handler"
-; and you cannot use both "ob_gzhandler" and "zlib.output_compression". 
+; Note: People who wrote portable scripts should not depend on this ini
+;       directive. Instead, explicitly set the output handler using ob_start().
+;       Using this ini directive may cause problems unless you know what script 
+:       is doing.
+; Note: You cannot use both "mb_output_handler" with "ob_inconv_handler"
+;       and you cannot use both "ob_gzhandler" and "zlib.output_compression". 
 ;output_handler =
 
 ; Transparent output compression using the zlib library
 ; Valid values for this option are 'off', 'on', or a specific buffer size
 ; to be used for compression (default is 4KB)
-;
+; Note: Resulting chunk size may vary due to nature of compression. PHP 
+;       outputs chunks that are few handreds bytes each as a result of compression. 
+;       If you want larger chunk size for better performence, enable output_buffering 
+;       also. 
 ; Note: output_handler must be empty if this is set 'On' !!!!
 ;       Instead you must use zlib.output_handler.
-;
 zlib.output_compression = Off
 
 ; You cannot specify additional output handlers if zlib.output_compression
