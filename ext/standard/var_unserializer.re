@@ -335,8 +335,6 @@ PHPAPI int php_var_unserialize(UNSERIALIZE_PARAMETER)
 	zend_class_entry *ce;
 	int incomplete_class = 0;
 	
-	char *rval_temp;
-	
 	zval *user_func;
 	zval *retval_ptr;
 	zval **args[1];
