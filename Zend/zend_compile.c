@@ -181,7 +181,7 @@ ZEND_API char *zend_set_compiled_filename(char *new_compiled_filename TSRMLS_DC)
 	char **pp, *p;
 	int length = strlen(new_compiled_filename);
 
-	if (zend_hash_find(&CG(filenames_table), new_compiled_filename, length+1, (void **) &pp)==SUCCESS) {
+	if (zend_hash_find(&CG(filenames_table), new_compiled_filename, length+1, (void **) &pp) == SUCCESS) {
 		CG(compiled_filename) = *pp;
 		return *pp;
 	}
