@@ -130,7 +130,7 @@ PHP_FUNCTION(dom_domimplementation_create_document)
 	zval *node = NULL, *rv = NULL;
 	xmlDoc *docp;
 	xmlNode *nodep;
-	xmlDtdPtr doctype = NULL, dtd = NULL;
+	xmlDtdPtr doctype = NULL;
 	xmlNsPtr nsptr = NULL;
 	int ret, uri_len = 0, name_len = 0;
 	char *uri, *name;
@@ -142,7 +142,7 @@ PHP_FUNCTION(dom_domimplementation_create_document)
 		return;
 	}
 
-	if (doctype != NULL) {
+	if (node != NULL) {
 		DOM_GET_OBJ(doctype, node, xmlDtdPtr, doctobj);
 		if (doctype->type == XML_DOCUMENT_TYPE_NODE) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid DocumentType object");
@@ -192,20 +192,16 @@ PHP_FUNCTION(dom_domimplementation_create_document)
 			xmlFreeURI(uristruct);
 
 			if (uri_len > 0) {
-				if (prefix == NULL) {
+				if ((nsptr = xmlNewNs(NULL, uri, prefix)) == NULL) {
 					php_dom_throw_error(NAMESPACE_ERR, &return_value TSRMLS_CC);
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid Namespace");
-					xmlFree(localname);
-					RETURN_FALSE;
-				} else {
-					if ((nsptr = xmlNewNs(NULL, uri, prefix)) == NULL) {
-						php_dom_throw_error(NAMESPACE_ERR, &return_value TSRMLS_CC);
+					if (prefix != NULL) {
 						xmlFree(prefix);
-						xmlFree(localname);
-						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid Namespace");
-						RETURN_FALSE;	
 					}
+					xmlFree(localname);
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid Namespace");
+					RETURN_FALSE;	
 				}
+
 			}
 			if (prefix != NULL) {
 				xmlFree(prefix);
@@ -223,24 +219,42 @@ PHP_FUNCTION(dom_domimplementation_create_document)
 	}
 
 	if (doctype != NULL) {
-		dtd = xmlCreateIntSubset (docp, doctype->name, 
-			doctype->ExternalID, doctype->SystemID);
+		docp->intSubset = doctype;
+		doctype->parent = docp;
+		doctype->doc = docp;
+		docp->children = (xmlNodePtr) doctype;
+		docp->last = (xmlNodePtr) doctype;
 	}
 
 	if (localname != NULL) {
 		nodep = xmlNewDocNode (docp, nsptr, localname, NULL);
 		if (!nodep) {
+			if (doctype != NULL) {
+				docp->intSubset = NULL;
+				doctype->parent = NULL;
+				doctype->doc = NULL;
+				docp->children = NULL;
+				docp->last = NULL;
+			}
 			xmlFreeDoc(docp);
 			xmlFree(localname);
 			/* Need some type of error here */
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unexpected Error");
 			RETURN_FALSE;
 		}
+
+		nodep->nsDef = nsptr;
+
 		xmlDocSetRootElement(docp, nodep);
 		xmlFree(localname);
 	}
 
 	DOM_RET_OBJ(rv, (xmlNodePtr) docp, &ret, NULL);
+
+	if (doctype != NULL) {
+		doctobj->document = ((dom_object *)((node_ptr *)docp->_private)->_private)->document;
+		increment_document_reference(doctobj, docp TSRMLS_CC);
+	}
 }
 /* }}} end dom_domimplementation_create_document */
 
