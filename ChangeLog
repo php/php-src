@@ -1,3 +1,36 @@
+2003-12-24  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/standard/file.c:
+      - fixes for compatibility. now fgetcsv() treats a null line to be a single
+        null component.
+
+2003-12-24  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      main/main.c:
+      MFH: Fixed bug #26707 (Incorrect error for disabled functions/classes).
+      
+
+    * main/main.c
+      main/php.h
+      main/php_globals.h:
+      Fixed bug #26707 (Incorrect error for disabled functions/classes).
+
+2003-12-24  Antony Dovgal  <tony2001@phpclub.net>
+
+    * ext/oci8/oci8.c:
+      separate oci_lob_flush() to use it in oci_lob_append() etc. in the future
+
+2003-12-24  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/iconv/iconv.c:
+      - Supply some comments. Hope those help when you have to debug this dead
+      beef.
+      - Fix iconv_mime_decode() to correctly handle "malformed" headers :)
+      - Fix iconv_mime_decode() bug, that the result is mangled when
+        ICONV_MIME_CONTINUE_ON_ERROR is enabled and the function encounters an
+        unconvertable encoded chunk.
+
 2003-12-23  Ilia Alshanetsky  <ilia@prohost.org>
 
     * run-tests.php:
