@@ -512,8 +512,8 @@ static void alloc_globals_dtor(zend_alloc_globals *alloc_globals_p TSRMLS_DC)
 #endif
 
 
-#ifdef __FreeBSD__
-/* FreeBSD floating point precision fix */
+#if defined(__FreeBSD__) || defined(__DragonFly__)
+/* FreeBSD and DragonFly floating point precision fix */
 #include <floatingpoint.h>
 #endif
 
@@ -554,8 +554,8 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions, i
 	alloc_globals_ctor(&alloc_globals TSRMLS_CC);
 #endif
 
-#ifdef __FreeBSD__
-	/* FreeBSD floating point precision fix */
+#if defined(__FreeBSD__) || defined(__DragonFly__)
+	/* FreeBSD and DragonFly floating point precision fix */
 	fpsetmask(0);
 #endif
 
