@@ -5,7 +5,6 @@ LTLIBRARY_DEPENDENCIES = \
 		$(top_builddir)/Zend/libZend.la \
 		$(top_builddir)/main/libmain_cli.la \
 		$(top_builddir)/$(REGEX_LIB) \
-		$(EXT_LTLIBS) \
 		$(EXT_CLI_LTLIBS) \
 		$(top_builddir)/$(TSRM_LIB)
 

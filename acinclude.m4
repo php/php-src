@@ -930,6 +930,8 @@ dnl "extname" is the name of the ext/ subdir where the extension resides
 dnl "shared" can be set to "shared" or "yes" to build the extension as
 dnl a dynamically loadable library. Optional parameter "sapi_class" can
 dnl be set to "cli" to mark extension build only with CLI or CGI sapi's.
+dnl If "nocli" is passed the extension will be built only with a non-cli
+dnl sapi.
 dnl
 AC_DEFUN(PHP_EXTENSION,[
   EXT_SUBDIRS="$EXT_SUBDIRS $1"
@@ -949,6 +951,10 @@ dnl ---------------------------------------------- Static module
     LIB_BUILD($ext_builddir)
     EXT_LTLIBS="$EXT_LTLIBS $abs_builddir/$ext_builddir/lib$1.la"
     EXT_STATIC="$EXT_STATIC $1"
+    if test "$3" != "nocli"; then
+      EXT_CLI_LTLIBS="$EXT_CLI_LTLIBS $abs_builddir/$ext_builddir/lib$1.la"
+      EXT_CLI_STATIC="$EXT_CLI_STATIC $1"
+    fi
   else
     if test "$2" = "shared" || test "$2" = "yes"; then
 dnl ---------------------------------------------- Shared module
@@ -958,15 +964,14 @@ dnl ---------------------------------------------- Shared module
   fi
 
   if test "$2" != "shared" && test "$2" != "yes" && test "$3" = "cli"; then
-dnl ---------------------------------------------- CLI static module
+dnl ---------------------------------------------- CLI only static module
     LIB_BUILD($ext_builddir)
     if test "$PHP_SAPI" = "cgi"; then
       EXT_LTLIBS="$EXT_LTLIBS $abs_builddir/$ext_builddir/lib$1.la"
       EXT_STATIC="$EXT_STATIC $1"
-    else
-      EXT_CLI_LTLIBS="$EXT_CLI_LTLIBS $abs_builddir/$ext_builddir/lib$1.la"
-      EXT_CLI_STATIC="$EXT_CLI_STATIC $1"
     fi
+    EXT_CLI_LTLIBS="$EXT_CLI_LTLIBS $abs_builddir/$ext_builddir/lib$1.la"
+    EXT_CLI_STATIC="$EXT_CLI_STATIC $1"
   fi
 
   PHP_FAST_OUTPUT($ext_builddir/Makefile)
