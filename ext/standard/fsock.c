@@ -307,9 +307,9 @@ static void php_fsockopen(INTERNAL_FUNCTION_PARAMETERS, int persistent) {
 			RETURN_FALSE;
 		}
 	  
-		memset(&unix_addr,(char)0,sizeof(unix_addr));
+		memset(&unix_addr, (char)0, sizeof(unix_addr));
 		unix_addr.sun_family = AF_UNIX;
-		strcpy(unix_addr.sun_path, (*args[0])->value.str.val);
+		strlcpy(unix_addr.sun_path, (*args[0])->value.str.val, sizeof(unix_addr.sun_path));
 
 		if (connect_nonb(socketd, (struct sockaddr *) &unix_addr, sizeof(unix_addr), &timeout) == SOCK_CONN_ERR) {
 			CLOSE_SOCK(1);
