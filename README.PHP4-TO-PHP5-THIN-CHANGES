@@ -8,3 +8,5 @@
 2. Change illegal use of string offset from E_WARNING to E_ERROR
 3. array_merge() accepts only arrays. If non-array is passed a E_WARNING for every non-array
    parameter will be throwed. Be careful because your code may start emitting E_WARNING out of the blue.
+4. Be careful when porting from ext/mysql to ext/mysqli. mysqli_fetch_row()/mysqli_fetch_array()/mysql_fetch_assoc()
+   retun NULL when there is no more data in the result set (ext/mysql's functions return FALSE).
