@@ -1698,6 +1698,13 @@ static zend_bool do_inherit_property_access_check(HashTable *target_ht, zend_pro
 		if ((child_info->flags & ZEND_ACC_PPP_MASK) > (parent_info->flags & ZEND_ACC_PPP_MASK)) {
 			zend_error(E_COMPILE_ERROR, "Access level to %s::$%s must be %s (as in class %s)%s", ce->name, hash_key->arKey, zend_visibility_string(parent_info->flags), parent_ce->name, (parent_info->flags&ZEND_ACC_PUBLIC) ? "" : " or weaker");
 		} else if (child_info->flags & ZEND_ACC_IMPLICIT_PUBLIC) {
+			/* Explicitly copy the value from the parent */
+			zval **pvalue;
+
+			if (zend_hash_quick_find(&parent_ce->default_properties, hash_key->arKey, hash_key->nKeyLength, hash_key->h, (void **) &pvalue)==SUCCESS) {
+				zend_hash_quick_update(&ce->default_properties, hash_key->arKey, hash_key->nKeyLength, hash_key->h, pvalue, sizeof(zval *), NULL);
+				(*pvalue)->refcount++;
+			}
 			return 1; /* Inherit from the parent */
 		}
 		return 0;	/* Don't copy from parent */
