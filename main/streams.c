@@ -1916,6 +1916,11 @@ PHPAPI int php_stream_parse_fopen_modes(const char *mode, int *open_flags)
 		flags |= O_BINARY;
 	}
 #endif
+#ifdef _O_TEXT
+	if (strchr(mode, 't')) {
+		flags |= _O_TEXT;
+	}
+#endif
 
 	*open_flags = flags;
 	return SUCCESS;
