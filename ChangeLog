@@ -2,6 +2,7 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? 1999, Version 4.0 Beta 3
+- Added user-level callbacks for session module (Sascha)
 - Added support for unknown POST content types (Zeev)
 - Added "wddx" serialization handler for session module (Sascha)
   (automatically enabled, if you compile with --with-wddx)
