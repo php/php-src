@@ -277,7 +277,7 @@ PHP_MINFO_FUNCTION(apache)
 		env_arr = table_elts(r->headers_in);
 		env = (table_entry *)env_arr->elts;
 		for (i = 0; i < env_arr->nelts; ++i) {
-			if (env[i].key) {
+			if (env[i].key && (!PG(safe_mode) || (PG(safe_mode) && strncasecmp(env[i].key, "authorization", 13)))) {
 				php_info_print_table_row(2, env[i].key, env[i].val);
 			}
 		}
