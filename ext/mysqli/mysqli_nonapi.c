@@ -194,6 +194,8 @@ PHP_FUNCTION(mysqli_query)
 	if (MyG(profiler)) {
 		gettimeofday(&starttime, NULL);
 		prresult = (PR_RESULT *)MYSQLI_PROFILER_NEW(prquery, MYSQLI_PR_RESULT, 1);
+	} else {
+		prresult = NULL;
 	}
 
 	result = (resultmode == MYSQLI_USE_RESULT) ? mysql_use_result(mysql) : mysql_store_result(mysql);

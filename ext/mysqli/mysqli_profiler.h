@@ -145,6 +145,8 @@ extern PR_MAIN *prmain;
 if (MyG(profiler))\
 {\
 	cmd = (PR_COMMAND *)php_mysqli_profiler_new_object((PR_COMMON *)parent, MYSQLI_PR_COMMAND,1);\
+} else {\
+	cmd = NULL;\
 }
 
 #define MYSQLI_PROFILER_COMMAND_RETURNLONG(cmd, value)\
