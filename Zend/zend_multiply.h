@@ -18,22 +18,13 @@
 
 /* $Id$ */
 
-#define HALF   (4*sizeof(long))
-#define UH(b)  ((b) >> HALF)
-#define LH(a)  ((a) & ~(-1L << HALF))
-
 #define ZEND_SIGNED_MULTIPLY_LONG(a, b, lval, dval, usedval) do {		\
-	long __mid,__upr,__res = (a) * (b);									\
-	if (-(long)(a) > 0 && -(long)(b) > 0) { /* overflow intended */		\
-		__mid = UH(-(a))*LH(-(b)) + LH(-(a))*UH(-(b));					\
-		__upr = UH(-(a))*UH(-(b)) + UH(__mid);							\
+	long   __lres  = (a) * (b);											\
+	double __dres  = (double)(a) * (double)(b);							\
+	double __delta = (double) __lres - __dres;							\
+	if ( ((usedval) = (( __dres + __delta ) != __dres))) {				\
+		(dval) = __dres;												\
 	} else {															\
-		__mid = UH(a)*LH(b) + LH(a)*UH(b);								\
-		__upr = UH(a)*UH(b) + UH(__mid);								\
-	}																	\
-	if (((usedval) = !((__upr==-1&&__res<0)||(!__upr&&__res>=0)))) {	\
-		(dval) = (double)(a)*(double)(b);								\
-	} else {															\
-		(lval) = __res;													\
+		(lval) = __lres;												\
 	}																	\
 } while (0)
