@@ -90,7 +90,7 @@ BEGIN_EXTERN_C()
 #define INIT_OVERLOADED_CLASS_ENTRY(class_container, class_name, functions, handle_fcall, handle_propget, handle_propset) \
 	{															\
 		class_container.name = strdup(class_name);				\
-		class_container.name_length = sizeof(class_name)-1;		\
+		class_container.name_length = strlen(class_name);		\
 		class_container.builtin_functions = functions;			\
 		class_container.constructor = NULL;						\
 		class_container.destructor = NULL;						\
@@ -136,6 +136,7 @@ ZEND_API zend_class_entry *zend_register_internal_class(zend_class_entry *class_
 ZEND_API zend_class_entry *zend_register_internal_class_ex(zend_class_entry *class_entry, zend_class_entry *parent_ce, char *parent_name TSRMLS_DC);
 
 ZEND_API int zend_disable_function(char *function_name, uint function_name_length TSRMLS_DC);
+ZEND_API int zend_disable_class(char *class_name, uint class_name_length TSRMLS_DC);
 
 ZEND_API void zend_wrong_param_count(TSRMLS_D);
 ZEND_API zend_bool zend_is_callable(zval *callable, zend_bool syntax_only, char **callable_name);
@@ -250,6 +251,7 @@ ZEND_API int zend_set_hash_symbol(zval *symbol, char *name, int name_length,
 #define add_method(arg, key, method)	add_assoc_function((arg), (key), (method))
 
 ZEND_API ZEND_FUNCTION(display_disabled_function);
+ZEND_API ZEND_FUNCTION(display_disabled_class);
 
 #if ZEND_DEBUG
 #define CHECK_ZVAL_STRING(z) \
