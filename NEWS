@@ -2,8 +2,13 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.3-dev
+- Added support for BSD/OS make (Sascha)
+- Added improved URL rewriter (Sascha)
+- Fixed readdir_r() use on Solaris (Sascha)
+- Improved HTTP headers for private-caching (jon@csh.rit.edu, Sascha)
+- Added new function session_cache_limiter (jon@csh.rit.edu, Sascha)
 - Added ftp_exec to the ftp functions (thanks to <jhennebicq@i-d.net>)
-- (Derick)
+  (Derick)
 - PEAR: add last executed query as debug info in DB errors (Stig)
 - PEAR: allow multiple modes in PEAR_Error (Stig)
 - Made the Sybase CT module thread safe (Zeev)
