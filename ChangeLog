@@ -1,3 +1,86 @@
+2001-08-22  Jeroen van Wolffelaar  <jeroen@A-Eskwadraat.nl>
+
+    * ext/standard/crypt.c: Fixed the right version
+
+    * ext/standard/crypt.c:
+    Reverted the patch to main branch - should have branched whole
+    ext/standard...
+
+    * ext/standard/crypt.c:
+    Commit forgotten fix in crypt.c, oversight of a BC-problem
+
+    * ext/standard/Makefile.in
+      ext/standard/php_math.h
+      ext/standard/php_rand.h
+      ext/standard/rand.c
+      ext/standard/rand_mt.c:
+    Experimental beginning of a change in the way rand-functions work.
+
+    This is only a _move around_ of code into functions.
+
+    * ext/standard/rand_mt.c: New file.
+
+2001-08-22  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/mhash/mhash.c: killed a compile warning.
+
+    * NEWS: Added missing entry..
+
+    * ext/readline/config.m4
+      ext/readline/php_readline.h
+      ext/readline/readline.c: MFH
+
+    * main/php.h: This is not needed anymore.
+
+    * ext/readline/config.m4
+      ext/readline/php_readline.h
+      ext/readline/readline.c: Fixed two problems:
+
+    - CGI_BINARY was defined always thus this extension
+      could be compiled with even when not building CGI binary.
+
+    - HAVE_READLINE => HAVE_LIBREADLINE (typo)
+
+    * ext/ctype/ctype.c
+      ext/ming/ming.c: More compile warnings nuked.
+
+    * ext/informix/ifx.ec: indent.
+
+    * ext/bz2/bz2.c
+      ext/zlib/zlib_fopen_wrapper.c
+      ext/gd/gd.c
+      ext/gd/php_gd.h
+      ext/exif/exif.c: Killed a compile warning.
+
+2001-08-22  Gavin Sherry  <swm@linuxworld.com.au>
+
+    * ext/standard/string.c: Fixed buffer overflow issue.
+
+2001-08-22  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * sapi/apache2filter/php_functions.c
+      sapi/apache2filter/sapi_apache2.c
+      sapi/apache2filter/apache_config.c:
+    Add some editor modes (in the rest of the source)
+
+2001-08-22  Gavin Sherry  <swm@linuxworld.com.au>
+
+    * ext/standard/string.c:
+    Changed php_strip_tags() to check if <? was XML code.
+
+2001-08-22  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * pear/Cache/Graphics.php: Cache this
+
+2001-08-22  Stig Bakken  <ssb@fast.no>
+
+    * ext/dbx/dbx.c: * added two missing end folds
+
+2001-08-22  Jon Parise  <jon@csh.rit.edu>
+
+    * pear/Cache/Graphics.php: - Correct typo (; -> ,).
+    - Added curly braces.
+
 2001-08-21  Joey Smith  <joey@joeysmith.com>
 
     * ext/standard/filestat.c: MFH: Make stat() act like stat, not filesize().
