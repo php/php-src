@@ -226,7 +226,7 @@ class DB {
 		}
 
 		if (!$parsed['database'])
-			$dsn = preg_replace('|/+$|', '', &$dsn);
+			$dsn = preg_replace('|/+$|', '', $dsn);
 
 		$parsed['hostspec'] = $dsn;
 
