@@ -308,11 +308,30 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 	if (!variable_ptr_ptr) {
 		switch (Ts[op1->u.var].EA.type) {
 			case IS_OVERLOADED_OBJECT:
-				set_overloaded_property(&Ts[op1->u.var], value TSRMLS_CC);
-				if (type == IS_TMP_VAR) {
-					zval_dtor(value);
+				{
+					int return_value_used;
+
+					return_value_used = result && !(result->u.EA.type & EXT_TYPE_UNUSED);
+
+					if (return_value_used) {
+						if (type == IS_TMP_VAR) {
+							MAKE_STD_ZVAL(*Ts[result->u.var].var.ptr_ptr);
+							**Ts[result->u.var].var.ptr_ptr = *value;
+							INIT_PZVAL(*Ts[result->u.var].var.ptr_ptr);
+						} else {
+							Ts[result->u.var].var.ptr_ptr = &value;
+							PZVAL_LOCK(*Ts[result->u.var].var.ptr_ptr);
+						}
+						AI_USE_PTR(Ts[result->u.var].var);
+					}
+
+					set_overloaded_property(&Ts[op1->u.var], value TSRMLS_CC);
+
+					if (!return_value_used && type == IS_TMP_VAR) {
+						zval_dtor(value);
+					}
+					break;
 				}
-				break;
 			case IS_STRING_OFFSET: {
 					temp_variable *T = &Ts[op1->u.var];
 
