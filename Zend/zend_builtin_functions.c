@@ -433,7 +433,7 @@ ZEND_FUNCTION(error_reporting)
 /* }}} */
 
 
-/* {{{ proto bool define(string constant_name, mixed value, case_sensitive=true)
+/* {{{ proto bool define(string constant_name, mixed value, boolean case_sensitive=true)
    Define a new constant */
 ZEND_FUNCTION(define)
 {
