@@ -16,8 +16,9 @@
    +----------------------------------------------------------------------+
 */
 
-#include "zend_ts_hash.h"
+#ifdef ZTS
 
+#include "zend_ts_hash.h"
 
 /* ts management functions */
 static void begin_read(TsHashTable *ht)
@@ -337,3 +338,5 @@ void zend_ts_hash_display(TsHashTable *ht)
 	end_read(ht);
 }
 #endif
+
+#endif /* ZTS */
