@@ -1,3 +1,13 @@
+2000-12-26  Zeev Suraski  <zeev@zend.com>
+
+    * ext/mysql/libmysql/libmysql.dsp
+      sapi/isapi/php4isapi.dsp
+      win32/php4dllts.dsp
+      win32/php4ts.dsp:
+    Add Release_TSDbg support.  This mode compiles PHP with the release C runtime,
+    but with optimizations disabled and with debug info.  Some crashes can only
+    be debugged using this mode.
+
 2000-12-25  James L. Pine  <jlp@valinux.com>
 
     * pear/DB/oci8.php:
