@@ -290,6 +290,7 @@ php_ns_startup(sapi_module_struct *sapi_module)
 /* this structure is static (as in "it does not change") */
 
 static sapi_module_struct sapi_module = {
+	"aolserver",
 	"AOLserver",
 
 	php_ns_startup,							/* startup */

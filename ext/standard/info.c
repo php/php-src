@@ -179,8 +179,8 @@ PHPAPI void php_print_info(int flag)
 #ifdef CONFIGURE_COMMAND
 		php_info_print_table_row(2, "Configure Command", CONFIGURE_COMMAND );
 #endif
-		if (sapi_module.name) {
-			php_info_print_table_row(2, "Server API", sapi_module.name );
+		if (sapi_module.pretty_name) {
+			php_info_print_table_row(2, "Server API", sapi_module.pretty_name );
 		}
 
 #ifdef VIRTUAL_DIR

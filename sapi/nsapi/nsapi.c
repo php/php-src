@@ -322,7 +322,8 @@ sapi_nsapi_register_server_variables(zval *track_vars_array ELS_DC SLS_DC PLS_DC
 }
 
 static sapi_module_struct sapi_module = {
-	"NSAPI",				/* name */
+	"nsapi",				/* name */
+	"NSAPI",				/* pretty name */
 
 	php_module_startup,			/* startup */
 	php_module_shutdown_wrapper,		/* shutdown */

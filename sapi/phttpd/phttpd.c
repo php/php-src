@@ -162,6 +162,7 @@ php_phttpd_sapi_read_post(char *buf, uint count_bytes SLS_DC)
 }
 
 static sapi_module_struct sapi_module = {
+    "phttpd",
     "PHTTPD",
  
     php_phttpd_startup,                     /* startup */
