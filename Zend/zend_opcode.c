@@ -194,7 +194,7 @@ ZEND_API void destroy_op_array(zend_op_array *op_array)
 void init_op(zend_op *op CLS_DC)
 {
 	op->lineno = CG(zend_lineno);
-	op->filename = zend_get_compiled_filename();
+	op->filename = zend_get_compiled_filename(CLS_C);
 	op->result.op_type = IS_UNUSED;
 	op->extended_value = 0;
 	op->op1.u.EA.var = 0;

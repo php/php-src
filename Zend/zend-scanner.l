@@ -150,7 +150,7 @@ static inline void save_lexical_state(zend_lex_state *lex_state CLS_DC)
 	lex_state->in = yyin;
 	lex_state->lineno = CG(zend_lineno);
 	lex_state->state = YYSTATE;
-	lex_state->filename = zend_get_compiled_filename();
+	lex_state->filename = zend_get_compiled_filename(CLS_C);
 #else
 	lex_state->ZFL = CG(ZFL);
 #endif
@@ -338,7 +338,9 @@ ZEND_API zend_op_array *v_compile_files(int mark_as_ref CLS_DC, int file_count, 
 	int i;
 	int compiler_result;
 	int compiled_files=0;
+	zend_bool original_in_compilation = CG(in_compilation);
 
+	CG(in_compilation) = 1;
 	init_op_array(op_array, INITIAL_OP_ARRAY_SIZE);
 	save_lexical_state(&original_lex_state CLS_CC);
 
@@ -379,6 +381,7 @@ ZEND_API zend_op_array *v_compile_files(int mark_as_ref CLS_DC, int file_count, 
 			retval = NULL;
 		}
 	}
+	CG(in_compilation) = original_in_compilation;
 	return retval;
 }
 
@@ -454,11 +457,15 @@ zend_op_array *compile_string(zval *source_string CLS_DC)
 	zend_op_array *retval;
 	zval tmp;
 	int compiler_result;
+	zend_bool original_in_compilation = CG(in_compilation);
 
 	if (source_string->value.str.len==0) {
 		efree(op_array);
 		return NULL;
 	}
+
+	CG(in_compilation) = 1;
+
 	tmp = *source_string;
 	zval_copy_ctor(&tmp);
 	convert_to_string(&tmp);
@@ -494,6 +501,7 @@ zend_op_array *compile_string(zval *source_string CLS_DC)
 		}
 	}
 	zval_dtor(&tmp);
+	CG(in_compilation) = original_in_compilation;
 	return retval;
 }
 
@@ -1125,7 +1133,7 @@ ESCAPED_AND_WHITESPACE [\n\t\r #'.:;,()|^&+-/*=%!~<>?@]+
 }
 
 <ST_IN_SCRIPTING>"__FILE__" {
-	char *filename = zend_get_compiled_filename();
+	char *filename = zend_get_compiled_filename(CLS_C);
 	
 	if (!filename) {
 		filename = "";

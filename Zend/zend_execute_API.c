@@ -103,6 +103,8 @@ void init_executor(CLS_D ELS_DC)
 	EG(function_table) = CG(function_table);
 	EG(class_table) = CG(class_table);
 
+	EG(in_execution) = 0;
+
 	zend_ptr_stack_init(&EG(argument_stack));
 
 	EG(main_op_array) = NULL;
@@ -198,6 +200,14 @@ ZEND_API uint zend_get_executed_lineno(ELS_D)
 	} else {
 		return 0;
 	}
+}
+
+
+ZEND_API zend_bool zend_is_executing()
+{
+	ELS_FETCH();
+
+	return EG(in_execution);
 }
 
 

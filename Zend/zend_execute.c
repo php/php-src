@@ -967,7 +967,9 @@ void execute(zend_op_array *op_array ELS_DC)
 #else
 	temp_variable Ts[op_array->T];
 #endif
+	zend_bool original_in_execution=EG(in_execution);
 
+	EG(in_execution) = 1;
 #if SUPPORT_INTERACTIVE
 	if (EG(interactive)) {
 		opline = op_array->opcodes + op_array->start_op_number;
@@ -1649,6 +1651,7 @@ do_fcall_common:
 					op_array->last_executed_op_number = opline-op_array->opcodes;
 #endif
 					free_alloca(Ts);
+					EG(in_execution) = original_in_execution;
 					return;
 				}
 				break;
