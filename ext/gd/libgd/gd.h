@@ -321,11 +321,14 @@ typedef struct {
 				   gdFTEX_Shift_JIS, or gdFTEX_Big5;
 				   when not specified, maps are searched
 				   for in the above order. */
+	int hdpi;
+	int vdpi;
 }
  gdFTStringExtra, *gdFTStringExtraPtr;
 
 #define gdFTEX_LINESPACE 1
 #define gdFTEX_CHARMAP 2
+#define gdFTEX_RESOLUTION 4
 
 /* These are NOT flags; set one in 'charmap' if you set the gdFTEX_CHARMAP bit in 'flags'. */
 #define gdFTEX_Unicode 0
