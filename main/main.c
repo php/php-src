@@ -1263,8 +1263,10 @@ PHPAPI int php_lint_script(zend_file_handle *file CLS_DC ELS_DC PLS_DC)
 
 	op_array = zend_compile_file(file, ZEND_INCLUDE CLS_CC);
 	retval = (op_array?SUCCESS:FAILURE);
-	/* SMC op_array may be NULL */
-	if (op_array != NULL) destroy_op_array(op_array);
+
+	if (op_array != NULL) {
+		destroy_op_array(op_array);
+	}
 
 	return retval;
 }
