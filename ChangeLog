@@ -1,3 +1,29 @@
+2005-01-13  Ard Biesheuvel  <a.k.biesheuvel@ewi.tudelft.nl>
+
+    * (PHP_4_3)
+      ext/interbase/interbase.c:
+      Fixed unregistered bug: corrupted 32-bit LONGs on 64-bit systems
+
+2005-01-13  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * (PHP_5_0)
+      acinclude.m4:
+      MFH the extension dep macro (which is a NOP)
+      so that pecl extensions with deps can build against head and 5.0.x
+
+2005-01-13  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute.c:
+      Additional fix for fix of bug #29883
+
+2005-01-13  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/odbc/config.m4
+      ext/odbc/php_odbc.c
+      ext/odbc/php_odbc_includes.h:
+      Add support for ODBCRouter
+
 2005-01-12  Dmitry Stogov  <dmitry@zend.com>
 
     * ZendEngine2/zend_execute.c
