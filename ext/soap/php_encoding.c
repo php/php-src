@@ -2437,6 +2437,9 @@ zval *sdl_guess_convert_zval(encodeTypePtr enc, xmlNodePtr data)
 	sdlTypePtr type;
 
 	type = enc->sdl_type;
+	if (type == NULL) {
+		return guess_zval_convert(enc, data);
+	}
 /*FIXME: restriction support
 	if (type && type->restrictions &&
 	    data &&  data->children && data->children->content) {
@@ -2500,6 +2503,13 @@ xmlNodePtr sdl_guess_convert_xml(encodeTypePtr enc, zval *data, int style, xmlNo
 
 	type = enc->sdl_type;
 
+	if (type == NULL) {
+		ret = guess_xml_convert(enc, data, style, parent);
+		if (style == SOAP_ENCODED) {
+			set_ns_and_type(ret, enc);
+		}
+		return ret;
+	}
 /*FIXME: restriction support
 	if (type) {
 		if (type->restrictions && Z_TYPE_P(data) == IS_STRING) {
