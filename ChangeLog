@@ -1,3 +1,40 @@
+2000-11-11  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/gd/config.m4: Fix for #7758. Plus some cleaning.
+
+2000-11-11  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/info.c: Add Apache 2.0 sapi module and sort alphabetically.
+
+    * sapi/aolserver/aolserver.c:
+    strdup private AOLserver data before inserting it into SAPI's request_info.
+
+    * sapi/apache2filter/Makefile.in
+      sapi/apache2filter/README
+      sapi/apache2filter/php_apache.h
+      sapi/apache2filter/php_functions.c
+      sapi/apache2filter/sapi_apache2.c: Update README
+
+    Make Apache-related functions build
+
+    Add get_all_headers()
+
+    Fix segfault when SAPI outputs strings of length 0
+
+    Move request ctor/dtor into their own functions
+
+2000-11-11  Chuck Hagenbuch  <chuck@horde.org>
+
+    * ext/standard/datetime.c:
+    RFC822 does specify two digit years, but practically every decent mail
+    client I could check is using 4-digit years these days.
+
+2000-11-11  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * main/fopen-wrappers.c:
+    fix for #7756 and #6743 : fatal error on 'include("")' instead of warning
+    (+ some cleanup)
+
 2000-11-10  Ben Mansell  <ben@zeus.com>
 
     * README.Zeus: Further updates to README.Zeus
