@@ -85,11 +85,10 @@ if test "$PHP_SQLITE" != "no"; then
     fi
     PHP_SUBST(SQLITE_ENCODING)
 
-    AC_PATH_PROG(LEMON,lemon,no)
-    PHP_SUBST(LEMON)
-
     SQLITE_VERSION=`cat $ext_srcdir/libsqlite/VERSION`
     PHP_SUBST(SQLITE_VERSION)
+	
+    sed -e s/--VERS--/$SQLITE_VERSION/ -e s/--ENCODING--/$SQLITE_ENCODING/ $ext_srcdir/libsqlite/src/sqlite.h.in >$ext_srcdir/libsqlite/src/sqlite.h
 
     if test "$ext_shared" = "no"; then
       echo '#include "php_config.h"' > $ext_srcdir/libsqlite/src/config.h
@@ -105,8 +104,6 @@ if test "$PHP_SQLITE" != "no"; then
 # define NDEBUG
 #endif
 EOF
-
-    PHP_ADD_MAKEFILE_FRAGMENT
 
   fi
 

@@ -189,7 +189,7 @@ void sqliteDeleteFrom(
   }
 
   /* The usual case: There is a WHERE clause so we have to scan through
-  ** the table an pick which records to delete.
+  ** the table and pick which records to delete.
   */
   else{
     /* Begin the database scan
@@ -253,12 +253,7 @@ void sqliteDeleteFrom(
       ** cursors are opened only once on the outside the loop.
       */
       pParse->nTab = iCur + 1;
-      sqliteVdbeAddOp(v, OP_Integer, pTab->iDb, 0);
-      sqliteVdbeAddOp(v, OP_OpenWrite, iCur, pTab->tnum);
-      for(i=1, pIdx=pTab->pIndex; pIdx; i++, pIdx=pIdx->pNext){
-        sqliteVdbeAddOp(v, OP_Integer, pIdx->iDb, 0);
-        sqliteVdbeAddOp(v, OP_OpenWrite, pParse->nTab++, pIdx->tnum);
-      }
+      sqliteOpenTableAndIndices(pParse, pTab, iCur);
 
       /* This is the beginning of the delete loop when there are no
       ** row triggers */
@@ -299,13 +294,14 @@ void sqliteDeleteFrom(
       pParse->nTab = iCur;
     }
   }
+  sqliteVdbeAddOp(v, OP_SetCounts, 0, 0);
   sqliteEndWriteOperation(pParse);
 
   /*
   ** Return the number of rows that were deleted.
   */
   if( db->flags & SQLITE_CountRows ){
-    sqliteVdbeAddOp(v, OP_ColumnName, 0, 0);
+    sqliteVdbeAddOp(v, OP_ColumnName, 0, 1);
     sqliteVdbeChangeP3(v, -1, "rows deleted", P3_STATIC);
     sqliteVdbeAddOp(v, OP_Callback, 1, 0);
   }
@@ -347,7 +343,8 @@ void sqliteGenerateRowDelete(
   int addr;
   addr = sqliteVdbeAddOp(v, OP_NotExists, iCur, 0);
   sqliteGenerateRowIndexDelete(db, v, pTab, iCur, 0);
-  sqliteVdbeAddOp(v, OP_Delete, iCur, count);
+  sqliteVdbeAddOp(v, OP_Delete, iCur,
+    (count?OPFLAG_NCHANGE:0) | OPFLAG_CSCHANGE);
   sqliteVdbeChangeP2(v, addr, sqliteVdbeCurrentAddr(v));
 }
 

@@ -19,12 +19,35 @@
 /*
 ** The size of one page
 **
-** You can change this value to another (reasonable) power of two
-** such as 512, 2048, 4096, or 8192 and things will still work.  But
-** experiments show that a page size of 1024 gives the best speed.
-** (The speed differences are minimal.)
+** You can change this value to another (reasonable) value you want.
+** It need not be a power of two, though the interface to the disk
+** will likely be faster if it is.
+**
+** Experiments show that a page size of 1024 gives the best speed
+** for common usages.  The speed differences for different sizes
+** such as 512, 2048, 4096, an so forth, is minimal.  Note, however,
+** that changing the page size results in a completely imcompatible
+** file format.
 */
+#ifndef SQLITE_PAGE_SIZE
 #define SQLITE_PAGE_SIZE 1024
+#endif
+
+/*
+** Number of extra bytes of data allocated at the end of each page and
+** stored on disk but not used by the higher level btree layer.  Changing
+** this value results in a completely incompatible file format.
+*/
+#ifndef SQLITE_PAGE_RESERVE
+#define SQLITE_PAGE_RESERVE 0
+#endif
+
+/*
+** The total number of usable bytes stored on disk for each page.
+** The usable bytes come at the beginning of the page and the reserve
+** bytes come at the end.
+*/
+#define SQLITE_USABLE_SIZE (SQLITE_PAGE_SIZE-SQLITE_PAGE_RESERVE)
 
 /*
 ** Maximum number of pages in one database.  (This is a limitation of
@@ -75,6 +98,7 @@ int *sqlitepager_stats(Pager*);
 void sqlitepager_set_safety_level(Pager*,int);
 const char *sqlitepager_filename(Pager*);
 int sqlitepager_rename(Pager*, const char *zNewName);
+void sqlitepager_set_codec(Pager*,void(*)(void*,void*,Pgno,int),void*);
 
 #ifdef SQLITE_TEST
 void sqlitepager_refdump(Pager*);
