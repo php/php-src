@@ -19,6 +19,7 @@
 
 
 #include "php.h"
+#include "main.h"
 #include "php_ini.h"
 #include "internal_functions_registry.h"
 #include "php_standard.h"
@@ -77,6 +78,9 @@ typedef struct _php_shutdown_function_entry {
 
 /* some prototypes for local functions */
 static int user_shutdown_function_dtor(php_shutdown_function_entry *shutdown_function_entry);
+pval test_class_get_property(zend_property_reference *property_reference);
+int test_class_set_property(zend_property_reference *property_reference, pval *value);
+void test_class_call_function(INTERNAL_FUNCTION_PARAMETERS, zend_property_reference *property_reference);
 
 function_entry basic_functions[] = {
 	PHP_FE(intval,									NULL)
@@ -357,7 +361,7 @@ static int _php3_putenv_destructor(putenv_entry *pe)
 #define M_PI 3.14159265358979323846
 #endif
 
-void test_class_startup();
+void test_class_startup(void);
 
 PHP_MINIT_FUNCTION(basic)
 {
@@ -1034,7 +1038,7 @@ int user_shutdown_function_dtor(php_shutdown_function_entry *shutdown_function_e
 }
 
 
-void php3_call_shutdown_functions(void)
+void php_call_shutdown_functions(void)
 {
 	BLS_FETCH();
 	

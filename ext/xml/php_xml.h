@@ -127,6 +127,8 @@ PHP_FUNCTION(utf8_encode);
 PHP_FUNCTION(utf8_decode);
 PHP_FUNCTION(xml_parse_into_struct);
 
+PHPAPI char *_xml_zval_strdup(zval *val);
+
 #else /* !HAVE_LIBEXPAT */
 
 # define xml_module_ptr NULL

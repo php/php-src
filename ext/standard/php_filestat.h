@@ -54,6 +54,7 @@ PHP_FUNCTION(is_link);
 PHP_FUNCTION(file_exists);
 PHP_FUNCTION(stat);
 PHP_FUNCTION(lstat);
+PHP_FUNCTION(diskfreespace);
 PHP_FUNCTION(chown);
 PHP_FUNCTION(chgrp);
 PHP_FUNCTION(chmod);

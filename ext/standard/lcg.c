@@ -59,8 +59,6 @@ double php_combined_lcg(void)
 	return z * 4.656613e-10;
 }
 
-static void lcg_init_globals(LCGLS_D);
-
 static void lcg_init_globals(LCGLS_D)
 {
 	LCG(s1) = 1;
