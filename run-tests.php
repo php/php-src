@@ -138,6 +138,7 @@ settings2array($ini_overwrites,$info_params);
 settings2params($info_params);
 $php_info = `$php $info_params $info_file`;
 @unlink($info_file);
+define('TESTED_PHP_VERSION', `$php -r 'echo PHP_VERSION;'`);
 
 // Write test context information.
 
@@ -165,7 +166,7 @@ if (isset($argc) && $argc > 1) {
 		$testfile = realpath($argv[$i]);
 		if (is_dir($testfile)) {
 			find_files($testfile);
-		} else if(preg_match("/\.phpt$/", $testfile)) {
+		} else if (preg_match("/\.phpt$/", $testfile)) {
 			$test_files[] = $testfile;
 		}
 	}
@@ -177,7 +178,7 @@ if (isset($argc) && $argc > 1) {
 		foreach($test_files AS $name) {
 			$test_results[$name] = run_test($php,$name);
 		}
-		if(getenv('REPORT_EXIT_STATUS') == 1 and ereg('FAILED( |$)', implode(' ', $test_results))) {
+		if (getenv('REPORT_EXIT_STATUS') == 1 and ereg('FAILED( |$)', implode(' ', $test_results))) {
 			exit(1);
 		}
 		exit(0);
@@ -380,7 +381,7 @@ if (!getenv('NO_INTERACTION')) {
 			$cc_status=0;
 			foreach($flags AS $flag) {
 				system(getenv('CC')." $flag >/dev/null 2>&1", $cc_status);
-				if($cc_status == 0) {
+				if ($cc_status == 0) {
 					$compiler = shell_exec(getenv('CC')." $flag 2>&1");
 					break;
 				}
@@ -408,8 +409,10 @@ if (!getenv('NO_INTERACTION')) {
 			fwrite($fp, $failed_tests_data);
 			fclose($fp);
 		
-			if (!$just_save_results)
+			if (!$just_save_results) {
 			    echo "\nThe test script was unable to automatically send the report to PHP's QA Team\n";
+			}
+
 			echo "Please send ".$output_file." to ".PHP_QA_EMAIL." manually, thank you.\n";
 		} else {
 			fwrite($fp, "\nThank you for helping to make PHP better.\n");
@@ -418,7 +421,7 @@ if (!getenv('NO_INTERACTION')) {
 	}
 }
  
-if(getenv('REPORT_EXIT_STATUS') == 1 and $sum_results['FAILED']) {
+if (getenv('REPORT_EXIT_STATUS') == 1 and $sum_results['FAILED']) {
 	exit(1);
 }
 
@@ -439,8 +442,10 @@ function mail_qa_team($data, $compression, $status = FALSE)
 		return FALSE;
 	}
 
+	$php_version = urlencode(TESTED_PHP_VERSION);
+
 	echo "\nPosting to {$url_bits['host']} {$url_bits['path']}\n";
-	fwrite($fs, "POST ".$url_bits['path']."?status=$status HTTP/1.1\r\n");
+	fwrite($fs, "POST ".$url_bits['path']."?status=$status&version=$php_version HTTP/1.1\r\n");
 	fwrite($fs, "Host: ".$url_bits['host']."\r\n");
 	fwrite($fs, "User-Agent: QA Browser 0.1\r\n");
 	fwrite($fs, "Content-Type: application/x-www-form-urlencoded\r\n");
