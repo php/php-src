@@ -14,7 +14,7 @@ PHP 4                                                                      NEWS
   properly). (Ilia)
 - Fixed bug #30750 (Meaningful error message when upload directory is not 
   accessible). (Ilia)
-- Fixed bug #30739 (imagefill does not set back alphablending mode) (Pierre)
+- Fixed bug #30739 (imagefill does not set back alphablending mode). (Pierre)
 - Fixed bug #30672 (Problem handling exif data in jpeg images at unusual 
   places). (Marcus)
 - Fixed bug #30658 (Ensure that temporary files created by GD are removed).
@@ -27,16 +27,16 @@ PHP 4                                                                      NEWS
 - Fixed bug #30475 (curl_getinfo() may crash in some situations). (Ilia)
 - Fixed bug #30442 (segfault when parsing ?getvariable[][ ). (Tony)
 - Fixed bug #30388 (rename across filesystems loses ownership and
-  permission info) (Tony)
+  permission info). (Tony)
 - Fixed bug #30282 (segfault when using unknown/unsupported
   session.save_handler and/or session.serialize_handler). (Tony)
 - Fixed bug #30281 (Prevent non-wbmp images from being detected as such).
   (Ilia)
 - Fixed bug #30276 (Possible crash in ctype_digit on large numbers). (Ilia)
 - Fixed bug #30232 (session_start() sends Set-Cookie header only if the 
-  cookie isn't set). Tony
+  cookie isn't set). (Tony)
 - Fixed bug #30229 (imagerectangle and imagefilledrectangle do work well
-  with alpha channel, corners are drawn twice) (Pierre)
+  with alpha channel, corners are drawn twice). (Pierre)
 - Fixed bug #30224 (Sybase date strings are sometimes not null terminated).
   (Ilia)
 - Fixed bug #30133 (get_current_user() crashes on Windows). (Edin)
