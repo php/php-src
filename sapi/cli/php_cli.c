@@ -264,6 +264,7 @@ static void php_cli_usage(char *argv0)
 	            "       %s [options] [-- args...]\n"
 				"  -a               Run interactively\n"
 				"  -c <path>|<file> Look for php.ini file in this directory\n"
+				"  -n               No php.ini file will be used\n"
 				"  -d foo[=bar]     Define INI entry foo with value 'bar'\n"
 				"  -e               Generate extended information for debugger/profiler\n"
 				"  -f <file>        Parse <file>.\n"
@@ -423,8 +424,10 @@ int main(int argc, char *argv[])
 		case 'c':
 			cli_sapi_module.php_ini_path_override = strdup(ap_php_optarg);
 			break;
+		case 'n':
+			cli_sapi_module.php_ini_ignore = 1;
+			break;
 		}
-
 	}
 	ap_php_optind = orig_optind;
 	ap_php_optarg = orig_optarg;
@@ -479,6 +482,13 @@ int main(int argc, char *argv[])
 
 		zend_uv.html_errors = 0; /* tell the engine we're in non-html mode */
 
+		if (cli_sapi_module.php_ini_path_override && cli_sapi_module.php_ini_ignore) {
+			SG(headers_sent) = 1;
+			SG(request_info).no_headers = 1;
+			PUTS("You cannot use both -n and -c switch. Use -h for help.\n");
+			exit(1);
+		}
+	
 		while ((c = ap_php_getopt(argc, argv, OPTSTRING)) != -1) {
 			switch (c) {
 
@@ -561,7 +571,7 @@ int main(int argc, char *argv[])
 			break;
 
 #if 0 /* not yet operational, see also below ... */
-			case 'n': /* generate indented source mode*/
+			case '': /* generate indented source mode*/
 				if (behavior == PHP_MODE_CLI_DIRECT) {
 					param_error = "Source indenting only works for files.\n";
 					break;

@@ -340,32 +340,34 @@ int php_init_config()
 
 	fh.handle.fp = NULL;
 	/* Check if php_ini_path_override is a file */
-	if (sapi_module.php_ini_path_override && sapi_module.php_ini_path_override[0]) {
-		struct stat statbuf;
-
-		if (!VCWD_STAT(sapi_module.php_ini_path_override, &statbuf)) {
-			if (!((statbuf.st_mode & S_IFMT) == S_IFDIR)) {
-				fh.handle.fp = VCWD_FOPEN(sapi_module.php_ini_path_override, "r");
-				fh.filename = sapi_module.php_ini_path_override;
+	if (!sapi_module.php_ini_ignore) {
+		if (sapi_module.php_ini_path_override && sapi_module.php_ini_path_override[0]) {
+			struct stat statbuf;
+	
+			if (!VCWD_STAT(sapi_module.php_ini_path_override, &statbuf)) {
+				if (!((statbuf.st_mode & S_IFMT) == S_IFDIR)) {
+					fh.handle.fp = VCWD_FOPEN(sapi_module.php_ini_path_override, "r");
+					fh.filename = sapi_module.php_ini_path_override;
+				}
 			}
 		}
-	}
-	/* Search php-%sapi-module-name%.ini file in search path */
-	if (!fh.handle.fp) {
-		const char *fmt = "php-%s.ini";
-		char *ini_fname=emalloc(strlen(fmt)+strlen(sapi_module.name));
-		sprintf(ini_fname, fmt, sapi_module.name);
-		fh.handle.fp = php_fopen_with_path(ini_fname, "r", php_ini_search_path, &php_ini_opened_path TSRMLS_CC);
-		efree(ini_fname);
-		if (fh.handle.fp) {
-			fh.filename = php_ini_opened_path;
+		/* Search php-%sapi-module-name%.ini file in search path */
+		if (!fh.handle.fp) {
+			const char *fmt = "php-%s.ini";
+			char *ini_fname=emalloc(strlen(fmt)+strlen(sapi_module.name));
+			sprintf(ini_fname, fmt, sapi_module.name);
+			fh.handle.fp = php_fopen_with_path(ini_fname, "r", php_ini_search_path, &php_ini_opened_path TSRMLS_CC);
+			efree(ini_fname);
+			if (fh.handle.fp) {
+				fh.filename = php_ini_opened_path;
+			}
 		}
-	}
-	/* Search php.ini file in search path */
-	if (!fh.handle.fp) {
-		fh.handle.fp = php_fopen_with_path("php.ini", "r", php_ini_search_path, &php_ini_opened_path TSRMLS_CC);
-		if (fh.handle.fp) {
-			fh.filename = php_ini_opened_path;
+		/* Search php.ini file in search path */
+		if (!fh.handle.fp) {
+			fh.handle.fp = php_fopen_with_path("php.ini", "r", php_ini_search_path, &php_ini_opened_path TSRMLS_CC);
+			if (fh.handle.fp) {
+				fh.filename = php_ini_opened_path;
+			}
 		}
 	}
 	if (free_ini_search_path) {
@@ -390,7 +392,7 @@ int php_init_config()
 				efree(php_ini_opened_path);
 			php_ini_opened_path = zend_strndup(Z_STRVAL(tmp), Z_STRLEN(tmp));
 		}
-	}	
+	}
 
 	/* If the config_file_scan_dir is set at compile-time, go and scan this directory and
 	 * parse any .ini files found in this directory. */
