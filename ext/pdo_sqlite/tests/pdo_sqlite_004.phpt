@@ -1,5 +1,5 @@
 --TEST--
-PDO-SQLite: PDO_FETCH_NUM
+PDO-SQLite: PDO_FETCH_OBJ
 --SKIPIF--
 <?php # vim:ft=php
 if (!extension_loaded("pdo_sqlite")) print "skip"; ?>
@@ -15,31 +15,31 @@ $db->exec('INSERT INTO test VALUES(3, "C")');
 
 $stmt = $db->query('SELECT * FROM test');
 
-var_dump($stmt->fetchAll(PDO_FETCH_NUM));
+var_dump($stmt->fetchAll(PDO_FETCH_OBJ));
 ?>
 ===DONE===
 <?php exit(0); ?>
---EXPECT--
+--EXPECTF--
 array(3) {
   [0]=>
-  array(2) {
-    [0]=>
+  object(stdClass)#%d (2) {
+    ["id"]=>
     string(1) "1"
-    [1]=>
+    ["val"]=>
     string(1) "A"
   }
   [1]=>
-  array(2) {
-    [0]=>
+  object(stdClass)#%d (2) {
+    ["id"]=>
     string(1) "2"
-    [1]=>
+    ["val"]=>
     string(1) "B"
   }
   [2]=>
-  array(2) {
-    [0]=>
+  object(stdClass)#%d (2) {
+    ["id"]=>
     string(1) "3"
-    [1]=>
+    ["val"]=>
     string(1) "C"
   }
 }

@@ -20,7 +20,7 @@ var_dump($stmt->fetchAll(PDO_FETCH_BOTH));
 ===DONE===
 <?php exit(0); ?>
 --EXPECT--
-array(4) {
+array(3) {
   [0]=>
   array(4) {
     ["id"]=>
@@ -53,17 +53,6 @@ array(4) {
     string(1) "C"
     [1]=>
     string(1) "C"
-  }
-  [3]=>
-  array(4) {
-    ["id"]=>
-    string(1) "4"
-    [0]=>
-    string(1) "4"
-    ["val"]=>
-    string(1) "D"
-    [1]=>
-    string(1) "D"
   }
 }
 ===DONE===
