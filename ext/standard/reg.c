@@ -347,7 +347,7 @@ PHPAPI char *php_reg_replace(const char *pattern, const char *replace, const cha
 			walkbuf = &buf[tmp + subs[0].rm_so];
 			walk = replace;
 			while (*walk)
-				if ('\\' == *walk && isdigit(walk[1]) && walk[1] - '0' <= re.re_nsub) {
+				if ('\\' == *walk && isdigit(walk[1]) && walk[1] - '0' <= (int)re.re_nsub) {
 					if (subs[walk[1] - '0'].rm_so > -1 && subs[walk[1] - '0'].rm_eo > -1
 						/* this next case shouldn't happen. it does. */
 						&& subs[walk[1] - '0'].rm_so <= subs[walk[1] - '0'].rm_eo) {
