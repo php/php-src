@@ -131,6 +131,10 @@ SOURCE=.\php3_realpath.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\php_content_types.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\php_ini.c
 # End Source File
 # Begin Source File
@@ -212,6 +216,10 @@ SOURCE=.\php3_compat.h
 # Begin Source File
 
 SOURCE=.\php3_realpath.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\php_content_types.h
 # End Source File
 # Begin Source File
 
@@ -398,6 +406,8 @@ SOURCE=.\ext\pcre\php_pcre.c
 # ADD CPP /D "STATIC"
 
 !ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS"
+
+# ADD CPP /D "STATIC"
 
 !ENDIF 
 
@@ -607,6 +617,8 @@ SOURCE=.\ext\pcre\pcrelib\chartables.c
 
 !ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS"
 
+# ADD CPP /D "STATIC"
+
 !ENDIF 
 
 # End Source File
@@ -619,6 +631,8 @@ SOURCE=.\ext\pcre\pcrelib\get.c
 # ADD CPP /D "STATIC"
 
 !ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS"
+
+# ADD CPP /D "STATIC"
 
 !ENDIF 
 
@@ -633,6 +647,8 @@ SOURCE=.\ext\pcre\pcrelib\maketables.c
 
 !ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS"
 
+# ADD CPP /D "STATIC"
+
 !ENDIF 
 
 # End Source File
@@ -646,6 +662,8 @@ SOURCE=.\ext\pcre\pcrelib\pcre.c
 
 !ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS"
 
+# ADD CPP /D "STATIC"
+
 !ENDIF 
 
 # End Source File
@@ -658,6 +676,8 @@ SOURCE=.\ext\pcre\pcrelib\study.c
 # ADD CPP /D "STATIC"
 
 !ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS"
+
+# ADD CPP /D "STATIC"
 
 !ENDIF 
 
