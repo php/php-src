@@ -1,128 +1,132 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2002, Version 4.3.0
-- Fixed memory allocation problem in iconv. Fix is only available systems 
-  support iconv() in libc. (Yasuo)
-- Fixed var_dump() crash when there is recursive reference. (Yasuo)
-- Added optional 3rd parameter "int encoding_mode" to gzencode()
-  and fixed parameters to conform documentation. (Stefan)
-- Added exif_imagetype()
-  exif_thumbnail() supports thumbnails in TIFF format and can return size
-  of thumbnail
+- Fixed memory allocation problem in iconv. Fix is only available on systems 
+  which have iconv() support in libc. (Yasuo)
+- Fixed a crash bug in var_dump() when variable contains recursive references.
+  (Yasuo)
+- Added optional 3rd parameter "int encoding_mode" to gzencode() and fixed 
+  parameters to conform documentation. (Stefan)
+- Added exif_imagetype() function. (Marcus)
 - Added domxml functions:
     domxml_elem_get_elements_by_tagname() 
     domxml_doc_get_elements_by_tagname()
     domxml_doc_get_element_by_id()
     domxml_elem_remove_attribute()
     domxml_elem_get_attribute_node() (Chregu)
-- Fixed segfault in domxml_unlink() (jtate)
+- Fixed a segfault in domxml_unlink(). (jtate)
 - Added -r option to the CLI version of PHP which executes a piece of PHP
   code directly from the commmand line. (Edin)
-- Added formatting option to domxml_dump_mem() (Chregu)
-- New build system that, among other improvements, replaces the slow recursive
-  make with one global Makefile and eases the integration of proper
-  dependencies. automake is only needed for its aclocal tool. The
-  build process is now more portable and less resource-consuming. (Sascha)
+- Added formatting option to domxml_dump_mem(). (Chregu)
+- New improved build system. Among other improvements, replaces the slow 
+  recursive make with one global Makefile and eases the integration of proper
+  dependencies. Automake is only needed for its aclocal tool. The build 
+  process is now more portable and less resource-consuming. (Sascha)
 
 ?? ??? 2002, Version 4.2.0
-- Modfied the mysql extension to disable 'LOAD LOCAL' when safe mode is
+- ACHTUNG!! register_globals defaults to 'off' now !!!
+- Modified the mysql extension to disable 'LOAD LOCAL' when safe mode is
   enabled. (Jason)
-- read_exif_data is now an alias for exif_read_data
-  important to differenciate old/new version for tests)
-- new function exif_tagname returns the names of tags
-  new function exif_thumbnail extracts embedded thumbnail (Marcus)
-- Introduced major modifications to the Sockets Extension and its API (Jason):
+- Added CLI (command line interface) sapi which is more suitable for writing 
+  shell scripts. Some of the differences to CGI sapi are: no HTTP headers, 
+  plain text error messages, does not change working directory, etc. 
+  "make install" will install CLI SAPI version of php in {PREFIX}/bin/php while
+  CGI is renamed and installed as {PREFIX}/bin/php-cgi. (Edin)
+- Fixed HTTP file upload support to handle big files better. (Jani)
+- Major modifications to the Sockets Extension and its API (Jason):
   . Fixed numerous bugs.
-  . Added automatic host lookup capability to all functions that take addr's
-  . ex. socket_connect($sock, 'www.yahoo.com', 80);
+  . Added automatic host lookup capability to all functions that take addr's.
+    example: socket_connect($sock, 'www.yahoo.com', 80);
   . Corrected and standardized host lookup errors
   . Modified socket_recv() behavior. [$r=socket_recv($sock, $buf, $len, $flags)]
   . Added socket_set_block() which changes a socket into blocking IO mode
   . Modified socket_last_error() to not clear the last error
   . Added socket_clear_error() which clears the last error on a socket
   . Removed all code pertaining to fd_sets (socket_fd_*)
-  . Modfied/Improved socket_select() to take resource arrays instead of fd_sets
-     ex. <?php $wfds=$rfds=array($sock1, $sock2, $sock3, $sock7);
-               $r=socket_select($rfds, $wfds, NULL, 1);
-               print "Ready to read:\n"; var_dump($rfds); ?>
-- Returned iconv support to FreeBSD (kalowsky)
-- Added CLI (command line intrerface) sapi based on a cut-down version
-  of the CGI sapi which is more suited for writing shell scripts. Some of
-  the differences are: it prints no HTTP headers, displays plain text
-  error messages, does not change working directory, etc. "make install"
-  will install CLI SAPI version of php in {PREFIX}/bin/php while
-  CGI is renamed and installed as {PREFIX}/bin/php-cgi. (Edin)
-- Clean up posix extension (no more unwanted warning messages, introduce
-  posix_errno() and posix_strerror() for fetching error messages); changed the
-  way posix_getgrnam() and posix_getgrgid() return their values (breaks BC but
-  makes more sense); do not include functions in symbol table which aren't
-  supported on host system. (Markus)
-- Fixed HTTP file upload support to handle big files better. (Jani)
-- Added TIFF support for getimagesize(). (Marcus)
-- Added TIFF support for read_exif_data(). (Marcus)
+  . Modified/Improved socket_select() to accept array of resources instead of 
+    fd_sets. example: 
+    <?php 
+          $wfds=$rfds=array($sock1, $sock2, $sock3, $sock7);
+          $r=socket_select($rfds, $wfds, NULL, 1);
+          print "Ready to read:\n"; var_dump($rfds);
+    ?>
+- Changed read_exif_data() to be an alias of exif_read_data(). (Marcus)
+- Added exif_tagname() function which returns the names of tags and
+  exif_thumbnail() function to extract embedded thumbnails. (Marcus)
+- Fixed iconv support with FreeBSD. (kalowsky)
+- Cleaned up the posix extension: (Markus)
+  . Removed unwanted warning messages
+  . Added posix_errno() and posix_strerror() for fetching error messages
+  . Changed the way posix_getgrnam() and posix_getgrgid() return their values 
+    (breaks BC but makes more sense)
+  . Does not include functions in symbol table which aren't supported on host 
+    system. 
+- Added TIFF support for getimagesize() and read_exif_data(). (Marcus)
 - Changed the Velocis extension namespace to Birdstep to reflect new product 
   name. Added aliases for BC. (James)
 - Added safe_mode checks for opendir(). (jflemer)
-- Make the 2nd parameter to pgsql_fetch_* support NULL in case 3 parameters 
-  are supplied, but you do not want to provide a row number yourself. (Derick)
+- Changed the 2nd parameter in pgsql_fetch_*() functions to support NULL if
+  all 3 parameters are supplied, but you do not want to provide a row number.
+  (Derick)
 - Improved iconv() when using libc's iconv. (Yasuo)
 - Added PHP_SAPI constant which contains the name of running SAPI. (Edin)
-- Added ob_get_status() to get array of buffers and it's status. (Yasuo)
-- Fixed crash bug with ob_end_*() function. ob_end_*() will not delete
+- Added ob_get_status() which returns an array of buffers with their status.
+  (Yasuo)
+- Fixed a crash bug in ob_end_*() functions. ob_end_*() will not delete
   buffers that may not be deleted. (Yasuo)
 - Added 3rd parameter "bool erase" to ob_start(). If FALSE, the buffer may not
-  be deleted until script finshes. (Yasuo)
-- Changed ob_*() function that have void return type to bool. All ob_*()
-  functions return TRUE for success, FALSE for failure. (Yasuo)
+  be deleted until script finishes. (Yasuo)
+- Changed ob_*() functions to return TRUE for success, FALSE for failure.
+  (Yasuo)
 - Added sybase_ct support to dbx module. (Marc)
 - Fixed error message handling with PostgreSQL 7.2. (Rui)
 - Added object aggregation capability, see aggregation_*() functions. (Andrei)
-- Added debug_zval_dump(), which works similar to var_dump, yet displays extra
-  internal information such as refcounts and true type names. (Jason)
+- Added debug_zval_dump() which works similarly to var_dump, but displays 
+  extra internal information such as refcounts and true type names. (Jason)
 - Added Andrei's tokenizer extension. (Stig)
 - Removed ext/satellite. It is now part of PEAR. (eriksson)
 - Changed php.ini directive 'safe_mode_include_dir' to accept a (semi)colon 
-  separated path (like 'include_path') rather than a single directory. 
+  separated path (like 'include_path') rather than a single directory.
   (jflemer)
 - Added is_a() function that can be used to test whether object is of a certain
   class or is derived from it. (Andrei, Zend Engine)
 - Added optional parameter to highlight_string() and highlight_file() which
-  makes these functions return a highlighted string instead of dumping
-  to standard output. (Derick)
+  makes these functions to return a highlighted string instead of dumping
+  it to standard output. (Derick)
 - Added EXTR_IF_EXISTS and EXTR_PREFIX_IF_EXISTS flags to extract(). (Rasmus)
-- Fixed pg_pconnect(). It catches broken connection and reconnects to
-  PostgreSQL server always. When PostgreSQL is rebooted, web server reboot is
-  not needed to avoid errors. (Yasuo)
-- Fix --enable-safe-mode. This configure option was not working. (Yasuo)
+- Fixed a segfault in pg_pconnect(). If PostgreSQL server is restarted, broken 
+  connection is detected and reconnected. (Yasuo)
+- Fixed --enable-safe-mode configure option. (Yasuo)
 - Added function domxml_dump_node($doc,$node). Dumps a node plus all children 
   into a string. (chregu)
 - Added function domxml_node_get_content(). (chregu)
 - Added function domxml_dump_file($filename,[$compression]). Dumps XML to
   a file and uses compression, if specified. (chregu)
-- Added exslt integration (see http://exslt.org for details). To be configured 
-  with --with-dom-exslt[=DIR] (and --with-dom-xslt). (chregu,jaroslaw)
-- Don't touch any globals in session_unset() if register_globals is set
-  to off. (Thies)
+- Added exslt integration to domxml extension (http://exslt.org for details).
+  Configure with --with-dom-exslt[=DIR] (and --with-dom-xslt). 
+  (chregu,jaroslaw)
+- Fixed session_unset() to not touch any globals if register_globals is off.
+  (Thies)
 - Added 3 new optional parameters to OCIFetchStatement(). They control
   the number of rows to skip at the beginning of the cursor, the
   maximun numer of rows that should be fetched and the format of the
   returned array. (Thies)
 - Updated the XSLT extension to support Sablotron 0.8. (Petr Cimprich)
-- Fixed a bug in preg_match()/preg_match_all() when matching strings containing
-  null bytes. (Andrei)
+- Fixed a bug in preg_match() and preg_match_all() when matching strings 
+  contain null bytes. (Andrei)
 - Added xpath_register_ns() function. This makes it possible to issue XPath 
   queries with namespaces like for example: "//namespace:sampletag".
   (Chris Jarecki)
 - Added multi-byte enabled regular expression functions. (Rui)
-- Added second parameter to count() that can be used to specify either normal
-  or recursive counting. (patch by Vlad Bosinceanu <glipy@fx.ro>)
+- Added optional second parameter to count() which can be used to specify
+  either normal or recursive counting. (patch by Vlad Bosinceanu <glipy@fx.ro>)
 - Added mb_get_info() to get internal settings of mbstring. (Rui)
 - Added async query functions to PostgreSQL module. (Yasuo)
 - Added pg_copy_to()/pg_copy_from() for PostgreSQL module. (Youichi, Yasuo)
-- Added IPv6 support in FTP extension. (Stig Venaas)
+- Added IPv6 support for FTP extension. (Stig Venaas)
 - Improved the speed of wordwrap() significantly. (Jim)
 - Fixed pow()'s incorrect behaviour when dealing with powers of 0. (Jim)
-- Added is_finite(), is_infinite(), and is_nan(). (Jim)
+- Added is_finite(), is_infinite() and is_nan(). (Jim)
 - Fixed segfault in wordwrap() when wrapping to zero width and using
   multi-character break or trying to force cut (bug #12768). (Jim)
 - Fixed several bugs in dbase extension (dbase_pack() truncate file to right
@@ -138,24 +142,24 @@ PHP 4                                                                      NEWS
 - Fixed problem with dbase not returning very large (larger than long)
   integers properly. (Vlad)
 - Added concepts to IRCG: bailout-on-trivial issue, write output to
-  files, fetch a ressource upon connection end. (Sascha)
+  files, fetch a resource upon connection end. (Sascha)
 - Fixed POST-related bugs in thttpd, added QUERY_STRING, HTTP_HOST,
   HTTP_ACCEPT_LANGUAGE to the script environment, improved patch
   to send correct MIME types, and added support for /nocache/. (Sascha)
 - Fixed several bugs and memleaks in the domxml extension. (Markus)
 - Added var_export() which outputs a representation of a variable as reusable 
   PHP code. (Derick)
-- Added -w option to the cgi-version which strips all comments and whitespace
+- Added -w option to the CGI-version to strip all comments and whitespace
   from the script. (Thies)
 - Added support for SO_RCVTIMEO and SO_SNDTIMEO to ext/sockets. (Jason)
 - Added ob_get_level() which returns the nesting level of the output buffering
   mechanism. (Yasuo, Derick)
 - Added ob_flush() and ob_clean() functions which flush and clean an output 
   buffer without destroying the buffer. (Derick)
-- Added a parameter to mysql_connect() to force a new database link to be
-  created. (Markus, Derick)
+- Added new optional parameter to mysql_connect() which forces a new database 
+  link to be created. (Markus, Derick)
 - Added ldap_sort() function. (Stig Venaas)
-- Added md5_file(), which calculaties the MD5 sum of a file.
+- Added md5_file() function which calculates the MD5 sum of a file.
   Patch by Alessandro Astarita <aleast@capri.it> (Derick)
 - Added support for parsing recordsets contained in WDDX packets. (Andrei)
 - Renamed key_exists() to array_key_exists(). (Derick)
@@ -166,17 +170,17 @@ PHP 4                                                                      NEWS
 - Removed warning message about NONEXISTENT character set from mysql_connect() 
   when the server's default character set != latin1. (Mysql Team)
 - Added Direct I/O extension for lowlevel access to the POSIX layer. (Sterling)
-- New SAPI module for the WebJames server on RISC OS. (Alex Waugh)
-- Made ldap_add (and modify) functions to throw a warning with illegal value 
-  arrays. Previously segfaulted or added wrong value. (Stig Venaas)
-- Added Udm_Check_Charset() function into mnoGoSearch extension. (gluke)
+- Added SAPI module for the WebJames server on RISC OS. (Alex Waugh)
+- Fixed ldap_add() and ldap_modify() functions to throw a warning with illegal 
+  value arrays. Previously segfaulted or added wrong value. (Stig Venaas)
+- Added udm_check_charset() function into mnoGoSearch extension. (gluke)
 - Fixed mnoGoSearch extension to support mnogosearch-3.2.x. (gluke)
 - Made fbsql_num_rows() to return the correct value on all select statements.
   (Frank)
-- Added array_chunk() function that splits an array into chunks of specified
+- Added array_chunk() function which splits an array into chunks of specified
   size. (Andrei)
-- Fixed a bug which caused $HTTP_RAW_POST_DATA not to be populated on a missing
-  content-type even when always_populate_raw_post_data was On - fixed. (Rasmus)
+- Fixed $HTTP_RAW_POST_DATA to be populated on a missing content-type when 
+  always_populate_raw_post_data is on. (Rasmus)
 - Added session_cache_expire() function. (patch by anuradha@gnu.org) (Andrei)
 - Added array_fill() function. (Rasmus)
 - Made Authorization header to be hidden from phpinfo() output in safe_mode. 
@@ -190,8 +194,8 @@ PHP 4                                                                      NEWS
   mt_srand() has not been called. (Sterling)
 - Changed the seed options to srand() and mt_srand() to be optional. If the 
   seed is not specified the most random seed possible is generated. (Sterling)
-- Added array_change_key_case() function that returns array with
-  with all string keys lowercased or uppercased. (Edin)
+- Added array_change_key_case() function which returns an array with all 
+  string keys lowercased or uppercased. (Edin)
 - Added parameter to ircg_pconnect to suppress treating non-fatal errors
   as fatal, and added conversion of Windows quotes to &quot;. (Sascha)
 - Added pcntl_exec() function which behaves similar to the system execve.
@@ -202,7 +206,7 @@ PHP 4                                                                      NEWS
 - Added mcrypt_generic_deinit() to replace mcrypt_generic_end(). (Derick)
 - Added apache_setenv() function for injecting variables into Apache's
   subprocess_env table. (Rasmus)
-- Added support for 'int', 'bool', 'float' and 'null' for settype(). (Jeroen)
+- Added support for 'int', 'bool', 'float' and 'null' in settype(). (Jeroen)
 - Added IPv6 support to gethostbyaddr().
   (Patch by Matthias Wimmer <matthias@charente.de> and venaas)
 - Fixed LONG_VARCHAR type crashing in ODBC extension. Patch by Walter Franzini.
@@ -211,21 +215,21 @@ PHP 4                                                                      NEWS
   in itself. (Andrei)
 - Added ini_get_all() function which returns all registered ini entries
   or entries for the specified extension. (Jani)
-- Added mailparse_uudecode_all() which extracts all uuencoded attachments.
+- Added mailparse_uudecode_all() which extracts all uuencoded attachments. 
   (Wez)
-- Added support for chinese encodings to htmlentities() and htmlspecialchars().
+- Added support for chinese encodings in htmlentities() and htmlspecialchars().
   (Patch by Alan Knowles <alan_k@hklc.com> and Wez)
 - Improved support for autoconf-2.50+/libtool 1.4b+. (Jan Kneschke, Sascha)
 
 27 Feb 2002, Version 4.1.2
 - Fixed start up failure when mm save handler is used and there are multiple
   SAPIs working at the same time. (Yasuo)
-- Fixed the Roxen SAPI (Yasuo)
-- Fixed a buffer overflow in the RFC-1867 file upload code (Stefan)
-- Fixed a crash in the session module (Yasuo)
-- Fixed a crash in the pspell module (Yasuo)
+- Fixed the Roxen SAPI. (Yasuo)
+- Fixed a buffer overflow in the RFC-1867 file upload code. (Stefan)
+- Fixed a crash bug in the session module. (Yasuo)
+- Fixed a crash bug in the pspell module. (Yasuo)
 - Changed the default output encoding of mbstring 'pass' to fix
-  initialization problem (Rui)
+  initialization problem. (Rui)
 
 26 Dec 2001, Version 4.1.1
 - Fixed incompatibility with Windows .NET / IIS 6 - may improve stability
@@ -322,7 +326,7 @@ PHP 4                                                                      NEWS
   string to the gmp-number. (Troels)
 - Added the Cyrus-IMAP extension, which allows a direct interface to Cyrus' 
   more advanced capabilities. (Sterling)
-- Enhance read_exif_data() to support multiple comment tags (Rasmus)
+- Enhanced read_exif_data() to support multiple comment tags. (Rasmus)
 - Fixed a crash bug in array_map() when NULL callback was passed in. (Andrei)
 - Change from E_ERROR to E_WARNING in the exif extension (Rasmus)
 - New pow() implementation, which returns an integer when possible,
