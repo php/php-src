@@ -1,3 +1,19 @@
+2000-11-12  Kristian Köhntopp  <kk@netuse.de>
+
+    * ext/standard/output.c: Prototype corrected.
+
+2000-11-12  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/thttpd/thttpd.c:
+    Fix aborted connection handling and stop modifying thttpd data
+
+    * ext/fdf/config.m4: PHP_FDFTK is always != no. $PHP_FDFTK is not.
+
+2000-11-12  Rui Hirokawa  <louis@cityfujisawa.ne.jp>
+
+    * ext/fdf/Makefile.in
+      ext/fdf/config.m4: enabled shared module.
+
 2000-11-11  Jani Taskinen  <sniper@iki.fi>
 
     * ext/gd/config.m4: Fix for #7758. Plus some cleaning.
