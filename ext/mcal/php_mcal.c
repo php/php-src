@@ -207,7 +207,7 @@ PHP_MINIT_FUNCTION(mcal)
     return SUCCESS;
 }
 
-static int add_assoc_object(zval *arg, char *key, zval *tmp)
+static int add_assoc_object(zval *arg, char *key, zval *tmp TSRMLS_DC)
 {
 	HashTable *symtable;
 	
@@ -246,7 +246,7 @@ static void php_mcal_do_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	efree(mcal_password);
 	
 	if (!mcal_stream) {
-		php_error(E_WARNING, "Couldn't open stream %s\n", Z_STRVAL_PP(calendar));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Couldn't open stream %s\n", Z_STRVAL_PP(calendar));
 		RETURN_FALSE;
 	}
 	
@@ -285,7 +285,7 @@ static void _php_make_event_object(zval *myzvalue, CALEVENT *event TSRMLS_DC)
 		add_property_long(start,"min",event->start.min);
 		add_property_long(start,"sec",event->start.sec);
 	}
-	add_assoc_object(myzvalue, "start", start);
+	add_assoc_object(myzvalue, "start", start TSRMLS_CC);
 	
 	MAKE_STD_ZVAL(end);
 	object_init(end);
@@ -299,7 +299,7 @@ static void _php_make_event_object(zval *myzvalue, CALEVENT *event TSRMLS_DC)
 		add_property_long(end,"min",event->end.min);
 		add_property_long(end,"sec",event->end.sec);
 	}
-	add_assoc_object(myzvalue, "end", end);
+	add_assoc_object(myzvalue, "end", end TSRMLS_CC);
 	
 	if (event->category)
 		add_property_string(myzvalue,"category",event->category,1);
@@ -323,7 +323,7 @@ static void _php_make_event_object(zval *myzvalue, CALEVENT *event TSRMLS_DC)
 		add_property_long(recurend,"min",event->recur_enddate.min);
 		add_property_long(recurend,"sec",event->recur_enddate.sec);
 	}
-	add_assoc_object(myzvalue, "recur_enddate", recurend);
+	add_assoc_object(myzvalue, "recur_enddate", recurend TSRMLS_CC);
 	
 	add_property_long(myzvalue,"recur_data",event->recur_data.weekly_wday);	
 	
@@ -334,7 +334,7 @@ static void _php_make_event_object(zval *myzvalue, CALEVENT *event TSRMLS_DC)
 		for (attr = event->attrlist; attr; attr = attr->next) {
 			add_assoc_string(attrlist, attr->name, attr->value, 1);
 		}
-		add_assoc_object(myzvalue, "attrlist", attrlist);
+		add_assoc_object(myzvalue, "attrlist", attrlist TSRMLS_CC);
 	}
 }
 
@@ -356,7 +356,7 @@ PHP_FUNCTION(mcal_close)
 	ind = Z_LVAL_PP(streamind);
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!mcal_le_struct) {
-		php_error(E_WARNING, "Unable to find stream pointer");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 	if (myargcount==2) {
@@ -404,7 +404,7 @@ PHP_FUNCTION(mcal_reopen)
 	ind = Z_LVAL_PP(streamind);
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!mcal_le_struct) {
-		php_error(E_WARNING, "Unable to find stream pointer");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 	
@@ -415,7 +415,7 @@ PHP_FUNCTION(mcal_reopen)
 		mcal_le_struct->flags = cl_flags;	
 	}
 	if (mcal_stream == NULL) {
-		php_error(E_WARNING,"Couldn't re-open stream\n");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING,"Couldn't re-open stream\n");
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -439,7 +439,7 @@ PHP_FUNCTION(mcal_expunge)
 	
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!mcal_le_struct) {
-		php_error(E_WARNING, "Unable to find stream pointer");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 	
@@ -467,7 +467,7 @@ PHP_FUNCTION(mcal_fetch_event)
 	ind = Z_LVAL_PP(streamind);
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!mcal_le_struct) {
-		php_error(E_WARNING, "Unable to find stream pointer");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 	if (myargcount == 3) {
@@ -499,7 +499,7 @@ PHP_FUNCTION(mcal_fetch_current_stream_event)
 	ind = Z_LVAL_PP(streamind);
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!mcal_le_struct) {
-		php_error(E_WARNING, "Unable to find stream pointer");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
     }
 	_php_make_event_object(return_value, mcal_le_struct->event TSRMLS_CC);
@@ -528,7 +528,7 @@ PHP_FUNCTION(mcal_list_events)
 	ind = Z_LVAL_PP(streamind);
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!mcal_le_struct) {
-		php_error(E_WARNING, "Unable to find stream pointer");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 	
@@ -579,7 +579,7 @@ PHP_FUNCTION(mcal_create_calendar)
 	ind = Z_LVAL_PP(streamind);
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!mcal_le_struct) {
-		php_error(E_WARNING, "Unable to find stream pointer");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 	/*
@@ -615,7 +615,7 @@ PHP_FUNCTION(mcal_rename_calendar)
 	ind = Z_LVAL_PP(streamind);
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!mcal_le_struct) {
-		php_error(E_WARNING, "Unable to find stream pointer");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 	
@@ -645,7 +645,7 @@ PHP_FUNCTION(mcal_list_alarms)
 	ind = Z_LVAL_PP(streamind);
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!mcal_le_struct) {
-		php_error(E_WARNING, "Unable to find stream pointer");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 	
@@ -694,7 +694,7 @@ PHP_FUNCTION(mcal_delete_calendar)
 	ind = Z_LVAL_PP(streamind);
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!mcal_le_struct) {
-		php_error(E_WARNING, "Unable to find stream pointer");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 	
@@ -729,7 +729,7 @@ PHP_FUNCTION(mcal_delete_event)
 	ind = Z_LVAL_PP(streamind);
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!mcal_le_struct) {
-		php_error(E_WARNING, "Unable to find stream pointer");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 	
@@ -762,7 +762,7 @@ PHP_FUNCTION(mcal_append_event)
 	ind = Z_LVAL_PP(streamind);
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!mcal_le_struct) {
-		php_error(E_WARNING, "Unable to find stream pointer");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 	
@@ -792,7 +792,7 @@ PHP_FUNCTION(mcal_store_event)
 	ind = Z_LVAL_PP(streamind);
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!mcal_le_struct) {
-		php_error(E_WARNING, "Unable to find stream pointer");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 	
@@ -821,7 +821,7 @@ PHP_FUNCTION(mcal_snooze)
 	ind = Z_LVAL_PP(streamind);
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!mcal_le_struct) {
-		php_error(E_WARNING, "Unable to find stream pointer");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 	
@@ -854,7 +854,7 @@ PHP_FUNCTION(mcal_event_set_category)
 	ind = Z_LVAL_PP(streamind);
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!mcal_le_struct) {
-		php_error(E_WARNING, "Unable to find stream pointer");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 	mcal_le_struct->event->category = strdup(Z_STRVAL_PP(category));
@@ -881,7 +881,7 @@ PHP_FUNCTION(mcal_event_set_title)
 	ind = Z_LVAL_PP(streamind);
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!mcal_le_struct) {
-		php_error(E_WARNING, "Unable to find stream pointer");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find stream pointer");
 	RETURN_FALSE;
 	}
 	mcal_le_struct->event->title = strdup(Z_STRVAL_PP(title));
@@ -908,7 +908,7 @@ PHP_FUNCTION(mcal_event_set_description)
 	ind = Z_LVAL_PP(streamind);
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!mcal_le_struct) {
-		php_error(E_WARNING, "Unable to find stream pointer");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 	mcal_le_struct->event->description = strdup(Z_STRVAL_PP(description));
@@ -941,7 +941,7 @@ PHP_FUNCTION(mcal_event_set_start)
 	ind = Z_LVAL_PP(streamind);
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!mcal_le_struct) {
-		php_error(E_WARNING, "Unable to find stream pointer");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 	
@@ -982,7 +982,7 @@ PHP_FUNCTION(mcal_event_set_end)
 	ind = Z_LVAL_PP(streamind);
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!mcal_le_struct) {
-		php_error(E_WARNING, "Unable to find stream pointer");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 	
@@ -1014,7 +1014,7 @@ PHP_FUNCTION(mcal_event_set_alarm)
 	ind = Z_LVAL_PP(streamind);
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!mcal_le_struct) {
-		php_error(E_WARNING, "Unable to find stream pointer");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 	
@@ -1040,7 +1040,7 @@ PHP_FUNCTION(mcal_event_init)
 	ind = Z_LVAL_PP(streamind);
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!mcal_le_struct) {
-		php_error(E_WARNING, "Unable to find stream pointer");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 	
@@ -1068,7 +1068,7 @@ PHP_FUNCTION(mcal_event_set_class)
 	ind = Z_LVAL_PP(streamind);
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!mcal_le_struct) {
-		php_error(E_WARNING, "Unable to find stream pointer");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 	
@@ -1097,7 +1097,7 @@ PHP_FUNCTION(mcal_event_add_attribute)
 	ind = Z_LVAL_PP(streamind);
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!mcal_le_struct) {
-		php_error(E_WARNING, "Unable to find stream pointer");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 #if MCALVER >= 20000121
@@ -1330,7 +1330,7 @@ PHP_FUNCTION(mcal_next_recurrence)
 	ind = Z_LVAL_PP(streamind);
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!mcal_le_struct) {
-		php_error(E_WARNING, "Unable to find stream pointer");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 	
@@ -1403,7 +1403,7 @@ PHP_FUNCTION(mcal_event_set_recur_none)
 	ind = Z_LVAL_PP(streamind);
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!mcal_le_struct) {
-		php_error(E_WARNING, "Unable to find stream pointer");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 	
@@ -1435,7 +1435,7 @@ PHP_FUNCTION(mcal_event_set_recur_daily)
 	ind = Z_LVAL_PP(streamind);
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!mcal_le_struct) {
-		php_error(E_WARNING, "Unable to find stream pointer");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 	
@@ -1469,7 +1469,7 @@ PHP_FUNCTION(mcal_event_set_recur_weekly)
 	ind = Z_LVAL_PP(streamind);
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!mcal_le_struct) {
-		php_error(E_WARNING, "Unable to find stream pointer");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 	
@@ -1502,7 +1502,7 @@ PHP_FUNCTION(mcal_event_set_recur_monthly_mday)
 	ind = Z_LVAL_PP(streamind);
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!mcal_le_struct) {
-		php_error(E_WARNING, "Unable to find stream pointer");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 	
@@ -1535,7 +1535,7 @@ PHP_FUNCTION(mcal_event_set_recur_monthly_wday)
 	ind = Z_LVAL_PP(streamind);
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!mcal_le_struct) {
-		php_error(E_WARNING, "Unable to find stream pointer");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 	
@@ -1568,7 +1568,7 @@ PHP_FUNCTION(mcal_event_set_recur_yearly)
 	ind = Z_LVAL_PP(streamind);
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!mcal_le_struct) {
-		php_error(E_WARNING, "Unable to find stream pointer");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 	
