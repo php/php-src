@@ -32,7 +32,7 @@ if test "$PHP_SABLOT" != "no"; then
 
   testval=no
   for i in $PHP_EXPAT_DIR $SABLOT_DIR; do
-    if test -f $i/lib/libexpat.a -o -f $i/lib/libexpat.s?; then
+    if test -f $i/lib/libexpat.a -o -f $i/lib/libexpat.$SHLIB_SUFFIX_NAME; then
       AC_DEFINE(HAVE_LIBEXPAT2,1,[ ])
       PHP_ADD_LIBRARY_WITH_PATH(expat, $i/lib, SABLOT_SHARED_LIBADD)
       PHP_ADD_INCLUDE($i/include)
@@ -53,7 +53,7 @@ if test "$PHP_SABLOT" != "no"; then
   AC_CHECK_LIB(c, iconv_open, found_iconv=yes)
   if test "$found_iconv" = "no"; then
       for i in /usr /usr/local $ICONV_DIR; do
-        if test -f $i/lib/libconv.a -o -f $i/lib/libiconv.s?; then
+        if test -f $i/lib/libconv.a -o -f $i/lib/libiconv.$SHLIB_SUFFIX_NAME; then
           PHP_ADD_LIBRARY_WITH_PATH(iconv, $i/lib, SABLOT_SHARED_LIBADD)
           found_iconv=yes
         fi

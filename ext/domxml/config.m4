@@ -40,7 +40,7 @@ if test "$PHP_DOM" != "no"; then
 
   PHP_DOM_CHECK_VERSION
 
-  if test -f $DOMXML_DIR/lib/libxml2.a -o -f $DOMXML_DIR/lib/libxml2.s? ; then
+  if test -f $DOMXML_DIR/lib/libxml2.a -o -f $DOMXML_DIR/lib/libxml2.$SHLIB_SUFFIX_NAME ; then
     DOM_LIBNAME=xml2
   else
     DOM_LIBNAME=xml

@@ -19,7 +19,7 @@ PHP_ARG_WITH(snmp,for SNMP support,
         test -f $i/snmp/include/ucd-snmp/snmp.h && SNMP_INCDIR=$i/snmp/include/ucd-snmp
       done
       for i in /usr /usr/snmp /usr/local /usr/local/snmp; do
-        test -f $i/lib/libsnmp.a -o -f $i/lib/libsnmp.s? && SNMP_LIBDIR=$i/lib
+        test -f $i/lib/libsnmp.a -o -f $i/lib/libsnmp.$SHLIB_SUFFIX_NAME && SNMP_LIBDIR=$i/lib
       done
     else
       SNMP_INCDIR=$PHP_SNMP/include
