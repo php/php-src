@@ -1,3 +1,222 @@
+2002-10-08  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/tests/strings/nl2br.phpt: Added nl2br() test
+
+    * ext/standard/tests/strings/strrev.phpt:
+    Added test for strrev() function.
+
+2002-10-08  Andrei Zmievski  <andrei@php.net>
+
+    * ext/tokenizer/EXPERIMENTAL: Tokenizer has been stable for some time now.
+
+2002-10-08  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/imap/php_imap.c: Fixed bug #19280
+
+2002-10-08  Jani Taskinen  <sniper@iki.fi>
+
+    * main/php_version.h: revert version here too..
+
+2002-10-08  Colin Viebrock  <colin@easydns.com>
+
+    * ext/standard/css.c: don't define fonts ... use the browser defaults
+
+2002-10-08  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/session/tests/021.phpt: - hardcode default rewriting tags
+
+    * run-tests.php: - Fix .exp output
+
+2002-10-08  Andrei Zmievski  <andrei@php.net>
+
+    * configure.in: Revert to 4.3.0.
+
+2002-10-08  Moriyoshi Koizumi  <readjust@deneb.freemail.ne.jp>
+
+    * ext/mbstring/mbstring.c
+      ext/mbstring/mbregex.c: ZTS fixes
+
+2002-10-08  Melvyn Sopacua  <msopacua@idg.nl>
+
+    * ext/sysvmsg/config.m4: Fix config bug reported by Jan Lehnart.
+    Keep it simple, and the size of a pointer is always known, duh.
+
+2002-10-08  Moriyoshi Koizumi  <readjust@deneb.freemail.ne.jp>
+
+    * ext/mbstring/mbregex.c:
+    Removed table generating code. The return values of isalnum() may vary by the locale setting.
+
+2002-10-08  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/mbstring/mbregex.c: Fixed memory leak.
+
+2002-10-08  Tal Peer  <tal@twisthost.com>
+
+    * ext/fribidi/tests/001.phpt:
+    Enhanced test to also check charsets CP1255 and ISO-8859-8
+
+2002-10-08  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * NEWS: Apache 2 news
+
+2002-10-08  Pierre-Alain Joye  <paj@pearfr.org>
+
+    * pear/PEAR.php: Sorry Derick, generated the wrong patch
+    and we don't need to recreate an array ;)
+
+2002-10-08  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * pear/PEAR.php: - Fix for deprecated function
+
+    * ext/mcrypt/tests/vectors.txt: - Add the source file too
+
+    * ext/mcrypt/tests/blowfish.phpt: - Add blowfish compatibility test
+
+2002-10-08  Andrey Hristov  <andrey@webgate.bg>
+
+    * ext/standard/string.c:
+    Now str_shuffle() has the randomization characteristics of shuffle().
+    str_shuffle() won't return anymore the randomized string and thus will be
+    consistent with shuffle(). Since this function is new to 4.3.0 no BC
+    problems.
+
+2002-10-08  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/tests/aggregation/aggregate_properties_by_regexp.phpt:
+    - Skip if the function is not available (in case pcre was not compiled in).
+
+    * run-tests.php: - Show easier parseable and greppable output
+
+    * run-tests.php:
+    - Use getenv, as $_ENV is not available when variables_order= in php.ini
+      does not include "E".
+
+2002-10-08  Tal Peer  <tal@twisthost.com>
+
+    * ext/fribidi/tests/002.phpt:
+    Added test to check if charsets constants are defined
+
+2002-10-08  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/mbstring/mbregex.c:
+    - Please do not use notices for debug information
+
+    * Makefile.global: - Drop dependency on fixed php.ini
+
+    * ext/standard/tests/strings/implode.phpt: - Use error_reporting E_ALL
+
+    * tests/strings/004.phpt
+      run-tests.php: - Drop requirement for php.ini-dist
+    - Adjust test script to hard code ini settings
+
+    * php.ini-dist
+      php.ini-recommended: - Document correct default
+
+    * php.ini-recommended
+      php.ini-dist:
+    - Do not change those from the default in Zend/zend_highlight.h
+
+2002-10-08  George Schlossnagle  <george@omniti.com>
+
+    * main/SAPI.c: headers code cleanup
+
+    * sapi/apache/php_apache.c: header code cleanup
+
+2002-10-08  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ext/mbstring/php_mbregex.c
+      ext/mbstring/php_mbregex.h: Fix ZTS build.
+
+2002-10-08  Jani Taskinen  <sniper@iki.fi>
+
+    * tests/func/.cvsignore
+      tests/lang/.cvsignore
+      tests/strings/.cvsignore
+      tests/.cvsignore
+      tests/basic/.cvsignore
+      tests/classes/.cvsignore
+      pear/tests/.cvsignore
+      ext/zip/tests/.cvsignore
+      ext/zlib/tests/.cvsignore
+      pear/Console/tests/.cvsignore
+      ext/sysvmsg/tests/.cvsignore
+      ext/xml/tests/.cvsignore
+      ext/xslt/tests/.cvsignore
+      ext/standard/tests/serialize/.cvsignore
+      ext/standard/tests/strings/.cvsignore
+      ext/standard/tests/time/.cvsignore
+      ext/standard/tests/versioning/.cvsignore
+      ext/standard/tests/file/.cvsignore
+      ext/standard/tests/general_functions/.cvsignore
+      ext/standard/tests/math/.cvsignore
+      ext/standard/tests/reg/.cvsignore
+      ext/standard/tests/array/.cvsignore
+      ext/standard/tests/assert/.cvsignore
+      ext/standard/tests/aggregation/.cvsignore
+      ext/session/tests/.cvsignore
+      ext/skeleton/tests/.cvsignore
+      ext/standard/tests/.cvsignore
+      ext/pcntl/tests/.cvsignore
+      ext/pgsql/tests/.cvsignore
+      ext/pspell/tests/.cvsignore
+      ext/openssl/tests/.cvsignore
+      ext/mbstring/tests/.cvsignore
+      ext/mcrypt/tests/.cvsignore
+      ext/mcve/tests/.cvsignore
+      ext/ncurses/tests/.cvsignore
+      ext/iconv/tests/.cvsignore
+      ext/interbase/tests/.cvsignore
+      ext/domxml/tests/.cvsignore
+      ext/exif/tests/.cvsignore
+      ext/gmp/tests/.cvsignore
+      ext/db/tests/.cvsignore
+      ext/dbx/tests/.cvsignore
+      ext/dio/tests/.cvsignore
+      ext/crack/tests/.cvsignore
+      ext/ctype/tests/.cvsignore
+      ext/cybermut/tests/.cvsignore
+      ext/bz2/tests/.cvsignore: Add php.* to be ignored.
+
+    * run-tests.php: ws fixes
+
+2002-10-08  Sascha Schumann  <sascha@schumann.cx>
+
+    * configure.in: add support for adding /usr/lib to the linkline by default
+
+2002-10-08  George Schlossnagle  <george@omniti.com>
+
+    * sapi/apache/mod_php4.c
+      sapi/apache/php_apache.c:
+    sync with head.  add optional content type param to send_http_header
+
+    * main/SAPI.c
+      main/main.c
+      main/php_main.h: sync with head
+
+2002-10-08  Jani Taskinen  <sniper@iki.fi>
+
+    * NEWS: style polizei
+
+2002-10-08  Stig Bakken  <ssb@fast.no>
+
+    * main/config.w32.h.in:
+    * make these variables configurable from environment on Windows:
+      PEAR_INSTALLDIR           PHP_BINDIR      PHP_CONFIG_FILE_PATH
+      PHP_CONFIG_FILE_SCAN_DIR  PHP_DATADIR     PHP_EXTENSION_DIR
+      PHP_INCLUDE_PATH          PHP_LIBDIR      PHP_LOCALSTATEDIR
+      PHP_PREFIX                PHP_SYSCONFDIR
+
+2002-10-08  Rasmus Lerdorf  <rasmus@lerdorf.on.ca>
+
+    * ext/ming/config.m4: Get rid of redundant loop
+
+    * ext/ming/config.m4:
+    FreeBSD ming port sticks ming.h in /usr/local/include/ming/ming.h and
+    we weren't finding it there.
+
+    * sapi/apache/php_apache_http.h:
+    zlib.h being included before ssl.h needs to be handled here too
+
 2002-10-07  Rasmus Lerdorf  <rasmus@lerdorf.on.ca>
 
     * ext/zlib/config0.m4:
