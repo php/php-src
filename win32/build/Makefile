@@ -82,8 +82,8 @@ $(BUILD_DIR)\php.exe -d open_basedir= -d safe_mode=0 -d output_buffering=0 run-t
 
 build-snap:
 	@$(MAKE) "$(BUILD_DIR)\$(PHPDLL)"
-	for %T in ($(SAPI_TARGETS)) do $(MAKE) /nologo "%T"
-	for %T in ($(EXT_TARGETS)) do $(MAKE) /nologo "%T"
+	for %T in ($(SAPI_TARGETS)) do $(MAKE) /I /nologo "%T"
+	for %T in ($(EXT_TARGETS)) do $(MAKE) /I /nologo "%T"
 
 build-dist: $(BUILD_DIR)\deplister.exe
 	-rmdir /s /q $(BUILD_DIR)\php-$(PHP_VERSION_STRING)
