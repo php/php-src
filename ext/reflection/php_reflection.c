@@ -2315,7 +2315,7 @@ ZEND_METHOD(reflection_class, getMethod)
 	reflection_object *intern;
 	zend_class_entry *ce;
 	zend_function *mptr;
-	char *name; 
+	char *name, *lc_name; 
 	int name_len;
 
 	METHOD_NOTSTATIC;
@@ -2324,10 +2324,12 @@ ZEND_METHOD(reflection_class, getMethod)
 	}
 
 	GET_REFLECTION_OBJECT_PTR(ce);
-	zend_str_tolower(name, name_len);
-	if (zend_hash_find(&ce->function_table, name, name_len + 1, (void**) &mptr) == SUCCESS) {
+	lc_name = zend_str_tolower_dup(name, name_len);
+	if (zend_hash_find(&ce->function_table, lc_name, name_len + 1, (void**) &mptr) == SUCCESS) {
 		reflection_method_factory(ce, mptr, return_value TSRMLS_CC);
+		efree(lc_name);
 	} else {
+		efree(lc_name);
 		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, 
 				"Method %s does not exist", name);
 		return;
