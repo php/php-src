@@ -34,6 +34,12 @@ $GLOBALS['_PEAR_Command_commandlist'] = array();
 $GLOBALS['_PEAR_Command_uiclass'] = 'PEAR_Frontend_CLI';
 
 /**
+ * Instance of $_PEAR_Command_uiclass.
+ * @var object
+ */
+$GLOBALS['_PEAR_Command_uiobject'] = null;
+
+/**
 * The options accepted by the commands
 * @var string the options
 */
