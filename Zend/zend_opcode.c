@@ -190,12 +190,9 @@ void init_op(zend_op *op CLS_DC)
 	op->filename = zend_get_compiled_filename(CLS_C);
 	op->result.op_type = IS_UNUSED;
 	op->extended_value = 0;
-	op->op1.u.EA.var = 0;
-	op->op1.u.EA.type = 0;
-	op->op2.u.EA.var = 0;
-	op->op2.u.EA.type = 0;
-	op->result.u.EA.var = 0;
-	op->result.u.EA.type = 0;
+	memset(&op->op1, 0, sizeof(znode));
+	memset(&op->op2, 0, sizeof(znode));
+	memset(&op->result, 0, sizeof(znode));
 }
 
 zend_op *get_next_op(zend_op_array *op_array CLS_DC)

@@ -497,8 +497,8 @@ function_call:
 
 
 exit_expr:
-		/* empty */		{ $$.op_type = IS_UNUSED; }	
-	|	'(' ')'			{ $$.op_type = IS_UNUSED; }	
+		/* empty */		{ memset(&$$, 0, sizeof(znode)); $$.op_type = IS_UNUSED; }	
+	|	'(' ')'			{ memset(&$$, 0, sizeof(znode)); $$.op_type = IS_UNUSED; }	
 	|	'(' expr ')'	{ $$ = $2; }
 ;
 

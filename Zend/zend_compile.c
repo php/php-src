@@ -1183,6 +1183,8 @@ void do_early_binding(CLS_D)
 	zval_dtor(&opline->op1.u.constant);
 	zval_dtor(&opline->op2.u.constant);
 	opline->opcode = ZEND_NOP;
+	memset(&opline->op1, 0, sizeof(znode));
+	memset(&opline->op2, 0, sizeof(znode));
 	SET_UNUSED(opline->op1);
 	SET_UNUSED(opline->op2);
 }
