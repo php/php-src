@@ -80,8 +80,8 @@ $children = $rootnode->getElementsByTagName("Silly");
 print_node_list($children);
 
 echo "--------- Unlink Node\n";
-print_node($children.item(0));
-$rootnode->removeChild($children.item(0));
+print_node($children->item(0));
+$rootnode->removeChild($children->item(0));
 print_node_list($rootnode->childNodes);
 print $dom->savexml();
 
