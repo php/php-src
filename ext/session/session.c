@@ -633,7 +633,7 @@ static int migrate_global(HashTable *ht, HashPosition *pos TSRMLS_DC)
 			break;
 		case HASH_KEY_IS_LONG:
 			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "The session bug compatibility code will not "
-					"try to locate the global variable $%d due to its "
+					"try to locate the global variable $%lu due to its "
 					"numeric nature.", num_key);
 			break;
 	}
