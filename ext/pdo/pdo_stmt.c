@@ -529,11 +529,11 @@ static int do_fetch_common(pdo_stmt_t *stmt, enum pdo_fetch_orientation ori,
 static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value,
 	enum pdo_fetch_type how, enum pdo_fetch_orientation ori, long offset, zval *return_all TSRMLS_DC)
 {
-	enum pdo_fetch_type really_how = how;
 	zend_class_entry * ce;
 
-	if (really_how == PDO_FETCH_USE_DEFAULT) {
-		really_how = how = stmt->default_fetch_type;
+	how = how & ~PDO_FETCH_FLAGS;
+	if (how == PDO_FETCH_USE_DEFAULT) {
+		how = stmt->default_fetch_type;
 	}
 
 	if (!do_fetch_common(stmt, ori, offset, do_bind TSRMLS_CC)) {
@@ -805,7 +805,7 @@ static PHP_METHOD(PDOStatement, fetchSingle)
 static PHP_METHOD(PDOStatement, fetchAll)
 {
 	pdo_stmt_t *stmt = (pdo_stmt_t*)zend_object_store_get_object(getThis() TSRMLS_CC);
-	long how = PDO_FETCH_USE_DEFAULT, flags;
+	long how = PDO_FETCH_USE_DEFAULT;
 	zval *data, *return_all;
 	char *class_name;
 	int class_name_len;
@@ -847,13 +847,11 @@ static PHP_METHOD(PDOStatement, fetchAll)
 		}
 	}
 
-	flags = how & PDO_FETCH_FLAGS;
-	how   = how & ~PDO_FETCH_FLAGS;
 	if (!error)
 	{
 		PDO_STMT_CLEAR_ERR();
 		MAKE_STD_ZVAL(data);
-		if (flags & PDO_FETCH_GROUP) {
+		if (how & PDO_FETCH_GROUP) {
 			array_init(return_value);
 			return_all = return_value;
 		} else {
@@ -867,7 +865,7 @@ static PHP_METHOD(PDOStatement, fetchAll)
 		}
 	}
 	if (!error) {
-		if ((flags & PDO_FETCH_GROUP)) {
+		if ((how & PDO_FETCH_GROUP)) {
 			do {
 				MAKE_STD_ZVAL(data);
 			} while (do_fetch(stmt, TRUE, data, how, PDO_FETCH_ORI_NEXT, 0, return_all TSRMLS_CC));
