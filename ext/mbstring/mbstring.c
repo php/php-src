@@ -2017,8 +2017,8 @@ PHP_FUNCTION(mb_strimwidth)
 }
 /* }}} */
 
-/* {{{ */
-char * php_mb_convert_encoding(char *input, size_t length, char *_to_encoding, char *_from_encodings, size_t *output_len TSRMLS_DC)
+/* {{{ php_mb_convert_encoding */
+PHPAPI char * php_mb_convert_encoding(char *input, size_t length, char *_to_encoding, char *_from_encodings, size_t *output_len TSRMLS_DC)
 {
 	mbfl_string string, result, *ret;
 	enum mbfl_no_encoding from_encoding, to_encoding;
@@ -2026,15 +2026,18 @@ char * php_mb_convert_encoding(char *input, size_t length, char *_to_encoding, c
 	int size, *list;
 	char *output;
 
-	if (output_len) *output_len = 0;
+	if (output_len) {
+		*output_len = 0;
+	}
 	if ( !input || !length) {
 		return NULL;
 	}
 	/* new encoding */
-	if ( _to_encoding) {
+	if (_to_encoding) {
 		to_encoding = mbfl_name2no_encoding(_to_encoding);
 		if (to_encoding == mbfl_no_encoding_invalid) {
-			php_error(E_WARNING, "unknown encoding \"%s\"", _to_encoding);
+			php_error(E_WARNING, "%s() unknown encoding \"%s\"", _to_encoding,
+					  get_active_function_name(TSRMLS_C));
 			return NULL;
 		}
 	} else {
@@ -2064,13 +2067,15 @@ char * php_mb_convert_encoding(char *input, size_t length, char *_to_encoding, c
 			if (from_encoding != mbfl_no_encoding_invalid) {
 				string.no_encoding = from_encoding;
 			} else {
-				php_error(E_WARNING, "Unable to detect encoding in mb_convert_encoding()");
+				php_error(E_WARNING, "%s() unable to detect character encoding",
+						  get_active_function_name(TSRMLS_C));
 				from_encoding = mbfl_no_encoding_pass;
 				to_encoding = from_encoding;
 				string.no_encoding = from_encoding;
 			}
 		} else {
-			php_error(E_WARNING, "illegal from-encoding in mb_convert_encoding()");
+			php_error(E_WARNING, "$s() illegal character encoding specified",
+					  get_active_function_name(TSRMLS_C));
 		}
 		if (list != NULL) {
 			efree((void *)list);
@@ -2080,7 +2085,8 @@ char * php_mb_convert_encoding(char *input, size_t length, char *_to_encoding, c
 	/* initialize converter */
 	convd = mbfl_buffer_converter_new(from_encoding, to_encoding, string.len);
 	if (convd == NULL) {
-		php_error(E_WARNING, "Unable to create converter in mb_convert_encoding()");
+		php_error(E_WARNING, "%s() unable to create character encoding converter",
+				  get_active_function_name(TSRMLS_C));
 		return NULL;
 	}
 	mbfl_buffer_converter_illegal_mode(convd, MBSTRG(current_filter_illegal_mode));
@@ -2089,7 +2095,9 @@ char * php_mb_convert_encoding(char *input, size_t length, char *_to_encoding, c
 	/* do it */
 	ret = mbfl_buffer_converter_feed_result(convd, &string, &result);
 	if (ret) {
-		if (output_len) *output_len = ret->len;
+		if (output_len) {
+			*output_len = ret->len;
+		}
 		output = ret->val;
 	}
 
