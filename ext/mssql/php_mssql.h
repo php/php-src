@@ -12,7 +12,7 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Frank M. Kromann frank@frontbase.com>                       |
+   | Authors: Frank M. Kromann <frank@frontbase.com>                      |
    +----------------------------------------------------------------------+
  */
 
@@ -83,6 +83,7 @@ PHP_FUNCTION(mssql_min_message_severity);
 PHP_FUNCTION(mssql_init);
 PHP_FUNCTION(mssql_bind);
 PHP_FUNCTION(mssql_execute);
+PHP_FUNCTION(mssql_guid_string);
 
 typedef struct mssql_link {
 	LOGINREC *login;
