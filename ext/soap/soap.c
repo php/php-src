@@ -1052,8 +1052,13 @@ PHP_METHOD(soapserver, handle)
 
 	if (zend_hash_find(&EG(symbol_table), HTTP_RAW_POST_DATA, sizeof(HTTP_RAW_POST_DATA), (void **) &raw_post)!=FAILURE
 		&& ((*raw_post)->type==IS_STRING)) {
+		int old_error_reporting = EG(error_reporting);
+		EG(error_reporting) &= ~(E_WARNING|E_NOTICE|E_USER_WARNING|E_USER_NOTICE);
+		
 		doc_request = xmlParseMemory(Z_STRVAL_PP(raw_post),Z_STRLEN_PP(raw_post));
 		xmlCleanupParser();
+
+		EG(error_reporting) = old_error_reporting;
 
 		if (doc_request == NULL) {
 			php_error(E_ERROR, "Bad Request");

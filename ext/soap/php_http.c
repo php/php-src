@@ -306,7 +306,7 @@ int get_http_soap_response(zval *this_ptr, char **buffer, int *buffer_len TSRMLS
 	http_close = TRUE;
 	connection = get_http_header_value(http_headers,"Connection: ");
 	if (connection) {
-		if (!strcmp(connection, "Keep-Alive")) {
+		if (strncasecmp(connection, "Keep-Alive", sizeof("Keep-Alive")-1) == 0) {
 			http_close = FALSE;
 		}
 		efree(connection);
@@ -331,7 +331,8 @@ int get_http_soap_response(zval *this_ptr, char **buffer, int *buffer_len TSRMLS
 			cmplen = strlen(content_type);
 		}
 
-		if (strncmp(content_type, "text/xml", cmplen)) {
+		if (strncmp(content_type, "text/xml", cmplen) == 0 ||
+		    strncmp(content_type, "application/soap+xml", cmplen == 0)) {
 			if (strncmp(http_body, "<?xml", 5)) {
 				zval *err;
 				MAKE_STD_ZVAL(err);
