@@ -39,21 +39,32 @@ PHP_ARG_WITH(mysql, for MySQL support,
 [  --with-mysql[=DIR]      Include MySQL support. DIR is the MySQL base directory.
                           If unspecified, the bundled MySQL library will be used.], yes)
 
+if test "$PHP_MYSQL" = "yes"; then
+  sources="libmysql/libmysql.c libmysql/errmsg.c libmysql/net.c libmysql/violite.c libmysql/password.c \
+	libmysql/my_init.c libmysql/my_lib.c libmysql/my_static.c libmysql/my_malloc.c libmysql/my_realloc.c libmysql/my_create.c \
+	libmysql/my_delete.c libmysql/my_tempnam.c libmysql/my_open.c libmysql/mf_casecnv.c libmysql/my_read.c \
+	libmysql/my_write.c libmysql/errors.c libmysql/my_error.c libmysql/my_getwd.c libmysql/my_div.c libmysql/mf_pack.c \
+	libmysql/my_messnc.c libmysql/mf_dirname.c libmysql/mf_fn_ext.c libmysql/mf_wcomp.c libmysql/typelib.c libmysql/safemalloc.c \
+	libmysql/my_alloc.c libmysql/mf_format.c libmysql/mf_path.c libmysql/mf_unixpath.c libmysql/my_fopen.c libmysql/mf_loadpath.c \
+	libmysql/my_pthread.c libmysql/my_thr_init.c libmysql/thr_mutex.c libmysql/mulalloc.c libmysql/string.c libmysql/default.c \
+	libmysql/my_compress.c libmysql/array.c libmysql/my_once.c libmysql/list.c libmysql/my_net.c libmysql/dbug.c \
+	libmysql/strmov.c libmysql/strxmov.c libmysql/strnmov.c libmysql/strmake.c libmysql/strend.c libmysql/strfill.c \
+	libmysql/is_prefix.c libmysql/int2str.c libmysql/str2int.c libmysql/strinstr.c \
+	libmysql/strcont.c libmysql/strcend.c libmysql/bchange.c libmysql/bmove.c libmysql/bmove_upp.c \
+	libmysql/longlong2str.c libmysql/strtoull.c libmysql/strtoll.c libmysql/charset.c libmysql/ctype.c"
+else
+  sources=
+fi
+
 if test "$PHP_MYSQL" != "no"; then
   AC_DEFINE(HAVE_MYSQL, 1, [Whether you have MySQL])
-  PHP_EXTENSION(mysql,$ext_shared)
+  PHP_NEW_EXTENSION(mysql,php_mysql.c $sources, $ext_shared,,-I@ext_srcdir@/libmysql)
 fi
 
 if test "$PHP_MYSQL" = "yes"; then
   PHP_MYSQL_SOCK
   MYSQL_CHECKS
-  MYSQL_LIBADD=libmysql/libmysql_client.la
-  MYSQL_SHARED_LIBADD=libmysql/libmysql_client.la
-  MYSQL_SUBDIRS=libmysql
-  PHP_SUBST(MYSQL_LIBADD)
-  PHP_SUBST(MYSQL_SUBDIRS)
-  LIB_BUILD($ext_builddir/libmysql,$ext_shared,yes)
-  PHP_ADD_INCLUDE($ext_srcdir/libmysql)
+  PHP_ADD_BUILD_DIR($ext_builddir/libmysql)
   MYSQL_MODULE_TYPE=builtin
 elif test "$PHP_MYSQL" != "no"; then
   for i in $PHP_MYSQL; do

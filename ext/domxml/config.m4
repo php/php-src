@@ -104,7 +104,7 @@ PHP_ARG_WITH(dom-xslt, for DOM XSLT support,
                           DIR is the libxslt install directory.])
 
 PHP_ARG_WITH(dom-exslt, for DOM EXSLT support,
-[  --with-dom-exslt[=DIR]   Include DOM EXSLT support (requires libxslt >= 1.0.3).
+[  --with-dom-exslt[=DIR]  Include DOM EXSLT support (requires libxslt >= 1.0.3).
                           DIR is the libexslt install directory.])
 
 if test "$PHP_DOM_XSLT" != "no"; then

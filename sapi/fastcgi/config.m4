@@ -12,7 +12,7 @@ AC_ARG_WITH(fastcgi,
   fi
   test -f "$FASTCGIPATH/lib/libfcgi.a" || AC_MSG_ERROR(Unable to find libfcgi.a in $FASTCGIPATH/lib)
   test -f "$FASTCGIPATH/include/fastcgi.h" || AC_MSG_ERROR(Unable to find fastcgi.h in $FASTCGIPATH/include)
-  PHP_SAPI=fastcgi
+  PHP_SELECT_SAPI(fastcgi, programm, fastcgi.c) 
   PHP_LIBS=$FASTCGIPATH/lib/libfcgi.a
   PHP_ADD_INCLUDE($FASTCGIPATH/include)
   EXT_PROGRAM_LDADD="$EXT_PROGRAM_LDADD $FASTCGIPATH/lib/libfcgi.a"

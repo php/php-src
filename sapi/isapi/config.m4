@@ -16,8 +16,7 @@ AC_ARG_WITH(isapi,
 	PHP_BUILD_THREAD_SAFE
 	AC_DEFINE(WITH_ZEUS,1,[ ])
 	PHP_ADD_INCLUDE($ZEUSPATH/web/include)
-	PHP_SAPI=isapi
-	PHP_BUILD_SHARED
+    PHP_SELECT_SAPI(isapi, shared, php4isapi.c)
 	INSTALL_IT="\$(SHELL) \$(srcdir)/install-sh -m 0755 $SAPI_SHARED \$(INSTALL_ROOT)$ZEUSPATH/web/bin/"
 	RESULT=yes
 ])

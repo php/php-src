@@ -12,16 +12,10 @@ PHP_ARG_WITH(pcre-regex,for PCRE support,
                           if not using bundled library.],yes)
 
 if test "$PHP_PCRE_REGEX" != "no"; then
-  PHP_EXTENSION(pcre, $ext_shared)
   if test "$PHP_PCRE_REGEX" = "yes"; then
-    PCRE_LIBADD=pcrelib/libpcre.la
-    PCRE_SHARED_LIBADD=pcrelib/libpcre.la
-    PCRE_SUBDIRS=pcrelib
-    PHP_SUBST(PCRE_LIBADD)
-    PHP_SUBST(PCRE_SUBDIRS)
+    PHP_NEW_EXTENSION(pcre, pcrelib/maketables.c pcrelib/get.c pcrelib/study.c pcrelib/pcre.c php_pcre.c, $ext_shared,,-DSUPPORT_UTF8 -I@ext_srcdir@/pcrelib)
+    PHP_ADD_BUILD_DIR($ext_builddir/pcrelib)
     AC_DEFINE(HAVE_BUNDLED_PCRE, 1, [ ])
-    PHP_FAST_OUTPUT($ext_builddir/pcrelib/Makefile)
-    LIB_BUILD($ext_builddir/pcrelib,$ext_shared,yes)
   else
     test -f $PHP_PCRE_REGEX/pcre.h && PCRE_INCDIR=$PHP_PCRE_REGEX
     test -f $PHP_PCRE_REGEX/include/pcre.h && PCRE_INCDIR=$PHP_PCRE_REGEX/include
@@ -52,8 +46,8 @@ if test "$PHP_PCRE_REGEX" != "no"; then
 
     PHP_ADD_LIBRARY_WITH_PATH(pcre, $PCRE_LIBDIR, PCRE_SHARED_LIBADD)
     
-    PHP_ADD_INCLUDE($PCRE_INCDIR)
     AC_DEFINE(HAVE_PCRE, 1, [ ])
+    PHP_NEW_EXTENSION(pcre, php_pcre.c, $ext_shared,,-DSUPPORT_UTF8 -I$PCRE_INCDIR)
   fi
 fi
 PHP_SUBST(PCRE_SHARED_LIBADD)

@@ -39,10 +39,9 @@ AC_ARG_WITH(apxs2,
     esac
   done
   PHP_ADD_INCLUDE($APXS_INCLUDEDIR)
-  PHP_SAPI=apache2filter
   INSTALL_IT="$APXS -i -a -n php4 $SAPI_LIBTOOL"
-  PHP_BUILD_SHARED
   PHP_BUILD_THREAD_SAFE
+  PHP_SELECT_SAPI(apache2filter, shared, sapi_apache2.c apache_config.c php_functions.c) 
   AC_MSG_RESULT(yes)
   case $host_alias in
   *aix*)

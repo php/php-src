@@ -1,4 +1,0 @@
-
-SUBDIRS = $(PHP_SAPI)
-
-include $(top_srcdir)/build/rules.mk

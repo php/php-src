@@ -2,7 +2,124 @@ dnl $Id$
 dnl
 dnl This file contains local autoconf functions.
 
-sinclude(dynlib.m4)
+dnl PHP_ADD_MAKEFILE_FRAGMENT([srcfile[, ext_srcdir[, ext_builddir]]])
+dnl
+dnl Processes a file called Makefile.frag in the source directory
+dnl of the most recently added extension. $(srcdir) and $(builddir)
+dnl are substituted with the proper paths. Can be used to supply
+dnl custom rules and/or additional targets.
+dnl
+AC_DEFUN(PHP_ADD_MAKEFILE_FRAGMENT,[
+  ifelse($1,,src=$ext_srcdir/Makefile.frag,src=$1)
+  ifelse($2,,ac_srcdir=$ext_srcdir,ac_srcdir=$2)
+  ifelse($3,,ac_builddir=$ext_builddir,ac_builddir=$3)
+  sed -e "s#\$(srcdir)#$ac_srcdir#g" -e "s#\$(builddir)#$ac_builddir#g" $src  >> Makefile.fragments
+])
+
+
+dnl PHP_DEFINE(what[, value])
+dnl
+dnl Creates builddir/include/what.h and in there #define what value
+dnl
+AC_DEFUN(PHP_DEFINE,[
+  echo "#define $1 $2" > include/$1.h
+])
+
+dnl PHP_INIT_BUILD_SYSTEM
+dnl
+AC_DEFUN(PHP_INIT_BUILD_SYSTEM,[
+mkdir include >/dev/null 2>&1
+> Makefile.objects
+> Makefile.fragments
+])
+
+dnl PHP_GEN_GLOBAL_MAKEFILE
+dnl 
+dnl Generates the global makefile.
+dnl
+AC_DEFUN(PHP_GEN_GLOBAL_MAKEFILE,[
+  cat >Makefile <<EOF
+srcdir = $abs_srcdir
+builddir = $abs_builddir
+top_srcdir = $abs_srcdir
+top_builddir = $abs_builddir
+EOF
+  for i in $PHP_VAR_SUBST; do
+    eval echo "$i = \$$i" >> Makefile
+  done
+
+  cat $abs_srcdir/Makefile.global Makefile.fragments Makefile.objects >> Makefile
+])
+
+dnl PHP_ADD_SOURCES(source-path, sources[, special-flags[, type]])
+dnl
+dnl Adds sources which are located relative to source-path to the 
+dnl array of type type.  Sources are processed with optional 
+dnl special-flags which are passed to the compiler.  Sources
+dnl can be either written in C or C++ (filenames shall end in .c 
+dnl or .cpp, respectively).
+dnl
+dnl Note: If source-path begins with a "/", the "/" is removed and
+dnl the path is interpreted relative to the top build-directory.
+dnl
+dnl which array to append to?
+AC_DEFUN(PHP_ADD_SOURCES,[
+  ifelse($4,cli,ac_what=PHP_CLI_OBJS,ifelse($4,sapi,ac_what=PHP_SAPI_OBJS,ac_what=PHP_GLOBAL_OBJS))
+  PHP_ADD_SOURCES_X($1, $2, $3, $ac_what)
+])
+
+dnl PHP_ASSIGN_BUILD_VARS(type)
+dnl Internal macro, should/can be exploded manually
+AC_DEFUN(PHP_ASSIGN_BUILD_VARS,[
+  for acx in pre meta post; do for acy in c cxx; do eval b_${acy}_$acx=[\$]$1_${acy}_$acx; done; done
+  b_lo=[$]$1_lo
+])
+
+dnl PHP_ADD_SOURCES_X(source-path, sources[, special-flags[, target-var[, shared[, special-post-flags]]]])
+dnl
+dnl Additional to PHP_ADD_SOURCES (see above), this lets you set the
+dnl name of the array target-var directly, as well as whether
+dnl shared objects will be built from the sources.  Should not be 
+dnl used directly.
+dnl 
+AC_DEFUN(PHP_ADD_SOURCES_X,[
+  ac_what=$4
+
+dnl relative to source- or build-directory?
+  case $1 in
+  /*[)] ac_srcdir=`echo $ac_n "$1$ac_c"|cut -c 2-`; ac_bdir=$ac_srcdir ;;
+  *[)] ac_srcdir="$abs_srcdir/$1"; ac_bdir=$1 ;;
+  esac
+  
+dnl how to build .. shared or static?
+  ifelse($5,yes,PHP_ASSIGN_BUILD_VARS(shared),PHP_ASSIGN_BUILD_VARS(php))
+
+dnl iterate over the sources
+  for ac_src in $2; do
+  
+dnl remove the suffix
+      old_IFS=[$]IFS
+      IFS=.
+      set $ac_src
+      ac_obj=[$]1
+      IFS=$old_IFS
+      
+dnl append to the array which has been dynamically chosen
+      eval "$ac_what=\"[\$$]ac_what $ac_bdir/[$]ac_obj.lo\""
+
+dnl choose the right compiler/flags/etc. for the source-file
+      case $ac_src in
+	  *.c[)] ac_comp="$b_c_pre $3 -I$abs_srcdir/$ac_bdir -I$abs_builddir/$ac_bdir $b_c_meta -c $ac_srcdir/$ac_src -o $ac_bdir/$ac_obj.$b_lo $6$b_c_post" ;;
+	  *.cpp[)] ac_comp="$b_cxx_pre $3 -I$abs_srcdir/$ac_bdir -I$abs_builddir/$ac_bdir $b_cxx_meta -c $ac_srcdir/$ac_src -o $ac_bdir/$ac_obj.$b_lo $6$b_cxx_post" ;;
+      esac
+
+dnl create a rule for the object/source combo
+	  cat >>Makefile.objects<<EOF
+$ac_bdir/[$]ac_obj.lo: $ac_srcdir/[$]ac_src
+	$ac_comp
+EOF
+  done
+])
 
 dnl
 dnl Disable building CLI
@@ -370,9 +487,7 @@ if test "$php_always_shared" = "yes"; then
   test "[$]$1" = "no" && $1=yes
 fi
 
-if test -n "$2"; then
-  AC_MSG_RESULT([$ext_output])
-fi
+ifelse([$2],,,[AC_MSG_RESULT([$ext_output])])
 ])
 
 dnl
@@ -386,9 +501,7 @@ PHP_REAL_ARG_WITH([$1],[$2],[$3],[$4],PHP_[]translit($1,a-z0-9-,A-Z0-9_))
 ])
 
 AC_DEFUN(PHP_REAL_ARG_WITH,[
-if test -n "$2"; then
-  AC_MSG_CHECKING([$2])
-fi
+ifelse([$2],,,[AC_MSG_CHECKING([$2])])
 AC_ARG_WITH($1,[$3],$5=[$]withval,$5=ifelse($4,,no,$4))
 PHP_ARG_ANALYZE($5,[$2])
 ])
@@ -404,9 +517,7 @@ PHP_REAL_ARG_ENABLE([$1],[$2],[$3],[$4],PHP_[]translit($1,a-z-,A-Z_))
 ])
 
 AC_DEFUN(PHP_REAL_ARG_ENABLE,[
-if test -n "$2"; then
-  AC_MSG_CHECKING([$2])
-fi
+ifelse([$2],,,[AC_MSG_CHECKING([$2])])
 AC_ARG_ENABLE($1,[$3],$5=[$]enableval,$5=ifelse($4,,no,$4))
 PHP_ARG_ANALYZE($5,[$2])
 ])
@@ -493,10 +604,6 @@ AC_DEFUN(PHP_SUBST_OLD,[
   AC_SUBST($1)
 ])
 
-AC_DEFUN(PHP_FAST_OUTPUT,[
-  PHP_FAST_OUTPUT_FILES="$PHP_FAST_OUTPUT_FILES $1"
-])
-
 AC_DEFUN(PHP_MKDIR_P_CHECK,[
   AC_CACHE_CHECK(for working mkdir -p, ac_cv_mkdir_p,[
     test -d conftestdir && rm -rf conftestdir
@@ -510,19 +617,6 @@ dnl `mkdir -p' must be quiet about creating existing directories
     fi
     rm -rf conftestdir
   ])
-])
-
-AC_DEFUN(PHP_GEN_CONFIG_VARS,[
-  PHP_MKDIR_P_CHECK
-  echo creating config_vars.mk
-  > config_vars.mk
-  for i in $PHP_VAR_SUBST; do
-    eval echo "$i = \$$i" | sed 's%#%\\#%g' >> config_vars.mk
-  done
-])
-
-AC_DEFUN(PHP_GEN_MAKEFILES,[
-  $SHELL $srcdir/build/fastgen.sh $srcdir $ac_cv_mkdir_p $BSD_MAKEFILE $1
 ])
 
 AC_DEFUN(PHP_TM_GMTOFF,[
@@ -645,13 +739,25 @@ dnl
 dnl PHP_BUILD_SHARED
 dnl
 AC_DEFUN(PHP_BUILD_SHARED,[
+  PHP_BUILD_PROGRAM
+  OVERALL_TARGET=libphp4.la
   php_build_target=shared
+  
+  php_c_pre=$shared_c_pre
+  php_c_meta=$shared_c_meta
+  php_c_post=$shared_c_post
+  php_cxx_pre=$shared_cxx_pre
+  php_cxx_meta=$shared_cxx_meta
+  php_cxx_post=$shared_cxx_post
+  php_lo=$shared_lo
 ])
 
 dnl
 dnl PHP_BUILD_STATIC
 dnl
 AC_DEFUN(PHP_BUILD_STATIC,[
+  PHP_BUILD_PROGRAM
+  OVERALL_TARGET=libphp4.la
   php_build_target=static
 ])
 
@@ -659,6 +765,23 @@ dnl
 dnl PHP_BUILD_PROGRAM
 dnl
 AC_DEFUN(PHP_BUILD_PROGRAM,[
+  OVERALL_TARGET=php
+  php_c_pre='$(CC)'
+  php_c_meta='$(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)'
+  php_c_post=' && > $[@]'
+  php_cxx_pre='$(CXX)'
+  php_cxx_meta='$(COMMON_FLAGS) $(CXXFLAGS_CLEAN) $(EXTRA_CXXFLAGS)'
+  php_cxx_post=' && > $[@]'
+  php_lo=o
+  
+  shared_c_pre='$(LIBTOOL) --mode=compile $(CC)'
+  shared_c_meta='$(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS) -prefer-pic'
+  shared_c_post=
+  shared_cxx_pre='$(LIBTOOL) --mode=compile $(CXX)'
+  shared_cxx_meta='$(COMMON_FLAGS) $(CXXFLAGS_CLEAN) $(EXTRA_CXXFLAGS) -prefer-pic'
+  shared_cxx_post=
+  shared_lo=lo
+
   php_build_target=program
 ])
 
@@ -722,7 +845,7 @@ dnl builds RPATH from PHP_RPATHS
 dnl
 AC_DEFUN(PHP_BUILD_RPATH,[
   if test "$PHP_RPATH" = "yes" && test -n "$PHP_RPATHS"; then
-    OLD_RPATHS="$PHP_RPATHS"
+    OLD_RPATHS=$PHP_RPATHS
     unset PHP_RPATHS
     for i in $OLD_RPATHS; do
       PHP_LDFLAGS="$PHP_LDFLAGS -L$i"
@@ -752,7 +875,7 @@ AC_DEFUN(PHP_ADD_INCLUDE,[
 ])
 
 AC_DEFUN(PHP_X_ADD_LIBRARY,[
-  ifelse($2,,$3="-l$1 [$]$3", $3="[$]$3 -l$1")
+  ifelse([$2],,$3="-l$1 [$]$3", $3="[$]$3 -l$1")
 ])
 
 dnl
@@ -838,8 +961,8 @@ AC_DEFUN(PHP_ADD_LIBRARY_DEFER_WITH_PATH,[
 dnl
 dnl Set libtool variable
 dnl
-AC_DEFUN(AM_SET_LIBTOOL_VARIABLE,[
-  LIBTOOL='$(SHELL) $(top_builddir)/libtool $1'
+AC_DEFUN(PHP_SET_LIBTOOL_VARIABLE,[
+  LIBTOOL='$(SHELL) libtool $1'
 ])
 
 dnl
@@ -870,21 +993,15 @@ AC_DEFUN(PHP_CHECK_CC_OPTION,[
 AC_DEFUN(PHP_REGEX,[
 
 if test "$REGEX_TYPE" = "php"; then
-  REGEX_LIB=regex/libregex.la
-  REGEX_DIR=regex
   AC_DEFINE(HSREGEX,1,[ ])
   AC_DEFINE(REGEX,1,[ ])
-  PHP_FAST_OUTPUT(regex/Makefile)
+  PHP_ADD_SOURCES(regex, regcomp.c regexec.c regerror.c regfree.c)
 elif test "$REGEX_TYPE" = "system"; then
   AC_DEFINE(REGEX,0,[ ])
 fi
 
 AC_MSG_CHECKING([which regex library to use])
 AC_MSG_RESULT([$REGEX_TYPE])
-
-PHP_SUBST(REGEX_DIR)
-PHP_SUBST(REGEX_LIB)
-PHP_SUBST(HSREGEX)
 ])
 
 dnl
@@ -921,21 +1038,79 @@ AC_DEFUN(PHP_AC_BROKEN_SPRINTF,[
   fi
 ])
 
+dnl PHP_SHARED_MODULE(module-name, object-var, build-dir)
 dnl
-dnl PHP_EXTENSION(extname [, shared [,sapi_class]])
+dnl Basically sets up the link-stage for building module-name
+dnl from object_var in build-dir.
+dnl
+AC_DEFUN(PHP_SHARED_MODULE,[
+  PHP_MODULES="$PHP_MODULES \$(phplibdir)/$1.la"
+  PHP_SUBST($2)
+  cat >>Makefile.objects<<EOF
+\$(phplibdir)/$1.la: $3/$1.la
+	\$(LIBTOOL) --mode=install cp $3/$1.la \$(phplibdir)
+
+$3/$1.la: \$($2) \$(translit($1,a-z-,A-Z_)_SHARED_DEPENDENCIES)
+	\$(LIBTOOL) --mode=link \$(CC) \$(COMMON_FLAGS) \$(CFLAGS_CLEAN) \$(EXTRA_CFLAGS) \$(LDFLAGS) -o \[$]@ -export-dynamic -avoid-version -prefer-pic -module -rpath \$(phplibdir) \$(EXTRA_LDFLAGS) \$($2) \$(translit($1,a-z-,A-Z_)_SHARED_LIBADD)
+
+EOF
+])
+
+dnl
+dnl PHP_SELECT_SAPI(name, type[, sources])
+dnl
+dnl Selects the SAPI name and type (static, shared, programm)
+dnl and optionally also the source-files for the SAPI-specific
+dnl objects.
+dnl
+AC_DEFUN(PHP_SELECT_SAPI,[
+  PHP_SAPI=$1
+  
+  case "$2" in
+  static) PHP_BUILD_STATIC;;
+  shared) PHP_BUILD_SHARED;;
+  program) PHP_BUILD_PROGRAM;;
+  esac
+  
+  ifelse($3,,,[PHP_ADD_SOURCES(sapi/$1, $3,,sapi)])
+])
+
+dnl deprecated
+AC_DEFUN(PHP_EXTENSION,[
+  sources=`awk -f $abs_srcdir/scan_makefile_in.awk < $abs_srcdir/ext/$1/Makefile.in`
+
+  PHP_NEW_EXTENSION($1, $sources, $2, $3)
+
+  if test -r "$ext_srcdir/Makefile.frag"; then
+    PHP_ADD_MAKEFILE_FRAGMENT
+  fi
+])
+
+AC_DEFUN(PHP_ADD_BUILD_DIR,[
+  BUILD_DIR="$BUILD_DIR $1"
+])
+
+AC_DEFUN(PHP_GEN_BUILD_DIRS,[
+  PHP_MKDIR_P_CHECK
+  if test "$ac_cv_mkdir_p" = "yes"; then
+    mkdir -p $BUILD_DIR
+  fi
+])
+
+dnl
+dnl PHP_NEW_EXTENSION(extname, sources [, shared [,sapi_class[, extra-cflags]]])
 dnl
 dnl Includes an extension in the build.
 dnl
-dnl "extname" is the name of the ext/ subdir where the extension resides
+dnl "extname" is the name of the ext/ subdir where the extension resides.
+dnl "sources" is a list of files relative to the subdir which are used
+dnl to build the extension.
 dnl "shared" can be set to "shared" or "yes" to build the extension as
 dnl a dynamically loadable library. Optional parameter "sapi_class" can
 dnl be set to "cli" to mark extension build only with CLI or CGI sapi's.
-dnl If "nocli" is passed the extension will be built only with a non-cli
-dnl sapi.
-dnl
-AC_DEFUN(PHP_EXTENSION,[
-  EXT_SUBDIRS="$EXT_SUBDIRS $1"
-  
+dnl extra-cflags are passed to the compiler, with @ext_srcdir@ being
+dnl substituted.
+AC_DEFUN(PHP_NEW_EXTENSION,[
   if test -d "$abs_srcdir/ext/$1"; then
 dnl ---------------------------------------------- Internal Module
     ext_builddir=ext/$1
@@ -946,35 +1121,39 @@ dnl ---------------------------------------------- External Module
     ext_srcdir=$abs_srcdir
   fi
 
-  if test "$2" != "shared" && test "$2" != "yes" && test "$3" != "cli"; then
+  ifelse($5,,,[ac_extra=`echo $ac_n "$5$ac_c"|sed s#@ext_srcdir@#$ext_srcdir#g`])
+
+  if test "$3" != "shared" && test "$3" != "yes" && test "$4" != "cli"; then
 dnl ---------------------------------------------- Static module
-    LIB_BUILD($ext_builddir)
-    EXT_LTLIBS="$EXT_LTLIBS $abs_builddir/$ext_builddir/lib$1.la"
+
+    PHP_ADD_SOURCES($ext_builddir,$2,$ac_extra,)
     EXT_STATIC="$EXT_STATIC $1"
     if test "$3" != "nocli"; then
       EXT_CLI_LTLIBS="$EXT_CLI_LTLIBS $abs_builddir/$ext_builddir/lib$1.la"
       EXT_CLI_STATIC="$EXT_CLI_STATIC $1"
     fi
   else
-    if test "$2" = "shared" || test "$2" = "yes"; then
+    if test "$3" = "shared" || test "$3" = "yes"; then
 dnl ---------------------------------------------- Shared module
-      LIB_BUILD($ext_builddir,yes)
+      PHP_ADD_SOURCES_X($ext_builddir,$2,$ac_extra,shared_objects_$1,yes)
+      PHP_SHARED_MODULE($1,shared_objects_$1, $ext_builddir)
       AC_DEFINE_UNQUOTED([COMPILE_DL_]translit($1,a-z-,A-Z_), 1, Whether to build $1 as dynamic module)
     fi
   fi
 
-  if test "$2" != "shared" && test "$2" != "yes" && test "$3" = "cli"; then
-dnl ---------------------------------------------- CLI only static module
-    LIB_BUILD($ext_builddir)
+  if test "$3" != "shared" && test "$3" != "yes" && test "$4" = "cli"; then
+dnl ---------------------------------------------- CLI static module
     if test "$PHP_SAPI" = "cgi"; then
-      EXT_LTLIBS="$EXT_LTLIBS $abs_builddir/$ext_builddir/lib$1.la"
+      PHP_ADD_SOURCES($ext_builddir,$2,$ac_extra,)
       EXT_STATIC="$EXT_STATIC $1"
+    else
+      PHP_ADD_SOURCES($ext_srcdir,$2,$ac_extra,cli)
+      EXT_CLI_STATIC="$EXT_CLI_STATIC $1"
     fi
     EXT_CLI_LTLIBS="$EXT_CLI_LTLIBS $abs_builddir/$ext_builddir/lib$1.la"
     EXT_CLI_STATIC="$EXT_CLI_STATIC $1"
   fi
-
-  PHP_FAST_OUTPUT($ext_builddir/Makefile)
+  PHP_ADD_BUILD_DIR($ext_builddir)
 ])
 
 dnl
@@ -1126,11 +1305,6 @@ int main(void) {
     AC_DEFINE(CHARSET_EBCDIC,1, [Define if system uses EBCDIC])
   fi
 ])
-
-AC_DEFUN(AC_ADD_LIBPATH, [indir([PHP_ADD_LIBPATH], $@)])
-AC_DEFUN(AC_ADD_LIBRARY, [indir([PHP_ADD_LIBRARY], $@)])
-AC_DEFUN(AC_ADD_LIBRARY_WITH_PATH, [indir([PHP_ADD_LIBRARY_WITH_PATH], $@)])
-AC_DEFUN(AC_ADD_INCLUDE, [indir([PHP_ADD_INCLUDE], $@)])
 
 AC_DEFUN(PHP_FOPENCOOKIE,[
 	AC_CHECK_FUNC(fopencookie, [ have_glibc_fopencookie=yes ])

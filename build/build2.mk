@@ -30,37 +30,16 @@ config_h_in = main/php_config.h.in
 
 acconfig_h_SOURCES = acconfig.h.in $(config_h_files)
 
-targets = $(TOUCH_FILES) $(makefile_in_files) configure $(config_h_in)
+targets = $(TOUCH_FILES) configure $(config_h_in)
 
 
-all: Zend/Makefile.am TSRM/Makefile.am $(targets)
-
-Zend/Makefile.am:
-	test -d Zend || (test -d ../Zend && ln -s ../Zend Zend)
-
-TSRM/Makefile.am:
-	test -d TSRM || (test -d ../TSRM && ln -s ../TSRM TSRM)
+all: $(targets)
 
 acconfig.h: $(acconfig_h_SOURCES)
 	@echo rebuilding $@
 	cat $(acconfig_h_SOURCES) > $@
 
-$(makefile_in_files): $(makefile_am_files) aclocal.m4 configure.in $(config_m4_files)
-	@echo rebuilding Makefile templates
-	@for i in $(LT_TARGETS); do \
-		if test -f "$$i"; then \
-			mv $$i $$i.bak; \
-			cp $$i.bak $$i; \
-		fi; \
-	done
-	@test -f want_dependencies || flag=-i; \
-	automake -a $$flag $(AMFLAGS) $(makefile_files) 2>&1 | $(SUPPRESS_WARNINGS)
-	@for i in $(LT_TARGETS); do mv $$i.bak $$i; done
-
-aclocal.m4: configure.in acinclude.m4 dynlib.m4
-	aclocal 2>&1 | $(SUPPRESS_WARNINGS)
-
-SUPPRESS_WARNINGS = (egrep -v '(AC_TRY_RUN called without default to allow cross compiling|AC_PROG_CXXCPP was called before AC_PROG_CXX|.*AM_PROG_LEX.*|defined in acinclude.m4 but never used|AC_PROG_LEX invoked multiple times|AC_PROG_CPP called before)'||true)
+SUPPRESS_WARNINGS = (egrep -v '(AC_TRY_RUN called without default to allow cross compiling|AC_PROG_CXXCPP was called before AC_PROG_CXX|defined in acinclude.m4 but never used|AC_PROG_LEX invoked multiple times|AC_PROG_CPP was called before AC_PROG_CC)'||true)
 
 $(config_h_in): configure acconfig.h
 # explicitly remove target since autoheader does not seem to work 
@@ -72,6 +51,9 @@ $(config_h_in): configure acconfig.h
 $(TOUCH_FILES):
 	touch $(TOUCH_FILES)
 
+aclocal.m4: configure.in acinclude.m4
+	aclocal 2>&1 | $(SUPPRESS_WARNINGS)
+	
 configure: aclocal.m4 configure.in $(config_m4_files)
 	@echo rebuilding $@
 	@autoconf 2>&1 | $(SUPPRESS_WARNINGS)
