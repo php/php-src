@@ -204,7 +204,7 @@ PDO_API int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, int inquery_len,
 						case IS_DOUBLE:
 							convert_to_string(param->parameter);
 							plc->qlen = Z_STRLEN_P(param->parameter);
-							plc->quoted = Z_STRLEN_P(param->parameter);
+							plc->quoted = Z_STRVAL_P(param->parameter);
 							plc->freeq = 0;
 							break;
 
