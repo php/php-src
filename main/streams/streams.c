@@ -1198,6 +1198,7 @@ PHPAPI size_t _php_stream_copy_to_stream(php_stream *src, php_stream *dest, size
 	size_t readchunk;
 	size_t haveread = 0;
 	size_t didread;
+	php_stream_statbuf ssbuf;
 #if HAVE_MMAP
 	int srcfd;
 #endif
@@ -1243,14 +1244,11 @@ PHPAPI size_t _php_stream_copy_to_stream(php_stream *src, php_stream *dest, size
 	}
 #endif
 
-	{
-		php_stream_statbuf sbuf;
-		if (php_stream_stat(src, &sbuf TSRMLS_CC) == 0) {
-			/* in the event that the source file is 0 bytes, return 1 to indicate success
-			 * because opening the file to write had already created a copy */
-			if (sbuf.sb.st_size == 0) {
-				return 1;
-			}
+	if (php_stream_stat(src, &ssbuf) == 0) {
+		/* in the event that the source file is 0 bytes, return 1 to indicate success
+		 * because opening the file to write had already created a copy */
+		if (ssbuf.sb.st_size == 0) {
+			return 1;
 		}
 	}
 

@@ -841,7 +841,7 @@ static ZEND_FUNCTION(com_create_guid)
 		ZEND_WRONG_PARAM_COUNT();
 	}
 
-	if (CoCreateGuid(&retval) && StringFromCLSID(&retval, &guid_string)) {
+	if (CoCreateGuid(&retval) == S_OK && StringFromCLSID(&retval, &guid_string) == S_OK) {
 		Z_TYPE_P(return_value) = IS_STRING;
 		Z_STRVAL_P(return_value) = php_OLECHAR_to_char(guid_string, &Z_STRLEN_P(return_value), CP_ACP, 0);
 
