@@ -20,26 +20,8 @@ if test "$PHP_YAZ" != "no"; then
   if test -f $yazconfig; then
     AC_DEFINE(HAVE_YAZ,1,[Whether you have YAZ])
     . $yazconfig
-    for i in $YAZLIB; do
-      case $i in
-      -l*)
-        ii=`echo $i|cut -c 3-`
-        AC_ADD_LIBRARY($ii, YAZ_SHARED_LIBADD)
-        ;;
-      -L*)
-        ii=`echo $i|cut -c 3-`
-        AC_ADD_LIBPATH($ii,, YAZ_SHARED_LIBADD)
-        ;;
-      esac
-    done
-    for i in $YAZINC; do
-      case $i in
-      -I*)
-        ii=`echo $i|cut -c 3-`
-        AC_ADD_INCLUDE($ii)
-        ;;
-      esac
-    done
+    PHP_EVAL_LIBLINE($YAZLIB, YAZ_SHARED_LIBADD)
+    PHP_EVAL_INCLINE($YAZINC)
     PHP_SUBST(YAZ_SHARED_LIBADD)
     PHP_EXTENSION(yaz, $ext_shared)
   fi
