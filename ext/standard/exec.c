@@ -269,6 +269,7 @@ char *php_escape_shell_cmd(char *str) {
 		switch (str[x]) {
 			case '"':
 			case '\'':
+#ifndef PHP_WIN32
 				if (!p && (p = memchr(str + x + 1, str[x], l - x - 1))) {
 					/* noop */
 				} else if (p && *p == str[x]) {
@@ -278,6 +279,7 @@ char *php_escape_shell_cmd(char *str) {
 				}
 				cmd[y++] = str[x];
 				break;
+#endif
 			case '#': /* This is character-set independent */
 			case '&':
 			case ';':
@@ -299,6 +301,12 @@ char *php_escape_shell_cmd(char *str) {
 			case '\\':
 			case '\x0A': /* excluding these two */
 			case '\xFF':
+#ifdef PHP_WIN32
+			/* since Windows does not allow us to escape these chars, just remove them */
+			case '%':
+				cmd[y++] = ' ';
+				break;
+#endif
 				cmd[y++] = '\\';
 				/* fall-through */
 			default:
@@ -332,7 +340,9 @@ char *php_escape_shell_arg(char *str) {
 		switch (str[x]) {
 #ifdef PHP_WIN32
 		case '"':
-			cmd[y++] = '\\';
+		case '%':
+			cmd[y++] = ' ';
+			break;
 #else
 		case '\'':
 			cmd[y++] = '\'';
