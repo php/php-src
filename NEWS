@@ -1,6 +1,8 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.2.0-dev
+- Fix ImageColorsForIndex() and ImageColorAt() to work for TrueColor
+  images. (Rasmus)
 - Added support for bind_textdomain_codeset(). (rudib@email.si)
 - Add generic Win 32 API extension. (jmoore)
 - Fix Bug 9878 (patch by bfoddy@mediaone.net). (jmoore)
