@@ -54,6 +54,9 @@
 /* The longest property name we use in an uploaded file array */
 #define MAX_SIZE_OF_INDEX sizeof("[tmp_name]")
 
+/* The longest anonymous name */
+#define MAX_SIZE_ANONNAME 33
+
 /* Errors */
 #define UPLOAD_ERROR_OK   0  /* File upload succesful */
 #define UPLOAD_ERROR_A    1  /* Uploaded file exceeded upload_max_filesize */
@@ -686,7 +689,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 {
 	char *boundary, *s=NULL, *boundary_end = NULL, *start_arr=NULL, *array_index=NULL;
 	char *temp_filename=NULL, *lbuf=NULL, *abuf=NULL;
-	int boundary_len=0, total_bytes=0, cancel_upload=0, is_arr_upload=0, array_len=0, max_file_size=0, skip_upload=0;
+	int boundary_len=0, total_bytes=0, cancel_upload=0, is_arr_upload=0, array_len=0, max_file_size=0, skip_upload=0, anonindex=0, is_anonymous;
 	zval *http_post_files=NULL;
 	zend_bool magic_quotes_gpc;
 	multipart_buffer *mbuff;
@@ -817,12 +820,17 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 			}
 
 			/* Return with an error if the posted data is garbled */
-			if (!param) {
+			if (!param && !filename) {
 				sapi_module.sapi_error(E_WARNING, "File Upload Mime headers garbled");
-				if (filename) {
-					efree(filename);
-				}
 				SAFE_RETURN;
+			}
+			
+			if (!param) {
+				is_anonymous = 1;
+				param = emalloc(MAX_SIZE_ANONNAME);
+				snprintf(param, MAX_SIZE_ANONNAME, "%u", anonindex++);
+			} else {
+				is_anonymous = 0;
 			}
 
 			if (!skip_upload) {
@@ -928,10 +936,12 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 #else
 			s = strrchr(filename, '\\');
 #endif
-			if (s && s > filename) {
-				safe_php_register_variable(lbuf, s+1, NULL, 0 TSRMLS_CC);
-			} else {
-				safe_php_register_variable(lbuf, filename, NULL, 0 TSRMLS_CC);
+			if (!is_anonymous) {
+				if (s && s > filename) {
+					safe_php_register_variable(lbuf, s+1, NULL, 0 TSRMLS_CC);
+				} else {
+					safe_php_register_variable(lbuf, filename, NULL, 0 TSRMLS_CC);
+				}
 			}
 
 			/* Add $foo[name] */
@@ -965,7 +975,9 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 			} else {
 				sprintf(lbuf, "%s_type", param);
 			}
-			safe_php_register_variable(lbuf, cd, NULL, 0 TSRMLS_CC);
+			if (!is_anonymous) {
+				safe_php_register_variable(lbuf, cd, NULL, 0 TSRMLS_CC);
+			}
 
 			/* Add $foo[type] */
 			if (is_arr_upload) {
@@ -987,7 +999,9 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 			magic_quotes_gpc = PG(magic_quotes_gpc);
 			PG(magic_quotes_gpc) = 0;
 			/* if param is of form xxx[.*] this will cut it to xxx */
-			safe_php_register_variable(param, temp_filename, NULL, 1 TSRMLS_CC);
+			if (!is_anonymous) {
+				safe_php_register_variable(param, temp_filename, NULL, 1 TSRMLS_CC);
+			}
 	
 			/* Add $foo[tmp_name] */
 			if (is_arr_upload) {
@@ -1028,7 +1042,9 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 				} else {
 					sprintf(lbuf, "%s_size", param);
 				}
-				safe_php_register_variable_ex(lbuf, &file_size, NULL, 0 TSRMLS_CC);
+				if (!is_anonymous) {
+					safe_php_register_variable_ex(lbuf, &file_size, NULL, 0 TSRMLS_CC);
+				}	
 
 				/* Add $foo[size] */
 				if (is_arr_upload) {
