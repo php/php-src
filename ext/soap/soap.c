@@ -1366,8 +1366,12 @@ PHP_METHOD(soapserver, handle)
 			soapHeader *h = header;
 
 			header = header->next;
-			if (h->mustUnderstand && service->sdl && !h->function && !h->hdr) {
-				soap_server_fault("MustUnderstand","Header not understood", NULL, NULL TSRMLS_CC);
+			if (service->sdl && !h->function && !h->hdr) {
+				if (h->mustUnderstand) {
+					soap_server_fault("MustUnderstand","Header not understood", NULL, NULL TSRMLS_CC);
+				} else {
+					continue;
+				}
 			}
 
 			fn_name = estrndup(Z_STRVAL(h->function_name),Z_STRLEN(h->function_name));
