@@ -357,9 +357,6 @@ define_option enable-unified-odbc 'Enable unified ODBC support?' yesno yes \
     instead.'
 fi
 
-define_option with-dbase 'dBase support? ' yesno no \
-'    Whether to use the bundled dbase library.'
-
 define_option with-filepro 'filePro support? ' yesno no \
 '    Whether to use the bundled filePro library.  Read-access only.'
 

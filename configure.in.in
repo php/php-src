@@ -315,7 +315,7 @@ AC_ARG_WITH(apxs,
         withval=apxs
     fi
     APXS="$withval"
-    APXS_LDFLAGS="@DBASE_LIB@ @ORACLE_LFLAGS@ @ORACLE_LIBS@ @IODBC_LFLAGS@ @IODBC_LIBS@ @SYBASE_LFLAGS@ @SYBASE_LIBS@ @SYBASE_CT_LFLAGS@ @SYBASE_CT_LIBS@ @MYSQL_LFLAGS@ @MYSQL_LIBS@ @MSQL_LFLAGS@ @MSQL_LIBS@ @ADA_LFLAGS@ @ADA_LIBS@ @SOLID_LIBS@ @EMPRESS_LIBS@ @OPENLINK_LIBS@ @PGSQL_LFLAGS@ @PGSQL_LIBS@ @LDAP_LFLAGS@ @LDAP_LIBS@ @VELOCIS_LIBS@ @CODBC_LFLAGS@ @CODBC_LIBS@ @ZLIB_LIBS@ @PDFLIB_LIBS@ @FDFTK_LIBS@ @IFX_LFLAGS@ @IFX_LIBS@ @IBASE_LFLAGS@ @IBASE_LIBS@"
+    APXS_LDFLAGS="@ORACLE_LFLAGS@ @ORACLE_LIBS@ @IODBC_LFLAGS@ @IODBC_LIBS@ @SYBASE_LFLAGS@ @SYBASE_LIBS@ @SYBASE_CT_LFLAGS@ @SYBASE_CT_LIBS@ @MYSQL_LFLAGS@ @MYSQL_LIBS@ @MSQL_LFLAGS@ @MSQL_LIBS@ @ADA_LFLAGS@ @ADA_LIBS@ @SOLID_LIBS@ @EMPRESS_LIBS@ @OPENLINK_LIBS@ @PGSQL_LFLAGS@ @PGSQL_LIBS@ @LDAP_LFLAGS@ @LDAP_LIBS@ @VELOCIS_LIBS@ @CODBC_LFLAGS@ @CODBC_LIBS@ @ZLIB_LIBS@ @PDFLIB_LIBS@ @FDFTK_LIBS@ @IFX_LFLAGS@ @IFX_LIBS@ @IBASE_LFLAGS@ @IBASE_LIBS@"
     APACHE_INCLUDE="-I`$APXS -q INCLUDEDIR`"
     BINNAME=libphp3.so
     INSTALL_IT="\$(APXS) -i -a -n php3 $BINNAME"
@@ -414,13 +414,8 @@ AC_ARG_WITH(apache,
 	    APACHE_INCLUDE=-I$withval/src
 	    APACHE_TARGET=$withval/src
 	    BINNAME=libphp3.a
-	    if test "$with_dbase" = "yes"; then
-	      INSTALL_IT="mkdir -p $APACHE_TARGET; cp $BINNAME $APACHE_INSTALL_FILES dbase/libdbf.a $APACHE_TARGET"
-	      PHP_LIBS="-L. -lphp3 -ldbf"
-	    else
-	      INSTALL_IT="mkdir -p $APACHE_TARGET; cp $BINNAME $APACHE_INSTALL_FILES $APACHE_TARGET"
-	      PHP_LIBS="-L. -lphp3"
-	    fi
+	    INSTALL_IT="mkdir -p $APACHE_TARGET; cp $BINNAME $APACHE_INSTALL_FILES $APACHE_TARGET"
+	    PHP_LIBS="-L. -lphp3"
 	    AC_DEFINE(APACHE)
 	    AC_MSG_RESULT(yes - Apache 1.2.x)
 		STRONGHOLD=
@@ -435,13 +430,8 @@ AC_ARG_WITH(apache,
 			mkdir $APACHE_TARGET
 		fi
 	    BINNAME=libmodphp3.a
-	    if test "$with_dbase" = "yes"; then
-	      INSTALL_IT="mkdir -p $APACHE_TARGET; cp $BINNAME $APACHE_INSTALL_FILES dbase/libdbf.a $APACHE_TARGET; cp $srcdir/apMakefile.tmpl $APACHE_TARGET/Makefile.tmpl; cp $srcdir/apMakefile.libdir $APACHE_TARGET/Makefile.libdir"
-	      PHP_LIBS="-Lmodules/php3 -L../modules/php3 -L../../modules/php3 -lmodphp3 -ldbf"
-	    else
-	      INSTALL_IT="mkdir -p $APACHE_TARGET; cp $BINNAME $APACHE_INSTALL_FILES $APACHE_TARGET; cp $srcdir/apMakefile.tmpl $APACHE_TARGET/Makefile.tmpl; cp $srcdir/apMakefile.libdir $APACHE_TARGET/Makefile.libdir"
-	      PHP_LIBS="-Lmodules/php3 -L../modules/php3 -L../../modules/php3 -lmodphp3"
-		fi
+	    INSTALL_IT="mkdir -p $APACHE_TARGET; cp $BINNAME $APACHE_INSTALL_FILES $APACHE_TARGET; cp $srcdir/apMakefile.tmpl $APACHE_TARGET/Makefile.tmpl; cp $srcdir/apMakefile.libdir $APACHE_TARGET/Makefile.libdir"
+	    PHP_LIBS="-Lmodules/php3 -L../modules/php3 -L../../modules/php3 -lmodphp3"
 	    AC_DEFINE(APACHE)
 	    AC_MSG_RESULT(yes - Apache 1.3.x)
 		STRONGHOLD=
@@ -466,13 +456,8 @@ AC_ARG_WITH(apache,
 			mkdir $APACHE_TARGET
 		fi
 	    BINNAME=libmodphp3.a
-	    if test "$with_dbase" = "yes"; then
-	      PHP_LIBS="-Lmodules/php3 -L../modules/php3 -L../../modules/php3 -lmodphp3 -ldbf"
-	      INSTALL_IT="mkdir -p $APACHE_TARGET; cp $BINNAME $APACHE_INSTALL_FILES dbase/libdbf.a $APACHE_TARGET; cp $srcdir/apMakefile.tmpl $APACHE_TARGET/Makefile.tmpl; cp $srcdir/apMakefile.libdir $APACHE_TARGET/Makefile.libdir"
-	    else
-	      PHP_LIBS="-Lmodules/php3 -L../modules/php3 -L../../modules/php3 -lmodphp3"
-	      INSTALL_IT="mkdir -p $APACHE_TARGET; cp $BINNAME $APACHE_INSTALL_FILES $APACHE_TARGET; cp $srcdir/apMakefile.tmpl $APACHE_TARGET/Makefile.tmpl; cp $srcdir/apMakefile.libdir $APACHE_TARGET/Makefile.libdir"
-	    fi
+	    PHP_LIBS="-Lmodules/php3 -L../modules/php3 -L../../modules/php3 -lmodphp3"
+	    INSTALL_IT="mkdir -p $APACHE_TARGET; cp $BINNAME $APACHE_INSTALL_FILES $APACHE_TARGET; cp $srcdir/apMakefile.tmpl $APACHE_TARGET/Makefile.tmpl; cp $srcdir/apMakefile.libdir $APACHE_TARGET/Makefile.libdir"
 	    AC_DEFINE(APACHE)
 	    AC_MSG_RESULT(yes - Apache 1.3.x)
 		STRONGHOLD=
@@ -494,13 +479,8 @@ AC_ARG_WITH(apache,
 	    APACHE_INCLUDE=-"I$withval/apache -I$withval/ssl/include"
 	    APACHE_TARGET=$withval/apache
 	    BINNAME=libmodphp3.a
-	    if test "$with_dbase" = "yes"; then
-	      PHP_LIBS="-Lmodules/php3 -L../modules/php3 -L../../modules/php3 -lmodphp3 -ldbf"
-	      INSTALL_IT="mkdir -p $APACHE_TARGET; cp $BINNAME $APACHE_INSTALL_FILES dbase/libdbf.a $APACHE_TARGET"
-	    else
-	      PHP_LIBS="-Lmodules/php3 -L../modules/php3 -L../../modules/php3 -lmodphp3"
-	      INSTALL_IT="mkdir -p $APACHE_TARGET; cp $BINNAME $APACHE_INSTALL_FILES $APACHE_TARGET"
-	    fi
+	    PHP_LIBS="-Lmodules/php3 -L../modules/php3 -L../../modules/php3 -lmodphp3"
+	    INSTALL_IT="mkdir -p $APACHE_TARGET; cp $BINNAME $APACHE_INSTALL_FILES $APACHE_TARGET"
 		STRONGHOLD=-DSTRONGHOLD=1
 	    AC_DEFINE(APACHE)
 		AC_MSG_RESULT(yes - StrongHold)
@@ -1783,27 +1763,6 @@ dnl## AC_SUBST(FDFLIB_INCLUDE)
 INCLUDES="$INCLUDES $FDFLIB_INCLUDE"
 
 
-AC_MSG_CHECKING(whether to include the bundled dbase library)
-AC_ARG_WITH(dbase,
-[  --with-dbase            Include the bundled dbase library],
-[
-  if test "$withval" = "yes"; then
-	AC_MSG_RESULT(yes)
-	AC_DEFINE(DBASE,1)
-	DBASE_LIB=dbase/libdbf.a
-  else
-	AC_MSG_RESULT(no)
-	AC_DEFINE(DBASE,0)
-	DBASE_LIB=
-  fi
-],[
-  AC_MSG_RESULT(no)
-  AC_DEFINE(DBASE,0)
-  DBASE_LIB=
-])
-AC_SUBST(DBASE_LIB)
-
-
 AC_MSG_CHECKING(whether to include the bundled filePro support)
 AC_ARG_WITH(filepro,
 [  --with-filepro          Include the bundled read-only filePro support],[
@@ -1970,8 +1929,7 @@ PHP_OS=`uname`
 AC_DEFINE_UNQUOTED(PHP_OS,"$PHP_OS")
 
 AC_OUTPUT(Makefile build-defs.h libphp3.module
-          scripts/mkextlib ext/Makefile
-          regex/Makefile dbase/Makefile
+          scripts/mkextlib regex/Makefile ext/Makefile
           @@EXT_MAKEFILES@@, [
 chmod +x scripts/mkextlib
 ], [
