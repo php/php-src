@@ -7,12 +7,18 @@ AC_ARG_WITH(thttpd,
   if test ! -d $withval; then
     AC_MSG_RESULT(thttpd directory does not exist ($withval))
   fi
-  if egrep thttpd.2.21b $withval/version.h >/dev/null; then
-    :
-  else
-    AC_MSG_ERROR([This version only supports thttpd-2.21b])
-  fi
+
   PHP_EXPAND_PATH($withval, THTTPD)
+  
+  if grep thttpd.2.21b $withval/version.h >/dev/null; then
+    patch="test -f $THTTPD/php_patched || \
+    (cd $THTTPD && patch -p 1 < $abs_srcdir/sapi/thttpd/thttpd_patch && touch php_patched)"
+
+  elif grep Premium $withval/version.h >/dev/null; then
+    patch=
+  else
+    AC_MSG_ERROR([This version only supports thttpd-2.21b and Premium thttpd])
+  fi
   PHP_TARGET_RDYNAMIC
   INSTALL_IT="\
     echo 'PHP_LIBS = -L. -lphp4 \$(PHP_LIBS) \$(EXTRA_LIBS)' > $THTTPD/php_makefile; \
@@ -21,8 +27,7 @@ AC_ARG_WITH(thttpd,
     rm -f $THTTPD/php_thttpd.c $THTTPD/php_thttpd.h $THTTPD/libphp4.a; \
     \$(LN_S) $abs_srcdir/sapi/thttpd/thttpd.c $THTTPD/php_thttpd.c; \
     \$(LN_S) $abs_srcdir/sapi/thttpd/php_thttpd.h $abs_builddir/$SAPI_STATIC $THTTPD/;\
-    test -f $THTTPD/php_patched || \
-    (cd $THTTPD && patch -p 1 < $abs_srcdir/sapi/thttpd/thttpd_patch && touch php_patched)"
+    $patch"
   PHP_THTTPD="yes, using $THTTPD"
   PHP_ADD_INCLUDE($THTTPD)
   PHP_SELECT_SAPI(thttpd, static)
