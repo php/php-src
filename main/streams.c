@@ -759,18 +759,31 @@ PHPAPI int _php_stream_flush(php_stream *stream, int closing TSRMLS_DC)
 
 PHPAPI size_t _php_stream_write(php_stream *stream, const char *buf, size_t count TSRMLS_DC)
 {
-	size_t didwrite;
+	size_t didwrite = 0, towrite, justwrote;
 	
 	assert(stream);
 	if (buf == NULL || count == 0 || stream->ops->write == NULL)
 		return 0;
 
-	if (stream->filterhead) {
-		didwrite = stream->filterhead->fops->write(stream, stream->filterhead, buf, count TSRMLS_CC);
-	} else {
-		didwrite = stream->ops->write(stream, buf, count TSRMLS_CC);
+	while (count > 0) {
+		towrite = count;
+		if (towrite > stream->chunk_size)
+			towrite = stream->chunk_size;
+	
+		if (stream->filterhead) {
+			justwrote = stream->filterhead->fops->write(stream, stream->filterhead, buf, towrite TSRMLS_CC);
+		} else {
+			justwrote = stream->ops->write(stream, buf, towrite TSRMLS_CC);
+		}
+		if (justwrote > 0) {
+			stream->position += justwrote;
+			buf += justwrote;
+			count -= justwrote;
+			didwrite += justwrote;
+		} else {
+			break;
+		}
 	}
-	stream->position += didwrite;
 	return didwrite;
 }
 
