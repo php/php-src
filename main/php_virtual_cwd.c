@@ -258,7 +258,7 @@ int virtual_file_ex(cwd_state *state, char *path, verify_path_func verify_path)
 		ptr = strtok_r(NULL, TOKENIZER_STRING, &tok);
 	}
 
-	if (verify_path && !verify_path(state)) {
+	if (verify_path && verify_path(state)) {
 		free(state->cwd);
 
 		*state = *old_state;
