@@ -5,18 +5,18 @@
 
 static inline void zend_pzval_lock_func(zval *z)
 {
-	((z)->refcount++);
+	z->refcount++;
 }
 
 #define PZVAL_UNLOCK(z) zend_pzval_unlock_func(z TSRMLS_CC)
 
 static inline void zend_pzval_unlock_func(zval *z TSRMLS_DC)
 {
-	((z)->refcount--);
-	if (!(z)->refcount) {
-		(z)->refcount = 1;
-		(z)->is_ref = 0;
-		EG(garbage)[EG(garbage_ptr)++] = (z);
+	z->refcount--;
+	if (!z->refcount) {
+		z->refcount = 1;
+		z->is_ref = 0;
+		EG(garbage)[EG(garbage_ptr)++] = z;
 	}
 }
 
