@@ -48,12 +48,13 @@
   </maintainers>
   <release>
     <version>1.3b4</version>
-    <date>2003-10-30</date>
+    <date>2003-11-17</date>
     <state>beta</state>
     <notes>
 PEAR Installer:
 
 * Bug #171 --alldeps with a rel=&quot;eq&quot; should install the required version, if possible
+* Bug #249 installing from an url doesnt work 
 
     </notes>
     <provides type="class" name="OS_Guess" />
