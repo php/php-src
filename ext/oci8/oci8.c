@@ -16,6 +16,7 @@
    |          Thies C. Arntzen <thies@digicol.de>						  |
    +----------------------------------------------------------------------+
  */
+
 /* $Id$ */
 
 /* TODO list:
@@ -60,6 +61,8 @@
 static int le_conn; 
 static int le_stmt; 
 static int le_desc; 
+static int le_server; 
+static int le_session; 
 static zend_class_entry *oci_lob_class_entry_ptr;
 
 #ifndef SQLT_BFILEE
@@ -111,10 +114,12 @@ static void oci_debug(const char *format, ...);
 static void _oci_conn_list_dtor(oci_connection *connection);
 static void _oci_stmt_list_dtor(oci_statement *statement);
 static void _oci_descriptor_list_dtor(oci_descriptor *descriptor);
+static void _oci_server_list_dtor(oci_server *server);
+static void _oci_session_list_dtor(oci_session *session);
 
-static int _oci_column_hash_dtor(void *data);
-static int _oci_define_hash_dtor(void *data);
-static int _oci_bind_hash_dtor(void *data);
+static void _oci_column_hash_dtor(void *data);
+static void _oci_define_hash_dtor(void *data);
+static void _oci_bind_hash_dtor(void *data);
 
 static oci_connection *oci_get_conn(zval **);
 static oci_statement *oci_get_stmt(zval **);
@@ -130,20 +135,16 @@ static int oci_setprefetch(oci_statement *statement, int size);
 
 static void oci_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent,int exclusive);
 
-/* ServerAttach/Detach */
-static oci_server *oci_open_server(char *dbname,int persistent);
+static oci_server *_oci_open_server(char *dbname,int persistent);
 static void _oci_close_server(oci_server *server);
 
-/* SessionBegin/End */
-static oci_session *oci_open_user(oci_server* server,char *username,char *password,int persistent,int exclusive);
-static void _oci_close_user(oci_session *session);
+static oci_session *_oci_open_session(oci_server* server,char *username,char *password,int persistent,int exclusive);
+static void _oci_close_session(oci_session *session);
 
-/* bind callback functions */
 static sb4 oci_bind_in_callback(dvoid *, OCIBind *, ub4, ub4, dvoid **, ub4 *, ub1 *, dvoid **);
 static sb4 oci_bind_out_callback(dvoid *, OCIBind *, ub4, ub4, dvoid **, ub4 **, ub1 *, dvoid **, ub2 **);
 
 #if 0
-/* failover callback function */
 static sb4 oci_failover_callback(dvoid *svchp,dvoid* envhp,dvoid *fo_ctx,ub4 fo_type, ub4 fo_event);
 #endif
 
@@ -333,6 +334,8 @@ PHP_MINIT_FUNCTION(oci)
 	zend_class_entry oci_lob_class_entry;
 	ELS_FETCH();
 
+	OCI(shutdown) = 0;
+
 #ifdef ZTS 
 #define PHP_OCI_INIT_MODE OCI_THREADED
 #else
@@ -354,6 +357,8 @@ PHP_MINIT_FUNCTION(oci)
 	le_stmt = register_list_destructors(_oci_stmt_list_dtor, NULL);
 	le_conn = register_list_destructors(_oci_conn_list_dtor, NULL);
 	le_desc = register_list_destructors(_oci_descriptor_list_dtor, NULL);
+	le_server = register_list_destructors(_oci_server_list_dtor, NULL);
+	le_session = register_list_destructors(_oci_session_list_dtor, NULL);
 
 	INIT_CLASS_ENTRY(oci_lob_class_entry, "OCI-Lob", php_oci_lob_class_functions);
 
@@ -418,9 +423,9 @@ PHP_RINIT_FUNCTION(oci)
     return SUCCESS;
 }
 
-static int _user_pcleanup(oci_session *session)
+static int _session_pcleanup(oci_session *session)
 {
-	_oci_close_user(session);
+	_oci_close_session(session);
 
 	return 1;
 }
@@ -436,9 +441,11 @@ PHP_MSHUTDOWN_FUNCTION(oci)
 {
 	OCILS_FETCH();
 
+	OCI(shutdown) = 1;
+
     oci_debug("START php_mshutdown_oci");
 
-	zend_hash_apply(OCI(user),(int (*)(void *))_user_pcleanup);
+	zend_hash_apply(OCI(user),(int (*)(void *))_session_pcleanup);
 	zend_hash_apply(OCI(server),(int (*)(void *))_server_pcleanup);
 
 	zend_hash_destroy(OCI(user));
@@ -454,12 +461,13 @@ PHP_MSHUTDOWN_FUNCTION(oci)
 	return SUCCESS;
 }
 
-static int _user_cleanup(oci_session *session)
+#if 0
+static int _session_cleanup(oci_session *session)
 {
    	if (session->persistent)
 		return 0;
 
-	_oci_close_user(session);
+	_oci_close_session(session);
 
 	return 1;
 }
@@ -473,19 +481,20 @@ static int _server_cleanup(oci_server *server)
 
 	return 1;
 }
+#endif
 
 PHP_RSHUTDOWN_FUNCTION(oci)
 {
 	OCILS_FETCH();
 
-    oci_debug("\n\n##################################################\n\n");
-
     oci_debug("START php_rshutdown_oci");
 
+#if 0 
 	/* XXX free all statements, rollback all outstanding transactions */
 
-	zend_hash_apply(OCI(user),(int (*)(void *))_user_cleanup);
+	zend_hash_apply(OCI(user),(int (*)(void *))_session_cleanup);
 	zend_hash_apply(OCI(server),(int (*)(void *))_server_cleanup);
+#endif
 
     oci_debug("END   php_rshutdown_oci");
 
@@ -506,7 +515,7 @@ PHP_MINFO_FUNCTION(oci)
 /* }}} */
 /* {{{ _oci_define_hash_dtor() */
 
-static int
+static void
 _oci_define_hash_dtor(void *data)
 {
 	oci_define *define = (oci_define *) data;
@@ -519,14 +528,12 @@ _oci_define_hash_dtor(void *data)
 		efree(define->name);
 		define->name = 0;
 	}
-
-	return 1;
 }
 
 /* }}} */
 /* {{{ _oci_bind_hash_dtor() */
 
-static int
+static void
 _oci_bind_hash_dtor(void *data)
 {
 	oci_bind *bind = (oci_bind *) data;
@@ -534,8 +541,6 @@ _oci_bind_hash_dtor(void *data)
 	oci_debug("_oci_bind_hash_dtor:");
 
    	zval_del_ref(&(bind->zval));
-
-	return 1;
 }
 
 /* }}} */
@@ -556,7 +561,7 @@ _oci_bind_pre_exec(void *data)
 /* }}} */
 /* {{{ _oci_column_hash_dtor() */
 
-static int
+static void
 _oci_column_hash_dtor(void *data)
 {	
 	oci_out_column *column = (oci_out_column *) data;
@@ -580,8 +585,6 @@ _oci_column_hash_dtor(void *data)
 	if (column->name) {
 		efree(column->name);
 	}
-
-	return 1;
 }
 
 /* }}} */
@@ -676,6 +679,34 @@ _oci_descriptor_list_dtor(oci_descriptor *descr)
     oci_debug("END   _oci_descriptor_list_dtor: %d",descr->id);
 
 	efree(descr);
+}
+
+/* }}} */
+/* {{{ _oci_server_list_dtor()
+ */
+
+static void 
+_oci_server_list_dtor(oci_server *server)
+{
+	ELS_FETCH();
+
+	if (server->persistent)
+		return;
+
+	_oci_close_server(server);
+}
+
+/* }}} */
+/* {{{ _oci_session_list_dtor()
+ */
+
+static void 
+_oci_session_list_dtor(oci_session *session)
+{
+   	if (session->persistent)
+		return;
+
+	_oci_close_session(session);
 }
 
 /* }}} */
@@ -937,7 +968,6 @@ _oci_make_zval(zval *value,oci_statement *statement,oci_out_column *column, char
 					  column->name,column->retlen,column->retlen4,column->storage_size4,column->indicator,column->retcode);
 	
 	if (column->indicator == -1) { /* column is NULL */
-		/* XXX we should to make sure that there's no data attached to this yet!!! */
 		ZVAL_NULL(value); 
 		return 0;
 	}
@@ -1723,16 +1753,15 @@ oci_bind_out_callback(dvoid *octxp,      /* context pointer */
 }
 
 /* }}} */
-/* {{{ oci_open_user()
+/* {{{ _oci_open_session()
 
  */
 
-static oci_session *oci_open_user(oci_server* server,char *username,char *password,int persistent,int exclusive)
+static oci_session *_oci_open_session(oci_server* server,char *username,char *password,int persistent,int exclusive)
 {
-	oci_session *session = 0;
+	oci_session *session = 0, *psession = 0;
 	OCISvcCtx *svchp = 0;
 	char *hashed_details;
-	int hashed_details_length;
     OCILS_FETCH();
 
 	/* 
@@ -1744,30 +1773,27 @@ static oci_session *oci_open_user(oci_server* server,char *username,char *passwo
 	   but only as pesistent requested connections will be kept between requests!
 	*/
 
-	hashed_details_length = strlen(SAFE_STRING(username))+
-		strlen(SAFE_STRING(password))+
-		strlen(SAFE_STRING(server->dbname));
-
-	hashed_details = (char *) emalloc(hashed_details_length+1);
-
+	hashed_details = (char *) malloc(strlen(SAFE_STRING(username))+
+									 strlen(SAFE_STRING(password))+
+									 strlen(SAFE_STRING(server->dbname))+1);
+	
 	sprintf(hashed_details,"%s%s%s",
 			SAFE_STRING(username),
 			SAFE_STRING(password),
 			SAFE_STRING(server->dbname));
 
 	if (! exclusive) {
-		zend_hash_find(OCI(user), hashed_details, hashed_details_length+1, (void **) &session);
+		zend_hash_find(OCI(user), hashed_details, strlen(hashed_details)+1, (void **) &session);
 
 		if (session) {
 			if (session->open) {
 				if (persistent) {
 					session->persistent = 1;
 				}
-				efree(hashed_details);
+				free(hashed_details);
 				return session;
 			} else {
-				_oci_close_user(session);
-				zend_hash_del(OCI(user), hashed_details, hashed_details_length+1);
+				_oci_close_session(session);
 				/* breakthru to open */
 			}
 		}
@@ -1780,6 +1806,7 @@ static oci_session *oci_open_user(oci_server* server,char *username,char *passwo
 	}
 
 	session->persistent = persistent;
+	session->hashed_details = hashed_details;
 	session->server = server;
 
 	/* allocate temporary Service Context */
@@ -1790,7 +1817,7 @@ static oci_session *oci_open_user(oci_server* server,char *username,char *passwo
 					   0,
 					   NULL);
 	if (OCI(error) != OCI_SUCCESS) {
-		oci_error(OCI(pError), "oci_open_user: OCIHandleAlloc OCI_HTYPE_SVCCTX", OCI(error));
+		oci_error(OCI(pError), "_oci_open_session: OCIHandleAlloc OCI_HTYPE_SVCCTX", OCI(error));
 		goto CLEANUP;
 	}
 
@@ -1802,7 +1829,7 @@ static oci_session *oci_open_user(oci_server* server,char *username,char *passwo
 					   0,
 					   NULL);
 	if (OCI(error) != OCI_SUCCESS) {
-		oci_error(OCI(pError), "oci_open_user: OCIHandleAlloc OCI_HTYPE_SESSION", OCI(error));
+		oci_error(OCI(pError), "_oci_open_session: OCIHandleAlloc OCI_HTYPE_SESSION", OCI(error));
 		goto CLEANUP;
 	}
 
@@ -1815,7 +1842,7 @@ static oci_session *oci_open_user(oci_server* server,char *username,char *passwo
 				   OCI_ATTR_SERVER, 
 				   OCI(pError));
 	if (OCI(error) != OCI_SUCCESS) {
-		oci_error(OCI(pError), "oci_open_user: OCIAttrSet OCI_ATTR_SERVER", OCI(error));
+		oci_error(OCI(pError), "_oci_open_session: OCIAttrSet OCI_ATTR_SERVER", OCI(error));
 		goto CLEANUP;
 	}
 
@@ -1859,53 +1886,56 @@ static oci_session *oci_open_user(oci_server* server,char *username,char *passwo
 	/* Free Temporary Service Context */
 	OCIHandleFree((dvoid *) svchp, (ub4) OCI_HTYPE_SVCCTX);
 
-	session->num = OCI(user_num)++;
-
- 	session->open = 1;
-
-	oci_debug("oci_open_user new sess=%d user=%s",session->num,username);
 
 	if (exclusive) {
-		zend_hash_next_index_pointer_insert(OCI(user),
-											 (void *) session);
+		/*
+		zend_hash_next_index_insert(OCI(user),
+									(void *)session,
+									sizeof(oci_session),
+									(void**)&psession);
+		*/
 	} else {
-		zend_hash_pointer_update(OCI(user),
-								  hashed_details,
-								  hashed_details_length+1, 
-								  (void *) session);
+		zend_hash_update(OCI(user),
+						 session->hashed_details,
+						 strlen(session->hashed_details)+1, 
+						 (void *)session,
+						 sizeof(oci_session),
+						 (void**)&psession);
 	}
 
-	efree(hashed_details);
+	psession->num = zend_list_insert(psession,le_session);
+ 	psession->open = 1;
 
-	return session;
+	oci_debug("_oci_open_session new sess=%d user=%s",psession->num,username);
+
+	free(session);
+
+	return psession;
 
  CLEANUP:
-	oci_debug("oci_open_user: FAILURE -> CLEANUP called");
+	oci_debug("_oci_open_session: FAILURE -> CLEANUP called");
 
-	if (hashed_details) {
-		efree(hashed_details);
-	}
-
-	_oci_close_user(session);
+	_oci_close_session(session);
 
 	return 0;
 }
 
 /* }}} */
-/* {{{ _oci_close_user()
+/* {{{ _oci_close_session()
  */
 
 static void
-_oci_close_user(oci_session *session)
+_oci_close_session(oci_session *session)
 {
 	OCISvcCtx *svchp;
+	char *hashed_details;
 	OCILS_FETCH();
 
 	if (! session) {
 		return;
 	}
 
-	oci_debug("_oci_close_user: logging-off sess=%d",session->num);
+	oci_debug("_oci_close_session: logging-off sess=%d",session->num);
 
 	if (session->open) {
 		/* Temporary Service Context */
@@ -1917,7 +1947,7 @@ _oci_close_user(oci_session *session)
 						   (dvoid **) 0);
 		
 		if (OCI(error) != OCI_SUCCESS) {
-			oci_error(OCI(pError), "_oci_close_user OCIHandleAlloc OCI_HTYPE_SVCCTX", OCI(error));
+			oci_error(OCI(pError), "_oci_close_session OCIHandleAlloc OCI_HTYPE_SVCCTX", OCI(error));
 		}
 		
 		/* Set the server handle in service handle */ 
@@ -1929,7 +1959,7 @@ _oci_close_user(oci_session *session)
 					   OCI_ATTR_SERVER, 
 					   OCI(pError));
 		if (OCI(error) != OCI_SUCCESS) {
-			oci_error(OCI(pError), "_oci_close_user: OCIAttrSet OCI_ATTR_SERVER", OCI(error));
+			oci_error(OCI(pError), "_oci_close_session: OCIAttrSet OCI_ATTR_SERVER", OCI(error));
 		}
 		
 		/* Set the Authentication handle in the service handle */
@@ -1941,7 +1971,7 @@ _oci_close_user(oci_session *session)
 					   OCI_ATTR_SESSION,
 					   OCI(pError));
 		if (OCI(error) != OCI_SUCCESS) {
-			oci_error(OCI(pError), "_oci_close_user: OCIAttrSet OCI_ATTR_SESSION", OCI(error));
+			oci_error(OCI(pError), "_oci_close_session: OCIAttrSet OCI_ATTR_SESSION", OCI(error));
 		}
 		
 		OCI(error) = 
@@ -1950,10 +1980,10 @@ _oci_close_user(oci_session *session)
 						  session->pSession,
 						  (ub4) 0); 
 		if (OCI(error) != OCI_SUCCESS) {
-			oci_error(OCI(pError), "_oci_close_user: OCISessionEnd", OCI(error));
+			oci_error(OCI(pError), "_oci_close_session: OCISessionEnd", OCI(error));
 		}
 	} else {
-		oci_debug("_oci_close_user: logging-off DEAD session");
+		oci_debug("_oci_close_session: logging-off DEAD session");
 	}
 
 	OCIHandleFree((dvoid *) svchp, (ub4) OCI_HTYPE_SVCCTX);
@@ -1961,65 +1991,59 @@ _oci_close_user(oci_session *session)
 	if (session->pSession) {
 		OCIHandleFree((dvoid *) session->pSession, (ub4) OCI_HTYPE_SESSION);
 	}
-	
-   	free(session);
+
+	hashed_details = session->hashed_details;
+
+	if (! OCI(shutdown)) {
+		zend_hash_del(OCI(user), hashed_details, strlen(hashed_details)+1);
+	}
+
+	free(hashed_details);
 }
 
 /* }}} */
-/* {{{ oci_open_server()
+/* {{{ _oci_open_server()
  */
-static oci_server *oci_open_server(char *dbname,int persistent)
+
+static oci_server *_oci_open_server(char *dbname,int persistent)
 { 
-	oci_server *server = 0;
-	char *hashed_details;
-	int hashed_details_length;
+	oci_server *server, *pserver = 0;
     OCILS_FETCH();
 
 	/* 
 	   check if we already have this server open 
-
+	   
 	   we will reuse servers within a request no matter if the user requested persistent 
 	   connections or not!
 	   
 	   but only as pesistent requested connections will be kept between requests!
 	*/
 
-	hashed_details_length = strlen(SAFE_STRING((char *)dbname));
-	hashed_details = (char *) emalloc(hashed_details_length+1);
-	sprintf(hashed_details,"%s",SAFE_STRING((char *)dbname));
+	zend_hash_find(OCI(server), dbname, strlen(dbname)+1, (void **) &pserver);
 
-	zend_hash_find(OCI(server), hashed_details, hashed_details_length+1, (void **) &server);
-
-	if (server) {
+	if (pserver) {
 		/* XXX ini-flag */
 		/*
-		if (! oci_ping(server)) {
-			server->open = 0;
+		if (! oci_ping(pserver)) {
+			pserver->open = 0;
 		}
 		*/
-		if (server->open) {
+		if (pserver->open) {
 			/* if our new users uses this connection persistent, we're keeping it! */
 			if (persistent) {
-				server->persistent = persistent;
+				pserver->persistent = persistent;
 			}
 
-			efree(hashed_details);
-			return server;
+			return pserver;
 		} else { /* server "died" in the meantime - try to reconnect! */
-			_oci_close_server(server);
-			zend_hash_del(OCI(server),hashed_details,hashed_details_length+1);
+			_oci_close_server(pserver);
 			/* breakthru to open */
 		}
 	}
-
+	
 	server = calloc(1,sizeof(oci_server));
 
-	if (! server) {
-		goto CLEANUP;
-	}
-
 	server->persistent = persistent;
-
 	server->dbname = strdup(SAFE_STRING(dbname));
 	
 	OCIHandleAlloc(OCI(pEnv), 
@@ -2031,19 +2055,38 @@ static oci_server *oci_open_server(char *dbname,int persistent)
 	OCI(error) = 
 		OCIServerAttach(server->pServer,
 						OCI(pError),
-						(text*)dbname,
-						strlen(dbname),
+						(text*)server->dbname,
+						strlen(server->dbname),
 						(ub4) OCI_DEFAULT);
 
 	if (OCI(error)) {
-		oci_error(OCI(pError), "oci_open_server", OCI(error));
+		oci_error(OCI(pError), "_oci_open_server", OCI(error));
 		goto CLEANUP;
 	}
 	
-	server->num = OCI(server_num)++;
+	zend_hash_update(OCI(server),
+					 server->dbname,
+					 strlen(server->dbname)+1, 
+					 (void *)server,
+					 sizeof(oci_server),
+					 (void**)&pserver);
 
-	server->open = 1;
+	pserver->num  = zend_list_insert(pserver,le_server);
+	pserver->open = 1;
 
+	oci_debug("_oci_open_server new conn=%d dname=%s",server->num,server->dbname);
+
+	free(server);
+
+	return pserver;
+
+ CLEANUP:
+	oci_debug("_oci_open_server: FAILURE -> CLEANUP called");
+
+	_oci_close_server(server);
+		
+	return 0;
+}
 
 #if 0 
 	server->failover.fo_ctx = (dvoid *) server;
@@ -2057,48 +2100,41 @@ static oci_server *oci_open_server(char *dbname,int persistent)
 					   OCI(pError));   
 
 	if (error) {
-		oci_error(OCI(pError), "oci_open_server OCIAttrSet OCI_ATTR_FOCBK", error);
+		oci_error(OCI(pError), "_oci_open_server OCIAttrSet OCI_ATTR_FOCBK", error);
 		goto CLEANUP;
 	}
 #endif
 
-	oci_debug("oci_open_server new conn=%d dname=%s",server->num,server->dbname);
-
-	zend_hash_pointer_update(OCI(server),
-							  hashed_details,
-							  hashed_details_length+1, 
-							  (void *) server);
-
-	efree(hashed_details);
-
-	return server;
-
- CLEANUP:
-	oci_debug("oci_open_server: FAILURE -> CLEANUP called");
-
-	if (hashed_details) {
-		efree(hashed_details);
-	}
-
-	_oci_close_server(server);
-		
-	return 0;
-}
 
 /* }}} */
 /* {{{ _oci_close_server()
  */
 
+static int _oci_session_cleanup(list_entry *le)
+{
+	if (le->type == le_session) {
+		oci_server *server = ((oci_session*) le->ptr)->server;
+		if (server->open == 2) 
+			return 1;
+	}
+	return 0;
+}
+
+
 static void
 _oci_close_server(oci_server *server)
 {
+	char *dbname;
 	OCILS_FETCH();
+	ELS_FETCH();
 
-	if (! server) {
-		return;
+	server->open = 2;
+
+	if (! OCI(shutdown)) {
+		zend_hash_apply(&EG(regular_list),_oci_session_cleanup);
 	}
 
-	oci_debug("_oci_close_server: detaching conn=%d dbname=%s",server->num,server->dbname);
+	oci_debug("START _oci_close_server: detaching conn=%d dbname=%s",server->num,server->dbname);
 
 	/* XXX close server here */
 
@@ -2129,11 +2165,13 @@ _oci_close_server(oci_server *server)
 		OCIHandleFree((dvoid *) server->pServer, (ub4) OCI_HTYPE_SERVER);
 	}
 
-	if (server->dbname) {
-		free(server->dbname);
+	dbname = server->dbname;
+
+	if (! OCI(shutdown)) {
+		zend_hash_del(OCI(server),dbname,strlen(dbname)+1);
 	}
 
-	free(server);
+	free(dbname);
 }
 
 /* }}} */
@@ -2174,7 +2212,7 @@ static void oci_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent,int exclu
 		goto CLEANUP;
 	}
 
-	server = oci_open_server(dbname,persistent);
+	server = _oci_open_server(dbname,persistent);
 
 	if (! server) {
 		goto CLEANUP;
@@ -2182,7 +2220,7 @@ static void oci_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent,int exclu
 
 	persistent = server->persistent; /* if our server-context is not persistent we can't */
 
-	session = oci_open_user(server,username,password,persistent,exclusive);
+	session = _oci_open_session(server,username,password,persistent,exclusive);
 
 	if (! session) {
 		goto CLEANUP;
@@ -2429,7 +2467,7 @@ PHP_FUNCTION(ocibindbyname)
 					  (text*) (*name)->value.str.val,  /* placeholder name */					  
 					  (*name)->value.str.len,          /* placeholder length */
 					  (dvoid *)0,                      /* in/out data */
-					  value_sz, //OCI_MAX_DATA_SIZE,               /* max size of input/output data */
+					  value_sz, /* OCI_MAX_DATA_SIZE, */               /* max size of input/output data */
 					  (ub2)ocitype,                    /* in/out data type */
 					  (dvoid *)&bindp->indicator,      /* indicator (ignored) */
 					  (ub2 *)0,                        /* size array (ignored) */
