@@ -10,6 +10,12 @@
    <email>paj@pearfr.org</email>
    <role>lead</role>
   </maintainer>
+  <maintainer>
+   <user>iliaa</user>
+   <name>Ilia Alshanetsky</name>
+   <email>ilia@php.net</email>
+   <role>developer</role>
+  </maintainer>
  </maintainers>
  <description>Enchant is a binder for libenchant. Libenchant provides a common
 API for many spell libraries:
@@ -31,6 +37,7 @@ see www.abisource.com/enchant/</description>
    <file role="src" name="config.w32"/>
    <file role="src" name="enchant.c"/>
    <file role="src" name="php_enchant.h"/>
+   <file role="doc" name="CREDITS"/>
    <dir name="docs" role="doc">
      <dir name="examples">
        <file name="example1.php"/>

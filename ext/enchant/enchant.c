@@ -13,6 +13,7 @@
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
   | Author: Pierre-Alain Joye <paj@pearfr.org>                           |
+  |         Ilia Alshanetsky <ilia@prohost.org>                          |
   +----------------------------------------------------------------------+
 
   $Id$
@@ -81,6 +82,7 @@ function_entry enchant_functions[] = {
 	PHP_FE(enchant_dict_store_replacement, NULL)
 	PHP_FE(enchant_dict_get_error, NULL)
 	PHP_FE(enchant_dict_describe, NULL)
+	PHP_FE(enchant_dict_quick_check, third_arg_force_ref)
 
 	{NULL, NULL, NULL}	/* Must be the last line in enchant_functions[] */
 };
@@ -496,8 +498,47 @@ PHP_FUNCTION(enchant_broker_describe)
 }
 /* }}} */
 
+PHP_FUNCTION(enchant_dict_quick_check)
+{
+	zval *dict, *sugg = NULL;
+	char *word;
+	int wordlen;
+	enchant_dict *pdict;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs|z/", &dict, &word, &wordlen, &sugg) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	if (sugg) {
+		zval_dtor(sugg);
+	}
+
+	PHP_ENCHANT_GET_DICT;
+
+	if (enchant_dict_check(pdict->pdict, word, wordlen) > 0) {
+		if (!sugg && ZEND_NUM_ARGS() == 2) {
+			RETURN_FALSE;
+		}
+
+		int n_sugg;
+		char **suggs;
+
+		array_init(sugg);
+
+		suggs = enchant_dict_suggest(pdict->pdict, word, wordlen, &n_sugg);
+		if (suggs && n_sugg) {
+			int i;
+			for (i = 0; i < n_sugg; i++) {
+				add_next_index_string(sugg, suggs[i], 1);
+			}
+		}
+		RETURN_FALSE;
+	}
+	RETURN_TRUE;
+}
+
 /* {{{ proto long enchant_dict_check(resource broker)
-    0 if the word is correctly spelled, positive if not, negative if error */
+    If the word is correctly spelled return true, otherwise return false */
 PHP_FUNCTION(enchant_dict_check)
 {
 	zval *dict;
@@ -511,7 +552,7 @@ PHP_FUNCTION(enchant_dict_check)
 
 	PHP_ENCHANT_GET_DICT;
 
-	RETURN_LONG((long)enchant_dict_check(pdict->pdict, word, wordlen));
+	RETURN_BOOL(!enchant_dict_check(pdict->pdict, word, wordlen));
 }
 /* }}} */
 
