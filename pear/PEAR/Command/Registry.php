@@ -50,6 +50,13 @@ Tests if a package is installed in the system. Will exit(1) if it is not.
                 <, lt, <=, le, >, gt, >=, ge, ==, =, eq, !=, <>, ne
    <version>    The version to compare with
 '),
+        'info' => array(
+            'summary'  => 'Information of an installed package',
+            'function' => 'doInfo',
+            'shortcut' => 'i',
+            'options'  => array(),
+            'doc'      => '[package] Displays the information of an installed package'
+            )
         );
 
     // }}}
@@ -159,7 +166,7 @@ Tests if a package is installed in the system. Will exit(1) if it is not.
             }
             $this->ui->outputData($data, $command);
 
-            
+
         }
         return true;
     }
@@ -167,7 +174,8 @@ Tests if a package is installed in the system. Will exit(1) if it is not.
     // }}}
     // {{{ doShellTest()
 
-    function doShellTest($command, $options, $params) {
+    function doShellTest($command, $options, $params)
+    {
         $this->pushErrorHandling(PEAR_ERROR_RETURN);
         $reg = &new PEAR_Registry($this->config->get('php_dir'));
         // "pear shell-test Foo"
@@ -192,6 +200,27 @@ Tests if a package is installed in the system. Will exit(1) if it is not.
             $this->raiseError("$command: expects 1 to 3 parameters");
             exit(1);
         }
+    }
+
+    // }}}
+    // {{{ doInfo
+
+    function doInfo($command, $options, $params)
+    {
+        // $params[0] The package for showing info
+        if (sizeof($params) != 1) {
+            return $this->raiseError("This command only accepts one param: ".
+                                     "the package you want information");
+        }
+        $package = $params[0];
+        $reg = &new PEAR_Registry($this->config->get('php_dir'));
+        if (!$reg->packageExists($package)) {
+            return $this->raiseError("The package $package is not installed");
+        }
+        $info = $reg->packageInfo($package);
+        include_once 'PEAR/Command/Package.php';
+        $data = &PEAR_Command_Package::_infoForDisplaying($info);
+        $this->ui->outputData($data, $command);
     }
 
     // }}}
