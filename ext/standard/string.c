@@ -33,6 +33,9 @@
 #ifdef HAVE_LANGINFO_H
 # include <langinfo.h>
 #endif
+#ifdef HAVE_MONETARY_H
+# include <monetary.h>
+#endif
 #include "scanf.h"
 #include "zend_API.h"
 #include "zend_execute.h"
@@ -3909,8 +3912,8 @@ PHP_FUNCTION(str_rot13)
    Convert monetary value(s) to string */
 
 PHP_FUNCTION(money_format) {
-	int format_len, str_len = 1024;
-	char *format, *str = emalloc(str_len);
+	int format_len = 0, str_len;
+	char *format, *str;
 	double value;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sd",
@@ -3918,9 +3921,12 @@ PHP_FUNCTION(money_format) {
 		return;
 	}
 
+	str_len = format_len + 1024;
+	str = emalloc(str_len);
 	str_len = strfmon(str, str_len, format, value); 	
+	str[str_len] = 0;
 
-	RETURN_STRINGL(erealloc(str, strlen), str_len, 0);
+	RETURN_STRINGL(erealloc(str, str_len + 1), str_len, 0);
 }
 
 /* }}} */
