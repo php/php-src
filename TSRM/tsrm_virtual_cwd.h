@@ -143,7 +143,7 @@ CWD_API int virtual_open(const char *path TSRMLS_DC, int flags, ...);
 CWD_API int virtual_creat(const char *path, mode_t mode TSRMLS_DC);
 CWD_API int virtual_rename(char *oldname, char *newname TSRMLS_DC);
 CWD_API int virtual_stat(const char *path, struct stat *buf TSRMLS_DC);
-#if !defined(TSRM_WIN32) && !defined(NETWARE)
+#if !defined(TSRM_WIN32)
 CWD_API int virtual_lstat(const char *path, struct stat *buf TSRMLS_DC);
 #endif
 CWD_API int virtual_unlink(const char *path TSRMLS_DC);
@@ -250,7 +250,7 @@ extern virtual_cwd_globals cwd_globals;
 #define VCWD_REALPATH(path, real_path) virtual_realpath(path, real_path TSRMLS_CC)
 #define VCWD_RENAME(oldname, newname) virtual_rename(oldname, newname TSRMLS_CC)
 #define VCWD_STAT(path, buff) virtual_stat(path, buff TSRMLS_CC)
-#if !defined(TSRM_WIN32) && !defined(NETWARE)
+#if !defined(TSRM_WIN32)
 #define VCWD_LSTAT(path, buff) virtual_lstat(path, buff TSRMLS_CC)
 #endif
 #define VCWD_UNLINK(path) virtual_unlink(path TSRMLS_CC)
