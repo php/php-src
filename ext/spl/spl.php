@@ -368,7 +368,7 @@ class LimitIetrator implements Iterator
 	 */
 	function seek($position);
 	
-	/** return the current position (zero based)
+	/** \return the current position (zero based)
 	 */
 	function getPosition();
 }
