@@ -446,9 +446,11 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 					php_ini_path = strdup(ap_php_optarg);		/* intentional leak */
 					break;
 				case '?':
+					no_headers = 1;
 					php_output_startup();
 					SG(headers_sent) = 1;
 					php_cgi_usage(argv[0]);
+					php_end_ob_buffering(1);
 					exit(1);
 					break;
 			}
@@ -487,6 +489,7 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 					no_headers = 1;
 					break;
 				case 'v':
+					no_headers = 1;
 					if (!cgi_started) {
 						if (php_request_startup(CLS_C ELS_CC PLS_CC SLS_CC)==FAILURE) {
 							php_module_shutdown();
@@ -497,6 +500,7 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 						SG(headers_sent) = 1;
 					}
 					php_printf("%s\n", PHP_VERSION);
+					php_end_ob_buffering(1);
 					exit(1);
 					break;
 				case 'i':
@@ -531,10 +535,12 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 					CG(extended_info) = 1;
 					break;
 				case 'h':
-				case '?':
+			        case '?':
+				        no_headers = 1;  
 					php_output_startup();
 					SG(headers_sent) = 1;
 					php_cgi_usage(argv[0]);
+					php_end_ob_buffering(1);
 					exit(1);
 					break;
 				case 'd':
