@@ -318,6 +318,11 @@ ZEND_API inline int add_assoc_stringl(zval *arg, char *key, char *str, uint leng
 	return zend_hash_update(arg->value.ht, key, strlen(key)+1, (void *) &tmp, sizeof(zval *), NULL);
 }
 
+ZEND_API int add_assoc_zval(zval *arg, char *key, uint key_length, zval *value)
+{
+	return zend_hash_update(arg->value.ht, key, key_length, (void *) &value, sizeof(zval *), NULL);
+}
+
 
 ZEND_API inline int add_index_long(zval *arg, uint index, long n)
 {
