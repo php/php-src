@@ -4,6 +4,9 @@ PHP 4.0                                                                    NEWS
 ?? ??? 2000, Version 4.0.0 Release
 
 8 May 2000, Version 4.0 Release Candidate 2
+- Enabled assert() by default in php.ini-dist. (Andrei)
+- Put in safeguards in case dynamic code evaluation in assert() and
+  preg_replace() with /e modifier fails. (Andrei)
 - Fixed infinite recursion when serializing $GLOBALS[] in WDDX. (Andrei)
 - Made WDDX serialization properly escape <, >, and &. Also speeded up
   the serialization in general. (Andrei)
