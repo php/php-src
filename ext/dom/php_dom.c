@@ -284,15 +284,21 @@ zend_module_entry dom_module_entry = {
 ZEND_GET_MODULE(dom)
 #endif
 
-/* {{{ _phpXmlParserErrorCb */
-static void _phpXmlParserErrorCb(void *ctx, const char *msg, ...) {
+/* {{{ php_dom_error_func */
+static void php_dom_error_func(void *ctx, const char *msg, ...) {
 	va_list ap;
 	char *buf;
+	int len;
 	TSRMLS_FETCH();
 
 	va_start(ap, msg);
-	vspprintf(&buf, 0, msg, ap);
+	len = vspprintf(&buf, 0, msg, ap);
 	va_end(ap);
+	
+	/* remove any trailing \n */
+	while (len && buf[--len] == '\n') {
+		buf[len] = '\0';
+	}
 	php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", buf);
 	efree(buf);
 }
@@ -534,7 +540,7 @@ PHP_MINIT_FUNCTION(dom)
 	REGISTER_LONG_CONSTANT("XML_ATTRIBUTE_NOTATION",	XML_ATTRIBUTE_NOTATION,		CONST_CS | CONST_PERSISTENT);
 
 	xmlInitParser();
-	xmlSetGenericErrorFunc((void*) NULL, _phpXmlParserErrorCb);
+	xmlSetGenericErrorFunc((void*) NULL, php_dom_error_func);
 
 	return SUCCESS;
 }
