@@ -247,9 +247,10 @@ dbhead_t *dbf_open(char *dp, int o_flags TSRMLS_DC)
 
 	cp = dp;
 	if ((fd = VCWD_OPEN(cp, o_flags|O_BINARY)) < 0) {
-		cp = (char *)malloc(256);
-		strcpy(cp, dp); strcat(cp, ".dbf");
+		cp = (char *)malloc(MAXPATHLEN);  /* So where does this get free()'d?  -RL */
+		strncpy(cp, dp, MAXPATHLEN-5); strcat(cp, ".dbf");
 		if ((fd = VCWD_OPEN(cp, o_flags)) < 0) {
+			free(cp);
 			perror("open");
 			return NULL;
 		}

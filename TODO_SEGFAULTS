@@ -7,13 +7,13 @@ Fixed:
     i18n_convert/mb_convert_encoding (Moriyoshi Koizumi)
     socket_iovec_alloc (Rasmus)
 	exif_imagetype,exif_thumbnail (Rasmus)
+    dbase_open (Rasmus)
 
 
 Open:
 
     array_pad
     bcsub (1)
-    dbase_open
     mb_ereg (2)
     mb_ereg_match (2)
     mb_eregi (2)
