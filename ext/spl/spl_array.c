@@ -350,7 +350,7 @@ SPL_METHOD(Array, offsetGet)
 		return;
 	}
 	value = spl_array_read_dimension(getThis(), index, BP_VAR_R TSRMLS_CC);
-	RETURN_ZVAL(value, 0, 1);
+	RETURN_ZVAL(value, 1, 0);
 } /* }}} */
 
 /* {{{ proto void ArrayObject::offsetSet(mixed $index, mixed $newval)
