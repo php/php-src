@@ -56,6 +56,7 @@ function_entry sqlite_functions[] = {
 	PHP_FE(sqlite_field_name, NULL)
 	PHP_FE(sqlite_seek, NULL)
 	PHP_FE(sqlite_escape_string, NULL)
+	PHP_FE(sqlite_busy_timeout, NULL)
 	{NULL, NULL, NULL}
 };
 
@@ -243,9 +244,31 @@ PHP_FUNCTION(sqlite_open)
 
 	/* register the PHP functions */
 	sqlite_create_function(db, "php", -1, php_sqlite_function_callback, 0);
+
+	/* set default busy handler; keep retrying up until 1/2 second has passed,
+	 * then fail with a busy status code */
+	sqlite_busy_timeout(db, 500);
 	
 	ZEND_REGISTER_RESOURCE(return_value, db, le_sqlite_db);
 	
+}
+/* }}} */
+
+/* {{{ proto void sqlite_busy_timeout(resource db, int ms)
+   Set busy timeout duration. If ms <= 0, all busy handlers are disabled */
+PHP_FUNCTION(sqlite_busy_timeout)
+{
+	zval *zdb;
+	sqlite *db;
+	long ms;
+
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &zdb, &ms)) {
+		return;
+	}
+
+	ZEND_FETCH_RESOURCE(db, sqlite *, &zdb, -1, "sqlite database", le_sqlite_db);
+
+	sqlite_busy_timeout(db, ms);
 }
 /* }}} */
 
