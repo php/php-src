@@ -295,9 +295,6 @@ static void *php3_merge_dir(pool *p, void *basev, void *addv)
 	if (add->sendmail_path != orig.sendmail_path) new->sendmail_path = add->sendmail_path;
 	if (add->sendmail_from != orig.sendmail_from) new->sendmail_from = add->sendmail_from;
 	if (add->errors != orig.errors) new->errors = add->errors;
-	if (add->magic_quotes_gpc != orig.magic_quotes_gpc) new->magic_quotes_gpc = add->magic_quotes_gpc;
-	if (add->magic_quotes_runtime != orig.magic_quotes_runtime) new->magic_quotes_runtime = add->magic_quotes_runtime;
-	if (add->magic_quotes_sybase != orig.magic_quotes_sybase) new->magic_quotes_sybase = add->magic_quotes_sybase;
 	if (add->track_errors != orig.track_errors) new->track_errors = add->track_errors;
 	if (add->display_errors != orig.display_errors) new->display_errors = add->display_errors;
 	if (add->log_errors != orig.log_errors) new->log_errors = add->log_errors;
@@ -316,8 +313,6 @@ static void *php3_merge_dir(pool *p, void *basev, void *addv)
 	if (add->upload_max_filesize != orig.upload_max_filesize) new->upload_max_filesize = add->upload_max_filesize;
 	if (add->extension_dir != orig.extension_dir) new->extension_dir = add->extension_dir;
 	if (add->short_open_tag != orig.short_open_tag) new->short_open_tag = add->short_open_tag;
-	if (add->debugger_host != orig.debugger_host) new->debugger_host = add->debugger_host;
-	if (add->debugger_port != orig.debugger_port) new->debugger_port = add->debugger_port;
 	if (add->error_log != orig.error_log) new->error_log = add->error_log;
 	/* skip the highlight stuff */
 	if (add->sql_safe_mode != orig.sql_safe_mode) new->sql_safe_mode = add->sql_safe_mode;
@@ -352,12 +347,6 @@ char *php3flaghandler(cmd_parms * cmd, php3_ini_structure * conf, int val)
 		case 0:
 			conf->track_errors = val;
 			break;
-		case 1:
-			conf->magic_quotes_gpc = val;
-			break;
-		case 2:
-			conf->magic_quotes_runtime = val;
-			break;
 		case 3:
 			conf->short_open_tag = val;
 			break;
@@ -384,9 +373,6 @@ char *php3flaghandler(cmd_parms * cmd, php3_ini_structure * conf, int val)
 			break;
 		case 11:
 			conf->display_errors = val;
-			break;
-		case 12:
-			conf->magic_quotes_sybase = val;
 			break;
 		case 13:
 			conf->enable_dl = val;
@@ -585,8 +571,6 @@ command_rec php3_commands[] =
 	 "Lets PHP handle DAV requests by parsing this script."},
 #endif
 	{"php3_track_errors", php3flaghandler, (void *)0, OR_OPTIONS, FLAG, "on|off"},
-	{"php3_magic_quotes_gpc", php3flaghandler, (void *)1, OR_OPTIONS, FLAG, "on|off"},
-	{"php3_magic_quotes_runtime", php3flaghandler, (void *)2, OR_OPTIONS, FLAG, "on|off"},
 	{"php3_short_open_tag", php3flaghandler, (void *)3, OR_OPTIONS, FLAG, "on|off"},
 	{"php3_safe_mode", php3flaghandler, (void *)4, ACCESS_CONF|RSRC_CONF, FLAG, "on|off"},
 	{"php3_track_vars", php3flaghandler, (void *)5, OR_OPTIONS, FLAG, "on|off"},
@@ -596,7 +580,6 @@ command_rec php3_commands[] =
 	{"php3_last_modified", php3flaghandler, (void *)9, OR_OPTIONS, FLAG, "on|off"},
 	{"php3_log_errors", php3flaghandler, (void *)10, OR_OPTIONS, FLAG, "on|off"},
 	{"php3_display_errors", php3flaghandler, (void *)11, OR_OPTIONS, FLAG, "on|off"},
-	{"php3_magic_quotes_sybase", php3flaghandler, (void *)12, OR_OPTIONS, FLAG, "on|off"},
 	{"php3_enable_dl", php3flaghandler, (void *)13, RSRC_CONF|ACCESS_CONF, FLAG, "on|off"},
 	{"php3_asp_tags", php3flaghandler, (void *)14, OR_OPTIONS, FLAG, "on|off"},
 	{NULL}
