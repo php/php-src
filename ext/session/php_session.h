@@ -78,6 +78,7 @@ typedef struct {
 	char *save_path;
 	char *session_name;
 	char *id;
+	int lifetime;
 	ps_module *mod;
 	void *mod_data;
 	HashTable vars;
