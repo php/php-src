@@ -680,8 +680,6 @@ VARIANTARG _php_COM_get_property_handler(zend_property_reference *property_refer
 	int type;
 	VARIANTARG var_result;
 
-	/*printf("Reading a property from a TestClass object:\n");*/
-
 
 	/* fetch the IDispatch interface */
 	zend_hash_index_find(object->value.obj.properties, 0, (void **) &idispatch_handle);
@@ -752,8 +750,6 @@ int php_COM_set_property_handler(zend_property_reference *property_reference, pv
 	IDispatch *i_dispatch;
 	int type;
 	VARIANTARG var_result;
-
-	/*printf("Reading a property from a TestClass object:\n");*/
 
 
 	/* fetch the IDispatch interface */

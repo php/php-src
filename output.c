@@ -45,6 +45,7 @@ static inline void zend_ob_send();
  * Main
  */
 
+/* Start output layer */
 PHPAPI void zend_output_startup()
 {
 	ob_buffer = NULL;
@@ -53,6 +54,7 @@ PHPAPI void zend_output_startup()
 }
 
 
+/* Start output buffering */
 void zend_start_ob_buffering()
 {
 	zend_ob_init(4096, 1024);
@@ -60,6 +62,7 @@ void zend_start_ob_buffering()
 }
 
 
+/* End output buffering */
 void zend_end_ob_buffering(int send_buffer)
 {
 	SLS_FETCH();
@@ -92,7 +95,7 @@ static inline void zend_ob_allocate()
 }
 
 
-void zend_ob_init(uint initial_size, uint block_size)
+static void zend_ob_init(uint initial_size, uint block_size)
 {
 	if (ob_buffer) {
 		return;
@@ -104,7 +107,7 @@ void zend_ob_init(uint initial_size, uint block_size)
 }
 
 
-void zend_ob_destroy()
+static void zend_ob_destroy()
 {
 	if (ob_buffer) {
 		efree(ob_buffer);
@@ -113,7 +116,7 @@ void zend_ob_destroy()
 }
 
 
-void zend_ob_append(const char *text, uint text_length)
+static void zend_ob_append(const char *text, uint text_length)
 {
 	char *target;
 	int original_ob_text_length=ob_text_length;
@@ -126,7 +129,7 @@ void zend_ob_append(const char *text, uint text_length)
 }
 
 
-void zend_ob_prepend(const char *text, uint text_length)
+static void zend_ob_prepend(const char *text, uint text_length)
 {
 	char *p, *start;
 
@@ -152,6 +155,7 @@ static inline void zend_ob_send()
 }
 
 
+/* Return the current output buffer */
 int zend_ob_get_buffer(pval *p)
 {
 	if (!ob_buffer) {

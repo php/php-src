@@ -174,6 +174,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("short_open_tag",	"1",		PHP_INI_ALL,		OnUpdateInt,		short_tags,		php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("asp_tags",			"0",		PHP_INI_ALL,		OnUpdateInt,		asp_tags,		php_core_globals,	core_globals)
 	PHP_INI_ENTRY("precision",			"14",		PHP_INI_ALL,		OnSetPrecision)
+	STD_PHP_INI_BOOLEAN("output_buffering",	"0",	PHP_INI_PERDIR|PHP_INI_SYSTEM,	OnUpdateInt,	output_buffering,	php_core_globals,	core_globals)
 
 	PHP_INI_ENTRY_EX("highlight.comment",	HL_COMMENT_COLOR,	PHP_INI_ALL,		NULL,		php_ini_color_displayer_cb)
 	PHP_INI_ENTRY_EX("highlight.default",	HL_DEFAULT_COLOR,	PHP_INI_ALL,		NULL,		php_ini_color_displayer_cb)
@@ -640,6 +641,9 @@ int php_request_startup(CLS_D ELS_DC PLS_DC SLS_DC)
 {
 	zend_output_startup();
 
+	if (PG(output_buffering)) {
+		zend_start_ob_buffering();
+	}
 #if APACHE
 	/*
 	 * For the Apache module version, this bit of code registers a cleanup

@@ -2,6 +2,10 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? 1999, Version 4.0 Beta 3
+- Added output_buffering directive to php.ini, to enable output buffering
+  for all PHP scripts (default is off).
+- Fix some more class inheritance issues (Zeev, Zend library)
+- Fixed array_walk to always reset array pointer before working (Andrey)
 - Fixed Apache build wrt to shared modules on FreeBSD/Linux (Sascha)
 - Added session.extern_referer_chk which checks whether session ids were
   referred to by an external site and eliminates them (Sascha)
@@ -17,7 +21,7 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 - Fixed persistency of MHASH_* constants (Sascha)
 - Oracle is now ZTS-Save (Thies)
 - Fixed flushing of cached information to disk in DBA's DB2 module (Sascha)
-- OCI8 is now ZTS-Save (Thies)
+- OCI8 is now ZTS-Safe (Thies)
 - Fixed is_writeable/is_writable problem; they are both defined now (Andrey)
 - Imported PHP 3.0 diskfreespace() function (Thies)
 - Fixed thread-safety issues in the MySQL module (Zeev)
@@ -57,13 +61,13 @@ August 9 1999, Version 4.0 Beta 2
 - Fixed various inheritance problems (Andi & Zeev, Zend library)
 - Children now inherit their parent's constructor, if they do not supply a
   constructor of their own.
-- Fixed runtime inheritence of classes (parent methods/properties were
+- Fixed runtime inheritance of classes (parent methods/properties were
   overriding their children) (Zeev, Zend library)
 - Fixed backwards incompatibility with the "new" operator (Andi, Zend library)
 - Fixed bugs in uksort() and ksort() sort ordering (Andrey)
 - Fixed a memory leak when using assignment-op operators with lvalue of type
   string (Zeev, Zend library)
-- Fixed a problem in inheritence from classes that are defined in include()d
+- Fixed a problem in inheritance from classes that are defined in include()d
   files (Zeev, Zend library)
 - Fixed a problem with the PHP error handler that could result in a crash
   on certain operating systems (Zeev)

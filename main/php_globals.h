@@ -50,6 +50,7 @@ struct _php_core_globals {
 
 	long asp_tags;
 	long short_tags;
+	long output_buffering;
 
 	long safe_mode;
 	long sql_safe_mode;
