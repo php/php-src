@@ -105,6 +105,13 @@ BEGIN {
 	line = $0
 	spec_str = "\""
 
+## php extension must use lower case function names.
+## this will translate any capitalized letter to lowercase
+## and warn the user
+	if (match(func_name,"[A-Z]") != 0) {
+		printf("NOTICE: lower casing function name '%s'\n",func_name)
+		func_name = tolower(func_name)
+	}
 	func_type = gobble(type);
 	func_name = gobble(name);
 
