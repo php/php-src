@@ -863,14 +863,17 @@ PHPAPI size_t _php_stream_write(php_stream *stream, const char *buf, size_t coun
 			justwrote = stream->ops->write(stream, buf, towrite TSRMLS_CC);
 		}
 		if (justwrote > 0) {
-			stream->position += justwrote;
 			buf += justwrote;
 			count -= justwrote;
 			didwrite += justwrote;
 			
-			/* FIXME: invalidate the whole readbuffer */
-			stream->writepos = 0;
-			stream->readpos = 0;
+			/* Only screw with the buffer if we can seek, otherwise we lose data
+			 * buffered from fifos and sockets */
+			if (stream->ops->seek && (stream->flags & PHP_STREAM_FLAG_NO_SEEK) == 0) {
+				stream->position += justwrote;
+				stream->writepos = 0;
+				stream->readpos = 0;
+			}
 		} else {
 			break;
 		}
