@@ -53,6 +53,7 @@
     <notes>
 PEAR Installer:
 
+ * Bug #534  pear search doesn't list unstable releases
  * Bug #933  CMD Usability Patch 
  * Bug #1008 safe mode raises warning
 
