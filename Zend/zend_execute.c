@@ -839,8 +839,10 @@ fetch_string_dim:
 				}
 			}
 			break;
-		case IS_DOUBLE:
 		case IS_RESOURCE:
+			zend_error(E_WARNING, "Resource ID#%ld used as offset, casting to integer (%ld)", dim->value.lval, dim->value.lval);
+			/* Fall Through */
+		case IS_DOUBLE:
 		case IS_BOOL: 
 		case IS_LONG: {
 				long index;
@@ -3402,6 +3404,7 @@ static inline int zend_init_add_array_helper(ZEND_OPCODE_HANDLER_ARGS)
 				zend_hash_update(array_ptr->value.ht, "", sizeof(""), &expr_ptr, sizeof(zval *), NULL);
 				break;
 			default:
+				zend_error(E_WARNING, "Illegal offset type");
 				zval_ptr_dtor(&expr_ptr);
 				/* do nothing */
 				break;
