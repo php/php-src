@@ -1455,7 +1455,7 @@ static void php_odbc_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 				if (rc == SQL_SUCCESS_WITH_INFO) {
 					Z_STRLEN_P(tmp) = result->longreadlen;
 				} else if (result->values[i].vallen == SQL_NULL_DATA) {
-					Z_STRVAL_P(tmp) = empty_string;
+					ZVAL_NULL(tmp);
 					break;
 				} else {
 					Z_STRLEN_P(tmp) = result->values[i].vallen;
@@ -1465,7 +1465,7 @@ static void php_odbc_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 
 			default:
 				if (result->values[i].vallen == SQL_NULL_DATA) {
-					Z_STRVAL_P(tmp) = empty_string;
+					ZVAL_NULL(tmp);
 					break;
 				}
 				Z_STRLEN_P(tmp) = result->values[i].vallen;
