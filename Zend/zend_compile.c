@@ -1075,7 +1075,7 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 		/* Push a seperator to the switch and foreach stacks */
 		zend_switch_entry switch_entry;
 	
-		/* switch_entry.cond.op_type = IS_UNUSED;  Doesn't seem to be needed now */
+		switch_entry.cond.op_type = IS_UNUSED;
 		switch_entry.default_case = 0;
 		switch_entry.control_var = 0;
 
@@ -1489,7 +1489,7 @@ static int generate_free_foreach_copy(zend_op *foreach_copy TSRMLS_DC)
 	zend_op *opline;
 
 	/* If we reach the seperator then stop applying the stack */
-	if (foreach_copy->op1.op_type == IS_UNUSED && foreach_copy->op2.op_type == IS_UNUSED) {
+	if (foreach_copy->result.op_type == IS_UNUSED && foreach_copy->op1.op_type == IS_UNUSED) {
 		return 1;
 	}	
 
