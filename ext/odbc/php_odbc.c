@@ -69,7 +69,7 @@ static int le_result, le_conn, le_pconn;
 
 #define SAFE_SQL_NTS(n) ((SWORD) ((n)?(SQL_NTS):0))
 
-static unsigned char a3_arg3_and_3_force_ref[] = { 3, BYREF_NONE, BYREF_FORCE, BYREF_FORCE };
+static unsigned char a3_arg3_and_3_force_ref[] = { 3, BYREF_NONE, BYREF_FORCE, BYREF_ALLOW};
 
 /* {{{ odbc_functions[]
  */
@@ -1379,20 +1379,22 @@ PHP_FUNCTION(odbc_fetch_array)
 /* }}} */
 #endif
 
-/* {{{ proto int odbc_fetch_into(int result_id [, int rownumber], array result_array)
+/* {{{ proto int odbc_fetch_into(int result_id, array result_array, [, int rownumber])
    Fetch one result row into an array */ 
 PHP_FUNCTION(odbc_fetch_into)
 {
 	int numArgs, i;
 	odbc_result *result;
 	RETCODE rc;
-    SWORD sql_c_type;
+	SWORD sql_c_type;
 	char *buf = NULL;
+	pval **pv_res, **pv_res_arr, *tmp;
 #ifdef HAVE_SQL_EXTENDED_FETCH
+	pval **pv_row;
 	UDWORD crow;
 	UWORD  RowStatus[1];
 	SDWORD rownum = -1;
-	pval **pv_res, **pv_row, **pv_res_arr, *tmp;
+#endif /* HAVE_SQL_EXTENDED_FETCH */
 	
 	numArgs = ZEND_NUM_ARGS();
 
@@ -1401,26 +1403,18 @@ PHP_FUNCTION(odbc_fetch_into)
 			if (zend_get_parameters_ex(2, &pv_res, &pv_res_arr) == FAILURE)
 				WRONG_PARAM_COUNT;
 			break;
+#ifdef HAVE_SQL_EXTENDED_FETCH
 		case 3:
-			if (zend_get_parameters_ex(3, &pv_res, &pv_row, &pv_res_arr) == FAILURE)
+			if (zend_get_parameters_ex(3, &pv_res, &pv_res_arr, &pv_row) == FAILURE)
 				WRONG_PARAM_COUNT;
 			SEPARATE_ZVAL(pv_row);
 			convert_to_long_ex(pv_row);
 			rownum = Z_LVAL_PP(pv_row);
 			break;
+#endif /* HAVE_SQL_EXTENDED_FETCH */
 		default:
 			WRONG_PARAM_COUNT;
 	}
-
-#else
-	pval **pv_res, **pv_res_arr, *tmp;
-
-	numArgs = ZEND_NUM_ARGS();
-
-	if (numArgs != 2 || zend_get_parameters_ex(2, &pv_res, &pv_res_arr) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
-#endif
 
 	ZEND_FETCH_RESOURCE(result, odbc_result *, pv_res, -1, "ODBC result", le_result);
 	
