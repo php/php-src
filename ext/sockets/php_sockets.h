@@ -34,7 +34,9 @@ extern zend_module_entry sockets_module_entry;
 #include <winsock.h>
 #else
 #define PHP_SOCKETS_API
-#include <netinet/in.h>
+#if HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
 #endif
 
 PHP_MINIT_FUNCTION(sockets);
