@@ -2576,37 +2576,17 @@ PHP_FUNCTION(domxml_node_attributes)
 	zval *id, *attrs;
 	xmlNode *nodep;
 	int ret;
-#ifdef oldstyle_for_libxml_1_8_7
-	xmlAttr *attr;
-#endif
 
 	DOMXML_PARAM_NONE(nodep, id, le_domxmlnodep);
 	ret = node_attributes(&attrs, nodep TSRMLS_CC);
 	if ( ret == -1) {
-		RETURN_FALSE;
+		return NULL;
 	}
 
 	if ( ret > -1) {
 		*return_value = *attrs;
 		FREE_ZVAL(attrs);
 	} 
-		
-
-#ifdef oldstyle_for_libxml_1_8_7
-	attr = nodep->properties;
-	if (!attr) {
-		RETURN_FALSE;
-	}
-
-	if (array_init(return_value) == FAILURE) {
-		RETURN_FALSE;
-	}
-
-	while (attr) {
-		add_assoc_string(return_value, (char *) attr->name, xmlNodeGetContent(attr), 1);
-		attr = attr->next;
-	}
-#endif
 }
 /* }}} */
 
