@@ -24,6 +24,8 @@ PHP                                                                        NEWS
   . mysqli->client_info property (Georg)
   . inet_pton() (Sara)
   . inet_ntop() (Sara)
+- Added DomDocument->recover property for parsing not well-formed
+  XML Documents. (Christian)   
 - Added Cursor support for MySQL 5.0.x in mysqli (Georg)
 - Added proxy support to ftp wrapper via http. (Sara)
 - Added MDTM support to ftp_url_stat. (Sara)

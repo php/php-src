@@ -126,6 +126,7 @@ dom_doc_propsptr dom_get_doc_props(php_libxml_ref_obj *document)
 		doc_props->preservewhitespace = 1;
 		doc_props->substituteentities = 0;
 		doc_props->stricterror = 1;
+		doc_props->recover = 0;
 		if (document) {
 			document->doc_props = doc_props;
 		}
@@ -462,6 +463,7 @@ PHP_MINIT_FUNCTION(dom)
 	dom_register_prop_handler(&dom_document_prop_handlers, "validateOnParse", dom_document_validate_on_parse_read, dom_document_validate_on_parse_write TSRMLS_CC);
 	dom_register_prop_handler(&dom_document_prop_handlers, "resolveExternals", dom_document_resolve_externals_read, dom_document_resolve_externals_write TSRMLS_CC);
 	dom_register_prop_handler(&dom_document_prop_handlers, "preserveWhiteSpace", dom_document_preserve_whitespace_read, dom_document_preserve_whitespace_write TSRMLS_CC);
+	dom_register_prop_handler(&dom_document_prop_handlers, "recover", dom_document_recover_read, dom_document_recover_write TSRMLS_CC);
 	dom_register_prop_handler(&dom_document_prop_handlers, "substituteEntities", dom_document_substitue_entities_read, dom_document_substitue_entities_write TSRMLS_CC);
 
 	zend_hash_merge(&dom_document_prop_handlers, &dom_node_prop_handlers, NULL, NULL, sizeof(dom_prop_handler), 0);

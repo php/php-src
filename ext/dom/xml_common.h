@@ -31,6 +31,7 @@ typedef struct _dom_doc_props {
 	int preservewhitespace;
 	int substituteentities;
 	int stricterror;
+	int recover;
 } dom_doc_props;
 
 typedef dom_doc_props *dom_doc_propsptr;
