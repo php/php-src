@@ -184,14 +184,29 @@ static int php_b_body_write(const char *str, uint str_length)
 
 static int php_ub_body_write_no_header(const char *str, uint str_length)
 {
-	return php_header_write(str, str_length);
+	char *newstr = NULL;
+	uint new_length;
+	int result;
+
+	session_adapt_uris(str, str_length, &newstr, &new_length);
+		
+	if (newstr) {
+		str = newstr;
+		str_length = new_length;
+	}
+
+	result = php_header_write(str, str_length);
+
+	if (newstr) {
+		free(newstr);
+	}
+
+	return result;
 }
 
 
 static int php_ub_body_write(const char *str, uint str_length)
 {
-	char *newstr = NULL;
-	uint new_length;
 	int result = 0;
 	SLS_FETCH();
 
@@ -199,19 +214,8 @@ static int php_ub_body_write(const char *str, uint str_length)
 		zend_bailout();
 	}
 	if (php3_header()) {
-		session_adapt_uris(str, str_length, &newstr, &new_length);
-		
-		if (newstr) {
-			str = newstr;
-			str_length = new_length;
-		}
-
 		php_body_write = php_ub_body_write_no_header;
 		result = php_ub_body_write_no_header(str, str_length);
-
-		if (newstr) {
-			free(newstr);
-		}
 	}
 
 	return result;
