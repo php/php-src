@@ -347,7 +347,7 @@ main() {
   
   s = gmtime_r(&old, &t);
   p = asctime_r(&t, buf, 26);
-  if (p == buf && s == t) return (0);
+  if (p == buf && s == &t) return (0);
   return (1);
 }
   ],[
