@@ -1,3 +1,18 @@
+2004-09-26  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend.h
+      zend_variables.h:
+      - Fix build
+
+2004-09-26  Andi Gutmans  <andi@zend.com>
+
+    * zend.h
+      zend_variables.c
+      zend_variables.h:
+      - Apply Thies and Sterling's patch which doesn't call ctor/dtor functions
+      - for types which don't require it (BOOL/NULL/LONG/DOUBLE)
+      - Breaks serialization!!!
+
 2004-09-24  Anantha Kesari H Y  <hyanantha@novell.com>
 
     * zend_API.c:
