@@ -2418,7 +2418,7 @@ static void php_odbc_lasterror(INTERNAL_FUNCTION_PARAMETERS, int mode)
 {
 	odbc_connection *conn;
 	pval **pv_handle;
-    char *ptr, *dest;
+    char *ptr;
     int argc, len;
 
     argc = ZEND_NUM_ARGS();
@@ -2441,6 +2441,8 @@ static void php_odbc_lasterror(INTERNAL_FUNCTION_PARAMETERS, int mode)
             strncpy(ptr, conn->lasterrormsg, len);
         }
     } else {
+		ODBCLS_FETCH();
+
         if (mode == 0) {
             strncpy(ptr, ODBCG(laststate), len);
         } else {
