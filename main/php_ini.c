@@ -100,12 +100,12 @@ static int php_ini_displayer(zend_ini_entry *ini_entry, int module_number TSRMLS
 		return 0;
 	}
 	if (PG(html_errors)) {
-		PUTS("<tr valign=\"baseline\" bgcolor=\"" PHP_CONTENTS_COLOR "\">");
-		PUTS("<td bgcolor=\"" PHP_ENTRY_NAME_COLOR "\"><b>");
+		PUTS("<tr>");
+		PUTS("<td class=\"entry\">");
 		PHPWRITE(ini_entry->name, ini_entry->name_length-1);
-		PUTS("</b><br /></td><td align=\"center\">");
+		PUTS("</td><td class=\"value\">");
 		php_ini_displayer_cb(ini_entry, ZEND_INI_DISPLAY_ACTIVE);
-		PUTS("</td><td align=\"center\">");
+		PUTS("</td><td class=\"value\">");
 		php_ini_displayer_cb(ini_entry, ZEND_INI_DISPLAY_ORIG);
 		PUTS("</td></tr>\n");
 	} else {

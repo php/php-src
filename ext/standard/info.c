@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
    | Authors: Rasmus Lerdorf <rasmus@php.net>                             |
    |          Zeev Suraski <zeev@zend.com>                                |
+   |          Colin Viebrock <colin@easydns.com>                          |
    +----------------------------------------------------------------------+
 */
 
@@ -25,6 +26,7 @@
 #include "ext/standard/head.h"
 #include "info.h"
 #include "credits.h"
+#include "css.h"
 #include "SAPI.h"
 #include <time.h>
 #include "php_main.h"
@@ -49,7 +51,7 @@ ZEND_EXTERN_MODULE_GLOBALS(iconv)
 #endif
 
 #define SECTION(name)	if (PG(html_errors)) { \
-							PUTS("<h2 align=\"center\">" name "</h2>\n"); \
+							PUTS("<h2 class=\"section\">" name "</h2>\n"); \
 						} else { \
 							php_info_print_table_start(); \
 							php_info_print_table_header(1, name); \
@@ -66,7 +68,7 @@ static int _display_module_info(zend_module_entry *module, void *arg TSRMLS_DC)
 
 	if (show_info_func && module->info_func) {
 		if (PG(html_errors)) {
-			php_printf("<h2 align=\"center\"><a name=\"module_%s\">%s</a></h2>\n", module->name, module->name);
+			php_printf("<h2 class=\"section\"><a name=\"module_%s\">%s</a></h2>\n", module->name, module->name);
 		} else {
 			php_info_print_table_start();
 			php_info_print_table_header(1, module->name);
@@ -75,7 +77,7 @@ static int _display_module_info(zend_module_entry *module, void *arg TSRMLS_DC)
 		module->info_func(module TSRMLS_CC);
 	} else if (!show_info_func && !module->info_func) {
 		if (PG(html_errors)) {
-			php_printf("<tr valign=\"baseline\" bgcolor=\"" PHP_CONTENTS_COLOR "\">");
+			php_printf("<tr>");
 			php_printf("<td>");
 			php_printf("%s", module->name);
 			php_printf("</td></tr>\n");
@@ -102,8 +104,8 @@ static void php_print_gpcse_array(char *name, uint name_length TSRMLS_DC)
 		zend_hash_internal_pointer_reset(Z_ARRVAL_PP(data));
 		while (zend_hash_get_current_data(Z_ARRVAL_PP(data), (void **) &tmp) == SUCCESS) {
 			if (PG(html_errors)) {
-				PUTS("<tr valign=\"baseline\" bgcolor=\"" PHP_CONTENTS_COLOR "\">");
-				PUTS("<td bgcolor=\"" PHP_ENTRY_NAME_COLOR "\"><b>");
+				PUTS("<tr>");
+				PUTS("<td class=\"entry\">");
 
 			}
 
@@ -124,7 +126,7 @@ static void php_print_gpcse_array(char *name, uint name_length TSRMLS_DC)
 			}
 			PUTS("\"]");
 			if (PG(html_errors)) {
-				PUTS("</b></td><td>");
+				PUTS("</td><td class=\"value\">");
 			} else {
 				PUTS(" => ");
 			}
@@ -154,7 +156,7 @@ static void php_print_gpcse_array(char *name, uint name_length TSRMLS_DC)
 				}	
 			}
 			if (PG(html_errors)) {
-				PUTS("&nbsp;</td></tr>\n");
+				PUTS("</td></tr>\n");
 			} else {
 				PUTS("\n");
 			}	
@@ -169,12 +171,7 @@ static void php_print_gpcse_array(char *name, uint name_length TSRMLS_DC)
 void php_info_print_style(void)
 {
 	php_printf("<style type=\"text/css\"><!--\n");
-	php_printf("a { text-decoration: none; }\n");
-	php_printf("a:hover { text-decoration: underline; }\n");
-	php_printf("h1 { font-family: arial, helvetica, sans-serif; font-size: 18pt; font-weight: bold;}\n");
-	php_printf("h2 { font-family: arial, helvetica, sans-serif; font-size: 14pt; font-weight: bold;}\n");
-	php_printf("body, td { font-family: arial, helvetica, sans-serif; font-size: 10pt; }\n");
-	php_printf("th { font-family: arial, helvetica, sans-serif; font-size: 11pt; font-weight: bold; }\n");
+	php_info_print_css();
 	php_printf("//--></style>\n");
 }
 /* }}} */
@@ -270,7 +267,8 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 	the_time = time(NULL);
 	ta = php_localtime_r(&the_time, &tmbuf);
 	if (PG(html_errors)) {
-		PUTS("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\">\n<html>\n");
+		PUTS("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"DTD/xhtml1-transitional.dtd\">");
+		PUTS("<html>");
 		PUTS("<head>");
 		php_info_print_style();
 		if (SG(default_charset)) {
@@ -296,8 +294,8 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 	}
 
 	if (PG(html_errors)) {
-		php_printf("<title>phpinfo()</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=%s\"></head>", charset);
-		PUTS("<body text=\"#000000\" bgcolor=\"#ffffff\" link=\"#0000ff\" vlink=\"#ff00ff\" alink=\"#0000ff\">");
+		php_printf("<title>phpinfo()</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=%s\" /></head>", charset);
+		PUTS("<body>");
 	} else {
 		PUTS("       _           _        __        ____  \n");
 		PUTS(" _ __ | |__  _ __ (_)_ __  / _| ___  / /\\ \\ \n");
@@ -323,14 +321,14 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 				PUTS(SG(request_info).request_uri);
 			}
 			if ((ta->tm_mon==3) && (ta->tm_mday==1)) {
-				PUTS("?="PHP_EGG_LOGO_GUID"\" border=0 align=\"right\" alt=\"Thies!\"></a>");
+				PUTS("?="PHP_EGG_LOGO_GUID"\" alt=\"Thies!\" /></a>");
 			} else {
-				PUTS("?="PHP_LOGO_GUID"\" border=0 align=\"right\" alt=\"PHP Logo\"></a>");
+				PUTS("?="PHP_LOGO_GUID"\" alt=\"PHP Logo\" /></a>");
 			}
 		}
 
 		if (PG(html_errors)) {
-			php_printf("<h1>PHP Version %s</h1>\n", PHP_VERSION);
+			php_printf("<h1 class=\"phpver\">PHP Version %s</h1>\n", PHP_VERSION);
 		} else {
 			php_info_print_table_row(2, "PHP Version", PHP_VERSION);
 		}	
@@ -412,7 +410,7 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 			if (SG(request_info).request_uri) {
 				PUTS(SG(request_info).request_uri);
 			}
-			PUTS("?="ZEND_LOGO_GUID"\" border=\"0\" align=\"right\" alt=\"Zend logo\"></a>\n");
+			PUTS("?="ZEND_LOGO_GUID"\" alt=\"Zend logo\" /></a>\n");
 		}
 		PUTS("This program makes use of the Zend Scripting Language Engine:");
 		PUTS(PG(html_errors)?"<br />":"\n");
@@ -423,7 +421,7 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 
 	if ((flag & PHP_INFO_CREDITS) && expose_php && PG(html_errors)) {	
 		php_info_print_hr();
-		PUTS("<h1 align=\"center\"><a href=\"");
+		PUTS("<h1><a href=\"");
 		if (SG(request_info).request_uri) {
 			PUTS(SG(request_info).request_uri);
 		}
@@ -437,11 +435,11 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 	if (flag & PHP_INFO_CONFIGURATION) {
 		php_info_print_hr();
 		if (PG(html_errors)) {
-			PUTS("<h1 align=\"center\">Configuration</h1>\n");
+			PUTS("<h1>Configuration</h1>\n");
 		} else {
 			SECTION("Configuration");
 		}	
-		SECTION("PHP Core\n");
+		SECTION("PHP Core");
 		display_ini_entries(NULL);
 	}
 
@@ -550,7 +548,7 @@ PHPAPI void php_info_print_table_start()
 	TSRMLS_FETCH();
 
 	if (PG(html_errors)) {
-		php_printf("<table border=\"0\" cellpadding=\"3\" cellspacing=\"1\" width=\"600\" bgcolor=\"#000000\" align=\"center\">\n");
+		php_printf("<div class=\"centered\"><table><tbody>\n");
 	} else {
 		php_printf("\n");
 	}	
@@ -561,7 +559,7 @@ PHPAPI void php_info_print_table_end()
 	TSRMLS_FETCH();
 
 	if (PG(html_errors)) {
-		php_printf("</table><br />\n");
+		php_printf("</tbody></table></div><br />\n");
 	}
 
 }
@@ -573,11 +571,11 @@ PHPAPI void php_info_print_box_start(int flag)
 	php_info_print_table_start();
 	if (flag) {
 		if (PG(html_errors)) {
-			php_printf("<tr valign=\"middle\" bgcolor=\"" PHP_HEADER_COLOR "\"><td align=\"left\">\n");
+			php_printf("<tr class=\"header\"><td>\n");
 		}
 	} else {
 		if (PG(html_errors)) {
-			php_printf("<tr valign=\"top\" bgcolor=\"" PHP_CONTENTS_COLOR "\"><td align=\"left\">\n");
+			php_printf("<tr class=\"infobox\"><td>\n");
 		} else {
 			php_printf("\n");
 		}	
@@ -599,7 +597,7 @@ PHPAPI void php_info_print_hr()
 	TSRMLS_FETCH();
 
 	if (PG(html_errors)) {
-		php_printf("<hr noshade size=\"1\" width=\"600\">\n");
+		php_printf("<hr />\n");
 	} else {
 		php_printf("\n\n _______________________________________________________________________\n\n");
 	}
@@ -612,7 +610,7 @@ PHPAPI void php_info_print_table_colspan_header(int num_cols, char *header)
 	TSRMLS_FETCH();
 	
 	if (PG(html_errors)) {
-		php_printf("<tr bgcolor=\"" PHP_HEADER_COLOR "\"><th colspan=\"%d\">%s</th></tr>\n", num_cols, header );
+		php_printf("<tr class=\"header\"><th colspan=\"%d\">%s</th></tr>\n", num_cols, header );
 	} else {
 		spaces = (74 - strlen(header));
 		php_printf("%*s%s%*s\n", (int)(spaces/2), " ", header, (int)(spaces/2), " ");
@@ -631,12 +629,12 @@ PHPAPI void php_info_print_table_header(int num_cols, ...)
 
 	va_start(row_elements, num_cols);
 	if (PG(html_errors)) {
-		php_printf("<tr valign=\"middle\" bgcolor=\"" PHP_HEADER_COLOR "\">");
+		php_printf("<tr class=\"header\">");
 	}	
 	for (i=0; i<num_cols; i++) {
 		row_element = va_arg(row_elements, char *);
 		if (!row_element || !*row_element) {
-			row_element = PG(html_errors)?"&nbsp;":" ";
+			row_element = " ";
 		}
 		if (PG(html_errors)) {
 			php_printf("<th>%s</th>", row_element);
@@ -669,17 +667,17 @@ PHPAPI void php_info_print_table_row(int num_cols, ...)
 
 	va_start(row_elements, num_cols);
 	if (PG(html_errors)) {
-		php_printf("<tr valign=\"baseline\" bgcolor=\"" PHP_CONTENTS_COLOR "\">");
+		php_printf("<tr>");
 	}	
 	for (i=0; i<num_cols; i++) {
 		if (PG(html_errors)) {
-			php_printf("<td %s>%s",
-					   (i==0?"bgcolor=\"" PHP_ENTRY_NAME_COLOR "\" ":"align=\"left\""),
-					   (i==0?"<b>":""));
+			php_printf("<td class=\"%s\">",
+			   (i==0 ? "entry" : "value" )
+			);
 		}	
 		row_element = va_arg(row_elements, char *);
 		if (!row_element || !*row_element) {
-			PUTS(PG(html_errors)?"&nbsp;":" ");
+			PUTS( " " );
 		} else {
 			if (PG(html_errors)) {
 				zend_html_puts(row_element,  strlen(row_element));
@@ -693,7 +691,7 @@ PHPAPI void php_info_print_table_row(int num_cols, ...)
 			}
 		}
 		if (PG(html_errors)) {
-			php_printf("%s</td>", (i==0?"</b>":""));
+			php_printf("</td>");
 		}	
 	}
 	if (PG(html_errors)) {
