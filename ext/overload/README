@@ -16,9 +16,16 @@ properties normally.
 
 Usage
 -----
+<?php
+
 class OO {
     var $a = 111;
     var $elem = array('b' => 9, 'c' => 42);
+
+    function OO($aval = null)
+    {
+        $this->a = $aval;
+    }
 
     function __get($prop_name, &$prop_value)
     {
@@ -33,6 +40,20 @@ class OO {
     {
         $this->elem[$prop_name] = $prop_value;
         return true;
+    }
+
+    function __call()
+    {
+        $args = func_get_args();
+        $method = array_shift($args);
+        print '-- OO::' . $method . "() was called.--\n";
+        return call_user_func_array(array(&$this, 'my_' . $method), $args);
+    }
+
+    function my_whatever($f1, $f2, $f3)
+    {
+        var_dump($f1, $f2, $f3);
+        return $f1 + $f2;
     }
 }
 
@@ -50,6 +71,9 @@ $val->prop = 555;
 $o->a = array($val);
 var_dump($o->a[0]->prop);
 
+var_dump($o->whatever(1, 2, 'a'));
+
+?>
 
 What works
 ----------
@@ -58,15 +82,13 @@ Whatever you can get it to do.
 
 What doesn't work
 -----------------
-__call() support.
 Invoking original overloading handlers, if the class had any.
 __set() only works to one level of property access, no chains yet
-Whatever I am forgetting about here.
+Whatever else I am forgetting about here.
 
 
 What might change
 -----------------
-Hell, anything, even the name of extension and its function.
-
+Hell, anything, even the name of extension and its only function.
 
 Feedback, please.
