@@ -1,3 +1,45 @@
+2002-02-21  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ZEND_CHANGES:
+    Maintain ZEND_CHANGES to account for the addition of private member variables.
+
+2002-02-21  Andi Gutmans  <andi@zend.com>
+
+    * zend_object_handlers.c
+      zend_opcode.c
+      zend_language_parser.y
+      zend_language_scanner.l
+      zend_compile.c
+      zend.c
+      zend.h
+      zend_API.c: - Experimental support for private members.
+    <?
+    	class MyClass {
+    		private $Hello = "Hello, World!\n";
+
+    		function printHello()
+    		{
+    			print $this->Hello;
+    		}
+    	}
+
+    	class MyClass2 extends MyClass {
+    		function printHello()
+    		{
+    			MyClass::printHello(); /* Should print */
+    			print $this->Hello; /* Shouldn't print out anything */
+    		}
+    	}
+
+    	$obj = new MyClass();
+    	print $obj->Hello; /* Shouldn't print out anything */
+    	$obj->printHello(); /* Should print */
+
+    	$obj = new MyClass2();
+    	print $obj->Hello; /* Shouldn't print out anything */
+    	$obj->printHello();
+    ?>
+
 2002-02-14  Stanislav Malyshev  <stas@zend.com>
 
     * zend.h
