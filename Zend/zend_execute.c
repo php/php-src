@@ -74,7 +74,26 @@ static void zend_extension_fcall_end_handler(zend_extension *extension, zend_op_
 		&& function_being_called->common.arg_types							\
 		&& offset<=function_being_called->common.arg_types[0]				\
 		&& function_being_called->common.arg_types[offset]==BYREF_FORCE)
-	
+
+#define MAKE_REF_ON_READ_OBJECT(s)										\
+				{														\
+					zval **ptr_ptr;										\
+																		\
+					if ((ptr_ptr = (s))									\
+						&& ((*ptr_ptr)->type == IS_OBJECT)				\
+						&& (!(*ptr_ptr)->value.obj.ce->handle_function_call) \
+						&& (!(*ptr_ptr)->is_ref)						\
+						&& ((*ptr_ptr)->refcount>2)) { /* 2 because it's also locked */ \
+						zval *ptr = *ptr_ptr;							\
+																		\
+						ptr->refcount -= 2;								\
+						*(ptr_ptr) = (zval *) emalloc(sizeof(zval));	\
+						**(ptr_ptr) = *ptr;								\
+						zval_copy_ctor(*(ptr_ptr));						\
+						(*(ptr_ptr))->refcount=2;						\
+						(*(ptr_ptr))->is_ref = 1;						\
+					}													\
+				}
 
 static inline zval *_get_zval_ptr(znode *node, temp_variable *Ts, int *should_free ELS_DC)
 {
@@ -139,6 +158,35 @@ static inline zval *_get_zval_ptr(znode *node, temp_variable *Ts, int *should_fr
 	return NULL;
 }
 
+static inline zval *_get_object_zval_ptr(znode *node, temp_variable *Ts, int *should_free ELS_DC)
+{
+        switch(node->op_type) {
+                case IS_TMP_VAR:
+                        *should_free = 1;
+                        return &Ts[node->u.var].tmp_var;
+                        break;
+                case IS_VAR:
+                        if (Ts[node->u.var].var.ptr) {
+                                PZVAL_UNLOCK(Ts[node->u.var].var.ptr);
+                                *should_free = 0;
+                                return Ts[node->u.var].var.ptr;
+                        } else {
+                                *should_free = 1;
+                                return NULL;
+                        }
+                        break;
+                case IS_UNUSED:
+                        return NULL;
+                        break;
+#if DEBUG_ZEND
+                default:
+                        zend_error(E_ERROR, "Unknown temporary variable type");
+                        break;
+#endif
+        }
+        return NULL;
+}
+
 
 static inline zval **_get_zval_ptr_ptr(znode *node, temp_variable *Ts ELS_DC)
 {
@@ -154,40 +202,6 @@ static inline zval **_get_zval_ptr_ptr(znode *node, temp_variable *Ts ELS_DC)
 			break;
 	}
 }
-
-static inline zval *_get_object_zval_ptr(znode *node, temp_variable *Ts, int *should_free, zval ***object_ptr_ptr ELS_DC)
-{
-	switch(node->op_type) {
-		case IS_TMP_VAR:
-			*should_free = 1;
-			*object_ptr_ptr = NULL;
-			return &Ts[node->u.var].tmp_var;
-			break;
-		case IS_VAR:
-			if (Ts[node->u.var].var.ptr_ptr) {
-				PZVAL_UNLOCK(*Ts[node->u.var].var.ptr_ptr);
-				*should_free = 0;
-				*object_ptr_ptr = Ts[node->u.var].var.ptr_ptr;
-				return **object_ptr_ptr;
-			} else {
-				*should_free = 1;
-				*object_ptr_ptr = NULL;
-				return NULL;
-			}
-			break;
-		case IS_UNUSED:
-			*object_ptr_ptr = NULL;
-			return NULL;
-			break;
-#if DEBUG_ZEND
-		default:
-			zend_error(E_ERROR, "Unknown temporary variable type");
-			break;
-#endif
-	}
-	return NULL;
-}
-
 
 static inline zval **zend_fetch_property_address_inner(HashTable *ht, znode *op2, temp_variable *Ts, int type ELS_DC)
 {
@@ -896,7 +910,6 @@ static void call_overloaded_function(int arg_count, zval *return_value, HashTabl
 
 typedef struct _object_info {
 	zval *ptr;
-	zval **ptr_ptr;
 } object_info;
 
 void execute(zend_op_array *op_array ELS_DC)
@@ -905,7 +918,7 @@ void execute(zend_op_array *op_array ELS_DC)
 	zend_op *end = op_array->opcodes + op_array->last;
 	zend_function_state function_state;
 	zend_function *function_being_called=NULL;
-	object_info object = {NULL, NULL};
+	object_info object = {NULL};
 #if !defined (__GNUC__) || __GNUC__ < 2
 	temp_variable *Ts = (temp_variable *) do_alloca(sizeof(temp_variable)*op_array->T);
 #else
@@ -1132,6 +1145,7 @@ binary_assign_op_addr: {
 				break;
 			case ZEND_FETCH_R:
 				zend_fetch_var_address(&opline->result, &opline->op1, &opline->op2, Ts, BP_VAR_R ELS_CC);
+				MAKE_REF_ON_READ_OBJECT(Ts[opline->result.u.var].var.ptr_ptr);
 				AI_USE_PTR(Ts[opline->result.u.var].var);
 				break;
 			case ZEND_FETCH_W:
@@ -1159,6 +1173,7 @@ binary_assign_op_addr: {
 					PZVAL_LOCK(*Ts[opline->op1.u.var].var.ptr_ptr);
 				}
 				zend_fetch_dimension_address(&opline->result, &opline->op1, &opline->op2, Ts, BP_VAR_R ELS_CC);
+				MAKE_REF_ON_READ_OBJECT(Ts[opline->result.u.var].var.ptr_ptr);
 				AI_USE_PTR(Ts[opline->result.u.var].var);
 				break;
 			case ZEND_FETCH_DIM_W:
@@ -1183,6 +1198,7 @@ binary_assign_op_addr: {
 				break;
 			case ZEND_FETCH_OBJ_R:
 				zend_fetch_property_address(&opline->result, &opline->op1, &opline->op2, Ts, BP_VAR_R ELS_CC);
+				MAKE_REF_ON_READ_OBJECT(Ts[opline->result.u.var].var.ptr_ptr);
 				AI_USE_PTR(Ts[opline->result.u.var].var);
 				break;
 			case ZEND_FETCH_OBJ_W:
@@ -1360,12 +1376,7 @@ binary_assign_op_addr: {
 					HashTable *active_function_table;
 					zval tmp;
 
-					zend_ptr_stack_n_push(&EG(arg_types_stack), 3, function_being_called, object.ptr, object.ptr_ptr);
-					/*
-					zend_ptr_stack_push(&EG(arg_types_stack), function_being_called); 
-					zend_ptr_stack_push(&EG(arg_types_stack), object.ptr); 
-					zend_ptr_stack_push(&EG(arg_types_stack), object.ptr_ptr); 
-					*/
+					zend_ptr_stack_n_push(&EG(arg_types_stack), 2, function_being_called, object.ptr);
 					if (opline->extended_value & ZEND_CTOR_CALL) {
 						/* constructor call */
 
@@ -1396,12 +1407,14 @@ binary_assign_op_addr: {
 							if (zend_hash_find(EG(active_symbol_table), "this", sizeof("this"), (void **) &object_ptr_ptr)==FAILURE) {
 								object.ptr=NULL;
 							} else {
+								/* We assume that "this" is already is_ref and pointing to the object.
+								   If it isn't then tough */
 								object.ptr = *object_ptr_ptr;
-								object.ptr_ptr = object_ptr_ptr;
+								object.ptr->refcount++; /* For this pointer */
 							}
 						} else { /* used for member function calls */
-							object.ptr = _get_object_zval_ptr(&opline->op1, Ts, &EG(free_op1), &object.ptr_ptr ELS_CC);
-
+							object.ptr = _get_object_zval_ptr(&opline->op1, Ts, &EG(free_op1) ELS_CC);
+							
 							if (!object.ptr
 								|| ((object.ptr->type==IS_OBJECT) && (object.ptr->value.obj.ce->handle_function_call))) { /* overloaded function call */
 								zend_overloaded_element overloaded_element;
@@ -1429,6 +1442,7 @@ binary_assign_op_addr: {
 							if (object.ptr->type != IS_OBJECT) {
 								zend_error(E_ERROR, "Call to a member function on a non-object");
 							}
+							object.ptr->refcount++; /* For this pointer */
 							active_function_table = &(object.ptr->value.obj.ce->function_table);
 						}
 					} else { /* function pointer */
@@ -1481,24 +1495,12 @@ do_fcall_common:
 							&& object.ptr
 							&& function_being_called->type!=ZEND_OVERLOADED_FUNCTION) {
 							zval **this_ptr;
-							zval *tmp;
 
 							zend_hash_update_ptr(function_state.function_symbol_table, "this", sizeof("this"), NULL, sizeof(zval *), (void **) &this_ptr);
 							if (!PZVAL_IS_REF(object.ptr)) {
-		        				 /* break it away */
-                        		object.ptr->refcount--;
-                        		if (object.ptr->refcount>0) {
-                                	tmp = (zval *) emalloc(sizeof(zval));
-                                	*tmp = *object.ptr;
-                                	zendi_zval_copy_ctor(*tmp);
-									object.ptr = tmp;
-									*object.ptr_ptr = tmp;
-                        		}
-                        		object.ptr->refcount = 1;
-                        		object.ptr->is_ref = 1;
+								zend_error(E_WARNING,"Problem with method call. Report this bug\n");
                 			}
 							*this_ptr = object.ptr;
-							object.ptr->refcount++;
 							object.ptr = NULL;
 						}
 						original_return_value = EG(return_value);
@@ -1522,12 +1524,7 @@ do_fcall_common:
 						efree(function_being_called);
 					}
 					if (opline->opcode == ZEND_DO_FCALL_BY_NAME) {
-						zend_ptr_stack_n_pop(&EG(arg_types_stack), 3, &object.ptr_ptr, &object.ptr, &function_being_called);
-					/*
-						object.ptr_ptr = zend_ptr_stack_pop(&EG(arg_types_stack));
-						object.ptr = zend_ptr_stack_pop(&EG(arg_types_stack));
-						function_being_called = zend_ptr_stack_pop(&EG(arg_types_stack));
-					*/
+						zend_ptr_stack_n_pop(&EG(arg_types_stack), 2, &object.ptr, &function_being_called);
 					}
 					function_state.function = (zend_function *) op_array;
 					EG(function_state_ptr) = &function_state;
