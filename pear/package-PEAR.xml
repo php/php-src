@@ -31,9 +31,9 @@
     </maintainer>
   </maintainers>
   <release>
-    <version>1.0b3-dev3</version>
+    <version>1.0b3</version>
     <state>stable</state>
-    <date>2002-12-07</date>
+    <date>2002-12-13</date>
     <notes>
 * fixed "info" shortcut (conflicted with "install")
 </notes>
