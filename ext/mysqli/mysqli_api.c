@@ -620,6 +620,10 @@ PHP_FUNCTION(mysqli_execute)
 		MYSQLI_REPORT_STMT_ERROR(stmt->stmt);
 		RETURN_FALSE;
 	}
+	if (MyG(report_mode) & MYSQLI_REPORT_INDEX) {
+		php_mysqli_report_index(stmt->stmt->query, stmt->stmt->mysql->server_status TSRMLS_CC);
+	}
+	
 	RETURN_TRUE;
 }
 /* }}} */

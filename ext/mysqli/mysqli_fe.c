@@ -172,7 +172,6 @@ function_entry mysqli_link_methods[] = {
 	PHP_FALIAS(get_server_info,mysqli_get_server_info,NULL)
 	PHP_FALIAS(init,mysqli_init,NULL)
 	PHP_FALIAS(info,mysqli_info,NULL)
-	PHP_FALIAS(insert_id,mysqli_insert_id,NULL)
 	PHP_FALIAS(kill,mysqli_kill,NULL)
 	PHP_FALIAS(master_query,mysqli_master_query,NULL)
 	PHP_FALIAS(mysqli, mysqli_connect, NULL)
@@ -242,6 +241,7 @@ function_entry mysqli_stmt_methods[] = {
 	PHP_FALIAS(get_metadata, mysqli_get_metadata,NULL)
 	PHP_FALIAS(num_rows, mysqli_stmt_num_rows,NULL)
 	PHP_FALIAS(send_long_data,mysqli_send_long_data,NULL)
+	PHP_FALIAS(stmt,mysqli_prepare,NULL)
 	PHP_FALIAS(store_result,mysqli_stmt_store_result,NULL)
 	{NULL, NULL, NULL}
 };
