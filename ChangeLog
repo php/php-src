@@ -1,3 +1,92 @@
+2003-12-09  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * ZendEngine2/zend_operators.c
+      ZendEngine2/zend_operators.h
+      ext/bcmath/bcmath.c
+      ext/bcmath/config.m4
+      ext/bcmath/php_bcmath.h
+      ext/bcmath/libbcmath/src/bcmath.h
+      ext/bcmath/libbcmath/src/init.c
+      main/config.nw.h
+      main/config.w32.h
+      main/internal_functions_nw.c
+      main/internal_functions_win32.c:
+      - Brought ext/bcmath to the new millennium
+
+2003-12-09  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/PEAR/Common.php:
+      remove references to global variables in validatePackageInfo, remove
+      extraneous summary that is never reached in the switch
+
+2003-12-09  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/dom/node.c:
+      fix possible mem leak when element has children
+
+2003-12-09  Pierre-Alain Joye  <paj@pearfr.org>
+
+    * pear/PEAR/Downloader.php:
+      - MFB (fix pecl install)
+
+    * (PHP_4_3)
+      pear/PEAR/Downloader.php:
+      - Fix pecl installer
+        package::info() _must_ be called with PECL in mind
+        There should be other issues, more later.
+
+2003-12-09  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      NEWS
+      ext/ncurses/config.m4:
+      MFH: Fixed bug #26564 (ncurses5 has headers in PREFIX/include/ncurses/)
+
+    * ext/ncurses/config.m4:
+      Fixed bug #26564 (ncurses5 has headers in PREFIX/include/ncurses)
+
+2003-12-09  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/dom/node.c:
+      allow assignment to $node->nodeValue to work for more
+      objects and in situations where the rvalue is not a string.
+      (Fixes a segfault in that case)
+
+2003-12-09  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/xsl/php_xsl.c:
+      fix issues when passing in mulitple arguments
+
+2003-12-09  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * ext/cpdf/config.m4:
+      Fix the configure output..
+
+    * ext/cpdf/config.m4:
+      Removed unnecessary outputs
+
+    * ext/standard/credits_sapi.h:
+      - Update credits.
+
+    * ext/bz2/bz2.c
+      ext/bz2/php_bz2.h
+      ext/mono/php_mono.c
+      ext/mono/php_mono.h
+      ext/simplexml/php_simplexml.h
+      ext/simplexml/simplexml.c
+      main/php_realpath.c:
+      - Update header + added missing Id tags.
+
+2003-12-09  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend_constants.c:
+      - Fix overallocation (thanks to Ilia)
+
+2003-12-09  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/com_dotnet/com_variant.c:
+      Kill unused variables.
+
 2003-12-08  Hartmut Holzgraefe  <hartmut@php-groupies.de>
 
     * ext/standard/parsedate.y:

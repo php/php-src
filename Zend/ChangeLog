@@ -1,3 +1,14 @@
+2003-12-09  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * zend_operators.c
+      zend_operators.h:
+      - Brought ext/bcmath to the new millennium
+
+2003-12-09  Andi Gutmans  <andi@zend.com>
+
+    * zend_constants.c:
+      - Fix overallocation (thanks to Ilia)
+
 2003-12-08  Derick Rethans  <php@derickrethans.nl>
 
     * zend_builtin_functions.c:
