@@ -19,7 +19,6 @@ if test "$confighfiles" != "ext/*/config.h.stub"; then
 fi
 if ! cmp acconfig.h acconfig.h.new > /dev/null 2>&1; then
     mv acconfig.h.new acconfig.h
-    autoheader
 else
     rm -f acconfig.h.new
 fi
