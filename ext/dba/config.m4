@@ -10,7 +10,8 @@ AC_DEFUN(PHP_DBA_STD_BEGIN,[
 
 AC_DEFUN(PHP_TEMP_LDFLAGS,[
   old_LDFLAGS=$LDFLAGS
-  LDFLAGS="$1 $LDFLAGS"
+dnl  LDFLAGS="$1 $LDFLAGS"
+  LDFLAGS="$1"
   $2
   LDFLAGS=$old_LDFLAGS
 ])
@@ -141,14 +142,14 @@ AC_DEFUN(PHP_DBA_DB_CHECK,[
   for LIB in $2; do
     PHP_TEMP_LDFLAGS(-L$THIS_PREFIX/lib,[
       AC_CHECK_LIB($LIB, $3, [
-      AC_EGREP_CPP(yes,[
+        AC_EGREP_CPP(yes,[
 #include "$THIS_INCLUDE"
-          yes
+            yes
 #endif
         ],[
           THIS_LIBS=$LIB
           break
-        ],[ ])
+        ])
       ])
     ])
   done
