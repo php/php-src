@@ -194,8 +194,13 @@ static inline void zend_switch_free(zend_op *opline, temp_variable *Ts TSRMLS_DC
 	switch (opline->op1.op_type) {
 		case IS_VAR:
 			if (!T(opline->op1.u.var).var.ptr_ptr) {
-				get_zval_ptr(&opline->op1, Ts, &EG(free_op1), BP_VAR_R);
-				FREE_OP(Ts, &opline->op1, EG(free_op1));
+				temp_variable *T = &T(opline->op1.u.var);
+
+				/* perform the equivalent of equivalent of a
+				 * quick & silent get_zval_ptr, and FREE_OP
+				 */
+				PZVAL_UNLOCK(T->EA.data.str_offset.str);
+				zval_dtor(&T->tmp_var);
 			} else {
 				zval_ptr_dtor(&T(opline->op1.u.var).var.ptr);
 				if (opline->extended_value) { /* foreach() free */
