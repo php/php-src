@@ -31,6 +31,9 @@
 
 #if HAVE_PGSQL
 
+#ifndef InvalidOid
+#define InvalidOid ((Oid) 0)
+#endif
 
 #define PGSQL_ASSOC		1<<0
 #define PGSQL_NUM		1<<1
