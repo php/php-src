@@ -1587,6 +1587,11 @@ static void do_inherit_parent_constructor(zend_class_entry *ce)
 	if (!ce->parent) {
 		return;
 	}
+
+	/* You cannot change create_object */
+	ce->create_object = ce->parent->create_object;
+	
+	/* Inherit special functions if needed */
 	if (!ce->__get) {
 		ce->__get   = ce->parent->__get;
 	}
@@ -1596,29 +1601,16 @@ static void do_inherit_parent_constructor(zend_class_entry *ce)
 	if (!ce->__call) {
 		ce->__call = ce->parent->__call;
 	}
+	if (!ce->clone) {
+		ce->clone = ce->parent->clone;
+	}
 	if (!ce->destructor) {
 		ce->destructor   = ce->parent->destructor;
 	}
-	ce->create_object = ce->parent->create_object;
-	if (ce->constructor) {
-		return;
+	if (!ce->constructor) {
+		ce->constructor = ce->parent->constructor;
 	}
 
-	if (zend_hash_find(&ce->parent->function_table, ZEND_CONSTRUCTOR_FUNC_NAME, sizeof(ZEND_CONSTRUCTOR_FUNC_NAME), (void **) &function)==SUCCESS) {
-		/* inherit parent's constructor */
-		zend_hash_update(&ce->function_table, ZEND_CONSTRUCTOR_FUNC_NAME, sizeof(ZEND_CONSTRUCTOR_FUNC_NAME), function, sizeof(zend_function), NULL);
-		function_add_ref(function);
-	} else {
-		/* don't inherit the old style constructor if we already have the new style cconstructor */
-		if (!zend_hash_exists(&ce->function_table, ce->name, ce->name_length+1)) {
-			if (zend_hash_find(&ce->parent->function_table, ce->parent->name, ce->parent->name_length+1, (void **) &function)==SUCCESS) {
-				/* inherit parent's constructor */
-				zend_hash_update(&ce->function_table, ce->name, ce->name_length+1, function, sizeof(zend_function), NULL);
-				function_add_ref(function);
-			}
-		}
-	}
-	ce->constructor = ce->parent->constructor;
 }
 
 
