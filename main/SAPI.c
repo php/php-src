@@ -97,7 +97,7 @@ SAPI_API void sapi_free_header(sapi_header_struct *sapi_header)
 
 SAPI_API void sapi_handle_post(void *arg SLS_DC)
 {
-	if (SG(request_info).post_entry) {
+	if (SG(request_info).post_entry && SG(request_info).content_type_dup) {
 		SG(request_info).post_entry->post_handler(SG(request_info).content_type_dup, arg SLS_CC);
 		if (SG(request_info).post_data) {
 			efree(SG(request_info).post_data);
