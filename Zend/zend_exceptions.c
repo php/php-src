@@ -24,6 +24,24 @@
 
 zend_class_entry *default_exception_ptr;
 
+static zend_object_value zend_default_exception_new(zend_class_entry *class_type TSRMLS_DC)
+{
+	zval tmp, obj;
+	zend_object *object;
+
+	obj.value.obj = zend_objects_new(&object, class_type TSRMLS_CC);
+
+	ALLOC_HASHTABLE(object->properties);
+	zend_hash_init(object->properties, 0, NULL, ZVAL_PTR_DTOR, 0);
+	zend_hash_copy(object->properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
+
+	zend_update_property_string(class_type, &obj, "message", sizeof("message")-1, "Unknown exception" TSRMLS_CC);
+	zend_update_property_string(class_type, &obj, "file", sizeof("file")-1, zend_get_executed_filename(TSRMLS_C) TSRMLS_CC);
+	zend_update_property_long(class_type, &obj, "line", sizeof("line")-1, zend_get_executed_lineno(TSRMLS_C) TSRMLS_CC);
+
+	return obj.value.obj;
+}
+
 ZEND_FUNCTION(exception)
 {
 	char  *message = NULL;
@@ -38,21 +56,13 @@ ZEND_FUNCTION(exception)
 
 	object = getThis();
 
-	MAKE_STD_ZVAL(tmp);
-	ZVAL_STRING(tmp, message ? message : "Unknown exception", 1);
-	zend_hash_update(Z_OBJPROP_P(object), "message", sizeof("message"), (void **) &tmp, sizeof(zval *), NULL);
+	if (message) {
+		zend_update_property_string(Z_OBJCE_P(object), object, "message", sizeof("message")-1, message TSRMLS_CC);
+	}
 
-	MAKE_STD_ZVAL(tmp);
-	ZVAL_LONG(tmp, code);
-	zend_hash_update(Z_OBJPROP_P(object), "code", sizeof("code"), (void **) &tmp, sizeof(zval *), NULL);
-
-	MAKE_STD_ZVAL(tmp);
-	ZVAL_STRING(tmp, zend_get_executed_filename(TSRMLS_C), 1);
-	zend_hash_update(Z_OBJPROP_P(object), "file", sizeof("file"), (void **) &tmp, sizeof(zval *), NULL);
-
-	MAKE_STD_ZVAL(tmp);
-	ZVAL_LONG(tmp, zend_get_executed_lineno(TSRMLS_C));
-	zend_hash_update(Z_OBJPROP_P(object), "line", sizeof("line"), (void **) &tmp, sizeof(zval *), NULL);
+	if (code) {
+		zend_update_property_long(Z_OBJCE_P(object), object, "code", sizeof("code")-1, code TSRMLS_CC);
+	}
 }
 
 #define DEFAULT_0_PARAMS \
@@ -115,6 +125,12 @@ static void zend_register_default_exception(TSRMLS_D)
 
 	INIT_CLASS_ENTRY(default_exception, "exception", default_exception_functions);
 	default_exception_ptr = zend_register_internal_class(&default_exception TSRMLS_CC);
+	default_exception_ptr->create_object = zend_default_exception_new;
+
+	zend_declare_property_null(default_exception_ptr, "message", sizeof("message")-1, ZEND_ACC_PROTECTED);
+	zend_declare_property_long(default_exception_ptr, "code", sizeof("code")-1, 0, ZEND_ACC_PROTECTED);
+	zend_declare_property_null(default_exception_ptr, "file", sizeof("file")-1, ZEND_ACC_PROTECTED);
+	zend_declare_property_null(default_exception_ptr, "line", sizeof("line")-1, ZEND_ACC_PROTECTED);
 }
 
 ZEND_API zend_class_entry *zend_exception_get_default(void)
