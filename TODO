@@ -24,7 +24,6 @@ ext/oci8
 ext/standard
 ------------
     * strpad() (Andrei)
-    * advanced sort (Andrei)
 	* NOT binary safe:
 		strcspn()
 		strtok()
