@@ -1,6 +1,10 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 200?, Version 5.0.0
+- Added an extra ini setting (mail_force_extra_paramaters) which forces
+  the addition of the specified parameters to be passed as extra
+  parameters to the sendmail binary. These parameters will always replace
+  the value of the 5th parameter to mail(), even in safe mode. (Derick)
 - Moved extensions to PECL (http://pear.php.net/): (James, Tal)
   . ext/fribidi
 - Fixed bug #21600 (Assign by reference function call changes variable contents).
