@@ -1,3 +1,48 @@
+2004-10-22  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend_vm_handlers.h
+      ZendEngine2/zend_vm_spec.h:
+      - Nuke another two files
+
+    * ZendEngine2/Makefile.frag
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_vm.h
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.skl
+      ZendEngine2/zend_vm_gen.php:
+      - Commit new VM
+      - Old one is tagged as PRE_NEW_VM_GEN_PATCH
+      - Still doing work so more commits to come. Don't complain (yet) :)
+
+2004-10-22  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PRE_NEW_VM_GEN_PATCH)
+      ext/standard/microtime.c:
+      fix windows build
+
+2004-10-22  Edin Kadribasic  <edink@emini.dk>
+
+    * (PHP_4_3)
+      NEWS
+      NEWS
+      configure.in
+      configure.in
+      configure.in:
+      Revert Linux LFS patch
+
+2004-10-22  Andi Gutmans  <andi@zend.com>
+
+    * (PRE_NEW_VM_GEN_PATCH)
+      ZendEngine2/zend_execute.c:
+      - Fix crash (MFB PHP5_0)
+
+2004-10-22  Edin Kadribasic  <edink@emini.dk>
+
+    * (PHP_4_3)
+      NEWS
+      NEWS:
+      BFN
+
 2004-10-21  Edin Kadribasic  <edink@emini.dk>
 
     * (PHP_4_3)
