@@ -22,9 +22,9 @@
 
 #if WITH_BCMATH
 
-#include "number.h"
 #include "ext/standard/info.h"
 #include "php_bcmath.h"
+#include "ext/bcmath/libbcmath/src/bcmath.h"
 
 function_entry bcmath_functions[] = {
 	PHP_FE(bcadd,									NULL)
@@ -58,16 +58,44 @@ ZEND_GET_MODULE(bcmath)
 static long bc_precision;
 #endif
 
+/* Storage used for special numbers. */
+bc_num _zero_;
+bc_num _one_;
+bc_num _two_;
+
+
+/* Make a copy of a number!  Just increments the reference count! */
+bc_num copy_num (bc_num num)
+{
+  num->n_refs++;
+  return num;
+}
+
+
+/* Initialize a number NUM by making it a copy of zero. */
+void init_num (bc_num *num)
+{
+	*num = copy_num (_zero_);
+}
+
+
 PHP_MINIT_FUNCTION(bcmath)
 {
 	extern bc_num _zero_;
 	extern bc_num _one_;
 	extern bc_num _two_;
 
-	init_numbers();
+	_zero_ = bc_new_num (1,0);
+	_one_  = bc_new_num (1,0);
+	_one_->n_value[0] = 1;
+	_two_  = bc_new_num (1,0);
+	_two_->n_value[0] = 2;
 	persist_alloc(_zero_);
 	persist_alloc(_one_);
 	persist_alloc(_two_);
+	persist_alloc(_zero_->n_ptr);
+	persist_alloc(_one_->n_ptr);
+	persist_alloc(_two_->n_ptr);
 
 	return SUCCESS;
 }
@@ -76,7 +104,9 @@ PHP_MINIT_FUNCTION(bcmath)
 
 PHP_MSHUTDOWN_FUNCTION(bcmath)
 {
-	destruct_numbers();
+	bc_free_num(&_zero_);
+	bc_free_num(&_one_);
+	bc_free_num(&_two_);
 	return SUCCESS;
 }
 
@@ -124,18 +154,18 @@ PHP_FUNCTION(bcadd)
 	}
 	convert_to_string_ex(left);
 	convert_to_string_ex(right);
-	init_num(&first);
-	init_num(&second);
-	init_num(&result);
-	str2num(&first,(*left)->value.str.val,scale);
-	str2num(&second,(*right)->value.str.val,scale);
+	bc_init_num(&first);
+	bc_init_num(&second);
+	bc_init_num(&result);
+	bc_str2num(&first,(*left)->value.str.val,scale);
+	bc_str2num(&second,(*right)->value.str.val,scale);
 	bc_add (first,second,&result, scale);
-	return_value->value.str.val = num2str(result);
+	return_value->value.str.val = bc_num2str(result);
 	return_value->value.str.len = strlen(return_value->value.str.val);
 	return_value->type = IS_STRING;
-	free_num(&first);
-	free_num(&second);
-	free_num(&result);
+	bc_free_num(&first);
+	bc_free_num(&second);
+	bc_free_num(&result);
 	return;
 }
 /* }}} */
@@ -167,18 +197,18 @@ PHP_FUNCTION(bcsub)
 	}
 	convert_to_string_ex(left);
 	convert_to_string_ex(right);
-	init_num(&first);
-	init_num(&second);
-	init_num(&result);
-	str2num(&first,(*left)->value.str.val,scale);
-	str2num(&second,(*right)->value.str.val,scale);
+	bc_init_num(&first);
+	bc_init_num(&second);
+	bc_init_num(&result);
+	bc_str2num(&first,(*left)->value.str.val,scale);
+	bc_str2num(&second,(*right)->value.str.val,scale);
 	bc_sub (first,second,&result, scale);
-	return_value->value.str.val = num2str(result);
+	return_value->value.str.val = bc_num2str(result);
 	return_value->value.str.len = strlen(return_value->value.str.val);
 	return_value->type = IS_STRING;
-	free_num(&first);
-	free_num(&second);
-	free_num(&result);
+	bc_free_num(&first);
+	bc_free_num(&second);
+	bc_free_num(&result);
 	return;
 }
 /* }}} */
@@ -210,18 +240,18 @@ PHP_FUNCTION(bcmul)
 	}
 	convert_to_string_ex(left);
 	convert_to_string_ex(right);
-	init_num(&first);
-	init_num(&second);
-	init_num(&result);
-	str2num(&first,(*left)->value.str.val,scale);
-	str2num(&second,(*right)->value.str.val,scale);
+	bc_init_num(&first);
+	bc_init_num(&second);
+	bc_init_num(&result);
+	bc_str2num(&first,(*left)->value.str.val,scale);
+	bc_str2num(&second,(*right)->value.str.val,scale);
 	bc_multiply (first,second,&result, scale);
-	return_value->value.str.val = num2str(result);
+	return_value->value.str.val = bc_num2str(result);
 	return_value->value.str.len = strlen(return_value->value.str.val);
 	return_value->type = IS_STRING;
-	free_num(&first);
-	free_num(&second);
-	free_num(&result);
+	bc_free_num(&first);
+	bc_free_num(&second);
+	bc_free_num(&result);
 	return;
 }
 /* }}} */
@@ -253,14 +283,14 @@ PHP_FUNCTION(bcdiv)
 	}
 	convert_to_string_ex(left);
 	convert_to_string_ex(right);
-	init_num(&first);
-	init_num(&second);
-	init_num(&result);
-	str2num(&first,(*left)->value.str.val,scale);
-	str2num(&second,(*right)->value.str.val,scale);
+	bc_init_num(&first);
+	bc_init_num(&second);
+	bc_init_num(&result);
+	bc_str2num(&first,(*left)->value.str.val,scale);
+	bc_str2num(&second,(*right)->value.str.val,scale);
 	switch (bc_divide (first,second,&result, scale)) {
 		case 0: /* OK */
-			return_value->value.str.val = num2str(result);
+			return_value->value.str.val = bc_num2str(result);
 			return_value->value.str.len = strlen(return_value->value.str.val);
 			return_value->type = IS_STRING;
 			break;
@@ -268,9 +298,9 @@ PHP_FUNCTION(bcdiv)
 			php_error(E_WARNING,"Division by zero");
 			break;
 	}
-	free_num(&first);
-	free_num(&second);
-	free_num(&result);
+	bc_free_num(&first);
+	bc_free_num(&second);
+	bc_free_num(&result);
 	return;
 }
 /* }}} */
@@ -294,14 +324,14 @@ PHP_FUNCTION(bcmod)
 	}
 	convert_to_string_ex(left);
 	convert_to_string_ex(right);
-	init_num(&first);
-	init_num(&second);
-	init_num(&result);
-	str2num(&first,(*left)->value.str.val,0);
-	str2num(&second,(*right)->value.str.val,0);
+	bc_init_num(&first);
+	bc_init_num(&second);
+	bc_init_num(&result);
+	bc_str2num(&first,(*left)->value.str.val,0);
+	bc_str2num(&second,(*right)->value.str.val,0);
 	switch (bc_modulo(first,second,&result, 0)) {
 		case 0:
-			return_value->value.str.val = num2str(result);
+			return_value->value.str.val = bc_num2str(result);
 			return_value->value.str.len = strlen(return_value->value.str.val);
 			return_value->type = IS_STRING;
 			break;
@@ -309,9 +339,9 @@ PHP_FUNCTION(bcmod)
 			php_error(E_WARNING,"Division by zero");
 			break;
 	}
-	free_num(&first);
-	free_num(&second);
-	free_num(&result);
+	bc_free_num(&first);
+	bc_free_num(&second);
+	bc_free_num(&result);
 	return;
 }
 /* }}} */
@@ -343,18 +373,18 @@ PHP_FUNCTION(bcpow)
 	}
 	convert_to_string_ex(left);
 	convert_to_string_ex(right);
-	init_num(&first);
-	init_num(&second);
-	init_num(&result);
-	str2num(&first,(*left)->value.str.val,scale);
-	str2num(&second,(*right)->value.str.val,scale);
+	bc_init_num(&first);
+	bc_init_num(&second);
+	bc_init_num(&result);
+	bc_str2num(&first,(*left)->value.str.val,scale);
+	bc_str2num(&second,(*right)->value.str.val,scale);
 	bc_raise (first,second,&result, scale); 
-	return_value->value.str.val = num2str(result);
+	return_value->value.str.val = bc_num2str(result);
 	return_value->value.str.len = strlen(return_value->value.str.val);
 	return_value->type = IS_STRING;
-	free_num(&first);
-	free_num(&second);
-	free_num(&result);
+	bc_free_num(&first);
+	bc_free_num(&second);
+	bc_free_num(&result);
 	return;
 }
 /* }}} */
@@ -385,16 +415,16 @@ PHP_FUNCTION(bcsqrt)
 				break;
 	}
 	convert_to_string_ex(left);
-	init_num(&result);
-	str2num(&result,(*left)->value.str.val,scale);
+	bc_init_num(&result);
+	bc_str2num(&result,(*left)->value.str.val,scale);
 	if (bc_sqrt (&result, scale) != 0) {
-		return_value->value.str.val = num2str(result);
+		return_value->value.str.val = bc_num2str(result);
 		return_value->value.str.len = strlen(return_value->value.str.val);
 		return_value->type = IS_STRING;
 	} else {
 		php_error(E_WARNING,"Square root of negative number");
 	}
-	free_num(&result);
+	bc_free_num(&result);
 	return;
 }
 /* }}} */
@@ -427,16 +457,16 @@ PHP_FUNCTION(bccomp)
 
 	convert_to_string_ex(left);
 	convert_to_string_ex(right);
-	init_num(&first);
-	init_num(&second);
+	bc_init_num(&first);
+	bc_init_num(&second);
 
-	str2num(&first,(*left)->value.str.val,scale);
-	str2num(&second,(*right)->value.str.val,scale);
+	bc_str2num(&first,(*left)->value.str.val,scale);
+	bc_str2num(&second,(*right)->value.str.val,scale);
 	return_value->value.lval = bc_compare(first,second);
 	return_value->type = IS_LONG;
 
-	free_num(&first);
-	free_num(&second);
+	bc_free_num(&first);
+	bc_free_num(&second);
 	return;
 }
 /* }}} */

@@ -1,0 +1,9 @@
+Currently, only libbcmath.a is built.  To build and install it, do
+
+	configure
+	make
+	make install
+
+Typical configure parameters are available. (e.g. PREFIX)
+
+Bugs and comments to philnelson@acm.org.
