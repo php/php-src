@@ -791,13 +791,13 @@ VARIANTARG _php_COM_get_property_handler(zend_property_reference *property_refer
 	for (element=property_reference->elements_list.head; element; element=element->next) {
 		overloaded_property = (zend_overloaded_element *) element->data;
 		switch (overloaded_property->type) {
-			case IS_ARRAY:
+			case OE_IS_ARRAY:
 				if (do_COM_offget(&var_result, &var_result, &overloaded_property->element, element!=property_reference->elements_list.head)==FAILURE) {
 					/* bail out */
 				}
 				/*printf("Array offset:  ");*/
 				break;
-			case IS_OBJECT:
+			case OE_IS_OBJECT:
 				if (var_result.vt != VT_DISPATCH) {
 					/* bail out */
 				} else {
@@ -807,7 +807,7 @@ VARIANTARG _php_COM_get_property_handler(zend_property_reference *property_refer
 					/*printf("Object property:  ");*/
 				}
 				break;
-			case IS_METHOD:
+			case OE_IS_METHOD:
 				return var_result;
 				break;
 		}
@@ -861,10 +861,10 @@ int php_COM_set_property_handler(zend_property_reference *property_reference, pv
 	for (element=property_reference->elements_list.head; element && element!=property_reference->elements_list.tail; element=element->next) {
 		overloaded_property = (zend_overloaded_element *) element->data;
 		switch (overloaded_property->type) {
-			case IS_ARRAY:
+			case OE_IS_ARRAY:
 				/*printf("Array offset:  ");*/
 				break;
-			case IS_OBJECT:
+			case OE_IS_OBJECT:
 				if (var_result.vt != VT_DISPATCH) {
 					/* bail out */
 				} else {
@@ -872,7 +872,7 @@ int php_COM_set_property_handler(zend_property_reference *property_reference, pv
 					/*printf("Object property:  ");*/
 				}
 				break;
-			case IS_METHOD:
+			case OE_IS_METHOD:
 				/* this shouldn't happen */
 				return FAILURE;
 		}
@@ -946,11 +946,11 @@ void php_COM_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_property_r
 	     overloaded_property;
 	     overloaded_property = (zend_overloaded_element *) zend_llist_get_next(&property_reference->elements_list)) {
 		switch (overloaded_property->type) {
-		case IS_ARRAY:
+		case OE_IS_ARRAY:
 			break;
-		case IS_OBJECT:
+		case OE_IS_OBJECT:
 			break;
-		case IS_METHOD:
+		case OE_IS_METHOD:
 
 			break;
 		}
