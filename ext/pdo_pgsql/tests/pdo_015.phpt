@@ -1,5 +1,5 @@
 --TEST--
-PDO_MySQL: PDO_FETCH_COLUMN
+PDO_PGSQL: PDO_FETCH_COLUMN
 --SKIPIF--
 <?php # vim:ft=php
 require_once('skipif.inc');
