@@ -64,6 +64,9 @@ void php_xsl_set_object(zval *wrapper, void *obj TSRMLS_DC);
 void xsl_objects_free_storage(void *object TSRMLS_DC);
 zval *php_xsl_create_object(xsltStylesheetPtr obj, int *found, zval *wrapper_in, zval *return_value  TSRMLS_DC);
 
+void xsl_ext_function_string_php(xmlXPathParserContextPtr ctxt, int nargs);
+void xsl_ext_function_object_php(xmlXPathParserContextPtr ctxt, int nargs);
+
 #define REGISTER_XSL_CLASS(ce, name, parent_ce, funcs, entry) \
 INIT_CLASS_ENTRY(ce, name, funcs); \
 ce.create_object = xsl_objects_new; \
