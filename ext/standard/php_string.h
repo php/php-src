@@ -117,7 +117,7 @@ PHPAPI void php_trim(zval **str, zval *return_value, int mode TSRMLS_DC);
 PHPAPI void php_trim2(zval **str, zval **what, zval *return_value, int mode TSRMLS_DC);
 PHPAPI void php_strip_tags(char *rbuf, int len, int state, char *allow, int allow_len);
 
-PHPAPI void php_char_to_str(char *str, uint len, char from, char *to, int to_len, pval *result);
+PHPAPI int php_char_to_str(char *str, uint len, char from, char *to, int to_len, pval *result);
 
 PHPAPI void php_implode(zval *delim, zval *arr, zval *return_value);
 PHPAPI void php_explode(zval *delim, zval *str, zval *return_value, int limit);
