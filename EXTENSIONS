@@ -31,6 +31,10 @@ EXTENSION:           aolserver
 MAINTENANCE:         Unknown
 STATUS:              Unknown
 -------------------------------------------------------------------------------
+EXTENSION:           activescript
+MAINTENANCE:         Unknown
+STATUS:              Unknown
+-------------------------------------------------------------------------------
 EXTENSION:           apache
 PRIMARY MAINTAINER:  Rasmus Lerdorf <rasmus@php.net>
 MAINTENANCE:         Maintained
@@ -45,6 +49,10 @@ EXTENSION:           cgi
 MAINTENANCE:         Unknown
 STATUS:              Working
 -------------------------------------------------------------------------------
+EXTENSION:           cli
+MAINTENANCE:         Unknown
+STATUS:              Working
+-------------------------------------------------------------------------------
 EXTENSION:           fhttpd
 MAINTENANCE:         Unknown
 STATUS:              Unknown
@@ -54,8 +62,9 @@ MAINTENANCE:         Unknown
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           nsapi
-MAINTENANCE:         Unknown
-STATUS:              Unknown
+PRIMARY MAINTAINER:  Uwe Schindler <thetaphi@php.net>
+MAINTENANCE:         Maintained
+STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           phttpd
 MAINTENANCE:         Unknown
