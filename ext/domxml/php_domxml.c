@@ -429,9 +429,7 @@ static zend_function_entry php_domxmlelement_class_functions[] = {
 	PHP_FALIAS(set_attribute,			domxml_elem_set_attribute,		NULL)
 	PHP_FALIAS(remove_attribute,		domxml_elem_remove_attribute,	NULL)
 	PHP_FALIAS(get_attribute_node,		domxml_elem_get_attribute_node,	NULL)
-/* since this function is not implemented, outcomment it for the time beeing
 	PHP_FALIAS(set_attribute_node,		domxml_elem_set_attribute_node,	NULL)
-*/
 #if defined(LIBXML_XPATH_ENABLED)			
 	PHP_FALIAS(get_elements_by_tagname,	domxml_elem_get_elements_by_tagname,	NULL)
 #endif
@@ -2849,32 +2847,72 @@ PHP_FUNCTION(domxml_elem_get_attribute_node)
 
 /* {{{ proto bool domxml_elem_set_attribute_node(object attr)
    Sets value of given attribute */
-/* since this function is not implemented, outcomment it for the time beeing
 PHP_FUNCTION(domxml_elem_set_attribute_node)
 {
-	zval *id, **arg1, *rv = NULL;
+	zval *id, *node, *rv = NULL;
 	xmlNode *nodep;
-	xmlAttr *attrp, *newattrp;
+	xmlAttr *attrp, *newattrp, *existattrp;
 	int ret;
 
-	if ((ZEND_NUM_ARGS() == 1) && (zend_get_parameters_ex(1, &arg1) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	DOMXML_GET_THIS_OBJ(nodep, id, le_domxmlnodep);
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o", &node) == FAILURE) {
+		return;
 	}
 
-	id = getThis();
-	nodep = php_dom_get_object(id, le_domxmlelementp, 0 TSRMLS_CC);
-	attrp = php_dom_get_object(*arg1, le_domxmlattrp, 0 TSRMLS_CC);
+	DOMXML_GET_OBJ(attrp, node, le_domxmlnodep);
 
-	FIXME: The following line doesn't work 
-	newattrp = xmlCopyProp(nodep, attrp);
-	if (!newattrp) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "No such attribute '%s'", attrp->name);
+	if (attrp->type != XML_ATTRIBUTE_NODE) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Attribute node is required");
 		RETURN_FALSE;
+	}
+
+
+	existattrp = xmlHasProp(nodep,attrp->name);
+	if (existattrp != NULL) {
+		/* We cannot unlink an existing attribute as it may never be freed
+		Only the content of the text node of an attribute node is transfered over */
+
+		xmlChar *mem;
+		xmlNode *first, *firstattrp;
+
+		first = existattrp->children;
+		firstattrp = attrp->children;
+		if (mem = xmlNodeGetContent(firstattrp)) {
+			if (!first) {
+				xmlNodeSetContent((xmlNode *) existattrp, mem);
+			} else {
+				xmlNodeSetContent(first, mem);
+			}
+			xmlFree(mem);
+			newattrp = existattrp;
+		} else {
+			RETURN_FALSE;
+		}
+	} else {
+		/* xmlCopyProp does not add the copy to the element node.
+			It does set the parent of the copy to the element node however */
+		newattrp = xmlCopyProp(nodep, attrp);
+		if (!newattrp) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "No such attribute '%s'", attrp->name);
+			RETURN_FALSE;
+		} else {
+			xmlAttr *prop;
+			prop = nodep->properties;
+			if (prop == NULL) {
+				nodep->properties = newattrp;
+			} else {
+				while (prop->next != NULL) {
+					prop = prop->next;
+				}
+				prop->next = newattrp;
+				newattrp->prev = prop;
+			}
+		}
 	}
 
 	DOMXML_RET_OBJ(rv, (xmlNodePtr) newattrp, &ret);
 }
-*/
 /* }}} */
 
 /* {{{ proto string domxml_elem_has_attribute(string attrname)
