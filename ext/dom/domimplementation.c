@@ -35,10 +35,10 @@
 */
 
 zend_function_entry php_dom_domimplementation_class_functions[] = {
-	PHP_FALIAS(hasFeature, dom_domimplementation_has_feature, NULL)
-	PHP_FALIAS(createDocumentType, dom_domimplementation_create_document_type, NULL)
-	PHP_FALIAS(createDocument, dom_domimplementation_create_document, NULL)
-	PHP_FALIAS(getFeature, dom_domimplementation_get_feature, NULL)
+	PHP_ME(domimplementation, getFeature, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_ALLOW_STATIC)
+	PHP_ME(domimplementation, hasFeature, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_ALLOW_STATIC)
+	PHP_ME(domimplementation, createDocumentType, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_ALLOW_STATIC)
+	PHP_ME(domimplementation, createDocument, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_ALLOW_STATIC)
 	{NULL, NULL, NULL}
 };
 
@@ -49,7 +49,7 @@ zend_function_entry php_dom_domimplementation_class_functions[] = {
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-5CED94D7
 Since: 
 */
-PHP_FUNCTION(dom_domimplementation_has_feature)
+PHP_METHOD(domimplementation, hasFeature)
 {
 	int feature_len, version_len;
 	char *feature, *version;
@@ -71,11 +71,11 @@ PHP_FUNCTION(dom_domimplementation_has_feature)
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Level-2-Core-DOM-createDocType
 Since: DOM Level 2
 */
-PHP_FUNCTION(dom_domimplementation_create_document_type)
+PHP_METHOD(domimplementation, createDocumentType)
 {
 	zval *rv = NULL;
 	xmlDtd *doctype;
-	int ret, name_len, publicid_len, systemid_len;
+	int ret, name_len = 0, publicid_len = 0, systemid_len = 0;
 	char *name, *publicid, *systemid;
 	xmlChar *pch1 = NULL, *pch2 = NULL, *localname = NULL;
 	xmlURIPtr uri;
@@ -125,7 +125,7 @@ PHP_FUNCTION(dom_domimplementation_create_document_type)
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Level-2-Core-DOM-createDocument
 Since: DOM Level 2
 */
-PHP_FUNCTION(dom_domimplementation_create_document)
+PHP_METHOD(domimplementation, createDocument)
 {
 	zval *node = NULL, *rv = NULL;
 	xmlDoc *docp;
@@ -137,7 +137,7 @@ PHP_FUNCTION(dom_domimplementation_create_document)
 	char *prefix = NULL, *localname = NULL;
 	dom_object *doctobj;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|sso", &uri, &uri_len, &name, &name_len, &node) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|ssO", &uri, &uri_len, &name, &name_len, &node, dom_documenttype_class_entry) == FAILURE) {
 		return;
 	}
 
@@ -228,7 +228,7 @@ PHP_FUNCTION(dom_domimplementation_create_document)
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#DOMImplementation3-getFeature
 Since: DOM Level 3
 */
-PHP_FUNCTION(dom_domimplementation_get_feature)
+PHP_METHOD(domimplementation, getFeature)
 {
  DOM_NOT_IMPLEMENTED();
 }

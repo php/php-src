@@ -93,10 +93,10 @@ PHP_FUNCTION(dom_domimplementationsource_get_domimplementation);
 PHP_FUNCTION(dom_domimplementationsource_get_domimplementations);
 
 /* domimplementation methods */
-PHP_FUNCTION(dom_domimplementation_has_feature);
-PHP_FUNCTION(dom_domimplementation_create_document_type);
-PHP_FUNCTION(dom_domimplementation_create_document);
-PHP_FUNCTION(dom_domimplementation_get_feature);
+PHP_METHOD(domimplementation, hasFeature);
+PHP_METHOD(domimplementation, createDocumentType);
+PHP_METHOD(domimplementation, createDocument);
+PHP_METHOD(domimplementation, getFeature);
 
 /* domdocumentfragment methods */
 PHP_FUNCTION(dom_documentfragment_documentfragment);
@@ -121,16 +121,16 @@ PHP_FUNCTION(dom_document_normalize_document);
 PHP_FUNCTION(dom_document_rename_node);
 PHP_FUNCTION(dom_document_document);
 	/* convienience methods */
-PHP_FUNCTION(dom_document_load);
+PHP_METHOD(domdocument, load);
 PHP_FUNCTION(dom_document_save);
-PHP_FUNCTION(dom_document_loadxml);
+PHP_METHOD(domdocument, loadXML);
 PHP_FUNCTION(dom_document_savexml);
 PHP_FUNCTION(dom_document_validate);
 PHP_FUNCTION(dom_document_xinclude);
 
 #if defined(LIBXML_HTML_ENABLED)
-PHP_FUNCTION(dom_document_load_html);
-PHP_FUNCTION(dom_document_load_html_file);
+PHP_METHOD(domdocument, loadHTML);
+PHP_METHOD(domdocument, loadHTMLFile);
 PHP_FUNCTION(dom_document_save_html);
 PHP_FUNCTION(dom_document_save_html_file);
 #endif  /* defined(LIBXML_HTML_ENABLED) */

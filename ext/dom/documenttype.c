@@ -154,7 +154,7 @@ int dom_documenttype_system_id_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 	ALLOC_ZVAL(*retval);
 	if (dtdptr->SystemID) {
-		ZVAL_STRING(*retval, (char *) (dtdptr->ExternalID), 1);
+		ZVAL_STRING(*retval, (char *) (dtdptr->SystemID), 1);
 	} else {
 		ZVAL_EMPTY_STRING(*retval);
 	}
