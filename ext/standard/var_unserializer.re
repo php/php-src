@@ -110,6 +110,7 @@ PHPAPI void var_destroy(php_unserialize_data_t *var_hashx)
 
 
 /*!re2c
+uiv = [+]? [0-9]+;
 iv = [+-]? [0-9]+;
 nv = [+-]? ([0-9]* "." [0-9]+|[0-9]+ "." [0-9]*);
 nvexp = (iv | nv) [eE] [+-]? iv;
@@ -305,7 +306,7 @@ PHPAPI int php_var_unserialize(UNSERIALIZE_PARAMETER)
 	return 1;
 }
 
-"s:" iv ":" ["] 	{
+"s:" uiv ":" ["] 	{
 	int len;
 	char *str;
 
@@ -325,7 +326,7 @@ PHPAPI int php_var_unserialize(UNSERIALIZE_PARAMETER)
 	return 1;
 }
 
-"a:" iv ":" "{" {
+"a:" uiv ":" "{" {
 	int elements = parse_iv(start + 2);
 
 	*p = YYCURSOR;
@@ -351,7 +352,7 @@ PHPAPI int php_var_unserialize(UNSERIALIZE_PARAMETER)
 			object_common1(UNSERIALIZE_PASSTHRU, ZEND_STANDARD_CLASS_DEF_PTR));
 }
 
-"O:" iv ":" ["]	{
+"O:" uiv ":" ["]	{
 	int len;
 	int elements;
 	int len2;
