@@ -5,6 +5,8 @@
 extern "C" {
 #endif
 
+#include "php_compat.h"
+
 #ifndef WIN32
 /* default fontpath for unix systems */
 #define DEFAULT_FONTPATH "/usr/X11R6/lib/X11/fonts/TrueType:/usr/X11R6/lib/X11/fonts/truetype:/usr/X11R6/lib/X11/fonts/TTF:/usr/share/fonts/TrueType:/usr/share/fonts/truetype:/usr/openwin/lib/X11/fonts/TrueType:/usr/X11R6/lib/X11/fonts/Type1:."

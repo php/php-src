@@ -12,6 +12,7 @@
 #ifndef __WBMP_H
 #define __WBMP_H	1
 
+#include "php_compat.h"
 
 /* WBMP struct
 ** -----------

@@ -1,4 +1,6 @@
 
+#include "php_compat.h"
+
 int gdCosT[] =
 {
   1024,
