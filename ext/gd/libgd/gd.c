@@ -1080,7 +1080,6 @@ gdImageLine (gdImagePtr im, int x1, int y1, int x2, int y2, int color)
 
 /*
  * Added on 2003/12 by Pierre-Alain Joye (pajoye@pearfr.org)
- * (c) 2003 Pierre-Alain Joye
  * */
 #define BLEND_COLOR(a, nc, c, cc) \
 nc = (cc) + (((((c) - (cc)) * (a)) + ((((c) - (cc)) * (a)) >> 8) + 0x80) >> 8);
@@ -1105,7 +1104,6 @@ inline static void gdImageSetAAPixelColor(gdImagePtr im, int x, int y, int color
 
 /*
  * Added on 2003/12 by Pierre-Alain Joye (pajoye@pearfr.org)
- * (c) 2003 Pierre-Alain Joye
  **/
 void gdImageAALine (gdImagePtr im, int x1, int y1, int x2, int y2, int col)
 {
@@ -2344,7 +2342,6 @@ void gdImageCopyResampled (gdImagePtr dst, gdImagePtr src, int dstX, int dstY, i
 /*
  * Rotate function Added on 2003/12 
  * by Pierre-Alain Joye (pajoye@pearfr.org)
- * (c) 2003 Pierre-Alain Joye
  **/
 /* Begin rotate function */
 #ifdef ROTATE_PI
@@ -3313,7 +3310,6 @@ gdAlphaOverlayColor( int src, int dst, int max )
 
 /* Filters function added on 2003/12 
  * by Pierre-Alain Joye (pajoye@pearfr.org)
- * (c) 2003 Pierre-Alain Joye
  **/
 /* Begin filters function */
 #ifndef HAVE_GET_TRUE_COLOR
