@@ -45,11 +45,11 @@ static int pgsql_stmt_dtor(pdo_stmt_t *stmt TSRMLS_DC)
 	if (S->cursor_name) {
 		pdo_pgsql_db_handle *H = S->H;
 		char *q = NULL;
+		PGresult *res;
+
 		spprintf(&q, 0, "CLOSE %s", S->cursor_name);
-		PGresult *res = PQexec(H->server, q);
+		res = PQexec(H->server, q);
 		efree(q);
-		if (res) PQclear(res);
-		res = PQexec(H->server, "COMMIT");
 		if (res) PQclear(res);
 		efree(S->cursor_name);
 		S->cursor_name = NULL;
