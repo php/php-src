@@ -103,6 +103,7 @@ PEAR_FILES = \
 	PEAR/Autoloader.php \
 	PEAR/Common.php \
 	PEAR/Config.php \
+	PEAR/Dependency.php \
 	PEAR/Installer.php \
 	PEAR/Packager.php \
 	PEAR/Registry.php \
