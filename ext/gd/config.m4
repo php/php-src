@@ -12,6 +12,10 @@ AC_DEFUN(PHP_GD_JPEG,[
       test -f "$i/lib/libjpeg.s?" -o -f "$i/lib/libjpeg.a" && GD_JPEG_DIR=$i
     done
 
+    if test -z "$GD_JPEG_DIR"; then
+      AC_MSG_ERROR(libjpeg.(a|so) not found.)
+    fi
+
     PHP_CHECK_LIBRARY(jpeg,jpeg_read_header,
     [
       PHP_ADD_LIBRARY_WITH_PATH(jpeg, $GD_JPEG_DIR/lib, GD_SHARED_LIBADD)
@@ -34,6 +38,10 @@ AC_DEFUN(PHP_GD_PNG,[
     for i in /usr /usr/local $PHP_PNG_DIR; do
       test -f "$i/lib/libpng.s?" -o -f "$i/lib/libpng.a" && GD_PNG_DIR=$i
     done
+
+    if test -z "$GD_PNG_DIR"; then
+      AC_MSG_ERROR(libpng.(a|so) not found.)
+    fi
 
     if test "$PHP_ZLIB_DIR" = "no"; then
       AC_MSG_ERROR(PNG support requires ZLIB. Use --with-zlib-dir=<DIR>)
@@ -59,9 +67,14 @@ AC_DEFUN(PHP_GD_XPM,[
   [  --with-xpm-dir=DIR        GD: Set the path to libXpm install prefix.])
 
   if test "$PHP_XPM_DIR" != "no"; then
+
     for i in /usr /usr/local /usr/X11R6 $PHP_XPM_DIR; do
       test -f "$i/lib/libXpm.s?" -o -f "$i/lib/libXpm.a" && GD_XPM_DIR=$i
     done
+
+    if test -z "$GD_XPM_DIR"; then
+      AC_MSG_ERROR(libXpm.(a|so) not found.)
+    fi
 
     PHP_CHECK_LIBRARY(Xpm,XpmFreeXpmImage, 
     [
@@ -139,24 +152,25 @@ AC_DEFUN(PHP_GD_T1LIB,[
   [  --with-t1lib[=DIR]        GD: Include T1lib support.])
 
   if test "$PHP_T1LIB" != "no"; then
+
     for i in /usr /usr/local $PHP_T1LIB; do
-      test -f "$i/include/t1lib.h" && T1_DIR=$i
+      test -f "$i/include/t1lib.h" && GD_T1_DIR=$i
     done
 
-    if test -n "$T1_DIR"; then
-      PHP_CHECK_LIBRARY(t1, T1_LoadFont, 
-      [
-        AC_DEFINE(HAVE_LIBT1,1,[ ])
-        PHP_ADD_INCLUDE("$T1_DIR/include")
-        PHP_ADD_LIBRARY_WITH_PATH(t1, "$T1_DIR/lib", GD_SHARED_LIBADD)
-      ],[
-        AC_MSG_ERROR(Problem with libt1.(a|so). Please check config.log for more information.) 
-      ],[
-        -L$T1_DIR/lib
-      ])
-    else
+    if test -z "$GD_T1_DIR"; then
       AC_MSG_ERROR(Your t1lib distribution is not installed correctly. Please reinstall it.) 
     fi
+
+    PHP_CHECK_LIBRARY(t1, T1_LoadFont, 
+    [
+      AC_DEFINE(HAVE_LIBT1,1,[ ])
+      PHP_ADD_INCLUDE("$GD_T1_DIR/include")
+      PHP_ADD_LIBRARY_WITH_PATH(t1, "$GD_T1_DIR/lib", GD_SHARED_LIBADD)
+    ],[
+      AC_MSG_ERROR(Problem with libt1.(a|so). Please check config.log for more information.) 
+    ],[
+      -L$GD_T1_DIR/lib
+    ])
   fi
 ])
 
@@ -224,7 +238,7 @@ dnl A whole whack of possible places where these might be
         test -f $PHP_GD/$i/libgd.s? -o -f $PHP_GD/$i/libgd.a && GD_LIB=$PHP_GD/$i
       done
 
-      if test -n "$GD_INCLUDE" && test -n "$GD_LIB" ; then
+      if test -n "$GD_INCLUDE" -a -n "$GD_LIB" ; then
         PHP_ADD_LIBRARY_WITH_PATH(gd, $GD_LIB, GD_SHARED_LIBADD)
         AC_DEFINE(HAVE_LIBGD,1,[ ])
         PHP_GD_CHECK_VERSION
