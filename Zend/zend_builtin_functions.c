@@ -556,7 +556,7 @@ static void is_a_impl(INTERNAL_FUNCTION_PARAMETERS, zend_bool only_subclass)
 	else
 		ce = Z_OBJCE_PP(obj);
 	for (; ce != NULL; ce = ce->parent) {
-		if (!strncmp(ce->name, lcname, MIN(ce->name_length, (uint)Z_STRLEN_PP(class_name)))) {
+		if ((ce->name_length == Z_STRLEN_PP(class_name)) && !memcmp(ce->name, lcname, ce->name_length)) {
 			efree(lcname);
 			RETURN_TRUE;
 		}
