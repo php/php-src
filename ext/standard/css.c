@@ -34,6 +34,9 @@ PHPAPI void php_info_print_css(void)
 	PUTS("a:link {color: #000099; text-decoration: none;}\n");
 	PUTS("a:hover {text-decoration: underline;}\n");
 	PUTS("table {border-collapse: collapse;}\n");
+	PUTS(".center {text-align: center;}\n");
+	PUTS(".center table { margin-left: auto; margin-right: auto; text-align: left;}\n");
+	PUTS(".center th { text-align: center; !important }\n");
 	PUTS("td, th { border: 1px solid #000000; font-size: 75%; vertical-align: baseline;}\n");
 	PUTS("h1 {font-size: 150%;}\n");
 	PUTS("h2 {font-size: 125%;}\n");
