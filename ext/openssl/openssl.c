@@ -1799,66 +1799,22 @@ PHP_FUNCTION(openssl_pkey_free)
 /* {{{ proto int openssl_pkey_get_private(string key [, string passphrase])
    Get private key */
 PHP_FUNCTION(openssl_pkey_get_private)
-=======
-/* {{{ proto resource openssl_x509_read(mixed cert)
-   Read X.509 certificate */
-PHP_FUNCTION(openssl_x509_read)
 {
 	zval *cert;
-	X509 *x509;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &cert) == FAILURE)
-		return;
-
-	return_value->type = IS_RESOURCE;
-	x509 = php_openssl_x509_from_zval(&cert, 1, &Z_LVAL_P(return_value) TSRMLS_CC);
-
-	if (x509 == NULL) {
-		zend_error(E_WARNING, "%s() supplied parameter cannot be coerced into an X509 certificate!", get_active_function_name(TSRMLS_C));
-		RETURN_FALSE;
-	}
-}
-/* }}} */
-
-/* {{{ proto void openssl_free_x509(resource x509)
-   Free X.509 certificate */
-PHP_FUNCTION(openssl_x509_free)
-{
-	zval *x509;
-	X509 *cert;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &x509) == FAILURE)
-		return;
-
-	ZEND_FETCH_RESOURCE(cert, X509 *, &x509, -1, "OpenSSL X.509", le_x509);
-	zend_list_delete(Z_LVAL_P(x509));
-}
-/* }}} */
-
-/* {{{ setup_verify
- * calist is an array containing file and directory names.  create a
- * certificate store and add those certs to it for use in verification.
-*/
-static X509_STORE * setup_verify(zval * calist TSRMLS_DC)
-{
-{
 	EVP_PKEY *pkey;
-	zval * key;
 	char * passphrase = "";
-	int passphrase_len;
+	long passphrase_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|s", &key, &passphrase, &passphrase_len) == FAILURE)
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|s", &cert, &passphrase, &passphrase_len) == FAILURE)
 		return;
 
 	Z_TYPE_P(return_value) = IS_RESOURCE;
-	pkey = php_openssl_evp_from_zval(&key, 0, passphrase, 1, &Z_LVAL_P(return_value) TSRMLS_CC);
+	pkey = php_openssl_evp_from_zval(&cert, 0, NULL, 1, &Z_LVAL_P(return_value) TSRMLS_CC);
 
 	if (pkey == NULL) {
-		zend_error(E_WARNING, "%s(): unable to coerce arg to a private key", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
 /* }}} */
 
