@@ -2,14 +2,14 @@
 Translit UTF-8 quotes
 --SKIPIF--
 <?php
-include('skipif.inc');
+/* include('skipif.inc'); */
 ( ICONV_IMPL != "libiconv" ) and die("skip ICONV_IMPL != \"libiconv\""); 
 ?>
 --INI--
 error_reporting=2047
 --FILE--
 <?php // vim600: syn=php
-include('test.inc');
+/* include('test.inc'); */
 //error_reporting(E_ALL);
 $utf = implode('', file('ext/iconv/tests/Quotes.UTF-8'));
 

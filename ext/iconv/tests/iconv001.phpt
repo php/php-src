@@ -1,12 +1,12 @@
 --TEST--
 iconv test
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php /* include('skipif.inc'); */ ?>
 --INI--
 error_reporting=2039
 --FILE--
 <?php
-include('test.inc');
+/* include('test.inc'); */
 echo "iconv extension is available\n";
 $test = "זרו";
 var_dump("ISO-8859-1: $test");

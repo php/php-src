@@ -4,18 +4,22 @@ htmlentities() test 7 (mbstring / ISO-8859-1)
 output_handler=
 --SKIPIF--
 <?php
+/*
 if (!extension_loaded("mbstring") && ini_get("enable_dl")) {
 	$dlext = (substr(PHP_OS, 0, 3) == "WIN" ? ".dll" : ".so");
 	@dl("mbstring$dlext");
 }
+*/
 extension_loaded("mbstring") or die("skip mbstring not available\n");
 ?>
 --FILE--
 <?php
+/*
 	if (!extension_loaded("mbstring") && ini_get("enable_dl")) {
 		$dlext = (substr(PHP_OS, 0, 3) == "WIN" ? ".dll" : ".so");
 		@dl("mbstring$dlext");
 	}
+*/
 	mb_internal_encoding('ISO-8859-1');
 	print mb_internal_encoding()."\n";
 	var_dump(htmlentities("\xe4\xf6\xfc", ENT_QUOTES, ''));
