@@ -40,7 +40,6 @@ extern zend_module_entry ibase_module_entry;
 #endif
 #endif
 
-
 PHP_MINIT_FUNCTION(ibase);
 PHP_RINIT_FUNCTION(ibase);
 PHP_MSHUTDOWN_FUNCTION(ibase);

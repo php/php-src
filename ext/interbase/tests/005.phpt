@@ -108,8 +108,8 @@ three transaction on default link
     
 	$tr_1 = ibase_trans();  /* this default transaction also */
 	$tr_2 = ibase_trans(IBASE_READ);
-	$tr_3 = ibase_trans(IBASE_READ+IBASE_COMMITTED+ IBASE_REC_VERSION+ IBASE_WAIT );    
-	$tr_4 = ibase_trans(IBASE_READ+IBASE_COMMITTED+ IBASE_REC_NO_VERSION + IBASE_NOWAIT);	
+	$tr_3 = ibase_trans(IBASE_READ+IBASE_COMMITTED+IBASE_REC_VERSION+IBASE_WAIT);    
+	$tr_4 = ibase_trans(IBASE_READ+IBASE_COMMITTED+IBASE_REC_NO_VERSION+IBASE_NOWAIT);	
     
 	$res = ibase_query("select * from test5");
     
@@ -141,7 +141,7 @@ three transaction on default link
     ibase_commit($tr_1);
 
 	$tr_1 = ibase_trans();
-  ibase_query($tr_1, "insert into test5 (i) values (5)");
+  	 ibase_query($tr_1, "insert into test5 (i) values (5)");
 	
 	/* tr_2 is IBASE_READ + IBASE_CONCURRENCY + IBASE_WAIT */
 	$res = ibase_query($tr_2, "select * from test5");
