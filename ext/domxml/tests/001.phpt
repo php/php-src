@@ -106,7 +106,7 @@ Node Content:
 
 Node Name: #comment
 Node Type: 8
-Num Children: 1
+Num Children: 0
 Node Content:  lsfj  
 
 Node Name: chapter
@@ -126,7 +126,7 @@ Node Content: Title
 
 Node Name: #text
 Node Type: 3
-Num Children: 1
+Num Children: 0
 Node Content: 
 
 
@@ -136,14 +136,14 @@ Num Children: 7
 
 Node Name: #text
 Node Type: 3
-Num Children: 1
+Num Children: 0
 Node Content: 
 
 
 --------- last
 Node Name: #text
 Node Type: 3
-Num Children: 1
+Num Children: 0
 Node Content: 
 
 
@@ -160,7 +160,7 @@ Node Content: Title
 
 Node Name: #text
 Node Type: 3
-Num Children: 1
+Num Children: 0
 Node Content: 
 
 
@@ -170,7 +170,7 @@ Num Children: 7
 
 Node Name: #text
 Node Type: 3
-Num Children: 1
+Num Children: 0
 Node Content: 
 
 
@@ -193,7 +193,7 @@ Node Content: en
 --------- children of an attribute
 Node Name: #text
 Node Type: 3
-Num Children: 1
+Num Children: 0
 Node Content: en
 
 --------- Add child to root
@@ -249,7 +249,7 @@ Node Content: Title
 
 Node Name: #text
 Node Type: 3
-Num Children: 1
+Num Children: 0
 Node Content: 
 
 
@@ -259,7 +259,7 @@ Num Children: 7
 
 Node Name: #text
 Node Type: 3
-Num Children: 1
+Num Children: 0
 Node Content: 
 
 
