@@ -3061,7 +3061,7 @@ ZEND_METHOD(reflection_property, export)
 ZEND_METHOD(reflection_property, __construct)
 {
 	zval *propname, *classname;
-	char *name_str;
+	char *name_str, *class_name, *prop_name;
 	int name_len;
 	zval *object;
 	reflection_object *intern;
@@ -3126,8 +3126,9 @@ ZEND_METHOD(reflection_property, __construct)
 	ZVAL_STRINGL(classname, ce->name, ce->name_length, 1);
 	zend_hash_update(Z_OBJPROP_P(object), "class", sizeof("class"), (void **) &classname, sizeof(zval *), NULL);
 	
+	zend_unmangle_property_name(property_info->name, &class_name, &prop_name);
 	MAKE_STD_ZVAL(propname);
-	ZVAL_STRING(propname, property_info->name, 1);
+	ZVAL_STRING(propname, prop_name, 1);
 	zend_hash_update(Z_OBJPROP_P(object), "name", sizeof("name"), (void **) &propname, sizeof(zval *), NULL);
 
 	reference = (property_reference*) emalloc(sizeof(property_reference));
