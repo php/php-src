@@ -34,7 +34,7 @@ define('_PEAR_COMMON_PACKAGE_NAME_PREG', '[A-Za-z][a-zA-Z0-9_]+');
 define('PEAR_COMMON_PACKAGE_NAME_PREG', '/^' . _PEAR_COMMON_PACKAGE_NAME_PREG . '$/');
 
 // this should allow: 1, 1.0, 1.0RC1, 1.0dev, 1.0dev123234234234, 1.0a1, 1.0b1, 1.0pl1
-define('_PEAR_COMMON_PACKAGE_VERSION_PREG', '\d+(?:\.\d+)*(?:[a-z]+\d*)?');
+define('_PEAR_COMMON_PACKAGE_VERSION_PREG', '\d+(?:\.\d+)*(?:[a-zA-Z]+\d*)?');
 define('PEAR_COMMON_PACKAGE_VERSION_PREG', '/^' . _PEAR_COMMON_PACKAGE_VERSION_PREG . '$/i');
 
 // XXX far from perfect :-)
@@ -69,7 +69,7 @@ $GLOBALS['_PEAR_Common_dependency_types'] = array('pkg','ext','php','prog','ldli
  * Valid dependency relations
  * @var array
  */
-$GLOBALS['_PEAR_Common_dependency_relations'] = array('has','eq','lt','le','gt','ge','not');
+$GLOBALS['_PEAR_Common_dependency_relations'] = array('has','eq','lt','le','gt','ge','not', 'ne');
 
 /**
  * Valid file roles
@@ -98,7 +98,9 @@ $GLOBALS['_PEAR_Common_script_phases'] = array('pre-install', 'post-install', 'p
 // }}}
 
 /**
- * Class providing common functionality for PEAR adminsitration classes.
+ * Class providing common functionality for PEAR administration classes.
+ * @deprecated This class will disappear, and its components will be spread
+ *             into smaller classes, like the AT&T breakup
  */
 class PEAR_Common extends PEAR
 {
@@ -142,12 +144,6 @@ class PEAR_Common extends PEAR
      * @access private
      */
     var $_validPackageFile;
-    /**
-     * Temporary variable used in sorting packages by dependency in {@link sortPkgDeps()}
-     * @var array
-     * @access private
-     */
-    var $_packageSortTree;
 
     // }}}
 
@@ -1133,17 +1129,30 @@ class PEAR_Common extends PEAR
                 if (!empty($d['optional'])) {
                     if (!in_array($d['optional'], array('yes', 'no'))) {
                         $errors[] = "dependency $i: invalid relation optional attribute '$d[optional]', should be one of: yes no";
+                    } else {
+                        if (($d['rel'] == 'not' || $d['rel'] == 'ne') && $d['optional'] == 'yes') {
+                            $errors[] = "dependency $i: 'not' and 'ne' dependencies cannot be " .
+                                "optional";
+                        }
                     }
                 }
-                if ($d['rel'] != 'has' && empty($d['version'])) {
+                if ($d['rel'] != 'not' && $d['rel'] != 'has' && empty($d['version'])) {
                     $warnings[] = "dependency $i: missing version";
-                } elseif ($d['rel'] == 'has' && !empty($d['version'])) {
-                    $warnings[] = "dependency $i: version ignored for `has' dependencies";
+                } elseif (($d['rel'] == 'not' || $d['rel'] == 'has') && !empty($d['version'])) {
+                    $warnings[] = "dependency $i: version ignored for `$d[rel]' dependencies";
+                }
+                if ($d['rel'] == 'not' && !empty($d['version'])) {
+                    $warnings[] = "dependency $i: 'not' defines a total conflict, to exclude " .
+                        "specific versions, use 'ne'";
                 }
                 if ($d['type'] == 'php' && !empty($d['name'])) {
                     $warnings[] = "dependency $i: name ignored for php type dependencies";
                 } elseif ($d['type'] != 'php' && empty($d['name'])) {
                     $errors[] = "dependency $i: missing name";
+                }
+                if ($d['type'] == 'php' && $d['rel'] == 'not') {
+                    $errors[] = "dependency $i: PHP dependencies cannot use 'not' " .
+                        "rel, use 'ne' to exclude versions";
                 }
                 $i++;
             }
@@ -1293,6 +1302,15 @@ class PEAR_Common extends PEAR
         if (!function_exists("token_get_all")) {
             return false;
         }
+        if (!defined('T_DOC_COMMENT')) {
+            define('T_DOC_COMMENT', T_COMMENT);
+        }
+        if (!defined('T_INTERFACE')) {
+            define('T_INTERFACE', -1);
+        }
+        if (!defined('T_IMPLEMENTS')) {
+            define('T_IMPLEMENTS', -1);
+        }
         if (!$fp = @fopen($file, "r")) {
             return false;
         }
@@ -1315,17 +1333,21 @@ class PEAR_Common extends PEAR
         $brace_level = 0;
         $lastphpdoc = '';
         $current_class = '';
+        $current_interface = '';
         $current_class_level = -1;
         $current_function = '';
         $current_function_level = -1;
         $declared_classes = array();
+        $declared_interfaces = array();
         $declared_functions = array();
         $declared_methods = array();
         $used_classes = array();
         $used_functions = array();
         $extends = array();
+        $implements = array();
         $nodeps = array();
         $inquote = false;
+        $interface = false;
         for ($i = 0; $i < sizeof($tokens); $i++) {
             if (is_array($tokens[$i])) {
                 list($token, $data) = $tokens[$i];
@@ -1341,6 +1363,14 @@ class PEAR_Common extends PEAR
                 }
             }
             switch ($token) {
+                case T_WHITESPACE:
+                    continue;
+                case ';':
+                    if ($interface) {
+                        $current_function = '';
+                        $current_function_level = -1;
+                    }
+                    break;
                 case '"':
                     $inquote = true;
                     break;
@@ -1362,6 +1392,8 @@ class PEAR_Common extends PEAR
                 case ']': $bracket_level--; continue 2;
                 case '(': $paren_level++;   continue 2;
                 case ')': $paren_level--;   continue 2;
+                case T_INTERFACE:
+                    $interface = true;
                 case T_CLASS:
                     if (($current_class_level != -1) || ($current_function_level != -1)) {
                         PEAR::raiseError("Parser error: Invalid PHP file $file",
@@ -1371,19 +1403,38 @@ class PEAR_Common extends PEAR
                 case T_FUNCTION:
                 case T_NEW:
                 case T_EXTENDS:
+                case T_IMPLEMENTS:
                     $look_for = $token;
                     continue 2;
                 case T_STRING:
+                    if (version_compare(zend_version(), '2.0', '<')) {
+                        if (in_array(strtolower($data),
+                            array('public', 'private', 'protected', 'abstract',
+                                  'interface', 'implements', 'clone', 'throw') 
+                                 )) {
+                            PEAR::raiseError('Error: PHP5 packages must be packaged by php 5 PEAR');
+                            return false;
+                        }
+                    }
                     if ($look_for == T_CLASS) {
                         $current_class = $data;
                         $current_class_level = $brace_level;
                         $declared_classes[] = $current_class;
+                    } elseif ($look_for == T_INTERFACE) {
+                        $current_interface = $data;
+                        $current_class_level = $brace_level;
+                        $declared_interfaces[] = $current_interface;
+                    } elseif ($look_for == T_IMPLEMENTS) {
+                        $implements[$current_class] = $data;
                     } elseif ($look_for == T_EXTENDS) {
                         $extends[$current_class] = $data;
                     } elseif ($look_for == T_FUNCTION) {
                         if ($current_class) {
                             $current_function = "$current_class::$data";
                             $declared_methods[$current_class][] = $data;
+                        } elseif ($current_interface) {
+                            $current_function = "$current_interface::$data";
+                            $declared_methods[$current_interface][] = $data;
                         } else {
                             $current_function = $data;
                             $declared_functions[] = $current_function;
@@ -1398,6 +1449,7 @@ class PEAR_Common extends PEAR
                 case T_VARIABLE:
                     $look_for = 0;
                     continue 2;
+                case T_DOC_COMMENT:
                 case T_COMMENT:
                     if (preg_match('!^/\*\*\s!', $data)) {
                         $lastphpdoc = $data;
@@ -1422,10 +1474,12 @@ class PEAR_Common extends PEAR
         return array(
             "source_file" => $file,
             "declared_classes" => $declared_classes,
+            "declared_interfaces" => $declared_interfaces,
             "declared_methods" => $declared_methods,
             "declared_functions" => $declared_functions,
             "used_classes" => array_diff(array_keys($used_classes), $nodeps),
             "inheritance" => $extends,
+            "implements" => $implements,
             );
     }
 

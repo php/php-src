@@ -68,6 +68,11 @@
 // SparcStation 20 Solaris 8:
 // SunOS host.example.com 5.8 Generic_108528-12 sun4m sparc SUNW,SPARCstation-20
 //
+// Mac OS X (Darwin)
+// Darwin home-eden.local 7.5.0 Darwin Kernel Version 7.5.0: Thu Aug  5 19:26:16 PDT 2004; root:xnu/xnu-517.7.21.obj~3/RELEASE_PPC  Power Macintosh
+//
+// Mac OS X early versions
+// 
 
 // }}}
 
@@ -97,11 +102,11 @@ class OS_Guess
         static $sysmap = array(
             'HP-UX' => 'hpux',
             'IRIX64' => 'irix',
-            // Darwin?
         );
         static $cpumap = array(
             'i586' => 'i386',
             'i686' => 'i386',
+            'ppc' => 'powerpc',
         );
         if ($uname === null) {
             $uname = php_uname();
@@ -136,6 +141,24 @@ class OS_Guess
             case 'Linux':
                 $extra = $this->_detectGlibcVersion();
                 // use only the first two digits from the kernel version
+                $release = ereg_replace('^([[:digit:]]+\.[[:digit:]]+).*', '\1', $parts[2]);
+                break;
+            case 'Mac' :
+                $sysname = 'darwin';
+                $nodename = $parts[2];
+                $release = $parts[3];
+                if ($cpu == 'Macintosh') {
+                    if ($parts[$n - 2] == 'Power') {
+                        $cpu = 'powerpc';
+                    }
+                }
+                break;
+            case 'Darwin' :
+                if ($cpu == 'Macintosh') {
+                    if ($parts[$n - 2] == 'Power') {
+                        $cpu = 'powerpc';
+                    }
+                }
                 $release = ereg_replace('^([[:digit:]]+\.[[:digit:]]+).*', '\1', $parts[2]);
                 break;
             default:

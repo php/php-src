@@ -1,5 +1,5 @@
 <!--
-     $Id: package.dtd,v 1.35 2004-01-25 23:36:28 pajoye Exp $
+     $Id: package.dtd,v 1.36 2005-03-28 16:38:58 cellog Exp $
 
      This is the PEAR package description, version 1.0.
      It should be used with the informal public identifier:
@@ -20,7 +20,7 @@
          Stig S. Bakken <ssb@php.net>
 
   -->
-
+<!ENTITY % NUMBER "CDATA">
 <!ELEMENT package (name|summary|description|license|maintainers|release|changelog)+>
 <!ATTLIST package type    (source|binary|empty) "empty"
                   version CDATA                 #REQUIRED>
@@ -65,8 +65,8 @@
 <!ATTLIST file role           (php|ext|src|test|doc|data|script) 'php'
                debug          (na|on|off)        'na'
                zts            (na|on|off)        'na'
-               phpapi         NUMBER             #IMPLIED
-               zendapi        NUMBER             #IMPLIED
+               phpapi         %NUMBER;           #IMPLIED
+               zendapi        %NUMBER;           #IMPLIED
                format         CDATA              #IMPLIED
                baseinstalldir CDATA              #IMPLIED
                platform       CDATA              #IMPLIED
