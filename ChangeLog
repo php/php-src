@@ -1,3 +1,78 @@
+2003-03-29  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/standard/var.c:
+      Improved var_dump() and debug_zval_dump() so they also show the
+      namespace of the given object.
+
+2003-03-29  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * main/php_ini.c:
+      fix phpinfo() & php -i
+
+    * sapi/cli/php_cli.c:
+      use sizeof() as suggested by Andrei
+
+2003-03-29  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * sapi/cli/php_cli.c:
+      - html errors should default to off (0) in CLI
+
+2003-03-29  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * sapi/cgi/cgi_main.c:
+      Fixed too optimized part
+
+    * sapi/cgi/cgi_main.c:
+      CS & WS fixes
+
+    * (PHP_4_3)
+      configure.in:
+      MFH(r-1.436): improved bison check; now configure accepts 1.28, 1.35 and
+      1.75
+      only.
+
+    * configure.in:
+      Improved bison check; now configure accepts 1.28, 1.35, and 1.75 only.
+
+    * (PHP_4_3)
+      ext/mbstring/tests/mb_parse_str.phpt
+      ext/mbstring/tests/mb_parse_str02.phpt:
+      MFH: fixed test cases so it wouldn't be failed in case register_globals=on
+
+    * ext/mbstring/tests/mb_parse_str.phpt
+      ext/mbstring/tests/mb_parse_str02.phpt:
+      Fixed test cases so they wouldn't be failed in case register_globals=on
+
+2003-03-29  Sterling Hughes  <sterling@bumblebury.com>
+
+    * Makefile.global
+      acinclude.m4
+      configure.in
+      sapi/apache/apMakefile.tmpl
+      sapi/apache/config.m4
+      sapi/apache/libphp4.module.in
+      sapi/apache/libphp5.module.in
+      sapi/apache/mod_php4.c
+      sapi/apache/mod_php4.exp
+      sapi/apache/mod_php4.h
+      sapi/apache/mod_php5.c
+      sapi/apache/mod_php5.exp
+      sapi/apache/mod_php5.h
+      sapi/apache/php.sym
+      sapi/apache/php_apache_http.h
+      sapi/apache2filter/config.m4
+      sapi/apache2filter/php.sym
+      sapi/apache2filter/php_apache.h
+      sapi/apache2filter/sapi_apache2.c
+      sapi/apache2handler/config.m4
+      sapi/apache2handler/php.sym
+      sapi/apache2handler/php_apache.h
+      sapi/apache2handler/sapi_apache2.c:
+      update php module name to php5, not php4.
+      apache, apache2* and cli/cgi work.
+      sapi module maintainers should fix up their sapis, as I don't run
+      any servers with php outside of apache.
+
 2003-03-28  Derick Rethans  <d.rethans@jdimedia.nl>
 
     * run-tests.php:
