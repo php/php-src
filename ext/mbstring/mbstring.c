@@ -227,6 +227,14 @@ zend_module_entry mbstring_module_entry = {
 };
 /* }}} */
 
+/* {{{ static sapi_post_entry php_post_entries[] */
+static sapi_post_entry php_post_entries[] = {
+	{ DEFAULT_POST_CONTENT_TYPE, sizeof(DEFAULT_POST_CONTENT_TYPE)-1, sapi_read_standard_form_data,	php_std_post_handler },
+	{ MULTIPART_CONTENT_TYPE,    sizeof(MULTIPART_CONTENT_TYPE)-1,    NULL,                         rfc1867_post_handler },
+	{ NULL, 0, NULL, NULL }
+};
+/* }}} */
+
 ZEND_DECLARE_MODULE_GLOBALS(mbstring)
 
 #ifdef COMPILE_DL_MBSTRING
@@ -280,6 +288,14 @@ static mbfl_allocators _php_mb_allocators = {
 	_php_mb_allocators_pmalloc,
 	_php_mb_allocators_prealloc,
 	_php_mb_allocators_pfree
+};
+/* }}} */
+
+/* {{{ static sapi_post_entry mbstr_post_entries[] */
+static sapi_post_entry mbstr_post_entries[] = {
+	{ DEFAULT_POST_CONTENT_TYPE, sizeof(DEFAULT_POST_CONTENT_TYPE)-1, sapi_read_standard_form_data, php_mb_post_handler },
+	{ MULTIPART_CONTENT_TYPE,    sizeof(MULTIPART_CONTENT_TYPE)-1,    NULL,                         rfc1867_post_handler },
+	{ NULL, 0, NULL, NULL }
 };
 /* }}} */
 
@@ -680,10 +696,13 @@ static PHP_INI_MH(OnUpdate_mbstring_encoding_translation)
 
 	OnUpdateBool(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
 
-	if (MBSTRG(encoding_translation)){
-		_php_mb_enable_encoding_translation(1);
+	if (MBSTRG(encoding_translation)) {
+		sapi_unregister_post_entry(php_post_entries TSRMLS_CC);
+		sapi_register_post_entries(mbstr_post_entries TSRMLS_CC);
+		sapi_register_treat_data(mbstr_treat_data);
 	} else {
-		_php_mb_enable_encoding_translation(0);
+		sapi_unregister_post_entry(mbstr_post_entries TSRMLS_CC);
+		sapi_register_post_entries(php_post_entries TSRMLS_CC);
 	}
 
 	return SUCCESS;
@@ -774,7 +793,8 @@ PHP_MINIT_FUNCTION(mbstring)
 	REGISTER_INI_ENTRIES();
 
 	if (MBSTRG(encoding_translation)) {
-		_php_mb_enable_encoding_translation(1);
+		sapi_register_post_entries(mbstr_post_entries TSRMLS_CC);
+		sapi_register_treat_data(mbstr_treat_data);
 	}
 
 	REGISTER_LONG_CONSTANT("MB_OVERLOAD_MAIL", MB_OVERLOAD_MAIL, CONST_CS | CONST_PERSISTENT);
@@ -807,10 +827,6 @@ PHP_MSHUTDOWN_FUNCTION(mbstring)
 #endif /* ZEND_MULTIBYTE */
 	if (MBSTRG(detect_order_list)) {
 		free(MBSTRG(detect_order_list));
-	}
-
-	if (MBSTRG(encoding_translation)) {
-		_php_mb_enable_encoding_translation(0);
 	}
 
 #if HAVE_MBREGEX

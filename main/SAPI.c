@@ -51,8 +51,6 @@
 
 #include "php_content_types.h"
 
-static HashTable known_post_content_types;
-
 #ifdef ZTS
 SAPI_API int sapi_globals_id;
 #else
@@ -62,6 +60,13 @@ sapi_globals_struct sapi_globals;
 static void sapi_globals_ctor(sapi_globals_struct *sapi_globals TSRMLS_DC)
 {
 	memset(sapi_globals, 0, sizeof(*sapi_globals));
+	zend_hash_init_ex(&sapi_globals->known_post_content_types, 5,
+			NULL, NULL, 1, 0);
+}
+
+static void sapi_globals_dtor(sapi_globals_struct *sapi_globals TSRMLS_DC)
+{
+	zend_hash_destroy(&sapi_globals->known_post_content_types);
 }
 
 /* True globals (no need for thread safety) */
@@ -71,11 +76,11 @@ SAPI_API sapi_module_struct sapi_module;
 SAPI_API void sapi_startup(sapi_module_struct *sf)
 {
 	sapi_module = *sf;
-	zend_hash_init_ex(&known_post_content_types, 5, NULL, NULL, 1, 0);
 
 #ifdef ZTS
-	ts_allocate_id(&sapi_globals_id, sizeof(sapi_globals_struct), (ts_allocate_ctor) sapi_globals_ctor, NULL);
+	ts_allocate_id(&sapi_globals_id, sizeof(sapi_globals_struct), (ts_allocate_ctor) sapi_globals_ctor, (ts_allocate_dtor) sapi_globals_dtor);
 #else
+	TSRMLS_FETCH();
 	sapi_globals_ctor(&sapi_globals TSRMLS_CC);
 #endif
 
@@ -90,6 +95,13 @@ SAPI_API void sapi_startup(sapi_module_struct *sf)
 
 SAPI_API void sapi_shutdown(void)
 {
+#ifdef ZTS
+	ts_free_id(&sapi_globals_id);
+#else
+	TSRMLS_FETCH();
+	sapi_globals_dtor(&sapi_globals TSRMLS_CC);
+#endif
+
 	reentrancy_shutdown();
 
 	virtual_cwd_shutdown();
@@ -97,8 +109,6 @@ SAPI_API void sapi_shutdown(void)
 #ifdef PHP_WIN32
 	tsrm_win32_shutdown();
 #endif
-
-	zend_hash_destroy(&known_post_content_types);
 }
 
 
@@ -151,7 +161,8 @@ static void sapi_read_post_data(TSRMLS_D)
 	}
 
 	/* now try to find an appropriate POST content handler */
-	if (zend_hash_find(&known_post_content_types, content_type, content_type_length+1, (void **) &post_entry) == SUCCESS) {
+	if (zend_hash_find(&SG(known_post_content_types), content_type,
+			content_type_length+1, (void **) &post_entry) == SUCCESS) {
 		/* found one, register it for use */
 		SG(request_info).post_entry = post_entry;
 		post_reader_func = post_entry->post_reader;
@@ -802,12 +813,12 @@ SAPI_API int sapi_send_headers(TSRMLS_D)
 }
 
 
-SAPI_API int sapi_register_post_entries(sapi_post_entry *post_entries)
+SAPI_API int sapi_register_post_entries(sapi_post_entry *post_entries TSRMLS_DC)
 {
 	sapi_post_entry *p=post_entries;
 
 	while (p->content_type) {
-		if (sapi_register_post_entry(p) == FAILURE) {
+		if (sapi_register_post_entry(p TSRMLS_CC) == FAILURE) {
 			return FAILURE;
 		}
 		p++;
@@ -816,14 +827,17 @@ SAPI_API int sapi_register_post_entries(sapi_post_entry *post_entries)
 }
 
 
-SAPI_API int sapi_register_post_entry(sapi_post_entry *post_entry)
+SAPI_API int sapi_register_post_entry(sapi_post_entry *post_entry TSRMLS_DC)
 {
-	return zend_hash_add(&known_post_content_types, post_entry->content_type, post_entry->content_type_len+1, (void *) post_entry, sizeof(sapi_post_entry), NULL);
+	return zend_hash_add(&SG(known_post_content_types),
+			post_entry->content_type, post_entry->content_type_len+1,
+			(void *) post_entry, sizeof(sapi_post_entry), NULL);
 }
 
-SAPI_API void sapi_unregister_post_entry(sapi_post_entry *post_entry)
+SAPI_API void sapi_unregister_post_entry(sapi_post_entry *post_entry TSRMLS_DC)
 {
-	zend_hash_del(&known_post_content_types, post_entry->content_type, post_entry->content_type_len+1);
+	zend_hash_del(&SG(known_post_content_types), post_entry->content_type,
+			post_entry->content_type_len+1);
 }
 
 
