@@ -7,9 +7,9 @@ Bug #22836 (returning references to NULL)
 function &f()
 {
 	$x = "foo";
-        var_dump($x);
-        print "'$x'\n";
-        return ($a);
+	var_dump($x);
+	print "'$x'\n";
+	return ($a);
 }
 for ($i = 0; $i < 8; $i++) {
 	$h =& f();
@@ -21,4 +21,54 @@ string(3) "foo"
 
 Notice: Undefined variable:  a in %s on line %d
 
-Fatal error: Only variables or references can be returned by reference in %s on line %d
+Strict Standards: Only variable references should be returned by reference in %s on line %d
+string(3) "foo"
+'foo'
+
+Notice: Undefined variable:  a in %s on line %d
+
+Strict Standards: Only variable references should be returned by reference in %s on line %d
+string(3) "foo"
+'foo'
+
+Notice: Undefined variable:  a in %s on line %d
+
+Strict Standards: Only variable references should be returned by reference in %s on line %d
+string(3) "foo"
+'foo'
+
+Notice: Undefined variable:  a in %s on line %d
+
+Strict Standards: Only variable references should be returned by reference in %s on line %d
+string(3) "foo"
+'foo'
+
+Notice: Undefined variable:  a in %s on line %d
+
+Strict Standards: Only variable references should be returned by reference in %s on line %d
+string(3) "foo"
+'foo'
+
+Notice: Undefined variable:  a in %s on line %d
+
+Strict Standards: Only variable references should be returned by reference in %s on line %d
+string(3) "foo"
+'foo'
+
+Notice: Undefined variable:  a in %s on line %d
+
+Strict Standards: Only variable references should be returned by reference in %s on line %d
+string(3) "foo"
+'foo'
+
+Notice: Undefined variable:  a in %s on line %d
+
+Strict Standards: Only variable references should be returned by reference in %s on line %d
+string(3) "foo"
+'foo'
+
+Notice: Undefined variable:  a in %s on line %d
+
+Strict Standards: Only variable references should be returned by reference in %s on line %d
+
+
