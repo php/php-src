@@ -1,3 +1,70 @@
+2005-02-10  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_5_0)
+      ext/standard/array.c:
+      MFH: fix segfault in array_walk when retval_ptr is empty
+       - such as when exception thrown
+
+    * ext/standard/array.c:
+      fix segfault when retval_ptr is empty - such as when exception thrown
+
+2005-02-10  Hartmut Holzgraefe  <hartmut@php-groupies.de>
+
+    * ext/xml/tests/bug30266.phpt:
+      test case for Bug #30266
+
+2005-02-10  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      TSRM/TSRM.c
+      TSRM/TSRM.h
+      TSRM/tsrm_config.nw.h
+      TSRM/tsrm_config_common.h
+      TSRM/tsrm_nw.c
+      TSRM/tsrm_nw.h
+      TSRM/tsrm_virtual_cwd.c
+      TSRM/tsrm_virtual_cwd.h
+      TSRM/tsrm_win32.c
+      TSRM/tsrm_win32.h:
+      MFH: - Multiple fixes for nasty leaks in ZTS mode
+
+    * configure.in
+      configure.in
+      configure.in
+      Zend/zend_strtod.c
+      ZendEngine2/zend_strtod.c
+      ZendEngine2/zend_strtod.c:
+      - Fixed bug #31920 (zend_strtod.c error: conflicting types for 'int8_t')
+
+2005-02-10  Antony Dovgal  <tony2001@phpclub.net>
+
+    * ext/session/session.c:
+      hm..
+      fix #28324 _properly_
+
+    * ext/session/session.c:
+      fix bug #28324 (HTTP_SESSION_VARS appear when register_long_arrays is Off)
+
+2005-02-10  Pierre-Alain Joye  <pierre@dotgeek.org>
+
+    * ext/standard/sunfuncs.c:
+      - fix #30745 and #31853 (php-bugs at demark dot org, pierre)
+
+2005-02-10  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/mbstring/mb_gpc.c
+      ext/mbstring/mbstring.c:
+      Removed unused vars.
+
+2005-02-10  Dmitry Stogov  <dmitry@zend.com>
+
+    * NEWS
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_opcodes.h
+      ZendEngine2/tests/bug30407.phpt:
+      Fixed bug #30407 (Strange behaviour of default arguments)
+
 2005-02-09  Frank M. Kromann  <frank@kromann.info>
 
     * (PHP_4_3)
