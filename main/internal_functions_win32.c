@@ -56,8 +56,12 @@
 #include "ext/pcre/php_pcre.h"
 #include "ext/odbc/php_odbc.h"
 #include "ext/session/php_session.h"
+#if HAVE_LIBEXPAT
 #include "ext/xml/php_xml.h"
+#endif
+#if HAVE_LIBEXPAT && HAVE_WDDX
 #include "ext/wddx/php_wddx.h"
+#endif
 #include "ext/mysql/php_mysql.h"
 #include "ext/mbstring/mbstring.h"
 #if HAVE_OVERLOAD
@@ -88,9 +92,13 @@ zend_module_entry *php_builtin_extensions[] = {
 #endif
 	phpext_tokenizer_ptr,
 	phpext_pcre_ptr,
-	phpext_session_ptr,
+#if HAVE_LIBEXPAT
 	phpext_xml_ptr,
-	phpext_wddx_ptr
+#endif
+#if HAVE_LIBEXPAT && HAVE_WDDX
+	phpext_wddx_ptr,
+#endif
+	phpext_session_ptr
 };
 /* }}} */
 
