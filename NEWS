@@ -2,6 +2,10 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.2
+- Improved array_multisort() to be able to specify sort type as well sort
+  order. Incidentally, it can be used to sort multi-dimensional arrays
+  as well. (Andrei)
+- Fixed a possible data corruption in case of a huge amount of aborted requests (Zeev)
 - Apache module would sometimes close a wrong file-descriptor. (Sascha)
 - Fixed use of alternative storage handlers in the session module. (Sascha)
 - Updated str_pad() to be able to pad on left/right/both sides. (Andrei)
