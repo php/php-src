@@ -703,7 +703,8 @@ PHPAPI size_t _php_stream_copy_to_stream(php_stream *src, php_stream *dest, size
 
 typedef struct {
 	FILE *file;
-	int is_pipe;	/* use pclose */
+	int is_process_pipe;	/* use pclose instead of fclose */
+	int is_pipe;			/* don't try and seek */
 #if HAVE_FLUSHIO
 	char last_op;
 #endif
@@ -751,10 +752,24 @@ PHPAPI php_stream *_php_stream_fopen_tmpfile(int dummy STREAMS_DC TSRMLS_DC)
 PHPAPI php_stream *_php_stream_fopen_from_file(FILE *file, const char *mode STREAMS_DC TSRMLS_DC)
 {
 	php_stdio_stream_data *self;
-
+#ifdef S_ISFIFO
+	int fd;
+#endif
+	
 	self = emalloc_rel_orig(sizeof(*self));
 	self->file = file;
 	self->is_pipe = 0;
+	self->is_process_pipe = 0;
+
+#ifdef S_ISFIFO
+	/* detect if this is a pipe */
+	fd = fileno(file);
+	if (fd >= 0) {
+		struct stat sb;
+		self->is_pipe = (fstat(fd, &sb) == 0 && S_ISFIFO(sb.st_mode)) ? 1 : 0;
+	}
+#endif
+	
 	return php_stream_alloc_rel(&php_stream_stdio_ops, self, 0, mode);
 }
 
@@ -765,8 +780,10 @@ PHPAPI php_stream *_php_stream_fopen_from_pipe(FILE *file, const char *mode STRE
 	self = emalloc_rel_orig(sizeof(*self));
 	self->file = file;
 	self->is_pipe = 1;
+	self->is_process_pipe = 1;
 	return php_stream_alloc_rel(&php_stream_stdio_ops, self, 0, mode);
 }
+
 static size_t php_stdiop_write(php_stream *stream, const char *buf, size_t count TSRMLS_DC)
 {
 	php_stdio_stream_data *data = (php_stdio_stream_data*)stream->abstract;
@@ -814,7 +831,7 @@ static int php_stdiop_close(php_stream *stream, int close_handle TSRMLS_DC)
 	assert(data != NULL);
 
 	if (close_handle) {
-		if (data->is_pipe) {
+		if (data->is_process_pipe) {
 			ret = pclose(data->file);
 		} else {
 			ret = fclose(data->file);
@@ -844,6 +861,11 @@ static int php_stdiop_seek(php_stream *stream, off_t offset, int whence TSRMLS_D
 
 	assert(data != NULL);
 
+	if (data->is_pipe) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "cannot seek on a pipe");
+		return -1;
+	}
+	
 	if (offset == 0 && whence == SEEK_CUR)
 		return ftell(data->file);
 
