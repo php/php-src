@@ -103,7 +103,7 @@ ZEND_API zend_alloc_globals alloc_globals;
 	unsigned int real_size;		\
 	unsigned int cache_index;
 
-#define REAL_SIZE(size) ((size+7) & 0xFFFFFFF8)
+#define REAL_SIZE(size) ((size+7) & ~0x7)
 
 #define CALCULATE_REAL_SIZE_AND_CACHE_INDEX(size)	\
 	real_size = REAL_SIZE(size);				\
