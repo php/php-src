@@ -943,6 +943,10 @@ SOURCE=..\ext\mbstring\php_mbregex.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\ext\mbstring\html_entities.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\ext\overload\overload.c
 # End Source File
 # Begin Source File
