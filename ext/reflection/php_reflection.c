@@ -3358,6 +3358,7 @@ ZEND_METHOD(reflection_property, getValue)
 	}
 
 	if ((ref->prop->flags & ZEND_ACC_STATIC)) {
+		zend_update_class_constants(intern->ce TSRMLS_CC);
 		if (zend_hash_quick_find(intern->ce->static_members, ref->prop->name, ref->prop->name_length + 1, ref->prop->h, (void **) &member) == FAILURE) {
 			zend_error(E_ERROR, "Internal error: Could not find the property %s", ref->prop->name);
 			/* Bails out */
