@@ -2251,7 +2251,7 @@ PHP_FUNCTION(array_unique)
 	Bucket *p;
 	int i;
 
-	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &array) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &array) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	target_hash = HASH_OF(*array);
