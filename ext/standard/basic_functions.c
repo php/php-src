@@ -420,10 +420,10 @@ function_entry basic_functions[] = {
 	PHP_FE(number_format,													NULL)
 	PHP_FE(fmod,															NULL)
 #ifdef HAVE_INET_NTOP
-	PHP_FE(inet_ntop,														NULL)
+	PHP_NAMED_FE(inet_ntop,		php_inet_ntop,											NULL)
 #endif
 #ifdef HAVE_INET_PTON
-	PHP_FE(inet_pton,														NULL)
+	PHP_NAMED_FE(inet_pton,		php_inet_pton,											NULL)
 #endif
 	PHP_FE(ip2long,															NULL)
 	PHP_FE(long2ip,															NULL)
@@ -1282,7 +1282,7 @@ PHP_FUNCTION(constant)
 #ifdef HAVE_INET_NTOP
 /* {{{ proto string inet_ntop(string in_addr)
    Converts a packed inet address to a human readable IP address string */
-PHP_FUNCTION(inet_ntop)
+PHP_NAMED_FUNCTION(php_inet_ntop)
 {
 	char *address;
 	int address_len, af = AF_INET;
@@ -1315,7 +1315,7 @@ PHP_FUNCTION(inet_ntop)
 #ifdef HAVE_INET_PTON
 /* {{{ proto string inet_pton(string ip_address)
    Converts a human readable IP address to a packed binary string */
-PHP_FUNCTION(inet_pton)
+PHP_NAMED_FUNCTION(php_inet_pton)
 {
 	int ret, af = AF_INET;
 	char *address;

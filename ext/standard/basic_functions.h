@@ -53,10 +53,10 @@ PHP_FUNCTION(time_nanosleep);
 #endif
 PHP_FUNCTION(flush);
 #ifdef HAVE_INET_NTOP
-PHP_FUNCTION(inet_ntop);
+PHP_NAMED_FUNCTION(php_inet_ntop);
 #endif
 #ifdef HAVE_INET_PTON
-PHP_FUNCTION(inet_pton);
+PHP_NAMED_FUNCTION(php_inet_pton);
 #endif
 PHP_FUNCTION(ip2long);
 PHP_FUNCTION(long2ip);
