@@ -692,8 +692,6 @@ void php_request_shutdown(void *dummy)
 	SLS_FETCH();
 	PLS_FETCH();
 
-	php_output_set_status(0);
-
 	zend_try {
 		php_end_ob_buffers((zend_bool)(SG(request_info).headers_only?0:1));
 	} zend_end_try();
@@ -1342,7 +1340,6 @@ PHPAPI int php_handle_auth_data(const char *auth SLS_DC)
 PHPAPI int php_lint_script(zend_file_handle *file CLS_DC ELS_DC PLS_DC)
 {
 	zend_op_array *op_array;
-	SLS_FETCH();
 
 	zend_try {
 		op_array = zend_compile_file(file, ZEND_INCLUDE CLS_CC);
