@@ -56,8 +56,6 @@ PHP 4                                                                      NEWS
 - Added ldap_start_tls() function. (Stig Venaas, patch by kuenne@rentec.com)
 - Have rand() and mt_rand() seed automatically if srand() or mt_srand() has
   not been called. (Sterling)
-- Fixed is_dir(), is_writeable(), is_readable(), is_executable(), is_link() and
-  is_file() functions to not throw a 'file does not exist' warning. (Sterling)
 - Added array_change_key_case() function that returns array with
   with all string keys lowercased or uppercased. (EdinK)
 - Added parameter to ircg_pconnect to suppress treating non-fatal errors
