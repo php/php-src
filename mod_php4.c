@@ -149,6 +149,8 @@ int sapi_apache_header_handler(sapi_header_struct *sapi_header, sapi_headers_str
 
 	if (!strcasecmp(header_name, "Content-Type")) {
 		r->content_type = pstrdup(r->pool, header_content);
+	} else if (!strcasecmp(header_name, "Set-Cookie")) {
+		table_add(r->headers_out, header_name, header_content);
 	} else {
 		table_set(r->headers_out, header_name, header_content);
 	}
