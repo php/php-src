@@ -1,3 +1,134 @@
+2003-10-25  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/sqlite/sqlite.c:
+      Allow static methods being called from sqlite sql. Notice by Stphane Mariel
+
+    * ext/simplexml/simplexml.c
+      ext/simplexml/tests/004.phpt:
+      Fix test 4 with the help of Rob
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h:
+      Add zend_make_callable() which allows to make zval's callable zval's.
+      At the moment this function only converts strings of the form
+      class::method
+      to an array(class,method).
+
+    * ext/simplexml/simplexml.c:
+      Show if Schemas are supported
+
+    * ext/simplexml/php_simplexml.h
+      ext/simplexml/simplexml.c:
+      Fix memleaks
+
+    * ext/simplexml/tests/001.phpt
+      ext/simplexml/tests/002.phpt
+      ext/simplexml/tests/003.phpt
+      ext/simplexml/tests/003.xml
+      ext/simplexml/tests/004.phpt
+      ext/simplexml/tests/004.xml
+      ext/simplexml/tests/sxe.xml:
+      More testing
+
+    * ext/simplexml/simplexml.c:
+      Fix warning
+
+    * ext/simplexml/tests/002.phpt:
+      Fix test
+
+    * ext/simplexml/tests/001.phpt
+      ext/simplexml/tests/002.phpt
+      ext/simplexml/tests/sxe.dtd
+      ext/simplexml/tests/sxe.ent
+      ext/simplexml/tests/sxe.xml:
+      Add some testing
+
+    * ZendEngine2/zend_default_classes.c
+      ZendEngine2/zend_reflection_api.c:
+      This forces a better error message for non working clone calls.
+
+    * ZendEngine2/zend_default_classes.c:
+      And use things to throw an exception here
+
+    * ZendEngine2/zend_default_classes.c:
+      You shall not clone Exception instances
+
+    * ZendEngine2/zend_reflection_api.c:
+      You shall not clone reflection_xx instances
+
+    * ZendEngine2/ZEND_CHANGES
+      ZendEngine2/ZEND_CHANGES:
+      Update
+
+    * NEWS
+      ext/standard/image.c:
+      - Fixed bug #25581 (getimagesize () return incorrect values on bitmap
+        (os2) files)
+
+2003-10-25  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * (PHP_4_3)
+      ext/mbstring/mbstring.dsp:
+      fixed windows build.
+
+    * (PHP_4_3)
+      ext/mbstring/README.libmbfl
+      ext/mbstring/config.m4
+      ext/mbstring/cp932_table.h
+      ext/mbstring/html_entities.c
+      ext/mbstring/mbfilter.c
+      ext/mbstring/mbfilter.h
+      ext/mbstring/mbfilter_cn.c
+      ext/mbstring/mbfilter_cn.h
+      ext/mbstring/mbfilter_ja.c
+      ext/mbstring/mbfilter_ja.h
+      ext/mbstring/mbfilter_kr.c
+      ext/mbstring/mbfilter_kr.h
+      ext/mbstring/mbfilter_ru.c
+      ext/mbstring/mbfilter_ru.h
+      ext/mbstring/mbfilter_tw.c
+      ext/mbstring/mbfilter_tw.h
+      ext/mbstring/mbregex.c
+      ext/mbstring/mbregex.h
+      ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.dsp
+      ext/mbstring/mbstring.h
+      ext/mbstring/unicode_table.h
+      ext/mbstring/unicode_table_cn.h
+      ext/mbstring/unicode_table_ja.h
+      ext/mbstring/unicode_table_kr.h
+      ext/mbstring/unicode_table_ru.h
+      ext/mbstring/unicode_table_tw.h:
+      mbfilter is replaced with libmbfl to maintain the licence compatibility.
+      mbregex.[ch] is moved to mbregex/ for the same reason.
+
+    * (PHP_4_3)
+      ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.h
+      main/rfc1867.c:
+      name/value in multipart/form-date will be converted into internal encoding
+      when mbstring.encoding_translation is On.
+
+    * ext/mbstring/mbstring.c:
+      encoding detection shouldn't be performed if mbstring.http_input is set to
+      auto or any valid encoding.
+
+2003-10-25  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ZendEngine2/ZEND_CHANGES:
+      Fugbix typo.
+
+    * ZendEngine2/ZEND_CHANGES:
+      s/Throwable/Printable: Exception has become an internal class since I
+      initially documented interfaces.
+
+2003-10-25  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * tests/lang/bug25831.phpt
+      tests/lang/bug25831.phpt:
+      
+      file bug25831.phpt was initially added on branch PHP_4_3.
+
 2003-10-24  Jani Taskinen  <jani.taskinen@kolumbus.fi>
 
     * (PHP_4_3)
