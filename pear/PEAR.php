@@ -491,63 +491,6 @@ class PEAR
     }
 
     // }}}
-
-    /**
-    * Converts a php version string to an array
-    * (supported formats are: X.X.X, X.X.X-dev, X.X.XplX)
-    *
-    * @param string $version A valid php version (ie. 4.0.7)
-    * @return array
-    * @see PEAR::phpVersionIs()
-    */
-    function _explodePHPVersion($version)
-    {
-        @list($version, ) = explode('-', $version);  // 4.0.7-dev
-        @list($version, ) = explode('RC', $version); // 4.0.7RC1
-        list($mayor, $minor, $sub) = explode('.', $version);
-        @list($sub, $patch) = explode('pl', $sub);   // 4.0.14pl1
-        if ($patch === null) {
-            $patch = 0;
-        }
-        return array($mayor, $minor, $sub, $patch);
-    }
-
-    /**
-    * Find if a version is minor or greater than a given PHP version
-    * (it should be red as "if my php version is minor|greater|between this one)
-    *
-    * Usage:
-    * PEAR::phpVersionIs('4.0.7')           => if the current version
-    *                                          is minor than version 4.0.7
-    * PEAR::phpVersionIs(null, '4.0.12pl3') => if current is greater that 4.0.12pl3
-    * PEAR::phpVersionIs('4.0.9', '4.0.4')  => if current is between 4.0.9 and 4.0.4
-    *
-    * @param string $minorthan   Version should be minor than this param
-    * @param string $greaterthan Version should be greater than this param
-    * @param string $version     Version to compare with (defaults to current)
-    *
-    * @return bool If the comparation was successful or not
-    */
-    function phpVersionIs($minorthan = null, $greaterthan = null, $version = PHP_VERSION)
-    {
-        $version = PEAR::_explodePHPVersion($version);
-        $ret = false;
-        if ($minorthan) {
-            $minor = PEAR::_explodePHPVersion($minorthan);
-            for ($i=0; $i < count($version)-1 && $minor[$i] == $version[$i]; $i++);
-            if ($version[$i] >= $minor[$i]) {
-                return false;
-            }
-            $ret = true;
-        }
-        if ($greaterthan) {
-            $greater = PEAR::_explodePHPVersion($greaterthan);
-            for ($i=0; $i < count($version)-1 && $greater[$i] == $version[$i]; $i++);
-            $ret = ($version[$i] > $greater[$i]) ? true : false;
-        }
-        return $ret;
-    }
-
 }
 
 // {{{ _PEAR_call_destructors()
