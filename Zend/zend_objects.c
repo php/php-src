@@ -3,7 +3,7 @@
 #include "zend_variables.h"
 #include "zend_API.h"
 
-#define ZEND_DEBUG_OBJECTS 1
+#define ZEND_DEBUG_OBJECTS 0
 
 void zend_objects_init(zend_objects *objects, zend_uint init_size)
 {
