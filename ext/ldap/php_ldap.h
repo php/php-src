@@ -81,6 +81,11 @@ PHP_FUNCTION(ldap_error);
 
 PHP_FUNCTION(ldap_compare);
 
+#if LDAP_API_VERSION > 2000
+PHP_FUNCTION(ldap_get_option);
+PHP_FUNCTION(ldap_set_option);
+#endif
+
 #ifdef STR_TRANSLATION
 PHP_FUNCTION(ldap_t61_to_8859);
 PHP_FUNCTION(ldap_8859_to_t61);
