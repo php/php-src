@@ -176,7 +176,7 @@ PHP_FUNCTION(ftp_connect)
 /* }}} */
 
 #ifdef HAVE_OPENSSL_EXT
-/* {{{ proto resource ftp_ssl_connect(string host [, int port [, int timeout)]])
+/* {{{ proto resource ftp_ssl_connect(string host [, int port [, int timeout]])
    Opens a FTP-SSL stream */
 PHP_FUNCTION(ftp_ssl_connect)
 {
