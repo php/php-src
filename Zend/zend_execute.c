@@ -1988,22 +1988,20 @@ send_by_ref:
 									if (!opened_path || zend_hash_add(&EG(included_files), opened_path, strlen(opened_path)+1, (void *)&dummy, sizeof(int), NULL)==SUCCESS) {
 										new_op_array = zend_compile_file(&file_handle CLS_CC);
 										zend_destroy_file_handle(&file_handle CLS_CC);
-										if (!new_op_array) {
-											fclose(file_handle.handle.fp);
-										}
+										opened_path = NULL; /* zend_destroy_file_handle() already frees it */
 									} else {
 										fclose(file_handle.handle.fp);
 									}
 								} else {
-									if (opline->opcode==ZEND_INCLUDE_ONCE) {
+									if (opline->op2.u.constant.value.lval==ZEND_INCLUDE_ONCE) {
 										zend_message_dispatcher(ZMSG_FAILED_INCLUDE_FOPEN, file_handle.filename);
 									} else {
 										zend_message_dispatcher(ZMSG_FAILED_REQUIRE_FOPEN, file_handle.filename);
 									}
 								}
-								/* if (opened_path) {
-									free (opened_path);
-									} */
+								if (opened_path) {
+									free(opened_path);
+								}
 								break;
 							}
 							break;
