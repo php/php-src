@@ -1112,6 +1112,8 @@ PHP_FUNCTION(mssql_free_result)
 	}
 
 	ZEND_FETCH_RESOURCE(result, mssql_result *, mssql_result_index, -1, "MS SQL-result", le_result);	
+	if (dbdataready(result->mssql_ptr->link))
+		dbresults(result->mssql_ptr->link);
 	zend_list_delete(Z_LVAL_PP(mssql_result_index));
 	RETURN_TRUE;
 }
