@@ -101,16 +101,17 @@ Changes in the Zend Engine 2.0
       Old code that has no user-defined classes or functions named 
       'public', 'protected' or 'private' should run without modifications.
 
-    * Abstract Methods.
+    * Abstract Classes and Methods.
 
-      The Zend Engine 2.0 introduces abstract methods. An abstract
-      method only declares the method's signature and does not
-      provide an implementation.
+      The Zend Engine 2.0 introduces abstract classes and methods. An 
+      abstract method only declares the method's signature and does not 
+      provide an implementation. A class that contains abstract methods 
+      needs to be declared abstract.
 
       Example:
 
         <?php
-        class AbstractClass {
+        abstract class AbstractClass {
           abstract public function test();
         }
 
@@ -124,8 +125,7 @@ Changes in the Zend Engine 2.0
         $o->test();
         ?>
 
-      A class containing abstract methods may be instantiated, but
-      calling its abstract methods will result in an error.
+      Abstract classes cannot be instantiated.
 
       Old code that has no user-defined classes or functions named 
       'abstract' should run without modifications.
