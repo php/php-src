@@ -378,10 +378,14 @@ PHP_FUNCTION(soap_encode_to_xml)
 		php_error(E_ERROR, "wrong number of parameters to soap_encode_to_xml");
 
 	enc = get_conversion(Z_TYPE_P(pzval));
+	return_value = php_domobject_new(seralize_zval(pzval, NULL, name, SOAP_ENCODED), &found, NULL TSRMLS_CC);
+	
+/*
 	ret = php_domobject_new(seralize_zval(pzval, NULL, name, SOAP_ENCODED), &found, NULL TSRMLS_CC);
 	*return_value = *ret;
 	zval_copy_ctor(return_value);
 	zval_ptr_dtor(&ret);
+*/
 }
 
 PHP_FUNCTION(soap_encode_to_zval)
