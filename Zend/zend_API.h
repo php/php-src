@@ -29,7 +29,7 @@
 #include "zend_variables.h"
 #include "zend_execute.h"
 
-#define ZEND_FN(name) zend_if_##name
+#define ZEND_FN(name) zif_##name
 #define ZEND_NAMED_FUNCTION(name) void name(INTERNAL_FUNCTION_PARAMETERS)
 #define ZEND_FUNCTION(name) ZEND_NAMED_FUNCTION(ZEND_FN(name))
 
@@ -38,17 +38,19 @@
 #define ZEND_FALIAS(name, alias, arg_types) ZEND_NAMED_FE(name, ZEND_FN(alias), arg_types)
 #define ZEND_STATIC_FE(name, impl_name, arg_types) { name, impl_name, arg_types },
 
-#define ZEND_MINIT(module)       zend_minit_##module
-#define ZEND_MSHUTDOWN(module)   zend_mshutdown_##module
-#define ZEND_RINIT(module)       zend_rinit_##module
-#define ZEND_RSHUTDOWN(module)   zend_rshutdown_##module
-#define ZEND_MINFO(module)       zend_info_##module
+/* Name macros */
+#define ZEND_MODULE_STARTUP_N(module)       zm_startup_##module
+#define ZEND_MODULE_SHUTDOWN_N(module)		zm_shutdown_##module
+#define ZEND_MODULE_ACTIVATE_N(module)		zm_activate_##module
+#define ZEND_MODULE_DEACTIVATE_N(module)	zm_deactivate_##module
+#define ZEND_MODULE_INFO_N(module)			zm_info_##module
 
-#define ZEND_MINIT_FUNCTION(module)      int ZEND_MINIT(module)(INIT_FUNC_ARGS)
-#define ZEND_MSHUTDOWN_FUNCTION(module)  int ZEND_MSHUTDOWN(module)(SHUTDOWN_FUNC_ARGS)
-#define ZEND_RINIT_FUNCTION(module)      int ZEND_RINIT(module)(INIT_FUNC_ARGS)
-#define ZEND_RSHUTDOWN_FUNCTION(module)  int ZEND_RSHUTDOWN(module)(SHUTDOWN_FUNC_ARGS)
-#define ZEND_MINFO_FUNCTION(module)      void ZEND_MINFO(module)(ZEND_MODULE_INFO_FUNC_ARGS)
+/* Declaration macros */
+#define ZEND_MODULE_STARTUP_D(module)		int ZEND_MODULE_STARTUP_N(module)(INIT_FUNC_ARGS)
+#define ZEND_MODULE_SHUTDOWN_D(module)		int ZEND_MODULE_SHUTDOWN_N(module)(SHUTDOWN_FUNC_ARGS)
+#define ZEND_MODULE_ACTIVATE_D(module)		int ZEND_MODULE_ACTIVATE_N(module)(INIT_FUNC_ARGS)
+#define ZEND_MODULE_DEACTIVATE_D(module)	int ZEND_MODULE_DEACTIVATE_N(module)(SHUTDOWN_FUNC_ARGS)
+#define ZEND_MODULE_INFO_D(module)			void ZEND_MODULE_INFO_N(module)(ZEND_MODULE_INFO_FUNC_ARGS)
 
 #define ZEND_GET_MODULE(name) \
 	ZEND_DLEXPORT zend_module_entry *get_module(void) { return &name##_module_entry; }
@@ -397,7 +399,21 @@ ZEND_API int zend_set_hash_symbol(zval *symbol, char *name, int name_length,
 #define HASH_OF(p) ((p)->type==IS_ARRAY ? (p)->value.ht : (((p)->type==IS_OBJECT ? Z_OBJPROP_P(p) : NULL)))
 #define ZVAL_IS_NULL(z) ((z)->type==IS_NULL)
 
+/* For compatibility */
+#define ZEND_MINIT			ZEND_MODULE_STARTUP_N
+#define ZEND_MSHUTDOWN		ZEND_MODULE_SHUTDOWN_N
+#define ZEND_RINIT			ZEND_MODULE_ACTIVATE_N
+#define ZEND_RSHUTDOWN		ZEND_MODULE_DEACTIVATE_N
+#define ZEND_MINFO			ZEND_MODULE_INFO_N
+
+#define ZEND_MINIT_FUNCTION			ZEND_MODULE_STARTUP_D
+#define ZEND_MSHUTDOWN_FUNCTION		ZEND_MODULE_SHUTDOWN_N
+#define ZEND_RINIT_FUNCTION			ZEND_MODULE_ACTIVATE_N
+#define ZEND_RSHUTDOWN_FUNCTION		ZEND_MODULE_DEACTIVATE_N
+#define ZEND_MINFO_FUNCTION			ZEND_MODULE_INFO_N
+
 #endif /* ZEND_API_H */
+
 
 /*
  * Local variables:
