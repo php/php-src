@@ -79,7 +79,7 @@ PHP_METHOD(domtext, __construct)
 }
 /* }}} end DOMText::__construct */
 
-/* {{{ proto wholeText	string	
+/* {{{ wholeText	string	
 readonly=yes 
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-Text3-wholeText
 Since: DOM Level 3

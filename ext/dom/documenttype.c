@@ -38,7 +38,7 @@ zend_function_entry php_dom_documenttype_class_functions[] = {
 	{NULL, NULL, NULL}
 };
 
-/* {{{ proto name	string	
+/* {{{ name	string	
 readonly=yes 
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-1844763134
 Since: 
@@ -64,7 +64,7 @@ int dom_documenttype_name_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 
 
-/* {{{ proto entities	DOMNamedNodeMap	
+/* {{{ entities	DOMNamedNodeMap	
 readonly=yes 
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-1788794630
 Since: 
@@ -97,7 +97,7 @@ int dom_documenttype_entities_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 
 
-/* {{{ proto notations	DOMNamedNodeMap	
+/* {{{ notations	DOMNamedNodeMap	
 readonly=yes 
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-D46829EF
 Since: 
@@ -130,7 +130,7 @@ int dom_documenttype_notations_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 
 
-/* {{{ proto publicId	string	
+/* {{{ publicId	string	
 readonly=yes 
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-Core-DocType-publicId
 Since: DOM Level 2
@@ -160,7 +160,7 @@ int dom_documenttype_public_id_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 
 
-/* {{{ proto systemId	string	
+/* {{{ systemId	string	
 readonly=yes 
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-Core-DocType-systemId
 Since: DOM Level 2
@@ -189,7 +189,7 @@ int dom_documenttype_system_id_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 
 
-/* {{{ proto internalSubset	string	
+/* {{{ internalSubset	string	
 readonly=yes 
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-Core-DocType-internalSubset
 Since: DOM Level 2

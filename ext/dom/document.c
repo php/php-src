@@ -88,7 +88,7 @@ zend_function_entry php_dom_document_class_functions[] = {
 	{NULL, NULL, NULL}
 };
 
-/* {{{ proto docType	DOMDocumentType	
+/* {{{ docType	DOMDocumentType	
 readonly=yes 
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-B63ED1A31
 Since: 
@@ -124,7 +124,7 @@ int dom_document_doctype_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 
 
-/* {{{ proto implementation	DOMImplementation	
+/* {{{ implementation	DOMImplementation	
 readonly=yes 
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-1B793EBA
 Since: 
@@ -140,7 +140,7 @@ int dom_document_implementation_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 
 
-/* {{{ proto documentElement	DOMElement	
+/* {{{ documentElement	DOMElement	
 readonly=yes 
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-87CD092
 Since: 
@@ -173,7 +173,7 @@ int dom_document_document_element_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 /* }}} */
 
-/* {{{ proto encoding	string
+/* {{{ encoding	string
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-Document3-encoding
 Since: DOM Level 3
 */
@@ -246,7 +246,7 @@ int dom_document_encoding_write(dom_object *obj, zval *newval TSRMLS_DC)
 
 
 
-/* {{{ proto standalone	boolean	
+/* {{{ standalone	boolean	
 readonly=no 
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-Document3-standalone
 Since: DOM Level 3
@@ -312,7 +312,7 @@ int dom_document_standalone_write(dom_object *obj, zval *newval TSRMLS_DC)
 
 
 
-/* {{{ proto version	string	
+/* {{{ version	string	
 readonly=no
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-Document3-version
 Since: DOM Level 3
@@ -377,7 +377,7 @@ int dom_document_version_write(dom_object *obj, zval *newval TSRMLS_DC)
 
 /* }}} */
 
-/* {{{ proto strictErrorChecking	boolean	
+/* {{{ strictErrorChecking	boolean	
 readonly=no 
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-Document3-strictErrorChecking
 Since: DOM Level 3
@@ -422,7 +422,7 @@ int dom_document_strict_error_checking_write(dom_object *obj, zval *newval TSRML
 
 /* }}} */
 
-/* {{{ proto formatOutput	boolean	
+/* {{{ formatOutput	boolean	
 readonly=no
 */
 int dom_document_format_output_read(dom_object *obj, zval **retval TSRMLS_DC)
@@ -464,7 +464,7 @@ int dom_document_format_output_write(dom_object *obj, zval *newval TSRMLS_DC)
 }
 /* }}} */
 
-/* {{{ proto validateOnParse	boolean	
+/* {{{ validateOnParse	boolean	
 readonly=no
 */
 int	dom_document_validate_on_parse_read(dom_object *obj, zval **retval TSRMLS_DC)
@@ -507,7 +507,7 @@ int dom_document_validate_on_parse_write(dom_object *obj, zval *newval TSRMLS_DC
 /* }}} */
 
 
-/* {{{ proto resolveExternals	boolean	
+/* {{{ resolveExternals	boolean	
 readonly=no
 */
 int dom_document_resolve_externals_read(dom_object *obj, zval **retval TSRMLS_DC)
@@ -550,7 +550,7 @@ int dom_document_resolve_externals_write(dom_object *obj, zval *newval TSRMLS_DC
 /* }}} */
 
 
-/* {{{ proto preserveWhiteSpace	boolean	
+/* {{{ preserveWhiteSpace	boolean	
 readonly=no
 */
 int dom_document_preserve_whitespace_read(dom_object *obj, zval **retval TSRMLS_DC)
@@ -592,7 +592,7 @@ int dom_document_preserve_whitespace_write(dom_object *obj, zval *newval TSRMLS_
 }
 /* }}} */
 
-/* {{{ proto recover	boolean	
+/* {{{ recover	boolean	
 readonly=no
 */
 int dom_document_recover_read(dom_object *obj, zval **retval TSRMLS_DC)
@@ -635,7 +635,7 @@ int dom_document_recover_write(dom_object *obj, zval *newval TSRMLS_DC)
 /* }}} */
 
 
-/* {{{ proto substituteEntities	boolean	
+/* {{{ substituteEntities	boolean	
 readonly=no
 */
 int dom_document_substitue_entities_read(dom_object *obj, zval **retval TSRMLS_DC)
@@ -678,7 +678,7 @@ int dom_document_substitue_entities_write(dom_object *obj, zval *newval TSRMLS_D
 /* }}} */
 
 
-/* {{{ proto documentURI	string	
+/* {{{ documentURI	string	
 readonly=no 
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-Document3-documentURI
 Since: DOM Level 3
@@ -744,7 +744,7 @@ int dom_document_document_uri_write(dom_object *obj, zval *newval TSRMLS_DC)
 
 
 
-/* {{{ proto config	DOMConfiguration	
+/* {{{ config	DOMConfiguration	
 readonly=yes 
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-Document3-config
 Since: DOM Level 3
@@ -1572,7 +1572,7 @@ static void dom_parse_document(INTERNAL_FUNCTION_PARAMETERS, int mode) {
 }
 /* }}} end dom_parser_document */
 
-/* {{{ proto boolean|DOMNode dom_document_load(string source);
+/* {{{ proto DOMNode dom_document_load(string source);
 URL: http://www.w3.org/TR/DOM-Level-3-LS/load-save.html#LS-DocumentLS-load
 Since: DOM Level 3
 */
@@ -1582,7 +1582,7 @@ PHP_METHOD(domdocument, load)
 }
 /* }}} end dom_document_load */
 
-/* {{{ proto boolean|DOMNode dom_document_loadxml(string source);
+/* {{{ proto DOMNode dom_document_loadxml(string source);
 URL: http://www.w3.org/TR/DOM-Level-3-LS/load-save.html#LS-DocumentLS-loadXML
 Since: DOM Level 3
 */
@@ -1592,7 +1592,7 @@ PHP_METHOD(domdocument, loadXML)
 }
 /* }}} end dom_document_loadxml */
 
-/* {{{ proto long dom_document_save(string file);
+/* {{{ proto int dom_document_save(string file);
 Convenience method to save to file
 */
 PHP_FUNCTION(dom_document_save)
@@ -2050,7 +2050,7 @@ static void dom_load_html(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	}
 }
 
-/* {{{ proto boolean|DOMNode dom_document_load_html_file(string source);
+/* {{{ proto DOMNode dom_document_load_html_file(string source);
 Since: DOM extended
 */
 PHP_METHOD(domdocument, loadHTMLFile)
@@ -2059,7 +2059,7 @@ PHP_METHOD(domdocument, loadHTMLFile)
 }
 /* }}} end dom_document_load_html_file */
 
-/* {{{ proto boolean|DOMNode dom_document_load_html(string source);
+/* {{{ proto DOMNode dom_document_load_html(string source);
 Since: DOM extended
 */
 PHP_METHOD(domdocument, loadHTML)
@@ -2068,7 +2068,7 @@ PHP_METHOD(domdocument, loadHTML)
 }
 /* }}} end dom_document_load_html */
 
-/* {{{ proto long dom_document_save_html_file(string file);
+/* {{{ proto int dom_document_save_html_file(string file);
 Convenience method to save to file as html
 */
 PHP_FUNCTION(dom_document_save_html_file)
