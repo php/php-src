@@ -1656,14 +1656,6 @@ InputPath=..\ext\standard\parsedate.y
 
 # End Source File
 # End Group
-# Begin Group "Scanners"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=..\ext\standard\url_scanner_ex.re
-# End Source File
-# End Group
 # Begin Group "Text Files"
 
 # PROP Default_Filter ""
