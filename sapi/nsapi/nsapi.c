@@ -491,9 +491,32 @@ static void nsapi_request_dtor(NSLS_D TSRMLS_DC)
 	nsapi_free(SG(request_info).content_type);
 }
 
+static void nsapi_php_ini_entries(NSLS_D TSRMLS_DC)
+{
+	struct pb_entry *entry;
+	register int i;
+
+	for (i=0; i < NSG(pb)->hsize; i++) {
+		entry=NSG(pb)->ht[i];
+		while (entry) {
+			/* exclude standard entries given to "Service" which should not go into ini entries */
+			if (strcasecmp(entry->param->name,"fn") && strcasecmp(entry->param->name,"type")
+			 && strcasecmp(entry->param->name,"method")  && strcasecmp(entry->param->name,"Directive")) {
+				/* change the ini entry */
+				if (zend_alter_ini_entry(entry->param->name, strlen(entry->param->name)+1,
+				 entry->param->value, strlen(entry->param->value),
+				 PHP_INI_SYSTEM, PHP_INI_STAGE_RUNTIME)==FAILURE) {
+					log_error(LOG_WARN, "php4_execute", NSG(sn), NSG(rq), "Cannot change php.ini key \"%s\" to \"%s\"", entry->param->name, entry->param->value);
+				}
+			}
+			entry=entry->next;
+		}
+  	}
+}
+
 int nsapi_module_main(NSLS_D TSRMLS_DC)
 {
-	zend_file_handle file_handle;
+	zend_file_handle file_handle = {0};
 
 	if (php_request_startup(TSRMLS_C) == FAILURE) {
 		return FAILURE;
@@ -523,16 +546,28 @@ void NSAPI_PUBLIC php4_close(void *vparam)
 	if (nsapi_sapi_module.shutdown) {
 		nsapi_sapi_module.shutdown(&nsapi_sapi_module);
 	}
+
+	if (nsapi_sapi_module.php_ini_path_override) {
+		free(nsapi_sapi_module.php_ini_path_override);
+	}
+
 	tsrm_shutdown();
 }
 
 int NSAPI_PUBLIC php4_init(pblock *pb, Session *sn, Request *rq)
 {
 	php_core_globals *core_globals;
+	char *ini_path;
 
 	tsrm_startup(1, 1, 0, NULL);
 	core_globals = ts_resource(core_globals_id);
 
+	/* look if php_ini parameter is given to php4_init */
+	if (ini_path = pblock_findval("php_ini", pb)) {
+		nsapi_sapi_module.php_ini_path_override = strdup(ini_path);
+	}
+
+	/* start SAPI */
 	sapi_startup(&nsapi_sapi_module);
 	nsapi_sapi_module.startup(&nsapi_sapi_module);
 
@@ -555,6 +590,7 @@ int NSAPI_PUBLIC php4_execute(pblock *pb, Session *sn, Request *rq)
 	SG(server_context) = request_context;
 
 	nsapi_request_ctor(NSLS_C TSRMLS_CC);
+	nsapi_php_ini_entries(NSLS_C TSRMLS_CC);
 	retval = nsapi_module_main(NSLS_C TSRMLS_CC);
 	nsapi_request_dtor(NSLS_C TSRMLS_CC);
 

@@ -32,10 +32,10 @@ in the server-id/config/magnus.conf file, and not the server-id/config/obj.conf 
 	Windows: "c:\path\to\PHP4\nsapiPHP4.dll"
 
 
-Note! Place following two lines after mime.types init:
+Note! Place following two lines after mime.types init ([] means optional):
 
     Init fn="load-modules" funcs="php4_init,php4_close,php4_execute,php4_auth_trans" shlib="/php4/nsapiPHP4.dll"
-    Init fn=php4_init errorString="Failed to initialize PHP!"
+    Init fn=php4_init errorString="Failed to initialize PHP!" [php_ini="/path/to/php.ini"]
 
     <Object name="default">
     .
@@ -43,8 +43,10 @@ Note! Place following two lines after mime.types init:
     .
     # NOTE this next line should happen after all 'ObjectType' and before
     # all 'AddLog' lines
+    # You can modify some entries in php.ini request specific by adding it to the Service
+    # directive, e.g. doc_root="/path"
 
-    Service fn="php4_execute" type="magnus-internal/x-httpd-php"
+    Service fn="php4_execute" type="magnus-internal/x-httpd-php" [inikey=value ...]
     .
     .
     </Object>
