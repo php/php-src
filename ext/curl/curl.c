@@ -1020,7 +1020,8 @@ PHP_FUNCTION(curl_exec)
 	
 	error = curl_easy_perform(ch->cp);
 	SAVE_CURL_ERROR(ch, error);
-	if (error != CURLE_OK) {
+	/* CURLE_PARTIAL_FILE is returned by HEAD requests */
+	if (error != CURLE_OK && error != CURLE_PARTIAL_FILE) {
 		if (ch->handlers->write->buf.len > 0) {
 			smart_str_free(&ch->handlers->write->buf);
 		}
