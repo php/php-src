@@ -1087,6 +1087,12 @@ PHP_MINFO_FUNCTION(simplexml)
 	php_info_print_table_start();
 	php_info_print_table_header(2, "Simplexml support", "enabled");
 	php_info_print_table_row(2, "Revision", "$Revision$");
+	php_info_print_table_row(2, "Schema support", 
+#ifdef LIBXML_SCHEMAS_ENABLED
+		"enabled");
+#else
+		"not available");
+#endif
 	php_info_print_table_end();
 }
 /* }}} */
