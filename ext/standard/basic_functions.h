@@ -113,6 +113,9 @@ typedef struct {
 	char str_ebuf[40];
 	zval **array_walk_func_name;
 	zval **user_compare_func_name;
+	long page_uid;
+	long page_inode;
+	long page_mtime;
 } php_basic_globals;
 
 #ifdef ZTS
