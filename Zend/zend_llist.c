@@ -150,7 +150,7 @@ ZEND_API void zend_llist_apply_with_del(zend_llist *l, int (*func)(void *data))
 			if (l->dtor) {
 				l->dtor(element->data);
 				pefree(element, l->persistent);
-            }
+			}
 		}
 		element = next;
 	}
