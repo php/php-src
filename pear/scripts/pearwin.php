@@ -158,56 +158,16 @@ function heading($text)
 
 switch ($command) {
     case 'install':
-        include_once 'PEAR/Installer.php';
-        $package = $options[1][2];
-        $installer =& new PEAR_Installer($script_dir, $ext_dir, $doc_dir);
-        $installer->debug = $verbose;
-        if (PEAR::isError($installer->Install($package))) {
-            print "\ninstall failed\n";
-        } else {
-            print "install ok\n";
-        }
+        include 'pearcmd-install.php';
         break;
     case 'uninstall':
-        include_once 'PEAR/Installer.php';
-        $package = $options[1][2];
-        $installer =& new PEAR_Installer($script_dir, $ext_dir, $doc_dir);
-        $installer->debug = $verbose;
-        if (PEAR::isError($installer->uninstall($package))) {
-            print "\nuninstall failed\n";
-        } else {
-            print "uninstall ok\n";
-        }
+        include 'pearcmd-uninstall.php';
         break;
     case 'list':
-        include_once 'PEAR/Registry.php';
-        $reg = &new PEAR_Registry($script_dir);
-        $installed = $reg->packageInfo();
-        $i = $j = 0;
-        heading("Installed packages:");
-        foreach ($installed as $package) {
-            if ($i++ % 20 == 0) {
-                if ($j++ > 0) {
-                    print "\n";
-                }
-                printf("%-20s %-10s %s\n",
-                       "Package", "Version", "State");
-                print str_repeat("-", 75)."\n";
-            }
-            printf("%-20s %-10s %s\n", $package['package'],
-                   $package['version'], $package['release_state']);
-        }
+        include 'pearcmd-list.php';
         break;
     case 'package':
-        include_once 'PEAR/Packager.php';
-        $pkginfofile = $options[1][2];
-        $packager =& new PEAR_Packager($script_dir, $ext_dir, $doc_dir);
-        $packager->debug = $verbose;
-        if (PEAR::isError($packager->Package($pkginfofile))) {
-            print "\npackage failed\n";
-        } else {
-            print "package ok\n";
-        }
+        include 'pearcmd-package.php';
         break;
     case 'remote-list':
         include 'pearcmd-remote-list.php';
