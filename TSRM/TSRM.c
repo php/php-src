@@ -249,7 +249,7 @@ TSRM_API void *ts_resource_ex(ts_rsrc_id id, THREAD_T *th_id)
 
 	if (!thread_resources) {
 		allocate_new_resource(&tsrm_tls_table[hash_value], thread_id);
-		return ts_resource(id);
+		return ts_resource_ex(id, &thread_id);
 		/* thread_resources = tsrm_tls_table[hash_value]; */
 	} else {
 		 do {
@@ -260,7 +260,7 @@ TSRM_API void *ts_resource_ex(ts_rsrc_id id, THREAD_T *th_id)
 				thread_resources = thread_resources->next;
 			} else {
 				allocate_new_resource(&thread_resources->next, thread_id);
-				return ts_resource(id);
+				return ts_resource_ex(id, &thread_id);
 				/*
 				 * thread_resources = thread_resources->next;
 				 * break;
