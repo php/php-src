@@ -75,4 +75,26 @@ PHP_FUNCTION(clearstatcache);
 #define getuid() 1
 #endif
 
+PHPAPI void php_stat(const char *filename, php_stat_len filename_length, int type, pval *return_value TSRMLS_DC);
+
+/* Switches for various filestat functions: */
+#define FS_PERMS    0
+#define FS_INODE    1
+#define FS_SIZE     2
+#define FS_OWNER    3
+#define FS_GROUP    4
+#define FS_ATIME    5
+#define FS_MTIME    6
+#define FS_CTIME    7
+#define FS_TYPE     8
+#define FS_IS_W     9
+#define FS_IS_R    10
+#define FS_IS_X    11
+#define FS_IS_FILE 12
+#define FS_IS_DIR  13
+#define FS_IS_LINK 14
+#define FS_EXISTS  15
+#define FS_LSTAT   16
+#define FS_STAT    17
+
 #endif /* PHP_FILESTAT_H */
