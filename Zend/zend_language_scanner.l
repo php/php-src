@@ -7,7 +7,7 @@
    | Copyright (c) 1998-2002 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        | 
+   | that is bundled with this package in the file LICENSE, and is        |
    | available at through the world-wide-web at                           |
    | http://www.zend.com/license/2_00.txt.                                |
    | If you did not receive a copy of the Zend license and are unable to  |
@@ -111,7 +111,7 @@ do {																			\
 		CG(zend_lineno)++; \
 	} \
 }
-		
+
 
 #define ZEND_IS_OCT(c)  ((c)>='0' && (c)<='7')
 #define ZEND_IS_HEX(c)  (((c)>='0' && (c)<='9') || ((c)>='a' && (c)<='f') || ((c)>='A' && (c)<='F'))
@@ -161,7 +161,7 @@ ZEND_API void zend_restore_lexical_state(zend_lex_state *lex_state TSRMLS_DC)
 	} else {
 		YY_CURRENT_BUFFER = NULL;
 	}
-		
+
 	yy_delete_buffer(original_buffer_state TSRMLS_CC);
 	SCNG(yy_in) = lex_state->in;
 	BEGIN(lex_state->state);
@@ -233,7 +233,7 @@ ZEND_API int open_file_for_scanning(zend_file_handle *file_handle TSRMLS_DC)
 		return FAILURE;
 	}
 
-	file_handle->type = ZEND_HANDLE_FP;	
+	file_handle->type = ZEND_HANDLE_FP;
 	if (file_handle->handle.fp != stdin) {
 		zend_llist_add_element(&CG(open_files), file_handle);
 	}
@@ -243,20 +243,20 @@ ZEND_API int open_file_for_scanning(zend_file_handle *file_handle TSRMLS_DC)
 	BEGIN(INITIAL);
 
 	if (file_handle->opened_path) {
-		file_path = file_handle->opened_path; 
+		file_path = file_handle->opened_path;
 	} else {
 		file_path = file_handle->filename;
 	}
 
 	zend_set_compiled_filename(file_path TSRMLS_CC);
-	
+
 	if (CG(start_lineno)) {
 		CG(zend_lineno) = CG(start_lineno);
 		CG(start_lineno) = 0;
 	} else {
 		CG(zend_lineno) = 1;
 	}
-	
+
 	CG(increment_lineno) = 0;
 	return SUCCESS;
 }
@@ -287,7 +287,7 @@ ZEND_API zend_op_array *compile_file(zend_file_handle *file_handle, int type TSR
 	if (open_file_for_scanning(file_handle TSRMLS_CC)==FAILURE) {
 		if (type==ZEND_REQUIRE) {
 			zend_message_dispatcher(ZMSG_FAILED_REQUIRE_FOPEN, file_handle->filename);
-			zend_bailout();		
+			zend_bailout();
 		} else {
 			zend_message_dispatcher(ZMSG_FAILED_INCLUDE_FOPEN, file_handle->filename);
 		}
@@ -344,13 +344,13 @@ zend_op_array *compile_filename(int type, zval *filename TSRMLS_DC)
 	retval = zend_compile_file(&file_handle, type TSRMLS_CC);
 	if (retval && file_handle.handle.fp) {
 		int dummy = 1;
-		
+
 		if (!file_handle.opened_path) {
 			file_handle.opened_path = opened_path = estrndup(filename->value.str.val, filename->value.str.len);
-		} 
-		
+		}
+
 		zend_hash_add(&EG(included_files), file_handle.opened_path, strlen(file_handle.opened_path)+1, (void *)&dummy, sizeof(int), NULL);
-		
+
 		if (opened_path) {
 			efree(opened_path);
 		}
@@ -411,7 +411,7 @@ zend_op_array *compile_string(zval *source_string, char *filename TSRMLS_DC)
 		CG(active_op_array) = op_array;
 		BEGIN(ST_IN_SCRIPTING);
 		compiler_result = zendparse(TSRMLS_C);
-		
+
 		if (compiler_result==1) {
 			CG(active_op_array) = original_active_op_array;
 			CG(unclean_shutdown)=1;
@@ -959,7 +959,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	if (CG(active_class_entry)) {
 		class_name = CG(active_class_entry)->name;
 	}
-	
+
 	if (!class_name) {
 		class_name = "";
 	}
@@ -971,7 +971,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 <ST_IN_SCRIPTING>"__FUNCTION__" {
 	char *func_name = CG(active_op_array)->function_name;
-	
+
 	if (!func_name) {
 		func_name = "";
 	}
@@ -989,7 +989,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 <ST_IN_SCRIPTING>"__FILE__" {
 	char *filename = zend_get_compiled_filename(TSRMLS_C);
-	
+
 	if (!filename) {
 		filename = "";
 	}
@@ -1198,12 +1198,12 @@ NEWLINE ("\r"|"\n"|"\r\n")
 <ST_IN_SCRIPTING>(["]([^$"\\]|("\\".))*["]) {
 	register char *s, *t;
 	char *end;
-	
+
 	zendlval->value.str.val = estrndup(yytext+1, yyleng-2);
 	zendlval->value.str.len = yyleng-2;
 	zendlval->type = IS_STRING;
 	HANDLE_NEWLINES(yytext, yyleng);
-	
+
 	/* convert escape sequences */
 	s = t = zendlval->value.str.val;
 	end = s+zendlval->value.str.len;
@@ -1272,7 +1272,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 		}
 	}
 	*t = 0;
-	
+
 	return T_CONSTANT_ENCAPSED_STRING;
 }
 
@@ -1280,12 +1280,12 @@ NEWLINE ("\r"|"\n"|"\r\n")
 <ST_IN_SCRIPTING>([']([^'\\]|("\\".))*[']) {
 	register char *s, *t;
 	char *end;
-	
+
 	zendlval->value.str.val = estrndup(yytext+1, yyleng-2);
 	zendlval->value.str.len = yyleng-2;
 	zendlval->type = IS_STRING;
 	HANDLE_NEWLINES(yytext, yyleng);
-	
+
 	/* convert escape sequences */
 	s = t = zendlval->value.str.val;
 	end = s+zendlval->value.str.len;
@@ -1312,7 +1312,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 		}
 	}
 	*t = 0;
-	
+
 	return T_CONSTANT_ENCAPSED_STRING;
 }
 
@@ -1336,7 +1336,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	BEGIN(ST_HEREDOC);
 	return T_START_HEREDOC;
 }
-	
+
 
 <ST_IN_SCRIPTING>[`] {
 	BEGIN(ST_BACKQUOTE);
@@ -1360,7 +1360,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	} else {
 		label_len = yyleng-1;
 	}
-	
+
 	if (yytext[label_len-1]==';') {
 		label_len--;
 		unput_semicolon=1;
@@ -1426,7 +1426,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	if (yyleng == 2) {
 		yyless(1);
 	}
-	return T_CHARACTER;	
+	return T_CHARACTER;
 }
 
 
@@ -1538,17 +1538,9 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	zend_error(E_COMPILE_WARNING,"Unterminated comment starting line %d", CG(comment_start_line));
 	return 0;
 }
-	
+
 
 
 <ST_IN_SCRIPTING,INITIAL,ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_SINGLE_QUOTE,ST_HEREDOC>{ANY_CHAR} {
 	zend_error(E_COMPILE_WARNING,"Unexpected character in input:  '%c' (ASCII=%d) state=%d", yytext[0], yytext[0], YYSTATE);
 }
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- */

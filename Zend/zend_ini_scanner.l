@@ -156,7 +156,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 	/* eat trailing " */
 	yytext[yyleng-1]=0;
-	
+
 	/* eat leading " */
 	yytext++;
 
@@ -208,7 +208,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 <INITIAL>[=\n] {
 	if (yytext[0] == '\n') {
 		SCNG(lineno)++;
-	}	
+	}
 	return yytext[0];
 }
 
@@ -237,11 +237,3 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	yy_delete_buffer(YY_CURRENT_BUFFER TSRMLS_CC);
 	yyterminate();
 }
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- */
