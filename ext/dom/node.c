@@ -84,6 +84,17 @@ int dom_node_node_name_read(dom_object *obj, zval **retval TSRMLS_DC)
 				str = (char *) nodep->name;
 			}
 			break;
+		case XML_NAMESPACE_DECL:
+			ns = nodep->ns;
+			if (ns != NULL && ns->prefix) {
+				qname = xmlStrdup("xmlns");
+				qname = xmlStrcat(qname, ":");
+				qname = xmlStrcat(qname, nodep->name);
+				str = qname;
+			} else {
+				str = (char *) nodep->name;
+			}
+			break;
 		case XML_DOCUMENT_TYPE_NODE:
 		case XML_DTD_NODE:
 		case XML_PI_NODE:
@@ -107,11 +118,6 @@ int dom_node_node_name_read(dom_object *obj, zval **retval TSRMLS_DC)
 			break;
 		case XML_TEXT_NODE:
 			str = "#text";
-			break;
-		case XML_NAMESPACE_DECL:
-			if (nodep->ns != NULL) {
-				str = (char *) nodep->ns->prefix;
-			}
 			break;
 		default:
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid Node Type");
@@ -159,6 +165,9 @@ currently here as a convience method while developing */
 		case XML_CDATA_SECTION_NODE:
 		case XML_PI_NODE:
 			str = xmlNodeGetContent(nodep);
+			break;
+		case XML_NAMESPACE_DECL:
+			str = xmlNodeGetContent(nodep->children);
 			break;
 		default:
 			str = NULL;
@@ -519,6 +528,7 @@ int dom_node_namespace_uri_read(dom_object *obj, zval **retval TSRMLS_DC)
 	switch (nodep->type) {
 		case XML_ELEMENT_NODE:
 		case XML_ATTRIBUTE_NODE:
+		case XML_NAMESPACE_DECL:
 			if (nodep->ns != NULL) {
 				str = (char *) nodep->ns->href;
 			}
@@ -559,6 +569,7 @@ int dom_node_prefix_read(dom_object *obj, zval **retval TSRMLS_DC)
 	switch (nodep->type) {
 		case XML_ELEMENT_NODE:
 		case XML_ATTRIBUTE_NODE:
+		case XML_NAMESPACE_DECL:
 			ns = nodep->ns;
 			if (ns != NULL && ns->prefix) {
 				str = (char *) ns->prefix;
@@ -650,7 +661,7 @@ int dom_node_local_name_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 	ALLOC_ZVAL(*retval);
 
-	if (nodep->type == XML_ELEMENT_NODE || nodep->type == XML_ATTRIBUTE_NODE) {
+	if (nodep->type == XML_ELEMENT_NODE || nodep->type == XML_ATTRIBUTE_NODE || nodep->type == XML_NAMESPACE_DECL) {
 		ZVAL_STRING(*retval, (char *) (nodep->name), 1);
 	} else {
 		ZVAL_NULL(*retval);

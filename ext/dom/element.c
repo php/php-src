@@ -392,60 +392,21 @@ Since:
 PHP_FUNCTION(dom_element_get_elements_by_tag_name)
 {
 	zval *id;
-	xmlXPathContextPtr ctxp;
-	xmlNodePtr nodep;
-	xmlDocPtr docp;
-	xmlXPathObjectPtr xpathobjp;
-	int name_len, ret;
+	xmlNodePtr elemp;
+	int name_len;
 	dom_object *intern;
-	char *str,*name;
+	char *name;
 
-	DOM_GET_THIS_OBJ(nodep, id, xmlNodePtr, intern);
+	DOM_GET_THIS_OBJ(elemp, id, xmlNodePtr, intern);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &name, &name_len) == FAILURE) {
 		return;
 	}
 
-	docp = nodep->doc;
+	array_init(return_value);
+	elemp = elemp->children;
 
-	ctxp = xmlXPathNewContext(docp);
-
-	ctxp->node = nodep;
-	str = (char*) safe_emalloc((name_len+13), sizeof(char), 0) ;
-	sprintf(str ,"descendant::%s",name);
-
-	xpathobjp = xmlXPathEval(str, ctxp);
-	efree(str);
-	ctxp->node = NULL;
-
-	if (!xpathobjp) {
-		RETURN_FALSE;
-	}
-
-	if (xpathobjp->type ==  XPATH_NODESET) {
-		int i;
-		xmlNodeSetPtr nodesetp;
-
-		if (NULL == (nodesetp = xpathobjp->nodesetval)) {
-			xmlXPathFreeObject (xpathobjp);
-			xmlXPathFreeContext(ctxp);
-			RETURN_FALSE;
-		}
-
-		array_init(return_value);
-
-		for (i = 0; i < nodesetp->nodeNr; i++) {
-			xmlNodePtr node = nodesetp->nodeTab[i];
-			zval *child;
-			MAKE_STD_ZVAL(child);
-
-			child = php_dom_create_object(node, &ret, NULL, child, intern TSRMLS_CC);
-			add_next_index_zval(return_value, child);
-		}
-	}
-
-	xmlXPathFreeObject(xpathobjp);
-	xmlXPathFreeContext(ctxp);
+	dom_get_elements_by_tag_name_ns_raw(elemp, NULL, name, &return_value, intern TSRMLS_CC);
 }
 /* }}} end dom_element_get_elements_by_tag_name */
 
@@ -496,15 +457,15 @@ Since: DOM Level 2
 */
 PHP_FUNCTION(dom_element_set_attribute_ns)
 {
-	zval *id, *rv = NULL;
+	zval *id;
 	xmlNodePtr elemp, nodep = NULL;
 	xmlNsPtr nsptr;
 	xmlAttr *attr;
-	int ret, uri_len = 0, name_len = 0, value_len = 0;
+	int uri_len = 0, name_len = 0, value_len = 0;
 	char *uri, *name, *value;
 	char *localname = NULL, *prefix = NULL;
 	dom_object *intern;
-	int errorcode = 0, stricterror;
+	int errorcode = 0, stricterror, is_xmlns = 0;
 
 	DOM_GET_THIS_OBJ(elemp, id, xmlNodePtr, intern);
 
@@ -516,7 +477,7 @@ PHP_FUNCTION(dom_element_set_attribute_ns)
 
 	if (dom_node_is_read_only(elemp) == SUCCESS) {
 		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, stricterror TSRMLS_CC);
-		RETURN_FALSE;
+		RETURN_NULL();
 	}
 
 	errorcode = dom_check_qname(name, &localname, &prefix, uri_len, name_len);
@@ -527,19 +488,37 @@ PHP_FUNCTION(dom_element_set_attribute_ns)
 			if (nodep != NULL) {
 				node_list_unlink(nodep->children TSRMLS_CC);
 			}
-			nsptr = xmlSearchNsByHref(elemp->doc, elemp, uri);
-			while (nsptr && nsptr->prefix == NULL) {
-				nsptr = nsptr->next;
+
+			if (xmlStrEqual(prefix,"xmlns") && xmlStrEqual(uri, DOM_XMLNS_NAMESPACE)) {
+				is_xmlns = 1;
+				nsptr = dom_get_nsdecl(elemp, localname);
+			} else {
+				nsptr = xmlSearchNsByHref(elemp->doc, elemp, uri);
+				while (nsptr && nsptr->prefix == NULL) {
+					nsptr = nsptr->next;
+				}
 			}
+
 			if (nsptr == NULL) {
 				if (prefix == NULL) {
 					errorcode = NAMESPACE_ERR;
 				} else {
-					nsptr = dom_get_ns(elemp, uri, &errorcode, prefix);
+					if (is_xmlns == 1) {
+						xmlNewNs(elemp, value, localname);
+					} else {
+						nsptr = dom_get_ns(elemp, uri, &errorcode, prefix);
+					}
+				}
+			} else {
+				if (is_xmlns == 1) {
+					if (nsptr->href) {
+						xmlFree((xmlChar *) nsptr->href);
+					}
+					nsptr->href = xmlStrdup(value);
 				}
 			}
 
-			if (errorcode == 0) {
+			if (errorcode == 0 && is_xmlns == 0) {
 				attr = xmlSetNsProp(elemp, nsptr, localname, value);
 			}
 		} else {
@@ -558,14 +537,9 @@ PHP_FUNCTION(dom_element_set_attribute_ns)
 
 	if (errorcode != 0) {
 		php_dom_throw_error(errorcode, stricterror TSRMLS_CC);
-		RETURN_FALSE;
 	}
 
-	if (nodep == NULL) {
-		RETURN_FALSE;
-	}
-
-	DOM_RET_OBJ(rv, nodep, &ret, intern);
+	RETURN_NULL();
 }
 /* }}} end dom_element_set_attribute_ns */
 
@@ -579,6 +553,7 @@ PHP_FUNCTION(dom_element_remove_attribute_ns)
 	zval *id;
 	xmlNode *nodep;
 	xmlAttr *attrp;
+	xmlNsPtr nsptr;
 	dom_object *intern;
 	int name_len, uri_len;
 	char *name, *uri;
@@ -591,17 +566,28 @@ PHP_FUNCTION(dom_element_remove_attribute_ns)
 
 	if (dom_node_is_read_only(nodep) == SUCCESS) {
 		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, dom_get_strict_error(intern->document) TSRMLS_CC);
-		RETURN_FALSE;
+		RETURN_NULL();
 	}
 
-	if (xmlStrEqual(uri, DOM_XMLNS_NAMESPACE)) {
-		DOM_NOT_IMPLEMENTED();
-	} else {
-		attrp = xmlHasNsProp(nodep, name, uri);
-		if (attrp == NULL) {
-			RETURN_FALSE;
-		}
+	attrp = xmlHasNsProp(nodep, name, uri);
 
+	nsptr = dom_get_nsdecl(nodep, name);
+	if (nsptr != NULL) {
+		if (xmlStrEqual(uri, nsptr->href)) {
+			if (nsptr->href != NULL) {
+				xmlFree((char *) nsptr->href);
+				nsptr->href = NULL;
+			}
+			if (nsptr->prefix != NULL) {
+				xmlFree((char *) nsptr->prefix);
+				nsptr->prefix = NULL;
+			}
+		} else {
+			RETURN_NULL();
+		}
+	}
+
+	if (attrp) {
 		if (dom_object_get_data((xmlNodePtr) attrp) == NULL) {
 			node_list_unlink(attrp->children TSRMLS_CC);
 			xmlUnlinkNode((xmlNodePtr) attrp);
@@ -611,7 +597,7 @@ PHP_FUNCTION(dom_element_remove_attribute_ns)
 		}
 	}
 
-	RETURN_TRUE;
+	RETURN_NULL();
 }
 /* }}} end dom_element_remove_attribute_ns */
 
@@ -622,12 +608,12 @@ Since: DOM Level 2
 */
 PHP_FUNCTION(dom_element_get_attribute_node_ns)
 {
-	zval *id;
+	zval *id, *rv = NULL;
 	xmlNodePtr elemp;
-	xmlNs *nsp;
+	xmlAttrPtr attrp;
 	dom_object *intern;
-	int uri_len, name_len;
-	char *uri, *name, *value;
+	int uri_len, name_len, ret;
+	char *uri, *name;
 
 	DOM_GET_THIS_OBJ(elemp, id, xmlNodePtr, intern);
 
@@ -635,23 +621,13 @@ PHP_FUNCTION(dom_element_get_attribute_node_ns)
 		return;
 	}
 
-	value = xmlGetNsProp(elemp, name, uri);
+	attrp = xmlHasNsProp(elemp, name, uri);
 
-	if (value != NULL) {
-		RETVAL_STRING(value, 1);
-		xmlFree(value);
-	} else {
-		if (xmlStrEqual(name, DOM_XMLNS_NAMESPACE)) {
-			nsp = dom_get_nsdecl(elemp, name);
-			if (nsp != NULL) {
-				RETVAL_STRING((char *) nsp->href, 1);
-			} else {
-				RETVAL_EMPTY_STRING();
-			}
-		} else {
-			RETVAL_EMPTY_STRING();
-		}
+	if (attrp == NULL) {
+		RETURN_NULL();
 	}
+
+	DOM_RET_OBJ(rv, (xmlNodePtr) attrp, &ret, intern);
 
 }
 /* }}} end dom_element_get_attribute_node_ns */

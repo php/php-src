@@ -58,6 +58,7 @@ static HashTable dom_documenttype_prop_handlers;
 static HashTable dom_notation_prop_handlers;
 static HashTable dom_entity_prop_handlers;
 static HashTable dom_processinginstruction_prop_handlers;
+static HashTable dom_namespace_node_prop_handlers;
 #if defined(LIBXML_XPATH_ENABLED)
 static HashTable dom_xpath_prop_handlers;
 #endif
@@ -485,6 +486,19 @@ PHP_MINIT_FUNCTION(dom)
 	dom_register_prop_handler(&dom_node_prop_handlers, "textContent", dom_node_text_content_read, dom_node_text_content_write TSRMLS_CC);
 	zend_hash_add(&classes, ce.name, ce.name_length + 1, &dom_node_prop_handlers, sizeof(dom_node_prop_handlers), NULL);
 
+	REGISTER_DOM_CLASS(ce, "domnamespacenode", NULL, NULL, dom_namespace_node_class_entry);
+
+	zend_hash_init(&dom_namespace_node_prop_handlers, 0, NULL, NULL, 1);
+	dom_register_prop_handler(&dom_namespace_node_prop_handlers, "nodeName", dom_node_node_name_read, NULL TSRMLS_CC);
+	dom_register_prop_handler(&dom_namespace_node_prop_handlers, "nodeValue", dom_node_node_value_read, NULL TSRMLS_CC);
+	dom_register_prop_handler(&dom_namespace_node_prop_handlers, "nodeType", dom_node_node_type_read, NULL TSRMLS_CC);
+	dom_register_prop_handler(&dom_namespace_node_prop_handlers, "prefix", dom_node_prefix_read, NULL TSRMLS_CC);
+	dom_register_prop_handler(&dom_namespace_node_prop_handlers, "localName", dom_node_local_name_read, NULL TSRMLS_CC);
+	dom_register_prop_handler(&dom_namespace_node_prop_handlers, "namespaceURI", dom_node_namespace_uri_read, NULL TSRMLS_CC);
+	dom_register_prop_handler(&dom_namespace_node_prop_handlers, "ownerDocument", dom_node_owner_document_read, NULL TSRMLS_CC);
+	dom_register_prop_handler(&dom_namespace_node_prop_handlers, "parentNode", dom_node_parent_node_read, NULL TSRMLS_CC);
+	zend_hash_add(&classes, ce.name, ce.name_length + 1, &dom_namespace_node_prop_handlers, sizeof(dom_namespace_node_prop_handlers), NULL);
+
 	REGISTER_DOM_CLASS(ce, "domdocumentfragment", dom_node_class_entry, php_dom_documentfragment_class_functions, dom_documentfragment_class_entry);
 	zend_hash_add(&classes, ce.name, ce.name_length + 1, &dom_node_prop_handlers, sizeof(dom_node_prop_handlers), NULL);
 	
@@ -742,6 +756,7 @@ PHP_MSHUTDOWN_FUNCTION(dom)
 	zend_hash_destroy(&dom_domimplementationlist_prop_handlers);
 	zend_hash_destroy(&dom_document_prop_handlers);
 	zend_hash_destroy(&dom_node_prop_handlers);
+	zend_hash_destroy(&dom_namespace_node_prop_handlers);
 	zend_hash_destroy(&dom_nodelist_prop_handlers);
 	zend_hash_destroy(&dom_namednodemap_prop_handlers);
 	zend_hash_destroy(&dom_characterdata_prop_handlers);
@@ -815,8 +830,6 @@ void dom_node_free(xmlNodePtr node)
 			case XML_ENTITY_DECL:
 			case XML_ELEMENT_DECL:
 			case XML_ATTRIBUTE_DECL:
-			case XML_NAMESPACE_DECL:
-				/* These can never stand alone */
 				break;
 			case XML_NOTATION_NODE:
 				/* These require special handling */
@@ -831,6 +844,12 @@ void dom_node_free(xmlNodePtr node)
 				}
 				xmlFree(node);
 				break;
+			case XML_NAMESPACE_DECL:
+				if (node->ns) {
+					xmlFreeNs(node->ns);
+					node->ns = NULL;
+				}
+				node->type = XML_ELEMENT_NODE;
 			default:
 				xmlFreeNode(node);
 		}
@@ -859,6 +878,7 @@ void node_free_list(xmlNodePtr node TSRMLS_DC)
 				case XML_DOCUMENT_TYPE_NODE:
 				case XML_ENTITY_DECL:
 				case XML_ATTRIBUTE_NODE:
+				case XML_NAMESPACE_DECL:
 					node_free_list(node->children TSRMLS_CC);
 					break;
 				default:
@@ -889,7 +909,7 @@ void node_free_resource(xmlNodePtr node TSRMLS_DC)
 		case XML_HTML_DOCUMENT_NODE:
 			break;
 		default:
-			if (node->parent == NULL) {
+			if (node->parent == NULL || node->type == XML_NAMESPACE_DECL) {
 				node_free_list((xmlNodePtr) node->children TSRMLS_CC);
 				switch (node->type) {
 					/* Skip property freeing for the following types */
@@ -898,6 +918,7 @@ void node_free_resource(xmlNodePtr node TSRMLS_DC)
 					case XML_DOCUMENT_TYPE_NODE:
 					case XML_ENTITY_DECL:
 					case XML_ATTRIBUTE_NODE:
+					case XML_NAMESPACE_DECL:
 						break;
 					default:
 						node_free_list((xmlNodePtr) node->properties TSRMLS_CC);
@@ -1118,6 +1139,11 @@ zval *php_dom_create_object(xmlNodePtr obj, int *found, zval *wrapper_in, zval *
 			ce = dom_notation_class_entry;
 			break;
 		}
+		case XML_NAMESPACE_DECL:
+		{
+			ce = dom_namespace_node_class_entry;
+			break;
+		}
 		default:
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unsupported node type: %d\n", Z_TYPE_P(obj));
 			ZVAL_NULL(wrapper);
@@ -1183,17 +1209,13 @@ int dom_has_feature(char *feature, char *version)
 /* {{{ void dom_element_get_elements_by_tag_name_ns_raw(xmlNodePtr nodep, char *ns, char *local, zval **retval  TSRMLS_DC) */
 void dom_get_elements_by_tag_name_ns_raw(xmlNodePtr nodep, char *ns, char *local, zval **retval, dom_object *intern  TSRMLS_DC)
 {
-	dom_object *wrapper;
 	int ret;
 
 	while (nodep != NULL) {
 		if (nodep->type == XML_ELEMENT_NODE && xmlStrEqual(nodep->name, local)) {
 			if (ns == NULL || (nodep->ns != NULL && xmlStrEqual(nodep->ns->href, ns))) {
-				zval *child = NULL;
-				wrapper = dom_object_get_data(nodep);
-				if (wrapper == NULL) {
-					MAKE_STD_ZVAL(child);
-				}
+				zval *child;
+				MAKE_STD_ZVAL(child);
 
 				child = php_dom_create_object(nodep, &ret, NULL, child, intern TSRMLS_CC);
 				add_next_index_zval(*retval, child);
@@ -1328,7 +1350,7 @@ xmlNsPtr dom_get_nsdecl(xmlNode *node, xmlChar *localName) {
 	if (localName == NULL || xmlStrEqual(localName, "")) {
 		cur = node->nsDef;
 		while (cur != NULL) {
-			if (cur->prefix == NULL) {
+			if (cur->prefix == NULL  && cur->href != NULL) {
 				ret = cur;
 				break;
 			}
