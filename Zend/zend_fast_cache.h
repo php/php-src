@@ -78,6 +78,12 @@ typedef struct _zend_fast_cache_list_entry {
 		AG(fast_cache_list_head)[fc_type] = (zend_fast_cache_list_entry *) (p);			\
 	}
 
+#define ZEND_FAST_ALLOC_REL(p, type, fc_type)	\
+	ZEND_FAST_ALLOC(p, type, fc_type)
+
+#define ZEND_FAST_FREE_REL(p, fc_type)	\
+	ZEND_FAST_FREE(p, fc_type)
+
 
 #else /* !ZEND_ENABLE_FAST_CACHE */
 
@@ -86,6 +92,12 @@ typedef struct _zend_fast_cache_list_entry {
 
 #define ZEND_FAST_FREE(p, fc_type)	\
 	efree(p)
+
+#define ZEND_FAST_ALLOC_REL(p, type, fc_type)	\
+	(p) = (type *) emalloc_rel(sizeof(type))
+
+#define ZEND_FAST_FREE_REL(p, fc_type)	\
+	efree_rel(p)
 
 #endif /* ZEND_ENABLE_FAST_CACHE */
 
@@ -99,12 +111,24 @@ typedef struct _zend_fast_cache_list_entry {
 #define FREE_ZVAL(z)	\
 	ZEND_FAST_FREE(z, ZVAL_CACHE_LIST)
 
+#define ALLOC_ZVAL_REL(z)	\
+	ZEND_FAST_ALLOC_REL(z, zval, ZVAL_CACHE_LIST)
+
+#define FREE_ZVAL_REL(z)	\
+	ZEND_FAST_FREE_REL(z, ZVAL_CACHE_LIST)
+
 /* fast cache for HashTable's */
-#define ALLOC_HASHTABLE(b)	\
-	ZEND_FAST_ALLOC(b, HashTable, HASHTABLE_CACHE_LIST)
+#define ALLOC_HASHTABLE(ht)	\
+	ZEND_FAST_ALLOC(ht, HashTable, HASHTABLE_CACHE_LIST)
 
 #define FREE_HASHTABLE(ht)	\
 	ZEND_FAST_FREE(ht, HASHTABLE_CACHE_LIST)
+
+#define ALLOC_HASHTABLE_REL(ht)	\
+	ZEND_FAST_ALLOC_REL(ht, HashTable, HASHTABLE_CACHE_LIST)
+
+#define FREE_HASHTABLE_REL(ht)	\
+	ZEND_FAST_FREE_REL(ht, HASHTABLE_CACHE_LIST)
 
 #endif /* _ZEND_FAST_CACHE_H */
 

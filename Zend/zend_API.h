@@ -90,9 +90,12 @@ ZEND_API void wrong_param_count(void);
 
 ZEND_API int zend_startup_module(zend_module_entry *module);
 
-ZEND_API int array_init(zval *arg);
-ZEND_API int object_init(zval *arg);
-ZEND_API int object_init_ex(zval *arg, zend_class_entry *ce);
+#define array_init(arg)			_array_init((arg) ZEND_FILE_LINE_CC)
+#define object_init(arg)		_object_init((arg) ZEND_FILE_LINE_CC)
+#define object_init_ex(arg, ce)	_object_init_ex((arg), (ce) ZEND_FILE_LINE_CC)
+ZEND_API int _array_init(zval *arg ZEND_FILE_LINE_DC);
+ZEND_API int _object_init(zval *arg ZEND_FILE_LINE_DC);
+ZEND_API int _object_init_ex(zval *arg, zend_class_entry *ce ZEND_FILE_LINE_DC);
 
 /* no longer supported */
 ZEND_API int add_assoc_function(zval *arg, char *key,void (*function_ptr)(INTERNAL_FUNCTION_PARAMETERS));
