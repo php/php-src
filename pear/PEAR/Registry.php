@@ -55,7 +55,7 @@ class PEAR_Registry
 
     function _packageFileName($package)
     {
-        return "{$this->statedir}/{$package}.inf";
+        return "{$this->statedir}/{$package}.reg";
     }
 
     // }}}
@@ -162,7 +162,7 @@ class PEAR_Registry
             return $pkglist;
         }
         while ($ent = readdir($dp)) {
-            if ($ent{0} == "." || substr($ent, -4) != ".inf") {
+            if ($ent{0} == "." || substr($ent, -4) != ".reg") {
                 continue;
             }
             $pkglist[] = substr($ent, 0, -4);
