@@ -308,9 +308,7 @@ static void *php3_merge_dir(pool *p, void *basev, void *addv)
 	if (add->log_errors != orig.log_errors) new->log_errors = add->log_errors;
 	if (add->doc_root != orig.doc_root) new->doc_root = add->doc_root;
 	if (add->user_dir != orig.user_dir) new->user_dir = add->user_dir;
-	if (add->safe_mode != orig.safe_mode) new->safe_mode = add->safe_mode;
 	if (add->track_vars != orig.track_vars) new->track_vars = add->track_vars;
-	if (add->safe_mode_exec_dir != orig.safe_mode_exec_dir) new->safe_mode_exec_dir = add->safe_mode_exec_dir;
 	if (add->cgi_ext != orig.cgi_ext) new->cgi_ext = add->cgi_ext;
 	if (add->isapi_ext != orig.isapi_ext) new->isapi_ext = add->isapi_ext;
 	if (add->nsapi_ext != orig.nsapi_ext) new->nsapi_ext = add->nsapi_ext;
@@ -322,7 +320,6 @@ static void *php3_merge_dir(pool *p, void *basev, void *addv)
 	if (add->extension_dir != orig.extension_dir) new->extension_dir = add->extension_dir;
 	if (add->error_log != orig.error_log) new->error_log = add->error_log;
 	/* skip the highlight stuff */
-	if (add->sql_safe_mode != orig.sql_safe_mode) new->sql_safe_mode = add->sql_safe_mode;
 	if (add->xbithack != orig.xbithack) new->xbithack = add->xbithack;
 	if (add->engine != orig.engine) new->engine = add->engine;
 	if (add->last_modified != orig.last_modified) new->last_modified = add->last_modified;
@@ -353,14 +350,8 @@ char *php3flaghandler(cmd_parms * cmd, php3_ini_structure * conf, int val)
 		case 0:
 			conf->track_errors = val;
 			break;
-		case 4:
-			conf->safe_mode = val;
-			break;
 		case 5:
 			conf->track_vars = val;
-			break;
-		case 6:
-			conf->sql_safe_mode = val;
 			break;
 		case 7:
 			conf->engine = val;
@@ -432,9 +423,6 @@ char *php3take1handler(cmd_parms * cmd, php3_ini_structure * conf, char *arg)
 			break;
 		case 2:
 			conf->user_dir = pstrdup(cmd->pool, arg);
-			break;
-		case 3:
-			conf->safe_mode_exec_dir = pstrdup(cmd->pool, arg);
 			break;
 		case 4:
 			conf->include_path = pstrdup(cmd->pool, arg);
@@ -581,7 +569,6 @@ command_rec php3_commands[] =
 	{"php3_error_reporting", php3take1handler, (void *)0, OR_OPTIONS, TAKE1, "error reporting level"},
 	{"php3_doc_root", php3take1handler, (void *)1, ACCESS_CONF|RSRC_CONF, TAKE1, "directory"}, /* not used yet */
 	{"php3_user_dir", php3take1handler, (void *)2, ACCESS_CONF|RSRC_CONF, TAKE1, "user directory"}, /* not used yet */
-	{"php3_safe_mode_exec_dir", php3take1handler, (void *)3, ACCESS_CONF|RSRC_CONF, TAKE1, "safe mode executable dir"},
 	{"php3_include_path", php3take1handler, (void *)4, OR_OPTIONS, TAKE1, "colon-separated path"},
 	{"php3_auto_prepend_file", php3take1handler, (void *)5, OR_OPTIONS, TAKE1, "file name"},
 	{"php3_auto_append_file", php3take1handler, (void *)6, OR_OPTIONS, TAKE1, "file name"},
@@ -603,9 +590,7 @@ command_rec php3_commands[] =
 	 "Lets PHP handle DAV requests by parsing this script."},
 #endif
 	{"php3_track_errors", php3flaghandler, (void *)0, OR_OPTIONS, FLAG, "on|off"},
-	{"php3_safe_mode", php3flaghandler, (void *)4, ACCESS_CONF|RSRC_CONF, FLAG, "on|off"},
 	{"php3_track_vars", php3flaghandler, (void *)5, OR_OPTIONS, FLAG, "on|off"},
-	{"php3_sql_safe_mode", php3flaghandler, (void *)6,  ACCESS_CONF|RSRC_CONF, FLAG, "on|off"},
 	{"php3_engine", php3flaghandler, (void *)7, RSRC_CONF|ACCESS_CONF, FLAG, "on|off"},
 	{"php3_xbithack", php3flaghandler, (void *)8, OR_OPTIONS, FLAG, "on|off"},
 	{"php3_last_modified", php3flaghandler, (void *)9, OR_OPTIONS, FLAG, "on|off"},

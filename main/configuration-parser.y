@@ -34,6 +34,7 @@
 
 #define DEBUG_CFG_PARSER 1
 #include "php.h"
+#include "php_globals.h"
 #include "functions/dl.h"
 #include "functions/file.h"
 #include "functions/php3_browscap.h"
@@ -161,7 +162,7 @@ int php3_init_config(void)
 #if USE_CONFIG_FILE
 	{
 		char *env_location,*default_location,*php_ini_path;
-		int safe_mode_state = php3_ini.safe_mode;
+		int safe_mode_state = PG(safe_mode);
 		char *opened_path;
 		int free_default_location=0;
 		
@@ -203,13 +204,13 @@ int php3_init_config(void)
 			/* if path was set via -c flag, only look there */
 			strcpy(php_ini_path,default_location);
 		}
-		php3_ini.safe_mode = 0;
+		PG(safe_mode) = 0;
 		cfgin = php3_fopen_with_path("php3.ini","r",php_ini_path,&opened_path);
 		free(php_ini_path);
 		if (free_default_location) {
 			free(default_location);
 		}
-		php3_ini.safe_mode = safe_mode_state;
+		PG(safe_mode) = safe_mode_state;
 
 		if (!cfgin) {
 # if WIN32|WINNT
