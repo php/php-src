@@ -1707,6 +1707,14 @@ ZEND_API int zend_declare_property(zend_class_entry *ce, char *name, int name_le
 			}
 			break;
 		case ZEND_ACC_PUBLIC:
+			if (ce->parent) {
+				char *prot_name;
+				int prot_name_length;
+
+				mangle_property_name(&prot_name, &prot_name_length, "*", 1, name, name_length, ce->type & ZEND_INTERNAL_CLASS);
+				zend_hash_del(target_symbol_table, prot_name, prot_name_length+1);
+				pefree(prot_name, ce->type & ZEND_INTERNAL_CLASS);
+			}
 			zend_hash_update(target_symbol_table, name, name_length+1, &property, sizeof(zval *), NULL);
 			property_info.name = ce->type & ZEND_INTERNAL_CLASS ? zend_strndup(name, name_length) : estrndup(name, name_length);
 			property_info.name_length = name_length;
