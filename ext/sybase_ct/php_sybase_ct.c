@@ -798,10 +798,10 @@ PHP_FUNCTION(sybase_close)
 			break;
 	}
 
-	ZEND_FETCH_RESOURCE2(sybase_ptr, sybase_link *, &sybase_link_index, id, "Sybase-Link", le_link, le_plink);
+	ZEND_FETCH_RESOURCE2(sybase_ptr, sybase_link *, sybase_link_index, id, "Sybase-Link", le_link, le_plink);
 
 	if (id == -1) { /* explicit resource number */
-		zend_list_delete(Z_RESVAL_P(sybase_link_index));
+		zend_list_delete(Z_RESVAL_PP(sybase_link_index));
 	}
 
 	if (id != -1 || (sybase_link_index && Z_RESVAL_PP(sybase_link_index)==SybCtG(default_link))) {
@@ -1721,7 +1721,7 @@ PHP_FUNCTION(sybase_data_seek)
 	}
 
 
-	ZEND_FETCH_RESOURCE(result, sybase_result *, &sybase_result_index, -1, "Sybase result", le_result);
+	ZEND_FETCH_RESOURCE(result, sybase_result *, sybase_result_index, -1, "Sybase result", le_result);
 
 	convert_to_long_ex(offset);
 
@@ -1788,7 +1788,7 @@ static char *php_sybase_get_field_name(CS_INT type)
    Get field information */
 PHP_FUNCTION(sybase_fetch_field)
 {
-	zval *sybase_result_index, *offset;
+	zval **sybase_result_index, **offset;
 	int field_offset;
 	sybase_result *result;
 
@@ -1811,7 +1811,7 @@ PHP_FUNCTION(sybase_fetch_field)
 			break;
 	}
 
-	ZEND_FETCH_RESOURCE(result, sybase_result *, &sybase_result_index, -1, "Sybase result", le_result);
+	ZEND_FETCH_RESOURCE(result, sybase_result *, sybase_result_index, -1, "Sybase result", le_result);
 
 	if (field_offset==-1) {
 		field_offset = result->cur_field;
@@ -1849,7 +1849,7 @@ PHP_FUNCTION(sybase_field_seek)
 		WRONG_PARAM_COUNT;
 	}
 
-	ZEND_FETCH_RESOURCE(result, sybase_result *, &sybase_result_index, -1, "Sybase result", le_result);
+	ZEND_FETCH_RESOURCE(result, sybase_result *, sybase_result_index, -1, "Sybase result", le_result);
 
 	convert_to_long_ex(offset);
 	field_offset = Z_LVAL_PP(offset);
@@ -1883,7 +1883,7 @@ PHP_FUNCTION(sybase_result)
 	}
 
 
-	ZEND_FETCH_RESOURCE(result, sybase_result *, &sybase_result_index, -1, "Sybase result", le_result);
+	ZEND_FETCH_RESOURCE(result, sybase_result *, sybase_result_index, -1, "Sybase result", le_result);
 
 	convert_to_long_ex(row);
 	
@@ -1952,7 +1952,7 @@ PHP_FUNCTION(sybase_affected_rows)
 			break;
 	}
 
-	ZEND_FETCH_RESOURCE2(sybase_ptr, sybase_link *, &sybase_link_index, id, "Sybase-Link", le_link, le_plink);
+	ZEND_FETCH_RESOURCE2(sybase_ptr, sybase_link *, sybase_link_index, id, "Sybase-Link", le_link, le_plink);
 
 	Z_LVAL_P(return_value) = sybase_ptr->affected_rows;
 	Z_TYPE_P(return_value) = IS_LONG;

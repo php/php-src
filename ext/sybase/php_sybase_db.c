@@ -770,7 +770,7 @@ static void php_sybase_get_column_content(sybase_link *sybase_ptr,int offset,pva
    Send Sybase query */
 PHP_FUNCTION(sybase_query)
 {
-	pval *query,*sybase_link_index;
+	zval **query, **sybase_link_index;
 	int id,type,retvalue;
 	sybase_link *sybase_ptr;
 	sybase_result *result;
