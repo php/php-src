@@ -1092,7 +1092,7 @@ gdImageDashedLine (gdImagePtr im, int x1, int y1, int x2, int y2, int color)
   else
     {
       /* More-or-less vertical. use wid for horizontal stroke */
-      wid = thick * sin (atan2 (dy, dx));
+      wid = (int)(thick * sin (atan2 (dy, dx)));
       vert = 0;
 
       d = 2 * dx - dy;
