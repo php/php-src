@@ -1,6 +1,7 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.0.7-dev
+- Fixed various memory leaks in the LDAP extension (Stig Venaas)
 - Improved interactive mode - it is now available in all builds of PHP, without
   any significant slowdown (Zeev, Zend Engine)
 - Fixed crash in iptcparse() if the supplied data was bogus. (Thies)
