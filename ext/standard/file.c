@@ -465,7 +465,7 @@ PHP_FUNCTION(file_get_contents)
 }
 /* }}} */
 
-/* {{{ proto string file_put_contents(string file, string data)
+/* {{{ proto string file_put_contents(string file, string data[, bool use_include_path[, resource context]])
    Write/Create a file with contents data */
 PHP_FUNCTION(file_put_contents)
 {
@@ -474,14 +474,20 @@ PHP_FUNCTION(file_put_contents)
 	size_t filename_len, data_len;
 	int numbytes;
 	zend_bool use_include_path = 0;
+	zval *zcontext = NULL;
+	php_stream_context *context = NULL;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|b", &filename, &filename_len, 
-				&data, &data_len, &use_include_path) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|br!", &filename, &filename_len, 
+				&data, &data_len, &use_include_path, &zcontext) == FAILURE) {
 		return;
 	}
 
-	stream = php_stream_open_wrapper(filename, "wb", 
-			(use_include_path ? USE_PATH : 0) | ENFORCE_SAFE_MODE | REPORT_ERRORS, NULL);
+	if (zcontext) {
+		context = zend_fetch_resource(&zcontext TSRMLS_CC, -1, "Stream-Context", NULL, 1, php_le_stream_context());
+	}
+
+	stream = php_stream_open_wrapper_ex(filename, "wb", 
+			(use_include_path ? USE_PATH : 0) | ENFORCE_SAFE_MODE | REPORT_ERRORS, NULL, context);
 	if (stream == NULL) {
 		RETURN_FALSE;
 	}
@@ -1282,37 +1288,27 @@ PHP_FUNCTION(rmdir)
 }
 /* }}} */
 
-/* {{{ proto int readfile(string filename [, bool use_include_path])
+/* {{{ proto int readfile(string filename [, bool use_include_path[, resource context]])
    Output a file or a URL */
 PHP_FUNCTION(readfile)
 {
-	zval **arg1, **arg2;
-	int size=0;
-	int use_include_path=0;
+	int size = 0;
+	char *filename;
+	int filename_len;
+	zend_bool use_include_path = 0;
+	zval *zcontext = NULL;
 	php_stream *stream;
-	
-	/* check args */
-	switch (ZEND_NUM_ARGS()) {
-		case 1:
-			if (zend_get_parameters_ex(1, &arg1) == FAILURE) {
-				WRONG_PARAM_COUNT;
-			}
-			break;
+	php_stream_context *context = NULL;
 
-		case 2:
-			if (zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
-				WRONG_PARAM_COUNT;
-			}
-			convert_to_long_ex(arg2);
-			use_include_path = Z_LVAL_PP(arg2);
-			break;
-
-		default:
-			WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|br!", &filename, &filename_len, &use_include_path, &zcontext) == FAILURE) {
+		RETURN_FALSE;
 	}
-	convert_to_string_ex(arg1);
 
-	stream = php_stream_open_wrapper(Z_STRVAL_PP(arg1), "rb", (use_include_path ? USE_PATH : 0) | ENFORCE_SAFE_MODE | REPORT_ERRORS, NULL);
+	if (zcontext) {
+		context = zend_fetch_resource(&zcontext TSRMLS_CC, -1, "Stream-Context", NULL, 1, php_le_stream_context());
+	}
+
+	stream = php_stream_open_wrapper_ex(filename, "rb", (use_include_path ? USE_PATH : 0) | ENFORCE_SAFE_MODE | REPORT_ERRORS, NULL, context);
 	if (stream) {
 		size = php_stream_passthru(stream);
 		php_stream_close(stream);
