@@ -23,6 +23,7 @@
 #include "streams/php_streams_int.h"
 #include "php_network.h"
 #include "php_openssl.h"
+#include <openssl/ssl.h>
 #include <openssl/err.h>
 
 

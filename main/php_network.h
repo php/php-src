@@ -76,10 +76,6 @@ PHPAPI char *php_socket_strerror(long err, char *buf, size_t bufsize);
 #include <sys/time.h>
 #endif
 
-#if HAVE_OPENSSL_EXT
-#include <openssl/ssl.h>
-#endif
-
 #ifdef HAVE_STDDEF_H
 #include <stddef.h>
 #endif

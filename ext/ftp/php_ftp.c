@@ -35,6 +35,10 @@
 #endif
 #endif
 
+#if HAVE_OPENSSL_EXT
+#include <openssl/ssl.h>
+#endif
+
 #if HAVE_FTP
 
 #include "ext/standard/info.h"

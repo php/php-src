@@ -65,6 +65,10 @@
 #include <sys/select.h>
 #endif
 
+#if HAVE_OPENSSL_EXT
+#include <openssl/ssl.h>
+#endif
+
 #include "ftp.h"
 #include "ext/standard/fsock.h"
 
