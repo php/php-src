@@ -33,15 +33,6 @@ static inline zend_class_entry *spl_get_class_entry(zval *obj TSRMLS_DC)
 }
 /* }}} */
 
-#define spl_call_method_0(obj, obj_ce, fn_proxy, function_name, fname_len, retval) \
-	spl_call_method(obj, obj_ce, fn_proxy, function_name, fname_len, retval, 0, NULL, NULL TSRMLS_CC)
-
-#define spl_call_method_1(obj, obj_ce, fn_proxy, function_name, fname_len, retval, arg1) \
-	spl_call_method(obj, obj_ce, fn_proxy, function_name, fname_len, retval, 1, arg1, NULL TSRMLS_CC)
-
-#define spl_call_method_2(obj, obj_ce, fn_proxy, function_name, fname_len, retval, arg1, arg2) \
-	spl_call_method(obj, obj_ce, fn_proxy, function_name, fname_len, retval, 2, arg1, arg2 TSRMLS_CC)
-
 void spl_instantiate(zend_class_entry *pce, zval **object, int alloc TSRMLS_DC);
 int spl_instantiate_arg_ex1(zend_class_entry *pce, zval **retval, int alloc, zval *arg1 TSRMLS_DC);
 int spl_instantiate_arg_ex2(zend_class_entry *pce, zval **retval, int alloc, zval *arg1, zval *arg2 TSRMLS_DC);
