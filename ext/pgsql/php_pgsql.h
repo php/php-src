@@ -99,6 +99,7 @@ PHP_FUNCTION(pg_field_prtlen);
 PHP_FUNCTION(pg_field_is_null);
 /* async message functions */
 PHP_FUNCTION(pg_get_notify);
+PHP_FUNCTION(pg_get_pid);
 /* error message functions */
 PHP_FUNCTION(pg_result_error);
 PHP_FUNCTION(pg_last_error);
