@@ -110,7 +110,7 @@ void ThrowServletException (JNIEnv *jenv, char *msg) {
 static int sapi_servlet_ub_write(const char *str, uint str_length TSRMLS_DC)
 {
 	if (!SG(server_context)) {
-		fprintf(stderr, str);
+		fprintf(stderr, "%s", str);
 		return 0;
 	}
 

@@ -108,7 +108,7 @@ PHP_MINFO_FUNCTION(cyrus)
 
 extern void fatal(char *s, int exit)
 {
-	php_error(E_ERROR, s);
+	php_error(E_ERROR, "%s", s);
 }
 
 /* {{{ proto resource cyrus_connect([ string host [, string port [, int flags]]])

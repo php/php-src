@@ -1797,7 +1797,7 @@ static MH_ERROR error_print(void *user_data, SablotHandle proc, MH_ERROR code, M
 		XSLT_REG_ERRMSG(errmsg, handle);
 
 		/* Output a warning */
-		php_error(E_WARNING, msgbuf);
+		php_error(E_WARNING, "%s", msgbuf);
 
 		/* Cleanup */
 		efree(msgbuf);

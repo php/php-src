@@ -260,7 +260,7 @@ PHP_MINFO_FUNCTION(db)
 {
 	/* this isn't pretty ... should break out the info a bit more (cmv) */
 	php_info_print_box_start(0);
-	php_printf(php_get_info_db());
+	php_printf("%s", php_get_info_db());
 	php_info_print_box_end();
 }
 /* }}} */

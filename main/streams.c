@@ -369,7 +369,7 @@ fprintf(stderr, "stream_free: %s:%p[%s] preserve_handle=%d release_cast=%d remov
 # if defined(PHP_WIN32)
 			OutputDebugString(leakbuf);
 # else
-			fprintf(stderr, leakbuf);
+			fprintf(stderr, "%s", leakbuf);
 # endif
 		} else {
 			STR_FREE(stream->__orig_path);
@@ -2368,7 +2368,7 @@ PHPAPI void php_stream_wrapper_log_error(php_stream_wrapper *wrapper, int option
 	va_end(args);
 
 	if (options & REPORT_ERRORS || wrapper == NULL) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, buffer);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", buffer);
 		efree(buffer);
 	} else {
 		/* append to stack */
