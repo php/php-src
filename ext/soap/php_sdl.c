@@ -775,9 +775,12 @@ static sdlPtr load_wsdl(char *struri)
 						function->requestParameters = wsdl_message(&ctx, message->children->content);
 
 						name = get_attribute(input->properties, "name");
+/* FIXME
 						if (name != NULL) {
 							function->requestName = estrdup(name->children->content);
 						} else {
+*/
+						{
 							function->requestName = estrdup(function->functionName);
 						}
 
@@ -801,11 +804,14 @@ static sdlPtr load_wsdl(char *struri)
 						function->responseParameters = wsdl_message(&ctx, message->children->content);
 
 						name = get_attribute(output->properties, "name");
+/* FIXME
 						if (name != NULL) {
 							function->responseName = estrdup(name->children->content);
 						} else if (input == NULL) {
 							function->responseName = estrdup(function->functionName);
 						} else {
+*/
+						{
 							int len = strlen(function->functionName);
 							function->responseName = emalloc(len + sizeof("Response"));
 							memcpy(function->responseName, function->functionName, len);
@@ -954,7 +960,7 @@ static sdlPtr load_wsdl(char *struri)
 	return ctx.sdl;
 }
 
-#define WSDL_CACHE_VERSION 07
+#define WSDL_CACHE_VERSION 0x08
 
 #define WSDL_CACHE_GET(ret,type,buf)   memcpy(&ret,*buf,sizeof(type)); *buf += sizeof(type);
 #define WSDL_CACHE_GET_INT(ret,buf)    ret = ((unsigned char)(*buf)[0])|((unsigned char)(*buf)[1]<<8)|((unsigned char)(*buf)[2]<<16)|((int)(*buf)[3]<<24); *buf += 4;
