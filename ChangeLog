@@ -2,6 +2,8 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? 1999, Version 4.0 Beta 3
+- Added second parameter to array_keys which specifies search value
+  for which the key should be returned (Andrey)
 - Resourcified Informix driver (Danny)
 - New resource handling for odbc, renamed to php_odbc.[ch]
 - Make set_time_limit() work on Unix (Rasmus)
