@@ -17,7 +17,7 @@
   +----------------------------------------------------------------------+
 */
 
-// $Id: confutils.js,v 1.47 2004-11-10 20:12:42 fmk Exp $
+// $Id: confutils.js,v 1.48 2004-11-10 23:52:56 fmk Exp $
 
 var STDOUT = WScript.StdOut;
 var STDERR = WScript.StdErr;
@@ -1092,7 +1092,7 @@ function ADD_SOURCES(dir, file_list, target)
 	sub_build += d;
 
 
-	DEFINE(bd_flags_name, "/Fo" + sub_build + " /Fd" + sub_build + " /Fp" + sub_build + " /FR" + sub_build + " ");
+	DEFINE(bd_flags_name, " /Fd" + sub_build + " /Fp" + sub_build + " /FR" + sub_build + " ");
 
 	for (i in file_list) {
 		src = file_list[i];
@@ -1109,7 +1109,7 @@ function ADD_SOURCES(dir, file_list, target)
 			}
 		} else {
 			MFO.WriteLine(sub_build + obj + ": " + dir + "\\" + src);
-			MFO.WriteLine("\t$(CC) $(" + flags + ") $(CFLAGS) $(" + bd_flags_name + ") " + dir + "\\" + src + " /Fo" + sub_build + obj);
+			MFO.WriteLine("\t$(CC) $(" + flags + ") $(CFLAGS) $(" + bd_flags_name + ") /c " + dir + "\\" + src + " /Fo" + sub_build + obj);
 		}
 	}
 
