@@ -1145,67 +1145,36 @@ PHP_FUNCTION(soapobject)
 
 
 PHP_FUNCTION(__parse)
-
 {
-
 	char *message, *function;
-
 	int message_len, function_len;
-
 	int num_params;
-
 	zval **ret_params;
-
 	sdlPtr sdl;
-
 	sdlFunctionPtr fn;
 
-
-
 	if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|s", &message, &message_len, &function, &function_len) == FAILURE)
-
 		php_error(E_ERROR, "Invalid arguments to SoapObject->__parse");
-
-
 
 	FETCH_THIS_SDL(sdl);
 
-
-
 	if(sdl != NULL)
-
 	{
-
 		fn = get_function(sdl, function);
-
 		if(fn != NULL)
-
 			parse_packet_soap(getThis(), message, message_len, fn, NULL, &ret_params, &num_params);
-
 	}
-
 	else
-
 			parse_packet_soap(getThis(), message, message_len, NULL, function, &ret_params, &num_params);
 
-
-
 	if(num_params > 0)
-
 	{
-
 		*return_value = *ret_params[0];
-
 		zval_add_ref(&return_value);
-
 		efree(ret_params);
-
 	}
-
 	else
-
 		ZVAL_NULL(return_value)
-
 }
 
 PHP_FUNCTION(__call)
