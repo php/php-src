@@ -226,6 +226,8 @@ PHPAPI php_stream *_php_stream_alloc(php_stream_ops *ops, void *abstract,
 # define php_stream_to_zval(stream, zval)	{ ZVAL_RESOURCE(zval, (stream)->rsrc_id); }
 #endif
 
+#define php_stream_from_zval(stream, ppzval)	ZEND_FETCH_RESOURCE((stream), php_stream *, (ppzval), -1, "stream", php_file_le_stream())
+
 #define PHP_STREAM_FREE_CALL_DTOR			1 /* call ops->close */
 #define PHP_STREAM_FREE_RELEASE_STREAM		2 /* pefree(stream) */
 #define PHP_STREAM_FREE_PRESERVE_HANDLE		4 /* tell ops->close to not close it's underlying handle */
