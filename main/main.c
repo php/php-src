@@ -576,7 +576,7 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 	php_error(type, "%s", message);
 	efree(message);
 
-	if (PG(track_errors) && EG(active_symbol_table)) {
+	if (PG(track_errors) && module_initialized && EG(active_symbol_table)) {
 		zval *tmp;
 		ALLOC_INIT_ZVAL(tmp);
 		ZVAL_STRINGL(tmp, buffer, buffer_len, 1);
@@ -820,7 +820,7 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 		efree(buffer);
 		return;
 	}
-	if (PG(track_errors) && EG(active_symbol_table)) {
+	if (PG(track_errors) && module_initialized && EG(active_symbol_table)) {
 		pval *tmp;
 
 		ALLOC_ZVAL(tmp);
