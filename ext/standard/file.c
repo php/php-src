@@ -1051,6 +1051,8 @@ PHP_FUNCTION(fgetss)
 	int issock=0;
 	int socketd=0;
 	void *what;
+	char *allowed_tags=NULL;
+	int allowed_tags_len=0;
 	FIL_FETCH();
 
 	switch(ARG_COUNT(ht)) {
@@ -1064,6 +1066,8 @@ PHP_FUNCTION(fgetss)
 			RETURN_FALSE;
 		}
 		convert_to_string_ex(allow);
+		allowed_tags = (*allow)->value.str.val;
+		allowed_tags_len = (*allow)->value.str.len;
 		break;
 	default:
 		WRONG_PARAM_COUNT;
@@ -1091,7 +1095,7 @@ PHP_FUNCTION(fgetss)
 	}
 
 	/* strlen() can be used here since we are doing it on the return of an fgets() anyway */
-	php_strip_tags(buf, strlen(buf), FIL(fgetss_state), allow?(*allow)->value.str.val:NULL);
+	php_strip_tags(buf, strlen(buf), FIL(fgetss_state), allowed_tags, allowed_tags_len);
 
 	RETURN_STRING(buf, 0);
 }

@@ -2038,6 +2038,8 @@ PHP_FUNCTION(strip_tags)
 {
 	char *buf;
 	zval **str, **allow=NULL;
+	char *allowed_tags=NULL;
+	int allowed_tags_len=0;
 
 	switch(ARG_COUNT(ht)) {
 		case 1:
@@ -2050,6 +2052,8 @@ PHP_FUNCTION(strip_tags)
 				RETURN_FALSE;
 			}
 			convert_to_string_ex(allow);
+			allowed_tags = (*allow)->value.str.val;
+			allowed_tags_len = (*allow)->value.str.len;
 			break;
 		default:
 			WRONG_PARAM_COUNT;
@@ -2057,7 +2061,7 @@ PHP_FUNCTION(strip_tags)
 	}
 	convert_to_string_ex(str);
 	buf = estrdup((*str)->value.str.val);
-	php_strip_tags(buf, (*str)->value.str.len, 0, allow?(*allow)->value.str.val:NULL);
+	php_strip_tags(buf, (*str)->value.str.len, 0, allowed_tags, allowed_tags_len);
 	RETURN_STRING(buf, 0);
 }
 /* }}} */
@@ -2203,7 +2207,8 @@ int php_tag_find(char *tag, int len, char *set) {
 	in state 1 and when the tag is closed check it against the
 	allow string to see if we should allow it.
 */
-PHPAPI void php_strip_tags(char *rbuf, int len, int state, char *allow) {
+PHPAPI void php_strip_tags(char *rbuf, int len, int state, char *allow, int allow_len)
+{
 	char *tbuf, *buf, *p, *tp, *rp, c, lc;
 	int br, i=0;
 
@@ -2214,7 +2219,7 @@ PHPAPI void php_strip_tags(char *rbuf, int len, int state, char *allow) {
 	rp = rbuf;
 	br = 0;
 	if(allow) {
-		php_strtolower(allow, len);
+		php_strtolower(allow, allow_len);
 		tbuf = emalloc(PHP_TAG_BUF_SIZE+1);
 		tp = tbuf;
 	} else {
