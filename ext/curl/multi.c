@@ -221,7 +221,7 @@ PHP_FUNCTION(curl_multi_info_read)
 	array_init(return_value);
 	add_assoc_long(return_value, "msg", tmp_msg->msg);
 	add_assoc_long(return_value, "result", tmp_msg->data.result);
-	add_assoc_resource(return_value, "handle", zend_list_id_by_pointer(tmp_msg->easy_handle, le_curl TSRMLS_CC));
+	/* add_assoc_resource(return_value, "handle", zend_list_id_by_pointer(tmp_msg->easy_handle, le_curl TSRMLS_CC)); */
 	add_assoc_string(return_value, "whatever", (char *) tmp_msg->data.whatever, 1);
 }
 /* }}} */
