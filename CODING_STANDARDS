@@ -111,7 +111,7 @@ Naming Conventions
     avoided, except for places where the variable has no real meaning or
     a trivial meaning (e.g. for (i=0; i<100; i++) ...).
 
-[5] Variable names should be in lowercase;  Use underscores to seperate
+[5] Variable names should be in lowercase.  Use underscores to separate
     between words.
 
 
@@ -132,7 +132,7 @@ Syntax and indentation
     at the very least, when you write code that goes into the core
     of PHP or one of its standard modules, please maintain the K&R
     style.  This applies to just about everything, starting with
-    indentation and comment styles and up to function decleration
+    indentation and comment styles and up to function declaration
     syntax.
     
 [3] Be generous with whitespace and braces.  Always prefer:
@@ -145,7 +145,7 @@ Syntax and indentation
 
 	if(foo)bar;
 
-    Keep one empty line between the variable decleration section and
+    Keep one empty line between the variable declaration section and
     the statements in a block, as well as between logical statement
     groups in a block.  Maintain at least one empty line between
     two functions, preferably two.
@@ -163,7 +163,7 @@ prototype before it along with a brief one-line description of what the
 function does.  It would look like this:
 
 /* {{{ proto int abs(int number)
-   Return the absolute value of the number */
+   Returns the absolute value of the number */
 PHP_FUNCTION(abs)
 {
    ...
@@ -184,7 +184,7 @@ messing up the function summary.
 Optional arguments are written like this:
 
 /* {{{ proto object imap_header(int stream_id, int msg_no [, int from_length [, int subject_length [, string default_host]]])
-   Returns a header object with the defined parameters. */
+   Returns a header object with the defined parameters */
 
 And yes, please keep the prototype on a single line, even if that line
 is massive.
@@ -199,14 +199,14 @@ standard prefixing conventions during their initial implementation.
 
 The file labelled 'EXPERIMENTAL' should include the following
 information:
-   Any authoring infomration (known bugs, future directions of the module).
+   Any authoring information (known bugs, future directions of the module).
    Ongoing status notes which may not be appropriate for CVS comments.
 
 Aliases & Legacy Documentation
 -----------------------------------
 You may also have some deprecated aliases with close to duplicate
 names, for example, somedb_select_result and somedb_selectresult. For
-documentation puposes, these will only be documented by the most
+documentation purposes, these will only be documented by the most
 current name, with the aliases listed in the documentation for
 the parent function. For ease of reference, user-functions with
 completely different names, that alias to the same function (such as
@@ -215,4 +215,4 @@ proto should still be included, describing which function is aliased.
 
 Backwards compatible functions and names should be maintained as long
 as the code can be reasonably be kept as part of the codebase. See
-/phpdoc/README for me information on documentation.
+/phpdoc/README for more information on documentation.
