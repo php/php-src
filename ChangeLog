@@ -1,3 +1,24 @@
+2000-01-31  Zeev Suraski  <zeev@php.net>
+
+    * NEWS
+      ext/standard/basic_functions.c
+      ext/standard/basic_functions.h
+      php.ini-dist: Add the complement to the putenv() security
+
+2000-01-31  Andrei Zmievski  <andrei@ispi.net>
+
+    * TODO: Another todo.
+
+2000-01-31  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/datetime.c: (PHP mktime) Added windowing support for 0..70
+
+2000-01-31  Andrei Zmievski  <andrei@ispi.net>
+
+    * TODO: Another point.
+
+    * NEWS: *** empty log message ***
+
 2000-01-30  Zeev Suraski  <zeev@php.net>
 
     * ext/standard/basic_functions.h: Fix typo
