@@ -43,6 +43,9 @@
 #ifdef ZEND_WIN32
 # include "zend_config.w32.h"
 # define ZEND_PATHS_SEPARATOR		';'
+#elif defined(NETWARE)
+# include "zend_config.nw.h"
+# include "acconfig.h"
 #elif defined(__riscos__)
 # include "zend_config.h"
 # define ZEND_PATHS_SEPARATOR		';'
@@ -118,7 +121,7 @@ char *alloca ();
 # endif
 #endif
 
-#if (HAVE_ALLOCA || (defined (__GNUC__) && __GNUC__ >= 2)) && !(defined(ZTS) && defined(ZEND_WIN32))
+#if (HAVE_ALLOCA || (defined (__GNUC__) && __GNUC__ >= 2)) && !(defined(ZTS) && defined(ZEND_WIN32)) && !(defined(ZTS) && defined(NETWARE))
 # define do_alloca(p) alloca(p)
 # define free_alloca(p)
 #else
