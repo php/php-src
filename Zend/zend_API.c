@@ -1360,7 +1360,7 @@ ZEND_API zend_class_entry *zend_register_internal_class(zend_class_entry *orig_c
 
 	class_entry->type = ZEND_INTERNAL_CLASS;
 	class_entry->parent = NULL;
-	zend_initialize_class_data(class_entry, 0);
+	zend_initialize_class_data(class_entry, 0 TSRMLS_CC);
 
 	if (class_entry->builtin_functions) {
 		zend_register_functions(class_entry, class_entry->builtin_functions, &class_entry->function_table, MODULE_PERSISTENT TSRMLS_CC);

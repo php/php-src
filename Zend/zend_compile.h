@@ -336,8 +336,8 @@ void zend_do_end_catch(znode *try_token TSRMLS_DC);
 void zend_do_throw(znode *expr TSRMLS_DC);
 
 ZEND_API int do_bind_function(zend_op *opline, HashTable *function_table, HashTable *class_table, int compile_time);
-ZEND_API int do_bind_class(zend_op *opline, HashTable *function_table, HashTable *class_table);
-ZEND_API int do_bind_inherited_class(zend_op *opline, HashTable *function_table, HashTable *class_table, zend_class_entry *parent_ce);
+ZEND_API int do_bind_class(zend_op *opline, HashTable *function_table, HashTable *class_table TSRMLS_DC);
+ZEND_API int do_bind_inherited_class(zend_op *opline, HashTable *function_table, HashTable *class_table, zend_class_entry *parent_ce TSRMLS_DC);
 
 void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent_ce);
 void zend_do_early_binding(TSRMLS_D);
@@ -470,7 +470,7 @@ int pass_two(zend_op_array *op_array TSRMLS_DC);
 zend_brk_cont_element *get_next_brk_cont_element(zend_op_array *op_array);
 ZEND_API zend_bool zend_is_compiling(TSRMLS_D);
 ZEND_API char *zend_make_compiled_string_description(char *name TSRMLS_DC);
-void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify_handlers);
+void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify_handlers TSRMLS_DC);
 
 
 int zend_register_auto_global(char *name, uint name_len TSRMLS_DC);

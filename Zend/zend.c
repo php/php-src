@@ -370,7 +370,7 @@ static FILE *zend_fopen_wrapper(const char *filename, char **opened_path)
 }
 
 
-static void register_standard_class(void)
+static void register_standard_class(TSRMLS_D)
 {
 	zend_standard_class_def = malloc(sizeof(zend_class_entry));
 
@@ -378,7 +378,7 @@ static void register_standard_class(void)
 	zend_standard_class_def->name = zend_strndup("stdClass", zend_standard_class_def->name_length);
 	zend_standard_class_def->name_length = sizeof("stdClass") - 1;
 	zend_standard_class_def->parent = NULL;
-	zend_initialize_class_data(zend_standard_class_def, 1);
+	zend_initialize_class_data(zend_standard_class_def, 1 TSRMLS_CC);
 
 	zend_hash_add(GLOBAL_CLASS_TABLE, "stdclass", sizeof("stdclass"), &zend_standard_class_def, sizeof(zend_class_entry *), NULL);
 }
@@ -560,7 +560,6 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions, i
 	zend_hash_init_ex(GLOBAL_FUNCTION_TABLE, 100, NULL, ZEND_FUNCTION_DTOR, 1, 0);
 	zend_hash_init_ex(GLOBAL_CLASS_TABLE, 10, NULL, ZEND_CLASS_DTOR, 1, 0);
 
-	register_standard_class();
 	zend_hash_init_ex(&module_registry, 50, NULL, ZEND_MODULE_DTOR, 1, 0);
 	zend_init_rsrc_list_dtors();
 
@@ -597,6 +596,7 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions, i
 	EG(user_error_handler) = NULL;
 	EG(user_exception_handler) = NULL;
 #endif
+	register_standard_class(TSRMLS_C);
 	zend_register_standard_constants(TSRMLS_C);
 
 #ifndef ZTS

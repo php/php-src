@@ -194,7 +194,7 @@ void shutdown_executor(TSRMLS_D)
 {
 	/* return to global namespace here */
 	if(EG(active_namespace) != EG(global_namespace_ptr)) {
-		zend_switch_namespace(EG(global_namespace_ptr));
+		zend_switch_namespace(EG(global_namespace_ptr) TSRMLS_CC);
 	}
 
 	zend_try {

@@ -1663,7 +1663,7 @@ void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent_ce)
 	do_inherit_parent_constructor(ce);
 }
 
-static void create_class(HashTable *class_table, char *name, int name_length, zend_class_entry **ce)
+static void create_class(HashTable *class_table, char *name, int name_length, zend_class_entry **ce TSRMLS_DC)
 {
 	zend_class_entry *new_class_entry;
 
@@ -1674,7 +1674,7 @@ static void create_class(HashTable *class_table, char *name, int name_length, ze
 	new_class_entry->name = estrndup(name, name_length);
 	new_class_entry->name_length = name_length;
 	new_class_entry->parent = NULL;
-	zend_initialize_class_data(new_class_entry, 1);
+	zend_initialize_class_data(new_class_entry, 1 TSRMLS_CC);
 
 	zend_str_tolower(new_class_entry->name, new_class_entry->name_length);
 
@@ -1686,7 +1686,7 @@ static void create_class(HashTable *class_table, char *name, int name_length, ze
 
 #include "../TSRM/tsrm_strtok_r.h"
 
-static int create_nested_class(HashTable *class_table, char *path, zend_class_entry *new_ce)
+static int create_nested_class(HashTable *class_table, char *path, zend_class_entry *new_ce TSRMLS_DC)
 {
 	char *cur, *temp;
 	char *last;
@@ -1696,7 +1696,7 @@ static int create_nested_class(HashTable *class_table, char *path, zend_class_en
 	cur = tsrm_strtok_r(path, ":", &temp);
 
 	if (zend_hash_find(class_table, cur, strlen(cur)+1, (void **)&pce) == FAILURE) {
-		create_class(class_table, cur, strlen(cur), &ce);
+		create_class(class_table, cur, strlen(cur), &ce TSRMLS_CC);
 	} else {
 		ce = *pce;
 	}
@@ -1709,7 +1709,7 @@ static int create_nested_class(HashTable *class_table, char *path, zend_class_en
 			break;
 		}
 		if (zend_hash_find(&ce->class_table, last, strlen(last)+1, (void **)&pce) == FAILURE) {
-			create_class(&ce->class_table, last, strlen(last), &ce);
+			create_class(&ce->class_table, last, strlen(last), &ce TSRMLS_CC);
 		} else {
 			ce = *pce;
 		}
@@ -1756,7 +1756,7 @@ ZEND_API int do_bind_function(zend_op *opline, HashTable *function_table, HashTa
 }
 			
 
-ZEND_API int do_bind_class(zend_op *opline, HashTable *function_table, HashTable *class_table)
+ZEND_API int do_bind_class(zend_op *opline, HashTable *function_table, HashTable *class_table TSRMLS_DC)
 {
 	zend_class_entry *ce, **pce;
 
@@ -1767,7 +1767,7 @@ ZEND_API int do_bind_class(zend_op *opline, HashTable *function_table, HashTable
 		ce = *pce;
 	}
 	if (strchr(opline->op2.u.constant.value.str.val, ':')) {
-		return create_nested_class(class_table, opline->op2.u.constant.value.str.val, ce);
+		return create_nested_class(class_table, opline->op2.u.constant.value.str.val, ce TSRMLS_CC);
 	}
 	ce->refcount++;
 	if (zend_hash_add(class_table, opline->op2.u.constant.value.str.val, opline->op2.u.constant.value.str.len+1, &ce, sizeof(zend_class_entry *), NULL)==FAILURE) {
@@ -1779,7 +1779,7 @@ ZEND_API int do_bind_class(zend_op *opline, HashTable *function_table, HashTable
 	}
 }
 
-ZEND_API int do_bind_inherited_class(zend_op *opline, HashTable *function_table, HashTable *class_table, zend_class_entry *parent_ce)
+ZEND_API int do_bind_inherited_class(zend_op *opline, HashTable *function_table, HashTable *class_table, zend_class_entry *parent_ce TSRMLS_DC)
 {
 	zend_class_entry *ce, **pce;
 	int found_ce;
@@ -1796,7 +1796,7 @@ ZEND_API int do_bind_inherited_class(zend_op *opline, HashTable *function_table,
 	zend_do_inheritance(ce, parent_ce);
 
 	if (strchr(opline->op2.u.constant.value.str.val, ':')) {
-		return create_nested_class(class_table, opline->op2.u.constant.value.str.val, ce);
+		return create_nested_class(class_table, opline->op2.u.constant.value.str.val, ce TSRMLS_CC);
 	}
 
 	ce->refcount++;
@@ -2136,7 +2136,7 @@ void zend_do_begin_class_declaration(znode *class_token, znode *class_name, znod
 
 	new_class_entry->type = ZEND_USER_CLASS;
 	new_class_entry->parent = NULL;
-	zend_initialize_class_data(new_class_entry, 1);
+	zend_initialize_class_data(new_class_entry, 1 TSRMLS_CC);
 
 	if (parent_class_name->op_type != IS_UNUSED) {
 		doing_inheritance = 1;
@@ -3289,7 +3289,7 @@ void zend_do_declare_namespace_constant(znode *var_name, znode *value TSRMLS_DC)
 	FREE_PNODE(var_name);
 }
 
-void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify_handlers)
+void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify_handlers TSRMLS_DC)
 {
 	zend_bool persistent_hashes = (ce->type == ZEND_INTERNAL_CLASS) ? 1 : 0;
 

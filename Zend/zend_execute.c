@@ -3868,14 +3868,14 @@ int zend_ext_fcall_end_handler(ZEND_OPCODE_HANDLER_ARGS)
 
 int zend_declare_class_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
-	do_bind_class(EX(opline), EG(function_table), EG(class_table));
+	do_bind_class(EX(opline), EG(function_table), EG(class_table) TSRMLS_CC);
 	NEXT_OPCODE();
 }
 
 
 int zend_declare_inherited_class_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
-	do_bind_inherited_class(EX(opline), EG(function_table), EG(class_table), EX_T(EX(opline)->extended_value).EA.class_entry);
+	do_bind_inherited_class(EX(opline), EG(function_table), EG(class_table), EX_T(EX(opline)->extended_value).EA.class_entry TSRMLS_CC);
 	NEXT_OPCODE();
 }
 
