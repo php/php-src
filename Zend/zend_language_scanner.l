@@ -998,6 +998,35 @@ NAMESPACE_NAME ({LABEL}":")+{LABEL}
 	return T_FUNC_C;
 }
 
+<ST_IN_SCRIPTING>"__METHOD__" {
+	char *namespace_name = CG(active_namespace)->name;
+	char *class_name = CG(active_class_entry) ? CG(active_class_entry)->name : NULL;
+	char *func_name = CG(active_op_array)->function_name;
+	size_t len = 1;
+
+	if (namespace_name) {
+		len += strlen(namespace_name) + 2;
+	}
+	if (class_name) {
+		len += strlen(class_name) + 2;
+	}
+	if (func_name) {
+		len += strlen(func_name);
+	}
+
+	zendlval->value.str.val = emalloc(len);
+	zendlval->value.str.len = sprintf(zendlval->value.str.val, "%s%s%s%s%s", 
+		namespace_name ? namespace_name : "",
+		namespace_name && (class_name || func_name) ? "::" : "",
+		class_name ? class_name : "",
+		class_name && func_name ? "::" : "",
+		func_name ? func_name : ""
+		);
+	zendlval->value.str.len = strlen(zendlval->value.str.val);
+	zendlval->type = IS_STRING;
+	return T_CLASS_C;
+}
+
 <ST_IN_SCRIPTING>"__LINE__" {
 	zendlval->value.lval = CG(zend_lineno);
 	zendlval->type = IS_LONG;
