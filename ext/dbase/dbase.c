@@ -38,8 +38,8 @@
 #include "php_globals.h"
 
 #if DBASE
-#include "dbase.h"
-#include "../dbase/dbf.h"
+#include "php_dbase.h"
+#include "dbf.h"
 #if defined(THREAD_SAFE)
 DWORD DbaseTls;
 static int numthreads=0;

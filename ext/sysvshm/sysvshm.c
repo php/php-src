@@ -33,17 +33,12 @@
  * It may not compile or execute correctly on other systems.
  */
 
-#ifndef MSVC5
-#include "php_config.h"
-#endif
-
+#include "php.h"
 
 #if HAVE_SYSVSHM
 
 #include <errno.h>
 
-#include "php.h"
-#include "php3_var.h"
 #include "php3_sysvshm.h"
 
 

@@ -71,4 +71,6 @@ extern sysvsem_module php3_sysvsem_module;
 
 #endif
 
+#define phpext_sysvsem_ptr sysvsem_module_ptr
+
 #endif /* _PHP3_SYSVSEM_H */

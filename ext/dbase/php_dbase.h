@@ -49,4 +49,7 @@ extern void php3_dbase_get_record_with_names(INTERNAL_FUNCTION_PARAMETERS);
 #else
 #define dbase_module_ptr NULL
 #endif
+
+#define phpext_dbase_ptr dbase_module_ptr
+
 #endif /* _DBASE_H */

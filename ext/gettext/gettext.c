@@ -31,7 +31,6 @@
 
 #include <stdio.h>
 #include "php.h"
-#include "internal_functions.h"
 #include "php3_gettext.h"
 
 #if HAVE_LIBINTL

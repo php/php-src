@@ -34,8 +34,8 @@
 #include "php_mcrypt.h"
 #include "fcntl.h"
 
-/* we should find a way to figure out whether RC6/IDEA are available */
 #define NON_FREE
+#define MCRYPT2
 #include "mcrypt.h"
 
 function_entry mcrypt_functions[] = {
@@ -138,8 +138,10 @@ static int php_minit_mcrypt(INIT_FUNC_ARGS)
 	MCRYPT_ENTRY(TripleDES);
 	MCRYPT_ENTRY(ThreeWAY);
 	MCRYPT_ENTRY(GOST);
-#ifdef MCRYPT2
+#ifdef CRYPT
 	MCRYPT_ENTRY(CRYPT);
+#endif
+#ifdef DES_COMPAT
 	MCRYPT_ENTRY(DES_COMPAT);
 #endif
 	MCRYPT_ENTRY(SAFER64);

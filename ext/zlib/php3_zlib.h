@@ -36,7 +36,7 @@
 #if HAVE_ZLIB
 
 extern php3_module_entry php3_zlib_module_entry;
-#define php3_zlib_module_ptr &php3_zlib_module_entry
+#define zlib_module_ptr &php3_zlib_module_entry
 
 extern int php3_minit_zlib(INIT_FUNC_ARGS);
 extern int php3_mshutdown_zlib(SHUTDOWN_FUNC_ARGS);
@@ -57,7 +57,9 @@ extern void php3_readgzfile(INTERNAL_FUNCTION_PARAMETERS);
 extern void php3_gzfile(INTERNAL_FUNCTION_PARAMETERS);
 
 #else
-#define php3_zlib_module_ptr NULL
+#define zlib_module_ptr NULL
 #endif /* HAVE_ZLIB */
+
+#define phpext_zlib_ptr zlib_module_ptr
 
 #endif /* _PHP3_ZLIB_H */
