@@ -285,7 +285,7 @@ static PHP_INI_MH(OnMySQLPort)
 }
 /* }}} */
 
-/* {{{ PHP_INI
+/* {{{ PHP_INI */
 PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("mysql.allow_persistent",	"1",	PHP_INI_SYSTEM,		OnUpdateInt,		allow_persistent,	zend_mysql_globals,		mysql_globals)
 	STD_PHP_INI_ENTRY_EX("mysql.max_persistent",	"-1",	PHP_INI_SYSTEM,		OnUpdateInt,		max_persistent,		zend_mysql_globals,		mysql_globals,	display_link_numbers)
