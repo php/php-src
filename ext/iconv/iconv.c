@@ -18,6 +18,7 @@
  */
 
 #include "php.h"
+#include "php_config.h"
 
 #if HAVE_ICONV
 
@@ -35,6 +36,7 @@ static int le_iconv;
 function_entry iconv_functions[] = {
     PHP_FE(iconv,									NULL)
     PHP_FE(ob_iconv_handler,						NULL)
+    PHP_FE(iconv_get_encoding,						NULL)
     PHP_FE(iconv_set_encoding,						NULL)
 	{NULL, NULL, NULL}	
 };
@@ -57,48 +59,22 @@ ZEND_GET_MODULE(iconv)
 int php_iconv_string(char *, char **, char *, char *);
 
 
-static PHP_INI_MH(OnUpdateIconvOutputEncoding)
-{
-	ICONVLS_FETCH();
-
-	if (ICONVG(iconv_output_encoding)) {
-		free(ICONVG(iconv_output_encoding));
-	}
-	ICONVG(iconv_output_encoding) = zend_strndup(new_value, new_value_length);
-	return SUCCESS;
-}
-
-static PHP_INI_MH(OnUpdateIconvInternalEncoding)
-{
-	ICONVLS_FETCH();
-
-	if (ICONVG(iconv_internal_encoding)) {
-		free(ICONVG(iconv_internal_encoding));
-	}
-	ICONVG(iconv_internal_encoding) = zend_strndup(new_value, new_value_length);
-	return SUCCESS;
-}
-
-
 PHP_INI_BEGIN()
-	PHP_INI_ENTRY_EX("iconv.output_encoding",		ICONV_OUTPUT_ENCODING,		PHP_INI_SYSTEM,		OnUpdateIconvOutputEncoding,			NULL)
-	PHP_INI_ENTRY_EX("iconv.internal_encoding",		ICONV_INTERNAL_ENCODING,		PHP_INI_SYSTEM,		OnUpdateIconvInternalEncoding,			NULL)
+	 STD_PHP_INI_ENTRY("iconv.input_encoding",		ICONV_INPUT_ENCODING,		PHP_INI_ALL,		OnUpdateString,  input_encoding,		zend_iconv_globals,  iconv_globals)
+	 STD_PHP_INI_ENTRY("iconv.output_encoding",		ICONV_OUTPUT_ENCODING,		PHP_INI_ALL,		OnUpdateString,  output_encoding,		zend_iconv_globals,  iconv_globals)
+	 STD_PHP_INI_ENTRY("iconv.internal_encoding",		ICONV_INTERNAL_ENCODING,		PHP_INI_ALL,		OnUpdateString,  internal_encoding,		zend_iconv_globals,  iconv_globals)
 PHP_INI_END()
 
 
 PHP_MINIT_FUNCTION(iconv)
 {
-/* Remove comments if you have entries in php.ini
 	REGISTER_INI_ENTRIES();
-*/
 	return SUCCESS;
 }
 
 PHP_MSHUTDOWN_FUNCTION(iconv)
 {
-/* Remove comments if you have entries in php.ini
 	UNREGISTER_INI_ENTRIES();
-*/
 	return SUCCESS;
 }
 
@@ -172,6 +148,7 @@ PHP_FUNCTION(iconv)
 		RETURN_FALSE;
 	}
 }
+/* }}} */
 
 /* {{{ proto string ob_iconv_handler(string contents)
    Returns str in output buffer converted to the iconv.output_encoding character set */
@@ -187,8 +164,8 @@ PHP_FUNCTION(ob_iconv_handler)
 	}
 
 	if (php_iconv_string(Z_STRVAL_PP(zv_string), &out_buffer,
-						 ICONVG(iconv_internal_encoding), 
-						 ICONVG(iconv_output_encoding))==SUCCESS) {
+						 ICONVG(internal_encoding), 
+						 ICONVG(output_encoding))==SUCCESS) {
 		RETVAL_STRING(out_buffer, 0);
 	} else {
 		zval_dtor(return_value);
@@ -197,6 +174,7 @@ PHP_FUNCTION(ob_iconv_handler)
 	}
 	
 }
+/* }}} */
 
 /* {{{ proto bool iconv_set_encoding(string int_charset, string out_charset)
    Sets internal encoding and output encoding for ob_iconv_handler() */
@@ -212,20 +190,54 @@ PHP_FUNCTION(iconv_set_encoding)
 	convert_to_string_ex(int_charset);
 	convert_to_string_ex(out_charset);
 
-	if (ICONVG(iconv_internal_encoding)) {
-		free(ICONVG(iconv_internal_encoding));
+	if (ICONVG(internal_encoding)) {
+		free(ICONVG(internal_encoding));
 	}
-	ICONVG(iconv_internal_encoding) = estrndup(Z_STRVAL_PP(int_charset), Z_STRLEN_PP(int_charset));
+	ICONVG(internal_encoding) = estrndup(Z_STRVAL_PP(int_charset), Z_STRLEN_PP(int_charset));
 
-	if (ICONVG(iconv_output_encoding)) {
-		free(ICONVG(iconv_output_encoding));
+	if (ICONVG(output_encoding)) {
+		free(ICONVG(output_encoding));
 	}
-	ICONVG(iconv_output_encoding) = estrndup(Z_STRVAL_PP(out_charset),Z_STRLEN_PP(out_charset));
+	ICONVG(output_encoding) = estrndup(Z_STRVAL_PP(out_charset),Z_STRLEN_PP(out_charset));
 
 	RETURN_TRUE;
 }
-
 /* }}} */
+
+/* {{{ proto array iconv_get_encoding([string type])
+   Get internal encoding and output encoding for ob_iconv_handler() */
+PHP_FUNCTION(iconv_get_encoding)
+{
+	zval **type;
+	int argc = ZEND_NUM_ARGS();
+	ICONVLS_FETCH();
+
+	if (argc < 0 || argc > 1 || zend_get_parameters_ex(1, &type) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	convert_to_string_ex(type);
+
+	if (argc == 0 || !strcasecmp("all",Z_STRVAL_PP(type))) {
+		if (array_init(return_value) == FAILURE) {
+			RETURN_FALSE;
+		}
+		add_assoc_string(return_value, "output_encoding", 
+						 ICONVG(output_encoding), 1);
+		add_assoc_string(return_value, "internal_encoding", 
+						 ICONVG(internal_encoding), 1);
+	} else if (!strcasecmp("output_encoding",Z_STRVAL_PP(type))) {
+		RETVAL_STRING(ICONVG(output_encoding), 1);
+	} else if (!strcasecmp("internal_encoding",Z_STRVAL_PP(type))) {
+		RETVAL_STRING(ICONVG(internal_encoding), 1);
+	} else {
+		RETURN_FALSE;
+	}
+
+}
+/* }}} */
+
+
 #endif
 
 
