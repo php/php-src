@@ -28,6 +28,7 @@
 #include "php_simplexml.h"
 
 zend_class_entry *sxe_class_entry;
+SIMPLEXML_IMPORT int xml_parser_inited;
 
 #define SKIP_TEXT(__p) \
 	if ((__p)->type == XML_TEXT_NODE) { \
@@ -154,7 +155,6 @@ sxe_property_read(zval *object, zval *member TSRMLS_DC)
 
 		if (!xmlStrcmp(node->name, name)) {
 			APPEND_PREV_ELEMENT(counter, value);
- 
 			MAKE_STD_ZVAL(value);
 			_node_as_zval(sxe, node, value TSRMLS_CC);
 			value->refcount = 0;
@@ -912,20 +912,23 @@ PHP_FUNCTION(simplexml_load_file)
 	php_sxe_object *sxe;
 	char           *filename;
 	int             filename_len;
+	xmlDocPtr       docp;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &filename, &filename_len) == FAILURE) {
 		return;
 	}
 
-	sxe = php_sxe_object_new(TSRMLS_C);
-	sxe->document = emalloc(sizeof(simplexml_ref_obj));
-	sxe->document->ptr = (void *) xmlParseFile(filename);
-	sxe->document->refcount = 1;
-	if (sxe->document->ptr == NULL) {
-		efree(sxe->document);
+	docp = xmlParseFile(filename);
+	if (! docp) {
 		RETURN_FALSE;
 	}
+
+	sxe = php_sxe_object_new(TSRMLS_C);
+	sxe->document = emalloc(sizeof(simplexml_ref_obj));
+	sxe->document->ptr = docp;
+	sxe->document->refcount = 1;
 	sxe->nsmap = xmlHashCreate(10);
+	sxe->node = NULL;
 	
 
 	return_value->type = IS_OBJECT;
@@ -940,20 +943,23 @@ PHP_FUNCTION(simplexml_load_string)
 	php_sxe_object *sxe;
 	char           *data;
 	int             data_len;
+	xmlDocPtr       docp;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &data, &data_len) == FAILURE) {
 		return;
 	}
 
+	docp = xmlParseMemory(data, data_len);
+	if (! docp) {
+		RETURN_FALSE;
+	}
+
 	sxe = php_sxe_object_new(TSRMLS_C);
 	sxe->document = emalloc(sizeof(simplexml_ref_obj));
 	sxe->document->refcount = 1;
-	sxe->document->ptr = xmlParseMemory(data, data_len);
-	if (sxe->document->ptr == NULL) {
-		efree(sxe->document);
-		RETURN_FALSE;
-	}
+	sxe->document->ptr = docp;
 	sxe->nsmap = xmlHashCreate(10);
+	sxe->node = NULL;
 
 	return_value->type = IS_OBJECT;
 	return_value->value.obj = php_sxe_register_object(sxe TSRMLS_CC);
@@ -993,6 +999,11 @@ PHP_MINIT_FUNCTION(simplexml)
 	sxe.create_object = sxe_object_new;
 	sxe_class_entry = zend_register_internal_class(&sxe TSRMLS_CC);
 
+	if (!xml_parser_inited) {
+		xmlInitThreads();
+		xml_parser_inited = 1;
+	}
+
 	return SUCCESS;
 }
 /* }}} */
@@ -1001,7 +1012,11 @@ PHP_MINIT_FUNCTION(simplexml)
  */
 PHP_MSHUTDOWN_FUNCTION(simplexml)
 {
-	xmlCleanupParser();
+   	if (xml_parser_inited) {
+		xmlCleanupParser();
+		xml_parser_inited = 0;
+	}
+
 	return SUCCESS;
 }
 /* }}} */

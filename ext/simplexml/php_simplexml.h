@@ -26,8 +26,10 @@ extern zend_module_entry simplexml_module_entry;
 
 #ifdef PHP_WIN32
 #define PHP_SIMPLEXML_API __declspec(dllexport)
+#define SIMPLEXML_IMPORT __declspec(dllimport)
 #else
 #define PHP_SIMPLEXML_API
+#define SIMPLEXML_IMPORT extern
 #endif
 
 #ifdef ZTS
@@ -58,10 +60,10 @@ typedef struct {
 
 typedef struct {
 	zend_object zo;
-	xmlHashTablePtr nsmap;
-	simplexml_ref_obj *document;
-	xmlXPathContextPtr xpath;
 	xmlNodePtr node;
+	simplexml_ref_obj *document;
+	xmlHashTablePtr nsmap;
+	xmlXPathContextPtr xpath;
 } php_sxe_object;
 
 
