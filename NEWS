@@ -2,6 +2,9 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.4
+- POST handler for Adobe FDF format (Hartmut)
+- read and write .gz-files transparently on glibc based systems
+  using the 'zlib:' fopen wrapper (Hartmut)
 - Fixed a problem in the configuration parser (two null bytes were added
   to each ENCAPSULATED TC_STRING) (alex@zend.com)
 
