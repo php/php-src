@@ -1498,17 +1498,17 @@ void module_destructor(zend_module_entry *module)
 	}
 
 #if HAVE_LIBDL
-    #ifdef NETWARE
-        #ifdef APACHE_2_BUILD
-	if (module->handle) {
-		dlclose(module->handle);
-	}
-        #endif
-    #else
-	if (module->handle) {
-		dlclose(module->handle);
-	}
-    #endif
+#ifdef NETWARE
+#ifdef APACHE_2_BUILD
+        if (module->handle) {
+            dlclose(module->handle);
+        }
+#endif
+#else
+        if (module->handle) {
+            dlclose(module->handle);
+        }
+#endif
 #endif
 }
 
