@@ -88,9 +88,13 @@ static void convert_browscap_pattern(zval *pattern)
  */
 static void php_browscap_parser_cb(zval *arg1, zval *arg2, int callback_type, void *arg)
 {
+	if (!arg1) {
+		return;
+	}
+
 	switch (callback_type) {
 		case ZEND_INI_PARSER_ENTRY:
-			if (current_section) {
+			if (current_section && arg2) {
 				zval *new_property;
 				char *new_key;
 
