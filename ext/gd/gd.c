@@ -182,7 +182,7 @@ function_entry gd_functions[] = {
 	PHP_FE(imagecreate,								NULL)
 #if HAVE_LIBGD20
 	PHP_FE(imagecreatetruecolor,					NULL)
-	PHP_FE(imageistruecolor,					NULL)
+	PHP_FE(imageistruecolor,						NULL)
 	PHP_FE(imagetruecolortopalette,					NULL)
 	PHP_FE(imagesetthickness,						NULL)
 	PHP_FE(imagefilledarc,							NULL)
@@ -196,6 +196,7 @@ function_entry gd_functions[] = {
 
 #ifdef HAVE_GD_BUNDLED
 	PHP_FE(imagerotate,     						NULL)
+	PHP_FE(imageantialias,							NULL)
 #endif
 
 #if HAVE_GD_IMAGESETTILE
@@ -2129,6 +2130,7 @@ PHP_FUNCTION(imageline)
 {
 	zval **IM, **x1, **y1, **x2, **y2, **col;
 	gdImagePtr im;
+	int antialias=0;
 
 	if (ZEND_NUM_ARGS() != 6 || zend_get_parameters_ex(6, &IM, &x1, &y1, &x2, &y2, &col) == FAILURE) {
 		ZEND_WRONG_PARAM_COUNT();
@@ -2142,6 +2144,16 @@ PHP_FUNCTION(imageline)
 	convert_to_long_ex(y2);
 	convert_to_long_ex(col);
 
+#ifdef HAVE_GD_BUNDLED
+		antialias = im->antialias;
+#endif
+	if (antialias) {
+		gdImageAALine(im, Z_LVAL_PP(x1), Z_LVAL_PP(y1), Z_LVAL_PP(x2), Z_LVAL_PP(y2), Z_LVAL_PP(col));
+	} else {
+		gdImageLine(im, Z_LVAL_PP(x1), Z_LVAL_PP(y1), Z_LVAL_PP(x2), Z_LVAL_PP(y2), Z_LVAL_PP(col));
+	}
+								 
+	
 	gdImageLine(im, Z_LVAL_PP(x1), Z_LVAL_PP(y1), Z_LVAL_PP(x2), Z_LVAL_PP(y2), Z_LVAL_PP(col));
 	RETURN_TRUE;
 }
@@ -4063,6 +4075,24 @@ PHP_FUNCTION(imagefilter)
 }
 /* }}} */
 #endif
+
+/* {{{ proto imagesetantialias(int im, bool on)
+        Should antialiased functions used or not*/
+PHP_FUNCTION(imageantialias)
+{
+	zval **IM, **alias;
+	gdImagePtr im;
+
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &IM, &alias) == FAILURE) {
+		ZEND_WRONG_PARAM_COUNT();
+	}
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
+	convert_to_boolean_ex(alias);
+	gdImageAntialias(im, Z_LVAL_PP(alias));
+	RETURN_TRUE;
+}
+/* }}} */
+													   
 /* End section: Filters */
 
 /*
