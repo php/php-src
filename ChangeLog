@@ -1,3 +1,79 @@
+2003-10-08  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/openssl/xp_ssl.c:
+      And this EOF flag...
+
+    * (PHP_4_3)
+      main/network.c:
+      Don't forget these EOF flags either...
+
+2003-10-08  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * NEWS
+      NEWS:
+      BFN
+
+    * (PHP_4_3)
+      NEWS
+      ext/standard/array.c:
+      - Reverted the 'fix' for bug #25494
+
+2003-10-08  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * (PHP_4_3)
+      main/streams.c:
+      Backport from HEAD; set EOF marker after each read attempt to avoid it
+      being stuck in the on position.
+      Partial "fix" for #25649.
+
+    * main/streams/plain_wrapper.c
+      main/streams/xp_socket.c:
+      Set the EOF indicator after each read attempt.
+      This prevents it getting stuck in the on position.
+
+2003-10-08  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      NEWS
+      ext/session/session.c:
+      - Fixed bug #25780 (MFH: ext/session: invalid session.cookie_lifetime
+      causes crash in win32).
+
+    * ext/session/session.c:
+      - Fixed bug #25780 (ext/session: invalid session.cookie_lifetime causes
+      crash in win32).
+
+2003-10-08  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/standard/basic_functions.c
+      ext/standard/streamsfuncs.c
+      ext/standard/streamsfuncs.h:
+      Implement stream_get_contents, which is somewhat akin to file_get_contents,
+      except that it works on an already opened stream.
+
+2003-10-08  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/standard/var.c:
+      Oops..
+
+    * ext/standard/var.c:
+      Better fix for bug #25758
+
+2003-10-08  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      ext/standard/var.c
+      ext/standard/tests/array/bug25758.phpt:
+      MFH: Fixed bug #25758 (var_export does not escape ' & \ inside array keys)
+
+    * ext/standard/var.c:
+      Fixed bug #25758 (var_export does not escape ' & \ inside array keys)
+
+    * ext/standard/tests/array/bug25758.phpt:
+      
+      Fixed bug #25758 (var_export does not escape ' & \ inside array keys)
+
 2003-10-07  Jani Taskinen  <jani.taskinen@kolumbus.fi>
 
     * (PHP_4_3)
