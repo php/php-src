@@ -1,3 +1,20 @@
+2004-08-06  Sara Golemon  <php@alphaweb.net>
+
+    * ext/standard/dns.c:
+      Add A6 support, fix IPv6 address parsing, and improve define compatability
+
+    * ext/simplexml/simplexml.c:
+      ZTS Fix
+
+2004-08-06  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * (PHP_5_0)
+      ext/standard/streamsfuncs.c:
+      MFH: avoid possible segfault with stream_socket_client and bogus flags.
+
+    * ext/standard/streamsfuncs.c:
+      Avoid possible segfault when using stream_socket_client with bogus flags.
+
 2004-08-05  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/simplexml/php_simplexml_exports.h
