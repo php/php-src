@@ -24,7 +24,7 @@
 #include "php_string.h"
 
 /* faster, but obfuscated, all operations have a cost of 1 */
-static int fastest_levdist(const char *s1, const char *s2) 
+int fastest_levdist(const char *s1, const char *s2) 
 {
 	register char *p1,*p2; 
 	register int i,j,n;
