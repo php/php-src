@@ -46,7 +46,7 @@ typedef struct _zend_function_entry {
 #define ZEND_FUNCTION(name)				ZEND_NAMED_FUNCTION(ZEND_FN(name))
 #define ZEND_METHOD(classname, name)	ZEND_NAMED_FUNCTION(ZEND_FN(classname##_##name))
 
-#define ZEND_NAMED_FE(zend_name, name, arg_info)	{ #zend_name, name, arg_info, sizeof(arg_info)/sizeof(struct _zend_arg_info)-1, 0 },
+#define ZEND_NAMED_FE(zend_name, name, arg_info)	{ #zend_name, name, arg_info, (zend_uint) (sizeof(arg_info)/sizeof(struct _zend_arg_info)-1), 0 },
 #define ZEND_FE(name, arg_info)						ZEND_NAMED_FE(name, ZEND_FN(name), arg_info)
 #define ZEND_FALIAS(name, alias, arg_info)			ZEND_NAMED_FE(name, ZEND_FN(alias), arg_info)
 #define ZEND_ME(classname, name, arg_info, flags)	{ #name, ZEND_FN(classname##_##name), arg_info, sizeof(arg_info)/sizeof(struct _zend_arg_info)-1, flags },
