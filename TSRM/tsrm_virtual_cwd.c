@@ -302,6 +302,7 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 	unsigned char is_absolute = 0;
 #ifndef TSRM_WIN32
 	char resolved_path[MAXPATHLEN];
+#else
 	char *new_path;
 #endif
 
