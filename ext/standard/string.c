@@ -1138,14 +1138,14 @@ PHP_FUNCTION(ucfirst)
 PHP_FUNCTION(ucwords)
 {
 	zval **str;
-	register char *r,*r_end;
+	register char *r, *r_end;
 	
 	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &str) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(str);
 
-	if (!(*str)->value.str.len) {
+	if (!Z_STRLEN_PP(str)) {
 		RETURN_FALSE;
 	}
 	*return_value=**str;
@@ -1153,8 +1153,8 @@ PHP_FUNCTION(ucwords)
 
 	r=return_value->value.str.val;
 	*r=toupper((unsigned char)*r);
-	for(r_end = r + return_value->value.str.len -1 ; r < r_end ; ) {
-		if(isspace(*r)) {
+	for(r_end = r + return_value->value.str.len - 1 ; r < r_end ; ) {
+		if(isspace((int)*r)) {
 			*r=toupper((unsigned char)*++r);
 		} else {
 			r++;
