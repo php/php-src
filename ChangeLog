@@ -1,3 +1,24 @@
+1999-11-18  Andrew Skalski  <askalski@chek.com>
+
+    * ext/ftp/ftp.c
+      ext/ftp/ftp.h:
+    Removed stdio wrapper from sockets; added timeouts to socket ops.
+
+1999-11-18  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/apache/apMakefile.libdir
+      sapi/apache/apMakefile.tmpl
+      sapi/apache/config.m4
+      apMakefile.libdir
+      apMakefile.tmpl:
+    Moving apMakefile.{libdir,tmpl} to sapi/apache directory.
+
+1999-11-18  Sam Ruby  <rubys@us.ibm.com>
+
+    * ext/standard/info.c: arg!  alphabetize correctly!
+
+    * ext/standard/info.c: add Java module to credit info
+
 1999-11-17  Sascha Schumann  <sascha@schumann.cx>
 
     * php_globals.h:
