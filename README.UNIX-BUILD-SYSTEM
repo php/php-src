@@ -2,7 +2,7 @@ PHP Build System V5 Overview
 
 - supports Makefile.ins during transition phase
 - not-really-portable Makefile includes have been eliminated
-- supports seperate build directories without VPATH by using
+- supports separate build directories without VPATH by using
   explicit rules only
 - does not waste disk-space/CPU-time for building temporary libraries
   => especially noticeable on slower systems
@@ -50,8 +50,8 @@ are specified in the config.m4 now using the following macro:
 PHP_NEW_EXTENSION(foo, foo.c bar.c baz.cpp, $ext_shared)
 
 E.g. this enables the extension foo which consists of three source-code
-modules, two in C and one in C++.  And dependending on the user's
-wishes, the extension will even be built as a dynamic module.
+modules, two in C and one in C++.  And, depending on the user's wishes,
+the extension will even be built as a dynamic module.
 
 The full syntax:
 
