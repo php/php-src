@@ -4,9 +4,10 @@ PHP 4.0                                                                    NEWS
 ?? ??? 2000, Version 4.0.1
 - Added str_pad() for padding a string with an arbitrary string on left or
   right. (Andrei)
-- Made the short_tags, asp_tags and allow_call_time_pass_reference INI directives work
-  on a per-directory basis as well, e.g. from .htaccess files (Zeev)
-- added fflush() function. (Eric Huss)
+- Made the short_tags, asp_tags and allow_call_time_pass_reference INI
+  directives work on a per-directory basis as well, e.g. from .htaccess
+  files. (Zeev)
+- Added fflush() function. (Eric Huss)
 - Fixed a problem with static variables, default function arguments and class
   member variables, that contained array values. (Andi & Zeev, Zend Engine)
 - Fix virtual() when used with output buffering (Marc Pohl)
