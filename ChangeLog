@@ -1,3 +1,13 @@
+2004-12-11  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_4_3)
+      acinclude.m4
+      acinclude.m4:
+      - MFH: Generate all iconv headers by default
+
+    * acinclude.m4:
+      - Generate all iconv headers by default
+
 2004-12-10  Andi Gutmans  <andi@zend.com>
 
     * main/main.c:
