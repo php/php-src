@@ -4,43 +4,52 @@ AC_MSG_CHECKING(for Apache 2.0 module support via DSO through APXS)
 AC_ARG_WITH(apxs2,
 [  --with-apxs2[=FILE]     Build shared Apache 2.0 module. FILE is the optional
                           pathname to the Apache apxs tool; defaults to "apxs".],[
-	if test "$withval" = "yes"; then
-		APXS=apxs
-                if $APXS -q CFLAGS >/dev/null 2>&1; then
-                  :
-                else
-                  if test -x /usr/sbin/apxs ; then #SUSE 6.x 
-                    APXS=/usr/sbin/apxs
-                  fi
-                fi
-	else
-		PHP_EXPAND_PATH($withval, APXS)
-	fi
+  if test "$withval" = "yes"; then
+    APXS=apxs
+    $APXS -q CFLAGS >/dev/null 2>&1
+    if test "$?" != "0" && test -x /usr/sbin/apxs; then
+      APXS=/usr/sbin/apxs
+    fi
+  else
+    PHP_EXPAND_PATH($withval, APXS)
+  fi
 
-    if $APXS -q CFLAGS >/dev/null 2>&1; then
-      :
-    else
-      AC_MSG_RESULT()
-      $APXS
-      AC_MSG_ERROR([Sorry, I cannot run apxs. Either you need to install Perl or you need to pass the absolute path of apxs by using --with-apxs2=/absolute/path/to/apxs])
-    fi 
+  $APXS -q CFLAGS >/dev/null 2>&1
+  if test "$?" != "0"; then
+    AC_MSG_RESULT()
+    AC_MSG_RESULT()
+    AC_MSG_RESULT([Sorry, I cannot run apxs.  Possible reasons follow:]) 
+    AC_MSG_RESULT()
+    AC_MSG_RESULT([1. Perl is not installed])
+    AC_MSG_RESULT([2. apxs was not found. Try to pass the path using --with-apxs2=/path/to/apxs])
+    AC_MSG_RESULT([3. Apache was not built using --enable-so (the apxs usage page is displayed)])
+    AC_MSG_RESULT()
+    AC_MSG_RESULT([The output of $APXS follows:])
+    $APXS
+    AC_MSG_ERROR([Aborting])
+  fi 
 
-	APXS_INCLUDEDIR=`$APXS -q INCLUDEDIR`
-	APXS_CFLAGS=`$APXS -q CFLAGS`
-	PHP_ADD_INCLUDE($APXS_INCLUDEDIR)
-	if `echo $APXS_CFLAGS|grep USE_HSREGEX>/dev/null`; then
-		APACHE_HAS_REGEX=yes
-	fi
-	if `echo $APXS_CFLAGS|grep EAPI>/dev/null`; then
-	   CPPFLAGS="$CPPFLAGS -DEAPI"
-	fi
-	PHP_SAPI=apache2filter
-	INSTALL_IT="$APXS -i -a -n php4 $SAPI_LIBTOOL"
-	PHP_BUILD_SHARED
-	PHP_BUILD_THREAD_SAFE
-	AC_MSG_RESULT(yes)
+  APXS_INCLUDEDIR=`$APXS -q INCLUDEDIR`
+  APXS_CFLAGS=`$APXS -q CFLAGS`
+  for flag in $APXS_CFLAGS; do
+    case $flag in
+    -D*) CPPFLAGS="$CPPFLAGS $flag";;
+    esac
+  done
+  PHP_ADD_INCLUDE($APXS_INCLUDEDIR)
+  PHP_SAPI=apache2filter
+  INSTALL_IT="$APXS -i -a -n php4 $SAPI_LIBTOOL"
+  PHP_BUILD_SHARED
+  PHP_BUILD_THREAD_SAFE
+  AC_MSG_RESULT(yes)
+  case $host_alias in
+  *aix*)
+    APXS_SBINDIR=`$APXS -q SBINDIR`
+    LDFLAGS="$LDFLAGS -Wl,-bI:$APXS_SBINDIR/httpd.exp"
+    ;;
+  esac
 ],[
-	AC_MSG_RESULT(no)
+  AC_MSG_RESULT(no)
 ])
 
 PHP_SUBST(APXS)
