@@ -28,21 +28,58 @@
 #ifndef _HW_H
 #define _HW_H
 
+#if COMPILE_DL
+#undef HYPERWAVE
+#define HYPERWAVE 1
+#endif
+
+#if WIN32||WINNT
+#define PHP_HW_API __declspec(dllexport)
+#else
+#define PHP_HW_API
+#endif
+
 #if HYPERWAVE
+#ifndef DLEXPORT
+#define DLEXPORT
+#endif
+
+#ifdef ZTS
+#include "TSRM.h"
+#endif
+
 #include "hg_comm.h"
 
 extern php3_module_entry hw_module_entry;
 #define hw_module_ptr &hw_module_entry
 
 typedef struct {
-  long default_link;
-  long num_links,num_persistent;
-  long max_links,max_persistent;
-  long allow_persistent;
-  int le_socketp, le_psocketp, le_document;
-} hw_module;
+	long default_link;
+	long default_port;
+	long num_links,num_persistent;
+	long max_links,max_persistent;
+	long allow_persistent;
+	int le_socketp, le_psocketp, le_document;
+} php_hw_globals;
 
-extern hw_module php3_hw_module;
+#ifdef ZTS
+# define HwSLS_D        php_hw_globals *hw_globals
+# define HwSLS_DC       , HwSLS_D
+# define HwSLS_C        hw_globals
+# define HwSLS_CC , HwSLS_C
+# define HwSG(v) (hw_globals->v)
+# define HwSLS_FETCH()  php_hw_globals *hw_globals = ts_resource(hw_globals_id)
+#else
+# define HwSLS_D
+# define HwSLS_DC
+# define HwSLS_C
+# define HwSLS_CC
+# define HwSG(v) (hw_globals.v)
+# define HwSLS_FETCH()
+extern PHP_HW_API php_hw_globals hw_globals;
+#endif
+
+//extern hw_module php3_hw_module;
 
 typedef struct {
         int size;
@@ -54,6 +91,7 @@ typedef struct {
 extern hw_connection php3_hw_connection;
 
 extern PHP_MINIT_FUNCTION(hw);
+extern PHP_MSHUTDOWN_FUNCTION(hw);
 PHP_MINFO_FUNCTION(hw);
 
 PHP_FUNCTION(hw_connect);

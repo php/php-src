@@ -29,7 +29,7 @@
 
 /* $Id$ */
 
-/* pdflib 0.6 is subject to the ALADDIN FREE PUBLIC LICENSE.
+/* pdflib 2.01 is subject to the ALADDIN FREE PUBLIC LICENSE.
    Copyright (C) 1997 Thomas Merz. */
 
 /* Note that there is no code from the pdflib package in this file */
@@ -157,7 +157,7 @@ function_entry pdf_functions[] = {
 };
 
 php3_module_entry pdf_module_entry = {
-	"pdf", pdf_functions, PHP_MINIT(pdf), php3_mend_pdf, NULL, NULL, PHP_MINFO(pdf), 0, 0, 0, NULL
+	"pdf", pdf_functions, PHP_MINIT(pdf), PHP_MSHUTDOWN(pdf), NULL, NULL, PHP_MINFO(pdf), STANDARD_MODULE_PROPERTIES 
 };
 
 #if COMPILE_DL
@@ -189,10 +189,15 @@ PHP_MINIT_FUNCTION(pdf)
 
 PHP_MINFO_FUNCTION(pdf) {
 	/* need to use a PHPAPI function here because it is external module in windows */
-	php3_printf("pdflib %d.%d",  PDF_get_majorversion(), PDF_get_minorversion());
+	php3_printf("pdflib %d.%02d<BR>",  PDF_get_majorversion(), PDF_get_minorversion());
+#if PDFLIB_MINORVERSION > 0
+		php3_printf("The function pdf_put_image() and pdf_execute_image() are <B>not</B> available");
+#else
+		php3_printf("The function pdf_put_image() and pdf_execute_image() are available");
+#endif
 }
 
-int php3_mend_pdf(void){
+PHP_MSHUTDOWN_FUNCTION(pdf){
 	return SUCCESS;
 }
 
@@ -2014,9 +2019,13 @@ PHP_FUNCTION(pdf_open_memory_image) {
 	}
 
 
-	pdf_image = PDF_open_memory_image(pdf, buffer, im->sx, im->sy, 3, 8);
+#if PDFLIB_MINORVERSION == 0
+		pdf_image = PDF_open_memory_image(pdf, buffer, im->sx, im->sy, 3, 8);
+#else
+		pdf_image = PDF_open_memory_image(pdf, "raw", "memory", buffer, im->sx*im->sy*3, im->sx, im->sy, 3, 8, NULL);
+#endif
 
-	if(0 > pdf_image) {
+	if(-1 == pdf_image) {
 		php3_error(E_WARNING, "Could not open image");
 		RETURN_FALSE;
 	}
@@ -2110,6 +2119,9 @@ PHP_FUNCTION(pdf_put_image) {
 	PDF *pdf;
 	PDF_TLS_VARS;
 	
+#if PDFLIB_MINORVERSION > 0
+	php_printf(E_WARNING, "Version 2.01 of pdflib does not need the pdf_put_image() anymore, check the docs!");
+#else
 	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
@@ -2129,9 +2141,10 @@ PHP_FUNCTION(pdf_put_image) {
 		php3_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
-	
+
 	PDF_put_image(pdf, pdf_image);
-	
+#endif
+
 	RETURN_TRUE;
 }
 /* }}} */
@@ -2145,6 +2158,9 @@ PHP_FUNCTION(pdf_execute_image) {
 	PDF *pdf;
 	PDF_TLS_VARS;
 
+#if PDFLIB_MINORVERSION >= 01
+	php_printf(E_WARNING, "Version 2.01 of pdflib does not need the pdf_execute_image() anymore, check the docs!");
+#else
 	if (ARG_COUNT(ht) != 5 || getParameters(ht, 5, &arg1, &arg2, &arg3, &arg4, &arg5) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
@@ -2170,7 +2186,7 @@ PHP_FUNCTION(pdf_execute_image) {
 	convert_to_double(arg5);
 
 	PDF_execute_image(pdf, pdf_image, (float) arg3->value.dval, (float) arg4->value.dval, arg5->value.dval);
-
+#endif
 	RETURN_TRUE;
 }
 /* }}} */

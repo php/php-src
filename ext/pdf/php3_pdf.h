@@ -42,7 +42,7 @@ extern php3_module_entry pdf_module_entry;
 
 extern PHP_MINFO_FUNCTION(pdf);
 extern PHP_MINIT_FUNCTION(pdf);
-extern int php3_mend_pdf(void);
+extern PHP_MSHUTDOWN_FUNCTION(pdf);
 PHP_FUNCTION(pdf_set_info_creator);
 PHP_FUNCTION(pdf_set_info_title);
 PHP_FUNCTION(pdf_set_info_subject);

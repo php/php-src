@@ -38,15 +38,10 @@
 
 #if HYPERWAVE
 
+#include "php_ini.h"
 #include "php3_hyperwave.h"
 
-#if APACHE
-#  ifndef DEBUG
-#  undef palloc
-#  endif
-#endif
-
-hw_module php3_hw_module;
+//hw_module php3_hw_module;
 
 function_entry hw_functions[] = {
 	PHP_FE(hw_connect,								NULL)
@@ -115,8 +110,18 @@ function_entry hw_functions[] = {
 };
 
 php3_module_entry hw_module_entry = {
-	"HyperWave", hw_functions, PHP_MINIT(hw), NULL, NULL, NULL, PHP_MINFO(hw), 0, 0, 0, NULL
+	"HyperWave", hw_functions, PHP_MINIT(hw), PHP_MSHUTDOWN(hw), NULL, NULL, PHP_MINFO(hw), 0, 0, 0, NULL
 };
+
+#ifdef ZTS
+int hw_globals_id;
+#else
+PHP_HW_API php_hw_globals hw_globals;
+#endif
+
+#ifdef COMPILE_DL
+DLEXPORT php3_module_entry *get_module(void) { return &hw_module_entry; }
+#endif
 
 void print_msg(hg_msg *msg, char *str, int txt);
 
@@ -132,7 +137,7 @@ void _close_hw_link(hw_connection *conn)
 		free(conn->username);
 	close(conn->socket);
 	free(conn);
-	php3_hw_module.num_links--;
+	HwSG(num_links)--;
 }
 
 void _close_hw_plink(hw_connection *conn)
@@ -143,8 +148,8 @@ void _close_hw_plink(hw_connection *conn)
 		free(conn->username);
 	close(conn->socket);
 	free(conn);
-	php3_hw_module.num_links--;
-	php3_hw_module.num_persistent--;
+	HwSG(num_links)--;
+	HwSG(num_persistent)--;
 }
 
 void _free_hw_document(hw_document *doc)
@@ -158,13 +163,58 @@ void _free_hw_document(hw_document *doc)
 	free(doc);
 }
 
+#ifdef ZTS
+static void php_hw_init_globals(php_hw_globals *hw_globals)
+{
+	HwSG(num_persistent) = 0;
+}
+#endif
+
+static PHP_INI_MH(OnHyperwavePort) {
+	HwSLS_FETCH();
+
+	if (new_value==NULL) {
+		HwSG(default_port) = HG_SERVER_PORT;
+	} else {
+		HwSG(default_port) = atoi(new_value);
+	}
+	return SUCCESS;
+}
+
+PHP_INI_BEGIN()
+	STD_PHP_INI_ENTRY("hyerwave.allow_persistent",	"0",	PHP_INI_SYSTEM,		OnUpdateInt,		allow_persistent,	php_hw_globals, hw_globals)
+	PHP_INI_ENTRY("hyperwave.default_port",	"418", PHP_INI_ALL,	OnHyperwavePort)
+PHP_INI_END()
+
+PHP_MINIT_FUNCTION(hw) {
+
+#ifdef ZTS
+        hw_globals_id = ts_allocate_id(sizeof(php_hw_globals), php_hw_init_globals, NULL);
+#else
+        HwSG(num_persistent)=0;
+#endif
+	REGISTER_INI_ENTRIES();
+	HwSG(le_socketp) = register_list_destructors(_close_hw_link,NULL);
+	HwSG(le_psocketp) = register_list_destructors(NULL,_close_hw_plink);
+	HwSG(le_document) = register_list_destructors(_free_hw_document,NULL);
+	hw_module_entry.type = type;
+
+	return SUCCESS;
+}
+
+PHP_MSHUTDOWN_FUNCTION(hw)
+{
+	UNREGISTER_INI_ENTRIES();
+	return SUCCESS;
+}
+
 /* creates an array in return value and frees all memory
  * Also adds as an assoc. array at the end of the return array with
  * statistics.
  */
 int make_return_objrec(pval **return_value, char **objrecs, int count)
 {
-	pval stat_arr;
+	zval *stat_arr;
 	int i;
 	int hidden, collhead, fullcollhead, total;
         int collheadnr, fullcollheadnr;
@@ -201,19 +251,20 @@ int make_return_objrec(pval **return_value, char **objrecs, int count)
 	efree(objrecs);
 
 	/* Array for statistics */
-	if (array_init(&stat_arr) == FAILURE) {
+	stat_arr = (zval *) emalloc(sizeof(zval));
+	if (array_init(stat_arr) == FAILURE) {
 		return -1;
 	}
 
-	add_assoc_long(&stat_arr, "Hidden", hidden);
-	add_assoc_long(&stat_arr, "CollectionHead", collhead);
-	add_assoc_long(&stat_arr, "FullCollectionHead", fullcollhead);
-	add_assoc_long(&stat_arr, "Total", total);
-	add_assoc_long(&stat_arr, "CollectionHeadNr", collheadnr);
-	add_assoc_long(&stat_arr, "FullCollectionHeadNr", fullcollheadnr);
+	add_assoc_long(stat_arr, "Hidden", hidden);
+	add_assoc_long(stat_arr, "CollectionHead", collhead);
+	add_assoc_long(stat_arr, "FullCollectionHead", fullcollhead);
+	add_assoc_long(stat_arr, "Total", total);
+	add_assoc_long(stat_arr, "CollectionHeadNr", collheadnr);
+	add_assoc_long(stat_arr, "FullCollectionHeadNr", fullcollheadnr);
 
 	/* Add the stat array */
-	zend_hash_next_index_insert((*return_value)->value.ht, &stat_arr, sizeof(pval), NULL);
+	zend_hash_next_index_insert((*return_value)->value.ht, &stat_arr, sizeof(zval), NULL);
 
 	/* The title array can now be freed, but I don't know how */
 	return 0;
@@ -297,21 +348,18 @@ int make_return_array_from_objrec(pval **return_value, char *objrec) {
 	if(hasTitle) {
 		zend_hash_update((*return_value)->value.ht, "Title", 6, &title_arr, sizeof(zval *), NULL);
 
-		/* The title array can now be freed, but I don't know how */
 	}
 
 	if(hasDescription) {
 	/* Add the description array, if we have one */
 		zend_hash_update((*return_value)->value.ht, "Description", 12, &desc_arr, sizeof(zval *), NULL);
 
-		/* The description array can now be freed, but I don't know how */
 	}
 
 	if(hasKeyword) {
 	/* Add the keyword array, if we have one */
 		zend_hash_update((*return_value)->value.ht, "Keyword", 8, &keyword_arr, sizeof(zval *), NULL);
 
-		/* The keyword array can now be freed, but I don't know how */
 	}
 
 	/* All other attributes. Make a another copy first */
@@ -434,25 +482,6 @@ static int * make_ints_from_array(HashTable *lht) {
 	return objrec;
 }
 
-PHP_MINIT_FUNCTION(hw) {
-
-	if (cfg_get_long("hw.allow_persistent",&php3_hw_module.allow_persistent)==FAILURE) {
-		php3_hw_module.allow_persistent=1;
-	}
-	if (cfg_get_long("hw.max_persistent",&php3_hw_module.max_persistent)==FAILURE) {
-		php3_hw_module.max_persistent=-1;
-	}
-	if (cfg_get_long("hw.max_links",&php3_hw_module.max_links)==FAILURE) {
-		php3_hw_module.max_links=-1;
-	}
-	php3_hw_module.num_persistent=0;
-	php3_hw_module.le_socketp = register_list_destructors(_close_hw_link,NULL);
-	php3_hw_module.le_psocketp = register_list_destructors(NULL,_close_hw_plink);
-	php3_hw_module.le_document = register_list_destructors(_free_hw_document,NULL);
-
-	return SUCCESS;
-}
-
 #define BUFFERLEN 30
 static void php3_hw_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 {
@@ -522,16 +551,16 @@ static void php3_hw_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		if (zend_hash_find(plist, hashed_details, hashed_details_length+1, (void **) &le)==FAILURE) {
 			list_entry new_le;
 
-			if (php3_hw_module.max_links!=-1 && php3_hw_module.num_links>=php3_hw_module.max_links) {
-				php_error(E_ERROR,"Hyperwave:  Too many open links (%d)",php3_hw_module.num_links);
+			if (HwSG(max_links)!=-1 && HwSG(num_links)>=HwSG(max_links)) {
+				php_error(E_ERROR,"Hyperwave:  Too many open links (%d)",HwSG(num_links));
 				if(host) efree(host);
 				if(username) efree(username);
 				if(password) efree(password);
 				efree(hashed_details);
 				RETURN_FALSE;
 			}
-			if (php3_hw_module.max_persistent!=-1 && php3_hw_module.num_persistent>=php3_hw_module.max_persistent) {
-				php_error(E_ERROR,"Hyperwave: Too many open persistent links (%d)",php3_hw_module.num_persistent);
+			if (HwSG(max_persistent!=-1) && HwSG(num_persistent)>=HwSG(max_persistent)) {
+				php_error(E_ERROR,"Hyperwave: Too many open persistent links (%d)",HwSG(num_persistent));
 				if(host) efree(host);
 				if(username) efree(username);
 				if(password) efree(password);
@@ -580,7 +609,7 @@ static void php3_hw_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			ptr->username = strdup("anonymous");
 	
 			new_le.ptr = (void *) ptr;
-			new_le.type = php3_hw_module.le_psocketp;;
+			new_le.type = HwSG(le_psocketp);
 
 			if (zend_hash_update(plist,hashed_details,hashed_details_length+1,(void *) &new_le, sizeof(list_entry), NULL)==FAILURE) {
 				php_error(E_ERROR, "Could not hash table with connection details");
@@ -592,17 +621,17 @@ static void php3_hw_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 				RETURN_FALSE;
 			}
 
-			php3_hw_module.num_links++;
-			php3_hw_module.num_persistent++;
+			HwSG(num_links)++;
+			HwSG(num_persistent)++;
 		} else {
 			/*php_printf("Found already open connection\n"); */
-			if (le->type != php3_hw_module.le_psocketp) {
+			if (le->type != HwSG(le_psocketp)) {
 				RETURN_FALSE;
 			}
 			ptr = le->ptr;
 		}
 
-		return_value->value.lval = php3_list_insert(ptr,php3_hw_module.le_psocketp);
+		return_value->value.lval = php3_list_insert(ptr,HwSG(le_psocketp));
 		return_value->type = IS_LONG;
 	
 	} else {
@@ -622,8 +651,8 @@ static void php3_hw_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			}
 			link = (int) index_ptr->ptr;
 			ptr = (hw_connection *) php3_list_find(link,&type);   /* check if the link is still there */
-			if(!ptr || (type!=php3_hw_module.le_socketp && type!=php3_hw_module.le_psocketp)) {
-				return_value->value.lval = php3_hw_module.default_link = link;
+			if(!ptr || (type!=HwSG(le_socketp) && type!=HwSG(le_psocketp))) {
+				return_value->value.lval = HwSG(default_link) = link;
 				return_value->type = IS_LONG;
 				efree(hashed_details);
 				if(username) efree(username);
@@ -674,7 +703,7 @@ static void php3_hw_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		ptr->hostname = strdup(host);
 		ptr->username = strdup("anonymous");
 	
-		return_value->value.lval = php3_list_insert(ptr,php3_hw_module.le_socketp);
+		return_value->value.lval = php3_list_insert(ptr,HwSG(le_socketp));
 		return_value->type = IS_LONG;
 	
 		new_index_ptr.ptr = (void *) return_value->value.lval;
@@ -690,7 +719,7 @@ static void php3_hw_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 
 	efree(hashed_details);
 	if(host) efree(host);
-	php3_hw_module.default_link=return_value->value.lval;
+	HwSG(default_link)=return_value->value.lval;
 
 	/* At this point we have a working connection. If userdata was given
 	   we are also indentified.
@@ -743,7 +772,7 @@ PHP_FUNCTION(hw_close) {
 	convert_to_long(arg1);
 	id=arg1->value.lval;
 	ptr = php3_list_find(id,&type);
-	if(!ptr || (type!=php3_hw_module.le_socketp && type!=php3_hw_module.le_psocketp)) {
+	if(!ptr || (type!=HwSG(le_socketp) && type!=HwSG(le_psocketp))) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
@@ -767,7 +796,7 @@ PHP_FUNCTION(hw_info)
 	convert_to_long(arg1);
 	id=arg1->value.lval;
 	ptr = php3_list_find(id,&type);
-	if(!ptr || (type!=php3_hw_module.le_socketp && type!=php3_hw_module.le_psocketp)) {
+	if(!ptr || (type!=HwSG(le_socketp) && type!=HwSG(le_psocketp))) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
@@ -799,7 +828,7 @@ PHP_FUNCTION(hw_error)
 	convert_to_long(arg1);
 	id=arg1->value.lval;
 	ptr = php3_list_find(id,&type);
-	if(!ptr || (type!=php3_hw_module.le_socketp && type!=php3_hw_module.le_psocketp)) {
+	if(!ptr || (type!=HwSG(le_socketp) && type!=HwSG(le_psocketp))) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
@@ -822,7 +851,7 @@ PHP_FUNCTION(hw_errormsg)
 	convert_to_long(arg1);
 	id=arg1->value.lval;
 	ptr = php3_list_find(id,&type);
-	if(!ptr || (type!=php3_hw_module.le_socketp && type!=php3_hw_module.le_psocketp)) {
+	if(!ptr || (type!=HwSG(le_socketp) && type!=HwSG(le_psocketp))) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
@@ -927,7 +956,7 @@ char *php3_hw_command(INTERNAL_FUNCTION_PARAMETERS, int comm) {
 	convert_to_long(arg1);
 	link=arg1->value.lval;
 	ptr = php3_list_find(link,&type);
-	if(!ptr || (type!=php3_hw_module.le_socketp && type!=php3_hw_module.le_psocketp)) {
+	if(!ptr || (type!=HwSG(le_socketp) && type!=HwSG(le_psocketp))) {
 		php_error(E_WARNING,"Unable to find file identifier %d",link);
 		return NULL;
 	}
@@ -960,7 +989,7 @@ PHP_FUNCTION(hw_stat) {
 /* {{{ proto array hw_who(int link)
    Returns names and info of users loged in */
 PHP_FUNCTION(hw_who) {
-	pval user_arr;
+	zval *user_arr;
         char *object, *ptr, *temp, *attrname;
 	int i;
 
@@ -995,40 +1024,31 @@ php_printf("%s\n", ptr);
 	while(attrname != NULL) {
 		char *name;
 
-		if (array_init(&user_arr) == FAILURE) {
+		user_arr = (zval *) emalloc(sizeof(zval));
+		if (array_init(user_arr) == FAILURE) {
 			efree(object);
 			RETURN_FALSE;
 		}
 
 		ptr = attrname;
 		if(*ptr++ == '*')
-			add_assoc_long(&user_arr, "self", 1);
+			add_assoc_long(user_arr, "self", 1);
 		else
-			add_assoc_long(&user_arr, "self", 0);
+			add_assoc_long(user_arr, "self", 0);
 			
 		ptr++;
 		name = ptr;
 		while((*ptr != '\0') && (*ptr != ' '))
 			ptr++;
 		*ptr = '\0';
-		add_assoc_string(&user_arr, "id", name, 1);
+		add_assoc_string(user_arr, "id", name, 1);
 
 		ptr++;
 		name = ptr;
 		while((*ptr != '\0') && (*ptr != ' '))
 			ptr++;
 		*ptr = '\0';
-		add_assoc_string(&user_arr, "name", name, 1);
-
-		ptr++;
-		while((*ptr != '\0') && (*ptr == ' '))
-			ptr++;
-
-		name = ptr;
-		while((*ptr != '\0') && (*ptr != ' '))
-			ptr++;
-		*ptr = '\0';
-		add_assoc_string(&user_arr, "system", name, 1);
+		add_assoc_string(user_arr, "name", name, 1);
 
 		ptr++;
 		while((*ptr != '\0') && (*ptr == ' '))
@@ -1038,7 +1058,7 @@ php_printf("%s\n", ptr);
 		while((*ptr != '\0') && (*ptr != ' '))
 			ptr++;
 		*ptr = '\0';
-		add_assoc_string(&user_arr, "onSinceDate", name, 1);
+		add_assoc_string(user_arr, "system", name, 1);
 
 		ptr++;
 		while((*ptr != '\0') && (*ptr == ' '))
@@ -1048,7 +1068,7 @@ php_printf("%s\n", ptr);
 		while((*ptr != '\0') && (*ptr != ' '))
 			ptr++;
 		*ptr = '\0';
-		add_assoc_string(&user_arr, "onSinceTime", name, 1);
+		add_assoc_string(user_arr, "onSinceDate", name, 1);
 
 		ptr++;
 		while((*ptr != '\0') && (*ptr == ' '))
@@ -1058,12 +1078,20 @@ php_printf("%s\n", ptr);
 		while((*ptr != '\0') && (*ptr != ' '))
 			ptr++;
 		*ptr = '\0';
-		add_assoc_string(&user_arr, "TotalTime", name, 1);
+		add_assoc_string(user_arr, "onSinceTime", name, 1);
+
+		ptr++;
+		while((*ptr != '\0') && (*ptr == ' '))
+			ptr++;
+
+		name = ptr;
+		while((*ptr != '\0') && (*ptr != ' '))
+			ptr++;
+		*ptr = '\0';
+		add_assoc_string(user_arr, "TotalTime", name, 1);
 
 		/* Add the user array */
 		zend_hash_index_update(return_value->value.ht, i++, &user_arr, sizeof(pval), NULL);
-
-		/* The user array can now be freed, but I don't know how */
 
 		attrname = strtok(NULL, "\n");
 	}
@@ -1090,7 +1118,7 @@ PHP_FUNCTION(hw_dummy) {
 	id=arg2->value.lval;
 	msgid=arg3->value.lval;
 	ptr = php3_list_find(link,&type);
-	if(!ptr || (type!=php3_hw_module.le_socketp && type!=php3_hw_module.le_psocketp)) {
+	if(!ptr || (type!=HwSG(le_socketp) && type!=HwSG(le_psocketp))) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
@@ -1137,7 +1165,7 @@ PHP_FUNCTION(hw_getobject) {
 
 	link=argv[0]->value.lval;
 	ptr = php3_list_find(link,&type);
-	if(!ptr || (type!=php3_hw_module.le_socketp && type!=php3_hw_module.le_psocketp)) {
+	if(!ptr || (type!=HwSG(le_socketp) && type!=HwSG(le_psocketp))) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
@@ -1211,7 +1239,7 @@ PHP_FUNCTION(hw_insertobject) {
 	objrec=arg2->value.str.val;
 	parms=arg3->value.str.val;
 	ptr = php3_list_find(link,&type);
-	if(!ptr || (type!=php3_hw_module.le_socketp && type!=php3_hw_module.le_psocketp)) {
+	if(!ptr || (type!=HwSG(le_socketp) && type!=HwSG(le_psocketp))) {
 		php_error(E_WARNING,"Unable to find file identifier %d",link);
 		RETURN_FALSE;
 	}
@@ -1242,7 +1270,7 @@ PHP_FUNCTION(hw_getandlock) {
 	link=arg1->value.lval;
 	id=arg2->value.lval;
 	ptr = php3_list_find(link,&type);
-	if(!ptr || (type!=php3_hw_module.le_socketp && type!=php3_hw_module.le_psocketp)) {
+	if(!ptr || (type!=HwSG(le_socketp) && type!=HwSG(le_psocketp))) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
@@ -1273,7 +1301,7 @@ PHP_FUNCTION(hw_unlock) {
 	link=arg1->value.lval;
 	id=arg2->value.lval;
 	ptr = php3_list_find(link,&type);
-	if(!ptr || (type!=php3_hw_module.le_socketp && type!=php3_hw_module.le_psocketp)) {
+	if(!ptr || (type!=HwSG(le_socketp) && type!=HwSG(le_psocketp))) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
@@ -1301,7 +1329,7 @@ PHP_FUNCTION(hw_deleteobject) {
 	link=arg1->value.lval;
 	id=arg2->value.lval;
 	ptr = php3_list_find(link,&type);
-	if(!ptr || (type!=php3_hw_module.le_socketp && type!=php3_hw_module.le_psocketp)) {
+	if(!ptr || (type!=HwSG(le_socketp) && type!=HwSG(le_psocketp))) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
@@ -1334,7 +1362,7 @@ PHP_FUNCTION(hw_changeobject) {
 	id=arg2->value.lval;
 	newobjarr=arg3->value.ht;
 	ptr = php3_list_find(link,&type);
-	if(!ptr || (type!=php3_hw_module.le_socketp && type!=php3_hw_module.le_psocketp)) {
+	if(!ptr || (type!=HwSG(le_socketp) && type!=HwSG(le_psocketp))) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
@@ -1436,7 +1464,7 @@ PHP_FUNCTION(hw_modifyobject) {
 	remobjarr=argv[2]->value.ht;
 	addobjarr=argv[3]->value.ht;
 	ptr = php3_list_find(link,&type);
-	if(!ptr || (type!=php3_hw_module.le_socketp && type!=php3_hw_module.le_psocketp)) {
+	if(!ptr || (type!=HwSG(le_socketp) && type!=HwSG(le_psocketp))) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
@@ -1666,7 +1694,7 @@ fprintf(stderr, "Copy/Move %d\n", mvcp);
 			break;
 	}
 	ptr = php3_list_find(link,&type);
-	if(!ptr || (type!=php3_hw_module.le_socketp && type!=php3_hw_module.le_psocketp)) {
+	if(!ptr || (type!=HwSG(le_socketp) && type!=HwSG(le_psocketp))) {
 		php_error(E_WARNING,"Unable to find file identifier %d",link);
 		RETURN_FALSE;
 	}
@@ -1779,7 +1807,7 @@ PHP_FUNCTION(hw_gettext) {
 	link=argv[0]->value.lval;
 	id=argv[1]->value.lval;
 	ptr = php3_list_find(link,&type);
-	if(!ptr || (type!=php3_hw_module.le_socketp && type!=php3_hw_module.le_psocketp)) {
+	if(!ptr || (type!=HwSG(le_socketp) && type!=HwSG(le_psocketp))) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
@@ -1798,7 +1826,7 @@ PHP_FUNCTION(hw_gettext) {
 	doc->attributes = attributes;
 	doc->bodytag = bodytag;
 	doc->size = count;
-	return_value->value.lval = php3_list_insert(doc,php3_hw_module.le_document);
+	return_value->value.lval = php3_list_insert(doc,HwSG(le_document));
 	return_value->type = IS_LONG;
 	}
 }
@@ -1820,7 +1848,7 @@ PHP_FUNCTION(hw_edittext) {
 	link=arg1->value.lval;
 	ptr = php3_list_find(link,&type);
 
-	if(!ptr || (type!=php3_hw_module.le_socketp && type!=php3_hw_module.le_psocketp)) {
+	if(!ptr || (type!=HwSG(le_socketp) && type!=HwSG(le_psocketp))) {
 		php_error(E_WARNING,"Unable to find socket identifier %d",link);
 		RETURN_FALSE;
 	}
@@ -1828,7 +1856,7 @@ PHP_FUNCTION(hw_edittext) {
 	doc=arg2->value.lval;
 	docptr = php3_list_find(doc,&type);
 
-	if(!docptr || (type!=php3_hw_module.le_document)) {
+	if(!docptr || (type!=HwSG(le_document))) {
 		php_error(E_WARNING,"Unable to find document identifier %d", doc);
 		RETURN_FALSE;
 	}
@@ -1862,7 +1890,7 @@ PHP_FUNCTION(hw_getcgi) {
 	link=arg1->value.lval;
 	id=arg2->value.lval;
 	ptr = php3_list_find(link,&type);
-	if(!ptr || (type!=php3_hw_module.le_socketp && type!=php3_hw_module.le_psocketp)) {
+	if(!ptr || (type!=HwSG(le_socketp) && type!=HwSG(le_psocketp))) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
@@ -1900,7 +1928,7 @@ PHP_FUNCTION(hw_getcgi) {
 	doc->attributes = attributes;
 	doc->bodytag = NULL;
 	doc->size = count;
-	return_value->value.lval = php3_list_insert(doc,php3_hw_module.le_document);
+	return_value->value.lval = php3_list_insert(doc,HwSG(le_document));
 	return_value->type = IS_LONG;
 	}
 }
@@ -1923,7 +1951,7 @@ PHP_FUNCTION(hw_getremote) {
 	link=arg1->value.lval;
 	id=arg2->value.lval;
 	ptr = php3_list_find(link,&type);
-	if(!ptr || (type!=php3_hw_module.le_socketp && type!=php3_hw_module.le_psocketp)) {
+	if(!ptr || (type!=HwSG(le_socketp) && type!=HwSG(le_psocketp))) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
@@ -1941,7 +1969,7 @@ PHP_FUNCTION(hw_getremote) {
 	doc->attributes = attributes;
 	doc->bodytag = NULL;
 	doc->size = count;
-	return_value->value.lval = php3_list_insert(doc,php3_hw_module.le_document);
+	return_value->value.lval = php3_list_insert(doc,HwSG(le_document));
 	return_value->type = IS_LONG;
 	}
 }
@@ -1963,7 +1991,7 @@ PHP_FUNCTION(hw_getremotechildren) {
 	link=arg1->value.lval;
 	objrec=arg2->value.str.val;
 	ptr = php3_list_find(link,&type);
-	if(!ptr || (type!=php3_hw_module.le_socketp && type!=php3_hw_module.le_psocketp)) {
+	if(!ptr || (type!=HwSG(le_socketp) && type!=HwSG(le_psocketp))) {
 		php_error(E_WARNING,"Unable to find file identifier %d", link);
 		RETURN_FALSE;
 	}
@@ -2029,7 +2057,7 @@ php_printf("count = %d, remainder = <HR>%s---<HR>", count, remainder);
 		doc->attributes = strdup(objrec);
 		doc->bodytag = NULL;
 		doc->size = strlen(doc->data);
-		return_value->value.lval = php3_list_insert(doc,php3_hw_module.le_document);
+		return_value->value.lval = php3_list_insert(doc,HwSG(le_document));
 		return_value->type = IS_LONG;
 	} else {
 		if (array_init(return_value) == FAILURE) {
@@ -2066,7 +2094,7 @@ PHP_FUNCTION(hw_setlinkroot) {
 	link = arg1->value.lval;
 	rootid = arg2->value.lval;
 	ptr = php3_list_find(link,&type);
-	if(!ptr || (type!=php3_hw_module.le_socketp && type!=php3_hw_module.le_psocketp)) {
+	if(!ptr || (type!=HwSG(le_socketp) && type!=HwSG(le_psocketp))) {
 		php_error(E_WARNING,"Unable to find file identifier %d",link);
 		RETURN_FALSE;
 	}
@@ -2106,7 +2134,7 @@ PHP_FUNCTION(hw_pipedocument) {
 */	link=argv[0]->value.lval;
 	id=argv[1]->value.lval;
 	ptr = php3_list_find(link,&type);
-	if(!ptr || (type!=php3_hw_module.le_socketp && type!=php3_hw_module.le_psocketp)) {
+	if(!ptr || (type!=HwSG(le_socketp) && type!=HwSG(le_psocketp))) {
 		php_error(E_WARNING,"Unable to find file identifier %d", link);
 		RETURN_FALSE;
 	}
@@ -2138,7 +2166,7 @@ PHP_FUNCTION(hw_pipedocument) {
 	doc->bodytag = bodytag;
 	doc->size = count;
 /* fprintf(stderr, "size = %d\n", count); */
-	return_value->value.lval = php3_list_insert(doc,php3_hw_module.le_document);
+	return_value->value.lval = php3_list_insert(doc,HwSG(le_document));
 	return_value->type = IS_LONG;
 	}
 }
@@ -2166,7 +2194,7 @@ PHP_FUNCTION(hw_pipecgi) {
 	link=arg1->value.lval;
 	id=arg2->value.lval;
 	ptr = php3_list_find(link,&type);
-	if(!ptr || (type!=php3_hw_module.le_socketp && type!=php3_hw_module.le_psocketp)) {
+	if(!ptr || (type!=HwSG(le_socketp) && type!=HwSG(le_psocketp))) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
@@ -2203,7 +2231,7 @@ PHP_FUNCTION(hw_pipecgi) {
 	doc->attributes = attributes;
 	doc->bodytag = NULL;
 	doc->size = count;
-	return_value->value.lval = php3_list_insert(doc,php3_hw_module.le_document);
+	return_value->value.lval = php3_list_insert(doc,HwSG(le_document));
 	return_value->type = IS_LONG;
 	}
 }
@@ -2231,14 +2259,14 @@ PHP_FUNCTION(hw_insertdocument) {
 	link=arg1->value.lval;
 	id=arg2->value.lval;
 	ptr = php3_list_find(link,&type);
-	if(!ptr || (type!=php3_hw_module.le_socketp && type!=php3_hw_module.le_psocketp)) {
+	if(!ptr || (type!=HwSG(le_socketp) && type!=HwSG(le_psocketp))) {
 		php_error(E_WARNING,"Unable to find connection identifier %d",link);
 		RETURN_FALSE;
 	}
 
 	doc=arg3->value.lval;
 	docptr = php3_list_find(doc,&type);
-	if(!docptr || (type!=php3_hw_module.le_document)) {
+	if(!docptr || (type!=HwSG(le_document))) {
 		php_error(E_WARNING,"Unable to find document identifier %d",doc);
 		RETURN_FALSE;
 	}
@@ -2288,7 +2316,7 @@ PHP_FUNCTION(hw_new_document) {
 	doc->attributes = strdup(arg1->value.str.val);
 	doc->bodytag = NULL;
 	doc->size = arg3->value.lval;
-	return_value->value.lval = php3_list_insert(doc,php3_hw_module.le_document);
+	return_value->value.lval = php3_list_insert(doc,HwSG(le_document));
 	return_value->type = IS_LONG;
 }
 /* }}} */
@@ -2306,7 +2334,7 @@ PHP_FUNCTION(hw_free_document) {
 	convert_to_long(arg1);
 	id=arg1->value.lval;
 	ptr = php3_list_find(id,&type);
-	if(!ptr || (type!=php3_hw_module.le_document)) {
+	if(!ptr || (type!=HwSG(le_document))) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
@@ -2332,7 +2360,7 @@ PHP_FUNCTION(hw_output_document) {
 	convert_to_long(arg1);
 	id=arg1->value.lval;
 	ptr = php3_list_find(id,&type);
-	if(!ptr || (type!=php3_hw_module.le_document)) {
+	if(!ptr || (type!=HwSG(le_document))) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
@@ -2366,7 +2394,7 @@ PHP_FUNCTION(hw_document_bodytag) {
 	convert_to_long(argv[0]);
 	id=argv[0]->value.lval;
 	ptr = php3_list_find(id,&type);
-	if(!ptr || (type!=php3_hw_module.le_document)) {
+	if(!ptr || (type!=HwSG(le_document))) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
@@ -2405,7 +2433,7 @@ PHP_FUNCTION(hw_document_content) {
 	convert_to_long(argv[0]);
 	id=argv[0]->value.lval;
 	ptr = php3_list_find(id,&type);
-	if(!ptr || (type!=php3_hw_module.le_document)) {
+	if(!ptr || (type!=HwSG(le_document))) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
@@ -2433,7 +2461,7 @@ PHP_FUNCTION(hw_document_setcontent) {
 	convert_to_string(argv[1]);
 	id=argv[0]->value.lval;
 	ptr = php3_list_find(id,&type);
-	if(!ptr || (type!=php3_hw_module.le_document)) {
+	if(!ptr || (type!=HwSG(le_document))) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
@@ -2467,7 +2495,7 @@ PHP_FUNCTION(hw_document_size) {
 	convert_to_long(arg1);
 	id=arg1->value.lval;
 	ptr = php3_list_find(id,&type);
-	if(!ptr || (type!=php3_hw_module.le_document)) {
+	if(!ptr || (type!=HwSG(le_document))) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
@@ -2493,7 +2521,7 @@ PHP_FUNCTION(hw_document_attributes) {
 	convert_to_long(arg1);
 	id=arg1->value.lval;
 	ptr = php3_list_find(id,&type);
-	if(!ptr || (type!=php3_hw_module.le_document)) {
+	if(!ptr || (type!=HwSG(le_document))) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
@@ -2520,7 +2548,7 @@ PHP_FUNCTION(hw_getparentsobj) {
 	link=arg1->value.lval;
 	id=arg2->value.lval;
 	ptr = php3_list_find(link,&type);
-	if(!ptr || (type!=php3_hw_module.le_socketp && type!=php3_hw_module.le_psocketp)) {
+	if(!ptr || (type!=HwSG(le_socketp) && type!=HwSG(le_psocketp))) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
@@ -2554,7 +2582,7 @@ PHP_FUNCTION(hw_getparents) {
 	link=arg1->value.lval;
 	id=arg2->value.lval;
 	ptr = php3_list_find(link,&type);
-	if(!ptr || (type!=php3_hw_module.le_socketp && type!=php3_hw_module.le_psocketp)) {
+	if(!ptr || (type!=HwSG(le_socketp) && type!=HwSG(le_psocketp))) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
@@ -2599,7 +2627,7 @@ PHP_FUNCTION(hw_children) {
 	link=arg1->value.lval;
 	id=arg2->value.lval;
 	ptr = php3_list_find(link,&type);
-	if(!ptr || (type!=php3_hw_module.le_socketp && type!=php3_hw_module.le_psocketp)) {
+	if(!ptr || (type!=HwSG(le_socketp) && type!=HwSG(le_psocketp))) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
@@ -2645,7 +2673,7 @@ PHP_FUNCTION(hw_childrenobj) {
 	link=arg1->value.lval;
 	id=arg2->value.lval;
 	ptr = php3_list_find(link,&type);
-	if(!ptr || (type!=php3_hw_module.le_socketp && type!=php3_hw_module.le_psocketp)) {
+	if(!ptr || (type!=HwSG(le_socketp) && type!=HwSG(le_psocketp))) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
@@ -2679,7 +2707,7 @@ PHP_FUNCTION(hw_getchildcoll) {
 	link=arg1->value.lval;
 	id=arg2->value.lval;
 	ptr = php3_list_find(link,&type);
-	if(!ptr || (type!=php3_hw_module.le_socketp && type!=php3_hw_module.le_psocketp)) {
+	if(!ptr || (type!=HwSG(le_socketp) && type!=HwSG(le_psocketp))) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
@@ -2725,7 +2753,7 @@ PHP_FUNCTION(hw_getchildcollobj) {
 	link=arg1->value.lval;
 	id=arg2->value.lval;
 	ptr = php3_list_find(link,&type);
-	if(!ptr || (type!=php3_hw_module.le_socketp && type!=php3_hw_module.le_psocketp)) {
+	if(!ptr || (type!=HwSG(le_socketp) && type!=HwSG(le_psocketp))) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
@@ -2758,7 +2786,7 @@ PHP_FUNCTION(hw_docbyanchor) {
 	link=arg1->value.lval;
 	id=arg2->value.lval;
 	ptr = php3_list_find(link,&type);
-	if(!ptr || (type!=php3_hw_module.le_socketp && type!=php3_hw_module.le_psocketp)) {
+	if(!ptr || (type!=HwSG(le_socketp) && type!=HwSG(le_psocketp))) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
@@ -2789,7 +2817,7 @@ PHP_FUNCTION(hw_docbyanchorobj) {
 	link=arg1->value.lval;
 	id=arg2->value.lval;
 	ptr = php3_list_find(link,&type);
-	if(!ptr || (type!=php3_hw_module.le_socketp && type!=php3_hw_module.le_psocketp)) {
+	if(!ptr || (type!=HwSG(le_socketp) && type!=HwSG(le_psocketp))) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
@@ -2830,7 +2858,7 @@ PHP_FUNCTION(hw_getobjectbyquery) {
 	maxhits=arg3->value.lval;
 	if (maxhits < 0) maxhits=0x7FFFFFFF;
 	ptr = php3_list_find(link,&type);
-	if(!ptr || (type!=php3_hw_module.le_socketp && type!=php3_hw_module.le_psocketp)) {
+	if(!ptr || (type!=HwSG(le_socketp) && type!=HwSG(le_psocketp))) {
 		php_error(E_WARNING,"Unable to find file identifier %d",link);
 		RETURN_FALSE;
 	}
@@ -2873,7 +2901,7 @@ PHP_FUNCTION(hw_getobjectbyqueryobj) {
 	maxhits=arg3->value.lval;
 	if (maxhits < 0) maxhits=0x7FFFFFFF;
 	ptr = php3_list_find(link,&type);
-	if(!ptr || (type!=php3_hw_module.le_socketp && type!=php3_hw_module.le_psocketp)) {
+	if(!ptr || (type!=HwSG(le_socketp) && type!=HwSG(le_psocketp))) {
 		php_error(E_WARNING,"Unable to find file identifier %d",link);
 		RETURN_FALSE;
 	}
@@ -2913,7 +2941,7 @@ PHP_FUNCTION(hw_getobjectbyquerycoll) {
 	maxhits=arg4->value.lval;
 	if (maxhits < 0) maxhits=0x7FFFFFFF;
 	ptr = php3_list_find(link,&type);
-	if(!ptr || (type!=php3_hw_module.le_socketp && type!=php3_hw_module.le_psocketp)) {
+	if(!ptr || (type!=HwSG(le_socketp) && type!=HwSG(le_psocketp))) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
@@ -2958,7 +2986,7 @@ PHP_FUNCTION(hw_getobjectbyquerycollobj) {
 	maxhits=arg4->value.lval;
 	if (maxhits < 0) maxhits=0x7FFFFFFF;
 	ptr = php3_list_find(link,&type);
-	if(!ptr || (type!=php3_hw_module.le_socketp && type!=php3_hw_module.le_psocketp)) {
+	if(!ptr || (type!=HwSG(le_socketp) && type!=HwSG(le_psocketp))) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
@@ -2992,7 +3020,7 @@ PHP_FUNCTION(hw_getchilddoccoll) {
 	link=arg1->value.lval;
 	id=arg2->value.lval;
 	ptr = php3_list_find(link,&type);
-	if(!ptr || (type!=php3_hw_module.le_socketp && type!=php3_hw_module.le_psocketp)) {
+	if(!ptr || (type!=HwSG(le_socketp) && type!=HwSG(le_psocketp))) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
@@ -3031,7 +3059,7 @@ PHP_FUNCTION(hw_getchilddoccollobj) {
 	link=arg1->value.lval;
 	id=arg2->value.lval;
 	ptr = php3_list_find(link,&type);
-	if(!ptr || (type!=php3_hw_module.le_socketp && type!=php3_hw_module.le_psocketp)) {
+	if(!ptr || (type!=HwSG(le_socketp) && type!=HwSG(le_psocketp))) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
@@ -3066,7 +3094,7 @@ PHP_FUNCTION(hw_getanchors) {
 	link=arg1->value.lval;
 	id=arg2->value.lval;
 	ptr = php3_list_find(link,&type);
-	if(!ptr || (type!=php3_hw_module.le_socketp && type!=php3_hw_module.le_psocketp)) {
+	if(!ptr || (type!=HwSG(le_socketp) && type!=HwSG(le_psocketp))) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
@@ -3105,7 +3133,7 @@ PHP_FUNCTION(hw_getanchorsobj) {
 	link=arg1->value.lval;
 	id=arg2->value.lval;
 	ptr = (hw_connection *) php3_list_find(link,&type);
-	if(!ptr || (type!=php3_hw_module.le_socketp && type!=php3_hw_module.le_psocketp)) {
+	if(!ptr || (type!=HwSG(le_socketp) && type!=HwSG(le_psocketp))) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
@@ -3135,7 +3163,7 @@ PHP_FUNCTION(hw_getusername) {
 	convert_to_long(arg1);
 	link = arg1->value.lval;
 	ptr = php3_list_find(link,&type);
-	if(!ptr || (type!=php3_hw_module.le_socketp && type!=php3_hw_module.le_psocketp)) {
+	if(!ptr || (type!=HwSG(le_socketp) && type!=HwSG(le_psocketp))) {
 		php_error(E_WARNING,"Unable to find file identifier %d",link);
 		RETURN_FALSE;
 	}
@@ -3164,7 +3192,7 @@ PHP_FUNCTION(hw_identify) {
 	name=arg2->value.str.val;
 	passwd=arg3->value.str.val;
 	ptr = php3_list_find(link,&type);
-	if(!ptr || (type!=php3_hw_module.le_socketp && type!=php3_hw_module.le_psocketp)) {
+	if(!ptr || (type!=HwSG(le_socketp) && type!=HwSG(le_psocketp))) {
 		php_error(E_WARNING,"Unable to find file identifier %d",link);
 		RETURN_FALSE;
 	}
@@ -3246,7 +3274,7 @@ PHP_FUNCTION(hw_incollections) {
 	link = arg1->value.lval;
 	retcoll=arg4->value.lval;
 	ptr = php3_list_find(link,&type);
-	if(!ptr || (type!=php3_hw_module.le_socketp && type!=php3_hw_module.le_psocketp)) {
+	if(!ptr || (type!=HwSG(le_socketp) && type!=HwSG(le_psocketp))) {
 		php_error(E_WARNING,"Unable to find file identifier %d",link);
 		RETURN_FALSE;
 	}
@@ -3306,7 +3334,7 @@ PHP_FUNCTION(hw_inscoll) {
 	link = arg1->value.lval;
 	id=arg2->value.lval;
 	ptr = php3_list_find(link,&type);
-	if(!ptr || (type!=php3_hw_module.le_socketp && type!=php3_hw_module.le_psocketp)) {
+	if(!ptr || (type!=HwSG(le_socketp) && type!=HwSG(le_psocketp))) {
 		php_error(E_WARNING,"Unable to find file identifier %d",link);
 		RETURN_FALSE;
 	}
@@ -3354,7 +3382,7 @@ PHP_FUNCTION(hw_insdoc) {
 	link = argv[0]->value.lval;
 	id = argv[1]->value.lval;
 	ptr = php3_list_find(link,&type);
-	if(!ptr || (type!=php3_hw_module.le_socketp && type!=php3_hw_module.le_psocketp)) {
+	if(!ptr || (type!=HwSG(le_socketp) && type!=HwSG(le_psocketp))) {
 		php_error(E_WARNING,"Unable to find file identifier %d",link);
 		RETURN_FALSE;
 	}
@@ -3386,7 +3414,7 @@ PHP_FUNCTION(hw_getsrcbydestobj) {
 	link=arg1->value.lval;
 	id=arg2->value.lval;
 	ptr = php3_list_find(link,&type);
-	if(!ptr || (type!=php3_hw_module.le_socketp && type!=php3_hw_module.le_psocketp)) {
+	if(!ptr || (type!=HwSG(le_socketp) && type!=HwSG(le_psocketp))) {
 		php_error(E_WARNING,"Unable to find file identifier %d",link);
 		RETURN_FALSE;
 	}
@@ -3424,7 +3452,7 @@ PHP_FUNCTION(hw_getrellink) {
 	sourceid=arg3->value.lval;
 	destid=arg4->value.lval;
 	ptr = php3_list_find(link,&type);
-	if(!ptr || (type!=php3_hw_module.le_socketp && type!=php3_hw_module.le_psocketp)) {
+	if(!ptr || (type!=HwSG(le_socketp) && type!=HwSG(le_psocketp))) {
 		php_error(E_WARNING,"Unable to find file identifier %d",link);
 		RETURN_FALSE;
 	}
@@ -3442,7 +3470,8 @@ PHP_FUNCTION(hw_getrellink) {
 
 PHP_MINFO_FUNCTION(hw)
 {
-	php_printf("HG-CSP Version: 7.17");
+	php_printf("HG-CSP Version: 7.17<BR>\n");
+	DISPLAY_INI_ENTRIES();
 }
 
 /* {{{ proto void hw_connection_info(int link)
@@ -3459,7 +3488,7 @@ PHP_FUNCTION(hw_connection_info)
 	convert_to_long(arg1);
 	link=arg1->value.lval;
 	ptr = php3_list_find(link,&type);
-	if(!ptr || (type!=php3_hw_module.le_socketp && type!=php3_hw_module.le_psocketp)) {
+	if(!ptr || (type!=HwSG(le_socketp) && type!=HwSG(le_psocketp))) {
 		php_error(E_WARNING,"Unable to find file identifier %d",link);
 		RETURN_FALSE;
 	}
