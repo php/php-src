@@ -2400,11 +2400,14 @@ PHP_FUNCTION(ocifreedesc)
 
 PHP_FUNCTION(ocisavelob)
 {
-	pval *id, **tmp, **conn, *arg;
+	pval *id, **tmp, **conn, *arg,*oarg;
 	OCILobLocator *mylob;
 	oci_connection *connection;
 	oci_descriptor *descr;
+	int offparam;
 	ub4 loblen;
+    ub4 curloblen;
+    ub4 offset;
 
 	if ((id = getThis()) != 0) {
    		if (zend_hash_find(id->value.obj.properties, "connection", sizeof("connection"), (void **)&conn) == FAILURE) {
@@ -2433,32 +2436,54 @@ PHP_FUNCTION(ocisavelob)
 			RETURN_FALSE;
 		}
 
-	    if (getParameters(ht, 1, &arg) == FAILURE) {
+		offset = 0;	
+	    if (getParameters(ht, 2, &arg, &oarg) == SUCCESS) {
+			convert_to_long(oarg);
+			offparam = oarg->value.lval;
+
+			connection->error =
+				OCILobGetLength(connection->pServiceContext,
+								connection->pError,
+								mylob,
+								&curloblen);
+
+			oci_debug("OCIsavedesc: curloblen=%d",curloblen);
+
+			if (offparam == -1) {
+				offset = curloblen;
+			} else if (offparam >= curloblen) {
+				php3_error(E_WARNING, "Offset smaller than current LOB-Size - appending");
+				offset = curloblen;
+			} else {
+				offset = offparam;
+			}
+    	} else if (getParameters(ht, 1, &arg) == FAILURE) {
         	WRONG_PARAM_COUNT;
     	}
 
+		offset++;
 		loblen = arg->value.str.len;
 	
 		if (loblen < 1) {
-			php_error(E_WARNING, "Cannot save a lob wich size is less than 1 byte");
+			php3_error(E_WARNING, "Cannot save a lob wich size is less than 1 byte");
 			RETURN_FALSE;
 		}
-		
+
 		connection->error = 
 			OCILobWrite(connection->pServiceContext,
-						connection->pError,
-						mylob,
-						&loblen,
-						(ub4) 1,
-						(dvoid *) arg->value.str.val,
-						(ub4) loblen,
-						OCI_ONE_PIECE,
-						(dvoid *)0,
-						(OCICallbackLobWrite) 0,
-						(ub2) 0,
-						(ub1) SQLCS_IMPLICIT );
+					connection->pError,
+					mylob,
+					&loblen,
+					(ub4) offset,
+					(dvoid *) arg->value.str.val,
+					(ub4) loblen,
+					OCI_ONE_PIECE,
+					(dvoid *)0,
+					(OCICallbackLobWrite) 0,
+					(ub2) 0,
+					(ub1) SQLCS_IMPLICIT );
 
-		oci_debug("OCIsavelob: size=%d",loblen);
+		oci_debug("OCIsavedesc: size=%d offset=%d",loblen,offset);
 
 		if (connection->error) {
 			oci_error(connection->pError, "OCILobWrite", connection->error);
