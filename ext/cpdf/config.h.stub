@@ -1,0 +1,2 @@
+/* Define if you have the zlib library */
+#define HAVE_CPDFLIB 0
