@@ -68,7 +68,7 @@
 typedef unsigned char *LPBYTE;
 #else
 #define DBERRHANDLE(a, b) dbprocerrhandle(a, b)
-#define DBMSGHANDLE(a, b) dbprocerrhandle(a, b)
+#define DBMSGHANDLE(a, b) dbprocmsghandle(a, b)
 #define EHANDLEFUNC DBERRHANDLE_PROC
 #define MHANDLEFUNC DBMSGHANDLE_PROC
 #define DBSETOPT(a, b, c) dbsetopt(a, b, c)
