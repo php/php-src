@@ -69,7 +69,7 @@ ZEND_API int zend_ts_hash_init_ex(TsHashTable *ht, uint nSize, hash_func_t pHash
 ZEND_API void zend_ts_hash_destroy(TsHashTable *ht)
 {
 	tsrm_mutex_free(ht->mx_reader);
-	tsrm_mutex_free(ht->mx_reader);
+	tsrm_mutex_free(ht->mx_writer);
 	zend_hash_destroy(TS_HASH(ht));
 }
 
