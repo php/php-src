@@ -46,6 +46,9 @@
    However the PHPDoc style comments /** */ ,which starting PHP5 are parsed
    by PHP, are recongnized as T_DOC_COMMENT.
 
-7. $argv and $argc are populated always in CLI mode. On the other hand
-   $_SERVER['argc'] and $_SERVER['argv'] will be available if "S" is contained
-   in the "variables_order" php.ini setting.
+7. $_SERVER should be populated with argc and argv if variables_order
+   includes "S".  If you have specifically configured your system to not
+   create $_SERVER, then of course it shouldn't be there.  The change was to
+   always make argc and argv available in the CLI version regardless of the
+   variables_order setting.  As in, the CLI version will now always populate
+   the global $argc and $argv variables.
