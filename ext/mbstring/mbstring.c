@@ -68,7 +68,7 @@
 #include "php_content_types.h"
 #include "SAPI.h"
 #include "php_unicode.h"
-#include "TSRM.h"
+#include "TSRM/TSRM.h"
 
 #include "mb_gpc.h"
 
