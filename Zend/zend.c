@@ -460,12 +460,17 @@ void zend_activate_modules()
 	zend_hash_apply(&module_registry, (int (*)(void *)) module_registry_request_startup);
 }
 
+void zend_deactivate_modules()
+{
+	EG(opline_ptr) = NULL; /* we're no longer executing anything */
+
+	zend_hash_apply(&module_registry, (int (*)(void *)) module_registry_cleanup);
+}
 
 void zend_deactivate(CLS_D ELS_DC)
 {
 	EG(opline_ptr) = NULL; /* we're no longer executing anything */
 
-	zend_hash_apply(&module_registry, (int (*)(void *)) module_registry_cleanup);
 	shutdown_scanner(CLS_C);
 	shutdown_executor(ELS_C);
 	shutdown_compiler(CLS_C);
