@@ -4,7 +4,7 @@ $Id$
 
 WARNING: some prototypes in this file are out of date.
 The information contained here is being integrated into
-the php manual - stay tuned...
+the PHP manual - stay tuned...
 
 Please send comments to: Wez Furlong <wez@thebrainroom.com>
 
@@ -12,7 +12,7 @@ Why Streams?
 ============
 You may have noticed a shed-load of issock parameters flying around the PHP
 code; we don't want them - they are ugly and cumbersome and force you to
-special case sockets and files everytime you need to work with a "user-level"
+special case sockets and files every time you need to work with a "user-level"
 PHP file pointer.
 Streams take care of that and present the PHP extension coder with an ANSI
 stdio-alike API that looks much nicer and can be extended to support non file
@@ -138,7 +138,7 @@ make_seekable will always set newstream to be the stream that is valid
 if the function succeeds.
 When you have finished, remember to close the stream.
 
-NOTE: If you only need to seek forwards, there is no need to call this
+NOTE: If you only need to seek forward, there is no need to call this
 function, as the php_stream_seek can emulate forward seeking when the
 whence parameter is SEEK_CUR.
 
@@ -188,7 +188,7 @@ If your system has the fopencookie function, php streams can synthesize a
 FILE* on top of any stream, which is useful for SSL sockets, memory based
 streams, data base streams etc. etc.
 
-In situations where this is not desireable, you should query the stream
+In situations where this is not desirable, you should query the stream
 to see if it naturally supports FILE *.  You can use this code snippet
 for this purpose:
 
@@ -282,7 +282,7 @@ Writing your own stream implementation
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 RULE #1: when writing your own streams: make sure you have configured PHP with
 --enable-debug.
-I've taken some great pains to hook into the zend memory manager to help track
+I've taken some great pains to hook into the Zend memory manager to help track
 down allocation problems.  It will also help you spot incorrect use of the
 STREAMS_DC, STREAMS_CC and the semi-private STREAMS_REL_CC macros for function
 definitions.
@@ -295,7 +295,7 @@ be more up to date than these docs :-)
 First, you need to figure out what data you need to associate with the
 php_stream.  For example, you might need a pointer to some memory for memory
 based streams, or if you were making a stream to read data from an RDBMS like
-mysql, you might want to store the connection and rowset handles.
+MySQL, you might want to store the connection and rowset handles.
 
 The stream has a field called abstract that you can use to hold this data.
 If you need to store more than a single field of data, define a structure to
@@ -325,7 +325,7 @@ Once you have that part figured out, you can write your implementation and
 define the your own php_stream_ops struct (we called it my_ops in the above
 example).
 
-For example, for reading from this wierd mysql stream:
+For example, for reading from this weird MySQL stream:
 
 static size_t php_mysqlop_read(php_stream * stream, char * buf, size_t count)
 {
@@ -354,7 +354,7 @@ are all mandatory.  The rest are optional.  Declare your stream ops struct:
 php_stream_ops my_ops = {
     php_mysqlop_write, php_mysqlop_read, php_mysqlop_close,
     php_mysqlop_flush, NULL, NULL, NULL,
-    "Strange mySQL example"
+    "Strange MySQL example"
 }
 
 Thats it!
