@@ -157,6 +157,7 @@ static int odbc_stmt_fetch(pdo_stmt_t *stmt,
 		case PDO_FETCH_ORI_LAST:	odbcori = SQL_FETCH_LAST; break;
 		case PDO_FETCH_ORI_ABS:		odbcori = SQL_FETCH_ABSOLUTE; break;
 		case PDO_FETCH_ORI_REL:		odbcori = SQL_FETCH_RELATIVE; break;
+		default: printf("HMMM\n");
 	}
 	rc = SQLFetchScroll(S->stmt, odbcori, offset);
 #endif
@@ -169,7 +170,7 @@ static int odbc_stmt_fetch(pdo_stmt_t *stmt,
 		return 0;
 	}
 
-	pdo_odbc_stmt_error("SQLFetch");
+	pdo_odbc_stmt_error("SQLFetchScroll");
 
 	return 0;
 }
@@ -189,7 +190,7 @@ static int odbc_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC)
 
 	col->maxlen = S->cols[colno].datalen = colsize;
 	col->namelen = colnamelen;
-	col->name = S->cols[colno].colname;
+	col->name = estrdup(S->cols[colno].colname);
 
 	S->cols[colno].data = emalloc(colsize+1);
 
@@ -198,7 +199,7 @@ static int odbc_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC)
 
 	/* tell ODBC to put it straight into our buffer */
 	rc = SQLBindCol(S->stmt, colno+1, SQL_C_CHAR, S->cols[colno].data,
-			S->cols[colno].datalen, &S->cols[colno].fetched_len);
+			S->cols[colno].datalen+1, &S->cols[colno].fetched_len);
 	
 	return 1;
 }
