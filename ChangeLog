@@ -1,3 +1,54 @@
+2000-08-30  Daniel Beulshausen  <daniel@php4win.de>
+
+    * php_modules.dsw: updated with db and mhash
+
+    * ext/mhash/mhash.dsp: dsp for mhash
+
+    * main/config.w32.h: should be easier when compiling the modules
+
+    * ext/db/db.dsp: dsp for the db(m) extension
+
+2000-08-30  Andi Gutmans  <andi@php.net>
+
+    * main/fopen-wrappers.c: - Missed a space
+
+    * main/fopen-wrappers.c:
+    - Fix bug when using safe_mode and doc_root together
+
+2000-08-30  Zeev Suraski  <zeev@php.net>
+
+    * main/main.c: This is no longer relevant...
+
+    * main/main.c:
+    - Truly fix varargs handling - the current situation was a sure-fire crash in most platforms
+      (the older code worked, even though it didn't compile well for some very odd reason, probably
+      a compiler bug;  The new code would cause PHP to crash if both display_errors/log_errors and
+      track_errors were enabled)
+
+2000-08-30  Colin Viebrock  <cmv@privateworld.com>
+
+    * ext/snmp/snmp.c: more info for phpinfo()
+
+    * ext/standard/html.c:
+    Remove single quote from HTMLSpecialChars() ... use addslashes(),
+    htmlentities(), strtr() instead.
+
+2000-08-30  Andrei Zmievski  <andrei@ispi.net>
+
+    * NEWS: Removing placeholder.
+
+2000-08-30  Stig Bakken  <ssb@fast.no>
+
+    * ext/xml/tests/001.phpt
+      ext/xml/tests/002.phpt
+      ext/xml/tests/003.phpt
+      ext/xml/tests/004.phpt
+      ext/xml/tests/006.phpt
+      ext/xml/tests/inc.ent
+      ext/xml/tests/skipif.php
+      ext/xml/tests/xmltest.xml:
+    * added regression tests for the XML extension
+
 2000-08-29  Andrei Zmievski  <andrei@ispi.net>
 
     * NEWS
