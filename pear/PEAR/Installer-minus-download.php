@@ -582,11 +582,12 @@ class PEAR_Installer extends PEAR_Downloader
     {
         // trickiness: initialize here
         parent::PEAR_Downloader($this->ui, $options, $config);
+        $ret = parent::download($packages);
         $errors = $this->getErrorMsgs();
         $installpackages = $this->getDownloadedPackages();
         trigger_error("PEAR Warning: PEAR_Installer::download() is deprecated " .
                       "in favor of PEAR_Downloader class", E_USER_WARNING);
-        return parent::download($packages);
+        return $ret;
     }
 
     // }}}
