@@ -12,8 +12,8 @@ class sub_dir implements spl_sequence
 {
 	protected $adir = array();
 	protected $cnt  = 0;
-	protected $path = "";
-	protected $curr = "";
+	protected $path = '';
+	protected $curr = '';
 	protected $nodots = true;
 
 	/**
@@ -22,9 +22,11 @@ class sub_dir implements spl_sequence
 	 * @param path    The path to iterate.
 	 * @param nodots  Whether or not to display the entries '.' and '..'.
 	 */
-	function __construct($path, $nodots = true) {
+	function __construct($path, $nodots = true, $graph = false) {
 		$this->cnt = 0;
 		$this->path = $path;
+		$this->nodots = $nodots;
+		$this->graph = $graph;
 	}
 	
 	/**
@@ -41,12 +43,12 @@ class sub_dir implements spl_sequence
 		$this->adir[1] = $dir;
 		$this->cnt = 1;
 		if ($this->nodots) {
-			while ($this->has_more()) {
-				$ent = $this->current();
+			while ($dir->has_more()) {
+				$ent = $dir->current();
 				if ($ent != '.' && $ent != '..') {
 					break;
 				}
-				$this->next();
+				$dir->next();
 			}
 		}
 	}
@@ -67,13 +69,17 @@ class sub_dir implements spl_sequence
 				$new->cnt = $this->cnt++;
 				$this->adir[$this->cnt] = $new;
 				if ($this->nodots) {
+					$dir->has_more = false;
 					while ($new->has_more()) {
 						$ent = $new->current();
 						if ($ent != '.' && $ent != '..') {
+							$dir->has_more = true;
 							break;
 						}
 						$new->next();
 					}
+				} else {
+					$dir->has_more = $dir->has_more();
 				}
 			}
 			$dir->next();
@@ -99,8 +105,20 @@ class sub_dir implements spl_sequence
 	 */
 	function current() {
 		if ($this->cnt) {
-			$dir = $this->adir[$this->cnt];
-			return $dir->path . $dir->current();
+			if ($this->graph) {
+				$prefix = '';
+				for ($i = 1; $i < $this->cnt; $i++) {
+					$dir = $this->adir[$i];
+					$prefix .= $dir->has_more() ? '| ' : '  ';
+				}
+				$dir = $this->adir[$this->cnt];
+				$ent = $dir->current();
+				$prefix .= $dir->has_more() ? '+-' : '\-';
+				return $prefix . $ent;
+			} else {
+				$dir = $this->adir[$this->cnt];
+				return $dir->path . $dir->current();
+			}
 		}
 		throw new exception("No more elements available");
 	}
