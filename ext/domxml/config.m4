@@ -14,7 +14,7 @@ AC_ARG_WITH(dom,
       PHP_EXTENSION(domxml)
       old_LIBS=$LIBS
       LIBS="$LIBS -lz"
-      AC_CHECK_LIB(xml, xmlNewDoc, [AC_DEFINE(HAVE_DOMXML,1,[ ])],
+      AC_CHECK_LIB(xml, xmlFreeURI, [AC_DEFINE(HAVE_DOMXML,1,[ ])],
         [AC_MSG_ERROR(DOM module requires libxml >= 2.0)])
       LIBS=$old_LIBS
       AC_ADD_LIBRARY(z)
@@ -33,7 +33,7 @@ AC_ARG_WITH(dom,
           old_withval=$withval
           AC_MSG_CHECKING([for zlib (needed by DOM support)])
           AC_ARG_WITH(zlib-dir,
-          [  --with-zlib-dir[=DIR]   zlib dir for pdflib 3.0 or include zlib support],[
+          [  --with-zlib-dir[=DIR]   zlib dir for libxml or include zlib support],[
             AC_MSG_RESULT( )
             if test -z $withval; then
               withval="/usr/local"
@@ -51,7 +51,7 @@ AC_ARG_WITH(dom,
           LIBS="$LIBS -L$withval/lib -lz"
         fi
 
-        AC_CHECK_LIB(xml, xmlNewDoc, [AC_DEFINE(HAVE_DOMXML,1,[ ])],
+        AC_CHECK_LIB(xml, xmlFreeURI, [AC_DEFINE(HAVE_DOMXML,1,[ ])],
           [AC_MSG_ERROR(DOM module requires libxml >= 2.0.)])
         LIBS=$old_LIBS
         AC_ADD_LIBRARY_WITH_PATH(xml, $withval/lib)
