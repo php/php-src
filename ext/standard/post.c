@@ -360,32 +360,48 @@ void php_treat_data(int arg, char *str ELS_DC PLS_DC SLS_DC)
 	if (!res) {
 		return;
 	}
-	
-	if (arg == PARSE_COOKIE) {
-		var = strtok(res, ";");
-	} else if (arg == PARSE_POST) {
-		var = strtok(res, "&");
-	} else {
-		var = strtok(res, PG(arg_separator));
-	}
 
-	while (var) {
-		val = strchr(var, '=');
-		if (val) { /* have a value */
-			*val++ = '\0';
-			/* FIXME: XXX: not binary safe, discards returned length */
-			_php3_urldecode(var, strlen(var));
-			_php3_urldecode(val, strlen(val));
-			php_parse_gpc_data2(val,var,array_ptr ELS_CC PLS_CC);
-		}
+#if HAVE_FDFLIB
+	if((NULL != SG(request_info).content_type) && (0 == strcmp(SG(request_info).content_type, "application/vnd.fdf"))) {
+		pval *tmp;
+
+		tmp = (pval *) emalloc(sizeof(pval));
+		tmp->value.str.len = SG(request_info).post_data_length;
+		tmp->value.str.val = estrndup(SG(request_info).post_data, SG(request_info).post_data_length);
+		tmp->type = IS_STRING;
+		INIT_PZVAL(tmp);
+		zend_hash_add(&EG(symbol_table), "HTTP_FDF_DATA", sizeof("HTTP_FDF_DATA"), &tmp, sizeof(pval *),NULL);
+
+	} else {
+#endif
 		if (arg == PARSE_COOKIE) {
-			var = strtok(NULL, ";");
+			var = strtok(res, ";");
 		} else if (arg == PARSE_POST) {
-			var = strtok(NULL, "&");
+			var = strtok(res, "&");
 		} else {
-			var = strtok(NULL, PG(arg_separator));
+			var = strtok(res, PG(arg_separator));
 		}
+
+		while (var) {
+			val = strchr(var, '=');
+			if (val) { /* have a value */
+				*val++ = '\0';
+				/* FIXME: XXX: not binary safe, discards returned length */
+				_php3_urldecode(var, strlen(var));
+				_php3_urldecode(val, strlen(val));
+				php_parse_gpc_data2(val,var,array_ptr ELS_CC PLS_CC);
+			}
+			if (arg == PARSE_COOKIE) {
+				var = strtok(NULL, ";");
+			} else if (arg == PARSE_POST) {
+				var = strtok(NULL, "&");
+			} else {
+				var = strtok(NULL, PG(arg_separator));
+			}
+		}
+#if HAVE_FDFLIB
 	}
+#endif
 	if (free_buffer) {
 		efree(res);
 	}
