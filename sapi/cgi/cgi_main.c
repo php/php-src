@@ -249,8 +249,7 @@ static int sapi_cgibin_ub_write(const char *str, uint str_length TSRMLS_DC)
 	uint remaining = str_length;
 	size_t ret;
 
-	while (remaining > 0)
-	{
+	while (remaining > 0) {
 		ret = sapi_cgibin_single_write(ptr, remaining TSRMLS_CC);
 		if (!ret) {
 			php_handle_aborted_connection();
@@ -272,7 +271,8 @@ static void sapi_cgibin_flush(void *server_context)
 		if(!request || FCGX_FFlush( request->out ) == -1 ) {
 			php_handle_aborted_connection();
 		}
-	} else
+		return;
+	}
 #endif
 	if (fflush(stdout)==EOF) {
 		php_handle_aborted_connection();
@@ -354,9 +354,10 @@ static int sapi_cgi_read_post(char *buffer, uint count_bytes TSRMLS_DC)
 			FCGX_Request *request = (FCGX_Request *)SG(server_context);
 			tmp_read_bytes = FCGX_GetStr( pos, count_bytes-read_bytes, request->in );
 			pos += tmp_read_bytes;
-		} else
+		} else {
 #endif
 			tmp_read_bytes = read(0, buffer+read_bytes, count_bytes-read_bytes);
+		}
 
 		if (tmp_read_bytes<=0) {
 			break;
@@ -387,7 +388,9 @@ static char *_sapi_cgibin_putenv(char *name, char *value TSRMLS_DC)
 {
 	int len=0;
 	char *buf = NULL;
-	if (!name) return NULL;
+	if (!name) {
+		return NULL;
+	}
 	len = strlen(name) + (value?strlen(value):0) + sizeof("=") + 2;
 	buf = (char *)malloc(len);
 	if (buf == NULL) {
@@ -480,7 +483,7 @@ static int sapi_cgi_deactivate(TSRMLS_D)
 
 static int php_cgi_startup(sapi_module_struct *sapi_module)
 {
-	if (php_module_startup(sapi_module, NULL, 0)==FAILURE) {
+	if (php_module_startup(sapi_module, NULL, 0) == FAILURE) {
 		return FAILURE;
 	}
 	return SUCCESS;
@@ -639,8 +642,9 @@ static void init_request_info(TSRMLS_D)
 	/* some broken servers do not have script_filename or argv0
 	   an example, IIS configured in some ways.  then they do more
 	   broken stuff and set path_translated to the cgi script location */
-	if (!script_path_translated && env_path_translated)
-		script_path_translated = env_path_translated; 
+	if (!script_path_translated && env_path_translated) {
+		script_path_translated = env_path_translated;
+	}
 #endif
 
 	/* initialize the defaults */
@@ -670,22 +674,25 @@ static void init_request_info(TSRMLS_D)
 		if (fix_pathinfo) {
 
 			/* save the originals first for anything we change later */
-			if (env_path_translated)
+			if (env_path_translated) {
 				_sapi_cgibin_putenv("ORIG_PATH_TRANSLATED",env_path_translated TSRMLS_CC);
-			if (env_path_info)
+			}
+			if (env_path_info) {
 				_sapi_cgibin_putenv("ORIG_PATH_INFO",env_path_info TSRMLS_CC);
-			if (env_script_name)
+			}
+			if (env_script_name) {
 				_sapi_cgibin_putenv("ORIG_SCRIPT_NAME",env_script_name TSRMLS_CC);
-			if (env_script_filename)
+			}
+			if (env_script_filename) {
 				_sapi_cgibin_putenv("ORIG_SCRIPT_FILENAME",env_script_filename TSRMLS_CC);
-
+			}
 			if (!env_document_root) {
 				/* IIS version of DOCUMENT_ROOT, not avail in cgi, but is in fastcgi */
 				env_document_root = sapi_cgibin_getenv("APPL_PHYSICAL_PATH",0 TSRMLS_CC);
 				/* ini version of document root */
-				if (!env_document_root)
+				if (!env_document_root) {
 					env_document_root = PG(doc_root);
-
+				}
 				/* set the document root, this makes a more
 				   consistent env for php scripts */
 				if (env_document_root) {
@@ -756,7 +763,9 @@ static void init_request_info(TSRMLS_D)
 							int l = strlen(env_document_root);
 							int path_translated_len = 0;
 							char *path_translated = NULL;
-							if (env_document_root[l-1]=='/') --l;
+							if (env_document_root[l-1]=='/') {
+								--l;
+							}
 
 							/* we have docroot, so we should have:
 							 * DOCUMENT_ROOT=/docroot
@@ -803,7 +812,9 @@ static void init_request_info(TSRMLS_D)
 					script_path_translated = _sapi_cgibin_putenv("SCRIPT_FILENAME",NULL TSRMLS_CC);
 					SG(sapi_headers).http_response_code = 404;
 				}
-				if (pt) efree(pt);
+				if (pt) {
+					efree(pt);
+				}
 			} else {
 				/* make sure path_info/translated are empty */
 				script_path_translated = _sapi_cgibin_putenv("SCRIPT_FILENAME",script_path_translated TSRMLS_CC);
@@ -814,10 +825,11 @@ static void init_request_info(TSRMLS_D)
 		} else {
 #endif
 			/* pre 4.3 behaviour, shouldn't be used but provides BC */
-			if (env_path_info)
+			if (env_path_info) {
 				SG(request_info).request_uri = env_path_info;
-			else
+			} else {
 				SG(request_info).request_uri = env_script_name;
+			}
 #if !DISCARD_PATH
 			script_path_translated = env_path_translated;
 #endif
@@ -828,8 +840,9 @@ static void init_request_info(TSRMLS_D)
 		SG(request_info).query_string = sapi_cgibin_getenv("QUERY_STRING",0 TSRMLS_CC);
 		/* some server configurations allow '..' to slip through in the
 		   translated path.   We'll just refuse to handle such a path. */
-		if (script_path_translated && !strstr(script_path_translated,".."))
+		if (script_path_translated && !strstr(script_path_translated, "..")) {
 			SG(request_info).path_translated = estrdup(script_path_translated);
+		}
 		SG(request_info).content_type = (content_type ? content_type : "" );
 		SG(request_info).content_length = (content_length?atoi(content_length):0);
 		
@@ -1008,8 +1021,10 @@ int main(int argc, char *argv[])
 				   we are being started as an 'external' fastcgi
 				   server by accepting a bindpath parameter. */
 				case 'b':
-					if (!fastcgi) bindpath= strdup(optarg);
-				break;
+					if (!fastcgi) {
+						bindpath = strdup(optarg);
+					}
+					break;
 #endif
 			}
 
@@ -1030,7 +1045,7 @@ int main(int argc, char *argv[])
 	cgi_sapi_module.executable_location = argv[0];
 
 	/* startup after we get the above ini override se we get things right */
-	if (php_module_startup(&cgi_sapi_module, NULL, 0)==FAILURE) {
+	if (php_module_startup(&cgi_sapi_module, NULL, 0) == FAILURE) {
 #ifdef ZTS
 		tsrm_shutdown();
 #endif
@@ -1095,16 +1110,16 @@ consult the installation file that came with this distribution, or visit \n\
 		 * If just a port is specified, then we prepend a ':' onto the
 		 * path (it's what the fastcgi library expects)
 		 */
-		int port = atoi( bindpath );
-		if( port ) {
-			char bindport[ 32 ];
-			snprintf( bindport, 32, ":%s", bindpath );
-			fcgi_fd = FCGX_OpenSocket( bindport, 128 );
+		int port = atoi(bindpath);
+		if (port) {
+			char bindport[32];
+			snprintf(bindport, 32, ":%s", bindpath);
+			fcgi_fd = FCGX_OpenSocket(bindport, 128);
 		} else {
-			fcgi_fd = FCGX_OpenSocket( bindpath, 128 );
+			fcgi_fd = FCGX_OpenSocket(bindpath, 128);
 		}
 		if( fcgi_fd < 0 ) {
-			fprintf( stderr, "Couldn't create FastCGI listen socket on port %s\n", bindpath);
+			fprintf(stderr, "Couldn't create FastCGI listen socket on port %s\n", bindpath);
 #ifdef ZTS
 	        tsrm_shutdown();
 #endif
@@ -1314,7 +1329,7 @@ consult the installation file that came with this distribution, or visit \n\
 						break;
 
 				case 'i': /* php info & quit */
-						if (php_request_startup(TSRMLS_C)==FAILURE) {
+						if (php_request_startup(TSRMLS_C) == FAILURE) {
 							php_module_shutdown(TSRMLS_C);
 							return FAILURE;
 						}
@@ -1361,7 +1376,7 @@ consult the installation file that came with this distribution, or visit \n\
 
 				case 'v': /* show php version & quit */
 						no_headers = 1;
-						if (php_request_startup(TSRMLS_C)==FAILURE) {
+						if (php_request_startup(TSRMLS_C) == FAILURE) {
 							php_module_shutdown(TSRMLS_C);
 							return FAILURE;
 						}
@@ -1515,14 +1530,14 @@ consult the installation file that came with this distribution, or visit \n\
 			case PHP_MODE_LINT:
 				PG(during_request_startup) = 0;
 				exit_status = php_lint_script(&file_handle TSRMLS_CC);
-				if (exit_status==SUCCESS) {
+				if (exit_status == SUCCESS) {
 					zend_printf("No syntax errors detected in %s\n", file_handle.filename);
 				} else {
 					zend_printf("Errors parsing %s\n", file_handle.filename);
 				}
 				break;
 			case PHP_MODE_STRIP:
-				if (open_file_for_scanning(&file_handle TSRMLS_CC)==SUCCESS) {
+				if (open_file_for_scanning(&file_handle TSRMLS_CC) == SUCCESS) {
 					zend_strip(TSRMLS_C);
 					fclose(file_handle.handle.fp);
 				}
@@ -1532,7 +1547,7 @@ consult the installation file that came with this distribution, or visit \n\
 				{
 					zend_syntax_highlighter_ini syntax_highlighter_ini;
 
-					if (open_file_for_scanning(&file_handle TSRMLS_CC)==SUCCESS) {
+					if (open_file_for_scanning(&file_handle TSRMLS_CC) == SUCCESS) {
 						php_get_highlight_struct(&syntax_highlighter_ini);
 						zend_highlight(&syntax_highlighter_ini TSRMLS_CC);
 						fclose(file_handle.handle.fp);
@@ -1575,9 +1590,11 @@ consult the installation file that came with this distribution, or visit \n\
 			if (!fastcgi) break;
 			/* only fastcgi will get here */
 			requests++;
-			if( max_requests && ( requests == max_requests )) {
+			if(max_requests && (requests == max_requests)) {
 				FCGX_Finish_r(&request);
-				if (bindpath) free (bindpath);
+				if (bindpath) {
+					free(bindpath);
+				}
 				break;
 			}
 			/* end of fastcgi loop */
