@@ -28,12 +28,8 @@ if test "$PHP_DOM" != "no"; then
   if test -r $PHP_DOM/include/libxml/tree.h; then
     DOMXML_DIR=$PHP_DOM
   else
-    AC_MSG_CHECKING(for DOM in default path)
     for i in /usr/local /usr; do
-      if test -r $i/include/libxml/tree.h; then
-        DOMXML_DIR=$i
-        AC_MSG_RESULT(found in $i)
-      fi
+      test -r $i/include/libxml/tree.h && DOMXML_DIR=$i
     done
   fi
 
@@ -44,23 +40,22 @@ if test "$PHP_DOM" != "no"; then
 
   PHP_DOM_CHECK_VERSION
 
-  PHP_ADD_INCLUDE($DOMXML_DIR/include)
-
   if test -f $DOMXML_DIR/lib/libxml2.a -o -f $DOMXML_DIR/lib/libxml2.s? ; then
     DOM_LIBNAME=xml2
   else
     DOM_LIBNAME=xml
   fi
 
-  PHP_SUBST(DOMXML_SHARED_LIBADD)
   PHP_ADD_LIBRARY_WITH_PATH($DOM_LIBNAME, $DOMXML_DIR/lib, DOMXML_SHARED_LIBADD)
+  PHP_ADD_INCLUDE($DOMXML_DIR/include)
 
   if test "$PHP_ZLIB_DIR" = "no"; then
     AC_MSG_ERROR(DOMXML requires ZLIB. Use --with-zlib-dir=<DIR>)
+  else
+    PHP_ADD_LIBRARY_WITH_PATH(z, $PHP_ZLIB_DIR/lib, DOMXML_SHARED_LIBADD)
   fi
-
-  PHP_ADD_LIBRARY_WITH_PATH(z, $PHP_ZLIB_DIR/lib, DOMXML_SHARED_LIBADD)
-
+  
   AC_DEFINE(HAVE_DOMXML,1,[ ])
   PHP_EXTENSION(domxml, $ext_shared)
+  PHP_SUBST(DOMXML_SHARED_LIBADD)
 fi
