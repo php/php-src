@@ -80,6 +80,9 @@ static zend_class_entry *oci_lob_class_entry_ptr;
 
 #include <fcntl.h>
 
+#ifndef O_BINARY
+#define O_BINARY 0
+#endif
 
 /* }}} */
 /* {{{ thread safety stuff */
@@ -2698,7 +2701,7 @@ PHP_FUNCTION(ocisavelobfile)
 
 		filename = (*arg)->value.str.val;
 
-		if ((fp = V_OPEN((filename, O_RDONLY))) == -1) {
+		if ((fp = V_OPEN((filename, O_RDONLY|O_BINARY))) == -1) {
 			php_error(E_WARNING, "Can't open file %s", filename);
 			RETURN_FALSE;
         } 
@@ -2820,7 +2823,7 @@ PHP_FUNCTION(ociwritelobtofile)
 				goto bail;
 			}
 
-			if ((fp = V_OPEN((filename,O_CREAT|O_TRUNC|O_WRONLY))) == -1) {
+			if ((fp = V_OPEN((filename,O_CREAT | O_RDWR | O_BINARY | O_TRUNC, 0600))) == -1) {
 				php_error(E_WARNING, "Can't create file %s", filename);
 				goto bail;
 			} 
