@@ -95,7 +95,6 @@ PHPAPI php_url *php_url_parse(char const *str)
  */
 PHPAPI php_url *php_url_parse_ex(char const *str, int length)
 {
-	int length = strlen(str);
 	char port_buf[6];
 	php_url *ret = ecalloc(1, sizeof(php_url));
 	char *s, *e, *p, *pp, *ue;
