@@ -1558,7 +1558,6 @@ consult the installation file that came with this distribution, or visit \n\
 		switch (behavior) {
 			case PHP_MODE_STANDARD:
 				php_execute_script(&file_handle TSRMLS_CC);
-				exit_status = EG(exit_status);
 				break;
 			case PHP_MODE_LINT:
 				PG(during_request_startup) = 0;
@@ -1615,6 +1614,7 @@ fastcgi_request_done:
 			}
 
 			php_request_shutdown((void *) 0);
+			exit_status = EG(exit_status);
 
 			if (SG(request_info).path_translated) {
 				free(SG(request_info).path_translated);
