@@ -10,6 +10,7 @@ PHP 4                                                                      NEWS
   images. (Ilia)
 - Fixed handling of return values from storred procedures in mssql_execute()
   with multiple result sets returned. (Frank)
+- Fixed bug #28456 (Problem with enclosed / in uploaded files). (Antony)
 - Fixed logic bug in session_register() which allowed registering _SESSION
   and/or HTTP_SESSION_VARS. (Sara)
 - Fixed bug #28386 (wordwrap() wraps lines 1 character too soon). (Ilia)
