@@ -1,3 +1,93 @@
+2000-06-11  Rasmus Lerdorf  <rasmus@php.net>
+
+    * build/rules.mk
+      build/rules_pear.mk: Fix overlooked core->main change
+
+2000-06-11  Zeev Suraski  <zeev@php.net>
+
+    * ext/mysql/php_mysql.c
+      php4.dsp
+      php4dll.dsp
+      php4dllts.dsp
+      php4ts.dsp
+      sapi/apache/php4apache.dsp
+      sapi/isapi/php4isapi.dsp
+      sapi/nsapi/php4nsapi.dsp: Fix Windows .dsp's
+
+2000-06-11  Sascha Schumann  <sascha@schumann.cx>
+
+    * Makefile.in
+      configure.in
+      main/Makefile.in
+      php4dll.dsp
+      php4dllts.dsp: Change directory name from core to main.
+
+    * Makefile.in
+      build/rules.mk
+      build/rules_pear.mk
+      configure.in
+      main/Makefile.in
+      php4dll.dsp
+      php4dllts.dsp:
+    Prepare move of the top-level source files to the core directory.
+
+2000-06-11  Andi Gutmans  <andi@php.net>
+
+    * NEWS: - Update NEWS
+
+    * ext/standard/cyr_convert.c:
+    - Untested but it should fix the problem with cyr_convert() not being
+    - binary safe and destroying other values in the script
+
+    * ext/swf/swf.c: - Make shockwave work with virtual_dir (a bit ugly).
+    - swf_openfile doesn't return any values. This seems to mean that you can
+    - only have one file open at a time.
+
+2000-06-11  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/interbase/interbase.c: Added argument type.
+
+2000-06-11  Stig Venaas  <venaas@uninett.no>
+
+    * ext/standard/array.c:
+    Forgot to set_compare_func in the new array functions, had only tested
+    with older source.
+
+2000-06-11  Sascha Schumann  <sascha@schumann.cx>
+
+    * acinclude.m4
+      configure.in: Separate creating config_vars.mk and generating Makefiles.
+
+    This change enables you to regenerate Makefiles by running config.status.
+
+    * build/fastgen.sh: Remove unnecessary second cat invocation
+
+2000-06-11  Thies C. Arntzen  <thies@digicol.de>
+
+    * main/main.c: (set_time_limit) converted to new API.
+
+2000-06-11  Sascha Schumann  <sascha@schumann.cx>
+
+    * config.guess
+      config.sub
+      ltconfig
+      ltmain.sh: Upgrade to Libtool 1.3.5.
+
+2000-06-11  Sterling Hughes  <stirling@bestweb.net>
+
+    * ext/swf/swf.c: oops.
+
+
+2000-06-11  Jouni Ahto  <jah@mork.net>
+
+    * ext/skeleton/create_stubs
+      ext/ext_skel:
+    - Avoid generating unnecessary switch statemets.
+    - Add a test if argument was given (if it is optional) before trying to
+      fetch a resource and a note that something should be done if it wasn't.
+    - Some cosmetic fixes in the code generated.
+    - Some other small fixes in the code generated, already forgotten.
+
 2000-06-10  Andrei Zmievski  <andrei@ispi.net>
 
     * ext/pcre/php_pcre.c: One more place.
