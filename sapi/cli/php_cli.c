@@ -438,7 +438,7 @@ int main(int argc, char *argv[])
 {
 	int exit_status = SUCCESS;
 	int c;
-	zend_file_handle file_handle;
+	zend_file_handle file_handle = {0};
 /* temporary locals */
 	int behavior=PHP_MODE_STANDARD;
 	int no_headers=1;

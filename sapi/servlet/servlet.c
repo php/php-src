@@ -310,7 +310,7 @@ JNIEXPORT void JNICALL Java_net_php_servlet_send
 	 jstring contentType, jint contentLength, 
 	 jstring authUser, jboolean display_source_mode)
 {
-	zend_file_handle file_handle;
+	zend_file_handle file_handle = {0};
 	int retval;
 #ifndef VIRTUAL_DIR
 	char cwd[MAXPATHLEN];

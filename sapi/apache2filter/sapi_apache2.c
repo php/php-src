@@ -445,7 +445,7 @@ static int php_output_filter(ap_filter_t *f, apr_bucket_brigade *bb)
 	}
 
 	for (b = APR_BRIGADE_FIRST(bb); b != APR_BRIGADE_SENTINEL(bb); b = APR_BUCKET_NEXT(b)) {
-		zend_file_handle zfd;
+		zend_file_handle zfd = {0};
 
 		if (!ctx->request_processed && APR_BUCKET_IS_FILE(b)) {
 			const char *path;

@@ -507,7 +507,7 @@ static int php_handler(request_rec *r)
 		php_get_highlight_struct(&syntax_highlighter_ini);
 		highlight_file((char *)r->filename, &syntax_highlighter_ini TSRMLS_CC);
 	} else {
-		zend_file_handle zfd;
+		zend_file_handle zfd = {0};
 
 		zfd.type = ZEND_HANDLE_FILENAME;
 		zfd.filename = (char *) r->filename;
