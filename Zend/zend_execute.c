@@ -532,7 +532,8 @@ static void zend_fetch_var_address(zend_op *opline, temp_variable *Ts, int type 
 
 	switch (opline->extended_value) {
 		case ZEND_FETCH_LOCAL:
-			target_symbol_table = EG(active_symbol_table);
+			//target_symbol_table = EG(active_symbol_table);
+			target_symbol_table = EG(namespace)?&EG(namespace)->static_members:EG(active_symbol_table);
 			break;
 		case ZEND_FETCH_GLOBAL:
 			if (opline->op1.op_type == IS_VAR) {
@@ -1608,7 +1609,7 @@ binary_assign_op_addr: {
 						}
 					} else { /* function pointer */
 						EX(object).ptr = NULL;
-						active_function_table = EG(function_table);
+						active_function_table = EG(namespace)?&EG(namespace)->function_table:EG(function_table);
 					}
 					if (zend_hash_find(active_function_table, function_name->value.str.val, function_name->value.str.len+1, (void **) &function)==FAILURE) {
 						zend_error(E_ERROR, "Call to undefined function:  %s()", function_name->value.str.val);
@@ -1625,7 +1626,7 @@ overloaded_function_call_cont:
 			case ZEND_DO_FCALL: {
 					zval *fname = get_zval_ptr(&EX(opline)->op1, EX(Ts), &EG(free_op1), BP_VAR_R);
 
-					if (zend_hash_find(EG(function_table), fname->value.str.val, fname->value.str.len+1, (void **) &EX(function_state).function)==FAILURE) {
+					if (zend_hash_find(EG(namespace)?&EG(namespace)->function_table:EG(function_table), fname->value.str.val, fname->value.str.len+1, (void **) &EX(function_state).function)==FAILURE) {
 						zend_error(E_ERROR, "Unknown function:  %s()\n", fname->value.str.val);
 					}
 					FREE_OP(EX(Ts), &EX(opline)->op1, EG(free_op1));
@@ -1806,6 +1807,11 @@ do_fcall_common:
 				NEXT_OPCODE();
 			case ZEND_NAMESPACE:
 				{
+					if (EX(opline)->op1.op_type == IS_UNUSED) {
+						EG(namespace) = NULL;
+					} else {
+						EG(namespace) = EX(Ts)[EX(opline)->op1.u.var].EA.class_entry;
+					}
 					NEXT_OPCODE();
 				}
 			case ZEND_SEND_VAL: 
