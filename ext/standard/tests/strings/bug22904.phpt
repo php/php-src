@@ -1,8 +1,9 @@
 --TEST--
 Bug #22904 (magic mode failed for cybase with '\0')
 --FILE--
-<?php
 not active yet
+<?php
+
 /*
 ini_set("magic_quotes_sybase","on");
 test();
