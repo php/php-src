@@ -27,19 +27,20 @@
    +----------------------------------------------------------------------+
  */
 
+
+/* {{{ includes 
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
 #include "php.h"
-#include "fopen-wrappers.h"
-#include "reg.h"
-#include "post.h"
 #include "php3_string.h"
-#if HAVE_SETLOCALE
-#include <locale.h>
-#endif
-
 #include "php3_var.h"
+
+/* }}} */
+/* {{{ php3api_var_dump 
+xmae*/
 
 void php3api_var_dump(pval **struc, int level)
 {
@@ -124,6 +125,8 @@ void php3api_var_dump(pval **struc, int level)
 	}
 }
 
+/* }}} */
+/* {{{ php3api_var_dump */
 
 PHP_FUNCTION(var_dump)
 {
@@ -135,6 +138,8 @@ PHP_FUNCTION(var_dump)
 	php3api_var_dump(&struc, 1);
 }
 
+/* }}} */
+/* {{{ php3api_var_dump */
 
 
 #define STR_CAT(P,S,I) {\
@@ -150,21 +155,23 @@ PHP_FUNCTION(var_dump)
 	strcat(__p->value.str.val + __i, (S));\
 }
 
+/* }}} */
+/* {{{ php3api_var_dump */
 
-void php3api_var_serialize(pval *buf, pval *struc)
+void php3api_var_serialize(pval *buf, pval **struc)
 {
 	char s[256];
 	ulong slen;
 	int i, ch;
 
-	switch (struc->type) {
+	switch ((*struc)->type) {
 		case IS_LONG:
-			slen = sprintf(s, "i:%ld;", struc->value.lval);
+			slen = sprintf(s, "i:%ld;", (*struc)->value.lval);
 			STR_CAT(buf, s, slen);
 			return;
 
 		case IS_DOUBLE:
-			slen = sprintf(s, "d:%g;", struc->value.dval);
+			slen = sprintf(s, "d:%g;", (*struc)->value.dval);
 			STR_CAT(buf, s, slen);
 			return;
 
@@ -172,12 +179,12 @@ void php3api_var_serialize(pval *buf, pval *struc)
 				char *p;
 				
 				i = buf->value.str.len;
-				slen = sprintf(s, "s:%d:\"", struc->value.str.len);
-				STR_CAT(buf, s, slen + struc->value.str.len + 2);
+				slen = sprintf(s, "s:%d:\"", (*struc)->value.str.len);
+				STR_CAT(buf, s, slen + (*struc)->value.str.len + 2);
 				p = buf->value.str.val + i + slen;
-				if (struc->value.str.len > 0) {
-					memcpy(p, struc->value.str.val, struc->value.str.len);
-					p += struc->value.str.len;
+				if ((*struc)->value.str.len > 0) {
+					memcpy(p, (*struc)->value.str.val, (*struc)->value.str.len);
+					p += (*struc)->value.str.len;
 				}
 				*p++ = '\"';
 				*p++ = ';';
@@ -193,35 +200,42 @@ void php3api_var_serialize(pval *buf, pval *struc)
 			ch = 'o';
 
 		  got_array:
-			i = _php3_hash_num_elements(struc->value.ht);
+			i = _php3_hash_num_elements((*struc)->value.ht);
 			slen = sprintf(s, "%c:%d:{", ch, i);
 			STR_CAT(buf, s, slen);
 			if (i > 0) {
 				char *key;
-				pval *data;
-				pval d;
+				pval *data,*d;
 				ulong index;
 				
-				_php3_hash_internal_pointer_reset(struc->value.ht);
-				for (;; _php3_hash_move_forward(struc->value.ht)) {
-					if ((i = _php3_hash_get_current_key(struc->value.ht, &key, &index)) == HASH_KEY_NON_EXISTANT) {
+				_php3_hash_internal_pointer_reset((*struc)->value.ht);
+				for (;; _php3_hash_move_forward((*struc)->value.ht)) {
+					if ((i = _php3_hash_get_current_key((*struc)->value.ht, &key, &index)) == HASH_KEY_NON_EXISTANT) {
 						break;
 					}
-					if (_php3_hash_get_current_data(struc->value.ht, (void **) (&data)) != SUCCESS || !data || (data == struc)) {
+					if (_php3_hash_get_current_data((*struc)->value.ht, (void **) (&data)) != SUCCESS || !data || (data == (*struc))) {
 						continue;
 					}
+					if (data->type==IS_STRING && data->value.str.val==undefined_variable_string) {
+						continue;
+					}
+
 					switch (i) {
 						case HASH_KEY_IS_LONG:
-							d.type = IS_LONG;
-							d.value.lval = index;
+							d = emalloc(sizeof(pval));	
+							d->type = IS_LONG;
+							d->value.lval = index;
 							php3api_var_serialize(buf, &d);
+							efree(d);
 							break;
 						case HASH_KEY_IS_STRING:
-							d.type = IS_STRING;
-							d.value.str.val = key;
-							d.value.str.len = strlen(key);
+							d = emalloc(sizeof(pval));	
+							d->type = IS_STRING;
+							d->value.str.val = key;
+							d->value.str.len = strlen(key);
 							php3api_var_serialize(buf, &d);
 							efree(key);
+							efree(d);
 							break;
 					}
 					php3api_var_serialize(buf, data);
@@ -236,8 +250,10 @@ void php3api_var_serialize(pval *buf, pval *struc)
 	}
 }
 
+/* }}} */
+/* {{{ php3api_var_dump */
 
-int php3api_var_unserialize(pval *rval, char **p, char *max)
+int php3api_var_unserialize(pval **rval, char **p, char *max)
 {
 	char *q;
 	char *str;
@@ -256,8 +272,10 @@ int php3api_var_unserialize(pval *rval, char **p, char *max)
 				return 0;
 			}
 			(*p)++;
-			rval->type = IS_LONG;
-			rval->value.lval = atol(q + 2);
+			(*rval)->type = IS_LONG;
+			(*rval)->refcount = 1;
+			(*rval)->is_ref = 0;
+			(*rval)->value.lval = atol(q + 2);
 			return 1;
 
 		case 'd':
@@ -272,8 +290,10 @@ int php3api_var_unserialize(pval *rval, char **p, char *max)
 				return 0;
 			}
 			(*p)++;
-			rval->type = IS_DOUBLE;
-			rval->value.dval = atof(q + 2);
+			(*rval)->type = IS_DOUBLE;
+			(*rval)->refcount = 1;
+			(*rval)->is_ref = 0;
+			(*rval)->value.dval = atof(q + 2);
 			return 1;
 
 		case 's':
@@ -300,23 +320,25 @@ int php3api_var_unserialize(pval *rval, char **p, char *max)
 			}
 			str[i] = 0;
 			(*p) += i + 2;
-			rval->type = IS_STRING;
-			rval->value.str.val = str;
-			rval->value.str.len = i;
+			(*rval)->type = IS_STRING;
+			(*rval)->value.str.val = str;
+			(*rval)->value.str.len = i;
+ 			(*rval)->refcount = 1;
+			(*rval)->is_ref = 0;
 			return 1;
 
 		case 'a':
-			rval->type = IS_ARRAY;
+			(*rval)->type = IS_ARRAY;
 			goto got_array;
 
 		case 'o':
-			rval->type = IS_OBJECT;
+			(*rval)->type = IS_OBJECT;
 
 		  got_array:
 			(*p) += 2;
 			i = atoi(*p);
-			rval->value.ht = (HashTable *) emalloc(sizeof(HashTable));
-			_php3_hash_init(rval->value.ht, i + 1, NULL, PVAL_DESTRUCTOR, 0);
+			(*rval)->value.ht = (HashTable *) emalloc(sizeof(HashTable));
+			_php3_hash_init((*rval)->value.ht, i + 1, NULL, PVAL_DESTRUCTOR, 0);
 			while (**p && **p != ':') {
 				(*p)++;
 			}
@@ -324,24 +346,29 @@ int php3api_var_unserialize(pval *rval, char **p, char *max)
 				return 0;
 			}
 			for ((*p) += 2; **p && **p != '}' && i > 0; i--) {
-				pval key;
-				pval data;
+				pval *key = emalloc(sizeof(pval));
+				pval *data = emalloc(sizeof(pval));
 				
 				if (!php3api_var_unserialize(&key, p, max)) {
+				    efree(key);
+					efree(data);
 					return 0;
 				}
 				if (!php3api_var_unserialize(&data, p, max)) {
+				    efree(key);
+					efree(data);
 					return 0;
 				}
-				switch (key.type) {
+				switch (key->type) {
 					case IS_LONG:
-						_php3_hash_index_update(rval->value.ht, key.value.lval, &data, sizeof(data), NULL);
+						_php3_hash_index_update((*rval)->value.ht, key->value.lval, &data, sizeof(data), NULL);
 						break;
 					case IS_STRING:
-						_php3_hash_add(rval->value.ht, key.value.str.val, key.value.str.len + 1, &data, sizeof(data), NULL);
+						_php3_hash_add((*rval)->value.ht, key->value.str.val, key->value.str.len + 1, &data, sizeof(data), NULL);
 						break;
 				}
-				pval_destructor(&key);
+				pval_destructor(key);
+				efree(key);
 			}
 			return *((*p)++) == '}';
 
@@ -350,8 +377,11 @@ int php3api_var_unserialize(pval *rval, char **p, char *max)
 	}
 }
 
-
+/* }}} */
+/* {{{ proto string serialize(mixed variable)
+   Returns a string representation of variable (which can later be unserialized) */
 PHP_FUNCTION(serialize)
+
 {
 	pval *struc;
 
@@ -361,8 +391,12 @@ PHP_FUNCTION(serialize)
 	return_value->type = IS_STRING;
 	return_value->value.str.val = NULL;
 	return_value->value.str.len = 0;
-	php3api_var_serialize(return_value, struc);
+	php3api_var_serialize(return_value, &struc);
 }
+
+/* }}} */
+/* {{{ proto mixed unserialize(string variable_representation)
+   Takes a string representation of variable and recreates it */
 
 
 PHP_FUNCTION(unserialize)
@@ -374,13 +408,15 @@ PHP_FUNCTION(unserialize)
 	}
 	if (buf->type == IS_STRING) {
 		char *p = buf->value.str.val;
-		if (!php3api_var_unserialize(return_value, &p, p + buf->value.str.len)) {
+		if (!php3api_var_unserialize(&return_value, &p, p + buf->value.str.len)) {
 			RETURN_FALSE;
 		}
 	} else {
 		RETURN_FALSE;
 	}
 }
+
+/* }}} *
 
 /*
  * Local variables:
