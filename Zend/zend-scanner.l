@@ -340,7 +340,6 @@ ZEND_API zend_op_array *v_compile_files(int mark_as_ref CLS_DC, int file_count, 
 	int compiled_files=0;
 	zend_bool original_in_compilation = CG(in_compilation);
 
-	CG(in_compilation) = 1;
 	init_op_array(op_array, INITIAL_OP_ARRAY_SIZE);
 	save_lexical_state(&original_lex_state CLS_CC);
 
@@ -353,10 +352,12 @@ ZEND_API zend_op_array *v_compile_files(int mark_as_ref CLS_DC, int file_count, 
 		if (open_file_for_scanning(file_handle CLS_CC)==FAILURE) {
 			zend_message_dispatcher(ZMSG_FAILED_INCLUDE_FOPEN, file_handle->filename);
 		} else {
+			CG(in_compilation) = 1;
 			CG(active_op_array) = op_array;
 			compiler_result = zendparse(CLS_C);
 			zend_close_file_handle(file_handle CLS_CC);
 			restore_lexical_state(&original_lex_state CLS_CC);
+			CG(in_compilation) = original_in_compilation;
 			if (compiler_result==1) { /* parser error */
 				CG(unclean_shutdown) = 1;
 				retval = NULL;
@@ -381,7 +382,6 @@ ZEND_API zend_op_array *v_compile_files(int mark_as_ref CLS_DC, int file_count, 
 			retval = NULL;
 		}
 	}
-	CG(in_compilation) = original_in_compilation;
 	return retval;
 }
 
