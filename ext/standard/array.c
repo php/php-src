@@ -1734,17 +1734,48 @@ PHP_FUNCTION(array_slice)
 /* }}} */
 
 
-/* {{{ proto array array_merge(array arr1, array arr2 [, ...])
-   Merges elements from passed arrays into one array */
-PHP_FUNCTION(array_merge)
+static void php_array_merge_impl(HashTable *dest, HashTable *src, int recursive)
 {
-	zval	  ***args = NULL,
-			   **entry;
-	HashTable	*hash;
+	zval	  **src_entry,
+			  **dest_entry;
+	char	   *string_key;
+	ulong		num_key;
+
+	zend_hash_internal_pointer_reset(src);
+	while(zend_hash_get_current_data(src, (void **)&src_entry) == SUCCESS) {
+		switch (zend_hash_get_current_key(src, &string_key, &num_key)) {
+			case HASH_KEY_IS_STRING:
+				if (recursive &&
+					zend_hash_find(dest, string_key, strlen(string_key) + 1,
+								   (void **)&dest_entry) == SUCCESS) {
+					convert_to_array_ex(dest_entry);
+					convert_to_array_ex(src_entry);
+					php_array_merge_impl(Z_ARRVAL_PP(dest_entry),
+										 Z_ARRVAL_PP(src_entry), recursive);
+				} else {
+					(*src_entry)->refcount++;
+
+					zend_hash_update(dest, string_key, strlen(string_key)+1,
+									 src_entry, sizeof(zval *), NULL);
+				}
+				efree(string_key);
+				break;
+
+			case HASH_KEY_IS_LONG:
+				(*src_entry)->refcount++;
+				zend_hash_next_index_insert(dest, src_entry, sizeof(zval *), NULL);
+				break;
+		}
+
+		zend_hash_move_forward(src);
+	}
+}
+
+static void php_array_merge(INTERNAL_FUNCTION_PARAMETERS, int recursive)
+{
+	zval	  ***args = NULL;
 	int			 argc,
 				 i;
-	char		*string_key;
-	ulong		 num_key;
 
 	/* Get the argument count and check it */	
 	argc = ARG_COUNT(ht);
@@ -1762,34 +1793,28 @@ PHP_FUNCTION(array_merge)
 	array_init(return_value);
 	
 	for (i=0; i<argc; i++) {
-		if ((*args[i])->type != IS_ARRAY) {
-			php_error(E_WARNING, "Skipping argument #%d to array_merge(), since it's not an array", i+1);
-			continue;
-		}
-		hash = (*args[i])->value.ht;
-		
-		zend_hash_internal_pointer_reset(hash);
-		while(zend_hash_get_current_data(hash, (void **)&entry) == SUCCESS) {
-			(*entry)->refcount++;
-			
-			switch (zend_hash_get_current_key(hash, &string_key, &num_key)) {
-				case HASH_KEY_IS_STRING:
-					zend_hash_update(return_value->value.ht, string_key, strlen(string_key)+1,
-									 entry, sizeof(zval *), NULL);
-					efree(string_key);
-					break;
-
-				case HASH_KEY_IS_LONG:
-					zend_hash_next_index_insert(return_value->value.ht,
-												entry, sizeof(zval *), NULL);
-					break;
-			}
-
-			zend_hash_move_forward(hash);
-		}
+		convert_to_array_ex(args[i]);
+		php_array_merge_impl(Z_ARRVAL_P(return_value), Z_ARRVAL_PP(args[i]), recursive);
 	}
 	
 	efree(args);
+}
+
+
+/* {{{ proto array array_merge(array arr1, array arr2 [, ...])
+   Merges elements from passed arrays into one array */
+PHP_FUNCTION(array_merge)
+{
+	php_array_merge(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+}
+/* }}} */
+
+
+/* {{{ proto array array_merge(array arr1, array arr2 [, ...])
+   Recursively merges elements from passed arrays into one array */
+PHP_FUNCTION(array_merge_recursive)
+{
+	php_array_merge(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 /* }}} */
 

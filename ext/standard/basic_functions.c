@@ -495,6 +495,7 @@ function_entry basic_functions[] = {
 	PHP_FE(array_splice,							first_arg_force_ref)
 	PHP_FE(array_slice,								NULL)
 	PHP_FE(array_merge,								NULL)
+	PHP_FE(array_merge_recursive,					NULL)
 	PHP_FE(array_keys,								NULL)
 	PHP_FE(array_values,							NULL)
 	PHP_FE(array_count_values,		 			  	NULL)
