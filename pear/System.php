@@ -433,12 +433,14 @@ class System
 
         // XXX FIXME honor safe mode
         $path_delim = OS_WINDOWS ? ';' : ':';
-        $exe_suffix = OS_WINDOWS ? '.exe' : '';
+        $exe_suffixes = OS_WINDOWS ? array('.exe','.bat','.cmd','.com') : array('');
         $path_elements = explode($path_delim, getenv('PATH'));
-        foreach ($path_elements as $dir) {
-            $file = $dir . DIRECTORY_SEPARATOR . $program . $exe_suffix;
-            if (@is_file($file) && @$pear_is_executable($file)) {
-                return $file;
+        foreach ($exe_suffixes as $suff) {
+            foreach ($path_elements as $dir) {
+                $file = $dir . DIRECTORY_SEPARATOR . $program . $suff;
+                if (@is_file($file) && @$pear_is_executable($file)) {
+                    return $file;
+                }
             }
         }
         return $fallback;
