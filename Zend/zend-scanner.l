@@ -1117,6 +1117,7 @@ ESCAPED_AND_WHITESPACE [\n\t\r #'.:;,()|^&+-/*=%!~<>?@]+
 }
 
 <ST_IN_SCRIPTING>"/*" {
+	CG(comment_start_line) = CG(zend_lineno);
 	BEGIN(ST_COMMENT);
 	yymore();
 }
@@ -1506,6 +1507,12 @@ ESCAPED_AND_WHITESPACE [\n\t\r #'.:;,()|^&+-/*=%!~<>?@]+
 <ST_DOUBLE_QUOTES,ST_BACKQUOTE,INITIAL,ST_IN_SCRIPTING,ST_LOOKING_FOR_PROPERTY><<EOF>> {
 	return 0;
 }
+
+<ST_COMMENT><<EOF>> {
+	zend_error(E_COMPILE_WARNING,"Unterminated comment starting line %d", CG(comment_start_line));
+	return 0;
+}
+	
 
 
 <ST_IN_SCRIPTING,INITIAL,ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_SINGLE_QUOTE>. {
