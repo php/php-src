@@ -1,3 +1,37 @@
+2003-03-26  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_execute.c
+      zend_language_parser.y:
+      Un-nest namespaces - now namespace X { namespace Y {} } is a parse error
+      Also refine namespaced includes
+
+2003-03-26  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * zend_compile.c:
+      Fixed bug #22900 (declaration of namespaces with same name results in
+      leaks).
+
+2003-03-26  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * zend.c
+      zend_API.c
+      zend_API.h
+      zend_builtin_functions.c
+      zend_compile.h
+      zend_execute.c
+      zend_execute_API.c
+      zend_opcode.c
+      zend_operators.h:
+      Eliminate TSRMLS_FETCH() calls in destroy_op_array() and
+      zend_get_class_entry().
+
+    * zend_API.c
+      zend_object_handlers.c
+      zend_objects.c
+      zend_objects.h:
+      Eliminate TSRMLS_FETCH() calls in zend_objects_new() and
+      zend_objects_get_address().
+
 2003-03-25  Andi Gutmans  <andi@zend.com>
 
     * zend_compile.c:

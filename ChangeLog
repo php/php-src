@@ -1,3 +1,45 @@
+2003-03-26  Sterling Hughes  <sterling@bumblebury.com>
+
+    * main/fopen_wrappers.c:
+      really fix
+
+    * main/fopen_wrappers.c:
+      fix segfault
+
+2003-03-26  Martin Jansen  <mail@martin-jansen.de>
+
+    * pear/PEAR/Common.php:
+      - Silence warning
+
+2003-03-26  David Croft  <david@infotrek.co.uk>
+
+    * NEWS:
+      a missing piece of news
+
+2003-03-26  David Hill  <David.Hill@hp.com>
+
+    * ext/standard/tests/time/002.phpt
+      ext/standard/tests/time/idate.phpt
+      ext/standard/tests/time/mktime.phpt:
+      Changing TZ to match Unix98 standard to make Tru64 happy
+
+2003-03-26  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ext/rpc/com/com.c
+      ext/rpc/com/conversion.c
+      ext/rpc/com/conversion.h
+      ext/rpc/com/dispatch.c
+      ext/rpc/com/variant.c
+      main/main.c:
+      Eliminate TSRMLS_FETCH() calls in destroy_op_array() and
+      zend_get_class_entry().
+
+    * win32/php_modules.dsw:
+      Leftover.
+
+    * ext/gd/gd.c:
+      Eliminate TSRMLS_FETCH() call in php_find_gd_font().
+
 2003-03-25  Rasmus Lerdorf  <rasmus@lerdorf.com>
 
     * (PHP_4_3)
