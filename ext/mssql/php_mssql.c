@@ -82,6 +82,7 @@ function_entry mssql_functions[] = {
 
 zend_module_entry mssql_module_entry = 
 {
+	STANDARD_MODULE_HEADER,
 	"mssql", 
 	mssql_functions, 
 	PHP_MINIT(mssql), 
@@ -89,6 +90,7 @@ zend_module_entry mssql_module_entry =
 	PHP_RINIT(mssql), 
 	PHP_RSHUTDOWN(mssql), 
 	PHP_MINFO(mssql), 
+        NO_VERSION_YET,
 	STANDARD_MODULE_PROPERTIES
 };
 
