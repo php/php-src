@@ -197,12 +197,12 @@ ZEND_API int numeric_compare_function(zval *result, zval *op1, zval *op2 TSRMLS_
 ZEND_API int string_compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC);
 
 ZEND_API void zend_str_tolower(char *str, unsigned int length);
-ZEND_API char *zend_str_tolower_copy(char *source, char *dest, unsigned int length);
+ZEND_API char *zend_str_tolower_copy(char *dest, const char *source, unsigned int length);
 
 static inline char *
-zend_str_tolower_dup(char *source, unsigned int length)
+zend_str_tolower_dup(const char *source, unsigned int length)
 {
-	return zend_str_tolower_copy(source, emalloc(length+1), length);
+	return zend_str_tolower_copy(emalloc(length+1), source, length);
 }
 
 ZEND_API int zend_binary_zval_strcmp(zval *s1, zval *s2);
