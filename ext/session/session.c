@@ -79,8 +79,14 @@ PHP_INI_BEGIN()
 PHP_INI_END()
 
 PS_SERIALIZER_FUNCS(php);
+#ifdef WDDX_SERIALIZER
+PS_SERIALIZER_FUNCS(wddx);
+#endif
 
 const static ps_serializer ps_serializers[] = {
+#ifdef WDDX_SERIALIZER
+	PS_SERIALIZER_ENTRY(wddx),
+#endif
 	PS_SERIALIZER_ENTRY(php),
 	{0}
 };
@@ -201,17 +207,18 @@ PS_SERIALIZER_DECODE_FUNC(php)
 	return SUCCESS;
 }
 
-#if 0
+#ifdef WDDX_SERIALIZER
 
 PS_SERIALIZER_ENCODE_FUNC(wddx)
 {
 	wddx_packet *packet;
 	char *key;
-	ELS_FETCH();
 	zval **struc;
 	char *buf;
+	ELS_FETCH();
 
 	packet = _php_wddx_constructor();
+	if(!packet) return FAILURE;
 
 	_php_wddx_packet_start(packet, NULL);
 	_php_wddx_add_chunk(packet, WDDX_STRUCT_S);
@@ -222,6 +229,7 @@ PS_SERIALIZER_ENCODE_FUNC(wddx)
 		if(zend_hash_find(&EG(symbol_table), key, strlen(key) + 1, (void **) &struc) == SUCCESS) {
 			_php_wddx_serialize_var(packet, *struc, key);
 		}
+		efree(key);
 	}
 	
 	_php_wddx_add_chunk(packet, WDDX_STRUCT_E);
@@ -244,7 +252,9 @@ PS_SERIALIZER_DECODE_FUNC(wddx)
 	int hash_type;
 	ELS_FETCH();
 
-	retval = (zval *) ecalloc(sizeof(zval), 1);
+	if(vallen == 0) return FAILURE;
+	
+	MAKE_STD_ZVAL(retval);
 
 	_php_wddx_deserialize(val, retval);
 
@@ -269,13 +279,16 @@ PS_SERIALIZER_DECODE_FUNC(wddx)
 
 	return SUCCESS;
 }
+
 #endif
 
 static char *_php_session_encode(int *newlen PSLS_DC)
 {
 	char *ret = NULL;
 
-	PS(serializer)->encode(&ret, newlen PSLS_CC);
+	if(PS(serializer)->encode(&ret, newlen PSLS_CC) == FAILURE) {
+		ret = NULL;
+	}
 
 	return ret;
 }
