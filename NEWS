@@ -4,7 +4,7 @@ PHP 4.0                                                                    NEWS
 - Added md5_file(), which calculaties the MD5 sum of a file.
   (patch by: Alessandro Astarita <aleast@capri.it>) (Derick)
 - Added support for parsing recordsets contained in WDDX packets. (Andrei)
-- Renamed key_exists tp array_key_exists. (Derick)
+- Renamed key_exists to array_key_exists. (Derick)
 - Fix ImageColorsForIndex() and ImageColorAt() to work for TrueColor
   images. (Rasmus)
 - Added support for bind_textdomain_codeset(). (rudib@email.si)
