@@ -164,7 +164,7 @@ zend_module_entry imap_module_entry = {
 	PHP_RINIT(imap),
 	PHP_RSHUTDOWN(imap),
 	PHP_MINFO(imap),
-    NO_VERSION_YET,
+	NO_VERSION_YET,
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */
@@ -250,19 +250,19 @@ FOBJECTLIST *mail_newfolderobjectlist(void)
  */
 void mail_free_foblist(FOBJECTLIST **foblist, FOBJECTLIST **tail)
 {
-    FOBJECTLIST *cur, *next;
-    
-    for(cur=*foblist, next=cur->next; cur; cur=next) {
-	next = cur->next;
+	FOBJECTLIST *cur, *next;
 
-	if(cur->text.data)
-	    fs_give((void **)&(cur->text.data));
+	for (cur=*foblist, next=cur->next; cur; cur=next) {
+		next = cur->next;
 
-	fs_give((void **)&cur);
-    }
+		if(cur->text.data)
+			fs_give((void **)&(cur->text.data));
 
-    *tail = NIL;
-    *foblist = NIL;
+		fs_give((void **)&cur);
+	}
+
+	*tail = NIL;
+	*foblist = NIL;
 }
 /* }}} */
 
@@ -520,8 +520,8 @@ PHP_MINIT_FUNCTION(imap)
 	REGISTER_LONG_CONSTANT("SA_UIDVALIDITY", SA_UIDVALIDITY , CONST_PERSISTENT | CONST_CS);
 	/* UID validity value */
 	REGISTER_LONG_CONSTANT("SA_ALL", sa_all, CONST_PERSISTENT | CONST_CS);
-     /* get all status information */
-		
+	/* get all status information */
+
 
 	/* Bits for mm_list() and mm_lsub() */
 
@@ -582,8 +582,7 @@ PHP_MINIT_FUNCTION(imap)
 	ENCOTHER                unknown
 	*/
 
-    le_imap = zend_register_list_destructors_ex(mail_close_it, NULL, "imap", module_number);
-
+	le_imap = zend_register_list_destructors_ex(mail_close_it, NULL, "imap", module_number);
 	return SUCCESS;
 }
 /* }}} */
@@ -640,19 +639,19 @@ PHP_MINFO_FUNCTION(imap)
 {
 	php_info_print_table_start();
 #if HAVE_IMAP2001
-	php_info_print_table_row(2, "IMAP c-Client Version", "2001");               
+	php_info_print_table_row(2, "IMAP c-Client Version", "2001");
 #elif HAVE_IMAP2000
-	php_info_print_table_row(2, "IMAP c-Client Version", "2000");               
+	php_info_print_table_row(2, "IMAP c-Client Version", "2000");
 #elif defined(IMAP41)
-	php_info_print_table_row(2, "IMAP c-Client Version", "4.1");               
+	php_info_print_table_row(2, "IMAP c-Client Version", "4.1");
 #else
-	php_info_print_table_row(2, "IMAP c-Client Version", "4.0"); 
+	php_info_print_table_row(2, "IMAP c-Client Version", "4.0");
 #endif
 #if HAVE_IMAP_SSL
-	php_info_print_table_row(2, "SSL Support", "enabled"); 
+	php_info_print_table_row(2, "SSL Support", "enabled");
 #endif
 #if HAVE_IMAP_KRB
-	php_info_print_table_row(2, "Kerberos Support", "enabled"); 
+	php_info_print_table_row(2, "Kerberos Support", "enabled");
 #endif
 	php_info_print_table_end();
 }
@@ -1093,7 +1092,7 @@ PHP_FUNCTION(imap_body)
 		php_error(E_WARNING, "%s(): Bad message number", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
 	}
-    
+
 	RETVAL_STRING(mail_fetchtext_full (imap_le_struct->imap_stream, Z_LVAL_PP(msgno), NIL, myargc==3 ? Z_LVAL_PP(flags) : NIL), 1);
 }
 /* }}} */
@@ -1119,7 +1118,7 @@ PHP_FUNCTION(imap_mail_copy)
 	}
 
 	if (mail_copy_full(imap_le_struct->imap_stream, Z_STRVAL_PP(seq), Z_STRVAL_PP(folder), myargcount==4 ? Z_LVAL_PP(options) : NIL)==T) {
-        RETURN_TRUE;
+		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;
 	}
@@ -1147,7 +1146,7 @@ PHP_FUNCTION(imap_mail_move)
 	}
 
 	if (mail_copy_full(imap_le_struct->imap_stream, Z_STRVAL_PP(seq), Z_STRVAL_PP(folder), myargcount == 4 ? (Z_LVAL_PP(options) | CP_MOVE) : CP_MOVE) == T) {
-        RETURN_TRUE;
+		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;
 	}
@@ -1170,7 +1169,7 @@ PHP_FUNCTION(imap_createmailbox)
 	convert_to_string_ex(folder);
 
 	if (mail_create(imap_le_struct->imap_stream, Z_STRVAL_PP(folder)) == T) {
-        RETURN_TRUE;
+		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;
 	}
@@ -1194,7 +1193,7 @@ PHP_FUNCTION(imap_renamemailbox)
 	convert_to_string_ex(new_mailbox);
 
 	if (mail_rename(imap_le_struct->imap_stream, Z_STRVAL_PP(old_mailbox), Z_STRVAL_PP(new_mailbox))==T) {
-        RETURN_TRUE;
+		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;
 	}
@@ -1217,7 +1216,7 @@ PHP_FUNCTION(imap_deletemailbox)
 	convert_to_string_ex(folder);
 
 	if (mail_delete(imap_le_struct->imap_stream, Z_STRVAL_PP(folder))==T) {
-        RETURN_TRUE;
+		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;
 	}
@@ -1704,7 +1703,7 @@ PHP_FUNCTION(imap_fetchstructure)
 	}
 
 	object_init(return_value);
-    
+
 	if ((myargc == 3) && (Z_LVAL_PP(flags) & FT_UID)) {
 		/* This should be cached; if it causes an extra RTT to the
 		   IMAP server, then that's the price we pay for making
@@ -1717,7 +1716,7 @@ PHP_FUNCTION(imap_fetchstructure)
 		php_error(E_WARNING, "%s(): Bad message number", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
 	}
-    
+
 	mail_fetchstructure_full(imap_le_struct->imap_stream, Z_LVAL_PP(msgno), &body , myargc == 3 ? Z_LVAL_PP(flags) : NIL);
 	
 	if (!body) {
@@ -2358,7 +2357,7 @@ PHP_FUNCTION(imap_clearflag_full)
 	}
 
 	mail_clearflag_full(imap_le_struct->imap_stream, Z_STRVAL_PP(sequence), Z_STRVAL_PP(flag), myargc==4 ? Z_LVAL_PP(flags) : NIL);
-    RETURN_TRUE;
+	RETURN_TRUE;
 }
 /* }}} */
 
@@ -2439,8 +2438,8 @@ PHP_FUNCTION(imap_fetchheader)
 	
 	if ((myargc == 3) && (Z_LVAL_PP(flags) & FT_UID)) {
 		/* This should be cached; if it causes an extra RTT to the
-           IMAP server, then that's the price we pay for making sure
-           we don't crash. */
+		   IMAP server, then that's the price we pay for making sure
+		   we don't crash. */
 		msgindex = mail_msgno(imap_le_struct->imap_stream, Z_LVAL_PP(msgno));
 	} else {
 		msgindex = Z_LVAL_PP(msgno);
@@ -2476,7 +2475,7 @@ PHP_FUNCTION(imap_uid)
 		php_error(E_WARNING, "%s(): Bad message number", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
 	}
-    
+
 	RETURN_LONG(mail_uid(imap_le_struct->imap_stream, Z_LVAL_PP(msgno)));
 }
 /* }}} */
@@ -2521,7 +2520,7 @@ PHP_FUNCTION(imap_status)
 	}
 
  	if (mail_status(imap_le_struct->imap_stream, Z_STRVAL_PP(mbx), Z_LVAL_PP(flags))) {
-	    add_property_long(return_value, "flags", IMAPG(status_flags));
+		add_property_long(return_value, "flags", IMAPG(status_flags));
 		if (IMAPG(status_flags) & SA_MESSAGES) {
 			add_property_long(return_value, "messages", IMAPG(status_messages));
 		}
@@ -2563,9 +2562,9 @@ PHP_FUNCTION(imap_bodystruct)
 	convert_to_string_ex(section);
 
 	if (!Z_LVAL_PP(msg) || Z_LVAL_PP(msg) < 1 || (unsigned) Z_LVAL_PP(msg) > imap_le_struct->imap_stream->nmsgs) {
-                php_error(E_WARNING, "%s(): Bad message number", get_active_function_name(TSRMLS_C));
-                RETURN_FALSE;
-        }
+		php_error(E_WARNING, "%s(): Bad message number", get_active_function_name(TSRMLS_C));
+		RETURN_FALSE;
+	}
 
 	if (object_init(return_value) == FAILURE) {
 		RETURN_FALSE;
@@ -2707,9 +2706,9 @@ PHP_FUNCTION(imap_fetch_overview)
 					rfc822_write_address(address, env->from);
 					add_property_string(myoverview, "from", address, 1);
 				}
-			        if (env->to) {
+				if (env->to) {
 					env->to->next = NULL;
-				    	address[0] = '\0';
+					address[0] = '\0';
 					rfc822_write_address(address, env->to);
 					add_property_string(myoverview, "to", address, 1);
 				}
@@ -2882,7 +2881,7 @@ PHP_FUNCTION(imap_mail_compose)
 					convert_to_string_ex(disp_data);
 					disp_param->value = (char *) fs_get(Z_STRLEN_PP(disp_data) + 1);
 					memcpy(disp_param->value, Z_STRVAL_PP(disp_data), Z_STRLEN_PP(disp_data) + 1);
-                		        zend_hash_move_forward(Z_ARRVAL_PP(pvalue));
+					zend_hash_move_forward(Z_ARRVAL_PP(pvalue));
 					disp_param->next = tmp_param;
 					tmp_param = disp_param;
 				}
@@ -2968,7 +2967,7 @@ PHP_FUNCTION(imap_mail_compose)
 						convert_to_string_ex(disp_data);
 						disp_param->value = (char *) fs_get(Z_STRLEN_PP(disp_data) + 1);
 						memcpy(disp_param->value, Z_STRVAL_PP(disp_data), Z_STRLEN_PP(disp_data) + 1);
-			                        zend_hash_move_forward(Z_ARRVAL_PP(pvalue));
+						zend_hash_move_forward(Z_ARRVAL_PP(pvalue));
 						disp_param->next = tmp_param;
 						tmp_param = disp_param;
 					}
@@ -3065,9 +3064,9 @@ PHP_FUNCTION(imap_mail_compose)
 				mystring=tempstring;
 				sprintf(mystring, "%s%s%s", mystring, bod->contents.text.data, CRLF);
 
-			} while ((part = part->next));/* until done */
-            /* output trailing cookie */
+			} while ((part = part->next)); /* until done */
 
+			/* output trailing cookie */
 			sprintf(tmp, "--%s--", cookie);
 			tempstring=emalloc(strlen(tmp)+strlen(CRLF)+strlen(mystring)+1);
 			strcpy(tempstring, mystring);
@@ -3332,7 +3331,7 @@ PHP_FUNCTION(imap_search)
 PHP_FUNCTION(imap_alerts)
 {
 	STRINGLIST *cur=NIL;
-    
+
 	if (ZEND_NUM_ARGS() > 0) {
 		ZEND_WRONG_PARAM_COUNT();
 	} 
@@ -3359,7 +3358,7 @@ PHP_FUNCTION(imap_alerts)
 PHP_FUNCTION(imap_errors)
 {
 	ERRORLIST *cur=NIL;
-    
+
 	if (ZEND_NUM_ARGS() > 0) {
 		ZEND_WRONG_PARAM_COUNT();
 	} 
@@ -3386,7 +3385,7 @@ PHP_FUNCTION(imap_errors)
 PHP_FUNCTION(imap_last_error)
 {
 	ERRORLIST *cur=NIL;
-    
+
 	if (ZEND_NUM_ARGS() > 0) {
 		ZEND_WRONG_PARAM_COUNT();
 	} 
@@ -3726,7 +3725,7 @@ void _php_imap_add_body(zval *arg, BODY *body TSRMLS_DC)
 			add_property_string(dparam, "attribute", dpar->attribute, 1);
 			add_property_string(dparam, "value", dpar->value, 1);
 			add_next_index_object(dparametres, dparam);
-        } while ((dpar = dpar->next));
+		} while ((dpar = dpar->next));
 		add_assoc_object(arg, "dparameters", dparametres);
 	} else {
 		add_property_long(arg, "ifdparameters", 0);
@@ -3799,20 +3798,20 @@ static void build_thread_tree_helper(THREADNODE *cur, zval *tree, long *numNodes
 
 	snprintf(buf, 25, "%ld.next", thisNode);
 	if(cur->next) {
-	    (*numNodes)++;
-	    add_assoc_long(tree, buf, *numNodes);
-	    build_thread_tree_helper(cur->next, tree, numNodes, buf);
+		(*numNodes)++;
+		add_assoc_long(tree, buf, *numNodes);
+		build_thread_tree_helper(cur->next, tree, numNodes, buf);
 	} else { /* "null pointer" */
-	    add_assoc_long(tree, buf, 0);
+		add_assoc_long(tree, buf, 0);
 	}
 
 	snprintf(buf, 25, "%ld.branch", thisNode);
 	if(cur->branch) {
-	    (*numNodes)++;
-	    add_assoc_long(tree, buf, *numNodes);
-	    build_thread_tree_helper(cur->branch, tree, numNodes, buf);	    
+		(*numNodes)++;
+		add_assoc_long(tree, buf, *numNodes);
+		build_thread_tree_helper(cur->branch, tree, numNodes, buf);	    
 	} else { /* "null pointer" */
-	    add_assoc_long(tree, buf, 0);
+		add_assoc_long(tree, buf, 0);
 	}
 }
 /* }}} */
@@ -3865,7 +3864,7 @@ PHP_FUNCTION (imap_thread)
 
 	/* Populate our return value data structure here. */
 	if(build_thread_tree(top, &return_value) == FAILURE) {
-	    mail_free_threadnode(&top);
+		mail_free_threadnode(&top);
 		RETURN_FALSE;
 	}
 	mail_free_threadnode(&top);
