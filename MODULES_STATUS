@@ -22,4 +22,4 @@ MS SQL              Working (tested on phpts and isapi versions)
 snmp                Working
 gettext             Working
 mcal                Working
-interbase           Mostly working
+interbase           Working
