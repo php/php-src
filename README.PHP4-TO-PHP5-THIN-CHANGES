@@ -43,7 +43,7 @@
    ext/tokenizer extension. If error_reporting is set to E_ALL notices will
    be produced. Instead of T_ML_CONSTANT for /* */ the T_COMMENT constant 
    is used, thus both // and /* */ are resolved as the T_COMMENT constant.
-   However the PHPDoc style comments /** */ ,which starting PHP5 are parsed
+   However the PHPDoc style comments /** */ ,which starting PHP 5 are parsed
    by PHP, are recongnized as T_DOC_COMMENT.
 
 7. $_SERVER should be populated with argc and argv if variables_order
@@ -64,7 +64,7 @@
        }
    }
    ?>
-   This script is perfectly valid and works in PHP4 but with PHP5 there
+   This script is perfectly valid and works in PHP 4 but with PHP 5 there
    will be a fatal error like :
    Fatal error: Class 'fubar' not found in ....
    If there is defined function __autoload() it will be called.
