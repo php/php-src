@@ -1,7 +1,7 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 2002, Version 4.3.0
-- Disable trans-sid by default. (Yasuo)
+- Transparent sid support is now disabled by default. (Yasuo) 
 - Fixed DomNode->insert_before() to behave according to W3C spec
   ie. new_child is moved, not copied. (chregu)
 - Added some namespace support with DomNode->add_namespace(uri, prefix)
