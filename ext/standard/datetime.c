@@ -786,6 +786,8 @@ PHP_FUNCTION(strtotime)
 	}
 
 	convert_to_string_ex(z_time);
+	if (Z_STRLEN_PP(z_time) == 0)
+		php_error (E_NOTICE, "strtotime() called with empty time parameter");
 	if (argc == 2) {
 		convert_to_long_ex(z_now);
 		now = Z_LVAL_PP(z_now);
