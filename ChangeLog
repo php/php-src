@@ -1,3 +1,81 @@
+2001-01-23  Boian Bonev  <boian@bonev.com>
+
+    * ext/vpopmail/CREDITS
+      ext/vpopmail/README
+      ext/vpopmail/config.m4
+      ext/vpopmail/php_vpopmail.c
+      ext/vpopmail/php_vpopmail.h:
+    changed function names to be like vpopmail_add_user instead vpopmail_adduser
+    added vpopmail_error to report error string (vpopmail_errno global var)
+    put exec functions back in with _ex (vpopmail_add_domain_ex)
+    rewritten README to help users keep secure
+    fixed protos to state bool instead void return type
+
+2001-01-23  Colin Viebrock  <colin@easydns.com>
+
+    * pear/Crypt/CBC.php: wrong name
+
+    * pear/Makefile.in: Forgot this too ...
+
+    * pear/Makefile.in: Never added this ...
+
+2001-01-23  MySQL Team  <mysql-all@mysql.com>
+
+    * ext/mysql/libmysql/thr_alarm.h
+      ext/mysql/libmysql/thr_mutex.c
+      ext/mysql/libmysql/typelib.c
+      ext/mysql/libmysql/update_sources
+      ext/mysql/libmysql/violite.c
+      ext/mysql/libmysql/violite.h
+      NEWS
+      ext/mysql/libmysql/acinclude.m4
+      ext/mysql/libmysql/bmove.c
+      ext/mysql/libmysql/charset.c
+      ext/mysql/libmysql/config-win.h
+      ext/mysql/libmysql/dbug.h
+      ext/mysql/libmysql/default.c
+      ext/mysql/libmysql/errors.c
+      ext/mysql/libmysql/fix_copyright
+      ext/mysql/libmysql/global.h
+      ext/mysql/libmysql/libmysql.c
+      ext/mysql/libmysql/m_string.h
+      ext/mysql/libmysql/mf_dirname.c
+      ext/mysql/libmysql/mf_format.c
+      ext/mysql/libmysql/mf_pack.c
+      ext/mysql/libmysql/mf_path.c
+      ext/mysql/libmysql/my_alloc.c
+      ext/mysql/libmysql/my_create.c
+      ext/mysql/libmysql/my_fopen.c
+      ext/mysql/libmysql/my_init.c
+      ext/mysql/libmysql/my_open.c
+      ext/mysql/libmysql/my_pthread.c
+      ext/mysql/libmysql/my_pthread.h
+      ext/mysql/libmysql/my_static.c
+      ext/mysql/libmysql/my_static.h
+      ext/mysql/libmysql/my_sys.h
+      ext/mysql/libmysql/my_thr_init.c
+      ext/mysql/libmysql/my_wincond.c
+      ext/mysql/libmysql/my_write.c
+      ext/mysql/libmysql/mysql.h
+      ext/mysql/libmysql/mysql_com.h
+      ext/mysql/libmysql/mysql_version.h
+      ext/mysql/libmysql/mysqld_error.h
+      ext/mysql/libmysql/mysys_err.h
+      ext/mysql/libmysql/net.c
+      ext/mysql/libmysql/raid.h
+      ext/mysql/libmysql/safemalloc.c
+      ext/mysql/libmysql/string.c:
+    Upgrade ext/mysql/libmysql to version 3.23.32.  One notable bug fix is
+    that the client can now connect to a server which is using a default
+    charset other than latin1.
+
+2001-01-23  Thies C. Arntzen  <thies@thieso.net>
+
+    * NEWS:
+2001-01-23  Jim Winstead  <jimw@php.net>
+
+    * ext/standard/credits.c: jouni was added as an author of the docs
+
 2001-01-22  Andrei Zmievski  <andrei@ispi.net>
 
     * ext/pcre/php_pcre.c:
