@@ -133,11 +133,7 @@ static inline zval *_get_zval_ptr(znode *node, temp_variable *Ts, int *should_fr
 			*should_free = 0;
 			return NULL;
 			break;
-#if DEBUG_ZEND
-		default:
-			zend_error(E_ERROR, "Unknown temporary variable type");
-			break;
-#endif
+		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 	return NULL;
 }
@@ -165,11 +161,7 @@ static inline zval *_get_object_zval_ptr(znode *node, temp_variable *Ts, int *sh
 		case IS_UNUSED:
 			return NULL;
 			break;
-#if DEBUG_ZEND
-		default:
-			zend_error(E_ERROR, "Unknown temporary variable type");
-			break;
-#endif
+		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 	return NULL;
 }
@@ -186,9 +178,7 @@ static inline zval **_get_zval_ptr_ptr(znode *node, temp_variable *Ts ELS_DC)
 			}
 			return Ts[node->u.var].var.ptr_ptr;
 			break;
-		default:
-			return NULL;
-			break;
+		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 }
 
@@ -234,6 +224,7 @@ static inline zval **zend_fetch_property_address_inner(HashTable *ht, znode *op2
 					zend_hash_update_ptr(ht, prop_ptr->value.str.val, prop_ptr->value.str.len+1, new_zval, sizeof(zval *), (void **) &retval);
 				}
 				break;
+			EMPTY_SWITCH_DEFAULT_CASE()
 		}
 	}
 
@@ -263,6 +254,7 @@ static inline void zend_switch_free(zend_op *opline, temp_variable *Ts ELS_DC)
 		case IS_TMP_VAR:
 			zendi_zval_dtor(Ts[opline->op1.u.var].tmp_var);
 			break;
+		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 }
 
@@ -315,6 +307,7 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 					T->tmp_var.type = IS_STRING;
 				}
 				break;
+			EMPTY_SWITCH_DEFAULT_CASE()
 		}
 		Ts[result->u.var].var.ptr_ptr = &EG(uninitialized_zval_ptr);
 		SELECTIVE_PZVAL_LOCK(*Ts[result->u.var].var.ptr_ptr, result);
@@ -391,6 +384,7 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 					value->refcount=1;
 					*variable_ptr = *value;
 					break;
+				EMPTY_SWITCH_DEFAULT_CASE()
 			}
 		} else { /* we need to split */
 			switch (type) {
@@ -423,6 +417,7 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 					value->refcount=1;
 					**variable_ptr_ptr = *value;
 					break;
+				EMPTY_SWITCH_DEFAULT_CASE()
 			}
 		}
 		(*variable_ptr_ptr)->is_ref=0;
@@ -472,11 +467,10 @@ static inline void zend_fetch_var_address(znode *result, znode *op1, znode *op2,
 	zval *varname = get_zval_ptr(op1, Ts, &free_op1, BP_VAR_R);
 	zval **retval;
 	zval tmp_varname;
-	HashTable *target_symbol_table;
+	HashTable *target_symbol_table=0;
 
 	switch (op2->u.fetch_type) {
 		case ZEND_FETCH_LOCAL:
-		default: /* just to shut gcc up */
 			target_symbol_table = EG(active_symbol_table);
 			break;
 		case ZEND_FETCH_GLOBAL:
@@ -492,6 +486,7 @@ static inline void zend_fetch_var_address(znode *result, znode *op1, znode *op2,
 			}
 			target_symbol_table = EG(active_op_array)->static_variables;
 			break;
+		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 
 	if (varname->type != IS_STRING) {
@@ -518,6 +513,7 @@ static inline void zend_fetch_var_address(znode *result, znode *op1, znode *op2,
 					zend_hash_update_ptr(target_symbol_table, varname->value.str.val, varname->value.str.len+1, new_zval, sizeof(zval *), (void **) &retval);
 				}
 				break;
+			EMPTY_SWITCH_DEFAULT_CASE()
 		}
 	}
 	if (op2->u.fetch_type == ZEND_FETCH_LOCAL) {
@@ -643,6 +639,7 @@ static inline void zend_fetch_dimension_address(znode *result, znode *op1, znode
 				case BP_VAR_RW:
 					*retval = &EG(error_zval_ptr);
 					break;
+				EMPTY_SWITCH_DEFAULT_CASE()
 			}
 			SELECTIVE_PZVAL_LOCK(**retval, result);
 			return;
@@ -803,6 +800,7 @@ static inline void zend_fetch_property_address(znode *result, znode *op1, znode 
 				case BP_VAR_RW:
 					*retval = &EG(error_zval_ptr);
 					break;
+				EMPTY_SWITCH_DEFAULT_CASE()
 			}
 			SELECTIVE_PZVAL_LOCK(**retval, result);
 			return;
@@ -2004,6 +2002,7 @@ send_by_ref:
 						case ZEND_EVAL:
 							new_op_array = compile_string(get_zval_ptr(&opline->op1, Ts, &EG(free_op1), BP_VAR_R) CLS_CC);
 							break;
+						EMPTY_SWITCH_DEFAULT_CASE()
 					}
 					FREE_OP(&opline->op1, EG(free_op1));
 					Ts[opline->result.u.var].var.ptr = NULL;
@@ -2153,6 +2152,7 @@ send_by_ref:
 							key->value.lval = int_key;
 							key->type = IS_LONG;
 							break;
+						EMPTY_SWITCH_DEFAULT_CASE()
 					}
 					zend_hash_index_update(result->value.ht, 1, &key, sizeof(zval *), NULL);
 					zend_hash_move_forward(array->value.ht);
@@ -2270,12 +2270,7 @@ send_by_ref:
 			case ZEND_EXT_NOP:
 			case ZEND_NOP:
 				break;
-#if (WINNT|WIN32) /* This makes the switch() statement twice as quick. Moving to enum
-					 might make this a general speed up for other platforms too */
-			default:
-				__assume(0);
-				break;
-#endif
+			EMPTY_SWITCH_DEFAULT_CASE()
 		}
 		opline++;
 	}
