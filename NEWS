@@ -6,11 +6,11 @@ PHP 4.0                                                                    NEWS
 - Fixed a bug in session.c. The php_session_save_current_state did not check
   if mod_data is NULL and such situation is possible if the user calls 
   session_module_name with a parameter. (alex@zend.com)
-- IIS Admin mudule added
+- Added IIS Admin extension. (Frank)
 - OCIBindByName() now does better parameter-checking. (Thies)
-- Attempted to make compile fixes for Solaris in ext/sockets/sockets.c (Chris Vandomelen)
+- Attempted to make compile fixes for Solaris in ext/sockets/sockets.c
+  (Chris Vandomelen)
 - Made read() binary-safe in sockets.c (Chris Vandomelen)
-- Attempted fixing some compile failures (Chris Vandomelen)
 - Made array_intersect and array_diff not alter order (Stig Venaas)
 - Made ldap_connect() accept URL in host parameter when using OpenLDAP
   2.x. To use SSL, use ldaps://host/ as URL. (Stig Venaas)
