@@ -162,18 +162,6 @@ static PHP_INI_MH(OnChangeMemoryLimit)
 /* }}} */
 #endif
 
-/* {{{ PHP_INI_MH
- */
-static PHP_INI_MH(OnUpdateErrorReporting)
-{
-	if (!new_value) {
-		EG(error_reporting) = E_ALL & ~E_NOTICE;
-	} else {
-		EG(error_reporting) = atoi(new_value);
-	}
-	return SUCCESS;
-}
-/* }}} */
 
 /* {{{ php_disable_functions
  */
@@ -307,7 +295,6 @@ PHP_INI_BEGIN()
 	PHP_INI_ENTRY("SMTP",						"localhost",PHP_INI_ALL,		NULL)
 	PHP_INI_ENTRY("smtp_port",					"25",		PHP_INI_ALL,		NULL)
 	PHP_INI_ENTRY("browscap",					NULL,		PHP_INI_SYSTEM,		NULL)
-	PHP_INI_ENTRY("error_reporting",			NULL,		PHP_INI_ALL,		OnUpdateErrorReporting)
 #if MEMORY_LIMIT
 	PHP_INI_ENTRY("memory_limit",				"8M",		PHP_INI_ALL,		OnChangeMemoryLimit)
 #endif
@@ -1085,6 +1072,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	}
 
 	REGISTER_INI_ENTRIES();
+	zend_register_standard_ini_entries(TSRMLS_C);
 
 	/* initialize stream wrappers registry
 	 * (this uses configuration parameters from php.ini)
