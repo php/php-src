@@ -69,7 +69,7 @@ snapshot:
 	bzip2 -t $$distname.tar.bz2
 
 cvsclean:
-	@for i in `find . -follow -name .cvsignore`; do \
+	@for i in `find . -name .cvsignore`; do \
 		(cd `dirname $$i` 2>/dev/null && rm -rf `cat .cvsignore` *.o *.a || true); \
 	done
 	@rm -f $(SUBDIRS) 2>/dev/null || true
