@@ -33,6 +33,7 @@ PHP                                                                        NEWS
   of files. (Andi)
 - Fixed get_declared_classes() to return only classes. (Andrey, Marcus)
 - Fixed __autoload() to preserve case of the passed class name. (Andi)
+- Fixed bug #26615 () (runekl at opoint dot com, Derick)
 - Fixed bug #26591 ("__autoload threw an exception" during an uncaught). 
   (Marcus)
 - Fixed bug #26534 (stream_get_meta_data() -> Access Violation). (Wez)

@@ -115,7 +115,7 @@ int php_exec(int type, char *cmd, pval *array, pval *return_value TSRMLS_DC)
 		while (php_stream_get_line(stream, b, EXEC_INPUT_BUF, &bufl)) {
 			/* no new line found, let's read some more */
 			if (b[bufl - 1] != '\n' && !php_stream_eof(stream)) {
-				if (buflen < (bufl + EXEC_INPUT_BUF)) {
+				if (buflen < (bufl + (b - buf) + EXEC_INPUT_BUF)) {
 					bufl += b - buf;
 					buflen = bufl + EXEC_INPUT_BUF;
 					buf = erealloc(buf, buflen);
