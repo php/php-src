@@ -412,7 +412,9 @@ static zend_function_entry php_domxmlelement_class_functions[] = {
 	PHP_FALIAS(set_attribute,			domxml_elem_set_attribute,		NULL)
 	PHP_FALIAS(remove_attribute,		domxml_elem_remove_attribute,	NULL)
 	PHP_FALIAS(get_attribute_node,		domxml_elem_get_attribute_node,	NULL)
+/* since this function is not implemented, outcomment it for the time beeing
 	PHP_FALIAS(set_attribute_node,		domxml_elem_set_attribute_node,	NULL)
+*/
 	PHP_FALIAS(get_elements_by_tagname,	domxml_elem_get_elements_by_tagname,	NULL)
 	PHP_FALIAS(has_attribute,	domxml_elem_has_attribute,	NULL)
 	{NULL, NULL, NULL}
@@ -2800,6 +2802,7 @@ PHP_FUNCTION(domxml_elem_get_attribute_node)
 
 /* {{{ proto bool domxml_elem_set_attribute_node(object attr)
    Sets value of given attribute */
+/* since this function is not implemented, outcomment it for the time beeing
 PHP_FUNCTION(domxml_elem_set_attribute_node)
 {
 	zval *id, *arg1, *rv = NULL;
@@ -2815,7 +2818,7 @@ PHP_FUNCTION(domxml_elem_set_attribute_node)
 		WRONG_PARAM_COUNT;
 	}
 
-	/* FIXME: The following line doesn't work */
+	FIXME: The following line doesn't work 
 	newattrp = xmlCopyProp(nodep, attrp);
 	if (!newattrp) {
 		php_error(E_WARNING, "%s(): no such attribute '%s'", get_active_function_name(TSRMLS_C), attrp->name);
@@ -2824,6 +2827,7 @@ PHP_FUNCTION(domxml_elem_set_attribute_node)
 
 	DOMXML_RET_OBJ(rv, (xmlNodePtr) newattrp, &ret);
 }
+*/
 /* }}} */
 
 /* {{{ proto string domxml_elem_has_attribute(string attrname)
