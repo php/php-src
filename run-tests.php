@@ -333,7 +333,7 @@ TEST $file
 	@unlink(ereg_replace('\.phpt$','.exp',$file));
 	@unlink(ereg_replace('\.phpt$','.out',$file));
 
-    // Check if test should be skipped.
+	// Check if test should be skipped.
 	if (array_key_exists('SKIPIF', $section_text)) {
 	    if (trim($section_text['SKIPIF'])) {
 			save_text($tmp_skipif, $section_text['SKIPIF']);
