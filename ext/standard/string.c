@@ -1142,7 +1142,7 @@ PHPAPI void php_basename(char *s, size_t len, char *suffix, size_t sufflen, char
 			case 0:
 				goto quit_loop;
 			case 1:
-#ifdef PHP_WIN32
+#if defined(PHP_WIN32) || defined(NETWARE)
 				if (*c == '/' || *c == '\\') {
 #else
 				if (*c == '/') {
