@@ -413,11 +413,10 @@ int MailConnect()
 	}
         */
 
-	if (INI_INT("sendmail_port")){
-		portnum = INI_INT("sendmail_port"));
-	} else {
+	portnum = INI_INT("sendmail_port");
+	if (!portnum) {
 		portnum = 25;
-	}	
+	}
 
 	/* Connect to server */
 	sock_in.sin_family = AF_INET;
