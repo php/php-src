@@ -1,3 +1,57 @@
+2002-07-22  jan  <jan@pb1.pair.com>
+
+    * ext/standard/datetime.c:
+     - merge forgotten WS fix which makes non gcc compilers groan. (#17621)
+
+2002-07-22  jmoore  <jmoore@pb1.pair.com>
+
+    * NEWS: Added news item about bug 13866 in response to bug 14752
+
+2002-07-22  jason  <jason@pb1.pair.com>
+
+    * ext/ftp/ftp.c
+      ext/standard/fsock.c
+      ext/standard/ftp_fopen_wrapper.c
+      ext/standard/http_fopen_wrapper.c
+      main/network.c
+      main/php_network.h:
+    Switch streams socket abstraction to use a timeval structure instead of an
+    integer to allow subsecond timeouts.
+
+    This supports the previous behavior of fsockopen()
+    Fixes bug #16261
+
+2002-07-22  helly  <helly@pb1.pair.com>
+
+    * ext/exif/exif.c: added some more tags from WinXP
+    changed conersion for TAG_FMT_SBYTE & BYTE
+
+2002-07-22  Tomas V.V.Cox  <cox@pb1.pair.com>
+
+    * pear/install-pear.php:
+    By the moment trust that the dependencies are good
+
+2002-07-22  helly  <helly@pb1.pair.com>
+
+    * ext/exif/exif.c: added EXIF Version 2.2 Tags
+
+2002-07-22  Tomas V.V.Cox  <cox@pb1.pair.com>
+
+    * pear/packages/Net_Socket-1.0.1.tar:
+    Bundle Net_socket, needed for Net_SMTP
+
+2002-07-22  sniper  <sniper@pb1.pair.com>
+
+    * ext/informix/ifx.ec: Fix typo..
+
+2002-07-22  georg  <georg@pb1.pair.com>
+
+    * NEWS: new mysql-functions for PHP 4.3.0
+
+2002-07-22  yohgaki  <yohgaki@pb1.pair.com>
+
+    * ext/pgsql/pgsql.c: Copy empty_string, fixed crash.
+
 2002-07-21  helly  <helly@pb1.pair.com>
 
     * ext/exif/exif.c: unify error messages & notices
