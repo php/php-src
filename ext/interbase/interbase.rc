@@ -36,9 +36,14 @@
 # define BUILD_TYPE "Release"
 #endif
 
-#define VERSION_INFO_ONLY
-#define PHP_H
+#include <ibase.h>
 #include "interbase.c"
+
+#ifdef FB_SQLDA
+#define CLIENT_LIB "fbclient.dll"
+#else
+#define CLIENT_LIB "gds32.dll"
+#endif
 
 #ifndef _MAC
 
@@ -64,6 +69,7 @@ BEGIN
             VALUE "File Revision", FILE_REVISION "\0"
             VALUE "LegalCopyright", "Copyright © 2003 The PHP Group\0"
 			VALUE "Build Type", BUILD_TYPE "\0"
+            VALUE "Client Library", CLIENT_LIB "\0"
 			VALUE "URL", "http://www.php.net\0"
         END
     END
