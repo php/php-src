@@ -85,7 +85,7 @@ build-snap:
 	for %T in ($(SAPI_TARGETS)) do $(MAKE) /nologo "%T"
 	for %T in ($(EXT_TARGETS)) do $(MAKE) /nologo "%T"
 
-build-dist:
+build-dist: $(BUILD_DIR)\deplister.exe
 	-rmdir /s /q $(BUILD_DIR)\php-$(PHP_VERSION_STRING)
 	-del /f /q $(BUILD_DIR)\php-$(PHP_VERSION_STRING).zip
 	$(BUILD_DIR)\php.exe win32/build/mkdist.php "$(BUILD_DIR)" "$(PHPDLL)" "$(SAPI_TARGETS)" "$(EXT_TARGETS)" "$(SNAPSHOT_TEMPLATE)"
@@ -96,10 +96,13 @@ build-dist:
 dist: all build-dist
 snap: build-snap build-dist
 
+$(BUILD_DIR)\deplister.exe:	win32\build\deplister.c
+	$(CL) /Fo$(BUILD_DIR)\ /Fd$(BUILD_DIR)\ /Fp$(BUILD_DIR)\ /FR$(BUILD_DIR) -o$(BUILD_DIR)\deplister.exe win32\build\deplister.c imagehlp.lib
+
 msi-installer: dist
 	$(BUILD_DIR)\php.exe ..\php-installer\build-installer.php "$(BUILD_DIR)" "$(PHPDLL)" "$(SAPI_TARGETS)" "$(EXT_TARGETS)"
 
 install: all
-	@copy $(BUILD_DIR)\*.exe $(PHP_PREFIX) /y >null
-	@copy $(BUILD_DIR)\*.dll $(PHP_PREFIX) /y >null
+	@copy $(BUILD_DIR)\*.exe $(PHP_PREFIX) /y >nul
+	@copy $(BUILD_DIR)\*.dll $(PHP_PREFIX) /y >nul
 	
