@@ -298,7 +298,7 @@ if (0 == count($test_results)) {
 $n_total = count($test_results);
 $n_total += $ignored_by_ext;
 
-$sum_results = array('PASSED'=>0, 'SKIPPED'=>0, 'FAILED'=>0);
+$sum_results = array('PASSED'=>0, 'WARNED'=>0, 'SKIPPED'=>0, 'FAILED'=>0);
 foreach ($test_results as $v) {
 	$sum_results[$v]++;
 }
@@ -321,6 +321,7 @@ Exts tested     : " . sprintf("%4d",$exts_tested) . "
 ---------------------------------------------------------------------
 Number of tests : " . sprintf("%4d",$n_total) . "
 Tests skipped   : " . sprintf("%4d (%2.1f%%)",$sum_results['SKIPPED'],$percent_results['SKIPPED']) . "
+Tests warned    : " . sprintf("%4d (%2.1f%%)",$sum_results['WARNED'],$percent_results['WARNED']) . "
 Tests failed    : " . sprintf("%4d (%2.1f%%)",$sum_results['FAILED'],$percent_results['FAILED']) . "
 Tests passed    : " . sprintf("%4d (%2.1f%%)",$sum_results['PASSED'],$percent_results['PASSED']) . "
 ---------------------------------------------------------------------
@@ -593,6 +594,7 @@ TEST $file
 
 	// Check if test should be skipped.
 	$info = '';
+	$warn = false;
 	if (array_key_exists('SKIPIF', $section_text)) {
 		if (trim($section_text['SKIPIF'])) {
 			save_text($tmp_skipif, $section_text['SKIPIF']);
@@ -612,6 +614,14 @@ TEST $file
 				$reason = (ereg("^info[[:space:]]*(.+)\$", trim($output))) ? ereg_replace("^info[[:space:]]*(.+)\$", "\\1", trim($output)) : FALSE;
 				if ($reason) {
 					$info = " (info: $reason)";
+					$tested .= $info;
+				}
+			}
+			if (eregi("^warn", trim($output))) {
+				$reason = (ereg("^warn[[:space:]]*(.+)\$", trim($output))) ? ereg_replace("^warn[[:space:]]*(.+)\$", "\\1", trim($output)) : FALSE;
+				if ($reason) {
+					$warn = true; /* only if there is a reason */
+					$info = " (warn: $reason)";
 					$tested .= $info;
 				}
 			}
@@ -728,7 +738,11 @@ COMMAND $cmd
 	}
 
 	// Test failed so we need to report details.
-	echo "FAIL $tested\n";
+	if ($warn) {
+		echo "WARN $tested\n";
+	} else {
+		echo "FAIL $tested\n";
+	}
 
 	$GLOBALS['__PHP_FAILED_TESTS__'][] = array(
 						'name' => $file,
@@ -777,7 +791,7 @@ $output
 		error_report($file,$logname,$tested);
 	}
 
-	return 'FAILED';
+	return $warn ? 'WARNED' : 'FAILED';
 }
 
 function generate_diff($wanted,$output)
