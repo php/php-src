@@ -49,6 +49,12 @@ extern PHPAPI zend_class_entry *spl_ce_RuntimeException;
 extern PHPAPI zend_class_entry *spl_ce_Countable;
 #endif
 
+#if PHP_SQLITE2_HAVE_PDO
+# include "pdo/php_pdo.h"
+# include "pdo/php_pdo_driver.h"
+extern pdo_driver_t pdo_sqlite2_driver;
+#endif
+
 #ifndef safe_emalloc
 # define safe_emalloc(a,b,c) emalloc((a)*(b)+(c))
 #endif
@@ -1068,12 +1074,23 @@ PHP_MINIT_FUNCTION(sqlite)
 	REGISTER_LONG_CONSTANT("SQLITE_ROW",			SQLITE_ROW, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SQLITE_DONE",			SQLITE_DONE, CONST_CS|CONST_PERSISTENT);
 
+#if PHP_SQLITE2_HAVE_PDO
+    if (FAILURE == php_pdo_register_driver(&pdo_sqlite2_driver)) {
+        return FAILURE;
+    }
+#endif
+
 	return SUCCESS;
 }
 
 PHP_MSHUTDOWN_FUNCTION(sqlite)
 {
 	UNREGISTER_INI_ENTRIES();
+
+#if PHP_SQLITE2_HAVE_PDO
+    php_pdo_unregister_driver(&pdo_sqlite2_driver);
+#endif
+
 	return SUCCESS;
 }
 
