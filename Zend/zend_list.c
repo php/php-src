@@ -154,10 +154,12 @@ ZEND_API void *zend_fetch_resource_ex(zval *passed_id, int default_id, char *res
 
 	if (default_id==-1) { /* use id */
 		if (!passed_id) {
-			zend_error(E_WARNING, "No %s resource supplied", resource_type_name);
+			if (resource_type_name)
+				zend_error(E_WARNING, "No %s resource supplied", resource_type_name);
 			return NULL;
 		} else if (passed_id->type != IS_RESOURCE) {
-			zend_error(E_WARNING, "Supplied argument is not a valid %s resource", resource_type_name);
+			if (resource_type_name)
+				zend_error(E_WARNING, "Supplied argument is not a valid %s resource", resource_type_name);
 			return NULL;
 		}
 		id = passed_id->value.lval;
@@ -167,7 +169,8 @@ ZEND_API void *zend_fetch_resource_ex(zval *passed_id, int default_id, char *res
 
 	resource = zend_list_find(id, &actual_resource_type);
 	if (!resource) {
-		zend_error(E_WARNING, "%d is not a valid %s resource", id, resource_type_name);
+		if (resource_type_name)
+			zend_error(E_WARNING, "%d is not a valid %s resource", id, resource_type_name);
 		return NULL;
 	}
 
