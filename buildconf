@@ -6,7 +6,7 @@ supplied_flag=$1
 if test "$1" = "--force"; then
     shift
 # this is a posix correct "test -nt"
-elif test "`ls -t buildconf buildconf.stamp 2>/dev/null |head -1`" != "buildconf"; then
+elif test "`ls -t build.mk buildconf buildconf.stamp 2>/dev/null |head -1`" = "buildconf.stamp"; then
     :
 else
     echo "buildconf: checking installation..."
@@ -112,45 +112,23 @@ if test ! -d TSRM; then
     fi
 fi
 
-./scripts/preconfig
+## build.mk does not check automake/libtool prefixes yet.
+##
+#mv aclocal.m4 aclocal.m4.old 2>/dev/null
+#aclocal
+#if test "$?" != "0" -a "$am_prefix" != "$lt_prefix"; then
+#    echo "buildconf: ERROR: aclocal failed, probably because automake and"
+#    echo "           libtool are installed with different prefixes;"
+#    echo "           automake is installed in $am_prefix, but libtool in $lt_prefix."
+#    echo "           Please re-install automake and/or libtool with a common prefix"
+#    echo "           and try again."
+#    exit 1
+#fi
 
-mv aclocal.m4 aclocal.m4.old 2>/dev/null
-aclocal
-if test "$?" != "0" -a "$am_prefix" != "$lt_prefix"; then
-    echo "buildconf: ERROR: aclocal failed, probably because automake and"
-    echo "           libtool are installed with different prefixes;"
-    echo "           automake is installed in $am_prefix, but libtool in $lt_prefix."
-    echo "           Please re-install automake and/or libtool with a common prefix"
-    echo "           and try again."
-    exit 1
-fi
-
-if cmp aclocal.m4.old aclocal.m4 > /dev/null 2>&1; then
-    echo "buildconf: keeping aclocal.m4"
-    mv aclocal.m4.old aclocal.m4
+if test "$supplied_flag" = "--local"; then
+  subdirs='SUBDIRS='
 else
-    echo "buildconf: created or modified aclocal.m4"
+  subdirs=''
 fi
 
-autoheader
-
-# find all Makefile.ams
-files="Makefile `find ext sapi regex pecl -name Makefile.am | sed 's#\.am##' | tr '\n' ' '`"
-
-# suppress stupid automake warning
-automake --add-missing --include-deps $automake_flags $files  2>&1 | grep -v \$PHP_OUTPUT_FILES >&2
-
-
-mv configure configure.old 2>/dev/null
-autoconf
-if cmp configure.old configure > /dev/null 2>&1; then
-    echo "buildconf: keeping configure"
-    mv configure.old configure
-else
-    echo "buildconf: created or modified configure"
-fi
-
-if test "$supplied_flag" != "--local"; then
-  (cd libzend; ./buildconf $automake_flags libzend/)
-  (cd TSRM; ./buildconf $automake_flags TSRM/)
-fi
+make -s -f build.mk AMFLAGS="$automake_flags" $subdirs
