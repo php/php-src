@@ -143,7 +143,7 @@ AC_DEFUN(PHP_GD_T1LIB,[
     done
 
     if test -n "$T1_DIR"; then
-      AC_CHECK_LIB(t1, T1_GetExtend, 
+      AC_CHECK_LIB(t1, T1_LoadFont, 
       [
         AC_DEFINE(HAVE_LIBT1,1,[ ])
         PHP_ADD_INCLUDE("$T1_DIR/include")
