@@ -77,6 +77,7 @@ PHP_FUNCTION(mssql_field_type);
 PHP_FUNCTION(mssql_data_seek);
 PHP_FUNCTION(mssql_field_seek);
 PHP_FUNCTION(mssql_result);
+PHP_FUNCTION(mssql_next_result);
 PHP_FUNCTION(mssql_min_error_severity);
 PHP_FUNCTION(mssql_min_message_severity);
 
@@ -116,6 +117,7 @@ typedef struct mssql_result {
 	mssql_link *mssql_ptr;
 	int batchsize;
 	int lastresult;
+	int blocks_initialized;
 	int cur_row,cur_field;
 	int num_rows,num_fields;
 } mssql_result;
