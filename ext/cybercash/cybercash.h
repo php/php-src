@@ -33,12 +33,6 @@
 
 #if HAVE_MCK
 
-#if PHP_API_VERSION < 19990421
-#define zend_module_entry cybercash_module_entry
-#include "modules.h"
-#include "internal_functions.h"
-#endif
-
 extern zend_module_entry cybercash_module_entry;
 #define cybercash_module_ptr &cybercash_module_entry
 
