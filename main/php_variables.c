@@ -120,7 +120,28 @@ PHPAPI void php_register_variable_ex(char *var, zval *val, pval *track_vars_arra
 
 	while (1) {
 		if (is_array) {
-			char *escaped_index;
+			char *escaped_index = NULL, *index_s;
+			int new_idx_len = 0;
+
+			ip++;
+			index_s = ip;
+			if (isspace(*ip)) {
+				ip++;
+			}
+			if (*ip==']') {
+				index_s = NULL;
+			} else {
+				ip = strchr(ip, ']');
+				if (!ip) {
+					/* PHP variables cannot contain '[' in their names, so we replace the character with a '_' */
+					*(index_s - 1) = '_';
+					index_len = var_len = strlen(var);
+					goto plain_var;
+					return;
+				}
+				*ip = 0;
+				new_idx_len = strlen(index_s);	
+			}
 
 			if (!index) {
 				MAKE_STD_ZVAL(gpc_element);
@@ -148,22 +169,9 @@ PHPAPI void php_register_variable_ex(char *var, zval *val, pval *track_vars_arra
 			}
 			symtable1 = Z_ARRVAL_PP(gpc_element_p);
 			/* ip pointed to the '[' character, now obtain the key */
-			index = ++ip;
-			index_len = 0;
-			if (*ip=='\n' || *ip=='\r' || *ip=='\t' || *ip==' ') {
-				ip++;
-			}
-			if (*ip==']') {
-				index = NULL;
-			} else {
-				ip = strchr(ip, ']');
-				if (!ip) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Missing ] in %s variable", var);
-					return;
-				}
-				*ip = 0;
-				index_len = strlen(index);
-			}
+			index = index_s;
+			index_len = new_idx_len;
+
 			ip++;
 			if (*ip=='[') {
 				is_array = 1;
@@ -172,6 +180,7 @@ PHPAPI void php_register_variable_ex(char *var, zval *val, pval *track_vars_arra
 				is_array = 0;
 			}
 		} else {
+plain_var:
 			MAKE_STD_ZVAL(gpc_element);
 			gpc_element->value = val->value;
 			Z_TYPE_P(gpc_element) = Z_TYPE_P(val);
