@@ -640,6 +640,12 @@ function_entry basic_functions[] = {
 	PHP_FALIAS(realpath,			warn_not_available,						NULL)
 #endif
 
+#ifdef HAVE_FNMATCH
+	PHP_FE(fnmatch,														    NULL)
+#else
+	PHP_FALIAS(fnmatch,				warn_not_available,						NULL)
+#endif
+
 	/* functions from fsock.c */
 	PHP_FE(fsockopen,				third_and_fourth_args_force_ref)
 	PHP_FE(pfsockopen,				third_and_fourth_args_force_ref)
@@ -673,7 +679,11 @@ function_entry basic_functions[] = {
 	PHP_FE(rewinddir,														NULL)
 	PHP_STATIC_FE("readdir",		php_if_readdir,							NULL)
 	PHP_FALIAS(dir,					getdir,									NULL)
-
+#ifdef HAVE_GLOB
+	PHP_FE(glob,															NULL)
+#else
+	PHP_FALIAS(glob,				warn_not_available,						NULL)
+#endif
 	/* functions from filestat.c */
 	PHP_FE(fileatime,														NULL)
 	PHP_FE(filectime,														NULL)

@@ -229,6 +229,8 @@ AC_ARG_WITH(system-regex,
   fi
 ])
 
+AC_CHECK_FUNCS(fnmatch glob)
+
 if test "$PHP_SAPI" = "cgi"; then
   AC_DEFINE(ENABLE_CHROOT_FUNC, 1, [Whether to enable chroot() function])
 fi

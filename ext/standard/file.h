@@ -66,6 +66,7 @@ PHP_FUNCTION(fd_isset);
 PHP_FUNCTION(select);
 #if (!defined(PHP_WIN32) && !defined(__BEOS__) && HAVE_REALPATH) || defined(ZTS)
 PHP_FUNCTION(realpath);
+PHP_FUNCTION(fnmatch);
 #endif
 PHP_NAMED_FUNCTION(php_if_ftruncate);
 PHP_NAMED_FUNCTION(php_if_fstat);
