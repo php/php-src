@@ -1,4 +1,6 @@
+dnl
 dnl $Id$
+dnl
 
 PHP_ARG_WITH(icap,for ICAP support,
 [  --with-icap[=DIR]       Include ICAP support.])

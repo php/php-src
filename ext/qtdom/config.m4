@@ -1,6 +1,6 @@
+dnl
 dnl $Id$
-dnl config.m4 for extension qtdom
-dnl don't forget to call PHP_EXTENSION(qtdom)
+dnl
 
 AC_MSG_CHECKING(whether to include QDOM support)
 AC_ARG_WITH(qtdom,

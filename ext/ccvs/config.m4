@@ -1,5 +1,6 @@
+dnl
 dnl $Id$
-dnl config.m4 for PHP4 CCVS Extension
+dnl
 
 PHP_ARG_WITH(ccvs, for CCVS support,
 [  --with-ccvs[=DIR]       Include CCVS support])

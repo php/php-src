@@ -1,5 +1,6 @@
+dnl
 dnl $Id$
-dnl config.m4 for extension libswf
+dnl
 
 PHP_ARG_WITH(swf, for libswf support,
 [  --with-swf[=DIR]        Include swf support])

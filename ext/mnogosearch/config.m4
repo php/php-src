@@ -1,5 +1,7 @@
+dnl
 dnl $Source$
 dnl $Id$
+dnl
 
 PHP_ARG_WITH(mnogosearch,for mnoGoSearch support,
 [  --with-mnogosearch[=DIR]

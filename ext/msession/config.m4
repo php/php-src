@@ -1,3 +1,6 @@
+dnl
+dnl $Id$
+dnl
 
 PHP_ARG_WITH(msession, for msession support,
 [  --with-msession[=DIR]   Include msession support])

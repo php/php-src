@@ -1,6 +1,6 @@
+dnl
 dnl $Id$
-dnl config.m4 for extension dbplus
-
+dnl
 
 PHP_ARG_WITH(dbplus, for dbplus support,
 [  --with-dbplus           Include dbplus support])

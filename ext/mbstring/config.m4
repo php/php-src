@@ -1,5 +1,6 @@
+dnl
 dnl $Id$
-dnl config.m4 for extension mbstring
+dnl
 
 PHP_ARG_ENABLE(mbstring, whether to enable multibyte string support,
 [  --enable-mbstring       Enable multibyte string support])
@@ -11,7 +12,8 @@ fi
 
 AC_MSG_CHECKING(whether to enable japanese encoding translation)
 AC_ARG_ENABLE(mbstr_enc_trans,
-[  --enable-mbstr-enc-trans   Enable japanese encoding translation],[
+[  --enable-mbstr-enc-trans
+                          Enable japanese encoding translation],[
   if test "$enableval" = "yes" ; then
     AC_DEFINE(MBSTR_ENC_TRANS, 1, [ ])
     AC_MSG_RESULT(yes)

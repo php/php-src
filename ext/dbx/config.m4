@@ -1,3 +1,6 @@
+dnl
+dnl $Id$
+dnl
 
 PHP_ARG_ENABLE(dbx,whether to enable dbx support,
 [  --enable-dbx            Enable dbx])

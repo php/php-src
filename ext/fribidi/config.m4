@@ -1,10 +1,9 @@
+dnl
 dnl $Id$
-dnl config.m4 for extension fribidi
+dnl
 
-PHP_ARG_WITH(fribidi, whether to add fribidi support,
-[  --with-fribidi[=DIR]    Include fribidi support (requires FriBidi >=0.1.12).
-                          DIR is the fribidi installation directory - 
-                          default /usr/local/])
+PHP_ARG_WITH(fribidi, for FriBidi support,
+[  --with-fribidi[=DIR]    Include fribidi support (requires FriBidi >=0.1.12).])
 
 if test "$PHP_FRIBIDI" != "no"; then
 

@@ -1,8 +1,9 @@
+dnl
 dnl $Id$
-dnl config.m4 for extension ncurses
+dnl
 
 PHP_ARG_WITH(ncurses, for ncurses support,
-[  --with-ncurses[=DIR]       Include ncurses support])
+[  --with-ncurses[=DIR]    Include ncurses support.])
 
 if test "$PHP_NCURSES" != "no"; then
    # --with-ncurses -> check with-path

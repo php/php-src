@@ -1,4 +1,6 @@
+dnl
 dnl $Id$
+dnl
 
 AC_DEFUN(AC_OCI8_VERSION,[
   AC_MSG_CHECKING([Oracle version])

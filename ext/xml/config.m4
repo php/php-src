@@ -1,5 +1,6 @@
-# $Source$
-# $Id$
+dnl
+dnl $Id$
+dnl
 
 dnl Fallback for --with-xml[=DIR]
 AC_ARG_WITH(xml,[],enable_xml=$withval)
@@ -12,7 +13,7 @@ else
   order=12
 fi
 
-PHP_ARG_ENABLE(xml,for XML support,
+PHP_ARG_ENABLE(xml,whether to enable XML support,
 [  --disable-xml           Disable XML support using bundled expat lib], yes)
 
 PHP_ARG_WITH(expat-dir, external libexpat install dir,

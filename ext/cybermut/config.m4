@@ -1,10 +1,9 @@
+dnl
 dnl $Id$
-dnl config.m4 for extension cybermut
-
+dnl
 
 PHP_ARG_WITH(cybermut, for cybermut support,
 [  --with-cybermut[=DIR]   Include CyberMut (french Credit Mutuel telepaiement)])
-
 
 if test "$PHP_CYBERMUT" != "no"; then
   for i in /usr/local /usr $PHP_CYBERMUT; do

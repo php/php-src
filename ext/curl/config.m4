@@ -1,5 +1,6 @@
+dnl
 dnl $Id$
-dnl config.m4 for extension CURL
+dnl
 
 PHP_ARG_WITH(curl, for CURL support,
 [  --with-curl[=DIR]       Include CURL support])

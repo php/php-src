@@ -1,18 +1,19 @@
-dnl config.m4 for extension xslt
+dnl
+dnl $Id$
+dnl
 dnl +------------------------------------------------------------------------------+
 dnl |  This is where the magic of the extension reallly is.  Depending on what     |
 dnl |  backend the user chooses, this script performs the magic                    |
 dnl +------------------------------------------------------------------------------+
-dnl   $Id$
 
 PHP_ARG_ENABLE(xslt, whether to enable xslt support,
-[  --enable-xslt           Enable xslt support])
+[  --enable-xslt           Enable xslt support.])
 
-PHP_ARG_WITH(xslt-sablot, whether to enable the XSLT Sablotron backend,
-[  --with-xslt-sablot      XSLT: Enable the sablotron backend])
+PHP_ARG_WITH(xslt-sablot, for XSLT Sablotron backend,
+[  --with-xslt-sablot        XSLT: Enable the sablotron backend.])
 
 PHP_ARG_WITH(expat-dir, libexpat dir for Sablotron XSL support,
-[  --with-expat-dir=DIR    Sablotron: libexpat dir for Sablotron 0.50])
+[  --with-expat-dir=DIR      XSLT: libexpat dir for Sablotron 0.50])
 
 if test "$PHP_XSLT" != "no"; then
 

@@ -1,5 +1,6 @@
+dnl
 dnl $Id$
-dnl config.m4 for extension OpenSSL
+dnl
 
 if test "$OPENSSL_DIR"; then
   PHP_EXTENSION(openssl, $ext_shared)

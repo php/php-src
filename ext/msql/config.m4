@@ -1,4 +1,6 @@
+dnl
 dnl $Id$
+dnl
 
 dnl
 dnl Test mSQL version by checking if msql.h has "IDX_TYPE" defined.

@@ -1,10 +1,11 @@
+dnl
 dnl $Id$
-dnl config.m4 for extension pcre
+dnl
 
 dnl By default we'll compile and link against the bundled PCRE library
 dnl if DIR is supplied, we'll use that for linking
 
-PHP_ARG_WITH(pcre-regex,whether to include PCRE support,
+PHP_ARG_WITH(pcre-regex,for PCRE support,
 [  --without-pcre-regex    Do not include Perl Compatible Regular Expressions 
                           support. Use --with-pcre-regex=DIR to specify DIR
                           where PCRE's include and library files are located,
@@ -56,6 +57,5 @@ if test "$PHP_PCRE_REGEX" != "no"; then
   fi
 fi
 PHP_SUBST(PCRE_SHARED_LIBADD)
-
 
 AC_CHECK_FUNC(memmove, [], [AC_DEFINE(USE_BCOPY, 1, [ ])])

@@ -1,4 +1,6 @@
+dnl
 dnl $Id$
+dnl
 
 PHP_ARG_WITH(informix,for Informix support,
 [  --with-informix[=DIR]   Include Informix support.  DIR is the Informix base

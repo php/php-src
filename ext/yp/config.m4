@@ -1,9 +1,9 @@
+dnl
 dnl $Id$
-dnl config.m4 for extension yp
-dnl don't forget to call PHP_EXTENSION(yp)
+dnl
 
 PHP_ARG_ENABLE(yp,whether to include YP support,
-[  --enable-yp             Include YP support])
+[  --enable-yp             Include YP support.])
 
 if test "$PHP_YP" != "no"; then
   AC_DEFINE(HAVE_YP,1,[ ])

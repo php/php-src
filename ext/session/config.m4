@@ -1,10 +1,12 @@
+dnl
 dnl $Id$
+dnl
+
+PHP_ARG_ENABLE(session, whether to enable PHP sessions,
+[  --disable-session       Disable session support], yes)
 
 PHP_ARG_WITH(mm,for mm support,
 [  --with-mm[=DIR]         Include mm support for session storage])
-
-PHP_ARG_ENABLE(session, whether to enable session support,
-[  --disable-session       Disable session support], yes)
 
 if test "$PHP_MM" != "no"; then
   for i in /usr/local /usr $PHP_MM; do

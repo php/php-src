@@ -1,10 +1,10 @@
+dnl
 dnl $Id$
-dnl config.m4 for extension ovrimos
-dnl don't forget to call PHP_EXTENSION(ovrimos)
+dnl
 
 PHP_ARG_WITH(ovrimos, for Ovrimos SQL Server support,
 [  --with-ovrimos[=DIR]    Include Ovrimos SQL Server support. DIR is the
-                          Ovrimos' libsqlcli install directory.])
+                          Ovrimos libsqlcli install directory.])
 
 if test "$PHP_OVRIMOS" != "no"; then
   for i in /usr/local /usr $PHP_OVRIMOS; do

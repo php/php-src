@@ -1,6 +1,8 @@
+dnl
 dnl $Id$
+dnl
 
-PHP_ARG_WITH(pspell,whether to include pspell support,
+PHP_ARG_WITH(pspell,for PSPELL support,
 [  --with-pspell[=DIR]     Include PSPELL support.])
 
 if test "$PHP_PSPELL" != "no"; then

@@ -3,8 +3,7 @@ dnl $Id$
 dnl 
 
 PHP_ARG_WITH(mcrypt, for mcrypt support,
-[  --with-mcrypt[=DIR]     Include mcrypt support. DIR is the mcrypt install 
-                          directory.])
+[  --with-mcrypt[=DIR]     Include mcrypt support.])
 
 if test "$PHP_MCRYPT" != "no"; then
   for i in /usr/local /usr $PHP_MCRYPT; do

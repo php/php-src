@@ -1,4 +1,6 @@
+dnl
 dnl $Id$
+dnl
 
 PHP_ARG_WITH(sybase,for Sybase support,
 [  --with-sybase[=DIR]     Include Sybase-DB support.  DIR is the Sybase home
