@@ -3137,6 +3137,12 @@ PHP_FUNCTION(imap_fetch_overview)
 					rfc822_write_address(address, env->from);
 					add_property_string(myoverview, "from", address, 1);
 				}
+			        if (env->to) {
+					env->to->next = NULL;
+				    	address[0] = '\0';
+					rfc822_write_address(address, env->to);
+					add_property_string(myoverview, "to", address, 1);
+				}
 				if (env->date) {
 					add_property_string(myoverview, "date", env->date, 1);
 				}
