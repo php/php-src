@@ -75,26 +75,26 @@ php3_module_entry crypt_module_entry = {
    PHP3_EXT_DES_CRYPT, PHP3_MD5_CRYPT and PHP3_BLOWFISH_CRYPT as appropriate 
    for the target platform
 */
-#ifdef PHP3_STD_DES_CRYPT
+#if PHP3_STD_DES_CRYPT
 #define PHP3_MAX_SALT_LEN 2
 #endif
-#ifdef PHP3_EXT_DES_CRYPT
+#if PHP3_EXT_DES_CRYPT
 #undef PHP3_MAX_SALT_LEN
 #define PHP3_MAX_SALT_LEN 9
 #endif
-#ifdef PHP3_MD5_CRYPT
+#if PHP3_MD5_CRYPT
 #undef PHP3_MAX_SALT_LEN
 #define PHP3_MAX_SALT_LEN 12
 #endif
-#ifdef PHP3_BLOWFISH_CRYPT
+#if PHP3_BLOWFISH_CRYPT
 #undef PHP3_MAX_SALT_LEN
 #define PHP3_MAX_SALT_LEN 17
 #endif
 
-#ifdef HAVE_LRAND48
+#if HAVE_LRAND48
 #define PHP3_CRYPT_RAND lrand48()
 #else
-#ifdef HAVE_RANDOM
+#if HAVE_RANDOM
 #define PHP3_CRYPT_RAND random()
 #else
 #define PHP3_CRYPT_RAND rand()
@@ -105,7 +105,7 @@ int php_minit_crypt(INIT_FUNC_ARGS)
 {
 	ELS_FETCH();
 
-#ifdef PHP3_STD_DES_CRYPT
+#if PHP3_STD_DES_CRYPT
     REGISTER_LONG_CONSTANT("CRYPT_SALT_LENGTH", 2, CONST_CS | CONST_PERSISTENT);
 #else
 #if PHP3_MD5_CRYPT
@@ -156,17 +156,17 @@ PHP_FUNCTION(crypt)
 
 	/* The automatic salt generation only covers standard DES and md5-crypt */
 	if(!*salt) {
-#ifdef HAVE_SRAND48
+#if HAVE_SRAND48
 		srand48((unsigned int) time(0) * getpid());
 #else
-#ifdef HAVE_SRANDOM
+#if HAVE_SRANDOM
 		srandom((unsigned int) time(0) * getpid());
 #else
 		srand((unsigned int) time(0) * getpid());
 #endif
 #endif
 
-#ifdef PHP3_STD_DES_CRYPT
+#if PHP3_STD_DES_CRYPT
 		php3i_to64(&salt[0], PHP3_CRYPT_RAND, 2);
 		salt[2] = '\0';
 #else
