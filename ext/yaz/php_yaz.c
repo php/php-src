@@ -23,6 +23,7 @@
 #endif
 
 #include "php.h"
+#include "php_ini.h"
 
 #if HAVE_YAZ
 
@@ -326,7 +327,6 @@ static void get_assoc (INTERNAL_FUNCTION_PARAMETERS, pval **id,
 					   Yaz_Association *assocp)
 {
 	Yaz_Association *as = 0;
-	YAZSLS_FETCH();
 	
 	*assocp = 0;
 #ifdef ZTS
@@ -1101,7 +1101,6 @@ static int do_event (int *id, int timeout)
 	int no = 0;
 	int max_fd = 0;
 	struct timeval tv;
-	YAZSLS_FETCH();
 	
 	tv.tv_sec = timeout;
 	tv.tv_usec = 0;
@@ -1111,7 +1110,7 @@ static int do_event (int *id, int timeout)
 #endif
 	FD_ZERO (&input);
 	FD_ZERO (&output);
-	for (i = 0; i < MAX_ASSOC; i++)
+	for (i = 0; i < YAZSG(max_links); i++)
 	{
 		Yaz_Association p = shared_associations[i];
 		int fd;
@@ -1140,7 +1139,7 @@ static int do_event (int *id, int timeout)
 #ifdef ZTS
 	tsrm_mutex_lock (yaz_mutex);
 #endif
-	for (i = 0; i<MAX_ASSOC; i++)
+	for (i = 0; i<YAZSG(max_links); i++)
 	{
 		int fd;
 		Yaz_Association p = shared_associations[i];
@@ -1209,12 +1208,13 @@ PHP_FUNCTION(yaz_connect)
 	const char *user_str = 0, *group_str = 0, *pass_str = 0;
 	const char *cookie_str = 0, *proxy_str = 0;
     const char *client_IP = 0;
+    const char *otherInfo[3];
 	int persistent = 1;
 	int piggyback = 1;
 	pval **zurl, **user = 0;
 	Yaz_Association as;
-	YAZSLS_FETCH();
 
+    otherInfo[0] = otherInfo[1] = otherInfo[2] = 0;
 	if (ZEND_NUM_ARGS() == 1)
 	{
 		if (zend_get_parameters_ex (1, &zurl) == FAILURE)
@@ -1241,7 +1241,9 @@ PHP_FUNCTION(yaz_connect)
 			piggyback_val = array_lookup_bool(ht, "piggyback");
 			if (piggyback_val)
 				piggyback = *piggyback_val;
-            client_IP = array_lookup_string(ht, "clientIP");
+            otherInfo[0] = array_lookup_string(ht, "otherInfo0");
+            otherInfo[1] = array_lookup_string(ht, "otherInfo1");
+            otherInfo[2] = array_lookup_string(ht, "otherInfo2");
 		}
 		else
 		{
@@ -1264,7 +1266,7 @@ PHP_FUNCTION(yaz_connect)
 #ifdef ZTS
 	tsrm_mutex_lock (yaz_mutex);
 #endif
-	for (i = 0; i<MAX_ASSOC; i++)
+	for (i = 0; i<YAZSG(max_links); i++)
 	{
 		as = shared_associations[i];
 #if USE_ZOOM
@@ -1276,6 +1278,9 @@ PHP_FUNCTION(yaz_connect)
 			!strcmp_null(option_get(as, "cookie"), cookie_str))
 		{
             option_set (as, "clientIP", client_IP);
+            option_set (as, "otherInfo0", otherInfo[0]);
+            option_set (as, "otherInfo1", otherInfo[1]);
+            option_set (as, "otherInfo2", otherInfo[2]);
 			ZOOM_connection_connect (as->zoom_conn, zurl_str, 0);
 			break;
 		}
@@ -1290,13 +1295,13 @@ PHP_FUNCTION(yaz_connect)
 			break;
 #endif
 	}
-	if (i == MAX_ASSOC)
+	if (i == YAZSG(max_links))
 	{
 		/* we didn't have it (or already in use) */
 		int i0 = -1;
 		int min_order = 2000000000;
 		/* find completely free slot or the oldest one */
-		for (i = 0; i<MAX_ASSOC && shared_associations[i]; i++)
+		for (i = 0; i<YAZSG(max_links) && shared_associations[i]; i++)
 		{
 			as = shared_associations[i];
 			if (persistent && !as->in_use && as->order < min_order)
@@ -1305,7 +1310,7 @@ PHP_FUNCTION(yaz_connect)
 				i0 = i;
 			}
 		}
-		if (i == MAX_ASSOC)
+		if (i == YAZSG(max_links))
 		{
 			i = i0;
 			if (i == -1)
@@ -1325,6 +1330,11 @@ PHP_FUNCTION(yaz_connect)
 		option_set (as, "pass", pass_str);
 		option_set (as, "cookie", cookie_str);
         option_set (as, "clientIP", client_IP);
+
+        option_set (as, "otherInfo0", otherInfo[0]);
+        option_set (as, "otherInfo1", otherInfo[1]);
+        option_set (as, "otherInfo2", otherInfo[2]);
+        
 		ZOOM_connection_connect (as->zoom_conn, zurl_str, 0);
 #else
 		as->host_port = xstrdup (zurl_str);
@@ -1524,7 +1534,6 @@ PHP_FUNCTION(yaz_wait)
 	ZOOM_connection conn_ar[MAX_ASSOC];
 #endif
 	int i, id, timeout = 15;
-	YAZSLS_FETCH();
 
 	if (ZEND_NUM_ARGS() == 1)
 	{
@@ -1548,7 +1557,7 @@ PHP_FUNCTION(yaz_wait)
 #ifdef ZTS
 	tsrm_mutex_lock (yaz_mutex);
 #endif
-	for (i = 0; i<MAX_ASSOC; i++)
+	for (i = 0; i<YAZSG(max_links); i++)
 	{
 #if USE_ZOOM
 		Yaz_Association p = shared_associations[i];
@@ -2966,8 +2975,6 @@ static void php_yaz_init_globals(zend_yaz_globals *yaz_globals)
 
 void yaz_close_session(Yaz_Association *as)
 {
-	YAZSLS_FETCH();
-
 	if (*as && (*as)->order == YAZSG(assoc_seq))
 	{
 		if ((*as)->persistent)
@@ -2990,6 +2997,18 @@ static void yaz_close_link (zend_rsrc_list_entry *rsrc
 	yaz_close_session (as);
 }
 
+/* {{{ PHP_INI_BEGIN
+ */
+PHP_INI_BEGIN()
+    STD_PHP_INI_ENTRY("yaz.max_links", "100", PHP_INI_ALL,
+                      OnUpdateInt, max_links,
+                      zend_yaz_globals, yaz_globals)
+    STD_PHP_INI_ENTRY("yaz.log_file", "", PHP_INI_ALL,
+                      OnUpdateString, log_file,
+                      zend_yaz_globals, yaz_globals)
+    PHP_INI_END()
+/* }}} */
+    
 PHP_MINIT_FUNCTION(yaz)
 {
 	int i;
@@ -2997,8 +3016,16 @@ PHP_MINIT_FUNCTION(yaz)
 #ifdef ZTS
 	yaz_mutex = tsrm_mutex_alloc();
 #endif
+    yaz_log_init_file ("/dev/null");
 	ZEND_INIT_MODULE_GLOBALS(yaz, php_yaz_init_globals, NULL);
 
+    REGISTER_INI_ENTRIES();
+
+    if (YAZSG(log_file))
+    {
+        yaz_log_init_file(YAZSG(log_file));
+        yaz_log_init_level (LOG_ALL);
+    }
 	le_link = zend_register_list_destructors_ex (yaz_close_link, 0,
 												"YAZ link", module_number);
 	order_associations = 1;
@@ -3031,6 +3058,9 @@ PHP_MINFO_FUNCTION(yaz)
 	php_info_print_table_start();
 	php_info_print_table_row(2, "YAZ Support", "enabled");
 	php_info_print_table_row(2, "YAZ Version", YAZ_VERSION);
+#if USE_ZOOM
+	php_info_print_table_row(2, "ZOOM", "enabled");
+#endif
 	php_info_print_table_end();
 }
 
@@ -3041,7 +3071,8 @@ PHP_RSHUTDOWN_FUNCTION(yaz)
 
 PHP_RINIT_FUNCTION(yaz)
 {
-	YAZSLS_FETCH();
+    char pidstr[20];
+    sprintf (pidstr, "%ld", (long) getpid());
 #ifdef ZTS
 	tsrm_mutex_lock (yaz_mutex);
 #endif
@@ -3049,6 +3080,7 @@ PHP_RINIT_FUNCTION(yaz)
 #ifdef ZTS
 	tsrm_mutex_unlock (yaz_mutex);
 #endif
+    yaz_log_init_prefix(pidstr);
 	return SUCCESS;
 }
 
