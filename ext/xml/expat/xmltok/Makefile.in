@@ -1,0 +1,10 @@
+
+DEPTH     = ../../../..
+topsrcdir = @topsrcdir@
+srcdir    = @srcdir@
+VPATH     = @srcdir@
+
+LTLIBRARY_NAME          = libexpat_tok.la
+LTLIBRARY_SOURCES       = xmltok.c xmlrole.c
+
+include $(topsrcdir)/build/ltlib.mk

@@ -1,56 +1,29 @@
 # $Source$
 # $Id$
 
-AC_MSG_CHECKING(for XML support)
-AC_ARG_WITH(xml,
-[  --with-xml[=DIR]        Include XML support.  Will look for expat
-                          in DIR if specified.  Set DIR to "shared" to
-                          build as a dl, or "shared,DIR" to build as a dl
-                          and still specify DIR.],[
-  PHP_WITH_SHARED
-  if test "$withval" != "no"; then
-    if test "$shared" = "yes"; then
-      AC_MSG_RESULT([yes (shared)])
-    else
-      AC_MSG_RESULT([yes (static)])
-    fi
+dnl Fallback for --with-xml[=DIR]
+AC_ARG_WITH(xml,[],enable_xml=$withval)
 
-    if test -z "$XML_INCLUDE" ; then
-    if test "$withval" = "yes"; then
-      test -d /usr/include/xml && XML_INCLUDE="/usr/include/xml"
-      test -d /usr/local/include/xml && XML_INCLUDE="/usr/local/include/xml"
-      test -d /usr/include/xmltok && XML_INCLUDE="/usr/include/xmltok"
-      AC_CHECK_LIB(expat, main, XML_LIBS="-lexpat", 
-	AC_CHECK_LIB(xmltok, main,
-	  AC_CHECK_LIB(xmlparse, main, XML_LIBS="-lxmlparse -lxmltok", 
-	    AC_MSG_ERROR(No expat library found for the xml module),"-lxmltok"),
-	  AC_MSG_ERROR(No expat library found for the xml module))
-      )
-    else
-      XML_LIBS="-L$withval/lib -lexpat"
-      if test -d $withval/include/xml; then
-	XML_INCLUDE="$withval/include/xml"
-      else
-	XML_INCLUDE="$withval/include"
-      fi
-    fi
-    fi
-    AC_DEFINE(HAVE_LIBEXPAT, 1, [ ])
-    PHP_EXTENSION(xml, $shared)
-    if test "$shared" != "yes"; then
-      EXTRA_LIBS="$EXTRA_LIBS $XML_LIBS"
-      AC_ADD_INCLUDE($XML_INCLUDE)
-      XML_INCLUDE=""
-      XML_STATIC="libphpext_xml.la"
-    else
-      XML_INCLUDE="-I$XML_INCLUDE"
-      XML_SHARED="xml.la"
-    fi
-  else
-    AC_MSG_RESULT(no)
-  fi
+AC_C_BIGENDIAN
+	
+AC_MSG_CHECKING(for XML support)
+AC_ARG_ENABLE(xml,
+[  --enable-xml            Include XML support using bundled expat lib],[
+  PHP_XML=$enableval
 ],[
-  AC_MSG_RESULT(no)
-]) 
-PHP_SUBST(XML_LIBS)
-PHP_SUBST(XML_INCLUDE)
+  PHP_XML=no
+])
+AC_MSG_RESULT($PHP_XML)
+
+if test "$PHP_XML" != "no"; then
+  AC_DEFINE(HAVE_LIBEXPAT, 1, [ ])
+  if test "$PHP_XML" = "shared"; then
+    shared=yes
+  else
+    shared=
+  fi
+  PHP_EXTENSION(xml, $shared)
+  AC_ADD_INCLUDE(${ext_src_base}expat/xmltok)
+  AC_ADD_INCLUDE(${ext_src_base}expat/xmlparse)
+  PHP_FAST_OUTPUT(${ext_base}expat/Makefile ${ext_base}expat/xmlparse/Makefile ${ext_base}expat/xmltok/Makefile)
+fi
