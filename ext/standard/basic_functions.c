@@ -162,7 +162,7 @@ function_entry basic_functions[] = {
 	PHP_FE(implode,									NULL)
 	PHP_FE(setlocale,								NULL)
 	PHP_FE(soundex,									NULL)
-	PHP_FE(levdist,									NULL)
+	PHP_FE(levenshtein,									NULL)
 	PHP_FE(chr,										NULL)
 	PHP_FE(ord,										NULL)
 	PHP_FE(parse_str,								NULL)
