@@ -343,10 +343,14 @@ int _php_mb_encoding_handler_ex(int data_type, zval *arg, char *res, char *separ
 			val_len = len_list[n];
 		}
 		n++;
+		/* we need val to be emalloc()ed */
+		val = estrndup(val, val_len);
 		if (sapi_module.input_filter(data_type, var, &val, val_len, &new_val_len TSRMLS_CC)) {
 			/* add variable to symbol table */
 			php_register_variable_safe(var, val, new_val_len, array_ptr TSRMLS_CC);
 		}
+		efree(val);
+		
 		if (convd != NULL){
 			mbfl_string_clear(&resvar);
 			mbfl_string_clear(&resval);
