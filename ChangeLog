@@ -2,6 +2,7 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? 1999, Version 4.0 Beta 3
+- Ora_Fetch_Into now resets the returned array in all cases (Thies) 
 - Fixed NULL-Column problem in Oracle-Driver (Thies)
 - Added extra metadata functions to ODBC, SQLTables etc (nick@easysoft.com)
 - Fixed SEGV in mcal make_event_object() (Andrew Skalski)
