@@ -4,11 +4,11 @@ dnl
 
 dnl Suppose we need FlatFile if no support or only CDB is used.
 
-AC_DEFUN(PHP_DBA_STD_BEGIN,[
+AC_DEFUN([PHP_DBA_STD_BEGIN],[
   unset THIS_INCLUDE THIS_LIBS THIS_LFLAGS THIS_PREFIX THIS_RESULT
 ])
 
-AC_DEFUN(PHP_TEMP_LDFLAGS,[
+AC_DEFUN([PHP_TEMP_LDFLAGS],[
   old_LDFLAGS=$LDFLAGS
   LDFLAGS="$1 $LDFLAGS"
   old_LIBS=$LIBS
@@ -19,14 +19,14 @@ AC_DEFUN(PHP_TEMP_LDFLAGS,[
 ])
 
 dnl Assign INCLUDE/LFLAGS from PREFIX
-AC_DEFUN(PHP_DBA_STD_ASSIGN,[
+AC_DEFUN([PHP_DBA_STD_ASSIGN],[
   if test -n "$THIS_PREFIX" && test "$THIS_PREFIX" != "/usr"; then
     THIS_LFLAGS=$THIS_PREFIX/$PHP_LIBDIR
   fi
 ])
 
 dnl Standard check
-AC_DEFUN(PHP_DBA_STD_CHECK,[
+AC_DEFUN([PHP_DBA_STD_CHECK],[
   THIS_RESULT="yes"
   if test -z "$THIS_INCLUDE"; then
     AC_MSG_ERROR([DBA: Could not find necessary header file(s).])
@@ -37,14 +37,14 @@ AC_DEFUN(PHP_DBA_STD_CHECK,[
 ])
 
 dnl Attach THIS_x to DBA_x
-AC_DEFUN(PHP_DBA_STD_ATTACH,[
+AC_DEFUN([PHP_DBA_STD_ATTACH],[
   PHP_ADD_LIBRARY_WITH_PATH($THIS_LIBS, $THIS_LFLAGS, DBA_SHARED_LIBADD)
   unset THIS_INCLUDE THIS_LIBS THIS_LFLAGS THIS_PREFIX
 ])
 
 dnl Print the result message
 dnl parameters(name [, full name [, empty or error message]])
-AC_DEFUN(AC_DBA_STD_RESULT,[
+AC_DEFUN([AC_DBA_STD_RESULT],[
   THIS_NAME=[]translit($1,a-z0-9-,A-Z0-9_)
   if test -n "$2"; then
     THIS_FULL_NAME="$2"
@@ -169,7 +169,7 @@ AC_DBA_STD_RESULT(ndbm)
 
 dnl Berkeley specific (library and version test)
 dnl parameters(version, library list, function)
-AC_DEFUN(PHP_DBA_DB_CHECK,[
+AC_DEFUN([PHP_DBA_DB_CHECK],[
   for LIB in $2; do
     if test -f $THIS_PREFIX/$PHP_LIBDIR/lib$LIB.a -o -f $THIS_PREFIX/$PHP_LIBDIR/lib$LIB.$SHLIB_SUFFIX_NAME; then
       PHP_TEMP_LDFLAGS(-L$THIS_PREFIX/$PHP_LIBDIR, -l$LIB,[
@@ -381,7 +381,7 @@ AC_ARG_WITH(dbm,
 ])
 AC_DBA_STD_RESULT(dbm)
 
-AC_DEFUN(PHP_DBA_BUILTIN_CDB,[
+AC_DEFUN([PHP_DBA_BUILTIN_CDB],[
   AC_DEFINE(DBA_CDB_BUILTIN, 1, [ ])
   AC_DEFINE(DBA_CDB_MAKE, 1, [ ])
   AC_DEFINE(DBA_CDB, 1, [ ])
@@ -427,7 +427,7 @@ AC_ARG_WITH(cdb,
 ])
 AC_DBA_STD_RESULT(cdb)
 
-AC_DEFUN(PHP_DBA_BUILTIN_INI,[
+AC_DEFUN([PHP_DBA_BUILTIN_INI],[
   AC_DEFINE(DBA_INIFILE, 1, [ ])
   ini_sources="libinifile/inifile.c"
   THIS_RESULT="builtin"
@@ -445,7 +445,7 @@ AC_ARG_WITH(inifile,
 ])
 AC_DBA_STD_RESULT(inifile,INI File)
 
-AC_DEFUN(PHP_DBA_BUILTIN_FLATFILE,[
+AC_DEFUN([PHP_DBA_BUILTIN_FLATFILE],[
   AC_DEFINE(DBA_FLATFILE, 1, [ ])
   flat_sources="libflatfile/flatfile.c"
   THIS_RESULT="builtin"

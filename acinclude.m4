@@ -16,7 +16,7 @@ AC_DEFUN([PHP_ADD_MAKEFILE_FRAGMENT],[
   sed -e "s#\$(srcdir)#$ac_srcdir#g" -e "s#\$(builddir)#$ac_builddir#g" $src  >> Makefile.fragments
 ])
 
-AC_DEFUN(PHP_PROG_RE2C,[
+AC_DEFUN([PHP_PROG_RE2C],[
   AC_CHECK_PROG(RE2C, re2c, re2c, [exit 0;])
 ])
 
@@ -1909,7 +1909,7 @@ dnl
 dnl PHP_TEST_BUILD(function, action-if-ok, action-if-not-ok [, extra-libs [, extra-source]])
 dnl This macro checks whether build works and given function exists.
 dnl
-AC_DEFUN(PHP_TEST_BUILD, [
+AC_DEFUN([PHP_TEST_BUILD], [
   old_LIBS=$LIBS
   LIBS="$4 $LIBS"
   AC_TRY_RUN([
@@ -1937,14 +1937,14 @@ dnl $1 = name of extension, $2 = extension upon which it depends
 dnl $3 = optional: if true, it's ok for $2 to have not been configured
 dnl default is false and should halt the build.
 dnl See ADD_EXTENSION_DEP in win32 build 
-AC_DEFUN(PHP_ADD_EXTENSION_DEP, [])
+AC_DEFUN([PHP_ADD_EXTENSION_DEP], [])
 
 
 dnl PHP_CHECK_64BIT([do if 32], [do if 64])
 dnl This macro is used to detect if we're at 64-bit platform or not.
 dnl It could be useful for those external libs, that have different precompiled 
 dnl versions in different directories.
-AC_DEFUN(PHP_CHECK_64BIT,[
+AC_DEFUN([PHP_CHECK_64BIT],[
   AC_CHECK_SIZEOF(int)
   AC_MSG_CHECKING([checking if we're at 64-bit platform])
   if test "$ac_cv_sizeof_int" = "4" ; then

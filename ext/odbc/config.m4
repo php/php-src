@@ -5,7 +5,7 @@ dnl
 dnl
 dnl Figure out which library file to link with for the Solid support.
 dnl
-AC_DEFUN(AC_FIND_SOLID_LIBS,[
+AC_DEFUN([AC_FIND_SOLID_LIBS],[
   AC_MSG_CHECKING([Solid library file])  
   ac_solid_uname_r=`uname -r 2>/dev/null`
   ac_solid_uname_s=`uname -s 2>/dev/null`
@@ -71,7 +71,7 @@ fi
 dnl
 dnl Figure out which library file to link with for the Empress support.
 dnl
-AC_DEFUN(AC_FIND_EMPRESS_LIBS,[
+AC_DEFUN([AC_FIND_EMPRESS_LIBS],[
   AC_MSG_CHECKING([Empress library file])
   ODBC_LIBS=`echo $1/libempodbccl.so | cut -d' ' -f1`
   if test ! -f $ODBC_LIBS; then
@@ -80,7 +80,7 @@ AC_DEFUN(AC_FIND_EMPRESS_LIBS,[
   AC_MSG_RESULT(`echo $ODBC_LIBS | sed -e 's!.*/!!'`)
 ])
 
-AC_DEFUN(AC_FIND_EMPRESS_BCS_LIBS,[
+AC_DEFUN([AC_FIND_EMPRESS_BCS_LIBS],[
   AC_MSG_CHECKING([Empress local access library file])
   ODBCBCS_LIBS=`echo $1/libempodbcbcs.a | cut -d' ' -f1`
   if test ! -f $ODBCBCS_LIBS; then

@@ -47,7 +47,7 @@ dnl
 dnl Checks for the configure options 
 dnl 
 
-AC_DEFUN(PHP_GD_JPEG,[
+AC_DEFUN([PHP_GD_JPEG],[
   if test "$PHP_JPEG_DIR" != "no"; then
 
     for i in $PHP_JPEG_DIR /usr/local /usr; do
@@ -72,7 +72,7 @@ AC_DEFUN(PHP_GD_JPEG,[
   fi
 ])
 
-AC_DEFUN(PHP_GD_PNG,[
+AC_DEFUN([PHP_GD_PNG],[
   if test "$PHP_PNG_DIR" != "no"; then
 
     for i in $PHP_PNG_DIR /usr/local /usr; do
@@ -107,7 +107,7 @@ AC_DEFUN(PHP_GD_PNG,[
   fi
 ])
 
-AC_DEFUN(PHP_GD_XPM,[
+AC_DEFUN([PHP_GD_XPM],[
   if test "$PHP_XPM_DIR" != "no"; then
 
     for i in $PHP_XPM_DIR /usr/local /usr/X11R6 /usr; do
@@ -141,7 +141,7 @@ AC_DEFUN(PHP_GD_XPM,[
   fi
 ])
 
-AC_DEFUN(PHP_GD_FREETYPE1,[
+AC_DEFUN([PHP_GD_FREETYPE1],[
   if test "$PHP_TTF" != "no"; then
     if test "$PHP_FREETYPE_DIR" = "no" -o "$PHP_FREETYPE_DIR" = ""; then
       if test -n "$PHP_TTF"; then
@@ -176,7 +176,7 @@ AC_DEFUN(PHP_GD_FREETYPE1,[
   fi
 ])
 
-AC_DEFUN(PHP_GD_FREETYPE2,[
+AC_DEFUN([PHP_GD_FREETYPE2],[
   if test "$PHP_FREETYPE_DIR" != "no"; then
 
     for i in $PHP_FREETYPE_DIR /usr/local /usr; do
@@ -201,7 +201,7 @@ AC_DEFUN(PHP_GD_FREETYPE2,[
   fi
 ])
 
-AC_DEFUN(PHP_GD_T1LIB,[
+AC_DEFUN([PHP_GD_T1LIB],[
   if test "$PHP_T1LIB" != "no"; then
 
     for i in $PHP_T1LIB /usr/local /usr; do
@@ -225,19 +225,19 @@ AC_DEFUN(PHP_GD_T1LIB,[
   fi
 ])
 
-AC_DEFUN(PHP_GD_TTSTR,[
+AC_DEFUN([PHP_GD_TTSTR],[
   if test "$PHP_GD_NATIVE_TTF" = "yes"; then
     AC_DEFINE(USE_GD_IMGSTRTTF, 1, [ ])
   fi
 ])
 
-AC_DEFUN(PHP_GD_JISX0208,[
+AC_DEFUN([PHP_GD_JISX0208],[
   if test "$PHP_GD_JIS_CONV" = "yes"; then
     USE_GD_JIS_CONV=1
   fi
 ])
 
-AC_DEFUN(PHP_GD_CHECK_VERSION,[
+AC_DEFUN([PHP_GD_CHECK_VERSION],[
   PHP_CHECK_LIBRARY(gd, gdImageString16,        [AC_DEFINE(HAVE_LIBGD13,             1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
   PHP_CHECK_LIBRARY(gd, gdImagePaletteCopy,     [AC_DEFINE(HAVE_LIBGD15,             1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
   PHP_CHECK_LIBRARY(gd, gdImageCreateFromPng,   [AC_DEFINE(HAVE_GD_PNG,              1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])

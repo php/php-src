@@ -2,7 +2,7 @@ dnl
 dnl $Id$
 dnl
 
-AC_DEFUN(MYSQL_LIB_CHK, [
+AC_DEFUN([MYSQL_LIB_CHK], [
   str="$MYSQL_DIR/$1/libmysqlclient.*"
   for j in `echo $str`; do
     if test -r $j; then
@@ -12,7 +12,7 @@ AC_DEFUN(MYSQL_LIB_CHK, [
   done
 ])
 
-AC_DEFUN(PHP_MYSQL_SOCKET_SEARCH, [
+AC_DEFUN([PHP_MYSQL_SOCKET_SEARCH], [
   for i in  \
     /var/run/mysqld/mysqld.sock \
     /var/tmp/mysql.sock \

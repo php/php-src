@@ -2,7 +2,7 @@ dnl
 dnl $Id$
 dnl
 
-AC_DEFUN(PHP_OCI_IF_DEFINED,[
+AC_DEFUN([PHP_OCI_IF_DEFINED],[
   old_CPPFLAGS=$CPPFLAGS
   CPPFLAGS=$3
   AC_EGREP_CPP(yes,[
@@ -18,7 +18,7 @@ AC_DEFUN(PHP_OCI_IF_DEFINED,[
   ])
 ])
 
-AC_DEFUN(AC_OCI8_CHECK_LIB_DIR,[
+AC_DEFUN([AC_OCI8_CHECK_LIB_DIR],[
   PHP_CHECK_64BIT([ TMP_OCI8_LIB_DIR=lib32 ], [ TMP_OCI8_LIB_DIR=lib ])
   AC_MSG_CHECKING([OCI8 libraries dir])
   if test -d "$OCI8_DIR/lib" -a ! -d "$OCI8_DIR/lib32"; then
@@ -33,7 +33,7 @@ AC_DEFUN(AC_OCI8_CHECK_LIB_DIR,[
   AC_MSG_RESULT($OCI8_LIB_DIR)
 ])
 
-AC_DEFUN(AC_OCI8IC_VERSION,[
+AC_DEFUN([AC_OCI8IC_VERSION],[
   AC_MSG_CHECKING([Oracle Instant Client version])
   if test -f $PHP_OCI8_INSTANT_CLIENT/libociei.$SHLIB_SUFFIX_NAME; then
     if test -f $PHP_OCI8_INSTANT_CLIENT/libclntsh.$SHLIB_SUFFIX_NAME.10.1; then
@@ -51,7 +51,7 @@ AC_DEFUN(AC_OCI8IC_VERSION,[
 ])
 
 
-AC_DEFUN(AC_OCI8_VERSION,[
+AC_DEFUN([AC_OCI8_VERSION],[
   AC_MSG_CHECKING([Oracle version])
   if test -s "$OCI8_DIR/orainst/unix.rgs"; then
     OCI8_VERSION=`grep '"ocommon"' $OCI8_DIR/orainst/unix.rgs | sed 's/[ ][ ]*/:/g' | cut -d: -f 6 | cut -c 2-4`
