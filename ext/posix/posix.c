@@ -186,7 +186,7 @@ ZEND_GET_MODULE(posix)
 
 #define PHP_POSIX_SINGLE_ARG_FUNC(func_name)	\
 	long val;	\
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &val) == FAILURE) return;	\
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &val) == FAILURE) RETURN_FALSE;	\
 	if (func_name(val) < 0) {	\
 		POSIX_G(last_error) = errno;	\
 		RETURN_FALSE;	\
@@ -200,9 +200,10 @@ PHP_FUNCTION(posix_kill)
 {
 	long pid, sig;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ll", &pid, &sig) == FAILURE)
-		return;
-  
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ll", &pid, &sig) == FAILURE) {
+		RETURN_FALSE;
+	}
+		
 	if (kill(pid, sig) < 0) {
 		POSIX_G(last_error) = errno;
 		RETURN_FALSE;
@@ -360,8 +361,9 @@ PHP_FUNCTION(posix_setpgid)
 {
 	long pid, pgid;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ll", &pid, &pgid) == FAILURE)
-		return;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ll", &pid, &pgid) == FAILURE) {
+		RETURN_FALSE;
+	}
 	
 	if (setpgid(pid, pgid) < 0) {
 		POSIX_G(last_error) = errno;
@@ -379,7 +381,7 @@ PHP_FUNCTION(posix_getpgid)
 {
 	long val;
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &val) == FAILURE) {
-		return;
+		RETURN_FALSE;
 	}
 	
 	if ((val = getpgid(val)) < 0) {
@@ -398,7 +400,7 @@ PHP_FUNCTION(posix_getsid)
 {
 	long val;
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &val) == FAILURE) {
-		return;
+		RETURN_FALSE;
 	}
 	
 	if ((val = getsid(val)) < 0) {
@@ -519,8 +521,9 @@ PHP_FUNCTION(posix_ttyname)
 	char *p;
 	int fd;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &z_fd) == FAILURE)
-		return;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &z_fd) == FAILURE) {
+		RETURN_FALSE;
+	}
 
 	switch (Z_TYPE_P(z_fd)) {
 		case IS_RESOURCE:
@@ -549,9 +552,10 @@ PHP_FUNCTION(posix_isatty)
 	zval *z_fd;
 	int fd;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &z_fd) == FAILURE)
-		return;
-
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &z_fd) == FAILURE) {
+		RETURN_FALSE;
+	}
+	
 	switch (Z_TYPE_P(z_fd)) {
 		case IS_RESOURCE:
 			if (!php_posix_stream_get_fd(z_fd, &fd TSRMLS_CC)) {
@@ -615,8 +619,9 @@ PHP_FUNCTION(posix_mkfifo)
 	long mode;
 	int     result;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sl", &path, &path_len, &mode) == FAILURE)
-		return;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sl", &path, &path_len, &mode) == FAILURE) {
+		RETURN_FALSE;
+	}
 
 	if (PG(safe_mode) && (!php_checkuid(path, NULL, CHECKUID_ALLOW_ONLY_DIR))) {
 		RETURN_FALSE;
@@ -673,8 +678,9 @@ PHP_FUNCTION(posix_access)
 	int filename_len, ret;
 	char *filename, *path;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &filename, &filename_len, &mode) == FAILURE)
-		return;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &filename, &filename_len, &mode) == FAILURE) {
+		RETURN_FALSE;
+	}
 
 	path = expand_filepath(filename, NULL TSRMLS_CC);
 
@@ -712,8 +718,9 @@ PHP_FUNCTION(posix_getgrnam)
 	struct group *g;
 	int name_len;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &name, &name_len) == FAILURE)
-		return;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &name, &name_len) == FAILURE) {
+		RETURN_FALSE;
+	}
 
 	if (NULL == (g = getgrnam(name))) {
 		POSIX_G(last_error) = errno;
@@ -736,8 +743,9 @@ PHP_FUNCTION(posix_getgrgid)
 	long gid;
 	struct group *g;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &gid) == FAILURE)
-		return;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &gid) == FAILURE) {
+		RETURN_FALSE;
+	}
 
 	if (NULL == (g = getgrgid(gid))) {
 		POSIX_G(last_error) = errno;
@@ -777,8 +785,9 @@ PHP_FUNCTION(posix_getpwnam)
 	char *name;
 	int name_len;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &name, &name_len) == FAILURE)
-		return;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &name, &name_len) == FAILURE) {
+		RETURN_FALSE;
+	}
 
 	if (NULL == (pw = getpwnam(name))) {
 		POSIX_G(last_error) = errno;
@@ -802,8 +811,9 @@ PHP_FUNCTION(posix_getpwuid)
 	long uid;
 	struct passwd *pw;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &uid) == FAILURE)
-		return;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &uid) == FAILURE) {
+		RETURN_FALSE;
+	}
 
 	if (NULL == (pw = getpwuid(uid))) {
 		POSIX_G(last_error) = errno;
@@ -951,8 +961,9 @@ PHP_FUNCTION(posix_strerror)
 {
 	long error;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &error) == FAILURE)
-		return;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &error) == FAILURE) {
+		RETURN_FALSE;
+	}
 
 	RETURN_STRING(strerror(error), 1);
 }
