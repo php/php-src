@@ -625,7 +625,6 @@ int main(int argc, char *argv[])
 			case '?':
 				php_output_startup();
 				php_output_activate(TSRMLS_C);
-				SG(headers_sent) = 1;
 				php_cli_usage(argv[0]);
 				php_end_ob_buffers(1 TSRMLS_CC);
 				exit_status=1;
@@ -836,8 +835,6 @@ int main(int argc, char *argv[])
 		}
 
 		if (param_error) {
-			SG(headers_sent) = 1;
-			SG(request_info).no_headers = 1;
 			PUTS(param_error);
 			exit_status=1;
 			goto out_err;
@@ -885,8 +882,6 @@ int main(int argc, char *argv[])
 		if (php_request_startup(TSRMLS_C)==FAILURE) {
 			*arg_excp = arg_free;
 			fclose(file_handle.handle.fp);
-			SG(headers_sent) = 1;
-			SG(request_info).no_headers = 1;
 			php_request_shutdown((void *) 0);
 			PUTS("Could not startup.\n");
 			goto err;
