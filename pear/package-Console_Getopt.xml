@@ -23,12 +23,10 @@ short and long options.</description>
     </maintainer>
   </maintainers>
   <release>
-    <version>0.11</version>
-    <date>2002-05-26</date>
-    <notes>POSIX getopt compatibility fix: treat first element of args
-array as command name
-</notes>
-    <state>beta</state>
+    <version>1.0</version>
+    <date>2002-09-13</date>
+    <notes>Stable release</notes>
+    <state>stable</state>
     <filelist>
      <dir name="Console">
       <file role="php" name="Getopt.php"/>
@@ -36,6 +34,19 @@ array as command name
     </filelist>
   </release>
   <changelog>
+    <release>
+      <version>0.11</version>
+      <date>2002-05-26</date>
+      <notes>POSIX getopt compatibility fix: treat first element of args
+        array as command name
+      </notes>
+      <state>beta</state>
+      <filelist>
+        <dir name="Console">
+          <file role="php" name="Getopt.php"/>
+        </dir>
+      </filelist>
+    </release>
     <release>
       <version>0.10</version>
       <date>2002-05-12</date>
