@@ -217,7 +217,7 @@ ZEND_API int zend_hash_add_or_update(HashTable *ht, char *arKey, uint nKeyLength
 	
 	h = ht->pHashFunction(arKey, nKeyLength);
 	nIndex = h % ht->nTableSize;
-	
+
 	p = ht->arBuckets[nIndex];
 	while (p != NULL) {
 		if ((p->h == h) && (p->nKeyLength == nKeyLength)) {
