@@ -30,12 +30,12 @@ define('PHP_QA_EMAIL', 'php-qa@lists.php.net');
 define('QA_SUBMISSION_PAGE', 'http://qa.php.net/buildtest-process.php');
 
 class webHarness extends testHarness {
-    
-    var $textdata;
-    
-    function checkSafeMode() {
-        if (ini_get('safe_mode')) {
-        
+	
+	var $textdata;
+	
+	function checkSafeMode() {
+		if (ini_get('safe_mode')) {
+		
 ?>
 <CENTER>
 <TABLE CELLPADDING=5 CELLSPACING=0 BORDER=1>
@@ -49,112 +49,111 @@ how you configured "safe_mode".
 </TR>
 </TABLE>
 </CENTER>
-<?php           
-            return true;
-        }
-        return false;
-    }
-    
-    function runHeader() {
-            
+<?php
+		return true;
+	}
+	return false;
+	}
+	
+	function runHeader() {
 ?>
 <TABLE CELLPADDING=3 CELLSPACING=0 BORDER=0 STYLE="border: thin solid black;">
 <TR>
-    <TD>TESTED FUNCTIONALITY</TD>
-    <TD>RESULT</TD>
+	<TD>TESTED FUNCTIONALITY</TD>
+	<TD>RESULT</TD>
 </TR>
 <?php
-        
-    }
-    
-    function runFooter() {
-    
-    
+
+	}
+
+	function runFooter() {
+
+
 ?>
 <TR>
 <TD COLSPAN=2 ALIGN=CENTER><FONT SIZE=3>Additional Notes</FONT><HR><?php $this->displaymsg(); ?></TD>
 </TR>
 </TABLE><BR><BR>
 <?php 
-    }
-    
-    function error($message)
-    {
-            $this->writemsg("ERROR: {$message}\n");
-            exit(1);
-    }
-    
-    // Use this function to do any displaying of text, so that
-    // things can be over-written as necessary.
-    
-    function writemsg($msg) {
-      
-        $this->textdata = $this->textdata . $msg;
-        
-    }
-    
-    function displaymsg() {
-        
+	}
+	
+	function error($message)
+	{
+		$this->writemsg("ERROR: {$message}\n");
+		exit(1);
+	}
+	
+	// Use this function to do any displaying of text, so that
+	// things can be over-written as necessary.
+	
+	function writemsg($msg) {
+		
+		$this->textdata = $this->textdata . $msg;
+		
+	}
+	
+	function displaymsg() {
+	
 ?>
 <TEXTAREA ROWS=10 COLS=80><?=$this->textdata?></TEXTAREA>
 <?php
-    }
-    
-    // Another wrapper function, this one should be used any time
-    // a particular test passes or fails
-    
-    function showstatus($item, $status, $reason = '') 
-    {
-        static $color = "#FAE998";
-        
-        $color = ($color == "#FAE998") ? "#FFFFFF" : "#FAE998";
-        
-        switch($status) {
-        
-            case 'PASSED':
-            
-                ?>
-                <TR>
-                <TD BGCOLOR=<?=$color?>><?=$item?></TD>
-                <TD VALIGN=CENTER ALIGN=CENTER BGCOLOR=<?=$color?> ROWSPAN=2><FONT COLOR=#00FF00>PASSED</FONT></TD>
-                </TR>
-                <TR>
-                <TD BGCOLOR=<?=$color?>>Notes: <?=htmlentities($reason)?></TD>
-                </TR>
-                <?php
-                
-                break;
-                
-            case 'FAILED':
-                
-                ?>
-                <TR>
-                <TD BGCOLOR=<?=$color?>><?=$item?></TD>
-                <TD VALIGN=CENTER ALIGN=CENTER BGCOLOR=<?=$color?> ROWSPAN=2><FONT COLOR=#FF0000>FAILED</FONT></TD>
-                </TR>
-                <TR>
-                <TD BGCOLOR=<?=$color?>>Notes: <?=htmlentities($reason)?></TD>
-                </TR>
-                <?php
-                
-                break;
-                
-            case 'SKIPPED':
-            
-                ?>
-                <TR>
-                <TD BGCOLOR=<?=$color?>><?=$item?></TD>
-                <TD VALIGN=CENTER ALIGN=CENTER BGCOLOR=<?=$color?> ROWSPAN=2><FONT COLOR=#000000>SKIPPED</FONT></TD>
-                </TR>
-                <TR>
-                <TD BGCOLOR=<?=$color?>>Notes: <?=htmlentities($reason)?></TD>
-                </TR>
-                <?php
-                break;
-            
-        }
-    
-    }
+	}
+	
+	// Another wrapper function, this one should be used any time
+	// a particular test passes or fails
+	
+	function showstatus($item, $status, $reason = '') 
+	{
+		static $color = "#FAE998";
+		
+		$color = ($color == "#FAE998") ? "#FFFFFF" : "#FAE998";
+		
+		switch($status) {
+		
+			case 'PASSED':
+			
+?>
+<TR>
+<TD BGCOLOR=<?=$color?>><?=$item?></TD>
+<TD VALIGN=CENTER ALIGN=CENTER BGCOLOR=<?=$color?> ROWSPAN=2><FONT COLOR=#00FF00>PASSED</FONT></TD>
+</TR>
+<TR>
+<TD BGCOLOR=<?=$color?>>Notes: <?=htmlentities($reason)?></TD>
+</TR>
+<?php
+				
+				break;
+				
+			case 'FAILED':
+				
+?>
+<TR>
+<TD BGCOLOR=<?=$color?>><?=$item?></TD>
+<TD VALIGN=CENTER ALIGN=CENTER BGCOLOR=<?=$color?> ROWSPAN=2><FONT COLOR=#FF0000>FAILED</FONT></TD>
+</TR>
+<TR>
+<TD BGCOLOR=<?=$color?>>Notes: <?=htmlentities($reason)?></TD>
+</TR>
+<?php
+				
+				break;
+				
+			case 'SKIPPED':
+			
+?>
+<TR>
+<TD BGCOLOR=<?=$color?>><?=$item?></TD>
+<TD VALIGN=CENTER ALIGN=CENTER BGCOLOR=<?=$color?> ROWSPAN=2><FONT COLOR=#000000>SKIPPED</FONT></TD>
+</TR>
+<TR>
+<TD BGCOLOR=<?=$color?>>Notes: <?=htmlentities($reason)?></TD>
+</TR>
+<?php
+				break;
+			
+		}
+	
+	}
 }
 
 class testHarness {
@@ -233,9 +232,9 @@ class testHarness {
 		$this->summarizeResults();
 	}
 
-        // Use this function to do any displaying of text, so that
-        // things can be over-written as necessary.
-        
+	// Use this function to do any displaying of text, so that
+	// things can be over-written as necessary.
+	
 	function writemsg($msg) {
 	    
 	    echo $msg;
@@ -246,27 +245,27 @@ class testHarness {
 	// a particular test passes or fails
 	
 	function showstatus($item, $status, $reason = '') {
-            
-            switch($status) {
-                
-                case 'PASSED':
-                
-                    $this->writemsg("PASSED: $item ($reason)\n");
-                    
-                    break;
-                    
-                case 'FAILED':
-                    
-                    $this->writemsg("FAILED: $item ($reason)\n");
-                    
-                    break;
-                    
-                case 'SKIPPED':
-                
-                    $this->writemsg("SKIPPED: $item ($reason)\n");
-                    break;
-                    
-            }
+	    
+	    switch($status) {
+		
+		case 'PASSED':
+		
+		    $this->writemsg("PASSED: $item ($reason)\n");
+		    
+		    break;
+		    
+		case 'FAILED':
+		    
+		    $this->writemsg("FAILED: $item ($reason)\n");
+		    
+		    break;
+		    
+		case 'SKIPPED':
+		
+		    $this->writemsg("SKIPPED: $item ($reason)\n");
+		    break;
+		    
+	    }
 	    
 	}
 	
@@ -384,7 +383,7 @@ class testHarness {
 
 
 SAFE_MODE_WARNING;
-                        writemsg($safewarn);
+			writemsg($safewarn);
 			return true;
 		}
 		return false;
@@ -466,7 +465,7 @@ SAFE_MODE_WARNING;
 	
 	function runFooter()
 	{
-            
+	    
 	}
 	
 	function run()
@@ -703,8 +702,8 @@ SAFE_MODE_WARNING;
 				if (ereg("^skip", trim($output))){
 				
 					$reason = (ereg("^skip[[:space:]]*(.+)\$", trim($output))) ? ereg_replace("^skip[[:space:]]*(.+)\$", "\\1", trim($output)) : FALSE;
-                                        $this->showstatus($section_text['TEST'], 'SKIPPED', $reason);
-        
+					$this->showstatus($section_text['TEST'], 'SKIPPED', $reason);
+	
 					return 'SKIPPED';
 				}
 			}
