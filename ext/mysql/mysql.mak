@@ -4,9 +4,9 @@ PROJECT_ROOT = ..\..
 
 # Module details
 MODULE_NAME = phpmysql
-MODULE_DESC = "PHP MySQL Extension"
-VMAJ = 0
-VMIN = 60
+MODULE_DESC = "PHP 4.2.3 - MySQL Extension"
+VMAJ = 3
+VMIN = 0
 VREV = 0
 
 #include the common settings
@@ -47,13 +47,15 @@ ifndef BINARY
 endif
 
 # Compile flags
-C_FLAGS  = -c -maxerrors 25 -msgstyle gcc -wchar_t on -bool on -processor Pentium -align 1
+C_FLAGS  = -c -maxerrors 25 -msgstyle gcc -wchar_t on -bool on -processor Pentium
 C_FLAGS += -nostdinc -nosyspath  
-C_FLAGS += -DNETWARE -DZTS -DNEW_LIBC -DUSE_OLD_FUNCTIONS -DCOMPILE_DL=1
-C_FLAGS += -I. -I$(PROJECT_ROOT)/main -I$(PROJECT_ROOT)/ext/standard -I$(PROJECT_ROOT) -I$(PROJECT_ROOT)/netware
+C_FLAGS += -relax_pointers		# To remove type-casting errors
+C_FLAGS += -DNETWARE -DZTS -DNEW_LIBC -DUSE_OLD_FUNCTIONS -DCOMPILE_DL_MYSQL=1
+C_FLAGS += -I. -I- -I$(PROJECT_ROOT) -I$(PROJECT_ROOT)/main
+C_FLAGS += -I$(PROJECT_ROOT)/ext/standard -I$(PROJECT_ROOT)/netware
 C_FLAGS += -I$(PROJECT_ROOT)/zend -I$(PROJECT_ROOT)/tsrm
-C_FLAGS += -I- -I$(SDK_DIR)/include -I$(MWCIncludes)
-C_FLAGS += -I$(MYSQL_DIR)/include -DCOMPILE_DL_MYSQL=1
+C_FLAGS += -I$(SDK_DIR)/include -I$(MWCIncludes)
+C_FLAGS += -I$(MYSQL_DIR)/include
 C_FLAGS += -I$(WINSOCK_DIR)/include/nlm -I$(WINSOCK_DIR)/include
 
 
@@ -79,10 +81,6 @@ IMPORT = @$(SDK_DIR)/imports/libc.imp        \
          @$(SDK_DIR)/imports/ws2nlm.imp      \
          @$(MPK_DIR)/import/mpkOrg.imp       \
          @$(PROJECT_ROOT)/netware/phplib.imp
-
-#EXPORT = mysql_functions    \
-#         mysql_module_entry \
-#         ($(MODULE_NAME).nlm) get_module
 EXPORT = ($(MODULE_NAME)) get_module
 API = OutputToScreen
 
@@ -119,7 +117,7 @@ $(OBJ_DIR)/%.obj: %.c
 	@$(CC) $< $(C_FLAGS) -o $@
 
 
-$(BINARY): $(DEPDS) $(OBJECTS)
+$(BINARY): $(OBJECTS)
 	@echo Import $(IMPORT) > $(basename $@).def
 ifdef API
 	@echo Import $(API) >> $(basename $@).def
@@ -133,8 +131,13 @@ ifeq '$(BUILD)' 'debug'
 	@echo Debug >> $(basename $@).def
 endif
 	@echo Flag_On 0x00000008 >> $(basename $@).def
-	@echo Start _NonAppStart >> $(basename $@).def
-	@echo Exit _NonAppStop >> $(basename $@).def
+#	@echo Start _NonAppStart >> $(basename $@).def
+#	@echo Exit _NonAppStop >> $(basename $@).def
+	@echo Start _LibCPrelude >> $(basename $@).def
+	@echo Exit _LibCPostlude >> $(basename $@).def
+
+	$(MPKTOOL) $(XDCFLAGS) $(basename $@).xdc
+	@echo xdcdata $(basename $@).xdc >> $(basename $@).def
 
 	@echo Linking $@...
 	@echo $(LD_FLAGS) -commandfile $(basename $@).def > $(basename $@).link
@@ -143,7 +146,7 @@ endif
 
 
 .PHONY: clean
-clean: cleand cleanobj cleanbin
+clean: cleanobj cleanbin
 
 .PHONY: cleand
 cleand:

@@ -4,10 +4,10 @@ PROJECT_ROOT = ..\..
 
 # Module details
 MODULE_NAME = php_ldap
-MODULE_DESC = "PHP LDAP Extension"
-VMAJ = 0
-VMIN = 60
-VREV = 1
+MODULE_DESC = "PHP 4.3 - LDAP Extension"
+VMAJ = 3
+VMIN = 0
+VREV = 0
 
 #include the common settings
 include $(PROJECT_ROOT)/netware/common.mif
@@ -44,12 +44,14 @@ C_FLAGS += -c -maxerrors 25 -msgstyle gcc
 C_FLAGS += -wchar_t on -bool on
 C_FLAGS += -processor Pentium
 C_FLAGS += -nostdinc -nosyspath
+C_FLAGS += -relax_pointers		# To remove type-casting errors
 C_FLAGS += -DNETWARE -DZTS
 C_FLAGS += -DNEW_LIBC
-C_FLAGS += -DCOMPILE_DL_LDAP -DCOMPILE_DL=1
-C_FLAGS += -I. -I$(PROJECT_ROOT)/main -I$(PROJECT_ROOT)/ext/standard -I$(PROJECT_ROOT) -I$(PROJECT_ROOT)/netware
+C_FLAGS += -DCOMPILE_DL_LDAP
+C_FLAGS += -I. -I- -I$(PROJECT_ROOT) -I$(PROJECT_ROOT)/main
+C_FLAGS += -I$(PROJECT_ROOT)/ext/standard -I$(PROJECT_ROOT)/netware
 C_FLAGS += -I$(PROJECT_ROOT)/zend -I$(PROJECT_ROOT)/tsrm
-C_FLAGS += -I- -I$(SDK_DIR)/include -I$(MWCIncludes)
+C_FLAGS += -I$(SDK_DIR)/include -I$(MWCIncludes)
 C_FLAGS += -I$(LDAP_DIR)/inc
 C_FLAGS += -I$(WINSOCK_DIR)/include/nlm -I$(WINSOCK_DIR)/include
 
@@ -81,10 +83,6 @@ IMPORT = @$(SDK_DIR)/imports/libc.imp        \
          @$(MPK_DIR)/import/mpkOrg.imp       \
          @$(LDAP_DIR)/lib/nlm/Ldapsdk.imp    \
          @$(PROJECT_ROOT)/netware/phplib.imp
-#EXPORT = get_module
-#EXPORT = ldap_functions    \
-#         ldap_module_entry \
-#         ($(MODULE_NAME).nlm) get_module
 EXPORT = ($(MODULE_NAME)) get_module
 API =  OutputToScreen
 
@@ -122,7 +120,7 @@ $(OBJ_DIR)/%.obj: %.c
 	@$(CC) $< $(C_FLAGS) -o $@
 
 
-$(BINARY): $(DEPDS) $(OBJECTS)
+$(BINARY): $(OBJECTS)
 	@echo Import $(IMPORT) > $(basename $@).def
 ifdef API
 	@echo Import $(API) >> $(basename $@).def
@@ -136,8 +134,10 @@ ifeq '$(BUILD)' 'debug'
 	@echo Debug >> $(basename $@).def
 endif
 	@echo Flag_On 0x00000008 >> $(basename $@).def
-	@echo Start _NonAppStart >> $(basename $@).def
-	@echo Exit _NonAppStop >> $(basename $@).def
+#	@echo Start _NonAppStart >> $(basename $@).def
+#	@echo Exit _NonAppStop >> $(basename $@).def
+	@echo Start _LibCPrelude >> $(basename $@).def
+	@echo Exit _LibCPostlude >> $(basename $@).def
 
 	$(MPKTOOL) $(XDCFLAGS) $(basename $@).xdc
 	@echo xdcdata $(basename $@).xdc >> $(basename $@).def
@@ -150,7 +150,7 @@ endif
 
 
 .PHONY: clean
-clean: cleand cleanobj cleanbin
+clean: cleanobj cleanbin
 
 .PHONY: cleand
 cleand:
