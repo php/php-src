@@ -472,6 +472,16 @@ static int php_handler(request_rec *r)
 		}
 	}
 
+	/* Give a 404 if PATH_INFO is used but is explicitly disabled in
+	 * the configuration; default behaviour is to accept. */ 
+	if (r->used_path_info == AP_REQ_REJECT_PATH_INFO
+		&& r->path_info && r->path_info[0]) {
+		zend_try {
+			zend_ini_deactivate(TSRMLS_C);
+		} zend_end_try();
+		return HTTP_NOT_FOUND;
+	}
+
 	/* handle situations where user turns the engine off */
 	if (!AP2(engine)) {
 		zend_try {
