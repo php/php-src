@@ -35,7 +35,8 @@
    Defaults to ISO-8859-1 for now. */
 
 enum entity_charset { cs_terminator, cs_8859_1, cs_cp1252,
-	cs_8859_15, cs_utf_8, cs_big5, cs_gb2312, cs_big5hkscs };
+					  cs_8859_15, cs_utf_8, cs_big5, cs_gb2312, 
+ 					  cs_big5hkscs, cs_sjis, cs_eucjp};
 typedef const char * entity_table_t;
 
 /* codepage 1252 is a Windows extension to iso-8859-1. */
@@ -99,6 +100,8 @@ static const struct html_entity_map entity_map[] = {
 	{ cs_big5, 			0xa0, 0xff, ent_iso_8859_1 },
 	{ cs_gb2312, 		0xa0, 0xff, ent_iso_8859_1 },
 	{ cs_big5hkscs, 	0xa0, 0xff, ent_iso_8859_1 },
+ 	{ cs_sjis,			0xa0, 0xff, ent_iso_8859_1 },
+ 	{ cs_eucjp,			0xa0, 0xff, ent_iso_8859_1 },
 	{ cs_terminator }
 };
 
@@ -113,6 +116,10 @@ static const struct {
 	{ "BIG5",			cs_big5 },
 	{ "GB2312",			cs_gb2312 },
 	{ "BIG5-HKSCS",		cs_big5hkscs },
+ 	{ "Shift_JIS",		cs_sjis },
+ 	{ "SJIS",   		cs_sjis },
+ 	{ "EUCJP",   		cs_eucjp },
+ 	{ "EUC-JP",   		cs_eucjp },
 	{ NULL }
 };
 
@@ -231,6 +238,74 @@ inline static unsigned short get_next_char(enum entity_charset charset,
 						mbseq[mbpos++] = next_char;
 						this_char |= next_char;
 						pos++;
+					}
+					
+				}
+				break;
+			}
+		case cs_sjis:
+			{
+				/* check if this is the first of a 2-byte sequence */
+				if ( (this_char >= 0x81 && this_char <= 0x9f) ||
+					 (this_char >= 0xe0 && this_char <= 0xef)
+					)	{
+					/* peek at the next char */
+					unsigned char next_char = str[pos];
+					if ((next_char >= 0x40 && next_char <= 0x7e) ||
+						(next_char >= 0x80 && next_char <= 0xfc))
+					{
+						/* yes, this a wide char */
+						this_char <<= 8;
+						mbseq[mbpos++] = next_char;
+						this_char |= next_char;
+						pos++;
+					}
+					
+				}
+				break;
+			}
+		case cs_eucjp:
+			{
+				/* check if this is the first of a multi-byte sequence */
+				if (this_char >= 0xa1 && this_char <= 0xfe)	{
+					/* peek at the next char */
+					unsigned char next_char = str[pos];
+					if (next_char >= 0xa1 && next_char <= 0xfe)
+					{
+						/* yes, this a jis kanji char */
+						this_char <<= 8;
+						mbseq[mbpos++] = next_char;
+						this_char |= next_char;
+						pos++;
+					}
+					
+				} else if (this_char == 0x8e)	{
+					/* peek at the next char */
+					unsigned char next_char = str[pos];
+					if (next_char >= 0xa1 && next_char <= 0xdf)
+					{
+						/* JIS X 0201 kana */
+						this_char <<= 8;
+						mbseq[mbpos++] = next_char;
+						this_char |= next_char;
+						pos++;
+					}
+					
+				} else if (this_char == 0x8f)	{
+					/* peek at the next two char */
+					unsigned char next_char = str[pos];
+					unsigned char next2_char = str[pos+1];
+					if ((next_char >= 0xa1 && next_char <= 0xfe) &&
+						(next2_char >= 0xa1 && next2_char <= 0xfe))
+					{
+						/* JIS X 0212 hojo-kanji */
+						this_char <<= 8;
+						mbseq[mbpos++] = next_char;
+						this_char |= next_char;
+						this_char <<= 8;
+						mbseq[mbpos++] = next2_char;
+						this_char |= next2_char;
+						pos+=2;
 					}
 					
 				}
