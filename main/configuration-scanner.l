@@ -107,7 +107,6 @@ void init_cfg_scanner()
 
 <INITIAL>["][^\n\r"]*["] {
 	/* ENCAPSULATED TC_STRING */
-	register int i;
 
 	/* eat trailing " */
 	yytext[yyleng-1]=0;
