@@ -32,7 +32,7 @@
 /*
  * Split raw mime stream up into appropriate components
  */
-void php_mime_split(char *buf, int cnt, char *boundary)
+static void php_mime_split(char *buf, int cnt, char *boundary)
 {
 	char *ptr, *loc, *loc2, *s, *name, *filename, *u, *fn;
 	int len, state = 0, Done = 0, rem, urem;

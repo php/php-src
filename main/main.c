@@ -523,7 +523,7 @@ static void php_set_timeout(long seconds)
 }
 
 
-static void php_unset_timeout()
+static void php_unset_timeout(void)
 {
 #if WIN32|WINNT
 #else
@@ -778,7 +778,7 @@ void php_request_shutdown_for_exec(void *dummy)
 }
 
 
-int return_one(void *p)
+static int return_one(void *p)
 {
 	return 1;
 }
@@ -817,7 +817,7 @@ void php_request_shutdown(void *dummy)
 }
 
 
-static int php3_config_ini_startup()
+static int php3_config_ini_startup(void)
 {
 	if (php3_init_config() == FAILURE) {
 		php_printf("PHP:  Unable to parse configuration file.\n");
@@ -826,7 +826,7 @@ static int php3_config_ini_startup()
 	return SUCCESS;
 }
 
-static void php3_config_ini_shutdown()
+static void php3_config_ini_shutdown(void)
 {
 	php3_shutdown_config();
 }
@@ -895,7 +895,7 @@ int php_module_startup(sapi_module_struct *sf)
 #ifdef ZTS
 	tsrm_set_new_thread_end_handler(php_new_thread_end_handler);
 	executor_globals = ts_resource(executor_globals_id);
-	core_globals_id = ts_allocate_id(sizeof(php_core_globals), core_globals_ctor, NULL);
+	core_globals_id = ts_allocate_id(sizeof(php_core_globals), (ts_allocate_ctor) core_globals_ctor, NULL);
 	core_globals = ts_resource(core_globals_id);
 #endif
 	EG(error_reporting) = E_ALL & ~E_NOTICE;

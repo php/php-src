@@ -325,7 +325,7 @@ PHP_MINIT_FUNCTION(file)
 	le_uploads = register_list_destructors(_file_upload_dtor, NULL);
 
 #ifdef ZTS
-	file_globals_id = ts_allocate_id(sizeof(php_file_globals), php_file_init_globals, NULL);
+	file_globals_id = ts_allocate_id(sizeof(php_file_globals), (ts_allocate_ctor) php_file_init_globals, NULL);
 #else
 	FIL(fgetss_state) = 0;
 	FIL(pclose_ret) = 0;

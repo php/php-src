@@ -140,7 +140,7 @@ PHP_MINIT_FUNCTION(pgsql)
 	ELS_FETCH();
 
 #ifdef ZTS
-	pgsql_globals_id = ts_allocate_id(sizeof(php_pgsql_globals), php_pgsql_init_globals, NULL);
+	pgsql_globals_id = ts_allocate_id(sizeof(php_pgsql_globals), (ts_allocate_ctor) php_pgsql_init_globals, NULL);
 #else
 	php_pgsql_init_globals(PGLS_C);
 #endif
@@ -633,7 +633,6 @@ void php3_pgsql_get_result_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 	PGresult *pgsql_result;
 	pgsql_result_handle *pg_result;
 	int type;
-	PGLS_FETCH();
 
 	if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &result)==FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -701,7 +700,6 @@ char *get_field_name(PGconn *pgsql, Oid oid, HashTable *list)
 	char hashed_oid_key[32];
 	list_entry *field_type;
 	char *ret=NULL;
-	PGLS_FETCH();
 
 	/* try to lookup the type in the resource list */
 	snprintf(hashed_oid_key,31,"pgsql_oid_%d",(int) oid);
@@ -752,7 +750,6 @@ void php3_pgsql_get_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 	PGresult *pgsql_result;
 	pgsql_result_handle *pg_result;
 	int type;
-	PGLS_FETCH();
 	
 	if (ARG_COUNT(ht)!=2 || getParameters(ht, 2, &result, &field)==FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -827,7 +824,6 @@ PHP_FUNCTION(pgsql_field_number)
 	PGresult *pgsql_result;
 	pgsql_result_handle *pg_result;
 	int type;
-	PGLS_FETCH();
 
 	if (ARG_COUNT(ht)!=2 || getParameters(ht, 2, &result, &field)==FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -856,7 +852,6 @@ PHP_FUNCTION(pgsql_result)
 	PGresult *pgsql_result;
 	pgsql_result_handle *pg_result;
 	int type,field_offset;
-	PGLS_FETCH();
 	
 	if (ARG_COUNT(ht)!=3 || getParameters(ht, 3, &result, &row, &field)==FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -908,7 +903,6 @@ static void php3_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 	char *element,*field_name;
 	uint element_len;
 	PLS_FETCH();
-	PGLS_FETCH();
 
 	switch (ARG_COUNT(ht)) {
 		case 2:
@@ -1017,7 +1011,6 @@ void php3_pgsql_data_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 	PGresult *pgsql_result;
 	pgsql_result_handle *pg_result;
 	int type,field_offset;
-	PGLS_FETCH();
 	
 	if (ARG_COUNT(ht)!=3 || getParameters(ht, 3, &result, &row, &field)==FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1085,7 +1078,6 @@ PHP_FUNCTION(pgsql_free_result)
 	pval *result;
 	pgsql_result_handle *pg_result;
 	int type;
-	PGLS_FETCH();
 	
 	if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &result)==FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1114,7 +1106,6 @@ PHP_FUNCTION(pgsql_last_oid)
 	PGresult *pgsql_result;
 	pgsql_result_handle *pg_result;
 	int type;
-	PGLS_FETCH();
 	
 	if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &result)==FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1348,7 +1339,6 @@ PHP_FUNCTION(pgsql_lo_close)
 	pval *pgsql_lofp;
 	int id, type;
 	pgLofp *pgsql;
-	PGLS_FETCH();
 
 	switch(ARG_COUNT(ht)) {
 		case 1:
@@ -1388,7 +1378,6 @@ PHP_FUNCTION(pgsql_lo_read)
 	int id, buf_len, type, nbytes;
 	char *buf;
 	pgLofp *pgsql;
-	PGLS_FETCH();
 
 	switch(ARG_COUNT(ht)) {
 		case 2:
@@ -1431,7 +1420,6 @@ PHP_FUNCTION(pgsql_lo_write)
 	int id, buf_len, nbytes, type;
 	char *buf;
 	pgLofp *pgsql;
-	PGLS_FETCH();
 
 	switch(ARG_COUNT(ht)) {
 		case 2:
@@ -1473,7 +1461,6 @@ PHP_FUNCTION(pgsql_lo_readall)
 	char buf[8192];
 	pgLofp *pgsql;
 	int output=1;
-	PGLS_FETCH();
 
 	switch(ARG_COUNT(ht)) {
 		case 1:
