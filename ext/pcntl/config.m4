@@ -9,9 +9,7 @@ PHP_ARG_ENABLE(pcntl, whether to enable pcntl support,
 [  --enable-pcntl          Enable experimental pcntl support (CGI ONLY!)])
 
 if test "$PHP_PCNTL" != "no"; then
-  if test "$PHP_SAPI" != "cgi"; then
-      AC_MSG_ERROR(pcntl currently only accepts the CGI SAPI, this will save you from harming your webserver.)
-  fi
+	PHP_CHECK_STANDALONE(pcntl)
  
   AC_CHECK_FUNCS(fork, [ AC_DEFINE(HAVE_FORK,1,[ ]) ], [ AC_MSG_ERROR(pcntl: fork() not supported by this platform) ])
   AC_CHECK_FUNCS(waitpid, [ AC_DEFINE(HAVE_WAITPID,1,[ ]) ], [ AC_MSG_ERROR(pcntl: fork() not supported by this platform) ])
