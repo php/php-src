@@ -35,12 +35,6 @@ March 1 1999, Version 3.0.7
   variables.
 - Clean up apxs build
 - Add INSTALL.REDHAT file to walk RedHat users through the install
-- Added optional second argument to mysql_fetch_array();  MYSQL_ASSOC will
-  cause the resulting array to contain the associative indices only,
-  MYSQL_NUM will cause the array to contain the numeric indices only (like
-  mysql_fetch_row()) and MYSQL_BOTH would cause them both to be defined
-  (default).
-- Backport the Zend debugging memory manager into the PHP 3.0.x tree.
 - Add function_exists() function.
 - Add another version of WDDX module
   (we need to pick a single implementation here)
@@ -76,8 +70,6 @@ March 1 1999, Version 3.0.7
 - Fix bug in pdf_close() function
 - Add WDDX support (see http://www.wddx.org for more info)
 - Add similar_text() function
-- Constructors of parent classes weren't accessible to derived classes (as
-  of 3.0.6).  Fixed.
 - Introduce simple regex compilation cache
 
 

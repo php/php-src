@@ -253,7 +253,7 @@ SAPI_POST_READER_FUNC(rfc1867_post_reader)
 
 	sapi_read_standard_form_data(content_type_dup SLS_CC);
 	if (SG(request_info).post_data) {
-		php_mime_split(SG(request_info).post_data, SG(request_info).content_length, boundary);
+		php_mime_split(SG(request_info).post_data, SG(request_info).post_data_length, boundary);
 		efree(SG(request_info).post_data);
 		SG(request_info).post_data = NULL;
 	}

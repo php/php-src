@@ -392,6 +392,15 @@ SOURCE=.\ext\odbc\php_odbc.c
 # Begin Source File
 
 SOURCE=.\ext\pcre\php_pcre.c
+
+!IF  "$(CFG)" == "php4dllts - Win32 Debug_TS"
+
+# ADD CPP /D "STATIC"
+
+!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS"
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
@@ -582,6 +591,91 @@ SOURCE=.\ext\standard\uniqid.h
 SOURCE=.\ext\standard\url.h
 # End Source File
 # End Group
+# Begin Group "PCRE"
+
+# PROP Default_Filter ""
+# Begin Group "Source Files No. 3"
+
+# PROP Default_Filter ".c"
+# Begin Source File
+
+SOURCE=.\ext\pcre\pcrelib\chartables.c
+
+!IF  "$(CFG)" == "php4dllts - Win32 Debug_TS"
+
+# ADD CPP /D "STATIC"
+
+!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=.\ext\pcre\pcrelib\get.c
+
+!IF  "$(CFG)" == "php4dllts - Win32 Debug_TS"
+
+# ADD CPP /D "STATIC"
+
+!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=.\ext\pcre\pcrelib\maketables.c
+
+!IF  "$(CFG)" == "php4dllts - Win32 Debug_TS"
+
+# ADD CPP /D "STATIC"
+
+!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=.\ext\pcre\pcrelib\pcre.c
+
+!IF  "$(CFG)" == "php4dllts - Win32 Debug_TS"
+
+# ADD CPP /D "STATIC"
+
+!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=.\ext\pcre\pcrelib\study.c
+
+!IF  "$(CFG)" == "php4dllts - Win32 Debug_TS"
+
+# ADD CPP /D "STATIC"
+
+!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS"
+
+!ENDIF 
+
+# End Source File
+# End Group
+# Begin Group "Header Files No. 3"
+
+# PROP Default_Filter ".h"
+# Begin Source File
+
+SOURCE=.\ext\pcre\pcrelib\internal.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\ext\pcre\pcrelib\pcre.h
+# End Source File
+# End Group
+# End Group
 # Begin Group "Regular Expressions"
 
 # PROP Default_Filter ""
@@ -601,46 +695,6 @@ SOURCE=.\regex\regexec.c
 
 SOURCE=.\regex\regfree.c
 # End Source File
-# End Group
-# Begin Group "PCRE"
-
-# PROP Default_Filter ""
-# Begin Group "Source Files No. 3"
-
-# PROP Default_Filter ".c"
-# Begin Source File
-
-SOURCE=.\ext\pcre\pcrelib\chartables.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\ext\pcre\pcrelib\get.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\ext\pcre\pcrelib\maketables.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\ext\pcre\pcrelib\pcre.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\ext\pcre\pcrelib\study.c
-# End Source File
-# End Group
-# Begin Group "Header Files No. 3"
-
-# PROP Default_Filter ".h"
-# Begin Source File
-
-SOURCE=.\ext\pcre\pcrelib\internal.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\ext\pcre\pcrelib\pcre.h
-# End Source File
-# End Group
 # End Group
 # End Group
 # Begin Group "Win32"
