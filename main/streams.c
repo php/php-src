@@ -1286,6 +1286,26 @@ PHPAPI php_stream_dirent *_php_stream_readdir(php_stream *dirstream, php_stream_
 	return NULL;
 }
 
+PHPAPI void php_stream_wrapper_log_error(php_stream_wrapper *wrapper, int options TSRMLS_DC, const char *fmt, ...)
+{
+	va_list args;
+	char *buffer = NULL;
+
+	va_start(args, fmt);
+	vspprintf(&buffer, 0, fmt, args);
+	va_end(args);
+
+	if (options & REPORT_ERRORS || wrapper == NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, buffer);
+		efree(buffer);
+	} else {
+		/* append to stack */
+		wrapper->err_stack = erealloc(wrapper->err_stack, (wrapper->err_count + 1) * sizeof(char *));
+		if (wrapper->err_stack)
+			wrapper->err_stack[wrapper->err_count++] = buffer;
+	}
+}
+
 /* {{{ php_stream_open_wrapper_ex */
 PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, char *mode, int options,
 		char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC)
@@ -1305,8 +1325,13 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, char *mode, int optio
 	wrapper = locate_url_wrapper(path, &path_to_open, options TSRMLS_CC);
 
 	if (wrapper)	{
+
+		/* prepare error stack */
+		wrapper->err_count = 0;
+		wrapper->err_stack = NULL;
+		
 		stream = wrapper->wops->stream_opener(wrapper,
-				path_to_open, mode, options,
+				path_to_open, mode, options ^ REPORT_ERRORS,
 				opened_path, context STREAMS_REL_CC TSRMLS_CC);
 		if (stream)
 			stream->wrapper = wrapper;
@@ -1326,8 +1351,8 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, char *mode, int optio
 				if (options & REPORT_ERRORS) {
 					char *tmp = estrdup(path);
 					php_strip_url_passwd(tmp);
-					zend_error(E_WARNING, "%s(\"%s\") - could not make seekable - %s",
-							get_active_function_name(TSRMLS_C), tmp, strerror(errno));
+					php_error_docref1(NULL TSRMLS_CC, tmp, E_WARNING, "could not make seekable - %s",
+							tmp, strerror(errno));
 					efree(tmp);
 
 					options ^= REPORT_ERRORS;
@@ -1338,14 +1363,54 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, char *mode, int optio
 		char *tmp = estrdup(path);
 		char *msg;
 
-		if (wrapper)
-			msg = strerror(errno);
-		else
+		if (wrapper) {
+			if (wrapper->err_count) {
+				int i;
+				size_t l;
+				int brlen;
+				char *br;
+
+				if (PG(html_errors)) {
+					brlen = 7;
+					br = "<br />\n";
+				} else {
+					brlen = 1;
+					br = "\n";
+				}
+
+				for (i = 0, l = 0; i < wrapper->err_count; i++) {
+					l += strlen(wrapper->err_stack[i]);
+					if (i < wrapper->err_count - 1)
+						l += brlen;
+				}
+				msg = emalloc(l + 1);
+				msg[0] = '\0';
+				for (i = 0; i < wrapper->err_count; i++) {
+					strcat(msg, wrapper->err_stack[i]);
+					if (i < wrapper->err_count - 1)
+						strcat(msg, br);
+				}
+				
+			} else {
+				msg = strerror(errno);
+			}
+		} else {
 			msg = "no suitable wrapper could be found";
+		}
 		
 		php_strip_url_passwd(tmp);
-		zend_error(E_WARNING, "%s(\"%s\") - %s", get_active_function_name(TSRMLS_C), tmp, msg);
+		php_error_docref1(NULL TSRMLS_CC, tmp, E_WARNING, "failed to create stream: %s", msg);
 		efree(tmp);
+	}
+	if (wrapper) {
+		/* tidy up the error stack */
+		int i;
+
+		for (i = 0; i < wrapper->err_count; i++)
+			efree(wrapper->err_stack[i]);
+		if (wrapper->err_stack)
+			efree(wrapper->err_stack);
+		wrapper->err_stack = NULL;
 	}
 	return stream;
 }

@@ -169,7 +169,14 @@ struct _php_stream_wrapper	{
 	php_stream_wrapper_ops *wops;	/* operations the wrapper can perform */
 	void *abstract;					/* context for the wrapper */
 	int is_url;						/* so that PG(allow_url_fopen) can be respected */
+
+	/* support for wrappers to return (multiple) error messages to the stream opener */
+	int err_count;
+	char **err_stack;
 };
+
+/* pushes an error message onto the stack for a wrapper instance */
+PHPAPI void php_stream_wrapper_log_error(php_stream_wrapper *wrapper, int options TSRMLS_DC, const char *fmt, ...);
 
 struct _php_stream  {
 	php_stream_ops *ops;

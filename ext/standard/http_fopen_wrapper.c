@@ -86,11 +86,16 @@ php_stream *php_stream_url_wrap_http(php_stream_wrapper *wrapper, char *path, ch
 	char tmp_line[128];
 	size_t chunk_size = 0, file_size = 0;
 
+	if (strchr(mode, 'a') || strchr(mode, '+') || strchr(mode, 'w')) {
+		php_stream_wrapper_log_error(wrapper, options, "HTTP wrapper does not writeable connections.");
+		return NULL;
+	}
+
 	resource = php_url_parse(path);
 	if (resource == NULL)
 		return NULL;
 	
-	use_ssl = resource->scheme && resource->scheme[4] == 's';
+	use_ssl = resource->scheme && (strlen(resource->scheme) > 4) && resource->scheme[4] == 's';
 
 	/* choose default ports */
 	if (use_ssl && resource->port == 0)
@@ -113,9 +118,7 @@ php_stream *php_stream_url_wrap_http(php_stream_wrapper *wrapper, char *path, ch
 #if HAVE_OPENSSL_EXT
 	if (use_ssl)	{
 		if (php_stream_sock_ssl_activate(stream, 1) == FAILURE)	{
-			if (options & REPORT_ERRORS)	{
-				zend_error(E_WARNING, "Unable to activate SSL mode");
-			}
+			php_stream_wrapper_log_error(wrapper, options, "Unable to activate SSL mode");
 			php_stream_close(stream);
 			stream = NULL;
 			goto out;
@@ -323,8 +326,7 @@ php_stream *php_stream_url_wrap_http(php_stream_wrapper *wrapper, char *path, ch
 				FREE_ZVAL(stream->wrapperdata);
 			}
 		} else {
-			if (options & REPORT_ERRORS)
-				zend_error(E_WARNING, "HTTP request failed! %s", tmp_line);
+			php_stream_wrapper_log_error(wrapper, options, "HTTP request failed! %s", tmp_line);
 		}
 	}
 out:

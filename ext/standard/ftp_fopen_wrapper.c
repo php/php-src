@@ -115,6 +115,11 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, char *path, ch
 	int i;
 	char *tpath, *ttpath;
 	size_t file_size = 0;
+
+	if (strchr(mode, 'a') || strchr(mode, '+')) {
+		php_stream_wrapper_log_error(wrapper, options, "FTP does not support simultaneous read/write connections.");
+		return NULL;
+	}
 	
 	resource = php_url_parse((char *) path);
 	if (resource == NULL || resource->path == NULL)
@@ -314,7 +319,7 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, char *path, ch
 		php_stream_close(stream);
 	}
 	if (tmp_line[0] != '\0')
-		zend_error(E_WARNING, "FTP server reports %s", tmp_line);
+		php_stream_wrapper_log_error(wrapper, options, "FTP server reports %s", tmp_line);
 	return NULL;
 }
 /* }}} */

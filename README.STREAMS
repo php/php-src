@@ -2,6 +2,10 @@ An Overview of the PHP Streams abstraction
 ==========================================
 $Id$
 
+WARNING: some prototypes in this file are out of date.
+The information contained here is being integrated into
+the php manual - stay tuned...
+
 Please send comments to: Wez Furlong <wez@thebrainroom.com>
 
 Why Streams?
