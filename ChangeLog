@@ -1,3 +1,61 @@
+2001-01-04  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * pear/Benchmark/Iterate.php
+      pear/Benchmark/Timer.php:
+    Added some more documentation. Fixed whitespaces, at least I hope so.
+
+    * pear/Benchmark/Iterate.php
+      pear/Benchmark/Timer.php: Changed my email address.
+
+2001-01-04  Frank M. Kromann  <fmk@swwwing.com>
+
+    * ext/mssql/php_mssql.c:
+    Fixing wrong return value when executing statements not returning a record set.
+
+2001-01-04  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/session/session.c: MFH session_unset() fix
+
+    * tests/dirname.phpt: MFH with version 1.2
+
+2001-01-04  Chuck Hagenbuch  <chuck@horde.org>
+
+    * pear/Log.php:
+    fix the Log::factory() method to assume that the Log stuff is in the
+    include_path (like all of PEAR does).
+
+2001-01-04  Jan Borsodi  <jb@ez.no>
+
+    * ext/qtdom/CREDITS: Added credits.
+
+    * ext/qtdom/qtdom_qt.cpp: Removed some stupid header text.
+    Implemented functions for returning the error string and starting and stopping the message handler.
+    Added comments for all functions.
+
+    * ext/qtdom/qtdom_qt.h: Removed some stupid header text.
+    Added a new struct for handling error logs and Qt Message Handler handles.
+    Added functions for returning the error string and starting and stopping the message handler.
+
+    * ext/qtdom/qtdom.c:
+    New function qdom_error which returns the error text from the last qdom operation, or FALSE if none occured.
+    Fixed the documentation for the qdom_tree function.
+    Added init and shutdown code for some global variables.
+    Added code for starting and stopping the Qt Message Handler in qdom_tree.
+
+    * ext/qtdom/qtdom.h:
+    New function qdom_error which returns the error text from the last qdom operation, or FALSE if none occured.
+
+2001-01-04  Jouni Ahto  <jah@mork.net>
+
+    * ext/informix/ifx.ec
+      ext/informix/php_informix.h
+      ext/interbase/interbase.c
+      ext/interbase/php_interbase.h
+      ext/pgsql/pgsql.c
+      ext/pgsql/php_pgsql.h
+      EXTENSIONS:
+    Changing my email address...
+
 2001-01-03  Zeev Suraski  <zeev@zend.com>
 
     * NEWS
