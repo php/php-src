@@ -38,7 +38,7 @@ PHP_FUNCTION(ncurses_addch)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l",&ch)==FAILURE) {
         return;
 	}
-	
+
 	RETURN_LONG(addch(ch));
 }
 /* }}} */
@@ -678,11 +678,11 @@ PHP_FUNCTION(ncurses_insdelln)
 PHP_FUNCTION(ncurses_mouseinterval)
 {
 	long intarg;
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l",&intarg)==FAILURE) {
 		return;
 	}
-	
+
 	RETURN_LONG(mouseinterval(intarg));
 }
 /* }}} */
@@ -734,7 +734,7 @@ PHP_FUNCTION(ncurses_slk_attroff)
 PHP_FUNCTION(ncurses_slk_attron)
 {
 	long intarg;
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l",&intarg)==FAILURE) {
 		return;
 	}
@@ -1447,7 +1447,141 @@ PHP_FUNCTION(ncurses_mousemask)
 }
 /* }}} */
 
-/* {{{ proto int ncurses_wmove(resource WINDOW, int x, int y)
+/* {{{ proto int ncurses_getmouse(array mevent)
+   Reads mouse event from queue */
+PHP_FUNCTION(ncurses_getmouse)
+{
+  zval **arg;
+	MEVENT mevent;
+	ulong retval;
+
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg) == FAILURE){
+		WRONG_PARAM_COUNT;
+  }
+
+	pval_destructor(*arg);
+	array_init(*arg);
+
+	retval = getmouse(&mevent);
+
+	add_assoc_long(*arg, "id", mevent.id);
+	add_assoc_long(*arg, "x", mevent.x);
+	add_assoc_long(*arg, "y", mevent.y);
+	add_assoc_long(*arg, "z", mevent.z);
+	add_assoc_long(*arg, "mmask", mevent.bstate);
+
+	RETURN_LONG(retval);
+}
+/* }}} */
+
+/* {{{ proto int ncurses_ungetmouse(array mevent)
+   push mouse event to queue */
+PHP_FUNCTION(ncurses_ungetmouse)
+{
+  zval **arg, **pvalue;
+	MEVENT mevent;
+	ulong retval;
+
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg) == FAILURE){
+		WRONG_PARAM_COUNT;
+  }
+
+	if (Z_TYPE_PP(arg) != IS_ARRAY){
+		php_error(E_WARNING, "ncurses_ungetmouse: expected mevent as array");
+		RETURN_FALSE;
+ 	}
+
+	if (zend_hash_find(Z_ARRVAL_PP(arg), "id", sizeof("id"), (void **) &pvalue)== SUCCESS) {
+		convert_to_long_ex(pvalue);
+		mevent.id = Z_LVAL_PP(pvalue);
+  }
+
+	if (zend_hash_find(Z_ARRVAL_PP(arg), "x", sizeof("x"), (void **) &pvalue)== SUCCESS) {
+		convert_to_long_ex(pvalue);
+		mevent.x = Z_LVAL_PP(pvalue);
+  }
+
+	if (zend_hash_find(Z_ARRVAL_PP(arg), "y", sizeof("y"), (void **) &pvalue)== SUCCESS) {
+		convert_to_long_ex(pvalue);
+		mevent.y = Z_LVAL_PP(pvalue);
+  }
+
+	if (zend_hash_find(Z_ARRVAL_PP(arg), "z", sizeof("z"), (void **) &pvalue)== SUCCESS) {
+		convert_to_long_ex(pvalue);
+		mevent.z = Z_LVAL_PP(pvalue);
+  }
+
+	if (zend_hash_find(Z_ARRVAL_PP(arg), "mmask", sizeof("mmask"), (void **) &pvalue)== SUCCESS) {
+		convert_to_long_ex(pvalue);
+		mevent.bstate = Z_LVAL_PP(pvalue);
+  }
+
+	retval = ungetmouse(&mevent);
+
+	RETURN_LONG(retval);
+}
+/* }}} */
+
+/* {{{ proto bool ncurses_mouse_trafo(int y, int x, bool toscreen)
+  transform coordinates */
+PHP_FUNCTION(ncurses_mouse_trafo)
+{
+	zval **x, **y, **toscreen;
+	ulong nx, ny, retval;
+
+	WINDOW **win;
+	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &y, &x, &toscreen) == FAILURE){
+		WRONG_PARAM_COUNT;
+  }
+
+	convert_to_long_ex(x);
+	convert_to_long_ex(y);
+	convert_to_boolean_ex(toscreen);
+
+	ny = Z_LVAL_PP(y);
+	nx = Z_LVAL_PP(x);
+
+ retval = mouse_trafo (&ny, &nx, Z_LVAL_PP(toscreen));
+
+ Z_LVAL_PP(y) = ny;
+ Z_LVAL_PP(x) = nx;
+
+	RETURN_BOOL(retval);
+}
+/* }}} */
+
+/* {{{ proto bool ncurses_wmouse_trafo(resource WINDOW, int y, int x, bool toscreen)
+  Transforms window/stdscr coordinates */
+PHP_FUNCTION(ncurses_wmouse_trafo)
+{
+	zval **handle, **x, **y, **toscreen;
+	ulong nx, ny, retval;
+	WINDOW **win;
+
+	if (ZEND_NUM_ARGS() != 4 || zend_get_parameters_ex(4, &y, &x, &toscreen) == FAILURE){
+		WRONG_PARAM_COUNT;
+  }
+
+	FETCH_WINRES(win, handle);
+
+	convert_to_long_ex(x);
+	convert_to_long_ex(y);
+	convert_to_boolean_ex(toscreen);
+
+	ny = Z_LVAL_PP(y);
+	nx = Z_LVAL_PP(x);
+
+ retval = wmouse_trafo (*win, &ny, &nx, Z_LVAL_PP(toscreen));
+
+ Z_LVAL_PP(y) = ny;
+ Z_LVAL_PP(x) = nx;
+
+	RETURN_BOOL(retval);
+}
+/* }}} */
+
+
+/* {{{ proto int ncurses_wmove(resource WINDOW, int y, int x)
   Moves windows output position */
 PHP_FUNCTION(ncurses_wmove)
 {
