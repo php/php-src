@@ -443,16 +443,13 @@ static char *zend_parse_arg_impl(zval **arg, va_list *va, char **spec)
 static int zend_parse_arg(int arg_num, zval **arg, va_list *va, char **spec, int quiet TSRMLS_DC)
 {
 	char *expected_type = NULL;
-	char buf[1024];
 
 	expected_type = zend_parse_arg_impl(arg, va, spec);
 	if (expected_type) {
 		if (!quiet) {
-			snprintf(buf, sizeof(buf)-1, "%s() expects parameter %d to be %s, %s given",
+			zend_error(E_WARNING, "%s() expects parameter %d to be %s, %s given",
 					get_active_function_name(TSRMLS_C), arg_num, expected_type,
 					zend_zval_type_name(*arg));
-			buf[sizeof(buf)-1] = '\0';
-			zend_error(E_WARNING, buf);
 		}
 		return FAILURE;
 	}
