@@ -64,7 +64,7 @@ PHP 4                                                                      NEWS
   dependencies. Automake is only needed for its aclocal tool. The build 
   process is now more portable and less resource-consuming. (Sascha)
 
-03 May 2002, Version 4.2.1
+13 May 2002, Version 4.2.1
 - Major update of domxml. New functions, better DOM compliance and bug fixes:
   * Changed the old $node->append_child() to $node->append_sibling() since
     the new append_child() behaves correctly (= W3C standard).
