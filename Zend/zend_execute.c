@@ -69,11 +69,6 @@ static void zend_extension_fcall_begin_handler(zend_extension *extension, zend_o
 static void zend_extension_fcall_end_handler(zend_extension *extension, zend_op_array *op_array);
 
 
-#define ARG_SHOULD_BE_SENT_BY_REF(offset)									\
-	(function_being_called													\
-		&& function_being_called->common.arg_types							\
-		&& offset<=function_being_called->common.arg_types[0]				\
-		&& function_being_called->common.arg_types[offset]==BYREF_FORCE)
 
 #define SEPARATE_ON_READ_OBJECT(obj, _type)	\
 if ((obj) && ((_type) == BP_VAR_R) && ((*(obj))->type == IS_OBJECT) && (!(*(obj))->is_ref)) { \
@@ -911,7 +906,7 @@ void execute(zend_op_array *op_array ELS_DC)
 	zend_op *opline = op_array->opcodes;
 	zend_op *end = op_array->opcodes + op_array->last;
 	zend_function_state function_state;
-	zend_function *function_being_called=NULL;
+	zend_function *fbc=NULL;  /* Function Being Called */
 	object_info object = {NULL};
 #if !defined (__GNUC__) || __GNUC__ < 2
 	temp_variable *Ts = (temp_variable *) do_alloca(sizeof(temp_variable)*op_array->T);
@@ -1151,7 +1146,7 @@ binary_assign_op_addr: {
 				zend_fetch_var_address(&opline->result, &opline->op1, &opline->op2, Ts, BP_VAR_RW ELS_CC);
 				break;
 			case ZEND_FETCH_FUNC_ARG:
-				if (ARG_SHOULD_BE_SENT_BY_REF(opline->extended_value)) {
+				if (ARG_SHOULD_BE_SENT_BY_REF(opline->extended_value, fbc, fbc->common.arg_types)) {
 					/* Behave like FETCH_W */
 					zend_fetch_var_address(&opline->result, &opline->op1, &opline->op2, Ts, BP_VAR_W ELS_CC);
 				} else {
@@ -1182,7 +1177,7 @@ binary_assign_op_addr: {
 				AI_USE_PTR(Ts[opline->result.u.var].var);
 				break;
 			case ZEND_FETCH_DIM_FUNC_ARG:
-				if (ARG_SHOULD_BE_SENT_BY_REF(opline->extended_value)) {
+				if (ARG_SHOULD_BE_SENT_BY_REF(opline->extended_value, fbc, fbc->common.arg_types)) {
 					/* Behave like FETCH_DIM_W */
 					zend_fetch_dimension_address(&opline->result, &opline->op1, &opline->op2, Ts, BP_VAR_W ELS_CC);
 				} else {
@@ -1206,7 +1201,7 @@ binary_assign_op_addr: {
 				AI_USE_PTR(Ts[opline->result.u.var].var);
 				break;
 			case ZEND_FETCH_OBJ_FUNC_ARG:
-				if (ARG_SHOULD_BE_SENT_BY_REF(opline->extended_value)) {
+				if (ARG_SHOULD_BE_SENT_BY_REF(opline->extended_value, fbc, fbc->common.arg_types)) {
 					/* Behave like FETCH_OBJ_W */
 					zend_fetch_property_address(&opline->result, &opline->op1, &opline->op2, Ts, BP_VAR_W ELS_CC);
 				} else {
@@ -1370,7 +1365,7 @@ binary_assign_op_addr: {
 					HashTable *active_function_table;
 					zval tmp;
 
-					zend_ptr_stack_n_push(&EG(arg_types_stack), 2, function_being_called, object.ptr);
+					zend_ptr_stack_n_push(&EG(arg_types_stack), 2, fbc, object.ptr);
 					if (opline->extended_value & ZEND_CTOR_CALL) {
 						/* constructor call */
 
@@ -1427,9 +1422,9 @@ binary_assign_op_addr: {
 								}
 								zend_stack_top(&EG(overloaded_objects_stack), (void **) &property_reference);
 								zend_llist_add_element(&property_reference->elements_list, &overloaded_element);
-								function_being_called = (zend_function *) emalloc(sizeof(zend_function));
-								function_being_called->type = ZEND_OVERLOADED_FUNCTION;
-								function_being_called->common.arg_types = NULL;
+								fbc = (zend_function *) emalloc(sizeof(zend_function));
+								fbc->type = ZEND_OVERLOADED_FUNCTION;
+								fbc->common.arg_types = NULL;
 								goto overloaded_function_call_cont;
 							}
 
@@ -1447,13 +1442,13 @@ binary_assign_op_addr: {
 						zend_error(E_ERROR, "Call to undefined function:  %s()", function_name->value.str.val);
 					}
 					zval_dtor(&tmp);
-					function_being_called = function;
+					fbc = function;
 overloaded_function_call_cont:
 					FREE_OP(&opline->op2, EG(free_op2));
 				}
 				break;
 			case ZEND_DO_FCALL_BY_NAME:
-				function_state.function = function_being_called;
+				function_state.function = fbc;
 				goto do_fcall_common;
 			case ZEND_DO_FCALL: {
 					zval *fname = get_zval_ptr(&opline->op1, Ts, &EG(free_op1), BP_VAR_R);
@@ -1492,7 +1487,7 @@ do_fcall_common:
 						EG(active_symbol_table) = function_state.function_symbol_table;
 						if (opline->opcode==ZEND_DO_FCALL_BY_NAME
 							&& object.ptr
-							&& function_being_called->type!=ZEND_OVERLOADED_FUNCTION) {
+							&& fbc->type!=ZEND_OVERLOADED_FUNCTION) {
 							zval **this_ptr;
 
 							zend_hash_update_ptr(function_state.function_symbol_table, "this", sizeof("this"), NULL, sizeof(zval *), (void **) &this_ptr);
@@ -1520,11 +1515,11 @@ do_fcall_common:
 						EG(active_symbol_table) = calling_symbol_table;
 					} else { /* ZEND_OVERLOADED_FUNCTION */
 						call_overloaded_function(opline->extended_value, &Ts[opline->result.u.var].tmp_var, &EG(regular_list), &EG(persistent_list) ELS_CC);
-						efree(function_being_called);
+						efree(fbc);
 					}
 					object.ptr = zend_ptr_stack_pop(&EG(arg_types_stack));
 					if (opline->opcode == ZEND_DO_FCALL_BY_NAME) {
-						function_being_called = zend_ptr_stack_pop(&EG(arg_types_stack));
+						fbc = zend_ptr_stack_pop(&EG(arg_types_stack));
 					}
 					function_state.function = (zend_function *) op_array;
 					EG(function_state_ptr) = &function_state;
@@ -1547,7 +1542,7 @@ do_fcall_common:
 				break;
 			case ZEND_SEND_VAL: 
 				if (opline->extended_value==ZEND_DO_FCALL_BY_NAME
-					&& ARG_SHOULD_BE_SENT_BY_REF(opline->op2.u.opline_num)) {
+					&& ARG_SHOULD_BE_SENT_BY_REF(opline->op2.u.opline_num, fbc, fbc->common.arg_types)) {
 						zend_error(E_ERROR, "Cannot pass parameter %d by reference", opline->op2.u.opline_num);
 				}
 				{
@@ -1560,7 +1555,7 @@ do_fcall_common:
 				break;
 			case ZEND_SEND_VAR:
 				if (opline->extended_value==ZEND_DO_FCALL_BY_NAME
-					&& ARG_SHOULD_BE_SENT_BY_REF(opline->op2.u.opline_num)) {
+					&& ARG_SHOULD_BE_SENT_BY_REF(opline->op2.u.opline_num, fbc, fbc->common.arg_types)) {
 						goto send_by_ref;
 				}
 				{

@@ -859,8 +859,9 @@ void do_pass_param(znode *param, int op, int offset CLS_DC)
 				break;
 		}
 	}
-	if (arg_types && offset<=arg_types[0]
-		&& arg_types[offset]==BYREF_FORCE) {
+
+
+	if (ARG_SHOULD_BE_SENT_BY_REF(offset, 1, arg_types)) {
 		/* change to passing by reference */
 		switch (param->op_type) {
 			case IS_VAR:

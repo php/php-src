@@ -587,4 +587,23 @@ int zendlex(znode *zendlval CLS_DC);
 
 #define SELECTIVE_PZVAL_LOCK(pzv, pzn)		if (!((pzn)->u.EA.type & EXT_TYPE_UNUSED)) { PZVAL_LOCK(pzv); }
 
+
+/* Lost In Stupid Parentheses */
+#define ARG_SHOULD_BE_SENT_BY_REF(offset, conduct_check, arg_types)	\
+	(																\
+		conduct_check												\
+		&& arg_types												\
+		&&															\
+		(															\
+			(														\
+				offset<=arg_types[0]								\
+				&& arg_types[offset]==BYREF_FORCE					\
+			)														\
+		||	(														\
+				offset>=arg_types[0]								\
+				&& arg_types[arg_types[0]]==BYREF_FORCE_REST		\
+			)														\
+		)															\
+	)
+
 #endif /* _COMPILE_H */
