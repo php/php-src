@@ -2,6 +2,8 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.1
+- Fixed a bug in mysql_connect() that made it ignore the socket argument, in
+  case of non-persistent connects (Zeev)
 - Added disable_functions php.ini directive, to allow administrators to disable
   certain functions for security reasons (Zeev)
 - Fixed sessions on Win32. When setting the directory depth parameter in
