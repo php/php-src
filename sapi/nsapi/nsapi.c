@@ -277,6 +277,27 @@ sapi_nsapi_register_server_variables(zval *track_vars_array ELS_DC SLS_DC PLS_DC
 		}
 		php_register_variable( (char *)nsapi_reqpb[i].env_var, value, track_vars_array ELS_CC PLS_CC );
 	}
+	
+	for (i = 0; i < nsapi_headers_size; i++) {
+		if ((value = pblock_findval(nsapi_headers[i].nsapi_eq, rc->rq->headers)) == NULL) {
+			value = buf;
+		}
+		php_register_variable( (char *)nsapi_headers[i].env_var, value, track_vars_array ELS_CC PLS_CC );
+	}
+
+	for (i = 0; i < nsapi_vars_size; i++) {
+		if ((value = pblock_findval(nsapi_vars[i].nsapi_eq, rc->rq->vars)) == NULL) {
+			value = buf;
+		}
+		php_register_variable( (char *)nsapi_vars[i].env_var, value, track_vars_array ELS_CC PLS_CC );
+	}
+
+	for (i = 0; i < nsapi_client_size; i++) {
+		if ((value = pblock_findval(nsapi_client[i].nsapi_eq, rc->sn->client)) == NULL) {
+			value = buf;
+		}
+		php_register_variable( (char *)nsapi_client[i].env_var, value, track_vars_array ELS_CC PLS_CC );
+	}
 
 	/*
 	 * Special PHP_SELF variable.
