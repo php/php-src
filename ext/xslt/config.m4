@@ -81,8 +81,12 @@ if test "$PHP_XSLT" != "no"; then
     fi
  
     AC_DEFINE(HAVE_SABLOT_BACKEND, 1, [ ])
-    AC_CHECK_LIB(sablot, SablotSetEncoding, AC_DEFINE(HAVE_SABLOT_SET_ENCODING, 1, [ ]))
-
+    if test "$found_expat" = "yes"; then
+     old_LIBS=$LIBS
+     LIBS="$LIBS -lexpat"
+     AC_CHECK_LIB(sablot, SablotSetEncoding, AC_DEFINE(HAVE_SABLOT_SET_ENCODING, 1, [ ]))
+     LIBS=$old_LIBS
+    fi
   fi
 
   PHP_ADD_INCLUDE($XSLT_DIR/include)
