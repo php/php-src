@@ -1434,7 +1434,7 @@ PHP_FUNCTION(getopt)
 		 * Attempt to allocate enough memory to hold all of the arguments
 		 * and a trailing NULL 
 		 */
-		if ((argv = (char **) emalloc((argc + 1) * sizeof(char *))) == NULL) {
+		if ((argv = (char **) safe_emalloc(sizeof(char *), (argc + 1), 0)) == NULL) {
 			RETURN_FALSE;
 		}
 
@@ -1802,7 +1802,7 @@ PHP_FUNCTION(call_user_func)
 		WRONG_PARAM_COUNT;
 	}
 
-	params = emalloc(sizeof(zval **) * argc);
+	params = safe_emalloc(sizeof(zval **), argc, 0);
 
 	if (zend_get_parameters_array_ex(argc, params) == FAILURE) {
 		efree(params);
@@ -1876,7 +1876,7 @@ PHP_FUNCTION(call_user_func_array)
 	func_params_ht = Z_ARRVAL_PP(params);
 
 	count = zend_hash_num_elements(func_params_ht);
-	func_params = emalloc(sizeof(zval **) * count);
+	func_params = safe_emalloc(sizeof(zval **), count, 0);
 
 	for (zend_hash_internal_pointer_reset(func_params_ht);
 		 zend_hash_get_current_data(func_params_ht, (void **) &func_params[current]) == SUCCESS;
@@ -1911,7 +1911,7 @@ PHP_FUNCTION(call_user_method)
 	if (arg_count < 2) {
 		WRONG_PARAM_COUNT;
 	}
-	params = (zval ***) emalloc(sizeof(zval **) * arg_count);
+	params = (zval ***) safe_emalloc(sizeof(zval **), arg_count, 0);
 
 	if (zend_get_parameters_array_ex(arg_count, params) == FAILURE) {
 		efree(params);
@@ -1961,7 +1961,7 @@ PHP_FUNCTION(call_user_method_array)
 
 	params_ar = HASH_OF(*params);
 	num_elems = zend_hash_num_elements(params_ar);
-	method_args = (zval ***) emalloc(sizeof(zval **) *num_elems);
+	method_args = (zval ***) safe_emalloc(sizeof(zval **), num_elems, 0);
 
 	for (zend_hash_internal_pointer_reset(params_ar);
 		 zend_hash_get_current_data(params_ar, (void **) &(method_args[element])) == SUCCESS;
@@ -2107,7 +2107,7 @@ PHP_FUNCTION(register_shutdown_function)
 		WRONG_PARAM_COUNT;
 	}
 
-	shutdown_function_entry.arguments = (pval **) emalloc(sizeof(pval *) *shutdown_function_entry.arg_count);
+	shutdown_function_entry.arguments = (pval **) safe_emalloc(sizeof(pval *), shutdown_function_entry.arg_count, 0);
 
 	if (zend_get_parameters_array(ht, shutdown_function_entry.arg_count, shutdown_function_entry.arguments) == FAILURE) {
 		RETURN_FALSE;
@@ -2643,7 +2643,7 @@ PHP_FUNCTION(register_tick_function)
 		WRONG_PARAM_COUNT;
 	}
 
-	tick_fe.arguments = (zval **) emalloc(sizeof(zval *) * tick_fe.arg_count);
+	tick_fe.arguments = (zval **) safe_emalloc(sizeof(zval *), tick_fe.arg_count, 0);
 
 	if (zend_get_parameters_array(ht, tick_fe.arg_count, tick_fe.arguments) == FAILURE) {
 		RETURN_FALSE;

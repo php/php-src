@@ -1429,7 +1429,7 @@ PHPAPI PHP_FUNCTION(fgetss)
 		RETURN_FALSE;
     }
 
-	buf = emalloc(sizeof(char) * (len + 1));
+	buf = safe_emalloc(sizeof(char), (len + 1), 0);
 	/*needed because recv doesnt set null char at end*/
 	memset(buf, 0, len + 1);
 
@@ -1463,7 +1463,7 @@ PHP_FUNCTION(fscanf)
 	if (argCount < 2) {
 		WRONG_PARAM_COUNT;
 	}
-	args = (zval ***)emalloc(argCount * sizeof(zval **));
+	args = (zval ***)safe_emalloc(argCount, sizeof(zval **), 0);
 	if (!args || (zend_get_parameters_array_ex(argCount, args) == FAILURE)) {
 		efree( args );
 		WRONG_PARAM_COUNT;

@@ -175,9 +175,9 @@ static char * BuildCharSet(CharSet *cset, char *format)
         ch = end++;
     }
 
-    cset->chars = (char *) emalloc(sizeof(char) * (end - format - 1));
+    cset->chars = (char *) safe_emalloc(sizeof(char), (end - format - 1), 0);
     if (nranges > 0) {
-        cset->ranges = (struct Range *) emalloc(sizeof(struct Range)*nranges);
+        cset->ranges = (struct Range *) safe_emalloc(sizeof(struct Range), nranges, 0);
     } else {
         cset->ranges = NULL;
     }
@@ -337,7 +337,7 @@ PHPAPI int ValidateFormat(char *format, int numVars, int *totalSubs)
      */
 
     if (numVars > nspace) {
-        nassign = (int*)emalloc(sizeof(int) * numVars);
+        nassign = (int*)safe_emalloc(sizeof(int), numVars, 0);
         nspace = numVars;
     }
     for (i = 0; i < nspace; i++) {
@@ -513,7 +513,7 @@ PHPAPI int ValidateFormat(char *format, int numVars, int *totalSubs)
                 nspace += STATIC_LIST_SIZE;
             }
             if (nassign == staticAssign) {
-                nassign = (void *)emalloc(nspace * sizeof(int));
+                nassign = (void *)safe_emalloc(nspace, sizeof(int), 0);
                 for (i = 0; i < STATIC_LIST_SIZE; ++i) {
                     nassign[i] = staticAssign[i];
                 }

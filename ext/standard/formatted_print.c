@@ -474,7 +474,7 @@ php_formatted_print(int ht, int *len, int use_array TSRMLS_DC)
 		SEPARATE_ZVAL(array);
 		convert_to_array_ex(array);
 		argc = 1 + zend_hash_num_elements(Z_ARRVAL_PP(array));
-		args = (zval ***)emalloc(argc * sizeof(zval *));
+		args = (zval ***)safe_emalloc(argc, sizeof(zval *), 0);
 		args[0] = z_format;
 		for (zend_hash_internal_pointer_reset(Z_ARRVAL_PP(array));
 			 zend_hash_get_current_data(Z_ARRVAL_PP(array), (void **)&args[i++]) == SUCCESS;
@@ -484,7 +484,7 @@ php_formatted_print(int ht, int *len, int use_array TSRMLS_DC)
 			WRONG_PARAM_COUNT_WITH_RETVAL(NULL);
 		}
 
-		args = (zval ***)emalloc(argc * sizeof(zval *));
+		args = (zval ***)safe_emalloc(argc, sizeof(zval *), 0);
 
 		if (zend_get_parameters_array_ex(argc, args) == FAILURE) {
 			efree(args);
