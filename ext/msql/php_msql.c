@@ -23,7 +23,7 @@
 #include "dl/phpdl.h"
 #include "functions/dl.h"
 #endif
-#include "php3_msql.h"
+#include "php_msql.h"
 #include "ext/standard/php3_standard.h"
 #include "php_globals.h"
 
@@ -36,27 +36,6 @@
 #else
 #include <msql.h>
 #endif
-
-#ifdef THREAD_SAFE
-DWORD MSQLTls;
-static int numthreads=0;
-
-typedef struct msql_global_struct{
-	msql_module php3_msql_module;
-}msql_global_struct;
-
-#define MSQL_GLOBAL(a) msql_globals->a
-
-#define MSQL_TLS_VARS \
-	msql_global_struct *msql_globals; \
-	msql_globals=TlsGetValue(MSQLTls); 
-
-#else
-#define MSQL_GLOBAL(a) a
-#define MSQL_TLS_VARS
-msql_module php3_msql_module;
-#endif
-
 
 #define MSQL_ASSOC		1<<0
 #define MSQL_NUM		1<<1
@@ -119,41 +98,14 @@ function_entry msql_functions[] = {
 };
 
 
-php3_module_entry msql_module_entry = {
-	"mSQL", msql_functions, PHP_MINIT(msql), PHP_MSHUTDOWN(msql), PHP_RINIT(msql), NULL,
+zend_module_entry msql_module_entry = {
+	"mSQL", msql_functions, PHP_MINIT(msql), NULL, PHP_RINIT(msql), NULL,
 			PHP_MINFO(msql), STANDARD_MODULE_PROPERTIES
 };
 
 
 #if COMPILE_DL
-DLEXPORT php3_module_entry *get_module(void) { return &msql_module_entry; }
-#if (WIN32|WINNT) && defined(THREAD_SAFE)
-
-/*NOTE: You should have an odbc.def file where you
-export DllMain*/
-BOOL WINAPI DllMain(HANDLE hModule, 
-                      DWORD  ul_reason_for_call, 
-                      LPVOID lpReserved)
-{
-    switch( ul_reason_for_call ) {
-    case DLL_PROCESS_ATTACH:
-		if ((MSQLTls=TlsAlloc())==0xFFFFFFFF){
-			return 0;
-		}
-		break;    
-    case DLL_THREAD_ATTACH:
-		break;
-    case DLL_THREAD_DETACH:
-		break;
-	case DLL_PROCESS_DETACH:
-		if (!TlsFree(MSQLTls)){
-			return 0;
-		}
-		break;
-    }
-    return 1;
-}
-#endif
+DLEXPORT zend_module_entry *get_module(void) { return &msql_module_entry; }
 #endif
 
 typedef struct {
@@ -161,14 +113,8 @@ typedef struct {
 	int af_rows;
 } m_query;
 
-#define MSQL_GET_QUERY(res) \
-	convert_to_long((res)); \
-	msql_query = (m_query *) php3_list_find((res)->value.lval,&type); \
-	if (type!=MSQL_GLOBAL(php3_msql_module).le_query) { \
-		php_error(E_WARNING,"%d is not a mSQL query index", \
-				res->value.lval); \
-		RETURN_FALSE; \
-	} \
+#define MSQL_GET_QUERY(res)																			\
+	ZEND_FETCH_RESOURCE(msql_query, m_query *, res, -1, "mSQL result", php_msql_module.le_query);	\
 	msql_result = msql_query->result
 
 static void _delete_query(void *arg)
@@ -179,68 +125,45 @@ static void _delete_query(void *arg)
 	efree(arg);
 }
 
-#define _new_query(a,b) \
-		__new_query(INTERNAL_FUNCTION_PARAM_PASSTHRU,a,b)
-
-static int __new_query(INTERNAL_FUNCTION_PARAMETERS, m_result *res, int af_rows)
+static m_query *php_msql_query_wrapper(m_result *res, int af_rows)
 {
 	m_query *query = (m_query *) emalloc(sizeof(m_query));
 	
 	query->result = res;
 	query->af_rows = af_rows;
 	
-	return (php3_list_insert((void *) query, 
-			MSQL_GLOBAL(php3_msql_module).le_query));
+	return query;
 }
 
 static void _close_msql_link(int link)
 {
-	MSQL_TLS_VARS;
 	msqlClose(link);
-	MSQL_GLOBAL(php3_msql_module).num_links--;
+	php_msql_module.num_links--;
 }
 
 
 static void _close_msql_plink(int link)
 {
-	MSQL_TLS_VARS;
 	msqlClose(link);
-	MSQL_GLOBAL(php3_msql_module).num_persistent--;
-	MSQL_GLOBAL(php3_msql_module).num_links--;
+	php_msql_module.num_persistent--;
+	php_msql_module.num_links--;
 }
 
 DLEXPORT PHP_MINIT_FUNCTION(msql)
 {
-#ifdef THREAD_SAFE
-	msql_global_struct *msql_globals;
-#if !COMPILE_DL
-	CREATE_MUTEX(msql_mutex,"MSQL_TLS");
-	SET_MUTEX(msql_mutex);
-	numthreads++;
-	if (numthreads==1){
-	if ((MSQLTls=TlsAlloc())==0xFFFFFFFF){
-		FREE_MUTEX(msql_mutex);
-		return 0;
-	}}
-	FREE_MUTEX(msql_mutex);
-#endif
-	msql_globals = (msql_global_struct *) LocalAlloc(LPTR, sizeof(msql_global_struct)); 
-	TlsSetValue(MSQLTls, (void *) msql_globals);
-#endif
-
-	if (cfg_get_long("msql.allow_persistent",&MSQL_GLOBAL(php3_msql_module).allow_persistent)==FAILURE) {
-		MSQL_GLOBAL(php3_msql_module).allow_persistent=1;
+	if (cfg_get_long("msql.allow_persistent",&php_msql_module.allow_persistent)==FAILURE) {
+		php_msql_module.allow_persistent=1;
 	}
-	if (cfg_get_long("msql.max_persistent",&MSQL_GLOBAL(php3_msql_module).max_persistent)==FAILURE) {
-		MSQL_GLOBAL(php3_msql_module).max_persistent=-1;
+	if (cfg_get_long("msql.max_persistent",&php_msql_module.max_persistent)==FAILURE) {
+		php_msql_module.max_persistent=-1;
 	}
-	if (cfg_get_long("msql.max_links",&MSQL_GLOBAL(php3_msql_module).max_links)==FAILURE) {
-		MSQL_GLOBAL(php3_msql_module).max_links=-1;
+	if (cfg_get_long("msql.max_links",&php_msql_module.max_links)==FAILURE) {
+		php_msql_module.max_links=-1;
 	}
-	MSQL_GLOBAL(php3_msql_module).num_persistent=0;
-	MSQL_GLOBAL(php3_msql_module).le_query = register_list_destructors(_delete_query,NULL);
-	MSQL_GLOBAL(php3_msql_module).le_link = register_list_destructors(_close_msql_link,NULL);
-	MSQL_GLOBAL(php3_msql_module).le_plink = register_list_destructors(NULL,_close_msql_plink);
+	php_msql_module.num_persistent=0;
+	php_msql_module.le_query = register_list_destructors(_delete_query,NULL);
+	php_msql_module.le_link = register_list_destructors(_close_msql_link,NULL);
+	php_msql_module.le_plink = register_list_destructors(NULL,_close_msql_plink);
 	
 	msql_module_entry.type = type;
 
@@ -251,32 +174,10 @@ DLEXPORT PHP_MINIT_FUNCTION(msql)
 	return SUCCESS;
 }
 
-DLEXPORT PHP_MSHUTDOWN_FUNCTION(msql)
-{
-#ifdef THREAD_SAFE
-	msql_global_struct *msql_globals;
-	msql_globals = TlsGetValue(MSQLTls); 
-	if (msql_globals != 0) 
-		LocalFree((HLOCAL) msql_globals); 
-#if !COMPILE_DL
-	SET_MUTEX(msql_mutex);
-	numthreads--;
-	if (!numthreads){
-	if (!TlsFree(MSQLTls)){
-		FREE_MUTEX(msql_mutex);
-		return 0;
-	}}
-	FREE_MUTEX(msql_mutex);
-#endif
-#endif
-	return SUCCESS;
-}
-
 DLEXPORT PHP_RINIT_FUNCTION(msql)
 {
-	MSQL_TLS_VARS;
-	MSQL_GLOBAL(php3_msql_module).default_link=-1;
-	MSQL_GLOBAL(php3_msql_module).num_links = MSQL_GLOBAL(php3_msql_module).num_persistent;
+	php_msql_module.default_link=-1;
+	php_msql_module.num_links = php_msql_module.num_persistent;
 	msqlErrMsg[0]=0;
 	return SUCCESS;
 }
@@ -284,18 +185,17 @@ DLEXPORT PHP_RINIT_FUNCTION(msql)
 DLEXPORT PHP_MINFO_FUNCTION(msql)
 {
 	char maxp[16],maxl[16];
-	MSQL_TLS_VARS;
 
-	if (MSQL_GLOBAL(php3_msql_module).max_persistent==-1) {
+	if (php_msql_module.max_persistent==-1) {
 		strcpy(maxp,"Unlimited");
 	} else {
-		snprintf(maxp,15,"%ld",MSQL_GLOBAL(php3_msql_module).max_persistent);
+		snprintf(maxp,15,"%ld",php_msql_module.max_persistent);
 		maxp[15]=0;
 	}
-	if (MSQL_GLOBAL(php3_msql_module).max_links==-1) {
+	if (php_msql_module.max_links==-1) {
 		strcpy(maxl,"Unlimited");
 	} else {
-		snprintf(maxl,15,"%ld",MSQL_GLOBAL(php3_msql_module).max_links);
+		snprintf(maxl,15,"%ld",php_msql_module.max_links);
 		maxl[15]=0;
 	}
 	php_printf("<table>"
@@ -303,19 +203,18 @@ DLEXPORT PHP_MINFO_FUNCTION(msql)
 				"<tr><td>Persistent links:</td><td>%d/%s</td></tr>\n"
 				"<tr><td>Total links:</td><td>%d/%s</td></tr>\n"
 				"</table>\n",
-				(MSQL_GLOBAL(php3_msql_module).allow_persistent?"Yes":"No"),
-				MSQL_GLOBAL(php3_msql_module).num_persistent,maxp,
-				MSQL_GLOBAL(php3_msql_module).num_links,maxl);
+				(php_msql_module.allow_persistent?"Yes":"No"),
+				php_msql_module.num_persistent,maxp,
+				php_msql_module.num_links,maxl);
 }
 
 
-static void php3_msql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
+static void php_msql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 {
 	char *host;
 	char *hashed_details;
 	int hashed_details_length;
 	int msql;
-	MSQL_TLS_VARS;
 	
 	switch(ARG_COUNT(ht)) {
 		case 0: /* defaults */
@@ -341,19 +240,19 @@ static void php3_msql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 			break;
 	}
 	
-	if (!MSQL_GLOBAL(php3_msql_module).allow_persistent) {
+	if (!php_msql_module.allow_persistent) {
 		persistent=0;
 	}
 	if (persistent) {
 		list_entry *le;
 		
-		if (MSQL_GLOBAL(php3_msql_module).max_links!=-1 && MSQL_GLOBAL(php3_msql_module).num_links>=MSQL_GLOBAL(php3_msql_module).max_links) {
-			php_error(E_WARNING,"mSQL:  Too many open links (%d)",MSQL_GLOBAL(php3_msql_module).num_links);
+		if (php_msql_module.max_links!=-1 && php_msql_module.num_links>=php_msql_module.max_links) {
+			php_error(E_WARNING,"mSQL:  Too many open links (%d)",php_msql_module.num_links);
 			efree(hashed_details);
 			RETURN_FALSE;
 		}
-		if (MSQL_GLOBAL(php3_msql_module).max_persistent!=-1 && MSQL_GLOBAL(php3_msql_module).num_persistent>=MSQL_GLOBAL(php3_msql_module).max_persistent) {
-			php_error(E_WARNING,"mSQL:  Too many open persistent links (%d)",MSQL_GLOBAL(php3_msql_module).num_persistent);
+		if (php_msql_module.max_persistent!=-1 && php_msql_module.num_persistent>=php_msql_module.max_persistent) {
+			php_error(E_WARNING,"mSQL:  Too many open persistent links (%d)",php_msql_module.num_persistent);
 			efree(hashed_details);
 			RETURN_FALSE;
 		}
@@ -369,16 +268,16 @@ static void php3_msql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 			}
 			
 			/* hash it up */
-			new_le.type = MSQL_GLOBAL(php3_msql_module).le_plink;
+			new_le.type = php_msql_module.le_plink;
 			new_le.ptr = (void *) msql;
 			if (zend_hash_update(plist, hashed_details, hashed_details_length+1, (void *) &new_le, sizeof(list_entry), NULL)==FAILURE) {
 				efree(hashed_details);
 				RETURN_FALSE;
 			}
-			MSQL_GLOBAL(php3_msql_module).num_persistent++;
-			MSQL_GLOBAL(php3_msql_module).num_links++;
+			php_msql_module.num_persistent++;
+			php_msql_module.num_links++;
 		} else {  /* we do */
-			if (le->type != MSQL_GLOBAL(php3_msql_module).le_plink) {
+			if (le->type != php_msql_module.le_plink) {
 				efree(hashed_details);
 				RETURN_FALSE;
 			}
@@ -396,8 +295,7 @@ static void php3_msql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 #endif
 			msql = (int) le->ptr;
 		}
-		return_value->value.lval = php3_list_insert((void *)msql,MSQL_GLOBAL(php3_msql_module).le_plink);
-		return_value->type = IS_LONG;
+		ZEND_REGISTER_RESOURCE(return_value, (void *) msql, php_msql_module.le_plink);
 	} else {
 		list_entry *index_ptr,new_index_ptr;
 		
@@ -414,9 +312,9 @@ static void php3_msql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 				RETURN_FALSE;
 			}
 			link = (int) index_ptr->ptr;
-			ptr = php3_list_find(link,&type);   /* check if the link is still there */
-			if (ptr && (type==MSQL_GLOBAL(php3_msql_module).le_link || type==MSQL_GLOBAL(php3_msql_module).le_plink)) {
-				return_value->value.lval = MSQL_GLOBAL(php3_msql_module).default_link = link;
+			ptr = zend_list_find(link,&type);   /* check if the link is still there */
+			if (ptr && (type==php_msql_module.le_link || type==php_msql_module.le_plink)) {
+				return_value->value.lval = php_msql_module.default_link = link;
 				return_value->type = IS_LONG;
 				efree(hashed_details);
 				return;
@@ -424,8 +322,8 @@ static void php3_msql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 				zend_hash_del(list,hashed_details,hashed_details_length+1);
 			}
 		}
-		if (MSQL_GLOBAL(php3_msql_module).max_links!=-1 && MSQL_GLOBAL(php3_msql_module).num_links>=MSQL_GLOBAL(php3_msql_module).max_links) {
-			php_error(E_WARNING,"mSQL:  Too many open links (%d)",MSQL_GLOBAL(php3_msql_module).num_links);
+		if (php_msql_module.max_links!=-1 && php_msql_module.num_links>=php_msql_module.max_links) {
+			php_error(E_WARNING,"mSQL:  Too many open links (%d)",php_msql_module.num_links);
 			efree(hashed_details);
 			RETURN_FALSE;
 		}
@@ -435,8 +333,7 @@ static void php3_msql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 		}
 
 		/* add it to the list */
-		return_value->value.lval = php3_list_insert((void *)msql,MSQL_GLOBAL(php3_msql_module).le_link);
-		return_value->type = IS_LONG;
+		ZEND_REGISTER_RESOURCE(return_value, (void *) msql, php_msql_module.le_plink);
 		
 		/* add it to the hash */
 		new_index_ptr.ptr = (void *) return_value->value.lval;
@@ -445,108 +342,103 @@ static void php3_msql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 			efree(hashed_details);
 			RETURN_FALSE;
 		}
-		MSQL_GLOBAL(php3_msql_module).num_links++;
+		php_msql_module.num_links++;
 	}
 	efree(hashed_details);
-	MSQL_GLOBAL(php3_msql_module).default_link=return_value->value.lval;
+	php_msql_module.default_link=return_value->value.lval;
 }
 
-static int php3_msql_get_default_link(INTERNAL_FUNCTION_PARAMETERS)
+
+static int php_msql_get_default_link(INTERNAL_FUNCTION_PARAMETERS)
 {
-	MSQL_TLS_VARS;
-	if (MSQL_GLOBAL(php3_msql_module).default_link==-1) { /* no link opened yet, implicitly open one */
+	if (php_msql_module.default_link==-1) { /* no link opened yet, implicitly open one */
 		ht = 0;
-		php3_msql_do_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+		php_msql_do_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 	}
-	return MSQL_GLOBAL(php3_msql_module).default_link;
+	return php_msql_module.default_link;
 }
+
 
 /* {{{ proto int msql_connect([string hostname[:port]] [, string username] [, string password])
    Open a connection to an mSQL Server */
 DLEXPORT PHP_FUNCTION(msql_connect)
 {
-	php3_msql_do_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU,0);
+	php_msql_do_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU,0);
 }
 /* }}} */
+
 
 /* {{{ proto int msql_pconnect([string hostname[:port]] [, string username] [, string password])
    Open a persistent connection to an mSQL Server */
 DLEXPORT PHP_FUNCTION(msql_pconnect)
 {
-	php3_msql_do_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU,1);
+	php_msql_do_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU,1);
 }
 /* }}} */
+
 
 /* {{{ proto int msql_close([int link_identifier])
    Close an mSQL connection */
 DLEXPORT PHP_FUNCTION(msql_close)
 {
 	pval *msql_link;
-	int id,type;
+	int id;
 	int msql;
-	MSQL_TLS_VARS;
 	
 	switch (ARG_COUNT(ht)) {
 		case 0:
-			id = MSQL_GLOBAL(php3_msql_module).default_link;
+			id = php_msql_module.default_link;
 			break;
 		case 1:
 			if (getParameters(ht, 1, &msql_link)==FAILURE) {
 				RETURN_FALSE;
 			}
-			convert_to_long(msql_link);
-			id = msql_link->value.lval;
+			id = -1;
 			break;
 		default:
 			WRONG_PARAM_COUNT;
 			break;
 	}
 	
-	msql = (int) php3_list_find(id,&type);
-	if (type!=MSQL_GLOBAL(php3_msql_module).le_link && type!=MSQL_GLOBAL(php3_msql_module).le_plink) {
-		php_error(E_WARNING,"%d is not a mSQL link index",id);
-		RETURN_FALSE;
-	}
+	msql = (int) zend_fetch_resource_ex(msql_link, id, "mSQL link", 2, php_msql_module.le_link, php_msql_module.le_plink);
+	ZEND_VERIFY_RESOURCE(msql);
 	
-	php3_list_delete(id);
+	zend_list_delete(id);
 	RETURN_TRUE;
 }
 /* }}} */
+
 
 /* {{{ proto int msql_select_db(string database_name [, int link_identifier])
    Select an mSQL database */
 DLEXPORT PHP_FUNCTION(msql_select_db)
 {
 	pval *db,*msql_link;
-	int id,type;
+	int id;
 	int msql;
-	MSQL_TLS_VARS;
 	
 	switch(ARG_COUNT(ht)) {
 		case 1:
 			if (getParameters(ht, 1, &db)==FAILURE) {
 				RETURN_FALSE;
 			}
-			id = php3_msql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+			id = php_msql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 			break;
 		case 2:
 			if (getParameters(ht, 2, &db, &msql_link)==FAILURE) {
 				RETURN_FALSE;
 			}
-			convert_to_long(msql_link);
-			id = msql_link->value.lval;
+			id = -1;
 			break;
 		default:
 			WRONG_PARAM_COUNT;
 			break;
 	}
 	
-	msql = (int) php3_list_find(id,&type);
-	if (type!=MSQL_GLOBAL(php3_msql_module).le_link && type!=MSQL_GLOBAL(php3_msql_module).le_plink) {
-		php_error(E_WARNING,"%d is not a mSQL link index",id);
-		RETURN_FALSE;
-	}
-	
+
+	msql = (int) zend_fetch_resource_ex(msql_link, id, "mSQL link", 2, php_msql_module.le_link, php_msql_module.le_plink);
+	ZEND_VERIFY_RESOURCE(msql);
+
 	convert_to_string(db);
 	
 	if (msqlSelectDB(msql,db->value.str.val)==-1) {
@@ -557,39 +449,35 @@ DLEXPORT PHP_FUNCTION(msql_select_db)
 }
 /* }}} */
 
+
 /* {{{ proto int msql_create_db(string database_name [, int link_identifier])
    Create an mSQL database */
 DLEXPORT PHP_FUNCTION(msql_create_db)
 {
 	pval *db,*msql_link;
-	int id,type;
+	int id;
 	int msql;
-	MSQL_TLS_VARS;
 	
 	switch(ARG_COUNT(ht)) {
 		case 1:
 			if (getParameters(ht, 1, &db)==FAILURE) {
 				WRONG_PARAM_COUNT;
 			}
-			id = php3_msql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+			id = php_msql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 			break;
 		case 2:
 			if (getParameters(ht, 2, &db, &msql_link)==FAILURE) {
 				WRONG_PARAM_COUNT;
 			}
-			convert_to_long(msql_link);
-			id = msql_link->value.lval;
+			id = -1;
 			break;
 		default:
 			WRONG_PARAM_COUNT;
 			break;
 	}
 	
-	msql = (int) php3_list_find(id,&type);
-	if (type!=MSQL_GLOBAL(php3_msql_module).le_link && type!=MSQL_GLOBAL(php3_msql_module).le_plink) {
-		php_error(E_WARNING,"%d is not a mSQL link index",id);
-		RETURN_FALSE;
-	}
+	msql = (int) zend_fetch_resource_ex(msql_link, id, "mSQL link", 2, php_msql_module.le_link, php_msql_module.le_plink);
+	ZEND_VERIFY_RESOURCE(msql);
 	
 	convert_to_string(db);
 	if (msqlCreateDB(msql,db->value.str.val)<0) {
@@ -600,39 +488,35 @@ DLEXPORT PHP_FUNCTION(msql_create_db)
 }
 /* }}} */
 
+
 /* {{{ proto int msql_drop_db(string database_name [, int link_identifier])
    Drop (delete) an mSQL database */
 DLEXPORT PHP_FUNCTION(msql_drop_db)
 {
 	pval *db,*msql_link;
-	int id,type;
+	int id;
 	int msql;
-	MSQL_TLS_VARS;
 	
 	switch(ARG_COUNT(ht)) {
 		case 1:
 			if (getParameters(ht, 1, &db)==FAILURE) {
 				WRONG_PARAM_COUNT;
 			}
-			id = php3_msql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+			id = php_msql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 			break;
 		case 2:
 			if (getParameters(ht, 2, &db, &msql_link)==FAILURE) {
 				WRONG_PARAM_COUNT;
 			}
-			convert_to_long(msql_link);
-			id = msql_link->value.lval;
+			id = -1;
 			break;
 		default:
 			WRONG_PARAM_COUNT;
 			break;
 	}
 	
-	msql = (int) php3_list_find(id,&type);
-	if (type!=MSQL_GLOBAL(php3_msql_module).le_link && type!=MSQL_GLOBAL(php3_msql_module).le_plink) {
-		php_error(E_WARNING,"%d is not a mSQL link index",id);
-		RETURN_FALSE;
-	}
+	msql = (int) zend_fetch_resource_ex(msql_link, id, "mSQL link", 2, php_msql_module.le_link, php_msql_module.le_plink);
+	ZEND_VERIFY_RESOURCE(msql);
 	
 	convert_to_string(db);
 	if (msqlDropDB(msql,db->value.str.val)<0) {
@@ -643,83 +527,75 @@ DLEXPORT PHP_FUNCTION(msql_drop_db)
 }
 /* }}} */
 
+
 /* {{{ proto int msql_query(string query [, int link_identifier])
    Send an SQL query to mSQL */
 DLEXPORT PHP_FUNCTION(msql_query)
 {
 	pval *query,*msql_link;
-	int id,type;
+	int id;
 	int msql;
 	int af_rows;
-	MSQL_TLS_VARS;
 	
 	switch(ARG_COUNT(ht)) {
 		case 1:
 			if (getParameters(ht, 1, &query)==FAILURE) {
 				WRONG_PARAM_COUNT;
 			}
-			id = MSQL_GLOBAL(php3_msql_module).default_link;
+			id = php_msql_module.default_link;
 			break;
 		case 2:
 			if (getParameters(ht, 2, &query, &msql_link)==FAILURE) {
 				WRONG_PARAM_COUNT;
 			}
-			convert_to_long(msql_link);
-			id = msql_link->value.lval;
+			id = -1;
 			break;
 		default:
 			WRONG_PARAM_COUNT;
 			break;
 	}
 	
-	msql = (int) php3_list_find(id,&type);
-	if (type!=MSQL_GLOBAL(php3_msql_module).le_link && type!=MSQL_GLOBAL(php3_msql_module).le_plink) {
-		php_error(E_WARNING,"%d is not a mSQL link index",id);
-		RETURN_FALSE;
-	}
+	msql = (int) zend_fetch_resource_ex(msql_link, id, "mSQL link", 2, php_msql_module.le_link, php_msql_module.le_plink);
+	ZEND_VERIFY_RESOURCE(msql);
 	
 	convert_to_string(query);
 	if ((af_rows = msqlQuery(msql,query->value.str.val))==-1) {
 		RETURN_FALSE;
 	}
-	RETVAL_LONG(_new_query(msqlStoreResult(), af_rows));
+	ZEND_REGISTER_RESOURCE(return_value, php_msql_query_wrapper(msqlStoreResult(), af_rows), php_msql_module.le_query);
 }
 /* }}} */
+
 
 /* {{{ proto int msql_db_query(string database_name, string query [, int link_identifier])
    Send an SQL query to mSQL */
 DLEXPORT PHP_FUNCTION(msql_db_query)
 {
 	pval *db,*query,*msql_link;
-	int id,type;
+	int id;
 	int msql;
 	int af_rows;
-	MSQL_TLS_VARS;
 	
 	switch(ARG_COUNT(ht)) {
 		case 2:
 			if (getParameters(ht, 2, &db, &query)==FAILURE) {
 				RETURN_FALSE;
 			}
-			id = php3_msql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+			id = php_msql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 			break;
 		case 3:
 			if (getParameters(ht, 3, &db, &query, &msql_link)==FAILURE) {
 				RETURN_FALSE;
 			}
-			convert_to_long(msql_link);
-			id = msql_link->value.lval;
+			id = -1;
 			break;
 		default:
 			WRONG_PARAM_COUNT;
 			break;
 	}
 	
-	msql = (int) php3_list_find(id,&type);
-	if (type!=MSQL_GLOBAL(php3_msql_module).le_link && type!=MSQL_GLOBAL(php3_msql_module).le_plink) {
-		php_error(E_WARNING,"%d is not a mSQL link index",id);
-		RETURN_FALSE;
-	}
+	msql = (int) zend_fetch_resource_ex(msql_link, id, "mSQL link", 2, php_msql_module.le_link, php_msql_module.le_plink);
+	ZEND_VERIFY_RESOURCE(msql);
 	
 	convert_to_string(db);
 	if (msqlSelectDB(msql,db->value.str.val)==-1) {
@@ -730,83 +606,76 @@ DLEXPORT PHP_FUNCTION(msql_db_query)
 	if ((af_rows = msqlQuery(msql,query->value.str.val))==-1) {
 		RETURN_FALSE;
 	}
-	RETVAL_LONG(_new_query(msqlStoreResult(), af_rows));
+	ZEND_REGISTER_RESOURCE(return_value, php_msql_query_wrapper(msqlStoreResult(), af_rows), php_msql_module.le_query);
 }
 /* }}} */
+
 
 /* {{{ proto int msql_list_dbs([int link_identifier])
    List databases available on an mSQL server */
 DLEXPORT PHP_FUNCTION(msql_list_dbs)
 {
 	pval *msql_link;
-	int id,type;
+	int id;
 	int msql;
 	m_result *msql_result;
-	MSQL_TLS_VARS;
 	
 	switch(ARG_COUNT(ht)) {
 		case 0:
-			id = php3_msql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+			id = php_msql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 			break;
 		case 1:
 			if (getParameters(ht, 1, &msql_link)==FAILURE) {
 				RETURN_FALSE;
 			}
-			convert_to_long(msql_link);
-			id = msql_link->value.lval;
+			id = -1;
 			break;
 		default:
 			WRONG_PARAM_COUNT;
 			break;
 	}
 	
-	msql = (int) php3_list_find(id,&type);
-	if (type!=MSQL_GLOBAL(php3_msql_module).le_link && type!=MSQL_GLOBAL(php3_msql_module).le_plink) {
-		php_error(E_WARNING,"%d is not a mSQL link index",id);
-		RETURN_FALSE;
-	}
+	msql = (int) zend_fetch_resource_ex(msql_link, id, "mSQL link", 2, php_msql_module.le_link, php_msql_module.le_plink);
+	ZEND_VERIFY_RESOURCE(msql);
+
 	if ((msql_result=msqlListDBs(msql))==NULL) {
 		php_error(E_WARNING,"Unable to save mSQL query result");
 		RETURN_FALSE;
 	}
-	RETVAL_LONG(_new_query(msql_result, 0));
+	ZEND_REGISTER_RESOURCE(return_value, php_msql_query_wrapper(msql_result, 0), php_msql_module.le_query);
 }
 /* }}} */
+
 
 /* {{{ proto int msql_list_tables(string database_name [, int link_identifier])
    List tables in an mSQL database */
 DLEXPORT PHP_FUNCTION(msql_list_tables)
 {
 	pval *db,*msql_link;
-	int id,type;
+	int id;
 	int msql;
 	m_result *msql_result;
-	MSQL_TLS_VARS;
 	
 	switch(ARG_COUNT(ht)) {
 		case 1:
 			if (getParameters(ht, 1, &db)==FAILURE) {
 				RETURN_FALSE;
 			}
-			id = php3_msql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+			id = php_msql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 			break;
 		case 2:
 			if (getParameters(ht, 2, &db, &msql_link)==FAILURE) {
 				RETURN_FALSE;
 			}
-			convert_to_long(msql_link);
-			id = msql_link->value.lval;
+			id = -1;
 			break;
 		default:
 			WRONG_PARAM_COUNT;
 			break;
 	}
 	
-	msql = (int) php3_list_find(id,&type);
-	if (type!=MSQL_GLOBAL(php3_msql_module).le_link && type!=MSQL_GLOBAL(php3_msql_module).le_plink) {
-		php_error(E_WARNING,"%d is not a mSQL link index",id);
-		RETURN_FALSE;
-	}
+	msql = (int) zend_fetch_resource_ex(msql_link, id, "mSQL link", 2, php_msql_module.le_link, php_msql_module.le_plink);
+	ZEND_VERIFY_RESOURCE(msql);
 	
 	convert_to_string(db);
 	if (msqlSelectDB(msql,db->value.str.val)==-1) {
@@ -816,44 +685,40 @@ DLEXPORT PHP_FUNCTION(msql_list_tables)
 		php_error(E_WARNING,"Unable to save mSQL query result");
 		RETURN_FALSE;
 	}
-	RETVAL_LONG(_new_query(msql_result, 0));
+	ZEND_REGISTER_RESOURCE(return_value, php_msql_query_wrapper(msql_result, 0), php_msql_module.le_query);
 }
 /* }}} */
+
 
 /* {{{ proto int msql_list_fields(string database_name, string table_name [, int link_identifier])
    List mSQL result fields */
 DLEXPORT PHP_FUNCTION(msql_list_fields)
 {
 	pval *db,*table,*msql_link;
-	int id,type;
+	int id;
 	int msql;
 	m_result *msql_result;
-	MSQL_TLS_VARS;
 	
 	switch(ARG_COUNT(ht)) {
 		case 2:
 			if (getParameters(ht, 2, &db, &table)==FAILURE) {
 				RETURN_FALSE;
 			}
-			id = php3_msql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+			id = php_msql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 			break;
 		case 3:
 			if (getParameters(ht, 3, &db, &table, &msql_link)==FAILURE) {
 				RETURN_FALSE;
 			}
-			convert_to_long(msql_link);
-			id = msql_link->value.lval;
+			id = -1;
 			break;
 		default:
 			WRONG_PARAM_COUNT;
 			break;
 	}
 	
-	msql = (int) php3_list_find(id,&type);
-	if (type!=MSQL_GLOBAL(php3_msql_module).le_link && type!=MSQL_GLOBAL(php3_msql_module).le_plink) {
-		php_error(E_WARNING,"%d is not a mSQL link index",id);
-		RETURN_FALSE;
-	}
+	msql = (int) zend_fetch_resource_ex(msql_link, id, "mSQL link", 2, php_msql_module.le_link, php_msql_module.le_plink);
+	ZEND_VERIFY_RESOURCE(msql);
 	
 	convert_to_string(db);
 	if (msqlSelectDB(msql,db->value.str.val)==-1) {
@@ -864,9 +729,10 @@ DLEXPORT PHP_FUNCTION(msql_list_fields)
 		php_error(E_WARNING,"Unable to save mSQL query result");
 		RETURN_FALSE;
 	}
-	RETVAL_LONG(_new_query(msql_result, 0));
+	ZEND_REGISTER_RESOURCE(return_value, php_msql_query_wrapper(msql_result, 0), php_msql_module.le_query);
 }
 /* }}} */
+
 
 /* {{{ proto string msql_error([int link_identifier])
    Returns the text of the error message from previous mSQL operation */
@@ -887,8 +753,7 @@ DLEXPORT PHP_FUNCTION(msql_result)
 	m_result *msql_result;
 	m_query *msql_query;
 	m_row sql_row;
-	int type,field_offset=0;
-	MSQL_TLS_VARS;
+	int field_offset=0;
 	PLS_FETCH();
 	
 	switch (ARG_COUNT(ht)) {
@@ -983,6 +848,7 @@ DLEXPORT PHP_FUNCTION(msql_result)
 }
 /* }}} */
 
+
 /* {{{ proto int msql_num_rows(int query)
    Get number of rows in a result */
 DLEXPORT PHP_FUNCTION(msql_num_rows)
@@ -990,8 +856,6 @@ DLEXPORT PHP_FUNCTION(msql_num_rows)
 	pval *result;
 	m_result *msql_result;
 	m_query *msql_query;
-	int type;
-	MSQL_TLS_VARS;
 	
 	if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &result)==FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1002,6 +866,7 @@ DLEXPORT PHP_FUNCTION(msql_num_rows)
 }
 /* }}} */
 
+
 /* {{{ proto int msql_num_fields(int query)
    Get number of fields in a result */
 DLEXPORT PHP_FUNCTION(msql_num_fields)
@@ -1009,8 +874,6 @@ DLEXPORT PHP_FUNCTION(msql_num_fields)
 	pval *result;
 	m_result *msql_result;
 	m_query *msql_query;
-	int type;
-	MSQL_TLS_VARS;
 	
 	if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &result)==FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1022,18 +885,16 @@ DLEXPORT PHP_FUNCTION(msql_num_fields)
 /* }}} */
 
 
-static void php3_msql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
+static void php_msql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 {
 	pval *result, *arg2;
 	m_result *msql_result;
 	m_row msql_row;
 	m_field *msql_field;
 	m_query *msql_query;
-	int type;
 	int num_fields;
 	int i;
 	PLS_FETCH();
-	MSQL_TLS_VARS;
 	
 	switch (ARG_COUNT(ht)) {
 		case 1:
@@ -1102,7 +963,7 @@ static void php3_msql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
    Get a result row as an enumerated array */
 DLEXPORT PHP_FUNCTION(msql_fetch_row)
 {
-	php3_msql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, MSQL_NUM);
+	php_msql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, MSQL_NUM);
 }
 /* }}} */
 
@@ -1111,7 +972,7 @@ DLEXPORT PHP_FUNCTION(msql_fetch_row)
    Fetch a result row as an object */
 DLEXPORT PHP_FUNCTION(msql_fetch_object)
 {
-	php3_msql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+	php_msql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 	if (return_value->type==IS_ARRAY) {
 		return_value->type=IS_OBJECT;
 		return_value->value.obj.properties = return_value->value.ht;
@@ -1124,7 +985,7 @@ DLEXPORT PHP_FUNCTION(msql_fetch_object)
    Fetch a result row as an associative array */
 DLEXPORT PHP_FUNCTION(msql_fetch_array)
 {
-	php3_msql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+	php_msql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
 
@@ -1135,8 +996,6 @@ DLEXPORT PHP_FUNCTION(msql_data_seek)
 	pval *result,*offset;
 	m_result *msql_result;
 	m_query *msql_query;
-	int type;
-	MSQL_TLS_VARS;
 	
 	if (ARG_COUNT(ht)!=2 || getParameters(ht, 2, &result, &offset)==FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1155,7 +1014,7 @@ DLEXPORT PHP_FUNCTION(msql_data_seek)
 }
 /* }}} */
 
-static char *php3_msql_get_field_name(int field_type)
+static char *php_msql_get_field_name(int field_type)
 {
 	switch (field_type) {
 #if MSQL1
@@ -1201,8 +1060,6 @@ DLEXPORT PHP_FUNCTION(msql_fetch_field)
 	m_result *msql_result;
 	m_field *msql_field;
 	m_query *msql_query;
-	int type;
-	MSQL_TLS_VARS;
 	
 	switch (ARG_COUNT(ht)) {
 		case 1:
@@ -1244,7 +1101,7 @@ DLEXPORT PHP_FUNCTION(msql_fetch_field)
 	add_property_long(return_value, "unique",(msql_field->flags&UNIQUE_FLAG?1:0));
 #endif
 
-	add_property_string(return_value, "type",php3_msql_get_field_name(msql_field->type), 1);
+	add_property_string(return_value, "type",php_msql_get_field_name(msql_field->type), 1);
 }
 /* }}} */
 
@@ -1255,8 +1112,6 @@ DLEXPORT PHP_FUNCTION(msql_field_seek)
 	pval *result, *offset;
 	m_result *msql_result;
 	m_query *msql_query;
-	int type;
-	MSQL_TLS_VARS;
 	
 	if (ARG_COUNT(ht)!=2 || getParameters(ht, 2, &result, &offset)==FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1283,14 +1138,12 @@ DLEXPORT PHP_FUNCTION(msql_field_seek)
 #define PHP3_MSQL_FIELD_TYPE 4
 #define PHP3_MSQL_FIELD_FLAGS 5
  
-static void php3_msql_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
+static void php_msql_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 {
 	pval *result, *field;
 	m_result *msql_result;
 	m_field *msql_field;
 	m_query *msql_query;
-	int type;
-	MSQL_TLS_VARS;
 	
 	if (ARG_COUNT(ht)!=2 || getParameters(ht, 2, &result, &field)==FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1326,7 +1179,7 @@ static void php3_msql_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 			return_value->type = IS_LONG;
 			break;
 		case PHP3_MSQL_FIELD_TYPE:
-			return_value->value.str.val = estrdup(php3_msql_get_field_name(msql_field->type));
+			return_value->value.str.val = estrdup(php_msql_get_field_name(msql_field->type));
 			return_value->value.str.len = strlen(return_value->value.str.val);
 			return_value->type = IS_STRING;
 			break;
@@ -1374,7 +1227,7 @@ static void php3_msql_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
    Get the name of the specified field in a result */
 DLEXPORT PHP_FUNCTION(msql_field_name)
 {
-	php3_msql_field_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP3_MSQL_FIELD_NAME);
+	php_msql_field_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP3_MSQL_FIELD_NAME);
 }
 /* }}} */
 
@@ -1382,7 +1235,7 @@ DLEXPORT PHP_FUNCTION(msql_field_name)
    Get name of the table the specified field is in */
 DLEXPORT PHP_FUNCTION(msql_field_table)
 {
-	php3_msql_field_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP3_MSQL_FIELD_TABLE);
+	php_msql_field_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP3_MSQL_FIELD_TABLE);
 }
 /* }}} */
 
@@ -1390,7 +1243,7 @@ DLEXPORT PHP_FUNCTION(msql_field_table)
    Returns the length of the specified field */
 DLEXPORT PHP_FUNCTION(msql_field_len)
 {
-	php3_msql_field_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP3_MSQL_FIELD_LEN);
+	php_msql_field_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP3_MSQL_FIELD_LEN);
 }
 /* }}} */
 
@@ -1398,7 +1251,7 @@ DLEXPORT PHP_FUNCTION(msql_field_len)
    Get the type of the specified field in a result */
 DLEXPORT PHP_FUNCTION(msql_field_type)
 {
-	php3_msql_field_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP3_MSQL_FIELD_TYPE);
+	php_msql_field_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP3_MSQL_FIELD_TYPE);
 }
 /* }}} */
 
@@ -1406,7 +1259,7 @@ DLEXPORT PHP_FUNCTION(msql_field_type)
    Get the flags associated with the specified field in a result */
 DLEXPORT PHP_FUNCTION(msql_field_flags)
 {
-	php3_msql_field_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP3_MSQL_FIELD_FLAGS);
+	php_msql_field_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP3_MSQL_FIELD_FLAGS);
 }
 /* }}} */
 
@@ -1418,15 +1271,13 @@ DLEXPORT PHP_FUNCTION(msql_free_result)
 	pval *result;
 	m_result *msql_result;
 	m_query *msql_query;
-	int type;
-	MSQL_TLS_VARS;
 	
 	if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &result)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
 	MSQL_GET_QUERY(result);
-	php3_list_delete(result->value.lval);
+	zend_list_delete(result->value.lval);
 	RETURN_TRUE;
 }
 /* }}} */
@@ -1438,8 +1289,6 @@ DLEXPORT PHP_FUNCTION(msql_affected_rows)
 	pval *result;
 	m_result *msql_result;
 	m_query *msql_query;
-	int type;
-	MSQL_TLS_VARS;
 
 	if(ARG_COUNT(ht) != 1 || getParameters(ht, 1, &result) == FAILURE) {
 		WRONG_PARAM_COUNT;
