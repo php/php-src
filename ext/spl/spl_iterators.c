@@ -985,7 +985,7 @@ static INLINE void spl_limit_it_seek(spl_dual_it_object *intern, long pos TSRMLS
 	}
 }
 
-/* {{{ proto LimitIterator:__construct(Iterator $it [, int $offset, int $count])
+/* {{{ proto LimitIterator::__construct(Iterator $it [, int $offset, int $count])
    Construct a LimitIterator from an Iterator with a given starting offset and optionally a maximum count */
 SPL_METHOD(LimitIterator, __construct)
 {
