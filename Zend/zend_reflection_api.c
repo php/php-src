@@ -82,6 +82,18 @@ ZEND_API zend_object_value reflection_objects_new(zend_class_entry *class_type T
 	return retval;
 }
 
+static zval * reflection_instanciate(zend_class_entry *pce, zval *object TSRMLS_DC)
+{
+	if (!object) {
+		ALLOC_ZVAL(object);
+	}
+	Z_TYPE_P(object) = IS_OBJECT;
+	object_init_ex(object, pce);
+	object->refcount = 1;
+	object->is_ref = 1;
+	return object;
+}
+
 ZEND_FUNCTION(reflection_function)
 {
 	zval **name;
@@ -320,6 +332,18 @@ ZEND_FUNCTION(reflection_function_invoke)
 	efree(params);
 }
 
+void reflection_class_factory(zend_class_entry *ce, zval *object)
+{
+	reflection_object *intern;
+	zval *name;
+	ALLOC_ZVAL(name);
+	ZVAL_STRINGL(name, ce->name, ce->name_length, 1);
+	reflection_instanciate(reflection_class_ptr, object);
+	intern = (reflection_object *) zend_object_store_get_object(object TSRMLS_CC);
+	intern->ptr = ce;
+	zend_hash_update(Z_OBJPROP_P(object), "name", sizeof("name"), (void **) &name, sizeof(zval *), NULL);
+}
+
 ZEND_FUNCTION(reflection_class)
 {
 	zval **name;
@@ -527,7 +551,7 @@ ZEND_FUNCTION(reflection_class_getconstant)
 	if (intern == NULL  || (ce = intern->ptr) == NULL) {
 		RETURN_FALSE;
 	}
-	if(zend_hash_find(&ce->constants_table, Z_STRVAL_PP(name), Z_STRLEN_PP(name) + 1, (void **) &value) == FAILURE) {
+	if (zend_hash_find(&ce->constants_table, Z_STRVAL_PP(name), Z_STRLEN_PP(name) + 1, (void **) &value) == FAILURE) {
 		RETURN_FALSE;
 	}
 	*return_value = **value;
@@ -549,6 +573,51 @@ ZEND_FUNCTION(reflection_class_isinterface)
 			RETURN_FALSE;
 	}
 	RETURN_BOOL(ce->type & ZEND_ACC_INTERFACE);
+}
+
+ZEND_FUNCTION(reflection_class_getinterfaces)
+{
+	zval  *object;
+	reflection_object *intern;
+	zend_class_entry *ce;
+
+	if (ZEND_NUM_ARGS() > 0) { 
+		ZEND_WRONG_PARAM_COUNT();
+	}
+	object = getThis();
+	intern = (reflection_object *) zend_object_store_get_object(object TSRMLS_CC);
+	if (intern == NULL || (ce = intern->ptr) == NULL) {
+			RETURN_FALSE;
+	}
+	if (ce->num_interfaces) {
+		int i;
+		array_init(return_value);	
+	   	for(i=0; i < ce->num_interfaces; i++) {
+			zval *interface;
+			ALLOC_ZVAL(interface);
+			reflection_class_factory(ce->interfaces[i], interface);
+			add_next_index_zval(return_value, interface);
+		}
+	}
+}
+
+ZEND_FUNCTION(reflection_class_getparentclass)
+{
+	zval  *object;
+	reflection_object *intern;
+	zend_class_entry *ce;
+
+	if (ZEND_NUM_ARGS() > 0) { 
+		ZEND_WRONG_PARAM_COUNT();
+	}
+	object = getThis();
+	intern = (reflection_object *) zend_object_store_get_object(object TSRMLS_CC);
+	if (intern && (ce = intern->ptr)  && ce->parent) {
+		reflection_class_factory(ce->parent, return_value);
+	} 
+	else {
+		RETURN_FALSE;
+	}
 }
 
 static zend_function_entry reflection_function_functions[] = {
@@ -576,7 +645,9 @@ static zend_function_entry reflection_class_functions[] = {
 	ZEND_NAMED_FE(getdoccomment, ZEND_FN(reflection_class_getdoccomment), NULL)
 	ZEND_NAMED_FE(getconstants, ZEND_FN(reflection_class_getconstants), NULL)
 	ZEND_NAMED_FE(getconstant, ZEND_FN(reflection_class_getconstant), NULL)
+	ZEND_NAMED_FE(getinterfaces, ZEND_FN(reflection_class_getinterfaces), NULL)
 	ZEND_NAMED_FE(isinterface, ZEND_FN(reflection_class_isinterface), NULL)
+	ZEND_NAMED_FE(getparentclass, ZEND_FN(reflection_class_getparentclass), NULL)
 	{NULL, NULL, NULL}
 };
 
