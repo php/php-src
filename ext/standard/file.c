@@ -13,7 +13,7 @@
    |                                                                      |
    |  B) the PHP License as published by the PHP Development Team and     |
    |     included in the distribution in the file: LICENSE                |
-   |                                                                      |
+   |							                                              |
    | This program is distributed in the hope that it will be useful,      |
    | but WITHOUT ANY WARRANTY; without even the implied warranty of       |
    | MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the        |
@@ -32,6 +32,7 @@
 #endif
 #include "php.h"
 #include "php_globals.h"
+#include "ext/standard/flock_compat.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -210,6 +211,7 @@ function_entry php3_file_functions[] = {
 php3_module_entry php3_file_module_entry = {
 	"PHP_file", php3_file_functions, php3_minit_file, NULL, NULL, NULL, NULL, STANDARD_MODULE_PROPERTIES
 };
+
 
 static int flock_values[] = { LOCK_SH, LOCK_EX, LOCK_UN };
 

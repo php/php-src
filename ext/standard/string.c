@@ -1297,7 +1297,7 @@ static char *_php3_memstr(char *s, char *c, size_t n, size_t m)
 {
     char *p;
 
-    for(p = s; (p - s) < n; p++)
+    for(p = s; ((size_t) (p - s)) < n; p++)
         if(memcmp(p, c, m) == 0)
             return p;
     return NULL;
