@@ -159,6 +159,12 @@ ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini
 		switch (token_type) {
 			case T_END_HEREDOC:
 				zend_html_puts(token.value.str.val, token.value.str.len TSRMLS_CC);
+				{
+					char *ptr = LANG_SCNG(yy_text);
+					if (ptr[LANG_SCNG(yy_leng) - 1] != ';') {
+						zend_html_putc('\n');
+					}
+				}
 				break;
 			default:
 				zend_html_puts(LANG_SCNG(yy_text), LANG_SCNG(yy_leng) TSRMLS_CC);
