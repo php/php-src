@@ -529,7 +529,7 @@ PHP_FUNCTION(mb_split)
 
 	count = -1;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zs|l", &arg_pat,
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zs|l", &arg_pat,
 	                        &string, &string_len, &count) == FAILURE) {
 		RETURN_FALSE;
 	} 
@@ -957,7 +957,7 @@ PHP_FUNCTION(mb_ereg_search_setpos)
 /* }}} */
 
 /* {{{ php_mb_regex_set_options */
-PHPAPI int php_mb_regex_set_options( int options ) 
+PHPAPI int php_mb_regex_set_options( int options TSRMLS_DC) 
 {
 	int prev_opt = MBSTRG(regex_default_options);
 	MBSTRG(regex_default_options) = options;
@@ -966,11 +966,11 @@ PHPAPI int php_mb_regex_set_options( int options )
 /* }}} */
 
 /* {{{ php_mb_regex_set_options_by_string */
-PHPAPI int php_mb_regex_set_options_by_string( const char *opt_str, int len )
+PHPAPI int php_mb_regex_set_options_by_string( const char *opt_str, int len TSRMLS_DC)
 {
 	int new_opt;
 	_php_mb_regex_init_options( opt_str, len, &new_opt, NULL);
-	return php_mb_regex_set_options( new_opt );
+	return php_mb_regex_set_options( new_opt TSRMLS_CC);
 }
 /* }}} */
 
@@ -984,7 +984,7 @@ PHP_FUNCTION(mb_regex_set_options)
 	                            &string, &string_len ) == FAILURE ) {
 		RETURN_FALSE;
 	}
-	php_mb_regex_set_options_by_string( (const char*)string, string_len );
+	php_mb_regex_set_options_by_string( (const char*)string, string_len TSRMLS_CC);
 	RETURN_TRUE;
 }
 /* }}} */
