@@ -37,20 +37,10 @@ typedef struct {
 
 #ifdef ZTS
 static int thttpd_globals_id;
-#define TSRMLS_D php_thttpd_globals *thttpd_context
-#define TSRMLS_DC , TSRMLS_D
-#define TSRMLS_C thttpd_context
-#define TSRMLS_CC , thttpd_context
-#define TG(v) (thttpd_context->v)
-#define TSRMLS_FETCH() TSRMLS_D = ts_resource(thttpd_globals_id)
+#define TG(v) TSRMG(thttpd_globals_id, php_thttpd_globals *, v)
 #else
 static php_thttpd_globals thttpd_globals;
-#define TSRMLS_D
-#define TSRMLS_DC
-#define TSRMLS_C
-#define TSRMLS_CC
 #define TG(v) (thttpd_globals.v)
-#define TSRMLS_FETCH()
 #endif
 
 static int sapi_thttpd_ub_write(const char *str, uint str_length)
@@ -88,7 +78,6 @@ static int sapi_thttpd_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 	zend_llist_position pos;
 	sapi_header_struct *h;
 	size_t len;
-	TSRMLS_FETCH();
 	
 	if (!SG(sapi_headers).http_status_line) {
 		snprintf(buf, 1023, "HTTP/1.0 %d Something\r\n", SG(sapi_headers).http_response_code);
@@ -137,7 +126,6 @@ static int sapi_thttpd_read_post(char *buffer, uint count_bytes TSRMLS_DC)
 {
 	size_t read_bytes = 0, tmp;
 	int c;
-	TSRMLS_FETCH();
 
 	/* to understand this, read cgi_interpose_input() in libhttpd.c */
 	c = TG(hc)->read_idx - TG(hc)->checked_idx;
@@ -164,8 +152,6 @@ static int sapi_thttpd_read_post(char *buffer, uint count_bytes TSRMLS_DC)
 
 static char *sapi_thttpd_read_cookies(TSRMLS_D)
 {
-	TSRMLS_FETCH();
-	
 	return TG(hc)->cookie;
 }
 
@@ -173,11 +159,10 @@ static char *sapi_thttpd_read_cookies(TSRMLS_D)
 #define ADD_STRING(name)										\
 	php_register_variable(name, buf, track_vars_array TSRMLS_CC)
 
-static void sapi_thttpd_register_variables(zval *track_vars_array TSRMLS_DC TSRMLS_DC TSRMLS_DC)
+static void sapi_thttpd_register_variables(zval *track_vars_array TSRMLS_DC)
 {
 	char buf[BUF_SIZE + 1];
 	char *p;
-	TSRMLS_FETCH();
 
 	php_register_variable("PHP_SELF", SG(request_info).request_uri, track_vars_array TSRMLS_CC);
 	php_register_variable("SERVER_SOFTWARE", SERVER_SOFTWARE, track_vars_array TSRMLS_CC);
@@ -258,10 +243,9 @@ static sapi_module_struct thttpd_sapi_module = {
 	STANDARD_SAPI_MODULE_PROPERTIES
 };
 
-static void thttpd_module_main(TSRMLS_D TSRMLS_DC)
+static void thttpd_module_main(TSRMLS_D)
 {
 	zend_file_handle file_handle;
-	TSRMLS_FETCH();
 
 	file_handle.type = ZEND_HANDLE_FILENAME;
 	file_handle.filename = SG(request_info).path_translated;
@@ -438,13 +422,12 @@ static void queue_request(httpd_conn *hc)
 	tsrm_mutex_unlock(qr_lock);
 }
 
-static off_t thttpd_real_php_request(httpd_conn *hc TSRMLS_DC TSRMLS_DC);
+static off_t thttpd_real_php_request(httpd_conn *hc TSRMLS_DC);
 
 static void *worker_thread(void *dummy)
 {
 	int do_work = 50;
 	httpd_conn *hc;
-	TSRMLS_FETCH();
 
 	while (do_work) {
 		hc = dequeue_request();
@@ -517,7 +500,7 @@ off_t thttpd_php_request(httpd_conn *hc)
 	queue_request(hc);
 #else
 	TSRMLS_FETCH();
-	return thttpd_real_php_request(hc TSRMLS_CC TSRMLS_CC);
+	return thttpd_real_php_request(hc TSRMLS_CC);
 #endif
 }
 
@@ -558,6 +541,7 @@ void thttpd_php_init(void)
 	thttpd_sapi_module.startup(&thttpd_sapi_module);
 	{
 		TSRMLS_FETCH();
+
 		SG(server_context) = (void *) 1;
 	}
 }
