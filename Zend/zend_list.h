@@ -82,6 +82,7 @@ ZEND_API int zend_register_resource(zval *rsrc_result, void *rsrc_pointer, int r
 ZEND_API void *zend_fetch_resource(zval **passed_id, int default_id, char *resource_type_name, int *found_resource_type, int num_resource_types, ...);
 
 ZEND_API char *zend_rsrc_list_get_rsrc_type(int resource);
+ZEND_API int zend_fetch_list_dtor_id(char *type_name);
 
 extern ZEND_API int le_index_ptr;  /* list entry type for index pointers */
 
@@ -100,5 +101,10 @@ extern ZEND_API int le_index_ptr;  /* list entry type for index pointers */
 
 #define ZEND_REGISTER_RESOURCE(rsrc_result, rsrc_pointer, rsrc_type)  \
     zend_register_resource(rsrc_result, rsrc_pointer, rsrc_type);
+
+#define ZEND_GET_LE(le_id, le_type_name)               \
+    if(le_id == 0) {                                   \
+        le_id = zend_fetch_list_dtor_id(le_type_name); \
+	}
 
 #endif
