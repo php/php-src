@@ -2223,7 +2223,7 @@ PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show
 	if (show_err) {
 		/* these names depend on the values of the PHP_STREAM_AS_XXX defines in php_streams.h */
 		static const char *cast_names[3] = {
-			"STDIO FILE*", "File Descriptor", "Socket Descriptor"
+			"STDIO FILE*", "File Descriptor", "Socket Descriptor", "select()able descriptor"
 		};
 
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "cannot represent a stream of type %s as a %s",
@@ -2716,7 +2716,8 @@ PHPAPI zend_bool _php_stream_open_wrapper_as_file_handle(char *path, char *mode,
 	if (stream == NULL)
 		return FAILURE;
 
-	if (php_stream_cast(stream, PHP_STREAM_AS_FD | PHP_STREAM_CAST_TRY_HARD 
+	if (php_stream_can_cast(stream, PHP_STREAM_AS_FD) == SUCCESS &&
+			php_stream_cast(stream, PHP_STREAM_AS_FD | PHP_STREAM_CAST_TRY_HARD 
 				| PHP_STREAM_CAST_RELEASE, (void **) &fh->handle.fd, 
 				REPORT_ERRORS) == SUCCESS) {
 		if ((options & STREAM_OPEN_FOR_INCLUDE) 
