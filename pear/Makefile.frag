@@ -99,16 +99,16 @@ PEARCMD=$(top_builddir)/sapi/cli/php -d include_path=$(top_srcdir)/pear pear/scr
 
 install-pear-installer: $(top_builddir)/sapi/cli/php
 	@if $(PEARCMD) shell-test PEAR; then \
-	    version=`grep '<version>' $(srcdir)/package-pear.xml|head -1|cut -d\> -f2|cut -d\< -f1`; \
+	    version=`grep '<version>' $(srcdir)/package-PEAR.xml|head -1|cut -d\> -f2|cut -d\< -f1`; \
 	    if ! $(PEARCMD) shell-test PEAR $$version; then \
 		echo "Found an older version of the PEAR Installer, upgrading..."; \
-	        $(PEARCMD) -q upgrade $(srcdir)/package-pear.xml; \
+	        $(PEARCMD) -q upgrade $(srcdir)/package-PEAR.xml; \
 	    else \
 		echo "No need to install or upgrade the PEAR Installer..."; \
 	    fi; \
 	else \
 	    echo "PEAR Installer not found, installing..."; \
-	    $(PEARCMD) -q install $(srcdir)/package-pear.xml; \
+	    $(PEARCMD) -q install $(srcdir)/package-PEAR.xml; \
 	fi
 
 install-pear-packages: # requires cli installed
