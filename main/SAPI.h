@@ -184,6 +184,7 @@ SAPI_API char *sapi_getenv(char *name, size_t name_len TSRMLS_DC);
 SAPI_API char *sapi_get_default_content_type(TSRMLS_D);
 SAPI_API void sapi_get_default_content_type_header(sapi_header_struct *default_header TSRMLS_DC);
 SAPI_API size_t sapi_apply_default_charset(char **mimetype, size_t len TSRMLS_DC);
+SAPI_API void sapi_activate_headers_only(TSRMLS_D);
 
 struct _sapi_module_struct {
 	char *name;
