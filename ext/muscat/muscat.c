@@ -140,17 +140,15 @@ PHP_MINFO_FUNCTION(muscat)
 	*/
 }
 
-/* {{{ proto _local_discard(Muscat_handle * handle) {
-	This is not a user function, it throws away all muscat_get output
-    */
+/* {{{ _local_discard(Muscat_handle * handle) {
+	This is not a user function, it throws away all muscat_get output */
 void _local_discard(struct Muscat_handle * handle) {
 	while(! H_Getfrom_Muscat(handle)) {};
 }
 /* }}} */
 
-/* {{{ proto _discard(Muscat_handle * handle) {
-	This is not a user function, it throws away all muscat_get output
-    */
+/* {{{ _discard(Muscat_handle * handle) {
+	This is not a user function, it throws away all muscat_get output */
 void _discard(_muscat_handle * handle) {
 	if (handle->net) _net_discard(&handle->handles.muscatnet_handle);
 	else _local_discard(&handle->handles.muscat_handle);
@@ -158,12 +156,8 @@ void _discard(_muscat_handle * handle) {
 /* }}} */
 
 
-/* {{{ proto resource setup_muscat(int size, string [muscat_dir])
-    Creates a new muscat session and returns the handle.
-    Size is the ammount of memory in bytes to allocate for muscat
-    muscat_dir is the muscat installation dir e.g. "/usr/local/empower",
-    it defaults to the compile time muscat directory
-    */
+/* {{{ proto resource setup_muscat(int size [, string muscat_dir])
+   Creates a new muscat session and returns the handle. Size is the ammount of memory in bytes to allocate for muscat muscat_dir is the muscat installation dir e.g. "/usr/local/empower", it defaults to the compile time muscat directory */
 PHP_FUNCTION(muscat_setup)
 {
 	zval **size_arg, **muscat_dir_arg;
@@ -205,11 +199,7 @@ PHP_FUNCTION(muscat_setup)
 /* }}} */
 
 /* {{{ proto resource setup_muscat_net(string muscat_host, int port)
-    Creates a new muscat session and returns the handle.
-    muscat_host is the hostname to connect to
-    port is the port number to connect to
-    - actually takes exactly the same args as fsockopen
-    */
+   Creates a new muscat session and returns the handle. muscat_host is the hostname to connect to port is the port number to connect to - actually takes exactly the same args as fsockopen */
 PHP_FUNCTION(muscat_setup_net)
 {
 	zval **socket_arg;
@@ -269,9 +259,8 @@ PHP_FUNCTION(muscat_setup_net_)
 }
 /* }}} */
 
-/* {{{ proto int muscat_give(resource Muscat_handle, string string)
-    Sends string to the core muscat api.
-    */
+/* {{{ proto int muscat_give(resource muscat_handle, string string)
+   Sends string to the core muscat api */
 PHP_FUNCTION(muscat_give)
 {
 	zval **Muscat_handle_arg, **string_arg;
@@ -297,11 +286,8 @@ PHP_FUNCTION(muscat_give)
 }
 /* }}} */
 
-/* {{{ proto string muscat_get(resource Muscat_handle)
-    gets a line back from the core muscat api.  Returns a literal false
-    when there is no more to get (as opposed to "").
-    Use ===FALSE or !==FALSE to check for this
-    */
+/* {{{ proto string muscat_get(resource muscat_handle)
+   Gets a line back from the core muscat api.  Returns a literal FALSE when there is no more to get (as opposed to ""). Use === FALSE or !== FALSE to check for this */
 PHP_FUNCTION(muscat_get)
 {
 	zval **Muscat_handle_arg;
@@ -331,9 +317,7 @@ PHP_FUNCTION(muscat_get)
 /* }}} */
 
 /* {{{ proto int muscat_close(resource muscat_handle)
-    Shuts down the muscat session and releases any memory back to php. [Not
-    back to the system, note!]
-    */
+   Shuts down the muscat session and releases any memory back to php. [Not back to the system, note!] */
 PHP_FUNCTION(muscat_close)
 {
 	zval **muscat_handle_arg;
