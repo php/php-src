@@ -384,6 +384,12 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, char *path, ch
 	int allow_overwrite = 0;
 	int read_write = 0;
 
+	if (context &&
+		php_stream_context_get_option(context, "ftp", "proxy", &tmpzval) == SUCCESS) {
+		/* Use http wrapper to proxy ftp request */
+		return php_stream_url_wrap_http(wrapper, path, mode, options, opened_path, context STREAMS_CC TSRMLS_CC);
+	}
+
 	tmp_line[0] = '\0';
 
 	if (strpbrk(mode, "r+")) {
@@ -1130,7 +1136,7 @@ static php_stream_wrapper_ops ftp_stream_wops = {
 	php_stream_ftp_stream_stat,
 	php_stream_ftp_url_stat, /* stat_url */
 	php_stream_ftp_opendir, /* opendir */
-	"FTP",
+	"ftp",
 	php_stream_ftp_unlink, /* unlink */
 	php_stream_ftp_rename, /* rename */
 	php_stream_ftp_mkdir,  /* mkdir */

@@ -15,6 +15,7 @@ PHP                                                                        NEWS
   . stream_socket_enable_crypto()  (Wez)
 - PHP will now respect extension dependencies when initializing.  (Wez)
 - Added Cursor support for MySQL 5.0.x in mysqli (Georg)
+- Added proxy support to ftp wrapper via http. (Sara)
 - Added MDTM support to ftp_url_stat. (Sara)
 - Added zlib stream filter suport. (Sara)
 - Added bz2 stream filter support. (Sara)
