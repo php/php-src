@@ -531,7 +531,8 @@ PHP_FUNCTION(pg_close)
 
 	if (id!=-1 
 		|| (pgsql_link && Z_RESVAL_PP(pgsql_link)==PGG(default_link))) {
-		zend_list_delete(PGG(default_link));
+		if (id!=-1)
+			zend_list_delete(PGG(default_link));
 		PGG(default_link) = -1;
 	}
 
