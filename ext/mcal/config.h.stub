@@ -1,0 +1,2 @@
+/* Define if you want the MCAL extension */
+#define HAVE_MCAL 0
