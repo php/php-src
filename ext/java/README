@@ -2,7 +2,7 @@ What is PHP4 ext/java?
 
    PHP4 ext/java provides a simple and effective means for creating and
    invoking methods on Java objects from PHP.  The JVM is created using JNI,
-   and everthing runs in-process.
+   and everything runs in-process.
 
    Two examples are provided, jver and jawt, to illustrate usage of this
    extension.  A few things to note:
