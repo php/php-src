@@ -268,7 +268,7 @@ int do_begin_function_call(znode *function_name CLS_DC);
 void do_begin_dynamic_function_call(znode *function_name CLS_DC);
 void do_begin_class_member_function_call(znode *class_name, znode *function_name CLS_DC);
 void do_end_function_call(znode *function_name, znode *result, znode *argument_list, int is_method, int is_dynamic_fcall CLS_DC);
-void do_return(znode *expr CLS_DC);
+void do_return(znode *expr, int do_end_vparse CLS_DC);
 ZEND_API int do_bind_function_or_class(zend_op *opline, HashTable *function_table, HashTable *class_table, int compile_time);
 void do_early_binding(CLS_D);
 

@@ -179,9 +179,9 @@ statement:
 	|	T_BREAK expr ';'		{ do_brk_cont(ZEND_BRK, &$2 CLS_CC); }
 	|	T_CONTINUE ';'		{ do_brk_cont(ZEND_CONT, NULL CLS_CC); }
 	|	T_CONTINUE expr ';'	{ do_brk_cont(ZEND_CONT, &$2 CLS_CC); }
-	|	T_RETURN ';'			{ do_return(NULL CLS_CC); }
-	|	T_RETURN expr_without_variable ';'		{ do_return(&$2 CLS_CC); }
-	|	T_RETURN cvar ';'		{ do_return(&$2 CLS_CC); }
+	|	T_RETURN ';'			{ do_return(NULL, 0 CLS_CC); }
+	|	T_RETURN expr_without_variable ';'		{ do_return(&$2, 0 CLS_CC); }
+	|	T_RETURN cvar ';'		{ do_return(&$2, 1 CLS_CC); }
 	|	T_GLOBAL global_var_list
 	|	T_STATIC static_var_list
 	|	T_ECHO echo_expr_list ';'

@@ -965,11 +965,11 @@ static int generate_free_foreach_copy(znode *foreach_copy CLS_DC)
 	return 0;
 }
 
-void do_return(znode *expr CLS_DC)
+void do_return(znode *expr, int do_end_vparse CLS_DC)
 {
 	zend_op *opline;
 	
-	if (expr->op_type==IS_VAR) {
+	if (do_end_vparse) {
 		if (CG(active_op_array)->return_reference) {
 			do_end_variable_parse(BP_VAR_W, 0 CLS_CC);
 		} else {
