@@ -16,6 +16,7 @@
    |                                               PHP4 port              |
    |          Christian Cartus <chc@idgruppe.de> : blobs, and IUS 9       |
    |          Jouni Ahto <jouni.ahto@exdec.fi>   : configuration stuff    |
+   |          Corne' Cornelius <cornec@reach.co.za> : input descriptors   |
    | Based on the MySQL code by:  Zeev Suraski <zeev@php.net>             |
    +----------------------------------------------------------------------+
 */

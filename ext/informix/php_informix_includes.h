@@ -15,6 +15,7 @@
    | Authors: Danny Heijl <Danny.Heijl@cevi.be>, initial cut (ODS 7)      |
    |          Christian Cartus <chc@idgruppe.de>, blobs, and IUS 9        |
    |          Jouni Ahto <jouni.ahto@exdec.fi>, configuration stuff       |
+   |          Corne' Cornelius <cornec@reach.co.za>,  input descriptors   |
    | based on mysql code by: Zeev Suraski <zeev@php.net>                  |
    +----------------------------------------------------------------------+
 */
