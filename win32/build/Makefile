@@ -72,7 +72,7 @@ clean-sapi:
 
 clean: clean-sapi
 	@echo Cleaning build dirs
-	@for %D in (_x $(BUILD_DIRS_SUB)) do @if exist @del /F /Q %D\*.* > NUL
+	@for %D in (_x $(BUILD_DIRS_SUB)) do @if exist %D @del /F /Q %D\*.* > NUL
 	-@del /F /Q $(BUILD_DIR)\*.res $(BUILD_DIR)\*.lib $(BUILD_DIR)\*.ilk $(BUILD_DIR)\*.pdb $(BUILD_DIR)\*.exp $(PHPDEF) $(BUILD_DIR)\php-$(PHP_VERSION_STRING).zip > NUL
 	-rmdir /s /q $(BUILD_DIR)\php-$(PHP_VERSION_STRING) 
 
