@@ -75,6 +75,7 @@ PHP_FUNCTION(array_diff);
 PHP_FUNCTION(array_sum);
 
 HashTable* php_splice(HashTable *, int, int, zval ***, int, HashTable **);
+PHPAPI void php_array_merge(HashTable *dest, HashTable *src, int recursive);
 int multisort_compare(const void *a, const void *b);
 
 typedef struct {
