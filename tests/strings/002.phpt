@@ -34,6 +34,10 @@ printf("printf test 22:%016x\n", 170);
 printf("printf test 23:%016X\n", 170);
 printf("printf test 24:%.5s\n", "abcdefghij");
 printf("printf test 25:%-2s\n", "gazonk");
+printf("printf test 26:%2\$d %1\$d\n", 1, 2);
+printf("printf test 27:%3\$d %d %d\n", 1, 2, 3);
+printf("printf test 28:%2\$02d %1\$2d\n", 1, 2);
+printf("printf test 29:%2\$-2d %1\$2d\n", 1, 2);
 
 ?>
 --EXPECT--
@@ -64,3 +68,7 @@ printf test 22:00000000000000aa
 printf test 23:00000000000000AA
 printf test 24:abcde
 printf test 25:gazonk
+printf test 26:2 1
+printf test 27:3 1 2
+printf test 28:02  1
+printf test 29:2   1
