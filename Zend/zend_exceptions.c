@@ -303,6 +303,17 @@ ZEND_METHOD(exception, getTraceAsString)
 }
 /* }}} */
 
+int zend_spprintf(char **message, int max_len, char *format, ...)
+{
+	va_list arg;
+	int len;
+
+	va_start(arg, format); 
+	len = zend_vspprintf(message, max_len, format, arg);
+	va_end(arg);
+	return len;
+}
+
 ZEND_METHOD(exception, __toString)
 {
 	zval *message, *file, *line, *trace;
@@ -329,12 +340,9 @@ ZEND_METHOD(exception, __toString)
 
 	zend_call_function(&fci, NULL TSRMLS_CC);
 
-	len = 11 + strlen(Z_OBJCE_P(getThis())->name) + 16 + Z_STRLEN_P(message) + 5 + Z_STRLEN_P(file) + 1 + MAX_LENGTH_OF_LONG + 14 + Z_STRLEN_P(trace) + 1;
-	str = emalloc(len);
-	sprintf(str, "exception '%s' with message '%s' in %s:%ld\nStack trace:\n%s", 
+	len = zend_spprintf(&str, 0, "exception '%s' with message '%s' in %s:%ld\nStack trace:\n%s", 
 		Z_OBJCE_P(getThis())->name, Z_STRVAL_P(message), Z_STRVAL_P(file), Z_LVAL_P(line), 
 		Z_STRLEN_P(trace) ? Z_STRVAL_P(trace) : "#0 {main}\n");
-	len = strlen(str);
 
 	/* We store the result in the private property string so we can access
 	 * the result in uncaught exception handlers without memleaks. */
@@ -485,14 +493,14 @@ ZEND_API void zend_exception_error(zval *exception TSRMLS_DC)
 		zend_fcall_info fci;
 		zval fname;
 		zval *str, *file, *line;
+		zval *old_exception = EG(exception);
 
-		file = zend_read_property(default_exception_ptr, exception, "file", sizeof("file")-1, 1 TSRMLS_CC);
-		line = zend_read_property(default_exception_ptr, exception, "line", sizeof("line")-1, 1 TSRMLS_CC);
+		EG(exception) = NULL;
 		
 		ZVAL_STRINGL(&fname, "__tostring", sizeof("__tostring")-1, 0);
 	
 		fci.size = sizeof(fci);
-		fci.function_table = &default_exception_ptr->function_table;
+		fci.function_table = &Z_OBJCE_P(exception)->function_table;
 		fci.function_name = &fname;
 		fci.symbol_table = NULL;
 		fci.object_pp = &exception;
@@ -500,11 +508,34 @@ ZEND_API void zend_exception_error(zval *exception TSRMLS_DC)
 		fci.param_count = 0;
 		fci.params = NULL;
 		fci.no_separation = 1;
-	
+
 		zend_call_function(&fci, NULL TSRMLS_CC);
-		zval_ptr_dtor(&str);
+
+		if (str) {
+			zend_update_property_string(default_exception_ptr, exception, "string", sizeof("string")-1, Z_STRVAL_P(str) TSRMLS_CC);
+			zval_ptr_dtor(&str);
+		} else if (EG(exception)) {
+			/* no result because of exception __tostring(), so at least return the class_name */
+			zend_update_property_string(default_exception_ptr, exception, "string", sizeof("string")-1, Z_OBJCE_P(exception)->name TSRMLS_CC);
+		}
 	
+		if (EG(exception)) {
+			/* do the best we can to inform about the inner exception */
+			if (instanceof_function(Z_OBJCE_P(exception), default_exception_ptr TSRMLS_CC)) {
+				file = zend_read_property(default_exception_ptr, EG(exception), "file", sizeof("file")-1, 1 TSRMLS_CC);
+				line = zend_read_property(default_exception_ptr, EG(exception), "line", sizeof("line")-1, 1 TSRMLS_CC);
+			} else {
+				file = NULL;
+				line = NULL;
+			}
+			zend_error_va(E_WARNING, file ? Z_STRVAL_P(file) : NULL, line ? Z_LVAL_P(line) : 0, "Uncaught %s in exception handling during call to %s::__tostring()", Z_OBJCE_P(EG(exception))->name, Z_OBJCE_P(exception)->name);
+		}
+
 		str = zend_read_property(default_exception_ptr, exception, "string", sizeof("string")-1, 1 TSRMLS_CC);
+		file = zend_read_property(default_exception_ptr, exception, "file", sizeof("file")-1, 1 TSRMLS_CC);
+		line = zend_read_property(default_exception_ptr, exception, "line", sizeof("line")-1, 1 TSRMLS_CC);
+
+		EG(exception) = old_exception;
 
 		zend_error_va(E_ERROR, Z_STRVAL_P(file), Z_LVAL_P(line), "Uncaught %s\n  thrown", Z_STRVAL_P(str));
 	} else {
