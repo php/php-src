@@ -54,6 +54,7 @@
 PHP_FUNCTION(solid_fetch_prev);
 #define SQLSMALLINT SWORD
 #define SQLUSMALLINT UWORD
+#define SQL_SUCCEEDED(rc) (((rc)&(~1))==0)
 
 #elif defined(HAVE_EMPRESS) /* Empress */
 
