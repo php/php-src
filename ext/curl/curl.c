@@ -580,9 +580,10 @@ PHP_FUNCTION(curl_exec)
 			php_error(E_WARNING, "Cannot initialize temporary file to save output from %s()", get_active_function_name());
 			RETURN_FALSE;
 		}
-		
-		curl_easy_setopt(curl_handle->cp, CURLOPT_FILE, fp);
-		
+		curl_handle->tmp_fp = fp;
+
+		curl_easy_setopt(curl_handle->cp, CURLOPT_FILE, fp);		
+	
 		is_temp_file = 1;
 	
 	} else if (curl_handle->return_transfer &&
@@ -803,6 +804,7 @@ static void _php_curl_close(zend_rsrc_list_entry *rsrc)
 {
 	php_curl *curl_handle = (php_curl *)rsrc->ptr;
 	curl_easy_cleanup(curl_handle->cp);
+	if (curl_handle->tmp_fp) fclose(curl_handle->tmp_fp);
 	zend_llist_clean(&curl_handle->to_free);
 	efree(curl_handle);
 }
