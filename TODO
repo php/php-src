@@ -83,6 +83,7 @@ ext/standard
     * strcase_replace(). (Andrei)
     * comparing arrays semantically (like Python). (Andrei)
     * move socket related functions to fsock.c.
+    * get_defined_funcs(), get_defined_vars().
     * NOT binary safe:
         strtok()
         basename()
