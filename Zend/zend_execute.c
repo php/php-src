@@ -865,11 +865,6 @@ static void call_overloaded_function(int arg_count, zval *return_value, HashTabl
 #	define free_alloca(p)	efree(p)
 #endif
 
-#undef do_alloca
-#undef free_aloca
-#	define do_alloca(p)		emalloc(p)
-#	define free_alloca(p)	efree(p)
-
 typedef struct _object_info {
 	zval *ptr;
 	zval **ptr_ptr;
