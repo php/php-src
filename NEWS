@@ -12,8 +12,6 @@ PHP                                                                        NEWS
   (Dmitry)
 - Fixed bug #27687 (Bug Adding Default Charset to "text/*" Content-Type 
   Header). (Marcus)
-- Fixed bug #27646 (Cannot serialize/unserialize non-finite numeric values).
-  (Marcus)
 - Fixed bug #27641 (Object cloning in ze1_compatibility_mode was reimplemented)
   (Dmitry, Andi)
 - Fixed bug #27628 (Simplify the process of making a POST request via stream
