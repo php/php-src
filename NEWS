@@ -41,8 +41,6 @@ PHP                                                                        NEWS
 - Fixed bug #32210 (proc_get_status() sets "running" always to true). (Ilia)
 - Fixed bug #32200 (Prevent using both --with-apxs2 and --with-apxs2filter).
   (Jani)
-- Fixed bug #32160 (file truncation in copy() when source & destination are
-  the same). (Ilia)
 - Fixed bug #32134 (Overloading offsetGet/offsetSet). (Marcus)
 - Fixed bug #32130 (ArrayIterator::seek() does not throw an Exception on 
   invalid index). (Marcus)
