@@ -3012,8 +3012,9 @@ static void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode, int 
 			do {
 			  zval ** item;
 			  char * key;
+			  ulong num_key;
 
-			  if (zend_hash_get_current_key_ex(HASH_OF(*EXT), &key, NULL, NULL, 0, &pos) == FAILURE)
+			  if (zend_hash_get_current_key_ex(HASH_OF(*EXT), &key, NULL, &num_key, 0, &pos) != HASH_KEY_IS_STRING)
 				  continue;
 
 			  if (zend_hash_get_current_data_ex(HASH_OF(*EXT), (void**)&item, &pos) == FAILURE)
