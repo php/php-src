@@ -1,5 +1,5 @@
 --TEST--
-Passing configuration file through tidy_parse_file()
+Passing configuration file through tidy_parse_file() (may fail with buggy libtidy)
 --SKIPIF--
 <?php if (!extension_loaded("tidy")) print "skip"; ?>
 --FILE--
