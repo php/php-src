@@ -1,3 +1,15 @@
+2002-09-24  Andi Gutmans  <andi@zend.com>
+
+    * zend_compile.c: - Fix leak
+
+    * zend_language_parser.y
+      zend_compile.c
+      zend_compile.h
+      zend_execute.c:
+    - Megapatch to try and support inheritance from sub-classes. Things might
+    - be *very* buggy now so don't get too upset if that happens.
+    - I still need to improve some stuff but it's a good step (hopefully).
+
 2002-09-23  Andi Gutmans  <andi@zend.com>
 
     * zend_globals.h
