@@ -446,10 +446,8 @@ Wrote: /usr/src/redhat/RPMS/i386/PEAR::Net_Socket-1.0-1.i386.rpm
         if (!file_exists($run_tests)) {
             $run_tests = PEAR_INSTALL_DIR . DIRECTORY_SEPARATOR . 'run-tests.php';
             if (!file_exists($run_tests)) {
-                return $this->raiseError("No `run-tests.php' file found at $rtsts. You need ".
-                                                "to copy there the run-tests.php file located ".
-                                                "inside the sources of your php distribution package, ".
-                                                "in order to make this command available.");
+                return $this->raiseError("No run-tests.php file found. Please copy this ".
+                                                "file from the sources of your PHP distribution to $rtsts");
             }
         }
         $plist = implode(" ", $params);
