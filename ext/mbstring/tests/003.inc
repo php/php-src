@@ -2,7 +2,7 @@
 // TODO: This is not a real test.... Need to change so that it does real testing
 //$debug = true;
 ini_set('include_path','.');
-include_once('common.inc');
+include_once('common.php');
 
 $ini = ini_get('mbstring.http_input');
 

@@ -2,7 +2,7 @@
 // TODO: 
 //$debug = true;
 ini_set('include_path','.');
-include_once('common.inc');
+include_once('common.php');
 
 // EUC-JP
 $r = mb_internal_encoding('EUC-JP');
