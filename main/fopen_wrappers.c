@@ -299,7 +299,7 @@ PHPAPI int php_fopen_primary_script(zend_file_handle *file_handle TSRMLS_DC)
 		if (s) {			/* if there is no path name after the file, do not bother */
 							/* to try open the directory */
 			length = s - (path_info + 2);
-			if (length > sizeof(user) - 1)
+			if (length > (int)sizeof(user) - 1)
 				length = sizeof(user) - 1;
 			memcpy(user, path_info + 2, length);
 			user[length] = '\0';

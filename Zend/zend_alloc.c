@@ -728,7 +728,7 @@ ZEND_API int _mem_block_check(void *ptr, int silent ZEND_FILE_LINE_DC ZEND_FILE_
 		had_problems = 1;
 		overflow_ptr = (char *) &end_magic;
 
-		for (i=0; i<sizeof(long); i++) {
+		for (i=0; i<(int)sizeof(long); i++) {
 			if (overflow_ptr[i]!=magic_ptr[i]) {
 				overflows++;
 			}
@@ -737,7 +737,7 @@ ZEND_API int _mem_block_check(void *ptr, int silent ZEND_FILE_LINE_DC ZEND_FILE_
 		zend_debug_alloc_output("%10s\t", "End:");
 		zend_debug_alloc_output("Overflown (magic=0x%0.8lX instead of 0x%0.8lX)\n", end_magic, MEM_BLOCK_END_MAGIC);
 		zend_debug_alloc_output("%10s\t","");
-		if (overflows>=sizeof(long)) {
+		if (overflows>=(int)sizeof(long)) {
 			zend_debug_alloc_output("At least %d bytes overflown\n", sizeof(long));
 		} else {
 			zend_debug_alloc_output("%d byte(s) overflown\n", overflows);

@@ -410,7 +410,8 @@ PHP_FUNCTION(gzcompress)
    Unzip a gzip-compressed string */
 PHP_FUNCTION(gzuncompress)
 {
-	int data_len, status, factor=1, maxfactor=16;
+	int data_len, status;
+	unsigned int factor=1, maxfactor=16;
 	long limit = 0;
 	unsigned long plength=0, length;
 	char *data, *s1=NULL, *s2=NULL;
@@ -433,7 +434,7 @@ PHP_FUNCTION(gzuncompress)
 	 that should be eneugh for all real life cases	
 	*/
 	do {
-		length = plength ? plength : data_len * (1 << factor++);
+		length = plength ? plength : (unsigned long)data_len * (1 << factor++);
 		s2 = (char *) erealloc(s1, length);
 		status = uncompress(s2, &length, data, data_len);
 		s1 = s2;
@@ -516,7 +517,8 @@ PHP_FUNCTION(gzdeflate)
    Unzip a gzip-compressed string */
 PHP_FUNCTION(gzinflate)
 {
-	int data_len, status, factor=1, maxfactor=16;
+	int data_len, status;
+	unsigned int factor=1, maxfactor=16;
 	long limit = 0;
 	unsigned long plength=0, length;
 	char *data, *s1=NULL, *s2=NULL;
@@ -544,7 +546,7 @@ PHP_FUNCTION(gzinflate)
 	stream.zfree = (free_func) Z_NULL;
 
 	do {
-		length = plength ? plength : data_len * (1 << factor++);
+		length = plength ? plength : (unsigned long)data_len * (1 << factor++);
 		s2 = (char *) erealloc(s1, length);
 
 		if (!s2 && s1) {

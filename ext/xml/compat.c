@@ -509,7 +509,7 @@ const XML_Char *error_mapping[] = {
 const XML_Char *
 XML_ErrorString(int code)
 {
-	if (code < 0 || code >= sizeof(error_mapping)) {
+	if (code < 0 || code >= (int)sizeof(error_mapping)) {
 		return "Unknown";
 	}
 	return error_mapping[code];

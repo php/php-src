@@ -847,7 +847,7 @@ PHP_MINIT_FUNCTION(pack)
 		/* Where to get lo to hi bytes from */
 		byte_map[0] = 0;
 
-		for (i = 0; i < sizeof(int); i++) {
+		for (i = 0; i < (int)sizeof(int); i++) {
 			int_map[i] = i;
 		}
 
@@ -879,7 +879,7 @@ PHP_MINIT_FUNCTION(pack)
 		/* Where to get hi to lo bytes from */
 		byte_map[0] = size - 1;
 
-		for (i = 0; i < sizeof(int); i++) {
+		for (i = 0; i < (int)sizeof(int); i++) {
 			int_map[i] = size - (sizeof(int) - i);
 		}
 
