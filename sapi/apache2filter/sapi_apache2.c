@@ -205,13 +205,20 @@ php_apache_sapi_register_variables(zval *track_vars_array TSRMLS_DC)
 	php_struct *ctx = SG(server_context);
 	const apr_array_header_t *arr = apr_table_elts(ctx->r->subprocess_env);
 	char *key, *val;
+ 	zval **path_translated_zv;
 	
 	APR_ARRAY_FOREACH_OPEN(arr, key, val)
 		if (!val) val = empty_string;
 		php_register_variable(key, val, track_vars_array TSRMLS_CC);
 	APR_ARRAY_FOREACH_CLOSE()
-		
+
 	php_register_variable("PHP_SELF", ctx->r->uri, track_vars_array TSRMLS_CC);
+
+	/* If PATH_TRANSLATED doesn't exist, copy it from SCRIPT_FILENAME */
+ 	if (!zend_hash_exists(Z_ARRVAL_P(track_vars_array), "PATH_TRANSLATED", sizeof("PATH_TRANSLATED"))
+ 		&& zend_hash_find(Z_ARRVAL_P(track_vars_array), "SCRIPT_FILENAME", sizeof("SCRIPT_FILENAME"), (void **) &path_translated_zv) == SUCCESS) {
+ 		php_register_variable("PATH_TRANSLATED", Z_STRVAL_PP(path_translated_zv), track_vars_array TSRMLS_CC);
+ 	}
 }
 
 static void
