@@ -71,16 +71,6 @@ zend_module_entry ncurses_module_entry = {
 ZEND_GET_MODULE(ncurses)
 #endif
 
-/* {{{ PHP_INI
- */
-/* Remove comments and fill if you need to have entries in php.ini
-PHP_INI_BEGIN()
-	STD_PHP_INI_ENTRY("ncurses.value",      "42", PHP_INI_ALL, OnUpdateLong, global_value, zend_ncurses_globals, ncurses_globals)
-	STD_PHP_INI_ENTRY("ncurses.string", "foobar", PHP_INI_ALL, OnUpdateString, global_string, zend_ncurses_globals, ncurses_globals)
-PHP_INI_END()
-*/
-/* }}} */
-
 #define PHP_NCURSES_CONST(x)  REGISTER_LONG_CONSTANT("NCURSES_"#x, x, CONST_CS | CONST_PERSISTENT)
 #define PHP_NCURSES_FKEY_CONST(x)  REGISTER_LONG_CONSTANT("NCURSES_KEY_F"#x, KEY_F0 + x, CONST_CS | CONST_PERSISTENT)
 
