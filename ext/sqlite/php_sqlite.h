@@ -51,7 +51,7 @@ PHP_FUNCTION(sqlite_array_query);
 PHP_FUNCTION(sqlite_single_query);
 
 PHP_FUNCTION(sqlite_fetch_array);
-PHP_FUNCTION(sqlite_fetch_string);
+PHP_FUNCTION(sqlite_fetch_single);
 PHP_FUNCTION(sqlite_fetch_all);
 PHP_FUNCTION(sqlite_current);
 PHP_FUNCTION(sqlite_column);
