@@ -56,7 +56,7 @@ RANLIB = @RANLIB@
 YACC = @YACC@
 MAINT = @MAINT@
 APXS = @APXS@
-APXS_LDFLAGS = @APXS_LDFLAGS@
+APXS_LDFLAGS = $(EXTRA_LIBS)
 WARNING_LEVEL = @WARNING_LEVEL@
 
 SOURCE = main.c internal_functions.c snprintf.c php3_sprintf.c \
@@ -87,11 +87,18 @@ php: all-recursive $(OBJS) @REGEX_LIB@ @FHTTPD_LIB@
 	$(CC) $(CFLAGS) -o $(BINNAME) $(LDFLAGS) $(OBJS) $(LIBS)
 
 # Apache modules
-libphp3.a libmodphp3.a libmodphp3-so.a: all-recursive $(OBJS)
+libphp3.a libmodphp3.a: all-recursive $(OBJS)
 	$(AR) $@.tmp $(OBJS)
 	$(srcdir)/scripts/armerge $@ $@.tmp ext/libphpext.a $(srcdir)/libzend/libzend.a
 	@rm -f $@.tmp
 	$(RANLIB) $(BINNAME)
+
+# Apache modules
+libmodphp3-so.a: all-recursive $(OBJS)
+	$(AR) $@.tmp $(OBJS)
+	$(srcdir)/scripts/armerge $@ $@.tmp ext/libphpext.a $(srcdir)/libzend/libzend.a
+	@rm -f $@.tmp
+	$(RANLIB) libmodphp3-so.a
 
 # Apache 1.3 shared module
 libphp3.so: $(srcdir)/mod_php3.c libmodphp3-so.a
