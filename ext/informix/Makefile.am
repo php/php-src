@@ -3,6 +3,7 @@
 INCLUDES=@INCLUDES@ -I@top_srcdir@ -I@top_srcdir@/libzend
 noinst_LTLIBRARIES=libphpext_informix.la
 libphpext_informix_la_SOURCES=ifx.c
+libphpext_informix_la_LIBADD=@IFX_LIBS@
 
 CLEANFILES = ifx.c
 
