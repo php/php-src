@@ -118,7 +118,7 @@ PHPAPI int php_com_safearray_get_elem(VARIANT *array, VARIANT *dest, LONG dim1 T
 	
 	/* check bounds */
 	if (dim1 < lbound || dim1 > ubound) {
-		php_com_throw_exception(E_INVALIDARG, "index out of bounds" TSRMLS_CC);
+		php_com_throw_exception(DISP_E_BADINDEX, "index out of bounds" TSRMLS_CC);
 		return 0;
 	}
 	

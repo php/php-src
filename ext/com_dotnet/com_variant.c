@@ -444,10 +444,7 @@ static void variant_binary_operation(enum variant_binary_opcode op, INTERNAL_FUN
 	if (SUCCEEDED(result)) {
 		php_com_wrap_variant(return_value, &vres, codepage TSRMLS_CC);
 	} else {
-		char *werr;
-		werr = php_win_err(result);
-		php_com_throw_exception(result, werr TSRMLS_CC);
-		LocalFree(werr);
+		php_com_throw_exception(result, NULL TSRMLS_CC);
 	}
 
 	VariantClear(&vres);
@@ -606,10 +603,7 @@ static void variant_unary_operation(enum variant_unary_opcode op, INTERNAL_FUNCT
 	if (SUCCEEDED(result)) {
 		php_com_wrap_variant(return_value, &vres, codepage TSRMLS_CC);
 	} else {
-		char *werr;
-		werr = php_win_err(result);
-		php_com_throw_exception(result, werr TSRMLS_CC);
-		LocalFree(werr);
+		php_com_throw_exception(result, NULL TSRMLS_CC);
 	}
 
 	VariantClear(&vres);
