@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
    | Authors: Rui Hirokawa <rui_hirokawa@ybb.ne.jp>                       |
    |          Stig Bakken <ssb@fast.no>                                   |
+   |          Moriyoshi Koizumi <moriyoshi@php.net>                       |
    +----------------------------------------------------------------------+
  */
 
