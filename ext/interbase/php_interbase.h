@@ -69,6 +69,10 @@ PHP_FUNCTION(ibase_blob_echo);
 PHP_FUNCTION(ibase_blob_info);
 PHP_FUNCTION(ibase_blob_import);
 
+PHP_FUNCTION(ibase_add_user);
+PHP_FUNCTION(ibase_modify_user);
+PHP_FUNCTION(ibase_delete_user);
+
 PHP_FUNCTION(ibase_errmsg);
 
 #define IBASE_MSGSIZE 256
