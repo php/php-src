@@ -1,3 +1,13 @@
+2005-03-16  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * (PHP_5_0)
+      zend_API.c:
+      MFH: don't call rshutdown twice for dl()'d modules.
+
+    * zend_API.c:
+      don't call rshutdown twice for dl()'d modules.
+      Spotted by Andrei.
+
 2005-03-15  Wez Furlong  <wez.php@thebrainroom.net>
 
     * zend.c
