@@ -29,10 +29,10 @@
 #include "ext/standard/info.h"
 #include "php_mysqli.h"
 
-#define MYSQLI_MAP_PROPERTY_LONG(__func, __type, __val)\
+#define MYSQLI_MAP_PROPERTY_LONG( __func, __type, __val)\
 int __func(mysqli_object *obj, zval **retval TSRMLS_DC) \
 {\
-	__type *p = (__type *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr;\
+	__type *p = (__type *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr; \
 	ALLOC_ZVAL(*retval);\
 	if (!p) {\
 		ZVAL_NULL(*retval);\
@@ -42,10 +42,10 @@ int __func(mysqli_object *obj, zval **retval TSRMLS_DC) \
 	return SUCCESS;\
 }\
 
-#define MYSQLI_MAP_PROPERTY_LONG_LONG(__func, __type, __val)\
+#define MYSQLI_MAP_PROPERTY_LONG_LONG( __func, __type, __val)\
 int __func(mysqli_object *obj, zval **retval TSRMLS_DC) \
 {\
-	__type *p = (__type *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr;\
+	__type *p = (__type *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr; \
 	ALLOC_ZVAL(*retval);\
 	if (!p) {\
 		ZVAL_NULL(*retval);\
@@ -61,10 +61,10 @@ int __func(mysqli_object *obj, zval **retval TSRMLS_DC) \
 	return SUCCESS;\
 }\
 
-#define MYSQLI_MAP_PROPERTY_STRING(__func, __type, __val)\
+#define MYSQLI_MAP_PROPERTY_STRING( __func, __type, __val)\
 int __func(mysqli_object *obj, zval **retval TSRMLS_DC) \
 {\
-	__type *p = (__type *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr;\
+	__type *p = (__type *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr; \
 	ALLOC_ZVAL(*retval);\
 	if (!p) {\
 		ZVAL_NULL(*retval);\
@@ -167,14 +167,14 @@ MYSQLI_MAP_PROPERTY_LONG(result_field_count_read, MYSQL_RES, field_count);
 MYSQLI_MAP_PROPERTY_LONG_LONG(result_num_rows_read, MYSQL_RES, row_count);
 
 /* statement properties */
-MYSQLI_MAP_PROPERTY_LONG_LONG(stmt_affected_rows_read, MYSQL_STMT, mysql->last_used_con->affected_rows);
-MYSQLI_MAP_PROPERTY_STRING(stmt_query_read, MYSQL_STMT, query);
-MYSQLI_MAP_PROPERTY_LONG(stmt_param_count_read, MYSQL_STMT, param_count);
-MYSQLI_MAP_PROPERTY_LONG(stmt_field_count_read, MYSQL_STMT, field_count);
-MYSQLI_MAP_PROPERTY_LONG(stmt_id_read, MYSQL_STMT, stmt_id);
-MYSQLI_MAP_PROPERTY_LONG(stmt_errno_read, MYSQL_STMT, last_errno);
-MYSQLI_MAP_PROPERTY_STRING(stmt_error_read, MYSQL_STMT, last_error);
-MYSQLI_MAP_PROPERTY_STRING(stmt_sqlstate_read, MYSQL_STMT, sqlstate);
+MYSQLI_MAP_PROPERTY_LONG_LONG(stmt_affected_rows_read, STMT, stmt->mysql->last_used_con->affected_rows);
+MYSQLI_MAP_PROPERTY_STRING(stmt_query_read, STMT, stmt->query);
+MYSQLI_MAP_PROPERTY_LONG(stmt_param_count_read, STMT, stmt->param_count);
+MYSQLI_MAP_PROPERTY_LONG(stmt_field_count_read, STMT, stmt->field_count);
+MYSQLI_MAP_PROPERTY_LONG(stmt_id_read, STMT, stmt->stmt_id);
+MYSQLI_MAP_PROPERTY_LONG(stmt_errno_read, STMT, stmt->last_errno);
+MYSQLI_MAP_PROPERTY_STRING(stmt_error_read, STMT, stmt->last_error);
+MYSQLI_MAP_PROPERTY_STRING(stmt_sqlstate_read, STMT, stmt->sqlstate);
 
 mysqli_property_entry mysqli_link_property_entries[] = {
 	{"affected_rows", link_affected_rows_read, NULL},
