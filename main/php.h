@@ -104,7 +104,7 @@ extern unsigned char second_arg_allow_ref[];
 #  define dlopen(a,b) LoadLibrary(a)
 #  define dlsym GetProcAddress
 # else
-#if HAVE_DLFCN_H && !(defined(_AIX) && APACHE)
+#if HAVE_DLFCN_H && !((defined(_AIX) || defined(AIX)) && APACHE)
 #  include <dlfcn.h>
 #endif
 # endif
