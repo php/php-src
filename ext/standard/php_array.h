@@ -75,6 +75,7 @@ PHP_FUNCTION(array_values);
 PHP_FUNCTION(array_count_values);
 PHP_FUNCTION(array_reverse);
 PHP_FUNCTION(array_pad);
+PHP_FUNCTION(array_flip);
 
 
 #define phpext_array_ptr array_module_ptr
