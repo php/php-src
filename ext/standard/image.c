@@ -46,10 +46,13 @@ PHPAPI const char php_sig_swf[3] = {'F', 'W', 'S'};
 PHPAPI const char php_sig_swc[3] = {'C', 'W', 'S'};
 PHPAPI const char php_sig_jpg[3] = {(char) 0xff, (char) 0xd8, (char) 0xff};
 PHPAPI const char php_sig_png[8] = {(char) 0x89, (char) 0x50, (char) 0x4e, (char) 0x47,
-(char) 0x0d, (char) 0x0a, (char) 0x1a, (char) 0x0a};
+                                    (char) 0x0d, (char) 0x0a, (char) 0x1a, (char) 0x0a};
 PHPAPI const char php_sig_tif_ii[4] = {'I','I', (char)0x2A, (char)0x00};
 PHPAPI const char php_sig_tif_mm[4] = {'M','M', (char)0x00, (char)0x2A};
-PHPAPI const char php_sig_jpc[3] = {(char)0xFF, (char)0x4F, (char)0xff};
+PHPAPI const char php_sig_jpc[3]  = {(char)0xff, (char)0x4f, (char)0xff};
+PHPAPI const char php_sig_jp2[12] = {(char)0x00, (char)0x00, (char)0x00, (char)0x0c,
+                                     (char)0x6a, (char)0x50, (char)0x20, (char)0x20,
+                                     (char)0x0d, (char)0x0a, (char)0x87, (char)0x0a};
 PHPAPI const char php_sig_iff[4] = {'F','O','R','M'};
 
 /* REMEMBER TO ADD MIME-TYPE TO FUNCTION php_image_type_to_mime_type */
@@ -76,7 +79,7 @@ PHP_MINIT_FUNCTION(imagetypes)
 	REGISTER_LONG_CONSTANT("IMAGETYPE_BMP",     IMAGE_FILETYPE_BMP,     CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMAGETYPE_TIFF_II", IMAGE_FILETYPE_TIFF_II, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMAGETYPE_TIFF_MM", IMAGE_FILETYPE_TIFF_MM, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMAGETYPE_JPC",     IMAGE_FILETYPE_JPC,     CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IMAGETYPE_JPC",     IMAGE_FILETYPE_JPC     ,CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMAGETYPE_JP2",     IMAGE_FILETYPE_JP2,     CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMAGETYPE_JPX",     IMAGE_FILETYPE_JPX,     CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMAGETYPE_JB2",     IMAGE_FILETYPE_JB2,     CONST_CS | CONST_PERSISTENT);
@@ -85,6 +88,7 @@ PHP_MINIT_FUNCTION(imagetypes)
 #endif	
 	REGISTER_LONG_CONSTANT("IMAGETYPE_IFF",     IMAGE_FILETYPE_IFF,     CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMAGETYPE_WBMP",    IMAGE_FILETYPE_WBMP,    CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IMAGETYPE_JPEG2000",IMAGE_FILETYPE_JPC     ,CONST_CS | CONST_PERSISTENT);/* keep alias */
 	return SUCCESS;
 }
 /* }}} */
@@ -534,12 +538,6 @@ static struct gfxinfo *php_handle_jpeg (php_stream * stream, pval *info TSRMLS_D
 }
 /* }}} */
 
-/* {{{ jpeg2000 constants
-  See ext/exif for more */
-#define JC_SOC   0x4F		/* Start of codestream */
-#define JC_SIZ   0x51		/* Image and tile size */
-/* }}} */
-
 /* {{{ php_read4
  */
 static unsigned int php_read4(php_stream * stream TSRMLS_DC)
@@ -556,37 +554,147 @@ static unsigned int php_read4(php_stream * stream TSRMLS_DC)
 }
 /* }}} */
 
-/* {{{ php_handle_tiff
-   main loop to parse TIFF structure */
+/* {{{ JPEG 2000 Marker Codes */
+#define JPEG2000_MARKER_PREFIX 0xFF /* All marker codes start with this */
+#define JPEG2000_MARKER_SOC 0x4F /* Start of Codestream */
+#define JPEG2000_MARKER_SOT 0x90 /* Start of Tile part */
+#define JPEG2000_MARKER_SOD 0x93 /* Start of Data */
+#define JPEG2000_MARKER_EOC 0xD9 /* End of Codestream */
+#define JPEG2000_MARKER_SIZ 0x51 /* Image and tile size */
+#define JPEG2000_MARKER_COD 0x52 /* Coding style default */ 
+#define JPEG2000_MARKER_COC 0x53 /* Coding style component */
+#define JPEG2000_MARKER_RGN 0x5E /* Region of interest */
+#define JPEG2000_MARKER_QCD 0x5C /* Quantization default */
+#define JPEG2000_MARKER_QCC 0x5D /* Quantization component */
+#define JPEG2000_MARKER_POC 0x5F /* Progression order change */
+#define JPEG2000_MARKER_TLM 0x55 /* Tile-part lengths */
+#define JPEG2000_MARKER_PLM 0x57 /* Packet length, main header */
+#define JPEG2000_MARKER_PLT 0x58 /* Packet length, tile-part header */
+#define JPEG2000_MARKER_PPM 0x60 /* Packed packet headers, main header */
+#define JPEG2000_MARKER_PPT 0x61 /* Packed packet headers, tile part header */
+#define JPEG2000_MARKER_SOP 0x91 /* Start of packet */
+#define JPEG2000_MARKER_EPH 0x92 /* End of packet header */
+#define JPEG2000_MARKER_CRG 0x63 /* Component registration */
+#define JPEG2000_MARKER_COM 0x64 /* Comment */
+/* }}} */
+
+/* {{{ php_handle_jpc
+   Main loop to parse JPEG2000 raw codestream structure */
 static struct gfxinfo *php_handle_jpc(php_stream * stream TSRMLS_DC)
 {
 	struct gfxinfo *result = NULL;
-	unsigned int marker, dummy;
-	unsigned short length, ff_read = 1;
+	unsigned short dummy_short;
+	int dummy_int, highest_bit_depth, bit_depth;
+	unsigned char first_marker_id;
+	int i;
 
-	marker = php_next_marker(stream, 0, 0, ff_read TSRMLS_CC);
-	ff_read = 0;
-	if ( marker == JC_SIZ)
-	{
-		length           = php_read2(stream TSRMLS_CC); /* Lsiz: length of segment */
-		if ( length<42 || length>49191) /* read the spec */
-			return NULL;
-		result = (struct gfxinfo *) ecalloc(1, sizeof(struct gfxinfo));
-		if ( !result)
-			return NULL;
-		dummy            = php_read2(stream TSRMLS_CC); /* Rsiz: capabilities */
-		result->height   = php_read4(stream TSRMLS_CC); /* Xsiz */
-		result->width    = php_read4(stream TSRMLS_CC); /* Ysiz */
-		dummy            = php_read4(stream TSRMLS_CC); /* X0siz */
-		dummy            = php_read4(stream TSRMLS_CC); /* Y0siz */
-		dummy            = php_read4(stream TSRMLS_CC); /* XTsiz */
-		dummy            = php_read4(stream TSRMLS_CC); /* YTsiz */
-		dummy            = php_read4(stream TSRMLS_CC); /* XT0siz */
-		dummy            = php_read4(stream TSRMLS_CC); /* YT0siz */
-		result->bits     = php_read2(stream TSRMLS_CC); /* Csiz: precision in bitss */
-		result->channels = 0; /* don't know yet */
-		return result;
+	/* JPEG 2000 components can be vastly different from one another.
+	   Each component can be sampled at a different resolution, use
+	   a different colour space, have a seperate colour depth, and
+	   be compressed totally differently! This makes giving a single
+	   "bit depth" answer somewhat problematic. For this implementation
+	   we'll use the highest depth encountered. */
+
+	/* Get the single byte that remains after the file type indentification */
+	first_marker_id = php_stream_getc(stream);
+
+	/* Ensure that this marker is SIZ (as is mandated by the standard) */
+	if (first_marker_id != JPEG2000_MARKER_SIZ) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "JPEG2000 codestream corrupt(Expected SIZ marker not found after SOC)");
+		return NULL;
 	}
+
+	result = (struct gfxinfo *)ecalloc(1, sizeof(struct gfxinfo));
+	if (!result) {
+		return NULL;
+	}
+
+	dummy_short = php_read2(stream TSRMLS_CC); /* Lsiz */
+	dummy_short = php_read2(stream TSRMLS_CC); /* Rsiz */
+	result->height = php_read4(stream TSRMLS_CC); /* Xsiz */
+	result->width = php_read4(stream TSRMLS_CC); /* Ysiz */
+
+	dummy_int = php_read4(stream TSRMLS_CC); /* XOsiz */
+	dummy_int = php_read4(stream TSRMLS_CC); /* YOsiz */
+	dummy_int = php_read4(stream TSRMLS_CC); /* XTsiz */
+	dummy_int = php_read4(stream TSRMLS_CC); /* YTsiz */
+	dummy_int = php_read4(stream TSRMLS_CC); /* XTOsiz */
+	dummy_int = php_read4(stream TSRMLS_CC); /* YTOsiz */
+
+	result->channels = php_read2(stream TSRMLS_CC); /* Csiz */
+
+	/* Collect and average bit depth info */
+	highest_bit_depth = bit_depth = 0;
+	for (i = 0; i < result->channels; i++) {
+		bit_depth = php_stream_getc(stream); /* Ssiz[i] */
+		bit_depth++;
+		if (bit_depth > highest_bit_depth) {
+			highest_bit_depth = bit_depth;
+		}
+
+		php_stream_getc(stream); /* XRsiz[i] */
+		php_stream_getc(stream); /* YRsiz[i] */
+	}
+
+	result->bits = highest_bit_depth;
+
+	return result;
+}
+/* }}} */
+
+/* {{{ php_handle_jp2
+   main loop to parse JPEG 2000 JP2 wrapper format structure */
+static struct gfxinfo *php_handle_jp2(php_stream *stream TSRMLS_DC)
+{
+	struct gfxinfo *result = NULL;
+	unsigned int box_length;
+	unsigned int box_type;
+	char jp2c_box_id[] = {(char)0x6a, (char)0x70, (char)0x32, (char)0x63};
+
+	/* JP2 is a wrapper format for JPEG 2000. Data is contained within "boxes".
+	   Boxes themselves can be contained within "super-boxes". Super-Boxes can
+	   contain super-boxes which provides us with a hierarchical storage system.
+
+	   It is valid for a JP2 file to contain multiple individual codestreams.
+	   We'll just look for the first codestream at the root of the box structure
+	   and handle that.
+	*/
+
+	for (;;)
+	{
+		box_length = php_read4(stream TSRMLS_CC); /* LBox */
+		/* TBox */
+		if (php_stream_read(stream, (void *)&box_type, sizeof(box_type)) != sizeof(box_type)) {
+			break;
+		}
+
+		/* Safe to use the 0 return for EOF as neither of these can be 0 */ 
+		if (box_length == 0 || box_type == 0) {
+			break;
+		}
+
+		if (box_length == 1) {
+			/* We won't handle XLBoxes */
+			return NULL;
+		}
+
+		if (!memcmp(&box_type, jp2c_box_id, 4))
+		{
+			/* Skip the first 3 bytes to emulate the file type examination */
+			php_stream_seek(stream, 3, SEEK_CUR);
+
+			result = php_handle_jpc(stream TSRMLS_CC);
+			break;
+		}
+
+		/* Skip over LBox (Which includes both TBox and LBox itself */
+		php_stream_seek(stream, box_length - 8, SEEK_CUR); 
+	}
+
+	if (result == NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "JP2 file has no codestreams at root level");
+	}
+
 	return result;
 }
 /* }}} */
@@ -867,7 +975,6 @@ PHPAPI const char * php_image_type_to_mime_type(int image_type)
 		case IMAGE_FILETYPE_GIF:
 			return "image/gif";
 		case IMAGE_FILETYPE_JPEG:
-		case IMAGE_FILETYPE_JPC:
 			return "image/jpeg";
 		case IMAGE_FILETYPE_PNG:
 			return "image/png";
@@ -885,6 +992,10 @@ PHPAPI const char * php_image_type_to_mime_type(int image_type)
 			return "image/iff";
 		case IMAGE_FILETYPE_WBMP:
 			return "image/vnd.wap.wbmp";
+		case IMAGE_FILETYPE_JPC:
+			return "application/octet-stream";
+		case IMAGE_FILETYPE_JP2:
+			return "image/jp2";
 		default:
 		case IMAGE_FILETYPE_UNKNOWN:
 			return "application/octet-stream"; /* suppose binary format */
@@ -912,20 +1023,24 @@ PHP_FUNCTION(image_type_to_mime_type)
    detect filetype from first bytes */
 PHPAPI int php_getimagetype(php_stream * stream, char *filetype TSRMLS_DC)
 {
-	char tmp[8];
+	char tmp[12];
 
 	if ( !filetype) filetype = tmp;
-	if((php_stream_read(stream, filetype, 3)) <= 0) {
+	if((php_stream_read(stream, filetype, 3)) != 3) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Read error!");
 		return IMAGE_FILETYPE_UNKNOWN;
 	}
 
+/* BYTES READ: 3 */
 	if (!memcmp(filetype, php_sig_gif, 3)) {
 		return IMAGE_FILETYPE_GIF;
 	} else if (!memcmp(filetype, php_sig_jpg, 3)) {
 		return IMAGE_FILETYPE_JPEG;
 	} else if (!memcmp(filetype, php_sig_png, 3)) {
-		php_stream_read(stream, filetype+3, 5);
+		if (php_stream_read(stream, filetype+3, 5) != 5) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Read error!");
+			return IMAGE_FILETYPE_UNKNOWN;
+		}
 		if (!memcmp(filetype, php_sig_png, 8)) {
 			return IMAGE_FILETYPE_PNG;
 		} else {
@@ -943,7 +1058,12 @@ PHPAPI int php_getimagetype(php_stream * stream, char *filetype TSRMLS_DC)
 	} else if (!memcmp(filetype, php_sig_jpc, 3)) {
 		return IMAGE_FILETYPE_JPC;
 	}
-	php_stream_read(stream, filetype+3, 1);
+
+	if (php_stream_read(stream, filetype+3, 1) != 1) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Read error!");
+		return IMAGE_FILETYPE_UNKNOWN;
+	}
+/* BYTES READ: 4 */
 	if (!memcmp(filetype, php_sig_tif_ii, 4)) {
 		return IMAGE_FILETYPE_TIFF_II;
 	} else
@@ -956,7 +1076,16 @@ PHPAPI int php_getimagetype(php_stream * stream, char *filetype TSRMLS_DC)
 	if (php_get_wbmp(stream, NULL, 1 TSRMLS_CC)) {
 		return IMAGE_FILETYPE_WBMP;
 	}
-    
+
+	if (php_stream_read(stream, filetype+4, 8) != 8) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Read error!");
+		return IMAGE_FILETYPE_UNKNOWN;
+	}
+/* BYTES READ: 12 */
+   	if (!memcmp(filetype, php_sig_jp2, 12)) {
+		return IMAGE_FILETYPE_JP2;
+	}
+
 	return IMAGE_FILETYPE_UNKNOWN;
 }
 /* }}} */
@@ -1042,10 +1171,13 @@ PHP_FUNCTION(getimagesize)
 		case IMAGE_FILETYPE_JPC:
 			result = php_handle_jpc(stream TSRMLS_CC);
 			break;
+		case IMAGE_FILETYPE_JP2:
+			result = php_handle_jp2(stream TSRMLS_CC);
+			break;
 		case IMAGE_FILETYPE_IFF:
-  			result = php_handle_iff(stream TSRMLS_CC);
-  			break;
-  		case IMAGE_FILETYPE_WBMP:
+			result = php_handle_iff(stream TSRMLS_CC);
+			break;
+		case IMAGE_FILETYPE_WBMP:
 			result = php_handle_wbmp(stream TSRMLS_CC);
 			break;
 		default:
