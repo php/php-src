@@ -68,7 +68,15 @@ ZEND_API void zend_objects_destroy_object(zend_object *object, zend_object_handl
 		zobj.value.obj.handlers = &std_object_handlers;
 		INIT_PZVAL(obj);
 
+		if (EG(exception)) {
+			zval_ptr_dtor(&EG(exception));
+			EG(exception) = NULL;
+		}
 		zend_call_method_with_0_params(&obj, object->ce, NULL, "__destruct", NULL);
+		if (EG(exception)) {
+			zval_ptr_dtor(&EG(exception));
+			EG(exception) = NULL;
+		}
 	}
 }
 
