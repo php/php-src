@@ -4,7 +4,7 @@
 
 # TARGTYPE "Win32 (x86) Static Library" 0x0104
 
-CFG=libbcmath - Win32 Debug_TS
+CFG=libbcmath - Win32 Release_TS_Inline
 !MESSAGE This is not a valid makefile. To build this project using NMAKE,
 !MESSAGE use the Export Makefile command and run
 !MESSAGE 
@@ -13,12 +13,13 @@ CFG=libbcmath - Win32 Debug_TS
 !MESSAGE You can specify a configuration when running NMAKE
 !MESSAGE by defining the macro CFG on the command line. For example:
 !MESSAGE 
-!MESSAGE NMAKE /f "libbcmath.mak" CFG="libbcmath - Win32 Debug_TS"
+!MESSAGE NMAKE /f "libbcmath.mak" CFG="libbcmath - Win32 Release_TS_Inline"
 !MESSAGE 
 !MESSAGE Possible choices for configuration are:
 !MESSAGE 
 !MESSAGE "libbcmath - Win32 Release_TS" (based on "Win32 (x86) Static Library")
 !MESSAGE "libbcmath - Win32 Debug_TS" (based on "Win32 (x86) Static Library")
+!MESSAGE "libbcmath - Win32 Release_TS_Inline" (based on "Win32 (x86) Static Library")
 !MESSAGE 
 
 # Begin Project
@@ -35,11 +36,11 @@ RSC=rc.exe
 # PROP BASE Intermediate_Dir "libbcmath_Release_TS"
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
-# PROP Output_Dir "libbcmath_Release_TS"
-# PROP Intermediate_Dir "libbcmath_Release_TS"
+# PROP Output_Dir "Release_TS"
+# PROP Intermediate_Dir "Release_TS"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDebug_TS" /D "_MBCS" /D "_LIB" /YX /FD /c
-# ADD CPP /nologo /W3 /GX /O2 /I "../ext/bcmath/libbcmath/src" /I "../Zend" /D "NDEBUG" /D ZEND_DEBUG=0 /D "_WINDOWS" /D "_USRDLL" /D "PHP4DLLTS_EXPORTS" /D "PHP_EXPORTS" /D "LIBZEND_EXPORTS" /D "TSRM_EXPORTS" /D "SAPI_EXPORTS" /D "MSVC5" /D "ZTS" /D "ZEND_WIN32" /D "PHP_WIN32" /D "WIN32" /D "_MBCS" /YX /FD /c
+# ADD CPP /nologo /MD /W3 /GX /O2 /I "../ext/bcmath/libbcmath/src" /I "../Zend" /D "NDEBUG" /D ZEND_DEBUG=0 /D "_WINDOWS" /D "_USRDLL" /D "PHP4DLLTS_EXPORTS" /D "PHP_EXPORTS" /D "LIBZEND_EXPORTS" /D "TSRM_EXPORTS" /D "SAPI_EXPORTS" /D "MSVC5" /D "ZTS" /D "ZEND_WIN32" /D "PHP_WIN32" /D "WIN32" /D "_MBCS" /YX /FD /c
 # ADD BASE RSC /l 0x409 /d "NDebug_TS"
 # ADD RSC /l 0x409 /d "NDebug_TS"
 BSC32=bscmake.exe
@@ -60,7 +61,7 @@ LIB32=link.exe -lib
 # PROP Intermediate_Dir "libbcmath_Debug_TS"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_Debug_TS" /D "_MBCS" /D "_LIB" /YX /FD /GZ /c
-# ADD CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_Debug_TS" /D "_MBCS" /D "_LIB" /YX /FD /GZ /c
+# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_Debug_TS" /D "_MBCS" /D "_LIB" /YX /FD /GZ /c
 # ADD BASE RSC /l 0x409 /d "_Debug_TS"
 # ADD RSC /l 0x409 /d "_Debug_TS"
 BSC32=bscmake.exe
@@ -68,6 +69,27 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
+# ADD LIB32 /nologo /out:"Debug_TS\libbcmath.lib"
+
+!ELSEIF  "$(CFG)" == "libbcmath - Win32 Release_TS_Inline"
+
+# PROP BASE Use_MFC 0
+# PROP BASE Output_Dir "libbcmath___Win32_Release_TS_Inline"
+# PROP BASE Intermediate_Dir "libbcmath___Win32_Release_TS_Inline"
+# PROP BASE Target_Dir ""
+# PROP Use_MFC 0
+# PROP Output_Dir "Release_TS_Inline"
+# PROP Intermediate_Dir "Release_TS_Inline"
+# PROP Target_Dir ""
+# ADD BASE CPP /nologo /MD /W3 /GX /O2 /I "../ext/bcmath/libbcmath/src" /I "../Zend" /D "NDEBUG" /D ZEND_DEBUG=0 /D "_WINDOWS" /D "_USRDLL" /D "PHP4DLLTS_EXPORTS" /D "PHP_EXPORTS" /D "LIBZEND_EXPORTS" /D "TSRM_EXPORTS" /D "SAPI_EXPORTS" /D "MSVC5" /D "ZTS" /D "ZEND_WIN32" /D "PHP_WIN32" /D "WIN32" /D "_MBCS" /YX /FD /c
+# ADD CPP /nologo /MD /W3 /GX /O2 /I "../ext/bcmath/libbcmath/src" /I "../Zend" /D "NDEBUG" /D ZEND_DEBUG=0 /D "_WINDOWS" /D "_USRDLL" /D "PHP4DLLTS_EXPORTS" /D "PHP_EXPORTS" /D "LIBZEND_EXPORTS" /D "TSRM_EXPORTS" /D "SAPI_EXPORTS" /D "MSVC5" /D "ZTS" /D "ZEND_WIN32" /D "PHP_WIN32" /D "WIN32" /D "_MBCS" /YX /FD /c
+# ADD BASE RSC /l 0x409 /d "NDebug_TS"
+# ADD RSC /l 0x409 /d "NDebug_TS"
+BSC32=bscmake.exe
+# ADD BASE BSC32 /nologo
+# ADD BSC32 /nologo
+LIB32=link.exe -lib
+# ADD BASE LIB32 /nologo /out:"Release_TS\libbcmath.lib"
 # ADD LIB32 /nologo
 
 !ENDIF 
@@ -76,6 +98,7 @@ LIB32=link.exe -lib
 
 # Name "libbcmath - Win32 Release_TS"
 # Name "libbcmath - Win32 Debug_TS"
+# Name "libbcmath - Win32 Release_TS_Inline"
 # Begin Group "Source Files"
 
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"

@@ -3,7 +3,7 @@ Microsoft Developer Studio Workspace File, Format Version 6.00
 
 ###############################################################################
 
-Project: "TSRM"=..\TSRM\TSRM.dsp - Package Owner=<4>
+Project: "TSRM"="..\TSRM\TSRM.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -15,7 +15,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "ZendTS"=..\Zend\ZendTS.dsp - Package Owner=<4>
+Project: "ZendTS"="..\Zend\ZendTS.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -30,7 +30,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "libmysql"=..\ext\mysql\libmysql\libmysql.dsp - Package Owner=<4>
+Project: "libbcmath"=".\libbcmath.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -42,7 +42,19 @@ Package=<4>
 
 ###############################################################################
 
-Project: "php4aolserver"=..\sapi\aolserver\php4aolserver.dsp - Package Owner=<4>
+Project: "libmysql"="..\ext\mysql\libmysql\libmysql.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "php4aolserver"="..\sapi\aolserver\php4aolserver.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -57,7 +69,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "php4apache"=..\sapi\apache\php4apache.dsp - Package Owner=<4>
+Project: "php4apache"="..\sapi\apache\php4apache.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -72,7 +84,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "php4dllts"=.\php4dllts.dsp - Package Owner=<4>
+Project: "php4dllts"=".\php4dllts.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -92,11 +104,14 @@ Package=<4>
     Begin Project Dependency
     Project_Dep_Name bindlib
     End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libbcmath
+    End Project Dependency
 }}}
 
 ###############################################################################
 
-Project: "php4isapi"=..\sapi\isapi\php4isapi.dsp - Package Owner=<4>
+Project: "php4isapi"="..\sapi\isapi\php4isapi.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -111,7 +126,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "php4nsapi"=..\sapi\nsapi\php4nsapi.dsp - Package Owner=<4>
+Project: "php4nsapi"="..\sapi\nsapi\php4nsapi.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -126,7 +141,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "php4ts"=.\php4ts.dsp - Package Owner=<4>
+Project: "php4ts"=".\php4ts.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -144,7 +159,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "servlet"=..\sapi\servlet\servlet.dsp - Package Owner=<4>
+Project: "servlet"="..\sapi\servlet\servlet.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
