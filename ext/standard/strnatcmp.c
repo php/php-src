@@ -36,8 +36,10 @@
 #  define UNUSED
 #endif
 
+#if 0
 static char const *version UNUSED =
     "$Id$";
+#endif
 /* {{{ compare_right
  */
 static int
