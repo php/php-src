@@ -350,7 +350,7 @@ next_iter:
 /* {{{ _get_base_node_value()
  */
 static void
-_get_base_node_value(xmlNodePtr node, zval **value TSRMLS_DC)
+_get_base_node_value(php_sxe_object *sxe_ref, xmlNodePtr node, zval **value TSRMLS_DC)
 {
 	php_sxe_object *subnode;
 	char           *contents;
@@ -364,14 +364,13 @@ _get_base_node_value(xmlNodePtr node, zval **value TSRMLS_DC)
 		}
 	} else {
 		subnode = php_sxe_object_new(TSRMLS_C);
-		subnode->document = emalloc(sizeof(simplexml_ref_obj));
-		subnode->document->refcount = 1;
-		subnode->document->ptr = node->doc;
+		subnode->document = sxe_ref->document;
+		subnode->document->refcount++;
 		subnode->node = node;
 
 		(*value)->type = IS_OBJECT;
 		(*value)->value.obj = php_sxe_register_object(subnode TSRMLS_CC);
-		zval_add_ref(value);
+		/*zval_add_ref(value);*/
 	}
 }
 /* }}} */
@@ -391,10 +390,16 @@ sxe_properties_get(zval *object TSRMLS_DC)
 	ulong            h;
 	int              namelen;
 
-	ALLOC_HASHTABLE(rv);
-	zend_hash_init(rv, 0, NULL, ZVAL_PTR_DTOR, 0);
-	
 	sxe = php_sxe_fetch_object(object TSRMLS_CC);
+
+	if (sxe->properties) {
+		zend_hash_clean(sxe->properties);
+		rv = sxe->properties;
+	} else {
+		ALLOC_HASHTABLE(rv);
+		zend_hash_init(rv, 0, NULL, ZVAL_PTR_DTOR, 0);
+		sxe->properties = rv;
+	}
 
 	GET_NODE(sxe, node);
 	node = node->children;
@@ -402,7 +407,7 @@ sxe_properties_get(zval *object TSRMLS_DC)
 	while (node) {
 		SKIP_TEXT(node);
 
-		_get_base_node_value(node, &value TSRMLS_CC);
+		_get_base_node_value(sxe, node, &value TSRMLS_CC);
 		
 		name = (char *) node->name;
 		namelen = xmlStrlen(node->name) + 1;
@@ -890,6 +895,11 @@ sxe_object_dtor(void *object, zend_object_handle handle TSRMLS_DC)
 	if (sxe->xpath) {
 		xmlXPathFreeContext(sxe->xpath);
 	}
+	
+	if (sxe->properties) {
+		zend_hash_destroy(sxe->properties);
+		FREE_HASHTABLE(sxe->properties);
+	}
 
 	efree(object);
 }
@@ -909,6 +919,7 @@ php_sxe_object_new(TSRMLS_D)
 	intern->document = NULL;
 	intern->nsmap = NULL;
 	intern->xpath = NULL;
+	intern->properties = NULL;
 
 	ALLOC_HASHTABLE(intern->zo.properties);
 	zend_hash_init(intern->zo.properties, 0, NULL, ZVAL_PTR_DTOR, 0);

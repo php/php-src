@@ -62,6 +62,7 @@ typedef struct {
 	simplexml_ref_obj *document;
 	xmlHashTablePtr nsmap;
 	xmlXPathContextPtr xpath;
+	HashTable *properties;
 } php_sxe_object;
 
 
