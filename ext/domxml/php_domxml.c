@@ -382,7 +382,7 @@ void domxmltestnode_class_startup()
 }
 #endif 
 
-/* {{{ proto string domxml_test(int id)
+/* {{{ proto int domxml_test(int id)
    Unity function for testing */
 PHP_FUNCTION(domxml_test)
 {
@@ -407,7 +407,7 @@ PHP_MINFO_FUNCTION(domxml)
 	php_info_print_table_end();
 }
 
-/* {{{ proto string domxml_attrname([int dir_handle])
+/* {{{ proto array domxml_attrname([int dir_handle])
    Returns list of attribute objects */
 PHP_FUNCTION(domxml_attrname)
 {
@@ -463,7 +463,7 @@ PHP_FUNCTION(domxml_attrname)
 }
 /* }}} */
 
-/* {{{ proto class domxml_node(string name)
+/* {{{ proto object domxml_node(string name)
    Creates node */
 PHP_FUNCTION(domxml_node)
 {
@@ -495,7 +495,7 @@ PHP_FUNCTION(domxml_node)
 }
 /* }}} */
 
-/* {{{ proto string domxml_lastchild([int node])
+/* {{{ proto object domxml_lastchild([int node])
    Read directory entry from dir_handle */
 PHP_FUNCTION(domxml_lastchild)
 {
@@ -545,7 +545,7 @@ PHP_FUNCTION(domxml_lastchild)
 }
 /* }}} */
 
-/* {{{ proto string domxml_parent([int node])
+/* {{{ proto object domxml_parent([int node])
    Returns parent of node */
 PHP_FUNCTION(domxml_parent)
 {
@@ -595,7 +595,7 @@ PHP_FUNCTION(domxml_parent)
 }
 /* }}} */
 
-/* {{{ proto string domxml_children([int node])
+/* {{{ proto array domxml_children([int node])
    Returns list of children nodes */
 PHP_FUNCTION(domxml_children)
 {
@@ -809,7 +809,7 @@ fprintf(stderr, "ATTRNAME = %s\n", attr->name);
 }
 /* }}} */
 
-/* {{{ proto string domxml_rootnew([int doc])
+/* {{{ proto array domxml_rootnew([int doc])
    Returns root nodes */
 PHP_FUNCTION(domxml_rootnew)
 {
@@ -871,7 +871,7 @@ PHP_FUNCTION(domxml_rootnew)
 }
 /* }}} */
 
-/* {{{ proto string domxml_root([int doc_handle])
+/* {{{ proto array domxml_root([int doc_handle])
    Returns root node of document */
 PHP_FUNCTION(domxml_root)
 {
@@ -929,7 +929,7 @@ PHP_FUNCTION(domxml_root)
 }
 /* }}} */
 
-/* {{{ proto string domxml_dtd([int doc_handle])
+/* {{{ proto object domxml_dtd([int doc_handle])
    Returns DTD of document */
 PHP_FUNCTION(domxml_intdtd)
 {
@@ -1019,7 +1019,7 @@ PHP_FUNCTION(domxml_dumpmem)
 }
 /* }}} */
 
-/* {{{ proto class xmldoc(string xmldoc)
+/* {{{ proto object xmldoc(string xmldoc)
    Creates DOM object of XML document */
 PHP_FUNCTION(xmldoc)
 {
@@ -1032,7 +1032,7 @@ PHP_FUNCTION(xmldoc)
 	}
 	convert_to_string(arg);
 
-	docp = xmlParseDoc(arg->value.str.val); //, arg->value.str.len);
+	docp = xmlParseDoc(arg->value.str.val); /*, arg->value.str.len); */
 	if (!docp) {
 		RETURN_FALSE;
 	}
@@ -1056,7 +1056,7 @@ PHP_FUNCTION(xmldoc)
 }
 /* }}} */
 
-/* {{{ proto class xmldocfile(string filename)
+/* {{{ proto object xmldocfile(string filename)
    Creates DOM object of XML document in file*/
 PHP_FUNCTION(xmldocfile)
 {
@@ -1086,7 +1086,7 @@ PHP_FUNCTION(xmldocfile)
 }
 /* }}} */
 
-/* {{{ proto string domxml_new_child([int node_handle,] string name, string content)
+/* {{{ proto object domxml_new_child([int node_handle,] string name, string content)
    Adds child node to parent node */
 PHP_FUNCTION(domxml_new_child)
 {
@@ -1141,7 +1141,7 @@ PHP_FUNCTION(domxml_new_child)
 }
 /* }}} */
 
-/* {{{ proto string domxml_set_content([int node_handle,] string content)
+/* {{{ proto bool domxml_set_content([int node_handle,] string content)
    Set content of a node */
 PHP_FUNCTION(domxml_set_content)
 {
@@ -1178,13 +1178,15 @@ PHP_FUNCTION(domxml_set_content)
 	if(content->value.str.len)
 		xmlNodeSetContent(nodep, content->value.str.val);
 
-	// FIXME: Actually the property 'content' of the node has to be updated
-	// as well. Since 'content' should disappear sooner or later and being
-	// replaces by a function 'content()' I skip this for now
+	/* FIXME: Actually the property 'content' of the node has to be updated
+	   as well. Since 'content' should disappear sooner or later and being
+	   replaces by a function 'content()' I skip this for now
+	*/
+	RETURN_TRUE;
 }
 /* }}} */
 
-/* {{{ proto string domxml_add_root([int doc_handle,] string name)
+/* {{{ proto object domxml_add_root([int doc_handle,] string name)
    Adds root node to document */
 PHP_FUNCTION(domxml_add_root)
 {
@@ -1239,7 +1241,7 @@ PHP_FUNCTION(domxml_add_root)
 }
 /* }}} */
 
-/* {{{ proto class domxml_new_xmldoc(string version)
+/* {{{ proto object domxml_new_xmldoc(string version)
    Creates new xmldoc */
 PHP_FUNCTION(domxml_new_xmldoc)
 {
@@ -1269,7 +1271,7 @@ PHP_FUNCTION(domxml_new_xmldoc)
 }
 /* }}} */
 
-/* {{{ proto string node_namespace([int node])
+/* {{{ proto int node_namespace([int node])
    Returns list of namespaces */
 static int node_namespace(zval **attributes, xmlNode *nodep)
 {
@@ -1306,7 +1308,7 @@ static int node_namespace(zval **attributes, xmlNode *nodep)
 	return 0;
 }
 
-/* {{{ proto string node_attributes([int node])
+/* {{{ proto int node_attributes(zval **attributes, int node)
    Returns list of children nodes */
 static int node_attributes(zval **attributes, xmlNode *nodep)
 {
@@ -1346,7 +1348,7 @@ static int node_attributes(zval **attributes, xmlNode *nodep)
 	return count;
 }
 
-/* {{{ proto string node_children([int node])
+/* {{{ proto int node_children([int node])
    Returns list of children nodes */
 static int node_children(zval **children, xmlNode *nodep)
 {
@@ -1410,7 +1412,7 @@ static int node_children(zval **children, xmlNode *nodep)
 }
 /* }}} */
 
-/* {{{ proto class xmltree(string xmldoc)
+/* {{{ proto object xmltree(string xmldoc)
    Create a tree of PHP objects from an XML document */
 PHP_FUNCTION(xmltree)
 {
@@ -1487,11 +1489,12 @@ PHP_FUNCTION(xmltree)
 }
 /* }}} */
 
-/* {{{ proto string xpath_init(void)
+/* {{{ proto bool xpath_init(void)
    Initializing XPath environment */
 PHP_FUNCTION(xpath_init)
 {
 	xmlXPathInit();
+	RETURN_TRUE;
 }
 /* }}} */
 
@@ -1574,7 +1577,6 @@ static void php_xpathptr_eval(INTERNAL_FUNCTION_PARAMETERS, int mode, int expr)
 				RETURN_FALSE;
 			}
 			ZEND_FETCH_RESOURCE(ctxp,xmlXPathContextPtr,tmp,-1, "XPathContext", le_xpathctxp)
-//			id_to_find = (*tmp)->value.lval;
 			if (getParameters(ht, 1, &str) == FAILURE)
 				WRONG_PARAM_COUNT;
 		} else {
