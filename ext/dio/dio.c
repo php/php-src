@@ -27,9 +27,15 @@
 
 #include <sys/stat.h>
 #include <sys/types.h>
+
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
+
 #include <fcntl.h>
+#ifndef PHP_WIN32
 #include <termios.h>
+#endif
 
 /* e.g. IRIX does not have CRTSCTS */
 #ifndef CRTSCTS
@@ -45,14 +51,20 @@ static int le_fd;
 
 function_entry dio_functions[] = {
 	PHP_FE(dio_open,      NULL)
+#ifndef PHP_WIN32
 	PHP_FE(dio_truncate,  NULL)
+#endif
 	PHP_FE(dio_stat,      NULL)
 	PHP_FE(dio_seek,      NULL)
+#ifndef PHP_WIN32
 	PHP_FE(dio_fcntl,     NULL)
+#endif
 	PHP_FE(dio_read,      NULL)
 	PHP_FE(dio_write,     NULL)
 	PHP_FE(dio_close,     NULL)
+#ifndef PHP_WIN32
 	PHP_FE(dio_tcsetattr,     NULL)
+#endif
 	{NULL, NULL, NULL}
 };
 
@@ -94,15 +106,22 @@ PHP_MINIT_FUNCTION(dio)
 	RDIOC(O_EXCL);
 	RDIOC(O_TRUNC);
 	RDIOC(O_APPEND);
+#ifdef O_NONBLOCK
 	RDIOC(O_NONBLOCK);
+#endif
+#ifdef O_NDELAY
 	RDIOC(O_NDELAY);
+#endif
 #ifdef O_SYNC
 	RDIOC(O_SYNC);
 #endif
 #ifdef O_ASYNC
 	RDIOC(O_ASYNC);
 #endif
+#ifdef O_NOCTTY
 	RDIOC(O_NOCTTY);
+#endif
+#ifndef PHP_WIN32
 	RDIOC(S_IRWXU);
 	RDIOC(S_IRUSR);
 	RDIOC(S_IWUSR);
@@ -127,6 +146,7 @@ PHP_MINIT_FUNCTION(dio)
 	RDIOC(F_UNLCK);
 	RDIOC(F_RDLCK);
 	RDIOC(F_WRLCK);
+#endif
 	
 	return SUCCESS;
 }
@@ -235,6 +255,7 @@ PHP_FUNCTION(dio_write)
 }
 /* }}} */
 
+#ifndef PHP_WIN32
 /* {{{ proto bool dio_truncate(resource fd, int offset)
    Truncate file descriptor fd to offset bytes */
 PHP_FUNCTION(dio_truncate)
@@ -257,6 +278,7 @@ PHP_FUNCTION(dio_truncate)
 	RETURN_TRUE;
 }
 /* }}} */
+#endif
 
 #define ADD_FIELD(f, v) add_assoc_long_ex(return_value, (f), sizeof(f), v);
 
@@ -288,8 +310,10 @@ PHP_FUNCTION(dio_stat)
 	ADD_FIELD("gid", s.st_gid);
 	ADD_FIELD("device_type", s.st_rdev);
 	ADD_FIELD("size", s.st_size);
+#ifndef PHP_WIN32
 	ADD_FIELD("block_size", s.st_blksize);
 	ADD_FIELD("blocks", s.st_blocks);
+#endif
 	ADD_FIELD("atime", s.st_atime);
 	ADD_FIELD("mtime", s.st_mtime);
 	ADD_FIELD("ctime", s.st_ctime);
@@ -315,6 +339,7 @@ PHP_FUNCTION(dio_seek)
 }
 /* }}} */
 
+#ifndef PHP_WIN32
 /* {{{ proto mixed dio_fcntl(resource fd, int cmd[, mixed arg])
    Perform a c library fcntl on fd */
 PHP_FUNCTION(dio_fcntl)
@@ -415,7 +440,9 @@ PHP_FUNCTION(dio_fcntl)
 	}
 }
 /* }}} */
+#endif
 
+#ifndef PHP_WIN32
 /* {{{ proto mixed dio_tcsetattr(resource fd,  array args )
    Perform a c library tcsetattr on fd */
 PHP_FUNCTION(dio_tcsetattr)
@@ -576,6 +603,7 @@ PHP_FUNCTION(dio_tcsetattr)
 	RETURN_TRUE;
 }
 /* }}} */
+#endif
 
 /* {{{ proto void dio_close(resource fd)
    Close the file descriptor given by fd */
