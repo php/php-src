@@ -34,10 +34,6 @@
 #include "zend.h"
 #include "php_compat.h"
 
-/* automake defines PACKAGE and VERSION for Zend too */
-#undef PACKAGE
-#undef VERSION
-
 #include "zend_API.h"
 
 #if PHP_BROKEN_SPRINTF
