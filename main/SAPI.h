@@ -27,8 +27,10 @@ extern sapi_module_struct sapi_module;  /* true global */
 
 
 typedef struct {
-	char *path_translated;
 	char *query_string;
+
+	char *path_translated;
+	char *request_uri;
 } sapi_request_info;
 
 

@@ -41,7 +41,6 @@ int php3_init_request_info(void *conf)
 	SLS_FETCH();
 
 	request_info.path_info = getenv("PATH_INFO");
-	request_info.path_translated = getenv("PATH_TRANSLATED");
 	request_info.current_user = NULL;
 	request_info.current_user_length = 0;
 	request_info.request_method = getenv("REQUEST_METHOD");
@@ -61,10 +60,8 @@ int php3_init_request_info(void *conf)
 	   script filename to php.exe thus makes us parse php.exe instead of file.php
 	   requires we get the info from path translated.  This can be removed at
 	   such a time taht apache nt is fixed */
-	else if (request_info.path_translated) {
-		request_info.script_filename = request_info.path_translated;
-	} else {
-		request_info.script_filename = NULL;
+	  else {
+		request_info.script_filename = getenv("PATH_TRANSLATED");
 	}
 #endif
 
@@ -82,8 +79,8 @@ int php3_init_request_info(void *conf)
 		request_info.filename = NULL;
 	}
 #else
-	if (request_info.path_translated) {
-		request_info.filename = estrdup(request_info.path_translated);
+	if (SG(request_info).path_translated) {
+		request_info.filename = estrdup(SG(request_info).path_translated);
 	} else {
 		request_info.filename = NULL;
 	}
@@ -98,98 +95,6 @@ int php3_destroy_request_info(void *conf)
 }
 #endif
 
-#if FHTTPD
-char script_name_resolved_buffer[2048];
-const char *method_names[] =
-{"Unknown", "GET", "HEAD", "POST", "PUT"};
-
-int php3_init_request_info(void *conf)
-{
-	static int exit_requested = 0;
-	int i, len;
-	req = NULL;
-
-	setalarm(idle_timeout);
-	while (checkinput(server->infd) && (req = readrequest(server))) {
-		alarm(0);
-		if (req->reqtype == FHTTPD_REQUEST) {
-			if (headermade)
-				php3_fhttpd_free_header();
-			response = createresponse(1024, req->id, req->fd, req->ver_major > 0);
-			if (response) {
-				if (req->script_name && req->script_name_resolved) {
-					len = strlen(req->script_name);
-					strncpy(script_name_resolved_buffer, req->script_name_resolved, 2047);
-					script_name_resolved_buffer[2047] = 0;
-
-					request_info.path_info = NULL;	/* Not supported */
-					request_info.path_translated = script_name_resolved_buffer;
-					request_info.query_string = req->query_string;
-					request_info.current_user = NULL;
-					request_info.current_user_length = 0;
-					request_info.request_method = method_names[req->method];
-					request_info.script_name = req->script_name;
-					request_info.content_length = req->databuffsize;
-					request_info.content_type = req->content_type;
-					request_info.cookies = NULL;
-					for (i = 0; i < req->nlines; i++) {
-						if (req->lines[i].paramc > 1) {
-							if (req->lines[i].params[0]) {
-								if (!strcasecmp(req->lines[i].params[0], "HTTP_COOKIE")) {
-									if (req->lines[i].params[1]) {
-										request_info.cookies = req->lines[i].params[1];
-									}
-								}
-							}
-						}
-					}
-					/* doc_root configuration variable is currently ignored,
-					   as it is with every other access method currently also. */
-
-					/* We always need to emalloc() filename, since it gets placed into
-					   the include file hash table, and gets freed with that table.
-					   Notice that this means that we don't need to efree() it in
-					   php3_destroy_request_info()! */
-					if (request_info.path_translated)
-						request_info.filename = estrdup(request_info.path_translated);
-					else
-						request_info.filename = NULL;
-
-					return SUCCESS;
-				} else {
-					deleterequest(req);
-					req = NULL;
-					setalarm(idle_timeout);
-				}
-			} else {
-				deleterequest(req);
-				req = NULL;
-				setalarm(idle_timeout);
-			}
-		} else {
-			if (req->reqtype == FHTTPD_EXITOK) {
-				exit_status = 1;
-				deleterequest(req);
-				req = NULL;
-				setalarm(idle_timeout);
-				return FAILURE;
-			}
-			deleterequest(req);
-			req = NULL;
-			setalarm(idle_timeout);
-		}
-	}
-	if (global_alarmflag) {
-		if (!exit_requested) {
-			requestexit(server, 1);
-			exit_requested = 1;
-		}
-	} else {
-	exit_status = 1; 
-	}
-	return FAILURE;
-}
-#endif							/* FHTTPD */
 
 #if APACHE
 int php3_init_request_info(void *conf)
@@ -226,7 +131,6 @@ int php3_init_request_info(void *conf)
 	else
 		request_info.filename = NULL;
 	request_info.path_info = sapi_rqst->path_info;
-	request_info.path_translated = sapi_rqst->path_translated;
 	request_info.current_user = sapi_rqst->current_user;
 	request_info.current_user_length = sapi_rqst->current_user_length;
 	request_info.request_method = sapi_rqst->request_method;
