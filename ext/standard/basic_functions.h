@@ -26,6 +26,10 @@
 
 #include "zend_highlight.h"
 
+#ifdef TRANS_SID
+#  include "url_scanner.h"
+#endif
+
 extern zend_module_entry basic_functions_module;
 #define basic_functions_module_ptr &basic_functions_module
 
@@ -161,6 +165,11 @@ typedef struct {
 
 	/* var.c */
 	zend_class_entry *incomplete_class;
+
+#ifdef TRANS_SID
+	/* url_scanner.c */
+	url_adapt_state_t url_adapt_state; 
+#endif
 } php_basic_globals;
 
 #ifdef ZTS
