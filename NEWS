@@ -63,13 +63,13 @@ PHP 4                                                                      NEWS
 - Removed extensions: (Jan, Jani, Sebastian)
   . ext/aspell
   . ext/ccvs
-  . ext/cybercash
   . ext/icap
   . sapi/fastcgi
   . sapi/fhttpd
-- Moved extensions to PECL (http://pear.php.net/): (James, Derick)
+- Moved extensions to PECL (http://pear.php.net/): (James, Derick, George)
   . ext/vpopmail
   . ext/cybermut
+  . ext/cybercash
 - ZLIB extension is now built-in in the Windows distribution.
   External extension (php_zlib.dll) has been removed. (Edin)
 - Fixed a crash when using invalid color index with imagecolortransparent().
