@@ -258,7 +258,7 @@ PHP_FUNCTION(system)
 }
 /* }}} */
 
-/* {{{ proto int passthru(string command [, int return_value])
+/* {{{ proto void passthru(string command [, int return_value])
    Execute an external program and display raw output */
 PHP_FUNCTION(passthru)
 {
