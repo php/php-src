@@ -56,6 +56,10 @@ php_array_globals array_globals;
 #define SORT_DESC		   -1
 #define SORT_ASC		    1
 
+#define SORT_REGULAR		0
+#define SORT_NUMERIC		1
+#define	SORT_STRING			2
+
 PHP_MINIT_FUNCTION(array)
 {
 #ifdef ZTS
@@ -70,6 +74,10 @@ PHP_MINIT_FUNCTION(array)
 	REGISTER_LONG_CONSTANT("SORT_ASC", SORT_ASC, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SORT_DESC", SORT_DESC, CONST_CS | CONST_PERSISTENT);
 
+	REGISTER_LONG_CONSTANT("SORT_REGULAR", SORT_REGULAR, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SORT_NUMERIC", SORT_NUMERIC, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SORT_STRING", SORT_STRING, CONST_CS | CONST_PERSISTENT);
+
 	return SUCCESS;
 }
 
@@ -82,6 +90,26 @@ PHP_MSHUTDOWN_FUNCTION(array)
     return SUCCESS;
 }
 
+static void set_compare_func(int sort_type)
+{
+	ARRAYLS_FETCH();
+
+	switch (sort_type) {
+		case SORT_NUMERIC:
+			ARRAYG(compare_func) = numeric_compare_function;
+			break;
+
+		case SORT_STRING:
+			ARRAYG(compare_func) = string_compare_function;
+			break;
+
+		case SORT_REGULAR:
+		default:
+			ARRAYG(compare_func) = compare_function;
+			break;
+	}
+}
+
 static int array_key_compare(const void *a, const void *b)
 {
 	Bucket *f;
@@ -89,6 +117,7 @@ static int array_key_compare(const void *a, const void *b)
 	pval result;
 	pval first;
 	pval second;
+	ARRAYLS_FETCH();
  
 	f = *((Bucket **) a);
 	s = *((Bucket **) b);
@@ -111,7 +140,7 @@ static int array_key_compare(const void *a, const void *b)
 		second.value.str.len = s->nKeyLength;
 	}
  
-    if (compare_function(&result, &first, &second) == FAILURE) {
+    if (ARRAYG(compare_func)(&result, &first, &second) == FAILURE) {
         return 0;
     } 
 
@@ -145,10 +174,12 @@ static int array_reverse_key_compare(const void *a, const void *b)
    Sort an array reverse by key */
 PHP_FUNCTION(krsort)
 {
-	pval **array;
+	zval **array, **sort_type;
+	int sort_type_val = SORT_REGULAR;
 	HashTable *target_hash;
 
-	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &array) == FAILURE) {
+	if (ARG_COUNT(ht) < 1 || ARG_COUNT(ht) > 2 ||
+		zend_get_parameters_ex(ARG_COUNT(ht), &array, &sort_type) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	target_hash = HASH_OF(*array);
@@ -156,6 +187,11 @@ PHP_FUNCTION(krsort)
 		php_error(E_WARNING, "Wrong datatype in krsort() call");
 		return;
 	}
+	if (ARG_COUNT(ht) == 2) {
+		convert_to_long_ex(sort_type);
+		sort_type_val = Z_LVAL_PP(sort_type);
+	}
+	set_compare_func(sort_type_val);
 	if (zend_hash_sort(target_hash, qsort, array_reverse_key_compare, 0) == FAILURE) {
 		return;
 	}
@@ -167,10 +203,12 @@ PHP_FUNCTION(krsort)
    Sort an array by key */
 PHP_FUNCTION(ksort)
 {
-	pval **array;
+	zval **array, **sort_type;
+	int sort_type_val = SORT_REGULAR;
 	HashTable *target_hash;
 
-	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &array) == FAILURE) {
+	if (ARG_COUNT(ht) < 1 || ARG_COUNT(ht) > 2 ||
+		zend_get_parameters_ex(ARG_COUNT(ht), &array, &sort_type) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	target_hash = HASH_OF(*array);
@@ -178,6 +216,11 @@ PHP_FUNCTION(ksort)
 		php_error(E_WARNING, "Wrong datatype in ksort() call");
 		return;
 	}
+	if (ARG_COUNT(ht) == 2) {
+		convert_to_long_ex(sort_type);
+		sort_type_val = Z_LVAL_PP(sort_type);
+	}
+	set_compare_func(sort_type_val);
 	if (zend_hash_sort(target_hash, qsort, array_key_compare,0) == FAILURE) {
 		return;
 	}
@@ -218,6 +261,7 @@ static int array_data_compare(const void *a, const void *b)
 	pval result;
 	pval *first;
 	pval *second;
+	ARRAYLS_FETCH();
  
 	f = *((Bucket **) a);
 	s = *((Bucket **) b);
@@ -225,7 +269,7 @@ static int array_data_compare(const void *a, const void *b)
 	first = *((pval **) f->pData);
 	second = *((pval **) s->pData);
 
-    if (compare_function(&result, first, second) == FAILURE) {
+    if (ARRAYG(compare_func)(&result, first, second) == FAILURE) {
         return 0;
     } 
 
@@ -351,10 +395,12 @@ PHP_FUNCTION(natcasesort)
    Sort an array and maintain index association */
 PHP_FUNCTION(asort)
 {
-	pval **array;
+	zval **array, **sort_type;
+	int sort_type_val = SORT_REGULAR;
 	HashTable *target_hash;
 
-	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &array) == FAILURE) {
+	if (ARG_COUNT(ht) < 1 || ARG_COUNT(ht) > 2 ||
+		zend_get_parameters_ex(ARG_COUNT(ht), &array, &sort_type) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	target_hash = HASH_OF(*array);
@@ -362,6 +408,11 @@ PHP_FUNCTION(asort)
 		php_error(E_WARNING, "Wrong datatype in asort() call");
 		return;
 	}
+	if (ARG_COUNT(ht) == 2) {
+		convert_to_long_ex(sort_type);
+		sort_type_val = Z_LVAL_PP(sort_type);
+	}
+	set_compare_func(sort_type_val);
 	if (zend_hash_sort(target_hash, qsort, array_data_compare,0) == FAILURE) {
 		return;
 	}
@@ -373,10 +424,12 @@ PHP_FUNCTION(asort)
    Sort an array in reverse order and maintain index association */
 PHP_FUNCTION(arsort)
 {
-	pval **array;
+	zval **array, **sort_type;
+	int sort_type_val = SORT_REGULAR;
 	HashTable *target_hash;
 
-	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &array) == FAILURE) {
+	if (ARG_COUNT(ht) < 1 || ARG_COUNT(ht) > 2 ||
+		zend_get_parameters_ex(ARG_COUNT(ht), &array, &sort_type) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	target_hash = HASH_OF(*array);
@@ -384,6 +437,11 @@ PHP_FUNCTION(arsort)
 		php_error(E_WARNING, "Wrong datatype in arsort() call");
 		RETURN_FALSE;
 	}
+	if (ARG_COUNT(ht) == 2) {
+		convert_to_long_ex(sort_type);
+		sort_type_val = Z_LVAL_PP(sort_type);
+	}
+	set_compare_func(sort_type_val);
 	if (zend_hash_sort(target_hash, qsort, array_reverse_data_compare,0) == FAILURE) {
 		RETURN_FALSE;
 	}
@@ -395,10 +453,12 @@ PHP_FUNCTION(arsort)
    Sort an array */
 PHP_FUNCTION(sort)
 {
-	pval **array;
+	zval **array, **sort_type;
+	int sort_type_val = SORT_REGULAR;
 	HashTable *target_hash;
 
-	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &array) == FAILURE) {
+	if (ARG_COUNT(ht) < 1 || ARG_COUNT(ht) > 2 ||
+		zend_get_parameters_ex(ARG_COUNT(ht), &array, &sort_type) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	target_hash = HASH_OF(*array);
@@ -406,6 +466,11 @@ PHP_FUNCTION(sort)
 		php_error(E_WARNING, "Wrong datatype in sort() call");
 		RETURN_FALSE;
 	}
+	if (ARG_COUNT(ht) == 2) {
+		convert_to_long_ex(sort_type);
+		sort_type_val = Z_LVAL_PP(sort_type);
+	}
+	set_compare_func(sort_type_val);
 	if (zend_hash_sort(target_hash, qsort, array_data_compare,1) == FAILURE) {
 		RETURN_FALSE;
 	}
@@ -417,10 +482,12 @@ PHP_FUNCTION(sort)
    Sort an array in reverse order */
 PHP_FUNCTION(rsort)
 {
-	pval **array;
+	zval **array, **sort_type;
+	int sort_type_val = SORT_REGULAR;
 	HashTable *target_hash;
 
-	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &array) == FAILURE) {
+	if (ARG_COUNT(ht) < 1 || ARG_COUNT(ht) > 2 ||
+		zend_get_parameters_ex(ARG_COUNT(ht), &array, &sort_type) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	target_hash = HASH_OF(*array);
@@ -428,6 +495,11 @@ PHP_FUNCTION(rsort)
 		php_error(E_WARNING, "Wrong datatype in rsort() call");
 		RETURN_FALSE;
 	}
+	if (ARG_COUNT(ht) == 2) {
+		convert_to_long_ex(sort_type);
+		sort_type_val = Z_LVAL_PP(sort_type);
+	}
+	set_compare_func(sort_type_val);
 	if (zend_hash_sort(target_hash, qsort, array_reverse_data_compare,1) == FAILURE) {
 		RETURN_FALSE;
 	}
@@ -1248,10 +1320,10 @@ PHP_FUNCTION(shuffle)
 /* }}} */
 
 
-/* HashTable* _phpi_splice(HashTable *in_hash, int offset, int length,
-						   zval ***list, int list_count, HashTable **removed) */
-HashTable* _phpi_splice(HashTable *in_hash, int offset, int length,
-						zval ***list, int list_count, HashTable **removed)
+/* HashTable* php_splice(HashTable *in_hash, int offset, int length,
+						 zval ***list, int list_count, HashTable **removed) */
+HashTable* php_splice(HashTable *in_hash, int offset, int length,
+					  zval ***list, int list_count, HashTable **removed)
 {
 	HashTable 	*out_hash = NULL;	/* Output hashtable */
 	int			 num_in,			/* Number of entries in the input hashtable */
@@ -1416,7 +1488,7 @@ static void _phpi_pop(INTERNAL_FUNCTION_PARAMETERS, int off_the_end)
 	INIT_PZVAL(return_value);
 	
 	/* Delete the first or last value */
-	new_hash = _phpi_splice((*stack)->value.ht, (off_the_end) ? -1 : 0, 1, NULL, 0, NULL);
+	new_hash = php_splice((*stack)->value.ht, (off_the_end) ? -1 : 0, 1, NULL, 0, NULL);
 	zend_hash_destroy((*stack)->value.ht);
 	efree((*stack)->value.ht);
 	(*stack)->value.ht = new_hash;
@@ -1474,7 +1546,7 @@ PHP_FUNCTION(array_unshift)
 
 	/* Use splice to insert the elements at the beginning.  Destroy old
 	   hashtable and replace it with new one */
-	new_hash = _phpi_splice(stack->value.ht, 0, 0, &args[1], argc-1, NULL);
+	new_hash = php_splice(stack->value.ht, 0, 0, &args[1], argc-1, NULL);
 	zend_hash_destroy(stack->value.ht);
 	efree(stack->value.ht);
 	stack->value.ht = new_hash;
@@ -1548,7 +1620,7 @@ PHP_FUNCTION(array_splice)
 	array_init(return_value);
 	
 	/* Perform splice */
-	new_hash = _phpi_splice(array->value.ht, offset, length,
+	new_hash = php_splice(array->value.ht, offset, length,
 							repl, repl_num,
 							&return_value->value.ht);
 	
@@ -1974,9 +2046,9 @@ PHP_FUNCTION(array_pad)
 	
 	/* Pad on the right or on the left */
 	if ((*pad_size)->value.lval > 0)
-		new_hash = _phpi_splice(return_value->value.ht, input_size, 0, pads, num_pads, NULL);
+		new_hash = php_splice(return_value->value.ht, input_size, 0, pads, num_pads, NULL);
 	else
-		new_hash = _phpi_splice(return_value->value.ht, 0, 0, pads, num_pads, NULL);
+		new_hash = php_splice(return_value->value.ht, 0, 0, pads, num_pads, NULL);
 
 	
 	/* Copy the result hash into return value */
@@ -2050,7 +2122,7 @@ int multisort_compare(const void *a, const void *b)
 	
 	r = 0;
 	do {
-		compare_function(&temp, *((zval **)ab[r]->pData), *((zval **)bb[r]->pData));
+		ARRAYG(compare_func)(&temp, *((zval **)ab[r]->pData), *((zval **)bb[r]->pData));
 		result = ARRAYG(multisort_flags)[r] * temp.value.lval;
 		if (result != 0)
 			return result;
@@ -2179,6 +2251,9 @@ PHP_FUNCTION(array_multisort)
 	}
 	for (k = 0; k < array_size; k++)
 		indirect[k][num_arrays] = NULL;
+
+	/* For now, assume it's always regular sort. */
+	set_compare_func(SORT_REGULAR);
 
 	/* Do the actual sort magic - bada-bim, bada-boom */
 	qsort(indirect, array_size, sizeof(Bucket **), multisort_compare);
