@@ -38,6 +38,7 @@
 #include "php_wddx_api.h"
 
 #define WDDX_BUF_LEN			256
+#define PHP_CLASS_NAME_VAR		"php_class_name"
 
 #define	EL_STRING				"string"
 #define EL_CHAR					"char"
@@ -345,7 +346,18 @@ static void _php_wddx_serialize_hash(wddx_packet *packet, zval *var)
 		sprintf(tmp_buf, WDDX_ARRAY_S, zend_hash_num_elements(target_hash));
 		_php_wddx_add_chunk(packet, tmp_buf);
 	}
-		
+
+	/* If variable is an object, serialize its classname */
+	if (var->type == IS_OBJECT)
+	{
+		sprintf(tmp_buf, WDDX_VAR_S, PHP_CLASS_NAME_VAR);
+		_php_wddx_add_chunk(packet, tmp_buf);
+		_php_wddx_add_chunk(packet, WDDX_STRING_S);
+		_php_wddx_add_chunk(packet, var->value.obj.ce->name);
+		_php_wddx_add_chunk(packet, WDDX_STRING_E);
+		_php_wddx_add_chunk(packet, WDDX_VAR_E);
+	}
+			
 	while(zend_hash_get_current_data(target_hash, (void**)&ent) == SUCCESS) {
 		if (hash_type == HASH_KEY_IS_STRING) {
 			ent_type = zend_hash_get_current_key(target_hash, &key, &idx);
@@ -411,7 +423,7 @@ static void _php_wddx_add_var(wddx_packet *packet, zval *name_var)
 	HashTable *target_hash;
 	ELS_FETCH();
 	
-	if (name_var->type & IS_STRING)
+	if (name_var->type == IS_STRING)
 	{
 		if (zend_hash_find(EG(active_symbol_table), name_var->value.str.val,
 							name_var->value.str.len+1, (void**)&val) != FAILURE) {
@@ -526,8 +538,13 @@ static void _php_wddx_push_element(void *user_data, const char *name, const char
 /* {{{ void _php_wddx_pop_element(void *user_data, const char *name) */
 static void _php_wddx_pop_element(void *user_data, const char *name)
 {
-	st_entry *ent1, *ent2;
-	wddx_stack *stack = (wddx_stack *)user_data;
+	st_entry 			*ent1, *ent2;
+	wddx_stack 			*stack = (wddx_stack *)user_data;
+	HashTable 			*target_hash;
+	zend_class_entry 	*ce;
+	zval				*obj;
+	zval				*tmp;
+	ELS_FETCH();
 	
 	if (!strcmp(name, EL_STRING) || !strcmp(name, EL_NUMBER) ||
 		!strcmp(name, EL_ARRAY) || !strcmp(name, EL_STRUCT)) {
@@ -535,14 +552,50 @@ static void _php_wddx_pop_element(void *user_data, const char *name)
 			wddx_stack_top(stack, (void**)&ent1);
 			stack->top--;
 			wddx_stack_top(stack, (void**)&ent2);
-			if (ent2->data->type == IS_ARRAY) {
+			if (ent2->data->type == IS_ARRAY || ent2->data->type == IS_OBJECT) {
+				target_hash = HASH_OF(ent2->data);
+				
 				if (ent1->varname) {
-					zend_hash_update(ent2->data->value.ht,
-									 ent1->varname, strlen(ent1->varname)+1,
-									 &ent1->data, sizeof(zval *), NULL);
+					if (!strcmp(ent1->varname, PHP_CLASS_NAME_VAR) &&
+						ent1->data->type == IS_STRING &&
+						ent1->data->value.str.len)
+					{
+						if (zend_hash_find(EG(class_table), ent1->data->value.str.val,
+										   ent1->data->value.str.len+1, (void **) &ce)==FAILURE) {
+							php_error(E_NOTICE, "Deserializing non-existant class: %s! No methods will be available!",
+									  ent1->data->value.str.val);
+							ce = &zend_standard_class_def;
+						}
+
+						/* Initialize target object */
+						MAKE_STD_ZVAL(obj);
+						INIT_PZVAL(obj);
+						object_init_ex(obj, ce);
+						
+						/* Merge current hashtable with object's default properties */
+						zend_hash_merge(obj->value.obj.properties,
+										ent2->data->value.ht,
+										(void (*)(void *)) zval_add_ref,
+										(void *) &tmp, sizeof(zval *), 0);
+
+						/* Clean up old array entry */
+						zval_dtor(ent2->data);
+						efree(ent2->data);
+						
+						/* Set stack entry to point to the newly created object */
+						ent2->data = obj;
+						
+						/* Clean up class name var entry */
+						zval_dtor(ent1->data);
+						efree(ent1->data);
+					}
+					else
+						zend_hash_update(target_hash,
+										 ent1->varname, strlen(ent1->varname)+1,
+										 &ent1->data, sizeof(zval *), NULL);
 					efree(ent1->varname);
 				} else	{
-					zend_hash_next_index_insert(ent2->data->value.ht,
+					zend_hash_next_index_insert(target_hash,
 												&ent1->data,
 												sizeof(zval *), NULL);
 				}
