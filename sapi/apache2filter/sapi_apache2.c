@@ -212,8 +212,10 @@ static int php_filter(ap_filter_t *f, ap_bucket_brigade *bb)
 		content_type = sapi_get_default_content_type(SLS_C);
 		f->r->content_type = apr_pstrdup(f->r->pool, content_type);
 		efree(content_type);
-		apr_table_set(f->r->headers_in, "Connection", "close");
+		apr_table_unset(f->r->headers_in, "Connection");
 		apr_table_unset(f->r->headers_out, "Content-Length");
+		apr_table_unset(f->r->headers_out, "Last-Modified");
+		apr_table_unset(f->r->headers_out, "Expires");
 		auth = apr_table_get(f->r->headers_in, "Authorization");
 		php_handle_auth_data(auth SLS_CC);
 	}
@@ -282,7 +284,12 @@ static int php_filter(ap_filter_t *f, ap_bucket_brigade *bb)
 #endif
 
 		smart_str_free(&content);
+		goto ok;
 skip_execution:
+#define NO_DATA "php_filter did not get ANY data"
+		eos = ap_bucket_create_transient(NO_DATA, sizeof(NO_DATA)-1);
+		AP_BRIGADE_INSERT_HEAD(bb, eos);
+ok:
 		php_request_shutdown(NULL);
 
 		/* Pass EOS bucket to next filter to signal end of request */
