@@ -25,6 +25,8 @@ Zend
 global
 ------
     For PHP 4.3.0:
+    * Change PHP error messages, so that they point to pages or sections 
+      in the PHP Manual.   
     * Make sure that all ZTS globals get destructed. Most ts_allocate_id()
       calls should have a dtor entry.
     * on some platforms unimplemented function will just do nothing 
