@@ -282,7 +282,8 @@ parameter.
         }
         $server = $this->config->get('master_server');
         if (!ereg('^http://', $params[0])) {
-            $pkgfile = "http://$server/get/$params[0]";
+            $getoption = isset($options['nocompress'])&&$options['nocompress']==1?'?uncompress=on':'';
+            $pkgfile = "http://$server/get/$params[0]".$getoption;
         } else {
             $pkgfile = $params[0];
         }
