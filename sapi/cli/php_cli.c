@@ -578,8 +578,6 @@ int main(int argc, char *argv[])
 				return FAILURE;
 			}
 			if (behavior == PHP_MODE_CLI_NO_TAGS) {
-				size_t len_r, len_w;
-				char buf[4096];
 				FILE *fp;
 
 				if (!(fp=tmpfile())) {
