@@ -246,4 +246,4 @@ typedef struct {
 #endif /* HAVE_DOMXML */
 #define phpext_domxml_ptr domxml_module_ptr
 
-#endif /* _PHP_DIR_H */
+#endif /* _PHP_DOMXML_H */
