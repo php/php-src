@@ -808,6 +808,7 @@ PHP_FUNCTION(session_unset)
 				== SUCCESS) {
 			zend_hash_del(&EG(symbol_table), variable, strlen(variable) + 1);
 		}
+		efree(variable);
 	}
 }
 /* }}} */
