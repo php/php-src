@@ -2164,7 +2164,7 @@ PHP_FUNCTION(odbc_close)
 		WRONG_PARAM_COUNT;
 	}
 
-	conn = (odbc_connection *) zend_fetch_resource(pv_conn, -1, "ODBC-Link", found_resource_type, 2, le_conn, le_pconn);
+	conn = (odbc_connection *) zend_fetch_resource(pv_conn, -1, "ODBC-Link", &found_resource_type, 2, le_conn, le_pconn);
 	if (found_resource_type==le_pconn) {
 		is_pconn = 1;
 	}
