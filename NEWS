@@ -2,6 +2,12 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.3-dev
+- Made the Sybase CT module thread safe (Zeev)
+- Added second argument to array_reverse() that indicatese whether
+  the original array keys should be preserved. (Andrei)
+- Clean up htmlspecialchars/htmlentities inconsistencies. (Rasmus)
+- PEAR: renamed DB_GETMODE_* to DB_FETCHMODE_*, added setFetchMode()
+- in DB_common to set the default mode, added some MySQL tests (Stig)
 - Made eval() and several other runtime-evaluated code portions report the
   nature and location of errors more accurately (Stas)
 - Added an optional parameter to wordwrap that cuts a string if the length of a
