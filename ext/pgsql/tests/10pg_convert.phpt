@@ -4,7 +4,16 @@ PostgreSQL pg_convert()
 <?php include("skipif.inc"); ?>
 --FILE--
 <?php
-include("pg_convert.inc");
+error_reporting(E_ALL);
+
+include 'config.inc';
+
+$db = pg_connect($conn_str);
+
+$fields = array('num'=>'1234', 'str'=>'AAA', 'bin'=>'BBB');
+$converted = pg_convert($db, $table_name, $fields);
+
+var_dump($converted);
 ?>
 --EXPECT--
 array(3) {
