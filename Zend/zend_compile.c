@@ -2573,6 +2573,7 @@ void zend_do_declare_implicit_property(TSRMLS_D)
 		&& !zend_hash_exists(&CG(active_class_entry)->properties_info, opline_ptr->op2.u.constant.value.str.val, opline_ptr->op2.u.constant.value.str.len+1)) {
 		znode property;
 
+		zend_error(E_STRICT, "Use of undefined property %s->%s", CG(active_class_entry)->name, opline_ptr->op2.u.constant.value.str.val);
 		property = opline_ptr->op2;
 		property.u.constant.value.str.val = estrndup(opline_ptr->op2.u.constant.value.str.val, opline_ptr->op2.u.constant.value.str.len);
 		zend_do_declare_property(&property, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_IMPLICIT_PUBLIC TSRMLS_CC);
