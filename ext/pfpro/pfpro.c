@@ -151,7 +151,7 @@ PHP_FUNCTION(pfpro_version)
 }
 /* }}} */
 
-/* {{{ proto void pfpro_init()
+/* {{{ proto bool pfpro_init()
    Initializes the Payflow Pro library */
 PHP_FUNCTION(pfpro_init)
 {
@@ -167,7 +167,7 @@ PHP_FUNCTION(pfpro_init)
 }
 /* }}} */
 
-/* {{{ proto void pfpro_cleanup()
+/* {{{ proto bool pfpro_cleanup()
    Shuts down the Payflow Pro library */
 PHP_FUNCTION(pfpro_cleanup)
 {

@@ -1443,7 +1443,7 @@ PHP_FUNCTION(pg_fetch_all)
 }
 /* }}} */
 
-/* {{{ proto mixed pg_result_seek(resource result, int offset)
+/* {{{ proto bool pg_result_seek(resource result, int offset)
    Set internal row offset */
 PHP_FUNCTION(pg_result_seek)
 {
@@ -3027,7 +3027,7 @@ PHP_FUNCTION(pg_get_result)
 }
 /* }}} */
 
-/* {{{ proto int pg_result_status(resource result[, long result_type])
+/* {{{ proto mixed pg_result_status(resource result[, long result_type])
    Get status of query result */
 PHP_FUNCTION(pg_result_status)
 {
@@ -3060,7 +3060,7 @@ PHP_FUNCTION(pg_result_status)
 /* }}} */
 
 
-/* {{{ proto resource pg_get_notify([resource connection[, result_type]])
+/* {{{ proto array pg_get_notify([resource connection[, result_type]])
    Get asynchronous notification */
 PHP_FUNCTION(pg_get_notify)
 {
@@ -3094,7 +3094,7 @@ PHP_FUNCTION(pg_get_notify)
 }
 /* }}} */
 
-/* {{{ proto resource pg_get_pid([resource connection)
+/* {{{ proto int pg_get_pid([resource connection)
    Get backend(server) pid */
 PHP_FUNCTION(pg_get_pid)
 {

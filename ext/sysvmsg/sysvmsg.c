@@ -125,7 +125,7 @@ PHP_MINFO_FUNCTION(sysvmsg)
 }
 /* }}} */
 
-/* {{{ proto array msg_set_queue(resource queue, array data)
+/* {{{ proto bool msg_set_queue(resource queue, array data)
    Set information for a message queue */
 PHP_FUNCTION(msg_set_queue)
 {
@@ -201,7 +201,7 @@ PHP_FUNCTION(msg_stat_queue)
 }
 /* }}} */
 
-/* {{{ proto resource msg_get_queue(long key [, long perms])
+/* {{{ proto resource msg_get_queue(int key [, int perms])
    Attach to a message queue */
 PHP_FUNCTION(msg_get_queue)
 {
@@ -251,7 +251,7 @@ PHP_FUNCTION(msg_remove_queue)
 }
 /* }}} */
 
-/* {{{ proto mixed msg_receive(resource queue, long desiredmsgtype, long &msgtype, long maxsize, mixed message [, bool unserialize=true [, long flags=0 [, long errorcode]]])
+/* {{{ proto mixed msg_receive(resource queue, int desiredmsgtype, int &msgtype, int maxsize, mixed message [, bool unserialize=true [, int flags=0 [, int errorcode]]])
    Send a message of type msgtype (must be > 0) to a message queue */
 PHP_FUNCTION(msg_receive)
 {
@@ -333,7 +333,7 @@ PHP_FUNCTION(msg_receive)
 }
 /* }}} */
 
-/* {{{ proto bool msg_send(resource queue, long msgtype, mixed message [, bool serialize=true [, bool blocking=true [, long errorcode]]])
+/* {{{ proto bool msg_send(resource queue, int msgtype, mixed message [, bool serialize=true [, bool blocking=true [, int errorcode]]])
    Send a message of type msgtype (must be > 0) to a message queue */
 PHP_FUNCTION(msg_send)
 {

@@ -320,7 +320,7 @@ PHP_FUNCTION(gzfile)
 }
 /* }}} */
 
-/* {{{ proto int gzopen(string filename, string mode [, int use_include_path])
+/* {{{ proto resource gzopen(string filename, string mode [, int use_include_path])
    Open a .gz-file and return a .gz-file pointer */
 PHP_FUNCTION(gzopen)
 {
