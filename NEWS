@@ -21,6 +21,8 @@ PHP 4                                                                      NEWS
 - Added improved JPEG 2000 support for getimagesize(). (Marcus, Adam Wright)
 - Added XBM and WBMP support for getimagesize(). (Marcus)
 - Fixed several errors in hwapi extension. Objects weren't handled properly. (Uwe)
+- Fixed bug #22363 (combinations of fwrite(), fread() and fseek() produce
+  unexpected results). (Wez)
 - Fixed bug #22330 (overloaded strrpos() gives wrong results).
   (david@santinoli.com, Moriyoshi)
 - Fixed bug #22308 (optimized passthru, code is now ~40 times faster). (Ilia)
@@ -59,9 +61,11 @@ PHP 4                                                                      NEWS
   (Wez)
 - Fixed bug #21809 (select would not always timeout during socket shutdown). (Wez)
 - Fixed bug #21725 (return behaviour differs between include and require). (Zeev)
+- Fixed bug #21713 (include remote files leaks descriptors on Solaris). (Wez)
 - Fixed bug #21708 (ucfirst() trouble again). (Moriyoshi)
 - Fixed bug #21689 (fgetcsv() suppresses some characters before a separator).
   (Masahiro, Moriyoshi)
+- Fixed bug #21912, #21676 (GetImageSize() failed for remote files). (Wez)
 - Fixed bug #21597 (made glob() understand Windows paths). (Edin)
 - Fixed bug #21549 (problem with Ingres II persistent connections). (Jani)
 - Fixed bug #21544 (Extended checks for where FreeTDS is installed). (Frank)
@@ -94,7 +98,9 @@ PHP 4                                                                      NEWS
 - Fixed bug #21228 (broken check for ob_gzhandler and made ob_start() return
   the correct value). (Ilia)
 - Fixed bug #21226 (parse_url handling of urls without a path). (Ilia)
+- Fixed bug #21185 (move_uploaded_file() does not ignore open_basedir). (Wez)
 - Fixed bug #21169 (Compile Failure and lots of warnings on UnixWare). (Derick)
+- Fixed bug #21131 (fopen() with mode 'a+' and rewind() doesn't work). (Wez)
 - Fixed bug #20857 (snmpset() failed always, patch by: rs@epost.de). (Jani)
 - Fixed bug #20802 (PHP would die silently when memory limit reached). (Ilia)
 - Fixed bug #20503 (imagesetbrush() not available on Windows). (Edin)
