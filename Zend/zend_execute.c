@@ -1806,13 +1806,6 @@ do_fcall_common:
 				NEXT_OPCODE();
 			case ZEND_NAMESPACE:
 				{
-					zend_namespace *namespace_ptr;
-
-					if (zend_hash_find(EG(namespaces), EX(opline)->op1.u.constant.value.str.val, EX(opline)->op1.u.constant.value.str.len + 1, (void **) &namespace_ptr) == FAILURE) {
-						zend_error(E_ERROR, "Internal namespaces error. Please report this!");
-					}
-					EG(function_table) = namespace_ptr->function_table;
-					EG(class_table) = namespace_ptr->class_table;
 					NEXT_OPCODE();
 				}
 			case ZEND_SEND_VAL: 

@@ -32,13 +32,11 @@
 #	define GLOBAL_CLASS_TABLE		global_class_table
 #	define GLOBAL_CONSTANTS_TABLE	global_constants_table
 #	define GLOBAL_AUTO_GLOBALS_TABLE	global_auto_globals_table
-#	define GLOBAL_NAMESPACES_TABLE	global_namespaces_table
 #else
 #	define GLOBAL_FUNCTION_TABLE	CG(function_table)
 #	define GLOBAL_CLASS_TABLE		CG(class_table)
 #	define GLOBAL_CONSTANTS_TABLE	CG(zend_constants)
 #	define GLOBAL_AUTO_GLOBALS_TABLE	CG(auto_globals)
-#	define GLOBAL_NAMESPACES_TABLE	CG(namespaces)
 #endif
 
 #if defined(ZEND_WIN32) && ZEND_DEBUG
@@ -67,7 +65,6 @@ HashTable *global_function_table;
 HashTable *global_class_table;
 HashTable *global_constants_table;
 HashTable *global_auto_globals_table;
-HashTable *global_namespaces_table;
 #endif
 
 zend_utility_values zend_uv;
@@ -434,21 +431,9 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions, i
 	GLOBAL_FUNCTION_TABLE = (HashTable *) malloc(sizeof(HashTable));
 	GLOBAL_CLASS_TABLE = (HashTable *) malloc(sizeof(HashTable));
 	GLOBAL_AUTO_GLOBALS_TABLE = (HashTable *) malloc(sizeof(HashTable));
-	GLOBAL_NAMESPACES_TABLE = (HashTable *) malloc(sizeof(HashTable));
 	zend_hash_init_ex(GLOBAL_FUNCTION_TABLE, 100, NULL, ZEND_FUNCTION_DTOR, 1, 0);
 	zend_hash_init_ex(GLOBAL_CLASS_TABLE, 10, NULL, ZEND_CLASS_DTOR, 1, 0);
 	zend_hash_init_ex(GLOBAL_AUTO_GLOBALS_TABLE, 8, NULL, NULL, 1, 0);
-	zend_hash_init_ex(GLOBAL_NAMESPACES_TABLE, 8, NULL, NULL, 1, 0);
-
-	{
-		zend_namespace main_namespace;
-
-		main_namespace.type = INTERNAL_NAMESPACE;
-		main_namespace.class_table = GLOBAL_CLASS_TABLE;
-		main_namespace.function_table = GLOBAL_FUNCTION_TABLE;
-
-		zend_hash_update(GLOBAL_NAMESPACES_TABLE, "", sizeof(""), &main_namespace, sizeof(zend_namespace), NULL);
-	}
 
 	register_standard_class();
 	zend_hash_init_ex(&module_registry, 50, NULL, ZEND_MODULE_DTOR, 1, 0);
@@ -472,7 +457,6 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions, i
 	compiler_globals->function_table = GLOBAL_FUNCTION_TABLE;
 	compiler_globals->class_table = GLOBAL_CLASS_TABLE;
 	compiler_globals->auto_globals = GLOBAL_AUTO_GLOBALS_TABLE;
-	compiler_globals->namespaces = GLOBAL_NAMESPACES_TABLE;
 	zend_startup_constants(tsrm_ls);
 	GLOBAL_CONSTANTS_TABLE = EG(zend_constants);
 #else
@@ -519,8 +503,6 @@ void zend_shutdown(TSRMLS_D)
 	free(GLOBAL_CLASS_TABLE);
 	zend_hash_destroy(GLOBAL_AUTO_GLOBALS_TABLE);
 	free(GLOBAL_AUTO_GLOBALS_TABLE);
-	zend_hash_destroy(GLOBAL_NAMESPACES_TABLE);
-	free(GLOBAL_NAMESPACES_TABLE);
 	zend_shutdown_extensions(TSRMLS_C);
 	free(zend_version_info);
 #ifndef ZTS

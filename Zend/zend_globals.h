@@ -87,7 +87,6 @@ struct _zend_compiler_globals {
 
 	HashTable *function_table;	/* function symbol table */
 	HashTable *class_table;		/* class table */
-	HashTable *namespaces;
 
 	HashTable filenames_table;
 
@@ -158,7 +157,6 @@ struct _zend_executor_globals {
 	HashTable *function_table;	/* function symbol table */
 	HashTable *class_table;		/* class table */
 	HashTable *zend_constants;	/* constants table */
-	HashTable *namespaces;
 
 	long precision;
 
