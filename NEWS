@@ -96,6 +96,8 @@ PHP                                                                        NEWS
 - Fixed bug with raw_post_data not getting set. (Brian)
 - Fixed bug in mysql::client_version(). (Georg)
 - Fixed ZTS destruction. (Marcus)
+- Fixed bug #32491 (File upload error - unable to create a temporary file).
+  (Uwe Schindler)
 - Fixed bug #32109 ($_POST is not populated in multithreaded environment).
   (Moriyoshi)
 - Fixed bug #31478 (segfault with empty() / isset()). (Moriyoshi)
