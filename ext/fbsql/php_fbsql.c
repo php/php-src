@@ -271,6 +271,7 @@ static void phpfbReleaseLink (zend_rsrc_list_entry *rsrc)
 			fbcdcClose(link->connection);
 			fbcdcRelease(link->connection);
 		}
+		if (link->execHandler) fbcehRelease(link->execHandler);
 		efree(link);
 		FB_SQL_G(linkCount)--;
 	}
@@ -292,6 +293,7 @@ static void phpfbReleasePLink (zend_rsrc_list_entry *rsrc)
 			fbcdcClose(link->connection);
 			fbcdcRelease(link->connection);
 		}
+		if (link->execHandler) fbcehRelease(link->execHandler);
 		free(link);
 		FB_SQL_G(linkCount)--;
 		FB_SQL_G(persistantCount)--;
@@ -2036,7 +2038,7 @@ void phpfbColumnAsString (PHPFBResult* result, int column, void* data ,int* leng
 			{
 				unsigned i;
 				unsigned int l = nBits / 8;
-				*length = l + 5;
+				*length = l*2+3+1;
 				if (value)
 				{
 					char*        r = emalloc(l*2+3+1);
@@ -2058,7 +2060,7 @@ void phpfbColumnAsString (PHPFBResult* result, int column, void* data ,int* leng
 			{
 				unsigned i;
 				unsigned int l = nBits;
-				*length = l + 5;
+				*length = l*2+3+1;
 				if (value)
 				{
 					char*        r = emalloc(l*2+3+1);
@@ -2847,10 +2849,7 @@ PHP_FUNCTION(fbsql_field_len)
 	}
 	else if (result->metaData)
 	{
-		unsigned int length = fbcdmdLength(fbccmdDatatype(fbcmdColumnMetaDataAtIndex(result->metaData,column)));
-		char         buffer[50];
-		sprintf(buffer,"%d",length);
-		RETURN_STRING(buffer, 1);
+		RETURN_LONG(fbcdmdLength(fbccmdDatatype(fbcmdColumnMetaDataAtIndex(result->metaData,column))));
 	}
 	else
 	{
