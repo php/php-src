@@ -1593,8 +1593,8 @@ PHP_FUNCTION(sqlite_fetch_column_types)
 		DB_FROM_OBJECT(db, object);
 	} else {
 		if (FAILURE == zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET,
-				ZEND_NUM_ARGS() TSRMLS_CC, "sr", &tbl, &tbl_len, &zdb) && 
-			FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &zdb, &tbl, &tbl_len)) {
+				ZEND_NUM_ARGS() TSRMLS_CC, "sr|l", &tbl, &tbl_len, &zdb, &result_type) && 
+			FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs|l", &zdb, &tbl, &tbl_len, &result_type)) {
 			return;
 		}
 		DB_FROM_ZVAL(db, &zdb);
