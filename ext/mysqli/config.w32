@@ -4,9 +4,9 @@
 ARG_WITH("mysqli", "MySQLi support", "no");
 
 if (PHP_MYSQLI != "no") {
-	if (CHECK_LIB("libmysql.lib", "mysql", PHP_MYSQL) &&
-			CHECK_HEADER_ADD_INCLUDE("mysql.h", "CFLAGS_MYSQL", PHP_PHP_BUILD + "\\include\\mysql;" + PHP_MYSQL)) {
-		EXTENSION("mysql", "mysqli.c mysqli_api.c mysqli_fe.c mysqli_nonapi.c mysqli_prop.c mysqli_report.c");
+	if (CHECK_LIB("libmysql.lib", "mysqli", PHP_MYSQL) &&
+			CHECK_HEADER_ADD_INCLUDE("mysql.h", "CFLAGS_MYSQLI", PHP_PHP_BUILD + "\\include\\mysql;" + PHP_MYSQL)) {
+		EXTENSION("mysqli", "mysqli.c mysqli_api.c mysqli_fe.c mysqli_nonapi.c mysqli_prop.c mysqli_report.c");
 		AC_DEFINE('HAVE_MYSQLILIB', 1, 'Have MySQLi library');
 	} else {
 		WARNING("mysqli not enabled; libraries and headers not found");
