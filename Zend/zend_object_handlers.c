@@ -91,9 +91,10 @@ static zval *zend_std_call_getter(zval *object, zval *member TSRMLS_DC)
 		zend_error(E_ERROR, "Could not call __get handler for class %s", Z_OBJCE_P(object)->name);
 		return NULL;
 	}
+	if (retval) {
+		retval->refcount--;
+	}
 
-	retval->refcount--;
-	
 	return retval;
 }
 
