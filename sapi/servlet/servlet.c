@@ -365,9 +365,16 @@ JNIEXPORT void JNICALL Java_net_php_servlet_send
 	 * Parse the file
 	 */
 	SETSTRING( SG(request_info).path_translated, pathTranslated );
+#ifdef VIRTUAL_DIR
+	file_handle.handle.fp = php_fopen_primary_script();
+#else
+        // The java runtime doesn't like the working directory to be
+        // changed, so save it and change it back as quickly as possible
+        // in the hopes that Java doesn't notice.
 	getcwd(cwd,MAXPATHLEN);
 	file_handle.handle.fp = php_fopen_primary_script();
 	chdir(cwd);
+#endif
 	file_handle.filename = SG(request_info).path_translated;
 	file_handle.free_filename = 0;
 	file_handle.type = ZEND_HANDLE_FP;
