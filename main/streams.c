@@ -808,6 +808,10 @@ PHPAPI size_t _php_stream_write(php_stream *stream, const char *buf, size_t coun
 			buf += justwrote;
 			count -= justwrote;
 			didwrite += justwrote;
+			
+			/* FIXME: invalidate the whole readbuffer */
+			stream->writepos = 0;
+			stream->readpos = 0;
 		} else {
 			break;
 		}
@@ -827,24 +831,26 @@ PHPAPI int _php_stream_seek(php_stream *stream, off_t offset, int whence TSRMLS_
 		return 0;
 
 	/* handle the case where we are in the buffer */
-	switch(whence) {
-		case SEEK_CUR:
-			if (offset > 0 && offset < stream->writepos - stream->readpos) {
-				stream->readpos += offset;
-				stream->position += offset;
-				stream->eof = 0;
-				return 0;
-			}
-			break;
-		case SEEK_SET:
-			if (offset > stream->position &&
-					offset < stream->position + stream->writepos - stream->readpos) {
-				stream->readpos += offset - stream->position;
-				stream->position = offset;
-				stream->eof = 0;
-				return 0;
-			}
-			break;
+	if ((stream->flags & PHP_STREAM_FLAG_NO_BUFFER) == 0) {
+		switch(whence) {
+			case SEEK_CUR:
+				if (offset > 0 && offset < stream->writepos - stream->readpos) {
+					stream->readpos += offset;
+					stream->position += offset;
+					stream->eof = 0;
+					return 0;
+				}
+				break;
+			case SEEK_SET:
+				if (offset > stream->position &&
+						offset < stream->position + stream->writepos - stream->readpos) {
+					stream->readpos += offset - stream->position;
+					stream->position = offset;
+					stream->eof = 0;
+					return 0;
+				}
+				break;
+		}
 	}
 	
 	/* invalidate the buffer contents */
@@ -1286,7 +1292,7 @@ static size_t php_stdiop_read(php_stream *stream, char *buf, size_t count TSRMLS
 
 		ret = fread(buf, 1, count, data->file);
 
-		if (ret == 0 && feof(data->file))
+		if (feof(data->file))
 			stream->eof = 1;
 	}
 	return ret;
