@@ -57,6 +57,7 @@ typedef struct _zend_objects_store {
 BEGIN_EXTERN_C()
 ZEND_API void zend_objects_store_init(zend_objects_store *objects, zend_uint init_size);
 ZEND_API void zend_objects_store_call_destructors(zend_objects_store *objects TSRMLS_DC);
+ZEND_API void zend_objects_store_mark_destructed(zend_objects_store *objects TSRMLS_DC);
 ZEND_API void zend_objects_store_destroy(zend_objects_store *objects);
 
 /* Store API functions */
