@@ -1,5 +1,5 @@
 --TEST--
-Bug #13213 (GetImageSize and wrong JPEG Comments
+Bug #13213 (GetImageSize and wrong JPEG Comments)
 --FILE--
 <?php
 var_dump(GetImageSize(dirname(__FILE__).'/bug13213.jpg'));
