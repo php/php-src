@@ -651,7 +651,7 @@ int main(int argc, char *argv[])
 			if (!(file_handle.handle.fp = VCWD_FOPEN(script_file, "rb"))) {
 				SG(headers_sent) = 1;
 				SG(request_info).no_headers = 1;
-				PUTS("Could not open input file.\n");
+				php_printf("Could not open input file: %s.\n", script_file);
 				goto err;
 			}
 			file_handle.filename = script_file;
