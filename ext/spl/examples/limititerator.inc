@@ -5,33 +5,49 @@ class LimitIterator implements Iterator
 	protected $it;
 	protected $offset;
 	protected $count;
-	protected $index;
+	private $pos;
 
-	// negative offset is  respected
 	// count === NULL means all
-	function __construct(Iterator $it, $offset = 0, $count = NULL)
+	function __construct(Iterator $it, $offset = 0, $count = -1)
 	{
+		if ($offset < 0) {
+			throw new exception('Parameter offset must be > 0');
+		}
+		if ($count < 0 && $count != -1) {
+			throw new exception('Parameter count must either be -1 or a value greater than or equal to 0');
+		}
 		$this->it     = $it;
 		$this->offset = $offset;
 		$this->count  = $count;
-		$this->index  = 0;
+		$this->pos    = 0;
 	}
 	
-	function rewind()
-	{
-		$this->it->rewind();
-		$this->index = 0;
+	function seek($position) {
+		if ($position < $this->offset) {
+			throw new exception('Cannot seek to '.$position.' which is below offset '.$this->offset);
+		}
+		if ($position > $this->offset + $this->count && $this->count != -1) {
+			throw new exception('Cannot seek to '.$position.' which is behind offset '.$this->offset.' plus count '.$this->count);
+		}
 		if ($this->it instanceof SeekableIterator) {
-			$this->index = $this->it->seek($this->offset);
+			$this->it->seek($position);
+			$this->pos = $position;
 		} else {
-			while($this->index < $this->offset && $this->it->hasMore()) {
+			while($this->pos < $position && $this->it->hasMore()) {
 				$this->next();
 			}
 		}
 	}
+
+	function rewind()
+	{
+		$this->it->rewind();
+		$this->pos = 0;
+		$this->seek($this->offset);
+	}
 	
 	function hasMore() {
-		return (is_null($this->count) || $this->index < $this->offset + $this->count)
+		return ($this->count == -1 || $this->pos < $this->offset + $this->count)
 			 && $this->it->hasMore();
 	}
 	
@@ -45,7 +61,11 @@ class LimitIterator implements Iterator
 
 	function next() {
 		$this->it->next();
-		$this->index++;
+		$this->pos++;
+	}
+
+	function getPosition() {
+		return $this->pos;
 	}
 }
 

@@ -25,6 +25,7 @@ EOF;
 $length = $argc > 3 ? $argv[3] : NULL;
 
 foreach(new LimitIterator(new DirectoryTreeIterator($argv[1]), @$argv[2], $length) as $file) {
+//foreach(new DirectoryTreeIterator($argv[1]) as $file) {
 	echo $file ."\n";
 }
 

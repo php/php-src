@@ -6,11 +6,13 @@ class CachingIterator
 	protected $current;
 	protected $key;
 	protected $more;
-	protected $strvalue;
+	protected $strValue;
+	protected $getStrVal;
 
-	function __construct(Iterator $it)
+	function __construct(Iterator $it, $getStrVal = true)
 	{
 		$this->it = $it;
+		$this->getStrVal = (boolean)$getStrVal;
 	}
 
 	function rewind()
@@ -24,15 +26,17 @@ class CachingIterator
 		if ($this->more = $this->it->hasMore()) {
 			$this->current = $this->it->current();
 			$this->key = $this->it->key();
-			if (is_object($this->current)) {
-				$this->strvalue = $this->current->__toString();
-			} else {
-				$this->strvalue = (string)$this->current;
+			if ($this->getStrVal) {
+				if (is_object($this->current)) {
+					$this->strValue = $this->current->__toString();
+				} else {
+					$this->strValue = (string)$this->current;
+				}
 			}
 		} else {
 			$this->current = NULL;
 			$this->key = NULL;
-			$this->strvalue = '';
+			$this->strValue = '';
 		}
 		$this->it->next();
 	}
@@ -64,7 +68,10 @@ class CachingIterator
 	
 	function __toString()
 	{
-		return $this->strvalue;
+		if (!$this->getStrVal) {
+			throw new exception('CachingIterator does not fetch string value (see CachingIterator::__construct)');
+		}
+		return $this->strValue;
 	}
 }
 
