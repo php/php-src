@@ -937,6 +937,8 @@ PHP_FUNCTION(imagetypes)
 
 /* {{{ _php_image_type
  */
+static const char php_sig_gd2[3] = {'g', 'd', '2'};
+
 static int _php_image_type (char data[8])
 {
 #ifdef HAVE_LIBGD15
