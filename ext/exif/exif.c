@@ -3776,7 +3776,7 @@ PHP_FUNCTION(exif_read_data)
 			}
 		}
 		for (i=0; i<SECTION_COUNT; i++) {
-			sprintf(tmp, ",%s,", exif_get_sectionname(i));
+			snprintf(tmp, sizeof(tmp), ",%s,", exif_get_sectionname(i));
 			if (strstr(sections_str, tmp)) {
 				sections_needed |= 1<<i;
 			}
