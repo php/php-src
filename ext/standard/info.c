@@ -96,7 +96,7 @@ PHPAPI void _php3_info(int flag)
 		}
 		PUTS("?=PHPE9568F34-D428-11d2-A769-00AA001ACF42\" border=\"0\" align=\"right\"></a>\n");
 		php3_printf("System: %s<br>Build Date: %s\n<br>", php3_uname, __DATE__);
-		php3_printf("php3.ini path:  %s<br>\n", CONFIGURATION_FILE_PATH);
+		php3_printf("php.ini path:  %s<br>\n", CONFIGURATION_FILE_PATH);
 
 		php3_printf("ZEND_DEBUG=%d<br>\n", ZEND_DEBUG);
 #ifdef ZTS
