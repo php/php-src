@@ -4001,19 +4001,22 @@ PHP_FUNCTION(exif_read_data)
    Reads the embedded thumbnail */
 PHP_FUNCTION(exif_thumbnail)
 {
-	zval **p_name, **p_width, **p_height, **p_imagetype;
-	int ret, arg_c = ZEND_NUM_ARGS();
+	zval *p_width, *p_height, *p_imagetype;
+	char *p_name;
+	int p_name_len, ret, arg_c = ZEND_NUM_ARGS();
 	image_info_type ImageInfo;
 
 	memset(&ImageInfo, 0, sizeof(ImageInfo));
 
-	if ((arg_c!=1 && arg_c!=3 && arg_c!=4) || zend_get_parameters_ex(arg_c, &p_name, &p_width, &p_height, &p_imagetype) == FAILURE) {
+	if (arg_c!=1 && arg_c!=3 && arg_c!=4) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_string_ex(p_name);
+	if (zend_parse_parameters(arg_c TSRMLS_CC, "s|z/z/z/", &p_name, &p_name_len, &p_width, &p_height, &p_imagetype) == FAILURE) {
+		return;
+	}
 
-	ret = exif_read_file(&ImageInfo, Z_STRVAL_PP(p_name), 1, 0 TSRMLS_CC);
+	ret = exif_read_file(&ImageInfo, p_name, 1, 0 TSRMLS_CC);
 	if (ret==FALSE) {
 		RETURN_FALSE;
 	}
@@ -4035,11 +4038,14 @@ PHP_FUNCTION(exif_thumbnail)
 		if (!ImageInfo.Thumbnail.width || !ImageInfo.Thumbnail.height) {
 			exif_scan_thumbnail(&ImageInfo TSRMLS_CC);
 		}
-		ZVAL_LONG(*p_width,  ImageInfo.Thumbnail.width);
-		ZVAL_LONG(*p_height, ImageInfo.Thumbnail.height);
+		zval_dtor(p_width);
+		zval_dtor(p_height);
+		ZVAL_LONG(p_width,  ImageInfo.Thumbnail.width);
+		ZVAL_LONG(p_height, ImageInfo.Thumbnail.height);
 	}
 	if (arg_c >= 4)	{
-		ZVAL_LONG(*p_imagetype, ImageInfo.Thumbnail.filetype);
+		zval_dtor(p_imagetype);
+		ZVAL_LONG(p_imagetype, ImageInfo.Thumbnail.filetype);
 	}
 
 #ifdef EXIF_DEBUG
@@ -4049,7 +4055,7 @@ PHP_FUNCTION(exif_thumbnail)
 	exif_discard_imageinfo(&ImageInfo);
 
 #ifdef EXIF_DEBUG
-	php_error_docref1(NULL TSRMLS_CC, Z_STRVAL_PP(p_name), E_NOTICE, "done");
+	php_error_docref1(NULL TSRMLS_CC, p_name, E_NOTICE, "done");
 #endif
 }
 /* }}} */
