@@ -34,6 +34,7 @@
 #endif
 
 #include "php.h"
+#include "php_globals.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -189,7 +190,7 @@ PHPAPI FILE *php3_fopen_wrapper(char *path, char *mode, int options, int *issock
 		return php3_fopen_with_path(path, mode, php3_ini.include_path, NULL);
 	} else {
 		if(!strcmp(mode,"r") || !strcmp(mode,"r+")) cm=0;
-		if (options & ENFORCE_SAFE_MODE && php3_ini.safe_mode && (!_php3_checkuid(path, cm))) {
+		if (options & ENFORCE_SAFE_MODE && PG(safe_mode) && (!_php3_checkuid(path, cm))) {
 			return NULL;
 		}
 		if (_php3_check_open_basedir(path)) return NULL;
@@ -316,7 +317,7 @@ PHPAPI FILE *php3_fopen_with_path(char *filename, char *mode, char *path, char *
 	}
 	/* Relative path open */
 	if (*filename == '.') {
-		if (php3_ini.safe_mode && (!_php3_checkuid(filename, cm))) {
+		if (PG(safe_mode) && (!_php3_checkuid(filename, cm))) {
 			return NULL;
 		}
 		if (_php3_check_open_basedir(filename)) return NULL;
@@ -332,7 +333,7 @@ PHPAPI FILE *php3_fopen_with_path(char *filename, char *mode, char *path, char *
 #else
 	if (*filename == '/') {
 #endif
-		if (php3_ini.safe_mode) {
+		if (PG(safe_mode)) {
 			if(php3_ini.doc_root) {
 				snprintf(trypath, MAXPATHLEN, "%s%s", php3_ini.doc_root, filename);
 			} else {
@@ -353,7 +354,7 @@ PHPAPI FILE *php3_fopen_with_path(char *filename, char *mode, char *path, char *
 		}
 	}
 	if (!path || (path && !*path)) {
-		if (php3_ini.safe_mode && (!_php3_checkuid(filename, cm))) {
+		if (PG(safe_mode) && (!_php3_checkuid(filename, cm))) {
 			return NULL;
 		}
 		if (_php3_check_open_basedir(filename)) return NULL;
@@ -378,7 +379,7 @@ PHPAPI FILE *php3_fopen_with_path(char *filename, char *mode, char *path, char *
 			end++;
 		}
 		snprintf(trypath, MAXPATHLEN, "%s/%s", ptr, filename);
-		if (php3_ini.safe_mode) {
+		if (PG(safe_mode)) {
 			if (stat(trypath, &sb) == 0 && (!_php3_checkuid(trypath, cm))) {
 				efree(pathbuf);
 				return NULL;
@@ -886,7 +887,7 @@ static FILE *php3_fopen_url_wrapper(const char *path, char *mode, int options, i
 		} else {
 			int cm=2;
 			if(!strcmp(mode,"r") || !strcmp(mode,"r+")) cm=0;
-			if (options & ENFORCE_SAFE_MODE && php3_ini.safe_mode && (!_php3_checkuid(path, cm))) {
+			if (options & ENFORCE_SAFE_MODE && PG(safe_mode) && (!_php3_checkuid(path, cm))) {
 				fp = NULL;
 			} else {
 				if (_php3_check_open_basedir((char *) path)) {

@@ -129,6 +129,14 @@ PHP_INI_MH(OnSetPrecision)
 }
 
 
+/* Need to convert to strings and make use of:
+ * DEFAULT_SHORT_OPEN_TAG
+ * PHP_SAFE_MODE
+ */
+#ifndef SAFE_MODE_EXEC_DIR
+#	define SAFE_MODE_EXEC_DIR "/"
+#endif
+
 PHP_INI_BEGIN()
 	PHP_INI_ENTRY("short_open_tag",		"1",		PHP_INI_ALL,		OnUpdateInt,			(void *) XtOffsetOf(php_core_globals, short_tags))
 	PHP_INI_ENTRY("asp_tags",			"0",		PHP_INI_ALL,		OnUpdateInt,			(void *) XtOffsetOf(php_core_globals, asp_tags))
@@ -144,6 +152,10 @@ PHP_INI_BEGIN()
 	PHP_INI_ENTRY("magic_quotes_gpc",		"1",			PHP_INI_ALL,		OnUpdateInt,	(void *) XtOffsetOf(php_core_globals, magic_quotes_gpc))
 	PHP_INI_ENTRY("magic_quotes_runtime",	"0",			PHP_INI_ALL,		OnUpdateInt,	(void *) XtOffsetOf(php_core_globals, magic_quotes_runtime))
 	PHP_INI_ENTRY("magic_quotes_sybase",	"0",			PHP_INI_ALL,		OnUpdateInt,	(void *) XtOffsetOf(php_core_globals, magic_quotes_sybase))
+
+	PHP_INI_ENTRY("safe_mode",				"0",			PHP_INI_SYSTEM,		OnUpdateInt,	(void *) XtOffsetOf(php_core_globals, safe_mode))
+	PHP_INI_ENTRY("sql.safe_mode",			"0",			PHP_INI_SYSTEM,		OnUpdateInt,	(void *) XtOffsetOf(php_core_globals, sql_safe_mode))
+	PHP_INI_ENTRY("safe_mode_exec_dir",		SAFE_MODE_EXEC_DIR,		PHP_INI_SYSTEM,	OnUpdateString,	(void *) XtOffsetOf(php_core_globals, safe_mode_exec_dir))
 PHP_INI_END()
 
 
@@ -456,7 +468,7 @@ void php3_set_time_limit(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *new_timeout;
 
-	if (php3_ini.safe_mode) {
+	if (PG(safe_mode)) {
 		php3_error(E_WARNING, "Cannot set time limit in safe mode");
 		RETURN_FALSE;
 	}
@@ -782,16 +794,6 @@ static int php3_config_ini_startup(ELS_D)
 				php3_ini.user_dir = NULL;
 			}
 		}
-		if (cfg_get_long("safe_mode", &php3_ini.safe_mode) == FAILURE) {
-			php3_ini.safe_mode = PHP_SAFE_MODE;
-		}
-		if (cfg_get_string("safe_mode_exec_dir", &php3_ini.safe_mode_exec_dir) == FAILURE) {
-#ifdef PHP_SAFE_MODE_EXEC_DIR
-			php3_ini.safe_mode_exec_dir = PHP_SAFE_MODE_EXEC_DIR;
-#else
-			php3_ini.safe_mode_exec_dir = "/";
-#endif
-		}
 		if (cfg_get_long("track_vars", &php3_ini.track_vars) == FAILURE) {
 			php3_ini.track_vars = PHP_TRACK_VARS;
 		}
@@ -825,9 +827,6 @@ static int php3_config_ini_startup(ELS_D)
 		}
 		if (cfg_get_string("extension_dir", &php3_ini.extension_dir) == FAILURE) {
 			php3_ini.extension_dir = NULL;
-		}
-		if (cfg_get_long("sql.safe_mode", &php3_ini.sql_safe_mode) == FAILURE) {
-			php3_ini.sql_safe_mode = 0;
 		}
 		if (cfg_get_long("engine", &php3_ini.engine) == FAILURE) {
 			php3_ini.engine = 1;

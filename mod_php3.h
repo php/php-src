@@ -48,9 +48,7 @@ typedef struct {
     long warn_plus_overloading;
     char *doc_root;
     char *user_dir;
-    long safe_mode;
     long track_vars;
-    char *safe_mode_exec_dir;
     char *cgi_ext;
     char *isapi_ext;
     char *nsapi_ext;
