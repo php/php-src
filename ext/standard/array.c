@@ -1038,7 +1038,7 @@ static int php_array_walk(HashTable *target_hash, zval **userdata, int recursive
 	zend_hash_internal_pointer_reset_ex(target_hash, &pos);
 
 	/* Iterate through hash */
-	while (zend_hash_get_current_data_ex(target_hash, (void **)&args[0], &pos) == SUCCESS) {
+	while (!EG(exception) && zend_hash_get_current_data_ex(target_hash, (void **)&args[0], &pos) == SUCCESS) {
 		if (recursive && Z_TYPE_PP(args[0]) == IS_ARRAY) {
 			HashTable *thash;
 			
