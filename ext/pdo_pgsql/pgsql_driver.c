@@ -86,6 +86,10 @@ static int pgsql_handle_closer(pdo_dbh_t *dbh TSRMLS_DC) /* {{{ */
 		PQfinish(H->server);
 		H->server = NULL;
 	}
+	if (H->einfo.errmsg) {
+		efree(H->einfo.errmsg);
+		H->einfo.errmsg = NULL;
+	}
 	return 0;
 }
 /* }}} */
@@ -174,6 +178,9 @@ static int pdo_pgsql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 
 	H = pecalloc(1, sizeof(pdo_pgsql_db_handle), dbh->is_persistent);
 	dbh->driver_data = H;
+
+	H->einfo.errcode = 0;
+	H->einfo.errmsg = NULL;
 	
 	/* handle for the server */
 	host = vars[0].optval;
