@@ -165,9 +165,8 @@ static size_t php_openssl_sockop_read(php_stream *stream, char *buf, size_t coun
 
 			if (nr_bytes <= 0) {
 				retry = handle_ssl_error(stream, nr_bytes TSRMLS_CC);
-				if (retry == 0 && !SSL_pending(sslsock->ssl_handle)) {
-					stream->eof = 1;
-				}
+				stream->eof = (retry == 0 && !SSL_pending(sslsock->ssl_handle));
+				
 			} else {
 				/* we got the data */
 				break;
