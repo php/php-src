@@ -52,7 +52,11 @@ int attr_is_equal_ex(xmlAttrPtr node, char *name, char *ns)
 	if (name == NULL || strcmp(node->name, name) == 0) {
 		if (ns) {
 			xmlNsPtr nsPtr = attr_find_ns(node);
-			return (strcmp(nsPtr->href, ns) == 0);
+			if (nsPtr) {
+				return (strcmp(nsPtr->href, ns) == 0);
+			} else {
+				return FALSE;
+			}
 		}
 		return TRUE;
 	}
@@ -64,7 +68,11 @@ int node_is_equal_ex(xmlNodePtr node, char *name, char *ns)
 	if (name == NULL || strcmp(node->name, name) == 0) {
 		if (ns) {
 			xmlNsPtr nsPtr = node_find_ns(node);
-			return (strcmp(nsPtr->href, ns) == 0);
+			if (nsPtr) {
+				return (strcmp(nsPtr->href, ns) == 0);
+			} else {
+				return FALSE;
+			}
 		}
 		return TRUE;
 	}
