@@ -1,9 +1,23 @@
-/* interface functions.
-
- * code by Shane Caraveo shane@caraveo.com
- * copy freely!
- *
+/*
+   +----------------------------------------------------------------------+
+   | PHP version 4.0                                                      |
+   +----------------------------------------------------------------------+
+   | Copyright (c) 1997, 1998, 1999, 2000 The PHP Group                   |
+   +----------------------------------------------------------------------+
+   | This source file is subject to version 2.01 of the PHP license,      |
+   | that is bundled with this package in the file LICENSE, and is        |
+   | available at through the world-wide-web at                           |
+   | http://www.php.net/license/2_01.txt.                                 |
+   | If you did not receive a copy of the PHP license and are unable to   |
+   | obtain it through the world-wide-web, please send a note to          |
+   | license@php.net so we can mail you a copy immediately.               |
+   +----------------------------------------------------------------------+
+   | Authors: Shane Caraveo             <shane@caraveo.com>               | 
+   |          Colin Viebrock            <cmv@easydns.com>                 |
+   |          Hartmut Holzgraefe        <hartmut@six.de>                  |
+   +----------------------------------------------------------------------+
  */
+/* $Id: */
 
 #include "php.h"
 #include "php_calendar.h"
@@ -22,6 +36,8 @@ function_entry calendar_functions[] = {
 	PHP_FE(jdmonthname, NULL)
 	PHP_FE(easter_date, NULL)
 	PHP_FE(easter_days, NULL)
+	PHP_FE(unixtojd,    NULL)
+	PHP_FE(jdtounix,    NULL)
 	{NULL, NULL, NULL}
 };
 
@@ -222,26 +238,30 @@ PHP_FUNCTION(jdtogregorian)
 }
 /* }}} */
 
-/* {{{ proto mixed jddayofweek(int juliandaycount, int mode)
+/* {{{ proto mixed jddayofweek(int juliandaycount, [int mode])
    Returns name or number of day of week from julian day count */
  PHP_FUNCTION(jddayofweek)
 {
-	pval **julday, **mode;
+	pval *julday, *mode;
 	int day;
 	char *daynamel, *daynames;
-
-	if (zend_get_parameters_ex(2, &julday, &mode) != SUCCESS) {
+	int myargc=ARG_COUNT(ht),mymode=0;
+	
+	if ((myargc < 1) || (myargc > 2) || (zend_get_parameters(ht,myargc, &julday, &mode) != SUCCESS)) {
 		WRONG_PARAM_COUNT;
 	}
 	
-	convert_to_long_ex(julday);
-	convert_to_long_ex(mode);
+	convert_to_long(julday);
+	if(myargc==2) {
+	  convert_to_long(mode);
+	  mymode = mode->value.lval;
+	} 
 
-	day = DayOfWeek((*julday)->value.lval);
+	day = DayOfWeek(julday->value.lval);
 	daynamel = DayNameLong[day];
 	daynames = DayNameShort[day];
 
-		switch ((*mode)->value.lval) {
+		switch (mymode) {
 			case 0L:
 				RETURN_LONG(day);
 				break;
