@@ -49,10 +49,6 @@ static DWORD timeout_thread_id;
 static int timeout_thread_initialized=0;
 #endif
 
-#ifdef NETWARE
-ZEND_API void zend_nw_stack_limit(int dummy);
-#endif
-
 #if ZEND_DEBUG
 static void (*original_sigsegv_handler)(int);
 static void zend_handle_sigsegv(int dummy)
@@ -179,10 +175,6 @@ void init_executor(TSRMLS_D)
 	EG(full_tables_cleanup) = 0;
 #ifdef ZEND_WIN32
 	EG(timed_out) = 0;
-#endif
-
-#ifdef NETWARE
-	EG(nw_stack_limit) = 0;
 #endif
 
 	EG(exception) = NULL;
@@ -1110,13 +1102,6 @@ ZEND_API void zend_timeout(int dummy)
 	zend_error(E_ERROR, "Maximum execution time of %d second%s exceeded",
 			  EG(timeout_seconds), EG(timeout_seconds) == 1 ? "" : "s");
 }
-
-#ifdef NETWARE
-ZEND_API void zend_nw_stack_limit(int dummy)
-{
-    zend_error(E_ERROR, "Stack limit exceeded");
-}
-#endif
 
 #ifdef ZEND_WIN32
 static LRESULT CALLBACK zend_timeout_WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
