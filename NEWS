@@ -1,6 +1,7 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2002, Version 4.3.0
+- mbstring module is enabled by default (Yasuo)
 - Fixed mixing OCIPlogon() and OCINLogon() to not leak Oracle-Sessions. (thies)
 - Changed old $node->append_child() to $node->append_sibling() since
   the new append_child() behaves correctly (= W3C standard). (chregu, uwe)
