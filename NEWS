@@ -2,6 +2,9 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 200?, Version 4.0.6
+<<<<<<< NEWS
+- Fixed a bug regarding the $PHP_SELF being incorrectly registered when
+  force-cgi-redirect was not enabled. (Sterling)
 - pfpro extension now supports version 3 of the Verisign SDK (John Donagher)
 - Udm_Cat_List and Udm_Cat_Path functions has been added.
 - Added key_exists() to check if a given key or index exists in an
@@ -70,7 +73,7 @@ PHP 4.0                                                                    NEWS
 - Added mysql_unbuffered_query(), which is useful for very large result sets
   (Zeev)
 
-?? ??? 200?, Version 4.0.5
+30 Apr 2001, Version 4.0.5
 - Added new php.ini directive: arg_separator.input which is used to tell
   PHP which characters are considered as argument separators in URLs. 
   Renamed php.ini directive: arg_separator -> arg_separator.output (Jani)
