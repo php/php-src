@@ -23,23 +23,6 @@
 ZEND_API zend_llist zend_extensions;
 static int last_resource_number;
 
-int zend_load_extensions(char **extension_paths)
-{
-	char **p = extension_paths;
-
-	if (!p) {
-		return SUCCESS;
-	}
-	while (*p) {
-		if (zend_load_extension(*p)==FAILURE) {
-			return FAILURE;
-		}
-		p++;
-	}
-	return SUCCESS;
-}
-
-
 int zend_load_extension(char *path)
 {
 #if ZEND_EXTENSIONS_SUPPORT
