@@ -1770,6 +1770,13 @@ static zend_bool do_inherit_property_access_check(HashTable *target_ht, zend_pro
 			if (child_info->flags & ZEND_ACC_STATIC) {
 				zval **prop;
 				if (zend_hash_find(parent_ce->static_members, prot_name, prot_name_length+1, (void**)&prop) == SUCCESS) {
+					zval **new_prop;
+					if (zend_hash_find(ce->static_members, child_info->name, child_info->name_length+1, (void**)&new_prop) == SUCCESS) {
+						if (Z_TYPE_PP(new_prop) != IS_NULL && Z_TYPE_PP(prop) != IS_NULL) {
+							zend_error(E_COMPILE_ERROR, "Cannot change initial value of property static protected %s::$%s in class %s", 
+								parent_ce->name, child_info->name, ce->name);
+						}
+					}
 					(*prop)->refcount++;
 					zend_hash_update(ce->static_members, child_info->name, child_info->name_length+1, (void**)prop, sizeof(zval*), NULL);
 					zend_hash_del(ce->static_members, prot_name, prot_name_length+1);
@@ -1778,6 +1785,9 @@ static zend_bool do_inherit_property_access_check(HashTable *target_ht, zend_pro
 				zend_hash_del(&ce->default_properties, prot_name, prot_name_length+1);
 			}
 			pefree(prot_name, ce->type & ZEND_INTERNAL_CLASS);
+		} else if (!(child_info->flags & ZEND_ACC_PRIVATE) && (child_info->flags & ZEND_ACC_STATIC)) {
+			zend_error(E_COMPILE_ERROR, "Cannot redeclare property static %s %s::$%s in class %s", 
+				zend_visibility_string(child_info->flags), parent_ce->name, child_info->name, ce->name);
 		}
 		return 0;	/* Don't copy from parent */
 	} else {
