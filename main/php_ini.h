@@ -1,7 +1,6 @@
 #ifndef _PHP_INI_H
 #define _PHP_INI_H
 
-
 #define PHP_INI_USER	(1<<0)
 #define PHP_INI_PERDIR	(1<<1)
 #define PHP_INI_SYSTEM	(1<<2)
@@ -44,7 +43,8 @@ long php_ini_long(char *name, uint name_length, int orig);
 double php_ini_double(char *name, uint name_length, int orig);
 char *php_ini_string(char *name, uint name_length, int orig);
 
-#define PHP_INI_BEGIN()								static php_ini_entry ini_entries[] = {
+#define PHP_INI_BEGIN()		static php_ini_entry ini_entries[] = {
+#define PHP_INI_END()		{ 0, 0, NULL, 0, NULL, NULL, NULL, 0, NULL, 0, 0 } };
 
 #define PHP_INI_ENTRY3(name, default_value, modifyable, on_modify, arg1, arg2, arg3) \
 	{ 0, modifyable, name, sizeof(name), on_modify, arg1, arg2, arg3, default_value, sizeof(default_value)-1, NULL, 0, 0 },
@@ -58,8 +58,13 @@ char *php_ini_string(char *name, uint name_length, int orig);
 #define PHP_INI_ENTRY(name, default_value, modifyable, on_modify) \
 	PHP_INI_ENTRY3(name, default_value, modifyable, on_modify, NULL, NULL, NULL)
 
-#define PHP_INI_END() \
-	{ 0, 0, NULL, 0, NULL, NULL, NULL, 0, NULL, 0, 0 } };
+#ifdef ZTS
+#define STD_PHP_INI_ENTRY(name, default_value, modifyable, on_modify, property_name, struct_type, struct_ptr) \
+	PHP_INI_ENTRY2(name, default_value, modifyable, on_modify, (void *) XtOffsetOf(struct_type, property_name), (void *) &struct_ptr##_id)
+#else
+#define STD_PHP_INI_ENTRY(name, default_value, modifyable, on_modify, property_name, struct_type, struct_ptr) \
+	PHP_INI_ENTRY2(name, default_value, modifyable, on_modify, (void *) XtOffsetOf(struct_type, property_name), (void *) &struct_ptr)
+#endif
 
 #define INI_INT(name) php_ini_long((name), sizeof(name), 0)
 #define INI_FLT(name) php_ini_double((name), sizeof(name), 0)
