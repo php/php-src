@@ -40,7 +40,8 @@
  * 2 - if file does not exist, check directory
  * 3 - only check directory (needed for mkdir)
  */
-PHPAPI int php_checkuid(const char *fn, char *fopen_mode, int mode) {
+PHPAPI int php_checkuid(const char *fn, char *fopen_mode, int mode)
+{
 	struct stat sb;
 	int ret;
 	long uid=0L, duid=0L;
