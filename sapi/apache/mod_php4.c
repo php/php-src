@@ -488,11 +488,6 @@ static int send_php(request_rec *r, int display_source_mode, char *filename)
 	}
 
 	zend_first_try {
-		/* We don't accept OPTIONS requests, but take everything else */
-		if (r->method_number == M_OPTIONS) {
-			r->allowed |= (1 << METHODS) - 1;
-			return DECLINED;
-		}
 
 		/* Make sure file exists */
 		if (filename == NULL && r->finfo.st_mode == 0) {
@@ -502,6 +497,14 @@ static int send_php(request_rec *r, int display_source_mode, char *filename)
 		per_dir_conf = (HashTable *) get_module_config(r->per_dir_config, &php4_module);
 		if (per_dir_conf) {
 			zend_hash_apply((HashTable *) per_dir_conf, (apply_func_t) php_apache_alter_ini_entries TSRMLS_CC);
+		}
+		
+		/* We don't accept OPTIONS requests, but take everything else */
+		if (!PG(allow_webdav_methods)) {
+				if (r->method_number == M_OPTIONS) {
+					r->allowed |= (1 << METHODS) - 1;
+				return DECLINED;
+			}
 		}
 
 		/* If PHP parser engine has been turned off with an "engine off"
