@@ -186,7 +186,7 @@ typedef struct _zend_function_entry {
 typedef struct _zend_property_reference {
 	int type;  /* read, write or r/w */
 	zval *object;
-	zend_llist elements_list;
+	zend_llist *elements_list;
 } zend_property_reference;
 
 

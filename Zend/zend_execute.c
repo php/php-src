@@ -54,9 +54,9 @@
 
 
 /* Prototypes */
-static zval get_overloaded_property(ELS_D);
-static void set_overloaded_property(zval *value ELS_DC);
-static void call_overloaded_function(int arg_count, zval *return_value ELS_DC);
+static zval get_overloaded_property(temp_variable *T ELS_DC);
+static void set_overloaded_property(temp_variable *T, zval *value ELS_DC);
+static void call_overloaded_function(temp_variable *T, int arg_count, zval *return_value ELS_DC);
 static void zend_fetch_var_address(znode *result, znode *op1, znode *op2, temp_variable *Ts, int type ELS_DC);
 static void zend_fetch_dimension_address(znode *result, znode *op1, znode *op2, temp_variable *Ts, int type ELS_DC);
 static void zend_fetch_property_address(znode *result, znode *op1, znode *op2, temp_variable *Ts, int type ELS_DC);
@@ -96,7 +96,7 @@ static inline zval *_get_zval_ptr(znode *node, temp_variable *Ts, int *should_fr
 
 				switch (Ts[node->u.var].EA.type) {
 					case IS_OVERLOADED_OBJECT:
-						Ts[node->u.var].tmp_var = get_overloaded_property(ELS_C);
+						Ts[node->u.var].tmp_var = get_overloaded_property(&Ts[node->u.var] ELS_CC);
 						Ts[node->u.var].tmp_var.refcount=1;
 						Ts[node->u.var].tmp_var.is_ref=1;
 						return &Ts[node->u.var].tmp_var;
@@ -262,7 +262,7 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 	if (!variable_ptr_ptr) {
 		switch (Ts[op1->u.var].EA.type) {
 			case IS_OVERLOADED_OBJECT:
-				set_overloaded_property(value ELS_CC);
+				set_overloaded_property(&Ts[op1->u.var], value ELS_CC);
 				if (type == IS_TMP_VAR) {
 					zval_dtor(value);
 				}
@@ -623,7 +623,6 @@ static void zend_fetch_dimension_address(znode *result, znode *op1, znode *op2, 
 
 
 	if (container_ptr == NULL) {
-		zend_property_reference *property_reference;
 		zend_overloaded_element overloaded_element;
 
 		if (Ts[op1->u.var].EA.type == IS_STRING_OFFSET) {
@@ -649,9 +648,8 @@ static void zend_fetch_dimension_address(znode *result, znode *op1, znode *op2, 
 			zval_copy_ctor(&overloaded_element.element);
 		}
 
-		zend_stack_top(&EG(overloaded_objects_stack), (void **) &property_reference);
-
-		zend_llist_add_element(&property_reference->elements_list, &overloaded_element);
+		Ts[result->u.var].EA = Ts[op1->u.var].EA;
+		zend_llist_add_element(Ts[result->u.var].EA.data.overloaded_element.elements_list, &overloaded_element);
 
 		Ts[result->u.var].EA.type = IS_OVERLOADED_OBJECT;
 		*retval = NULL;
@@ -786,7 +784,6 @@ static void zend_fetch_property_address(znode *result, znode *op1, znode *op2, t
 
 
 	if (container_ptr == NULL) {
-		zend_property_reference *property_reference;
 		zend_overloaded_element overloaded_element;
 
 		if (Ts[op1->u.var].EA.type == IS_STRING_OFFSET) {
@@ -812,9 +809,8 @@ static void zend_fetch_property_address(znode *result, znode *op1, znode *op2, t
 			zval_copy_ctor(&overloaded_element.element);
 		}
 
-		zend_stack_top(&EG(overloaded_objects_stack), (void **) &property_reference);
-
-		zend_llist_add_element(&property_reference->elements_list, &overloaded_element);
+		Ts[result->u.var].EA = Ts[op1->u.var].EA;
+		zend_llist_add_element(Ts[result->u.var].EA.data.overloaded_element.elements_list, &overloaded_element);
 
 		Ts[result->u.var].EA.type = IS_OVERLOADED_OBJECT;
 		*retval = NULL;
@@ -830,19 +826,18 @@ static void zend_fetch_property_address(znode *result, znode *op1, znode *op2, t
 
 	if (container->type == IS_OBJECT
 		&& container->value.obj.ce->handle_property_get) {
-		zend_property_reference property_reference;
 		zend_overloaded_element overloaded_element;
 
-		property_reference.object = container;
-		property_reference.type = type;
-		zend_llist_init(&property_reference.elements_list, sizeof(zend_overloaded_element), NULL, 0);
+		Ts[result->u.var].EA.data.overloaded_element.object = container;
+		Ts[result->u.var].EA.data.overloaded_element.type = type;
+		Ts[result->u.var].EA.data.overloaded_element.elements_list = (zend_llist *) emalloc(sizeof(zend_llist));
+		zend_llist_init(Ts[result->u.var].EA.data.overloaded_element.elements_list, sizeof(zend_overloaded_element), NULL, 0);
 		overloaded_element.element = *get_zval_ptr(op2, Ts, &free_op2, type);
 		overloaded_element.type = OE_IS_OBJECT;
 		if (!free_op2) {
 			zval_copy_ctor(&overloaded_element.element);
 		}
-		zend_llist_add_element(&property_reference.elements_list, &overloaded_element);
-		zend_stack_push(&EG(overloaded_objects_stack), &property_reference, sizeof(zend_property_reference));
+		zend_llist_add_element(Ts[result->u.var].EA.data.overloaded_element.elements_list, &overloaded_element);
 		Ts[result->u.var].EA.type = IS_OVERLOADED_OBJECT;
 		*retval = NULL;
 		return;
@@ -897,43 +892,31 @@ static void zend_fetch_property_address(znode *result, znode *op1, znode *op2, t
 }
 
 
-static zval get_overloaded_property(ELS_D)
+static zval get_overloaded_property(temp_variable *T ELS_DC)
 {
-	zend_property_reference *property_reference;
 	zval result;
 
-	zend_stack_top(&EG(overloaded_objects_stack), (void **) &property_reference);
-	result = (property_reference->object)->value.obj.ce->handle_property_get(property_reference);
+	result = (T->EA.data.overloaded_element.object)->value.obj.ce->handle_property_get(&T->EA.data.overloaded_element);
 
-	zend_llist_destroy(&property_reference->elements_list);
-
-	zend_stack_del_top(&EG(overloaded_objects_stack));
+	zend_llist_destroy(T->EA.data.overloaded_element.elements_list);
+	efree(T->EA.data.overloaded_element.elements_list);
 	return result;
 }
 
 
-static void set_overloaded_property(zval *value ELS_DC)
+static void set_overloaded_property(temp_variable *T, zval *value ELS_DC)
 {
-	zend_property_reference *property_reference;
-
-	zend_stack_top(&EG(overloaded_objects_stack), (void **) &property_reference);
-	(property_reference->object)->value.obj.ce->handle_property_set(property_reference, value);
-
-	zend_llist_destroy(&property_reference->elements_list);
-
-	zend_stack_del_top(&EG(overloaded_objects_stack));
+	(T->EA.data.overloaded_element.object)->value.obj.ce->handle_property_set(&T->EA.data.overloaded_element, value);
+	zend_llist_destroy(T->EA.data.overloaded_element.elements_list);
+	efree(T->EA.data.overloaded_element.elements_list);
 }
 
 
-static void call_overloaded_function(int arg_count, zval *return_value ELS_DC)
+static void call_overloaded_function(temp_variable *T, int arg_count, zval *return_value ELS_DC)
 {
-	zend_property_reference *property_reference;
-
-	zend_stack_top(&EG(overloaded_objects_stack), (void **) &property_reference);
-	(property_reference->object)->value.obj.ce->handle_function_call(arg_count, return_value, property_reference->object, 1 ELS_CC, property_reference);
-	zend_llist_destroy(&property_reference->elements_list);
-
-	zend_stack_del_top(&EG(overloaded_objects_stack));
+	(T->EA.data.overloaded_element.object)->value.obj.ce->handle_function_call(arg_count, return_value, T->EA.data.overloaded_element.object, 1 ELS_CC, &T->EA.data.overloaded_element);
+	zend_llist_destroy(T->EA.data.overloaded_element.elements_list);
+	efree(T->EA.data.overloaded_element.elements_list);
 }
 
 
@@ -1520,31 +1503,28 @@ binary_assign_op_addr: {
 							if ((!object.ptr && Ts[opline->op1.u.var].EA.type==IS_OVERLOADED_OBJECT)								
 								|| ((object.ptr && object.ptr->type==IS_OBJECT) && (object.ptr->value.obj.ce->handle_function_call))) { /* overloaded function call */
 								zend_overloaded_element overloaded_element;
-								zend_property_reference *property_reference;
 
 								overloaded_element.element = *function_name;
 								overloaded_element.type = OE_IS_METHOD;
 
 								if (object.ptr) {
-									zend_property_reference property_reference;
-
-									property_reference.object = object.ptr;
-									property_reference.type = BP_VAR_NA;
-									zend_llist_init(&property_reference.elements_list, sizeof(zend_overloaded_element), NULL, 0);
-									zend_stack_push(&EG(overloaded_objects_stack), &property_reference, sizeof(zend_property_reference));
+									Ts[opline->op1.u.var].EA.data.overloaded_element.object = object.ptr;
+									Ts[opline->op1.u.var].EA.data.overloaded_element.type = BP_VAR_NA;
+									Ts[opline->op1.u.var].EA.data.overloaded_element.elements_list = (zend_llist *) emalloc(sizeof(zend_llist));
+									zend_llist_init(Ts[opline->op1.u.var].EA.data.overloaded_element.elements_list, sizeof(zend_overloaded_element), NULL, 0);
 								}
-								zend_stack_top(&EG(overloaded_objects_stack), (void **) &property_reference);
-								zend_llist_add_element(&property_reference->elements_list, &overloaded_element);
+								zend_llist_add_element(Ts[opline->op1.u.var].EA.data.overloaded_element.elements_list, &overloaded_element);
 								fbc = (zend_function *) emalloc(sizeof(zend_function));
 								fbc->type = ZEND_OVERLOADED_FUNCTION;
 								fbc->common.arg_types = NULL;
+								fbc->overloaded_function.var = opline->op1.u.var;
 								goto overloaded_function_call_cont;
 							}
 
 							if (!object.ptr || object.ptr->type != IS_OBJECT) {
 								zend_error(E_ERROR, "Call to a member function on a non-object");
 							}
-							object.ptr->refcount++; /* For this pointer */
+							object.ptr->refcount++; /* For $this pointer */
 							active_function_table = &(object.ptr->value.obj.ce->function_table);
 						}
 					} else { /* function pointer */
@@ -1648,7 +1628,7 @@ do_fcall_common:
 					} else { /* ZEND_OVERLOADED_FUNCTION */
 						ALLOC_ZVAL(Ts[opline->result.u.var].var.ptr);
 						INIT_ZVAL(*(Ts[opline->result.u.var].var.ptr));
-						call_overloaded_function(opline->extended_value, Ts[opline->result.u.var].var.ptr ELS_CC);
+						call_overloaded_function(&Ts[fbc->overloaded_function.var], opline->extended_value, Ts[opline->result.u.var].var.ptr ELS_CC);
 						efree(fbc);
 						if (!return_value_used) {
 							zval_ptr_dtor(&Ts[opline->result.u.var].var.ptr);

@@ -130,6 +130,16 @@ typedef struct _zend_internal_function {
 } zend_internal_function;
 
 
+typedef struct _zend_overloaded_function {
+	zend_uchar type;	/* MUST be the first element of this struct! */
+
+	zend_uchar *arg_types;		/* MUST be the second element of this struct */
+	char *function_name;		/* MUST be the third element of this struct */
+
+	zend_uint var;
+} zend_overloaded_function;
+
+
 typedef union _zend_function {
 	zend_uchar type;	/* MUST be the first element of this struct! */
 	struct {
@@ -140,6 +150,7 @@ typedef union _zend_function {
 	
 	zend_op_array op_array;
 	zend_internal_function internal_function;
+	zend_overloaded_function overloaded_function;
 } zend_function;
 
 
