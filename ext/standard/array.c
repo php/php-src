@@ -1341,8 +1341,6 @@ PHP_FUNCTION(array_init)
 		RETURN_FALSE;
     }
 
-	SEPARATE_ZVAL(val);
-
 	switch(Z_TYPE_PP(start_key)) {
 		case IS_STRING:
 		case IS_LONG:
