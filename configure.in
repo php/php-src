@@ -242,7 +242,7 @@ AC_CHECK_LIB(nsl, gethostname, [
 
 fi
 
-AC_CHECK_LIB(dl, dlopen,[LIBS="-ldl $LIBS"])
+AC_CHECK_LIB(dl, dlopen,[PHP_ADD_LIBRARY(dl)])
 
 dnl The sin may be in a library which need not be specifed
 dnl as well as res_search resides in libsocket
@@ -736,7 +736,7 @@ if test "$abs_srcdir" != "$abs_builddir"; then
   INCLUDES="$INCLUDES -I\$(top_srcdir)/TSRM"
 fi
 
-EXTRA_LIBS="$EXTRA_LIBS $DLIBS $LIBS $PHP_EXTENSION_LIBS"
+EXTRA_LIBS="$EXTRA_LIBS $DLIBS $LIBS"
 unset LIBS LDFLAGS
 
 PHP_CONFIGURE_PART(Configuring TSRM)
