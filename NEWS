@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? March 2004, PHP 5 Release Candidate 1
+- Replaced the exec_finished hook by the zend_post_deactive hook for
+  extensions. The new hook will be run after the symbol table and destructors
+  are run. (Derick)
 - Fixed possible crash when internal get_method() is not defined. (Andi)
 - Fixed calling methods using call_user_func() in conjunction with 
   the array("Class","Method") syntax to use the scope of the PHP user function.

@@ -1188,10 +1188,6 @@ void php_request_shutdown(void *dummy)
 	EG(opline_ptr) = NULL;
 
 	zend_try {
-		zend_exec_finished(TSRMLS_C);
-	} zend_end_try();
-
-	zend_try {
 		php_end_ob_buffers((zend_bool)(SG(request_info).headers_only?0:1) TSRMLS_CC);
 	} zend_end_try();
 
@@ -1219,6 +1215,10 @@ void php_request_shutdown(void *dummy)
 
 		
 	zend_deactivate(TSRMLS_C);
+
+	zend_try {
+		zend_post_deactivate_modules(TSRMLS_C);
+	} zend_end_try();
 
 	zend_try {
 		sapi_deactivate(TSRMLS_C);
