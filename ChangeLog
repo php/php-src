@@ -1,3 +1,115 @@
+2002-04-16  Wez Furlong  <wez.php@thebrainroom.com>
+
+    * main/php_streams.h
+      main/streams.c
+      pear/scripts/pear.in
+      pear/scripts/pearize.in
+      main/php.h
+      ext/zlib/zlib_fopen_wrapper.c
+      ext/standard/php_fopen_wrapper.c
+      ext/zlib/zlib.c
+      ext/standard/ftp_fopen_wrapper.c
+      ext/standard/http_fopen_wrapper.c
+      ext/standard/dir.c
+      ext/bz2/bz2.c
+      ext/standard/basic_functions.c:
+    Always initialize wrappers, regardless of PG(allow_url_fopen).
+    Add is_url field to wrapper structure; the stream wrapper openers
+    will disallow opening is is_url && !PG(allow_url_fopen).
+    Add infrastructure for stat($url) and opendir($url).
+    Tidy up/centralize code that locates and instantiates wrappers for the
+    various operations.
+    Implement opendir for plain files.
+    Make the PHP opendir and dir functions use the streams implementations.
+    Add modelines for syntax highlighting the pear scripts in vim
+
+2002-04-16  Stig Bakken  <ssb@fast.no>
+
+    * pear/DB.php: * added DB::isConnection
+    * phpdoc fixes
+
+2002-04-16  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * main/php_ini.c: fix cli/cgi -c <path>|<file>
+
+2002-04-16  Aaron Bannert  <aaron@apache.org>
+
+    * sapi/apache2filter/sapi_apache2.c:
+    It makes more sense to do the null-pointer check *before* trying to use it.
+    (Also fix a typo that Cliff pointed out: "safe" --> "save".)
+
+    Obtained from:  Ryan Morgan <rmorgan@covalent.net>
+
+2002-04-16  Sterling Hughes  <sterling@bumblebury.com>
+
+    * ext/xslt/sablot.c:
+    move xslt_error and xslt_errno down to functions, in order to
+    make logical room for the xslt_dom_* functions
+
+
+2002-04-16  Wez Furlong  <wez.php@thebrainroom.com>
+
+    * ext/zlib/zlib.c: remove old code
+
+2002-04-16  Sander Roobol  <phy@wanadoo.nl>
+
+    * ext/w32api/w32api.c: MFH (#16628)
+
+    * ext/w32api/w32api.c: Added missing function to function_entry
+
+2002-04-16  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Common.php:
+    * started working on analyzeSourceCode and detectDependencies methods
+
+2002-04-16  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/tokenizer/tokenizer.c: removed ws pollution
+
+    * ext/tokenizer/tokenizer.c: Added 2 new tokens: T_CLASS_C and T_FUNC_C
+
+2002-04-16  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/xslt/config.m4: - MFB: Remove version number
+
+    * ext/xslt/config.m4: - Remove version number here
+
+2002-04-16  Sterling Hughes  <sterling@bumblebury.com>
+
+    * ext/xslt/README.XSLT-BACKENDS:
+    update these docs, phpdoc will lag a bit :)
+
+    * ext/xslt/php_sablot.h
+      ext/xslt/sablot.c:
+    Prefix current functions with "sax" in order to make way for dom interface
+    backwards compatibility is maintained via function aliases
+    xslt_sax_set_sax_handlers is a bit wierd, i guess...
+
+    * ext/xslt/sablot.c: clean up the error code a tidbit
+
+2002-04-16  Stig Bakken  <ssb@fast.no>
+
+    * ext/tokenizer/config.m4: * build tokenizer by default
+
+    * pear/PEAR/Packager.php:
+    * chdir back to original dir in PEAR_Packager::package
+    * only display "cvstag" hint if CVS/Root exists
+
+2002-04-16  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/PEAR/Autoloader.php
+      pear/PEAR/Command/Remote.php: Added standar header
+
+    * pear/PEAR/Command/Registry.php:
+    Vim tags added plus some other minor text about license and author
+
+    * pear/PEAR/Command/Registry.php:
+    Be more clear when no packages are installed
+
+    * pear/PEAR/Command/Package.php:
+    Give the right error when wrong params given to package-info and
+    fix/add help some help messages
+
 2002-04-15  Frank M. Kromann  <frank@frontbase.com>
 
     * ext/mbstring/mbstring.h: Fixing Win32 compilation of mbstring
