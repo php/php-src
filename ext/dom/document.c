@@ -1063,7 +1063,7 @@ PHP_FUNCTION(dom_document_import_node)
 /* }}} end dom_document_import_node */
 
 
-/* {{{ proto DOMElement dom_document_create_element_ns(string namespaceURI, string qualifiedName);
+/* {{{ proto DOMElement dom_document_create_element_ns(string namespaceURI, string qualifiedName [,string value]);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-DocCrElNS
 Since: DOM Level 2
 */
@@ -1073,13 +1073,13 @@ PHP_FUNCTION(dom_document_create_element_ns)
 	xmlDocPtr docp;
 	xmlNodePtr nodep = NULL;
 	xmlNsPtr nsptr = NULL;
-	int ret, uri_len = 0, name_len = 0;
-	char *uri, *name;
+	int ret, uri_len = 0, name_len = 0, value_len = 0;
+	char *uri, *name, *value = NULL;
 	char *localname = NULL, *prefix = NULL;
 	int errorcode;
 	dom_object *intern;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os!s", &id, dom_document_class_entry, &uri, &uri_len, &name, &name_len) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os!s|s", &id, dom_document_class_entry, &uri, &uri_len, &name, &name_len, &value, &value_len) == FAILURE) {
 		return;
 	}
 
@@ -1089,7 +1089,7 @@ PHP_FUNCTION(dom_document_create_element_ns)
 
 	if (errorcode == 0) {
 		if (xmlValidateName((xmlChar *) localname, 0) == 0) {
-			nodep = xmlNewDocNode (docp, NULL, localname, NULL);
+			nodep = xmlNewDocNode (docp, NULL, localname, value);
 			if (nodep != NULL && uri != NULL) {
 				nsptr = xmlSearchNsByHref (nodep->doc, nodep, uri);
 				if (nsptr == NULL) {
