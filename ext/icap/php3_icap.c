@@ -519,7 +519,6 @@ void php3_icap_list_alarms(INTERNAL_FUNCTION_PARAMETERS)
 	pils *icap_le_struct; 
         int icap_folders=0;
         unsigned int msgno;
-        pils *icap_le_struct;
         cal_list_t *my_cal_list;
         caldate_t begincal,endcal;
 
@@ -737,7 +736,7 @@ void php3_icap_store_event(INTERNAL_FUNCTION_PARAMETERS)
 	}
 	if(_php3_hash_find(storeobject->value.ht,"category",sizeof("category"),(void **) &pvalue)== SUCCESS){
           SEPARATE_ZVAL(pvalue);
-	  convert_to_string(pvalue);
+	  convert_to_string(*pvalue);
 	  myevent.category=strdup((*pvalue)->value.str.val);
 	}
 	if(_php3_hash_find(storeobject->value.ht,"title",sizeof("title"),(void **) &pvalue)== SUCCESS){
