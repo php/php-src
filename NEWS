@@ -1,6 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.2.0-dev
+- Fix bug in krsort() where an extra character was being compared (Andi)
+- fixed bug that made pspell include pspell.h from a wrong location. (Vlad)
 - added function overload in mbstring to add multibyte support for 
   string and mail functions. (Rui)
 - Added flags parameter to preg_grep(). The only flag currently is
