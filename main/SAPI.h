@@ -3,6 +3,7 @@
 
 #include "zend.h"
 #include "zend_llist.h"
+#include "zend_operators.h"
 
 #define SAPI_POST_BLOCK_SIZE 4000
 
@@ -66,6 +67,13 @@ typedef struct {
 } sapi_globals_struct;
 
 
+typedef struct _sapi_post_content_type_reader {
+	char *content_type;
+	uint content_type_len;
+	void (*post_reader)(SLS_D);
+} sapi_post_content_type_reader;
+
+
 #ifdef ZTS
 # define SLS_D	sapi_globals_struct *sapi_globals
 # define SLS_DC	, SLS_D
@@ -92,6 +100,8 @@ SAPI_API void sapi_deactivate(SLS_D);
 SAPI_API int sapi_add_header(char *header_line, uint header_line_len);
 SAPI_API int sapi_send_headers();
 
+SAPI_API int sapi_register_post_reader(sapi_post_content_type_reader *post_content_type_reader);
+
 struct _sapi_module_struct {
 	char *name;
 
@@ -111,7 +121,6 @@ struct _sapi_module_struct {
 };
 
 
-
 /* header_handler() constants */
 #define SAPI_HEADER_ADD			(1<<0)
 #define SAPI_HEADER_DELETE_ALL	(1<<1)
@@ -123,5 +132,7 @@ struct _sapi_module_struct {
 #define SAPI_HEADER_SEND_FAILED			3
 
 #define SAPI_DEFAULT_CONTENT_TYPE "Content-Type: text/html"
+
+#define SAPI_POST_READER_FUNC(post_reader) void post_reader(SLS_D)
 
 #endif /* _NEW_SAPI_H */
