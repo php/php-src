@@ -222,7 +222,7 @@ PHP_FUNCTION(shm_put_var)
 	long key, id;
 	sysvshm_shm *shm_list_ptr;
 	int type;
-	pval shm_var;
+	smart_str shm_var = {0};
 	int ret;	
 	php_serialize_data_t var_hash;
 
@@ -243,17 +243,14 @@ PHP_FUNCTION(shm_put_var)
 
 	/* setup string-variable and serialize */
 
-	shm_var.type=IS_STRING;
-	shm_var.value.str.len=0;
-	shm_var.value.str.val=0;
 	PHP_VAR_SERIALIZE_INIT(var_hash);
 	php_var_serialize(&shm_var,arg_var,&var_hash);
 	PHP_VAR_SERIALIZE_DESTROY(var_hash);
 	/* insert serialized variable into shared memory */
-	ret=php_put_shm_data(shm_list_ptr->ptr,key,shm_var.value.str.val,shm_var.value.str.len);
+	ret=php_put_shm_data(shm_list_ptr->ptr,key,shm_var.c,shm_var.len);
 
 	/* free string */
-	efree(shm_var.value.str.val);
+	smart_str_free(&shm_var);
 	
 	if(ret==-1) {
 		php_error(E_WARNING, "not enough shared memory left");

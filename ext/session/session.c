@@ -279,36 +279,26 @@ int php_get_session_var(char *name, size_t namelen, zval ***state_var TSRMLS_DC)
 
 PS_SERIALIZER_ENCODE_FUNC(php_binary)
 {
-	zval *buf;
-	unsigned char strbuf[MAX_STR + 1];
+	smart_str buf = {0};
 	php_serialize_data_t var_hash;
 	PS_ENCODE_VARS;
-
-
-	buf = ecalloc(sizeof(*buf), 1);
-	Z_TYPE_P(buf) = IS_STRING;
-	buf->refcount++;
 
 	PHP_VAR_SERIALIZE_INIT(var_hash);
 
 	PS_ENCODE_LOOP(
 			if (key_length > PS_BIN_MAX) continue;
-			strbuf[0] = (unsigned char) key_length;
-			memcpy(strbuf + 1, key, key_length);
+			smart_str_appendc(&buf, key_length);
+			smart_str_appendl(&buf, key, key_length);
 			
-			STR_CAT(buf, strbuf, key_length + 1);
-			php_var_serialize(buf, struc, &var_hash);
+			php_var_serialize(&buf, struc, &var_hash);
 		} else {
 			if (key_length > PS_BIN_MAX) continue;
-			strbuf[0] = (unsigned char) (key_length & PS_BIN_UNDEF);
-			memcpy(strbuf + 1, key, key_length);
-			
-			STR_CAT(buf, strbuf, key_length + 1);
+			smart_str_appendc(&buf, (key_length & PS_BIN_UNDEF));
+			smart_str_appendl(&buf, key, key_length);
 	);
 
-	if (newlen) *newlen = Z_STRLEN_P(buf);
-	*newstr = Z_STRVAL_P(buf);
-	efree(buf);
+	if (newlen) *newlen = buf.len;
+	*newstr = buf.c;
 	PHP_VAR_SERIALIZE_DESTROY(var_hash);
 
 	return SUCCESS;
@@ -355,36 +345,27 @@ PS_SERIALIZER_DECODE_FUNC(php_binary)
 
 PS_SERIALIZER_ENCODE_FUNC(php)
 {
-	zval *buf;
-	char strbuf[MAX_STR + 1];
+	smart_str buf = {0};
 	php_serialize_data_t var_hash;
 	PS_ENCODE_VARS;
-
-	buf = ecalloc(sizeof(*buf), 1);
-	Z_TYPE_P(buf) = IS_STRING;
-	buf->refcount++;
 
 	PHP_VAR_SERIALIZE_INIT(var_hash);
 
 	PS_ENCODE_LOOP(
 			if (key_length + 1 > MAX_STR) continue;
-			memcpy(strbuf, key, key_length);
-			strbuf[key_length] = PS_DELIMITER;
-			STR_CAT(buf, strbuf, key_length + 1);
+			smart_str_appendl(&buf, key, key_length);
+			smart_str_appendc(&buf, PS_DELIMITER);
 			
-			php_var_serialize(buf, struc, &var_hash);
+			php_var_serialize(&buf, struc, &var_hash);
 		} else {
 			if (key_length + 2 > MAX_STR) continue;
-			strbuf[0] = PS_UNDEF_MARKER;
-			memcpy(strbuf + 1, key, key_length);
-			strbuf[key_length + 1] = PS_DELIMITER;
-			
-			STR_CAT(buf, strbuf, key_length + 2);
+			smart_str_appendc(&buf, PS_UNDEF_MARKER);
+			smart_str_appendl(&buf, key, key_length);
+			smart_str_appendc(&buf, PS_DELIMITER);
 	);
 
-	if (newlen) *newlen = Z_STRLEN_P(buf);
-	*newstr = Z_STRVAL_P(buf);
-	efree(buf);
+	if (newlen) *newlen = buf.len;
+	*newstr = buf.c;
 
 	PHP_VAR_SERIALIZE_DESTROY(var_hash);
 	return SUCCESS;

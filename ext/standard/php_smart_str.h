@@ -46,6 +46,7 @@
 #define smart_str_free(s) smart_str_free_ex(s, 0)
 #define smart_str_appendl(dest,src,len) smart_str_appendl_ex(dest,src,len,0)
 #define smart_str_append(dest, src) smart_str_append_ex(dest,src,0)
+#define smart_str_append_long(dest, val) smart_str_append_long_ex(dest,val,0)
 
 static inline void smart_str_appendc_ex(smart_str *dest, char c, int what)
 {
@@ -73,6 +74,36 @@ static inline void smart_str_appendl_ex(smart_str *dest, const char *src, size_t
 	smart_str_alloc(dest, len, what);
 	memcpy(dest->c + dest->len, src, len);
 	dest->len = newlen;
+}
+
+static inline char *smart_str_print_long(char *buf, long num)
+{
+	char *p = buf;
+	long tmp = 0;
+	
+	if (num < 0) {
+		num = -num;
+		*p++ = '-';
+	}
+
+	while (num > 0) {
+		tmp = tmp * 10 + (num % 10);
+		num /= 10;
+	}
+
+	do {
+		*p++ = (tmp % 10) + '0';
+		tmp /= 10;
+	} while (tmp > 0);
+
+	return p;
+}
+
+static inline void smart_str_append_long_ex(smart_str *dest, long num, int type)
+{
+	char buf[32];
+	char *p = smart_str_print_long(buf, num);
+	smart_str_appendl_ex(dest, buf, p - buf, type);
 }
 
 static inline void smart_str_append_ex(smart_str *dest, smart_str *src, int what)
