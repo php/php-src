@@ -1,3 +1,83 @@
+2004-08-31  Sara Golemon  <php@alphaweb.net>
+
+    * (PHP_4_3)
+      ext/curl/curlstreams.c
+      ext/curl/streams.c:
+      MFH: Use user_agent ini setting if it's available.
+
+    * ext/curl/streams.c:
+      Use user_agent ini setting if it's available.
+
+2004-08-31  Joe Orton  <jorton@redhat.com>
+
+    * ext/gd/libgd/gd.h
+      ext/gd/libgd/gdtables.c
+      ext/gd/libgd/wbmp.h
+      main/php_compat.h:
+      Move global symbols defined by bundled copy of libgd into private
+      php_gd_* namespace, to avoid symbol conflicts with, for instance,
+      another Apache module which loads a different copy of libgd.
+
+2004-08-31  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_4_3)
+      main/streams.c:
+      if not using Zend's alloc, don't touch _emalloc
+
+2004-08-31  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      configure.in
+      main/php_version.h:
+      back to dev.
+
+    * (PHP_4_3)
+      NEWS
+      configure.in
+      main/php_version.h:
+      4.3.9RC2
+
+2004-08-31  Joe Orton  <jorton@redhat.com>
+
+    * (PHP_5_0)
+      tests/lang/bug27354.phpt
+      tests/lang/bug27354.phpt:
+      MFH: Do not rely on handling of integers which might be outside the
+      range of a 32-bit signed long.
+
+2004-08-31  Antony Dovgal  <tony2001@phpclub.net>
+
+    * (PHP_5_0)
+      main/streams/streams.c:
+      MFH: fix bug #29723 (file_get_contents() fails with the file:// wrapper
+      under Win32)
+
+    * main/streams/streams.c:
+      fix bug #29723 (file_get_contents() fails with the file:// wrapper under
+      Win32)
+
+2004-08-31  Joe Orton  <jorton@redhat.com>
+
+    * (PHP_4_3)
+      ext/standard/tests/time/001.phpt
+      ext/standard/tests/time/001.phpt:
+      MFH: fix gettimeofday() tests to not fail if the same time is
+      returned by successive calls.
+
+    * tests/lang/bug27354.phpt:
+      Do not rely on behaviour of integers which might be greater than
+      LONG_MAX on 32-bit architectures.
+
+2004-08-31  Antony Dovgal  <tony2001@phpclub.net>
+
+    * (PHP_5_0)
+      ext/oci8/oci8.dsw
+      ext/oci8/oci8.dsw:
+      MFH: this file shouldn't be in the repository at all
+
+    * ext/oci8/oci8.dsw:
+      this file shouldn't be in the repository at all
+
 2004-08-30  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_4_3)
