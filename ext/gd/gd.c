@@ -308,7 +308,7 @@ PHP_MINFO_FUNCTION(gd)
 #ifdef HAVE_GD_GIF_READ
 	php_info_print_table_row(2, "GIF Read Support", "enabled");
 #endif
-#ifdef(HAVE_GD_GID_CREATE)
+#ifdef HAVE_GD_GIF_CREATE
 	php_info_print_table_row(2, "GIF Create Support", "enabled");
 #endif
 #ifdef HAVE_GD_JPG
