@@ -143,6 +143,10 @@ SOURCE=.\ext\standard\quot_print.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\reentrancy.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\request_info.c
 # End Source File
 # Begin Source File
@@ -164,10 +168,6 @@ SOURCE=.\strlcat.c
 # Begin Source File
 
 SOURCE=.\strlcpy.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\strtok_r.c
 # End Source File
 # End Group
 # Begin Group "Header Files"
