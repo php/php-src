@@ -274,30 +274,49 @@ void php_print_credits(int flag)
 
 	PUTS("<h1>PHP 4.0 Credits</h1>\n");
 
+	if (flag & PHP_CREDITS_GROUP) {
+		/* Group */
+
+		PUTS("<table border=5 width=\"600\">\n");
+		php_info_print_table_header(1, "PHP Group");
+		php_info_print_table_row(1, "Thies C. Arntzen, Stig Bakken, Andi Gutmans, Rasmus Lerdorf, \
+					Sascha Schumann, Zeev Suraski, Jim Winstead, Andrei Zmievski");
+		PUTS("</table>\n");
+	}
+
 	if (flag & PHP_CREDITS_GENERAL) {
 		/* Language */
+
 		PUTS("<table border=5 width=\"600\">\n");
 		PUTS("<tr><th colspan=\"2\" bgcolor=\"" PHP_HEADER_COLOR "\">PHP 4.0 Authors</th></tr>\n");
 		php_info_print_table_header(2, "Contribution", "Authors");
-		CREDIT_LINE("PHP Group", "Thies C. Arntzen, Stig Bakken, Andi Gutmans, Rasmus Lerdorf, \
-					Sascha Schumann, Zeev Suraski, Jim Winstead, Andrei Zmievski");
 		CREDIT_LINE("Zend Scripting Language Engine", "Andi Gutmans, Zeev Suraski");
 		CREDIT_LINE("Extension Module API", "Andi Gutmans, Zeev Suraski");
 		CREDIT_LINE("UNIX Build and Modularization", "Stig Bakken, Sascha Schumann");
 		CREDIT_LINE("Win32 Port", "Shane Caraveo, Zeev Suraski");
 		CREDIT_LINE("Server API (SAPI) Abstraction Layer", "Andi Gutmans, Shane Caraveo, Zeev Suraski");
-		CREDIT_LINE("Apache SAPI Module", "Rasmus Lerdorf, Zeev Suraski");
-		CREDIT_LINE("ISAPI SAPI Module", "Andi Gutmans, Zeev Suraski");
-		CREDIT_LINE("CGI SAPI Module", "Rasmus Lerdorf, Stig Bakken");
-		CREDIT_LINE("AOLserver SAPI Module", "Sascha Schumann");
-		CREDIT_LINE("Servlet SAPI Module", "Sam Ruby");
-		CREDIT_LINE("Roxen SAPI Module", "David Hedbor");
-		CREDIT_LINE("thttpd SAPI Module", "Sascha Schumann");
+		PUTS("</table>\n");
+	}
+
+	if (flag & PHP_CREDITS_GENERAL) {
+		/* SAPI Modules */
+
+		PUTS("<table border=5 width=\"600\">\n");
+		PUTS("<tr><th colspan=\"2\" bgcolor=\"" PHP_HEADER_COLOR "\">SAPI Modules</th></tr>\n");
+		php_info_print_table_header(2, "Contribution", "Authors");
+		CREDIT_LINE("Apache", "Rasmus Lerdorf, Zeev Suraski");
+		CREDIT_LINE("ISAPI", "Andi Gutmans, Zeev Suraski");
+		CREDIT_LINE("CGI", "Rasmus Lerdorf, Stig Bakken");
+		CREDIT_LINE("AOLserver", "Sascha Schumann");
+		CREDIT_LINE("Java Servlet", "Sam Ruby");
+		CREDIT_LINE("Roxen", "David Hedbor");
+		CREDIT_LINE("thttpd", "Sascha Schumann");
 		PUTS("</table>\n");
 	}
 
 	if (flag & PHP_CREDITS_MODULES) {
 		/* Modules */
+
 		PUTS("<table border=5 width=\"600\">\n");
 		PUTS("<tr><th colspan=\"2\" bgcolor=\"" PHP_HEADER_COLOR "\">Module Authors</th></tr>\n");
 		php_info_print_table_header(2, "Module", "Authors");
@@ -410,6 +429,13 @@ void register_phpinfo_constants(INIT_FUNC_ARGS)
 	REGISTER_LONG_CONSTANT("INFO_VARIABLES", PHP_INFO_VARIABLES, CONST_PERSISTENT|CONST_CS);
 	REGISTER_LONG_CONSTANT("INFO_LICENSE", PHP_INFO_LICENSE, CONST_PERSISTENT|CONST_CS);
 	REGISTER_LONG_CONSTANT("INFO_ALL", PHP_INFO_ALL, CONST_PERSISTENT|CONST_CS);
+	REGISTER_LONG_CONSTANT("CREDITS_GROUP",	PHP_CREDITS_GROUP, CONST_PERSISTENT|CONST_CS);
+	REGISTER_LONG_CONSTANT("CREDITS_GENERAL",	PHP_CREDITS_GENERAL, CONST_PERSISTENT|CONST_CS);
+	REGISTER_LONG_CONSTANT("CREDITS_SAPI",	PHP_CREDITS_SAPI, CONST_PERSISTENT|CONST_CS);
+	REGISTER_LONG_CONSTANT("CREDITS_MODULES",	PHP_CREDITS_MODULES, CONST_PERSISTENT|CONST_CS);
+	REGISTER_LONG_CONSTANT("CREDITS_DOCS",	PHP_CREDITS_DOCS, CONST_PERSISTENT|CONST_CS);
+	REGISTER_LONG_CONSTANT("CREDITS_FULLPAGE",	PHP_CREDITS_FULLPAGE, CONST_PERSISTENT|CONST_CS);
+	REGISTER_LONG_CONSTANT("CREDITS_ALL",	PHP_CREDITS_ALL, CONST_PERSISTENT|CONST_CS);
 }
 
 

@@ -2,6 +2,8 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? ????, Version 4.0 Beta 4
+- Made PHP work under Microsoft Personal Web Server, under both Windows NT
+  workstation and Windows 95 (Zeev)
 - Made multipart/form-data content obey to the variables_order directive (Zeev)
 - Updated the browscap module to work with PHP 4.0 (Zeev)
 - Recover gracefully in ISAPI after the client prematurely presses STOP (Andi)
