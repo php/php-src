@@ -38,6 +38,8 @@ AC_DEFUN(AC_ADD_LIBPATH,[
   AC_EXPAND_PATH($1, ai_p)
   AC_PHP_ONCE(LIBPATH, $ai_p, [
     EXTRA_LIBS="$EXTRA_LIBS -L$ai_p"
+    if test -n "$rpath_raw" ; then
+      RPATHS="$RPATHS ${raw_runpath_switch}$ai_p"
     if test -n "$APXS" ; then
       RPATHS="$RPATHS ${apxs_runpath_switch}$ai_p'"
     else
