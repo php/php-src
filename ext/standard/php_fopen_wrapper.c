@@ -21,6 +21,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 #include "php.h"
 #include "php_globals.h"
@@ -37,11 +38,11 @@ FILE *php_fopen_url_wrap_php(char *path, char *mode, int options, int *issock, i
 	*issock = 0;
 	
 	if (!strcasecmp(res, "stdin")) {
-		return fdopen(STDIN_FILENO, mode);
+		return fdopen(dup(STDIN_FILENO), mode);
 	} else if (!strcasecmp(res, "stdout")) {
-		return fdopen(STDOUT_FILENO, mode);
+		return fdopen(dup(STDOUT_FILENO), mode);
 	} else if (!strcasecmp(res, "stderr")) {
-		return fdopen(STDERR_FILENO, mode);
+		return fdopen(dup(STDERR_FILENO), mode);
 	}
 	
 	return NULL;
