@@ -6,7 +6,7 @@ Fixed:
 
     mb_convert_encoding (Moriyoshi)
     socket_iovec_alloc (Rasmus)
-    exif_imagetype,exif_thumbnail (Rasmus)
+    exif_thumbnail (Rasmus)
     dbase_open (Rasmus)
     array_pad (Rasmus)
     str_repeat (Ilia)
@@ -19,8 +19,27 @@ Fixed:
 
 Open:
 
-    none at this time
+    the dbase extension(1)
+	
+(1) heap corruption, mostly visible in malloc-related calls.  Whether you see 
+    this or not might depend on your libc/compiler.  Hard to track down,
+    because the result of the corruption might be quite delayed.
 
+    Reproducable with glibc-2.3/gcc 3.2.2 by:
+	
+cat <<X | php do_crash
+dbase_add_record
+dbase_close
+dbase_create
+dbase_delete_record
+dbase_get_record
+dbase_get_record_with_names
+dbase_numfields
+dbase_numrecords
+dbase_open
+X 
+
+	
 Methodology
 
     1. Use a plain PHP_4_3 tree
