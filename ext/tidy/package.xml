@@ -25,7 +25,7 @@ but also traverse the document tree using the Zend Engine 2 OO semantics.
  <license>PHP</license>
  <release>
   <state>beta</state>
-  <version>2.0-dev</version>
+  <version>2.0dev</version>
   <date>2003-11-13</date>
   <notes>
     Major API changes for PHP 5.0, including the re-introduction of resources, output buffering support,
@@ -60,6 +60,6 @@ but also traverse the document tree using the Zend Engine 2 OO semantics.
   </deps>
  </release>
 </package>
-!--
+<!--
 vim:et:ts=1:sw=1
 -->
