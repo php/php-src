@@ -166,6 +166,15 @@ PHPAPI void php_end_ob_buffer(zend_bool send_buffer, zend_bool just_flush TSRMLS
 		status |= PHP_OUTPUT_HANDLER_END;
 	}
 
+#if 0
+ {
+	 FILE *fp;
+	 fp = fopen("/tmp/ob_log", "a");
+	 fprintf(fp, "NestLevel: %d  ObStatus: %d  HandlerName: %s\n", OG(ob_nesting_level), status, OG(active_ob_buffer).handler_name);
+	 fclose(fp);
+ }
+#endif
+	
 	if (OG(active_ob_buffer).internal_output_handler) {
 		final_buffer = OG(active_ob_buffer).internal_output_handler_buffer;
 		final_buffer_length = OG(active_ob_buffer).internal_output_handler_buffer_size;
@@ -239,8 +248,8 @@ PHPAPI void php_end_ob_buffer(zend_bool send_buffer, zend_bool just_flush TSRMLS
 	OG(ob_nesting_level)--;
 
 	if (send_buffer) {
-		/* FIXME: It's better to make it work with the last buffer */
-		if (OG(ob_nesting_level) == 1 && status == (PHP_OUTPUT_HANDLER_START|PHP_OUTPUT_HANDLER_END))
+		/* FIXME: chunked output behavior is needed to be checked. (Yasuo) */
+		if (OG(ob_nesting_level) == 0 && !OG(active_ob_buffer).erase && status == (PHP_OUTPUT_HANDLER_START|PHP_OUTPUT_HANDLER_END))
 			ADD_CL_HEADER(final_buffer_length);
 		OG(php_body_write)(final_buffer, final_buffer_length TSRMLS_CC);
 	}
