@@ -190,10 +190,7 @@ static int qdom_find_children( zval **children, struct qdom_node *orig_node TSRM
             child_node = qdom_do_first_child( child_node );
             if ( qdom_find_children( &n_children, child_node TSRMLS_CC) > 0 )
             {
-                zend_hash_update(child->value.obj.properties,
-                                 "children", sizeof("children"),
-                                 (void *) &n_children, sizeof(zval *),
-                                 NULL);
+                zend_hash_update(Z_OBJPROP_P(child), "children", sizeof("children"), (void *) &n_children, sizeof(zval *), NULL);
             }
             qdom_do_node_free( child_node );
         }
@@ -242,7 +239,7 @@ PHP_FUNCTION(qdom_tree)
     if ( qdom_find_children( &children, node TSRMLS_CC) > 0 )
     {
         add_property_long(return_value, "type", node->Type);
-        zend_hash_update(return_value->value.obj.properties, "children", sizeof("children"), (void *) &children, sizeof(zval *), NULL);
+        zend_hash_update(Z_OBJPROP_P(return_value), "children", sizeof("children"), (void *) &children, sizeof(zval *), NULL);
     }
 
     qdom_do_free( doc );

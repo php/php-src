@@ -2325,7 +2325,7 @@ static int node_attributes(zval **attributes, xmlNode *nodep TSRMLS_DC)
 		pattr = php_domobject_new((xmlNodePtr) attr, &ret TSRMLS_CC);
 		/** XXX FIXME XXX */
 /*		if(0 <= (n = node_children(&children, attr->children TSRMLS_CC))) {
-			zend_hash_update(pattr->value.obj.properties, "children", sizeof("children"), (void *) &children, sizeof(zval *), NULL);
+			zend_hash_update(Z_OBJPROP_P(value), "children", sizeof("children"), (void *) &children, sizeof(zval *), NULL);
 		}
 */		add_property_string(pattr, "name", (char *) (attr->name), 1);
 		add_property_string(pattr, "value", xmlNodeGetContent((xmlNodePtr) attr), 1);
@@ -2365,7 +2365,7 @@ static int node_children(zval **children, xmlNode *nodep TSRMLS_DC)
 		/* Get the namespace of the current node and add it as a property */
 		/* XXX FIXME XXX */
 /*		if(!node_namespace(&namespace, last))
-			zend_hash_update(child->value.obj.properties, "namespace", sizeof("namespace"), (void *) &namespace, sizeof(zval *), NULL);
+			zend_hash_update(Z_OBJPROP_P(child), "namespace", sizeof("namespace"), (void *) &namespace, sizeof(zval *), NULL);
 */
 
 		/* Get the attributes of the current node and add it as a property */
