@@ -37,7 +37,7 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <stdlib.h>
-#ifdef HAVE_UINSTD_H
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 #include <fcntl.h>
