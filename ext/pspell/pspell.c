@@ -72,7 +72,7 @@ PHP_MINIT_FUNCTION(pspell){
 	return SUCCESS;
 }
 
-/* {{{ proto int pspell_new(string language [, string spelling [, string jargon [, string encoding [, mode]]]])
+/* {{{ proto int pspell_new(string language [, string spelling [, string jargon [, string encoding [, int mode]]]])
    Load a dictionary */
 PHP_FUNCTION(pspell_new){
 	zval **language,**spelling,**jargon,**encoding,**pmode;
