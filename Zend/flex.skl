@@ -321,6 +321,10 @@ static void yy_fatal_error YY_PROTO(( yyconst char msg[] ));
 %% code to copy yytext_ptr to yytext[] goes here, if %array
 	yy_c_buf_p = yy_cp;
 
+#undef yyleng
+#undef yytext
+#undef yytext_ptr
+
 %% data tables for the DFA and the user's section 1 definitions go here
 
 /* Macros after this point can all be overridden by user definitions in

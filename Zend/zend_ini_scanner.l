@@ -17,6 +17,10 @@
    +----------------------------------------------------------------------+
 */
 
+#define yyleng SCNG(yy_leng)
+#define yytext SCNG(yy_text)
+#define yytext_ptr SCNG(yy_text)
+
 #include "zend.h"
 #include "zend_globals.h"
 #include "zend_ini_parser.h"
