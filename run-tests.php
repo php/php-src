@@ -161,15 +161,21 @@ function initialize()
         }
     }
 
-    if (isset($_ENV["TOP_BUILDDIR"]) && @is_executable($_ENV["TOP_BUILDDIR"]."/php{$ext}")) {
-        $php = $_ENV["TOP_BUILDDIR"]."/php{$ext}";
-    } elseif (isset($_ENV["TOP_BUILDDIR"]) && @is_executable($_ENV["TOP_BUILDDIR"]."/sapi/cli/php{$ext}")) {
+/* Lets check for cli first, since the new build system runs the cli sapi,
+   and this script makes assumptions about the executeable based on things
+   it determines from *this* instance.  If the sapis are not the same, tests
+   will fail due to silly things like headers not being ignored in the right
+   places */
+
+    if (isset($_ENV["TOP_BUILDDIR"]) && @is_executable($_ENV["TOP_BUILDDIR"]."/sapi/cli/php{$ext}")) {
         $php = $_ENV["TOP_BUILDDIR"]."/sapi/cli/php{$ext}";
-    } elseif (@is_executable("./php{$ext}")) {
-        $php = getcwd() . "/php{$ext}";
     } elseif (@is_executable("./sapi/cli/php{$ext}")) {
         $php = getcwd() . "/sapi/cli/php{$ext}";
-    }
+    } elseif (isset($_ENV["TOP_BUILDDIR"]) && @is_executable($_ENV["TOP_BUILDDIR"]."/php{$ext}")) {
+        $php = $_ENV["TOP_BUILDDIR"]."/php{$ext}";
+    } elseif (@is_executable("./php{$ext}")) {
+        $php = getcwd() . "/php{$ext}";
+	}
 // Test result can be bogus, if we use php binary in path. - yohgaki@php.net
 //     if (empty($php)) {
 //         $php = in_path("php", $windows_p);
