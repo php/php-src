@@ -447,6 +447,13 @@ void zend_activate(CLS_D ELS_DC)
 	startup_scanner(CLS_C);
 }
 
+
+void zend_activate_modules()
+{
+	zend_hash_apply(&module_registry, (int (*)(void *)) module_registry_request_startup);
+}
+
+
 void zend_deactivate(CLS_D ELS_DC)
 {
 	zend_hash_apply(&module_registry, (int (*)(void *)) module_registry_cleanup);

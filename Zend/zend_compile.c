@@ -101,7 +101,6 @@ void init_compiler(CLS_D ELS_DC)
 	CG(asp_tags) = ZEND_UV(asp_tags);
 	CG(allow_call_time_pass_reference) = ZEND_UV(allow_call_time_pass_reference);
 	CG(handle_op_arrays) = 1;
-	zend_hash_apply(&module_registry, (int (*)(void *)) module_registry_request_startup);
 	init_resource_list(ELS_C);
 	CG(unclean_shutdown) = 0;
 	zend_llist_init(&CG(open_files), sizeof(zend_file_handle), (void (*)(void *)) zend_open_file_dtor, 0);
