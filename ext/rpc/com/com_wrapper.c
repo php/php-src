@@ -1200,6 +1200,12 @@ PHPAPI pval php_COM_get_property_handler(zend_property_reference *property_refer
 		pval_destructor(&overloaded_property->element);
 	}
 
+	if (obj_prop != NULL)
+	{
+		RETVAL_COM(obj);
+	}
+
+
 	FREE_VARIANT(var_result);              
 
 	return return_value;
