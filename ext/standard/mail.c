@@ -23,7 +23,7 @@
 #include <stdio.h>
 #include "php.h"
 #include "ext/standard/info.h"
-#if !defined(PHP_WIN32)
+#if !defined(PHP_WIN32) && !defined(NETWARE)
 #include "build-defs.h"
 #if HAVE_SYSEXITS_H
 #include <sysexits.h>
@@ -40,6 +40,11 @@
 #if HAVE_SENDMAIL
 #ifdef PHP_WIN32
 #include "win32/sendmail.h"
+#endif
+
+#ifdef NETWARE
+#include "netware/pipe.h"    /* For popen(), pclose() */
+#include "netware/sysexits.h"   /* For exit status codes like EX_OK */
 #endif
 
 /* {{{ proto int ezmlm_hash(string addr)
@@ -137,7 +142,8 @@ PHP_FUNCTION(mail)
  */
 PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char *extra_cmd TSRMLS_DC)
 {
-#ifdef PHP_WIN32
+/*#ifdef PHP_WIN32*/
+#if (defined PHP_WIN32 || defined NETWARE)
 	int tsm_err;
 	char *tsm_errmsg = NULL;
 #endif
@@ -147,7 +153,8 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 	char *sendmail_cmd = NULL;
 
 	if (!sendmail_path) {
-#ifdef PHP_WIN32
+/*#ifdef PHP_WIN32*/
+#if (defined PHP_WIN32 || defined NETWARE)
 		/* handle old style win smtp sending */
 		if (TSendMail(INI_STR("SMTP"), &tsm_err, &tsm_errmsg, headers, subject, to, message, NULL, NULL, NULL) == FAILURE) {
 			if (tsm_errmsg) {
