@@ -2147,7 +2147,7 @@ PHP_FUNCTION(pg_lo_write)
 			RETURN_FALSE;
 		}
 		if (Z_LVAL_PP(z_len) < 0) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Buffer size must be larger than 0, but %d was specified", Z_STRLEN_PP(str));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Buffer size must be larger than 0, but %ld was specified", Z_LVAL_PP(z_len));
 			RETURN_FALSE;
 		}
 		len = Z_LVAL_PP(z_len);
