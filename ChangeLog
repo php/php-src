@@ -1,3 +1,80 @@
+2002-03-10  jim winstead  <jimw@apache.org>
+
+    * ext/standard/math.c:
+    handle numeric strings. this means we're less picky about the argument
+    types, but the math functions aren't generally that picky.
+
+2002-03-10  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * ext/standard/syslog.c: - Fix protos.
+
+    * ext/iconv/iconv.c: - MFH fix for #15799.
+
+2002-03-10  Shane Caraveo  <shane@caraveo.com>
+
+    * win32/php4ts.dsp: fix output directory
+
+    * sapi/cgi/cgi_main.c: woohoo, take some credit!
+
+    * sapi/cgi/cgi_main.c:
+    children should be zero by default, enable by setting PHP_FCGI_CHILDREN env var.
+
+    * win32/php4ts.dsp:
+    Update makefile for compiling with fastcgi under windows
+
+    * sapi/cgi/libfcgi/LICENSE.TERMS
+      sapi/cgi/libfcgi/fcgi_stdio.c
+      sapi/cgi/libfcgi/fcgiapp.c
+      sapi/cgi/libfcgi/include/fastcgi.h
+      sapi/cgi/libfcgi/include/fcgi_config.h
+      sapi/cgi/libfcgi/include/fcgi_config_x86.h
+      sapi/cgi/libfcgi/include/fcgi_stdio.h
+      sapi/cgi/libfcgi/include/fcgiapp.h
+      sapi/cgi/libfcgi/include/fcgiappmisc.h
+      sapi/cgi/libfcgi/include/fcgimisc.h
+      sapi/cgi/libfcgi/include/fcgio.h
+      sapi/cgi/libfcgi/include/fcgios.h
+      sapi/cgi/libfcgi/os_unix.c
+      sapi/cgi/libfcgi/os_win32.c
+      sapi/cgi/libfcgi/strerror.c
+      sapi/cgi/cgi_main.c: combine fastcgi capability with regular cgi binary
+    include fastcgi library for ease of windows builds
+    NOTE: included fastcgi library is modified for thread safety, but
+    	fastcgi support in cgi_main.c is only written for single
+    	threaded serving.  This does not present any issue for using
+    	fastcgi.
+
+2002-03-10  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * ext/mbstring/tests/007.phpt: fixed wrong include file.
+
+    * ext/mbstring/tests/skipif.inc: fixed module name iconv->mbstring.
+
+2002-03-10  Stefan Esser  <s.esser@e-matters.de>
+
+    * main/rfc1867.c: Fix: Now returns correct Content-Type for Opera 6.01
+
+    * main/rfc1867.c: Fix: Now returns correct Content-Type with Opera 6.01
+
+2002-03-10  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * ext/iconv/iconv.c: - Fix crash in iconv_set_encoding(). [Closes #15799]
+
+2002-03-10  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/standard/tests/aggregation/aggregate.lib
+      ext/standard/tests/aggregation/aggregate.lib.php
+      ext/standard/tests/aggregation/aggregate.phpt
+      ext/standard/tests/aggregation/aggregate_methods.phpt
+      ext/standard/tests/aggregation/aggregate_methods_by_list.phpt
+      ext/standard/tests/aggregation/aggregate_methods_by_regexp.phpt
+      ext/standard/tests/aggregation/aggregate_properties.phpt
+      ext/standard/tests/aggregation/aggregate_properties_by_list.phpt
+      ext/standard/tests/aggregation/aggregate_properties_by_regexp.phpt
+      ext/standard/tests/aggregation/aggregation_info.phpt
+      ext/standard/tests/aggregation/deaggregate.phpt:
+    - Renamed aggregate.lib.php -> aggregate.lib (.php files are always deleted bycvsclean)
+
 2002-03-09  Jani Taskinen  <sniper@iki.fi>
 
     * Makefile.in
