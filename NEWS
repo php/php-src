@@ -2,6 +2,7 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.2
+- Fixed support for current thttpd releases. (Sascha)
 - Virtualize realpath, chmod, chown and utime (Stas)
 - Support content-encoding headers in file upload MIME parts
   (Ragnar Kjørstad)
