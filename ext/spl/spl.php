@@ -12,7 +12,9 @@
  * foreach construct and do not need to implement IteratorAggregate or
  * Iterator.
  *
- * \note This is an engine internal interface.
+ * \note This is an engine internal interface which cannot be implemented
+ * in PHP scripts. Either IteratorAggregate or Iterator must be used 
+ * instead.
  */
 interface Traversable
 {
@@ -24,7 +26,7 @@ interface Traversable
  */ 
 interface IteratorAggregate implements Traversable
 {
-	/** Return an Iterator for the implementing object.
+	/** \return an Iterator for the implementing object.
 	 */
 	function getIterator();
 }
@@ -72,9 +74,11 @@ interface RecursiveIterator implements Iterator
 	function getChildren();
 }
 
-/** Class for recursive traversal. The objects of this class are created by 
- * instances of RecursiveIterator. Elements of those iterators may be 
- * traversable themselves. If so these sub elements are recursed into.
+/** \brief Class for recursive traversal. 
+ *
+ * The objects of this class are created by instances of RecursiveIterator. 
+ * Elements of those iterators may be traversable themselves. If so these 
+ * sub elements are recursed into.
  */
 class RecursiveIteratorIterator implements Iterator
 {
@@ -153,6 +157,11 @@ class ArrayObject implements IteratorAggregate, ArrayAccess
 	 *       returns an array of the public properties.
 	 */	
 	function getArrayCopy();
+
+	/** \return the number of elements in the array or the number of public
+	 * properties in the object.
+	 */
+	function count();
 }
 
 /** \brief An Array iterator
@@ -209,8 +218,19 @@ class ArrayIterator implements Iterator, SeekableIterator, ArrayAccess
 	 */
 	function seek($position);
 
-/** Iterator that wrapps around another iterator and only returns selected
- * elements of the inner iterator.
+	/** \return the number of elements in the array or the number of public
+	 * properties in the object.
+	 */
+	function count();
+}
+
+/** \brief An iterator that filters other iterators
+ * 
+ * Iterator that wrapps around another iterator and only returns selected
+ * elements of the inner iterator. The only thing that needs to be done to
+ * make this work is implementing method accept(). Typically this invloves
+ * reading the current element or key of the inner Iterator and checking
+ * whether it is acceptable.
  */
 abstract class FilterIterator implements Iterator
 {
