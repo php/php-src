@@ -1,3 +1,32 @@
+2004-10-25  Greg Beaver  <greg@chiaraquartet.net>
+
+    * (PHP_5_0)
+      pear/PEAR/Builder.php
+      pear/PEAR/Common.php
+      pear/PEAR/Downloader.php
+      pear/PEAR/ErrorStack.php
+      pear/PEAR/Exception.php
+      pear/PEAR/Installer.php
+      pear/PEAR/Registry.php
+      pear/PEAR/Command/Install.php
+      pear/PEAR/Command/Package.php:
+      sync with PEAR_1_3 branch of pear-core
+
+    * (PHP_5_0)
+      pear/go-pear-list.php:
+      update for PEAR 1.3.2
+
+2004-10-25  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/microtime.c:
+      Merge gettimeofday() based code to prevent duplication.
+
+2004-10-25  Greg Beaver  <greg@chiaraquartet.net>
+
+    * (PHP_5_0)
+      pear/go-pear.bat:
+      pass in first parameter to work with go-pear 0.5.0 "local" option
+
 2004-10-24  Ilia Alshanetsky  <ilia@prohost.org>
 
     * NEWS
