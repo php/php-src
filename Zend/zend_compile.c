@@ -1729,67 +1729,6 @@ void zend_do_implement_interface(zend_class_entry *ce, zend_class_entry *iface)
 }
 
 
-static void create_class(HashTable *class_table, char *name, int name_length, zend_class_entry **ce TSRMLS_DC)
-{
-	zend_class_entry *new_class_entry;
-
-	new_class_entry = emalloc(sizeof(zend_class_entry));
-	*ce = new_class_entry;
-
-	new_class_entry->type = ZEND_USER_CLASS;
-	new_class_entry->name = estrndup(name, name_length);
-	new_class_entry->name_length = name_length;
-	new_class_entry->parent = NULL;
-	zend_initialize_class_data(new_class_entry, 1 TSRMLS_CC);
-
-	zend_str_tolower(new_class_entry->name, new_class_entry->name_length);
-
-	if (zend_hash_update(class_table, new_class_entry->name, name_length+1, &new_class_entry, sizeof(zend_class_entry *), NULL) == FAILURE) {
-		zend_error(E_COMPILE_ERROR, "Can't create class. Fatal error, please report!");
-	}
-}
-
-
-#include "../TSRM/tsrm_strtok_r.h"
-
-static zend_class_entry *create_nested_class(HashTable *class_table, char *path, zend_class_entry *new_ce TSRMLS_DC)
-{
-	char *cur, *temp;
-	char *last;
-	zend_class_entry *ce, **pce;
-
-
-	cur = tsrm_strtok_r(path, ":", &temp);
-
-	if (zend_hash_find(class_table, cur, strlen(cur)+1, (void **)&pce) == FAILURE) {
-		create_class(class_table, cur, strlen(cur), &ce TSRMLS_CC);
-	} else {
-		ce = *pce;
-	}
-
-	last = tsrm_strtok_r(NULL, ":", &temp);
-
-	for(;;) {
-		cur = tsrm_strtok_r(NULL, ":", &temp);
-		if (!cur) {
-			break;
-		}
-		if (zend_hash_find(&ce->class_table, last, strlen(last)+1, (void **)&pce) == FAILURE) {
-			create_class(&ce->class_table, last, strlen(last), &ce TSRMLS_CC);
-		} else {
-			ce = *pce;
-		}
-		last = cur;
-	}
-	new_ce->refcount++;
-	if (zend_hash_add(&ce->class_table, last, strlen(last)+1, &new_ce, sizeof(zend_class_entry *), NULL) == FAILURE) {
-		new_ce->refcount--;
-		zend_error(E_COMPILE_ERROR, "Cannot redeclare class '%s' - class or namespace with this name already exist.", last);
-		return NULL;
-	}
-	return new_ce;
-}
-
 ZEND_API int do_bind_function(zend_op *opline, HashTable *function_table, HashTable *class_table, int compile_time)
 {
 	zend_function *function;
@@ -1832,9 +1771,6 @@ ZEND_API zend_class_entry *do_bind_class(zend_op *opline, HashTable *function_ta
 	} else {
 		ce = *pce;
 	}
-	if (strchr(opline->op2.u.constant.value.str.val, ':')) {
-		return create_nested_class(class_table, opline->op2.u.constant.value.str.val, ce TSRMLS_CC);
-	}
 	ce->refcount++;
 	if (zend_hash_add(class_table, opline->op2.u.constant.value.str.val, opline->op2.u.constant.value.str.len+1, &ce, sizeof(zend_class_entry *), NULL)==FAILURE) {
 		ce->refcount--;
@@ -1860,10 +1796,6 @@ ZEND_API zend_class_entry *do_bind_inherited_class(zend_op *opline, HashTable *f
 	}
 
 	zend_do_inheritance(ce, parent_ce);
-
-	if (strchr(opline->op2.u.constant.value.str.val, ':')) {
-		return create_nested_class(class_table, opline->op2.u.constant.value.str.val, ce TSRMLS_CC);
-	}
 
 	ce->refcount++;
 
