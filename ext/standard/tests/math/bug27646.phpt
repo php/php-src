@@ -3,17 +3,17 @@ Bug #27646 (Cannot serialize/unserialize non-finite numeric values)
 --FILE--
 <?php
 
-$f=-(float)INF;
+$f=-INF;
 var_dump($f);
 var_dump(serialize($f));
 var_dump(unserialize(serialize($f)));
 
-$f=(float)INF;
+$f=INF;
 var_dump($f);
 var_dump(serialize($f));
 var_dump(unserialize(serialize($f)));
 
-$f=(float)NAN;
+$f=NAN;
 var_dump($f);
 var_dump(serialize($f));
 var_dump(unserialize(serialize($f)));
