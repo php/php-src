@@ -3043,20 +3043,20 @@ static long php_intifx_create_blob(long type, long mode, char* param, long len, 
 
 		if (*param && param != "") {
 
-			char *filename;
+                        /* 
+                         * copy the filename in param to filename in loc_fname 
+                         * otherwise we'll unlink non-temporary files
+                         * 
+                         * loc_fname gets filled by php_intifx_init_blob_infile
+                         */
 
-			if (Ifx_blob->BLOB.blob_data.loc_fname != NULL) {
-				unlink(Ifx_blob->BLOB.blob_data.loc_fname);
-				efree(Ifx_blob->BLOB.blob_data.loc_fname);
-			}
-			if ((filename = emalloc(len + 1)) == NULL)  {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can't create blob-resource");
-				return -1;
-			}
-			memcpy(filename, param, len);
-			filename[len] = 0;
-			Ifx_blob->BLOB.blob_data.loc_fname = filename;
-			Ifx_blob->BLOB.blob_data.loc_size = -1;
+                        if (Ifx_blob->BLOB.blob_data.loc_fname != NULL) {
+                                if (php_copy_file(param, Ifx_blob->BLOB.blob_data.loc_fname TSRMLS_CC) == FAILURE)   {
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can't create blob-resource file. File copy failed: %s", param);
+					return -1;
+				}
+                                Ifx_blob->BLOB.blob_data.loc_size = -1;
+                        }
 		}
 	}
 
