@@ -1579,6 +1579,10 @@ PHP_FUNCTION(strrpos)
 		RETURN_FALSE;
 	}
 
+	if ((haystack_len == 0) || (needle_len == 0)) {
+		RETURN_FALSE;
+	}
+
 	if (offset >= 0) {
 		p = haystack + offset;
 		e = haystack + haystack_len - needle_len;
@@ -1612,6 +1616,10 @@ PHP_FUNCTION(strripos)
 	char *needle_dup, *haystack_dup;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|l", &haystack, &haystack_len, &needle, &needle_len, &offset) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	if ((haystack_len == 0) || (needle_len == 0)) {
 		RETURN_FALSE;
 	}
 
