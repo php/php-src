@@ -28,6 +28,8 @@ GPL. If you do not delete the provisions above, a recipient may use
 your version of this file under either the MPL or the GPL.
 */
 
+#include "php_compat.h"
+
 #include "xmldef.h"
 #include "xmlparse.h"
 

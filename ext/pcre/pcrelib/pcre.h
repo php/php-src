@@ -11,6 +11,8 @@
 #define PCRE_MINOR 08
 #define PCRE_DATE  31-Aug-1999
 
+#include "php_compat.h"
+
 /* Win32 uses DLL by default */
 
 #ifdef _WIN32
