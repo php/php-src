@@ -201,6 +201,7 @@ function_entry fbsql_functions[] = {
 	PHP_FE(fbsql_num_fields,	NULL)
 	PHP_FE(fbsql_fetch_row,		NULL)
 	PHP_FE(fbsql_fetch_array,	NULL)
+	PHP_FE(fbsql_fetch_assoc,	NULL)
 	PHP_FE(fbsql_fetch_object,	NULL)
 	PHP_FE(fbsql_data_seek,		NULL)
 	PHP_FE(fbsql_fetch_lengths,	NULL)
@@ -2523,11 +2524,29 @@ PHP_FUNCTION(fbsql_num_fields)
 /* }}} */
 
 
-/* {{{ proto object fbsql_fetch_object(int result [, int result_typ])
+/* {{{ proto array fbsql_fetch_row(int result)
+	*/
+PHP_FUNCTION(fbsql_fetch_row)
+{
+	php_fbsql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, FBSQL_NUM);
+}
+/* }}} */
+
+
+/* {{{ proto object fbsql_fetch_assoc(int result)
+	*/
+PHP_FUNCTION(fbsql_fetch_assoc)
+{
+	php_fbsql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, FBSQL_ASSOC);
+}
+/* }}} */
+
+
+/* {{{ proto object fbsql_fetch_object(int result [, int result_type])
 	*/
 PHP_FUNCTION(fbsql_fetch_object)
 {
-	PHP_FN(fbsql_fetch_array)(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	php_fbsql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, FBSQL_ASSOC);
 	if (return_value->type==IS_ARRAY)
 	{
 		return_value->type=IS_OBJECT;
@@ -2538,72 +2557,15 @@ PHP_FUNCTION(fbsql_fetch_object)
 /* }}} */
 
 
-/* {{{ proto array fbsql_fetch_row(int result)
-	*/
-PHP_FUNCTION(fbsql_fetch_row)
+/* {{{ proto array fbsql_fetch_array(int result [, int result_type])
+   Fetch a result row as an array (associative, numeric or both)*/
+PHP_FUNCTION(fbsql_fetch_array)
 {
-	int   argc    = ARG_COUNT(ht);
-	zval	**argv[2];
-	int                 i;
-	int                 resultIndex;
-	PHPFBResult*       result;
-	int                 rowIndex ;
-	void**              row;
-	FBSQLLS_FETCH();
-
-	resultIndex = FB_SQL_G(resultIndex);
-
-	if ((argc < 0) || (argc > 1)) WRONG_PARAM_COUNT;
-	if (zend_get_parameters_ex(argc,&argv[0])==FAILURE) RETURN_FALSE;
-
-	if (argc >= 1) {
-		convert_to_long_ex(argv[0]);
-		resultIndex = (*argv[0])->value.lval;
-	}
-	result = phpfbGetResult(resultIndex);
-	if (result == NULL) RETURN_FALSE;
-   
-	rowIndex = result->rowIndex;
-
-	if (result->fetchHandle == NULL) {
-		RETURN_FALSE;
-	}
-	if (result->rowCount == 0) {
-		RETURN_FALSE;
-	}
-	if (result->rowCount == 0x7fffffff) {
-		if (!phpfbFetchRow(result,rowIndex)) {
-			RETURN_FALSE;
-		}
-	}
-	if (!(row = fbcrhRowAtIndex(result->rowHandler,rowIndex))) {
-		RETURN_FALSE;
-	}
-	if (array_init(return_value)==FAILURE) {
-		RETURN_FALSE;
-	}
-	result->row = row;
-	for (i=0; i < result->columnCount; i++) {
-		char*        value;
-		unsigned int length;
-		if (row[i]) {
-			phpfbColumnAsString(result,i,row[i],&length,&value);
-			add_index_stringl(return_value,i,value,length,0);
-		}
-		else {
-			add_index_unset(return_value,i);
-		}
-	}
-	result->rowIndex    = rowIndex+1;
-	result->columnIndex = 0;
-	FB_SQL_G(resultIndex) = resultIndex;
+	php_fbsql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, FBSQL_NUM);
 }
 /* }}} */
 
-
-/* {{{ proto array fbsql_fetch_array(int result [, int result_typ])
-	*/
-PHP_FUNCTION(fbsql_fetch_array)
+static void php_fbsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 {
 	int   argc    = ARG_COUNT(ht);
 	zval	**argv[2];
@@ -2611,7 +2573,6 @@ PHP_FUNCTION(fbsql_fetch_array)
 	int                 resultIndex;
 	PHPFBResult* result;
 	int                 rowIndex;
-	int                 result_type = FBSQL_BOTH;
 	void**              row;
 	FBSQLLS_FETCH();
 
@@ -2696,7 +2657,6 @@ PHP_FUNCTION(fbsql_fetch_array)
 	result->rowIndex    = result->rowIndex+1;
 	result->columnIndex = 0;
 }
-/* }}} */
 
 
 /* {{{ proto int fbsql_data_seek(int result, int row_number)
