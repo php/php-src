@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2004, PHP 5.1.0
+- Implement access to INI variables from within .ini file. (Andrei)
 - Add SAPI hook to get the current request time. (Rasmus)
 - Fixed bug #29522 (accessing properties without connection) (Georg)
 - Fixed bug #29335 (fetch functions now use MYSQLI_BOTH as default) (Georg)
