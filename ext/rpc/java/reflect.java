@@ -46,6 +46,7 @@ public class reflect {
   private static native void setResultFromArray(long result);
   private static native long nextElement(long array);
   private static native long hashUpdate(long array, byte key[]);
+  private static native long hashIndexUpdate(long array, long key);
   private static native void setException(long result, byte value[]);
   public  static native void setEnv();
 
@@ -88,7 +89,13 @@ public class reflect {
       setResultFromArray(result);
       for (Enumeration e = ht.keys(); e.hasMoreElements(); ) {
         Object key = e.nextElement();
-        setResult(hashUpdate(result, key.toString().getBytes()), ht.get(key));
+        long slot;
+        if (key instanceof Number && 
+            !(key instanceof Double || key instanceof Float))
+          slot = hashIndexUpdate(result, ((Number)key).longValue());
+        else
+          slot = hashUpdate(result, key.toString().getBytes());
+        setResult(slot, ht.get(key));
       }
 
     } else {
@@ -176,8 +183,13 @@ public class reflect {
             if (!c.isInstance(args[i])) break;
             weight++;
           }
-        } else if (parms[i].isInstance("")) {
-	  if (!(args[i] instanceof byte[]))
+        } else if (parms[i].isAssignableFrom(java.lang.String.class)) {
+	  if (!(args[i] instanceof byte[]) && !(args[i] instanceof String))
+	    weight+=9999;
+        } else if (parms[i].isArray()) {
+	  if (args[i] instanceof java.util.Hashtable)
+	    weight+=256;
+          else
 	    weight+=9999;
         } else if (parms[i].isPrimitive()) {
           Class c=parms[i];
@@ -235,6 +247,42 @@ public class reflect {
         if (c == Float.TYPE)   result[i]=new Float(n.floatValue());
         if (c == Long.TYPE && !(n instanceof Long)) 
           result[i]=new Long(n.longValue());
+      } else if (args[i] instanceof Hashtable && parms[i].isArray()) {
+        try {
+          Hashtable ht = (Hashtable)args[i];
+          int size = ht.size();
+
+          // Verify that the keys are Long, and determine maximum
+          for (Enumeration e = ht.keys(); e.hasMoreElements(); ) {
+            int index = ((Long)e.nextElement()).intValue();
+            if (index >= size) size = index+1;
+          }
+
+          Object tempArray[] = new Object[size];
+          Class tempTarget[] = new Class[size];
+          Class targetType = parms[i].getComponentType();
+
+          // flatten the hash table into an array
+          for (int j=0; j<size; j++) {
+            tempArray[j] = ht.get(new Long(j));
+            if (tempArray[j] == null && targetType.isPrimitive()) 
+              throw new Exception("bail");
+            tempTarget[j] = targetType;
+          }
+
+          // coerce individual elements into the target type
+          Object coercedArray[] = coerce(tempTarget, tempArray);
+        
+          // copy the results into the desired array type
+          Object array = Array.newInstance(targetType,size);
+          for (int j=0; j<size; j++) {
+            Array.set(array, j, coercedArray[j]);
+          }
+
+          result[i]=array;
+        } catch (Exception e) {
+          // leave result[i] alone...
+        }
       }
     }
     return result;
