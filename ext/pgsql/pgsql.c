@@ -887,7 +887,7 @@ static void php3_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 			}
 			break;
 		case 3:
-			if (getParameters(ht, 2, &result, &row, &arg3)==FAILURE) {
+			if (getParameters(ht, 3, &result, &row, &arg3)==FAILURE) {
 				RETURN_FALSE;
 			}
 			convert_to_long(arg3);
