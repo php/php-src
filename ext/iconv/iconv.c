@@ -1221,7 +1221,7 @@ static php_iconv_err_t _php_iconv_mime_encode(smart_str *pretval, const char *fn
 					goto out;
 				}
 
-			} break; /* case PHP_ICONV_ENC_SCHEME_BASE64: */
+			} break; /* case PHP_ICONV_ENC_SCHEME_QPRINT: */
 		}
 	} while (in_left > 0);
 
