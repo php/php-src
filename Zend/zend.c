@@ -333,10 +333,8 @@ static void alloc_globals_ctor(zend_alloc_globals *alloc_globals_p TSRMLS_DC)
 #endif
 
 #ifdef ZTS
-static void zend_new_thread_end_handler(THREAD_T thread_id)
+static void zend_new_thread_end_handler(THREAD_T thread_id TSRMLS_DC)
 {
-	TSRMLS_FETCH();
-
 	zend_copy_ini_directives(TSRMLS_C);
 	zend_ini_refresh_caches(ZEND_INI_STAGE_STARTUP TSRMLS_CC);
 }
@@ -420,7 +418,7 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions, i
 #endif
 
 	if (start_builtin_functions) {
-		zend_startup_builtin_functions();
+		zend_startup_builtin_functions(TSRMLS_C);
 	}
 
 	zend_ini_startup(TSRMLS_C);
@@ -522,18 +520,17 @@ void zend_activate(TSRMLS_D)
 }
 
 
-void zend_activate_modules()
+void zend_activate_modules(void)
 {
-	zend_hash_apply(&module_registry, (int (*)(void *)) module_registry_request_startup);
+	zend_hash_apply(&module_registry, (apply_func_t) module_registry_request_startup);
 }
 
-void zend_deactivate_modules()
+void zend_deactivate_modules(TSRMLS_D)
 {
-	TSRMLS_FETCH();
 	EG(opline_ptr) = NULL; /* we're no longer executing anything */
 
 	zend_try {
-		zend_hash_apply(&module_registry, (int (*)(void *)) module_registry_cleanup);
+		zend_hash_apply(&module_registry, (apply_func_t) module_registry_cleanup);
 	} zend_end_try();
 }
 
@@ -780,12 +777,11 @@ ZEND_API int zend_execute_scripts(int type TSRMLS_DC, int file_count, ...)
 
 #define COMPILED_STRING_DESCRIPTION_FORMAT "%s(%d) : %s"
 
-ZEND_API char *zend_make_compiled_string_description(char *name)
+ZEND_API char *zend_make_compiled_string_description(char *name TSRMLS_DC)
 {
 	char *cur_filename;
 	int cur_lineno;
 	char *compiled_string_description;
-	TSRMLS_FETCH();
 
 	if (zend_is_compiling()) {
 		cur_filename = zend_get_compiled_filename(TSRMLS_C);

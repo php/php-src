@@ -937,9 +937,9 @@ static void call_overloaded_function(temp_variable *T, int arg_count, zval *retu
 #if ZEND_INTENSIVE_DEBUGGING
 
 #define CHECK_SYMBOL_TABLES()														\
-	zend_hash_apply(&EG(symbol_table), (int (*)()) zend_check_symbol);				\
+	zend_hash_apply(&EG(symbol_table), (apply_func_t) zend_check_symbol);				\
 	if (&EG(symbol_table)!=EG(active_symbol_table)) {								\
-		zend_hash_apply(EG(active_symbol_table), (int (*)()) zend_check_symbol);	\
+		zend_hash_apply(EG(active_symbol_table), (apply_func_t) zend_check_symbol);	\
 	}
 
 static int zend_check_symbol(zval **pz)
@@ -947,9 +947,9 @@ static int zend_check_symbol(zval **pz)
 	if ((*pz)->type>9) {
 		fprintf(stderr, "Warning!  %x has invalid type!\n", *pz);
 	} else if ((*pz)->type==IS_ARRAY) {
-		zend_hash_apply((*pz)->value.ht, (int (*)()) zend_check_symbol);
+		zend_hash_apply((*pz)->value.ht, (apply_func_t) zend_check_symbol);
 	} else if ((*pz)->type==IS_OBJECT) {
-		zend_hash_apply((*pz)->value.obj.properties, (int (*)()) zend_check_symbol);
+		zend_hash_apply((*pz)->value.obj.properties, (apply_func_t) zend_check_symbol);
 	}
 
 	return 0;
@@ -2086,7 +2086,7 @@ send_by_ref:
 							new_op_array = compile_filename(opline->op2.u.constant.value.lval, inc_filename TSRMLS_CC);
 							break;
 						case ZEND_EVAL: {
-								char *eval_desc = zend_make_compiled_string_description("eval()'d code");
+								char *eval_desc = zend_make_compiled_string_description("eval()'d code" TSRMLS_CC);
 
 								new_op_array = compile_string(inc_filename, eval_desc TSRMLS_CC);
 								efree(eval_desc);

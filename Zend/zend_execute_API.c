@@ -173,8 +173,8 @@ void shutdown_executor(TSRMLS_D)
 		zend_ptr_stack_destroy(&EG(argument_stack));
 
 		/* Destroy all op arrays */
-		zend_hash_apply(EG(function_table), (int (*)(void *)) is_not_internal_function);
-		zend_hash_apply(EG(class_table), (int (*)(void *)) is_not_internal_class);
+		zend_hash_apply(EG(function_table), (apply_func_t) is_not_internal_function);
+		zend_hash_apply(EG(class_table), (apply_func_t) is_not_internal_class);
 	} zend_end_try();
 
 	zend_destroy_rsrc_list(TSRMLS_C); /* must be destroyed after the main symbol table and
