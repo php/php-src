@@ -30,12 +30,18 @@
 #include "php_session.h"
 #include "mod_mm.h"
 
+#define PS_MM_PATH "/tmp/session_mm"
+
+/*
+ * this list holds all data associated with one session 
+ */
+
 typedef struct ps_sd {
+	struct ps_sd *next, *prev;
 	time_t ctime;
 	char *key;
 	void *data;
 	size_t datalen;
-	struct ps_sd *next, *prev;
 } ps_sd;
 
 typedef struct {
@@ -46,7 +52,7 @@ typedef struct {
 static ps_mm *ps_mm_instance = NULL;
 
 /* should be a prime */
-#define HASH_SIZE 11
+#define HASH_SIZE 577
 
 #if 0
 #define ps_mm_debug(a...) fprintf(stderr, a)
@@ -58,6 +64,11 @@ static ps_mm *ps_mm_instance = NULL;
 #define THREE_QUARTERS ((int) ((BITS_IN_int * 3) / 4))
 #define ONE_EIGTH ((int) (BITS_IN_int / 8))
 #define HIGH_BITS (~((unsigned int)(~0) >> ONE_EIGTH))
+
+/*
+ * Weinberger's generic hash algorithm, adapted by Holub
+ * (published in [Holub 1990])
+ */
 
 static unsigned int ps_sd_hash(const char *data)
 {
@@ -82,13 +93,27 @@ static ps_sd *ps_sd_new(ps_mm *data, const char *key, const void *sdata, size_t 
 	h = ps_sd_hash(key) % HASH_SIZE;
 	
 	sd = mm_malloc(data->mm, sizeof(*sd));
+	if(!sd) {
+		return NULL;
+	}
 	sd->ctime = 0;
 	
 	sd->data = mm_malloc(data->mm, sdatalen);
-	memcpy(sd->data, sdata, sdatalen);
+	if(!sd->data) {
+		mm_free(data->mm, sd);
+		return NULL;
+	}
+
 	sd->datalen = sdatalen;
 	
 	sd->key = mm_strdup(data->mm, key);
+	if(!sd->key) {
+		mm_free(data->mm, sd->data);
+		mm_free(data->mm, sd);
+		return NULL;
+	}
+	
+	memcpy(sd->data, sdata, sdatalen);
 	
 	if((sd->next = data->hash[h]))
 		sd->next->prev = sd;
@@ -116,7 +141,7 @@ static void ps_sd_destroy(ps_mm *data, ps_sd *sd)
 		data->hash[h] = sd->next;
 		
 	mm_free(data->mm, sd->key);
-	mm_free(data->mm, sd->data);
+	if(sd->data) mm_free(data->mm, sd->data);
 	mm_free(data->mm, sd);
 }
 
@@ -159,17 +184,38 @@ static int ps_mm_initialize(ps_mm *data, const char *path)
 
 static void ps_mm_destroy(ps_mm *data)
 {
+	int h;
+	ps_sd *sd, *next;
+
+	for(h = 0; h < HASH_SIZE; h++) {
+		for(sd = data->hash[h]; sd; sd = next) {
+			next = sd->next;
+			ps_sd_destroy(data, sd);
+		}
+	}
+	
 	mm_free(data->mm, data->hash);
 	mm_destroy(data->mm);
 }
 
+PHP_GINIT_FUNCTION(ps_mm)
+{
+	ps_mm_instance = calloc(sizeof(*ps_mm_instance), 1);
+	ps_mm_initialize(ps_mm_instance, PS_MM_PATH);
+	return SUCCESS;
+}
+
+PHP_GSHUTDOWN_FUNCTION(ps_mm)
+{
+	ps_mm_destroy(ps_mm_instance);
+	free(ps_mm_instance);
+	return SUCCESS;
+}
+
 PS_OPEN_FUNC(mm)
 {
-	if(!ps_mm_instance) {
-		ps_mm_instance = calloc(sizeof(*data), 1);
-		ps_mm_initialize(ps_mm_instance, save_path);
-	}
-
+	ps_mm_debug("open: ps_mm_instance=%x\n", ps_mm_instance);
+	
 	PS_SET_MOD_DATA(ps_mm_instance);
 	
 	return SUCCESS;
@@ -219,14 +265,19 @@ PS_WRITE_FUNC(mm)
 		mm_free(data->mm, sd->data);
 		sd->datalen = vallen;
 		sd->data = mm_malloc(data->mm, vallen);
-		memcpy(sd->data, val, vallen);
+		if(!sd->data) {
+			ps_sd_destroy(data, sd);
+			sd = NULL;
+		} else {
+			memcpy(sd->data, val, vallen);
+		}
 	}
 
-	time(&sd->ctime);
+	if(sd) time(&sd->ctime);
 
 	mm_unlock(data->mm);
 	
-	return SUCCESS;
+	return sd ? SUCCESS : FAILURE;
 }
 
 PS_DESTROY_FUNC(mm)
@@ -273,5 +324,15 @@ PS_GC_FUNC(mm)
 	
 	return SUCCESS;
 }
+
+zend_module_entry php_session_mm_module = {
+	"Session MM",
+	NULL,
+	NULL, NULL,
+	NULL, NULL,
+	NULL,
+	PHP_GINIT(ps_mm), PHP_GSHUTDOWN(ps_mm),
+	STANDARD_MODULE_PROPERTIES_EX
+};
 
 #endif

@@ -2,6 +2,8 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? 1999, Version 4.0 Beta 3
+- Added shared memory module for session data storage (Sascha)
+- Fixed session.auto_start (Sascha)
 - Fixed several problems with output buffering and HEAD requests (Zeev)
 - Fixed HTTP Status code issue with ISAPI module (Zeev)
 - Fixed a problem that prevented $GLOBALS from working properly (Zeev, Zend

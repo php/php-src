@@ -259,12 +259,16 @@ extern int ap_vsnprintf(char *, size_t, const char *, va_list);
 #define PHP_RINIT(module)	php3_rinit_##module
 #define PHP_RSHUTDOWN(module)	php3_rshutdown_##module
 #define PHP_MINFO(module)	php3_info_##module
+#define PHP_GINIT(module)		php3_ginit_##module
+#define PHP_GSHUTDOWN(module)	php3_gshutdown_##module
 
-#define PHP_MINIT_FUNCTION(module)	int php3_minit_##module(INIT_FUNC_ARGS)
-#define PHP_MSHUTDOWN_FUNCTION(module)	int php3_mshutdown_##module(SHUTDOWN_FUNC_ARGS)
-#define PHP_RINIT_FUNCTION(module)	int php3_rinit_##module(INIT_FUNC_ARGS)
-#define PHP_RSHUTDOWN_FUNCTION(module)	int php3_rshutdown_##module(SHUTDOWN_FUNC_ARGS)
-#define PHP_MINFO_FUNCTION(module)	void php3_info_##module(ZEND_MODULE_INFO_FUNC_ARGS)
+#define PHP_MINIT_FUNCTION(module)	int PHP_MINIT(module)(INIT_FUNC_ARGS)
+#define PHP_MSHUTDOWN_FUNCTION(module)	int PHP_MSHUTDOWN(module)(SHUTDOWN_FUNC_ARGS)
+#define PHP_RINIT_FUNCTION(module)	int PHP_RINIT(module)(INIT_FUNC_ARGS)
+#define PHP_RSHUTDOWN_FUNCTION(module)	int PHP_RSHUTDOWN(module)(SHUTDOWN_FUNC_ARGS)
+#define PHP_MINFO_FUNCTION(module)	void PHP_MINFO(module)(ZEND_MODULE_INFO_FUNC_ARGS)
+#define PHP_GINIT_FUNCTION(module)	static int PHP_GINIT(module)(void)
+#define PHP_GSHUTDOWN_FUNCTION(module)	static int PHP_GSHUTDOWN(module)(void)
 
 
 /* global variables */

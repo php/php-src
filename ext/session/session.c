@@ -281,7 +281,6 @@ static void _php_session_send_cookie(PSLS_D)
 	cookie = ecalloc(len + 1, 1);
 	
 	snprintf(cookie, len, COOKIE_FMT, PS(session_name), PS(id));
-	cookie[len] = '\0';
 	if (PS(lifetime) > 0) {
 		strcat(cookie, COOKIE_EXPIRES);
 		strcat(cookie, date_fmt);
@@ -701,7 +700,7 @@ int php_rinit_session(INIT_FUNC_ARGS)
 		return FAILURE;
 	}
 
-	if(INI_INT("session_auto_start")) {
+	if(INI_INT("session.auto_start")) {
 		_php_session_start(PSLS_C);
 	}
 
