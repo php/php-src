@@ -143,8 +143,9 @@ typedef struct {
 	HashTable putenv_ht;
 	char *strtok_string;
 	char *locale_string;
-	char *strtok_pos1;
-	char *strtok_pos2;
+	char *strtok_last;
+	char strtok_table[256];
+	ulong strtok_len;
 	char str_ebuf[40];
 	zval **array_walk_func_name;
 	zval **user_compare_func_name;

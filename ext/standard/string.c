@@ -803,60 +803,82 @@ PHP_FUNCTION(implode)
 }
 /* }}} */
 
+#define STRTOK_TABLE(p) BG(strtok_table)[(unsigned char) *p]	
+
 /* {{{ proto string strtok([string str,] string token)
    Tokenize a string */
 PHP_FUNCTION(strtok)
 {
-	zval **str, **tok;
-	char *token = NULL, *tokp=NULL;
-	char *first = NULL;
-	int argc;
+	zval **args[2];
+	zval **tok, **str;
+	char *token;
+	char *token_end;
+	char *p;
+	char *pe;
 	
-	argc = ZEND_NUM_ARGS();
-
-	if ((argc == 1 && zend_get_parameters_ex(1, &tok) == FAILURE) ||
-		(argc == 2 && zend_get_parameters_ex(2, &str, &tok) == FAILURE) ||
-		argc < 1 || argc > 2) {
+	if (ZEND_NUM_ARGS() < 1 || ZEND_NUM_ARGS() > 2 ||
+			zend_get_parameters_array_ex(ZEND_NUM_ARGS(), args) == FAILURE)
 		WRONG_PARAM_COUNT;
-	}
-	convert_to_string_ex(tok);
-	tokp = token = (*tok)->value.str.val;
-
-	if (argc == 2) {
+	
+	switch (ZEND_NUM_ARGS()) {
+	case 1:
+		tok = args[0];
+		break;
+	case 2:
+		str = args[0];
+		tok = args[1];
 		convert_to_string_ex(str);
 
 		STR_FREE(BG(strtok_string));
-		BG(strtok_string) = estrndup((*str)->value.str.val,(*str)->value.str.len);
-		BG(strtok_pos1) = BG(strtok_string);
-		BG(strtok_pos2) = NULL;
+		BG(strtok_last) = BG(strtok_string) = estrndup(Z_STRVAL_PP(str), Z_STRLEN_PP(str));
+		BG(strtok_len) = Z_STRLEN_PP(str);
+		break;
 	}
-	if (BG(strtok_pos1) && *BG(strtok_pos1)) {
-		for ( /* NOP */ ; token && *token; token++) {
-			BG(strtok_pos2) = strchr(BG(strtok_pos1), (int) *token);
-			if (!first || (BG(strtok_pos2) && BG(strtok_pos2) < first)) {
-				first = BG(strtok_pos2);
-			}
-		}						/* NB: token is unusable now */
+	
+	p = BG(strtok_last); /* Where we start to search */
+	pe = BG(strtok_string) + BG(strtok_len);
 
-		BG(strtok_pos2) = first;
-		if (BG(strtok_pos2)) {
-			*BG(strtok_pos2) = '\0';
+	if (!p || p >= pe)
+		RETURN_FALSE;
+
+	convert_to_string_ex(tok);
+	
+	token = Z_STRVAL_PP(tok);
+	token_end = token + Z_STRLEN_PP(tok);
+
+	while (token < token_end) 
+		STRTOK_TABLE(token++) = 1;
+
+	/* Skip leading delimiters */
+	while (STRTOK_TABLE(p))
+		if (++p >= pe) {
+			/* no other chars left */
+			BG(strtok_last) = NULL;
+			RETVAL_FALSE;
+			goto restore;
 		}
-		RETVAL_STRING(BG(strtok_pos1),1);
-#if 0
-		/* skip 'token' white space for next call to strtok */
-		while (BG(strtok_pos2) && 
-			strchr(tokp, *(BG(strtok_pos2)+1))) {
-			BG(strtok_pos2)++;
-		}
-#endif
-		if (BG(strtok_pos2))
-			BG(strtok_pos1) = BG(strtok_pos2) + 1;
-		else
-			BG(strtok_pos1) = NULL;
+	
+	/* We know at this place that *p is no delimiter, so skip it */	
+	while (++p < pe)
+		if (STRTOK_TABLE(p))
+		   goto return_token;	
+
+	if (p - BG(strtok_last)) {
+return_token:
+		RETVAL_STRINGL(BG(strtok_last), p - BG(strtok_last), 1);
+		BG(strtok_last) = p + 1;
 	} else {
 		RETVAL_FALSE;
+		BG(strtok_last) = NULL;
 	}
+
+	/* Restore table -- usually faster then memset'ing the table
+	   on every invocation */
+restore:
+	token = Z_STRVAL_PP(tok);
+	
+	while (token < token_end)
+		STRTOK_TABLE(token++) = 0;
 }
 /* }}} */
 

@@ -847,6 +847,7 @@ PHP_MSHUTDOWN_FUNCTION(basic)
 
 PHP_RINIT_FUNCTION(basic)
 {
+	memset(BG(strtok_table), 0, 256);
 	BG(strtok_string) = NULL;
 	BG(locale_string) = NULL;
 	BG(user_compare_func_name) = NULL;
