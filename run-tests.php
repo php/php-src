@@ -534,7 +534,7 @@ TEST $file
 			save_text($tmp_skipif, $section_text['SKIPIF']);
 			$output = `$php $info_params $tmp_skipif`;
 			@unlink($tmp_skipif);
-			if (ereg("^skip", trim($output))){
+			if (ereg("^skip", strtolower(trim($output)))) {
 				echo "SKIP $tested";
 				$reason = (ereg("^skip[[:space:]]*(.+)\$", trim($output))) ? ereg_replace("^skip[[:space:]]*(.+)\$", "\\1", trim($output)) : FALSE;
 				if ($reason) {
@@ -543,6 +543,12 @@ TEST $file
 					echo "\n";
 				}
 				return 'SKIPPED';
+			}
+			if (ereg("^info", strtolower(trim($output)))) {
+				$reason = (ereg("^info[[:space:]]*(.+)\$", trim($output))) ? ereg_replace("^info[[:space:]]*(.+)\$", "\\1", trim($output)) : FALSE;
+				if ($reason) {
+					$tested .= " (info: $reason)";
+				}
 			}
 		}
 	}
