@@ -1206,10 +1206,7 @@ ZEND_API zend_class_entry *zend_register_internal_class_ex(zend_class_entry *cla
 ZEND_API zend_class_entry *zend_register_internal_class(zend_class_entry *class_entry TSRMLS_DC)
 {
 	zend_class_entry *register_class;
-	char *lowercase_name;
-	
-	lowercase_name = do_alloca(class_entry->name_length+1);
-	memcpy(lowercase_name, class_entry->name, class_entry->name_length+1);
+	char *lowercase_name = zend_strndup(class_entry->name, class_entry->name_length);
 
 	zend_str_tolower(lowercase_name, class_entry->name_length);
 
@@ -1229,7 +1226,7 @@ ZEND_API zend_class_entry *zend_register_internal_class(zend_class_entry *class_
 	}
 
 	zend_hash_update(CG(class_table), lowercase_name, class_entry->name_length+1, class_entry, sizeof(zend_class_entry), (void **) &register_class);
-	free_alloca(lowercase_name);
+	free(lowercase_name);
 	return register_class;
 }
 
