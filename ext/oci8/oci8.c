@@ -3798,7 +3798,7 @@ PHP_FUNCTION(oci_free_descriptor)
 }
 /* }}} */
 
-/* {{{ proto bool oci_lob_save()
+/* {{{ proto bool oci_lob_save( string data [, int offset ])
    Saves a large object */
 PHP_FUNCTION(oci_lob_save)
 {
@@ -3892,7 +3892,7 @@ PHP_FUNCTION(oci_lob_save)
 }
 /* }}} */
 
-/* {{{ proto bool oci_lob_import()
+/* {{{ proto bool oci_lob_import( string filename )
    Saves a large object to file */
 PHP_FUNCTION(oci_lob_import)
 {
@@ -4002,7 +4002,7 @@ PHP_FUNCTION(oci_lob_load)
 }
 /* }}} */
 
-/* {{{ proto string oci_lob_read()
+/* {{{ proto string oci_lob_read( int length )
    Reads particular part of a large object */
 PHP_FUNCTION(oci_lob_read)
 {
@@ -4105,7 +4105,7 @@ PHP_FUNCTION(oci_lob_rewind)
 }
 /* }}} */
 
-/* {{{ proto bool oci_lob_seek()
+/* {{{ proto bool oci_lob_seek( int offset [, int whence ])
    Moves the pointer of a LOB */
 PHP_FUNCTION(oci_lob_seek)
 {
@@ -4189,7 +4189,7 @@ PHP_FUNCTION(oci_lob_size)
 }
 /* }}} */
 
-/* {{{ proto int oci_lob_write()
+/* {{{ proto int oci_lob_write( string string [, int length ])
    Writes data to current position of a LOB */
 PHP_FUNCTION(oci_lob_write)
 {
@@ -4280,7 +4280,7 @@ PHP_FUNCTION(oci_lob_write)
 }
 /* }}} */
 
-/* {{{ proto bool oci_lob_append()
+/* {{{ proto bool oci_lob_append( object lob )
    Appends data from a LOB to another LOB */
 PHP_FUNCTION(oci_lob_append)
 {
@@ -4311,6 +4311,7 @@ PHP_FUNCTION(oci_lob_append)
 		}
 		
 		if (zend_get_parameters_ex(1, &arg) == SUCCESS) {
+			convert_to_object_ex(arg);
 			if ((inx = _oci_get_ocidesc(*arg,&from_descr TSRMLS_CC)) == 0) {
 				RETURN_FALSE;
 			}
@@ -4355,7 +4356,7 @@ PHP_FUNCTION(oci_lob_append)
 }
 /* }}} */
 
-/* {{{ proto bool oci_lob_truncate()
+/* {{{ proto bool oci_lob_truncate( [ int length ])
    Truncates a LOB */
 PHP_FUNCTION(oci_lob_truncate)
 {
@@ -4424,7 +4425,7 @@ PHP_FUNCTION(oci_lob_truncate)
 }
 /* }}} */
 
-/* {{{ proto int oci_lob_erase()
+/* {{{ proto int oci_lob_erase( [ int offset [, int length ] ] )
    Erases a specified portion of the internal LOB, starting at a specified offset */
 PHP_FUNCTION(oci_lob_erase)
 {
@@ -4501,7 +4502,7 @@ PHP_FUNCTION(oci_lob_erase)
 }
 /* }}} */
 
-/* {{{ proto bool oci_lob_flush()
+/* {{{ proto bool oci_lob_flush( [ int flag ] )
    Flushes the LOB buffer */
 PHP_FUNCTION(oci_lob_flush)
 {
@@ -4549,7 +4550,7 @@ PHP_FUNCTION(oci_lob_flush)
 }
 /* }}} */
 
-/* {{{ proto bool ocisetbufferinglob()
+/* {{{ proto bool ocisetbufferinglob( boolean flag )
    Enables/disables buffering for a LOB */
 PHP_FUNCTION(ocisetbufferinglob)
 {
@@ -4671,7 +4672,7 @@ PHP_FUNCTION(ocigetbufferinglob)
 }
 /* }}} */
 
-/* {{{ proto bool oci_lob_copy()
+/* {{{ proto bool oci_lob_copy( object lob_to, object lob_from [, int length ] )
    Copies data from a LOB to another LOB */
 PHP_FUNCTION(oci_lob_copy)
 {
@@ -4686,9 +4687,8 @@ PHP_FUNCTION(oci_lob_copy)
 			WRONG_PARAM_COUNT;
 		}
 
-		if ((*arg1)->type != IS_OBJECT || (*arg2)->type != IS_OBJECT) {
-			RETURN_FALSE;
-		}
+		convert_to_object_ex(arg1);
+		convert_to_object_ex(arg2);
 		
 		if ((inx = _oci_get_ocidesc(*arg1,&descr TSRMLS_CC)) == 0 || (inx = _oci_get_ocidesc(*arg2,&from_descr TSRMLS_CC)) == 0) {
 			RETURN_FALSE;
@@ -4743,7 +4743,7 @@ PHP_FUNCTION(oci_lob_copy)
 }
 /* }}} */
 
-/* {{{ proto bool oci_lob_is_equal()
+/* {{{ proto bool oci_lob_is_equal( object lob1, object lob2 )
    Tests to see if two LOB/FILE locators are equal */
 PHP_FUNCTION(oci_lob_is_equal)
 {
@@ -4758,10 +4758,9 @@ PHP_FUNCTION(oci_lob_is_equal)
 			WRONG_PARAM_COUNT;
 		}
 
-		if ((*arg1)->type != IS_OBJECT || (*arg2)->type != IS_OBJECT) {
-			RETURN_FALSE;
-		}
-
+		convert_to_object_ex(arg1);
+		convert_to_object_ex(arg2);
+		
 		if ((inx = _oci_get_ocidesc(*arg1,&first_descr TSRMLS_CC)) == 0 || (inx = _oci_get_ocidesc(*arg2,&second_descr TSRMLS_CC)) == 0) {
 			RETURN_FALSE;
 		}
