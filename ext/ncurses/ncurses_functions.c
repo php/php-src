@@ -1769,7 +1769,6 @@ PHP_FUNCTION(ncurses_termname)
 	IS_NCURSES_INITIALIZED();
 
 	strlcpy(temp, termname(), sizeof(temp));
-	temp[sizeof(temp) - 1] = '\0';
 
 	RETURN_STRINGL (temp, strlen(temp), 1);
 }
@@ -1784,7 +1783,6 @@ PHP_FUNCTION(ncurses_longname)
 	IS_NCURSES_INITIALIZED();
 
 	strlcpy(temp, longname(), sizeof(temp));
-	temp[sizeof(temp) - 1] = '\0';
 
 	RETURN_STRINGL (temp, strlen(temp), 1);
 }
