@@ -43,9 +43,11 @@ static ZEND_FUNCTION(get_parent_class);
 static ZEND_FUNCTION(method_exists);
 static ZEND_FUNCTION(class_exists);
 static ZEND_FUNCTION(function_exists);
+#if ZEND_DEBUG
 static ZEND_FUNCTION(leak);
 #ifdef ZEND_TEST_EXCEPTIONS
 static ZEND_FUNCTION(crash);
+#endif
 #endif
 static ZEND_FUNCTION(get_included_files);
 static ZEND_FUNCTION(is_subclass_of);
@@ -98,9 +100,11 @@ static zend_function_entry builtin_functions[] = {
 	ZEND_FE(method_exists,		NULL)
 	ZEND_FE(class_exists,		NULL)
 	ZEND_FE(function_exists,	NULL)
+#if ZEND_DEBUG
 	ZEND_FE(leak,				NULL)
 #ifdef ZEND_TEST_EXCEPTIONS
 	ZEND_FE(crash,				NULL)
+#endif
 #endif
 	ZEND_FE(get_included_files,	NULL)
 	ZEND_FALIAS(get_required_files,	get_included_files,		NULL)
@@ -836,7 +840,7 @@ ZEND_FUNCTION(function_exists)
 }
 /* }}} */
 
-
+#if ZEND_DEBUG
 /* {{{ proto void leak(int num_bytes=3)
    Cause an intentional memory leak, for testing/debugging purposes */
 ZEND_FUNCTION(leak)
@@ -865,6 +869,7 @@ ZEND_FUNCTION(crash)
 }
 #endif
 
+#endif /* ZEND_DEBUG */
 
 /* {{{ proto array get_included_files(void)
    Returns an array with the file names that were include_once()'d */
