@@ -365,6 +365,49 @@ PHP_FUNCTION(get_meta_tags)
 }
 
 /* }}} */
+
+/* {{{ proto string get_file_contents(string filename [, bool use_include_path])
+   Read the entire file into a string */
+PHP_FUNCTION(get_file_contents)
+{
+	char *filename;
+	int filename_len;
+	char *contents, *target_buf;
+	zend_bool use_include_path = 0;
+	php_stream *stream;
+	int len, newlen;
+
+	/* Parse arguments */
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|b",
+							  &filename, &filename_len, &use_include_path) == FAILURE) {
+		return;
+	}
+
+	stream = php_stream_open_wrapper(filename, "rb", 
+			use_include_path | ENFORCE_SAFE_MODE | REPORT_ERRORS,
+			NULL TSRMLS_CC);
+	if (!stream) {
+		RETURN_FALSE;
+	}
+
+	/* uses mmap if possible */
+	if ((len = php_stream_copy_to_mem(stream, &contents, PHP_STREAM_COPY_ALL, 0)) > 0) {
+		
+		if (PG(magic_quotes_runtime)) {
+			contents = php_addslashes(contents, len, &newlen, 1 TSRMLS_CC); /* 1 = free source string */
+			len = newlen;
+		}
+
+		RETVAL_STRINGL(contents, len);
+	} else {
+		RETVAL_FALSE;
+	}
+
+	php_stream_close(stream);
+	
+}
+/* }}} */
+
 /* {{{ proto array file(string filename [, bool use_include_path])
    Read entire file into an array */
 
@@ -390,7 +433,7 @@ PHP_FUNCTION(file)
 	stream = php_stream_open_wrapper(filename, "rb", 
 			use_include_path | ENFORCE_SAFE_MODE | REPORT_ERRORS,
 			NULL TSRMLS_CC);
-	if (!stream)	{
+	if (!stream) {
 		RETURN_FALSE;
 	}
 

@@ -90,7 +90,7 @@ PHPAPI int php_stream_free(php_stream *stream, int call_dtor) /* {{{ */
 	ret = stream->ops->close(stream, call_dtor);
 	stream->abstract = NULL;
 	
-	if (call_dtor)	{	
+	if (call_dtor) {	
 		/* tidy up any FILE* that might have been fdopened */
 		if (stream->fclose_stdiocast == PHP_STREAM_FCLOSE_FDOPEN && stream->stdiocast) {
 			fclose(stream->stdiocast);
