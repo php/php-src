@@ -74,16 +74,14 @@ struct dirent *readdir(DIR *dp)
 int readdir_r(DIR *dp, struct dirent *entry, struct dirent **result)
 {
 	if (!dp || dp->finished) {
-		if (result) 
-			*result = NULL;
+		*result = NULL;
 		return 0;
 	}
 
 	if (dp->offset != 0) {
 		if (_findnext(dp->handle, &(dp->fileinfo)) < 0) {
 			dp->finished = 1;
-			if (result) 
-				*result = NULL;
+			*result = NULL;
 			return 0;
 		}
 	}
@@ -94,11 +92,9 @@ int readdir_r(DIR *dp, struct dirent *entry, struct dirent **result)
 	dp->dent.d_reclen = strlen(dp->dent.d_name);
 	dp->dent.d_off = dp->offset;
 
-	if (entry)
-		memcpy(entry, &dp->dent, sizeof(*entry));
+	memcpy(entry, &dp->dent, sizeof(*entry));
 
-	if (result)
-		*result = &dp->dent;
+	*result = &dp->dent;
 
 	return 0;
 }
