@@ -334,6 +334,9 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 
 	buffer_len = vsnprintf(buffer, sizeof(buffer)-1, format, args);
 	buffer[sizeof(buffer)-1]=0;
+	if(buffer_len > sizeof(buffer) - 1 || buffer_len < 0) {
+		buffer_len = sizeof(buffer) - 1;
+	}
 
 	/* display/log the error if necessary */
 	if ((EG(error_reporting) & type || (type & E_CORE))
