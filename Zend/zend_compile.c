@@ -285,11 +285,15 @@ void fetch_simple_variable_ex(znode *result, znode *varname, int bp, zend_uchar 
 	*result = opline_ptr->result;
 	SET_UNUSED(opline_ptr->op2);
 
-	if (varname->op_type == IS_CONST && varname->u.constant.type == IS_STRING
-		&& zend_hash_exists(CG(auto_globals), varname->u.constant.value.str.val, varname->u.constant.value.str.len+1)) {
-		opline_ptr->op2.u.EA.type = ZEND_FETCH_GLOBAL;
-	} else {
-		opline_ptr->op2.u.EA.type = ZEND_FETCH_LOCAL;
+	opline_ptr->op2.u.EA.type = ZEND_FETCH_LOCAL;
+	if (varname->op_type == IS_CONST && varname->u.constant.type == IS_STRING) {
+		if(zend_hash_exists(CG(auto_globals), varname->u.constant.value.str.val, varname->u.constant.value.str.len+1)) {
+			opline_ptr->op2.u.EA.type = ZEND_FETCH_GLOBAL;
+		} else {
+			if(CG(active_op_array)->static_variables && zend_hash_exists(CG(active_op_array)->static_variables, varname->u.constant.value.str.val, varname->u.constant.value.str.len+1)) {
+				opline_ptr->op2.u.EA.type = ZEND_FETCH_STATIC;
+			} 
+		}
 	}
 
 	if (bp) {
@@ -2557,27 +2561,32 @@ void zend_do_list_end(znode *result, znode *expr TSRMLS_DC)
 	}
 }
 
-
-void zend_do_fetch_global_or_static_variable(znode *varname, znode *static_assignment, int fetch_type TSRMLS_DC)
+void zend_do_fetch_static_variable(znode *varname, znode *static_assignment, int fetch_type TSRMLS_DC)
 {
-	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+	zval *tmp;
+
+	ALLOC_ZVAL(tmp);
+	convert_to_string(&varname->u.constant);
+	if(static_assignment) {
+		*tmp = static_assignment->u.constant;
+	} else {
+		INIT_ZVAL(*tmp);
+	}
+	if (!CG(active_op_array)->static_variables) {
+		ALLOC_HASHTABLE(CG(active_op_array)->static_variables);
+		zend_hash_init(CG(active_op_array)->static_variables, 2, NULL, ZVAL_PTR_DTOR, 0);
+	}
+	zend_hash_update(CG(active_op_array)->static_variables, varname->u.constant.value.str.val, varname->u.constant.value.str.len+1, &tmp, sizeof(zval *), NULL);
+	zval_dtor(&varname->u.constant);
+}
+
+void zend_do_fetch_global_variable(znode *varname, znode *static_assignment, int fetch_type TSRMLS_DC)
+{
+	zend_op *opline;
 	znode lval;
 	znode result;
 
-	if (fetch_type==ZEND_FETCH_STATIC && static_assignment) {
-		zval *tmp;
-
-		ALLOC_ZVAL(tmp);
-		convert_to_string(&varname->u.constant);
-		*tmp = static_assignment->u.constant;
-		if (!CG(active_op_array)->static_variables) {
-			ALLOC_HASHTABLE(CG(active_op_array)->static_variables);
-			zend_hash_init(CG(active_op_array)->static_variables, 2, NULL, ZVAL_PTR_DTOR, 0);
-		}
-		zend_hash_update(CG(active_op_array)->static_variables, varname->u.constant.value.str.val, varname->u.constant.value.str.len+1, &tmp, sizeof(zval *), NULL);
-	}
-
-
+	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 	opline->opcode = ZEND_FETCH_W;		/* the default mode must be Write, since fetch_simple_variable() is used to define function arguments */
 	opline->result.op_type = IS_VAR;
 	opline->result.u.EA.type = 0;

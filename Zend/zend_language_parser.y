@@ -408,8 +408,8 @@ non_empty_function_call_parameter_list:
 ;
 
 global_var_list:
-		global_var_list ',' global_var	{ zend_do_fetch_global_or_static_variable(&$3, NULL, ZEND_FETCH_GLOBAL TSRMLS_CC); }
-	|	global_var						{ zend_do_fetch_global_or_static_variable(&$1, NULL, ZEND_FETCH_GLOBAL TSRMLS_CC); }
+		global_var_list ',' global_var	{ zend_do_fetch_global_variable(&$3, NULL, ZEND_FETCH_GLOBAL TSRMLS_CC); }
+	|	global_var						{ zend_do_fetch_global_variable(&$1, NULL, ZEND_FETCH_GLOBAL TSRMLS_CC); }
 ;
 
 
@@ -421,10 +421,10 @@ global_var:
 
 
 static_var_list:
-		static_var_list ',' T_VARIABLE { zend_do_fetch_global_or_static_variable(&$3, NULL, ZEND_FETCH_STATIC TSRMLS_CC); }
-	|	static_var_list ',' T_VARIABLE '=' static_scalar { zend_do_fetch_global_or_static_variable(&$3, &$5, ZEND_FETCH_STATIC TSRMLS_CC); }
-	|	T_VARIABLE  { zend_do_fetch_global_or_static_variable(&$1, NULL, ZEND_FETCH_STATIC TSRMLS_CC); }
-	|	T_VARIABLE '=' static_scalar { zend_do_fetch_global_or_static_variable(&$1, &$3, ZEND_FETCH_STATIC TSRMLS_CC); }
+		static_var_list ',' T_VARIABLE { zend_do_fetch_static_variable(&$3, NULL, ZEND_FETCH_STATIC TSRMLS_CC); }
+	|	static_var_list ',' T_VARIABLE '=' static_scalar { zend_do_fetch_static_variable(&$3, &$5, ZEND_FETCH_STATIC TSRMLS_CC); }
+	|	T_VARIABLE  { zend_do_fetch_static_variable(&$1, NULL, ZEND_FETCH_STATIC TSRMLS_CC); }
+	|	T_VARIABLE '=' static_scalar { zend_do_fetch_static_variable(&$1, &$3, ZEND_FETCH_STATIC TSRMLS_CC); }
 
 ;
 
