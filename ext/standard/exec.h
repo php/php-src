@@ -28,6 +28,7 @@ PHP_FUNCTION(escapeshellarg);
 PHP_FUNCTION(passthru);
 PHP_FUNCTION(shell_exec);
 PHP_FUNCTION(proc_open);
+PHP_FUNCTION(proc_close);
 PHP_MINIT_FUNCTION(proc_open);
 
 char *php_escape_shell_cmd(char *);
