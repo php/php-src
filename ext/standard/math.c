@@ -258,7 +258,7 @@ PHP_FUNCTION(pi)
 
 /* }}} */
 /* {{{ proto double pow(double base, double exponent)
-   Returns base raised to the power of expopent */
+   Returns base raised to the power of exponent */
 
 PHP_FUNCTION(pow)
 {
