@@ -125,11 +125,11 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	return CFG_FALSE;
 }
 
-<INITIAL>[[][^[]+[\]]{NEWLINE}? {
+<INITIAL>[[][^[]+[\]][ ]*{NEWLINE}? {
 	/* SECTION */
 
-	/* eat trailng ] */
-	while (yyleng>0 && (yytext[yyleng-1]=='\n' || yytext[yyleng-1]=='\r' || yytext[yyleng-1]==']')) {
+	/* eat trailng and spaces ] */
+	while (yyleng>0 && (yytext[yyleng-1]=='\n' || yytext[yyleng-1]=='\r' || yytext[yyleng-1]==']' || yytext[yyleng-1]==' ')) {
 		yyleng--;
 		yytext[yyleng]=0;
 	}
