@@ -22,6 +22,7 @@ PEAR_FILES = \
 	DB/mssql.php \
 	DB/pgsql.php \
 	DB/storage.php \
+	DB/oci8.php \
 	HTTP.php \
 	File/Find.php \
 	PEAR.php \
