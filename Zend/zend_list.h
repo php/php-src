@@ -34,6 +34,7 @@ typedef struct _zend_rsrc_list_entry {
 	void *ptr;
 	int type;
 	int refcount;
+	int id;
 } zend_rsrc_list_entry;
 
 typedef void (*rsrc_dtor_func_t)(zend_rsrc_list_entry *rsrc TSRMLS_DC);
@@ -74,6 +75,7 @@ ZEND_API int zend_list_insert(void *ptr, int type);
 ZEND_API int _zend_list_addref(int id TSRMLS_DC);
 ZEND_API int _zend_list_delete(int id TSRMLS_DC);
 ZEND_API void *_zend_list_find(int id, int *type TSRMLS_DC);
+ZEND_API int zend_list_id_by_pointer(void *p, int type TSRMLS_DC);
 
 #define zend_list_addref(id)		_zend_list_addref(id TSRMLS_CC)
 #define zend_list_delete(id)		_zend_list_delete(id TSRMLS_CC)
