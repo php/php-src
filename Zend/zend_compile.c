@@ -2139,6 +2139,9 @@ void zend_do_early_binding(TSRMLS_D)
 			}
 
 			break;
+		case ZEND_ADD_INTERFACE:
+			/* We currently don't early-bind classes that implement interfaces */
+			return;
 		default:
 			zend_error(E_COMPILE_ERROR, "Invalid binding type");
 			return;
