@@ -40,7 +40,7 @@ int __func(mysqli_object *obj, zval **retval TSRMLS_DC) \
 		ZVAL_LONG(*retval, (long)p->__val);\
 	}\
 	return SUCCESS;\
-}\
+}
 
 #define MYSQLI_MAP_PROPERTY_LONG_LONG( __func, __type, __val)\
 int __func(mysqli_object *obj, zval **retval TSRMLS_DC) \
@@ -59,12 +59,12 @@ int __func(mysqli_object *obj, zval **retval TSRMLS_DC) \
 		} \
 	}\
 	return SUCCESS;\
-}\
+}
 
 #define MYSQLI_MAP_PROPERTY_STRING( __func, __type, __val)\
-int __func(mysqli_object *obj, zval **retval TSRMLS_DC) \
+int __func(mysqli_object *obj, zval **retval TSRMLS_DC)\
 {\
-	__type *p = (__type *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr; \
+	__type *p = (__type *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr;\
 	ALLOC_ZVAL(*retval);\
 	if (!p) {\
 		ZVAL_NULL(*retval);\
@@ -76,10 +76,11 @@ int __func(mysqli_object *obj, zval **retval TSRMLS_DC) \
 		}\
 	}\
 	return SUCCESS;\
-}\
+}
 
 /* {{{ property link_client_version_read */
-int link_client_version_read(mysqli_object *obj, zval **retval TSRMLS_DC) {
+int link_client_version_read(mysqli_object *obj, zval **retval TSRMLS_DC)
+{
 	ALLOC_ZVAL(*retval);
 	ZVAL_STRING(*retval, MYSQL_SERVER_VERSION, 1);
 	return SUCCESS;
@@ -87,7 +88,8 @@ int link_client_version_read(mysqli_object *obj, zval **retval TSRMLS_DC) {
 /* }}} */
 
 /* {{{ property link_connect_errno_read */
-int link_connect_errno_read(mysqli_object *obj, zval **retval TSRMLS_DC) {
+int link_connect_errno_read(mysqli_object *obj, zval **retval TSRMLS_DC)
+{
 	ALLOC_ZVAL(*retval);
 	ZVAL_LONG(*retval, (long)MyG(error_no));
 	return SUCCESS;
@@ -95,8 +97,9 @@ int link_connect_errno_read(mysqli_object *obj, zval **retval TSRMLS_DC) {
 /* }}} */
 
 /* {{{ property link_server_version_read */
-int link_server_version_read(mysqli_object *obj, zval **retval TSRMLS_DC) {
-    MYSQL *mysql = (MYSQL *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr;
+int link_server_version_read(mysqli_object *obj, zval **retval TSRMLS_DC)
+{
+	MYSQL *mysql = (MYSQL *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr;
 	ALLOC_ZVAL(*retval);
 	ZVAL_LONG(*retval, mysql_get_server_version(mysql));
 	return SUCCESS;
@@ -104,7 +107,8 @@ int link_server_version_read(mysqli_object *obj, zval **retval TSRMLS_DC) {
 /* }}} */
 
 /* {{{ property link_connect_error_read */
-int link_connect_error_read(mysqli_object *obj, zval **retval TSRMLS_DC) {
+int link_connect_error_read(mysqli_object *obj, zval **retval TSRMLS_DC)
+{
 	ALLOC_ZVAL(*retval);
 	ZVAL_STRING(*retval, MyG(error_msg), 1);
 	return SUCCESS;
@@ -135,7 +139,8 @@ MYSQLI_MAP_PROPERTY_LONG(link_warning_count_read, MYSQL, warning_count);
 /* result properties */
 
 /* {{{ property result_type_read */
-int result_type_read(mysqli_object *obj, zval **retval TSRMLS_DC) {
+int result_type_read(mysqli_object *obj, zval **retval TSRMLS_DC)
+{
 	MYSQL_RES *p = (MYSQL_RES *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr;
 
 	ALLOC_ZVAL(*retval);
@@ -149,7 +154,8 @@ int result_type_read(mysqli_object *obj, zval **retval TSRMLS_DC) {
 /* }}} */
 
 /* {{{ property result_lengths_read */
-int result_lengths_read(mysqli_object *obj, zval **retval TSRMLS_DC) {
+int result_lengths_read(mysqli_object *obj, zval **retval TSRMLS_DC)
+{
 	MYSQL_RES *p = (MYSQL_RES *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr;
 
 	ALLOC_ZVAL(*retval);
@@ -207,7 +213,7 @@ mysqli_property_entry mysqli_link_property_entries[] = {
 	{"server_capabilities", link_server_capabilities_read, NULL},
 	{"server_status", link_server_status_read, NULL},
 	{"server_info", link_server_info_read, NULL},
-    {"server_version", link_server_version_read, NULL},
+	{"server_version", link_server_version_read, NULL},
 	{"sqlstate", link_sqlstate_read, NULL},
 	{"port", link_port_read, NULL},
 	{"protocol_version", link_protocol_version_read, NULL},
@@ -239,3 +245,12 @@ mysqli_property_entry mysqli_stmt_property_entries[] = {
 	{"sqlstate", stmt_sqlstate_read, NULL},
 	{NULL, NULL, NULL}
 };
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim600: noet sw=4 ts=4 fdm=marker
+ * vim<600: noet sw=4 ts=4
+ */
