@@ -72,6 +72,21 @@ Package=<4>
 
 ###############################################################################
 
+Project: "php4apache2"="..\SAPI\APACHE2FILTER\php4apache2.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name php4dllts
+    End Project Dependency
+}}}
+
+###############################################################################
+
 Project: "php4dllts"=".\php4dllts.dsp" - Package Owner=<4>
 
 Package=<5>
