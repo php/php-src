@@ -182,6 +182,3 @@
 
 /* Define if you have the pdflib library */
 #define HAVE_PDFLIB 0
-
-/* Define if you have the fdftk library */
-#define HAVE_FDFLIB 0

@@ -34,7 +34,7 @@
 #include "config.h"
 #endif
 #include "php.h"
-#include "functions/head.h"
+#include "ext/standard/head.h"
 
 #if HYPERWAVE
 

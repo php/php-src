@@ -51,7 +51,7 @@
 #include <sys/socket.h>
 /* #include <sys/uio.h> */
 #endif
-#include "functions/head.h"
+#include "ext/standard/head.h"
 #include "safe_mode.h"
 #include "php3_string.h"
 #include "file.h"

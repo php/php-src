@@ -34,7 +34,7 @@
 #include "tls.h"
 #endif
 #include "php.h"
-#include "functions/head.h"
+#include "ext/standard/head.h"
 #include "php_globals.h"
 #include "php_ini.h"
 #include "mod_php3.h"

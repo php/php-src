@@ -50,7 +50,7 @@
 # include "dl/phpdl.h"
 # include "ext/standard/php3_standard.h"
 # include "php3_odbc.h"
-# include "functions/head.h"
+# include "ext/standard/head.h"
 # include "snprintf.h"
 # include "php_ini.h"
 

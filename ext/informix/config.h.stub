@@ -1,0 +1,2 @@
+/* define if you want to use the informix extension */
+/* #undef HAVE_LIBINFORMIX */
