@@ -23,13 +23,13 @@ foreach ($data as $str) {
 }
 
 echo "====FOREACH====\n";
-$r = $db->unbuffered_query("SELECT a from strings", SQLITE_NUM);
+$r = $db->unbufferedQuery("SELECT a from strings", SQLITE_NUM);
 foreach($r as $idx => $row) {
 	var_dump($row[0]);
 	var_dump($row[0]);
 }
 echo "====FOR====\n";
-$r = $db->unbuffered_query("SELECT a from strings", SQLITE_NUM);
+$r = $db->unbufferedQuery("SELECT a from strings", SQLITE_NUM);
 for(;$r->valid(); $r->next()) {
 	$v = $r->column(0);
 	var_dump($v);

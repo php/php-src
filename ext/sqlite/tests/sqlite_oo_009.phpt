@@ -21,8 +21,8 @@ foreach ($data as $str) {
 	$db->query("INSERT INTO strings VALUES('$str')");
 }
 
-$r = $db->unbuffered_query("SELECT a from strings");
-while ($row = $r->fetch_array(SQLITE_NUM)) {
+$r = $db->unbufferedQuery("SELECT a from strings");
+while ($row = $r->fetch(SQLITE_NUM)) {
 	var_dump($row);
 }
 echo "DONE!\n";
