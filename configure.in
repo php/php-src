@@ -116,7 +116,10 @@ AC_PROG_RANLIB
 AC_PROG_CC_C_O
 AC_PROG_LN_S
 
-AM_PROG_LEX
+AC_PROG_LEX
+if test -n "$LEX"; then
+  AC_DECL_YYTEXT
+fi
 
 dnl ## Make flex scanners use const if they can, even if __STDC__ is not
 dnl ## true, for compilers like Sun's that only set __STDC__ true in
