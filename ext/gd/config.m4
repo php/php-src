@@ -126,6 +126,10 @@ AC_DEFUN(PHP_GD_FREETYPE2,[
   PHP_ARG_WITH(freetype-dir, for freetype(2),
   [  --with-freetype-dir=DIR   GD: Set the path to freetype2 install prefix.])
 
+  if test "$PHP_TTF" != "no"; then
+    PHP_FREETYPE_DIR="no"
+  fi
+
   if test "$PHP_FREETYPE_DIR" != "no"; then
     for i in /usr /usr/local $PHP_FREETYPE_DIR; do
       if test -f "$i/include/freetype2/freetype/freetype.h"; then
