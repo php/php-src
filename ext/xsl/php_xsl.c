@@ -285,6 +285,7 @@ PHP_MSHUTDOWN_FUNCTION(xsl)
  */
 PHP_RINIT_FUNCTION(xsl)
 {
+	xsltSetGenericErrorFunc(NULL, php_libxml_error_handler);
 	return SUCCESS;
 }
 /* }}} */
@@ -294,6 +295,7 @@ PHP_RINIT_FUNCTION(xsl)
  */
 PHP_RSHUTDOWN_FUNCTION(xsl)
 {
+	xsltSetGenericErrorFunc(NULL, NULL);
 	return SUCCESS;
 }
 /* }}} */
