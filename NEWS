@@ -5,7 +5,6 @@ PHP 4                                                                      NEWS
 - Added warnings for deprecated mysql functions:
   . mysql_create_db() 
   . mysql_drop_db() 
-  . mysql_db_query() 
   . mysql_escape_string()
 - Added XsltObject->dump_file($result,$filename[,$compression]) for dumping
   xslt-result directly into a file. (chregu)
