@@ -430,14 +430,6 @@ static zval **zend_std_get_property_ptr_ptr(zval *object, zval *member TSRMLS_DC
 }
 
 
-static zval *zend_std_get_property_ptr(zval *object, zval *member TSRMLS_DC)
-{
-	zval **rv = zend_std_get_property_ptr_ptr(object, member TSRMLS_CC);
-
-	return *rv;
-}
-
-
 static void zend_std_unset_property(zval *object, zval *member TSRMLS_DC)
 {
 	zend_object *zobj;
