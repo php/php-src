@@ -166,18 +166,24 @@ PHP_FUNCTION(setcookie)
 PHP_FUNCTION(headers_sent)
 {
 	zval *arg1, *arg2;
+	char *file="";
+	int line=0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|zz", &arg1, &arg2) == FAILURE)
 		return;
 
-	
+	if (SG(headers_sent)) {
+		line = php_get_output_start_lineno(TSRMLS_C);
+		file = php_get_output_start_filename(TSRMLS_C);
+	}
+
 	switch(ZEND_NUM_ARGS()) {
 	case 2:
 		zval_dtor(arg2);
-		ZVAL_LONG(arg2, php_get_output_start_lineno(TSRMLS_C));
+		ZVAL_LONG(arg2, line);
 	case 1:
 		zval_dtor(arg1);
-		ZVAL_STRING(arg1, php_get_output_start_filename(TSRMLS_C), 1);
+		ZVAL_STRING(arg1, file, 1);
 		break;
 	}
 
