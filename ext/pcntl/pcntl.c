@@ -368,7 +368,7 @@ PHP_FUNCTION(pcntl_wstopsig)
 }
 /* }}} */
 
-/* {{{ proto bool pcntl_exec(string path, [array args], [array envs])
+/* {{{ proto bool pcntl_exec(string path [, array args [, array envs]])
    Executes specified program in current process space as defined by exec(2) */
 PHP_FUNCTION(pcntl_exec)
 {
