@@ -54,8 +54,10 @@
 
 #ifdef PHP_WIN32
 #define LL_MASK "I64"
+#define LL_LIT(lit) lit ## I64
 #else
 #define LL_MASK "ll"
+#define LL_LIT(lit) lit ## ll
 #endif
 
 #define QUERY_RESULT	1
@@ -1130,7 +1132,7 @@ static int _php_ibase_alloc_array(ibase_array **ib_arrayp, int *array_cntp, XSQL
 						break;
 					case blr_long:
 						IB_ARRAY[ar_cnt].el_type = SQL_LONG;
-						IB_ARRAY[ar_cnt].el_size = sizeof(long);
+						IB_ARRAY[ar_cnt].el_size = sizeof(ISC_LONG);
 						break;
 					case blr_float:
 						IB_ARRAY[ar_cnt].el_type = SQL_FLOAT;
@@ -1140,18 +1142,44 @@ static int _php_ibase_alloc_array(ibase_array **ib_arrayp, int *array_cntp, XSQL
 						IB_ARRAY[ar_cnt].el_type = SQL_DOUBLE;
 						IB_ARRAY[ar_cnt].el_size = sizeof(double);
 						break;
+#ifdef blr_int64
+					case blr_int64:
+						IB_ARRAY[ar_cnt].el_type = SQL_INT64;
+						IB_ARRAY[ar_cnt].el_size = sizeof(ISC_INT64);
+						break;
+#endif
+#ifndef blr_timestamp
 					case blr_date:
 						IB_ARRAY[ar_cnt].el_type = SQL_DATE;
 						IB_ARRAY[ar_cnt].el_size = sizeof(ISC_QUAD);
 						break;
+#else
+					case blr_timestamp:
+						IB_ARRAY[ar_cnt].el_type = SQL_TIMESTAMP;
+						IB_ARRAY[ar_cnt].el_size = sizeof(ISC_TIMESTAMP);
+						break;
+					case blr_sql_date:
+						IB_ARRAY[ar_cnt].el_type = SQL_TYPE_DATE;
+						IB_ARRAY[ar_cnt].el_size = sizeof(ISC_DATE);
+						break;
+					case blr_sql_time:
+						IB_ARRAY[ar_cnt].el_type = SQL_TYPE_TIME;
+						IB_ARRAY[ar_cnt].el_size = sizeof(ISC_TIME);
+						break;
+#endif						
 					case blr_varying:
 					case blr_varying2:	/* changed to SQL_TEXT ? */
 						/* sql_type = SQL_VARYING; Why? FIXME: ??? */
 						IB_ARRAY[ar_cnt].el_type = SQL_TEXT;
 						IB_ARRAY[ar_cnt].el_size = ar_desc->array_desc_length + sizeof(short);
 						break;
+					case blr_quad:
+					case blr_blob_id:
+					case blr_cstring:
+					case blr_cstring2:
+						/* FIXME */
 					default:
-						_php_ibase_module_error("Unexpected array type %d in relation '%s' column '%s'" TSRMLS_CC, ar_desc->array_desc_dtype, var->relname, var->sqlname);
+						_php_ibase_module_error("Unsupported array type %d in relation '%s' column '%s'" TSRMLS_CC, ar_desc->array_desc_dtype, var->relname, var->sqlname);
 						efree(IB_ARRAY);
 						IB_ARRAY = NULL;
 						return FAILURE;
@@ -1478,7 +1506,7 @@ static void _php_ibase_alloc_xsqlda(XSQLDA *sqlda)
 				var->sqldata = emalloc(sizeof(short));
 				break;
 			case SQL_LONG:
-				var->sqldata = emalloc(sizeof(long));
+				var->sqldata = emalloc(sizeof(ISC_LONG));
 				break;
 			case SQL_FLOAT:
 				var->sqldata = emalloc(sizeof(float));
@@ -2262,15 +2290,23 @@ PHP_FUNCTION(ibase_num_rows)
 /* {{{ _php_ibase_var_zval() */
 static int _php_ibase_var_zval(zval *val, void *data, int type, int len, int scale, int flag TSRMLS_DC)
 {
-	char string_data[255];
-	
+#ifdef SQL_INT64
+	static ISC_INT64 const scales[] = { 1, 10, 100, 1000, 10000, 100000, 1000000, 100000000, 1000000000, 
+		1000000000, LL_LIT(10000000000),LL_LIT(100000000000),LL_LIT(10000000000000),LL_LIT(100000000000000),
+		LL_LIT(1000000000000000),LL_LIT(1000000000000000),LL_LIT(1000000000000000000) };
+#else 
+	static long const scales[] = { 1, 10, 100, 1000, 10000, 100000, 1000000, 100000000, 1000000000, 1000000000 };
+#endif		
+
 	switch (type & ~1) {
-		unsigned short j;
+		unsigned short l;
+		long n;
+		char string_data[255];
 
 		case SQL_VARYING:
 			len = ((IBVARY *) data)->vary_length;
 			data = ((IBVARY *) data)->vary_string;
-			/* fallout */
+			/* no break */
 		case SQL_TEXT:
 			if (PG(magic_quotes_runtime)) {
 				Z_STRVAL_P(val) = php_addslashes(data, len, &Z_STRLEN_P(val), 0 TSRMLS_CC);
@@ -2279,81 +2315,62 @@ static int _php_ibase_var_zval(zval *val, void *data, int type, int len, int sca
 				ZVAL_STRINGL(val,(char *) data,len,1);
 			}
 			break;
-		case SQL_LONG:
 		case SQL_SHORT:
-			if (scale < 0) {
-				long n, f = 1;
-
-				if ( (type & ~1) == SQL_SHORT) {
-					n = *(short *) (data);
-				} else {	
-					n = *(long *) (data);
-				}
-				for (j = 0; j < -scale; j++) {
-					f *= 10;
-				}
-				if (n  >= 0 || n < -f) {
-					j = sprintf(string_data, "%ld.%0*ld", n / f, -scale,  labs(n % f) );
-				} else {
-					j = sprintf(string_data, "%s.%0*ld","-0", -scale, -n % f);
-				}
-				ZVAL_STRINGL(val,string_data,j,1);
-			} else if ( (type & ~1) == SQL_SHORT) {
-				ZVAL_LONG(val, *(short *) data);
+			n = *(short *) data;
+			goto _sql_long;
+		case SQL_LONG:
+			n = *(long *) data; 
+		_sql_long:
+			if (scale == 0) {
+				ZVAL_LONG(val,n);
 			} else {
-				ZVAL_LONG(val, *(long *) data);
+				long f = scales[-scale];
+				
+				if (n >= 0) {
+					l = sprintf(string_data, "%ld.%0*ld", n / f, -scale,  n % f);
+				} else if (n < -f) {
+					l = sprintf(string_data, "%ld.%0*ld", n / f, -scale,  -n % f);
+				} else {
+					l = sprintf(string_data, "-0.%0*ld", -scale, -n % f);
+				}
+				ZVAL_STRINGL(val,string_data,l,1);
 			}
 			break;
 		case SQL_FLOAT:
 			ZVAL_DOUBLE(val, *(float *) data);
 			break;
 		case SQL_DOUBLE:
-			if (scale < 0) {
-				j = sprintf(string_data, "%.*f", -scale, *(double *) data);
-				ZVAL_STRINGL(val, string_data, j, 1);
-			} else {
-				ZVAL_DOUBLE(val, *(double *) data);
-			}
+			ZVAL_DOUBLE(val, *(double *) data);
 			break;
 #ifdef SQL_INT64
 		case SQL_INT64:
-			if (scale < 0) {
-				ISC_INT64 n = *(ISC_INT64 *) data, f = 1;
-
-				for (j = 0; j < -scale; j++) {
-					f *= 10;
-				}
-				if (n >= 0) {
-					j = sprintf(string_data, "%" LL_MASK "d.%0*" LL_MASK "d", n / f, -scale, n % f);
-				} else if (n < -f) {
-					j = sprintf(string_data, "%" LL_MASK "d.%0*" LL_MASK "d", n / f, -scale, -n % f);				
- 				} else {
-					j = sprintf(string_data, "-0.%0*" LL_MASK "d", -scale, -n % f);
-				}
+			if (scale == 0) {
+				l = sprintf(string_data, "%.0" LL_MASK "d", *(ISC_INT64 *) data);
 			} else {
-				j = sprintf(string_data, "%.0" LL_MASK "d", *(ISC_INT64 *) data);
+				ISC_INT64 n = *(ISC_INT64 *) data, f = scales[-scale];
+
+				if (n >= 0) {
+					l = sprintf(string_data, "%" LL_MASK "d.%0*" LL_MASK "d", n / f, -scale, n % f);
+				} else if (n < -f) {
+					l = sprintf(string_data, "%" LL_MASK "d.%0*" LL_MASK "d", n / f, -scale, -n % f);				
+ 				} else {
+					l = sprintf(string_data, "-0.%0*" LL_MASK "d", -scale, -n % f);
+				}
 			}
-			ZVAL_STRINGL(val,string_data,j,1);
+			ZVAL_STRINGL(val,string_data,l,1);
 			break;
 #endif
-#ifndef SQL_TIMESTAMP
-		case SQL_DATE:
-#else
-		case SQL_TIMESTAMP:
-		case SQL_TYPE_DATE:
-		case SQL_TYPE_TIME:
-#endif
+		default: /* == any date/time type */
 		{
 			struct tm t;
 			char *format = NULL;
-			long timestamp = -1;
 
 #ifndef SQL_TIMESTAMP
 			isc_decode_date((ISC_QUAD *) data, &t);
 			format = IBG(timestampformat);
 #else
 			switch (type & ~1) {
-				case SQL_TIMESTAMP:
+				default: /* == case SQL_TIMESTAMP: */
 					isc_decode_timestamp((ISC_TIMESTAMP *) data, &t);
 					format = IBG(timestampformat);
 					break;
@@ -2372,29 +2389,33 @@ static int _php_ibase_var_zval(zval *val, void *data, int type, int len, int sca
 			   always sets tm_isdst to 0, sometimes incorrectly (InterBase 6 bug?)
 			*/
 			t.tm_isdst = -1;
-			timestamp = mktime(&t);
 #if HAVE_TM_ZONE
 			t.tm_zone = tzname[0];
 #endif
 			if (flag & PHP_IBASE_UNIXTIME) {
-				ZVAL_LONG(val, timestamp);
+				ZVAL_LONG(val, mktime(&t));
 			} else {
 #if HAVE_STRFTIME
-				j = strftime(string_data, sizeof(string_data), format, &t);
+				l = strftime(string_data, sizeof(string_data), format, &t);
 #else
-				/* FIXME (will not work for time values) */
-				if (!t.tm_hour && !t.tm_min && !t.tm_sec) {
-					j = sprintf(string_data, "%02d/%02d/%4d", t.tm_mon + 1, t.tm_mday, t.tm_year + 1900);
-				} else {
-					j = sprintf(string_data, "%02d/%02d/%4d %02d:%02d:%02d", t.tm_mon+1, t.tm_mday, t.tm_year + 1900, t.tm_hour, t.tm_min, t.tm_sec);
+				switch (type & ~1) {
+					default:
+						l = sprintf(string_data, "%02d/%02d/%4d %02d:%02d:%02d", t.tm_mon+1, t.tm_mday, t.tm_year + 1900, t.tm_hour, t.tm_min, t.tm_sec);
+						break;
+#ifdef SQL_TIMESTAMP
+					case SQL_TYPE_DATE:
+						l = sprintf(string_data, "%02d/%02d/%4d", t.tm_mon + 1, t.tm_mday, t.tm_year + 1900);
+						break;
+					case SQL_TYPE_TIME:
+						l = sprintf(string_data, "%02d:%02d:%02d", t.tm_hour, t.tm_min, t.tm_sec);
+						break;
+#endif
 				}
 #endif
-				ZVAL_STRINGL(val,string_data,j,1);
+				ZVAL_STRINGL(val,string_data,l,1);
 				break;
 			}
 		}
-		default:
-			return FAILURE;
 	} /* switch (type) */
 	return SUCCESS;
 }
@@ -3124,8 +3145,7 @@ PHP_FUNCTION(ibase_field_info)
 
 	s = _php_ibase_field_type(var);
 	add_index_string(return_value, 4, s, 1);
-	add_assoc_string(return_value, "type", s, 1);
-	efree(s);
+	add_assoc_string(return_value, "type", s, 0);
 }
 /* }}} */
 
@@ -3190,8 +3210,7 @@ PHP_FUNCTION(ibase_param_info)
 
 	s = _php_ibase_field_type(var);
 	add_index_string(return_value, 1, s, 1);
-	add_assoc_string(return_value, "type", s, 1);
-	efree(s);
+	add_assoc_string(return_value, "type", s, 0);
 }
 /* }}} */
 
