@@ -2,6 +2,8 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 200?, Version 4.0.6
+- Fixed interactive mode (-a). It works again with the same limitations it
+  has always had (Andi, Zend Engine)
 - Improved memory manager to use less memory and provide better memory overflow
   detection abilities in debug mode (Andi, Zend Engine)
 - Fixed resource leaks when resources were being cast to numbers (Zeev, Zend
