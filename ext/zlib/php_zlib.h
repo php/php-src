@@ -50,6 +50,8 @@ PHP_FUNCTION(readgzfile);
 PHP_FUNCTION(gzfile);
 PHP_FUNCTION(gzcompress);
 PHP_FUNCTION(gzuncompress);
+PHP_FUNCTION(gzdeflate);
+PHP_FUNCTION(gzinflate);
 
 #ifdef ZTS
 #define ZLIBLS_D php_zlib_globals *zlib_globals
