@@ -1,6 +1,6 @@
 diff -ur thttpd-2.21b/Makefile.in thttpd-2.21b-cool/Makefile.in
---- thttpd-2.21b/Makefile.in	2001-03-29 20:36:22.000000000 +0200
-+++ thttpd-2.21b-cool/Makefile.in	2002-10-13 13:33:24.000000000 +0200
+--- thttpd-2.21b/Makefile.in	Thu Mar 29 20:36:21 2001
++++ thttpd-2.21b-cool/Makefile.in	Sun Oct 13 13:52:58 2002
 @@ -46,13 +46,15 @@
  
  # You shouldn't need to edit anything below here.
@@ -28,19 +28,19 @@ diff -ur thttpd-2.21b/Makefile.in thttpd-2.21b-cool/Makefile.in
  
  OBJ =		$(SRC:.c=.o) @LIBOBJS@
  
-@@ -152,6 +154,9 @@
+@@ -151,6 +153,9 @@
+ 
  tags:
  	ctags -wtd *.c *.h
- 
++
 +php_thttpd.o: php_thttpd.c
 +	$(CC) $(PHP_CFLAGS) $(CFLAGS) -c php_thttpd.c
-+
+ 
  tar:
  	@name=`sed -n -e '/SERVER_SOFTWARE/!d' -e 's,.*thttpd/,thttpd-,' -e 's, .*,,p' version.h` ; \
- 	  rm -rf $$name ; \
 diff -ur thttpd-2.21b/config.h thttpd-2.21b-cool/config.h
---- thttpd-2.21b/config.h	2001-04-09 23:57:36.000000000 +0200
-+++ thttpd-2.21b-cool/config.h	2002-10-13 13:33:24.000000000 +0200
+--- thttpd-2.21b/config.h	Mon Apr  9 23:57:36 2001
++++ thttpd-2.21b-cool/config.h	Sun Oct 13 13:52:58 2002
 @@ -82,6 +82,11 @@
  */
  #define IDLE_READ_TIMELIMIT 60
@@ -63,8 +63,8 @@ diff -ur thttpd-2.21b/config.h thttpd-2.21b-cool/config.h
  /* CONFIGURE: If this is defined then thttpd will automatically generate
  ** index pages for directories that don't have an explicit index file.
 diff -ur thttpd-2.21b/fdwatch.c thttpd-2.21b-cool/fdwatch.c
---- thttpd-2.21b/fdwatch.c	2001-04-13 07:36:08.000000000 +0200
-+++ thttpd-2.21b-cool/fdwatch.c	2002-10-13 13:47:42.000000000 +0200
+--- thttpd-2.21b/fdwatch.c	Fri Apr 13 07:36:08 2001
++++ thttpd-2.21b-cool/fdwatch.c	Sun Oct 13 13:52:58 2002
 @@ -460,7 +460,7 @@
  
      ridx = 0;
@@ -86,8 +86,8 @@ diff -ur thttpd-2.21b/fdwatch.c thttpd-2.21b-cool/fdwatch.c
  	}
      }
 diff -ur thttpd-2.21b/libhttpd.c thttpd-2.21b-cool/libhttpd.c
---- thttpd-2.21b/libhttpd.c	2001-04-24 00:42:40.000000000 +0200
-+++ thttpd-2.21b-cool/libhttpd.c	2002-10-13 13:41:38.000000000 +0200
+--- thttpd-2.21b/libhttpd.c	Tue Apr 24 00:42:40 2001
++++ thttpd-2.21b-cool/libhttpd.c	Sun Oct 13 13:52:58 2002
 @@ -85,6 +85,12 @@
  #include "match.h"
  #include "tdate_parse.h"
@@ -479,8 +479,8 @@ diff -ur thttpd-2.21b/libhttpd.c thttpd-2.21b-cool/libhttpd.c
  	}
  
 diff -ur thttpd-2.21b/libhttpd.h thttpd-2.21b-cool/libhttpd.h
---- thttpd-2.21b/libhttpd.h	2001-04-24 00:36:50.000000000 +0200
-+++ thttpd-2.21b-cool/libhttpd.h	2002-10-13 13:38:28.000000000 +0200
+--- thttpd-2.21b/libhttpd.h	Tue Apr 24 00:36:50 2001
++++ thttpd-2.21b-cool/libhttpd.h	Sun Oct 13 13:52:58 2002
 @@ -69,6 +69,7 @@
      char* server_hostname;
      int port;
@@ -508,8 +508,8 @@ diff -ur thttpd-2.21b/libhttpd.h thttpd-2.21b-cool/libhttpd.h
  /* Call this to de-initialize a connection struct and *really* free the
  ** mallocced strings.
 diff -ur thttpd-2.21b/mime_encodings.txt thttpd-2.21b-cool/mime_encodings.txt
---- thttpd-2.21b/mime_encodings.txt	2000-05-10 03:22:28.000000000 +0200
-+++ thttpd-2.21b-cool/mime_encodings.txt	2002-10-13 13:33:24.000000000 +0200
+--- thttpd-2.21b/mime_encodings.txt	Wed May 10 03:22:28 2000
++++ thttpd-2.21b-cool/mime_encodings.txt	Sun Oct 13 13:52:58 2002
 @@ -3,6 +3,6 @@
  # A list of file extensions followed by the corresponding MIME encoding.
  # Extensions not found in the table proceed to the mime_types table.
@@ -520,8 +520,8 @@ diff -ur thttpd-2.21b/mime_encodings.txt thttpd-2.21b-cool/mime_encodings.txt
 +gz	gzip
  uu	x-uuencode
 diff -ur thttpd-2.21b/mime_types.txt thttpd-2.21b-cool/mime_types.txt
---- thttpd-2.21b/mime_types.txt	2001-04-14 04:53:30.000000000 +0200
-+++ thttpd-2.21b-cool/mime_types.txt	2002-10-13 13:33:24.000000000 +0200
+--- thttpd-2.21b/mime_types.txt	Sat Apr 14 04:53:30 2001
++++ thttpd-2.21b-cool/mime_types.txt	Sun Oct 13 13:52:58 2002
 @@ -1,135 +1,138 @@
 -# mime_types.txt
 -#
@@ -771,8 +771,8 @@ diff -ur thttpd-2.21b/mime_types.txt thttpd-2.21b-cool/mime_types.txt
 +movie	video/x-sgi-movie
 +ice	x-conference/x-cooltalk
 diff -ur thttpd-2.21b/mmc.c thttpd-2.21b-cool/mmc.c
---- thttpd-2.21b/mmc.c	2001-04-13 23:02:16.000000000 +0200
-+++ thttpd-2.21b-cool/mmc.c	2002-10-13 13:33:24.000000000 +0200
+--- thttpd-2.21b/mmc.c	Fri Apr 13 23:02:15 2001
++++ thttpd-2.21b-cool/mmc.c	Sun Oct 13 13:52:58 2002
 @@ -70,6 +70,7 @@
      unsigned int hash;
      int hash_idx;
@@ -843,8 +843,8 @@ diff -ur thttpd-2.21b/mmc.c thttpd-2.21b-cool/mmc.c
  	    m->reftime = nowP->tv_sec;
  	else
 diff -ur thttpd-2.21b/mmc.h thttpd-2.21b-cool/mmc.h
---- thttpd-2.21b/mmc.h	2001-04-13 07:36:54.000000000 +0200
-+++ thttpd-2.21b-cool/mmc.h	2002-10-13 13:33:24.000000000 +0200
+--- thttpd-2.21b/mmc.h	Fri Apr 13 07:36:54 2001
++++ thttpd-2.21b-cool/mmc.h	Sun Oct 13 13:52:58 2002
 @@ -31,8 +31,9 @@
  /* Returns an mmap()ed area for the given file, or (void*) 0 on errors.
  ** If you have a stat buffer on the file, pass it in, otherwise pass 0.
@@ -857,8 +857,8 @@ diff -ur thttpd-2.21b/mmc.h thttpd-2.21b-cool/mmc.h
  /* Done with an mmap()ed area that was returned by mmc_map().
  ** If you have a stat buffer on the file, pass it in, otherwise pass 0.
 diff -ur thttpd-2.21b/thttpd.c thttpd-2.21b-cool/thttpd.c
---- thttpd-2.21b/thttpd.c	2001-04-24 00:41:58.000000000 +0200
-+++ thttpd-2.21b-cool/thttpd.c	2002-10-13 13:47:42.000000000 +0200
+--- thttpd-2.21b/thttpd.c	Tue Apr 24 00:41:57 2001
++++ thttpd-2.21b-cool/thttpd.c	Sun Oct 13 13:52:58 2002
 @@ -95,6 +95,7 @@
      httpd_conn* hc;
      int tnums[MAXTHROTTLENUMS];         /* throttle indexes */
