@@ -1,3 +1,43 @@
+2001-08-01  Zeev Suraski  <zeev@zend.com>
+
+    * sapi/apache/mod_php4.c
+      sapi/apache/sapi_apache.c: Fix Apache/ZTS build
+
+2001-08-01  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/ircg.c: Don't segfault on broken format messages
+
+2001-08-01  Frank M. Kromann  <frank@frontbase.com>
+
+    * ext/standard/math.c
+      ext/standard/basic_functions.c:
+    These new math functions are not supported on Win32
+
+2001-08-01  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/standard/math.c
+      ext/standard/php_math.h
+      ext/standard/basic_functions.c:
+    - Added a few new math functions from Jesus Castagnetto.
+    - Converted to Z_* macros.
+    - Added a few new math functions. 
+
+2001-08-01  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/PEAR/Installer.php: added BaseInstall dir support
+
+2001-08-01  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/fdf/config.m4:
+    This should work better. Thanks to Jon Wagoner <jwagoner@wlion.com>
+
+    * .cvsignore: configure leftovers..
+
+    * main/fopen_wrappers.c
+      main/fopen_wrappers.h: kill warning and make this build again.
+
+    * ext/standard/php_fopen_wrapper.c: fix build.
+
 2001-07-31  Jani Taskinen  <sniper@iki.fi>
 
     * ext/yp/yp.c: killed some compile warnings
