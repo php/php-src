@@ -2,6 +2,8 @@
 SPL: ArrayIterator
 --SKIPIF--
 <?php if (!extension_loaded("spl")) print "skip"; ?>
+--INI--
+allow_call_time_pass_reference=1
 --FILE--
 <?php
 
@@ -26,6 +28,9 @@ $obj = new ArrayObject(&$arr);
 
 foreach($obj as $ak=>$av) {
 	foreach($obj as $bk=>$bv) {
+		if ($ak==0 && $bk==0) {
+			$arr[0] = "modify";
+		}
 		echo "$ak=>$av - $bk=>$bv\n";
 	}
 }
@@ -89,10 +94,10 @@ echo "Done\n";
 0=>0 - 0=>0
 0=>0 - 1=>1
 0=>0 - 2=>2
-1=>1 - 0=>0
+1=>1 - 0=>modify
 1=>1 - 1=>1
 1=>1 - 2=>2
-2=>2 - 0=>0
+2=>2 - 0=>modify
 2=>2 - 1=>1
 2=>2 - 2=>2
 ==Modify==
