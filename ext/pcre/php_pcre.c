@@ -417,7 +417,7 @@ static void php_pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global)
 			matched++;
 			match = (*subject)->value.str.val + offsets[0];
 
-			/* If subpatters array has been passed, fill it in with values. */
+			/* If subpatterns array has been passed, fill it in with values. */
 			if (subpats != NULL) {
 				/* Try to get the list of substrings and display a warning if failed. */
 				if (pcre_get_substring_list((*subject)->value.str.val,
@@ -716,6 +716,9 @@ char *php_pcre_replace(char *regex,   int regex_len,
 				*walkbuf = '\0';
 				/* increment the result length by how much we've added to the string */
 				*result_len += walkbuf - (result + *result_len);
+
+				if (limit != -1)
+					limit--;
 			}
 		} else { /* Failed to match */
 			/* If we previously set PCRE_NOTEMPTY after a null match,
@@ -752,9 +755,6 @@ char *php_pcre_replace(char *regex,   int regex_len,
 		
 		/* Advance to the next piece. */
 		start_offset = offsets[1];
-
-		if (limit != -1)
-			limit--;
 	}
 	
 	efree(offsets);
