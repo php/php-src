@@ -155,7 +155,7 @@ ZEND_API ulong zend_hash_func(char *arKey, uint nKeyLength)
 	}
 
 
-ZEND_API int zend_hash_init(HashTable *ht, uint nSize, hash_func_t pHashFunction, dtor_func_t pDestructor, zend_bool persistent)
+ZEND_API int _zend_hash_init(HashTable *ht, uint nSize, hash_func_t pHashFunction, dtor_func_t pDestructor, zend_bool persistent ZEND_FILE_LINE_DC)
 {
 	uint i = 3;
 
@@ -169,7 +169,11 @@ ZEND_API int zend_hash_init(HashTable *ht, uint nSize, hash_func_t pHashFunction
 	ht->nTableMask = ht->nTableSize - 1;
 	
 	/* Uses ecalloc() so that Bucket* == NULL */
-	ht->arBuckets = (Bucket **) pecalloc(ht->nTableSize, sizeof(Bucket *), persistent);
+	if (persistent) {
+		ht->arBuckets = (Bucket **) calloc(ht->nTableSize, sizeof(Bucket *));
+	} else {
+		ht->arBuckets = (Bucket **) ecalloc_rel(ht->nTableSize, sizeof(Bucket *));
+	}
 	
 	if (!ht->arBuckets) {
 		return FAILURE;
@@ -188,9 +192,9 @@ ZEND_API int zend_hash_init(HashTable *ht, uint nSize, hash_func_t pHashFunction
 }
 
 
-ZEND_API int zend_hash_init_ex(HashTable *ht, uint nSize, hash_func_t pHashFunction, dtor_func_t pDestructor, zend_bool persistent, zend_bool bApplyProtection)
+ZEND_API int _zend_hash_init_ex(HashTable *ht, uint nSize, hash_func_t pHashFunction, dtor_func_t pDestructor, zend_bool persistent, zend_bool bApplyProtection ZEND_FILE_LINE_DC)
 {
-	int retval = zend_hash_init(ht, nSize, pHashFunction, pDestructor, persistent);
+	int retval = _zend_hash_init(ht, nSize, pHashFunction, pDestructor, persistent ZEND_FILE_LINE_CC);
 
 	ht->bApplyProtection = bApplyProtection;
 	return retval;
