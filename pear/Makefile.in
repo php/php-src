@@ -29,8 +29,7 @@ PEAR_SUBDIRS = \
 	Payment \
 	PEAR \
 	Schedule \
-	XML \
-	XML/RPC
+	XML 
 
 PEAR_FILES = \
 	Benchmark/Iterate.php \
@@ -104,9 +103,7 @@ PEAR_FILES = \
 	PEAR/Uploader.php \
 	Payment/Verisign.php \
 	Schedule/At.php \
-	XML/Parser.php \
-	XML/RPC.php \
-	XML/RPC/Server.php
+	XML/Parser.php 
 
 install-data-local:
 	@if $(mkinstalldirs) $(INSTALL_ROOT)$(peardir); then \
