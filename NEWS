@@ -1,6 +1,10 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.0.7-dev
+- Fixed bugs in the mcrypt extension that caused crashes (Derick)
+- Fixed bugs in the mcrypt extension that caused crashes (Derick)
+- Added the IMG_ARC_ROUNDED option for the ImageFilledArc() function, which
+  specified that the drawn curve should be rounded. (Sterling)
 - Fixed getopt so it accepts arguments in the form -<option><value> not
   just -<option> <value> (jmoore)
 - Updated the sockets extension to use resources instead of longs for the Socket
