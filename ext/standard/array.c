@@ -1059,7 +1059,7 @@ static void _compact_var(HashTable *eg_active_symbol_table, zval *return_value, 
 		if (zend_hash_find(eg_active_symbol_table, entry->value.str.val,
 						   entry->value.str.len+1, (void **)&value_ptr) != FAILURE) {
 			value = *value_ptr;
-			data = ALLOC_ZVAL();
+			ALLOC_ZVAL(data);
 			*data = *value;
 			zval_copy_ctor(data);
 			INIT_PZVAL(data);

@@ -212,9 +212,10 @@ ZEND_API int zend_set_hash_symbol(zval *symbol, char *name, int name_length,
 
 #define SET_VAR_STRING(n,v)	{																				\
 								{																			\
-									zval *var = ALLOC_ZVAL();								\
+									zval *var;																\
 									char *str=(v); /* prevent 'v' from being evaluated more than once */	\
 																											\
+									ALLOC_ZVAL(var);														\
 									var->value.str.val = (str);												\
 									var->value.str.len = strlen((str));										\
 									var->type = IS_STRING;													\
@@ -224,8 +225,9 @@ ZEND_API int zend_set_hash_symbol(zval *symbol, char *name, int name_length,
 
 #define SET_VAR_STRINGL(n,v,l)	{														\
 									{													\
-										zval *var = ALLOC_ZVAL();		\
+										zval *var;										\
 																						\
+										ALLOC_ZVAL(var);								\
 										var->value.str.val = (v);						\
 										var->value.str.len = (l);						\
 										var->type = IS_STRING;							\
@@ -235,8 +237,9 @@ ZEND_API int zend_set_hash_symbol(zval *symbol, char *name, int name_length,
 
 #define SET_VAR_LONG(n,v)	{															\
 								{														\
-									zval *var = ALLOC_ZVAL();			\
+									zval *var;											\
 																						\
+									ALLOC_ZVAL(var);									\
 									var->value.lval = (v);								\
 									var->type = IS_LONG;								\
 									ZEND_SET_GLOBAL_VAR(n, var);						\
@@ -245,8 +248,9 @@ ZEND_API int zend_set_hash_symbol(zval *symbol, char *name, int name_length,
 
 #define SET_VAR_DOUBLE(n,v)	{															\
 								{														\
-									zval *var = ALLOC_ZVAL();			\
+									zval *var;											\
 																						\
+									ALLOC_ZVAL(var);									\
 									var->value.dval = (v);								\
 									var->type = IS_DOUBLE;								\
 									ZEND_SET_GLOBAL_VAR(n, var);						\

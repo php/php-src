@@ -45,7 +45,7 @@ static void php_mime_split(char *buf, int cnt, char *boundary)
 	PLS_FETCH();
 
 	if (PG(track_vars)) {
-		http_post_vars = ALLOC_ZVAL();
+		ALLOC_ZVAL(http_post_vars);
 		array_init(http_post_vars);
 		INIT_PZVAL(http_post_vars);
 		

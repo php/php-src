@@ -1498,7 +1498,9 @@ void do_end_class_declaration(CLS_D)
 void do_declare_property(znode *var_name, znode *value CLS_DC)
 {
 	if (value) {
-		zval *property = ALLOC_ZVAL();
+		zval *property;
+
+		ALLOC_ZVAL(property);
 
 		*property = value->u.constant;
 		zend_hash_update(&CG(active_class_entry)->default_properties, var_name->u.constant.value.str.val, var_name->u.constant.value.str.len+1, &property, sizeof(zval *), NULL);
@@ -1687,8 +1689,9 @@ void do_add_array_element(znode *result, znode *expr, znode *offset, int is_ref 
 
 void do_add_static_array_element(znode *result, znode *offset, znode *expr)
 {
-	zval *element = ALLOC_ZVAL();
+	zval *element;
 
+	ALLOC_ZVAL(element);
 	*element = expr->u.constant;
 	if (offset) {
 		switch (offset->u.constant.type) {
@@ -1807,8 +1810,9 @@ void do_fetch_global_or_static_variable(znode *varname, znode *static_assignment
 	znode lval;
 
 	if (fetch_type==ZEND_FETCH_STATIC && static_assignment) {
-		zval *tmp = ALLOC_ZVAL();
+		zval *tmp;
 
+		ALLOC_ZVAL(tmp);
 		convert_to_string(&varname->u.constant);
 		*tmp = static_assignment->u.constant;
 		if (!CG(active_op_array)->static_variables) {

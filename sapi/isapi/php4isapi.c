@@ -407,8 +407,9 @@ static void hash_isapi_variables(ELS_D SLS_DC)
 
 		if (colon) {
 			char *value = colon+1;
-			zval *entry = ALLOC_ZVAL();
+			zval *entry;
 
+			ALLOC_ZVAL(entry);
 			while (*value==' ') {
 				value++;
 			}

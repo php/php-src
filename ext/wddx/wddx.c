@@ -468,7 +468,7 @@ static void _php_wddx_push_element(void *user_data, const char *name, const char
 		} else
 			ent.varname = NULL;
 		
-		ent.data = ALLOC_ZVAL();
+		ALLOC_ZVAL(ent.data);
 		ent.data->value.str.val = NULL;
 		ent.data->value.str.len = 0;
 		INIT_PZVAL(ent.data);
@@ -492,7 +492,7 @@ static void _php_wddx_push_element(void *user_data, const char *name, const char
 		} else
 			ent.varname = NULL;
 		
-		ent.data = ALLOC_ZVAL();
+		ALLOC_ZVAL(ent.data);
 		INIT_PZVAL(ent.data);
 		wddx_stack_push((wddx_stack *)stack, &ent, sizeof(st_entry));
 	} else if (!strcmp(name, EL_ARRAY)) {
@@ -504,7 +504,7 @@ static void _php_wddx_push_element(void *user_data, const char *name, const char
 		} else
 			ent.varname = NULL;
 		
-		ent.data = ALLOC_ZVAL();
+		ALLOC_ZVAL(ent.data);
 		array_init(ent.data);
 		INIT_PZVAL(ent.data);
 		wddx_stack_push((wddx_stack *)stack, &ent, sizeof(st_entry));
@@ -517,7 +517,7 @@ static void _php_wddx_push_element(void *user_data, const char *name, const char
 		} else
 			ent.varname = NULL;
 		
-		ent.data = ALLOC_ZVAL();
+		ALLOC_ZVAL(ent.data);
 		array_init(ent.data);
 		INIT_PZVAL(ent.data);
 		wddx_stack_push((wddx_stack *)stack, &ent, sizeof(st_entry));

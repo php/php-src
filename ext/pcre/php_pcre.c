@@ -393,7 +393,7 @@ static void _pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global)
 	if (global && subpats_order_val == PREG_PATTERN_ORDER) {
 		match_sets = (zval **)emalloc(num_subpats * sizeof(zval *));
 		for (i=0; i<num_subpats; i++) {
-			match_sets[i] = ALLOC_ZVAL();
+			ALLOC_ZVAL(match_sets[i]);
 			array_init(match_sets[i]);
 			INIT_PZVAL(match_sets[i]);
 		}
@@ -441,7 +441,7 @@ static void _pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global)
 					}
 					else {
 						/* Allocate the result set array */
-						result_set = ALLOC_ZVAL();
+						ALLOC_ZVAL(result_set);
 						array_init(result_set);
 						INIT_PZVAL(result_set);
 						
