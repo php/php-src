@@ -1,23 +1,44 @@
+/*
+   +----------------------------------------------------------------------+
+   | PHP Version 4                                                        |
+   +----------------------------------------------------------------------+
+   | Copyright (c) 1997-2002 The PHP Group                                |
+   +----------------------------------------------------------------------+
+   | This source file is subject to version 2.02 of the PHP license,      |
+   | that is bundled with this package in the file LICENSE, and is        |
+   | available at through the world-wide-web at                           |
+   | http://www.php.net/license/2_02.txt.                                 |
+   | If you did not receive a copy of the PHP license and are unable to   |
+   | obtain it through the world-wide-web, please send a note to          |
+   | license@php.net so we can mail you a copy immediately.               |
+   +----------------------------------------------------------------------+
+   | Author: Harald Radi <h.radi@nme.at>                                  |
+   +----------------------------------------------------------------------+
+ */
+
 #ifndef HANDLER_H
 #define HANDLER_H
 
 #include "php.h"
 #include "php_ini.h"
 
-#define RPC_HANDLER(layer)				{#layer, layer##_handler_init, &layer##_object_handlers,	\
-										&layer##_class_entry, layer##_function_entry,				\
-										layer##_method_entry, layer##_ini_entry}
+#define RPC_HANDLER(layer)				{#layer, layer##_handler_init, layer##_handler_shutdown,	\
+										&layer##_object_handlers, &layer##_class_entry,				\
+										layer##_function_entry, layer##_method_entry,				\
+										layer##_ini_entry}
 
-#define RPC_DECLARE_HANDLER(layer)		void layer##_handler_init();					\
-										rpc_object_handlers layer##_object_handlers;	\
-										zend_class_entry layer##_class_entry;			\
-										function_entry layer##_function_entry[];		\
-										function_entry layer##_method_entry[];			\
+#define RPC_DECLARE_HANDLER(layer)		void layer##_handler_init(int module_number TSRMLS_DC);		\
+										void layer##_handler_shutdown(TSRMLS_D);					\
+										rpc_object_handlers layer##_object_handlers;				\
+										zend_class_entry *layer##_class_entry;						\
+										function_entry layer##_function_entry[];					\
+										function_entry layer##_method_entry[];						\
 										zend_ini_entry layer##_ini_entry[];
 
-#define RPC_INIT_FUNCTION(layer)		void layer##_handler_init()
+#define RPC_INIT_FUNCTION(layer)		void layer##_handler_init(int module_number TSRMLS_DC)
+#define RPC_SHUTDOWN_FUNCTION(layer)	void layer##_handler_shutdown(TSRMLS_D)
 
-#define RPC_REGISTER_HANDLERS_START(layer)		zend_class_entry layer##_class_entry;				\
+#define RPC_REGISTER_HANDLERS_START(layer)		zend_class_entry *layer##_class_entry;				\
 												rpc_object_handlers layer##_object_handlers = {
 
 #define RPC_REGISTER_HANDLERS_END()				};
@@ -65,11 +86,12 @@ typedef struct _rpc_string {
 typedef struct _rpc_object_handlers {
 	const zend_bool poolable;
 	const zend_uint hash_type;
-	int (*rpc_hash)(rpc_string name, rpc_string *hash, int num_args, char *arg_types, int type);
-	int (*rpc_name)(rpc_string hash, rpc_string *name, int type);
+	int (*rpc_hash)(rpc_string name, rpc_string *hash, void *data, int num_args, char *arg_types, int type);
+	int (*rpc_name)(rpc_string hash, rpc_string *name, void *data, int type);
 	int (*rpc_ctor)(rpc_string class_name, void **data, int num_args, zval **args[]);
-	int (*rpc_dtor)(void **data);
-	int (*rpc_call)(rpc_string method_name, void **data, zval **return_value, int num_args, zval **args[]);
+	int (*rpc_dtor)(void *data);
+	int (*rpc_describe)(rpc_string method_name, void *data, char **arg_types);
+	int (*rpc_call)(rpc_string method_name, void **data, zval *return_value, int num_args, zval **args[]);
 	int (*rpc_get)(rpc_string property_name, zval *return_value, void **data);
 	int (*rpc_set)(rpc_string property_name, zval *value, void **data);
 	int (*rpc_compare)(void **data1, void **data2);
@@ -82,8 +104,9 @@ typedef struct _rpc_object_handlers {
 typedef struct _rpc_handler_entry {
 	char					*name;
 	void (*rpc_handler_init)();
+	void (*rpc_handler_shutdown)();
 	rpc_object_handlers		*handlers;
-	zend_class_entry		*ce;
+	zend_class_entry		**ce;
 	function_entry			*functions;
 	function_entry			*methods;
 	zend_ini_entry			*ini;

@@ -1,31 +1,67 @@
+/*
+   +----------------------------------------------------------------------+
+   | PHP Version 4                                                        |
+   +----------------------------------------------------------------------+
+   | Copyright (c) 1997-2002 The PHP Group                                |
+   +----------------------------------------------------------------------+
+   | This source file is subject to version 2.02 of the PHP license,      |
+   | that is bundled with this package in the file LICENSE, and is        |
+   | available at through the world-wide-web at                           |
+   | http://www.php.net/license/2_02.txt.                                 |
+   | If you did not receive a copy of the PHP license and are unable to   |
+   | obtain it through the world-wide-web, please send a note to          |
+   | license@php.net so we can mail you a copy immediately.               |
+   +----------------------------------------------------------------------+
+   | Author: Harald Radi <h.radi@nme.at>                                  |
+   +----------------------------------------------------------------------+
+ */
+
+
 #ifndef VARIANT_H
 #define VARIANT_H
 
 #if PHP_WIN32
 
-#define ALLOC_VARIANT(v)	(v) = (VARIANT *) emalloc(sizeof(VARIANT));					\
-							VariantInit(v);
+#define ALLOC_VARIANT(v)	(v) = (variantval *) emalloc(sizeof(variantval));	\
+							(v)->var = (VARIANT *) emalloc(sizeof(VARIANT));	\
+							(v)->codepage = CP_ACP;								\
+							VariantInit((v)->var);
 
-#define FREE_VARIANT(v)		VariantClear(v);											\
-							efree(v);
+#define FREE_VARIANT(v)		VariantClear((v)->var);								\
+							efree((v)->var);									\
+							efree((v));
 
+#define ZVAL_VARIANT(z, v, cp)													\
+	if (V_VT(v) == VT_DISPATCH) {												\
+		rpc_internal *intern;													\
+		comval *obj;															\
+		ALLOC_COM(obj);															\
+		Z_TYPE_P(z) = IS_OBJECT;												\
+		(z)->value.obj = rpc_objects_new(com_class_entry TSRMLS_CC);			\
+		if (GET_INTERNAL_EX(intern, (z)) != SUCCESS) {							\
+			/* TODO: exception */												\
+		}																		\
+		php_COM_set(obj, &V_DISPATCH(v), TRUE);									\
+		intern->data = obj;														\
+	} else {																	\
+		php_variant_to_zval((v), (z), cp);										\
+		VariantClear(v);														\
+		efree(v);																\
+	}
 
-#define IS_VARIANT			php_VARIANT_get_le_variant()
+#define RETVAL_VARIANT(v, cp)	ZVAL_VARIANT(return_value, v, cp)
+#define RETURN_VARIANT(v, cp)	RETVAL_VARIANT(v, cp)							\
+								return;
 
-#define ZVAL_VARIANT(z, v)		if (V_VT(v) == VT_DISPATCH) {							\
-									comval *obj;										\
-									ALLOC_COM(obj);										\
-									php_COM_set(obj, &V_DISPATCH(v), TRUE TSRMLS_CC);	\
-									ZVAL_RESOURCE((z), zend_list_insert(obj, IS_COM));		\
-								} else {												\
-									php_variant_to_pval((v), (z), codepage TSRMLS_CC);	\
-									FREE_VARIANT(v);									\
-								}
+typedef struct variantval_ {
+	VARIANT* var;
+	long codepage;
+} variantval;
 
-#define RETVAL_VARIANT(v)	ZVAL_VARIANT(return_value, (v));
-#define RETURN_VARIANT(v)	RETVAL_VARIANT(v)											\
-							return;
+void php_variant_init(int module_number TSRMLS_DC);
+void php_variant_shutdown(TSRMLS_D);
 
+ZEND_FUNCTION(variant_load);
 
 #endif  /* PHP_WIN32 */
 

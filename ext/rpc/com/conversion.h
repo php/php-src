@@ -1,3 +1,22 @@
+/*
+   +----------------------------------------------------------------------+
+   | PHP Version 4                                                        |
+   +----------------------------------------------------------------------+
+   | Copyright (c) 1997-2002 The PHP Group                                |
+   +----------------------------------------------------------------------+
+   | This source file is subject to version 2.02 of the PHP license,      |
+   | that is bundled with this package in the file LICENSE, and is        |
+   | available at through the world-wide-web at                           |
+   | http://www.php.net/license/2_02.txt.                                 |
+   | If you did not receive a copy of the PHP license and are unable to   |
+   | obtain it through the world-wide-web, please send a note to          |
+   | license@php.net so we can mail you a copy immediately.               |
+   +----------------------------------------------------------------------+
+   | Author: Harald Radi <h.radi@nme.at>                                  |
+   |         Alan Brown <abrown@pobox.com>                                |
+   +----------------------------------------------------------------------+
+ */
+
 #ifndef CONVERSION_H
 #define CONVERSION_H
 
@@ -11,12 +30,12 @@
 
 BEGIN_EXTERN_C()
 
-PHPAPI void php_pval_to_variant(pval *pval_arg, VARIANT *var_arg, int codepage TSRMLS_DC);
-PHPAPI void php_pval_to_variant_ex(pval *pval_arg, VARIANT *var_arg, pval *pval_type, int codepage TSRMLS_DC);
-PHPAPI void php_pval_to_variant_ex2(pval *pval_arg, VARIANT *var_arg, int type, int codepage TSRMLS_DC);
-PHPAPI int php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int codepage TSRMLS_DC);
-PHPAPI OLECHAR *php_char_to_OLECHAR(char *C_str, uint strlen, int codepage TSRMLS_DC);
-PHPAPI char *php_OLECHAR_to_char(OLECHAR *unicode_str, uint *out_length, int codepage TSRMLS_DC);
+ZEND_API void php_zval_to_variant(zval *zval_arg, VARIANT *var_arg, int codepage);
+ZEND_API void php_zval_to_variant_ex(zval *zval_arg, VARIANT *var_arg, int type, int codepage);
+ZEND_API int php_variant_to_zval(VARIANT *var_arg, zval *zval_arg, int codepage);
+
+ZEND_API OLECHAR *php_char_to_OLECHAR(char *C_str, uint strlen, int codepage, int persist);
+ZEND_API char *php_OLECHAR_to_char(OLECHAR *unicode_str, uint *out_length, int codepage, int persist);
 
 END_EXTERN_C()
 
