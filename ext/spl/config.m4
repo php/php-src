@@ -2,22 +2,22 @@ dnl $Id$
 dnl config.m4 for extension SPL
 
 PHP_ARG_ENABLE(spl, enable SPL suppport,
-[  --enable-spl            Enable Standard PHP Library])
+[  --disable-spl           Enable Standard PHP Library], yes)
 
 dnl first enable/disable all hooks
 
-PHP_ARG_ENABLE(spl, enable all hooks,
+PHP_ARG_ENABLE(spl-hook-all, enable all hooks,
 [  --enable-spl-hook-all       SPL: Enable all hooks])
 
 dnl now all single enable/disable for hooks
 
-PHP_ARG_ENABLE(spl, enable hook on foreach,
+PHP_ARG_ENABLE(spl-foreach, enable hook on foreach,
 [  --disable-spl-foreach       SPL: Disable hook on forach], yes)
 
-PHP_ARG_ENABLE(spl, enable hook on array read,
+PHP_ARG_ENABLE(spl-array-read, enable hook on array read,
 [  --enable-spl-array-read     SPL: Enable hook on array read])
 
-PHP_ARG_ENABLE(spl, enable hook on array write,
+PHP_ARG_ENABLE(spl-array-write, enable hook on array write,
 [  --enable-spl-array-write    SPL: Enable hook on array write (+read)])
 
 dnl last do checks on hooks
