@@ -161,6 +161,8 @@ PHP_RSHUTDOWN_FUNCTION(nsapi);
 PHP_MINFO_FUNCTION(nsapi);
 
 PHP_FUNCTION(virtual);
+PHP_FUNCTION(nsapi_request_headers);
+PHP_FUNCTION(nsapi_response_headers);
 
 ZEND_BEGIN_MODULE_GLOBALS(nsapi)
 	long read_timeout;
@@ -180,8 +182,13 @@ ZEND_DECLARE_MODULE_GLOBALS(nsapi)
  * Every user visible function must have an entry in nsapi_functions[].
  */
 function_entry nsapi_functions[] = {
-	PHP_FE(virtual,	NULL)		/* Make subrequest */
-	{NULL, NULL, NULL}	/* Must be the last line in nsapi_functions[] */
+	PHP_FE(virtual,	NULL)												/* Make subrequest */
+	PHP_FE(nsapi_request_headers, NULL)									/* get request headers */
+	PHP_FALIAS(getallheaders, nsapi_request_headers, NULL)				/* compatibility */
+	PHP_FALIAS(apache_request_headers, nsapi_request_headers, NULL)		/* compatibility */
+	PHP_FE(nsapi_response_headers, NULL)								/* get response headers */
+	PHP_FALIAS(apache_response_headers, nsapi_response_headers, NULL)	/* compatibility */
+	{NULL, NULL, NULL}
 };
 /* }}} */
 
@@ -196,7 +203,7 @@ zend_module_entry nsapi_module_entry = {
 	NULL,
 	NULL,
 	PHP_MINFO(nsapi),
-	NO_VERSION_YET,
+	"$Id$",
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */
@@ -297,7 +304,7 @@ PHP_MSHUTDOWN_FUNCTION(nsapi)
 PHP_MINFO_FUNCTION(nsapi)
 {
 	php_info_print_table_start();
-	php_info_print_table_row(2, "NSAPI support", "enabled");
+	php_info_print_table_row(2, "NSAPI Module Version", nsapi_module_entry.version);
 	php_info_print_table_row(2, "Server Software", system_version());
 	php_info_print_table_row(2, "Sub-requests with virtual()",
 	 (nsapi_servact_service)?((zend_ini_long("zlib.output_compression", sizeof("zlib.output_compression"), 0))?"not supported with zlib.output_compression":"enabled"):"not supported on this platform" );
@@ -381,6 +388,54 @@ PHP_FUNCTION(virtual)
 
 		RETURN_TRUE;
 	}
+}
+/* }}} */
+
+/* {{{ proto array nsapi_request_headers(void)
+   Get all headers from the request */
+PHP_FUNCTION(nsapi_request_headers)
+{
+	register int i;
+	struct pb_entry *entry;
+	nsapi_request_context *rc = (nsapi_request_context *)SG(server_context);
+
+	if (array_init(return_value) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	for (i=0; i < rc->rq->headers->hsize; i++) {
+		entry=rc->rq->headers->ht[i];
+		while (entry) {
+			if (!PG(safe_mode) || strcasecmp(entry->param->name, "authorization")) {
+				add_assoc_string(return_value, entry->param->name, entry->param->value, 1);
+			}
+			entry=entry->next;
+		}
+  	}
+}
+/* }}} */
+
+/* {{{ proto array nsapi_response_headers(void)
+   Get all headers from the response */
+PHP_FUNCTION(nsapi_response_headers)
+{
+	register int i;
+	struct pb_entry *entry;
+	nsapi_request_context *rc = (nsapi_request_context *)SG(server_context);
+
+	if (array_init(return_value) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	php_header();
+
+	for (i=0; i < rc->rq->srvhdrs->hsize; i++) {
+		entry=rc->rq->srvhdrs->ht[i];
+		while (entry) {
+			add_assoc_string(return_value, entry->param->name, entry->param->value, 1);
+			entry=entry->next;
+		}
+  	}
 }
 /* }}} */
 
@@ -551,15 +606,17 @@ static void sapi_nsapi_register_server_variables(zval *track_vars_array TSRMLS_D
 	for (i=0; i < rc->rq->headers->hsize; i++) {
 		entry=rc->rq->headers->ht[i];
 		while (entry) {
-			snprintf(buf, NS_BUF_SIZE, "HTTP_%s", entry->param->name);
-			for(p = buf + 5; *p; p++) {
-				*p = toupper(*p);
-				if (*p < 'A' || *p > 'Z') {
-					*p = '_';
+			if (!PG(safe_mode) || strcasecmp(entry->param->name, "authorization")) {
+				snprintf(buf, NS_BUF_SIZE, "HTTP_%s", entry->param->name);
+				for(p = buf + 5; *p; p++) {
+					*p = toupper(*p);
+					if (*p < 'A' || *p > 'Z') {
+						*p = '_';
+					}
 				}
+				buf[NS_BUF_SIZE]='\0';
+				php_register_variable(buf, entry->param->value, track_vars_array TSRMLS_CC);
 			}
-			buf[NS_BUF_SIZE]='\0';
-			php_register_variable(buf, entry->param->value, track_vars_array TSRMLS_CC);
 			entry=entry->next;
 		}
   	}
