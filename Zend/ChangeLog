@@ -1,3 +1,51 @@
+2004-03-28  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_API.c:
+      Use lowercasing here
+
+    * zend.c:
+      Initialize the complete struct
+
+2004-03-28  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_language_parser.y:
+      check writability on =& too
+
+    * zend_execute.c:
+      - call set handler if assigning to object having this handler
+      - cleanup: use macros to access object internal vars
+
+    * zend_interfaces.c:
+      preserve ZEND_API in definition
+
+    * zend_interfaces.h:
+      declare as extern
+
+2004-03-28  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_reflection_api.c:
+      Fix memleak found by Timm
+
+2004-03-28  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_operators.c:
+      centralize object-to-scalar conversion, make it work with get handler
+
+    * zend.c:
+      try get handler on printable conversion
+
+    * zend_object_handlers.h:
+      some more clear comments
+
+    * zend_operators.c:
+      Use macros for object parts access
+
+2004-03-28  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_execute_API.c:
+      fix of fix related to __autoload. (ext/standard/tests/network/bug20134.phpt
+      passes again)
+
 2004-03-27  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend.c:

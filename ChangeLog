@@ -1,3 +1,103 @@
+2004-03-28  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_API.c:
+      Use lowercasing here
+
+    * run-tests.php:
+      Add ability to pass -n to the executed php
+
+    * ext/standard/basic_functions.c:
+      Improve portability (idea by Ard)
+
+    * ZendEngine2/zend.c:
+      Initialize the complete struct
+
+    * ext/simplexml/CREDITS
+      ext/simplexml/simplexml.c
+      ext/sqlite/CREDITS
+      ext/sqlite/sqlite.c
+      ext/standard/credits_ext.h:
+      Fix writing of SQLite and SimpleXMl extension and add Rob to the credits
+      line of the latter. Add ext/SPL.
+
+2004-03-28  Stanislav Malyshev  <stas@zend.com>
+
+    * ZendEngine2/zend_language_parser.y:
+      check writability on =& too
+
+2004-03-28  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/xsl/xsltprocessor.c:
+      Fix XSL (Rob/Marcus)
+
+2004-03-28  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * NEWS
+      ext/standard/datetime.c
+      ext/standard/tests/time/bug27719.phpt:
+      MFB test case for bug #27719 and improve comments in this tricky DST code
+
+    * (PHP_4_3)
+      NEWS
+      ext/session/session.c
+      ext/standard/datetime.c
+      ext/standard/head.c
+      ext/standard/tests/time/bug27719.phpt:
+      - Merge whitespace and trivial changes from HEAD back to the branch so the
+        diff between HEAD and PHP_4_3 only shows feature changes
+      - Fix test case for bug #27719 (TZ=EST means no DST so the test was wrong)
+
+2004-03-28  Stanislav Malyshev  <stas@zend.com>
+
+    * ZendEngine2/zend_execute.c:
+      - call set handler if assigning to object having this handler
+      - cleanup: use macros to access object internal vars
+
+    * ZendEngine2/zend_interfaces.c:
+      preserve ZEND_API in definition
+
+    * ZendEngine2/zend_interfaces.h:
+      declare as extern
+
+2004-03-28  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * run-tests.php:
+      Show progress
+
+    * tests/classes/tostring.phpt:
+      Adapt ecpectations to 5.0 reality
+
+    * ZendEngine2/zend_reflection_api.c:
+      Fix memleak found by Timm
+
+2004-03-28  Stanislav Malyshev  <stas@zend.com>
+
+    * ZendEngine2/zend_operators.c:
+      centralize object-to-scalar conversion, make it work with get handler
+
+    * ZendEngine2/zend.c:
+      try get handler on printable conversion
+
+    * ZendEngine2/zend_object_handlers.h:
+      some more clear comments
+
+    * ZendEngine2/zend_operators.c:
+      Use macros for object parts access
+
+2004-03-28  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_execute_API.c:
+      fix of fix related to __autoload. (ext/standard/tests/network/bug20134.phpt
+      passes again)
+
+2004-03-28  Andrey Hristov  <php@hristov.com>
+
+    * README.PHP4-TO-PHP5-THIN-CHANGES:
+      - Fixed the explanation and example about "classes must be declared before
+      used".
+      - Added new entry about get_class() (Thanks Lukas for reminding
+      (toStudlyCapOrNotToStudlyCap.txt).
+
 2004-03-27  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * tests/classes/type_hinting_002.phpt:
