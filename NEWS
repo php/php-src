@@ -2,8 +2,7 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? ????, Version 4.0 Beta 4
-- Preliminary support for date/time stamping in error logs
-- implemented count_chars(). (Thies)
+- Implemented count_chars(). (Thies)
 - Added class_exists() function (Andrei, Zend library)
 - Made strspn() and strcspn() binary-safe. (Andrei)
 - Added array_multisort() function. (Andrei)
