@@ -2707,13 +2707,14 @@ PHP_MINFO_FUNCTION(ming)
 
 /* {{{ todo PHP_MINIT_FUNCTION(ming)
 */
+
 /* custom error handler propagates ming errors up to php */
 static void php_ming_error(char *msg, ...)
 {
-	TSRMLS_FETCH();
-
 	va_list args;
 	char *buffer;
+	
+	TSRMLS_FETCH();
 
 	va_start(args, msg);
 	vspprintf(&buffer, 0, msg, args);
