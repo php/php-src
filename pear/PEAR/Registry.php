@@ -29,7 +29,9 @@ TODO:
 require_once "System.php";
 require_once "PEAR.php";
 
-define("PEAR_REGISTRY_ERROR_LOCK", -2);
+define('PEAR_REGISTRY_ERROR_LOCK',   -2);
+define('PEAR_REGISTRY_ERROR_FORMAT', -3);
+define('PEAR_REGISTRY_ERROR_FILE',   -4);
 
 /**
  * Administration class used to maintain the installed package database.
@@ -63,6 +65,20 @@ class PEAR_Registry extends PEAR
      */
     var $lock_mode = 0; // XXX UNUSED
 
+    /** Cache of package information.  Structure:
+     * array(
+     *   'package' => array('id' => ... ),
+     *   ... )
+     * @var array
+     */
+    var $pkginfo_cache = array();
+
+    /** Cache of file map.  Structure:
+     * array( '/path/to/file' => 'package', ... )
+     * @var array
+     */
+    var $filemap_cache = array();
+
     // }}}
 
     // {{{ constructor
@@ -78,11 +94,12 @@ class PEAR_Registry extends PEAR
     {
         parent::PEAR();
         $ds = DIRECTORY_SEPARATOR;
+        $this->install_dir = $pear_install_dir;
         $this->statedir = $pear_install_dir.$ds.'.registry';
         $this->filemap  = $pear_install_dir.$ds.'.filemap';
         $this->lockfile = $pear_install_dir.$ds.'.lock';
         if (!file_exists($this->filemap)) {
-            $this->_rebuildFileMap();
+            $this->rebuildFileMap();
         }
     }
 
@@ -164,9 +181,9 @@ class PEAR_Registry extends PEAR
     }
 
     // }}}
-    // {{{ _rebuildFileMap()
+    // {{{ rebuildFileMap()
 
-    function _rebuildFileMap()
+    function rebuildFileMap()
     {
         $packages = $this->listPackages();
         $files = array();
@@ -194,8 +211,29 @@ class PEAR_Registry extends PEAR
         if (!$fp) {
             return false;
         }
+        $this->filemap_cache = $files;
         fwrite($fp, serialize($files));
         fclose($fp);
+        return true;
+    }
+
+    // }}}
+    // {{{ readFileMap()
+
+    function readFileMap()
+    {
+        $fp = @fopen($this->filemap, 'r');
+        if (!$fp) {
+            return $this->raiseError('PEAR_Registry: could not open filemap', PEAR_REGISTRY_ERROR_FILE, null, null, $php_errormsg);
+        }
+        $fsize = filesize($this->filemap);
+        $data = fread($fp, $fsize);
+        fclose($fp);
+        $tmp = unserialize($data);
+        if (!$tmp && $fsize > 7) {
+            return $this->raiseError('PEAR_Registry: invalid filemap data', PEAR_REGISTRY_ERROR_FORMAT, null, null, $data);
+        }
+        $this->filemap = $tmp;
         return true;
     }
 
@@ -216,7 +254,7 @@ class PEAR_Registry extends PEAR
      */
     function _lock($mode = LOCK_EX)
     {
-        if(!strstr(php_uname(), 'Windows 95/98')) {
+        if (!strstr(php_uname(), 'Windows 95/98')) {
             if ($mode != LOCK_UN && is_resource($this->lock_fp)) {
                 // XXX does not check type of lock (LOCK_SH/LOCK_EX)
                 return true;
@@ -389,7 +427,7 @@ class PEAR_Registry extends PEAR
         }
         $file = $this->_packageFileName($package);
         $ret = @unlink($file);
-        $this->_rebuildFileMap();
+        $this->rebuildFileMap();
         $this->_unlock();
         return $ret;
     }
@@ -406,9 +444,6 @@ class PEAR_Registry extends PEAR
         if (PEAR::isError($e = $this->_lock(LOCK_EX))) {
             return $e;
         }
-        if (!file_exists($this->filemap)) {
-            $this->_rebuildFileMap();
-        }
         $fp = $this->_openPackageFile($package, 'w');
         if ($fp === null) {
             $this->_unlock();
@@ -422,13 +457,61 @@ class PEAR_Registry extends PEAR
         }
         $this->_closePackageFile($fp);
         if (isset($info['filelist'])) {
-            $this->_rebuildFileMap();
+            $this->rebuildFileMap();
         }
         $this->_unlock();
         return true;
     }
 
     // }}}
+    // {{{ checkFileMap()
+
+    /**
+     * Test whether a file belongs to a package.
+     *
+     * @param string $path file path, absolute or relative to the pear
+     * install dir
+     *
+     * @return string which package the file belongs to, or an empty
+     * string if the file does not belong to an installed package
+     *
+     * @access public
+     */
+    function checkFileMap($path)
+    {
+        if (is_array($path)) {
+            static $notempty;
+            if (empty($notempty)) {
+                $notempty = create_function('$a','return !empty($a);');
+            }
+            $pkgs = array();
+            foreach ($path as $name => $attrs) {
+                if (isset($attrs['baseinstalldir'])) {
+                    $name = $attrs['baseinstalldir'].DIRECTORY_SEPARATOR.$name;
+                }
+                $pkgs[$name] = $this->checkFileMap($name);
+            }
+            return array_filter($pkgs, $notempty);
+        }
+        if (empty($this->filemap_cache) && PEAR::isError($this->readFileMap())) {
+            return $err;
+        }
+        if (isset($this->filemap_cache[$path])) {
+            return $this->filemap_cache[$path];
+        }
+        $l = strlen($this->install_dir);
+        if (substr($path, 0, $l) == $this->install_dir) {
+            $path = preg_replace('!^'.DIRECTORY_SEPARATOR.'+!', '', substr($path, $l));
+        }
+        if (isset($this->filemap_cache[$path])) {
+            return $this->filemap_cache[$path];
+        }
+        return '';
+    }
+
+    // }}}
+
+    // {{{ rebuildDepsFile()
 
     /**
     Experimental dependencies database handling functions (not yet in production)
@@ -601,6 +684,8 @@ class PEAR_Registry extends PEAR
         }
         return $this->_depWriteDepDB($data);
     }
+
+    // }}}
 }
 
 ?>
