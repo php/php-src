@@ -36,6 +36,7 @@
 #endif
 
 #include "ext/standard/info.h"
+#define SECTION(name)  PUTS("<H2>" name "</H2>\n")
 
 #define NS_BUF_SIZE 511
 
