@@ -56,6 +56,7 @@ PHP_FUNCTION(xslt_set_error_handler);
 #ifdef HAVE_SABLOT_SET_ENCODING
 PHP_FUNCTION(xslt_set_encoding);
 #endif
+PHP_FUNCTION(xslt_set_base);
 PHP_FUNCTION(xslt_fetch_result);
 PHP_FUNCTION(xslt_free);
 
