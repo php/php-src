@@ -157,17 +157,17 @@ class mystream
 
 }
 
-if (@stream_register_wrapper("bogus", "class_not_exist")) {
+if (@stream_wrapper_register("bogus", "class_not_exist")) {
 	die("Registered a non-existant class!!!???");
 }
 echo "Not Registered\n";
 
-if (!stream_register_wrapper("test", "mystream")) {
+if (!stream_wrapper_register("test", "mystream")) {
 	die("test wrapper registration failed");
 }
 echo "Registered\n";
 
-if (!stream_register_wrapper("bogon", "uselessstream")) {
+if (!stream_wrapper_register("bogon", "uselessstream")) {
 	die("bogon wrapper registration failed");
 }
 echo "Registered\n";

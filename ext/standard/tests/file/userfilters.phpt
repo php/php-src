@@ -18,7 +18,7 @@ class testfilter extends php_user_filter {
   }
 }
 
-stream_register_filter('testfilter','testfilter');
+stream_filter_register('testfilter','testfilter');
 
 $text = "Hello There!";
 
