@@ -58,7 +58,7 @@ typedef struct _zend_fast_cache_list_entry {
 
 #define ZEND_FAST_ALLOC(p, type, fc_type)								\
 	{																\
-		ALS_FETCH();												\
+		TSRMLS_FETCH();												\
 																	\
 		if (((p) = (type *) AG(fast_cache_list_head)[fc_type])) {	\
 			AG(fast_cache_list_head)[fc_type] = ((zend_fast_cache_list_entry *) AG(fast_cache_list_head)[fc_type])->next;	\
@@ -72,7 +72,7 @@ typedef struct _zend_fast_cache_list_entry {
 
 #define ZEND_FAST_FREE(p, fc_type)										\
 	{																\
-		ALS_FETCH();												\
+		TSRMLS_FETCH();												\
 																	\
 		((zend_fast_cache_list_entry *) (p))->next = (zend_fast_cache_list_entry *) AG(fast_cache_list_head)[fc_type];	\
 		AG(fast_cache_list_head)[fc_type] = (zend_fast_cache_list_entry *) (p);			\

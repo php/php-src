@@ -29,8 +29,8 @@
 extern char *zendtext;
 extern int zendleng;
 #else
-#define zendtext ((char *) zend_get_zendtext(CLS_C))
-#define zendleng zend_get_zendleng(CLS_C)
+#define zendtext ((char *) zend_get_zendtext(TSRMLS_C))
+#define zendleng zend_get_zendleng(TSRMLS_C)
 #endif
 
 ZEND_API void zend_html_putc(char c)
@@ -88,13 +88,13 @@ ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini
 	char *last_color = syntax_highlighter_ini->highlight_html;
 	char *next_color;
 	int in_string=0;
-	CLS_FETCH();
+	TSRMLS_FETCH();
 
 	zend_printf("<code>");
 	zend_printf("<font color=\"%s\">\n", last_color);
 	/* highlight stuff coming back from zendlex() */
 	token.type = 0;
-	while ((token_type=lex_scan(&token CLS_CC))) {
+	while ((token_type=lex_scan(&token TSRMLS_CC))) {
 		switch (token_type) {
 			case T_INLINE_HTML:
 				next_color = syntax_highlighter_ini->highlight_html;
@@ -170,7 +170,7 @@ ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini
 			efree(token.value.str.val);
 			if (has_semicolon) {
 				/* the following semicolon was unput(), ignore it */
-				lex_scan(&token CLS_CC);
+				lex_scan(&token TSRMLS_CC);
 			}
 		}
 		token.type = 0;

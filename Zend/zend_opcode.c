@@ -50,7 +50,7 @@ static void op_array_alloc_ops(zend_op_array *op_array)
 
 
 
-void init_op_array(zend_op_array *op_array, int type, int initial_ops_size CLS_DC)
+void init_op_array(zend_op_array *op_array, int type, int initial_ops_size TSRMLS_DC)
 {
 	op_array->type = type;
 
@@ -72,7 +72,7 @@ void init_op_array(zend_op_array *op_array, int type, int initial_ops_size CLS_D
 	op_array->T = 0;
 
 	op_array->function_name = NULL;
-	op_array->filename = zend_get_compiled_filename(CLS_C);
+	op_array->filename = zend_get_compiled_filename(TSRMLS_C);
 
 	op_array->arg_types = NULL;
 
@@ -181,7 +181,7 @@ ZEND_API void destroy_op_array(zend_op_array *op_array)
 }
 
 
-void init_op(zend_op *op CLS_DC)
+void init_op(zend_op *op TSRMLS_DC)
 {
 	memset(&op->result, 0, sizeof(znode));
 	op->lineno = CG(zend_lineno);
@@ -191,7 +191,7 @@ void init_op(zend_op *op CLS_DC)
 	memset(&op->op2, 0, sizeof(znode));
 }
 
-zend_op *get_next_op(zend_op_array *op_array CLS_DC)
+zend_op *get_next_op(zend_op_array *op_array TSRMLS_DC)
 {
 	zend_uint next_op_num = op_array->last++;
 	zend_op *next_op;
@@ -209,7 +209,7 @@ zend_op *get_next_op(zend_op_array *op_array CLS_DC)
 	
 	next_op = &(op_array->opcodes[next_op_num]);
 	
-	init_op(next_op CLS_CC);
+	init_op(next_op TSRMLS_CC);
 
 	return next_op;
 }
@@ -231,7 +231,7 @@ zend_brk_cont_element *get_next_brk_cont_element(zend_op_array *op_array)
 }
 
 
-static void zend_update_extended_info(zend_op_array *op_array CLS_DC)
+static void zend_update_extended_info(zend_op_array *op_array TSRMLS_DC)
 {
 	zend_op *opline = op_array->opcodes, *end=opline+op_array->last;
 
@@ -267,13 +267,13 @@ static void zend_extension_op_array_handler(zend_extension *extension, zend_op_a
 int pass_two(zend_op_array *op_array)
 {
 	zend_op *opline, *end;
-	CLS_FETCH();
+	TSRMLS_FETCH();
 
 	if (op_array->type!=ZEND_USER_FUNCTION && op_array->type!=ZEND_EVAL_CODE) {
 		return 0;
 	}
 	if (CG(extended_info)) {
-		zend_update_extended_info(op_array CLS_CC);
+		zend_update_extended_info(op_array TSRMLS_CC);
 	}
 	if (CG(handle_op_arrays)) {
 		zend_llist_apply_with_argument(&zend_extensions, (void (*)(void *, void *)) zend_extension_op_array_handler, op_array);

@@ -30,8 +30,8 @@
 extern char *zendtext;
 extern int zendleng;
 #else
-#define zendtext ((char *) zend_get_zendtext(CLS_C))
-#define zendleng zend_get_zendleng(CLS_C)
+#define zendtext ((char *) zend_get_zendtext(TSRMLS_C))
+#define zendleng zend_get_zendleng(TSRMLS_C)
 #endif
 
 
@@ -59,13 +59,13 @@ ZEND_API void zend_indent()
 	int nest_level=0;
 	int emit_whitespace[256];
 	int i;
-	CLS_FETCH();
+	TSRMLS_FETCH();
 
 	memset(emit_whitespace, 0, sizeof(int)*256);
 
 	/* highlight stuff coming back from zendlex() */
 	token.type = 0;
-	while ((token_type=lex_scan(&token CLS_CC))) {
+	while ((token_type=lex_scan(&token TSRMLS_CC))) {
 		switch (token_type) {
 			case T_INLINE_HTML:
 				zend_write(zendtext, zendleng);

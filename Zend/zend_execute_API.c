@@ -102,7 +102,7 @@ static int is_not_internal_class(zend_class_entry *ce)
 }
 
 
-void init_executor(CLS_D TSRMLS_DC)
+void init_executor(TSRMLS_D)
 {
 	INIT_ZVAL(EG(uninitialized_zval));
 	INIT_ZVAL(EG(error_zval));
@@ -529,7 +529,7 @@ int call_user_function_ex(HashTable *function_table, zval **object_pp, zval *fun
 }
 
 
-ZEND_API int zend_eval_string(char *str, zval *retval_ptr, char *string_name CLS_DC TSRMLS_DC)
+ZEND_API int zend_eval_string(char *str, zval *retval_ptr, char *string_name TSRMLS_DC)
 {
 	zval pv;
 	zend_op_array *new_op_array;
@@ -554,7 +554,7 @@ ZEND_API int zend_eval_string(char *str, zval *retval_ptr, char *string_name CLS
 
 	original_handle_op_arrays = CG(handle_op_arrays);
 	CG(handle_op_arrays) = 0;
-	new_op_array = compile_string(&pv, string_name CLS_CC);
+	new_op_array = compile_string(&pv, string_name TSRMLS_CC);
 	CG(handle_op_arrays) = original_handle_op_arrays;
 
 	if (new_op_array) {
@@ -596,11 +596,10 @@ ZEND_API int zend_eval_string(char *str, zval *retval_ptr, char *string_name CLS
 }
 
 
-void execute_new_code(CLS_D)
+void execute_new_code(TSRMLS_D)
 {
     zend_op *opline, *end;
 	zend_op *ret_opline;
-	TSRMLS_FETCH();
 
 	if (!CG(interactive)
 		|| CG(active_op_array)->backpatch_count>0
@@ -609,7 +608,7 @@ void execute_new_code(CLS_D)
 		return;
 	}
 
-	ret_opline = get_next_op(CG(active_op_array) CLS_CC);
+	ret_opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 	ret_opline->opcode = ZEND_RETURN;
 	ret_opline->op1.op_type = IS_CONST;
 	INIT_ZVAL(ret_opline->op1.u.constant);
@@ -647,8 +646,6 @@ ZEND_API void zend_timeout(int dummy)
 	TSRMLS_FETCH();
 
 	/* is there any point in this?  we're terminating the request anyway...
-	PLS_FETCH();
-
 	PG(connection_status) |= PHP_CONNECTION_TIMEOUT;
 	*/
 	zend_error(E_ERROR, "Maximum execution time of %d second%s exceeded",
@@ -677,16 +674,16 @@ static LRESULT CALLBACK zend_timeout_WndProc(HWND hWnd, UINT message, WPARAM wPa
 			break;
 		case WM_TIMER: {
 #ifdef ZTS
-				zend_executor_globals *executor_globals;
+				void ***tsrm_ls;
 
-				executor_globals = ts_resource_ex(executor_globals_id, &wParam);
-				if (!executor_globals) {
+				tsrm_ls = ts_resource_ex(0, &wParam);
+				if (!tsrm_ls) {
 					/* Thread died before receiving its timeout? */
 					break;
 				}
 #endif
 				KillTimer(timeout_window, wParam);
-				executor_globals->timed_out = 1;
+				EG(timed_out) = 1;
 			}
 			break;
 		default:

@@ -1033,7 +1033,7 @@ int zend_register_functions(zend_function_entry *functions, HashTable *function_
 	int count=0,unload=0;
 	HashTable *target_function_table = function_table;
 	int error_type;
-	CLS_FETCH();
+	TSRMLS_FETCH();
 
 	if (type==MODULE_PERSISTENT) {
 		error_type = E_CORE_WARNING;
@@ -1083,7 +1083,7 @@ void zend_unregister_functions(zend_function_entry *functions, int count, HashTa
 	zend_function_entry *ptr = functions;
 	int i=0;
 	HashTable *target_function_table = function_table;
-	CLS_FETCH();
+	TSRMLS_FETCH();
 
 	if (!target_function_table) {
 		target_function_table = CG(function_table);
@@ -1199,7 +1199,7 @@ int zend_next_free_module(void)
 ZEND_API zend_class_entry *zend_register_internal_class_ex(zend_class_entry *class_entry, zend_class_entry *parent_ce, char *parent_name)
 {
 	zend_class_entry *register_class;
-	CLS_FETCH();
+	TSRMLS_FETCH();
 
 	if (!parent_ce && parent_name) {
 			if (zend_hash_find(CG(class_table), parent_name, strlen(parent_name)+1, (void **) &parent_ce)==FAILURE) {
@@ -1219,7 +1219,7 @@ ZEND_API zend_class_entry *zend_register_internal_class(zend_class_entry *class_
 {
 	zend_class_entry *register_class;
 	char *lowercase_name = zend_strndup(class_entry->name, class_entry->name_length);
-	CLS_FETCH();
+	TSRMLS_FETCH();
 
 	zend_str_tolower(lowercase_name, class_entry->name_length);
 
@@ -1292,7 +1292,7 @@ static zend_function_entry disabled_function[] =  {
 
 ZEND_API int zend_disable_function(char *function_name, uint function_name_length)
 {
-	CLS_FETCH();
+	TSRMLS_FETCH();
 
 	if (zend_hash_del(CG(function_table), function_name, function_name_length+1)==FAILURE) {
 		return FAILURE;

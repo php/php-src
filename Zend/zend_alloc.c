@@ -123,7 +123,7 @@ ZEND_API void *_emalloc(size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
 	zend_mem_header *p;
 	DECLARE_CACHE_VARS();
-	ALS_FETCH();
+	TSRMLS_FETCH();
 
 	CALCULATE_REAL_SIZE_AND_CACHE_INDEX(size);
 
@@ -198,7 +198,7 @@ ZEND_API void _efree(void *ptr ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
 	zend_mem_header *p = (zend_mem_header *) ((char *)ptr - sizeof(zend_mem_header) - MEM_HEADER_PADDING);
 	DECLARE_CACHE_VARS();
-	ALS_FETCH();
+	TSRMLS_FETCH();
 
 #if defined(ZTS) && TSRM_DEBUG
 	if (p->thread_id != tsrm_thread_id()) {
@@ -260,7 +260,7 @@ ZEND_API void *_erealloc(void *ptr, size_t size, int allow_failure ZEND_FILE_LIN
 	zend_mem_header *p;
 	zend_mem_header *orig;
 	DECLARE_CACHE_VARS();
-	ALS_FETCH();
+	TSRMLS_FETCH();
 
 	if (!ptr) {
 		return _emalloc(size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
@@ -374,7 +374,7 @@ ZEND_API char *zend_strndup(const char *s, uint length)
 ZEND_API int zend_set_memory_limit(unsigned int memory_limit)
 {
 #if MEMORY_LIMIT
-	ALS_FETCH();
+	TSRMLS_FETCH();
 
 	AG(memory_limit) = memory_limit;
 	return SUCCESS;
@@ -384,7 +384,7 @@ ZEND_API int zend_set_memory_limit(unsigned int memory_limit)
 }
 
 
-ZEND_API void start_memory_manager(ALS_D)
+ZEND_API void start_memory_manager(TSRMLS_D)
 {
 #if 0
 #ifndef ZTS
@@ -439,7 +439,7 @@ ZEND_API void shutdown_memory_manager(int silent, int clean_cache)
 	int had_leaks = 0;
 #endif
 	zend_fast_cache_list_entry *fast_cache_list_entry, *next_fast_cache_list_entry;
-	ALS_FETCH();
+	TSRMLS_FETCH();
 
 	for (fci=0; fci<MAX_FAST_CACHE_TYPES; fci++) {
 		fast_cache_list_entry = AG(fast_cache_list_head)[fci];
@@ -690,7 +690,7 @@ ZEND_API void _full_mem_check(int silent ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_D
 {
 	zend_mem_header *p;
 	int errors=0;
-	ALS_FETCH();
+	TSRMLS_FETCH();
 
 	p = AG(head);
 	
@@ -713,7 +713,7 @@ ZEND_API void _full_mem_check(int silent ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_D
 ZEND_API int _persist_alloc(void *ptr ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
 	zend_mem_header *p = (zend_mem_header *) ((char *)ptr-sizeof(zend_mem_header)-MEM_HEADER_PADDING);
-	ALS_FETCH();
+	TSRMLS_FETCH();
 
 #if ZEND_DEBUG
 	_mem_block_check(ptr, 1 ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);

@@ -23,8 +23,6 @@
 
 #define ZEND_VERSION "1.0.7"
 
-#include "../TSRM/TSRM.h"
-
 #ifdef __cplusplus
 #define BEGIN_EXTERN_C() extern "C" {
 #define END_EXTERN_C() }
