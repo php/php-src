@@ -24,7 +24,7 @@ interface Traversable
  *
  * \note This is an engine internal interface.
  */ 
-interface IteratorAggregate implements Traversable
+interface IteratorAggregate extends Traversable
 {
 	/** \return an Iterator for the implementing object.
 	 */
@@ -36,7 +36,7 @@ interface IteratorAggregate implements Traversable
  *
  * \note This is an engine internal interface.
  */
-interface Iterator implements Traversable
+interface Iterator extends Traversable
 {
 	/** Rewind the Iterator to the first element.
 	 */
@@ -62,7 +62,7 @@ interface Iterator implements Traversable
 /** Interface for recursive traversal to be used with 
  * RecursiveIteratorIterator.
  */
-interface RecursiveIterator implements Iterator
+interface RecursiveIterator extends Iterator
 {
 	/** \return whether current element can be iterated itself.
 	  */
@@ -254,7 +254,7 @@ abstract class FilterIterator implements Iterator
  * may also be used for other situations where seeking a specific offset is
  * required and easily possible.
  */
-interface SeekableIterator implements Iterator
+interface SeekableIterator extends Iterator
 {
 	/** Seek to a specific position if available or throw an exception.
 	 * \param $position offset to seek to.
