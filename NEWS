@@ -1,9 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2003, Version 4.3.4
-- Fixed bug #25239 (ftp_fopen_wrapper not RFC compliant). (Sara)
 - Fixed disk_total_space() and disk_free_space() under FreeBSD. (Jon Parise)
-- Fixed false warning on zero-size BLOB fetch. (Ard Biesheuve)
+- Fixed bug #25239 (ftp_fopen_wrapper not RFC compliant). (Sara)
 
 25 Aug 2003, Version 4.3.3
 - Upgraded the bundled Expat library to version 1.95.6. (Jani)
