@@ -145,11 +145,16 @@ function_entry sockets_functions[] = {
 	PHP_FE(socket_sendmsg,			NULL)
 	PHP_FE(socket_readv,			NULL)
 	PHP_FE(socket_writev,			NULL)
-	PHP_FE(socket_getopt,			NULL)
-	PHP_FE(socket_setopt,			NULL)
+	PHP_FE(socket_get_option,		NULL)
+	PHP_FE(socket_set_option,		NULL)
 	PHP_FE(socket_shutdown,			NULL)
 	PHP_FE(socket_last_error,		NULL)
 	PHP_FE(socket_clear_error,		NULL)
+	
+	/* for downwards compatability */
+	PHP_FALIAS(socket_getopt, socket_get_option, NULL)
+	PHP_FALIAS(socket_setopt, socket_set_option, NULL)
+	
 	{NULL, NULL, NULL}
 };
 /* }}} */
@@ -1690,9 +1695,9 @@ PHP_FUNCTION(socket_sendmsg)
 }
 /* }}} */
 
-/* {{{ proto mixed socket_getopt(resource socket, int level, int optname)
+/* {{{ proto mixed socket_get_option(resource socket, int level, int optname)
    Gets socket options for the socket */
-PHP_FUNCTION(socket_getopt)
+PHP_FUNCTION(socket_get_option)
 {
 	zval			*arg1;
 	struct linger	linger_val;
@@ -1754,9 +1759,9 @@ PHP_FUNCTION(socket_getopt)
 }
 /* }}} */
 
-/* {{{ proto bool socket_setopt(resource socket, int level, int optname, int|array optval)
+/* {{{ proto bool socket_set_option(resource socket, int level, int optname, int|array optval)
    Sets socket options for the socket */
-PHP_FUNCTION(socket_setopt)
+PHP_FUNCTION(socket_set_option)
 {
 	zval			*arg1, *arg4;
 	struct linger	lv;
