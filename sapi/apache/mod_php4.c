@@ -400,9 +400,6 @@ static void init_request_info(SLS_D)
 /* 		&& !auth_type(r) */
 		&& !strcasecmp(getword(r->pool, &authorization, ' '), "Basic")) {
 		tmp = uudecode(r->pool, authorization);
-#ifdef CHARSET_EBCDIC
-		ascii2ebcdic(tmp,tmp,strlen(tmp));
-#endif
 		SG(request_info).auth_user = getword_nulls_nc(r->pool, &tmp, ':');
 		if (SG(request_info).auth_user) {
 			r->connection->user = pstrdup(r->connection->pool,SG(request_info).auth_user);
