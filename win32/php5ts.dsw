@@ -3,6 +3,18 @@ Microsoft Developer Studio Workspace File, Format Version 6.00
 
 ###############################################################################
 
+Project: "EngineSelect"=".\EngineSelect.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
 Project: "TSRM"="..\TSRM\TSRM.dsp" - Package Owner=<4>
 
 Package=<5>
@@ -25,6 +37,9 @@ Package=<4>
 {{{
     Begin Project Dependency
     Project_Dep_Name TSRM
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name EngineSelect
     End Project Dependency
 }}}
 
