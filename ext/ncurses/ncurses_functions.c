@@ -13,7 +13,7 @@
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
   | Authors: Hartmut Holzgraefe <hartmut@six.de>                         |
-  |                                                                      |
+  |          Georg Richter <georg.richter@php-ev.de>                     |
   +----------------------------------------------------------------------+
 */
 
@@ -193,7 +193,7 @@ PHP_FUNCTION(ncurses_standend)
 /* }}} */
 
 /* {{{ proto int ncurses_baudrate()
-   Return baudrate of terminal */
+   Returns baudrate of terminal */
 PHP_FUNCTION(ncurses_baudrate)
 {
 	RETURN_LONG(baudrate());
@@ -305,7 +305,7 @@ PHP_FUNCTION(ncurses_erase)
 /* }}} */
 
 /* {{{ proto string ncurses_erasechar()
-   Return current erase character */
+   Returns current erase character */
 PHP_FUNCTION(ncurses_erasechar)
 {
 	char temp[2];
@@ -379,7 +379,7 @@ PHP_FUNCTION(ncurses_isendwin)
 /* }}} */
 
 /* {{{ proto string ncurses_killchar()
-   Return current line kill character */
+   Returns current line kill character */
 PHP_FUNCTION(ncurses_killchar)
 {
 	char temp[2];
@@ -456,7 +456,7 @@ PHP_FUNCTION(ncurses_savetty)
 /* }}} */
 
 /* {{{ proto bool ncurses_termattrs()
-   Return a logical OR of all attribute flags supported by terminal */
+   Returns a logical OR of all attribute flags supported by terminal */
 PHP_FUNCTION(ncurses_termattrs)
 {
 	RETURN_LONG(termattrs());
@@ -1170,7 +1170,7 @@ PHP_FUNCTION(ncurses_mvinch)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lls",&y,&x)==FAILURE) {
         return;
 	}
-	
+
 	RETURN_LONG(mvinch(y,x));
 }
 /* }}} */
@@ -1185,28 +1185,36 @@ PHP_FUNCTION(ncurses_insstr)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s",&str,&str_len)==FAILURE) {
 		return;
 	}
-	
+
 	RETURN_LONG(insstr(str));
 }
 /* }}} */
 
-#if 0
-/* TODO return by reference */
+
 /* {{{ proto int ncurses_instr(string buffer)
-   Read string from terminal screen */
+   Reads string from terminal screen */
 PHP_FUNCTION(ncurses_instr)
 {
+	ulong retval;
+	zval **param;
 	char *str;
-	int str_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s",&str,&str_len)==FAILURE) {
-		return;
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &param) == FAILURE ){
+		WRONG_PARAM_COUNT;
 	}
-	
-	RETURN_LONG(instr(str));
+
+	convert_to_string_ex(param);
+
+	str = (char *)emalloc(COLS + 1);
+	retval = instr(str);
+
+	ZVAL_STRING(*param, str, strlen(str));
+	efree(str);
+
+	RETURN_LONG(retval);
 }
 /* }}} */
-#endif
+
 
 /* {{{ proto int ncurses_mvhline(int y, int x, int attrchar, int n)
    Set new position and draw a horizontal line using an attributed character and max. n characters long */
@@ -1217,7 +1225,7 @@ PHP_FUNCTION(ncurses_mvhline)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "llll",&i1,&i2,&i3,&i4)==FAILURE) {
         return;
 	}
-	
+
 	RETURN_LONG(mvhline(i1,i2,i3,i4));
 }
 /* }}} */
@@ -1336,7 +1344,7 @@ PHP_FUNCTION(ncurses_vline)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ll",&i1,&i2)==FAILURE) {
         return;
 	}
-	
+
 	RETURN_LONG(vline(i1,i2));
 }
 /* }}} */
@@ -1391,6 +1399,51 @@ PHP_FUNCTION(ncurses_wrefresh)
 	FETCH_WINRES(w,handle);
 
 	RETURN_LONG(wrefresh(*w));
+}
+/* }}} */
+
+/* {{{ proto string ncurses_termname()
+   returns terminal name */
+PHP_FUNCTION(ncurses_termname)
+{
+	char temp[15];
+
+	strcpy (temp, termname());
+	RETURN_STRINGL (temp, strlen(temp), 1);
+}
+/* }}} */
+
+/* {{{ proto string ncurses_longname()
+   returns terminal description */
+PHP_FUNCTION(ncurses_longname)
+{
+	char temp[128];
+
+	strcpy (temp, longname());
+	RETURN_STRINGL (temp, strlen(temp), 1);
+}
+/* }}} */
+
+/* {{{ proto int ncurses_mousemask()
+   returns and sets mouse options */
+PHP_FUNCTION(ncurses_mousemask)
+{
+	ulong oldmask;
+	ulong retval;
+	zval **param, **newmask;
+
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &newmask, &param) == FAILURE ){
+		WRONG_PARAM_COUNT;
+	}
+
+	convert_to_long_ex(newmask);
+
+	retval = mousemask(Z_LVAL_PP(newmask), &oldmask);
+
+	Z_TYPE_PP(param) = IS_LONG;
+	Z_LVAL_PP(param) = oldmask;
+
+	RETURN_LONG(retval);
 }
 /* }}} */
 
