@@ -617,7 +617,7 @@ static void php_sybase_get_column_content(sybase_link *sybase_ptr,int offset,pva
 	*result_ptr = result;
 
 	if (dbdatlen(sybase_ptr->link,offset) == 0) {
-		ZVAL_RESET(result);
+		ZVAL_BOOL(result, 0);
 		return;
 	}
 
@@ -688,7 +688,7 @@ static void php_sybase_get_column_content(sybase_link *sybase_ptr,int offset,pva
 				result->type = IS_STRING;
 			} else {
 				php_error(E_WARNING,"Sybase:  column %d has unknown data type (%d)", offset, coltype(offset));
-				ZVAL_RESET(result);
+				ZVAL_BOOL(result, 0);
 			}
 		}
 	}
