@@ -1135,6 +1135,13 @@ static void php_search_array(INTERNAL_FUNCTION_PARAMETERS, int behavior)
 		WRONG_PARAM_COUNT;
 	}
 
+#ifndef ZEND_ENGINE_2	
+	if (Z_TYPE_PP(value) == IS_OBJECT) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Wrong datatype for first argument");
+		RETURN_FALSE;
+	}
+#endif
+	
 	if (Z_TYPE_PP(array) != IS_ARRAY) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Wrong datatype for second argument");
 		RETURN_FALSE;
@@ -1473,6 +1480,14 @@ PHP_FUNCTION(array_fill)
 	}
 	newval = *val;
 	while (i--) {
+#ifndef ZEND_ENGINE_2
+		if (newval->refcount >= 62000) {
+			MAKE_STD_ZVAL(newval);
+			*newval = **val;
+			zval_copy_ctor(newval);
+			newval->refcount = 0;
+		}
+#endif		
 		zval_add_ref(&newval);
 		zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &newval, sizeof(zval *), NULL);
 	}
@@ -2243,7 +2258,7 @@ PHP_FUNCTION(array_merge_recursive)
 /* }}} */
 
 
-/* {{{ proto array array_keys(array input [, mixed search_value])
+/* {{{ proto array array_keys(array input [, mixed search_value[, bool strict]])
    Return just the keys from the input array, optionally only for the specified search_value */
 PHP_FUNCTION(array_keys)
 {
@@ -2251,24 +2266,33 @@ PHP_FUNCTION(array_keys)
 	     **search_value,	/* Value to search for */
 	     **entry,		/* An entry in the input array */
 	       res,		/* Result of comparison */
+	     **strict,		/* be strict */
 	      *new_val;		/* New value */
 	int    add_key;		/* Flag to indicate whether a key should be added */
 	char  *string_key;	/* String key */
 	uint   string_key_len;
 	ulong  num_key;		/* Numeric key */
 	HashPosition pos;
+	int (*is_equal_func)(zval *, zval *, zval * TSRMLS_DC) = is_equal_function;
+
 
 	search_value = NULL;
 	
 	/* Get arguments and do error-checking */
-	if (ZEND_NUM_ARGS() < 1 || ZEND_NUM_ARGS() > 2 ||
-		zend_get_parameters_ex(ZEND_NUM_ARGS(), &input, &search_value) == FAILURE) {
+	if (ZEND_NUM_ARGS() < 1 || ZEND_NUM_ARGS() > 3 ||
+		zend_get_parameters_ex(ZEND_NUM_ARGS(), &input, &search_value, &strict) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
 	if (Z_TYPE_PP(input) != IS_ARRAY) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The first argument should be an array");
 		return;
+	}
+	if (ZEND_NUM_ARGS() == 3) {
+		convert_to_boolean_ex(strict);
+		if (Z_LVAL_PP(strict)) {
+			is_equal_func = is_identical_function;
+		}
 	}
 	
 	/* Initialize return array */
@@ -2279,7 +2303,7 @@ PHP_FUNCTION(array_keys)
 	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_PP(input), &pos);
 	while (zend_hash_get_current_data_ex(Z_ARRVAL_PP(input), (void **)&entry, &pos) == SUCCESS) {
 		if (search_value != NULL) {
-	 		is_equal_function(&res, *search_value, *entry TSRMLS_CC);
+	 		is_equal_func(&res, *search_value, *entry TSRMLS_CC);
 			add_key = zval_is_true(&res);
 		}
 	
