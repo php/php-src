@@ -6,7 +6,7 @@
  * @version 1.0
  *
  */
-class RecursiveIteratorIterator implements Iterator
+class RecursiveIteratorIterator implements OuterIterator
 {
 	protected $ait = array();
 	protected $count = 0;
@@ -90,6 +90,14 @@ class RecursiveIteratorIterator implements Iterator
 			$level = $this->count;
 		}
 		return @$this->ait[$level];
+	}
+
+	/**
+	 * @return The inner iterator
+	 */	
+	function getInnerIterator()
+	{
+		return $this->it;
 	}
 
 	function getDepth()

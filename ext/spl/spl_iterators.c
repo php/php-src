@@ -44,6 +44,7 @@ zend_class_entry *spl_ce_SeekableIterator;
 zend_class_entry *spl_ce_LimitIterator;
 zend_class_entry *spl_ce_CachingIterator;
 zend_class_entry *spl_ce_CachingRecursiveIterator;
+zend_class_entry *spl_ce_OuterIterator;
 
 function_entry spl_funcs_RecursiveIterator[] = {
 	SPL_ABSTRACT_ME(RecursiveIterator, hasChildren,  NULL)
@@ -59,6 +60,7 @@ SPL_METHOD(RecursiveIteratorIterator, current);
 SPL_METHOD(RecursiveIteratorIterator, next);
 SPL_METHOD(RecursiveIteratorIterator, getDepth);
 SPL_METHOD(RecursiveIteratorIterator, getSubIterator);
+SPL_METHOD(RecursiveIteratorIterator, getInnerIterator);
 
 static
 ZEND_BEGIN_ARG_INFO(arginfo_recursive_it___construct, 0) 
@@ -80,6 +82,7 @@ static zend_function_entry spl_funcs_RecursiveIteratorIterator[] = {
 	SPL_ME(RecursiveIteratorIterator, next,          NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(RecursiveIteratorIterator, getDepth,      NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(RecursiveIteratorIterator, getSubIterator,arginfo_recursive_it_getSubIterator, ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveIteratorIterator, getInnerIterator,NULL, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 
@@ -414,8 +417,8 @@ SPL_METHOD(RecursiveIteratorIterator, getDepth)
 	RETURN_LONG(object->level);
 } /* }}} */
 
-/* {{{ proto RecursiveIterator RecursiveIteratorIterator::getSubIterator()
-   The current active sub iterator */
+/* {{{ proto RecursiveIterator RecursiveIteratorIterator::getSubIterator([int level])
+   The current active sub iterator or the iterator at specified level */
 SPL_METHOD(RecursiveIteratorIterator, getSubIterator)
 {
 	spl_recursive_it_object   *object = (spl_recursive_it_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
@@ -427,6 +430,16 @@ SPL_METHOD(RecursiveIteratorIterator, getSubIterator)
 	if (level < 0 || level > object->level) {
 		RETURN_NULL();
 	}
+	RETURN_ZVAL(object->iterators[level].zobject, 1, 0);
+} /* }}} */
+
+/* {{{ proto RecursiveIterator RecursiveIteratorIterator::getInnerIterator()
+   The current active sub iterator */
+SPL_METHOD(RecursiveIteratorIterator, getInnerIterator)
+{
+	spl_recursive_it_object   *object = (spl_recursive_it_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	long  level = object->level;
+	
 	RETURN_ZVAL(object->iterators[level].zobject, 1, 0);
 } /* }}} */
 
@@ -1386,6 +1399,11 @@ PHP_FUNCTION(iterator_count)
 }
 /* }}} */
 
+static zend_function_entry spl_funcs_OuterIterator[] = {
+	SPL_ABSTRACT_ME(OuterIterator, getInnerIterator,   NULL)
+	{NULL, NULL, NULL}
+};
+
 /* {{{ PHP_MINIT_FUNCTION(spl_iterators)
  */
 PHP_MINIT_FUNCTION(spl_iterators)
@@ -1432,7 +1450,15 @@ PHP_MINIT_FUNCTION(spl_iterators)
 
 	REGISTER_SPL_SUB_CLASS_EX(CachingRecursiveIterator, CachingIterator, spl_dual_it_new, spl_funcs_CachingRecursiveIterator);
 	REGISTER_SPL_IMPLEMENTS(CachingRecursiveIterator, RecursiveIterator);
-  
+	
+	REGISTER_SPL_INTERFACE(OuterIterator);
+	REGISTER_SPL_ITERATOR(OuterIterator);
+
+	REGISTER_SPL_IMPLEMENTS(RecursiveIteratorIterator, OuterIterator);
+	REGISTER_SPL_IMPLEMENTS(CachingIterator, OuterIterator);
+	REGISTER_SPL_IMPLEMENTS(FilterIterator, OuterIterator);
+	REGISTER_SPL_IMPLEMENTS(LimitIterator, OuterIterator);
+
 	return SUCCESS;
 }
 /* }}} */

@@ -168,6 +168,7 @@ PHP_FUNCTION(class_implements)
 	SPL_ADD_CLASS(DirectoryIterator, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(FilterIterator, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(LimitIterator, z_list, sub, allow, ce_flags); \
+	SPL_ADD_CLASS(OuterIterator, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(ParentIterator, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(RecursiveDirectoryIterator, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(RecursiveIterator, z_list, sub, allow, ce_flags); \
