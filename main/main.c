@@ -242,6 +242,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("log_errors_max_len",	 "1024",		PHP_INI_ALL,		OnUpdateInt,			log_errors_max_len,		php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("ignore_repeated_errors",	"0",	PHP_INI_ALL,		OnUpdateBool,			ignore_repeated_errors,	php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("ignore_repeated_source",	"0",	PHP_INI_ALL,		OnUpdateBool,			ignore_repeated_source,	php_core_globals,	core_globals)
+	STD_PHP_INI_BOOLEAN("report_memleaks",		"1",		PHP_INI_SYSTEM,		OnUpdateBool,			report_memleaks,		php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("magic_quotes_gpc",		"1",		PHP_INI_ALL,		OnUpdateBool,			magic_quotes_gpc,		php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("magic_quotes_runtime",	"0",		PHP_INI_ALL,		OnUpdateBool,			magic_quotes_runtime,	php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("magic_quotes_sybase",	"0",		PHP_INI_ALL,		OnUpdateBool,			magic_quotes_sybase,	php_core_globals,	core_globals)
@@ -609,7 +610,7 @@ static void php_message_handler_for_zend(long message, void *data)
 		case ZMSG_MEMORY_LEAK_REPEATED: {
 				TSRMLS_FETCH();
 
-				if (EG(error_reporting)&E_WARNING) {
+				if ((EG(error_reporting)&E_WARNING) && PG(report_memleaks)) {
 #if ZEND_DEBUG
 					char memory_leak_buf[512];
 

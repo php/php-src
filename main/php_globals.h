@@ -79,6 +79,7 @@ struct _php_core_globals {
 	int       log_errors_max_len;
 	zend_bool ignore_repeated_errors;
 	zend_bool ignore_repeated_source;
+	zend_bool report_memleaks;
 	char *error_log;
 
 	char *doc_root;

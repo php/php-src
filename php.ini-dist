@@ -270,6 +270,11 @@ ignore_repeated_errors = Off
 ; sourcelines.
 ignore_repeated_source = Off
 
+; If this parameter is set to Off, then memory leaks will not be shown (on
+; stdout or in the log). This has only effect in a debug compile, and if 
+; error reporting includes E_WARNING in the allowed list
+report_memleaks = On
+
 ; Store the last error/warning message in $php_errormsg (boolean).
 track_errors = Off
 
