@@ -1,3 +1,46 @@
+2004-01-27  Andrey Hristov  <php@hristov.com>
+
+    * ext/mysql/php_mysql.c:
+      message about that mysql_list_tables() is deprecated
+
+2004-01-27  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * main/streams/transports.c:
+      Fix segfault for scripts like this:
+      <?php
+      pfsockopen("foo");
+      pfsockopen("foo");
+      ?>
+      Where the transport fails to connect (since args are bogus);
+      the problem was that the persistent stream entry was not
+      correctly freed.
+
+2004-01-27  Georg Richter  <phpinfo@t-online.de>
+
+    * ext/mysqli/mysqli_api.c:
+      changed prototype mysql_dataseek from void to bool
+        add check for specified offset
+
+    * ext/mysqli/mysqli_api.c
+      ext/mysqli/mysqli_fe.c:
+      prototype fixes
+      removed method field_tell (which is already property current_field)
+
+2004-01-27  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * main/streams/userspace.c:
+      Removed unused variable.
+
+2004-01-27  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_4_3)
+      makerpm:
+      still version 4 here
+
+    * (PHP_4_3)
+      makerpm:
+      Use RPM variables
+
 2004-01-26  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ZendEngine2/zend_interfaces.c
