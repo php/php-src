@@ -18,13 +18,15 @@
 
 /* $Id$ */
 
+/* {{{ includes & prototypes */
+
 #include "php.h"
+#include "php_readline.h"
 
 #if HAVE_LIBREADLINE
 
 #include <readline/readline.h>
 #include <readline/history.h>
-
 
 PHP_FUNCTION(readline);
 PHP_FUNCTION(readline_version);
@@ -36,6 +38,9 @@ PHP_FUNCTION(readline_write_history);
 
 PHP_MINIT_FUNCTION(readline);
 
+/* }}} */
+/* {{{ module stuff */
+
 static zend_function_entry php_readline_functions[] = {
 	PHP_FE(readline,	   		        NULL)
 	PHP_FE(readline_version,   	        NULL)
@@ -46,7 +51,7 @@ static zend_function_entry php_readline_functions[] = {
 	{NULL, NULL, NULL}
 };
 
-zend_module_entry readline_module_entry = {
+zend_module_entry readline_module_entry = { 
 	"PHP-Readline", 
 	php_readline_functions, 
 	PHP_MINIT(readline), 
@@ -62,6 +67,7 @@ PHP_MINIT_FUNCTION(readline)
 	return SUCCESS;
 }
 
+/* }}} */
 /* {{{ proto string readline([string prompt]) */
 
 PHP_FUNCTION(readline)
