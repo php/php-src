@@ -2408,6 +2408,15 @@ void zend_do_switch_end(znode *case_list TSRMLS_DC)
 	
 	zend_stack_top(&CG(switch_cond_stack), (void **) &switch_entry_ptr);
 
+	/* add code to jmp to default case */
+	if (switch_entry_ptr->default_case != -1) {
+		opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+		opline->opcode = ZEND_JMP;
+		SET_UNUSED(opline->op1);
+		SET_UNUSED(opline->op2);
+		opline->op1.u.opline_num = switch_entry_ptr->default_case;
+	}
+
 	if (case_list->op_type != IS_UNUSED) { /* non-empty switch */
 		int next_op_number = get_next_op_number(CG(active_op_array));
 
@@ -2482,8 +2491,13 @@ void zend_do_case_after_statement(znode *result, znode *case_token TSRMLS_DC)
 	SET_UNUSED(opline->op2);
 	result->u.opline_num = next_op_number;
 
-	if (case_token->u.opline_num != -1) {
-		CG(active_op_array)->opcodes[case_token->u.opline_num].op2.u.opline_num = get_next_op_number(CG(active_op_array));
+	switch (CG(active_op_array)->opcodes[case_token->u.opline_num].opcode) {
+		case ZEND_JMP:
+			CG(active_op_array)->opcodes[case_token->u.opline_num].op1.u.opline_num = get_next_op_number(CG(active_op_array));
+			break;
+		case ZEND_JMPZ:
+			CG(active_op_array)->opcodes[case_token->u.opline_num].op2.u.opline_num = get_next_op_number(CG(active_op_array));
+			break;
 	}
 }
 
@@ -2492,11 +2506,17 @@ void zend_do_case_after_statement(znode *result, znode *case_token TSRMLS_DC)
 void zend_do_default_before_statement(znode *case_list, znode *default_token TSRMLS_DC)
 {
 	int next_op_number = get_next_op_number(CG(active_op_array));
+	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 	zend_switch_entry *switch_entry_ptr;
 
 	zend_stack_top(&CG(switch_cond_stack), (void **) &switch_entry_ptr);
 
-	default_token->u.opline_num = -1;
+	opline->opcode = ZEND_JMP;
+	SET_UNUSED(opline->op1);
+	SET_UNUSED(opline->op2);
+	default_token->u.opline_num = next_op_number;
+
+	next_op_number = get_next_op_number(CG(active_op_array));
 	switch_entry_ptr->default_case = next_op_number;
 
 	if (case_list->op_type==IS_UNUSED) {
