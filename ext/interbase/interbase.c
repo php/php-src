@@ -3935,6 +3935,9 @@ PHP_FUNCTION(ibase_wait_event)
 /* {{{ _php_ibase_callback() */
 static isc_callback _php_ibase_callback(ibase_event *event, unsigned short buffer_size, char *result_buf)
 {
+	/* this function is called asynchronously by the Interbase client library. */
+	TSRMLS_FETCH_FROM_CTX(event->thread_ctx);
+	
 	/**
 	 * The callback function is called when the event is first registered and when the event
 	 * is cancelled. I consider this is a bug. By clearing event->callback, we make sure 
@@ -3946,9 +3949,6 @@ static isc_callback _php_ibase_callback(ibase_event *event, unsigned short buffe
 		ISC_STATUS occurred_event[15];
 		zval event_name, link_id, return_value, *args[2] = { &event_name, &link_id };
 
-		/* this function is called asynchronously by the Interbase client library. */
-		TSRMLS_FETCH_FROM_CTX(event->thread_ctx);
-	
 		/* copy the updated results into the result buffer */
 		memcpy(event->result_buffer, result_buf, buffer_size);
 		
@@ -4086,6 +4086,7 @@ PHP_FUNCTION(ibase_set_event_handler)
 	efree(args);
 
 	ZEND_REGISTER_RESOURCE(return_value, event, le_event);
+	zend_list_addref(Z_LVAL_P(return_value));
 }
    
 /* }}} */
