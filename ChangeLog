@@ -1,3 +1,71 @@
+2004-03-21  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/package-PEARtests.xml
+      pear/tests/package-PEARtests.xml:
+      added in wrong directory, move to tests/
+
+    * pear/PEAR/ErrorStack.php:
+      small changes
+      Use '' instead of ""
+      allow subclasses to easily change the exception class used just by
+      overriding the _exceptionClass property
+
+    * pear/package-PEARtests.xml:
+      new package.xml to be used for installing tests, to make it easy to collect
+      all tests in the same location for all PEAR packages
+
+2004-03-21  Stig Bakken  <ssb@trd.overture.com>
+
+    * pear/PEAR.php:
+      - fit copyright header on 80 columns
+
+2004-03-21  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend_execute.c:
+      - Improve consistency
+
+2004-03-21  Georg Richter  <phpinfo@t-online.de>
+
+    * ext/mysqli/mysqli_fe.c:
+      ups - changed alias instead of method before
+
+    * ext/mysqli/mysqli_fe.c:
+      renamed get_metadata method to get_result_metadata.
+      (We have to differentiate between result_metadata and param_metdata.
+       mysql_stmt_param_metadata will be added in libmysql 4.1.3)
+
+2004-03-21  Stanislav Malyshev  <stas@zend.com>
+
+    * ZendEngine2/zend_objects_API.c
+      ZendEngine2/zend_objects_API.h:
+      return zval *, to make it useful for read_property
+
+    * ext/dom/php_dom.c
+      ext/mysqli/mysqli.c
+      ext/simplexml/simplexml.c:
+      Update for new read_property API
+
+    * ZendEngine2/zend_objects_API.c:
+      update to new API
+
+    * ZendEngine2/zend_execute.c
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_object_handlers.h:
+      API change for read_property:
+      instead of bool silent it now gets fetch type
+      This can be used for creating proxy objects for write contexts
+
+2004-03-21  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/gd/libgd/gd.c:
+      Fixed a possible crash inside libgd's gdImageFillToBorder() due to a stack
+      overflow.
+
+2004-03-21  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend_execute.c:
+      - Nuke unused code
+
 2004-03-20  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * tests/lang/bug23384.phpt:

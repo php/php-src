@@ -1,3 +1,29 @@
+2004-03-21  Andi Gutmans  <andi@zend.com>
+
+    * zend_execute.c:
+      - Improve consistency
+
+2004-03-21  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_objects_API.c
+      zend_objects_API.h:
+      return zval *, to make it useful for read_property
+
+    * zend_objects_API.c:
+      update to new API
+
+    * zend_execute.c
+      zend_object_handlers.c
+      zend_object_handlers.h:
+      API change for read_property:
+      instead of bool silent it now gets fetch type
+      This can be used for creating proxy objects for write contexts
+
+2004-03-21  Andi Gutmans  <andi@zend.com>
+
+    * zend_execute.c:
+      - Nuke unused code
+
 2004-03-18  Andi Gutmans  <andi@zend.com>
 
     * zend.h:
