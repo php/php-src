@@ -1,3 +1,30 @@
+2004-08-12  Andi Gutmans  <andi@zend.com>
+
+    * (PHP_5_0)
+      zend.h:
+      - Back to 5.0.2-dev
+
+    * (PHP_5_0)
+      zend.h:
+      - Roll 5.0.1
+
+    * (PHP_5_0)
+      zend.h:
+      - Back to -dev
+
+    * (PHP_5_0)
+      zend.h:
+      - 5.0.1RC2
+
+    * zend_compile.c
+      zend_compile.h
+      zend_execute.c:
+      - Don't use magic numbers
+
+    * zend_compile.c
+      zend_execute.c:
+      - Significantly improve performance of foreach($arr as $data). (Marcus)
+
 2004-08-11  Ilia Alshanetsky  <ilia@prohost.org>
 
     * zend_highlight.c:
