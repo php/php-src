@@ -504,7 +504,9 @@ class PEAR_Common extends PEAR
      */
     function _pkginfo_cdata_1_0($xp, $data)
     {
-        $this->cdata .= $data;
+        if (isset($this->cdata)) {
+            $this->cdata .= $data;
+        }
     }
 
     // }}}
