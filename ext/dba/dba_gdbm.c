@@ -60,10 +60,15 @@ DBA_OPEN_FUNC(gdbm)
 	
 	if(dbf) {
 		info->dbf = ecalloc(sizeof(dba_gdbm_data), 1);
+		if (!info->dbf) {
+			*error = "Out of memory";
+			gdbm_close(dbf);
+			return FAILURE;
+		}
 		((dba_gdbm_data *) info->dbf)->dbf = dbf;
 		return SUCCESS;
 	}
-	*error = "Out of memory";
+	*error = gdbm_strerror(gdbm_errno);
 	return FAILURE;
 }
 
