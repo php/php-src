@@ -189,13 +189,13 @@ installed package.'
             // "pear shell-test Foo 1.0"
         } elseif (sizeof($params) == 2) {
             $v = $reg->packageInfo($params[0], 'version');
-            if (!$v || !version_compare($v, $params[1], "ge")) {
+            if (!$v || !version_compare("$v", "{$params[1]}", "ge")) {
                 exit(1);
             }
             // "pear shell-test Foo ge 1.0"
         } elseif (sizeof($params) == 3) {
             $v = $reg->packageInfo($params[0], 'version');
-            if (!$v || !version_compare($v, $params[2], $params[1])) {
+            if (!$v || !version_compare("$v", "{$params[2]}", $params[1])) {
                 exit(1);
             }
         } else {

@@ -112,7 +112,7 @@ class PEAR_Dependency
             case 'gt':
                 $version = $this->registry->packageInfo($name, 'version');
                 if (!$this->registry->packageExists($name)
-                    || !version_compare($version, $req, $relation))
+                    || !version_compare("$version", "$req", $relation))
                 {
                     return "requires package `$name' " .
                            $this->signOperator($relation) . " $req";
@@ -143,7 +143,8 @@ class PEAR_Dependency
         if (substr($relation, 0, 2) == 'v.') {
             $ext_ver = phpversion($name);
             $operator = substr($relation, 2);
-            if (!version_compare($ext_ver, $req, $operator)) {
+            // Force params to be strings, otherwise the comparation will fail (ex. 0.9==0.90)
+            if (!version_compare("$ext_ver", "$req", $operator)) {
                 return "'$name' PHP extension version " .
                         $this->signOperator($operator) . " $req is required";
             }
@@ -183,7 +184,7 @@ class PEAR_Dependency
         if (substr($relation, 0, 2) == 'v.') {
             $php_ver = phpversion();
             $operator = substr($relation, 2);
-            if (!version_compare($php_ver, $req, $operator)) {
+            if (!version_compare("$php_ver", "$req", $operator)) {
                 return "PHP version " . $this->signOperator($operator) .
                        " $req is required";
             }

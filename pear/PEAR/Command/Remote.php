@@ -125,7 +125,7 @@ version of DB is 1.2, the downloaded file will be DB-1.2.tgz.',
         $info['installed'] = $installed['version'] ? $installed['version'] : '- no -';
 
         $this->ui->outputData($info, $command);
-        
+
         return true;
     }
 
@@ -190,7 +190,7 @@ version of DB is 1.2, the downloaded file will be DB-1.2.tgz.',
                     continue;
                 if ($options['mode'] == 'notinstalled' && isset($installed['version']))
                     continue;
-                if ($options['mode'] == 'upgrades' 
+                if ($options['mode'] == 'upgrades'
                     && (!isset($installed['version']) || $installed['version'] == $info['stable']))
                 {
                     continue;
@@ -329,7 +329,7 @@ version of DB is 1.2, the downloaded file will be DB-1.2.tgz.',
             }
             extract($info);
             $inst_version = $reg->packageInfo($package, 'version');
-            if (version_compare($version, $inst_version, "le")) {
+            if (version_compare("$version", "$inst_version", "le")) {
                 // installed version is up-to-date
                 continue;
             }
@@ -344,7 +344,11 @@ version of DB is 1.2, the downloaded file will be DB-1.2.tgz.',
             }
             $data['data'][] = array($package, $version, $fs);
         }
-        $this->ui->outputData($data, $command);
+        if (empty($data['data'])) {
+            $this->ui->outputData('No upgrades avaible');
+        } else {
+            $this->ui->outputData($data, $command);
+        }
         return true;
     }
 

@@ -453,7 +453,7 @@ class PEAR_Config extends PEAR
             $version = $matches[1];
             $contents = substr($contents, strlen($matches[0]));
         }
-        if (version_compare($version, '1', '<')) {
+        if (version_compare("$version", '1', '<')) {
             $data = unserialize($contents);
             if (!is_array($data)) {
                 if (strlen(trim($contents)) > 0) {
@@ -601,7 +601,7 @@ class PEAR_Config extends PEAR
         }
         extract($this->configuration_info[$key]);
         switch ($type) {
-            case 'integer': 
+            case 'integer':
                 $value = (int)$value;
                 break;
             case 'set': {
