@@ -135,7 +135,7 @@ TSRM_API FILE* popen(const char *command, const char *type)
 		startup.hStdOutput = GetStdHandle(STD_OUTPUT_HANDLE);
 	}
 
-	cmd = (char*)malloc(strlen(command)+strlen(TWG(comspec))+4);
+	cmd = (char*)malloc(strlen(command)+strlen(TWG(comspec))+sizeof(" /c "));
 	sprintf(cmd, "%s /c %s", TWG(comspec), command);
 	if (!CreateProcess(NULL, cmd, &security, &security, security.bInheritHandle, NORMAL_PRIORITY_CLASS, NULL, NULL, &startup, &process)) {
 		return NULL;
