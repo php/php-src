@@ -1,6 +1,12 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? March 2004, PHP 5 Release Candidate 1
+18 March 2004, PHP 5 Release Candidate 1
+- Fixed numerous bugs with the just-in-time auto-global initialization, that
+  could cause $_SERVER, $argv/$argc and other variables not to work properly.
+  (Zeev)
+- Fixed data corruption with constant assignments to object properties. (Zeev)
+- Changed __toString() to be called automatically only with print and echo
+  statements. (Andi)
 - Replaced the exec_finished hook by the zend_post_deactive hook for
   extensions. The new hook will be run after the symbol table and destructors
   are run. (Derick)
