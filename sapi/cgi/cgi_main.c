@@ -417,9 +417,6 @@ int main(int argc, char *argv[])
 	setmode(_fileno(stderr), O_BINARY);		/* make the stdio mode be binary */
 #endif
 
-	if (php_module_startup(&cgi_sapi_module)==FAILURE) {
-		return FAILURE;
-	}
 
 	/* Make sure we detect we are a cgi - a bit redundancy here,
 	   but the default case is that we have to check only the first one. */
@@ -433,7 +430,29 @@ int main(int argc, char *argv[])
 		} else {
 			argv0 = NULL;
 		}
+	}
+
+	if (!cgi) {
+		while ((c=ap_php_getopt(argc, argv, OPTSTRING))!=-1) {
+			switch (c) {
+				case 'c':
+					cgi_sapi_module.php_ini_path_override = strdup(ap_php_optarg);
+					break;
+			}
+
+		}
+		ap_php_optind = orig_optind;
+		ap_php_optarg = orig_optarg;
+	}
+
+	/* startup after we get the above ini override se we get things right */
+	if (php_module_startup(&cgi_sapi_module)==FAILURE) {
+		return FAILURE;
+	}
+
 #if FORCE_CGI_REDIRECT
+	/* check force_cgi after startup, so we have proper output */
+	if (cgi) {
 		/* Apache will generate REDIRECT_STATUS,
 		 * Netscape and redirect.so will generate HTTP_REDIRECT_STATUS.
 		 * redirect.so and installation instructions available from
@@ -460,21 +479,8 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 
 			return FAILURE;
 		}
+	}
 #endif							/* FORCE_CGI_REDIRECT */
-	}
-
-	if (!cgi) {
-		while ((c=ap_php_getopt(argc, argv, OPTSTRING))!=-1) {
-			switch (c) {
-				case 'c':
-					cgi_sapi_module.php_ini_path_override = strdup(ap_php_optarg);
-					break;
-			}
-
-		}
-		ap_php_optind = orig_optind;
-		ap_php_optarg = orig_optarg;
-	}
 
 #ifdef ZTS
 	compiler_globals = ts_resource(compiler_globals_id);
@@ -581,8 +587,8 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 					break;
 
 			case 'm': /* list compiled in modules */
-		          	php_output_startup();
-                                SG(headers_sent) = 1;
+		        php_output_startup();
+                SG(headers_sent) = 1;
 				php_printf("Running PHP %s\n%s\n", PHP_VERSION , get_zend_version());
 				php_printf("[PHP Modules]\n");
 				zend_hash_apply_with_argument(&module_registry, (int (*)(void *, void *)) _print_module_info, NULL);
