@@ -326,7 +326,7 @@ PHP_NAMED_FUNCTION(php_if_readdir)
 
 #ifdef HAVE_GLOB
 /* {{{ proto array glob(string pattern [, int flags])
-    */
+    Find pathnames matching a pattern */
 PHP_FUNCTION(glob)
 {
 	char *pattern = NULL;
