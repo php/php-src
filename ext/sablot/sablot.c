@@ -727,6 +727,8 @@ PHP_FUNCTION(xslt_errno)
 	php_sablot *handle;
 	int argc = ZEND_NUM_ARGS();
 	
+	SABLOTLS_FETCH();
+
 	if (argc < 0 || argc > 1 ||
 	    zend_get_parameters_ex(argc, &xh) == FAILURE) {
 		WRONG_PARAM_COUNT;
