@@ -145,7 +145,7 @@ PHP_FUNCTION(mysqli_embedded_connect)
 /* }}} */
 #endif
 
-/* {{{ proto int mysqli_connect_errno()
+/* {{{ proto int mysqli_connect_errno(void)
    Returns the numerical value of the error message from last connect command */
 PHP_FUNCTION(mysqli_connect_errno)
 {
@@ -153,7 +153,7 @@ PHP_FUNCTION(mysqli_connect_errno)
 }
 /* }}} */
 
-/* {{{ proto string mysqli_connect_error()
+/* {{{ proto string mysqli_connect_error(void)
    Returns the text of the error message from previous MySQL operation */
 PHP_FUNCTION(mysqli_connect_error) 
 {
