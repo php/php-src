@@ -30,6 +30,10 @@
 #include <udm_config.h>
 #include <udmsearch.h>
 
+#if UDM_VERSION_ID >= 30203
+#include <udm_crc32.h>
+#endif
+
 extern zend_module_entry mnogosearch_module_entry;
 #define mnogosearch_module_ptr &mnogosearch_module_entry
 
@@ -52,6 +56,10 @@ DLEXPORT PHP_MINFO_FUNCTION(mnogosearch);
 DLEXPORT PHP_FUNCTION(udm_api_version);
 #if UDM_VERSION_ID >= 30200
 DLEXPORT PHP_FUNCTION(udm_check_charset);
+#endif
+
+#if UDM_VERSION_ID >= 30203
+DLEXPORT PHP_FUNCTION(udm_crc32);
 #endif
 
 DLEXPORT PHP_FUNCTION(udm_alloc_agent);
