@@ -54,9 +54,9 @@ class Console_Getopt {
      *
      * Most of the semantics of this function are based on GNU getopt_long().
      *
-     * @param $args array an array of command-line arguments
-     * @param $short_options string specifies the list of allowed short options
-     * @param $long_options array specifies the list of allowed long options
+     * @param array  $args           an array of command-line arguments
+     * @param string $short_options  specifies the list of allowed short options
+     * @param array  $long_options   specifies the list of allowed long options
      *
      * @return array two-element array containing the list of parsed options and
      * the non-option arguments
@@ -66,6 +66,10 @@ class Console_Getopt {
      */
     function getopt($args, $short_options, $long_options = null)
     {
+        // in case you pass directly readPHPArgv() as the first arg
+        if (PEAR::isError($args)) {
+            return $args;
+        }
         $opts     = array();
         $non_opts = array();
 
@@ -189,6 +193,29 @@ class Console_Getopt {
 
         return new Getopt_Error("unrecognized option --$opt\n");
     }
+
+    /**
+    * Safely read the $argv PHP array across different PHP configurations.
+    * Will take care on register_globals and register_argc_argv ini directives
+    *
+    * @access public
+    * @return mixed the $argv PHP array or PEAR error if not registered
+    */
+    function readPHPArgv()
+    {
+        global $argv;
+        if (!is_array($argv)) {
+            if (!is_array($_SERVER['argv'])) {
+                if (!is_array($HTTP_SERVER_VARS['argv'])) {
+                    return new Getopt_Error("Could not read cmd args (register_argc_argv=Off?)\n");
+                }
+                return $HTTP_SERVER_VARS['argv'];
+            }
+            return $_SERVER['argv'];
+        }
+        return $argv;
+    }
+
 }
 
 
