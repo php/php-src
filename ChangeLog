@@ -1,3 +1,57 @@
+2001-12-20  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * configure.in
+      main/php_version.h
+      NEWS: Go with 4.1.1
+
+2001-12-20  Frank M. Kromann  <frank@frontbase.com>
+
+    * win32/php_modules.dsw:
+    Removed Win32 specific projects. These are now located in pear/PECL
+
+    * win32/sendmail.c: Adding cvs ID
+
+2001-12-20  Colin Viebrock  <colin@easydns.com>
+
+    * pear/Crypt/CBC.php: MFH
+
+    * pear/Crypt/CBC.php: Really fix it this time ...
+
+    * pear/Crypt/CBC.php: Fix
+
+2001-12-20  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ext/mcrypt/php_mcrypt.h: Update header.
+
+2001-12-20  Colin Viebrock  <colin@easydns.com>
+
+    * ext/mcrypt/mcrypt.c
+      ext/mcrypt/php_mcrypt.h: Add headers and Id lines
+
+2001-12-20  Martin Jansen  <mail@martin-jansen.de>
+
+    * pear/Experimental/Image/gtext.php: * Typo
+
+2001-12-20  Ulf Wendel  <ulf.wendel@phpdoc.de>
+
+    * pear/Experimental/Image/gtext.php: require graphics cache
+
+    * pear/Experimental/Image/color_helper.php:
+    if we do the comparison to lowercase, we need a lowercase list...
+
+    * pear/Cache/Graphics.php:
+    - names graphics files "id.type", otherwise your webserver will not
+    recognize the type and send wrong headers
+
+2001-12-20  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * ext/domxml/php_domxml.c:
+    - Fix crash with EntityRef nodes (and properly support them).
+
+2001-12-20  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * ext/pgsql/README: Added when experimental functions are added.
+
 2001-12-19  Ulf Wendel  <ulf.wendel@phpdoc.de>
 
     * pear/HTML/Menu.php: PHP_SELF & friends went to $_SERVER since 4.1.0
