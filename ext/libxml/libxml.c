@@ -253,15 +253,18 @@ int php_libxml_streams_IO_match_wrapper(const char *filename)
 
 void *php_libxml_streams_IO_open_wrapper(const char *filename, const char *mode, const int read_only)
 {
-	char resolved_path[MAXPATHLEN + 1];
 	php_stream_statbuf ssbuf;
 	php_stream_context *context = NULL;
 	php_stream_wrapper *wrapper = NULL;
-	char *path_to_open = NULL;
+	char *resolved_path, *path_to_open = NULL;
+	void *ret_val = NULL;
 
 	TSRMLS_FETCH();
-	xmlURIUnescapeString(filename, 0, resolved_path);
-	path_to_open = resolved_path;
+	resolved_path = xmlURIUnescapeString(filename, 0, NULL);
+
+	if (resolved_path == NULL) {
+		return NULL;
+	}
 
 	/* logic copied from _php_stream_stat, but we only want to fail
 	   if the wrapper supports stat, otherwise, figure it out from
@@ -272,15 +275,20 @@ void *php_libxml_streams_IO_open_wrapper(const char *filename, const char *mode,
 	wrapper = php_stream_locate_url_wrapper(resolved_path, &path_to_open, ENFORCE_SAFE_MODE TSRMLS_CC);
 	if (wrapper && read_only && wrapper->wops->url_stat) {
 		if (wrapper->wops->url_stat(wrapper, path_to_open, 0, &ssbuf, NULL TSRMLS_CC) == -1) {
+			xmlFree(resolved_path);
 			return NULL;
 		}
 	}
 
 	if (LIBXML(stream_context)) {
 		context = zend_fetch_resource(&LIBXML(stream_context) TSRMLS_CC, -1, "Stream-Context", NULL, 1, php_le_stream_context());
-		return php_stream_open_wrapper_ex((char *)resolved_path, (char *)mode, ENFORCE_SAFE_MODE|REPORT_ERRORS, NULL, context);
+		ret_val = php_stream_open_wrapper_ex(path_to_open, (char *)mode, ENFORCE_SAFE_MODE|REPORT_ERRORS, NULL, context);
+		xmlFree(resolved_path);
+		return ret_val;
 	}
-	return php_stream_open_wrapper((char *)resolved_path, (char *)mode, ENFORCE_SAFE_MODE|REPORT_ERRORS, NULL);
+	ret_val = php_stream_open_wrapper(path_to_open, (char *)mode, ENFORCE_SAFE_MODE|REPORT_ERRORS, NULL);
+	xmlFree(resolved_path);
+	return ret_val;
 }
 
 void *php_libxml_streams_IO_open_read_wrapper(const char *filename)
