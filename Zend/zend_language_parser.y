@@ -129,6 +129,7 @@
 %token T_FUNC_C
 %token T_LINE
 %token T_FILE
+%token T_NAMESPACE_C
 %token T_COMMENT
 %token T_DOC_COMMENT
 %token T_OPEN_TAG
@@ -708,6 +709,7 @@ common_scalar:
 	|	T_FILE 						{ $$ = $1; }
 	|	T_CLASS_C					{ $$ = $1; }
 	|	T_FUNC_C					{ $$ = $1; }
+	|	T_NAMESPACE_C				{ $$ = $1; }
 ;
 
 
