@@ -16,7 +16,7 @@
 ./" 
 ./" $Id$
 ./" 
-.TH PHP 1
+.TH PHP 1 "Feb 2003" "The PHP Group" "Scripting Language"
 .SH NAME
 .TP 15
 .B php
@@ -24,49 +24,21 @@ PHP Command Line Interface 'CLI'
 .SH SYNOPSIS
 .B php
 [options] [
-.B \-f
-]
+.B \-f ]
 .IR file
 [[\-\-] 
-.IR args
-]
+.IR args.\|.\|. ]
 .LP
 .B php
 [options] 
 .B \-r 
 .IR code
 [[\-\-]
-.IR args
-]
-.LP
-.B php
-[options] [\-B 
-.IR code
-] 
-.B \-R 
-.IR code
-[\-E 
-.IR code
-] [[\-\-]
-.IR args
-]
-.LP
-.B php
-[options] [\-B 
-.IR code
-]
-.B \-F 
-.IR file
-[\-E 
-.IR code
-] [[\-\-]
-.IR args
-]
+.IR args.\|.\|. ]
 .LP
 .B php
 [options] \-\- [
-.IR args
-]
+.IR args.\|.\|. ]
 .LP
 .SH DESCRIPTION
 .B PHP
@@ -84,21 +56,7 @@ simply as you would do inside a .php file when using the
 .B eval() 
 function.
 .LP
-It is also possible to process the standard input line by line using either
-the parameter \-R or \-F. In this mode each separate input line causes the
-.IR code 
-specified by \-R or the 
-.IR file
-specified by \-F to be executed.
-You can access the input line by \fB$argn\fP. While processing the input lines
-.B $argi 
-contains the number of the actual line being processed. Further more
-the paramters \-B and \-E can be used to execute 
-.IR code
-(see \-r) before and
-after all input lines have been processed respectively.
-.LP
-If none of \-r \-f \-B \-R \-F or \-E is present but a single parameter is given 
+If none of \-r or \-f is present but a single parameter is given 
 then this parameter is taken as the filename to parse and execute (same as 
 with \-f). If no parameter is present then the standard input is read and 
 executed.
@@ -107,7 +65,7 @@ executed.
 .B \-a
 Run interactively
 .TP
-.B \-c path|file 
+.B \-c \fIpath\fP|\fIfile\fP
 Look for 
 .B php.ini 
 file in the directory
@@ -120,7 +78,7 @@ No
 .B php.ini 
 file will be used
 .TP
-.B \-d foo[=bar]
+.B \-d \fIfoo\fP[=\fIbar\fP]
 Define INI entry 
 .IR foo 
 with value
@@ -129,7 +87,7 @@ with value
 .B \-e
 Generate extended information for debugger/profiler
 .TP
-.B \-f file
+.B \-f \fIfile\fP
 Parse and execute 
 .IR file
 .TP
@@ -145,31 +103,11 @@ Syntax check only (lint)
 .B \-m
 Show compiled in modules
 .TP
-.B \-r code
+.B \-r \fIcode\fP
 Run PHP 
 .IR code
 without using script tags
 .B '<?..?>'
-.TP
-.B \-B code
-Run PHP 
-.IR code
-before processing input lines
-.TP
-.B \-R code
-Run PHP 
-.IR code
-for every input line
-.TP
-.B \-F file
-Parse and execute 
-.IR file
-for every input line
-.TP
-.B \-E code
-Run PHP 
-.IR code
-after processing all input lines
 .TP
 .B \-s
 Display colour syntax highlighted source
@@ -180,14 +118,14 @@ Version number
 .B \-w
 Display source with stripped comments and whitespace
 .TP
-.B \-z file
+.B \-z \fIfile\fP
 Load Zend extension 
 .IR file
 .TP
-.IR args
+.IR args.\|.\|.
 Arguments passed to script. Use 
 .B '\-\-'
-.IR args 
+.IR args
 when first argument starts with 
 .B '\-'
 or script is read from stdin
@@ -202,41 +140,25 @@ The standard configuration file will only be used when
 cannot not be found.
 .SH EXAMPLES
 .TP 5
-php \-r 'echo "Hello World\\n";'
+\fIphp -r 'echo "Hello World\\n";'\fP
 This command simply writes the text "Hello World" to stabdard out.
 .TP
-php \-r 'print_r(gd_info());'
+\fIphp \-r 'print_r(gd_info());'\fP
 This shows the configuration of your gd extension. You can use this
 to easily check which imag formats you can use. If you have any
 dynamic modules you may want to use the same ini file that php uses
 when executed from your webserver. There are more extensions which
-have such a function. For dba use php \-r 'print_r(dba_handlers(1));'
-.TP
-php \-d html_errors=1 \-i | php \-R 'echo strip_tags($argn)."\\n";'
-This example uses PHP first to generate a HTML output. This is 
-meant to be replaced with any tool that displays HTML (for instance
-you could use 'cat file.html'). The second php command now strips off
-the HTML tags line by line and outputs the result.
-.TP
-php \-E 'echo "Lines: $argi\\n";'
-This command shows the number of lines being input.
-.TP
-php \-R '$l+=count(file($argn));' \-E'echo "Lines:$l\\n";'
-This commands expects each input line beeing a file. It counts all lines 
-of the files specified by each input line and shows the summarized result. 
-You may combine this with tools like find and change the php scriptlet.
-.TP
-php \-R 'echo $argn; fgets(STDIN);'
-Since you have access to STDIN from within \-B \-R and \-F you can skip certain
-input lines with your code. But note that in such cases $argi only counts the
-lines being processed by php itself. Having read this you will guess what the 
-above program does: skipping every second input line.
+have such a function. For dba use:
+.RS
+\fIphp \-r 'print_r(dba_handlers(1));'\fP
+.RE
 .SH TIPS
 You can use a shebang line to automatically invoke php
 from scripts. Only the CLI version of PHP will ignore
 such a first line as shown below:
 .P
 .PD 0
+.RS
 #!/bin/php
 .P
 <?php
@@ -244,6 +166,7 @@ such a first line as shown below:
  // your script
 .P
 ?>
+.RE
 .PD 1
 .P
 .SH SEE ALSO
@@ -251,6 +174,12 @@ For a more or less complete description of PHP look here:
 .PD 0
 .P
 .B http://www.php.net/manual/
+.PD 1
+.P
+A nice introduction to PHP by Stig Sæther Bakken can be found here:
+.PD 0
+.P
+.B http://www.zend.com/zend/art/intro.php
 .PD 1
 .SH BUGS
 You can view the list of known bugs or add any new bug you
@@ -272,8 +201,10 @@ A List of active developers can be found here:
 .P
 And last but not least PHP was developed with the help of a huge amount of 
 contributors all around the world.
+.SH VERSION INFORMATION
+This manpage describes \fBphp\fP, version 4.3.1.
 .SH COPYRIGHT
-Copyright (c) 1997-2003 The PHP Group
+Copyright \(co 1997\-2003 The PHP Group
 .LP
 This source file is subject to version 2.02 of the PHP license,
 that is bundled with this package in the file LICENSE, and is
