@@ -30,6 +30,7 @@ PHP 4                                                                      NEWS
   . Added more detailed error reporting to apache_lookup_uri() and virtual().
   . Renamed getallheaders() to apache_request_headers() and made an alias for BC.
   . Added php_apache_sapi_getenv() and php_apache_sapi_get_stat().
+  . Added syntax-highlighting handling (.phps)
 - Fixed strstr(), strchr() and strrchr() to be binary safe. (Andrey)
 - Added array_diff_assoc() and array_intersect_assoc(). (Andrey)
 - Fixed bug #17825 (ob_start() chunk size option didn't work well). (Yasuo)
