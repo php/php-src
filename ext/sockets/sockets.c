@@ -476,7 +476,6 @@ PHP_FUNCTION(socket_fd_zero)
 PHP_FUNCTION(socket_select)
 {
 	zval **arg1, **arg2, **arg3, **arg4, **arg5, **arg6;
-	php_socket *php_sock;
 	struct timeval tv;
 	fd_set *rfds, *wfds, *xfds;
 
@@ -484,16 +483,16 @@ PHP_FUNCTION(socket_select)
 		WRONG_PARAM_COUNT;
 	}
 	
+	convert_to_long_ex(arg1);
 	convert_to_long_ex(arg5);
 	convert_to_long_ex(arg6);
-	ZEND_FETCH_RESOURCE(php_sock, php_socket *, arg1, -1, "Socket", le_socket);
 	ZEND_FETCH_RESOURCE(rfds, fd_set *, arg2, -1, "File descriptor set", le_destroy);
 	ZEND_FETCH_RESOURCE(wfds, fd_set *, arg3, -1, "File descriptor set", le_destroy);
 	ZEND_FETCH_RESOURCE(xfds, fd_set *, arg4, -1, "File descriptor set", le_destroy);
 	tv.tv_sec  = Z_LVAL_PP(arg5);
 	tv.tv_usec = Z_LVAL_PP(arg6);
 
-	RETURN_LONG(select(php_sock->socket, rfds, wfds, xfds, &tv));
+	RETURN_LONG(select(Z_LVAL_PP(arg1), rfds, wfds, xfds, &tv));
 }
 /* }}} */
 
