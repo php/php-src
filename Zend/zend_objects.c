@@ -106,21 +106,8 @@ ZEND_API zend_object *zend_objects_get_address(zval *zobject TSRMLS_DC)
 	return (zend_object *)zend_object_store_get_object(zobject TSRMLS_CC);
 }
 
-ZEND_API zend_object_value zend_objects_clone_obj(zval *zobject TSRMLS_DC)
+ZEND_API void zend_objects_clone_members(zend_object *new_object, zend_object_value new_obj_val, zend_object *old_object, zend_object_handle handle TSRMLS_DC)
 {
-	zend_object_value retval;
-	zend_object *old_object;
-	zend_object *new_object;
-	zend_object_handle handle = Z_OBJ_HANDLE_P(zobject);
-
-	/* assume that create isn't overwritten, so when clone depends on the 
-	 * overwritten one then it must itself be overwritten */
-	old_object = zend_objects_get_address(zobject TSRMLS_CC);
-	retval = zend_objects_new(&new_object, old_object->ce TSRMLS_CC);
-
-	ALLOC_HASHTABLE(new_object->properties);
-	zend_hash_init(new_object->properties, 0, NULL, ZVAL_PTR_DTOR, 0);
-
 	if (old_object->ce->clone) {
 		zval *old_obj;
 		zval *new_obj;
@@ -133,7 +120,7 @@ ZEND_API zend_object_value zend_objects_clone_obj(zval *zobject TSRMLS_DC)
 
 		MAKE_STD_ZVAL(new_obj);
 		new_obj->type = IS_OBJECT;
-		new_obj->value.obj = retval;
+		new_obj->value.obj = new_obj_val;
 		zval_copy_ctor(new_obj);
 
 		MAKE_STD_ZVAL(old_obj);
@@ -160,8 +147,26 @@ ZEND_API zend_object_value zend_objects_clone_obj(zval *zobject TSRMLS_DC)
 	} else {
 		zend_hash_copy(new_object->properties, old_object->properties, (copy_ctor_func_t) zval_add_ref, (void *) NULL /* Not used anymore */, sizeof(zval *));
 	}
+}
 
-	return retval;
+ZEND_API zend_object_value zend_objects_clone_obj(zval *zobject TSRMLS_DC)
+{
+	zend_object_value new_obj_val;
+	zend_object *old_object;
+	zend_object *new_object;
+	zend_object_handle handle = Z_OBJ_HANDLE_P(zobject);
+
+	/* assume that create isn't overwritten, so when clone depends on the 
+	 * overwritten one then it must itself be overwritten */
+	old_object = zend_objects_get_address(zobject TSRMLS_CC);
+	new_obj_val = zend_objects_new(&new_object, old_object->ce TSRMLS_CC);
+
+	ALLOC_HASHTABLE(new_object->properties);
+	zend_hash_init(new_object->properties, 0, NULL, ZVAL_PTR_DTOR, 0);
+
+	zend_objects_clone_members(new_object, new_obj_val, old_object, handle TSRMLS_CC);
+
+	return new_obj_val;
 }
 
 /*
