@@ -2468,6 +2468,7 @@ PHPAPI char *php_addslashes(char *str, int length, int *new_length, int should_f
 	if (should_free) {
 		STR_FREE(str);
 	}
+	new_str = (char *) erealloc(new_str, *new_length);
 	return new_str;
 }
 /* }}} */
