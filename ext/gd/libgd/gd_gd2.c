@@ -43,8 +43,7 @@ typedef struct
 {
 	int offset;
 	int size;
-}
-t_chunk_info;
+} t_chunk_info;
 
 extern int _gdGetColors(gdIOCtx * in, gdImagePtr im, int gd2xFlag);
 extern void _gdPutColors(gdImagePtr im, gdIOCtx * out);
