@@ -22,6 +22,7 @@ CFG=bindlib - Win32 Debug_TS
 !MESSAGE "bindlib - Win32 Debug_TS" (based on "Win32 (x86) Static Library")
 !MESSAGE "bindlib - Win32 Release_TS" (based on "Win32 (x86) Static Library")
 !MESSAGE "bindlib - Win32 Release_TS_inline" (based on "Win32 (x86) Static Library")
+!MESSAGE "bindlib - Win32 Release_inline" (based on "Win32 (x86) Static Library")
 !MESSAGE 
 
 # Begin Project
@@ -146,6 +147,29 @@ LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo /out:"Release\resolv.lib"
 # ADD LIB32 /nologo /out:"Release_Ts_inline\resolv.lib"
 
+!ELSEIF  "$(CFG)" == "bindlib - Win32 Release_inline"
+
+# PROP BASE Use_MFC 0
+# PROP BASE Use_Debug_Libraries 0
+# PROP BASE Output_Dir "bindlib___Win32_Release_inline"
+# PROP BASE Intermediate_Dir "bindlib___Win32_Release_inline"
+# PROP BASE Target_Dir ""
+# PROP Use_MFC 0
+# PROP Use_Debug_Libraries 0
+# PROP Output_Dir "Release_inline"
+# PROP Intermediate_Dir "Release_inline"
+# PROP Target_Dir ""
+# ADD BASE CPP /nologo /MD /W3 /GX /O2 /I "." /D "NDEBUG" /D "WIN32" /D "_MBCS" /D "_LIB" /D "WINNT" /YX /FD /c
+# ADD CPP /nologo /MD /W3 /GX /O2 /I "." /D "NDEBUG" /D "WIN32" /D "_MBCS" /D "_LIB" /D "WINNT" /YX /FD /c
+# ADD BASE RSC /l 0x40d /d "NDEBUG"
+# ADD RSC /l 0x40d /d "NDEBUG"
+BSC32=bscmake.exe
+# ADD BASE BSC32 /nologo
+# ADD BSC32 /nologo
+LIB32=link.exe -lib
+# ADD BASE LIB32 /nologo /out:"Release\resolv.lib"
+# ADD LIB32 /nologo /out:"Release_inline\resolv.lib"
+
 !ENDIF 
 
 # Begin Target
@@ -155,6 +179,7 @@ LIB32=link.exe -lib
 # Name "bindlib - Win32 Debug_TS"
 # Name "bindlib - Win32 Release_TS"
 # Name "bindlib - Win32 Release_TS_inline"
+# Name "bindlib - Win32 Release_inline"
 # Begin Group "Source Files"
 
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
