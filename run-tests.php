@@ -284,8 +284,8 @@ function do_testing($argc, &$argv)
     dowriteln(sprintf("Tests passed:     %4d (%s%%)", $passed, $passed_pstr));
     dowriteln("=============================");
     dowriteln("Skipped ".sizeof($skipped_extensions)." extensions.");
-	dowriteln("PHP SAPI: ".PHP_SAPI);
-    dowriteln("PHP Version: ".PHP_VERSION);
+	$php_bin_info_cmd = "$php -q -f tests/bin-info.inc";
+	system($php_bin_info_cmd, $ret);
 }
 
 function find_testdirs($dir = '.', $first_pass = true)
