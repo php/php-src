@@ -56,6 +56,7 @@ PHP                                                                        NEWS
 - Fixed bug with raw_post_data not getting set. (Brian)
 - Fixed bug in mysql::client_version(). (Georg)
 - Fixed ZTS destruction. (Marcus)
+- Fixed bug #31478 (segfault with empty() / isset()). (Moriyoshi)
 - Fixed bug #29728 (Reflection API Feature: Default parameter value). (Marcus)
 - Fixed bug #29522 (accessing properties without connection). (Georg)
 - Fixed bug #29335 (fetch functions now use MYSQLI_BOTH as default). (Georg)
