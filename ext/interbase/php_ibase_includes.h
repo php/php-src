@@ -29,6 +29,10 @@
 #define SQLDA_CURRENT_VERSION SQLDA_VERSION1
 #endif
 
+#ifndef METADATALENGTH
+#define METADATALENGTH 32
+#endif
+
 #define RESET_ERRMSG do { IBG(errmsg)[0] = '\0'; IBG(sql_code) = 0; } while (0)
 
 #define IB_STATUS (IBG(status))
