@@ -141,7 +141,6 @@ ext/standard
         strtok()
         basename()
         dirname()
-        strip_tags()
 
 ext/wddx
 --------
