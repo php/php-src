@@ -442,11 +442,10 @@ static void _php_ibase_free_blob(ibase_blob_handle *ib_blob)
 /* {{{ _php_ibase_free_trans()	*/
 static void _php_ibase_free_trans(ibase_tr_link *ib_trans)
 {
-	zval **dummy;
 	ibase_db_link *ib_link;
 	IBLS_FETCH();
 
-	ib_link = (ibase_db_link *) zend_fetch_resource(dummy, ib_trans->link_rsrc, "InterBase link", NULL, 2, IBG(le_link), IBG(le_plink));
+	ib_link = (ibase_db_link *) zend_fetch_resource(NULL, ib_trans->link_rsrc, "InterBase link", NULL, 2, IBG(le_link), IBG(le_plink));
 	
 	if (ib_link) {
 		if (ib_link->trans[ib_trans->trans_num] != NULL) {
@@ -663,7 +662,7 @@ static int _php_ibase_attach_db(char *server, char *uname, char *passwd, char *c
 
 	dpb_length = dpb - dpb_buffer;
 
-	if (isc_attach_database(IB_STATUS, strlen(server), server, db, dpb_length, dpb_buffer)) {
+	if (isc_attach_database(IB_STATUS, (short) strlen(server), server, db, (short) dpb_length, dpb_buffer)) {
 		_php_ibase_error();
 		return FAILURE;
 	}
@@ -788,7 +787,7 @@ static void _php_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 
 			ib_link = (ibase_db_link *) malloc(sizeof(ibase_db_link));
 			ib_link->link = db_handle;
-			ib_link->dialect = (ib_dialect ? strtoul(ib_dialect, NULL, 10) : SQL_DIALECT_CURRENT);
+			ib_link->dialect = (ib_dialect ? (unsigned short) strtoul(ib_dialect, NULL, 10) : SQL_DIALECT_CURRENT);
 			for (i = 0; i < IBASE_TRANS_ON_LINK; i++)
 				ib_link->trans[i] = NULL;
 			
@@ -849,7 +848,7 @@ static void _php_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 
 		ib_link = (ibase_db_link *) emalloc(sizeof(ibase_db_link));
 		ib_link->link = db_handle;
-		ib_link->dialect = (ib_dialect ? strtoul(ib_dialect, NULL, 10) : SQL_DIALECT_CURRENT);
+		ib_link->dialect = (ib_dialect ? (unsigned short) strtoul(ib_dialect, NULL, 10) : SQL_DIALECT_CURRENT);
 		for (i = 0; i < IBASE_TRANS_ON_LINK; i++)
 			ib_link->trans[i] = NULL;
 
@@ -1021,7 +1020,7 @@ static int _php_ibase_alloc_array(ibase_array **ib_arrayp, int *array_cntp,
 
 /* {{{ _php_ibase_alloc_query() */
 /* allocate and prepare query */
-static int _php_ibase_alloc_query(ibase_query **ib_queryp, isc_db_handle link, isc_tr_handle trans, char *query, int dialect)
+static int _php_ibase_alloc_query(ibase_query **ib_queryp, isc_db_handle link, isc_tr_handle trans, char *query, unsigned short dialect)
 {
 #define IB_QUERY (*ib_queryp)
 	IBLS_FETCH();
@@ -1043,7 +1042,7 @@ static int _php_ibase_alloc_query(ibase_query **ib_queryp, isc_db_handle link, i
 		goto _php_ibase_alloc_query_error;
 	}
 
-	IB_QUERY->out_sqlda = emalloc(XSQLDA_LENGTH(0));
+	IB_QUERY->out_sqlda = (XSQLDA *) emalloc(XSQLDA_LENGTH(0));
 	IB_QUERY->out_sqlda->sqln = 0;
 	IB_QUERY->out_sqlda->version = SQLDA_VERSION1;
 
@@ -1434,7 +1433,6 @@ _php_ibase_exec_error:		 /* I'm a bad boy... */
 PHP_FUNCTION(ibase_trans)
 {
 	pval ***args;
-	zval **dummy;
 	char tpb[20], *tpbp = NULL;
 	long trans_argl = 0;
 	int tpb_len = 0, argn, link_id, trans_n = 0, i;
@@ -1474,7 +1472,7 @@ PHP_FUNCTION(ibase_trans)
 	}
 
 	if (argn < 2) {
-		ZEND_FETCH_RESOURCE2(ib_link, ibase_db_link *, dummy, link_id, "InterBase link", IBG(le_link), IBG(le_plink));
+		ZEND_FETCH_RESOURCE2(ib_link, ibase_db_link *, NULL, link_id, "InterBase link", IBG(le_link), IBG(le_plink));
 	}
 
 	if (trans_argl ) {
@@ -1726,7 +1724,7 @@ static int _php_ibase_var_pval(pval *val, void *data, int type, int len, int sca
 		case SQL_LONG:
 			if (scale) {
 				int j, f = 1;
-				float n = *(long *)(data);
+				float n = (float) *(long *)(data);
 				
 				for (j = 0; j < -scale; j++)
 					f *= 10;
@@ -1763,8 +1761,8 @@ static int _php_ibase_var_pval(pval *val, void *data, int type, int len, int sca
 		case SQL_INT64:
 			val->type = IS_STRING;
 			val->value.str.len = sprintf(string_data, "%Ld.%Ld",
-										 (ISC_INT64) (*(ISC_INT64 *)data / (int) pow(10.0, (double) -scale)),
-										 (ISC_INT64) abs((*(ISC_INT64 *)data % (int) pow(10.0, (double) -scale))));
+										 (ISC_INT64) (*((ISC_INT64 *)data) / (int) pow(10.0, (double) -scale)),
+										 (ISC_INT64) abs((int) (*((ISC_INT64 *)data) % (int) pow(10.0, (double) -scale))));
 			val->value.str.val = estrdup(string_data);
 			break;
 #endif
@@ -1989,8 +1987,9 @@ static void _php_ibase_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int fetch_type)
 						
 						/* find total length of blob's data */
 						for (p = bl_info; *p != isc_info_end && p < bl_info+sizeof(bl_info);) {
-							int item_len, item = *p++;
-							item_len = (short)isc_vax_integer(p, 2);
+							unsigned short item_len, item = *p++;
+
+							item_len = (short) isc_vax_integer(p, 2);
 							p += 2;
 							if (item == isc_info_blob_total_length)
 								max_len = isc_vax_integer(p, item_len);
@@ -2000,7 +1999,8 @@ static void _php_ibase_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int fetch_type)
 						bl_data = emalloc(max_len+1);
 						
 						for (cur_len = stat = 0; stat == 0 && cur_len < max_len; ) {
-							unsigned short seg_len, max_seg = max_len-cur_len > USHRT_MAX ? USHRT_MAX : max_len-cur_len;
+							unsigned short seg_len;
+							unsigned short max_seg = (unsigned short) (max_len - cur_len > USHRT_MAX ? USHRT_MAX : max_len-cur_len);
 							stat = isc_get_segment(IB_STATUS, &bl_handle, &seg_len, max_seg, &bl_data[cur_len]);
 							cur_len += seg_len;
 							if (cur_len > max_len) { /* never!*/
@@ -2160,7 +2160,7 @@ PHP_FUNCTION(ibase_prepare)
 				RETURN_FALSE;
 			}
 			link_id = IBG(default_link);
-			ZEND_FETCH_RESOURCE2(ib_link, ibase_db_link *, link_arg, link_id, "InterBase link", IBG(le_link), IBG(le_plink));
+			ZEND_FETCH_RESOURCE2(ib_link, ibase_db_link *, NULL, link_id, "InterBase link", IBG(le_link), IBG(le_plink));
 			break;
 		case 2:
 			if (zend_get_parameters_ex(2, &link_arg, &query_arg) == FAILURE) {
@@ -2463,7 +2463,9 @@ static int _php_ibase_blob_info(isc_blob_handle bl_handle,IBASE_BLOBINFO *bl_inf
 	}
 
 	for (p = bl_inf; *p != isc_info_end && p < bl_inf+sizeof(bl_inf);) {
-		int item_len, item = *p++;
+		unsigned short item_len;
+		int item = *p++;
+
 		item_len = (short)isc_vax_integer(p, 2);
 		p += 2;
 		switch (item) {
@@ -2508,7 +2510,7 @@ PHP_FUNCTION(ibase_blob_create)
 	switch (ZEND_NUM_ARGS()) {
 		case 0:
 			link_id = IBG(default_link);
-			ZEND_FETCH_RESOURCE2(ib_link, ibase_db_link *, link_arg, link_id, "InterBase link", IBG(le_link), IBG(le_plink));
+			ZEND_FETCH_RESOURCE2(ib_link, ibase_db_link *, NULL, link_id, "InterBase link", IBG(le_link), IBG(le_plink));
 			break;
 		case 1:
 			if (zend_get_parameters_ex(1, &link_arg) == FAILURE) {
@@ -2598,7 +2600,7 @@ PHP_FUNCTION(ibase_blob_add)
 	
 	convert_to_string(string_arg);
 
-	if (isc_put_segment(IB_STATUS, &ib_blob->bl_handle, string_arg->value.str.len, string_arg->value.str.val)) {
+	if (isc_put_segment(IB_STATUS, &ib_blob->bl_handle, (unsigned short) string_arg->value.str.len, string_arg->value.str.val)) {
 		_php_ibase_error();
 		RETURN_FALSE;
 	}
@@ -2625,7 +2627,7 @@ PHP_FUNCTION(ibase_blob_get)
 	}
 
 	convert_to_long(len_arg);
-	max_len = len_arg->value.lval;
+	max_len = (unsigned short) len_arg->value.lval;
 
 	GET_BLOB_HANDLE_ARG(blob_arg, ib_blob);
 
@@ -2634,7 +2636,7 @@ PHP_FUNCTION(ibase_blob_get)
 		bl_data = emalloc(max_len+1);
 
 		for (cur_len = stat = 0; stat == 0; ) {
-			stat = isc_get_segment(IB_STATUS, &ib_blob->bl_handle, &seg_len, max_len-cur_len, &bl_data[cur_len]);
+			stat = isc_get_segment(IB_STATUS, &ib_blob->bl_handle, &seg_len, (unsigned short) (max_len-cur_len), &bl_data[cur_len]);
 			cur_len += seg_len;
 			if (cur_len > max_len) { /* never!*/
 				efree(bl_data);
@@ -2855,7 +2857,8 @@ extern int wsa_fp;
 PHP_FUNCTION(ibase_blob_import)
 {
 	zval **link_arg, **file_arg;
-	int trans_n = 0, link_id = 0, trans_id = 0, size, b;
+	int trans_n = 0, link_id = 0, trans_id = 0, size;
+	unsigned short b;
 	int issock=0, socketd=0;
 	ibase_blob_handle ib_blob;
 	ibase_db_link *ib_link;
@@ -2871,7 +2874,7 @@ PHP_FUNCTION(ibase_blob_import)
 				RETURN_FALSE;
 			}
 			link_id = IBG(default_link);
-			ZEND_FETCH_RESOURCE2(ib_link, ibase_db_link *, link_arg, link_id, "InterBase link", IBG(le_link), IBG(le_plink));
+			ZEND_FETCH_RESOURCE2(ib_link, ibase_db_link *, NULL, link_id, "InterBase link", IBG(le_link), IBG(le_plink));
 			break;
 		case 2:
 			if (zend_get_parameters_ex(2, &link_arg, &file_arg) == FAILURE) {
