@@ -1,3 +1,93 @@
+2002-02-10  Sean Bright  <elixer@erols.com>
+
+    * ext/gmp/gmp.c:
+    '0b' could be the beginning of a hex string (without leading '0x') so if
+    the user specifies base 16, use that instead.
+
+    * ext/gmp/tests/003.phpt: Add a new test for GMP base recognition.
+
+    * ext/gmp/gmp.c: Fix for bugs #10133 and #15454.
+
+    Bug #15454 results from a bug in GMP.  If you pass in a string '0xABCD' and
+    specify a base of 0, GMP figures out that it is hex and skips over the 0x
+    characters.  If you specify base 16, then it doesn't skip those chars.
+    This was confirmed with the following test program:
+
+
+    int main()
+    {
+            char *str_one, *str_two;
+            mpz_t num_one, num_two;
+
+    	mpz_init_set_str (num_one, "0x45", 0);
+    	str_one = mpz_get_str(NULL, 10, num_one);
+
+    	mpz_init_set_str (num_two, "0x45", 16);
+    	str_two = mpz_get_str(NULL, 10, num_two);
+
+    	printf("%s / %s\n", str_one, str_two);
+
+    	mpz_clear (num_one);
+    	mpz_clear (num_two);
+
+    	return 0;
+    }
+
+    We now take anything that starts with 0[xX] as hexidecimal and anything
+    that starts 0[bB] as binary (this is what GMP does internally).  We also
+    no longer force the base to 10 or 16, but instead let GMP decide what the
+    best base is, be it hex, dec, or octal.
+
+2002-02-10  Jason Greene  <jason@inetgurus.net>
+
+    * ext/standard/basic_functions.c
+      ext/standard/php_var.h
+      ext/standard/var.c: Renamed zval_debug_dump() to debug_zval_dump()
+
+2002-02-10  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/PEAR/Common.php: Now System will return false on fail
+
+    * pear/tests/pear_system.phpt: test suite for the System class
+
+    * pear/System.php:
+    - Now error will be triggered with trigger_error(). When a command
+      fails the function will return false
+    - In-line documentation update
+
+2002-02-10  Thies C. Arntzen  <thies@thieso.net>
+
+    * ext/oci8/oci8.c
+      ext/oci8/php_oci8.h:
+    only rollback at script end if there is something to rollback.
+
+2002-02-10  Stig Venaas  <venaas@uninett.no>
+
+    * ext/ftp/ftp.c
+      main/network.c
+      main/php_network.h:
+    Added php_sockaddr_size() in network.c (and the header file). This is used
+    in ftp.c to make sure connect() and bind() is called with size argument
+    which is exactly the size of the relevant sockaddr_xx structure
+
+2002-02-10  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * pear/Mail/mime.php: Mail/mime/get has wrong parameter name.
+
+2002-02-10  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ext/tokenizer/tokenizer.c: TSRM fixes.
+
+2002-02-10  Jason Greene  <jason@inetgurus.net>
+
+    * ext/standard/basic_functions.c
+      ext/standard/php_var.h
+      ext/standard/var.c:    internal information such as refcounts, and the true type names (Jason)
+
+2002-02-10  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * ext/mbstring/mbstring.c: Fix typo
+
 2002-02-09  Andrei Zmievski  <andrei@ispi.net>
 
     * ext/tokenizer/php_tokenizer.h
