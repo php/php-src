@@ -1,3 +1,170 @@
+2001-02-18  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/thttpd/thttpd.c:
+    Save 50% of the syscalls when writing the HTTP header.
+
+2001-02-18  Thies C. Arntzen  <thies@thieso.net>
+
+    * ext/standard/fsock.c: [p]fsockopen: fixed possible leak
+
+2001-02-18  David Guerizec  <david@guerizec.net>
+
+    * ext/midgard/midgard.c: allow execution of 'normal' php scripts
+
+2001-02-18  Thies C. Arntzen  <thies@thieso.net>
+
+    * ext/standard/string.c: fixed buffer-overwrite
+
+2001-02-18  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/config.m4:
+    ircg creates a convenient script now.  of course, this is incompatible
+    to older ircg versions.  if someone else would have created ircg, I
+    probably would hate him.
+
+2001-02-18  Thies C. Arntzen  <thies@thieso.net>
+
+    * ext/imap/php_imap.c: fixed a possible double-free
+
+2001-02-18  Jon Parise  <jon@csh.rit.edu>
+
+    * pear/CODING_STANDARDS:
+    Go back to listing the copyright years explicitly (instead of using a
+    range).
+
+2001-02-18  Ulf Wendel  <ulf.wendel@phpdoc.de>
+
+    * pear/PHPDoc/xmlwriter/PhpdocXMLWriter.php:
+    Sorry, whitespace only changes to follow the PEAR Coding conventions. Replaced tabs with spaces.
+
+2001-02-18  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/interbase/interbase.c
+      ext/mysql/php_mysql.c: Typos in protos.
+
+2001-02-18  Ulf Wendel  <ulf.wendel@phpdoc.de>
+
+    * pear/PHPDoc/xmlreader/PhpdocXMLReader.php
+      pear/PHPDoc/xmlexporter/PhpdocXMLClassExporter.php
+      pear/PHPDoc/xmlexporter/PhpdocXMLDocumentExporter.php
+      pear/PHPDoc/xmlexporter/PhpdocXMLExporter.php
+      pear/PHPDoc/xmlexporter/PhpdocXMLIndexExporter.php
+      pear/PHPDoc/xmlexporter/PhpdocXMLModuleExporter.php
+      pear/PHPDoc/xmlexporter/PhpdocXMLWarningExporter.php:
+    Sorry, whitespace only changes to follow the PEAR Coding conventions. Replaced tabs with spaces.
+
+2001-02-18  Harald Radi  <h.radi@nme.at>
+
+    * ext/com/typedef_VARIANT.c:
+    export global constants for codepage and variant type
+    VT_* and CP_*
+
+    * ext/com/conversion.c:
+    added a few more variant types for zval <-> variant conversion
+
+    * ext/com/COM.cpp:
+    - Added new object VARIANT() to encapsulate values for use with
+      the COM and DOTNET module. Therefore it is now possible to pass
+      values by reference, convert php values to extended variant types (currency,
+      date, idispatch, iunknown, ...) and define the codepage that should
+      be used for unicode - conversion.
+
+    * ext/com/CREDITS: added myself to CREDITS
+
+2001-02-18  Ulf Wendel  <ulf.wendel@phpdoc.de>
+
+    * pear/PHPDoc/warning/PhpdocWarning.php
+      pear/PHPDoc/renderer/html/PhpdocHTMLClassRenderer.php
+      pear/PHPDoc/renderer/html/PhpdocHTMLDocumentRenderer.php
+      pear/PHPDoc/renderer/html/PhpdocHTMLIndexRenderer.php
+      pear/PHPDoc/renderer/html/PhpdocHTMLModuleRenderer.php
+      pear/PHPDoc/renderer/html/PhpdocHTMLRenderer.php
+      pear/PHPDoc/renderer/html/PhpdocHTMLRendererManager.php
+      pear/PHPDoc/renderer/html/PhpdocHTMLWarningRenderer.php
+      pear/PHPDoc/renderer/PhpdocRendererObject.php:
+    Sorry, whitespace only changes to follow the PEAR Coding conventions. Replaced tabs with spaces.
+
+2001-02-18  Stig Bakken  <ssb@fast.no>
+
+    * pear/DB/oci8.php: * use "hostspec" dsn parameter as SID if specified
+
+    * pear/DB/common.php: * added "persistent" option
+
+2001-02-18  Ulf Wendel  <ulf.wendel@phpdoc.de>
+
+    * pear/PHPDoc/indexer/PhpdocIndexer.php
+      pear/PHPDoc/filehandler/PhpdocFileHandler.php
+      pear/PHPDoc/exceptions/PhpdocError.php
+      pear/PHPDoc/core/Phpdoc.php
+      pear/PHPDoc/core/PhpdocArgvHandler.php
+      pear/PHPDoc/core/PhpdocObject.php
+      pear/PHPDoc/core/PhpdocSetupHandler.php
+      pear/PHPDoc/analyser/PhpdocAnalyser.php
+      pear/PHPDoc/analyser/PhpdocClassAnalyser.php
+      pear/PHPDoc/analyser/PhpdocModuleAnalyser.php
+      pear/PHPDoc/accessor/PhpdocAccessor.php
+      pear/PHPDoc/accessor/PhpdocClassAccessor.php
+      pear/PHPDoc/accessor/PhpdocDocumentAccessor.php
+      pear/PHPDoc/accessor/PhpdocIndexAccessor.php
+      pear/PHPDoc/accessor/PhpdocModuleAccessor.php
+      pear/PHPDoc/accessor/PhpdocWarningAccessor.php:
+    Sorry, whitespace only changes to follow the PEAR Coding conventions. Replaced tabs with spaces.
+
+    * pear/PHPDoc/parser/PhpdocParserRegExp.php
+      pear/PHPDoc/parser/PhpdocParserTags.php
+      pear/PHPDoc/parser/PhpdocUseParser.php
+      pear/PHPDoc/parser/PhpdocVariableParser.php
+      pear/PHPDoc/parser/PhpdocClassParser.php
+      pear/PHPDoc/parser/PhpdocConstantParser.php
+      pear/PHPDoc/parser/PhpdocFunctionParser.php
+      pear/PHPDoc/parser/PhpdocModuleParser.php
+      pear/PHPDoc/parser/PhpdocParser.php
+      pear/PHPDoc/parser/PhpdocParserCore.php:
+    Sorry, whitespace only changes to follow the PEAR Coding conventions. Replaces tabs with spaces.
+
+2001-02-18  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/ircg.c: Remove unnecessary assignment which caused a segfault
+
+    * ext/ircg/ircg.c: Set from for MSG_FMT_SELF_PART
+
+2001-02-18  Thies C. Arntzen  <thies@thieso.net>
+
+    * ext/oci8/oci8.c:
+    - Fixed crash in OCI8 when using unitialized LOBs. (Thies)
+
+2001-02-18  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/ircg.c: Add code for user-quit hook
+
+    * ext/ircg/ircg.c:
+    irc_write_buf_del() performs a final flush now, if the fd is not dead yet.
+
+    afterwards we perform a shutdown() on the socket, so that thttpd
+    notices that the socket is to be closed.  Otherwise, we might do
+    two close()s which is bad (as the fd might be reused in the meantime).
+
+    * ext/ircg/ircg.c:
+    Close an apparent race which caused HTTP connections to stay open,
+    even though the IRC server refused to let us login.
+
+2001-02-18  David Croft  <david@infotrek.co.uk>
+
+    * header: add year 2001 to header
+
+2001-02-18  Emiliano Heyns  <emile@iris-advies.com>
+
+    * ext/midgard/.cvsignore:
+    Simplifying .cvsignore (and losing some fat on the way)
+
+2001-02-18  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/ircg.c:
+    Add a new format string identifier 'r' which inserts the raw message.
+
+    Also port the ctcp copy function to the hash_ex API as per Andi's
+    suggestion.
+
 2001-02-17  Emiliano Heyns  <emile@iris-advies.com>
 
     * ext/midgard/eventmember.c
