@@ -33,7 +33,7 @@ array(2) {
   ["one"]=>
   string(3) "ABC"
   ["two"]=>
-  object(test)#1 (2) {
+  object(test)(2) {
     ["a"]=>
     int(7)
     ["b"]=>
