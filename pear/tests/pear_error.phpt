@@ -137,17 +137,17 @@ mode=print: test error[pear_error: message="test error" code=-42 mode=print leve
 mode=callback(function): errorhandler function called, obj=[pear_error: message="test error" code=-42 mode=callback callback=errorhandler prefix="" info=""]
 mode=callback(method): errorhandler method called, obj=[pear_error: message="test error" code=-42 mode=callback callback=errorclass::errorhandler prefix="" info=""]
 mode=print&trigger: test error
-User Notice: test error in PEAR.php on line 594
+User Notice: test error in PEAR.php on line 593
 [pear_error: message="test error" code=-42 mode=print|trigger level=notice prefix="" info=""]
 mode=trigger:
-User Notice: test error in PEAR.php on line 594
+User Notice: test error in PEAR.php on line 593
 [pear_error: message="test error" code=-42 mode=trigger level=notice prefix="" info=""]
 mode=trigger,level=notice:
-User Notice: test error in PEAR.php on line 594
+User Notice: test error in PEAR.php on line 593
 [pear_error: message="test error" code=-42 mode=trigger level=notice prefix="" info=""]
 mode=trigger,level=warning:
-User Warning: test error in PEAR.php on line 594
+User Warning: test error in PEAR.php on line 593
 [pear_error: message="test error" code=-42 mode=trigger level=warning prefix="" info=""]
 mode=trigger,level=error:
-User Error: test error in PEAR.php on line 594
+User Error: test error in PEAR.php on line 593
 [pear_error: message="test error" code=-42 mode=trigger level=error prefix="" info=""]
