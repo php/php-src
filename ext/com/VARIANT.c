@@ -132,14 +132,14 @@ static void php_VARIANT_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend
 	zend_overloaded_element *function_name = (zend_overloaded_element *) property_reference->elements_list->tail->data;
 	VARIANT *pVar;
 
-	if((zend_llist_count(property_reference->elements_list)==1) && !strcmp(Z_STRVAL(function_name->element), "variant")) {
+	if ((zend_llist_count(property_reference->elements_list)==1) && !strcmp(Z_STRVAL(function_name->element), "variant")) {
 		/* constructor */
 		pval *object_handle, *data, *type, *code_page;
 
 		ALLOC_VARIANT(pVar);
 		VariantInit(pVar);
 
-		switch(ZEND_NUM_ARGS()) {
+		switch (ZEND_NUM_ARGS()) {
 			case 0:
 				/* nothing to do */
 				break;
@@ -166,7 +166,7 @@ static void php_VARIANT_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend
 
 		RETVAL_LONG(zend_list_insert(pVar, IS_VARIANT));
 
-		if(!zend_is_true(return_value)) {
+		if (!zend_is_true(return_value)) {
 			ZVAL_FALSE(object);
 			return;
 		}
@@ -194,19 +194,19 @@ static pval php_VARIANT_get_property_handler(zend_property_reference *property_r
 	zend_hash_index_find(Z_OBJPROP_P(object), 0, (void **) &var_handle);
 	var_arg = zend_list_find(Z_LVAL_PP(var_handle), &type);
 
-	if(!var_arg || (type != IS_VARIANT)) {
+	if (!var_arg || (type != IS_VARIANT)) {
 		ZVAL_FALSE(&result);
 	} else {
 		overloaded_property = (zend_overloaded_element *) property_reference->elements_list->head->data;
-		switch(overloaded_property->type) {
+		switch (overloaded_property->type) {
 			case OE_IS_ARRAY:
 				ZVAL_FALSE(&result);
 				break;
 
 			case OE_IS_OBJECT:
-				if(!strcmp(overloaded_property->element.value.str.val, "value")) {
+				if (!strcmp(overloaded_property->element.value.str.val, "value")) {
 					php_variant_to_pval(var_arg, &result, 0, codepage TSRMLS_CC);
-				} else if(!strcmp(Z_STRVAL(overloaded_property->element), "type")) {
+				} else if (!strcmp(Z_STRVAL(overloaded_property->element), "type")) {
 					ZVAL_LONG(&result, V_VT(var_arg))
 				} else {
 					ZVAL_FALSE(&result);
@@ -256,83 +256,83 @@ static int do_VARIANT_propset(VARIANT *var_arg, pval *arg_property, pval *value 
 
 	Z_TYPE(type) = IS_STRING;
 
-	if(!strcmp(Z_STRVAL_P(arg_property), "bVal")) {
+	if (!strcmp(Z_STRVAL_P(arg_property), "bVal")) {
 		Z_LVAL(type) = VT_UI1;
-	} else if(!strcmp(Z_STRVAL_P(arg_property), "iVal")) { 
+	} else if (!strcmp(Z_STRVAL_P(arg_property), "iVal")) { 
 		Z_LVAL(type) = VT_I2;
-	} else if(!strcmp(Z_STRVAL_P(arg_property), "lVal")) {
+	} else if (!strcmp(Z_STRVAL_P(arg_property), "lVal")) {
 		Z_LVAL(type) = VT_I4;
-	} else if(!strcmp(Z_STRVAL_P(arg_property), "fltVal")) {
+	} else if (!strcmp(Z_STRVAL_P(arg_property), "fltVal")) {
 		Z_LVAL(type) = VT_R4;
-	} else if(!strcmp(Z_STRVAL_P(arg_property), "dblVal")) {
+	} else if (!strcmp(Z_STRVAL_P(arg_property), "dblVal")) {
 		Z_LVAL(type) = VT_R8;
-	} else if(!strcmp(Z_STRVAL_P(arg_property), "boolVal")) {
+	} else if (!strcmp(Z_STRVAL_P(arg_property), "boolVal")) {
 		Z_LVAL(type) = VT_BOOL;
-	} else if(!strcmp(Z_STRVAL_P(arg_property), "scode")) {
+	} else if (!strcmp(Z_STRVAL_P(arg_property), "scode")) {
 		Z_LVAL(type) = VT_ERROR;
-	} else if(!strcmp(Z_STRVAL_P(arg_property), "cyVal")) {
+	} else if (!strcmp(Z_STRVAL_P(arg_property), "cyVal")) {
 		Z_LVAL(type) = VT_CY;
-	} else if(!strcmp(Z_STRVAL_P(arg_property), "date")) {
+	} else if (!strcmp(Z_STRVAL_P(arg_property), "date")) {
 		Z_LVAL(type) = VT_DATE;
-	} else if(!strcmp(Z_STRVAL_P(arg_property), "bstrVal")) {
+	} else if (!strcmp(Z_STRVAL_P(arg_property), "bstrVal")) {
 		Z_LVAL(type) = VT_BSTR;
-	} else if(!strcmp(Z_STRVAL_P(arg_property), "pdecVal")) {
+	} else if (!strcmp(Z_STRVAL_P(arg_property), "pdecVal")) {
 		Z_LVAL(type) = VT_DECIMAL|VT_BYREF;
-	} else if(!strcmp(Z_STRVAL_P(arg_property), "punkVal")) {
+	} else if (!strcmp(Z_STRVAL_P(arg_property), "punkVal")) {
 		Z_LVAL(type) = VT_UNKNOWN;
-	} else if(!strcmp(Z_STRVAL_P(arg_property), "pdispVal")) {
+	} else if (!strcmp(Z_STRVAL_P(arg_property), "pdispVal")) {
 		Z_LVAL(type) = VT_DISPATCH;
-	} else if(!strcmp(Z_STRVAL_P(arg_property), "parray")) {
+	} else if (!strcmp(Z_STRVAL_P(arg_property), "parray")) {
 		Z_LVAL(type) = VT_ARRAY;
-	} else if(!strcmp(Z_STRVAL_P(arg_property), "pbVal")) {
+	} else if (!strcmp(Z_STRVAL_P(arg_property), "pbVal")) {
 		Z_LVAL(type) = VT_UI1|VT_BYREF;
-	} else if(!strcmp(Z_STRVAL_P(arg_property), "piVal")) {
+	} else if (!strcmp(Z_STRVAL_P(arg_property), "piVal")) {
 		Z_LVAL(type) = VT_I2|VT_BYREF;
-	} else if(!strcmp(Z_STRVAL_P(arg_property), "plVal")) {
+	} else if (!strcmp(Z_STRVAL_P(arg_property), "plVal")) {
 		Z_LVAL(type) = VT_I4|VT_BYREF;
-	} else if(!strcmp(Z_STRVAL_P(arg_property), "pfltVal")) {
+	} else if (!strcmp(Z_STRVAL_P(arg_property), "pfltVal")) {
 		Z_LVAL(type) = VT_R4|VT_BYREF;
-	} else if(!strcmp(Z_STRVAL_P(arg_property), "pdblVal")) {
+	} else if (!strcmp(Z_STRVAL_P(arg_property), "pdblVal")) {
 		Z_LVAL(type) = VT_R8|VT_BYREF;
-	} else if(!strcmp(Z_STRVAL_P(arg_property), "pboolVal")) {
+	} else if (!strcmp(Z_STRVAL_P(arg_property), "pboolVal")) {
 		Z_LVAL(type) = VT_BOOL|VT_BYREF;
-	} else if(!strcmp(Z_STRVAL_P(arg_property), "pscode")) {
+	} else if (!strcmp(Z_STRVAL_P(arg_property), "pscode")) {
 		Z_LVAL(type) = VT_ERROR|VT_BYREF;
-	} else if(!strcmp(Z_STRVAL_P(arg_property), "pcyVal")) {
+	} else if (!strcmp(Z_STRVAL_P(arg_property), "pcyVal")) {
 		Z_LVAL(type) = VT_CY|VT_BYREF;
-	} else if(!strcmp(Z_STRVAL_P(arg_property), "pdate")) {
+	} else if (!strcmp(Z_STRVAL_P(arg_property), "pdate")) {
 		Z_LVAL(type) = VT_DATE|VT_BYREF;
-	} else if(!strcmp(Z_STRVAL_P(arg_property), "pbstrVal")) {
+	} else if (!strcmp(Z_STRVAL_P(arg_property), "pbstrVal")) {
 		Z_LVAL(type) = VT_BSTR|VT_BYREF;
-	} else if(!strcmp(Z_STRVAL_P(arg_property), "ppunkVal")) {
+	} else if (!strcmp(Z_STRVAL_P(arg_property), "ppunkVal")) {
 		Z_LVAL(type) = VT_UNKNOWN|VT_BYREF;
-	} else if(!strcmp(Z_STRVAL_P(arg_property), "ppdispVal")) {
+	} else if (!strcmp(Z_STRVAL_P(arg_property), "ppdispVal")) {
 		Z_LVAL(type) = VT_DISPATCH|VT_BYREF;
-	} else if(!strcmp(Z_STRVAL_P(arg_property), "pparray")) {
+	} else if (!strcmp(Z_STRVAL_P(arg_property), "pparray")) {
 		Z_LVAL(type) = VT_ARRAY|VT_BYREF;
-	} else if(!strcmp(Z_STRVAL_P(arg_property), "pvarVal")) {
+	} else if (!strcmp(Z_STRVAL_P(arg_property), "pvarVal")) {
 		Z_LVAL(type) = VT_VARIANT|VT_BYREF;
-	} else if(!strcmp(Z_STRVAL_P(arg_property), "byref")) {
+	} else if (!strcmp(Z_STRVAL_P(arg_property), "byref")) {
 		Z_LVAL(type) = VT_BYREF;
-	} else if(!strcmp(Z_STRVAL_P(arg_property), "cVal")) {
+	} else if (!strcmp(Z_STRVAL_P(arg_property), "cVal")) {
 		Z_LVAL(type) = VT_I1;
-	} else if(!strcmp(Z_STRVAL_P(arg_property), "uiVal")) {
+	} else if (!strcmp(Z_STRVAL_P(arg_property), "uiVal")) {
 		Z_LVAL(type) = VT_UI2;
-	} else if(!strcmp(Z_STRVAL_P(arg_property), "ulVal")) {
+	} else if (!strcmp(Z_STRVAL_P(arg_property), "ulVal")) {
 		Z_LVAL(type) = VT_UI4;
-	} else if(!strcmp(Z_STRVAL_P(arg_property), "intVal")) {
+	} else if (!strcmp(Z_STRVAL_P(arg_property), "intVal")) {
 		Z_LVAL(type) = VT_INT;
-	} else if(!strcmp(Z_STRVAL_P(arg_property), "uintVal")) {
+	} else if (!strcmp(Z_STRVAL_P(arg_property), "uintVal")) {
 		Z_LVAL(type) = VT_UINT|VT_BYREF;
-	} else if(!strcmp(Z_STRVAL_P(arg_property), "pcVal")) {
+	} else if (!strcmp(Z_STRVAL_P(arg_property), "pcVal")) {
 		Z_LVAL(type) = VT_I1|VT_BYREF;
-	} else if(!strcmp(Z_STRVAL_P(arg_property), "puiVal")) {
+	} else if (!strcmp(Z_STRVAL_P(arg_property), "puiVal")) {
 		Z_LVAL(type) = VT_UI2|VT_BYREF;
-	} else if(!strcmp(Z_STRVAL_P(arg_property), "pulVal")) {
+	} else if (!strcmp(Z_STRVAL_P(arg_property), "pulVal")) {
 		Z_LVAL(type) = VT_UI4|VT_BYREF;
-	} else if(!strcmp(Z_STRVAL_P(arg_property), "pintVal")) {
+	} else if (!strcmp(Z_STRVAL_P(arg_property), "pintVal")) {
 		Z_LVAL(type) = VT_INT|VT_BYREF;
-	} else if(!strcmp(Z_STRVAL_P(arg_property), "puintVal")) {
+	} else if (!strcmp(Z_STRVAL_P(arg_property), "puintVal")) {
 		Z_LVAL(type) = VT_UINT|VT_BYREF;
 	} else {
 		php_error(E_WARNING, "Unknown member.");
