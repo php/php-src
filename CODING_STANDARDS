@@ -133,22 +133,7 @@ Naming Conventions
 [5] Variable names should be in lowercase.  Use underscores to separate
     between words.
 
-[6] Method names follow the 'studlyCaps' (also referred to as 'bumpy case'
-    or 'camel caps') naming convention, with care taken to minimize the
-    letter count. The initial letter of the name is lowercase, and each
-    letter that starts a new 'word' is capitalized.
-
-    Good:
-    'connect()'
-    'getData()'
-    'buildSomeWidget()'
-
-    Bad:
-    'get_Data()'
-    'buildsomewidget'
-    'getI()'
-
-[7] Classes should be given descriptive names. Avoid using abbreviations
+[6] Classes should be given descriptive names. Avoid using abbreviations
     where possible. Each word in the class name should start with a capital
     letter, with words underscore delimited. The class name should be prefixed
     with the name of the 'parent set'.
