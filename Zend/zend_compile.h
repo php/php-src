@@ -546,6 +546,9 @@ int zendlex(znode *zendlval TSRMLS_DC);
 #define ZEND_CLONE					111
 
 #define ZEND_INIT_CTOR_CALL			112
+#define ZEND_INIT_METHOD_CALL		113
+#define ZEND_INIT_STATIC_METHOD_CALL 114
+
 /* end of block */
 
 
