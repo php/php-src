@@ -1,0 +1,9 @@
+This is bcmath, a library of arbitrary precision math routines.
+These routines, in a different form, are the routines that to
+the arbitrary precision calculations for GNU bc and GNU dc.
+
+This library is provided to make these routines useful in a
+larger context with less restrictions on the use of them.
+
+These routines do not duplicate functionality of the GNU gmp
+library.  gmp is similar, but the actual computation is different.
