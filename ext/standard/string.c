@@ -2316,6 +2316,8 @@ PHPAPI void php_stripcslashes(char *str, int *len)
  */
 PHPAPI char *php_addcslashes(char *str, int length, int *new_length, int should_free, char *what, int wlength)
 {
+	/* TSRMLS_FETCH(); (causes parse error -> ?) */
+
 	char flags[256];
 	char *new_str = emalloc((length?length:(length=strlen(str)))*4+1); 
 	char *source,*target;
@@ -2331,14 +2333,7 @@ PHPAPI char *php_addcslashes(char *str, int length, int *new_length, int should_
 		length = strlen(str);
 	}
 
-	memset(flags, '\0', sizeof(flags));
-	for (source=what,end=source+wlength; (c=*source) || source<end; source++) {
-		if (source+3<end && *(source+1) == '.' && *(source+2) == '.' && (unsigned char)*(source+3)>=(unsigned char)c) {
-			memset(flags+c, 1, (unsigned char)*(source+3)-(unsigned char)c+1);
-			source+=3;
-		} else
-			flags[(unsigned char)c]=1;
-	}
+	php_charmask(what, wlength, flags TSRMLS_CC);
 
 	for (source=str,end=source+length,target=new_str; (c=*source) || source<end; source++) {
 		if (flags[(unsigned char)c]) {
