@@ -3206,11 +3206,14 @@ ZEND_VM_HANDLER(ZEND_UNSET_VAR)
 		target_symbol_table = zend_get_target_symbol_table(opline, EX(Ts), BP_VAR_IS, varname TSRMLS_CC);		
 		if (zend_hash_del(target_symbol_table, varname->value.str.val, varname->value.str.len+1) == SUCCESS) {		
 			zend_execute_data *ex = EXECUTE_DATA; 
+			ulong hash_value = zend_inline_hash_func(varname->value.str.val, varname->value.str.len+1);
+
 			do {
 				int i;
 
 				for (i = 0; i < ex->op_array->last_var; i++) {
-					if (ex->op_array->vars[i].name_len == varname->value.str.len &&
+					if (ex->op_array->vars[i].hash_value == hash_value &&
+						ex->op_array->vars[i].name_len == varname->value.str.len &&
 						!memcmp(ex->op_array->vars[i].name, varname->value.str.val, varname->value.str.len)) {
 						ex->CVs[i] = NULL;
 						break;
@@ -3285,12 +3288,15 @@ ZEND_VM_HANDLER(ZEND_UNSET_DIM_OBJ)
 					if (zend_symtable_del(ht, offset->value.str.val, offset->value.str.len+1) == SUCCESS &&
 					    ht == &EG(symbol_table)) {
 						zend_execute_data *ex;
+						ulong hash_value = zend_inline_hash_func(offset->value.str.val, offset->value.str.len+1);
+
 						for (ex = EXECUTE_DATA; ex; ex = ex->prev_execute_data) {
 							if (ex->symbol_table == ht) {
 								int i;
 
 								for (i = 0; i < ex->op_array->last_var; i++) {
-									if (ex->op_array->vars[i].name_len == offset->value.str.len &&
+									if (ex->op_array->vars[i].hash_value == hash_value &&
+									    ex->op_array->vars[i].name_len == offset->value.str.len &&
 									    !memcmp(ex->op_array->vars[i].name, offset->value.str.val, offset->value.str.len)) {
 										ex->CVs[i] = NULL;
 										break;

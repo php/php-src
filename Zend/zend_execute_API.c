@@ -1346,13 +1346,15 @@ void zend_verify_abstract_class(zend_class_entry *ce TSRMLS_DC)
 ZEND_API int zend_delete_global_variable(char *name, int name_len TSRMLS_DC)
 {
 	zend_execute_data *ex;
+	ulong hash_value = zend_inline_hash_func(name, name_len+1);
 
-	if (zend_symtable_del(&EG(symbol_table), name, name_len+1) == SUCCESS) {
+	if (zend_hash_quick_exists(&EG(symbol_table), name, name_len+1, hash_value)) {
 		for (ex = EG(current_execute_data); ex; ex = ex->prev_execute_data) {
 			if (ex->symbol_table == &EG(symbol_table)) {
 				int i;
 				for (i = 0; i < ex->op_array->last_var; i++) {
-					if (ex->op_array->vars[i].name_len == name_len &&
+					if (ex->op_array->vars[i].hash_value == hash_value &&
+					    ex->op_array->vars[i].name_len == name_len &&
 					    !memcmp(ex->op_array->vars[i].name, name, name_len)) {
 						ex->CVs[i] = NULL;
 						break;
@@ -1360,7 +1362,7 @@ ZEND_API int zend_delete_global_variable(char *name, int name_len TSRMLS_DC)
 				}
 			}
 		}
-		return SUCCESS;
+		return zend_hash_del(&EG(symbol_table), name, name_len+1);
 	}
 	return FAILURE;
 }
