@@ -32,13 +32,6 @@ require_once 'PEAR/Common.php';
  */
 class PEAR_Packager extends PEAR_Common
 {
-    // {{{ properties
-
-    /** debug mode (integer) */
-    var $debug = 0;
-
-    // }}}
-
     // {{{ constructor
 
     function PEAR_Packager()
@@ -60,7 +53,6 @@ class PEAR_Packager extends PEAR_Common
 
     function package($pkgfile = null, $compress = true)
     {
-        $this->orig_pwd = getcwd();
         if (empty($pkgfile)) {
             $pkgfile = 'package.xml';
         }
@@ -68,19 +60,17 @@ class PEAR_Packager extends PEAR_Common
         if (PEAR::isError($pkginfo)) {
             return $this->raiseError($pkginfo);
         }
-        // XXX This needs to be checked in infoFromDescriptionFile
-        //     or at least a helper method to do the proper checks
         if (empty($pkginfo['version'])) {
             return $this->raiseError("No version info found in $pkgfile");
         }
         // TMP DIR -------------------------------------------------
         // We allow calls like "pear package /home/user/mypack/package.xml"
+        $oldcwd = getcwd();
         if (!@chdir(dirname($pkgfile))) {
             return $this->raiseError('Could not chdir to '.dirname($pkgfile));
         }
-        $pwd = getcwd();
         $pkgfile = basename($pkgfile);
-        if (isset($pkginfo['release_state']) && $pkginfo['release_state'] == 'snapshot' && empty($pkginfo['version'])) {
+        if (@$pkginfo['release_state'] == 'snapshot' && empty($pkginfo['version'])) {
             $pkginfo['version'] = date('Ymd');
         }
         // don't want strange characters
@@ -95,7 +85,7 @@ class PEAR_Packager extends PEAR_Common
         // Copy files -----------------------------------------------
         foreach ($pkginfo['filelist'] as $fname => $atts) {
             if (!file_exists($fname)) {
-                chdir($this->orig_pwd);
+                chdir($oldcwd);
                 return $this->raiseError("File $fname does not exist");
             } else {
                 $filelist[$i++] = $fname;
@@ -108,14 +98,14 @@ class PEAR_Packager extends PEAR_Common
         }
         $new_xml = $this->xmlFromInfo($pkginfo);
         if (PEAR::isError($new_xml)) {
-            chdir($this->orig_pwd);
+            chdir($oldcwd);
             return $this->raiseError($new_xml);
         }
         $tmpdir = $this->mkTempDir(getcwd());
         $newpkgfile = $tmpdir . DIRECTORY_SEPARATOR . 'package.xml';
         $np = @fopen($newpkgfile, "w");
         if (!$np) {
-            chdir($this->orig_pwd);
+            chdir($oldcwd);
             return $this->raiseError("PEAR_Packager: unable to rewrite $pkgfile");
         }
         fwrite($np, $new_xml);
@@ -123,21 +113,21 @@ class PEAR_Packager extends PEAR_Common
 
         // TAR the Package -------------------------------------------
         $ext = $compress ? '.tgz' : '.tar';
-        $dest_package = $this->orig_pwd . DIRECTORY_SEPARATOR . $pkgver . $ext;
+        $dest_package = $oldcwd . DIRECTORY_SEPARATOR . $pkgver . $ext;
         $tar =& new Archive_Tar($dest_package, $compress);
         $tar->setErrorHandling(PEAR_ERROR_RETURN); // XXX Don't print errors
         // ----- Creates with the package.xml file
         $ok = $tar->createModify($newpkgfile, '', $tmpdir);
         if (PEAR::isError($ok)) {
-            chdir($this->orig_pwd);
+            chdir($oldcwd);
             return $this->raiseError($ok);
         } elseif (!$ok) {
-            chdir($this->orig_pwd);
+            chdir($oldcwd);
             return $this->raiseError('PEAR_Packager: tarball creation failed');
         }
         // ----- Add the content of the package
         if (!$tar->addModify($filelist, $pkgver)) {
-            chdir($this->orig_pwd);
+            chdir($oldcwd);
             return $this->raiseError('PEAR_Packager: tarball creation failed');
         }
         $this->log(1, "Package $dest_package done");
@@ -147,7 +137,7 @@ class PEAR_Packager extends PEAR_Common
             $this->log(1, "Tag the released code with `pear cvstag $pkgfile'");
             $this->log(1, "(or set the CVS tag $cvstag by hand)");
         }
-        chdir($this->orig_pwd);
+        chdir($oldcwd);
         return $dest_package;
     }
 
