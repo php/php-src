@@ -182,8 +182,14 @@ warn_plus_overloading	=	Off		; warn if the + operator is used with strings
 ;;;;;;;;;;;;;;;;;
 ; Data Handling ;
 ;;;;;;;;;;;;;;;;;
-;arg_separator      =   "&amp;" ; The separator used in PHP generated URLs to separate arguments.
-                                ; Default is "&".
+
+;arg_separator.output = "&amp;"	; The separator used in PHP generated URLs to separate arguments.
+								; Default is "&".
+
+;arg_separator.input = ";&"		; List of separator(s) used by PHP to parse input URLs into variables.
+								; Default is "&". 
+								; NOTE: Every character in this directive is considered as separator!                 
+
 variables_order		=	"GPCS"	; This directive describes the order in which PHP registers
 								; GET, POST, Cookie, Environment and Built-in variables (G, P,
 								; C, E & S respectively, often referred to as EGPCS or GPC).

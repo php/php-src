@@ -67,12 +67,12 @@ static char *url_attr_addon(const char *tag,const char *attr,const char *val,con
 	if(flag) {		
 		if(!strstr(val,buf)&&!strchr(val,':'))
 			{
-				char *result = (char *)emalloc(strlen(buf)+strlen(PG(arg_separator))+1);
+				char *result = (char *)emalloc(strlen(buf)+strlen(PG(arg_separator).output)+1);
 				int n;
 
 				if(strchr(val,'?')) {
-					strcpy(result,PG(arg_separator));
-					n=strlen(PG(arg_separator));
+					strcpy(result,PG(arg_separator).output);
+					n=strlen(PG(arg_separator).output);
 				} else {
 					*result='?';
 					n=1;

@@ -30,7 +30,10 @@ PHP 4.0                                                                    NEWS
   (Zeev)
 
 ?? ??? 200?, Version 4.0.5
-- New FastCGI server module. (Ben Mansell)
+- Added new php.ini directive: arg_separator.input which is used to tell
+  PHP which characters are considered as argument separators in URLs. 
+  Renamed php.ini directive: arg_separator -> arg_separator.output (Jani)
+- Added FastCGI SAPI module. (Ben Mansell)
 - Added array_reduce(), which allows iterative reduction of an array
   to a single value via a callback function. (Andrei)
 - The imageloadfont function of the gd extension should be not platform
