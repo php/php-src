@@ -66,6 +66,7 @@ static void php_free_pcre_cache(void *data)
 	pefree(pce->re, 1);
 #if HAVE_SETLOCALE
 	if ((void*)pce->tables) pefree((void*)pce->tables, 1);
+	pefree(pce->locale, 1);
 #endif
 }
 
@@ -302,7 +303,7 @@ PHPAPI pcre* pcre_get_compiled_regex(char *regex, pcre_extra **extra, int *preg_
 	new_entry.extra = *extra;
 	new_entry.preg_options = poptions;
 #if HAVE_SETLOCALE
-	new_entry.locale = locale;
+	new_entry.locale = pestrdup(locale, 1);
 	new_entry.tables = tables;
 #endif
 	zend_hash_update(&PCRE_G(pcre_cache), regex, regex_len+1, (void *)&new_entry,
