@@ -80,6 +80,15 @@ static int le_gd;
 #endif
 #endif
 
+#define CPDF_FETCH_CPDFDOC(pdf_zval) \
+        convert_to_long(pdf_zval); \
+	id = Z_LVAL_P(pdf_zval); \
+	pdf = zend_list_find(id, &type); \
+	if(!pdf || type != CPDF_GLOBAL(le_cpdf)) { \
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find identifier %d", id); \
+		RETURN_FALSE; \
+	} \
+
 function_entry cpdf_functions[] = {
   PHP_FE(cpdf_global_set_document_limits, NULL)
 	PHP_FE(cpdf_set_creator, NULL)
@@ -261,14 +270,8 @@ PHP_FUNCTION(cpdf_set_creator)
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
+	CPDF_FETCH_CPDFDOC(arg1);
 	convert_to_string(arg2);
-	id=Z_LVAL_P(arg1);
-	pdf = zend_list_find(id, &type);
-	if (!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php_error(E_WARNING, "%s(): Unable to find identifier %d (type=%d)", get_active_function_name(TSRMLS_C), id, type);
-		RETURN_FALSE;
-	}
 
 	cpdf_setCreator(pdf, Z_STRVAL_P(arg2));
 
@@ -288,14 +291,8 @@ PHP_FUNCTION(cpdf_set_title)
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
+	CPDF_FETCH_CPDFDOC(arg1);
 	convert_to_string(arg2);
-	id=Z_LVAL_P(arg1);
-	pdf = zend_list_find(id, &type);
-	if (!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php_error(E_WARNING, "%s(): Unable to find identifier %d (type=%d)", get_active_function_name(TSRMLS_C), id, type);
-		RETURN_FALSE;
-	}
 
 	cpdf_setTitle(pdf, Z_STRVAL_P(arg2));
 
@@ -316,14 +313,8 @@ PHP_FUNCTION(cpdf_set_subject)
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
+	CPDF_FETCH_CPDFDOC(arg1);
 	convert_to_string(arg2);
-	id=Z_LVAL_P(arg1);
-	pdf = zend_list_find(id, &type);
-	if (!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php_error(E_WARNING, "%s(): Unable to find identifier %d (type=%d)", get_active_function_name(TSRMLS_C), id, type);
-		RETURN_FALSE;
-	}
 
 	cpdf_setSubject(pdf, Z_STRVAL_P(arg2));
 
@@ -343,14 +334,8 @@ PHP_FUNCTION(cpdf_set_keywords)
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
+	CPDF_FETCH_CPDFDOC(arg1);
 	convert_to_string(arg2);
-	id=Z_LVAL_P(arg1);
-	pdf = zend_list_find(id, &type);
-	if (!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php_error(E_WARNING, "%s(): Unable to find identifier %d (type=%d)", get_active_function_name(TSRMLS_C), id, type);
-		RETURN_FALSE;
-	}
 
 	cpdf_setKeywords(pdf, Z_STRVAL_P(arg2));
 
@@ -374,16 +359,8 @@ PHP_FUNCTION(cpdf_set_viewer_preferences)
 	if (getParameters(ht, 2, &arg1, &arg2) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-	convert_to_long(arg1);
+	CPDF_FETCH_CPDFDOC(arg1);
 	convert_to_array(arg2);
-
-	id = Z_LVAL_P (arg1);
-
-	pdf = zend_list_find(id, &type);
-	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php_error(E_WARNING, "%s(): Unable to find identifier %d", get_active_function_name(TSRMLS_C), id);
-		RETURN_FALSE;
-	}
 
 	if (zend_hash_find (Z_ARRVAL_P(arg2), "pagemode", sizeof ("pagemode"), (void **) &zvalue) == SUCCESS)
 	{
@@ -475,7 +452,7 @@ PHP_FUNCTION(cpdf_open)
 		convert_to_string(arg2);
 #if APACHE
 		if(strcmp(Z_STRVAL_P(arg2), "-") == 0)
-			php_error(E_WARNING, "%s(): Writing to stdout as described in the ClibPDF manual is not possible if php is used as an Apache module. Write to a memory stream and use cpdf_output_buffer() instead.", get_active_function_name(TSRMLS_C));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Writing to stdout as described in the ClibPDF manual is not possible if php is used as an Apache module. Write to a memory stream and use cpdf_output_buffer() instead.");
 #endif
 		cpdf_setOutputFilename(cpdf, Z_STRVAL_P(arg2));
 	}
@@ -498,13 +475,8 @@ PHP_FUNCTION(cpdf_close)
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	id=Z_LVAL_P(arg1);
-	pdf = zend_list_find(id, &type);
-	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php_error(E_WARNING, "%s(): Unable to find identifier %d", get_active_function_name(TSRMLS_C), id);
-		RETURN_FALSE;
-	}
+	CPDF_FETCH_CPDFDOC(arg1);
+
 	zend_list_delete(id);
 
 	RETURN_TRUE;
@@ -528,21 +500,15 @@ PHP_FUNCTION(cpdf_page_init)
 	if (getParametersArray(ht, argc, argv) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-	convert_to_long(argv[0]);
+	CPDF_FETCH_CPDFDOC(argv[0]);
 	convert_to_long(argv[1]);
 	convert_to_long(argv[2]);
 	convert_to_long(argv[3]);
 	convert_to_long(argv[4]);
-	id=Z_LVAL_P(argv[0]);
 	pagenr=Z_LVAL_P(argv[1]);
 	orientation=Z_LVAL_P(argv[2]);
 	height = Z_LVAL_P(argv[3]);
 	width = Z_LVAL_P(argv[4]);
-	pdf = zend_list_find(id, &type);
-	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php_error(E_WARNING, "%s(): Unable to find identifier %d", get_active_function_name(TSRMLS_C), id);
-		RETURN_FALSE;
-	}
 
 	if(argc > 5) {
 		convert_to_double(argv[5]);
@@ -569,16 +535,10 @@ PHP_FUNCTION(cpdf_finalize_page)
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
+	CPDF_FETCH_CPDFDOC(arg1);
 	convert_to_long(arg2);
-	id=Z_LVAL_P(arg1);
 	pagenr=Z_LVAL_P(arg2);
-	pdf = zend_list_find(id, &type);
-	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php_error(E_WARNING, "%s(): Unable to find identifier %d", get_active_function_name(TSRMLS_C), id);
-		RETURN_FALSE;
-	}
-
+	
 	cpdf_finalizePage(pdf, pagenr);
 
 	RETURN_TRUE;
@@ -597,15 +557,9 @@ PHP_FUNCTION(cpdf_set_current_page)
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
+	CPDF_FETCH_CPDFDOC(arg1);
 	convert_to_long(arg2);
-	id=Z_LVAL_P(arg1);
 	pagenr=Z_LVAL_P(arg2);
-	pdf = zend_list_find(id, &type);
-	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php_error(E_WARNING, "%s(): Unable to find identifier %d", get_active_function_name(TSRMLS_C), id);
-		RETURN_FALSE;
-	}
 
 	cpdf_setCurrentPage(pdf, pagenr);
 
@@ -625,13 +579,7 @@ PHP_FUNCTION(cpdf_begin_text)
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	id=Z_LVAL_P(arg1);
-	pdf = zend_list_find(id, &type);
-	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php_error(E_WARNING, "%s(): Unable to find identifier %d", get_active_function_name(TSRMLS_C), id);
-		RETURN_FALSE;
-	}
+	CPDF_FETCH_CPDFDOC(arg1);
 
 	cpdf_beginText(pdf, 0);
 
@@ -651,13 +599,7 @@ PHP_FUNCTION(cpdf_end_text)
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	id=Z_LVAL_P(arg1);
-	pdf = zend_list_find(id, &type);
-	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php_error(E_WARNING, "%s(): Unable to find identifier %d", get_active_function_name(TSRMLS_C), id);
-		RETURN_FALSE;
-	}
+	CPDF_FETCH_CPDFDOC(arg1);
 
 	cpdf_endText(pdf);
 
@@ -677,14 +619,8 @@ PHP_FUNCTION(cpdf_show)
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
+	CPDF_FETCH_CPDFDOC(arg1);
 	convert_to_string(arg2);
-	id=Z_LVAL_P(arg1);
-	pdf = zend_list_find(id, &type);
-	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php_error(E_WARNING, "%s(): Unable to find identifier %d", get_active_function_name(TSRMLS_C), id);
-		RETURN_FALSE;
-	}
 
 	cpdf_textShow(pdf, Z_STRVAL_P(arg2));
 
@@ -706,16 +642,10 @@ PHP_FUNCTION(cpdf_show_xy)
 	if (getParametersArray(ht, argc, argv) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-	convert_to_long(argv[0]);
+	CPDF_FETCH_CPDFDOC(argv[0]);
 	convert_to_string(argv[1]);
 	convert_to_double(argv[2]);
 	convert_to_double(argv[3]);
-	id=Z_LVAL_P(argv[0]);
-	pdf = zend_list_find(id, &type);
-	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php_error(E_WARNING, "%s(): Unable to find identifier %d", get_active_function_name(TSRMLS_C), id);
-		RETURN_FALSE;
-	}
 
 	if(argc == 5) {
 		convert_to_long(argv[4]);
@@ -742,14 +672,8 @@ PHP_FUNCTION(cpdf_continue_text)
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
+	CPDF_FETCH_CPDFDOC(arg1);
 	convert_to_string(arg2);
-	id=Z_LVAL_P(arg1);
-	pdf = zend_list_find(id, &type);
-	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php_error(E_WARNING, "%s(): Unable to find identifier %d", get_active_function_name(TSRMLS_C), id);
-		RETURN_FALSE;
-	}
 
 	cpdf_textCRLFshow(pdf, Z_STRVAL_P(arg2));
 
@@ -769,14 +693,8 @@ PHP_FUNCTION(cpdf_text)
 	if((argc < 2) || (argc == 3) || (argc > 7) || getParametersArray(ht, argc, argv) == FAILURE)
 			WRONG_PARAM_COUNT;
 
-	convert_to_long(argv[0]);
+	CPDF_FETCH_CPDFDOC(argv[0]);
 	convert_to_string(argv[1]);
-	id=Z_LVAL_P(argv[0]);
-	pdf = zend_list_find(id, &type);
-	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php_error(E_WARNING, "%s(): Unable to find identifier %d", get_active_function_name(TSRMLS_C), id);
-		RETURN_FALSE;
-	}
 
 	if(argc > 4) {
 		convert_to_long(argv[4]);
@@ -859,19 +777,13 @@ PHP_FUNCTION(cpdf_set_font)
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
+	CPDF_FETCH_CPDFDOC(arg1);
 	convert_to_string(arg2);
 	convert_to_double(arg3);
 	convert_to_string(arg4);
-	id=Z_LVAL_P(arg1);
-	pdf = zend_list_find(id, &type);
-	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php_error(E_WARNING, "%s(): Unable to find identifier %d", get_active_function_name(TSRMLS_C), id);
-		RETURN_FALSE;
-	}
 	
 /*	if(Z_LVAL_P(arg4) > 6) {
-		php_error(E_WARNING, "%s(): Font encoding set to 5", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Font encoding set to 5");
 		Z_LVAL_P(arg4) = 5;
 	}
 */
@@ -893,15 +805,9 @@ PHP_FUNCTION(cpdf_set_font_directories)
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
+	CPDF_FETCH_CPDFDOC(arg1);
 	convert_to_string(arg2);
 	convert_to_string(arg3);
-	id=Z_LVAL_P(arg1);
-	pdf = zend_list_find(id, &type);
-	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php_error(E_WARNING, "%s(): Unable to find identifier %d", get_active_function_name(TSRMLS_C), id);
-		RETURN_FALSE;
-	}
 
 	cpdf_setFontDirectories(pdf, Z_STRVAL_P(arg2), Z_STRVAL_P(arg3));
 
@@ -921,14 +827,8 @@ PHP_FUNCTION(cpdf_set_font_map_file)
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
+	CPDF_FETCH_CPDFDOC(arg1);
 	convert_to_string(arg2);
-	id=Z_LVAL_P(arg1);
-	pdf = zend_list_find(id, &type);
-	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php_error(E_WARNING, "%s(): Unable to find identifier %d", get_active_function_name(TSRMLS_C), id);
-		RETURN_FALSE;
-	}
 
 	cpdf_setFontMapFile(pdf, Z_STRVAL_P(arg2));
 
@@ -948,14 +848,8 @@ PHP_FUNCTION(cpdf_set_leading)
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
+	CPDF_FETCH_CPDFDOC(arg1);
 	convert_to_double(arg2);
-	id=Z_LVAL_P(arg1);
-	pdf = zend_list_find(id, &type);
-	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php_error(E_WARNING, "%s(): Unable to find identifier %d", get_active_function_name(TSRMLS_C), id);
-		RETURN_FALSE;
-	}
 	
 	cpdf_setTextLeading(pdf, (float) Z_DVAL_P(arg2));
 
@@ -975,14 +869,8 @@ PHP_FUNCTION(cpdf_set_text_rendering)
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
+	CPDF_FETCH_CPDFDOC(arg1);
 	convert_to_long(arg2);
-	id=Z_LVAL_P(arg1);
-	pdf = zend_list_find(id, &type);
-	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php_error(E_WARNING, "%s(): Unable to find identifier %d", get_active_function_name(TSRMLS_C), id);
-		RETURN_FALSE;
-	}
 	
 	cpdf_setTextRenderingMode(pdf, Z_LVAL_P(arg2));
 
@@ -1002,14 +890,8 @@ PHP_FUNCTION(cpdf_set_horiz_scaling)
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
+	CPDF_FETCH_CPDFDOC(arg1);
 	convert_to_double(arg2);
-	id=Z_LVAL_P(arg1);
-	pdf = zend_list_find(id, &type);
-	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php_error(E_WARNING, "%s(): Unable to find identifier %d", get_active_function_name(TSRMLS_C), id);
-		RETURN_FALSE;
-	}
 	
 	cpdf_setHorizontalScaling(pdf, (float) Z_DVAL_P(arg2) * 100.0);
 
@@ -1029,14 +911,8 @@ PHP_FUNCTION(cpdf_set_text_rise)
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
+	CPDF_FETCH_CPDFDOC(arg1);
 	convert_to_double(arg2);
-	id=Z_LVAL_P(arg1);
-	pdf = zend_list_find(id, &type);
-	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php_error(E_WARNING, "%s(): Unable to find identifier %d", get_active_function_name(TSRMLS_C), id);
-		RETURN_FALSE;
-	}
 	
 	cpdf_setTextRise(pdf, (float) Z_DVAL_P(arg2));
 
@@ -1059,18 +935,11 @@ PHP_FUNCTION(cpdf_set_text_matrix)
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
+	CPDF_FETCH_CPDFDOC(arg1);
 	convert_to_array(arg2);
-	id=Z_LVAL_P(arg1);
-	matrix=Z_ARRVAL_P(arg2);
-	pdf = zend_list_find(id, &type);
-	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php_error(E_WARNING, "%s(): Unable to find identifier %d", get_active_function_name(TSRMLS_C), id);
-		RETURN_FALSE;
-	}
 	
 	if(zend_hash_num_elements(matrix) != 6) {
-		php_error(E_WARNING, "%s(): Text matrix must have 6 elements", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Text matrix must have 6 elements");
 		RETURN_FALSE;
 	}
 
@@ -1111,15 +980,9 @@ PHP_FUNCTION(cpdf_set_text_pos)
 	if (getParametersArray(ht, argc, argv) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-	convert_to_long(argv[0]);
+	CPDF_FETCH_CPDFDOC(argv[0]);
 	convert_to_double(argv[1]);
 	convert_to_double(argv[2]);
-	id=Z_LVAL_P(argv[0]);
-	pdf = zend_list_find(id, &type);
-	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php_error(E_WARNING, "%s(): Unable to find identifier %d", get_active_function_name(TSRMLS_C), id);
-		RETURN_FALSE;
-	}
 	
 	if(argc > 3) {
 		convert_to_long(argv[3]);
@@ -1146,14 +1009,8 @@ PHP_FUNCTION(cpdf_rotate_text)
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
+	CPDF_FETCH_CPDFDOC(arg1);
 	convert_to_double(arg2);
-	id=Z_LVAL_P(arg1);
-	pdf = zend_list_find(id, &type);
-	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php_error(E_WARNING, "%s(): Unable to find identifier %d", get_active_function_name(TSRMLS_C), id);
-		RETURN_FALSE;
-	}
 
 	cpdf_rotateText(pdf, (float) Z_DVAL_P(arg2));
 
@@ -1173,14 +1030,8 @@ PHP_FUNCTION(cpdf_set_char_spacing)
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
+	CPDF_FETCH_CPDFDOC(arg1);
 	convert_to_double(arg2);
-	id=Z_LVAL_P(arg1);
-	pdf = zend_list_find(id, &type);
-	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php_error(E_WARNING, "%s(): Unable to find identifier %d", get_active_function_name(TSRMLS_C), id);
-		RETURN_FALSE;
-	}
 
 	cpdf_setCharacterSpacing(pdf, (float) Z_DVAL_P(arg2));
 
@@ -1200,14 +1051,8 @@ PHP_FUNCTION(cpdf_set_word_spacing)
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
+	CPDF_FETCH_CPDFDOC(arg1);
 	convert_to_double(arg2);
-	id=Z_LVAL_P(arg1);
-	pdf = zend_list_find(id, &type);
-	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php_error(E_WARNING, "%s(): Unable to find identifier %d", get_active_function_name(TSRMLS_C), id);
-		RETURN_FALSE;
-	}
 
 	cpdf_setWordSpacing(pdf, (float) Z_DVAL_P(arg2));
 
@@ -1228,14 +1073,8 @@ PHP_FUNCTION(cpdf_stringwidth)
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
+	CPDF_FETCH_CPDFDOC(arg1);
 	convert_to_string(arg2);
-	id=Z_LVAL_P(arg1);
-	pdf = zend_list_find(id, &type);
-	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php_error(E_WARNING, "%s(): Unable to find identifier %d", get_active_function_name(TSRMLS_C), id);
-		RETURN_FALSE;
-	}
 
 	width = (double) cpdf_stringWidth(pdf, Z_STRVAL_P(arg2));
 
@@ -1255,13 +1094,7 @@ PHP_FUNCTION(cpdf_save)
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	id=Z_LVAL_P(arg1);
-	pdf = zend_list_find(id, &type);
-	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php_error(E_WARNING, "%s(): Unable to find identifier %d", get_active_function_name(TSRMLS_C), id);
-		RETURN_FALSE;
-	}
+	CPDF_FETCH_CPDFDOC(arg1);
 
 	cpdf_gsave(pdf);
 
@@ -1281,13 +1114,7 @@ PHP_FUNCTION(cpdf_restore)
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	id=Z_LVAL_P(arg1);
-	pdf = zend_list_find(id, &type);
-	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php_error(E_WARNING, "%s(): Unable to find identifier %d", get_active_function_name(TSRMLS_C), id);
-		RETURN_FALSE;
-	}
+	CPDF_FETCH_CPDFDOC(arg1);
 
 	cpdf_grestore(pdf);
 
@@ -1307,15 +1134,9 @@ PHP_FUNCTION(cpdf_translate)
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
+	CPDF_FETCH_CPDFDOC(arg1);
 	convert_to_double(arg2);
 	convert_to_double(arg3);
-	id=Z_LVAL_P(arg1);
-	pdf = zend_list_find(id, &type);
-	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php_error(E_WARNING, "%s(): Unable to find identifier %d", get_active_function_name(TSRMLS_C), id);
-		RETURN_FALSE;
-	}
 
 	cpdf_rawTranslate(pdf, (float) Z_DVAL_P(arg2), (float) Z_DVAL_P(arg3));
 
@@ -1335,15 +1156,9 @@ PHP_FUNCTION(cpdf_scale)
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
+	CPDF_FETCH_CPDFDOC(arg1);
 	convert_to_double(arg2);
 	convert_to_double(arg3);
-	id=Z_LVAL_P(arg1);
-	pdf = zend_list_find(id, &type);
-	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php_error(E_WARNING, "%s(): Unable to find identifier %d", get_active_function_name(TSRMLS_C), id);
-		RETURN_FALSE;
-	}
 
 	cpdf_scale(pdf, (float) Z_DVAL_P(arg2), (float) Z_DVAL_P(arg3));
 
@@ -1363,14 +1178,8 @@ PHP_FUNCTION(cpdf_rotate)
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
+	CPDF_FETCH_CPDFDOC(arg1);
 	convert_to_double(arg2);
-	id=Z_LVAL_P(arg1);
-	pdf = zend_list_find(id, &type);
-	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php_error(E_WARNING, "%s(): Unable to find identifier %d", get_active_function_name(TSRMLS_C), id);
-		RETURN_FALSE;
-	}
 
 	cpdf_rotate(pdf, (float) Z_DVAL_P(arg2));
 
@@ -1390,17 +1199,11 @@ PHP_FUNCTION(cpdf_setflat)
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
+	CPDF_FETCH_CPDFDOC(arg1);
 	convert_to_double(arg2);
-	id=Z_LVAL_P(arg1);
-	pdf = zend_list_find(id, &type);
-	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php_error(E_WARNING, "%s(): Unable to find identifier %d", get_active_function_name(TSRMLS_C), id);
-		RETURN_FALSE;
-	}
 
 	if((Z_LVAL_P(arg2) > 100) && (Z_LVAL_P(arg2) < 0)) {
-		php_error(E_WARNING, "%s(): Parameter has to between 0 and 100", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Parameter has to between 0 and 100");
 		RETURN_FALSE;
 	}
 
@@ -1422,17 +1225,11 @@ PHP_FUNCTION(cpdf_setlinejoin)
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
+	CPDF_FETCH_CPDFDOC(arg1);
 	convert_to_long(arg2);
-	id=Z_LVAL_P(arg1);
-	pdf = zend_list_find(id, &type);
-	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php_error(E_WARNING, "%s(): Unable to find identifier %d", get_active_function_name(TSRMLS_C), id);
-		RETURN_FALSE;
-	}
 
 	if((Z_LVAL_P(arg2) > 2) && (Z_LVAL_P(arg2) < 0)) {
-		php_error(E_WARNING, "%s(): Parameter has to between 0 and 2", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Parameter has to between 0 and 2");
 		RETURN_FALSE;
 	}
 
@@ -1454,17 +1251,11 @@ PHP_FUNCTION(cpdf_setlinecap)
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
+	CPDF_FETCH_CPDFDOC(arg1);
 	convert_to_long(arg2);
-	id=Z_LVAL_P(arg1);
-	pdf = zend_list_find(id, &type);
-	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php_error(E_WARNING, "%s(): Unable to find identifier %d", get_active_function_name(TSRMLS_C), id);
-		RETURN_FALSE;
-	}
 
 	if((Z_LVAL_P(arg2) > 2) && (Z_LVAL_P(arg2) < 0)) {
-		php_error(E_WARNING, "%s(): Parameter has to be > 0 and =< 2", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Parameter has to be > 0 and =< 2");
 		RETURN_FALSE;
 	}
 
@@ -1486,17 +1277,11 @@ PHP_FUNCTION(cpdf_setmiterlimit)
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
+	CPDF_FETCH_CPDFDOC(arg1);
 	convert_to_double(arg2);
-	id=Z_LVAL_P(arg1);
-	pdf = zend_list_find(id, &type);
-	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php_error(E_WARNING, "%s(): Unable to find identifier %d", get_active_function_name(TSRMLS_C), id);
-		RETURN_FALSE;
-	}
 
 	if(Z_DVAL_P(arg2) < 1) {
-		php_error(E_WARNING, "%s(): Parameter has to be >= 1", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Parameter has to be >= 1");
 		RETURN_FALSE;
 	}
 
@@ -1518,14 +1303,8 @@ PHP_FUNCTION(cpdf_setlinewidth)
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
+	CPDF_FETCH_CPDFDOC(arg1);
 	convert_to_double(arg2);
-	id=Z_LVAL_P(arg1);
-	pdf = zend_list_find(id, &type);
-	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php_error(E_WARNING, "%s(): Unable to find identifier %d", get_active_function_name(TSRMLS_C), id);
-		RETURN_FALSE;
-	}
 
 	cpdf_setlinewidth(pdf, (float) Z_DVAL_P(arg2));
 
@@ -1547,15 +1326,9 @@ PHP_FUNCTION(cpdf_setdash)
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
+	CPDF_FETCH_CPDFDOC(arg1);
 	convert_to_long(arg2);
 	convert_to_long(arg3);
-	id=Z_LVAL_P(arg1);
-	pdf = zend_list_find(id, &type);
-	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php_error(E_WARNING, "%s(): Unable to find identifier %d", get_active_function_name(TSRMLS_C), id);
-		RETURN_FALSE;
-	}
 
 	snprintf(buffer, BUFFERLEN, "[%d %d] 0", (int) Z_LVAL_P(arg2), (int) Z_LVAL_P(arg3));
 	cpdf_setdash(pdf, buffer);
@@ -1579,15 +1352,9 @@ PHP_FUNCTION(cpdf_moveto)
 	if (getParametersArray(ht, argc, argv) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-	convert_to_long(argv[0]);
+	CPDF_FETCH_CPDFDOC(argv[0]);
 	convert_to_double(argv[1]);
 	convert_to_double(argv[2]);
-	id=Z_LVAL_P(argv[0]);
-	pdf = zend_list_find(id, &type);
-	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php_error(E_WARNING, "%s(): Unable to find identifier %d", get_active_function_name(TSRMLS_C), id);
-		RETURN_FALSE;
-	}
 
 	if(argc > 3) {
 		convert_to_long(argv[3]);
@@ -1616,15 +1383,9 @@ PHP_FUNCTION(cpdf_rmoveto)
 	if (getParametersArray(ht, argc, argv) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-	convert_to_long(argv[0]);
+	CPDF_FETCH_CPDFDOC(argv[0]);
 	convert_to_double(argv[1]);
 	convert_to_double(argv[2]);
-	id=Z_LVAL_P(argv[0]);
-	pdf = zend_list_find(id, &type);
-	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php_error(E_WARNING, "%s(): Unable to find identifier %d", get_active_function_name(TSRMLS_C), id);
-		RETURN_FALSE;
-	}
 
 	if(argc > 3) {
 		convert_to_long(argv[3]);
@@ -1653,19 +1414,13 @@ PHP_FUNCTION(cpdf_curveto)
 	if (getParametersArray(ht, argc, argv) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-	convert_to_long(argv[0]);
+	CPDF_FETCH_CPDFDOC(argv[0]);
 	convert_to_double(argv[1]);
 	convert_to_double(argv[2]);
 	convert_to_double(argv[3]);
 	convert_to_double(argv[4]);
 	convert_to_double(argv[5]);
 	convert_to_double(argv[6]);
-	id=Z_LVAL_P(argv[0]);
-	pdf = zend_list_find(id, &type);
-	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php_error(E_WARNING, "%s(): Unable to find identifier %d", get_active_function_name(TSRMLS_C), id);
-		RETURN_FALSE;
-	}
 
 	if(argc > 7) {
 		convert_to_long(argv[7]);
@@ -1704,15 +1459,9 @@ PHP_FUNCTION(cpdf_lineto)
 	if (getParametersArray(ht, argc, argv) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-	convert_to_long(argv[0]);
+	CPDF_FETCH_CPDFDOC(argv[0]);
 	convert_to_double(argv[1]);
 	convert_to_double(argv[2]);
-	id=Z_LVAL_P(argv[0]);
-	pdf = zend_list_find(id, &type);
-	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php_error(E_WARNING, "%s(): Unable to find identifier %d", get_active_function_name(TSRMLS_C), id);
-		RETURN_FALSE;
-	}
 
 	if(argc > 3) {
 		convert_to_long(argv[3]);
@@ -1741,15 +1490,9 @@ PHP_FUNCTION(cpdf_rlineto)
 	if (getParametersArray(ht, argc, argv) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-	convert_to_long(argv[0]);
+	CPDF_FETCH_CPDFDOC(argv[0]);
 	convert_to_double(argv[1]);
 	convert_to_double(argv[2]);
-	id=Z_LVAL_P(argv[0]);
-	pdf = zend_list_find(id, &type);
-	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php_error(E_WARNING, "%s(): Unable to find identifier %d", get_active_function_name(TSRMLS_C), id);
-		RETURN_FALSE;
-	}
 
 	if(argc > 3) {
 		convert_to_long(argv[3]);
@@ -1778,16 +1521,10 @@ PHP_FUNCTION(cpdf_circle)
 	if (getParametersArray(ht, argc, argv) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-	convert_to_long(argv[0]);
+	CPDF_FETCH_CPDFDOC(argv[0]);
 	convert_to_double(argv[1]);
 	convert_to_double(argv[2]);
 	convert_to_double(argv[3]);
-	id=Z_LVAL_P(argv[0]);
-	pdf = zend_list_find(id, &type);
-	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php_error(E_WARNING, "%s(): Unable to find identifier %d", get_active_function_name(TSRMLS_C), id);
-		RETURN_FALSE;
-	}
 
 	if(argc > 4) {
 		convert_to_long(argv[4]);
@@ -1816,18 +1553,12 @@ PHP_FUNCTION(cpdf_arc)
 	if (getParametersArray(ht, argc, argv) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-	convert_to_long(argv[0]);
+	CPDF_FETCH_CPDFDOC(argv[0]);
 	convert_to_double(argv[1]);
 	convert_to_double(argv[2]);
 	convert_to_double(argv[3]);
 	convert_to_double(argv[4]);
 	convert_to_double(argv[5]);
-	id=Z_LVAL_P(argv[0]);
-	pdf = zend_list_find(id, &type);
-	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php_error(E_WARNING, "%s(): Unable to find identifier %d", get_active_function_name(TSRMLS_C), id);
-		RETURN_FALSE;
-	}
 
 	if(argc > 6) {
 		convert_to_long(argv[6]);
@@ -1856,17 +1587,11 @@ PHP_FUNCTION(cpdf_rect)
 	if (getParametersArray(ht, argc, argv) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-	convert_to_long(argv[0]);
+	CPDF_FETCH_CPDFDOC(argv[0]);
 	convert_to_double(argv[1]);
 	convert_to_double(argv[2]);
 	convert_to_double(argv[3]);
 	convert_to_double(argv[4]);
-	id=Z_LVAL_P(argv[0]);
-	pdf = zend_list_find(id, &type);
-	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php_error(E_WARNING, "%s(): Unable to find identifier %d", get_active_function_name(TSRMLS_C), id);
-		RETURN_FALSE;
-	}
 
 	if(argc > 5) {
 		convert_to_long(argv[5]);
@@ -1899,13 +1624,7 @@ PHP_FUNCTION(cpdf_newpath)
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	id=Z_LVAL_P(arg1);
-	pdf = zend_list_find(id, &type);
-	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php_error(E_WARNING, "%s(): Unable to find identifier %d", get_active_function_name(TSRMLS_C), id);
-		RETURN_FALSE;
-	}
+	CPDF_FETCH_CPDFDOC(arg1);
 
 	cpdf_newpath(pdf);
 
@@ -1925,13 +1644,7 @@ PHP_FUNCTION(cpdf_closepath)
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	id=Z_LVAL_P(arg1);
-	pdf = zend_list_find(id, &type);
-	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php_error(E_WARNING, "%s(): Unable to find identifier %d", get_active_function_name(TSRMLS_C), id);
-		RETURN_FALSE;
-	}
+	CPDF_FETCH_CPDFDOC(arg1);
 
 	cpdf_closepath(pdf);
 
@@ -1951,13 +1664,7 @@ PHP_FUNCTION(cpdf_closepath_stroke)
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	id=Z_LVAL_P(arg1);
-	pdf = zend_list_find(id, &type);
-	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php_error(E_WARNING, "%s(): Unable to find identifier %d", get_active_function_name(TSRMLS_C), id);
-		RETURN_FALSE;
-	}
+	CPDF_FETCH_CPDFDOC(arg1);
 
 	cpdf_closepath(pdf);
 	cpdf_stroke(pdf);
@@ -1978,13 +1685,7 @@ PHP_FUNCTION(cpdf_stroke)
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	id=Z_LVAL_P(arg1);
-	pdf = zend_list_find(id, &type);
-	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php_error(E_WARNING, "%s(): Unable to find identifier %d", get_active_function_name(TSRMLS_C), id);
-		RETURN_FALSE;
-	}
+	CPDF_FETCH_CPDFDOC(arg1);
 
 	cpdf_stroke(pdf);
 
@@ -2004,13 +1705,7 @@ PHP_FUNCTION(cpdf_fill)
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	id=Z_LVAL_P(arg1);
-	pdf = zend_list_find(id, &type);
-	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php_error(E_WARNING, "%s(): Unable to find identifier %d", get_active_function_name(TSRMLS_C), id);
-		RETURN_FALSE;
-	}
+	CPDF_FETCH_CPDFDOC(arg1);
 
 	cpdf_fill(pdf);
 
@@ -2030,13 +1725,7 @@ PHP_FUNCTION(cpdf_fill_stroke)
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	id=Z_LVAL_P(arg1);
-	pdf = zend_list_find(id, &type);
-	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php_error(E_WARNING, "%s(): Unable to find identifier %d", get_active_function_name(TSRMLS_C), id);
-		RETURN_FALSE;
-	}
+	CPDF_FETCH_CPDFDOC(arg1);
 
 	cpdf_fill(pdf);
 	cpdf_stroke(pdf);
@@ -2057,13 +1746,7 @@ PHP_FUNCTION(cpdf_closepath_fill_stroke)
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	id=Z_LVAL_P(arg1);
-	pdf = zend_list_find(id, &type);
-	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php_error(E_WARNING, "%s(): Unable to find identifier %d", get_active_function_name(TSRMLS_C), id);
-		RETURN_FALSE;
-	}
+	CPDF_FETCH_CPDFDOC(arg1);
 
 	cpdf_closepath(pdf);
 	cpdf_fill(pdf);
@@ -2085,13 +1768,7 @@ PHP_FUNCTION(cpdf_clip)
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	id=Z_LVAL_P(arg1);
-	pdf = zend_list_find(id, &type);
-	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php_error(E_WARNING, "%s(): Unable to find identifier %d", get_active_function_name(TSRMLS_C), id);
-		RETURN_FALSE;
-	}
+	CPDF_FETCH_CPDFDOC(arg1);
 
 	cpdf_clip(pdf);
 
@@ -2111,14 +1788,8 @@ PHP_FUNCTION(cpdf_setgray_fill)
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
+	CPDF_FETCH_CPDFDOC(arg1);
 	convert_to_double(arg2);
-	id=Z_LVAL_P(arg1);
-	pdf = zend_list_find(id, &type);
-	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php_error(E_WARNING, "%s(): Unable to find identifier %d", get_active_function_name(TSRMLS_C), id);
-		RETURN_FALSE;
-	}
 
 	cpdf_setgrayFill(pdf, (float) Z_DVAL_P(arg2));
 
@@ -2138,14 +1809,8 @@ PHP_FUNCTION(cpdf_setgray_stroke)
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
+	CPDF_FETCH_CPDFDOC(arg1);
 	convert_to_double(arg2);
-	id=Z_LVAL_P(arg1);
-	pdf = zend_list_find(id, &type);
-	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php_error(E_WARNING, "%s(): Unable to find identifier %d", get_active_function_name(TSRMLS_C), id);
-		RETURN_FALSE;
-	}
 
 	cpdf_setgrayStroke(pdf, (float) Z_DVAL_P(arg2));
 
@@ -2165,14 +1830,8 @@ PHP_FUNCTION(cpdf_setgray)
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
+	CPDF_FETCH_CPDFDOC(arg1);
 	convert_to_double(arg2);
-	id=Z_LVAL_P(arg1);
-	pdf = zend_list_find(id, &type);
-	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php_error(E_WARNING, "%s(): Unable to find identifier %d", get_active_function_name(TSRMLS_C), id);
-		RETURN_FALSE;
-	}
 
 	cpdf_setgray(pdf, (float) Z_DVAL_P(arg2));
 
@@ -2192,16 +1851,10 @@ PHP_FUNCTION(cpdf_setrgbcolor_fill)
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
+	CPDF_FETCH_CPDFDOC(arg1);
 	convert_to_double(arg2);
 	convert_to_double(arg3);
 	convert_to_double(arg4);
-	id=Z_LVAL_P(arg1);
-	pdf = zend_list_find(id, &type);
-	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php_error(E_WARNING, "%s(): Unable to find identifier %d", get_active_function_name(TSRMLS_C), id);
-		RETURN_FALSE;
-	}
 
 	cpdf_setrgbcolorFill(pdf, (float) Z_DVAL_P(arg2), (float) Z_DVAL_P(arg3), (float) Z_DVAL_P(arg4));
 
@@ -2221,16 +1874,10 @@ PHP_FUNCTION(cpdf_setrgbcolor_stroke)
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
+	CPDF_FETCH_CPDFDOC(arg1);
 	convert_to_double(arg2);
 	convert_to_double(arg3);
 	convert_to_double(arg4);
-	id=Z_LVAL_P(arg1);
-	pdf = zend_list_find(id, &type);
-	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php_error(E_WARNING, "%s(): Unable to find identifier %d", get_active_function_name(TSRMLS_C), id);
-		RETURN_FALSE;
-	}
 
 	cpdf_setrgbcolorStroke(pdf, (float) Z_DVAL_P(arg2), (float) Z_DVAL_P(arg3), (float) Z_DVAL_P(arg4));
 
@@ -2250,16 +1897,10 @@ PHP_FUNCTION(cpdf_setrgbcolor)
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
+	CPDF_FETCH_CPDFDOC(arg1);
 	convert_to_double(arg2);
 	convert_to_double(arg3);
 	convert_to_double(arg4);
-	id=Z_LVAL_P(arg1);
-	pdf = zend_list_find(id, &type);
-	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php_error(E_WARNING, "%s(): Unable to find identifier %d", get_active_function_name(TSRMLS_C), id);
-		RETURN_FALSE;
-	}
 
 	cpdf_setrgbcolor(pdf, (float) Z_DVAL_P(arg2), (float) Z_DVAL_P(arg3), (float) Z_DVAL_P(arg4));
 
@@ -2279,18 +1920,12 @@ PHP_FUNCTION(cpdf_set_page_animation)
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
+	CPDF_FETCH_CPDFDOC(arg1);
 	convert_to_long(arg2);
 	convert_to_double(arg3);
 	convert_to_double(arg4);
 	convert_to_long(arg5);
 	convert_to_long(arg6);
-	id=Z_LVAL_P(arg1);
-	pdf = zend_list_find(id, &type);
-	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php_error(E_WARNING, "%s(): Unable to find identifier %d", get_active_function_name(TSRMLS_C), id);
-		RETURN_FALSE;
-	}
 
 	cpdf_setPageTransition(pdf, Z_LVAL_P(arg2), Z_DVAL_P(arg3), Z_DVAL_P(arg4),
 	                       Z_LVAL_P(arg5), Z_LVAL_P(arg6));
@@ -2311,13 +1946,7 @@ PHP_FUNCTION(cpdf_finalize)
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	id=Z_LVAL_P(arg1);
-	pdf = zend_list_find(id, &type);
-	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php_error(E_WARNING, "%s(): Unable to find identifier %d", get_active_function_name(TSRMLS_C), id);
-		RETURN_FALSE;
-	}
+	CPDF_FETCH_CPDFDOC(arg1);
 
 	cpdf_finalizeAll(pdf);
 
@@ -2338,13 +1967,7 @@ PHP_FUNCTION(cpdf_output_buffer)
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
-	id=Z_LVAL_P(arg1);
-	pdf = zend_list_find(id, &type);
-	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php_error(E_WARNING, "%s(): Unable to find identifier %d", get_active_function_name(TSRMLS_C), id);
-		RETURN_FALSE;
-	}
+	CPDF_FETCH_CPDFDOC(arg1);
 
 	buffer = cpdf_getBufferForPDF(pdf, &lenght);
 
@@ -2366,18 +1989,12 @@ PHP_FUNCTION(cpdf_save_to_file)
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(arg1);
+	CPDF_FETCH_CPDFDOC(arg1);
 	convert_to_string(arg2);
-	id=Z_LVAL_P(arg1);
-	pdf = zend_list_find(id, &type);
-	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php_error(E_WARNING, "%s(): Unable to find identifier %d", get_active_function_name(TSRMLS_C), id);
-		RETURN_FALSE;
-	}
 
 #if APACHE
 	if(strcmp(Z_STRVAL_P(arg2), "-") == 0)
-		php_error(E_WARNING, "%s(): Writing to stdout as described in the ClibPDF manual is not possible if php is used as an Apache module. Use cpdf_output_buffer() instead.", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Writing to stdout as described in the ClibPDF manual is not possible if php is used as an Apache module. Use cpdf_output_buffer() instead.");
 #endif
 
 	cpdf_savePDFmemoryStreamToFile(pdf, Z_STRVAL_P(arg2));
@@ -2401,7 +2018,7 @@ PHP_FUNCTION(cpdf_import_jpeg)
 	if (getParametersArray(ht, argc, argv) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-	convert_to_long(argv[0]);
+	CPDF_FETCH_CPDFDOC(argv[0]);
 	convert_to_string(argv[1]);
 	convert_to_double(argv[2]);
 	convert_to_double(argv[3]);
@@ -2415,12 +2032,6 @@ PHP_FUNCTION(cpdf_import_jpeg)
 	convert_to_double(argv[8]);
 	yscale = (float) Z_DVAL_P(argv[8]);
 	convert_to_long(argv[9]);
-	id=Z_LVAL_P(argv[0]);
-	pdf = zend_list_find(id, &type);
-	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php_error(E_WARNING, "%s(): Unable to find identifier %d", get_active_function_name(TSRMLS_C), id);
-		RETURN_FALSE;
-	}
 
 	if(argc > 10) {
 		convert_to_long(argv[10]);
@@ -2471,7 +2082,7 @@ PHP_FUNCTION(cpdf_place_inline_image)
 	if (getParametersArray(ht, argc, argv) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-	convert_to_long(argv[0]);
+	CPDF_FETCH_CPDFDOC(argv[0]);
 	convert_to_long(argv[1]);
 	convert_to_double(argv[2]);
 	convert_to_double(argv[3]);
@@ -2479,12 +2090,6 @@ PHP_FUNCTION(cpdf_place_inline_image)
 	convert_to_double(argv[5]);
 	convert_to_double(argv[6]);
 	convert_to_long(argv[7]);
-	id=Z_LVAL_P(argv[0]);
-	pdf = zend_list_find(id, &type);
-	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php_error(E_WARNING, "%s(): Unable to find identifier %d", get_active_function_name(TSRMLS_C), id);
-		RETURN_FALSE;
-	}
 
 	gid=Z_LVAL_P(argv[1]);
 	im = zend_list_find(gid, &type);
@@ -2492,11 +2097,11 @@ PHP_FUNCTION(cpdf_place_inline_image)
 	ZEND_GET_RESOURCE_TYPE_ID(CPDF_GLOBAL(le_gd), "gd");
 	if(!CPDF_GLOBAL(le_gd))
 	{
-		php_error(E_ERROR, "%s(): Unable to find handle for GD image stream. Please check the GD extension is loaded.", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Unable to find handle for GD image stream. Please check the GD extension is loaded.");
 	}
 
 	if (!im || type != CPDF_GLOBAL(le_gd)) {
-		php_error(E_WARNING, "%s(): Unable to find image pointer", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find image pointer");
 		RETURN_FALSE;
 	}
 
@@ -2561,19 +2166,13 @@ PHP_FUNCTION(cpdf_add_annotation)
 	if (getParametersArray(ht, argc, argv) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-	convert_to_long(argv[0]);
+	CPDF_FETCH_CPDFDOC(argv[0]);
 	convert_to_double(argv[1]);
 	convert_to_double(argv[2]);
 	convert_to_double(argv[3]);
 	convert_to_double(argv[4]);
 	convert_to_string(argv[5]);
 	convert_to_string(argv[6]);
-	id=Z_LVAL_P(argv[0]);
-	pdf = zend_list_find(id, &type);
-	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php_error(E_WARNING, "%s(): Unable to find identifier %d", get_active_function_name(TSRMLS_C), id);
-		RETURN_FALSE;
-	}
 
 	attrib.flags = AF_NOZOOM | AF_NOROTATE | AF_READONLY;
 	attrib.border_array = "[0 0 1 [4 2]]";
@@ -2621,18 +2220,12 @@ PHP_FUNCTION(cpdf_set_action_url)
 	if (getParametersArray(ht, argc, argv) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-	convert_to_long(argv[0]);
+	CPDF_FETCH_CPDFDOC(argv[0]);
 	convert_to_double(argv[1]);
 	convert_to_double(argv[2]);
 	convert_to_double(argv[3]);
 	convert_to_double(argv[4]);
 	convert_to_string(argv[5]);
-	id=Z_LVAL_P(argv[0]);
-	pdf = zend_list_find(id, &type);
-	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php_error(E_WARNING, "%s(): Unable to find identifier %d", get_active_function_name(TSRMLS_C), id);
-		RETURN_FALSE;
-	}
 
 	attrib.flags = AF_NOZOOM | AF_NOROTATE | AF_READONLY;
 	attrib.border_array = "[0 0 1 [4 0]]";
@@ -2678,24 +2271,18 @@ PHP_FUNCTION(cpdf_add_outline)
 	if (getParametersArray(ht, argc, argv) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-	convert_to_long(argv[0]);
+	CPDF_FETCH_CPDFDOC(argv[0]);
 	convert_to_long(argv[1]);
 	convert_to_long(argv[2]);
 	convert_to_long(argv[3]);
 	convert_to_long(argv[4]);
 	convert_to_string(argv[5]);
-	id=Z_LVAL_P(argv[0]);
-	pdf = zend_list_find(id, &type);
-	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php_error(E_WARNING, "%s(): Unable to find identifier %d", get_active_function_name(TSRMLS_C), id);
-		RETURN_FALSE;
-	}
 
 	oid=Z_LVAL_P(argv[1]);
 	lastoutline = zend_list_find(oid, &type);
 	if(!lastoutline || type!=CPDF_GLOBAL(le_outline)) {
 		lastoutline = NULL;
-/*		php_error(E_WARNING, "%s(): Unable to find last outline entry %d", get_active_function_name(TSRMLS_C), id);
+/*		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find last outline entry %d", id);
 		RETURN_FALSE; */
 	}
 
