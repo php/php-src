@@ -25,7 +25,6 @@
 #include "zend_builtin_functions.h"
 
 zend_class_entry *default_exception_ptr;
-zend_class_entry *abstract_exception_ptr;
 
 static zend_object_value zend_default_exception_new(zend_class_entry *class_type TSRMLS_DC)
 {
@@ -347,19 +346,11 @@ static void zend_register_default_exception(TSRMLS_D)
 	zend_declare_property_null(default_exception_ptr, "file", sizeof("file")-1, ZEND_ACC_PROTECTED);
 	zend_declare_property_null(default_exception_ptr, "line", sizeof("line")-1, ZEND_ACC_PROTECTED);
 	zend_declare_property_null(default_exception_ptr, "trace", sizeof("trace")-1, ZEND_ACC_PROTECTED);
-
-	INIT_CLASS_ENTRY(ce, "abstract_exception", NULL);
-	abstract_exception_ptr = zend_register_internal_class_ex(&ce, default_exception_ptr, NULL TSRMLS_CC);
 }
 
 ZEND_API zend_class_entry *zend_exception_get_default(void)
 {
 	return default_exception_ptr;
-}
-
-ZEND_API zend_class_entry *zend_exception_get_abstract(void)
-{
-	return abstract_exception_ptr;
 }
 
 ZEND_API void zend_throw_exception_ex(zend_class_entry *exception_ce, long code TSRMLS_DC, char *format, ...)

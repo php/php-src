@@ -25,7 +25,6 @@
 BEGIN_EXTERN_C()
 
 ZEND_API zend_class_entry *zend_exception_get_default(void);
-ZEND_API zend_class_entry *zend_exception_get_abstract(void);
 ZEND_API void zend_register_default_classes(TSRMLS_D);
 
 /* exception_ce   NULL or zend_exception_get_default() or a derived class 
