@@ -1,3 +1,36 @@
+2003-02-02  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * main/php_scandir.h:
+      Fixed bug #22021.
+
+    * ext/curl/interface.c:
+      Gave the user the ability to specify encoding of the request.
+      Patch by jens@mermaidconsulting.dk.
+
+    * main/php_scandir.c:
+      Fixed build on Solaris (patch by Melvyn Sopacua).
+
+2003-02-02  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ext/standard/info.c:
+      Fix warning.
+
+2003-02-02  Zeev Suraski  <zeev@zend.com>
+
+    * ext/standard/info.c
+      ext/standard/info.c:
+      Fix phpinfo() display of Zend extensions
+
+2003-02-02  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/gd/config.m4
+      ext/gd/libgd/gd.c
+      ext/gd/libgd/xbm.c
+      ext/gd/tests/conv_test.xbm
+      ext/gd/tests/xbm2png.phpt:
+      - new xbm support
+      
+
 2003-02-01  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ext/standard/image.c:
