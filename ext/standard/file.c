@@ -319,7 +319,7 @@ void php3_get_meta_tags(INTERNAL_FUNCTION_PARAMETERS)
 	}
 	/* Now loop through the file and do the magic quotes thing if needed */
 	memset(buf,0,8191);
-	while((issock?SOCK_FGETS(buf,8191,socketd):(int)fgets(buf,8191,fp))
+	while((issock?SOCK_FGETS(buf,8191,socketd):fgets(buf,8191,fp) != NULL)
 		&& !php3i_stristr(buf,"</head>")) {
 		if(php3i_stristr(buf,"<meta")) {
 
@@ -442,7 +442,7 @@ void php3_file(INTERNAL_FUNCTION_PARAMETERS)
 
 	/* Now loop through the file and do the magic quotes thing if needed */
 	memset(buf,0,8191);
-	while(issock?SOCK_FGETS(buf,8191,socketd):(int)fgets(buf,8191,fp)) {
+	while(issock?SOCK_FGETS(buf,8191,socketd):fgets(buf,8191,fp) != NULL) {
 		if (PG(magic_quotes_runtime)) {
 			int len;
 			
@@ -853,7 +853,7 @@ void php3_fgets(INTERNAL_FUNCTION_PARAMETERS)
 	buf = emalloc(sizeof(char) * (len + 1));
 	/* needed because recv doesnt put a null at the end*/
 	memset(buf,0,len+1);
-	if (!(issock?SOCK_FGETS(buf,len,socketd):(int)fgets(buf,len,fp))) {
+	if (!(issock?SOCK_FGETS(buf,len,socketd):fgets(buf,len,fp) != NULL)) {
 		efree(buf);
 		RETVAL_FALSE;
 	} else {
@@ -947,7 +947,7 @@ void php3_fgetss(INTERNAL_FUNCTION_PARAMETERS)
 	buf = emalloc(sizeof(char) * (len + 1));
 	/*needed because recv doesnt set null char at end*/
 	memset(buf,0,len+1);
-	if (!(issock?SOCK_FGETS(buf,len,socketd):(int)fgets(buf, len, fp))) {
+	if (!(issock?SOCK_FGETS(buf,len,socketd):fgets(buf, len, fp) != NULL)) {
 		efree(buf);
 		RETURN_FALSE;
 	}
@@ -1556,7 +1556,7 @@ void php3_fgetcsv(INTERNAL_FUNCTION_PARAMETERS) {
 	buf = emalloc(sizeof(char) * (len + 1));
 	/*needed because recv doesnt set null char at end*/
 	memset(buf,0,len+1);
-	if (!(issock?SOCK_FGETS(buf,len,socketd):(int)fgets(buf, len, fp))) {
+	if (!(issock?SOCK_FGETS(buf,len,socketd):fgets(buf, len, fp) != NULL)) {
 		efree(buf);
 		RETURN_FALSE;
 	}
