@@ -196,7 +196,7 @@ PHP_MINFO_FUNCTION(apache)
 	
 	PUTS("<tr><td valign=\"top\" bgcolor=\"" PHP_ENTRY_NAME_COLOR "\">Loaded modules</td><td bgcolor=\"" PHP_CONTENTS_COLOR "\">");
 	for(modp = top_module; modp; modp = modp->next) {
-		strncpy(name, modp->name, sizeof(name) - 1);
+		strlcpy(name, modp->name, sizeof(name));
 		if ((p = strrchr(name, '.'))) {
 			*p='\0'; /* Cut off ugly .c extensions on module names */
 		}
