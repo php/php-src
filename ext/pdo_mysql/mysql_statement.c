@@ -62,17 +62,15 @@ static int pdo_mysql_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 			S->result = NULL;
 		}
 	}
-	if(mysql_real_query(H->server, stmt->active_query_string, 
-           stmt->active_query_stringlen) != 0) 
-	{
-		pdo_mysql_error(H);
+	if (mysql_real_query(H->server, stmt->active_query_string, stmt->active_query_stringlen) != 0) {
+		pdo_mysql_error(dbh);
 		return 0;
 	}
-	if((S->result = mysql_use_result(H->server)) == NULL) {
-		pdo_mysql_error(H);
+	if ((S->result = mysql_use_result(H->server)) == NULL) {
+		pdo_mysql_error(dbh);
 		return 0;
 	}
-	if(!stmt->executed) { 
+	if (!stmt->executed) { 
 		stmt->column_count = (int) mysql_num_fields(S->result);
 		S->cols = ecalloc(stmt->column_count, sizeof(pdo_mysql_column));
 	}
@@ -88,10 +86,12 @@ static int pdo_mysql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_da
 static int pdo_mysql_stmt_fetch(pdo_stmt_t *stmt TSRMLS_DC)
 {
 	pdo_mysql_stmt *S = (pdo_mysql_stmt*)stmt->driver_data;
-
+	if (!S->result) {
+		return 0;	
+	}
 	if((S->current_data = mysql_fetch_row(S->result)) == NULL) {
 		/* there seems to be no way of distinguishing 'no data' from 'error' */
-		pdo_mysql_error(S->H);
+		pdo_mysql_error(stmt->dbh);
 		return 0;
 	} 
 	S->current_lengths = mysql_fetch_lengths(S->result);
@@ -106,6 +106,9 @@ static int pdo_mysql_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC)
 	struct pdo_column_data *cols = stmt->columns;
 	unsigned int num_fields, i;
 
+	if (!S->result) {
+		return 0;	
+	}
 	/* fetch all on demand, this seems easiest 
 	** if we've been here before bail out 
 	*/
@@ -130,12 +133,12 @@ static int pdo_mysql_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC)
 static int pdo_mysql_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, unsigned long *len TSRMLS_DC)
 {
 	pdo_mysql_stmt *S = (pdo_mysql_stmt*)stmt->driver_data;
-	if(S->current_data == NULL) {
+	if(S->current_data == NULL || !S->result) {
 		return 0;
 	}
 	if(colno >= mysql_num_fields(S->result)) {
 		/* error invalid column */
-		pdo_mysql_error(S->H);
+		pdo_mysql_error(stmt->dbh);
 		return 0;
 	}
 	*ptr = S->current_data[colno];
