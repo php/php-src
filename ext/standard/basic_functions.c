@@ -268,8 +268,82 @@ void test_class_startup(void)
 }
 #endif
 
+typedef struct {
+	zval *return_value;
+	zend_class_entry *scope;
+} add_info_t;
+
+/* {{{ add_function_info */
+static int add_function_info(zend_function *func, add_info_t *add_info TSRMLS_DC)
+{
+	char *name;
+	char *decorated;
+	zend_class_entry *scope;
+	if (func->internal_function.handler != zif_display_disabled_function) {
+		/* ?? internal_function->type = ZEND_INTERNAL_FUNCTION;  */
+		if (func->common.scope)
+			scope = func->common.scope;
+		else
+			scope = add_info->scope;
+		if (scope) {
+			spprintf(&name, 0, "%s::%s", scope->name, func->common.function_name);
+			spprintf(&decorated, 0, "%s%s %s%s::%s()", 
+#ifdef ZEND_ACC_FINAL
+				func->common.fn_flags & ZEND_ACC_FINAL   ? "final " :
+#endif
+				(func->common.fn_flags & ZEND_ACC_ABSTRACT ? "abstract " : ""),
+				zend_visibility_string(func->common.fn_flags),
+				func->common.fn_flags & ZEND_ACC_STATIC  ? "static " : "",
+				scope->name, 
+				func->common.function_name);
+		} else {
+			name = estrdup(func->common.function_name);
+			spprintf(&decorated, 0, "%s()", func->common.function_name);
+		}
+		add_assoc_string(add_info->return_value, name, decorated, 0);
+		efree(name);
+	}
+	return 0;
+}
+/* }}} */
+
+/* {{{ add_class_info */
+static int add_class_info(zend_class_entry **zclass, add_info_t *add_info TSRMLS_DC)
+{
+/*	char *f;
+	spprintf(&f, 0, "class %s", (*zclass)->name);
+	add_next_index_string(return_value, f, 0);*/
+	add_info->scope = *zclass;
+	zend_hash_apply_with_argument(&(*zclass)->function_table, (apply_func_arg_t)add_function_info, add_info TSRMLS_CC);
+	return 0;
+}
+/* }}} */
+
+/* {{{ proto array function_list()
+   Returns an array of all php functions */
+PHP_FUNCTION(function_list)
+{
+	add_info_t add_info;
+
+	if (ZEND_NUM_ARGS()) {
+		WRONG_PARAM_COUNT;
+	}
+
+	if (array_init(return_value) == FAILURE) {
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Unable to initialize array");
+		RETURN_FALSE;
+	}
+
+	add_info.return_value = return_value;
+	add_info.scope = NULL;
+
+	zend_hash_apply_with_argument(EG(function_table), (apply_func_arg_t)add_function_info, &add_info TSRMLS_CC);
+	zend_hash_apply_with_argument(EG(class_table),    (apply_func_arg_t)add_class_info,    &add_info TSRMLS_CC);
+}
+/* }}} */
 
 function_entry basic_functions[] = {
+	PHP_FE(function_list,													NULL)
 	PHP_FE(constant,														NULL)
 	PHP_FE(bin2hex,															NULL)
 	PHP_FE(sleep,															NULL)
@@ -1507,7 +1581,7 @@ PHP_FUNCTION(getopt)
 		 * Attempt to allocate enough memory to hold all of the arguments
 		 * and a trailing NULL 
 		 */
-		if ((argv = (char **) emalloc((argc + 1) * sizeof(char *))) == NULL) {
+		if ((argv = (char **) safe_emalloc(sizeof(char *), (argc + 1), 0)) == NULL) {
 			RETURN_FALSE;
 		}
 
@@ -1875,7 +1949,7 @@ PHP_FUNCTION(call_user_func)
 		WRONG_PARAM_COUNT;
 	}
 
-	params = emalloc(sizeof(zval **) * argc);
+	params = safe_emalloc(sizeof(zval **), argc, 0);
 
 	if (zend_get_parameters_array_ex(argc, params) == FAILURE) {
 		efree(params);
@@ -1949,7 +2023,7 @@ PHP_FUNCTION(call_user_func_array)
 	func_params_ht = Z_ARRVAL_PP(params);
 
 	count = zend_hash_num_elements(func_params_ht);
-	func_params = emalloc(sizeof(zval **) * count);
+	func_params = safe_emalloc(sizeof(zval **), count, 0);
 
 	for (zend_hash_internal_pointer_reset(func_params_ht);
 		 zend_hash_get_current_data(func_params_ht, (void **) &func_params[current]) == SUCCESS;
@@ -1984,7 +2058,7 @@ PHP_FUNCTION(call_user_method)
 	if (arg_count < 2) {
 		WRONG_PARAM_COUNT;
 	}
-	params = (zval ***) emalloc(sizeof(zval **) * arg_count);
+	params = (zval ***) safe_emalloc(sizeof(zval **), arg_count, 0);
 
 	if (zend_get_parameters_array_ex(arg_count, params) == FAILURE) {
 		efree(params);
@@ -2034,7 +2108,7 @@ PHP_FUNCTION(call_user_method_array)
 
 	params_ar = HASH_OF(*params);
 	num_elems = zend_hash_num_elements(params_ar);
-	method_args = (zval ***) emalloc(sizeof(zval **) *num_elems);
+	method_args = (zval ***) safe_emalloc(sizeof(zval **), num_elems, 0);
 
 	for (zend_hash_internal_pointer_reset(params_ar);
 		 zend_hash_get_current_data(params_ar, (void **) &(method_args[element])) == SUCCESS;
@@ -2180,7 +2254,7 @@ PHP_FUNCTION(register_shutdown_function)
 		WRONG_PARAM_COUNT;
 	}
 
-	shutdown_function_entry.arguments = (pval **) emalloc(sizeof(pval *) *shutdown_function_entry.arg_count);
+	shutdown_function_entry.arguments = (pval **) safe_emalloc(sizeof(pval *), shutdown_function_entry.arg_count, 0);
 
 	if (zend_get_parameters_array(ht, shutdown_function_entry.arg_count, shutdown_function_entry.arguments) == FAILURE) {
 		RETURN_FALSE;
@@ -2717,7 +2791,7 @@ PHP_FUNCTION(register_tick_function)
 		WRONG_PARAM_COUNT;
 	}
 
-	tick_fe.arguments = (zval **) emalloc(sizeof(zval *) * tick_fe.arg_count);
+	tick_fe.arguments = (zval **) safe_emalloc(sizeof(zval *), tick_fe.arg_count, 0);
 
 	if (zend_get_parameters_array(ht, tick_fe.arg_count, tick_fe.arguments) == FAILURE) {
 		RETURN_FALSE;
@@ -3064,4 +3138,3 @@ PHP_FUNCTION(import_request_variables)
  * vim600: fdm=marker
  * vim: noet sw=4 ts=4
  */
-
