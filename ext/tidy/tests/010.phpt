@@ -12,7 +12,7 @@ Accessing root, body, html, and head nodes..
  
 ?>
 --EXPECT--
-object(tidyNode)#2 (5) {
+object(tidyNode)#2 (8) {
   ["value"]=>
   string(94) "<html>
 <head>
@@ -25,12 +25,18 @@ object(tidyNode)#2 (5) {
   string(0) ""
   ["type"]=>
   int(0)
+  ["line"]=>
+  int(1)
+  ["column"]=>
+  int(1)
+  ["proprietary"]=>
+  bool(false)
   ["attribute"]=>
   NULL
   ["child"]=>
   array(1) {
     [0]=>
-    &object(tidyNode)#3 (6) {
+    &object(tidyNode)#3 (9) {
       ["value"]=>
       string(94) "<html>
 <head>
@@ -43,6 +49,12 @@ object(tidyNode)#2 (5) {
       string(4) "html"
       ["type"]=>
       int(5)
+      ["line"]=>
+      int(1)
+      ["column"]=>
+      int(1)
+      ["proprietary"]=>
+      bool(false)
       ["id"]=>
       int(48)
       ["attribute"]=>
@@ -50,7 +62,7 @@ object(tidyNode)#2 (5) {
       ["child"]=>
       array(2) {
         [0]=>
-        &object(tidyNode)#4 (6) {
+        &object(tidyNode)#4 (9) {
           ["value"]=>
           string(31) "<head>
 <title></title>
@@ -60,6 +72,12 @@ object(tidyNode)#2 (5) {
           string(4) "head"
           ["type"]=>
           int(5)
+          ["line"]=>
+          int(1)
+          ["column"]=>
+          int(7)
+          ["proprietary"]=>
+          bool(false)
           ["id"]=>
           int(46)
           ["attribute"]=>
@@ -67,7 +85,7 @@ object(tidyNode)#2 (5) {
           ["child"]=>
           array(1) {
             [0]=>
-            &object(tidyNode)#5 (6) {
+            &object(tidyNode)#5 (9) {
               ["value"]=>
               string(16) "<title></title>
 "
@@ -75,6 +93,12 @@ object(tidyNode)#2 (5) {
               string(5) "title"
               ["type"]=>
               int(5)
+              ["line"]=>
+              int(1)
+              ["column"]=>
+              int(57)
+              ["proprietary"]=>
+              bool(false)
               ["id"]=>
               int(111)
               ["attribute"]=>
@@ -85,7 +109,7 @@ object(tidyNode)#2 (5) {
           }
         }
         [1]=>
-        &object(tidyNode)#6 (6) {
+        &object(tidyNode)#6 (9) {
           ["value"]=>
           string(49) "<body bgcolor="#FFFFFF" alink="#000000">
 </body>
@@ -94,6 +118,12 @@ object(tidyNode)#2 (5) {
           string(4) "body"
           ["type"]=>
           int(5)
+          ["line"]=>
+          int(1)
+          ["column"]=>
+          int(7)
+          ["proprietary"]=>
+          bool(false)
           ["id"]=>
           int(16)
           ["attribute"]=>
@@ -110,7 +140,7 @@ object(tidyNode)#2 (5) {
     }
   }
 }
-object(tidyNode)#2 (6) {
+object(tidyNode)#2 (9) {
   ["value"]=>
   string(49) "<body bgcolor="#FFFFFF" alink="#000000">
 </body>
@@ -119,6 +149,12 @@ object(tidyNode)#2 (6) {
   string(4) "body"
   ["type"]=>
   int(5)
+  ["line"]=>
+  int(1)
+  ["column"]=>
+  int(7)
+  ["proprietary"]=>
+  bool(false)
   ["id"]=>
   int(16)
   ["attribute"]=>
@@ -131,7 +167,7 @@ object(tidyNode)#2 (6) {
   ["child"]=>
   NULL
 }
-object(tidyNode)#2 (6) {
+object(tidyNode)#2 (9) {
   ["value"]=>
   string(94) "<html>
 <head>
@@ -144,6 +180,12 @@ object(tidyNode)#2 (6) {
   string(4) "html"
   ["type"]=>
   int(5)
+  ["line"]=>
+  int(1)
+  ["column"]=>
+  int(1)
+  ["proprietary"]=>
+  bool(false)
   ["id"]=>
   int(48)
   ["attribute"]=>
@@ -151,7 +193,7 @@ object(tidyNode)#2 (6) {
   ["child"]=>
   array(2) {
     [0]=>
-    &object(tidyNode)#3 (6) {
+    &object(tidyNode)#3 (9) {
       ["value"]=>
       string(31) "<head>
 <title></title>
@@ -161,6 +203,12 @@ object(tidyNode)#2 (6) {
       string(4) "head"
       ["type"]=>
       int(5)
+      ["line"]=>
+      int(1)
+      ["column"]=>
+      int(7)
+      ["proprietary"]=>
+      bool(false)
       ["id"]=>
       int(46)
       ["attribute"]=>
@@ -168,7 +216,7 @@ object(tidyNode)#2 (6) {
       ["child"]=>
       array(1) {
         [0]=>
-        &object(tidyNode)#6 (6) {
+        &object(tidyNode)#6 (9) {
           ["value"]=>
           string(16) "<title></title>
 "
@@ -176,6 +224,12 @@ object(tidyNode)#2 (6) {
           string(5) "title"
           ["type"]=>
           int(5)
+          ["line"]=>
+          int(1)
+          ["column"]=>
+          int(57)
+          ["proprietary"]=>
+          bool(false)
           ["id"]=>
           int(111)
           ["attribute"]=>
@@ -186,7 +240,7 @@ object(tidyNode)#2 (6) {
       }
     }
     [1]=>
-    &object(tidyNode)#4 (6) {
+    &object(tidyNode)#4 (9) {
       ["value"]=>
       string(49) "<body bgcolor="#FFFFFF" alink="#000000">
 </body>
@@ -195,6 +249,12 @@ object(tidyNode)#2 (6) {
       string(4) "body"
       ["type"]=>
       int(5)
+      ["line"]=>
+      int(1)
+      ["column"]=>
+      int(7)
+      ["proprietary"]=>
+      bool(false)
       ["id"]=>
       int(16)
       ["attribute"]=>
@@ -209,7 +269,7 @@ object(tidyNode)#2 (6) {
     }
   }
 }
-object(tidyNode)#2 (6) {
+object(tidyNode)#2 (9) {
   ["value"]=>
   string(31) "<head>
 <title></title>
@@ -219,6 +279,12 @@ object(tidyNode)#2 (6) {
   string(4) "head"
   ["type"]=>
   int(5)
+  ["line"]=>
+  int(1)
+  ["column"]=>
+  int(7)
+  ["proprietary"]=>
+  bool(false)
   ["id"]=>
   int(46)
   ["attribute"]=>
@@ -226,7 +292,7 @@ object(tidyNode)#2 (6) {
   ["child"]=>
   array(1) {
     [0]=>
-    &object(tidyNode)#4 (6) {
+    &object(tidyNode)#4 (9) {
       ["value"]=>
       string(16) "<title></title>
 "
@@ -234,6 +300,12 @@ object(tidyNode)#2 (6) {
       string(5) "title"
       ["type"]=>
       int(5)
+      ["line"]=>
+      int(1)
+      ["column"]=>
+      int(57)
+      ["proprietary"]=>
+      bool(false)
       ["id"]=>
       int(111)
       ["attribute"]=>
