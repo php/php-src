@@ -319,7 +319,7 @@ static int php_fbsql_get_default_link(INTERNAL_FUNCTION_PARAMETERS FBSQLLS_DC)
 }
 
 
-static int phpfbQuery(INTERNAL_FUNCTION_PARAMETERS, char* sql, PHPFBLink* link);
+static void phpfbQuery(INTERNAL_FUNCTION_PARAMETERS, char* sql, PHPFBLink* link);
 
 /* {{{ PHP_INI
  */
@@ -545,10 +545,10 @@ static void php_fbsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistant)
 
 		phpLink = emalloc(sizeof(PHPFBLink));
 		phpLink->persistant       = persistant;
-		phpLink->hostName         = estrdup(hostName);
-		phpLink->userName         = estrdup(userName);
-		phpLink->userPassword     = estrdup(userPassword);
-		phpLink->databasePassword = estrdup(FB_SQL_G(databasePassword));
+		phpLink->hostName         = strdup(hostName);
+		phpLink->userName         = strdup(userName);
+		phpLink->userPassword     = strdup(userPassword);
+		phpLink->databasePassword = strdup(FB_SQL_G(databasePassword));
 		phpLink->databaseName	  = NULL;
 		phpLink->execHandler      = fbcehHandlerForHost(hostName,128);
 		phpLink->affectedRows     = 0;
@@ -614,7 +614,7 @@ PHP_FUNCTION(fbsql_pconnect)
 }
 /* }}} */
 
-/* {{{ proto int fbsql_close([int link_identifier])
+/* {{{ proto int fbsql_close([resource link_identifier])
 	*/
 PHP_FUNCTION(fbsql_close)
 {
@@ -735,7 +735,7 @@ void phpfbestrdup(const char * s, int* length, char** value)
 }
 /* }}} */
 
-/* {{{ proto bool fbsql_autocommit(int link_identifier [, bool OnOff])
+/* {{{ proto bool fbsql_autocommit(resource link_identifier [, bool OnOff])
    Turn on auto-commit */
 PHP_FUNCTION(fbsql_autocommit)
 {
@@ -777,7 +777,7 @@ PHP_FUNCTION(fbsql_autocommit)
 }
 /* }}} */
 
-/* {{{ proto int fbsql_commit([int link_identifier])
+/* {{{ proto int fbsql_commit([resource link_identifier])
 	*/
 PHP_FUNCTION(fbsql_commit)
 {
@@ -815,7 +815,7 @@ PHP_FUNCTION(fbsql_commit)
 }
 /* }}} */
 
-/* {{{ proto int fbsql_rollback([int link_identifier])
+/* {{{ proto int fbsql_rollback([resource link_identifier])
 	*/
 PHP_FUNCTION(fbsql_rollback)
 {
@@ -853,7 +853,7 @@ PHP_FUNCTION(fbsql_rollback)
 }
 /* }}} */
 
-/* {{{ proto string fbsql_hostname(int link_identifier [, string host_name])
+/* {{{ proto string fbsql_hostname(resource link_identifier [, string host_name])
 	*/
 PHP_FUNCTION(fbsql_hostname)
 {
@@ -888,7 +888,7 @@ PHP_FUNCTION(fbsql_hostname)
 }
 /* }}} */
 
-/* {{{ proto string fbsql_database(int link_identifier [, string database])
+/* {{{ proto string fbsql_database(resource link_identifier [, string database])
 	*/
 PHP_FUNCTION(fbsql_database)
 {
@@ -923,7 +923,7 @@ PHP_FUNCTION(fbsql_database)
 }
 /* }}} */
 
-/* {{{ proto string fbsql_database_password(int link_identifier [, string database_password])
+/* {{{ proto string fbsql_database_password(resource link_identifier [, string database_password])
 	*/
 PHP_FUNCTION(fbsql_database_password)
 {
@@ -958,7 +958,7 @@ PHP_FUNCTION(fbsql_database_password)
 }
 /* }}} */
 
-/* {{{ proto string fbsql_username(int link_identifier [, string username])
+/* {{{ proto string fbsql_username(resource link_identifier [, string username])
 	*/
 PHP_FUNCTION(fbsql_username)
 {
@@ -993,7 +993,7 @@ PHP_FUNCTION(fbsql_username)
 }
 /* }}} */
 
-/* {{{ proto string fbsql_password(int link_identifier [, string password])
+/* {{{ proto string fbsql_password(resource link_identifier [, string password])
 	*/
 PHP_FUNCTION(fbsql_password)
 {   
@@ -1028,7 +1028,7 @@ PHP_FUNCTION(fbsql_password)
 }
 /* }}} */
 
-/* {{{ proto bool fbsql_select_db([string database_name [, int link_identifier]])   
+/* {{{ proto bool fbsql_select_db([string database_name [, resource link_identifier]])   
 	*/
 PHP_FUNCTION(fbsql_select_db)
 {
@@ -1083,7 +1083,7 @@ PHP_FUNCTION(fbsql_select_db)
 }
 /* }}} */
 
-/* {{{ proto int fbsql_change_user(string user, string password [, string database [, int link_identifier]]);
+/* {{{ proto int fbsql_change_user(string user, string password [, string database [, resource link_identifier]]);
 	*/
 PHP_FUNCTION(fbsql_change_user)
 {
@@ -1143,7 +1143,7 @@ PHP_FUNCTION(fbsql_change_user)
 }
 /* }}} */
 
-/* {{{ proto bool fbsql_create_db(string database_name [, int link_identifier])
+/* {{{ proto bool fbsql_create_db(string database_name [, resource link_identifier])
 	*/
 PHP_FUNCTION(fbsql_create_db)
 {
@@ -1214,7 +1214,7 @@ PHP_FUNCTION(fbsql_create_db)
 }
 /* }}} */
 
-/* {{{ proto int fbsql_drop_db(string database_name [, int link_identifier])
+/* {{{ proto int fbsql_drop_db(string database_name [, resource link_identifier])
 	*/
 PHP_FUNCTION(fbsql_drop_db)
 {
@@ -1286,7 +1286,7 @@ PHP_FUNCTION(fbsql_drop_db)
 }
 /* }}} */
 
-/* {{{ proto int fbsql_start_db(string database_name [, int link_identifier])
+/* {{{ proto int fbsql_start_db(string database_name [, resource link_identifier])
 	*/
 PHP_FUNCTION(fbsql_start_db)
 {
@@ -1362,7 +1362,7 @@ PHP_FUNCTION(fbsql_start_db)
 }
 /* }}} */
 
-/* {{{ proto int fbsql_stop_db(string database_name [, int link_identifier])
+/* {{{ proto int fbsql_stop_db(string database_name [, resource link_identifier])
 	*/
 PHP_FUNCTION(fbsql_stop_db)
 {
@@ -1419,7 +1419,7 @@ PHP_FUNCTION(fbsql_stop_db)
 }
 /* }}} */
 
-/* {{{ proto int fbsql_db_status(string database_name [, int link_identifier])
+/* {{{ proto int fbsql_db_status(string database_name [, resource link_identifier])
 	Get the status (Stoped, Starting, Started, Stopping) for a given database*/
 PHP_FUNCTION(fbsql_db_status)
 {
@@ -1503,9 +1503,7 @@ int mdOk(PHPFBLink* link, FBCMetaData* md)
 }
 /* }}} */
 
-/* {{{ phpfbQuery
- */
-static int phpfbQuery(INTERNAL_FUNCTION_PARAMETERS, char* sql, PHPFBLink* link)
+static void phpfbQuery(INTERNAL_FUNCTION_PARAMETERS, char* sql, PHPFBLink* link)
 {
 	PHPFBResult*  result = NULL;
 	FBCMetaData*   md, *meta;
@@ -1521,76 +1519,72 @@ static int phpfbQuery(INTERNAL_FUNCTION_PARAMETERS, char* sql, PHPFBLink* link)
 		return_value->value.lval = 0;
 		return_value->type       = IS_LONG;
 		fbcmdRelease(meta);
-		return 0;
 	}
+	else {
+		if (fbcmdHasMetaDataArray(meta)) {
+			sR = fbcmdMetaDataArrayCount(meta);
+			md = (FBCMetaData*)fbcmdMetaDataAtIndex(meta, cR);
+		}
+		else
+			md = meta;
 
-	if (fbcmdHasMetaDataArray(meta)) {
-		sR = fbcmdMetaDataArrayCount(meta);
-		md = (FBCMetaData*)fbcmdMetaDataAtIndex(meta, cR);
-	}
-	else
-		md = meta;
+		tp     = fbcmdStatementType(md);
 
-	tp     = fbcmdStatementType(md);
-
-	if ((tp[0] == 'C') || (tp[0] == 'R'))
-	{
-		return_value->value.lval = 1;
-		return_value->type       = IS_LONG;
-		fbcmdRelease(meta);
-		return 1;
-	}
-	else if (tp[0] == 'I')
-	{
-		link->insert_id = fbcmdRowIndex(md);
-		return_value->value.lval = 1;
-		return_value->type       = IS_LONG;
-		fbcmdRelease(meta);
-		return 1;
-	}
-	else if ((fh = fbcmdFetchHandle(md)) || (tp[0] == 'E'))
-	{
-		result = emalloc(sizeof(PHPFBResult));
-		result->link        = link;
-		result->fetchHandle = fh;
-		result->ResultmetaData    = meta;
-		result->metaData    = md;
-		result->rowHandler  = NULL;
-		result->batchSize   = FB_SQL_G(batchSize);
-		result->rowCount    = 0x7fffffff;
-		result->columnCount = 0;
-		result->rowIndex    = 0;
-		result->columnIndex = 0;
-		result->row         = NULL;
-		result->array       = NULL;
-		result->list        = NULL;
-		result->selectResults = sR;
-		result->currentResult = cR;
-
-		if (tp[0] != 'E')
+		if ((tp[0] == 'C') || (tp[0] == 'R'))
 		{
-			result->rowCount    = 0x7fffffff;
-			result->columnCount = fbcmdColumnCount(md);
+			return_value->value.lval = 1;
+			return_value->type       = IS_LONG;
+			if (sR == 1 && md) fbcmdRelease(md);
+		}
+		else if (tp[0] == 'I' || tp[0] == 'U')
+		{
+			if (tp[0] == 'I') link->insert_id = fbcmdRowIndex(md);
+			return_value->value.lval = 1;
+			return_value->type       = IS_LONG;
+			if (sR == 1 && md) fbcmdRelease(md);
+		}
+		else if ((fh = fbcmdFetchHandle(md)) || (tp[0] == 'E'))
+		{
+			result = emalloc(sizeof(PHPFBResult));
+			result->link        = link;
 			result->fetchHandle = fh;
+			result->ResultmetaData    = meta;
+			result->metaData    = md;
+			result->rowHandler  = NULL;
 			result->batchSize   = FB_SQL_G(batchSize);
-		}
-		else 
-		{
-			char* r = fbcmdMessage(result->metaData);
-			if ((result->list = fbcplParse(r)))
-			{
-				result->rowCount    = fbcplCount(result->list);
-				result->columnCount = 7;
-			}
-		}
-		ZEND_REGISTER_RESOURCE(return_value, result, le_result);
-	}
-	if (link) link->affectedRows = fbcmdRowCount(md);
-	return 1;
-}
-/* }}} */
+			result->rowCount    = 0x7fffffff;
+			result->columnCount = 0;
+			result->rowIndex    = 0;
+			result->columnIndex = 0;
+			result->row         = NULL;
+			result->array       = NULL;
+			result->list        = NULL;
+			result->selectResults = sR;
+			result->currentResult = cR;
 
-/* {{{ proto resource fbsql_query(string query [, int link_identifier])
+			if (tp[0] != 'E')
+			{
+				result->rowCount    = 0x7fffffff;
+				result->columnCount = fbcmdColumnCount(md);
+				result->fetchHandle = fh;
+				result->batchSize   = FB_SQL_G(batchSize);
+			}
+			else 
+			{
+				char* r = fbcmdMessage(result->metaData);
+				if ((result->list = fbcplParse(r)))
+				{
+					result->rowCount    = fbcplCount(result->list);
+					result->columnCount = 7;
+				}
+			}
+			ZEND_REGISTER_RESOURCE(return_value, result, le_result);
+		}
+		if (link) link->affectedRows = fbcmdRowCount(md);
+	}
+}
+
+/* {{{ proto resource fbsql_query(string query [, resource link_identifier])
 	*/
 PHP_FUNCTION(fbsql_query)
 {
@@ -1625,7 +1619,7 @@ PHP_FUNCTION(fbsql_query)
 }
 /* }}} */
 
-/* {{{ proto resource fbsql_db_query(string database_name, string query [, int link_identifier])
+/* {{{ proto resource fbsql_db_query(string database_name, string query [, resource link_identifier])
 	*/
 PHP_FUNCTION(fbsql_db_query)
 {
@@ -1668,7 +1662,7 @@ PHP_FUNCTION(fbsql_db_query)
 }
 /* }}} */
 
-/* {{{ proto int fbsql_list_dbs([int link_identifier])
+/* {{{ proto int fbsql_list_dbs([resource link_identifier])
 	*/
 PHP_FUNCTION(fbsql_list_dbs)
 {
@@ -1761,7 +1755,7 @@ PHP_FUNCTION(fbsql_list_tables)
 }
 /* }}} */
 
-/* {{{ proto int fbsql_list_fields(string database_name, string table_name [, int link_identifier])
+/* {{{ proto int fbsql_list_fields(string database_name, string table_name [, resource link_identifier])
 	*/
 PHP_FUNCTION(fbsql_list_fields)
 {
@@ -1805,7 +1799,7 @@ PHP_FUNCTION(fbsql_list_fields)
 }
 /* }}} */
 
-/* {{{ proto string fbsql_error([int link_identifier])
+/* {{{ proto string fbsql_error([resource link_identifier])
 	*/
 PHP_FUNCTION(fbsql_error)
 {
@@ -1840,7 +1834,7 @@ PHP_FUNCTION(fbsql_error)
 }
 /* }}} */
 
-/* {{{ proto int fbsql_errno([int link_identifier])
+/* {{{ proto int fbsql_errno([resource link_identifier])
 	*/
 PHP_FUNCTION(fbsql_errno)
 {
@@ -1889,7 +1883,7 @@ PHP_FUNCTION(fbsql_warnings)
 }
 /* }}} */
 
-/* {{{ proto int fbsql_affected_rows([int link_identifier])
+/* {{{ proto int fbsql_affected_rows([resource link_identifier])
 	*/
 PHP_FUNCTION(fbsql_affected_rows)
 {
@@ -1919,7 +1913,7 @@ PHP_FUNCTION(fbsql_affected_rows)
 }
 /* }}} */
 
-/* {{{ proto int fbsql_insert_id([int link_identifier])
+/* {{{ proto int fbsql_insert_id([resource link_identifier])
 	*/
 PHP_FUNCTION(fbsql_insert_id)
 {
