@@ -4025,15 +4025,18 @@ static void php_string_shuffle(char *str, long len TSRMLS_DC)
    Shuffles string. One permutation of all possible is created */
 PHP_FUNCTION(str_shuffle)
 {
-	char *str;
-	int str_len;
+	zval **arg;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &str, &str_len) == FAILURE) {
-		RETURN_FALSE;
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg)) {
+		WRONG_PARAM_COUNT;
 	}
-	php_string_shuffle(str, str_len TSRMLS_CC);
 	
-	return;
+	convert_to_string_ex(arg);
+	*return_value = **arg;
+	zval_copy_ctor(return_value);
+	if (Z_STRLEN_P(return_value) > 1) { 
+		php_string_shuffle(Z_STRVAL_P(return_value), Z_STRLEN_P(return_value) TSRMLS_CC);
+	}
 }
 /* }}} */
 
