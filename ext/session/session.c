@@ -738,7 +738,7 @@ static void php_register_var(zval** entry PSLS_DC)
 		zend_hash_internal_pointer_reset((*entry)->value.ht);
 
 		while(zend_hash_get_current_data((*entry)->value.ht, (void**)&value) == SUCCESS) {
-			php_register_var(value);
+			php_register_var(value PSLS_CC);
 			zend_hash_move_forward((*entry)->value.ht);
 		}
 	} else {
