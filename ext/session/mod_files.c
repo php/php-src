@@ -33,8 +33,8 @@
 #if WIN32||WINNT
 #define NEEDRDH 1
 #include "win32/readdir.h"
-#include <time.h>
 #endif
+#include <time.h>
 
 #include <fcntl.h>
 

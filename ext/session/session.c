@@ -28,6 +28,8 @@
 #include "win32/time.h"
 #endif
 
+#include <fcntl.h>
+
 #include "php.h"
 #include "php_ini.h"
 #include "SAPI.h"
@@ -70,7 +72,9 @@ PHP_INI_BEGIN()
 	PHP_INI_ENTRY("session.gc_maxlifetime", "1440", PHP_INI_ALL, NULL)
 	PHP_INI_ENTRY("session.lifetime", "0", PHP_INI_ALL, NULL)
 	PHP_INI_ENTRY("session.serialize_handler", "php", PHP_INI_ALL, NULL)
-	PHP_INI_ENTRY("session.extern_referer_chk", "", PHP_INI_ALL, NULL)
+	PHP_INI_ENTRY("session.extern_referer_check", "", PHP_INI_ALL, NULL)
+	PHP_INI_ENTRY("session.entropy_file", "", PHP_INI_ALL, NULL)
+	PHP_INI_ENTRY("session.entropy_length", "", PHP_INI_ALL, NULL)
 PHP_INI_END()
 
 PS_SERIALIZER_FUNCS(php);
@@ -232,7 +236,6 @@ PS_SERIALIZER_DECODE_FUNC(wddx)
 {
 	zval *retval;
 	zval **ent;
-	zval *current;
 	char *key;
 	char tmp[128];
 	ulong idx;
@@ -280,7 +283,7 @@ static void _php_session_decode(const char *val, int vallen PSLS_DC)
 	PS(serializer)->decode(val, vallen PSLS_CC);
 }
 
-static char *_php_create_id(int *newlen)
+static char *_php_create_id(int *newlen PSLS_DC)
 {
 	PHP3_MD5_CTX context;
 	unsigned char digest[16];
@@ -293,6 +296,24 @@ static char *_php_create_id(int *newlen)
 	
 	sprintf(buf, "%ld%ld%0.8f", tv.tv_sec, tv.tv_usec, php_combined_lcg() * 10);
 	PHP3_MD5Update(&context, buf, strlen(buf));
+
+	if(PS(entropy_length) > 0) {
+		int fd;
+
+		fd = open(PS(entropy_file), O_RDONLY);
+		if(fd >= 0) {
+			char *p;
+			int n;
+			
+			p = emalloc(PS(entropy_length));
+			n = read(fd, p, PS(entropy_length));
+			if(n > 0) {
+				PHP3_MD5Update(&context, p, n);
+			}
+			efree(p);
+			close(fd);
+		}
+	}
 
 	PHP3_MD5Final(digest, &context);
 
@@ -466,7 +487,7 @@ static void _php_session_start(PSLS_D)
 	}
 	
 	if(!PS(id)) {
-		PS(id) = _php_create_id(NULL);
+		PS(id) = _php_create_id(NULL PSLS_C);
 	}
 
 	if(send_cookie) {
@@ -739,9 +760,11 @@ static void php_rinit_session_globals(PSLS_D)
 	zend_hash_init(&PS(vars), 0, NULL, NULL, 0);
 	PS(save_path) = estrdup(INI_STR("session.save_path"));
 	PS(session_name) = estrdup(INI_STR("session.name"));
+	PS(entropy_file) = estrdup(INI_STR("session.entropy_file"));
+	PS(entropy_length) = INI_INT("session.entropy_length");
 	PS(gc_probability) = INI_INT("session.gc_probability");
 	PS(gc_maxlifetime) = INI_INT("session.gc_maxlifetime");
-	PS(extern_referer_chk) = estrdup(INI_STR("extern_referer_chk"));
+	PS(extern_referer_chk) = estrdup(INI_STR("session.extern_referer_check"));
 	PS(id) = NULL;
 	PS(lifetime) = INI_INT("session.lifetime");
 	PS(nr_open_sessions) = 0;
@@ -752,6 +775,7 @@ static void php_rshutdown_session_globals(PSLS_D)
 {
 	if(PS(mod_data))
 		PS(mod)->close(&PS(mod_data));
+	efree(PS(entropy_file));
 	efree(PS(extern_referer_chk));
 	efree(PS(save_path));
 	efree(PS(session_name));
