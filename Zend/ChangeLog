@@ -1,3 +1,14 @@
+2003-05-27  Sterling Hughes  <sterling@bumblebury.com>
+
+    * zend.c
+      zend_object_handlers.c
+      zend_object_handlers.h
+      zend_operators.c:
+      Assume lazy consensus regarding the cast_object() patch.  *Only*
+      implemented
+      from a internals perspective.  This callback has been very useful for both
+      ext/mono and ext/simplexml
+
 2003-05-26  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_language_scanner.l:
