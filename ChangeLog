@@ -1,3 +1,63 @@
+2004-12-09  Antony Dovgal  <tony2001@phpclub.net>
+
+    * (PHP_4_3)
+      ext/session/session.c
+      ext/session/session.c:
+      CS changes
+
+    * ext/session/session.c:
+      CS changes (as suggested by Ilia)
+
+    * ext/pcre/php_pcre.c:
+      fix 1-byte leak
+
+    * (PHP_4_3)
+      ext/session/session.c
+      ext/session/session.c:
+      MFH: fix segfault in session_module_name() when session.save_handler is
+      empty
+
+    * ext/session/session.c:
+      fix segfault in session_module_name() when session.save_handler is empty
+
+2004-12-09  Pierre-Alain Joye  <pierre@dotgeek.org>
+
+    * (PHP_5_0)
+      NEWS:
+      - fix the entry position, thx D
+
+    * (PHP_5_0)
+      NEWS
+      ext/gd/libgd/gdft.c
+      ext/gd/libgd/gdft.c:
+      - MFH: #28598, attempt to restore MS Symbol ttf support
+
+    * (PHP_5_0)
+      ext/gd/libgd/gd.c:
+      - MFB: #30229, fixed imagerectangle used with alpha channel
+      - MFB: imagefill, always restore the alphablending mode
+
+2004-12-09  Derick Rethans  <php@derickrethans.nl>
+
+    * acinclude.m4:
+      - MF43: Fixed bug #31034 (Problem with non-existing iconv header file).
+
+    * (PHP_5_0)
+      NEWS
+      acinclude.m4:
+      - MFH: Fixed bug #31034 (Problem with non-existing iconv header file).
+      (Derick)
+
+    * (PHP_4_3)
+      NEWS
+      acinclude.m4:
+      - Fixed bug #31034 (Problem with non-existing iconv header file). (Derick)
+
+2004-12-09  Antony Dovgal  <tony2001@phpclub.net>
+
+    * ext/mysqli/mysqli.c:
+      fix buffer overrun and remove debug printf() call
+
 2004-12-08  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_4_3)
