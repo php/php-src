@@ -2,7 +2,9 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 28 Jun 2000, Version 4.0.1
-- Make --enable-discard-path work again. (Andi) 
+- Fixed a bug in opendir(), which prevented readdir() from working properly if
+  the $dir argument wasn't explicitly specified (Zeev)
+- Made --enable-discard-path work again. (Andi) 
 - Removed 8KB limit on line length of the file() function (Zeev)
 - Disabled dl() when PHP is being used as a module inside a multithreaded web
   server - it didn't work before, and caused weird results (Zeev)
@@ -96,8 +98,8 @@ PHP 4.0                                                                    NEWS
 - Clean up constants in flock() function and add optional 3rd arg which
   is set to true on EWOULDBLOCK (Rasmus)
 - Added functions pg_loimport(), pg_loexport(). (Jouni)
-- Add SWF support to getimagesize() function (Derick Rethans)
-- Add support for both indexed and non-indexed arrays of file uploads
+- Added SWF support to getimagesize() function (Derick Rethans)
+- Added support for both indexed and non-indexed arrays of file uploads
   eg. name="file[]" type="file" (Rasmus)
 - Added create_function(), which gives the ability to create functions
   on-the-fly (Zeev, Zend Engine)
@@ -151,7 +153,7 @@ PHP 4.0                                                                    NEWS
   jpeg images it generates.  (Rasmus)
 - Fixed basename() bug where "file.ext///" would not return the same
   as "/path/file.ext///" (Rasmus)
-- Add the swf_ortho function. (Sterling)
+- Added the swf_ortho function. (Sterling)
 - Moved to virtual current working directory support. This highly improves the
   functionality and stability of multi-threaded versions of PHP (Andi, Sascha)
 

@@ -45,12 +45,20 @@ typedef struct {
 } php_dir_globals;
 
 #ifdef ZTS
-#define DIR(v) (dir_globals->v)
+#define DIRG(v) (dir_globals->v)
 #define DIRLS_FETCH() php_dir_globals *dir_globals = ts_resource(dir_globals_id)
+#define DIRLS_D		php_dir_globals *dir_globals
+#define DIRLS_DC	, DIRLS_D
+#define DIRLS_C		dir_globals
+#define DIRLS_CC	, DIRLS_C
 int dir_globals_id;
 #else
-#define DIR(v) (dir_globals.v)
+#define DIRG(v) (dir_globals.v)
 #define DIRLS_FETCH()
+#define DIRLS_D
+#define DIRLS_DC
+#define DIRLS_C
+#define DIRLS_CC
 php_dir_globals dir_globals;
 #endif
 
@@ -73,7 +81,7 @@ static zend_class_entry *dir_class_entry_ptr;
 			} \
 			ZEND_FETCH_RESOURCE(dirp,php_dir *,tmp,-1, "Directory", le_dirp); \
 		} else { \
-			ZEND_FETCH_RESOURCE(dirp,php_dir *,0,DIR(default_dir), "Directory", le_dirp); \
+			ZEND_FETCH_RESOURCE(dirp,php_dir *,0,DIRG(default_dir), "Directory", le_dirp); \
 		} \
 	} else if ((ZEND_NUM_ARGS() != 1) || zend_get_parameters_ex(1, &id) == FAILURE) { \
 		WRONG_PARAM_COUNT; \
@@ -89,18 +97,26 @@ static zend_function_entry php_dir_class_functions[] = {
 };
 
 
+static void php_set_default_dir(int id DIRLS_DC)
+{
+    if (DIRG(default_dir)!=-1) {
+        zend_list_delete(DIRG(default_dir));
+    }
+    DIRG(default_dir) = id;
+    zend_list_addref(id);
+}
+
+
 static void _dir_dtor(php_dir *dirp)
 {
 	closedir(dirp->dir);
 	efree(dirp);
 }
 
-#ifdef ZTS
-static void php_dir_init_globals(php_dir_globals *dir_globals)
+static void php_dir_init_globals(DIRLS_D)
 {
-	DIR(default_dir) = 0;
+	DIRG(default_dir) = -1;
 }
-#endif
 
 PHP_MINIT_FUNCTION(dir)
 {
@@ -114,7 +130,7 @@ PHP_MINIT_FUNCTION(dir)
 #ifdef ZTS
 	dir_globals_id = ts_allocate_id(sizeof(php_dir_globals), (ts_allocate_ctor) php_dir_init_globals, NULL);
 #else
-	DIR(default_dir) = 0;
+	php_dir_init_globals(DIRLS_C);
 #endif
 
 	return SUCCESS;
@@ -150,7 +166,7 @@ static void _php_do_opendir(INTERNAL_FUNCTION_PARAMETERS, int createobject)
 
 	dirp->id = zend_list_insert(dirp,le_dirp);
 
-	DIR(default_dir) = dirp->id;
+	php_set_default_dir(dirp->id DIRLS_CC);
 
 	if (createobject) {
 		object_init_ex(return_value, dir_class_entry_ptr);
