@@ -5,6 +5,6 @@ a=Hello+World
 --GET--
 --FILE--
 <?php error_reporting(0);
-echo $a?>
+echo $_POST['a']; ?>
 --EXPECT--
 Hello World
