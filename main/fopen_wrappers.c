@@ -348,7 +348,9 @@ PHPAPI FILE *php_fopen_primary_script(void)
 		STR_FREE(SG(request_info).path_translated);	/* for same reason as above */
 		return NULL;
 	}
-	V_CHDIR_FILE(filename);
+    if (!(SG(options) & SAPI_OPTION_NO_CHDIR)) {
+		V_CHDIR_FILE(filename);
+    }
 	SG(request_info).path_translated = filename;
 
 	return fp;
