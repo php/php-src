@@ -311,10 +311,10 @@ fprintf(stderr, "stream_free: %s:%p[%s] preserve_handle=%d release_cast=%d remov
 	if (close_options & PHP_STREAM_FREE_RELEASE_STREAM) {
 		
 		while (stream->readfilters.head) {
-			php_stream_filter_remove(stream->readfilters.head, 1);
+			php_stream_filter_remove(stream->readfilters.head, 1 TSRMLS_CC);
 		}
 		while (stream->writefilters.head) {
-			php_stream_filter_remove(stream->writefilters.head, 1);
+			php_stream_filter_remove(stream->writefilters.head, 1 TSRMLS_CC);
 		}
 
 		if (stream->wrapper && stream->wrapper->wops && stream->wrapper->wops->stream_closer) {
@@ -388,7 +388,7 @@ static void php_stream_fill_read_buffer(php_stream *stream, size_t size TSRMLS_D
 				bucket = php_stream_bucket_new(stream, chunk_buf, justread, 0, 0 TSRMLS_CC);
 
 				/* after this call, bucket is owned by the brigade */
-				php_stream_bucket_append(brig_inp, bucket);
+				php_stream_bucket_append(brig_inp, bucket TSRMLS_CC);
 
 				flags = PSFS_FLAG_NORMAL;
 			} else {
@@ -845,7 +845,7 @@ static size_t _php_stream_write_filtered(php_stream *stream, const char *buf, si
 
 	if (buf) {
 		bucket = php_stream_bucket_new(stream, (char *)buf, count, 0, 0 TSRMLS_CC);
-		php_stream_bucket_append(&brig_in, bucket);
+		php_stream_bucket_append(&brig_in, bucket TSRMLS_CC);
 	}
 
 	for (filter = stream->writefilters.head; filter; filter = filter->next) {

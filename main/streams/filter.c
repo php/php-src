@@ -110,7 +110,7 @@ PHPAPI php_stream_bucket *php_stream_bucket_make_writeable(php_stream_bucket *bu
 	retval->refcount = 1;
 	retval->own_buf = 1;
 
-	php_stream_bucket_delref(bucket);
+	php_stream_bucket_delref(bucket TSRMLS_CC);
 	
 	return retval;
 }
