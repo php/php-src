@@ -260,7 +260,7 @@ PHP_MINIT_FUNCTION(ps_mm)
 	}
 
 	if (!sprintf(euid,"%d", geteuid())) {
-		php_error(E_WARNING,"mm session save handler cannot get effecitve UID");
+		php_error(E_WARNING,"mm session save handler cannot get effective UID");
 		return FAILURE;
 	}
 		
