@@ -4097,10 +4097,12 @@ int zend_add_interface_handler(ZEND_OPCODE_HANDLER_ARGS)
 	ai.afn[idx] ? ai.afn[idx]->common.function_name : "", \
 	ai.afn[idx] && ai.afn[idx+1] ? ", " : (ai.afn[idx] && ai.cnt >= MAX_ABSTRACT_INFO_CNT ? ", ..." : "")
 
+
 typedef struct _zend_abstract_info {
 	zend_function *afn[MAX_ABSTRACT_INFO_CNT+1];
 	int cnt;
 } zend_abstract_info;
+
 
 int zend_verify_abstract_class_function(zend_function *fn, zend_abstract_info *ai TSRMLS_DC)
 {
@@ -4112,6 +4114,7 @@ int zend_verify_abstract_class_function(zend_function *fn, zend_abstract_info *a
 	}
 	return 0;
 }
+
 
 int zend_verify_abstract_class_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
