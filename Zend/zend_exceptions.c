@@ -388,7 +388,7 @@ static void zend_register_default_exception(TSRMLS_D)
 	zend_declare_property_long(default_exception_ptr, "code", sizeof("code")-1, 0, ZEND_ACC_PROTECTED TSRMLS_CC);
 	zend_declare_property_null(default_exception_ptr, "file", sizeof("file")-1, ZEND_ACC_PROTECTED TSRMLS_CC);
 	zend_declare_property_null(default_exception_ptr, "line", sizeof("line")-1, ZEND_ACC_PROTECTED TSRMLS_CC);
-	zend_declare_property_null(default_exception_ptr, "trace", sizeof("trace")-1, ZEND_ACC_PROTECTED TSRMLS_CC);
+	zend_declare_property_null(default_exception_ptr, "trace", sizeof("trace")-1, ZEND_ACC_PRIVATE TSRMLS_CC);
 }
 
 ZEND_API zend_class_entry *zend_exception_get_default(void)
