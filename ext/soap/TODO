@@ -58,7 +58,8 @@ Encoding
 	  SOAP 1.2 doesn't support partially transmitted and sparse arrays
 - references to external resources
 ? support for "nillable" and "nil"
-- default values
++ default values of <attribute>
+- default values of <element>
 ? provide schema 1999/2001 support???
 ? make internal refrences for soap encoding (use seralization logic)???
 ? provide user space overriding of serialization certin objects and types???
@@ -106,7 +107,7 @@ Schema
 		- maxInclusive (for numeric, date types)
 		- totalDigits (for decimal)
 		- fractionDigits (for decimal)
-	? list
+	+ list
 	? union
 ? support for user defined complex types
   ? full support for content model encoding/decoding
