@@ -342,7 +342,7 @@ PHP_FUNCTION(dbplus_add)
 }
 /* }}} */
 
-/* {{{ proto int dbplus_aql(string query [, string server [, string dbpath]])
+/* {{{ proto resource dbplus_aql(string query [, string server [, string dbpath]])
    Perform AQL query */
 PHP_FUNCTION(dbplus_aql)
 {
@@ -777,7 +777,7 @@ PHP_FUNCTION(dbplus_next)
 }
 /* }}} */
 
-/* {{{ proto int dbplus_open(string name)
+/* {{{ proto resource dbplus_open(string name)
    Open a relation file */
 PHP_FUNCTION(dbplus_open)
 {
@@ -843,8 +843,9 @@ PHP_FUNCTION(dbplus_rchperm)
 }
 /* }}} */
 
-/* {{{ proto int dbplus_rcreate(string name, mixed domlist [, int overwrite])
-    */
+/* {{{ proto resource dbplus_rcreate(string name, mixed domlist [, int overwrite])
+	 Create a new db++ reslation
+*/
 PHP_FUNCTION(dbplus_rcreate)
 {
   zval **name, **domlist, **overwrite;
@@ -903,8 +904,9 @@ PHP_FUNCTION(dbplus_rcreate)
 }
 /* }}} */
 
-/* {{{ proto int dbplus_rcrtexact(string name, int handle[, int overwrite])
-    */
+/* {{{ proto resource dbplus_rcrtexact(string name, resource relation [, boolean overwrite])
+	 Create an exact but empty copy of a relation including indices
+ */
 PHP_FUNCTION(dbplus_rcrtexact)
 {
   zval **name, **relation, **overwrite;
@@ -943,8 +945,9 @@ PHP_FUNCTION(dbplus_rcrtexact)
 }
 /* }}} */
 
-/* {{{ proto int dbplus_rcrtlike(string name, int handle [, int overwrite])
-    */
+/* {{{ proto resource dbplus_rcrtlike(string name, int handle [, int overwrite])
+	 Create an empty copy of a relation with default indices
+*/
 PHP_FUNCTION(dbplus_rcrtlike)
 {
   zval **name, **relation, **overwrite;
@@ -1047,8 +1050,9 @@ PHP_FUNCTION(dbplus_restorepos)
 }
 /* }}} */
 
-/* {{{ proto int dbplus_rkeys(int relation, mixed domlist)
-    */
+/* {{{ proto resource dbplus_rkeys(resource relation, mixed domlist)
+	 Define primary key for relation
+*/
 PHP_FUNCTION(dbplus_rkeys)
 {
   relf *r, *rnew;
@@ -1106,8 +1110,8 @@ PHP_FUNCTION(dbplus_rkeys)
 }
 /* }}} */
 
-/* {{{ proto int dbplus_ropen(string name)
-   Open relation file ... ??? */
+/* {{{ proto resource dbplus_ropen(string name)
+   Open relation file local */
 PHP_FUNCTION(dbplus_ropen)
 {
   relf *r;
@@ -1128,7 +1132,7 @@ PHP_FUNCTION(dbplus_ropen)
 }
 /* }}} */
 
-/* {{{ proto int dbplus_rquery(string name, string dbpath)
+/* {{{ proto resceour dbplus_rquery(string name, string dbpath)
     */
 PHP_FUNCTION(dbplus_rquery)
 {
@@ -1169,8 +1173,9 @@ PHP_FUNCTION(dbplus_rrename)
 }
 /* }}} */
 
-/* {{{ proto int dbplus_rsecindex(int relation, mixed domlist, int compact)
-    */
+/* {{{ proto resource dbplus_rsecindex(resource relation, mixed domlist, int compact)
+	 Create an additional index on relation
+*/
 PHP_FUNCTION(dbplus_rsecindex)
 {
   relf *r, *rnew;
@@ -1315,7 +1320,7 @@ PHP_FUNCTION(dbplus_setindexbynumber)
 }
 /* }}} */
 
-/* {{{ proto int dbplus_sql(string query, string server, string dbpath)
+/* {{{ proto resource dbplus_sql(string query, string server, string dbpath)
    Perform SQL query */
 PHP_FUNCTION(dbplus_sql)
 {
@@ -1356,6 +1361,7 @@ PHP_FUNCTION(dbplus_sql)
 /* }}} */
 
 /* {{{ proto string dbplus_tcl(int sid, string script)
+	 Execute server side TCL code
     */
 PHP_FUNCTION(dbplus_tcl)
 {
