@@ -194,7 +194,10 @@ ZEND_API void zend_open_file_dtor(zend_file_handle *fh)
 			delete ((ifstream *) fh->handle.is);
 			break;
 		case ZEND_HANDLE_STDIOSTREAM:
-			delete ((istdiostream *) fh->handle.is);
+			istdiostream *pstdiostream = (istdiostream *) fh->handle.is;
+			
+			fclose(pstdiostream->rdbuf()->stdiofile());
+			delete pstdiostream;
 			break;
 #endif
 	}
