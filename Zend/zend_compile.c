@@ -1481,7 +1481,7 @@ static int generate_free_foreach_copy(znode *foreach_copy TSRMLS_DC)
 {
 	zend_op *opline;
 	
-	if (foreach_copy->op_type!=IS_VAR && foreach_copy->op_type!=IS_TMP_VAR) {
+	if (foreach_copy->op_type != IS_VAR && foreach_copy->op_type != IS_TMP_VAR) {
 		return 1;
 	}
 
@@ -3267,6 +3267,7 @@ void zend_do_foreach_begin(znode *foreach_token, znode *array, znode *open_brack
 {
 	zend_op *opline;
 	zend_bool is_variable;
+	zend_bool push_container = 0;
 
 	if (variable) {
 		if (zend_is_function_or_method_call(array)) {
@@ -3278,6 +3279,7 @@ void zend_do_foreach_begin(znode *foreach_token, znode *array, znode *open_brack
 		if (CG(active_op_array)->opcodes[CG(active_op_array)->last-1].opcode == ZEND_FETCH_OBJ_W) {
 			/* FIXME:  This will cause a leak, we have to unlock at the end of foreach() */
 			CG(active_op_array)->opcodes[CG(active_op_array)->last-1].extended_value |= ZEND_FETCH_ADD_LOCK;
+			push_container = 1;
 		}
 	} else {
 		is_variable = 0;
@@ -3295,7 +3297,15 @@ void zend_do_foreach_begin(znode *foreach_token, znode *array, znode *open_brack
 	*open_brackets_token = opline->result;
 
 	zend_stack_push(&CG(foreach_copy_stack), (void *) &opline->result, sizeof(znode));
+	if (push_container) {
+		zend_stack_push(&CG(foreach_copy_stack), (void *) &CG(active_op_array)->opcodes[CG(active_op_array)->last-2].op1, sizeof(znode));
+	} else {
+		znode tmp;
 
+		tmp.op_type = IS_UNUSED;
+		zend_stack_push(&CG(foreach_copy_stack), (void *) &tmp, sizeof(znode));
+	}
+	
 	/* save the location of the beginning of the loop (array fetching) */
 	opline->op2.u.opline_num = foreach_token->u.opline_num = get_next_op_number(CG(active_op_array));
 
@@ -3381,6 +3391,7 @@ void zend_do_foreach_cont(znode *value, znode *key, znode *as_token, znode *fore
 
 void zend_do_foreach_end(znode *foreach_token, znode *open_brackets_token TSRMLS_DC)
 {
+	znode *container_ptr;
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
 	opline->opcode = ZEND_JMP;
@@ -3392,8 +3403,11 @@ void zend_do_foreach_end(znode *foreach_token, znode *open_brackets_token TSRMLS
 
 	do_end_loop(foreach_token->u.opline_num TSRMLS_CC);
 
-	generate_free_foreach_copy(open_brackets_token TSRMLS_CC);
+	zend_stack_top(&CG(foreach_copy_stack), &container_ptr);
+	generate_free_foreach_copy(container_ptr TSRMLS_CC);
+	zend_stack_del_top(&CG(foreach_copy_stack));
 
+	generate_free_foreach_copy(open_brackets_token TSRMLS_CC);
 	zend_stack_del_top(&CG(foreach_copy_stack));
 
 	DEC_BPC(CG(active_op_array));
