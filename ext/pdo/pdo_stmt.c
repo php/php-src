@@ -29,6 +29,7 @@
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
+#include "ext/standard/php_var.h"
 #include "php_pdo.h"
 #include "php_pdo_driver.h"
 #include "php_pdo_int.h"
@@ -202,7 +203,7 @@ static void get_lazy_object(pdo_stmt_t *stmt, zval *return_value TSRMLS_DC) /* {
 {
 	if (Z_TYPE(stmt->lazy_object_ref) == IS_NULL) {
 		Z_TYPE(stmt->lazy_object_ref) = IS_OBJECT;
-		Z_OBJ_HANDLE(stmt->lazy_object_ref) = zend_objects_store_put(stmt, zend_objects_destroy_object, pdo_row_free_storage, NULL TSRMLS_CC);
+		Z_OBJ_HANDLE(stmt->lazy_object_ref) = zend_objects_store_put(stmt, (zend_objects_store_dtor_t)zend_objects_destroy_object, pdo_row_free_storage, NULL TSRMLS_CC);
 		Z_OBJ_HT(stmt->lazy_object_ref) = &pdo_row_object_handlers;
 		stmt->refcount++;
 	}
@@ -735,8 +736,13 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value,
 			case PDO_FETCH_COLUMN:
 				if (stmt->fetch.column >= 0 && stmt->fetch.column < stmt->column_count) {
 					fetch_value(stmt, return_value, stmt->fetch.column TSRMLS_CC);
-					return 1;
+					if (!return_all) {
+						return 1;
+					} else {
+						break;
+					}
 				}
+				fprintf(stderr, "FAIL\n");
 				return 0;
 
 			case PDO_FETCH_OBJ:
@@ -768,11 +774,13 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value,
 					zval_dtor(&val);
 				}
 				ce = stmt->fetch.cls.ce;
-				object_init_ex(return_value, ce);
-				if (!stmt->fetch.cls.fci.size) {
-					if (!do_fetch_class_prepare(stmt TSRMLS_CC))
-					{
-						return 0;
+				if ((flags & PDO_FETCH_SERIALIZE) == 0) {
+					object_init_ex(return_value, ce);
+					if (!stmt->fetch.cls.fci.size) {
+						if (!do_fetch_class_prepare(stmt TSRMLS_CC))
+						{
+							return 0;
+						}
 					}
 				}
 				break;
@@ -807,7 +815,11 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value,
 			INIT_PZVAL(&grp_val);
 			fetch_value(stmt, &grp_val, i TSRMLS_CC);
 			convert_to_string(&grp_val);
-			i++;
+			if (how == PDO_FETCH_COLUMN) {
+				i = stmt->column_count; /* no more data to fetch */
+			} else {
+				i++;
+			}
 		}
 
 		for (idx = 0; i < stmt->column_count; i++, idx++) {
@@ -838,9 +850,32 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value,
 					break;
 
 				case PDO_FETCH_CLASS:
-					zend_update_property(ce, return_value,
-						stmt->columns[i].name, stmt->columns[i].namelen,
-						val TSRMLS_CC);
+					if ((flags & PDO_FETCH_SERIALIZE) == 0 || idx) {
+						zend_update_property(ce, return_value,
+							stmt->columns[i].name, stmt->columns[i].namelen,
+							val TSRMLS_CC);
+					} else {
+#ifdef MBO_0
+						php_unserialize_data_t var_hash;
+
+						PHP_VAR_UNSERIALIZE_INIT(var_hash);
+						if (php_var_unserialize(&return_value, (const unsigned char**)&Z_STRVAL_P(val), Z_STRVAL_P(val)+Z_STRLEN_P(val), NULL TSRMLS_CC) == FAILURE) {
+							zend_throw_exception_ex(pdo_exception_ce, 0 TSRMLS_CC, "Cannot unserialize data");
+							PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
+							return 0;
+						}
+						PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
+#else
+						if (!ce->unserialize) {
+							zend_throw_exception_ex(pdo_exception_ce, 0 TSRMLS_CC, "Class %s cannot be unserialized", ce->name);
+							return 0;
+						} else if (ce->unserialize(&return_value, ce, Z_TYPE_P(val) == IS_STRING ? Z_STRVAL_P(val) : "", Z_TYPE_P(val) == IS_STRING ? Z_STRLEN_P(val) : 0, NULL TSRMLS_CC) == FAILURE) {
+							zend_throw_exception_ex(pdo_exception_ce, 0 TSRMLS_CC, "Class %s cannot be unserialized", ce->name);
+							zval_dtor(return_value);
+							ZVAL_NULL(return_value);
+						}
+#endif
+					}
 					break;
 				
 				case PDO_FETCH_FUNC:
@@ -944,17 +979,21 @@ static int pdo_stmt_verify_mode(pdo_stmt_t *stmt, int mode, int fetch_all TSRMLS
 		return 1;
 	
 	default:
+		if ((flags & PDO_FETCH_SERIALIZE) == PDO_FETCH_SERIALIZE) {
+			zend_throw_exception_ex(pdo_exception_ce, 0 TSRMLS_CC, "Fetch mode flag PDO_FETCH_SERIALIZE requires mode PDO_FETCH_CLASS", mode);
+			return 0;
+		}
 		if ((flags & PDO_FETCH_CLASSTYPE) == PDO_FETCH_CLASSTYPE) {
 			zend_throw_exception_ex(pdo_exception_ce, 0 TSRMLS_CC, "Fetch mode flag PDO_FETCH_CLASSTYPE requires mode PDO_FETCH_CLASS", mode);
+			return 0;
+		}
+		if (mode >= PDO_FETCH__MAX) {
+			zend_throw_exception_ex(pdo_exception_ce, 0 TSRMLS_CC, "Fetch mode %d is invalid", mode);
 			return 0;
 		}
 		/* no break; */
 
 	case PDO_FETCH_CLASS:
-		if (mode >= PDO_FETCH__MAX) {
-			zend_throw_exception_ex(pdo_exception_ce, 0 TSRMLS_CC, "Fetch mode %d is invalid", mode);
-			return 0;
-		}
 		return 1;
 	}
 }
@@ -1156,10 +1195,26 @@ static PHP_METHOD(PDOStatement, fetchAll)
 		}
 		do_fetch_func_prepare(stmt TSRMLS_CC);
 		break;
+	
+	case PDO_FETCH_COLUMN:
+		switch(ZEND_NUM_ARGS()) {
+		case 0:
+		case 1:
+			stmt->fetch.column = how & PDO_FETCH_GROUP ? 1 : 0;
+			break;
+		case 2:
+			convert_to_long(arg2);
+			stmt->fetch.column = Z_LVAL_P(arg2);
+			break;
+		case 3:
+			zend_throw_exception_ex(pdo_exception_ce, 0 TSRMLS_CC, "Third parameter not allowed for specified fetch mode");
+			error = 1;
+		}
+		break;
 
 	default:
 		if (ZEND_NUM_ARGS() > 1) {
-			zend_throw_exception_ex(pdo_exception_ce, 0 TSRMLS_CC, "Additional parameter not allowed for specified fetch mode");
+			zend_throw_exception_ex(pdo_exception_ce, 0 TSRMLS_CC, "Additional parameters not allowed for specified fetch mode");
 			error = 1;
 		}
 	}
@@ -1818,7 +1873,7 @@ zend_object_value pdo_dbstmt_new(zend_class_entry *ce TSRMLS_DC)
 	ALLOC_HASHTABLE(stmt->properties);
 	zend_hash_init(stmt->properties, 0, NULL, ZVAL_PTR_DTOR, 0);
 
-	retval.handle = zend_objects_store_put(stmt, zend_objects_destroy_object, pdo_dbstmt_free_storage, NULL TSRMLS_CC);
+	retval.handle = zend_objects_store_put(stmt, (zend_objects_store_dtor_t)zend_objects_destroy_object, pdo_dbstmt_free_storage, NULL TSRMLS_CC);
 	retval.handlers = &pdo_dbstmt_object_handlers;
 
 	return retval;
@@ -2133,7 +2188,7 @@ zend_object_value pdo_row_new(zend_class_entry *ce TSRMLS_DC)
 {
 	zend_object_value retval;
 
-	retval.handle = zend_objects_store_put(NULL, zend_objects_destroy_object, pdo_row_free_storage, NULL TSRMLS_CC);
+	retval.handle = zend_objects_store_put(NULL, (zend_objects_store_dtor_t)zend_objects_destroy_object, pdo_row_free_storage, NULL TSRMLS_CC);
 	retval.handlers = &pdo_row_object_handlers;
 
 	return retval;

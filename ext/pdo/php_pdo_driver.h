@@ -44,7 +44,7 @@ PDO_API char *php_pdo_int64_to_str(pdo_int64_t i64 TSRMLS_DC);
 # define FALSE 0
 #endif
 
-#define PDO_DRIVER_API	20050226
+#define PDO_DRIVER_API	20050227
 
 enum pdo_param_type {
 	PDO_PARAM_NULL,
@@ -95,6 +95,7 @@ enum pdo_fetch_type {
 #define PDO_FETCH_GROUP     0x00010000  /* fetch into groups */
 #define PDO_FETCH_UNIQUE    0x00030000  /* fetch into groups assuming first col is unique */
 #define PDO_FETCH_CLASSTYPE 0x00040000  /* fetch class gets its class name from 1st column */
+#define PDO_FETCH_SERIALIZE 0x00080000  /* fetch class instances by calling serialize */
 
 /* fetch orientation for scrollable cursors */
 enum pdo_fetch_orientation {
