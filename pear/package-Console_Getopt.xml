@@ -32,9 +32,6 @@ short and long options.</description>
       <file role="php" name="Getopt.php"/>
      </dir>
     </filelist>
-	<deps>
-	 <dep type="pkg" rel="ge" version="1.3b4">PEAR</dep>
-	</deps>
   </release>
   <changelog>
     <release>
