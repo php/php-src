@@ -47,18 +47,18 @@ extern php3_module_entry ibase_module_entry;
 extern int php3_minit_ibase(INIT_FUNC_ARGS);
 extern int php3_rinit_ibase(INIT_FUNC_ARGS);
 extern int php3_mfinish_ibase(void);
-extern void php3_info_ibase(ZEND_MODULE_INFO_FUNC_ARGS);
-extern void php3_ibase_connect(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_ibase_pconnect(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_ibase_close(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_ibase_query(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_ibase_fetch_row(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_ibase_free_result(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_ibase_prepare(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_ibase_bind(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_ibase_execute(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_ibase_free_query(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_ibase_timefmt(INTERNAL_FUNCTION_PARAMETERS);
+void php3_info_ibase(ZEND_MODULE_INFO_FUNC_ARGS);
+PHP_FUNCTION(ibase_connect);
+PHP_FUNCTION(ibase_pconnect);
+PHP_FUNCTION(ibase_close);
+PHP_FUNCTION(ibase_query);
+PHP_FUNCTION(ibase_fetch_row);
+PHP_FUNCTION(ibase_free_result);
+PHP_FUNCTION(ibase_prepare);
+PHP_FUNCTION(ibase_bind);
+PHP_FUNCTION(ibase_execute);
+PHP_FUNCTION(ibase_free_query);
+PHP_FUNCTION(ibase_timefmt);
 
 typedef struct {
 	long default_link;
@@ -97,6 +97,8 @@ extern ibase_module php3_ibase_module;
 #define php3_ibase_module_ptr NULL
 
 #endif /* HAVE_IBASE */
+
+#define phpext_interbase_ptr php3_ibase_module_ptr
 
 #endif /* _PHP3_IBASE_H */
 

@@ -10,12 +10,8 @@ over to PHP4.
 - added Oracle-OCI8 persistent connections
 - fixed OCIDefineByName crash.
 - fixed some NULL-column related problems in OCI8-module.
-- optimized fgets() and fread()
-- memory leak in operators.c fixed
-- Fixed the XML bug that caused garbage behind attributes
 - Some Informix driver improvements.
 - PUT method support (mlemos@acm.org)
-- Add ldap_mod_add(), ldap_mod_del() and ldap_mod_replace() (Gerritt Thomson)
 - Fix parameter count problem in odbc_setoption()
 - Really fix implode() this time.  The fix in 3.0.7 was bogus
 - Added more option to the date() function: (Colin Viebrock)
@@ -69,7 +65,6 @@ March 1 1999, Version 3.0.7
 - Improvements in FreeType support: Macintosh fonts work, and non-antialiased
   output is considerably cleaner  <mka@satama.com>
 - Fixed checkdate() function, range of valid years is now 0 to 32767
-- Make sure XML element attributes have the right character encoding
 - hw_insertdocument() returns object id now
 - Add pdf_open() warning in configure and documentation
 - Add diskfreespace() function

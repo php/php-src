@@ -76,20 +76,20 @@ extern php3_module_entry velocis_module_entry;
 /* velocis.c functions */
 extern int php3_minit_velocis(INIT_FUNC_ARGS);
 extern int php3_rinit_velocis(INIT_FUNC_ARGS);
-extern void php3_info_velocis(ZEND_MODULE_INFO_FUNC_ARGS);
+void php3_info_velocis(ZEND_MODULE_INFO_FUNC_ARGS);
 extern int php3_shutdown_velocis(SHUTDOWN_FUNC_ARGS);
-extern void php3_velocis_connect(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_velocis_close(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_velocis_exec(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_velocis_fetch(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_velocis_result(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_velocis_freeresult(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_velocis_autocommit(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_velocis_off_autocommit(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_velocis_commit(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_velocis_rollback(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_velocis_fieldnum(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_velocis_fieldname(INTERNAL_FUNCTION_PARAMETERS);
+PHP_FUNCTION(velocis_connect);
+PHP_FUNCTION(velocis_close);
+PHP_FUNCTION(velocis_exec);
+PHP_FUNCTION(velocis_fetch);
+PHP_FUNCTION(velocis_result);
+PHP_FUNCTION(velocis_freeresult);
+PHP_FUNCTION(velocis_autocommit);
+PHP_FUNCTION(velocis_off_autocommit);
+PHP_FUNCTION(velocis_commit);
+PHP_FUNCTION(velocis_rollback);
+PHP_FUNCTION(velocis_fieldnum);
+PHP_FUNCTION(velocis_fieldname);
 
 extern velocis_module php3_velocis_module;
 

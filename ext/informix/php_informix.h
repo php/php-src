@@ -56,69 +56,69 @@ extern php3_module_entry ifx_module_entry;
 extern int php3_minit_ifx(INIT_FUNC_ARGS);
 extern int php3_rinit_ifx(INIT_FUNC_ARGS);
 extern int php3_mshutdown_ifx(SHUTDOWN_FUNC_ARGS);
-extern void php3_info_ifx(ZEND_MODULE_INFO_FUNC_ARGS);
-extern void php3_ifx_connect(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_ifx_pconnect(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_ifx_close(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_ifx_query(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_ifx_prepare(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_ifx_do(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_ifx_error(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_ifx_errormsg(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_ifx_affected_rows(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_ifx_num_rows(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_ifx_num_fields(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_ifx_fetch_row(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_ifx_free_result(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_ifx_htmltbl_result(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_ifx_fieldtypes(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_ifx_fieldproperties(INTERNAL_FUNCTION_PARAMETERS);
+void php3_info_ifx(ZEND_MODULE_INFO_FUNC_ARGS);
+PHP_FUNCTION(ifx_connect);
+PHP_FUNCTION(ifx_pconnect);
+PHP_FUNCTION(ifx_close);
+PHP_FUNCTION(ifx_query);
+PHP_FUNCTION(ifx_prepare);
+PHP_FUNCTION(ifx_do);
+PHP_FUNCTION(ifx_error);
+PHP_FUNCTION(ifx_errormsg);
+PHP_FUNCTION(ifx_affected_rows);
+PHP_FUNCTION(ifx_num_rows);
+PHP_FUNCTION(ifx_num_fields);
+PHP_FUNCTION(ifx_fetch_row);
+PHP_FUNCTION(ifx_free_result);
+PHP_FUNCTION(ifx_htmltbl_result);
+PHP_FUNCTION(ifx_fieldtypes);
+PHP_FUNCTION(ifx_fieldproperties);
 
 long php3_intifx_getType(long id, HashTable *list);
-extern void php3_ifx_create_blob(INTERNAL_FUNCTION_PARAMETERS);
+PHP_FUNCTION(ifx_create_blob);
 long php3_intifx_create_blob(long type, long mode, char* param, long len, HashTable *list);
-extern void php3_ifx_free_blob(INTERNAL_FUNCTION_PARAMETERS) ;
+PHP_FUNCTION(ifx_free_blob) ;
 long php3_intifx_free_blob(long id, HashTable *list);
 long php3_intifx2_free_blob(long id, HashTable *list);
-extern void php3_ifx_get_blob(INTERNAL_FUNCTION_PARAMETERS);
+PHP_FUNCTION(ifx_get_blob);
 long php3_intifx_get_blob(long bid, HashTable *list, char** content);
-extern void php3_ifx_update_blob(INTERNAL_FUNCTION_PARAMETERS);
+PHP_FUNCTION(ifx_update_blob);
 long php3_intifx_update_blob(long bid, char* param, long len, HashTable *list);
 loc_t *php3_intifx_get_blobloc(long bid, HashTable *list);
 char* php3_intifx_create_tmpfile(long bid);
-extern void php3_ifx_blobinfile_mode(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_ifx_copy_blob(INTERNAL_FUNCTION_PARAMETERS);
+PHP_FUNCTION(ifx_blobinfile_mode);
+PHP_FUNCTION(ifx_copy_blob);
 long php3_intifx_copy_blob(long bid, HashTable *list);
-extern void php3_ifx_textasvarchar(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_ifx_byteasvarchar(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_ifx_nullformat(INTERNAL_FUNCTION_PARAMETERS);
+PHP_FUNCTION(ifx_textasvarchar);
+PHP_FUNCTION(ifx_byteasvarchar);
+PHP_FUNCTION(ifx_nullformat);
 char* php3_intifx_null();
 
-extern void php3_ifx_create_char(INTERNAL_FUNCTION_PARAMETERS);
+PHP_FUNCTION(ifx_create_char);
 long php3_intifx_create_char(char* param, long len, HashTable *list);
-extern void php3_ifx_free_char(INTERNAL_FUNCTION_PARAMETERS) ;
+PHP_FUNCTION(ifx_free_char) ;
 long php3_intifx_free_char(long id, HashTable *list);
-extern void php3_ifx_update_char(INTERNAL_FUNCTION_PARAMETERS);
+PHP_FUNCTION(ifx_update_char);
 long php3_intifx_update_char(long bid, char* param, long len, HashTable *list);
-extern void php3_ifx_get_char(INTERNAL_FUNCTION_PARAMETERS);
+PHP_FUNCTION(ifx_get_char);
 long php3_intifx_get_char(long bid, HashTable *list, char** content);
 
 
 #if HAVE_IFX_IUS
-extern void php3_ifxus_create_slob(INTERNAL_FUNCTION_PARAMETERS);
+PHP_FUNCTION(ifxus_create_slob);
 long php3_intifxus_create_slob(long create_mode, HashTable *list);
-extern void php3_ifxus_free_slob(INTERNAL_FUNCTION_PARAMETERS) ;
+PHP_FUNCTION(ifxus_free_slob) ;
 long php3_intifxus_free_slob(long bid, HashTable *list);
-extern void php3_ifxus_close_slob(INTERNAL_FUNCTION_PARAMETERS) ;
+PHP_FUNCTION(ifxus_close_slob) ;
 long php3_intifxus_close_slob(long bid, HashTable *list);
-extern void php3_ifxus_open_slob(INTERNAL_FUNCTION_PARAMETERS) ;
+PHP_FUNCTION(ifxus_open_slob) ;
 long php3_intifxus_open_slob(long bid, long create_mode, HashTable *list);
 long php3_intifxus_new_slob(HashTable *list);
 ifx_lo_t *php3_intifxus_get_slobloc(long bid, HashTable *list);
-extern void php3_ifxus_read_slob(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_ifxus_write_slob(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_ifxus_seek_slob(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_ifxus_tell_slob(INTERNAL_FUNCTION_PARAMETERS);
+PHP_FUNCTION(ifxus_read_slob);
+PHP_FUNCTION(ifxus_write_slob);
+PHP_FUNCTION(ifxus_seek_slob);
+PHP_FUNCTION(ifxus_tell_slob);
 #endif
 
 typedef struct {
@@ -204,5 +204,7 @@ extern ifx_module php3_ifx_module;
 #define ifx_module_ptr NULL
 
 #endif
+
+#define phpext_informix_ptr ifx_module_ptr
 
 #endif /* _PHP3_IFX_H */

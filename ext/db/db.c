@@ -256,14 +256,14 @@ void php3_info_db(ZEND_MODULE_INFO_FUNC_ARGS)
 	php3_printf(php3_get_info_db());
 }
 
-void php3_dblist(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(dblist)
 {
 	char *str = php3_get_info_db();
 	RETURN_STRING(str,1);
 }
 
 
-void php3_dbmopen(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(dbmopen) {
 	pval *filename, *mode;
 	dbm_info *info=NULL;
 	int ret;
@@ -421,7 +421,7 @@ dbm_info *_php3_dbmopen(char *filename, char *mode) {
 	return NULL;
 }
 
-void php3_dbmclose(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(dbmclose) {
 	pval *id;
 
 	if (ARG_COUNT(ht) != 1 || getParameters(ht,1,&id)==FAILURE) {
@@ -469,7 +469,7 @@ int _php3_dbmclose(dbm_info *info) {
  * ret = 0  success
  * ret = 1  key already exists - nothing done
  */
-void php3_dbminsert(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(dbminsert)
 {
 	pval *id, *key, *value;
 	dbm_info *info;
@@ -522,7 +522,7 @@ int _php3_dbminsert(dbm_info *info, char *key, char *value) {
 	return(ret);	
 }	
 
-void php3_dbmreplace(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(dbmreplace)
 {
 	pval *id, *key, *value;
 	dbm_info *info;
@@ -578,7 +578,7 @@ int _php3_dbmreplace(dbm_info *info, char *key, char *value) {
 	return(ret);	
 }	
 
-void php3_dbmfetch(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(dbmfetch)
 {
 	pval *id, *key;
 	dbm_info *info;
@@ -649,7 +649,7 @@ char *_php3_dbmfetch(dbm_info *info, char *key) {
 }
 
 
-void php3_dbmexists(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(dbmexists)
 {
 	pval *id, *key;
 	dbm_info *info;
@@ -692,7 +692,7 @@ int _php3_dbmexists(dbm_info *info, char *key) {
 	return(ret);
 }
 		
-void php3_dbmdelete(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(dbmdelete)
 {
 	pval *id, *key;
 	dbm_info *info;
@@ -734,7 +734,7 @@ int _php3_dbmdelete(dbm_info *info, char *key) {
 	return(ret);
 }
 
-void php3_dbmfirstkey(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(dbmfirstkey)
 {
 	pval *id;
 	dbm_info *info;
@@ -791,7 +791,7 @@ char *_php3_dbmfirstkey(dbm_info *info) {
 	return (ret);
 }
 
-void php3_dbmnextkey(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(dbmnextkey)
 {
 	pval *id, *key;
 	dbm_info *info;

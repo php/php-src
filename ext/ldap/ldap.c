@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP HTML Embedded Scripting Language Version 3.0                     |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997,1998 PHP Development Team (See Credits file)      |
+   | Copyright (c) 1997-1999 PHP Development Team (See Credits file)      |
    +----------------------------------------------------------------------+
    | This program is free software; you can redistribute it and/or modify |
    | it under the terms of one of the following licenses:                 |
@@ -26,6 +26,7 @@
    | Authors: Amitay Isaacs  <amitay@w-o-i.com>                           |
    |          Eric Warnke    <ericw@albany.edu>                           |
    |          Rasmus Lerdorf <rasmus@lerdorf.on.ca>                       |
+   |          Gerrit Thomson <334647@swin.edu.au>                         |
    +----------------------------------------------------------------------+
  */
  
@@ -98,6 +99,11 @@ function_entry ldap_functions[] = {
 	{"ldap_add", 					php3_ldap_add,					NULL},
 	{"ldap_delete",					php3_ldap_delete,				NULL},
 	{"ldap_modify",					php3_ldap_modify,				NULL},
+/* additional functions for attribute based modifications, Gerrit Thomson */
+	{"ldap_mod_add",				php3_ldap_mod_add,				NULL},
+	{"ldap_mod_replace",			php3_ldap_mod_replace,			NULL},
+	{"ldap_mod_del",				php3_ldap_mod_del,				NULL},
+/* end gjt mod */
 	{NULL, NULL, NULL}
 };
 
@@ -304,7 +310,7 @@ void php3_info_ldap(ZEND_MODULE_INFO_FUNC_ARGS)
 
 /* {{{ proto int ldap_connect([string host [, int port]])
    Connect to an LDAP server */
-void php3_ldap_connect(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(ldap_connect)
 {
 	char *host;
 	int port;
@@ -449,7 +455,7 @@ static BerElement * _get_ber_entry(pval *berp, HashTable *list)
 }
 
 #if 0
-void php3_ber_free(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(ber_free)
 {
         pval *berp;
 		
@@ -462,7 +468,7 @@ void php3_ber_free(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int ldap_bind(int link [, string dn, string password])
    Bind to LDAP directory */
-void php3_ldap_bind(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(ldap_bind)
 {
 pval *link, *bind_rdn, *bind_pw;
 char *ldap_bind_rdn, *ldap_bind_pw;
@@ -518,7 +524,7 @@ LDAP *ldap;
 
 /* {{{ proto int ldap_unbind(int link)
    Unbind from LDAP directory */
-void php3_ldap_unbind(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(ldap_unbind)
 {
 pval *link;
 LDAP *ldap;
@@ -637,26 +643,26 @@ static void php3_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 	return;
 }
 
-/* {{{ proto int ldap_read(int link, string base_dn, string filter [, string attributes])
+/* {{{ proto int ldap_read(int link, string base_dn, string filter [, array attributes])
    Read an entry */
-void php3_ldap_read(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(ldap_read)
 {
 	php3_ldap_do_search(INTERNAL_FUNCTION_PARAM_PASSTHRU, LDAP_SCOPE_BASE);
 }
 /* }}} */
 
-/* {{{ proto int ldap_list(int link, string base_dn, string filter [, string attributes])
+/* {{{ proto int ldap_list(int link, string base_dn, string filter [, array attributes])
    Single-level search */
-void php3_ldap_list(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(ldap_list)
 {
 	php3_ldap_do_search(INTERNAL_FUNCTION_PARAM_PASSTHRU, LDAP_SCOPE_ONELEVEL);
 }
 /* }}} */
 
 
-/* {{{ proto int ldap_search(int link, string base_dn, string filter [, string attributes])
+/* {{{ proto int ldap_search(int link, string base_dn, string filter [, array attributes])
    Search LDAP tree under base_dn */
-void php3_ldap_search(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(ldap_search)
 {
 	php3_ldap_do_search(INTERNAL_FUNCTION_PARAM_PASSTHRU, LDAP_SCOPE_SUBTREE);
 }
@@ -664,7 +670,7 @@ void php3_ldap_search(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int ldap_free_result(int result)
    Free result memory */
-void php3_ldap_free_result(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(ldap_free_result)
 {
 pval *result;
 LDAPMessage *ldap_result;
@@ -686,7 +692,7 @@ LDAPMessage *ldap_result;
 
 /* {{{ proto int ldap_count_entries(int link, int result)
    Count the number of entries in a search result */
-void php3_ldap_count_entries(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(ldap_count_entries)
 {
 pval *result, *link;
 LDAP *ldap;
@@ -708,7 +714,7 @@ LDAPMessage *ldap_result;
 
 /* {{{ proto int ldap_first_entry(int link, int result)
    Return first result id */
-void php3_ldap_first_entry(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(ldap_first_entry)
 {
 	pval *result, *link;
 	LDAP *ldap;
@@ -736,7 +742,7 @@ void php3_ldap_first_entry(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int ldap_next_entry(int link, int entry)
    Get next result entry */
-void php3_ldap_next_entry(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(ldap_next_entry)
 {
 	pval *result_entry, *link;
 	LDAP *ldap;
@@ -763,7 +769,7 @@ void php3_ldap_next_entry(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto array ldap_get_entries(int link, int result)
    Get all result entries */
-void php3_ldap_get_entries(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(ldap_get_entries)
 {
 pval *link, *result;
 LDAPMessage *ldap_result, *ldap_result_entry;
@@ -846,7 +852,7 @@ char *dn;
 
 /* {{{ proto string ldap_first_attribute(int link, int result, int ber)
    Return first attribute */
-void php3_ldap_first_attribute(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(ldap_first_attribute)
 {
 	pval *result,*link,*berp;
 	LDAP *ldap;
@@ -882,7 +888,7 @@ void php3_ldap_first_attribute(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto string ldap_next_attribute(int link, int result, int ber)
    Get the next attribute in result */
-void php3_ldap_next_attribute(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(ldap_next_attribute)
 {
 pval *result,*link,*berp;
 LDAP *ldap;
@@ -915,7 +921,7 @@ char *attribute;
 
 /* {{{ proto array ldap_get_attributes(int link, int result)
    Get attributes from a search result entry */
-void php3_ldap_get_attributes(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(ldap_get_attributes)
 {
 pval *link, *result_entry;
 pval tmp;
@@ -972,7 +978,7 @@ BerElement *ber;
 
 /* {{{ proto array ldap_get_values(int link, int result, string attribute)
    Get all values from a result entry */
-void php3_ldap_get_values(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(ldap_get_values)
 {
 pval *link, *result_entry, *attr;
 LDAP *ldap;
@@ -1023,7 +1029,7 @@ int i, num_values;
 
 /* {{{ proto string ldap_get_dn(int link, int result)
    Get the DN of a result entry */
-void php3_ldap_get_dn(INTERNAL_FUNCTION_PARAMETERS) 
+PHP_FUNCTION(ldap_get_dn) 
 {
 	pval *link,*entryp;
 	LDAP *ld;
@@ -1054,7 +1060,7 @@ void php3_ldap_get_dn(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto array ldap_explode_dn(string dn, int with_attrib)
    Splits DN into its component parts */
-void php3_ldap_explode_dn(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(ldap_explode_dn)
 {
 pval *dn, *with_attrib;
 char **ldap_value;
@@ -1088,7 +1094,7 @@ int i, count;
 
 /* {{{ proto string ldap_dn2ufn(string dn)
    Convert DN to User Friendly Naming format */
-void php3_ldap_dn2ufn(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(ldap_dn2ufn)
 {
 	pval *dn;
 	char *ufn;
@@ -1111,7 +1117,10 @@ void php3_ldap_dn2ufn(INTERNAL_FUNCTION_PARAMETERS)
 	}
 }
 /* }}} */
-	
+
+/* added to fix use of ldap_modify_add for doing an ldap_add, gerrit thomson.   */
+#define PHP_LD_FULL_ADD 0xff
+ 	
 
 static void php3_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper)
 {
@@ -1122,7 +1131,8 @@ LDAPMod **ldap_mods;
 int i, j, num_attribs, num_values;
 char *attribute;
 ulong index;
-
+int is_full_add=0; /* flag for full add operation so ldap_mod_add can be put back into oper, gerrit THomson */
+ 
 	if (ARG_COUNT(ht) != 3 || getParameters(ht, 3, &link, &dn, &entry) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}	
@@ -1143,6 +1153,13 @@ ulong index;
 	ldap_mods = emalloc((num_attribs+1) * sizeof(LDAPMod *));
 
 	_php3_hash_internal_pointer_reset(entry->value.ht);
+        /* added by gerrit thomson to fix ldap_add using ldap_mod_add */
+        if ( oper == PHP_LD_FULL_ADD )
+        {
+                oper = LDAP_MOD_ADD;
+                is_full_add = 1;
+        }
+	/* end additional , gerrit thomson */
 
 	for(i=0; i<num_attribs; i++) {
 		ldap_mods[i] = emalloc(sizeof(LDAPMod));
@@ -1165,8 +1182,10 @@ ulong index;
 		}
 
 		ldap_mods[i]->mod_values = emalloc((num_values+1) * sizeof(char *));
-		
-		if (num_values == 1) {
+
+/* allow for arrays with one element, no allowance for arrays with none but probably not required, gerrit thomson. */
+/*              if (num_values == 1) {*/
+                if ((num_values == 1) && (value->type != IS_ARRAY)) {
 			convert_to_string(value);
 			ldap_mods[i]->mod_values[0] = value->value.str.val;
 		} else {	
@@ -1182,7 +1201,9 @@ ulong index;
 	}
 	ldap_mods[num_attribs] = NULL;
 
-	if (oper == LDAP_MOD_ADD) {
+/* check flag to see if do_mod was called to perform full add , gerrit thomson */
+/* 	if (oper == LDAP_MOD_ADD) { */
+        if (is_full_add == 1) {
 		if (ldap_add_s(ldap, ldap_dn, ldap_mods) != LDAP_SUCCESS) {
 			ldap_perror(ldap, "LDAP");
 			php3_error(E_WARNING, "LDAP: add operation could not be completed.");
@@ -1207,24 +1228,56 @@ ulong index;
 
 /* {{{ proto int ldap_add(int link, string dn, array entry)
    Add entries to LDAP directory */
-void php3_ldap_add(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(ldap_add)
 {
-	php3_ldap_do_modify(INTERNAL_FUNCTION_PARAM_PASSTHRU, LDAP_MOD_ADD);
+	/* use a newly define parameter into the do_modify so ldap_mod_add can be used the way it is supposed to be used , Gerrit THomson */
+	/* php3_ldap_do_modify(INTERNAL_FUNCTION_PARAM_PASSTHRU, LDAP_MOD_ADD);*/
+	php3_ldap_do_modify(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_LD_FULL_ADD);
 }
 /* }}} */
 
 
 /* {{{ proto int ldap_modify(int link, string dn, array entry)
    Modify an LDAP entry */
-void php3_ldap_modify(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(ldap_modify)
 {
 	php3_ldap_do_modify(INTERNAL_FUNCTION_PARAM_PASSTHRU, LDAP_MOD_REPLACE); 
 }
 /* }}} */
 
+
+/* three functions for attribute base modifications, gerrit Thomson */
+
+
+
+/* {{{ proto int ldap_mod_replace(int link, string dn, array entry)
+   Replace attribute values with new ones */
+PHP_FUNCTION(ldap_mod_replace)
+{
+        php3_ldap_do_modify(INTERNAL_FUNCTION_PARAM_PASSTHRU, LDAP_MOD_REPLACE);}
+/* }}} */
+
+/* {{{ proto int ldap_mod_add(int link, string dn, array entry)
+        Add attribute values to current */
+PHP_FUNCTION(ldap_mod_add)
+{
+        php3_ldap_do_modify(INTERNAL_FUNCTION_PARAM_PASSTHRU, LDAP_MOD_ADD);
+}
+/* }}} */
+
+/* {{{ proto int ldap_mod_del(int link, string dn, array entry)
+   Delete attribute values */
+PHP_FUNCTION(ldap_mod_del)
+{
+        php3_ldap_do_modify(INTERNAL_FUNCTION_PARAM_PASSTHRU, LDAP_MOD_DELETE);
+}
+
+/* end of attribute based functions , gerrit thomson */
+
+
 /* {{{ proto int ldap_delete(int link, string dn)
    Delete an entry from a directory */
-void php3_ldap_delete(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(ldap_delete)
 {
 pval *link, *dn;
 LDAP *ldap;

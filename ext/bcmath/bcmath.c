@@ -76,7 +76,7 @@ int php3_rend_bcmath(SHUTDOWN_FUNC_ARGS)
 
 /* {{{ proto string bcadd(string left_operand, string right_operand [, int scale])
    Returns the sum of two arbitrary precision numbers */
-void php3_bcmath_add(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(bcmath_add)
 {
 	pval *left, *right,*scale_param;
 	bc_num first, second, result;
@@ -119,7 +119,7 @@ void php3_bcmath_add(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto string bcsub(string left_operand, string right_operand [, int scale])
    Returns the difference between two arbitrary precision numbers (subtration) */
-void php3_bcmath_sub(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(bcmath_sub)
 {
 	pval *left, *right,*scale_param;
 	bc_num first, second, result;
@@ -162,7 +162,7 @@ void php3_bcmath_sub(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto string bcmul(string left_operand, string right_operand [, int scale])
    Returns the multiplication of two arbitrary precision numbers */
-void php3_bcmath_mul(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(bcmath_mul)
 {
 	pval *left, *right,*scale_param;
 	bc_num first, second, result;
@@ -205,7 +205,7 @@ void php3_bcmath_mul(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto string bcdiv(string left_operand, string right_operand [, int scale])
    Returns the quotient of two arbitrary precision numbers (division) */
-void php3_bcmath_div(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(bcmath_div)
 {
 	pval *left, *right,*scale_param;
 	bc_num first, second, result;
@@ -254,7 +254,7 @@ void php3_bcmath_div(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto string bcmod(string left_operand, string right_operand)
    Returns the modulus of the two arbitrary precision operands */
-void php3_bcmath_mod(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(bcmath_mod)
 {
 	pval *left, *right;
 	bc_num first, second, result;
@@ -295,7 +295,7 @@ void php3_bcmath_mod(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto string bcpow(string x, string y [, int scale])
    Returns the value of an arbitrary precision number raised to the power of another */
-void php3_bcmath_pow(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(bcmath_pow)
 {
 	pval *left, *right,*scale_param;
 	bc_num first, second, result;
@@ -338,7 +338,7 @@ void php3_bcmath_pow(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto string bcsqrt(string operand [, int scale])
    Returns the square root of an arbitray precision number */
-void php3_bcmath_sqrt(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(bcmath_sqrt)
 {
 	pval *left,*scale_param;
 	bc_num result;
@@ -378,7 +378,7 @@ void php3_bcmath_sqrt(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto string bccomp(string left_operand, string right_operand [, int scale])
    Compares two arbitrary precision numbers */
-void php3_bcmath_comp(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(bcmath_comp)
 {
 	pval *left, *right, *scale_param;
 	bc_num first, second;
@@ -420,7 +420,7 @@ void php3_bcmath_comp(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto string bcscale(int scale)
    Sets default scale parameter for all bc math functions */
-void php3_bcmath_set_scale(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(bcmath_set_scale)
 {
 	pval *new_scale;
 	

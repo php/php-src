@@ -132,9 +132,9 @@ typedef struct {
 typedef int hw_objectID;
 typedef char hw_objrec;
 
-extern void set_swap(int do_swap);
+void set_swap(int do_swap);
 extern int  open_hg_connection(char *server_name, int port);
-extern void close_hg_connection(int sockfd);
+void close_hg_connection(int sockfd);
 extern int initialize_hg_connection(int sockfd, int *do_swap, int *version, char **userdata, char **server_string, char *username, char *password);
 
 extern int send_ready(int sockfd);

@@ -32,9 +32,6 @@
 
 #include <stdlib.h>
 
-#ifndef MSVC5
-#include "php_config.h"
-#endif
 #include "php.h"
 #include "php3_pgsql.h"
 #include "ext/standard/php3_standard.h"
@@ -367,7 +364,7 @@ int php3_pgsql_get_default_link(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int pg_connect([string connection_string] | [string host, string port, [string options, [string tty,]] string database)
    Open a PostgreSQL connection */
-void php3_pgsql_connect(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(pgsql_connect)
 {
 	php3_pgsql_do_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU,0);
 }
@@ -375,7 +372,7 @@ void php3_pgsql_connect(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int pg_connect([string connection_string] | [string host, string port, [string options, [string tty,]] string database)
    Open a persistent PostgreSQL connection */
-void php3_pgsql_pconnect(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(pgsql_pconnect)
 {
 	php3_pgsql_do_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU,1);
 }
@@ -383,7 +380,7 @@ void php3_pgsql_pconnect(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto bool pg_close([int connection])
    Close a PostgreSQL connection */ 
-void php3_pgsql_close(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(pgsql_close)
 {
 	pval *pgsql_link;
 	int id,type;
@@ -481,7 +478,7 @@ void php3_pgsql_get_link_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 
 /* {{{ proto string pg_dbname([int connection])
    Get the database name */ 
-void php3_pgsql_dbname(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(pgsql_dbname)
 {
 	php3_pgsql_get_link_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP3_PG_DBNAME);
 }
@@ -489,7 +486,7 @@ void php3_pgsql_dbname(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto string pg_errormessage([int connection])
    Get the error message string */
-void php3_pgsql_error_message(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(pgsql_error_message)
 {
 	php3_pgsql_get_link_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP3_PG_ERROR_MESSAGE);
 }
@@ -497,7 +494,7 @@ void php3_pgsql_error_message(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto string pg_options([int connection])
    Get the options associated with the connection */
-void php3_pgsql_options(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(pgsql_options)
 {
 	php3_pgsql_get_link_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP3_PG_OPTIONS);
 }
@@ -505,7 +502,7 @@ void php3_pgsql_options(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int pg_port([int connection])
    Return the port number associated with the connection */
-void php3_pgsql_port(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(pgsql_port)
 {
 	php3_pgsql_get_link_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP3_PG_PORT);
 }
@@ -513,7 +510,7 @@ void php3_pgsql_port(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto string pg_tty([int connection])
    Return the tty name associated with the connection */
-void php3_pgsql_tty(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(pgsql_tty)
 {
 	php3_pgsql_get_link_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP3_PG_TTY);
 }
@@ -521,7 +518,7 @@ void php3_pgsql_tty(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto string pg_host([int connection])
    Returns the host name associated with the connection */
-void php3_pgsql_host(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(pgsql_host)
 {
 	php3_pgsql_get_link_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP3_PG_HOST);
 }
@@ -529,7 +526,7 @@ void php3_pgsql_host(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int pg_exec([int connection,] string query)
    Execute a query */
-void php3_pgsql_exec(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(pgsql_exec)
 {
 	pval *query,*pgsql_link;
 	int id,type;
@@ -645,7 +642,7 @@ void php3_pgsql_get_result_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 
 /* {{{ proto int pg_numrows(int result)
    Return the number of rows in the result */
-void php3_pgsql_num_rows(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(pgsql_num_rows)
 {
 	php3_pgsql_get_result_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP3_PG_NUM_ROWS);
 }
@@ -653,7 +650,7 @@ void php3_pgsql_num_rows(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int pg_numfields(int result)
    Return the number of fields in the result */
-void php3_pgsql_num_fields(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(pgsql_num_fields)
 {
 	php3_pgsql_get_result_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP3_PG_NUM_FIELDS);
 }
@@ -661,7 +658,7 @@ void php3_pgsql_num_fields(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int pg_cmdtuples(int result)
    Returns the number of affected tuples */
-void php3_pgsql_cmdtuples(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(pgsql_cmdtuples)
 {
 	php3_pgsql_get_result_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP3_PG_CMD_TUPLES);
 }
@@ -768,7 +765,7 @@ void php3_pgsql_get_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 
 /* {{{ proto string pg_fieldname(int result, int field_number)
    Returns the name of the field */
-void php3_pgsql_field_name(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(pgsql_field_name)
 {
 	php3_pgsql_get_field_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP3_PG_FIELD_NAME);
 }
@@ -776,7 +773,7 @@ void php3_pgsql_field_name(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto pg_fieldsize(int result, int field_number)
    Returns the internal size of the field */ 
-void php3_pgsql_field_size(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(pgsql_field_size)
 {
 	php3_pgsql_get_field_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP3_PG_FIELD_SIZE);
 }
@@ -784,7 +781,7 @@ void php3_pgsql_field_size(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto string pg_fieldtype(int result, int field_number)
    Returns the type name for the given field */
-void php3_pgsql_field_type(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(pgsql_field_type)
 {
 	php3_pgsql_get_field_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP3_PG_FIELD_TYPE);
 }
@@ -792,7 +789,7 @@ void php3_pgsql_field_type(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int pg_fieldnum(int result, string field_name)
    Returns the field number of the named field */
-void php3_pgsql_field_number(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(pgsql_field_number)
 {
 	pval *result,*field;
 	PGresult *pgsql_result;
@@ -820,7 +817,7 @@ void php3_pgsql_field_number(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto mixed pg_result(int result, int row_number, mixed field_name)
    Returns values from a result identifier */
-void php3_pgsql_result(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(pgsql_result)
 {
 	pval *result, *row, *field=NULL;
 	PGresult *pgsql_result;
@@ -869,7 +866,7 @@ void php3_pgsql_result(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto array pg_fetchrow(int result, int row)
    Get a row as an enumerated array */ 
-void php3_pgsql_fetch_row(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(pgsql_fetch_row)
 {
 	pval *result, *row;
 	PGresult *pgsql_result;
@@ -920,7 +917,7 @@ void php3_pgsql_fetch_row(INTERNAL_FUNCTION_PARAMETERS)
 }
 /* }}} */
 
-void php3_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(pgsql_fetch_hash)
 {
 	pval *result, *row, *pval_ptr;
 	PGresult *pgsql_result;
@@ -975,7 +972,7 @@ void php3_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS)
 /* ??  This is a rather odd function - why not just point pg_fetcharray() directly at fetch_hash ? -RL */
 /* {{{ proto array pg_fetch_array(int result, int row)
    Fetch a row as an array */
-void php3_pgsql_fetch_array(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(pgsql_fetch_array)
 {
 	php3_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
@@ -983,7 +980,7 @@ void php3_pgsql_fetch_array(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto object pg_fetch_object(int result, int row)
    Fetch a row as an object */
-void php3_pgsql_fetch_object(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(pgsql_fetch_object)
 {
 	php3_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 	if (return_value->type==IS_ARRAY) {
@@ -1047,7 +1044,7 @@ void php3_pgsql_data_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 
 /* {{{ proto int pg_fieldprtlen(int result, int row, mixed field_name_or_number)
    Returns the printed length */
-void php3_pgsql_data_length(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(pgsql_data_length)
 {
 	php3_pgsql_data_info(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP3_PG_DATA_LENGTH);
 }
@@ -1055,7 +1052,7 @@ void php3_pgsql_data_length(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int pg_fieldisnull(int result, int row, mixed field_name_or_number)
    Test if a field is NULL */
-void php3_pgsql_data_isnull(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(pgsql_data_isnull)
 {
 	php3_pgsql_data_info(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP3_PG_DATA_ISNULL);
 }
@@ -1063,7 +1060,7 @@ void php3_pgsql_data_isnull(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int pg_freeresult(int result)
    Free result memory */
-void php3_pgsql_free_result(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(pgsql_free_result)
 {
 	pval *result;
 	pgsql_result_handle *pg_result;
@@ -1090,7 +1087,7 @@ void php3_pgsql_free_result(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int pg_getlastoid(int result)
    Returns the last object identifier */
-void php3_pgsql_last_oid(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(pgsql_last_oid)
 {
 	pval *result;
 	PGresult *pgsql_result;
@@ -1122,7 +1119,7 @@ void php3_pgsql_last_oid(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int pg_locreate(int connection)
    Create a large object */
-void php3_pgsql_lo_create(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(pgsql_lo_create)
 {
   	pval *pgsql_link;
 	PGconn *pgsql;
@@ -1171,7 +1168,7 @@ void php3_pgsql_lo_create(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto void pg_lounlink([int connection, ] int large_obj_id)
    Delete a large object */
-void php3_pgsql_lo_unlink(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(pgsql_lo_unlink)
 {
 	pval *pgsql_link, *oid;
 	PGconn *pgsql;
@@ -1217,7 +1214,7 @@ void php3_pgsql_lo_unlink(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int pg_loopen([int connection,] int objoid, string mode)
    Open a large object and return fd */
-void php3_pgsql_lo_open(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(pgsql_lo_open)
 {
 	pval *pgsql_link, *oid, *mode;
 	PGconn *pgsql;
@@ -1321,7 +1318,7 @@ void php3_pgsql_lo_open(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto void pg_loclose(int fd)
    Close a large object */
-void php3_pgsql_lo_close(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(pgsql_lo_close)
 {
 	pval *pgsql_lofp;
 	int id, type;
@@ -1359,7 +1356,7 @@ void php3_pgsql_lo_close(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto string pg_loread(int fd, int len)
    Read a large object */
-void php3_pgsql_lo_read(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(pgsql_lo_read)
 {
   	pval *pgsql_id, *len;
 	int id, buf_len, type, nbytes;
@@ -1401,7 +1398,7 @@ void php3_pgsql_lo_read(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int pg_lowrite(int fd, string buf)
    Write a large object */
-void php3_pgsql_lo_write(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(pgsql_lo_write)
 {
   	pval *pgsql_id, *str;
 	int id, buf_len, nbytes, type;
@@ -1440,7 +1437,7 @@ void php3_pgsql_lo_write(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto void pg_loreadall(int fd)
    Read a large object and send straight to browser */
-void php3_pgsql_lo_readall(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(pgsql_lo_readall)
 {
   	pval *pgsql_id;
 	int i, id, tbytes, type;

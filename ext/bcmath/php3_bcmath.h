@@ -45,15 +45,15 @@ extern php3_module_entry bcmath_module_entry;
 
 extern int php3_rinit_bcmath(INIT_FUNC_ARGS);
 extern int php3_rend_bcmath(SHUTDOWN_FUNC_ARGS);
-extern void php3_bcmath_add(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_bcmath_sub(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_bcmath_mul(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_bcmath_div(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_bcmath_mod(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_bcmath_pow(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_bcmath_sqrt(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_bcmath_comp(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_bcmath_set_scale(INTERNAL_FUNCTION_PARAMETERS);
+PHP_FUNCTION(bcmath_add);
+PHP_FUNCTION(bcmath_sub);
+PHP_FUNCTION(bcmath_mul);
+PHP_FUNCTION(bcmath_div);
+PHP_FUNCTION(bcmath_mod);
+PHP_FUNCTION(bcmath_pow);
+PHP_FUNCTION(bcmath_sqrt);
+PHP_FUNCTION(bcmath_comp);
+PHP_FUNCTION(bcmath_set_scale);
 
 #else
 

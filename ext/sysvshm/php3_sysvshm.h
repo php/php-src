@@ -80,12 +80,12 @@ typedef struct {
 
 
 extern int php3_minit_sysvshm(INIT_FUNC_ARGS);
-extern void php3_sysvshm_attach(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_sysvshm_detach(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_sysvshm_remove(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_sysvshm_put_var(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_sysvshm_get_var(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_sysvshm_remove_var(INTERNAL_FUNCTION_PARAMETERS);
+PHP_FUNCTION(sysvshm_attach);
+PHP_FUNCTION(sysvshm_detach);
+PHP_FUNCTION(sysvshm_remove);
+PHP_FUNCTION(sysvshm_put_var);
+PHP_FUNCTION(sysvshm_get_var);
+PHP_FUNCTION(sysvshm_remove_var);
 extern int php3int_put_shmdata(sysvshm_chunk_head *ptr,long key,char *data, long len);
 extern long php3int_check_shmdata(sysvshm_chunk_head *ptr, long key);
 extern int php3int_remove_shmdata(sysvshm_chunk_head *ptr, long shm_varpos);

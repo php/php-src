@@ -36,16 +36,16 @@ extern php3_module_entry dbase_module_entry;
 #define dbase_module_ptr &dbase_module_entry
 
 extern int php3_minit_dbase(INIT_FUNC_ARGS);
-extern void php3_dbase_open(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_dbase_create(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_dbase_close(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_dbase_numrecords(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_dbase_numfields(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_dbase_add_record(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_dbase_get_record(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_dbase_delete_record(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_dbase_pack(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_dbase_get_record_with_names(INTERNAL_FUNCTION_PARAMETERS);
+PHP_FUNCTION(dbase_open);
+PHP_FUNCTION(dbase_create);
+PHP_FUNCTION(dbase_close);
+PHP_FUNCTION(dbase_numrecords);
+PHP_FUNCTION(dbase_numfields);
+PHP_FUNCTION(dbase_add_record);
+PHP_FUNCTION(dbase_get_record);
+PHP_FUNCTION(dbase_delete_record);
+PHP_FUNCTION(dbase_pack);
+PHP_FUNCTION(dbase_get_record_with_names);
 #else
 #define dbase_module_ptr NULL
 #endif

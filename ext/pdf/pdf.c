@@ -172,7 +172,7 @@ int php3_mend_pdf(void){
 
 /* {{{ proto int pdf_get_info(void)
    Returns a default info structure for a pdf document */
-void php3_pdf_get_info(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(pdf_get_info) {
 	PDF_info *pdf_info;
 	int id;
 	PDF_TLS_VARS;
@@ -191,7 +191,7 @@ void php3_pdf_get_info(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto pdf_set_info_creator(int info, string creator)
    Fills the creator field of the info structure */
-void php3_pdf_set_info_creator(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(pdf_set_info_creator) {
 	pval *arg1, *arg2;
 	int id, type;
 	PDF_info *pdf_info;
@@ -219,7 +219,7 @@ void php3_pdf_set_info_creator(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto pdf_set_info_title(int info, string title)
    Fills the title field of the info structure */
-void php3_pdf_set_info_title(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(pdf_set_info_title) {
 	pval *arg1, *arg2;
 	int id, type;
 	PDF_info *pdf_info;
@@ -247,7 +247,7 @@ void php3_pdf_set_info_title(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto pdf_set_info_subject(int info, string subject)
    Fills the subject field of the info structure */
-void php3_pdf_set_info_subject(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(pdf_set_info_subject) {
 	pval *arg1, *arg2;
 	int id, type;
 	PDF_info *pdf_info;
@@ -275,7 +275,7 @@ void php3_pdf_set_info_subject(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto pdf_set_info_author(int info, string author)
    Fills the author field of the info structure */
-void php3_pdf_set_info_author(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(pdf_set_info_author) {
 	pval *arg1, *arg2;
 	int id, type;
 	PDF_info *pdf_info;
@@ -303,7 +303,7 @@ void php3_pdf_set_info_author(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto pdf_set_info_keywords(int info, string keywords)
    Fills the keywords field of the info structure */
-void php3_pdf_set_info_keywords(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(pdf_set_info_keywords) {
 	pval *arg1, *arg2;
 	int id, type;
 	PDF_info *pdf_info;
@@ -331,7 +331,7 @@ void php3_pdf_set_info_keywords(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto int pdf_open(int filedesc, int info)
    Opens a new pdf document */
-void php3_pdf_open(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(pdf_open) {
 	pval *file;
 	pval *info;
 	int id, type;
@@ -372,7 +372,7 @@ void php3_pdf_open(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto void pdf_close(int pdfdoc)
    Closes the pdf document */
-void php3_pdf_close(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(pdf_close) {
 	pval *arg1;
 	int id, type;
 	PDF *pdf;
@@ -398,7 +398,7 @@ void php3_pdf_close(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto void pdf_begin_page(int pdfdoc, double height, double width)
    Starts page */
-void php3_pdf_begin_page(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(pdf_begin_page) {
 	pval *arg1, *arg2, *arg3;
 	int id, type;
 	double height, width;
@@ -429,7 +429,7 @@ void php3_pdf_begin_page(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto void pdf_end_page(int pdfdoc)
    Ends page */
-void php3_pdf_end_page(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(pdf_end_page) {
 	pval *arg1;
 	int id, type;
 	PDF *pdf;
@@ -455,7 +455,7 @@ void php3_pdf_end_page(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto void pdf_show(int pdfdoc, string text)
    Output text at current position */
-void php3_pdf_show(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(pdf_show) {
 	pval *arg1, *arg2;
 	int id, type;
 	PDF *pdf;
@@ -482,7 +482,7 @@ void php3_pdf_show(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto void pdf_show_xy(int pdfdoc, string text)
    Output text at position */
-void php3_pdf_show_xy(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(pdf_show_xy) {
 	pval *arg1, *arg2, *arg3, *arg4;
 	int id, type;
 	PDF *pdf;
@@ -511,7 +511,7 @@ void php3_pdf_show_xy(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto void pdf_set_font(int pdfdoc, string font, double size, string encoding)
    Select the current font face and size */
-void php3_pdf_set_font(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(pdf_set_font) {
 	pval *arg1, *arg2, *arg3, *arg4;
 	int id, type;
 	PDF *pdf;
@@ -540,7 +540,7 @@ void php3_pdf_set_font(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto void pdf_set_leading(int pdfdoc, double distance)
    Sets distance between text lines */
-void php3_pdf_set_leading(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(pdf_set_leading) {
 	pval *arg1, *arg2;
 	int id, type;
 	PDF *pdf;
@@ -567,7 +567,7 @@ void php3_pdf_set_leading(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto void pdf_set_text_rendering(int pdfdoc, int mode)
    Determines how text is rendered */
-void php3_pdf_set_text_rendering(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(pdf_set_text_rendering) {
 	pval *arg1, *arg2;
 	int id, type;
 	PDF *pdf;
@@ -594,7 +594,7 @@ void php3_pdf_set_text_rendering(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto void pdf_set_horiz_scaling(int pdfdoc, double scale)
    Sets horizontal scaling of text */
-void php3_pdf_set_horiz_scaling(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(pdf_set_horiz_scaling) {
 	pval *arg1, *arg2;
 	int id, type;
 	PDF *pdf;
@@ -621,7 +621,7 @@ void php3_pdf_set_horiz_scaling(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto void pdf_set_text_rise(int pdfdoc, double value)
    Sets the text rise */
-void php3_pdf_set_text_rise(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(pdf_set_text_rise) {
 	pval *arg1, *arg2;
 	int id, type;
 	PDF *pdf;
@@ -648,7 +648,7 @@ void php3_pdf_set_text_rise(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto void pdf_set_text_matrix(int pdfdoc, arry matrix)
    Sets the text matrix */
-void php3_pdf_set_text_matrix(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(pdf_set_text_matrix) {
 	pval *arg1, *arg2, *data;
 	int id, type, i;
 	HashTable *matrix;
@@ -697,7 +697,7 @@ void php3_pdf_set_text_matrix(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto void pdf_set_text_pos(int pdfdoc, double x, double y)
    */
-void php3_pdf_set_text_pos(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(pdf_set_text_pos) {
 	pval *arg1, *arg2, *arg3;
 	int id, type;
 	PDF *pdf;
@@ -725,7 +725,7 @@ void php3_pdf_set_text_pos(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto void pdf_set_char_spacing(int pdfdoc, double space)
    Sets character spacing */
-void php3_pdf_set_char_spacing(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(pdf_set_char_spacing) {
 	pval *arg1, *arg2;
 	int id, type;
 	PDF *pdf;
@@ -752,7 +752,7 @@ void php3_pdf_set_char_spacing(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto void pdf_set_word_spacing(int pdfdoc, double space)
    Sets spacing between words */
-void php3_pdf_set_word_spacing(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(pdf_set_word_spacing) {
 	pval *arg1, *arg2;
 	int id, type;
 	PDF *pdf;
@@ -779,7 +779,7 @@ void php3_pdf_set_word_spacing(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto void pdf_continue_text(int pdfdoc, string text)
    Output text in next line */
-void php3_pdf_continue_text(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(pdf_continue_text) {
 	pval *arg1, *arg2;
 	int id, type;
 	PDF *pdf;
@@ -806,7 +806,7 @@ void php3_pdf_continue_text(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto double pdf_stringwidth(int pdfdoc, string text)
    Returns width of text in current font*/
-void php3_pdf_stringwidth(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(pdf_stringwidth) {
 	pval *arg1, *arg2;
 	int id, type;
 	double width;
@@ -834,7 +834,7 @@ void php3_pdf_stringwidth(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto void pdf_save(int pdfdoc)
    Saves current enviroment */
-void php3_pdf_save(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(pdf_save) {
 	pval *arg1;
 	int id, type;
 	PDF *pdf;
@@ -860,7 +860,7 @@ void php3_pdf_save(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto void pdf_restore(int pdfdoc)
    Restores formerly saved enviroment */
-void php3_pdf_restore(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(pdf_restore) {
 	pval *arg1;
 	int id, type;
 	PDF *pdf;
@@ -886,7 +886,7 @@ void php3_pdf_restore(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto void pdf_translate(int pdfdoc, double x, double y)
    Sets origin of coordinate system */
-void php3_pdf_translate(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(pdf_translate) {
 	pval *arg1, *arg2, *arg3;
 	int id, type;
 	PDF *pdf;
@@ -914,7 +914,7 @@ void php3_pdf_translate(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto void pdf_scale(int pdfdoc, double x-scale, double y-scale)
    Sets scaling */
-void php3_pdf_scale(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(pdf_scale) {
 	pval *arg1, *arg2, *arg3;
 	int id, type;
 	PDF *pdf;
@@ -942,7 +942,7 @@ void php3_pdf_scale(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto void pdf_rotate(int pdfdoc, double angle)
    Sets rotation */
-void php3_pdf_rotate(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(pdf_rotate) {
 	pval *arg1, *arg2;
 	int id, type;
 	PDF *pdf;
@@ -969,7 +969,7 @@ void php3_pdf_rotate(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto void pdf_setflat(int pdfdoc, double value)
    Sets flatness */
-void php3_pdf_setflat(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(pdf_setflat) {
 	pval *arg1, *arg2;
 	int id, type;
 	PDF *pdf;
@@ -1001,7 +1001,7 @@ void php3_pdf_setflat(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto void pdf_setlinejoin(int pdfdoc, int value)
    Sets linejoin parameter */
-void php3_pdf_setlinejoin(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(pdf_setlinejoin) {
 	pval *arg1, *arg2;
 	int id, type;
 	PDF *pdf;
@@ -1033,7 +1033,7 @@ void php3_pdf_setlinejoin(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto void pdf_setlinecap(int pdfdoc, int value)
    Sets linecap parameter */
-void php3_pdf_setlinecap(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(pdf_setlinecap) {
 	pval *arg1, *arg2;
 	int id, type;
 	PDF *pdf;
@@ -1065,7 +1065,7 @@ void php3_pdf_setlinecap(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto void pdf_setmiterlimit(int pdfdoc, double value)
    Sets miter limit */
-void php3_pdf_setmiterlimit(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(pdf_setmiterlimit) {
 	pval *arg1, *arg2;
 	int id, type;
 	PDF *pdf;
@@ -1097,7 +1097,7 @@ void php3_pdf_setmiterlimit(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto void pdf_setlinewidth(int pdfdoc, double width)
    Sets line width */
-void php3_pdf_setlinewidth(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(pdf_setlinewidth) {
 	pval *arg1, *arg2;
 	int id, type;
 	PDF *pdf;
@@ -1124,7 +1124,7 @@ void php3_pdf_setlinewidth(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto void pdf_setdash(int pdfdoc, double white, double black)
    Sets dash pattern */
-void php3_pdf_setdash(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(pdf_setdash) {
 	pval *arg1, *arg2, *arg3;
 	int id, type;
 	PDF *pdf;
@@ -1152,7 +1152,7 @@ void php3_pdf_setdash(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto void pdf_moveto(int pdfdoc, double x, double y)
    Sets current point */
-void php3_pdf_moveto(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(pdf_moveto) {
 	pval *arg1, *arg2, *arg3;
 	int id, type;
 	PDF *pdf;
@@ -1180,7 +1180,7 @@ void php3_pdf_moveto(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto void pdf_curveto(int pdfdoc, double x1, double y1, double x2, double y2, double x3, double y3)
    Draws a curve */
-void php3_pdf_curveto(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(pdf_curveto) {
 	pval *arg1, *arg2, *arg3, *arg4, *arg5, *arg6, *arg7;
 	int id, type;
 	PDF *pdf;
@@ -1217,7 +1217,7 @@ void php3_pdf_curveto(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto void pdf_lineto(int pdfdoc, double x, double y)
    Draws a line */
-void php3_pdf_lineto(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(pdf_lineto) {
 	pval *arg1, *arg2, *arg3;
 	int id, type;
 	PDF *pdf;
@@ -1245,7 +1245,7 @@ void php3_pdf_lineto(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto void pdf_circle(int pdfdoc, double x, double y, double radius)
    Draws a circle */
-void php3_pdf_circle(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(pdf_circle) {
 	pval *arg1, *arg2, *arg3, *arg4;
 	int id, type;
 	PDF *pdf;
@@ -1274,7 +1274,7 @@ void php3_pdf_circle(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto void pdf_arc(int pdfdoc, double x, double y, double radius, double start, double end)
    Draws an arc */
-void php3_pdf_arc(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(pdf_arc) {
 	pval *arg1, *arg2, *arg3, *arg4, *arg5, *arg6;
 	int id, type;
 	PDF *pdf;
@@ -1305,7 +1305,7 @@ void php3_pdf_arc(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto void pdf_rect(int pdfdoc, double x, double y, double width, double height)
    Draws a rectangle */
-void php3_pdf_rect(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(pdf_rect) {
 	pval *arg1, *arg2, *arg3, *arg4, *arg5;
 	int id, type;
 	PDF *pdf;
@@ -1338,7 +1338,7 @@ void php3_pdf_rect(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto void pdf_closepath(int pdfdoc)
    Close path */
-void php3_pdf_closepath(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(pdf_closepath) {
 	pval *arg1;
 	int id, type;
 	PDF *pdf;
@@ -1364,7 +1364,7 @@ void php3_pdf_closepath(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto void pdf_closepath_stroke(int pdfdoc)
    Close path and draw line along path */
-void php3_pdf_closepath_stroke(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(pdf_closepath_stroke) {
 	pval *arg1;
 	int id, type;
 	PDF *pdf;
@@ -1390,7 +1390,7 @@ void php3_pdf_closepath_stroke(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto void pdf_closepath_stroke(int pdfdoc)
    Draw line along path path */
-void php3_pdf_stroke(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(pdf_stroke) {
 	pval *arg1;
 	int id, type;
 	PDF *pdf;
@@ -1416,7 +1416,7 @@ void php3_pdf_stroke(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto void pdf_fill(int pdfdoc)
    Fill current path */
-void php3_pdf_fill(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(pdf_fill) {
 	pval *arg1;
 	int id, type;
 	PDF *pdf;
@@ -1442,7 +1442,7 @@ void php3_pdf_fill(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto void pdf_fill_stroke(int pdfdoc)
    Fill and stroke current path */
-void php3_pdf_fill_stroke(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(pdf_fill_stroke) {
 	pval *arg1;
 	int id, type;
 	PDF *pdf;
@@ -1468,7 +1468,7 @@ void php3_pdf_fill_stroke(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto void pdf_closepath_fill_stroke(int pdfdoc)
    Close, fill and stroke current path */
-void php3_pdf_closepath_fill_stroke(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(pdf_closepath_fill_stroke) {
 	pval *arg1;
 	int id, type;
 	PDF *pdf;
@@ -1494,7 +1494,7 @@ void php3_pdf_closepath_fill_stroke(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto void pdf_endpath(int pdfdoc)
    Ends current path */
-void php3_pdf_endpath(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(pdf_endpath) {
 	pval *arg1;
 	int id, type;
 	PDF *pdf;
@@ -1520,7 +1520,7 @@ void php3_pdf_endpath(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto void pdf_clip(int pdfdoc)
    Clips to current path */
-void php3_pdf_clip(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(pdf_clip) {
 	pval *arg1;
 	int id, type;
 	PDF *pdf;
@@ -1546,7 +1546,7 @@ void php3_pdf_clip(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto void pdf_setgray_fill(int pdfdoc, double value)
    Sets filling color to gray value */
-void php3_pdf_setgray_fill(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(pdf_setgray_fill) {
 	pval *arg1, *arg2;
 	int id, type;
 	PDF *pdf;
@@ -1573,7 +1573,7 @@ void php3_pdf_setgray_fill(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto void pdf_setgray_stroke(int pdfdoc, double value)
    Sets drawing color to gray value */
-void php3_pdf_setgray_stroke(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(pdf_setgray_stroke) {
 	pval *arg1, *arg2;
 	int id, type;
 	PDF *pdf;
@@ -1600,7 +1600,7 @@ void php3_pdf_setgray_stroke(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto void pdf_setgray(int pdfdoc, double value)
    Sets drawing and filling color to gray value */
-void php3_pdf_setgray(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(pdf_setgray) {
 	pval *arg1, *arg2;
 	int id, type;
 	PDF *pdf;
@@ -1627,7 +1627,7 @@ void php3_pdf_setgray(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto void pdf_setrgbcolor_fill(int pdfdoc, double red, double green, double blue)
    Sets filling color to rgb color value */
-void php3_pdf_setrgbcolor_fill(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(pdf_setrgbcolor_fill) {
 	pval *arg1, *arg2, *arg3, *arg4;
 	int id, type;
 	PDF *pdf;
@@ -1654,7 +1654,7 @@ void php3_pdf_setrgbcolor_fill(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto void pdf_setrgbcolor_stroke(int pdfdoc, double red, double green, double blue)
    Sets drawing color to rgb color value */
-void php3_pdf_setrgbcolor_stroke(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(pdf_setrgbcolor_stroke) {
 	pval *arg1, *arg2, *arg3, *arg4;
 	int id, type;
 	PDF *pdf;
@@ -1681,7 +1681,7 @@ void php3_pdf_setrgbcolor_stroke(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto void pdf_setrgbcolor(int pdfdoc, double red, double green, double blue)
    Sets drawing and filling color to rgb color value */
-void php3_pdf_setrgbcolor(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(pdf_setrgbcolor) {
 	pval *arg1, *arg2, *arg3, *arg4;
 	int id, type;
 	PDF *pdf;
@@ -1708,7 +1708,7 @@ void php3_pdf_setrgbcolor(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto void pdf_add_outline(int pdfdoc, string text);
    Add bookmark for current page */
-void php3_pdf_add_outline(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(pdf_add_outline) {
 	pval *arg1, *arg2;
 	int id, type;
 	PDF *pdf;
@@ -1735,7 +1735,7 @@ void php3_pdf_add_outline(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto void pdf_set_transition(int pdfdoc, int transition)
    Sets transition between pages */
-void php3_pdf_set_transition(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(pdf_set_transition) {
 	pval *arg1, *arg2;
 	int id, type;
 	PDF *pdf;
@@ -1762,7 +1762,7 @@ void php3_pdf_set_transition(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto void pdf_set_duration(int pdfdoc, double duration)
    Sets duration between pages */
-void php3_pdf_set_duration(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(pdf_set_duration) {
 	pval *arg1, *arg2;
 	int id, type;
 	PDF *pdf;

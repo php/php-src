@@ -49,34 +49,34 @@ extern DLEXPORT int php3_minit_msql(INIT_FUNC_ARGS);
 extern DLEXPORT int php3_rinit_msql(INIT_FUNC_ARGS);
 extern DLEXPORT int php3_mshutdown_msql(SHUTDOWN_FUNC_ARGS);
 extern DLEXPORT void php3_info_msql(ZEND_MODULE_INFO_FUNC_ARGS);
-extern DLEXPORT void php3_msql_connect(INTERNAL_FUNCTION_PARAMETERS);
-extern DLEXPORT void php3_msql_pconnect(INTERNAL_FUNCTION_PARAMETERS);
-extern DLEXPORT void php3_msql_close(INTERNAL_FUNCTION_PARAMETERS);
-extern DLEXPORT void php3_msql_select_db(INTERNAL_FUNCTION_PARAMETERS);
-extern DLEXPORT void php3_msql_create_db(INTERNAL_FUNCTION_PARAMETERS);
-extern DLEXPORT void php3_msql_drop_db(INTERNAL_FUNCTION_PARAMETERS);
-extern DLEXPORT void php3_msql_list_dbs(INTERNAL_FUNCTION_PARAMETERS);
-extern DLEXPORT void php3_msql_list_tables(INTERNAL_FUNCTION_PARAMETERS);
-extern DLEXPORT void php3_msql_list_fields(INTERNAL_FUNCTION_PARAMETERS);
-extern DLEXPORT void php3_msql_error(INTERNAL_FUNCTION_PARAMETERS);
-extern DLEXPORT void php3_msql_affected_rows(INTERNAL_FUNCTION_PARAMETERS);
-extern DLEXPORT void php3_msql_query(INTERNAL_FUNCTION_PARAMETERS);
-extern DLEXPORT void php3_msql_db_query(INTERNAL_FUNCTION_PARAMETERS);
-extern DLEXPORT void php3_msql_result(INTERNAL_FUNCTION_PARAMETERS);
-extern DLEXPORT void php3_msql_num_rows(INTERNAL_FUNCTION_PARAMETERS);
-extern DLEXPORT void php3_msql_num_fields(INTERNAL_FUNCTION_PARAMETERS);
-extern DLEXPORT void php3_msql_fetch_row(INTERNAL_FUNCTION_PARAMETERS);
-extern DLEXPORT void php3_msql_data_seek(INTERNAL_FUNCTION_PARAMETERS);
-extern DLEXPORT void php3_msql_fetch_field(INTERNAL_FUNCTION_PARAMETERS);
-extern DLEXPORT void php3_msql_field_seek(INTERNAL_FUNCTION_PARAMETERS);
-extern DLEXPORT void php3_msql_free_result(INTERNAL_FUNCTION_PARAMETERS);
-extern DLEXPORT void php3_msql_field_name(INTERNAL_FUNCTION_PARAMETERS);
-extern DLEXPORT void php3_msql_field_table(INTERNAL_FUNCTION_PARAMETERS);
-extern DLEXPORT void php3_msql_field_len(INTERNAL_FUNCTION_PARAMETERS);
-extern DLEXPORT void php3_msql_field_type(INTERNAL_FUNCTION_PARAMETERS);
-extern DLEXPORT void php3_msql_field_flags(INTERNAL_FUNCTION_PARAMETERS);
-extern DLEXPORT void php3_msql_fetch_array(INTERNAL_FUNCTION_PARAMETERS);
-extern DLEXPORT void php3_msql_fetch_object(INTERNAL_FUNCTION_PARAMETERS);
+extern DLEXPORT PHP_FUNCTION(msql_connect);
+extern DLEXPORT PHP_FUNCTION(msql_pconnect);
+extern DLEXPORT PHP_FUNCTION(msql_close);
+extern DLEXPORT PHP_FUNCTION(msql_select_db);
+extern DLEXPORT PHP_FUNCTION(msql_create_db);
+extern DLEXPORT PHP_FUNCTION(msql_drop_db);
+extern DLEXPORT PHP_FUNCTION(msql_list_dbs);
+extern DLEXPORT PHP_FUNCTION(msql_list_tables);
+extern DLEXPORT PHP_FUNCTION(msql_list_fields);
+extern DLEXPORT PHP_FUNCTION(msql_error);
+extern DLEXPORT PHP_FUNCTION(msql_affected_rows);
+extern DLEXPORT PHP_FUNCTION(msql_query);
+extern DLEXPORT PHP_FUNCTION(msql_db_query);
+extern DLEXPORT PHP_FUNCTION(msql_result);
+extern DLEXPORT PHP_FUNCTION(msql_num_rows);
+extern DLEXPORT PHP_FUNCTION(msql_num_fields);
+extern DLEXPORT PHP_FUNCTION(msql_fetch_row);
+extern DLEXPORT PHP_FUNCTION(msql_data_seek);
+extern DLEXPORT PHP_FUNCTION(msql_fetch_field);
+extern DLEXPORT PHP_FUNCTION(msql_field_seek);
+extern DLEXPORT PHP_FUNCTION(msql_free_result);
+extern DLEXPORT PHP_FUNCTION(msql_field_name);
+extern DLEXPORT PHP_FUNCTION(msql_field_table);
+extern DLEXPORT PHP_FUNCTION(msql_field_len);
+extern DLEXPORT PHP_FUNCTION(msql_field_type);
+extern DLEXPORT PHP_FUNCTION(msql_field_flags);
+extern DLEXPORT PHP_FUNCTION(msql_fetch_array);
+extern DLEXPORT PHP_FUNCTION(msql_fetch_object);
 
 typedef struct {
 	long default_link;
@@ -96,5 +96,7 @@ extern msql_module php3_msql_module;
 #define msql_module_ptr NULL
 
 #endif
+
+#define phpext_msql_ptr msql_module_ptr
 
 #endif /* _PHP3_MSQL_H */

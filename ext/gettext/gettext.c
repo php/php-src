@@ -56,7 +56,7 @@ void php3_info_gettext(ZEND_MODULE_INFO_FUNC_ARGS)
 	php3_printf("GNU gettext support active.");
 }
 
-void php3_textdomain(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(textdomain)
 {
     pval *domain;
     char *domain_name, *retval;
@@ -79,7 +79,7 @@ void php3_textdomain(INTERNAL_FUNCTION_PARAMETERS)
     RETURN_STRING(retval, 1);
 }
 
-void php3_gettext(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(gettext)
 {
     pval *msgid;
     char *msgstr;
@@ -94,7 +94,7 @@ void php3_gettext(INTERNAL_FUNCTION_PARAMETERS)
     RETURN_STRING(msgstr, 1);
 }
 
-void php3_dgettext(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(dgettext)
 {
 	pval *domain_name, *msgid;
 	char *msgstr;
@@ -112,7 +112,7 @@ void php3_dgettext(INTERNAL_FUNCTION_PARAMETERS)
 	RETURN_STRING(msgstr, 1);
 }
 
-void php3_dcgettext(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(dcgettext)
 {
 	pval *domain_name, *msgid, *category;
 	char *msgstr;
@@ -133,7 +133,7 @@ void php3_dcgettext(INTERNAL_FUNCTION_PARAMETERS)
 	RETURN_STRING(msgstr, 1);
 }
 
-void php3_bindtextdomain(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(bindtextdomain)
 {
 	pval *domain_name, *dir;
 	char *retval, *dir_name;

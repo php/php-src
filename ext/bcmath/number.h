@@ -99,20 +99,20 @@ typedef bc_struct *bc_num;
 #define FALSE 0
 #endif
 
-extern void init_numbers (void);
-extern void destruct_numbers (void);
-extern void str2num (bc_num *num, char *str, int scale);
+void init_numbers (void);
+void destruct_numbers (void);
+void str2num (bc_num *num, char *str, int scale);
 extern char *num2str (bc_num num);
-extern void bc_add ( bc_num n1, bc_num n2, bc_num *result, int scale_min);
-extern void bc_sub (bc_num n1, bc_num n2, bc_num *result, int scale_min);
-extern void bc_multiply (bc_num n1, bc_num n2, bc_num *prod, int scale);
+void bc_add ( bc_num n1, bc_num n2, bc_num *result, int scale_min);
+void bc_sub (bc_num n1, bc_num n2, bc_num *result, int scale_min);
+void bc_multiply (bc_num n1, bc_num n2, bc_num *prod, int scale);
 extern int bc_divide (bc_num n1, bc_num n2, bc_num *quot, int scale);
 extern int bc_modulo (bc_num num1, bc_num num2, bc_num *result, int scale);
-extern void bc_raise (bc_num num1, bc_num num2, bc_num *result, int scale);
+void bc_raise (bc_num num1, bc_num num2, bc_num *result, int scale);
 extern int bc_sqrt (bc_num *num, int scale);
 extern int bc_compare (bc_num n1, bc_num n2);
 
-extern void free_num (bc_num *num);
-extern void init_num (bc_num *num);
+void free_num (bc_num *num);
+void init_num (bc_num *num);
 
 #endif

@@ -47,43 +47,43 @@ extern php3_module_entry ldap_module_entry;
 #define ldap_module_ptr &ldap_module_entry
 
 /* LDAP functions */
-extern int php3_minit_ldap(INIT_FUNC_ARGS);
-extern int php3_mshutdown_ldap(SHUTDOWN_FUNC_ARGS);
+int php3_minit_ldap(INIT_FUNC_ARGS);
+int php3_mshutdown_ldap(SHUTDOWN_FUNC_ARGS);
 
-extern void php3_info_ldap(ZEND_MODULE_INFO_FUNC_ARGS);
+void php3_info_ldap(ZEND_MODULE_INFO_FUNC_ARGS);
 
-extern void php3_ldap_connect(INTERNAL_FUNCTION_PARAMETERS);
+PHP_FUNCTION(ldap_connect);
 
-extern void php3_ldap_bind(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_ldap_unbind(INTERNAL_FUNCTION_PARAMETERS);
+PHP_FUNCTION(ldap_bind);
+PHP_FUNCTION(ldap_unbind);
 
-extern void php3_ldap_read(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_ldap_list(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_ldap_search(INTERNAL_FUNCTION_PARAMETERS);
+PHP_FUNCTION(ldap_read);
+PHP_FUNCTION(ldap_list);
+PHP_FUNCTION(ldap_search);
 
-extern void php3_ldap_free_result(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_ldap_count_entries(INTERNAL_FUNCTION_PARAMETERS);
+PHP_FUNCTION(ldap_free_result);
+PHP_FUNCTION(ldap_count_entries);
 
-extern void php3_ldap_first_entry(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_ldap_next_entry(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_ldap_get_entries(INTERNAL_FUNCTION_PARAMETERS);
+PHP_FUNCTION(ldap_first_entry);
+PHP_FUNCTION(ldap_next_entry);
+PHP_FUNCTION(ldap_get_entries);
 #if 0
-extern void php3_ldap_free_entry(INTERNAL_FUNCTION_PARAMETERS);
+PHP_FUNCTION(ldap_free_entry);
 #endif
-extern void php3_ldap_first_attribute(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_ldap_next_attribute(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_ldap_get_attributes(INTERNAL_FUNCTION_PARAMETERS);
+PHP_FUNCTION(ldap_first_attribute);
+PHP_FUNCTION(ldap_next_attribute);
+PHP_FUNCTION(ldap_get_attributes);
 
-extern void php3_ldap_get_values(INTERNAL_FUNCTION_PARAMETERS);
+PHP_FUNCTION(ldap_get_values);
 
-extern void php3_ber_free(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_ldap_get_dn(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_ldap_explode_dn(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_ldap_dn2ufn(INTERNAL_FUNCTION_PARAMETERS);
+PHP_FUNCTION(ber_free);
+PHP_FUNCTION(ldap_get_dn);
+PHP_FUNCTION(ldap_explode_dn);
+PHP_FUNCTION(ldap_dn2ufn);
 
-extern void php3_ldap_add(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_ldap_delete(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_ldap_modify(INTERNAL_FUNCTION_PARAMETERS);
+PHP_FUNCTION(ldap_add);
+PHP_FUNCTION(ldap_delete);
+PHP_FUNCTION(ldap_modify);
 
 typedef struct {
 	long default_link;
@@ -117,5 +117,7 @@ extern ldap_module php3_ldap_module;
 #define ldap_module_ptr NULL
 
 #endif
+
+#define phpext_ldap_ptr ldap_module_ptr
 
 #endif /* _PHP3_LDAP_H */

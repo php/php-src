@@ -46,7 +46,7 @@
 #include <errno.h>
 #include "php_globals.h"
 
-#include "filepro.h"
+#include "php_filepro.h"
 #if HAVE_FILEPRO
 
 typedef struct fp_field {
@@ -186,7 +186,7 @@ BOOL WINAPI DllMain(HANDLE hModule,
  * a user is using it!  We cannot lock anything since Web connections don't
  * provide the ability to later unlock what we locked.  Be smart, be safe.
  */
-void php3_filepro(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(filepro)
 {
 	pval *dir;
 	FILE *fp;
@@ -282,7 +282,7 @@ void php3_filepro(INTERNAL_FUNCTION_PARAMETERS)
  * 
  * Errors return false, success returns the row count.
  */
-void php3_filepro_rowcount(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(filepro_rowcount)
 {
 	FILE *fp;
 	char workbuf[MAXPATHLEN];
@@ -336,7 +336,7 @@ void php3_filepro_rowcount(INTERNAL_FUNCTION_PARAMETERS)
  * 
  * Errors return false, success returns the name of the field.
  */
-void php3_filepro_fieldname(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(filepro_fieldname)
 {
 	pval *fno;
 	FP_FIELD *lp;
@@ -374,7 +374,7 @@ void php3_filepro_fieldname(INTERNAL_FUNCTION_PARAMETERS)
  * 
  * Errors return false, success returns the type (edit) of the field
  */
-void php3_filepro_fieldtype(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(filepro_fieldtype)
 {
 	pval *fno;
 	FP_FIELD *lp;
@@ -410,7 +410,7 @@ void php3_filepro_fieldtype(INTERNAL_FUNCTION_PARAMETERS)
  * 
  * Errors return false, success returns the character width of the field.
  */
-void php3_filepro_fieldwidth(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(filepro_fieldwidth)
 {
 	pval *fno;
 	FP_FIELD *lp;
@@ -446,7 +446,7 @@ void php3_filepro_fieldwidth(INTERNAL_FUNCTION_PARAMETERS)
  * 
  * Errors return false, success returns the field count.
  */
-void php3_filepro_fieldcount(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(filepro_fieldcount)
 {
 	FP_TLS_VARS;
 
@@ -470,7 +470,7 @@ void php3_filepro_fieldcount(INTERNAL_FUNCTION_PARAMETERS)
  * 
  * Errors return false, success returns the datum.
  */
-void php3_filepro_retrieve(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(filepro_retrieve)
 {
 	pval *rno, *fno;
     FP_FIELD *lp;

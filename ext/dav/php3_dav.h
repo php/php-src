@@ -53,7 +53,10 @@ PHP_FUNCTION(dav_set_mkcol_handlers);
 
 # endif /* HAVE_MOD_DAV */
 
+#define phpext_dav_ptr phpdav_module_ptr
+
 #endif /* _PHP_DAV_H */
+
 
 /*
  * Local variables:

@@ -159,7 +159,7 @@ DLEXPORT php3_module_entry *get_module(void) { return &mysql_module_entry; }
 #endif
 
 #if APACHE
-extern void timeout(int sig);
+void timeout(int sig);
 #endif
 
 #define CHECK_LINK(link) { if (link==-1) { php3_error(E_WARNING,"MySQL:  A link to the server could not be established"); RETURN_FALSE; } }
@@ -600,7 +600,7 @@ static int php3_mysql_get_default_link(INTERNAL_FUNCTION_PARAMETERS MySLS_DC)
 
 /* {{{ proto int mysql_connect([string hostname[:port]] [, string username] [, string password])
    Open a connection to a MySQL Server */
-void php3_mysql_connect(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(mysql_connect)
 {
 	php3_mysql_do_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU,0);
 }
@@ -608,7 +608,7 @@ void php3_mysql_connect(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int mysql_pconnect([string hostname[:port]] [, string username] [, string password])
    Open a persistent connection to a MySQL Server */
-void php3_mysql_pconnect(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(mysql_pconnect)
 {
 	php3_mysql_do_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU,1);
 }
@@ -616,7 +616,7 @@ void php3_mysql_pconnect(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int mysql_close([int link_identifier])
    Close a MySQL connection */
-void php3_mysql_close(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(mysql_close)
 {
 	pval *mysql_link;
 	int id,type;
@@ -651,7 +651,7 @@ void php3_mysql_close(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int mysql_select_db(string database_name [, int link_identifier])
    Select a MySQL database */
-void php3_mysql_select_db(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(mysql_select_db)
 {
 	pval *db,*mysql_link;
 	int id,type;
@@ -697,7 +697,7 @@ void php3_mysql_select_db(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int mysql_create_db(string database_name [, int link_identifier])
    Create a MySQL database */
-void php3_mysql_create_db(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(mysql_create_db)
 {
 	pval *db,*mysql_link;
 	int id,type;
@@ -742,7 +742,7 @@ void php3_mysql_create_db(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int mysql_drop_db(string database_name [, int link_identifier])
    Drop (delete) a MySQL database */
-void php3_mysql_drop_db(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(mysql_drop_db)
 {
 	pval *db,*mysql_link;
 	int id,type;
@@ -787,7 +787,7 @@ void php3_mysql_drop_db(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int mysql_query(string query [, int link_identifier])
    Send an SQL query to MySQL */
-void php3_mysql_query(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(mysql_query)
 {
 	pval *query,*mysql_link;
 	int id,type;
@@ -844,7 +844,7 @@ void php3_mysql_query(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int mysql_db_query(string database_name, string query [, int link_identifier])
    Send an SQL query to MySQL */
-void php3_mysql_db_query(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(mysql_db_query)
 {
 	pval *db,*query,*mysql_link;
 	int id,type;
@@ -909,7 +909,7 @@ void php3_mysql_db_query(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int mysql_list_dbs([int link_identifier])
    List databases available on a MySQL server */
-void php3_mysql_list_dbs(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(mysql_list_dbs)
 {
 	pval *mysql_link;
 	int id,type;
@@ -951,7 +951,7 @@ void php3_mysql_list_dbs(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int mysql_list_tables(string database_name [, int link_identifier])
    List tables in a MySQL database */
-void php3_mysql_list_tables(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(mysql_list_tables)
 {
 	pval *db,*mysql_link;
 	int id,type;
@@ -1001,7 +1001,7 @@ void php3_mysql_list_tables(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int mysql_list_fields(string database_name, string table_name [, int link_identifier])
    List MySQL result fields */
-void php3_mysql_list_fields(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(mysql_list_fields)
 {
 	pval *db,*table,*mysql_link;
 	int id,type;
@@ -1052,7 +1052,7 @@ void php3_mysql_list_fields(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto string mysql_error([int link_identifier])
    Returns the text of the error message from previous MySQL operation */
-void php3_mysql_error(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(mysql_error)
 {
 	pval *mysql_link;
 	int id,type;
@@ -1091,7 +1091,7 @@ void php3_mysql_error(INTERNAL_FUNCTION_PARAMETERS)
 /* {{{ proto int mysql_errno([int link_identifier])
    Returns the number of the error message from previous MySQL operation */
 #ifdef mysql_errno
-void php3_mysql_errno(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(mysql_errno)
 {
 	pval *mysql_link;
 	int id,type;
@@ -1130,7 +1130,7 @@ void php3_mysql_errno(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int mysql_affected_rows([int link_identifier])
    Get number of affected rows in previous MySQL operation */
-void php3_mysql_affected_rows(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(mysql_affected_rows)
 {
 	pval *mysql_link;
 	int id,type;
@@ -1167,7 +1167,7 @@ void php3_mysql_affected_rows(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int mysql_insert_id([int link_identifier])
    Get the id generated from the previous INSERT operation */
-void php3_mysql_insert_id(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(mysql_insert_id)
 {
 	pval *mysql_link;
 	int id,type;
@@ -1204,7 +1204,7 @@ void php3_mysql_insert_id(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int mysql_result(int result, int row [, mixed field])
    Get result data */
-void php3_mysql_result(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(mysql_result)
 {
 	pval *result, *row, *field=NULL;
 	MYSQL_RES *mysql_result;
@@ -1316,7 +1316,7 @@ void php3_mysql_result(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int mysql_num_rows(int result)
    Get number of rows in a result */
-void php3_mysql_num_rows(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(mysql_num_rows)
 {
 	pval *result;
 	MYSQL_RES *mysql_result;
@@ -1343,7 +1343,7 @@ void php3_mysql_num_rows(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int mysql_num_fields(int result)
    Get number of fields in a result */
-void php3_mysql_num_fields(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(mysql_num_fields)
 {
 	pval *result;
 	MYSQL_RES *mysql_result;
@@ -1369,7 +1369,7 @@ void php3_mysql_num_fields(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto array mysql_fetch_row(int result)
    Get a result row as an enumerated array */
-void php3_mysql_fetch_row(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(mysql_fetch_row)
 {
 	pval *result;
 	MYSQL_RES *mysql_result;
@@ -1419,7 +1419,7 @@ void php3_mysql_fetch_row(INTERNAL_FUNCTION_PARAMETERS)
 }
 /* }}} */
 
-static void php3_mysql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS)
+static PHP_FUNCTION(mysql_fetch_hash)
 {
 	pval *result;
 	MYSQL_RES *mysql_result;
@@ -1476,7 +1476,7 @@ static void php3_mysql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto object mysql_fetch_object(int result)
    Fetch a result row as an object */
-void php3_mysql_fetch_object(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(mysql_fetch_object)
 {
 	php3_mysql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 	if (return_value->type==IS_ARRAY) {
@@ -1489,7 +1489,7 @@ void php3_mysql_fetch_object(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto array mysql_fetch_array(int result)
    Fetch a result row as an associative array */
-void php3_mysql_fetch_array(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(mysql_fetch_array)
 {
 	php3_mysql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
@@ -1497,7 +1497,7 @@ void php3_mysql_fetch_array(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int mysql_data_seek(int result, int row_number)
    Move internal result pointer */
-void php3_mysql_data_seek(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(mysql_data_seek)
 {
 	pval *result,*offset;
 	MYSQL_RES *mysql_result;
@@ -1527,7 +1527,7 @@ void php3_mysql_data_seek(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto array mysql_fetch_lengths(int result)
    Get max data size of each column in a result */
-void php3_mysql_fetch_lengths(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(mysql_fetch_lengths)
 {
 	pval *result;
 	MYSQL_RES *mysql_result;
@@ -1612,7 +1612,7 @@ static char *php3_mysql_get_field_name(int field_type)
 
 /* {{{ proto object mysql_fetch_field(int result [, int field_offset])
    Get column information from a result and return as an object */
-void php3_mysql_fetch_field(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(mysql_fetch_field)
 {
 	pval *result,*field=NULL;
 	MYSQL_RES *mysql_result;
@@ -1675,7 +1675,7 @@ void php3_mysql_fetch_field(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int mysql_field_seek(int result, int field_offset)
    Set result pointer to a specific field offset */
-void php3_mysql_field_seek(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(mysql_field_seek)
 {
 	pval *result, *offset;
 	MYSQL_RES *mysql_result;
@@ -1837,7 +1837,7 @@ static void php3_mysql_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 
 /* {{{ proto string mysql_field_name(int result, int field_index)
    Get the name of the specified field in a result */
-void php3_mysql_field_name(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(mysql_field_name)
 {
 	php3_mysql_field_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP3_MYSQL_FIELD_NAME);
 }
@@ -1845,7 +1845,7 @@ void php3_mysql_field_name(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto string mysql_field_table(int result, int field_offset)
    Get name of the table the specified field is in */
-void php3_mysql_field_table(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(mysql_field_table)
 {
 	php3_mysql_field_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP3_MYSQL_FIELD_TABLE);
 }
@@ -1853,7 +1853,7 @@ void php3_mysql_field_table(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int mysql_field_len(int result, int field_offet)
    Returns the length of the specified field */
-void php3_mysql_field_len(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(mysql_field_len)
 {
 	php3_mysql_field_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP3_MYSQL_FIELD_LEN);
 }
@@ -1861,7 +1861,7 @@ void php3_mysql_field_len(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto string mysql_field_type(int result, int field_offset)
    Get the type of the specified field in a result */
-void php3_mysql_field_type(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(mysql_field_type)
 {
 	php3_mysql_field_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP3_MYSQL_FIELD_TYPE);
 }
@@ -1869,7 +1869,7 @@ void php3_mysql_field_type(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto string mysql_field_flags(int result, int field_offset)
    Get the flags associated with the specified field in a result */
-void php3_mysql_field_flags(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(mysql_field_flags)
 {
 	php3_mysql_field_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP3_MYSQL_FIELD_FLAGS);
 }
@@ -1877,7 +1877,7 @@ void php3_mysql_field_flags(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int mysql_free_result(int result)
    Free result memory */
-void php3_mysql_free_result(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(mysql_free_result)
 {
 	pval *result;
 	MYSQL_RES *mysql_result;

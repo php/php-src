@@ -116,7 +116,7 @@ static int php3_mend_dbase(void){
 
 /* {{{ proto int dbase_open(string name, int mode)
    Opens a dBase-format database file */
-void php3_dbase_open(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(dbase_open) {
 	pval *dbf_name, *options;
 	dbhead_t *dbh;
 	int handle;
@@ -149,7 +149,7 @@ void php3_dbase_open(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto bool dbase_close(int identifier)
    Closes an open dBase-format database file */
-void php3_dbase_close(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(dbase_close) {
 	pval *dbh_id;
 	dbhead_t *dbh;
 	int dbh_type;
@@ -172,7 +172,7 @@ void php3_dbase_close(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto int dbase_numrecords(int identifier)
    Returns the number of records in the database */
-void php3_dbase_numrecords(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(dbase_numrecords) {
 	pval *dbh_id;
 	dbhead_t *dbh;
 	int dbh_type;
@@ -194,7 +194,7 @@ void php3_dbase_numrecords(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto int dbase_numfields(int identifier)
    Returns the number of fields (columns) in the database */
-void php3_dbase_numfields(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(dbase_numfields) {
 	pval *dbh_id;
 	dbhead_t *dbh;
 	int dbh_type;
@@ -216,7 +216,7 @@ void php3_dbase_numfields(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto bool dbase_pack(int identifier)
    Packs the database (deletes records marked for deletion) */
-void php3_dbase_pack(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(dbase_pack) {
 	pval *dbh_id;
 	dbhead_t *dbh;
 	int dbh_type;
@@ -240,7 +240,7 @@ void php3_dbase_pack(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto bool dbase_add_record(int identifier, array data)
    Adds a record to the database */
-void php3_dbase_add_record(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(dbase_add_record) {
 	pval *dbh_id, *fields, *field;
 	dbhead_t *dbh;
 	int dbh_type;
@@ -308,7 +308,7 @@ void php3_dbase_add_record(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto bool dbase_delete_record(int identifier, int record)
    Marks a record to be deleted */
-void php3_dbase_delete_record(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(dbase_delete_record) {
 	pval *dbh_id, *record;
 	dbhead_t *dbh;
 	int dbh_type;
@@ -342,7 +342,7 @@ void php3_dbase_delete_record(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto array dbase_get_record(int identifier, int record)
    Returns an array representing a record from the database */
-void php3_dbase_get_record(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(dbase_get_record) {
 	pval *dbh_id, *record;
 	dbhead_t *dbh;
 	int dbh_type;
@@ -420,7 +420,7 @@ void php3_dbase_get_record(INTERNAL_FUNCTION_PARAMETERS) {
 /* From Martin Kuba <makub@aida.inet.cz> */
 /* {{{ proto array dbase_get_record_with_names(int identifier, int record)
    Returns an associative array representing a record from the database */
-void php3_dbase_get_record_with_names(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(dbase_get_record_with_names) {
 	pval *dbh_id, *record;
 	dbhead_t *dbh;
 	int dbh_type;
@@ -495,7 +495,7 @@ void php3_dbase_get_record_with_names(INTERNAL_FUNCTION_PARAMETERS) {
 
 /* {{{ proto bool dbase_create(string filename, array fields)
    Creates a new dBase-format database file */
-void php3_dbase_create(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(dbase_create) {
 	pval *filename, *fields, *field, *value;
 	int fd;
 	dbhead_t *dbh;

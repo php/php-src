@@ -40,21 +40,21 @@ extern php3_module_entry php3_zlib_module_entry;
 
 extern int php3_minit_zlib(INIT_FUNC_ARGS);
 extern int php3_mshutdown_zlib(SHUTDOWN_FUNC_ARGS);
-extern void php3_info_zlib(ZEND_MODULE_INFO_FUNC_ARGS);
-extern void php3_gzopen(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_gzclose(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_gzeof(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_gzread(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_gzgetc(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_gzgets(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_gzgetss(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_gzwrite(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_gzrewind(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_gztell(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_gzseek(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_gzpassthru(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_readgzfile(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_gzfile(INTERNAL_FUNCTION_PARAMETERS);
+void php3_info_zlib(ZEND_MODULE_INFO_FUNC_ARGS);
+PHP_FUNCTION(gzopen);
+PHP_FUNCTION(gzclose);
+PHP_FUNCTION(gzeof);
+PHP_FUNCTION(gzread);
+PHP_FUNCTION(gzgetc);
+PHP_FUNCTION(gzgets);
+PHP_FUNCTION(gzgetss);
+PHP_FUNCTION(gzwrite);
+PHP_FUNCTION(gzrewind);
+PHP_FUNCTION(gztell);
+PHP_FUNCTION(gzseek);
+PHP_FUNCTION(gzpassthru);
+PHP_FUNCTION(readgzfile);
+PHP_FUNCTION(gzfile);
 
 #else
 #define zlib_module_ptr NULL

@@ -422,7 +422,7 @@ static int _ora_ping(oraConnection *conn)
 
 /* {{{ proto int ora_logon(string user, string password)
    Open an Oracle connection */
-void php3_Ora_Logon(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(Ora_Logon)
 {
 	php3_Ora_Do_Logon(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
@@ -430,7 +430,7 @@ void php3_Ora_Logon(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int ora_plogon(string user, string password)
    Open a persistant Oracle connection */
-void php3_Ora_PLogon(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(Ora_PLogon)
 {
 	php3_Ora_Do_Logon(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
@@ -596,7 +596,7 @@ void php3_Ora_Do_Logon(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 
 /* {{{ proto int ora_logoff(int connection)
    Close an Oracle connection */
-void php3_Ora_Logoff(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(Ora_Logoff)
 {								/* conn_index */
 	int type, ind;
 	oraConnection *conn;
@@ -621,7 +621,7 @@ void php3_Ora_Logoff(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int ora_open(int connection)
    Open an Oracle cursor */
-void php3_Ora_Open(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(Ora_Open)
 {								/* conn_index */
 	pval *arg;
 	oraConnection *conn = NULL;
@@ -658,7 +658,7 @@ void php3_Ora_Open(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int ora_close(int cursor)
    Close an Oracle cursor */
-void php3_Ora_Close(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(Ora_Close)
 {								/* conn_index */
 	pval *arg;
 
@@ -675,7 +675,7 @@ void php3_Ora_Close(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int ora_commitoff(int connection)
    Disable automatic commit */
-void php3_Ora_CommitOff(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(Ora_CommitOff)
 {								/* conn_index */
 	pval *arg;
 	oraConnection *conn;
@@ -700,7 +700,7 @@ void php3_Ora_CommitOff(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int ora_commiton(int connection)
    Enable automatic commit */
-void php3_Ora_CommitOn(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(Ora_CommitOn)
 {								/* conn_index */
 	pval *arg;
 	oraConnection *conn;
@@ -725,7 +725,7 @@ void php3_Ora_CommitOn(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int ora_commit(int connection)
    Commit an Oracle transaction */
-void php3_Ora_Commit(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(Ora_Commit)
 {								/* conn_index */
 	pval *arg;
 	oraConnection *conn;
@@ -750,7 +750,7 @@ void php3_Ora_Commit(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int ora_rollback(int connection)
    Roll back an Oracle transaction */
-void php3_Ora_Rollback(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(Ora_Rollback)
 {								/* conn_index */
 	pval *arg;
 	oraConnection *conn;
@@ -775,7 +775,7 @@ void php3_Ora_Rollback(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int ora_parse(int cursor, string sql_statement [, int defer])
    Parse an Oracle SQL statement */
-void php3_Ora_Parse(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(Ora_Parse)
 {	
      /* cursor_ind, sql_statement [, defer] */
 	int argc;
@@ -831,7 +831,7 @@ void php3_Ora_Parse(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int ora_bind(int cursor, string php_variable_name, string sql_parameter_name, int length [, int type])
    Bind a PHP variable to an Oracle parameter */
-void php3_Ora_Bind(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(Ora_Bind)
 { /* cursor_ind, php_var_name, sql_var_name, data_len [, inout]*/
 	/* inout: 0 = in/out, 1 = in, 2 = out */
 	int argc;
@@ -933,7 +933,7 @@ void php3_Ora_Bind(INTERNAL_FUNCTION_PARAMETERS)
  */
 /* {{{ proto int ora_exec(int cursor)
    Execute a parsed statement */
-void php3_Ora_Exec(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(Ora_Exec)
 {								/* cursor_index */
 	pval *arg;
 	oraCursor *cursor = NULL;
@@ -977,7 +977,7 @@ void php3_Ora_Exec(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int ora_numcols(int cursor)
    Returns the numbers of columns in a result */
-void php3_Ora_NumCols(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(Ora_NumCols)
 {								/* cursor_index */
 	pval *arg;
 	oraCursor *cursor = NULL;
@@ -997,7 +997,7 @@ void php3_Ora_NumCols(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int ora_numrows(int cursor)
    Returns the number of rows in a result */
-void php3_Ora_NumRows(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(Ora_NumRows)
 {								/* cursor_index */
 	pval *arg;
 	oraCursor *cursor = NULL;
@@ -1018,7 +1018,7 @@ void php3_Ora_NumRows(INTERNAL_FUNCTION_PARAMETERS)
 /* prepares/executes/fetches 1st row if avail*/
 /* {{{ proto int ora_do(int connection, int cursor)
    Parse and execute a statement and fetch first result row */ 
-void php3_Ora_Do(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(Ora_Do)
 {
 	pval *argv[2];
 	oraConnection *conn = NULL;
@@ -1100,7 +1100,7 @@ void php3_Ora_Do(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int ora_fetch(int cursor)
    Fetch a row of result data from a cursor */
-void php3_Ora_Fetch(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(Ora_Fetch)
 {								/* cursor_index */
 	pval *arg;
 	oraCursor *cursor;
@@ -1135,7 +1135,7 @@ void php3_Ora_Fetch(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int ora_fetch_into(int cursor, array result [ , int flags ])
    Fetch a row into the specified result array */
-void php3_Ora_FetchInto(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(Ora_FetchInto)
 {
 	pval     *arg1, *arr, *flg, *tmp;
 	oraCursor *cursor;
@@ -1272,7 +1272,7 @@ void php3_Ora_FetchInto(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto string ora_columnname(int cursor, int column)
    Get the name of an Oracle result column */
-void php3_Ora_ColumnName(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(Ora_ColumnName)
 {								/* cursor_index, column_index */
 	pval *argv[2];
 	int cursor_ind;
@@ -1313,7 +1313,7 @@ void php3_Ora_ColumnName(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto string ora_columntype(int cursor, int column) 
    Get the type of an Oracle result column */
-void php3_Ora_ColumnType(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(Ora_ColumnType)
 {								/* cursor_index, column_index */
 	pval *argv[2];
 	int cursor_ind, colno;
@@ -1386,7 +1386,7 @@ void php3_Ora_ColumnType(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int ora_columnsize(int cursor, int column)
    Return the size of the column */
-void php3_Ora_ColumnSize(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(Ora_ColumnSize)
 {								/* cursor_index, column_index */
 	pval *argv[2];
 	int cursor_ind;
@@ -1426,7 +1426,7 @@ void php3_Ora_ColumnSize(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto mixed ora_getcolumn(int cursor, int column)
    Get data from a fetched row */
-void php3_Ora_GetColumn(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(Ora_GetColumn)
 {								/* cursor_index, column_index */
 	pval *argv[2];
 	int colno;
@@ -1520,7 +1520,7 @@ void php3_Ora_GetColumn(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto string ora_error(int cursor_or_connection)
    Get an Oracle error message */
-void php3_Ora_Error(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(Ora_Error)
 {
 	pval *arg;
 	oraCursor *cursor;
@@ -1545,7 +1545,7 @@ void php3_Ora_Error(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int ora_errorcode(int cursor_or_connection)
    Get an Oracle error code */
-void php3_Ora_ErrorCode(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(Ora_ErrorCode)
 {
 	pval *arg;
 	oraCursor *cursor;

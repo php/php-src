@@ -1,12 +1,12 @@
-extern void put_long(char *cp, long lval);
+void put_long(char *cp, long lval);
 extern long get_long(char *cp);
 extern int get_short(char *cp);
-extern void put_short(char *cp, int sval);
-extern void put_double(char *cp, double fval);
+void put_short(char *cp, int sval);
+void put_double(char *cp, double fval);
 extern double get_double(char *cp);
-extern void copy_fill(char *dp, char *sp, int len);
-extern void copy_crimp(char *dp, char *sp, int len);
-extern void db_set_date(char *cp, int year, int month, int day);
+void copy_fill(char *dp, char *sp, int len);
+void copy_crimp(char *dp, char *sp, int len);
+void db_set_date(char *cp, int year, int month, int day);
 extern int db_date_year(char *cp);
 extern int db_date_month(char *cp);
 extern int db_date_day(char *cp);

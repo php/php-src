@@ -52,12 +52,12 @@
 
 extern module *top_module;
 
-void php3_virtual(INTERNAL_FUNCTION_PARAMETERS);
-void php3_getallheaders(INTERNAL_FUNCTION_PARAMETERS);
-void php3_apachelog(INTERNAL_FUNCTION_PARAMETERS);
+PHP_FUNCTION(virtual);
+PHP_FUNCTION(getallheaders);
+PHP_FUNCTION(apachelog);
 void php3_info_apache(ZEND_MODULE_INFO_FUNC_ARGS);
-void php3_apache_note(INTERNAL_FUNCTION_PARAMETERS);
-void php3_apache_lookup_uri(INTERNAL_FUNCTION_PARAMETERS);
+PHP_FUNCTION(apache_note);
+PHP_FUNCTION(apache_lookup_uri);
 
 function_entry apache_functions[] = {
 	{"virtual",			php3_virtual,		NULL},
@@ -127,7 +127,7 @@ php3_module_entry apache_module_entry = {
 
 /* {{{ proto string apache_note(string note_name [, string note_value])
    Get and set Apache request notes */
-void php3_apache_note(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(apache_note)
 {
 	pval *arg_name,*arg_val;
 	char *note_val;
@@ -228,7 +228,7 @@ void php3_info_apache(ZEND_MODULE_INFO_FUNC_ARGS)
  */
 /* {{{ proto int virtual(string filename)
    Perform an Apache sub-request */
-void php3_virtual(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(virtual)
 {
 	pval *filename;
 	request_rec *rr = NULL;
@@ -273,7 +273,7 @@ void php3_virtual(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto array getallheaders(void)
    Fetch all HTTP request headers */
-void php3_getallheaders(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(getallheaders)
 {
     array_header *env_arr;
     table_entry *tenv;
@@ -300,7 +300,7 @@ void php3_getallheaders(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto class apache_lookup_uri(string URI)
    Perform a partial request of the given URI to obtain information about it */
-void php3_apache_lookup_uri(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(apache_lookup_uri)
 {
 	pval *filename;
 	request_rec *rr=NULL;
@@ -374,7 +374,7 @@ void php3_apache_lookup_uri(INTERNAL_FUNCTION_PARAMETERS)
 #if 0
 This function is most likely a bad idea.  Just playing with it for now.
 
-void php3_apache_exec_uri(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(apache_exec_uri)
 {
 	pval *filename;
 	request_rec *rr=NULL;

@@ -432,7 +432,7 @@ static void _php3_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 
 /* {{{ proto int ibase_connect(string database [, string username] [, string password])
    Open a connection to an InterBase database */
-void php3_ibase_connect(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(ibase_connect)
 {
 	_php3_ibase_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
@@ -440,7 +440,7 @@ void php3_ibase_connect(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int ibase_pconnect(string database [, string username] [, string password])
    Open a persistent connection to an InterBase database */
-void php3_ibase_pconnect(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(ibase_pconnect)
 {
 	_php3_ibase_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
@@ -448,7 +448,7 @@ void php3_ibase_pconnect(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int ibase_close([int link_identifier])
    Close an InterBase connection */
-void php3_ibase_close(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(ibase_close)
 {
 	pval *ibase_link;
 	int id, type;
@@ -642,7 +642,7 @@ static XSQLDA *_php3_ibase_execute(isc_tr_handle tr_handle, isc_stmt_handle quer
 
 /* {{{ proto int ibase_query([int link_identifier, ]string query)
    Execute a query (without parameter placeholders). */
-void php3_ibase_query(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(ibase_query)
 {
 	pval *query, *ibase_link;
 	int id, type;
@@ -725,7 +725,7 @@ void php3_ibase_query(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int ibase_fetch_row(int result)
    Fetch a row from the results of a query. */
-void php3_ibase_fetch_row(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(ibase_fetch_row)
 {
 	pval *result;
 	pval *pval_ptr;
@@ -886,7 +886,7 @@ void php3_ibase_fetch_row(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int ibase_free_result(int result)
    Free the memory used by a result. */
-void php3_ibase_free_result(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(ibase_free_result)
 {
 	pval *result;
 	ibase_result_handle *ibase_result;
@@ -915,7 +915,7 @@ void php3_ibase_free_result(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int ibase_prepare([int link_identifier, ]string query)
    Prepare a query for later binding of parameter placeholders and execution. */
-void php3_ibase_prepare(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(ibase_prepare)
 {
 	pval *query, *ibase_link;
 	int id, type;
@@ -974,7 +974,7 @@ void php3_ibase_prepare(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int ibase_bind (int query)
    Bind parameter placeholders in a previously prepared query. Still nonfunctional. */
-void php3_ibase_bind(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(ibase_bind)
 {
 	pval *query;
 	ibase_query_handle *ibase_query;
@@ -1034,7 +1034,7 @@ void php3_ibase_bind(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int ibase_execute(int query)
    Execute a previously prepared (and possibly binded) query. */
-void php3_ibase_execute(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(ibase_execute)
 {
 	pval *query;
 	ibase_query_handle *ibase_query;
@@ -1071,7 +1071,7 @@ void php3_ibase_execute(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int ibase_free_query(int query)
    Free memory used by a query */
-void php3_ibase_free_query(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(ibase_free_query)
 {
 	pval *query;
 	ibase_query_handle *ibase_query;
@@ -1100,7 +1100,7 @@ void php3_ibase_free_query(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int ibase_timefmt(string format)
    Sets the format of datetime columns returned from queries. Still nonfunctional. */
-void php3_ibase_timefmt(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(ibase_timefmt)
 {
 	pval *pmode;
 	IBASE_TLS_VARS;

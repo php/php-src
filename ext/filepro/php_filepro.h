@@ -40,18 +40,18 @@
 #define _FILEPRO_H
 #if HAVE_FILEPRO
 extern php3_module_entry filepro_module_entry;
-#define filepro_module_ptr &filepro_module_entry
+#define phpext_filepro_ptr &filepro_module_entry
 
-extern void php3_filepro(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_filepro_rowcount(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_filepro_fieldname(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_filepro_fieldtype(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_filepro_fieldwidth(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_filepro_fieldcount(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_filepro_retrieve(INTERNAL_FUNCTION_PARAMETERS);
+PHP_FUNCTION(filepro);
+PHP_FUNCTION(filepro_rowcount);
+PHP_FUNCTION(filepro_fieldname);
+PHP_FUNCTION(filepro_fieldtype);
+PHP_FUNCTION(filepro_fieldwidth);
+PHP_FUNCTION(filepro_fieldcount);
+PHP_FUNCTION(filepro_retrieve);
 extern int php3_minit_filepro(INIT_FUNC_ARGS);
 extern int php3_mend_filepro(void);
 #else
-#define filepro_module_ptr NULL
+#define phpext_filepro_ptr NULL
 #endif
 #endif /* _FILEPRO_H */
