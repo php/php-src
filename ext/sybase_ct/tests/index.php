@@ -84,7 +84,7 @@
         "\n%s: %s in %s on line %d\n", 
         $names[$errno], 
         $errstr,
-        $this->name,
+        strstr($errfile, 'eval()\'d code') ? $this->name : $errfile,
         $errline
       );
     }
