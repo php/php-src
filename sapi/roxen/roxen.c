@@ -528,7 +528,7 @@ static sapi_module_struct roxen_sapi_module = {
 			&pval, sizeof(zval *), NULL)
 
 static void
-php_roxen_hash_environment(CLS_D ELS_DC PLS_DC SLS_DC)
+php_roxen_hash_environment(CLS_D TSRMLS_DC PLS_DC SLS_DC)
 {
   int i;
   char buf[512];
@@ -586,7 +586,7 @@ static int php_roxen_module_main(SLS_D)
 #ifdef ZTS
   CLS_FETCH();
   PLS_FETCH();
-  ELS_FETCH();
+  TSRMLS_FETCH();
 #ifdef ROXEN_USE_ZTS
   GET_THIS();
 #endif
@@ -598,14 +598,14 @@ static int php_roxen_module_main(SLS_D)
   file_handle.opened_path = NULL;
 
   THREADS_ALLOW();
-  res = php_request_startup(CLS_C ELS_CC PLS_CC SLS_CC);
+  res = php_request_startup(CLS_C TSRMLS_CC PLS_CC SLS_CC);
   THREADS_DISALLOW();
   if(res == FAILURE) {
     return 0;
   }
-  php_roxen_hash_environment(CLS_C ELS_CC PLS_CC SLS_CC);
+  php_roxen_hash_environment(CLS_C TSRMLS_CC PLS_CC SLS_CC);
   THREADS_ALLOW();
-  php_execute_script(&file_handle CLS_CC ELS_CC PLS_CC);
+  php_execute_script(&file_handle CLS_CC TSRMLS_CC PLS_CC);
   php_request_shutdown(NULL);
   THREADS_DISALLOW();
   return 1;
@@ -705,7 +705,7 @@ void pike_module_init( void )
 #ifdef ZTS
     tsrm_startup(1, 1, 0, NULL);
 #ifdef ROXEN_USE_ZTS
-    roxen_globals_id = ts_allocate_id(sizeof(php_roxen_request), NULL, NULL);
+    ts_allocate_id(&roxen_globals_id, sizeof(php_roxen_request), NULL, NULL);
 #endif	 
 #endif
     sapi_startup(&roxen_sapi_module);

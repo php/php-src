@@ -819,7 +819,7 @@ php_mbstr_encoding_handler(zval *arg, char *res, char *separator) {
 	mbfl_encoding_detector *identd;
 	mbfl_buffer_converter *convd;
 	MBSTRLS_FETCH();
-	ELS_FETCH();
+	TSRMLS_FETCH();
 	PLS_FETCH();
 
 	mbfl_string_init(&string);
@@ -919,10 +919,10 @@ php_mbstr_encoding_handler(zval *arg, char *res, char *separator) {
 			ret = mbfl_buffer_converter_feed_result(convd, &string, &result);
 		}
 		if (ret != NULL) {
-			php_register_variable_safe(val_list[n], ret->val, ret->len, array_ptr ELS_CC PLS_CC);
+			php_register_variable_safe(val_list[n], ret->val, ret->len, array_ptr TSRMLS_CC PLS_CC);
 			efree(ret->val);
 		} else {
-			php_register_variable_safe(val_list[n], val_list[n+1], len_list[n+1], array_ptr ELS_CC PLS_CC);
+			php_register_variable_safe(val_list[n], val_list[n+1], len_list[n+1], array_ptr TSRMLS_CC PLS_CC);
 		}
 		n+=2;
 	}
@@ -954,7 +954,7 @@ SAPI_POST_HANDLER_FUNC(php_mbstr_post_handler)
 }
 
 /* http input processing */
-void mbstr_treat_data(int arg, char *str, zval* destArray ELS_DC PLS_DC SLS_DC)
+void mbstr_treat_data(int arg, char *str, zval* destArray TSRMLS_DC PLS_DC SLS_DC)
 {
 	char *res = NULL, *var, *val, *separator=NULL;
 	const char *c_var;
@@ -1239,7 +1239,7 @@ PHP_FUNCTION(mb_parse_str)
 		}
 		n++;
 		/* add variable to symbol table */
-		php_register_variable_safe(var, val, val_len, track_vars_array ELS_CC PLS_CC);
+		php_register_variable_safe(var, val, val_len, track_vars_array TSRMLS_CC PLS_CC);
 		mbfl_string_clear(&resvar);
 		mbfl_string_clear(&resval);
 	}

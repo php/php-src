@@ -84,7 +84,7 @@ static void _free_reg_cache(reg_cache *rc)
 #undef regcomp
 #define regcomp(a,b,c) _php_regcomp(a,b,c)
 	
-static void php_reg_init_globals(php_reg_globals *reg_globals) 
+static void php_reg_init_globals(php_reg_globals *reg_globals TSRMLS_DC)
 {
 	zend_hash_init(&reg_globals->ht_rc, 0, NULL, (void (*)(void *)) _free_reg_cache, 1);
 }
@@ -92,9 +92,9 @@ static void php_reg_init_globals(php_reg_globals *reg_globals)
 PHP_MINIT_FUNCTION(regex)
 {
 #ifdef ZTS
-	reg_globals_id = ts_allocate_id(sizeof(php_reg_globals), (ts_allocate_ctor) php_reg_init_globals, NULL);
+	ts_allocate_id(&reg_globals_id, sizeof(php_reg_globals), (ts_allocate_ctor) php_reg_init_globals, NULL);
 #else
-	php_reg_init_globals(&reg_globals);
+	php_reg_init_globals(&reg_globals TSRMLS_CC);
 #endif
 
 	return SUCCESS;

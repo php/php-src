@@ -147,7 +147,7 @@ static char *sapi_fastcgi_read_cookies(SLS_D)
 }
 
 
-static void sapi_fastcgi_register_variables(zval *track_vars_array ELS_DC SLS_DC PLS_DC)
+static void sapi_fastcgi_register_variables(zval *track_vars_array TSRMLS_DC SLS_DC PLS_DC)
 {
 	char *self = getenv("REQUEST_URI");
 	char *ptr = strchr( self, '?' );
@@ -162,7 +162,7 @@ static void sapi_fastcgi_register_variables(zval *track_vars_array ELS_DC SLS_DC
 
 	/* strip query string off this */
 	if ( ptr ) *ptr = 0;
-	php_register_variable( "PHP_SELF", getenv("REQUEST_URI"), track_vars_array ELS_CC PLS_CC);
+	php_register_variable( "PHP_SELF", getenv("REQUEST_URI"), track_vars_array TSRMLS_CC PLS_CC);
 	if ( ptr ) *ptr = '?';
 }
 
@@ -203,7 +203,7 @@ static void fastcgi_module_main(TLS_D SLS_DC)
 {
 	zend_file_handle file_handle;
 	CLS_FETCH();
-	ELS_FETCH();
+	TSRMLS_FETCH();
 	PLS_FETCH();
 
 	file_handle.type = ZEND_HANDLE_FILENAME;
@@ -211,8 +211,8 @@ static void fastcgi_module_main(TLS_D SLS_DC)
 	file_handle.free_filename = 0;
 	file_handle.opened_path = NULL;
 
-	if (php_request_startup(CLS_C ELS_CC PLS_CC SLS_CC) == SUCCESS) {
-		php_execute_script(&file_handle CLS_CC ELS_CC PLS_CC);
+	if (php_request_startup(CLS_C TSRMLS_CC PLS_CC SLS_CC) == SUCCESS) {
+		php_execute_script(&file_handle CLS_CC TSRMLS_CC PLS_CC);
 		php_request_shutdown(NULL);
 	}
 }

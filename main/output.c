@@ -50,7 +50,7 @@ static int php_default_output_func(const char *str, uint str_len)
 }
 
 
-static void php_output_init_globals(OLS_D)
+static void php_output_init_globals(OLS_D TSRMLS_DC)
 {
  	OG(php_body_write) = php_default_output_func;
 	OG(php_header_write) = php_default_output_func;
@@ -64,9 +64,9 @@ static void php_output_init_globals(OLS_D)
 PHPAPI void php_output_startup(void)
 {
 #ifdef ZTS
-	output_globals_id = ts_allocate_id(sizeof(php_output_globals), (ts_allocate_ctor) php_output_init_globals, NULL);
+	ts_allocate_id(&output_globals_id, sizeof(php_output_globals), (ts_allocate_ctor) php_output_init_globals, NULL);
 #else 
-	php_output_init_globals(OLS_C);
+	php_output_init_globals(OLS_C TSRMLS_CC);
 #endif
 }
 
@@ -93,7 +93,7 @@ PHPAPI void php_output_set_status(zend_bool status)
 
 void php_output_register_constants()
 {
-	ELS_FETCH();
+	TSRMLS_FETCH();
 
 	REGISTER_MAIN_LONG_CONSTANT("PHP_OUTPUT_HANDLER_START", PHP_OUTPUT_HANDLER_START, CONST_CS | CONST_PERSISTENT);
 	REGISTER_MAIN_LONG_CONSTANT("PHP_OUTPUT_HANDLER_CONT", PHP_OUTPUT_HANDLER_CONT, CONST_CS | CONST_PERSISTENT);
@@ -499,10 +499,10 @@ static int php_ub_body_write(const char *str, uint str_length)
 			OG(output_start_filename) = zend_get_compiled_filename(CLS_C);
 			OG(output_start_lineno) = zend_get_compiled_lineno(CLS_C);
 		} else if (zend_is_executing()) {
-			ELS_FETCH();
+			TSRMLS_FETCH();
 
-			OG(output_start_filename) = zend_get_executed_filename(ELS_C);
-			OG(output_start_lineno) = zend_get_executed_lineno(ELS_C);
+			OG(output_start_filename) = zend_get_executed_filename(TSRMLS_C);
+			OG(output_start_lineno) = zend_get_executed_lineno(TSRMLS_C);
 		}
 
 		OG(php_body_write) = php_ub_body_write_no_header;

@@ -164,7 +164,7 @@ void session_adapt_flush(int (*)(const char *, uint));
 #endif
 
 void php_set_session_var(char *name, size_t namelen, zval *state_val,HashTable *var_hash PSLS_DC);
-int php_get_session_var(char *name, size_t namelen, zval ***state_var PLS_DC PSLS_DC ELS_DC);
+int php_get_session_var(char *name, size_t namelen, zval ***state_var PLS_DC PSLS_DC TSRMLS_DC);
 
 int php_session_register_module(ps_module *);
 
@@ -187,7 +187,7 @@ int php_session_register_serializer(const char *name,
 	ulong key_length;											\
 	ulong num_key;												\
 	zval **struc;												\
-	ELS_FETCH();												\
+	TSRMLS_FETCH();												\
 	PLS_FETCH()
 
 #define PS_ENCODE_LOOP(code)										\
@@ -195,7 +195,7 @@ int php_session_register_serializer(const char *name,
 			zend_hash_get_current_key_ex(&PS(vars), &key, &key_length, &num_key, 0, NULL) == HASH_KEY_IS_STRING; \
 			zend_hash_move_forward(&PS(vars))) {				\
 			key_length--;										\
-		if (php_get_session_var(key, key_length, &struc PLS_CC PSLS_CC ELS_CC) == SUCCESS) { \
+		if (php_get_session_var(key, key_length, &struc PLS_CC PSLS_CC TSRMLS_CC) == SUCCESS) { \
 			code;		 										\
 		} 														\
 	}

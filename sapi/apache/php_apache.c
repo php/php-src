@@ -90,7 +90,7 @@ PHP_INI_END()
 
 
 
-static void php_apache_globals_ctor(php_apache_info_struct *apache_globals)
+static void php_apache_globals_ctor(php_apache_info_struct *apache_globals TSRMLS_DC)
 {
 	apache_globals->in_request = 0;
 }
@@ -99,9 +99,9 @@ static void php_apache_globals_ctor(php_apache_info_struct *apache_globals)
 static PHP_MINIT_FUNCTION(apache)
 {
 #ifdef ZTS
-	php_apache_info_id = ts_allocate_id(sizeof(php_apache_info_struct), php_apache_globals_ctor, NULL);
+	ts_allocate_id(&php_apache_info_id, sizeof(php_apache_info_struct), php_apache_globals_ctor, NULL);
 #else
-	php_apache_globals_ctor(&php_apache_info);
+	php_apache_globals_ctor(&php_apache_info TSRMLS_CC);
 #endif
 	REGISTER_INI_ENTRIES();
 	return SUCCESS;

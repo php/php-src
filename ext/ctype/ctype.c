@@ -85,7 +85,7 @@ ZEND_GET_MODULE(ctype)
  */
 PHP_MINFO_FUNCTION(ctype)
 {
-	ELS_FETCH();
+	TSRMLS_FETCH();
 	SLS_FETCH();
 
 	php_info_print_table_start();

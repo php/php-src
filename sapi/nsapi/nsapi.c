@@ -278,7 +278,7 @@ sapi_nsapi_read_cookies(SLS_D)
 }
 
 static void
-sapi_nsapi_register_server_variables(zval *track_vars_array ELS_DC SLS_DC PLS_DC)
+sapi_nsapi_register_server_variables(zval *track_vars_array TSRMLS_DC SLS_DC PLS_DC)
 {
 	nsapi_request_context *rc = (nsapi_request_context *)SG(server_context);
 	size_t i;
@@ -288,48 +288,48 @@ sapi_nsapi_register_server_variables(zval *track_vars_array ELS_DC SLS_DC PLS_DC
 	for (i = 0; i < nsapi_reqpb_size; i++) {
 		value = pblock_findval(nsapi_reqpb[i].nsapi_eq, rc->rq->reqpb);
 		if (value) {
-			php_register_variable( (char *)nsapi_reqpb[i].env_var, value, track_vars_array ELS_CC PLS_CC );
+			php_register_variable( (char *)nsapi_reqpb[i].env_var, value, track_vars_array TSRMLS_CC PLS_CC );
 		}
 	}
 	
 	for (i = 0; i < nsapi_headers_size; i++) {
 		value = pblock_findval(nsapi_headers[i].nsapi_eq, rc->rq->headers);
 		if (value) {
-			php_register_variable( (char *)nsapi_headers[i].env_var, value, track_vars_array ELS_CC PLS_CC );
+			php_register_variable( (char *)nsapi_headers[i].env_var, value, track_vars_array TSRMLS_CC PLS_CC );
 		}
 	}
 
 	for (i = 0; i < nsapi_vars_size; i++) {
 		value = pblock_findval(nsapi_vars[i].nsapi_eq, rc->rq->vars);
 		if (value) {
-			php_register_variable( (char *)nsapi_vars[i].env_var, value, track_vars_array ELS_CC PLS_CC );
+			php_register_variable( (char *)nsapi_vars[i].env_var, value, track_vars_array TSRMLS_CC PLS_CC );
 		}
 	}
 
 	for (i = 0; i < nsapi_client_size; i++) {
 		value = pblock_findval(nsapi_client[i].nsapi_eq, rc->sn->client);
 		if (value) {
-			php_register_variable( (char *)nsapi_client[i].env_var, value, track_vars_array ELS_CC PLS_CC );
+			php_register_variable( (char *)nsapi_client[i].env_var, value, track_vars_array TSRMLS_CC PLS_CC );
 		}
 	}
 	
 	value = session_dns(rc->sn);
 	if (value) {
-		php_register_variable("REMOTE_HOST", value, track_vars_array ELS_CC PLS_CC );
+		php_register_variable("REMOTE_HOST", value, track_vars_array TSRMLS_CC PLS_CC );
 	}
 	sprintf(buf, "%d", conf_getglobals()->Vport);
-	php_register_variable("SERVER_PORT", buf, track_vars_array ELS_CC PLS_CC );
-	php_register_variable("SERVER_NAME", util_hostname(), track_vars_array ELS_CC PLS_CC );
-	php_register_variable("SERVER_URL", http_uri2url("", ""), track_vars_array ELS_CC PLS_CC );
-	php_register_variable("HTTPS", (security_active ? "ON" : "OFF"), track_vars_array ELS_CC PLS_CC );
-/*	php_register_variable("SERVER_SOFTWARE", MAGNUS_VERSION_STRING, track_vars_array ELS_CC PLS_CC ); */
+	php_register_variable("SERVER_PORT", buf, track_vars_array TSRMLS_CC PLS_CC );
+	php_register_variable("SERVER_NAME", util_hostname(), track_vars_array TSRMLS_CC PLS_CC );
+	php_register_variable("SERVER_URL", http_uri2url("", ""), track_vars_array TSRMLS_CC PLS_CC );
+	php_register_variable("HTTPS", (security_active ? "ON" : "OFF"), track_vars_array TSRMLS_CC PLS_CC );
+/*	php_register_variable("SERVER_SOFTWARE", MAGNUS_VERSION_STRING, track_vars_array TSRMLS_CC PLS_CC ); */
 
 	/*
 	 * Special PHP_SELF variable.
 	 */
 	value = pblock_findval("uri", rc->rq->reqpb);
 	if ( value != NULL ) {
-		php_register_variable("PHP_SELF", value, track_vars_array ELS_CC PLS_CC );
+		php_register_variable("PHP_SELF", value, track_vars_array TSRMLS_CC PLS_CC );
  	}
 }
   
@@ -449,10 +449,10 @@ nsapi_module_main(NSLS_D SLS_DC)
 	zend_file_handle file_handle;
 
 	CLS_FETCH();
-	ELS_FETCH();
+	TSRMLS_FETCH();
 	PLS_FETCH();
 
-	if (php_request_startup(CLS_C ELS_CC PLS_CC SLS_CC) == FAILURE) {
+	if (php_request_startup(CLS_C TSRMLS_CC PLS_CC SLS_CC) == FAILURE) {
 		return FAILURE;
 	}
 
@@ -466,7 +466,7 @@ nsapi_module_main(NSLS_D SLS_DC)
 		"Parsing [%s]", SG(request_info).path_translated);
 #endif
 
-	php_execute_script(&file_handle CLS_CC ELS_CC PLS_CC);
+	php_execute_script(&file_handle CLS_CC TSRMLS_CC PLS_CC);
 	php_request_shutdown(NULL);
 
 #if defined(NSAPI_DEBUG)

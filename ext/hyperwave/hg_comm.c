@@ -632,7 +632,7 @@ char *fnInsAnchorsIntoText(char *text, DLIST *pAnchorList, char **bodytag, char 
 	int laststart=0;
 	char emptystring[BUFFERLEN];
 	int i;
-	ELS_FETCH();
+	TSRMLS_FETCH();
 	
 	emptystring[0] = '\0';
 

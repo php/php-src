@@ -599,7 +599,7 @@ static void _php_java_destructor(zend_rsrc_list_entry *rsrc)
 }
 
 #ifdef ZTS
-static void alloc_java_globals_ctor(php_java_globals *java_globals) {
+static void alloc_java_globals_ctor(php_java_globals *java_globals TSRMLS_DC) {
   memset(java_globals, 0, sizeof(php_java_globals));
 }
 #endif
@@ -624,7 +624,7 @@ PHP_MINIT_FUNCTION(java) {
   }
 
 #ifdef ZTS
-  java_globals_id = ts_allocate_id(sizeof(php_java_globals), 
+  ts_allocate_id(&java_globals_id, sizeof(php_java_globals),
     (ts_allocate_ctor)alloc_java_globals_ctor, NULL);
 #endif
 

@@ -102,7 +102,7 @@ void php_dl(pval *file, int type, pval *return_value)
 	int error_type;
 	char *extension_dir;
 	PLS_FETCH();
-	ELS_FETCH();
+	TSRMLS_FETCH();
 
 
 	if (type==MODULE_PERSISTENT) {
@@ -177,7 +177,7 @@ void php_dl(pval *file, int type, pval *return_value)
 	module_entry->type = type;
 	module_entry->module_number = zend_next_free_module();
 	if (module_entry->module_startup_func) {
-		if (module_entry->module_startup_func(type, module_entry->module_number ELS_CC)==FAILURE) {
+		if (module_entry->module_startup_func(type, module_entry->module_number TSRMLS_CC)==FAILURE) {
 			php_error(error_type, "%s:  Unable to initialize module", module_entry->name);
 			DL_UNLOAD(handle);
 			RETURN_FALSE;
@@ -186,7 +186,7 @@ void php_dl(pval *file, int type, pval *return_value)
 	zend_register_module(module_entry);
 
 	if ((type == MODULE_TEMPORARY) && module_entry->request_startup_func) {
-		if (module_entry->request_startup_func(type, module_entry->module_number ELS_CC)) {
+		if (module_entry->request_startup_func(type, module_entry->module_number TSRMLS_CC)) {
 			php_error(error_type, "%s:  Unable to initialize module", module_entry->name);
 			DL_UNLOAD(handle);
 			RETURN_FALSE;

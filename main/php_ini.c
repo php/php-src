@@ -100,7 +100,7 @@ static int php_ini_displayer(zend_ini_entry *ini_entry, int module_number)
 PHPAPI void display_ini_entries(zend_module_entry *module)
 {
 	int module_number;
-	ELS_FETCH();
+	TSRMLS_FETCH();
 
 	if (module) {
 		module_number = module->module_number;

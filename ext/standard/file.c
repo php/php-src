@@ -168,7 +168,7 @@ PHPAPI int php_file_le_socket(void) /* XXX doe we really want this???? */
 }
 
 
-static void file_globals_ctor(FLS_D)
+static void file_globals_ctor(FLS_D TSRMLS_DC)
 {
 	zend_hash_init(&FG(ht_fsock_keys), 0, NULL, NULL, 1);
 	zend_hash_init(&FG(ht_fsock_socks), 0, NULL, (void (*)(void *))php_msock_destroy, 1);
@@ -179,7 +179,7 @@ static void file_globals_ctor(FLS_D)
 }
 
 
-static void file_globals_dtor(FLS_D)
+static void file_globals_dtor(FLS_D TSRMLS_DC)
 {
 	zend_hash_destroy(&FG(ht_fsock_socks));
 	zend_hash_destroy(&FG(ht_fsock_keys));
@@ -198,9 +198,9 @@ PHP_MINIT_FUNCTION(file)
 #endif
 
 #ifdef ZTS
-	file_globals_id = ts_allocate_id(sizeof(php_file_globals), (ts_allocate_ctor) file_globals_ctor, (ts_allocate_dtor) file_globals_dtor);
+	ts_allocate_id(&file_globals_id, sizeof(php_file_globals), (ts_allocate_ctor) file_globals_ctor, (ts_allocate_dtor) file_globals_dtor);
 #else
-	file_globals_ctor(FLS_C);
+	file_globals_ctor(FLS_C TSRMLS_CC);
 #endif
 
 	REGISTER_LONG_CONSTANT("SEEK_SET", SEEK_SET, CONST_CS | CONST_PERSISTENT);
@@ -220,8 +220,9 @@ PHP_MSHUTDOWN_FUNCTION(file)
 {
 #ifndef ZTS
 	FLS_FETCH();
+	TSRMLS_FETCH();
 
-	file_globals_dtor(FLS_C);
+	file_globals_dtor(FLS_C TSRMLS_CC);
 #endif
 	return SUCCESS;
 }

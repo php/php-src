@@ -498,7 +498,7 @@ static int extract_callback_user_func(const char *p, size_t n, zval *userfunc)
 {
 	zval * retval;
 	zval * arg;
-	ELS_FETCH();
+	TSRMLS_FETCH();
 
 	MAKE_STD_ZVAL(retval);
 	retval->type = IS_BOOL;

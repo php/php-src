@@ -348,7 +348,7 @@ PHP_INI_BEGIN()
 PHP_INI_END()
 
 #ifdef ZTS
-static void php_odbc_init_globals(php_odbc_globals *odbc_globals)
+static void php_odbc_init_globals(php_odbc_globals *odbc_globals TSRMLS_DC)
 {
 	ODBCG(num_persistent) = 0;
 }
@@ -363,7 +363,7 @@ PHP_MINIT_FUNCTION(odbc)
 #endif
 
 #ifdef ZTS
-	odbc_globals_id = ts_allocate_id(sizeof(php_odbc_globals), php_odbc_init_globals, NULL);
+	ts_allocate_id(&odbc_globals_id, sizeof(php_odbc_globals), php_odbc_init_globals, NULL);
 	odbc_globals = ts_resource(odbc_globals_id);
 #else
 	ODBCG(num_persistent) = 0;

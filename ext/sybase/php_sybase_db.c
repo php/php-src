@@ -167,7 +167,7 @@ static void _free_sybase_result(zend_rsrc_list_entry *rsrc)
 static void _close_sybase_link(zend_rsrc_list_entry *rsrc)
 {
 	sybase_link *sybase_ptr = (sybase_link *)rsrc->ptr;
-	ELS_FETCH();
+	TSRMLS_FETCH();
 
 	sybase_ptr->valid = 0;
 

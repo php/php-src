@@ -143,7 +143,7 @@ php_apache_sapi_read_cookies(SLS_D)
 }
 
 static void
-php_apache_sapi_register_variables(zval *track_vars_array ELS_DC SLS_DC PLS_DC)
+php_apache_sapi_register_variables(zval *track_vars_array TSRMLS_DC SLS_DC PLS_DC)
 {
 	php_struct *ctx = SG(server_context);
 	apr_array_header_t *arr = apr_table_elts(ctx->f->r->subprocess_env);
@@ -151,10 +151,10 @@ php_apache_sapi_register_variables(zval *track_vars_array ELS_DC SLS_DC PLS_DC)
 	
 	APR_ARRAY_FOREACH_OPEN(arr, key, val)
 		if (!val) val = empty_string;
-		php_register_variable(key, val, track_vars_array ELS_CC PLS_CC);
+		php_register_variable(key, val, track_vars_array TSRMLS_CC PLS_CC);
 	APR_ARRAY_FOREACH_CLOSE()
 		
-	php_register_variable("PHP_SELF", ctx->f->r->uri, track_vars_array ELS_CC PLS_CC);
+	php_register_variable("PHP_SELF", ctx->f->r->uri, track_vars_array TSRMLS_CC PLS_CC);
 }
 
 static void
@@ -266,7 +266,7 @@ static void php_apache_request_ctor(ap_filter_t *f, php_struct *ctx SLS_DC)
 	char *content_type;
 	const char *auth;
 	CLS_FETCH();
-	ELS_FETCH();
+	TSRMLS_FETCH();
 	PLS_FETCH();
 	
 	PG(during_request_startup) = 0;
@@ -291,7 +291,7 @@ static void php_apache_request_ctor(ap_filter_t *f, php_struct *ctx SLS_DC)
 	auth = apr_table_get(f->r->headers_in, "Authorization");
 	php_handle_auth_data(auth SLS_CC);
 
-	php_request_startup(CLS_C ELS_CC PLS_CC SLS_CC);
+	php_request_startup(CLS_C TSRMLS_CC PLS_CC SLS_CC);
 }
 
 static void php_apache_request_dtor(ap_filter_t *f SLS_DC)
@@ -340,7 +340,7 @@ static int php_output_filter(ap_filter_t *f, apr_bucket_brigade *bb)
 		zend_file_handle zfd;
 		apr_bucket *eos;
 		CLS_FETCH();
-		ELS_FETCH();
+		TSRMLS_FETCH();
 		PLS_FETCH();
 
 		/* We want to execute only one script per request.
@@ -365,7 +365,7 @@ static int php_output_filter(ap_filter_t *f, apr_bucket_brigade *bb)
 				zfd.free_filename = 0;
 				zfd.opened_path = NULL;
 
-				php_execute_script(&zfd CLS_CC ELS_CC PLS_CC);
+				php_execute_script(&zfd CLS_CC TSRMLS_CC PLS_CC);
 			} else {
 				
 #define NO_DATA "The PHP Filter did not receive suitable input data"

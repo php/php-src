@@ -38,7 +38,7 @@ static sapi_post_entry php_post_entries[] = {
 SAPI_POST_READER_FUNC(php_default_post_reader)
 {
 	char *data;
-	ELS_FETCH();
+	TSRMLS_FETCH();
 
 	if(!SG(request_info).post_data) sapi_read_standard_form_data(SLS_C);
 	data = estrndup(SG(request_info).post_data,SG(request_info).post_data_length);

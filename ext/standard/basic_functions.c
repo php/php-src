@@ -691,7 +691,7 @@ static void php_putenv_destructor(putenv_entry *pe)
 
 void test_class_startup(void);
 
-static void basic_globals_ctor(BLS_D)
+static void basic_globals_ctor(BLS_D TSRMLS_DC)
 {
 	BG(next) = NULL;
 	BG(left) = -1;
@@ -709,7 +709,7 @@ static void basic_globals_ctor(BLS_D)
 #endif
 }
 
-static void basic_globals_dtor(BLS_D)
+static void basic_globals_dtor(BLS_D TSRMLS_DC)
 {
 	zend_hash_destroy(&BG(sm_protected_env_vars));
 	if (BG(sm_allowed_env_vars)) {
@@ -726,9 +726,9 @@ PHP_MINIT_FUNCTION(basic)
 	PLS_FETCH();
 
 #ifdef ZTS
-	basic_globals_id = ts_allocate_id(sizeof(php_basic_globals), (ts_allocate_ctor) basic_globals_ctor, (ts_allocate_dtor) basic_globals_dtor);
+	ts_allocate_id(&basic_globals_id, sizeof(php_basic_globals), (ts_allocate_ctor) basic_globals_ctor, (ts_allocate_dtor) basic_globals_dtor);
 #else
-	basic_globals_ctor(BLS_C);
+	basic_globals_ctor(BLS_C TSRMLS_CC);
 #endif
 
 	REGISTER_LONG_CONSTANT("CONNECTION_ABORTED", PHP_CONNECTION_ABORTED, CONST_CS | CONST_PERSISTENT);
@@ -804,8 +804,9 @@ PHP_MSHUTDOWN_FUNCTION(basic)
 {
 	PLS_FETCH();
 	BLS_FETCH();
+	TSRMLS_FETCH();
 
-	basic_globals_dtor(BLS_C);
+	basic_globals_dtor(BLS_C TSRMLS_CC);
 
 #ifdef ZTS
 	ts_free_id(basic_globals_id);
@@ -1824,7 +1825,7 @@ void user_tick_function_dtor(user_tick_function_entry *tick_function_entry)
 static int user_shutdown_function_call(php_shutdown_function_entry *shutdown_function_entry)
 {
 	zval retval;
-	ELS_FETCH();
+	TSRMLS_FETCH();
 
 	if (call_user_function(EG(function_table), NULL, shutdown_function_entry->arguments[0], &retval, shutdown_function_entry->arg_count-1, shutdown_function_entry->arguments+1)==SUCCESS) {
 		zval_dtor(&retval);
@@ -1839,7 +1840,7 @@ static void user_tick_function_call(user_tick_function_entry *tick_fe)
 {
 	zval retval;
 	zval *function = tick_fe->arguments[0];
-	ELS_FETCH();
+	TSRMLS_FETCH();
 
 	if (call_user_function(EG(function_table), NULL, function, &retval,
 						   tick_fe->arg_count - 1, tick_fe->arguments + 1) == SUCCESS) {
@@ -1888,7 +1889,7 @@ static int user_tick_function_compare(user_tick_function_entry *tick_fe1,
 void php_call_shutdown_functions(void)
 {
 	BLS_FETCH();
-	ELS_FETCH();
+	TSRMLS_FETCH();
 
 	if (BG(user_shutdown_function_names)) zend_try {
 		zend_hash_apply(BG(user_shutdown_function_names), (apply_func_t)user_shutdown_function_call);

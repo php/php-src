@@ -160,7 +160,7 @@ static int le_xml_parser;
 
 
 #ifdef ZTS
-static void php_xml_init_globals(php_xml_globals *xml_globals)
+static void php_xml_init_globals(php_xml_globals *xml_globals TSRMLS_DC)
 {
 	XML(default_encoding) = "ISO-8859-1";
 }
@@ -171,7 +171,7 @@ PHP_MINIT_FUNCTION(xml)
 	le_xml_parser =	zend_register_list_destructors_ex(xml_parser_dtor, NULL, "xml", module_number);
 
 #ifdef ZTS
-	xml_globals_id = ts_allocate_id(sizeof(php_xml_globals), (ts_allocate_ctor) php_xml_init_globals, NULL);
+	ts_allocate_id(&xml_globals_id, sizeof(php_xml_globals), (ts_allocate_ctor) php_xml_init_globals, NULL);
 #else
 	XML(default_encoding) = "ISO-8859-1";
 #endif
@@ -367,7 +367,7 @@ xml_set_handler(zval **handler, zval **data)
 static zval *
 xml_call_handler(xml_parser *parser, zval *handler, int argc, zval **argv)
 {
-	ELS_FETCH();
+	TSRMLS_FETCH();
 
 	if (parser && handler) {
 		zval *retval;

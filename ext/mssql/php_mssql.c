@@ -227,7 +227,7 @@ static void _close_mssql_link(zend_rsrc_list_entry *rsrc)
 {
 	mssql_link *mssql_ptr = (mssql_link *)rsrc->ptr;
 	MSSQLLS_FETCH();
-	ELS_FETCH();
+	TSRMLS_FETCH();
 
 	mssql_ptr->valid = 0;
 	zend_hash_apply(&EG(regular_list),(int (*)(void *))_clean_invalid_results);

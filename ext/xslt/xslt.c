@@ -216,7 +216,7 @@ extern void xslt_call_function(char *name,
 	zval   ***argv;   /* Argument container, maps around for call_user_function_ex() */
 	int       error;  /* Error container */
 	int       idx;    /* Idx, when looping through and free'ing the arguments */
-	ELS_FETCH();      /* For TS mode, fetch the executor globals */
+	TSRMLS_FETCH();      /* For TS mode, fetch the executor globals */
 
 	/* Allocate and initialize return value from the function */
 	MAKE_STD_ZVAL(*retval);

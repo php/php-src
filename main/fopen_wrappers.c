@@ -401,7 +401,7 @@ PHPAPI FILE *php_fopen_with_path(char *filename, char *mode, char *path, char **
 	int safe_mode_include_dir_length;
 	int exec_fname_length;
 	PLS_FETCH();
-	ELS_FETCH();
+	TSRMLS_FETCH();
 
 	if (opened_path) {
 		*opened_path = NULL;
@@ -466,7 +466,7 @@ PHPAPI FILE *php_fopen_with_path(char *filename, char *mode, char *path, char **
 	 * as a fall back case
 	 */
 	if (zend_is_executing()) {
-		exec_fname = zend_get_executed_filename(ELS_C);
+		exec_fname = zend_get_executed_filename(TSRMLS_C);
 		exec_fname_length = strlen(exec_fname);
 		path_length = strlen(path);
 

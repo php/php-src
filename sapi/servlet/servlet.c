@@ -290,7 +290,7 @@ JNIEXPORT jlong JNICALL Java_net_php_servlet_define
 	pval *pzval;
 	jlong addr = 0;
 	const char *nameAsUTF = (*jenv)->GetStringUTFChars(jenv, name, 0);
-	ELS_FETCH();
+	TSRMLS_FETCH();
 
 	MAKE_STD_ZVAL(pzval);
 	addr = (jlong)(long) pzval;
@@ -321,7 +321,7 @@ JNIEXPORT void JNICALL Java_net_php_servlet_send
 	SLS_FETCH();
 	PLS_FETCH();
 	CLS_FETCH();
-	ELS_FETCH();
+	TSRMLS_FETCH();
 
 	zend_try {
 		SG(server_context) = emalloc(sizeof(servlet_request));
@@ -342,7 +342,7 @@ JNIEXPORT void JNICALL Java_net_php_servlet_send
 		SG(sapi_headers).http_response_code = 200;
 		SG(request_info).content_length = contentLength;
 		SG(request_info).auth_password = NULL;
-		if (php_request_startup(CLS_C ELS_CC PLS_CC SLS_CC)==FAILURE) {
+		if (php_request_startup(CLS_C TSRMLS_CC PLS_CC SLS_CC)==FAILURE) {
 			ThrowServletException(jenv,"request startup failure");
 			return;
 		}
@@ -385,7 +385,7 @@ JNIEXPORT void JNICALL Java_net_php_servlet_send
 				zend_highlight(&syntax_highlighter_ini);
 			}
 		} else {
-			php_execute_script(&file_handle CLS_CC ELS_CC PLS_CC);
+			php_execute_script(&file_handle CLS_CC TSRMLS_CC PLS_CC);
 			php_header();			/* Make sure headers have been sent */
 		}
 

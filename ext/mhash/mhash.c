@@ -71,7 +71,7 @@ static PHP_MINIT_FUNCTION(mhash)
 			snprintf(buf, 127, "MHASH_%s", name);
 			zend_register_long_constant(buf, strlen(buf) + 1,
 						    i, CONST_PERSISTENT,
-						    module_number ELS_CC);
+						    module_number TSRMLS_CC);
 			free(name);
 		}
 	}

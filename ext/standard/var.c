@@ -72,7 +72,7 @@ void php_var_dump(zval **struc, int level)
 			php_printf("%sint(%ld)\n", COMMON, Z_LVAL_PP(struc));
 			break;
 		case IS_DOUBLE: {
-				ELS_FETCH();
+				TSRMLS_FETCH();
 
 				php_printf("%sfloat(%.*G)\n", COMMON, (int) EG(precision), Z_DVAL_PP(struc));
 			}
@@ -208,7 +208,7 @@ PHPAPI void php_var_serialize(zval *buf, zval **struc, HashTable *var_hash)
 			return;
 
 		case IS_DOUBLE: {
-				ELS_FETCH();
+				TSRMLS_FETCH();
 				slen = sprintf(s, "d:%.*G;",(int) EG(precision), Z_DVAL_PP(struc));
 				STR_CAT(buf, s, slen);
 			}
@@ -366,7 +366,7 @@ PHPAPI int php_var_unserialize(zval **rval, const char **p, const char *max, Has
 	HashTable *myht;
 	zval **rval_ref;
 
-	ELS_FETCH();
+	TSRMLS_FETCH();
 	BLS_FETCH();
 
 	if (var_hash && **p != 'R') {  /* references aren't counted by serializer! */

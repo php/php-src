@@ -366,7 +366,7 @@ PHP_FUNCTION(yp_err_string) {
 PHP_MINIT_FUNCTION(yp)
 {
 #ifdef ZTS
-	yp_globals_id = ts_allocate_id(sizeof(php_yp_globals), NULL, NULL);
+	ts_allocate_id(&yp_globals_id, sizeof(php_yp_globals), NULL, NULL);
 #endif
 
 	REGISTER_LONG_CONSTANT("YPERR_BADARGS", YPERR_BADARGS, CONST_CS | CONST_PERSISTENT);

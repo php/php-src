@@ -76,7 +76,7 @@ static void php_pcre_init_globals(php_pcre_globals *pcre_globals)
 }
 
 
-static void php_pcre_shutdown_globals(php_pcre_globals *pcre_globals)
+static void php_pcre_shutdown_globals(php_pcre_globals *pcre_globals TSRMLS_DC)
 {
 	zend_hash_destroy(&PCRE_G(pcre_cache));
 }
@@ -97,10 +97,11 @@ PHP_MINFO_FUNCTION(pcre)
 static PHP_MINIT_FUNCTION(pcre)
 {
 #ifdef ZTS
-	pcre_globals_id = ts_allocate_id(
-							sizeof(php_pcre_globals),
-							(ts_allocate_ctor) php_pcre_init_globals,
-							(ts_allocate_dtor) php_pcre_shutdown_globals);
+	ts_allocate_id(
+					&pcre_globals_id,
+					sizeof(php_pcre_globals),
+					(ts_allocate_ctor) php_pcre_init_globals,
+					(ts_allocate_dtor) php_pcre_shutdown_globals);
 #else
 	zend_hash_init(&PCRE_G(pcre_cache), 0, NULL, php_free_pcre_cache, 1);
 #endif
@@ -565,7 +566,7 @@ static int preg_do_repl_func(zval *function, char *subject, int *offsets, int co
 	zval		*subpats;			/* Captured subpatterns */ 
 	int			 result_len;		/* Return value length */
 	int			 i;
-	ELS_FETCH();
+	TSRMLS_FETCH();
 
 	MAKE_STD_ZVAL(subpats);
 	array_init(subpats);
@@ -609,7 +610,7 @@ static int preg_do_eval(char *eval_str, int eval_str_len, char *subject,
 	char        *compiled_string_description;
 	smart_str    code = {0};
 	CLS_FETCH();
-	ELS_FETCH();
+	TSRMLS_FETCH();
 	
 	eval_str_end = eval_str + eval_str_len;
 	walk = segment = eval_str;
@@ -663,7 +664,7 @@ static int preg_do_eval(char *eval_str, int eval_str_len, char *subject,
 
 	compiled_string_description = zend_make_compiled_string_description("regexp code");
 	/* Run the code */
-	if (zend_eval_string(code.c, &retval, compiled_string_description CLS_CC ELS_CC) == FAILURE) {
+	if (zend_eval_string(code.c, &retval, compiled_string_description CLS_CC TSRMLS_CC) == FAILURE) {
 		efree(compiled_string_description);
 		zend_error(E_ERROR, "Failed evaluating code:\n%s\n", code);
 		/* zend_error() does not return in this case */
