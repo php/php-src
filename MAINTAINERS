@@ -95,6 +95,10 @@ EXTENSION:           snmp
 PRIMARY MAINTAINER:  Rasmus Lerdorf <rasmus@php.net>
 STATUS:              Odd Fixes
 --------------------------------------------------------------------------------
+EXTENSION:           swf
+PRIMARY MAINTAINER:  Sterling Hughes <sterling@php.net>
+STATUS:              Maintained
+--------------------------------------------------------------------------------
 EXTENSION:           wddx
 PRIMARY MAINTAINER:  Andrei Zmievski <andrei@ispi.net>
 STATUS:              Maintained
