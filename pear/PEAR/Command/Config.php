@@ -29,10 +29,38 @@ require_once "PEAR/Config.php";
  */
 class PEAR_Command_Config extends PEAR_Command_Common
 {
-    // {{{ properties
-    // }}}
-
-    // {{{ constructor
+    var $commands = array(
+        'config-show' => array(
+            'summary' => 'Show All Settings',
+            'options' => array(),
+            'doc' => 'Displays all configuration values.  An optional argument
+may be used to tell which configuration layer to display.  Valid
+configuration layers are "user", "system" and "default".
+',
+            ),
+        'config-get' => array(
+            'summary' => 'Show One Setting',
+            'options' => array(),
+            'doc' => 'Displays the value of one configuration parameter.  The
+first argument is the name of the parameter, an optional second argument
+may be used to tell which configuration layer to look in.  Valid configuration
+layers are "user", "system" and "default".  If no layer is specified, a value
+will be picked from the first layer that defines the parameter, in the order
+just specified.
+',
+            ),
+        'config-set' => array(
+            'summary' => 'Change Setting',
+            'options' => array(),
+            'doc' => 'Sets the value of one configuration parameter.  The first
+argument is the name of the parameter, the second argument is the new value.
+Some parameters are be subject to validation, and the command will fail with
+an error message if the new value does not make sense.  An optional third
+argument may be used to specify which layer to set the configuration parameter
+in.  The default layer is "user".
+',
+            ),
+        );
 
     /**
      * PEAR_Command_Config constructor.
@@ -43,46 +71,6 @@ class PEAR_Command_Config extends PEAR_Command_Common
     {
         parent::PEAR_Command_Common($ui, $config);
     }
-
-    // }}}
-
-    // {{{ getCommands()
-
-    /**
-     * Return a list of all the commands defined by this class.
-     * @return array list of commands
-     * @access public
-     */
-    function getCommands()
-    {
-        return array('config-show' => 'Show All Settings',
-                     'config-get' => 'Show One Setting',
-                     'config-set' => 'Change Setting');
-    }
-
-    // }}}
-
-    function getHelp($command)
-    {
-        switch ($command) {
-            case 'config-show':
-                $ret = array('[<layer>]', 'Displays the configuration');
-                break;
-            case 'config-get':
-                $ret = array('<parameter> [<layer>]',
-                             'Displays the value of the given parameter');
-                break;
-            case 'config-set':
-                $ret = array('<parameter> <value> [<layer>]',
-                             'Sets the value of a parameter in the config');
-                break;
-        }
-        $ret[1] .= "\n".
-                   "  <layer>    Where to store/get the configuration. The installer\n".
-                   "             supports 'user' (per user conf) and 'system' (global conf)";
-        return $ret;
-    }
-    // {{{ run()
 
     function run($command, $options, $params)
     {
@@ -159,14 +147,12 @@ class PEAR_Command_Config extends PEAR_Command_Common
         return true;
     }
 
-    // }}}
-
     /**
-    * Checks if a layer is defined or not
-    *
-    * @param string $layer The layer to search for
-    * @return mixed False on no error or the error message
-    */
+     * Checks if a layer is defined or not
+     *
+     * @param string $layer The layer to search for
+     * @return mixed False on no error or the error message
+     */
     function _checkLayer($layer = null)
     {
         if (!empty($layer)) {
