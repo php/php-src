@@ -477,6 +477,7 @@ int call_user_function_ex(HashTable *function_table, zval **object_pp, zval *fun
 	EX(object) = NULL;
 	EX(Ts) = NULL;
 	EX(op_array) = NULL;
+	EX(opline) = NULL;
 	*retval_ptr_ptr = NULL;
 
 	if (function_name->type==IS_ARRAY) { /* assume array($obj, $name) couple */
