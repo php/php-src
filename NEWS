@@ -11,6 +11,7 @@ PHP                                                                        NEWS
   (Derick)
 - Fixed problems with longlong values in mysqli. (Georg)
 - Fixed class name case preserving of user defined classes. (Marcus)
+- Fixed bug #27042 (SPL: SeekableIterator seek() broken). (Marcus)
 - Fixed bug #27008 (Every class method can be called as static). (Marcus)
 - Fixed bug #26938 (exec() has problems reading long lines).
   (Ilia, runekl[at]opoint[dot]com
