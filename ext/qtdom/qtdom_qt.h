@@ -2,15 +2,7 @@
 //
 // $Id$
 //
-// Definition of ||| class
-//
-// <real-name> <<mail-name>>
 // Created on: <09-Nov-2000 12:00:24 root>
-//
-// Copyright (C) 1999-2000 eZ Systems.  All rights reserved.
-//
-// IMPORTANT NOTE: You may NOT copy this file or any part of it into
-// your own programs or libraries.
 //
 
 #ifndef QDOM_QT_H
@@ -37,6 +29,20 @@ struct qdom_doc
     struct qdom_node *Children;
 };
 
+struct qdom_message
+{
+    char *Log;
+    void *OldHandler;
+};
+
+void qdom_init();
+void qdom_shutdown();
+
+void qdom_do_install_message_handler();
+void qdom_do_free_message_handler();
+
+char *qdom_error_log();
+
 void qdom_do_version( char **ver );
 
 struct qdom_node *qdom_do_next_node( struct qdom_node *node );
@@ -56,5 +62,6 @@ void qdom_do_doc_type( struct qdom_doc *doc, char **name );
 struct qdom_doc *qdom_do_init( const char *arg );
 void qdom_do_free( struct qdom_doc *doc );
 
-  
+struct qdom_message *g_qdom_message_log;
+
 #endif // QDOM_QT_H
