@@ -1904,16 +1904,16 @@ PHP_FUNCTION(imap_fetchstructure)
 		convert_to_long_ex(flags);
 	}
 	object_init(return_value);
-
+    
 	ind = Z_LVAL_PP(streamind);
-
+    
 	imap_le_struct = (pils *) zend_list_find(ind, &ind_type);
-
+    
 	if (!imap_le_struct || !IS_STREAM(ind_type)) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
-
+    
 	if ((myargc == 3) && (Z_LVAL_PP(flags) & FT_UID)) {
 		/*  This should be cached; if it causes an extra RTT to the
 			IMAP server, then that's the price we pay for making sure
@@ -1926,8 +1926,8 @@ PHP_FUNCTION(imap_fetchstructure)
 		php_error(E_WARNING, "Bad message number");
 		RETURN_FALSE;
 	}
-
-	mail_fetchstructure_full(imap_le_struct->imap_stream, msgindex, &body ,myargc == 3 ? Z_LVAL_PP(flags) : NIL);
+    
+	mail_fetchstructure_full(imap_le_struct->imap_stream, Z_LVAL_PP(msgno), &body ,myargc == 3 ? Z_LVAL_PP(flags) : NIL);
 	
 	if (!body) {
 		php_error(E_WARNING, "No body information available");
