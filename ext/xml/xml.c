@@ -74,9 +74,6 @@ ZEND_GET_MODULE(xml)
 
 /* {{{ function prototypes */
 PHP_MINIT_FUNCTION(xml);
-PHP_RINIT_FUNCTION(xml);
-PHP_MSHUTDOWN_FUNCTION(xml);
-PHP_RSHUTDOWN_FUNCTION(xml);
 PHP_MINFO_FUNCTION(xml);
 
 static void xml_parser_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC);
@@ -147,9 +144,9 @@ zend_module_entry xml_module_entry = {
 	"xml",                /* extension name */
 	xml_functions,        /* extension function list */
 	PHP_MINIT(xml),       /* extension-wide startup function */
-	PHP_MSHUTDOWN(xml),   /* extension-wide shutdown function */
-	PHP_RINIT(xml),       /* per-request startup function */
-	PHP_RSHUTDOWN(xml),   /* per-request shutdown function */
+	NULL,                 /* extension-wide shutdown function */
+	NULL,                 /* per-request startup function */
+	NULL,                 /* per-request shutdown function */
 	PHP_MINFO(xml),       /* information function */
     NO_VERSION_YET,
 	STANDARD_MODULE_PROPERTIES
@@ -250,25 +247,6 @@ PHP_MINIT_FUNCTION(xml)
 
 	return SUCCESS;
 }
-
-
-PHP_RINIT_FUNCTION(xml)
-{
-    return SUCCESS;
-}
-
-
-PHP_MSHUTDOWN_FUNCTION(xml)
-{
-	return SUCCESS;
-}
-
-
-PHP_RSHUTDOWN_FUNCTION(xml)
-{
-	return SUCCESS;
-}
-
 
 PHP_MINFO_FUNCTION(xml)
 {

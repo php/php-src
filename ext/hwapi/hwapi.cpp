@@ -202,8 +202,8 @@ zend_module_entry hwapi_module_entry = {
 	"hwapi",
 	hwapi_functions,
 	PHP_MINIT(hwapi),
-	PHP_MSHUTDOWN(hwapi),
-	PHP_RINIT(hwapi),
+	NULL,
+	NULL,
 	NULL,
 	PHP_MINFO(hwapi),
 	NO_VERSION_YET,
@@ -2221,14 +2221,6 @@ PHP_MINIT_FUNCTION(hwapi) {
 	initargs.setMessageFilePath("");
 	HW_API::init(initargs);
 
-	return SUCCESS;
-}
-
-PHP_MSHUTDOWN_FUNCTION(hwapi) {
-	return SUCCESS;
-}
-
-PHP_RINIT_FUNCTION(hwapi) {
 	return SUCCESS;
 }
 
