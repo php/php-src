@@ -46,7 +46,7 @@ if test "$PHP_CURL" != "no"; then
     AC_MSG_RESULT($curl_version_full)
     CURL_LIBS=`$CURL_CONFIG --libs`
   else
-    AC_MSG_ERROR(cURL version 7.10.2 or later is required to compile php with cURL support)
+    AC_MSG_ERROR(cURL version 7.10.5 or later is required to compile php with cURL support)
   fi
 
   PHP_ADD_INCLUDE($CURL_DIR/include)
