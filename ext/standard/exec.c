@@ -72,7 +72,7 @@ static int php_make_safe_mode_command(char *cmd, char **safecmd TSRMLS_DC)
 	larg0 = strlen(arg0);
 
 	if (strstr(arg0, "..")) {
-		php_error(E_WARNING, "No '..' components allowed in path");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "No '..' components allowed in path");
 		efree(arg0);
 		return FAILURE;
 	}

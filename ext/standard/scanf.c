@@ -461,7 +461,7 @@ PHPAPI int ValidateFormat(char *format, int numVars, int *totalSubs)
 	    	/* problem - cc                                               */
                 /*
                 if (flags & SCAN_WIDTH) {
-                    php_error(E_WARNING, "field width may not be specified in %c conversion");
+                    php_error_docref(NULL TSRMLS_CC, E_WARNING, "Field width may not be specified in %c conversion");
                     goto error;
                 }
                 */
@@ -491,11 +491,11 @@ PHPAPI int ValidateFormat(char *format, int numVars, int *totalSubs)
             }
             break;
 	    badSet:
-            php_error(E_WARNING, "unmatched [ in format string");
+            php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unmatched [ in format string");
             goto error;
 	    default:
             {
-             php_error(E_WARNING, "bad scan conversion character \"%c\"", ch);
+             php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad scan conversion character \"%c\"", ch);
              goto error;
            }
 	}
@@ -545,14 +545,14 @@ PHPAPI int ValidateFormat(char *format, int numVars, int *totalSubs)
     }
     for (i = 0; i < numVars; i++) {
         if (nassign[i] > 1) {
-            php_error(E_WARNING, "variable is assigned by multiple \"%n$\" conversion specifiers");
+            php_error_docref(NULL TSRMLS_CC, E_WARNING, "Variable is assigned by multiple \"%n$\" conversion specifiers");
             goto error;
         } else if (!xpgSize && (nassign[i] == 0)) {
             /*
              * If the space is empty, and xpgSize is 0 (means XPG wasn't
              * used, and/or numVars != 0), then too many vars were given
              */
-            php_error(E_WARNING, "variable is not assigned by any conversion specifiers");
+            php_error_docref(NULL TSRMLS_CC, E_WARNING, "Variable is not assigned by any conversion specifiers");
             goto error;
         }
     }
@@ -564,9 +564,9 @@ PHPAPI int ValidateFormat(char *format, int numVars, int *totalSubs)
 
     badIndex:
         if (gotXpg) {
-            php_error(E_WARNING, "\"%n$\" argument index out of range");
+            php_error_docref(NULL TSRMLS_CC, E_WARNING, "\"%n$\" argument index out of range");
         } else {
-            php_error(E_WARNING, "different numbers of variable names and field specifiers");
+            php_error_docref(NULL TSRMLS_CC, E_WARNING, "Different numbers of variable names and field specifiers");
         }
 
     error:

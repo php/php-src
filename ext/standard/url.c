@@ -285,7 +285,7 @@ PHP_FUNCTION(parse_url)
 
 	resource = php_url_parse(str);
 	if (resource == NULL) {
-		php_error(E_WARNING, "unable to parse url (%s)", str);
+		php_error_docref1(NULL TSRMLS_CC, str, E_WARNING, "Unable to parse url");
 		RETURN_FALSE;
 	}
 

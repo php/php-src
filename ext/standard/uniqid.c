@@ -57,7 +57,7 @@ PHP_FUNCTION(uniqid)
 
 	/* Do some bounds checking since we are using a char array. */
 	if (prefix_len > 114) {
-		php_error(E_WARNING, "The prefix to uniqid should not be more than 114 characters.");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The prefix to uniqid should not be more than 114 characters.");
 		return;
 	}
 #if HAVE_USLEEP && !defined(PHP_WIN32)

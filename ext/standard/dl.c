@@ -220,7 +220,7 @@ void php_dl(pval *file, int type, pval *return_value TSRMLS_DC)
 				zts        = module_entry->zts; 
 			}
 
-			php_error(error_type,
+			php_error_docref(NULL TSRMLS_CC, error_type,
 					  "%s: Unable to initialize module\n"
 					  "Module compiled with module API=%d, debug=%d, thread-safety=%d\n"
 					  "PHP    compiled with module API=%d, debug=%d, thread-safety=%d\n"
