@@ -481,7 +481,7 @@ static void apache_php_module_shutdown_wrapper(void)
 
 void php_init_handler(server_rec *s, pool *p)
 {
-	register_cleanup(p, NULL, apache_php_module_shutdown_wrapper, php_module_shutdown_for_exec);
+	register_cleanup(p, NULL, (void (*)(void *))apache_php_module_shutdown_wrapper, php_module_shutdown_for_exec);
 	if (!apache_php_initialized) {
 		sapi_startup(&sapi_module);
 		php_module_startup(&sapi_module);
