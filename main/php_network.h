@@ -41,10 +41,18 @@
 #include <sys/time.h>
 #endif
 
+#ifdef HAVE_SOCKADDR_STORAGE
+typedef struct sockaddr_storage php_sockaddr_storage;
+#else
+typedef struct {
+        unsigned short ss_family;
+        char info[256];
+} php_sockaddr_storage;
+#endif
 
 
-int php_hostconnect(char *host, unsigned short port, int socktype, int timeout);
-PHPAPI int php_connect_nonb(int sockfd, struct sockaddr *addr, socklen_t addrlen, struct timeval *timeout);
+int php_hostconnect(const char *host, unsigned short port, int socktype, int timeout);
+PHPAPI int php_connect_nonb(int sockfd, const struct sockaddr *addr, socklen_t addrlen, struct timeval *timeout);
 
 #endif /* _PHP_NETWORK_H */
 
