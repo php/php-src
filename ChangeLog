@@ -1,3 +1,31 @@
+2000-12-18  Zak Greant  <zak@nucleus.com>
+
+    * ext/standard/tests/general_functions/005.phpt:
+    Adding test for is_scalar().
+
+2000-12-18  Chuck Hagenbuch  <chuck@horde.org>
+
+    * pear/Crypt/HCEMD5.php: Add some error checking/tolerance.
+
+2000-12-18  Zak Greant  <zak@nucleus.com>
+
+    * ext/standard/basic_functions.c
+      ext/standard/basic_functions.h: Added is_scalar() function.
+
+2000-12-18  Andi Gutmans  <andi@zend.com>
+
+    * makedist: - No need to generate number.c and number.h anymore.
+
+2000-12-18  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/sysvshm/sysvshm.c:
+    fixed BUG #8306: shmat() returns -1 on errors, not NULL
+
+2000-12-18  Stig Bakken  <ssb@fast.no>
+
+    * pear/DB/mysql.php:
+    * change mysql sequence type to unsigned and add not null (thanks Mikhail)
+
 2000-12-17  Stanislav Malyshev  <stas@zend.com>
 
     * ext/odbc/config.m4:
