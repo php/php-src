@@ -1,3 +1,8 @@
+2004-04-17  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend.c:
+      Retval may not be set when zend_execute() is overloaded
+
 2004-04-15  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_execute.c:

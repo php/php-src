@@ -1,3 +1,20 @@
+2004-04-17  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/standard/html.c:
+      - MFH: Fix for bug #28042 (greek letters in html to entitity mapping not
+        correct)
+
+    * (PHP_4_3)
+      NEWS
+      ext/standard/html.c:
+      - Fix for bug #28042 (greek letters in html to entitity mapping not
+      correct)
+
+2004-04-17  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend.c:
+      Retval may not be set when zend_execute() is overloaded
+
 2004-04-16  Uwe Schindler  <uwe@thetaphi.de>
 
     * (PHP_4_3)
