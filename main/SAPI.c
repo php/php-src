@@ -385,12 +385,17 @@ static int sapi_extract_response_code(const char *header_line)
 	return code;
 }
 
+static int sapi_find_matching_header(void *element1, void *element2)
+{
+	return strncasecmp(((sapi_header_struct*)element1)->header, (char*)element2, strlen((char*)element2)) == 0;
+}
+
 /* This function expects a *duplicated* string, that was previously emalloc()'d.
  * Pointers sent to this functions will be automatically freed by the framework.
  */
 SAPI_API int sapi_add_header_ex(char *header_line, uint header_line_len, zend_bool duplicate, zend_bool replace TSRMLS_DC)
 {
-	int retval, free_header = 0;
+	int retval;
 	sapi_header_struct sapi_header;
 	char *colon_offset;
 	long myuid = 0L;
@@ -436,7 +441,7 @@ SAPI_API int sapi_add_header_ex(char *header_line, uint header_line_len, zend_bo
 		if (colon_offset) {
 			*colon_offset = 0;
 			if (!STRCASECMP(header_line, "Content-Type")) {
-				char *ptr = colon_offset, *mimetype = NULL, *newheader;
+				char *ptr = colon_offset+1, *mimetype = NULL, *newheader;
 				size_t len = header_line_len - (ptr - header_line), newlen;
 				while (*ptr == ' ' && *ptr != '\0') {
 					ptr++;
@@ -452,7 +457,7 @@ SAPI_API int sapi_add_header_ex(char *header_line, uint header_line_len, zend_bo
 					sapi_header.header_len = newlen - 1;
 					colon_offset = strchr(newheader, ':');
 					*colon_offset = '\0';
-					free_header = 1;
+					efree(header_line);
 				}
 				efree(mimetype);
 				SG(sapi_headers).send_default_content_type = 0;
@@ -551,10 +556,20 @@ SAPI_API int sapi_add_header_ex(char *header_line, uint header_line_len, zend_bo
 		zend_llist_clean(&SG(sapi_headers).headers);
 	}
 	if (retval & SAPI_HEADER_ADD) {
+		/* in replace mode first remove the header if it already exists in the headers llist */
+		if (replace) {
+			colon_offset = strchr(sapi_header.header, ':');
+			if (colon_offset) {
+				char sav;
+				colon_offset++;
+				sav = *colon_offset;
+				*colon_offset = 0;
+				zend_llist_del_element(&SG(sapi_headers).headers, sapi_header.header, (int(*)(void*, void*))sapi_find_matching_header);
+				*colon_offset = sav;
+			}
+		}
+
 		zend_llist_add_element(&SG(sapi_headers).headers, (void *) &sapi_header);
-	}
-	if (free_header) {
-		efree(sapi_header.header);
 	}
 	return SUCCESS;
 }
