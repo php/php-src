@@ -57,6 +57,7 @@
 #include "zend_constants.h"
 #include "zend_variables.h"
 #include "zend_operators.h"
+#include "zend_strtod.h"
 
 #ifdef HAVE_STDARG_H
 # include <stdarg.h>
@@ -1188,7 +1189,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	errno = 0;
 	zendlval->value.lval = strtol(yytext, NULL, 0);
 	if (errno == ERANGE) { /* overflow */
-		zendlval->value.dval = strtod(yytext, NULL);
+		zendlval->value.dval = zend_strtod(yytext, NULL);
 		zendlval->type = IS_DOUBLE;
 		return T_DNUMBER;
 	} else {
@@ -1225,7 +1226,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 <ST_IN_SCRIPTING>{DNUM}|{EXPONENT_DNUM} {
-	zendlval->value.dval = strtod(yytext, NULL);
+	zendlval->value.dval = zend_strtod(yytext, NULL);
 	zendlval->type = IS_DOUBLE;
 	return T_DNUMBER;
 }
