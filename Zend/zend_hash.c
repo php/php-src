@@ -1011,7 +1011,7 @@ ZEND_API int zend_hash_has_more_elements_ex(HashTable *ht, HashPosition *pos)
 
 	IS_CONSISTENT(ht);
 
-	if (*current && (*current)->pListNext) {
+	if (*current) {
 		return SUCCESS;
 	} else {
 		return FAILURE;
