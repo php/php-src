@@ -113,7 +113,7 @@ PHP_RSHUTDOWN_FUNCTION(oracle);
 PHP_MINFO_FUNCTION(oracle);
 /* }}} */
 
-static unsigned char second_arg_force_ref[] = { 2, BYREF_NONE, BYREF_FORCE };
+static unsigned char second_args_force_ref[] = { 2, BYREF_NONE, BYREF_FORCE };
 
 /* {{{ oracle_functions[]
  */
@@ -128,7 +128,7 @@ function_entry oracle_functions[] = {
 	PHP_FE(ora_errorcode,							NULL)
 	PHP_FE(ora_exec,								NULL)
 	PHP_FE(ora_fetch,								NULL)
-   	PHP_FE(ora_fetch_into,							second_arg_force_ref)
+   	PHP_FE(ora_fetch_into,							second_args_force_ref)
 	PHP_FE(ora_columntype,							NULL)
 	PHP_FE(ora_columnname,							NULL)
 	PHP_FE(ora_columnsize,							NULL)
