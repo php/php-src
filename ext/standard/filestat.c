@@ -396,7 +396,7 @@ PHP_FUNCTION(touch)
 	}
 	convert_to_string_ex(filename);
 
-	if (PG(safe_mode) &&(!php_checkuid((*filename)->value.str.val, NULL, 1))) {
+	if (PG(safe_mode) &&(!php_checkuid((*filename)->value.str.val, NULL, 2))) {
 		if (newtime) efree(newtime);
 		RETURN_FALSE;
 	}
