@@ -25,4 +25,6 @@ PHP_FUNCTION(mcrypt_create_iv);
 #define mcrypt_module_ptr NULL
 #endif
 
+#define phpext_mcrypt_ptr mcrypt_module_ptr
+
 #endif
