@@ -510,6 +510,9 @@ class DB
             @dl($name . $dlext);
         }
         if (!extension_loaded($name)) {
+            trigger_error("The extension '$name' couldn't be loaded. ".
+                            'Probably you don\'t have support in your PHP '.
+                            'to this Database backend', E_USER_ERROR);
             return false;
         }
         return true;
