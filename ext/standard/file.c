@@ -2072,6 +2072,36 @@ PHP_FUNCTION(fd_isset)
 
 #endif
 
+/* Function reads all data from file or socket and puts it into the buffer */
+size_t php_fread_all(char **buf, int socket, FILE *fp, int issock) {
+	size_t ret;
+	char *ptr;
+	size_t len = 0, max_len;
+	int step = PHP_FSOCK_CHUNK_SIZE;
+	int min_room = PHP_FSOCK_CHUNK_SIZE/4;
+	
+	ptr = *buf = emalloc(step);
+	max_len = step;
+
+	while(ret = FP_FREAD(ptr, max_len - len, socket, fp, issock)) {
+		len += ret;
+		if(len + min_room >= max_len) {
+			*buf = erealloc(*buf, max_len + step);
+			max_len += step;
+			ptr = *buf + len;
+		}
+	}
+
+	if(len) {
+		*buf = erealloc(*buf, len);
+	} else {
+		efree(*buf);
+		*buf = NULL;
+	}
+
+	return len;
+}
+
 /*
  * Local variables:
  * tab-width: 4
