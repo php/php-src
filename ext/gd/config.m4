@@ -238,7 +238,6 @@ if test "$PHP_GD" = "php"; then
 		libgd/wbmp.c libgd/gd_wbmp.c libgd/gdhelpers.c libgd/gd_topal.c"
 
   PHP_NEW_EXTENSION(gd, gd.c gdt1.c $sources, $ext_shared,, \\$(GDLIB_CFLAGS))
-  PHP_ADD_INCLUDE($ext_srcdir/libgd)
   PHP_ADD_BUILD_DIR($ext_builddir/libgd)
 
 dnl PNG is required by GD library
@@ -268,7 +267,8 @@ dnl These are always available with bundled library
 
   AC_DEFINE(HAVE_GD_BUNDLED,          1, [ ])
 
-  GDLIB_CFLAGS="-DHAVE_LIBPNG"
+dnl Make sure the libgd/ is first in the include path
+  GDLIB_CFLAGS="-I$ext_srcdir/libgd -DHAVE_LIBPNG"
 
 dnl Depending which libraries were included to PHP configure,
 dnl enable the support in bundled GD library
