@@ -564,6 +564,8 @@ static TABLE const TimezoneTable[] = {
     { "hst",	tZONE,     HOUR (10) },	/* Hawaii Standard */
     { "hdt",	tDAYZONE,  HOUR (10) },	/* Hawaii Daylight */
     { "cat",	tZONE,     HOUR (10) },	/* Central Alaska */
+    { "akst",	tZONE,     HOUR (10) }, /* Alaska Standard */
+    { "akdt",	tZONE,     HOUR (10) }, /* Alaska Daylight */
     { "ahst",	tZONE,     HOUR (10) },	/* Alaska-Hawaii Standard */
     { "nt",	tZONE,     HOUR (11) },	/* Nome */
     { "idlw",	tZONE,     HOUR (12) },	/* International Date Line West */
