@@ -1,6 +1,10 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.2.0-dev
+- Added Udm_Check_Charset function (gluke)
+- New SAPI module for the WebJames server on RISC OS (Alex Waugh)
+- Made ldap_add (and modify) give warning with illegal value arrays.
+  Previously seg faulted or added wrong value (Stig Venaas)
 - mnoGoSearch module example updates for 3.2.x compatibility
 - Some mnogosearch-3.2.x compilation bugs fixes.
   Make crosswords and weight sections work with mnogosearch-3.2.x
