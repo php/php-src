@@ -658,7 +658,7 @@ PHP_FUNCTION(wordwrap)
 			} else if (text[current] == ' ') {
 				if (current - laststart >= linelength) {
 					newtext[current] = breakchar[0];
-					laststart = current;
+					laststart = current + 1;
 				}
 				lastspace = current;
 			} else if (current - laststart >= linelength && laststart != lastspace) {

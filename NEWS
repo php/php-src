@@ -10,6 +10,7 @@ PHP 4                                                                      NEWS
   with multiple result sets returned. (Frank)
 - Fixed logic bug in session_register() which allowed registering _SESSION
   and/or HTTP_SESSION_VARS. (Sara)
+- Fixed bug #28386 (wordwrap() wraps lines 1 character too soon). (Ilia)
 - Fixed bug #28374 (Possible unterminated loop inside 
   _php_pgsql_trim_message()). (Ilia)
 - Fixed bug #28355 (glob() does not return error on Linux when it does not
