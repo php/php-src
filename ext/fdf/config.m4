@@ -3,7 +3,7 @@ dnl $Id$
 PHP_ARG_WITH(fdftk, for fdftk support,
 [  --with-fdftk[=DIR]      Include fdftk support])
 
-if test "PHP_FDFTK" != "no"; then
+if test "$PHP_FDFTK" != "no"; then
   if test -r $PHP_FDFTK/include/FdfTk.h; then
     FDFTK_DIR=$PHP_FDFTK
   else
