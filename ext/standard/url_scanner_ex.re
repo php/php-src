@@ -225,7 +225,7 @@ enum {
 #define HANDLE_TAG() {\
 	int ok = 0; \
 	int i; \
-	smart_str_setl(&ctx->tag, start, YYCURSOR - start); \
+	smart_str_copyl(&ctx->tag, start, YYCURSOR - start); \
 	for (i = 0; check_tag_arg[i].tag; i++) { \
 		if (ctx->tag.len == check_tag_arg[i].taglen \
 				&& strncasecmp(ctx->tag.c, check_tag_arg[i].tag, ctx->tag.len) == 0) { \
@@ -237,30 +237,13 @@ enum {
 }
 
 #define HANDLE_ARG() {\
-	smart_str_setl(&ctx->arg, start, YYCURSOR - start); \
+	smart_str_copyl(&ctx->arg, start, YYCURSOR - start); \
 }
 #define HANDLE_VAL(quotes) {\
 	smart_str_setl(&ctx->val, start + quotes, YYCURSOR - start - quotes * 2); \
 	tag_arg(ctx PLS_CC); \
 }
 
-/*
- * Since arg/tag are read-only during the mainloop, we do not need
- * to copy them. We need those variables across multiple calls 
- * to url_adapt() though, but they point to a private buffer. So we
- * copy them before leaving the mainloop() and restore them at
- * the beginning.
- */
-
-#define MOVE_TO_CTX(X) \
-	if (ctx->X.c) \
-		smart_str_copyl(&ctx->c_##X, ctx->X.c, ctx->X.len); \
-	else \
-		smart_str_free(&ctx->c_##X)
-
-#define FETCH_FROM_CTX(X) \
-	smart_str_setl(&ctx->X, ctx->c_##X.c, ctx->c_##X.len)
-	
 static inline void mainloop(url_adapt_state_ex_t *ctx, const char *newdata, size_t newlen)
 {
 	char *end, *q;
@@ -268,9 +251,6 @@ static inline void mainloop(url_adapt_state_ex_t *ctx, const char *newdata, size
 	char *start;
 	int rest;
 	PLS_FETCH();
-
-	FETCH_FROM_CTX(arg);
-	FETCH_FROM_CTX(tag);
 
 	smart_str_appendl(&ctx->buf, newdata, newlen);
 	
@@ -340,9 +320,6 @@ stop:
 	printf("stopped in state %d at pos %d (%d:%c)\n", STATE, YYCURSOR - ctx->buf.c, *YYCURSOR, *YYCURSOR);
 #endif
 
-	MOVE_TO_CTX(tag);
-	MOVE_TO_CTX(arg);
-
 	rest = YYLIMIT - start;
 		
 	memmove(ctx->buf.c, start, rest);
@@ -395,8 +372,8 @@ PHP_RSHUTDOWN_FUNCTION(url_scanner)
 
 	smart_str_free(&ctx->result);
 	smart_str_free(&ctx->buf);
-	smart_str_free(&ctx->c_tag);
-	smart_str_free(&ctx->c_arg);
+	smart_str_free(&ctx->tag);
+	smart_str_free(&ctx->arg);
 
 	return SUCCESS;
 }
