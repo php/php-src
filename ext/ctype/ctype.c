@@ -100,7 +100,6 @@ static int ctype(int (*iswhat)(int), zval **c)
 		{
 			char *p;
 			int n, len;
-			convert_to_string_ex(c);
 			p=Z_STRVAL_PP(c);
 			len = Z_STRLEN_PP(c);
 			for(n=0;n<len;n++) {
