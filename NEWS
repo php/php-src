@@ -2,8 +2,6 @@ PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 200?, Version 4.4.0
 - Fixed bug #20442 (upgraded bunbled expat to 1.95.5). (Ilia)
-- Fixed bug #20424 (stream_get_meta_data craches on a normal file stream).
-  (Derick, Wez)
 - Added imagefilter() function which allows application of various filters.
   This function is only available with bundled GD. (Pierre-Alain Joye, Ilia)  
 
@@ -16,8 +14,8 @@ PHP 4                                                                      NEWS
   . ext/ccvs
   . ext/cybercash
   . ext/icap
-  . sapi/fhttpd
   . sapi/fastcgi
+  . sapi/fhttpd
 - Moved extensions to PECL (http://pear.php.net/): (James, Derick)
   . ext/vpopmail
   . ext/cybermut
@@ -35,6 +33,10 @@ PHP 4                                                                      NEWS
 - Fixed bug #20381 (array_merge_recursive mangles input arrays). (Moriyoshi) 
 - Added -n command switch to cli and cgi version which allows to skip php.ini
   parsing at startup. (Marcus, Wez)
+- Fixed bug #19689 (absolute paths like /test/dir/ not working correctly).
+  (Ilia)
+- Fixed bug #20424 (stream_get_meta_data crashes on a normal file stream).
+  (Derick, Wez)
 - Added "neutral" language entry to mbstring spec. (Moriyoshi) 
 - Changed bundled gd library to consider php.ini option memory_limit. (Marcus)
 - Modified log() to accept multiple bases. (Jason)
