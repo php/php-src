@@ -57,8 +57,8 @@ PHPAPI const char php_sig_swf[3] = {'F', 'W', 'S'};
 PHPAPI const char php_sig_jpg[3] = {(char) 0xff, (char) 0xd8, (char) 0xff};
 PHPAPI const char php_sig_png[8] = {(char) 0x89, (char) 0x50, (char) 0x4e, (char) 0x47,
 (char) 0x0d, (char) 0x0a, (char) 0x1a, (char) 0x0a};
-PHPAPI const char php_sig_tif_ii[8] = {'I','I', (char)0x2A, (char)0x00, (char)0x08, (char)0x00, (char)0x00, (char)0x00};
-PHPAPI const char php_sig_tif_mm[8] = {'M','M', (char)0x00, (char)0x2A, (char)0x00, (char)0x00, (char)0x00, (char)0x08};
+PHPAPI const char php_sig_tif_ii[4] = {'I','I', (char)0x2A, (char)0x00};
+PHPAPI const char php_sig_tif_mm[4] = {'M','M', (char)0x00, (char)0x2A};
 
 
 /* return info as a struct, to make expansion easier */
@@ -473,13 +473,24 @@ static unsigned php_ifd_get32u(void *Long, int motorola_intel)
 static struct gfxinfo *php_handle_tiff (int socketd, FILE *fp, int issock, pval *info, int motorola_intel)
 {
 	struct gfxinfo *result = NULL;
-
+	static char skip[1024];
 	int i, num_entries;
 	unsigned char *dir_entry;
-	size_t ifd_size, dir_size, entry_value, entry_length, width, height;
+	size_t ifd_size, dir_size, entry_value, entry_length, width, height, ifd_addr;
 	int entry_tag , entry_type;
-	char *ifd_data;
+	char *ifd_data, ifd_ptr[4];
 
+	FP_FREAD(ifd_ptr, 4, socketd, fp, issock);
+	ifd_addr = php_ifd_get32u(ifd_ptr, motorola_intel)-8;
+	while ( ifd_addr>sizeof(skip)) {
+		FP_FREAD( skip, sizeof(skip), socketd, fp, issock);
+		ifd_addr -= sizeof(skip);
+		if (FP_FEOF( socketd, fp, issock)) return NULL;
+	}
+	if ( ifd_addr > 0) {
+		FP_FREAD( skip, ifd_addr, socketd, fp, issock);
+		if (FP_FEOF( socketd, fp, issock)) return NULL;
+	}
 	ifd_size = 2;
 	ifd_data = emalloc(ifd_size);
 	FP_FREAD(ifd_data, 2, socketd, fp, issock);
@@ -496,6 +507,10 @@ static struct gfxinfo *php_handle_tiff (int socketd, FILE *fp, int issock, pval 
 		entry_type   = php_ifd_get16u(dir_entry+2, motorola_intel);
 		entry_length = php_ifd_get32u(dir_entry+4, motorola_intel) * php_tiff_bytes_per_format[entry_type];
 		switch(entry_type) {
+			case TAG_FMT_BYTE:
+			case TAG_FMT_SBYTE:
+				entry_value  = (size_t)(dir_entry[8]);
+				break;
 			case TAG_FMT_USHORT:
 				entry_value  = php_ifd_get16u(dir_entry+8, motorola_intel);
 				break;
@@ -625,12 +640,12 @@ PHP_FUNCTION(getimagesize)
 		result = php_handle_bmp(socketd, fp, issock);
 		itype = IMAGE_FILETYPE_BMP;
 	} else {
-		FP_FREAD(filetype+3, 5, socketd, fp, issock);
-		if (!memcmp(filetype, php_sig_tif_ii, 8)) {
+		FP_FREAD(filetype+3, 1, socketd, fp, issock);
+		if (!memcmp(filetype, php_sig_tif_ii, 4)) {
 			result = php_handle_tiff(socketd, fp, issock, NULL, 0);
 			itype = IMAGE_FILETYPE_TIFF;
 		} else
-		if (!memcmp(filetype, php_sig_tif_mm, 8)) {
+		if (!memcmp(filetype, php_sig_tif_mm, 4)) {
 			result = php_handle_tiff(socketd, fp, issock, NULL, 1);
 			itype = IMAGE_FILETYPE_TIFF;
 		}
