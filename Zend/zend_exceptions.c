@@ -563,7 +563,7 @@ ZEND_API void zend_throw_exception_object(zval *exception TSRMLS_DC)
 	exception_ce = Z_OBJCE_P(exception);
 
 	if (!exception_ce || !instanceof_function(exception_ce, default_exception_ce TSRMLS_CC)) {
-		zend_error(E_ERROR, "Exceptions must valid objects that are derived from class Exception");
+		zend_error(E_ERROR, "Exceptions must be valid objects that are derived from class Exception");
 	}
 	zend_throw_exception_internal(exception TSRMLS_CC);
 }
