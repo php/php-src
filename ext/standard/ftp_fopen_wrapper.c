@@ -562,7 +562,7 @@ static size_t php_ftp_dirstream_read(php_stream *stream, char *buf, size_t count
 	php_stream *innerstream = (php_stream *)stream->abstract;
 	size_t tmp_len;
 	char *basename;
-	int basename_len;
+	size_t basename_len;
 
 	if (count != sizeof(php_stream_dirent)) {
 		return 0;
@@ -586,8 +586,9 @@ static size_t php_ftp_dirstream_read(php_stream *stream, char *buf, size_t count
 		return 0;
 	}
 
-	memcpy(ent->d_name, basename, MIN((int)sizeof(ent->d_name), basename_len)-1);
-	ent->d_name[sizeof(ent->d_name)-1] = '\0';
+	tmp_len = MIN(sizeof(ent->d_name), basename_len) - 1;
+	memcpy(ent->d_name, basename, tmp_len);
+	ent->d_name[tmp_len] = '\0';
 	efree(basename);
 
 	return sizeof(php_stream_dirent);

@@ -1068,56 +1068,69 @@ PHP_FUNCTION(strtolower)
 
 /* {{{ php_basename
  */
-PHPAPI void php_basename(char *s, size_t len, char *suffix, size_t sufflen, char **p_ret, int *p_len)
+PHPAPI void php_basename(char *s, size_t len, char *suffix, size_t sufflen, char **p_ret, size_t *p_len)
 {
-	char *ret=NULL, *c;
-	c = s + len - 1;	
+	char *ret = NULL, *c, *comp, *cend;
+	size_t inc_len, cnt;
+	int state;
 
-	/* strip trailing slashes */
-	while (*c == '/'
+	c = comp = cend = s;
+	cnt = len;
+	state = 0;
+	while (cnt > 0) {
+		inc_len = (*c == '\0' ? 1: php_mblen(c, cnt));
+
+		switch (inc_len) {
+			case -2:
+			case -1:
+				inc_len = 1;
+				php_mblen(NULL, 0);
+				break;
+			case 0:
+				goto quit_loop;
+			case 1:
 #ifdef PHP_WIN32
-		   || (*c == '\\' && !IsDBCSLeadByte(*(c-1)))
+				if (*c == '/' || *c == '\\') {
+#else
+				if (*c == '/') {
 #endif
-	) {
-		c--;
-		len--;
-	}
-
-	/* do suffix removal as the unix command does */
-	if (suffix && (len > sufflen)) {
-		if (!memcmp(suffix, c-sufflen+1, sufflen)) {
-			if( (*(c-sufflen) != '/')
-#ifdef PHP_WIN32
-		   && ( *(c-sufflen) != '\\' || IsDBCSLeadByte(*(c-sufflen-1)))
-#endif			
-				) {
-				c -= sufflen;
-				len -= sufflen;
-			}
+					if (state == 1) {
+						state = 0;
+						cend = c;
+					}
+				} else {
+					if (state == 0) {
+						comp = c;
+						state = 1;
+					}
+				}
+			default:
+				break;
 		}
-	}
-		
-	while(c>=s) {
-		if(*c == '/'
-#ifdef PHP_WIN32
-		   || ( *c == '\\' && !IsDBCSLeadByte(*(c-1)))
-#endif			
-		   ) {
-			c++;
-			break;
-		}
-		c--;
+		c += inc_len;
+		cnt -= inc_len;
 	}
 
-	if (c<s) c=s;
+quit_loop:
+	if (state == 1) {
+		cend = c;
+	}
+	if (suffix != NULL && sufflen < (cend - comp) &&
+			memcmp(cend - sufflen, suffix, sufflen) == 0) {
+		cend -= sufflen;
+	}
 
-	len -= (c-s);
-	ret = emalloc(len+1);
-	memcpy(ret, c, len);
+	len = cend - comp;
+	ret = emalloc(len + 1);
+	memcpy(ret, comp, len);
 	ret[len] = '\0';
 
-	if(p_ret) *p_ret = ret;
-	if(p_len) *p_len = len;
+	if (p_ret) {
+		*p_ret = ret;
+	}
+	if (p_len) {
+		*p_len = len;
+	}
 }
 /* }}} */
 
@@ -1126,14 +1139,15 @@ PHPAPI void php_basename(char *s, size_t len, char *suffix, size_t sufflen, char
 PHP_FUNCTION(basename)
 {
 	char *string, *suffix = NULL, *ret;
-	int   string_len, suffix_len = 0, ret_len;
+	int   string_len, suffix_len = 0;
+	size_t ret_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|s", &string, &string_len, &suffix, &suffix_len) == FAILURE) {
 		return;
 	}
 
-	php_basename(string, string_len, suffix, suffix_len, &ret, &ret_len);	
-	RETURN_STRINGL(ret, ret_len, 0);
+	php_basename(string, string_len, suffix, suffix_len, &ret, &ret_len);
+	RETURN_STRINGL(ret, (int)ret_len, 0);
 }
 /* }}} */
 
@@ -1230,7 +1244,8 @@ PHP_FUNCTION(pathinfo)
 {
 	zval *tmp;
 	char *path, *ret = NULL;
-	int path_len, ret_len;
+	int path_len;
+	size_t ret_len;
 	long opt = PHP_PATHINFO_ALL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &path, &path_len, &opt) == FAILURE) {
