@@ -174,7 +174,7 @@ PHP_FUNCTION(opendir)
 }
 
 /* }}} */
-/* {{{ proto class dir(string directory)
+/* {{{ proto object dir(string directory)
    Directory class with properties, handle and class and methods read, rewind and close */
 
 PHP_FUNCTION(getdir)
