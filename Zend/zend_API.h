@@ -165,10 +165,10 @@ ZEND_API int zend_disable_class(char *class_name, uint class_name_length TSRMLS_
 ZEND_API void zend_wrong_param_count(TSRMLS_D);
 ZEND_API zend_bool zend_is_callable(zval *callable, zend_bool syntax_only, char **callable_name);
 ZEND_API char *zend_get_module_version(char *module_name);
-ZEND_API int zend_declare_property(zend_class_entry *ce, char *name, int name_length, zval *property, int access_type);
-ZEND_API int zend_declare_property_null(zend_class_entry *ce, char *name, int name_length, int access_type);
-ZEND_API int zend_declare_property_long(zend_class_entry *ce, char *name, int name_length, long value, int access_type);
-ZEND_API int zend_declare_property_string(zend_class_entry *ce, char *name, int name_length, char *value, int access_type);
+ZEND_API int zend_declare_property(zend_class_entry *ce, char *name, int name_length, zval *property, int access_type TSRMLS_DC);
+ZEND_API int zend_declare_property_null(zend_class_entry *ce, char *name, int name_length, int access_type TSRMLS_DC);
+ZEND_API int zend_declare_property_long(zend_class_entry *ce, char *name, int name_length, long value, int access_type TSRMLS_DC);
+ZEND_API int zend_declare_property_string(zend_class_entry *ce, char *name, int name_length, char *value, int access_type TSRMLS_DC);
 
 ZEND_API void zend_update_property(zend_class_entry *scope, zval *object, char *name, int name_length, zval *value TSRMLS_DC);
 ZEND_API void zend_update_property_null(zend_class_entry *scope, zval *object, char *name, int name_length TSRMLS_DC);
@@ -473,7 +473,7 @@ ZEND_API ZEND_FUNCTION(display_disabled_class);
 {																					\
 	char *_name = (name);															\
 	int namelen = strlen(_name);													\
-	zend_declare_property(class_ptr, _name, namelen, value, mask);		\
+	zend_declare_property(class_ptr, _name, namelen, value, mask TSRMLS_CC);		\
 }
 
 #define HASH_OF(p) ((p)->type==IS_ARRAY ? (p)->value.ht : (((p)->type==IS_OBJECT ? Z_OBJ_HT_P(p)->get_properties((p) TSRMLS_CC) : NULL)))

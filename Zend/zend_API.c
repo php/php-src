@@ -1659,7 +1659,7 @@ ZEND_API char *zend_get_module_version(char *module_name)
 }
 
 
-ZEND_API int zend_declare_property(zend_class_entry *ce, char *name, int name_length, zval *property, int access_type)
+ZEND_API int zend_declare_property(zend_class_entry *ce, char *name, int name_length, zval *property, int access_type TSRMLS_DC)
 {
 	zend_property_info property_info;
 	HashTable *target_symbol_table;
@@ -1683,6 +1683,8 @@ ZEND_API int zend_declare_property(zend_class_entry *ce, char *name, int name_le
 			default:
 				break;
 		}
+	} else {
+		zval_update_constant(&property, (void *) 1 TSRMLS_CC);
 	}
 	switch (access_type & ZEND_ACC_PPP_MASK) {
 		case ZEND_ACC_PRIVATE: {
@@ -1727,7 +1729,7 @@ ZEND_API int zend_declare_property(zend_class_entry *ce, char *name, int name_le
 	return SUCCESS;
 }
 
-ZEND_API int zend_declare_property_null(zend_class_entry *ce, char *name, int name_length, int access_type)
+ZEND_API int zend_declare_property_null(zend_class_entry *ce, char *name, int name_length, int access_type TSRMLS_DC)
 {
 	zval *property;
 	
@@ -1737,10 +1739,10 @@ ZEND_API int zend_declare_property_null(zend_class_entry *ce, char *name, int na
 		ALLOC_ZVAL(property);
 	}
 	INIT_ZVAL(*property);
-	return zend_declare_property(ce, name, name_length, property, access_type);
+	return zend_declare_property(ce, name, name_length, property, access_type TSRMLS_CC);
 }
 
-ZEND_API int zend_declare_property_long(zend_class_entry *ce, char *name, int name_length, long value, int access_type)
+ZEND_API int zend_declare_property_long(zend_class_entry *ce, char *name, int name_length, long value, int access_type TSRMLS_DC)
 {
 	zval *property;
 	
@@ -1751,10 +1753,10 @@ ZEND_API int zend_declare_property_long(zend_class_entry *ce, char *name, int na
 	}
 	INIT_PZVAL(property);
 	ZVAL_LONG(property, value);
-	return zend_declare_property(ce, name, name_length, property, access_type);
+	return zend_declare_property(ce, name, name_length, property, access_type TSRMLS_CC);
 }
 
-ZEND_API int zend_declare_property_string(zend_class_entry *ce, char *name, int name_length, char *value, int access_type)
+ZEND_API int zend_declare_property_string(zend_class_entry *ce, char *name, int name_length, char *value, int access_type TSRMLS_DC)
 {
 	zval *property;
 	int len = strlen(value);
@@ -1767,7 +1769,7 @@ ZEND_API int zend_declare_property_string(zend_class_entry *ce, char *name, int 
 		ZVAL_STRINGL(property, value, len, 1);
 	}
 	INIT_PZVAL(property);
-	return zend_declare_property(ce, name, name_length, property, access_type);
+	return zend_declare_property(ce, name, name_length, property, access_type TSRMLS_CC);
 }
 
 ZEND_API void zend_update_property(zend_class_entry *scope, zval *object, char *name, int name_length, zval *value TSRMLS_DC)
