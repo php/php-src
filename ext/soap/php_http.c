@@ -215,12 +215,13 @@ int send_http_soap_request(zval *this_ptr, xmlDoc *doc, char *location, char *so
 
 int get_http_soap_response(zval *this_ptr, char **buffer, int *buffer_len TSRMLS_DC)
 {
-	char *http_headers, *http_body, *content_type, *http_version, http_status[4], *cookie_itt;
+	char *http_headers, *http_body, *content_type, *http_version, *cookie_itt;
 	int http_header_size, http_body_size, http_close;
 	php_stream *stream;
 	zval **trace, **tmp;
 	char* connection;
 	int http_1_1 = 0;
+	int http_status = 0;
 
 	if (zend_hash_find(Z_OBJPROP_P(this_ptr), "httpsocket", sizeof("httpsocket"), (void **)&tmp) == SUCCESS) {
 		php_stream_from_zval_no_verify(stream,tmp);
@@ -247,8 +248,7 @@ int get_http_soap_response(zval *this_ptr, char **buffer, int *buffer_len TSRMLS
 
 		if (tmp != NULL) {
 			tmp++;
-			strncpy(http_status,tmp,4);
-			http_status[3] = '\0';
+			http_status = atoi(tmp);
 		}
 
 		/*
@@ -257,22 +257,30 @@ int get_http_soap_response(zval *this_ptr, char **buffer, int *buffer_len TSRMLS
 		Maybe try and test for some of the 300's 400's specfics but not
 		right now.
 
-		if (strcmp(http_status,"200"))
-		{
-			zval *err;
-			char *http_err;
+		if (http_status >= 200 && http_status < 300) {
+		} else if (http_status >= 300 && http_status < 400) {
+			add_soap_fault(this_ptr, "Client", "HTTTP redirection is not supported", NULL, NULL TSRMLS_CC);
+		} else if (http_status == 400) {
+			add_soap_fault(this_ptr, "Client", "Bad Request", NULL, NULL TSRMLS_CC);
+		} else if (http_status == 401) {
+			add_soap_fault(this_ptr, "Client", "Unauthorized Request", NULL, NULL TSRMLS_CC);
+		} else if (http_status == 405) {
+			add_soap_fault(this_ptr, "Client", "Method not allowed", NULL, NULL TSRMLS_CC);
+		} else if (http_status == 415) {
+			add_soap_fault(this_ptr, "Client", "Unsupported Media Type", NULL, NULL TSRMLS_CC);
+		} else if (http_status >= 400 && http_status < 500) {
+			add_soap_fault(this_ptr, "Client", "Client Error", NULL, NULL TSRMLS_CC);
+		} else if (http_status == 500) {
+			add_soap_fault(this_ptr, "Server", "Internal Server Error", NULL, NULL TSRMLS_CC);
+		} else if (http_status >= 500 && http_status < 600) {
+			add_soap_fault(this_ptr, "Server", "Server Error", NULL, NULL TSRMLS_CC);
+		} else {
+			add_soap_fault(this_ptr, "Client", "Unsupported HTTP status code", NULL, NULL TSRMLS_CC);
+		}
+		*/
 
-			MAKE_STD_ZVAL(err);
-			ZVAL_STRING(err, http_body, 1);
-			http_err = emalloc(strlen("HTTP request failed ()") + 4);
-			sprintf(http_err, "HTTP request failed (%s)", http_status);
-			add_soap_fault(thisObj, "Client", http_err, NULL, err TSRMLS_CC);
-			efree(http_err);
-			return;
-		}*/
-
-		/* Try and get headers again */
-		if (!strcmp(http_status, "100")) {
+		/* Try and get headers again
+		if (http_status == 100") {
 			efree(http_headers);
 			if (!get_http_headers(stream, &http_headers, &http_header_size TSRMLS_CC)) {
 				php_stream_close(stream);
@@ -281,6 +289,7 @@ int get_http_soap_response(zval *this_ptr, char **buffer, int *buffer_len TSRMLS
 				return FALSE;
 			}
 		}
+		*/
 
 		if (strncmp(http_version,"1.1", 3)) {
 			http_1_1 = 1;
