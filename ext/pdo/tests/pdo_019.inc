@@ -2,7 +2,7 @@
 
 require_once('pdo.inc');
 	
-set_sql('create1', 'CREATE TABLE test(idx int PRIMARY KEY, txt VARCHAR(20))');
+set_sql('create1', 'CREATE TABLE test(idx int NOT NULL PRIMARY KEY, txt VARCHAR(20))');
 set_sql('insert1', 'INSERT INTO test VALUES(0, \'String0\')'); 
 set_sql('insert2', 'INSERT INTO test VALUES(1, \'String1\')'); 
 set_sql('insert3', 'INSERT INTO test VALUES(2, \'String2\')'); 
