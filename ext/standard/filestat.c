@@ -552,7 +552,7 @@ PHPAPI void php_stat(const char *filename, php_stat_len filename_length, int typ
 	struct stat *stat_sb;
 #endif
 	php_stream_statbuf ssb;
-	int rmask=S_IROTH, wmask=S_IWOTH, xmask=S_IXOTH; /* access rights defaults to other */
+	int flags = 0, rmask=S_IROTH, wmask=S_IWOTH, xmask=S_IXOTH; /* access rights defaults to other */
 	char *stat_sb_names[13]={"dev", "ino", "mode", "nlink", "uid", "gid", "rdev",
 			      "size", "atime", "mtime", "ctime", "blksize", "blocks"};
 
@@ -560,16 +560,14 @@ PHPAPI void php_stat(const char *filename, php_stat_len filename_length, int typ
 		RETURN_FALSE;
 	}
 
-	if (PG(safe_mode) &&(!php_checkuid_ex(filename, NULL, CHECKUID_CHECK_FILE_AND_DIR, IS_EXISTS_CHECK(type) ? CHECKUID_NO_ERRORS : 0))) {
-		RETURN_FALSE;
+	if (IS_LINK_OPERATION(type)) {
+		flags |= PHP_STREAM_URL_STAT_LINK;
+	}
+	if (IS_EXISTS_CHECK(type)) {
+		flags |= PHP_STREAM_URL_STAT_QUIET;
 	}
 
-	if (php_check_open_basedir_ex(filename, IS_EXISTS_CHECK(type) ? 0 : 1 TSRMLS_CC)) {
-		RETURN_FALSE;
-	}
-
-
-	if (php_stream_stat_path_ex((char *)filename, (IS_LINK_OPERATION(type) ? PHP_STREAM_URL_STAT_LINK : 0), &ssb, NULL)) {
+	if (php_stream_stat_path_ex((char *)filename, flags, &ssb, NULL)) {
 		/* Error Occured */
 		if (!IS_EXISTS_CHECK(type)) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%sstat failed for %s", IS_LINK_OPERATION(type) ? "L" : "", filename);

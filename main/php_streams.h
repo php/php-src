@@ -319,6 +319,7 @@ PHPAPI int _php_stream_set_option(php_stream *stream, int option, int value, voi
 
 /* Flags for url_stat method in wrapper ops */
 #define PHP_STREAM_URL_STAT_LINK	1
+#define PHP_STREAM_URL_STAT_QUIET	2
 
 /* change the blocking mode of stream: value == 1 => blocking, value == 0 => non-blocking. */
 #define PHP_STREAM_OPTION_BLOCKING	1
