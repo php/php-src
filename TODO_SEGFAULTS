@@ -28,7 +28,7 @@ Open:
     Notes:
 
 (1) appears, when bcadd, bcmod, bcmul, bcscale, bcsqrt have been tested
-    prior to it.  does not segfault otherwise.
+    prior to it.  does not segfault when tested alone.
 
 (2) sometimes, mb_ereg passes the test, although a subsequent mbereg
     will cause a segfault. Probably something in-between screws up the engine.
@@ -38,10 +38,12 @@ Open:
 	
 	format = Z_STRVAL_PP(args[0]);
 
+	format was zero.  The zval appeared to be fubar'ed.
+
     I am not able to reproduce this particular issue at the moment.  I
     was not able to create a simple test case for this initially, so
-    the lack of reproducibility likely relates to changes in the 
-    changed/now-extended test script.
+    the lack of reproducibility likely relates to modifications in the 
+    now-extended test script.
 
 
 
