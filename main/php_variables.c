@@ -300,9 +300,8 @@ void php_treat_data(int arg, char *str, zval* destArray TSRMLS_DC)
 			php_url_decode(var, strlen(var));
 			val_len = php_url_decode(val, strlen(val));
 			php_register_variable_safe(var, val, val_len, array_ptr TSRMLS_CC);
-		}
-		else {
-			php_register_variable_safe(var, NULL, 0, array_ptr TSRMLS_CC);
+		} else {
+			php_register_variable_safe(var, "", 0, array_ptr TSRMLS_CC);
 		}
 		var = php_strtok_r(NULL, separator, &strtok_buf);
 	}
