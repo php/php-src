@@ -1,3 +1,178 @@
+2000-04-30  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/swf/php_swf.h: Allow the SWF module to compile as a dl.
+
+    * ext/swf/swf.c: Proto's and the such.
+
+2000-04-30  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/swf/.cvsignore: Ignore standard files
+
+2000-04-30  Andi Gutmans  <andi@php.net>
+
+    * ext/session/mod_files.c
+      ext/session/session.c
+      ext/dba/dba_cdb.c
+      ext/dba/dba_dbm.c
+      ext/dbase/dbase.c
+      ext/dbase/dbf_head.c
+      ext/oci8/oci8.c
+      dl/log/log_sql.c
+      ext/db/db.c: - Change some open's to V_OPEN()'s
+
+2000-04-30  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/swf/Makefile.in
+      ext/swf/config.m4
+      ext/swf/php_swf.h
+      ext/swf/swf.c
+      ext/swf/swf.h:
+    Add LibSWF support to PHP, will be sending an e-mail on the files and
+    uses shortly.
+
+2000-04-30  Rasmus Lerdorf  <rasmus@php.net>
+
+    * sapi/nsapi/Makefile.in
+      sapi/nsapi/config.m4
+      sapi/nsapi/nsapi.c:
+    Add initial NSAPI module from Jayakumar Muthukumarasamy
+
+2000-04-30  Andi Gutmans  <andi@php.net>
+
+    * ext/standard/file.c
+      php.h:
+    - Take Sascha's advice and create on V_OPEN() which replaces open().
+    - Unlike the other macros its argument has to have braces around it, for
+    - example, open(filename, flags) becomse V_OPEN((filename, flags))
+    - Made small conversion to new Zend macros. The ugly (*foo)->value.str.val
+    - now becomes Z_STRVAL_PP(foo). PP means pointer pointer, there also exist
+    - single P's for example foo->value.str.val becomes Z_STRVAL_P(foo).
+
+2000-04-30  Jouni Ahto  <jah@mork.net>
+
+    * ext/imap/config.m4:
+    Debian 2.2 puts rfc822.h in /usr/include/c-client, check that place too.
+
+    * MODULES_STATUS:
+
+    * ext/interbase/interbase.c
+      ext/interbase/php_interbase.h:
+    Moving module to the high-performance API & fixing it for PHP4.
+
+2000-04-30  Shane Caraveo  <shane@php.net>
+
+    * sapi/apache/sapi_apache.c:
+    zeroing the variables fixes one crash...now crashes on memory allocation during zend_compile_files
+
+    * sapi/apache/mod_php4.c: sorry, do comments right
+
+    * sapi/apache/apachephp4.dsp
+      sapi/apache/mod_php4.c
+      sapi/apache/mod_php4.h
+      sapi/apache/php_apache.c
+      sapi/apache/sapi_apache.c:
+    apache module now compiles under win32, apache loads, but crashes on line 1167 main.c on page request
+
+2000-04-30  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/servlet/Makefile.in
+      sapi/thttpd/Makefile.in
+      sapi/roxen/Makefile.in
+      sapi/isapi/Makefile.in
+      sapi/phttpd/Makefile.in
+      sapi/aolserver/Makefile.in
+      sapi/apache/Makefile.in
+      sapi/cgi/Makefile.in
+      pear/Makefile.in
+      regex/Makefile.in
+      sapi/Makefile.in
+      ext/xml/expat/xmlparse/Makefile.in
+      ext/xml/expat/xmltok/Makefile.in
+      ext/yp/Makefile.in
+      ext/zlib/Makefile.in
+      ext/wddx/Makefile.in
+      ext/xml/Makefile.in
+      ext/xml/expat/Makefile.in
+      ext/sysvsem/Makefile.in
+      ext/sysvshm/Makefile.in
+      ext/standard/Makefile.in
+      ext/sybase/Makefile.in
+      ext/sybase_ct/Makefile.in
+      ext/recode/Makefile.in
+      ext/session/Makefile.in
+      ext/snmp/Makefile.in
+      ext/pcre/pcrelib/Makefile.in
+      ext/pdf/Makefile.in
+      ext/pgsql/Makefile.in
+      ext/posix/Makefile.in
+      ext/readline/Makefile.in
+      ext/oci8/Makefile.in
+      ext/odbc/Makefile.in
+      ext/oracle/Makefile.in
+      ext/pcre/Makefile.in
+      ext/mysql/libmysql/Makefile.in
+      ext/msql/Makefile.in
+      ext/mysql/Makefile.in
+      ext/ldap/Makefile.in
+      ext/mcal/Makefile.in
+      ext/mcrypt/Makefile.in
+      ext/mhash/Makefile.in
+      ext/informix/Makefile.in
+      ext/interbase/Makefile.in
+      ext/java/Makefile.in
+      ext/icap/Makefile.in
+      ext/imap/Makefile.in
+      ext/gettext/Makefile.in
+      ext/hyperwave/Makefile.in
+      ext/ftp/Makefile.in
+      ext/gd/Makefile.in
+      ext/fdf/Makefile.in
+      ext/filepro/Makefile.in
+      ext/db/Makefile.in
+      ext/dba/Makefile.in
+      ext/dbase/Makefile.in
+      ext/domxml/Makefile.in: Overall UNIX build system improvements:
+
+    * Makefile header is now completely dynamic
+    * Absolute paths in (top_)?(src|build)dir and VPATH
+      (fixes Tru64 support)
+    * VPATH does not contain variables anymore
+      (fixes UnixWare support)
+
+    * ext/cybercash/Makefile.in
+      ext/dav/Makefile.in
+      ext/aspell/Makefile.in
+      ext/bcmath/Makefile.in
+      ext/calendar/Makefile.in
+      ext/cpdf/Makefile.in:
+    (The first part of this commit died with a SIGPIPE from the CVS server.)
+
+    Overall UNIX build system improvements:
+
+    * Makefile header is now completely dynamic
+    * Absolute paths in (top_)?(src|build)dir and VPATH
+      (fixes Tru64 support)
+    * VPATH does not contain variables anymore
+      (fixes UnixWare support)
+
+    * build/fastgen.sh
+      build/ltlib.mk
+      build/rules.mk
+      build/rules_pear.mk
+      ext/Makefile.in
+      ext/ext_skel
+      Makefile.in
+      NEWS: Overall UNIX build system improvements:
+
+    * Makefile header is now completely dynamic
+    * Absolute paths in (top_)?(src|build)dir and VPATH
+      (fixes Tru64 support)
+    * VPATH does not contain variables anymore
+      (fixes UnixWare support)
+
+    * php_virtual_cwd.c
+      php_virtual_cwd.h: Fix virtual_open() by adding ellipse
+
 2000-04-29  Andi Gutmans  <andi@php.net>
 
     * php.h
