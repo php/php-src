@@ -2476,6 +2476,7 @@ PHP_FUNCTION(move_uploaded_file)
 	zval **path, **new_path;
 	zend_bool successful=0;
 	SLS_FETCH();
+	PLS_FETCH();
 
 	if (!SG(rfc1867_uploaded_files)) {
 		RETURN_FALSE;
