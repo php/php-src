@@ -147,7 +147,6 @@ PHP_FUNCTION(xsl_xsltprocessor_import_stylesheet)
 	if ((oldsheetp = (xsltStylesheetPtr)intern->ptr)) { 
 		/* free wrapper */
 		if (((xsltStylesheetPtr) intern->ptr)->_private != NULL) {
-			efree(((xsltStylesheetPtr) intern->ptr)->_private);
 			((xsltStylesheetPtr) intern->ptr)->_private = NULL;   
 		}
 		if (intern->document != NULL) {
