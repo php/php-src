@@ -14,7 +14,8 @@
    +----------------------------------------------------------------------+
    | Authors: Sascha Schumann <sascha@schumann.cx>                        |
    |                                                                      |
-   | HMAC functionality added by Nikos Mavroyanopoulos <nmav@hellug.gr>   |
+   | HMAC and KEYGEN functionality added by                               |
+   |  Nikos Mavroyanopoulos <nmav@hellug.gr>                              |
    +----------------------------------------------------------------------+
  */
 
@@ -32,6 +33,7 @@
 function_entry mhash_functions[] = {
 	PHP_FE(mhash_get_block_size, NULL)
 	    PHP_FE(mhash_get_hash_name, NULL)
+	    PHP_FE(mhash_keygen_s2k, NULL)
 	    PHP_FE(mhash_count, NULL)
 	PHP_FE(mhash, NULL) {0}
 	,
@@ -52,6 +54,7 @@ zend_module_entry mhash_module_entry = {
 ZEND_GET_MODULE(mhash)
 #endif
 #define MHASH_FAILED_MSG "mhash initialization failed"
+#define MHASH_KEYGEN_FAILED_MSG "mhash key generation failed"
 static PHP_MINIT_FUNCTION(mhash)
 {
 	int i;
@@ -186,6 +189,79 @@ PHP_FUNCTION(mhash)
 		RETVAL_STRINGL(hash_data, bsize, 1);
 		mhash_free(hash_data);
 	} else {
+		RETURN_FALSE;
+	}
+}
+
+/* }}} */
+
+/* {{{ proto string mhash_keygen_s2k(int hash, string input_password, string salt, int bytes)
+   generate a key using hash functions */
+/* SALTED S2K uses a fixed salt */
+#define SALT_SIZE 8
+PHP_FUNCTION(mhash_keygen_s2k)
+{
+	pval **hash, **input_password, **bytes, **input_salt;
+	unsigned char *key;
+	int password_len, salt_len;
+	int hashid, size=0, val;
+	KEYGEN keystruct;
+	char salt[SALT_SIZE], *ret;
+	char* password, error[128];
+	
+	if (ZEND_NUM_ARGS() != 4) {
+		WRONG_PARAM_COUNT;
+	}
+	if (zend_get_parameters_ex(4, &hash, &input_password, &input_salt, &bytes) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	convert_to_long_ex(hash);
+	convert_to_string_ex(input_password);
+	convert_to_string_ex(input_salt);
+	convert_to_long_ex(bytes);
+
+	password = (*input_password)->value.str.val;
+	password_len = (*input_password)->value.str.len;
+
+	salt_len = (*input_salt)->value.str.len;
+
+	if (salt_len > mhash_get_keygen_salt_size(KEYGEN_S2K_SALTED)) {
+		sprintf( error, "The specified salt [%d] is more bytes than the required by the algorithm [%d]\n", salt_len, mhash_get_keygen_salt_size(KEYGEN_S2K_SALTED));
+
+		php_error(E_WARNING, error);
+	}
+
+	memset( salt, 0, SALT_SIZE);
+	memcpy( salt, (*input_salt)->value.str.val, salt_len);
+	salt_len=SALT_SIZE;
+	
+/*	if (salt_len==0) {
+ *		php_error(E_WARNING, "Not using salt is really not recommended);
+ *	}
+ */
+	
+	hashid = (*hash)->value.lval;
+	size = (*bytes)->value.lval;
+
+	keystruct.hash_algorithm[0]=hashid;
+	keystruct.hash_algorithm[1]=hashid;
+	keystruct.count=0;
+	keystruct.salt = salt;
+	keystruct.salt_size = salt_len;
+
+	ret = malloc(size);
+	if (ret==NULL) {
+		php_error(E_WARNING, MHASH_KEYGEN_FAILED_MSG);
+		RETURN_FALSE;
+	}
+
+	val = mhash_keygen_ext( KEYGEN_S2K_SALTED, keystruct, ret, size, password, password_len);
+	if ( val >= 0) {
+		RETVAL_STRINGL(ret, size, 1);
+		free(ret);
+	} else {
+		php_error(E_WARNING, MHASH_KEYGEN_FAILED_MSG);
+		free(ret);
 		RETURN_FALSE;
 	}
 }
