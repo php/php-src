@@ -217,7 +217,7 @@ SAPI_POST_HANDLER_FUNC(php_std_post_handler)
 
 void php_treat_data(int arg, char *str, zval* destArray ELS_DC PLS_DC SLS_DC)
 {
-	char *res = NULL, *var, *val;
+	char *res = NULL, *var, *val, *separator = ";&";
 	const char *c_var;
 	pval *array_ptr;
 	int free_buffer=0;
@@ -238,6 +238,7 @@ void php_treat_data(int arg, char *str, zval* destArray ELS_DC PLS_DC SLS_DC)
 					PG(http_globals)[TRACK_VARS_GET] = array_ptr;
 					break;
 				case PARSE_COOKIE:
+					separator=";";
 					PG(http_globals)[TRACK_VARS_COOKIE] = array_ptr;
 					break;
 			}
@@ -277,8 +278,8 @@ void php_treat_data(int arg, char *str, zval* destArray ELS_DC PLS_DC SLS_DC)
 		return;
 	}
 
-	var = php_strtok_r(res, ";&", &strtok_buf);
-
+	var = php_strtok_r(res, separator, &strtok_buf);
+	
 	while (var) {
 		val = strchr(var, '=');
 		if (val) { /* have a value */
@@ -289,7 +290,7 @@ void php_treat_data(int arg, char *str, zval* destArray ELS_DC PLS_DC SLS_DC)
 			val_len = php_url_decode(val, strlen(val));
 			php_register_variable_safe(var, val, val_len, array_ptr ELS_CC PLS_CC);
 		}
-		var = php_strtok_r(NULL, ";&", &strtok_buf);
+		var = php_strtok_r(NULL, separator, &strtok_buf);
 	}
 	if (free_buffer) {
 		efree(res);
