@@ -367,6 +367,10 @@ ap_php_gcvt(double number, int ndigit, char *buf, boolean_e altform)
 	register int i;
 	char buf1[NDIG];
 
+	if (ndigit >= NDIG - 1) {
+		ndigit = NDIG - 2;	
+	}
+
 	p1 = ap_php_ecvt(number, ndigit, &decpt, &sign, buf1);
 	p2 = buf;
 	if (sign)
