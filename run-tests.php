@@ -178,6 +178,7 @@ settings2array($ini_overwrites,$info_params);
 settings2params($info_params);
 $php_info = `$php $info_params $info_file`;
 @unlink($info_file);
+define('TESTED_PHP_VERSION', `$php -r 'echo PHP_VERSION;'`);
 
 // Write test context information.
 
@@ -452,7 +453,7 @@ function mail_qa_team($data, $compression, $status = FALSE)
 		return FALSE;
 	}
 
-	$php_version = urlencode(phpversion());
+	$php_version = urlencode(TESTED_PHP_VERSION);
 
 	echo "\nPosting to {$url_bits['host']} {$url_bits['path']}\n";
 	fwrite($fs, "POST ".$url_bits['path']."?status=$status&version=$php_version HTTP/1.1\r\n");
