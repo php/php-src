@@ -1,0 +1,234 @@
+#!/usr/local/bin/php -f
+<?php // -*- C++ -*-
+
+error_reporting(1);
+
+// config section, should be read from php-config
+$debug = true;
+$pear_phpdir = "@PEAR_INSTALLDIR@";
+$pear_extdir = "@EXTENSION_DIR@";
+//$pear_extdir = ini_get("extension_dir");
+$pear_docdir = ""; // empty means don't install docs
+
+$pkgfile = $argv[0];
+
+if (!$pkgfile) {
+    die("Usage: pear <packagefile>\n");
+}
+if (!file_exists($pkgfile)) {
+    die("No such file: $pkgfile\n");
+}
+
+$fp = popen("gzip -dc $pkgfile | tar -tf -", "r");
+if (!$fp) {
+    die("Unable to examine $pkgfile (gzip or tar failed)\n");
+}
+while ($line = fgets($fp, 4096)) {
+    $line = rtrim($line);
+    if (preg_match('!^[^/]+/package.xml$!', $line)) {
+	if ($descfile) {
+	    die("Invalid package: multiple package.xml files at depth one!\n");
+	}
+	$descfile = $line;
+    }
+}
+pclose($fp);
+
+if (!$descfile) {
+    die("Invalid package: no package.xml file found!\n");
+}
+
+$tmpdir = tempnam("/tmp", "pear");
+if (!mkdir($tmpdir, 0755)) {
+    die("Unable to create temporary directory $tmpdir.\n");
+}
+
+register_shutdown_function("cleanup");
+
+$pwd = trim(`pwd`);
+
+if (substr($pkgfile, 0, 1) == "/") {
+    $pkgfilepath = $pkgfile;
+} else {
+    $pkgfilepath = $pwd.'/'.$pkgfile;
+}
+
+if (!chdir($tmpdir)) {
+    die("Unable to chdir to $tmpdir.\n");
+}
+
+system("gzip -dc $pkgfilepath | tar -xf -");
+
+if (!file_exists($descfile)) {
+    die("Huh?  No package.xml file after extracting the archive.\n");
+}
+
+$pkgdir = dirname($descfile);
+
+$fp = fopen($descfile, "r");
+$xp = xml_parser_create();
+if (!$xp) {
+    die("Unable to create XML parser.\n");
+}
+xml_set_element_handler($xp, "start_handler", "end_handler");
+xml_set_character_data_handler($xp, "char_handler");
+xml_parser_set_option($xp, XML_OPTION_CASE_FOLDING, false);
+
+$element_stack = array();
+$current_element = false;
+$destdir = '';
+$pkginfo = array();
+
+while ($data = fread($fp, 2048)) {
+    if (!xml_parse($xp, $data, feof($fp))) {
+        die(sprintf("XML error: %s at line %d",
+                    xml_error_string(xml_get_error_code($xp)),
+                    xml_get_current_line_number($xp)));
+    }
+}
+
+if ($pkginfo['pkgtype'] != "binary") {
+    die("Invalid package: only binary packages supported yet.\n");
+}
+
+print "ok so far\n";
+exit;
+
+function start_handler($xp, $name, $attribs) {
+    global $element_stack, $current_element, $pkginfo;
+    array_push($element_stack, $name);
+    $current_element = $name;
+    switch ($name) {
+	case "Package":
+	    $pkginfo['pkgtype'] = strtolower($attribs["Type"]);
+	    break;
+    }
+}
+
+function end_handler($xp, $name) {
+    global $element_stack, $current_element;
+    array_pop($element_stack);
+    $current_element = $element_stack[sizeof($element_stack)-1];
+}
+
+function char_handler($xp, $data) {
+    global $element_stack, $current_element, $pkginfo;
+    global $phpfiles, $extfiles, $docfiles, $pkgdir;
+    global $pear_phpdir, $pear_extdir, $pear_docdir;
+    global $destdir, $debug;
+
+    switch ($current_element) {
+	case "DestDir":
+	    $destdir = trim($data);
+	    if (substr($destdir, 0, 1) == "/") {
+		$destdir = substr($destdir, 1);
+	    }
+	    break;
+	case "Dir":
+	    if (!$pear_phpdir) {
+		break;
+	    }
+	    $dir = trim($data);
+	    $d = "$pear_phpdir/$destdir/$dir";
+	    if (is_file($d)) {
+		print "Error: wanted to create the directory $d\n";
+		print "       but it was already a file.\n";
+		continue 2;
+	    }
+	    if (is_dir($d)) {
+		continue 2;
+	    }
+	    if (!mkdir($d, 0755)) {
+		print "Error: could not mkdir $d\n";
+		continue 2;
+	    }
+	    if ($debug) print "[debug] created directory $d\n";
+	    break;
+	case "File":
+	    if (!$pear_phpdir) {
+		break;
+	    }
+	    $file = trim($data);
+	    $d = "$pear_phpdir/$destdir";
+	    if (!copy("$pkgdir/$file", "$d/$file")) {
+		print "Error: failed to copy $pkgdir/$file to $d\n";
+		continue 2;
+	    }
+	    if ($debug) print "[debug] installed $d/$file\n";
+	    break;
+	case "ExtDir":
+	    if (!$pear_extdir) {
+		break;
+	    }
+	    $dir = trim($data);
+	    $d = "$pear_extdir/$destdir/$dir";
+	    if (is_file($d)) {
+		print "Error: wanted to create the directory $d\n";
+		print "       but it was already a file.\n";
+		continue 2;
+	    }
+	    if (is_dir($d)) {
+		continue 2;
+	    }
+	    if (!mkdir($d, 0755)) {
+		print "Error: could not mkdir $d\n";
+		continue 2;
+	    }
+	    if ($debug) print "[debug] created directory $d\n";
+	    break;
+	case "ExtFile":
+	    if (!$pear_extdir) {
+		break;
+	    }
+	    $file = trim($data);
+	    $d = "$pear_extdir/$destdir";
+	    if (!copy("$pkgdir/$file", "$d/$file")) {
+		print "Error: failed to copy $pkgdir/$file to $d\n";
+		continue 2;
+	    }
+	    if ($debug) print "[debug] installed $d/$file\n";
+	    break;
+	case "DocDir":
+	    if (!$pear_docdir) {
+		break;
+	    }
+	    $dir = trim($data);
+	    $d = "$pear_docdir/$destdir/$dir";
+	    if (is_file($d)) {
+		print "Error: wanted to create the directory $d\n";
+		print "       but it was already a file.\n";
+		continue 2;
+	    }
+	    if (is_dir($d)) {
+		continue 2;
+	    }
+	    if (!mkdir($d, 0755)) {
+		print "Error: could not mkdir $d\n";
+		continue 2;
+	    }
+	    if ($debug) print "[debug] created directory $d\n";
+	    break;
+	case "DocFile":
+	    if (!$pear_docdir) {
+		break;
+	    }
+	    $file = trim($data);
+	    $d = "$pear_docdir/$destdir";
+	    if (!copy("$pkgdir/$file", "$d/$file")) {
+		print "Error: failed to copy $pkgdir/$file to $d\n";
+		continue 2;
+	    }
+	    if ($debug) print "[debug] installed $d/$file\n";
+	    break;
+    }
+}
+
+function cleanup() {
+    global $tmpdir;
+    if ($tmpdir && is_dir($tmpdir)) {
+	system("rm -rf $tmpdir");
+    }
+    $tmpdir = null;
+}
+
+?>
