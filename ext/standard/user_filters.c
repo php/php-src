@@ -411,21 +411,27 @@ static void filter_item_dtor(struct php_user_filter_data *fdat)
 {
 }
 
-/* {{{ proto array stream_get_filters()
+/* {{{ proto array stream_get_filters([bool system])
    Returns a list of registered filters */
 PHP_FUNCTION(stream_get_filters)
 {
 	char *filter_name;
 	int key_flags, filter_name_len = 0;
+	zend_bool return_system = 0;
 	HashTable *filters_hash;
 
-	if (ZEND_NUM_ARGS() != 0) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|b", &return_system) == FAILURE) {
+		RETURN_FALSE;
 	}
 
 	array_init(return_value);
 
-	filters_hash = php_get_stream_filters_hash();
+	/* TODO: Bug #21487 */
+
+	if (return_system)
+		filters_hash = php_get_stream_filters_hash();
+	else
+		filters_hash = BG(user_filter_map);
 
 	if (filters_hash) {
 		for(zend_hash_internal_pointer_reset(filters_hash);
