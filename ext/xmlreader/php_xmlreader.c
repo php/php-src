@@ -760,6 +760,31 @@ PHP_METHOD(xmlreader, read)
 }
 /* }}} */
 
+/* {{{ proto boolean read()
+Moves the position of the current instance to the next node in the stream. */
+PHP_METHOD(xmlreader, next)
+{
+	zval *id;
+	int retval;
+	xmlreader_object *intern;
+
+	id = getThis();
+	intern = (xmlreader_object *)zend_object_store_get_object(id TSRMLS_CC);
+	if (intern != NULL && intern->ptr != NULL) {
+		retval = xmlTextReaderNext(intern->ptr);
+		if (retval == -1) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "An Error Occured while reading");
+			RETURN_FALSE;
+		} else {
+			RETURN_BOOL(retval);
+		}
+	}
+	
+	php_error_docref(NULL TSRMLS_CC, E_WARNING, "Load Data before trying to read");
+	RETURN_FALSE;
+}
+/* }}} */
+
 /* {{{ proto boolean open(string URI)
 Sets the URI that the the XMLReader will parse. */
 PHP_METHOD(xmlreader, open)
@@ -1007,6 +1032,7 @@ static zend_function_entry xmlreader_functions[] = {
 	PHP_ME(xmlreader, moveToNextAttribute, NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(xmlreader, open, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_ALLOW_STATIC)
 	PHP_ME(xmlreader, read, NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(xmlreader, next, NULL, ZEND_ACC_PUBLIC)
 /* Not Yet Implemented though defined in libxml as of 2.6.9dev
 	PHP_ME(xmlreader, readInnerXml, NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(xmlreader, readOuterXml, NULL, ZEND_ACC_PUBLIC)
