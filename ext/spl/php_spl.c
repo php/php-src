@@ -26,8 +26,9 @@
 #include "php_spl.h"
 #include "spl_functions.h"
 #include "spl_engine.h"
-#include "spl_foreach.h"
 #include "spl_array.h"
+#include "spl_directory.h"
+#include "spl_iterators.h"
 
 #ifdef COMPILE_DL_SPL
 ZEND_GET_MODULE(spl)
@@ -61,12 +62,8 @@ zend_module_entry spl_module_entry = {
 };
 /* }}} */
 
-zend_class_entry *spl_ce_iterator;
-zend_class_entry *spl_ce_forward;
-zend_class_entry *spl_ce_assoc;
-zend_class_entry *spl_ce_sequence;
-zend_class_entry *spl_ce_forward_assoc;
-zend_class_entry *spl_ce_sequence_assoc;
+zend_class_entry *spl_ce_recursive_it;
+zend_class_entry *spl_ce_recursive_it_it;
 zend_class_entry *spl_ce_array_read;
 zend_class_entry *spl_ce_array_access;
 
@@ -81,77 +78,8 @@ function_entry spl_functions_none[] = {
  */
 static void spl_init_globals(zend_spl_globals *spl_globals)
 {
-#ifdef SPL_FOREACH
-	ZEND_EXECUTE_HOOK(ZEND_FE_RESET);
-	ZEND_EXECUTE_HOOK(ZEND_FE_FETCH);
-	ZEND_EXECUTE_HOOK(ZEND_SWITCH_FREE);
-#endif
-
-#if defined(SPL_ARRAY_READ) | defined(SPL_ARRAY_WRITE)
-	ZEND_EXECUTE_HOOK(ZEND_FETCH_DIM_R);
-	ZEND_EXECUTE_HOOK(ZEND_FETCH_DIM_W);
-	ZEND_EXECUTE_HOOK(ZEND_FETCH_DIM_RW);
-#endif
-
-#ifdef SPL_ARRAY_WRITE
-	ZEND_EXECUTE_HOOK(ZEND_ASSIGN_DIM);
-	ZEND_EXECUTE_HOOK(ZEND_UNSET_DIM_OBJ);
-#endif /* SPL_ARRAY_WRITE */
 }
 /* }}} */
-
-PHP_FUNCTION(spl_abstract) {}
-
-#define SPL_ABSTRACT_FE(class, name, arg_info) \
-	{ #name, ZEND_FN(spl_abstract), arg_info, sizeof(arg_info)/sizeof(struct _zend_arg_info)-1, ZEND_ACC_ABSTRACT|ZEND_ACC_PUBLIC },
-
-static
-ZEND_BEGIN_ARG_INFO(arginfo_one_param, 0)
-	ZEND_ARG_INFO(0, index)
-ZEND_END_ARG_INFO();
-
-static
-ZEND_BEGIN_ARG_INFO(arginfo_two_params, 0)
-	ZEND_ARG_INFO(0, index)
-	ZEND_ARG_INFO(0, value)
-ZEND_END_ARG_INFO();
-
-function_entry spl_funcs_iterator[] = {
-	SPL_ABSTRACT_FE(iterator, newIterator, NULL)
-	{NULL, NULL, NULL}
-};
-
-function_entry spl_funcs_forward[] = {
-	SPL_ABSTRACT_FE(forward, current,  NULL)
-	SPL_ABSTRACT_FE(forward, next,     NULL)
-	SPL_ABSTRACT_FE(forward, hasMore,  NULL)
-	{NULL, NULL, NULL}
-};
-
-function_entry spl_funcs_sequence[] = {
-	SPL_ABSTRACT_FE(sequence, rewind,  NULL)
-	{NULL, NULL, NULL}
-};
-
-function_entry spl_funcs_assoc[] = {
-	SPL_ABSTRACT_FE(assoc, key,  NULL)
-	{NULL, NULL, NULL}
-};
-
-function_entry *spl_funcs_forward_assoc  = NULL;
-function_entry *spl_funcs_sequence_assoc = NULL;
-
-function_entry spl_funcs_array_read[] = {
-	SPL_ABSTRACT_FE(array_read, get,     arginfo_one_param)
-	SPL_ABSTRACT_FE(array_read, exists,  arginfo_one_param)
-	{NULL, NULL, NULL}
-};
-
-function_entry spl_funcs_array_access[] = {
-	SPL_ABSTRACT_FE(array_access, set,  arginfo_two_params)
-	SPL_ABSTRACT_FE(array_access, del,  arginfo_one_param)
-	{NULL, NULL, NULL}
-};
 
 /* {{{ PHP_MINIT_FUNCTION(spl)
  */
@@ -159,28 +87,7 @@ PHP_MINIT_FUNCTION(spl)
 {
 	ZEND_INIT_MODULE_GLOBALS(spl, spl_init_globals, NULL);
 
-	REGISTER_SPL_INTERFACE(iterator);
-
-	REGISTER_SPL_INTERFACE(forward);
-
-	REGISTER_SPL_INTERFACE(sequence);
-	REGISTER_SPL_IMPLEMENT(sequence, forward);
-
-	REGISTER_SPL_INTERFACE(assoc);
-
-	REGISTER_SPL_INTERFACE(forward_assoc);
-	REGISTER_SPL_IMPLEMENT(forward_assoc, assoc);
-	REGISTER_SPL_IMPLEMENT(forward_assoc, forward);
-
-	REGISTER_SPL_INTERFACE(sequence_assoc);
-	REGISTER_SPL_IMPLEMENT(sequence_assoc, forward_assoc);
-	REGISTER_SPL_IMPLEMENT(sequence_assoc, sequence);
-
-	REGISTER_SPL_INTERFACE(array_read);
-
-	REGISTER_SPL_INTERFACE(array_access);
-	REGISTER_SPL_IMPLEMENT(array_access, array_read);
-
+	PHP_MINIT(spl_iterators)(INIT_FUNC_ARGS_PASSTHRU);
 	PHP_MINIT(spl_array)(INIT_FUNC_ARGS_PASSTHRU);
 	PHP_MINIT(spl_directory)(INIT_FUNC_ARGS_PASSTHRU);
 
@@ -256,10 +163,8 @@ PHP_MINFO_FUNCTION(spl)
 	php_info_print_table_row(2,    "forward",            foreach);
 	php_info_print_table_row(2,    "sequence",           foreach);
 	php_info_print_table_row(2,    "assoc",              foreach);
-	php_info_print_table_row(2,    "forward_assoc",      foreach);
-	php_info_print_table_row(2,    "sequence_assoc",     foreach);
-	php_info_print_table_row(2,    "array_read",         array_read);
-	php_info_print_table_row(2,    "array_access",       array_write);
+	php_info_print_table_row(2,    "ArrayRead",         array_read);
+	php_info_print_table_row(2,    "ArrayAccess",       array_write);
 	php_info_print_table_end();
 }
 /* }}} */
@@ -305,14 +210,13 @@ PHP_FUNCTION(spl_classes)
 {
 	array_init(return_value);
 
-	SPL_ADD_CLASS(iterator);
-	SPL_ADD_CLASS(forward);
-	SPL_ADD_CLASS(sequence);
-	SPL_ADD_CLASS(assoc);
-	SPL_ADD_CLASS(forward_assoc);
-	SPL_ADD_CLASS(sequence_assoc);
-	SPL_ADD_CLASS(array_read);
-	SPL_ADD_CLASS(array_access);
+	SPL_ADD_CLASS(ArrayAccess);
+	SPL_ADD_CLASS(ArrayClass);
+	SPL_ADD_CLASS(ArrayIterator);
+	SPL_ADD_CLASS(ArrayRead);
+	SPL_ADD_CLASS(DirectoryIterator);
+	SPL_ADD_CLASS(RecursiveIterator);
+	SPL_ADD_CLASS(RecursiveIteratorIterator);
 }
 /* }}} */
 

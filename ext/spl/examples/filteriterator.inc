@@ -10,11 +10,9 @@
  * and the instance will only return elements which match the given regular 
  * expression.
  */
-class filter implements spl_forward
+abstract class FilterIterator implements Iterator
 {
 	protected $it;
-	protected $regex;
-	protected $curr;
 
 	/**
 	 * Constructs a filter around an iterator whose elemnts are strings.
@@ -22,43 +20,27 @@ class filter implements spl_forward
 	 * method is called.
 	 *
 	 * @param it     Object that implements at least spl_forward
-	 * @param regex  Regular expression used as a filter.
+	 * @patam regex  Regular expression used as a filter.
 	 */
-	function __construct(spl_forward $it, $regex) {
-		if ($it instanceof spl_sequence) {
-			$it->rewind();
-		}
+	function __construct(Iterator $it) {
 		$this->it = $it;
-		$this->regex = $regex;
-		$this->fetch();
-	}
-	
-	/**
-	 * Destruct the iterator.
-	 */
-	function __destruct() {
-		unset($this->it);
 	}
 
-	/**
-	 * Check whether a value can be accepted.
-	 *
-	 * @param value   used to test
-	 * @return whether input is acceptable
-	 */
-	protected function accept($value) {
-		return ereg($this->regex, $value);
+	function rewind() {	
+		$this->it->rewind();
+		$this->fetch();
 	}
+
+	abstract function accept();
 
 	/**
 	 * Fetch next element and store it.
+	 *
+	 * @return void
 	 */
 	protected function fetch() {
-		$this->curr = false;
 		while ($this->it->hasMore()) {
-			$curr = $this->it->current();
-			if ($this->accept($curr)) {
-				$this->curr = $curr;
+			if ($this->accept()) {
 				return;
 			}
 			$this->it->next();
@@ -67,6 +49,8 @@ class filter implements spl_forward
 
 	/**
 	 * Move to next element
+	 *
+	 * @return void
 	 */
 	function next() {
 		$this->it->next();
@@ -77,14 +61,21 @@ class filter implements spl_forward
 	 * @return Whether more elements are available
 	 */
 	function hasMore() {
-		return $this->curr !== false;
+		return $this->it->hasMore();
+	}
+	
+	/**
+	 * @return The current key
+	 */
+	function key() {
+		return $this->it->key();
 	}
 	
 	/**
 	 * @return The current value
 	 */
 	function current() {
-		return $this->curr;
+		return $this->it->current();
 	}
 	
 	/**

@@ -16,39 +16,18 @@
    +----------------------------------------------------------------------+
  */
 
-#ifndef SPL_ENGINE_H
-#define SPL_ENGINE_H
+#ifndef SPL_ITERATORS_H
+#define SPL_ITERATORS_H
 
 #include "php.h"
 #include "php_spl.h"
 
-/* {{{ zend_class_entry */
-static inline zend_class_entry *spl_get_class_entry(zval *obj TSRMLS_DC)
-{
-	if (obj && Z_TYPE_P(obj) == IS_OBJECT && Z_OBJ_HT_P(obj)->get_class_entry) {
-		return Z_OBJ_HT_P(obj)->get_class_entry(obj TSRMLS_CC);
-	} else {
-		return NULL;
-	}
-}
-/* }}} */
+extern zend_class_entry *spl_ce_RecursiveIterator;
+extern zend_class_entry *spl_ce_RecursiveIteratorIterator;
 
-#define spl_call_method_0(obj, obj_ce, fn_proxy, function_name, fname_len, retval) \
-	spl_call_method(obj, obj_ce, fn_proxy, function_name, fname_len, retval, 0, NULL, NULL TSRMLS_CC)
+PHP_MINIT_FUNCTION(spl_iterators);
 
-#define spl_call_method_1(obj, obj_ce, fn_proxy, function_name, fname_len, retval, arg1) \
-	spl_call_method(obj, obj_ce, fn_proxy, function_name, fname_len, retval, 1, arg1, NULL TSRMLS_CC)
-
-#define spl_call_method_2(obj, obj_ce, fn_proxy, function_name, fname_len, retval, arg1, arg2) \
-	spl_call_method(obj, obj_ce, fn_proxy, function_name, fname_len, retval, 2, arg1, arg2 TSRMLS_CC)
-
-void spl_instantiate(zend_class_entry *pce, zval **object, int alloc TSRMLS_DC);
-int spl_instantiate_arg_ex1(zend_class_entry *pce, zval **retval, int alloc, zval *arg1 TSRMLS_DC);
-int spl_instantiate_arg_ex2(zend_class_entry *pce, zval **retval, int alloc, zval *arg1, zval *arg2 TSRMLS_DC);
-
-int spl_is_instance_of(zval **obj, zend_class_entry *ce TSRMLS_DC);
-
-#endif /* SPL_ENGINE_H */
+#endif /* SPL_ITERATORS_H */
 
 /*
  * Local Variables:

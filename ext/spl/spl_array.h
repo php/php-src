@@ -22,16 +22,12 @@
 #include "php.h"
 #include "php_spl.h"
 
-#ifdef SPL_ARRAY_READ
-ZEND_EXECUTE_HOOK_FUNCTION(ZEND_FETCH_DIM_R);
-ZEND_EXECUTE_HOOK_FUNCTION(ZEND_FETCH_DIM_W);
-ZEND_EXECUTE_HOOK_FUNCTION(ZEND_FETCH_DIM_RW);
-#endif
+extern zend_class_entry *spl_ce_ArrayRead;
+extern zend_class_entry *spl_ce_ArrayAccess;
+extern zend_class_entry *spl_ce_ArrayClass;
+extern zend_class_entry *spl_ce_ArrayIterator;
 
-#ifdef SPL_ARRAY_WRITE
-ZEND_EXECUTE_HOOK_FUNCTION(ZEND_ASSIGN_DIM);
-ZEND_EXECUTE_HOOK_FUNCTION(ZEND_UNSET_DIM_OBJ);
-#endif
+PHP_MINIT_FUNCTION(spl_array);
 
 #endif /* SPL_ARRAY_H */
 

@@ -16,17 +16,17 @@
    +----------------------------------------------------------------------+
  */
 
-#ifndef SPL_FOREACH_H
-#define SPL_FOREACH_H
+#ifndef SPL_DIRECTORY_H
+#define SPL_DIRECTORY_H
 
 #include "php.h"
 #include "php_spl.h"
 
-ZEND_EXECUTE_HOOK_FUNCTION(ZEND_FE_RESET);
-ZEND_EXECUTE_HOOK_FUNCTION(ZEND_FE_FETCH);
-ZEND_EXECUTE_HOOK_FUNCTION(ZEND_SWITCH_FREE);
+extern zend_class_entry *spl_ce_DirectoryIterator;
 
-#endif /* SPL_FOREACH_H */
+PHP_MINIT_FUNCTION(spl_directory);
+
+#endif /* SPL_DIRECTORY_H */
 
 /*
  * Local Variables:

@@ -24,7 +24,6 @@
 #include "php_ini.h"
 #include "ext/standard/info.h"
 #include "php_spl.h"
-#include "spl_foreach.h"
 
 /* {{{ spl_destroy_class */
 void spl_destroy_class(zend_class_entry ** ppce)
@@ -62,17 +61,24 @@ void spl_register_std_class(zend_class_entry ** ppce, char * class_name, void * 
 }
 /* }}} */
 
+/* {{{ spl_register_sub_class */
+void spl_register_sub_class(zend_class_entry ** ppce, zend_class_entry * parent_ce, char * class_name, void *obj_ctor, function_entry * function_list TSRMLS_DC)
+{
+	zend_class_entry ce;
+	
+	INIT_CLASS_ENTRY(ce, class_name, function_list);
+	ce.name_length = strlen(class_name);
+	*ppce = zend_register_internal_class_ex(&ce, parent_ce, NULL TSRMLS_CC);
+
+	/* entries changed by initialize */
+	(*ppce)->create_object = obj_ctor;
+}
+/* }}} */
+
 /* {{{ spl_register_parent_ce */
 void spl_register_parent_ce(zend_class_entry * class_entry, zend_class_entry * parent_class TSRMLS_DC)
 {
 	class_entry->parent = parent_class;
-}
-/* }}} */
-
-/* {{{ spl_register_implement */
-void spl_register_implement(zend_class_entry * class_entry, zend_class_entry * interface_entry TSRMLS_DC)
-{
-	zend_class_implements(class_entry TSRMLS_CC, 1, interface_entry);
 }
 /* }}} */
 
