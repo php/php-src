@@ -435,18 +435,6 @@ Package=<4>
 
 ###############################################################################
 
-Project: "swf"=..\ext\swf\swf.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-}}}
-
-###############################################################################
-
 Project: "sybase_ct"=..\ext\sybase_ct\sybase_ct.dsp - Package Owner=<4>
 
 Package=<5>
