@@ -1,7 +1,7 @@
 PHP_ARG_BUNDLE(bundle-expat, Whether to enable XML support,
 [  --disable-bundle-expat  Use the bundled expat library], yes)
 
-if test "$PHP_BUNDLE_EXPAT" = "yes"; then
+if test "$PHP_BUNDLE_EXPAT" = "yes" && test "$PHP_EXPAT_DIR" = "no"; then
 	AC_C_BIGENDIAN
 	if test "$ac_cv_c_bigendian" = "yes"; then
 		order=4321
