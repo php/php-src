@@ -1,3 +1,6586 @@
+2002-12-16  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/mssql/php_mssql.h:
+      Fixing WIn32 build after adding support for FreeTDS
+
+    * ext/mssql/config.m4
+      ext/mssql/php_mssql.c
+      ext/mssql/php_mssql.h:
+      Allow the native MSSQL extension to be compiled with FreeTDS on *nix
+      platforms.
+      This will make the whole MSSAL API available on these platforms.
+
+2002-12-16  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Remote.php:
+      - fix one missing DIRECTORY_SEPARATOR and a typo
+
+2002-12-16  Sergey Kartashoff  <gluke@biosys.net>
+
+    * ext/mnogosearch/php_mnogo.c:
+      - mnogosearch extension updated to compile with mnogosearch-3.2.8
+
+2002-12-16  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/exif/exif.c
+      ext/exif/exif.c
+      ext/exif/exif.c:
+      MFH
+
+    * ext/exif/exif.c
+      ext/exif/exif.c:
+      fix compiler definition tests
+
+2002-12-16  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * main/main.c:
+      MFH
+
+    * main/main.c:
+      A better, strtok() free implementaion of php_disable_functions().
+
+    * ext/pgsql/pgsql.c:
+      MFH (memory leak).
+
+2002-12-16  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/exif/tests/exif006.phpt:
+      fix test
+
+    * ext/exif/tests/exif006.phpt:
+      Add version check since this will be available since php 4.4.
+
+    * ext/exif/tests/exif002.phpt
+      ext/exif/tests/exif003.phpt
+      ext/exif/tests/exif004.phpt
+      ext/exif/tests/exif005.phpt:
+      MFH: that silly dot
+
+    * ext/exif/tests/exif002.phpt
+      ext/exif/tests/exif003.phpt
+      ext/exif/tests/exif004.phpt
+      ext/exif/tests/exif005.phpt
+      ext/exif/tests/exif006.phpt:
+      forgot to remove that dot
+
+    * ext/exif/tests/exif002.phpt
+      ext/exif/tests/exif003.phpt
+      ext/exif/tests/exif004.phpt
+      ext/exif/tests/exif005.phpt:
+      MFH
+
+    * ext/exif/exif.c
+      ext/exif/tests/exif002.phpt
+      ext/exif/tests/exif003.phpt
+      ext/exif/tests/exif004.phpt
+      ext/exif/tests/exif005.phpt
+      ext/exif/tests/exif006.phpt:
+      -Add constant that shows whether or not exif uses mbstring.
+      -Fix tests
+
+2002-12-16  Sascha Schumann  <sascha@schumann.cx>
+
+    * pear/pear.m4:
+      CFLAGS_CLEAN was not properly defined
+
+2002-12-16  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/exif/exif.c:
+      change mbstring detection
+
+2002-12-16  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * NEWS:
+      - Fix typo
+
+    * NEWS:
+      - MFB
+
+    * NEWS:
+      - Update NEWS
+
+    * ext/mcrypt/tests/bug21039.phpt
+      ext/mcrypt/tests/bug21039.phpt:
+      
+      file bug21039.phpt was initially added on branch PHP_4_3.
+
+    * ext/mcrypt/mcrypt.c:
+      - Fix bug #21039
+
+2002-12-16  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/pgsql/pgsql.c:
+      A better memory leak patch.
+
+2002-12-15  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/exif/exif.c:
+      ws
+
+    * ext/gd/libgd/gd.c:
+      MFB: gd uses float instead of double
+
+2002-12-15  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/yaz/php_yaz.c:
+      Close log file on shutdown.
+
+    * ext/pgsql/pgsql.c:
+      Fixed a memory leak.
+
+2002-12-14  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/exif/exif.c:
+      MFH
+
+    * ext/exif/exif.c:
+      Fix build when mbstring is a shared module or dll under windows
+
+2002-12-14  Pierre-Alain Joye  <paj@pearfr.org>
+
+    * ext/gd/libgd/gd.c:
+      Do not allow AA if not trueColor (imageantialias does nothing)
+
+2002-12-14  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/exif/exif.c:
+      MFH: bugfix: #21010
+
+    * ext/exif/exif.c:
+      Bugfix: #21010 (Here it's maker (manufacturer) instead of marker)
+
+2002-12-14  Stefan Esser  <s.esser@e-matters.de>
+
+    * main/rfc1867.c:
+      cleanup
+
+2002-12-14  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/gd/config.m4:
+      MFB: Fix bug #20995
+
+    * ext/gd/config.m4:
+      Fixed bug: #20995
+
+2002-12-13  Melvyn Sopacua  <msopacua@idg.nl>
+
+    * tests/lang/bug20993.phpt:
+      MFH
+
+    * tests/lang/bug20993.phpt:
+      
+      Add testcase for bug #20993
+
+2002-12-13  Vlad Krupin  <phpdevel@echospace.com>
+
+    * ext/dbase/dbf_head.c:
+      MFH fix for bug 19727
+
+2002-12-13  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * configure.in:
+      MFH
+
+    * ext/dba/tests/.cvsignore:
+      MFH
+
+    * ext/dba/tests/.cvsignore:
+      Add missing entry
+
+    * configure.in:
+      Fix cli build for cygwin
+
+    * ext/openssl/openssl.c:
+      MFB: ZTS fix by Ilia
+
+2002-12-13  Vlad Krupin  <phpdevel@echospace.com>
+
+    * ext/dbase/dbf_head.c:
+      Fix for bug 19727. dBase5 (at least for windows) seems to allow 1024 fields
+
+2002-12-13  Stig Bakken  <ssb@fast.no>
+
+    * pear/package-PEAR.xml:
+      MFH
+
+    * pear/package-PEAR.xml:
+      - update release notes, remove warning
+
+    * pear/PEAR/Frontend/CLI.php
+      pear/scripts/pear.bat
+      pear/scripts/pear.in
+      pear/scripts/phpize.in:
+      MFH
+
+    * pear/PEAR/Command/Registry.php
+      pear/PEAR/Command/Remote.php:
+      MFH
+
+    * pear/PEAR/Config.php
+      pear/PEAR/Dependency.php
+      pear/PEAR/Installer.php
+      pear/PEAR/Remote.php
+      pear/PEAR/Command/Auth.php
+      pear/PEAR/Command/Build.php
+      pear/PEAR/Command/Common.php
+      pear/PEAR/Command/Config.php
+      pear/PEAR/Command/Install.php
+      pear/PEAR/Command/Package.php:
+      MFH
+
+    * pear/System.php
+      pear/install-pear.php
+      pear/package-PEAR.xml
+      pear/package.dtd
+      pear/OS/Guess.php
+      pear/PEAR/Common.php:
+      MFH
+
+    * pear/package-PEAR.xml:
+      - fix version/date
+
+    * pear/package-PEAR.xml
+      pear/PEAR/Config.php
+      pear/scripts/pear.bat
+      pear/scripts/pear.in:
+      - introduce php_bin config parameter
+      * use PHP_PEAR_<PARAM_NAME> environment variables for defaults
+        (for example PHP_PEAR_PHP_DIR)
+      * Windows cleanups
+
+    * pear/System.php:
+      - _parseArgs bugfix
+
+2002-12-13  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/ircg.c:
+      remove IRCGG()
+
+    * ext/ircg/ircg.c
+      ext/ircg/php_ircg.h:
+      make IRCG startup behaviour configurable (work dir, shared mem size,
+      control user)
+
+2002-12-12  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/standard/tests/strings/bug20934.phpt:
+      MFB
+
+    * ext/standard/tests/strings/bug20934.phpt:
+      Forgot to prepend "SKIP"
+
+    * ext/standard/tests/strings/bug20934.phpt:
+      MFH
+
+    * ext/standard/tests/strings/bug20934.phpt:
+      
+      Added a test case for bug #20934
+
+2002-12-12  Stefan Esser  <s.esser@e-matters.de>
+
+    * ext/sybase/php_sybase_db.c:
+      MFH: finally?! correct
+
+    * ext/sybase/php_sybase_db.c:
+      remove extra char in case of binary/money fields
+
+2002-12-12  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/gd/gd.c:
+      MFH
+
+    * ext/gd/gd.c:
+      Fixed bug #20974 (added missing sanity check).
+
+    * ext/standard/basic_functions.c:
+      MFH
+
+2002-12-12  Melvyn Sopacua  <msopacua@idg.nl>
+
+    * ext/standard/basic_functions.c:
+      Fix for BSD's (possibly others):
+        Accept system default, for the index. Don't initialize it.
+
+2002-12-12  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/openssl/openssl.c:
+      Fixed ZTS build.
+
+2002-12-12  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/standard/exec.c
+      main/streams.c:
+      MFB: popen/pclose and proc_open/proc_close fixes.
+
+    * ext/standard/exec.c
+      main/streams.c:
+      Fix some issues with the return value from pclose and proc_close,
+      and bogus seek-on-pipe warnings when used with fpassthru.
+
+2002-12-12  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * run-tests.php:
+      Fix a possible E_NOTICE warning message.
+
+    * run-tests.php:
+      MFH
+
+2002-12-12  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/openssl/tests/001.phpt:
+      MFH more entropy "fix"
+
+    * ext/openssl/tests/001.phpt:
+      Attempt to add more entropy for key generation.
+
+    * NEWS:
+      MFB streams news
+
+2002-12-12  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/html.c
+      ext/standard/string.c:
+      MFH
+
+    * ext/standard/html.c:
+      Fixed misspelling of the Greek letter lambda,
+      noticed by jmartin-php@notamusica.com.
+
+2002-12-12  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * NEWS:
+      Collect streams related changes into one place, as requested by Jani.
+
+2002-12-12  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/openssl/openssl.c
+      ext/pcntl/pcntl.c:
+      MFH
+
+    * ext/openssl/openssl.c:
+      php_error -> php_error_docref conversion fix (noticed by derick)
+
+2002-12-12  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * NEWS:
+      MFH
+
+    * NEWS:
+      Bug fixing news.
+
+2002-12-12  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/openssl/README
+      ext/openssl/openssl.c:
+      MFH #20936 fix
+
+2002-12-12  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * NEWS:
+      MFH
+
+2002-12-12  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/tests/strings/bug20927.phpt:
+      MFH
+
+2002-12-12  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * NEWS:
+      Jani happification
+
+2002-12-12  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/openssl/README
+      ext/openssl/openssl.c:
+      Patch for #20936 (openssl: public key handling was broken).
+      Thanks to <jeroen@derks.it> for the patch.
+
+2002-12-12  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/tests/strings/bug20927.phpt:
+      
+      Fixed bug #20927 and updated the test case for the bug.
+
+    * ext/standard/string.c:
+      Fixed bug #20927 and updated the test case for the bug.
+
+2002-12-12  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * NEWS:
+      Bug fixing news
+
+    * ext/standard/html.c:
+      MFH: Fixed bug #20934 (htmlspecialchars returns latin1 from UTF-8)
+
+    * ext/standard/html.c:
+      Fixed bug #20934 (htmlspecialchars returns latin1 from UTF-8)
+
+2002-12-12  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/openssl/openssl.c:
+      MFH: ws, php_error_docref, typeconversion for cygwin
+
+    * ext/dio/dio.c:
+      MFH
+
+    * ext/pcntl/pcntl.c:
+      php_error -> php_error_docref
+
+    * ext/pcntl/pcntl.c:
+      SIGIOT may not be defined in cygwin
+
+    * ext/openssl/openssl.c:
+      typeconversion is needed here for cygwin
+
+    * ext/dio/dio.c:
+      O_ASYNC is not defined in cygwin
+
+2002-12-12  Edin Kadribasic  <edink@proventum.net>
+
+    * ext/domxml/domxml.dsp:
+      MFB: DOM/XSLT support in win32 build (bug #20485).
+
+    * ext/domxml/domxml.dsp:
+      Fixed bug #20485 (added flags to windows build to compile DOM/XSLT).
+
+2002-12-11  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/gd/gd.c
+      ext/gd/php_gd.h:
+      MFH (make imagecreatefromxpm() unavailable when bundled GD is used)
+
+    * NEWS:
+      GD library news.
+
+    * ext/gd/tests/jpeg2png.phpt:
+      MFH
+
+    * ext/gd/tests/jpeg2png.phpt:
+      Added check for availability of jpeg support.
+
+    * ext/gd/gd.c
+      ext/gd/php_gd.h:
+      Fixed build with non-bundled GD. Hidden the anti-alias functions when
+      non-bundled GD is used and made imagecreatefromxpm() unavailable because
+      of a bug in the external GD library.
+
+2002-12-11  Pierre-Alain Joye  <paj@pearfr.org>
+
+    * ext/gd/libgd/gd.c:
+      Fix brightness filter (argument ingnored)
+
+2002-12-11  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/gd/libgd/gd.c:
+      White space fixes.
+
+    * ext/gd/libgd/gd.c:
+      Syncronize bundled gd sources with that of gd 2.0.9, affected functions
+      are: gdImageBrushApply() & gdImageCopyResized().
+
+2002-12-11  Pierre-Alain Joye  <paj@pearfr.org>
+
+    * ext/gd/libgd/gd.h:
+      Add antialias flag to image structure
+      Add AA support
+
+    * ext/gd/libgd/gd.c:
+      Add gdImageAAline (antialiased line)
+      Add AA support for gdImagePolygon
+
+    * ext/gd/php_gd.h:
+      Remove double definition of imagesettile
+      Add imageantiallias
+
+    * ext/gd/gd.c:
+      Add imageantialias(im, flag)
+      Add AA support for bundled imageline
+
+2002-12-11  Melvyn Sopacua  <msopacua@idg.nl>
+
+    * ext/standard/tests/strings/bug20927.phpt:
+      Add testcase for reported wordwrap bug
+
+2002-12-11  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * run-tests.php:
+      - MFB
+
+    * run-tests.php:
+      - Make it also work when you press enter instead of typing 'y'
+
+2002-12-11  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/fdf/fdf.c:
+      MFH
+
+    * ext/fdf/fdf.c:
+      Added missing &.
+
+2002-12-11  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * configure.in
+      main/php_version.h:
+      Back to -dev.
+
+    * configure.in
+      main/php_version.h:
+      Go for RC3.
+
+2002-12-11  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/tests/general_functions/getopt.phpt:
+      MFH
+
+    * ext/standard/tests/general_functions/getopt.phpt:
+      
+      Added getopt() test.
+
+    * run-tests.php:
+      MFH
+
+    * run-tests.php:
+      Ask the user for their e-mail address so that we can contact them if need
+      be.
+
+2002-12-11  Sara Golemon  <php@alphaweb.net>
+
+    * ext/bcmath/bcmath.c
+      ext/bcmath/php_bcmath.h:
+      Renamed bc_powmod to bcpowmod to keep it inline with existing module
+      functions.  Fixed whitespace problem.
+
+2002-12-11  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/fdf/fdf.c:
+      Added missing variable to parameter retrieval.
+
+2002-12-11  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/oci8/oci8.c:
+      - ws fixes
+      - // -> /* */ (No C++ comments in c code!)
+      - #if / #else / etc. have to start from first column.
+
+    * ext/standard/tests/image/.cvsignore
+      ext/sysvsem/tests/.cvsignore
+      pear/Console/tests/.cvsignore:
+      MFH
+
+    * ext/sysvsem/tests/.cvsignore
+      pear/Console/tests/.cvsignore
+      tests/run-test/.cvsignore:
+      
+      - Some more missing .cvsignore files.
+
+    * ext/calendar/tests/.cvsignore
+      ext/standard/tests/image/.cvsignore:
+      - Some more missing .cvsignore files.
+
+    * pear/tests/.cvsignore
+      tests/run-test/.cvsignore:
+      MFH
+
+    * pear/tests/.cvsignore:
+      missing entry
+
+    * ext/bcmath/tests/.cvsignore:
+      missing file
+
+    * ext/bcmath/tests/.cvsignore
+      ext/bcmath/tests/.cvsignore:
+      
+      file .cvsignore was initially added on branch PHP_4_3.
+
+2002-12-11  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * ext/mbstring/mbfilter_kr.c
+      ext/mbstring/mbfilter_kr.c:
+      fixed lack of variable initialization bug.
+
+2002-12-11  Abdul-Kareem Abo-Namous  <predator79@web.de>
+
+    * ext/oci8/oci8.c:
+      fixed string comparison which brought up a gcc warning.
+
+2002-12-11  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/dba/dba.c:
+      MFH
+
+    * ext/dba/dba.c:
+      Warnings and Notices when lock modifiers for dba_(p)open are used wrong.
+      This finally closes bug #20828 (and i hope it must not be reopened)
+
+2002-12-11  Edin Kadribasic  <edink@proventum.net>
+
+    * sapi/cli/php_cli.c:
+      MFH: Fix for #20539 (patch by Moriyoshi Koizumi).
+
+    * sapi/cli/php_cli.c:
+      Fix for #20539 (patch by Moriyoshi Koizumi).
+
+2002-12-11  Jani Taskinen  <sniper@iki.fi>
+
+    * NEWS:
+      MFH
+
+    * NEWS:
+      snow..not again..
+
+    * ext/mysql/libmysql/libmysql.c:
+      MFH: fix from 3.23.54
+
+    * configure.in
+      sapi/apache/libphp4.module.in:
+      MFH: Fix for bug #20928
+
+    * configure.in
+      sapi/apache/libphp4.module.in:
+      Fixed bug #20298: LDFLAGS were not passed to the static apache module build
+
+2002-12-11  Georg Richter  <georg.richter@phpev.de>
+
+    * NEWS:
+      fixed security bug in libmysql
+
+    * ext/mysql/libmysql/libmysql.c:
+      Security fix (merged from 3.23.54)
+
+2002-12-11  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/exif/exif.c:
+      decode variable is only used when mbstring is avaliable.
+
+    * ext/openssl/openssl.c:
+      ZTS fix.
+
+    * sapi/pi3web/pi3web_sapi.c:
+      MFH
+
+    * sapi/pi3web/pi3web_sapi.c:
+      Fixed compiler warning.
+
+    * ext/openssl/openssl.c:
+      Fix ZTS build
+
+2002-12-10  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/dba/dba.c:
+      MFH
+
+    * ext/dba/dba.c:
+      add missing comment
+
+    * ext/dba/dba.c:
+      LOCK_EX is not allowed in read mode -> try using existing .lck file in read
+      only mode only when in read mode.
+
+2002-12-10  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/openssl/EXPERIMENTAL:
+      No longer experimental
+
+    * ext/openssl/EXPERIMENTAL:
+      No longer experimental.
+
+    * ext/openssl/openssl.c:
+      use php_error_docref and tidy up some WS/coding standards.
+
+    * ext/openssl/openssl.c:
+      Fix proto and avoid potential segfault on an error.
+
+2002-12-10  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/dba/dba.c:
+      -remove second attempt to close lock file
+      -default to lock on db file instead on .lck file.
+      -try to use existing .lck file and only create it on failure (allows ro
+      access)
+
+    * ext/cpdf/config.m4:
+      stick to "check <what> <result>" scheme, do not repeat messages and
+      align messages correctly.
+
+2002-12-10  Stefan Esser  <s.esser@e-matters.de>
+
+    * ext/sybase/php_sybase_db.c
+      ext/sybase/php_sybase_db.c:
+      MFH
+
+    * ext/sybase/php_sybase_db.c:
+      fixing cut&paste bug
+
+2002-12-10  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * main/php_main.h
+      sapi/apache_hooks/mod_php4.c
+      sapi/apache_hooks/php_apache.c
+      sapi/apache_hooks/sapi_apache.c:
+      Fixed a few compile warnings and one compile error.
+
+2002-12-10  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/gd/config.m4:
+      MFH
+
+    * ext/gd/config.m4:
+      directory values are optional
+
+    * ext/fam/config.m4:
+      remove not wanted skeleton comment and align configure message
+
+2002-12-10  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/gd/gd.c
+      ext/gd/gd.c:
+      Fixed build with GD 1.8.4
+
+2002-12-10  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/bcmath/bcmath.c:
+      Fixing ZTS Build
+
+2002-12-10  Sara Golemon  <php@alphaweb.net>
+
+    * ext/bcmath/bcmath.c
+      ext/bcmath/php_bcmath.h:
+      Added support for libbcmath's bc_raisemod function as bc_powmod()
+
+2002-12-10  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/ircg.c:
+      Change to more suitable defaults until I add the appropiate ini settings
+
+2002-12-10  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/exif/exif.c
+      ext/exif/exif.c:
+      MFH
+
+    * ext/exif/exif.c:
+      Fixed win32 build.
+
+    * ext/gd/gd.c:
+      MFH
+
+2002-12-10  Edin Kadribasic  <edink@proventum.net>
+
+    * ext/snmp/snmp.c:
+      MFB: Fix ZTS build.
+
+    * ext/snmp/snmp.c:
+      Fix ZTS build.
+
+2002-12-10  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * main/streams.c:
+      MFB
+
+    * main/streams.c:
+      Fix for bug #20831.
+
+2002-12-10  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/cyrus/config.m4:
+      MFH: added the version check
+
+    * ext/cyrus/config.m4:
+      This extension requires cyrus-imap >= 2.0.8
+
+2002-12-10  Edin Kadribasic  <edink@proventum.net>
+
+    * main/streams.c:
+      Improve UNC path detection.
+
+2002-12-10  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * main/rfc1867.c
+      main/rfc1867.c:
+      MFH
+
+    * main/rfc1867.c:
+      Removed one more unneeded check.
+
+    * main/rfc1867.c:
+      Removed a pointless check. Thanks Stefan.
+
+2002-12-10  Stefan Esser  <s.esser@e-matters.de>
+
+    * ext/sybase/php_sybase_db.c:
+      fixing crashbug
+      
+      patch by freddy77@angelfire.com
+
+2002-12-10  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/exif/exif.c:
+      MFH
+
+    * ext/exif/exif.c:
+      -make those debug messages
+
+    * ext/cpdf/config.m4:
+      -when required haeder was not found --with-cdpf was simply ignored. I
+       changed this to be an error.
+      -cpdf did not check for --with-jpeg-dir and --with-tiff-dir
+
+    * tests/classes/abstract.phpt
+      tests/classes/abstract_class.phpt
+      tests/classes/static_mix_1.phpt
+      tests/classes/static_mix_2.phpt:
+      "of cause" should have been "of course" but is not needed anyway
+
+2002-12-10  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/exif/exif.c:
+      Fixed bug #20907, patch by m-arai@sco.bekkoame.ne.jp.
+
+2002-12-09  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/cyrus/config.m4:
+      MFH
+
+2002-12-09  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * sapi/apache2filter/sapi_apache2.c:
+      MFH
+
+    * sapi/apache2filter/sapi_apache2.c:
+      Replaced deprecated APR_BRIGADE_FOREACH macro.
+
+2002-12-09  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/cyrus/config.m4:
+      fix typos
+
+    * ext/cyrus/config.m4:
+      Make this actually work too.
+
+2002-12-09  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * configure.in
+      ext/zip/config.m4
+      ext/zlib/config0.m4:
+      Centralize fopencookie test
+
+    * configure.in
+      ext/zip/config.m4
+      ext/zlib/config0.m4:
+      Centralize the fopencookie test.
+
+    * ext/curl/curlstreams.c:
+      No need to compile this code if curl streams are not enabled, which they
+      cannot be in 4.3 (configure option is disabled and they don't work yet
+      anyway).
+
+2002-12-09  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/dba/dba.c:
+      MFH: '-' modifier (bug #20282, #20858)
+
+2002-12-09  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/cyrus/config.m4:
+      Fix the build with new cyrus and sasl2 libs
+
+2002-12-09  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/dba/dba.c:
+      Recheckin as unix
+
+    * ext/dba/dba.c:
+      Added open modifier '-' to skip/ignore locking. See bug #20828, #20858
+
+2002-12-09  Melvyn Sopacua  <msopacua@idg.nl>
+
+    * sapi/cgi/config9.m4
+      sapi/cli/config.m4:
+      MFH: fix make install target on Cygwin
+
+    * sapi/cgi/config9.m4
+      sapi/cli/config.m4:
+      Fix make install target on Cygwin, bug #20807
+
+2002-12-09  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/zlib/tests/gzreadgzwrite.phpt
+      ext/zlib/tests/gzreadgzwriteplain.phpt:
+      MFB: zlib stream tests
+
+    * configure.in
+      main/streams.c:
+      MFH: fopencookie for BSD patch
+
+    * configure.in
+      main/streams.c:
+      Emulate fopencookie on *BSD systems.
+      Patch mostly from Melvyn Sopacua <msopacua@idg.nl>
+
+2002-12-09  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/standard/array.c:
+      
+
+2002-12-09  Sascha Schumann  <sascha@schumann.cx>
+
+    * Makefile.global:
+      Use $(INSTALL) rather than cp to install modules.
+      
+      $(INSTALL) will usually unlink the target file first, so that in-memory
+      instances of the old file don't get simply overwritten (and crash and
+      burn).
+
+    * ext/ircg/ircg_scanner.c
+      ext/ircg/ircg_scanner.re:
+      turn frequently called functions into macros to reduce function call
+      and pointer dereference overhead.
+
+2002-12-09  Edin Kadribasic  <edink@proventum.net>
+
+    * ext/sockets/sockets.c:
+      MFB: Fix for #20894.
+
+2002-12-09  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/ircg.c
+      ext/ircg/php_ircg_formats.h
+      ext/ircg/php_ircg_private.h
+      ext/ircg/php_ircg_tokenizer.h:
+      It is now possible to run 'apachectl restart' even if PHP
+      and/or the IRCG extension are a shared module.
+      
+      In those cases, the heap will be initialized to zero during
+      a restart, so we basically lose all state information,
+      including pointers to already allocated data structures.
+      
+      We compensate that by introducing a separate area manager
+      which maintains a id => ptr mapping.  That manager can be
+      queried through a UNIX domain socket, so that the newly
+      loaded DSO (which still has the shared memory segment
+      attached) can ask the manager for the pointers.
+
+2002-12-09  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/standard/dns.c:
+      T_AAAA is not always available.
+
+2002-12-09  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * sapi/cli/php_cli.c:
+      Fix build.
+
+2002-12-09  Edin Kadribasic  <edink@proventum.net>
+
+    * ext/sockets/sockets.c:
+      Fixed crash in socket_read on windows #20894 (patch by Wez Furlong).
+
+2002-12-09  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/zlib/zlib_fopen_wrapper.c:
+      MFB zlib related fixes
+      (sorry I didn't get around to doing this sooner)
+
+    * main/streams.c:
+      MFB: #20831 fix
+
+    * main/streams.c:
+      Fix for bug #20831; include() from UNC paths does not work.
+
+2002-12-09  Christian Stocker  <chregu@phant.ch>
+
+    * ext/domxml/php_domxml.c:
+      PHP_FALIAS for doc_get_elements_by_tagname got lost
+
+2002-12-08  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/gd/libgd/gd.c:
+      Fixed a color mixup in gdImageCopyResampled() when dealing with true-color
+      images & brought the code up to PHP coding standards.
+
+2002-12-08  Harald Radi  <harald.radi+coding.php@nme.at>
+
+    * sapi/milter/php_milter.c:
+      MFH those punctuation fixes
+
+    * sapi/milter/TODO:
+      update todo
+
+    * sapi/milter/php_milter.h:
+      initial checkin
+
+    * sapi/milter/php_milter.c:
+      threaded version to 1:1 map connections and php request handler threads
+
+2002-12-08  Timm Friebe  <thekid@thekid.de>
+
+    * ext/sybase_ct/php_sybase_ct.c:
+      - MFH
+
+2002-12-08  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * sapi/cli/php_cli.c:
+      Fixed stream leaks
+
+    * ext/standard/dns.c:
+      Prevented return_value from being freed() twice
+
+2002-12-08  Sara Golemon  <php@alphaweb.net>
+
+    * ext/standard/dns.c:
+      Bug #17174 Added IPv6 (AAAA record) support to dns_check_record() also
+      added support to dns_get_record
+
+2002-12-07  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * tests/classes/abstract_class.phpt
+      tests/classes/abstract_redeclare.phpt:
+      Updated error message
+
+2002-12-07  Timm Friebe  <thekid@thekid.de>
+
+    * ext/sybase_ct/php_sybase_ct.c:
+      - Fixed three memory leaks
+      - Fixed segfault with sybase_unbuffered_query() and unfetched resultsets
+
+2002-12-07  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * NEWS:
+      MFH
+
+    * NEWS:
+      Bug fixing news.
+
+    * main/php_variables.c:
+      MFH
+
+    * main/php_variables.c:
+      Fixed bug #20796. $_GET/$_POST/$_COOKIE data can get overwritten when
+      register_globals are on and input contains arrays.
+
+2002-12-07  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * tests/classes/abstract_class.phpt:
+      Adding a test for abstract class instanciation
+
+2002-12-07  Jani Taskinen  <sniper@iki.fi>
+
+    * NEWS:
+      sync
+
+    * NEWS:
+      Bug fixes for new stuff do not belong in NEWS..
+
+2002-12-07  Sander Roobol  <phy@wanadoo.nl>
+
+    * NEWS:
+      sync with branch
+
+    * NEWS:
+      MFH
+
+    * NEWS:
+      Forgot to add this entry...
+
+2002-12-07  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/imap/php_imap.c:
+      MFH
+
+    * ext/imap/php_imap.c:
+      fixing code style
+
+2002-12-07  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * main/rfc1867.c:
+      MFH
+
+    * main/rfc1867.c:
+      Fixed bugs #20725 & #20860. Post form variables get lost if the uploaded
+      files cannot be written to disk.
+
+2002-12-06  Frank M. Kromann  <frank@kromann.info>
+
+    * win32/sendmail.c
+      win32/sendmail.h:
+      MFH
+
+    * win32/sendmail.c
+      win32/sendmail.h:
+      Removing unused code and making sure headers are send when called from
+      imap_mail()
+
+    * ext/imap/php_imap.c:
+      MFH
+
+    * ext/imap/php_imap.c:
+      Fixing a possible strcat on a NULL pointer
+
+2002-12-06  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/oci8/config.m4:
+      Fixed build with autoconf-2.54
+
+2002-12-06  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/tests/array/bug20865.phpt:
+      MFH
+
+    * ext/standard/tests/array/bug20865.phpt:
+      
+      Added test case for bug #20865.
+
+    * ext/standard/array.c:
+      MFH
+
+    * ext/standard/array.c:
+      Fixed bug #20865, array_key_exists() could not locate NULL keys.
+
+2002-12-06  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/cpdf/cpdf.c:
+      cpdf + bundled gd
+
+2002-12-06  Abdul-Kareem Abo-Namous  <predator79@web.de>
+
+    * ext/oci8/config.m4
+      ext/oci8/oci8.c
+      ext/oci8/php_oci8.h:
+      
+      added support for multiple character sets.
+      
+      OCILogon now has a forth optional parameter, which is the character set
+      requested by the string (i.e. we8iso8859p1). when left blank, NLS_LANG or
+      default is used.
+      
+      config.m4 was changed to identify Oracle 9+ which is needed for this
+      feature. all other oracle versions (lesser) fall back to the old
+      behaviour.
+
+2002-12-06  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/ircg.c:
+      fix uninitialized pointer issue
+
+2002-12-06  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * sapi/servlet/README:
+      A bit of an update for the sapi/servlet installation guide.
+
+2002-12-06  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/config.m4:
+      enable shared build
+
+2002-12-06  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * NEWS:
+      MFH
+
+2002-12-06  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/ircg.c:
+      added a hook-registration function similiar to irc_connect() for
+      the write buffer. we register a callback for closed-conn notification
+      and an async handler for write_buf_add completion, so that we
+      can maintain proper reference counts.
+      
+      we also call the global IRCG init function only once. this proves to
+      be successful all the time and even apachectl restart/graceful works
+      beautifully now.
+
+2002-12-06  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/ftp/php_ftp.c:
+      MFH
+
+2002-12-06  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * NEWS:
+      Deprecate sapi/fastcgi.
+
+2002-12-06  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/ftp/php_ftp.c:
+      Fixed bug #20812, ftp_get returned NULL on success instead of TRUE.
+
+2002-12-06  Pierre-Alain Joye  <paj@pearfr.org>
+
+    * ext/gd/gd.c
+      ext/gd/php_gd.h:
+      Add imageistruecolor
+
+2002-12-06  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Frontend/CLI.php:
+      MFH
+
+    * pear/PEAR/Frontend/CLI.php:
+      - fix upgrade-all output
+
+2002-12-05  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/calendar/calendar.c:
+      Fixed memory leaks inside heb_number_to_chars().
+
+2002-12-05  James Cox  <james@imajes.info>
+
+    * INSTALL:
+      more rain
+
+    * INSTALL:
+      rainy and cold here.
+
+    * INSTALL:
+      touch again.
+
+2002-12-05  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/calendar/calendar.c:
+      Fixed a memory leak inside heb_number_to_chars().
+
+    * ext/standard/array.c
+      ext/standard/basic_functions.c
+      ext/standard/datetime.c
+      ext/standard/dns.c
+      ext/standard/filestat.c
+      ext/standard/iptc.c
+      ext/standard/pack.c
+      ext/standard/reg.c
+      ext/standard/scanf.c
+      ext/standard/string.c:
+      MFH
+
+2002-12-05  James Cox  <james@imajes.info>
+
+    * INSTALL:
+      touch2.
+
+    * INSTALL:
+      touch
+
+2002-12-05  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/array.c
+      ext/standard/basic_functions.c
+      ext/standard/datetime.c
+      ext/standard/dns.c
+      ext/standard/filestat.c
+      ext/standard/iptc.c
+      ext/standard/pack.c
+      ext/standard/reg.c
+      ext/standard/scanf.c
+      ext/standard/string.c:
+      Remove pointless checks for array_init() return values.
+
+2002-12-05  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/domxml/php_domxml.c:
+      MFH
+
+    * ext/xml/xml.c
+      main/SAPI.c
+      main/main.c:
+      MFH
+
+    * ext/bcmath/bcmath.c
+      ext/calendar/easter.c
+      ext/db/db.c:
+      MFH
+
+    * ext/bcmath/bcmath.c
+      ext/calendar/easter.c
+      ext/domxml/php_domxml.c:
+      php_error -> php_error_docref
+
+    * main/SAPI.c:
+      -php_error -> php_error_docref
+
+2002-12-05  Sara Golemon  <php@alphaweb.net>
+
+    * ext/standard/aggregation.c
+      ext/standard/aggregation.h
+      ext/standard/basic_functions.c:
+      Bug #20746.  Renamed aggregation_info() to aggregate_info() per naming
+      conventions and created alias for BC.
+
+2002-12-05  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/standard/base64.c:
+      MFH: both the check and php_error in the comment
+
+    * ext/standard/base64.c
+      ext/standard/dl.c
+      ext/standard/exec.c
+      ext/standard/http_fopen_wrapper.c
+      ext/standard/incomplete_class.c
+      ext/standard/levenshtein.c
+      ext/standard/link.c
+      ext/standard/math.c
+      ext/standard/pack.c
+      ext/standard/reg.c
+      ext/standard/scanf.c
+      ext/standard/uniqid.c
+      ext/standard/url.c
+      ext/standard/var.c:
+      -php_error -> php_error_docref
+      -removed some cases where emalloc result was tested
+
+    * ext/session/session.c:
+      correct code that is guarded by "#if 0"
+
+    * ext/session/mod_mm.c:
+      fix ZTS build
+
+    * ext/session/mod_files.c
+      ext/session/mod_mm.c
+      ext/session/mod_mm.c
+      ext/session/session.c
+      ext/session/session.c
+      ext/standard/dl.c
+      ext/standard/exec.c
+      ext/standard/http_fopen_wrapper.c
+      ext/standard/incomplete_class.c
+      ext/standard/levenshtein.c
+      ext/standard/link.c
+      ext/standard/math.c
+      ext/standard/pack.c
+      ext/standard/reg.c
+      ext/standard/scanf.c
+      ext/standard/uniqid.c
+      ext/standard/url.c
+      ext/standard/var.c:
+      MFH
+
+    * ext/session/mod_files.c
+      ext/session/mod_mm.c
+      ext/session/session.c
+      ext/xml/xml.c
+      main/main.c
+      sapi/apache/php_apache.c:
+      php_error -> php_error_docref
+
+2002-12-05  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/tests/file/bug12556.phpt
+      ext/standard/tests/file/test.csv:
+      MFH
+
+    * ext/standard/file.c:
+      MFH
+
+2002-12-05  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/mysql/php_mysql.c:
+      MFH
+
+    * ext/mysql/php_mysql.c:
+      -fix a warning that was an error
+      -php_error -> php_error_docref
+
+2002-12-05  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/tests/file/bug12556.phpt:
+      
+      Fixed bug #12556, updated the test for this bug.
+
+    * ext/standard/file.c:
+      Fixed bug #12556, updated the test for this bug.
+
+2002-12-05  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/db/db.c:
+      fix debug only
+
+2002-12-05  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/snmp/php_snmp.h
+      ext/snmp/snmp.c:
+      MFH:
+      - Renamed snmpv3_* to snmp3_*
+      - Conversion to php_error_docref
+      - Whitespace fixes
+
+    * ext/snmp/php_snmp.h
+      ext/snmp/snmp.c:
+      - Renamed snmpv3_* to snmp3_*
+      - Conversion to php_error_docref
+      - Whitespace fixes
+
+2002-12-05  Melvyn Sopacua  <msopacua@idg.nl>
+
+    * ext/standard/tests/file/test.csv:
+      
+      Test data
+
+    * ext/standard/tests/file/bug12556.phpt:
+      Add a testcase for this bug
+
+2002-12-05  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/standard/image.c:
+      MFH: Remove unnecessary code here
+
+    * ext/standard/image.c:
+      Remove unnecessary code here
+
+2002-12-05  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/mysql/libmysql/acinclude.m4:
+      MFH
+
+    * ext/mysql/libmysql/acinclude.m4:
+      ws fix (bug: #20808)
+
+2002-12-05  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/ircg.c:
+      let the write buffer notify us about terminated connections
+
+2002-12-05  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/standard/image.c:
+      MFH: return FALSE
+
+    * ext/standard/image.c:
+      MFH: swc & zlib\nMFH: return FALSE
+
+    * ext/standard/aggregation.c:
+      Fix aggregation with ZE2 in PHP4.3\n#I will not MFB it since aggregation
+      should move to ZEndEngine
+
+    * ext/standard/image.c:
+      Return FALSE on error as mentioned by John Coggeshall.
+      See Bug #20822
+
+    * configure.in:
+      MFH
+
+2002-12-04  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/gd/gd.c:
+      MFH (build fix, when xpm support is not avaliable).
+
+2002-12-04  Rasmus Lerdorf  <rasmus@lerdorf.on.ca>
+
+    * ext/gd/gd.c:
+      Fix build
+
+2002-12-04  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/gd/tests/jpeg2png.phpt
+      ext/gd/tests/jpg2gd.phpt
+      ext/gd/tests/png2gd.phpt
+      ext/gd/tests/xpm2gd.phpt
+      ext/gd/tests/xpm2jpg.phpt
+      ext/gd/tests/xpm2png.phpt:
+      MFH
+
+    * ext/gd/gd.c
+      ext/gd/libgd/gd.h
+      ext/gd/tests/conv_test.gif
+      ext/gd/tests/conv_test.jpeg
+      ext/gd/tests/conv_test.png
+      ext/gd/tests/conv_test.xpm
+      ext/gd/tests/gif2gd.phpt
+      ext/gd/tests/gif2jpg.phpt
+      ext/gd/tests/gif2png.phpt:
+      MFH
+
+    * ext/gd/tests/conv_test.gif
+      ext/gd/tests/conv_test.jpeg
+      ext/gd/tests/conv_test.png
+      ext/gd/tests/conv_test.xpm
+      ext/gd/tests/gif2gd.phpt
+      ext/gd/tests/gif2jpg.phpt
+      ext/gd/tests/gif2png.phpt
+      ext/gd/tests/jpeg2png.phpt
+      ext/gd/tests/jpg2gd.phpt
+      ext/gd/tests/png2gd.phpt
+      ext/gd/tests/xpm2gd.phpt
+      ext/gd/tests/xpm2jpg.phpt
+      ext/gd/tests/xpm2png.phpt:
+      
+      Added GD image conversion tests.
+
+    * ext/gd/gd.c
+      ext/gd/libgd/gd.h:
+      Made imagecreatefromxpm() work once again.
+
+    * NEWS
+      NEWS:
+      Fixed a typo.
+
+    * NEWS:
+      MFH
+
+    * NEWS:
+      Bug fixing news.
+
+    * ext/gd/gd.c
+      ext/gd/libgd/gd_gd2.c
+      ext/gd/libgd/gd_png.c
+      ext/gd/libgd/gd_topal.c:
+      MFH (truecolor fixes + gdImageTrueColorToPalette() fix).
+
+    * ext/gd/libgd/gd_topal.c:
+      Fixed a memory leak inside gdImageTrueColorToPalette().
+
+2002-12-04  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/standard/array.c:
+      Forgot to merge this part
+
+    * ext/standard/tests/array/bug12776.phpt:
+      MFH
+
+    * ext/standard/tests/array/bug12776.phpt:
+      
+      Added a test for bug #12776
+
+    * NEWS:
+      MFH: bug fix news
+
+    * NEWS:
+      Bug fix news
+
+    * ext/standard/array.c:
+      MFH: fixed segfaults in array_walk() when keys are passed to cb by
+      reference
+
+    * ext/standard/array.c:
+      Fixed segfaults of array_walk() when keys are passed to cb by reference.
+      Fixed bug #12776.
+
+2002-12-04  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/gd/gd.c:
+      WS fixes.
+
+2002-12-04  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/ircg.c:
+      display data from IRCG's logging subsystem
+
+    * ext/ircg/ircg.c
+      ext/ircg/php_ircg_private.h:
+      Delay put_irconn call for set_current until we actually finish
+      using the conn structure.
+      
+      This just passed a test with 25M messages delivered and 45K logins
+      handled in an Apache 1.3 context.
+
+2002-12-04  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * NEWS
+      ext/java/java.c:
+      MFH
+
+    * NEWS:
+      Fix bugs #20270, #15702, #18600 (segfaults in ext/java). (Tony J. White)
+
+    * ext/java/java.c:
+      Fix bugs #20270, #15702, #18600. Patch by Tony J. White <tjw@tjw.org>.
+
+2002-12-04  Pierre-Alain Joye  <paj@pearfr.org>
+
+    * ext/gd/gd.c:
+      Fix imagegd stdoutput
+      Typo 256 colors
+
+    * ext/gd/gd.c:
+      Fix imagegd crashes when used with truecolor image (from jpeg,png, or
+      imagecreatetruecolor)
+      may we add parameters to imagegd to let user specify the palette size and
+      dither (set to 256 and true) ?
+
+2002-12-04  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/ircg.c:
+      restore inline allocation of write buffer
+
+    * ext/ircg/ircg.c
+      ext/ircg/php_ircg_private.h:
+      Ensure that a terminating Apache child does not destroy our globally
+      shared locks and data structures.
+
+2002-12-03  Christian Dickmann  <chrisdicki@gmx.de>
+
+    * pear/PEAR/Command/Remote.php:
+      silence some possible warnings
+
+2002-12-03  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/fbsql/php_fbsql.c
+      ext/mssql/php_mssql.c:
+      MFH
+
+    * ext/fbsql/php_fbsql.c
+      ext/mssql/php_mssql.c:
+      Changed php_error() to php_error_docref()
+
+2002-12-03  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/pdf/pdf.c:
+      MFH
+
+    * ext/pdf/pdf.c:
+      Fixed a bug that caused a crash in pdf_open_memory_image(), when a
+      truecolor
+      image was loaded, it now checks if the image is truecolor and performs the
+      appropriate calculations (fixed bug #20785).
+      Changed E_WARNING back to E_ERROR.
+
+2002-12-03  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/mssql/php_mssql.c
+      ext/mssql/php_mssql.h:
+      MFH
+
+    * ext/mssql/php_mssql.c
+      ext/mssql/php_mssql.h:
+      Bug #19370
+      Allow stored procedures to return multiple results.
+
+    * ext/mssql/php_mssql.c:
+      MFH
+
+    * ext/mssql/php_mssql.c:
+      Bug #17593
+      Make sure any pending data is released from the server when freeing the
+      result
+
+2002-12-03  Harald Radi  <harald.radi+coding.php@nme.at>
+
+    * sapi/milter/TODO:
+      damn milter api:
+      "Furthermore, since there is not a one-to-one correspondence between
+       threads and connections (N connections mapped onto M threads,
+       M <= N), connection-specific data must be accessed through the handles
+       provided by the Milter library."
+      
+      which in other words means php_request_startup() and the corresponding
+      php_request_shutdown() will never be called for the same thread
+
+2002-12-03  Edin Kadribasic  <edink@proventum.net>
+
+    * ext/mssql/php_mssql.c:
+      MFH: Allocating enough memory to hold values.
+           Fix crash when certan stored procedures was called. This caused
+           the free_result function to free memory not yet allocated.
+
+2002-12-03  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/gd/libgd/gd_gd2.c
+      ext/gd/libgd/gd_png.c:
+      Fixed a crash that occurs during the last step of png/jpeg -> gd2 ->
+      png/jpeg
+      conversion. The same crash still occures with png/jpeg -> gd -> png/jpeg,
+      because
+      apparently gd format cannot handle truecolor images.
+      Turned off debug messages inside gd_gd2.c.
+
+2002-12-03  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/standard/array.c:
+      MFH: fixed leaks in array_walk()
+
+    * ext/standard/array.c:
+      Fixed leaks in array_walk()
+
+2002-12-03  Harald Radi  <harald.radi+coding.php@nme.at>
+
+    * sapi/milter/milter.php:
+      fix typos and make example more useful
+
+2002-12-03  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/ircg.c
+      ext/ircg/php_ircg_private.h:
+      further work on stabilizing concurrent IRCG accesses
+
+2002-12-03  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/ldap/config.m4:
+      MFH: Need these libraries for static build
+
+    * ext/ldap/config.m4:
+      - Need these libraries for static build
+
+2002-12-03  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/config.m4
+      ext/ircg/ircg.c
+      ext/ircg/php_ircg.h
+      ext/ircg/php_ircg_alloc.h
+      ext/ircg/php_ircg_cache.c
+      ext/ircg/php_ircg_cache.h
+      ext/ircg/php_ircg_conversion.c
+      ext/ircg/php_ircg_conversion.h
+      ext/ircg/php_ircg_error.c
+      ext/ircg/php_ircg_error.h
+      ext/ircg/php_ircg_private.h
+      ext/ircg/php_ircg_tokenizer.c
+      ext/ircg/php_ircg_tokenizer.h:
+      Move subsystems into their own source file.
+
+2002-12-03  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/ldap/config.m4:
+      MFH: Fixed build with iPlanet LDAP SDK 5.x
+
+    * ext/ldap/config.m4:
+      - Fixed the build with iPlanet LDAP SDK 5.x
+
+2002-12-03  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/mssql/php_mssql.c:
+      Allocating enough memory to hold values.
+      Fix crash when certan stored procedures was called. This caused the
+      free_result function to free memory not yet allocated.
+
+2002-12-03  Jason Greene  <jason@inetgurus.net>
+
+    * ext/sockets/php_sockets_win.c:
+      MFH
+
+2002-12-02  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/iconv/EXPERIMENTAL:
+      Iconv extension is no longer experimental
+
+    * ext/mbstring/mbregex.c
+      ext/mbstring/mbstring.dsp
+      ext/mbstring/mbstring.h
+      ext/mbstring/php_mbregex.c
+      ext/mbstring/php_unicode.c
+      ext/mbstring/php_unicode.h:
+      Reverted the changes because the problem was elsewhere.
+
+    * main/config.w32.h.in:
+      Reverted wrong part of the commit made in 1.24
+
+2002-12-02  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/mbstring/mbregex.c
+      ext/mbstring/mbstring.h:
+      Fixing the Win32 compilation of mbstring with mbregex enabled.
+
+    * ext/mbstring/mbstring.dsp
+      ext/mbstring/mbstring.h
+      ext/mbstring/php_mbregex.c
+      ext/mbstring/php_unicode.c
+      ext/mbstring/php_unicode.h:
+      Fixing build on WIn32
+      MBREGEX is disabled for now. 5 mbre_* functions are undefined on WIn32
+
+2002-12-02  Sterling Hughes  <sterling@bumblebury.com>
+
+    * TODO:
+      apparently this isn't finished
+
+2002-12-02  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * configure.in:
+      MFH
+
+    * configure.in:
+      Fixed flex version check. Some lex scanners like Sun's SGU do not appear
+      to support -V flag, so by passing them data on stdin we prevent them from
+      sitting idle waiting for stdin data. I've also added some common version
+      retrieval flags, that may be supported by various lex scanners.
+
+    * ext/standard/basic_functions.c:
+      MFH
+
+    * ext/standard/basic_functions.c:
+      Repositioned CoInitialize and CoUninitialize that apparetly makes it more
+      correct according to MS docs. Patch (+5) by Michael Sisolak
+      <msisolak@yahoo.com>.
+
+    * ext/pdf/pdf.c:
+      MFH
+
+    * ext/pdf/pdf.c:
+      Fixed a crash bug that can occur due to PDF_delete() being called more then
+      once and E_ERROR occurring during the shutdown sequence.
+
+2002-12-02  Jason Greene  <jason@inetgurus.net>
+
+    * ext/sockets/php_sockets_win.c:
+      Revert patch that should have been reverted a long time ago.
+      There was a memory leak in the error handling system on win32, that this
+      patch
+      circumvented (by preventing the errors (EAGAIN mesages) from being
+      generated).
+
+2002-12-02  Shane Caraveo  <shane@caraveo.com>
+
+    * sapi/cgi/libfcgi/acinclude.m4:
+      MFH
+
+    * sapi/cgi/libfcgi/acinclude.m4
+      sapi/cgi/libfcgi/libfcgi.m4:
+      aparently did not add these on head
+      removed ssize_t which was causing problems, and not in libfcgi anyway
+
+    * sapi/cgi/cgi_main.c:
+      MFH
+
+    * sapi/cgi/cgi_main.c:
+      fix use of Alias under apache by defaulting script_name to redirect_url
+      dont lstat, stat.
+
+2002-12-02  Jon Parise  <jon@csh.rit.edu>
+
+    * sapi/milter/php_milter.c:
+      Correct the punctuation of these error messages.
+
+2002-12-01  Shane Caraveo  <shane@caraveo.com>
+
+    * sapi/cgi/cgi_main.c
+      sapi/cgi/config9.m4:
+      MFH
+
+    * configure.in
+      main/config.w32.h.in
+      main/fopen_wrappers.c
+      main/win95nt.h
+      sapi/cgi/README.FastCGI:
+      MFH
+
+    * sapi/cgi/libfcgi/include/fcgi_config.h
+      sapi/cgi/libfcgi/include/fcgi_config_win32.h
+      sapi/cgi/libfcgi/include/fcgiapp.h
+      sapi/cgi/libfcgi/include/fcgios.h
+      win32/php4ts.dsp:
+      MFH
+
+    * sapi/cgi/libfcgi/acinclude.m4
+      sapi/cgi/libfcgi/acinclude.m4
+      sapi/cgi/libfcgi/fcgiapp.c
+      sapi/cgi/libfcgi/libfcgi.m4
+      sapi/cgi/libfcgi/libfcgi.m4
+      sapi/cgi/libfcgi/os_unix.c:
+      
+      file acinclude.m4 was initially added on branch PHP_4_3.
+
+2002-12-01  Sterling Hughes  <sterling@bumblebury.com>
+
+    * TODO
+      ext/bz2/bz2.c
+      ext/sockets/sockets.c:
+      TODO: Cleanup elements that have happened, or most likely won't happen. 
+      There
+      is probably more that should be gone, but its still a move in the right
+      direction.
+      
+      Other stuff is ws/formatting changes
+
+2002-12-01  Shane Caraveo  <shane@caraveo.com>
+
+    * sapi/cgi/config9.m4:
+      build support for cgi fixes previously commited
+
+    * main/config.w32.h.in
+      main/win95nt.h
+      sapi/cgi/cgi_main.c
+      sapi/cgi/libfcgi/fcgiapp.c
+      sapi/cgi/libfcgi/include/fcgiapp.h:
+      Fix CGI to match cgi spec.
+      This patch properly fixes support for CGI in PHP.  For backwards
+      compatible
+      broken behaviour, cgi.fix_pathinfo can be set to zero in php.ini.
+      CGI failed to work under apache at all, either using the cgi-script
+      directive
+      or as a ScriptAlias setup. Typicaly it would try to parse itself.  This
+      will
+      still happen if you dissable fix_pathinfo, and set DISCARD_PATH.
+      This also fixes PATH_INFO, and finally we can run pres2 under cgi or
+      fastcgi.
+      This patch has been tested under Apache 1.3, 2.0, IIS, as both cgi and
+      fastcgi,
+      on Windows and OSX.  A followup patch with build stuff for linux will
+      follow.
+
+    * main/fopen_wrappers.c:
+      php_error_docref aborts cgi.  This broke using php as cgi under
+      apache/mod_cgi with the cgi-script directive and bang lines in php
+      scripts.
+      removing it allows this to work again.
+
+2002-12-01  Harald Radi  <harald.radi+coding.php@nme.at>
+
+    * sapi/milter/milter.php:
+      example
+
+    * sapi/milter/php_milter.c:
+      
+      rename callbacks to fit the original name
+
+    * sapi/milter/php_getopt.h:
+      initial checkin
+
+    * sapi/milter/TODO
+      sapi/milter/php_milter.c:
+      if the api functions are called, check if they're valid in that context
+      reopen file per request, so milter doesn't hang. PHPA or APC can be used
+      to speed the milter up
+      added a milter_init callback to init the milter before it is registered
+      added protos to make sniper happy
+
+2002-12-01  Stefan Roehrich  <stefan@roehri.ch>
+
+    * ext/zlib/zlib.c:
+      Comment about maximal length now matches code.
+
+2002-12-01  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/overload/config.m4:
+      fix build..
+
+2002-12-01  Harald Radi  <harald.radi+coding.php@nme.at>
+
+    * sapi/milter/php_milter.c:
+      first working version
+
+    * sapi/milter/config.m4:
+      check for libmilter path
+
+2002-12-01  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/ext_skel:
+      -fix typo
+
+2002-12-01  Stanislav Malyshev  <stas@zend.com>
+
+    * sapi/isapi/php4isapi.c:
+      improve username/password detection for IIS
+
+2002-12-01  Harald Radi  <harald.radi+coding.php@nme.at>
+
+    * sapi/milter/TODO
+      sapi/milter/config.m4:
+      no message
+
+2002-12-01  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/gd/libgd/gd.c
+      ext/gd/libgd/gd.h
+      ext/gd/libgd/gd_arc_f_buggy.c
+      ext/gd/libgd/gd_gd2.c
+      ext/gd/libgd/gd_gif_in.c
+      ext/gd/libgd/gd_jpeg.c
+      ext/gd/libgd/gd_png.c
+      ext/gd/libgd/gd_ss.c
+      ext/gd/libgd/gd_wbmp.c
+      ext/gd/libgd/gdkanji.c
+      ext/gd/libgd/gdxpm.c:
+      No more (f)printf for errors and warnings instead use php_error_docref.
+
+2002-12-01  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/ircg.c
+      ext/ircg/ircg_scanner.c
+      ext/ircg/ircg_scanner.re
+      ext/ircg/php_ircg_alloc.h:
+      expand define's
+      make the msg scanner use shared memory, if necessary
+      replace the msg cache with a more predictable algorithm
+
+2002-12-01  Jani Taskinen  <sniper@iki.fi>
+
+    * sapi/milter/config.m4:
+      Fix build
+
+2002-12-01  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/ircg.c:
+      Make error subsystem work properly in a multi-process environment
+
+    * ext/ircg/ircg.c:
+      fix condition
+
+    * ext/ircg/ircg.c:
+      flush write buffer in idle handler
+      add missing condition before deleting write buffer
+
+    * ext/ircg/ircg.c:
+      move back initialization of the write buffer to the original place,
+      so that the condition "fd>=0" can be equated to "wb is initialized"
+      again.
+
+    * ext/ircg/config.m4
+      ext/ircg/ircg.c
+      ext/ircg/ircg_common.c
+      ext/ircg/ircg_dummy.c
+      ext/ircg/ircg_thttpd.c
+      ext/ircg/php_ircg.h
+      ext/ircg/php_ircg_alloc.h
+      ext/ircg/php_ircg_hash.h
+      ext/ircg/php_ircg_lock.h:
+      Initial work on porting extension to IRCG 4.
+
+2002-12-01  Harald Radi  <harald.radi+coding.php@nme.at>
+
+    * sapi/milter/Makefile.frag
+      sapi/milter/TODO
+      sapi/milter/config.m4
+      sapi/milter/getopt.c
+      sapi/milter/php_milter.c:
+      it finally compiles now
+      tests will follow tomorrow
+
+2002-12-01  Sascha Schumann  <sascha@schumann.cx>
+
+    * main/SAPI.c
+      main/SAPI.h
+      sapi/apache/mod_php4.c:
+      add a "force HTTP/1.0 response" facility to the SAPI layer
+      
+      this is necessary, when you want to take over control of a connection
+      and the web server is doing stupid things by default (like enabling
+      chunked transfer encoding for no reason).
+
+2002-12-01  Sterling Hughes  <sterling@bumblebury.com>
+
+    * run-tests2.php:
+      remove dos line endings
+
+2002-12-01  Harald Radi  <harald.radi+coding.php@nme.at>
+
+    * sapi/milter/php_milter.c:
+      fix build
+
+2002-12-01  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/standard/base64.c:
+      Fixed possible buffer overflow in php_base64_decode();
+
+2002-12-01  Harald Radi  <harald.radi+coding.php@nme.at>
+
+    * sapi/milter/TODO:
+      todo or not todo
+
+    * sapi/milter/EXPERIMENTAL
+      sapi/milter/php_milter.c:
+      added remaining functions, still untested, still having problems with
+      config.m4
+
+2002-12-01  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/overload/config.m4:
+      Skip overload for ZE2
+      Bug #20156
+
+2002-12-01  Harald Radi  <harald.radi+coding.php@nme.at>
+
+    * sapi/milter/CREDITS
+      sapi/milter/Makefile.frag
+      sapi/milter/config.m4
+      sapi/milter/php_milter.c:
+      Sendmail Milter SAPI
+      initial version
+
+2002-11-30  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/imap/php_imap.c:
+      MFH
+
+    * win32/sendmail.c:
+      MFH
+
+    * win32/sendmail.c:
+      Dont scan headers for cc abd bcc if extra parameters are used for these
+
+    * ext/imap/php_imap.c:
+      Fix the use of "personal" information in To and Cc headers
+
+2002-11-30  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/file.c:
+      MFH
+
+    * ext/standard/file.c:
+      Fixed bug #20716.
+
+2002-11-30  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/standard/file.h
+      main/php_globals.h:
+      MFH: Bug #20433
+
+    * ext/standard/file.h
+      main/php_globals.h:
+      Bug #20433
+
+2002-11-30  Christian Stocker  <chregu@phant.ch>
+
+    * ext/domxml/php_domxml.c:
+      MFH (fixed big bad memory leak in xpath objects.)
+
+    * ext/domxml/php_domxml.c:
+      fixed big bad memory leak in xpath objects.
+
+2002-11-29  Jason Greene  <jason@inetgurus.net>
+
+    * ext/sockets/EXPERIMENTAL:
+      Sockets is no longer experimental
+
+2002-11-29  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/mbstring/tests/mb_split.phpt:
+      MFH
+
+    * ext/mbstring/tests/mb_split.phpt:
+      Prevented the result from being affected by function overloading
+
+2002-11-29  Sander Roobol  <phy@wanadoo.nl>
+
+    * ext/bcmath/libbcmath/src/init.c
+      ext/bcmath/libbcmath/src/private.h
+      ext/bcmath/libbcmath/src/recmul.c:
+      MFH
+
+    * ext/bcmath/libbcmath/src/init.c
+      ext/bcmath/libbcmath/src/private.h
+      ext/bcmath/libbcmath/src/recmul.c:
+      Remove all traces of _bc_Free_list - it's not used anymore
+
+2002-11-29  Yasuo Ohgaki  <yohgaki@ohgaki.net>
+
+    * ext/pgsql/pgsql.c:
+      MFH
+
+    * ext/pgsql/pgsql.c:
+      Fixed problem with PostgreSQL 7.3
+
+2002-11-29  Christian Stocker  <chregu@phant.ch>
+
+    * ext/domxml/php_domxml.c:
+      removed unused variable
+
+2002-11-29  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/mcrypt/mcrypt.c:
+      - Fix memleak (patch by Oleg.Roitburd@lycos-europe.com)
+
+2002-11-29  Jani Taskinen  <sniper@iki.fi>
+
+    * main/php_content_types.c:
+      MFB
+
+2002-11-29  Martin Kraemer  <Martin.Kraemer@fujitsu-siemens.com>
+
+    * main/php_content_types.c:
+      Portability: In C sources, do not use C++ comments
+
+2002-11-29  Christian Stocker  <chregu@phant.ch>
+
+    * ext/java/config.m4:
+      MFH
+      fix for bug #20389  (no trailing slash in configure option)
+
+    * ext/java/config.m4:
+      fix for bug #20389  (no trailing slash in configure option)
+
+2002-11-29  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/thttpd/thttpd.c:
+      add missing line
+
+2002-11-29  Christian Stocker  <chregu@phant.ch>
+
+    * ext/domxml/php_domxml.c
+      ext/domxml/php_domxml.h:
+      
+      changed my mind. Automatic namesapce registration is not done within
+      xpath_eval() anymore, but in a seperate function.
+
+2002-11-29  Martin Kraemer  <Martin.Kraemer@fujitsu-siemens.com>
+
+    * ext/bcmath/libbcmath/src/private.h
+      ext/gd/gdcache.h
+      ext/standard/mail.c:
+      Portability fixes (MFH)
+
+2002-11-29  Christian Stocker  <chregu@phant.ch>
+
+    * ext/domxml/php_domxml.c:
+      do some kind of automatic namespace registration in xpath_eval(). This
+      works only for namespaces defined in the context node (eg docroot if
+      no second argument is given. If one wants to use namespaces defined
+      elsewhere or with different prefixes, you still have to use
+      xpath_ns_register()
+
+    * ext/domxml/TODO:
+      MFH
+       relative xpath queries are already possible
+        (use $ctx->xpath_eval($xpath,$contextnode) )
+
+    * ext/domxml/TODO:
+      relative xpath queries are already possible
+      (use $ctx->xpath_eval($xpath,$contextnode) )
+
+    * ext/domxml/php_domxml.c:
+      get_element_by_id does not need LIBXML_XPATH support
+
+2002-11-29  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/gd/libgd/gd.c
+      ext/gd/libgd/gd_jpeg.c
+      ext/gd/libgd/gdft.c:
+      Conversion fixes
+
+    * ext/gd/gd.c:
+      Conversion fixes
+
+    * ext/gd/libgd/gd.c
+      ext/gd/libgd/gd_gd2.c
+      ext/gd/libgd/gd_jpeg.c
+      ext/gd/libgd/gd_png.c:
+      Conversion fixes
+
+    * tests/classes/abstract.phpt:
+      Do not instanciate an abstract class
+
+2002-11-28  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/mhash/tests/001.phpt
+      ext/mhash/tests/003.phpt:
+      MFH
+
+    * ext/mhash/tests/001.phpt
+      ext/mhash/tests/003.phpt:
+      Fixed mhash tests, apparently the TIGER algorithm was updated (fixed?) in
+      later mhash releases and consequently returns a different hash. I've
+      updated
+      the hash to the one generated by latter releases.
+      Removed useless \r from ext/mhash/tests/003.phpt.
+
+2002-11-28  Martin Kraemer  <Martin.Kraemer@fujitsu-siemens.com>
+
+    * ext/gd/gdcache.h:
+      Portability: avoid <malloc.h> warnings on FreeBSD
+
+    * ext/bcmath/libbcmath/src/private.h:
+      Portability: The header contains the declaration; while the source
+      ext/bcmath/libbcmath/src/init.c has the definition
+      (otherwise some compilers complain about 'duplicate symbols')
+
+    * ext/standard/mail.c:
+      Portability: Use 0 if the platform does not define EX_OK
+
+2002-11-27  Sterling Hughes  <sterling@bumblebury.com>
+
+    * ext/standard/file.c:
+      MFH
+
+    * ext/standard/scanf.h:
+      no more need for this either
+
+    * ext/standard/file.c:
+      don't use stupid constants, be smart, just read the line
+
+2002-11-27  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/imap/php_imap.c
+      ext/w32api/w32api_function_definition_parser.y
+      ext/xmlrpc/xmlrpc-epi-php.c
+      ext/xmlrpc/libxmlrpc/base64.c
+      ext/xmlrpc/libxmlrpc/encodings.c
+      ext/xmlrpc/libxmlrpc/xml_element.c:
+      MFH
+
+2002-11-27  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * configure.in
+      main/php_version.h:
+      Back to -dev
+
+2002-11-27  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/imap/php_imap.c:
+      free alocated mem.
+      minor changes in the layout
+
+2002-11-27  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * configure.in
+      main/php_version.h:
+      Update version to RC2.
+
+2002-11-27  Sterling Hughes  <sterling@bumblebury.com>
+
+    * ext/curl/curl.c:
+      fix memleak
+
+2002-11-27  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/README.txt:
+      Add note about GNU make
+
+2002-11-27  Tal Peer  <tal@twisthost.com>
+
+    * ext/calendar/tests/jdtojewish.phpt:
+      
+      jdtojewish() test
+
+    * ext/calendar/calendar.c:
+      
+      Added an additional (optional) argument to jdtojewish() to keep BC
+      with 4.3 (and let users getdates in Hebrew without further formatting)
+
+2002-11-27  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/string.c
+      ext/standard/tests/strings/strip_tags.phpt:
+      MFH
+
+    * ext/standard/string.c
+      ext/standard/tests/strings/strip_tags.phpt:
+      Fixed bug #20664.
+
+2002-11-27  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/exif/exif.c:
+      MFH: remove comment
+
+    * ext/exif/exif.c:
+      -Code completley rewritten
+
+    * ext/exif/exif.c:
+      MFH: Canon fix
+
+    * ext/exif/tests/exif006.phpt
+      ext/exif/tests/test6.jpg:
+      -Add test for exif_read_data and magic_quotes_runtime
+
+    * ext/exif/exif.c:
+      -Forgot to correct length
+
+    * ext/exif/exif.c:
+      -Add magic_quotes_runtime support
+      -Fix Canon Markernote
+
+2002-11-27  Stig Bakken  <ssb@fast.no>
+
+    * pear/package-PEAR.xml
+      pear/package.dtd
+      pear/PEAR/Common.php:
+      MFH
+
+2002-11-27  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/w32api/php_w32api.h
+      ext/w32api/w32api.c
+      ext/w32api/w32api_function_definition_scanner.l
+      ext/w32api/w32api_function_definition_scanner.l
+      ext/w32api/w32api_type_definition_parser.y
+      ext/w32api/w32api_type_definition_scanner.l
+      ext/w32api/w32api_type_definition_scanner.l:
+      Convert  0D 0D 0A line breaks to 0D 0A
+
+2002-11-26  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Command/Registry.php
+      pear/PEAR/Command/Registry.php:
+      MFH
+
+    * pear/PEAR/Command/Registry.php:
+      - fix typo
+
+2002-11-26  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/xmlrpc/xmlrpc-epi-php.c:
+      time is a function. Use the name of the variable 'timestamp'
+
+    * ext/xmlrpc/libxmlrpc/encodings.c:
+      Adding missing header file on Win32
+
+    * ext/xmlrpc/libxmlrpc/base64.c
+      ext/xmlrpc/libxmlrpc/xml_element.c:
+      removing unused variables
+
+2002-11-26  Stig Bakken  <ssb@fast.no>
+
+    * pear/package-PEAR.xml
+      pear/package.dtd
+      pear/PEAR/Common.php:
+      - lose obsolete tags: libfile, libname, sources, includes, libadd
+
+2002-11-26  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/w32api/w32api_function_definition_parser.y:
+      Adding missing ;
+
+2002-11-26  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/standard/array.c:
+      MFH: improved the error reporting portion of array_walk()
+
+    * ext/standard/array.c:
+      Improved the error reporting portion of array_walk() as suggested by Markus
+
+    * ext/standard/array.c:
+      MFH: prevent too many error reports from being displayed
+
+2002-11-26  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Command/Auth.php
+      pear/PEAR/Command/Build.php
+      pear/PEAR/Command/Config.php
+      pear/PEAR/Command/Install.php
+      pear/PEAR/Command/Package.php
+      pear/PEAR/Command/Registry.php
+      pear/PEAR/Command/Remote.php:
+      MFH
+
+2002-11-26  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/standard/array.c:
+      Prevent too many error reports from being displayed
+
+2002-11-26  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Command/Auth.php
+      pear/PEAR/Command/Build.php
+      pear/PEAR/Command/Config.php
+      pear/PEAR/Command/Install.php
+      pear/PEAR/Command/Package.php
+      pear/PEAR/Command/Registry.php
+      pear/PEAR/Command/Remote.php:
+      - ws/folding
+
+2002-11-26  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/standard/array.c:
+      MFH: Fixed incorrect error messages of array_walk()
+
+    * ext/standard/array.c:
+      Fixed incorrect error messages of array_walk() in case the callback is
+      specified in an array form
+
+2002-11-26  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Command/Registry.php:
+      - changed "info" shortcut to "in"
+
+2002-11-26  Christian Stocker  <chregu@phant.ch>
+
+    * ext/domxml/php_domxml.c:
+      MFH (Fix for Bug #20639  DomElement->get_elements_by_tagname() doesn't
+      work)
+
+    * ext/domxml/php_domxml.c:
+      Fix for Bug #20639  DomElement->get_elements_by_tagname() doesn't work
+
+2002-11-26  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/calendar/calendar.c:
+      Update to use new parameter parsing API.
+      Updates to Jewish/Hebrew calendar code.
+      Patch from Moshe Doron, amended by Tal Peer,
+      reviewed by me.
+
+2002-11-26  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/dba/config.m4
+      ext/dba/dba.c
+      ext/dba/dba_db4.c
+      ext/dba/php_db4.h:
+      Add Berkeley db4 support
+
+    * ext/dba/config.m4:
+      -Disallow combining db2 with db3 which are conflicting.
+      -Stop searching for headers and libraries when found.
+      -Check version for Berkeley DB library headers.
+
+    * configure.in:
+      Highlight "Thank you"
+
+2002-11-26  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/imap/php_imap.c:
+      Avoid , at the end of each string (to, cc and bcc)
+
+2002-11-26  Shane Caraveo  <shane@caraveo.com>
+
+    * win32/php4ts.dsp:
+      fix windows build of cgi/fastcgi
+
+2002-11-26  Jani Taskinen  <sniper@iki.fi>
+
+    * main/SAPI.h
+      sapi/activescript/php4activescript.c
+      sapi/aolserver/aolserver.c
+      sapi/apache2filter/sapi_apache2.c
+      sapi/apache_hooks/mod_php4.c
+      sapi/caudium/caudium.c
+      sapi/cgi/cgi_main.c
+      sapi/cli/php_cli.c
+      sapi/embed/php_embed.c
+      sapi/isapi/php4isapi.c
+      sapi/nsapi/nsapi.c
+      sapi/phttpd/phttpd.c
+      sapi/pi3web/pi3web_sapi.c
+      sapi/roxen/roxen.c
+      sapi/servlet/servlet.c
+      sapi/tux/php_tux.c
+      sapi/webjames/webjames.c:
+      - Made the STANDARD_SAPI_MODULE_PROPERTIES be what it says it is.
+
+2002-11-26  Shane Caraveo  <shane@caraveo.com>
+
+    * sapi/cgi/libfcgi/include/fcgi_config_win32.h
+      sapi/cgi/libfcgi/include/fcgios.h:
+      
+      configure now supports building the cgi-fcgi module
+      configure --enable-fastcgi
+
+    * configure.in
+      sapi/cgi/README.FastCGI
+      sapi/cgi/cgi_main.c
+      sapi/cgi/config9.m4
+      sapi/cgi/libfcgi/fcgiapp.c
+      sapi/cgi/libfcgi/os_unix.c
+      sapi/cgi/libfcgi/include/fcgi_config.h:
+      configure now supports building the cgi-fcgi module
+      configure --enable-fastcgi
+
+2002-11-26  Sascha Schumann  <sascha@schumann.cx>
+
+    * main/SAPI.c
+      main/SAPI.h
+      sapi/apache/mod_php4.c
+      sapi/thttpd/thttpd.c:
+      Add sapi_get_fd() and implement it for the Apache/thttpd SAPIs.
+
+2002-11-26  Yasuo Ohgaki  <yohgaki@ohgaki.net>
+
+    * ext/pgsql/pgsql.c:
+      MFH
+
+    * ext/pgsql/pgsql.c:
+      Remove a warning
+
+2002-11-26  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Common.php:
+      - a little more "windows robust" when looking for package.xml
+
+    * pear/package-PEAR.xml
+      pear/package-PEAR.xml:
+      MFH
+
+    * pear/package-PEAR.xml:
+      - forgot to set release date
+
+    * pear/PEAR/Command/Install.php:
+      MFH
+
+    * pear/PEAR/Installer.php:
+      MFH
+
+    * pear/package-PEAR.xml
+      pear/PEAR/Installer.php
+      pear/PEAR/Command/Install.php:
+      - added --ignore-errors option, --force no longer ignores errors
+
+    * pear/PEAR/Config.php:
+      - added sig_keyid config param
+
+    * pear/PEAR/Command/Remote.php:
+      MFH
+
+    * pear/PEAR/Command/Config.php:
+      MFH
+
+    * pear/PEAR/Remote.php
+      pear/PEAR/Command/Common.php
+      pear/PEAR/Command/Package.php
+      pear/PEAR/Frontend/CLI.php:
+      MFH
+
+2002-11-25  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/session/tests/001.phpt
+      ext/session/tests/003.phpt
+      ext/session/tests/004.phpt
+      ext/session/tests/005.phpt
+      ext/session/tests/006.phpt
+      ext/session/tests/007.phpt
+      ext/session/tests/008-php4.2.3.phpt
+      ext/session/tests/009.phpt
+      ext/session/tests/012.phpt
+      ext/session/tests/013.phpt
+      ext/session/tests/014.phpt
+      ext/session/tests/015.phpt
+      ext/session/tests/016.phpt
+      ext/session/tests/017.phpt
+      ext/session/tests/018.phpt
+      ext/session/tests/019.phpt
+      ext/session/tests/020.phpt
+      ext/session/tests/021.phpt:
+      MFH (test failure if session.serialize_handler is not set to php).
+
+    * ext/session/tests/001.phpt
+      ext/session/tests/003.phpt
+      ext/session/tests/004.phpt
+      ext/session/tests/005.phpt
+      ext/session/tests/006.phpt
+      ext/session/tests/007.phpt
+      ext/session/tests/008-php4.2.3.phpt
+      ext/session/tests/009.phpt
+      ext/session/tests/012.phpt
+      ext/session/tests/013.phpt
+      ext/session/tests/014.phpt
+      ext/session/tests/015.phpt
+      ext/session/tests/016.phpt
+      ext/session/tests/017.phpt
+      ext/session/tests/018.phpt
+      ext/session/tests/019.phpt
+      ext/session/tests/020.phpt
+      ext/session/tests/021.phpt:
+      Set serialize_handler to php to prevent test failures.
+
+2002-11-25  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Command/Package.php:
+      - more accurate description of "makerpm" command
+
+    * pear/PEAR/Command/Common.php:
+      - silence some notices
+
+2002-11-25  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/gd/config.m4
+      ext/gd/libgd/gdxpm.c:
+      MFH (fixed a compile failure when --with-xpm-dir is used).
+
+2002-11-25  Stefan Esser  <s.esser@e-matters.de>
+
+    * ext/standard/ftp_fopen_wrapper.c:
+      MFH
+
+    * ext/standard/ftp_fopen_wrapper.c:
+      tmp_line was possible uninitialised, resulting in crap error messages.
+
+2002-11-25  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/ftp_fopen_wrapper.c:
+      MFH
+
+    * ext/standard/ftp_fopen_wrapper.c:
+      Added a check to determine if the file can be retrieved or sent.
+      This check also prevents incorrect error reporting in the event the
+      retrieval
+      or the sending of the file cannot be accomplished.
+
+2002-11-25  Maxim Maletsky  <maxim@maxim.cx>
+
+    * ext/oci8/oci8.c:
+      Bug# 16798. Tests appreciated by someone with Oracle 8.0
+
+2002-11-25  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/mbstring/config.m4:
+      
+
+    * ext/mbstring/mbstring.c:
+      Forgot to adjust this one
+
+    * ext/mbstring/mbstring.c
+      ext/mbstring/php_mbregex.c
+      ext/mbstring/php_mbregex.h:
+      Renamed several internal functions for consistency
+
+2002-11-25  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * ext/mbstring/mbfilter_kr.c
+      ext/mbstring/unicode_table_kr.h:
+      simplified and a bug fixed in korean encoding conversion table.
+
+    * ext/mbstring/mbfilter_kr.c
+      ext/mbstring/unicode_table_kr.h:
+      simplified korean encoding conversion table.
+
+2002-11-25  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/gd/libgd/gd_gd2.c:
+      Removed un-needed zlib check.
+
+2002-11-25  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * EXTENSIONS
+      ext/calendar/cal_unix.c
+      ext/calendar/calendar.c
+      ext/calendar/easter.c
+      ext/ctype/ctype.c
+      ext/ctype/php_ctype.h
+      ext/fdf/fdf.c
+      ext/imap/php_imap.c
+      ext/imap/php_imap.h
+      ext/mime_magic/mime_magic.c
+      ext/ncurses/ncurses.c
+      ext/ncurses/ncurses_fe.c
+      ext/ncurses/ncurses_functions.c
+      ext/ncurses/php_ncurses.h
+      ext/ncurses/php_ncurses_fe.h
+      ext/standard/levenshtein.c
+      ext/standard/url_scanner.c
+      ext/zlib/zlib_fopen_wrapper.c
+      main/php_logos.c:
+      email address change
+
+2002-11-25  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/gd/config.m4
+      ext/gd/libgd/gd.c
+      ext/gd/libgd/gd.h
+      ext/gd/libgd/gd_gd2.c
+      ext/gd/libgd/gd_jpeg.c
+      ext/gd/libgd/gd_png.c
+      ext/gd/libgd/gd_wbmp.c
+      ext/gd/libgd/gdft.c
+      ext/gd/libgd/gdxpm.c:
+      Synchronized bundled gd library with the latest stable GD, 2.0.6
+      Fixed a configuration problem with xpm.
+      Fixed 2 possible memory leaks in fontFetch().
+
+2002-11-25  Yasuo Ohgaki  <yohgaki@ohgaki.net>
+
+    * ext/pgsql/pgsql.c:
+      Cleanup state=4 and avoid using sscanf()
+
+2002-11-24  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/mbstring/tests/mb_parse_str02.phpt:
+      MFB
+
+    * ext/mbstring/tests/mb_parse_str02.phpt
+      ext/mbstring/tests/mb_parse_str02.phpt:
+      
+      file mb_parse_str02.phpt was initially added on branch PHP_4_3.
+
+2002-11-24  Sergey Kartashoff  <gluke@biosys.net>
+
+    * ext/mnogosearch/php_mnogo.h:
+      - Header file update for new mnogosearch functions
+
+    * ext/mnogosearch/php_mnogo.c:
+         udm_get_res_field_ex
+      - A new functions have been added: udm_set_agent_param_ex and
+        udm_get_res_field_ex
+
+2002-11-24  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/mbstring/mbstring.c:
+      Fixed mb_parse_str() bug pointed out by Yasuo.
+
+2002-11-24  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/pgsql/pgsql.c:
+      Use proper form of NUL
+      Drop superfluous checks for NULL results
+
+2002-11-24  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * tests/classes/static_mix_1.phpt
+      tests/classes/static_mix_2.phpt:
+      Better naming
+
+    * tests/classes/abstract_redeclare.phpt:
+      Add test against redeclaring an overloaded method abstract
+
+    * tests/classes/static_mix_1.phpt
+      tests/classes/static_mix_2.phpt:
+      Add test against mixing static/non static methods
+
+2002-11-24  Sterling Hughes  <sterling@bumblebury.com>
+
+    * ext/pgsql/pgsql.c:
+      null after the erealloc()
+
+2002-11-24  Christian Dickmann  <chrisdicki@gmx.de>
+
+    * pear/PEAR/Remote.php:
+      remove the check, cause i don't really know, if content has to be an array
+      everytime
+
+    * pear/PEAR/Remote.php:
+      add some checks to increase cache integrity
+
+    * pear/PEAR/Command/Remote.php:
+      add errormessage, but that does not fix the problem
+
+2002-11-24  Yasuo Ohgaki  <yohgaki@ohgaki.net>
+
+    * ext/pgsql/pgsql.c:
+      Added missing '\0'
+
+2002-11-24  Jani Taskinen  <sniper@iki.fi>
+
+    * php.ini-dist:
+      MFB: ; instead of :
+
+    * php.ini-dist:
+      fix typo (; instead of :)
+
+2002-11-24  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/gd/tests/imagefttext.phpt
+      ext/gd/tests/imagettftext.phpt:
+      Renamed the file because this is actually a test for gdImageStringFt().
+
+2002-11-24  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/gd/libgd/gdft.c:
+      Fix compile warning, MIN/MAX macros may already be defined by param.h
+
+    * ext/gd/libgd/gdhelpers.h:
+      Added gdPEstrdup macro.
+
+    * ext/gd/libgd/gdft.c:
+      Fixed 3 memory leaks.
+      Formatted the code to meet PHP's coding standards, which makes it MUCH
+      easier
+      to understand.
+
+2002-11-24  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/gd/gd.c:
+      Fixed the macro so this can be compiled with ft1
+
+    * ext/gd/tests/imagettftext.phpt:
+      Sorry, wrong commit.
+
+    * ext/gd/tests/imagettftext.phpt:
+      Dismissed the second part of the test
+
+2002-11-23  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/mbstring/mbstring.dsp:
+      Adding mb_gpc files to project
+
+2002-11-23  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/gd/gd.c
+      ext/gd/php_gd.h:
+      Fixed leaks. Other leaks are originated in libgd.
+
+2002-11-23  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * tests/func/002.phpt
+      tests/func/003.phpt
+      tests/func/004.phpt
+      tests/lang/033.phpt:
+      - MFH: Adjust tests for removed old_function() in Zend Engine 2
+
+    * tests/func/002.phpt
+      tests/func/003.phpt
+      tests/func/004.phpt
+      tests/lang/033.phpt:
+      - Adjust tests for removed old_function() in Zend Engine 2
+
+2002-11-23  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/gd/libgd/gdcache.c:
+      Fixed segfaults
+
+2002-11-23  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/dba/dba_db3.c
+      ext/dba/dba_db3.c:
+      MFH
+
+    * ext/dba/dba_db3.c:
+      Allow db4.0 & db4.1 here. Patch by Ralf Engelschall (rse@engelschall.com)
+
+2002-11-23  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/mbstring/html_entities.c:
+      Forgot this one. Updated license information
+
+    * ext/mbstring/mb_gpc.c
+      ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.h
+      ext/mbstring/php_mbregex.c:
+      Updated license information headers
+
+    * ext/mbstring/config.m4
+      ext/mbstring/mb_gpc.c
+      ext/mbstring/mb_gpc.h
+      ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.h:
+      Separated GPC related part from mbstring.c
+
+2002-11-23  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/gd/gd.c:
+      ws fix
+
+2002-11-23  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/flock_compat.c:
+      - Make it compile on IRIX again
+
+2002-11-23  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * run-tests.php:
+      MFH
+
+    * run-tests.php:
+      Move up general tests
+
+2002-11-23  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/standard/array.c:
+      Fixed some odd behaviours of range()
+
+    * ext/gd/gd.c:
+      Fixed tab positions
+
+    * ext/gd/gd.c:
+      Fixed tab positions.
+
+    * ext/mbstring/tests/mb_send_mail07.phpt:
+      Test for mb_send_mail() under language=Korean
+
+    * ext/gd/gd.c:
+      MFH (imagecolordeallocate() fix)
+
+2002-11-23  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * main/streams.c:
+      MFB: Fix memleak in debug mode
+
+    * main/streams.c:
+      Fix memleak in debug mode
+
+2002-11-23  Sara Golemon  <php@alphaweb.net>
+
+    * ext/standard/dns.c:
+      New function dns_get_record(): close resolver socket after use.
+      fix to internal func php_parserr(): correct bug in return state.
+
+2002-11-23  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/exif/tests/exif000.phpt:
+      MFH: Testing default behaviour
+
+    * ext/exif/tests/exif000.phpt:
+      
+      Testing default behaviour
+
+2002-11-22  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * ext/mbstring/mbfilter_kr.c
+      ext/mbstring/mbfilter_kr.c:
+      fixed some bugs in korean encoding conversion.
+
+2002-11-22  Rasmus Lerdorf  <rasmus@lerdorf.on.ca>
+
+    * ext/gd/gd.c:
+      Applied imagedeallocate() fix
+
+2002-11-22  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * main/rfc1867.c:
+      Added missing declaration.
+
+    * ext/exif/exif.c:
+      MFH
+
+    * ext/exif/exif.c:
+      Fixed bug #20560.
+
+2002-11-22  Stefan Esser  <s.esser@e-matters.de>
+
+    * main/rfc1867.c:
+      MFH
+
+    * main/rfc1867.c:
+      little fix
+
+2002-11-22  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/dba/tests/dba008.phpt:
+      MFH
+
+    * ext/dba/dba.c:
+      MFH
+
+    * ext/dba/dba.c
+      ext/dba/tests/dba008.phpt:
+      Make magic_quotes_runtime work bidirectional for dba
+
+2002-11-22  Edin Kadribasic  <edink@proventum.net>
+
+    * sapi/cgi/cgi_main.c:
+      MFH: Avoid possible buffer overflow.
+
+    * sapi/cgi/cgi_main.c:
+      Avoid possible buffer overflow.
+
+2002-11-22  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/mhash/tests/001.phpt
+      ext/mhash/tests/002.phpt
+      ext/mhash/tests/003.phpt:
+      MFH
+
+    * ext/mhash/tests/001.phpt
+      ext/mhash/tests/002.phpt
+      ext/mhash/tests/003.phpt:
+      Show which algorythm fails and do not fail when we have new algos.
+
+2002-11-22  Edin Kadribasic  <edink@proventum.net>
+
+    * sapi/cgi/cgi_main.c:
+      MFB: Don't send default http status (200).
+
+    * sapi/cgi/cgi_main.c:
+      Don't send default http status (200) (Thanks to Sascha Schumann for idea).
+
+2002-11-22  Andrey Hristov  <andrey@webgate.bg>
+
+    * tests/classes/abstract.phpt:
+      typo fix.
+
+2002-11-22  Stefan Esser  <s.esser@e-matters.de>
+
+    * ext/standard/tests/general_functions/009.phpt:
+      MFH: sha1() test
+
+2002-11-22  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * tests/classes/abstract.phpt:
+      Update error message and say 'method' instead of 'function'
+
+2002-11-22  Edin Kadribasic  <edink@proventum.net>
+
+    * php.ini-dist
+      php.ini-recommended
+      sapi/cgi/cgi_main.c:
+      MFH: Fixed bug #19207 by adding cgi.rfc2616_headers config directive.
+
+    * php.ini-dist
+      php.ini-recommended
+      sapi/cgi/cgi_main.c:
+      Fixed bug #19207 by adding cgi.rfc2616_headers configuration directive.
+
+2002-11-22  Sander Roobol  <phy@wanadoo.nl>
+
+    * ext/bcmath/bcmath.c
+      ext/bcmath/php_bcmath.h
+      ext/bcmath/libbcmath/src/bcmath.h
+      ext/bcmath/libbcmath/src/debug.c
+      ext/bcmath/libbcmath/src/div.c
+      ext/bcmath/libbcmath/src/divmod.c
+      ext/bcmath/libbcmath/src/init.c
+      ext/bcmath/libbcmath/src/output.c
+      ext/bcmath/libbcmath/src/raise.c
+      ext/bcmath/libbcmath/src/raisemod.c
+      ext/bcmath/libbcmath/src/recmul.c
+      ext/bcmath/libbcmath/src/sqrt.c
+      ext/bcmath/libbcmath/src/str2num.c
+      ext/bcmath/libbcmath/src/zero.c:
+      MFH
+
+    * ext/bcmath/bcmath.c
+      ext/bcmath/php_bcmath.h
+      ext/bcmath/libbcmath/src/bcmath.h
+      ext/bcmath/libbcmath/src/debug.c
+      ext/bcmath/libbcmath/src/div.c
+      ext/bcmath/libbcmath/src/divmod.c
+      ext/bcmath/libbcmath/src/init.c
+      ext/bcmath/libbcmath/src/output.c
+      ext/bcmath/libbcmath/src/raise.c
+      ext/bcmath/libbcmath/src/raisemod.c
+      ext/bcmath/libbcmath/src/recmul.c
+      ext/bcmath/libbcmath/src/sqrt.c
+      ext/bcmath/libbcmath/src/str2num.c
+      ext/bcmath/libbcmath/src/zero.c:
+      Made bcmath extension thread safe.
+
+2002-11-22  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Frontend/CLI.php:
+      - fix config-show output
+
+2002-11-22  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/gd/gdcache.c:
+      Added missing header (fixed bug #20555).
+
+    * ext/pcre/tests/.cvsignore
+      ext/pcre/tests/bug20528.phpt:
+      MFH
+
+    * ext/pcre/tests/.cvsignore
+      ext/pcre/tests/bug20528.phpt:
+      
+      Added a test case for bug #20528.
+
+    * ext/pcre/php_pcre.c:
+      MFH
+
+    * ext/pcre/php_pcre.c:
+      Fixed bug #20528.
+
+2002-11-21  Melvyn Sopacua  <msopacua@idg.nl>
+
+    * ext/xslt/php_sablot.h
+      ext/xslt/sablot.c:
+      MFH Fix bug #20518
+
+    * ext/xslt/tests/bug20518.phpt:
+      test for bug #20518
+
+    * ext/xslt/php_sablot.h
+      ext/xslt/sablot.c:
+      Fix bug #20518
+
+    * ext/xslt/tests/bug20518.phpt:
+      
+      test for bug #20518
+
+2002-11-21  Maxim Maletsky  <maxim@maxim.cx>
+
+    * ext/oci8/oci8.c:
+      Added E_WARNING to OCIPasswordChage() when Safe Mode is in effect
+
+    * ext/oci8/oci8.c:
+      
+
+    * ext/oci8/oci8.c:
+      comment typo
+
+    * ext/oci8/oci8.c:
+      Disabled OCIPasswordChange() in safe mode. Possible security risks.
+
+2002-11-21  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/mbstring/tests/mb_send_mail01.phpt
+      ext/mbstring/tests/mb_send_mail03.phpt
+      ext/mbstring/tests/mb_send_mail04.phpt:
+      MFH (added missing mb_internal_encoding())
+
+    * ext/mbstring/tests/mb_send_mail01.phpt
+      ext/mbstring/tests/mb_send_mail03.phpt
+      ext/mbstring/tests/mb_send_mail04.phpt:
+      Added missing mb_internal_encoding()
+
+    * ext/mbstring/tests/mb_ereg_replace-compat-13.phpt:
+      MFH (removed unnecessary \n)
+
+    * ext/mbstring/tests/mb_ereg_replace-compat-13.phpt:
+      Removed unnecessary "\n"
+
+    * ext/gd/tests/imagettftext.phpt
+      ext/gd/tests/test8859.ttf:
+      Added a test case for imagettftext()
+
+2002-11-21  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * run-tests.php:
+      MFH
+
+    * run-tests.php:
+      Revert that unwanted debug thing - thanks to Sander Robol
+
+2002-11-21  Sander Roobol  <phy@wanadoo.nl>
+
+    * ext/bcmath/tests/bcadd.phpt
+      ext/bcmath/tests/bcadd.phpt
+      ext/bcmath/tests/bccomp.phpt
+      ext/bcmath/tests/bccomp.phpt
+      ext/bcmath/tests/bcdiv.phpt
+      ext/bcmath/tests/bcdiv.phpt
+      ext/bcmath/tests/bcmod.phpt
+      ext/bcmath/tests/bcmod.phpt
+      ext/bcmath/tests/bcmul.phpt
+      ext/bcmath/tests/bcmul.phpt
+      ext/bcmath/tests/bcpow.phpt
+      ext/bcmath/tests/bcpow.phpt
+      ext/bcmath/tests/bcscale.phpt
+      ext/bcmath/tests/bcscale.phpt
+      ext/bcmath/tests/bcsqrt.phpt
+      ext/bcmath/tests/bcsqrt.phpt
+      ext/bcmath/tests/bcsub.phpt
+      ext/bcmath/tests/bcsub.phpt:
+      MFH
+
+    * ext/bcmath/tests/bcadd.phpt
+      ext/bcmath/tests/bccomp.phpt
+      ext/bcmath/tests/bcdiv.phpt
+      ext/bcmath/tests/bcmod.phpt
+      ext/bcmath/tests/bcmul.phpt
+      ext/bcmath/tests/bcpow.phpt
+      ext/bcmath/tests/bcscale.phpt
+      ext/bcmath/tests/bcsqrt.phpt
+      ext/bcmath/tests/bcsub.phpt:
+      Hardcode the bcmath.scale ini-entry
+
+2002-11-21  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * ext/mbstring/CREDITS
+      ext/mbstring/CREDITS
+      ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.c:
+      mbstring is supporting CJK + some other encodings.
+
+    * ext/mbstring/mbfilter_kr.c
+      ext/mbstring/mbfilter_kr.c
+      ext/mbstring/unicode_table_kr.h
+      ext/mbstring/unicode_table_kr.h:
+      fixed incorrect encoding conversion in korean.
+
+2002-11-21  Sander Roobol  <phy@wanadoo.nl>
+
+    * ext/bcmath/tests/bcadd.phpt
+      ext/bcmath/tests/bccomp.phpt
+      ext/bcmath/tests/bcdiv.phpt
+      ext/bcmath/tests/bcmod.phpt
+      ext/bcmath/tests/bcmul.phpt
+      ext/bcmath/tests/bcpow.phpt
+      ext/bcmath/tests/bcscale.phpt
+      ext/bcmath/tests/bcsqrt.phpt
+      ext/bcmath/tests/bcsub.phpt:
+      
+      Adding tests for the bcmath extension
+
+2002-11-21  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * run-tests.php:
+      Force showing the question
+
+    * tests/classes/abstract.phpt:
+      Test: An abstract function can be overwritten but not called
+
+    * run-tests.php
+      main/main.c
+      main/php_globals.h:
+      Make it possible to test language features like newly introduced 'abstract'
+      independantly from debug mode.
+
+2002-11-21  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/mbstring/mbstring.c:
+      Fixed yet another mb_parse_str() bug
+
+2002-11-21  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/standard/php_fopen_wrapper.c
+      main/SAPI.c:
+      MFH
+
+    * ext/standard/php_fopen_wrapper.c
+      main/SAPI.c:
+      the apache 1.x sapi read_posts tests for SG(read_post_bytes) being
+      counted up, so lets make it happy although this value is not really
+      needed in these cases ...
+
+2002-11-20  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/mysql/php_mysql.c:
+      MFH, as requested by georg
+
+2002-11-20  James Cox  <james@imajes.info>
+
+    * win32/php4dllts.dsp:
+      grr..
+
+    * win32/php4dllts.dsp:
+      remove number.c from the win32 build..
+      
+
+2002-11-20  Andi Gutmans  <andi@zend.com>
+
+    * ext/bcmath/config.m4:
+      - CVS nuked number.* so we'll nuke it from the build:)
+
+2002-11-20  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/w32api/.cvsignore:
+      Adding generated files to ignore list
+
+2002-11-20  Andi Gutmans  <andi@zend.com>
+
+    * ext/bcmath/bcmath.c
+      ext/bcmath/libbcmath/src/bcmath.h
+      ext/bcmath/libbcmath/src/init.c
+      ext/bcmath/libbcmath/src/output.c
+      ext/bcmath/libbcmath/src/raise.c
+      ext/bcmath/libbcmath/src/raisemod.c
+      ext/bcmath/libbcmath/src/recmul.c
+      ext/bcmath/libbcmath/src/sqrt.c
+      ext/bcmath/libbcmath/src/str2num.c
+      ext/bcmath/libbcmath/src/zero.c:
+      - Revert previous patch
+
+    * ext/bcmath/bcmath.c
+      ext/bcmath/libbcmath/src/bcmath.h
+      ext/bcmath/libbcmath/src/init.c
+      ext/bcmath/libbcmath/src/output.c
+      ext/bcmath/libbcmath/src/raise.c
+      ext/bcmath/libbcmath/src/raisemod.c
+      ext/bcmath/libbcmath/src/recmul.c
+      ext/bcmath/libbcmath/src/sqrt.c
+      ext/bcmath/libbcmath/src/str2num.c
+      ext/bcmath/libbcmath/src/zero.c:
+      - Intermediate commit which works on making bcmath thread-safe.
+
+2002-11-20  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/domxml/domxml.dsp:
+      Adding path to resolv.lib
+
+    * ext/w32api/php_w32api.h
+      ext/w32api/w32api.c
+      ext/w32api/w32api_function_definition_parser.y
+      ext/w32api/w32api_type_definition_parser.y:
+      Changing line endings to CRLF. This allows the extension to build again.
+
+2002-11-20  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/session/session.c:
+      - MFH: Add an error message to the ini handlers
+
+2002-11-20  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/session/session.c:
+      Add an error message to the ini handlers
+
+2002-11-20  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/shmop/php_shmop.h
+      ext/shmop/shmop.c
+      ext/shmop/tests/.cvsignore
+      ext/shmop/tests/001.phpt:
+      MFH
+
+2002-11-20  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/session/session.c:
+      add protective checks to ini updates
+      
+      Noticed by: Derick Rethans <d.rethans@jdimedia.nl>
+      PR: #20284
+
+2002-11-20  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/shmop/php_shmop.h
+      ext/shmop/shmop.c
+      ext/shmop/tests/.cvsignore
+      ext/shmop/tests/001.phpt:
+      Switched to a new parameter parsing API, which simplifies the code.
+      Made error reporting use php_error_docref().
+      Fixed a memory leak in shmop_open() when an invalid flag is specified.
+      Added tests for shmop() extension.
+
+2002-11-20  Sander Roobol  <phy@wanadoo.nl>
+
+    * ext/standard/credits_sapi.h:
+      One Apache 1.3 line is enough
+
+2002-11-20  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/mhash/tests/001.phpt
+      ext/mhash/tests/002.phpt
+      ext/mhash/tests/003.phpt
+      ext/mhash/tests/skip.inc:
+      MFH
+
+    * ext/mhash/mhash.c
+      ext/mhash/tests/.cvsignore:
+      MFH
+
+2002-11-20  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Command/Config.php:
+      - convert to english
+
+    * pear/PEAR/Command/Config.php:
+      - fix doc for config-{set,get}
+
+2002-11-20  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/mhash/tests/.cvsignore:
+      
+      Added .cvsignore file.
+
+    * ext/mhash/mhash.c
+      ext/mhash/tests/001.phpt
+      ext/mhash/tests/002.phpt
+      ext/mhash/tests/003.phpt
+      ext/mhash/tests/skip.inc:
+      Switched to a new parameter parsing API, which simplifies the code a great
+      deal.
+      Made error reporting use php_error_docref()
+      Fixed a bug in mhash_keygen_s2k() that caused non \0 terminated data to be
+      returned.
+      Added tests of all mhash functions.
+
+2002-11-19  Stefan Esser  <s.esser@e-matters.de>
+
+    * ext/standard/tests/general_functions/009.phpt:
+      
+      Adding SHA1 tests.
+
+2002-11-19  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/image.c:
+      Do not register IMAGETYPE_SWC if zlib, which is needed for parsing of swc
+      files is not available.
+
+2002-11-19  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/zlib/zlib_fopen_wrapper.c:
+      Be pedantic with the return value
+
+    * ext/zlib/tests/gzreadgzwriteplain.phpt
+      ext/zlib/tests/gzreadgzwriteplain.phpt:
+      
+      file gzreadgzwriteplain.phpt was initially added on branch PHP_4_3.
+
+    * ext/zlib/zlib_fopen_wrapper.c:
+      Remove a memset I added while debugging
+
+2002-11-19  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/gd/gdcache.c
+      ext/gd/gdttf.c
+      ext/gd/libgd/gd_topal.c
+      ext/gd/libgd/gdcache.c
+      ext/gd/libgd/gdhelpers.h:
+      Addressed the issue of persistant allocation.
+      Fixed bug #20470.
+      Fixed a memory leak in gdttf.c that would happen when an error during
+      processing occures.
+
+2002-11-19  George Schlossnagle  <george@omniti.com>
+
+    * sapi/apache_hooks/README:
+      brief v1 documentation
+
+    * sapi/apache_hooks/CREDITS:
+      Props to Lukas as well
+
+2002-11-19  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/zlib/zlib_fopen_wrapper.c
+      ext/zlib/tests/gzreadgzwrite.phpt
+      ext/zlib/tests/gzreadgzwrite.phpt:
+      Resolve some problems with zlib streams, mostly related to opening the
+      stream with an invalid mode.
+      There still seem to be some issues when reading from non-compressed files.
+      Investigation continues.
+
+2002-11-19  Jani Taskinen  <sniper@iki.fi>
+
+    * sapi/apache_hooks/CREDITS:
+      Add George to the credits and add note about it being different than the
+      real Apache SAPI
+
+    * sapi/apache_hooks/config.m4:
+      Fix the configure..
+
+2002-11-19  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.h:
+      Function renamings: s/php_mbstr_/php_mb/.
+
+    * ext/mbstring/mbstring.c:
+      Unified the duplicated portions.
+
+    * ext/mbstring/tests/mb_parse_str.phpt:
+      MFH
+
+    * ext/mbstring/tests/mb_parse_str.phpt:
+      
+      Added a test to check whether mb_parse_str() works properly
+
+    * ext/mbstring/tests/zend-multibyte.phpt:
+      MFH
+
+    * ext/mbstring/tests/zend-multibyte.phpt:
+      Modified the test so it wouldn't be affected by ini settings.
+
+2002-11-19  Edin Kadribasic  <edink@proventum.net>
+
+    * ext/standard/credits_ext.h
+      ext/standard/credits_ext.h
+      ext/standard/credits_sapi.h
+      ext/standard/credits_sapi.h:
+      Update Credits
+
+2002-11-19  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * tests/lang/bison1.phpt
+      win32/install.txt:
+      - MFH
+
+    * tests/lang/bison1.phpt:
+      
+      - Add test for bison weirdness as some people experienced (seems fixed
+        now though)
+
+2002-11-19  Edin Kadribasic  <edink@proventum.net>
+
+    * ext/pcre/pcrelib/pcre.h:
+      MFH (Fix for linking warnings  on windows).
+
+2002-11-19  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * pear/Makefile.frag:
+      - MFB: Safemode install problem
+
+    * pear/Makefile.frag:
+      - Fix safemode relating pear install problems
+
+2002-11-19  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * main/main.c:
+      MFH
+
+    * main/main.c:
+      Allow error_prepend and error_append being empty as used in run-test.php
+
+2002-11-19  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * win32/install.txt:
+      - Committing patch by Philip Olson <philip@cornado.com>.
+
+2002-11-19  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/standard/basic_functions.c
+      ext/standard/config.m4
+      ext/standard/dns.c
+      ext/standard/dns.h:
+      -rename checkdnsrr to dns_check_record, keep old name as alias
+      -rename getmxrr to dns_get_mx, keep old name as alias
+      -added dns_get_record
+
+2002-11-19  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Command/Config.php:
+      MFH
+
+    * pear/PEAR/Command/Config.php:
+      - allow config-get in the default layer
+
+2002-11-19  George Schlossnagle  <george@omniti.com>
+
+    * sapi/apache_hooks/config.m4:
+      now this works (thanks Rasmus)
+      Note:  the correct line is --with-apache-hooks
+
+2002-11-19  Edin Kadribasic  <edink@proventum.net>
+
+    * ext/dba/dba.dsp
+      ext/dba/libcdb/cdb.c
+      ext/dba/libcdb/cdb.h
+      ext/dba/libcdb/cdb_make.c
+      ext/dba/libcdb/cdb_make.h
+      ext/dba/libcdb/uint32.c
+      ext/dba/libcdb/uint32.h
+      ext/dba/libflatfile/flatfile.c
+      ext/dba/libflatfile/flatfile.h:
+      MFH (fix windows build)
+
+    * ext/dba/dba.dsp
+      ext/dba/libcdb/cdb.c
+      ext/dba/libcdb/cdb.h
+      ext/dba/libcdb/cdb_make.c
+      ext/dba/libcdb/cdb_make.h
+      ext/dba/libcdb/uint32.c
+      ext/dba/libcdb/uint32.h
+      ext/dba/libflatfile/flatfile.c
+      ext/dba/libflatfile/flatfile.h:
+      No need to declare functions used internally by DBA as PHPAPI. This
+      fixes windows build.
+
+2002-11-18  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/mime_magic/mime_magic.c:
+      MFH (binary mode fix)
+
+    * ext/mime_magic/mime_magic.c:
+      We have to use binary mode here.
+
+    * ext/mime_magic/mime_magic.c:
+      MFH (fixed possible leaks)
+
+    * ext/mime_magic/mime_magic.c:
+      Fixed possible leaks
+
+2002-11-18  George Schlossnagle  <george@omniti.com>
+
+    * sapi/apache_hooks/mod_php4.c
+      sapi/apache_hooks/sapi_apache.c:
+      fixed recurrent entrance to add_cgi_vars
+
+2002-11-18  Thies C. Arntzen  <thies@thieso.net>
+
+    * ext/xml/xml.c:
+      use FREE_ZVAL when freeing zvals
+
+2002-11-18  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * main/streams.c:
+      Fix warning as discussed with Wez.
+
+2002-11-18  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/fam/.cvsignore
+      ext/fam/CREDITS
+      ext/fam/config.m4
+      ext/fam/fam.c
+      ext/fam/php_fam.h:
+      Add FAM support for LGPLed libfam.
+      
+      FAM, the File Alteration Monitor, provides an API that applications can
+      use to
+      be notified when specific files or directories are changed.
+      
+      FAM is being used in Enlightenment, GNOME/Nautilus, and KDE.
+      
+
+2002-11-18  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/standard/tests/image/246x247.png
+      ext/standard/tests/image/384x385.png
+      ext/standard/tests/image/getimagesize.phpt
+      ext/standard/tests/image/getimagesize_246x247.phpt
+      ext/standard/tests/image/getimagesize_384x385.phpt:
+      MFH
+      -Added colordepth for png
+      -Added tests for width/heidth for unsigned/signed problems
+
+    * ext/standard/image.c:
+      MFH: Added colordepth for png\n
+
+    * ext/standard/tests/image/246x247.png
+      ext/standard/tests/image/384x385.png
+      ext/standard/tests/image/getimagesize.phpt
+      ext/standard/tests/image/getimagesize_246x247.phpt
+      ext/standard/tests/image/getimagesize_384x385.phpt:
+      
+      -Added colordepth for png
+      -Added tests for width/heidth for unsigned/signed problems
+
+    * ext/standard/image.c:
+      Added colordepth for png
+
+2002-11-18  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ext_skel:
+      add missing backslash
+
+2002-11-18  Edin Kadribasic  <edink@proventum.net>
+
+    * ext/pcre/pcrelib/pcre.h:
+      Nuke one more win32 linking warning.
+
+2002-11-18  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/standard/image.c:
+      Fixing unsigned/signed problems (and i thought about it before...)\n
+
+    * ext/standard/image.c:
+      Fixing unsigned/signed problems (and i thought about it before...)
+
+2002-11-18  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/image.c:
+      - MFH
+
+    * ext/standard/image.c:
+      - Remove outdated GPL clause; the file was totally rewritten
+
+2002-11-18  Edin Kadribasic  <edink@proventum.net>
+
+    * ext/xml/expat/expat.h:
+      Really nuke win32 linking warnings.
+
+2002-11-18  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * main/php_compat.h:
+      Fix bug #20442.
+
+    * ext/xml/expat/expat.h:
+      Hopefully fix win32 linker warnings.
+
+2002-11-18  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/gd/libgd/gdft.c
+      ext/gd/libgd/gdhelpers.c:
+      - Remove e*() memory function calls from the branch
+
+2002-11-18  Edin Kadribasic  <edink@proventum.net>
+
+    * sapi/apache_hooks/mod_php4.c
+      sapi/apache_hooks/php_apache.c
+      sapi/apache_hooks/php_apache_http.h:
+      Initial attempt to get apache_hooks api to compile on windows.
+      Still getting link errors with
+      undefined symbol: 'php_request_startup_for_hook'.
+
+2002-11-18  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * main/memory_streams.c
+      main/memory_streams.c
+      main/php_open_temporary_file.c
+      main/php_open_temporary_file.c
+      main/streams.c
+      main/streams.c:
+      wb -> r+b
+
+2002-11-18  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/gd/libgd/gd_jpeg.c
+      ext/gd/libgd/gd_png.c
+      ext/gd/libgd/gdhelpers.c
+      ext/gd/libgd/gdhelpers.h:
+      Changed memory allocation wrappers to macros, so that it is possible to see
+      where the memory leak is happening.
+
+2002-11-18  Edin Kadribasic  <edink@proventum.net>
+
+    * sapi/apache_hooks/php4apache.dsp
+      sapi/apache_hooks/php4apache_hooks.dsp:
+      Updated windows build file.
+
+    * sapi/apache_hooks/.cvsignore:
+      Added .cvsignore file.
+
+    * NEWS:
+      MFH (fribidi is not available on windows yet).
+
+    * NEWS:
+      Remove fribidi from the NEWS item about extensions available on windows
+      for now. This is because I'm unable to get fribidi library to compile
+      on windows.
+
+2002-11-18  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/curl/config.m4:
+      Re-enable the curlwrappers configure option.
+      I still don't recommend it's use unless you are hacking both curl and PHP
+      to make it work.
+
+    * NEWS:
+      Amend news about mbstring enabled by default
+
+    * NEWS:
+      Amend info about mbstring enabled by default (no longer true).
+
+    * main/php_open_temporary_file.c:
+      MFH other temp file mode fixes and Id tag.
+
+    * main/php_open_temporary_file.c:
+      Merge the temp file mode fix from the branch,
+      add missing Id tag.
+
+    * acinclude.m4
+      ext/zlib/zlib.c
+      main/php_streams.h
+      main/streams.c:
+      Merge streams changes from branch.
+
+    * ext/zlib/zlib.c:
+      Remove redundant info line (all wrappers are listed near the start of
+      the phpinfo page).
+
+2002-11-18  Rasmus Lerdorf  <rasmus@lerdorf.on.ca>
+
+    * sapi/apache_hooks/php_apache.c:
+      Fix a few warnings - compiles nicely now
+
+2002-11-18  George Schlossnagle  <george@omniti.com>
+
+    * sapi/apache_hooks/php_apache.c:
+      
+
+2002-11-18  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * main/SAPI.h
+      main/main.c:
+      Fix ZTS build.
+
+2002-11-18  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/qtdom/config.m4:
+      MFH; Fixed bug: #20458 (--with-qtdom=shared broken)
+
+    * ext/qtdom/config.m4:
+      Fixed bug: #20458 (--with-qtdom=shared broken)
+
+    * ext/standard/browscap.c:
+      MFH: Added error message if browscap location is not set in php.ini
+
+    * ext/standard/browscap.c:
+      Added error message if browscap location is not set in php.ini
+
+2002-11-18  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/browscap.c:
+      MFH
+
+    * ext/standard/browscap.c:
+      Fixed bug #20462.
+
+    * ext/xml/expat/xmlparse.c:
+      Removed duplicate php_compat.h include.
+
+2002-11-18  George Schlossnagle  <george@omniti.com>
+
+    * sapi/apache_hooks/CREDITS
+      sapi/apache_hooks/apMakefile.libdir
+      sapi/apache_hooks/apMakefile.tmpl
+      sapi/apache_hooks/config.m4
+      sapi/apache_hooks/libphp4.module.in
+      sapi/apache_hooks/mod_php4.c
+      sapi/apache_hooks/mod_php4.exp
+      sapi/apache_hooks/mod_php4.h
+      sapi/apache_hooks/php.sym
+      sapi/apache_hooks/php4apache.dsp
+      sapi/apache_hooks/php_apache.c
+      sapi/apache_hooks/php_apache_http.h
+      sapi/apache_hooks/sapi_apache.c:
+      initial import of all these files.  This was previously the apache_hooks
+      branch of the apache sapi.  Now it lives on its own.  General
+      functionality
+      seems to be working, though there may be a problem with some
+      output buffering, most likely due to the way that sapi_deactivate needs
+      to be mangled with here.
+
+    * main/SAPI.c
+      main/SAPI.h
+      main/main.c
+      main/php_main.h:
+      added support functions for the apache_hooks SAPI
+
+2002-11-18  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/gd/config.m4:
+      MFH
+
+    * ext/gd/config.m4:
+      Fix the test. (and indented it for easier bug spotting :)
+
+2002-11-17  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * main/php_streams.h:
+      Add missing Id tag.
+
+    * main/php_streams.h
+      main/streams.c:
+      Revise stream shutdown procedure.
+
+2002-11-17  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * main/main.c:
+      MFH
+
+    * main/main.c:
+      Fixed bug #20466.
+
+    * ext/gd/config.m4
+      ext/gd/config.m4:
+      MFH
+
+    * ext/gd/config.m4:
+      Fixed gd 2.0.4 check
+
+2002-11-17  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ext/xml/expat/winconfig.h:
+      Fix warning. HAVE_MEMMOVE is already defined in config.w32.h.
+
+    * ext/xml/expat/xmlparse.c
+      ext/xml/expat/xmlrole.c
+      ext/xml/expat/xmltok.c:
+      Fix Win32 build. (Lots of linkage warnings remain!)
+
+2002-11-17  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/gd/config.m4:
+      A better gd >=2.0.4 version check for non-bundled gd library.
+
+2002-11-17  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/gd/libgd/gdft.c
+      ext/gd/libgd/gdhelpers.c
+      ext/gd/libgd/gdhelpers.h:
+      - MFB
+
+    * ext/gd/libgd/gdft.c
+      ext/gd/libgd/gdhelpers.c
+      ext/gd/libgd/gdhelpers.h:
+      - Fix memory problem for real this time.
+
+2002-11-17  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * acinclude.m4
+      main/streams.c:
+      s/off64t/off64_t/
+
+    * acinclude.m4
+      main/streams.c:
+      Fix fopencookie detection for newer versions of glibc.
+      The GNU people strike again with their useless docs; fopencookie does NOT
+      use "fpos_t *" as documented :/
+      Additionally, it appears that the the libio layer buffers in chunks of
+      8KB,
+      so our test needs to exploit this in order to function correctly.
+      Thanks to Derick for doing some groundwork.
+
+2002-11-17  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * NEWS:
+      Expat upgrade news.
+
+    * ext/xml/config.m4
+      ext/xml/expat/Changes
+      ext/xml/expat/ascii.h
+      ext/xml/expat/asciitab.h
+      ext/xml/expat/expat.h
+      ext/xml/expat/iasciitab.h
+      ext/xml/expat/internal.h
+      ext/xml/expat/latin1tab.h
+      ext/xml/expat/utf8tab.h
+      ext/xml/expat/winconfig.h
+      ext/xml/expat/xmlparse.c
+      ext/xml/expat/xmlrole.c
+      ext/xml/expat/xmlrole.h
+      ext/xml/expat/xmltok.c
+      ext/xml/expat/xmltok.h
+      ext/xml/expat/xmltok_impl.c
+      ext/xml/expat/xmltok_ns.c
+      main/php_compat.h:
+      Upgraded the bundled expat library to 1.95.5 (latest stable, atm).
+      Fixed bug #20442.
+
+2002-11-17  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/gd/libgd/gd.c:
+      - Fix compile problems for mips pro
+
+2002-11-17  Zeev Suraski  <zeev@zend.com>
+
+    * main/main.c:
+      MFH - unify error_reporting handling through the INI subsystem
+
+    * main/main.c:
+      Unify handling of error_reporting - fix bug #16137
+
+2002-11-17  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/gd/libgd/gdft.c:
+      - MFB: Fix memory allocation problem in bundled GD (reported by Brian
+      Havard)
+
+    * ext/gd/libgd/gdft.c:
+      - Fix memory allocation problem in bundled GD (reported by Brian Havard)
+
+2002-11-17  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/standard/tests/math/hexdec.phpt:
+      MFH: Conversion fix by Michael Mauch
+
+    * ext/standard/tests/math/hexdec.phpt:
+      Conversion fix by Michael Mauch
+
+2002-11-17  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/ircg.c
+      ext/ircg/php_ircg.h:
+      add invite handling
+
+2002-11-17  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * main/streams.c:
+      Avoid a potential double fclose().
+
+2002-11-17  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * main/streams.c:
+      Fix compile warning.
+
+2002-11-17  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * main/streams.c:
+      Remove debugging printf
+
+2002-11-17  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * main/streams.c:
+      MFH
+
+    * main/streams.c:
+      Fixed a problem that would cause include/require("/dir/file") to fail on
+      Windows.
+
+2002-11-16  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/standard/tests/general_functions/008.phpt:
+      MFH: Force float for the float test
+
+    * ext/standard/tests/general_functions/008.phpt:
+      Force float for the float test
+
+2002-11-16  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * main/streams.c:
+      initialize this member so that it doesn't segfault on shutdown...
+
+    * main/php_streams.h
+      main/streams.c:
+      php_stream_fopen_tmpfile now uses php_open_temporary_file rather than
+      tmpfile().
+      tmpfile() under win32 will try to use the root directory; the default
+      IIS settings prohibit access to the root directory, which renders
+      tmpfile()
+      useless.
+      PHP's tmpfile() streams are correctly cleaned up and unlinked when closed
+      (or at request shutdown).  However, if the stream is cast and passed to
+      a third party library, the temporary file may linger.
+      This is unfortunate, since streams uses this process internally for
+      handling
+      the casting of user-streams.
+      --> some more work is needed on this, but this can be done more easily
+      under
+      Linux.
+
+    * main/php_open_temporary_file.c:
+      Change "wb" -> "r+b" for win32.
+      The difference is staggering - I've spent hours tracking this down.
+      It should probably be made the same for all platforms.
+
+2002-11-16  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/dbx/tests/skipif.inc:
+      Show module used in test
+
+    * ext/standard/tests/array/001.phpt
+      ext/standard/tests/array/002.phpt
+      ext/standard/tests/array/003.phpt
+      ext/standard/tests/array/004.phpt
+      ext/standard/tests/array/005.phpt
+      ext/standard/tests/array/006.phpt
+      ext/standard/tests/array/007.phpt
+      ext/standard/tests/array/008.phpt
+      ext/standard/tests/array/array_change_key_case.phpt
+      ext/standard/tests/array/array_chunk.phpt
+      ext/standard/tests/array/array_count_values.phpt
+      ext/standard/tests/array/array_search.phpt
+      ext/standard/tests/array/count_recursive.phpt
+      ext/standard/tests/array/data.inc
+      ext/standard/tests/array/var_export.phpt:
+      MFH
+
+    * ext/standard/tests/array/001.phpt
+      ext/standard/tests/array/002.phpt
+      ext/standard/tests/array/003.phpt
+      ext/standard/tests/array/data.inc:
+      -Do not rely on a side effect of 32bit platforms (patch by Michael Mauch)
+      -remove unused sections
+
+    * ext/standard/tests/array/004.phpt
+      ext/standard/tests/array/005.phpt
+      ext/standard/tests/array/006.phpt
+      ext/standard/tests/array/007.phpt
+      ext/standard/tests/array/008.phpt
+      ext/standard/tests/array/array_change_key_case.phpt
+      ext/standard/tests/array/array_chunk.phpt
+      ext/standard/tests/array/array_count_values.phpt
+      ext/standard/tests/array/array_search.phpt
+      ext/standard/tests/array/count_recursive.phpt
+      ext/standard/tests/array/var_export.phpt:
+      removed unused sections
+
+2002-11-16  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/tests/strings/crc32.phpt:
+      MFH
+
+    * ext/standard/tests/strings/crc32.phpt:
+      Fixed the test so it works properly on both 32 and 64 bit platforms.
+
+2002-11-16  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/standard/image.c:
+      MFH: Make getimagesize more robust against corrupt files
+
+    * ext/standard/image.c:
+      Make getimagesize more robust against corrupt files
+
+2002-11-16  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * main/streams.c:
+      This is not needed here.
+
+2002-11-16  Georg Richter  <georg.richter@phpev.de>
+
+    * ext/mysql/php_mysql.c:
+      forgot to decrement result_allocated :(
+
+2002-11-16  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/ircg.c
+      ext/ircg/php_ircg.h:
+      Add ircg_who(), and
+      Change function table so that it leaves unsupported functions undefined.
+
+2002-11-16  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * main/streams.c:
+      Remove debugging line...
+
+    * main/php_streams.h
+      main/streams.c:
+      Make include/require of user-streams work on systems without fopencookie.
+
+2002-11-16  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ext/standard/html.c:
+      MFH
+
+    * ext/standard/html.c:
+      Fix Win32 build.
+
+2002-11-15  Stig Bakken  <ssb@fast.no>
+
+    * pear/scripts/pearize.in:
+      MFH
+
+    * pear/scripts/pearize.in:
+      no longer in use
+
+2002-11-15  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/dba/config.m4:
+      MFH: When --enable-dba is used then include builtin modules unless
+      --without-xxx is not used.
+
+    * ext/dba/config.m4:
+      When --enable-dba is used then include builtin modules unless --without-xxx
+      is not used.
+
+2002-11-15  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/gd/tests/imagefilter.phpt:
+      Removed the md5 checks since the files may be slightly different due to
+      float -> int conversion inconsistencies on various architectures.
+
+2002-11-15  Maxim Maletsky  <maxim@maxim.cx>
+
+    * ext/oci8/oci8.c:
+      WS
+
+    * ext/oci8/oci8.c:
+      Tons of WS fixes all over the file
+
+2002-11-15  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/pgsql/tests/80_bug14383.phpt:
+      MFH: Added test for bug 14383
+
+    * ext/gd/tests/bug19366.phpt:
+      MFH: simplify and show skip reason
+
+    * ext/xslt/config.m4:
+      MFH: show correct result
+
+    * tests/lang/bug20175.phpt:
+      MFH: new syntax
+
+    * ext/dba/tests/dba001.phpt
+      ext/dba/tests/dba002.phpt
+      ext/dba/tests/dba003.phpt
+      ext/dba/tests/dba004.phpt
+      ext/dba/tests/dba005.phpt
+      ext/dba/tests/dba006.phpt
+      ext/dba/tests/dba007.phpt
+      ext/dba/tests/dba008.phpt
+      ext/dba/tests/skipif.inc
+      ext/dba/tests/test.inc:
+      MFH: info about handler used and use flatfile if available
+
+    * configure.in
+      ext/db/config.m4:
+      MFH: deprecate ext/db
+
+2002-11-15  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/mime_magic/mime_magic.c
+      ext/standard/array.c
+      ext/standard/html.c:
+      MFH
+
+    * NEWS:
+      MFH
+
+2002-11-15  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/link.c:
+      MFH (symlinks + ZTS).
+
+    * ext/standard/link.c:
+      With ZTS on, we need to resolve the full paths before making symlinks.
+      If a chdir() call occurs before the symlink operation, the symlink is
+      created in the current directory rather then directory we've chdired to
+      because in ZTS we don't actually chdir but store the new path internally.
+      
+      For an example of this problem consider the
+      ext/standard/tests/file/001.phpt
+      test under ZTS.
+
+2002-11-15  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * run-tests.php:
+      MFH: SKIP and INFO result from --SKIPIF--
+
+    * run-tests.php:
+      Use eregi is better (noticed by Jon)
+
+2002-11-15  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/standard/tests/array/bug20381.phpt:
+      MFH.
+
+    * ext/mime_magic/mime_magic.c:
+      Always use binary mode for magic files
+
+    * ext/standard/html.c:
+      Include php_config.h for HAVE_MBSTRING
+
+2002-11-15  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * run-tests.php:
+      MFH
+      -Allow skip in upper letters.
+      -Add 'info' result to --SKIPIF-- -> see following dba commits
+
+    * ext/dba/tests/skipif.inc
+      ext/dba/tests/test.inc:
+      Use flatfile if available.
+
+2002-11-15  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/mbstring/tests/overload.phpt
+      ext/mbstring/tests/overload01.phpt
+      ext/mbstring/tests/overload02.phpt:
+      MFH
+
+    * ext/mbstring/tests/overload02.phpt:
+      
+      Divided the overload test into two so as to handle the case mbregex is
+      not enabled
+
+    * ext/mbstring/tests/overload.phpt
+      ext/mbstring/tests/overload01.phpt:
+      Divided the overload test into two so as to handle the case mbregex is
+      not enabled
+
+2002-11-15  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/dba/tests/dba001.phpt
+      ext/dba/tests/dba002.phpt
+      ext/dba/tests/dba003.phpt
+      ext/dba/tests/dba004.phpt
+      ext/dba/tests/dba005.phpt
+      ext/dba/tests/dba006.phpt
+      ext/dba/tests/dba007.phpt
+      ext/dba/tests/dba008.phpt
+      ext/dba/tests/skipif.inc:
+      Show which handler was used in the test
+
+    * run-tests.php:
+      -Allow skip in upper letters.
+      -Add 'info' result to --SKIPIF-- -> see following dba commits
+
+2002-11-15  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/mbstring/tests/casefold.phpt
+      ext/mbstring/tests/mb_ereg-compat-01.phpt
+      ext/mbstring/tests/mb_ereg-compat-01.phpt
+      ext/mbstring/tests/mb_ereg-compat-01.phpt
+      ext/mbstring/tests/mb_ereg-compat-02.phpt
+      ext/mbstring/tests/mb_ereg-compat-02.phpt
+      ext/mbstring/tests/mb_ereg-compat-02.phpt
+      ext/mbstring/tests/mb_ereg.phpt
+      ext/mbstring/tests/mb_ereg.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-01.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-01.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-01.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-02.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-02.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-02.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-03.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-03.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-03.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-04.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-04.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-04.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-05.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-05.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-05.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-06.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-06.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-06.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-07.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-07.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-07.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-08.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-08.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-08.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-09.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-09.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-09.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-10.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-10.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-10.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-11.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-11.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-11.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-12.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-12.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-12.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-13.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-13.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-13.phpt
+      ext/mbstring/tests/mb_ereg_replace.phpt
+      ext/mbstring/tests/mb_ereg_replace.phpt
+      ext/mbstring/tests/mb_ereg_replace.phpt
+      ext/mbstring/tests/mb_ereg_replace.phpt
+      ext/mbstring/tests/mb_ereg_search_xxx.phpt
+      ext/mbstring/tests/mb_regex_set_options.phpt
+      ext/mbstring/tests/mb_split-compat-01.phpt
+      ext/mbstring/tests/mb_split.phpt
+      ext/mbstring/tests/php_gr_jp_10830.phpt:
+      MFH
+
+2002-11-15  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * configure.in:
+      Speling (found by Andi)
+
+2002-11-15  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/mbstring/tests/casefold.phpt
+      ext/mbstring/tests/mb_ereg-compat-01.phpt
+      ext/mbstring/tests/mb_ereg-compat-02.phpt
+      ext/mbstring/tests/mb_ereg.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-01.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-02.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-03.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-04.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-05.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-06.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-07.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-08.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-09.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-10.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-11.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-12.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-13.phpt
+      ext/mbstring/tests/mb_ereg_replace.phpt
+      ext/mbstring/tests/mb_ereg_search_xxx.phpt
+      ext/mbstring/tests/mb_regex_set_options.phpt
+      ext/mbstring/tests/mb_split-compat-01.phpt
+      ext/mbstring/tests/mb_split.phpt
+      ext/mbstring/tests/php_gr_jp_10830.phpt:
+      %s/SKIP/skip/g
+
+2002-11-15  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/gd/tests/bug19366.phpt:
+      Simplify and show skip reason
+
+    * tests/lang/bug20175.phpt:
+      Update to new syntax suggestion
+
+    * ext/xslt/config.m4:
+      Show correct result
+
+2002-11-15  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/mime_magic/mime_magic.c:
+      Fixed segfault in case the specified magic file cannot be read.
+
+    * NEWS
+      NEWS:
+      Bug fixing news
+
+    * ext/mbstring/tests/mb_ereg_replace.phpt:
+      Removed unnecessary ?>
+
+    * ext/mbstring/tests/mb_split-compat-01.phpt
+      ext/mbstring/tests/mb_split-compat-01.phpt:
+      MFH
+
+    * ext/mbstring/tests/mb_ereg-compat-01.phpt
+      ext/mbstring/tests/mb_ereg-compat-02.phpt
+      ext/mbstring/tests/mb_ereg.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-01.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-02.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-03.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-04.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-05.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-06.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-07.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-08.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-09.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-10.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-11.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-12.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-13.phpt
+      ext/mbstring/tests/mb_ereg_replace.phpt
+      ext/mbstring/tests/mb_split-compat-01.phpt:
+      Fixed bogus SKIPIF conditions.
+
+2002-11-15  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/standard/tests/time/001.phpt:
+      MFH: Only show the first results
+
+    * ext/standard/tests/time/001.phpt:
+      Only show the first results
+
+    * run-tests.php:
+      Correction
+
+2002-11-15  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/mbstring/tests/mb_ereg-compat-01.phpt
+      ext/mbstring/tests/mb_ereg-compat-02.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-01.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-02.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-03.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-04.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-05.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-06.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-07.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-08.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-09.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-10.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-11.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-12.phpt
+      ext/mbstring/tests/mb_ereg_replace-compat-13.phpt
+      ext/mbstring/tests/mb_ereg_replace.phpt
+      ext/mbstring/tests/mb_split-compat-01.phpt:
+      Added some skipif conditions to handle the case mbstring is enabled but
+      mbregex is disabled.
+
+2002-11-15  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * run-tests.php:
+      MFH: Show Zend version
+
+    * run-tests.php:
+      Show Zend version
+
+    * ext/domxml/tests/domxml002.phpt:
+      MFH: Showing memleaks for a memleak test is a good idea
+
+    * ext/domxml/tests/domxml002.phpt:
+      Showing memleaks for a memleak test is a good idea
+
+    * configure.in
+      ext/db/config.m4:
+      db is deprecated now
+
+    * ext/domxml/php_domxml.c:
+      MFH: Fix segfaults (check ext/domxml/tests/domxml002.phpt)
+
+    * ext/domxml/php_domxml.c:
+      Fix segfaults (check ext/domxml/tests/domxml002.phpt)
+
+2002-11-15  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/mysql/php_mysql.c:
+      - MFH: removed restore_connection_defaults for pconnects (discussed on
+             php-dev@)
+             bug #19529 closed
+             bug #12513 reopened
+
+2002-11-15  Sander Roobol  <phy@wanadoo.nl>
+
+    * run-tests.php:
+      MFH
+
+    * run-tests.php:
+      Move the build-environment stuff down or the test results up, so you
+      don't need to scroll down to see the failed tests.
+
+2002-11-15  Georg Richter  <georg.richter@phpev.de>
+
+    * ext/mysql/php_mysql.c:
+      removed restore_connection_defaults for pconnects (discussed on php-dev@)
+      bug #19529 closed
+      bug #12513 reopened
+
+2002-11-15  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/mime_magic/mime_magic.c:
+      MFH
+
+    * ext/standard/dir.c:
+      ws fix
+
+    * NEWS:
+      clean the mess..
+
+2002-11-15  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/standard/array.c:
+      Fixed bug #20381
+
+    * ext/standard/tests/array/bug20381.phpt:
+      
+      Added a test case for bug #20381
+
+2002-11-15  Maxim Maletsky  <maxim@maxim.cx>
+
+    * ext/oci8/oci8.c:
+      I mean - todo typo :)
+
+    * ext/oci8/oci8.c:
+      todo typo
+
+2002-11-15  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/ircg.c:
+      Simplify handling of ctcp messages by improving %t.
+
+2002-11-15  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/mime_magic/mime_magic.c:
+      Use C comments
+
+2002-11-15  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * sapi/cgi/cgi_main.c:
+      MFH
+
+    * sapi/cgi/cgi_main.c:
+      Oops.
+
+    * sapi/cgi/cgi_main.c:
+      Fix function prototype.
+
+2002-11-15  Sascha Schumann  <sascha@schumann.cx>
+
+    * acinclude.m4
+      configure.in
+      pear/scripts/phpize.in:
+      use grep -E instead of egrep. the latter is not defined by POSIX anymore
+
+2002-11-14  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Common.php
+      pear/PEAR/Dependency.php
+      pear/PEAR/Installer.php:
+      MFH
+
+    * pear/install-pear.php
+      pear/OS/Guess.php:
+      MFH
+
+    * pear/PEAR/Common.php
+      pear/PEAR/Dependency.php
+      pear/PEAR/Installer.php:
+      Added error codes for the PEAR_Dependency class
+      Changed the dependency API to have a reference to an error message
+      string as first arg to all check methods
+
+2002-11-14  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/iconv/iconv.c
+      ext/mbstring/mbstring.c:
+      MFH
+
+    * ext/iconv/iconv.c:
+      Fixed a problem that ICONV_IMPL doesn't give a correct value in win32
+      build.
+
+2002-11-14  Stig Bakken  <ssb@fast.no>
+
+    * ext/standard/dir.c:
+      MFH
+
+    * ext/standard/dir.c:
+      Added PATH_SEPARATOR constant
+
+    * pear/OS/Guess.php:
+      - a little bit of internal refactoring
+
+2002-11-14  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/mbstring/tests/zend-multibyte.phpt:
+      MFH
+
+    * ext/mbstring/tests/zend-multibyte.phpt:
+      
+      Added a test for zend-multibyte extension
+
+2002-11-14  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/exif/tests/exif001.phpt
+      ext/exif/tests/exif003.phpt
+      ext/exif/tests/exif004.phpt
+      ext/exif/tests/exif005.phpt:
+      MFH: Test updates
+
+    * NEWS:
+      Correct last update
+
+    * ext/dba/dba.c
+      ext/dba/tests/dba008.phpt
+      ext/dba/tests/dba_cdb_make.phpt:
+      MFH: magic_quotes_runtime support is needed to have ext/dba being
+      superset of deprectaed ext/db
+
+    * ext/exif/tests/exif001.phpt
+      ext/exif/tests/exif004.phpt
+      ext/exif/tests/exif005.phpt:
+      Minor test corrections
+
+    * ext/exif/exif.c
+      ext/exif/tests/exif003.phpt:
+      Test is affected by mbstring
+
+2002-11-14  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/mbstring/mbstring.c:
+      Fixed possible buffer over run in php_mb_safe_strrchr_ex()
+
+2002-11-14  Maxim Maletsky  <maxim@maxim.cx>
+
+    * ext/oci8/oci8.c:
+      Added function OCIPasswordChange() that allows renewal of an expired Oracle
+      password.
+
+2002-11-14  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ext/standard/info.c:
+      MFH
+
+    * ext/standard/info.c:
+      Sort the modules for info output as well.
+
+2002-11-14  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/dba/tests/dba_cdb_make.phpt:
+      file() is affected by magic_quotes_runtime
+
+    * NEWS
+      NEWS:
+      Add info: Add magic_quotes_runtime support
+
+2002-11-14  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * sapi/cgi/cgi_main.c
+      sapi/cli/php_cli.c:
+      MFH
+
+2002-11-14  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/dba/tests/dba008.phpt:
+      
+      Add magic_quotes_runtime support
+
+    * ext/dba/dba.c:
+      Add magic_quotes_runtime support
+
+    * run-tests.php:
+      MFH: Add magic_quotes_runtime which affects several tests
+
+    * run-tests.php:
+      Add magic_quotes_runtime which affects several tests
+
+2002-11-14  Melvyn Sopacua  <msopacua@idg.nl>
+
+    * README.SUBMITTING_PATCH:
+      typo
+
+    * README.SUBMITTING_PATCH:
+      MFH plus typo fix
+
+2002-11-14  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * sapi/cgi/cgi_main.c
+      sapi/cli/php_cli.c:
+      Sort the modules and extensions before printing them when -m switch is
+      used.
+
+2002-11-14  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/pgsql/tests/80_bug14383.phpt:
+      
+      Test for bug #14383
+
+    * run-tests.php:
+      MFH: Only set the overwrites once (keep this in sync as long as possible)
+
+    * run-tests.php:
+      Only set the overwrites once
+
+2002-11-14  Melvyn Sopacua  <msopacua@idg.nl>
+
+    * README.SUBMITTING_PATCH:
+      Add a note about the mime-type
+
+2002-11-14  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * configure.in
+      main/php_version.h:
+      Back to 4.3.0-dev.
+
+2002-11-14  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/mbstring/php_mbregex.c:
+      Fix build
+
+    * ext/mbstring/mbstring.c
+      ext/mbstring/php_mbregex.c
+      ext/mbstring/php_mbregex.h:
+      Moved some mbregex related portions from mbstring.c to php_mbregex.c
+
+    * ext/standard/tests/strings/bug20169.phpt:
+      Prevent warnings under safe mode
+
+2002-11-14  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * run-tests.php:
+      MFH (disable safe_mode for test).
+
+    * run-tests.php:
+      Disable safe_mode as it interferes with just about every test that needs
+      to access the file system, set enviroment variables or execute commands.
+
+2002-11-14  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * NEWS
+      NEWS:
+      Missed that
+
+2002-11-14  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * configure.in:
+      Fix version.
+
+    * configure.in
+      main/php_version.h:
+      Go for RC1.
+
+2002-11-14  Stefan Esser  <s.esser@e-matters.de>
+
+    * main/rfc1867.c:
+      MFH
+
+2002-11-14  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/sysvmsg/sysvmsg.c
+      ext/sysvshm/sysvshm.c:
+      MFH (zts compile warning).
+
+    * ext/sysvmsg/sysvmsg.c
+      ext/sysvshm/sysvshm.c:
+      Fixed ZTS compile warning.
+
+2002-11-14  Stefan Esser  <s.esser@e-matters.de>
+
+    * main/rfc1867.c:
+      Fixing possible remote overflow due to mbstring translation.
+
+2002-11-14  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/link.c:
+      MFH (fic for bug #20423).
+
+    * ext/standard/link.c:
+      Fixed bug #20423.
+
+2002-11-14  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/gd/gd.c:
+      Fix TSRM build
+
+    * ext/gd/libgd/gd.c:
+      Fix warnings (Marcus & Pierre-Alain Joye)
+
+    * NEWS
+      NEWS:
+      Info about gd changes
+
+2002-11-14  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/standard/tests/network/bug20134.phpt:
+      Add a test case for this "bug" # 20134.
+      I'm not sure that this test is actually useful, so I'm not adding
+      it to the branch.
+
+2002-11-14  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/dba/dba.c
+      ext/dba/php_dba.h
+      ext/dba/tests/dba_cdb.phpt
+      ext/dba/tests/dba_db2.phpt
+      ext/dba/tests/dba_db3.phpt
+      ext/dba/tests/dba_dbm.phpt
+      ext/dba/tests/dba_flatfile.phpt
+      ext/dba/tests/dba_gdbm.phpt
+      ext/dba/tests/dba_handler.inc
+      ext/dba/tests/dba_ndbm.phpt:
+      MFH:
+      Fix locking behaviour: On some systems read during write is permitted but
+      most libraries are not capable of that. GDBM is system dependant so there
+      we only test  that we do not deadlock.
+
+    * NEWS:
+      MFH: Info about closed bugs
+
+    * NEWS:
+      Info about closed bugs
+
+    * ext/dba/dba.c
+      ext/dba/php_dba.h
+      ext/dba/tests/dba_cdb.phpt
+      ext/dba/tests/dba_db2.phpt
+      ext/dba/tests/dba_db3.phpt
+      ext/dba/tests/dba_dbm.phpt
+      ext/dba/tests/dba_flatfile.phpt
+      ext/dba/tests/dba_gdbm.phpt
+      ext/dba/tests/dba_handler.inc
+      ext/dba/tests/dba_ndbm.phpt:
+      Fix locking behaviour: On some systems read during write is permitted but
+      most libraries are not capable of that. GDBM is system dependant so there
+      we only test  that we do not deadlock.
+
+2002-11-14  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/standard/tests/file/fopencookie.phpt
+      ext/standard/tests/file/fopencookie.phpt:
+      MFB
+
+    * ext/standard/tests/file/fopencookie.phpt:
+      Add note about shortcomings of this test.
+
+2002-11-14  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/mbstring/tests/mb_send_mail05.phpt
+      ext/mbstring/tests/mb_send_mail06.phpt
+      ext/mbstring/tests/overload.phpt:
+      MFH (skip conditions for tests)
+
+    * ext/yaz/php_yaz.c:
+      MFH (compile warning fix).
+
+    * NEWS:
+      Bug fix news.
+
+    * ext/standard/url.c
+      ext/standard/tests/strings/url_t.phpt:
+      MFH (parse_url bug).
+
+    * ext/standard/url.c
+      ext/standard/tests/strings/url_t.phpt:
+      Fixed bug #20420 and added partial urls to the test of the function.
+
+2002-11-14  Edin Kadribasic  <edink@proventum.net>
+
+    * ext/mbstring/mbstring.h:
+      MFH (fixes unix build of mbstring)
+
+2002-11-14  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/standard/tests/file/fopencookie.phpt:
+      
+      Add this test to make sure that fopencookie is detected and working
+      correctly (or that the less efficient tmpfile casting is working).
+      More details in the test itself.
+
+    * ext/mbstring/mbstring.h:
+      Fix build for unix.
+      Not sure if this needs merging to the branch (haven't got that far yet
+      today).
+
+    * ext/curl/interface.c
+      ext/curl/streams.c:
+      Commit these before Sterling renames the files again :-)
+      When curlstreams are enabled, registers a each supported protocol
+      with PHP.
+      "More Correctly" implement eof for curlstreams.
+      Still not ready for anything like primetime.
+
+2002-11-14  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * NEWS
+      ext/standard/tests/file/bug20424.phpt
+      main/streams.c:
+      - MFB: Fixed bug #20484 (stream_get_meta_data crashes on a normal file
+        stream). (Derick, Wez)
+
+    * NEWS
+      ext/standard/tests/file/bug20424.phpt
+      ext/standard/tests/file/bug20424.phpt
+      main/streams.c:
+      - Fixed bug #20424 (stream_get_meta_data craches on a normal file stream).
+        (Derick, Wez)
+
+2002-11-14  Jon Parise  <jon@csh.rit.edu>
+
+    * ext/standard/array.c:
+      
+
+2002-11-14  Sterling Hughes  <sterling@bumblebury.com>
+
+    * ext/curl/multi.c:
+      remove C++ comments
+
+2002-11-14  James Cox  <james@imajes.info>
+
+    * ext/standard/credits.c:
+      MFH..
+
+    * ext/standard/credits.c:
+      changing..
+      
+
+    * NEWS:
+      MFH
+
+2002-11-14  Jani Taskinen  <sniper@iki.fi>
+
+    * pear/Makefile.frag:
+      MFH
+
+2002-11-14  James Cox  <james@imajes.info>
+
+    * NEWS:
+      englishify
+
+2002-11-14  Sascha Schumann  <sascha@schumann.cx>
+
+    * pear/Makefile.frag:
+      Fix "make install" in vpath env
+
+    * acinclude.m4
+      configure.in
+      ext/ircg/config.m4
+      ext/ircg/ircg.c
+      ext/ircg/ircg_dummy.c
+      ext/ircg/ircg_thttpd.c
+      sapi/cli/config.m4:
+      - Remove PHP_DISABLE_CLI
+      - Streamline ircg build: thttpd-dependent part moved into separate source
+        file, so that it can be added to the SAPI-only object list.
+
+    * config.guess
+      config.sub:
+      upgrade files to libtool 1.4.3 shipped ones
+
+2002-11-14  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/pdf/config.m4:
+      MFB: Fix for bug: #20412
+
+    * ext/pdf/config.m4:
+      Fixed bug: #20414, shared build did not work
+
+2002-11-13  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/ircg.c:
+      Remove debugging stuff
+
+2002-11-13  Edin Kadribasic  <edink@proventum.net>
+
+    * ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.dsp
+      ext/mbstring/mbstring.h
+      ext/mbstring/php_mbregex.c
+      ext/mbstring/php_mbregex.h
+      ext/mbstring/php_unicode.c
+      ext/mbstring/php_unicode.h:
+      MFB (made mbstring compile on windows again).
+
+2002-11-13  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/ircg.c:
+      always use the mass_join formats, when the server is sending a namelist
+      
+      always use the single join format, when the server is sending a JOIN
+      
+      combining both was originally seen as more convenient, but proved
+      to be difficult when developing frontends.
+
+2002-11-13  Edin Kadribasic  <edink@proventum.net>
+
+    * ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.dsp
+      ext/mbstring/mbstring.h
+      ext/mbstring/php_mbregex.c
+      ext/mbstring/php_mbregex.h
+      ext/mbstring/php_unicode.c
+      ext/mbstring/php_unicode.h:
+      Made mbstring compile on windows again.
+
+2002-11-13  Sterling Hughes  <sterling@bumblebury.com>
+
+    * ext/curl/multi.c:
+      curl_multi_info_read is unimplemented...
+
+2002-11-13  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * NEWS:
+      Moved news entry about imagefilter() to proper location.
+
+2002-11-13  Sterling Hughes  <sterling@bumblebury.com>
+
+    * ext/curl/CREDITS
+      ext/curl/config.m4
+      ext/curl/curl.c
+      ext/curl/curl.dsp
+      ext/curl/curlstreams.c
+      ext/curl/interface.c
+      ext/curl/multi.c
+      ext/curl/php_curl.h
+      ext/curl/streams.c:
+      add multi support and reorganize things a bit...
+
+2002-11-13  Jani Taskinen  <sniper@iki.fi>
+
+    * NEWS:
+      Welcome 4.4.0
+
+2002-11-13  Edin Kadribasic  <edink@proventum.net>
+
+    * win32/php4dll.dsp
+      win32/php4dllts.dsp:
+      MFH (relly disable compilation of mbstring)
+
+    * main/config.w32.h.in:
+      MFH (mbstring defines commented out to allow defining them elsewhere).
+
+    * win32/php4dll.dsp
+      win32/php4dllts.dsp:
+      Really remove mbstring from the build.
+
+    * main/config.w32.h.in:
+      Allow mbstring defines to be somewhere else without warnings.
+
+2002-11-13  Stig Bakken  <ssb@fast.no>
+
+    * pear/install-pear.php:
+      MFH: remove debug output
+
+2002-11-13  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * NEWS:
+      New gd function.
+
+    * ext/gd/tests/imagefilter.phpt
+      ext/gd/tests/test.png:
+      Added tests for imagefilter() function.
+
+    * ext/gd/gd.c
+      ext/gd/php_gd.h
+      ext/gd/libgd/gd.c
+      ext/gd/libgd/gd.h:
+      Added imagefilter() function by Pierre-Alain Joye (paj@pearfr.org). This
+      function allows negate, grayscale, brightness, contrast, colorize,
+      selective blur,
+      Gaussian blur, edge detect, smooth, sharpen and emboss filters to be
+      applied
+      on an image.
+
+2002-11-13  Stig Bakken  <ssb@fast.no>
+
+    * pear/install-pear.php:
+      - remove debug output
+
+2002-11-13  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * NEWS:
+      - MFH: moved ext/cybermut to PECL
+
+    * NEWS:
+      - Moved cybermut to PECL
+
+2002-11-13  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * configure.in
+      main/php_version.h:
+      Change version to 4.4.0-dev.
+
+2002-11-13  Jani Taskinen  <sniper@iki.fi>
+
+    * NEWS:
+      moved this entry under correct version
+
+2002-11-13  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/yaz/php_yaz.c:
+      Compile warning fix.
+
+    * ext/mbstring/tests/overload.phpt:
+      Added a skip condition for when mail() function is not avaliable.
+
+    * ext/mbstring/tests/mb_send_mail05.phpt
+      ext/mbstring/tests/mb_send_mail06.phpt:
+      Added a skip condition for when the encoding needed for the test is not
+      available or supported.
+
+2002-11-13  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/dba/libcdb/cdb.c:
+      
+      must be unsigned
+
+    * ext/dba/libflatfile/flatfile.c
+      ext/dba/libflatfile/flatfile.h:
+      
+      -use size_t
+      -recheckin header as unix file
+
+2002-11-13  Christian Dickmann  <chrisdicki@gmx.de>
+
+    * pear/PEAR/Common.php
+      pear/PEAR/Command/Install.php
+      pear/PEAR/Frontend/CLI.php:
+      
+      Add new tag to package.xml named <warnings>.\nThis warnings are printed
+      when installing/upgrading the package.\nThis patch was created in a
+      cooperation with Tal Peer (Thanks for the idea Tal)
+
+2002-11-13  John Coggeshall  <john@coggeshall.org>
+
+    * ext/standard/dir.c:
+      
+      
+      Added GLOB_ONLYDIR and GLOB_BRACE for compatiable systems for the glob()
+      function.
+      
+      Modified the layout and some minor logic in the experimental webHarness()
+      test class
+      
+      Added Whitespace accidently to array.c :)
+
+    * run-tests2.php
+      ext/standard/array.c:
+      
+      Added GLOB_ONLYDIR and GLOB_BRACE for compatiable systems for the glob()
+      function.
+      
+      Modified the layout and some minor logic in the experimental webHarness()
+      test class
+      
+      Added Whitespace accidently to array.c :)
+
+2002-11-13  Edin Kadribasic  <edink@proventum.net>
+
+    * ext/dba/config.m4:
+      
+      Allow use of Berkeley db version 3.1 as found on many RedHat systems.
+
+2002-11-13  Jan Lehnardt  <jan@dasmoped.net>
+
+    * sapi/cli/php_cli.c:
+      
+       - be more verbose
+
+2002-11-13  Edin Kadribasic  <edink@proventum.net>
+
+    * ext/dba/dba.dsp
+      ext/dba/dba_cdb.c
+      ext/dba/dba_flatfile.c
+      ext/dba/libcdb/cdb.c
+      ext/dba/libcdb/cdb_make.c:
+      
+      Added support for bundled flatfile, cdb and cdb_make handlers
+      to win32 build of the dba extension.
+
+2002-11-13  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/mbstring/tests/mb_send_mail06.phpt:
+      
+      Added a test for mb_send_mail() to check if the function properly handles
+      Traditional Chinese characters.
+
+    * ext/mbstring/mbfilter.c:
+      Corrected Traditional Chinese language spec and the preferred MIME name
+       of which the encoding is used in that locale.
+
+2002-11-13  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/db/db.c:
+      
+      avoid fileno()
+
+2002-11-13  Andrey Hristov  <andrey@webgate.bg>
+
+    * TODO:
+      Already binary safe.
+
+2002-11-13  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/mysql/php_mysql.c:
+      
+      - Reset globals for each request
+
+2002-11-13  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/mbstring/tests/mb_send_mail05.phpt:
+      
+      Added a test for mb_send_mail() to check if the simplified Chinese support
+      works
+
+    * ext/mbstring/tests/mb_send_mail02.phpt:
+      Updated the test
+
+    * ext/mbstring/mbstring.c:
+      
+      Prevented unwanted encoding detections in mb_send_mail()
+
+    * NEWS:
+      
+      Update for a recent change on mbstring
+
+    * ext/mbstring/mbstring.c:
+      Fixed mb_encode_mimeheader() to work with languages other than Japanese and
+      English
+
+    * ext/mbstring/mbstring.c:
+      Fixed a buffer over-run bug in case a function to be overloaded doesn't
+      exist.
+
+2002-11-13  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * main/config.w32.h.in:
+      
+      Disable mbstring (and sync behaviour with *NIX per Andrei's commit).
+
+2002-11-13  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ext/mbstring/config.m4:
+      Disable mbstring by default.
+
+2002-11-13  Jani Taskinen  <sniper@iki.fi>
+
+    * pear/install-pear.php:
+      
+      added missing cvs id tag
+
+2002-11-13  Stig Bakken  <ssb@fast.no>
+
+    * pear/install-pear.php:
+      - support INSTALL_ROOT
+
+2002-11-12  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/mysql/libmysql/libmysql.c
+      ext/mysql/libmysql/my_getwd.c
+      ext/mysql/libmysql/my_tempnam.c:
+      
+      Using // is not very good idea..
+
+    * pear/Makefile.frag:
+      
+      Do not use any php.ini files for the installs.
+
+2002-11-12  Edin Kadribasic  <edink@proventum.net>
+
+    * ext/sybase_ct/php_sybase_ct.c:
+      
+      Fixed ZTS build and removed an unused variable.
+
+    * ext/db/db.dsp:
+      Fix build. flock_compat.c and flock_compat.h are now in the exported
+      part of php4ts.dll.
+
+2002-11-12  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/mbstring/mbstring.c:
+      Cosmetics
+
+    * ext/mbstring/mbstring.c:
+      Fixed a function overloading related bug.
+
+    * ext/standard/tests/strings/htmlentities02.phpt
+      ext/standard/tests/strings/htmlentities03.phpt
+      ext/standard/tests/strings/htmlentities04.phpt:
+      Fixed the tests so that they won't be affected by the ini setting of
+      default_charset
+
+2002-11-12  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/dbase/dbf_rec.c:
+      ftruncate is defined in flock_compat.h on windows
+
+    * main/SAPI.h
+      main/php_ini.c:
+      Implemented -n switch to skip parsing ini at startup as suggested by Wez.
+
+    * sapi/cgi/cgi_main.c
+      sapi/cli/php_cli.c:
+      
+      Implemented -n switch to skip parsing ini at startup as suggested by Wez.
+
+2002-11-12  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/mbstring/tests/mb_send_mail03.phpt:
+      
+      Fixed language name
+
+    * ext/mbstring/tests/mb_send_mail01.phpt
+      ext/mbstring/tests/mb_send_mail02.phpt
+      ext/mbstring/tests/mb_send_mail03.phpt
+      ext/mbstring/tests/mb_send_mail04.phpt:
+      
+      Added test cases for mb_send_mail()
+
+    * ext/mbstring/mbfilter.c:
+      Forgot to change this one.
+
+    * ext/mbstring/mbfilter.c
+      ext/mbstring/mbfilter.h
+      ext/mbstring/mbstring.c:
+      Added neutral language spec for backwards compatibility
+
+2002-11-12  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/standard/php_fopen_wrapper.c
+      main/SAPI.c
+      main/SAPI.h
+      main/php_content_types.c:
+      
+      HTTP_RAW_POST_DATA BC fixes
+      php://input stream fixes (POST data handerl mangles data, CLI crashbug)
+
+2002-11-12  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/tests/image/getimagesize_swc.phpt:
+      Added test for swc files (compressed swf files), this must be done in a
+      separate test, since this test has a dependency on the zlib extension.
+
+    * ext/mbstring/mbregex.c:
+      Fixed a memory leak.
+
+2002-11-12  Sascha Schumann  <sascha@schumann.cx>
+
+    * Makefile.global:
+      Add missing $(INSTALL_ROOT)
+
+2002-11-12  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/odbc/config.m4:
+      ws fixes
+
+2002-11-12  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * sapi/cgi/cgi_main.c:
+      reverting accidential commit
+
+    * sapi/cgi/cgi_main.c:
+      -** empty log message ***
+
+2002-11-12  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/image.c:
+      
+      Data manipulation (for big endian transformation) should occur after the
+      data has been read from file.
+
+2002-11-12  Jason Greene  <jason@inetgurus.net>
+
+    * NEWS:
+      Correct Entry, Add entry
+
+2002-11-12  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/gd/libgd/gdhelpers.c:
+      
+      use *e*malloc functions
+
+    * NEWS:
+      -add gd_info()
+      -keep important news at top
+      -speling
+
+2002-11-12  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * main/main.c:
+      
+      Changed max_input_time PHP_INI_SYSTEM|PHP_INI_PERDIR because ini_set()
+      will
+      already be too late, the POST/GET/COOKIE processing occures before the
+      script
+      gets parsed.
+      Changed the default value to -1. If users have previously (older PHPs)
+      adressed the problem by setting timeout to a large value, we can avoid
+      breaking
+      their script by detecting the -1 and using timeout_seconds instead of
+      max_input_time when setting the 'input' timeout.
+
+2002-11-12  James Moore  <James@phpuk.org>
+
+    * ext/w32api/w32api_function_definition_parser.y
+      ext/w32api/w32api_function_definition_scanner.l
+      ext/w32api/w32api_type_definition_parser.y
+      ext/w32api/w32api_type_definition_scanner.l:
+      
+      Forgot the parsers and scanners
+
+    * ext/w32api/php_w32api.h
+      ext/w32api/w32api.c
+      ext/w32api/w32api.dsp:
+      
+      Rewrite of the W32api extension
+
+    * ext/w32api/README
+      ext/w32api/TODO:
+      Rewrite of the W32api extension
+
+2002-11-12  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/ming/ming.c:
+      Fixed compile error.
+
+2002-11-12  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/ming/ming.c:
+      php_error() => php_error_docref()
+
+2002-11-12  Timm Friebe  <thekid@thekid.de>
+
+    * ext/sybase_ct/php_sybase_ct.c:
+      - Added optional parameter to sybase_fetch_object() (Timm)
+      - Changed php_error and zend_error to php_error_docref (Timm)
+      - Changed sybase_query() to clean up and free unread results (Timm)
+
+2002-11-12  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/gd/libgd/gd.c
+      ext/gd/libgd/gd_gd2.c
+      ext/gd/libgd/gdft.c
+      ext/mbstring/mbstring.c
+      ext/ming/config.m4
+      ext/ming/ming.c
+      ext/ming/ming.c:
+      fix warnings
+
+    * ext/dbase/dbf_rec.c:
+      fix windows warning: not needed here
+
+    * ext/db/db.c:
+      -fix includes
+      -fix one missing efree
+      -replace efree/emalloc with erealloc
+
+    * ext/gd/gd.c
+      ext/gd/php_gd.h:
+      
+      new function gd_info() returns an associative array of gd support options.
+      # The index names are those from the minfo function. Therefore it is
+
+    * ext/standard/math.c:
+      
+      fix warnings
+
+    * ext/standard/flock_compat.c:
+      correct the last patch: make flock() a function again when it is missing
+
+2002-11-12  Yasuo Ohgaki  <yohgaki@ohgaki.net>
+
+    * ext/pgsql/pgsql.c:
+      
+      Speed up pg_escape_bytea, from O(n^2) => O(n). My test script speed up
+      from 50 sec to 5 sec. (sscanf is too slow at least under my linux, I
+      might write better function that unescape values later)
+      Use emalloc/erealloc for bundled PQescapeBytea(php_pgsql_escape_bytea)
+
+2002-11-12  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/mysql/php_mysql.c:
+      - Fix warning
+
+2002-11-12  David Viner  <dviner@yahoo-inc.com>
+
+    * ext/xslt/TODO:
+      adding to do list to help clarify exactly what we are (or
+      should be) working on for the XSLT extension.
+      --dviner
+
+2002-11-12  Zak Greant  <zak@mysql.com>
+
+    * ext/mysql/php_mysql.c:
+      Modified php_mysql_do_connect() as suggested by Nick Gaugler - using
+      mysql_ping() as a more efficient alternative to using mysql_stat() to
+      check if the server is alive and then calling mysql_(real_)?connect() to
+      reconnect.
+      
+      Simple tests of opening pconnects indicate that only about 10k of data per
+      ping needs to be returned to the client per connection check, rather than
+      about 110k per status check.
+
+2002-11-11  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/standard/flock_compat.c
+      ext/standard/flock_compat.h:
+      make flock() a function again when it is missing
+
+2002-11-11  Harrie Hazewinkel  <harrie@lisanza.net>
+
+    * ext/snmp/php_snmp.h
+      ext/snmp/snmp.c:
+      
+      Adding a more detail print functions, that assist/make it easier for
+      creating SNMP scripts.
+      They are only supported when you have NET-SNMP.
+      Need to be documented still though.
+
+    * ext/snmp/CREDITS
+      ext/snmp/php_snmp.h
+      ext/snmp/snmp.c:
+      Adding SNMPv3 support.
+      This splits the old php_snmp function into an argument parsing part and
+      a data retrieval part. The data retrieval part is reused for SNMPv3.
+      SNMPv3 has only a different argument parsing.
+      
+      THe code is not extremely beautiful, but having NET-SNMP and
+      UCD-SNMP support creates this. :-(
+      Documentation must still be done.
+
+2002-11-11  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/dba/dba.c:
+      
+      Use php_flock instead of flock
+
+    * ext/standard/flock_compat.c
+      ext/standard/flock_compat.h:
+      -make the flock() emulation a separate function named php_flock()
+      -use a define to make php_flock() available as flock() when necessary
+
+2002-11-11  Harrie Hazewinkel  <harrie@lisanza.net>
+
+    * ext/snmp/snmp.c:
+      Fixing the php_info function.
+      Print UCD-SNMP when UCD-SNMP is used.
+      Print NET-SNMP when NET-SNMP is used.
+
+2002-11-11  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * README.STREAMS:
+      forgot to add fprintf in list
+
+2002-11-11  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/mysql/php_mysql.c:
+      Fixed compile warnings.
+
+2002-11-11  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/standard/flock_compat.c
+      ext/standard/flock_compat.h:
+      make flock PHPAPI
+
+2002-11-11  Jason Greene  <jason@inetgurus.net>
+
+    * ext/standard/math.c:
+      Switch to using error_docref
+
+2002-11-11  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * pear/pear.m4:
+      - Revert that patch, this was not optional at all.
+
+2002-11-11  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * configure.in:
+      
+      Added a flex version check. In the event required flex version is not
+      available, an advisory warning (similar to bison one) will be given to the
+      user. This is needed for systems such as Sun OS, where the existing lex
+      parser cannot be used to regenerate Zend/PHP lexical parsers.
+
+2002-11-11  Edin Kadribasic  <edink@proventum.net>
+
+    * ext/openssl/openssl.dsp:
+      Fixed windows build. Symbol PHP_EXPORTS is a no-no for dynamically
+      linked extensions.
+
+2002-11-11  Georg Richter  <georg.richter@phpev.de>
+
+    * php.ini-dist
+      php.ini-recommended:
+      
+      added a little bit more information for mysql.trace_mode
+
+2002-11-11  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/standard/html.c:
+      
+      Added support for windows code pages.
+
+    * ext/standard/html.c:
+      WS
+
+2002-11-11  Georg Richter  <georg.richter@phpev.de>
+
+    * php.ini-dist
+      php.ini-recommended:
+      added mysql.trace_mode
+
+    * ext/mysql/php_mysql.c
+      ext/mysql/php_mysql.h:
+      Added new functionality:
+      	Warnings for table/index scans
+      	Warnings for SQL-Errors
+      	Warnings for non free result sets
+      
+      It can be activated via ini.setting "mysql.trace_mode"
+
+2002-11-11  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/dba/dba.c:
+      -fix file open mode when modifier 'd' is used
+
+    * ext/dba/tests/dba_handler.inc
+      ext/dba/tests/test.inc:
+      
+      -Precondiftion: no open files
+      -do not show warning from dba_open call for read during write
+
+    * ext/dba/libflatfile/flatfile.c:
+      Add missing flush
+
+2002-11-11  Jason Greene  <jason@inetgurus.net>
+
+    * ext/standard/math.c:
+      Report function name when log() triggers a base warning
+
+    * ext/standard/math.c
+      ext/standard/tests/math/log.phpt:
+      Add the ability to take the logarithm of any base by adding a base
+      parameter
+      to log()
+      Added regression tests for the new form
+
+    * ext/standard/tests/math/log.phpt:
+      add test function for log()
+
+2002-11-11  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/mbstring/php_unicode.c:
+      
+      Fixed mb_convert_case() / mb_strtolower() / mb_strtoupper() to work in
+      64bit systems
+
+2002-11-11  Christian Dickmann  <chrisdicki@gmx.de>
+
+    * pear/PEAR/Remote.php:
+      
+      make cache (get/set) binary safe
+
+2002-11-11  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * tests/lang/bug17882.phpt:
+      Removed the test. I should have been more aware of variability of
+      error messages. Thanks Ilia.
+
+2002-11-10  James Cox  <james@imajes.info>
+
+    * ext/standard/credits.c:
+      
+      give Wez streams credits he deserves.
+
+2002-11-10  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/dba/dba.c:
+      Emit a warning when open mode modifier t is used wrong.
+
+    * ext/dba/tests/dba_gdbm.phpt
+      ext/dba/tests/dba_handler.inc
+      ext/dba/tests/test.inc:
+      
+      Add $lock_flag which allows to change lock behaviour for both 'l' and 'd'
+      Remember gdbm has its own locking so 't' does not work here - maybe a
+      warning is needed for that, too.
+
+    * ext/dba/tests/dba_handler.inc:
+      Use 'l' to open database file with locking on .lck file.
+
+2002-11-10  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/mbstring/mbstring.c:
+      Fixed mb_send_mail() so that it correctly handles the language setting.
+
+    * ext/mbstring/mbfilter.c:
+      Fixed German language spec entry.
+
+2002-11-10  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/curl/curl.c:
+      
+      - Make it rely on cURL version 7.9.8 again, so that we can start with the
+        Release Process.
+
+    * ext/curl/config.m4:
+      - Make it rely on cURL version 7.9.8 again, so that we can start with the
+        Release Process.
+
+    * ext/pcre/php_pcre.c
+      ext/rpc/com/com_wrapper.c
+      ext/standard/assert.c:
+      
+      - Remove \n from error messages
+
+    * ext/com/COM.c
+      ext/dbx/dbx.c:
+      - Remove \n from error messages
+
+2002-11-10  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/mbstring/mbstring.c:
+      Fixed OnUpdate_mbstring_language so that change for mbstring.language
+      would be reflected to the setting properly
+
+    * ext/mbstring/mbstring.c:
+      Changed the default settings so that it shouldn't affect htmlentities()
+
+2002-11-10  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/xslt/tests/xslt_backend_info.phpt:
+      Added a missing '.', which is needed for proper skip check.
+
+    * sapi/apache/mod_php4.c
+      sapi/apache2filter/apache_config.c:
+      PHP flags specified in .htaccess can now be turned on by using '1' as well
+      as
+      'On'.
+
+    * main/main.c:
+      Added missing zend_lineno initilization.
+
+2002-11-10  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * tests/lang/bug17882.phpt:
+      Made it conscious of the line number
+
+    * ext/mbstring/mbstring.c:
+      These changes seems to have bad effect on htmlentities().
+      Remove it.
+
+    * tests/lang/bug17882.phpt:
+      Added a test case for bug #17882
+
+2002-11-10  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/dba/dba.c
+      ext/dba/dba_cdb.c
+      ext/dba/dba_flatfile.c
+      ext/dba/php_dba.h:
+      -Centralise open stream for builtin modules that use streams
+      -If locks work on database file then only one stream open call is used
+
+    * NEWS:
+      update dba change list
+
+    * ext/dba/dba.c:
+      finish work on locking
+      -all but gdbm do internal locking now since only gdbm has internal locking
+      -you can force locking on database or lck file (with gdbm this makes no
+       sense so a notice is generated)
+
+2002-11-10  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/mbstring/tests/ini_language.phpt:
+      Added a test case to check if my recent patch works
+
+2002-11-10  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/thttpd/thttpd_patch:
+      Defend against pipelined requests on persistent connections as used by
+      IRCG. These could cause thttpd to start a second request in the same
+      connection context, and thereby causing real damage.
+      
+      Mozilla 1.0.1 is buggy in that context: When HTTP/1.1 pipelining is
+      enabled (defaults to off), it will send any number of requests over
+      a persistent connection (which is fine), even after it has received
+      a "Connection: close" header field in a subsequent response header.
+      This blatantly violates RFC 2616, section 8.1.2. Because it cannot
+      receive any response on the dead connection, the download manager
+      pops up and tries to download a file (which never arrives).
+      
+      Also, we don't try to send a 400 message anymore, if the connection
+      dies.
+
+2002-11-10  Melvyn Sopacua  <msopacua@idg.nl>
+
+    * ext/xslt/config.m4
+      ext/xslt/php_sablot.h
+      ext/xslt/sablot.c
+      ext/xslt/tests/xslt_backend_info.phpt:
+      
+      - implement xslt_backend_info
+      - add test for it
+      - fix some prototypes
+
+    * run-tests.php:
+      
+      - Make it possible for people to save results and/or remove unwanted ENV
+        data.
+      - Use more options for the CC 'version' flag
+
+2002-11-10  Maxim Maletsky  <maxim@maxim.cx>
+
+    * ext/oci8/oci8.c:
+      fixed several proto return types throughout the extension
+
+2002-11-10  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * NEWS:
+      Bug fixing news.
+
+    * ext/openssl/openssl.c:
+      
+      Fixed bug #19935. Made OpenSSL file system operations abide by safe_mode
+      & open_basedir restrictions.
+
+    * main/streams.c:
+      
+      Fixed a bug that in many situations would cause open_basedir restriction
+      to
+      be bypassed. Most notable exception, is the inclusion of files via
+      include(),
+      with a partial path.
+
+2002-11-10  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Installer.php:
+      
+      - implement transactions for uninstall
+      * change "revert" to "rollback"
+
+    * pear/PEAR/Installer.php:
+      - implemented file transactions so installs may be safely aborted
+      * preparing 1.0b2 release
+
+    * pear/package-PEAR.xml:
+      
+      - implemented file transactions so installs may be safely aborted
+      * preparing 1.0b2 release
+
+2002-11-10  Jani Taskinen  <sniper@iki.fi>
+
+    * main/main.c:
+      ws fixes
+
+2002-11-10  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Remote.php:
+      - add folds
+
+    * main/main.c:
+      - honor track_errors ini setting in php_verror()
+
+2002-11-09  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/mbstring/mbstring.c:
+      Fixed typo
+
+    * ext/mbstring/tests/mb_substr_count.phpt:
+      Added a test for mb_substr_count()
+
+    * ext/mbstring/mbfilter.c
+      ext/mbstring/mbfilter.h
+      ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.h:
+      Added mb_substr_count() as per the request #15097
+
+    * ext/mbstring/mbstring.c:
+      Fixed PHP_INI_MH(OnUpdate_mbstring_language) so that ini entry values
+      are properly updated.
+
+2002-11-09  Sterling Hughes  <sterling@bumblebury.com>
+
+    * ext/curl/curl.c:
+      add a whole bunch of constants that make the interface somewhat up-to-date.
+
+    * ext/curl/config.m4:
+      add check for curl 7.10.2
+
+2002-11-09  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ext/pcre/php_pcre.c:
+      Fix memory leak in non-ZTS mode.
+
+2002-11-09  Stig Bakken  <ssb@fast.no>
+
+    * pear/Makefile.frag:
+      - cleaning house
+
+2002-11-08  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * main/fopen_wrappers.c:
+      
+      Made open_basedir error more descriptive.
+
+2002-11-08  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ext/tokenizer/php_tokenizer.h:
+      Remove unnecessary comments.
+
+2002-11-08  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/iconv/iconv.c:
+      
+      Use proper types
+
+    * ext/iconv/iconv.c:
+      Fixed typo
+
+2002-11-08  Sterling Hughes  <sterling@bumblebury.com>
+
+    * ext/curl/curl.c
+      ext/curl/php_curl.h:
+      add support for curl 7.10.* constants (at least most of them)
+      add support for persistent connections
+
+2002-11-08  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * tests/lang/bug19566.phpt:
+      Added a test for bug #19566
+
+2002-11-08  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/standard/tests/strings/htmlentities06.phpt:
+      hide possible warnings
+
+2002-11-08  Sterling Hughes  <sterling@bumblebury.com>
+
+    * ext/standard/basic_functions.c:
+      
+      use consistent constants
+
+2002-11-08  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/thttpd/thttpd.c:
+      s/PHP_API/PHP_API_VERSION/
+
+2002-11-08  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * build/shtool:
+      -update to version 1.6.2
+      -added path command as requested by jani
+
+2002-11-08  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * main/SAPI.c
+      main/php_content_types.c:
+      fix for #20198:
+      "always_populate_raw_post_data = On" breaks HTTP file uploads
+
+2002-11-08  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/mbstring/tests/overload.phpt:
+      
+      Added a test for function overloading behaviour
+
+2002-11-08  CHAILLAN Nicolas  <nicos@worldakt.com>
+
+    * ext/readline/readline.c:
+      Very little fixes
+
+2002-11-08  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/image.c:
+      Fixed prototype of image_type_to_mime_type(), bug #20094.
+
+    * ext/standard/ftp_fopen_wrapper.c:
+      
+      Fixed compile warning when compiling without openssl support.
+
+    * ext/standard/tests/image/getimagesize.phpt
+      ext/standard/tests/image/image_type_to_mime_type.phpt
+      ext/standard/tests/image/skipif_imagetype.inc:
+      
+      Move SWC (compressed swf) check into a separate test because this check
+      requires zlib. This separation allows us to skip the test if zlib is
+      not available and not fail.
+
+    * NEWS:
+      Bug fixing news.
+
+    * ext/standard/tests/strings/htmlentities05.phpt
+      ext/standard/tests/strings/htmlentities06.phpt
+      ext/standard/tests/strings/htmlentities07.phpt
+      ext/standard/tests/strings/htmlentities08.phpt
+      ext/standard/tests/strings/htmlentities09.phpt:
+      Added skip conditions in the event the required charset is not avaliabled.
+      Removed old (commented out) module loading code.
+
+    * run-tests.php:
+      This option is needed if we need to track errors inside the skip condition.
+
+    * ext/pspell/tests/01pspell_basic.phpt:
+      Added a skip condition if the English dictionary needed for the test is not
+      avaliable.
+
+    * ext/pcntl/tests/001.phpt:
+      Added a skip condition in the event posix_kill(), which is used by the test
+      is not avaliable.
+
+    * ext/exif/exif.c:
+      
+      Removed duplicate assignment.
+
+2002-11-08  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/dba/dba.c
+      ext/dba/dba_flatfile.c
+      ext/dba/php_dba.h:
+      -lock support moved from dba_flatfile.c to dba.c
+      -flatfile, cdb, cdb_make use locking now
+
+2002-11-08  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Installer.php:
+      - fix path prepends
+
+2002-11-07  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/dba/dba_flatfile.c:
+      not needed anywhere here
+
+    * ext/db/tests/003.phpt:
+      expand test: see if another insert fails
+
+    * ext/dba/dba_flatfile.c
+      ext/dba/libflatfile/flatfile.c
+      ext/dba/libflatfile/flatfile.h:
+      -rename anything to flatfile_xxx/FLATFILE_xxx
+      -fix update function
+      -add warnings for update function
+
+2002-11-07  Brian France  <list@firehawksystems.com>
+
+    * ext/xml/config.m4:
+      
+      	Changed:  EXPAT_SHARED_LIBADD -> XML_SHARED_LIBADD
+      
+      	If the xml extension was built shared with a shared libexpat
+      	it would not get the required link to libexpat.so.
+
+2002-11-07  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/curl/config.m4:
+      Really disable curlwrappers configure option.
+
+2002-11-07  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/tests/array/001.phpt
+      ext/standard/tests/array/002.phpt
+      ext/standard/tests/array/003.phpt
+      ext/standard/tests/array/data.inc:
+      
+      This makes the output of the tests consistent on 32bit and 64 bit
+      platforms.
+      The old test relied on the 32 bit behaviour, which caused them to always
+      fail
+      on 64 bit platforms.
+
+    * ext/standard/tests/image/image_type_to_mime_type.phpt:
+      Added swf info.
+
+    * ext/standard/tests/image/getimagesize.phpt
+      ext/standard/tests/image/test13pix.swf
+      ext/standard/tests/image/test4pix.swf:
+      Added swf and swc (compressed swf) test cases and added 'bits' portion to
+      the expected bmp test results.
+
+    * ext/standard/image.c:
+      Fixed a crash in image_type_to_mime_type(), when a non integer value is
+      passed to the function.
+      Fixed Width/Height detection of bmp files on big endian systems.
+      Added bit depth detection for bmp files.
+
+    * ext/standard/tests/strings/url_t.phpt:
+      
+      Added additional tests to parse_url() test suit, corrected the output of 2
+      existing tests, which were affected by a bug fixed in latest update to
+      parse_url() source code.
+
+    * ext/standard/url.c:
+      
+      parse_url can now correctly parse mailto:, zlib: (old zlib wrapper) and
+      simular. Thanks to Wez Furlong for noticing the problem.
+
+2002-11-07  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * NEWS:
+      Fix.
+
+2002-11-07  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/calendar/calendar.c:
+      
+      WS
+
+    * ext/calendar/calendar.c:
+      Make this static also.
+
+    * ext/calendar/calendar.c:
+      Make this static
+
+2002-11-07  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/dba/tests/dba_handler.inc:
+      add test to see if insert fails when key already exists
+
+    * ext/dba/dba_gdbm.c:
+      remove debug output and use php_error_docref instead
+
+2002-11-07  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/thttpd/thttpd.c:
+      let this source file compile with php 4.2.x
+
+    * main/php.h:
+      bumb api version because of module_startup change
+
+    * sapi/thttpd/README:
+      Add two missing entries
+
+2002-11-07  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/head.c:
+      Fixed a crash in headers_sent(), that occures if
+      php_get_output_start_filename() returns NULL.
+
+    * ext/standard/file.c
+      main/safe_mode.c:
+      
+      Instead of checking whether realpath exists based on OS. Use the
+      HAVE_REALPATH define, which is set if realpath() is avaliable. This patch
+      also resolves bug #18868.
+
+2002-11-06  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/dba/dba.c
+      ext/dba/dba_cdb.c
+      ext/dba/dba_db2.c
+      ext/dba/dba_db3.c
+      ext/dba/dba_dbm.c
+      ext/dba/dba_flatfile.c
+      ext/dba/dba_gdbm.c
+      ext/dba/dba_ndbm.c:
+      emalloc never returns 0, so we can simplify the code paths.
+      also replace ecalloc with emalloc+memset, so that the latter can be
+      inlined.
+
+    * sapi/thttpd/thttpd_patch:
+      - use TCP_DEFER_ACCEPT
+      - don't timeout connections which are managed by IRCG
+      - don't generate invalid HTTP replies, if the client did not send a
+        request line yet
+
+2002-11-06  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/iconv/tests/iconv001.phpt
+      ext/iconv/tests/iconv002.phpt
+      ext/iconv/tests/ob_iconv_handler.phpt:
+      Cosmetics
+
+    * ext/iconv/tests/iconv003.phpt:
+      Added a test case to check the behaviour on failure
+
+2002-11-06  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/dbx/tests/005.phpt
+      ext/dbx/tests/009.phpt:
+      added missing magic_quotes_runtime=0
+
+2002-11-06  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/iconv/iconv.c:
+      Clean up
+
+    * ext/iconv/tests/iconv002.phpt:
+      Stricter SKIPIF conditions
+
+    * ext/iconv/iconv.c:
+      Fixed segfaults in case the specified encoding is not acceptable to iconv.
+
+    * ext/standard/tests/strings/htmlentities02.phpt
+      ext/standard/tests/strings/htmlentities03.phpt
+      ext/standard/tests/strings/htmlentities04.phpt:
+      Oops, preg_match() returns integer value, not boolean.
+
+    * ext/standard/tests/strings/htmlentities02.phpt
+      ext/standard/tests/strings/htmlentities03.phpt
+      ext/standard/tests/strings/htmlentities04.phpt:
+      Made skip conditions stricter.
+
+2002-11-06  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/dba/tests/dba_handler.inc
+      ext/dba/tests/test.inc:
+      -convert from dos to unix file
+
+    * ext/dba/tests/skipif.inc:
+      
+      -convert from dos to unix file
+      -disallow cdb_make
+
+    * ext/dba/tests/dba_cdb.phpt
+      ext/dba/tests/dba_db2.phpt
+      ext/dba/tests/dba_db3.phpt
+      ext/dba/tests/dba_dbm.phpt
+      ext/dba/tests/dba_flatfile.phpt
+      ext/dba/tests/dba_gdbm.phpt
+      ext/dba/tests/dba_handler.inc
+      ext/dba/tests/dba_ndbm.phpt
+      ext/dba/tests/test.inc:
+      
+      check whether a written databse can be appended and if read during write
+      is permitted
+
+    * ext/dba/dba_flatfile.c:
+      fix locks and reading
+
+2002-11-06  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/curl/config.m4:
+      Disable --with-curlwrappers.
+      (Pending support from libcurl itself)
+
+2002-11-06  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/dba/config.m4:
+      There shall never be an external library for this (hopefully).
+
+    * ext/dba/config.m4
+      ext/dba/dba.c
+      ext/dba/dba_flatfile.c
+      ext/dba/dba_flatile.c
+      ext/dba/libflatfile/flatfile.c
+      ext/dba/libflatfile/flatfile.h:
+      Use the the name 'flatfile' correctly so the handler support can be built
+      now.
+
+    * ext/dba/config.m4
+      ext/dba/dba.c
+      ext/dba/dba_dbm.c
+      ext/dba/dba_flatile.c
+      ext/dba/php_flatfile.h
+      ext/dba/libflatfile/.cvsignore
+      ext/dba/libflatfile/flatfile.c
+      ext/dba/libflatfile/flatfile.h
+      ext/dba/tests/dba_flatfile.phpt:
+      move newly introduced flatfile support from dbm to new flatfile handler
+
+    * ext/dba/dba_dbm.c:
+      correct file open modes
+
+    * README.STREAMS:
+      add fprintf replacement: tested, working, used
+
+    * ext/dba/dba_dbm.c:
+      
+
+    * ext/dba/config.m4
+      ext/dba/dba_dbm.c:
+      Incorporate rewritten version of dbm from db extension.
+
+    * main/php_streams.h:
+      
+      Make the macro use the function and not the other macro as discussed
+      with Wez.
+
+    * main/php_streams.h
+      main/streams.c:
+      php_stream replacement for fprintf
+
+2002-11-05  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * sapi/cgi/cgi_main.c
+      sapi/cli/php_cli.c:
+      Fixed bug #20035. ZE now allows us to pass the current line position by
+      setting zend_lineno to (current_line * -1).
+
+    * ext/yaz/php_yaz.c:
+      
+      Fixed compile warning, removed unused variables and added process.h
+      header,
+      which is needed on Windows for getpid() function.
+
+2002-11-05  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/dba/dba_gdbm.c:
+      correct errors
+
+2002-11-05  Andi Gutmans  <andi@zend.com>
+
+    * ext/tokenizer/tokenizer.c:
+      - Arghh... Change #ifdef to #ifndef
+
+    * ext/tokenizer/tokenizer.c:
+      - Fix Engine 2 build
+
+2002-11-05  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/standard/tests/strings/bug20261.phpt:
+      Fixed typo
+
+    * ext/standard/tests/strings/bug20261.phpt:
+      Added a test for bug #20261
+
+2002-11-05  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/array.c:
+      Fixed a memory leak in array_fill().
+      The refcount hack is now done for ZE1 only and is slightly faster then the
+      original.
+      After this patch array_fill() can consistently create arrays with >65k
+      elements.
+
+2002-11-05  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * sapi/cli/php_cli.c:
+      call php_module_startup after zts has been initialised. This way we could
+      have called zend_ini_deactivate(TSRMLS_C). But it seems unnecessary.
+
+    * ext/dba/dba.c:
+      -use of emalloc functions
+      -info was not initialised fulle due to memset parameters
+       now that the whole structure is initialised we can stop putting 0 in it.
+
+2002-11-05  Edin Kadribasic  <edink@proventum.net>
+
+    * ext/ldap/.cvsignore:
+      Ignore all temporary target directories created by the windows build.
+
+2002-11-05  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * main/fopen_wrappers.c:
+      Added 4th argument to virtual_file_ex() that specifies whether or not
+      realpath() should be used during path resolving. In a number of functions
+      we do not want to use realpath(), since realpath() will resolve symlinks.
+
+2002-11-05  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/dba/dba.c
+      ext/dba/dba_cdb.c
+      ext/dba/dba_db2.c
+      ext/dba/dba_db3.c
+      ext/dba/dba_dbm.c
+      ext/dba/dba_gdbm.c
+      ext/dba/dba_ndbm.c
+      ext/dba/php_dba.h:
+      Why did open fail?
+
+2002-11-05  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/pgsql/pgsql.c:
+      Fix compile warning.
+
+2002-11-05  Edin Kadribasic  <edink@proventum.net>
+
+    * ext/ldap/ldap.dsp:
+      Added two new targets to the ldap win32 build which enable ldap
+      extension to be linked with ssl version of openldap libs.
+
+    * ext/ldap/ldap.c:
+      Fixed win32 build by including missing stddef.h
+
+2002-11-05  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/standard/string.c:
+      
+      style fix
+
+2002-11-05  Edin Kadribasic  <edink@proventum.net>
+
+    * sapi/embed/php4embed.dsp
+      win32/phpembed.dsp:
+      Moving php/embed windows build files to sapi/embed folder.
+
+2002-11-05  Andrey Hristov  <andrey@webgate.bg>
+
+    * php.ini-dist
+      php.ini-recommended:
+      correcting typos.
+
+2002-11-05  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/dba/config.m4:
+      added missing compiler define
+
+    * ext/dba/dba_cdb.c:
+      no memory no members
+
+    * ext/standard/ftp_fopen_wrapper.c:
+      silence
+
+2002-11-05  Edin Kadribasic  <edink@proventum.net>
+
+    * sapi/cli/php_cli.c:
+      Made php -v output look nicer on standard 80 column display.
+
+2002-11-05  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * main/php_streams.h:
+      correct define: silences compiler warning in http_fopen_wrapper.c
+
+    * ext/standard/tests/time/001.phpt:
+      
+      Use EXPECT again
+
+    * tests/lang/bug20175.phpt:
+      
+      Comment out part 3 for now
+      Added Part 4
+
+2002-11-05  Adam Dickmeiss  <adam@indexdata.dk>
+
+    * ext/yaz/php_yaz.c:
+      Fix handling of zero-length records
+
+2002-11-05  Timm Friebe  <thekid@thekid.de>
+
+    * ext/sybase_ct/CREDITS:
+      
+
+    * ext/sybase_ct/php_sybase_ct.c
+      ext/sybase_ct/php_sybase_ct.h:
+      
+
+2002-11-05  Stig Bakken  <ssb@fast.no>
+
+    * ext/standard/basic_functions.c
+      ext/standard/basic_functions.h:
+      Added separate functions for setting include_path, for environments
+      where ini_set has been disabled.  New functions: get_include_path(),
+      set_include_path(), restore_include_path()
+
+2002-11-04  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/link.c:
+      
+      Revert virtual_link() patch.
+
+2002-11-04  David Reid  <dreid@jetnet.co.uk>
+
+    * main/php_reentrancy.h
+      main/reentrancy.c:
+      Work around a daft mistake in the beos headers...
+
+    * configure.in
+      ext/standard/ftok.c:
+      Not all systems have sys/ipc.h so let's check and only include it if we
+      have it.
+
+2002-11-04  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * NEWS:
+      collect and append dba changes
+
+    * ext/dba/CREDITS
+      ext/dba/config.m4
+      ext/dba/dba.c
+      ext/dba/dba_cdb.c
+      ext/dba/install_cdb.sh
+      ext/dba/libcdb/.cvsignore
+      ext/dba/libcdb/cdb.c
+      ext/dba/libcdb/cdb.h
+      ext/dba/libcdb/cdb_make.c
+      ext/dba/libcdb/cdb_make.h
+      ext/dba/libcdb/uint32.c
+      ext/dba/libcdb/uint32.h
+      ext/dba/tests/dba_cdb.phpt
+      ext/dba/tests/dba_cdb_make.phpt
+      ext/dba/tests/dba_cdb_read.phpt:
+      incorporate cdb-0.75 as suggested by D. J. Bernstein
+
+2002-11-04  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/exec.c:
+      
+      Silence compiler warning.
+
+2002-11-04  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * tests/lang/bug20175.phpt:
+      2nd wow returns different results with ZE1/ZE2
+
+2002-11-04  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * tests/lang/bug20175.phpt:
+      Removed \r, which caused the test to fail.
+
+2002-11-04  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/dba/dba_db2.c
+      ext/dba/dba_db3.c
+      ext/dba/dba_dbm.c
+      ext/dba/dba_gdbm.c:
+      use ecmalloc/efree functions instead of (c|m)alloc/free
+
+2002-11-04  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/apache2filter/README:
+      Fix debugging description
+
+2002-11-04  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/standard/dl.c:
+      
+      Fixed bug #20243
+
+2002-11-04  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/dba/dba.c
+      ext/dba/dba_db2.c
+      ext/dba/dba_db3.c
+      ext/dba/php_dba.h:
+      passing around TSRM
+
+    * tests/lang/bug20175.phpt:
+      See http://bugs.php.net/20175
+
+    * run-tests.php:
+      move the run-test tests to the top
+
+    * tests/dirname.phpt
+      tests/run-test/test001.phpt
+      tests/run-test/test002.phpt
+      tests/run-test/test003.phpt
+      tests/run-test/test004.phpt
+      tests/run-test/test005.phpt
+      tests/run-test/test006.phpt
+      tests/run-test/test007.phpt:
+      -testing the tests
+      -moved tests/dirname.phpt to tests/run-test/test007.phpt because many
+       tests use this to find their additional files.
+      -no more tests in tests directly only in subdirectories
+
+    * run-tests.php:
+      sort them
+
+2002-11-04  Melvyn Sopacua  <msopacua@idg.nl>
+
+    * ext/sysvsem/tests/sysv.phpt:
+      Add test for both sysvsem and sysvshm
+
 2002-11-03  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/gd/libgd/gdft.c: Fix win32 build.
