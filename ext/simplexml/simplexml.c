@@ -265,7 +265,6 @@ sxe_property_get_ptr(zval *object, zval *member TSRMLS_DC)
 	property_ptr = emalloc(sizeof(zval **));
 
 	property = sxe_property_read(object, member TSRMLS_CC);
-	//zval_add_ref(&property);
 
 	*property_ptr = property;
 	
