@@ -1689,6 +1689,10 @@ SOURCE=..\ext\session\session.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\ext\standard\sha1.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\ext\standard\soundex.c
 # End Source File
 # Begin Source File
@@ -1892,6 +1896,10 @@ SOURCE=..\ext\standard\reg.h
 # Begin Source File
 
 SOURCE=..\ext\standard\scanf.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\sha1.h
 # End Source File
 # Begin Source File
 
