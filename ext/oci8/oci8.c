@@ -4407,6 +4407,7 @@ PHP_FUNCTION(ocipasswordchange)
 
 	/*  Disable in Safe Mode  */
 	if (PG(safe_mode)) {
+		php_error(E_WARNING, "%s is disabled in Safe Mode", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
 	}
 
