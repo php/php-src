@@ -554,7 +554,7 @@ PHP_FUNCTION(clearstatcache)
 
 /* {{{ php_stat
  */
-static void php_stat(const char *filename, php_stat_len filename_length, int type, pval *return_value)
+static void php_stat(const char *filename, php_stat_len filename_length, int type, pval *return_value TSRMLS_DC)
 {
 	zval *stat_dev, *stat_ino, *stat_mode, *stat_nlink, *stat_uid, *stat_gid, *stat_rdev,
 	 	*stat_size, *stat_atime, *stat_mtime, *stat_ctime, *stat_blksize, *stat_blocks;
@@ -562,7 +562,6 @@ static void php_stat(const char *filename, php_stat_len filename_length, int typ
 	int rmask=S_IROTH, wmask=S_IWOTH, xmask=S_IXOTH; /* access rights defaults to other */
 	char *stat_sb_names[13]={"dev", "ino", "mode", "nlink", "uid", "gid", "rdev",
 			      "size", "atime", "mtime", "ctime", "blksize", "blocks"};
-	TSRMLS_FETCH();
 
 	stat_sb = &BG(sb);
 
@@ -736,6 +735,7 @@ static void php_stat(const char *filename, php_stat_len filename_length, int typ
 		zend_hash_next_index_insert(HASH_OF(return_value), (void *)&stat_nlink, sizeof(zval *), NULL);
 		zend_hash_next_index_insert(HASH_OF(return_value), (void *)&stat_uid, sizeof(zval *), NULL);
 		zend_hash_next_index_insert(HASH_OF(return_value), (void *)&stat_gid, sizeof(zval *), NULL);
+        
 		zend_hash_next_index_insert(HASH_OF(return_value), (void *)&stat_rdev, sizeof(zval *), NULL);
 		zend_hash_next_index_insert(HASH_OF(return_value), (void *)&stat_size, sizeof(zval *), NULL);
 		zend_hash_next_index_insert(HASH_OF(return_value), (void *)&stat_atime, sizeof(zval *), NULL);
@@ -774,7 +774,7 @@ void name(INTERNAL_FUNCTION_PARAMETERS) { \
 		WRONG_PARAM_COUNT; \
 	} \
 	convert_to_string_ex(filename); \
-	php_stat(Z_STRVAL_PP(filename), (php_stat_len) Z_STRLEN_PP(filename), funcnum, return_value); \
+	php_stat(Z_STRVAL_PP(filename), (php_stat_len) Z_STRLEN_PP(filename), funcnum, return_value TSRMLS_CC); \
 }
 
 /* {{{ proto int fileperms(string filename)
