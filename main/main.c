@@ -1566,6 +1566,7 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file TSRMLS_DC)
 
 	EG(exit_status) = 0;
 	if (php_handle_special_queries(TSRMLS_C)) {
+		zend_file_handle_dtor(primary_file);
 		return 0;
 	}
 #ifndef HAVE_BROKEN_GETCWD
