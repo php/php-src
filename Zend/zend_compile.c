@@ -762,6 +762,10 @@ void zend_do_end_function_declaration(znode *function_token CLS_DC)
 	zend_do_extended_info(CLS_C);
 	zend_do_return(NULL, 0 CLS_CC);
 	pass_two(CG(active_op_array));
+#if SUPPORT_INTERACTIVE
+	CG(active_op_array)->start_op_number = 0;
+	CG(active_op_array)->end_op_number = CG(active_op_array)->last;
+#endif
 	CG(active_op_array) = function_token->u.op_array;
 
 	/* Pop the switch and foreach seperators */
