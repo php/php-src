@@ -29,7 +29,7 @@ interface iterator {
  * can be used as a parameter to be iterated (normally an array).
  *
  * \code
-	class c implements spl::foreach, spl::forward {
+	class c implements spl_foreach, spl_forward {
 		private $num = 0;
 		function new_iterator() {
 			$this->num = 0;
@@ -62,13 +62,13 @@ interface iterator {
  * If you need this you must split the two parts.
  *
  * \code
-	class c implements spl::foreach {
+	class c implements spl_foreach {
 		public $max = 3;
 		function new_iterator() {
 			return new c_iter($this);
 		}
 	}
-	class c_iter implements spl::forward {
+	class c_iter implements spl_forward {
 		private $obj;
 		private $num = 0;
 		function __construct($obj) {
@@ -97,13 +97,13 @@ interface iterator {
  * You can also use this interface with the for() construct.
  *
  * \code
-	class c implements spl::foreach {
+	class c implements spl_foreach {
 		public $max = 3;
 		function new_iterator() {
 			return new c_iter($this);
 		}
 	}
- 	class c_iter implements spl::forward {
+ 	class c_iter implements spl_forward {
  		private $obj;
 		private $num = 0;
 		function __construct($obj) {
@@ -212,7 +212,7 @@ interface array_read {
  *
  * The following example shows how to use an array_writer:
  * \code 
-	class array_emulation implemets spl::array_access {
+	class array_emulation implemets spl_array_access {
 		private $ar = array();
 		function exists($index) {
 			return array_key_exists($index, $this->ar);
@@ -245,7 +245,7 @@ interface array_access extends array_read {
  *
  * The following example shows how to use a customized array_writer:
  * \code 
-	class array_emulation_ex extends array_emulation implemets spl::array_access_ex {
+	class array_emulation_ex extends array_emulation implemets spl_array_access_ex {
 		private $last_index = NULL;
 		function new_writer($index) {
 			$last_index = $index;
