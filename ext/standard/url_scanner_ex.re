@@ -36,6 +36,8 @@
 #define url_adapt_ext url_adapt_ext_ex
 #define url_scanner url_scanner_ex
 
+#define smart_str_0(x) ((x)->c[(x)->len] = '\0')
+
 static inline void smart_str_append(smart_str *dest, smart_str *src)
 {
 	size_t newlen;
@@ -45,11 +47,11 @@ static inline void smart_str_append(smart_str *dest, smart_str *src)
 	
 	newlen = dest->len + src->len;
 	if (newlen >= dest->a) {
-		dest->c = realloc(dest->c, newlen + 129);
+		dest->c = erealloc(dest->c, newlen + 129);
 		dest->a = newlen + 128;
 	}
 	memcpy(dest->c + dest->len, src->c, src->len);
-	dest->c[dest->len = newlen] = '\0';
+	dest->len = newlen;
 }
 
 static inline void smart_str_appendc(smart_str *dest, char c)
@@ -58,17 +60,16 @@ static inline void smart_str_appendc(smart_str *dest, char c)
 
 	newlen = dest->len + 1;
 	if (newlen >= dest->a) {
-		dest->c = realloc(dest->c, newlen + 129);
+		dest->c = erealloc(dest->c, newlen + 129);
 		dest->a = newlen + 128;
 	}
 	dest->c[dest->len++] = c;
-	dest->c[dest->len] = '\0';
 }
 
 static inline void smart_str_free(smart_str *s)
 {
 	if (s->c) {
-		free(s->c);
+		efree(s->c);
 		s->c = NULL;
 	}
 	s->a = s->len = 0;
@@ -76,9 +77,8 @@ static inline void smart_str_free(smart_str *s)
 
 static inline void smart_str_copyl(smart_str *dest, const char *src, size_t len)
 {
-	dest->c = realloc(dest->c, len + 1);
+	dest->c = erealloc(dest->c, len + 1);
 	memcpy(dest->c, src, len);
-	dest->c[len] = '\0';
 	dest->a = dest->len = len;
 }
 
@@ -110,7 +110,7 @@ static inline void append_modified_url(smart_str *url, smart_str *dest, smart_st
 {
 	register const char *p, *q;
 	const char *bash = NULL;
-	char sep = "?";
+	char sep = '?';
 	
 	q = url->c + url->len;
 	
@@ -327,7 +327,6 @@ stop:
 	ctx->buf.len = rest;
 }
 
-
 char *url_adapt_ext(const char *src, size_t srclen, const char *name, const char *value, size_t *newlen)
 {
 	char *ret;
@@ -345,9 +344,11 @@ char *url_adapt_ext(const char *src, size_t srclen, const char *name, const char
 	if (ctx->result.len == 0) {
 		return strdup("");
 	}
-	ret = ctx->result.c;
-	ctx->result.c = NULL;
-	ctx->result.len = ctx->result.a = 0;
+	smart_str_0(&ctx->result);
+	ret = malloc(ctx->result.len + 1);
+	memcpy(ret, ctx->result.c, ctx->result.len + 1);
+	
+	ctx->result.len = 0;
 	return ret;
 }
 
