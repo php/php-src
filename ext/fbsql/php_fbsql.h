@@ -43,6 +43,7 @@ PHP_FUNCTION(fbsql_connect);
 PHP_FUNCTION(fbsql_pconnect);
 PHP_FUNCTION(fbsql_close);
 PHP_FUNCTION(fbsql_select_db);
+PHP_FUNCTION(fbsql_set_characterset);
 PHP_FUNCTION(fbsql_change_user);
 PHP_FUNCTION(fbsql_create_db);
 PHP_FUNCTION(fbsql_drop_db);
