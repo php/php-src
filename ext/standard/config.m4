@@ -199,8 +199,23 @@ AC_FLUSH_IO
 divert(5)dnl
 
 AC_ARG_WITH(regex,
-[  --with-regex=TYPE       regex library type: system, apache, php],[
-  REGEX_TYPE=$withval
+[  --with-regex=TYPE       regex library type: system, apache, php],
+[
+  case $withval in 
+    system)
+      REGEX_TYPE=system
+      ;;
+    apache)
+      REGEX_TYPE=apache
+      ;;
+    php)
+      REGEX_TYPE=php
+      ;;
+    *)
+      REGEX_TYPE=php
+      AC_MSG_WARN(Invalid regex library type. Using default value: php)
+      ;;
+  esac
 ],[
   REGEX_TYPE=php
 ])
