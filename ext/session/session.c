@@ -699,7 +699,7 @@ PHP_FUNCTION(session_id)
 }
 /* }}} */
 
-/* {{{ proto session_register(string varname)
+/* {{{ proto bool session_register(string varname)
    adds varname to the list of variables which are freezed at the session end */
 PHP_FUNCTION(session_register)
 {
@@ -715,10 +715,12 @@ PHP_FUNCTION(session_register)
 	
 	if(!PS(nr_open_sessions)) _php_session_start(PSLS_C);
 	PS_ADD_VAR((*p_name)->value.str.val);
+	
+	RETURN_TRUE;
 }
 /* }}} */
 
-/* {{{ proto session_unregister(string varname)
+/* {{{ proto bool session_unregister(string varname)
    removes varname from the list of variables which are freezed at the session end */
 PHP_FUNCTION(session_unregister)
 {
@@ -733,6 +735,8 @@ PHP_FUNCTION(session_unregister)
 	convert_to_string_ex(p_name);
 	
 	PS_DEL_VAR((*p_name)->value.str.val);
+
+	RETURN_TRUE;
 }
 /* }}} */
 
