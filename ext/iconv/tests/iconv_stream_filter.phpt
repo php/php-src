@@ -6,20 +6,20 @@ iconv stream filter
 iconv.internal_charset=iso-8859-1
 --FILE--
 <?php
-$fp = fopen(dirname(__FILE__).'/iconv_stream_filter.txt', 'r');
+$fp = fopen(dirname(__FILE__).'/iconv_stream_filter.txt', 'rb');
 var_dump(bin2hex(fread($fp, 10)));
 var_dump(bin2hex(fread($fp, 5)));
 var_dump(bin2hex(fread($fp, 1)));
 fclose($fp);
 
-$fp = fopen(dirname(__FILE__).'/iconv_stream_filter.txt', 'r');
+$fp = fopen(dirname(__FILE__).'/iconv_stream_filter.txt', 'rb');
 stream_filter_append($fp, 'convert.iconv.ISO-2022-JP/EUC-JP');
 var_dump(bin2hex(fread($fp, 10)));
 var_dump(bin2hex(fread($fp, 5)));
 var_dump(bin2hex(fread($fp, 1)));
 fclose($fp);
 
-$fp = fopen(dirname(__FILE__).'/iconv_stream_filter.txt', 'r');
+$fp = fopen(dirname(__FILE__).'/iconv_stream_filter.txt', 'rb');
 stream_filter_append($fp, 'string.rot13'); // this will make conversion fail.
 stream_filter_append($fp, 'convert.iconv.ISO-2022-JP/EUC-JP');
 var_dump(bin2hex(fread($fp, 10)));
