@@ -32,6 +32,19 @@ AC_DEFUN([PDO_ODBC_CHECK_HEADER],[
                                   
 AC_MSG_CHECKING(which ODBC flavour you want)
 if test "$PHP_PDO_ODBC" != "no" && test "$PHP_PDO_ODBC" != "yes" ; then
+
+  AC_MSG_CHECKING([for PDO includes])
+  if test -f $prefix/include/php/ext/pdo/php_pdo_driver.h; then
+    pdo_inc_path=$prefix/include/php/ext
+  elif test -f $abs_srcdir/include/php/ext/pdo/php_pdo_driver.h; then
+    pdo_inc_path=$abs_srcdir/ext
+  elif test -f ext/pdo/php_pdo_driver.h; then
+    pdo_inc_path=ext
+  else
+    AC_MSG_ERROR([Cannot find php_pdo_driver.h.])
+  fi
+  AC_MSG_RESULT($pdo_inc_path)
+
   pdo_odbc_flavour=`echo $withval | cut -d, -f1`
   pdo_odbc_dir=`echo $withval | cut -d, -f2`
 
@@ -130,7 +143,7 @@ functions required for PDO support.
   PHP_EVAL_LIBLINE($PDO_ODBC_LIBS $PDO_ODBC_LFLAGS, [PDO_ODBC_SHARED_LIBADD])
   PHP_SUBST(PDO_ODBC_SHARED_LIBADD)
 
-  PHP_NEW_EXTENSION(pdo_odbc, pdo_odbc.c odbc_driver.c odbc_stmt.c, $ext_shared,,-I\$prefix/include/php/ext $PDO_ODBC_INCLUDE)
+  PHP_NEW_EXTENSION(pdo_odbc, pdo_odbc.c odbc_driver.c odbc_stmt.c, $ext_shared,,-I$pdo_inc_path $PDO_ODBC_INCLUDE)
   PHP_ADD_EXTENSION_DEP(pdo_odbc, pdo)
 else
   AC_MSG_ERROR(
