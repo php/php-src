@@ -25,6 +25,8 @@
 #include "zend_variables.h"
 #include "zend_constants.h"
 
+#undef ZEND_TEST_EXCEPTIONS
+
 static ZEND_FUNCTION(zend_version);
 static ZEND_FUNCTION(func_num_args);
 static ZEND_FUNCTION(func_get_arg);
@@ -51,8 +53,6 @@ static ZEND_FUNCTION(get_imported_files);
 static ZEND_FUNCTION(is_subclass_of);
 
 extern unsigned char first_arg_force_ref[];
-
-#undef ZEND_TEST_EXCEPTIONS
 
 static zend_function_entry builtin_functions[] = {
 	ZEND_FE(zend_version,		NULL)
