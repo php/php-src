@@ -1,3 +1,85 @@
+2000-10-08  Chuck Hagenbuch  <chuck@horde.org>
+
+    * pear/File/SearchReplace.php
+      pear/Makefile.in: Add File_SearchReplace class from Richard Heyes.
+
+2000-10-08  Daniel Beulshausen  <daniel@php4win.de>
+
+    * main/internal_functions_win32.c
+      ext/bcmath/bcmath.c
+      ext/bcmath/php_bcmath.h
+      ext/ftp/php_ftp.c
+      ext/ftp/php_ftp.h: more cleanup of info code
+
+    * ext/calendar/calendar.c: only beautifying
+
+2000-10-08  Sebastian Bergmann  <sb@phpopentracker.de>
+
+    * pear/PHPDoc/renderer/html/templates/module.html
+      pear/PHPDoc/renderer/html/templates/modulegroup.html
+      pear/PHPDoc/renderer/html/templates/packagelist.html
+      pear/PHPDoc/renderer/html/templates/phpdoc.css
+      pear/PHPDoc/renderer/html/templates/warnings.html
+      pear/PHPDoc/renderer/html/templates/xmlfiles.html
+      pear/PHPDoc/renderer/html/PhpdocHTMLWarningRenderer.php
+      pear/PHPDoc/renderer/html/templates/class.html
+      pear/PHPDoc/renderer/html/templates/classtree.html
+      pear/PHPDoc/renderer/html/templates/elementlist.html
+      pear/PHPDoc/renderer/html/templates/frame_packageelementlist.html
+      pear/PHPDoc/renderer/html/templates/frame_packagelist.html
+      pear/PHPDoc/apidoc/keep/empty.html
+      pear/PHPDoc/apidoc/keep/index2.html
+      pear/PHPDoc/apidoc/keep/phpdoc.css
+      pear/PHPDoc/apidoc/keep/phpdoc.dtd
+      pear/PHPDoc/renderer/html/PhpdocHTMLClassRenderer.php
+      pear/PHPDoc/renderer/html/PhpdocHTMLDocumentRenderer.php
+      pear/PHPDoc/renderer/html/PhpdocHTMLIndexRenderer.php
+      pear/PHPDoc/renderer/html/PhpdocHTMLModuleRenderer.php
+      pear/PHPDoc/renderer/html/PhpdocHTMLRenderer.php
+      pear/PHPDoc/renderer/html/PhpdocHTMLRendererManager.php
+      pear/PHPDoc/xmlexporter/PhpdocXMLClassExporter.php
+      pear/PHPDoc/xmlexporter/PhpdocXMLDocumentExporter.php
+      pear/PHPDoc/xmlexporter/PhpdocXMLExporter.php
+      pear/PHPDoc/xmlexporter/PhpdocXMLIndexExporter.php
+      pear/PHPDoc/xmlexporter/PhpdocXMLModuleExporter.php
+      pear/PHPDoc/xmlexporter/PhpdocXMLWarningExporter.php
+      pear/PHPDoc/xmlreader/PhpdocXMLReader.php
+      pear/PHPDoc/xmlwriter/PhpdocXMLWriter.php
+      pear/PHPDoc/renderer/PhpdocRendererObject.php
+      pear/PHPDoc/warning/PhpdocWarning.php
+      pear/PHPDoc/filehandler/PhpdocFileHandler.php
+      pear/PHPDoc/indexer/PhpdocIndexer.php
+      pear/PHPDoc/parser/PhpdocClassParser.php
+      pear/PHPDoc/parser/PhpdocConstantParser.php
+      pear/PHPDoc/parser/PhpdocFunctionParser.php
+      pear/PHPDoc/parser/PhpdocModuleParser.php
+      pear/PHPDoc/parser/PhpdocParser.php
+      pear/PHPDoc/parser/PhpdocParserCore.php
+      pear/PHPDoc/parser/PhpdocParserRegExp.php
+      pear/PHPDoc/parser/PhpdocParserTags.php
+      pear/PHPDoc/parser/PhpdocUseParser.php
+      pear/PHPDoc/parser/PhpdocVariableParser.php
+      pear/PHPDoc/redist/IT.php
+      pear/PHPDoc/redist/ITX.php
+      pear/PHPDoc/README
+      pear/PHPDoc/accessor/PhpdocAccessor.php
+      pear/PHPDoc/accessor/PhpdocClassAccessor.php
+      pear/PHPDoc/accessor/PhpdocDocumentAccessor.php
+      pear/PHPDoc/accessor/PhpdocIndexAccessor.php
+      pear/PHPDoc/accessor/PhpdocModuleAccessor.php
+      pear/PHPDoc/accessor/PhpdocWarningAccessor.php
+      pear/PHPDoc/analyser/PhpdocAnalyser.php
+      pear/PHPDoc/analyser/PhpdocClassAnalyser.php
+      pear/PHPDoc/analyser/PhpdocModuleAnalyser.php
+      pear/PHPDoc/core/Phpdoc.php
+      pear/PHPDoc/core/PhpdocArgvHandler.php
+      pear/PHPDoc/core/PhpdocObject.php
+      pear/PHPDoc/core/PhpdocSetupHandler.php
+      pear/PHPDoc/exceptions/PhpdocError.php
+      pear/PHPDoc/index.php
+      pear/PHPDoc/prepend.php:
+    Initial commit for Ulf Wendel's PHPDoc. I hope I haven't forgot a directory or file along the way...
+
 2000-10-07  Sascha Schumann  <sascha@schumann.cx>
 
     * ext/shmop/php_shmop.h
