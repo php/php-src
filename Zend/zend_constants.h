@@ -23,8 +23,12 @@
 
 #include "zend_globals.h"
 
-#define CONST_CS 0x1				/* Case Sensitive */
-#define CONST_PERSISTENT 0x2
+#define CONST_CS				(1<<0)				/* Case Sensitive */
+#define CONST_PERSISTENT		(1<<1)				/* Persistent */
+#define CONST_EFREE_PERSISTENT	(1<<2)				/* In conjunction with CONST_PERSISTENT,
+													 * means that the constant should be freed
+													 * using zval_dtor() on shutdown.
+													 */
 
 typedef struct _zend_constant {
 	zval value;
