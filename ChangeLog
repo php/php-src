@@ -1,3 +1,31 @@
+2000-04-18  Evan Klinger  <evan715@home.com>
+
+    * ext/standard/basic_functions.c:
+    - Fixed long2ip() to return the correct IP address. 
+
+2000-04-18  Zeev Suraski  <zeev@php.net>
+
+    * NEWS
+      ext/imap/php_imap.c: - Fix many memory leaks in the IMAP module
+    - Begin migrating to the high performance API
+
+2000-04-18  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/standard/output.c: Corrected some protos.
+
+2000-04-18  Zeev Suraski  <zeev@php.net>
+
+    * ext/imap/php_imap.c: indent/beautify
+
+    * ext/standard/output.c: Document the ob_*() functions
+
+2000-04-18  Jouni Ahto  <jah@mork.net>
+
+    * MAINTAINERS
+      MODULES_STATUS
+      ext/interbase/interbase.c
+      ext/interbase/php_interbase.h:
+
 2000-04-17  Frank M. Kromann  <fmk@swwwing.com>
 
     * ext/mssql/php_mssql.c: minor optimization
