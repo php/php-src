@@ -273,36 +273,6 @@ PHP_MINIT_FUNCTION(browscap)
 }
 
 
-/* {{{ proto void parse_ini_file(string filename)
-   Parse configuration file */
-PHP_FUNCTION(parse_ini_file)
-{
-#ifdef ZTS
-	php_error(E_WARNING, "parse_ini_file() is not supported in multithreaded PHP");
-	RETURN_FALSE;
-#else
-	zval **filename;
-
-	if (ARG_COUNT(ht)!=1 || zend_get_parameters_ex(1, &filename)==FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
-	convert_to_string_ex(filename);
-	cfgin = V_FOPEN((*filename)->value.str.val, "r");
-	if (!cfgin) {
-		php_error(E_WARNING,"Cannot open '%s' for reading", (*filename)->value.str.val);
-		return;
-	}
-	array_init(return_value);
-	init_cfg_scanner();
-	active_hash_table = return_value->value.ht;
-	parsing_mode = PARSING_MODE_STANDALONE;
-	currently_parsed_filename = (*filename)->value.str.val;
-	yyparse();
-	fclose(cfgin);
-#endif
-}
-/* }}} */
-
 int php_shutdown_config(void)
 {
 	zend_hash_destroy(&configuration_hash);
