@@ -102,6 +102,8 @@
 #define getuid() 1
 #endif
 
+#define S_IXROOT ( S_IXUSR | S_IXGRP | S_IXOTH )
+
 PHP_RINIT_FUNCTION(filestat)
 {
 	BLS_FETCH();
@@ -531,7 +533,7 @@ static void php_stat(const char *filename, int type, pval *return_value)
 		if(getuid()==0) RETURN_LONG(1); /* root */
 		RETURN_LONG((BG(sb).st_mode&rmask)!=0);
 	case 11: /*is executable*/
-		if(getuid()==0) RETURN_LONG(1); /* root */
+		if(getuid()==0) xmask = S_IXROOT; /* root */
 		RETURN_LONG((BG(sb).st_mode&xmask)!=0 && !S_ISDIR(BG(sb).st_mode));
 	case 12: /*is file*/
 		RETURN_LONG(S_ISREG(BG(sb).st_mode));
