@@ -227,9 +227,12 @@ AC_ARG_WITH(t1lib,
   AC_MSG_RESULT(no)
 ])
 
+dnl NetBSD package structure
   if test -f /usr/pkg/include/gd/gd.h -a -z "$GD_INCLUDE" ; then
     GD_INCLUDE="/usr/pkg/include/gd"
   fi
+
+dnl SuSE 6.x package structure
   if test -f /usr/include/gd/gd.h -a -z "$GD_INCLUDE" ; then
     GD_INCLUDE="/usr/include/gd"
   fi
