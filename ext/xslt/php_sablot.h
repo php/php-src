@@ -41,6 +41,7 @@ extern zend_module_entry xslt_module_entry;
 #define XSLT_ERROR(handle)     ((handle)->handlers->error)
 
 #define XSLT_PROCESSOR(handle) ((handle)->processor.ptr)
+#define XSLT_SITUATION(handle)  ((handle)->processor.sit)
 
 #define XSLT_ERRNO(handle)     ((handle)->err->no)
 #define XSLT_ERRSTR(handle)    ((handle)->err->str)
@@ -63,6 +64,7 @@ PHP_FUNCTION(xslt_error);
 PHP_FUNCTION(xslt_errno);
 PHP_FUNCTION(xslt_free);
 PHP_FUNCTION(xslt_set_object);
+PHP_FUNCTION(xslt_setopt);
 PHP_FUNCTION(xslt_backend_version);
 PHP_FUNCTION(xslt_backend_name);
 
@@ -95,6 +97,7 @@ struct xslt_handlers {
 
 struct xslt_processor {
 	SablotHandle ptr;
+	SablotSituation sit;
 	long         idx;
 };
 
