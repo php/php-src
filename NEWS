@@ -2,6 +2,9 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.1
+- Added --enable-c9x-inline option for compilers which support the new C9x
+  standard. If you encounter undefined references to i_zend_is_true and
+  other symbols, you should enable this.  (Sascha, Zend Library)
 - Fixed a problem in ldap_add() and ldap_modify(), sometimes added trailing
   garbage to the values (Stig Venaas) 
 - Fixed a problem with dbmopen() not handing 'c' correctly with dbm/db/ndbm
