@@ -21,6 +21,7 @@ PHP                                                                        NEWS
 - Fixed bug #27742 (WDSL SOAP Parsing Schema bug). (Dmitry)
 - Fixed bug #27722 (Segfault on schema without targetNamespace). (Dmitry)
 - Fixed bug #27719 (mktime issues on and around DST changeover). (Rasmus)
+- Fixed bug #27681 (soap extension fails without HAVE_TM_GMTOFF). (Dmitry)
 - Fixed bug #27641 (Object cloning in ze1_compatibility_mode was reimplemented)
   (Dmitry, Andi)
 - Fixed bug #27628 (Simplify the process of making a POST request via stream
