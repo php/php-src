@@ -157,8 +157,8 @@ zend_module_entry dbx_module_entry = {
 	dbx_functions,
 	ZEND_MINIT(dbx),
 	ZEND_MSHUTDOWN(dbx),
-	NULL, /*ZEND_RINIT(dbx),        / * Replace with NULL if there's nothing to do at request start */
-	NULL, /*ZEND_RSHUTDOWN(dbx),    / * Replace with NULL if there's nothing to do at request end */
+	NULL, /*ZEND_RINIT(dbx),         Replace with NULL if there's nothing to do at request start */
+	NULL, /*ZEND_RSHUTDOWN(dbx),     Replace with NULL if there's nothing to do at request end */
 	ZEND_MINFO(dbx),
     NO_VERSION_YET,
 	STANDARD_MODULE_PROPERTIES
