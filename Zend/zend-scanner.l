@@ -409,8 +409,11 @@ zend_op_array *compile_filename(int type, zval *filename CLS_DC ELS_DC)
 	return retval;
 }
 
-
-static inline int prepare_string_for_scanning(zval *str CLS_DC)
+#ifndef ZTS
+static inline int prepare_string_for_scanning(zval *str)
+#else
+static inline int prepare_string_for_scanning(zval *str, istrstream **input_stream CLS_DC)
+#endif
 {
 #ifndef ZTS
 	/* enforce two trailing NULLs for flex... */
@@ -421,10 +424,10 @@ static inline int prepare_string_for_scanning(zval *str CLS_DC)
 	yyin=NULL;
 	yy_scan_buffer(str->value.str.val, str->value.str.len+2);
 #else
-	istrstream *input_stream = new istrstream(str->value.str.val, str->value.str.len);
+	*input_stream = new istrstream(str->value.str.val, str->value.str.len);
 	CG(ZFL) = new ZendFlexLexer;
 
-	CG(ZFL)->switch_streams(input_stream, &cout);
+	CG(ZFL)->switch_streams(*input_stream, &cout);
 #endif
 	zend_set_compiled_filename("Eval code");
 	CG(zend_lineno) = 1;
@@ -441,6 +444,9 @@ zend_op_array *compile_string(zval *source_string CLS_DC)
 	zval tmp;
 	int compiler_result;
 	zend_bool original_in_compilation = CG(in_compilation);
+#ifdef ZTS
+	istrstream *input_stream;
+#endif
 
 	if (source_string->value.str.len==0) {
 		efree(op_array);
@@ -455,7 +461,11 @@ zend_op_array *compile_string(zval *source_string CLS_DC)
 	source_string = &tmp;
 
 	save_lexical_state(&original_lex_state CLS_CC);
-	if (prepare_string_for_scanning(source_string CLS_CC)==FAILURE) {
+#ifndef ZTS
+	if (prepare_string_for_scanning(source_string)==FAILURE) {
+#else
+	if (prepare_string_for_scanning(source_string, &input_stream CLS_CC)==FAILURE) {
+#endif
 		efree(op_array);
 		retval = NULL;
 	} else {
@@ -480,6 +490,7 @@ zend_op_array *compile_string(zval *source_string CLS_DC)
 			retval = op_array;
 		}
 	}
+	delete input_stream;
 	zval_dtor(&tmp);
 	CG(in_compilation) = original_in_compilation;
 	return retval;
@@ -513,16 +524,22 @@ int highlight_string(zval *str, zend_syntax_highlighter_ini *syntax_highlighter_
 {
 	zend_lex_state original_lex_state;
 	zval tmp = *str;
+	istrstream *input_stream;
 	CLS_FETCH();
 
 	str = &tmp;
 	zval_copy_ctor(str);
 	save_lexical_state(&original_lex_state CLS_CC);
-	if (prepare_string_for_scanning(str CLS_CC)==FAILURE) {
+#ifndef ZTS
+	if (prepare_string_for_scanning(str)==FAILURE) {
+#else
+	if (prepare_string_for_scanning(str, &input_stream CLS_CC)==FAILURE) {
+#endif
 		return FAILURE;
 	}
 	zend_highlight(syntax_highlighter_ini);
 	restore_lexical_state(&original_lex_state CLS_CC);
+	delete input_stream;
 	zval_dtor(str);
 	return SUCCESS;
 }
