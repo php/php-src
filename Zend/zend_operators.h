@@ -28,8 +28,9 @@
 #include <ieeefp.h>
 #endif
 
-#if WITH_BCMATH
-#include "ext/bcmath/number.h"
+
+#if 0&&WITH_BCMATH
+#include "ext/bcmath/libbcmath/src/bcmath.h"
 #endif
 
 #define MAX_LENGTH_OF_LONG 18
@@ -88,7 +89,7 @@ static inline int is_numeric_string(char *str, int length, long *lval, double *d
 		if (dval) {
 			*dval = local_dval;
 		}
-#if WITH_BCMATH
+#if 0&&WITH_BCMATH
 		if (length>16) {
 			register char *ptr=str, *end=str+length;
 			
