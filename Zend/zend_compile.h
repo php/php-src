@@ -35,7 +35,11 @@
 
 #define DEBUG_ZEND 0
 
-#define SUPPORT_INTERACTIVE 1
+#ifndef ZTS
+# define SUPPORT_INTERACTIVE 1
+#else
+# define SUPPORT_INTERACTIVE 0
+#endif
 
 #define FREE_PNODE(znode)	zval_dtor(&znode->u.constant);
 #define FREE_OP(op, should_free) if (should_free) zval_dtor(&Ts[(op)->u.var].tmp_var);
