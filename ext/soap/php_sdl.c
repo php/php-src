@@ -91,7 +91,7 @@ encodePtr create_encoder(sdlPtr sdl, sdlTypePtr cur_type, const char *ns, const 
 		sdl->encoders = malloc(sizeof(HashTable));
 		zend_hash_init(sdl->encoders, 0, NULL, delete_encoder, 1);
 	}
-	zend_hash_add(sdl->encoders, nscat.c, nscat.len + 1, &enc, sizeof(encodePtr), NULL);
+	zend_hash_update(sdl->encoders, nscat.c, nscat.len + 1, &enc, sizeof(encodePtr), NULL);
 	smart_str_free(&nscat);
 	return enc;
 }
