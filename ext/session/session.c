@@ -1122,8 +1122,13 @@ PHP_FUNCTION(session_set_save_handler)
 	if (ZEND_NUM_ARGS() != 6 || zend_get_parameters_array_ex(6, args) == FAILURE)
 		WRONG_PARAM_COUNT;
 	
-	if (PS(session_status) != php_session_none) 
+	if (PS(session_status) != php_session_none) {
+		php_error(E_NOTICE, "%s() cannot set session save handler functions once session is started. "
+				  "Current session save handler (%s)",
+				  get_active_function_name(TSRMLS_C),
+				  (PS(mod)->name ? PS(mod)->name : "none"));
 		RETURN_FALSE;
+	}
 	
 	zend_alter_ini_entry("session.save_handler", sizeof("session.save_handler"), "user", sizeof("user")-1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
 
