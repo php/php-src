@@ -123,17 +123,209 @@ ZEND_METHOD(exception, gettrace)
 	_default_exception_get_entry(getThis(), "trace", sizeof("trace")-1, return_value TSRMLS_CC);
 }
 
+/* {{{ ZEND_METHOD(exception, gettraceasstring) */
+#define TRACE_APPEND_CHR(chr)                                            \
+	*str = (char*)erealloc(*str, *len + 1 + 1);                          \
+	(*str)[(*len)++] = chr
+
+#define TRACE_APPEND_STRL(val, vallen)                                   \
+	{                                                                    \
+	    int l = vallen;                                                  \
+		*str = (char*)erealloc(*str, *len + l + 1);                      \
+		memcpy((*str) + *len, val, l);                                   \
+		*len += l;                                                       \
+	}
+
+#define TRACE_APPEND_STR(val)                                            \
+	TRACE_APPEND_STRL(val, sizeof(val)-1)
+
+#define TRACE_APPEND_KEY(key)                                            \
+	if (zend_hash_find(ht, key, sizeof(key), (void**)&tmp) == SUCCESS) { \
+	    TRACE_APPEND_STRL(Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp));           \
+	}
+
+static int _build_trace_args(zval **arg, int num_args, va_list args, zend_hash_key *hash_key)
+{
+	char **str;
+	int *len;
+
+	str = va_arg(args, char**);
+	len = va_arg(args, int*);
+
+	/* the trivial way would be to do:
+	 * conver_to_string_ex(arg);
+	 * append it and kill the now tmp arg.
+	 * but that could cause some E_NOTICE and also damn long lines.
+	 */
+
+	switch (Z_TYPE_PP(arg)) {
+		case IS_NULL:
+			TRACE_APPEND_STR("NULL, ");
+			break;
+		case IS_STRING:
+			TRACE_APPEND_CHR('\'');
+			if (Z_STRLEN_PP(arg) > 15) {
+				TRACE_APPEND_STRL(Z_STRVAL_PP(arg), 15);
+				TRACE_APPEND_STR("...', ");
+			} else {
+				TRACE_APPEND_STRL(Z_STRVAL_PP(arg), Z_STRLEN_PP(arg));
+				TRACE_APPEND_STR("', ");
+			}
+			break;
+		case IS_BOOL:
+			if (Z_LVAL_PP(arg)) {
+				TRACE_APPEND_STR("true, ");
+			} else {
+				TRACE_APPEND_STR("false, ");
+			}
+			break;
+		case IS_RESOURCE:
+			TRACE_APPEND_STR("Resource id #");
+			/* break; */
+		case IS_LONG: {
+			long lval = Z_LVAL_PP(arg);
+			char s_tmp[MAX_LENGTH_OF_LONG + 1];
+			int l_tmp = zend_sprintf(s_tmp, "%ld", lval);  /* SAFE */
+			TRACE_APPEND_STRL(s_tmp, l_tmp);
+			TRACE_APPEND_STR(", ");
+			break;
+		}
+		case IS_DOUBLE: {
+			double dval = Z_DVAL_PP(arg);
+			char *s_tmp;
+			int l_tmp;
+			TSRMLS_FETCH();
+
+			s_tmp = emalloc(MAX_LENGTH_OF_DOUBLE + EG(precision) + 1);
+			l_tmp = zend_sprintf(s_tmp, "%.*G", (int) EG(precision), dval);  /* SAFE */
+			TRACE_APPEND_STRL(s_tmp, l_tmp);
+			/* %G already handles removing trailing zeros from the fractional part, yay */
+			efree(s_tmp);
+			TRACE_APPEND_STR(", ");
+			break;
+		}
+		case IS_ARRAY:
+			TRACE_APPEND_STR("Array, ");
+			break;
+		case IS_OBJECT: {
+			TSRMLS_FETCH();
+
+			TRACE_APPEND_STR("Object(");
+			TRACE_APPEND_STRL(Z_OBJCE_PP(arg)->name, strlen(Z_OBJCE_PP(arg)->name));
+			TRACE_APPEND_STR("), ");
+			break;
+		}
+		default:
+			break;
+	}
+	return ZEND_HASH_APPLY_KEEP;
+}
+
+static int _build_trace_string(zval **frame, int num_args, va_list args, zend_hash_key *hash_key)
+{
+	char *s_tmp, **str;
+	int *len;
+	long line;
+	HashTable *ht = Z_ARRVAL_PP(frame);
+	zval **file, **tmp;
+
+	str = va_arg(args, char**);
+	len = va_arg(args, int*);
+
+	if (zend_hash_find(ht, "file", sizeof("file"), (void**)&file) == SUCCESS) {
+		if (zend_hash_find(ht, "line", sizeof("line"), (void**)&tmp) == SUCCESS) {
+			line = Z_LVAL_PP(tmp);
+		} else {
+			line = 0;
+		}
+		s_tmp = emalloc(Z_STRLEN_PP(file) + MAX_LENGTH_OF_LONG + 2 + 1);
+		sprintf(s_tmp, "%s(%ld): ", Z_STRVAL_PP(file), line);
+		TRACE_APPEND_STRL(s_tmp, strlen(s_tmp));
+		efree(s_tmp);
+	} else {
+		TRACE_APPEND_STR("[internal function]: ");
+	}
+	TRACE_APPEND_KEY("class");
+	TRACE_APPEND_KEY("type");
+	TRACE_APPEND_KEY("function");
+	TRACE_APPEND_CHR('(');
+	if (zend_hash_find(ht, "args", sizeof("args"), (void**)&tmp) == SUCCESS) {
+		zend_hash_apply_with_arguments(Z_ARRVAL_PP(tmp), (apply_func_args_t)_build_trace_args, 2, str, len);
+		*len -= 2; /* remove last ', ' */
+	}
+	TRACE_APPEND_STR(")\n");
+	return ZEND_HASH_APPLY_KEEP;
+}
+
+ZEND_METHOD(exception, gettraceasstring)
+{
+	zval *trace;
+	char *str = estrdup("");
+	int len = 0;
+	
+	trace = zend_read_property(Z_OBJCE_P(getThis()), getThis(), "trace", sizeof("trace")-1, 1 TSRMLS_CC);
+	zend_hash_apply_with_arguments(Z_ARRVAL_P(trace), (apply_func_args_t)_build_trace_string, 2, &str, &len);
+
+	str[len] = '\0';	
+	RETURN_STRINGL(str, len, 0); 
+}
+/* }}} */
+
+ZEND_METHOD(exception, tostring)
+{
+	zval *message, *file, *line, *trace;
+	char *str;
+	int len;
+	zend_fcall_info fci;
+	zval fname;
+	
+	message = zend_read_property(Z_OBJCE_P(getThis()), getThis(), "message", sizeof("message")-1, 1 TSRMLS_CC);
+	file = zend_read_property(Z_OBJCE_P(getThis()), getThis(), "file", sizeof("file")-1, 1 TSRMLS_CC);
+	line = zend_read_property(Z_OBJCE_P(getThis()), getThis(), "line", sizeof("line")-1, 1 TSRMLS_CC);
+
+	ZVAL_STRINGL(&fname, "gettraceasstring", sizeof("gettraceasstring")-1, 0);
+
+	fci.size = sizeof(fci);
+	fci.function_table = &Z_OBJCE_P(getThis())->function_table;
+	fci.function_name = &fname;
+	fci.symbol_table = NULL;
+	fci.object_pp = &getThis();
+	fci.retval_ptr_ptr = &trace;
+	fci.param_count = 0;
+	fci.params = NULL;
+	fci.no_separation = 1;
+
+	zend_call_function(&fci, NULL TSRMLS_CC);
+
+	len = 11 + strlen(Z_OBJCE_P(getThis())->name) + 16 + Z_STRLEN_P(message) + 5 + Z_STRLEN_P(file) + 1 + MAX_LENGTH_OF_LONG + 14 + Z_STRLEN_P(trace) + 1;
+	str = emalloc(len);
+	sprintf(str, "exception '%s' with message '%s' in %s:%ld\nStack trace:\n%s", 
+		Z_OBJCE_P(getThis())->name, Z_STRVAL_P(message), Z_STRVAL_P(file), Z_LVAL_P(line), 
+		Z_STRVAL_P(trace));
+	len = strlen(str);
+
+	/* We store the result in the private property string so we can access
+	 * the result in uncaught exception handlers without memleaks. */
+	zend_update_property_string(default_exception_ptr, getThis(), "string", sizeof("string")-1, str TSRMLS_CC);
+
+	zval_ptr_dtor(&trace);
+
+	RETURN_STRINGL(str, len, 0);
+}
+
 /* All functions that may be used in uncaught exception handlers must be final
  * and must not throw exceptions. Otherwise we would need a facility to handle
  * such exceptions in that handler.
  */
 static zend_function_entry default_exception_functions[] = {
 	ZEND_ME(exception, __construct, NULL, 0)
-	ZEND_ME(exception, getmessage, NULL, 0) /* non final for now */
+	ZEND_ME(exception, getmessage, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
 	ZEND_ME(exception, getcode, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
 	ZEND_ME(exception, getfile, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
 	ZEND_ME(exception, getline, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
 	ZEND_ME(exception, gettrace, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
+	ZEND_ME(exception, gettraceasstring, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
+	ZEND_ME(exception, tostring, NULL, 0)
 	{NULL, NULL, NULL}
 };
 
@@ -146,6 +338,7 @@ static void zend_register_default_exception(TSRMLS_D)
 	default_exception_ptr->create_object = zend_default_exception_new;
 
 	zend_declare_property_string(default_exception_ptr, "message", sizeof("message")-1, "Unknown exception", ZEND_ACC_PROTECTED);
+	zend_declare_property_string(default_exception_ptr, "string", sizeof("string")-1, "", ZEND_ACC_PRIVATE);
 	zend_declare_property_long(default_exception_ptr, "code", sizeof("code")-1, 0, ZEND_ACC_PROTECTED);
 	zend_declare_property_null(default_exception_ptr, "file", sizeof("file")-1, ZEND_ACC_PROTECTED);
 	zend_declare_property_null(default_exception_ptr, "line", sizeof("line")-1, ZEND_ACC_PROTECTED);
@@ -252,10 +445,10 @@ ZEND_API void zend_exception_error(zval *exception TSRMLS_DC)
 	if (instanceof_function(Z_OBJCE_P(exception), default_exception_ptr TSRMLS_CC)) {
 		zval *message = zend_read_property(default_exception_ptr, exception, "message", sizeof("message")-1, 1 TSRMLS_CC);
 		zval *file = zend_read_property(default_exception_ptr, exception, "file", sizeof("file")-1, 1 TSRMLS_CC);
-		zval *lineno = zend_read_property(default_exception_ptr, exception, "line", sizeof("line")-1, 1 TSRMLS_CC);
-		zend_error_va(E_ERROR, Z_STRVAL_P(file), Z_LVAL_P(lineno), "Uncaught exception '%s' with message '%s'", Z_OBJCE_P(exception)->name, Z_STRVAL_P(message));
+		zval *line = zend_read_property(default_exception_ptr, exception, "line", sizeof("line")-1, 1 TSRMLS_CC);
+		zend_error_va(E_ERROR, Z_STRVAL_P(file), Z_LVAL_P(line), "Uncaught exception '%s' with message '%s'", Z_OBJCE_P(exception)->name, Z_STRVAL_P(message));
 	} else {
-		zend_error(E_ERROR, "Uncaught exception '%s'!", Z_OBJCE_P(exception)->name);
+		zend_error(E_ERROR, "Uncaught exception '%s'", Z_OBJCE_P(exception)->name);
 	}
 }
 
