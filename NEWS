@@ -1,5 +1,7 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? ??? 200?, Version 4.0.7
+- Add pg_last_notice() function (Rasmus from suggestion by Dirk@rackspace.com)
 
 ?? ??? 200?, Version 4.0.6
 - Fixed a bug in preg_split() that would incorrectly limit the number of
