@@ -1217,19 +1217,16 @@ binary_assign_op_addr: {
 			case ZEND_ADD_VAR: {
 					zval *var = get_zval_ptr(&opline->op2, Ts, &free_op2, BP_VAR_R);
 					zval var_copy;
-					int destroy=0;
+					int use_copy;
 
-					if (var->type != IS_STRING) {
-						var_copy = *var;
-						zval_copy_ctor(&var_copy);
+					zend_make_printable_zval(var, &var_copy, &use_copy);
+					if (use_copy) {
 						var = &var_copy;
-						convert_to_string(var);
-						destroy=1;
 					}
 					add_string_to_string(	&Ts[opline->result.u.var].tmp_var,
 											get_zval_ptr(&opline->op1, Ts, &free_op1, BP_VAR_NA),
 											var);
-					if (destroy) {
+					if (use_copy) {
 						zval_dtor(var);
 					}
 					/* original comment, possibly problematic:

@@ -180,6 +180,7 @@ ZEND_API void zend_bailout();
 END_EXTERN_C()
 ZEND_API char *get_zend_version();
 
+ZEND_API void zend_make_printable_zval(zval *expr, zval *expr_copy, int *use_copy);
 ZEND_API int zend_print_zval(zval *expr, int indent);
 ZEND_API void zend_print_zval_r(zval *expr, int indent);
 
