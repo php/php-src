@@ -31,6 +31,8 @@
 #include "spl_engine.h"
 #include "spl_foreach.h"
 
+#define OPTIMIZED_ARRAY_CONSTRUCT
+
 #define ezalloc(size) \
 	memset(emalloc(size), 0, size)
 
@@ -79,12 +81,11 @@ ZEND_EXECUTE_HOOK_FUNCTION(ZEND_FE_RESET)
 }
 /* }}} */
 
+/* {{{ OPTIMIZED_ARRAY_CONSTRUCT macros */
+#ifdef OPTIMIZED_ARRAY_CONSTRUCT
 #define CONNECT_TO_BUCKET_DLLIST(element, list_head)		\
 	(element)->pNext = (list_head);							\
-	(element)->pLast = NULL;								\
-	if ((element)->pNext) {									\
-		(element)->pNext->pLast = (element);				\
-	}
+	(element)->pLast = NULL;
 
 #define CONNECT_TO_GLOBAL_DLLIST(element, ht)				\
 	(element)->pListLast = (ht)->pListTail;					\
@@ -99,6 +100,8 @@ ZEND_EXECUTE_HOOK_FUNCTION(ZEND_FE_RESET)
 	if ((ht)->pInternalPointer == NULL) {					\
 		(ht)->pInternalPointer = (element);					\
 	}
+#endif
+/* }}} */
 
 /* {{{ ZEND_EXECUTE_HOOK_FUNCTION(ZEND_FE_FETCH) */
 ZEND_EXECUTE_HOOK_FUNCTION(ZEND_FE_FETCH)
@@ -129,7 +132,6 @@ ZEND_EXECUTE_HOOK_FUNCTION(ZEND_FE_FETCH)
 		spl_begin_method_call_this(obj, proxy->obj_ce, &proxy->f_more, "has_more", sizeof("has_more")-1, &more TSRMLS_CC);
 		if (zend_is_true(&more)) {
 			result = &EX_T(EX(opline)->result.u.var).tmp_var;
-			array_init(result);
 
 			spl_begin_method_call_ex(obj, proxy->obj_ce, &proxy->f_current, "current", sizeof("current")-1, &value TSRMLS_CC);
 
@@ -140,31 +142,57 @@ ZEND_EXECUTE_HOOK_FUNCTION(ZEND_FE_FETCH)
 				key->value.lval = proxy->index;
 				key->type = IS_LONG;
 			}
+#ifndef OPTIMIZED_ARRAY_CONSTRUCT
+			array_init(result);
 			zend_hash_index_update(result->value.ht, 0, &value, sizeof(zval *), NULL);
 			zend_hash_index_update(result->value.ht, 1, &key, sizeof(zval *), NULL);
-/*
+#else
 			{
 				Bucket *p;
+				HashTable *ht;
+
+				ht = emalloc(sizeof(HashTable));
+				result->value.ht = ht;
+				ht->nTableSize = 1 << 1;
+				ht->nTableMask = ht->nTableSize - 1;
+#if ZEND_DEBUG
+				ht->inconsistent = 0; /*HT_OK;*/
+#endif
 				
+				ht->arBuckets = (Bucket **)emalloc(ht->nTableSize * sizeof(Bucket *));
+				
+				ht->pDestructor = ZVAL_PTR_DTOR;
+				ht->pListHead = NULL;
+				ht->pListTail = NULL;
+				ht->nNumOfElements = 0;
+				ht->nNextFreeElement = 0;
+				ht->pInternalPointer = NULL;
+				ht->persistent = 0;
+				ht->nApplyCount = 0;
+				ht->bApplyProtection = 1;
+				result->type = IS_ARRAY;
+
 				p = (Bucket*)emalloc(sizeof(Bucket)-1);
 				p->pDataPtr = value;
 				p->pData = &p->pDataPtr;
 				p->nKeyLength = 0;
 				p->h = 0;
-				CONNECT_TO_BUCKET_DLLIST(p, result->value.ht->arBuckets[0]);
 				result->value.ht->arBuckets[0] = p;
-				CONNECT_TO_GLOBAL_DLLIST(p, result->value.ht);
+				CONNECT_TO_BUCKET_DLLIST(p, ht->arBuckets[0]);
+				CONNECT_TO_GLOBAL_DLLIST(p, ht);
+
 				p = (Bucket*)emalloc(sizeof(Bucket)-1);
 				p->pDataPtr = key;
 				p->pData = &p->pDataPtr;
 				p->nKeyLength = 0;
 				p->h = 1;
-				CONNECT_TO_BUCKET_DLLIST(p, result->value.ht->arBuckets[1]);
 				result->value.ht->arBuckets[1] = p;
-				CONNECT_TO_GLOBAL_DLLIST(p, result->value.ht);
-				result->value.ht->nNumOfElements = 2;
+				CONNECT_TO_BUCKET_DLLIST(p, ht->arBuckets[1]);
+				CONNECT_TO_GLOBAL_DLLIST(p, ht);
+
+				ht->nNumOfElements = 2;
 			}
-*/
+#endif
 			NEXT_OPCODE();
 		}
 		efree(proxy);
