@@ -29,11 +29,9 @@
 
 /* $Id$ */
 
-/* Get PCRE library from ftp://ftp.cus.cam.ac.uk/pub/software/programs/pcre/ */
-
 #include "php.h"
 
-#if HAVE_LIBPCRE
+#if HAVE_PCRE
 
 #include "php_pcre.h"
 
