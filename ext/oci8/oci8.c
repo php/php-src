@@ -124,10 +124,6 @@ static zend_class_entry *oci_coll_class_entry_ptr;
 	} \
 }
 
-#ifndef PHP_WIN32
-#include "build-defs.h"
-#endif
-
 #include <fcntl.h>
 
 #ifndef O_BINARY

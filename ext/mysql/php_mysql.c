@@ -43,7 +43,6 @@
 # include <sys/socket.h>
 # define signal(a, b) NULL
 #else
-# include "build-defs.h"
 # if HAVE_SIGNAL_H
 #  include <signal.h>
 # endif

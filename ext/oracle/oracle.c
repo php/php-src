@@ -53,10 +53,6 @@
 #define PHP_ORA_API
 #endif                                   
 
-#ifndef PHP_WIN32
-#include "build-defs.h"
-#endif 
-
 #ifdef ZTS
 int ora_globals_id;
 #else

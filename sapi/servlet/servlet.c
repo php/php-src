@@ -29,8 +29,6 @@
 #include "win32/time.h"
 #include "win32/signal.h"
 #include <process.h>
-#else
-#include "build-defs.h"
 #endif
 #if HAVE_SYS_TIME_H
 #include <sys/time.h>

@@ -34,10 +34,6 @@
 
 #if HAVE_IMAP
 
-#ifndef PHP_WIN32
-#include "build-defs.h"
-#endif
-
 #if defined(HAVE_IMAP2000) || defined(HAVE_IMAP2001)
  /* these are used for quota support */
 # include "c-client.h"	/* includes mail.h and rfc822.h */

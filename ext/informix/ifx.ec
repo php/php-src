@@ -47,13 +47,17 @@
 
 #ifdef PHP_WIN32
 #include <winsock.h>
-#else
-#include "build-defs.h"
+#endif
 
 #if HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
+
+#if HAVE_NETDB_H
 #include <netdb.h>
+#endif
+
+#if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
 

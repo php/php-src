@@ -31,9 +31,6 @@
 #include "SAPI.h"
 #include <time.h>
 #include "php_main.h"
-#if !defined(PHP_WIN32) && !defined(NETWARE)
-#include "build-defs.h"
-#endif
 #include "zend_globals.h"		/* needs ELS */
 #include "zend_extensions.h"
 #ifdef HAVE_SYS_UTSNAME_H

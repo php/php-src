@@ -40,8 +40,6 @@
 #ifdef USE_WINSOCK
 #include <novsock2.h>
 #endif
-#else
-#include "build-defs.h"
 #endif
 #if HAVE_SYS_TIME_H
 #include <sys/time.h>

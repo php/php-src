@@ -7,7 +7,7 @@
 
 #if (defined(REGEX) && REGEX == 1) || (!defined(REGEX))
 
-#if !(WIN32|WINNT)
+#ifndef PHP_WIN32
 
 #ifndef PHP_NO_ALIASES
 

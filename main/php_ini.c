@@ -22,9 +22,6 @@
 #define INI_CHECK_CWD
 
 #include "php.h"
-#if !defined(PHP_WIN32) && !defined(NETWARE)
-#include "build-defs.h"
-#endif
 #include "ext/standard/info.h"
 #include "zend_ini.h"
 #include "php_ini.h"

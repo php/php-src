@@ -35,9 +35,6 @@
 
 #if HAVE_LIBEXPAT
 
-#if !defined(PHP_WIN32) && !defined(NETWARE)
-#  include "build-defs.h"
-# endif
 # include "ext/standard/head.h"
 
 /* Short-term TODO list:

@@ -35,8 +35,6 @@
 
 #ifdef PHP_WIN32
 #include <winsock.h>
-#else
-#include "build-defs.h"
 #endif
 
 #if HYPERWAVE
