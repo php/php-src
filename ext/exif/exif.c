@@ -67,7 +67,7 @@
  * while extending the module as it shows if you are at the right position.
  * You are always considered to have a copy of TIFF6.0 and EXIF2.10 standard.
  */
-#undef EXIF_DEBUG
+#endif EXIF_DEBUG
 
 #undef EXIF_JPEG2000
 
@@ -118,7 +118,7 @@ PHP_MINFO_FUNCTION(exif)
 	php_info_print_table_start();
 	php_info_print_table_row(2, "EXIF Support", "enabled");
 	php_info_print_table_row(2, "EXIF Version", EXIF_VERSION);
-	php_info_print_table_row(2, "Supported EXIF Version", "02100");
+	php_info_print_table_row(2, "Supported EXIF Version", "02200");
 	php_info_print_table_row(2, "Supported filetypes", "JPEG,TIFF");
 	php_info_print_table_end();
 }
@@ -301,6 +301,37 @@ static char *exif_get_tagformat(int format)
 #endif
 
 /* Describes tag values */
+#define TAG_GPS_VERSION_ID              0x0000
+#define TAG_GPS_LATITUDE_REF            0x0001
+#define TAG_GPS_LATITUDE                0x0002
+#define TAG_GPS_LONGITUDE_REF           0x0003
+#define TAG_GPS_LONGITUDE               0x0004
+#define TAG_GPS_ALTITUDE_REF            0x0005
+#define TAG_GPS_ALTITUDE                0x0006
+#define TAG_GPS_TIME_STAMP              0x0007
+#define TAG_GPS_SATELLITES              0x0008
+#define TAG_GPS_STATUS                  0x0009
+#define TAG_GPS_MEASURE_MODE            0x000A
+#define TAG_GPS_DOP                     0x000B
+#define TAG_GPS_SPEED_REF               0x000C
+#define TAG_GPS_SPEED                   0x000D
+#define TAG_GPS_TRACK_REF               0x000E
+#define TAG_GPS_TRACK                   0x000F
+#define TAG_GPS_IMG_DIRECTION_REF       0x0010
+#define TAG_GPS_IMG_DIRECTION           0x0011
+#define TAG_GPS_MAP_DATUM               0x0012
+#define TAG_GPS_DEST_LATITUDE_REF       0x0013
+#define TAG_GPS_DEST_LATITUDE           0x0014
+#define TAG_GPS_DEST_LONGITUDE_REF      0x0015
+#define TAG_GPS_DEST_LONGITUDE          0x0016
+#define TAG_GPS_DEST_BEARING_REF        0x0017
+#define TAG_GPS_DEST_BEARING            0x0018
+#define TAG_GPS_DEST_DISTANCE_REF       0x0019
+#define TAG_GPS_DEST_DISTANCE           0x001A
+#define TAG_GPS_PROCESSING_METHOD       0x001B
+#define TAG_GPS_AREA_INFORMATION        0x001C
+#define TAG_GPS_DATE_STAMP              0x001D
+#define TAG_GPS_DIFFERENTIAL            0x001E
 #define TAG_TIFF_COMMENT                0x00FE /* SHOUDLNT HAPPEN */
 #define TAG_NEW_SUBFILE                 0x00FE /* New version of subfile tag */
 #define TAG_SUBFILE_TYPE                0x00FF /* Old version of subfile tag */
@@ -312,7 +343,6 @@ static char *exif_get_tagformat(int format)
 #define TAG_TRESHHOLDING                0x0107
 #define TAG_CELL_WIDTH                  0x0108
 #define TAG_CELL_HEIGHT                 0x0109
-#define TAG_STRIP_OFFSETS               0x0111
 #define TAG_FILL_ORDER                  0x010A
 #define TAG_DOCUMENT_NAME               0x010D
 #define TAG_IMAGE_DESCRIPTION           0x010E
@@ -378,31 +408,67 @@ static char *exif_get_tagformat(int format)
 #define TAG_EXPOSURETIME                0x829A
 #define TAG_FNUMBER                     0x829D
 #define TAG_EXIF_IFD_POINTER            0x8769
+#define TAG_EXPOSURE_PROGRAM            0x8822
+#define TAG_SPECTRAL_SENSITY            0x8824
 #define TAG_GPS_IFD_POINTER             0x8825
 #define TAG_ISOSPEED                    0x8827
+#define TAG_OPTOELECTRIC_CONVERSION_F   0x8828
 #define TAG_EXIFVERSION                 0x9000
+#define TAG_DATE_TIME_ORIGINAL          0x9003
+#define TAG_DATE_TIME_DIGITIZED         0x9004
+#define TAG_COMPONENT_CONFIG            0x9101
+#define TAG_COMPRESSED_BITS_PER_PIXEL   0x9102
 #define TAG_SHUTTERSPEED                0x9201
 #define TAG_APERTURE                    0x9202
-#define TAG_DATETIME_ORIGINAL           0x9003
-#define TAG_MAXAPERTURE                 0x9205
+#define TAG_BRIGHTNESS_VALUE            0x9203
+#define TAG_EXPOSURE_BIAS_VALUE         0x9204
+#define TAG_MAX_APERTURE                0x9205
 #define TAG_SUBJECT_DISTANCE            0x9206
+#define TAG_METRIC_MODULE               0x9207
 #define TAG_LIGHT_SOURCE                0x9208
 #define TAG_FLASH                       0x9209
-#define TAG_FOCALLENGTH                 0x920A
+#define TAG_FOCAL_LENGTH                0x920A
+#define TAG_SUBJECT_AREA                0x9214
 #define TAG_MARKER_NOTE                 0x927C
 #define TAG_USERCOMMENT                 0x9286
-#define TAG_XP_TITLE                    0x9c9b
-#define TAG_XP_COMMENTS                 0x9c9c
-#define TAG_XP_AUTHOR                   0x9c9d
-#define TAG_XP_KEYWORDS                 0x9c9e
-#define TAG_XP_SUBJECT                  0x9c9f
+#define TAG_SUB_SEC_TIME                0x9290
+#define TAG_SUB_SEC_TIME_ORIGINAL       0x9291
+#define TAG_SUB_SEC_TIME_DIGITIZED      0x9292
+#define TAG_XP_TITLE                    0x9C9B
+#define TAG_XP_COMMENTS                 0x9C9C
+#define TAG_XP_AUTHOR                   0x9C9D
+#define TAG_XP_KEYWORDS                 0x9C9E
+#define TAG_XP_SUBJECT                  0x9C9F
 #define TAG_FLASH_PIX_VERSION           0xA000
 #define TAG_COLOR_SPACE                 0xA001
-#define TAG_COMP_IMAGEWIDTH             0xA002 /* compressed images only */
-#define TAG_COMP_IMAGEHEIGHT            0xA003
+#define TAG_COMP_IMAGE_WIDTH            0xA002 /* compressed images only */
+#define TAG_COMP_IMAGE_HEIGHT           0xA003
+#define TAG_RELATED_SOUND_FILE          0xA004
 #define TAG_INTEROP_IFD_POINTER         0xA005 /* IFD pointer */
-#define TAG_FOCALPLANEXRES              0xA20E
-#define TAG_FOCALPLANEUNITS             0xA210
+#define TAG_FLASH_ENERGY                0xA20B
+#define TAG_SPATIAL_FREQUENCY_RESPONSE  0xA20C
+#define TAG_FOCALPLANE_X_RES            0xA20E
+#define TAG_FOCALPLANE_Y_RES            0xA20F
+#define TAG_FOCALPLANE_RESOLUTION_UNIT  0xA210
+#define TAG_SUBJECT_LOCATION            0xA214
+#define TAG_EXPOSURE_INDEX              0xA215
+#define TAG_SENSING_METHOD              0xA217
+#define TAG_FILE_SOURCE                 0xA300
+#define TAG_SCENE_TYPE                  0xA301
+#define TAG_CFA_PATTERN                 0xA302
+#define TAG_CUSTOM_RENDERED             0xA401
+#define TAG_EXPOSURE_MODE               0xA402
+#define TAG_WHITE_BALANCE               0xA403
+#define TAG_DIGITAL_ZOOM_RATIO          0xA404
+#define TAG_FOCAL_LENGTH_IN_35_MM_FILM  0xA405
+#define TAG_SCENE_CAPTURE_TYPE          0xA406
+#define TAG_GAIN_CONTROL                0xA407
+#define TAG_CONTRAST                    0xA408
+#define TAG_SATURATION                  0xA409
+#define TAG_SHARPNESS                   0xA40A
+#define TAG_DEVICE_SETTING_DESCRIPTION  0xA40B
+#define TAG_SUBJECT_DISTANCE_RANGE      0xA40C
+#define TAG_IMAGE_UNIQUE_ID             0xA420
 
 /* Olympus specific tags */
 #define TAG_OLYMPUS_SPECIALMODE         0x0200
@@ -417,6 +483,7 @@ static char *exif_get_tagformat(int format)
 /* Internal */
 #define TAG_NONE               			-1 /* note that -1 <> 0xFFFF */
 #define TAG_COMPUTED_VALUE     			-2
+#define TAG_END_OF_LIST                 0xFFFD
 
 /* Values for TAG_PHOTOMETRIC_INTERPRETATION */
 #define PMI_BLACK_IS_ZERO       0
@@ -432,11 +499,41 @@ static char *exif_get_tagformat(int format)
 
 /* {{{ TabTable[]
  */
-
 static const struct {
 	unsigned short Tag;
 	char *Desc;
 } TagTable[] = {
+  { 0x0000, "GPSVersion"},
+  { 0x0001, "GPSLatitudeRef"},
+  { 0x0002, "GPSLatitude"},
+  { 0x0003, "GPSLongitude"},
+  { 0x0004, "GPSLongitudeRef"},
+  { 0x0005, "GPSAltitudeRef"},
+  { 0x0006, "GPSAltitude"},
+  { 0x0007, "GPSTimeStamp"},
+  { 0x0008, "GPSSatellites"},
+  { 0x0009, "GPSStatus"},
+  { 0x000A, "GPSMeasureMode"},
+  { 0x000B, "GPSDOP"},
+  { 0x000C, "GPSSpeedRef"},
+  { 0x000D, "GPSSpeed"},
+  { 0x000E, "GPSTrackRef"},
+  { 0x000F, "GPSTrack"},
+  { 0x0010, "GPSImgDirectionRef"},
+  { 0x0011, "GPSImgDirection"},
+  { 0x0012, "GPSMapDatum"},
+  { 0x0013, "GPSDestLatitudeRef"},
+  { 0x0014, "GPSDestLatitude"},
+  { 0x0015, "GPSDestLongitudeRef"},
+  { 0x0016, "GPSDestLongitude"},
+  { 0x0017, "GPSDestBearingRef"},
+  { 0x0018, "GPSDestBearing"},
+  { 0x0019, "GPSDestDistanceRef"},
+  { 0x001A, "GPSDestDistance"},
+  { 0x001B, "GPSProcessingMode"},
+  { 0x001C, "GPSAreaInformation"},
+  { 0x001D, "GPSDateStamp"},
+  { 0x001E, "GPSDifferential"},
   { 0x00FE, "NewSubFile"},
   { 0x00FF, "SubFile"},
   { 0x0100, "ImageWidth"},
@@ -508,6 +605,9 @@ static const struct {
   { 0x0213, "YCbCrPositioning"},
   { 0x0214, "ReferenceBlackWhite"},
   { 0x1000, "RelatedImageFileFormat"},
+  { 0x8822, "ExposureProgram"},
+  { 0x8824, "SpectralSensity"},
+  { 0x8828, "OECF"},
   { 0x828D, "CFARepeatPatternDim"},
   { 0x828E, "CFAPattern"},
   { 0x828F, "BatteryLevel"},
@@ -559,6 +659,7 @@ static const struct {
   { 0xA001, "ColorSpace"},
   { 0xA002, "ExifImageWidth"},
   { 0xA003, "ExifImageLength"},
+  { 0xA004, "RelatedSoundFile"},
   { 0xA005, "InteroperabilityOffset"},
   { 0xA20B, "FlashEnergy"},                 /* 0x920B in TIFF/EP */
   { 0xA20C, "SpatialFrequencyResponse"},    /* 0x920C    -  -    */
@@ -570,26 +671,40 @@ static const struct {
   { 0xA217, "SensingMethod"},               /* 0x9217    -  -    */
   { 0xA300, "FileSource"},
   { 0xA301, "SceneType"},
+  { 0xA302, "CFAPattern"},
+  { 0xA401, "CustomRendered"},
+  { 0xA402, "ExposureMode"},
+  { 0xA403, "WhiteBalance"},
+  { 0xA404, "DigitalZoomRatio"},
+  { 0xA405, "FocalLengthIn35mmFilm"},
+  { 0xA406, "SceneCaptureType"},
+  { 0xA407, "GainControl"},
+  { 0xA408, "Contrast"},
+  { 0xA409, "Saturation"},
+  { 0xA40A, "Sharpness"},
+  { 0xA40B, "DeviceSettingDescription"},
+  { 0xA40C, "SubjectDistanceRange"},
+  { 0xA420, "ImageUniqueID"},
   {TAG_NONE,           "no tag value"},
   {TAG_COMPUTED_VALUE, "computed value"},
-  {      0, ""}  /* Important for exif_get_tagname() IF value != "" functionresult is != false */
+  {TAG_END_OF_LIST,    ""}  /* Important for exif_get_tagname() IF value != "" functionresult is != false */
 } ;
 
 /* }}} */
 
 /* {{{ exif_get_tagname
 	Get headername for tag_num or NULL if not defined */
-static char * exif_get_tagname(int tag_num, char *ret, int len)
+static char * exif_get_tagname(int tag_num, char *ret, int len TSRMLS_DC)
 {
 	int i, t;
 	char tmp[32];
 
 	for (i=0;;i++) {
-		if ((t=TagTable[i].Tag) == tag_num || !t) {
+		if ((t=TagTable[i].Tag) == tag_num || t==TAG_END_OF_LIST) {
+			if (t==TAG_END_OF_LIST) {
+				break;
+			}
 			if (ret && len)  {
-				if (!t) {
-					break;
-				}
 				strncpy(ret, TagTable[i].Desc, abs(len));
 				if (len<0) {
 					len = -len;
@@ -603,7 +718,7 @@ static char * exif_get_tagname(int tag_num, char *ret, int len)
 		}
 	}
 	if (ret && len) {
-		sprintf(tmp, "UndefinedTag:0x%04X", tag_num);
+		snprintf(tmp, sizeof(tmp), "UndefinedTag:0x%04X", tag_num);
 		strncpy(ret, tmp, abs(len));
 		if (len<0) {
 			len = -len;
@@ -1842,7 +1957,7 @@ PHP_FUNCTION(exif_tagname)
 
 	convert_to_long_ex(p_num);
 	tag = Z_LVAL_PP(p_num);
-	szTemp = exif_get_tagname(tag, NULL, 0);
+	szTemp = exif_get_tagname(tag, NULL, 0 TSRMLS_CC);
 	if (tag<0 || !szTemp || !szTemp[0]) {
 		RETURN_BOOL(FALSE);
 	} else {
@@ -1995,7 +2110,7 @@ static void exif_thumbnail_build(image_info_type *ImageInfo TSRMLS_DC) {
 				info_data  = &info_list->list[i];
 				byte_count = php_tiff_bytes_per_format[info_data->format] * info_data->length;
 #ifdef EXIF_DEBUG
-				php_error(E_NOTICE, "%s(): thumbnail: process tag(x%04X=%s): %s%s (%d bytes)", get_active_function_name(TSRMLS_C), info_data->tag, exif_get_tagname(info_data->tag, tagname, -12), (info_data->length>1)&&info_data->format!=TAG_FMT_UNDEFINED&&info_data->format!=TAG_FMT_STRING?"ARRAY OF ":"", exif_get_tagformat(info_data->format), byte_count);
+				php_error(E_NOTICE, "%s(): thumbnail: process tag(x%04X=%s): %s%s (%d bytes)", get_active_function_name(TSRMLS_C), info_data->tag, exif_get_tagname(info_data->tag, tagname, -12 TSRMLS_CC), (info_data->length>1)&&info_data->format!=TAG_FMT_UNDEFINED&&info_data->format!=TAG_FMT_STRING?"ARRAY OF ":"", exif_get_tagformat(info_data->format), byte_count);
 #endif
 				if (info_data->tag==TAG_STRIP_OFFSETS || info_data->tag==TAG_JPEG_INTERCHANGE_FORMAT) {
 					php_ifd_set16u(new_data + 0, info_data->tag,    ImageInfo->motorola_intel);
@@ -2235,7 +2350,7 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, cha
 
 	if (!format || format >= NUM_FORMATS) {
 		/* (-1) catches illegal zero case as unsigned underflows to positive large. */
-		php_error(E_WARNING, "%s(): Illegal format code in IFD: 0x%04X", get_active_function_name(TSRMLS_C), format);
+		php_error(E_WARNING, "%s(): Illegal format code in IFD_TAG: 0x%04X", get_active_function_name(TSRMLS_C), format);
 		return TRUE;
 	}
 
@@ -2255,11 +2370,11 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, cha
 				if (value_ptr < dir_entry) {
 					/* we can read this if offset_val > 0 */
 					/* some files have their values in other parts of the file */
-					php_error(E_WARNING, "%s(): process tag(x%04X=%s): Illegal pointer offset(x%04X < x%04X)", get_active_function_name(TSRMLS_C), tag, exif_get_tagname(tag, tagname, -12), offset_val, dir_entry);
+					php_error(E_WARNING, "%s(): process tag(x%04X=%s): Illegal pointer offset(x%04X < x%04X)", get_active_function_name(TSRMLS_C), tag, exif_get_tagname(tag, tagname, -12 TSRMLS_CC), offset_val, dir_entry);
 				} else {
 					/* this is for sure not allowed */
 					/* exception are IFD pointers */
-					php_error(E_WARNING, "%s(): process tag(x%04X=%s): Illegal pointer offset(x%04X + x%04X = x%04X > x%04X)", get_active_function_name(TSRMLS_C), tag, exif_get_tagname(tag, tagname, -12), offset_val, byte_count, offset_val+byte_count, IFDlength);
+					php_error(E_WARNING, "%s(): process tag(x%04X=%s): Illegal pointer offset(x%04X + x%04X = x%04X > x%04X)", get_active_function_name(TSRMLS_C), tag, exif_get_tagname(tag, tagname, -12 TSRMLS_CC), offset_val, byte_count, offset_val+byte_count, IFDlength);
 				}
 				return TRUE;
 			}
@@ -2306,17 +2421,17 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, cha
 
 	ImageInfo->sections_found |= FOUND_ANY_TAG;
 #ifdef EXIF_DEBUG
-	php_error(E_NOTICE, "%s(): process tag(x%04X=%s,@x%04X + x%04X(=%d)): %s%s", get_active_function_name(TSRMLS_C), tag, exif_get_tagname(tag, tagname, -12), offset_val, byte_count, byte_count, (components>1)&&format!=TAG_FMT_UNDEFINED&&format!=TAG_FMT_STRING?"ARRAY OF ":"", format==TAG_FMT_STRING?(value_ptr?value_ptr:"<no data>"):exif_get_tagformat(format));
+	php_error(E_NOTICE, "%s(): process tag(x%04X=%s,@x%04X + x%04X(=%d)): %s%s", get_active_function_name(TSRMLS_C), tag, exif_get_tagname(tag, tagname, -12 TSRMLS_CC), offset_val, byte_count, byte_count, (components>1)&&format!=TAG_FMT_UNDEFINED&&format!=TAG_FMT_STRING?"ARRAY OF ":"", format==TAG_FMT_STRING?(value_ptr?value_ptr:"<no data>"):exif_get_tagformat(format));
 #endif
 	if (section_index==SECTION_THUMBNAIL) {
 		switch(tag) {
 			case TAG_IMAGEWIDTH:
-			case TAG_COMP_IMAGEWIDTH:
+			case TAG_COMP_IMAGE_WIDTH:
 				ImageInfo->Thumbnail.width = exif_convert_any_to_int(value_ptr, format, ImageInfo->motorola_intel TSRMLS_CC);
 				break;
 
 			case TAG_IMAGEHEIGHT:
-			case TAG_COMP_IMAGEHEIGHT:
+			case TAG_COMP_IMAGE_HEIGHT:
 				ImageInfo->Thumbnail.height = exif_convert_any_to_int(value_ptr, format, ImageInfo->motorola_intel TSRMLS_CC);
 				break;
 
@@ -2395,7 +2510,7 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, cha
 				break;
 
 			case TAG_APERTURE:
-			case TAG_MAXAPERTURE:
+			case TAG_MAX_APERTURE:
 				/* More relevant info always comes earlier, so only use this field if we don't
 				   have appropriate aperture information yet. */
 				if (ImageInfo->ApertureFNumber == 0) {
@@ -2418,11 +2533,11 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, cha
 				ImageInfo->ExposureTime = -1;
 				break;
 
-			case TAG_COMP_IMAGEWIDTH:
+			case TAG_COMP_IMAGE_WIDTH:
 				ImageInfo->ExifImageWidth = exif_convert_any_to_int(value_ptr, format, ImageInfo->motorola_intel TSRMLS_CC);
 				break;
 
-			case TAG_FOCALPLANEXRES:
+			case TAG_FOCALPLANE_X_RES:
 				ImageInfo->FocalplaneXRes = exif_convert_any_format(value_ptr, format, ImageInfo->motorola_intel TSRMLS_CC);
 				break;
 
@@ -2432,7 +2547,7 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, cha
 				ImageInfo->Distance = (float)exif_convert_any_format(value_ptr, format, ImageInfo->motorola_intel TSRMLS_CC);
 				break;
 
-			case TAG_FOCALPLANEUNITS:
+			case TAG_FOCALPLANE_RESOLUTION_UNIT:
 				switch((int)exif_convert_any_format(value_ptr, format, ImageInfo->motorola_intel TSRMLS_CC)) {
 					case 1: ImageInfo->FocalplaneUnits = 25.4; break; /* inch */
 					case 2:
@@ -2489,7 +2604,7 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, cha
 				}
 		}
 	}
-	exif_iif_add_tag(ImageInfo, section_index, exif_get_tagname(tag, tagname, sizeof(tagname)), tag, format, components, value_ptr TSRMLS_CC);
+	exif_iif_add_tag(ImageInfo, section_index, exif_get_tagname(tag, tagname, sizeof(tagname) TSRMLS_CC), tag, format, components, value_ptr TSRMLS_CC);
 	EFREE_IF(outside);
 	return TRUE;
 }
@@ -2920,7 +3035,7 @@ static int exif_process_IFD_in_TIFF(image_info_type *ImageInfo, size_t dir_offse
 				entry_tag    = php_ifd_get16u(dir_entry+0, ImageInfo->motorola_intel);
 				entry_type   = php_ifd_get16u(dir_entry+2, ImageInfo->motorola_intel);
 				if (entry_type > NUM_FORMATS) {
-					php_error(E_WARNING, "%s(): Error in TIFF: Illegal format, suppose bytes", get_active_function_name(TSRMLS_C));
+					php_error(E_WARNING, "%s(): Illegal format code in TIFF 0x%04d, suppose bytes", get_active_function_name(TSRMLS_C), entry_type);
 					entry_type = TAG_FMT_BYTE;
 				}
 				entry_length = php_ifd_get32u(dir_entry+4, ImageInfo->motorola_intel) * php_tiff_bytes_per_format[entry_type];
@@ -2941,11 +3056,11 @@ static int exif_process_IFD_in_TIFF(image_info_type *ImageInfo, size_t dir_offse
 					}
 					switch(entry_tag) {
 						case TAG_IMAGEWIDTH:
-						case TAG_COMP_IMAGEWIDTH:
+						case TAG_COMP_IMAGE_WIDTH:
 							ImageInfo->Width  = entry_value;
 							break;
 						case TAG_IMAGEHEIGHT:
-						case TAG_COMP_IMAGEHEIGHT:
+						case TAG_COMP_IMAGE_HEIGHT:
 							ImageInfo->Height = entry_value;
 							break;
 						case TAG_PHOTOMETRIC_INTERPRETATION:
@@ -3373,7 +3488,7 @@ PHP_FUNCTION(exif_read_data)
 	exif_iif_add_str(&ImageInfo, SECTION_COMPUTED, "Copyright.Editor",       ImageInfo.CopyrightEditor TSRMLS_CC);
 
 	for (i=0; i<ImageInfo.xp_fields.count; i++) {
-		exif_iif_add_str(&ImageInfo, SECTION_WINXP, exif_get_tagname(ImageInfo.xp_fields.list[i].tag, NULL, 0), ImageInfo.xp_fields.list[i].value TSRMLS_CC);
+		exif_iif_add_str(&ImageInfo, SECTION_WINXP, exif_get_tagname(ImageInfo.xp_fields.list[i].tag, NULL, 0 TSRMLS_CC), ImageInfo.xp_fields.list[i].value TSRMLS_CC);
 	}
 	if (ImageInfo.Thumbnail.size) {
 		if (read_thumbnail) {
