@@ -81,14 +81,13 @@ DBA_OPEN_FUNC(db3)
 		filemode = Z_LVAL_PP(info->argv[0]);
 	}
 
+#ifdef DB_FCNTL_LOCKING
+	gmode |= DB_FCNTL_LOCKING;
+#endif
+
 	if ((err=db_create(&dbp, NULL, 0)) == 0) {
 	    dbp->set_errcall(dbp, php_dba_db3_errcall_fcn);
-	    if (
-#if (DB_VERSION_MAJOR == 4 && DB_VERSION_MINOR >= 1)
-			(err=dbp->open(dbp, 0, info->path, NULL, type, gmode, filemode)) == 0) {
-#else
-			(err=dbp->open(dbp, info->path, NULL, type, gmode, filemode)) == 0) {
-#endif
+	    if ((err=dbp->open(dbp, info->path, NULL, type, gmode, filemode)) == 0) {
 			dba_db3_data *data;
 
 			data = pemalloc(sizeof(*data), info->flags&DBA_PERSISTENT);

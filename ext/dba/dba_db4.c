@@ -81,6 +81,10 @@ DBA_OPEN_FUNC(db4)
 		filemode = Z_LVAL_PP(info->argv[0]);
 	}
 
+#ifdef DB_FCNTL_LOCKING
+	gmode |= DB_FCNTL_LOCKING;
+#endif
+
 	if ((err=db_create(&dbp, NULL, 0)) == 0) {
 	    dbp->set_errcall(dbp, php_dba_db4_errcall_fcn);
 	    if (

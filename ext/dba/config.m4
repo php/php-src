@@ -144,7 +144,7 @@ AC_DEFUN(PHP_DBA_DB_CHECK,[
         AC_TRY_RUN([
 #include "$THIS_INCLUDE"
 int main() {
-  return DB_VERSION_MAJOR >= $1 ? 0 : 1;
+  return (DB_VERSION_MAJOR == $1) ? 0 : 1;
 }
         ],[
           THIS_LIBS=$LIB
@@ -156,6 +156,21 @@ int main() {
       ])
     ])
   done
+  if test "$1" = "4"; then
+    AC_MSG_CHECKING(for db4 minor version and patch level)
+    AC_TRY_RUN([
+#include "$THIS_INCLUDE"
+int main() {
+  return (DB_VERSION_MINOR != 1 || DB_VERSION_PATCH >= 25) ? 0 : 1;
+}
+    ],[
+      AC_MSG_RESULT(ok)
+    ],[
+      AC_MSG_ERROR(Version 4.1 requires patch level 25)
+    ],[
+      AC_MSG_RESULT(crosscompiling)
+    ])
+  fi
   if test -n "$THIS_LIBS"; then
     AC_DEFINE(DBA_DB$1, 1, [ ]) 
     if test -n "$THIS_INCLUDE"; then
@@ -194,7 +209,7 @@ AC_ARG_WITH(db4,
         break
       fi
     done
-    PHP_DBA_DB_CHECK(4, db-4.1 db-4 db4 db, db_create)
+    PHP_DBA_DB_CHECK(4, db-4.1 db-4.0 db-4 db4 db, db_create)
   fi
 ])
 AC_DBA_STD_RESULT(db4,Berkeley DB4)
@@ -229,7 +244,7 @@ AC_ARG_WITH(db3,
         break
       fi
     done
-    PHP_DBA_DB_CHECK(3, db-3.3 db-3.2 db-3.1 db-3 db3 db, db_create)
+    PHP_DBA_DB_CHECK(3, db-3.3 db-3.2 db-3.1 db-3.0 db-3 db3 db, db_create)
   fi
       ])
 AC_DBA_STD_RESULT(db3,Berkeley DB3)
