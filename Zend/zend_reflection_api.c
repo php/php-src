@@ -405,7 +405,7 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 		} else {
 			string_printf(str, "\n");
 		}
-		string_printf(str, "  }\n");
+		string_printf(str, "%s  }\n", indent);
 	}
 
 	/* Default/Implicit properties */
@@ -482,7 +482,7 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 		} else {
 			string_printf(str, "\n");
 		}
-		string_printf(str, "  }\n");
+		string_printf(str, "%s  }\n", indent);
 	}
 	
 	string_printf(str, "%s}\n", indent);
@@ -639,6 +639,55 @@ static void _property_string(string *str, zend_property_info *prop, char *prop_n
 }
 /* }}} */
 
+static int _extension_ini_string(zend_ini_entry *ini_entry, int num_args, va_list args, zend_hash_key *hash_key)
+{
+	string *str = va_arg(args, string *);
+	char *indent = va_arg(args, char *);
+	int number = va_arg(args, int);
+	char *comma = "";
+
+	if (number == ini_entry->module_number) {
+		string_printf(str, "    %sEntry [ %s <", indent, ini_entry->name);
+		if (ini_entry->modifiable & ZEND_INI_ALL) {
+			string_printf(str, "ALL");
+		} else {
+			if (ini_entry->modifiable & ZEND_INI_USER) {
+				string_printf(str, "USER");
+				comma = ",";
+			}
+			if (ini_entry->modifiable & ZEND_INI_PERDIR) {
+				string_printf(str, "%sPERDIR", comma);
+				comma = ",";
+			}
+			if (ini_entry->modifiable & ZEND_INI_SYSTEM) {
+				string_printf(str, "%sSYSTEM", comma);
+			}
+		}
+ 
+		string_printf(str, "> ]\n", indent, ini_entry->name);
+		string_printf(str, "    %s  Current = '%s'\n", indent, ini_entry->value ? ini_entry->value : "");
+		if (ini_entry->modified) {
+			string_printf(str, "    %s  Default = '%s'\n", indent, ini_entry->orig_value ? ini_entry->orig_value : "");
+		}
+		string_printf(str, "    %s}\n", indent);
+	}
+	return ZEND_HASH_APPLY_KEEP;
+}
+
+static int _extension_class_string(zend_class_entry **pce, int num_args, va_list args, zend_hash_key *hash_key)
+{
+	string *str = va_arg(args, string *);
+	char *indent = va_arg(args, char *);
+	struct _zend_module_entry *module = va_arg(args, struct _zend_module_entry*);
+
+	if ((*pce)->module && !strcasecmp((*pce)->module->name, module->name)) {
+		TSRMLS_FETCH();
+		string_printf(str, "\n");
+		_class_string(str, *pce, NULL, indent TSRMLS_CC);
+	}
+	return ZEND_HASH_APPLY_KEEP;
+}
+
 /* {{{ _extension_string */
 static void _extension_string(string *str, zend_module_entry *module, char *indent TSRMLS_DC)
 {
@@ -652,7 +701,20 @@ static void _extension_string(string *str, zend_module_entry *module, char *inde
 	string_printf(str, " extension #%d %s version %s ] {\n",
 				  module->module_number, module->name,
 				  (module->version == NO_VERSION_YET) ? "<no_version>" : module->version);
-	if (module->functions) {
+
+	{
+		string str_ini;
+		string_init(&str_ini);
+		zend_hash_apply_with_arguments(EG(ini_directives), (apply_func_args_t) _extension_ini_string, 3, &str_ini, indent, module->module_number);
+		if (str_ini.len > 1) {
+			string_printf(str, "\n - INI {\n");
+			string_append(str, &str_ini);
+			string_printf(str, "%s  }\n", indent);
+		}
+		string_free(&str_ini);
+	}
+
+	if (module->functions && module->functions->fname) {
 		zend_function *fptr;
 		zend_function_entry *func = module->functions;
 
@@ -669,6 +731,23 @@ static void _extension_string(string *str, zend_module_entry *module, char *inde
 			func++;
 		}
 		string_printf(str, "%s  }\n", indent);
+	}
+	
+	{
+		string str_classes;
+		string sub_indent;
+		
+		string_init(&sub_indent);
+		string_printf(&sub_indent, "%s    ", indent);
+		string_init(&str_classes);
+		zend_hash_apply_with_arguments(EG(class_table), (apply_func_args_t) _extension_class_string, 3, &str_classes, sub_indent.string, module TSRMLS_CC);
+		if (str_classes.len > 1) {
+			string_printf(str, "\n - Classes {\n");
+			string_append(str, &str_classes);
+			string_printf(str, "%s  }\n", indent);
+		}
+		string_free(&str_classes);
+		string_free(&sub_indent);
 	}
 
 	string_printf(str, "%s}\n", indent);
@@ -3036,7 +3115,7 @@ static int _addinientry(zend_ini_entry *ini_entry, int num_args, va_list args, z
 			add_assoc_null(retval, ini_entry->name);
 		}
 	}
-	return 0;
+	return ZEND_HASH_APPLY_KEEP;
 }
 /* }}} */
 
