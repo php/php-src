@@ -38,7 +38,7 @@
   */
 #include "php.h"
 
-#if PHP_EXIF
+#if HAVE_EXIF
 
 #include "php_exif.h"
 #include <math.h>

@@ -21,11 +21,6 @@
 #ifndef _PHP_SWF_H
 #define _PHP_SWF_H
 
-#ifdef COMPILE_DL_SWF
-#undef HAVE_SWF
-#define HAVE_SWF 1
-#endif
-
 #if HAVE_SWF
 
 extern zend_module_entry swf_module_entry;

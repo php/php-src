@@ -33,11 +33,6 @@
 #ifndef _PHP_SYBASE_H
 #define _PHP_SYBASE_H
 
-#if COMPILE_DL
-#undef HAVE_SYBASE
-#define HAVE_SYBASE 1
-#endif
-
 #if HAVE_SYBASE
 
 extern zend_module_entry sybase_module_entry;

@@ -33,11 +33,6 @@
 #ifndef _PHP_MSQL_H
 #define _PHP_MSQL_H
 
-#if COMPILE_DL
-#undef HAVE_MSQL
-#define HAVE_MSQL 1
-#endif
-
 #if HAVE_MSQL
 
 extern zend_module_entry msql_module_entry;

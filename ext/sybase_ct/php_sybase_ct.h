@@ -33,11 +33,6 @@
 #ifndef _PHP_SYBASE_CT_H
 #define _PHP_SYBASE_CT_H
 
-#if COMPILE_DL
-#undef HAVE_SYBASE_CT
-#define HAVE_SYBASE_CT 1
-#endif
-
 #if HAVE_SYBASE_CT
 
 #define CTLIB_VERSION CS_VERSION_100

@@ -33,11 +33,6 @@
 #ifndef _PHP_SYSVSEM_H
 #define _PHP_SYSVSEM_H
 
-#if COMPILE_DL
-#undef HAVE_SYSVSEM
-#define HAVE_SYSVSEM 1
-#endif
-
 #if HAVE_SYSVSEM
 
 extern zend_module_entry sysvsem_module_entry;

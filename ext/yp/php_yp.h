@@ -31,11 +31,6 @@
 #ifndef _PHP_YP_H
 #define _PHP_YP_H
 
-#if COMPILE_DL
-#undef HAVE_YP
-#define HAVE_YP 1
-#endif
-
 #if HAVE_YP
 
 extern zend_module_entry yp_module_entry;

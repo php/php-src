@@ -22,10 +22,6 @@
 #ifndef _PHP_SNMP_H
 #define _PHP_SNMP_H
 
-#if COMPILE_DL
-#undef HAVE_SNMP
-#define HAVE_SNMP 1
-#endif
 #if HAVE_SNMP
 #ifndef DLEXPORT
 #define DLEXPORT

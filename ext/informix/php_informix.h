@@ -34,12 +34,6 @@
 #ifndef _PHP_IFX_H
 #define _PHP_IFX_H
 
-
-#if COMPILE_DL
-#undef HAVE_IFX
-#define HAVE_IFX 1
-#endif
-
 #ifdef PHP_WIN32
 #define PHP_IFX_API __declspec(dllexport)
 #else

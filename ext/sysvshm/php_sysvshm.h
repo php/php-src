@@ -33,12 +33,6 @@
 #ifndef _PHP_SYSVSHM_H
 #define _PHP_SYSVSHM_H
 
-#if COMPILE_DL
-#undef HAVE_SYSVSHM
-#define HAVE_SYSVSHM 1
-#endif
-
-
 #if HAVE_SYSVSHM
 
 extern zend_module_entry sysvshm_module_entry;

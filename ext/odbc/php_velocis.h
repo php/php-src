@@ -33,11 +33,6 @@
 #ifndef _PHP_VELOCIS_H
 #define _PHP_VELOCIS_H
 
-#if COMPILE_DL
-#undef HAVE_VELOCIS
-#define HAVE_VELOCIS 1
-#endif
-
 #if defined(HAVE_VELOCIS) && !HAVE_UODBC
 #define UNIX
 #include <sql.h>

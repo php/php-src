@@ -40,11 +40,6 @@
 #define ENABLE_GD_TTF
 #endif
 
-#if COMPILE_DL
-#undef HAVE_LIBGD
-#define HAVE_LIBGD 1
-#endif
-
 #if HAVE_LIBGD
 
 #include <gd.h>

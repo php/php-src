@@ -28,11 +28,6 @@
 #ifndef _HW_H
 #define _HW_H
 
-#if COMPILE_DL
-#undef HYPERWAVE
-#define HYPERWAVE 1
-#endif
-
 #ifdef PHP_WIN32
 #define PHP_HW_API __declspec(dllexport)
 #else

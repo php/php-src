@@ -22,11 +22,6 @@
 #ifndef _PHP_RECODE_H
 #define _PHP_RECODE_H
 
-#ifdef COMPILE_DL_RECODE
-#undef HAVE_LIBRECODE
-#define HAVE_LIBRECODE 1
-#endif
-
 #ifdef PHP_WIN32
 #define PHP_MYSQL_API __declspec(dllexport)
 #else

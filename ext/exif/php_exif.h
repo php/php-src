@@ -15,12 +15,8 @@
    | Authors: Rasmus Lerdorf <rasmus@php.net>                             |
    +----------------------------------------------------------------------+
  */
-#ifdef COMPILE_DL || COMPILE_DL_EXIF
-# undef PHP_EXIF
-# define PHP_EXIF 1
-#endif
 
-#if PHP_EXIF
+#if HAVE_EXIF
 extern zend_module_entry exif_module_entry;
 #define phpext_exif_ptr &exif_module_entry
 

@@ -33,11 +33,7 @@
 #ifndef _PHP_POSIX_H
 #define _PHP_POSIX_H
 
-#if COMPILE_DL
-#define HAVE_POSIX 1
-#endif
 
-#if HAVE_POSIX
 #ifndef DLEXPORT
 #define DLEXPORT
 #endif

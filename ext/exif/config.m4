@@ -6,6 +6,6 @@ dnl Make sure that the comment is aligned:
 [  --enable-exif           Enable exif support])
 
 if test "$PHP_EXIF" != "no"; then
-  AC_DEFINE(PHP_EXIF, 1, [Whether you want exif support])
+  AC_DEFINE(HAVE_EXIF, 1, [Whether you want exif support])
   PHP_EXTENSION(exif, $ext_shared)
 fi
