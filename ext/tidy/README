@@ -1,23 +1,12 @@
 
 README FOR ext/tidy by John Coggeshall <john@php.net>
 
-Tidy Version: 0.7b
-
 Tidy is an extension based on Libtidy (http://tidy.sf.net/) and allows a PHP developer
 to clean, repair, and traverse HTML, XHTML, and XML documents -- including ones with
 embedded scripting languages such as PHP or ASP within them using OO constructs.
 
----------------------------------------------------------------------------------------
-!! Important Note !!
----------------------------------------------------------------------------------------
-At this time libtidy has a small memory leak inside the ParseConfigFileEnc() function
-used to load configuration from a file. If you intend to use this functionality apply
-the "libtidy.txt" patch (cd tidy/src/; patch -p0 < libtidy.txt) to libtidy sources and
-then recompile libtidy.
----------------------------------------------------------------------------------------
 
-The Tidy extension has two separate APIs, one for general parsing, cleaning, and
-repairing and another for document traversal. The general API is provided below:
+The general API is provided below:
 
   tidy_create()                     Reinitialize the tidy engine
   tidy_parse_file($file)	    Parse the document stored in $file
@@ -60,63 +49,4 @@ repairing and another for document traversal. The general API is provided below:
   tidy_save_config($file)           Saves the current config to $file
   
   
-Beyond these general-purpose API functions, Tidy also supports the following
-functions which are used to retrieve an object for document traversal:
-  
-  tidy_get_root()              Returns an object starting at the root of the
-                                    document
-  tidy_get_head()              Returns an object starting at the <HEAD> tag
-  tidy_get_html()              Returns an object starting at the <HTML> tag
-  tidy_get_body()              Returns an object starting at the <BODY> tag
-  
-All Navigation of the specified document is done via the PHP5 object constructs.
-There are two types of objects which Tidy can create. The first is TidyNode, which
-represents HTML Tags, Text, and more (see the TidyNode_Type Constants). The second
-is TidyAttr, which represents an attribute within an HTML tag (TidyNode). The
-functionality of these objects is represented by the following schema:
-
-class TidyNode {
-
-    public $name;               // name of node (i.e. HEAD)
-    public $value;              // value of node (everything between tags)
-    public $type;               // type of node (text, php, asp, etc.)
-    public $id;                 // id of node (i.e. TIDY_TAG_HEAD)
-    
-    public function attributes();            // an array of attributes (see TidyAttr)
-    public function children();           // an array of child nodes
-    
-    function has_siblings();    // any sibling nodes?
-    function has_children();    // any child nodes?
-       
-    function is_comment();      // is node a comment?
-    function is_xhtml();        // is document XHTML?
-    function is_xml();          // is document generic XML (not HTML/XHTML)
-    function is_text();         // is node text?
-    function is_html();         // is node an HTML tag?
-    
-    function is_jste();         // is jste block?
-    function is_asp();          // is Microsoft ASP block?
-    function is_php();          // is PHP block?
-    
-    function next();            // returns next node
-    function prev();            // returns prev node
-        
-    /* Searches for a particular attribute in the current node based
-       on node ID. If found returns a TidyAttr object for it */
-    function get_attr($attr_id);
-
-    /*
-}
-
-class TidyAttr {
-
-    public $name;           // attribute name i.e. HREF
-    public $value;          // attribute value
-    public $id;             // attribute id i.e. TIDY_ATTR_HREF
-
-}
-
-Examples of using these objects to navigate the tree can be found in the examples/
-directory (I suggest looking at urlgrab.php and dumpit.php)
-
 E-mail thoughts, suggestions, patches, etc. to <john@php.net>
