@@ -1,3 +1,58 @@
+2000-05-06  Sascha Schumann  <sascha@schumann.cx>
+
+    * configure.in:
+    This change addresses an issue on systems which cannot link against libnsl
+    and libsocket, resulting in segfaults. If yp_get_default_domain is
+    available after checking for libsocket, we assume we do not need libnsl
+    anymore.
+
+    * ext/standard/basic_functions.c:
+    On some systems, <syslog.h> defines syslog to another symbol, so that
+    syslog.lo does not contain the expected symbols. Including <symbol.h>
+    in basic_functions.c fixes the resulting linking problem.
+
+2000-05-06  Shane Caraveo  <shane@php.net>
+
+    * php4ts.dsw: add nsapi to workspace
+
+    * NEWS: news
+
+    * sapi/nsapi/nsapi-readme.txt
+      sapi/nsapi/nsapi.c
+      sapi/nsapi/nsapiphp4.dsp: nsapi now compiles under win32, untested
+
+    * php4ts.dsw: add apache module to workspace
+
+    * NEWS: some news
+
+2000-05-06  Andrei Zmievski  <andrei@ispi.net>
+
+    * NEWS: Some breaking news for RC2.
+
+    * php.ini-dist: It helps to change the comment too.
+
+2000-05-06  Shane Caraveo  <shane@php.net>
+
+    * sapi/apache/apachephp4.dsp: oh boy! apache-win32 works!
+
+2000-05-06  Andrei Zmievski  <andrei@ispi.net>
+
+    * php.ini-dist: Enable assert by default,
+
+    * ext/pcre/php_pcre.c
+      ext/standard/assert.c: Fixes for possible failure of zend_eval_string().
+
+2000-05-06  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/dbase/dbf_head.c:
+    Fix dbase breakage related to the virtual path changes.
+
+    * NEWS
+      configure.in
+      php_version.h: Planning for 4.0RC2 on Monday
+
+    * pear/Makefile.in: Fix regex
+
 2000-05-05  Andrei Zmievski  <andrei@ispi.net>
 
     * tests/testarray: Testing.
