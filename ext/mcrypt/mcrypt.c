@@ -1211,7 +1211,7 @@ static void php_mcrypt_do_crypt (char* cipher, zval **key, zval **data, char *mo
 	int block_size, max_key_length, use_key_length, i, count, iv_size;
 	unsigned long int data_size;
 	int *key_length_sizes;
-	char *key_s, *iv_s;
+	char *key_s = NULL, *iv_s;
 	char *data_s;
 	MCRYPT td;
     MCLS_FETCH();
@@ -1309,6 +1309,8 @@ static void php_mcrypt_do_crypt (char* cipher, zval **key, zval **data, char *mo
 	mcrypt_generic_end (td);
 	if (iv_s != NULL)
 		efree (iv_s);
+	if (key_s != NULL)
+		efree (key_s);
 	efree (data_s);
 	mcrypt_module_close (td);
 }
