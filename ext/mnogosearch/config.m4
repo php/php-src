@@ -21,7 +21,7 @@ PHP_ARG_WITH(mnogosearch,for mnoGoSearch support,
     
     if test -x "$MNOGOSEARCH_BINDIR/udm-config"; then
     	MNOGOSEARCH_VERSION=`$MNOGOSEARCH_BINDIR/udm-config --version`
-    	MNOGOSEARCH_VERSION_ID=`$MNOGOSEARCH_BINDIR/udm-config -version-id`
+    	MNOGOSEARCH_VERSION_ID=`$MNOGOSEARCH_BINDIR/udm-config --version-id`
 
 	if test $? -ne 0; then
 		AC_MSG_RESULT(<= 3.1.9)    
