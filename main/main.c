@@ -202,6 +202,44 @@ static void php_disable_functions(TSRMLS_D)
 }
 /* }}} */
 
+/* {{{ php_disable_classes
+ */
+static void php_disable_classes(TSRMLS_D)
+{
+	char *s = NULL;
+	char *e = INI_STR("disable_classes");
+	char p;
+
+	if (!*e) {
+		return;
+	}
+
+	while (*e) {
+		switch (*e) {
+			case ' ':
+			case ',':
+				if (s) {
+					p = *e;
+					*e = '\0';
+					zend_disable_class(s, e-s TSRMLS_CC);
+					*e = p;
+					s = NULL;
+				}
+				break;
+			default:
+				if (!s) {
+					s = e;
+				}
+				break;
+		}
+		e++;
+	}
+	if (s) {
+		zend_disable_class(s, e-s TSRMLS_CC);
+	}
+}
+/* }}} */
+
 /* {{{ PHP_INI_MH
  */
 static PHP_INI_MH(OnUpdateTimeout)
@@ -324,6 +362,7 @@ PHP_INI_BEGIN()
 	PHP_INI_ENTRY("sendmail_from",				NULL,		PHP_INI_ALL,		NULL)
 	PHP_INI_ENTRY("sendmail_path",	DEFAULT_SENDMAIL_PATH,	PHP_INI_SYSTEM,		NULL)
 	PHP_INI_ENTRY("disable_functions",			"",			PHP_INI_SYSTEM,		NULL)
+	PHP_INI_ENTRY("disable_classes",			"",			PHP_INI_SYSTEM,		NULL)
 
 	STD_PHP_INI_BOOLEAN("allow_url_fopen",		"1",		PHP_INI_ALL,		OnUpdateBool,			allow_url_fopen,			php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("always_populate_raw_post_data",		"0",		PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnUpdateBool,			always_populate_raw_post_data,			php_core_globals,	core_globals)
@@ -1178,8 +1217,9 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	 */
 	php_ini_delayed_modules_startup(TSRMLS_C);
 
-	/* disable certain functions as requested by php.ini */
+	/* disable certain classes and functions as requested by php.ini */
 	php_disable_functions(TSRMLS_C);
+	php_disable_classes(TSRMLS_C);
 
 	/* start Zend extensions */
 	zend_startup_extensions();
