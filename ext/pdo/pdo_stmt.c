@@ -821,13 +821,11 @@ void pdo_dbstmt_free_storage(zend_object *object TSRMLS_DC)
 	}
 	
 	zend_objects_store_del_ref(&stmt->database_object_handle TSRMLS_CC);
-#if 0
-	/* declared in the header, but not implemented... */
-	zend_objects_store_delete_obj(&stmt->lazy_object_ref TSRMLS_CC);
-#else
-	zend_objects_store_del_ref(&stmt->lazy_object_ref TSRMLS_CC);
-#endif
-		
+/* XXX: Does not appear to be needed and causes problems according to valgrind
+	if (&stmt->lazy_object_ref) {
+		zend_objects_store_del_ref(&stmt->lazy_object_ref TSRMLS_CC);
+	}
+*/
 	efree(stmt);
 }
 
