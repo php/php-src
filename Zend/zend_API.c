@@ -1565,29 +1565,6 @@ ZEND_API char *zend_get_module_version(char *module_name)
     return module->version;
 }
 
-ZEND_API void zend_make_full_classname(zend_class_entry *ce, char **name, zend_uint *name_len)
-{
-	int len = ce->name_length;
-	char *full_name;
-
-	if(ce->ns && ce->ns->name) {
-		len += ce->ns->name_length + 2;
-	}
-
-	*name = full_name = emalloc(len+1);
-	*name_len = len;
-	
-	if(ce->ns && ce->ns->name) {
-		memcpy(full_name, ce->ns->name, ce->ns->name_length);
-		full_name += ce->ns->name_length;
-		*(full_name++) = ':';
-		*(full_name++) = ':';
-	}
-
-	memcpy(full_name, ce->name, ce->name_length);
-	full_name[ce->name_length] = '\0';
-}
-
 /*
  * Local variables:
  * tab-width: 4

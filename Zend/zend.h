@@ -308,7 +308,6 @@ struct _zend_class_entry {
 	HashTable *static_members;
 	HashTable constants_table;
 	zend_function_entry *builtin_functions;
-	struct _zend_class_entry *ns;
 
 	union _zend_function *constructor;
 	union _zend_function *destructor;

@@ -535,12 +535,7 @@ ZEND_FUNCTION(get_class)
 			RETURN_FALSE;
 		}
 
-		if(ce->ns) {
-			zend_make_full_classname(ce, &name, &name_len);
-			RETURN_STRINGL(name, name_len, 0);
-		} else {
-			RETURN_STRINGL(ce->name, ce->name_length, 1);
-		}
+		RETURN_STRINGL(ce->name, ce->name_length, 1);
 	} 
 
 	RETURN_STRINGL(name, name_len, 0);
@@ -567,8 +562,7 @@ ZEND_FUNCTION(get_parent_class)
 			&& Z_OBJ_HT_PP(arg)->get_class_name(*arg, &name, &name_length, 1 TSRMLS_CC) == SUCCESS) {
 			RETURN_STRINGL(name, name_length, 0);
 		} else if (Z_OBJ_HT_PP(arg)->get_class_entry && (ce = zend_get_class_entry(*arg TSRMLS_CC))) {
-			zend_make_full_classname(ce, &name, &name_length);
-			RETURN_STRINGL(name, name_length, 0);
+			RETURN_STRINGL(ce->name, ce->name_length, 1);
 		} else {
 			RETURN_FALSE;
 		}
@@ -583,8 +577,7 @@ ZEND_FUNCTION(get_parent_class)
 	}
 
 	if (ce && ce->parent) {
-		zend_make_full_classname(ce->parent, &name, &name_length);
-		RETURN_STRINGL(name, name_length, 0);
+		RETURN_STRINGL(ce->parent->name, ce->parent->name_length, 1);
 	} else {
 		RETURN_FALSE;
 	}
