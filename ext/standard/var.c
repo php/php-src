@@ -161,7 +161,7 @@ inline int php_add_var_hash(HashTable *var_hash, zval *var, void *var_old) {
 	snprintf(id,sizeof(id)-1, "%p", var);
 	id[sizeof(id)-1]='\0';
 
-	if(var_old && zend_hash_find(var_hash, id, sizeof(id), var_old) == SUCCESS) {
+	if(var_old && zend_hash_find(var_hash, id, strlen(id), var_old) == SUCCESS) {
 		if(!var->is_ref) {
 			/* we still need to bump up the counter, since non-refs will
 			   be counted separately by unserializer */
@@ -172,7 +172,7 @@ inline int php_add_var_hash(HashTable *var_hash, zval *var, void *var_old) {
 	}
 	
 	var_no = zend_hash_num_elements(var_hash)+1; /* +1 because otherwise hash will think we are trying to store NULL pointer */
-	zend_hash_add(var_hash, id, sizeof(id), &var_no, sizeof(var_no), NULL);
+	zend_hash_add(var_hash, id, strlen(id), &var_no, sizeof(var_no), NULL);
 	return SUCCESS;
 }
 
