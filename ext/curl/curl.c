@@ -250,6 +250,7 @@ PHP_MINIT_FUNCTION(curl)
 #define PHP_CURL_RETURN 4
 #define PHP_CURL_ASCII  5
 #define PHP_CURL_BINARY 6
+#define PHP_CURL_IGNORE 7
 
 /* {{{ curl_write
  */
@@ -416,6 +417,10 @@ static size_t curl_write_header(char *data, size_t size, size_t nmemb, void *ctx
 		zval_ptr_dtor(&retval);
 		break;
 	}
+	case PHP_CURL_IGNORE:
+		length = size * nmemb;
+
+		break;
 	}
 	
 	return length;
@@ -546,6 +551,7 @@ PHP_FUNCTION(curl_init)
 	ch->handlers->write->method = PHP_CURL_STDOUT;
 	ch->handlers->write->type   = PHP_CURL_ASCII;
 	ch->handlers->read->method  = PHP_CURL_DIRECT;
+	ch->handlers->write_header->method = PHP_CURL_IGNORE;
 
 	curl_easy_setopt(ch->cp, CURLOPT_NOPROGRESS,        1);
 	curl_easy_setopt(ch->cp, CURLOPT_VERBOSE,           0);
