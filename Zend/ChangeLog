@@ -1,3 +1,30 @@
+2003-07-22  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_hash.h:
+      Fix for the moment
+
+2003-07-22  Zeev Suraski  <zeev@zend.com>
+
+    * zend_execute.c
+      zend_hash.c
+      zend_hash.h
+      zend_operators.c
+      zend_operators.h:
+      Improve infrastructure of numeric handling of elements in symbol tables.
+      
+      When you want to work with a symbol table, and you don't know whether you
+      have a numeric ("string that looks like a number") or a string element in
+      your hands, use zend_symtable_*() functions, in place of zend_hash_*()
+      functions.
+
+    * zend_execute.c
+      zend_object_handlers.c
+      zend_object_handlers.h
+      zend_objects_API.c:
+      Fix isset()/empty() for non-trivial object elements
+      (API change - read_property now accepts an extra element)
+      Fixes bug #24436
+
 2003-07-21  Zeev Suraski  <zeev@zend.com>
 
     * zend_object_handlers.c:
