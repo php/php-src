@@ -51,7 +51,6 @@ HOW TO INSTALL
         
 TODO
 
-    POST requests
     php_*flag config directives
     PHP functions like apache_sub_req (see php_functions.c)
     Protocol handlers
