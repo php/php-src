@@ -287,7 +287,7 @@ void php_log_err(char *log_message)
 			time(&error_time);
 			strftime(error_time_str, 128, "%d-%b-%Y %H:%M:%S", php_localtime_r(&error_time, &tmbuf)); 
 			fprintf(log_file, "[%s] ", error_time_str);
-			fprintf(log_file, log_message);
+			fprintf(log_file, "%s", log_message);
 			fprintf(log_file, "\n");
 			fclose(log_file);
 			return;

@@ -47,7 +47,7 @@ static void incomplete_class_message(zend_property_reference *ref)
 	
 	efree(class_name);
 
-	php_error(E_ERROR, buf);
+	php_error(E_ERROR, "%s", buf);
 }
 
 static void incomplete_class_call_func(INTERNAL_FUNCTION_PARAMETERS, zend_property_reference *property_reference)

@@ -51,7 +51,7 @@ static int _display_module_info(zend_module_entry *module, void *arg)
 	} else if (!show_info_func && !module->info_func) {
 		php_printf("<TR VALIGN=\"baseline\" BGCOLOR=\"" PHP_CONTENTS_COLOR "\">");
 		php_printf("<TD>");
-		php_printf(module->name);
+		php_printf("%s", module->name);
 		php_printf("</TD></TR>\n");
 	}
 	return 0;
