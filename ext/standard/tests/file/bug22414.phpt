@@ -2,8 +2,9 @@
 Bug #22414: passthru() does not read data correctly
 --SKIPIF--
 <?php
-	if (empty(@shell_exec("which cat")) {
-		dir('skip cat binary needed for this test is not avaliable');
+	$cat_path = @shell_exec("which cat");
+	if (empty($cat_path)) {
+		die('skip cat binary needed for this test is not avaliable');
 	}
 ?>
 --POST--
