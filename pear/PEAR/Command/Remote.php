@@ -170,6 +170,9 @@ version of DB is 1.2, the downloaded file will be DB-1.2.tgz.',
         if (PEAR::isError($available)) {
             return $this->raiseError($available);
         }
+        if (!is_array($available)) {
+            return $this->raiseError('The package list could not be fetched from the remote server. Please try again. (Debug info: "'.$available.'")');
+        }
         $data = array(
             'caption' => 'All packages:',
             'border' => true,
