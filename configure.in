@@ -725,6 +725,8 @@ dnl test -n "$GCC" && CFLAGS="$CFLAGS -fpic"
 dnl add -fPIC option on Solaris if we are building dynamic extensions
 dnl PHP_SOLARIS_PIC_WEIRDNESS
 
+EXTRA_LIBS="$EXTRA_LIBS $LIBS"
+LIBS=""
 LDFLAGS=""
 if test "$PHP_THREAD_SAFETY" = "yes"; then
   TSRM_BASIC_CHECKS
@@ -738,8 +740,6 @@ phplibdir="`pwd`/modules"
 phptempdir="`pwd`/libs"
 AC_SUBST(phplibdir)
 AC_SUBST(phptempdir)
-EXTRA_LIBS="$EXTRA_LIBS $LIBS"
-LIBS=""
 
 AC_BUILD_RPATH
 
