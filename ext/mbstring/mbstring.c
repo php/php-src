@@ -194,6 +194,7 @@ function_entry mbstring_functions[] = {
 	PHP_FE(mb_strimwidth,				NULL)
 	PHP_FE(mb_convert_encoding,		NULL)
 	PHP_FE(mb_detect_encoding,		NULL)
+	PHP_FE(mb_guess_encoding,		NULL)
 	PHP_FE(mb_convert_kana,			NULL)
 	PHP_FE(mb_encode_mimeheader,		NULL)
 	PHP_FE(mb_decode_mimeheader,		NULL)
@@ -2594,6 +2595,83 @@ PHP_FUNCTION(mb_detect_encoding)
 	string.val = Z_STRVAL_PP(arg_str);
 	string.len = Z_STRLEN_PP(arg_str);
 	ret = mbfl_identify_encoding_name(&string, elist, size TSRMLS_CC);
+	if (list != NULL) {
+		efree((void *)list);
+	}
+	if (ret != NULL) {
+		RETVAL_STRING((char *)ret, 1);
+	} else {
+		RETVAL_FALSE;
+	}
+}
+/* }}} */
+
+
+
+/* {{{ proto string mb_guess_encoding(string str [, mixed encoding_list])
+   Encodings of the given string is returned (as a string) */
+PHP_FUNCTION(mb_guess_encoding)
+{
+	pval **arg_str, **arg_list;
+	mbfl_string string;
+	const char *ret;
+	enum mbfl_no_encoding *elist;
+	int size, *list;
+
+	if (ZEND_NUM_ARGS() == 1) {
+		if (zend_get_parameters_ex(1, &arg_str) == FAILURE) {
+			WRONG_PARAM_COUNT;
+		}
+	} else if (ZEND_NUM_ARGS() == 2) {
+		if (zend_get_parameters_ex(2, &arg_str, &arg_list) == FAILURE) {
+			WRONG_PARAM_COUNT;
+		}
+	} else {
+		WRONG_PARAM_COUNT;
+	}
+
+	/* make encoding list */
+	list = NULL;
+	size = 0;
+	if (ZEND_NUM_ARGS() >= 2) {
+		switch (Z_TYPE_PP(arg_list)) {
+		case IS_ARRAY:
+			if (!php_mbstring_parse_encoding_array(*arg_list, &list, &size, 0)) {
+				if (list) {
+					efree(list);
+					size = 0;
+				}
+			}
+			break;
+		default:
+			convert_to_string_ex(arg_list);
+			if (!php_mbstring_parse_encoding_list(Z_STRVAL_PP(arg_list), Z_STRLEN_PP(arg_list), &list, &size, 0)) {
+				if (list) {
+					efree(list);
+					size = 0;
+				}
+			}
+			break;
+		}
+		if (size <= 0) {
+			php_error(E_WARNING, "%s() illegal argument",
+					  get_active_function_name(TSRMLS_C));
+		}
+	}
+
+	if (size > 0 && list != NULL) {
+		elist = list;
+	} else {
+		elist = MBSTRG(current_detect_order_list);
+		size = MBSTRG(current_detect_order_list_size);
+	}
+
+	convert_to_string_ex(arg_str);
+	mbfl_string_init(&string);
+	string.no_language = MBSTRG(current_language);
+	string.val = Z_STRVAL_PP(arg_str);
+	string.len = Z_STRLEN_PP(arg_str);
+	ret = mbfl_guess_encoding_name(&string, elist, size TSRMLS_CC);
 	if (list != NULL) {
 		efree((void *)list);
 	}

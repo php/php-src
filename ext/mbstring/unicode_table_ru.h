@@ -67,3 +67,40 @@ static const int koi8r_ucs_table_min = 0x80;
 static const int koi8r_ucs_table_len = (sizeof (koi8r_ucs_table) / sizeof (unsigned short));
 static const int koi8r_ucs_table_max = 0x80 + (sizeof (koi8r_ucs_table) / sizeof (unsigned short));
 
+
+
+static const unsigned int cp1251_char_ratings_table[] = {
+	14985, 3207, 9044, 2847, 6015,18094, 2305, 3456,
+	15786, 2472, 6531, 7803, 6341,13494,21800, 6267,
+	10139,10398,13877, 5094,  536, 2201,  855, 2665, 
+	 1127,  981,   99, 4460, 3805,  426, 1516, 4341
+};
+static const int cp1251_char_ratings_table_min = 0xe0;
+static const int cp1251_char_ratings_table_len = (sizeof (cp1251_char_ratings_table) / sizeof (unsigned int));
+
+
+static const unsigned int cp866_char_ratings_table[] = {
+   	   99,    0, 1516,14985, 2305,  536,  855, 6015, 
+	 5094, 4460, 2201,15786, 2472, 6531, 7803, 6341,
+	13494,21800,    0,    0,    0,    0,    0,    0,    
+		0,    0,    0,    0,    0,    0,    0,    0,    
+		0,    0,    0,    0,    0,    0,    0,    0,    
+		0,    0,    0,    0,    0,    0,    0,    0,    
+		0,    0,    0,    0,    0,    0,    0,    0,    
+		0,    0,    0,    0,    0,    0,    0,    0,    
+		0,    0, 4341,10139,10398,13877,18094, 2847, 
+	 3207,  981, 3456,  426, 2665, 3805, 9044, 1127,    
+	    0, 6267
+};
+static const int cp866_char_ratings_table_min = 0x9e;
+static const int cp866_char_ratings_table_len = (sizeof (cp866_char_ratings_table) / sizeof (unsigned int));
+
+
+static const unsigned int koi8r_char_ratings_table[] = {
+ 	 1516,14985, 3207,  855, 6015,18094,  536, 2847, 
+     2201,15786, 2472, 6531, 7803, 6341,13494,21800,
+     6267, 4341,10139,10398,13877, 5094, 2305, 9044,
+     3805, 4460, 3456, 1127,  426,  981, 2665,   99
+};
+static const int koi8r_char_ratings_table_min = 0xc0;
+static const int koi8r_char_ratings_table_len = (sizeof (koi8r_char_ratings_table) / sizeof (unsigned int));
