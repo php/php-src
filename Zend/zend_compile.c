@@ -26,7 +26,7 @@
 #include "zend_fast_cache.h"
 
 
-ZEND_API zend_op_array *(*zend_compile_files)(int type CLS_DC, int file_count, ...);
+ZEND_API zend_op_array *(*zend_v_compile_files)(int type CLS_DC, int file_count, va_list files);
 
 
 #ifndef ZTS

@@ -324,7 +324,7 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions, i
 	zend_get_ini_entry_p = utility_functions->get_ini_entry;
 	zend_ticks_function = utility_functions->ticks_function;
 
-	zend_compile_files = compile_files;
+	zend_v_compile_files = v_compile_files;
 	zend_execute = execute;
 
 	zend_llist_init(&zend_extensions, sizeof(zend_extension), (void (*)(void *)) zend_extension_dtor, 1);
