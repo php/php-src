@@ -50,9 +50,9 @@ ZEND_API int zend_get_parameters(int ht, int param_count, ...)
 
 	va_start(ptr, param_count);
 
-	while (param_count>0) {
+	while (param_count-->0) {
 		param = va_arg(ptr, zval **);
-		param_ptr = *(p-param_count);
+		param_ptr = *(p-arg_count);
 		if (!PZVAL_IS_REF(param_ptr) && param_ptr->refcount>1) {
 			zval *new_tmp;
 
@@ -61,11 +61,11 @@ ZEND_API int zend_get_parameters(int ht, int param_count, ...)
 			zval_copy_ctor(new_tmp);
 			INIT_PZVAL(new_tmp);
 			param_ptr = new_tmp;
-			((zval *) *(p-param_count))->refcount--;
+			((zval *) *(p-arg_count))->refcount--;
 			*(p-param_count) = param_ptr;
 		}
 		*param = param_ptr;
-		param_count--;
+		arg_count--;
 	}
 	va_end(ptr);
 
@@ -88,8 +88,8 @@ ZEND_API int zend_get_parameters_array(int ht, int param_count, zval **argument_
 	}
 
 
-	while (param_count>0) {
-		param_ptr = *(p-param_count);
+	while (param_count-->0) {
+		param_ptr = *(p-arg_count);
 		if (!PZVAL_IS_REF(param_ptr) && param_ptr->refcount>1) {
 			zval *new_tmp;
 
@@ -98,11 +98,11 @@ ZEND_API int zend_get_parameters_array(int ht, int param_count, zval **argument_
 			zval_copy_ctor(new_tmp);
 			INIT_PZVAL(new_tmp);
 			param_ptr = new_tmp;
-			((zval *) *(p-param_count))->refcount--;
-			*(p-param_count) = param_ptr;
+			((zval *) *(p-arg_count))->refcount--;
+			*(p-arg_count) = param_ptr;
 		}
 		*(argument_array++) = param_ptr;
-		param_count--;
+		arg_count--;
 	}
 
 	return SUCCESS;
@@ -129,9 +129,9 @@ ZEND_API int zend_get_parameters_ex(int param_count, ...)
 	}
 
 	va_start(ptr, param_count);
-	while (param_count>0) {
+	while (param_count-->0) {
 		param = va_arg(ptr, zval ***);
-		*param = (zval **) p-(param_count--);
+		*param = (zval **) p-(arg_count--);
 	}
 	va_end(ptr);
 
@@ -152,8 +152,8 @@ ZEND_API int zend_get_parameters_array_ex(int param_count, zval ***argument_arra
 		return FAILURE;
 	}
 
-	while (param_count>0) {
-		*(argument_array++) = (zval **) p-(param_count--);
+	while (param_count-->0) {
+		*(argument_array++) = (zval **) p-(arg_count--);
 	}
 
 	return SUCCESS;
