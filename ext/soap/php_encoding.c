@@ -242,6 +242,7 @@ zval *to_zval_user(encodeType type, xmlNodePtr node)
 		if(call_user_function(EG(function_table), NULL, type.map->map_functions.to_zval, ret, 1, &param  TSRMLS_CC) == FAILURE)
 			php_error(E_ERROR, "Error calling to_zval");
 		zval_ptr_dtor(&param);
+		efree(param);
 	}
 	return ret;
 }
@@ -286,7 +287,7 @@ zval *to_zval_stringl(encodeType type, xmlNodePtr data)
 xmlNodePtr to_xml_string(encodeType type, zval *data, int style)
 {
 	xmlNodePtr ret;
-	char *str;
+	char *str, *pstr;
 	int new_len;
 
 	ret = xmlNewNode(NULL, "BOGUS");
@@ -294,7 +295,13 @@ xmlNodePtr to_xml_string(encodeType type, zval *data, int style)
 
 	convert_to_string(data);
 	str = php_escape_html_entities(Z_STRVAL_P(data), Z_STRLEN_P(data), &new_len, 0, 0, NULL);
-	xmlNodeSetContentLen(ret, str, new_len);
+
+	pstr = malloc(new_len + 1);
+	memcpy(pstr, str, new_len);
+	pstr[new_len] = '\0';
+	efree(str);
+	
+	xmlNodeSetContentLen(ret, pstr, new_len);
 
 	if(style == SOAP_ENCODED)
 		set_ns_and_type(ret, type);

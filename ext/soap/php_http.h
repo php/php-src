@@ -8,7 +8,7 @@ char *get_http_header_value(char *headers, char *type);
 int get_http_body(SOAP_STREAM socketd, char *headers,  char **response, int *out_size TSRMLS_DC);
 int get_http_headers(SOAP_STREAM socketd,char **response, int *out_size TSRMLS_DC);
 
-#ifndef PHP_STREAMS
+#ifndef PHP_HAVE_STREAMS
 #ifndef ZEND_WIN32
 # ifndef closesocket
 #  define closesocket close

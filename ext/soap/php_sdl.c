@@ -232,6 +232,9 @@ xmlNodePtr sdl_to_xml_array(sdlTypePtr type, zval *data, int style)
 					smart_str_appendc(&array_type_and_size, ':');
 					smart_str_appends(&array_type_and_size, value);
 					smart_str_0(&array_type_and_size);
+
+					smart_str_free(prefix);
+					efree(prefix);
 				}
 			}
 			else
@@ -317,6 +320,10 @@ sdlBindingPtr get_binding_from_type(sdlPtr sdl, int type)
 {
 	sdlBindingPtr *binding;
 
+	if (sdl == NULL) {
+		return NULL;
+	}
+	
 	for(zend_hash_internal_pointer_reset(sdl->bindings);
 		zend_hash_get_current_data(sdl->bindings, (void **) &binding) == SUCCESS;
 		zend_hash_move_forward(sdl->bindings))
@@ -539,13 +546,13 @@ sdlPtr load_wsdl(char *struri, sdlPtr parent)
 	xmlCleanupParser();
 
 	if(!wsdl)
-		php_error(E_ERROR, "SOAP-ERROR: Parsing WSDL: Could't load");
+		php_error(E_ERROR, "SOAP-ERROR: Parsing WSDL: Couldn't load from %s", struri);
 
 	tmpsdl->doc = wsdl;
 	root = wsdl->children;
 	definitions = get_node(root, "definitions");
 	if(!definitions)
-		php_error(E_ERROR, "SOAP-ERROR: Parsing WSDL: Could't find definitions");
+		php_error(E_ERROR, "SOAP-ERROR: Parsing WSDL: Couldn't find definitions in %s", struri);
 
 	targetNamespace = get_attribute(definitions->properties, "targetNamespace");
 	if(targetNamespace)
@@ -619,10 +626,11 @@ sdlPtr load_wsdl(char *struri, sdlPtr parent)
 
 			parse_namespace(bindingAttr->children->content, &ctype, &ns);
 			binding = get_node_with_attribute(definitions->children, "binding", "name", ctype);
-			if(ns) efree(ns); if(ctype) efree(ctype);
 
 			if(!binding)
-				php_error(E_ERROR, "SOAP-ERROR: Parsing WSDL: No binding");
+				php_error(E_ERROR, "SOAP-ERROR: Parsing WSDL: No binding element with name \"%s\"", ctype);
+			
+			if(ns) efree(ns); if(ctype) efree(ctype);
 
 			if(tmpbinding->bindingType == BINDING_SOAP)
 			{

@@ -16,22 +16,14 @@
 # include "ext/domxml/php_domxml.h"
 #endif
 
-/*
- PHP_STREAMS were introduced php-4.2.0.. i think
- Make this part of configure
-*/
-#ifdef STREAMS_DC
-# define PHP_STREAMS
-#endif
-
 #ifdef PHP_WIN32
-# ifdef PHP_STREAMS
+# ifdef PHP_HAVE_STREAMS
 #  define SOAP_STREAM php_stream *
 # else
 #  define SOAP_STREAM SOCKET
 # endif
 #else
-# ifdef PHP_STREAMS
+# ifdef PHP_HAVE_STREAMS
 #  define SOAP_STREAM php_stream *
 # else
 #  define SOCKET unsigned int
@@ -320,7 +312,7 @@ int my_call_user_function(HashTable *function_table, zval **object_pp, zval *fun
 
 #define ENDFOREACH(n) \
 		} \
-	} while(n = n->next);
+	} while ((n = n->next));
 
 #define ZERO_PARAM() \
 	if(ZEND_NUM_ARGS() != 0) \
