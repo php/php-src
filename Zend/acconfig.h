@@ -1,5 +1,3 @@
-#undef HAVE_CLASS_ISTDIOSTREAM
-
 #define ZEND_API
 
 @TOP@
@@ -32,9 +30,6 @@
 
 /* Define if you want to enable memory limit support */
 #define MEMORY_LIMIT 0
-
-/* Define if you have broken sprintf function like SunOS 4 */
-#define ZEND_BROKEN_SPRINTF 0
 
 /* Define to compile Zend thread safe */
 #undef ZTS
