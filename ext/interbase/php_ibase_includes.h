@@ -64,7 +64,6 @@ ZEND_BEGIN_MODULE_GLOBALS(ibase)
 	long allow_persistent;
 	char *default_db, *default_user, *default_password, *default_charset;
 	char *timestampformat, *dateformat, *timeformat;
-	char *cfg_timestampformat, *cfg_dateformat, *cfg_timeformat;
 	char errmsg[MAX_ERRMSG];
 	long sql_code;
 ZEND_END_MODULE_GLOBALS(ibase)
@@ -115,10 +114,6 @@ enum php_interbase_option {
 	PHP_IBASE_FETCH_BLOBS		= 1,
 	PHP_IBASE_FETCH_ARRAYS      = 2,
 	PHP_IBASE_UNIXTIME 			= 4,
-	/* timefmt flags */
-	PHP_IBASE_TIMESTAMP 		= 1,
-	PHP_IBASE_DATE 				= 2,
-	PHP_IBASE_TIME 				= 4,
 	/* transaction access mode */
 	PHP_IBASE_WRITE 			= 1,
 	PHP_IBASE_READ 				= 2,
