@@ -605,19 +605,20 @@ AC_ARG_ENABLE(low-memory,
 ])
 AC_MSG_RESULT($PHP_LOW_MEMORY)
 
-AC_MSG_CHECKING(whether to install PEAR)
-AC_ARG_WITH(pear,
-[  --without-pear          Do not install PEAR],[
-  if test "$withval" = "yes"; then
-    PEAR_DIR=pear
-    AC_MSG_RESULT(yes)
-  else
-    AC_MSG_RESULT(no)
-  fi
+AC_ARG_ENABLE(pear,
+[  --disable-pear          Do not install PEAR],[
+  PHP_PEAR=$enableval
 ],[
-  PEAR_DIR=pear
-  AC_MSG_RESULT(yes)
+  PHP_PEAR=yes
 ])
+
+AC_MSG_CHECKING(whether to install PEAR)
+AC_MSG_RESULT($PHP_PEAR)
+
+if test "$PHP_PEAR" = "yes"; then
+  PEAR_DIR=pear
+fi
+
 AC_SUBST(PEAR_DIR)
 
 PHP_SAPI=cgi
