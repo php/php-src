@@ -198,6 +198,7 @@ PHP_MINFO_FUNCTION(apache)
 #if !defined(WIN32) && !defined(WINNT)
 	php_info_print_table_row(2, "Server Root", server_root);
 
+	strcpy(modulenames, "");
 	for(modp = top_module; modp; modp = modp->next) {
 		strlcpy(name, modp->name, sizeof(name));
 		if ((p = strrchr(name, '.'))) {
