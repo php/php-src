@@ -23,6 +23,7 @@ PHP                                                                        NEWS
 - New php.ini options:
   . "session.hash_function" and "session.hash_bits_per_character". (Sascha)
   . "mail.force_extra_paramaters". (Derick)
+  . "register_long_arrays". (Zeev)
 - Improved the speed of internal functions that use callbacks by 40% due to a 
   new internal fast_call_user_function() function. (Sterling)
 - Improved the streams support: (Wez)
@@ -87,10 +88,11 @@ PHP                                                                        NEWS
   (Ilia)
 - Added optional parameter to file() which makes the result array not contain
   the line endings and to skip empty lines. (Ilia)
-- Added new range() functionality: (Ilia)
-  . Support for float modifier.
-  . Detection of numeric values inside strings passed as high & low.
-  . Proper handle the situations where high == low.
+- Added new range() functionality:
+  . Support for float modifier. (Ilia)
+  . Detection of numeric values inside strings passed as high & low. (Ilia)
+  . Proper handle the situations where high == low. (Ilia)
+  . Added an optional step parameter. (Jon)
 - Added encoding detection feature for expat XML parser.
   (Adam Dickmeiss, Moriyoshi)
 - Added missing multibyte (unicode) support and numeric entity support to
@@ -100,6 +102,7 @@ PHP                                                                        NEWS
 - Added context options 'method', 'header' and 'content' for "http://" fopen 
   wrapper. (Sara)
 - Added input filter support. See README.input_filter for more info. (Rasmus)
+- Added a replace count for str_[i]replace(), see bug #8218. (Sara)
 - Fixed is_executable() to be available also on Windows. (Shane)
 - Fixed dirname() and strip_tags() to be binary-safe. (Moriyoshi)
 - Fixed bug #24098 (crash in pathinfo()). (Ilia)
