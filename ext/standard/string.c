@@ -3509,11 +3509,12 @@ PHPAPI void php_strip_tags(char *rbuf, int len, int *stateptr, char *allow, int 
 				/* JavaScript & Other HTML scripting languages */
 				if (state == 1 && *(p-1) == '<') { 
 					state = 3;
+					lc = c;
 				} else {
 					*(rp++) = c;
 				}	
 				break;
-			
+
 			case '?':
 
 				if (state == 1 && *(p-1)=='<') { 
@@ -3522,13 +3523,28 @@ PHPAPI void php_strip_tags(char *rbuf, int len, int *stateptr, char *allow, int 
 					break;
 				}
 
+			case 'E':
+			case 'e':
+				/* !DOCTYPE exception */
+				if (state==3 && p > buf+6
+						     && tolower(*(p-1)) == 'p'
+					         && tolower(*(p-2)) == 'y'
+						     && tolower(*(p-3)) == 't'
+						     && tolower(*(p-4)) == 'c'
+						     && tolower(*(p-5)) == 'o'
+						     && tolower(*(p-6)) == 'd') {
+					state = 1;
+					break;
+				}
+				/* fall-through */
+
 			case 'l':
 
 				/* swm: If we encounter '<?xml' then we shouldn't be in
 				 * state == 2 (PHP). Switch back to HTML.
 				 */
 
-				if (state == 2 && *(p-1) == 'm' && *(p-2) == 'x') {
+				if (state == 2 && p > buf+2 && *(p-1) == 'm' && *(p-2) == 'x') {
 					state = 1;
 					break;
 				}
