@@ -53,7 +53,7 @@ ZEND_API void zend_html_putc(char c)
 }
 
 
-ZEND_API void zend_html_puts(const char *s, uint len)
+ZEND_API void zend_html_puts(const char *s, uint len TSRMLS_DC)
 {
 	const char *ptr=s, *end=s+len;
 	
@@ -113,7 +113,7 @@ ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini
 				in_string = !in_string;
 				break;				
 			case T_WHITESPACE:
-				zend_html_puts(LANG_SCNG(yy_text), LANG_SCNG(yy_leng));  /* no color needed */
+				zend_html_puts(LANG_SCNG(yy_text), LANG_SCNG(yy_leng) TSRMLS_CC);  /* no color needed */
 				token.type = 0;
 				continue;
 				break;
@@ -141,10 +141,10 @@ ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini
 		}
 		switch (token_type) {
 			case T_END_HEREDOC:
-				zend_html_puts(token.value.str.val, token.value.str.len);
+				zend_html_puts(token.value.str.val, token.value.str.len TSRMLS_CC);
 				break;
 			default:
-				zend_html_puts(LANG_SCNG(yy_text), LANG_SCNG(yy_leng));
+				zend_html_puts(LANG_SCNG(yy_text), LANG_SCNG(yy_leng) TSRMLS_CC);
 				break;
 		}
 
