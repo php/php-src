@@ -432,11 +432,6 @@ static void spl_RecursiveIteratorIterator_dtor(void *_object, zend_object_handle
 }
 /* }}} */
 
-static int spl_recursive_it_gets_implemented(zend_class_entry *iface, zend_class_entry *class_type TSRMLS_DC)
-{
-	return SUCCESS;
-}
-
 /* {{{ spl_RecursiveIteratorIterator_new */
 static zend_object_value spl_RecursiveIteratorIterator_new(zend_class_entry *class_type TSRMLS_DC)
 {
@@ -1169,8 +1164,6 @@ PHP_MINIT_FUNCTION(spl_iterators)
 	/*spl_handlers_dual_it.call_method = spl_dual_it_call_method;*/
 	spl_handlers_dual_it.clone_obj = NULL;
 	
-	spl_ce_RecursiveIterator->interface_gets_implemented = spl_recursive_it_gets_implemented;
-
 	spl_ce_RecursiveIteratorIterator->get_iterator = spl_recursive_it_get_iterator;
 	spl_ce_RecursiveIteratorIterator->iterator_funcs.funcs = &spl_recursive_it_iterator_funcs;
 
