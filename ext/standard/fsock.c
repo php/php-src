@@ -96,12 +96,12 @@ extern int le_fp;
 #include "build-defs.h"
 #endif
 
-/* {{{ lookup_hostname */
+/* {{{ php_lookup_hostname */
 
 /*
  * Converts a host name to an IP address.
  */
-PHPAPI int lookup_hostname(const char *addr, struct in_addr *in)
+PHPAPI int php_lookup_hostname(const char *addr, struct in_addr *in)
 {
 	struct hostent *host_info;
 
@@ -274,7 +274,7 @@ static void php_fsockopen(INTERNAL_FUNCTION_PARAMETERS, int persistent) {
 	  
 		server.sin_family = AF_INET;
 		
-		if(lookup_hostname(udp ? &(*args[0])->value.str.val[6] : (*args[0])->value.str.val,&server.sin_addr)) {
+		if(php_lookup_hostname(udp ? &(*args[0])->value.str.val[6] : (*args[0])->value.str.val,&server.sin_addr)) {
 			CLOSE_SOCK(1);
 			RETURN_FALSE;
 		}
