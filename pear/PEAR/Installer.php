@@ -257,6 +257,8 @@ class PEAR_Installer extends PEAR_Common
         }
         $oldcwd = getcwd();
         $need_download = false;
+        //  ==> XXX should be removed later on
+        $flag_old_format = false;
         if (preg_match('#^(http|ftp)://#', $pkgfile)) {
             $need_download = true;
         } elseif (!@is_file($pkgfile)) {
@@ -341,8 +343,6 @@ class PEAR_Installer extends PEAR_Common
             // ----- Look for existing package file
             $descfile = $tmpdir . DIRECTORY_SEPARATOR . 'package.xml';
 
-            //  ==> XXX This part should be removed later on
-            $flag_old_format = false;
             if (!is_file($descfile)) {
                 // ----- Look for old package archive format
                 // In this format the package.xml file was inside the
