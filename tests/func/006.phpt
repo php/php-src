@@ -14,8 +14,10 @@ echo 'A';
   ob_end_clean();
 $a = ob_get_contents();
 ob_end_clean();
-echo $b;
-echo $a;
+
+var_dump( $b ); // 2B
+var_dump( $a ); // 1A
 ?>
 --EXPECT--
-2B1A
+string(2) "2B"
+string(2) "1A"
