@@ -20,24 +20,18 @@
 #ifndef PHP_ICONV_H
 #define PHP_ICONV_H
 
-#include <iconv.h>
-#include "php.h"
-#include "SAPI.h"
-
-extern zend_module_entry iconv_module_entry;
-#define phpext_iconv_ptr &iconv_module_entry
-
 #ifdef PHP_WIN32
 #define PHP_ICONV_API __declspec(dllexport)
 #else
 #define PHP_ICONV_API
 #endif
 
-PHP_MINIT_FUNCTION(iconv);
-PHP_MSHUTDOWN_FUNCTION(iconv);
-PHP_RINIT_FUNCTION(iconv);
-PHP_RSHUTDOWN_FUNCTION(iconv);
-PHP_MINFO_FUNCTION(iconv);
+extern zend_module_entry iconv_module_entry;
+#define phpext_iconv_ptr &iconv_module_entry
+
+PHP_MINIT_FUNCTION(miconv);
+PHP_MSHUTDOWN_FUNCTION(miconv);
+PHP_MINFO_FUNCTION(miconv);
 
 PHP_FUNCTION(iconv);
 PHP_FUNCTION(ob_iconv_handler);
