@@ -1,8 +1,6 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 200?, Version 4.3.1
-- Fixed several errors in functions in hwapi extension. Passed objects
-  weren't handled properly. (Uwe)
 - Enabled read-only GIF support in the bundled GDLIB (php_gd2.dll) on Windows.
   (Sebastian, Edin)
 - Improved dba extension (Marcus)
@@ -21,6 +19,7 @@ PHP 4                                                                      NEWS
   --enable-memory-limit. (Andrey)
 - Added improved JPEG 2000 support for getimagesize(). (Marcus, Adam Wright)
 - Added XBM and WBMP support for getimagesize(). (Marcus)
+- Fixed several errors in hwapi extension. Objects weren't handled properly. (Uwe)
 - Fixed bug #22191 (frontbase build broken with old version of frontbase). (Ilia)
 - Fixed bug #22187 (spprintf function did not handle floats correctly). (Ilia)
 - Fixed bug #22149 (incorrect insertion of session id when tabs are used to
@@ -98,13 +97,13 @@ PHP 4                                                                      NEWS
 - Removed extensions: (Jan, Jani, Sebastian)
   . ext/aspell
   . ext/ccvs
-  . ext/cybercash
   . ext/icap
   . sapi/fastcgi
   . sapi/fhttpd
-- Moved extensions to PECL (http://pear.php.net/): (James, Derick)
+- Moved extensions to PECL (http://pear.php.net/): (James, Derick, George)
   . ext/vpopmail
   . ext/cybermut
+  . ext/cybercash
 - Make PHP_AUTH_* variables not available in safe mode under Apache when an
   external basic auth mechanism is used. (Philip)
 - Aliased dba_popen() to dba_open() until 4.3.1 when persistent STDIO streams
