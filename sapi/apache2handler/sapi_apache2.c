@@ -547,7 +547,6 @@ zend_first_try {
 			char *mem_usage;
 
 			mem_usage = apr_psprintf(ctx->r->pool, "%u", AG(allocated_memory_peak));
-			AG(allocated_memory_peak) = 0;
 			apr_table_set(r->notes, "mod_php_memory_usage", mem_usage);
 		}
 #endif
