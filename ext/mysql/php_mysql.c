@@ -116,10 +116,12 @@ function_entry mysql_functions[] = {
 	PHP_FE(mysql_pconnect,								NULL)
 	PHP_FE(mysql_close,									NULL)
 	PHP_FE(mysql_select_db,								NULL)
+#ifndef NETWARE		/* The below two functions not supported on NetWare */
 #if MYSQL_VERSION_ID < 40000
 	PHP_FE(mysql_create_db,								NULL)
 	PHP_FE(mysql_drop_db,								NULL)
 #endif
+#endif	/* NETWARE */
 	PHP_FE(mysql_query,									NULL)
 	PHP_FE(mysql_unbuffered_query,						NULL)
 	PHP_FE(mysql_db_query,								NULL)
@@ -173,10 +175,12 @@ function_entry mysql_functions[] = {
 	PHP_FALIAS(mysql_fieldtype,		mysql_field_type,	NULL)
 	PHP_FALIAS(mysql_fieldflags,	mysql_field_flags,	NULL)
 	PHP_FALIAS(mysql_selectdb,		mysql_select_db,	NULL)
+#ifndef NETWARE		/* The below two functions not supported on NetWare */
 #if MYSQL_VERSION_ID < 40000
 	PHP_FALIAS(mysql_createdb,		mysql_create_db,	NULL)
 	PHP_FALIAS(mysql_dropdb,		mysql_drop_db,		NULL)
 #endif
+#endif	/* NETWARE */
 	PHP_FALIAS(mysql_freeresult,	mysql_free_result,	NULL)
 	PHP_FALIAS(mysql_numfields,		mysql_num_fields,	NULL)
 	PHP_FALIAS(mysql_numrows,		mysql_num_rows,		NULL)
@@ -1076,6 +1080,7 @@ PHP_FUNCTION(mysql_character_set_name)
 /* }}} */
 #endif
 
+#ifndef NETWARE		/* The below two functions not supported on NetWare */
 #if MYSQL_VERSION_ID < 40000
 /* {{{ proto bool mysql_create_db(string database_name [, int link_identifier])
    Create a MySQL database */
@@ -1156,6 +1161,7 @@ PHP_FUNCTION(mysql_drop_db)
 }
 /* }}} */
 #endif
+#endif	/* NETWARE */
 
 /* {{{ php_mysql_do_query_general
  */
