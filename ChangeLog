@@ -1,3 +1,50 @@
+2002-06-22  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/exif/exif.c
+      ext/standard/php_image.h: -exif version
+    -missing constant (and notice)
+    -corrected error messages
+
+    * ext/exif/exif.c:
+    exif_read_data returns mime-type now for image and thumbnail And exif_thumbnail now optionally returns imagetype. 
+
+    * ext/standard/basic_functions.c
+      ext/standard/image.c
+      ext/standard/php_image.h:
+    GetImageSize now returns additional index 'MimeType' and new function
+    imagetype2mimetype to convert php imagetypes to mime-types. 
+
+    * ext/standard/image.c: ws fix
+
+2002-06-22  Stig Venaas  <venaas@uninett.no>
+
+    * ext/ldap/ldap.c:
+    Better not include ldap_parse_result() and ldap_start_tls() at all in
+    the symbol table when they are not usable. Makes it possible to check
+    on their usability.
+
+2002-06-22  Sander Roobol  <phy@wanadoo.nl>
+
+    * sapi/apache2filter/apache_config.c:
+    Made php_admin_value work outside <location> and <directory> blocks.
+
+2002-06-22  Andi Gutmans  <andi@zend.com>
+
+    * sapi/cgi/cgi_main.c: - Revert WS changes
+
+    * sapi/cgi/cgi_main.c: - This shouldn't have snuck in.
+
+    * sapi/cgi/cgi_main.c: - Stop using persist_alloc().
+
+2002-06-22  Stig Venaas  <venaas@uninett.no>
+
+    * ext/ldap/config.m4
+      ext/ldap/ldap.c: Added test for ldap_start_tls_s()
+
+2002-06-22  Den V. Tsopa  <tdv@edisoft.ru>
+
+    * ext/mbstring/mbfilter.c: small fix in preprocessor directive
+
 2002-06-21  Markus Fischer  <mfischer@guru.josefine.at>
 
     * ext/ldap/ldap.c: - Fix ZTS build, see #17915.
