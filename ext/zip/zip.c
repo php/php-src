@@ -285,7 +285,7 @@ PHP_FUNCTION(zip_entry_read)
 	if (ret == 0) {
 		RETURN_FALSE;
 	} else {
-		RETURN_STRINGL(buf, len, 0);
+		RETURN_STRINGL(buf, ret, 0);
 	}
 }
 /* }}} */
