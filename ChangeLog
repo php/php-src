@@ -1,3 +1,48 @@
+2001-11-14  Stig Venaas  <venaas@uninett.no>
+
+    * ext/ldap/ldap.c:
+    Fixed some memory leaks and removed some unnecessary checks due to
+    ZEND_FETCH_RESOURCE returning on error
+
+2001-11-14  Frank M. Kromann  <frank@frontbase.com>
+
+    * ext/fbsql/php_fbsql.c: Prevent fbsql_num_rows from looping
+
+    * ext/iconv/iconv.dsp: Fixing debug build
+
+2001-11-14  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/DB/pgsql.php:
+    make the DB_ERROR_ALREADY_EXISTS error regexp compatible with
+    Postgres 7.x also (will they someday implement error numbers? :-)
+
+2001-11-14  Stig Bakken  <ssb@fast.no>
+
+    * pear/Makefile.in: * install Archive_Tar
+
+2001-11-14  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/standard/file.c:
+    Many other reasons that setvbuf can fail than "wrong arguments", returning
+    false should be enough
+
+2001-11-14  Christian Stocker  <chregu@phant.ch>
+
+    * pear/Makefile.in: adding PEAR/Registry.php
+
+2001-11-14  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/fsock.c: - Fix crashbug on dtor
+
+2001-11-14  Christian Stocker  <chregu@phant.ch>
+
+    * pear/PEAR/WebInstaller.php:
+    checking if package.xml.gz exists, before checking if it's writeable
+
+2001-11-14  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * pear/Math/Fraction.php: Hopefully fix this.
+
 2001-11-13  Doug MacEachern  <dougm@covalent.net>
 
     * sapi/apache2filter/sapi_apache2.c: setup standard CGI variables
