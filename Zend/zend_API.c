@@ -1042,11 +1042,12 @@ ZEND_API int zend_startup_module(zend_module_entry *module)
 int zend_register_functions(zend_class_entry *scope, zend_function_entry *functions, HashTable *function_table, int type TSRMLS_DC)
 {
 	zend_function_entry *ptr = functions;
-	zend_function function;
+	zend_function function, *reg_function;
 	zend_internal_function *internal_function = (zend_internal_function *)&function;
 	int count=0, unload=0;
 	HashTable *target_function_table = function_table;
 	int error_type;
+	zend_function *ctor = NULL, *dtor = NULL, *clone = NULL;
 
 	if (type==MODULE_PERSISTENT) {
 		error_type = E_CORE_WARNING;
@@ -1070,9 +1071,24 @@ int zend_register_functions(zend_class_entry *scope, zend_function_entry *functi
 			zend_unregister_functions(functions, count, target_function_table TSRMLS_CC);
 			return FAILURE;
 		}
-		if (zend_hash_add(target_function_table, ptr->fname, strlen(ptr->fname)+1, &function, sizeof(zend_function), NULL) == FAILURE) {
+		if (zend_hash_add(target_function_table, ptr->fname, strlen(ptr->fname)+1, &function, sizeof(zend_function), (void**)&reg_function) == FAILURE) {
 			unload=1;
 			break;
+		}
+		if (scope) {
+			/*
+			 * If it's an old-style constructor, store it only if we don't have
+			 * a constructor already.
+			 */
+			if (!strcmp(ptr->fname, scope->name) && !ctor) {
+				ctor = reg_function;
+			} else if (!strcmp(ptr->fname, ZEND_CONSTRUCTOR_FUNC_NAME)) {
+				ctor = reg_function;
+			} else if (!strcmp(ptr->fname, ZEND_DESTRUCTOR_FUNC_NAME)) {
+				dtor = reg_function;
+			} else if (!strcmp(ptr->fname, ZEND_CLONE_FUNC_NAME)) {
+				clone = reg_function;
+			}
 		}
 		ptr++;
 		count++;
@@ -1086,6 +1102,11 @@ int zend_register_functions(zend_class_entry *scope, zend_function_entry *functi
 		}
 		zend_unregister_functions(functions, count, target_function_table TSRMLS_CC);
 		return FAILURE;
+	}
+	if (scope) {
+		scope->constructor = ctor;
+		scope->destructor = dtor;
+		scope->clone = clone;
 	}
 	return SUCCESS;
 }
