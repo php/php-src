@@ -146,6 +146,9 @@ struct _soapService {
 #define SOAP_COMPRESSION_GZIP    0x00
 #define SOAP_COMPRESSION_DEFLATE 0x10
 
+#define SOAP_AUTHENTICATION_BASIC   0
+#define SOAP_AUTHENTICATION_DIGEST  1
+
 ZEND_BEGIN_MODULE_GLOBALS(soap)
 	HashTable  defEncNs;     /* mapping of default namespaces to prefixes */
 	HashTable  defEnc;
