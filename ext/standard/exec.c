@@ -67,10 +67,6 @@ int php_Exec(int type, char *cmd, pval *array, pval *return_value TSRMLS_DC)
 #endif
 
 	buf = (char *) emalloc(EXEC_INPUT_BUF);
-	if (!buf) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to emalloc %d bytes for exec buffer", EXEC_INPUT_BUF);
-		return -1;
-	}
 	buflen = EXEC_INPUT_BUF;
 
 	if (PG(safe_mode)) {
@@ -162,14 +158,6 @@ int php_Exec(int type, char *cmd, pval *array, pval *return_value TSRMLS_DC)
 			do {
 				if ( buflen <= (l+1) ) {
 					buf = erealloc(buf, buflen + EXEC_INPUT_BUF);
-					if ( buf == NULL ) {
-						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to erealloc %d bytes for exec buffer", 
-								buflen + EXEC_INPUT_BUF);
-#if PHP_SIGCHILD
-						signal (SIGCHLD, sig_handler);
-#endif
-						return -1;
-					}
 					buflen += EXEC_INPUT_BUF;
 				}
 

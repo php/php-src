@@ -215,10 +215,6 @@ static struct gfxinfo *php_handle_swc(php_stream * stream TSRMLS_DC)
 		do {
 			szlength=slength*(1<<factor++);
 			buf = (char *) erealloc(buf,szlength);
-			if (!buf) {
-				status = 1;
-				break;
-			} 
 			status = uncompress(buf, &szlength, bufz, slength);
 		} while ((status==Z_BUF_ERROR)&&(factor<maxfactor));
 		
@@ -439,7 +435,6 @@ static void php_read_APP(php_stream * stream, unsigned int marker, zval *info TS
 	length -= 2;				/* length includes itself */
 
 	buffer = emalloc(length);
-	if ( !buffer) return;
 
 	if (php_stream_read(stream, buffer, (long) length) <= 0) {
 		efree(buffer);
@@ -485,8 +480,6 @@ static struct gfxinfo *php_handle_jpeg (php_stream * stream, pval *info TSRMLS_D
 				if (result == NULL) {
 					/* handle SOFn block */
 					result = (struct gfxinfo *) ecalloc(1, sizeof(struct gfxinfo));
-					if ( !result)
-						return NULL;
 					length = php_read2(stream TSRMLS_CC);
 					result->bits     = php_stream_getc(stream);
 					result->height   = php_read2(stream TSRMLS_CC);
@@ -605,9 +598,6 @@ static struct gfxinfo *php_handle_jpc(php_stream * stream TSRMLS_DC)
 	}
 
 	result = (struct gfxinfo *)ecalloc(1, sizeof(struct gfxinfo));
-	if (!result) {
-		return NULL;
-	}
 
 	dummy_short = php_read2(stream TSRMLS_CC); /* Lsiz */
 	dummy_short = php_read2(stream TSRMLS_CC); /* Rsiz */
