@@ -764,7 +764,7 @@ void zend_deactivate(TSRMLS_D)
 	EG(active_symbol_table) = NULL;
 
 	/* restore namespace to global */
-	zend_switch_namespace(EG(global_namespace_ptr));
+	zend_switch_namespace(EG(global_namespace_ptr) TSRMLS_CC);
 	CG(function_table) = EG(function_table);
 	CG(class_table) = EG(class_table);
 	
