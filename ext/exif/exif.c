@@ -995,6 +995,14 @@ static int scan_JPEG_header (ImageInfoType *ImageInfo, FILE *infile, Section_t *
                 }
                 break;
 
+			case M_JFIF:
+				/* Regular jpegs always have this tag, exif images have the
+				 * exif marker instead, althogh ACDsee will write images with
+				 * both markers.  this program will re-create this marker on
+				 * absence of exif marker.  Hence no need to keep the copy
+				 * from the file. */
+				efree(Sections[--(*SectionsRead)].Data);
+				break;
 
             case M_SOF0: 
             case M_SOF1: 

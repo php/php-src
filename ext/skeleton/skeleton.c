@@ -131,17 +131,14 @@ PHP_MINFO_FUNCTION(extname)
    Return a string to confirm that the module is compiled in */
 PHP_FUNCTION(confirm_extname_compiled)
 {
-	zval **arg;
-	int len;
+	char *arg = NULL;
+	int arg_len, len;
 	char string[256];
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg) == FAILURE) {
-		ZEND_WRONG_PARAM_COUNT();
-	}
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &arg, &arg_len) == FAILURE)
+		return;
 
-	convert_to_string_ex(arg);
-
-	len = sprintf(string, "Congratulations! You have successfully modified ext/%.78s/config.m4. Module %.78s is now compiled into PHP.", "extname", Z_STRVAL_PP(arg));
+	len = sprintf(string, "Congratulations! You have successfully modified ext/%.78s/config.m4. Module %.78s is now compiled into PHP.", "extname", arg);
 	RETURN_STRINGL(string, len, 1);
 }
 /* }}} */
