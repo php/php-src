@@ -250,8 +250,7 @@ static int php_count_recursive(zval *array, long mode TSRMLS_DC)
 
 	target_hash = HASH_OF(array);
 
-	if (Z_TYPE_P(array) == IS_ARRAY)
-	{
+	if (Z_TYPE_P(array) == IS_ARRAY) {
 		cnt += zend_hash_num_elements(target_hash);
 		if (mode == COUNT_RECURSIVE) {
 			HashPosition pos;
@@ -641,7 +640,7 @@ static int array_user_key_compare(const void *a, const void *b TSRMLS_DC)
 	zval_dtor(&key1);
 	zval_dtor(&key2);
 	
-	if (status==SUCCESS) {
+	if (status == SUCCESS) {
 		convert_to_long(&retval);
 		return Z_LVAL(retval);
 	} else {
@@ -861,7 +860,7 @@ PHP_FUNCTION(min)
 		if (zend_get_parameters_ex(1, &arr) == FAILURE || Z_TYPE_PP(arr) != IS_ARRAY) {
 			WRONG_PARAM_COUNT;
 		}
-		if (zend_hash_minmax(Z_ARRVAL_PP(arr), array_data_compare, 0, (void **) &result TSRMLS_CC)==SUCCESS) {
+		if (zend_hash_minmax(Z_ARRVAL_PP(arr), array_data_compare, 0, (void **) &result TSRMLS_CC) == SUCCESS) {
 			*return_value = **result;
 			zval_copy_ctor(return_value);
 		} else {
@@ -913,7 +912,7 @@ PHP_FUNCTION(max)
 		if (zend_get_parameters_ex(1, &arr) == FAILURE || Z_TYPE_PP(arr) != IS_ARRAY) {
 			WRONG_PARAM_COUNT;
 		}
-		if (zend_hash_minmax(Z_ARRVAL_PP(arr), array_data_compare, 1, (void **) &result TSRMLS_CC)==SUCCESS) {
+		if (zend_hash_minmax(Z_ARRVAL_PP(arr), array_data_compare, 1, (void **) &result TSRMLS_CC) == SUCCESS) {
 			*return_value = **result;
 			zval_copy_ctor(return_value);
 		} else {
@@ -925,7 +924,7 @@ PHP_FUNCTION(max)
 		pval **max, result;
 		int i;
 
-		if (zend_get_parameters_array_ex(ZEND_NUM_ARGS(), args)==FAILURE) {
+		if (zend_get_parameters_array_ex(ZEND_NUM_ARGS(), args) == FAILURE) {
 			efree(args);
 			WRONG_PARAM_COUNT;
 		}
@@ -967,7 +966,7 @@ static int php_array_walk(HashTable *target_hash, zval **userdata TSRMLS_DC)
 	zend_hash_internal_pointer_reset_ex(target_hash, &pos);
 
 	/* Iterate through hash */
-	while(zend_hash_get_current_data_ex(target_hash, (void **)&args[0], &pos) == SUCCESS) {
+	while (zend_hash_get_current_data_ex(target_hash, (void **)&args[0], &pos) == SUCCESS) {
 		/* Set up the key */
 		if (zend_hash_get_current_key_ex(target_hash, &string_key, &string_key_len, &num_key, 0, &pos) == HASH_KEY_IS_LONG) {
 			Z_TYPE_P(key) = IS_LONG;
@@ -983,9 +982,10 @@ static int php_array_walk(HashTable *target_hash, zval **userdata TSRMLS_DC)
 						   &retval_ptr, userdata ? 3 : 2, args, 0, NULL TSRMLS_CC) == SUCCESS) {
 		
 			zval_ptr_dtor(&retval_ptr);
-		} else
+		} else {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to call %s() - function does not exist",
 					  (*BG(array_walk_func_name))->value.str.val);
+		}
 
 		zend_hash_move_forward_ex(target_hash, &pos);
 	}
@@ -1071,10 +1071,10 @@ static void php_search_array(INTERNAL_FUNCTION_PARAMETERS, int behavior)
 
 	target_hash = HASH_OF(*array);
 	zend_hash_internal_pointer_reset_ex(target_hash, &pos);
-	while(zend_hash_get_current_data_ex(target_hash, (void **)&entry, &pos) == SUCCESS) {
+	while (zend_hash_get_current_data_ex(target_hash, (void **)&entry, &pos) == SUCCESS) {
 	 	is_equal_func(&res, *value, *entry TSRMLS_CC);
 		if (Z_LVAL(res)) {
-			if (behavior==0) {		 
+			if (behavior == 0) {		 
 				RETURN_TRUE;
 			} else {
 				/* Return current key */
@@ -1126,7 +1126,7 @@ static int php_valid_var_name(char *var_name)
 		return 0;
 	
 	if (len > 1) {
-		for(i=1; i<len; i++) {
+		for (i=1; i<len; i++) {
 			if (!isalnum((int)var_name[i]) && var_name[i] != '_') {
 				return 0;
 			}
@@ -1200,7 +1200,7 @@ PHP_FUNCTION(extract)
 	}
 		
 	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_PP(var_array), &pos);
-	while(zend_hash_get_current_data_ex(Z_ARRVAL_PP(var_array), (void **)&entry, &pos) == SUCCESS) {
+	while (zend_hash_get_current_data_ex(Z_ARRVAL_PP(var_array), (void **)&entry, &pos) == SUCCESS) {
 		key_type = zend_hash_get_current_key_ex(Z_ARRVAL_PP(var_array), &var_name, &var_name_len, &num_key, 0, &pos);
 		var_exists = 0;
 
@@ -1271,7 +1271,7 @@ PHP_FUNCTION(extract)
 
 					(*entry)->is_ref = 1;
 					(*entry)->refcount++;
-					if (zend_hash_find(EG(active_symbol_table), final_name.c, final_name.len+1, (void **) &orig_var)==SUCCESS
+					if (zend_hash_find(EG(active_symbol_table), final_name.c, final_name.len+1, (void **) &orig_var) == SUCCESS
 						&& PZVAL_IS_REF(*orig_var)) {
 
 						(*entry)->refcount += (*orig_var)->refcount-2;
@@ -1375,11 +1375,11 @@ PHP_FUNCTION(array_fill)
 		RETURN_FALSE;
 	}
 
-	switch(Z_TYPE_PP(start_key)) {
+	switch (Z_TYPE_PP(start_key)) {
 		case IS_STRING:
 		case IS_LONG:
 		case IS_DOUBLE:
-			if(PZVAL_IS_REF(*val)) {
+			if (PZVAL_IS_REF(*val)) {
 				SEPARATE_ZVAL(val);
 			}
 			convert_to_long_ex(start_key);
@@ -1394,13 +1394,13 @@ PHP_FUNCTION(array_fill)
 
 	convert_to_long_ex(num);
 	i = Z_LVAL_PP(num) - 1;	
-	if(i<0) {
+	if (i < 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Number of elements must be positive");
 		RETURN_FALSE;
 	}
 	newval = *val;
-	while(i--) {
-		if(!(i%62000)) {
+	while (i--) {
+		if (!(i%62000)) {
 			MAKE_STD_ZVAL(newval);
 			*newval = **val;
 			zval_copy_ctor(newval);
@@ -1426,13 +1426,13 @@ PHP_FUNCTION(range)
 		RETURN_FALSE;
 	}
 
-	if(Z_TYPE_PP(zlow)==IS_STRING && Z_TYPE_PP(zhigh)==IS_STRING) {
+	if (Z_TYPE_PP(zlow)==IS_STRING && Z_TYPE_PP(zhigh)==IS_STRING) {
 		char *low, *high;
 		convert_to_string_ex(zlow);
 		convert_to_string_ex(zhigh);
 		low = Z_STRVAL_PP(zlow);
 		high = Z_STRVAL_PP(zhigh);
-		if(*low>*high) {
+		if (*low>*high) {
 			for (; *low >= *high; (*low)--) {
 				add_next_index_stringl(return_value, low, 1, 1);
 			}	
@@ -1447,7 +1447,7 @@ PHP_FUNCTION(range)
 		convert_to_long_ex(zhigh);
 		low = Z_LVAL_PP(zlow);
 		high = Z_LVAL_PP(zhigh);
-		if(low>high) { 
+		if (low > high) { 
 			for (; low >= high; low--) {
 				add_next_index_long(return_value, low);
 			}	
@@ -1559,10 +1559,11 @@ HashTable* php_splice(HashTable *in_hash, int offset, int length,
 		offset = 0;
 	
 	/* ..and the length */
-	if (length < 0)
+	if (length < 0) {
 		length = num_in-offset+length;
-	else if(offset+length > num_in)
+	} else if (offset+length > num_in) {
 		length = num_in-offset;
+	}
 
 	/* Create and initialize output hash */
 	ALLOC_HASHTABLE(out_hash);
@@ -1585,7 +1586,7 @@ HashTable* php_splice(HashTable *in_hash, int offset, int length,
 	/* If hash for removed entries exists, go until offset+length
 	   and copy the entries to it */
 	if (removed != NULL) {
-		for( ; pos<offset+length && p; pos++, p=p->pListNext) {
+		for ( ; pos<offset+length && p; pos++, p=p->pListNext) {
 			entry = *((zval **)p->pData);
 			entry->refcount++;
 			if (p->nKeyLength)
@@ -1594,7 +1595,7 @@ HashTable* php_splice(HashTable *in_hash, int offset, int length,
 				zend_hash_next_index_insert(*removed, &entry, sizeof(zval *), NULL);
 		}
 	} else /* otherwise just skip those entries */
-		for( ; pos<offset+length && p; pos++, p=p->pListNext);
+		for ( ; pos<offset+length && p; pos++, p=p->pListNext);
 	
 	/* If there are entries to insert.. */
 	if (list != NULL) {
@@ -1728,7 +1729,7 @@ static void _phpi_pop(INTERNAL_FUNCTION_PARAMETERS, int off_the_end)
 		}
 		Z_ARRVAL_PP(stack)->nNextFreeElement = k+1;
 		zend_hash_rehash(Z_ARRVAL_PP(stack));
-	} else if(!key_len) {
+	} else if (!key_len) {
 		Z_ARRVAL_PP(stack)->nNextFreeElement = Z_ARRVAL_PP(stack)->nNextFreeElement - 1;
 	}
 }
@@ -1915,8 +1916,9 @@ PHP_FUNCTION(array_slice)
 	if (argc == 3) {
 		convert_to_long_ex(length);
 		length_val = Z_LVAL_PP(length);
-	} else
+	} else {
 		length_val = zend_hash_num_elements(Z_ARRVAL_PP(input));
+	}
 	
 	/* Initialize returned array */
 	array_init(return_value);
@@ -1931,10 +1933,11 @@ PHP_FUNCTION(array_slice)
 		offset_val = 0;
 	
 	/* ..and the length */
-	if (length_val < 0)
+	if (length_val < 0) {
 		length_val = num_in-offset_val+length_val;
-	else if(offset_val+length_val > num_in)
+	} else if (offset_val+length_val > num_in) {
 		length_val = num_in-offset_val;
+	}
 	
 	if (length_val == 0)
 		return;
@@ -1942,14 +1945,14 @@ PHP_FUNCTION(array_slice)
 	/* Start at the beginning and go until we hit offset */
 	pos = 0;
 	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_PP(input), &hpos);
-	while(pos < offset_val &&
+	while (pos < offset_val &&
 		  zend_hash_get_current_data_ex(Z_ARRVAL_PP(input), (void **)&entry, &hpos) == SUCCESS) {
 		pos++;
 		zend_hash_move_forward_ex(Z_ARRVAL_PP(input), &hpos);
 	}
 	
 	/* Copy elements from input array to the one that's returned */
-	while(pos < offset_val+length_val &&
+	while (pos < offset_val+length_val &&
 		  zend_hash_get_current_data_ex(Z_ARRVAL_PP(input), (void **)&entry, &hpos) == SUCCESS) {
 		
 		(*entry)->refcount++;
@@ -1982,7 +1985,7 @@ PHPAPI int php_array_merge(HashTable *dest, HashTable *src, int recursive TSRMLS
 	HashPosition pos;
 
 	zend_hash_internal_pointer_reset_ex(src, &pos);
-	while(zend_hash_get_current_data_ex(src, (void **)&src_entry, &pos) == SUCCESS) {
+	while (zend_hash_get_current_data_ex(src, (void **)&src_entry, &pos) == SUCCESS) {
 		switch (zend_hash_get_current_key_ex(src, &string_key, &string_key_len, &num_key, 0, &pos)) {
 			case HASH_KEY_IS_STRING:
 				if (recursive &&
@@ -2101,7 +2104,7 @@ PHP_FUNCTION(array_keys)
 	
 	/* Go through input array and add keys to the return array */
 	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_PP(input), &pos);
-	while(zend_hash_get_current_data_ex(Z_ARRVAL_PP(input), (void **)&entry, &pos) == SUCCESS) {
+	while (zend_hash_get_current_data_ex(Z_ARRVAL_PP(input), (void **)&entry, &pos) == SUCCESS) {
 		if (search_value != NULL) {
 	 		is_equal_function(&res, *search_value, *entry TSRMLS_CC);
 			add_key = zval_is_true(&res);
@@ -2157,7 +2160,7 @@ PHP_FUNCTION(array_values)
 
 	/* Go through input array and add values to the return array */	
 	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_PP(input), &pos);
-	while(zend_hash_get_current_data_ex(Z_ARRVAL_PP(input), (void **)&entry, &pos) == SUCCESS) {
+	while (zend_hash_get_current_data_ex(Z_ARRVAL_PP(input), (void **)&entry, &pos) == SUCCESS) {
 		
 		(*entry)->refcount++;
 		zend_hash_next_index_insert(Z_ARRVAL_P(return_value), entry,
@@ -2264,7 +2267,7 @@ PHP_FUNCTION(array_reverse)
 	array_init(return_value);
 	
 	zend_hash_internal_pointer_end_ex(Z_ARRVAL_PP(input), &pos);
-	while(zend_hash_get_current_data_ex(Z_ARRVAL_PP(input), (void **)&entry, &pos) == SUCCESS) {
+	while (zend_hash_get_current_data_ex(Z_ARRVAL_PP(input), (void **)&entry, &pos) == SUCCESS) {
 		(*entry)->refcount++;
 		
 		switch (zend_hash_get_current_key_ex(Z_ARRVAL_PP(input), &string_key, &string_key_len, &num_key, 0, &pos)) {
