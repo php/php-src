@@ -9,6 +9,10 @@ PHP 4.0                                                                    NEWS
 - Empty entry. Enjoy
 
 ?? ??? 2000, Version 4.0.4
+- Allow assigning a newly created object by reference. This is needed only if
+  your constructor makes other data structures reference the $this object (for
+  example, $GLOBALS["foobar"] =& $this;)
+  The new syntax is $obj =& new MyClass(); (Andi, Zend Engine)
 - Allow for three expression types to be sent to functions which are requesting
   the function argument to be passed by reference (only c. was previously
   supported):
