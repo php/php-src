@@ -71,6 +71,8 @@ PHPAPI int php_file_le_fopen(void);
 PHPAPI int php_file_le_popen(void);
 PHPAPI int php_file_le_socket(void);
 PHPAPI int php_copy_file(char *src, char *dest);
+#if 0
 PHPAPI FILE *php_open_temporary_file(const char *dir, const char *pfx, char **opened_path_p);
+#endif
 
 #endif /* FILE_H */

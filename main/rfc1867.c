@@ -19,7 +19,7 @@
 
 #include <stdio.h>
 #include "php.h"
-#include "ext/standard/php_standard.h"
+#include "php_open_temporary_file.h"
 #include "zend_globals.h"
 #include "php_globals.h"
 #include "php_variables.h"
