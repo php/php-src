@@ -126,6 +126,7 @@ function_entry mysqli_functions[] = {
 	PHP_FE(mysqli_stmt_fetch,							NULL)
 #ifndef HAVE_MYSQLI_OLDAPI
 	PHP_FE(mysqli_stmt_free_result,						NULL)
+	PHP_FE(mysqli_stmt_reset,							NULL)
 #endif
 	PHP_FE(mysqli_stmt_param_count,						NULL)
 	PHP_FE(mysqli_send_query,							NULL)
@@ -167,7 +168,7 @@ function_entry mysqli_functions[] = {
 	PHP_FALIAS(mysqli_fetch, mysqli_stmt_fetch,			NULL)
 	PHP_FALIAS(mysqli_param_count,
 				mysqli_stmt_param_count,				NULL)
-	PHP_FALIAS(mysqli_get_metadata,
+	PHP_FALIAS(mysqli_get_result_metadata,
 				mysqli_stmt_result_metadata,			NULL)
 	PHP_FALIAS(mysqli_send_long_data,
 				mysqli_stmt_send_long_data,				NULL)
@@ -271,6 +272,7 @@ function_entry mysqli_stmt_methods[] = {
 	PHP_FALIAS(stmt,mysqli_prepare,NULL)
 #ifndef HAVE_MYSQLI_OLDAPI
 	PHP_FALIAS(free_result,mysqli_stmt_free_result,NULL)
+	PHP_FALIAS(reset,mysqli_stmt_reset,NULL)
 	PHP_FALIAS(prepare,mysqli_stmt_prepare, NULL)
 #endif
 	PHP_FALIAS(store_result,mysqli_stmt_store_result,NULL)
