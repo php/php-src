@@ -43,7 +43,7 @@ PHPAPI int php_register_info_logo(char *logo_string, char *mimetype, unsigned ch
 	return zend_hash_add(&phpinfo_logo_hash, logo_string, strlen(logo_string), &info_logo, sizeof(php_info_logo), NULL);
 }
 
-PHPAPI int php_unregister_info_logos(char *logo_string)
+PHPAPI int php_unregister_info_logo(char *logo_string)
 {
 	return zend_hash_del(&phpinfo_logo_hash, logo_string, strlen(logo_string));
 }
