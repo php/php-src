@@ -1662,8 +1662,7 @@ static void _phpi_pop(INTERNAL_FUNCTION_PARAMETERS, int off_the_end)
 {
 	zval	   **stack,			/* Input stack */
 			   **val;			/* Value to be popped */
-	char *key = NULL;
-	int key_len;
+	HashTable	*new_hash;		/* New stack */
 	
 	/* Get the arguments and do error-checking */
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &stack) == FAILURE) {
@@ -1690,8 +1689,10 @@ static void _phpi_pop(INTERNAL_FUNCTION_PARAMETERS, int off_the_end)
 	INIT_PZVAL(return_value);
 	
 	/* Delete the first or last value */
-	zend_hash_get_current_key_ex(Z_ARRVAL_PP(stack), &key, &key_len, &key_len, 0, NULL);
-	zend_hash_del_key_or_index(Z_ARRVAL_PP(stack), key, key_len, key_len, (key) ? HASH_DEL_KEY : HASH_DEL_INDEX);
+	new_hash = php_splice(Z_ARRVAL_PP(stack), (off_the_end) ? -1 : 0, 1, NULL, 0, NULL);
+	zend_hash_destroy(Z_ARRVAL_PP(stack));
+	efree(Z_ARRVAL_PP(stack));
+	Z_ARRVAL_PP(stack) = new_hash;
 }
 /* }}} */
 
