@@ -38,6 +38,7 @@ void php3api_var_dump(pval **struc, int level)
 	int i, c = 0;
 	pval **data;
 	char buf[512];
+	HashTable *myht;
 
 	switch ((*struc)->type) {
 		case IS_BOOL:
@@ -64,25 +65,27 @@ void php3api_var_dump(pval **struc, int level)
 			break;
 
 		case IS_ARRAY:
-			i = sprintf(buf, "%*carray(%d) {\n", level, ' ', zend_hash_num_elements((*struc)->value.ht));
+			myht = (*struc)->value.ht;
+			i = sprintf(buf, "%*carray(%d) {\n", level, ' ', zend_hash_num_elements(myht));
 			PHPWRITE(&buf[1], i - 1);
 			goto head_done;
 
 		case IS_OBJECT:
-			i = sprintf(buf, "%*cobject(%d) {\n", level, ' ', zend_hash_num_elements((*struc)->value.ht));
+			myht = (*struc)->value.obj.properties;
+			i = sprintf(buf, "%*cobject(%d) {\n", level, ' ', zend_hash_num_elements(myht));
 			PHPWRITE(&buf[1], i - 1);
 		  head_done:
 
-			zend_hash_internal_pointer_reset((*struc)->value.ht);
-			for (;; zend_hash_move_forward((*struc)->value.ht)) {
-				if ((i = zend_hash_get_current_key((*struc)->value.ht, &key, &index)) == HASH_KEY_NON_EXISTANT)
+			zend_hash_internal_pointer_reset(myht);
+			for (;; zend_hash_move_forward(myht)) {
+				if ((i = zend_hash_get_current_key(myht, &key, &index)) == HASH_KEY_NON_EXISTANT)
 					break;
 				if (c > 0) {
 					strcpy(buf, "\n");
 					PHPWRITE(buf, strlen(buf));
 				}
 				c++;
-				if (zend_hash_get_current_data((*struc)->value.ht, (void **) (&data)) != SUCCESS || !data || (data == struc))
+				if (zend_hash_get_current_data(myht, (void **) (&data)) != SUCCESS || !data || (data == struc))
 					continue;
 				switch (i) {
 					case HASH_KEY_IS_LONG:{
