@@ -1362,7 +1362,7 @@ static int* get_position_12(int dimension, const char* str)
 	int *pos;
 	int i = -1, flag = 0;
 
-	pos = emalloc(sizeof(int)*dimension);
+	pos = safe_emalloc(sizeof(int), dimension, 0);
 	memset(pos,0,sizeof(int)*dimension);
 	while (*str != '\0' && (*str < '0' || *str > '9') && (*str != '*')) {
 		str++;
@@ -1419,7 +1419,7 @@ static int* get_position(int dimension, const char* str)
 {
 	int *pos;
 
-	pos = emalloc(sizeof(int)*dimension);
+	pos = safe_emalloc(sizeof(int), dimension, 0);
 	get_position_ex(dimension, str, &pos);
 	return pos;
 }
@@ -1557,7 +1557,7 @@ static xmlNodePtr to_xml_array(encodeTypePtr type, zval *data, int style, xmlNod
 				smart_str_appends(&array_type, value);
 			}
 
-			dims = emalloc(sizeof(int)*dimension);
+			dims = safe_emalloc(sizeof(int), dimension, 0);
 			dims[0] = i;
 			el = &data;
 			for (i = 1; i < dimension; i++) {
@@ -1647,14 +1647,14 @@ static xmlNodePtr to_xml_array(encodeTypePtr type, zval *data, int style, xmlNod
 
 			smart_str_append_long(&array_size, i);
 
-			dims = emalloc(sizeof(int)*dimension);
+			dims = safe_emalloc(sizeof(int), dimension, 0);
 			dims[0] = i;
 		} else {
 
 			get_array_type(xmlParam, data, &array_type TSRMLS_CC);
 			enc = get_encoder_ex(SOAP_GLOBAL(sdl), array_type.c, array_type.len);
 			smart_str_append_long(&array_size, i);
-			dims = emalloc(sizeof(int)*dimension);
+			dims = safe_emalloc(sizeof(int), dimension, 0);
 			dims[0] = i;
 		}
 
@@ -1832,7 +1832,7 @@ static zval *to_zval_array(encodeTypePtr type, xmlNodePtr data)
 		dims = emalloc(sizeof(int));
 		*dims = 0;
 	}
-	pos = emalloc(sizeof(int)*dimension);
+	pos = safe_emalloc(sizeof(int), dimension, 0);
 	memset(pos,0,sizeof(int)*dimension);
 	if (data &&
 	    (attr = get_attribute(data->properties,"offset")) &&

@@ -272,7 +272,7 @@ static HRESULT STDMETHODCALLTYPE disp_invokeex(
 		
 		/* convert args into zvals.
 		 * Args are in reverse order */
-		params = (zval ***)emalloc(sizeof(zval **) * pdp->cArgs);
+		params = (zval ***)safe_emalloc(sizeof(zval **), pdp->cArgs, 0);
 		for (i = 0; i < pdp->cArgs; i++) {
 			VARIANT *arg;
 			zval *zarg;
