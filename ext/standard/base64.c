@@ -71,6 +71,19 @@ unsigned char *_php3_base64_encode(const unsigned char *string, int length, int 
 unsigned char *_php3_base64_decode(const unsigned char *string, int length, int *ret_length) {
 	const unsigned char *current = string;
 	int ch, i = 0, j = 0, k;
+	/* this sucks for threaded environments */
+	static short reverse_table[256];
+	static int table_built;
+
+	if(++table_built == 1) {
+		char *chp;
+		for(ch = 0; ch < 256; ch++) {
+			chp = strchr(base64_table, ch);
+			if(chp)
+				reverse_table[ch] = chp - base64_table;
+			else
+				reverse_table[ch] = -1;
+	}
 
 	unsigned char *result = (unsigned char *)emalloc((length / 4 * 3 + 1) * sizeof(char));
 	if (result == NULL) {
@@ -80,9 +93,8 @@ unsigned char *_php3_base64_decode(const unsigned char *string, int length, int 
 	/* run through the whole string, converting as we go */
 	while ((ch = *current++) != '\0') {
 		if (ch == base64_pad) break;
-		ch = (int)strchr(base64_table, ch);
-		if (ch == 0) continue;
-		ch -= (int)base64_table;
+		ch = reverse_table[ch];
+		if (ch < 0) continue;
 
 		switch(i % 4) {
 		case 0:
