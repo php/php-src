@@ -108,7 +108,7 @@ public class servlet extends HttpServlet {
         if (colon > 0) {
           try {
             addHeader.invoke(response, new Object[]
-              { data.substring(0,colon), data.substring(colon + 2) } );
+              { data.substring(0, colon), data.substring(colon + 2) } );
           }
 
           catch (Exception e) {
