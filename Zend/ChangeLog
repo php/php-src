@@ -1,3 +1,22 @@
+2004-10-27  Andi Gutmans  <andi@zend.com>
+
+    * zend_vm_opcodes.h:
+      - Oops missed this one
+
+    * zend_operators.c:
+      - Revert   Fixed bug #30228 (crash when comparing SimpleXML attribute to a
+      boolean).
+      - Need to discuss where the real problem is.
+
+    * README.ZEND_VM:
+      - Tiny fixes
+
+    * README.ZEND_VM
+      zend_compile.h
+      zend_vm_execute.h
+      zend_vm_gen.php:
+      - Improve comments, docs, code...
+
 2004-10-26  Andi Gutmans  <andi@zend.com>
 
     * zend_builtin_functions.c:

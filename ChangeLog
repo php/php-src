@@ -1,3 +1,51 @@
+2004-10-27  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/microtime.c:
+      Simplify and cleanup code.
+
+2004-10-27  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend_vm_opcodes.h:
+      - Oops missed this one
+
+    * ZendEngine2/zend_operators.c:
+      - Revert   Fixed bug #30228 (crash when comparing SimpleXML attribute to a
+      boolean).
+      - Need to discuss where the real problem is.
+
+    * ZendEngine2/README.ZEND_VM:
+      - Tiny fixes
+
+    * ZendEngine2/README.ZEND_VM
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_gen.php:
+      - Improve comments, docs, code...
+
+2004-10-27  Antony Dovgal  <tony2001@phpclub.net>
+
+    * (PHP_4_3)
+      NEWS
+      NEWS:
+      BFN
+
+    * (PHP_4_3)
+      ext/standard/file.c
+      main/streams/plain_wrapper.c:
+      MFH: fix bug #30388 (rename across filesystems loses ownership and
+      permission info)
+
+    * main/streams/plain_wrapper.c:
+      fix bug #30388 (rename across filesystems loses ownership and permission
+      info)
+
+2004-10-27  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/openssl/openssl.c
+      ext/openssl/openssl.c
+      ext/openssl/openssl.c:
+      Fix possible crash; patch by Kamesh Jayachandran
+
 2004-10-26  Andrey Hristov  <php@hristov.com>
 
     * (PHP_5_0)
