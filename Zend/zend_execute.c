@@ -3772,7 +3772,6 @@ int zend_fe_reset_handler(ZEND_OPCODE_HANDLER_ARGS)
 int zend_fe_fetch_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zval *array = get_zval_ptr(&opline->op1, EX(Ts), &EG(free_op1), BP_VAR_R);
-	zval *result = &EX_T(opline->result.u.var).tmp_var;
 	zval **value, *key;
 	char *str_key;
 	uint str_key_len;
@@ -3780,6 +3779,8 @@ int zend_fe_fetch_handler(ZEND_OPCODE_HANDLER_ARGS)
 	HashTable *fe_ht;
 	zend_object_iterator *iter = NULL;
 	int key_type;
+	/* extended_value & 2 means that the key is also needed */
+	zend_bool use_key = opline->extended_value & 2;
 
 	PZVAL_LOCK(array);
 
@@ -3805,10 +3806,12 @@ int zend_fe_fetch_handler(ZEND_OPCODE_HANDLER_ARGS)
 
 				zend_hash_move_forward(fe_ht);
 			} while (key_type != HASH_KEY_IS_STRING || zend_check_property_access(zobj, str_key TSRMLS_CC) != SUCCESS);
-			zend_unmangle_property_name(str_key, &class_name, &prop_name);
-			str_key_len = strlen(prop_name);
-			str_key = estrndup(prop_name, str_key_len);
-			str_key_len++;
+			if (use_key) {
+				zend_unmangle_property_name(str_key, &class_name, &prop_name);
+				str_key_len = strlen(prop_name);
+				str_key = estrndup(prop_name, str_key_len);
+				str_key_len++;
+			}
 			break;
 		}
 
@@ -3819,7 +3822,9 @@ int zend_fe_fetch_handler(ZEND_OPCODE_HANDLER_ARGS)
 				SET_OPCODE(op_array->opcodes+opline->op2.u.opline_num);
 				return 0; /* CHECK_ME */
 			}
-			key_type = zend_hash_get_current_key_ex(fe_ht, &str_key, &str_key_len, &int_key, 1, NULL);
+			if (use_key) {
+				key_type = zend_hash_get_current_key_ex(fe_ht, &str_key, &str_key_len, &int_key, 1, NULL);
+			}
 			zend_hash_move_forward(fe_ht);
 			break;
 
@@ -3841,41 +3846,59 @@ int zend_fe_fetch_handler(ZEND_OPCODE_HANDLER_ARGS)
 				SET_OPCODE(op_array->opcodes+opline->op2.u.opline_num);
 				return 0; /* CHECK_ME */
 			}
-			if (iter->funcs->get_current_key) {
-				key_type = iter->funcs->get_current_key(iter, &str_key, &str_key_len, &int_key TSRMLS_CC);
-			} else {
-				key_type = HASH_KEY_IS_LONG;
-				int_key = iter->index;
+			if (use_key) {
+				if (iter->funcs->get_current_key) {
+					key_type = iter->funcs->get_current_key(iter, &str_key, &str_key_len, &int_key TSRMLS_CC);
+				} else {
+					key_type = HASH_KEY_IS_LONG;
+					int_key = iter->index;
+				}
 			}
 
 			break;
 	}
 
-	array_init(result);
-
-	if (opline->extended_value) {
+	if (opline->extended_value & 1) {
 		SEPARATE_ZVAL_IF_NOT_REF(value);
 		(*value)->is_ref = 1;
 	}
-	(*value)->refcount++;
-	zend_hash_index_update(result->value.ht, 0, value, sizeof(zval *), NULL);
 
-	ALLOC_ZVAL(key);
-	INIT_PZVAL(key);
+	if (!use_key) {
+		if (opline->extended_value & 1) {
+			EX_T(opline->result.u.var).var.ptr_ptr = value;
+			(*value)->refcount++;
+		} else {
+			zval *result = &EX_T(opline->result.u.var).tmp_var;
 
-	switch (key_type) {
-		case HASH_KEY_IS_STRING:
-			key->value.str.val = str_key;
-			key->value.str.len = str_key_len-1;
-			key->type = IS_STRING;
-			break;
-		case HASH_KEY_IS_LONG:
-			key->value.lval = int_key;
-			key->type = IS_LONG;
-			break;
-		EMPTY_SWITCH_DEFAULT_CASE()
+			*result = **value;
+			zval_copy_ctor(result);
+		}
+	} else {
+		zval *result = &EX_T(opline->result.u.var).tmp_var;
+
+		(*value)->refcount++;
+
+		array_init(result);
+
+		zend_hash_index_update(result->value.ht, 0, value, sizeof(zval *), NULL);
+
+		ALLOC_ZVAL(key);
+		INIT_PZVAL(key);
+
+		switch (key_type) {
+			case HASH_KEY_IS_STRING:
+				key->value.str.val = str_key;
+				key->value.str.len = str_key_len-1;
+				key->type = IS_STRING;
+				break;
+			case HASH_KEY_IS_LONG:
+				key->value.lval = int_key;
+				key->type = IS_LONG;
+				break;
+			EMPTY_SWITCH_DEFAULT_CASE()
+		}
+		zend_hash_index_update(result->value.ht, 1, &key, sizeof(zval *), NULL);
 	}
-	zend_hash_index_update(result->value.ht, 1, &key, sizeof(zval *), NULL);
 
 	NEXT_OPCODE();
 }
