@@ -28,7 +28,7 @@ class PEAR_Command_Package extends PEAR_Command_Common
      */
     function getCommands()
     {
-        return array('package');
+        return array('package', 'package-list', 'package-info');
     }
 
     // }}}
@@ -71,6 +71,105 @@ class PEAR_Command_Package extends PEAR_Command_Common
                 } else {
                     $this->ui->displayLine("Package ok.");
                 }
+                break;
+            }
+            case 'package-list': {
+                include_once "PEAR/Common.php";
+                $obj = new PEAR_Common();
+                if (PEAR::isError($info = $obj->infoFromTgzFile($params[0]))) {
+                    return $info;
+                }
+                $list =$info['filelist'];
+                $caption = 'Contents of ' . basename($params[0]);
+                $this->ui->startTable(array('caption' => $caption,
+                                            'border' => true));
+                $this->ui->tableRow(array('Package File', 'Install Destination'),
+                                    array('bold' => true));
+                foreach ($list as $file => $att) {
+                    if (isset($att['baseinstalldir'])) {
+                        $dest = $att['baseinstalldir'] . '/' . basename($file);
+                    } else {
+                        $dest = basename($file);
+                    }
+                    $dest = preg_replace('!^/+!', '', $dest);
+                    $this->ui->tableRow(array($file, $dest));
+                }
+                $this->ui->endTable();
+                break;
+            }
+            case 'package-info': {
+                include_once "PEAR/Common.php";
+                $obj = new PEAR_Common();
+                if (PEAR::isError($info = $obj->infoFromTgzFile($params[0]))) {
+                    return $info;
+                }
+                unset($info['filelist']);
+                $keys = array_keys($info);
+                $longtext = array('description', 'summary');
+                foreach ($keys as $key) {
+                    if (is_array($info[$key])) {
+                        switch ($key) {
+                            case 'maintainers': {
+                                $i = 0;
+                                $mstr = '';
+                                foreach ($info[$key] as $m) {
+                                    if ($i++ > 0) {
+                                        $mstr .= "\n";
+                                    }
+                                    if (isset($m['email'])) {
+                                        $mstr .= $m['email'];
+                                    } else {
+                                        $mstr .= $m['handle'] . '@php.net';
+                                    }
+                                    $mstr .= " ($m[role])";
+                                }
+                                $info[$key] = $mstr;
+                                break;
+                            }
+                            case 'release_deps': {
+                                static $rel_trans = array(
+                                    'lt' => '<',
+                                    'le' => '<=',
+                                    'eq' => '=',
+                                    'ne' => '!=',
+                                    'gt' => '>',
+                                    'ge' => '>=',
+                                    );
+                                $i = 0;
+                                $dstr = '';
+                                foreach ($info[$key] as $d) {
+                                    if ($i++ > 0) {
+                                        $dstr .= ", ";
+                                    }
+                                    if (isset($rel_trans[$d['rel']])) {
+                                        $d['rel'] = $rel_trans[$d['rel']];
+                                    }
+                                    $dstr .= "$d[type] $d[rel]";
+                                    if (isset($d['version'])) {
+                                        $dstr .= " $d[version]";
+                                    }
+                                }
+                                $info[$key] = $dstr;
+                                break;
+                            }
+                            default: {
+                                $info[$key] = implode(", ", $info[$key]);
+                                break;
+                            }
+                        }
+                    }
+                    $info[$key] = trim($info[$key]);
+                    if (in_array($key, $longtext)) {
+                        $info[$key] = preg_replace('/  +/', ' ', $info[$key]);
+                    }
+                }
+                $caption = 'About ' . basename($params[0]);
+                $this->ui->startTable(array('caption' => $caption,
+                                            'border' => true));
+                foreach ($info as $key => $value) {
+                    $this->ui->tableRow(array($key, $value));
+                }
+                $this->ui->endTable();
                 break;
             }
             default: {
