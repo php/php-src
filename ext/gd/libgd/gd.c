@@ -2075,12 +2075,9 @@ void gdImageCopyMerge (gdImagePtr dst, gdImagePtr src, int dstX, int dstY, int s
 			} else {
 				dc = gdImageGetPixel(dst, tox, toy);
 
-                                ncR = (int)gdImageRed (src, c) * (pct / 100.0) 
-                                        + gdImageRed (dst, dc) * ((100 - pct) / 100.0);
-                                ncG = (int)gdImageGreen (src, c) * (pct / 100.0) 
-                                        + (int)gdImageGreen (dst, dc) * ((100 - pct) / 100.0);
-                                ncB = (int)gdImageBlue (src, c) * (pct / 100.0) 
-                                        + gdImageBlue (dst, dc) * ((100 - pct) / 100.0);
+ 				ncR = (int)gdImageRed (src, c) * (pct / 100.0) + gdImageRed (dst, dc) * ((100 - pct) / 100.0);
+ 				ncG = (int)gdImageGreen (src, c) * (pct / 100.0) + (int)gdImageGreen (dst, dc) * ((100 - pct) / 100.0);
+ 				ncB = (int)gdImageBlue (src, c) * (pct / 100.0) + gdImageBlue (dst, dc) * ((100 - pct) / 100.0);
 
 				/* Find a reasonable color */
 				nc = gdImageColorResolve (dst, ncR, ncG, ncB);
