@@ -391,6 +391,7 @@ DWORD fnWrapperProc(LPCONTROL_BLOCK lpCB)
 	file_handle.filename = lpCB->lpszFileName;
 	file_handle.free_filename = 0;
 	file_handle.type = ZEND_HANDLE_FILENAME;
+	file_handle.opened_path = NULL;
 
 	CG(extended_info) = 0;
 	init_request_info(sapi_globals, lpCB);
