@@ -131,6 +131,7 @@
 #define WSDL_SOAP11_NAMESPACE "http://schemas.xmlsoap.org/wsdl/soap/"
 #define WSDL_SOAP12_NAMESPACE "http://schemas.xmlsoap.org/wsdl/soap12/"
 #define RPC_SOAP12_NAMESPACE  "http://www.w3.org/2003/05/soap-rpc"
+#define RPC_SOAP12_NS_PREFIX  "rpc"
 
 #define WSDL_HTTP11_NAMESPACE "http://schemas.xmlsoap.org/wsdl/http/"
 #define WSDL_HTTP12_NAMESPACE	"http://www.w3.org/2003/05/soap/bindings/HTTP/"
@@ -152,7 +153,7 @@ struct _encodeType {
 struct _encode {
 	encodeType details;
 	zval *(*to_zval)(encodeTypePtr type, xmlNodePtr data);
-	xmlNodePtr (*to_xml)(encodeTypePtr type, zval *data, int style);
+	xmlNodePtr (*to_xml)(encodeTypePtr type, zval *data, int style, xmlNodePtr parent);
 
 	xmlNodePtr (*to_zval_before)(encodeTypePtr type, xmlNodePtr data, int style);
 	zval *(*to_zval_after)(encodeTypePtr type, zval *data);
@@ -164,13 +165,13 @@ struct _encode {
 smart_str *build_soap_action(zval *this_ptr, char *soapaction);
 
 /* Master functions all encode/decode should be called thur these functions */
-xmlNodePtr master_to_xml(encodePtr encode, zval *data, int style);
+xmlNodePtr master_to_xml(encodePtr encode, zval *data, int style, xmlNodePtr parent);
 zval *master_to_zval(encodePtr encode, xmlNodePtr data);
 
 #ifdef HAVE_PHP_DOMXML
 /* user defined mapping */
 zval *to_xml_before_user(encodeTypePtr type, zval *data);
-xmlNodePtr to_xml_user(encodeTypePtr type, zval *data, int style);
+xmlNodePtr to_xml_user(encodeTypePtr type, zval *data, int style, xmlNodePtr parent);
 xmlNodePtr to_xml_after_user(encodeTypePtr type, xmlNodePtr node, int style);
 xmlNodePtr to_zval_before_user(encodeTypePtr type, xmlNodePtr node, int style);
 zval *to_zval_user(encodeTypePtr type, xmlNodePtr node);
@@ -180,7 +181,7 @@ zval *to_zval_after_user(encodeTypePtr type, zval *data);
 void whiteSpace_replace(char* str);
 void whiteSpace_collapse(char* str);
 
-xmlNodePtr sdl_guess_convert_xml(encodeTypePtr enc, zval* data, int style);
+xmlNodePtr sdl_guess_convert_xml(encodeTypePtr enc, zval* data, int style, xmlNodePtr parent);
 zval *sdl_guess_convert_zval(encodeTypePtr enc, xmlNodePtr data);
 
 #define get_conversion(e) get_conversion_ex(SOAP_GLOBAL(defEncIndex), e)
@@ -188,7 +189,7 @@ zval *sdl_guess_convert_zval(encodeTypePtr enc, xmlNodePtr data);
 #define get_conversion_from_href_type(t) get_conversion_from_href_type_ex(SOAP_GLOBAL(defEnc), t, strlen(t))
 
 void encode_reset_ns();
-smart_str *encode_new_ns();
+xmlNsPtr encode_add_ns(xmlNodePtr node, const char* ns);
 
 encodePtr get_conversion_ex(HashTable *encoding, int encode);
 encodePtr get_conversion_from_type_ex(HashTable *encoding, xmlNodePtr node, const char *type);

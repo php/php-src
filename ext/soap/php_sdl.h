@@ -133,6 +133,7 @@ struct _sdlType {
 
 struct _sdlParam {
 	int        order;
+	sdlTypePtr element;
 	encodePtr  encode;
 	char      *paramName;
 };

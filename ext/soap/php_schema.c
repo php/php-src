@@ -279,7 +279,7 @@ int load_schema(sdlPtr sdl,xmlNodePtr schema)
 	    		uri = xmlBuildURI(location->children->content, base);
 			    xmlFree(base);
 				}
-			} 
+			}
 			schema_load_file(sdl,ns,uri,tns,1);
 		  if (uri != NULL) {xmlFree(uri);}
 		} else if (node_is_equal(trav,"annotation")) {
@@ -2210,11 +2210,13 @@ int schema_pass2(sdlPtr sdl)
 
 int schema_pass3(sdlPtr sdl)
 {
+/*
 	if (sdl->elements) {
 		zend_hash_destroy(sdl->elements);
 		free(sdl->elements);
 		sdl->elements = NULL;
 	}
+*/
 	if (sdl->attributes) {
 		zend_hash_destroy(sdl->attributes);
 		free(sdl->attributes);
@@ -2332,4 +2334,3 @@ static void delete_schema_restriction_var_char(void *srvc)
 		free(ptr);
 	}
 }
-
