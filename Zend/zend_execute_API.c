@@ -36,12 +36,11 @@
 ZEND_API void (*zend_execute)(zend_op_array *op_array TSRMLS_DC);
 ZEND_API void (*zend_execute_internal)(zend_execute_data *execute_data_ptr, int return_value_used TSRMLS_DC);
 
-/* true global */
+/* true globals */
 ZEND_API zend_fcall_info_cache empty_fcall_info_cache = { NULL, NULL, NULL, 0 };
 
 #ifdef ZEND_WIN32
 #include <process.h>
-
 static WNDCLASS wc;
 static HWND timeout_window;
 static HANDLE timeout_thread_event;
