@@ -192,7 +192,7 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 	if (sendmail) {
 #ifndef PHP_WIN32
 		if (EACCES == errno) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Permission denied; unable to execute shell to run mail delivery binary");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Permission denied: unable to execute shell to run mail delivery binary");
 			pclose(sendmail);
 			return 0;
 		}
@@ -230,7 +230,7 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 /* {{{ PHP_MINFO_FUNCTION
  */
 PHP_MINFO_FUNCTION(mail)
-{
+
 	char *sendmail_path = INI_STR("sendmail_path");
 
 #ifdef PHP_WIN32
