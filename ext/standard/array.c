@@ -2941,7 +2941,7 @@ PHP_FUNCTION(array_filter)
 				} else
 					zval_ptr_dtor(&retval);
 			} else {
-				php_error(E_WARNING, "%s() had an error invoking the reduction callback", get_active_function_name());
+				php_error(E_WARNING, "%s() had an error invoking the filter callback", get_active_function_name());
 				return;
 			}
 		} else if (!zend_is_true(*operand))
@@ -2960,6 +2960,117 @@ PHP_FUNCTION(array_filter)
 				break;
 		}
 	}
+}
+/* }}} */
+
+
+/* {{{ proto array array_map(mixed callback, array input1 [, array input2 ,...])
+   Applies the callback to the elements in given arrays. */
+PHP_FUNCTION(array_map)
+{
+	zval ***args = NULL;
+	zval ***params;
+	zval *callback;
+	zval *result, *null;
+	char *callback_name;
+	int i, k, maxlen = 0;
+	int *array_len;
+
+	if (ZEND_NUM_ARGS() < 2) {
+		WRONG_PARAM_COUNT;
+	}
+
+	args = (zval ***)emalloc(ZEND_NUM_ARGS() * sizeof(zval **));
+	if (zend_get_parameters_array_ex(ZEND_NUM_ARGS(), args) == FAILURE) {
+		efree(args);
+		WRONG_PARAM_COUNT;
+	}
+
+	callback = *args[0];
+	if (Z_TYPE_P(callback) != IS_NULL && !zend_is_callable(callback, 0, &callback_name)) {
+		php_error(E_WARNING, "%s() expects argument 1, '%s', to be either NULL or a valid callback",
+				  get_active_function_name(), callback_name);
+		efree(callback_name);
+		efree(args);
+		return;
+	}
+
+	/* Cache array sizes. */
+	array_len = (int*)emalloc((ZEND_NUM_ARGS()-1) * sizeof(int));
+
+	/* Check that arrays are indeed arrays and calculate maximum size. */
+	for (i = 0; i < ZEND_NUM_ARGS()-1; i++) {
+		if (Z_TYPE_PP(args[i+1]) != IS_ARRAY) {
+			php_error(E_WARNING, "%s() expects argument %d to be an array",
+					  get_active_function_name(), i + 2);
+			efree(array_len);
+			efree(args);
+			return;
+		}
+		array_len[i] = zend_hash_num_elements(Z_ARRVAL_PP(args[i+1]));
+		if (array_len[i] > maxlen)
+			maxlen = array_len[i];
+	}
+
+	/* Short-circuit: if no callback and only one array, just return it. */
+	if (Z_TYPE_P(callback) == IS_NULL && ZEND_NUM_ARGS() == 2) {
+		*return_value = **args[1];
+		zval_copy_ctor(return_value);
+		efree(array_len);
+		efree(args);
+		return;
+	}
+
+	array_init(return_value);
+	params = (zval ***)emalloc((ZEND_NUM_ARGS()-1) * sizeof(zval **));
+	MAKE_STD_ZVAL(null);
+	ZVAL_NULL(null);
+
+	/* We iterate through all the arrays at once. */
+	for (k = 0; k < maxlen; k++) {
+		/*
+		 * If no callback, the result will be an array, consisting of current
+		 * entries from all arrays.
+		 */
+		if (Z_TYPE_P(callback) == IS_NULL) {
+			MAKE_STD_ZVAL(result);
+			array_init(result);
+		}
+
+		for (i = 0; i < ZEND_NUM_ARGS()-1; i++) {
+			/*
+			 * If this array still hash elements, add the current one to the
+			 * parameter list, otherwise use null value.
+			 */
+			if (k < array_len[i]) {
+				zend_hash_index_find(Z_ARRVAL_PP(args[i+1]), k, (void **)&params[i]);
+			} else {
+				if (Z_TYPE_P(callback) == IS_NULL)
+					zval_add_ref(&null);
+				params[i] = &null;
+			}
+
+			if (Z_TYPE_P(callback) == IS_NULL)
+				add_next_index_zval(result, *params[i]);
+		}
+
+		if (Z_TYPE_P(callback) != IS_NULL) {
+			if (!call_user_function_ex(EG(function_table), NULL, callback, &result, ZEND_NUM_ARGS()-1, params, 0, NULL) == SUCCESS && result) {
+				php_error(E_WARNING, "%s() had an error invoking the map callback", get_active_function_name());
+				efree(array_len);
+				efree(args);
+				zval_dtor(return_value);
+				RETURN_NULL();
+			}
+		}
+
+		add_next_index_zval(return_value, result);
+	}
+	
+	zval_ptr_dtor(&null);
+	efree(params);
+	efree(array_len);
+	efree(args);
 }
 /* }}} */
 
