@@ -1151,6 +1151,7 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper)
                 if ((num_values == 1) && ((*value)->type != IS_ARRAY)) {
 			convert_to_string_ex(value);
 			ldap_mods[i]->mod_values[0] = (*value)->value.str.val;
+			ldap_mods[i]->mod_values[0][(*value)->value.str.len] = '\0';
 		} else {	
 			for(j=0; j<num_values; j++) {
 				zend_hash_index_find((*value)->value.ht,j, (void **) &ivalue);
