@@ -939,7 +939,7 @@ PHP_FUNCTION(socket_connect)
 		RETURN_FALSE;
 	}
 
-	RETURN_FALSE;
+	RETURN_TRUE;
 }
 /* }}} */
 
