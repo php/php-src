@@ -2,13 +2,13 @@
 Verify PHP 4.2 compatibility: global is used albeit register_globals=0
 --SKIPIF--
 <?php include('skipif.inc'); ?>
+--INI--
+register_globals=0
+session.bug_compat_42=1
+session.bug_compat_warn=0
 --FILE--
 <?php
 error_reporting(E_ALL & ~E_NOTICE);
-
-ini_set("register.globals", 0);
-ini_set("session.bug_compat_42", 1);
-ini_set("session.bug_compat_warn", 0);
 
 ob_start();
 session_id("abtest");
