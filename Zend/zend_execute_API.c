@@ -295,7 +295,7 @@ void shutdown_executor(TSRMLS_D)
 		zend_objects_store_destroy(&EG(objects_store));
 		if (EG(in_autoload)) {
 			zend_hash_destroy(EG(in_autoload));
-			efree(EG(in_autoload));
+			FREE_HASHTABLE(EG(in_autoload));
 		}
 	} zend_end_try();
 }
@@ -894,7 +894,7 @@ ZEND_API int zend_lookup_class(char *name, int name_length, zend_class_entry ***
 	}
 
 	if (EG(in_autoload) == NULL) {
-		EG(in_autoload) = emalloc(sizeof(HashTable));
+		ALLOC_HASHTABLE(EG(in_autoload));
 		zend_hash_init(EG(in_autoload), 0, NULL, NULL, 0);	
 	}
 	
