@@ -1874,7 +1874,7 @@ PHPAPI int php_stream_parse_fopen_modes(const char *mode, int *open_flags)
 	} else if (flags) {
 		flags |= O_WRONLY;
 	} else {
-		flags |= O_RDONLY'
+		flags |= O_RDONLY;
 	}
 
 #ifdef O_BINARY
