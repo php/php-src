@@ -430,7 +430,7 @@ if (!getenv('NO_INTERACTION')) {
 		$compression = 0;
 		
 		if ($just_save_results || !mail_qa_team($failed_tests_data, $compression, $status)) {
-			$output_file = 'php_test_results_' . date('Ymd') . ( $compression ? '.txt.gz' : '.txt' );
+			$output_file = 'php_test_results_' . date('Ymd_Hi') . ( $compression ? '.txt.gz' : '.txt' );
 			$fp = fopen($output_file, "w");
 			fwrite($fp, $failed_tests_data);
 			fclose($fp);
