@@ -1,6 +1,12 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2002, Version 4.3.0
+- Fixed seg fault in domxml_unlink() (jtate)
+- implemented domxml_elem_get_attribute_node(attrname) (chregu)
+- domxml_elem_remove_attribute(attibutename) is now implemented (chregu)
+- Added -r option to the CLI version of PHP which executes a piece of PHP
+  code directly from the commmand line. (Edin)
+- added formatting option to domxml_dump_mem() (chregu)
 - New build system that, among other improvements, replaces the slow recursive
   make with one global Makefile and eases the integration of proper
   dependencies. automake is only needed for its aclocal tool. The
