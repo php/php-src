@@ -1,3 +1,69 @@
+2002-06-11  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * ext/domxml/TODO: - Those have been implemented already.
+
+    * main/streams.c: - Fix builtin gets() emulation (hopefully).
+
+    * ext/bz2/bz2.c:
+    - Fix bzcompress(), remove leaks and add some sanity check on emalloc()s.
+
+    * TODO: - Add some recent observations with bz2.
+
+    * main/streams.c: - Add missing Id tag.
+
+    * main/streams.c:
+    - Always \0 terminate data returned from _php_stream_copy_to_mem().
+
+2002-06-11  Pierre-Alain Joye  <pajoye@phpindex.com>
+
+    * pear/Date/Calc.php: Add comment to ::isLeapYear()
+    Remove useless comment added during the last commit
+
+    * pear/Date/Calc.php:
+    Remove regexp and months checks and use the native php function checkdate()
+    Keep year check, only 4 digits allowed
+
+2002-06-11  Jason Greene  <jason@inetgurus.net>
+
+    * TODO: Forgot one
+
+    * TODO: Sockets currently works great with all compilers on Solaris
+    Update TODO
+
+2002-06-11  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/mime_magic/TODO
+      ext/mime_magic/mime_magic.c:
+    now it works on streams (plus some debug code removed)
+
+    * main/php_streams.h:
+    macro definition fixed, guess it was the usual kind of cut&past bug?
+
+2002-06-11  Edin Kadribasic  <edink@proventum.net>
+
+    * sapi/cli/config.m4
+      configure.in:
+    Disable installing pear when --disable-cli is used since pear installer
+    needs cli to function.
+
+2002-06-11  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * TODO: - These things have been done already.
+
+2002-06-11  Jason Greene  <jason@inetgurus.net>
+
+    * ext/standard/fsock.c
+      main/network.c
+      main/php_network.h:    Also fixed error handling on unix (micropatch)
+
+    Closes Bug #14740
+
+2002-06-11  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/mysql/config.m4
+      NEWS: - Reverted last bogus commit and fixed the credits in NEWS.
+
+
 2002-06-10  Markus Fischer  <mfischer@guru.josefine.at>
 
     * ext/pcre/php_pcre.c: - Typo.
