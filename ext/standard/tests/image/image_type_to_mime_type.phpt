@@ -29,7 +29,7 @@ array(10) {
   ["test1pix.bmp"]=>
   string(9) "image/bmp"
   ["test1pix.jpc"]=>
-  string(10) "image/jpeg"
+  string(24) "application/octet-stream"
   ["test1pix.jpg"]=>
   string(10) "image/jpeg"
   ["test2pix.gif"]=>
