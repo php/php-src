@@ -189,15 +189,19 @@ PHP_FUNCTION(odbc_longreadlen);
 */
 PHP_FUNCTION(odbc_tables);
 PHP_FUNCTION(odbc_columns);
+#if !defined(HAVE_DBMAKER) && !defined(HAVE_SOLID)    /* not supported now */
 PHP_FUNCTION(odbc_columnprivileges);
+PHP_FUNCTION(odbc_tableprivileges);
+#endif
+#if !defined(HAVE_SOLID)    /* not supported */
 PHP_FUNCTION(odbc_foreignkeys);
+PHP_FUNCTION(odbc_procedures);
+PHP_FUNCTION(odbc_procedurecolumns);
+#endif
 PHP_FUNCTION(odbc_gettypeinfo);
 PHP_FUNCTION(odbc_primarykeys);
-PHP_FUNCTION(odbc_procedurecolumns);
-PHP_FUNCTION(odbc_procedures);
 PHP_FUNCTION(odbc_specialcolumns);
 PHP_FUNCTION(odbc_statistics);
-PHP_FUNCTION(odbc_tableprivileges);
 
 typedef struct odbc_connection {
 #if defined( HAVE_IBMDB2 ) || defined( HAVE_UNIXODBC )
