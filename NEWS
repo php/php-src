@@ -2,6 +2,11 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? 1999, Version 4.0 Beta 3
+- ucfirst()/ucwords() no longer modify arg1. (Thies)
+- Fixed strtr() not to modify arg1. (Thies)
+ -Added Win32 build files for Informix driver
+  and make it compile with ZTS (danny)
+Added tmpfile() function (Stig)
 - Upgraded regex library to alpha3.8 (Sascha)
 - Fixed selecting nested-tables in OCI8. (Thies)
 - RFC-854 fix for internal FTP-Code. Commands have to end in "\r\n" (Thies)
