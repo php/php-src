@@ -224,7 +224,9 @@ class PEAR
      *
      * @param   mixed $data   the value to test
      * @param   int   $code   if $data is an error object, return true
-     *                        only if $obj->getCode() == $code
+     *                        only if $code is a string and
+     *                        $obj->getMessage() == $code or 
+     *                        $code is an integer and $obj->getCode() == $code
      * @access  public
      * @return  bool    true if parameter is an error
      */
