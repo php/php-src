@@ -39,6 +39,8 @@ typedef struct {
 	int read_post_data;	
 	void (*on_close)(int);
 	long async_send;
+
+	smart_str sbuf;
 } php_thttpd_globals;
 
 
@@ -57,7 +59,12 @@ PHP_INI_END()
 static int sapi_thttpd_ub_write(const char *str, uint str_length TSRMLS_DC)
 {
 	int n;
-	uint sent = 0;	
+	uint sent = 0;
+	
+	if (TG(sbuf).c != 0) {
+		smart_str_appendl_ex(&TG(sbuf), str, str_length, 1);
+		return str_length;
+	}
 	
 	while (str_length > 0) {
 		n = send(TG(hc)->conn_fd, str, str_length, 0);
@@ -65,18 +72,10 @@ static int sapi_thttpd_ub_write(const char *str, uint str_length TSRMLS_DC)
 		if (n == -1 && errno == EPIPE)
 			php_handle_aborted_connection();
 		if (n == -1 && errno == EAGAIN) {
-			fd_set fdw;
+			smart_str_appendl_ex(&TG(sbuf), str, str_length, 1);
 
-			FD_ZERO(&fdw);
-			FD_SET(TG(hc)->conn_fd, &fdw);
-			n = select(TG(hc)->conn_fd + 1, NULL, &fdw, NULL, NULL);
-			if (n <= 0)
-				php_handle_aborted_connection();
-
-			continue;
+			return sent + str_length;
 		}
-		if (n <= 0) 
-			return n;
 
 		TG(hc)->bytes_sent += n;
 		str += n;
@@ -90,8 +89,10 @@ static int sapi_thttpd_ub_write(const char *str, uint str_length TSRMLS_DC)
 #define ADD_VEC(str,l) vec[n].iov_base=str;len += (vec[n].iov_len=l); n++
 #define COMBINE_HEADERS 30
 
-static int do_writev(struct iovec *vec, int n, int len TSRMLS_DC)
+static int do_writev(struct iovec *vec, int nvec, int len TSRMLS_DC)
 {
+	int n;
+
 	/*
 	 * XXX: partial writevs are not handled
 	 * This can only cause problems, if the user tries to send
@@ -99,12 +100,48 @@ static int do_writev(struct iovec *vec, int n, int len TSRMLS_DC)
 	 * The maximum size depends on SO_SNDBUF and is usually
 	 * at least 16KB from my experience.
 	 */
-	if (writev(TG(hc)->conn_fd, vec, n) == -1 && errno == EPIPE)
-		php_handle_aborted_connection();
-	TG(hc)->bytes_sent += len;
+	
+	if (TG(sbuf).c == 0) {
+		n = writev(TG(hc)->conn_fd, vec, nvec);
+
+		if (n == -1) {
+			if (errno == EAGAIN) {
+				n = 0;
+			} else {
+				php_handle_aborted_connection();
+			}
+		}
+
+
+		TG(hc)->bytes_sent += n;
+	} else
+		n = 0;
+
+	if (n < len) {
+		int i;
+
+		/* merge all unwritten data into sbuf */
+		for (i = 0; i < nvec; vec++, i++) {
+			/* has this vector been written completely? */
+			if (n >= vec->iov_len) {
+				/* yes, proceed */
+				n -= vec->iov_len;
+				continue;
+			}
+
+			if (n > 0) {
+				/* adjust vector */
+				vec->iov_base = (char *) vec->iov_base + n;
+				vec->iov_len -= n;
+				n = 0;
+			}
+
+			smart_str_appendl_ex(&TG(sbuf), vec->iov_base, vec->iov_len, 1);
+		}
+	}
 	
 	return 0;
-}	
+}
 
 static int sapi_thttpd_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 {
@@ -127,6 +164,7 @@ static int sapi_thttpd_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 	TG(hc)->status = SG(sapi_headers).http_response_code;
 
 #define DEF_CT "Content-Type: text/html\r\n"
+
 	if (SG(sapi_headers).send_default_content_type) {
 		ADD_VEC(DEF_CT, strlen(DEF_CT));
 	}
@@ -354,6 +392,7 @@ static void thttpd_request_ctor(TSRMLS_D)
 {
 	smart_str s = {0};
 
+	TG(sbuf).c = 0;
 	SG(request_info).query_string = TG(hc)->query?strdup(TG(hc)->query):NULL;
 
 	smart_str_appends_ex(&s, TG(hc)->hs->cwd, 1);
@@ -376,6 +415,7 @@ static void thttpd_request_ctor(TSRMLS_D)
 
 static void thttpd_request_dtor(TSRMLS_D)
 {
+	smart_str_free_ex(&TG(sbuf), 1);
 	if (SG(request_info).query_string)
 		free(SG(request_info).query_string);
 	free(SG(request_info).request_uri);
@@ -571,6 +611,15 @@ static off_t thttpd_real_php_request(httpd_conn *hc TSRMLS_DC)
 	thttpd_request_ctor(TSRMLS_C);
 
 	thttpd_module_main(TSRMLS_C);
+
+	if (TG(sbuf).c != 0) {
+		TG(hc)->buf_address = TG(sbuf).c;
+		TG(hc)->buf_len = TG(sbuf).len;
+
+		TG(sbuf).c = 0;
+		TG(sbuf).len = 0;
+		TG(sbuf).a = 0;
+	}
 
 	thttpd_request_dtor(TSRMLS_C);
 

@@ -1,6 +1,6 @@
-diff -ur thttpd-2.21b-orig/Makefile.in thttpd-2.21b/Makefile.in
---- thttpd-2.21b-orig/Makefile.in	Thu Mar 29 20:36:21 2001
-+++ thttpd-2.21b/Makefile.in	Mon Aug 13 23:50:27 2001
+diff -ur thttpd-2.21b/Makefile.in thttpd-2.21b-cool/Makefile.in
+--- thttpd-2.21b/Makefile.in	Thu Mar 29 20:36:21 2001
++++ thttpd-2.21b-cool/Makefile.in	Sun Jul 14 13:54:27 2002
 @@ -46,13 +46,15 @@
  
  # You shouldn't need to edit anything below here.
@@ -38,9 +38,9 @@ diff -ur thttpd-2.21b-orig/Makefile.in thttpd-2.21b/Makefile.in
  
  tar:
  	@name=`sed -n -e '/SERVER_SOFTWARE/!d' -e 's,.*thttpd/,thttpd-,' -e 's, .*,,p' version.h` ; \
-diff -ur thttpd-2.21b-orig/config.h thttpd-2.21b/config.h
---- thttpd-2.21b-orig/config.h	Mon Apr  9 23:57:36 2001
-+++ thttpd-2.21b/config.h	Mon Aug 13 23:51:00 2001
+diff -ur thttpd-2.21b/config.h thttpd-2.21b-cool/config.h
+--- thttpd-2.21b/config.h	Mon Apr  9 23:57:36 2001
++++ thttpd-2.21b-cool/config.h	Sun Jul 14 13:54:27 2002
 @@ -316,7 +316,7 @@
  /* CONFIGURE: A list of index filenames to check.  The files are searched
  ** for in this order.
@@ -50,9 +50,9 @@ diff -ur thttpd-2.21b-orig/config.h thttpd-2.21b/config.h
  
  /* CONFIGURE: If this is defined then thttpd will automatically generate
  ** index pages for directories that don't have an explicit index file.
-diff -ur thttpd-2.21b-orig/fdwatch.c thttpd-2.21b/fdwatch.c
---- thttpd-2.21b-orig/fdwatch.c	Fri Apr 13 07:36:08 2001
-+++ thttpd-2.21b/fdwatch.c	Tue Aug 14 00:00:10 2001
+diff -ur thttpd-2.21b/fdwatch.c thttpd-2.21b-cool/fdwatch.c
+--- thttpd-2.21b/fdwatch.c	Fri Apr 13 07:36:08 2001
++++ thttpd-2.21b-cool/fdwatch.c	Sun Jul 14 13:54:27 2002
 @@ -460,7 +460,7 @@
  
      ridx = 0;
@@ -73,9 +73,9 @@ diff -ur thttpd-2.21b-orig/fdwatch.c thttpd-2.21b/fdwatch.c
  	default: return 0;
  	}
      }
-diff -ur thttpd-2.21b-orig/libhttpd.c thttpd-2.21b/libhttpd.c
---- thttpd-2.21b-orig/libhttpd.c	Tue Apr 24 00:42:40 2001
-+++ thttpd-2.21b/libhttpd.c	Tue Aug 14 00:00:07 2001
+diff -ur thttpd-2.21b/libhttpd.c thttpd-2.21b-cool/libhttpd.c
+--- thttpd-2.21b/libhttpd.c	Tue Apr 24 00:42:40 2001
++++ thttpd-2.21b-cool/libhttpd.c	Sun Jul 14 14:43:04 2002
 @@ -85,6 +85,8 @@
  #include "match.h"
  #include "tdate_parse.h"
@@ -119,19 +119,35 @@ diff -ur thttpd-2.21b-orig/libhttpd.c thttpd-2.21b/libhttpd.c
      /* Done initializing. */
      if ( hs->binding_hostname == (char*) 0 )
  	syslog( LOG_INFO, "%.80s starting on port %d", SERVER_SOFTWARE, hs->port );
-@@ -2353,7 +2361,10 @@
+@@ -1703,7 +1711,9 @@
+     hc->keep_alive = 0;
+     hc->should_linger = 0;
+     hc->file_address = (char*) 0;
+-    return GC_OK;
++    hc->buf_address = (char*) 0;
++	hc->buf_len = 0;
++	return GC_OK;
+     }
+ 
+ 
+@@ -2353,7 +2363,15 @@
      {
      make_log_entry( hc, nowP );
  
 -    if ( hc->file_address != (char*) 0 )
-+    if ( hc->file_address == (char*) 1 )
++    if (hc->buf_address != 0) {
++		free(hc->buf_address);
++		hc->buf_address = 0;
++		hc->buf_len = 0;
++	}
++	if ( hc->file_address == (char*) 1 )
 +    {
 +	thttpd_closed_conn(hc->conn_fd);
 +    } else if ( hc->file_address != (char*) 0 )
  	{
  	mmc_unmap( hc->file_address, &(hc->sb), nowP );
  	hc->file_address = (char*) 0;
-@@ -3026,11 +3037,9 @@
+@@ -3026,11 +3044,9 @@
  post_post_garbage_hack( httpd_conn* hc )
      {
      char buf[2];
@@ -145,80 +161,19 @@ diff -ur thttpd-2.21b-orig/libhttpd.c thttpd-2.21b/libhttpd.c
      }
  
  
-@@ -3560,6 +3569,11 @@
- 	 ( hc->sb.st_mode & S_IXOTH ) &&
+@@ -3561,6 +3577,11 @@
  	 match( hc->hs->cgi_pattern, hc->expnfilename ) )
  	return cgi( hc );
-+
+ 
 +	if ( hc->hs->php_pattern != (char*) 0 &&
 +			match( hc->hs->php_pattern, hc->expnfilename)) {
 +		return thttpd_php_request( hc );
 +	}
- 
++
      /* It's not CGI.  If it's executable or there's pathinfo, someone's
      ** trying to either serve or run a non-CGI file as CGI.   Either case
-Only in thttpd-2.21b: libhttpd.c~
-diff -ur thttpd-2.21b-orig/libhttpd.h thttpd-2.21b/libhttpd.h
---- thttpd-2.21b-orig/libhttpd.h	Tue Apr 24 00:36:50 2001
-+++ thttpd-2.21b/libhttpd.h	Mon Aug 13 23:50:27 2001
-@@ -69,6 +69,7 @@
-     char* server_hostname;
-     int port;
-     char* cgi_pattern;
-+    char* php_pattern;
-     char* charset;
-     char* cwd;
-     int listen4_fd, listen6_fd;
-diff -ur thttpd-2.21b-orig/thttpd.c thttpd-2.21b/thttpd.c
---- thttpd-2.21b-orig/thttpd.c	Tue Apr 24 00:41:57 2001
-+++ thttpd-2.21b/thttpd.c	Mon Aug 13 23:50:27 2001
-@@ -1333,7 +1333,7 @@
- 	clear_connection( c, tvP );
- 	return;
- 	}
--    hc->read_idx += sz;
-+    if (sz > 0) hc->read_idx += sz;
- 
-     /* Do we have a complete request yet? */
-     switch ( httpd_got_request( hc ) )
-@@ -1387,6 +1387,12 @@
- 	clear_connection( c, tvP );
- 	return;
- 	}
-+	if (hc->file_address == (char *) 1) {
-+		tmr_cancel( c->idle_read_timer );
-+		c->idle_read_timer = (Timer*) 0;
-+		c->wouldblock_delay = 0;
-+		return;
-+	}
-     if ( c->bytes_sent >= c->bytes_to_send )
- 	{
- 	/* There's nothing to send. */
-@@ -1500,7 +1506,7 @@
- 	    {
- 	    /* Yes; move the unwritten part to the front of the buffer. */
- 	    int newlen = hc->responselen - sz;
--	    (void) memcpy( hc->response, &(hc->response[sz]), newlen );
-+	    (void) memmove( hc->response, &(hc->response[sz]), newlen );
- 	    hc->responselen = newlen;
- 	    sz = 0;
- 	    }
-diff -ur thttpd-2.21b-plain/mime_encodings.txt thttpd-2.21b/mime_encodings.txt
---- thttpd-2.21b-plain/mime_encodings.txt	Wed May 10 03:22:28 2000
-+++ thttpd-2.21b/mime_encodings.txt	Mon Dec 10 15:10:25 2001
-@@ -3,6 +3,6 @@
- # A list of file extensions followed by the corresponding MIME encoding.
- # Extensions not found in the table proceed to the mime_types table.
- 
--Z	x-compress
--gz	x-gzip
-+Z	compress
-+gz	gzip
- uu	x-uuencode
-diff -ur thttpd-2.21b-plain/libhttpd.c thttpd-2.21b/libhttpd.c
---- thttpd-2.21b-plain/libhttpd.c	Tue Apr 24 00:42:40 2001
-+++ thttpd-2.21b/libhttpd.c	Mon Dec 10 14:32:26 2001
-@@ -3611,14 +3611,18 @@
+     ** is prohibited.
+@@ -3611,14 +3632,18 @@
  	}
      else
  	{
@@ -238,3 +193,446 @@ diff -ur thttpd-2.21b-plain/libhttpd.c thttpd-2.21b/libhttpd.c
  	    hc->sb.st_mtime );
  	}
  
+diff -ur thttpd-2.21b/libhttpd.h thttpd-2.21b-cool/libhttpd.h
+--- thttpd-2.21b/libhttpd.h	Tue Apr 24 00:36:50 2001
++++ thttpd-2.21b-cool/libhttpd.h	Sun Jul 14 14:35:58 2002
+@@ -69,6 +69,7 @@
+     char* server_hostname;
+     int port;
+     char* cgi_pattern;
++    char* php_pattern;
+     char* charset;
+     char* cwd;
+     int listen4_fd, listen6_fd;
+@@ -137,6 +138,8 @@
+     struct stat sb;
+     int conn_fd;
+     char* file_address;
++	char *buf_address;
++	size_t buf_len;
+     } httpd_conn;
+ 
+ /* Methods. */
+diff -ur thttpd-2.21b/mime_encodings.txt thttpd-2.21b-cool/mime_encodings.txt
+--- thttpd-2.21b/mime_encodings.txt	Wed May 10 03:22:28 2000
++++ thttpd-2.21b-cool/mime_encodings.txt	Sun Jul 14 13:54:27 2002
+@@ -3,6 +3,6 @@
+ # A list of file extensions followed by the corresponding MIME encoding.
+ # Extensions not found in the table proceed to the mime_types table.
+ 
+-Z	x-compress
+-gz	x-gzip
++Z	compress
++gz	gzip
+ uu	x-uuencode
+diff -ur thttpd-2.21b/mime_types.txt thttpd-2.21b-cool/mime_types.txt
+--- thttpd-2.21b/mime_types.txt	Sat Apr 14 04:53:30 2001
++++ thttpd-2.21b-cool/mime_types.txt	Sun Jul 14 14:05:09 2002
+@@ -1,135 +1,138 @@
+-# mime_types.txt
+-#
+-# A list of file extensions followed by the corresponding MIME type.
+-# Extensions not found in the table are returned as text/plain.
+-
+-html	text/html; charset=%s
+-htm	text/html; charset=%s
+-txt	text/plain; charset=%s
+-rtx	text/richtext
+-etx	text/x-setext
+-tsv	text/tab-separated-values
+-css	text/css
+-xml	text/xml
+-dtd	text/xml
+-
+-gif	image/gif
+-jpg	image/jpeg
+-jpeg	image/jpeg
+-jpe	image/jpeg
+-jfif	image/jpeg
+-tif	image/tiff
+-tiff	image/tiff
+-pbm	image/x-portable-bitmap
+-pgm	image/x-portable-graymap
+-ppm	image/x-portable-pixmap
+-pnm	image/x-portable-anymap
+-xbm	image/x-xbitmap
+-xpm	image/x-xpixmap
+-xwd	image/x-xwindowdump
+-ief	image/ief
+-png	image/png
+-
+-au	audio/basic
+-snd	audio/basic
+-aif	audio/x-aiff
+-aiff	audio/x-aiff
+-aifc	audio/x-aiff
+-ra	audio/x-pn-realaudio
+-ram	audio/x-pn-realaudio
+-rm	audio/x-pn-realaudio
+-rpm	audio/x-pn-realaudio-plugin
+-wav	audio/wav
+-mid	audio/midi
+-midi	audio/midi
+-kar	audio/midi
+-mpga	audio/mpeg
+-mp2	audio/mpeg
+-mp3	audio/mpeg
+-
+-mpeg	video/mpeg
+-mpg	video/mpeg
+-mpe	video/mpeg
+-qt	video/quicktime
+-mov	video/quicktime
+-avi	video/x-msvideo
+-movie	video/x-sgi-movie
+-mv	video/x-sgi-movie
+-vx	video/x-rad-screenplay
+-
+-a	application/octet-stream
++ez	application/andrew-inset
++hqx	application/mac-binhex40
++cpt	application/mac-compactpro
++doc	application/msword
+ bin	application/octet-stream
++dms	application/octet-stream
++lha	application/octet-stream
++lzh	application/octet-stream
+ exe	application/octet-stream
+-dump	application/octet-stream
+-o	application/octet-stream
+-class	application/java
+-js	application/x-javascript
++class	application/octet-stream
++so	application/octet-stream
++dll	application/octet-stream
++oda	application/oda
++pdf	application/pdf
+ ai	application/postscript
+ eps	application/postscript
+ ps	application/postscript
+-dir	application/x-director
++smi	application/smil
++smil	application/smil
++mif	application/vnd.mif
++xls	application/vnd.ms-excel
++ppt	application/vnd.ms-powerpoint
++wbxml	application/vnd.wap.wbxml
++wmlc	application/vnd.wap.wmlc
++wmlsc	application/vnd.wap.wmlscriptc
++bcpio	application/x-bcpio
++vcd	application/x-cdlink
++pgn	application/x-chess-pgn
++cpio	application/x-cpio
++csh	application/x-csh
+ dcr	application/x-director
++dir	application/x-director
+ dxr	application/x-director
+-fgd	application/x-director
+-aam	application/x-authorware-map
+-aas	application/x-authorware-seg
+-aab	application/x-authorware-bin
+-fh4	image/x-freehand
+-fh7	image/x-freehand
+-fh5	image/x-freehand
+-fhc	image/x-freehand
+-fh	image/x-freehand
+-spl	application/futuresplash
+-swf	application/x-shockwave-flash
+ dvi	application/x-dvi
++spl	application/x-futuresplash
+ gtar	application/x-gtar
+ hdf	application/x-hdf
+-hqx	application/mac-binhex40
+-iv	application/x-inventor
++js	application/x-javascript
++skp	application/x-koan
++skd	application/x-koan
++skt	application/x-koan
++skm	application/x-koan
+ latex	application/x-latex
+-man	application/x-troff-man
+-me	application/x-troff-me
+-mif	application/x-mif
+-ms	application/x-troff-ms
+-oda	application/oda
+-pdf	application/pdf
+-rtf	application/rtf
+-bcpio	application/x-bcpio
+-cpio	application/x-cpio
+-sv4cpio	application/x-sv4cpio
+-sv4crc	application/x-sv4crc
+-sh	application/x-shar
++nc	application/x-netcdf
++cdf	application/x-netcdf
++sh	application/x-sh
+ shar	application/x-shar
++swf	application/x-shockwave-flash
+ sit	application/x-stuffit
++sv4cpio	application/x-sv4cpio
++sv4crc	application/x-sv4crc
+ tar	application/x-tar
++tcl	application/x-tcl
+ tex	application/x-tex
+-texi	application/x-texinfo
+ texinfo	application/x-texinfo
++texi	application/x-texinfo
++t	application/x-troff
+ tr	application/x-troff
+ roff	application/x-troff
+ man	application/x-troff-man
+ me	application/x-troff-me
+ ms	application/x-troff-ms
+-zip	application/x-zip-compressed
+-tsp	application/dsptype
+-wsrc	application/x-wais-source
+ ustar	application/x-ustar
+-cdf	application/x-netcdf
+-nc	application/x-netcdf
+-doc	application/msword
+-ppt	application/powerpoint
+-
+-crt	application/x-x509-ca-cert
+-crl	application/x-pkcs7-crl
+-
++src	application/x-wais-source
++xhtml	application/xhtml+xml
++xht	application/xhtml+xml
++zip	application/zip
++au	audio/basic
++snd	audio/basic
++mid	audio/midi
++midi	audio/midi
++kar	audio/midi
++mpga	audio/mpeg
++mp2	audio/mpeg
++mp3	audio/mpeg
++aif	audio/x-aiff
++aiff	audio/x-aiff
++aifc	audio/x-aiff
++m3u	audio/x-mpegurl
++ram	audio/x-pn-realaudio
++rm	audio/x-pn-realaudio
++rpm	audio/x-pn-realaudio-plugin
++ra	audio/x-realaudio
++wav	audio/x-wav
++pdb	chemical/x-pdb
++xyz	chemical/x-xyz
++bmp	image/bmp
++gif	image/gif
++ief	image/ief
++jpeg	image/jpeg
++jpg	image/jpeg
++jpe	image/jpeg
++png	image/png
++tiff	image/tiff
++tif	image/tiff
++djvu	image/vnd.djvu
++djv	image/vnd.djvu
++wbmp	image/vnd.wap.wbmp
++ras	image/x-cmu-raster
++pnm	image/x-portable-anymap
++pbm	image/x-portable-bitmap
++pgm	image/x-portable-graymap
++ppm	image/x-portable-pixmap
++rgb	image/x-rgb
++xbm	image/x-xbitmap
++xpm	image/x-xpixmap
++xwd	image/x-xwindowdump
++igs	model/iges
++iges	model/iges
++msh	model/mesh
++mesh	model/mesh
++silo	model/mesh
+ wrl	model/vrml
+ vrml	model/vrml
+-mime	message/rfc822
+-
+-pac	application/x-ns-proxy-autoconfig
+-
++css	text/css
++html	text/html; charset=%s
++htm	text/html; charset=%s
++asc	text/plain; charset=%s
++txt	text/plain; charset=%s
++rtx	text/richtext
++rtf	text/rtf
++sgml	text/sgml
++sgm	text/sgml
++tsv	text/tab-separated-values
+ wml	text/vnd.wap.wml
+-wmlc	application/vnd.wap.wmlc
+ wmls	text/vnd.wap.wmlscript
+-wmlsc	application/vnd.wap.wmlscriptc
+-wbmp	image/vnd.wap.wbmp
++etx	text/x-setext
++xml	text/xml
++xsl	text/xml
++mpeg	video/mpeg
++mpg	video/mpeg
++mpe	video/mpeg
++qt	video/quicktime
++mov	video/quicktime
++mxu	video/vnd.mpegurl
++avi	video/x-msvideo
++movie	video/x-sgi-movie
++ice	x-conference/x-cooltalk
+diff -ur thttpd-2.21b/thttpd.c thttpd-2.21b-cool/thttpd.c
+--- thttpd-2.21b/thttpd.c	Tue Apr 24 00:41:57 2001
++++ thttpd-2.21b-cool/thttpd.c	Sun Jul 14 14:56:18 2002
+@@ -111,12 +111,15 @@
+ static int httpd_conn_count;
+ 
+ /* The connection states. */
+-#define CNST_FREE 0
+-#define CNST_READING 1
+-#define CNST_SENDING 2
+-#define CNST_PAUSING 3
+-#define CNST_LINGERING 4
+-
++enum {
++	CNST_FREE = 0,
++	CNST_READING,
++	CNST_SENDING,
++	CNST_PAUSING,
++	CNST_LINGERING,
++	CNST_SENDING_BUF,
++	CNST_TOTAL_NR
++};
+ 
+ static httpd_server* hs = (httpd_server*) 0;
+ int terminate = 0;
+@@ -140,6 +143,7 @@
+ static int handle_newconnect( struct timeval* tvP, int listen_fd );
+ static void handle_read( connecttab* c, struct timeval* tvP );
+ static void handle_send( connecttab* c, struct timeval* tvP );
++static void handle_send_buf( connecttab* c, struct timeval* tvP );
+ static void handle_linger( connecttab* c, struct timeval* tvP );
+ static int check_throttles( connecttab* c );
+ static void clear_throttles( connecttab* c, struct timeval* tvP );
+@@ -157,6 +161,12 @@
+ static void logstats( struct timeval* nowP );
+ static void thttpd_logstats( long secs );
+ 
++typedef void (*handler_func)(connecttab*, struct timeval *);
++
++handler_func handler_array[CNST_TOTAL_NR] =
++{NULL, handle_read, handle_send, NULL, handle_linger, handle_send_buf};
++
++#define RUN_HANDLER(type, c) handler_array[type](c, &tv)
+ 
+ static void
+ handle_term( int sig )
+@@ -566,15 +576,17 @@
+ 	    if ( c == (connecttab*) 0 )
+ 		continue;
+ 	    hc = c->hc;
+-	    if ( c->conn_state == CNST_READING &&
+-		 fdwatch_check_fd( hc->conn_fd ) )
+-		handle_read( c, &tv );
+-	    else if ( c->conn_state == CNST_SENDING &&
+-		 fdwatch_check_fd( hc->conn_fd ) )
+-		handle_send( c, &tv );
+-	    else if ( c->conn_state == CNST_LINGERING &&
+-		 fdwatch_check_fd( hc->conn_fd ) )
+-		handle_linger( c, &tv );
++	    switch (c->conn_state) {
++			case CNST_READING:
++			case CNST_SENDING:
++			case CNST_LINGERING:
++			case CNST_SENDING_BUF:
++				fdwatch_check_fd(hc->conn_fd);
++				RUN_HANDLER(c->conn_state, c);
++				break;
++		}
++		
++		
+ 	    }
+ 	tmr_run( &tv );
+ 
+@@ -1333,7 +1345,7 @@
+ 	clear_connection( c, tvP );
+ 	return;
+ 	}
+-    hc->read_idx += sz;
++    if (sz > 0) hc->read_idx += sz;
+ 
+     /* Do we have a complete request yet? */
+     switch ( httpd_got_request( hc ) )
+@@ -1379,6 +1391,7 @@
+     else
+ 	c->bytes_to_send = hc->bytes_to_send;
+ 
++	if (hc->buf_address == 0) {
+     /* Check if it's already handled. */
+     if ( hc->file_address == (char*) 0 )
+ 	{
+@@ -1387,15 +1400,22 @@
+ 	clear_connection( c, tvP );
+ 	return;
+ 	}
++	if (hc->file_address == (char *) 1) {
++		tmr_cancel( c->idle_read_timer );
++		c->idle_read_timer = (Timer*) 0;
++		c->wouldblock_delay = 0;
++		return;
++	}
+     if ( c->bytes_sent >= c->bytes_to_send )
+ 	{
+ 	/* There's nothing to send. */
+ 	clear_connection( c, tvP );
+ 	return;
+ 	}
++	}
+ 
+     /* Cool, we have a valid connection and a file to send to it. */
+-    c->conn_state = CNST_SENDING;
++    c->conn_state = hc->buf_address ? CNST_SENDING_BUF : CNST_SENDING;
+     c->started_at = tvP->tv_sec;
+     c->wouldblock_delay = 0;
+     client_data.p = c;
+@@ -1500,7 +1520,7 @@
+ 	    {
+ 	    /* Yes; move the unwritten part to the front of the buffer. */
+ 	    int newlen = hc->responselen - sz;
+-	    (void) memcpy( hc->response, &(hc->response[sz]), newlen );
++	    (void) memmove( hc->response, &(hc->response[sz]), newlen );
+ 	    hc->responselen = newlen;
+ 	    sz = 0;
+ 	    }
+@@ -1568,6 +1588,36 @@
+ 	really_clear_connection( c, tvP );
+     }
+ 
++
++static void
++handle_send_buf(connecttab *c, struct timeval *tvP)
++{
++	httpd_conn* hc = c->hc;
++	int n = send(hc->conn_fd, hc->buf_address, hc->buf_len, 0);
++
++	if (n < 0) {
++		if (errno == EAGAIN)
++			return;
++
++		clear_connection( c, tvP );
++		return;
++	}
++
++	tmr_reset( tvP, c->idle_send_timer );
++
++	if (n == hc->buf_len) {
++		free(hc->buf_address);
++		hc->buf_address = 0;
++		hc->buf_len = 0;
++
++		clear_connection(c, tvP);
++		return;
++	}
++
++	hc->buf_len -= n;
++
++	memmove(hc->buf_address, hc->buf_address + n, hc->buf_len);
++}
+ 
+ static int
+ check_throttles( connecttab* c )
