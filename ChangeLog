@@ -1,3 +1,23 @@
+2001-10-24  Rasmus Lerdorf  <rasmus@php.net>
+
+    * main/SAPI.c: Let's suppress this warning if always_populate is enabled
+
+2001-10-24  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/gd/gd.c: MFH
+
+    * ext/gd/gd.c: Fixed logic bug introduced by me. Bug: #13796
+
+    * ext/hyperwave/hw.c
+      ext/hyperwave/hg_comm.c: C++ comment pollution removed.
+
+2001-10-24  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/hyperwave/hw.c:
+    - switched src and dest in memcpy. This caused a segm fault in hw_new_document_from_file()
+
+    * ext/hyperwave/hg_comm.c: - freeing memory wasn't always done right
+
 2001-10-23  Rasmus Lerdorf  <rasmus@php.net>
 
     * main/SAPI.c: Ok, now actually make it work - maybe...
