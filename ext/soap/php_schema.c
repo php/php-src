@@ -1678,7 +1678,7 @@ static int schema_element(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr element, sdlTyp
 			/* TODO: <unique> support */
 		} else if (node_is_equal(trav,"key")) {
 			/* TODO: <key> support */
-		} else if (node_is_equal(trav,"key")) {
+		} else if (node_is_equal(trav,"keyref")) {
 			/* TODO: <keyref> support */
 		} else {
 			php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: unexpected <%s> in element",trav->name);
@@ -1954,6 +1954,10 @@ static int schema_attributeGroup(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrGrou
 	}
 
 	trav = attrGroup->children;
+	if (trav != NULL && node_is_equal(trav, "annotation")) {
+		/* TODO: <annotation> support */
+		trav = trav->next;
+	}
 	while (trav != NULL) {
 		if (node_is_equal(trav,"attribute")) {
 			if (ref != NULL) {
