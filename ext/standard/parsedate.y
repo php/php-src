@@ -84,44 +84,44 @@
    then those parser generators need to be fixed instead of adding those
    names to this list. */
 
-#define yymaxdepth gd_maxdepth
-#define yyparse gd_parse
-#define yylex   gd_lex
-#define yyerror gd_error
-#define yylval  gd_lval
-#define yychar  gd_char
-#define yydebug gd_debug
-#define yypact  gd_pact
-#define yyr1    gd_r1
-#define yyr2    gd_r2
-#define yydef   gd_def
-#define yychk   gd_chk
-#define yypgo   gd_pgo
-#define yyact   gd_act
-#define yyexca  gd_exca
-#define yyerrflag gd_errflag
-#define yynerrs gd_nerrs
-#define yyps    gd_ps
-#define yypv    gd_pv
-#define yys     gd_s
-#define yy_yys  gd_yys
-#define yystate gd_state
-#define yytmp   gd_tmp
-#define yyv     gd_v
-#define yy_yyv  gd_yyv
-#define yyval   gd_val
-#define yylloc  gd_lloc
-#define yyreds  gd_reds          /* With YYDEBUG defined */
-#define yytoks  gd_toks          /* With YYDEBUG defined */
-#define yylhs   gd_yylhs
-#define yylen   gd_yylen
-#define yydefred gd_yydefred
-#define yydgoto gd_yydgoto
-#define yysindex gd_yysindex
-#define yyrindex gd_yyrindex
-#define yygindex gd_yygindex
-#define yytable  gd_yytable
-#define yycheck  gd_yycheck
+#define yymaxdepth php_gd_maxdepth
+#define yyparse php_gd_parse
+#define yylex   php_gd_lex
+#define yyerror php_gd_error
+#define yylval  php_gd_lval
+#define yychar  php_gd_char
+#define yydebug php_gd_debug
+#define yypact  php_gd_pact
+#define yyr1    php_gd_r1
+#define yyr2    php_gd_r2
+#define yydef   php_gd_def
+#define yychk   php_gd_chk
+#define yypgo   php_gd_pgo
+#define yyact   php_gd_act
+#define yyexca  php_gd_exca
+#define yyerrflag php_gd_errflag
+#define yynerrs php_gd_nerrs
+#define yyps    php_gd_ps
+#define yypv    php_gd_pv
+#define yys     php_gd_s
+#define yy_yys  php_gd_yys
+#define yystate php_gd_state
+#define yytmp   php_gd_tmp
+#define yyv     php_gd_v
+#define yy_yyv  php_gd_yyv
+#define yyval   php_gd_val
+#define yylloc  php_gd_lloc
+#define yyreds  php_gd_reds          /* With YYDEBUG defined */
+#define yytoks  php_gd_toks          /* With YYDEBUG defined */
+#define yylhs   php_gd_yylhs
+#define yylen   php_gd_yylen
+#define yydefred php_gd_yydefred
+#define yydgoto php_gd_yydgoto
+#define yysindex php_gd_yysindex
+#define yyrindex php_gd_yyrindex
+#define yygindex php_gd_yygindex
+#define yytable  php_gd_yytable
+#define yycheck  php_gd_yycheck
 
 static int yylex ();
 static int yyerror ();
@@ -905,7 +905,7 @@ difftm (struct tm *a, struct tm *b)
 	  + (a->tm_sec - b->tm_sec));
 }
 
-time_t parse_date(char *p, time_t *now)
+time_t php_parse_date(char *p, time_t *now)
 {
   struct tm tm, tm0, *tmp;
   time_t Start;
