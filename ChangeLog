@@ -2,6 +2,10 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ??? ?? 1999, Version 4.0 Beta 2
+- Children now inherit their parent's constructor, if they do not supply a
+  constructor of their own.
+- Fixed runtime inheritence of classes (parent methods/properties were
+  overriding their children) (Zeev, libzend)
 - Fixed backwards incompatibility with the "new" operator (Andi, libzend)
 - Fixed bugs in uksort() and ksort() sort ordering (Andrey)
 - Fixed a memory leak when using assignment-op operators with lvalue of type
