@@ -244,6 +244,7 @@ PHP_FUNCTION(get_browser)
 	}
 	
 	if (agent_name == NULL || Z_TYPE_PP(agent_name) == IS_NULL) {
+		zend_is_auto_global("_SERVER", sizeof("_SERVER")-1 TSRMLS_CC);
 		if (!PG(http_globals)[TRACK_VARS_SERVER]
 			|| zend_hash_find(PG(http_globals)[TRACK_VARS_SERVER]->value.ht, "HTTP_USER_AGENT", sizeof("HTTP_USER_AGENT"), (void **) &agent_name)==FAILURE) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "HTTP_USER_AGENT variable is not set, cannot determine user agent name");
