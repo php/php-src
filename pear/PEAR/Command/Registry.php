@@ -263,18 +263,18 @@ installed package.'
                             } else {
                                 $rel = $d['rel'];
                             }
-
                             if (isset($this->_deps_type_trans[$d['type']])) {
                                 $type = ucfirst($this->_deps_type_trans[$d['type']]);
                             } else {
                                 $type = $d['type'];
                             }
-
                             if (isset($d['name'])) {
                                 $name = $d['name'] . ' ';
+                            } else {
+                                $name = '';
                             }
                             if (isset($d['version'])) {
-                                $version = $d['version'];
+                                $version = $d['version'] . ' ';
                             } else {
                                 $version = '';
                             }
