@@ -40,7 +40,7 @@ PHP_RINIT_FUNCTION(pdo_mysql);
 PHP_RSHUTDOWN_FUNCTION(pdo_mysql);
 PHP_MINFO_FUNCTION(pdo_mysql);
 
-#endif	/* PHP_PDO_OCI_H */
+#endif	/* PHP_PDO_MYSQL_H */
 
 
 /*
