@@ -1593,7 +1593,7 @@ oci_loadlob(oci_connection *connection, oci_descriptor *mydescr, char **buffer,u
 					   mydescr->ocidescr,
 					   &readlen,				/* IN/OUT bytes toread/read */
 					   siz + 1,					/* offset (starts with 1) */ 
-					   (dvoid *) buf + siz,	
+					   (dvoid *) ((char *) buf + siz),	
 					   readlen,		 			/* size of buffer */
 					   (dvoid *)0,
 					   (OCICallbackLobRead) 0, 	/* callback... */
