@@ -676,6 +676,16 @@ CACHE_LIMITER_FUNC(private)
 	last_modified(TSRMLS_C);
 }
 
+CACHE_LIMITER_FUNC(private_no_expire)
+{
+	char buf[MAX_STR + 1];
+	
+	sprintf(buf, "Cache-Control: private, max-age=%ld, pre-check=%ld", PS(cache_expire) * 60, PS(cache_expire) * 60);
+	ADD_COOKIE(buf);
+
+	last_modified(TSRMLS_C);
+}
+
 CACHE_LIMITER_FUNC(nocache)
 {
 	ADD_COOKIE("Expires: Thu, 19 Nov 1981 08:52:00 GMT");
@@ -688,6 +698,7 @@ CACHE_LIMITER_FUNC(nocache)
 static php_session_cache_limiter_t php_session_cache_limiters[] = {
 	CACHE_LIMITER(public)
 	CACHE_LIMITER(private)
+	CACHE_LIMITER(private_no_expire)
 	CACHE_LIMITER(nocache)
 	{0}
 };
