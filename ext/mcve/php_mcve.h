@@ -1,7 +1,6 @@
 /*
  * basic mcve php module
  *
- * $Id$
  */
 
 #ifndef _PHP_MCVE_H
@@ -18,7 +17,7 @@ extern zend_module_entry php_mcve_module_entry;
 //#endif
 
 
-#define PHP_MCVE_VERSION	"1.0"
+#define PHP_MCVE_VERSION	"3.0"
 
 #define MCVE_CONST (CONST_CS | CONST_PERSISTENT)
 
@@ -33,7 +32,17 @@ PHP_FUNCTION(mcve_setdropfile);
 PHP_FUNCTION(mcve_setip);
 PHP_FUNCTION(mcve_setssl);
 PHP_FUNCTION(mcve_settimeout);
+PHP_FUNCTION(mcve_verifyconnection);
+PHP_FUNCTION(mcve_verifysslcert);
+PHP_FUNCTION(mcve_maxconntimeout);
+PHP_FUNCTION(mcve_connectionerror);
+PHP_FUNCTION(mcve_deletetrans);
 PHP_FUNCTION(mcve_connect);
+PHP_FUNCTION(mcve_transnew);
+PHP_FUNCTION(mcve_transparam);
+PHP_FUNCTION(mcve_transsend);
+PHP_FUNCTION(mcve_ping);
+PHP_FUNCTION(mcve_responseparam);
 PHP_FUNCTION(mcve_returnstatus);
 PHP_FUNCTION(mcve_returncode);
 PHP_FUNCTION(mcve_transactionssent);
