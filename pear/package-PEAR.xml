@@ -37,12 +37,13 @@
     </maintainer>
   </maintainers>
   <release>
-    <version>1.2</version>
-    <state>stable</state>
-    <date>2003-01-10</date>
+    <version>1.2b2</version>
+    <state>beta</state>
+    <date>2003-06-23</date>
     <notes>
 * Changed license from PHP 2.02 to 3.0
 * Added support for optional dependencies
+* Made upgrade and uninstall package case insensitive
 * pear makerpm, now works and generates a better system independant spec file
 * pear install|build &lt;pecl-package&gt;, now exposes the compilation progress
 * Added new pear bundle command, which downloads and uncompress a &lt;pecl-package&gt;.
