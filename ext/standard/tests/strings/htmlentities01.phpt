@@ -1,6 +1,7 @@
 --TEST--
 htmlentities() test 1 (cp1252)
 --INI--
+output_handler=
 mbstring.internal_encoding=pass
 --FILE--
 <?php

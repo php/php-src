@@ -2,6 +2,8 @@
 mb_convert_encoding()
 --SKIPIF--
 <?php extension_loaded('mbstring') or die('skip mbstring not available'); ?>
+--INI--
+output_handler=
 --FILE--
 <?php
 // TODO: Add more tests
