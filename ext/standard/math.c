@@ -101,6 +101,7 @@ PHP_FUNCTION(floor) {
 
 /* }}} */
 /* {{{ proto int round(double number)
+
    Returns the rounded value of the number */
 
 #ifndef HAVE_RINT
@@ -128,7 +129,10 @@ PHP_FUNCTION(round)
 	convert_scalar_to_number_ex(value);
 
 	if ((*value)->type == IS_DOUBLE) {
-		RETURN_DOUBLE(rint((*value)->value.dval));
+		double d;
+		d=rint((*value)->value.dval);
+		if(d==0.0) d=0.0; /* workaround for rint() returning -0 instead of 0 */
+		RETURN_DOUBLE(d);
 	} else if ((*value)->type == IS_LONG) {
 		RETURN_DOUBLE((double)(*value)->value.lval);
 	}
