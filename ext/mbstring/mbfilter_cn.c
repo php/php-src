@@ -111,8 +111,8 @@ mbfl_filt_conv_wchar_euccn(int c, mbfl_convert_filter *filter TSRMLS_DC)
 		s = ucs_a3_cp936_table[c - ucs_a3_cp936_table_min];
 	} else if (c >= ucs_i_cp936_table_min && c < ucs_i_cp936_table_max) {
 		s = ucs_i_cp936_table[c - ucs_i_cp936_table_min];
-	} else if (c >= ucs_r_cp936_table_min && c < ucs_r_cp936_table_max) {
-		s = ucs_r_cp936_table[c - ucs_r_cp936_table_min];
+	} else if (c >= ucs_hff_cp936_table_min && c < ucs_hff_cp936_table_max) {
+		s = ucs_hff_cp936_table[c - ucs_hff_cp936_table_min];
 	}
 	c1 = (s >> 8) & 0xff;
 	c2 = s & 0xff;
@@ -223,8 +223,14 @@ mbfl_filt_conv_wchar_cp936(int c, mbfl_convert_filter *filter TSRMLS_DC)
 		s = ucs_a3_cp936_table[c - ucs_a3_cp936_table_min];
 	} else if (c >= ucs_i_cp936_table_min && c < ucs_i_cp936_table_max) {
 		s = ucs_i_cp936_table[c - ucs_i_cp936_table_min];
-	} else if (c >= ucs_r_cp936_table_min && c < ucs_r_cp936_table_max) {
-		s = ucs_r_cp936_table[c - ucs_r_cp936_table_min];
+	} else if (c >= ucs_ci_cp936_table_min && c < ucs_ci_cp936_table_max) {
+		s = ucs_ci_cp936_table[c - ucs_ci_cp936_table_min];
+	} else if (c >= ucs_cf_cp936_table_min && c < ucs_cf_cp936_table_max) {
+		s = ucs_cf_cp936_table[c - ucs_cf_cp936_table_min];
+	} else if (c >= ucs_sfv_cp936_table_min && c < ucs_sfv_cp936_table_max) {
+		s = ucs_sfv_cp936_table[c - ucs_sfv_cp936_table_min];
+	} else if (c >= ucs_hff_cp936_table_min && c < ucs_hff_cp936_table_max) {
+		s = ucs_hff_cp936_table[c - ucs_hff_cp936_table_min];
 	}
 	if (s <= 0) {
 		c1 = c & ~MBFL_WCSPLANE_MASK;

@@ -653,7 +653,7 @@ static mbfl_encoding mbfl_encoding_eucjp_win = {
 	MBFL_ENCTYPE_MBCS
 };
 
-static const char *mbfl_encoding_sjis_win_aliases[] = {"SJIS-open", "MS_Kanji", "Windows-31J", NULL};
+static const char *mbfl_encoding_sjis_win_aliases[] = {"SJIS-open", "MS_Kanji", "Windows-31J", "CP932", NULL};
 
 static mbfl_encoding mbfl_encoding_sjis_win = {
 	mbfl_no_encoding_sjis_win,
