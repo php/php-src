@@ -124,7 +124,7 @@ ZEND_API void destroy_zend_class(zend_class_entry *ce)
 			free(ce->refcount);
 			zend_hash_destroy(&ce->function_table);
 			zend_hash_destroy(&ce->default_properties);
-			/* zend_hash_destroy(&ce->class_table); FIXME: Make sure this is initialized */
+			zend_hash_destroy(&ce->class_table);
 			break;
 	}
 }
