@@ -627,7 +627,7 @@ PHPAPI void php_stream_sock_set_timeout(php_stream *stream, struct timeval *time
 	sock->timeout_event = 0;
 }
 
-PHPAPI int php_set_sock_blocking(int socketd, int block)
+PHPAPI int php_set_sock_blocking(int socketd, int block TSRMLS_DC)
 {
       int ret = SUCCESS;
       int flags;
@@ -671,7 +671,7 @@ PHPAPI int php_stream_sock_set_blocking(php_stream *stream, int mode TSRMLS_DC)
 	if (mode == oldmode)
 		return oldmode;
 	
-	if (SUCCESS == php_set_sock_blocking(sock->socket, mode)) {
+	if (SUCCESS == php_set_sock_blocking(sock->socket, mode TSRMLS_CC)) {
 		sock->is_blocked = mode;
 		return oldmode;
 	}
