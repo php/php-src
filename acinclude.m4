@@ -17,12 +17,12 @@ AC_DEFUN(PHP_ADD_MAKEFILE_FRAGMENT,[
 ])
 
 
-dnl PHP_DEFINE(what[, value])
+dnl PHP_DEFINE(WHAT[, value])
 dnl
-dnl Creates builddir/include/what.h and in there #define what value
+dnl Creates builddir/include/what.h and in there #define WHAT value
 dnl
 AC_DEFUN(PHP_DEFINE,[
-  echo "#define $1 $2" > include/$1.h
+  [echo "#define ]$1[]ifelse([$2],,[ 1],[ $2])[" > include/php_]translit($1,A-Z,a-z)[.h]
 ])
 
 dnl PHP_INIT_BUILD_SYSTEM
@@ -31,6 +31,9 @@ AC_DEFUN(PHP_INIT_BUILD_SYSTEM,[
 mkdir include >/dev/null 2>&1
 > Makefile.objects
 > Makefile.fragments
+dnl We need to play tricks here to avoid matching the egrep line itself
+pattern=define
+egrep $pattern'.*include/php' $srcdir/configure|sed 's/.*>//'|xargs touch
 ])
 
 dnl PHP_GEN_GLOBAL_MAKEFILE
@@ -68,9 +71,23 @@ AC_DEFUN(PHP_ADD_SOURCES,[
 ])
 
 dnl PHP_ASSIGN_BUILD_VARS(type)
-dnl Internal macro, should/can be exploded manually
+dnl Internal macro
 AC_DEFUN(PHP_ASSIGN_BUILD_VARS,[
-  for acx in pre meta post; do for acy in c cxx; do eval b_${acy}_$acx=[\$]$1_${acy}_$acx; done; done
+ifelse($1,shared,[
+  b_c_pre=$shared_c_pre
+  b_cxx_pre=$shared_cxx_pre
+  b_c_meta=$shared_c_meta
+  b_cxx_meta=$shared_cxx_meta
+  b_c_post=$shared_c_post
+  b_cxx_post=$shared_cxx_post
+],[
+  b_c_pre=$php_c_pre
+  b_cxx_pre=$php_cxx_pre
+  b_c_meta=$php_c_meta
+  b_cxx_meta=$php_cxx_meta
+  b_c_post=$php_c_post
+  b_cxx_post=$php_cxx_post
+])dnl
   b_lo=[$]$1_lo
 ])
 
@@ -1357,10 +1374,14 @@ AC_DEFUN(PHP_SETUP_ICONV, [
   found_iconv=no
   unset ICONV_DIR
 
-  AC_CHECK_FUNCS(iconv libiconv, [
-    AC_DEFINE(HAVE_ICONV, 1, [ ])
+  AC_CHECK_FUNC(iconv, [
+    PHP_DEFINE(HAVE_ICONV)
     found_iconv=yes
-  ], [
+  ],[
+    AC_CHECK_FUNC(libiconv,[
+      PHP_DEFINE(HAVE_LIBICONV)
+      found_iconv=yes
+  ],[
 
     for i in $PHP_ICONV /usr/local /usr; do
       if test -r $i/include/giconv.h; then
@@ -1383,16 +1404,17 @@ AC_DEFUN(PHP_SETUP_ICONV, [
     then
       PHP_CHECK_LIBRARY($iconv_lib_name, libiconv, [
         found_iconv=yes
-        AC_DEFINE(HAVE_LIBICONV, 1, [ ])
+        PHP_DEFINE(HAVE_LIBICONV)
       ], [
         PHP_CHECK_LIBRARY($iconv_lib_name, iconv, [
           found_iconv=yes
-          AC_DEFINE(HAVE_ICONV, 1, [ ])
+          PHP_DEFINE(HAVE_ICONV)
         ])
       ], [
         -L$ICONV_DIR/lib
       ])
     fi
+  ])
   ])
 
   if test "$found_iconv" = "yes"; then

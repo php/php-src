@@ -26,6 +26,11 @@
 #define PHP_ICONV_API
 #endif
 
+#ifdef PHP_ATOM_INC
+#include "php_have_iconv.h"
+#endif
+
+
 #if HAVE_ICONV
 extern zend_module_entry iconv_module_entry;
 #define iconv_module_ptr &iconv_module_entry
