@@ -297,6 +297,8 @@ int PHPMsessionDestroy(const char *session)
 	return ret;
 }
 
+/* {{{ proto bool msession_connect(string host, string port)
+   Connect to msession sever */
 PHP_FUNCTION(msession_connect)
 {
 	char *szhost;
@@ -334,12 +336,19 @@ PHP_FUNCTION(msession_connect)
 		RETURN_FALSE;
 	}
 }
+/* }}} */
+
+/* {{{ proto void msession_disconnect(void)
+   Disconnect from msession server */
 PHP_FUNCTION(msession_disconnect)
 {
 	PHPMsessionDisconnect();
 	RETURN_NULL();
 }
+/* }}} */
 
+/* {{{ proto int msession_count(void)
+   Get session count */
 PHP_FUNCTION(msession_count)
 {
 	if(g_conn)
@@ -355,7 +364,10 @@ PHP_FUNCTION(msession_count)
 	}
 	RETURN_NULL();
 }
+/* }}} */
 
+/* {{{ proto bool msession_create(string session)
+   Create a session */
 PHP_FUNCTION(msession_create)
 {
 	int stat;
@@ -395,7 +407,10 @@ PHP_FUNCTION(msession_create)
 		RETURN_FALSE;
 	}
 }
+/* }}} */
 
+/* {{{ proto bool msession_destroy(string name)
+   Destroy a session */
 PHP_FUNCTION(msession_destroy)
 {
 	char *szsession;
@@ -426,6 +441,10 @@ PHP_FUNCTION(msession_destroy)
 
 	RETURN_TRUE;
 }
+/* }}} */
+
+/* {{{ proto int msession_lock(string name)
+   Lock a session */
 PHP_FUNCTION(msession_lock)
 {
 	char *szsession;
@@ -467,6 +486,10 @@ PHP_FUNCTION(msession_lock)
 	}
 
 }
+/* }}} */
+
+/* {{{ proto int msession_unlock(string session, int key)
+   Unlock a session */
 PHP_FUNCTION(msession_unlock)
 {
 	char *szsession;
@@ -509,7 +532,10 @@ PHP_FUNCTION(msession_unlock)
 		RETURN_FALSE;
 	}
 }
+/* }}} */
 
+/* {{{ proto bool msession_set(string session, string name, string value)
+   Set value in session */
 PHP_FUNCTION(msession_set)
 {
 	char *szsession;
@@ -562,6 +588,10 @@ PHP_FUNCTION(msession_set)
 	}
 
 }
+/* }}} */
+
+/* {{{ proto string msession_get(string session, string name, string value)
+   Get value from session */
 PHP_FUNCTION(msession_get)
 {
 	char *szsession;
@@ -611,6 +641,10 @@ PHP_FUNCTION(msession_get)
 	}
 
 }
+/* }}} */
+
+/* {{{ proto string msession_uniq(int param)
+   Get uniq id */
 PHP_FUNCTION(msession_uniq)
 {
 	long val;
@@ -649,6 +683,10 @@ PHP_FUNCTION(msession_uniq)
 		RETURN_NULL();
 	}
 }
+/* }}} */
+
+/* {{{ proto string msession_randstr(int param)
+   Get random string */
 PHP_FUNCTION(msession_randstr)
 {
 	long val;
@@ -687,6 +725,10 @@ PHP_FUNCTION(msession_randstr)
 		RETURN_NULL();
 	}
 }
+/* }}} */
+
+/* {{{ proto array msession_find(string name, string value)
+   Find value */
 PHP_FUNCTION(msession_find)
 {
 	char *szname;
@@ -740,6 +782,10 @@ PHP_FUNCTION(msession_find)
 		RETURN_NULL();
 	}
 }
+/* }}} */
+
+/* {{{ proto array msession_list(void)
+   List ... ? */
 PHP_FUNCTION(msession_list)
 {
 	GET_REQB
@@ -774,7 +820,10 @@ PHP_FUNCTION(msession_list)
 		RETURN_NULL();
 	}
 }
+/* }}} */
 
+/* {{{ proto array msession_get_array(string session)
+   Get array of ... ? */
 PHP_FUNCTION(msession_get_array)
 {
 	char *szsession;
@@ -836,6 +885,10 @@ PHP_FUNCTION(msession_get_array)
 		RETURN_NULL();
 	}
 }
+/* }}} */
+
+/* {{{ proto bool msession_set_array(string session, array tuples)
+   Set array of ... */
 PHP_FUNCTION(msession_set_array)
 {
 	zval **session;
@@ -914,7 +967,10 @@ PHP_FUNCTION(msession_set_array)
 	efree((void *)pairs);
 	RETURN_NULL();
 }
+/* }}} */
 
+/* {{{ proto array msession_listvar(string name)
+   List variables in session */
 PHP_FUNCTION(msession_listvar)
 {
 	zval **name;
@@ -965,7 +1021,10 @@ PHP_FUNCTION(msession_listvar)
 		RETURN_NULL();
 	}
 }
+/* }}} */
 
+/* {{{ proto int msession_timeout(string session [, int param ])
+   Set/get session timeout */
 PHP_FUNCTION(msession_timeout)
 {
 	zval **session;
@@ -1009,6 +1068,10 @@ PHP_FUNCTION(msession_timeout)
 		RETURN_NULL();
 	}
 }
+/* }}} */
+
+/* {{{ proto string msession_inc(string session, string name) 
+   Increment value in session */
 PHP_FUNCTION(msession_inc)
 {
 	char *val;
@@ -1042,6 +1105,10 @@ PHP_FUNCTION(msession_inc)
 		RETURN_FALSE;
 	}
 }
+/* }}} */
+
+/* {{{ proto string msession_getdata(string session)
+   Get data ... ? */
 PHP_FUNCTION(msession_getdata)
 {
 	char *val;
@@ -1070,7 +1137,10 @@ PHP_FUNCTION(msession_getdata)
 	}
 
 }
+/* }}} */
 
+/* {{{ proto bool msession_setdata(string session, string value)
+   Set data  ... ?*/
 PHP_FUNCTION(msession_setdata)
 {
 	zval **session;
@@ -1096,6 +1166,10 @@ PHP_FUNCTION(msession_setdata)
 		RETURN_FALSE;
 	}
 }
+/* }}} */
+
+/* {{{ proto string msession_plugin(string session, string val [, string param ])
+   Register a session plugin ... ? */
 PHP_FUNCTION(msession_plugin)
 {
 	int ret;
