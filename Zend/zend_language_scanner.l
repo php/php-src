@@ -1382,16 +1382,6 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	return T_OPEN_TAG;
 }
 
-
-<INITIAL>"<?php_track_vars?>"{NEWLINE}? {
-	zend_error(E_WARNING, "&lt;?php_track_vars?&gt; is no longer supported - please use the track_vars INI directive instead");
-	HANDLE_NEWLINE(yytext[yyleng-1]);
-	zendlval->value.str.val = (char *) estrndup(yytext, yyleng);
-	zendlval->value.str.len = yyleng;
-	zendlval->type = IS_STRING;
-	return T_INLINE_HTML;
-}
-
 <ST_IN_SCRIPTING,ST_DOUBLE_QUOTES,ST_HEREDOC,ST_BACKQUOTE>"$"{LABEL} {
 	zend_copy_value(zendlval, (yytext+1), (yyleng-1));
 	zendlval->type = IS_STRING;
