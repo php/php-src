@@ -1,6 +1,7 @@
 This is the first file you should be reading after you get your CVS account.
 We'll assume you're basically familiar with CVS, but feel free to post
-your questions on the mailing list.
+your questions on the mailing list. Please have a a look at 
+http://cvsbook.red-bean.com/ for more detailed information on CVS.
 
 PHP is developed through the efforts of a large number of people.
 Collaboration is a Good Thing(tm), and CVS lets us do this. Thus, following
