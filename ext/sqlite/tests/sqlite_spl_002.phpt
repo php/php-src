@@ -1,5 +1,5 @@
 --TEST--
-sqlite-oo: and SPL Countable
+sqlite-spl: Countable
 --SKIPIF--
 <?php # vim:ft=php
 if (!extension_loaded("sqlite")) print "skip"; 
