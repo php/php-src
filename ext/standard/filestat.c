@@ -573,28 +573,16 @@ static void php_stat(const char *filename, php_stat_len filename_length, int typ
 	}
 
 #ifndef PHP_WIN32
-#ifdef VIRTUAL_DIR
-	{
-		char *tmpname;
-
-		if (virtual_filepath(filename, &tmpname TSRMLS_CC)) {
-			php_error(E_WARNING, "Cannot get the virtual filepath of %s\n", filename);
-			RETURN_FALSE;
-		}
-
-		filename = tmpname;
-	}
-#endif
 
 	switch (type) {
 		case FS_IS_W:
-			RETURN_BOOL (!access (filename, W_OK));
+			RETURN_BOOL (!VCWD_ACCESS(filename, W_OK));
 		case FS_IS_R:
-			RETURN_BOOL (!access (filename, R_OK));
+			RETURN_BOOL (!VCWD_ACCESS(filename, R_OK));
 		case FS_IS_X:
-			RETURN_BOOL (!access (filename, X_OK));
+			RETURN_BOOL (!VCWD_ACCESS(filename, X_OK));
 		case FS_EXISTS:
-			RETURN_BOOL (!access (filename, F_OK));
+			RETURN_BOOL (!VCWD_ACCESS(filename, F_OK));
 	}
 #endif
 
