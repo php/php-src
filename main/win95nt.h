@@ -31,8 +31,6 @@ typedef char * caddr_t;
 typedef unsigned int uint;
 typedef unsigned long ulong;
 #if !NSAPI
-#define strcasecmp(s1, s2) stricmp(s1, s2)
-#define strncasecmp(s1, s2, n) strnicmp(s1, s2, n)
 typedef long pid_t;
 #endif
 
