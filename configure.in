@@ -691,7 +691,7 @@ AC_SUBST(INSTALL_IT)
 #libphp4.module 
 AC_OUTPUT([Makefile php4.spec ext/Makefile sapi/Makefile pecl/Makefile
            $PHP_OUTPUT_FILES
-           scripts/mkextlib regex/Makefile build-defs.h], [], [
+           scripts/mkextlib build-defs.h], [], [
 
 if test ! -f $srcdir/ext/bcmath/number.c; then
 	echo "creating number.c"
