@@ -735,7 +735,7 @@ static int php_fbsql_select_db(char *databaseName, PHPFBLink *link TSRMLS_DC)
 		if (c == NULL)
 		{
 			if (FB_SQL_G(generateWarnings))
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, fbcdcClassErrorMessage());
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", fbcdcClassErrorMessage());
 			return 0;
 		}
 		md = fbcdcCreateSession(c, "PHP", link->userName, link->userPassword, link->userName);
@@ -746,7 +746,7 @@ static int php_fbsql_select_db(char *databaseName, PHPFBLink *link TSRMLS_DC)
 			if (FB_SQL_G(generateWarnings))
 			{
 				if (emg)
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, emg);
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", emg);
 				else
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "No message");
 			}

@@ -60,7 +60,7 @@ main (int argc, char *argv[])
   err = gdImageStringFT ((gdImagePtr) NULL, &brect[0], 0, f, sz, angle, 0, 0, s);
   if (err)
     {
-      fprintf (stderr, err);
+      fprintf (stderr, "%s", err);
       return 1;
     }
 
@@ -87,7 +87,7 @@ main (int argc, char *argv[])
   err = gdImageStringFT (im, NULL, black, f, sz, angle, x, y, s);
   if (err)
     {
-      fprintf (stderr, err);
+      fprintf (stderr, "%s", err);
       return 1;
     }
   /* TBB: Write img to test/fttest.png */
