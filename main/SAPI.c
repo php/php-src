@@ -306,8 +306,16 @@ SAPI_API void sapi_activate(TSRMLS_D)
 	SG(rfc1867_uploaded_files) = NULL;
 
 	if (SG(server_context)) {
-		if (SG(request_info).request_method 
-			&& !strcmp(SG(request_info).request_method, "POST")) {
+		if ( SG(request_info).request_method 
+			&&  (!strcmp(SG(request_info).request_method, "POST")
+				|| (PG(allow_webdav_methods) 
+					&& (!strcmp(SG(request_info).request_method, "PROPFIND")
+					|| !strcmp(SG(request_info).request_method, "PROPPATCH")				
+					|| !strcmp(SG(request_info).request_method, "PUT")
+					|| !strcmp(SG(request_info).request_method, "MOVE")
+					|| !strcmp(SG(request_info).request_method, "POST")
+					|| !strcmp(SG(request_info).request_method, "COPY")
+					|| !strcmp(SG(request_info).request_method, "LOCK"))))) {
 			if (!SG(request_info).content_type) {
 				SG(request_info).content_type_dup = NULL;
 				if(PG(always_populate_raw_post_data)) {
