@@ -8,7 +8,8 @@ PHP 4                                                                      NEWS
 - Fixed output buffering implicit flush. (Yasuo) 
 - Added getopt() for parsing command line options and arguments. (Jon)
 - Added pg_fetch_assoc(), pg_fetch_all(), pg_ping(), pg_meta_data(), pg_convert(), 
-  pg_insert(), pg_select(), pg_update(), pg_delete() and pg_data_seek(). (Yasuo)
+  pg_insert(), pg_select(), pg_update(), pg_delete(), pg_data_seek() and
+  pg_unescape_bytea(). (Yasuo)
 - Fixed bug #17281 (Sanity checks for encoding sessions). (Ilia)
 - Fixed bug #16995 and #19392 (Prevent crash if $HTTP_SESSION_VARS != ARRAY).
   (Ilia)
