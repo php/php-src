@@ -1,3 +1,19 @@
+2004-01-24  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_API.c
+      zend_compile.c
+      zend_compile.h
+      zend_execute.c
+      zend_execute_API.c:
+      Switch from ZEND_ACC_DYNAMIC to ZEND_ACC_ALLOW_STATIC and disallow calling
+      internal non-static methods statically.
+
+2004-01-24  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * zend_execute.c
+      zend_execute_API.c:
+      Change message as proposed by Jon.
+
 2004-01-23  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_API.c
