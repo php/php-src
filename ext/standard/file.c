@@ -1571,7 +1571,7 @@ PHP_FUNCTION(copy)
 #ifdef PHP_WIN32
 	if ((fd_t=V_OPEN((Z_STRVAL_PP(target),_O_WRONLY|_O_CREAT|_O_TRUNC|_O_BINARY,_S_IREAD|_S_IWRITE)))==-1){
 #else
-	if ((fd_t=V_CREAT(Z_STRVAL_PP(target),0777))==-1) {
+	if ((fd_t=V_CREAT(Z_STRVAL_PP(target),0700))==-1) {
 #endif
 		php_error(E_WARNING,"Unable to create '%s':  %s", Z_STRVAL_PP(target), strerror(errno));
 		close(fd_s);
