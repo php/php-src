@@ -179,8 +179,6 @@ extern php3_module_entry oci8_module_entry;
 #define OCI_MAX_NAME_LEN  64
 #define OCI_MAX_DATA_SIZE INT_MAX
 #define OCI_PIECE_SIZE    (64*1024)-1
-#define OCI_CONN_TYPE(x)  ((x)==le_conn)
-#define OCI_STMT_TYPE(x)  ((x)==le_stmt)
 
 #ifdef ZTS
 #define OCILS_D php_oci_globals *oci_globals
