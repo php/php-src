@@ -639,9 +639,36 @@ int call_user_function_ex(HashTable *function_table, zval **object_pp, zval *fun
 
 ZEND_API int zend_lookup_class(char *name, int name_length, zend_class_entry ***ce TSRMLS_DC)
 {
-	return zend_hash_find(EG(class_table), name, name_length+1, (void **) ce);
-}
+	zval **args[1];
+	zval *autoload_function;
+	zval *class_name;
+	zval *retval_ptr;
+	int retval;
 
+	if (zend_hash_find(EG(class_table), name, name_length+1, (void **) ce) == SUCCESS) {
+		return SUCCESS;
+	}
+
+	MAKE_STD_ZVAL(autoload_function);
+	ZVAL_STRINGL(autoload_function, "__autoload", sizeof("__autoload")-1,  1);
+
+	MAKE_STD_ZVAL(class_name);
+	ZVAL_STRINGL(class_name, name, name_length, 1);
+	args[0] = &class_name;
+
+	retval = call_user_function_ex(EG(function_table), NULL, autoload_function, &retval_ptr, 1, args, 0, NULL TSRMLS_CC);
+
+	zval_ptr_dtor(&autoload_function);
+	zval_ptr_dtor(&class_name);
+	
+	if (retval == FAILURE) {
+		return FAILURE;
+	}
+
+	zval_ptr_dtor(&retval_ptr);
+
+	return zend_hash_find(EG(class_table), name, name_length + 1, (void **) ce);		
+}
 
 ZEND_API int zend_eval_string(char *str, zval *retval_ptr, char *string_name TSRMLS_DC)
 {
