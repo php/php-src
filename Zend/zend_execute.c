@@ -2036,6 +2036,7 @@ send_by_ref:
 					int return_value_used;
 					zval *inc_filename = get_zval_ptr(&opline->op1, Ts, &EG(free_op1), BP_VAR_R);
 					zval tmp_inc_filename;
+					zend_bool failure_retval=0;
 
 					if (inc_filename->type!=IS_STRING) {
 						tmp_inc_filename = *inc_filename;
@@ -2066,6 +2067,7 @@ send_by_ref:
 										opened_path = NULL; /* zend_destroy_file_handle() already frees it */
 									} else {
 										fclose(file_handle.handle.fp);
+										failure_retval=1;
 									}
 								} else {
 									if (opline->op2.u.constant.value.lval==ZEND_INCLUDE_ONCE) {
@@ -2097,11 +2099,11 @@ send_by_ref:
 						zval_dtor(&tmp_inc_filename);
 					}
 					FREE_OP(&opline->op1, EG(free_op1));
-					Ts[opline->result.u.var].var.ptr = NULL;
 					Ts[opline->result.u.var].var.ptr_ptr = &Ts[opline->result.u.var].var.ptr;
 					if (new_op_array) {
 						EG(return_value_ptr_ptr) = Ts[opline->result.u.var].var.ptr_ptr;
 						EG(active_op_array) = new_op_array;
+						Ts[opline->result.u.var].var.ptr = NULL;
 
 						zend_execute(new_op_array TSRMLS_CC);
 						
@@ -2114,7 +2116,7 @@ send_by_ref:
 								ALLOC_ZVAL(Ts[opline->result.u.var].var.ptr);
 								INIT_PZVAL(Ts[opline->result.u.var].var.ptr);
 								Ts[opline->result.u.var].var.ptr->value.lval = 1;
-								Ts[opline->result.u.var].var.ptr->type = IS_LONG;
+								Ts[opline->result.u.var].var.ptr->type = IS_BOOL;
 							}
 						}
 
@@ -2127,6 +2129,8 @@ send_by_ref:
 						if (return_value_used) {
 							ALLOC_ZVAL(Ts[opline->result.u.var].var.ptr);
 							INIT_ZVAL(*Ts[opline->result.u.var].var.ptr);
+							Ts[opline->result.u.var].var.ptr->value.lval = failure_retval;
+							Ts[opline->result.u.var].var.ptr->type = IS_BOOL;
 						}
 					}
 					EG(return_value_ptr_ptr) = original_return_value;
