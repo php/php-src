@@ -1,3 +1,231 @@
+2004-02-12  Derick Rethans  <php@derickrethans.nl>
+
+    * NEWS
+      ext/simplexml/simplexml.c:
+      - Fixed start-up problem if both SPL and SimpleXML were enabled. The
+        double initialization of apache 1.3 was causing problems here.
+
+2004-02-12  Stig Bakken  <ssb@trd.overture.com>
+
+    * ext/oci8/oci8.c
+      ext/standard/crypt.c
+      ext/standard/php_crypt.h:
+      - email address update
+
+    * ext/oci8/oci8.c:
+      - update my email address
+
+2004-02-12  Stefan Esser  <s.esser@e-matters.de>
+
+    * main/rfc1867.c:
+      better write into the correct buffer
+
+2004-02-12  Andi Gutmans  <andi@zend.com>
+
+    * NEWS
+      configure.in
+      main/php_version.h:
+      - We are RC1-dev now
+
+    * (php_5_0_0b4)
+      configure.in
+      main/php_version.h:
+      - Roll Beta 4
+
+    * (php_5_0_0b4)
+      ZendEngine2/zend_execute.c:
+      - Remove old code
+
+2004-02-12  Hartmut Holzgraefe  <hartmut@php-groupies.de>
+
+    * (php_5_0_0b4)
+      README.PHP4-TO-PHP5-THIN-CHANGES
+      ZendEngine2/ZEND_CHANGES:
+      making sure that the provided examples actualy work (or at least do not
+      generate no parse errors) unless they are really expected to fail
+
+2004-02-12  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (php_5_0_0b4)
+      NEWS:
+      reorder
+
+2004-02-12  Andi Gutmans  <andi@zend.com>
+
+    * (php_5_0_0b4)
+      ZendEngine2/zend_object_handlers.c:
+      - This was too strict.
+
+2004-02-12  Zeev Suraski  <zeev@zend.com>
+
+    * (php_5_0_0b4)
+      tests/classes/array_access_005.phpt:
+      Fix test
+
+2004-02-12  Pierre-Alain Joye  <paj@pearfr.org>
+
+    * (php_5_0_0b4)
+      pear/packages/DB-1.6.0RC6.tar:
+      - Update to DB-1.6.0RC6 (stable)
+        notabene: No more RC with stable state will be bundled with stable
+        php release. It's ok for php5 beta4.
+
+    * pear/packages/DB-1.6.0RC1.tar:
+      - Remove old DB
+
+2004-02-12  Zeev Suraski  <zeev@zend.com>
+
+    * (php_5_0_0b4)
+      ext/com_dotnet/com_saproxy.c:
+      Fix prototype/warning
+
+2004-02-12  Andi Gutmans  <andi@zend.com>
+
+    * NEWS:
+      - More news
+
+2004-02-12  Zeev Suraski  <zeev@zend.com>
+
+    * (php_5_0_0b4)
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_interfaces.c
+      ZendEngine2/zend_object_handlers.c:
+      - Check return-by-reference bit when implementing interface prototypes
+      - Add infrastructure for built-in functions to hint whether they
+        return by reference or not.  It is NOT currently used for anything,
+        except for interface prototypes (you can use it to request that the
+        function that implements your prototype returns by reference or
+        doesn't return by reference).
+        For downwards compatibility - by default, interface prototypes are
+        agnostic as to whether the function that implements them returns
+        by reference or not.  Use ZEND_BEGIN_ARG_INFO_EX() with
+        ZEND_RETURN_VALUE/ZEND_RETURN_REFERENCE to change that.
+      - Fix ArrayAccess::getOffset() to conduct additional checks.
+        If your getOffset() should work with multidimensional arrays - it
+        must return by reference.
+
+2004-02-12  Andi Gutmans  <andi@zend.com>
+
+    * NEWS:
+      - Add News entry
+
+    * (php_5_0_0b4)
+      ZendEngine2/zend_object_handlers.h:
+      - Add comments to read/write property/dimension for extension authors
+
+2004-02-12  Zeev Suraski  <zeev@zend.com>
+
+    * (php_5_0_0b4)
+      tests/lang/035.phpt
+      tests/lang/error_2_exception_001.phpt:
+      extend Exception
+
+2004-02-12  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * (php_5_0_0b4)
+      ext/com_dotnet/com_handlers.c:
+      fix copy-n-past error in constructor.
+      Spotted by Eric Colinet.
+
+2004-02-12  Zeev Suraski  <zeev@zend.com>
+
+    * configure.in:
+      Update configure
+
+    * ZendEngine2/zend_default_classes.h
+      ext/com_dotnet/com_com.c
+      ext/com_dotnet/com_dotnet.c
+      ext/com_dotnet/com_extension.c
+      ext/com_dotnet/com_handlers.c
+      ext/com_dotnet/com_iterator.c
+      ext/com_dotnet/com_misc.c
+      ext/com_dotnet/com_saproxy.c
+      ext/dom/php_dom.h
+      ext/mysql/php_mysql.c
+      ext/mysqli/mysqli.c
+      ext/pgsql/pgsql.c
+      ext/simplexml/simplexml.c
+      ext/sqlite/sqlite.c
+      main/main.c:
+      zend_default_classes.h -> zend_exceptions.h
+
+2004-02-12  Andi Gutmans  <andi@zend.com>
+
+    * (php_5_0_0b4)
+      ZendEngine2/Makefile.am:
+      - Add zend_exceptions.c
+
+2004-02-12  Zeev Suraski  <zeev@zend.com>
+
+    * (php_5_0_0b4)
+      ZendEngine2/ZendTS.dsp
+      ZendEngine2/zend.c
+      ZendEngine2/zend_default_classes.c
+      ZendEngine2/zend_exceptions.c
+      ZendEngine2/zend_exceptions.h
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute.h
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_reflection_api.c:
+      Centralize exceptions code in zend_exceptions.[ch].
+      Remove zend_default_classes.h (use zend_exceptions.h instead)
+      
+      NOTE:  This currently breaks the build, fixes to php-src and pecl coming
+             soon
+
+2004-02-12  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend_execute.c:
+      - Use zend_throw_exception_object() in throw_handler to make sure it
+      - does all the checks
+
+2004-02-12  Zeev Suraski  <zeev@zend.com>
+
+    * ZendEngine2/zend_default_classes.c
+      ZendEngine2/zend_default_classes.h
+      ZendEngine2/zend_exceptions.c
+      ZendEngine2/zend_exceptions.h
+      ZendEngine2/zend_execute.h
+      ZendEngine2/zend_execute_API.c:
+      Exceptions updates:
+      
+      - Enforce exceptions to be derived from class Exception.  This allows
+        users to perform catch-all.  It's not yet complete, so don't get
+        comfortable with it just yet :)  Updates are coming soon.
+      - Implement zend_throw_exception() using zend_throw_exception_ex()
+
+2004-02-12  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend_execute.h
+      ZendEngine2/zend_execute_API.c:
+      - Add API function to throw exception by using an object
+
+    * (php_5_0_0b4RC1)
+      NEWS
+      configure.in
+      main/php_version.h:
+      - Go with b4 RC 1 (Sanity package)
+
+2004-02-12  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      NEWS:
+      BFN
+
+    * (php_5_0_0b4RC1)
+      ext/standard/datetime.c:
+      ws fix
+
+    * (PHP_4_3)
+      ext/standard/datetime.c:
+      MFH: - Fixed bug #23467 (Showing incorrect Time Zone)
+
+    * ext/standard/datetime.c:
+      - Fixed bug #23467 (Showing incorrect Time Zone)
+
 2004-02-11  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ZendEngine2/zend.c:
