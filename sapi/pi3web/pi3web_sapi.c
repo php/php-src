@@ -121,6 +121,7 @@ static void php_info_pi3web(ZEND_MODULE_INFO_FUNC_ARGS)
 
 
 static zend_module_entry php_pi3web_module = {
+	STANDARD_MODULE_HEADER,
 	"PI3WEB",
 	NULL,
 	NULL,
@@ -128,6 +129,7 @@ static zend_module_entry php_pi3web_module = {
 	NULL,
 	NULL,
 	php_info_pi3web,
+	NULL,
 	STANDARD_MODULE_PROPERTIES
 };
 
