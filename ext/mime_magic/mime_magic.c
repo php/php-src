@@ -483,15 +483,21 @@ static unsigned long signextend(struct magic *m, unsigned long v)
 /*
  *
  */
-static int is_valid_mimetype(char *p)
+static int is_valid_mimetype(char *p, int p_len)
 {
-	do {
-		if(!isalnum(*p) && (*p != '-')) return 0;
-	} while(*(++p) != '/');
-	++p;
-	do {
-		if(!isalnum(*p) && (*p != '-')) return 0;
-	} while(*(++p));
+	if (p_len > 0) {
+		do {
+			if (!isalnum(*p) && (*p != '-') && (*p != '.')) {
+				return 0;
+			}
+		} while (*(++p) != '/');
+		++p;
+		do {
+			if (!isalnum(*p) && (*p != '-') && (*p != '.') && !isspace(*p)) {
+				return 0;
+			}
+		} while (*(++p));
+	}
 	return 1;
 }
 
@@ -710,9 +716,9 @@ static int parse(char *l, int lineno)
     else
 		m->nospflag = 0;
 
-	if(!is_valid_mimetype(l)) {
+	if (!is_valid_mimetype(l, strlen(l))) {
 		if(MIME_MAGIC_G(debug))
-			php_error_docref("http://www.php.net/mime_magic" TSRMLS_CC, E_WARNING, ": (%s:%d) '%s' is not a valid mimetype, etry skipped", MIME_MAGIC_G(magicfile), lineno, l);
+			php_error_docref("http://www.php.net/mime_magic" TSRMLS_CC, E_WARNING, ": (%s:%d) '%s' is not a valid mimetype, entry skipped", MIME_MAGIC_G(magicfile), lineno, l);
 		return -1;
 	}
 	
@@ -992,7 +998,7 @@ static char *rsl_strdup(int start_frag, int start_pos, int len)
     req_dat =  MIME_MAGIC_G(req_dat);
 
     /* allocate the result string */
-    result = (char *) emalloc(len + 1);
+    result = (char *) emalloc(len + 2);
 
     /* loop through and collect the string */
     res_pos = 0;
