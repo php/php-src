@@ -23,7 +23,7 @@
 * statements. Because of SQL's strong typing, you will have to declare
 * an external function for every combination of input and output parameters 
 * your application requires. The types of the input arguments and the result
-* type can be either [VAR]CHARs or unscaled integers or floats.
+* type can be either [VAR]CHARs, (un)scaled integers or doubles/floats.
 * 
 * Declare the functions like this:
 * 
@@ -73,6 +73,16 @@
 
 #define min(a,b) ((a)<(b)?(a):(b))
 
+#ifdef PHP_WIN32
+#define LL_LIT(lit) lit ## I64
+#else
+#define LL_LIT(lit) lit ## ll
+#endif
+
+static ISC_INT64 const scales[] = { 1, 10, 100, 1000, 10000, 100000, 1000000, 100000000, 1000000000,
+	1000000000, LL_LIT(10000000000),LL_LIT(100000000000),LL_LIT(10000000000000),LL_LIT(100000000000000),
+	LL_LIT(1000000000000000),LL_LIT(1000000000000000),LL_LIT(1000000000000000000) };
+
 static void call_php(char *name, PARAMDSC *r, int argc, PARAMDSC **argv)
 {
 
@@ -102,27 +112,53 @@ static void call_php(char *name, PARAMDSC *r, int argc, PARAMDSC **argv)
 			}
 
 			switch (argv[i]->dsc_dtype) {
+				ISC_INT64 l;
+
 				case dtype_cstring:
 					ZVAL_STRING(argp[i], (char*)argv[i]->dsc_address,0);
 					break;
+
 				case dtype_text:
 					ZVAL_STRINGL(argp[i], (char*)argv[i]->dsc_address, argv[i]->dsc_length,0);
 					break;
+
 				case dtype_varying:
 					ZVAL_STRINGL(argp[i], ((PARAMVARY*)argv[i]->dsc_address)->vary_string,
 						((PARAMVARY*)argv[i]->dsc_address)->vary_length,0);
 					break;
 
 				case dtype_short:
-					ZVAL_LONG(argp[i], *(short*)argv[i]->dsc_address);
+					if (argv[i]->dsc_scale == 0) {
+						ZVAL_LONG(argp[i], *(short*)argv[i]->dsc_address);
+					} else {
+						ZVAL_DOUBLE(argp[i],
+							((double)*(short*)argv[i]->dsc_address)/scales[-argv[i]->dsc_scale]);
+					}
 					break;
+
 				case dtype_long:
-					ZVAL_LONG(argp[i], *(ISC_LONG*)argv[i]->dsc_address);
+					if (argv[i]->dsc_scale == 0) {
+						ZVAL_LONG(argp[i], *(ISC_LONG*)argv[i]->dsc_address);
+					} else {
+						ZVAL_DOUBLE(argp[i],
+							((double)*(ISC_LONG*)argv[i]->dsc_address)/scales[-argv[i]->dsc_scale]);
+					}
+					break;
+
+				case dtype_int64:
+					l = *(ISC_INT64*)argv[i]->dsc_address;
+
+					if (argv[i]->dsc_scale == 0 && l <= LONG_MAX && l >= LONG_MIN) {
+						ZVAL_LONG(argp[i], (long)l);
+					} else {
+						ZVAL_DOUBLE(argp[i], ((double)l)/scales[-argv[i]->dsc_scale]);
+					}
 					break;
 
 				case dtype_real:
 					ZVAL_DOUBLE(argp[i], *(float*)argv[i]->dsc_address);
 					break;
+
 				case dtype_double:
 					ZVAL_DOUBLE(argp[i], *(double*)argv[i]->dsc_address);
 					break;
