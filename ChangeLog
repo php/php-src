@@ -1,3 +1,114 @@
+2002-08-20  helly  <helly@pb1.pair.com>
+
+    * php.ini-dist
+      php.ini-recommended:
+    speling - thanks (Masaki Fujimoto), acually this wasn't my best piece of doc
+
+    * main/output.c:
+    Revert ob_start() defaults to 40K/10K until i find a better solution.
+
+2002-08-20  kalowsky  <kalowsky@pb1.pair.com>
+
+    * ext/imap/config.m4: MFH or MSG... your choice...
+
+    * ext/imap/config.m4: Correcting english in config
+
+    * sapi/nsapi/config.m4: Bug fix for #18999
+
+    * sapi/nsapi/config.m4: Fix for Bug #18999
+
+2002-08-20  wez  <wez@pb1.pair.com>
+
+    * main/streams.c: Fix newly introduced leak in the debug build.
+
+    * ext/standard/basic_functions.c
+      ext/standard/file.c
+      ext/standard/file.h
+      ext/standard/php_string.h
+      ext/standard/string.c
+      main/php_streams.h
+      main/streams.c: Implement filter API for streams.
+
+    Filters can be stacked onto a stream; more details will follow in docs and
+    on php-dev.
+
+    Implement "string.rot13" filter
+
+    Allows the following script:
+
+    $fp = fopen("file.txt", "r");
+    stream_filter_prepend($fp, "string.rot13");
+
+    // File contents will be subject to a rot13 transformation before
+    // being output.
+    fpassthru($fp);
+    fclose($fp);
+
+    * ext/standard/base64.c: fix vim modeline
+
+2002-08-20  helly  <helly@pb1.pair.com>
+
+    * php.ini-dist
+      php.ini-recommended: speling - thanks derick
+
+    * ext/zlib/zlib.c: change to php_error_docref()
+
+    * php.ini-dist
+      php.ini-recommended: note about double_buffering
+
+    * ext/standard/url_scanner_ex.c
+      ext/standard/url_scanner_ex.re
+      ext/zlib/zlib.c: Changed handling of output buffer sizes.
+
+    * main/main.c
+      main/output.c
+      main/php_globals.h
+      main/php_output.h: Changed handling of output buffer sizes.
+
+2002-08-20  sander  <sander@pb1.pair.com>
+
+    * ext/standard/var_unserializer.c: MFH
+
+    * ext/standard/var_unserializer.re:
+    MFH (var_unserializer.c follows in a second)
+
+2002-08-20  Sascha Schumann  <sas@pb1.pair.com>
+
+    * ext/standard/filestat.c: MFH
+
+2002-08-20  sniper  <sniper@pb1.pair.com>
+
+    * ext/oci8/config.m4: remove tabs
+
+2002-08-20  derick  <derick@pb1.pair.com>
+
+    * ext/standard/fsock.c:
+    - Fix for the compiler on Compaq Tru64 4.0F PK3 (bug #18974)
+
+2002-08-20  helly  <helly@pb1.pair.com>
+
+    * ext/mbstring/mbfilter.c
+      ext/mbstring/unicode_table_ru.h: NO C++ comments
+
+2002-08-20  edink  <edink@pb1.pair.com>
+
+    * ext/oci8/oci8.dsp:
+    Windows build supports returning the sql statement which failed.
+
+    * ext/dbx/dbx_sybasect.c: MFH (Remove C++ comments, bug #17628)
+
+    * ext/oci8/config.m4
+      ext/oci8/oci8.c: Fixed build with Oracle 8.0.x (bug #18973).
+
+    * ext/standard/dir.c: MFH (Fix for bug #14657, patch by Steph Fox)
+
+    * win32/readdir.c
+      win32/readdir.h: MFH (Fix for bug #11214, patch by Steph Fox)
+
+2002-08-20  kalowsky  <kalowsky@pb1.pair.com>
+
+    * ext/odbc/php_odbc.c: WS fix
+
 2002-08-19  wez  <wez@pb1.pair.com>
 
     * main/network.c
