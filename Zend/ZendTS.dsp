@@ -396,7 +396,7 @@ SOURCE=".\zend-scanner.l"
 InputPath=".\zend-scanner.l"
 
 "zend-scanner.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	flex -+ -i -Sflex.skl -Pzend -ozend-scanner.cpp zend-scanner.l
+	flex -+ -B -i -Sflex.skl -Pzend -ozend-scanner.cpp zend-scanner.l
 
 # End Custom Build
 
@@ -416,7 +416,7 @@ InputPath=".\zend-scanner.l"
 InputPath=".\zend-scanner.l"
 
 "zend-scanner.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	flex -+ -i -Sflex.skl -Pzend -ozend-scanner.cpp zend-scanner.l
+	flex -+ -B -i -Sflex.skl -Pzend -ozend-scanner.cpp zend-scanner.l
 
 # End Custom Build
 
