@@ -2014,7 +2014,7 @@ PHP_FUNCTION(domxml_node_replace_node)
 
 	repnode = xmlReplaceNode(nodep, new_repnode);
 
-	DOMXML_RET_OBJ(rv, repnode, &ret);
+	DOMXML_RET_OBJ(rv, nodep, &ret);
 }
 /* }}} */
 
