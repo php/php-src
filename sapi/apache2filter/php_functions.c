@@ -23,6 +23,7 @@
 #include "ext/standard/info.h"
 #include "SAPI.h"
 
+#define CORE_PRIVATE
 #include "apr_strings.h"
 #include "apr_time.h"
 #include "ap_config.h"
