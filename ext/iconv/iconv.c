@@ -148,7 +148,7 @@ int php_iconv_string(char *in_p, char **out, char *in_charset, char *out_charset
 }
 
 /* {{{ proto string iconv(string in_charset, string out_charset, string str)
-       Returns str converted to the out_charset character set.
+   Returns str converted to the out_charset character set
 */
 PHP_FUNCTION(iconv)
 {
@@ -175,8 +175,7 @@ PHP_FUNCTION(iconv)
 }
 
 /* {{{ proto string ob_iconv_handler(string contents)
-       Returns str in output buffer converted to the iconv.output_encoding 
-	   character set.
+   Returns str in output buffer converted to the iconv.output_encoding character set
 */
 PHP_FUNCTION(ob_iconv_handler)
 {
@@ -202,7 +201,7 @@ PHP_FUNCTION(ob_iconv_handler)
 }
 
 /* {{{ proto bool iconv_set_encoding(string int_charset, string out_charset)
-   set internal encoding and output encoding for ob_iconv_handler().
+   Sets internal encoding and output encoding for ob_iconv_handler()
 */
 PHP_FUNCTION(iconv_set_encoding)
 {
