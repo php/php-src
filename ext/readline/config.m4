@@ -9,6 +9,12 @@ PHP_ARG_WITH(readline,for readline support,
 [  --with-readline[=DIR]   Include readline support.  DIR is the readline
                           install directory.])
 
+if test "$PHP_READLINE" != "no" -o "$PHP_LIBEDIT" != "no"; then
+  if test "$PHP_SAPI" != "cgi"; then
+    AC_MSG_ERROR([readline extension can only be used with CGI build!])
+  fi
+fi
+
 if test "$PHP_READLINE" != "no"; then
   for i in /usr/local /usr $PHP_READLINE; do
     if test -f $i/include/readline/readline.h; then
