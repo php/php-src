@@ -7473,7 +7473,7 @@ mbfl_convert_encoding(
  * identify encoding
  */
 const mbfl_encoding *
-mbfl_identify_encoding(mbfl_string *string, enum mbfl_no_encoding *elist, int eliztsz TSRMLS_DC)
+mbfl_identify_encoding(mbfl_string *string, enum mbfl_no_encoding *elist, int eliztsz, int strict TSRMLS_DC)
 {
 	int i, n, num, bad;
 	unsigned char *p;
@@ -7517,7 +7517,7 @@ mbfl_identify_encoding(mbfl_string *string, enum mbfl_no_encoding *elist, int el
 				}
 				i++;
 			}
-			if ((num - 1) <= bad) {
+			if ((num - 1) <= bad && !strict) {
 				break;
 			}
 			p++;
@@ -7556,11 +7556,11 @@ mbfl_identify_encoding(mbfl_string *string, enum mbfl_no_encoding *elist, int el
 }
 
 const char*
-mbfl_identify_encoding_name(mbfl_string *string, enum mbfl_no_encoding *elist, int eliztsz TSRMLS_DC)
+mbfl_identify_encoding_name(mbfl_string *string, enum mbfl_no_encoding *elist, int eliztsz, int strict TSRMLS_DC)
 {
 	const mbfl_encoding *encoding;
 
-	encoding = mbfl_identify_encoding(string, elist, eliztsz TSRMLS_CC);
+	encoding = mbfl_identify_encoding(string, elist, eliztsz, strict TSRMLS_CC);
 	if (encoding != NULL &&
 	    encoding->no_encoding > mbfl_no_encoding_charset_min &&
 	    encoding->no_encoding < mbfl_no_encoding_charset_max) {
@@ -7575,7 +7575,7 @@ mbfl_identify_encoding_no(mbfl_string *string, enum mbfl_no_encoding *elist, int
 {
 	const mbfl_encoding *encoding;
 
-	encoding = mbfl_identify_encoding(string, elist, eliztsz TSRMLS_CC);
+	encoding = mbfl_identify_encoding(string, elist, eliztsz, 0 TSRMLS_CC);
 	if (encoding != NULL &&
 	    encoding->no_encoding > mbfl_no_encoding_charset_min &&
 	    encoding->no_encoding < mbfl_no_encoding_charset_max) {
