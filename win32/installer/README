@@ -1,0 +1,58 @@
+PHP Installer for Win32, by Wez Furlong <wez@thebrainroom.com>
+==============================================================
+$Id$
+
+Here are the supporting scripts for building the win32 PHP installer.
+You need to have the Super-Pimp Installer from Nullsoft (Open Source).
+It is available here:
+	http://nsis.sourceforge.net/
+
+To build an installer, you need:
+
+	o A Source Tree
+	o A win32 snapshot (extracted from the .zip)
+
+	(The source tree and snapshot should have matching versions!)
+
+A Script/Batch file.
+I'm using this (in a .bat file):
+
+----------------------------------------------------------------
+cd <snapshot_root>
+cli\php <source_root>\win32\installer\gen-nsis.php > php.nsi
+"C:\Program Files\NSIS\makensis" /pause /nocd php.nsi
+----------------------------------------------------------------
+  
+  ** It is a good idea to examine the php.nsi file for WARNING
+  ** comments.  These indicate inconsistencies about your source
+  ** tree structure.
+
+This will generate InstallPHP<Version>.exe, where <Version> is the version of
+the php in the snapshot.  The Installer will be placed in the snapshot root.
+
+Installer Concept
+=================
+
+Maintaining installers is a real chore, so we use PHP to generate as much as
+possible.
+
+The gen-nsis.php script will examine the extensions dir from the snapshot and
+then attempt to extract information about the extensions from the source code.
+The sapi dir is subjected to similar treatment.
+
+Throughout the installation, values for php.ini settings are decided; these are
+appended to a temporary file.  After everything has been installed, the
+iniset.php script is run and merges the values from the temporary file into the
+"official" php.ini.
+
+These scripts take advantage of features found in PHP 4.3.0 and later, so you
+can't build a PHP 4.2.x distro with it.
+
+Hacking
+=======
+
+While hacking, it's a good idea to comment out the SetCompressor line; it will
+speed up your installer builds...
+Also, switch the logic for the $SYSDIR define at the top to install vital DLLs
+to a fake system dir.
+
