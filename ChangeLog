@@ -1,3 +1,102 @@
+2004-07-27  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * sapi/activescript/README
+      sapi/activescript/marshal.cpp
+      sapi/activescript/php5activescript.c
+      sapi/activescript/php5as_scriptengine.h
+      sapi/activescript/scriptengine.cpp:
+      Tidy up a few loose ends.
+      Override normal php.ini behaviour so that only the launching applications
+      folder is searched; this avoids picking up a default php.ini with an
+      execution
+      time limit set.
+
+    * ext/com_dotnet/com_extension.c:
+      that's not my copy of the exception ctor, do don't fiddle its flags.
+
+    * ext/com_dotnet/com_handlers.c:
+      "better" "fix" for #29392.
+      This fixes the crash; the sample script:
+      
+      	$c = new COM('ADODB.Connection');
+      	echo $c;
+      
+      still does not work because the engine tries to call $c->__toString() and
+      the
+      ADODB object *might* implement that method, but doesn't know until you
+      open the
+      connection.
+
+2004-07-27  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_0)
+      NEWS
+      ext/sqlite/sqlite.c
+      ext/sqlite/sqlite.c:
+      MFH: Fixed bug 29395 (sqlite_escape_string() returns bogus data on empty
+      strings).
+
+    * ext/sqlite/sqlite.c:
+      Fixed bug 29395 (sqlite_escape_string() returns bogus data on empty
+      strings).
+      
+      Original Patch by: Tony
+
+2004-07-27  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_exceptions.c:
+      - Be specific about visibility
+
+2004-07-27  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/gd/config.m4:
+      Added missing comma. Thanks Tony.
+
+2004-07-27  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * sapi/activescript/README
+      sapi/activescript/classfactory.cpp
+      sapi/activescript/config.w32
+      sapi/activescript/marshal.cpp
+      sapi/activescript/php5activescript.c
+      sapi/activescript/php5as_classfactory.h
+      sapi/activescript/php5as_scriptengine.h
+      sapi/activescript/scriptengine.cpp:
+      Major re-jig.
+      With thanks to Rob Richards for tracking down a couple of big bugs caused
+      by
+      teeny bits of code.
+
+    * ext/com_dotnet/com_wrapper.c:
+      protect caller from a potential bailout
+
+    * ext/com_dotnet/com_handlers.c:
+      Revert last fix, because it breaks dynamic methods
+
+    * ext/com_dotnet/com_handlers.c:
+      Fix #29392 COM behaved badly for non-existant methods
+
+    * ZendEngine2/zend_builtin_functions.c:
+      Fix two possible crashes.  Latter is unlikely unless you are doing scary
+      things, but former looks nasty.
+
+2004-07-27  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      ext/gd/config.m4
+      ext/gd/config.m4
+      ext/gd/gd.c
+      ext/gd/gd.c:
+      MFH: Fixed bug #29349 (imagecreatefromstring() crashes with external GD
+      library).
+
+    * ext/gd/config.m4
+      ext/gd/gd.c:
+      Fixed bug #29349 (imagecreatefromstring() crashes with external GD library)
+      
+      Original Patch By: adconrad at debian dot org
+
 2004-07-26  Stanislav Malyshev  <stas@zend.com>
 
     * ZendEngine2/zend_interfaces.c:
