@@ -24,8 +24,8 @@
  <license>PHP</license>
  <release>
   <state>beta</state>
-  <version>0.2.2</version>
-  <date>2005-02-12</date>
+  <version>0.3</version>
+  <date>2005-03-09</date>
 
   <notes>
     You need to install the PDO core module before you can make use of this one.
@@ -33,6 +33,8 @@
 
     Windows binary: http://snaps.php.net/win32/PECL_5_0/php_pdo_sqlite.dll
 
+    - Fixed PECL Bug #3452; problem when first row of a result set contains a NULL value.
+    - Upgraded bundled sqlite to 3.1.3
     - setting PDO_ATTR_TIMEOUT controls the busy timeout
     - Fixed PECL Bug #3391; cannot bind NULL parameters	
     - Fixed build problem when building the bundled sqlite library
@@ -157,7 +159,7 @@
   </filelist>
   <deps>
    <dep type="php" rel="ge" version="5.0.3"/>
-   <dep type="ext" rel="ge" name="pdo" version="0.2"/>
+   <dep type="ext" rel="ge" name="pdo" version="0.3"/>
   </deps>
  </release>
 </package>
