@@ -507,7 +507,7 @@ void zend_post_startup(TSRMLS_D)
 
 	compiler_globals_ctor(compiler_globals, tsrm_ls);
 	zend_startup_constants(TSRMLS_C);
-	zend_copy_constants(EG(zend_constants), global_constants_table);
+	zend_copy_constants(EG(zend_constants), &global_main_class.constants_table);
 }
 #endif
 
