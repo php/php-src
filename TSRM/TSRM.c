@@ -412,6 +412,8 @@ TSRM_API THREAD_T tsrm_thread_id(void)
 {
 #ifdef TSRM_WIN32
 	return GetCurrentThreadId();
+#elif defined(NETWARE)
+	return NXThreadGetId();
 #elif defined(GNUPTH)
 	return pth_self();
 #elif defined(PTHREADS)
@@ -430,10 +432,17 @@ TSRM_API THREAD_T tsrm_thread_id(void)
 TSRM_API MUTEX_T tsrm_mutex_alloc(void)
 {
     MUTEX_T mutexp;
+#ifdef NETWARE
+    long flags = 0;  /* Don't require NX_MUTEX_RECURSIVE, I guess */
+    NXHierarchy_t order = 0;
+    NX_LOCK_INFO_ALLOC (lockInfo, "PHP-TSRM", 0);
+#endif    
 
 #ifdef TSRM_WIN32
     mutexp = malloc(sizeof(CRITICAL_SECTION));
 	InitializeCriticalSection(mutexp);
+#elif defined(NETWARE)
+    mutexp = NXMutexAlloc(flags, order, &lockInfo); /* return value ignored for now */
 #elif defined(GNUPTH)
 	mutexp = (MUTEX_T) malloc(sizeof(*mutexp));
 	pth_mutex_init(mutexp);
@@ -460,6 +469,8 @@ TSRM_API void tsrm_mutex_free(MUTEX_T mutexp)
     if (mutexp) {
 #ifdef TSRM_WIN32
 		DeleteCriticalSection(mutexp);
+#elif defined(NETWARE)
+		NXMutexFree(mutexp);
 #elif defined(GNUPTH)
 		free(mutexp);
 #elif defined(PTHREADS)
@@ -486,6 +497,8 @@ TSRM_API int tsrm_mutex_lock(MUTEX_T mutexp)
 #ifdef TSRM_WIN32
 	EnterCriticalSection(mutexp);
 	return 1;
+#elif defined(NETWARE)
+	return NXLock(mutexp);	
 #elif defined(GNUPTH)
 	return pth_mutex_acquire(mutexp, 0, NULL);
 #elif defined(PTHREADS)
@@ -507,6 +520,8 @@ TSRM_API int tsrm_mutex_unlock(MUTEX_T mutexp)
 #ifdef TSRM_WIN32
 	LeaveCriticalSection(mutexp);
 	return 1;
+#elif defined(NETWARE)
+	return NXUnlock(mutexp);
 #elif defined(GNUPTH)
 	return pth_mutex_release(mutexp);
 #elif defined(PTHREADS)
