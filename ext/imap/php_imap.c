@@ -3162,7 +3162,7 @@ int _php_imap_mail(char *to, char *subject, char *message, char *headers, char *
 			addr = addr->next;
 		}
 		efree(tempMailTo);
-		bufferTo[offset] = 0;
+		if (offset>0) bufferTo[offset-1] = 0;
 	}
 
 	if (cc && *cc) {
@@ -3180,7 +3180,7 @@ int _php_imap_mail(char *to, char *subject, char *message, char *headers, char *
 			addr = addr->next;
 		}
 		efree(tempMailTo);
-		bufferCc[offset] = 0;
+		if (offset>0) bufferCc[offset-1] = 0;
 	}
 
 	if (bcc && *bcc) {
@@ -3198,7 +3198,7 @@ int _php_imap_mail(char *to, char *subject, char *message, char *headers, char *
 			addr = addr->next;
 		}
 		efree(tempMailTo);
-		bufferBcc[offset] = 0;
+		if (offset>0) bufferBcc[offset-1] = 0;
 	}
 
 
