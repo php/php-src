@@ -177,7 +177,7 @@ void php_DOTNET_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_propert
 		*object_handle = *return_value;
 		pval_copy_constructor(object_handle);
 		INIT_PZVAL(object_handle);
-		zend_hash_index_update(object->value.obj.properties, 0, &object_handle, sizeof(pval *), NULL);
+		zend_hash_index_update(Z_OBJPROP_P(object), 0, &object_handle, sizeof(pval *), NULL);
 		pval_destructor(&function_name->element);
 	} else {
 		php_COM_call_function_handler(INTERNAL_FUNCTION_PARAM_PASSTHRU, property_reference);

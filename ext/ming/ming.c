@@ -117,7 +117,7 @@ static void *SWFgetProperty(zval *id, char *name, int namelen, int proptype TSRM
   
   if(id)
   {
-    if(zend_hash_find(id->value.obj.properties, name, namelen+1, (void **)&tmp) == FAILURE)
+    if(zend_hash_find(Z_OBJPROP_P(id), name, namelen+1, (void **)&tmp) == FAILURE)
     {
       php_error(E_WARNING, "unable to find property %s", name);
       return NULL;

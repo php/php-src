@@ -2382,11 +2382,8 @@ PHP_FUNCTION(fbsql_fetch_assoc)
 PHP_FUNCTION(fbsql_fetch_object)
 {
 	php_fbsql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, FBSQL_ASSOC);
-	if (return_value->type==IS_ARRAY)
-	{
-		return_value->type=IS_OBJECT;
-		return_value->value.obj.properties = return_value->value.ht;
-		return_value->value.obj.ce = &zend_standard_class_def;
+	if (return_value->type==IS_ARRAY) {
+		object_and_properties_init(return_value, &zend_standard_class_def, return_value->value.ht);
 	}
 }
 /* }}} */

@@ -176,10 +176,8 @@ static int qdom_find_children( zval **children, struct qdom_node *orig_node TSRM
             struct qdom_attribute *attr = qdom_do_node_attributes( node );
             if ( qdom_find_attributes( &a_children, attr TSRMLS_CC) > 0 )
             {
-                zend_hash_update(child->value.obj.properties,
-                                 "attributes", sizeof("attributes"),
-                                 (void *) &a_children, sizeof(zval *),
-                                 NULL);
+                zend_hash_update(Z_OBJPROP_P(child), "attributes", sizeof("attributes"),
+								(void *) &a_children, sizeof(zval *), NULL);
             }
             qdom_do_attributes_free( attr );
 /*              add_property_long(child, "attributes", num_attrs ); */
