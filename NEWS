@@ -1,6 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2002, Version 4.3.0
+- Fixed a crash in ereg_replace() when backreference number was greater
+  than the number of subpatterns. (oliver@billix.franken.de)
 - Added preliminary SAX-Input support. It's now possible to build a DomDocument
   with SAX-Events. (chregu)
 - Bundle gd library 2.0.1 with php (ext/gd/libgd) (Rasmus), tweak config.m4 to
