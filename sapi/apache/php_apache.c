@@ -151,11 +151,11 @@ PHP_FUNCTION(apache_note)
 	}
 	
 	convert_to_string_ex(arg_name);
-	note_val = (char *) table_get(((request_rec *)SG(server_context))->notes, Z_STRVAL_PP(arg_name));
+	note_val = (char *) table_get(((request_rec *)SG(server_context))->notes, (*arg_name)->value.str.val);
 	
 	if (arg_count == 2) {
 		convert_to_string_ex(arg_val);
-		table_set(((request_rec *)SG(server_context))->notes, Z_STRVAL_PP(arg_name), Z_STRVAL_PP(arg_val));
+		table_set(((request_rec *)SG(server_context))->notes, (*arg_name)->value.str.val, (*arg_val)->value.str.val);
 	}
 
 	if (note_val) {
@@ -307,14 +307,14 @@ PHP_FUNCTION(virtual)
 	}
 	convert_to_string_ex(filename);
 	
-	if (!(rr = sub_req_lookup_uri (Z_STRVAL_PP(filename), ((request_rec *) SG(server_context))))) {
-		php_error(E_WARNING, "Unable to include '%s' - URI lookup failed", Z_STRVAL_PP(filename));
+	if (!(rr = sub_req_lookup_uri ((*filename)->value.str.val, ((request_rec *) SG(server_context))))) {
+		php_error(E_WARNING, "Unable to include '%s' - URI lookup failed", (*filename)->value.str.val);
 		if (rr) destroy_sub_req (rr);
 		RETURN_FALSE;
 	}
 
 	if (rr->status != 200) {
-		php_error(E_WARNING, "Unable to include '%s' - error finding URI", Z_STRVAL_PP(filename));
+		php_error(E_WARNING, "Unable to include '%s' - error finding URI", (*filename)->value.str.val);
 		if (rr) destroy_sub_req (rr);
 		RETURN_FALSE;
 	}
@@ -323,7 +323,7 @@ PHP_FUNCTION(virtual)
 	php_header();
 
 	if (run_sub_req(rr)) {
-		php_error(E_WARNING, "Unable to include '%s' - request execution failed", Z_STRVAL_PP(filename));
+		php_error(E_WARNING, "Unable to include '%s' - request execution failed", (*filename)->value.str.val);
 		if (rr) destroy_sub_req (rr);
 		RETURN_FALSE;
 	} else {
@@ -393,8 +393,8 @@ PHP_FUNCTION(apache_lookup_uri)
 	}
 	convert_to_string_ex(filename);
 
-	if(!(rr = sub_req_lookup_uri(Z_STRVAL_PP(filename), ((request_rec *) SG(server_context))))) {
-		php_error(E_WARNING, "URI lookup failed", Z_STRVAL_PP(filename));
+	if(!(rr = sub_req_lookup_uri((*filename)->value.str.val, ((request_rec *) SG(server_context))))) {
+		php_error(E_WARNING, "URI lookup failed", (*filename)->value.str.val);
 		RETURN_FALSE;
 	}
 	object_init(return_value);
@@ -468,8 +468,8 @@ PHP_FUNCTION(apache_exec_uri)
 	}
 	convert_to_string_ex(filename);
 
-	if(!(rr = ap_sub_req_lookup_uri(Z_STRVAL_PP(filename), ((request_rec *) SG(server_context))))) {
-		php_error(E_WARNING, "URI lookup failed", Z_STRVAL_PP(filename));
+	if(!(rr = ap_sub_req_lookup_uri((*filename)->value.str.val, ((request_rec *) SG(server_context))))) {
+		php_error(E_WARNING, "URI lookup failed", (*filename)->value.str.val);
 		RETURN_FALSE;
 	}
 	RETVAL_LONG(ap_run_sub_req(rr));
