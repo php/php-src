@@ -1756,6 +1756,10 @@ send_by_ref:
 					zval *varptr;
 					varptr_ptr = get_zval_ptr_ptr(&opline->op1, Ts, BP_VAR_W);
 
+					if (!varptr_ptr) {
+						zend_error(E_ERROR, "Only variables can be passed by reference");
+					}
+
 					varptr = *varptr_ptr;
 
 					if (!PZVAL_IS_REF(varptr)) {
