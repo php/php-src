@@ -26,8 +26,8 @@
 #include "zend_constants.h"
 
 static ZEND_FUNCTION(zend_version);
-static ZEND_FUNCTION(zend_num_args);
-static ZEND_FUNCTION(zend_get_arg);
+static ZEND_FUNCTION(uf_num_args);
+static ZEND_FUNCTION(uf_get_arg);
 static ZEND_FUNCTION(strlen);
 static ZEND_FUNCTION(strcmp);
 static ZEND_FUNCTION(strcasecmp);
@@ -42,8 +42,8 @@ static ZEND_FUNCTION(leak);
 
 static zend_function_entry builtin_functions[] = {
 	ZEND_FE(zend_version,		NULL)
-	ZEND_FE(zend_num_args,		NULL)
-	ZEND_FE(zend_get_arg,		NULL)
+	ZEND_FE(uf_num_args,		NULL)
+	ZEND_FE(uf_get_arg,		NULL)
 	ZEND_FE(strlen,				NULL)
 	ZEND_FE(strcmp,				NULL)
 	ZEND_FE(strcasecmp,			NULL)
@@ -71,26 +71,26 @@ ZEND_FUNCTION(zend_version)
 }
 
 
-ZEND_FUNCTION(zend_num_args)
+ZEND_FUNCTION(uf_num_args)
 {
 	void **p;
 	int arg_count;
 	ELS_FETCH();
 
 	p = EG(argument_stack).top_element-1;
-	arg_count = (ulong) *p;		/* this is the amount of arguments passed to zend_num_args(); */
+	arg_count = (ulong) *p;		/* this is the amount of arguments passed to uf_num_args(); */
 
 	p = EG(argument_stack).top_element-1-arg_count-1;
 	if (p>=EG(argument_stack).elements) {
 		RETURN_LONG((ulong) *p);
 	} else {
-		zend_error(E_WARNING, "zend_num_args():  Called from the global scope - no function context");
+		zend_error(E_WARNING, "uf_num_args():  Called from the global scope - no function context");
 		RETURN_LONG(-1);
 	}
 }
 
 
-ZEND_FUNCTION(zend_get_arg)
+ZEND_FUNCTION(uf_get_arg)
 {
 	void **p;
 	int arg_count;
@@ -106,7 +106,7 @@ ZEND_FUNCTION(zend_get_arg)
 	requested_offset = (*z_requested_offset)->value.lval;
 
 	p = EG(argument_stack).top_element-1;
-	arg_count = (ulong) *p;		/* this is the amount of arguments passed to zend_num_args(); */
+	arg_count = (ulong) *p;		/* this is the amount of arguments passed to uf_num_args(); */
 
 	p = EG(argument_stack).top_element-1-arg_count-1;
 	if (p<EG(argument_stack).elements) {
@@ -115,7 +115,7 @@ ZEND_FUNCTION(zend_get_arg)
 	arg_count = (ulong) *p;
 
 	if (requested_offset>arg_count) {
-		zend_error(E_WARNING, "zend_get_arg():  Only %d arguments passed to function (argument %d requested)", arg_count, requested_offset);
+		zend_error(E_WARNING, "uf_get_arg():  Only %d arguments passed to function (argument %d requested)", arg_count, requested_offset);
 		RETURN_FALSE;
 	}
 
