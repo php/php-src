@@ -4,7 +4,7 @@ $Id$
 HOW TO CREATE A SELF-CONTAINED PHP EXTENSION
 
   A self-contained extension can be distributed independently of
-  the PHP source. To create such an extension, three things are
+  the PHP source. To create such an extension, two things are
   required:
 
   - Configuration file (config.m4)
