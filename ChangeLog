@@ -1,3 +1,18 @@
+2001-04-15  Stig Bakken  <ssb@fast.no>
+
+    * pear/catalog: * added sgml/xml catalog file
+
+    * pear/package.dtd: * add a package type called empty (default)
+
+2001-04-15  Alexander Feldman  <alex@zend.com>
+
+    * ext/standard/file.c: Fixed typo.
+
+    * ext/standard/file.c:
+    We shoud not fseek in a pipe and this caused a problem with popen and
+    fgets on the platforms where the buffer fix was applied (Solaris, FreeBSD).
+    Now the fseek is done only when the handle is of type fopen.
+
 2001-04-14  Stig Bakken  <ssb@fast.no>
 
     * pear/DB/mysql.php:
