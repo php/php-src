@@ -1,3 +1,53 @@
+2001-12-31  Jon Parise  <jon@csh.rit.edu>
+
+    * ext/overload/overload.c:
+    Match the table style of the other single-row info entries.
+
+2001-12-31  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/DB/tests/tableinfo.inc: E_ALL fixes
+
+    * pear/DB/mysql.php:
+    Always use mysql_select_db() before each query to ensure a working
+    support of multiple database connections in the same script
+
+2001-12-31  Vlad Krupin  <phpdevel@echospace.com>
+
+    * ext/dbase/dbf_rec.c:
+    Now dbase_pack() actually truncates the resulting .dbf file to the right
+    size (possibly fixing bug #6852 #3).
+
+2001-12-31  Jan Lehnardt  <jan@lehnardt.de>
+
+    * pear/HTML/Menu_Browser.php: fix typo
+
+2001-12-31  Martin Jansen  <mail@martin-jansen.de>
+
+    * pear/XML/tests/001.phpt
+      pear/XML/tests/002.phpt
+      pear/XML/tests/003.phpt
+      pear/XML/tests/005.phpt: * tabs -> spaces.
+
+2001-12-31  Vlad Krupin  <phpdevel@echospace.com>
+
+    * ext/dbase/dbase.c:
+    Verified and fixed bug 6852 #2. Now memo fields are 10 butes long, not 9.
+    That does not seem to affect how the code works except when creating a new
+    structure, in which case 'M' fields used to get created with size 9.
+
+    * ext/dbase/dbase.c:
+    Verified and fixed bug 6852 #1. No more null byte after terminating 0x0D.
+    Verified that the problem is real when creating new files and writing
+    a record. Both fixed and old versions seem to be able to somehow read
+    and write already existing files properly though.
+
+2001-12-31  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/notes/php_notes.c: Oops, missed one proto.
+
+    * ext/notes/php_notes.c
+      ext/ncurses/ncurses_functions.c: Fixed some protos.
+
 2001-12-30  Georg Richter  <georg.richter@phpev.de>
 
     * ext/ncurses/ncurses_functions.c:
