@@ -271,6 +271,21 @@ static int php_array_element_export(zval **zv, int num_args, va_list args, zend_
 	return 0;
 }
 
+static int php_object_element_export(zval **zv, int num_args, va_list args, zend_hash_key *hash_key)
+{
+	int level;
+	TSRMLS_FETCH();
+
+	level = va_arg(args, int);
+
+	if (hash_key->nKeyLength != 0) {
+		php_printf("%*cvar $%s = ", level + 1, ' ', hash_key->arKey);
+	}
+	php_var_export(zv, level + 2 TSRMLS_CC);
+	PUTS (";\n");
+	return 0;
+}
+
 void php_var_export(zval **struc, int level TSRMLS_DC)
 {
 	HashTable *myht;
@@ -299,19 +314,27 @@ void php_var_export(zval **struc, int level TSRMLS_DC)
 		break;
 	case IS_ARRAY:
 		myht = Z_ARRVAL_PP(struc);
-		goto head_done;
-	case IS_OBJECT:
-		myht = Z_OBJPROP_PP(struc);
-head_done:
 		if (level > 1) {
 			php_printf("\n%*c", level - 1, ' ');
 		}
 		PUTS ("array (\n");
 		zend_hash_apply_with_arguments(myht, (apply_func_args_t) php_array_element_export, 1, level);
 		if (level > 1) {
-			php_printf("%*c", level-1, ' ');
+			php_printf("%*c", level - 1, ' ');
 		}
 		PUTS(")");
+		break;
+	case IS_OBJECT:
+		myht = Z_OBJPROP_PP(struc);
+		if (level > 1) {
+			php_printf("\n%*c", level - 1, ' ');
+		}
+		php_printf ("class %s {\n", ((*struc)->value.obj.ce)->name);
+		zend_hash_apply_with_arguments(myht, (apply_func_args_t) php_object_element_export, 1, level);
+		if (level > 1) {
+			php_printf("%*c", level - 1, ' ');
+		}
+		PUTS("}");
 		break;
 	default:
 		PUTS ("NULL");
@@ -323,7 +346,7 @@ head_done:
 
 
 /* {{{ proto mixed var_export(mixed var [, bool return])
-   Outputs or returns a string representation of avariable */
+   Outputs or returns a string representation of a variable */
 PHP_FUNCTION(var_export)
 {
 	zval *var;
