@@ -335,7 +335,17 @@ if ($sum_results['FAILED'] && !getenv('NO_INTERACTION')) {
 		$failed_tests_data = '';
 		$sep = "\n" . str_repeat('=', 80) . "\n";
 		
-		$failed_tests_data .= "OS:\n". PHP_OS. "\n";
+		$failed_tests_data .= $failed_test_summary . "\n";
+		
+		foreach ($GLOBALS['__PHP_FAILED_TESTS__'] as $test_info) {
+			$failed_tests_data .= $sep . $test_info['name'];
+			$failed_tests_data .= $sep . file_get_contents(realpath($test_info['output']));
+			$failed_tests_data .= $sep . file_get_contents(realpath($test_info['diff']));
+			$failed_tests_data .= $sep . "\n\n";
+		}
+		
+		$failed_tests_data .= "\n" . $sep . 'BUILD ENVIRONMENT' . $sep;
+		$failed_tests_data .= "OS:\n". PHP_OS. "\n\n";
 		$automake = $autoconf = $libtool = $compiler = 'N/A';
 		if (substr(PHP_OS, 0, 3) != "WIN") {
 			$automake = shell_exec('automake --version');
@@ -358,15 +368,6 @@ if ($sum_results['FAILED'] && !getenv('NO_INTERACTION')) {
 		$failed_tests_data .= "Compiler:\n$compiler\n";
 		$failed_tests_data .= "Bison:\n". @shell_exec('bison --version'). "\n";
 		$failed_tests_data .= "\n\n";
-		
-		$failed_tests_data .= $failed_test_summary . "\n";
-		
-		foreach ($GLOBALS['__PHP_FAILED_TESTS__'] as $test_info) {
-			$failed_tests_data .= $sep . $test_info['name'];
-			$failed_tests_data .= $sep . file_get_contents(realpath($test_info['output']));
-			$failed_tests_data .= $sep . file_get_contents(realpath($test_info['diff']));
-			$failed_tests_data .= $sep . "\n\n";
-		}
 		
 		$failed_tests_data .= $sep . "PHPINFO" . $sep;
 		$failed_tests_data .= shell_exec($php.' -dhtml_errors=0 -i');
