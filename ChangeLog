@@ -1,3 +1,81 @@
+2001-12-14  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * ext/domxml/php_domxml.c: - Damn Typo.
+
+    * ext/domxml/php_domxml.c: - Remove redundant code.
+
+2001-12-14  Martin Jansen  <mail@martin-jansen.de>
+
+    * pear/HTML/IT.php: * Remove conflict.
+
+2001-12-14  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * main/php_version.h
+      configure.in: Change version to 4.1.1-dev.
+
+2001-12-14  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * pear/HTTP.php: be rfc compliant...
+
+    RFC 822 *only* supports four digits for the year in order to have a compliant
+    header.
+    RFC 850 supports two digits for the year (y2k_incompliant :) so use that when
+    y2k_compliance is turned off.
+
+    In either case, both of these formats require that GMT be appended to the header,
+    so we do this as well
+
+2001-12-14  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * ext/domxml/php_domxml.c
+      ext/domxml/php_domxml.h: - MFH bug fixes.
+
+2001-12-14  Vlad Krupin  <phpdevel@echospace.com>
+
+    * ext/dbase/dbase.c: MFH
+
+2001-12-14  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * NEWS: the datetime.c fixes
+
+    * ext/standard/datetime.c: MFH'ed::
+
+        use zval macro's (not exactly necessary, but not harmful).
+        jmoore's fix for timezones.
+
+    * NEWS: Derick MFH'ed
+
+    * NEWS: derick's message is in the PHP_4_0_7 branch (or will be :)
+    jmoore merged this fix into PHP_4_0_7 before the release...
+
+2001-12-14  Thies C. Arntzen  <thies@thieso.net>
+
+    * ext/xml/xml.c: add todo
+
+2001-12-14  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Autoloader.php: * update to new overload api
+
+2001-12-14  Jason Greene  <jason@inetgurus.net>
+
+    * ext/sockets/CREDITS
+      ext/sockets/sockets.c: Add myself as a maintainer
+
+2001-12-14  Vlad Krupin  <phpdevel@echospace.com>
+
+    * ext/dbase/dbase.c:
+    Fixed bug #5993. Now if the result returned from a database is bigger
+    than a long, dbase_get_record() and dbase_get_record_with_names() will
+    return a string instead.
+
+2001-12-14  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/ncurses/ncurses_fe.c
+      ext/ncurses/php_ncurses_fe.h:
+    Got some undefined symbol without this patch..
+
+    * NEWS: Missing period. :)
+
 2001-12-13  Alexander Merz  <alexander.merz@t-online.de>
 
     * pear/DB/common.php
