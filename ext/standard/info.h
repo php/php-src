@@ -72,7 +72,6 @@ PHPAPI void php_info_print_style(void);
 PHPAPI void php_info_print_table_colspan_header(int num_cols, char *header);
 PHPAPI void php_info_print_table_header(int num_cols, ...);
 PHPAPI void php_info_print_table_row(int num_cols, ...);
-PHPAPI void php_info_print_table_row_ex(int num_cols, const char *, ...);
 PHPAPI void php_info_print_table_start(void);
 PHPAPI void php_info_print_table_end(void);
 PHPAPI void php_info_print_box_start(int bg);

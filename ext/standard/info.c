@@ -759,12 +759,12 @@ PHPAPI void php_info_print_table_header(int num_cols, ...)
 }
 /* }}} */
 
-/* {{{ php_info_print_table_row_internal
+/* {{{ php_info_print_table_row
  */
-static void php_info_print_table_row_internal(int num_cols, 
-		const char *value_class, va_list row_elements)
+PHPAPI void php_info_print_table_row(int num_cols, ...)
 {
 	int i;
+	va_list row_elements;
 	char *row_element;
 	char *elem_esc = NULL;
 /*
@@ -773,13 +773,14 @@ static void php_info_print_table_row_internal(int num_cols,
 
 	TSRMLS_FETCH();
 
+	va_start(row_elements, num_cols);
 	if (!sapi_module.phpinfo_as_text) {
 		php_printf("<tr>");
 	}	
 	for (i=0; i<num_cols; i++) {
 		if (!sapi_module.phpinfo_as_text) {
 			php_printf("<td class=\"%s\">",
-			   (i==0 ? "e" : value_class )
+			   (i==0 ? "e" : "v" )
 			);
 		}	
 		row_element = va_arg(row_elements, char *);
@@ -810,30 +811,7 @@ static void php_info_print_table_row_internal(int num_cols,
 	if (!sapi_module.phpinfo_as_text) {
 		php_printf("</tr>\n");
 	}
-}
-/* }}} */
-
-/* {{{ php_info_print_table_row
- */
-PHPAPI void php_info_print_table_row(int num_cols, ...)
-{
-	va_list row_elements;
 	
-	va_start(row_elements, num_cols);
-	php_info_print_table_row_internal(num_cols, "v", row_elements);
-	va_end(row_elements);
-}
-/* }}} */
-
-/* {{{ php_info_print_table_row_ex
- */
-PHPAPI void php_info_print_table_row_ex(int num_cols, const char *value_class, 
-		...)
-{
-	va_list row_elements;
-	
-	va_start(row_elements, value_class);
-	php_info_print_table_row_internal(num_cols, value_class, row_elements);
 	va_end(row_elements);
 }
 /* }}} */
