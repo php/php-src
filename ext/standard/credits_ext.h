@@ -49,6 +49,7 @@ CREDIT_LINE("MS SQL","Frank M. Kromann");
 CREDIT_LINE("MySQL","Zeev Suraski");
 CREDIT_LINE("OCI8","Stig Bakken, Thies C. Arntzen");
 CREDIT_LINE("ODBC","Stig Bakken, Andreas Karajannis, Frank M. Kromann");
+CREDIT_LINE("OpenSSL","Stig Venaas");
 CREDIT_LINE("Oracle","Stig Bakken, Mitch Golden, Rasmus Lerdorf, Andreas Karajannis, Thies C. Arntzen");
 CREDIT_LINE("Ovrimos","Nikos Mavroyanopoulos");
 CREDIT_LINE("PDF","Uwe Steinmann");
