@@ -1,3 +1,26 @@
+2000-11-24  Sterling Hughes  <Sterling.Hughes@pentap.net>
+
+    * ext/standard/basic_functions.c
+      ext/standard/basic_functions.h:
+
+    * ext/sablot/sablot.c: Declaring variables is generally a good thing
+
+2000-11-24  André Langhorst  <A.Langhorst@itbnet.de>
+
+    * ext/standard/html.c: fixed bug 7961
+
+2000-11-24  Sterling Hughes  <Sterling.Hughes@pentap.net>
+
+    * ext/sablot/sablot.c:
+    Fix segfault when non-array in params or arguments is given to
+    xslt_transform() or xslt_run().
+
+    Update xslt_output_begintransform() to new output buffering syntax (torben@php.net)
+
+2000-11-24  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/pcre/php_pcre.c: Fix the arg array size.
+
 2000-11-23  Stig Venaas  <venaas@uninett.no>
 
     * ext/openssl/CREDITS
