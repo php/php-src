@@ -129,6 +129,7 @@ void init_executor(TSRMLS_D)
 
 	EG(function_table) = CG(function_table);
 	EG(class_table) = CG(class_table);
+	EG(namespaces) = CG(namespaces);
 
 	EG(in_execution) = 0;
 

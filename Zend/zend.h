@@ -168,6 +168,17 @@ typedef unsigned short zend_ushort;
 #define INTERNAL_FUNCTION_PARAMETERS int ht, zval *return_value, zval *this_ptr, int return_value_used TSRMLS_DC
 #define INTERNAL_FUNCTION_PARAM_PASSTHRU ht, return_value, this_ptr, return_value_used TSRMLS_CC
 
+typedef enum {
+	INTERNAL_NAMESPACE = 0,
+	USER_NAMESPACE = 1	
+} namespace_type;
+
+typedef struct _zend_namespace_struct {
+	namespace_type type;
+	HashTable *class_table;
+	HashTable *function_table;
+} zend_namespace;
+
 /*
  * zval
  */

@@ -32,7 +32,7 @@
 #define DEBUG_ZEND 0
 
 #define FREE_PNODE(znode)	zval_dtor(&znode->u.constant);
-#define FREE_OP(op, should_free) if (should_free) zval_dtor(&Ts[(op)->u.var].tmp_var);
+#define FREE_OP(Ts, op, should_free) if (should_free) zval_dtor(&Ts[(op)->u.var].tmp_var);
 
 #define SET_UNUSED(op)  (op).op_type = IS_UNUSED
 
@@ -343,6 +343,8 @@ void zend_do_declare_end(TSRMLS_D);
 
 void zend_do_end_heredoc(TSRMLS_D);
 
+void do_namespace(znode *namespace TSRMLS_DC);
+
 void zend_do_exit(znode *result, znode *message TSRMLS_DC);
 
 void zend_do_begin_silence(znode *strudel_token TSRMLS_DC);
@@ -532,6 +534,8 @@ int zendlex(znode *zendlval TSRMLS_DC);
 
 #define ZEND_CATCH					107
 #define ZEND_THROW					108
+
+#define ZEND_NAMESPACE				109
 
 /* end of block */
 
