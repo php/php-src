@@ -1,3 +1,70 @@
+2003-02-07  Sara Golemon  <php@alphaweb.net>
+
+    * ext/standard/http_fopen_wrapper.c:
+      chunk_size should always be reduced to 1 while scanning response headers to
+      avoid buffering the actual stream prior to any read calls.
+
+2003-02-07  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * main/php_streams.h:
+      Added missing definitions.
+
+2003-02-07  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * sapi/cli/php.1:
+      Adding some text and some backslashes which are needed sometimes
+      somewhere...
+
+    * sapi/cli/php_cli.c:
+      Define STDIN/OUT/ERR for -B -R -F -E (works as expected).
+      Enable exit in same switches.
+
+2003-02-07  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * NEWS:
+      New function news.
+
+    * ext/standard/basic_functions.c
+      ext/standard/php_string.h
+      ext/standard/string.c:
+      Added str_split() function. This function can be used to break down a
+      string into an array.
+
+    * ext/standard/basic_functions.c
+      ext/standard/url.c
+      ext/standard/url.h
+      main/streams.c:
+      Added get_browser() function. This function can be used to fetch the
+      headers
+      sent by the server when a request is made for a given URL.
+
+2003-02-07  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * sapi/cli/php_cli.c:
+      No more maximum line size for -R and -F
+
+2003-02-07  Uwe Schindler  <uwe@thetaphi.de>
+
+    * sapi/nsapi/nsapi.c:
+      (NSAPI SAPI) Fixed _SERVER[] variables (all headers included) to be now
+      similar to apache SAPI; with this new file the memory leaks (webserver
+      eats up memory during a few days running) are also disappeared (all by
+      NSAPI allocated strings are freed).
+
+2003-02-07  Zeev Suraski  <zeev@zend.com>
+
+    * main/win95nt.h:
+      Fixlet
+
+2003-02-07  Dan Kalowsky  <dank@deadmime.org>
+
+    * ext/odbc/php_odbc.c:
+      MFB
+
+    * (PHP_4_3)
+      ext/odbc/php_odbc.c:
+      Patch for Bug #21279 submitted by ernani@php.net
+
 2003-02-06  James Cox  <james@imajes.info>
 
     * NEWS:
