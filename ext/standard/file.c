@@ -1482,6 +1482,7 @@ PHP_FUNCTION(fscanf)
 
 	buf = php_stream_get_line((php_stream *) what, NULL, 0, &len);
 	if (buf == NULL) {
+		efree(args);
 		RETURN_FALSE;
 	}
 
