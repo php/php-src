@@ -227,7 +227,7 @@ ZEND_API int zend_set_hash_symbol(zval *symbol, char *name, int name_length,
 
 #define ZVAL_EMPTY_STRING(z) {	        \
 		(z)->value.str.len = 0;  	    \
-		(z)->value.str.val = empty_string \
+		(z)->value.str.val = empty_string; \
 		(z)->type = IS_STRING;		    \
 	}
 
@@ -268,7 +268,7 @@ ZEND_API int zend_set_hash_symbol(zval *symbol, char *name, int name_length,
 
 #define RETVAL_EMPTY_STRING() {	            \
 		return_value->value.str.len = 0;  	\
-		return_value->value.str.val = empty_string \
+		return_value->value.str.val = empty_string; \
 		return_value->type = IS_STRING;		\
 	}
 
@@ -319,7 +319,7 @@ ZEND_API int zend_set_hash_symbol(zval *symbol, char *name, int name_length,
 
 #define RETURN_EMPTY_STRING() {	            \
 		return_value->value.str.len = 0;  	\
-		return_value->value.str.val = empty_string \
+		return_value->value.str.val = empty_string; \
 		return_value->type = IS_STRING;		\
         return;                             \
 	}
