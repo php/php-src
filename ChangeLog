@@ -1,3 +1,35 @@
+2000-05-07  Jim Winstead  <jimw@php.net>
+
+    * header: another minor change to test CVS mails again
+
+2000-05-07  Sascha Schumann  <sascha@schumann.cx>
+
+    * acinclude.m4:
+    Never tell link editor to libc. Some systems use thread-safe
+    replacements for libc in Pthreads mode.
+
+    * configure.in:
+    Libtool creates libphp4.so.0.0 on at least AIX and FreeBSD 2.2.
+
+    This hack will catch the resulting shared library anyway.
+
+    The Right Way to approach this is to fix libtool to properly
+    handle -module on all platforms.
+
+    * ext/ftp/php_ftp.c: executor_globals is always passed to MINIT functions
+
+    * ext/dbase/dbf_misc.c: s/localtime_r/php_localtime_r/
+
+    * makedist: Avoid relying on non-standard tar `z' option.
+
+    Turn on best compression for creating the archive.
+
+    * ext/standard/basic_functions.c
+      ext/standard/php_syslog.h
+      ext/standard/syslog.c:
+    Move <syslog.h> inclusion into php_syslog.h. This will make sure that
+    all source files "get it."
+
 2000-05-06  Sascha Schumann  <sascha@schumann.cx>
 
     * configure.in:
