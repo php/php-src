@@ -34,7 +34,12 @@
 #include "zend_default_classes.h"
 #include "zend_interfaces.h"
 
-zend_class_entry *sxe_class_entry;
+zend_class_entry *sxe_class_entry = NULL;
+
+PHP_API zend_class_entry *sxe_get_element_class_entry()
+{
+	return sxe_class_entry;
+}
 
 #define SXE_ME(func, arg_info, flags) PHP_ME(simplexml_element, func, arg_info, flags)
 
