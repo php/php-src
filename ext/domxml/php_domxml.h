@@ -158,6 +158,11 @@ PHP_FUNCTION(domxml_entity_notation_name);
 PHP_FUNCTION(domxml_pi_target);
 PHP_FUNCTION(domxml_pi_data);
 
+/* Class Parser methods */
+PHP_FUNCTION(domxml_parser);
+PHP_FUNCTION(domxml_parser_add_chunk);
+PHP_FUNCTION(domxml_parser_end);
+
 /* Class XPathContext methods */
 #if defined(LIBXML_XPATH_ENABLED)
 PHP_FUNCTION(xpath_init);

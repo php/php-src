@@ -141,9 +141,12 @@ static int le_domxmltextp;
 static int le_domxmlpip;
 static int le_domxmlcommentp;
 static int le_domxmlnotationp;
+static int le_domxmlparserp;
 /*static int le_domxmlentityp;*/
 static int le_domxmlentityrefp;
 /*static int le_domxmlnsp;*/
+
+
 #if HAVE_DOMXSLT
 static int le_domxsltstylesheetp;
 #endif
@@ -167,6 +170,7 @@ zend_class_entry *domxmlnotation_class_entry;
 zend_class_entry *domxmlentity_class_entry;
 zend_class_entry *domxmlentityref_class_entry;
 zend_class_entry *domxmlns_class_entry;
+zend_class_entry *domxmlparser_class_entry;
 #if defined(LIBXML_XPATH_ENABLED)
 zend_class_entry *xpathctx_class_entry;
 zend_class_entry *xpathobject_class_entry;
@@ -207,7 +211,9 @@ static zend_function_entry domxml_functions[] = {
 	PHP_FE(domxml_node_set_content,										NULL)
 	PHP_FE(domxml_node_get_content,										NULL)
 	PHP_FE(domxml_new_xmldoc,											NULL)
-
+	PHP_FE(domxml_parser,												NULL)
+	PHP_FE(domxml_parser_add_chunk,										NULL)
+	PHP_FE(domxml_parser_end,											NULL)
 #if defined(LIBXML_XPATH_ENABLED)
 	PHP_FE(xpath_new_context,											NULL)
 	PHP_FE(xpath_eval,													NULL)
@@ -277,6 +283,12 @@ static function_entry php_domxmldoc_class_functions[] = {
 	PHP_FALIAS(get_elements_by_tagname,	domxml_doc_get_elements_by_tagname,	NULL)
 	PHP_FALIAS(get_element_by_id,		domxml_doc_get_element_by_id,	NULL)
 #endif
+	{NULL, NULL, NULL}
+};
+
+static function_entry php_domxmlparser_class_functions[] = {
+	PHP_FALIAS(add_chunk,				domxml_parser_add_chunk,		NULL)
+	PHP_FALIAS(end,						domxml_parser_end,				NULL)
 	{NULL, NULL, NULL}
 };
 
@@ -578,6 +590,17 @@ static void php_free_xpath_object(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 }
 #endif
 
+static void php_free_xml_parser(zend_rsrc_list_entry *rsrc TSRMLS_DC)
+{
+	xmlParserCtxtPtr parser = (xmlParserCtxtPtr) rsrc->ptr;
+
+	if (parser) {
+		zval *wrapper = dom_object_get_data(parser);
+		zval_ptr_dtor(&wrapper);        
+		xmlFreeParserCtxt(parser);
+	}
+}
+
 
 #if HAVE_DOMXSLT
 static void php_free_xslt_stylesheet(zend_rsrc_list_entry *rsrc TSRMLS_DC)
@@ -874,6 +897,53 @@ static zval *php_xpathcontext_new(xmlXPathContextPtr obj, int *found TSRMLS_DC)
 	return (wrapper);
 }
 
+/* helper functions for xmlparser stuff */
+static void xmlparser_set_data(void *obj, zval *wrapper)
+{
+	((xmlParserCtxtPtr) obj)->_private = wrapper;
+}
+
+
+static void php_xmlparser_set_object(zval *wrapper, void *obj, int rsrc_type)
+{
+	zval *handle, *addr;
+
+	MAKE_STD_ZVAL(handle);
+	Z_TYPE_P(handle) = IS_LONG;
+	Z_LVAL_P(handle) = zend_list_insert(obj, rsrc_type);
+
+	MAKE_STD_ZVAL(addr);
+	Z_TYPE_P(addr) = IS_LONG;
+	Z_LVAL_P(addr) = (int) obj;
+
+	zend_hash_index_update(Z_OBJPROP_P(wrapper), 0, &handle, sizeof(zval *), NULL);
+	zend_hash_index_update(Z_OBJPROP_P(wrapper), 1, &addr, sizeof(zval *), NULL);
+	zval_add_ref(&wrapper);
+	xmlparser_set_data(obj, wrapper);
+}
+
+
+static zval *php_xmlparser_new(xmlParserCtxtPtr obj, int *found TSRMLS_DC)
+{
+	zval *wrapper;
+	int rsrc_type;
+
+		*found = 0;
+
+	if (!obj) {
+		MAKE_STD_ZVAL(wrapper);
+		ZVAL_NULL(wrapper);
+		return wrapper;
+	}
+
+	MAKE_STD_ZVAL(wrapper);
+	object_init_ex(wrapper, domxmlparser_class_entry);
+	rsrc_type = le_domxmlparserp;
+	php_xmlparser_set_object(wrapper, (void *) obj, rsrc_type);
+
+	return (wrapper);
+}
+
 
 void *php_dom_get_object(zval *wrapper, int rsrc_type1, int rsrc_type2 TSRMLS_DC)
 {
@@ -1147,7 +1217,7 @@ PHP_MINIT_FUNCTION(domxml)
 	le_domxmlcdatap = zend_register_list_destructors_ex(php_free_xml_node, NULL, "domcdata", module_number);
 	le_domxmlentityrefp = zend_register_list_destructors_ex(php_free_xml_node, NULL, "domentityref", module_number);
 	le_domxmlpip = zend_register_list_destructors_ex(php_free_xml_node, NULL, "dompi", module_number);
-
+	le_domxmlparserp =	zend_register_list_destructors_ex(php_free_xml_parser, NULL, "domparser", module_number);
 	/* Not yet initialized le_*s */
 	le_domxmldoctypep   = -10000;
 	le_domxmlnotationp  = -10003;
@@ -1168,6 +1238,9 @@ PHP_MINIT_FUNCTION(domxml)
 
 	INIT_OVERLOADED_CLASS_ENTRY(ce, "DomDocument", php_domxmldoc_class_functions, NULL, NULL, NULL);
 	domxmldoc_class_entry = zend_register_internal_class_ex(&ce, domxmlnode_class_entry, NULL TSRMLS_CC);
+
+   	INIT_OVERLOADED_CLASS_ENTRY(ce, "DomParser", php_domxmlparser_class_functions, NULL, NULL, NULL);
+	domxmlparser_class_entry = zend_register_internal_class_ex(&ce, domxmlparser_class_entry, NULL TSRMLS_CC);
 
 	INIT_OVERLOADED_CLASS_ENTRY(ce, "DomDocumentType", php_domxmldoctype_class_functions, NULL,	NULL, NULL);
 	domxmldoctype_class_entry = zend_register_internal_class_ex(&ce, domxmlnode_class_entry, NULL TSRMLS_CC);
@@ -3147,6 +3220,76 @@ PHP_FUNCTION(domxml_new_xmldoc)
 	}
 
 	DOMXML_RET_OBJ(rv, (xmlNodePtr) docp, &ret);
+}
+/* }}} */
+
+/* {{{ proto object domxml_parer([string buf[,string filename]])
+   Creates new xmlparser */
+PHP_FUNCTION(domxml_parser)
+{
+	zval *rv;
+	xmlParserCtxtPtr parserp;
+	int ret, buf_len = 0;
+	char *buf = "";
+	char *filename = NULL;
+	int filename_len = 0;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|ss", &buf, &buf_len, &filename, &filename_len) == FAILURE) {
+		return;
+	}
+
+	parserp =  xmlCreatePushParserCtxt(NULL, NULL, buf, buf_len , filename);
+	if (!parserp) {
+		RETURN_FALSE;
+	}
+
+	rv = php_xmlparser_new(parserp, &ret TSRMLS_CC);    
+	DOMXML_RET_ZVAL(rv);
+}
+/* }}} */
+
+/* {{{ proto bool domxml_parser_add_chunk(string chunk)
+   adds xml-chunk to parser */
+PHP_FUNCTION(domxml_parser_add_chunk)
+{
+	zval *id;
+	xmlParserCtxtPtr parserp;
+	char *chunk;
+	int chunk_len, error;
+
+	DOMXML_PARAM_TWO(parserp, id, le_domxmlparserp,"s", &chunk, &chunk_len);
+	error = xmlParseChunk(parserp, chunk, chunk_len , 0);
+	if (error != 0) {
+		RETURN_FALSE;
+	}
+
+	RETURN_TRUE;
+}
+/* }}} */
+
+/* {{{ proto object domxml_parser_end([string chunk])
+   Ends parsing and returns DomDocument*/
+PHP_FUNCTION(domxml_parser_end)
+{
+	zval *id,*rv;
+	xmlParserCtxtPtr parserp;
+	char *chunk = NULL;
+	int chunk_len = 0, error;
+	int ret;
+
+
+	DOMXML_PARAM_TWO(parserp, id, le_domxmlparserp,"|s", &chunk, &chunk_len);
+	error = xmlParseChunk(parserp, chunk, chunk_len, 1);
+	if (error != 0) {
+		php_error(E_ERROR,"error: %d",error);		
+		RETURN_FALSE;
+	}
+	if (parserp->myDoc != NULL) {
+		DOMXML_RET_OBJ(rv, (xmlNodePtr) parserp->myDoc, &ret);
+	}
+	else {
+		RETVAL_FALSE
+	}
 }
 /* }}} */
 
