@@ -40,8 +40,9 @@
 
 #define YYSTYPE zval
 
-#define PARSING_MODE_CFG 0
-#define PARSING_MODE_BROWSCAP 1
+#define PARSING_MODE_CFG		0
+#define PARSING_MODE_BROWSCAP	1
+#define PARSING_MODE_STANDALONE	2
 
 static HashTable configuration_hash;
 extern HashTable browser_hash;
@@ -263,6 +264,34 @@ PHP_MINIT_FUNCTION(browscap)
 }
 
 
+PHP_FUNCTION(parse_ini_file)
+{
+#if ZTS
+	php_error(E_WARNING, "parse_ini_file() is not supported in multithreaded PHP");
+	RETURN_FALSE;
+#else
+	zval **filename;
+
+	if (ARG_COUNT(ht)!=1 || zend_get_parameters_ex(1, &filename)==FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	convert_to_string_ex(filename);
+	cfgin = fopen((*filename)->value.str.val, "r");
+	if (!cfgin) {
+		php_error(E_WARNING,"Cannot open '%s' for reading", (*filename)->value.str.val);
+		return FAILURE;
+	}
+	array_init(return_value);
+	init_cfg_scanner();
+	active_hash_table = return_value->value.ht;
+	parsing_mode = PARSING_MODE_STANDALONE;
+	currently_parsed_filename = (*filename)->value.str.val;
+	yyparse();
+	fclose(cfgin);
+#endif
+}
+
+
 int php_shutdown_config(void)
 {
 	zend_hash_destroy(&configuration_hash);
@@ -405,24 +434,38 @@ statement:
 			printf("'%s' = '%s'\n",$1.value.str.val,$3.value.str.val);
 #endif
 			$3.type = IS_STRING;
-			if (parsing_mode==PARSING_MODE_CFG) {
-				zend_hash_update(active_hash_table, $1.value.str.val, $1.value.str.len+1, &$3, sizeof(zval), NULL);
-				if (active_hash_table == &configuration_hash) {
-			        php_alter_ini_entry($1.value.str.val, $1.value.str.len+1, $3.value.str.val, $3.value.str.len+1, PHP_INI_SYSTEM, PHP_INI_STAGE_STARTUP);
-				}
-			} else if (parsing_mode==PARSING_MODE_BROWSCAP) {
-				if (current_section) {
-					zval *new_property;
+			switch (parsing_mode) {
+				case PARSING_MODE_CFG:
+					zend_hash_update(active_hash_table, $1.value.str.val, $1.value.str.len+1, &$3, sizeof(zval), NULL);
+					if (active_hash_table == &configuration_hash) {
+						php_alter_ini_entry($1.value.str.val, $1.value.str.len+1, $3.value.str.val, $3.value.str.len+1, PHP_INI_SYSTEM, PHP_INI_STAGE_STARTUP);
+					}
+					break;
+				case PARSING_MODE_BROWSCAP:
+					if (current_section) {
+						zval *new_property;
 
-					new_property = (zval *) malloc(sizeof(zval));
-					INIT_PZVAL(new_property);
-					new_property->value.str.val = $3.value.str.val;
-					new_property->value.str.len = $3.value.str.len;
-					new_property->type = IS_STRING;
-					zend_str_tolower(new_property->value.str.val, new_property->value.str.len);
-					zend_hash_update(current_section->value.obj.properties, $1.value.str.val, $1.value.str.len+1, &new_property, sizeof(zval *), NULL);
-				}
-			}
+						new_property = (zval *) malloc(sizeof(zval));
+						INIT_PZVAL(new_property);
+						new_property->value.str.val = $3.value.str.val;
+						new_property->value.str.len = $3.value.str.len;
+						new_property->type = IS_STRING;
+						zend_str_tolower(new_property->value.str.val, new_property->value.str.len);
+						zend_hash_update(current_section->value.obj.properties, $1.value.str.val, $1.value.str.len+1, &new_property, sizeof(zval *), NULL);
+					}
+					break;
+				case PARSING_MODE_STANDALONE: {
+						zval *entry;
+
+						MAKE_STD_ZVAL(entry);
+						entry->value.str.val = estrndup($3.value.str.val, $3.value.str.len);
+						entry->value.str.len = $3.value.str.len;
+						entry->type = IS_STRING;
+						zend_hash_update(active_hash_table, $1.value.str.val, $1.value.str.len+1, &entry, sizeof(zval *), NULL);
+						pvalue_config_destructor(&$3);
+					}
+					break;
+			}		
 			free($1.value.str.val);
 		}
 	|	TC_STRING { free($1.value.str.val); }
