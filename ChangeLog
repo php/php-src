@@ -1,3 +1,115 @@
+2002-03-26  Jon Parise  <jon@csh.rit.edu>
+
+    * ext/mime_magic/.cvsignore: Ignore generated files.
+
+2002-03-26  Sean Bright  <elixer@erols.com>
+
+    * php.ini-dist: Fix typo.
+
+2002-03-26  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/mime_magic/mime_magic.c
+      ext/mime_magic/php_mime_magic.h: build conflicts fixed
+
+2002-03-26  Sander Roobol  <phy@wanadoo.nl>
+
+    * ext/standard/tests/array/002.phpt
+      ext/standard/tests/array/003.phpt
+      ext/standard/tests/array/004.phpt
+      ext/standard/tests/array/array_data.txt
+      ext/standard/tests/array/data.inc
+      ext/standard/tests/array/001.phpt: MFH
+
+    * ext/standard/tests/array/001.phpt
+      ext/standard/tests/array/002.phpt
+      ext/standard/tests/array/003.phpt
+      ext/standard/tests/array/004.phpt
+      ext/standard/tests/array/array_data.txt
+      ext/standard/tests/array/data.inc:
+    Fixed the array-tests. Broke the test up into various smaller tests.
+    Reduced the test data because it was unmanageable.
+
+2002-03-26  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/PEAR/Command/Config.php
+      pear/PEAR/Frontend/CLI.php: E_ALL fixes
+
+    * pear/PEAR/Registry.php:
+    _lock() now returns PEAR Error or true for consistency
+
+2002-03-26  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * sapi/cli/php_cli.c: allow other modes to work with -- correct
+
+    * sapi/cli/php_cli.c: fix behaviour on --
+
+2002-03-26  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/config.m4:
+    outcomment default linking against pam due to no feedback
+    regarding its purpose
+
+    * ext/standard/url_scanner_ex.c
+      ext/standard/url_scanner_ex.re:
+    If an argument (<tag val=argument..) was not quoted, leave it that way.
+
+2002-03-26  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/string.c: - MFH for bug #11244
+
+2002-03-26  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * ext/pgsql/pgsql.c: Remove warnings
+
+2002-03-26  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/openssl/openssl.c: - No asserts in the branch
+
+2002-03-26  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * ext/pgsql/pgsql.c:
+    Changed error messages to be consistent with other error messages
+
+2002-03-26  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/dbx/dbx.c: - MFB
+
+    * ext/dbx/dbx.c: - Fix comments
+
+2002-03-26  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * ext/standard/string.c:
+    - Fix bug 11244 (patch by "Tal Peer" <hazgul99@hotmail.com>).
+
+2002-03-26  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/openssl/tests/.cvsignore
+      ext/openssl/tests/001.phpt
+      ext/openssl/tests/skipif.inc
+      ext/openssl/openssl.c: - MFH for passphrase bug
+
+2002-03-26  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/xmlrpc/libxmlrpc/encodings.c:
+    MFH the use of correct header file -fix
+
+    * ext/xmlrpc/config.m4
+      ext/xslt/config.m4: MFH fixes for the iconv stuff
+
+    * ext/xmlrpc/libxmlrpc/encodings.c: - Use correct header file.
+
+    * acinclude.m4: MFB. (I must have been sleep-walking..)
+
+2002-03-26  Wez Furlong  <wez.php@thebrainroom.com>
+
+    * ext/openssl/tests/.cvsignore
+      ext/openssl/tests/001.phpt
+      ext/openssl/tests/skipif.inc
+      ext/openssl/openssl.c:
+    Fix regular openssl_pkey_get_private($content, $phrase) syntax and
+    add test case.
+    This stuff should be merged into the 4.2 branch.
+
 2002-03-25  Jani Taskinen  <sniper@iki.fi>
 
     * ext/xmlrpc/php_config.h.in: Why was this here??
