@@ -1199,7 +1199,7 @@ static void zend_fetch_dimension_address(temp_variable *result, zval **container
 					  ZVAL_LONG(&tmp, lval);
 						dim = &tmp;
 					} else {
-						if (type != BP_VAR_IS && type != BP_VAR_UNSET) {
+						if (type != BP_VAR_IS) {
 							zend_error(E_NOTICE, "Trying to get string index from a string");
 						}
 						if (result) {
