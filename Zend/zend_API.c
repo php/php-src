@@ -1573,7 +1573,7 @@ ZEND_API int zend_disable_class(char *class_name, uint class_name_length TSRMLS_
 	return 1;
 }
 
-zend_bool zend_is_callable(zval *callable, zend_bool syntax_only, char **callable_name)
+ZEND_API zend_bool zend_is_callable(zval *callable, zend_bool syntax_only, char **callable_name)
 {
 	char *lcname;
 	zend_bool retval = 0;
@@ -1681,6 +1681,33 @@ zend_bool zend_is_callable(zval *callable, zend_bool syntax_only, char **callabl
 			break;
 	}
 
+	return retval;
+}
+
+
+ZEND_API zend_bool zend_make_callable(zval *callable, char **callable_name TSRMLS_DC)
+{
+	char *lcname, *func;
+	zend_bool retval = 0;
+
+	if (zend_is_callable(callable, 0, callable_name)) {
+		return 1;
+	}
+	switch (Z_TYPE_P(callable)) {
+		case IS_STRING:
+			lcname = zend_str_tolower_dup(Z_STRVAL_P(callable), Z_STRLEN_P(callable));
+
+			if ((func = strstr(lcname, "::")) != NULL) {
+				zval_dtor(callable);
+				array_init(callable);
+				add_next_index_stringl(callable, lcname, func - lcname, 1);
+				func += 2;
+				add_next_index_stringl(callable, func, strlen(func), 1);
+				retval = 1; 
+			}
+			efree(lcname);
+			break;
+	}
 	return retval;
 }
 
