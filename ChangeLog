@@ -1,3 +1,40 @@
+2000-11-16  Jason Greene  <jason@inetgurus.net>
+
+    * NEWS: Added ext/java fix line - I should learn to use '@' correctly : )
+
+    * ext/java/java.c:
+    SUN CC does not like like left side casting - see bug #6759
+
+2000-11-16  Daniel Beulshausen  <daniel@php4win.de>
+
+    * ext/printer/php_printer.h
+      ext/printer/printer.c
+      ext/printer/printer.php: - fixed bug which crashed printer_write
+    - fixed bug which crashed get_default_printer() in case
+      no printer was detected
+    - added option "devicename" to printer_get_option()
+      to retrive the printer name ( similiar to printer_name() )
+
+2000-11-16  Thies C. Arntzen  <thies@thieso.net>
+
+    * ext/oracle/oracle.c:
+    fix ora_fetch_into to allow_call_time_pass_reference = Off; (#7838)
+
+2000-11-16  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/openssl/php_openssl.h: extname -> openssl
+
+2000-11-16  Thies C. Arntzen  <thies@thieso.net>
+
+    * ext/oci8/oci8.c: don't use TLS in MINIT function.
+
+2000-11-16  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/ircg.c: Add mIRC-style color handling
+
+    http://www.mirc.co.uk/help/color.txt
+    http://www.ircle.com/colorfaq.html
+
 2000-11-15  Sascha Schumann  <sascha@schumann.cx>
 
     * ext/ircg/ircg.c:
