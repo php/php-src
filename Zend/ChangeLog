@@ -1,3 +1,9 @@
+2003-02-27  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * zend_ini_scanner.l:
+      MFB: We know ini file scanning will never be interactive, so speed it up a
+      bit.  Need a dynamic check for the language scanner.
+
 2003-02-26  Sebastian Bergmann  <sb@sebastian-bergmann.de>
 
     * ZEND_CHANGES:
