@@ -991,7 +991,7 @@ static sybase_result * php_sybase_fetch_result_set (sybase_link *sybase_ptr)
 		result->data[i] = (pval *) emalloc(sizeof(pval)*num_fields);
 		for (j=0; j<num_fields; j++) {
 			if (indicators[j] == -1) { /* null value */
-				ZVAL_BOOL(&result->data[i][j], 0);
+				ZVAL_FALSE(&result->data[i][j]);
 			} else {
 				result->data[i][j].value.str.len = lengths[j]-1;  /* we don't need the NULL in the length */
 				result->data[i][j].value.str.val = estrndup(tmp_buffer[j], lengths[j]);
