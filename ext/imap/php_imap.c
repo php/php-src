@@ -2623,6 +2623,10 @@ PHP_FUNCTION(imap_bodystruct)
 	}
 	
 	body=mail_body(imap_le_struct->imap_stream, Z_LVAL_PP(msg), Z_STRVAL_PP(section));
+	if (body == NULL) {
+		zval_dtor(return_value);
+		RETURN_FALSE;
+	}
 	if (body->type <= TYPEMAX) {
 		add_property_long(return_value, "type", body->type);
 	}
