@@ -22,7 +22,7 @@
 #include "zend_ini_parser.h"
 #include "zend_ini_scanner.h"
 
-#ifdef ZTS
+#ifdef __cplusplus
 # ifdef HAVE_STDIOSTR_H
 #  include <stdiostr.h>
 # endif

@@ -49,7 +49,7 @@
 #include "zend_variables.h"
 #include "zend_operators.h"
 
-#ifdef ZTS
+#ifdef __cplusplus
 # include <fstream.h>
 # ifdef HAVE_STDIOSTR_H
 #  include <stdiostr.h>

@@ -70,8 +70,6 @@ AC_CHECK_FUNCS(finite isfinite isinf isnan)
 
 ZEND_FP_EXCEPT
 	
-AC_SUBST(ZEND_SCANNER)
-
 ])
 
 
@@ -153,14 +151,9 @@ test -n "$DEBUG_CFLAGS" && CFLAGS="$CFLAGS $DEBUG_CFLAGS"
 
 if test "$ZEND_EXPERIMENTAL_ZTS" = "yes"; then
   AC_DEFINE(ZTS,1,[ ])
-  ZEND_SCANNER_TYPE=cc
-  CPPFLAGS="$CPPFLAGS -I../TSRM"
+  CFLAGS="$CFLAGS -DZTS"
   LIBZEND_CPLUSPLUS_CHECKS
-else
-  ZEND_SCANNER_TYPE=c
 fi  
-
-ZEND_SCANNER="libZend_${ZEND_SCANNER_TYPE}.la"
 
 if test "$ZEND_MEMORY_LIMIT" = "yes"; then
   AC_DEFINE(MEMORY_LIMIT, 1, [Memory limit])

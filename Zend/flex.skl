@@ -107,9 +107,7 @@ class istream;
 
 typedef struct yy_buffer_state *YY_BUFFER_STATE;
 
-//FIXextern int yyleng;
 %-
-//FIX extern FILE *yyin, *yyout;
 %*
 
 
@@ -214,7 +212,6 @@ struct yy_buffer_state
 	};
 
 %- Standard (non-C++) definition
-//FIXstatic YY_BUFFER_STATE yy_current_buffer = 0;
 #define yy_current_buffer SCNG(current_buffer)
 %*
 
@@ -231,8 +228,6 @@ static char yy_hold_char;
 
 static int yy_n_chars;		/* number of characters read into yy_ch_buf */
 
-
-//FIXint yyleng;
 
 /* Points to current character in buffer. */
 #define yy_c_buf_p SCNG(c_buf_p)
