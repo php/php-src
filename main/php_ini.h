@@ -46,6 +46,7 @@ PHPAPI void display_ini_entries(zend_module_entry *module);
 PHPAPI long php_ini_long(char *name, uint name_length, int orig);
 PHPAPI double php_ini_double(char *name, uint name_length, int orig);
 PHPAPI char *php_ini_string(char *name, uint name_length, int orig);
+php_ini_entry *get_ini_entry(char *name, uint name_length);
 
 PHPAPI int php_ini_register_displayer(char *name, uint name_length, void (*displayer)(php_ini_entry *ini_entry, int type));
 PHPAPI PHP_INI_DISP(php_ini_boolean_displayer_cb);

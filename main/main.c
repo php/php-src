@@ -551,6 +551,21 @@ static FILE *php_fopen_wrapper_for_zend(const char *filename)
 }
 
 
+static int php_get_ini_entry_for_zend(char *name, uint name_length, zval *contents)
+{
+	php_ini_entry *ini_entry = get_ini_entry(name, name_length);
+
+	if (ini_entry) {
+		contents->type = IS_STRING;
+		contents->value.str.val = ini_entry->value;
+		contents->value.str.len = ini_entry->value_length;
+		return SUCCESS;
+	} else {
+		return FAILURE;
+	}
+}
+
+
 static void php_message_handler_for_zend(long message, void *data)
 {
 	switch (message) {
@@ -790,7 +805,7 @@ int php_module_startup(sapi_module_struct *sf)
 	zuf.message_handler = php_message_handler_for_zend;
 	zuf.block_interruptions = BLOCK_INTERRUPTIONS;
 	zuf.unblock_interruptions = UNBLOCK_INTERRUPTIONS;
-
+	zuf.get_ini_entry = php_get_ini_entry_for_zend;
 	zend_startup(&zuf, NULL);
 
 #ifdef ZTS
