@@ -56,6 +56,8 @@ static ZEND_FUNCTION(trigger_error);
 static ZEND_FUNCTION(set_error_handler);
 static ZEND_FUNCTION(restore_error_handler);
 static ZEND_FUNCTION(get_declared_classes);
+static ZEND_FUNCTION(get_defined_functions);
+static ZEND_FUNCTION(get_defined_vars);
 static ZEND_FUNCTION(create_function);
 static ZEND_FUNCTION(get_resource_type);
 #if ZEND_DEBUG
@@ -101,6 +103,8 @@ static zend_function_entry builtin_functions[] = {
 	ZEND_FE(set_error_handler,		NULL)
 	ZEND_FE(restore_error_handler,	NULL)
 	ZEND_FE(get_declared_classes, NULL)
+	ZEND_FE(get_defined_functions, NULL)
+	ZEND_FE(get_defined_vars,	NULL)
 	ZEND_FE(create_function,	NULL)
 	ZEND_FE(get_resource_type,	NULL)
 #if ZEND_DEBUG
@@ -851,6 +855,78 @@ ZEND_FUNCTION(get_declared_classes)
 }
 /* }}} */
 
+static int copy_function_name(zend_function *func, int num_args, va_list args, zend_hash_key *hash_key)
+{
+	zval *ar = va_arg(args, zval *);
+	
+	if (hash_key->nKeyLength != 0 && hash_key->arKey[0] != 0) {
+		add_next_index_stringl(ar, hash_key->arKey, hash_key->nKeyLength-1, 1);
+	}
+	
+	return 0;
+}
+
+/* {{{ proto array get_defined_functions(void)
+   Returns an array of all defined functions */
+ZEND_FUNCTION(get_defined_functions)
+{
+	ELS_FETCH();
+	
+	if (ZEND_NUM_ARGS() != 0) {
+		ZEND_WRONG_PARAM_COUNT();
+	}
+	RETURN_FALSE;
+	array_init(return_value);
+	
+	zend_hash_apply_with_arguments(CG(function_table), (apply_func_args_t)copy_function_name, 1, return_value);
+}
+/* }}} */
+
+static int copy_variable_name(zval *varname, int num_args, va_list args, zend_hash_key *hash_key)
+{
+	zval *ar = va_arg(args, zval *);
+	
+	if (hash_key->nKeyLength != 0 && hash_key->arKey[0] != 0) {
+		add_next_index_stringl(ar, hash_key->arKey, hash_key->nKeyLength-1, 1);
+	}
+	
+	return 0;
+}
+
+/* {{{ proto array get_defined_vars(void)
+   Returns a two-dimensional associative array of all defined variable names */
+ZEND_FUNCTION(get_defined_vars)
+{	
+	zval *globals,
+	     *current;
+	ELS_FETCH();
+
+	if (ZEND_NUM_ARGS() != 0) {
+		ZEND_WRONG_PARAM_COUNT();
+	}
+	
+	MAKE_STD_ZVAL(globals);
+	array_init(globals);
+
+	MAKE_STD_ZVAL(current);
+	array_init(current);
+
+	array_init(return_value);
+	
+	zend_hash_apply_with_arguments(&EG(symbol_table), (apply_func_args_t)copy_variable_name, 1, globals);
+	zend_hash_apply_with_arguments(EG(active_symbol_table), (apply_func_args_t)copy_variable_name, 1, current);
+
+	if (zend_hash_add(return_value->value.ht, "GLOBALS", sizeof("GLOBALS"), (void **)&current, sizeof(zval *), NULL) == FAILURE) {
+		zend_error(E_WARNING, "Cannot add GLOBAL variables to return value from get_defined_vars()");
+		RETURN_FALSE;
+	}
+	
+	if (zend_hash_add(return_value->value.ht, "CURRENT", sizeof("CURRENT"), (void **)&current, sizeof(zval *), NULL) == FAILURE) {
+		zend_error(E_WARNING, "Cannot add CURRENT variables to return value from get_defined_vars()");
+		RETURN_FALSE;
+	}
+}
+/* }}} */
 
 #define LAMBDA_TEMP_FUNCNAME	"__lambda_func"
 
