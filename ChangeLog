@@ -1,3 +1,59 @@
+2001-03-15  Emiliano Heyns  <emile@iris-advies.com>
+
+    * ext/midgard/attachment.c: closing file after serving it.
+
+2001-03-15  Daniel Beulshausen  <daniel@php4win.de>
+
+    * ext/iconv/iconv.c: fix win32 build
+
+2001-03-15  Ulf Wendel  <ulf.wendel@phpdoc.de>
+
+    * pear/XML/Parser.php: - put the todo list into the inline docs
+
+    * pear/XML/Render.php:
+    - removed all methods that did the same like the (parent) methods in XML/Parse.php
+    - added todo to the inline docs
+
+    After this there's only one method left at all which tries to instantiate non existant classes. Can I move this code to the Experimental/ directory?
+
+    * pear/XML/Parser.php: - made it work without warnings
+    - handler methods are now configurable
+    - added startHandler() and endHandler()
+      "event" is the default handling mode and calls these methods. Implemented them
+      as "abstract" methods.
+
+    * pear/XML/Parser.php: Cleanup on parse (fclose()).
+
+    * pear/XML/Parser.php:
+    If the creation of the parser fails, the constructor "throws" an error by returning a XML_Parser_Error object. That means the user will get an object of the type XML_Parser_Error and the methods parse() and parseString() can't get called.
+
+    * pear/XML/Parser.php: - lots of whitespace (tabs vs. spaces)
+    - added basic inline docs
+    - added error handling to the constructor
+
+2001-03-15  Emiliano Heyns  <emile@iris-advies.com>
+
+    * ext/midgard/midgard.c:
+    Remove php_error for situations where Midgard is loaded but not configured
+    (which is valid).
+
+2001-03-15  David Guerizec  <david@guerizec.net>
+
+    * ext/midgard/snippet.c: Snippet author is a string.
+
+2001-03-15  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/bz2/bz2.c: remove a little insanity.
+
+    * ext/bz2/bz2.c
+      ext/bz2/php_bz2.h:
+    Bit of a cleanup, added some inline docs, decreased the amount of
+    memory used.
+
+2001-03-15  Jon Parise  <jon@csh.rit.edu>
+
+    * ext/standard/credits.h: Whitespace (spaces to four-column tabs)
+
 2001-03-14  Ulf Wendel  <ulf.wendel@phpdoc.de>
 
     * pear/Experimental/HTML/Menu.php: - code beatifiying
