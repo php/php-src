@@ -27,6 +27,30 @@ Package=<4>
 
 ###############################################################################
 
+Project: "cpdf"=.\ext\cpdf\cpdf.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "domxml"=.\ext\domxml\domxml.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
 Project: "exif"=.\ext\exif\exif.dsp - Package Owner=<4>
 
 Package=<5>
