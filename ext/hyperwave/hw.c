@@ -1349,7 +1349,13 @@ char *php_hw_command(INTERNAL_FUNCTION_PARAMETERS, int comm) {
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
 		return NULL;
 	}
-	HW_FETCH_LINK(arg1);
+	convert_to_long_ex(arg1);
+	link = Z_LVAL_PP(arg1);
+	ptr = (hw_connection *) zend_list_find(link, &type);
+	if(!ptr || (type != le_socketp && type != le_psocketp)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find file identifier %d", link);
+		return NULL;
+	}
 
 	set_swap(ptr->swap_on);
 	{
@@ -2746,7 +2752,7 @@ PHP_FUNCTION(hw_new_document_from_file)
 	int use_include_path=0;
 	hw_document *doc;
 
-	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || (zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE)) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -2872,7 +2878,7 @@ PHP_FUNCTION(hw_document_content)
 	int id, type;
 	hw_document *ptr;
 
-	if (ZEND_NUM_ARGS() != 1 || (zend_get_parameters_ex(1, arg1) == FAILURE)) {
+	if (ZEND_NUM_ARGS() != 1 || (zend_get_parameters_ex(1, &arg1) == FAILURE)) {
 		RETURN_FALSE;
 	}
 	
