@@ -427,7 +427,8 @@ PHP_MINIT_FUNCTION(pgsql)
 PHP_MSHUTDOWN_FUNCTION(pgsql)
 {
 	UNREGISTER_INI_ENTRIES();
-	
+	zend_hash_destroy(&PGG(notices));
+
 	return SUCCESS;
 }
 /* }}} */
