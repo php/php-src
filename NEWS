@@ -1,6 +1,9 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 200?, Version 4.4.0
+- Made handler parameter of dba_(p)open() optional. (Marcus)
+- Added php.ini option 'dba.default_handler' to specify a default handler.
+  (Marcus)
 - Fixed bug #17098 (make Apache aware that PHP scripts represent dynamic data
   and should not be cached). (Ilia)
 - Make uniqid() parameters optional and allow any prefix length. (Marcus)
