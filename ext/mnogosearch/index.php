@@ -5,7 +5,7 @@
 
 <?
 
-/*   mnoGoSearch-php0lite v.1.0
+/*   mnoGoSearch-php-lite v.1.0
  *   for mnoGoSearch ( formely known as UdmSearch ) free web search engine
  *   (C) 2001 by Sergey Kartashoff <gluke@mail.ru>,
  *               mnoGoSearch Developers Team <devel@mnogosearch.org>
