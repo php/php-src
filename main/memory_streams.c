@@ -318,7 +318,7 @@ static size_t php_stream_temp_write(php_stream *stream, const char *buf, size_t 
 		if (memsize + count >= ts->smax) {
 			php_stream *file = php_stream_fopen_tmpfile();
 			php_stream_write(file, membuf, memsize);
-			php_stream_close(ts->innerstream);
+			php_stream_memory_close(ts->innerstream);
 			ts->innerstream = file;
 		}
 	}
