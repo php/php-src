@@ -1438,6 +1438,11 @@ static php_iconv_err_t _php_iconv_mime_decode(smart_str *pretval, const char *st
 		}
 	}
 
+	if (cd != (iconv_t)(-1)) {
+		if ((err = _php_iconv_appendl(pretval, NULL, 0, cd)) != PHP_ICONV_ERR_SUCCESS) {
+			goto out;
+		}
+	}
 	smart_str_0(pretval);
 out:
 	if (cd != (iconv_t)(-1)) {
