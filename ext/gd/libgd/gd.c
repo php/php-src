@@ -5,7 +5,7 @@
 #include "gd.h"
 #include "gdhelpers.h"
 
-#include "php_config.h"
+#include "php.h"
 
 #ifdef _MSC_VER
 # if _MSC_VER >= 1300
