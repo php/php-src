@@ -166,6 +166,10 @@ function_entry mnogosearch_functions[] = {
 	PHP_FE(udm_set_agent_param_ex,	NULL)
 	PHP_FE(udm_get_res_field_ex,	NULL)
 #endif
+#if UDM_VERSION_ID >= 30211
+	PHP_FE(udm_hash32,		NULL)
+	PHP_FE(udm_alloc_agent_array,	NULL)
+#endif
 #endif
 
 	PHP_FE(udm_alloc_agent,		NULL)
@@ -458,7 +462,7 @@ DLEXPORT PHP_FUNCTION(udm_alloc_agent)
 				UdmVarListReplaceStr(&Env->Vars,"SyslogFacility","local7");
 				UdmSetLogLevel(Env,0);
 				UdmOpenLog("mnoGoSearch-php",Env,0);
-
+#if UDM_VERSION_ID <= 30210
 				if(!memcmp(dbaddr,"searchd:",8)){
 					UDM_URL	Url;
 					UdmURLParse(&Url,dbaddr);
@@ -466,6 +470,7 @@ DLEXPORT PHP_FUNCTION(udm_alloc_agent)
 				}
 				
 				UdmVarListReplaceStr(&Env->Vars,"DBAddr",dbaddr);
+				
 				if(UDM_OK!=UdmDBSetAddr(Env->db,dbaddr,UDM_OPEN_MODE_READ)){
 				    sprintf(Env->errstr,"Invalid DBAddr: '%s'",dbaddr);
 #if UDM_VERSION_ID <= 30207
@@ -474,7 +479,9 @@ DLEXPORT PHP_FUNCTION(udm_alloc_agent)
 				    php_error_docref(NULL TSRMLS_CC, E_WARNING,"Invalid DBAddr");
 				    RETURN_FALSE;
 				}
-				
+#else
+				UdmDBListAdd(&Env->dbl,dbaddr, UDM_OPEN_MODE_WRITE);
+#endif
 				Agent=UdmAgentInit(NULL,Env,0);
 #elif UDM_VERSION_ID >= 30200
 				Env=UdmAllocEnv();
@@ -512,7 +519,7 @@ DLEXPORT PHP_FUNCTION(udm_alloc_agent)
 				UdmVarListReplaceStr(&Env->Vars,"SyslogFacility","local7");
 				UdmSetLogLevel(Env,0);
 				UdmOpenLog("mnoGoSearch-php",Env,0);
-
+#if UDM_VERSION_ID <= 30210
 				if(!memcmp(dbaddr,"searchd:",8)){
 					UDM_URL	Url;
 					UdmURLParse(&Url,dbaddr);
@@ -527,6 +534,9 @@ DLEXPORT PHP_FUNCTION(udm_alloc_agent)
 				    php_error_docref(NULL TSRMLS_CC, E_WARNING,"Invalid DBAddr");
 				    RETURN_FALSE;
 				}
+#else
+				UdmDBListAdd(&Env->dbl,dbaddr, UDM_OPEN_MODE_WRITE);
+#endif
 				Agent=UdmAgentInit(NULL,Env,0);
 #elif UDM_VERSION_ID >= 30200
 				Env=UdmAllocEnv();
@@ -1777,6 +1787,92 @@ DLEXPORT PHP_FUNCTION(udm_get_res_field_ex)
 /* }}} */
 #endif
 
+#if UDM_VERSION_ID >= 30211
+/* {{{ proto int udm_alloc_agent_array(array dbaddr)
+   Allocate mnoGoSearch session */
+DLEXPORT PHP_FUNCTION(udm_alloc_agent_array)
+{
+	switch(ZEND_NUM_ARGS()){
+
+		case 1: {
+				pval **yydbaddr;
+				zval **tmp;
+				char *dbaddr;
+				UDM_ENV   * Env;
+				UDM_AGENT * Agent;
+				HashPosition   pos;
+				
+				if(zend_get_parameters_ex(1,&yydbaddr)==FAILURE){
+					RETURN_FALSE;
+				}
+				
+				if (Z_TYPE_PP(yydbaddr) != IS_ARRAY) {
+				    	php_error_docref(NULL TSRMLS_CC, E_WARNING, "Argument DBAddr must be an array.");
+					RETURN_FALSE;
+				}
+				convert_to_array_ex(yydbaddr);
+				
+				Env=UdmEnvInit(NULL);
+				UdmVarListReplaceStr(&Env->Vars,"SyslogFacility","local7");
+				UdmSetLogLevel(Env,0);
+				UdmOpenLog("mnoGoSearch-php",Env,0);
+				
+				zend_hash_internal_pointer_reset_ex(HASH_OF(*yydbaddr), &pos);
+				
+				while (zend_hash_get_current_data_ex(HASH_OF(*yydbaddr), (void **)&tmp, &pos) == SUCCESS) {
+				    convert_to_string_ex(tmp);
+				    dbaddr = Z_STRVAL_PP(tmp);
+				    UdmDBListAdd(&Env->dbl,dbaddr, UDM_OPEN_MODE_WRITE);
+				    
+				    zend_hash_move_forward_ex(HASH_OF(*yydbaddr), &pos);
+				}
+				
+				Agent=UdmAgentInit(NULL,Env,0);
+				ZEND_REGISTER_RESOURCE(return_value,Agent,le_link);
+			}
+			break;
+			
+		default:
+			WRONG_PARAM_COUNT;
+			break;
+	}
+}
+/* }}} */
+
+/* {{{ proto int udm_hash32(int agent, string str)
+   Return Hash32 checksum of gived string */
+DLEXPORT PHP_FUNCTION(udm_hash32)
+{
+	pval ** yystr, ** yyagent;
+	char *str;
+	udmhash32_t hash32;
+	char buf[32];
+	UDM_AGENT * Agent;
+	int id=-1;
+
+	switch(ZEND_NUM_ARGS()){
+		case 2: {
+				if (zend_get_parameters_ex(2, &yyagent,&yystr)==FAILURE) {
+					RETURN_FALSE;
+				}
+			}
+			break;
+		default:				
+			WRONG_PARAM_COUNT;
+			break;
+	}
+	ZEND_FETCH_RESOURCE(Agent, UDM_AGENT *, yyagent, id, "mnoGoSearch-Agent", le_link);
+	convert_to_string_ex(yystr);
+	str = Z_STRVAL_PP(yystr);
+
+	hash32=UdmHash32((str),strlen(str));
+	snprintf(buf,sizeof(buf)-1,"%u",hash32);
+	
+	RETURN_STRING(buf,1);
+}
+/* }}} */
+#endif
+
 /* {{{ proto int udm_find(int agent, string query)
    Perform search */
 DLEXPORT PHP_FUNCTION(udm_find)
@@ -2065,7 +2161,7 @@ DLEXPORT PHP_FUNCTION(udm_get_res_param)
 			    {	
 				size_t wsize=(1+len*15)*sizeof(char);
 				char *wordinfo = (char*) malloc(wsize);
-				int corder = -1, ccount = 0;
+				int corder = (size_t)-1, ccount = 0;
 	  
 				*wordinfo = '\0';
 				
@@ -2262,7 +2358,11 @@ DLEXPORT PHP_FUNCTION(udm_cat_list)
 #if UDM_VERSION_ID >= 30204
 	bzero(&C,sizeof(C));
 	strncpy(C.addr,cat,sizeof(C.addr)-1);
+#if UDM_VERSION_ID <= 30210
 	if(!UdmCatAction(Agent,&C,UDM_CAT_ACTION_LIST,Agent->Conf->db)){
+#else
+	if(UDM_OK == UdmCatAction(Agent,&C,UDM_CAT_ACTION_LIST)){
+#endif
 #else
 	if((c=UdmCatList(Agent,cat))){
 #endif
@@ -2277,11 +2377,9 @@ DLEXPORT PHP_FUNCTION(udm_cat_list)
 		    int i;
 		    if (C.ncategories) {
 			for(i=0;i<C.ncategories;i++){
-			    snprintf(buf, UDMSTRSIZ, "%s%s",C.Category[i].link[0]?"@ ":"", C.Category[i].name);
-			    add_next_index_string(return_value, C.Category[i].link[0]?C.Category[i].link:C.Category[i].path, 1);
-			    add_next_index_string(return_value, buf, 1);
+			    add_next_index_stringl(return_value, C.Category[i].path,strlen(C.Category[i].path),1);
+			    add_next_index_stringl(return_value, C.Category[i].name,strlen(C.Category[i].name),1);
 			}
-			free(C.Category);
 		    } else {
 			RETURN_FALSE;
 		    }
@@ -2334,7 +2432,11 @@ DLEXPORT PHP_FUNCTION(udm_cat_path)
 #if UDM_VERSION_ID >= 30204
 	bzero(&C,sizeof(C));
 	strncpy(C.addr,cat,sizeof(C.addr)-1);
+#if UDM_VERSION_ID <= 30210
 	if(!UdmCatAction(Agent,&C,UDM_CAT_ACTION_PATH,Agent->Conf->db)){
+#else
+	if(UDM_OK == UdmCatAction(Agent,&C,UDM_CAT_ACTION_PATH)){
+#endif
 #else
 	if((c=UdmCatPath(Agent,cat))){
 #endif
@@ -2349,11 +2451,9 @@ DLEXPORT PHP_FUNCTION(udm_cat_path)
 		    int i;
 		    if (C.ncategories) {
 			for(i=0;i<C.ncategories;i++){			
-			    snprintf(buf, UDMSTRSIZ, "%s%s",C.Category[i].link[0]?"@ ":"", C.Category[i].name);
-			    add_next_index_string(return_value, C.Category[i].link[0]?C.Category[i].link:C.Category[i].path, 1);
-			    add_next_index_string(return_value, buf, 1);
+			    add_next_index_stringl(return_value, C.Category[i].path,strlen(C.Category[i].path),1);
+			    add_next_index_stringl(return_value, C.Category[i].name,strlen(C.Category[i].name),1);
 			}
-			free(C.Category);
 		    } else {
 			RETURN_FALSE;
 		    }
@@ -2395,7 +2495,11 @@ DLEXPORT PHP_FUNCTION(udm_get_doc_count)
 	}
 	ZEND_FETCH_RESOURCE(Agent, UDM_AGENT *, yyagent, id, "mnoGoSearch-Agent", le_link);
 #if UDM_VERSION_ID >= 30204
+#if UDM_VERSION_ID <= 30210
 	if (!Agent->doccount) UdmURLAction(Agent,NULL,UDM_URL_ACTION_DOCCOUNT,Agent->Conf->db);
+#else
+	if (!Agent->doccount) UdmURLAction(Agent,NULL,UDM_URL_ACTION_DOCCOUNT);
+#endif
 	RETURN_LONG(Agent->doccount);
 #else
 	RETURN_LONG(UdmGetDocCount(Agent));

@@ -71,6 +71,10 @@ DLEXPORT PHP_FUNCTION(udm_make_excerpt);
 DLEXPORT PHP_FUNCTION(udm_set_agent_param_ex);
 DLEXPORT PHP_FUNCTION(udm_get_res_field_ex);
 #endif
+#if UDM_VERSION_ID >= 30211
+DLEXPORT PHP_FUNCTION(udm_hash32);
+DLEXPORT PHP_FUNCTION(udm_alloc_agent_array);
+#endif
 #endif
 
 DLEXPORT PHP_FUNCTION(udm_alloc_agent);
