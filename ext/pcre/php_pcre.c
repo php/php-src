@@ -596,7 +596,7 @@ static int preg_do_eval(char *eval_str, int eval_str_len, char *subject,
 char *php_pcre_replace(char *regex,   int regex_len,
 					   char *subject, int subject_len,
 					   char *replace, int replace_len,
-					   int  *result_len)
+					   int  *result_len, int limit)
 {
 	pcre			*re = NULL;			/* Compiled regular expression */
 	pcre_extra		*extra = NULL;		/* Holds results of studying */
@@ -660,7 +660,7 @@ char *php_pcre_replace(char *regex,   int regex_len,
 
 		piece = subject + start_offset;
 
-		if (count > 0) {
+		if (count > 0 && (limit == -1 || limit > 0)) {
 			/* Set the match location in subject */
 			match = subject + offsets[0];
 
@@ -750,8 +750,11 @@ char *php_pcre_replace(char *regex,   int regex_len,
 		   advance to the next character. */
 		g_notempty = (offsets[1] == offsets[0])? PCRE_NOTEMPTY | PCRE_ANCHORED : 0;
 		
-		/* Advance to the next piece */
+		/* Advance to the next piece. */
 		start_offset = offsets[1];
+
+		if (limit != -1)
+			limit--;
 	}
 	
 	efree(offsets);
@@ -760,8 +763,7 @@ char *php_pcre_replace(char *regex,   int regex_len,
 }
 
 
-static char *php_replace_in_subject(zval *regex, zval *replace, zval **subject,
-									int *result_len)
+static char *php_replace_in_subject(zval *regex, zval *replace, zval **subject, int *result_len, int limit)
 {
 	zval		**regex_entry,
 				**replace_entry = NULL;
@@ -824,7 +826,8 @@ static char *php_replace_in_subject(zval *regex, zval *replace, zval **subject,
 										   subject_len,
 										   replace_value,
 										   replace_len,
-										   result_len)) != NULL) {
+										   result_len,
+										   limit)) != NULL) {
 				efree(subject_value);
 				subject_value = result;
 				subject_len = *result_len;
@@ -841,33 +844,42 @@ static char *php_replace_in_subject(zval *regex, zval *replace, zval **subject,
 								  (*subject)->value.str.len,
 							      replace->value.str.val,
 								  replace->value.str.len,
-								  result_len);
+								  result_len,
+								  limit);
 		return result;
 	}
 }
 
 
-/* {{{ proto string preg_replace(string|array regex, string|array replace, string|array subject)
-   Perform Perl-style regular expression replacement */
+/* {{{ proto string preg_replace(string|array regex, string|array replace, string|array subject [, int limit])
+   Perform Perl-style regular expression replacement. */
 PHP_FUNCTION(preg_replace)
 {
 	zval		   **regex,
 				   **replace,
 				   **subject,
+				   **limit,
 				   **subject_entry;
 	char			*result;
 	int				 result_len;
+	int				 limit_val = -1;
 	char			*string_key;
 	ulong			 num_key;
 	
 	/* Get function parameters and do error-checking. */
-	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &regex, &replace, &subject) == FAILURE) {
+	if (ZEND_NUM_ARGS() < 3 || ZEND_NUM_ARGS() > 4 ||
+		zend_get_parameters_ex(ZEND_NUM_ARGS(), &regex, &replace, &subject, &limit) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
 	SEPARATE_ZVAL(regex);
 	SEPARATE_ZVAL(replace);
 	SEPARATE_ZVAL(subject);
+
+	if (ZEND_NUM_ARGS() > 3) {
+		convert_to_long_ex(limit);
+		limit_val = Z_LVAL_PP(limit);
+	}
 		
 	/* Make sure we're dealing with strings and do the replacement */
 	if ((*regex)->type != IS_ARRAY) {
@@ -885,7 +897,7 @@ PHP_FUNCTION(preg_replace)
 		   and add the result to the return_value array. */
 		while (zend_hash_get_current_data((*subject)->value.ht,
 										  (void **)&subject_entry) == SUCCESS) {
-			if ((result = php_replace_in_subject(*regex, *replace, subject_entry, &result_len)) != NULL) {
+			if ((result = php_replace_in_subject(*regex, *replace, subject_entry, &result_len, limit_val)) != NULL) {
 				/* Add to return array */
 				switch(zend_hash_get_current_key((*subject)->value.ht, &string_key, &num_key))
 				{
@@ -904,7 +916,7 @@ PHP_FUNCTION(preg_replace)
 		}
 	}
 	else {	/* if subject is not an array */
-		if ((result = php_replace_in_subject(*regex, *replace, subject, &result_len)) != NULL) {
+		if ((result = php_replace_in_subject(*regex, *replace, subject, &result_len, limit_val)) != NULL) {
 			RETVAL_STRINGL(result, result_len, 0);
 		}
 	}	
