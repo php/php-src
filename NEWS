@@ -1,6 +1,7 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.2.0-dev
+- Fix behaviour of strtok. Bug 13866 (jmoore)
 - Made fbsql_num_rows() return the correct value on all select statements.
   (Frank)
 - Fixed HTTP file upload support to handle big files better. (Jani)
