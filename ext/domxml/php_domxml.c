@@ -667,12 +667,12 @@ static zval *php_domobject_new(xmlNodePtr obj, int *found) {
 	return(wrapper);
 }
 
-PHP_MINIT_FUNCTION(domxml)
+PHP_RINIT_FUNCTION(domxml)
 {
 	return SUCCESS;
 }
 
-PHP_RINIT_FUNCTION(domxml)
+PHP_MINIT_FUNCTION(domxml)
 {
 	zend_class_entry ce;
 	le_domxmldocp = zend_register_list_destructors_ex(php_free_xml_doc, NULL, "domdocument", module_number);
