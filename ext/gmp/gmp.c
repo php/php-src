@@ -946,7 +946,7 @@ ZEND_FUNCTION(gmp_invert)
 	}
 
 	FETCH_GMP_ZVAL(gmpnum_a, a_arg);
-	FETCH_GMP_ZVAL(gmpnum_b, a_arg);
+	FETCH_GMP_ZVAL(gmpnum_b, b_arg);
 
 	INIT_GMP_NUM(gmpnum_result);
 	if(mpz_invert(*gmpnum_result, *gmpnum_a, *gmpnum_b)) {
