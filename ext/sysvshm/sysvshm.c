@@ -12,7 +12,7 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Christian Cartus <chc@idgruppe.de>                          |
+   | Authors: Christian Cartus <cartus@atrior.de>                         |
    +----------------------------------------------------------------------+
  */
  
@@ -75,7 +75,7 @@ PHP_MINIT_FUNCTION(sysvshm)
 }
 
 
-/* {{{ proto int shm_attach(int key, int size, int flag)
+/* {{{ proto int shm_attach(int key [, int memsize [, int perm]])
    Return an id for the shared memory with the given key */
 PHP_FUNCTION(shm_attach)
 {
@@ -150,7 +150,7 @@ PHP_FUNCTION(shm_attach)
 
 
 
-/* {{{ proto int shm_detach(int id)
+/* {{{ proto int shm_detach(int shm_identifier)
    Releases the shared memory attachment with the given id */
 PHP_FUNCTION(shm_detach)
 {
@@ -201,7 +201,7 @@ PHP_FUNCTION(shm_remove)
 
 
 
-/* {{{ proto int shm_put_var(int id, int key, object *variable)
+/* {{{ proto int shm_put_var(int shm_identifier, int variable_key, mixed_variable)
    Insert a variable into shared memory */
 PHP_FUNCTION(shm_put_var)
 {
@@ -248,9 +248,7 @@ PHP_FUNCTION(shm_put_var)
 /* }}} */
 
 
-
-
-/* {{{ proto string/float/int/array shm_get_var(int id, int key)
+/* {{{ proto mixed shm_get_var(int id, int variable_key)
    Returns a variable into shared memory */
 PHP_FUNCTION(shm_get_var)
 {
@@ -295,7 +293,7 @@ PHP_FUNCTION(shm_get_var)
 }
 /* }}} */
 
-/* {{{ proto int shm_remove_var(int id, int key)
+/* {{{ proto int shm_remove_var(int id, variable_key)
    Removes variable from shared memory */
 PHP_FUNCTION(shm_remove_var)
 {
