@@ -33,9 +33,9 @@
 #include <yaz/yaz-version.h>
 
 #ifndef YAZ_VERSIONL
-#error YAZ version 2.0 or later must be used.
-#elif YAZ_VERSIONL < 0x020000
-#error YAZ version 2.0 or later must be used.
+#error YAZ version 2.0.6 or later must be used.
+#elif YAZ_VERSIONL < 0x020006
+#error YAZ version 2.0.6 or later must be used.
 #endif
 
 #ifdef PHP_WIN32
@@ -111,11 +111,34 @@ static Yaz_Association *shared_associations;
 static int order_associations;
 static int le_link;
 
+
+#ifdef COMPILE_DL_YAZ
+ZEND_GET_MODULE(yaz)
+#endif
+
+#ifdef ZEND_BEGIN_ARG_INFO
+    ZEND_BEGIN_ARG_INFO(second_argument_force_ref, 0)
+        ZEND_ARG_PASS_INFO(0)
+        ZEND_ARG_PASS_INFO(1)
+    ZEND_END_ARG_INFO();
+
+    ZEND_BEGIN_ARG_INFO(third_argument_force_ref, 0)
+        ZEND_ARG_PASS_INFO(0)
+        ZEND_ARG_PASS_INFO(1)
+    ZEND_END_ARG_INFO();
+#else
+static unsigned char second_argument_force_ref[] = {
+        2, BYREF_NONE, BYREF_FORCE };
+static unsigned char third_argument_force_ref[] = {
+        3, BYREF_NONE, BYREF_NONE, BYREF_FORCE };
+#endif
+
+
 function_entry yaz_functions [] = {
 	PHP_FE(yaz_connect, NULL)
 	PHP_FE(yaz_close, NULL)
 	PHP_FE(yaz_search, NULL)
-	PHP_FE(yaz_wait, second_arg_force_ref)
+	PHP_FE(yaz_wait, second_argument_force_ref)
 	PHP_FE(yaz_errno, NULL)
 	PHP_FE(yaz_error, NULL)
 	PHP_FE(yaz_addinfo, NULL)
@@ -127,15 +150,16 @@ function_entry yaz_functions [] = {
 	PHP_FE(yaz_itemorder, NULL)
 	PHP_FE(yaz_es_result, NULL)
 	PHP_FE(yaz_scan, NULL)
-	PHP_FE(yaz_scan_result, second_arg_force_ref)
+	PHP_FE(yaz_scan_result, second_argument_force_ref)
 	PHP_FE(yaz_present, NULL)
 	PHP_FE(yaz_ccl_conf, NULL)
-	PHP_FE(yaz_ccl_parse, third_arg_force_ref)
+	PHP_FE(yaz_ccl_parse, third_argument_force_ref)
 	PHP_FE(yaz_database, NULL)
 	PHP_FE(yaz_sort, NULL)
 	PHP_FE(yaz_schema, NULL)
 	PHP_FE(yaz_set_option, NULL)
 	PHP_FE(yaz_get_option, NULL)
+	PHP_FE(yaz_es, NULL)
 	{NULL, NULL, NULL}
 };
 
@@ -304,9 +328,10 @@ PHP_FUNCTION(yaz_connect)
 			otherInfo[0] = array_lookup_string(ht, "otherInfo0");
 			otherInfo[1] = array_lookup_string(ht, "otherInfo1");
 			otherInfo[2] = array_lookup_string(ht, "otherInfo2");
-		} else {
+		} else if (Z_TYPE_PP(user) == IS_STRING) {
 			convert_to_string_ex(user);
-			user_str = (*user)->value.str.val;
+			if (*(*user)->value.str.val)
+				user_str = (*user)->value.str.val;
 		}
 	} else {
 		WRONG_PARAM_COUNT;
@@ -831,8 +856,50 @@ static Z_GenericRecord *marc_to_grs1(const char *buf, ODR o)
 	}
 	return r;
 }
+static void retval_array2_grs1(zval *return_value, Z_GenericRecord *p)
+{
+	int i;
+	
+	array_init(return_value);
+	
+	for (i = 0; i<p->num_elements; i++)
+	{
+		zval *zval_element;
+		zval *zval_sub;
+		Z_TaggedElement *e = p->elements[i];
+		
+		ALLOC_ZVAL(zval_element);
+		array_init(zval_element);
+		INIT_PZVAL(zval_element);
+		
+		if (e->tagType)
+			add_assoc_long(zval_element, "tagType", *e->tagType);
 
-static void retval_grs1(zval *return_value, Z_GenericRecord *p)
+		if (e->tagValue->which == Z_StringOrNumeric_string)
+			add_assoc_string(zval_element, "tag", e->tagValue->u.string, 1);
+		else if (e->tagValue->which == Z_StringOrNumeric_numeric)
+			add_assoc_long(zval_element, "tag", *e->tagValue->u.numeric);
+
+		switch (e->content->which) {
+		case Z_ElementData_string:
+			add_assoc_string(zval_element, "content",e->content->u.string, 1);
+			break;
+		case Z_ElementData_numeric:
+			add_assoc_long(zval_element, "content",*e->content->u.numeric);
+			break;
+		case Z_ElementData_trueOrFalse:
+			add_assoc_bool(zval_element, "content",*e->content->u.trueOrFalse);
+			break;
+		case Z_ElementData_subtree:
+			ALLOC_ZVAL(zval_sub);
+			retval_array2_grs1(zval_sub, e->content->u.subtree);
+			add_assoc_zval(zval_element, "content", zval_sub);
+		}
+		add_next_index_zval(return_value, zval_element);
+	}
+}
+
+static void retval_array1_grs1(zval *return_value, Z_GenericRecord *p)
 {
 	Z_GenericRecord *grs[20];
 	int eno[20];
@@ -940,7 +1007,7 @@ PHP_FUNCTION(yaz_record)
 			type = "render";
 		}
 		if (r) {
-			if (!strcmp(type, "array")) {
+			if (!strcmp(type, "array") || !strcmp(type, "array1")) {
 				Z_External *ext = (Z_External *) ZOOM_record_get(r, "ext", 0);
 				if (ext->which == Z_External_OPAC)
 					ext = ext->u.opac->bibliographicRecord;
@@ -948,7 +1015,7 @@ PHP_FUNCTION(yaz_record)
 					oident *ent = oid_getentbyoid(ext->direct_reference);
 					
 					if (ext->which == Z_External_grs1 && ent->value == VAL_GRS1) {
-						retval_grs1(return_value, ext->u.grs1);
+						retval_array1_grs1(return_value, ext->u.grs1);
 					} else if (ext->which == Z_External_octet) {
 						char *buf = (char *) (ext->u.octet_aligned->buf);
 						ODR odr = odr_createmem(ODR_DECODE);
@@ -966,7 +1033,38 @@ PHP_FUNCTION(yaz_record)
 							rec = marc_to_grs1(buf, odr);
 						}
 						if (rec) {
-							retval_grs1(return_value, rec);
+							retval_array1_grs1(return_value, rec);
+						}
+						odr_destroy(odr);
+					}
+				}
+			} else if (!strcmp(type, "array2")) {
+				Z_External *ext = (Z_External *) ZOOM_record_get(r, "ext", 0);
+				if (ext->which == Z_External_OPAC)
+					ext = ext->u.opac->bibliographicRecord;
+				if (ext) {
+					oident *ent = oid_getentbyoid(ext->direct_reference);
+					
+					if (ext->which == Z_External_grs1 && ent->value == VAL_GRS1) {
+						retval_array2_grs1(return_value, ext->u.grs1);
+					} else if (ext->which == Z_External_octet) {
+						char *buf = (char *) (ext->u.octet_aligned->buf);
+						ODR odr = odr_createmem(ODR_DECODE);
+						Z_GenericRecord *rec = 0;
+						
+						switch (ent->value) {
+						case VAL_SOIF:
+						case VAL_HTML:
+							break;
+						case VAL_TEXT_XML:
+						case VAL_APPLICATION_XML:
+							/* text2grs1(&buf, &len, t->odr_in, 0, 0); */
+							break;
+						default:
+							rec = marc_to_grs1(buf, odr);
+						}
+						if (rec) {
+							retval_array2_grs1(return_value, rec);
 						}
 						odr_destroy(odr);
 					}
@@ -974,9 +1072,13 @@ PHP_FUNCTION(yaz_record)
 			} else {
 				int rlen;
 				const char *info = ZOOM_record_get(r, type, &rlen);
-
+#if 0
+				return_value->value.str.len = 1;
+				return_value->value.str.val = "X";
+#else			  
 				return_value->value.str.len = (rlen > 0) ? rlen : 0;
 				return_value->value.str.val = estrndup(info, return_value->value.str.len);
+#endif
 				return_value->type = IS_STRING;
 			}
 		}
@@ -1204,6 +1306,42 @@ PHP_FUNCTION(yaz_itemorder)
 }
 /* }}} */
 
+/* {{{ proto void yaz_es(resource id, string type, array package)
+   Sends Extended Services Request */
+PHP_FUNCTION(yaz_es)
+{
+	pval **pval_id, **pval_type, **pval_package;
+	Yaz_Association p;
+	
+	if (ZEND_NUM_ARGS() != 3 ||
+		zend_get_parameters_ex(3, &pval_id, &pval_type, 
+							   &pval_package) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	if (Z_TYPE_PP(pval_type) != IS_STRING) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Expected string parameter");
+		RETURN_FALSE;
+	}
+	
+	if (Z_TYPE_PP(pval_package) != IS_ARRAY) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Expected array parameter");
+		RETURN_FALSE;
+	}
+
+	get_assoc(INTERNAL_FUNCTION_PARAM_PASSTHRU, pval_id, &p);
+	if (p) {
+		ZOOM_options options = ZOOM_options_create();
+		
+		ZOOM_options_set_callback(options, ill_array_lookup, Z_ARRVAL_PP(pval_package));
+		ZOOM_package_destroy(p->zoom_package);
+		p->zoom_package = ZOOM_connection_package(p->zoom_conn, options);
+		ZOOM_package_send(p->zoom_package, (*pval_type)->value.str.val);
+		ZOOM_options_destroy (options);
+	}
+	release_assoc(p);
+}
+/* }}} */
+
 /* {{{ proto void yaz_scan(resource id, type, query [, flags])
    Sends Scan Request */
 PHP_FUNCTION(yaz_scan)
@@ -1317,6 +1455,15 @@ PHP_FUNCTION(yaz_scan_result)
 				add_next_index_string(my_zval, "?", 1);
 			}
 			add_next_index_long(my_zval, occ);
+
+			term = ZOOM_scanset_display_term(p->zoom_scan, pos, &occ, &len);
+
+			if (term) {
+				add_next_index_stringl(my_zval, (char*) term, len, 1);
+			} else {
+				add_next_index_string(my_zval, "?", 1);
+			}
+
 			zend_hash_next_index_insert(return_value->value.ht, (void *) &my_zval, sizeof(zval *), NULL);
 		}
 
@@ -1634,12 +1781,6 @@ zend_module_entry yaz_module_entry = {
 	STANDARD_MODULE_PROPERTIES
 };
 
-#ifdef COMPILE_DL_YAZ
-ZEND_GET_MODULE(yaz)
-# ifdef PHP_WIN32
-# include "zend_arg_defs.c"
-# endif
-#endif
 
 #endif
 
