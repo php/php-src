@@ -317,7 +317,7 @@ static char *php_tidy_file_to_mem(char *filename, zend_bool use_include_path TSR
 	return data;
 }
 
-static void tidy_object_dtor(void *object, zend_object_handle handle TSRMLS_DC)
+static void tidy_object_free_storage(void *object TSRMLS_DC)
 {
 	PHPTidyObj *intern = (PHPTidyObj *)object;
 
@@ -382,7 +382,7 @@ static void tidy_object_new(zend_class_entry *class_type, zend_object_handlers *
 			break;
 	}
 
-	retval->handle = zend_objects_store_put(intern, tidy_object_dtor, NULL TSRMLS_CC);
+	retval->handle = zend_objects_store_put(intern, NULL, tidy_object_free_storage, NULL TSRMLS_CC);
 	retval->handlers = handlers;
 }
 

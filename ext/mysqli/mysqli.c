@@ -101,9 +101,9 @@ void php_clear_stmt_bind(STMT *stmt)
 }
 /* }}} */
 
-/* {{{ mysqli_objects_dtor
+/* {{{ mysqli_objects_free_storage
  */
-static void mysqli_objects_dtor(void *object, zend_object_handle handle TSRMLS_DC)
+static void mysqli_objects_free_storage(void *object TSRMLS_DC)
 {
 	mysqli_object 	*intern = (mysqli_object *)object;
 	MYSQLI_RESOURCE	*my_res = (MYSQLI_RESOURCE *)intern->ptr;
@@ -276,7 +276,7 @@ PHP_MYSQLI_EXPORT(zend_object_value) mysqli_objects_new(zend_class_entry *class_
 	zend_hash_copy(intern->zo.properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref,
 					(void *) &tmp, sizeof(zval *));
 
-	retval.handle = zend_objects_store_put(intern, mysqli_objects_dtor, mysqli_objects_clone TSRMLS_CC);
+	retval.handle = zend_objects_store_put(intern, NULL, mysqli_objects_free_storage, mysqli_objects_clone TSRMLS_CC);
 	retval.handlers = &mysqli_object_handlers;
 
 	return retval;

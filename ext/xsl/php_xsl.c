@@ -74,8 +74,8 @@ void xsl_objects_clone(void *object, void **object_clone TSRMLS_DC)
 }
 /* }}} */
 
-/* {{{ xsl_objects_dtor */
-void xsl_objects_dtor(void *object, zend_object_handle handle TSRMLS_DC)
+/* {{{ xsl_objects_free_storage */
+void xsl_objects_free_storage(void *object TSRMLS_DC)
 {
 	xsl_object *intern = (xsl_object *)object;
 
@@ -119,7 +119,7 @@ zend_object_value xsl_objects_new(zend_class_entry *class_type TSRMLS_DC)
 	zend_hash_copy(intern->std.properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
 	ALLOC_HASHTABLE(intern->parameter);
 	zend_hash_init(intern->parameter, 0, NULL, ZVAL_PTR_DTOR, 0);
-	retval.handle = zend_objects_store_put(intern, xsl_objects_dtor, xsl_objects_clone TSRMLS_CC);
+	retval.handle = zend_objects_store_put(intern, NULL, xsl_objects_free_storage, xsl_objects_clone TSRMLS_CC);
 	intern->handle = retval.handle;
 	retval.handlers = &xsl_object_handlers;
 	return retval;
