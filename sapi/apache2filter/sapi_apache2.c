@@ -218,25 +218,25 @@ static sapi_module_struct apache2_sapi_module = {
 	"apache2filter",
 	"Apache 2.0 Filter",
 
-	php_module_startup,							/* startup */
+	php_module_startup,						/* startup */
 	php_module_shutdown_wrapper,			/* shutdown */
 
 	NULL,									/* activate */
 	NULL,									/* deactivate */
 
-	php_apache_sapi_ub_write,					/* unbuffered write */
+	php_apache_sapi_ub_write,				/* unbuffered write */
 	php_apache_sapi_flush,					/* flush */
 	NULL,									/* get uid */
 	NULL,									/* getenv */
 
 	php_error,								/* error handler */
 
-	php_apache_sapi_header_handler,				/* header handler */
-	php_apache_sapi_send_headers,				/* send headers handler */
+	php_apache_sapi_header_handler,			/* header handler */
+	php_apache_sapi_send_headers,			/* send headers handler */
 	NULL,									/* send header handler */
 
-	php_apache_sapi_read_post,					/* read POST data */
-	php_apache_sapi_read_cookies,				/* read Cookies */
+	php_apache_sapi_read_post,				/* read POST data */
+	php_apache_sapi_read_cookies,			/* read Cookies */
 
 	php_apache_sapi_register_variables,
 	php_apache_sapi_log_message,			/* Log message */
@@ -458,8 +458,7 @@ static void php_add_filter(request_rec *r, ap_filter_t *f)
 
 	if (output) {
 		ap_add_output_filter("PHP", NULL, r, r->connection);
-	}
-	else {
+	} else {
 		ap_add_input_filter("PHP", NULL, r, r->connection);
 	}
 }
@@ -506,19 +505,19 @@ static void php_register_hook(apr_pool_t *p)
 {
 	ap_hook_post_config(php_apache_server_startup, NULL, NULL, APR_HOOK_MIDDLE);
 	ap_hook_insert_filter(php_insert_filter, NULL, NULL, APR_HOOK_MIDDLE);
-    ap_hook_post_read_request(php_post_read_request, NULL, NULL, APR_HOOK_MIDDLE);
+	ap_hook_post_read_request(php_post_read_request, NULL, NULL, APR_HOOK_MIDDLE);
 	ap_register_output_filter("PHP", php_output_filter, AP_FTYPE_RESOURCE);
 	ap_register_input_filter("PHP", php_input_filter, AP_FTYPE_RESOURCE);
 }
 
 AP_MODULE_DECLARE_DATA module php4_module = {
-    STANDARD20_MODULE_STUFF,
-    create_php_config,		/* create per-directory config structure */
-    merge_php_config,      		/* merge per-directory config structures */
-    NULL,			/* create per-server config structure */
-    NULL,			/* merge per-server config structures */
-    php_dir_cmds,			/* command apr_table_t */
-    php_register_hook		/* register hooks */
+	STANDARD20_MODULE_STUFF,
+	create_php_config,		/* create per-directory config structure */
+	merge_php_config,		/* merge per-directory config structures */
+	NULL,					/* create per-server config structure */
+	NULL,					/* merge per-server config structures */
+	php_dir_cmds,			/* command apr_table_t */
+	php_register_hook		/* register hooks */
 };
 
 /*
@@ -529,5 +528,3 @@ AP_MODULE_DECLARE_DATA module php4_module = {
  * vim600: sw=4 ts=4 fdm=marker
  * vim<600: sw=4 ts=4
  */
-
-
