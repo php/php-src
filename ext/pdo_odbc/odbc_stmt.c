@@ -273,9 +273,7 @@ static int odbc_stmt_fetch(pdo_stmt_t *stmt,
 	pdo_odbc_stmt *S = (pdo_odbc_stmt*)stmt->driver_data;
 	RETCODE rc;
 	SQLSMALLINT odbcori;
-#if 0
-	rc = SQLFetch(S->stmt);
-#else
+
 	switch (ori) {
 		case PDO_FETCH_ORI_NEXT:	odbcori = SQL_FETCH_NEXT; break;
 		case PDO_FETCH_ORI_PRIOR:	odbcori = SQL_FETCH_PRIOR; break;
@@ -283,10 +281,11 @@ static int odbc_stmt_fetch(pdo_stmt_t *stmt,
 		case PDO_FETCH_ORI_LAST:	odbcori = SQL_FETCH_LAST; break;
 		case PDO_FETCH_ORI_ABS:		odbcori = SQL_FETCH_ABSOLUTE; break;
 		case PDO_FETCH_ORI_REL:		odbcori = SQL_FETCH_RELATIVE; break;
-		default: printf("HMMM\n");
+		default: 
+			strcpy(stmt->error_code, "HY106");
+			return 0;
 	}
 	rc = SQLFetchScroll(S->stmt, odbcori, offset);
-#endif
 
 	if (rc == SQL_SUCCESS || rc == SQL_SUCCESS_WITH_INFO) {
 		return 1;
