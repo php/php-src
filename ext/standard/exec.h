@@ -36,8 +36,6 @@ PHP_MINIT_FUNCTION(proc_open);
 
 char *php_escape_shell_cmd(char *);
 char *php_escape_shell_arg(char *);
-int php_Exec(int type, char *cmd, pval *array, pval *return_value TSRMLS_DC);
-
-#define PHP_EMPTY_EXEC_PARAM { php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot execute a blank command"); RETURN_FALSE; }
+int php_exec(int type, char *cmd, pval *array, pval *return_value TSRMLS_DC);
 
 #endif /* EXEC_H */
