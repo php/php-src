@@ -32,7 +32,7 @@ $(LTLIBRARY_NAME): $(LTLIBRARY_OBJECTS) $(LTLIBRARY_DEPENDENCIES)
 $(LTLIBRARY_SHARED_NAME): $(LTLIBRARY_OBJECTS) $(LTLIBRARY_DEPENDENCIES)
 	@test -d $(phplibdir) || $(mkinstalldirs) $(phplibdir)
 	$(LINK) -avoid-version -module -rpath $(phplibdir) $(LTLIBRARY_LDFLAGS) $(LTLIBRARY_OBJECTS) $(LTLIBRARY_SHARED_LIBADD)
-	$(SHLIBTOOL) --mode=install install $@ $(phplibdir)
+	$(SHLIBTOOL) --mode=install cp $@ $(phplibdir)
 
 shared:
 	@if test -z '$(LTLIBRARY_SHARED_NAME)'; then \
