@@ -675,7 +675,7 @@ function_entry basic_functions[] = {
 
 	PHP_FALIAS(socket_get_status, stream_get_meta_data,						NULL)
 
-#if (!defined(PHP_WIN32) && !defined(__BEOS__) && !defined(NETWARE) && HAVE_REALPATH) || defined(ZTS)
+#if (!defined(__BEOS__) && !defined(NETWARE) && HAVE_REALPATH) || defined(ZTS)
 	PHP_FE(realpath,														NULL)
 #endif
 
