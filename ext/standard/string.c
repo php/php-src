@@ -2323,7 +2323,7 @@ PHP_FUNCTION(nl2br)
 	
 	convert_to_string_ex(str);
 	
-	php_char_to_str((*str)->value.str.val,(*str)->value.str.len,'\n',"<br>\n",5,return_value);
+	php_char_to_str((*str)->value.str.val,(*str)->value.str.len,'\n',"<br />\n",7,return_value);
 }
 /* }}} */
 
