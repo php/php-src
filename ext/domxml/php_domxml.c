@@ -391,7 +391,8 @@ void *php_xpath_get_object(zval *wrapper, int rsrc_type1, int rsrc_type2)
 	void *obj;
 	zval **handle;
 	int type;
-				  
+	TSRMLS_FETCH();
+					  
 	if (Z_TYPE_P(wrapper) != IS_OBJECT) {
 		php_error(E_ERROR, "Wrapper is not an object");
 	}
@@ -470,7 +471,8 @@ void *php_xpath_get_context(zval *wrapper, int rsrc_type1, int rsrc_type2)
 	void *obj;
 	zval **handle;
 	int type;
-				  
+	TSRMLS_FETCH();
+					  
 	if (Z_TYPE_P(wrapper) != IS_OBJECT) {
 		php_error(E_ERROR, "Wrapper is not an object");
 	}
@@ -549,6 +551,7 @@ void *php_dom_get_object(zval *wrapper, int rsrc_type1, int rsrc_type2)
 	void *obj;
 	zval **handle;
 	int type;
+	TSRMLS_FETCH();
 				  
 	if (Z_TYPE_P(wrapper) != IS_OBJECT) {
 		php_error(E_ERROR, "Wrapper is not an object");
