@@ -24,10 +24,8 @@
 
 /* {{{ php_info_print_css
  */
-PHPAPI void php_info_print_css(void)
+PHPAPI void php_info_print_css(TSRMLS_D)
 {
-	TSRMLS_FETCH();
-
 	PUTS("body {background-color: #ffffff; color: #000000;}\n");
 	PUTS("body, td, th, h1, h2 {font-family: sans-serif;}\n");
 	PUTS("pre {margin: 0px; font-family: monospace;}\n");

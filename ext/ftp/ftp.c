@@ -103,7 +103,7 @@ static int		ftp_type(ftpbuf_t *ftp, ftptype_t type);
 static databuf_t*	ftp_getdata(ftpbuf_t *ftp TSRMLS_DC);
 
 /* accepts the data connection, returns updated data buffer */
-static databuf_t*	data_accept(databuf_t *data, ftpbuf_t *ftp);
+static databuf_t*	data_accept(databuf_t *data, ftpbuf_t *ftp TSRMLS_DC);
 
 /* closes the data connection, returns NULL */
 static databuf_t*	data_close(ftpbuf_t *ftp, databuf_t *data);
@@ -790,7 +790,7 @@ ftp_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, ftptype_t type, 
 		goto bail;
 	}
 
-	if ((data = data_accept(data, ftp)) == NULL) {
+	if ((data = data_accept(data, ftp TSRMLS_CC)) == NULL) {
 		goto bail;
 	}
 
@@ -874,7 +874,7 @@ ftp_put(ftpbuf_t *ftp, const char *path, php_stream *instream, ftptype_t type, i
 	if (!ftp_getresp(ftp) || (ftp->resp != 150 && ftp->resp != 125)) {
 		goto bail;
 	}
-	if ((data = data_accept(data, ftp)) == NULL) {
+	if ((data = data_accept(data, ftp TSRMLS_CC)) == NULL) {
 		goto bail;
 	}
 
@@ -1469,14 +1469,13 @@ bail:
 /* {{{ data_accept
  */
 databuf_t*
-data_accept(databuf_t *data, ftpbuf_t *ftp)
+data_accept(databuf_t *data, ftpbuf_t *ftp TSRMLS_DC)
 {
 	php_sockaddr_storage addr;
 	socklen_t			size;
 
 #if HAVE_OPENSSL_EXT
 	SSL_CTX		*ctx;
-	TSRMLS_FETCH();	
 #endif
 
 	if (data->fd != -1) {
@@ -1603,7 +1602,7 @@ ftp_genlist(ftpbuf_t *ftp, const char *cmd, const char *path TSRMLS_DC)
 	}
 
 	/* pull data buffer into tmpfile */
-	if ((data = data_accept(data, ftp)) == NULL) {
+	if ((data = data_accept(data, ftp TSRMLS_CC)) == NULL) {
 		goto bail;
 	}
 	size = 0;
@@ -1717,7 +1716,7 @@ ftp_nb_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, ftptype_t typ
 		goto bail;
 	}
 
-	if ((data = data_accept(data, ftp)) == NULL) {
+	if ((data = data_accept(data, ftp TSRMLS_CC)) == NULL) {
 		goto bail;
 	}
 
@@ -1834,7 +1833,7 @@ ftp_nb_put(ftpbuf_t *ftp, const char *path, php_stream *instream, ftptype_t type
 	if (!ftp_getresp(ftp) || (ftp->resp != 150 && ftp->resp != 125)) {
 		goto bail;
 	}
-	if ((data = data_accept(data, ftp)) == NULL) { 
+	if ((data = data_accept(data, ftp TSRMLS_CC)) == NULL) { 
 		goto bail;
 	}
 	ftp->data = data;

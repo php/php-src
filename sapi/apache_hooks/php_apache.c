@@ -1732,7 +1732,7 @@ PHP_FUNCTION(virtual)
 	}
 
 	php_end_ob_buffers(1 TSRMLS_CC);
-	php_header();
+	php_header(TSRMLS_C);
 
 	if (run_sub_req(rr)) {
 		php_error(E_WARNING, "Unable to include '%s' - request execution failed", (*filename)->value.str.val);

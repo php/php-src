@@ -100,7 +100,7 @@ static void aggregate_methods(zend_class_entry *ce, zend_class_entry *from_ce, i
 	}
 #if (HAVE_PCRE || HAVE_BUNDLED_PCRE) && !defined(COMPILE_DL_PCRE)
 	else if (aggr_type == AGGREGATE_BY_REGEXP) {
-		if ((re = pcre_get_compiled_regex(Z_STRVAL_P(aggr_filter), &re_extra, &re_options)) == NULL) {
+		if ((re = pcre_get_compiled_regex(Z_STRVAL_P(aggr_filter), &re_extra, &re_options TSRMLS_CC)) == NULL) {
 			return;
 		}
 	}
@@ -206,7 +206,7 @@ static void aggregate_properties(zval *obj, zend_class_entry *from_ce, int aggr_
 	}
 #if (HAVE_PCRE || HAVE_BUNDLED_PCRE) && !defined(COMPILE_DL_PCRE)
 	else if (aggr_type == AGGREGATE_BY_REGEXP) {
-		if ((re = pcre_get_compiled_regex(Z_STRVAL_P(aggr_filter), &re_extra, &re_options)) == NULL) {
+		if ((re = pcre_get_compiled_regex(Z_STRVAL_P(aggr_filter), &re_extra, &re_options TSRMLS_CC)) == NULL) {
 			return;
 		}
 	}

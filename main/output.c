@@ -683,10 +683,10 @@ static int php_ub_body_write(const char *str, uint str_length TSRMLS_DC)
 	int result = 0;
 
 	if (SG(request_info).headers_only) {
-		php_header();
+		php_header(TSRMLS_C);
 		zend_bailout();
 	}
-	if (php_header()) {
+	if (php_header(TSRMLS_C)) {
 		if (zend_is_compiling(TSRMLS_C)) {
 			OG(output_start_filename) = zend_get_compiled_filename(TSRMLS_C);
 			OG(output_start_lineno) = zend_get_compiled_lineno(TSRMLS_C);

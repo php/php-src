@@ -184,10 +184,10 @@ static void php_print_gpcse_array(char *name, uint name_length TSRMLS_DC)
 
 /* {{{ php_info_print_style
  */
-void php_info_print_style(void)
+void php_info_print_style(TSRMLS_D)
 {
 	php_printf("<style type=\"text/css\"><!--\n");
-	php_info_print_css();
+	php_info_print_css(TSRMLS_C);
 	php_printf("//--></style>\n");
 }
 /* }}} */
@@ -357,7 +357,7 @@ PHPAPI void php_print_info_htmlhead(TSRMLS_D)
 	PUTS("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"DTD/xhtml1-transitional.dtd\">\n");
 	PUTS("<html>");
 	PUTS("<head>\n");
-	php_info_print_style();
+	php_info_print_style(TSRMLS_C);
 	PUTS("<title>phpinfo()</title>");
 /*
 	php_printf("<meta http-equiv=\"Content-Type\" content=\"text/html; charset=%s\" />\n", charset);
@@ -897,7 +897,7 @@ PHP_FUNCTION(phpcredits)
 		flag = PHP_CREDITS_ALL;
 	} 
 
-	php_print_credits(flag);
+	php_print_credits(flag TSRMLS_CC);
 	RETURN_TRUE;
 }
 /* }}} */

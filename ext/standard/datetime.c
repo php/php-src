@@ -881,11 +881,10 @@ PHP_FUNCTION(getdate)
 
 /* {{{ php_std_date
    Return date string in standard format for http headers */
-char *php_std_date(time_t t)
+char *php_std_date(time_t t TSRMLS_DC)
 {
 	struct tm *tm1, tmbuf;
 	char *str;
-	TSRMLS_FETCH();
 
 	tm1 = php_gmtime_r(&t, &tmbuf);
 	str = emalloc(81);

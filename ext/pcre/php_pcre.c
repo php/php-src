@@ -131,7 +131,7 @@ static PHP_RINIT_FUNCTION(pcre)
 
 /* {{{ pcre_get_compiled_regex
  */
-PHPAPI pcre* pcre_get_compiled_regex(char *regex, pcre_extra **extra, int *preg_options) {
+PHPAPI pcre* pcre_get_compiled_regex(char *regex, pcre_extra **extra, int *preg_options TSRMLS_DC) {
 	pcre				*re = NULL;
 	int				 	 coptions = 0;
 	int				 	 soptions = 0;
@@ -151,7 +151,6 @@ PHPAPI pcre* pcre_get_compiled_regex(char *regex, pcre_extra **extra, int *preg_
 #endif
 	pcre_cache_entry	*pce;
 	pcre_cache_entry	 new_entry;
-	TSRMLS_FETCH();
 
 	/* Try to lookup the cached regex entry, and if successful, just pass
 	   back the compiled pattern, otherwise go on and compile it. */
@@ -408,7 +407,7 @@ static void php_pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global)
 	}
 
 	/* Compile regex or get it from cache. */
-	if ((re = pcre_get_compiled_regex(Z_STRVAL_PP(regex), &extra, &preg_options)) == NULL) {
+	if ((re = pcre_get_compiled_regex(Z_STRVAL_PP(regex), &extra, &preg_options TSRMLS_CC)) == NULL) {
 		RETURN_FALSE;
 	}
 
@@ -612,14 +611,13 @@ static int preg_get_backref(char **str, int *backref)
 
 /* {{{ preg_do_repl_func
  */
-static int preg_do_repl_func(zval *function, char *subject, int *offsets, int count, char **result)
+static int preg_do_repl_func(zval *function, char *subject, int *offsets, int count, char **result TSRMLS_DC)
 {
 	zval		*retval_ptr;		/* Function return value */
 	zval	   **args[1];			/* Argument to pass to function */
 	zval		*subpats;			/* Captured subpatterns */ 
 	int			 result_len;		/* Return value length */
 	int			 i;
-	TSRMLS_FETCH();
 
 	MAKE_STD_ZVAL(subpats);
 	array_init(subpats);
@@ -769,7 +767,7 @@ PHPAPI char *php_pcre_replace(char *regex,   int regex_len,
 					 walk_last;			/* Last walked character */
 
 	/* Compile regex or get it from cache. */
-	if ((re = pcre_get_compiled_regex(regex, &extra, &preg_options)) == NULL) {
+	if ((re = pcre_get_compiled_regex(regex, &extra, &preg_options TSRMLS_CC)) == NULL) {
 		return NULL;
 	}
 
@@ -824,7 +822,7 @@ PHPAPI char *php_pcre_replace(char *regex,   int regex_len,
 			} else if (is_callable_replace) {
 				/* Use custom function to get replacement string and its length. */
 				eval_result_len = preg_do_repl_func(replace_val, subject, offsets,
-													count, &eval_result);
+													count, &eval_result TSRMLS_CC);
 				new_len += eval_result_len;
 			} else { /* do regular substitution */
 				walk = replace;
@@ -1174,7 +1172,7 @@ PHP_FUNCTION(preg_split)
 	convert_to_string_ex(subject);
 	
 	/* Compile regex or get it from cache. */
-	if ((re = pcre_get_compiled_regex(Z_STRVAL_PP(regex), &extra, &preg_options)) == NULL) {
+	if ((re = pcre_get_compiled_regex(Z_STRVAL_PP(regex), &extra, &preg_options TSRMLS_CC)) == NULL) {
 		RETURN_FALSE;
 	}
 	
@@ -1408,7 +1406,7 @@ PHP_FUNCTION(preg_grep)
 	}
 	
 	/* Compile regex or get it from cache. */
-	if ((re = pcre_get_compiled_regex(Z_STRVAL_PP(regex), &extra, &preg_options)) == NULL) {
+	if ((re = pcre_get_compiled_regex(Z_STRVAL_PP(regex), &extra, &preg_options TSRMLS_CC)) == NULL) {
 		RETURN_FALSE;
 	}
 

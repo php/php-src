@@ -26,10 +26,8 @@
 
 /* {{{ php_print_credits
  */
-PHPAPI void php_print_credits(int flag)
+PHPAPI void php_print_credits(int flag TSRMLS_DC)
 {
-	TSRMLS_FETCH();
-
 	if (flag & PHP_CREDITS_FULLPAGE) {
 		php_print_info_htmlhead(TSRMLS_C);
 	}

@@ -55,10 +55,8 @@ PHP_FUNCTION(header)
 }
 /* }}} */
 
-PHPAPI int php_header()
+PHPAPI int php_header(TSRMLS_D)
 {
-	TSRMLS_FETCH();
-
 	if (sapi_send_headers(TSRMLS_C)==FAILURE || SG(request_info).headers_only) {
 		return 0; /* don't allow output */
 	} else {
@@ -98,14 +96,14 @@ PHPAPI int php_setcookie(char *name, int name_len, char *value, int value_len, t
 		 * pick an expiry date 1 year and 1 second in the past
 		 */
 		t = time(NULL) - 31536001;
-		dt = php_std_date(t);
+		dt = php_std_date(t TSRMLS_CC);
 		sprintf(cookie, "Set-Cookie: %s=deleted; expires=%s", name, dt);
 		efree(dt);
 	} else {
 		sprintf(cookie, "Set-Cookie: %s=%s", name, value ? encoded_value : "");
 		if (expires > 0) {
 			strcat(cookie, "; expires=");
-			dt = php_std_date(expires);
+			dt = php_std_date(expires TSRMLS_CC);
 			strcat(cookie, dt);
 			efree(dt);
 		}

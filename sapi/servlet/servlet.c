@@ -375,7 +375,7 @@ JNIEXPORT void JNICALL Java_net_php_servlet_send
 			}
 		} else {
 			php_execute_script(&file_handle TSRMLS_CC);
-			php_header();			/* Make sure headers have been sent */
+			php_header(TSRMLS_C);			/* Make sure headers have been sent */
 		}
 
 		/*
