@@ -22,6 +22,8 @@
 
 #include "php.h"
 
+#include <sys/types.h>
+#include <dirent.h>
 #include <time.h>
 
 /* currently, PHP does not check for these functions, but assumes
@@ -38,6 +40,13 @@
 #undef HAVE_ASCTIME_R
 #undef HAVE_CTIME_R
 #undef HAVE_GMTIME_R
+#endif
+
+#if defined(HAVE_POSIX_READDIR_R)
+#define php_readdir_r readdir_r
+#else
+PHPAPI int php_readdir_r(DIR *dirp, struct dirent *entry,
+		struct dirent **result);
 #endif
 
 #if !defined(HAVE_LOCALTIME_R) && defined(HAVE_LOCALTIME)

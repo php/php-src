@@ -17,7 +17,17 @@
  */
 
 
+#include <sys/types.h>
 #include <string.h>
+#include <errno.h>
+#ifdef HAVE_DIRENT_H
+#include <dirent.h>
+#endif
+
+#ifdef PHP_WIN32
+#define NEEDRDH 1
+#include "win32/readdir.h"
+#endif
 
 #include "php_reentrancy.h"
 #include "ext/standard/php_rand.h"                   /* for RAND_MAX */
@@ -27,6 +37,7 @@ enum {
 	CTIME_R,
 	ASCTIME_R,
 	GMTIME_R,
+	READDIR_R,
 	NUMBER_OF_LOCKS
 };
 
@@ -77,7 +88,37 @@ PHPAPI struct tm *php_gmtime_r(const time_t *const timep, struct tm *p_tm)
 }
 
 #endif
+
+#if !defined(HAVE_POSIX_READDIR_R)
+
+PHPAPI int php_readdir_r(DIR *dirp, struct dirent *entry, 
+		struct dirent **result)
+{
+	struct dirent *ptr;
+	int ret = 0;
+
+	local_lock(READDIR_R);
 	
+	errno = 0;
+	
+	ptr = readdir(dirp);
+	
+	if (!ptr && errno != 0)
+		ret = errno;
+
+	if (entry && ptr)
+		memcpy(entry, ptr, sizeof(*ptr));
+
+	if (result) 
+		*result = ptr;
+
+	local_unlock(READDIR_R);
+
+	return ret;
+}
+
+#endif
+
 #if !defined(HAVE_LOCALTIME_R) && defined(HAVE_LOCALTIME)
 
 PHPAPI struct tm *php_localtime_r(const time_t *const timep, struct tm *p_tm)
