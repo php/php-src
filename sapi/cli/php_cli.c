@@ -220,7 +220,10 @@ static int sapi_cli_ub_write(const char *str, uint str_length TSRMLS_DC)
 
 static void sapi_cli_flush(void *server_context)
 {
-	if (fflush(stdout)==EOF) {
+	/* Ignore EBADF here, it's caused by the fact that STDIN/STDOUT/STDERR streams
+	 * are/could be closed before fflush() is called.
+	 */
+	if (fflush(stdout)==EOF && errno!=EBADF) {
 #ifndef PHP_CLI_WIN32_NO_CONSOLE
 		php_handle_aborted_connection();
 #endif
