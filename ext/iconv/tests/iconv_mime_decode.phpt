@@ -1,5 +1,5 @@
 --TEST--
-iconv_mime_decode() (quoted-printable)
+iconv_mime_decode()
 --SKIPIF--
 <?php extension_loaded('iconv') or die('skip iconv extension is not available'); ?>
 --INI--
@@ -40,6 +40,20 @@ HERE
 Subject: =?ISO-8859-1?Q?Pr=FCfung?= =?ISO-8859-1*de_DE?Q?Pr=FCfung??   =?ISO-8859-2?X?k=F9=D4=F1=D3let?=
 HERE
 );
+	do_single_test(<<< HERE
+From: =?ISO-2022-JP?B?GyRCJTUbKEI=?=
+ =?ISO-2022-JP?B?GyRCJXMlVxsoQg==?=
+ =?ISO-2022-JP?B?GyRCJWtKOBsoQg==?=
+ =?ISO-2022-JP?B?GyRCO3pOcxsoQg==?=
+ =?ISO-2022-JP?B?GyRCJTUlcxsoQg==?=
+ =?ISO-2022-JP?B?GyRCJVclaxsoQg==?=
+ =?ISO-2022-JP?B?GyRCSjg7ehsoQg==?=
+ =?ISO-2022-JP?B?GyRCTnNGfBsoQg==?=
+ =?ISO-2022-JP?B?GyRCS1w4bBsoQg==?=
+ =?ISO-2022-JP?B?GyRCJUYlLRsoQg==?=
+ =?ISO-2022-JP?B?GyRCJTklSBsoQg==?=
+HERE
+);
 }
 
 $mode = 0;
@@ -56,16 +70,21 @@ do_regression_test();
 (31) "Subject: PrüfungPrüfungkůÔńÓlet"
 2: iconv_mime_decode(): Malformed string
 (0) ""
+(27) "From: サンプル文字列サンプル文字列日本語テキスト"
 (31) "Subject: PrüfungPrüfungkůÔńÓlet"
 (32) "Subject: Prüfung PrüfungkůÔńÓlet"
 (100) "Subject: =?ISO-8859-1?Q?Pr=FCfung?==?ISO-8859-1*de_DE?Q?Pr=FCfung?==?ISO-8859-2?Q?k=F9=D4=F1=D3let?="
 2: iconv_mime_decode(): Malformed string
 (0) ""
+(27) "From: サンプル文字列サンプル文字列日本語テキスト"
 (31) "Subject: PrüfungPrüfungkůÔńÓlet"
 (32) "Subject: Prüfung PrüfungkůÔńÓlet"
 (31) "Subject: PrüfungPrüfungkůÔńÓlet"
 (84) "Subject: Prüfung=?ISO-8859-1*de_DE?Q?Pr=FCfung??   =?ISO-8859-2?X?k=F9=D4=F1=D3let?="
+(27) "From: サンプル文字列サンプル文字列日本語テキスト"
 (31) "Subject: PrüfungPrüfungkůÔńÓlet"
 (32) "Subject: Prüfung PrüfungkůÔńÓlet"
 (100) "Subject: =?ISO-8859-1?Q?Pr=FCfung?==?ISO-8859-1*de_DE?Q?Pr=FCfung?==?ISO-8859-2?Q?k=F9=D4=F1=D3let?="
 (84) "Subject: Prüfung=?ISO-8859-1*de_DE?Q?Pr=FCfung??   =?ISO-8859-2?X?k=F9=D4=F1=D3let?="
+(27) "From: サンプル文字列サンプル文字列日本語テキスト"
+
