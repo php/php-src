@@ -26,6 +26,10 @@ AC_ARG_WITH(imap,
       AC_MSG_ERROR(Cannot find rfc822.h. Please check your IMAP installation)
     fi
 
+    if test -r "$IMAP_DIR/c-client/c-client.a"; then
+      ln -s "$IMAP_DIR/c-client/c-client.a" "$IMAP_DIR/c-client/libc-client.a" >/dev/null 2>&1
+    fi
+
     for lib in imap c-client c-client4; do
       IMAP_LIB=$lib
       if eval test -r "$IMAP_DIR/lib/lib$lib*"; then
