@@ -1,3 +1,33 @@
+2004-11-14  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/curl/interface.c:
+      Added support for better control over FTP encryption protocols.
+
+2004-11-14  Sergey Kartashoff  <gluke@mail.ru>
+
+    * ext/mnogosearch/php_mnogo.c
+      ext/mnogosearch/php_mnogo.c:
+      
+
+    * ext/mnogosearch/php_mnogo.c
+      ext/mnogosearch/php_mnogo.c:
+      - More mnogosearch-3.2.23+ compatibility
+
+2004-11-14  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_0)
+      NEWS:
+      BFN
+
+    * (PHP_5_0)
+      ZendEngine2/zend_reflection_api.c:
+      MFH #30783 Apache crash when using ReflectionFunction::getStaticVariables()
+      MFH proto fixes
+
+    * ZendEngine2/zend_reflection_api.c:
+      - Bugix #30783: Apache crash when using
+      ReflectionFunction::getStaticVariables()
+
 2004-11-13  Rainer Schaaf  <rjs@pdflib.com>
 
     * (PHP_4_3)
