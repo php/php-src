@@ -107,32 +107,32 @@ void dotnet_term() {
 PHP_FUNCTION(dotnet_load)
 {
 	HRESULT hr;
-	pval *assembly_name, *datatype_name, *code_page;
+	zval **assembly_name, **datatype_name, **code_page;
 	OLECHAR *assembly, *datatype;
 	comval *obj;
 
 	switch(ZEND_NUM_ARGS())
 	{
 		case 2:
-			getParameters(ht, 2, &assembly_name, &datatype_name);
+			zend_get_parameters_ex(2, &assembly_name, &datatype_name);
 			codepage = CP_ACP;
 			break;
 		case 3:
-			getParameters(ht, 3, &assembly_name, &datatype_name, &code_page);
+			zend_get_parameters_ex(3, &assembly_name, &datatype_name, &code_page);
 
-			convert_to_long(code_page);
-			codepage = Z_LVAL_P(code_page);
+			convert_to_long_ex(code_page);
+			codepage = Z_LVAL_PP(code_page);
 			break;
 		default:
 			WRONG_PARAM_COUNT;
 			break;
 	}
 
-	convert_to_string(assembly_name);
-	assembly = php_char_to_OLECHAR(Z_STRVAL_P(assembly_name), Z_STRLEN_P(assembly_name), codepage TSRMLS_CC);
+	convert_to_string_ex(assembly_name);
+	assembly = php_char_to_OLECHAR(Z_STRVAL_PP(assembly_name), Z_STRLEN_PP(assembly_name), codepage TSRMLS_CC);
 
-	convert_to_string(datatype_name);
-	datatype = php_char_to_OLECHAR(Z_STRVAL_P(datatype_name), Z_STRLEN_P(datatype_name), codepage TSRMLS_CC);
+	convert_to_string_ex(datatype_name);
+	datatype = php_char_to_OLECHAR(Z_STRVAL_PP(datatype_name), Z_STRLEN_PP(datatype_name), codepage TSRMLS_CC);
 
 	ALLOC_COM(obj);
 

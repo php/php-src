@@ -76,17 +76,17 @@ void _php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st) {
     AsnObjectIdentifier oid;
    char        *chkPtr = NULL;
 
-	if (getParameters(ht, 3, &a1, &a2, &a3) == FAILURE) {
+	if (zend_get_parameters_ex(3, &a1, &a2, &a3) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_string(a1);
-	convert_to_string(a2);
-	convert_to_string(a3);
+	convert_to_string_ex(a1);
+	convert_to_string_ex(a2);
+	convert_to_string_ex(a3);
 
-	agent=Z_STRVAL_P(a1);
-	community=Z_STRVAL_P(a2);
+	agent=Z_STRVAL_PP(a1);
+	community=Z_STRVAL_PP(a2);
 	operation=st;
-	SnmpMgrStrToOid(Z_STRVAL_P(a3), &oid);
+	SnmpMgrStrToOid(Z_STRVAL_PP(a3), &oid);
 
 /* 
    I've limited this to only one oid, but we can create a

@@ -2712,31 +2712,31 @@ PHP_FUNCTION(hw_insertdocument)
    Create a new document */
 PHP_FUNCTION(hw_new_document)
 {
-	pval *arg1, *arg2, *arg3;
+	zval **arg1, **arg2, **arg3;
 	char *ptr;
 	hw_document *doc;
 
-	if (ZEND_NUM_ARGS() != 3 || getParameters(ht, 3, &arg1, &arg2, &arg3) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 3 || (zend_get_parameters_ex(3, &arg1, &arg2, &arg3) == FAILURE)) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_string(arg1);
-	convert_to_string(arg2);
-	convert_to_long(arg3);
+	convert_to_string_ex(arg1);
+	convert_to_string_ex(arg2);
+	convert_to_long_ex(arg3);
 
 	doc = malloc(sizeof(hw_document));
 	if(NULL == doc)
 		RETURN_FALSE;
-	doc->data = malloc(Z_LVAL_P(arg3)+1);
+	doc->data = malloc(Z_LVAL_PP(arg3)+1);
 	if(NULL == doc->data) {
 		free(doc);
 		RETURN_FALSE;
 	}
-	memcpy(doc->data, Z_STRVAL_P(arg2), Z_LVAL_P(arg3));
+	memcpy(doc->data, Z_STRVAL_PP(arg2), Z_LVAL_PP(arg3));
 	ptr = doc->data;
-	ptr[Z_LVAL_P(arg3)] = '\0';
-	doc->attributes = strdup(Z_STRVAL_P(arg1));
+	ptr[Z_LVAL_PP(arg3)] = '\0';
+	doc->attributes = strdup(Z_STRVAL_PP(arg1));
 	doc->bodytag = NULL;
-	doc->size = Z_LVAL_P(arg3);
+	doc->size = Z_LVAL_PP(arg3);
 	Z_LVAL_P(return_value) = zend_list_insert(doc, le_document);
 	Z_TYPE_P(return_value) = IS_LONG;
 }

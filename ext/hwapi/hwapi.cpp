@@ -4285,12 +4285,12 @@ PHP_FUNCTION(hwapi_object_attribute) {
 /* {{{ proto string hwapi_object_insert(object attr)
    Inserts new HW_API_Attribute into HW_API_Object */
 PHP_FUNCTION(hwapi_object_insert) {
-	zval *arg1, *id;
+	zval **arg1, *id;
 	HW_API_Object *objp;
 	HW_API_Attribute *attrp;
 	char *value;
 
-	if ((ZEND_NUM_ARGS() != 1) || getParameters(ht, 1, &arg1) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || (zend_get_parameters_ex(1, &arg1) == FAILURE)) {
 		WRONG_PARAM_COUNT;
 	}
 	id = getThis();
@@ -4298,7 +4298,7 @@ PHP_FUNCTION(hwapi_object_insert) {
 	if(!objp) {
 		RETURN_FALSE;
 	}
-	attrp = (HW_API_Attribute *) php_hwapi_get_object(arg1, le_hwapi_attributep);
+	attrp = (HW_API_Attribute *) php_hwapi_get_object(*arg1, le_hwapi_attributep);
 
 	objp->insert(*attrp);
 
