@@ -5592,8 +5592,12 @@ PHP_FUNCTION(domxml_xslt_result_dump_mem)
 		RETURN_FALSE;
 	}
 
-	RETVAL_STRINGL(doc_txt_ptr, doc_txt_len, 1);
-	xmlFree(doc_txt_ptr);
+	if (doc_txt_ptr) {
+		RETVAL_STRINGL(doc_txt_ptr, doc_txt_len, 1);
+		xmlFree(doc_txt_ptr);
+	} else {
+		RETURN_EMPTY_STRING();
+	}
 }
 /* }}} */
 
