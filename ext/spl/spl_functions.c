@@ -72,9 +72,7 @@ void spl_register_parent_ce(zend_class_entry * class_entry, zend_class_entry * p
 /* {{{ spl_register_implement */
 void spl_register_implement(zend_class_entry * class_entry, zend_class_entry * interface_entry TSRMLS_DC)
 {
-	class_entry->interfaces = realloc(class_entry->interfaces, sizeof(zend_class_entry*) * (class_entry->num_interfaces+1));
-	class_entry->interfaces[class_entry->num_interfaces++] = interface_entry;
-	zend_do_implement_interface(class_entry, interface_entry);
+	zend_class_implements(class_entry TSRMLS_CC, 1, interface_entry);
 }
 /* }}} */
 
