@@ -24,7 +24,7 @@
 #include "libxml/uri.h"
 
 #include "ext/standard/md5.h"
-#include "tsrm_virtual_cwd.h"
+#include "../../TSRM/tsrm_virtual_cwd.h"
 
 #include <sys/types.h>
 #include <sys/stat.h>
