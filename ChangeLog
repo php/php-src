@@ -1,3 +1,54 @@
+2003-11-03  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      NEWS:
+      cosmetics
+
+2003-11-03  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/simplexml/tests/008.phpt:
+      Add regression test for XPath support
+
+    * ext/simplexml/tests/007.phpt:
+      Fix test
+
+2003-11-03  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/standard/streamsfuncs.c
+      main/php.h
+      main/php_streams.h
+      main/streams/streams.c:
+      - Always store the URI path in the streams structure, and expose it with
+        stream_get_meta_data().
+
+2003-11-03  Sterling Hughes  <winnie@edwardbear.org>
+
+    * ext/simplexml/simplexml.c:
+      make this macro safe
+
+    * ext/simplexml/simplexml.c:
+      remove attributes from this check
+
+    * ext/simplexml/simplexml.c:
+      - Stop a crash in xpath
+      - Remove the ability to access attributes via the -> operator, attributes
+      are accessed via the array indicators
+
+2003-11-03  Stefan Esser  <s.esser@e-matters.de>
+
+    * main/rfc1867.c:
+      Fixed possible crashbug.
+
+2003-11-03  Marc Boeren  <M.Boeren@guidance.nl>
+
+    * ext/dbx/dbx.c:
+      Make life for the doc-team easier, without causing harm ;-)
+
+2003-11-03  Stefan Esser  <s.esser@e-matters.de>
+
+    * main/rfc1867.c:
+      It is usually a good idea to write only into allocated bufferspace.
+
 2003-11-02  Edin Kadribasic  <edink@proventum.net>
 
     * (PHP_4_3)
