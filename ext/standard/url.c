@@ -67,13 +67,7 @@ PHPAPI php_url *php_url_parse(char *str)
 	int err;
 	int length = strlen(str);
 	char *result;
-
-	php_url *ret = (php_url *) emalloc(sizeof(php_url));
-	if (!ret) {
-		/*php_error(E_WARNING, "Unable to allocate memory\n");*/
-		return NULL;
-	}
-	memset(ret, 0, sizeof(php_url));
+	php_url *ret = ecalloc(1, sizeof(php_url));
 
 	/* from Appendix B of draft-fielding-url-syntax-09,
 	   http://www.ics.uci.edu/~fielding/url/url.txt */
@@ -167,7 +161,7 @@ PHPAPI php_url *php_url_parse(char *str)
    Parse a URL and return its components */
 PHP_FUNCTION(parse_url)
 {
-	pval **str;
+	zval **str;
 	php_url *resource;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &str) == FAILURE) {
@@ -175,18 +169,16 @@ PHP_FUNCTION(parse_url)
 	}
 	convert_to_string_ex(str);
 
-	resource = php_url_parse((*str)->value.str.val);
-
+	resource = php_url_parse(Z_STRVAL_PP(str));
 	if (resource == NULL) {
-		php_error(E_WARNING, "unable to parse url (%s)", (*str)->value.str.val);
+		php_error(E_WARNING, "unable to parse url (%s)", Z_STRVAL_PP(str));
 		RETURN_FALSE;
 	}
+
 	/* allocate an array for return */
-	if (array_init(return_value) == FAILURE) {
-		php_url_free(resource);
-		RETURN_FALSE;
-	}
-	/* add the various elements to the array */
+	array_init(return_value);
+
+    /* add the various elements to the array */
 	if (resource->scheme != NULL)
 		add_assoc_string(return_value, "scheme", resource->scheme, 1);
 	if (resource->host != NULL)
@@ -203,7 +195,8 @@ PHP_FUNCTION(parse_url)
 		add_assoc_string(return_value, "query", resource->query, 1);
 	if (resource->fragment != NULL)
 		add_assoc_string(return_value, "fragment", resource->fragment, 1);
-	php_url_free(resource);
+	
+    php_url_free(resource);
 }
 /* }}} */
 
@@ -285,7 +278,7 @@ PHPAPI char *php_url_encode(char *s, int len, int *new_length)
    URL-encodes string */
 PHP_FUNCTION(urlencode)
 {
-	pval **arg;
+	zval **arg;
 	char *str;
 	int str_len;
 
@@ -294,12 +287,8 @@ PHP_FUNCTION(urlencode)
 	}
 	convert_to_string_ex(arg);
 
-	if (!(*arg)->value.str.len) {
-		ZVAL_FALSE(return_value);
-		return;
-	}
-	str = php_url_encode((*arg)->value.str.val, (*arg)->value.str.len, &str_len);
-	RETVAL_STRINGL(str, str_len, 0);
+	str = php_url_encode(Z_STRVAL_PP(arg), Z_STRLEN_PP(arg), &str_len);
+	RETURN_STRINGL(str, str_len, 0);
 }
 /* }}} */
 
@@ -307,7 +296,8 @@ PHP_FUNCTION(urlencode)
    Decodes URL-encoded string */
 PHP_FUNCTION(urldecode)
 {
-	pval **arg;
+	zval **arg;
+	char  *str;
 	int len;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg) == FAILURE) {
@@ -315,16 +305,10 @@ PHP_FUNCTION(urldecode)
 	}
 	convert_to_string_ex(arg);
 
-	if (!(*arg)->value.str.len) {
-		ZVAL_FALSE(return_value);
-		return;
-	}
+	str = estrndup(Z_STRVAL_PP(arg), Z_STRLEN_PP(arg)); 
+	len = php_url_decode(str, Z_STRLEN_PP(arg));
 
-	*return_value = **arg;
-	zval_copy_ctor(return_value);
-	
-	len = php_url_decode(return_value->value.str.val, return_value->value.str.len);
-	return_value->value.str.len = len;
+    RETURN_STRINGL(str, len, 0);
 }
 /* }}} */
 
@@ -394,7 +378,7 @@ PHPAPI char *php_raw_url_encode(char *s, int len, int *new_length)
    URL-encodes string */
 PHP_FUNCTION(rawurlencode)
 {
-	pval **arg;
+	zval **arg;
 	char *str;
 	int new_len;
 
@@ -403,11 +387,8 @@ PHP_FUNCTION(rawurlencode)
 	}
 	convert_to_string_ex(arg);
 
-	if (!(*arg)->value.str.len) {
-		RETURN_FALSE;
-	}
-	str = php_raw_url_encode((*arg)->value.str.val, (*arg)->value.str.len, &new_len);
-	RETVAL_STRINGL(str, new_len, 0);
+	str = php_raw_url_encode(Z_STRVAL_PP(arg), Z_STRLEN_PP(arg), &new_len);
+	RETURN_STRINGL(str, new_len, 0);
 }
 /* }}} */
 
@@ -415,7 +396,7 @@ PHP_FUNCTION(rawurlencode)
    Decodes URL-encodes string */
 PHP_FUNCTION(rawurldecode)
 {
-	pval **arg;
+	zval **arg;
 	int len;
 	char *str;
 
@@ -424,13 +405,10 @@ PHP_FUNCTION(rawurldecode)
 	}
 	convert_to_string_ex(arg);
 
-	if (!(*arg)->value.str.len) {
-		RETURN_FALSE;
-	}
 	str = estrndup(Z_STRVAL_PP(arg), Z_STRLEN_PP(arg));
 	len = php_raw_url_decode(str, Z_STRLEN_PP(arg));
 
-	RETVAL_STRINGL(str, len, 0);
+	RETURN_STRINGL(str, len, 0);
 }
 /* }}} */
 
