@@ -2,6 +2,10 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 28 Jun 2000, Version 4.0.1
+- Added a new (fifth) parameter to dba_[p]open(), which kind of database to
+  create (DBA_BTREE or DBA_HASH), if the handler is either 'db2' or 'db3' and 
+  mode 'c' or 'n'. It is ignored if mode is 'c' and the db already exists.
+  (Jouni)
 - Fixed a bug in opendir(), which prevented readdir() from working properly if
   the $dir argument wasn't explicitly specified (Zeev)
 - Made --enable-discard-path work again. (Andi) 
