@@ -78,6 +78,9 @@ PHP_FUNCTION(ini_get);
 PHP_FUNCTION(ini_get_all);
 PHP_FUNCTION(ini_set);
 PHP_FUNCTION(ini_restore);
+PHP_FUNCTION(get_include_path);
+PHP_FUNCTION(set_include_path);
+PHP_FUNCTION(restore_include_path);
 
 PHP_FUNCTION(print_r);
 
