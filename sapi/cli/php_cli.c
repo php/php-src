@@ -360,6 +360,9 @@ static void php_register_command_line_global_vars(char **arg TSRMLS_DC)
 	efree(*arg);
 }
 
+static php_stream_context *sc_in_process = NULL;
+static php_stream *s_in_process = NULL;
+
 static void cli_register_file_handles(TSRMLS_D)
 {
 	zval *zin, *zout, *zerr;
@@ -378,6 +381,9 @@ static void cli_register_file_handles(TSRMLS_D)
 	if (s_in==NULL || s_out==NULL || s_err==NULL) {
 		return;
 	}
+	
+	sc_in_process = sc_in;
+	s_in_process = s_in;
 
 	php_stream_to_zval(s_in,  zin);
 	php_stream_to_zval(s_out, zout);
@@ -903,9 +909,9 @@ int main(int argc, char *argv[])
 			{
 				char *input;
 				size_t len, index = 0;
-				php_stream_context *sc_in = php_stream_context_alloc();
-				php_stream *s_in = php_stream_open_wrapper_ex("php://stdin", "rb", 0, NULL, sc_in);
 				pval *argn, *argi;
+
+				cli_register_file_handles(TSRMLS_C);
 	
 				if (exec_begin && zend_eval_string(exec_begin, NULL, "Command line begin code" TSRMLS_CC) == FAILURE) {
 					exit_status=254;
@@ -915,7 +921,7 @@ int main(int argc, char *argv[])
 				Z_LVAL_P(argi) = index;
 				INIT_PZVAL(argi);
 				zend_hash_update(&EG(symbol_table), "argi", sizeof("argi"), &argi, sizeof(pval *), NULL);
-				while (exit_status == SUCCESS && (input=php_stream_gets(s_in, NULL, 0)) != NULL) {
+				while (exit_status == SUCCESS && (input=php_stream_gets(s_in_process, NULL, 0)) != NULL) {
 					len = strlen(input);
 					while (len-- && (input[len]=='\n' || input[len]=='\r')) {
 						input[len] = '\0';
@@ -948,8 +954,6 @@ int main(int argc, char *argv[])
 					exit_status=254;
 				}
 	
-				php_stream_close(s_in);
-				php_stream_context_free(sc_in);
 				break;
 			}
 		}
