@@ -1,4 +1,3 @@
-
 /* 
  *    PHP Sendmail for Windows.
  *
