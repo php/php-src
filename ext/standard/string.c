@@ -829,7 +829,7 @@ void php3_substr(INTERNAL_FUNCTION_PARAMETERS)
 	if ((f + l) < (int)string->value.str.len) {
 		string->value.str.val[f + l] = '\0';
 	}
-	RETVAL_STRING(string->value.str.val + f,1);
+	RETVAL_STRINGL(string->value.str.val + f, l, 1);
 }
 /* }}} */
 
