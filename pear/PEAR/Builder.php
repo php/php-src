@@ -57,7 +57,7 @@ class PEAR_Builder extends PEAR_Common
     }
 
     // }}}
-    
+
     // {{{ _build_win32()
 
     /**
@@ -83,13 +83,13 @@ class PEAR_Builder extends PEAR_Common
         }
         // XXX TODO: make release build type configurable
         $command = 'msdev '.$dsp.' /MAKE "'.$info['package']. ' - Release"';
-        
+
         $this->current_callback = $callback;
         $err = $this->_runCommand($command, array(&$this, 'msdevCallback'));
         if (PEAR::isError($err)) {
             return $err;
         }
-        
+
         // figure out the build platform and type
         $platform = 'Win32';
         $buildtype = 'Release';
@@ -107,11 +107,11 @@ class PEAR_Builder extends PEAR_Common
         } else {
             return $this->raiseError("Did not understand the completion status returned from msdev.exe.");
         }
-        
+
         // msdev doesn't tell us the output directory :/
         // open the dsp, find /out and use that directory
         $dsptext = join(file($dsp),'');
-        
+
         // this regex depends on the build platform and type having been
         // correctly identified above.
         $regex ='/.*?!IF\s+"\$\(CFG\)"\s+==\s+("'.
@@ -129,7 +129,7 @@ class PEAR_Builder extends PEAR_Common
         if (@copy($outfile, "$dir/$out")) {
             $outfile = "$dir/$out";
         }
-        
+
         $built_files[] = array(
             'file' => "$outfile",
             'php_api' => $this->php_api_version,
@@ -140,7 +140,7 @@ class PEAR_Builder extends PEAR_Common
         return $built_files;
     }
     // }}}
-    
+
     // {{{ msdevCallback()
     function msdevCallback($what, $data)
     {
@@ -149,7 +149,7 @@ class PEAR_Builder extends PEAR_Common
         $this->_lastline = $data;
     }
     // }}}
-    
+
     // {{{ build()
 
     /**
@@ -205,7 +205,7 @@ class PEAR_Builder extends PEAR_Common
         if (!$err) {
             return $this->raiseError("`phpize' failed");
         }
-        
+
         // start of interactive part
         $configure_command = "$dir/configure";
         if (isset($info['configure_options'])) {
@@ -223,9 +223,10 @@ class PEAR_Builder extends PEAR_Common
             }
         }
         // end of interactive part
-        
+
         // make configurable
-        $build_basedir = "/var/tmp/pear-build-$_ENV[USER]";
+        $user = getenv('USER')?getenv('USER'):'defaultuser';
+        $build_basedir = "/var/tmp/pear-build-$user";
         $build_dir = "$build_basedir/$info[package]-$info[version]";
         $this->log(1, "building in $build_dir");
         if (is_dir($build_dir)) {
@@ -235,8 +236,8 @@ class PEAR_Builder extends PEAR_Common
             return $this->raiseError("could not create build dir: $build_dir");
         }
         $this->addTempFile($build_dir);
-        if (isset($_ENV['MAKE'])) {
-            $make_command = $_ENV['MAKE'];
+        if (getenv('MAKE')) {
+            $make_command = getenv('MAKE');
         } else {
             $make_command = 'make';
         }
