@@ -37,6 +37,7 @@
 
 #define	PREG_SPLIT_NO_EMPTY			(1<<0)
 #define PREG_SPLIT_DELIM_CAPTURE	(1<<1)
+#define PREG_SPLIT_OFFSET_CAPTURE	(1<<2)
 
 #define PREG_REPLACE_EVAL			(1<<0)
 
@@ -100,6 +101,7 @@ static PHP_MINIT_FUNCTION(pcre)
 	REGISTER_LONG_CONSTANT("PREG_SET_ORDER", PREG_SET_ORDER, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PREG_SPLIT_NO_EMPTY", PREG_SPLIT_NO_EMPTY, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PREG_SPLIT_DELIM_CAPTURE", PREG_SPLIT_DELIM_CAPTURE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PREG_SPLIT_OFFSET_CAPTURE", PREG_SPLIT_OFFSET_CAPTURE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PREG_GREP_INVERT", PREG_GREP_INVERT, CONST_CS | CONST_PERSISTENT);
 	return SUCCESS;
 }
@@ -1062,6 +1064,21 @@ PHP_FUNCTION(preg_replace_callback)
 }
 /* }}} */
 
+static inline void add_offset_pair(zval *result, char *str, int len, int offset)
+{
+	zval *match_pair;
+
+	ALLOC_ZVAL(match_pair);
+	array_init(match_pair);
+	INIT_PZVAL(match_pair);
+
+	/* Add (match, offset) to the return value */
+	add_next_index_stringl(match_pair, str, len, 1);
+	add_next_index_long(match_pair, offset);
+	
+	zend_hash_next_index_insert(Z_ARRVAL_P(result), &match_pair, sizeof(zval *), NULL);
+}
+
 /* {{{ proto array preg_split(string pattern, string subject [, int limit [, int flags]]) 
    Split string into an array using a perl-style regular expression as a delimiter */
 PHP_FUNCTION(preg_split)
@@ -1080,8 +1097,10 @@ PHP_FUNCTION(preg_split)
 	int				 limit_val = -1;	/* Integer value of limit */
 	int				 no_empty = 0;		/* If NO_EMPTY flag is set */
 	int				 delim_capture = 0; /* If delimiters should be captured */
+	int				 offset_capture = 0;/* If offsets should be captured */
 	int				 count = 0;			/* Count of matched subpatterns */
 	int				 start_offset;		/* Where the new search starts */
+	int				 next_offset;		/* End of the last delimiter match + 1 */
 	int				 g_notempty = 0;	/* If the match should not be empty */
 	char			*match,				/* The current match */
 					*last_match;		/* Location of last match */
@@ -1102,6 +1121,7 @@ PHP_FUNCTION(preg_split)
 			convert_to_long_ex(flags);
 			no_empty = Z_LVAL_PP(flags) & PREG_SPLIT_NO_EMPTY;
 			delim_capture = Z_LVAL_PP(flags) & PREG_SPLIT_DELIM_CAPTURE;
+			offset_capture = Z_LVAL_PP(flags) & PREG_SPLIT_OFFSET_CAPTURE;
 		}
 	}
 	
@@ -1123,6 +1143,7 @@ PHP_FUNCTION(preg_split)
 	
 	/* Start at the beginning of the string */
 	start_offset = 0;
+	next_offset = 0;
 	last_match = Z_STRVAL_PP(subject);
 	match = NULL;
 	
@@ -1143,9 +1164,15 @@ PHP_FUNCTION(preg_split)
 			match = Z_STRVAL_PP(subject) + offsets[0];
 
 			if (!no_empty || &Z_STRVAL_PP(subject)[offsets[0]] != last_match) {
-				/* Add the piece to the return value */
-				add_next_index_stringl(return_value, last_match,
-									   &Z_STRVAL_PP(subject)[offsets[0]]-last_match, 1);
+
+				if (offset_capture) {
+					/* Add (match, offset) pair to the return value */
+					add_offset_pair(return_value, last_match, &Z_STRVAL_PP(subject)[offsets[0]]-last_match, next_offset);
+				} else {
+                	/* Add the piece to the return value */
+					add_next_index_stringl(return_value, last_match,
+								   	   &Z_STRVAL_PP(subject)[offsets[0]]-last_match, 1);
+				}
 
 				/* One less left to do */
 				if (limit_val != -1)
@@ -1153,15 +1180,22 @@ PHP_FUNCTION(preg_split)
 			}
 			
 			last_match = &Z_STRVAL_PP(subject)[offsets[1]];
+            next_offset = offsets[1];
 
 			if (delim_capture) {
 				int i, match_len;
 				for (i = 1; i < count; i++) {
 					match_len = offsets[(i<<1)+1] - offsets[i<<1];
-					if (!no_empty || match_len > 0)
-						add_next_index_stringl(return_value,
-											   &Z_STRVAL_PP(subject)[offsets[i<<1]],
-											   match_len, 1);
+					/* If we have matched a delimiter */
+					if (!no_empty || match_len > 0) {
+						if (offset_capture) {
+							add_offset_pair(return_value, &Z_STRVAL_PP(subject)[offsets[i<<1]], match_len, offsets[i<<1]);
+						} else {
+							add_next_index_stringl(return_value,
+												   &Z_STRVAL_PP(subject)[offsets[i<<1]],
+												   match_len, 1);
+						}
+					}
 				}
 			}
 		} else { /* Failed to match */
@@ -1185,11 +1219,20 @@ PHP_FUNCTION(preg_split)
 		/* Advance to the position right after the last full match */
 		start_offset = offsets[1];
 	}
-	
+
+
 	if (!no_empty || start_offset != Z_STRLEN_PP(subject))
-		/* Add the last piece to the return value */
-		add_next_index_string(return_value,
-							  &Z_STRVAL_PP(subject)[start_offset], 1);
+	{
+		if (offset_capture) {
+			/* Add the last (match, offset) pair to the return value */
+			add_offset_pair(return_value, &Z_STRVAL_PP(subject)[start_offset], Z_STRLEN_PP(subject) - start_offset, start_offset);
+		} else {
+			/* Add the last piece to the return value */
+			add_next_index_string(return_value,
+									&Z_STRVAL_PP(subject)[start_offset], 1);
+		}
+	}
+
 	
 	/* Clean up */
 	efree(offsets);
