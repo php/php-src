@@ -272,7 +272,6 @@ JNIEXPORT void JNICALL Java_net_php_servlet_shutdown
 	(JNIEnv *jenv, jobject self)
 {
 	php_module_shutdown();
-	php_global_shutdown_extensions(additional_php_extensions, EXTCOUNT);
 #ifdef ZTS
 	tsrm_shutdown();
 #endif

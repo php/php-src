@@ -90,16 +90,6 @@ int php_startup_internal_extensions(void)
 	return php_startup_extensions(php_builtin_extensions, EXTCOUNT);
 }
 
-int php_global_startup_internal_extensions(void)
-{
-	return php_global_startup_extensions(php_builtin_extensions, EXTCOUNT);
-}
-
-int php_global_shutdown_internal_extensions(void)
-{
-	return php_global_shutdown_extensions(php_builtin_extensions, EXTCOUNT);
-}
-
 
 /*
  * Local variables:
