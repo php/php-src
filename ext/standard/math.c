@@ -617,11 +617,6 @@ PHP_FUNCTION(sqrt)
 /* {{{ proto float hypot(float num1, float num2)
    Returns sqrt(num1*num1 + num2*num2) */
 
-/*
-   WARNING: this function is expermental: it could change its name or
-   disappear in the next version of PHP!
-*/
-
 #ifdef HAVE_HYPOT
 PHP_FUNCTION(hypot)
 {
