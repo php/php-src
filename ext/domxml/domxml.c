@@ -1317,9 +1317,9 @@ PHP_FUNCTION(xmltree)
 			if((*keydata)->type == IS_OBJECT) {
 			  if (zend_hash_find((*keydata)->value.obj.properties, "type", sizeof("type"), (void **)&prop) == SUCCESS) {
 					if((*prop)->value.lval == XML_ELEMENT_NODE) {
-						zend_hash_update(return_value->value.obj.properties, "root", strlen("root")+1, (void *) &(*keydata), sizeof(zval *), NULL);
-//						(*keydata)->is_ref = 1;
-//						(*keydata)->refcount = 2;
+						zend_hash_update(return_value->value.obj.properties, "root", sizeof("root"), (void **) keydata, sizeof(zval *), NULL);
+						(*keydata)->is_ref = 1;
+						(*keydata)->refcount++;
 					}
 				}
 			}
