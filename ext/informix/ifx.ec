@@ -445,7 +445,7 @@ EXEC SQL END DECLARE SECTION;
 			passwd_len = strlen(IFXG(default_password));
 		}
 
-		if (zend_parse_parameters(ZEND_NUM_ARGS(), "|sss", &host, &host_len, &user, &user_len, &passwd, &passwd_len) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|sss", &host, &host_len, &user, &user_len, &passwd, &passwd_len) == FAILURE) {
 			return;
 		}
 
