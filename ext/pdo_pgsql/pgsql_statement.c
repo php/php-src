@@ -30,6 +30,12 @@
 #include "php_pdo_pgsql.h"
 #include "php_pdo_pgsql_int.h"
 
+/* from postgresql/src/include/catalog/pg_type.h */
+#define BOOLOID			16
+#define INT8OID			20
+#define INT2OID			21
+#define INT4OID			23
+
 
 static int pgsql_stmt_dtor(pdo_stmt_t *stmt TSRMLS_DC)
 {
@@ -158,7 +164,7 @@ static int pgsql_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC)
 {
 	pdo_pgsql_stmt *S = (pdo_pgsql_stmt*)stmt->driver_data;
 	struct pdo_column_data *cols = stmt->columns;
-
+	
 	if (!S->result) {
 		return 0;
 	}
@@ -167,7 +173,27 @@ static int pgsql_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC)
 	cols[colno].namelen = strlen(cols[colno].name);
 	cols[colno].maxlen = PQfsize(S->result, colno);
 	cols[colno].precision = PQfmod(S->result, colno);
-	cols[colno].param_type = PDO_PARAM_STR;
+
+	switch(PQftype(S->result, colno)) {
+
+		case BOOLOID:
+			cols[colno].param_type = PDO_PARAM_BOOL;
+			break;
+
+		case INT2OID:
+		case INT4OID:
+			cols[colno].param_type = PDO_PARAM_INT;
+			break;
+
+		case INT8OID:
+			if (sizeof(long)>=8) {
+				cols[colno].param_type = PDO_PARAM_INT;
+			}
+			break;
+
+		default:
+			cols[colno].param_type = PDO_PARAM_STR;
+	}
 
 	return 1;
 }
@@ -175,14 +201,38 @@ static int pgsql_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC)
 static int pgsql_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, unsigned long *len TSRMLS_DC)
 {
 	pdo_pgsql_stmt *S = (pdo_pgsql_stmt*)stmt->driver_data;
+	struct pdo_column_data *cols = stmt->columns;
+	long intval;
+	zend_bool boolval;
 
 	if (!S->result) {
 		return 0;
 	}
 
 	/* We have already increased count by 1 in pgsql_stmt_fetch() */
-	*ptr = PQgetvalue(S->result, S->current_row - 1, colno);
-	*len = PQgetlength(S->result, S->current_row - 1, colno);
+	if (PQgetisnull(S->result, S->current_row - 1, colno)) { /* Check if we got NULL */
+		*ptr = NULL;
+		*len = 0;
+	} else {
+		*ptr = PQgetvalue(S->result, S->current_row - 1, colno);
+		*len = PQgetlength(S->result, S->current_row - 1, colno);
+		
+		switch(cols[colno].param_type) {
+
+			case PDO_PARAM_INT:
+				intval = atol(*ptr);
+ 				printf ("Here %d %s\n", intval, *ptr);
+				*ptr = &intval;
+				*len = sizeof(long);
+				break;
+
+			case PDO_PARAM_BOOL:
+				boolval = **ptr == 't' ? 1: 0;
+				*ptr = &boolval;
+				*len = sizeof(zend_bool);
+				break;
+		}
+	}
 
 	return 1;
 }
