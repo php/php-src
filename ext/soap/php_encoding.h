@@ -5,11 +5,17 @@
 #define XSD_1999_TIMEINSTANT 401
 #define XSD_1999_TIMEINSTANT_STRING "timeInstant"
 
-#define SOAP_1_1_ENC "http://schemas.xmlsoap.org/soap/encoding/"
-#define SOAP_1_1_ENV "http://schemas.xmlsoap.org/soap/envelope/"
+#define SOAP_1_1_ENV_NAMESPACE "http://schemas.xmlsoap.org/soap/envelope/"
+#define SOAP_1_1_ENV_NS_PREFIX "SOAP-ENV"
 
-#define SOAP_1_2_ENC "http://www.w3.org/2003/05/soap-encoding"
-#define SOAP_1_2_ENV "http://www.w3.org/2003/05/soap-envelope"
+#define SOAP_1_2_ENV_NAMESPACE "http://www.w3.org/2003/05/soap-envelope"
+#define SOAP_1_2_ENV_NS_PREFIX "env"
+
+#define SOAP_1_1_ENC_NAMESPACE "http://schemas.xmlsoap.org/soap/encoding/"
+#define SOAP_1_1_ENC_NS_PREFIX "SOAP-ENC"
+
+#define SOAP_1_2_ENC_NAMESPACE "http://www.w3.org/2003/05/soap-encoding"
+#define SOAP_1_2_ENC_NS_PREFIX "enc"
 
 #define SCHEMA_NAMESPACE "http://www.w3.org/2001/XMLSchema"
 #define XSD_NAMESPACE "http://www.w3.org/2001/XMLSchema"
@@ -115,8 +121,6 @@
 #define APACHE_MAP 200
 #define APACHE_MAP_STRING "Map"
 
-#define SOAP_ENC_NAMESPACE "http://schemas.xmlsoap.org/soap/encoding/"
-#define SOAP_ENC_NS_PREFIX "SOAP-ENC"
 #define SOAP_ENC_ARRAY 300
 #define SOAP_ENC_ARRAY_STRING "Array"
 #define SOAP_ENC_OBJECT 301

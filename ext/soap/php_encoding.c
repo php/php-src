@@ -50,9 +50,12 @@ encode defaultEncoding[] = {
 	{{IS_DOUBLE, XSD_FLOAT_STRING, XSD_NAMESPACE, NULL}, to_zval_double, to_xml_double},
 	{{IS_BOOL, XSD_BOOLEAN_STRING, XSD_NAMESPACE, NULL}, to_zval_bool, to_xml_bool},
 	{{IS_CONSTANT, XSD_STRING_STRING, XSD_NAMESPACE, NULL}, to_zval_string, to_xml_string},
-	{{IS_ARRAY, SOAP_ENC_ARRAY_STRING, SOAP_ENC_NAMESPACE, NULL}, to_zval_array, guess_array_map},
-	{{IS_CONSTANT_ARRAY, SOAP_ENC_ARRAY_STRING, SOAP_ENC_NAMESPACE, NULL}, to_zval_array, to_xml_array},
-	{{IS_OBJECT, SOAP_ENC_OBJECT_STRING, SOAP_ENC_NAMESPACE, NULL}, to_zval_object, to_xml_object},
+	{{IS_ARRAY, SOAP_ENC_ARRAY_STRING, SOAP_1_1_ENC_NAMESPACE, NULL}, to_zval_array, guess_array_map},
+	{{IS_CONSTANT_ARRAY, SOAP_ENC_ARRAY_STRING, SOAP_1_1_ENC_NAMESPACE, NULL}, to_zval_array, to_xml_array},
+	{{IS_OBJECT, SOAP_ENC_OBJECT_STRING, SOAP_1_1_ENC_NAMESPACE, NULL}, to_zval_object, to_xml_object},
+	{{IS_ARRAY, SOAP_ENC_ARRAY_STRING, SOAP_1_2_ENC_NAMESPACE, NULL}, to_zval_array, guess_array_map},
+	{{IS_CONSTANT_ARRAY, SOAP_ENC_ARRAY_STRING, SOAP_1_2_ENC_NAMESPACE, NULL}, to_zval_array, to_xml_array},
+	{{IS_OBJECT, SOAP_ENC_OBJECT_STRING, SOAP_1_2_ENC_NAMESPACE, NULL}, to_zval_object, to_xml_object},
 
 	{{XSD_STRING, XSD_STRING_STRING, XSD_NAMESPACE, NULL}, to_zval_string, to_xml_string},
 	{{XSD_BOOLEAN, XSD_BOOLEAN_STRING, XSD_NAMESPACE, NULL}, to_zval_bool, to_xml_bool},
@@ -106,8 +109,10 @@ encode defaultEncoding[] = {
 
 	{{APACHE_MAP, APACHE_MAP_STRING, APACHE_NAMESPACE, NULL}, to_zval_map, to_xml_map},
 
-	{{SOAP_ENC_OBJECT, SOAP_ENC_OBJECT_STRING, SOAP_ENC_NAMESPACE, NULL}, to_zval_object, to_xml_object},
-	{{SOAP_ENC_ARRAY, SOAP_ENC_ARRAY_STRING, SOAP_ENC_NAMESPACE, NULL}, to_zval_array, to_xml_array},
+	{{SOAP_ENC_OBJECT, SOAP_ENC_OBJECT_STRING, SOAP_1_1_ENC_NAMESPACE, NULL}, to_zval_object, to_xml_object},
+	{{SOAP_ENC_ARRAY, SOAP_ENC_ARRAY_STRING, SOAP_1_1_ENC_NAMESPACE, NULL}, to_zval_array, to_xml_array},
+	{{SOAP_ENC_OBJECT, SOAP_ENC_OBJECT_STRING, SOAP_1_2_ENC_NAMESPACE, NULL}, to_zval_object, to_xml_object},
+	{{SOAP_ENC_ARRAY, SOAP_ENC_ARRAY_STRING, SOAP_1_2_ENC_NAMESPACE, NULL}, to_zval_array, to_xml_array},
 
 	/* support some of the 1999 data types */
 	{{XSD_STRING, XSD_STRING_STRING, XSD_1999_NAMESPACE, NULL}, to_zval_string, to_xml_string},
@@ -776,6 +781,51 @@ static xmlNodePtr guess_array_map(encodeType type, zval *data, int style)
 	return master_to_xml(enc, data, style);
 }
 
+static int calc_dimension_12(const char* str)
+{
+	int i = 1, flag = 1;
+	while (*str != '\0' && (*str < '0' || *str > '9')) {
+		str++;
+	}
+	while (*str != '\0') {
+		if (*str >= '0' && *str <= '9') {
+			if (flag == 0) {
+	   		i++;
+	   		flag = 1;
+	   	}
+		} else {
+		  flag = 0;
+		}
+		str++;
+	}
+	return i;
+}
+
+static int* get_position_12(int dimension, const char* str)
+{
+	int *pos;
+	int i = 0, flag = 1;
+
+	pos = emalloc(sizeof(int)*dimension);
+	memset(pos,0,sizeof(int)*dimension);
+	while (*str != '\0' && (*str < '0' || *str > '9')) {
+		str++;
+	}
+	while (*str != '\0') {
+		if (*str >= '0' && *str <= '9') {
+			if (flag == 0) {
+	   		i++;
+	   		flag = 1;
+	   	}
+	   	pos[i] = (pos[i]*10)+(*str-'0');
+		} else {
+		  flag = 0;
+		}
+		str++;
+	}
+	return pos;
+}
+
 static int calc_dimension(const char* str)
 {
 	int i = 1;
@@ -863,14 +913,17 @@ static inline int array_num_elements(HashTable* ht)
 xmlNodePtr to_xml_array(encodeType type, zval *data, int style)
 {
 	sdlTypePtr sdl_type = type.sdl_type;
-	smart_str array_type_and_size = {0}, array_type = {0};
+	smart_str array_type = {0}, array_size = {0};
 	int i;
 	xmlNodePtr xmlParam;
 	encodePtr enc = NULL;
 	int dimension = 1;
 	int* dims;
+	int soap_version;
 
 	TSRMLS_FETCH();
+
+	soap_version = SOAP_GLOBAL(soap_version);
 
 	xmlParam = xmlNewNode(NULL,"BOGUS");
 
@@ -887,8 +940,8 @@ xmlNodePtr to_xml_array(encodeType type, zval *data, int style)
 
 			if (sdl_type &&
 			    sdl_type->attributes &&
-			    zend_hash_find(sdl_type->attributes, SOAP_ENC_NAMESPACE":arrayType",
-			      sizeof(SOAP_ENC_NAMESPACE":arrayType"),
+			    zend_hash_find(sdl_type->attributes, SOAP_1_1_ENC_NAMESPACE":arrayType",
+			      sizeof(SOAP_1_1_ENC_NAMESPACE":arrayType"),
 			      (void **)&arrayType) == SUCCESS &&
 			    zend_hash_find((*arrayType)->extraAttributes, WSDL_NAMESPACE":arrayType", sizeof(WSDL_NAMESPACE":arrayType"), (void **)&arrayTypeAttr) == SUCCESS) {
 
@@ -909,8 +962,8 @@ xmlNodePtr to_xml_array(encodeType type, zval *data, int style)
 					enc = get_encoder(SOAP_GLOBAL(sdl), myNs->href, value);
 
 					if (strcmp(myNs->href,XSD_NAMESPACE) == 0) {
-						smart_str_appendl(&array_type_and_size, XSD_NS_PREFIX, sizeof(XSD_NS_PREFIX) - 1);
-						smart_str_appendc(&array_type_and_size, ':');
+						smart_str_appendl(&array_type, XSD_NS_PREFIX, sizeof(XSD_NS_PREFIX) - 1);
+						smart_str_appendc(&array_type, ':');
 					} else {
 						smart_str *prefix = encode_new_ns();
 						smart_str smart_ns = {0};
@@ -921,8 +974,8 @@ xmlNodePtr to_xml_array(encodeType type, zval *data, int style)
 						xmlSetProp(xmlParam, smart_ns.c, myNs->href);
 						smart_str_free(&smart_ns);
 
-						smart_str_appends(&array_type_and_size, prefix->c);
-						smart_str_appendc(&array_type_and_size, ':');
+						smart_str_appends(&array_type, prefix->c);
+						smart_str_appendc(&array_type, ':');
 						smart_str_free(prefix);
 						efree(prefix);
 					}
@@ -942,15 +995,13 @@ xmlNodePtr to_xml_array(encodeType type, zval *data, int style)
 					}
 				}
 
-				smart_str_appends(&array_type_and_size, value);
-				smart_str_appendc(&array_type_and_size, '[');
-				smart_str_append_long(&array_type_and_size, dims[0]);
+				smart_str_appends(&array_type, value);
+
+				smart_str_append_long(&array_size, dims[0]);
 				for (i=1; i<dimension; i++) {
-					smart_str_appendc(&array_type_and_size, ',');
-					smart_str_append_long(&array_type_and_size, dims[i]);
+					smart_str_appendc(&array_size, ',');
+					smart_str_append_long(&array_size, dims[i]);
 				}
-				smart_str_appendc(&array_type_and_size, ']');
-				smart_str_0(&array_type_and_size);
 
 				efree(value);
 				if (ns) efree(ns);
@@ -963,8 +1014,8 @@ xmlNodePtr to_xml_array(encodeType type, zval *data, int style)
 
 				if (ns) {
 					if (strcmp(ns,XSD_NAMESPACE) == 0) {
-						smart_str_appendl(&array_type_and_size, XSD_NS_PREFIX, sizeof(XSD_NS_PREFIX) - 1);
-						smart_str_appendc(&array_type_and_size, ':');
+						smart_str_appendl(&array_type, XSD_NS_PREFIX, sizeof(XSD_NS_PREFIX) - 1);
+						smart_str_appendc(&array_type, ':');
 					} else {
 						smart_str *prefix = encode_new_ns();
 						smart_str smart_ns = {0};
@@ -975,37 +1026,48 @@ xmlNodePtr to_xml_array(encodeType type, zval *data, int style)
 						xmlSetProp(xmlParam, smart_ns.c, ns);
 						smart_str_free(&smart_ns);
 
-						smart_str_appends(&array_type_and_size, prefix->c);
-						smart_str_appendc(&array_type_and_size, ':');
+						smart_str_appends(&array_type, prefix->c);
+						smart_str_appendc(&array_type, ':');
 						smart_str_free(prefix);
 						efree(prefix);
 					}
 				}
 				enc = elementType->encode;
-				smart_str_appends(&array_type_and_size, elementType->encode->details.type_str);
-				smart_str_free(&array_type);
-				smart_str_appendc(&array_type_and_size, '[');
-				smart_str_append_long(&array_type_and_size, i);
-				smart_str_appendc(&array_type_and_size, ']');
-				smart_str_0(&array_type_and_size);
+				smart_str_appends(&array_type, elementType->encode->details.type_str);
+				smart_str_append_long(&array_size, i);
 
 				dims = emalloc(sizeof(int)*dimension);
 				dims[0] = i;
 			} else {
+
 				get_array_type(data, &array_type TSRMLS_CC);
 				enc = get_encoder_ex(SOAP_GLOBAL(sdl), array_type.c);
-				smart_str_append(&array_type_and_size, &array_type);
-				smart_str_appendc(&array_type_and_size, '[');
-				smart_str_append_long(&array_type_and_size, i);
-				smart_str_appendc(&array_type_and_size, ']');
-				smart_str_0(&array_type_and_size);
+				smart_str_append_long(&array_size, i);
 				dims = emalloc(sizeof(int)*dimension);
 				dims[0] = i;
 			}
-			xmlSetProp(xmlParam, "SOAP-ENC:arrayType", array_type_and_size.c);
 
-			smart_str_free(&array_type_and_size);
+			if (soap_version == SOAP_1_1) {
+				smart_str_appendc(&array_type, '[');
+				smart_str_append(&array_type, &array_size);
+				smart_str_appendc(&array_type, ']');
+				smart_str_0(&array_type);
+				xmlSetProp(xmlParam, SOAP_1_1_ENC_NS_PREFIX":arrayType", array_type.c);
+			} else {
+				int i = 0;
+				while (i < array_size.len) {
+					if (array_size.c[i] == ',') {array_size.c[i] = ' ';}
+					++i;
+				}
+				smart_str_0(&array_type);
+				smart_str_0(&array_size);
+				xmlSetProp(xmlParam, SOAP_1_2_ENC_NS_PREFIX":itemType", array_type.c);
+				xmlSetProp(xmlParam, SOAP_1_2_ENC_NS_PREFIX":arraySize", array_size.c);
+			}
+
 			smart_str_free(&array_type);
+			smart_str_free(&array_size);
+
 		} else {
 			dims = emalloc(sizeof(int)*dimension);
 			dims[0] = i;
@@ -1016,30 +1078,6 @@ xmlNodePtr to_xml_array(encodeType type, zval *data, int style)
 		if (style == SOAP_ENCODED) {
 			set_ns_and_type(xmlParam, type);
 		}
-/*
-		zend_hash_internal_pointer_reset(data->value.ht);
-		for (;i > 0;i--) {
-			xmlNodePtr xparam;
-			zval **zdata;
-			encodePtr enc;
-			zend_hash_get_current_data(data->value.ht, (void **)&zdata);
-
-			enc = get_conversion((*zdata)->type);
-			xparam = master_to_xml(enc, (*zdata), style);
-
-			if (style == SOAP_LITERAL) {
-				xmlNodeSetName(xparam, enc->details.type_str);
-			} else {
-				xmlNodeSetName(xparam, "val");
-			}
-
-			xmlAddChild(xmlParam, xparam);
-			zend_hash_move_forward(data->value.ht);
-		}
-		if (style == SOAP_ENCODED) {
-			set_ns_and_type(xmlParam, type);
-		}
-*/
 	}
 	return xmlParam;
 }
@@ -1052,9 +1090,7 @@ zval *to_zval_array(encodeType type, xmlNodePtr data)
 	int dimension = 1;
 	int* dims = NULL;
 	int* pos = NULL;
-	xmlAttrPtr arrayTypeAttr;
-	xmlAttrPtr offsetAttr;
-	xmlAttrPtr *tmp;
+	xmlAttrPtr attr, *tmp;
 	sdlPtr sdl;
 	sdlAttributePtr *arrayType;
 
@@ -1065,14 +1101,13 @@ zval *to_zval_array(encodeType type, xmlNodePtr data)
 	sdl = SOAP_GLOBAL(sdl);
 
 	if (data &&
-	    (arrayTypeAttr = get_attribute(data->properties,"arrayType")) &&
-	    arrayTypeAttr->children &&
-	    arrayTypeAttr->children->content) {
+	    (attr = get_attribute(data->properties,"arrayType")) &&
+	    attr->children && attr->children->content) {
 		char *type, *end, *ns;
 		xmlNsPtr nsptr;
 
-		parse_namespace(arrayTypeAttr->children->content, &type, &ns);
-		nsptr = xmlSearchNs(arrayTypeAttr->doc, arrayTypeAttr->parent, ns);
+		parse_namespace(attr->children->content, &type, &ns);
+		nsptr = xmlSearchNs(attr->doc, attr->parent, ns);
 
 		end = strrchr(type,'[');
 		if (end) {
@@ -1085,18 +1120,48 @@ zval *to_zval_array(encodeType type, xmlNodePtr data)
 		}
 		efree(type);
 		if (ns) {efree(ns);}
+
+	} else if ((attr = get_attribute(data->properties,"itemType")) &&
+	    attr->children &&
+	    attr->children->content) {
+		char *type, *ns;
+		xmlNsPtr nsptr;
+
+		parse_namespace(attr->children->content, &type, &ns);
+		nsptr = xmlSearchNs(attr->doc, attr->parent, ns);
+		if (nsptr != NULL) {
+			enc = get_encoder(SOAP_GLOBAL(sdl), nsptr->href, type);
+		}
+		efree(type);
+		if (ns) {efree(ns);}
+
+		if ((attr = get_attribute(data->properties,"arraySize")) &&
+		    attr->children && attr->children->content) {
+			dimension = calc_dimension_12(attr->children->content);
+			dims = get_position_12(dimension, attr->children->content);
+		} else {
+			dims = emalloc(sizeof(int));
+			*dims = 0;
+		}
+
+	} else if ((attr = get_attribute(data->properties,"arraySize")) &&
+	    attr->children && attr->children->content) {
+
+		dimension = calc_dimension_12(attr->children->content);
+		dims = get_position_12(dimension, attr->children->content);
+
 	} else if (type.sdl_type != NULL &&
 	           type.sdl_type->attributes != NULL &&
-	           zend_hash_find(type.sdl_type->attributes, SOAP_ENC_NAMESPACE":arrayType",
-	                          sizeof(SOAP_ENC_NAMESPACE":arrayType"),
+	           zend_hash_find(type.sdl_type->attributes, SOAP_1_1_ENC_NAMESPACE":arrayType",
+	                          sizeof(SOAP_1_1_ENC_NAMESPACE":arrayType"),
 	                          (void **)&arrayType) == SUCCESS &&
 	           zend_hash_find((*arrayType)->extraAttributes, WSDL_NAMESPACE":arrayType", sizeof(WSDL_NAMESPACE":arrayType"), (void **)&tmp) == SUCCESS) {
 		char *type, *end, *ns;
 		xmlNsPtr nsptr;
 
-		arrayTypeAttr = *tmp;
-		parse_namespace(arrayTypeAttr->children->content, &type, &ns);
-		nsptr = xmlSearchNs(arrayTypeAttr->doc, arrayTypeAttr->parent, ns);
+		attr = *tmp;
+		parse_namespace(attr->children->content, &type, &ns);
+		nsptr = xmlSearchNs(attr->doc, attr->parent, ns);
 
 		end = strrchr(type,'[');
 		if (end) {
@@ -1109,21 +1174,63 @@ zval *to_zval_array(encodeType type, xmlNodePtr data)
 		if (ns) {efree(ns);}
 		dims = emalloc(sizeof(int));
 		*dims = 0;
+
+	} else if (type.sdl_type != NULL &&
+	           type.sdl_type->attributes != NULL &&
+	           zend_hash_find(type.sdl_type->attributes, SOAP_1_2_ENC_NAMESPACE":itemType",
+	                          sizeof(SOAP_1_2_ENC_NAMESPACE":itemType"),
+	                          (void **)&arrayType) == SUCCESS &&
+	           zend_hash_find((*arrayType)->extraAttributes, WSDL_NAMESPACE":itemType", sizeof(WSDL_NAMESPACE":itemType"), (void **)&tmp) == SUCCESS) {
+
+		char *name, *ns;
+		xmlNsPtr nsptr;
+
+		attr = *tmp;
+		parse_namespace(attr->children->content, &name, &ns);
+		nsptr = xmlSearchNs(attr->doc, attr->parent, ns);
+
+		if (nsptr != NULL) {
+			enc = get_encoder(SOAP_GLOBAL(sdl), nsptr->href, name);
+		}
+		efree(name);
+		if (ns) {efree(ns);}
+
+		if (zend_hash_find(type.sdl_type->attributes, SOAP_1_2_ENC_NAMESPACE":arraySize",
+		                   sizeof(SOAP_1_2_ENC_NAMESPACE":arraySize"),
+		                   (void **)&arrayType) == SUCCESS &&
+		    zend_hash_find((*arrayType)->extraAttributes, WSDL_NAMESPACE":arraySize", sizeof(WSDL_NAMESPACE":arraysize"), (void **)&tmp) == SUCCESS) {
+			attr = *tmp;
+			dimension = calc_dimension_12(attr->children->content);
+			dims = get_position_12(dimension, attr->children->content);
+		} else {
+			dims = emalloc(sizeof(int));
+			*dims = 0;
+		}
+	} else if (type.sdl_type != NULL &&
+	           type.sdl_type->attributes != NULL &&
+	           zend_hash_find(type.sdl_type->attributes, SOAP_1_2_ENC_NAMESPACE":arraySize",
+	                          sizeof(SOAP_1_2_ENC_NAMESPACE":arraySize"),
+	                          (void **)&arrayType) == SUCCESS &&
+	           zend_hash_find((*arrayType)->extraAttributes, WSDL_NAMESPACE":arraySize", sizeof(WSDL_NAMESPACE":arraysize"), (void **)&tmp) == SUCCESS) {
+
+		attr = *tmp;
+		dimension = calc_dimension_12(attr->children->content);
+		dims = get_position_12(dimension, attr->children->content);
 	}
 	if (dims == NULL) {
+		dimension = 1;
 		dims = emalloc(sizeof(int));
 		*dims = 0;
 	}
 	pos = emalloc(sizeof(int)*dimension);
 	memset(pos,0,sizeof(int)*dimension);
 	if (data &&
-	    (offsetAttr = get_attribute(data->properties,"offset")) &&
-	     offsetAttr->children &&
-	     offsetAttr->children->content) {
-		char* tmp = strrchr(offsetAttr->children->content,'[');
+	    (attr = get_attribute(data->properties,"offset")) &&
+	     attr->children && attr->children->content) {
+		char* tmp = strrchr(attr->children->content,'[');
 
 		if (tmp == NULL) {
-			tmp = offsetAttr->children->content;
+			tmp = attr->children->content;
 		}
 		get_position_ex(dimension, tmp, &pos);
 	}
@@ -1151,7 +1258,7 @@ zval *to_zval_array(encodeType type, xmlNodePtr data)
 			if (position != NULL && position->children && position->children->content) {
 				char* tmp = strrchr(position->children->content,'[');
 				if (tmp == NULL) {
-					tmp = offsetAttr->children->content;
+					tmp = position->children->content;
 				}
 				get_position_ex(dimension, tmp, &pos);
 			}
@@ -1351,7 +1458,9 @@ zval *guess_zval_convert(encodeType type, xmlNodePtr data)
 			/* Logic: has children = IS_OBJECT else IS_STRING */
 			xmlNodePtr trav;
 
-			if (get_attribute(data->properties, "arrayType")) {
+			if (get_attribute(data->properties, "arrayType") ||
+			    get_attribute(data->properties, "itemType") ||
+			    get_attribute(data->properties, "arraySize")) {
 				enc = get_conversion(SOAP_ENC_ARRAY);
 			} else {
 				enc = get_conversion(XSD_STRING);
