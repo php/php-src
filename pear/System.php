@@ -226,6 +226,14 @@ class System
             if ($opt[0] == 'p') {
                 $create_parents = true;
             } elseif($opt[0] == 'm') {
+                // if the mode is clearly an octal number (starts with 0)
+                // convert it to decimal
+                if (strlen($opt[1]) && $opt[1]{0} == '0') {
+                    $opt[1] = octdec($opt[1]);
+                } else {
+                    // convert to int
+                    $opt[1] += 0;
+                }
                 $mode = $opt[1];
             }
         }
