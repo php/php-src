@@ -34,6 +34,8 @@
 #include "spl_exceptions.h"
 
 zend_class_entry *spl_ce_LogicException;
+zend_class_entry *spl_ce_BadFunctionCallException;
+zend_class_entry *spl_ce_BadMethodCallException;
 zend_class_entry *spl_ce_DomainException;
 zend_class_entry *spl_ce_InvalidArgumentException;
 zend_class_entry *spl_ce_LengthException;
@@ -50,6 +52,8 @@ zend_class_entry *spl_ce_UnderflowException;
 PHP_MINIT_FUNCTION(spl_exceptions)
 {
     REGISTER_SPL_SUB_CLASS_EX(LogicException,           Exception,        NULL, NULL);
+    REGISTER_SPL_SUB_CLASS_EX(BadFunctionCallException, LogicException,   NULL, NULL);
+    REGISTER_SPL_SUB_CLASS_EX(BadMethodCallException,   BadFunctionCallException,   NULL, NULL);
     REGISTER_SPL_SUB_CLASS_EX(DomainException,          LogicException,   NULL, NULL);
     REGISTER_SPL_SUB_CLASS_EX(InvalidArgumentException, LogicException,   NULL, NULL);
     REGISTER_SPL_SUB_CLASS_EX(LengthException,          LogicException,   NULL, NULL);

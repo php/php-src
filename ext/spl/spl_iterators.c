@@ -34,6 +34,7 @@
 #include "spl_iterators.h"
 #include "spl_directory.h"
 #include "spl_array.h"
+#include "spl_exceptions.h"
 
 #define INLINE inline
 
@@ -244,7 +245,7 @@ next_step:
 					if (child) {
 						zval_ptr_dtor(&child);
 					}
-					zend_throw_exception(zend_exception_get_default(), "Objects returned by RecursiveIterator::getChildren() must implement RecursiveIterator", 0 TSRMLS_CC);
+					zend_throw_exception(spl_ce_InvalidArgumentException, "Objects returned by RecursiveIterator::getChildren() must implement RecursiveIterator", 0 TSRMLS_CC);
 					return;
 				}
 				if (object->mode == RIT_CHILD_FIRST) {
@@ -612,12 +613,12 @@ static INLINE spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAME
 			}
 			if (intern->u.limit.offset < 0) {
 				php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
-				zend_throw_exception(zend_exception_get_default(), "Parameter offset must be > 0", 0 TSRMLS_CC);
+				zend_throw_exception(spl_ce_OutOfRangeException, "Parameter offset must be > 0", 0 TSRMLS_CC);
 				return NULL;
 			}
 			if (intern->u.limit.count < 0 && intern->u.limit.count != -1) {
 				php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
-				zend_throw_exception(zend_exception_get_default(), "Parameter count must either be -1 or a value greater than or equal 0", 0 TSRMLS_CC);
+				zend_throw_exception(spl_ce_OutOfRangeException, "Parameter count must either be -1 or a value greater than or equal 0", 0 TSRMLS_CC);
 				return NULL;
 			}
 			break;
@@ -1041,11 +1042,11 @@ static INLINE void spl_limit_it_seek(spl_dual_it_object *intern, long pos TSRMLS
 
 	spl_dual_it_free(intern TSRMLS_CC);
 	if (pos < intern->u.limit.offset) {
-		zend_throw_exception_ex(zend_exception_get_default(), 0 TSRMLS_CC, "Cannot seek to %ld which is below the offset %ld", pos, intern->u.limit.offset);
+		zend_throw_exception_ex(spl_ce_OutOfBoundsException, 0 TSRMLS_CC, "Cannot seek to %ld which is below the offset %ld", pos, intern->u.limit.offset);
 		return;
 	}
 	if (pos > intern->u.limit.offset + intern->u.limit.count && intern->u.limit.count != -1) {
-		zend_throw_exception_ex(zend_exception_get_default(), 0 TSRMLS_CC, "Cannot seek to %ld which is behind offest %ld plus count %ld", pos, intern->u.limit.offset, intern->u.limit.count);
+		zend_throw_exception_ex(spl_ce_OutOfBoundsException, 0 TSRMLS_CC, "Cannot seek to %ld which is behind offest %ld plus count %ld", pos, intern->u.limit.offset, intern->u.limit.count);
 		return;
 	}
 	if (instanceof_function(intern->inner.ce, spl_ce_SeekableIterator TSRMLS_CC)) {
@@ -1325,7 +1326,7 @@ SPL_METHOD(CachingIterator, __toString)
 	intern = (spl_dual_it_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 
 	if (!(intern->u.caching.flags & CIT_CALL_TOSTRING))	{
-		zend_throw_exception_ex(zend_exception_get_default(), 0 TSRMLS_CC, "%s does not fetch string value (see CachingIterator::__construct)", Z_OBJCE_P(getThis())->name);
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "%s does not fetch string value (see CachingIterator::__construct)", Z_OBJCE_P(getThis())->name);
 	}
 	if (intern->u.caching.zstr) {
 		RETURN_STRINGL(Z_STRVAL_P(intern->u.caching.zstr), Z_STRLEN_P(intern->u.caching.zstr), 1);
@@ -1554,14 +1555,14 @@ SPL_METHOD(EmptyIterator, valid)
    Throws exception */
 SPL_METHOD(EmptyIterator, key)
 {
-	zend_throw_exception(NULL, "Accessing the key of an EmptyIterator", 0 TSRMLS_CC);
+	zend_throw_exception(spl_ce_BadMethodCallException, "Accessing the key of an EmptyIterator", 0 TSRMLS_CC);
 } /* }}} */
 
 /* {{{ proto EmptyIterator::current()
    Throws exception */
 SPL_METHOD(EmptyIterator, current)
 {
-	zend_throw_exception(NULL, "Accessing the value of an EmptyIterator", 0 TSRMLS_CC);
+	zend_throw_exception(spl_ce_BadMethodCallException, "Accessing the value of an EmptyIterator", 0 TSRMLS_CC);
 } /* }}} */
 
 /* {{{ proto EmptyIterator::next()

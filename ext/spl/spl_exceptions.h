@@ -25,6 +25,8 @@
 #include "php_spl.h"
 
 extern zend_class_entry *spl_ce_LogicException;
+extern zend_class_entry *spl_ce_BadFunctionCallException;
+extern zend_class_entry *spl_ce_BadMethodCallException;
 extern zend_class_entry *spl_ce_DomainException;
 extern zend_class_entry *spl_ce_InvalidArgumentException;
 extern zend_class_entry *spl_ce_LengthException;
