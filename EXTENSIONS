@@ -238,9 +238,10 @@ MAINTENANCE:         Maintained
 STATUS:              Experimental
 -------------------------------------------------------------------------------
 EXTENSION:           exif
-MAINTENANCE:         Unknown
-STATUS:              Unknown
-SINCE:               4.0.1
+PRIMARY MAINTAINER:  Marcus Boerger <helly@php.net>
+MAINTENANCE:         Maintained
+STATUS:              Working/Experimental
+COMMENT:			 Thumbnails disabled, extending functionality, Core working
 -------------------------------------------------------------------------------
 EXTENSION:           fdf
 PRIMARY MAINTAINER:  Uwe Steinmann <steinm@php.net>
