@@ -101,8 +101,10 @@ compared.
 Objects - reflection
 --------------------
 
-get_class_name is used to retrieve class name of the object. No other
-reflection functions are currently implemented.
+get_class_name is used to retrieve class name of the object. 
+get_class_entry returns class entry (zend_class_entry) for the object,
+in case there exists PHP class for it.
+No other reflection functions are currently implemented.
 
 Objects - data structures and handlers
 ---------------------------------------
@@ -186,7 +188,7 @@ for any other PHP internal function).
 
 get_constructor - get description for the object constructor method
 
-get_class_entry - should return the class entry
+get_class_entry - should return the class entry for the object
 
 get_class_name - get the name of the class the object belongs to
 
