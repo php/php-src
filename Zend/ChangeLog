@@ -1,3 +1,21 @@
+2003-01-11  Andi Gutmans  <andi@zend.com>
+
+    * zend_execute.c:
+      - Fix typo and whitespace
+
+2003-01-11  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * zend.c
+      zend_execute.c
+      zend_execute.h
+      zend_execute_API.c:
+      - Ported the zend_execute_internal hook to ZendEngine2.
+
+2003-01-11  Harald Radi  <harald.radi+coding.php@nme.at>
+
+    * zend_ts_hash.c:
+      freed reader twice instead of writer and reader
+
 2003-01-10  Ilia Alshanetsky  <ilia@prohost.org>
 
     * zend_alloc.c:

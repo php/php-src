@@ -1,3 +1,66 @@
+2003-01-11  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/sybase_ct/php_sybase_ct.c:
+      Do not 'convert' double columns to integers after the 1st row in the result
+      set.
+
+    * ext/sybase_ct/php_sybase_ct.c:
+      Fixed handling of NUMERIC type, when it contains numbers that could
+      potentially exceed the interger limit.
+
+2003-01-11  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/standard/browscap.c
+      ext/standard/datetime.c
+      ext/standard/file.c
+      ext/standard/formatted_print.c
+      ext/standard/pack.c
+      ext/standard/reg.c
+      ext/standard/string.c:
+      Reverted because correct decision has not been made yet.
+
+    * sapi/apache2filter/php_functions.c:
+      This patch is likely to fix win32 build
+
+    * ext/standard/browscap.c
+      ext/standard/datetime.c
+      ext/standard/pack.c
+      ext/standard/reg.c
+      ext/standard/string.c:
+      Reduced warnings in ZE2 build
+
+    * ext/standard/file.c
+      ext/standard/formatted_print.c:
+      Reduced compiler warnings in ZE2 build
+
+2003-01-11  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/string.c:
+      Added stripos() & strripos() functions.
+      Added 3rd parameter (offset) to strrpos().
+
+2003-01-11  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ext/rpc/rpc.c:
+      Add missing ,.
+
+2003-01-11  Harald Radi  <harald.radi+coding.php@nme.at>
+
+    * ext/rpc/rpc.c
+      ext/rpc/rpc_proxy.c
+      ext/rpc/com/variant.c:
+      fix build
+
+2003-01-11  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * win32/php4dllts.dsp:
+      Leftover.
+
+2003-01-11  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * sapi/cli/php_cli.c:
+      Fix the line numbering when the 1st line in the script is #!.
+
 2003-01-10  Harald Radi  <harald.radi+coding.php@nme.at>
 
     * main/config.w32.h
