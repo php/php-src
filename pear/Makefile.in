@@ -139,7 +139,7 @@ BUILD_FILES = \
 	dynlib.m4 \
 	acinclude.m4
 
-bin_SCRIPTS = phpize php-config pear
+bin_SCRIPTS = phpize php-config pear pearize
 
 install-build:
 	$(mkinstalldirs) $(INSTALL_ROOT)$(phpbuilddir) $(INSTALL_ROOT)$(bindir) && \
@@ -183,6 +183,9 @@ scripts/pear: scripts/pear.in $(top_builddir)/config.status
 
 scripts/phpize: scripts/phpize.in $(top_builddir)/config.status
 	(cd ..;CONFIG_FILES=pear/scripts/phpize CONFIG_HEADERS= $(top_builddir)/config.status)
+
+scripts/pearize: scripts/pearize.in $(top_builddir)/config.status
+	(cd ..;CONFIG_FILES=pear/scripts/pearize CONFIG_HEADERS= $(top_builddir)/config.status)
 
 scripts/php-config: scripts/php-config.in $(top_builddir)/config.status
 	(cd ..;CONFIG_FILES=pear/scripts/php-config CONFIG_HEADERS= $(top_builddir)/config.status)
