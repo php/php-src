@@ -144,7 +144,7 @@ AC_DEFUN(PHP_GD_T1LIB,[
       fi
     done
 
-    if test "$T1_DIR"; then
+    if test -n "$T1_DIR"; then
       AC_CHECK_LIB(t1, T1_GetExtend, 
       [
         AC_DEFINE(HAVE_LIBT1,1,[ ])
