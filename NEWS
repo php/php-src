@@ -1,6 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Feb 2004, Version 4.3.5
+- Fixed crash in php_ini_scanned_files() when no additional INI files were
+  actually parsed. (Jon)
 - Fixed possible crashes inside socket extension, due to missing check inside
   allocation functions. (Ilia)
 - Fixed bug #27590 (crash during shutdown when freeing persistent resources
