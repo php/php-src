@@ -2768,6 +2768,8 @@ PHPAPI void php_strip_tags(char *rbuf, int len, int state, char *allow, int allo
 						lc = '(';
 						br++;
 					}
+				} else if (state == 1) {
+					*(tp++) = c;
 				} else if (state == 0) {
 					*(rp++) = c;
 				}
@@ -2779,6 +2781,8 @@ PHPAPI void php_strip_tags(char *rbuf, int len, int state, char *allow, int allo
 						lc = ')';
 						br--;
 					}
+				} else if (state == 1) {
+					*(tp++) = c;
 				} else if (state == 0) {
 					*(rp++) = c;
 				}
