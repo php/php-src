@@ -2,6 +2,8 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.4
+- Fixed possible crash bug in imap_fetchstructure() (Jani)
+- Fixed possible crash bug in imap_open() (Jani & Mark Musone)
 - Added url_rewriter.tags configuration directive (Sascha)
 - Added CORBA client extension, ready for use (eriksson@php.net)
 - Fixed memory leak in x-httpd-source mode (Jason Greene)
