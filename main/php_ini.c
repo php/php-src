@@ -366,6 +366,24 @@ PHPAPI void display_ini_entries(zend_module_entry *module)
 
 /* Standard message handlers */
 
+PHPAPI PHP_INI_MH(OnUpdateBool)
+{
+	zend_bool *p;
+#ifndef ZTS
+	char *base = (char *) mh_arg2;
+#else
+	char *base;
+
+	base = (char *) ts_resource(*((int *) mh_arg2));
+#endif
+
+	p = (zend_bool *) (base+(size_t) mh_arg1);
+
+	*p = (zend_bool) atoi(new_value);
+	return SUCCESS;
+}
+
+
 PHPAPI PHP_INI_MH(OnUpdateInt)
 {
 	long *p;
