@@ -827,7 +827,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 			}
 
 #if HAVE_MBSTRING
-			s = mbstr_strrchr(filename, '\\');
+			s = mbstr_strrchr(filename, '\\' TSRMLS_CC);
 #else
 			s = strrchr(filename, '\\');
 #endif
