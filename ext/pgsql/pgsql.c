@@ -351,7 +351,9 @@ static int _rollback_transactions(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 #if HAVE_PGTRANSACTIONSTATUS && HAVE_PQPROTOCOLVERSION
 		res = PQexec(link,"ROLLBACK;");
 #else
-		res = PQexec(link,"BEGIN;ROLLBACK;");
+		res = PQexec(link,"BEGIN;");
+		PQclear(res);
+		res = PQexec(link,"ROLLBACK;");
 #endif
 		PQclear(res);
 		PGG(ignore_notices) = orig;
