@@ -1,3 +1,46 @@
+2005-03-05  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * (PHP_4_3)
+      ext/exif/exif.c:
+      wtf?
+
+2005-03-05  John Coggeshall  <john@coggeshall.org>
+
+    * ext/skeleton/tests/001.phpt:
+      Opps.
+
+2005-03-05  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_0)
+      NEWS:
+      - Make sure to note that this involves SOAP.
+
+2005-03-05  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * NEWS
+      main/SAPI.c
+      main/php_content_types.c
+      main/php_content_types.h:
+      - Fixed bug #32109 ($_POST is not populated in multithreaded environment).
+
+2005-03-05  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_0)
+      NEWS:
+      Fixed bug #32115 (dateTime encoding of timezone incorrect)
+
+2005-03-05  John Coggeshall  <john@coggeshall.org>
+
+    * ext/skeleton/tests/001.phpt:
+      Starting tests....
+
+2005-03-05  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ext/standard/array.c:
+      Check that object can actually return a class entry. I need this for a
+      class-entry-less helper objects that should not be present in the class
+      table.
+
 2005-03-04  Jani Taskinen  <jani.taskinen@kolumbus.fi>
 
     * sapi/apache_hooks/config.m4:
