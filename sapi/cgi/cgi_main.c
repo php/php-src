@@ -511,7 +511,7 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 	zend_llist_init(&global_vars, sizeof(char *), NULL, 0);
 
 	if (!cgi) {					/* never execute the arguments if you are a CGI */
-		if (!SG(request_info).argv0) {
+		if (SG(request_info).argv0) {
 			free(SG(request_info).argv0);
 			SG(request_info).argv0 = NULL;
 		}
