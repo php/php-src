@@ -701,8 +701,8 @@ void php_request_shutdown(void *dummy)
 
 
 	shutdown_scanner(CLS_C);
-	shutdown_compiler(CLS_C);
 	shutdown_executor(ELS_C);
+	shutdown_compiler(CLS_C);
 
 	sapi_deactivate(SLS_C);
 

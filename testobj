@@ -1,9 +1,14 @@
 <?
 
-//$a = new TestClass;
-$a->foo = 5;
-$foo = 456;
+class foobar {
+	function foobar() {
+		print "foobar!\n";
+		$this->initialized = 1;
+	}
+};
 
-print $a->foobar[2]["testing 123".$foo]->barbara."\n";
-print "---\n";
-$a->foobar[2]["testing 123".$foo]->barbara=5;
+//$foo = new foobar or die("Unable to construct foobar\n");
+$word = new COm("word.application");
+$word->visible = true;
+sleep(5);
+$word->quit();

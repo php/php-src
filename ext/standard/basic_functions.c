@@ -1974,15 +1974,14 @@ void test_class_call_function(INTERNAL_FUNCTION_PARAMETERS, zend_property_refere
 
 void test_class_startup()
 {
-	zend_class_entry class_entry;
+	zend_class_entry test_class_entry;
 
-	class_entry.name = strdup("TestClass");
-	class_entry.name_length = sizeof("TestClass")-1;
+	INIT_OVERLOADED_CLASS_ENTRY(test_class_entry, "TestClass", NULL,
+								test_class_call_function,
+								test_class_get_property,
+								test_class_set_property);
 
-	class_entry.handle_property_get = test_class_get_property;
-	class_entry.handle_property_set = test_class_set_property;
-	class_entry.handle_function_call = test_class_call_function;
-	register_internal_class(&class_entry);
+	register_internal_class(&test_class_entry);
 }
 
 
