@@ -23,7 +23,7 @@ var_dump(pg_result_seek($result, 0));
 echo "Ok\n";
 ?>
 --EXPECT--
-object(stdClass)#1 (3) {
+object(stdClass) (3) {
   ["num"]=>
   string(1) "1"
   ["str"]=>
