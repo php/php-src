@@ -62,12 +62,3 @@ typedef long pid_t;
 #undef PHP_PROG_SENDMAIL
 #define PHP_PROG_SENDMAIL "Built in mailer"
 #endif
-
-#define CONVERT_TO_WIN_FS(Filename) 			\
-{									   			\
-	char *stemp;				   			    \
-	if (Filename)								\
-		for (stemp = Filename; *stemp; stemp++) \
-			if ( *stemp	== '/')				    \
-				*stemp = '\\';				    \
-}									 
