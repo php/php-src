@@ -29,7 +29,7 @@
 */
 /* $Id$ */
 
-/* Synced with php3 revision 1.24 1999-06-18 [ssb] */
+/* Synced with php 3.0 revision 1.24 1999-06-18 [ssb] */
 
 #ifndef _FSOCK_H
 #define _FSOCK_H
@@ -65,7 +65,7 @@ char *php_sock_fgets(char *buf, size_t maxlen, int socket);
 size_t php_sock_fread(char *buf, size_t maxlen, int socket);
 int php_sock_feof(int socket);
 int php_sock_fgetc(int socket);
-int _php3_is_persistent_sock(int);
+int php_is_persistent_sock(int);
 int php_sockset_blocking(int socket, int mode);
 int php_sockdestroy(int socket);
 int php_sock_close(int socket);
@@ -81,7 +81,7 @@ PHP_RSHUTDOWN_FUNCTION(fsock);
 typedef struct {
 	HashTable ht_fsock_keys;
 	HashTable ht_fsock_socks;
-	struct php3i_sockbuf *phpsockbuf;
+	struct php_sockbuf *phpsockbuf;
 	size_t def_chunk_size;
 } php_fsock_globals;
 

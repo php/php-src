@@ -56,10 +56,10 @@ static int _display_module_info(zend_module_entry *module, void *arg)
 PHPAPI void php_print_info(int flag)
 {
 	char **env,*tmp1,*tmp2;
-	char *php3_uname;
+	char *php_uname;
 	int expose_php = INI_INT("expose_php");
 #if WIN32|WINNT
-	char php3_windows_uname[256];
+	char php_windows_uname[256];
 	DWORD dwBuild=0;
 	DWORD dwVersion = GetVersion();
 	DWORD dwWindowsMajorVersion =  (DWORD)(LOBYTE(LOWORD(dwVersion)));
@@ -74,13 +74,13 @@ PHPAPI void php_print_info(int flag)
 		// Get build numbers for Windows NT or Win95
 		if (dwVersion < 0x80000000){
 			dwBuild = (DWORD)(HIWORD(dwVersion));
-			snprintf(php3_windows_uname,255,"%s %d.%d build %d","Windows NT",dwWindowsMajorVersion,dwWindowsMinorVersion,dwBuild);
+			snprintf(php_windows_uname,255,"%s %d.%d build %d","Windows NT",dwWindowsMajorVersion,dwWindowsMinorVersion,dwBuild);
 		} else {
-			snprintf(php3_windows_uname,255,"%s %d.%d","Windows 95/98",dwWindowsMajorVersion,dwWindowsMinorVersion);
+			snprintf(php_windows_uname,255,"%s %d.%d","Windows 95/98",dwWindowsMajorVersion,dwWindowsMinorVersion);
 		}
-		php3_uname = php3_windows_uname;
+		php_uname = php_windows_uname;
 #else
-		php3_uname=PHP_UNAME;
+		php_uname=PHP_UNAME;
 #endif
 
 
@@ -94,7 +94,7 @@ PHPAPI void php_print_info(int flag)
 			}
 			PUTS("?=PHPE9568F34-D428-11d2-A769-00AA001ACF42\" border=\"0\" align=\"right\"></a>\n");
 		}
-		php_printf("System: %s<br>Build Date: %s\n<br>", php3_uname, __DATE__);
+		php_printf("System: %s<br>Build Date: %s\n<br>", php_uname, __DATE__);
 #ifdef CONFIGURE_COMMAND
 		php_printf("Configure command: %s<br>\n", CONFIGURE_COMMAND);
 #endif

@@ -98,7 +98,7 @@ PHP_FUNCTION(mail)
 		headers = (*argv[3])->value.str.val;
 	}
 	
-	if (_php3_mail(to, subject, message, headers)){
+	if (php_mail(to, subject, message, headers)){
 		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;
@@ -106,7 +106,7 @@ PHP_FUNCTION(mail)
 }
 /* }}} */
 
-int _php3_mail(char *to, char *subject, char *message, char *headers)
+int php_mail(char *to, char *subject, char *message, char *headers)
 {
 #if MSVC5
 	int tsm_err;

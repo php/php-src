@@ -48,11 +48,11 @@
 #include "php_image.h"
 
 /* file type markers */
-const char php3_sig_gif[3] =
+const char php_sig_gif[3] =
 {'G', 'I', 'F'};
-const char php3_sig_jpg[3] =
+const char php_sig_jpg[3] =
 {(char) 0xff, (char) 0xd8, (char) 0xff};
-const char php3_sig_png[8] =
+const char php_sig_png[8] =
 {(char) 0x89, (char) 0x50, (char) 0x4e,
  (char) 0x47, (char) 0x0d, (char) 0x0a,
  (char) 0x1a, (char) 0x0a};
@@ -67,7 +67,7 @@ struct gfxinfo {
 };
 
 /* routine to handle GIF files. If only everything were that easy... ;} */
-static struct gfxinfo *php3_handle_gif (FILE *fp)
+static struct gfxinfo *php_handle_gif (FILE *fp)
 {
 	struct gfxinfo *result = NULL;
 	unsigned char a[2];
@@ -81,7 +81,7 @@ static struct gfxinfo *php3_handle_gif (FILE *fp)
 	return result;
 }
 
-static unsigned long php3_read4(FILE *fp)
+static unsigned long php_read4(FILE *fp)
 {
 	unsigned char a[ 4 ];
 
@@ -93,15 +93,15 @@ static unsigned long php3_read4(FILE *fp)
 }
 
 /* routine to handle PNG files. - even easier */
-static struct gfxinfo *php3_handle_png(FILE *fp)
+static struct gfxinfo *php_handle_png(FILE *fp)
 {
 	struct gfxinfo *result = NULL;
 	unsigned long in_width, in_height;
 
 	result = (struct gfxinfo *) ecalloc(1,sizeof(struct gfxinfo));
 	fseek(fp, 16L, SEEK_SET);
-	in_width = php3_read4(fp);
-	in_height = php3_read4(fp);
+	in_width = php_read4(fp);
+	in_height = php_read4(fp);
 	result->width = (unsigned int) in_width;
 	result->height = (unsigned int) in_height;
 	return result;
@@ -143,7 +143,7 @@ static struct gfxinfo *php3_handle_png(FILE *fp)
 #define M_APP14 0xee
 #define M_APP15 0xef
 
-static unsigned short php3_read2(FILE *fp)
+static unsigned short php_read2(FILE *fp)
 {
 	unsigned char a[ 2 ];
 
@@ -153,7 +153,7 @@ static unsigned short php3_read2(FILE *fp)
 	return (((unsigned short) a[ 0 ]) << 8) + ((unsigned short) a[ 1 ]);
 }
 
-static unsigned int php3_next_marker(FILE *fp)
+static unsigned int php_next_marker(FILE *fp)
 	 /* get next marker byte from file */
 {
 	int c;
@@ -176,23 +176,23 @@ static unsigned int php3_next_marker(FILE *fp)
 	return (unsigned int) c;
 }
 
-static void php3_skip_variable(FILE *fp)
+static void php_skip_variable(FILE *fp)
 	 /* skip over a variable-length block; assumes proper length marker */
 {
 	unsigned short length;
 
-	length = php3_read2(fp);
+	length = php_read2(fp);
 	length -= 2;				/* length includes itself */
 	fseek(fp, (long) length, SEEK_CUR);	/* skip the header */
 }
 
-static void php3_read_APP(FILE *fp,unsigned int marker,pval *info)
+static void php_read_APP(FILE *fp,unsigned int marker,pval *info)
 {
 	unsigned short length;
 	unsigned char *buffer;
 	unsigned char markername[ 16 ];
 
-	length = php3_read2(fp);
+	length = php_read2(fp);
 	length -= 2;				/* length includes itself */
 
     buffer = emalloc(length);
@@ -208,7 +208,7 @@ static void php3_read_APP(FILE *fp,unsigned int marker,pval *info)
 	efree(buffer);
 }
 
-static struct gfxinfo *php3_handle_jpeg(FILE *fp,pval *info)
+static struct gfxinfo *php_handle_jpeg(FILE *fp,pval *info)
 	 /* main loop to parse JPEG structure */
 {
 	struct gfxinfo *result = NULL;
@@ -223,7 +223,7 @@ static struct gfxinfo *php3_handle_jpeg(FILE *fp,pval *info)
 		return NULL;
 
 	for (;;) {
-		marker = php3_next_marker(fp);
+		marker = php_next_marker(fp);
 		switch (marker) {
 			case M_SOF0:
 			case M_SOF1:
@@ -245,14 +245,14 @@ static struct gfxinfo *php3_handle_jpeg(FILE *fp,pval *info)
 					fseek(fp, 2, SEEK_CUR);
  
 					result->bits = fgetc(fp);
-					result->height = php3_read2(fp);
-					result->width = php3_read2(fp);
+					result->height = php_read2(fp);
+					result->width = php_read2(fp);
 					result->channels = fgetc(fp);
  
 					if (! info) /* if we don't want an extanded info -> return */
 						return result;
 				} else {
-					php3_skip_variable(fp);
+					php_skip_variable(fp);
 				}
 				break;
 
@@ -273,9 +273,9 @@ static struct gfxinfo *php3_handle_jpeg(FILE *fp,pval *info)
 			case M_APP14:
 			case M_APP15:
 				if (info) {	
-					php3_read_APP(fp,marker,info); /* read all the app markes... */
+					php_read_APP(fp,marker,info); /* read all the app markes... */
 				} else {
-				    php3_skip_variable(fp);
+				    php_skip_variable(fp);
 				}
 				break;
 
@@ -285,7 +285,7 @@ static struct gfxinfo *php3_handle_jpeg(FILE *fp,pval *info)
 				break;
 
 			default:
-				php3_skip_variable(fp);		/* anything else isn't interesting */
+				php_skip_variable(fp);		/* anything else isn't interesting */
 				break;
 		}
 	}
@@ -343,21 +343,21 @@ PHP_FUNCTION(getimagesize)
 		return;
 	}
 	fread(filetype,sizeof(filetype),1,fp);
-	if (!memcmp(filetype, php3_sig_gif, 3)) {
-		result = php3_handle_gif (fp);
+	if (!memcmp(filetype, php_sig_gif, 3)) {
+		result = php_handle_gif (fp);
 		itype = 1;
-	} else if (!memcmp(filetype, php3_sig_jpg, 3)) {
+	} else if (!memcmp(filetype, php_sig_jpg, 3)) {
 		if (info) {
-			result = php3_handle_jpeg(fp,*info);
+			result = php_handle_jpeg(fp,*info);
 		} else {
-			result = php3_handle_jpeg(fp,NULL);
+			result = php_handle_jpeg(fp,NULL);
 		}
 		itype = 2;
-	} else if (!memcmp(filetype, php3_sig_png, 3)) {
+	} else if (!memcmp(filetype, php_sig_png, 3)) {
 		fseek(fp, 0L, SEEK_SET);
 		fread(pngtype, sizeof(pngtype), 1, fp);
-		if (!memcmp(pngtype, php3_sig_png, 8)) {
-			result = php3_handle_png(fp);
+		if (!memcmp(pngtype, php_sig_png, 8)) {
+			result = php_handle_png(fp);
 			itype = 3;
 		} else {
 			php_error(E_WARNING, "PNG file corrupted by ASCII conversion");

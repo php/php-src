@@ -195,7 +195,7 @@ PHP_FUNCTION(parse_url)
 }
 /* }}} */
 
-static int php3_htoi(char *s)
+static int php_htoi(char *s)
 {
 	int value;
 	int c;
@@ -228,7 +228,7 @@ static int php3_htoi(char *s)
 
 static unsigned char hexchars[] = "0123456789ABCDEF";
 
-char *_php3_urlencode(char *s, int len)
+char *php_url_encode(char *s, int len)
 {
 	register int x, y;
 	unsigned char *str;
@@ -275,7 +275,7 @@ PHP_FUNCTION(urlencode)
 		var_reset(return_value);
 		return;
 	}
-	str = _php3_urlencode((*arg)->value.str.val, (*arg)->value.str.len);
+	str = php_url_encode((*arg)->value.str.val, (*arg)->value.str.len);
 	RETVAL_STRING(str, 1);
 	efree(str);
 }
@@ -301,12 +301,12 @@ PHP_FUNCTION(urldecode)
 	*return_value = **arg;
 	zval_copy_ctor(return_value);
 	
-	len = _php3_urldecode(return_value->value.str.val, return_value->value.str.len);
+	len = php_url_decode(return_value->value.str.val, return_value->value.str.len);
 	return_value->value.str.len = len;
 }
 /* }}} */
 
-int _php3_urldecode(char *str, int len)
+int php_url_decode(char *str, int len)
 {
 	char *dest = str;
 	char *data = str;
@@ -316,9 +316,9 @@ int _php3_urldecode(char *str, int len)
 			*dest = ' ';
 		else if (*data == '%' && len >= 2 && isxdigit((int) *(data + 1)) && isxdigit((int) *(data + 2))) {
 #ifndef CHARSET_EBCDIC
-			*dest = (char) php3_htoi(data + 1);
+			*dest = (char) php_htoi(data + 1);
 #else
-			*dest = os_toebcdic[(char) php3_htoi(data + 1)];
+			*dest = os_toebcdic[(char) php_htoi(data + 1)];
 #endif
 			data += 2;
 			len -= 2;
@@ -331,7 +331,7 @@ int _php3_urldecode(char *str, int len)
 	return dest - str;
 }
 
-char *_php3_rawurlencode(char *s, int len)
+char *php_raw_url_encode(char *s, int len)
 {
 	register int x, y;
 	unsigned char *str;
@@ -374,7 +374,7 @@ PHP_FUNCTION(rawurlencode)
 	if (!(*arg)->value.str.len) {
 		RETURN_FALSE;
 	}
-	str = _php3_rawurlencode((*arg)->value.str.val, (*arg)->value.str.len);
+	str = php_raw_url_encode((*arg)->value.str.val, (*arg)->value.str.len);
 	RETVAL_STRING(str, 1);
 	efree(str);
 }
@@ -409,9 +409,9 @@ int php_raw_url_decode(char *str, int len)
 	while (len--) {
 		if (*data == '%' && len >= 2 && isxdigit((int) *(data + 1)) && isxdigit((int) *(data + 2))) {
 #ifndef CHARSET_EBCDIC
-			*dest = (char) php3_htoi(data + 1);
+			*dest = (char) php_htoi(data + 1);
 #else
-			*dest = os_toebcdic[(char) php3_htoi(data + 1)];
+			*dest = os_toebcdic[(char) php_htoi(data + 1)];
 #endif
 			data += 2;
 			len -= 2;

@@ -37,21 +37,21 @@
 
 /* need to figure out some nice way to get rid of these */
 #ifndef THREAD_SAFE
-static int php3_HeaderPrinted = 0;
-static int php3_PrintHeader = 1;
+static int php_header_printed = 0;
+static int php_print_header = 1;
 static CookieList *top = NULL;
 static char *cont_type = NULL;
 static int header_called = 0;
 #endif
 
-void php3_PushCookieList(char *, char *, time_t, char *, char *, int);
-CookieList *php3_PopCookieList(void);
+void php_push_cookie_list(char *, char *, time_t, char *, char *, int);
+CookieList *php_pop_cookie_list(void);
 
 PHP_RINIT_FUNCTION(head)
 {
-	php3_HeaderPrinted = 0;
+	php_header_printed = 0;
 	if (header_called == 0)
-		php3_PrintHeader = 1;
+		php_print_header = 1;
 	top = NULL;
 	cont_type = NULL;
 
@@ -75,7 +75,7 @@ void php4i_add_header_information(char *header_information, uint header_length)
 	req = ((request_rec *) SG(server_context));
 #endif
 
-	if (php3_HeaderPrinted == 1) {
+	if (php_header_printed == 1) {
 #if DEBUG
 		php_error(E_WARNING, "Cannot add more header information - the header was already sent "
 							  "(header information may be added only before any output is generated from the script - "
@@ -106,13 +106,13 @@ void php4i_add_header_information(char *header_information, uint header_length)
 			if (PG(safe_mode) && (!strcasecmp(header_information, "WWW-authenticate"))) {
 				myuid = php_getuid();
 				sprintf(temp2, "realm=\"%ld ", myuid);  /* SAFE */
-				temp = _php3_regreplace("realm=\"", temp2, rr, 1, 0);
+				temp = php_reg_replace("realm=\"", temp2, rr, 1, 0);
 				if (!strcmp(temp, rr)) {
 					sprintf(temp2, "realm=%ld", myuid);  /* SAFE */
-					temp = _php3_regreplace("realm=", temp2, rr, 1, 0);
+					temp = php_reg_replace("realm=", temp2, rr, 1, 0);
 					if (!strcmp(temp, rr)) {
 						sprintf(temp2, " realm=%ld", myuid);  /* SAFE */
-						temp = _php3_regreplace("$", temp2, rr, 0, 0);
+						temp = php_reg_replace("$", temp2, rr, 0, 0);
 					}
 				}
 				table_set(req->headers_out, header_information, temp);
@@ -123,7 +123,7 @@ void php4i_add_header_information(char *header_information, uint header_length)
 			req->status = REDIRECT;
 		}
 		*r = ':';
-		php3_HeaderPrinted = 2;
+		php_header_printed = 2;
 	}
 	if (!strncasecmp(header_information, "http/", 5)) {
 		if (strlen(header_information) > 9) {
@@ -160,9 +160,6 @@ void php4i_add_header_information(char *header_information, uint header_length)
 				sapi_rqst->header(sapi_rqst->scid,tempstr);
 				efree(tempstr);
 			}
-#elif FHTTPD
-            php3_fhttpd_puts_header(header_information);
-            php3_fhttpd_puts_header("\r\n");
 #else
 			PUTS_H(header_information);
 			PUTS_H("\015\012");
@@ -176,9 +173,6 @@ void php4i_add_header_information(char *header_information, uint header_length)
 		sapi_rqst->header(sapi_rqst->scid,tempstr);
 		efree(tempstr);
 		}
-#elif FHTTPD
-        php3_fhttpd_puts_header(header_information);
-        php3_fhttpd_puts_header("\r\n");
 #else
 		PUTS_H(header_information);
 		PUTS_H("\015\012");
@@ -248,13 +242,13 @@ PHPAPI int php_header(void)
 		PG(header_is_being_sent) = 0;
 		return 1;
 	}
-	if ((php3_PrintHeader && !php3_HeaderPrinted) || (php3_PrintHeader && php3_HeaderPrinted == 2)) {
-		cookie = php3_PopCookieList();
+	if ((php_print_header && !php_header_printed) || (php_print_header && php_header_printed == 2)) {
+		cookie = php_pop_cookie_list();
 		while (cookie) {
 			if (cookie->name)
 				len += strlen(cookie->name);
                       if (cookie->value) {
-                              cookievalue = _php3_urlencode(cookie->value, strlen (cookie->value));
+                              cookievalue = php_url_encode(cookie->value, strlen (cookie->value));
                               len += strlen(cookievalue);
                       }
 			if (cookie->path)
@@ -271,7 +265,7 @@ PHPAPI int php_header(void)
 				sprintf(tempstr, "%s=deleted", cookie->name);
 				t = time(NULL) - 31536001;
 				strcat(tempstr, "; expires=");
-				dt = php3_std_date(t);
+				dt = php_std_date(t);
 				strcat(tempstr, dt);
 				efree(dt);
 			} else {
@@ -285,7 +279,7 @@ PHPAPI int php_header(void)
                               cookievalue=NULL;
 				if (cookie->expires > 0) {
 					strcat(tempstr, "; expires=");
-					dt = php3_std_date(cookie->expires);
+					dt = php_std_date(cookie->expires);
 					strcat(tempstr, dt);
 					efree(dt);
 				}
@@ -312,10 +306,10 @@ PHPAPI int php_header(void)
 			if (cookie->value) efree(cookie->value);
                       if (cookievalue) efree(cookievalue);
 			efree(cookie);
-			cookie = php3_PopCookieList();
+			cookie = php_pop_cookie_list();
 			efree(tempstr);
 		}
-		php3_HeaderPrinted = 1;
+		php_header_printed = 1;
 		header_called = 1;
 		send_http_header(((request_rec *) SG(server_context)));
 		if (((request_rec *) SG(server_context))->header_only) {
@@ -325,12 +319,10 @@ PHPAPI int php_header(void)
 		}
 	}
 #else
-	if (php3_PrintHeader && !php3_HeaderPrinted) {
+	if (php_print_header && !php_header_printed) {
 		if (!cont_type) {
 #if USE_SAPI
 			sapi_rqst->header(sapi_rqst->scid,"Content-type: text/html\015\012\015\012");
-#elif FHTTPD
-			php3_fhttpd_puts_header("Content-type: text/html\r\n");
 #else
 			PUTS_H("Content-type: text/html\015\012\015\012");
 #endif
@@ -343,17 +335,6 @@ PHPAPI int php_header(void)
 			sprintf(tempstr,"Content-type: %s\015\012\015\012",cont_type);
 			sapi_rqst->header(sapi_rqst->scid,tempstr);
 			efree(tempstr);
-#elif FHTTPD
-			tempstr = emalloc(strlen(cont_type)
-							  + sizeof("Content-type:") + 2);
-			if(tempstr) {
-				strcpy(tempstr, "Content-type:");
-				strcpy(tempstr + sizeof("Content-type:") - 1,
-					   cont_type);
-				strcat(tempstr, "\r\n");
-				php3_fhttpd_puts_header(tempstr);
-				efree(tempstr);
-			}
 #else
 			PUTS_H("Content-type:");
 			PUTS_H(cont_type);
@@ -371,7 +352,7 @@ PHPAPI int php_header(void)
 #else
 		fflush(stdout);
 #endif
-		php3_HeaderPrinted = 1;
+		php_header_printed = 1;
 		header_called = 1;
 	}
 #endif
@@ -393,7 +374,7 @@ PHPAPI int php_header()
 
 
 
-void php3_PushCookieList(char *name, char *value, time_t expires, char *path, char *domain, int secure)
+void php_push_cookie_list(char *name, char *value, time_t expires, char *path, char *domain, int secure)
 {
 	CookieList *new;
 
@@ -408,7 +389,7 @@ void php3_PushCookieList(char *name, char *value, time_t expires, char *path, ch
 	top = new;
 }
 
-CookieList *php3_PopCookieList(void)
+CookieList *php_pop_cookie_list(void)
 {
 	CookieList *ret;
 
@@ -418,7 +399,7 @@ CookieList *php3_PopCookieList(void)
 	return (ret);
 }
 
-/* php3_setcookie(name,value,expires,path,domain,secure) */
+/* php_set_cookie(name,value,expires,path,domain,secure) */
 PHP_FUNCTION(setcookie)
 {
 	char *cookie;
@@ -435,8 +416,8 @@ PHP_FUNCTION(setcookie)
 	if (arg_count < 1 || arg_count > 6 || getParametersArray(ht, arg_count, arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	if (php3_HeaderPrinted == 1) {
-		php_error(E_WARNING, "Oops, php3_SetCookie called after header has been sent\n");
+	if (php_header_printed == 1) {
+		php_error(E_WARNING, "Oops, php_set_cookie called after header has been sent\n");
 		return;
 	}
 	switch (arg_count) {
@@ -466,7 +447,7 @@ PHP_FUNCTION(setcookie)
 			break;
 	}
 #if 0
-	php3_PushCookieList(name, value, expires, path, domain, secure);
+	php_push_cookie_list(name, value, expires, path, domain, secure);
 #else
 	if (name) {
 		len += strlen(name);
@@ -490,12 +471,12 @@ PHP_FUNCTION(setcookie)
 		sprintf(cookie, "Set-Cookie: %s=deleted", name);
 		strcat(cookie, "; expires=");
 		t = time(NULL) - 31536001;
-		dt = php3_std_date(t);
+		dt = php_std_date(t);
 		strcat(cookie, dt);
 		efree(dt);
 	} else {
 		/* FIXME: XXX: this is not binary data safe */
-		r = _php3_urlencode(value, strlen (value));
+		r = php_url_encode(value, strlen (value));
 		sprintf(cookie, "Set-Cookie: %s=%s", name, value ? r : "");
 		if (r) efree(r);
 		if (value) efree(value);
@@ -504,7 +485,7 @@ PHP_FUNCTION(setcookie)
 		name=NULL;
 		if (expires > 0) {
 			strcat(cookie, "; expires=");
-			dt = php3_std_date(expires);
+			dt = php_std_date(expires);
 			strcat(cookie, dt);
 			efree(dt);
 		}
@@ -550,7 +531,7 @@ PHP_FUNCTION(setcookie)
 
 int php_headers_unsent(void)
 {
-	if (php3_HeaderPrinted!=1 || !php3_PrintHeader) {
+	if (php_header_printed!=1 || !php_print_header) {
 		return 1;
 	} else {
 		return 0;

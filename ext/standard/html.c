@@ -43,7 +43,7 @@ static char EntTable[][7] =
 	"uuml","yacute","thorn","yuml"
 };
 
-static void _php3_htmlentities(INTERNAL_FUNCTION_PARAMETERS, int all)
+static void php_html_entities(INTERNAL_FUNCTION_PARAMETERS, int all)
 {
     pval **arg;
     int i, len, maxlen;
@@ -109,7 +109,7 @@ void register_html_constants(INIT_FUNC_ARGS)
    Convert special characters to HTML entities */
 PHP_FUNCTION(htmlspecialchars)
 {
-	_php3_htmlentities(INTERNAL_FUNCTION_PARAM_PASSTHRU,0);
+	php_html_entities(INTERNAL_FUNCTION_PARAM_PASSTHRU,0);
 }
 /* }}} */
 
@@ -117,7 +117,7 @@ PHP_FUNCTION(htmlspecialchars)
    Convert all applicable characters to HTML entities */
 PHP_FUNCTION(htmlentities)
 {
-	_php3_htmlentities(INTERNAL_FUNCTION_PARAM_PASSTHRU,1);
+	php_html_entities(INTERNAL_FUNCTION_PARAM_PASSTHRU,1);
 }
 /* }}} */
 

@@ -110,7 +110,7 @@ PHP_MINIT_FUNCTION(crypt)
 
 static unsigned char itoa64[] = "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
-static void php3i_to64(char *s, long v, int n)	{
+static void php_to64(char *s, long v, int n)	{
 	while (--n >= 0) {
 		*s++ = itoa64[v&0x3f]; 		
 		v >>= 6;
@@ -159,13 +159,13 @@ PHP_FUNCTION(crypt)
 #endif
 
 #if PHP3_STD_DES_CRYPT
-		php3i_to64(&salt[0], PHP3_CRYPT_RAND, 2);
+		php_to64(&salt[0], PHP3_CRYPT_RAND, 2);
 		salt[2] = '\0';
 #else
 #if PHP3_MD5_CRYPT
 		strcpy(salt, "$1$");
-		php3i_to64(&salt[3], PHP3_CRYPT_RAND, 4);
-		php3i_to64(&salt[7], PHP3_CRYPT_RAND, 4);
+		php_to64(&salt[3], PHP3_CRYPT_RAND, 4);
+		php_to64(&salt[7], PHP3_CRYPT_RAND, 4);
 		strcpy(&salt[11], "$");
 #endif
 #endif

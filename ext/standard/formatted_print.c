@@ -53,13 +53,12 @@ static char HEXCHARS[] = "0123456789ABCDEF";
  */
 
 /*
- *    _php3_cvt converts to decimal
+ *    php_convert_to_decimal converts to decimal
  *      the number of digits is specified by ndigit
  *      decpt is set to the position of the decimal point
  *      sign is set to 0 for positive, 1 for negative
  */
-static char *
-_php3_cvt(double arg, int ndigits, int *decpt, int *sign, int eflag)
+static char *php_convert_to_decimal(double arg, int ndigits, int *decpt, int *sign, int eflag)
 {
 	register int r2;
 	double fi, fj;
@@ -246,7 +245,7 @@ php_sprintf_appenddouble(char **buffer, int *pos,
 	} else if (precision > MAX_FLOAT_PRECISION) {
 		precision = MAX_FLOAT_PRECISION;
 	}
-	cvt = _php3_cvt(number, precision, &decpt, &sign, (fmt == 'e'));
+	cvt = php_convert_to_decimal(number, precision, &decpt, &sign, (fmt == 'e'));
 
 	if (sign) {
 		numbuf[i++] = '-';

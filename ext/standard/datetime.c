@@ -74,7 +74,7 @@ PHP_FUNCTION(time)
 	return_value->type = IS_LONG;
 }
 
-void _php3_mktime(INTERNAL_FUNCTION_PARAMETERS, int gm)
+void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gm)
 {
 	pval *arguments[7];
 	struct tm *ta, tmbuf;
@@ -174,16 +174,16 @@ void _php3_mktime(INTERNAL_FUNCTION_PARAMETERS, int gm)
 
 PHP_FUNCTION(mktime)
 {
-	_php3_mktime(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+	php_mktime(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 
 PHP_FUNCTION(gmmktime)
 {
-	_php3_mktime(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
+	php_mktime(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 
 static void
-_php3_date(INTERNAL_FUNCTION_PARAMETERS, int gm)
+php_date(INTERNAL_FUNCTION_PARAMETERS, int gm)
 {
 	pval *format, *timestamp;
 	time_t the_time;
@@ -430,12 +430,12 @@ _php3_date(INTERNAL_FUNCTION_PARAMETERS, int gm)
 
 PHP_FUNCTION(date)
 {
-	_php3_date(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+	php_date(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 
 PHP_FUNCTION(gmdate)
 {
-	_php3_date(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
+	php_date(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 
 PHP_FUNCTION(getdate)
@@ -476,7 +476,7 @@ PHP_FUNCTION(getdate)
 }
 
 /* Return date string in standard format for http headers */
-char *php3_std_date(time_t t)
+char *php_std_date(time_t t)
 {
 	struct tm *tm1, tmbuf;
 	char *str;

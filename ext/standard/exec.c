@@ -83,7 +83,7 @@ static int _Exec(int type, char *cmd, pval *array, pval *return_value)
 			*c = ' ';
 			strncat(d, c, overflow_limit);
 		}
-		tmp = _php3_escapeshellcmd(d);
+		tmp = php_escape_shell_cmd(d);
 		efree(d);
 		d = tmp;
 #if WIN32|WINNT
@@ -306,7 +306,7 @@ PHP_FUNCTION(passthru)
 }
 /* }}} */
 
-static int php3_ind(char *s, char c)
+static int php_get_index(char *s, char c)
 {
 	register int x;
 
@@ -325,7 +325,7 @@ static int php3_ind(char *s, char c)
 
    *NOT* safe for binary strings
 */
-char * _php3_escapeshellcmd(char *str) {
+char * php_escape_shell_cmd(char *str) {
 	register int x, y, l;
 	char *cmd;
 
@@ -333,7 +333,7 @@ char * _php3_escapeshellcmd(char *str) {
 	cmd = emalloc(2 * l + 1);
 	strcpy(cmd, str);
 	for (x = 0; cmd[x]; x++) {
-		if (php3_ind("&;`'\"|*?~<>^()[]{}$\\\x0A\xFF", cmd[x]) != -1) {
+		if (php_get_index("&;`'\"|*?~<>^()[]{}$\\\x0A\xFF", cmd[x]) != -1) {
 			for (y = l + 1; y > x; y--)
 				cmd[y] = cmd[y - 1];
 			l++;				/* length has been increased */
@@ -357,7 +357,7 @@ PHP_FUNCTION(escapeshellcmd)
 	
 	convert_to_string(arg1);
 	if (arg1->value.str.len) {
-		cmd = _php3_escapeshellcmd(arg1->value.str.val);
+		cmd = php_escape_shell_cmd(arg1->value.str.val);
 		RETVAL_STRING(cmd, 1);
 		efree(cmd);
 	}

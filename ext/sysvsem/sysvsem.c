@@ -50,14 +50,14 @@ union semun {
 #endif
 
 function_entry sysvsem_functions[] = {
-	{"sem_get",				php3_sysvsem_get,			NULL},
-	{"sem_acquire",			php3_sysvsem_acquire,		NULL},
-	{"sem_release",			php3_sysvsem_release,		NULL},
+	PHP_FE(sem_get,			NULL)
+	PHP_FE(sem_acquire,		NULL)
+	PHP_FE(sem_release,		NULL)
 	{NULL, NULL, NULL}
 };
 
 zend_module_entry sysvsem_module_entry = {
-	"System V semaphores", sysvsem_functions, php3_minit_sysvsem, NULL, NULL, NULL, NULL, STANDARD_MODULE_PROPERTIES
+	"System V semaphores", sysvsem_functions, PHP_MINIT(sysvsem), NULL, NULL, NULL, NULL, STANDARD_MODULE_PROPERTIES
 };
 
 #if COMPILE_DL
@@ -65,7 +65,7 @@ zend_module_entry *get_module() { return &sysvsem_module_entry; }
 #endif
 
 
-THREAD_LS sysvsem_module php3_sysvsem_module;
+THREAD_LS sysvsem_module php_sysvsem_module;
 
 /* Semaphore functions using System V semaphores.  Each semaphore
  * actually consists of three semaphores allocated as a unit under the
@@ -77,7 +77,7 @@ THREAD_LS sysvsem_module php3_sysvsem_module;
  * SYSVSEM_SEM to max_acquire.  This allows max_acquire to be set and
  * track the PHP code without having a global init routine or external
  * semaphore init code.  Except see the bug regarding a race condition
- * php3_sysvsem_get().  Semaphore 2 (SYSVSEM_SETVAL) serializes the
+ * php_sysvsem_get().  Semaphore 2 (SYSVSEM_SETVAL) serializes the
  * calls to GETVAL SYSVSEM_USAGE and SETVAL SYSVSEM_SEM.  It can be
  * acquired only when it is zero.
  */
@@ -114,9 +114,9 @@ static void release_sysvsem_sem(sysvsem_sem *sem_ptr)
 }
 
 
-int php3_minit_sysvsem(INIT_FUNC_ARGS)
+PHP_MINIT_FUNCTION(sysvsem)
 {
-	php3_sysvsem_module.le_sem = register_list_destructors(release_sysvsem_sem, NULL);
+	php_sysvsem_module.le_sem = register_list_destructors(release_sysvsem_sem, NULL);
 
 	return SUCCESS;
 }
@@ -129,7 +129,7 @@ int php3_minit_sysvsem(INIT_FUNC_ARGS)
 
 /* {{{ proto int sem_get(int key [, int max_acquire [, int perm]])
    Return an id for the semaphore with the given key, and allow max_acquire (default 1) processes to acquire it simultaneously. */
-PHP_FUNCTION(sysvsem_get)
+PHP_FUNCTION(sem_get)
 {
 	pval **arg_key, **arg_max_acquire, **arg_perm;
 	int key, max_acquire, perm;
@@ -272,14 +272,15 @@ PHP_FUNCTION(sysvsem_get)
 	sem_ptr->semid = semid;
 	sem_ptr->count = 0;
 
-	return_value->value.lval = zend_list_insert(sem_ptr, php3_sysvsem_module.le_sem);
+	return_value->value.lval = zend_list_insert(sem_ptr, php_sysvsem_module.le_sem);
 	return_value->type = IS_LONG;
 
 	sem_ptr->id = (int)return_value->value.lval;
 }
 /* }}} */
 
-static void _php3_sysvsem_semop(INTERNAL_FUNCTION_PARAMETERS, int acquire)
+
+static void php_sysvsem_semop(INTERNAL_FUNCTION_PARAMETERS, int acquire)
 {
 	pval **arg_id;
 	int id, type;
@@ -300,7 +301,7 @@ static void _php3_sysvsem_semop(INTERNAL_FUNCTION_PARAMETERS, int acquire)
 	}
 
 	sem_ptr = (sysvsem_sem *) zend_list_find(id, &type);
-	if (type!=php3_sysvsem_module.le_sem) {
+	if (type!=php_sysvsem_module.le_sem) {
 		php_error(E_WARNING, "%d is not a SysV semaphore index", id);
 		RETURN_FALSE;
 	}
@@ -329,17 +330,17 @@ static void _php3_sysvsem_semop(INTERNAL_FUNCTION_PARAMETERS, int acquire)
 
 /* {{{ proto int sem_acquire(int id)
    Acquires the semaphore with the given id, blocking if necessary. */
-PHP_FUNCTION(sysvsem_acquire)
+PHP_FUNCTION(sem_acquire)
 {
-	_php3_sysvsem_semop(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
+	php_sysvsem_semop(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 /* }}} */
 
 /* {{{ proto int sem_release(int id)
    Releases the semaphore with the given id. */
-PHP_FUNCTION(sysvsem_release)
+PHP_FUNCTION(sem_release)
 {
-	_php3_sysvsem_semop(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+	php_sysvsem_semop(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
 
