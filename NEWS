@@ -7,6 +7,8 @@ PHP 4                                                                      NEWS
   . Disallow linkage of Berkeley db submodules against libraries with
     different major version.
   . Disallow configuring of more than one Berkeley db handler. 
+- Fixed bug #21169 (Compile Failure, and lots of warnings on UnixWare).
+  (Derick)
 - Fixed bug #21338 (html_entity_decode() crashed when "" is passed). (Ilia)
 - Fixed bug #21229 (missing 3rd argument to php_module_startup). (Ilia)
 - Fixed bug #21267 (opening URLs that result in redirection to a relative
