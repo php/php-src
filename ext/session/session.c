@@ -266,7 +266,7 @@ void php_set_session_var(char *name, size_t namelen, zval *state_val, php_unseri
 		} else {
 			zend_set_hash_symbol(state_val, name, namelen, 1, 2, Z_ARRVAL_P(PS(http_session_vars)), &EG(symbol_table));
 		}
-	} else {
+	} else if (PS(http_session_vars)) {
 		zend_set_hash_symbol(state_val, name, namelen, 0, 1, Z_ARRVAL_P(PS(http_session_vars)));
 	}
 }
