@@ -1,3 +1,47 @@
+2005-03-26  Edin Kadribasic  <edink@emini.dk>
+
+    * pear/make-pear-bundle.php:
+      Script that creates PEAR bundle dir for distribution
+
+2005-03-26  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_0)
+      configure.in
+      main/php_version.h:
+      - Back to -dev
+
+2005-03-26  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/xml/compat.c
+      ext/xml/expat_compat.h
+      ext/xmlrpc/config.m4
+      ext/xmlrpc/libxmlrpc/xml_element.c
+      ext/xmlrpc/libxmlrpc/xmlrpc.c
+      main/php_compat.h:
+      - Made it possible to build ext/xmlrpc with libxml2
+
+    * configure.in
+      build/libtool.m4:
+      - Prevent compiling shared extensions when --enable-versioning is used
+      - Fix -export-symbols in Linux in the bundled libtool.m4:
+        o http://lists.gnu.org/archive/html/libtool/2002-07/msg00029.html
+
+    * NEWS:
+      BFN
+
+    * ZendEngine2/zend_execute_API.c:
+      - Fixed bug #28839 (SIGSEGV in interactive mode (php -a))
+        (kameshj at fastmail dot fm)
+
+    * ext/ingres_ii/config.m4
+      ext/ingres_ii/config.w32
+      ext/ingres_ii/ii.c
+      ext/ingres_ii/php_ii.h:
+      - Fix windows build (using config.w32 and keeping sync with config.m4)
+
+    * main/php.h:
+      Fix path
+
 2005-03-25  Jani Taskinen  <jani.taskinen@sci.fi>
 
     * NEWS:
