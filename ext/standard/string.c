@@ -2582,7 +2582,7 @@ PHP_FUNCTION(substr_count)
 /* }}} */	
 
 
-/* {{{ proto string str_pad(string input, int pad_length [, string pad_string [, int pad_type ]])
+/* {{{ proto string str_pad(string input, int pad_length [, string pad_string [, int pad_type]])
    Returns input string padded on the left or right to specified length with pad_string */
 PHP_FUNCTION(str_pad)
 {
