@@ -64,7 +64,7 @@
 #define HAVE_PCRE 1
 
 /* Enable / Disable SESSION extension (default: enabled) */
-#define HAVE_SESSION 1
+#define HAVE_PHP_SESSION 1
 
 /* Enable / Disable TOKENIZER extension (default: enabled) */
 #define HAVE_TOKENIZER 1

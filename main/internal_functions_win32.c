@@ -67,7 +67,7 @@
 #if HAVE_UODBC
 #include "ext/odbc/php_odbc.h"
 #endif
-#if HAVE_SESSION
+#if HAVE_PHP_SESSION
 #include "ext/session/php_session.h"
 #endif
 #if HAVE_LIBEXPAT
@@ -131,7 +131,7 @@ zend_module_entry *php_builtin_extensions[] = {
 #if HAVE_PCRE || HAVE_BUNDLED_PCRE
 	,phpext_pcre_ptr
 #endif
-#if HAVE_SESSION
+#if HAVE_PHP_SESSION
 	,phpext_session_ptr
 #endif
 #if HAVE_TOKENIZER
