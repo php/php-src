@@ -1,3 +1,218 @@
+2002-10-06  Melvyn Sopacua  <msopacua@idg.nl>
+
+    * ext/xslt/tests/009.phpt:
+    (xslt tests) Add test for memory leaks, caused by inapproreate use of
+                 the struct. Memory leak is caused by at least 2 errors on
+                 handle.
+
+2002-10-06  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * main/streams.c:
+    Try to ensure that we return the number of bytes requested during fread().
+
+2002-10-06  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ext/session/session.c: Silence warning.
+
+2002-10-06  Sander Roobol  <phy@wanadoo.nl>
+
+    * tests/lang/029.phpt: Skip this test if we're not using ZE2
+
+    * ext/standard/tests/strings/add-and-stripcslashes.phpt:
+    We're testing stripCslashes() here :)
+
+    * ext/standard/tests/strings/add-and-stripcslashes.phpt:
+    Some more weird tests on Derick's request :)
+
+    * ext/standard/tests/strings/add-and-stripcslashes.phpt
+      ext/standard/tests/strings/bin2hex.phpt
+      ext/standard/tests/strings/chr_ord.phpt
+      ext/standard/tests/strings/chunk_split.phpt
+      ext/standard/tests/strings/count_chars.phpt
+      ext/standard/tests/strings/crc32.phpt
+      ext/standard/tests/strings/trim.phpt: Some string tests
+
+2002-10-06  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/tests/array/array_change_key_case.phpt
+      ext/standard/tests/array/array_chunk.phpt
+      ext/standard/tests/array/array_count_values.phpt:
+    - Add new tests for: array_change_key_case, array_chunk and
+      array_count_values.
+
+2002-10-06  Sander Roobol  <phy@wanadoo.nl>
+
+    * ext/standard/string.c: MFH
+
+    * ext/standard/string.c: Fix another leak in implode()
+
+2002-10-06  Rasmus Lerdorf  <rasmus@lerdorf.on.ca>
+
+    * ext/gd/libgd/gd_topal.c: MFH fixes 19704 and 19781
+
+    * ext/gd/libgd/gd_topal.c: Fix for bug 19781
+
+2002-10-06  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * tests/strings/004.phpt: - Fix highlight_string test.
+
+2002-10-06  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/session/session.c: Code cleanup. Thanks Andi.
+
+2002-10-06  Rasmus Lerdorf  <rasmus@lerdorf.on.ca>
+
+    * ext/standard/basic_functions.c
+      ext/standard/info.c
+      ext/standard/info.h
+      run-tests.php:
+    Add php_ini_scanned_files() so "make test" can tell you when you have
+    additional .ini files that are scanned.
+
+2002-10-06  Sander Roobol  <phy@wanadoo.nl>
+
+    * ext/standard/basic_functions.c: MFH
+
+    * ext/standard/basic_functions.c:
+    You can't detect NULL nicely - false is better and more PHPish.
+
+2002-10-06  Moriyoshi Koizumi  <readjust@deneb.freemail.ne.jp>
+
+    * ext/mbstring/php_mbregex.c: Fix build. Thanks to Sebastian, Rasmus.
+
+2002-10-06  Rasmus Lerdorf  <rasmus@lerdorf.on.ca>
+
+    * ext/mbstring/php_mbregex.c: Fix build
+
+2002-10-06  Sander Roobol  <phy@wanadoo.nl>
+
+    * ext/standard/basic_functions.c: Fixed getopt() - made it actually work
+
+2002-10-06  Melvyn Sopacua  <msopacua@idg.nl>
+
+    * ext/xslt/README.XSLT-BACKENDS
+      ext/xslt/php_sablot.h
+      ext/xslt/sablot.c
+      ext/xslt/xslt.c: MFB
+
+2002-10-06  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/tests/strings/url_t.phpt:
+    Added expected data to parse_url() test
+
+    * ext/standard/url.c:
+    Added a much faster parse_url() implementation. This also fixes a number
+    of bugs in the old parse_url() implementation.
+
+2002-10-06  Melvyn Sopacua  <msopacua@idg.nl>
+
+    * ext/xslt/tests/public.xml: MFH
+
+    * ext/xslt/tests/public.xml: missed this, needed by 007.phpt
+
+2002-10-06  Moriyoshi Koizumi  <readjust@deneb.freemail.ne.jp>
+
+    * ext/mbstring/mbfilter.c: merging
+
+    * ext/mbstring/php_mbregex.c:
+    Added support for aliases of the encoding names.
+
+    * ext/mbstring/php_mbregex.c: added support for aliases of the encodings.
+
+2002-10-06  Melvyn Sopacua  <msopacua@idg.nl>
+
+    * ext/xslt/sablot.c: whitespace
+
+2002-10-06  Zeev Suraski  <zeev@zend.com>
+
+    * main/output.c
+      ext/standard/basic_functions.c
+      ext/standard/var.c: Revert the implicit_flush mess.
+
+    Do not revert it again under any circumstances!
+
+    Yasuo/anybody else - if there are issues with implicit_flush, please inform
+    me and I will fix them.
+
+2002-10-06  Sander Roobol  <phy@wanadoo.nl>
+
+    * ext/standard/string.c: MFH
+
+    * ext/standard/string.c:
+    Fixed segfault and memory leak in the new implementation of implode()
+
+    * ext/standard/tests/strings/implode.phpt
+      ext/standard/tests/strings/str_repeat.phpt:
+    Add testcases for implode() and str_repeat()
+
+2002-10-06  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ext/mbstring/mbfilter.c: HAVE_MBSTRING awareness.
+
+    * ext/mbstring/mbregex.c: HAVE_MBREGEX awareness.
+
+2002-10-06  Zeev Suraski  <zeev@zend.com>
+
+    * ext/standard/basic_functions.c
+      main/output.c
+      main/php_output.h: Begin the cleanup - remove ob_flush_all()
+
+2002-10-06  Rasmus Lerdorf  <rasmus@lerdorf.on.ca>
+
+    * ext/gd/libgd/gd.c: MFH
+
+    * ext/gd/libgd/gd.c:
+    WS fix - although the entire libgd directory is horrendously formatted.
+    However, since we are forking existing code, fixing it would make it much
+    harder to merge any Boutell patches (if they ever come out with any).
+
+    * ext/gd/libgd/gd.c: Oops
+
+    * ext/gd/libgd/gd_topal.c:
+    Ok, perhaps it's too late at night, but I see absolutely no reason for
+    this chunk of code here.  Why is it writing a palette.map file to disk
+    in the middle of this function?  Looks like leftover debug code, and this
+    particular code seems to be crashing on OSX as per bug #19704.
+
+    * ext/gd/libgd/gd.c: MFH bug fix for #19700
+
+    * ext/gd/libgd/gd.c: Fix for bug #19700 - code by Wez
+
+2002-10-06  Moriyoshi Koizumi  <readjust@deneb.freemail.ne.jp>
+
+    * ext/mbstring/php_mbregex.c: made messages more consistent
+
+2002-10-06  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * sapi/servlet/README: Add note about javax.servlet package.
+
+2002-10-06  Moriyoshi Koizumi  <readjust@deneb.freemail.ne.jp>
+
+    * ext/mbstring/php_mbregex.c: Warnings for empty regular expressions
+
+2002-10-06  Rasmus Lerdorf  <rasmus@lerdorf.on.ca>
+
+    * ext/gd/config.m4
+      ext/gd/libgd/gd.h
+      ext/gd/libgd/gd_gif_in.c
+      NEWS: MFH the read-only GIF support
+
+    * ext/gd/libgd/gd.h
+      ext/gd/libgd/gd_gif_in.c
+      NEWS
+      ext/gd/config.m4:
+    As discussed a while ago, decoding GIF images is not considered a Unisys
+    LZW patent violation so we can distribute read-only GIF support with
+    our bundled GD2.  The patent also expires in 2003, which is quickly
+    approaching, so we can roll in write support soon unless things change.
+
+2002-10-06  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/fbsql/fbsql.dsp: Adding missing include path's to non TS projects
+
+    * ext/fbsql/php_fbsql.c:
+    Fixing comment allowing the module to compile again
+
 2002-10-05  Melvyn Sopacua  <msopacua@idg.nl>
 
     * ext/xslt/README.XSLT-BACKENDS:
