@@ -39,7 +39,7 @@ static int mcve_init;  /* For Safe Memory Deallocation */
 /* {{{ extension definition structures */
 static unsigned char second_arg_force_ref[] = { 2, BYREF_NONE, BYREF_FORCE };
 
-function_entry php_mcve_functions[] = {
+function_entry mcve_functions[] = {
 	PHP_FE(mcve_initengine,			NULL)
 	PHP_FE(mcve_initconn,			NULL)
 	PHP_FE(mcve_deleteresponse,		NULL)
@@ -120,12 +120,12 @@ function_entry php_mcve_functions[] = {
 	{ NULL, NULL, NULL }
 };
 
-zend_module_entry php_mcve_module_entry = {
+zend_module_entry mcve_module_entry = {
 #if ZEND_MODULE_API_NO >= 20010901
 	STANDARD_MODULE_HEADER,
 #endif
 	"mcve",			/* module name */
-	php_mcve_functions,	/* struct of functions (see above) */
+	mcve_functions,	/* struct of functions (see above) */
 	PHP_MINIT(mcve),	/* module initialization functions */
 	NULL,			/* module shutdown functions */
 	NULL,			/* request initialization functions */

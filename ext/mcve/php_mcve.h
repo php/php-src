@@ -20,9 +20,9 @@
 #ifndef _PHP_MCVE_H
 #define _PHP_MCVE_H
 
-extern zend_module_entry php_mcve_module_entry;
+extern zend_module_entry mcve_module_entry;
 
-#define mcve_module_ptr &php_mcve_module_entry
+#define mcve_module_ptr &mcve_module_entry
 #define phpext_mcve_ptr mcve_module_ptr
 
 #define PHP_MCVE_VERSION	"3.0"
