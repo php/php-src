@@ -1,3 +1,62 @@
+2002-10-16  Harald Radi  <harald.radi+coding.php@nme.at>
+
+    * ext/com/VARIANT.c
+      ext/com/conversion.c
+      ext/com/conversion.h:
+     changed the VARIANT class to be able to create arrays of all types
+     and not only VT_VARIANT
+
+2002-10-16  Rasmus Lerdorf  <rasmus@lerdorf.on.ca>
+
+    * ext/gd/libgd/gd_topal.c: Fix for bug #19941
+
+2002-10-16  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * sapi/apache2filter/sapi_apache2.c: Fixed a bug with .phps handler.
+
+    * main/main.c:
+    Fixed bug #19921. (memory leak introduced by me in rev 1.492)
+
+2002-10-16  Jani Taskinen  <sniper@iki.fi>
+
+    * acinclude.m4: - Fix typo..
+
+2002-10-16  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * main/config.w32.h.in: Revert. Again.
+
+2002-10-16  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * ext/mbstring/mbstring.c: modified zend_bool handling code.
+
+    * ext/mbstring/mbstring.h: *** empty log message ***
+
+    * ext/mbstring/mbstring.c:
+    fixed a problem when mbstring.encoding_translation is defined per directory basis.
+
+2002-10-16  Edin Kadribasic  <edink@proventum.net>
+
+    * NEWS: Newly available extensions on windows.
+
+2002-10-16  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * main/config.w32.h.in: Patch by Urs Gehrig <urs@circle.ch>.
+
+2002-10-16  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/snmp/snmp.c: - Fixed memleak when connection fails.
+    - Fixed snmpget() to work with net-snmp
+    - Fixed the error messages to use the new style.
+
+    * ext/snmp/snmp.c: Some more compatibility fixes for net-snmp vs ucd-snmp
+
+    * ext/snmp/snmp.c:
+    - Fix the last commit..(thanks to Harrie Hazewinkel <harrie@lisanza.net>)
+
+2002-10-16  Edin Kadribasic  <edink@proventum.net>
+
+    * ext/fribidi/fribidi.dsp: Added win32 project file.
+
 2002-10-15  Yasuo Ohgaki  <yohgaki@ohgaki.net>
 
     * main/output.c: Sync with head
