@@ -137,33 +137,45 @@ zend_module_entry session_module_entry = {
 
 #define PS_DEL_VAR(name) PS_DEL_VARL(name, strlen(name))
 
+
+
+
+#define ENCODE_VARS 											\
+	char *key;													\
+	ulong num_key;												\
+	zval **struc;												\
+	ELS_FETCH()
+
+#define ENCODE_LOOP(code)										\
+	for(zend_hash_internal_pointer_reset(&PS(vars));			\
+			zend_hash_get_current_key(&PS(vars), &key, &num_key) == HASH_KEY_IS_STRING; \
+			zend_hash_move_forward(&PS(vars))) {				\
+		if(zend_hash_find(&EG(symbol_table), key, strlen(key) + 1, (void **) &struc) == SUCCESS) { \
+			code;		 										\
+		} 														\
+		efree(key);												\
+	}
+
+
+
 PS_SERIALIZER_ENCODE_FUNC(php)
 {
 	pval *buf;
-	pval **struc;
-	char *key;
 	char strbuf[MAX_STR + 1];
-	ulong num_key;
-	ELS_FETCH();
+	ENCODE_VARS;
 
 	buf = ecalloc(sizeof(*buf), 1);
 	buf->type = IS_STRING;
 	buf->refcount++;
 
-	for(zend_hash_internal_pointer_reset(&PS(vars));
-			zend_hash_get_current_key(&PS(vars), &key, &num_key) == HASH_KEY_IS_STRING;
-			zend_hash_move_forward(&PS(vars))) {
-		if(zend_hash_find(&EG(symbol_table), key, strlen(key) + 1, (void **) &struc) 
-				== SUCCESS) {
+	ENCODE_LOOP(
 			snprintf(strbuf, MAX_STR, STD_FMT, key);
 			STR_CAT(buf, strbuf, strlen(strbuf));
 			php_var_serialize(buf, struc);
 		} else {
 			snprintf(strbuf, MAX_STR, NOTFOUND_FMT, key);
 			STR_CAT(buf, strbuf, strlen(strbuf));
-		}
-		efree(key);
-	}
+	);
 
 	if(newlen) *newlen = buf->value.str.len;
 	*newstr = buf->value.str.val;
@@ -216,10 +228,7 @@ PS_SERIALIZER_DECODE_FUNC(php)
 PS_SERIALIZER_ENCODE_FUNC(wddx)
 {
 	wddx_packet *packet;
-	char *key;
-	ulong num_key;
-	zval **struc;
-	ELS_FETCH();
+	ENCODE_VARS;
 
 	packet = _php_wddx_constructor();
 	if(!packet) return FAILURE;
@@ -227,14 +236,9 @@ PS_SERIALIZER_ENCODE_FUNC(wddx)
 	_php_wddx_packet_start(packet, NULL);
 	_php_wddx_add_chunk(packet, WDDX_STRUCT_S);
 	
-	for(zend_hash_internal_pointer_reset(&PS(vars));
-			zend_hash_get_current_key(&PS(vars), &key, &num_key) == HASH_KEY_IS_STRING;
-			zend_hash_move_forward(&PS(vars))) {
-		if(zend_hash_find(&EG(symbol_table), key, strlen(key) + 1, (void **) &struc) == SUCCESS) {
-			_php_wddx_serialize_var(packet, *struc, key);
-		}
-		efree(key);
-	}
+	ENCODE_LOOP(
+		_php_wddx_serialize_var(packet, *struc, key);
+	);
 	
 	_php_wddx_add_chunk(packet, WDDX_STRUCT_E);
 	_php_wddx_packet_end(packet);
