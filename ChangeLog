@@ -2,6 +2,7 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? 1999, Version 4.0 Beta 3
+- Added '--disable-rpath' option (Sascha)
 - Added AOLserver SAPI module (Sascha)
 - Fixed XML Callbacks. (Thies)
 - Updated ODBC to use the new high-performance Zend function API (kara)

@@ -38,12 +38,27 @@ AC_DEFUN(AC_ADD_LIBPATH,[
   AC_EXPAND_PATH($1, ai_p)
   AC_PHP_ONCE(LIBPATH, $ai_p, [
     EXTRA_LIBS="$EXTRA_LIBS -L$ai_p"
-    if test -n "$APXS" ; then
-      RPATHS="$RPATHS ${apxs_runpath_switch}$ai_p'"
-    else
-      RPATHS="$RPATHS ${ld_runpath_switch}$ai_p"
-    fi
+    PHP_RPATHS="$PHP_RPATHS $ai_p"
   ])
+])
+
+dnl
+dnl AC_BUILD_RPATH()
+dnl
+dnl builds RPATH from PHP_RPATHS
+dnl
+AC_DEFUN(AC_BUILD_RPATH,[
+  if test "$enable_rpath" = "yes"; then
+    if test -n "$AXPS"; then
+      for i in $PHP_RPATHS; do
+        RPATHS="$RPATHS ${apxs_runpath_switch}$i'"
+      done
+    else
+      for i in $PHP_RPATHS; do
+        RPATHS="$RPATHS ${ld_runpath_switch}$i"
+      done
+    fi
+  fi
 ])
 
 dnl
