@@ -675,7 +675,7 @@ static void php_isapi_report_exception(char *message, int message_len TSRMLS_DC)
 		lpECB->ServerSupportFunction(lpECB->ConnID, HSE_REQ_SEND_RESPONSE_HEADER_EX, &header_info, NULL, NULL);
 		SG(headers_sent)=1;
 	}
-	sapi_isapi_ub_write(message, message_len);
+	sapi_isapi_ub_write(message, message_len TSRMLS_CC);
 }
 
 
