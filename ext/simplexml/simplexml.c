@@ -28,7 +28,6 @@
 #include "php_simplexml.h"
 
 zend_class_entry *sxe_class_entry;
-SIMPLEXML_IMPORT int xml_parser_inited;
 
 #define SKIP_TEXT(__p) \
 	if ((__p)->type == XML_TEXT_NODE) { \
@@ -999,10 +998,7 @@ PHP_MINIT_FUNCTION(simplexml)
 	sxe.create_object = sxe_object_new;
 	sxe_class_entry = zend_register_internal_class(&sxe TSRMLS_CC);
 
-	if (!xml_parser_inited) {
-		xmlInitThreads();
-		xml_parser_inited = 1;
-	}
+	xmlInitParser();
 
 	return SUCCESS;
 }
@@ -1012,10 +1008,7 @@ PHP_MINIT_FUNCTION(simplexml)
  */
 PHP_MSHUTDOWN_FUNCTION(simplexml)
 {
-   	if (xml_parser_inited) {
-		xmlCleanupParser();
-		xml_parser_inited = 0;
-	}
+	xmlCleanupParser();
 
 	return SUCCESS;
 }

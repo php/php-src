@@ -61,9 +61,6 @@ typedef struct _dom_object {
 #else
 #define PHPAPI __declspec(dllimport)
 #endif /* DOM_EXPORTS */
-#define DOM_IMPORT __declspec(dllimport)
-#else
-#define DOM_IMPORT extern
 #endif /* PHP_WIN32 */
 
 #ifdef ZTS

@@ -37,8 +37,6 @@
 #define PHP_XPATH 1
 #define PHP_XPTR 2
 
-DOM_IMPORT int xml_parser_inited;
-
 zend_object_handlers dom_object_handlers;
 
 static HashTable classes;
@@ -580,10 +578,7 @@ PHP_MINIT_FUNCTION(dom)
 	REGISTER_LONG_CONSTANT("XML_ATTRIBUTE_ENUMERATION",	XML_ATTRIBUTE_ENUMERATION,	CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("XML_ATTRIBUTE_NOTATION",	XML_ATTRIBUTE_NOTATION,		CONST_CS | CONST_PERSISTENT);
 
-	if (!xml_parser_inited) {
-		xmlInitThreads();
-		xml_parser_inited = 1;
-	}
+	xmlInitParser();
 
 	return SUCCESS;
 }
@@ -611,10 +606,7 @@ PHP_MINFO_FUNCTION(dom)
 
 PHP_MSHUTDOWN_FUNCTION(dom)
 {
-   	if (xml_parser_inited) {
-		xmlCleanupParser();
-		xml_parser_inited = 0;
-	}
+	xmlCleanupParser();
 
 	zend_hash_destroy(&dom_domstringlist_prop_handlers);
 	zend_hash_destroy(&dom_namelist_prop_handlers);
