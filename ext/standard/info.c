@@ -81,7 +81,7 @@ static int _display_module_info(zend_module_entry *module, void *arg TSRMLS_DC)
 			php_printf("%s", module->name);
 			php_printf("</td></tr>\n");
 		} else {
-			php_printf(module->name);
+			php_printf("%s", module->name);
 			php_printf("\n");
 		}
 	}
