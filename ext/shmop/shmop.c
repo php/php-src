@@ -164,34 +164,33 @@ PHP_FUNCTION(shmop_open)
 			break;
 		default:
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid access mode");
-			efree(shmop);
-			RETURN_FALSE;
+			goto err;
 	}
 
 	shmop->shmid = shmget(shmop->key, shmop->size, shmop->shmflg);
 	if (shmop->shmid == -1) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to attach or create shared memory segment");
-		efree(shmop);
-		RETURN_FALSE;
+		goto err;
 	}
 
 	if (shmctl(shmop->shmid, IPC_STAT, &shm)) {
-		efree(shmop);
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to get shared memory segment information");
-		RETURN_FALSE;
+		goto err;
 	}	
 
 	shmop->addr = shmat(shmop->shmid, 0, shmop->shmatflg);
 	if (shmop->addr == (char*) -1) {
-		efree(shmop);
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to attach to shared memory segment");
-		RETURN_FALSE;
+		goto err;
 	}
 
 	shmop->size = shm.shm_segsz;
 
 	rsid = zend_list_insert(shmop, shm_type);
 	RETURN_LONG(rsid);
+err:
+	efree(shmop);
+	RETURN_FALSE;
 }
 /* }}} */
 
@@ -222,12 +221,7 @@ PHP_FUNCTION(shmop_read)
 		RETURN_FALSE;
 	}
 
-	if (start + count > shmop->size) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "count is out of range");
-		RETURN_FALSE;
-	}
-
-	if (count < 0 ){
+	if (start + count > shmop->size || count < 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "count is out of range");
 		RETURN_FALSE;
 	}
