@@ -1823,6 +1823,8 @@ oci_fetch(oci_statement *statement, ub4 nrows, char *func TSRMLS_DC)
 	}
 
 	if (statement->error == OCI_SUCCESS_WITH_INFO || statement->error == OCI_SUCCESS) {
+		statement->has_data = 1;
+
 		/* do the stuff needed for OCIDefineByName */
 		for (i = 0; i < statement->ncolumns; i++) {
 			column = oci_get_col(statement, i + 1, 0);
@@ -1837,8 +1839,6 @@ oci_fetch(oci_statement *statement, ub4 nrows, char *func TSRMLS_DC)
 			zval_dtor(column->define->zval);
 			_oci_make_zval(column->define->zval,statement,column,"OCIFetch",0 TSRMLS_CC);
 		}
-
-		statement->has_data = 1;
 
 		return 1;
 	}
