@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in -*- makefile -*-
 
-CLEANFILES = zend-parser.c zend-parser.h zend-scanner.c zend-parser.output 
+#CLEANFILES = zend-parser.c zend-parser.h zend-scanner.c zend-parser.output 
 
 AUTOMAKE_OPTIONS=foreign
 noinst_LIBRARIES=libzend.a
