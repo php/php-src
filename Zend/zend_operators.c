@@ -1581,6 +1581,17 @@ ZEND_API void zend_str_tolower(char *str, unsigned int length)
 	}
 }
 
+ZEND_API void zend_str_tolower_nlc(char *str, unsigned int length)
+{
+	register char *p=str, *end=p+length;
+	
+	while (p<end) {
+		if (*p >= 'A' && *p <= 'Z') {
+			*p = (*p)+32;
+		}	
+		p++;
+	}
+}
 
 ZEND_API int zend_binary_strcmp(char *s1, uint len1, char *s2, uint len2)
 {

@@ -214,7 +214,7 @@ ZEND_API int zend_get_constant(char *name, uint name_len, zval *result TSRMLS_DC
 	if (zend_hash_find(EG(zend_constants), name, name_len+1, (void **) &c) == FAILURE) {
 		lookup_name = do_alloca(name_len+1);
 		memcpy(lookup_name, name, name_len+1);
-		zend_str_tolower(lookup_name, name_len);
+		zend_str_tolower_nlc(lookup_name, name_len);
 
 		if (zend_hash_find(EG(zend_constants), lookup_name, name_len+1, (void **) &c)==SUCCESS) {
 			if ((c->flags & CONST_CS) && memcmp(c->name, name, name_len)!=0) {
@@ -249,7 +249,7 @@ ZEND_API int zend_register_constant(zend_constant *c TSRMLS_DC)
 	memcpy(lowercase_name, c->name, c->name_len);
 
 	if (!(c->flags & CONST_CS)) {
-		zend_str_tolower(lowercase_name, c->name_len);
+		zend_str_tolower_nlc(lowercase_name, c->name_len);
 	}	
 
 	if (zend_hash_add(EG(zend_constants), lowercase_name, c->name_len, (void *) c, sizeof(zend_constant), NULL)==FAILURE) {

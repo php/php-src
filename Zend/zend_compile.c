@@ -670,7 +670,7 @@ void zend_do_import(int type, znode *what TSRMLS_DC)
 
 	if (what) {
 		if (type == T_FUNCTION || type == T_CLASS) {
-			zend_str_tolower(what->u.constant.value.str.val, what->u.constant.value.str.len);
+			zend_str_tolower_nlc(what->u.constant.value.str.val, what->u.constant.value.str.len);
 		}
 		opline.op2 = *what;
 	} else {
@@ -844,7 +844,7 @@ void zend_do_add_variable(znode *result, znode *op1, znode *op2 TSRMLS_DC)
 static void zend_lowercase_znode_if_const(znode *z)
 {
 	if (z->op_type == IS_CONST) {
-		zend_str_tolower(z->u.constant.value.str.val, z->u.constant.value.str.len);
+		zend_str_tolower_nlc(z->u.constant.value.str.val, z->u.constant.value.str.len);
 	}
 }
 
@@ -903,7 +903,7 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 	int function_begin_line = function_token->u.opline_num;
 
 	function_token->u.op_array = CG(active_op_array);
-	zend_str_tolower(name, name_len);
+	zend_str_tolower_nlc(name, name_len);
 
 	init_op_array(&op_array, ZEND_USER_FUNCTION, INITIAL_OP_ARRAY_SIZE TSRMLS_CC);
 
@@ -1032,7 +1032,7 @@ int zend_do_begin_function_call(znode *function_name TSRMLS_DC)
 {
 	zend_function *function;
 	
-	zend_str_tolower(function_name->u.constant.value.str.val, function_name->u.constant.value.str.len);
+	zend_str_tolower_nlc(function_name->u.constant.value.str.val, function_name->u.constant.value.str.len);
 	if (zend_hash_find(CG(function_table), function_name->u.constant.value.str.val, function_name->u.constant.value.str.len+1, (void **) &function)==FAILURE) {
 		zend_do_begin_dynamic_function_call(function_name TSRMLS_CC);
 		return 1; /* Dynamic */
@@ -1126,7 +1126,7 @@ void do_fetch_class(znode *result, znode *class_entry, znode *class_name TSRMLS_
 		SET_UNUSED(opline->op1);
 		CG(catch_begin) = fetch_class_op_number;
 	}
-	zend_str_tolower(class_name->u.constant.value.str.val, class_name->u.constant.value.str.len);
+	zend_str_tolower_nlc(class_name->u.constant.value.str.val, class_name->u.constant.value.str.len);
 	if ((class_name->u.constant.value.str.len == (sizeof("self") - 1)) &&
 		!memcmp(class_name->u.constant.value.str.val, "self", sizeof("self"))) {
 		SET_UNUSED(opline->op2);
@@ -1161,7 +1161,7 @@ void do_fetch_class_name(znode *result, znode *class_name_entry, znode *class_na
 		*result = *class_name_entry;
 	}
 	if (!case_sensitive) {
-		zend_str_tolower(class_name->u.constant.value.str.val, class_name->u.constant.value.str.len);
+		zend_str_tolower_nlc(class_name->u.constant.value.str.val, class_name->u.constant.value.str.len);
 	}
 
 	length = sizeof("::")-1 + result->u.constant.value.str.len + class_name->u.constant.value.str.len;
@@ -1542,7 +1542,7 @@ static void create_class(HashTable *class_table, char *name, int name_length, ze
 	new_class_entry->refcount = 1;
 	new_class_entry->constants_updated = 0;
 
-	zend_str_tolower(new_class_entry->name, new_class_entry->name_length);
+	zend_str_tolower_nlc(new_class_entry->name, new_class_entry->name_length);
 
 	zend_hash_init(&new_class_entry->function_table, 10, NULL, ZEND_FUNCTION_DTOR, 0);
 	zend_hash_init(&new_class_entry->class_table, 10, NULL, ZEND_CLASS_DTOR, 0);
@@ -2015,7 +2015,7 @@ void zend_do_begin_class_declaration(znode *class_token, znode *class_name, znod
 	new_class_entry->refcount = 1;
 	new_class_entry->constants_updated = 0;
 	
-	zend_str_tolower(new_class_entry->name, new_class_entry->name_length);
+	zend_str_tolower_nlc(new_class_entry->name, new_class_entry->name_length);
 
 	zend_hash_init(&new_class_entry->function_table, 10, NULL, ZEND_FUNCTION_DTOR, 0);
 	zend_hash_init(&new_class_entry->class_table, 10, NULL, ZEND_CLASS_DTOR, 0);

@@ -564,7 +564,7 @@ ZEND_FUNCTION(get_parent_class)
 		zend_class_entry **pce;
 		
 		SEPARATE_ZVAL(arg);
-		zend_str_tolower(Z_STRVAL_PP(arg), Z_STRLEN_PP(arg));
+		zend_str_tolower_nlc(Z_STRVAL_PP(arg), Z_STRLEN_PP(arg));
 		if (zend_lookup_class(Z_STRVAL_PP(arg), Z_STRLEN_PP(arg), &pce TSRMLS_CC) == SUCCESS) {
 			ce = *pce;
 		}
@@ -601,7 +601,7 @@ static void is_a_impl(INTERNAL_FUNCTION_PARAMETERS, zend_bool only_subclass)
 	convert_to_string_ex(class_name);
 
 	lcname = estrndup(Z_STRVAL_PP(class_name), Z_STRLEN_PP(class_name));
-	zend_str_tolower(lcname, Z_STRLEN_PP(class_name));
+	zend_str_tolower_nlc(lcname, Z_STRLEN_PP(class_name));
 
 	if (only_subclass)
 		ce = Z_OBJCE_PP(obj)->parent;
@@ -651,7 +651,7 @@ ZEND_FUNCTION(get_class_vars)
 
 	convert_to_string_ex(class_name);
 	lcname = estrndup((*class_name)->value.str.val, (*class_name)->value.str.len);
-	zend_str_tolower(lcname, (*class_name)->value.str.len);
+	zend_str_tolower_nlc(lcname, (*class_name)->value.str.len);
 
 	if (zend_lookup_class(lcname, Z_STRLEN_PP(class_name), &pce TSRMLS_CC) == FAILURE) {
 		efree(lcname);
@@ -718,7 +718,7 @@ ZEND_FUNCTION(get_class_methods)
 		ce = Z_OBJCE_PP(class);
 	} else if (Z_TYPE_PP(class) == IS_STRING) {
 		SEPARATE_ZVAL(class);
-		zend_str_tolower(Z_STRVAL_PP(class), Z_STRLEN_PP(class));
+		zend_str_tolower_nlc(Z_STRVAL_PP(class), Z_STRLEN_PP(class));
 
 		if (zend_lookup_class(Z_STRVAL_PP(class), Z_STRLEN_PP(class), &pce TSRMLS_CC) == SUCCESS) {
 			ce = *pce;
@@ -764,7 +764,7 @@ ZEND_FUNCTION(method_exists)
 
 	convert_to_string_ex(method_name);
 	lcname = estrndup((*method_name)->value.str.val, (*method_name)->value.str.len);
-	zend_str_tolower(lcname, (*method_name)->value.str.len);
+	zend_str_tolower_nlc(lcname, (*method_name)->value.str.len);
 	if (zend_hash_exists(&Z_OBJCE_PP(klass)->function_table, lcname, (*method_name)->value.str.len+1)) {
 		efree(lcname);
 		RETURN_TRUE;
@@ -788,7 +788,7 @@ ZEND_FUNCTION(class_exists)
 	}
 	convert_to_string_ex(class_name);
 	lcname = estrndup((*class_name)->value.str.val, (*class_name)->value.str.len);
-	zend_str_tolower(lcname, (*class_name)->value.str.len);
+	zend_str_tolower_nlc(lcname, (*class_name)->value.str.len);
 	if (zend_hash_exists(EG(class_table), lcname, (*class_name)->value.str.len+1)) {
 		efree(lcname);
 		RETURN_TRUE;
@@ -814,7 +814,7 @@ ZEND_FUNCTION(function_exists)
 	}
 	convert_to_string_ex(function_name);
 	lcname = estrndup((*function_name)->value.str.val, (*function_name)->value.str.len);
-	zend_str_tolower(lcname, (*function_name)->value.str.len);
+	zend_str_tolower_nlc(lcname, (*function_name)->value.str.len);
 
 	retval = (zend_hash_find(EG(function_table), lcname, (*function_name)->value.str.len+1, (void **)&func) == SUCCESS);
 	efree(lcname);
