@@ -71,18 +71,28 @@ extern zend_module_entry tidy_module_entry;
 	}	\
 	obj = (PHPTidyObj *) zend_object_store_get_object(object TSRMLS_CC);	\
 
-#define TIDY_FETCH_PARSED_OBJECT	\
-	TIDY_FETCH_OBJECT;	\
-	TIDY_PARSED_CHECK(obj);	\
 
 #define Z_OBJ_P(zval_p) zend_objects_get_address(zval_p TSRMLS_CC)
 
 #define TIDY_METHOD_MAP(name, func_name, arg_types) \
 	ZEND_NAMED_FE(name, ZEND_FN(func_name), arg_types)
 
-#define TIDY_THROW(message) \
-	PG(suppress_errors) = 0; \
-	EG(exception) = zend_throw_exception(tidy_ce_exception, message, 0 TSRMLS_CC);
+#define TIDY_APPLY_CONFIG_ZVAL(_doc, _val) \
+    if(_val) { \
+        if(Z_TYPE_P(_val) == IS_ARRAY) { \
+            _php_tidy_apply_config_array(_doc, HASH_OF(_val) TSRMLS_CC); \
+        } else { \
+            convert_to_string_ex(&_val); \
+            TIDY_SAFE_MODE_CHECK(Z_STRVAL_P(_val)); \
+            if (tidyLoadConfig(_doc, Z_STRVAL_P(_val)) < 0) { \
+                php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not load configuration file '%s'", Z_STRVAL_P(_val)); \
+                RETURN_FALSE; \
+            } \
+        } \
+    }
+
+
+#define TIDY_THROW(...) zend_throw_exception_ex(tidy_ce_exception, 0 TSRMLS_CC, __VA_ARGS__)
 
 #define TIDY_NODE_METHOD(name)    PHP_FUNCTION(tnm_ ##name)
 #define TIDY_NODE_ME(name, param)      TIDY_METHOD_MAP(name, tnm_ ##name, param)
@@ -91,10 +101,10 @@ extern zend_module_entry tidy_module_entry;
 #define TIDY_ATTR_METHOD(name)    PHP_FUNCTION(tam_ ##name)
 #define TIDY_ATTR_ME(name, param) TIDY_METHOD_MAP(name, tam_ ##name, param)
 
-#define REGISTER_TIDY_CLASS(name, parent) \
+#define REGISTER_TIDY_CLASS(classname, name, parent) \
 	{ \
 		zend_class_entry ce; \
-		INIT_CLASS_ENTRY(ce, "tidy_" # name, tidy_funcs_ ## name); \
+		INIT_CLASS_ENTRY(ce, # classname, tidy_funcs_ ## name); \
 		ce.create_object = tidy_object_new_ ## name; \
 		tidy_ce_ ## name = zend_register_internal_class_ex(&ce, parent, NULL TSRMLS_CC); \
 		tidy_ce_ ## name->ce_flags |= ZEND_ACC_FINAL_CLASS; \
@@ -139,19 +149,6 @@ extern zend_module_entry tidy_module_entry;
 		zend_hash_update(_table, #_key, sizeof(#_key), (void *)&tmp, sizeof(zval *), NULL); \
 	}
 
-#define TIDY_PARSED_CHECK(_obj) \
-if (!_obj->ptdoc->parsed) { \
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "A document must be parsed before executing this function."); \
-	RETURN_FALSE; \
-}
-
-#define TIDY_PARSED_REPAIR_CHECK(_obj) \
-TIDY_PARSED_CHECK(_obj); \
-if (!_obj->ptdoc->repaired) { \
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "You must clean and repair the document before executing this function."); \
-	RETURN_FALSE; \
-}
-
 #define TIDY_SAFE_MODE_CHECK(filename) \
 if ((PG(safe_mode) && (!php_checkuid(filename, NULL, CHECKUID_CHECK_FILE_AND_DIR))) || php_check_open_basedir(filename TSRMLS_CC)) { \
 	RETURN_FALSE; \
@@ -163,6 +160,7 @@ if ((PG(safe_mode) && (!php_checkuid(filename, NULL, CHECKUID_CHECK_FILE_AND_DIR
 			zend_error(E_ERROR, "Unable to load Tidy configuration file at '%s'.", TG(default_config)); \
 		} \
 	}
+
 
 typedef struct _PHPTidyDoc PHPTidyDoc;
 typedef struct _PHPTidyObj PHPTidyObj;
@@ -184,15 +182,12 @@ typedef enum {
 struct _PHPTidyDoc {
 	TidyDoc     doc;
 	TidyBuffer  *errbuf;
-	zend_bool   parsed;
-	zend_bool   repaired;
 	unsigned int ref_count;
 };
 
 struct _PHPTidyObj {
 	zend_object         std;
 	TidyNode            node;
-	TidyAttr            attr;
 	tidy_obj_type       type;
 	PHPTidyDoc          *ptdoc;
 };
@@ -200,11 +195,9 @@ struct _PHPTidyObj {
 static char *php_tidy_file_to_mem(char *, zend_bool TSRMLS_DC);
 static void tidy_object_dtor(void *, zend_object_handle  TSRMLS_DC);
 static zend_object_value tidy_object_new_node(zend_class_entry * TSRMLS_DC);
-static zend_object_value tidy_object_new_attr(zend_class_entry * TSRMLS_DC);
 static zend_object_value tidy_object_new_doc(zend_class_entry * TSRMLS_DC);
 static zend_object_value tidy_object_new_exception(zend_class_entry * TSRMLS_DC);
 static zend_class_entry *tidy_get_ce_node(zval * TSRMLS_DC);
-static zend_class_entry *tidy_get_ce_attr(zval * TSRMLS_DC);
 static zend_class_entry *tidy_get_ce_doc(zval * TSRMLS_DC);
 static zval * tidy_instanciate(zend_class_entry *, zval * TSRMLS_DC);
 static int tidy_doc_cast_handler(zval *, zval *, int, int TSRMLS_DC);
@@ -218,7 +211,6 @@ static int _php_tidy_apply_config_array(TidyDoc doc, HashTable *ht_options TSRML
 
 void _php_tidy_register_nodetypes(INIT_FUNC_ARGS);
 void _php_tidy_register_tags(INIT_FUNC_ARGS);
-void _php_tidy_register_attributes(INIT_FUNC_ARGS);
 
 PHP_MINIT_FUNCTION(tidy);
 PHP_MSHUTDOWN_FUNCTION(tidy);
@@ -226,10 +218,6 @@ PHP_RINIT_FUNCTION(tidy);
 PHP_RSHUTDOWN_FUNCTION(tidy);
 PHP_MINFO_FUNCTION(tidy);
 
-PHP_FUNCTION(tidy_reset_config);
-PHP_FUNCTION(tidy_restore_config);
-PHP_FUNCTION(tidy_snapshot_config);
-PHP_FUNCTION(tidy_setopt);
 PHP_FUNCTION(tidy_getopt);
 PHP_FUNCTION(tidy_parse_string);
 PHP_FUNCTION(tidy_parse_file);
@@ -250,10 +238,6 @@ PHP_FUNCTION(tidy_error_count);
 PHP_FUNCTION(tidy_warning_count);
 PHP_FUNCTION(tidy_access_count);
 PHP_FUNCTION(tidy_config_count);
-PHP_FUNCTION(tidy_load_config);
-PHP_FUNCTION(tidy_load_config_enc);
-PHP_FUNCTION(tidy_set_encoding);
-PHP_FUNCTION(tidy_save_config);
 
 PHP_FUNCTION(ob_tidyhandler);
 
@@ -262,7 +246,9 @@ PHP_FUNCTION(tidy_get_html);
 PHP_FUNCTION(tidy_get_head);
 PHP_FUNCTION(tidy_get_body);
 
-TIDY_ATTR_METHOD(__construct);
+TIDY_DOC_METHOD(__construct);
+TIDY_DOC_METHOD(parse_file);
+TIDY_DOC_METHOD(parse_string);
 
 TIDY_NODE_METHOD(__construct);
 TIDY_NODE_METHOD(has_children);

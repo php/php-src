@@ -1,13 +1,14 @@
 --TEST--
 Accessing the error buffer via $obj->error_buf...
 --SKIPIF--
-<?php if (!extension_loaded("tidy") || !class_exists("tidy_doc")) print "skip"; ?>
+<?php if (!extension_loaded("tidy")) print "skip"; ?>
 --POST--
 --GET--
 --INI--
 --FILE--
 <?php 
-    	$a = tidy_parse_string("<HTML><asd asdf></HTML>");
+
+   	$a = tidy_parse_string("<HTML><asd asdf></HTML>");
 	echo $a->error_buf;
  
 ?>

@@ -7,15 +7,9 @@ tidy_diagnose()
 --INI--
 --FILE--
 <?php 
-	if (class_exists("tidy_doc")) {
-		$a = tidy_parse_string("<HTML></HTML>");
-		tidy_diagnose($a);
-		echo tidy_get_error_buffer($a);
-	} else {
-		tidy_parse_string("<HTML></HTML>");
-		tidy_diagnose();
-		echo tidy_get_error_buffer();
-	}
+	$a = tidy_parse_string("<HTML></HTML>");
+	tidy_diagnose($a);
+	echo tidy_get_error_buffer($a);
 ?>
 --EXPECT--
 

@@ -1,7 +1,7 @@
 --TEST--
 Accessing children nodes
 --SKIPIF--
-<?php if (!extension_loaded("tidy") || !class_exists("tidy_doc")) print "skip"; ?>
+<?php if (!extension_loaded("tidy")) print "skip"; ?>
 --POST--
 --GET--
 --INI--
