@@ -536,12 +536,14 @@ int SendText(char *RPath, char *Subject, char *mailTo, char *mailCc, char *mailB
 				   which would look like "\r\n\r\n". */
 				memcpy(stripped_header + (pos1 - headers - 4), pos2 + 2, strlen(pos2) - 2);
 			}
-		} else {
-			/* Simplify the code that we create a copy of stripped_header no matter if
-			   we actually strip something or not. So we've a single efree() later. */
-			if (NULL == (stripped_header = estrndup(headers, strlen(headers)))) {
-				return OUT_OF_MEMORY;
-			}
+		}
+	}
+
+	/* Simplify the code that we create a copy of stripped_header no matter if
+	   we actually strip something or not. So we've a single efree() later. */
+	if (headers && !stripped_header) {
+		if (NULL == (stripped_header = estrndup(headers, strlen(headers)))) {
+			return OUT_OF_MEMORY;
 		}
 	}
 
@@ -555,12 +557,11 @@ int SendText(char *RPath, char *Subject, char *mailTo, char *mailCc, char *mailB
 		return (res);
 	}
 
-
 	/* send message header */
 	if (Subject == NULL) {
-		res = PostHeader(RPath, "No Subject", mailTo, stripped_header, NULL);
+		res = PostHeader(RPath, "No Subject", mailTo, stripped_header);
 	} else {
-		res = PostHeader(RPath, Subject, mailTo, stripped_header, NULL);
+		res = PostHeader(RPath, Subject, mailTo, stripped_header);
 	}
 	if (stripped_header) {
 		efree(stripped_header);
@@ -568,7 +569,6 @@ int SendText(char *RPath, char *Subject, char *mailTo, char *mailCc, char *mailB
 	if (res != SUCCESS) {
 		return (res);
 	}
-
 
 	/* send message contents in 1024 chunks */
 	if (strlen(data) <= 1024) {
@@ -620,13 +620,12 @@ int addToHeader(char **header_buffer, const char *specifier, char *string) {
 //              2) Subject
 //              3) destination address
 //              4) headers
-//				5) cc destination address
 // Output:      Error code or Success
 // Description:
 // Author/Date:  jcar 20/9/96
 // History:
 //********************************************************************/
-int PostHeader(char *RPath, char *Subject, char *mailTo, char *xheaders, char *mailCc)
+int PostHeader(char *RPath, char *Subject, char *mailTo, char *xheaders)
 {
 
 	/* Print message header according to RFC 822 */
@@ -683,12 +682,6 @@ int PostHeader(char *RPath, char *Subject, char *mailTo, char *xheaders, char *m
 	if ((headers_lc && (!strstr(headers_lc, "\r\nto:") && (strncmp(headers_lc, "to:", 3) != 0))) || !headers_lc) {
 		if (!addToHeader(&header_buffer, "To: %s\r\n", mailTo)) {
 			goto PostHeader_outofmem;
-		}
-	}
-
-	if (mailCc && *mailCc) {
-		if (!addToHeader(&header_buffer, "Cc: %s\r\n", mailCc)) {
-		goto PostHeader_outofmem;
 		}
 	}
 	if(xheaders){
