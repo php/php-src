@@ -1,3 +1,18 @@
+2002-01-01  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * ext/ftp/php_ftp.c
+      ext/ftp/php_ftp.h:
+    - Switched to zend_parse_parameters(), unified error/warning messages,
+      use real resources instead of integers, adjusted prototypes (hope I got
+      them all).
+
+    * NEWS: - Summarize dbase fixes.
+
+2002-01-01  Adam Dickmeiss  <adam@indexdata.dk>
+
+    * ext/yaz/php_yaz.c:
+    Removal of non-essential parameters for non-piggyback search.
+
 2001-12-31  Jon Parise  <jon@csh.rit.edu>
 
     * ext/overload/overload.c:
