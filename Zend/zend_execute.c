@@ -3643,36 +3643,37 @@ int zend_fe_fetch_handler(ZEND_OPCODE_HANDLER_ARGS)
 			EX(opline) = op_array->opcodes+EX(opline)->op2.u.opline_num;
 			return 0; /* CHECK_ME */
 			
-		case ZEND_ITER_PLAIN_ARRAY:
-			/* good old fashioned foreach on an array */
+		case ZEND_ITER_PLAIN_OBJECT: {
+			char *class_name, *prop_name;
+			zend_object *zobj = zend_objects_get_address(array TSRMLS_CC);
+
 			fe_ht = HASH_OF(array);
-			if (Z_TYPE_P(array) == IS_OBJECT) {
-				char *class_name, *prop_name;
-				zend_object *zobj = zend_objects_get_address(array TSRMLS_CC);
-
-				do {
-					if (zend_hash_get_current_data(fe_ht, (void **) &value)==FAILURE) {
-						/* reached end of iteration */
-						EX(opline) = op_array->opcodes+EX(opline)->op2.u.opline_num;
-						return 0; /* CHECK_ME */
-					}
-					key_type = zend_hash_get_current_key_ex(fe_ht, &str_key, &str_key_len, &int_key, 0, NULL);
-
-					zend_hash_move_forward(fe_ht);
-				} while (zend_check_property_access(zobj, str_key TSRMLS_CC) != SUCCESS);
-				zend_unmangle_property_name(str_key, &class_name, &prop_name);
-				str_key_len = strlen(prop_name);
-				str_key = estrndup(prop_name, str_key_len);
-				str_key_len++;
-			} else {
+			do {
 				if (zend_hash_get_current_data(fe_ht, (void **) &value)==FAILURE) {
 					/* reached end of iteration */
 					EX(opline) = op_array->opcodes+EX(opline)->op2.u.opline_num;
 					return 0; /* CHECK_ME */
 				}
-				key_type = zend_hash_get_current_key_ex(fe_ht, &str_key, &str_key_len, &int_key, 1, NULL);
+				key_type = zend_hash_get_current_key_ex(fe_ht, &str_key, &str_key_len, &int_key, 0, NULL);
+
 				zend_hash_move_forward(fe_ht);
+			} while (zend_check_property_access(zobj, str_key TSRMLS_CC) != SUCCESS);
+			zend_unmangle_property_name(str_key, &class_name, &prop_name);
+			str_key_len = strlen(prop_name);
+			str_key = estrndup(prop_name, str_key_len);
+			str_key_len++;
+			break;
+		}
+
+		case ZEND_ITER_PLAIN_ARRAY:
+			fe_ht = HASH_OF(array);
+			if (zend_hash_get_current_data(fe_ht, (void **) &value)==FAILURE) {
+				/* reached end of iteration */
+				EX(opline) = op_array->opcodes+EX(opline)->op2.u.opline_num;
+				return 0; /* CHECK_ME */
 			}
+			key_type = zend_hash_get_current_key_ex(fe_ht, &str_key, &str_key_len, &int_key, 1, NULL);
+			zend_hash_move_forward(fe_ht);
 			break;
 
 		case ZEND_ITER_OBJECT:

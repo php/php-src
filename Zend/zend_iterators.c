@@ -81,15 +81,19 @@ ZEND_API enum zend_object_iterator_kind zend_iterator_unwrap(
 				*iter = (zend_object_iterator *)zend_object_store_get_object(array_ptr TSRMLS_CC);
 				return ZEND_ITER_OBJECT;
 			}
-			/* Until we have a default iterator that respects visibility we do the array trick */
-			/*return ZEND_ITER_INVALID*/;
+			if (HASH_OF(array_ptr)) {
+				return ZEND_ITER_PLAIN_OBJECT;
+			}
+			return ZEND_ITER_INVALID;
+			
 			
 		case IS_ARRAY:
-			*iter = NULL;
-			return HASH_OF(array_ptr) ? ZEND_ITER_PLAIN_ARRAY : ZEND_ITER_INVALID;
+			if (HASH_OF(array_ptr)) {
+				return ZEND_ITER_PLAIN_ARRAY;
+			}
+			return ZEND_ITER_INVALID;
 			
 		default:
-			*iter = NULL;
 			return ZEND_ITER_INVALID;
 	}
 }
