@@ -139,12 +139,6 @@ static int php_do_open_temporary_file(const char *path, const char *pfx, char **
 		VCWD_CHMOD(opened_path, 0600);
 		fd = VCWD_OPEN_MODE(opened_path, open_flags, 0600);
 	}
-#elif defined(NETWARE)
-	/* Using standard mktemp() implementation for NetWare */
-	file_path = mktemp(opened_path);
-	if (file_path) {
-		fd = VCWD_OPEN(file_path, open_flags);
-	}
 #elif defined(HAVE_MKSTEMP)
 	fd = mkstemp(opened_path);
 #else
