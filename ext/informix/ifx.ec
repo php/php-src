@@ -746,18 +746,19 @@ static void php3_ifx_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
                            (void **) &index_ptr) == SUCCESS) {
             int type,link;
             void *ptr;
-
+#ifdef THREAD_SAFE
+            if (index_ptr->type != _php3_le_index_ptr()) {
+#else
             if (index_ptr->type != le_index_ptr) {
+#endif
                 RETURN_FALSE;
             }
             link = (int) index_ptr->ptr;
             ptr = php3_list_find(link,&type);   /* check if the link is still there */
-            if (ptr && (type==IFXG(le_link) ||
-                        type==IFXG(le_plink))) {
-                return_value->value.lval = 
-                          IFXG(default_link) = 
-                          link;
-                return_value->type = IS_LONG;
+            if (ptr && (type==IFXG(le_link) || type==IFXG(le_plink))) {
+            	zend_list_addref(link);
+                return_value->value.lval = IFXG(default_link) = link;
+                return_value->type = IS_RESOURCE;
                 efree(hashed_details);
                 return;
             } else {
@@ -790,13 +791,16 @@ static void php3_ifx_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
         }
 
         /* add it to the list */
-        return_value->value.lval = 
-             php3_list_insert(ifx,IFXG(le_link));
-        return_value->type = IS_LONG;
+        return_value->value.lval = php3_list_insert(ifx,IFXG(le_link));
+        return_value->type = IS_RESOURCE;
         
         /* add it to the hash */
         new_index_ptr.ptr = (void *) return_value->value.lval;
+#ifdef THREAD_SAFE
+        new_index_ptr.type = _php3_le_index_ptr();
+#else
         new_index_ptr.type = le_index_ptr;
+#endif
         if (_php3_hash_update(list,
                               hashed_details,
                               hashed_details_length+1,
@@ -1083,7 +1087,7 @@ EXEC SQL END DECLARE SECTION;
          ## NONSELECT-STATEMENT 
          ##
       */
-      pval *pblobidarr, *tmp;
+      pval *pblobidarr, **tmp;
 
       Ifx_Result->iscursory = 0;
       
@@ -1115,16 +1119,16 @@ EXEC SQL END DECLARE SECTION;
           i=1;
           while (_php3_hash_get_current_data(pblobidarr->value.ht, 
                                            (void **) &tmp) == SUCCESS) {
-              convert_to_long(tmp);
+              convert_to_long(*tmp);
               if ((query_type == SQ_UPDATE) || (query_type == SQ_UPDALL)) {
                    EXEC SQL SET DESCRIPTOR :descrpid COUNT = :i;
                }
               /* TEXT/BYTE */
- 	      if(php3_intifx_getType((int)tmp->value.lval,list)==TYPE_BLTEXT || php3_intifx_getType((int)tmp->value.lval,list)==TYPE_BLBYTE) {
-               locator=php3_intifx_get_blobloc((int)tmp->value.lval,list);
+ 	      if(php3_intifx_getType((int)(*tmp)->value.lval,list)==TYPE_BLTEXT || php3_intifx_getType((int)(*tmp)->value.lval,list)==TYPE_BLBYTE) {
+               locator=php3_intifx_get_blobloc((int)((*tmp)->value.lval),list);
                if(locator==NULL) {
                    php3_error(E_WARNING,"%d is not a Informix blob-result index",
-                              (int)tmp->value.lval);
+                              (int)((*tmp)->value.lval));
                    EXEC SQL DEALLOCATE DESCRIPTOR :descrpid;
                    EXEC SQL free :statemid;
                    efree(Ifx_Result);
@@ -1139,8 +1143,8 @@ EXEC SQL END DECLARE SECTION;
               }
               
               /* CHAR */
-              if(php3_intifx_getType((int)tmp->value.lval,list)==TYPE_CHAR) {
-               len=php3_intifx_get_char((int)tmp->value.lval,list,&char_tmp);
+              if(php3_intifx_getType((int)(*tmp)->value.lval,list)==TYPE_CHAR) {
+               len=php3_intifx_get_char((int)((*tmp)->value.lval),list,&char_tmp);
                indicator=0;
                if(char_tmp==NULL || len<0)
                 indicator=-1;
@@ -1485,7 +1489,7 @@ EXEC SQL END DECLARE SECTION;
          ## NONSELECT-STATEMENT 
          ##
       */
-      pval *pblobidarr, *tmp;
+      pval *pblobidarr, **tmp;
 
       Ifx_Result->iscursory = 0;
 
@@ -1517,16 +1521,16 @@ EXEC SQL END DECLARE SECTION;
            i=1;
            while (_php3_hash_get_current_data(pblobidarr->value.ht, 
                                               (void **) &tmp) == SUCCESS) {
-              convert_to_long(tmp);
+              convert_to_long(*tmp);
               if ((query_type == SQ_UPDATE) || (query_type == SQ_UPDALL)) {
                   EXEC SQL SET DESCRIPTOR :descrpid COUNT = :i;
               }
               /* TEXT/BYTE */
- 	      if(php3_intifx_getType((int)tmp->value.lval,list)==TYPE_BLTEXT || php3_intifx_getType((int)tmp->value.lval,list)==TYPE_BLBYTE) {
-                locator=php3_intifx_get_blobloc((int)tmp->value.lval,list);
+ 	      if(php3_intifx_getType((int)((*tmp)->value.lval),list)==TYPE_BLTEXT || php3_intifx_getType((int)((*tmp)->value.lval),list)==TYPE_BLBYTE) {
+                locator=php3_intifx_get_blobloc((int)((*tmp)->value.lval),list);
                 if(locator==NULL) {
                     php3_error(E_WARNING,"%d is not a Informix blob-result index",
-                               (int)tmp->value.lval);
+                               (int)((*tmp)->value.lval));
                     EXEC SQL DEALLOCATE DESCRIPTOR :descrpid;
                     EXEC SQL free :statemid;
                     efree(Ifx_Result);
@@ -1540,8 +1544,8 @@ EXEC SQL END DECLARE SECTION;
                                         TYPE=:loc_t_type; 
               }
               /* CHAR */
-              if(php3_intifx_getType((int)tmp->value.lval,list)==TYPE_CHAR) {
-               len=php3_intifx_get_char((int)tmp->value.lval,list,&char_tmp);
+              if(php3_intifx_getType((int)((*tmp)->value.lval),list)==TYPE_CHAR) {
+               len=php3_intifx_get_char((int)((*tmp)->value.lval),list,&char_tmp);
                indicator=0;
                if(char_tmp==NULL || len<0)
                 indicator=-1;
