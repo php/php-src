@@ -195,19 +195,20 @@ php_sprintf_appendstring(char **buffer, int *pos, int *size, char *add,
 
 
 inline static void
-php_sprintf_appendint(char **buffer, int *pos, int *size, int number,
+php_sprintf_appendint(char **buffer, int *pos, int *size, long number,
 						int width, char padding, int alignment)
 {
 	char numbuf[NUM_BUF_SIZE];
-	register unsigned int magn, nmagn, i = NUM_BUF_SIZE - 1, neg = 0;
+	register unsigned long magn, nmagn;
+	register unsigned int i = NUM_BUF_SIZE - 1, neg = 0;
 
 	PRINTF_DEBUG(("sprintf: appendint(%x, %x, %x, %d, %d, '%c', %d)\n",
 				  *buffer, pos, size, number, width, padding, alignment));
 	if (number < 0) {
 		neg = 1;
-		magn = ((unsigned int) -(number + 1)) + 1;
+		magn = ((unsigned long) -(number + 1)) + 1;
 	} else {
-		magn = (unsigned int) number;
+		magn = (unsigned long) number;
 	}
 
 	/* Can't right-pad 0's on integers */
@@ -233,11 +234,13 @@ php_sprintf_appendint(char **buffer, int *pos, int *size, int number,
 }
 
 inline static void
-php_sprintf_appenduint(char **buffer, int *pos, int *size, int number,
-						int width, char padding, int alignment)
+php_sprintf_appenduint(char **buffer, int *pos, int *size,
+					   unsigned long number,
+					   int width, char padding, int alignment)
 {
 	char numbuf[NUM_BUF_SIZE];
-	register unsigned int magn, nmagn, i = NUM_BUF_SIZE - 1;
+	register unsigned long magn, nmagn;
+	register unsigned int i = NUM_BUF_SIZE - 1;
 
 	PRINTF_DEBUG(("sprintf: appenduint(%x, %x, %x, %d, %d, '%c', %d)\n",
 				  *buffer, pos, size, number, width, padding, alignment));
@@ -337,12 +340,13 @@ php_sprintf_appenddouble(char **buffer, int *pos,
 
 
 inline static void
-php_sprintf_append2n(char **buffer, int *pos, int *size, int number,
+php_sprintf_append2n(char **buffer, int *pos, int *size, long number,
 					 int width, char padding, int alignment, int n,
 					 char *chartable, int expprec)
 {
 	char numbuf[NUM_BUF_SIZE];
-	register unsigned int num, i = NUM_BUF_SIZE - 1, neg = 0;
+	register unsigned long num;
+	register unsigned int  i = NUM_BUF_SIZE - 1;
 	register int andbits = (1 << n) - 1;
 
 	PRINTF_DEBUG(("sprintf: append2n(%x, %x, %x, %d, %d, '%c', %d, %d, %x)\n",
@@ -350,13 +354,7 @@ php_sprintf_append2n(char **buffer, int *pos, int *size, int number,
 				  chartable));
 	PRINTF_DEBUG(("sprintf: append2n 2^%d andbits=%x\n", n, andbits));
 
-	if (number < 0) {
-		neg = 1;
-		num = ((unsigned int) -(number + 1)) + 1;
-	} else {
-		num = (unsigned int) number;
-	}
-
+	num = (unsigned long) number;
 	numbuf[i] = '\0';
 
 	do {
@@ -365,20 +363,17 @@ php_sprintf_append2n(char **buffer, int *pos, int *size, int number,
 	}
 	while (num > 0);
 
-	if (neg) {
-		numbuf[--i] = '-';
-	}
 	php_sprintf_appendstring(buffer, pos, size, &numbuf[i], width, 0,
 							 padding, alignment, (NUM_BUF_SIZE - 1) - i,
-							 neg, expprec);
+							 0, expprec);
 }
 
 
-inline static int
+inline static long
 php_sprintf_getnumber(char *buffer, int *pos)
 {
 	char *endptr;
-	register int num = strtol(&buffer[*pos], &endptr, 10);
+	register long num = strtol(&buffer[*pos], &endptr, 10);
 	register int i = 0;
 
 	if (endptr != NULL) {
