@@ -38,9 +38,13 @@ define('PEAR_CONFIG_DEFAULT_BINDIR',
        PHP_BINDIR);
 define('PEAR_CONFIG_DEFAULT_DOCDIR',
        PEAR_INSTALL_DIR.DIRECTORY_SEPARATOR.'docs');
-define('PEAR_CONFIG_DEFAULT_PHPDIR',
-//       PEAR_INSTALL_DIR.DIRECTORY_SEPARATOR.'lib');
-       PEAR_INSTALL_DIR);
+if (@is_dir(PEAR_INSTALL_DIR.DIRECTORY_SEPARATOR.'lib')) {
+    define('PEAR_CONFIG_DEFAULT_PHPDIR',
+           PEAR_INSTALL_DIR.DIRECTORY_SEPARATOR.'lib');
+} else {
+    define('PEAR_CONFIG_DEFAULT_PHPDIR',
+           PEAR_INSTALL_DIR);
+}
 define('PEAR_CONFIG_DEFAULT_DATADIR',
        PEAR_INSTALL_DIR.DIRECTORY_SEPARATOR.'data');
 define('PEAR_CONFIG_DEFAULT_TESTDIR',
@@ -48,13 +52,14 @@ define('PEAR_CONFIG_DEFAULT_TESTDIR',
 if (@is_dir(PHP_SYSCONFDIR)) {
     define('PEAR_CONFIG_SYSCONFDIR', PHP_SYSCONFDIR);
 } else {
+    // real bootstrapping nightmare
     if (OS_WINDOWS) {
-        if (@is_dir('c:\php')) {
-            define('PEAR_CONFIG_SYSCONFDIR', 'c:\php');
-        } elseif (@is_dir('c:\php4')) {
-            define('PEAR_CONFIG_SYSCONFDIR', 'c:\php4');
-        } elseif (@is_dir('c:\program files\php')) {
-            define('PEAR_CONFIG_SYSCONFDIR', 'c:\program files\php');
+        if (@is_dir(PHP_CONFIG_FILE_PATH)) {
+            define('PEAR_CONFIG_SYSCONFDIR', PHP_CONFIG_FILE_PATH);
+        } elseif (@is_dir('c:\winnt') && @file_exists('c:\winnt\php.ini')) {
+            define('PEAR_CONFIG_SYSCONFDIR', 'c:\winnt');
+        } elseif (@is_dir('c:\windows') && @file_exists('c:\windows\php.ini')) {
+            define('PEAR_CONFIG_SYSCONFDIR', 'c:\windows');
         }
     }
     if (!defined('PEAR_CONFIG_SYSCONFDIR')) {
@@ -240,16 +245,16 @@ class PEAR_Config extends PEAR
         $sl = DIRECTORY_SEPARATOR;
         if (empty($user_file)) {
             if (OS_WINDOWS) {
-                $user_file = PHP_SYSCONFDIR . $sl . 'pear.ini';
+                $user_file = PEAR_CONFIG_SYSCONFDIR . $sl . 'pear.ini';
             } else {
                 $user_file = getenv('HOME') . $sl . '.pearrc';
             }
         }
         if (empty($system_file)) {
             if (OS_WINDOWS) {
-                $system_file = PHP_SYSCONFDIR . $sl . 'pearsys.ini';
+                $system_file = PEAR_CONFIG_SYSCONFDIR . $sl . 'pearsys.ini';
             } else {
-                $system_file = PHP_SYSCONFDIR . $sl . 'pear.conf';
+                $system_file = PEAR_CONFIG_SYSCONFDIR . $sl . 'pear.conf';
             }
         }
         $this->layers = array_keys($this->configuration);
