@@ -359,7 +359,7 @@ class PEAR_Downloader extends PEAR_Common
                     if ($info['type'] != 'pkg') {
                         continue;
                     }
-                    $ret = $this->_processDependency($info, $mywillinstall);
+                    $ret = $this->_processDependency($package, $info, $mywillinstall);
                     if ($ret === false) {
                         continue;
                     }
@@ -467,7 +467,7 @@ class PEAR_Downloader extends PEAR_Common
     }
     
     // }}}
-    // {{{ _processDependency($info)
+    // {{{ _processDependency($package, $info, $mywillinstall)
     
     /**
      * Process a dependency, download if necessary
@@ -476,7 +476,7 @@ class PEAR_Downloader extends PEAR_Common
      * @return false|string|PEAR_Error
      * @access private
      */
-    function _processDependency($info, $mywillinstall)
+    function _processDependency($package, $info, $mywillinstall)
     {
         $state = $this->_preferredState;
         if (!isset($this->_options['alldeps']) && isset($info['optional']) &&
