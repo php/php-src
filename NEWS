@@ -1,13 +1,12 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 2002, Version 4.3.0
-- Added --with-config-file-scan-dir compile-time switch which specifies a
-  directory which will be scanned for *.ini files.
-- Added ob_flush_all() that flushes all buffers. (Yasuo)
-- Added ob_get_clean() and og_get_flush(). (Yasuo)
 - ATTENTION! "make install" will *by default* install the CLI SAPI binary in 
   {PREFIX}/bin/php. If you don't disable the CGI binary, it will be
   installed as {PREFIX}/bin/php-cgi.
+- Added --with-config-file-scan-dir compile-time switch which specifies a
+  directory which will be scanned for *.ini files.
+- Added ob_flush_all(), ob_get_clean() and ob_get_flush(). (Yasuo)
 - Added ftp_ssl_connect() to ext/ftp for FTP over SSL support. (Stefan Esser)
 - Made a few additions and changes to Apache 2 sapi. (Ilia)
   . Added apache_response_headers(), apache_note(), apache_getenv() and 
