@@ -228,7 +228,7 @@ PHP_MSHUTDOWN_FUNCTION(file)
 
 
 
-/* {{{ proto bool flock(int fp, int operation [, int wouldblock])
+/* {{{ proto bool flock(resource fp, int operation [, int wouldblock])
    Portable file locking */
 
 static int flock_values[] = { LOCK_SH, LOCK_EX, LOCK_UN };
@@ -283,7 +283,7 @@ PHP_FUNCTION(flock)
 
 #define PHP_META_UNSAFE ".\\+*?[^]$() "
 
-/* {{{ proto array get_meta_tags(string filename [, int use_include_path])
+/* {{{ proto array get_meta_tags(string filename [, bool use_include_path])
    Extracts all meta tag content attributes from a file and returns an array */
 
 PHP_FUNCTION(get_meta_tags)
@@ -456,7 +456,7 @@ PHP_FUNCTION(get_meta_tags)
 }
 
 /* }}} */
-/* {{{ proto array file(string filename [, int use_include_path])
+/* {{{ proto array file(string filename [, bool use_include_path])
    Read entire file into an array */
 
 #define PHP_FILE_BUF_SIZE	80
@@ -580,7 +580,7 @@ PHP_FUNCTION(tempnam)
 }
 /* }}} */
 
-/* {{{ proto int tmpfile(void)
+/* {{{ proto resource tmpfile(void)
    Create a temporary file that will be deleted automatically after use */
 PHP_NAMED_FUNCTION(php_if_tmpfile)
 {
@@ -599,7 +599,7 @@ PHP_NAMED_FUNCTION(php_if_tmpfile)
 /* }}} */
 
 #if HAVE_PHP_STREAM
-/* {{{ PHP_FUNCTION
+/* {{{ proto resource fopenstream(string filename, string mode)
  */
 PHP_FUNCTION(fopenstream)
 {
@@ -623,7 +623,7 @@ PHP_FUNCTION(fopenstream)
 /* }}} */
 #endif
 
-/* {{{ proto int fopen(string filename, string mode [, int use_include_path])
+/* {{{ proto resource fopen(string filename, string mode [, bool use_include_path])
    Open a file or a URL and return a file pointer */
 PHP_NAMED_FUNCTION(php_if_fopen)
 {
@@ -684,7 +684,7 @@ PHP_NAMED_FUNCTION(php_if_fopen)
 }
 /* }}} */
 
-/* {{{ proto int fclose(int fp)
+/* {{{ proto bool fclose(resource fp)
    Close an open file pointer */
 PHP_FUNCTION(fclose)
 {
@@ -704,7 +704,7 @@ PHP_FUNCTION(fclose)
 }
 
 /* }}} */
-/* {{{ proto int popen(string command, string mode)
+/* {{{ proto resource popen(string command, string mode)
    Execute a command and open either a read or a write pipe to it */
 
 PHP_FUNCTION(popen)
@@ -762,7 +762,7 @@ PHP_FUNCTION(popen)
 }
 /* }}} */
 
-/* {{{ proto int pclose(int fp)
+/* {{{ proto int pclose(resource fp)
    Close a file pointer opened by popen() */
 PHP_FUNCTION(pclose)
 {
@@ -781,7 +781,7 @@ PHP_FUNCTION(pclose)
 }
 /* }}} */
 
-/* {{{ proto int feof(int fp)
+/* {{{ proto bool feof(resource fp)
    Test for end-of-file on a file pointer */
 PHP_FUNCTION(feof)
 {
@@ -966,7 +966,7 @@ PHP_FUNCTION(socket_get_status)
 /* }}} */
 
 
-/* {{{ proto string fgets(int fp, int length)
+/* {{{ proto string fgets(resource fp, int length)
    Get a line from file pointer */
 PHP_FUNCTION(fgets)
 {
@@ -1040,7 +1040,7 @@ exit_failed:
 }
 /* }}} */
 
-/* {{{ proto string fgetc(int fp)
+/* {{{ proto string fgetc(resource fp)
    Get a character from file pointer */
 PHP_FUNCTION(fgetc)
 {
@@ -1091,7 +1091,7 @@ PHP_FUNCTION(fgetc)
 }
 /* }}} */
 
-/* {{{ proto string fgetss(int fp, int length [, string allowable_tags])
+/* {{{ proto string fgetss(resource fp, int length [, string allowable_tags])
    Get a line from file pointer and strip HTML tags */
 PHP_FUNCTION(fgetss)
 {
@@ -1242,7 +1242,7 @@ PHP_FUNCTION(fscanf)
 }
 /* }}} */
 
-/* {{{ proto int fwrite(int fp, string str [, int length])
+/* {{{ proto int fwrite(resource fp, string str [, int length])
    Binary-safe file write */
 PHP_FUNCTION(fwrite)
 {
@@ -1310,7 +1310,7 @@ PHP_FUNCTION(fwrite)
 }
 /* }}} */
 
-/* {{{ proto int fflush(int fp)
+/* {{{ proto bool fflush(resource fp)
    Flushes output */
 PHP_FUNCTION(fflush)
 {
@@ -1398,7 +1398,7 @@ PHP_FUNCTION(set_file_buffer)
 }
 /* }}} */
 
-/* {{{ proto int rewind(int fp)
+/* {{{ proto bool rewind(resource fp)
    Rewind the position of a file pointer */
 PHP_FUNCTION(rewind)
 {
@@ -1418,7 +1418,7 @@ PHP_FUNCTION(rewind)
 }
 /* }}} */
 
-/* {{{ proto int ftell(int fp)
+/* {{{ proto int ftell(resource fp)
    Get file pointer's read/write position */
 PHP_FUNCTION(ftell)
 {
@@ -1443,7 +1443,7 @@ PHP_FUNCTION(ftell)
 }
 /* }}} */
 
-/* {{{ proto int fseek(int fp, int offset [, int whence])
+/* {{{ proto int fseek(resource fp, int offset [, int whence])
    Seek on a file pointer */
 PHP_FUNCTION(fseek)
 {
@@ -1470,7 +1470,7 @@ PHP_FUNCTION(fseek)
 }
 
 /* }}} */
-/* {{{ proto int mkdir(string pathname, int mode)
+/* {{{ proto bool mkdir(string pathname, int mode)
    Create a directory */
 
 PHP_FUNCTION(mkdir)
@@ -1499,7 +1499,7 @@ PHP_FUNCTION(mkdir)
 }
 /* }}} */
 
-/* {{{ proto int rmdir(string dirname)
+/* {{{ proto bool rmdir(string dirname)
    Remove a directory */
 PHP_FUNCTION(rmdir)
 {
@@ -1665,7 +1665,7 @@ PHP_FUNCTION(umask)
 /* }}} */
 
 
-/* {{{ proto int fpassthru(int fp)
+/* {{{ proto int fpassthru(resource fp)
    Output all remaining data from a file pointer */
 
 PHP_FUNCTION(fpassthru)
@@ -1697,7 +1697,7 @@ PHP_FUNCTION(fpassthru)
 }
 /* }}} */
 
-/* {{{ proto int rename(string old_name, string new_name)
+/* {{{ proto bool rename(string old_name, string new_name)
    Rename a file */
 PHP_FUNCTION(rename)
 {
@@ -1729,7 +1729,7 @@ PHP_FUNCTION(rename)
 }
 /* }}} */
 
-/* {{{ proto int unlink(string filename)
+/* {{{ proto bool unlink(string filename)
    Delete a file */
 PHP_FUNCTION(unlink)
 {
@@ -1756,7 +1756,7 @@ PHP_FUNCTION(unlink)
 }
 /* }}} */
 
-/* {{{ proto int ftruncate (int fp, int size)
+/* {{{ proto int ftruncate(resource fp, int size)
    Truncate file to 'size' length */
 PHP_NAMED_FUNCTION(php_if_ftruncate)
 {
@@ -1785,7 +1785,7 @@ PHP_NAMED_FUNCTION(php_if_ftruncate)
 }
 /* }}} */
 
-/* {{{ proto int fstat(int fp)
+/* {{{ proto int fstat(resource fp)
    Stat() on a filehandle */
 PHP_NAMED_FUNCTION(php_if_fstat)
 {
@@ -1870,7 +1870,7 @@ PHP_NAMED_FUNCTION(php_if_fstat)
 }
 /* }}} */
 
-/* {{{ proto int copy(string source_file, string destination_file)
+/* {{{ proto bool copy(string source_file, string destination_file)
    Copy a file */
 PHP_FUNCTION(copy)
 {
@@ -1966,7 +1966,7 @@ cleanup:
 }
 /* }}} */
 
-/* {{{ proto string fread(int fp, int length)
+/* {{{ proto string fread(resource fp, int length)
    Binary-safe file read */
 PHP_FUNCTION(fread)
 {
@@ -2018,7 +2018,7 @@ PHP_FUNCTION(fread)
 }
 /* }}} */
 
-/* {{{ proto array fgetcsv(int fp, int length [, string delimiter])
+/* {{{ proto array fgetcsv(resource fp, int length [, string delimiter])
    Get line from file pointer and parse for CSV fields */
 PHP_FUNCTION(fgetcsv)
 {
