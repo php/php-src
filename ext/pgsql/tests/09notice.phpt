@@ -18,12 +18,11 @@ if ($msg === FALSE) {
 	echo "Cannot find notice message in hash\n";
 	var_dump($msg);
 }
-echo $msg;
+echo $msg."\n";
 echo "pg_last_notice() is Ok\n";
 
 ?>
---EXPECT--
-NOTICE:  BEGIN: already a transaction in progress
-
+--EXPECTF--
+Notice: pg_query(): NOTICE:  BEGIN: already a transaction in progress in %s on line %d
 NOTICE:  BEGIN: already a transaction in progress
 pg_last_notice() is Ok

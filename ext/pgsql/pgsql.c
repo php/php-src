@@ -264,15 +264,21 @@ static void _close_pgsql_plink(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 static void _php_pgsql_notice_handler(void *resource_id, const char *message)
 {
 	php_pgsql_notice *notice;
+	int i;
 	
 	TSRMLS_FETCH();
 	if (! PGG(ignore_notices)) {
-		if (PGG(log_notices)) {
-			php_log_err((char *) message TSRMLS_CC);
-		}
 		notice = (php_pgsql_notice *)emalloc(sizeof(php_pgsql_notice));
-		notice->len = strlen(message);
-		notice->message = estrndup(message, notice->len);
+		i = strlen(message)-1;
+		while (i && (message[i] == '\r' || message[i] == '\n')) {
+			i--;
+		}
+		i++;
+		notice->message = estrndup(message, i);
+		notice->len = i;
+		if (PGG(log_notices)) {
+			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "%s", notice->message);
+		}
 		zend_hash_index_update(&PGG(notices), *(int *)resource_id, (void **)&notice, sizeof(php_pgsql_notice *), NULL);
 	}
 }
