@@ -17,9 +17,12 @@ AC_ARG_WITH(mysql,
 			elif test -f /usr/local/include/mysql/mysql.h; then
 				MYSQL_INCDIR=/usr/local/include/mysql
 				MYSQL_LIBDIR=/usr/local/lib/mysql
-			elif test -f /usr/local/include/mysql.h; then
+		    elif test -f /usr/local/include/mysql.h; then
 				MYSQL_INCDIR=/usr/local/include
-				MYSQL_LIBDIR=/usr/local/lib  
+				MYSQL_LIBDIR=/usr/local/lib 
+            elif test -f /usr/local/mysql/include/mysql/mysql.h; then
+				MYSQL_INCDIR=/usr/local/mysql/include/mysql
+				MYSQL_LIBDIR=/usr/local/mysql/lib/mysql
 			else
 				AC_MSG_RESULT(no)
 				AC_MSG_ERROR(Invalid MySQL directory - unable to find mysql.h)
