@@ -2952,7 +2952,7 @@ int exif_read_file(image_info_type *ImageInfo, char *FileName, int read_thumbnai
 {
 	int ret;
 	struct stat st;
-	php_stream *mem_stream, *org_stream;
+	php_stream *mem_stream;
 
 	/* Start with an empty image information structure. */
 	memset(ImageInfo, 0, sizeof(*ImageInfo));
@@ -2960,7 +2960,7 @@ int exif_read_file(image_info_type *ImageInfo, char *FileName, int read_thumbnai
 	ImageInfo->motorola_intel = 0;
 
 	#ifdef HAVE_PHP_STREAM
-	ImageInfo->infile = php_stream_open_wrapper(FileName, "rb", REPORT_ERRORS|IGNORE_PATH|ENFORCE_SAFE_MODE, NULL TSRMLS_CC);
+	ImageInfo->infile = php_stream_open_wrapper(FileName, "rb", IGNORE_PATH|ENFORCE_SAFE_MODE, NULL TSRMLS_CC);
 	#else
 	ImageInfo->infile = VCWD_FOPEN(FileName, "rb"); /* Unix ignores 'b', windows needs it. */
 	#endif
@@ -2982,18 +2982,11 @@ int exif_read_file(image_info_type *ImageInfo, char *FileName, int read_thumbnai
 		ImageInfo->FileDateTime = 0;
 		#ifdef HAVE_PHP_STREAM
 		if ( !php_stream_is(ImageInfo->infile, PHP_STREAM_IS_STDIO)) {
-	    	#ifdef EXIF_DEBUG
-	    	php_error(E_NOTICE,"stream is not stdio: using a memory stream");
-	    	#endif
 			mem_stream = php_memory_stream_create();
-			org_stream = ImageInfo->infile;
-			ImageInfo->FileSize = php_stream_copy_to_stream(org_stream, mem_stream, PHP_STREAM_COPY_ALL);
-			org_stream->wrapper->destroy = NULL;
-			auto_fclose(org_stream);
+/*			mem_stream = php_stream_fopen_tmpfile(); files my be big */
+			ImageInfo->FileSize = php_stream_copy_to_stream(ImageInfo->infile, mem_stream, PHP_STREAM_COPY_ALL);
+			auto_fclose(ImageInfo->infile);
 			ImageInfo->infile = mem_stream;
-	    	#ifdef EXIF_DEBUG
-	    	php_error(E_NOTICE,"stream is not stdio: copy %d done", ImageInfo->FileSize);
-	    	#endif
 		}
 		#else
 		ImageInfo->FileSize = 0;
