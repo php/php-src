@@ -1,7 +1,0 @@
-
-LTLIBRARY_NAME    = libovrimos.la
-LTLIBRARY_SOURCES = ovrimos.c
-LTLIBRARY_SHARED_NAME = ovrimos.la
-LTLIBRARY_SHARED_LIBADD = $(OVRIMOS_SHARED_LIBADD)
-
-include $(top_srcdir)/build/dynlib.mk
