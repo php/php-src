@@ -1001,8 +1001,8 @@ static int _php_ibase_exec(INTERNAL_FUNCTION_PARAMETERS, ibase_result **ib_resul
 					/* this return value evaluates to bool(true) and to int(0) */
 					RETVAL_STRINGL("0 ",2,1);
 				}
+				break;
 			}
-			
 		default:
 			RETVAL_TRUE;
 	}
