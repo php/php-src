@@ -1,3 +1,56 @@
+2002-06-16  Stefan Esser  <s.esser@e-matters.de>
+
+    * ext/standard/link.c: Fixed Bug #17790
+
+    - link and symlink now check uid and open_base_dir for link and its target
+
+2002-06-16  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/standard/formatted_print.c:
+    reverted patch depending on not yet commited work
+
+2002-06-16  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/mcrypt/mcrypt.c: - Fix version in phpinfo();
+
+2002-06-16  Andi Gutmans  <andi@zend.com>
+
+    * configure.in: - Add zend_mm.c
+
+2002-06-16  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/package-PEAR.xml:
+    Install the pear command under the bin_dir setting intead of the fixed
+    PHP_BINDIR
+
+2002-06-16  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/standard/formatted_print.c: make sprinf() locale-aware (Bug# 12647)
+
+2002-06-16  Sander Roobol  <phy@wanadoo.nl>
+
+    * run-tests.php
+      tests/php.ini:
+    Made the tests (and not only run-tests.php) actually use php.ini-dist, and
+    removed unused php.ini file.
+
+2002-06-16  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * php.ini-recommended
+      php.ini-dist: - List new session.use_only_cookies option.
+
+2002-06-16  Stig Bakken  <ssb@fast.no>
+
+    * pear/scripts/pear.in
+      pear/package-PEAR.xml: * set include_path when running "pear"
+
+2002-06-16  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/xmlrpc/xmlrpc-epi-php.c: Fixed bug: #17732.
+
+    xmlrpc_decode_request() and xmlrpc_set_type() expect some parameters to be
+    passed by reference.
+
 2002-06-15  Markus Fischer  <mfischer@guru.josefine.at>
 
     * ext/gd/gd.c: - Be more verbose which index causes the warning.
