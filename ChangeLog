@@ -1,3 +1,96 @@
+2001-05-19  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/standard/file.c: Fix bug #9526
+
+2001-05-19  Jani Taskinen  <sniper@iki.fi>
+
+    * configure.in
+      ext/standard/basic_functions.c: MFH
+
+    * configure.in
+      ext/standard/basic_functions.c: Fixed bug #10964
+
+2001-05-19  Sascha Schumann  <sascha@schumann.cx>
+
+    * acinclude.m4:
+    Store some build-specific environment variables in config.nice.
+
+2001-05-19  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/gd/gd.c: nuke last remnants of the old globals stuff
+
+
+2001-05-19  James Moore  <James@phpuk.org>
+
+    * NEWS: MFH
+
+    * NEWS: Correct NEWS entry
+
+2001-05-19  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/apache/config.m4:
+    s/^I/  / and some re-indenting.  Also align the APXS checking code
+    with the standard scheme.
+
+    * sapi/apache2filter/config.m4:
+    Reindent, add link map for AIX, improve diagnostic message,
+    carry over all -D* CPPFLAGS, and nuke REGEX recognition.
+
+2001-05-19  Andi Gutmans  <andi@zend.com>
+
+    * ext/bz2/bz2.c: - MFH
+
+    * ext/bz2/bz2.c: - Remove \n from php_error()
+
+    * ext/bz2/bz2.c:
+    - Fix crash bug in bzopen() when specifying invalid filename
+     Fixed crash bug in bzopen() when specifying an invalid file. 
+
+2001-05-19  Andrei Zmievski  <andrei@ispi.net>
+
+    * NEWS: Format.
+
+2001-05-19  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/session/php_session.h: Use zend_hash_add_empty_element
+
+    * sapi/cgi/config.m4
+      sapi/cgi/cgi_main.c:
+    Use write(2), if we can successfully write to stdout.
+
+2001-05-19  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * NEWS: - MFH
+
+    * NEWS: - Adding an entry about mcrypt bugs
+
+2001-05-19  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/xml/expat/xmlparse.c: Looks like this was a bogus gcc warning.
+
+    Submitted by: Sebastian Bergmann
+
+    * ext/session/session.c:
+    Improve reading from external data source for session id creation.
+
+    Improve generating the string representation of the md5 session id.
+
+    * ext/xml/expat/xmlparse.c
+      ext/xml/expat/xmlrole.c
+      ext/xml/expat/xmltok.c: Nuke some warnings.
+
+    * NEWS: merge
+
+    * NEWS: add entry
+
+    * ext/standard/basic_functions.c
+      ext/standard/basic_functions.h
+      ext/standard/file.c: MFH
+
+    munmap() file in RSHUTDOWN, if PHPWRITE fails.
+
+    Files should be shared among processes.
+
 2001-05-18  Sascha Schumann  <sascha@schumann.cx>
 
     * ext/standard/basic_functions.c
