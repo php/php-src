@@ -312,7 +312,7 @@ ZEND_API int zval_update_constant(zval **pp, void *arg)
 }
 
 
-int call_user_function(HashTable *function_table, zval *object, zval *function_name, zval *retval_ptr, int param_count, zval *params[])
+int call_user_function(HashTable *function_table, zval **object_pp, zval *function_name, zval *retval_ptr, int param_count, zval *params[])
 {
 	zval ***params_array = (zval ***) emalloc(sizeof(zval **)*param_count);
 	int i;
@@ -322,7 +322,7 @@ int call_user_function(HashTable *function_table, zval *object, zval *function_n
 	for (i=0; i<param_count; i++) {
 		params_array[i] = &params[i];
 	}
-	ex_retval = call_user_function_ex(function_table, object, function_name, &local_retval_ptr, param_count, params_array, 1, NULL);
+	ex_retval = call_user_function_ex(function_table, object_pp, function_name, &local_retval_ptr, param_count, params_array, 1, NULL);
 	if (local_retval_ptr) {
 		COPY_PZVAL_TO_ZVAL(*retval_ptr, local_retval_ptr);
 	} else {
@@ -333,7 +333,7 @@ int call_user_function(HashTable *function_table, zval *object, zval *function_n
 }
 
 
-int call_user_function_ex(HashTable *function_table, zval *object, zval *function_name, zval **retval_ptr_ptr, int param_count, zval **params[], int no_separation, HashTable *symbol_table)
+int call_user_function_ex(HashTable *function_table, zval **object_pp, zval *function_name, zval **retval_ptr_ptr, int param_count, zval **params[], int no_separation, HashTable *symbol_table)
 {
 	int i;
 	zval **original_return_value;
@@ -357,15 +357,15 @@ int call_user_function_ex(HashTable *function_table, zval *object, zval *functio
 		}
 		function_name = *tmp_real_function_name;
 		SEPARATE_ZVAL_IF_NOT_REF(tmp_object_ptr);
-		object = *tmp_object_ptr;
-		object->is_ref = 1;
+		object_pp = tmp_object_ptr;
+		(*object_pp)->is_ref = 1;
 	}
 
-	if (object) {
-		if (object->type != IS_OBJECT) {
+	if (object_pp) {
+		if (Z_TYPE_PP(object_pp) != IS_OBJECT) {
 			return FAILURE;
 		}
-		function_table = &object->value.obj.ce->function_table;
+		function_table = &(*object_pp)->value.obj.ce->function_table;
 	}
 
 	if (function_name->type!=IS_STRING) {
@@ -422,14 +422,13 @@ int call_user_function_ex(HashTable *function_table, zval *object, zval *functio
 			ALLOC_HASHTABLE(EG(active_symbol_table));
 			zend_hash_init(EG(active_symbol_table), 0, NULL, ZVAL_PTR_DTOR, 0);
 		}
-		if (object) {
+		if (object_pp) {
 			zval *dummy, **this_ptr;
-
+				
 			ALLOC_ZVAL(dummy);
-			INIT_ZVAL(*dummy);
-			
+			INIT_ZVAL(*dummy);	
 			zend_hash_update(EG(active_symbol_table), "this", sizeof("this"), &dummy, sizeof(zval *), (void **) &this_ptr);
-			zend_assign_to_variable_reference(NULL, this_ptr, &object, NULL ELS_CC);
+			zend_assign_to_variable_reference(NULL, this_ptr, object_pp, NULL ELS_CC);
 		}
 		original_return_value = EG(return_value_ptr_ptr);
 		original_op_array = EG(active_op_array);
@@ -447,7 +446,7 @@ int call_user_function_ex(HashTable *function_table, zval *object, zval *functio
 		EG(opline_ptr) = original_opline_ptr;
 	} else {
 		ALLOC_INIT_ZVAL(*retval_ptr_ptr);
-		((zend_internal_function *) function_state.function)->handler(param_count, *retval_ptr_ptr, object, 1 ELS_CC);
+		((zend_internal_function *) function_state.function)->handler(param_count, *retval_ptr_ptr, *object_pp, 1 ELS_CC);
 		INIT_PZVAL(*retval_ptr_ptr);
 	}
 	zend_ptr_stack_clear_multiple(ELS_C);
