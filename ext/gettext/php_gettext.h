@@ -36,6 +36,9 @@ PHP_FUNCTION(gettext);
 PHP_FUNCTION(dgettext);
 PHP_FUNCTION(dcgettext);
 PHP_FUNCTION(bindtextdomain);
+PHP_FUNCTION(ngettext);
+PHP_FUNCTION(dngettext);
+PHP_FUNCTION(dcngettext);
 
 #else
 #define gettext_module_ptr NULL
