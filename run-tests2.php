@@ -1378,7 +1378,7 @@ class testHarness {
 			   but used by a couple tests to catch a security hole
 			   in older php versions.  At least IIS can be configured
 			   to do this. */
-			$args = $env['QUERY_STRING'];
+			$args = "$ini_overwrites $tmp_file \"$args\" 2>&1";
 		} else {
 			$args = $section_text['ARGS'] ? $section_text['ARGS'] : '';
 			$args = "$ini_overwrites $tmp_file $args 2>&1";
