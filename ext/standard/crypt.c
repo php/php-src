@@ -122,7 +122,10 @@ PHP_FUNCTION(crypt)
 	char salt[PHP3_MAX_SALT_LEN+1];
 	pval *arg1, *arg2;
 
-	salt[0]='\0';
+	salt[0]=salt[PHP3_MAX_SALT_LEN]='\0';
+	/* This will produce suitable results if people depend on DES-encryption
+	   available (passing always 2-character salt). At least for glibc6.1 */
+	memset(&salt[1], '$', PHP3_MAX_SALT_LEN-1);
 
 	switch (ARG_COUNT(ht)) {
 		case 1:
