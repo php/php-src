@@ -1,0 +1,202 @@
+<?php
+
+/* Test script for PHP module ext/exif
+ *
+ * (c) Marcus Boerger, 2002
+ *
+ * Rename the file to test.php and read the instructions. If the
+ * script cannot be executed or does not generate any output check
+ * you error log. In most cases this would mean you found an error
+ * if the rest of your php environment works fine.
+ *
+ * The original version of module exif has many errors and mostly
+ * fails on executing this script.
+ */
+
+$possible = array();
+
+/****************************************************************************/
+// message function is used for debugging purpose: just to se what happens
+function message($msg) {
+	error_log($msg,0);
+	echo "$msg\n";
+}
+
+function error_msg() {
+	if (array_key_exists('php_errormsg',$GLOBALS)) return $GLOBALS['php_errormsg'];
+	return 'php.ini: track_errors is off';
+}
+
+/****************************************************************************/
+// private to function search_file()
+function _search_file($root,&$possible,$path='') {
+	$sub = array();
+
+	//error_log("search_file($root,$path)",0);
+	if ($dir = @opendir($root.$path.'/')) {
+		while (($found = @readdir($dir)) !== false) {
+			$type = @filetype($root.$path.'/'.$found);
+			//error_log("search_file($root$path):$type=$found",0);
+			switch( $type) {
+				case 'file':
+				$pos = strpos($found,'.');
+				if ( $pos !== false && strtolower(substr($found,$pos+1))=='jpg') {
+					$possible[] = $root.$path.'/'.$found;
+					//error_log("search_file($root$path) add:$path/$found",0);
+				}
+				break;
+				case 'dir':
+				if ( $found!='.' && $found!='..') {
+					$sub[count($sub)] = $found;
+				}
+				break;
+			}
+		}
+		@closedir($dir);
+		foreach( $sub as $idx => $found) {
+			_search_file($root,$possible,$path.'/'.$found);
+		}
+	}
+}
+
+/****************************************************************************/
+// function: search_file($file,$ext)
+//
+// Searches for $file in document tree. The path is ignored.
+//
+function search_file() {
+	global $argv;
+	$possible = array();
+
+	if ( array_key_exists('SCRIPT_FILENAME',$_SERVER)) {
+		$path = $_SERVER['SCRIPT_FILENAME'];
+	} else {
+		$path = $argv[0];
+	}
+	if ( ($p=strpos($path,'?')) !== false) $path = substr($path,0,$p);
+	if ( ($p=strrpos($path,'/')) < strlen($path)-1) $path = substr($path,0,$p);
+	_search_file($path,$possible);
+	return $possible;
+}
+
+/****************************************************************************/
+// function: search_file($file,$ext)
+//
+// Searches for $file in document tree. The path is ignored.
+//
+function AddInfo($Name,$Value) {
+	$Value = nl2br($Value);
+	return "<tr><td>$Name</td><td>$Value&nbsp;</td></tr>\n";
+}
+
+$possible = search_file();
+
+?><!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional">
+<html>
+<head>
+<title>PHP moduls exif test page</title>
+<style type="text/css">
+body {
+	font-size: 12pt;
+}
+h1 {
+	font-size: 20pt;
+	font-weight:bold;
+}
+h2 {
+	font-size: 16pt;
+	font-weight:bold;
+}
+th {
+	text-align: left;
+}
+</style>
+</head>
+<body>
+<h1>Test script for PHP module ext/exif</h1>
+<p>
+(c) Marcus Boerger, 2002
+</p>
+<p>
+Images taken from <a href="http://www.exif.org">www.exif.org</a>,
+<a href="http://marcus-boerger.de">marcus-boerger.de</a>
+all rights reserved by their authors and artists, see exif headers.
+The files can be downloaded <a href="http://marcus-boerger.de/php/ext/exif/test/">here</a>.
+To start the test you simple have to put all images into the same directory as this script.
+The test will work with all files in that directory and all subdirectories. To test private
+images just put them into that directory.
+</p>
+<p>
+Youmay take a look at the test <a href="http://marcus-boerger.de/php/ext/exif/test.txt">source here</a>.
+</p>
+<p>
+This test just prooves that some exif headers can be scanned.
+If all files produce a header in output the module might be o.k.
+</p>
+<p>
+What to look for in detail:
+</p>
+<ul>
+<li>kodak-dc4800-plus-acdsee.jpg
+	<ul>
+	<li>should provide a long comment 'by marcus b&ouml;rger&lt;%04i&gt;'*n</li>
+	</ul>
+</li>
+<li>hp-photosmart
+	<ul>
+	<li>should provide a ***two line*** copyright notice</li>
+	</ul>
+</li>
+</ul>
+<h2>function exif_headername</h2>
+<table border='1' cellspacing='0' cellpadding='3' summary="EXIF headernames">
+<?php
+if (function_exists('exif_headername')) {
+?>
+<tr><td>ImageWidth</td><td><?=@exif_headername(0x0100)?></td><td><?=error_msg()?></td></tr>
+<tr><td>JPEGProc</td><td><?=@exif_headername(0x0200)?></td><td><?=error_msg()?></td></tr>
+<tr><td>SceneType</td><td><?=@exif_headername(0xA301)?></td><td><?=error_msg()?></td></tr>
+<tr><td>false</td><td><?=@exif_headername(0x0000)===false?'false':'value'?></td><td><?=error_msg()?></td></tr>
+<?php
+} else {
+	echo "<tr><td>function exif_headername is not supported</td></tr>\n";
+}
+?>
+</table>
+<br clear="all">
+<h2>function read_exif_data for <?=count($possible)?> images</h2>
+<table border='1' cellspacing='0' cellpadding='3' summary="EXIF information">
+<?php
+if (function_exists('read_exif_data')) {
+	$num = 0;
+	foreach($possible as $idx => $file) {
+		$num++;
+		$res   = '';
+		$len   = 2;
+		$image = @read_exif_data($file,false);
+		$error = error_msg();
+		//error_log("read_exif_data($file)",0);
+		foreach($image as $Name => $Value) {
+			if ( $Name!='Thumbnail') {
+				if ( is_array($Value)) {
+					$len++;
+					$res .= AddInfo($Name,'Array('.count($Value).')');
+					foreach( $Value as $idx => $Entry) {
+						$len++;
+						$res .= AddInfo($Name.':'.$idx,$Entry);
+					}
+				} else {
+					$len++;
+					$res .= AddInfo($Name,$Value);
+				}
+			}
+		}
+		echo "<tr><td rowspan='$len' valign='top'>$num</td></tr><tr><th>$file</th><td>$error</td></tr>\n$res";
+	}
+} else {
+	echo "<tr><td>function read_exif_data is not supported</td></tr>\n";
+}
+?>
+</table>
+</body>
+</html>
