@@ -1816,7 +1816,7 @@ PHP_FUNCTION(fread)
 	
 	if (!issock) {
 #ifdef HAVE_FLUSHIO
-		if (type == le_fopen)
+		if (type == le_fopen) {
 			fseek((FILE*)what, 0, SEEK_CUR);
 		}
 #endif
