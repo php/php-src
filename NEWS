@@ -21,6 +21,7 @@ PHP 4                                                                      NEWS
 - Added improved JPEG 2000 support for getimagesize(). (Marcus, Adam Wright)
 - Added XBM and WBMP support for getimagesize(). (Marcus)
 - Fixed several errors in hwapi extension. Objects weren't handled properly. (Uwe)
+- Fixed bug #22376 (wrong httpd.conf modified when using INSTALL_ROOT). (Jani)
 - Fixed bug #22363 (combinations of fwrite(), fread() and fseek() produce
   unexpected results). (Wez)
 - Fixed bug #22330 (overloaded strrpos() gives wrong results).
