@@ -18,7 +18,7 @@
 
 /* $Id$ */
 
-/* This code is dristributed under the PHP license with permission from
+/* This code is distributed under the PHP license with permission from
    the author Jochen Obalek <jochen.obalek@bigfoot.de> */
 
 /* encrypt.h - API to 56 bit DES encryption via  calls
