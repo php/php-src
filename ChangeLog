@@ -1,3 +1,37 @@
+2001-02-07  Chuck Hagenbuch  <chuck@horde.org>
+
+    * pear/Mail/Sendmail.php:
+    remove double quotes which may not be stripped by sendmail (causing
+    problems), and add checks for dangerous characters (in addition to the
+    pre-existing escapeShellCmd()) in the $from variable.
+
+    * pear/Mail.php
+      pear/Mail/RFC822.php
+      pear/Mail/SMTP.php
+      pear/Mail/Sendmail.php
+      pear/Mail/rfc822.php
+      pear/Mail/sendmail.php
+      pear/Mail/smtp.php
+      pear/Makefile.in:
+    may as well go by the capitalization we agreed on sooner rather than later.
+
+2001-02-07  Boian Bonev  <boian@bonev.com>
+
+    * ext/vpopmail/php_vpopmail.c:
+2001-02-07  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/domxml/config.m4:
+    Improve use of $withval.  This also cures the problem of adding -Lyes/lib
+    to $LIBS.
+
+2001-02-07  Andrei Zmievski  <andrei@ispi.net>
+
+    * NEWS: Only one entry for mnoGoSearch is necessary.
+
+2001-02-07  Sergey Kartashoff  <gluke@biosys.net>
+
+    * ext/mnogosearch/.cvsignore: Added .cvsignore
+
 2001-02-06  Jim Jagielski  <jim@jaguNET.com>
 
     * NEWS
