@@ -948,7 +948,7 @@ static void php_ii_field_info(INTERNAL_FUNCTION_PARAMETERS, int info_type)
 	switch (info_type) {
 
 		case II_FIELD_INFO_NAME:
-			name = php_ii_field_name(ii_link, index);
+			name = php_ii_field_name(ii_link, index TSRMLS_CC);
 			if (name == NULL) {
 				RETURN_FALSE;
 			}
@@ -1037,7 +1037,7 @@ static void php_ii_field_info(INTERNAL_FUNCTION_PARAMETERS, int info_type)
 
 /* Return the name of a field in a query result
 */
-static char *php_ii_field_name(II_LINK *ii_link, int index)
+static char *php_ii_field_name(II_LINK *ii_link, int index TSRMLS_DC)
 {
 	if (index < 1 || index > ii_link->fieldCount) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Ingres II:  php_ii_field_name() called with wrong index (%d)", index);
@@ -1206,7 +1206,7 @@ static void php_ii_fetch(INTERNAL_FUNCTION_PARAMETERS, II_LINK *ii_link, int res
 							add_index_null(return_value, i + k - 1);
 						}
 						if (result_type & II_ASSOC) {
-							add_assoc_null(return_value, php_ii_field_name(ii_link, i + k - 1));
+							add_assoc_null(return_value, php_ii_field_name(ii_link, i + k - 1 TSRMLS_CC));
 						}
 
 					} else {	/* non NULL value */
@@ -1241,7 +1241,7 @@ static void php_ii_fetch(INTERNAL_FUNCTION_PARAMETERS, II_LINK *ii_link, int res
 								}
 
 								if (result_type & II_ASSOC) {
-									add_assoc_double(return_value, php_ii_field_name(ii_link, i + k - 1), value_double);
+									add_assoc_double(return_value, php_ii_field_name(ii_link, i + k - 1 TSRMLS_CC), value_double);
 								}
 								break;
 
@@ -1270,7 +1270,7 @@ static void php_ii_fetch(INTERNAL_FUNCTION_PARAMETERS, II_LINK *ii_link, int res
 								}
 	
 								if (result_type & II_ASSOC) {
-									add_assoc_long(return_value, php_ii_field_name(ii_link, i + k - 1), value_long);
+									add_assoc_long(return_value, php_ii_field_name(ii_link, i + k - 1 TSRMLS_CC), value_long);
 								}
 								break;
 
@@ -1311,7 +1311,7 @@ static void php_ii_fetch(INTERNAL_FUNCTION_PARAMETERS, II_LINK *ii_link, int res
 								}
 
 								if (result_type & II_ASSOC) {
-									add_assoc_stringl(return_value, php_ii_field_name (ii_link, i + k - 1), value_char_p, len, should_copy);
+									add_assoc_stringl(return_value, php_ii_field_name(ii_link, i + k - 1 TSRMLS_CC), value_char_p, len, should_copy);
 								}
 
 								/* eventualy restore data pointer state for
