@@ -1,3 +1,43 @@
+2004-09-20  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      configure.in
+      main/php_version.h:
+      Back to dev.
+
+    * (PHP_4_3)
+      configure.in
+      main/php_version.h:
+      4.3.9
+
+    * (PHP_4_3)
+      NEWS:
+      Prepare news file for release.
+
+2004-09-20  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/standard/basic_functions.c
+      ext/standard/math.c:
+      Enable hypot for all
+
+2004-09-20  Uwe Schindler  <uwe@thetaphi.de>
+
+    * sapi/nsapi/nsapi.c
+      sapi/nsapi/nsapi.c:
+      changed order of processing of ini entries
+
+2004-09-20  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_0)
+      NEWS
+      ext/standard/url.c
+      ext/standard/url.h:
+      MFH: Fixed bug #29913 (parse_url() is now binary safe).
+
+    * ext/standard/url.c
+      ext/standard/url.h:
+      Fixed bug #29913 (parse_url() is now binary safe).
+
 2004-09-19  Wez Furlong  <wez.php@thebrainroom.net>
 
     * ext/com_dotnet/com_iterator.c:
