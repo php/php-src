@@ -317,6 +317,7 @@ static function_entry php_domxmldoc_class_functions[] = {
 	PHP_FALIAS(create_cdata_section,	domxml_doc_create_cdata_section,	NULL)
 	PHP_FALIAS(create_entity_reference,	domxml_doc_create_entity_reference,	NULL)
 	PHP_FALIAS(create_processing_instruction,	domxml_doc_create_processing_instruction,	NULL)
+	PHP_FALIAS(get_elements_by_tagname,	domxml_doc_get_elements_by_tagname,	NULL)
 	PHP_FALIAS(get_element_by_id,		domxml_doc_get_element_by_id,	NULL)
 	/* Everything below this comment is none DOM compliant */
 	/* children is deprecated because it is inherited from DomNode */
