@@ -3122,7 +3122,7 @@ EXEC SQL END DECLARE SECTION;
         
     efree(Ifx_Result);             /* this can be safely done now */
   
-    php3_list_delete(result->value.lval);
+    zend_list_delete(result->value.lval);
     RETURN_TRUE;
 }
 /* }}} */
