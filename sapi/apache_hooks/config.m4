@@ -2,7 +2,7 @@ dnl
 dnl $Id$
 dnl
 
-AC_MSG_CHECKING(for Apache 1.x module support via DSO through APXS)
+AC_MSG_CHECKING(for Apache 1.x (hooks) module support via DSO through APXS)
 AC_ARG_WITH(apache-hooks,
 [  --with-apache-hooks[=FILE]      
                           EXPERIMENTAL: Build shared Apache 1.x module. FILE is the optional
@@ -89,7 +89,7 @@ AC_ARG_WITH(apache-hooks,
 APACHE_INSTALL_FILES="\$(srcdir)/sapi/apache_hooks/mod_php4.* sapi/apache_hooks/libphp4.module"
 
 if test "$PHP_SAPI" != "apache_hooks"; then
-AC_MSG_CHECKING(for Apache 1.x module support)
+AC_MSG_CHECKING(for Apache 1.x (hooks) module support)
 AC_ARG_WITH(apache-hooks-static,
 [  --with-apache-hooks-static[=DIR]     
                           EXPERIMENTAL: Build Apache 1.x module. DIR is the top-level Apache
