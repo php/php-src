@@ -3040,7 +3040,10 @@ PHP_FUNCTION(imagepstext)
 	int space;
 	int *f_ind;
 	int h_lines, v_lines, c_ind;
-	int rd, gr, bl, al, fg_rd, fg_gr, fg_bl, fg_al, bg_rd, bg_gr, bg_bl, bg_al, _fg, _bg;
+	int rd, gr, bl, fg_rd, fg_gr, fg_bl, bg_rd, bg_gr, bg_bl, _fg, _bg;
+#if HAVE_LIBGD20
+	int fg_al, bg_al, al;
+#endif
 	int aa[16], aa_steps;
 	int width, amount_kern, add_width;
 	double angle, extend;
@@ -3089,19 +3092,28 @@ PHP_FUNCTION(imagepstext)
 	fg_rd = gdImageRed  (bg_img, _fg);
 	fg_gr = gdImageGreen(bg_img, _fg);
 	fg_bl = gdImageBlue (bg_img, _fg);
+#if HAVE_LIBGD20
 	fg_al = gdImageAlpha(bg_img, _fg);
+#endif
 
 	bg_rd = gdImageRed  (bg_img, _bg);
 	bg_gr = gdImageGreen(bg_img, _bg);
 	bg_bl = gdImageBlue (bg_img, _bg);
+#if HAVE_LIBGD20
 	bg_al = gdImageAlpha(bg_img, _bg);
+#endif
 
 	for (i = 0; i < aa_steps; i++) {
 		rd = bg_rd+(double)(fg_rd-bg_rd)/aa_steps*(i+1);
 		gr = bg_gr+(double)(fg_gr-bg_gr)/aa_steps*(i+1);
 		bl = bg_bl+(double)(fg_bl-bg_bl)/aa_steps*(i+1);
+#if HAVE_LIBGD20
 		al = bg_al+(double)(fg_al-bg_al)/aa_steps*(i+1);
 		aa[i] = gdImageColorResolveAlpha(bg_img, rd, gr, bl, al);
+#else
+		aa[i] = gdImageColorResolve(bg_img, rd, gr, bl);
+#endif
+
 	}
 
 	T1_AASetBitsPerPixel(8);
