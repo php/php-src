@@ -88,17 +88,17 @@ PHP         : $php
 PHP_SAPI    : " . PHP_SAPI . "
 PHP_VERSION : " . PHP_VERSION . "
 PHP_OS      : " . PHP_OS . "
-INI actual  : " . get_cfg_var('cfg_file_path') . "
+INI actual  : " . realpath(get_cfg_var('cfg_file_path')) . "
 INI wanted  : " . realpath('php.ini-dist') . "
 =====================================================================
 ";
 
 // Make sure we are using the proper php.ini.
 
-// FIXME: this doesn't work on linux
-/*$php_ini = realpath("php.ini-dist");
-realpath(get_cfg_var('cfg_file_path')) == $php_ini
-    or error("php.ini-dist was not used!");*/
+$php_ini = realpath("php.ini-dist");
+if(realpath(get_cfg_var('cfg_file_path')) != $php_ini) {
+	error("php.ini-dist was not used!");
+}
 
 // Determine the tests to be run.
 
