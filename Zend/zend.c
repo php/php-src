@@ -284,7 +284,7 @@ static void alloc_globals_ctor(zend_alloc_globals *alloc_globals)
 #endif
 
 
-int zend_startup(zend_utility_functions *utility_functions, char **extensions)
+int zend_startup(zend_utility_functions *utility_functions, char **extensions, int start_builtin_functions)
 {
 #ifdef ZTS
 	zend_compiler_globals *compiler_globals;
@@ -351,7 +351,9 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions)
 	init_resource_plist(ELS_C);
 #endif
 
-	zend_startup_builtin_functions();
+	if (start_builtin_functions) {
+		zend_startup_builtin_functions();
+	}
 
 	return SUCCESS;
 }
