@@ -161,29 +161,25 @@ function initialize()
         }
     }
 
-/* Lets check for cli first, since the new build system runs the cli sapi,
-   and this script makes assumptions about the executeable based on things
-   it determines from *this* instance.  If the sapis are not the same, tests
-   will fail due to silly things like headers not being ignored in the right
-   places */
+/*  We need to check CGI SAPI first since some tests must be skipped when
+    CLI SAPI is used. CLI SAPI is built always while CGI SAPI is not.
+    - yohgaki@php.net */
 
-    if (isset($_ENV["TOP_BUILDDIR"]) && @is_executable($_ENV["TOP_BUILDDIR"]."/sapi/cli/php{$ext}")) {
-        $php = $_ENV["TOP_BUILDDIR"]."/sapi/cli/php{$ext}";
-    } elseif (@is_executable("./sapi/cli/php{$ext}")) {
-        $php = getcwd() . "/sapi/cli/php{$ext}";
-    } elseif (isset($_ENV["TOP_BUILDDIR"]) && @is_executable($_ENV["TOP_BUILDDIR"]."/php{$ext}")) {
+	if (isset($_ENV["TOP_BUILDDIR"]) && @is_executable($_ENV["TOP_BUILDDIR"]."/php{$ext}")) {
         $php = $_ENV["TOP_BUILDDIR"]."/php{$ext}";
     } elseif (@is_executable("./php{$ext}")) {
         $php = getcwd() . "/php{$ext}";
-	}
+	} elseif (isset($_ENV["TOP_BUILDDIR"]) && @is_executable($_ENV["TOP_BUILDDIR"]."/sapi/cli/php{$ext}")) {
+        $php = $_ENV["TOP_BUILDDIR"]."/sapi/cli/php{$ext}";
+    } elseif (@is_executable("./sapi/cli/php{$ext}")) {
+        $php = getcwd() . "/sapi/cli/php{$ext}";
+    }
 // Test result can be bogus, if we use php binary in path. - yohgaki@php.net
 //     if (empty($php)) {
 //         $php = in_path("php", $windows_p);
 //     }
     if (empty($php)) {
         dowriteln("Unable to find PHP executable (php{$ext}).");
-        dowriteln("Please build PHP as a CGI executable or make sure it is");
-        dowriteln("available in the PATH environment variable.");
         exit;
     }
     if ($windows_p) {
@@ -290,8 +286,8 @@ function do_testing($argc, &$argv)
     dowriteln(sprintf("Tests passed:     %4d (%s%%)", $passed, $passed_pstr));
     dowriteln("=============================");
     dowriteln("Skipped ".sizeof($skipped_extensions)." extensions.");
-	$php_bin_info_cmd = "$php -q -f tests/bin-info.inc";
-	system($php_bin_info_cmd, $ret);
+ 	$php_bin_info_cmd = "$php -q -f ".$_ENV["TOP_BUILDDIR"]."/tests/bin-info.inc";
+ 	system($php_bin_info_cmd);
 }
 
 function find_testdirs($dir = '.', $first_pass = true)
