@@ -1484,26 +1484,22 @@ PHP_FUNCTION(fscanf)
 		RETURN_FALSE;
 	}
 
-	len = SCAN_MAX_FSCANF_BUFSIZE;
 
-	buf = emalloc(len + 1);
-	/* needed because recv doesnt put a null at the end*/
-	memset(buf, 0, len+1);
-
-	if (php_stream_gets((php_stream *) what, buf, len) == NULL)	{
-		efree(buf);
+	buf = php_stream_get_line((php_stream *) what, NULL, 0, &len);
+	if (buf == NULL) {
 		RETURN_FALSE;
 	}
 
 	convert_to_string_ex(format_string);
 	result = php_sscanf_internal(buf, Z_STRVAL_PP(format_string),
 			argCount, args, 2, &return_value TSRMLS_CC);
+
 	efree(args);
 	efree(buf);
-	if (SCAN_ERROR_WRONG_PARAM_COUNT == result) {
-		WRONG_PARAM_COUNT
-	}
 
+	if (SCAN_ERROR_WRONG_PARAM_COUNT == result) {
+		WRONG_PARAM_COUNT;
+	}
 
 }
 /* }}} */
