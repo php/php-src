@@ -73,6 +73,7 @@ void init_compiler(CLS_D ELS_DC)
 
 void shutdown_compiler(CLS_D)
 {
+	zend_hash_apply(&module_registry, (int (*)(void *)) module_registry_cleanup);
 	zend_stack_destroy(&CG(bp_stack));
 	zend_stack_destroy(&CG(function_call_stack));
 	zend_stack_destroy(&CG(switch_cond_stack));
@@ -80,7 +81,6 @@ void shutdown_compiler(CLS_D)
 	zend_llist_destroy(&CG(filenames_list));
 	zend_hash_apply(CG(function_table), (int (*)(void *)) is_not_internal_function);
 	zend_hash_apply(CG(class_table), (int (*)(void *)) is_not_internal_class);
-	zend_hash_apply(&module_registry, (int (*)(void *)) module_registry_cleanup);
 	zend_llist_destroy(&CG(open_files));
 }
 
