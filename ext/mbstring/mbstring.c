@@ -90,11 +90,11 @@ static sapi_post_entry mbstr_post_entries[] = {
 #endif
 
 static struct mb_overload_def mb_ovld[] = {
-	{MB_OVERLOAD_MAIL, "mail", "mb_send_mail", NULL},
-	{MB_OVERLOAD_STRING, "strlen", "mb_strlen", NULL},
-	{MB_OVERLOAD_STRING, "strpos", "mb_strpos", NULL},
-	{MB_OVERLOAD_STRING, "strrpos", "mb_strrpos", NULL},
-	{MB_OVERLOAD_STRING, "substr", "mb_substr", NULL},
+	{MB_OVERLOAD_MAIL, "mail", "mb_send_mail", "mb_orig_mail"},
+	{MB_OVERLOAD_STRING, "strlen", "mb_strlen", "mb_orig_strlen"},
+	{MB_OVERLOAD_STRING, "strpos", "mb_strpos", "mb_orig_strrpos"},
+	{MB_OVERLOAD_STRING, "strrpos", "mb_strrpos", "mb_orig_strrpos"},
+	{MB_OVERLOAD_STRING, "substr", "mb_substr", "mb_orig_substr"},
 	{0, NULL, NULL, NULL}
 }; 
 
@@ -452,7 +452,7 @@ PHP_MSHUTDOWN_FUNCTION(mbstring)
 PHP_RINIT_FUNCTION(mbstring)
 {
 	int n, *list, *entry;
-	zend_function *func;
+	zend_function *func, *orig;
 	struct mb_overload_def *p;
 	TSRMLS_FETCH();
 
@@ -486,17 +486,15 @@ PHP_RINIT_FUNCTION(mbstring)
 		p = &(mb_ovld[0]);
 		
 		while (p->type > 0) {
-			if ((MBSTRG(func_overload) & p->type) == p->type && !(p->orig)){
-				if(zend_hash_find(EG(function_table), p->ovld_func, strlen(p->ovld_func)+1 , 
-								  (void **)&func) != SUCCESS) {
-					php_error(E_ERROR, "mbstring couldn't found function %s.", p->ovld_func);
-				}
-
+			if ((MBSTRG(func_overload) & p->type) == p->type && 
+				zend_hash_find(EG(function_table), p->save_func, strlen(p->save_func)+1 , (void **)&orig) != SUCCESS) {
+				zend_hash_find(EG(function_table), p->ovld_func, strlen(p->ovld_func)+1 , (void **)&func);
+				
 				if (zend_hash_find(EG(function_table), p->orig_func, 
-								   strlen(p->orig_func)+1, (void **)&(p->orig)) != SUCCESS) {
+								   strlen(p->orig_func)+1, (void **)&orig) != SUCCESS) {
 					php_error(E_ERROR, "mbstring couldn't found function %s.", p->orig_func);
 				}
-				
+				zend_hash_add(EG(function_table), p->save_func, strlen(p->save_func)+1, orig, sizeof(zend_function), NULL);
 				if (zend_hash_update(EG(function_table), p->orig_func, strlen(p->orig_func)+1,
 									 func, sizeof(zend_function), NULL) == FAILURE){
 					php_error(E_ERROR, "mbstring couldn't replace function %s.", p->orig_func);
@@ -512,6 +510,10 @@ PHP_RINIT_FUNCTION(mbstring)
 
 PHP_RSHUTDOWN_FUNCTION(mbstring)
 {
+	struct mb_overload_def *p;
+	zend_function *orig;
+	TSRMLS_FETCH();
+
 	if (MBSTRG(current_detect_order_list) != NULL) {
 		efree(MBSTRG(current_detect_order_list));
 		MBSTRG(current_detect_order_list) = NULL;
@@ -528,6 +530,16 @@ PHP_RSHUTDOWN_FUNCTION(mbstring)
 	MBSTRG(http_input_identify_get) = mbfl_no_encoding_invalid;
 	MBSTRG(http_input_identify_cookie) = mbfl_no_encoding_invalid;
 	MBSTRG(http_input_identify_string) = mbfl_no_encoding_invalid;
+
+ 	/*  clear overloaded function. */
+	if (MBSTRG(func_overload)){
+		p = &(mb_ovld[0]);
+		while (p->type > 0 && zend_hash_find(EG(function_table), p->save_func, strlen(p->save_func)+1 , (void **)&orig) == SUCCESS) {
+			zend_hash_update(EG(function_table), p->orig_func, strlen(p->orig_func)+1, orig, sizeof(zend_function), NULL);
+			zend_hash_del(EG(function_table), p->save_func, strlen(p->save_func)+1);
+			p++;
+		}
+	}
 
 	return SUCCESS;
 }
