@@ -257,13 +257,13 @@ int open_listen_sock(php_socket **php_sock, int port, int backlog TSRMLS_DC)
 
 int accept_connect(php_socket *in_sock, php_socket **new_sock, struct sockaddr *la TSRMLS_DC)
 {
-	int			m;
+	socklen_t	salen;
 	php_socket	*out_sock = (php_socket*)emalloc(sizeof(php_socket));
 	
 	*new_sock = out_sock;
-	m = sizeof(*la);
+	salen = sizeof(*la);
 
-	out_sock->bsd_socket = accept(in_sock->bsd_socket, la, &m);
+	out_sock->bsd_socket = accept(in_sock->bsd_socket, la, &salen);
 
 	if (IS_INVALID_SOCKET(out_sock)) {
 		PHP_SOCKET_ERROR(out_sock, "unable to accept incoming connection", errno);
@@ -796,7 +796,7 @@ PHP_FUNCTION(socket_getsockname)
 	struct sockaddr_in		*sin;
 	struct sockaddr_un		*s_un;
 	char					*addr_string;
-	int						salen = sizeof(php_sockaddr_storage);
+	socklen_t				salen = sizeof(php_sockaddr_storage);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rz|z", &arg1, &addr, &port) == FAILURE)
 		return;
@@ -851,7 +851,7 @@ PHP_FUNCTION(socket_getpeername)
 	struct sockaddr_in		*sin;
 	struct sockaddr_un		*s_un;
 	char					*addr_string;
-	int						salen = sizeof(php_sockaddr_storage);
+	socklen_t				salen = sizeof(php_sockaddr_storage);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rz|z", &arg1, &arg2, &arg3) == FAILURE)
 		return;
@@ -1616,7 +1616,8 @@ PHP_FUNCTION(socket_sendmsg)
 	php_socket		*php_sock;
 	struct sockaddr	sa;
 	char			*addr;
-	int				salen, flags, addr_len, port;
+	socklen_t		salen;
+	int				flags, addr_len, port;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rrls|l", &arg1, &arg2, &flags, &addr, &addr_len, &port) == FAILURE)
 		return;
