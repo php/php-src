@@ -76,7 +76,7 @@ void init_op_array(zend_op_array *op_array, int initial_ops_size)
 	}
 #endif
 
-	op_array->refcount = (int *) emalloc(sizeof(int));
+	op_array->refcount = (zend_uint *) emalloc(sizeof(int));
 	*op_array->refcount = 1;
 	op_array->size = initial_ops_size;
 	op_array->last = 0;
