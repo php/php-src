@@ -53,6 +53,10 @@ zend_module_entry calendar_module_entry = {
   STANDARD_MODULE_PROPERTIES,
 };
 
+#ifdef COMPILE_DL_CALENDAR
+ZEND_GET_MODULE(calendar)
+#endif
+
 PHP_MINIT_FUNCTION(calendar)
 {
   /*
