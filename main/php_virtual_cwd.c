@@ -220,17 +220,20 @@ CWD_API int virtual_file_ex(cwd_state *state, char *path, verify_path_func verif
 	cwd_state *old_state;
 	int ret = 0;
 	int copy_amount = -1;
+	char *free_path;
+	zend_bool is_absolute = 0;
 
 	if (path_length == 0) 
 		return (0);
 
-	path = estrndup(path, path_length);
+	free_path = path = estrndup(path, path_length);
 
 	old_state = (cwd_state *) malloc(sizeof(cwd_state));
 	CWD_STATE_COPY(old_state, state);
 
 	if (IS_ABSOLUTE_PATH(path, path_length)) {
 		copy_amount = COPY_WHEN_ABSOLUTE;
+		is_absolute = 1;
 #ifdef ZEND_WIN32
 	} else if(IS_SLASH(path[0])) {
 		copy_amount = 2;
@@ -239,8 +242,13 @@ CWD_API int virtual_file_ex(cwd_state *state, char *path, verify_path_func verif
 
 	if (copy_amount != -1) {
 		state->cwd = (char *) realloc(state->cwd, copy_amount + 1);
-		if (copy_amount)
-			memcpy(state->cwd, old_state->cwd, copy_amount);
+		if (copy_amount) {
+			if (is_absolute) {
+				memcpy(state->cwd, path, copy_amount);
+			} else {
+				memcpy(state->cwd, old_state->cwd, copy_amount);
+			}
+		}
 		state->cwd[copy_amount] = '\0';
 		state->cwd_length = copy_amount;
 		path += copy_amount;
@@ -293,7 +301,7 @@ CWD_API int virtual_file_ex(cwd_state *state, char *path, verify_path_func verif
 	
 	free(old_state);
 	
-	efree(path);
+	efree(free_path);
 
 	return (ret);
 }
