@@ -1,3 +1,116 @@
+1999-11-13  Andrei Zmievski  <zmievski@ispi.net>
+
+    * internal_functions.c.in: These are inserted automatically now.
+
+    * ext/standard/basic_functions.c: It's in array.c now.
+
+    * ext/standard/Makefile.am
+      ext/standard/array.c
+      ext/standard/basic_functions.c
+      ext/standard/basic_functions.h
+      ext/standard/php_array.h
+      internal_functions.c.in: Split array functions into separate module.
+
+1999-11-13  Sascha Schumann  <sascha@schumann.cx>
+
+    * regex/regex_extra.h
+      php_regex.h:
+    Suck in prototypes correctly with applied aliases
+    (otherwise php_reg* would not be prototyped)
+
+1999-11-13  Andi Gutmans  <andi@php.net>
+
+    * regex/regex_extra.h
+      php4dllts.dsp: - Make Win32 compile again
+
+1999-11-13  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/apache/config.m4: Allow --with-apxs and --with-regex=apache
+
+    * sapi/apache/config.m4
+      sapi/apache/libphp4.module.in
+      regex/regex_extra.h
+      regex/utils.h
+      ext/standard/config.m4
+      ext/standard/reg.c
+      Makefile.am
+      acinclude.m4
+      configure.in
+      php.h
+      php_regex.h:
+    Improve regex library selection. It lets user specify whether they want
+    system, apache, or php's regex library by using the --with-regex option.
+    "php" is the default; if you use --with-apache in combination with
+    Apache 1.3.x, the default is "apache".
+
+    * .cvsignore: Remove libtool targets
+
+    * ext/standard/config.m4
+      Makefile.am
+      acinclude.m4
+      configure.in:
+    - remove extra CPPFLAGS from top-level Makefile
+    - HSREGEX defaults to what the user wants, but can be changed now internally
+
+    * configure.in: Export CPPFLAGS to propagate additional flags
+
+    * configure.in: Fix typo (escape sign was one off)
+
+    * configure.in
+      php_version.h: preparing 4.0b3-RC5
+
+    * sapi/cgi/Makefile.am
+      sapi/isapi/Makefile.am
+      ext/zlib/Makefile.am
+      ext/wddx/Makefile.am
+      ext/yp/Makefile.am
+      ext/sysvsem/Makefile.am
+      ext/sysvshm/Makefile.am
+      ext/sybase/Makefile.am
+      ext/sybase_ct/Makefile.am
+      ext/session/Makefile.am
+      ext/standard/Makefile.am
+      ext/pdf/Makefile.am
+      ext/oracle/Makefile.am
+      ext/pcre/Makefile.am
+      ext/oci8/Makefile.am
+      ext/odbc/Makefile.am
+      ext/msql/Makefile.am
+      ext/mhash/Makefile.am
+      ext/mcal/Makefile.am
+      ext/mcrypt/Makefile.am
+      ext/interbase/Makefile.am
+      ext/ldap/Makefile.am
+      ext/imap/Makefile.am
+      ext/informix/Makefile.am
+      ext/hyperwave/Makefile.am
+      ext/icap/Makefile.am
+      ext/gettext/Makefile.am
+      ext/gd/Makefile.am
+      ext/filepro/Makefile.am
+      ext/ftp/Makefile.am
+      ext/dbase/Makefile.am
+      ext/fdf/Makefile.am
+      ext/db/Makefile.am
+      ext/dba/Makefile.am
+      ext/bcmath/Makefile.am
+      ext/dav/Makefile.am
+      ext/apache/Makefile.am
+      ext/aspell/Makefile.am
+      configure.in:
+    Remove the extra INCLUDES line from most automake Mafiles. This is not
+    necessary, because we can change the value of INCLUDES globally in one
+    place (configure.in).
+
+    Also add two defines in thread-safe mode
+    (_REENTRANT and POSIX_PTHREAD_SEMANTICS)
+
+    * acinclude.m4: (AC_EXPAND_PATH) Expand relative paths completely
+
+1999-11-13  changelog  <changelog@www>
+
+    * NEWS: NEWS update
+
 1999-11-12  Sascha Schumann  <sascha@schumann.cx>
 
     * sapi/apache/config.m4
