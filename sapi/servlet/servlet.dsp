@@ -1,27 +1,27 @@
-# Microsoft Developer Studio Project File - Name="java" - Package Owner=<4>
+# Microsoft Developer Studio Project File - Name="servlet" - Package Owner=<4>
 # Microsoft Developer Studio Generated Build File, Format Version 6.00
 # ** DO NOT EDIT **
 
 # TARGTYPE "Win32 (x86) Dynamic-Link Library" 0x0102
 
-CFG=java - Win32 Debug_TS
+CFG=servlet - Win32 Debug_TS
 !MESSAGE This is not a valid makefile. To build this project using NMAKE,
 !MESSAGE use the Export Makefile command and run
-!MESSAGE
-!MESSAGE NMAKE /f "java.mak".
-!MESSAGE
+!MESSAGE 
+!MESSAGE NMAKE /f "servlet.mak".
+!MESSAGE 
 !MESSAGE You can specify a configuration when running NMAKE
 !MESSAGE by defining the macro CFG on the command line. For example:
-!MESSAGE
-!MESSAGE NMAKE /f "java.mak" CFG="java - Win32 Debug_TS"
-!MESSAGE
+!MESSAGE 
+!MESSAGE NMAKE /f "servlet.mak" CFG="servlet - Win32 Debug_TS"
+!MESSAGE 
 !MESSAGE Possible choices for configuration are:
-!MESSAGE
-!MESSAGE "java - Win32 Release" (based on "Win32 (x86) Dynamic-Link Library")
-!MESSAGE "java - Win32 Debug" (based on "Win32 (x86) Dynamic-Link Library")
-!MESSAGE "java - Win32 Debug_TS" (based on "Win32 (x86) Dynamic-Link Library")
-!MESSAGE "java - Win32 Release_TS" (based on "Win32 (x86) Dynamic-Link Library")
-!MESSAGE
+!MESSAGE 
+!MESSAGE "servlet - Win32 Release" (based on "Win32 (x86) Dynamic-Link Library")
+!MESSAGE "servlet - Win32 Debug" (based on "Win32 (x86) Dynamic-Link Library")
+!MESSAGE "servlet - Win32 Debug_TS" (based on "Win32 (x86) Dynamic-Link Library")
+!MESSAGE "servlet - Win32 Release_TS" (based on "Win32 (x86) Dynamic-Link Library")
+!MESSAGE 
 
 # Begin Project
 # PROP AllowPerConfigDependencies 0
@@ -31,7 +31,7 @@ CPP=cl.exe
 MTL=midl.exe
 RSC=rc.exe
 
-!IF  "$(CFG)" == "java - Win32 Release"
+!IF  "$(CFG)" == "servlet - Win32 Release"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 0
@@ -55,9 +55,9 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /machine:I386
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /machine:I386 /out:"..\..\Release/php_java.dll" /libpath:"$(JAVA_HOME)\lib" /libpath:"..\..\Release"
+# ADD LINK32 php_java.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /machine:I386 /out:"..\..\Release/phpsrvlt.dll" /libpath:"$(JAVA_HOME)\lib" /libpath:"..\..\Release"
 
-!ELSEIF  "$(CFG)" == "java - Win32 Debug"
+!ELSEIF  "$(CFG)" == "servlet - Win32 Debug"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 1
@@ -81,9 +81,9 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /debug /machine:I386 /out:"..\..\Debug/php_java.dll" /pdbtype:sept /libpath:"$(JAVA_HOME)\lib" /libpath:"..\..\Debug"
+# ADD LINK32 php_java.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /debug /machine:I386 /out:"..\..\Debug/phpsrvlt.dll" /pdbtype:sept /libpath:"$(JAVA_HOME)\lib" /libpath:"..\..\Debug"
 
-!ELSEIF  "$(CFG)" == "java - Win32 Debug_TS"
+!ELSEIF  "$(CFG)" == "servlet - Win32 Debug_TS"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 1
@@ -107,9 +107,9 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib php4ts.lib /nologo /dll /debug /machine:I386 /out:"..\..\Debug_TS/php_java.dll" /pdbtype:sept /libpath:"$(JAVA_HOME)\lib" /libpath:"..\..\Debug_TS"
+# ADD LINK32 php4ts.lib php_java.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /debug /machine:I386 /out:"..\..\Debug_TS/phpsrvlt.dll" /pdbtype:sept /libpath:"$(JAVA_HOME)\lib" /libpath:"..\..\Debug_TS"
 
-!ELSEIF  "$(CFG)" == "java - Win32 Release_TS"
+!ELSEIF  "$(CFG)" == "servlet - Win32 Release_TS"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 0
@@ -133,121 +133,134 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /machine:I386
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib php4ts.lib /nologo /dll /machine:I386 /out:"..\..\Release_TS/php_java.dll" /libpath:"$(JAVA_HOME)\lib" /libpath:"..\..\Release_TS"
+# ADD LINK32 php4ts.lib php_java.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /machine:I386 /out:"..\..\Release_TS/phpsrvlt.dll" /libpath:"$(JAVA_HOME)\lib" /libpath:"..\..\Release_TS"
 
-!ENDIF
+!ENDIF 
 
 # Begin Target
 
-# Name "java - Win32 Release"
-# Name "java - Win32 Debug"
-# Name "java - Win32 Debug_TS"
-# Name "java - Win32 Release_TS"
+# Name "servlet - Win32 Release"
+# Name "servlet - Win32 Debug"
+# Name "servlet - Win32 Debug_TS"
+# Name "servlet - Win32 Release_TS"
 # Begin Group "Source Files"
 
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 # Begin Source File
 
-SOURCE=.\java.c
+SOURCE=.\servlet.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\ext\java\java.c
 # End Source File
 # End Group
 # Begin Group "Header Files"
 
 # PROP Default_Filter "h;hpp;hxx;hm;inl"
-# Begin Source File
-
-SOURCE=.\php_java.h
-# End Source File
 # End Group
 # Begin Group "Java Files"
 
 # PROP Default_Filter "java"
 # Begin Source File
 
-SOURCE=.\reflect.java
+SOURCE=.\servlet.java
 
-!IF  "$(CFG)" == "java - Win32 Release"
+!IF  "$(CFG)" == "servlet - Win32 Release"
 
 # Begin Custom Build
 OutDir=.\..\..\Release
-TargetName=php_java
-InputPath=.\reflect.java
+InputPath=.\servlet.java
 
-"$(OutDir)\php_java.jar" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-        if not exist net mkdir net
-        if not exist net\php mkdir net\php
-        copy $(InputPath) net\php > nul
-	echo library=php_java>net\php\reflect.properties
-        $(JAVA_HOME)\bin\javac net\php\reflect.java
-        $(JAVA_HOME)\bin\jar c0f $(OutDir)\php_java.jar net\php\*.class net\php\*.properties
-        erase net\php\reflect.*
-        rmdir net\php
-        rmdir net
-
+"$(OutDir)\phpsrvlt.jar" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	if not exist net mkdir net 
+	if not exist net\php mkdir net\php 
+	copy $(InputPath) net\php > nul 
+	copy ..\..\ext\java\reflect.java net\php > nul
+	echo library=phpsrvlt>net/php/reflect.properties
+	echo library=phpsrvlt>net/php/servlet.properties
+	$(JAVA_HOME)\bin\javac net\php\servlet.java 
+	$(JAVA_HOME)\bin\jar c0f $(OutDir)\phpsrvlt.jar net\php\*.class net\php\*.properties
+	erase net\php\servlet.* 
+	erase net\php\reflect.* 
+	rmdir net\php 
+	rmdir net 
+	
 # End Custom Build
 
-!ELSEIF  "$(CFG)" == "java - Win32 Debug"
+!ELSEIF  "$(CFG)" == "servlet - Win32 Debug"
 
 # Begin Custom Build
 OutDir=.\..\..\Debug
-TargetName=php_java
-InputPath=.\reflect.java
+InputPath=.\servlet.java
 
-"$(OutDir)\php_java.jar" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-        if not exist net mkdir net
-        if not exist net\php mkdir net\php
-        copy $(InputPath) net\php > nul
-	echo library=php_java>net\php\reflect.properties
-        $(JAVA_HOME)\bin\javac -g net\php\reflect.java
-        $(JAVA_HOME)\bin\jar c0f $(OutDir)\php_java.jar net\php\*.class net\php\*.properties
-        erase net\php\reflect.*
-        rmdir net\php
-        rmdir net
-
+"$(OutDir)\phpsrvlt.jar" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	if not exist net mkdir net 
+	if not exist net\php mkdir net\php 
+	copy $(InputPath) net\php > nul 
+	copy ..\..\ext\java\reflect.java net\php > nul
+	echo library=phpsrvlt>net/php/reflect.properties
+	echo library=phpsrvlt>net/php/servlet.properties
+	$(JAVA_HOME)\bin\javac -g net\php\servlet.java 
+	$(JAVA_HOME)\bin\jar c0f $(OutDir)\phpsrvlt.jar net\php\*.class net\php\*.properties
+	erase net\php\servlet.* 
+	erase net\php\reflect.* 
+	rmdir net\php 
+	rmdir net 
+	
 # End Custom Build
 
-!ELSEIF  "$(CFG)" == "java - Win32 Debug_TS"
+!ELSEIF  "$(CFG)" == "servlet - Win32 Debug_TS"
 
+USERDEP__SERVL=".\servlet.java"	
 # Begin Custom Build
 OutDir=.\..\..\Debug_TS
-TargetName=php_java
-InputPath=.\reflect.java
+InputPath=.\servlet.java
 
-"$(OutDir)\php_java.jar" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-        if not exist net mkdir net
-        if not exist net\php mkdir net\php
-        copy $(InputPath) net\php > nul
-	echo library=php_java>net\php\reflect.properties
-        $(JAVA_HOME)\bin\javac -g net\php\reflect.java
-        $(JAVA_HOME)\bin\jar c0f $(OutDir)\php_java.jar net\php\*.class net\php\*.properties
-        erase net\php\reflect.*
-        rmdir net\php
-        rmdir net
-
+"$(OutDir)\phpsrvlt.jar" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	if not exist net mkdir net 
+	if not exist net\php mkdir net\php 
+	copy *.java net\php > nul 
+	copy ..\..\ext\java\reflect.java net\php > nul
+	echo library=phpsrvlt>net/php/reflect.properties
+	echo library=phpsrvlt>net/php/servlet.properties
+	$(JAVA_HOME)\bin\javac -g net\php\servlet.java 
+	$(JAVA_HOME)\bin\jar c0f $(OutDir)\phpsrvlt.jar net\php\*.class net\php\*.properties
+	erase net\php\servlet.* 
+	erase net\php\reflect.* 
+	rmdir net\php 
+	rmdir net 
+	
 # End Custom Build
 
-!ELSEIF  "$(CFG)" == "java - Win32 Release_TS"
+!ELSEIF  "$(CFG)" == "servlet - Win32 Release_TS"
 
 # Begin Custom Build
 OutDir=.\..\..\Release_TS
-TargetName=php_java
-InputPath=.\reflect.java
+InputPath=.\servlet.java
 
-"$(OutDir)\php_java.jar" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-        if not exist net mkdir net
-        if not exist net\php mkdir net\php
-        copy $(InputPath) net\php > nul
-	echo library=php_java>net\php\reflect.properties
-        $(JAVA_HOME)\bin\javac net\php\reflect.java
-        $(JAVA_HOME)\bin\jar c0f $(OutDir)\php_java.jar net\php\*.class net\php\*.properties
-        erase net\php\reflect.*
-        rmdir net\php
-        rmdir net
-
+"$(OutDir)\phpsrvlt.jar" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	if not exist net mkdir net 
+	if not exist net\php mkdir net\php 
+	copy $(InputPath) net\php > nul 
+	copy ..\..\ext\java\reflect.java net\php > nul
+	echo library=phpsrvlt>net/php/reflect.properties
+	echo library=phpsrvlt>net/php/servlet.properties
+	$(JAVA_HOME)\bin\javac net\php\servlet.java 
+	$(JAVA_HOME)\bin\jar c0f $(OutDir)\phpsrvlt.jar net\php\*.class net\php\*.properties
+	erase net\php\servlet.* 
+	erase net\php\reflect.* 
+	rmdir net\php 
+	rmdir net 
+	
 # End Custom Build
 
-!ENDIF
+!ENDIF 
 
+# End Source File
+# Begin Source File
+
+SOURCE=.\servlet.java
 # End Source File
 # End Group
 # Begin Source File

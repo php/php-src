@@ -177,8 +177,9 @@ InputPath=.\reflect.java
         if not exist net mkdir net
         if not exist net\php mkdir net\php
         copy $(InputPath) net\php > nul
+	echo library=php_java>net\php\reflect.properties
         $(JAVA_HOME)\bin\javac net\php\reflect.java
-        $(JAVA_HOME)\bin\jar c0f $(OutDir)\php_java.jar net\php\*.class
+        $(JAVA_HOME)\bin\jar c0f $(OutDir)\php_java.jar net\php\*.class net\php\*.properties
         erase net\php\reflect.*
         rmdir net\php
         rmdir net
@@ -196,8 +197,9 @@ InputPath=.\reflect.java
         if not exist net mkdir net
         if not exist net\php mkdir net\php
         copy $(InputPath) net\php > nul
+	echo library=php_java>net\php\reflect.properties
         $(JAVA_HOME)\bin\javac -g net\php\reflect.java
-        $(JAVA_HOME)\bin\jar c0f $(OutDir)\php_java.jar net\php\*.class
+        $(JAVA_HOME)\bin\jar c0f $(OutDir)\php_java.jar net\php\*.class net\php\*.properties
         erase net\php\reflect.*
         rmdir net\php
         rmdir net
@@ -215,8 +217,9 @@ InputPath=.\reflect.java
         if not exist net mkdir net
         if not exist net\php mkdir net\php
         copy $(InputPath) net\php > nul
+	echo library=php_java>net\php\reflect.properties
         $(JAVA_HOME)\bin\javac -g net\php\reflect.java
-        $(JAVA_HOME)\bin\jar c0f $(OutDir)\php_java.jar net\php\*.class
+        $(JAVA_HOME)\bin\jar c0f $(OutDir)\php_java.jar net\php\*.class net\php\*.properties
         erase net\php\reflect.*
         rmdir net\php
         rmdir net
@@ -234,8 +237,9 @@ InputPath=.\reflect.java
         if not exist net mkdir net
         if not exist net\php mkdir net\php
         copy $(InputPath) net\php > nul
+	echo library=php_java>net\php\reflect.properties
         $(JAVA_HOME)\bin\javac net\php\reflect.java
-        $(JAVA_HOME)\bin\jar c0f $(OutDir)\php_java.jar net\php\*.class
+        $(JAVA_HOME)\bin\jar c0f $(OutDir)\php_java.jar net\php\*.class net\php\*.properties
         erase net\php\reflect.*
         rmdir net\php
         rmdir net

@@ -309,6 +309,7 @@ void php_print_credits(int flag)
 		CREDIT_LINE("ISAPI SAPI Module", "Andi Gutmans, Zeev Suraski");
 		CREDIT_LINE("CGI SAPI Module", "Rasmus Lerdorf, Stig Bakken");
 		CREDIT_LINE("AOLserver SAPI Module", "Sascha Schumann");
+		CREDIT_LINE("Servlet SAPI Module", "Sam Ruby");
 		CREDIT_LINE("Overall Work", "Thies C. Arntzen, Stig Bakken, Shane Caraveo, \
 					Rasmus Lerdorf, Sascha Schumann, Zeev Suraski, Andrei Zmievski, \
 					and others");

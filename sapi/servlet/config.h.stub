@@ -1,0 +1,3 @@
+#ifndef SAPI_SERVLET
+#define SAPI_SERVLET 0
+#endif

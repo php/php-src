@@ -19,11 +19,21 @@
 package net.php;
 
 import java.lang.reflect.*;
+import java.util.ResourceBundle;
 import java.beans.*;
 
 class reflect {
 
-  static { System.loadLibrary("php_java"); }
+  static { loadLibrary("reflect"); }
+  
+  protected static void loadLibrary(String property) {
+    try {
+      ResourceBundle bundle = ResourceBundle.getBundle("net.php."+property);
+      System.loadLibrary(bundle.getString("library"));
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
 
   //
   // Native methods
@@ -34,6 +44,7 @@ class reflect {
   private static native void setResultFromBoolean(long result, boolean value);
   private static native void setResultFromObject(long result, Object value);
   private static native void setException(long result, String value);
+  public  static native void setEnv();
 
   //
   // Helper routines which encapsulate the native methods

@@ -14,9 +14,11 @@ AC_ARG_WITH(java,
       if test -d /usr/local/lib/kaffe; then
 	JAVA_CFLAGS="-DKAFFE"
 	JAVA_INCLUDE=-I/usr/local/include/kaffe
+	JAVA_CLASSPATH=/usr/local/share/kaffe/Klasses.jar
       elif test -d /usr/lib/kaffe; then
 	JAVA_CFLAGS="-DKAFFE"
 	JAVA_INCLUDE=-I/usr/include/kaffe
+	JAVA_CLASSPATH=/usr/share/kaffe/Klasses.jar
       else
 	AC_MSG_RESULT(no)
 	AC_MSG_ERROR(unable to find Java VM libraries)
@@ -26,6 +28,8 @@ AC_ARG_WITH(java,
 	JAVA_INCLUDE="-I$withval/include"
 	test -f $withval/lib/classes.zip && JAVA_CFLAGS="-DJNI_11"
 	test -f $withval/lib/jvm.jar	 && JAVA_CFLAGS="-DJNI_12"
+	test -f $withval/lib/classes.zip && JAVA_CLASSPATH="$withval/lib/classes.zip"
+	test -f $withval/lib/jvm.jar	 && JAVA_CLASSPATH="$withval/lib/jvm.jar"
 	for i in $JAVA_INCLUDE/*; do
 	  test -f $i/jni_md.h	 && JAVA_INCLUDE="$JAVA_INCLUDE $i"
 	done
@@ -35,6 +39,8 @@ AC_ARG_WITH(java,
 	  test -f $i/jni_md.h	 && JAVA_INCLUDE="$JAVA_INCLUDE -I$i"
 	  test -f $i/classes.zip && JAVA_CFLAGS="-DJNI_11"
 	  test -f $i/jvm.jar	 && JAVA_CFLAGS="-DJNI_12"
+	  test -f $i/classes.zip && JAVA_CLASSPATH="$i/classes.zip"
+	  test -f $i/jvm.jar	 && JAVA_CLASSPATH="$i/jvm.jar"
 	done
 	if test -z "$JAVA_INCLUDE"; then
 	  AC_MSG_RESULT(no)
@@ -55,6 +61,7 @@ AC_ARG_WITH(java,
 ])
 
 AC_SUBST(JAVA_CFLAGS)
+AC_SUBST(JAVA_CLASSPATH)
 AC_SUBST(JAVA_INCLUDE)
 AC_SUBST(JAVA_SHARED)
 AC_SUBST(JAVA_LFLAGS)
