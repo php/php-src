@@ -17,8 +17,6 @@ static int schema_element(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr element, sdlTyp
 static int schema_attribute(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr attrType, sdlTypePtr cur_type);
 static int schema_any(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr extType, sdlTypePtr cur_type);
 static int schema_attributeGroup(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr attrType, sdlTypePtr cur_type);
-#define schema_attributeGroupRef schema_attributeGroup
-//static int schema_attributeGroupRef(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr attrType, sdlTypePtr cur_type);
 
 static int schema_restriction_var_int(xmlNodePtr val, sdlRestrictionIntPtr *valptr);
 
@@ -55,7 +53,7 @@ static void schema_cleanup(xmlNodePtr schema)
 			}
 		} else if ((trav->type != XML_ELEMENT_NODE) &&
 		           (trav->type != XML_CDATA_SECTION_NODE)) {
-			del = trav;	
+			del = trav;
 		} else if (trav->children != NULL) {
 			schema_cleanup(trav);
 		}
@@ -619,7 +617,7 @@ static int schema_restriction_simpleContent(sdlPtr sdl, xmlAttrPtr tsn, xmlNodeP
 			if (node_is_equal(trav,"attribute")) {
 				schema_attribute(sdl, tsn, trav, cur_type);
 			} else if (node_is_equal(trav,"attributeGroup")) {
-				schema_attributeGroupRef(sdl, tsn, trav, cur_type);
+				schema_attributeGroup(sdl, tsn, trav, cur_type);
 			} else if (node_is_equal(trav,"anyAttribute")) {
 				/* TODO: <anyAttribute> support */
 				trav = trav->next;
@@ -693,7 +691,7 @@ static int schema_restriction_complexContent(sdlPtr sdl, xmlAttrPtr tsn, xmlNode
 		if (node_is_equal(trav,"attribute")) {
 			schema_attribute(sdl, tsn, trav, cur_type);
 		} else if (node_is_equal(trav,"attributeGroup")) {
-			schema_attributeGroupRef(sdl, tsn, trav, cur_type);
+			schema_attributeGroup(sdl, tsn, trav, cur_type);
 		} else if (node_is_equal(trav,"anyAttribute")) {
 			/* TODO: <anyAttribute> support */
 			trav = trav->next;
@@ -804,7 +802,7 @@ static int schema_extension_simpleContent(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr
 		if (node_is_equal(trav,"attribute")) {
 			schema_attribute(sdl, tsn, trav, cur_type);
 		} else if (node_is_equal(trav,"attributeGroup")) {
-			schema_attributeGroupRef(sdl, tsn, trav, cur_type);
+			schema_attributeGroup(sdl, tsn, trav, cur_type);
 		} else if (node_is_equal(trav,"anyAttribute")) {
 			/* TODO: <anyAttribute> support */
 			trav = trav->next;
@@ -868,7 +866,7 @@ static int schema_extension_complexContent(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePt
 		if (node_is_equal(trav,"attribute")) {
 			schema_attribute(sdl, tsn, trav, cur_type);
 		} else if (node_is_equal(trav,"attributeGroup")) {
-			schema_attributeGroupRef(sdl, tsn, trav, cur_type);
+			schema_attributeGroup(sdl, tsn, trav, cur_type);
 		} else if (node_is_equal(trav,"anyAttribute")) {
 			/* TODO: <anyAttribute> support */
 			trav = trav->next;
@@ -1198,7 +1196,7 @@ static int schema_complexType(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr compType, s
 				if (node_is_equal(trav,"attribute")) {
 					schema_attribute(sdl, tsn, trav, cur_type);
 				} else if (node_is_equal(trav,"attributeGroup")) {
-					schema_attributeGroupRef(sdl, tsn, trav, cur_type);
+					schema_attributeGroup(sdl, tsn, trav, cur_type);
 				} else if (node_is_equal(trav,"anyAttribute")) {
 					/* TODO: <anyAttribute> support */
 					trav = trav->next;
@@ -1551,7 +1549,7 @@ static int schema_attributeGroup(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr attrGrou
 	xmlNodePtr trav;
 	xmlAttrPtr name, ref = NULL;
 
-	
+
 	name = get_attribute(attrGroup->properties, "name");
 	if (name == NULL) {
 		name = ref = get_attribute(attrGroup->properties, "ref");
@@ -1628,7 +1626,7 @@ static int schema_attributeGroup(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr attrGrou
 			if (ref != NULL) {
 				php_error(E_ERROR, "Error parsing schema (attributeGroup have both 'ref' attribute and subattribute)");
 			}
-			schema_attributeGroupRef(sdl, tsn, trav, cur_type);
+			schema_attributeGroup(sdl, tsn, trav, cur_type);
 		} else if (node_is_equal(trav,"anyAttribute")) {
 			if (ref != NULL) {
 				php_error(E_ERROR, "Error parsing schema (attributeGroup have both 'ref' attribute and subattribute)");
@@ -1646,17 +1644,6 @@ static int schema_attributeGroup(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr attrGrou
 	}
 	return TRUE;
 }
-
-//static int schema_attributeGroupRef(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr attrGroup, sdlTypePtr cur_type)
-//{
-//	xmlAttrPtr ref = get_attribute(attrGroup->properties, "ref");
-//	if (ref != NULL) {
-//		/*FIXME*/
-//	} else {
-//		php_error(E_ERROR, "Error parsing schema (attributeGroup has no 'ref' attribute)");
-//	}
-//	return TRUE;
-//}
 
 static void schema_attribute_fixup(sdlPtr sdl, sdlAttributePtr attr)
 {
@@ -1686,7 +1673,7 @@ static void schema_attribute_fixup(sdlPtr sdl, sdlAttributePtr attr)
 				}
 				if ((*tmp)->extraAttributes != NULL) {
 				  xmlNodePtr node;
-				
+
 					attr->extraAttributes = malloc(sizeof(HashTable));
 
 					zend_hash_init(attr->extraAttributes, 0, NULL, NULL, 1);
@@ -1737,7 +1724,7 @@ static void schema_attributegroup_fixup(sdlPtr sdl, sdlAttributePtr attr, HashTa
 
 							zend_hash_get_current_key_ex((*tmp)->attributes, &key, &key_len, NULL, 0, NULL);
 							zend_hash_add(ht, key, key_len, &newAttr, sizeof(sdlAttributePtr), NULL);
-							
+
 							zend_hash_move_forward((*tmp)->attributes);
 						} else {
 							ulong index;
