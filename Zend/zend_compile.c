@@ -1723,7 +1723,7 @@ void zend_do_early_binding(TSRMLS_D)
 	zend_op *opline = &CG(active_op_array)->opcodes[CG(active_op_array)->last-1];
 	HashTable *table;
 
-	if (strchr(opline->op2.u.constant.value.str.val, ':')) {
+	if (opline->op2.op_type != IS_UNUSED && strchr(opline->op2.u.constant.value.str.val, ':')) {
 		return;
 	}
 	if (do_bind_function_or_class(opline, CG(function_table), CG(class_table), 1)==FAILURE) {
