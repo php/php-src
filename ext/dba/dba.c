@@ -719,7 +719,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 
 	if (!error && lock_mode) {
 		if (lock_dbf) {
-			lock_name = estrdup(info->path);
+			lock_name = Z_STRVAL_PP(args[0]);
 		} else {
 			spprintf(&lock_name, 0, "%s.lck", info->path);
 			if (!strcmp(file_mode, "r")) {
@@ -757,7 +757,9 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 				}
 			}
 		}
-		efree(lock_name);
+		if (!lock_dbf) {
+			efree(lock_name);
+		}
 		if (!info->lock.fp) {
 			dba_close(info TSRMLS_CC);
 			/* stream operation already wrote an error message */
