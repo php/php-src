@@ -32,8 +32,9 @@ loaded.
     <state>stable</state>
     <filelist>
       <dir name="Archive">
-        <file role="php">Tar.php</file>
+        <file role="php" name="Tar.php"/>
       </dir>
+      <file role="doc" name="docs/Archive_Tar.txt" baseinstalldir="/"/>
     </filelist>
   </release>
   <changelog>
