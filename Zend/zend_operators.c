@@ -1579,18 +1579,21 @@ ZEND_API int zval_is_true(zval *op)
 	return (op->value.lval ? 1 : 0);
 }
 
-ZEND_API char *zend_str_tolower_copy(char *str, unsigned int length)
+ZEND_API char *zend_str_tolower_copy(char *p, unsigned int length)
 {
 	register char *result;
-	register char *p = str;
+	register char *end = p + length;
+	char *start;
 
 	result = emalloc(length+1);
+	start = result;
 
-	do {
-		result[length] = tolower(p[length]);
-	} while (length--);
-	
-	return result;
+	while (p < end) {
+		*result++ = tolower(*p++);
+	}
+	*result = *end;
+
+	return start;
 }
 	
 ZEND_API void zend_str_tolower(char *str, unsigned int length)
