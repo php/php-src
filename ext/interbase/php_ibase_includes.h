@@ -191,8 +191,8 @@ typedef void (__stdcall *info_func_t)(char*);
 typedef void (*info_func_t)(char*);
 #endif
 
-PHPAPI void _php_ibase_error(TSRMLS_D);
-PHPAPI void _php_ibase_module_error(char * TSRMLS_DC, ...)
+void _php_ibase_error(TSRMLS_D);
+void _php_ibase_module_error(char * TSRMLS_DC, ...)
 	PHP_ATTRIBUTE_FORMAT(printf,1,PHP_ATTR_FMT_OFFSET +2);
 
 /* determine if a resource is a link or transaction handle */
@@ -205,8 +205,8 @@ PHPAPI void _php_ibase_module_error(char * TSRMLS_DC, ...)
 		if (SUCCESS != _php_ibase_def_trans(lh, &th TSRMLS_CC)) { RETURN_FALSE; }			\
 	} while (0)
 
-PHPAPI int _php_ibase_def_trans(ibase_db_link *ib_link, ibase_trans **trans TSRMLS_DC);
-PHPAPI void _php_ibase_get_link_trans(INTERNAL_FUNCTION_PARAMETERS, zval **link_id,
+int _php_ibase_def_trans(ibase_db_link *ib_link, ibase_trans **trans TSRMLS_DC);
+void _php_ibase_get_link_trans(INTERNAL_FUNCTION_PARAMETERS, zval **link_id,
 	ibase_db_link **ib_link, ibase_trans **trans);
 
 /* provided by ibase_query.c */
@@ -214,14 +214,14 @@ void php_ibase_query_minit(INIT_FUNC_ARGS);
 
 /* provided by ibase_blobs.c */
 void php_ibase_blobs_minit(INIT_FUNC_ARGS);
-PHPAPI int _php_ibase_string_to_quad(char const *id, ISC_QUAD *qd);
-PHPAPI char *_php_ibase_quad_to_string(ISC_QUAD const qd);
-PHPAPI int _php_ibase_blob_get(zval *return_value, ibase_blob *ib_blob, unsigned long max_len TSRMLS_DC);
-PHPAPI int _php_ibase_blob_add(zval **string_arg, ibase_blob *ib_blob TSRMLS_DC);
+int _php_ibase_string_to_quad(char const *id, ISC_QUAD *qd);
+char *_php_ibase_quad_to_string(ISC_QUAD const qd);
+int _php_ibase_blob_get(zval *return_value, ibase_blob *ib_blob, unsigned long max_len TSRMLS_DC);
+int _php_ibase_blob_add(zval **string_arg, ibase_blob *ib_blob TSRMLS_DC);
 
 /* provided by ibase_events.c */
 void php_ibase_events_minit(INIT_FUNC_ARGS);
-PHPAPI void _php_ibase_free_event(ibase_event *event TSRMLS_DC);
+void _php_ibase_free_event(ibase_event *event TSRMLS_DC);
 
 /* provided by ibase_service.c */
 void php_ibase_service_minit(INIT_FUNC_ARGS);
