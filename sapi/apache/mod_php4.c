@@ -19,46 +19,7 @@
  */
 /* $Id$ */
 
-#define NO_REGEX_EXTRA_H
-#ifdef WIN32
-#include <winsock2.h>
-#include <stddef.h>
-#endif
-
-#include "zend.h"
-#include "php.h"
-#include "php_variables.h"
-
-#include "httpd.h"
-#include "http_config.h"
-#if MODULE_MAGIC_NUMBER > 19980712
-# include "ap_compat.h"
-#else
-# if MODULE_MAGIC_NUMBER > 19980324
-#  include "compat.h"
-# endif
-#endif
-#include "http_core.h"
-#include "http_main.h"
-#include "http_protocol.h"
-#include "http_request.h"
-#include "http_log.h"
-
-#include "php_ini.h"
-#include "php_globals.h"
-#include "SAPI.h"
-#include "php_main.h"
-
-#include "zend_compile.h"
-#include "zend_execute.h"
-#include "zend_highlight.h"
-#include "zend_indent.h"
-
-#include "ext/standard/php_standard.h"
-
-#include "util_script.h"
-
-#include "mod_php4.h"
+#include "php_apache_http.h"
 
 #undef shutdown
 
@@ -434,7 +395,7 @@ static void init_request_info(TSRMLS_D)
 		authorization = table_get(r->headers_in, "Authorization");
 	}
 	if (authorization
-/* 		&& !auth_type(r) */
+		&& !auth_type(r)
 		&& !strcasecmp(getword(r->pool, &authorization, ' '), "Basic")) {
 		tmp = uudecode(r->pool, authorization);
 		SG(request_info).auth_user = getword_nulls_nc(r->pool, &tmp, ':');
