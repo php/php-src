@@ -980,24 +980,7 @@ void FCGX_ClearError(FCGX_Stream *stream) {
      */
 }
 
-/*
- *======================================================================
- * Parameters
- *======================================================================
- */
 
-/*
- * A vector of pointers representing the parameters received
- * by a FastCGI application server, with the vector's length
- * and last valid element so adding new parameters is efficient.
- */
-
-typedef struct Params {
-    FCGX_ParamArray vec;    /* vector of strings */
-    int length;		    /* number of string vec can hold */
-    char **cur;		    /* current item in vec; *cur == NULL */
-} Params;
-typedef Params *ParamsPtr;
 
 /*
  *----------------------------------------------------------------------
@@ -1071,12 +1054,44 @@ static void PutParam(ParamsPtr paramsPtr, char *nameValue)
     *paramsPtr->cur++ = nameValue;
     size = paramsPtr->cur - paramsPtr->vec;
     if(size >= paramsPtr->length) {
-	paramsPtr->length *= 2;
-	paramsPtr->vec = (FCGX_ParamArray)realloc(paramsPtr->vec, paramsPtr->length * sizeof(char *));
-	paramsPtr->cur = paramsPtr->vec + size;
+        paramsPtr->length *= 2;
+        paramsPtr->vec = (FCGX_ParamArray)realloc(paramsPtr->vec, paramsPtr->length * sizeof(char *));
+        paramsPtr->cur = paramsPtr->vec + size;
     }
     *paramsPtr->cur = NULL;
 }
+
+
+void FCGX_PutEnv(FCGX_Request *request, char *var)
+{
+	char *nameValue;
+	char *e, **p;
+	int len;
+
+	if (!strchr(var,'=')) {
+		return;
+	}
+	nameValue = StringCopy(var);
+	e = strchr(nameValue,'=');
+	*e = 0;
+
+	/* find the name and replace it */
+    len = strlen(nameValue);
+
+    for (p = request->envp; p && *p; ++p) {
+        if((strncmp(nameValue, *p, len) == 0) && ((*p)[len] == '=')) {
+            free(*p);
+			*e = '=';
+			*p = nameValue;
+			return;
+        }
+    }
+    *e = '=';
+	/* this is a new var, add it to the environment */
+	PutParam(request->paramsPtr,nameValue);
+	request->envp = request->paramsPtr->vec;
+}
+
 
 /*
  *----------------------------------------------------------------------
@@ -1100,7 +1115,7 @@ char *FCGX_GetParam(const char *name, FCGX_ParamArray envp)
 
     len = strlen(name);
 
-    for (p = envp; *p; ++p) {
+    for (p = envp; p && *p; ++p) {
         if((strncmp(name, *p, len) == 0) && ((*p)[len] == '=')) {
             return *p+len+1;
         }
@@ -2027,6 +2042,7 @@ void FCGX_Free(FCGX_Request * request, int close)
     _FCGX_FreeStream(&request->out, FALSE);
     _FCGX_FreeStream(&request->err, FALSE);
     FreeParams(&request->paramsPtr);
+	request->envp = NULL;
 
     if (close) {
         OS_IpcClose(request->ipcFd);
