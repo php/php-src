@@ -127,10 +127,6 @@ SOURCE=.\mergesort.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\output.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\php3_realpath.c
 # End Source File
 # Begin Source File
@@ -384,6 +380,10 @@ SOURCE=.\ext\session\mod_user.c
 # Begin Source File
 
 SOURCE=.\ext\bcmath\number.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\ext\standard\output.c
 # End Source File
 # Begin Source File
 
