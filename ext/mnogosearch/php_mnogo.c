@@ -52,6 +52,8 @@
 #define UDM_PARAM_CHARSET	6
 #define UDM_PARAM_STOPTABLE	7
 #define UDM_PARAM_STOPFILE	8
+#define UDM_PARAM_WEIGHT_FACTOR	9
+#define UDM_PARAM_WORD_MATCH	10
 
 /* udm_add_search_limit constants */
 #define UDM_LIMIT_URL		1
@@ -59,6 +61,7 @@
 #define UDM_LIMIT_LANG		3
 #define UDM_LIMIT_CAT		4
 
+/* track modes */
 #define UDM_TRACK_ENABLED	1
 #define UDM_TRACK_DISABLED	0
 
@@ -155,6 +158,8 @@ DLEXPORT PHP_MINIT_FUNCTION(mnogosearch)
 	REGISTER_LONG_CONSTANT("UDM_PARAM_STOP_TABLE",	UDM_PARAM_STOPTABLE,CONST_CS | CONST_PERSISTENT);	
 	REGISTER_LONG_CONSTANT("UDM_PARAM_STOPFILE",	UDM_PARAM_STOPFILE,CONST_CS | CONST_PERSISTENT);	
 	REGISTER_LONG_CONSTANT("UDM_PARAM_STOP_FILE",	UDM_PARAM_STOPFILE,CONST_CS | CONST_PERSISTENT);	
+	REGISTER_LONG_CONSTANT("UDM_PARAM_WEIGHT_FACTOR",UDM_PARAM_WEIGHT_FACTOR,CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("UDM_PARAM_WORD_MATCH",  UDM_PARAM_WORD_MATCH,CONST_CS | CONST_PERSISTENT);
 	
 	/* udm_add_search_limit constants */
 	REGISTER_LONG_CONSTANT("UDM_LIMIT_CAT",		UDM_LIMIT_CAT,CONST_CS | CONST_PERSISTENT);
@@ -184,6 +189,12 @@ DLEXPORT PHP_MINIT_FUNCTION(mnogosearch)
 	/* track mode params */
 	REGISTER_LONG_CONSTANT("UDM_TRACK_ENABLED",	UDM_TRACK_ENABLED,CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("UDM_TRACK_DISABLED",	UDM_TRACK_DISABLED,CONST_CS | CONST_PERSISTENT);
+	
+	/* word match mode params */
+	REGISTER_LONG_CONSTANT("UDM_MATCH_WORD",	UDM_MATCH_WORD,CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("UDM_MATCH_BEGIN",	UDM_MATCH_BEGIN,CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("UDM_MATCH_SUBSTR",	UDM_MATCH_SUBSTR,CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("UDM_MATCH_END",		UDM_MATCH_END,CONST_CS | CONST_PERSISTENT);
 
 	return SUCCESS;
 }
@@ -330,6 +341,32 @@ DLEXPORT PHP_FUNCTION(udm_set_agent_param)
 			}
 			
 			break;
+
+		case UDM_PARAM_WORD_MATCH:
+			switch (atoi(val)){
+					case UDM_MATCH_WORD:
+						Agent->word_match=UDM_MATCH_WORD;
+						break;
+
+					case UDM_MATCH_BEGIN:
+						Agent->word_match=UDM_MATCH_BEGIN;
+						break;
+
+					case UDM_MATCH_END:
+						Agent->word_match=UDM_MATCH_END;
+						break;
+
+					case UDM_MATCH_SUBSTR:
+						Agent->word_match=UDM_MATCH_SUBSTR;
+						break;
+						
+					default:
+						php_error(E_WARNING,"Udm_Set_Agent_Param: Unknown word match mode");
+						RETURN_FALSE;
+						break;
+			}
+			
+			break;
 			
 		case UDM_PARAM_CACHE_MODE: 
 			switch (atoi(val)){
@@ -385,6 +422,11 @@ DLEXPORT PHP_FUNCTION(udm_set_agent_param)
 				php_error(E_WARNING,Agent->Conf->errstr);
 				RETURN_FALSE;
 			}
+			    
+			break;
+			
+		case UDM_PARAM_WEIGHT_FACTOR: 
+			Agent->weight_factor=strdup(val);
 			    
 			break;
 			
