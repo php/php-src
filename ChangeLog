@@ -1,3 +1,62 @@
+2001-12-12  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/skeleton/create_stubs: editor preferences for XML files updated
+
+2001-12-12  Andrei Zmievski  <andrei@ispi.net>
+
+    * pear/pear.m4:
+    Always output config.nice for standalone extensions. (Really helps with
+    PHP-GTK).
+
+2001-12-12  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/ircg.c: Fix warnings and time_t/struct timeval braino
+
+2001-12-12  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/ming/config.m4: Fixed a typo and added [] around the message text.
+
+    * ext/ming/ming.c: More ZTS fixes.
+
+    * ext/ming/config.m4
+      ext/ming/ming.c: Fixed some compile problems (in ZTS mode)
+
+2001-12-12  Ulf Wendel  <ulf.wendel@phpdoc.de>
+
+    * pear/HTML/ITX.php:
+    remove surrounding " and ' from the macro call arguments
+
+    * pear/HTML/IT.php: Bugfix: "untouch" touched blocks on parse
+
+2001-12-12  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/overload/overload.c:
+    Since PHP method names are case-insensitive, we have to fold access to 'FOO'
+    and 'foo' properties into a call to the same accessor.
+
+    * ext/overload/overload.c
+      ext/overload/php_overload.h:
+    Ack, apparently in statically linked-in extensions we have to clean the
+    hash of overloaded classes on request shutdown. Also, added some fold
+    markers and rearranged some defines.
+
+2001-12-12  Stig Bakken  <ssb@fast.no>
+
+    * ext/standard/versioning.c: return boolean where appropriate
+
+    * pear/scripts/pear.in: * implemented "upgrade"
+    * report install/uninstall errors
+
+    * pear/Makefile.in: * install PEAR/Autoloader.php
+
+    * pear/PEAR/Installer.php: * implemented upgrade
+
+    * pear/PEAR/Registry.php:
+    * PEAR_Registry::updatePackage now takes an optional 2nd arg for
+      replacing package info instead of merging
+
+    * pear/PEAR/Remote.php: * make do without overload function
+
 2001-12-11  Thomas V.V.Cox  <cox@idecnet.com>
 
     * pear/scripts/pear.in: fixed bug #14414
