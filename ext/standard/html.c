@@ -926,7 +926,11 @@ PHPAPI char *php_unescape_html_entities(unsigned char *old, int oldlen, int *new
 				if (p[1] == '#') {
 					int invalid_code = 0;
 
-					code = strtol(p + 2, &next, 10);
+					if (p[2] == 'x' || p[2] == 'X') {
+						code = strtol(p + 3, &next, 16);
+					} else {
+						code = strtol(p + 2, &next, 10);
+					}
 
 					if (next != NULL && *next == ';') {
 						switch (charset) {
