@@ -113,52 +113,53 @@ static int odbc_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len, p
 	pdo_odbc_db_handle *H = (pdo_odbc_db_handle *)dbh->driver_data;
 	pdo_odbc_stmt *S = ecalloc(1, sizeof(*S));
 	enum pdo_cursor_type cursor_type = PDO_CURSOR_FWDONLY;
+	int ret;
+	char *nsql = NULL;
+	int nsql_len = 0;
 
 	S->H = H;
+
+	/* before we prepare, we need to peek at the query; if it uses named parameters,
+	 * we want PDO to rewrite them for us */
+	stmt->supports_placeholders = PDO_PLACEHOLDER_POSITIONAL;
+	ret = pdo_parse_params(stmt, (char*)sql, sql_len, &nsql, &nsql_len TSRMLS_CC);
+	
+	if (ret == 1) {
+		/* query was re-written */
+		sql = nsql;
+	} else if (ret == -1) {
+		/* couldn't grok it */
+		return 0;
+	}
 	
 	rc = SQLAllocHandle(SQL_HANDLE_STMT, H->dbc, &S->stmt);
 
 	if (rc == SQL_INVALID_HANDLE || rc == SQL_ERROR) {
 		efree(S);
+		if (nsql) {
+			efree(nsql);
+		}
 		pdo_odbc_drv_error("SQLAllocStmt");
 		return 0;
 	}
 
 	cursor_type = pdo_attr_lval(driver_options, PDO_ATTR_CURSOR, PDO_CURSOR_FWDONLY TSRMLS_CC);
 	if (cursor_type != PDO_CURSOR_FWDONLY) {
-#if 0
-		SQLUINTEGER cursor;
-		cursor = SQL_SCROLLABLE;
-#endif
-
-		printf("setting up scrollable cursor\n");
-
 		rc = SQLSetStmtAttr(S->stmt, SQL_ATTR_CURSOR_SCROLLABLE, (void*)SQL_SCROLLABLE, 0);
 		if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
 			pdo_odbc_stmt_error("SQLSetStmtAttr: SQL_ATTR_CURSOR_SCROLLABLE");
 			SQLFreeHandle(SQL_HANDLE_STMT, S->stmt);
+			if (nsql) {
+				efree(nsql);
+			}
 			return 0;
 		}
-
-#if 0
-		SQLSetStmtAttr(S->stmt, SQL_ATTR_CURSOR_TYPE, (void*)SQL_CURSOR_STATIC, 0);
-		switch (cursor_type) {
-			case PDO_CURSOR_SCROLL:
-				cursor = SQL_CURSOR_STATIC;
-			default:
-				;
-		}
-
-		rc = SQLSetStmtOptions(S->stmt, SQL_CURSOR_TYPE, (void*)cursor, SQL_IS_UINTEGER);
-		if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
-			pdo_odbc_stmt_error("SQLSetStmtOption: SQL_CURSOR_TYPE");
-			SQLFreeHandle(SQL_HANDLE_STMT, S->stmt);
-			return 0;
-		}
-#endif
 	}
 	
 	rc = SQLPrepare(S->stmt, (char*)sql, SQL_NTS);
+	if (nsql) {
+		efree(nsql);
+	}
 
 	if (rc != SQL_SUCCESS) {
 		pdo_odbc_stmt_error("SQLPrepare");
@@ -171,7 +172,6 @@ static int odbc_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len, p
 	
 	stmt->driver_data = S;
 	stmt->methods = &odbc_stmt_methods;
-	stmt->supports_placeholders = PDO_PLACEHOLDER_POSITIONAL;
 	
 	return 1;
 }
