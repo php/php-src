@@ -43,7 +43,11 @@ static int	le_netbuf;
 function_entry php3_ftp_functions[] = {
 	PHP_FE(ftp_connect,			NULL)
 	PHP_FE(ftp_login,			NULL)
+	PHP_FE(ftp_pwd,				NULL)
+	PHP_FE(ftp_cdup,			NULL)
 	PHP_FE(ftp_chdir,			NULL)
+	PHP_FE(ftp_mkdir,			NULL)
+	PHP_FE(ftp_rmdir,			NULL)
 	PHP_FE(ftp_nlist,			NULL)
 	PHP_FE(ftp_listraw,			NULL)
 	PHP_FE(ftp_systype,			NULL)
@@ -141,6 +145,65 @@ PHP_FUNCTION(ftp_login)
 	RETURN_TRUE;
 }
 
+PHP_FUNCTION(ftp_pwd)
+{
+	pval		*arg1;
+	int		id, type;
+	netbuf		*net;
+	char		buf[512];
+
+	/* arg1 - netbuf
+	 */
+	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	convert_to_long(arg1);
+
+	id = arg1->value.lval;
+	net = php3_list_find(id, &type);
+	if (!net || type != le_netbuf) {
+		php_error(E_WARNING, "Unable to find netbuf %d", id);
+		RETURN_FALSE;
+	}
+
+	if (!FtpPwd(buf, sizeof(buf), net)) {
+		php_error(E_WARNING, "FtpPwd: %s", FtpLastResponse(net));
+		RETURN_FALSE;
+	}
+
+	RETURN_STRING(buf, 1);
+}
+
+PHP_FUNCTION(ftp_cdup)
+{
+	pval		*arg1;
+	int		id, type;
+	netbuf		*net;
+
+	/* arg1 - netbuf
+	 */
+	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	convert_to_long(arg1);
+
+	id = arg1->value.lval;
+	net = php3_list_find(id, &type);
+	if (!net || type != le_netbuf) {
+		php_error(E_WARNING, "Unable to find netbuf %d", id);
+		RETURN_FALSE;
+	}
+
+	if (!FtpCDUp(net)) {
+		php_error(E_WARNING, "FtpCdup: %s", FtpLastResponse(net));
+		RETURN_FALSE;
+	}
+
+	RETURN_TRUE;
+}
+
 PHP_FUNCTION(ftp_chdir)
 {
 	pval		*arg1, *arg2;
@@ -169,6 +232,74 @@ PHP_FUNCTION(ftp_chdir)
 	/* change directories */
 	if (!FtpChdir(arg2->value.str.val, net)) {
 		php_error(E_WARNING, "FtpChdir: %s", FtpLastResponse(net));
+		RETURN_FALSE;
+	}
+
+	RETURN_TRUE;
+}
+
+PHP_FUNCTION(ftp_mkdir)
+{
+	pval		*arg1, *arg2;
+	int		id, type;
+	netbuf		*net;
+
+	/* arg1 - netbuf
+	 * arg2 - directory
+	 */
+	if (	ARG_COUNT(ht) != 2 ||
+		getParameters(ht, 2, &arg1, &arg2) == FAILURE)
+	{
+		WRONG_PARAM_COUNT;
+	}
+
+	convert_to_long(arg1);
+	convert_to_string(arg2);
+
+	id = arg1->value.lval;
+	net = php3_list_find(id, &type);
+	if (!net || type != le_netbuf) {
+		php_error(E_WARNING, "Unable to find netbuf %d", id);
+		RETURN_FALSE;
+	}
+
+	/* change directories */
+	if (!FtpMkdir(arg2->value.str.val, net)) {
+		php_error(E_WARNING, "FtpMkdir: %s", FtpLastResponse(net));
+		RETURN_FALSE;
+	}
+
+	RETURN_TRUE;
+}
+
+PHP_FUNCTION(ftp_rmdir)
+{
+	pval		*arg1, *arg2;
+	int		id, type;
+	netbuf		*net;
+
+	/* arg1 - netbuf
+	 * arg2 - directory
+	 */
+	if (	ARG_COUNT(ht) != 2 ||
+		getParameters(ht, 2, &arg1, &arg2) == FAILURE)
+	{
+		WRONG_PARAM_COUNT;
+	}
+
+	convert_to_long(arg1);
+	convert_to_string(arg2);
+
+	id = arg1->value.lval;
+	net = php3_list_find(id, &type);
+	if (!net || type != le_netbuf) {
+		php_error(E_WARNING, "Unable to find netbuf %d", id);
+		RETURN_FALSE;
+	}
+
+	/* change directories */
+	if (!FtpRmdir(arg2->value.str.val, net)) {
+		php_error(E_WARNING, "FtpRmdir: %s", FtpLastResponse(net));
 		RETURN_FALSE;
 	}
 
@@ -356,6 +487,7 @@ PHP_FUNCTION(ftp_systype)
 	}
 
 	if (!FtpSysType(buf, sizeof(buf), net)) {
+		php_error(E_WARNING, "FtpSysType: %s", FtpLastResponse(net));
 		RETURN_FALSE;
 	}
 
