@@ -183,7 +183,7 @@ static void sapi_cgi_register_variables(zval *track_vars_array ELS_DC SLS_DC PLS
 static void sapi_cgi_log_message(char *message)
 {
 	if (php_header()) {
-		fprintf(stderr, message);
+		fprintf(stderr, "%s", message);
 		fprintf(stderr, "\n");
 	}
 }

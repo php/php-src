@@ -278,7 +278,7 @@ static void php_apache_log_message(char *message)
 		log_error(message, ((request_rec *) SG(server_context))->server);
 #endif
 	} else {
-		fprintf(stderr, message);
+		fprintf(stderr, "%s", message);
 		fprintf(stderr, "\n");
 	}
 }
