@@ -1336,9 +1336,7 @@ PHP_FUNCTION(odbc_fetch_object)
 	/* OBJECTS_FIXME */
 	php_odbc_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, ODBC_OBJECT);
 	if (Z_TYPE_P(return_value) == IS_ARRAY) {
-		Z_TYPE_P(return_value) = IS_OBJECT;
-		Z_OBJPROP_P(return_value) = return_value->value.ht;
-		Z_OBJCE_P(return_value) = &zend_standard_class_def;
+		object_and_properties_init(return_value, &zend_standard_class_def, return_value->value.ht);
 	}
 }
 /* }}} */
