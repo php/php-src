@@ -426,6 +426,8 @@ PHP_FUNCTION(get_meta_tags)
 			in_tag = 1;
 		} else if (tok == TOK_CLOSETAG) {
 			if (have_name) {
+				/* For BC */
+				php_strtolower(name, strlen(name));
 				if (have_content) {
 					add_assoc_string(return_value, name, value, 0); 
 				} else {
