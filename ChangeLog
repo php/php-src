@@ -1,3 +1,77 @@
+2001-12-22  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/msession/msession.c: re-added prototype folding hooks
+
+    * ext/msession/msession.c: *now* it is backwards compatible ...
+
+2001-12-22  Rasmus Lerdorf  <rasmus@php.net>
+
+    * EXTENSIONS: .
+
+2001-12-22  Mark L. Woodward  <mlwmohawk@mohawksoft.com>
+
+    * ext/msession/msession.c:
+    Toned down a comment that was written in the heat of the moment.
+
+2001-12-22  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/math.c: - Let ceil also return a float in every case
+
+    * ext/standard/tests/math/floorceil.phpt: - Add test for floor and ceil
+
+2001-12-22  Zak Greant  <zak@jobvillage.com>
+
+    * ext/standard/array.c
+      ext/standard/tests/array/001.phpt:
+    Modified array_walk, arsort, asort, krsort, ksort, rsort, shuffle, sort,
+    uasort, uksort and usort.
+
+    Corrected prototype comments for all.
+
+    Converted to use zend_parse_parameters, except for the u.?sort functions.
+
+    Changed return values for failure from implicit NULL to explicit FALSE in
+    asort(), krsort(), and ksort().
+
+    Changed pval to zval in the u.?sort functions.
+
+    Added test to help ensure that fixes to code do not change function
+    behavior. Tests are quite large (~237k) but compress down to ~16k.
+    Please let me know if this is a problem!
+
+2001-12-22  Stig Bakken  <ssb@fast.no>
+
+    * pear/HTML/Form.php: * set enctype automatically when adding files
+
+    * pear/PEAR/Common.php:
+    * add "pedantic" mode in infoFromTgzFile and skip some checks if not
+      pedantic
+
+2001-12-22  Zeev Suraski  <zeev@zend.com>
+
+    * NEWS: Update NEWS
+
+    * sapi/isapi/php4isapi.c: MFH
+
+    * sapi/isapi/php4isapi.c: Fix incompatibility with Windows .NET (IIS 6)
+    May also improve stability under other Windows versions
+
+    * ext/standard/reg.c: Fix a warning
+
+    * ext/pcre/php_pcre.c:
+    Fix a warning and remove a printf() that slipped in...
+
+2001-12-22  Mark L. Woodward  <mlwmohawk@mohawksoft.com>
+
+    * ext/msession/php_msession.h
+      ext/msession/reqclient.h: Added msession_call
+
+    * ext/msession/msession.c: reverted chages
+    Restored zend_get_parameters_ex
+    Put back ansi brackets
+    Added author note.
+    Added msession_call
+
 2001-12-21  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
 
     * pear/Makefile.in: Install session module haeder
