@@ -1,12 +1,34 @@
 README FOR THTTPD MODULE (by Sascha Schumann)        
 ($Date$)
 
-	This is a SAPI module for PHP 4.0 supporting thttpd, the tiny,
+	This is a SAPI module for PHP 4.x supporting thttpd, the tiny,
 	turbo, throttling HTTP server by Jef Poskanzer.
 
+	NOTE: All requests will be serialized. That means, one long running
+	      script will block all other requests. Choose another web-server,
+	      if you want to execute arbitrary scripts.
+
 	The module contains a patch against version 2.21b of thttpd. The patch
-	adds hooks to thttpd to call PHP, if a filename matches *.php. This
-	patch will be applied when you install PHP.
+	fixes a number of bugs and adds some functionality:
+
+	- HTTP/1.1 Persistent Connection/Pipeline Support
+	- PHP Scripting (**.php by default)
+	- Highlighting PHP Scripts (**.phps by default)
+	- Fast Accept Loop
+	- Periodic Connection Expiring
+
+	You can configure the filename extensions by creating a config file for
+	thttpd and setting these entries:
+
+	phppat=PATTERN
+	phpspat=PATTERN
+
+	The PATTERN has the same format as defined here:
+
+		http://acme.com/software/thttpd/options.html#CGI_PATTERN
+
+	"**.php" means: match any file ending in .php in any directory.
+	Setting the pattern from the command line is not supported.
 
 	NOTE: This version supports *only* thttpd 2.21b, no prior or later
 	version.
@@ -15,18 +37,14 @@ README FOR THTTPD MODULE (by Sascha Schumann)
 	like IMP 2.2.0 without any problems). Its original intention was to
 	demonstrate the ability of PHP to work in every web server environment.
 
-	NOTE: All requests will be serialized. That means, one long running
-	      script will block all other requests. Choose another web-server,
-	      if you want to execute arbitrary scripts.
-
 REQUIRED DOWNLOADS
 
-	1. thttpd 2.21b (2.20 or 2.22beta will _not_ work)
+	1. thttpd 2.21b (2.20 or +2.22beta will _not_ work)
 	   
 	   Full Distribution:
 	   http://www.acme.com/software/thttpd/thttpd-2.21b.tar.gz
 	   
-	2. PHP 4.0.x
+	2. PHP 4.x
 	   
 	   Download:
 	   http://www.php.net/
