@@ -2317,7 +2317,7 @@ static int php_ini_check_path(char *option_name, int option_len, char *new_optio
 		return 0;
 	}
 	
-	return strncmp(option_name, new_option_name, option_len);
+	return !strncmp(option_name, new_option_name, option_len);
 }
 
 /* {{{ proto string ini_set(string varname, string newvalue)
