@@ -8,7 +8,7 @@
 
 #if HAVE_IMAP
 
-#ifndef MSVC5
+#if !(WIN32||WINNT)
 #include "build-defs.h"
 #endif
 

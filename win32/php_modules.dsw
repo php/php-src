@@ -15,7 +15,31 @@ Package=<4>
 
 ###############################################################################
 
+Project: "imap"=.\ext\imap\imap.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
 Project: "mysql"=.\ext\mysql\mysql.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "pgsql"=.\ext\pgsql\pgsql.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
