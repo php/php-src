@@ -640,8 +640,8 @@ static void php_message_handler_for_zend(long message, void *data)
 #if PHP_SIGCHILD
 static int sigchld_handler(int apar)
 {
-    int status;             
-    wait(&status);
+    while (waitpid(-1, NULL, WNOHANG) > 0)
+		;
     signal(SIGCHLD,sigchld_handler);   
 }
 #endif
