@@ -178,6 +178,7 @@ PHP_FUNCTION(imap_thread);
 #if defined(HAVE_IMAP2000) || defined(HAVE_IMAP2001)
 PHP_FUNCTION(imap_get_quota);
 PHP_FUNCTION(imap_set_quota);
+PHP_FUNCTION(imap_setacl);
 #endif
 
 
