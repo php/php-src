@@ -351,7 +351,7 @@ dnl "shared" can be set to "shared" or "yes" to build the extension as
 dnl a dynamically loadable library.
 dnl
 AC_DEFUN(PHP_EXTENSION,[
-  if test -d "$cwd/$srcdir/ext/$1" -o -d "$cwd/$srcdir/sapi/$1" ; then
+  if test -d "$cwd/$srcdir/ext/$1" ; then
     EXT_SUBDIRS="$EXT_SUBDIRS $1"
     if test "$2" != "shared" && test "$2" != "yes" && test -z "$php_always_shared"; then
       _extlib="lib$1.a"
