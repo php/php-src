@@ -409,6 +409,30 @@ PHPAPI void display_ini_entries(zend_module_entry *module)
 }
 
 
+PHPAPI int php_atoi(const char *str, int str_len)
+{
+	int retval;
+
+	if (!str_len) {
+		str_len = strlen(str);
+	}
+	retval = atoi(str);
+	if (str_len>0) {
+		switch (str[str_len-1]) {
+			case 'k':
+			case 'K':
+				retval *= 1024;
+				break;
+			case 'm':
+			case 'M':
+				retval *= 1048576;
+				break;
+		}
+	}
+	return retval;
+}
+
+
 /* Standard message handlers */
 
 PHPAPI PHP_INI_MH(OnUpdateBool)
@@ -442,7 +466,7 @@ PHPAPI PHP_INI_MH(OnUpdateInt)
 
 	p = (long *) (base+(size_t) mh_arg1);
 
-	*p = atoi(new_value);
+	*p = php_atoi(new_value, new_value_length);
 	return SUCCESS;
 }
 

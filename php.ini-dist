@@ -135,7 +135,7 @@ expose_php	=	On		; Decides whether PHP may expose the fact that it is installed 
 ;;;;;;;;;;;;;;;;;;;
 
 max_execution_time = 30     ; Maximum execution time of each script, in seconds
-memory_limit = 8388608		; Maximum amount of memory a script may consume (8MB)
+memory_limit = 8M			; Maximum amount of memory a script may consume (8MB)
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -167,6 +167,10 @@ display_errors	=	On	; Print out errors (as a part of the output)
 						; Keeping display_errors enabled on a production web site may reveal
 						; security information to end users, such as file paths on your Web server,
 						; your database schema or other information.
+display_startup_errors = Off		; Even when display_errors is on, errors that occur during
+									; PHP's startup sequence are not displayed.  It's strongly
+									; recommended to keep display_startup_errors off, except for
+									; when debugging.
 log_errors		=	Off	; Log errors into a log file (server-specific log, stderr, or error_log (below))
 						; As stated above, you're strongly advised to use error logging in place of
 						; error displaying on production web sites.
@@ -201,6 +205,7 @@ register_argc_argv	=	On		; This directive tells PHP whether to declare the argv&
 								; variables (that would contain the GET information).  If you
 								; don't use these variables, you should turn it off for
 								; increased performance
+post_max_size		=	8M		; Maximum size of POST data that PHP will accept.
 gpc_order			=	"GPC"	; This directive is deprecated.  Use variables_order instead.
 
 ; Magic quotes
@@ -225,13 +230,19 @@ default_mimetype = "text/html"
 include_path	=                   ; UNIX: "/path1:/path2"  Windows: "\path1;\path2"
 doc_root		=					; the root of the php pages, used only if nonempty
 user_dir		=					; the directory under which php opens the script using /~username, used only if nonempty
-;upload_tmp_dir	=	                ; temporary directory for HTTP uploaded files (will use system default if not specified)
-upload_max_filesize = 2097152       ; 2 Meg default limit on file uploads
 extension_dir	=	./				; directory in which the loadable extensions (modules) reside
 enable_dl		= On				; Whether or not to enable the dl() function.
 									; The dl() function does NOT properly work in multithreaded
 									; servers, such as IIS or Zeus, and is automatically disabled
 									; on them.
+
+
+;;;;;;;;;;;;;;;;
+; File Uploads ;
+;;;;;;;;;;;;;;;;
+file_uploads	= On				; Whether to allow HTTP file uploads
+;upload_tmp_dir	=	                ; temporary directory for HTTP uploaded files (will use system default if not specified)
+upload_max_filesize = 2M		    ; Maximum allowed size for uploaded files
 
 
 ;;;;;;;;;;;;;;;;;;;;;;
