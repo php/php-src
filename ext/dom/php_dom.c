@@ -32,7 +32,6 @@
 
 #if HAVE_DOM
 
-#include "zend_execute_locks.h"
 #include "ext/standard/info.h"
 #define PHP_XPATH 1
 #define PHP_XPTR 2
