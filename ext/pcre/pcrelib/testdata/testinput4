@@ -1,0 +1,64 @@
+/^[\w]+/
+    *** Failers
+    École
+
+/^[\w]+/Lfr
+    École
+
+/^[\w]+/
+    *** Failers
+    École
+
+/^[\W]+/
+    École
+
+/^[\W]+/Lfr
+    *** Failers
+    École
+
+/[\b]/
+    \b
+    *** Failers
+    a
+
+/[\b]/Lfr
+    \b
+    *** Failers
+    a
+
+/^\w+/
+    *** Failers
+    École
+
+/^\w+/Lfr
+    École
+
+/(.+)\b(.+)/
+    École
+
+/(.+)\b(.+)/Lfr
+    *** Failers
+    École
+
+/École/i
+    École
+    *** Failers
+    école
+
+/École/iLfr
+    École
+    école
+
+/\w/IS
+
+/\w/ISLfr
+
+/^[\xc8-\xc9]/iLfr
+    École
+    école
+
+/^[\xc8-\xc9]/Lfr
+    École
+    *** Failers 
+    école
+

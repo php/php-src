@@ -1,0 +1,105 @@
+<HTML>
+<HEAD>
+<TITLE>pgrep specification</TITLE>
+</HEAD>
+<body bgcolor="#FFFFFF" text="#00005A">
+<H1>pgrep specification</H1>
+This HTML document has been generated automatically from the original man page.
+If there is any nonsense in it, please consult the man page in case the
+conversion went wrong.
+<UL>
+<LI><A NAME="TOC1" HREF="#SEC1">NAME</A>
+<LI><A NAME="TOC2" HREF="#SEC2">SYNOPSIS</A>
+<LI><A NAME="TOC3" HREF="#SEC3">DESCRIPTION</A>
+<LI><A NAME="TOC4" HREF="#SEC4">OPTIONS</A>
+<LI><A NAME="TOC5" HREF="#SEC5">SEE ALSO</A>
+<LI><A NAME="TOC6" HREF="#SEC6">DIAGNOSTICS</A>
+<LI><A NAME="TOC7" HREF="#SEC7">AUTHOR</A>
+</UL>
+<LI><A NAME="SEC1" HREF="#TOC1">NAME</A>
+<P>
+pgrep - a grep with Perl-compatible regular expressions.
+</P>
+<LI><A NAME="SEC2" HREF="#TOC1">SYNOPSIS</A>
+<P>
+<B>pgrep [-Vchilnsvx] pattern [file] ...</B>
+</P>
+<LI><A NAME="SEC3" HREF="#TOC1">DESCRIPTION</A>
+<P>
+<B>pgrep</B> searches files for character patterns, in the same way as other
+grep commands do, but it uses the PCRE regular expression library to support
+patterns that are compatible with the regular expressions of Perl 5. See
+<B>pcre(3)</B> for a full description of syntax and semantics.
+</P>
+<P>
+If no files are specified, <B>pgrep</B> reads the standard input. By default,
+each line that matches the pattern is copied to the standard output, and if
+there is more than one file, the file name is printed before each line of
+output. However, there are options that can change how <B>pgrep</B> behaves.
+</P>
+<P>
+Lines are limited to BUFSIZ characters. BUFSIZ is defined in <B>&#60;stdio.h&#62;</B>.
+The newline character is removed from the end of each line before it is matched
+against the pattern.
+</P>
+<LI><A NAME="SEC4" HREF="#TOC1">OPTIONS</A>
+<P>
+<B>-V</B>
+Write the version number of the PCRE library being used to the standard error
+stream.
+</P>
+<P>
+<B>-c</B>
+Do not print individual lines; instead just print a count of the number of
+lines that would otherwise have been printed. If several files are given, a
+count is printed for each of them.
+</P>
+<P>
+<B>-h</B>
+Suppress printing of filenames when searching multiple files.
+</P>
+<P>
+<B>-i</B>
+Ignore upper/lower case distinctions during comparisons.
+</P>
+<P>
+<B>-l</B>
+Instead of printing lines from the files, just print the names of the files
+containing lines that would have been printed. Each file name is printed
+once, on a separate line.
+</P>
+<P>
+<B>-n</B>
+Precede each line by its line number in the file.
+</P>
+<P>
+<B>-s</B>
+Work silently, that is, display nothing except error messages.
+The exit status indicates whether any matches were found.
+</P>
+<P>
+<B>-v</B>
+Invert the sense of the match, so that lines which do <I>not</I> match the
+pattern are now the ones that are found.
+</P>
+<P>
+<B>-x</B>
+Force the pattern to be anchored (it must start matching at the beginning of
+the line) and in addition, require it to match the entire line. This is
+equivalent to having ^ and $ characters at the start and end of each
+alternative branch in the regular expression.
+</P>
+<LI><A NAME="SEC5" HREF="#TOC1">SEE ALSO</A>
+<P>
+<B>pcre(3)</B>, Perl 5 documentation
+</P>
+<LI><A NAME="SEC6" HREF="#TOC1">DIAGNOSTICS</A>
+<P>
+Exit status is 0 if any matches were found, 1 if no matches were found, and 2
+for syntax errors or inacessible files (even if matches were found).
+</P>
+<LI><A NAME="SEC7" HREF="#TOC1">AUTHOR</A>
+<P>
+Philip Hazel &#60;ph10@cam.ac.uk&#62;
+<BR>
+Copyright (c) 1997-1999 University of Cambridge.
