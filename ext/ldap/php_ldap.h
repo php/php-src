@@ -34,12 +34,6 @@
 #ifndef _PHP_LDAP_H
 #define _PHP_LDAP_H
 
-#if COMPILE_DL
-#undef HAVE_LDAP
-#define HAVE_LDAP 1
-#endif
-
-#if HAVE_LDAP
 #include <lber.h>
 #include <ldap.h>
 
@@ -89,38 +83,28 @@ PHP_FUNCTION(ldap_mod_add);
 PHP_FUNCTION(ldap_mod_replace);
 PHP_FUNCTION(ldap_mod_del);
 
-typedef struct {
+ZEND_BEGIN_MODULE_GLOBALS(ldap)
 	long default_link;
 	long num_links, max_links;
 	char *base_dn;
-	int le_result, le_result_entry, le_ber_entry;
-	int le_link;
+ZEND_END_MODULE_GLOBALS(ldap)
 
-	/* I just found out that the thread safe features
-		of the netscape ldap library are only required if
-		multiple threads are accessing the same LDAP
-		structure.  Since we are not doing that, we do
-		not need to use this feature.  I am leaving the
-		code here anyway just in case.  smc
-		*/
-#if 0
-	struct ldap_thread_fns tfns;
-	int le_errno; /* Corresponds to the LDAP error code */
-	char *le_matched; /* Matching components of the DN, 
-                  if an NO_SUCH_OBJECT error occurred */
-	char *le_errmsg; /* Error message */
-#endif
-} ldap_module;
-
-#ifndef THREAD_SAFE
-extern ldap_module php_ldap_module;
-#endif
-
+#ifdef ZTS
+# define LDAPLS_D	zend_ldap_globals *ldap_globals
+# define LDAPLS_DC	, LDAPLS_D
+# define LDAPLS_C	ldap_globals
+# define LDAPLS_CC , LDAPLS_C
+# define LDAPG(v) (ldap_globals->v)
+# define LDAPLS_FETCH()	zend_ldap_globals *ldap_globals = ts_resource(ldap_globals_id)
 #else
-
-#define ldap_module_ptr NULL
-
+# define LDAPLS_D
+# define LDAPLS_DC
+# define LDAPLS_C
+# define LDAPLS_CC
+# define LDAPG(v) (ldap_globals.v)
+# define LDAPLS_FETCH()
 #endif
+
 
 #define phpext_ldap_ptr ldap_module_ptr
 

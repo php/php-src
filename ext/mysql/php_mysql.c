@@ -52,7 +52,6 @@ static int le_result,le_link,le_plink;
 
 #include "php_ini.h"
 
-#if HAVE_MYSQL
 # if HAVE_MYSQL_MYSQL_H
 #  include <mysql/mysql.h>
 # else
@@ -61,7 +60,6 @@ static int le_result,le_link,le_plink;
 #ifdef HAVE_MYSQL_REAL_CONNECT
 #ifdef HAVE_ERRMSG_H
 #include <errmsg.h>
-#endif
 #endif
 
 #define SAFE_STRING(s) ((s)?(s):"")
@@ -150,26 +148,23 @@ zend_module_entry mysql_module_entry = {
 			 PHP_MINFO(mysql), STANDARD_MODULE_PROPERTIES
 };
 
-#ifdef ZTS
-int mysql_globals_id;
-#else
-PHP_MYSQL_API php_mysql_globals mysql_globals;
-#endif
+
+ZEND_DECLARE_MODULE_GLOBALS(mysql)
 
 #ifdef COMPILE_DL_MYSQL
-# include "dl/phpdl.h"
-DLEXPORT zend_module_entry *get_module(void) { return &mysql_module_entry; }
+ZEND_DLEXPORT zend_module_entry *get_module(void) { return &mysql_module_entry; }
 #endif
 
 void timeout(int sig);
 
 #define CHECK_LINK(link) { if (link==-1) { php_error(E_WARNING,"MySQL:  A link to the server could not be established"); RETURN_FALSE; } }
 
-/* NOTE  Don't ask me why, but soon as I made this the list
- * destructor, I stoped getting access violations in windows
- * with mysql 3.22.7a
+/*
+ * This wrapper is required since mysql_free_result() returns an integer, and
+ * thus, cannot be used directly
  */
-static void _free_mysql_result(MYSQL_RES *mysql_result){
+static void _free_mysql_result(MYSQL_RES *mysql_result)
+{
 	mysql_free_result(mysql_result);
 }
 
@@ -240,31 +235,25 @@ static PHP_INI_MH(OnMySQLPort)
 
 
 PHP_INI_BEGIN()
-	STD_PHP_INI_BOOLEAN("mysql.allow_persistent",	"1",	PHP_INI_SYSTEM,		OnUpdateInt,		allow_persistent,	php_mysql_globals,		mysql_globals)
-	STD_PHP_INI_ENTRY_EX("mysql.max_persistent",	"-1",	PHP_INI_SYSTEM,		OnUpdateInt,		max_persistent,		php_mysql_globals,		mysql_globals,	display_link_numbers)
-	STD_PHP_INI_ENTRY_EX("mysql.max_links",		"-1",	PHP_INI_SYSTEM,			OnUpdateInt,		max_links,			php_mysql_globals,		mysql_globals,	display_link_numbers)
-	STD_PHP_INI_ENTRY("mysql.default_host",		NULL,	PHP_INI_ALL,			OnUpdateString,		default_host,		php_mysql_globals,		mysql_globals)
-	STD_PHP_INI_ENTRY("mysql.default_user",		NULL,	PHP_INI_ALL,			OnUpdateString,		default_user,		php_mysql_globals,		mysql_globals)
-	STD_PHP_INI_ENTRY("mysql.default_password",	NULL,	PHP_INI_ALL,			OnUpdateString,		default_password,	php_mysql_globals,		mysql_globals)
+	STD_PHP_INI_BOOLEAN("mysql.allow_persistent",	"1",	PHP_INI_SYSTEM,		OnUpdateInt,		allow_persistent,	zend_mysql_globals,		mysql_globals)
+	STD_PHP_INI_ENTRY_EX("mysql.max_persistent",	"-1",	PHP_INI_SYSTEM,		OnUpdateInt,		max_persistent,		zend_mysql_globals,		mysql_globals,	display_link_numbers)
+	STD_PHP_INI_ENTRY_EX("mysql.max_links",		"-1",	PHP_INI_SYSTEM,			OnUpdateInt,		max_links,			zend_mysql_globals,		mysql_globals,	display_link_numbers)
+	STD_PHP_INI_ENTRY("mysql.default_host",		NULL,	PHP_INI_ALL,			OnUpdateString,		default_host,		zend_mysql_globals,		mysql_globals)
+	STD_PHP_INI_ENTRY("mysql.default_user",		NULL,	PHP_INI_ALL,			OnUpdateString,		default_user,		zend_mysql_globals,		mysql_globals)
+	STD_PHP_INI_ENTRY("mysql.default_password",	NULL,	PHP_INI_ALL,			OnUpdateString,		default_password,	zend_mysql_globals,		mysql_globals)
 	PHP_INI_ENTRY("mysql.default_port",		NULL,	PHP_INI_ALL,			OnMySQLPort)
 PHP_INI_END()
 
 
-#ifdef ZTS
-static void php_mysql_init_globals(php_mysql_globals *mysql_globals)
+static void php_mysql_init_globals(zend_mysql_globals *mysql_globals)
 {
-	MySG(num_persistent) = 0;
+	mysql_globals->num_persistent = 0;
 }
-#endif
 
 
 PHP_MINIT_FUNCTION(mysql)
 {
-#ifdef ZTS
-	mysql_globals_id = ts_allocate_id(sizeof(php_mysql_globals), (ts_allocate_ctor) php_mysql_init_globals, NULL);
-#else
-	MySG(num_persistent)=0;
-#endif
+	ZEND_INIT_MODULE_GLOBALS(mysql, php_mysql_init_globals, NULL);
 
 	REGISTER_INI_ENTRIES();
 	le_result = register_list_destructors(_free_mysql_result,NULL);

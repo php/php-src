@@ -44,7 +44,7 @@ RSC=rc.exe
 # PROP Intermediate_Dir "Release"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "IMAP_EXPORTS" /YX /FD /c
-# ADD CPP /nologo /MT /W3 /GX /O2 /D "NDEBUG" /D "IMAP_EXPORTS" /D "COMPILE_DL_IMAP" /D HAVE_IMAP=1 /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "ZEND_WIN32" /D "PHP_WIN32" /YX /FD /c
+# ADD CPP /nologo /MD /W3 /GX /O2 /I "..\.." /I "..\..\Zend" /I "..\..\..\bindlib_w32" /I "..\..\..\php_build\IMAP\c-client" /I "..\..\TSRM" /D "NDEBUG" /D "IMAP_EXPORTS" /D "COMPILE_DL_IMAP" /D HAVE_IMAP=1 /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "ZEND_WIN32" /D "PHP_WIN32" /D ZEND_DEBUG=0 /YX /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x40d /d "NDEBUG"
@@ -54,7 +54,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /machine:I386
-# ADD LINK32 c-client.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib php4ts.lib wsock32.lib winmm.lib /nologo /dll /machine:I386 /libpath:"..\..\Debug_TS"
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib php4nts.lib wsock32.lib winmm.lib cclient.lib /nologo /dll /machine:I386 /libpath:"..\..\Release" /libpath:"..\..\..\php_build\IMAP\C-Client"
 
 !ELSEIF  "$(CFG)" == "imap - Win32 Debug"
 
@@ -69,7 +69,7 @@ LINK32=link.exe
 # PROP Intermediate_Dir "Debug"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "IMAP_EXPORTS" /YX /FD /GZ /c
-# ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /D "_DEBUG" /D "IMAP_EXPORTS" /D "COMPILE_DL_IMAP" /D HAVE_IMAP=1 /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "ZEND_WIN32" /D "PHP_WIN32" /FR /YX /FD /GZ /c
+# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "..\.." /I "..\..\Zend" /I "..\..\..\bindlib_w32" /I "..\..\..\php_build\IMAP\c-client" /I "..\..\TSRM" /D "_DEBUG" /D "IMAP_EXPORTS" /D "COMPILE_DL_IMAP" /D HAVE_IMAP=1 /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "ZEND_WIN32" /D "PHP_WIN32" /D ZEND_DEBUG=0 /FR /YX /FD /GZ /c
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x40d /d "_DEBUG"
@@ -79,7 +79,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 c-client.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib php4ts.lib wsock32.lib winmm.lib /nologo /dll /debug /machine:I386 /pdbtype:sept /libpath:"..\..\Debug"
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib php4nts_debug.lib wsock32.lib winmm.lib cclient.lib /nologo /dll /debug /machine:I386 /pdbtype:sept /libpath:"..\..\Debug" /libpath:"..\..\..\php_build\IMAP\C-Client"
 
 !ELSEIF  "$(CFG)" == "imap - Win32 Debug_TS"
 
@@ -95,7 +95,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "IMAP_EXPORTS" /FR /YX /FD /GZ /c
-# ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /D "_DEBUG" /D "ZTS" /D "IMAP_EXPORTS" /D "COMPILE_DL_IMAP" /D HAVE_IMAP=1 /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "ZEND_WIN32" /D "PHP_WIN32" /FR /YX /FD /GZ /c
+# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "..\.." /I "..\..\Zend" /I "..\..\..\bindlib_w32" /I "..\..\..\php_build\IMAP\c-client" /I "..\..\TSRM" /D "ZTS" /D "_DEBUG" /D "IMAP_EXPORTS" /D "COMPILE_DL_IMAP" /D HAVE_IMAP=1 /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "ZEND_WIN32" /D "PHP_WIN32" /D ZEND_DEBUG=0 /FR /YX /FD /GZ /c
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x40d /d "_DEBUG"
@@ -105,7 +105,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib php4ts.lib wsock32.lib winmm.lib /nologo /dll /debug /machine:I386 /pdbtype:sept /libpath:"..\..\..\\" /libpath:"..\..\Debug_TS"
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib php4ts_debug.lib wsock32.lib winmm.lib cclient.lib /nologo /dll /debug /machine:I386 /pdbtype:sept /libpath:"..\..\..\\" /libpath:"..\..\Debug_TS" /libpath:"..\..\..\php_build\IMAP\C-Client"
 
 !ELSEIF  "$(CFG)" == "imap - Win32 Release_TS"
 
@@ -118,9 +118,10 @@ LINK32=link.exe
 # PROP Use_Debug_Libraries 0
 # PROP Output_Dir "Release_TS"
 # PROP Intermediate_Dir "Release_TS"
+# PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "IMAP_EXPORTS" /YX /FD /c
-# ADD CPP /nologo /MT /W3 /GX /O2 /D "NDEBUG" /D "ZTS" /D "IMAP_EXPORTS" /D "COMPILE_DL_IMAP" /D HAVE_IMAP=1 /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "ZEND_WIN32" /D "PHP_WIN32" /YX /FD /c
+# ADD CPP /nologo /MD /W3 /GX /O2 /I "..\.." /I "..\..\Zend" /I "..\..\..\bindlib_w32" /I "..\..\..\php_build\IMAP\c-client" /I "..\..\TSRM" /D "ZTS" /D "NDEBUG" /D "IMAP_EXPORTS" /D "COMPILE_DL_IMAP" /D HAVE_IMAP=1 /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "ZEND_WIN32" /D "PHP_WIN32" /D ZEND_DEBUG=0 /YX /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x40d /d "NDEBUG"
@@ -130,7 +131,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /machine:I386
-# ADD LINK32 c-client.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib php4ts.lib wsock32.lib winmm.lib /nologo /dll /machine:I386 /libpath:"..\..\Debug_TS"
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib php4ts.lib wsock32.lib winmm.lib cclient.lib /nologo /dll /machine:I386 /libpath:"..\..\Release_TS" /libpath:"..\..\..\php_build\IMAP\C-Client"
 
 !ENDIF 
 
@@ -156,98 +157,6 @@ SOURCE=.\imap.c
 
 SOURCE=.\imap.h
 # End Source File
-# End Group
-# Begin Group "IMAP"
-
-# PROP Default_Filter ""
-# Begin Group "Source Files No. 1"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE="..\..\..\Imap\c-client\dummynt.c"
-# End Source File
-# Begin Source File
-
-SOURCE="..\..\..\Imap\c-client\fdstring.c"
-# End Source File
-# Begin Source File
-
-SOURCE="..\..\..\Imap\c-client\flstring.c"
-# End Source File
-# Begin Source File
-
-SOURCE="..\..\..\Imap\c-client\imap4r1.c"
-# End Source File
-# Begin Source File
-
-SOURCE="..\..\..\Imap\c-client\mail.c"
-# End Source File
-# Begin Source File
-
-SOURCE="..\..\..\Imap\c-client\mbxnt.c"
-# End Source File
-# Begin Source File
-
-SOURCE="..\..\..\Imap\c-client\misc.c"
-# End Source File
-# Begin Source File
-
-SOURCE="..\..\..\Imap\c-client\mtxnt.c"
-# End Source File
-# Begin Source File
-
-SOURCE="..\..\..\Imap\c-client\netmsg.c"
-# End Source File
-# Begin Source File
-
-SOURCE="..\..\..\Imap\c-client\newsrc.c"
-# End Source File
-# Begin Source File
-
-SOURCE="..\..\..\Imap\c-client\nntp.c"
-# End Source File
-# Begin Source File
-
-SOURCE="..\..\..\Imap\c-client\os_nt.c"
-# End Source File
-# Begin Source File
-
-SOURCE="..\..\..\Imap\c-client\pop3.c"
-# End Source File
-# Begin Source File
-
-SOURCE="..\..\..\Imap\c-client\pseudo.c"
-# End Source File
-# Begin Source File
-
-SOURCE="..\..\..\Imap\c-client\rfc822.c"
-# End Source File
-# Begin Source File
-
-SOURCE="..\..\..\Imap\c-client\smanager.c"
-# End Source File
-# Begin Source File
-
-SOURCE="..\..\..\Imap\c-client\smtp.c"
-# End Source File
-# Begin Source File
-
-SOURCE="..\..\..\Imap\c-client\tenexnt.c"
-# End Source File
-# Begin Source File
-
-SOURCE="..\..\..\Imap\c-client\unixnt.c"
-# End Source File
-# Begin Source File
-
-SOURCE="..\..\..\Imap\c-client\utf8.c"
-# End Source File
-# End Group
-# Begin Group "Header Files No. 1"
-
-# PROP Default_Filter ""
-# End Group
 # End Group
 # End Target
 # End Project

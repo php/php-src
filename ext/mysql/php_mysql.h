@@ -80,23 +80,22 @@ PHP_FUNCTION(mysql_field_len);
 PHP_FUNCTION(mysql_field_type);
 PHP_FUNCTION(mysql_field_flags);
 
-typedef struct {
+ZEND_BEGIN_MODULE_GLOBALS(mysql)
 	long default_link;
 	long num_links,num_persistent;
 	long max_links,max_persistent;
 	long allow_persistent;
 	long default_port;
 	char *default_host, *default_user, *default_password;
-} php_mysql_globals;
-
+ZEND_END_MODULE_GLOBALS(mysql);
 
 #ifdef ZTS
-# define MySLS_D	php_mysql_globals *mysql_globals
+# define MySLS_D	zend_mysql_globals *mysql_globals
 # define MySLS_DC	, MySLS_D
 # define MySLS_C	mysql_globals
 # define MySLS_CC , MySLS_C
 # define MySG(v) (mysql_globals->v)
-# define MySLS_FETCH()	php_mysql_globals *mysql_globals = ts_resource(mysql_globals_id)
+# define MySLS_FETCH()	zend_mysql_globals *mysql_globals = ts_resource(mysql_module_entry.globals_id)
 #else
 # define MySLS_D
 # define MySLS_DC
@@ -104,7 +103,6 @@ typedef struct {
 # define MySLS_CC
 # define MySG(v) (mysql_globals.v)
 # define MySLS_FETCH()
-extern PHP_MYSQL_API php_mysql_globals mysql_globals;
 #endif
 
 
