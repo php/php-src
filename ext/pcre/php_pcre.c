@@ -84,10 +84,11 @@ static void php_pcre_free(void *ptr)
 }
 
 
-static void _php_free_pcre_cache(void *data)
+static int _php_free_pcre_cache(void *data)
 {
 	pcre_cache_entry *pce = (pcre_cache_entry *) data;
 	pefree(pce->re, 1);
+	return 1;
 }
 
 

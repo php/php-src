@@ -98,9 +98,10 @@ static int _php_regcomp(regex_t *preg, const char *pattern, int cflags)
 	return r;
 }
 
-static void _free_reg_cache(reg_cache *rc) 
+static int _free_reg_cache(reg_cache *rc) 
 {
 	regfree(&rc->preg);
+	return 1;
 }
 
 #define regfree(a);
@@ -108,7 +109,7 @@ static void _free_reg_cache(reg_cache *rc)
 	
 static void php_reg_init_globals(php_reg_globals *reg_globals) 
 {
-	_php3_hash_init(&reg_globals->ht_rc, 0, NULL, (void (*)(void *)) _free_reg_cache, 1);
+	_php3_hash_init(&reg_globals->ht_rc, 0, NULL, (int (*)(void *)) _free_reg_cache, 1);
 }
 
 static int php_minit_regex(INIT_FUNC_ARGS)
