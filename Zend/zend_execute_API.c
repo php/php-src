@@ -29,6 +29,7 @@
 #include "zend_ptr_stack.h"
 #include "zend_constants.h"
 #include "zend_extensions.h"
+#include "zend_default_classes.h"
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
 #endif
@@ -857,6 +858,26 @@ ZEND_API int zend_eval_string(char *str, zval *retval_ptr, char *string_name TSR
 	}
 	zval_dtor(&pv);
 	return retval;
+}
+
+
+ZEND_API int zend_eval_string_ex(char *str, zval *retval_ptr, char *string_name, int handle_exceptions TSRMLS_DC)
+{
+	int result;
+	zval *exception = EG(exception);
+
+
+	if (handle_exceptions) {
+		EG(exception) = NULL;
+	}
+	result = zend_eval_string(str, retval_ptr, string_name TSRMLS_CC);
+	if (handle_exceptions && EG(exception)) {
+		zend_exception_error(EG(exception) TSRMLS_CC);
+		zval_ptr_dtor(&EG(exception));
+		EG(exception) = exception;
+		result = FAILURE;
+	}
+	return result;
 }
 
 

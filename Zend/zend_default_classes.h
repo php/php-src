@@ -26,6 +26,7 @@ BEGIN_EXTERN_C()
 ZEND_API zend_class_entry *zend_exception_get_default(void);
 ZEND_API void zend_throw_exception(char *message, long code TSRMLS_DC);
 ZEND_API void zend_register_default_classes(TSRMLS_D);
+ZEND_API void zend_exception_error(zval *exception TSRMLS_DC);
 	
 END_EXTERN_C()
 

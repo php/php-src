@@ -153,6 +153,27 @@ ZEND_API void zend_throw_exception(char *message, long code TSRMLS_DC)
 	EG(exception) = ex;
 }
 
+static void zend_error_va(int type, const char *file, uint lineno, const char *format, ...)
+{
+	va_list args;
+	
+	va_start(args, format);
+	zend_error_cb(E_ERROR, file, lineno, format, args);
+	va_end(args);
+}
+
+ZEND_API void zend_exception_error(zval *exception TSRMLS_DC)
+{
+	if (instanceof_function(Z_OBJCE_P(exception), default_exception_ptr TSRMLS_CC)) {
+		zval *message = zend_read_property(default_exception_ptr, exception, "message", sizeof("message")-1, 1 TSRMLS_CC);
+		zval *file = zend_read_property(default_exception_ptr, exception, "file", sizeof("file")-1, 1 TSRMLS_CC);
+		zval *lineno = zend_read_property(default_exception_ptr, exception, "line", sizeof("line")-1, 1 TSRMLS_CC);
+		zend_error_va(E_ERROR, Z_STRVAL_P(file), Z_LVAL_P(lineno), "Uncaught exception '%s' with message '%s'", Z_OBJCE_P(exception)->name, Z_STRVAL_P(message));
+	} else {
+		zend_error(E_ERROR, "Uncaught exception '%s'!", Z_OBJCE_P(exception)->name);
+	}
+}
+
 ZEND_API void zend_register_default_classes(TSRMLS_D)
 {
 	zend_register_default_exception(TSRMLS_C);
