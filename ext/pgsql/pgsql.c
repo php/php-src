@@ -2829,9 +2829,15 @@ PHP_FUNCTION(pg_result_status)
 	PGresult *pgsql_result;
 	pgsql_result_handle *pg_result;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|l",
-							  &result, &result_type) == FAILURE) {
-		return;
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "r|l",
+							  &result, &result_type) == SUCCESS) {
+	}
+	else {
+		if (Z_TYPE_P(result) != IS_RESOURCE)
+			RETURN_FALSE;
+		php_error(E_WARNING,"%s expects parameter 1 to be resource and 2 to be integer",
+				  get_active_function_name(TSRMLS_C));
+		RETURN_FALSE;
 	}
 
 	ZEND_FETCH_RESOURCE(pg_result, pgsql_result_handle *, &result, -1, "PostgreSQL result", le_result);
