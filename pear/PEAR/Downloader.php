@@ -153,6 +153,25 @@ class PEAR_Downloader extends PEAR_Common
     }
     
     // }}}
+    // {{{ configSet()
+    function configSet($key, $value, $layer = 'user')
+    {
+        $this->_config->set($key, $value, $layer);
+        $this->_preferredState = $this->_config->get('preferred_state');
+        if (!$this->_preferredState) {
+            // don't inadvertantly use a non-set preferred_state
+            $this->_preferredState = null;
+        }
+    }
+    
+    // }}}
+    // {{{ setOptions()
+    function setOptions($options)
+    {
+        $this->_options = $options;
+    }
+    
+    // }}}
     // {{{ _downloadFile()
     /**
      * @param string filename to download
