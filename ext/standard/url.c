@@ -101,7 +101,10 @@ PHPAPI php_url *php_url_parse(char *str)
 		if (*(e+2) == '/') {
 			s = e + 3;
 		} else {
-			s = e + 2;
+			s = e + 1;
+			if (!strncasecmp("file", ret->scheme, sizeof("file"))) {
+				goto nohost;
+			}	
 		}	
 	} else if (e) { /* no scheme, look for port */
 		p = e + 1;
@@ -185,6 +188,8 @@ PHPAPI php_url *php_url_parse(char *str)
 	}
 	
 	s = e;
+	
+	nohost:
 	
 	if ((p = strchr(s, '?'))) {
 		pp = strchr(s, '#');
