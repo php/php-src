@@ -87,41 +87,15 @@ static void sapi_fastcgi_flush( void *server_context )
 }
 
 
-static int sapi_fastcgi_send_headers(sapi_headers_struct *sapi_headers SLS_DC)
+static void sapi_fastcgi_send_header(sapi_header_struct *sapi_header, void *server_context)
 {
-	char buf[1024];
-	int n = 0;
-	zend_llist_position pos;
-	sapi_header_struct *h;
-
-	switch( sapi_headers->http_response_code ) {
-	case 200:
-		/* Default, assumed by FastCGI */
-		break;
-	case 302:
-		FCGX_PutS( "Status: 302 Moved Temporarily\r\n", out );
-		break;
-	case 401:
-		FCGX_PutS( "Status: 401 Authorization Required\r\n", out );
-		break;
-	default:
-		FCGX_FPrintF( out, "Status: %d Undescribed\r\\n",
-			      sapi_headers->http_response_code );
-	}
-	
-	h = zend_llist_get_first_ex(&sapi_headers->headers, &pos);
-	while (h) {
-		/* TODO: Buffer headers together into one big Put? */
+	if( sapi_header ) {
 #ifdef DEBUG_FASTCGI
-		fprintf( stderr, "Printing header %s\n", h->header );
+		fprintf( stderr, "Header: %s\n", sapi_header->header );
 #endif
-		FCGX_PutStr( h->header, h->header_len, out );
-		FCGX_PutStr( "\r\n", 2, out );
-		h = zend_llist_get_next_ex(&sapi_headers->headers, &pos);
+		FCGX_PutStr( sapi_header->header, sapi_header->header_len, out );
 	}
 	FCGX_PutStr( "\r\n", 2, out );
-	
-	return SAPI_HEADER_SENT_SUCCESSFULLY;
 }
 
 static int sapi_fastcgi_read_post(char *buffer, uint count_bytes SLS_DC)
@@ -182,8 +156,8 @@ static sapi_module_struct fastcgi_sapi_module = {
 	php_error,
 	
 	NULL,
-	sapi_fastcgi_send_headers,
 	NULL,
+	sapi_fastcgi_send_header,
 	sapi_fastcgi_read_post,
 	sapi_fastcgi_read_cookies,
 
