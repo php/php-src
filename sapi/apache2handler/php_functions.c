@@ -386,7 +386,7 @@ PHP_MINFO_FUNCTION(apache)
 	php_info_print_table_row(2, "Apache API Version", tmp);
 	
 	if (serv->server_admin && *(serv->server_admin)) {
-		php_info_print_table_row(2, "Servert Administrator", serv->server_admin);
+		php_info_print_table_row(2, "Server Administrator", serv->server_admin);
 	}
 	
 	sprintf(tmp, "%s:%u", serv->server_hostname, serv->port);
