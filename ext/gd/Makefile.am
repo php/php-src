@@ -3,7 +3,7 @@
 phplibdir=$(libdir)/php
 
 SRC=gd.c gdcache.c gdttf.c
-INCLUDES=@INCLUDES@ -I@GD_INCLUDES@ -I@top_srcdir@ -I@top_srcdir@/libzend
+INCLUDES=@INCLUDES@ @GD_INCLUDES@ -I@top_srcdir@ -I@top_srcdir@/libzend
 noinst_LIBRARIES=@GD_STATIC@
 EXTRA_LIBRARIES=libphpext_gd.a
 libphpext_gd_a_SOURCES=$(SRC)
