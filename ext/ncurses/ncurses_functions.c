@@ -30,7 +30,7 @@
 
 
 /* {{{ proto int ncurses_addch(int ch)
-   Add character at current position and advance cursor */
+   Adds character at current position and advance cursor */
 PHP_FUNCTION(ncurses_addch)
 {
 	long ch;
@@ -44,7 +44,7 @@ PHP_FUNCTION(ncurses_addch)
 /* }}} */
 
 /* {{{ proto int ncurses_color_set(int pair)
-   Set fore- and background color */
+   Sets fore- and background color */
 PHP_FUNCTION(ncurses_color_set)
 {
 #ifdef HAVE_NCURSES_COLOR_SET
@@ -61,7 +61,7 @@ PHP_FUNCTION(ncurses_color_set)
 /* }}} */
 
 /* {{{ proto int ncurses_delwin(resource window)
-   Delete a ncurses window */
+   Deletes a ncurses window */
 PHP_FUNCTION(ncurses_delwin)
 {
 	zval **handle;
@@ -78,7 +78,7 @@ PHP_FUNCTION(ncurses_delwin)
 /* }}} */
 
 /* {{{ proto int ncurses_end(void)
-   Stop using ncurses, clean up the screen */
+   Stops using ncurses, clean up the screen */
 PHP_FUNCTION(ncurses_end)
 {
 	RETURN_LONG(endwin());             /* endialize the curses library */
@@ -86,7 +86,7 @@ PHP_FUNCTION(ncurses_end)
 /* }}} */
 
 /* {{{ proto int ncurses_getch(void)
-   Read a character from keyboard */
+   Reads a character from keyboard */
 PHP_FUNCTION(ncurses_getch)
 {
 	RETURN_LONG(getch());
@@ -94,7 +94,7 @@ PHP_FUNCTION(ncurses_getch)
 /* }}} */
 
 /* {{{ proto bool ncurses_has_colors(void)
-   Check if terminal has colors */
+   Checks if terminal has colors */
 PHP_FUNCTION(ncurses_has_colors)
 {
 	RETURN_BOOL(has_colors());
@@ -102,7 +102,7 @@ PHP_FUNCTION(ncurses_has_colors)
 /* }}} */
 
 /* {{{ proto int ncurses_init(void)
-   Initialize ncurses */
+   Initializes ncurses */
 PHP_FUNCTION(ncurses_init)
 {
 	initscr();             /* initialize the curses library */
@@ -112,7 +112,7 @@ PHP_FUNCTION(ncurses_init)
 /* }}} */
 
 /* {{{ proto int ncurses_init_pair(int pair, int fg, int bg)
-   Allocate a color pair */
+   Allocates a color pair */
 PHP_FUNCTION(ncurses_init_pair)
 {
 	long pair, fg, bg;
@@ -139,7 +139,7 @@ PHP_FUNCTION(ncurses_move)
 
 
 /* {{{ proto int ncurses_newwin(int rows, int cols, int y, int x)
-   Create a new window */
+   Creates a new window */
 PHP_FUNCTION(ncurses_newwin)
 {
 	long rows,cols,y,x;
@@ -169,7 +169,7 @@ PHP_FUNCTION(ncurses_refresh)
 /* }}} */
 
 /* {{{ proto int ncurses_start_color(void)
-   Start using colors */
+   Starts using colors */
 PHP_FUNCTION(ncurses_start_color)
 {
 	RETURN_LONG(start_color());
@@ -177,7 +177,7 @@ PHP_FUNCTION(ncurses_start_color)
 /* }}} */
 
 /* {{{ proto int ncurses_standout(void)
-   Start using 'standout' attribute */
+   Starts using 'standout' attribute */
 PHP_FUNCTION(ncurses_standout)
 {
 	RETURN_LONG(standout());
@@ -185,7 +185,7 @@ PHP_FUNCTION(ncurses_standout)
 /* }}} */
 
 /* {{{ proto int ncurses_standend(void)
-   Stop using 'standout' attribute */
+   Stops using 'standout' attribute */
 PHP_FUNCTION(ncurses_standend)
 {
 	RETURN_LONG(standend());
@@ -209,7 +209,7 @@ PHP_FUNCTION(ncurses_beep)
 /* }}} */
 
 /* {{{ proto bool ncurses_can_change_color(void)
-   Check if we can change terminals colors */
+   Checks if we can change terminals colors */
 PHP_FUNCTION(ncurses_can_change_color)
 {
 	RETURN_LONG(can_change_color());
@@ -217,7 +217,7 @@ PHP_FUNCTION(ncurses_can_change_color)
 /* }}} */
 
 /* {{{ proto bool ncurses_cbreak(void)
-   Switch of input buffering */
+   Switches of input buffering */
 PHP_FUNCTION(ncurses_cbreak)
 {
 	RETURN_LONG(cbreak());
@@ -225,7 +225,7 @@ PHP_FUNCTION(ncurses_cbreak)
 /* }}} */
 
 /* {{{ proto bool ncurses_clear(void)
-   Clear screen */
+   Clears screen */
 PHP_FUNCTION(ncurses_clear)
 {
 	RETURN_LONG(clear());
@@ -233,7 +233,7 @@ PHP_FUNCTION(ncurses_clear)
 /* }}} */
 
 /* {{{ proto bool ncurses_clrtobot(void)
-   Clear screen from current position to bottom */
+   Clears screen from current position to bottom */
 PHP_FUNCTION(ncurses_clrtobot)
 {
 	RETURN_LONG(clrtobot());
@@ -241,7 +241,7 @@ PHP_FUNCTION(ncurses_clrtobot)
 /* }}} */
 
 /* {{{ proto bool ncurses_clrtoeol(void)
-   Clear screen from current position to end of line */
+   Clears screen from current position to end of line */
 PHP_FUNCTION(ncurses_clrtoeol)
 {
 	RETURN_LONG(clrtoeol());
@@ -249,7 +249,7 @@ PHP_FUNCTION(ncurses_clrtoeol)
 /* }}} */
 
 /* {{{ proto bool ncurses_def_prog_mode(void)
-  Saves terminals (program) mode */
+   Saves terminals (program) mode */
 PHP_FUNCTION(ncurses_def_prog_mode)
 {
 	RETURN_LONG(def_prog_mode());
@@ -257,7 +257,7 @@ PHP_FUNCTION(ncurses_def_prog_mode)
 /* }}} */
 
 /* {{{ proto bool ncurses_def_shell_mode(void)
-  Saves terminal (shell) mode*/
+   Saves terminal (shell) mode*/
 PHP_FUNCTION(ncurses_def_shell_mode)
 {
 	RETURN_LONG(def_shell_mode());
@@ -265,7 +265,7 @@ PHP_FUNCTION(ncurses_def_shell_mode)
 /* }}} */
 
 /* {{{ proto bool ncurses_delch(void)
-   Delete character at current position, move rest of line left */
+   Deletes character at current position, move rest of line left */
 PHP_FUNCTION(ncurses_delch)
 {
 	RETURN_LONG(delch());
@@ -273,7 +273,7 @@ PHP_FUNCTION(ncurses_delch)
 /* }}} */
 
 /* {{{ proto bool ncurses_deleteln(void)
-   Delete line at current position, move rest of screen up */
+   Deletes line at current position, move rest of screen up */
 PHP_FUNCTION(ncurses_deleteln)
 {
 	RETURN_LONG(deleteln());
@@ -281,7 +281,7 @@ PHP_FUNCTION(ncurses_deleteln)
 /* }}} */
 
 /* {{{ proto bool ncurses_doupdate(void)
-   Write all prepared refreshes to terminal */
+   Writes all prepared refreshes to terminal */
 PHP_FUNCTION(ncurses_doupdate)
 {
 	RETURN_LONG(doupdate());
@@ -289,7 +289,7 @@ PHP_FUNCTION(ncurses_doupdate)
 /* }}} */
 
 /* {{{ proto bool ncurses_echo(void)
-   Activate keyboard input echo */
+   Activates keyboard input echo */
 PHP_FUNCTION(ncurses_echo)
 {
 	RETURN_LONG(echo());
@@ -297,7 +297,7 @@ PHP_FUNCTION(ncurses_echo)
 /* }}} */
 
 /* {{{ proto bool ncurses_erase(void)
-   Erease terminal screen */
+   Erases terminal screen */
 PHP_FUNCTION(ncurses_erase)
 {
 	RETURN_LONG(erase());
@@ -318,7 +318,7 @@ PHP_FUNCTION(ncurses_erasechar)
 /* }}} */
 
 /* {{{ proto bool ncurses_flash(void)
-   Flash terminal screen (visual bell) */
+   Flashes terminal screen (visual bell) */
 PHP_FUNCTION(ncurses_flash)
 {
 	RETURN_LONG(flash());
@@ -326,7 +326,7 @@ PHP_FUNCTION(ncurses_flash)
 /* }}} */
 
 /* {{{ proto bool ncurses_flushinp(void)
-   Flush keyboard input buffer */
+   Flushes keyboard input buffer */
 PHP_FUNCTION(ncurses_flushinp)
 {
 	RETURN_LONG(flushinp());
@@ -334,7 +334,7 @@ PHP_FUNCTION(ncurses_flushinp)
 /* }}} */
 
 /* {{{ proto bool ncurses_has_ic(void)
-   Check for insert- and delete-capabilities */
+   Checks for insert- and delete-capabilities */
 PHP_FUNCTION(ncurses_has_ic)
 {
 	RETURN_LONG(has_ic());
@@ -343,7 +343,7 @@ PHP_FUNCTION(ncurses_has_ic)
 
 
 /* {{{ proto bool ncurses_has_il(void)
-   Check for line insert- and delete-capabilities */
+   Checks for line insert- and delete-capabilities */
 PHP_FUNCTION(ncurses_has_il)
 {
 	RETURN_LONG(has_il());
@@ -351,7 +351,7 @@ PHP_FUNCTION(ncurses_has_il)
 /* }}} */
 
 /* {{{ proto string ncurses_inch(void)
-   Get character and attribute at current position */
+   Gets character and attribute at current position */
 PHP_FUNCTION(ncurses_inch)
 {
 	char temp[2];
@@ -362,8 +362,8 @@ PHP_FUNCTION(ncurses_inch)
 	RETURN_STRINGL (temp, 1, 1);
 }
 
-	/* {{{ proto bool ncurses_insertln(void)
-   Insert a line, move rest of screen down */
+/* {{{ proto bool ncurses_insertln(void)
+   Inserts a line, move rest of screen down */
 PHP_FUNCTION(ncurses_insertln)
 {
 	RETURN_LONG(insertln());
@@ -392,7 +392,7 @@ PHP_FUNCTION(ncurses_killchar)
 /* }}} */
 
 /* {{{ proto bool ncurses_nl(void)
-   Translate newline and carriage return / line feed */
+   Translates newline and carriage return / line feed */
 PHP_FUNCTION(ncurses_nl)
 {
 	RETURN_LONG(nl());
@@ -400,7 +400,7 @@ PHP_FUNCTION(ncurses_nl)
 /* }}} */
 
 /* {{{ proto bool ncurses_nocbreak(void)
-   Switch terminal to cooked mode */
+   Switches terminal to cooked mode */
 PHP_FUNCTION(ncurses_nocbreak)
 {
 	RETURN_LONG(nocbreak());
@@ -408,7 +408,7 @@ PHP_FUNCTION(ncurses_nocbreak)
 /* }}} */
 
 /* {{{ proto bool ncurses_noecho(void)
-   Switch off keyboard input echo */
+   Switches off keyboard input echo */
 PHP_FUNCTION(ncurses_noecho)
 {
 	RETURN_LONG(noecho());
@@ -424,7 +424,7 @@ PHP_FUNCTION(ncurses_nonl)
 /* }}} */
 
 /* {{{ proto bool ncurses_noraw(void)
-   Switch terminal out of raw mode */
+   Switches terminal out of raw mode */
 PHP_FUNCTION(ncurses_noraw)
 {
 	RETURN_LONG(noraw());
@@ -432,7 +432,7 @@ PHP_FUNCTION(ncurses_noraw)
 /* }}} */
 
 /* {{{ proto bool ncurses_raw(void)
-   Switch terminal into raw mode */
+   Switches terminal into raw mode */
 PHP_FUNCTION(ncurses_raw)
 {
 	RETURN_LONG(raw());
@@ -440,7 +440,7 @@ PHP_FUNCTION(ncurses_raw)
 /* }}} */
 
 /* {{{ proto bool ncurses_resetty(void)
-   Restore saved terminal state */
+   Restores saved terminal state */
 PHP_FUNCTION(ncurses_resetty)
 {
 	RETURN_LONG(resetty());
@@ -448,7 +448,7 @@ PHP_FUNCTION(ncurses_resetty)
 /* }}} */
 
 /* {{{ proto bool ncurses_savetty(void)
-   Save terminal state */
+   Saves terminal state */
 PHP_FUNCTION(ncurses_savetty)
 {
 	RETURN_LONG(savetty());
@@ -464,7 +464,7 @@ PHP_FUNCTION(ncurses_termattrs)
 /* }}} */
 
 /* {{{ proto bool ncurses_use_default_colors(void)
-   Assign terminal default colors to color id -1 */
+   Assigns terminal default colors to color id -1 */
 PHP_FUNCTION(ncurses_use_default_colors)
 {
 	RETURN_LONG(use_default_colors());
@@ -475,7 +475,7 @@ PHP_FUNCTION(ncurses_use_default_colors)
  */
 
 /* {{{ proto bool ncurses_slk_attr(void)
-   returns current soft label keys attribute */
+   Returns current soft label keys attribute */
 PHP_FUNCTION(ncurses_slk_attr)
 {
 	RETURN_LONG(slk_attr());
@@ -483,7 +483,7 @@ PHP_FUNCTION(ncurses_slk_attr)
 /* }}} */
 
 /* {{{ proto bool ncurses_slk_clear(void)
-  Clears soft label keys from screen */
+   Clears soft label keys from screen */
 PHP_FUNCTION(ncurses_slk_clear)
 {
 	RETURN_LONG(slk_clear());
@@ -491,7 +491,7 @@ PHP_FUNCTION(ncurses_slk_clear)
 /* }}} */
 
 /* {{{ proto bool ncurses_slk_noutrefresh(void)
-  Copies soft label keys to virtual screen */
+   Copies soft label keys to virtual screen */
 PHP_FUNCTION(ncurses_slk_noutrefresh)
 {
 	RETURN_LONG(slk_noutrefresh());
@@ -499,7 +499,7 @@ PHP_FUNCTION(ncurses_slk_noutrefresh)
 /* }}} */
 
 /* {{{ proto bool ncurses_slk_refresh(void)
-  Copies soft label keys to screen */
+   Copies soft label keys to screen */
 PHP_FUNCTION(ncurses_slk_refresh)
 {
 	RETURN_LONG(slk_refresh());
@@ -507,7 +507,7 @@ PHP_FUNCTION(ncurses_slk_refresh)
 /* }}} */
 
 /* {{{ proto bool ncurses_slk_restore(void)
-  Restores soft label keys */
+   Restores soft label keys */
 PHP_FUNCTION(ncurses_slk_restore)
 {
 	RETURN_LONG(slk_restore());
@@ -515,7 +515,7 @@ PHP_FUNCTION(ncurses_slk_restore)
 /* }}} */
 
 /* {{{ proto bool ncurses_slk_touch(void)
-  Forces output when ncurses_slk_noutrefresh is performed */
+   Forces output when ncurses_slk_noutrefresh is performed */
 PHP_FUNCTION(ncurses_slk_touch)
 {
 	RETURN_LONG(slk_touch());
@@ -523,7 +523,7 @@ PHP_FUNCTION(ncurses_slk_touch)
 /* }}} */
 
 /* {{{ proto bool ncurses_slk_set(int labelnr, string label, int format)
-  sets function key labels */
+   Sets function key labels */
 PHP_FUNCTION(ncurses_slk_set)
 {
 	char *str;
@@ -540,7 +540,7 @@ PHP_FUNCTION(ncurses_slk_set)
 
 
 /* {{{ proto int ncurses_attroff(int attributes)
-   Turn off the given attributes */
+   Turns off the given attributes */
 PHP_FUNCTION(ncurses_attroff)
 {
 	long intarg;
@@ -554,7 +554,7 @@ PHP_FUNCTION(ncurses_attroff)
 /* }}} */
 
 /* {{{ proto int ncurses_attron(int attributes)
-   Turn on the given attributes */
+   Turns on the given attributes */
 PHP_FUNCTION(ncurses_attron)
 {
 	long intarg;
@@ -568,7 +568,7 @@ PHP_FUNCTION(ncurses_attron)
 /* }}} */
 
 /* {{{ proto int ncurses_attrset(int attributes)
-   Set given attributes */
+   Sets given attributes */
 PHP_FUNCTION(ncurses_attrset)
 {
 	long intarg;
@@ -582,7 +582,7 @@ PHP_FUNCTION(ncurses_attrset)
 /* }}} */
 
 /* {{{ proto int ncurses_bkgd(int attrchar)
-   Set background property for terminal screen */
+   Sets background property for terminal screen */
 PHP_FUNCTION(ncurses_bkgd)
 {
 	long intarg;
@@ -596,7 +596,7 @@ PHP_FUNCTION(ncurses_bkgd)
 /* }}} */
 
 /* {{{ proto int ncurses_curs_set(int visibility)
-   Set cursor state */
+   Sets cursor state */
 PHP_FUNCTION(ncurses_curs_set)
 {
 	long intarg;
@@ -610,7 +610,7 @@ PHP_FUNCTION(ncurses_curs_set)
 /* }}} */
 
 /* {{{ proto int ncurses_delay_output(int milliseconds)
-   Delay output on terminal using padding characters */
+   Delays output on terminal using padding characters */
 PHP_FUNCTION(ncurses_delay_output)
 {
 	long intarg;
@@ -638,7 +638,7 @@ PHP_FUNCTION(ncurses_echochar)
 /* }}} */
 
 /* {{{ proto int ncurses_halfdelay(int tenth)
-   Put terminal into halfdelay mode */
+   Puts terminal into halfdelay mode */
 PHP_FUNCTION(ncurses_halfdelay)
 {
 	long intarg;
@@ -652,7 +652,7 @@ PHP_FUNCTION(ncurses_halfdelay)
 /* }}} */
 
 /* {{{ proto int ncurses_has_key(int keycode)
-   Check for presence of a function key on terminal keyboard */
+   Checks for presence of a function key on terminal keyboard */
 PHP_FUNCTION(ncurses_has_key)
 {
 	long intarg;
@@ -666,7 +666,7 @@ PHP_FUNCTION(ncurses_has_key)
 /* }}} */
 
 /* {{{ proto int ncurses_insch(int character)
-   Insert character moving rest of line including character at current position */
+   Inserts character moving rest of line including character at current position */
 PHP_FUNCTION(ncurses_insch)
 {
 	long intarg;
@@ -680,7 +680,7 @@ PHP_FUNCTION(ncurses_insch)
 /* }}} */
 
 /* {{{ proto int ncurses_insdelln(int count)
-   Insert lines before current line scrolling down (negative numbers delete and scroll up) */
+   Inserts lines before current line scrolling down (negative numbers delete and scroll up) */
 PHP_FUNCTION(ncurses_insdelln)
 {
 	long intarg;
@@ -694,7 +694,7 @@ PHP_FUNCTION(ncurses_insdelln)
 /* }}} */
 
 /* {{{ proto int ncurses_mouseinterval(int milliseconds)
-   Set timeout for mouse button clicks */
+   Sets timeout for mouse button clicks */
 PHP_FUNCTION(ncurses_mouseinterval)
 {
 	long intarg;
@@ -722,7 +722,7 @@ PHP_FUNCTION(ncurses_napms)
 /* }}} */
 
 /* {{{ proto int ncurses_scrl(int count)
-   Scroll window content up or down without changing current position */
+   Scrolls window content up or down without changing current position */
 PHP_FUNCTION(ncurses_scrl)
 {
 	long intarg;
@@ -736,7 +736,7 @@ PHP_FUNCTION(ncurses_scrl)
 /* }}} */
 
 /* {{{ proto int ncurses_slk_attroff(int intarg)
- */
+   ??? */
 PHP_FUNCTION(ncurses_slk_attroff)
 {
 	long intarg;
@@ -750,7 +750,7 @@ PHP_FUNCTION(ncurses_slk_attroff)
 /* }}} */
 
 /* {{{ proto int ncurses_slk_attron(int intarg)
- */
+   ??? */
 PHP_FUNCTION(ncurses_slk_attron)
 {
 	long intarg;
@@ -764,7 +764,7 @@ PHP_FUNCTION(ncurses_slk_attron)
 /* }}} */
 
 /* {{{ proto int ncurses_slk_attrset(int intarg)
- */
+   ??? */
 PHP_FUNCTION(ncurses_slk_attrset)
 {
 	long intarg;
@@ -778,7 +778,7 @@ PHP_FUNCTION(ncurses_slk_attrset)
 /* }}} */
 
 /* {{{ proto int ncurses_slk_color(int intarg)
-  Sets color for soft label keys*/
+   Sets color for soft label keys*/
 PHP_FUNCTION(ncurses_slk_color)
 {
 #ifdef HAVE_NCURSES_SLK_COLOR
@@ -797,7 +797,7 @@ PHP_FUNCTION(ncurses_slk_color)
 /* }}} */
 
 /* {{{ proto int ncurses_slk_init(int intarg)
-  Inits soft label keys */
+   Inits soft label keys */
 PHP_FUNCTION(ncurses_slk_init)
 {
 	long intarg;
@@ -811,7 +811,7 @@ PHP_FUNCTION(ncurses_slk_init)
 /* }}} */
 
 /* {{{ proto int ncurses_typeahead(int fd)
-   Specify different filedescriptor for typeahead checking */
+   Specifys different filedescriptor for typeahead checking */
 PHP_FUNCTION(ncurses_typeahead)
 {
 	long intarg;
@@ -825,7 +825,7 @@ PHP_FUNCTION(ncurses_typeahead)
 /* }}} */
 
 /* {{{ proto int ncurses_ungetch(int keycode)
-   Put a character back into the input stream */
+   Puts a character back into the input stream */
 PHP_FUNCTION(ncurses_ungetch)
 {
 	long intarg;
@@ -839,7 +839,7 @@ PHP_FUNCTION(ncurses_ungetch)
 /* }}} */
 
 /* {{{ proto int ncurses_vidattr(int intarg)
- */
+   ??? */
 PHP_FUNCTION(ncurses_vidattr)
 {
 	long intarg;
@@ -853,7 +853,7 @@ PHP_FUNCTION(ncurses_vidattr)
 /* }}} */
 
 /* {{{ proto int ncurses_use_extended_names(bool flag)
-   Control use of extended names in terminfo descriptions */
+   Controls use of extended names in terminfo descriptions */
 PHP_FUNCTION(ncurses_use_extended_names)
 {
 #ifdef HAVE_NCURSES_USE_EXTENDED_NAMES
@@ -872,7 +872,7 @@ PHP_FUNCTION(ncurses_use_extended_names)
 /* }}} */
 
 /* {{{ proto void ncurses_bkgdset(int attrchar)
-   Control screen background */
+   Controls screen background */
 PHP_FUNCTION(ncurses_bkgdset)
 {
 	long intarg;
@@ -902,7 +902,7 @@ PHP_FUNCTION(ncurses_noqiflush)
 /* }}} */
 
 /* {{{ proto int ncurses_qiflush(void)
-   Flush on signal characters */
+   Flushes on signal characters */
 PHP_FUNCTION(ncurses_qiflush)
 {
 	qiflush();
@@ -910,7 +910,7 @@ PHP_FUNCTION(ncurses_qiflush)
 /* }}} */
 
 /* {{{ proto void ncurses_timeout(int millisec)
-   Set timeout for special key sequences */
+   Sets timeout for special key sequences */
 PHP_FUNCTION(ncurses_timeout)
 {
 	long intarg;
@@ -924,7 +924,7 @@ PHP_FUNCTION(ncurses_timeout)
 /* }}} */
 
 /* {{{ proto void ncurses_use_env(bool flag)
-   Control use of environment information about terminal size */
+   Controls use of environment information about terminal size */
 PHP_FUNCTION(ncurses_use_env)
 {
 	long intarg;
@@ -938,7 +938,7 @@ PHP_FUNCTION(ncurses_use_env)
 /* }}} */
 
 /* {{{ proto int ncurses_addstr(string text)
-   Output text at current position */
+   Outputs text at current position */
 PHP_FUNCTION(ncurses_addstr)
 {
 	char *str;
@@ -953,7 +953,7 @@ PHP_FUNCTION(ncurses_addstr)
 /* }}} */
 
 /* {{{ proto int ncurses_putp(string text)
- */
+   ??? */
 PHP_FUNCTION(ncurses_putp)
 {
 	char *str;
@@ -968,7 +968,7 @@ PHP_FUNCTION(ncurses_putp)
 /* }}} */
 
 /* {{{ proto int ncurses_scr_dump(string filename)
-   Dump screen content to file */
+   Dumps screen content to file */
 PHP_FUNCTION(ncurses_scr_dump)
 {
 	char *str;
@@ -983,7 +983,7 @@ PHP_FUNCTION(ncurses_scr_dump)
 /* }}} */
 
 /* {{{ proto int ncurses_scr_init(string filename)
-   Initialize screen from file dump */
+   Initializes screen from file dump */
 PHP_FUNCTION(ncurses_scr_init)
 {
 	char *str;
@@ -998,7 +998,7 @@ PHP_FUNCTION(ncurses_scr_init)
 /* }}} */
 
 /* {{{ proto int ncurses_scr_restore(string filename)
-   Restore screen from file dump */
+   Restores screen from file dump */
 PHP_FUNCTION(ncurses_scr_restore)
 {
 	char *str;
@@ -1013,7 +1013,7 @@ PHP_FUNCTION(ncurses_scr_restore)
 /* }}} */
 
 /* {{{ proto int ncurses_scr_set(string filename)
-   Inherit screen from file dump */
+   Inherits screen from file dump */
 PHP_FUNCTION(ncurses_scr_set)
 {
 	char *str;
@@ -1028,7 +1028,7 @@ PHP_FUNCTION(ncurses_scr_set)
 /* }}} */
 
 /* {{{ proto int ncurses_mvaddch(int y, int x, int c)
-   Move current position and add character */
+   Moves current position and add character */
 PHP_FUNCTION(ncurses_mvaddch)
 {
 	long y,x,c;
@@ -1042,7 +1042,7 @@ PHP_FUNCTION(ncurses_mvaddch)
 /* }}} */
 
 /* {{{ proto int ncurses_mvaddchnstr(int y, int x, string s, int n)
-   Move position and add attrributed string with specified length */
+   Moves position and add attrributed string with specified length */
 PHP_FUNCTION(ncurses_mvaddchnstr)
 {
 	long y,x,n;
@@ -1058,7 +1058,7 @@ PHP_FUNCTION(ncurses_mvaddchnstr)
 /* }}} */
 
 /* {{{ proto int ncurses_addchnstr(string s, int n)
-   Add attributed string with specified length at current position */
+   Adds attributed string with specified length at current position */
 PHP_FUNCTION(ncurses_addchnstr)
 {
 	long n;
@@ -1074,7 +1074,7 @@ PHP_FUNCTION(ncurses_addchnstr)
 /* }}} */
 
 /* {{{ proto int ncurses_mvaddchstr(int y, int x, string s)
-   Move position and add attributed string */
+   Moves position and add attributed string */
 PHP_FUNCTION(ncurses_mvaddchstr)
 {
 	long y,x;
@@ -1090,7 +1090,7 @@ PHP_FUNCTION(ncurses_mvaddchstr)
 /* }}} */
 
 /* {{{ proto int ncurses_addchstr(string s)
-   Add attributed string at current position */
+   Adds attributed string at current position */
 PHP_FUNCTION(ncurses_addchstr)
 {
 	char *str;
@@ -1105,7 +1105,7 @@ PHP_FUNCTION(ncurses_addchstr)
 /* }}} */
 
 /* {{{ proto int ncurses_mvaddnstr(int y, int x, string s, int n)
-   Move position and add string with specified length */
+   Moves position and add string with specified length */
 PHP_FUNCTION(ncurses_mvaddnstr)
 {
 	long y,x,n;
@@ -1121,7 +1121,7 @@ PHP_FUNCTION(ncurses_mvaddnstr)
 /* }}} */
 
 /* {{{ proto int ncurses_addnstr(string s, int n)
-   Add string with specified length at current position */
+   Adds string with specified length at current position */
 PHP_FUNCTION(ncurses_addnstr)
 {
 	long n;
@@ -1137,7 +1137,7 @@ PHP_FUNCTION(ncurses_addnstr)
 /* }}} */
 
 /* {{{ proto int ncurses_mvaddstr(int y, int x, string s)
-   Move position and add string */
+   Moves position and add string */
 PHP_FUNCTION(ncurses_mvaddstr)
 {
 	long y,x;
@@ -1153,7 +1153,7 @@ PHP_FUNCTION(ncurses_mvaddstr)
 /* }}} */
 
 /* {{{ proto int ncurses_mvdelch(int y, int x)
-   Move position and delete character, shift rest of line left */
+   Moves position and delete character, shift rest of line left */
 PHP_FUNCTION(ncurses_mvdelch)
 {
 	long y,x;
@@ -1168,7 +1168,7 @@ PHP_FUNCTION(ncurses_mvdelch)
 
 
 /* {{{ proto int ncurses_mvgetch(int y, int x)
-   Move position and get character at new position */
+   Moves position and get character at new position */
 PHP_FUNCTION(ncurses_mvgetch)
 {
 	long y,x;
@@ -1182,7 +1182,7 @@ PHP_FUNCTION(ncurses_mvgetch)
 /* }}} */
 
 /* {{{ proto int ncurses_mvinch(int y, int x)
-   Move position and get attributed character at new position */
+   Moves position and get attributed character at new position */
 PHP_FUNCTION(ncurses_mvinch)
 {
 	long y,x;
@@ -1196,7 +1196,7 @@ PHP_FUNCTION(ncurses_mvinch)
 /* }}} */
 
 /* {{{ proto int ncurses_insstr(string text)
-   Insert string at current position, moving rest of line right */
+   Inserts string at current position, moving rest of line right */
 PHP_FUNCTION(ncurses_insstr)
 {
 	char *str;
@@ -1237,7 +1237,7 @@ PHP_FUNCTION(ncurses_instr)
 
 
 /* {{{ proto int ncurses_mvhline(int y, int x, int attrchar, int n)
-   Set new position and draw a horizontal line using an attributed character and max. n characters long */
+   Sets new position and draw a horizontal line using an attributed character and max. n characters long */
 PHP_FUNCTION(ncurses_mvhline)
 {
 	long i1,i2,i3,i4;
@@ -1251,7 +1251,7 @@ PHP_FUNCTION(ncurses_mvhline)
 /* }}} */
 
 /* {{{ proto int ncurses_mvvline(int y, int x, int attrchar, int n)
-   Set new position and draw a vertical line using an attributed character and max. n characters long */
+   Sets new position and draw a vertical line using an attributed character and max. n characters long */
 PHP_FUNCTION(ncurses_mvvline)
 {
 	long i1,i2,i3,i4;
@@ -1265,7 +1265,7 @@ PHP_FUNCTION(ncurses_mvvline)
 /* }}} */
 
 /* {{{ proto int ncurses_mvcur(int old_y,int old_x, int new_y, int new_x)
-   Move cursor immediately */
+   Moves cursor immediately */
 PHP_FUNCTION(ncurses_mvcur)
 {
 	long i1,i2,i3,i4;
@@ -1279,7 +1279,7 @@ PHP_FUNCTION(ncurses_mvcur)
 /* }}} */
 
 /* {{{ proto int ncurses_init_color(int color, int r, int g, int b)
-   Set new RGB value for color */
+   Sets new RGB value for color */
 PHP_FUNCTION(ncurses_init_color)
 {
 	long i1,i2,i3,i4;
@@ -1293,7 +1293,7 @@ PHP_FUNCTION(ncurses_init_color)
 /* }}} */
 
 /* {{{ proto int ncurses_border(int left, int right, int top, int bottom, int tl_corner, int tr_corner, int bl_corner, int br_corner)
-   Draw a border around the screen using attributed characters */
+   Draws a border around the screen using attributed characters */
 PHP_FUNCTION(ncurses_border)
 {
 	long i1,i2,i3,i4,i5,i6,i7,i8;
@@ -1307,7 +1307,7 @@ PHP_FUNCTION(ncurses_border)
 /* }}} */
 
 /* {{{ proto int ncurses_assume_default_colors(int fg, int bg)
-   Define default colors for color 0 */
+   Defines default colors for color 0 */
 PHP_FUNCTION(ncurses_assume_default_colors)
 {
 #ifdef HAVE_NCURSES_ASSUME_DEFAULT_COLORS
@@ -1326,7 +1326,7 @@ PHP_FUNCTION(ncurses_assume_default_colors)
 /* }}} */
 
 /* {{{ proto int ncurses_define_key(string definition, int keycode)
-   Define a keycode */
+   Defines a keycode */
 PHP_FUNCTION(ncurses_define_key)
 {
 	long n;
@@ -1342,7 +1342,7 @@ PHP_FUNCTION(ncurses_define_key)
 /* }}} */
 
 /* {{{ proto int ncurses_hline(int charattr, int n)
-   Draw a horizontal line at current position using an attributed character and max. n characters long */
+   Draws a horizontal line at current position using an attributed character and max. n characters long */
 PHP_FUNCTION(ncurses_hline)
 {
 	long i1,i2;
@@ -1356,7 +1356,7 @@ PHP_FUNCTION(ncurses_hline)
 /* }}} */
 
 /* {{{ proto int ncurses_vline(int charattr, int n)
-   Draw a vertical line at current position using an attributed character and max. n characters long */
+   Draws a vertical line at current position using an attributed character and max. n characters long */
 PHP_FUNCTION(ncurses_vline)
 {
 	long i1,i2;
@@ -1370,7 +1370,7 @@ PHP_FUNCTION(ncurses_vline)
 /* }}} */
 
 /* {{{ proto int ncurses_keyok(int keycode, bool enable)
-   Enable or disable a keycode */
+   Enables or disable a keycode */
 PHP_FUNCTION(ncurses_keyok)
 {
 	long i,b;
@@ -1384,7 +1384,7 @@ PHP_FUNCTION(ncurses_keyok)
 /* }}} */
 
 /* {{{ proto int ncurses_mvwaddstr(resource window, int y, int x, string text)
-   Add string at new position in window */
+   Adds string at new position in window */
 PHP_FUNCTION(ncurses_mvwaddstr)
 {
 	zval **handle, **x, **y, **text;
@@ -1406,7 +1406,7 @@ PHP_FUNCTION(ncurses_mvwaddstr)
 /* }}} */
 
 /* {{{ proto int ncurses_wrefresh(resource window)
-   Refresh window on terminal screen */
+   Refreshes window on terminal screen */
 PHP_FUNCTION(ncurses_wrefresh)
 {
 	zval **handle;
@@ -1495,7 +1495,7 @@ PHP_FUNCTION(ncurses_getmouse)
 /* }}} */
 
 /* {{{ proto int ncurses_ungetmouse(array mevent)
-   pushes mouse event to queue */
+   Pushes mouse event to queue */
 PHP_FUNCTION(ncurses_ungetmouse)
 {
   zval **arg, **pvalue;
@@ -1543,7 +1543,7 @@ PHP_FUNCTION(ncurses_ungetmouse)
 /* }}} */
 
 /* {{{ proto bool ncurses_mouse_trafo(int y, int x, bool toscreen)
-  transform coordinates */
+   Transforms coordinates */
 PHP_FUNCTION(ncurses_mouse_trafo)
 {
 	zval **x, **y, **toscreen;
@@ -1570,8 +1570,8 @@ PHP_FUNCTION(ncurses_mouse_trafo)
 }
 /* }}} */
 
-/* {{{ proto bool ncurses_wmouse_trafo(resource WINDOW, int y, int x, bool toscreen)
-  Transforms window/stdscr coordinates */
+/* {{{ proto bool ncurses_wmouse_trafo(resource window, int y, int x, bool toscreen)
+   Transforms window/stdscr coordinates */
 PHP_FUNCTION(ncurses_wmouse_trafo)
 {
 	zval **handle, **x, **y, **toscreen;
@@ -1601,8 +1601,8 @@ PHP_FUNCTION(ncurses_wmouse_trafo)
 /* }}} */
 
 
-/* {{{ proto int ncurses_wmove(resource WINDOW, int y, int x)
-  Moves windows output position */
+/* {{{ proto int ncurses_wmove(resource window, int y, int x)
+   Moves windows output position */
 PHP_FUNCTION(ncurses_wmove)
 {
 	zval **handle, **x, **y;
@@ -1619,8 +1619,8 @@ PHP_FUNCTION(ncurses_wmove)
 	RETURN_LONG(wmove(*win, Z_LVAL_PP(y), Z_LVAL_PP(x)));
 }
 
-/* {{{ proto int ncurses_keypad(resource WINDOW, bool bf)
-  Turns keypad on or off */
+/* {{{ proto int ncurses_keypad(resource window, bool bf)
+   Turns keypad on or off */
 PHP_FUNCTION(ncurses_keypad)
 {
 	zval **handle, **bf;
@@ -1639,8 +1639,8 @@ PHP_FUNCTION(ncurses_keypad)
 }
 /* }}} */
 
-/* {{{ proto int ncurses_wcolor_set(resource WINDOW, int color_pair)
-  Sets windows color pairings */
+/* {{{ proto int ncurses_wcolor_set(resource window, int color_pair)
+   Sets windows color pairings */
 PHP_FUNCTION(ncurses_wcolor_set)
 {
 	zval **handle, **color_pair, **opts;
@@ -1661,8 +1661,8 @@ PHP_FUNCTION(ncurses_wcolor_set)
 }
 /* }}} */
 
-/* {{{ proto int ncurses_wclear(resource WINDOW)
-  Clears window*/
+/* {{{ proto int ncurses_wclear(resource window)
+   Clears window */
 
 PHP_FUNCTION(ncurses_wclear)
 {
@@ -1678,8 +1678,8 @@ PHP_FUNCTION(ncurses_wclear)
 }
 /* }}} */
 
-/* {{{ proto int ncurses_wnoutrefresh(resource WINDOW)
-  Copies window to virtual screen*/
+/* {{{ proto int ncurses_wnoutrefresh(resource window)
+   Copies window to virtual screen */
 PHP_FUNCTION(ncurses_wnoutrefresh)
 {
 	zval **handle;
@@ -1694,8 +1694,8 @@ PHP_FUNCTION(ncurses_wnoutrefresh)
 }
 /* }}} */
 
-/* {{{ proto int ncurses_waddstr(resource WINDOW, string str, [int n])
-  Outputs text at current postion in window */
+/* {{{ proto int ncurses_waddstr(resource window, string str [, int n])
+   Outputs text at current postion in window */
 PHP_FUNCTION(ncurses_waddstr)
 {
 	zval **handle, **str, **n;
@@ -1719,8 +1719,8 @@ PHP_FUNCTION(ncurses_waddstr)
 }
 /* }}} */
 
-/* {{{ proto int ncurses_wgetch(resource WINDOW)
-  Reads a character from keyboard (window)*/
+/* {{{ proto int ncurses_wgetch(resource window)
+   Reads a character from keyboard (window) */
 PHP_FUNCTION(ncurses_wgetch)
 {
 	zval **handle;
