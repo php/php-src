@@ -2073,26 +2073,25 @@ PHP_FUNCTION(ini_set)
 		RETVAL_FALSE;
 	}
 
+#define _CHECK_PATH(var, ini) php_ini_check_path(Z_STRVAL_PP(var), Z_STRLEN_PP(var), ini, sizeof(ini))
+	
 	/* safe_mode & basedir check */
-	if( 
-		(PG(safe_mode) || PG(open_basedir)) && 
-		(
-			php_ini_check_path((((*varname)->value).str).val, (((*varname)->value).str).len, "error_log", sizeof("error_log")) ||
-			php_ini_check_path((((*varname)->value).str).val, (((*varname)->value).str).len, "java.class.path", sizeof("java.class.path")) ||
-			php_ini_check_path((((*varname)->value).str).val, (((*varname)->value).str).len, "java.home", sizeof("java.home")) ||
-			php_ini_check_path((((*varname)->value).str).val, (((*varname)->value).str).len, "java.library.path", sizeof("java.library.path")) ||
-			php_ini_check_path((((*varname)->value).str).val, (((*varname)->value).str).len, "session.save_path", sizeof("session.save_path")) ||
-			php_ini_check_path((((*varname)->value).str).val, (((*varname)->value).str).len, "vpopmail.directory", sizeof("vpopmail.directory"))
-		) 
-	) {
-		if (PG(safe_mode) &&(!php_checkuid(Z_STRVAL_PP(new_value), NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
-			zval_dtor(return_value);
-			RETURN_FALSE;
-		}
+	if (PG(safe_mode) || PG(open_basedir)) {
+		if (_CHECK_PATH(varname, "error_log") ||
+			_CHECK_PATH(varname, "java.class.path") ||
+			_CHECK_PATH(varname, "java.home") ||
+			_CHECK_PATH(varname, "java.library.path") ||
+			_CHECK_PATH(varname, "session.save_path") ||
+			_CHECK_PATH(varname, "vpopmail.directory")) {
+			if (PG(safe_mode) &&(!php_checkuid(Z_STRVAL_PP(new_value), NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
+				zval_dtor(return_value);
+				RETURN_FALSE;
+			}
 
-		if (php_check_open_basedir(Z_STRVAL_PP(new_value) TSRMLS_CC)) {
-			zval_dtor(return_value);
-			RETURN_FALSE;
+			if (php_check_open_basedir(Z_STRVAL_PP(new_value) TSRMLS_CC)) {
+				zval_dtor(return_value);
+				RETURN_FALSE;
+			}
 		}
 	}	
 		
