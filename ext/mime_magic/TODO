@@ -1,3 +1,2 @@
 - general cleanup
 - support for content-encoding / compressed files
-- use streams

@@ -150,8 +150,9 @@
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
-
+ 
 #include "php.h"
+#include "php_streams.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
 #include "php_mime_magic.h"
@@ -184,7 +185,7 @@ static int magic_rsl_get(char **, char **);
 static int magic_process(char *);
 
 static long from_oct(int, char *);
-static int fsmagic(const char *fn);
+static int fsmagic(char *fn);
 
 
 #if HAVE_ZLIB
@@ -198,16 +199,12 @@ ZEND_DECLARE_MODULE_GLOBALS(mime_magic)
 
 
 /* True global resources - no need for thread safety here */
-/* static int le_mime_magic; */
 static magic_server_config_rec mime_global;
 
-/* {{{ mime_magic_functions[]
- *
- * Every user visible function must have an entry in mime_magic_functions[].
- */
+/* {{{ mime_magic_functions[] */
 function_entry mime_magic_functions[] = {
-	PHP_FE(mime_content_type,	NULL)		/* For testing, remove later. */
-	{NULL, NULL, NULL}	/* Must be the last line in mime_magic_functions[] */
+	PHP_FE(mime_content_type,	NULL)	   
+	{NULL, NULL, NULL}	
 };
 /* }}} */
 
@@ -221,11 +218,11 @@ zend_module_entry mime_magic_module_entry = {
 	mime_magic_functions,
 	PHP_MINIT(mime_magic),
 	PHP_MSHUTDOWN(mime_magic),
-	PHP_RINIT(mime_magic),		/* Replace with NULL if there's nothing to do at request start */
-	PHP_RSHUTDOWN(mime_magic),	/* Replace with NULL if there's nothing to do at request end */
+	NULL,
+	NULL,
 	PHP_MINFO(mime_magic),
 #if ZEND_MODULE_API_NO >= 20010901
-	"0.1", /* Replace with version number for your extension */
+	"0.1", 
 #endif
 	STANDARD_MODULE_PROPERTIES
 };
@@ -275,24 +272,6 @@ PHP_MSHUTDOWN_FUNCTION(mime_magic)
 }
 /* }}} */
 
-/* Remove if there's nothing to do at request start */
-/* {{{ PHP_RINIT_FUNCTION
- */
-PHP_RINIT_FUNCTION(mime_magic)
-{
-	return SUCCESS;
-}
-/* }}} */
-
-/* Remove if there's nothing to do at request end */
-/* {{{ PHP_RSHUTDOWN_FUNCTION
- */
-PHP_RSHUTDOWN_FUNCTION(mime_magic)
-{
-	return SUCCESS;
-}
-/* }}} */
-
 /* {{{ PHP_MINFO_FUNCTION
  */
 PHP_MINFO_FUNCTION(mime_magic)
@@ -301,16 +280,10 @@ PHP_MINFO_FUNCTION(mime_magic)
 	php_info_print_table_header(2, "mime_magic support", "enabled");
 	php_info_print_table_end();
 
-	/* Remove comments if you have entries in php.ini
 	DISPLAY_INI_ENTRIES();
-	*/
 }
 /* }}} */
 
-
-/* Remove the following function when you have succesfully modified config.m4
-   so that your module can be compiled into PHP, it exists only for testing
-   purposes. */
 
 /* {{{ proto string mime_content_type(string filename)
    Return content-type for file */
@@ -359,10 +332,7 @@ static int apprentice(void)
     char line[BUFSIZ + 1];
     int errs = 0;
     int lineno;
-#if MIME_MAGIC_DEBUG
-    int rule = 0;
-    struct magic *m, *prevm;
-#endif
+
     char *fname;
     magic_server_config_rec *conf = &mime_global;
 
@@ -401,53 +371,12 @@ static int apprentice(void)
 		if (line[ws_offset] == '#')
 			continue;
 
-#if MIME_MAGIC_DEBUG
-		/* if we get here, we're going to use it so count it */
-		rule++;
-#endif
-
 		/* parse it */
 		if (parse(line + ws_offset, lineno) != 0)
 			++errs;
     }
 
     (void) fclose(f);
-
-#if MIME_MAGIC_DEBUG
-    php_error(E_NOTICE,
-				 MODNAME ": apprentice conf=%x file=%s m=%s m->next=%s last=%s",
-				 conf,
-				 conf->magicfile ? conf->magicfile : "NULL",
-				 conf->magic ? "set" : "NULL",
-				 (conf->magic && conf->magic->next) ? "set" : "NULL",
-				 conf->last ? "set" : "NULL");
-    php_error(E_NOTICE,
-				 MODNAME ": apprentice read %d lines, %d rules, %d errors",
-				 lineno, rule, errs);
-#endif
-
-#if MIME_MAGIC_DEBUG
-    prevm = 0;
-    php_error(E_NOTICE,
-				 MODNAME ": apprentice test");
-    for (m = conf->magic; m; m = m->next) {
-		if (isprint((((unsigned long) m) >> 24) & 255) &&
-			isprint((((unsigned long) m) >> 16) & 255) &&
-			isprint((((unsigned long) m) >> 8) & 255) &&
-			isprint(((unsigned long) m) & 255)) {
-			php_error(E_NOTICE,
-						 MODNAME ": apprentice: POINTER CLOBBERED! "
-						 "m=\"%c%c%c%c\" line=%d",
-						 (((unsigned long) m) >> 24) & 255,
-						 (((unsigned long) m) >> 16) & 255,
-						 (((unsigned long) m) >> 8) & 255,
-						 ((unsigned long) m) & 255,
-						 prevm ? prevm->lineno : -1);
-			break;
-		}
-		prevm = m;
-    }
-#endif
 
     return (errs ? -1 : 0);
 }
@@ -704,12 +633,6 @@ static int parse(char *l, int lineno)
 		m->nospflag = 0;
     strncpy(m->desc, l, sizeof(m->desc) - 1);
     m->desc[sizeof(m->desc) - 1] = '\0';
-
-#if MIME_MAGIC_DEBUG
-    php_error(E_NOTICE,
-				 MODNAME ": parse line=%d m=%x next=%x cont=%d desc=%s",
-				 lineno, m, m->next, m->cont_level, m->desc);
-#endif /* MIME_MAGIC_DEBUG */
 
     return 0;
 }
@@ -1011,10 +934,7 @@ static char *rsl_strdup(int start_frag, int start_pos, int len)
 
     /* clean up and return */
     result[res_pos] = 0;
-#if MIME_MAGIC_DEBUG
-    php_error(E_NOTICE,
-				  MODNAME ": rsl_strdup() %d chars: %s", res_pos - 1, result);
-#endif
+
     return result;
 }
 
@@ -1025,7 +945,7 @@ static char *rsl_strdup(int start_frag, int start_pos, int len)
  */
 static int magic_process(char *filename)
 {
-    int fd = 0;
+	php_stream *stream;
     unsigned char buf[HOWMANY + 1];	/* one extra for terminating '\0' */
     int nbytes = 0;		/* number of bytes read from a datafile */
     int result;
@@ -1044,7 +964,9 @@ static int magic_process(char *filename)
 		return result;
     }
 
-    if ((fd = open(filename, O_RDONLY, 0)) < 0) {
+    stream = php_stream_open_wrapper(filename, "r", IGNORE_PATH | ENFORCE_SAFE_MODE | REPORT_ERRORS, NULL);
+
+    if (stream == NULL) {
 		/* We can't open it, but we were able to stat it. */
 		php_error(E_WARNING,
 					  MODNAME ": can't read `%s'", filename);
@@ -1055,7 +977,7 @@ static int magic_process(char *filename)
     /*
      * try looking at the first HOWMANY bytes
      */
-    if ((nbytes = read(fd, (char *) buf, sizeof(buf) - 1)) == -1) {
+    if ((nbytes = php_stream_read(stream, (char *) buf, sizeof(buf) - 1)) == -1) {
 		php_error(E_WARNING,
 					  MODNAME ": read failed: %s", filename);
 		return MIME_MAGIC_ERROR;
@@ -1068,7 +990,7 @@ static int magic_process(char *filename)
 		tryit(buf, nbytes, 1); 
     }
 
-    (void) close(fd);
+    (void) php_stream_close(stream);
     (void) magic_rsl_putchar('\n');
 
     return MIME_MAGIC_OK;
@@ -1110,13 +1032,15 @@ static void tryit(unsigned char *buf, int nb, int checkzmagic)
  * return MIME_MAGIC_OK to indicate it's a regular file still needing handling
  * other returns indicate a failure of some sort
  */
-static int fsmagic(const char *fn)
+static int fsmagic(char *filename)
 {
-	struct stat finfo;
+	php_stream_statbuf stat_ssb;
 
-	stat(fn, &finfo);
+	if(!php_stream_stat_path(filename, &stat_ssb)) {
+		return MIME_MAGIC_OK;
+	}
 
-    switch (finfo.st_mode & S_IFMT) {
+    switch (stat_ssb.sb.st_mode & S_IFMT) {
     case S_IFDIR:
 		magic_rsl_puts(DIR_MAGIC_TYPE);
 		return MIME_MAGIC_DONE;
@@ -1151,7 +1075,7 @@ static int fsmagic(const char *fn)
 		 * symlink is broken.
 		 */
 		php_error(E_WARNING,
-					  MODNAME ": broken symlink (%s)", fn);
+					  MODNAME ": broken symlink (%s)", filename);
 		return MIME_MAGIC_ERROR;
 #endif
 #ifdef    S_IFSOCK
@@ -1163,16 +1087,18 @@ static int fsmagic(const char *fn)
 #endif
     case S_IFREG:
 		break;
+	case 0:
+		break;
     default:
 		php_error(E_WARNING,
-					  MODNAME ": invalid mode 0%o.", (unsigned int)finfo.st_mode);
+					  MODNAME ": invalid mode 0%o.", (unsigned int)stat_ssb.sb.st_mode);
 		return MIME_MAGIC_ERROR;
     }
 
     /*
      * regular file, check next possibility
      */
-    if (finfo.st_size == 0) {
+    if (stat_ssb.sb.st_size == 0) {
 		magic_rsl_puts(MIME_TEXT_UNKNOWN);
 		return MIME_MAGIC_DONE;
     }
@@ -1220,50 +1146,13 @@ static int softmagic(unsigned char *buf, int nbytes)
  */
 static int match(unsigned char *s, int nbytes)
 {
-#if MIME_MAGIC_DEBUG
-    int rule_counter = 0;
-#endif
     int cont_level = 0;
     int need_separator = 0;
     union VALUETYPE p;
     magic_server_config_rec *conf = &mime_global;
     struct magic *m;
 
-#if MIME_MAGIC_DEBUG
-    php_error(E_NOTICE,
-				  MODNAME ": match conf=%x file=%s m=%s m->next=%s last=%s",
-				  conf,
-				  conf->magicfile ? conf->magicfile : "NULL",
-				  conf->magic ? "set" : "NULL",
-				  (conf->magic && conf->magic->next) ? "set" : "NULL",
-				  conf->last ? "set" : "NULL");
-#endif
-
-#if MIME_MAGIC_DEBUG
     for (m = conf->magic; m; m = m->next) {
-		if (isprint((((unsigned long) m) >> 24) & 255) &&
-			isprint((((unsigned long) m) >> 16) & 255) &&
-			isprint((((unsigned long) m) >> 8) & 255) &&
-			isprint(((unsigned long) m) & 255)) {
-			php_error(E_NOTICE,
-						  MODNAME ": match: POINTER CLOBBERED! "
-						  "m=\"%c%c%c%c\"",
-						  (((unsigned long) m) >> 24) & 255,
-						  (((unsigned long) m) >> 16) & 255,
-						  (((unsigned long) m) >> 8) & 255,
-						  ((unsigned long) m) & 255);
-			break;
-		}
-    }
-#endif
-
-    for (m = conf->magic; m; m = m->next) {
-#if MIME_MAGIC_DEBUG
-		rule_counter++;
-		php_error(E_NOTICE,
-					  MODNAME ": line=%d desc=%s", m->lineno, m->desc);
-#endif
-
 		/* check if main entry matches */
 		if (!mget(&p, s, m, nbytes) ||
 			!mcheck(&p, m)) {
@@ -1278,14 +1167,6 @@ static int match(unsigned char *s, int nbytes)
 
 			m_cont = m->next;
 			while (m_cont && (m_cont->cont_level != 0)) {
-#if MIME_MAGIC_DEBUG
-				rule_counter++;
-				php_error(E_NOTICE,
-							  MODNAME ": line=%d mc=%x mc->next=%x cont=%d desc=%s",
-							  m_cont->lineno, m_cont,
-							  m_cont->next, m_cont->cont_level,
-							  m_cont->desc);
-#endif
 				/*
 				 * this trick allows us to keep *m in sync when the continue
 				 * advances the pointer
@@ -1298,12 +1179,6 @@ static int match(unsigned char *s, int nbytes)
 
 		/* if we get here, the main entry rule was a match */
 		/* this will be the last run through the loop */
-#if MIME_MAGIC_DEBUG
-		php_error(E_NOTICE,
-					  MODNAME ": rule matched, line=%d type=%d %s",
-					  m->lineno, m->type,
-					  (m->type == STRING) ? m->value.s : "");
-#endif
 
 		/* print the match */
 		mprint(&p, m);
@@ -1322,12 +1197,6 @@ static int match(unsigned char *s, int nbytes)
 		 */
 		m = m->next;
 		while (m && (m->cont_level != 0)) {
-#if MIME_MAGIC_DEBUG
-		php_error(E_NOTICE,
-						  MODNAME ": match line=%d cont=%d type=%d %s",
-						  m->lineno, m->cont_level, m->type,
-						  (m->type == STRING) ? m->value.s : "");
-#endif
 			if (cont_level >= m->cont_level) {
 				if (cont_level > m->cont_level) {
 					/*
@@ -1366,16 +1235,8 @@ static int match(unsigned char *s, int nbytes)
 			/* move to next continuation record */
 			m = m->next;
 		}
-#if MIME_MAGIC_DEBUG
-		php_error(E_NOTICE,
-					  MODNAME ": matched after %d rules", rule_counter);
-#endif
 		return 1;		/* all through */
     }
-#if MIME_MAGIC_DEBUG
-		php_error(E_NOTICE,
-				  MODNAME ": failed after %d rules", rule_counter);
-#endif
     return 0;			/* no match at all */
 }
 
@@ -1640,77 +1501,41 @@ static int mcheck(union VALUETYPE *p, struct magic *m)
 
     switch (m->reln) {
     case 'x':
-#if MIME_MAGIC_DEBUG
-		php_error(E_NOTICE,
-					  "%lu == *any* = 1", v);
-#endif
 		matched = 1;
 		break;
 
     case '!':
 		matched = v != l;
-#if MIME_MAGIC_DEBUG
-		php_error(E_NOTICE,
-					  "%lu != %lu = %d", v, l, matched);
-#endif
 		break;
 
     case '=':
 		matched = v == l;
-#if MIME_MAGIC_DEBUG
-		php_error(E_NOTICE,
-					  "%lu == %lu = %d", v, l, matched);
-#endif
 		break;
 
     case '>':
 		if (m->flag & UNSIGNED) {
 			matched = v > l;
-#if MIME_MAGIC_DEBUG
-		php_error(E_NOTICE,
-						  "%lu > %lu = %d", v, l, matched);
-#endif
 		}
 		else {
 			matched = (long) v > (long) l;
-#if MIME_MAGIC_DEBUG
-		php_error(E_NOTICE,
-						  "%ld > %ld = %d", v, l, matched);
-#endif
 		}
 		break;
 
     case '<':
 		if (m->flag & UNSIGNED) {
 			matched = v < l;
-#if MIME_MAGIC_DEBUG
-		php_error(E_NOTICE,
-						  "%lu < %lu = %d", v, l, matched);
-#endif
 		}
 		else {
 			matched = (long) v < (long) l;
-#if MIME_MAGIC_DEBUG
-		php_error(E_NOTICE,
-						  "%ld < %ld = %d", v, l, matched);
-#endif
 		}
 		break;
 
     case '&':
 		matched = (v & l) == l;
-#if MIME_MAGIC_DEBUG
-		php_error(E_NOTICE,
-					  "((%lx & %lx) == %lx) = %d", v, l, l, matched);
-#endif
 		break;
 
     case '^':
 		matched = (v & l) != l;
-#if MIME_MAGIC_DEBUG
-		php_error(E_NOTICE,
-					  "((%lx & %lx) != %lx) = %d", v, l, l, matched);
-#endif
 		break;
 
     default:
@@ -1725,7 +1550,7 @@ static int mcheck(union VALUETYPE *p, struct magic *m)
     return matched;
 }
 
-#if HAVE_ZLIB
+#if HAVE_ZLIB 
 /*
  * compress routines: zmagic() - returns 0 if not recognized, uncompresses
  * and prints information if recognized uncompress(s, method, old, n, newch)
