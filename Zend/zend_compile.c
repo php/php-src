@@ -82,6 +82,8 @@ void zend_init_compiler_data_structures(TSRMLS_D)
 	CG(in_compilation) = 0;
 	init_compiler_declarables(TSRMLS_C);
 	CG(throw_list) = NULL;
+	CG(namespace) = NULL;
+	CG(namespace_len) = 0;
 }
 
 
@@ -106,6 +108,10 @@ void shutdown_compiler(TSRMLS_D)
 	zend_stack_destroy(&CG(list_stack));
 	zend_hash_destroy(&CG(filenames_table));
 	zend_llist_destroy(&CG(open_files));
+
+	if (CG(namespace)) {
+		efree(CG(namespace));
+	}
 }
 
 
@@ -2338,6 +2344,46 @@ void zend_do_end_heredoc(TSRMLS_D)
 			opline->op2.u.constant.value.str.val[(opline->op2.u.constant.value.str.len--)-1] = 0;
 		}
 	}	
+}
+
+
+void do_namespace(znode *namespace TSRMLS_DC)
+{
+	zend_namespace *namespace_ptr;
+
+	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+
+	if (CG(namespace)) {
+		efree(CG(namespace));
+	}
+	CG(namespace) = namespace->u.constant.value.str.val;
+	CG(namespace_len) = namespace->u.constant.value.str.len;
+
+	opline->opcode = ZEND_NAMESPACE;
+	zval_copy_ctor(&namespace->u.constant);
+	opline->op1 = *namespace;
+	SET_UNUSED(opline->op2);
+
+	if (zend_hash_find(CG(namespaces), CG(namespace), CG(namespace_len)+1, (void **) &namespace_ptr) == FAILURE) {
+		zend_namespace new_namespace;
+		HashTable *new_function_table;
+		HashTable *new_class_table;
+
+		new_function_table = (HashTable *) malloc(sizeof(HashTable));
+		new_class_table = (HashTable *) malloc(sizeof(HashTable));
+		zend_hash_init_ex(new_function_table, 100, NULL, ZEND_FUNCTION_DTOR, 1, 0);
+		zend_hash_init_ex(new_class_table, 10, NULL, ZEND_CLASS_DTOR, 1, 0);
+		new_namespace.type = USER_NAMESPACE;
+		new_namespace.function_table = new_function_table;
+		new_namespace.class_table = new_class_table;
+
+		zend_hash_update(CG(namespaces), CG(namespace), CG(namespace_len)+1, &new_namespace, sizeof(zend_namespace), NULL);
+		CG(function_table) = new_function_table;
+		CG(class_table) = new_class_table;
+	} else {
+		CG(function_table) = namespace_ptr->function_table;
+		CG(class_table) = namespace_ptr->class_table;
+	}
 }
 
 
