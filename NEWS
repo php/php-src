@@ -2,6 +2,12 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 200?, Version 4.0.6
+- Using ITypeInfo instead of IDispatch if possible. This makes DCOM calls
+  and even COM calls much faster.
+  All ini settings are now prefixed by 'com.'.
+  Now you need not provide a path to the file containing the typelib, you can
+  also provide the GUID of the TypeLib - entry or an IID for preloading
+  type - information. (phanto)
 - rewrite of domxml. It's now mostly DOM Level 2 conform (Uwe)
 - Added array_map() function that applies a callback to the elements
   of given arrays and returns the result. It can also be used with a
