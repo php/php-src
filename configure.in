@@ -1141,7 +1141,7 @@ $PHP_OUTPUT_FILES"
 
 AC_OUTPUT($ALL_OUTPUT_FILES, [], [
 
-if test "\$CONFIG_FILES" = "$ALL_OUTPUT_FILES" || test -z "\$CONFIG_FILES"; then
+if test "\$CONFIG_FILES" = "$ALL_OUTPUT_FILES" || test "\$CONFIG_FILES" = " $ALL_OUTPUT_FILES" || test -z "\$CONFIG_FILES"; then
   REDO_ALL=yes
 fi
 
