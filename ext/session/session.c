@@ -214,7 +214,6 @@ PS_SERIALIZER_ENCODE_FUNC(wddx)
 	wddx_packet *packet;
 	char *key;
 	zval **struc;
-	char *buf;
 	ELS_FETCH();
 
 	packet = _php_wddx_constructor();
@@ -250,13 +249,14 @@ PS_SERIALIZER_DECODE_FUNC(wddx)
 	char tmp[128];
 	ulong idx;
 	int hash_type;
+	int dofree = 1;
 	ELS_FETCH();
 
 	if(vallen == 0) return FAILURE;
 	
 	MAKE_STD_ZVAL(retval);
 
-	_php_wddx_deserialize(val, retval);
+	_php_wddx_deserialize_ex(val, vallen, retval);
 
 	for(zend_hash_internal_pointer_reset(retval->value.ht);
 			zend_hash_get_current_data(retval->value.ht, (void **) &ent) == SUCCESS;
@@ -267,10 +267,14 @@ PS_SERIALIZER_DECODE_FUNC(wddx)
 			case HASH_KEY_IS_LONG:
 				sprintf(tmp, "%ld", idx);
 				key = tmp;
+				dofree = 0;
 			case HASH_KEY_IS_STRING:
 				zval_add_ref(ent);
 				zend_hash_update(&EG(symbol_table), key, strlen(key) + 1,
 						ent, sizeof(ent), NULL);
+				PS_ADD_VAR(key);
+				if(dofree) efree(key);
+				dofree = 1;
 		}
 	}
 
