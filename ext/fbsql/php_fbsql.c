@@ -237,7 +237,7 @@ zend_module_entry fbsql_module_entry = {
    PHP_MINIT(fbsql),
    PHP_MSHUTDOWN(fbsql),
    PHP_RINIT(fbsql),
-   NULL,
+   PHP_RSHUTDOWN(fbsql),
    PHP_MINFO(fbsql),
    STANDARD_MODULE_PROPERTIES
 };
@@ -361,12 +361,13 @@ PHPFBLink* phpfbRetainLink (PHPFBLink* link)
 
 void phpfbReleaseLink (PHPFBLink* link)
 {
+	FBSQLLS_FETCH();
 	if (link)
 	{
 		link->retainCount--;
 		if (link->retainCount == 0)
 		{
-/*			if (link->index == FB_SQL_G(linkIndex) FB_SQL_G(linkIndex = 0; */
+			if (link->index == FB_SQL_G(linkIndex)) FB_SQL_G(linkIndex)--;
 			free(link->hostName);
 			free(link->userName);
 			free(link->userPassword);
@@ -446,6 +447,11 @@ PHP_MSHUTDOWN_FUNCTION(fbsql)
 }
 
 PHP_RINIT_FUNCTION(fbsql)
+{
+   return SUCCESS;
+}
+
+PHP_RSHUTDOWN_FUNCTION(fbsql)
 {
    return SUCCESS;
 }
