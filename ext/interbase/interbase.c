@@ -25,6 +25,12 @@ A lot... */
 
 /*
 	Changes:
+		2001-05-31: Jeremy Bettis <jeremy@deadbeef.com>
+			- If a blob handle was expected and something else was
+			  received create a blob and add the value to it.
+			- If the incoming argument to a bind parameter is NULL
+			  then store a NULL in the database.
+			- More verbose date errors.
 		1999-09-21:	Ivo Panacek <ivop@regionet.cz>
 			- added COMPILE_DL section
 			- more verbose php_info_ibase function
@@ -484,13 +490,13 @@ PHP_INI_BEGIN()
 	 STD_PHP_INI_ENTRY("ibase.timeformat", "%H:%M:%S", PHP_INI_ALL, OnUpdateString, cfg_timeformat, zend_ibase_globals, ibase_globals)
 PHP_INI_END()
 
-static void php_ibase_init_globals(TSRMLS_D)
+static void php_ibase_init_globals(zend_ibase_globals *ibase_globals)
 {
-	IBG(timestampformat) = NULL;
-	IBG(dateformat) = NULL;
-	IBG(timeformat) = NULL;
-	IBG(errmsg) = NULL;
-	IBG(num_persistent) = 0;
+	ibase_globals->timestampformat = NULL;
+	ibase_globals->dateformat = NULL;
+	ibase_globals->timeformat = NULL;
+	ibase_globals->errmsg = NULL;
+	ibase_globals->num_persistent = 0;
 }
 
 PHP_MINIT_FUNCTION(ibase)
@@ -1118,7 +1124,7 @@ _php_ibase_alloc_query_error:
 
 /* {{{ _php_ibase_bind()
    Bind parameter placeholders in a previously prepared query */
-static int _php_ibase_bind(XSQLDA *sqlda, pval **b_vars, BIND_BUF *buf)
+static int _php_ibase_bind(XSQLDA *sqlda, pval **b_vars, BIND_BUF *buf, ibase_query *ib_query)
 {
 	XSQLVAR *var;
 	pval *b_var;
@@ -1131,6 +1137,15 @@ static int _php_ibase_bind(XSQLDA *sqlda, pval **b_vars, BIND_BUF *buf)
 		var->sqlind	 = &buf[i].sqlind;
 		b_var = b_vars[i];
 		
+		if (b_var->type == IS_NULL) {
+			static char nothing[64];
+			static short null_flag = -1;
+			var->sqldata = nothing;
+			var->sqltype |= 1;
+			var->sqlind = &null_flag;
+			if (var->sqllen > 64)
+				var->sqllen = 64;
+		} else
 		switch(var->sqltype & ~1) {
 			case SQL_TEXT:			   /* direct to variable */
 			case SQL_VARYING:
@@ -1208,7 +1223,7 @@ static int _php_ibase_bind(XSQLDA *sqlda, pval **b_vars, BIND_BUF *buf)
 					n = sscanf(b_var->value.str.val, "%d%*[/]%d%*[/]%d %d%*[:]%d%*[:]%d",
 						   &t.tm_mon, &t.tm_mday, &t.tm_year,  &t.tm_hour, &t.tm_min, &t.tm_sec);
 					if(n != 3 && n != 6){
-						_php_ibase_module_error("invalid date/time format");
+						_php_ibase_module_error("invalid date/time format: Expected 3 or 6 fields, got %d. Use format m/d/Y H:i:s. You gave '%s'", n, b_var->value.str.val);
 						return FAILURE;
 					}
 					t.tm_year -= 1900;
@@ -1266,12 +1281,38 @@ static int _php_ibase_bind(XSQLDA *sqlda, pval **b_vars, BIND_BUF *buf)
 					if (b_var->type != IS_STRING
 						|| b_var->value.str.len != sizeof(ibase_blob_handle)
 						|| ((ibase_blob_handle *)(b_var->value.str.val))->bl_handle != 0) {
+						ibase_blob_handle *ib_blob;
+						TSRMLS_FETCH();
+
+						ib_blob = (ibase_blob_handle *) emalloc(sizeof(ibase_blob_handle));
+						ib_blob->trans_handle = ib_query->trans;
+						ib_blob->link = ib_query->link;
+						ib_blob->bl_handle = NULL;
+						if (isc_create_blob(IB_STATUS, &ib_blob->link, &ib_blob->trans_handle, &ib_blob->bl_handle, &ib_blob->bl_qd)) {
+							efree(ib_blob);
+							_php_ibase_error();
+							return FAILURE;
+						}
+						convert_to_string(b_var);
+						if (isc_put_segment(IB_STATUS, &ib_blob->bl_handle, (unsigned short) b_var->value.str.len, b_var->value.str.val)) {
+							_php_ibase_error();
+							return FAILURE;
+						}
+						if (isc_close_blob(IB_STATUS, &ib_blob->bl_handle)) {
+							_php_ibase_error();
+							return FAILURE;
+						}
+						ib_blob_id = ib_blob;
+						var->sqldata = (void ISC_FAR *)&ib_blob_id->bl_qd;
+/*
 						_php_ibase_module_error("invalid blob id string");
 						return FAILURE;
-					}
-					ib_blob_id = (ibase_blob_handle *)b_var->value.str.val;
+*/
+					} else {
+						ib_blob_id = (ibase_blob_handle *)b_var->value.str.val;
 					
-					var->sqldata = (void ISC_FAR *)&ib_blob_id->bl_qd;
+						var->sqldata = (void ISC_FAR *)&ib_blob_id->bl_qd;
+					}
 				}
 			break;
 			case SQL_ARRAY:
@@ -1383,7 +1424,7 @@ static int _php_ibase_exec(ibase_result **ib_resultp, ibase_query *ib_query, int
 		in_sqlda = emalloc(XSQLDA_LENGTH(ib_query->in_sqlda->sqld));
 		memcpy(in_sqlda, ib_query->in_sqlda, XSQLDA_LENGTH(ib_query->in_sqlda->sqld));
 		bind_buf = emalloc(sizeof(BIND_BUF) * ib_query->in_sqlda->sqld);
-		if (_php_ibase_bind(in_sqlda, args, bind_buf) == FAILURE) {
+		if (_php_ibase_bind(in_sqlda, args, bind_buf, ib_query) == FAILURE) {
 			IBDEBUG("Could not bind input XSQLDA... (_php_ibase_exec)");
 			goto _php_ibase_exec_error;
 		}
