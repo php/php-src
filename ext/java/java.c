@@ -730,6 +730,17 @@ JNIEXPORT jlong JNICALL Java_net_php_reflect_nextElement
   return (jlong)(long)result;
 }
 
+JNIEXPORT jlong JNICALL Java_net_php_reflect_hashIndexUpdate
+  (JNIEnv *jenv, jclass self, jlong array, jlong key)
+{
+  pval *result;
+  pval *handle = (pval*)(long)array;
+  ALLOC_ZVAL(result);
+  zend_hash_index_update(handle->value.ht, (unsigned long)key, 
+    &result, sizeof(zval *), NULL);
+  return (jlong)(long)result;
+}
+
 JNIEXPORT jlong JNICALL Java_net_php_reflect_hashUpdate
   (JNIEnv *jenv, jclass self, jlong array, jbyteArray key)
 {

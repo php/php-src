@@ -40,6 +40,12 @@ What is PHP4 ext/java?
 	possibly with a loss of data (example: double precision floating point
 	numbers will be converted to boolean).
 
+     6) In the tradition of PHP, arrays and hashtables may pretty much
+        be used interchangably.  Note that hashtables in PHP may only be
+        indexed by integers or strings; and that arrays of primitive types
+        in Java can not be sparse.  Also note that these constructs are
+        passed by value, so may be expensive in terms of memory and time.
+
 Build and execution instructions:
 
    Given the number of platforms and providers of JVMs, no single set of
