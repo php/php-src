@@ -233,7 +233,7 @@ typedef struct _virtual_cwd_globals {
 #define VCWD_POPEN(command, type) popen(command, type)
 #define VCWD_ACCESS(pathname, mode) access(pathname, mode)
 
-#if !defined(TSRM_WIN32) && !defined(NETWARE)
+#ifdef HAVE_REALPATH
 #define VCWD_REALPATH(path, real_path) realpath(path, real_path)
 #else
 #define VCWD_REALPATH(path, real_path) strcpy(real_path, path)
