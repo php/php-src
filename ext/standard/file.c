@@ -1723,10 +1723,11 @@ PHPAPI PHP_FUNCTION(fread)
 static const char *php_fgetcsv_lookup_trailing_spaces(const char *ptr, size_t len, const char delimiter TSRMLS_DC)
 {
 	int inc_len;
-	size_t cnt = 0;
+	unsigned char last_chars[2] = { 0, 0 };
 
 	while (len > 0) {
-		switch ((inc_len = _php_mblen(ptr, len))) {
+		inc_len = (*ptr == '\0' ? 1: _php_mblen(ptr, len));
+		switch (inc_len) {
 			case -2:
 			case -1:
 				inc_len = 1;
@@ -1734,20 +1735,25 @@ static const char *php_fgetcsv_lookup_trailing_spaces(const char *ptr, size_t le
 			case 0:
 				goto quit_loop;
 			case 1:
-				if (delimiter != *ptr && isspace((int)*(const unsigned char *)ptr)) {
-					cnt++;
-					break;
-				}
-				/* break is omitted intentionally */
 			default:
-				cnt = 0;
+				last_chars[0] = last_chars[1];
+				last_chars[1] = *ptr;
 				break;
 		}
 		ptr += inc_len;
 		len -= inc_len;
 	}
 quit_loop:
-	return ptr - cnt;
+	switch (last_chars[1]) {
+		case '\n':
+			if (last_chars[0] == '\r') {
+				return ptr - 2;
+			}
+			/* break is omitted intentionally */
+		case '\r':
+			return ptr - 1;
+	}
+	return ptr;
 }
 
 /* {{{ proto array fgetcsv(resource fp [,int length [, string delimiter [, string enclosure]]])
@@ -1853,7 +1859,7 @@ PHP_FUNCTION(fgetcsv)
 
 		/* 1. Strip any leading space */
 		for (;;) {
-			inc_len = (bptr < limit ? _php_mblen(bptr, limit - bptr): 0);
+			inc_len = (bptr < limit ? (*bptr == '\0' ? 1: _php_mblen(bptr, limit - bptr)): 0);
 			switch (inc_len) {
 				case -2:
 				case -1:
@@ -1882,7 +1888,7 @@ PHP_FUNCTION(fgetcsv)
 
 			/* 2A. handle enclosure delimited field */
 			for (;;) {
-				inc_len = (bptr < limit ? _php_mblen(bptr, limit - bptr): 0);
+				inc_len = (bptr < limit ? (*bptr == '\0' ? 1: _php_mblen(bptr, limit - bptr)): 0);
 				switch (inc_len) {
 					case 0:
 						switch (state) {
@@ -2019,7 +2025,7 @@ PHP_FUNCTION(fgetcsv)
 						break;
 				}
 				bptr += inc_len;
-				inc_len = (bptr < limit ? _php_mblen(bptr, limit - bptr): 0);
+				inc_len = (bptr < limit ? (*bptr == '\0' ? 1: _php_mblen(bptr, limit - bptr)): 0);
 			}
 		quit_loop_3:
 			comp_end = tptr;
@@ -2033,7 +2039,7 @@ PHP_FUNCTION(fgetcsv)
 			hunk_begin = bptr;
 
 			for (;;) {
-				inc_len = (bptr < limit ? _php_mblen(bptr, limit - bptr): 0);
+				inc_len = (bptr < limit ? (*bptr == '\0' ? 1: _php_mblen(bptr, limit - bptr)): 0);
 				switch (inc_len) {
 					case 0:
 						goto quit_loop_4;
