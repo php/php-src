@@ -646,6 +646,7 @@ php_formatted_print(int ht, int *len, int use_array, int format_offset TSRMLS_DC
 			if (multiuse) {
 				MAKE_STD_ZVAL(tmp);
 				*tmp = **(args[argnum]);
+				INIT_PZVAL(tmp);
 				zval_copy_ctor(tmp);
 			} else {
 				SEPARATE_ZVAL(args[argnum]);
