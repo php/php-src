@@ -151,7 +151,6 @@
 #endif
 
 #define MSQL1 0
-#define HAVE_FILEPRO 0
 
 #ifndef DEBUG /* should be set to ZEND_DEBUG */
 #define DEBUG 0
