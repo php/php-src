@@ -13,7 +13,7 @@ class foo
 
 	function &method1() {
 		print __CLASS__."::".__FUNCTION__."\n";
-		return $this->foo;
+		return @$this->foo;
 	}
 
 	function &method2() {
@@ -23,7 +23,7 @@ class foo
 
 	function method3() {
 		print __CLASS__."::".__FUNCTION__."\n";
-		return $this->foo;
+		return @$this->foo;
 	}
 }
 
@@ -88,28 +88,9 @@ ouch($bar);
 $bar->instance->finalize();
 print "I'm alive!\n";
 ?>
---EXPECT--
+--EXPECTF--
 ok1
 bar::run1
 foo::method1
-foo::method1
-foo::finalize
-done!
-ok2
-bar::run2
-foo::method2
-foo::method2
-foo::finalize
-done!
-ok3
-bar::run3
-foo::method3
-foo::method3
-foo::finalize
-done!
-ouch
-bar::run1
-foo::method1
-foo::method1
-foo::finalize
-I'm alive!
+
+Fatal error: Only variables or references can be returned by reference in %s on line %d
