@@ -674,13 +674,41 @@ static void php_message_handler_for_zend(long message, void *data)
 	}
 }
 
+static void php_start_post_request_startup(void *data)
+{
+	php_post_request_startup *ptr = (php_post_request_startup *) data;
 
+	ptr->func(ptr->userdata);
+}
+
+static void php_finish_post_request_startup(PLS_D)
+{
+	zend_llist_apply(&PG(ll_post_request_startup), php_start_post_request_startup);
+	zend_llist_destroy(&PG(ll_post_request_startup));
+}
+
+static void php_init_post_request_startup(PLS_D)
+{
+	zend_llist_init(&PG(ll_post_request_startup), sizeof(php_post_request_startup), NULL, 0);
+}
+
+void php_register_post_request_startup(void (*func)(void *), void *userdata)
+{
+	php_post_request_startup ptr;
+	PLS_FETCH();
+
+	ptr.func = func;
+	ptr.userdata = userdata;
+	
+	zend_llist_add_element(&PG(ll_post_request_startup), &ptr);
+}
 
 int php_request_startup(CLS_D ELS_DC PLS_DC SLS_DC)
 {
 	global_lock();
 	
 	php_output_startup();
+	php_init_post_request_startup(PLS_C);
 
 	if (PG(output_buffering)) {
 		php_start_ob_buffering();
@@ -732,6 +760,9 @@ int php_request_startup(CLS_D ELS_DC PLS_DC SLS_DC)
 
 		zend_hash_update(&EG(symbol_table), "PHP_AUTH_PW", sizeof("PHP_AUTH_PW"), &auth_password, sizeof(zval *), NULL);
 	}
+
+	php_finish_post_request_startup(PLS_C);
+	
 	return SUCCESS;
 }
 

@@ -94,8 +94,15 @@ struct _php_core_globals {
 	/* for fsock */
 	HashTable ht_fsock_keys;
 	HashTable ht_fsock_socks;
+
+	zend_llist ll_post_request_startup;
 };
 
+
+typedef struct {
+	void (*func)(void *);
+	void *userdata;
+} php_post_request_startup;
 
 #endif /* _PHP_GLOBALS_H */
 
