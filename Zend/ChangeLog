@@ -1,3 +1,7 @@
+2002-10-06  Andi Gutmans  <andi@zend.com>
+
+    * zend_execute.c: - Fix problem with unsetting object members.
+
 2002-10-01  Andi Gutmans  <andi@zend.com>
 
     * zend_language_parser.y:
