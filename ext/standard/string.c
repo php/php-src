@@ -62,7 +62,7 @@ static char *php_bin2hex(const unsigned char *old, const size_t oldlen, size_t *
    converts the binary representation of data to hex */
 PHP_FUNCTION(bin2hex)
 {
-	pval **data;
+	zval **data;
 	char *new;
 	size_t newlen;
 
@@ -116,7 +116,7 @@ PHP_FUNCTION(strcspn)
 }
 /* }}} */
 
-PHPAPI void php_trim(pval *str, pval * return_value, int mode)
+PHPAPI void php_trim(zval *str, zval * return_value, int mode)
 /* mode 1 : trim left
    mode 2 : trim right
    mode 3 : trim left and right
@@ -160,7 +160,7 @@ PHPAPI void php_trim(pval *str, pval * return_value, int mode)
    Remove trailing whitespace */
 PHP_FUNCTION(chop)
 {
-	pval **str;
+	zval **str;
 	
 	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &str) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -179,7 +179,7 @@ PHP_FUNCTION(chop)
    Strip whitespace from the beginning and end of a string */
 PHP_FUNCTION(trim)
 {
-	pval **str;
+	zval **str;
 	
 	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &str) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -198,7 +198,7 @@ PHP_FUNCTION(trim)
    Strip whitespace from the beginning of a string */
 PHP_FUNCTION(ltrim)
 {
-	pval **str;
+	zval **str;
 	
 	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &str) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -212,7 +212,7 @@ PHP_FUNCTION(ltrim)
 }
 /* }}} */
 
-PHPAPI void php_explode(pval *delim, pval *str, pval *return_value) 
+PHPAPI void php_explode(zval *delim, zval *str, zval *return_value) 
 {
 	char *p1, *p2, *endp;
 	int i = 0;
@@ -240,7 +240,7 @@ PHPAPI void php_explode(pval *delim, pval *str, pval *return_value)
    Split a string on string separator and return array of components */
 PHP_FUNCTION(explode)
 {
-	pval **str, **delim;
+	zval **str, **delim;
 
 	if (ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &delim, &str) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -266,9 +266,9 @@ PHP_FUNCTION(explode)
 /* {{{ proto string join(array src, string glue)
    An alias for implode */
 /* }}} */
-PHPAPI void php_implode(pval *delim, pval *arr, pval *return_value) 
+PHPAPI void php_implode(zval *delim, zval *arr, zval *return_value) 
 {
-	pval **tmp;
+	zval **tmp;
 	int len = 0, count = 0, target = 0;
 
 	/* convert everything to strings, and calculate length */
@@ -309,7 +309,7 @@ PHPAPI void php_implode(pval *delim, pval *arr, pval *return_value)
    Join array elements placing glue string between items and return one string */
 PHP_FUNCTION(implode)
 {
-	pval **arg1, **arg2, *delim, *arr;
+	zval **arg1, **arg2, *delim, *arr;
 	
 	if (ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -338,7 +338,7 @@ PHP_FUNCTION(implode)
    Tokenize a string */
 PHP_FUNCTION(strtok)
 {
-	pval **str, **tok;
+	zval **str, **tok;
 	char *token = NULL, *tokp=NULL;
 	char *first = NULL;
 	int argc;
@@ -410,7 +410,7 @@ PHPAPI char *php_strtoupper(char *s, size_t len)
    Make a string uppercase */
 PHP_FUNCTION(strtoupper)
 {
-	pval **arg;
+	zval **arg;
 	
 	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &arg)) {
 		WRONG_PARAM_COUNT;
@@ -442,7 +442,7 @@ PHPAPI char *php_strtolower(char *s, size_t len)
    Make a string lowercase */
 PHP_FUNCTION(strtolower)
 {
-	pval **str;
+	zval **str;
 	char *ret;
 	
 	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &str)) {
@@ -460,7 +460,7 @@ PHP_FUNCTION(strtolower)
    Return the filename component of the path */
 PHP_FUNCTION(basename)
 {
-	pval **str;
+	zval **str;
 	char *ret, *c;
 	
 	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &str)) {
@@ -512,7 +512,7 @@ PHPAPI void php_dirname(char *str, int len) {
    Return the directory name component of the path */
 PHP_FUNCTION(dirname)
 {
-	pval **str;
+	zval **str;
 	char *ret;
 	
 	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &str)) {
@@ -650,7 +650,7 @@ PHP_FUNCTION(strstr)
    Find position of first occurrence of a string within another */
 PHP_FUNCTION(strpos)
 {
-	pval **haystack, **needle, **OFFSET;
+	zval **haystack, **needle, **OFFSET;
 	int offset = 0;
 	char *found = NULL;
 	char *endp;
@@ -717,7 +717,7 @@ PHP_FUNCTION(strpos)
    Find the last occurrence of a character in a string within another */
 PHP_FUNCTION(strrpos)
 {
-	pval **haystack, **needle;
+	zval **haystack, **needle;
 	char *found = NULL;
 	
 	if (ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &haystack, &needle) == FAILURE) {
@@ -744,7 +744,7 @@ PHP_FUNCTION(strrpos)
    Find the last occurrence of a character in a string within another */
 PHP_FUNCTION(strrchr)
 {
-	pval **haystack, **needle;
+	zval **haystack, **needle;
 	char *found = NULL;
 	
 	if (ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &haystack, &needle) ==
@@ -810,7 +810,7 @@ static char *php_chunk_split(char *src, int srclen, char *end, int endlen,
    Return split line */
 PHP_FUNCTION(chunk_split) 
 {
-	pval **p_str, **p_chunklen, **p_ending;
+	zval **p_str, **p_chunklen, **p_ending;
 	int argc;
 	char *result;
 	char *end    = "\r\n";
@@ -857,7 +857,7 @@ PHP_FUNCTION(chunk_split)
    Return part of a string */
 PHP_FUNCTION(substr)
 {
-	pval **string, **from, **len;
+	zval **string, **from, **len;
 	int argc, l;
 	int f;
 	
@@ -1040,7 +1040,7 @@ PHP_FUNCTION(quotemeta)
    Return ASCII value of character */
 PHP_FUNCTION(ord)
 {
-	pval **str;
+	zval **str;
 	
 	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &str) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1054,7 +1054,7 @@ PHP_FUNCTION(ord)
    Convert ASCII code to a character */
 PHP_FUNCTION(chr)
 {
-	pval **num;
+	zval **num;
 	char temp[2];
 	
 	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &num) == FAILURE) {
@@ -1071,7 +1071,7 @@ PHP_FUNCTION(chr)
    Make a string's first character uppercase */
 PHP_FUNCTION(ucfirst)
 {
-	pval **arg;
+	zval **arg;
 	
 	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1248,7 +1248,7 @@ static void php_strtr_array(zval *return_value,char *str,int slen,HashTable *has
    Translate characters in str using given translation tables */
 PHP_FUNCTION(strtr)
 {								/* strtr(STRING,FROM,TO) */
-	pval **str, **from, **to;
+	zval **str, **from, **to;
 	int ac = ARG_COUNT(ht);
 
 	if (ac < 2 || ac > 3 || zend_get_parameters_ex(ac, &str, &from, &to) == FAILURE) {
@@ -1285,7 +1285,7 @@ PHP_FUNCTION(strtr)
    Reverse a string */
 PHP_FUNCTION(strrev)
 {
-	pval **str;
+	zval **str;
 	int i,len;
 	char c;
 	
@@ -1296,7 +1296,7 @@ PHP_FUNCTION(strrev)
 	convert_to_string_ex(str);
 	
 	*return_value = **str;
-	pval_copy_constructor(return_value);
+	zval_copy_ctor(return_value);
 
 	len = return_value->value.str.len;
 	
@@ -1351,7 +1351,7 @@ static int php_similar_char(const char *txt1, int len1,
    Calculates the similarity between two strings */
 PHP_FUNCTION(similar_text)
 {
-	pval **t1, **t2, **percent;
+	zval **t1, **t2, **percent;
 	int ac = ARG_COUNT(ht);
 	int sim;
 	
@@ -1440,7 +1440,7 @@ PHPAPI void php_stripslashes(char *string, int *len)
    or with ASCII<32 (except '\n', '\r', '\t' etc...) */
 PHP_FUNCTION(addcslashes)
 {
-	pval **str, **what;
+	zval **str, **what;
 
 	if (ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &str, &what) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1456,7 +1456,7 @@ PHP_FUNCTION(addcslashes)
    Escape single quote, double quotes and backslash characters in a string with backslashes */
 PHP_FUNCTION(addslashes)
 {
-	pval **str;
+	zval **str;
 
 	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &str) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1471,7 +1471,7 @@ PHP_FUNCTION(addslashes)
    Strip backslashes from a string. Uses C-style conventions*/
 PHP_FUNCTION(stripcslashes)
 {
-	pval **str;
+	zval **str;
 	
 	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &str) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1488,7 +1488,7 @@ PHP_FUNCTION(stripcslashes)
    Strip backslashes from a string */
 PHP_FUNCTION(stripslashes)
 {
-	pval **str;
+	zval **str;
 	
 	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &str) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1682,7 +1682,7 @@ PHPAPI char *php_addslashes(char *str, int length, int *new_length, int should_f
 #define _isblank(c) (((((unsigned char) c)==' ' || ((unsigned char) c)=='\t')) ? 1 : 0)
 #define _isnewline(c) (((((unsigned char) c)=='\n' || ((unsigned char) c)=='\r')) ? 1 : 0)
 
-PHPAPI void php_char_to_str(char *str,uint len,char from,char *to,int to_len,pval *result)
+PHPAPI void php_char_to_str(char *str,uint len,char from,char *to,int to_len,zval *result)
 {
 	int char_count=0;
 	char *source,*target,*tmp,*source_end=str+len, *tmp_end=NULL;
@@ -1788,7 +1788,7 @@ finish:
    Replace all occurrences of needle in haystack with str */
 PHP_FUNCTION(str_replace)
 {
-	pval **haystack, **needle, **str;
+	zval **haystack, **needle, **str;
 	char *new;
 	int len = 0;
 
@@ -1832,7 +1832,7 @@ PHP_FUNCTION(str_replace)
  */
 static void php_hebrev(INTERNAL_FUNCTION_PARAMETERS,int convert_newlines)
 {
-	pval **str,**max_chars_per_line;
+	zval **str,**max_chars_per_line;
 	char *heb_str,*tmp,*target,*opposite_target,*broken_str;
 	int block_start, block_end, block_type, block_length, i;
 	int block_ended;
@@ -2014,7 +2014,7 @@ PHP_FUNCTION(hebrevc)
    Converts newlines to HTML line breaks */
 PHP_FUNCTION(nl2br)
 {
-	pval **str;
+	zval **str;
 	
 	if (ARG_COUNT(ht)!=1 || zend_get_parameters_ex(1, &str)==FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -2031,7 +2031,7 @@ PHP_FUNCTION(nl2br)
 PHP_FUNCTION(strip_tags)
 {
 	char *buf;
-	pval **str, **allow=NULL;
+	zval **str, **allow=NULL;
 
 	switch(ARG_COUNT(ht)) {
 		case 1:
@@ -2060,8 +2060,8 @@ PHP_FUNCTION(strip_tags)
    Set locale information */
 PHP_FUNCTION(setlocale)
 {
-	pval **pcategory, **plocale;
-	pval *category, *locale;
+	zval **pcategory, **plocale;
+	zval *category, *locale;
 	int cat;
 	char *loc, *retval;
 	BLS_FETCH();
@@ -2113,7 +2113,7 @@ PHP_FUNCTION(setlocale)
    Parses GET/POST/COOKIE data and sets global variables. */
 PHP_FUNCTION(parse_str)
 {
-	pval **arg;
+	zval **arg;
 	char *res = NULL;
 	ELS_FETCH();
 	PLS_FETCH();
