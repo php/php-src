@@ -156,30 +156,7 @@ static void sapi_cgi_register_variables(zval *track_vars_array ELS_DC SLS_DC PLS
 	php_import_environment_variables(track_vars_array ELS_CC PLS_CC);
 
 	/* Build the special-case PHP_SELF variable for the CGI version */
-#if FORCE_CGI_REDIRECT
 	php_register_variable("PHP_SELF", (SG(request_info).request_uri ? SG(request_info).request_uri:""), track_vars_array ELS_CC PLS_CC);
-#else
-	{
-		char *sn;
-		char *val;
-		int l=0;
-
-		sn = getenv("SCRIPT_NAME");
-		pi = SG(request_info).request_uri;
-		if (sn)
-			l += strlen(sn);
-		if (pi)
-			l += strlen(pi);
-		if (pi && sn && !strcmp(pi, sn)) {
-			l -= strlen(pi);
-			pi = NULL;
-		}
-		val = emalloc(l + 1);
-		sprintf(val, "%s%s", (sn ? sn : ""), (pi ? pi : ""));	/* SAFE */
-		php_register_variable("PHP_SELF", val, track_vars_array ELS_CC PLS_CC);
-		efree(val);
-	}
-#endif
 }
 
 
