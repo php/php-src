@@ -1097,25 +1097,25 @@ void zend_do_end_function_declaration(znode *function_token TSRMLS_DC)
 	pass_two(CG(active_op_array) TSRMLS_CC);
 
 	/* we don't care if the function name is longer, in fact lowercasing only 
-	 * the beginning of the name speeds up th echeck process */
+	 * the beginning of the name speeds up the check process */
 	name_len = strlen(CG(active_op_array)->function_name);
 	zend_str_tolower_copy(lcname, CG(active_op_array)->function_name, MIN(name_len, sizeof(lcname)-1));
 	lcname[sizeof(lcname)-1] = '\0'; // zend_str_tolower_copy won't necessarily set the zero byte
 
 	if (CG(active_class_entry)) {
-		if (name_len == sizeof(ZEND_DESTRUCTOR_FUNC_NAME) - 1 && !strcmp(lcname, ZEND_DESTRUCTOR_FUNC_NAME) && CG(active_op_array)->num_args != 0) {
+		if (name_len == sizeof(ZEND_DESTRUCTOR_FUNC_NAME) - 1 && !memcmp(lcname, ZEND_DESTRUCTOR_FUNC_NAME, sizeof(ZEND_DESTRUCTOR_FUNC_NAME)) && CG(active_op_array)->num_args != 0) {
 			zend_error(E_COMPILE_ERROR, "Destuctor %s::%s() cannot take arguments", CG(active_class_entry)->name, ZEND_DESTRUCTOR_FUNC_NAME);
-		} else if (name_len == sizeof(ZEND_CLONE_FUNC_NAME) - 1 && !strcmp(lcname, ZEND_CLONE_FUNC_NAME) && CG(active_op_array)->num_args != 0) {
+		} else if (name_len == sizeof(ZEND_CLONE_FUNC_NAME) - 1 && !memcmp(lcname, ZEND_CLONE_FUNC_NAME, sizeof(ZEND_CLONE_FUNC_NAME)) && CG(active_op_array)->num_args != 0) {
 			zend_error(E_COMPILE_ERROR, "Method %s::%s() cannot accept any arguments", CG(active_class_entry)->name, ZEND_CLONE_FUNC_NAME);
-		} else if (name_len == sizeof(ZEND_GET_FUNC_NAME) - 1 && !strcmp(lcname, ZEND_GET_FUNC_NAME) && CG(active_op_array)->num_args != 1) {
+		} else if (name_len == sizeof(ZEND_GET_FUNC_NAME) - 1 && !memcmp(lcname, ZEND_GET_FUNC_NAME, sizeof(ZEND_GET_FUNC_NAME)) && CG(active_op_array)->num_args != 1) {
 			zend_error(E_COMPILE_ERROR, "Method %s::%s() must take exactly 1 argument", CG(active_class_entry)->name, ZEND_GET_FUNC_NAME);
-		} else if (name_len == sizeof(ZEND_SET_FUNC_NAME) - 1 && !strcmp(lcname, ZEND_SET_FUNC_NAME) && CG(active_op_array)->num_args != 2) {
+		} else if (name_len == sizeof(ZEND_SET_FUNC_NAME) - 1 && !memcmp(lcname, ZEND_SET_FUNC_NAME, sizeof(ZEND_SET_FUNC_NAME)) && CG(active_op_array)->num_args != 2) {
 			zend_error(E_COMPILE_ERROR, "Method %s::%s() must take exactly 2 arguments", CG(active_class_entry)->name, ZEND_SET_FUNC_NAME);
-		} else if (name_len == sizeof(ZEND_CALL_FUNC_NAME) - 1 && !strcmp(lcname, ZEND_CALL_FUNC_NAME) && CG(active_op_array)->num_args != 2) {
+		} else if (name_len == sizeof(ZEND_CALL_FUNC_NAME) - 1 && !memcmp(lcname, ZEND_CALL_FUNC_NAME, sizeof(ZEND_CALL_FUNC_NAME)) && CG(active_op_array)->num_args != 2) {
 			zend_error(E_COMPILE_ERROR, "Method %s::%s() must take exactly 2 arguments", CG(active_class_entry)->name, ZEND_CALL_FUNC_NAME);
 		}
 	} else {
-		if (name_len == sizeof(ZEND_AUTOLOAD_FUNC_NAME) - 1 && !strcmp(lcname, ZEND_AUTOLOAD_FUNC_NAME) && CG(active_op_array)->num_args != 1) {
+		if (name_len == sizeof(ZEND_AUTOLOAD_FUNC_NAME) - 1 && !memcmp(lcname, ZEND_AUTOLOAD_FUNC_NAME, sizeof(ZEND_AUTOLOAD_FUNC_NAME)) && CG(active_op_array)->num_args != 1) {
 			zend_error(E_COMPILE_ERROR, "%s() must take exactly 1 argument", ZEND_AUTOLOAD_FUNC_NAME);
 		}		
 	}
