@@ -38,7 +38,7 @@ typedef union _temp_variable {
 		union {
 			struct {
 				zval *str;
-				int offset;
+				zend_uint offset;
 			} str_offset;
 			zend_property_reference overloaded_element;
 		} data;

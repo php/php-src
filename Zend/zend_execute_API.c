@@ -642,7 +642,7 @@ ZEND_API int zend_eval_string(char *str, zval *retval_ptr, char *string_name TSR
 	zend_op_array *new_op_array;
 	zend_op_array *original_active_op_array = EG(active_op_array);
 	zend_function_state *original_function_state_ptr = EG(function_state_ptr);
-	int original_handle_op_arrays;
+	zend_uchar original_handle_op_arrays;
 	int retval;
 
 	if (retval_ptr) {

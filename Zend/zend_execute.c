@@ -427,7 +427,7 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 							break;
 						}
 						if (T->EA.data.str_offset.offset >= T->EA.data.str_offset.str->value.str.len) {
-							int i;
+							zend_uint i;
 
 							if (T->EA.data.str_offset.str->value.str.len==0) {
 								STR_FREE(T->EA.data.str_offset.str->value.str.val);
@@ -493,7 +493,7 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 	
 	if (PZVAL_IS_REF(variable_ptr)) {
 		if (variable_ptr!=value) {
-			short refcount=variable_ptr->refcount;
+			zend_uint refcount = variable_ptr->refcount;
 			zval garbage;
 	
 			if (type!=IS_TMP_VAR) {
@@ -1814,7 +1814,7 @@ binary_assign_op_addr_obj:
 						zval *class_name;
 						zend_bool is_const;
 						char *class_name_strval;
-						int class_name_strlen;
+						zend_uint class_name_strlen;
 						
 						if (EX(opline)->extended_value == ZEND_FETCH_CLASS_SELF) {
 							if (!EG(scope)) {

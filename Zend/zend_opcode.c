@@ -50,7 +50,7 @@ static void op_array_alloc_ops(zend_op_array *op_array)
 
 
 
-void init_op_array(zend_op_array *op_array, int type, int initial_ops_size TSRMLS_DC)
+void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_size TSRMLS_DC)
 {
 	op_array->type = type;
 

@@ -161,7 +161,7 @@ ZEND_API ulong zend_hash_func(char *arKey, uint nKeyLength)
 	}
 
 
-ZEND_API int zend_hash_init(HashTable *ht, uint nSize, hash_func_t pHashFunction, dtor_func_t pDestructor, int persistent)
+ZEND_API int zend_hash_init(HashTable *ht, uint nSize, hash_func_t pHashFunction, dtor_func_t pDestructor, zend_bool persistent)
 {
 	uint i = 3;
 
@@ -194,7 +194,7 @@ ZEND_API int zend_hash_init(HashTable *ht, uint nSize, hash_func_t pHashFunction
 }
 
 
-ZEND_API int zend_hash_init_ex(HashTable *ht, uint nSize, hash_func_t pHashFunction, dtor_func_t pDestructor, int persistent, zend_bool bApplyProtection)
+ZEND_API int zend_hash_init_ex(HashTable *ht, uint nSize, hash_func_t pHashFunction, dtor_func_t pDestructor, zend_bool persistent, zend_bool bApplyProtection)
 {
 	int retval = zend_hash_init(ht, nSize, pHashFunction, pDestructor, persistent);
 

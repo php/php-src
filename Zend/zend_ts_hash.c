@@ -50,7 +50,7 @@ static void end_write(TsHashTable *ht)
 }
 
 /* delegates */
-ZEND_API int zend_ts_hash_init(TsHashTable *ht, uint nSize, hash_func_t pHashFunction, dtor_func_t pDestructor, int persistent)
+ZEND_API int zend_ts_hash_init(TsHashTable *ht, uint nSize, hash_func_t pHashFunction, dtor_func_t pDestructor, zend_bool persistent)
 {
 	ht->mx_reader = tsrm_mutex_alloc();
 	ht->mx_writer = tsrm_mutex_alloc();
@@ -58,7 +58,7 @@ ZEND_API int zend_ts_hash_init(TsHashTable *ht, uint nSize, hash_func_t pHashFun
 	return zend_hash_init(&(ht->hash), nSize, pHashFunction, pDestructor, persistent);
 }
 
-ZEND_API int zend_ts_hash_init_ex(TsHashTable *ht, uint nSize, hash_func_t pHashFunction, dtor_func_t pDestructor, int persistent, zend_bool bApplyProtection)
+ZEND_API int zend_ts_hash_init_ex(TsHashTable *ht, uint nSize, hash_func_t pHashFunction, dtor_func_t pDestructor, zend_bool persistent, zend_bool bApplyProtection)
 {
 	ht->mx_reader = tsrm_mutex_alloc();
 	ht->mx_writer = tsrm_mutex_alloc();
