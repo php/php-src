@@ -784,7 +784,11 @@ static void zend_fetch_dimension_address(znode *result, znode *op1, znode *op2, 
 
 	if (!container_ptr) {
 		if(T(op1->u.var).EA.type == IS_STRING_OFFSET) {
+			zval *offset;
 			zend_error(E_WARNING, "Cannot use string offset as an array");
+
+			offset = get_zval_ptr(op2, Ts, &EG(free_op2), BP_VAR_R);
+			FREE_OP(Ts, op2, EG(free_op2));
 		}
 		*retval = &EG(error_zval_ptr);
 		SELECTIVE_PZVAL_LOCK(**retval, result);
