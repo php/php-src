@@ -30,17 +30,15 @@ PHP                                                                        NEWS
   . added class File
 - Added several new functions to support the PostgreSQL v3 protocol introduced 
   in PostgreSQL 7.4. (Christopher)
-  . pg_transaction_status() New function to get in-transaction status of
-    a database connection.
-  . pg_query_params() New function to allow execution of parameterized queries.
-  . pg_prepare() New function to allow preparing named queries.
-  . pg_execute() New function to allow execution of named prepared queries.
-  . pg_send_query_params() New function that is the async equivalent of
-    pg_query_params.
-  . pg_send_prepare() New function that is the async equivalent of pg_prepare().
-  . pg_send_execute() New function that is the async equivalent of pg_execute().
-  . pg_result_error_field() New function that allows highly detailed error 
-    information, most importantly the SQLSTATE error code.
+  . pg_transaction_status() - in-transaction status of a database connection.
+  . pg_query_params() - execution of parameterized queries.
+  . pg_prepare() - prepare named queries.
+  . pg_execute() - execution of named prepared queries.
+  . pg_send_query_params() - async equivalent of pg_query_params().
+  . pg_send_prepare() - async equivalent of pg_prepare().
+  . pg_send_execute() - async equivalent of pg_execute().
+  . pg_result_error_field() - highly detailed error information, 
+    most importantly the SQLSTATE error code.
 - Added optional fifth parameter "count" to preg_replace_callback() and
   preg_replace() to count the number of replacements made. FR #32275. (Andrey)
 - Added optional third parameter "charlist" to str_word_count() which
