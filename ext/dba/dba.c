@@ -682,7 +682,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 /* }}} */
 #undef FREENOW
 
-/* {{{ proto int dba_popen(string path [, string mode, string handlername, string ...])
+/* {{{ proto int dba_popen(string path, string mode [, string handlername, string ...])
    Opens path using the specified handler in mode persistently */
 PHP_FUNCTION(dba_popen)
 {
