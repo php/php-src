@@ -2264,7 +2264,8 @@ PHP_FUNCTION(imap_utf7_encode)
 		} else if (inp == endp || !SPECIAL(*inp)) {
 			/* flush overflow and terminate region */
 			if (state != ST_ENCODE0) {
-				*outp++ = B64(*outp);
+				c = B64(*outp);
+				*outp++ = c;
 			}
 			*outp++ = '-';
 			state = ST_NORMAL;
