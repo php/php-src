@@ -103,9 +103,9 @@ DBA_OPEN_FUNC(cdb)
 	cdb = ecalloc(sizeof(dba_cdb), 1);
 	if (!cdb) {
 #if DBA_CDB_BUILTIN
-		php_stream_close(cdb->file);
+		php_stream_close(file);
 #else
-		close(cdb->file);
+		close(file);
 #endif
 		return FAILURE;
 	}
