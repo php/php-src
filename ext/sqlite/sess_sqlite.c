@@ -88,6 +88,8 @@ PS_OPEN_FUNC(sqlite)
 	/* allow up to 1 minute when busy */
 	sqlite_busy_timeout(db, 60000);
 
+	/* sqlite_exec(db, "PRAGMA default_synchronous = OFF", NULL, NULL, NULL); */
+	
 	/* This will fail if the table already exists, but that's not a big problem. I'm
 	   unclear as to how to check for a table's existence in SQLite -- that would be better here. */
 	sqlite_exec(db, CREATE_TBL_QUERY, NULL, NULL, NULL);
@@ -110,11 +112,15 @@ PS_READ_FUNC(sqlite)
 {
 	PS_SQLITE_DATA;
 	char *query;
+	const char *tail;
 	sqlite_vm *vm;
 	int colcount, result;
 	const char **rowdata, **colnames;
 	char *error;
 
+	*val = NULL;
+	*vallen = 0;
+	
 	if (!ps_sqlite_valid_key(key)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "SQLite: The session id contains illegal characters, valid characters are a-z, A-Z, 0-9 and '-,'");
 		return FAILURE;
@@ -126,7 +132,7 @@ PS_READ_FUNC(sqlite)
 		return FAILURE;
 	}
 
-	if (sqlite_compile(db, query, NULL, &vm, &error) != SQLITE_OK) {
+	if (sqlite_compile(db, query, &tail, &vm, &error) != SQLITE_OK) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "SQLite: Could not compile session read query: %s", error);
 		sqlite_freemem(error);
 		sqlite_freemem(query);
@@ -135,10 +141,7 @@ PS_READ_FUNC(sqlite)
 
 	switch ((result = sqlite_step(vm, &colcount, &rowdata, &colnames))) {
 		case SQLITE_ROW:
-			if (rowdata[0] == NULL) {
-				*vallen = 0;
-				*val = NULL;
-			} else {
+			if (rowdata[0] != NULL) {
 				*vallen = strlen(rowdata[0]);
 				*val = emalloc(*vallen);
 				*vallen = sqlite_decode_binary(rowdata[0], *val);
@@ -146,7 +149,7 @@ PS_READ_FUNC(sqlite)
 			}
 			break;
 		default:
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "SQLite: session read query failed: %s", error);
+			//php_error_docref(NULL TSRMLS_CC, E_WARNING, "SQLite: session read query failed: %s", error);
 			sqlite_freemem(error);
 			error = NULL;
 	}
