@@ -5360,7 +5360,8 @@ PHP_FUNCTION(domxml_xslt_process)
 	xmlDocPtr xmldocp;
 	xmlDocPtr docp;
 	char **params = NULL;
-	int ret, clone = -1;
+	int ret;
+	long clone = -1;
 	char *filename;
 	int filename_len = 0;
 	FILE *f;
