@@ -28,11 +28,6 @@ PHP_ARG_WITH(mnogosearch,for mnoGoSearch support,
 		AC_MSG_ERROR(mnoGoSearch 3.1.10 at least required)
 	fi
 	
-	if test -l "$MNOGOSEARCH_VERSION_ID" -gt 6; then
-		AC_MSG_RESULT(<= 3.1.9)    
-		AC_MSG_ERROR(mnoGoSearch 3.1.10 at least required)
-	fi
-	
 	if test "$MNOGOSEARCH_VERSION_ID" -lt 30110; then
 		AC_MSG_RESULT(<= 3.1.9)
 		AC_MSG_ERROR(mnoGoSearch 3.1.10 at least required)
