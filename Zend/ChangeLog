@@ -1,3 +1,7 @@
+2002-11-01  Andi Gutmans  <andi@zend.com>
+
+    * zend_execute.c: - Fix unset($this->foo)
+
 2002-10-24  Andi Gutmans  <andi@zend.com>
 
     * zend_execute.c
