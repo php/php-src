@@ -4,6 +4,11 @@ count
 --GET--
 --FILE--
 <?php
+print "Testing NULL...\n";
+$arr = NULL;
+print "COUNT_NORMAL: should be 0, is ".count($arr, COUNT_NORMAL)."\n";
+print "COUNT_RECURSIVE: should be 0, is ".count($arr, COUNT_RECURSIVE)."\n";
+
 print "Testing arrays...\n";
 $arr = array(1, array(3, 4, array(6, array(8))));
 print "COUNT_NORMAL: should be 2, is ".count($arr, COUNT_NORMAL)."\n";
@@ -23,6 +28,9 @@ print "COUNT_NORMAL: should be 1, is ".count("string")."\n";
 print "COUNT_NORMAL: should be 2, is ".count(array("a", array("b")))."\n";
 ?>
 --EXPECT--
+Testing NULL...
+COUNT_NORMAL: should be 0, is 0
+COUNT_RECURSIVE: should be 0, is 0
 Testing arrays...
 COUNT_NORMAL: should be 2, is 2
 COUNT_RECURSIVE: should be 8, is 8
