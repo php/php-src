@@ -1,12 +1,12 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
-?? ??? 2000, Version 4.0.5
+?? ??? 200?, Version 4.0.5
 - Added the call_user_method_array function which allows you to call a method
   with an arbitrary number of parameters. (Sterling)
 - ext/odbc: IBM DB2 patch by Walter Franzini <walter@sys-net.it>
 - Made ldap_get_entries() return an array even if there are no entries
-- Empty entry. Enjoy
+- Added extension for the cracklib library. (Alexander Feldman)
 
 ?? ??? 2000, Version 4.0.4
 - Allow assigning a newly created object by reference. This is needed only if
@@ -28,7 +28,6 @@ PHP 4.0                                                                    NEWS
 - Fixed bad mod_perl interaction which caused segfaults when using LFS (Sascha)
 - const CONSTNAME now gets recognized. Before the patch only @const CONSTNAME
   description was recognized.
-- Added extension for the cracklib library. (Alexander Feldman)
 - Added the is_null() function that will return true if a variable is of
   type null. (Sterling)
 - Fixed a bug which made readdir() unusable in some systems. (Jani)
