@@ -60,7 +60,7 @@ PHP_ARG_WITH(imap,for IMAP support,
     PHP_EXPAND_PATH($IMAP_DIR, IMAP_DIR)
 
     if test -z "$IMAP_DIR"; then
-      AC_MSG_ERROR(Cannot find rfc822.h. Please check your IMAP installation)
+      AC_MSG_ERROR(Cannot find rfc822.h. Please check your IMAP installation.)
     fi
 
     if test -r "$IMAP_DIR/c-client/c-client.a"; then
@@ -76,7 +76,7 @@ PHP_ARG_WITH(imap,for IMAP support,
     done
 
     if test -z "$IMAP_LIBDIR"; then
-      AC_MSG_ERROR(Cannot find imap library. Please check your IMAP installation)
+      AC_MSG_ERROR(Cannot find imap library. Please check your IMAP installation.)
     fi
 
     PHP_ADD_INCLUDE($IMAP_INC_DIR)
