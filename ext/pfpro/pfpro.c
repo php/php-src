@@ -19,18 +19,6 @@
 
 /* $Id$ */
 
-/* TODO:
- *
- * 1. Ini file entries for default host, port, proxy address, port,
- *    proxy logon, proxy password - John
- *
- * 2. User-friendly wrapper functions for sale, authorise, capture
- *    and void - David
- *
- * 3. Update documentation for the above.
- *
- */
-
 #include "php.h"
 #include "php_ini.h"
 #include "php_pfpro.h"
@@ -73,14 +61,14 @@ ZEND_GET_MODULE(pfpro)
 
 
 PHP_INI_BEGIN()
-	STD_PHP_INI_ENTRY("pfpro.defaulthost",			"test.signio.com",	PHP_INI_ALL, OnUpdateString,			defaulthost,			php_pfpro_globals,	pfpro_globals) 
-	STD_PHP_INI_ENTRY("pfpro.defaultport",			"443",			PHP_INI_ALL, OnUpdateInt,			defaultport,			php_pfpro_globals,	pfpro_globals) 
-	STD_PHP_INI_ENTRY("pfpro.defaulttimeout",		"30",			PHP_INI_ALL, OnUpdateInt,			defaulttimeout,			php_pfpro_globals,	pfpro_globals) 
-	STD_PHP_INI_ENTRY("pfpro.proxyaddress",			"",			PHP_INI_ALL, OnUpdateString,			proxyaddress,			php_pfpro_globals,	pfpro_globals) 
-	STD_PHP_INI_ENTRY("pfpro.proxyport",			"",			PHP_INI_ALL, OnUpdateInt,			proxyport,			php_pfpro_globals,	pfpro_globals) 
-	STD_PHP_INI_ENTRY("pfpro.proxylogon",			"",			PHP_INI_ALL, OnUpdateString,			proxylogon,			php_pfpro_globals,	pfpro_globals) 
-	STD_PHP_INI_ENTRY("pfpro.proxypassword",		"",			PHP_INI_ALL, OnUpdateString,			proxypassword,			php_pfpro_globals,	pfpro_globals) 
-PHP_INI_END() 
+	STD_PHP_INI_ENTRY("pfpro.defaulthost",		"test.signio.com",	PHP_INI_ALL, OnUpdateString,	defaulthost,			php_pfpro_globals,	pfpro_globals)
+	STD_PHP_INI_ENTRY("pfpro.defaultport",			"443",			PHP_INI_ALL, OnUpdateInt,		defaultport,			php_pfpro_globals,	pfpro_globals)
+	STD_PHP_INI_ENTRY("pfpro.defaulttimeout",		"30",			PHP_INI_ALL, OnUpdateInt,		defaulttimeout,			php_pfpro_globals,	pfpro_globals)
+	STD_PHP_INI_ENTRY("pfpro.proxyaddress",			"",				PHP_INI_ALL, OnUpdateString,	proxyaddress,			php_pfpro_globals,	pfpro_globals)
+	STD_PHP_INI_ENTRY("pfpro.proxyport",			"",				PHP_INI_ALL, OnUpdateInt,		proxyport,			php_pfpro_globals,	pfpro_globals)
+	STD_PHP_INI_ENTRY("pfpro.proxylogon",			"",				PHP_INI_ALL, OnUpdateString,	proxylogon,			php_pfpro_globals,	pfpro_globals)
+	STD_PHP_INI_ENTRY("pfpro.proxypassword",		"",				PHP_INI_ALL, OnUpdateString,	proxypassword,			php_pfpro_globals,	pfpro_globals)
+PHP_INI_END()
 
 
 PHP_MINIT_FUNCTION(pfpro)
@@ -91,9 +79,7 @@ PHP_MINIT_FUNCTION(pfpro)
 
 PHP_MSHUTDOWN_FUNCTION(pfpro)
 {
-/*
 	UNREGISTER_INI_ENTRIES();
-*/
 	return SUCCESS;
 }
 
@@ -125,9 +111,7 @@ PHP_MINFO_FUNCTION(pfpro)
 	php_info_print_table_row(2, "libpfpro version", PNVersion());
 	php_info_print_table_end();
 
-	/*
 	DISPLAY_INI_ENTRIES();
-	*/
 }
 
 
@@ -190,16 +174,16 @@ PHP_FUNCTION(pfpro_cleanup)
    Raw Payflow Pro transaction processing */
 PHP_FUNCTION(pfpro_process_raw)
 {
-	pval ***args;
+	zval ***args;
 
 	char *parmlist;
 	char *address = NULL;
-	int port = (int)PFPROG(defaultport);
-	int timeout = (int)PFPROG(defaulttimeout);
-	char *proxyAddress = (char*)PFPROG(proxyaddress);
-	int proxyPort = (int)PFPROG(proxyport);
-	char *proxyLogon = (char*)PFPROG(proxylogon); 
-	char *proxyPassword = (char*)PFPROG(proxypassword);
+	int port = PFPROG(defaultport);
+	int timeout = PFPROG(defaulttimeout);
+	char *proxyAddress = PFPROG(proxyaddress);
+	int proxyPort = PFPROG(proxyport);
+	char *proxyLogon = PFPROG(proxylogon);
+	char *proxyPassword = PFPROG(proxypassword);
 
 	int freeaddress = 0;
 
@@ -214,7 +198,7 @@ PHP_FUNCTION(pfpro_process_raw)
 		WRONG_PARAM_COUNT;
 	}
 
-	args = (pval ***) emalloc(sizeof(pval **) * ZEND_NUM_ARGS());
+	args = (zval ***) emalloc(sizeof(zval **) * ZEND_NUM_ARGS());
 
 	if (zend_get_parameters_array_ex(ZEND_NUM_ARGS(), args) == FAILURE) {
         php_error(E_WARNING, "Unable to read parameters in pfpro_process_raw()");
@@ -310,7 +294,7 @@ PHP_FUNCTION(pfpro_process_raw)
    Payflow Pro transaction processing using arrays */
 PHP_FUNCTION(pfpro_process)
 {
-	pval ***args;
+	zval ***args;
 
 	HashTable *target_hash;
 	ulong num_key;
@@ -319,12 +303,12 @@ PHP_FUNCTION(pfpro_process)
 	int pass;
 
 	char *address = NULL;
-	int port = (int)PFPROG(defaultport);
-	int timeout = (int)PFPROG(defaulttimeout);
-	char *proxyAddress = (char*)PFPROG(proxyaddress);
-	int proxyPort = (int)PFPROG(proxyport);
-	char *proxyLogon = (char*)PFPROG(proxylogon); 
-	char *proxyPassword = (char*)PFPROG(proxypassword);
+	int port = PFPROG(defaultport);
+	int timeout = PFPROG(defaulttimeout);
+	char *proxyAddress = PFPROG(proxyaddress);
+	int proxyPort = PFPROG(proxyport);
+	char *proxyLogon = PFPROG(proxylogon);
+	char *proxyPassword = PFPROG(proxypassword);
 
 	int freeaddress = 0;
 
@@ -350,7 +334,7 @@ PHP_FUNCTION(pfpro_process)
 		WRONG_PARAM_COUNT;
 	}
 
-	args = (pval ***) emalloc(sizeof(pval **) * ZEND_NUM_ARGS());
+	args = (zval ***) emalloc(sizeof(zval **) * ZEND_NUM_ARGS());
 
 	if (zend_get_parameters_array_ex(ZEND_NUM_ARGS(), args) == FAILURE) {
         php_error(E_ERROR, "Unable to read parameters in pfpro_process()");
@@ -423,9 +407,6 @@ PHP_FUNCTION(pfpro_process)
 				parmlength += 1;
 			}
 
-			/* John I don't see any need to put the key in a zval
-			   if it's not used as such and is pulled straight out */
-
 			switch (zend_hash_get_current_key(target_hash, &string_key, &num_key)) {
 
 				case HASH_KEY_IS_STRING:
@@ -437,7 +418,7 @@ PHP_FUNCTION(pfpro_process)
 					efree(string_key);
 
 					break;
-					
+
 				case HASH_KEY_IS_LONG:
 
 					sprintf(tmpbuf, "%d", num_key);
@@ -565,7 +546,7 @@ PHP_FUNCTION(pfpro_process)
 			tmpbuf[valpos - rsppos] = 0;
 			add_assoc_string(return_value, tmpbuf, valpos + 1, 1);
 		}
-		
+
 	} while (rsppos = strtok(NULL, "&"));
 #else
 
@@ -583,13 +564,13 @@ PHP_FUNCTION(pfpro_process)
 	p_end = response + strlen(response);
 	p1 = response;
 	p2 = (char*)php_memnstr(response, pdelim1, 1, p_end);
-	
+
 	sp1 = (char*)php_memnstr(response, pdelim2, 1, p2);
 	strncpy(buf, p1, sp1-p1);
-	
+
 	sp1++;
 	strncpy(sbuf, sp1, p2-sp1);
-	
+
 	add_assoc_string(return_value, &buf[0], &sbuf[0], 1);
 
 	do {
@@ -601,24 +582,24 @@ PHP_FUNCTION(pfpro_process)
 		if ((sp2 = (char*)php_memnstr(p1, pdelim1, 1, p_end)) != NULL) {
 			sp1 = (char*)php_memnstr(p1, pdelim2, 1, sp2);
 			strncpy(buf, p1, sp1-p1);
-			
+
 			sp1++;
 
 			strncpy(sbuf, sp1, sp2-sp1);
-			
+
 			add_assoc_string(return_value, &buf[0], &sbuf[0], 1);
 		}
 
 
 	} while ((p2 = (char*)php_memnstr(p1, pdelim1, 1, p_end)) != NULL);
-	
+
 	if (p1 <= p_end) {
 		memset(buf, 0, sizeof(buf));
 		memset(sbuf, 0, sizeof(sbuf));
 
 		sp1 = (char*)php_memnstr(p1, pdelim2, 1, p_end);
 		strncpy(buf, p1, sp1-p1);
-			
+
 		sp1++;
 		strncpy(sbuf, sp1, p_end-sp1);
 
