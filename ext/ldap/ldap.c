@@ -616,10 +616,7 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 			}
 
 			num_attribs = zend_hash_num_elements(Z_ARRVAL_PP(attrs));
-			if ((ldap_attrs = safe_emalloc((num_attribs+1), sizeof(char *), 0)) == NULL) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not allocate memory");
-				RETURN_FALSE;
-			}
+			ldap_attrs = safe_emalloc((num_attribs+1), sizeof(char *), 0);
 
 			for (i = 0; i<num_attribs; i++) {
 				if (zend_hash_index_find(Z_ARRVAL_PP(attrs), i, (void **) &attr) == FAILURE) {
