@@ -80,7 +80,7 @@ php_sockets_globals sockets_globals;
 #endif
 
 #ifndef SUN_LEN
-#define SUN_LEN(su) (sizeof(su) - sizeof(su.sun_path) + strlen(su.sun_path))
+#define SUN_LEN(su) (sizeof(*(su)) - sizeof((su)->sun_path) + strlen((su)->sun_path))
 #endif
 
 #define PHP_NORMAL_READ 0x0001
@@ -922,7 +922,7 @@ PHP_FUNCTION(socket_connect)
 		case AF_UNIX:
 			s_un.sun_family = AF_UNIX;
 			snprintf(s_un.sun_path, 108, "%s", Z_STRVAL_PP(arg2));
-			retval = connect(php_sock->socket, (struct sockaddr *)&s_un, SUN_LEN(s_un));
+			retval = connect(php_sock->socket, (struct sockaddr *)&s_un, SUN_LEN(&s_un));
 			break;
 
 		default:
@@ -1011,7 +1011,7 @@ PHP_FUNCTION(socket_bind)
 		memset(sa, 0, sizeof(sa_storage));
 		sa->sun_family = AF_UNIX;
 		snprintf(sa->sun_path, 108, "%s", Z_STRVAL_PP(arg2));
-		retval = bind(php_sock->socket, (struct sockaddr *) sa, SUN_LEN((*sa)));
+		retval = bind(php_sock->socket, (struct sockaddr *) sa, SUN_LEN(sa));
 
 	} else if (php_sock->type == AF_INET) {
 		
@@ -1468,7 +1468,7 @@ PHP_FUNCTION(socket_sendto)
 
 			which = (Z_STRLEN_PP(arg2) > Z_LVAL_PP(arg3)) ? 1 : 0;
 			retval = sendto(php_sock->socket, Z_STRVAL_PP(arg2), (which ? Z_LVAL_PP(arg3) : Z_STRLEN_PP(arg2)),
-			Z_LVAL_PP(arg4), (struct sockaddr *) &s_un, SUN_LEN(s_un));
+			Z_LVAL_PP(arg4), (struct sockaddr *) &s_un, SUN_LEN(&s_un));
 
 		case AF_INET:
 			if (argc != 6) {
@@ -1734,7 +1734,7 @@ PHP_FUNCTION(socket_sendmsg)
 
 				snprintf(s_un->sun_path, 108, "%s", Z_STRVAL_PP(arg4));
 
-				hdr.msg_namelen = SUN_LEN((*s_un));
+				hdr.msg_namelen = SUN_LEN(s_un);
 
 				if(sendmsg(php_sock->socket, &hdr, Z_LVAL_PP(arg3)) != 0) {
 					php_error(E_WARNING, "unable to sendmsg, %i", errno);
