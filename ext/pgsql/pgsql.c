@@ -93,7 +93,7 @@ zend_module_entry pgsql_module_entry = {
 	PHP_MINIT(pgsql),
 	PHP_MSHUTDOWN(pgsql),
 	PHP_RINIT(pgsql),
-	NULL,
+	PHP_RSHUTDOWN(pgsql),
 	PHP_MINFO(pgsql),
 	STANDARD_MODULE_PROPERTIES
 };
@@ -143,6 +143,29 @@ static void _close_pgsql_plink(zend_rsrc_list_entry *rsrc)
 	PQfinish(link);
 	PGG(num_persistent)--;
 	PGG(num_links)--;
+}
+
+static int _rollback_transactions(zend_rsrc_list_entry *rsrc)
+{
+	PGconn *link = (PGconn *)rsrc->ptr;
+	/*
+	PGresult *pg_result;
+	ExecStatusType status;
+	*/
+
+	PQexec(link,"BEGIN;ROLLBACK;");
+
+	/* maybe do error handling later....
+	pg_result = PQexec(link,"BEGIN;ROLLBACK;");
+	
+	if (pg_result) {
+		status = PQresultStatus(pg_result);
+	} else {
+		status = (ExecStatusType) PQstatus(link);
+	}
+	*/
+
+	return 0;
 }
 
 
@@ -212,6 +235,14 @@ PHP_RINIT_FUNCTION(pgsql)
 	PGG(num_links) = PGG(num_persistent);
 	return SUCCESS;
 }
+
+PHP_RSHUTDOWN_FUNCTION(pgsql)
+{
+	zend_hash_apply(&EG(persistent_list),_rollback_transactions);
+
+	return SUCCESS;
+}
+
 
 
 PHP_MINFO_FUNCTION(pgsql)
@@ -490,6 +521,8 @@ PHP_FUNCTION(pg_close)
 	}
 	
 	ZEND_FETCH_RESOURCE2(pgsql, PGconn *, pgsql_link, id, "PostgreSQL link", le_link, le_plink);
+
+	printf("\npg_close %d\n",id);
 
 	if (id==-1) { /* explicit resource number */
 		zend_list_delete(Z_RESVAL_PP(pgsql_link));
