@@ -1416,7 +1416,7 @@ PHP_FUNCTION(preg_quote)
 
 	/* Nothing to do if we got an empty string */
 	if (in_str == in_str_end) {
-		RETVAL_EMPTY_STRING();
+		RETURN_EMPTY_STRING();
 	}
 
 	if (ZEND_NUM_ARGS() == 2) {
