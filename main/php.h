@@ -398,7 +398,7 @@ END_EXTERN_C()
 
 
 /* Virtual current working directory support */
-#include "../TSRM/tsrm_virtual_cwd.h"
+#include "tsrm_virtual_cwd.h"
 
 #include "zend_constants.h"
 
