@@ -2776,6 +2776,12 @@ PHP_FUNCTION(array_sum)
 		WRONG_PARAM_COUNT;
 	}
 
+	if (Z_TYPE_PP(input) != IS_ARRAY) {
+		php_error(E_WARNING, "The argument to %s() should be an array",
+				  get_active_function_name());
+		return;
+	}
+
 	ZVAL_LONG(return_value, 0);
 
 	for (zend_hash_internal_pointer_reset(Z_ARRVAL_PP(input));
