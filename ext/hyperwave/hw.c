@@ -44,6 +44,10 @@
 
 //hw_module php3_hw_module;
 
+#define HW_ATTR_NONE	1
+#define HW_ATTR_LANG	2
+#define HW_ATTR_NR	3
+
 function_entry hw_functions[] = {
 	PHP_FE(hw_connect,								NULL)
 	PHP_FE(hw_pconnect,								NULL)
@@ -200,6 +204,9 @@ PHP_MINIT_FUNCTION(hw) {
 	HwSG(le_document) = register_list_destructors(_free_hw_document,NULL);
 	hw_module_entry.type = type;
 
+//	REGISTER_LONG_CONSTANT("HW_ATTR_LANG", HW_ATTR_LANG, CONST_CS | CONST_PERSISTENT);
+//	REGISTER_LONG_CONSTANT("HW_ATTR_NR", HW_ATTR_NR, CONST_CS | CONST_PERSISTENT);
+//	REGISTER_LONG_CONSTANT("HW_ATTR_NONE", HW_ATTR_NONE, CONST_CS | CONST_PERSISTENT);
 	return SUCCESS;
 }
 
@@ -273,59 +280,25 @@ int make_return_objrec(pval **return_value, char **objrecs, int count)
 /*
 ** creates an array return value from object record
 */
-#define ARR_SPEC_TYPE_NR    1
-#define ARR_SPEC_TYPE_LANG  2
-#define FILL_SPEC(spec, t) {attr_spec *__spec = emalloc(sizeof(attr_spec));\
-                            __spec->hasAttr = 0; \
-                            MAKE_STD_ZVAL(__spec->arr); \
-                            __spec->type = t; \
-                            spec = __spec; }
-typedef struct _attr_spec {
-	int hasAttr;       /* If that attribute has been encountered in current object record */
-	zval *arr;         /* The array containing all values of the attribute */
-	enum {ATTR_NONE,   /* The type of the attribute */
-	      ATTR_NR,
-	      ATTR_LANG
-	} type;
-} attr_spec;
-
-int make2_return_array_from_objrec(pval **return_value, char *objrec) {
+int make2_return_array_from_objrec(pval **return_value, char *objrec, zval *sarr) {
 	char *attrname, *str, *temp, language[3];
 	int i, count;
 	zval *spec_arr;
-	attr_spec *spec;
 	
 	/* Create an array with an entry containing specs for each attribute
-	   and fill in the specs for Title, Description, Keyword, Group
+	   and fill in the specs for Title, Description, Keyword, Group.
+	   If an array is passed as the last argument use it instead.
 	 */
-	MAKE_STD_ZVAL(spec_arr);
-	array_init(spec_arr);
-	FILL_SPEC(spec, ATTR_LANG);
-	add_assoc_long(spec_arr, "Title", (long) spec);
-	FILL_SPEC(spec, ATTR_LANG);
-	add_assoc_long(spec_arr, "Description", (long) spec);
-	FILL_SPEC(spec, ATTR_LANG);
-	add_assoc_long(spec_arr, "Keyword", (long) spec);
-	FILL_SPEC(spec, ATTR_NONE);
-	add_assoc_long(spec_arr, "Group", (long) spec);
-
-/*
-	count = zend_hash_num_elements(spec_arr->value.ht);
-	zend_hash_internal_pointer_reset(spec_arr->value.ht);
-	for(i=0; i<count; i++) {
-		zval *keydata, **keydataptr;
-		attr_spec *spec;
-		int keytype;
-		ulong length;
-		char *key;
-		keytype = zend_hash_get_current_key(spec_arr->value.ht, &key, &length);
-		zend_hash_get_current_data(spec_arr->value.ht, (void **) &keydataptr);
-		keydata = *keydataptr;
-		spec = (attr_spec *) keydata->value.lval;
-fprintf(stderr,"spec=0x%X, hasAttr=%d, arr=0x%X, type=%d\n", spec, spec->hasAttr, spec->arr, spec->type);
-		zend_hash_move_forward(spec_arr->value.ht);
+	if(NULL != sarr) {
+		spec_arr = sarr;
+	} else {
+		MAKE_STD_ZVAL(spec_arr);
+		array_init(spec_arr);
+		add_assoc_long(spec_arr, "Title", HW_ATTR_LANG);
+		add_assoc_long(spec_arr, "Description", HW_ATTR_LANG);
+		add_assoc_long(spec_arr, "Keyword", HW_ATTR_LANG);
+		add_assoc_long(spec_arr, "Group", HW_ATTR_NONE);
 	}
-*/
 
 	if (array_init(*return_value) == FAILURE) {
 		(*return_value)->type = IS_STRING;
@@ -343,7 +316,7 @@ fprintf(stderr,"spec=0x%X, hasAttr=%d, arr=0x%X, type=%d\n", spec, spec->hasAttr
 	attrname = strtok(temp, "\n");
 	while(attrname != NULL) {
 		zval *data, **dataptr;
-		attr_spec *spec;
+		long spec;
 		str = attrname;
 
 		/* Check if a specification is available.
@@ -357,15 +330,20 @@ fprintf(stderr,"spec=0x%X, hasAttr=%d, arr=0x%X, type=%d\n", spec, spec->hasAttr
 		if(zend_hash_find(spec_arr->value.ht, attrname, strlen(attrname)+1, (void **) &dataptr) == FAILURE) {
 			add_assoc_string(*return_value, attrname, str, 1);
 		} else {
+			zval *newarr;
 			data = *dataptr;
-			spec = (attr_spec *) data->value.lval;
-			if ((spec->hasAttr == 0) && (array_init(spec->arr) == FAILURE)) {
-				return -1;
-			}
-			spec->hasAttr = 1;
+			spec = data->value.lval;
 
-			switch(spec->type) {
-				case ATTR_LANG:
+			if(zend_hash_find((*return_value)->value.ht, attrname, strlen(attrname)+1, (void **) &dataptr) == FAILURE) {
+				MAKE_STD_ZVAL(newarr);
+				array_init(newarr);
+				zend_hash_add((*return_value)->value.ht, attrname, strlen(attrname)+1, &newarr, sizeof(zval *), NULL);
+			} else {
+				newarr = *dataptr;
+			}
+
+			switch(spec) {
+				case HW_ATTR_LANG:
 					if(str[2] == ':') {
 						str[2] = '\0';
 						strcpy(language, str);
@@ -373,10 +351,20 @@ fprintf(stderr,"spec=0x%X, hasAttr=%d, arr=0x%X, type=%d\n", spec, spec->hasAttr
 					} else
 						strcpy(language, "xx");
 
-					add_assoc_string(spec->arr, language, str, 1);
+					add_assoc_string(newarr, language, str, 1);
 					break;
-				case ATTR_NONE:
-					add_next_index_string(spec->arr, str, 1);
+				case HW_ATTR_NR:
+					if(str[1] == ':') {
+						str[1] = '\0';
+						strcpy(language, str);
+						str += 2;
+					} else
+						strcpy(language, "x");
+
+					add_assoc_string(newarr, language, str, 1);
+					break;
+				case HW_ATTR_NONE:
+					add_next_index_string(newarr, str, 1);
 					break;
 			}
 		}
@@ -384,34 +372,6 @@ fprintf(stderr,"spec=0x%X, hasAttr=%d, arr=0x%X, type=%d\n", spec, spec->hasAttr
 		attrname = strtok(NULL, "\n");
 	}
 	efree(temp);
-
-	/* At this point the attributes listed in the specs haven't been
-	   added to the return value array. Loop throught the spec and
-	   add each attribute array if it exists
-	 */
-	count = zend_hash_num_elements(spec_arr->value.ht);
-	zend_hash_internal_pointer_reset(spec_arr->value.ht);
-	for(i=0; i<count; i++) {
-		zval *keydata, **keydataptr, *val;
-		attr_spec *spec;
-		int keytype;
-		ulong length;
-		char *key;
-		keytype = zend_hash_get_current_key(spec_arr->value.ht, &key, &length);
-		zend_hash_get_current_data(spec_arr->value.ht, (void **) &keydataptr);
-		keydata = *keydataptr;
-		spec = (attr_spec *) keydata->value.lval;
-		val = spec->arr;
-		if(spec->hasAttr) {
-			zend_hash_add((*return_value)->value.ht, key, strlen(key)+1, &val, sizeof(zval *), NULL);
-
-		} else {
-			efree(val);
-		}
-		efree(spec);
-		zend_hash_move_forward(spec_arr->value.ht);
-	}
-
 
 	return(0);
 }
@@ -3403,13 +3363,24 @@ PHP_FUNCTION(hw_identify) {
 /* {{{ proto array hw_objrec2array(string objrec)
    Returns object array of object record*/
 PHP_FUNCTION(hw_objrec2array) {
-	pval *arg1;
+	zval *arg1, *arg2;
 
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	switch(ARG_COUNT(ht)) {
+		case 1:
+			if(getParameters(ht, 1, &arg1) == FAILURE)
+				WRONG_PARAM_COUNT;
+			arg2 = NULL;
+			break;
+		case 2:
+			if(getParameters(ht, 2, &arg1, &arg2) == FAILURE)
+				WRONG_PARAM_COUNT;
+			convert_to_array(arg2);
+			break;
+		default:
+			WRONG_PARAM_COUNT;
 	}
 	convert_to_string(arg1);
-	make2_return_array_from_objrec(&return_value, arg1->value.str.val);
+	make2_return_array_from_objrec(&return_value, arg1->value.str.val, arg2);
 }
 /* }}} */
 
