@@ -1780,6 +1780,8 @@ PHP_FUNCTION(fgetcsv)
 			if (len < 0) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length parameter may not be negative");
 				RETURN_FALSE;
+			} else if (len == 0) {
+				len = 1;
 			}
 		} else {
 			len = -1;
