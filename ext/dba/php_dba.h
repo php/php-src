@@ -91,7 +91,7 @@ extern zend_module_entry dba_module_entry;
 	DBA_OPTIMIZE_FUNC(x); \
 	DBA_SYNC_FUNC(x)
 
-#define VALLEN(p) (*p)->value.str.val, (*p)->value.str.len
+#define VALLEN(p) Z_STRVAL_PP(p), Z_STRLEN_PP(p)
 	
 PHP_FUNCTION(dba_open);
 PHP_FUNCTION(dba_popen);

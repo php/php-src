@@ -97,7 +97,7 @@ PHP_FUNCTION(mhash_get_block_size)
 
 	convert_to_long_ex(hash);
 
-	RETURN_LONG(mhash_get_block_size((*hash)->value.lval));
+	RETURN_LONG(mhash_get_block_size(Z_LVAL_PP(hash)));
 }
 
 /* }}} */
@@ -116,7 +116,7 @@ PHP_FUNCTION(mhash_get_hash_name)
 
 	convert_to_long_ex(hash);
 
-	name = mhash_get_hash_name((*hash)->value.lval);
+	name = mhash_get_hash_name(Z_LVAL_PP(hash));
 	if (name) {
 		RETVAL_STRING(name, 1);
 		free(name);
@@ -157,28 +157,28 @@ PHP_FUNCTION(mhash)
 	convert_to_long_ex(hash);
 	convert_to_string_ex(data);
 
-	bsize = mhash_get_block_size((*hash)->value.lval);
+	bsize = mhash_get_block_size(Z_LVAL_PP(hash));
 
 	if (num_args == 3) {
-		if (mhash_get_hash_pblock((*hash)->value.lval) == 0) {
+		if (mhash_get_hash_pblock(Z_LVAL_PP(hash)) == 0) {
 			php_error(E_WARNING, MHASH_FAILED_MSG);
 			RETURN_FALSE;
 		}
 		td =
-		    mhash_hmac_init((*hash)->value.lval,
-				    (*key)->value.str.val,
-				    (*key)->value.str.len,
+		    mhash_hmac_init(Z_LVAL_PP(hash),
+				    Z_STRVAL_PP(key),
+				    Z_STRLEN_PP(key),
 				    mhash_get_hash_pblock((*hash)->value.
 							  lval));
 	} else {
-		td = mhash_init((*hash)->value.lval);
+		td = mhash_init(Z_LVAL_PP(hash));
 	}
 	if (td == MHASH_FAILED) {
 		php_error(E_WARNING, MHASH_FAILED_MSG);
 		RETURN_FALSE;
 	}
 
-	mhash(td, (*data)->value.str.val, (*data)->value.str.len);
+	mhash(td, Z_STRVAL_PP(data), Z_STRLEN_PP(data));
 
 	if (num_args == 3) {
 		hash_data = (unsigned char *) mhash_hmac_end(td);
@@ -220,10 +220,10 @@ PHP_FUNCTION(mhash_keygen_s2k)
 	convert_to_string_ex(input_salt);
 	convert_to_long_ex(bytes);
 
-	password = (*input_password)->value.str.val;
-	password_len = (*input_password)->value.str.len;
+	password = Z_STRVAL_PP(input_password);
+	password_len = Z_STRLEN_PP(input_password);
 
-	salt_len = (*input_salt)->value.str.len;
+	salt_len = Z_STRLEN_PP(input_salt);
 
 	if (salt_len > mhash_get_keygen_salt_size(KEYGEN_S2K_SALTED)) {
 		sprintf( error, "The specified salt [%d] is more bytes than the required by the algorithm [%d]\n", salt_len, mhash_get_keygen_salt_size(KEYGEN_S2K_SALTED));
@@ -232,7 +232,7 @@ PHP_FUNCTION(mhash_keygen_s2k)
 	}
 
 	memset( salt, 0, SALT_SIZE);
-	memcpy( salt, (*input_salt)->value.str.val, salt_len);
+	memcpy( salt, Z_STRVAL_PP(input_salt), salt_len);
 	salt_len=SALT_SIZE;
 	
 /*	if (salt_len==0) {
@@ -240,8 +240,8 @@ PHP_FUNCTION(mhash_keygen_s2k)
  *	}
  */
 	
-	hashid = (*hash)->value.lval;
-	size = (*bytes)->value.lval;
+	hashid = Z_LVAL_PP(hash);
+	size = Z_LVAL_PP(bytes);
 
 	keystruct.hash_algorithm[0]=hashid;
 	keystruct.hash_algorithm[1]=hashid;
