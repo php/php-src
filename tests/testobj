@@ -25,6 +25,7 @@ print get_parent_class($boo).endl;
 print method_exists($foo,"foobar").endl;
 print method_exists($boo,"foobar").endl;
 print method_exists($boo,"barbara").endl;
+
 //$word = new COm("word.application");
 //$word->visible = true;
 //sleep(5);
