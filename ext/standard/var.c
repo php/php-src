@@ -75,7 +75,7 @@ void php3api_var_dump(pval **struc, int level)
 
 		case IS_OBJECT:
 			myht = HASH_OF(*struc);
-			i = sprintf(buf, "%*object of %s (%d) {\n", level, ' ', (*struc)->value.obj.ce->name, zend_hash_num_elements(myht));
+			i = sprintf(buf, "%*cobject of %s (%d) {\n", level, ' ', (*struc)->value.obj.ce->name, zend_hash_num_elements(myht));
 			PHPWRITE(&buf[1], i - 1);
 		  head_done:
 
