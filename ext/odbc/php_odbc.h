@@ -69,6 +69,7 @@ PHP_FUNCTION(solid_fetch_prev);
 #include <sql.h>
 #include <sqlext.h>
 #define HAVE_SQL_EXTENDED_FETCH 1
+#define SQL_SUCCEEDED(rc) (((rc)&(~1))==0)
 
 #elif defined(HAVE_IODBC) /* iODBC library */
 
