@@ -80,7 +80,7 @@ php_stream_ops php_stream_gzio_ops = {
 	NULL, "ZLIB"
 };
 
-php_stream *php_stream_gzopen(char *path, char *mode, int options, char **opened_path STREAMS_DC TSRMLS_DC)
+php_stream *php_stream_gzopen(char *path, char *mode, int options, char **opened_path, void *wrappercontext STREAMS_DC TSRMLS_DC)
 {
 	struct php_gz_stream_data_t *self;
 	php_stream *stream = NULL;
