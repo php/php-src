@@ -1,0 +1,16 @@
+- more input checking
+- config.m4 support for
+  - --with-...
+  - library checks
+  - header checks
+  - C++ linking
+  - ...
+- class implementation support
+- more documentation stuff
+  - current output yet untested
+	- classes
+  - requirements (see also confing.m4)  
+- protos
+  - resource type specification
+  - object type specification
+  - callable types

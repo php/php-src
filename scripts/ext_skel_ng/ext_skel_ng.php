@@ -9,6 +9,12 @@
 	// generate code
 	$ext->write_header_file();
 	$ext->write_code_file();
+	if(isset($ext->logo)) {
+		$fp = fopen("{$ext->name}/{$ext->name}_logo.h", "w");
+		fwrite($fp, $ext->logo->h_code());
+		fclose($fp);
+		$ext->logo->h_code();
+	}
 
 	// generate project files for configure and ms dev studio
 	$ext->write_config_m4();

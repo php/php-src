@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
 <!DOCTYPE extension SYSTEM "extension.dtd">
-<extension version="0.1">
+<extension>
 	<name>dummy</name>
   <summary>experimental dummy extension</summary>
   <description>
@@ -22,11 +22,13 @@
 		</maintainer>
   </maintainers>
 		
+	<logo src='dummy.gif'></logo>
+
   <release>
 		<version>0.1</version>
 		<date>2002-02-16</date>
 		<state>alpha</state>
-    <license>other</license>
+    <license>php</license>
     <notes>
       - first experimental draft
     </notes>
@@ -48,11 +50,27 @@
   </constants>
 
   <globals>
-		<global name="foobar" type="int"></global>
-		<phpini name="foo_int"    type="int"    value="42"     access="system"></phpini> 
-		<phpini name="foo_bool"    type="int"   value="on"     access="all"   onupdate="OnUpdateBool"></phpini> 
+		<global name="foobar"     type="int"></global>
+		<phpini name="foo_int"    type="int"    value="42"     access="system">some int value</phpini> 
+		<phpini name="foo_bool"   type="int"    value="on"     access="all"   onupdate="OnUpdateBool"></phpini> 
 		<phpini name="foo_string" type="string" value="foobar" access="all"   ></phpini> 
   </globals>
+
+  <resources>
+		<resource name="dummy_resource" payload="char *">
+			<description>
+        a dummy string resource
+      </description>
+			<destruct>
+<![CDATA[
+  free(resource);
+]]>
+      </destruct>
+		</resource>
+		<resource name="dummy_resource2">
+		</resource>
+	</resources>
+
 
   <functions>
 		
@@ -127,6 +145,11 @@ foo
 bar
 		  </description>
 		</function>
+
+		<function role='public' name='dummy_resource'>
+			<summary>dummy resource test</summary>
+			<proto>resource dummy_resource(resource bar)</proto>
+		</function>
 		
 		<function name='dummy_string'>
 			<summary>dummy string conversion</summary>
@@ -138,6 +161,14 @@ bar
       </code>
 		</function>
 		
+		<function name ="dummy_void">
+			<proto>void dummy_void(void)</proto>
+		</function>
+
+		<function name ="dummy_void2">
+			<proto>void dummy_void2()</proto>
+		</function>
+
   </functions>
 	
 </extension>
