@@ -189,7 +189,7 @@ void init_op(zend_op *op CLS_DC)
 {
 	memset(&op->result, 0, sizeof(znode));
 	op->lineno = CG(zend_lineno);
-	op->result.op_type = IS_UNUSED;
+	SET_UNUSED(op->result);
 	op->extended_value = 0;
 	memset(&op->op1, 0, sizeof(znode));
 	memset(&op->op2, 0, sizeof(znode));
@@ -260,8 +260,8 @@ static void zend_update_extended_info(zend_op_array *op_array CLS_DC)
 	}
 	opline = get_next_op(op_array CLS_CC);
 	opline->opcode = ZEND_EXT_STMT;
-	opline->op1.op_type = IS_UNUSED;
-	opline->op2.op_type = IS_UNUSED;
+	SET_UNUSED(opline->op1);
+	SET_UNUSED(opline->op2);
 	if (op_array->last>0) {
 		opline->lineno= op_array->opcodes[op_array->last-2].lineno;
 	}
