@@ -5,6 +5,7 @@
 Fixed:
 
     i18n_convert/mb_convert_encoding (Moriyoshi Koizumi)
+    socket_iovec_alloc (Rasmus)
 
 
 
@@ -21,7 +22,6 @@ Open:
     mb_split
     ob_start (3)
     setlocale
-    socket_iovec_alloc
     unregister_tick_function
     xml_parser_create
 
