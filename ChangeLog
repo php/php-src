@@ -1,3 +1,21 @@
+2001-03-31  Zeev Suraski  <zeev@zend.com>
+
+    * ext/standard/output.c: MFH - header handling with output buffering
+
+    * ext/standard/output.c: Fix headers handling with output buffering
+
+2001-03-31  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/ircg.c
+      ext/ircg/php_ircg.h:
+    Add ircg_html_encode() which is an interface to the standard
+    HTML encoder for URLs and color attributes.
+
+2001-03-31  Christian Stocker  <chregu@nomad.ch>
+
+    * pear/Experimental/XML/fo2pdf.php: - converted tabs to spaces
+    - more links in the docs about xsl:fo
+
 2001-03-30  Fredrik Öhrn  <ohrn@chl.chalmers.se>
 
     * ext/cpdf/cpdf.c
