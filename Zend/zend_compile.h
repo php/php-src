@@ -461,9 +461,9 @@ void zend_do_isset_or_isempty(int type, znode *result, znode *variable TSRMLS_DC
 
 void zend_do_instanceof(znode *result, znode *expr, znode *class_znode, int type TSRMLS_DC);
 
-void zend_do_foreach_begin(znode *foreach_token, znode *open_brackets_token, znode *array, int variable TSRMLS_DC);
-void zend_do_foreach_cont(znode *foreach_token, znode *open_brackets_token, znode *as_token, znode *value, znode *key, znode *cont_token TSRMLS_DC);
-void zend_do_foreach_end(znode *foreach_token, znode *open_brackets_token, znode *cont_token TSRMLS_DC);
+void zend_do_foreach_begin(znode *foreach_token, znode *array, znode *open_brackets_token, znode *as_token, int variable TSRMLS_DC);
+void zend_do_foreach_cont(znode *value, znode *key, znode *as_token, znode *foreach_token TSRMLS_DC);
+void zend_do_foreach_end(znode *foreach_token, znode *open_brackets_token TSRMLS_DC);
 
 void zend_do_declare_begin(TSRMLS_D);
 void zend_do_declare_stmt(znode *var, znode *val TSRMLS_DC);
