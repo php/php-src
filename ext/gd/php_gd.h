@@ -49,7 +49,7 @@
 
 #include <gd.h>
 
-extern php3_module_entry gd_module_entry;
+extern zend_module_entry gd_module_entry;
 #define phpext_gd_ptr &gd_module_entry
 
 /* gd.c functions */

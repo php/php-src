@@ -41,7 +41,7 @@
 #if HAVE_IBASE
 #include <ibase.h>
 
-extern php3_module_entry ibase_module_entry;
+extern zend_module_entry ibase_module_entry;
 #define php3_ibase_module_ptr &ibase_module_entry
 
 extern PHP_MINIT_FUNCTION(ibase);

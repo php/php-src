@@ -94,13 +94,13 @@ function_entry icap_functions[] = {
 };
 
 
-php3_module_entry php3_icap_module_entry = {
+zend_module_entry php3_icap_module_entry = {
 	CALVER, icap_functions, PHP_MINIT(icap), NULL, NULL, NULL, PHP_MINFO(icap), 0, 0, 0, NULL
 };
 
 
 #if COMPILE_DL
-DLEXPORT php3_module_entry *get_module(void) { return &php3_icap_module_entry; }
+DLEXPORT zend_module_entry *get_module(void) { return &php3_icap_module_entry; }
 #endif
 
 /* 
@@ -127,11 +127,11 @@ CALSTREAM *cal_close_it (pils *icap_le_struct)
 
 PHP_MINFO_FUNCTION(icap)
 {
-	php3_printf("Icap Support enabled<br>");
-	php3_printf("<table>");
-	php3_printf("<tr><td>Icap Version:</td>");
-	php3_printf("<td>%s</td>",CALVER);
-	php3_printf("</tr></table>");
+	php_printf("Icap Support enabled<br>");
+	php_printf("<table>");
+	php_printf("<tr><td>Icap Version:</td>");
+	php_printf("<td>%s</td>",CALVER);
+	php_printf("</tr></table>");
 }
 
 PHP_MINIT_FUNCTION(icap)
@@ -185,7 +185,7 @@ void php3_icap_do_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	}
 		icap_stream = cal_open(NULL,calendar->value.str.val,0);
 	if (!icap_stream) {
-		php3_error(E_WARNING,"Couldn't open stream %s\n",calendar->value.str.val);
+		php_error(E_WARNING,"Couldn't open stream %s\n",calendar->value.str.val);
 		RETURN_FALSE;
 	}
 
@@ -216,7 +216,7 @@ void php3_icap_close(INTERNAL_FUNCTION_PARAMETERS)
         ind = streamind->value.lval;
         icap_le_struct = (pils *)zend_list_find(ind, &ind_type);
         if (!icap_le_struct ) {
-	  php3_error(E_WARNING, "Unable to find stream pointer");
+	  php_error(E_WARNING, "Unable to find stream pointer");
                 RETURN_FALSE;
 	}
         if(myargcount==2) {
@@ -267,7 +267,7 @@ void php3_icap_reopen(INTERNAL_FUNCTION_PARAMETERS)
 	ind = streamind->value.lval;
 	icap_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!icap_le_struct ) {
-		php3_error(E_WARNING, "Unable to find stream pointer");
+		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 
@@ -280,7 +280,7 @@ void php3_icap_reopen(INTERNAL_FUNCTION_PARAMETERS)
 	//	icap_stream = cal_connect(calendar->value.str.val);
 	//	cal_login(icap_stream, calendar->value.str.val);
 	if (icap_stream == NULL) {
-		php3_error(E_WARNING,"Couldn't re-open stream\n");
+		php_error(E_WARNING,"Couldn't re-open stream\n");
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -308,7 +308,7 @@ void php3_icap_expunge(INTERNAL_FUNCTION_PARAMETERS)
 	icap_le_struct = (pils *)zend_list_find(ind, &ind_type);
 
 	if (!icap_le_struct ) {
-		php3_error(E_WARNING, "Unable to find stream pointer");
+		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 
@@ -336,7 +336,7 @@ void php3_icap_fetch_event(INTERNAL_FUNCTION_PARAMETERS)
 	ind = streamind->value.lval;
 	icap_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!icap_le_struct ) {
-		php3_error(E_WARNING, "Unable to find stream pointer");
+		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
     }
 	if(myargcount==3) {
@@ -414,7 +414,7 @@ void php3_icap_list_events(INTERNAL_FUNCTION_PARAMETERS)
 	icap_le_struct = (pils *)zend_list_find(ind, &ind_type);
 
 	if (!icap_le_struct ) {
-		php3_error(E_WARNING, "Unable to find stream pointer");
+		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 
@@ -424,34 +424,34 @@ void php3_icap_list_events(INTERNAL_FUNCTION_PARAMETERS)
 	}
 	begincal.has_time=0;
 	endcal.has_time=0;
-	if(_php3_hash_find(begindate->value.ht,"year",sizeof("year"),(void **) &pvalue)== SUCCESS){
+	if(zend_hash_find(begindate->value.ht,"year",sizeof("year"),(void **) &pvalue)== SUCCESS){
 	 SEPARATE_ZVAL(pvalue);
           convert_to_long(*pvalue);
           begincal.year=(*pvalue)->value.lval;
        }
-       if(_php3_hash_find(begindate->value.ht,"month",sizeof("month"),(void **) &pvalue)== SUCCESS){
+       if(zend_hash_find(begindate->value.ht,"month",sizeof("month"),(void **) &pvalue)== SUCCESS){
           SEPARATE_ZVAL(pvalue);
           convert_to_long(*pvalue);
           begincal.mon=(*pvalue)->value.lval;
        }
-       if(_php3_hash_find(begindate->value.ht,"day",sizeof("day"),(void **) &pvalue)== SUCCESS){
+       if(zend_hash_find(begindate->value.ht,"day",sizeof("day"),(void **) &pvalue)== SUCCESS){
           SEPARATE_ZVAL(pvalue);
           convert_to_long(*pvalue);
           begincal.mday=(*pvalue)->value.lval;
        }
 if(myargc == 3)
   {
-    if(_php3_hash_find(enddate->value.ht,"year",sizeof("year"),(void **) &pvalue)== SUCCESS){
+    if(zend_hash_find(enddate->value.ht,"year",sizeof("year"),(void **) &pvalue)== SUCCESS){
           SEPARATE_ZVAL(pvalue);
       convert_to_long(*pvalue);
       endcal.year=(*pvalue)->value.lval;
     }
-    if(_php3_hash_find(enddate->value.ht,"month",sizeof("month"),(void **) &pvalue)== SUCCESS){
+    if(zend_hash_find(enddate->value.ht,"month",sizeof("month"),(void **) &pvalue)== SUCCESS){
           SEPARATE_ZVAL(pvalue);
       convert_to_long(*pvalue);
       endcal.mon=(*pvalue)->value.lval;
     }
-    if(_php3_hash_find(enddate->value.ht,"day",sizeof("day"),(void **) &pvalue)== SUCCESS){
+    if(zend_hash_find(enddate->value.ht,"day",sizeof("day"),(void **) &pvalue)== SUCCESS){
           SEPARATE_ZVAL(pvalue);
       convert_to_long(*pvalue);
       endcal.mday=(*pvalue)->value.lval;
@@ -492,7 +492,7 @@ void php3_icap_create_calendar(INTERNAL_FUNCTION_PARAMETERS)
 
 	icap_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!icap_le_struct ) {
-		php3_error(E_WARNING, "Unable to find stream pointer");
+		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 /*
@@ -528,7 +528,7 @@ void php3_icap_rename_calendar(INTERNAL_FUNCTION_PARAMETERS)
 
 	icap_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!icap_le_struct ) {
-		php3_error(E_WARNING, "Unable to find stream pointer");
+		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 /*
@@ -566,7 +566,7 @@ void php3_icap_list_alarms(INTERNAL_FUNCTION_PARAMETERS)
 
 	icap_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!icap_le_struct ) {
-		php3_error(E_WARNING, "Unable to find stream pointer");
+		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 
@@ -575,28 +575,28 @@ void php3_icap_list_alarms(INTERNAL_FUNCTION_PARAMETERS)
         }
 	mydate.has_date=1;
 	mydate.has_time=1;
-       if(_php3_hash_find(date->value.ht,"year",sizeof("year"),(void **) &pvalue)== SUCCESS){
+       if(zend_hash_find(date->value.ht,"year",sizeof("year"),(void **) &pvalue)== SUCCESS){
           SEPARATE_ZVAL(pvalue);
           convert_to_long(*pvalue);
           mydate.year=(*pvalue)->value.lval;
        }
-       if(_php3_hash_find(date->value.ht,"month",sizeof("month"),(void **) &pvalue)== SUCCESS){
+       if(zend_hash_find(date->value.ht,"month",sizeof("month"),(void **) &pvalue)== SUCCESS){
           SEPARATE_ZVAL(pvalue);
           convert_to_long(*pvalue);
           mydate.mon=(*pvalue)->value.lval;
        }
-       if(_php3_hash_find(date->value.ht,"day",sizeof("day"),(void **) &pvalue)== SUCCESS){
+       if(zend_hash_find(date->value.ht,"day",sizeof("day"),(void **) &pvalue)== SUCCESS){
           SEPARATE_ZVAL(pvalue);
           convert_to_long(*pvalue);
           mydate.mday=(*pvalue)->value.lval;
        }
 
-       if(_php3_hash_find(time->value.ht,"hour",sizeof("hour"),(void **) &pvalue)== SUCCESS){
+       if(zend_hash_find(time->value.ht,"hour",sizeof("hour"),(void **) &pvalue)== SUCCESS){
           SEPARATE_ZVAL(pvalue);
           convert_to_long(*pvalue);
           mydate.hour=(*pvalue)->value.lval;
        }
-       if(_php3_hash_find(time->value.ht,"minute",sizeof("minute"),(void **) &pvalue)== SUCCESS){
+       if(zend_hash_find(time->value.ht,"minute",sizeof("minute"),(void **) &pvalue)== SUCCESS){
           SEPARATE_ZVAL(pvalue);
           convert_to_long(*pvalue);
           mydate.min=(*pvalue)->value.lval;
@@ -636,7 +636,7 @@ void php3_icap_delete_calendar(INTERNAL_FUNCTION_PARAMETERS)
 
 	icap_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!icap_le_struct ) {
-		php3_error(E_WARNING, "Unable to find stream pointer");
+		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 	
@@ -671,7 +671,7 @@ void php3_icap_delete_event(INTERNAL_FUNCTION_PARAMETERS)
 
 	icap_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!icap_le_struct ) {
-		php3_error(E_WARNING, "Unable to find stream pointer");
+		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 	if (cal_remove(icap_le_struct->icap_stream,uid->value.lval)) 
@@ -725,7 +725,7 @@ void php3_icap_store_event(INTERNAL_FUNCTION_PARAMETERS)
 	icap_le_struct = (pils *)zend_list_find(ind, &ind_type);
 
 	if (!icap_le_struct ) {
-		php3_error(E_WARNING, "Unable to find stream pointer");
+		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 
@@ -734,69 +734,69 @@ void php3_icap_store_event(INTERNAL_FUNCTION_PARAMETERS)
 		RETURN_FALSE;
 	}
 	myevent=calevent_new();
-	if(_php3_hash_find(storeobject->value.ht,"uid",sizeof("uid"),(void **) &pvalue)== SUCCESS){
+	if(zend_hash_find(storeobject->value.ht,"uid",sizeof("uid"),(void **) &pvalue)== SUCCESS){
           SEPARATE_ZVAL(pvalue);
 	  convert_to_long(*pvalue);
 	  myevent->id=(*pvalue)->value.lval;
 	}
-	if(_php3_hash_find(storeobject->value.ht,"public",sizeof("public"),(void **) &pvalue)== SUCCESS){
+	if(zend_hash_find(storeobject->value.ht,"public",sizeof("public"),(void **) &pvalue)== SUCCESS){
           SEPARATE_ZVAL(pvalue);
 	  convert_to_long(*pvalue);
 	  myevent->public=(*pvalue)->value.lval;
 	}
-	if(_php3_hash_find(storeobject->value.ht,"category",sizeof("category"),(void **) &pvalue)== SUCCESS){
+	if(zend_hash_find(storeobject->value.ht,"category",sizeof("category"),(void **) &pvalue)== SUCCESS){
           SEPARATE_ZVAL(pvalue);
 	  convert_to_string(*pvalue);
 	  myevent->category=strdup((*pvalue)->value.str.val);
 	}
-	if(_php3_hash_find(storeobject->value.ht,"title",sizeof("title"),(void **) &pvalue)== SUCCESS){
+	if(zend_hash_find(storeobject->value.ht,"title",sizeof("title"),(void **) &pvalue)== SUCCESS){
           SEPARATE_ZVAL(pvalue);
 	  convert_to_string(*pvalue);
 	  myevent->title=strdup((*pvalue)->value.str.val);
 	}
-	if(_php3_hash_find(storeobject->value.ht,"description",sizeof("description"),(void **) &pvalue)== SUCCESS){
+	if(zend_hash_find(storeobject->value.ht,"description",sizeof("description"),(void **) &pvalue)== SUCCESS){
           SEPARATE_ZVAL(pvalue);
 	  convert_to_string(*pvalue);
 	  myevent->description=strdup((*pvalue)->value.str.val);
 	}
 
-	if(_php3_hash_find(storeobject->value.ht,"alarm",sizeof("alarm"),(void **) &pvalue)== SUCCESS){
+	if(zend_hash_find(storeobject->value.ht,"alarm",sizeof("alarm"),(void **) &pvalue)== SUCCESS){
           SEPARATE_ZVAL(pvalue);
 	  convert_to_long(*pvalue);
 	  myevent->alarm=(*pvalue)->value.lval;
 	}
 
 
-       	if(_php3_hash_find(storeobject->value.ht,"start",sizeof("start"),(void **) &temppvalue)== SUCCESS){
+       	if(zend_hash_find(storeobject->value.ht,"start",sizeof("start"),(void **) &temppvalue)== SUCCESS){
           SEPARATE_ZVAL(temppvalue);
 	  convert_to_array(*temppvalue);
 	  
-	  if(_php3_hash_find((*temppvalue)->value.ht,"year",sizeof("year"),(void **) &pvalue)== SUCCESS){
+	  if(zend_hash_find((*temppvalue)->value.ht,"year",sizeof("year"),(void **) &pvalue)== SUCCESS){
 	    SEPARATE_ZVAL(pvalue);
 	    convert_to_long(*pvalue);
 	    myevent->start.year=(*pvalue)->value.lval;
 	  }
-	  if(_php3_hash_find((*temppvalue)->value.ht,"month",sizeof("month"),(void **) &pvalue)== SUCCESS){
+	  if(zend_hash_find((*temppvalue)->value.ht,"month",sizeof("month"),(void **) &pvalue)== SUCCESS){
 	    SEPARATE_ZVAL(pvalue);
 	    convert_to_long(*pvalue);
 	    myevent->start.mon=(*pvalue)->value.lval;
 	  }
-	  if(_php3_hash_find((*temppvalue)->value.ht,"mday",sizeof("mday"),(void **) &pvalue)== SUCCESS){
+	  if(zend_hash_find((*temppvalue)->value.ht,"mday",sizeof("mday"),(void **) &pvalue)== SUCCESS){
 	    SEPARATE_ZVAL(pvalue);
 	    convert_to_long(*pvalue);
 	    myevent->start.mday=(*pvalue)->value.lval;
 	  }
-	  if(_php3_hash_find((*temppvalue)->value.ht,"hour",sizeof("hour"),(void **) &pvalue)== SUCCESS){
+	  if(zend_hash_find((*temppvalue)->value.ht,"hour",sizeof("hour"),(void **) &pvalue)== SUCCESS){
 	    SEPARATE_ZVAL(pvalue);
 	    convert_to_long(*pvalue);
 	    myevent->start.hour=(*pvalue)->value.lval;
 	  }
-	  if(_php3_hash_find((*temppvalue)->value.ht,"min",sizeof("min"),(void **) &pvalue)== SUCCESS){
+	  if(zend_hash_find((*temppvalue)->value.ht,"min",sizeof("min"),(void **) &pvalue)== SUCCESS){
 	    SEPARATE_ZVAL(pvalue);
 	    convert_to_long(*pvalue);
 	    myevent->start.min=(*pvalue)->value.lval;
 	  }
-	  if(_php3_hash_find((*temppvalue)->value.ht,"sec",sizeof("sec"),(void **) &pvalue)== SUCCESS){
+	  if(zend_hash_find((*temppvalue)->value.ht,"sec",sizeof("sec"),(void **) &pvalue)== SUCCESS){
 	    SEPARATE_ZVAL(pvalue);
 	    convert_to_long(*pvalue);
 	    myevent->start.sec=(*pvalue)->value.lval;
@@ -804,36 +804,36 @@ void php3_icap_store_event(INTERNAL_FUNCTION_PARAMETERS)
 	  myevent->start.has_date=true;
 	}
 
-       	if(_php3_hash_find(storeobject->value.ht,"end",sizeof("end"),(void **) &temppvalue)== SUCCESS){
+       	if(zend_hash_find(storeobject->value.ht,"end",sizeof("end"),(void **) &temppvalue)== SUCCESS){
           SEPARATE_ZVAL(temppvalue);
 	  convert_to_array(*temppvalue);
 	  
-	  if(_php3_hash_find((*temppvalue)->value.ht,"year",sizeof("year"),(void **) &pvalue)== SUCCESS){
+	  if(zend_hash_find((*temppvalue)->value.ht,"year",sizeof("year"),(void **) &pvalue)== SUCCESS){
 	    SEPARATE_ZVAL(pvalue);
 	    convert_to_long(*pvalue);
 	    myevent->end.year=(*pvalue)->value.lval;
 	  }
-	  if(_php3_hash_find((*temppvalue)->value.ht,"month",sizeof("month"),(void **) &pvalue)== SUCCESS){
+	  if(zend_hash_find((*temppvalue)->value.ht,"month",sizeof("month"),(void **) &pvalue)== SUCCESS){
 	    SEPARATE_ZVAL(pvalue);
 	    convert_to_long(*pvalue);
 	    myevent->end.mon=(*pvalue)->value.lval;
 	  }
-	  if(_php3_hash_find((*temppvalue)->value.ht,"mday",sizeof("mday"),(void **) &pvalue)== SUCCESS){
+	  if(zend_hash_find((*temppvalue)->value.ht,"mday",sizeof("mday"),(void **) &pvalue)== SUCCESS){
 	    SEPARATE_ZVAL(pvalue);
 	    convert_to_long(*pvalue);
 	    myevent->end.mday=(*pvalue)->value.lval;
 	  }
-	  if(_php3_hash_find((*temppvalue)->value.ht,"hour",sizeof("hour"),(void **) &pvalue)== SUCCESS){
+	  if(zend_hash_find((*temppvalue)->value.ht,"hour",sizeof("hour"),(void **) &pvalue)== SUCCESS){
 	    SEPARATE_ZVAL(pvalue);
 	    convert_to_long(*pvalue);
 	    myevent->end.hour=(*pvalue)->value.lval;
 	  }
-	  if(_php3_hash_find((*temppvalue)->value.ht,"min",sizeof("min"),(void **) &pvalue)== SUCCESS){
+	  if(zend_hash_find((*temppvalue)->value.ht,"min",sizeof("min"),(void **) &pvalue)== SUCCESS){
 	    SEPARATE_ZVAL(pvalue);
 	    convert_to_long(*pvalue);
 	    myevent->end.min=(*pvalue)->value.lval;
 	  }
-	  if(_php3_hash_find((*temppvalue)->value.ht,"sec",sizeof("sec"),(void **) &pvalue)== SUCCESS){
+	  if(zend_hash_find((*temppvalue)->value.ht,"sec",sizeof("sec"),(void **) &pvalue)== SUCCESS){
 	    SEPARATE_ZVAL(pvalue);
 	    convert_to_long(*pvalue);
 	    myevent->end.sec=(*pvalue)->value.lval;
@@ -870,7 +870,7 @@ void php3_icap_snooze(INTERNAL_FUNCTION_PARAMETERS)
 	icap_le_struct = (pils *)zend_list_find(ind, &ind_type);
 
 	if (!icap_le_struct ) {
-		php3_error(E_WARNING, "Unable to find stream pointer");
+		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 

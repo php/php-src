@@ -44,13 +44,13 @@ function_entry mail_functions[] = {
 	{NULL, NULL, NULL}
 };
 
-php3_module_entry mail_module_entry = {
+zend_module_entry mail_module_entry = {
 	"Sendmail", mail_functions, NULL, NULL, NULL, NULL, PHP_MINFO(mail), STANDARD_MODULE_PROPERTIES
 };
 
 
 #if COMPILE_DL
-DLEXPORT php3_module_entry *get_module(void) { return &odbc_module_entry; }
+DLEXPORT zend_module_entry *get_module(void) { return &odbc_module_entry; }
 #endif
 
 /* {{{ proto int mail(string to, string subject, string message [, string additional_headers])

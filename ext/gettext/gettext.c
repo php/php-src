@@ -36,7 +36,7 @@ function_entry php3_gettext_functions[] = {
     {NULL, NULL, NULL}
 };
 
-php3_module_entry php3_gettext_module_entry = {
+zend_module_entry php3_gettext_module_entry = {
 	"gettext", php3_gettext_functions, NULL, NULL, NULL, NULL, PHP_MINFO(gettext), STANDARD_MODULE_PROPERTIES
 };
 

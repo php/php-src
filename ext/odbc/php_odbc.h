@@ -147,7 +147,7 @@ PHP_FUNCTION(solid_fetch_prev);
 #include <sqlext.h>
 #endif
 
-extern php3_module_entry odbc_module_entry;
+extern zend_module_entry odbc_module_entry;
 #define odbc_module_ptr &odbc_module_entry
 
 

@@ -724,13 +724,13 @@ function_entry dbase_functions[] = {
 	{NULL, NULL, NULL}
 };
 
-php3_module_entry dbase_module_entry = {
+zend_module_entry dbase_module_entry = {
 	"DBase", dbase_functions, PHP_MINIT(dbase), PHP_MSHUTDOWN(dbase), NULL, NULL, NULL, STANDARD_MODULE_PROPERTIES
 };
 
 
 #if defined(COMPILE_DL)
-DLEXPORT php3_module_entry *get_module(void) { return &dbase_module_entry; }
+DLEXPORT zend_module_entry *get_module(void) { return &dbase_module_entry; }
 
 #if (WIN32|WINNT) && defined(THREAD_SAFE)
 

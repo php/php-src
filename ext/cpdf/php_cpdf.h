@@ -35,7 +35,7 @@
 
 #include <cpdflib.h>
 
-extern php3_module_entry cpdf_module_entry;
+extern zend_module_entry cpdf_module_entry;
 #define cpdf_module_ptr &cpdf_module_entry
 
 extern PHP_MINFO_FUNCTION(cpdf);

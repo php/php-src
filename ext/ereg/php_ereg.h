@@ -33,7 +33,7 @@
 #ifndef _REG_H
 #define _REG_H
 
-extern php3_module_entry regexp_module_entry;
+extern zend_module_entry regexp_module_entry;
 #define regexp_module_ptr &regexp_module_entry
 
 char *_php3_regreplace(const char *pattern, const char *replace, const char *string, int icase, int extended);

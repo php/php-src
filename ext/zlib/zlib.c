@@ -98,7 +98,7 @@ function_entry php3_zlib_functions[] = {
 	{NULL, NULL, NULL}
 };
 
-php3_module_entry php3_zlib_module_entry = {
+zend_module_entry php3_zlib_module_entry = {
 	"zlib",
 	php3_zlib_functions,
 	PHP_MINIT(zlib),
@@ -110,7 +110,7 @@ php3_module_entry php3_zlib_module_entry = {
 };
 
 #if defined(COMPILE_DL)
-DLEXPORT php3_module_entry *get_module(void) { return &php_zlib_module_entry; }
+DLEXPORT zend_module_entry *get_module(void) { return &php_zlib_module_entry; }
 #endif
 
 static void phpi_destructor_gzclose(gzFile *zp) {

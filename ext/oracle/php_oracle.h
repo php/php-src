@@ -25,7 +25,7 @@
 #include "ociapr.h"
 #endif
 
-extern php3_module_entry oracle_module_entry;
+extern zend_module_entry oracle_module_entry;
 #define phpext_oracle_ptr &oracle_module_entry
 
 #ifdef ZTS

@@ -70,7 +70,7 @@ typedef struct {
 	int le_link,le_result;
 } velocis_module;
 
-extern php3_module_entry velocis_module_entry;
+extern zend_module_entry velocis_module_entry;
 #define velocis_module_ptr &velocis_module_entry
 
 /* velocis.c functions */

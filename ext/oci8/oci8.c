@@ -92,7 +92,7 @@ PHP_OCI_API php_oci_globals oci_globals;
 /* {{{ dynamically loadable module stuff */
 
 #if COMPILE_DL
-DLEXPORT php3_module_entry *get_module() { return &oci_module_entry; };
+DLEXPORT zend_module_entry *get_module() { return &oci_module_entry; };
 #endif /* COMPILE_DL */
 
 /* }}} */
@@ -259,7 +259,7 @@ static zend_function_entry php_oci_lob_class_functions[] = {
     {NULL,NULL,NULL}
 };
 
-php3_module_entry oci8_module_entry = {
+zend_module_entry oci8_module_entry = {
     "Oracle-OCI8",        /* extension name */
     php_oci_functions,    /* extension function list */
     PHP_MINIT(oci),       /* extension-wide startup function */
@@ -2441,7 +2441,7 @@ PHP_FUNCTION(ocisavelob)
 			if (offparam == -1) {
 				offset = curloblen;
 			} else if (offparam >= curloblen) {
-				php3_error(E_WARNING, "Offset smaller than current LOB-Size - appending");
+				php_error(E_WARNING, "Offset smaller than current LOB-Size - appending");
 				offset = curloblen;
 			} else {
 				offset = offparam;
@@ -2455,7 +2455,7 @@ PHP_FUNCTION(ocisavelob)
 		loblen = (*arg)->value.str.len;
 	
 		if (loblen < 1) {
-			php3_error(E_WARNING, "Cannot save a lob wich size is less than 1 byte");
+			php_error(E_WARNING, "Cannot save a lob wich size is less than 1 byte");
 			RETURN_FALSE;
 		}
 

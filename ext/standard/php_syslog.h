@@ -32,7 +32,7 @@
 #define _PHP_SYSLOG_H
 
 #if HAVE_SYSLOG_H
-extern php3_module_entry syslog_module_entry;
+extern zend_module_entry syslog_module_entry;
 #define syslog_module_ptr &syslog_module_entry
 
 extern PHP_MINIT_FUNCTION(syslog);

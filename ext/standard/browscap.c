@@ -33,7 +33,7 @@ function_entry browscap_functions[] = {
 	{NULL, NULL, NULL}
 };
 
-php3_module_entry browscap_module_entry = {
+zend_module_entry browscap_module_entry = {
 	"browscap", browscap_functions, PHP_MINIT(browscap), PHP_MSHUTDOWN(browscap),
 	NULL, NULL, NULL, STANDARD_MODULE_PROPERTIES
 };

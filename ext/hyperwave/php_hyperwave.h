@@ -50,7 +50,7 @@
 
 #include "hg_comm.h"
 
-extern php3_module_entry hw_module_entry;
+extern zend_module_entry hw_module_entry;
 #define hw_module_ptr &hw_module_entry
 
 typedef struct {

@@ -37,7 +37,7 @@
 #include "modules.h"
 #endif
 
-extern php3_module_entry php3_gettext_module_entry;
+extern zend_module_entry php3_gettext_module_entry;
 #define gettext_module_ptr &php3_gettext_module_entry
 
 PHP_MINFO_FUNCTION(gettext);

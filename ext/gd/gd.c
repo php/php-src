@@ -131,13 +131,13 @@ function_entry gd_functions[] = {
 	{NULL, NULL, NULL}
 };
 
-php3_module_entry gd_module_entry = {
+zend_module_entry gd_module_entry = {
 	"gd", gd_functions, PHP_MINIT(gd), PHP_MSHUTDOWN(gd), NULL, NULL, PHP_MINFO(gd), STANDARD_MODULE_PROPERTIES
 };
 
 #ifdef COMPILE_DL_GD
 # include "dl/phpdl.h"
-DLEXPORT php3_module_entry *get_module(void) { return &gd_module_entry; }
+DLEXPORT zend_module_entry *get_module(void) { return &gd_module_entry; }
 #endif
 
 
@@ -416,7 +416,7 @@ void php3_imagecreatefrompng (INTERNAL_FUNCTION_PARAMETERS) {
 #endif
       if (!fp) {
               php_strip_url_passwd(fn);
-              php3_error(E_WARNING,
+              php_error(E_WARNING,
                                       "ImageCreateFromPng: Unable to open %s for reading", fn);
               RETURN_FALSE;
       }
@@ -448,19 +448,19 @@ void php3_imagepng (INTERNAL_FUNCTION_PARAMETERS) {
               convert_to_string(file);
               fn = file->value.str.val;
               if (!fn || fn == empty_string || php_check_open_basedir(fn)) {
-                      php3_error(E_WARNING, "ImagePng: Invalid filename");
+                      php_error(E_WARNING, "ImagePng: Invalid filename");
                       RETURN_FALSE;
               }
       }
       im = zend_list_find(imgind->value.lval, &ind_type);
       if (!im || ind_type != GD_GLOBAL(le_gd)) {
-              php3_error(E_WARNING, "ImagePng: unable to find image pointer");
+              php_error(E_WARNING, "ImagePng: unable to find image pointer");
               RETURN_FALSE;
       }
       if (argc == 2) {
               fp = fopen(fn, "wb");
               if (!fp) {
-                      php3_error(E_WARNING, "ImagePng: unable to open %s for writing", fn);
+                      php_error(E_WARNING, "ImagePng: unable to open %s for writing", fn);
                       RETURN_FALSE;
               }
               gdImagePng (im,fp);
@@ -473,7 +473,7 @@ void php3_imagepng (INTERNAL_FUNCTION_PARAMETERS) {
               char  buf[4096];
               tmp = tmpfile();
               if (tmp == NULL) {
-                      php3_error(E_WARNING, "Unable to open temporary file");
+                      php_error(E_WARNING, "Unable to open temporary file");
                       RETURN_FALSE;
               }
               output = php_header();

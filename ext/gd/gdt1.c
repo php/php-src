@@ -51,16 +51,16 @@ void php3_imagepsloadfont(INTERNAL_FUNCTION_PARAMETERS) {
 		efree(f_ind);
 		switch (l_ind) {
 		case -1:
-			php3_error(E_WARNING, "Couldn't find the font file");
+			php_error(E_WARNING, "Couldn't find the font file");
 			RETURN_FALSE;
 			break;
 		case -2:
 		case -3:
-			php3_error(E_WARNING, "Memory allocation fault in t1lib");
+			php_error(E_WARNING, "Memory allocation fault in t1lib");
 			RETURN_FALSE;
 			break;
 		default:
-			php3_error(E_WARNING, "An unknown error occurred in t1lib");
+			php_error(E_WARNING, "An unknown error occurred in t1lib");
 			RETURN_FALSE;
 			break;
 		}
@@ -91,7 +91,7 @@ void php3_imagepscopyfont(INTERNAL_FUNCTION_PARAMETERS) {
 	of_ind = zend_list_find(fnt->value.lval, &type);
 
 	if (type != GD_GLOBAL(le_ps_font)) {
-		php3_error(E_WARNING, "%d is not a Type 1 font index", fnt->value.lval);
+		php_error(E_WARNING, "%d is not a Type 1 font index", fnt->value.lval);
 		RETURN_FALSE;
 	}
 
@@ -103,19 +103,19 @@ void php3_imagepscopyfont(INTERNAL_FUNCTION_PARAMETERS) {
 		efree(nf_ind);
 		switch (l_ind) {
 		case -1:
-			php3_error(E_WARNING, "FontID %d is not loaded in memory", l_ind);
+			php_error(E_WARNING, "FontID %d is not loaded in memory", l_ind);
 			RETURN_FALSE;
 			break;
 		case -2:
-			php3_error(E_WARNING, "Tried to copy a logical font");
+			php_error(E_WARNING, "Tried to copy a logical font");
 			RETURN_FALSE;
 			break;
 		case -3:
-			php3_error(E_WARNING, "Memory allocation fault in t1lib");
+			php_error(E_WARNING, "Memory allocation fault in t1lib");
 			RETURN_FALSE;
 			break;
 		default:
-			php3_error(E_WARNING, "An unknown error occurred in t1lib");
+			php_error(E_WARNING, "An unknown error occurred in t1lib");
 			RETURN_FALSE;
 			break;
 		}
@@ -143,7 +143,7 @@ void php3_imagepsfreefont(INTERNAL_FUNCTION_PARAMETERS) {
 	zend_list_find(fnt->value.lval, &type);
 
 	if (type != GD_GLOBAL(le_ps_font)) {
-		php3_error(E_WARNING, "%d is not a Type 1 font index", fnt->value.lval);
+		php_error(E_WARNING, "%d is not a Type 1 font index", fnt->value.lval);
 		RETURN_FALSE;
 	}
 
@@ -170,19 +170,19 @@ void php3_imagepsencodefont(INTERNAL_FUNCTION_PARAMETERS) {
 	f_ind = zend_list_find(fnt->value.lval, &type);
 
 	if (type != GD_GLOBAL(le_ps_font)) {
-		php3_error(E_WARNING, "%d is not a Type 1 font index", fnt->value.lval);
+		php_error(E_WARNING, "%d is not a Type 1 font index", fnt->value.lval);
 		RETURN_FALSE;
 	}
 
 	if ((enc_vector = T1_LoadEncoding(enc->value.str.val)) == NULL) {
-		php3_error(E_WARNING, "Couldn't load encoding vector from %s", enc->value.str.val);
+		php_error(E_WARNING, "Couldn't load encoding vector from %s", enc->value.str.val);
 		RETURN_FALSE;
 	}
 
 	T1_DeleteAllSizes(f_ind->font_id);
 	if (T1_ReencodeFont(f_ind->font_id, enc_vector)) {
 		T1_DeleteEncoding(enc_vector);
-		php3_error(E_WARNING, "Couldn't reencode font");
+		php_error(E_WARNING, "Couldn't reencode font");
 		RETURN_FALSE;
 	}
 	zend_list_insert(enc_vector, GD_GLOBAL(le_ps_enc));
@@ -207,7 +207,7 @@ void php3_imagepsextendfont(INTERNAL_FUNCTION_PARAMETERS) {
 	f_ind = zend_list_find(fnt->value.lval, &type);
 
 	if (type != GD_GLOBAL(le_ps_font)) {
-		php3_error(E_WARNING, "%d is not a Type 1 font index", fnt->value.lval);
+		php_error(E_WARNING, "%d is not a Type 1 font index", fnt->value.lval);
 		RETURN_FALSE;
 	}
 
@@ -234,7 +234,7 @@ void php3_imagepsslantfont(INTERNAL_FUNCTION_PARAMETERS) {
 	f_ind = zend_list_find(fnt->value.lval, &type);
 
 	if (type != GD_GLOBAL(le_ps_font)) {
-		php3_error(E_WARNING, "%d is not a Type 1 font index", fnt->value.lval);
+		php_error(E_WARNING, "%d is not a Type 1 font index", fnt->value.lval);
 		RETURN_FALSE;
 	}
 
@@ -312,14 +312,14 @@ void php3_imagepstext(INTERNAL_FUNCTION_PARAMETERS) {
 	bg_img = zend_list_find(img->value.lval, &type);
 
 	if (!bg_img || type != GD_GLOBAL(le_gd)) {
-		php3_error(E_WARNING, "Unable to find image pointer");
+		php_error(E_WARNING, "Unable to find image pointer");
 		RETURN_FALSE;
 	}
 
 	f_ind = zend_list_find(fnt->value.lval, &type);
 
 	if (!f_ind || type != GD_GLOBAL(le_ps_font)) {
-		php3_error(E_WARNING, "%d is not a Type 1 font index", fnt->value.lval);
+		php_error(E_WARNING, "%d is not a Type 1 font index", fnt->value.lval);
 		RETURN_FALSE;
 	}
 
@@ -349,7 +349,7 @@ void php3_imagepstext(INTERNAL_FUNCTION_PARAMETERS) {
 		T1_AASetLevel(T1_AA_HIGH);
 		break;
 	default:
-		php3_error(E_WARNING, "Invalid value %d as number of steps for antialiasing", aa_steps);
+		php_error(E_WARNING, "Invalid value %d as number of steps for antialiasing", aa_steps);
 		RETURN_FALSE;
 	}
 
@@ -374,7 +374,7 @@ void php3_imagepstext(INTERNAL_FUNCTION_PARAMETERS) {
 	}
 	str_img = T1_AAFillOutline(str_path, 0);
 #else
-	php3_error(E_WARNING, "Setting space between characters in function ImagePSText is supported only with t1lib version 0.9 or above");
+	php_error(E_WARNING, "Setting space between characters in function ImagePSText is supported only with t1lib version 0.9 or above");
 	RETURN_FALSE;
 #endif
 	} else {
@@ -457,7 +457,7 @@ void php3_imagepsbbox(INTERNAL_FUNCTION_PARAMETERS) {
 	f_ind = zend_list_find(fnt->value.lval, &type);
 
 	if (type != GD_GLOBAL(le_ps_font)) {
-		php3_error(E_WARNING, "%d is not a Type 1 font index", fnt->value.lval);
+		php_error(E_WARNING, "%d is not a Type 1 font index", fnt->value.lval);
 		RETURN_FALSE;
 	}
 

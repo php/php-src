@@ -40,7 +40,7 @@
 
 #if HAVE_FTP
 
-extern php3_module_entry php3_ftp_module_entry;
+extern zend_module_entry php3_ftp_module_entry;
 #define php3_ftp_module_ptr &php3_ftp_module_entry
 
 #ifdef ZEND_VERSION

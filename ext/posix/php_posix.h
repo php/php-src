@@ -42,7 +42,7 @@
 #define DLEXPORT
 #endif
 
-extern php3_module_entry posix_module_entry;
+extern zend_module_entry posix_module_entry;
 #define posix_module_ptr &posix_module_entry
 
 PHP_FUNCTION(posix_kill);

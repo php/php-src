@@ -2,7 +2,7 @@
 #define PHP_CRYPT_H
 
 #if HAVE_CRYPT
-extern php3_module_entry crypt_module_entry;
+extern zend_module_entry crypt_module_entry;
 #define crypt_module_ptr &crypt_module_entry
 PHP_FUNCTION(crypt);
 extern PHP_MINIT_FUNCTION(crypt);

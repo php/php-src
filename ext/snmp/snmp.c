@@ -84,12 +84,12 @@ function_entry snmp_functions[] = {
     {NULL,NULL,NULL}
 };
 
-php3_module_entry snmp_module_entry = {
+zend_module_entry snmp_module_entry = {
 	"SNMP",snmp_functions,php3i_snmp_init,NULL,NULL,NULL,php3_info_snmp,STANDARD_MODULE_PROPERTIES
 };
 
 #if COMPILE_DL
-DLEXPORT php3_module_entry *get_module() { return &snmp_module_entry; };
+DLEXPORT zend_module_entry *get_module() { return &snmp_module_entry; };
 #endif
 
 /* THREAD_LS snmp_module php3_snmp_module; - may need one of these at some point */

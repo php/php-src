@@ -49,7 +49,7 @@ typedef struct CookieList {
 	struct CookieList *next;
 } CookieList;
 
-extern php3_module_entry php_header_module_entry;
+extern zend_module_entry php_header_module_entry;
 #define php_header_module_ptr &php_header_module_entry
 
 extern PHP_RINIT_FUNCTION(head);

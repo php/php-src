@@ -21,7 +21,7 @@
 
 #ifndef _PHP_DIR_H
 #define _PHP_DIR_H
-extern php3_module_entry php3_dir_module_entry;
+extern zend_module_entry php3_dir_module_entry;
 #define php3_dir_module_ptr &php3_dir_module_entry
 
 /* directory functions */

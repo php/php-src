@@ -107,7 +107,7 @@ static zend_function_entry php_output_functions[] = {
 PHP_RINIT_FUNCTION(output);
 PHP_RSHUTDOWN_FUNCTION(output);
 
-php3_module_entry output_module_entry = {
+zend_module_entry output_module_entry = {
 	"PHP_output", 
 	php_output_functions, 
 	NULL,                   /* extension-wide startup function */

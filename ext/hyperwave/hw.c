@@ -115,7 +115,7 @@ function_entry hw_functions[] = {
 	{NULL, NULL, NULL}
 };
 
-php3_module_entry hw_module_entry = {
+zend_module_entry hw_module_entry = {
 	"HyperWave", hw_functions, PHP_MINIT(hw), PHP_MSHUTDOWN(hw), NULL, NULL, PHP_MINFO(hw), 0, 0, 0, NULL
 };
 
@@ -126,13 +126,13 @@ PHP_HW_API php_hw_globals hw_globals;
 #endif
 
 #ifdef COMPILE_DL
-DLEXPORT php3_module_entry *get_module(void) { return &hw_module_entry; }
+DLEXPORT zend_module_entry *get_module(void) { return &hw_module_entry; }
 #endif
 
 void print_msg(hg_msg *msg, char *str, int txt);
 
 #if COMPILE_DL
-DLEXPORT php3_module_entry *get_module(void) { return &hw_module_entry; }
+DLEXPORT zend_module_entry *get_module(void) { return &hw_module_entry; }
 #endif
 
 void _close_hw_link(hw_connection *conn)
@@ -3609,13 +3609,13 @@ PHP_FUNCTION(hw_mapid) {
 	id=(*arg3)->value.lval;
 	ptr = zend_list_find(link,&type);
 	if(!ptr || (type!=HwSG(le_socketp) && type!=HwSG(le_psocketp))) {
-		php3_error(E_WARNING,"Unable to find file identifier %d",link);
+		php_error(E_WARNING,"Unable to find file identifier %d",link);
 		RETURN_FALSE;
 	}
 
 	set_swap(ptr->swap_on);
 	if (0 != (ptr->lasterror = send_mapid(ptr->socket, servid, id, &virtid))) {
-		php3_error(E_WARNING, "send_command (mapid) returned %d\n", ptr->lasterror);
+		php_error(E_WARNING, "send_command (mapid) returned %d\n", ptr->lasterror);
 		RETURN_FALSE;
 	}
 	RETURN_LONG(virtid);

@@ -32,7 +32,7 @@
 #ifndef _DBASE_H
 #define _DBASE_H
 #if DBASE
-extern php3_module_entry dbase_module_entry;
+extern zend_module_entry dbase_module_entry;
 #define dbase_module_ptr &dbase_module_entry
 
 extern PHP_MINIT_FUNCTION(dbase);

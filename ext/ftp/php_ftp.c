@@ -37,7 +37,7 @@
 #ifndef ZEND_VERSION
 #include "internal_functions.h"
 #include "php3_list.h"
-#define php_error php3_error
+#define php_error php_error
 #endif
 
 #include "ext/standard/file.h"
@@ -72,7 +72,7 @@ function_entry php3_ftp_functions[] = {
 	{NULL, NULL, NULL}
 };
 
-php3_module_entry php3_ftp_module_entry = {
+zend_module_entry php3_ftp_module_entry = {
 	"FTP Functions",
 	php3_ftp_functions,
 #ifdef ZEND_VERSION

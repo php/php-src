@@ -265,13 +265,13 @@ function_entry syslog_functions[] = {
 };
 
 
-php3_module_entry syslog_module_entry = {
+zend_module_entry syslog_module_entry = {
 	"Syslog", syslog_functions, PHP_MINIT(syslog), NULL, PHP_RINIT(syslog), PHP_RSHUTDOWN(syslog), NULL, STANDARD_MODULE_PROPERTIES
 };
 
 
 #if COMPILE_DL
-DLEXPORT php3_module_entry *get_module(void) { return &syslog_module_entry; }
+DLEXPORT zend_module_entry *get_module(void) { return &syslog_module_entry; }
 #endif
 
 

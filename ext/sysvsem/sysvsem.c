@@ -61,7 +61,7 @@ zend_module_entry sysvsem_module_entry = {
 };
 
 #if COMPILE_DL
-php3_module_entry *get_module() { return &sysvsem_module_entry; }
+zend_module_entry *get_module() { return &sysvsem_module_entry; }
 #endif
 
 

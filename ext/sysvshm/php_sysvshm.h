@@ -41,7 +41,7 @@
 
 #if HAVE_SYSVSHM
 
-extern php3_module_entry sysvshm_module_entry;
+extern zend_module_entry sysvshm_module_entry;
 #define sysvshm_module_ptr &sysvshm_module_entry
 
 #include <sys/types.h>

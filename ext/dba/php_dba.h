@@ -53,7 +53,7 @@ typedef struct dba_info {
 	struct dba_handler *hnd;
 } dba_info;
 
-extern php3_module_entry dba_module_entry;
+extern zend_module_entry dba_module_entry;
 #define dba_module_ptr &dba_module_entry
 
 /* common prototypes which must be supplied by modules */

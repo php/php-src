@@ -46,13 +46,13 @@ function_entry aspell_functions[] = {
 
 static int le_aspell;
 
-php3_module_entry aspell_module_entry = {
+zend_module_entry aspell_module_entry = {
 	"Aspell", aspell_functions, PHP_MINIT(aspell), NULL, NULL, NULL, PHP_MINFO(aspell), STANDARD_MODULE_PROPERTIES
 };
 
 
 #if COMPILE_DL
-DLEXPORT php3_module_entry *get_module(void) { return &aspell_module_entry; }
+DLEXPORT zend_module_entry *get_module(void) { return &aspell_module_entry; }
 #endif
 
 PHP_MINIT_FUNCTION(aspell)

@@ -80,7 +80,7 @@ typedef struct {
 } xml_encoding;
 
 
-extern php3_module_entry xml_module_entry;
+extern zend_module_entry xml_module_entry;
 # define xml_module_ptr &xml_module_entry
 
 enum php3_xml_option {

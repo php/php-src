@@ -46,7 +46,7 @@ function_entry dl_functions[] = {
 };
 
 
-php3_module_entry dl_module_entry = {
+zend_module_entry dl_module_entry = {
 	"PHP_DL", dl_functions, NULL, NULL, NULL, NULL, PHP_MINFO(dl), STANDARD_MODULE_PROPERTIES
 };
 
@@ -84,8 +84,8 @@ void php_dl(pval *file,int type,pval *return_value)
 {
 	void *handle;
 	char libpath[MAXPATHLEN + 1];
-	php3_module_entry *module_entry,*tmp;
-	php3_module_entry *(*get_module)(void);
+	zend_module_entry *module_entry,*tmp;
+	zend_module_entry *(*get_module)(void);
 	PLS_FETCH();
 	
 	if (cfg_get_string("extension_dir",&PG(extension_dir))==SUCCESS
@@ -119,7 +119,7 @@ void php_dl(pval *file,int type,pval *return_value)
 #endif
 		RETURN_FALSE;
 	}
-	get_module = (php3_module_entry *(*)(void)) dlsym(handle, "get_module");
+	get_module = (zend_module_entry *(*)(void)) dlsym(handle, "get_module");
 	
 	if (!get_module) {
 		dlclose(handle);

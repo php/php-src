@@ -53,7 +53,7 @@ function_entry crypt_functions[] = {
 	{NULL, NULL, NULL}
 };
 
-php3_module_entry crypt_module_entry = {
+zend_module_entry crypt_module_entry = {
 	"Crypt", crypt_functions, PHP_MINIT(crypt), NULL, NULL, NULL, NULL, STANDARD_MODULE_PROPERTIES
 };
 

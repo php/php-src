@@ -33,7 +33,7 @@
 #ifndef _MAIL_H
 #define _MAIL_H
 #if HAVE_SENDMAIL
-extern php3_module_entry mail_module_entry;
+extern zend_module_entry mail_module_entry;
 #define mail_module_ptr &mail_module_entry
 
 PHP_FUNCTION(mail);

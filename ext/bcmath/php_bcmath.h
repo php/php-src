@@ -40,7 +40,7 @@
 
 #if WITH_BCMATH
 
-extern php3_module_entry bcmath_module_entry;
+extern zend_module_entry bcmath_module_entry;
 #define phpext_bcmath_ptr &bcmath_module_entry
 
 extern PHP_RINIT_FUNCTION(bcmath);

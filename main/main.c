@@ -887,6 +887,7 @@ int php_module_startup(sapi_module_struct *sf)
 	zend_utility_functions zuf;
 	zend_utility_values zuv;
 	int module_number=0;	/* for REGISTER_INI_ENTRIES() */
+	char *php_os;
 #ifdef ZTS
 	zend_executor_globals *executor_globals;
 	php_core_globals *core_globals;
@@ -895,6 +896,16 @@ int php_module_startup(sapi_module_struct *sf)
 #if (WIN32|WINNT) && !(USE_SAPI)
 	WORD wVersionRequested = MAKEWORD(2, 0);
 	WSADATA wsaData;
+#endif
+#if WIN32|WINNT
+    /* Get build numbers for Windows NT or Win95 */
+    if (dwVersion < 0x80000000){
+        php_os="WINNT";
+    } else {
+        php_os="WIN32";
+    }
+#else
+    php_os=PHP_OS;
 #endif
 
 	global_lock_init();
@@ -962,6 +973,9 @@ int php_module_startup(sapi_module_struct *sf)
 	zuv.import_use_extension = ".php";
 	zend_set_utility_values(&zuv);
 	php_startup_SAPI_content_types();
+
+    REGISTER_MAIN_STRINGL_CONSTANT("PHP_VERSION", PHP_VERSION, sizeof(PHP_VERSION)-1, CONST_PERSISTENT | CONST_CS);
+    REGISTER_MAIN_STRINGL_CONSTANT("PHP_OS", php_os, strlen(php_os), CONST_PERSISTENT | CONST_CS);
 
 	if (php_startup_internal_extensions() == FAILURE) {
 		php_printf("Unable to start builtin modules\n");
