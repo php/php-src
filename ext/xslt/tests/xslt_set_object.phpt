@@ -4,9 +4,11 @@ xslt_set_object function
 <?php
 include("skipif.inc");
 if(!function_exists('xslt_set_object')) {
-	die("skip\n");
+	die("skip function xslt_set_object() not available");
 }
 ?>
+--INI--
+magic_quotes_runtime=0
 --FILE--
 <?php
 error_reporting(E_ALL);

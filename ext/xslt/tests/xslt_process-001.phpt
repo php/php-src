@@ -4,9 +4,11 @@ Various ways to provide xml and xslt arguments and params
 <?php
 include("skipif.inc");
 if(!function_exists('utf8_encode')) {
-	die("skip\n");
+	die("skip function utf8_encode() not available");
 }
 ?>
+--INI--
+magic_quotes_runtime=0
 --FILE--
 <?php
 error_reporting(E_ALL);
