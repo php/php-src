@@ -391,13 +391,18 @@ static zend_bool OrbitObject_AddArguments(OrbitObject * pObject,
 		CORBA_Request request, OperationType * pOperation, int argumentCount, 
 		const zval ** ppArguments, CORBA_NamedValue ** ppNamedValue)
 {
-	ParameterType * p_parameter = OperationType_GetFirstParameter(pOperation);
+	ParameterType * p_parameter = NULL;
 	int i = 0;
-	zend_bool success;
+	zend_bool success = FALSE;
 
 	if (argumentCount < 1)
 		return TRUE;	/* nothing to do */
 
+	p_parameter = OperationType_GetFirstParameter(pOperation);
+
+	if (NULL == p_parameter)
+		return FALSE; /* oups! */
+	
 	do
 	{
 		ppNamedValue[i] = satellite_new(CORBA_NamedValue);
@@ -405,7 +410,7 @@ static zend_bool OrbitObject_AddArguments(OrbitObject * pObject,
 				request, p_parameter, ppArguments[i], ppNamedValue[i]);
 
 		if (!success)
-			return FALSE;
+			goto error;
 
 		i++;
 	} while (i < argumentCount && ParameterType_GetNext(p_parameter));
@@ -417,10 +422,19 @@ static zend_bool OrbitObject_AddArguments(OrbitObject * pObject,
 		
 		/* bad number of arguments */
 		wrong_param_count();
-		return FALSE;
+		goto error;
 	}
 
-	return TRUE;
+	success = TRUE;
+	goto exit;
+
+error:
+	success = FALSE;
+
+exit:
+	orbit_delete(p_parameter);
+	return success;
+
 }
 
 /*
