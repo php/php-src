@@ -41,6 +41,7 @@
 #include "ext/standard/php_standard.h"
 #include "php_open_temporary_file.h"
 #include "php_informix.h"
+#include "php_informix_includes.h"
 #include "php_globals.h"
 #include "php_ini.h"
 

@@ -43,12 +43,6 @@
 extern zend_module_entry ifx_module_entry;
 #define ifx_module_ptr &ifx_module_entry
 
-#undef TYPEMAX
-#undef CHAR
-
-#include "locator.h"
-#include "sqltypes.h"
-
 /* user functions */
 PHP_MINIT_FUNCTION(ifx);
 PHP_RINIT_FUNCTION(ifx);
@@ -121,56 +115,6 @@ ZEND_END_MODULE_GLOBALS(ifx)
 # define IFXG(v) TSRMG(ifx_globals_id, zend_ifx_globals *, v)
 #else
 # define IFXG(v) (ifx_globals.v)
-#endif
-
-#define MAX_RESID          64
-#define BLOBINFILE 0      /* 0=in memory, 1=in file */
-
-/* query result set data */
-typedef struct ifx_res {
-	char connecid[16];
-	char cursorid[16];
-	char descrpid[16];
-	char statemid[16];
-	int  isscroll;
-	int  ishold;
-	int  iscursory;
-	int  paramquery;
-	int  numcols;
-	int  rowid;
-	int  affected_rows;
-	long sqlerrd[6];
-	int res_id[MAX_RESID];
-} IFX_RES;
-
-typedef struct _IFX_IDRES {
-	int type;
-	union {
-		struct {
-			int mode;
-			loc_t blob_data;
-		} BLOBRES;
-
-		struct {
-			char *char_data;
-			int len;
-		} CHARRES;
-
-#if HAVE_IFX_IUS
-		struct {
-			ifx_lo_t slob_data;
-			ifx_lo_create_spec_t *createspec;
-			int lofd;
-		} SLOBRES;
-#endif
-	} DATARES;
-} IFX_IDRES;
-
-#define BLOB DATARES.BLOBRES
-#define CHAR DATARES.CHARRES
-
-#if HAVE_IFX_IUS
-#define SLOB DATARES.SLOBRES
 #endif
 
 #else /* not HAVE_IFX  */
