@@ -439,7 +439,7 @@ PHP_FUNCTION(bcsqrt)
 }
 /* }}} */
 
-/* {{{ proto string bccomp(string left_operand, string right_operand [, int scale])
+/* {{{ proto int bccomp(string left_operand, string right_operand [, int scale])
    Compares two arbitrary precision numbers */
 PHP_FUNCTION(bccomp)
 {
@@ -481,7 +481,7 @@ PHP_FUNCTION(bccomp)
 }
 /* }}} */
 
-/* {{{ proto string bcscale(int scale)
+/* {{{ proto bool bcscale(int scale)
    Sets default scale parameter for all bc math functions */
 PHP_FUNCTION(bcscale)
 {
