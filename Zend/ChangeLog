@@ -1,3 +1,23 @@
+2002-07-30  jason  <jason@pb1.pair.com>
+
+    * zend_compile.c
+      zend_execute.c
+      zend_globals.h: MFZE1 global declare
+
+    * zend_compile.c: Fix segfault
+
+2002-07-30  Andrei Zmievski  <andrei@pb1.pair.com>
+
+    * zend_compile.c
+      zend_compile.h
+      zend_execute.c
+      zend_language_parser.y
+      zend_language_scanner.l
+      zend_operators.c
+      zend_operators.h:
+    - Adding 'is' operator that can be used to check the type of a variable,
+      or its class. 
+
 2002-07-28  phanto  <phanto@pb1.pair.com>
 
     * OBJECTS2_HOWTO: update the handlers struct
