@@ -3569,7 +3569,7 @@ PHP_FUNCTION(domxml_xslt_process)
 		RETURN_FALSE;
 	}
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o|a|b", &idxml, &idparams, &xpath_params) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o|ab", &idxml, &idparams, &xpath_params) == FAILURE) {
 		RETURN_FALSE;
 	}
 
