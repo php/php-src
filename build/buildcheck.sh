@@ -16,7 +16,7 @@
 #  |          Sascha Schumann <sascha@schumann.cx>                        |
 #  +----------------------------------------------------------------------+
 #
-# $Id: buildcheck.sh,v 1.21.2.8 2004-12-30 15:43:52 rasmus Exp $ 
+# $Id: buildcheck.sh,v 1.21.2.9 2004-12-30 19:54:46 rasmus Exp $ 
 #
 
 echo "buildconf: checking installation..."
@@ -44,9 +44,7 @@ fi
 
 
 if test "$1" = "2" && test "$2" -ge "50"; then
-  echo "buildconf: Your version of autoconf likely contains buggy cache code."
-  echo "           Running cvsclean for you."
-  echo "           To avoid this, install autoconf-2.13 and automake-1.5."
+  echo "buildconf: running cvsclean."
   ./cvsclean
   stamp=
 fi

@@ -39,7 +39,7 @@ acconfig.h: $(acconfig_h_SOURCES)
 	@echo rebuilding $@
 	cat $(acconfig_h_SOURCES) > $@
 
-SUPPRESS_WARNINGS = (egrep -v '(AC_TRY_RUN called without default to allow cross compiling|AC_PROG_CXXCPP was called before AC_PROG_CXX|defined in acinclude.m4 but never used|AC_PROG_LEX invoked multiple times)'||true)
+SUPPRESS_WARNINGS = (egrep -v '(AC_TRY_RUN called without default to allow cross compiling|AC_PROG_CXXCPP was called before AC_PROG_CXX|defined in acinclude.m4 but never used|AC_PROG_LEX invoked multiple times|AC_DECL_YYTEXT is expanded from...|the top level)'||true)
 
 $(config_h_in): configure acconfig.h
 # explicitly remove target since autoheader does not seem to work 
@@ -47,7 +47,7 @@ $(config_h_in): configure acconfig.h
 	@echo rebuilding $@
 	@rm -f $@
 	@autoheader=`./build/shtool path autoheader-2.13 autoheader`; \
-	$$autoheader 2>&1 | $(SUPPRESS_WARNINGS)
+	$$autoheader -W none 2>&1 | $(SUPPRESS_WARNINGS)
 
 $(TOUCH_FILES):
 	touch $(TOUCH_FILES)
