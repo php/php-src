@@ -587,6 +587,17 @@ static size_t php_sockop_write(php_stream *stream, const char *buf, size_t count
 
 	return didwrite;
 }
+
+#if ZEND_DEBUG && DEBUG_MAIN_NETWORK
+static inline void dump_sock_state(char *msg, php_netstream_data_t *sock TSRMLS_DC)
+{
+	printf("%s: blocked=%d timeout_event=%d eof=%d inbuf=%d\n", msg, sock->is_blocked, sock->timeout_event, sock->eof, TOREAD(sock));
+}
+# define DUMP_SOCK_STATE(msg, sock)	dump_sock_state(msg, sock TSRMLS_CC)
+#else
+# define DUMP_SOCK_STATE(msg, sock)	/* nothing */
+#endif
+
 static void php_sock_stream_wait_for_data(php_stream *stream, php_netstream_data_t *sock TSRMLS_DC)
 {
 	fd_set fdr, tfdr;
@@ -602,9 +613,12 @@ static void php_sock_stream_wait_for_data(php_stream *stream, php_netstream_data
 	else
 		ptimeout = &timeout;
 
+	
 	while(1) {
 		tfdr = fdr;
 		timeout = sock->timeout;
+
+DUMP_SOCK_STATE("wait_for_data", sock);
 
 		retval = select(sock->socket + 1, &tfdr, NULL, NULL, ptimeout);
 
@@ -614,14 +628,17 @@ static void php_sock_stream_wait_for_data(php_stream *stream, php_netstream_data
 		if (retval >= 0)
 			break;
 	}
+DUMP_SOCK_STATE("wait_for_data: done", sock);
 }
+
 
 static size_t php_sock_stream_read_internal(php_stream *stream, php_netstream_data_t *sock TSRMLS_DC)
 {
 	char buf[PHP_SOCK_CHUNK_SIZE];
 	int nr_bytes;
 	size_t nr_read = 0;
-
+	php_sockaddr_storage sa;
+	
 	/* For blocking sockets, we wait until there is some
 	   data to read (real data or EOF)
 
@@ -629,12 +646,15 @@ static size_t php_sock_stream_read_internal(php_stream *stream, php_netstream_da
 	   therefore sock->eof would be set errornously.
 	 */
 
+DUMP_SOCK_STATE("read_internal entry", sock);
 
 	if(sock->is_blocked) {
 		php_sock_stream_wait_for_data(stream, sock TSRMLS_CC);
 		if (sock->timeout_event)
 			return 0;
 	}
+
+DUMP_SOCK_STATE("read_internal about to recv/SSL_read", sock);
 
 	/* read at a maximum sock->chunk_size */
 #if HAVE_OPENSSL_EXT
@@ -643,11 +663,13 @@ static size_t php_sock_stream_read_internal(php_stream *stream, php_netstream_da
 	else
 #endif
 	nr_bytes = recv(sock->socket, buf, sock->chunk_size, 0);
+DUMP_SOCK_STATE("read_internal after recv/SSL_read", sock);
+
 	if(nr_bytes > 0) {
 
 		php_stream_notify_progress_increment(stream->context, nr_bytes, 0);
 		
-		/* try to avoid ever expanding buffer */
+		/* try to avoid an ever-expanding buffer */
 		if (sock->readpos > 0) {
 			memmove(sock->readbuf, READPTR(sock), sock->readbuflen - sock->readpos);
 			sock->writepos -= sock->readpos;
@@ -677,6 +699,7 @@ static size_t php_sock_stream_read(php_stream *stream, php_netstream_data_t *soc
 	int i;
 
 	for(i = 0; !sock->eof && i < MAX_CHUNKS_PER_READ; i++) {
+DUMP_SOCK_STATE("read about to read_internal", sock);
 		nr_bytes = php_sock_stream_read_internal(stream, sock TSRMLS_CC);
 		if(nr_bytes == 0)
 			break;
@@ -695,6 +718,7 @@ static size_t php_sockop_read(php_stream *stream, char *buf, size_t count TSRMLS
 
 	if (buf == NULL && count == 0) {
 		/* check for EOF condition */
+DUMP_SOCK_STATE("check for EOF", sock);
 		
 		if (sock->eof)
 			return EOF;
@@ -731,7 +755,8 @@ static size_t php_sockop_read(php_stream *stream, char *buf, size_t count TSRMLS
 	if (sock->is_blocked) {
 		sock->timeout_event = 0;
 		while(!sock->eof && TOREAD(sock) < count && !sock->timeout_event)
-			php_sock_stream_read_internal(stream, sock TSRMLS_CC);
+			if (php_sock_stream_read_internal(stream, sock TSRMLS_CC) == 0)
+				break;
 	} else {
 		php_sock_stream_read(stream, sock TSRMLS_CC);
 	}
@@ -757,6 +782,8 @@ static int php_sockop_close(php_stream *stream, int close_handle TSRMLS_DC)
 		if (sock->ssl_active) {
 			SSL_shutdown(sock->ssl_handle);
 			sock->ssl_active = 0;
+		}
+		if (sock->ssl_handle) {
 			SSL_free(sock->ssl_handle);
 			sock->ssl_handle = NULL;
 		}
