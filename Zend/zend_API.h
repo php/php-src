@@ -137,6 +137,7 @@ ZEND_API int zend_disable_function(char *function_name, uint function_name_lengt
 
 ZEND_API void zend_wrong_param_count(TSRMLS_D);
 ZEND_API zend_bool zend_is_callable(zval *callable, zend_bool syntax_only, char **callable_name);
+ZEND_API char *zend_get_module_version(char *module_name);
 
 #define getThis() (this_ptr)
 
