@@ -18,7 +18,8 @@ PHP_ARG_ENABLE(xml,for XML support,
 PHP_ARG_WITH(expat-dir, external libexpat install dir,
 [  --with-expat-dir=DIR    XML: external libexpat install dir])
 
-if test "$PHP_XML" = "yes" -a "$PHP_EXPAT_DIR" = "no"; then
+if test "$PHP_XML" = "yes"; then
+if test "$PHP_EXPAT_DIR" = "no"; then
 
     AC_DEFINE(HAVE_LIBEXPAT, 1, [ ])
     AC_DEFINE(HAVE_LIBEXPAT_BUNDLED, 1, [ ])
@@ -52,4 +53,5 @@ else
 
   PHP_ADD_INCLUDE($EXPAT_DIR/include)
   PHP_ADD_LIBRARY_WITH_PATH(expat, $EXPAT_DIR/lib, EXPAT_SHARED_LIBADD)
+fi
 fi
