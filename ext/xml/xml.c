@@ -158,9 +158,6 @@ static void php_xml_init_globals(php_xml_globals *xml_globals)
 
 PHP_MINIT_FUNCTION(xml)
 {
-
-	ELS_FETCH();
-
 	le_xml_parser =	register_list_destructors(xml_parser_dtor, NULL);
 
 #ifdef ZTS

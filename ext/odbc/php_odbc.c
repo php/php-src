@@ -314,7 +314,6 @@ static void php_odbc_init_globals(php_odbc_globals *odbc_globals)
 
 PHP_MINIT_FUNCTION(odbc)
 {
-	ELS_FETCH();
 	ODBCLS_D;
 #ifdef SQLANY_BUG
 	HDBC    foobar;
@@ -622,7 +621,7 @@ PHP_FUNCTION(odbc_close_all)
 {
 	void *ptr;
 	int type;
-	int i, nument = zend_hash_next_free_element(list);
+	int i, nument = zend_hash_next_free_element(&EG(regular_list));
 
 	for(i = 1; i < nument; i++) {
 		ptr = zend_list_find(i, &type);
@@ -1757,7 +1756,7 @@ try_and_get_another_connection:
 	if (persistent) {
 		list_entry *le;
 		
-		if (zend_hash_find(plist, hashed_details, hashed_len + 1, (void **) &le)
+		if (zend_hash_find(&EG(persistent_list), hashed_details, hashed_len + 1, (void **) &le)
 		  					== FAILURE) { /* the link is not in the persistent list */
 			list_entry new_le;
 			
@@ -1779,7 +1778,7 @@ try_and_get_another_connection:
 			
 			new_le.type = le_pconn;
 			new_le.ptr = db_conn;
-			if (zend_hash_update(plist, hashed_details, hashed_len + 1, &new_le,
+			if (zend_hash_update(&EG(persistent_list), hashed_details, hashed_len + 1, &new_le,
 						sizeof(list_entry), NULL) == FAILURE) {
 				free(db_conn);
 				efree(hashed_details);
@@ -1809,7 +1808,7 @@ try_and_get_another_connection:
 					d_name, sizeof(d_name), &len);
 
 				if(ret != SQL_SUCCESS){
-					zend_hash_del(plist, hashed_details, hashed_len + 1);
+					zend_hash_del(&EG(persistent_list), hashed_details, hashed_len + 1);
 					SQLDisconnect(db_conn->hdbc);
 					SQLFreeConnect(db_conn->hdbc);
 					goto try_and_get_another_connection;
@@ -1820,7 +1819,7 @@ try_and_get_another_connection:
 	} else { /* non persistent */
 		list_entry *index_ptr, new_index_ptr;
 		
-		if (zend_hash_find(list, hashed_details, hashed_len + 1, 
+		if (zend_hash_find(&EG(regular_list), hashed_details, hashed_len + 1, 
 					(void **) &index_ptr) == SUCCESS) {
 			int type, conn_id;
 			void *ptr;		
@@ -1836,7 +1835,7 @@ try_and_get_another_connection:
 				efree(hashed_details);
 				return;
 			} else {
-				zend_hash_del(list, hashed_details, hashed_len + 1);
+				zend_hash_del(&EG(regular_list), hashed_details, hashed_len + 1);
 			}
 		}
 		if (ODBCG(max_links) != -1 && ODBCG(num_links) >= ODBCG(max_links)) {
@@ -1852,7 +1851,7 @@ try_and_get_another_connection:
 		ZEND_REGISTER_RESOURCE(return_value, db_conn, le_conn);
 		new_index_ptr.ptr = (void *) return_value->value.lval;
 		new_index_ptr.type = le_index_ptr;
-		if (zend_hash_update(list, hashed_details, hashed_len + 1, (void *) &new_index_ptr,
+		if (zend_hash_update(&EG(regular_list), hashed_details, hashed_len + 1, (void *) &new_index_ptr,
 				   sizeof(list_entry), NULL) == FAILURE) {
 			efree(hashed_details);
 			RETURN_FALSE;
