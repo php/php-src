@@ -1,11 +1,5 @@
 1) Implement the following list entries and thier destructors:
-	le_domxmldoctypep
-	le_domxmldtdp
-	le_domxmlcdatap
-	le_domxmlpip
-	le_domxmlcommentp
 	le_domxmlnotationp
-	le_domxmlentityrefp
 
 2) Use ZEND_FETCH_RESOURCE() macros instead of custom functions.
 3) Implement those classes we really want, kill all of the rest.
