@@ -663,7 +663,7 @@ PHPAPI int php_sscanf_internal(	char *string,char *format,
             return FAILURE;
         }
         for (i = 0; i < totalVars; i++) {
-           	if (add_next_index_unset(*return_value) == FAILURE) {
+           	if (add_next_index_null(*return_value) == FAILURE) {
 				scan_set_error_return(0, return_value);
 				return FAILURE;
 	   	}

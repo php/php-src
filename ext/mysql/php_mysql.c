@@ -1425,9 +1425,9 @@ static void php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 		} else {
 			/* NULL value. */
 			if (result_type & MYSQL_NUM)
-				add_index_unset(return_value, i);
+				add_index_null(return_value, i);
 			else
-				add_assoc_unset(return_value, mysql_field->name);
+				add_assoc_null(return_value, mysql_field->name);
 		}
 	}
 }
