@@ -1,3 +1,20 @@
+2005-03-29  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_0)
+      NEWS:
+      patch reverted.
+
+    * (PHP_4_3)
+      NEWS:
+      patch was reverted.
+
+2005-03-29  Sara Golemon  <php@alphaweb.net>
+
+    * ext/standard/streamsfuncs.c
+      main/streams/filter.c
+      main/streams/php_stream_filter_api.h:
+      BugFix #31137 stream_filter_remove() segfaults when stream already closed
+
 2005-03-28  Ilia Alshanetsky  <ilia@prohost.org>
 
     * main/php_variables.c:
