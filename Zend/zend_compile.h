@@ -275,6 +275,7 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 void zend_do_end_function_declaration(znode *function_token TSRMLS_DC);
 void zend_do_receive_arg(int op, znode *var, znode *offset, znode *initialization, unsigned char pass_type TSRMLS_DC);
 int zend_do_begin_function_call(znode *function_name TSRMLS_DC);
+void zend_do_begin_method_call(znode *object, znode *function_name TSRMLS_DC);
 void zend_do_begin_dynamic_function_call(znode *function_name TSRMLS_DC);
 void zend_do_begin_class_member_function_call(znode *class_name, znode *function_name TSRMLS_DC);
 void zend_do_end_function_call(znode *function_name, znode *result, znode *argument_list, int is_method, int is_dynamic_fcall TSRMLS_DC);
