@@ -1,3 +1,81 @@
+2001-04-16  Stig Bakken  <ssb@fast.no>
+
+    * build/rules.mk
+      run-tests.php:
+    * using CGI -C option, you no longer have to specify "full" path to tests
+
+    * main/SAPI.h
+      main/fopen_wrappers.c
+      sapi/cgi/cgi_main.c:
+    Added -C command-line option to avoid chdir to the script's directory 
+
+2001-04-16  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/DB/mssql.php: - Remove extra checks in connect
+    - move fetchrow to use fetchInto
+    - fix fetchInto to return null on no more rows instead of an error
+    - Add fetch arbitrary row numbers feature to fetchInto
+    - spaces
+
+2001-04-16  Stig Bakken  <ssb@fast.no>
+
+    * pear/XML/Parser.php: * use raiseError
+
+    * pear/DB.php
+      pear/DB/tests/db_ismanip.phpt:
+    * DB::isManip now handles create, drop, alter, grant, revoke.
+
+    * pear/XML/Parser.php: * store source/target encoding in the object
+
+    * pear/XML/Parser.php:
+    * added a third parameter to constructor to let you specify target encoding
+
+    * pear/DB/storage.php: * some cleanups and doc-comments
+    * added support for multi-column primary keys
+
+    * pear/DB/common.php: * added "debug" option
+
+    * pear/PEAR.php.in
+      pear/tests/pear_error.phpt:
+    * make the error class used by raiseError configurable (_error_class property,
+      overridden by first parameter to constructor)
+
+    * pear/DB.php: * actually commit the stuff I said I had committed :-)
+
+2001-04-16  Frank M. Kromann  <frank@frontbase.com>
+
+    * ext/fbsql/php_fbsql.c: Fixing memory leek on CancelFetch.
+
+2001-04-16  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * TODO: Daniel fixed this for PHP 4.0.6.
+
+2001-04-16  Andrei Zmievski  <andrei@ispi.net>
+
+    * TODO-4.1.txt: More todo stuff.
+
+2001-04-16  James Moore  <James@phpuk.org>
+
+    * win32/install.txt:
+    - Updating order slighly so the install is easier to follow.
+
+2001-04-16  Stig Bakken  <ssb@fast.no>
+
+    * pear/XML/Parser.php:
+    * changed first parameter to constructor to "null" by default (instead
+      of "UTF-8"), this will use the document-specified encoding
+
+2001-04-16  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/pcre/php_pcre.c:
+    - Fixed a bug with /e modifier in preg_replace(), that would not correctly
+      replace two-digit references if single digit references were present
+      before them. This fixed bug #10218. 
+
+2001-04-16  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/ircg.c: Add support for banlists
+
 2001-04-15  Stig Bakken  <ssb@fast.no>
 
     * pear/catalog: * added sgml/xml catalog file
