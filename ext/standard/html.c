@@ -674,6 +674,8 @@ static enum entity_charset determine_charset(char *charset_hint TSRMLS_DC)
 
 		case mbfl_no_encoding_8859_5:
 			return cs_8859_5;
+
+		default:	
 	}
 #else
 	{
