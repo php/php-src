@@ -515,7 +515,7 @@ parse_class_entry:
 
 static_or_variable_string:
 		T_STRING	{ $$ = $1; }
-	|	r_cvar		{ $$ = $1; }
+	|	r_cvar_without_static_member	{ $$ = $1; }
 ;
 
 
@@ -597,10 +597,18 @@ rw_cvar:
 	cvar { zend_do_end_variable_parse(BP_VAR_RW, 0 TSRMLS_CC); $$ = $1; }
 ;
 
-cvar:
-		variable { $$ = $1; }
+r_cvar_without_static_member:
+	variable { zend_do_end_variable_parse(BP_VAR_R, 0 TSRMLS_CC); $$ = $1; }
 ;
 
+cvar:
+		variable { $$ = $1; }
+	|	static_member {$$ = $1; }
+;
+
+static_member:
+	parse_class_entry T_PAAMAYIM_NEKUDOTAYIM variable { $$ = $3; zend_do_fetch_static_member(&$1 TSRMLS_CC); }
+;
 
 variable:
 		variable_property '(' { zend_do_begin_method_call(NULL, &$1 TSRMLS_CC); }

@@ -117,6 +117,7 @@ ZEND_API void destroy_zend_class(zend_class_entry *ce)
 			efree(ce->refcount);
 			zend_hash_destroy(&ce->function_table);
 			zend_hash_destroy(&ce->default_properties);
+			zend_hash_destroy(&ce->static_members);
 			zend_hash_destroy(&ce->class_table);
 			break;
 		case ZEND_INTERNAL_CLASS:
@@ -124,6 +125,7 @@ ZEND_API void destroy_zend_class(zend_class_entry *ce)
 			free(ce->refcount);
 			zend_hash_destroy(&ce->function_table);
 			zend_hash_destroy(&ce->default_properties);
+			zend_hash_destroy(&ce->static_members);
 			zend_hash_destroy(&ce->class_table);
 			break;
 	}

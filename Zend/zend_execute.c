@@ -547,6 +547,9 @@ static void zend_fetch_var_address(zend_op *opline, temp_variable *Ts, int type 
 			}
 			target_symbol_table = EG(active_op_array)->static_variables;
 			break;
+		case ZEND_FETCH_STATIC_MEMBER:
+			target_symbol_table = &Ts[opline->op2.u.var].EA.class_entry->static_members;
+			break;
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 
@@ -579,7 +582,7 @@ static void zend_fetch_var_address(zend_op *opline, temp_variable *Ts, int type 
 	}
 	if (opline->extended_value == ZEND_FETCH_LOCAL) {
 		FREE_OP(Ts, &opline->op1, free_op1);
-	} else if (opline->extended_value == ZEND_FETCH_STATIC) {
+	} else if (opline->extended_value == ZEND_FETCH_STATIC || opline->extended_value == ZEND_FETCH_STATIC_MEMBER) {
 		zval_update_constant(retval, (void *) 1 TSRMLS_CC);
 	}
 

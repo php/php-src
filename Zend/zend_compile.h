@@ -232,6 +232,7 @@ void zend_do_fetch_globals(znode *varname TSRMLS_DC);
 void fetch_array_begin(znode *result, znode *varname, znode *first_dim TSRMLS_DC);
 void fetch_array_dim(znode *result, znode *parent, znode *dim TSRMLS_DC);
 void fetch_string_offset(znode *result, znode *parent, znode *offset TSRMLS_DC);
+void zend_do_fetch_static_member(znode *class TSRMLS_DC);
 void zend_do_print(znode *result, znode *arg TSRMLS_DC);
 void zend_do_echo(znode *arg TSRMLS_DC);
 typedef int (*unary_op_type)(zval *, zval *);
@@ -544,9 +545,10 @@ int zendlex(znode *zendlval TSRMLS_DC);
 
 
 /* global/local fetches */
-#define ZEND_FETCH_GLOBAL	0
-#define ZEND_FETCH_LOCAL	1
-#define ZEND_FETCH_STATIC	2
+#define ZEND_FETCH_GLOBAL			0
+#define ZEND_FETCH_LOCAL			1
+#define ZEND_FETCH_STATIC			2
+#define ZEND_FETCH_STATIC_MEMBER	3
 
 /* unset types */
 #define ZEND_UNSET_REG 0
