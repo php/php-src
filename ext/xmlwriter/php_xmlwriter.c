@@ -38,14 +38,15 @@ static zend_function_entry xmlwriter_functions[] = {
 	PHP_FE(xmlwriter_set_indent_string, NULL)
 #endif
 #if LIBXML_VERSION >= 20616
-	PHP_FE(xmlwriter_start_comment,	NULL)
+	PHP_FE(xmlwriter_start_comment,		NULL)
 	PHP_FE(xmlwriter_end_comment,		NULL)
 #endif
 	PHP_FE(xmlwriter_start_attribute,	NULL)
-	PHP_FE(xmlwriter_start_attribute_ns,	NULL)
-	PHP_FE(xmlwriter_end_attribute,	NULL)
+	PHP_FE(xmlwriter_end_attribute,		NULL)
 	PHP_FE(xmlwriter_write_attribute,	NULL)
-	PHP_FE(xmlwriter_write_attribute_ns,	NULL)
+#if LIBXML_VERSION >= 20617
+	PHP_FE(xmlwriter_start_attribute_ns,NULL)
+#endif
 	PHP_FE(xmlwriter_start_element,		NULL)
 	PHP_FE(xmlwriter_end_element,		NULL)
 	PHP_FE(xmlwriter_start_element_ns,	NULL)
@@ -167,6 +168,7 @@ static void xmlwriter_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC) {
 		efree(intern);
 	}
 }
+/* }}} */
 
 #if LIBXML_VERSION >= 20605
 /* {{{ proto bool xmlwriter_set_indent(resource xmlwriter, bool)
@@ -195,6 +197,7 @@ PHP_FUNCTION(xmlwriter_set_indent)
 	
 	RETURN_FALSE;
 }
+/* }}} */
 
 /* {{{ proto bool xmlwriter_set_indent_string(resource xmlwriter, string indentString)
 Set string used for indenting - returns FALSE on error */
@@ -222,6 +225,8 @@ PHP_FUNCTION(xmlwriter_set_indent_string)
 	
 	RETURN_FALSE;
 }
+/* }}} */
+
 #endif
 
 /* {{{ proto bool xmlwriter_start_attribute(resource xmlwriter, string name)
@@ -256,6 +261,7 @@ PHP_FUNCTION(xmlwriter_start_attribute)
 	
 	RETURN_FALSE;
 }
+/* }}} */
 
 /* {{{ proto bool xmlwriter_end_attribute(resource xmlwriter)
 End attribute - returns FALSE on error */
@@ -282,7 +288,9 @@ PHP_FUNCTION(xmlwriter_end_attribute)
 	
 	RETURN_FALSE;
 }
+/* }}} */
 
+#if LIBXML_VERSION >= 20616
 /* {{{ proto bool xmlwriter_start_attribute_ns(resource xmlwriter, string prefix, string name, string uri)
 Create start namespaced attribute - returns FALSE on error */
 PHP_FUNCTION(xmlwriter_start_attribute_ns)
@@ -316,6 +324,8 @@ PHP_FUNCTION(xmlwriter_start_attribute_ns)
 	
 	RETURN_FALSE;
 }
+/* }}} */
+#endif
 
 /* {{{ proto bool xmlwriter_write_attribute(resource xmlwriter, string name, string content)
 Write full attribute - returns FALSE on error */
@@ -350,6 +360,7 @@ PHP_FUNCTION(xmlwriter_write_attribute)
 	
 	RETURN_FALSE;
 }
+/* }}} */
 
 /* {{{ proto bool xmlwriter_write_attribute_ns(resource xmlwriter, string prefix, string name, string uri, string content)
 Write full namespaced attribute - returns FALSE on error */
@@ -384,6 +395,7 @@ PHP_FUNCTION(xmlwriter_write_attribute_ns)
 	
 	RETURN_FALSE;
 }
+/* }}} */
 
 /* {{{ proto bool xmlwriter_start_element(resource xmlwriter, string name)
 Create start element tag - returns FALSE on error */
@@ -417,6 +429,7 @@ PHP_FUNCTION(xmlwriter_start_element)
 	
 	RETURN_FALSE;
 }
+/* }}} */
 
 /* {{{ proto bool xmlwriter_start_element_ns(resource xmlwriter, string prefix, string name, string uri)
 Create start namespaced element tag - returns FALSE on error */
@@ -451,6 +464,7 @@ PHP_FUNCTION(xmlwriter_start_element_ns)
 	
 	RETURN_FALSE;
 }
+/* }}} */
 
 /* {{{ proto bool xmlwriter_end_element(resource xmlwriter)
 End current element - returns FALSE on error */
@@ -477,6 +491,7 @@ PHP_FUNCTION(xmlwriter_end_element)
 	
 	RETURN_FALSE;
 }
+/* }}} */
 
 /* {{{ proto bool xmlwriter_write_element(resource xmlwriter, string name, string content)
 Write full element tag - returns FALSE on error */
@@ -511,6 +526,7 @@ PHP_FUNCTION(xmlwriter_write_element)
 	
 	RETURN_FALSE;
 }
+/* }}} */
 
 /* {{{ proto bool xmlwriter_write_element_ns(resource xmlwriter, string prefix, string name, string uri, string content)
 Write full namesapced element tag - returns FALSE on error */
@@ -545,6 +561,7 @@ PHP_FUNCTION(xmlwriter_write_element_ns)
 	
 	RETURN_FALSE;
 }
+/* }}} */
 
 /* {{{ proto bool xmlwriter_start_pi(resource xmlwriter, string target)
 Create start PI tag - returns FALSE on error */
@@ -578,6 +595,7 @@ PHP_FUNCTION(xmlwriter_start_pi)
 	
 	RETURN_FALSE;
 }
+/* }}} */
 
 /* {{{ proto bool xmlwriter_end_pi(resource xmlwriter)
 End current PI - returns FALSE on error */
@@ -604,6 +622,7 @@ PHP_FUNCTION(xmlwriter_end_pi)
 	
 	RETURN_FALSE;
 }
+/* }}} */
 
 /* {{{ proto bool xmlwriter_write_pi(resource xmlwriter, string target, string content)
 Write full PI tag - returns FALSE on error */
@@ -638,6 +657,7 @@ PHP_FUNCTION(xmlwriter_write_pi)
 	
 	RETURN_FALSE;
 }
+/* }}} */
 
 /* {{{ proto bool xmlwriter_start_cdata(resource xmlwriter)
 Create start CDATA tag - returns FALSE on error */
@@ -664,6 +684,7 @@ PHP_FUNCTION(xmlwriter_start_cdata)
 	
 	RETURN_FALSE;
 }
+/* }}} */
 
 /* {{{ proto bool xmlwriter_end_cdata(resource xmlwriter)
 End current CDATA - returns FALSE on error */
@@ -690,6 +711,7 @@ PHP_FUNCTION(xmlwriter_end_cdata)
 	
 	RETURN_FALSE;
 }
+/* }}} */
 
 /* {{{ proto bool xmlwriter_write_cdata(resource xmlwriter, string content)
 Write full CDATA tag - returns FALSE on error */
@@ -718,6 +740,7 @@ PHP_FUNCTION(xmlwriter_write_cdata)
 	
 	RETURN_FALSE;
 }
+/* }}} */
 
 /* {{{ proto bool xmlwriter_text(resource xmlwriter, string content)
 Write text - returns FALSE on error */
@@ -745,6 +768,7 @@ PHP_FUNCTION(xmlwriter_text)
 	
 	RETURN_FALSE;
 }
+/* }}} */
 
 /* {{{ proto bool xmlwriter_start_comment(resource xmlwriter)
 Create start comment - returns FALSE on error */
@@ -771,6 +795,7 @@ PHP_FUNCTION(xmlwriter_start_comment)
 	
 	RETURN_FALSE;
 }
+/* }}} */
 
 /* {{{ proto bool xmlwriter_end_comment(resource xmlwriter)
 Create end comment - returns FALSE on error */
@@ -797,7 +822,7 @@ PHP_FUNCTION(xmlwriter_end_comment)
 	
 	RETURN_FALSE;
 }
-
+/* }}} */
 
 /* {{{ proto bool xmlwriter_write_comment(resource xmlwriter, string content)
 Write full comment tag - returns FALSE on error */
@@ -826,6 +851,7 @@ PHP_FUNCTION(xmlwriter_write_comment)
 	
 	RETURN_FALSE;
 }
+/* }}} */
 
 /* {{{ proto bool xmlwriter_start_document(resource xmlwriter, string version, string encoding, string standalone)
 Create document tag - returns FALSE on error */
@@ -853,6 +879,7 @@ PHP_FUNCTION(xmlwriter_start_document)
 	
 	RETURN_FALSE;
 }
+/* }}} */
 
 /* {{{ proto bool xmlwriter_end_document(resource xmlwriter)
 End current document - returns FALSE on error */
@@ -879,7 +906,7 @@ PHP_FUNCTION(xmlwriter_end_document)
 	
 	RETURN_FALSE;
 }
-
+/* }}} */
 
 /* {{{ proto bool xmlwriter_start_dtd(resource xmlwriter, string name, string pubid, string sysid)
 Create start DTD tag - returns FALSE on error */
@@ -907,6 +934,7 @@ PHP_FUNCTION(xmlwriter_start_dtd)
 	
 	RETURN_FALSE;
 }
+/* }}} */
 
 /* {{{ proto bool xmlwriter_end_dtd(resource xmlwriter)
 End current DTD - returns FALSE on error */
@@ -933,6 +961,7 @@ PHP_FUNCTION(xmlwriter_end_dtd)
 	
 	RETURN_FALSE;
 }
+/* }}} */
 
 /* {{{ proto bool xmlwriter_write_dtd(resource xmlwriter, string name, string pubid, string sysid, string subset)
 Write full DTD tag - returns FALSE on error */
@@ -960,6 +989,7 @@ PHP_FUNCTION(xmlwriter_write_dtd)
 	
 	RETURN_FALSE;
 }
+/* }}} */
 
 /* {{{ proto bool xmlwriter_start_dtd_element(resource xmlwriter, string name)
 Create start DTD element - returns FALSE on error */
@@ -993,6 +1023,7 @@ PHP_FUNCTION(xmlwriter_start_dtd_element)
 	
 	RETURN_FALSE;
 }
+/* }}} */
 
 /* {{{ proto bool xmlwriter_end_dtd_element(resource xmlwriter)
 End current DTD element - returns FALSE on error */
@@ -1019,6 +1050,7 @@ PHP_FUNCTION(xmlwriter_end_dtd_element)
 	
 	RETURN_FALSE;
 }
+/* }}} */
 
 /* {{{ proto bool xmlwriter_write_dtd_element(resource xmlwriter, string name, string content)
 Write full DTD element tag - returns FALSE on error */
@@ -1053,6 +1085,7 @@ PHP_FUNCTION(xmlwriter_write_dtd_element)
 	
 	RETURN_FALSE;
 }
+/* }}} */
 
 /* {{{ proto bool xmlwriter_start_dtd_attlist(resource xmlwriter, string name)
 Create start DTD AttList - returns FALSE on error */
@@ -1086,6 +1119,7 @@ PHP_FUNCTION(xmlwriter_start_dtd_attlist)
 	
 	RETURN_FALSE;
 }
+/* }}} */
 
 /* {{{ proto bool xmlwriter_end_dtd_attlist(resource xmlwriter)
 End current DTD AttList - returns FALSE on error */
@@ -1112,6 +1146,7 @@ PHP_FUNCTION(xmlwriter_end_dtd_attlist)
 	
 	RETURN_FALSE;
 }
+/* }}} */
 
 /* {{{ proto bool xmlwriter_write_dtd_attlist(resource xmlwriter, string name, string content)
 Write full DTD AttList tag - returns FALSE on error */
@@ -1146,6 +1181,7 @@ PHP_FUNCTION(xmlwriter_write_dtd_attlist)
 	
 	RETURN_FALSE;
 }
+/* }}} */
 
 /* {{{ proto bool xmlwriter_start_dtd_entity(resource xmlwriter, string name, bool isparam)
 Create start DTD Entity - returns FALSE on error */
@@ -1180,6 +1216,7 @@ PHP_FUNCTION(xmlwriter_start_dtd_entity)
 	
 	RETURN_FALSE;
 }
+/* }}} */
 
 /* {{{ proto bool xmlwriter_end_dtd_entity(resource xmlwriter)
 End current DTD Entity - returns FALSE on error */
@@ -1206,6 +1243,7 @@ PHP_FUNCTION(xmlwriter_end_dtd_entity)
 	
 	RETURN_FALSE;
 }
+/* }}} */
 
 /* {{{ proto bool xmlwriter_write_dtd_entity(resource xmlwriter, string name, string content)
 Write full DTD Entity tag - returns FALSE on error */
@@ -1240,6 +1278,7 @@ PHP_FUNCTION(xmlwriter_write_dtd_entity)
 	
 	RETURN_FALSE;
 }
+/* }}} */
 
 /* {{{ proto resource xmlwriter_open_uri(resource xmlwriter, string source)
 Create new xmlwriter using source uri for output */
@@ -1274,6 +1313,7 @@ PHP_FUNCTION(xmlwriter_open_uri)
 	ZEND_REGISTER_RESOURCE(return_value,intern,le_xmlwriter);
 
 }
+/* }}} */
 
 /* {{{ proto resource xmlwriter_open_memory()
 Create new xmlwriter using memory for string output */
@@ -1303,6 +1343,7 @@ PHP_FUNCTION(xmlwriter_open_memory)
 	ZEND_REGISTER_RESOURCE(return_value,intern,le_xmlwriter);
 
 }
+/* }}} */
 
 /* {{{ proto string xmlwriter_output_memory(resource xmlwriter [,bool flush])
 Output current buffer as string */
@@ -1333,6 +1374,7 @@ PHP_FUNCTION(xmlwriter_output_memory)
 	
 	RETURN_EMPTY_STRING()
 }
+/* }}} */
 
 /* {{{ PHP_MINIT_FUNCTION
  */
@@ -1344,7 +1386,6 @@ PHP_MINIT_FUNCTION(xmlwriter)
 	return SUCCESS;
 }
 /* }}} */
-
 
 /* {{{ PHP_MSHUTDOWN_FUNCTION
  */
