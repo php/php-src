@@ -48,9 +48,11 @@
 
 /* {{{ includes & stuff */
 
+/*
 #if defined(COMPILE_DL)
 # include "dl/phpdl.h"
 #endif
+*/
 
 #include "php.h"
 
@@ -97,7 +99,7 @@ PHP_OCI_API php_oci_globals oci_globals;
 /* }}} */
 /* {{{ dynamically loadable module stuff */
 
-#if COMPILE_DL
+#if COMPILE_DL_OCI8
 DLEXPORT zend_module_entry *get_module() { return &oci8_module_entry; };
 #endif /* COMPILE_DL */
 
