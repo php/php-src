@@ -1,3 +1,137 @@
+2002-04-05  Sterling Hughes  <sterling@bumblebury.com>
+
+    * sapi/apache2filter/sapi_apache2.c: MFH changes per doug's request
+
+2002-04-05  Joseph Tate  <jtate@mi-corporation.com>
+
+    * ext/domxml/tests/001.phpt
+      ext/domxml/tests/domxml_test.inc: Added test suite for domxml extension.
+
+    * ext/domxml/php_domxml.c: MFH added unlink_node alias
+
+    * ext/domxml/php_domxml.c: Added unlink_node alias for consistency
+
+2002-04-05  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/exif/tests/003.phpt
+      ext/exif/tests/test3.jpg: -testing unicode user-comment
+
+    * ext/exif/exif.c: -correct length for ASCII
+    -global encoding variables
+
+    * ext/mbstring/tests/016.inc
+      ext/mbstring/tests/016.phpt:
+    include comma separated encoding lists in test
+
+    * ext/mbstring/mbstring.c: no space for comma separated encoding lists
+
+    * ext/exif/exif.c: aligning #
+
+2002-04-05  Christian Stocker  <chregu@phant.ch>
+
+    * ext/domxml/php_domxml.c:
+    oops. that was an error not detected in shared library mode ...
+
+    * ext/domxml/php_domxml.c
+      ext/domxml/php_domxml.h:
+    added domxml_parser(), domxml_parser_add_chunk() and  domxml_parser_end().
+    It provides access to the PushParser interface of libxml2.
+
+2002-04-05  Zeev Suraski  <zeev@zend.com>
+
+    * ext/bz2/php_bz2.h: Fix build
+
+2002-04-05  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/DB/mysql.php:
+    - Fix a problem in nextID() when the sequence table is empty
+    - Use push/popErrorHanlding() instead of the "hack"
+
+2002-04-05  Stig Bakken  <ssb@fast.no>
+
+    * ext/zlib/php_zlib.h
+      ext/zlib/zlib.c: Add zlib.output_compression_level option 
+
+2002-04-05  Jani Taskinen  <sniper@iki.fi>
+
+    * NEWS: MFH the fixed entries
+
+    * NEWS: Fixed some entries..
+
+2002-04-05  Zeev Suraski  <zeev@zend.com>
+
+    * ext/zlib/zlib.dsp
+      ext/zlib/zlib.c
+      ext/standard/file.c
+      ext/standard/file.h
+      ext/bz2/bz2.c
+      ext/bz2/bz2.dsp
+      ext/bz2/php_bz2.h: Fix gzip/bz2 builds for Windows
+
+2002-04-05  Wez Furlong  <wez.php@thebrainroom.com>
+
+    * NEWS: let people know about mailparse being pickled
+
+    * pear/Makefile.in:
+    MFH: add mbstring headers to those for pear/pecl extensions
+
+2002-04-05  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * ext/pgsql/tests/09notice.phpt: Add error message from _notice_handler()
+
+    * NEWS: FMB. Fixed bug info.
+
+    * NEWS: Forgot mention fixed bug that is reported by user.
+
+    * ext/pgsql/pgsql.c: MFH.
+    Fixed pg_last_notice() double free.
+
+    * ext/pgsql/pgsql.c: Fix pg_last_notice() double free.
+
+    * ext/pgsql/tests/09notice.phpt
+      ext/pgsql/tests/notice.inc: Add notice message test
+
+2002-04-05  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/README.txt: update regarding version numbers
+
+2002-04-05  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * ext/pgsql/tests/escape.inc: Update message
+
+    * ext/pgsql/tests/createdb.inc
+      ext/pgsql/tests/large_object.inc
+      ext/pgsql/tests/config.inc: Add bytea field to test table.
+    Use table name variable.
+
+    * ext/pgsql/tests/08escape.phpt
+      ext/pgsql/tests/escape.inc
+      ext/pgsql/tests/php.gif: Add real pg_escape_bytea() test.
+
+    * ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.h:
+    Fixed way of exporing functions. (Need PHPAPI for Win)
+    Fixed if statement format. ("if () stmt;" should be "if () \n {stmt;}")
+    Fixed error message so that appropriate function names are
+    displayed.
+
+2002-04-05  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/DB/mysql.php: ws
+
+2002-04-05  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/exif/exif.c:
+    Unicode is now based on php_mb_convert_encoding if available
+
+    * ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.h: new function php_mb_convert_encoding
+
+2002-04-05  Wez Furlong  <wez.php@thebrainroom.com>
+
+    * pear/Makefile.frag:
+    add mbstring headers to those for pear/pecl extensions
+
 2002-04-04  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
 
     * ext/exif/exif.c: removed calls to wctomb, wcstombs
