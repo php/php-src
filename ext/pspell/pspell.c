@@ -805,7 +805,7 @@ PHP_FUNCTION(pspell_config_ignore)
 }
 /* }}} */
 
-static int pspell_config_path(INTERNAL_FUNCTION_PARAMETERS, char *option)
+static void pspell_config_path(INTERNAL_FUNCTION_PARAMETERS, char *option)
 {
 	int type;
 	zval **sccin, **value;
