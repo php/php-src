@@ -21,9 +21,7 @@
 
 #include "oratypes.h"
 #include "ocidfn.h"
-#ifdef __STDC__
 #include "ociapr.h"
-#endif
 
 extern zend_module_entry oracle_module_entry;
 #define phpext_oracle_ptr &oracle_module_entry
