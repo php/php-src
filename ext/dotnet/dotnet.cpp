@@ -182,7 +182,7 @@ function_entry DOTNET_functions[] = {
 static PHP_MINFO_FUNCTION(DOTNET)
 {
 	php_info_print_table_start();
-	php_info_print_table_row(2, "DOTNET support", "enabled");
+	php_info_print_table_row(2, ".NET support", "enabled");
 	php_info_print_table_end();
 }
 
