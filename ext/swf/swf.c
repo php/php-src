@@ -166,11 +166,11 @@ PHP_FUNCTION(swf_openfile)
 	convert_to_double_ex(g);
 	convert_to_double_ex(b);
 	
-	na = (*name)->value.str.val;
+	na = Z_STRVAL_PP(name);
 	
 	swf_openfile((strcasecmp("php://stdout", na)==0) ? stdout : na,
-			 (float)(*sizeX)->value.dval, (float)(*sizeY)->value.dval,
-      		 	 (float)(*frameRate)->value.dval, (float)(*r)->value.dval, (float)(*g)->value.dval, (float)(*b)->value.dval);
+			 (float)Z_DVAL_PP(sizeX), (float)Z_DVAL_PP(sizeY),
+      		 	 (float)Z_DVAL_PP(frameRate), (float)Z_DVAL_PP(r), (float)Z_DVAL_PP(g), (float)Z_DVAL_PP(b));
 }
 /* }}} */
 
@@ -192,7 +192,7 @@ PHP_FUNCTION(swf_labelframe)
 	    WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(name);
-	swf_labelframe((*name)->value.str.val);
+	swf_labelframe(Z_STRVAL_PP(name));
 }
 /* }}} */
 
@@ -215,7 +215,7 @@ PHP_FUNCTION(swf_setframe)
 	}
 	convert_to_long_ex(frameno);
 	
-	swf_setframe((*frameno)->value.lval);
+	swf_setframe(Z_LVAL_PP(frameno));
 }
 /* }}} */
 
@@ -238,9 +238,9 @@ void col_swf(INTERNAL_FUNCTION_PARAMETERS, int opt) {
 	convert_to_double_ex(b);
 	convert_to_double_ex(a);
 	if (opt) {
-		swf_addcolor((float)(*r)->value.dval, (float)(*g)->value.dval, (float)(*b)->value.dval, (float)(*a)->value.dval);
+		swf_addcolor((float)Z_DVAL_PP(r), (float)Z_DVAL_PP(g), (float)Z_DVAL_PP(b), (float)Z_DVAL_PP(a));
 	} else {
-		swf_mulcolor((float)(*r)->value.dval, (float)(*g)->value.dval, (float)(*b)->value.dval, (float)(*a)->value.dval);
+		swf_mulcolor((float)Z_DVAL_PP(r), (float)Z_DVAL_PP(g), (float)Z_DVAL_PP(b), (float)Z_DVAL_PP(a));
 	}
 }
 
@@ -271,7 +271,7 @@ PHP_FUNCTION(swf_placeobject)
 	}
 	convert_to_long_ex(objid);
 	convert_to_long_ex(depth);
-	swf_placeobject((*objid)->value.lval, (*depth)->value.lval);
+	swf_placeobject(Z_LVAL_PP(objid), Z_LVAL_PP(depth));
 }
 /* }}} */
 
@@ -287,7 +287,7 @@ PHP_FUNCTION(swf_modifyobject)
 	convert_to_long_ex(depth);
 	convert_to_long_ex(how);
 	
-	swf_modifyobject((*depth)->value.lval, (*how)->value.lval);
+	swf_modifyobject(Z_LVAL_PP(depth), Z_LVAL_PP(how));
 }
 /* }}} */
 
@@ -302,7 +302,7 @@ PHP_FUNCTION(swf_removeobject)
 	}
 	convert_to_long_ex(depth);
 	
-	swf_removeobject((*depth)->value.lval);
+	swf_removeobject(Z_LVAL_PP(depth));
 }
 
 /* {{{ proto int swf_nextid(void)
@@ -340,7 +340,7 @@ PHP_FUNCTION(swf_actiongotoframe)
 	}
 	convert_to_long_ex(frameno);
 
-	swf_actionGotoFrame((*frameno)->value.lval);
+	swf_actionGotoFrame(Z_LVAL_PP(frameno));
 }
 /* }}} */
 
@@ -356,7 +356,7 @@ PHP_FUNCTION(swf_actiongeturl)
 	convert_to_string_ex(url);
 	convert_to_string_ex(target);
 	
-	swf_actionGetURL((*url)->value.str.val, (*target)->value.str.val);
+	swf_actionGetURL(Z_STRVAL_PP(url), Z_STRVAL_PP(target));
 }
 /* }}} */
 
@@ -412,7 +412,7 @@ PHP_FUNCTION(swf_actionwaitforframe)
 	
 	convert_to_long_ex(frame);
 	convert_to_long_ex(skipcount);
-	swf_actionWaitForFrame((*frame)->value.lval, (*skipcount)->value.lval);
+	swf_actionWaitForFrame(Z_LVAL_PP(frame), Z_LVAL_PP(skipcount));
 }
 /* }}} */
 
@@ -427,7 +427,7 @@ PHP_FUNCTION(swf_actionsettarget)
 	}
 	
 	convert_to_string_ex(target);
-	swf_actionSetTarget((*target)->value.str.val);
+	swf_actionSetTarget(Z_STRVAL_PP(target));
 }
 /* }}} */
 
@@ -442,7 +442,7 @@ PHP_FUNCTION(swf_actiongotolabel)
 	}
 
 	convert_to_string_ex(label);
-	swf_actionGoToLabel((*label)->value.str.val);
+	swf_actionGoToLabel(Z_STRVAL_PP(label));
 }
 /* }}} */
 
@@ -462,11 +462,11 @@ void php_swf_define(INTERNAL_FUNCTION_PARAMETERS, int opt)
 	convert_to_double_ex(width);
 	
 	if (opt) {
-		swf_defineline((*objid)->value.lval, (float)(*x1)->value.dval, (float)(*y1)->value.dval,
-	 	               (float)(*x2)->value.dval, (float)(*y2)->value.dval, (float)(*width)->value.dval);
+		swf_defineline(Z_LVAL_PP(objid), (float)Z_DVAL_PP(x1), (float)Z_DVAL_PP(y1),
+	 	               (float)Z_DVAL_PP(x2), (float)Z_DVAL_PP(y2), (float)(Z_DVAL_PP(width));
 	} else {
-		swf_definerect((*objid)->value.lval, (float)(*x1)->value.dval, (float)(*y1)->value.dval,
-	 	               (float)(*x2)->value.dval, (float)(*y2)->value.dval, (float)(*width)->value.dval);
+		swf_definerect(Z_LVAL_PP(objid), (float)Z_DVAL_PP(x1), (float)Z_DVAL_PP(y1),
+	 	               (float)Z_DVAL_PP(x2), (float)Z_DVAL_PP(y2), (float)(Z_DVAL_PP(width));
 	}
 }
 
@@ -507,23 +507,23 @@ PHP_FUNCTION(swf_definepoly)
 		php_error(E_WARNING, "Wrong datatype of second argument to swf_definepoly");
 	}
 	
-	npoints = (*NumPoints)->value.lval;
+	npoints = Z_LVAL_PP(NumPoints);
 	for (i = 0; i < npoints; i++)
 	{
-		if (zend_hash_index_find((*coordinates)->value.ht, (i * 2), (void **)&var) == SUCCESS) {
+		if (zend_hash_index_find(Z_ARRVAL_PP(coordinates), (i * 2), (void **)&var) == SUCCESS) {
 			SEPARATE_ZVAL(var);
 			convert_to_double_ex(var);
-			coords[i][0] = (float)(*var)->value.dval;
+			coords[i][0] = (float)Z_DVAL_PP(var);
 		}
 		
-		if (zend_hash_index_find((*coordinates)->value.ht, (i * 2) + 1, (void **)&var) == SUCCESS) {
+		if (zend_hash_index_find(Z_ARRVAL_PP(coordinates), (i * 2) + 1, (void **)&var) == SUCCESS) {
 			SEPARATE_ZVAL(var);
 			convert_to_double_ex(var);
-			coords[i][1] = (float)(*var)->value.dval;
+			coords[i][1] = (float)Z_DVAL_PP(var);
 		}
 		
 	}
-	swf_definepoly((*obj_id)->value.lval, coords, npoints, (float)(*width)->value.dval);
+	swf_definepoly(Z_LVAL_PP(obj_id), coords, npoints, (float)Z_DVAL_PP(width));
 }
 /* }}} */
 
@@ -537,7 +537,7 @@ PHP_FUNCTION(swf_startshape)
 	    WRONG_PARAM_COUNT;
 	}
 	convert_to_long_ex(objid);
-	swf_startshape((*objid)->value.lval);
+	swf_startshape(Z_LVAL_PP(objid));
 }
 /* }}} */
 
@@ -555,8 +555,8 @@ PHP_FUNCTION(swf_shapelinesolid)
 	convert_to_double_ex(b);
 	convert_to_double_ex(a);
 	convert_to_double_ex(width);
-	swf_shapelinesolid((float)(*r)->value.dval, (float)(*g)->value.dval, (float)(*b)->value.dval, (float)(*a)->value.dval,
-				   (float)(*width)->value.dval);
+	swf_shapelinesolid((float)Z_DVAL_PP(r), (float)Z_DVAL_PP(g), (float)Z_DVAL_PP(b), (float)Z_DVAL_PP(a),
+				   (float)Z_DVAL_PP(width));
 }
 /* }}} */
 
@@ -583,7 +583,7 @@ PHP_FUNCTION(swf_shapefillsolid)
 	convert_to_double_ex(b);
 	convert_to_double_ex(a);
 	
-	swf_shapefillsolid((float)(*r)->value.dval, (float)(*g)->value.dval, (float)(*b)->value.dval, (float)(*a)->value.dval);
+	swf_shapefillsolid((float)Z_DVAL_PP(r), (float)Z_DVAL_PP(g), (float)Z_DVAL_PP(b), (float)Z_DVAL_PP(a));
 }
 /* }}} */
 
@@ -597,9 +597,9 @@ void php_swf_fill_bitmap(INTERNAL_FUNCTION_PARAMETERS, int opt)
 	convert_to_long_ex(bitmapid);
 	
 	if (opt) {
-		swf_shapefillbitmapclip((*bitmapid)->value.lval);
+		swf_shapefillbitmapclip(Z_LVAL_PP(bitmapid));
 	} else {
-		swf_shapefillbitmaptile((*bitmapid)->value.lval);
+		swf_shapefillbitmaptile(Z_LVAL_PP(bitmapid));
 	}
 }
 
@@ -630,9 +630,9 @@ void php_swf_shape(INTERNAL_FUNCTION_PARAMETERS, int opt)
 	convert_to_double_ex(y);
 	
 	if (opt) {
-		swf_shapemoveto((float)(*x)->value.dval, (float)(*y)->value.dval);
+		swf_shapemoveto((float)Z_DVAL_PP(x), (float)Z_DVAL_PP(y));
 	} else {
-		swf_shapelineto((float)(*x)->value.dval, (float)(*y)->value.dval);
+		swf_shapelineto((float)Z_DVAL_PP(x), (float)Z_DVAL_PP(y));
 	}
 }
 
@@ -666,7 +666,7 @@ PHP_FUNCTION(swf_shapecurveto)
 	convert_to_double_ex(x2);
 	convert_to_double_ex(y2);
 	
-	swf_shapecurveto((float)(*x1)->value.dval, (float)(*y1)->value.dval, (float)(*x2)->value.dval, (float)(*y2)->value.dval);
+	swf_shapecurveto((float)Z_DVAL_PP(x1), (float)Z_DVAL_PP(y1), (float)Z_DVAL_PP(x2), (float)Z_DVAL_PP(y2));
 }
 /* }}} */
 
@@ -686,8 +686,8 @@ PHP_FUNCTION(swf_shapecurveto3)
 	convert_to_double_ex(x3);
 	convert_to_double_ex(y3);
 	
-	swf_shapecurveto3((float)(*x1)->value.dval, (float)(*y1)->value.dval, (float)(*x2)->value.dval, (float)(*y2)->value.dval,
-				  (float)(*x3)->value.dval, (float)(*y3)->value.dval);
+	swf_shapecurveto3((float)Z_DVAL_PP(x1), (float)Z_DVAL_PP(y1), (float)Z_DVAL_PP(x2), (float)Z_DVAL_PP(y2),
+				  (float)Z_DVAL_PP(x3), (float)Z_DVAL_PP(y3));
 }
 /* }}} */
 
@@ -706,8 +706,8 @@ PHP_FUNCTION(swf_shapearc)
 	convert_to_double_ex(ang1);
 	convert_to_double_ex(ang2);
 	
-	swf_shapearc((float)(*x)->value.dval, (float)(*y)->value.dval, (float)(*r)->value.dval, (float)(*ang1)->value.dval,
-	             (float)(*ang2)->value.dval);
+	swf_shapearc((float)Z_DVAL_PP(x), (float)Z_DVAL_PP(y), (float)Z_DVAL_PP(r), (float)Z_DVAL_PP(ang1),
+	             (float)Z_DVAL_PP(ang2));
 }
 /* }}} */
 
@@ -731,7 +731,7 @@ PHP_FUNCTION(swf_definefont)
 	convert_to_long_ex(fontid);
 	convert_to_string_ex(name);
 	
-	swf_definefont((*fontid)->value.lval, (*name)->value.str.val);
+	swf_definefont(Z_LVAL_PP(fontid), Z_STRVAL_PP(name));
 }
 /* }}} */
 
@@ -745,7 +745,7 @@ PHP_FUNCTION(swf_setfont)
 	    WRONG_PARAM_COUNT;
 	}
 	convert_to_long_ex(fontid);
-	swf_setfont((*fontid)->value.lval);
+	swf_setfont(Z_LVAL_PP(fontid));
 }
 /* }}} */
 
@@ -760,7 +760,7 @@ PHP_FUNCTION(swf_fontsize)
 	}
 	convert_to_double_ex(height);
 	
-	swf_fontsize((float)(*height)->value.dval);
+	swf_fontsize((float)Z_DVAL_PP(height));
 }
 /* }}} */
 
@@ -775,7 +775,7 @@ PHP_FUNCTION(swf_fontslant)
 	}
 	convert_to_double_ex(slant);
 	
-	swf_fontslant((float)(*slant)->value.dval);
+	swf_fontslant((float)Z_DVAL_PP(slant));
 }
 /* }}} */
 
@@ -789,7 +789,7 @@ PHP_FUNCTION(swf_fonttracking)
 	    WRONG_PARAM_COUNT;
 	}
 	convert_to_double_ex(track);
-	swf_fonttracking((float)(*track)->value.dval);
+	swf_fonttracking((float)Z_DVAL_PP(track));
 }
 /* }}} */
 
@@ -821,7 +821,7 @@ PHP_FUNCTION(swf_definetext)
 	convert_to_string_ex(str);
 	convert_to_long_ex(docCenter);
 	
-	swf_definetext((*objid)->value.lval, (*str)->value.str.val, (*docCenter)->value.lval);
+	swf_definetext(Z_LVAL_PP(objid), Z_STRVAL_PP(str), Z_LVAL_PP(docCenter));
 }
 /* }}} */
 
@@ -835,7 +835,7 @@ PHP_FUNCTION(swf_textwidth)
 	    WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(str);
-	RETURN_DOUBLE((double)swf_textwidth((*str)->value.str.val));
+	RETURN_DOUBLE((double)swf_textwidth(Z_STRVAL_PP(str)));
 }
 /* }}} */
 
@@ -851,7 +851,7 @@ PHP_FUNCTION(swf_definebitmap)
 	convert_to_long_ex(objid);
 	convert_to_string_ex(imgname);
 	
-	swf_definebitmap((*objid)->value.lval, (*imgname)->value.str.val);
+	swf_definebitmap(Z_LVAL_PP(objid), Z_STRVAL_PP(imgname));
 }
 /* }}} */
 
@@ -868,7 +868,7 @@ PHP_FUNCTION(swf_getbitmapinfo)
 	}
 	convert_to_long_ex(bitmapid);
 	
-	size = swf_getbitmapinfo((*bitmapid)->value.lval, &width, &height);
+	size = swf_getbitmapinfo(Z_LVAL_PP(bitmapid), &width, &height);
 	if (array_init(return_value) == FAILURE) {
 		php_error(E_WARNING, "Cannot initialize return value from swf_getbitmapinfo");
 		RETURN_FALSE;
@@ -891,7 +891,7 @@ PHP_FUNCTION(swf_startsymbol)
 	}
 	convert_to_long_ex(objid);
 	
-	swf_startsymbol((*objid)->value.lval);
+	swf_startsymbol(Z_LVAL_PP(objid));
 }
 /* }}} */
 
@@ -915,7 +915,7 @@ PHP_FUNCTION(swf_startbutton)
 	convert_to_long_ex(objid);
 	convert_to_long_ex(type);
 	
-	swf_startbutton((*objid)->value.lval, (*type)->value.lval); /* TYPE_MENUBUTTON, TYPE_PUSHBUTTON */
+	swf_startbutton(Z_LVAL_PP(objid), Z_LVAL_PP(type)); /* TYPE_MENUBUTTON, TYPE_PUSHBUTTON */
 }
 /* }}} */
 
@@ -932,7 +932,7 @@ PHP_FUNCTION(swf_addbuttonrecord)
 	convert_to_long_ex(objid);
 	convert_to_long_ex(depth);
 	
-	swf_addbuttonrecord((*state)->value.lval, (*objid)->value.lval, (*depth)->value.lval);
+	swf_addbuttonrecord(Z_LVAL_PP(state), Z_LVAL_PP(objid), Z_LVAL_PP(depth));
 }
 /* }}} */
 
@@ -947,7 +947,7 @@ PHP_FUNCTION(swf_oncondition)
 	}
 	convert_to_long_ex(transitions);
 	
-	swf_oncondition((*transitions)->value.lval);
+	swf_oncondition(Z_LVAL_PP(transitions));
 }
 /* }}} */
 
@@ -972,17 +972,17 @@ void php_swf_geo_same(INTERNAL_FUNCTION_PARAMETERS, int opt)
 	convert_to_double_ex(arg4);
 
 	if (opt == 0) {
-		swf_viewport((*arg1)->value.dval, (*arg2)->value.dval, (*arg3)->value.dval,
-		             (*arg4)->value.dval);
+		swf_viewport(Z_DVAL_PP(arg1), Z_DVAL_PP(arg2), Z_DVAL_PP(arg3),
+		             Z_DVAL_PP(arg4));
 	} else if (opt == 1) {
-		swf_ortho2((*arg1)->value.dval, (*arg2)->value.dval, (*arg3)->value.dval,
-		           (*arg4)->value.dval);
+		swf_ortho2(Z_DVAL_PP(arg1), Z_DVAL_PP(arg2), Z_DVAL_PP(arg3),
+		             Z_DVAL_PP(arg4));
 	} else if (opt == 2) {
-		swf_polarview((*arg1)->value.dval, (*arg2)->value.dval, (*arg3)->value.dval,
-		              (*arg4)->value.dval);
+		swf_polarview(Z_DVAL_PP(arg1), Z_DVAL_PP(arg2), Z_DVAL_PP(arg3),
+		             Z_DVAL_PP(arg4));
 	} else if (opt == 3) {
-		swf_perspective((*arg1)->value.dval, (*arg2)->value.dval, (*arg3)->value.dval,
-		                (*arg4)->value.dval);
+		swf_perspective(Z_DVAL_PP(arg1), Z_DVAL_PP(arg2), Z_DVAL_PP(arg3),
+		             Z_DVAL_PP(arg4));
 	}
 } 
 
@@ -1018,9 +1018,9 @@ PHP_FUNCTION(swf_ortho)
 	convert_to_double_ex(zmin);
 	convert_to_double_ex(zmax);
 	
-	swf_ortho((*xmin)->value.dval, (*xmax)->value.dval,
-	          (*ymin)->value.dval, (*ymax)->value.dval,
-	          (*zmin)->value.dval, (*zmax)->value.dval);
+	swf_ortho(Z_DVAL_PP(xmin), Z_DVAL_PP(xmax),
+	          Z_DVAL_PP(ymin), Z_DVAL_PP(ymax),
+	          Z_DVAL_PP(zmin), Z_DVAL_PP(zmax));
 }
 /* }}} */
 
@@ -1057,8 +1057,8 @@ PHP_FUNCTION(swf_lookat)
 	convert_to_double_ex(pz);
 	convert_to_double_ex(twist);
 	
-	swf_lookat((*vx)->value.dval, (*vy)->value.dval, (*vz)->value.dval,
-	           (*px)->value.dval, (*py)->value.dval, (*pz)->value.dval, (*twist)->value.dval);
+	swf_lookat(Z_DVAL_PP(vx), Z_DVAL_PP(vy), Z_DVAL_PP(vz),
+	           Z_DVAL_PP(px), Z_DVAL_PP(py), Z_DVAL_PP(pz), Z_DVAL_PP(twist));
 }
 /* }}} */
 
@@ -1091,7 +1091,7 @@ PHP_FUNCTION(swf_scale)
 	convert_to_double_ex(y);
 	convert_to_double_ex(z);
 	
-	swf_scale((*x)->value.dval, (*y)->value.dval, (*z)->value.dval);
+	swf_scale(Z_DVAL_PP(x), Z_DVAL_PP(y), Z_DVAL_PP(z));
 }
 /* }}} */
 
@@ -1108,7 +1108,7 @@ PHP_FUNCTION(swf_translate)
 	convert_to_double_ex(y);
 	convert_to_double_ex(z);
 	
-	swf_translate((*x)->value.dval, (*y)->value.dval, (*z)->value.dval);
+	swf_translate(Z_DVAL_PP(x), Z_DVAL_PP(y), Z_DVAL_PP(z));
 }
 /* }}} */
 
@@ -1124,7 +1124,7 @@ PHP_FUNCTION(swf_rotate)
 	convert_to_double_ex(angle);
 	convert_to_string_ex(axis);
 
-	swf_rotate((*angle)->value.dval, (char)((*axis)->value.str.val)[0]);
+	swf_rotate(Z_DVAL_PP(angle), (char)(Z_STRVAL_PP(axis))[0]);
 }
 /* }}} */
 
@@ -1139,7 +1139,7 @@ PHP_FUNCTION(swf_posround)
 	}
 	convert_to_long_ex(doit);
 	
-	swf_posround((*doit)->value.lval);
+	swf_posround(Z_LVAL_PP(doit));
 }
 /* }}} */
 
