@@ -381,6 +381,7 @@ static int sapi_apache_force_http_10(TSRMLS_D)
 	
 	return SUCCESS;
 }
+/* }}} */
 
 /* {{{ sapi_apache_get_target_uid
  */
@@ -389,6 +390,7 @@ static int sapi_apache_get_target_uid(uid_t *obj TSRMLS_DC)
 	*obj = ap_user_id;
 	return SUCCESS;
 }
+/* }}} */
 
 /* {{{ sapi_apache_get_target_gid
  */
@@ -397,6 +399,7 @@ static int sapi_apache_get_target_gid(gid_t *obj TSRMLS_DC)
 	*obj = ap_group_id;
 	return SUCCESS;
 }
+/* }}} */
 
 /* {{{ sapi_module_struct apache_sapi_module
  */
