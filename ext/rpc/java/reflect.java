@@ -88,12 +88,23 @@ public class reflect {
     }
   }
 
+  static Throwable lastException = null;
+
+  static void lastException(long result) {
+    setResult(result, lastException);
+  }
+
+  static void clearException() {
+    lastException = null;
+  }
+
   static void setException(long result, Throwable e) {
     if (e instanceof InvocationTargetException) {
       Throwable t = ((InvocationTargetException)e).getTargetException();
       if (t!=null) e=t;
     }
 
+    lastException = e;
     setException(result, e.toString().getBytes());
   }
 

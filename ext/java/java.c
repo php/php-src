@@ -384,6 +384,36 @@ void java_call_function_handler
 
 /***************************************************************************/
 
+PHP_FUNCTION(java_last_exception_get)
+{
+  jlong result = 0;
+  jmethodID lastEx;
+
+  (pval*)(long)result = return_value;
+  
+  lastEx = (*jenv)->GetStaticMethodID(jenv, php_reflect, "lastException",
+          "(J)V");
+
+  (*jenv)->CallStaticVoidMethod(jenv, php_reflect, lastEx, result);
+}
+
+/***************************************************************************/
+
+PHP_FUNCTION(java_last_exception_clear)
+{
+  jlong result = 0;
+  jmethodID clearEx;
+
+  (pval*)(long)result = return_value;
+  
+  clearEx = (*jenv)->GetStaticMethodID(jenv, php_reflect, "clearException",
+          "()V");
+
+  (*jenv)->CallStaticVoidMethod(jenv, php_reflect, clearEx);
+}
+
+/***************************************************************************/
+
 static pval _java_getset_property
   (zend_property_reference *property_reference, jobjectArray value)
 {
@@ -475,6 +505,8 @@ PHP_MSHUTDOWN_FUNCTION(java) {
 }
 
 function_entry java_functions[] = {
+  PHP_FE(java_last_exception_get, NULL)
+  PHP_FE(java_last_exception_clear, NULL)
   {NULL, NULL, NULL}
 };
 
