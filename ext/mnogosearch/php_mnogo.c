@@ -868,7 +868,11 @@ DLEXPORT PHP_FUNCTION(udm_set_agent_param)
 			break;
 
 		case UDM_PARAM_STOPFILE: 
+#if UDM_VERSION_ID >= 30204
+			if (UdmStopListLoad(Agent->Conf,val)) {
+#else
 			if (UdmFileLoadStopList(Agent->Conf,val)) {
+#endif
 				php_error(E_WARNING,Agent->Conf->errstr);
 				RETURN_FALSE;
 			}
@@ -1933,7 +1937,10 @@ DLEXPORT PHP_FUNCTION(udm_cat_list)
 	cat = Z_STRVAL_PP(yycat);
 
 #if UDM_VERSION_ID >= 30204
-	if(UdmCatList(Agent,c,cat)){
+	if (NULL==(c=(UDM_CATEGORY *)malloc(sizeof(UDM_CATEGORY)))) RETURN_FALSE;
+	if (NULL==(c->Category=malloc(sizeof(UDM_CATITEM)))) RETURN_FALSE;
+	strncpy(c->addr,cat,sizeof(c->addr)-1);
+	if(UdmCatAction(Agent,c,UDM_CAT_ACTION_LIST,Agent->Conf->db)){
 #else
 	if((c=UdmCatList(Agent,cat))){
 #endif
@@ -1964,7 +1971,11 @@ DLEXPORT PHP_FUNCTION(udm_cat_list)
 		}
 #endif		
 		free(buf);
-	} else {
+#if UDM_VERSION_ID >= 30204	
+		free(c->Category);
+		free(c);
+#endif
+} else {
 		RETURN_FALSE;
 	}
 }
@@ -1997,7 +2008,10 @@ DLEXPORT PHP_FUNCTION(udm_cat_path)
 	cat = Z_STRVAL_PP(yycat);
 
 #if UDM_VERSION_ID >= 30204
-	if(UdmCatPath(Agent,c,cat)){
+	if (NULL==(c=(UDM_CATEGORY *)malloc(sizeof(UDM_CATEGORY)))) RETURN_FALSE;
+	if (NULL==(c->Category=malloc(sizeof(UDM_CATITEM)))) RETURN_FALSE;
+	strncpy(c->addr,cat,sizeof(c->addr)-1);
+	if(UdmCatAction(Agent,c,UDM_CAT_ACTION_PATH,Agent->Conf->db)){
 #else
 	if((c=UdmCatPath(Agent,cat))){
 #endif
@@ -2028,6 +2042,10 @@ DLEXPORT PHP_FUNCTION(udm_cat_path)
 		}
 #endif		
 		free(buf);
+#if UDM_VERSION_ID >= 30204	
+		free(c->Category);
+		free(c);
+#endif
 	} else {
 		RETURN_FALSE;
 	}
@@ -2055,7 +2073,11 @@ DLEXPORT PHP_FUNCTION(udm_get_doc_count)
 			break;
 	}
 	ZEND_FETCH_RESOURCE(Agent, UDM_AGENT *, yyagent, id, "mnoGoSearch-Agent", le_link);
+#if UDM_VERSION_ID >= 30204
+	RETURN_LONG(UdmURLAction(Agent,NULL,UDM_URL_ACTION_DOCCOUNT,Agent->Conf->db));
+#else
 	RETURN_LONG(UdmGetDocCount(Agent));
+#endif
 }
 /* }}} */
 #endif
