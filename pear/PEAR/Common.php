@@ -927,6 +927,9 @@ class PEAR_Common extends PEAR
                     if (isset($fa['md5sum'])) {
                         $ret .= " md5sum=\"$fa[md5sum]\"";
                     }
+                    if (isset($fa['platform'])) {
+                        $ret .= " platform=\"$fa[platform]\"";
+                    }
                     if (!empty($fa['install-as'])) {
                         $ret .= ' install-as="' .
                              htmlspecialchars($fa['install-as']) . '"';
