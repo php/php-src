@@ -458,6 +458,8 @@ static void php_session_decode(const char *val, int vallen PSLS_DC)
 	}
 }
 
+static char hexconvtab[] = "0123456789abcdef";
+
 static char *_php_create_id(int *newlen PSLS_DC)
 {
 	PHP_MD5_CTX context;
@@ -465,6 +467,8 @@ static char *_php_create_id(int *newlen PSLS_DC)
 	char buf[256];
 	struct timeval tv;
 	int i;
+	int j = 0;
+	unsigned char c;
 
 	gettimeofday(&tv, NULL);
 	PHP_MD5Init(&context);
@@ -477,27 +481,31 @@ static char *_php_create_id(int *newlen PSLS_DC)
 
 		fd = VCWD_OPEN((PS(entropy_file), O_RDONLY));
 		if (fd >= 0) {
-			char *p;
+			char buf[2048];
 			int n;
+			int to_read = PS(entropy_length);
 			
-			p = emalloc(PS(entropy_length));
-			n = read(fd, p, PS(entropy_length));
-			if (n > 0) {
-				PHP_MD5Update(&context, p, n);
+			while (to_read > 0) {
+				n = read(fd, buf, MIN(to_read, sizeof(buf)));
+				if (n <= 0) break;
+				PHP_MD5Update(&context, buf, n);
+				to_read -= n;
 			}
-			efree(p);
 			close(fd);
 		}
 	}
 
 	PHP_MD5Final(digest, &context);
-
-	for (i = 0; i < 16; i++)
-		sprintf(buf + (i << 1), "%02x", digest[i]);
-	buf[i << 1] = '\0';
+	
+	for (i = 0; i < 16; i++) {
+		c = digest[i];
+		buf[j++] = hexconvtab[c >> 4];
+		buf[j++] = hexconvtab[c & 15];
+	}
+	buf[j] = '\0';
 	
 	if (newlen) 
-		*newlen = i << 1;
+		*newlen = j;
 	return estrdup(buf);
 }
 
