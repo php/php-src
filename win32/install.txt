@@ -233,7 +233,7 @@ Web server configuration
    AddType application/x-httpd-php .php
    Action application/x-httpd-php "/php/php.exe"
 
-  Please not that you cannot use php-cli.exe with your webserver. You have
+  Please note that you cannot use php-cli.exe with your webserver. You have
   to use php.exe which can be found in the sapi directory of your 
   PHP distribution.
 
