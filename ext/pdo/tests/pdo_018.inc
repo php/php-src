@@ -1,6 +1,6 @@
 <?php # vim:ft=php
 
-class TestBase implements Serializeable
+class TestBase implements Serializable
 {
 	public    $BasePub = 'Public';
 	protected $BasePro = 'Protected';
