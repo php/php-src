@@ -60,7 +60,7 @@ PHPAPI int php_stream_filter_register_factory_volatile(const char *filterpattern
 	if (!FG(stream_filters)) {
 		php_stream_filter_factory tmpfactory;
 
-		FG(stream_filters) = emalloc(sizeof(HashTable));
+		ALLOC_HASHTABLE(FG(stream_filters));
 		zend_hash_init(FG(stream_filters), 0, NULL, NULL, 1);
 		zend_hash_copy(FG(stream_filters), &stream_filters_hash, NULL, &tmpfactory, sizeof(php_stream_filter_factory));
 	}
