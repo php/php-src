@@ -89,6 +89,7 @@ PHP                                                                        NEWS
 - Fixed bug #29767 (Weird behaviour of __set($name, $value)). (Dmitry)
 - Fixed bug #29733 (printf() handles repeated placeholders wrong).
   (bugs dot php dot net at bluetwanger dot de, Ilia)
+- Fixed bug #29329 (configure for mysqli with shared doesn't work). (Georg)
 - Fixed bug #29136 (make test - libtool failure on MacOSX). (Jani)
 - Fixed bug #28976 (mail(): use "From:" from headers if sendmail_from is empty).
   (Jani)
