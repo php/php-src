@@ -3792,10 +3792,10 @@ int zend_ticks_handler(ZEND_OPCODE_HANDLER_ARGS)
 	NEXT_OPCODE();
 }
 
-int zend_is_class_handler(ZEND_OPCODE_HANDLER_ARGS)
+int zend_instanceof_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zval *expr = get_zval_ptr(&EX(opline)->op1, EX(Ts), &EG(free_op1), BP_VAR_R);
-	is_class_function(&EX_T(EX(opline)->result.u.var).tmp_var, expr,
+	instanceof_function(&EX_T(EX(opline)->result.u.var).tmp_var, expr,
 						 EX_T(EX(opline)->op2.u.var).EA.class_entry TSRMLS_CC);
 	FREE_OP(EX(Ts), &EX(opline)->op1, EG(free_op1));
 	NEXT_OPCODE();
@@ -3978,7 +3978,7 @@ void zend_init_opcodes_handlers()
 	zend_opcode_handlers[ZEND_ASSIGN_OBJ] = zend_assign_obj_handler;
 	zend_opcode_handlers[ZEND_MAKE_VAR] = zend_make_var_handler;
 
-	zend_opcode_handlers[ZEND_IS_CLASS] = zend_is_class_handler;
+	zend_opcode_handlers[ZEND_INSTANCEOF] = zend_instanceof_handler;
 
 	zend_opcode_handlers[ZEND_DECLARE_CLASS] = zend_declare_class_handler;
 	zend_opcode_handlers[ZEND_DECLARE_INHERITED_CLASS] = zend_declare_inherited_class_handler;

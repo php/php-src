@@ -67,7 +67,7 @@
 %left '*' '/' '%'
 %right '!' '~' T_INC T_DEC T_INT_CAST T_DOUBLE_CAST T_STRING_CAST T_ARRAY_CAST T_OBJECT_CAST T_BOOL_CAST T_UNSET_CAST '@'
 %right '['
-%nonassoc T_NEW T_IS_CLASS
+%nonassoc T_NEW T_INSTANCEOF
 %token T_EXIT
 %token T_IF
 %left T_ELSEIF
@@ -94,7 +94,7 @@
 %token T_ENDFOREACH
 %token T_DECLARE
 %token T_ENDDECLARE
-%token T_IS_CLASS
+%token T_INSTANCEOF
 %token T_AS
 %token T_SWITCH
 %token T_ENDSWITCH
@@ -548,7 +548,7 @@ expr_without_variable:
 	|	expr T_IS_SMALLER_OR_EQUAL expr { zend_do_binary_op(ZEND_IS_SMALLER_OR_EQUAL, &$$, &$1, &$3 TSRMLS_CC); }
 	|	expr '>' expr 					{ zend_do_binary_op(ZEND_IS_SMALLER, &$$, &$3, &$1 TSRMLS_CC); }
 	|	expr T_IS_GREATER_OR_EQUAL expr { zend_do_binary_op(ZEND_IS_SMALLER_OR_EQUAL, &$$, &$3, &$1 TSRMLS_CC); }
-	|	expr T_IS_CLASS is_class_expr { zend_do_is_class(&$$, &$1, &$3, 0 TSRMLS_CC); }
+	|	expr T_INSTANCEOF instanceof_expr { zend_do_instanceof(&$$, &$1, &$3, 0 TSRMLS_CC); }
 	|	'(' expr ')' 	{ $$ = $2; }
 	|	expr '?' { zend_do_begin_qm_op(&$1, &$2 TSRMLS_CC); }
 		expr ':' { zend_do_qm_true(&$4, &$2, &$5 TSRMLS_CC); }
@@ -606,7 +606,7 @@ static_or_variable_string:
 	|	r_variable_without_static_member	{ $$ = $1; }
 ;
 
-is_class_expr:
+instanceof_expr:
 		parse_class_entry T_STRING { do_fetch_class(&$$, &$1, &$2 TSRMLS_CC); }
 	|	T_STRING { do_fetch_class(&$$, NULL, &$1 TSRMLS_CC); }
 ;

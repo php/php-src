@@ -379,7 +379,7 @@ void zend_do_include_or_eval(int type, znode *result, znode *op1 TSRMLS_DC);
 void zend_do_unset(znode *variable TSRMLS_DC);
 void zend_do_isset_or_isempty(int type, znode *result, znode *variable TSRMLS_DC);
 
-void zend_do_is_class(znode *result, znode *expr, znode *class_znode, int type TSRMLS_DC);
+void zend_do_instanceof(znode *result, znode *expr, znode *class_znode, int type TSRMLS_DC);
 
 void zend_do_foreach_begin(znode *foreach_token, znode *array, znode *open_brackets_token, znode *as_token, int variable TSRMLS_DC);
 void zend_do_foreach_cont(znode *value, znode *key, znode *as_token TSRMLS_DC);
@@ -621,7 +621,7 @@ int zendlex(znode *zendlval TSRMLS_DC);
 #define ZEND_ASSIGN_OBJ				136
 #define ZEND_MAKE_VAR				137
 
-#define ZEND_IS_CLASS				138
+#define ZEND_INSTANCEOF				138
 
 #define ZEND_DECLARE_CLASS				139
 #define ZEND_DECLARE_INHERITED_CLASS	140

@@ -1360,7 +1360,7 @@ ZEND_API int is_smaller_or_equal_function(zval *result, zval *op1, zval *op2 TSR
 }
 
 
-ZEND_API int is_class_function(zval *result, zval *op1, zend_class_entry *class TSRMLS_DC)
+ZEND_API int instanceof_function(zval *result, zval *op1, zend_class_entry *class TSRMLS_DC)
 {
 	if (Z_TYPE_P(op1) == IS_OBJECT) {
 		zend_class_entry *ce;

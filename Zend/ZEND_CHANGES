@@ -496,6 +496,8 @@ Changes in the Zend Engine 2.0
 
 	  * Abstract methods. (TBD)
 
+    * instanceof (TBD)
+
     * Static function variables.
 
       Statics are now treated at compile-time which allows developers

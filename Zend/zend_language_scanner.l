@@ -572,8 +572,8 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	return T_ENDDECLARE;
 }
 
-<ST_IN_SCRIPTING>"is" {
-	return T_IS_CLASS;
+<ST_IN_SCRIPTING>"instanceof" {
+	return T_INSTANCEOF;
 }
 
 <ST_IN_SCRIPTING>"as" {
