@@ -13,7 +13,7 @@ AC_ARG_WITH(fdftk,
       AC_MSG_RESULT(yes)
       PHP_EXTENSION(fdf)
       AC_CHECK_LIB(FdfTk, FDFOpen, [
-        AC_DEFINE(HAVE_FDFLIB,,[ ])
+        AC_DEFINE(HAVE_FDFLIB,1,[ ])
         EXTRA_LIBS="$EXTRA_LIBS -lFdfTk"
       ],[AC_MSG_ERROR(fdftk module requires fdftk 2.0)])
       ;;
@@ -25,7 +25,7 @@ AC_ARG_WITH(fdftk,
         old_LIBS=$LIBS
         LIBS="$LIBS -L$withval/lib"
         AC_CHECK_LIB(FdfTk, FDFOpen, [
-          AC_DEFINE(HAVE_FDFLIB,,[ ])
+          AC_DEFINE(HAVE_FDFLIB,1,[ ])
           EXTRA_LIBS="$EXTRA_LIBS -L$withval/lib -lFdfTk"
         ],[AC_MSG_ERROR(fdftk module requires fdftk lib 2.0.)])
         LIBS=$old_LIBS

@@ -37,7 +37,7 @@ AC_ARG_WITH(pgsql,
 
     old_CFLAGS=$CFLAGS
     CFLAGS="$CFLAGS $PGSQL_INCLUDE"
-    AC_DEFINE(HAVE_PGSQL,,[ ])
+    AC_DEFINE(HAVE_PGSQL,1,[ ])
     if test "$shared" = "yes"; then
       AC_MSG_RESULT(yes (shared))
       PGSQL_SHARED="pgsql.la"
@@ -47,7 +47,7 @@ AC_ARG_WITH(pgsql,
       AC_ADD_INCLUDE($PGSQL_INCDIR)
       PGSQL_STATIC="libphpext_pgsql.la"
     fi
-    AC_CHECK_FUNC(PQcmdTuples,AC_DEFINE(HAVE_PQCMDTUPLES,,[ ]))
+    AC_CHECK_FUNC(PQcmdTuples,AC_DEFINE(HAVE_PQCMDTUPLES,1,[ ]))
     CFLAGS=$old_CFLAGS
     PHP_EXTENSION(pgsql,$shared)
   else

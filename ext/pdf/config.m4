@@ -16,7 +16,7 @@ echo $withval
       old_LDFLAGS=$LDFLAGS
 		  old_LIBS=$LIBS
 		  LIBS="$LIBS -ltiff -ljpeg -lz"
-      AC_CHECK_LIB(pdf, PDF_close, [AC_DEFINE(HAVE_PDFLIB,,[ ])],
+      AC_CHECK_LIB(pdf, PDF_close, [AC_DEFINE(HAVE_PDFLIB,1,[ ])],
         [AC_MSG_ERROR(pdflib extension requires pdflib 2.x. You may as well need libtiff and libjpeg. In such a case use the options --with-tiff-dir=<DIR> and --with-jpeg-dir=<DIR>)])
       LIBS=$old_LIBS
       LDFLAGS=$old_LDFLAGS
@@ -94,7 +94,7 @@ echo $withval
 
         old_LIBS=$LIBS
         LIBS="$LIBS -L$withval/lib"
-        AC_CHECK_LIB(pdf, PDF_close, [AC_DEFINE(HAVE_PDFLIB,,[ ]) PDFLIB_LIBS="$PDFLIB_LIBS -L$withval/lib -lpdf"],
+        AC_CHECK_LIB(pdf, PDF_close, [AC_DEFINE(HAVE_PDFLIB,1,[ ]) PDFLIB_LIBS="$PDFLIB_LIBS -L$withval/lib -lpdf"],
           [AC_MSG_ERROR(pdflib extension requires pdflib 2.x.)])
         LIBS=$old_LIBS
         AC_ADD_LIBRARY_WITH_PATH(pdf, $withval/lib)

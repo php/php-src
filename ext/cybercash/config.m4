@@ -15,7 +15,7 @@ AC_ARG_WITH(cybercash,
 	LIBS="$LIBS -L$MCK_DIR/lib"
 	AC_ADD_LIBRARY_WITH_PATH(mckcrypto, $MCK_DIR/lib)
 	AC_ADD_INCLUDE($MCK_DIR)
-	AC_DEFINE(HAVE_MCK,,[Whether you have CyberCash])
+	AC_DEFINE(HAVE_MCK,1,[Whether you have CyberCash])
       else
         AC_MSG_ERROR(Please reinstall the CyberCash MCK - I cannot find mckcrypt.h)
         AC_MSG_RESULT(no)

@@ -113,18 +113,18 @@ main() {
 
 AC_CHECK_LIB(c, dlopen, [
  # fake it
- AC_DEFINE(HAVE_LIBDL,,[ ]) ], [
+ AC_DEFINE(HAVE_LIBDL,1,[ ]) ], [
  AC_CHECK_LIB(dl, dlopen, [
   LIBS="-ldl $LIBS"
-  AC_DEFINE(HAVE_LIBDL,,[ ]) ], []) ])
+  AC_DEFINE(HAVE_LIBDL,1,[ ]) ], []) ])
 
 AC_CHECK_LIB(pam, pam_start, [
   EXTRA_LIBS="$EXTRA_LIBS -lpam"
-  AC_DEFINE(HAVE_LIBPAM,,[ ]) ], []) 
+  AC_DEFINE(HAVE_LIBPAM,1,[ ]) ], []) 
 
 AC_CHECK_LIB(crypt, crypt, [
  AC_ADD_LIBRARY(crypt)
- AC_DEFINE(HAVE_LIBCRYPT,,[ ]) ], [])
+ AC_DEFINE(HAVE_LIBCRYPT,1,[ ]) ], [])
 
 AC_CHECK_FUNCS(getcwd)
 AC_CHECK_FUNCS(getwd)

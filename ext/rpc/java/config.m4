@@ -49,7 +49,7 @@ AC_ARG_WITH(java,
       fi
     fi
 
-    AC_DEFINE(HAVE_JAVA,,[ ])
+    AC_DEFINE(HAVE_JAVA,1,[ ])
     PHP_EXTENSION(java, shared)
     PHP_BUILD_SHARED
     AC_MSG_RESULT(yes)

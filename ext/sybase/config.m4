@@ -20,9 +20,9 @@ AC_ARG_WITH(sybase,
     PHP_EXTENSION(sybase)
     AC_CHECK_LIB(dnet_stub, dnet_addr,
      [ AC_ADD_LIBRARY(dnet_stub)
-        AC_DEFINE(HAVE_LIBDNET_STUB,,[ ])
+        AC_DEFINE(HAVE_LIBDNET_STUB,1,[ ])
      ])
-    AC_DEFINE(HAVE_SYBASE,,[ ])
+    AC_DEFINE(HAVE_SYBASE,1,[ ])
   else
     AC_MSG_RESULT(no)
   fi

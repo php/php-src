@@ -90,7 +90,7 @@ AC_ARG_WITH(ndbm,
 	done
     
     if test "$NDBM_EXTRA" != ""; then
-      eval "AC_DEFINE($NDBM_EXTRA, 1, [ ])"
+      eval "AC_DEFINE($NDBM_EXTRA, 1)"
     fi
 
     for LIB in db1 ndbm c; do
@@ -135,7 +135,7 @@ AC_ARG_WITH(db2,
     fi
     
     if test -n "$DB2_EXTRA"; then
-      eval "AC_DEFINE($DB2_EXTRA, 1, [ ])"
+      eval "AC_DEFINE($DB2_EXTRA, 1)"
     fi
 
     for LIB in db db2 c; do
@@ -163,7 +163,7 @@ AC_ARG_WITH(db3,
 	done
 
     if test -n "$DB3_EXTRA"; then
-      eval "AC_DEFINE($DB3_EXTRA, 1, [ ])"
+      eval "AC_DEFINE($DB3_EXTRA, 1)"
     fi
 
     for LIB in db; do

@@ -162,7 +162,7 @@ AC_ARG_WITH(oci8,
     # only using shared libs right now
     ORACLE_LIBS=$ORACLE_SHLIBS
 
-    AC_DEFINE(HAVE_ORACLE,,[ ])
+    AC_DEFINE(HAVE_ORACLE,1,[ ])
 
   fi
 
