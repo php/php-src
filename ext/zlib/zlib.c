@@ -760,7 +760,7 @@ PHP_FUNCTION(gzcompress)
 	}
 	convert_to_string_ex(data);
 	
-	l2 = (*data)->value.str.len + ((*data)->value.str.len/1000) + 15;
+	l2 = (*data)->value.str.len + ((*data)->value.str.len/1000) + 15 + 1; /* room for \0 */
 	s2 = (char *) emalloc(l2);
 	if(! s2) RETURN_FALSE;
 	
@@ -770,7 +770,9 @@ PHP_FUNCTION(gzcompress)
 		status = compress(s2,&l2,(*data)->value.str.val, (*data)->value.str.len);
 	}
 	
-	if(status==Z_OK) {
+	if (status==Z_OK) {
+		s2 = erealloc(s2,l2 + 1);
+		s2[l2] = '\0';
 		RETURN_STRINGL(s2, l2, 0);
 	} else {
 		efree(s2);
@@ -785,7 +787,7 @@ PHP_FUNCTION(gzcompress)
 PHP_FUNCTION(gzuncompress)
 {
 	zval **data, **zlimit = NULL;
-	int status,factor=1,maxfactor=8;
+	int status,factor=1,maxfactor=16;
 	unsigned long plength=0,length;
 	char *s1=NULL,*s2=NULL;
 
@@ -825,8 +827,9 @@ PHP_FUNCTION(gzuncompress)
 		s1=s2;
 	} while((status==Z_BUF_ERROR)&&(!plength)&&(factor<maxfactor));
 
-	if(status==Z_OK) {
-		s2 = erealloc(s2, length);
+	if (status==Z_OK) {
+		s2 = erealloc(s2, length + 1); /* space for \0 */
+		s2[ length ] = '\0';
 		RETURN_STRINGL(s2, length, 0);
 	} else {
 		efree(s2);
@@ -1014,7 +1017,7 @@ static int php_do_deflate(uint str_length, Bytef **p_buffer, uint *p_buffer_len,
 		prev_outlen = outlen;
 		outlen *= 3;
 		if ((outlen+start_offset+end_offset) > *p_buffer_len) {
-			buffer = realloc(buffer, outlen+start_offset+end_offset);
+			buffer = erealloc(buffer, outlen+start_offset+end_offset);
 		}
 		
 		ZLIBG(stream).next_out = buffer+start_offset + prev_outlen;
