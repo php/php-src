@@ -227,34 +227,35 @@ void php_com_typelibrary_dtor(void *pDest)
 PHPAPI ITypeLib *php_com_load_typelib_via_cache(char *search_string,
 	int codepage, int *cached TSRMLS_DC)
 {
-	ITypeLib **TL;
+	ITypeLib **TLp;
+	ITypeLib *TL;
 	char *name_dup;
 	int l;
 
 	l = strlen(search_string);
 
 	if (zend_ts_hash_find(&php_com_typelibraries, search_string, l+1,
-			(void**)&TL) == SUCCESS) {
+			(void**)&TLp) == SUCCESS) {
 		*cached = 1;
 		/* add a reference for the caller */
-		ITypeLib_AddRef(*TL);
-		return *TL;
+		ITypeLib_AddRef(*TLp);
+		return *TLp;
 	}
 
 	*cached = 0;
 	name_dup = estrndup(search_string, l);
-	*TL = php_com_load_typelib(name_dup, codepage TSRMLS_CC);
+	TL = php_com_load_typelib(name_dup, codepage TSRMLS_CC);
 	efree(name_dup);
 
-	if (*TL) {
+	if (TL) {
 		if (SUCCESS == zend_ts_hash_update(&php_com_typelibraries,
-				search_string, l+1, (void*)*TL, sizeof(ITypeLib*), NULL)) {
+				search_string, l+1, (void*)TL, sizeof(ITypeLib*), NULL)) {
 			/* add a reference for the hash table */
-			ITypeLib_AddRef(*TL);
+			ITypeLib_AddRef(TL);
 		}
 	}
 
-	return *TL;
+	return TL;
 }
 
 ITypeInfo *php_com_locate_typeinfo(char *typelibname, php_com_dotnet_object *obj, char *dispname, int sink TSRMLS_DC)
