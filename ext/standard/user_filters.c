@@ -280,8 +280,8 @@ static php_stream_filter *user_filter_factory_create(const char *filtername,
 
 	/* bind the classname to the actual class */
 	if (fdat->ce == NULL) {
-		if (FAILURE == zend_hash_find(EG(class_table), fdat->classname, strlen(fdat->classname)+1,
-					(void **)&fdat->ce)) {
+		if (FAILURE == zend_lookup_class(fdat->classname, strlen(fdat->classname),
+					(zend_class_entry ***)&fdat->ce TSRMLS_CC)) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING,
 					"user-filter \"%s\" requires class \"%s\", but that class is not defined",
 					filtername, fdat->classname);
