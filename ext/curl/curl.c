@@ -669,7 +669,7 @@ PHP_FUNCTION(curl_setopt)
 	case CURLOPT_STDERR: {
 		FILE *fp;
 		ZEND_FETCH_RESOURCE(fp, FILE *, zvalue, -1, "File-Handle", php_file_le_fopen());
-		
+
 		error = CURLE_OK;
 		switch (option) {
 		case CURLOPT_FILE:
@@ -730,7 +730,7 @@ PHP_FUNCTION(curl_setopt)
 			HashTable        *postfields;
 			struct HttpPost  *first = NULL;
 			struct HttpPost  *last  = NULL;
-	
+
 			postfields = HASH_OF(*zvalue);
 			if (! postfields) {
 				php_error(E_WARNING, "Couldn't get HashTable in CURLOPT_POSTFIELDS");
@@ -1030,6 +1030,6 @@ static void _php_curl_close(zend_rsrc_list_entry *rsrc TSRMLS_DC)
  * tab-width: 4
  * c-basic-offset: 4
  * End:
- * vim600: sw=4 ts=4 tw=78 fdm=marker
- * vim<600: sw=4 ts=4 tw=78
+ * vim600: noet sw=4 ts=4 tw=78 fdm=marker
+ * vim<600: noet sw=4 ts=4 tw=78
  */
