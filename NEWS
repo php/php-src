@@ -3,6 +3,10 @@ PHP 4                                                                      NEWS
 ? ? ??? 200?, Version 5.0.0
 - Moved extensions to PECL (http://pear.php.net/): (James, Tal)
   . ext/fribidi
+- Added get_headers() function, it can be used to retrieve headers sent
+  by the browser for the specified URL.
+- Added str_split() function, this function can break down a string into an
+  array of elements based on length.
 - Added man page for CLI version of PHP. (marcus)
 - Added array_walk_recursive() function that can apply user function 
   recursively to an array. (Ilia)
