@@ -289,6 +289,10 @@ dnl enable the support in bundled GD library
     GDLIB_CFLAGS="$GDLIB_CFLAGS -DHAVE_LIBFREETYPE"
   fi
 
+  if test -n "$TTF_DIR"; then
+    GDLIB_CFLAGS="$GDLIB_CFLAGS -DHAVE_LIBTTF"
+  fi
+
   PHP_SUBST(GDLIB_CFLAGS)
 
 else
