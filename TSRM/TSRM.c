@@ -352,7 +352,7 @@ void ts_free_thread(void)
 				tsrm_tls_table[hash_value] = thread_resources->next;
 			}
 #if defined(PTHREADS)
-			pthread_setspecific( tls_key, 0 );
+			pthread_setspecific(tls_key, 0);
 #endif
 			free(thread_resources);
 			break;
