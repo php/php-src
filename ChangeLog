@@ -1,3 +1,53 @@
+2002-08-03  jflemer  <jflemer@pb1.pair.com>
+
+    * ext/standard/tests/general_functions/proc_open.phpt:
+    Close pipes to avoid deadlock.
+    Submitted By: Melvyn Sopacua <msopacua@idg.nl>
+
+2002-08-03  kalowsky  <kalowsky@pb1.pair.com>
+
+    * ext/imap/php_imap.c:
+    Cleaning up the imap_get_quotaroot return array to remove useless data
+
+2002-08-03  Rasmus Lerdorf  <rasmus@pb1.pair.com>
+
+    * main/SAPI.c: Yup, sizeof() includes the space for the \0
+
+2002-08-03  helly  <helly@pb1.pair.com>
+
+    * run-tests.php:
+    -additional section INI that allows to set special ini settings on call
+     by adding '-c foo=bar' strings to php call. Each line must have format
+     foo=bar. This of cause only works for cli version.
+    -made sections SKIPIF,INI,GET,POST optional
+
+2002-08-03  gluke  <gluke@pb1.pair.com>
+
+    * ext/mnogosearch/index.php:
+    * ext/mnogosearch/index.php
+      ext/mnogosearch/php_mnogo.c:
+    - UDM_PARAM_STORED mnogosearch parameter has been added to set
+      stored address.
+
+2002-08-03  Andi Gutmans  <andi@pb1.pair.com>
+
+    * ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.h:
+    - Fix build on Windows. Also please don't use Java style opening function
+    - bracket indentation.
+
+2002-08-03  gluke  <gluke@pb1.pair.com>
+
+    * ext/mnogosearch/php_mnogo.h
+      ext/mnogosearch/index.php
+      ext/mnogosearch/php_mnogo.c:
+    - An Udm_Make_Excerpt function has been added to mnogosearch extension
+      to support excerpts while using with mnogosearch-3.2.5 or later.
+
+2002-08-03  rodif_bl  <rodif_bl@pb1.pair.com>
+
+    * ext/standard/array.c: one last fix for array_shift
+
 2002-08-02  jflemer  <jflemer@pb1.pair.com>
 
     * ext/standard/exec.c: Fix typo in #if. Bug #17538.
