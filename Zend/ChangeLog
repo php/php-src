@@ -1,3 +1,19 @@
+2004-07-15  Andi Gutmans  <andi@zend.com>
+
+    * zend_alloc.c
+      zend_alloc.h:
+      - Improve performance of zend_alloc by stopping the size from being a bit
+      - field.
+
+2004-07-15  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_exceptions.c
+      zend_exceptions.h:
+      - Add new class ErrorException to encapsulate errors in exceptions
+
+    * zend_dynamic_array.h:
+      - Fix prototype
+
 2004-07-14  Stanislav Malyshev  <stas@zend.com>
 
     * zend_object_handlers.c:

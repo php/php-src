@@ -1,3 +1,65 @@
+2004-07-15  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend_alloc.c
+      ZendEngine2/zend_alloc.h:
+      - Improve performance of zend_alloc by stopping the size from being a bit
+      - field.
+
+2004-07-15  Zeev Suraski  <zeev@zend.com>
+
+    * ext/sqlite/libsqlite/src/sqlite.w32.h:
+      Fix sqlite build
+
+2004-07-15  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * main/main.c:
+      - Use ErrorException instead of Exception
+
+    * ZendEngine2/zend_exceptions.c
+      ZendEngine2/zend_exceptions.h:
+      - Add new class ErrorException to encapsulate errors in exceptions
+
+    * TSRM/TSRM.c:
+      Apply the fix
+
+    * ZendEngine2/zend_dynamic_array.h:
+      - Fix prototype
+
+    * php.ini-dist
+      php.ini-recommended:
+      Synch comments
+
+2004-07-15  Dan Kalowsky  <dank@deadmime.org>
+
+    * ext/odbc/php_odbc.c:
+      Bug 29058 (patch submitted by bug reporter)
+
+2004-07-15  Magnus M‰‰tt‰  <novell@kiruna.se>
+
+    * tests/classes/bug26737.phpt:
+      Test for bug 26737:
+      Protected and private variables are not saved on serialization
+      when a user defined __sleep is used.
+
+2004-07-15  Antony Dovgal  <tony2001@phpclub.net>
+
+    * ext/oci8/oci8.c:
+      fix #29012 (Potential race during first connection) thanks to cjbj at
+      hotmail dot com
+
+2004-07-15  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      ext/standard/strnatcmp.c
+      ext/standard/tests/strings/bug29075.phpt:
+      MFH: Fixed Bug #29075 (strnatcmp() incorrectly handles whitespace).
+
+    * ext/standard/strnatcmp.c
+      ext/standard/tests/strings/bug29075.phpt:
+      Fixed Bug #29075 (strnatcmp() incorrectly handles whitespace).
+      
+
 2004-07-14  Edin Kadribasic  <edink@emini.dk>
 
     * (PHP_4_3)
