@@ -249,6 +249,7 @@ extern int ap_vsnprintf(char *, size_t, const char *, va_list);
 #define STR_FREE(ptr) if (ptr && ptr!=empty_string && ptr!=undefined_variable_string) { efree(ptr); }
 #define COPY_STRING(yy)   (yy).value.str.val = (char *) estrndup((yy).value.str.val,(yy).value.str.len)
 #define STR_PRINT(str)	((str)?(str):"")
+#define HASH_OF(p) ((p)->type==IS_ARRAY ? (p)->value.ht : (((p)->type==IS_OBJECT ? (p)->value.obj.properties : NULL)))
 
 #ifndef MAXPATHLEN
 #define MAXPATHLEN 256    /* Should be safe for any weird systems that do not define it */

@@ -18,8 +18,6 @@
  */
 
 
-#define HASH_OF(p) ((p)->type==IS_ARRAY ? (p)->value.ht : (((p)->type==IS_OBJECT ? (p)->value.obj.properties : NULL)))
-
 #include "php.h"
 #include "php_ini.h"
 #include "internal_functions_registry.h"
