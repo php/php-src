@@ -937,8 +937,10 @@ PHP_FUNCTION(ucfirst)
 	if (!*(*arg)->value.str.val) {
 		RETURN_FALSE;
 	}
-	*(*arg)->value.str.val = toupper((unsigned char)*(*arg)->value.str.val);
-	RETVAL_STRING((*arg)->value.str.val,1);
+
+	*return_value=**arg;
+	zval_copy_ctor(return_value);
+	*return_value->value.str.val = toupper((unsigned char)*return_value->value.str.val);
 }
 /* }}} */
 
@@ -957,8 +959,11 @@ PHP_FUNCTION(ucwords)
 	if (!*(*arg)->value.str.val) {
 		RETURN_FALSE;
 	}
-	*(*arg)->value.str.val = toupper((unsigned char)*(*arg)->value.str.val);
-	r=(*arg)->value.str.val;
+	*return_value=**arg;
+	zval_copy_ctor(return_value);
+	*return_value->value.str.val = toupper((unsigned char)*return_value->value.str.val);
+
+	r=return_value->value.str.val;
 	while((r=strstr(r," "))){
 		if(*(r+1)){
 			r++;
@@ -967,7 +972,6 @@ PHP_FUNCTION(ucwords)
 			break;
 		}
 	}
-	RETVAL_STRING((*arg)->value.str.val,1);
 }
 /* }}} */
 
