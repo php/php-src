@@ -591,3 +591,4 @@ ZEND_API void zend_error(int type, const char *format, ...)
 }
 
 #endif
+
