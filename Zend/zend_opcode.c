@@ -173,6 +173,12 @@ ZEND_API void destroy_zend_class(zend_class_entry **pce)
 			free(ce->static_members);
 			zend_hash_destroy(&ce->constants_table);
 			zend_hash_destroy(&ce->class_table);
+			if (ce->num_interfaces > 0) {
+				free(ce->interfaces);
+			}
+			if (ce->doc_comment) {
+				free(ce->doc_comment);
+			}
 			free(ce);
 			break;
 		case ZEND_USER_NAMESPACE:
