@@ -1702,7 +1702,7 @@ $endif;
 ** ----------------------------------------------------------------------
 */
 
-/* {{{ proto string ifx_error([int connection_id]);
+/* {{{ proto string ifx_error([int connection_id])
    Returns the Informix error codes (SQLSTATE & SQLCODE) */
 PHP_FUNCTION(ifx_error)
 {
