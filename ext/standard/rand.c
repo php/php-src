@@ -27,6 +27,8 @@
 #include "phpmath.h"
 #include "php_rand.h"
 
+#include "basic_functions.h"
+
 /*
    This is the ``Mersenne Twister'' random number generator MT19937, which
    generates pseudorandom integers uniformly distributed in 0..(2^32 - 1)
@@ -77,13 +79,12 @@
    uint32 must be an unsigned integer type capable of holding at least 32
    bits; exactly 32 should be fastest, but 64 is better on an Alpha with
    GCC at -O3 optimization so try your options and see what's best for you
-  
+
    Melo: we should put some ifdefs here to catch those alphas...
 */
 
-typedef unsigned int uint32;
 
-#define N             (624)                /* length of state vector */
+#define N             MT_N                 /* length of state vector */
 #define M             (397)                /* a period parameter */
 #define K             (0x9908B0DFU)        /* a magic constant */
 #define hiBit(u)      ((u) & 0x80000000U)  /* mask all but highest   bit of u */
@@ -91,12 +92,7 @@ typedef unsigned int uint32;
 #define loBits(u)     ((u) & 0x7FFFFFFFU)  /* mask     the highest   bit of u */
 #define mixBits(u, v) (hiBit(u)|loBits(v)) /* move hi bit of u to hi bit of v */
 
-static uint32   state[N+1];  /* state vector + 1 extra to not violate ANSI C */
-static uint32   *next;       /* next random value is computed from here */
-static int      left = -1;   /* can *next++ this many times before reloading */
-
-
-static void seedMT(uint32 seed)
+static void seedMT(uint32 seed BLS_DC)
 {
     /*
        We initialize state[0..(N-1)] via the generator
@@ -144,31 +140,31 @@ static void seedMT(uint32 seed)
        so-- that's why the only change I made is to restrict to odd seeds.
     */
 
-    register uint32 x = (seed | 1U) & 0xFFFFFFFFU, *s = state;
+    register uint32 x = (seed | 1U) & 0xFFFFFFFFU, *s = BG(state);
     register int    j;
 
-    for(left=0, *s++=x, j=N; --j;
+    for(BG(left)=0, *s++=x, j=N; --j;
         *s++ = (x*=69069U) & 0xFFFFFFFFU);
 }
 
 
-static uint32 reloadMT(void)
+static uint32 reloadMT(BLS_D)
 {
-    register uint32 *p0=state, *p2=state+2, *pM=state+M, s0, s1;
+    register uint32 *p0=BG(state), *p2=BG(state)+2, *pM=BG(state)+M, s0, s1;
     register int    j;
 
-    if(left < -1)
-        seedMT(4357U);
+    if(BG(left) < -1)
+        seedMT(4357U BLS_CC);
 
-    left=N-1, next=state+1;
+    BG(left)=N-1, BG(next)=BG(state)+1;
 
-    for(s0=state[0], s1=state[1], j=N-M+1; --j; s0=s1, s1=*p2++)
+    for(s0=BG(state)[0], s1=BG(state)[1], j=N-M+1; --j; s0=s1, s1=*p2++)
         *p0++ = *pM++ ^ (mixBits(s0, s1) >> 1) ^ (loBit(s1) ? K : 0U);
 
-    for(pM=state, j=M; --j; s0=s1, s1=*p2++)
+    for(pM=BG(state), j=M; --j; s0=s1, s1=*p2++)
         *p0++ = *pM++ ^ (mixBits(s0, s1) >> 1) ^ (loBit(s1) ? K : 0U);
 
-    s1=state[0], *p0 = *pM ^ (mixBits(s0, s1) >> 1) ^ (loBit(s1) ? K : 0U);
+    s1=BG(state)[0], *p0 = *pM ^ (mixBits(s0, s1) >> 1) ^ (loBit(s1) ? K : 0U);
     s1 ^= (s1 >> 11);
     s1 ^= (s1 <<  7) & 0x9D2C5680U;
     s1 ^= (s1 << 15) & 0xEFC60000U;
@@ -179,11 +175,12 @@ static uint32 reloadMT(void)
 static inline uint32 randomMT(void)
 {
     uint32 y;
+	BLS_FETCH();
 
-    if(--left < 0)
-        return(reloadMT());
+    if(--BG(left) < 0)
+        return(reloadMT(BLS_C));
 
-    y  = *next++;
+    y  = *BG(next)++;
     y ^= (y >> 11);
     y ^= (y <<  7) & 0x9D2C5680U;
     y ^= (y << 15) & 0xEFC60000U;
@@ -217,12 +214,13 @@ PHP_FUNCTION(srand)
 PHP_FUNCTION(mt_srand)
 {
 	pval **arg;
+	BLS_FETCH();
 
 	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long_ex(arg);
-	seedMT((*arg)->value.lval);
+	seedMT((*arg)->value.lval BLS_CC);
 }
 /* }}} */
 

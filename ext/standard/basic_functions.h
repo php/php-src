@@ -111,6 +111,18 @@ typedef unsigned int php_stat_len;
 typedef int php_stat_len;
 #endif
 
+#if SIZEOF_INT == 4
+/* Most 32-bit and 64-bit systems have 32-bit ints */
+typedef unsigned int uint32;
+#elif SIZEOF_LONG == 4
+/* 16-bit systems? */
+typedef unsigned long uint32;
+#else
+#error Need type which holds 32 bits
+#endif
+
+#define MT_N (624)
+
 typedef struct {
 	HashTable *user_shutdown_function_names;
 	HashTable putenv_ht;
@@ -132,6 +144,11 @@ typedef struct {
 	php_stat_len CurrentStatLength;
 	struct stat sb;
 	struct stat lsb;
+
+	/* rand.c */
+	uint32   state[MT_N+1];  /* state vector + 1 extra to not violate ANSI C */
+	uint32   *next;       /* next random value is computed from here */
+	int      left;        /* can *next++ this many times before reloading */
 } php_basic_globals;
 
 #ifdef ZTS
