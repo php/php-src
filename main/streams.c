@@ -302,6 +302,12 @@ PHPAPI size_t php_stream_copy_to_stream(php_stream *src, php_stream *dest, size_
 	int srcfd;
 #endif
 
+	if (maxlen == 0)
+		return 0;
+
+	if (maxlen == PHP_STREAM_COPY_ALL)
+		maxlen = 0;
+	
 #if HAVE_MMAP
 	/* try and optimize the case where we are copying from the start of a plain file.
 	 * We could probably make this work in more situations, but I don't trust the stdio
@@ -315,11 +321,14 @@ PHPAPI size_t php_stream_copy_to_stream(php_stream *src, php_stream *dest, size_
 
 		if (fstat(srcfd, &sbuf) == 0) {
 			void *srcfile;
+		
+			if (maxlen > sbuf.st_size || maxlen == 0)
+				maxlen = sbuf.st_size;
 			
-			srcfile = mmap(NULL, sbuf.st_size, PROT_READ, MAP_SHARED, srcfd, 0);
+			srcfile = mmap(NULL, maxlen, PROT_READ, MAP_SHARED, srcfd, 0);
 			if (srcfile != (void*)MAP_FAILED) {
-				haveread = php_stream_write(dest, srcfile, sbuf.st_size);
-				munmap(srcfile, sbuf.st_size);
+				haveread = php_stream_write(dest, srcfile, maxlen);
+				munmap(srcfile, maxlen);
 				return haveread;
 			}
 		}

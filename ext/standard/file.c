@@ -1658,7 +1658,7 @@ PHPAPI int php_copy_file(char *src, char *dest TSRMLS_DC)
 				NULL TSRMLS_CC);
 
 	if (srcstream && deststream)
-		ret = php_stream_copy_to_stream(srcstream, deststream, 0) == 0 ? FAILURE : SUCCESS;
+		ret = php_stream_copy_to_stream(srcstream, deststream, PHP_STREAM_COPY_ALL) == 0 ? FAILURE : SUCCESS;
 
 	if (srcstream)
 		php_stream_close(srcstream);

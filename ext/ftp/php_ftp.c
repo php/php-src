@@ -489,7 +489,7 @@ PHP_FUNCTION(ftp_get)
 	}
 
 	php_stream_rewind(tmpstream);
-	if (php_stream_copy_to_stream(tmpstream, outstream, 0) == 0)	{	
+	if (php_stream_copy_to_stream(tmpstream, outstream, PHP_STREAM_COPY_ALL) == 0)	{	
 		php_error(E_WARNING, "%s(): error writing %s", get_active_function_name(TSRMLS_C), local);
 		RETVAL_FALSE;
 	}
