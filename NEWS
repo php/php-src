@@ -9,6 +9,7 @@ PHP                                                                        NEWS
   (Paul Hudson, Derick)
 - Fixed bug with raw_post_data not getting set (Brian)
 - Fixed a file-descriptor leak with phpinfo() and other 'special' URLs (Zeev)
+- Fixed bug #29873 (No defines around pcntl_*priority definitions). (Derick)
 - Fixed bug #29844 (SOAP doesn't return the result of a valid SOAP request).
   (Dmitry)
 - Fixed bug #29842 (soapclient return null value). (Dmitry)
