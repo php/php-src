@@ -440,6 +440,8 @@ int call_user_function_ex(HashTable *function_table, zval **object_pp, zval *fun
 	int (*orig_unary_op)(zval *result, zval *op1);
 	int (*orig_binary_op)(zval *result, zval *op1, zval *op2 TSRMLS_DC);
 	zval function_name_copy;
+	zend_class_entry *current_namespace;
+	zend_class_entry *calling_namespace = NULL;
 
 	*retval_ptr_ptr = NULL;
 
@@ -464,6 +466,7 @@ int call_user_function_ex(HashTable *function_table, zval **object_pp, zval *fun
 	if (object_pp) {
 		if (Z_TYPE_PP(object_pp) == IS_OBJECT) {
 			function_table = &Z_OBJCE_PP(object_pp)->function_table;
+			calling_namespace = Z_OBJCE_PP(object_pp);
 		} else if (Z_TYPE_PP(object_pp) == IS_STRING) {
 			zend_class_entry *ce;
 			char *lc_class;
@@ -477,6 +480,7 @@ int call_user_function_ex(HashTable *function_table, zval **object_pp, zval *fun
 				return FAILURE;
 
 			function_table = &ce->function_table;
+			calling_namespace = ce;
 			object_pp = NULL;
 		} else
 			return FAILURE;
@@ -535,6 +539,9 @@ int call_user_function_ex(HashTable *function_table, zval **object_pp, zval *fun
 
 	EG(function_state_ptr) = &function_state;
 
+	current_namespace = EG(namespace);
+	EG(namespace) = calling_namespace;
+
 	if (function_state.function->type == ZEND_USER_FUNCTION) {
 		calling_symbol_table = EG(active_symbol_table);
 		if (symbol_table) {
@@ -580,6 +587,8 @@ int call_user_function_ex(HashTable *function_table, zval **object_pp, zval *fun
 	}
 	zend_ptr_stack_clear_multiple(TSRMLS_C);
 	EG(function_state_ptr) = original_function_state_ptr;
+
+	EG(namespace) = current_namespace;
 
 	return SUCCESS;
 }

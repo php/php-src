@@ -1556,6 +1556,7 @@ binary_assign_op_addr: {
 							EX(object).ptr = this_ptr;
 						}
 						EX(fbc) = Z_OBJCE_P(EX(object).ptr)->constructor;
+						EX(calling_namespace) = Z_OBJCE_P(EX(object).ptr);
 						NEXT_OPCODE();
 					}
 					function_name = get_zval_ptr(&EX(opline)->op2, EX(Ts), &EG(free_op2), BP_VAR_R);
