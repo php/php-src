@@ -494,6 +494,8 @@ static PHP_METHOD(PDO, prepare)
 				RETURN_FALSE;
 			}
 			ctor_args = *item;
+		} else {
+			ctor_args = NULL;
 		}
 	} else {
 		dbstmt_ce = pdo_dbstmt_ce;
