@@ -368,7 +368,7 @@ PHP_FUNCTION(ora_logon)
 /* }}} */
 
 /* {{{ proto int ora_plogon(string user, string password)
-   Open a persistant Oracle connection */
+   Open a persistent Oracle connection */
 PHP_FUNCTION(ora_plogon)
 {
 	ora_do_logon(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
@@ -562,7 +562,6 @@ PHP_FUNCTION(ora_logoff)
 /* }}} */
 
 /* {{{ proto int ora_open(int connection)
-
    Open an Oracle cursor */
 PHP_FUNCTION(ora_open)
 {								/* conn_index */
@@ -1048,7 +1047,7 @@ PHP_FUNCTION(ora_fetch)
 }
 /* }}} */
 
-/* {{{ proto int ora_fetch_into(int cursor, array result [ , int flags ])
+/* {{{ proto int ora_fetch_into(int cursor, array result [, int flags])
    Fetch a row into the specified result array */
 PHP_FUNCTION(ora_fetch_into)
 {
