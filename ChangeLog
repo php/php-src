@@ -1,3 +1,64 @@
+2003-03-27  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * main/php_variables.c:
+      Improved php_import_environment_variables: avoid emalloc()ing in most cases
+
+2003-03-27  Harald Radi  <harald.radi+coding.php@nme.at>
+
+    * ext/rpc/com/com_wrapper.c:
+      MFB ext/com
+      fix #22899
+      invoke is called twice
+
+2003-03-27  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/array.c:
+      CS
+
+2003-03-27  David Hill  <David.Hill@hp.com>
+
+    * configure.in:
+      Correcting checking of flex version (dave)
+
+2003-03-27  Shane Caraveo  <shane@caraveo.com>
+
+    * sapi/cgi/cgi_main.c
+      sapi/isapi/php4isapi.c:
+      handle invalid paths passed to us from iis
+
+2003-03-27  David Hill  <David.Hill@hp.com>
+
+    * ext/standard/tests/time/002.phpt:
+      Backing out part of TZ change
+
+2003-03-27  Edin Kadribasic  <edink@proventum.net>
+
+    * (PHP_4_3)
+      NEWS:
+      BFN
+
+    * ext/mysql/libmysql/config-win.h:
+      MFB
+
+    * (PHP_4_3)
+      ext/mysql/libmysql/config-win.h:
+      Fixed bug #22083.
+
+2003-03-27  Jani Taskinen  <sniper@iki.fi>
+
+    * sapi/apache2handler/sapi_apache2.c:
+      CS fix
+
+2003-03-27  Ian Holsman  <Ian@holsman.net>
+
+    * sapi/apache2handler/sapi_apache2.c:
+      change to a pool-based bucket instead of a transient one.
+
+    * sapi/apache2handler/sapi_apache2.c:
+      remove flush from standard unbuffered write.
+      people requiring a flush can turn implicit flush on.
+      Thanks ilia for benchmarking this!
+
 2003-03-26  Sterling Hughes  <sterling@bumblebury.com>
 
     * main/fopen_wrappers.c:
