@@ -804,7 +804,7 @@ ZEND_FUNCTION(get_declared_classes)
 
 #define LAMBDA_TEMP_FUNCNAME	"__lambda_func"
 
-/* {{{ proto string lambda(string args, string code)
+/* {{{ proto string create_function(string args, string code)
    Creates an anonymous function, and returns its name (funny, eh?) */
 ZEND_FUNCTION(create_function)
 {
@@ -836,7 +836,7 @@ ZEND_FUNCTION(create_function)
 		zend_function *func;
 
 		if (zend_hash_find(EG(function_table), LAMBDA_TEMP_FUNCNAME, sizeof(LAMBDA_TEMP_FUNCNAME), (void **) &func)==FAILURE) {
-			zend_error(E_ERROR, "Unexpected inconsistency in lambda()");
+			zend_error(E_ERROR, "Unexpected inconsistency in create_function()");
 			RETURN_FALSE;
 		}
 		function_add_ref(func);
