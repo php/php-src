@@ -10,6 +10,7 @@ register_globals=1
 session.bug_compat_42=1
 session.bug_compat_warn=0
 session.name=PHPSESSID
+session.serialize_handler=php
 --FILE--
 <?php
 error_reporting(E_ALL);

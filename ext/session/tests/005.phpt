@@ -7,6 +7,7 @@ session.use_cookies=0
 session.cache_limiter=
 register_globals=1
 session.name=PHPSESSID
+session.serialize_handler=php
 --FILE--
 <?php
 
