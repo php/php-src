@@ -149,6 +149,24 @@ function_entry gd_functions[] = {
 	PHP_FE(imagecopymerge,							NULL)
 	PHP_FE(imagecopyresized,						NULL)
 	PHP_FE(imagecreate,								NULL)
+
+	PHP_FE(imagecreatetruecolor,					NULL)
+	PHP_FE(imagetruecolortopalette,				NULL)
+	PHP_FE(imagesetthickness,						NULL)
+	PHP_FE(imageellipse,								NULL)
+	PHP_FE(imagefilledellipse,						NULL)
+	PHP_FE(imagefilledarc,							NULL)
+	PHP_FE(imagealphablending,						NULL)
+	PHP_FE(imagecolorresolvealpha, 				NULL)
+	PHP_FE(imagecolorclosestalpha,				NULL)
+	PHP_FE(imagecolorexactalpha,					NULL)
+	PHP_FE(imagecopyresampled,						NULL)
+	PHP_FE(imagesettile,								NULL)
+
+	PHP_FE(imagesetbrush,							NULL)
+	PHP_FE(imagesetstyle,							NULL)
+	PHP_FE(imagecopymergegray,						NULL)
+
 	PHP_FE(imagecreatefromstring,					NULL)
 	PHP_FE(imagecreatefrompng,						NULL)
 	PHP_FE(imagepng,								NULL)
@@ -261,6 +279,21 @@ PHP_MINIT_FUNCTION(gd)
 	REGISTER_LONG_CONSTANT("IMG_JPEG", 2, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMG_PNG", 4, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMG_WBMP", 8, CONST_CS | CONST_PERSISTENT);
+#ifdef gdTiled
+	/* special colours for gd */
+	REGISTER_LONG_CONSTANT("IMG_COLOR_TILED", gdTiled, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IMG_COLOR_STYLED", gdStyled, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IMG_COLOR_BRUSHED", gdBrushed, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IMG_COLOR_STYLEDBRUSHED", gdStyledBrushed, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IMG_COLOR_TRANSPARENT", gdTransparent, CONST_CS | CONST_PERSISTENT);
+#endif
+#if HAVE_LIBGD20
+	/* for imagefilledarc */
+	REGISTER_LONG_CONSTANT("IMG_ARC_PIE", gdPie, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IMG_ARC_CHORD", gdChord, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IMG_ARC_NOFILL", gdNoFill, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IMG_ARC_EDGED", gdEdged, CONST_CS | CONST_PERSISTENT);
+#endif
 	return SUCCESS;
 }
 
@@ -271,7 +304,9 @@ PHP_MINFO_FUNCTION(gd)
 
 	/* need to use a PHPAPI function here because it is external module in windows */
 
-#if HAVE_GDIMAGECOLORRESOLVE
+#if HAVE_LIBGD20
+	php_info_print_table_row(2, "GD Version", "2.0 or higher");
+#elif HAVE_GDIMAGECOLORRESOLVE
 	php_info_print_table_row(2, "GD Version", "1.6.2 or higher");
 #elif HAVE_LIBGD13
 	php_info_print_table_row(2, "GD Version", "between 1.3 and 1.6.1");
@@ -475,6 +510,440 @@ PHP_FUNCTION(imageloadfont)
 	RETURN_LONG(ind);
 }
 /* }}} */
+
+/* {{{ proto void imagesetstyle(resource im, array styles)
+	Set the line drawing styles for use with imageline and IMG_COLOR_STYLED. */
+PHP_FUNCTION(imagesetstyle)
+{
+	zval **IM, **dither, **styles;
+	gdImagePtr im;
+	int * stylearr;
+	int index;
+	HashPosition pos;
+	GDLS_FETCH();
+
+	if (ZEND_NUM_ARGS() != 2 ||	zend_get_parameters_ex(2, &IM, &styles) == FAILURE) 
+	{
+		WRONG_PARAM_COUNT;
+	}
+
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
+	convert_to_array_ex(dither);
+
+	/* copy the style values in the stylearr */
+	stylearr = emalloc(sizeof(int) * zend_hash_num_elements(HASH_OF(*styles)));
+
+	zend_hash_internal_pointer_reset_ex(HASH_OF(*styles), &pos);
+		
+	for (index=0;; zend_hash_move_forward_ex(HASH_OF(*styles), &pos))	{
+		zval ** item;
+
+		if (zend_hash_get_current_data_ex(HASH_OF(*styles), (void**)&item, &pos) == FAILURE)
+			break;
+
+		convert_to_long_ex(item);
+
+		stylearr[index++] = Z_LVAL_PP(item);
+	}
+	gdImageSetStyle(im, stylearr, index);
+
+	efree(stylearr);
+
+	RETURN_TRUE;
+}
+/* }}} */
+
+
+/* {{{ proto int imagecreatetruecolor(int x_size, int y_size)
+   Create a new true color image */
+PHP_FUNCTION(imagecreatetruecolor)
+{
+#if HAVE_LIBGD20
+	zval **x_size, **y_size;
+	gdImagePtr im;
+	GDLS_FETCH();
+
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &x_size, &y_size) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	convert_to_long_ex(x_size);
+	convert_to_long_ex(y_size);
+
+	im = gdImageCreateTrueColor(Z_LVAL_PP(x_size), Z_LVAL_PP(y_size));
+
+	ZEND_REGISTER_RESOURCE(return_value, im, le_gd);
+#else
+	zend_error(E_ERROR, "%s(): requires GD 2.0 or later", get_active_function_name());
+#endif
+}
+/* }}} */
+
+/* {{{ void ImageTrueColorToPalette(resource im, bool ditherFlag, int colorsWanted)
+	Convert a true colour image to a palette based image with a number of colours, optionally using dithering. */
+PHP_FUNCTION(imagetruecolortopalette)
+{
+#if HAVE_LIBGD20
+	zval **IM, **dither, **ncolors;
+	gdImagePtr im;
+	GDLS_FETCH();
+
+	if (ZEND_NUM_ARGS() != 3 ||	zend_get_parameters_ex(3, &IM, &dither, &ncolors) == FAILURE) 
+	{
+		WRONG_PARAM_COUNT;
+	}
+
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
+	convert_to_boolean_ex(dither);
+	convert_to_long_ex(ncolors);
+		
+	gdImageTrueColorToPalette(im, Z_LVAL_PP(dither), Z_LVAL_PP(ncolors));
+
+	RETURN_TRUE;
+#else
+	zend_error(E_ERROR, "%s(): requires GD 2.0 or later", get_active_function_name());
+#endif
+
+}
+/* }}} */
+
+/* {{{ proto void imagesetthickness(resource im, int thickness)
+	Set line thickness for drawing lines, ellipses, rectangles, polygons etc. */
+PHP_FUNCTION(imagesetthickness)
+{
+#if HAVE_LIBGD20
+	zval **IM, **thick;
+	gdImagePtr im;
+	GDLS_FETCH();
+
+	if (ZEND_NUM_ARGS() != 2 ||	zend_get_parameters_ex(2, &IM, &thick) == FAILURE) 
+	{
+		WRONG_PARAM_COUNT;
+	}
+
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
+	convert_to_boolean_ex(thick);
+		
+	gdImageSetThickness(im, Z_LVAL_PP(thick));
+
+	RETURN_TRUE;
+#else
+	zend_error(E_ERROR, "%s(): requires GD 2.0 or later", get_active_function_name());
+#endif
+
+}
+/* }}} */
+
+/* {{{ proto void imageellipse(resource im, int cx, int cy, int w, int h, int color)
+	Draw an ellipse */
+PHP_FUNCTION(imageellipse)
+{
+#if 0 && HAVE_LIBGD20 /* this function is missing from GD 2.0.1 */
+	zval **IM, **cx, **cy, **w, **h, **color;
+	gdImagePtr im;
+	GDLS_FETCH();
+
+	if (ZEND_NUM_ARGS() != 6 || zend_get_parameters_ex(6, &IM, &cx, &cy, &w, &h, &color) == FAILURE) 
+	{
+		WRONG_PARAM_COUNT;
+	}
+	
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
+
+	convert_to_long_ex(cx);
+	convert_to_long_ex(cy);
+	convert_to_long_ex(w);
+	convert_to_long_ex(h);
+	convert_to_long_ex(color);
+
+	gdImageEllipse(im, Z_LVAL_PP(cx), Z_LVAL_PP(cy), Z_LVAL_PP(w), Z_LVAL_PP(h), Z_LVAL_PP(color));
+
+	RETURN_TRUE;
+#else
+	zend_error(E_ERROR, "%s(): requires GD 2.0 or later", get_active_function_name());
+#endif
+}
+/* }}} */
+
+/* {{{ proto void imagefilledellipse(resource im, int cx, int cy, int w, int h, int color)
+	Draw an ellipse */
+PHP_FUNCTION(imagefilledellipse)
+{
+#if HAVE_LIBGD20
+	zval **IM, **cx, **cy, **w, **h, **color;
+	gdImagePtr im;
+	GDLS_FETCH();
+
+	if (ZEND_NUM_ARGS() != 6 || zend_get_parameters_ex(6, &IM, &cx, &cy, &w, &h, &color) == FAILURE) 
+	{
+		WRONG_PARAM_COUNT;
+	}
+	
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
+
+	convert_to_long_ex(cx);
+	convert_to_long_ex(cy);
+	convert_to_long_ex(w);
+	convert_to_long_ex(h);
+	convert_to_long_ex(color);
+
+	gdImageFilledEllipse(im, Z_LVAL_PP(cx), Z_LVAL_PP(cy), Z_LVAL_PP(w), Z_LVAL_PP(h), Z_LVAL_PP(color));
+
+	RETURN_TRUE;
+#else
+	zend_error(E_ERROR, "%s(): requires GD 2.0 or later", get_active_function_name());
+#endif
+}
+/* }}} */
+
+/* {{{ proto int imagefilledarc(int im, int cx, int cy, int w, int h, int s, int e, int col, int style)
+   Draw a filled partial ellipse */
+PHP_FUNCTION(imagefilledarc)
+{
+#if HAVE_LIBGD20
+	zval **IM, **cx, **cy, **w, **h, **ST, **E, **col, **style;
+	gdImagePtr im;
+	int e,st;
+	GDLS_FETCH();
+
+	if (ZEND_NUM_ARGS() != 9 ||	zend_get_parameters_ex(9, &IM, &cx, &cy, &w, &h, &ST, &E, &col, &style) == FAILURE)
+	{
+		WRONG_PARAM_COUNT;
+	}
+
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
+
+	convert_to_long_ex(cx);
+	convert_to_long_ex(cy);
+	convert_to_long_ex(w);
+	convert_to_long_ex(h);
+	convert_to_long_ex(ST);
+	convert_to_long_ex(E);
+	convert_to_long_ex(col);
+	convert_to_long_ex(style);
+
+	e = Z_LVAL_PP(E);
+	st = Z_LVAL_PP(ST);
+
+	if (e < 0)   e %= 360;
+	if (st < 0) st %= 360;
+
+	gdImageFilledArc(im,Z_LVAL_PP(cx),Z_LVAL_PP(cy),Z_LVAL_PP(w),Z_LVAL_PP(h),st,e,Z_LVAL_PP(col), Z_LVAL_PP(style));
+	RETURN_TRUE;
+#else
+	zend_error(E_ERROR, "%s(): requires GD 2.0 or later", get_active_function_name());
+#endif
+}
+/* }}} */	
+
+/* {{{ proto void imagealphablending(resource im, bool on)
+   Turn alpha blending mode on or off for the given image */
+PHP_FUNCTION(imagealphablending)
+{
+#if HAVE_LIBGD20
+	zval **IM, **blend;
+	gdImagePtr im;
+	GDLS_FETCH();
+
+	if (ZEND_NUM_ARGS() != 2 ||	zend_get_parameters_ex(2, &IM, &blend) == FAILURE) 
+	{
+		WRONG_PARAM_COUNT;
+	}
+
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
+	convert_to_boolean_ex(blend);
+		
+	gdImageAlphaBlending(im, Z_LVAL_PP(blend));
+
+	RETURN_TRUE;
+#else
+	zend_error(E_ERROR, "%s(): requires GD 2.0 or later", get_active_function_name());
+#endif
+}
+/* }}} */
+
+/* {{{ proto int imagecolorresolvealpha(resource im, int red, int green, int blue, int alpha)
+   Resolve/Allocate a colour with an alpha level.  Works for true colour and palette based images */
+PHP_FUNCTION(imagecolorresolvealpha)
+{
+#if HAVE_LIBGD20
+	zval **IM, ** red, **green, **blue, **alpha;
+	gdImagePtr im;
+	GDLS_FETCH();
+
+	if (ZEND_NUM_ARGS() != 5 || zend_get_parameters_ex(5, &IM, &red, &green, &blue, &alpha) == FAILURE) 
+	{
+		WRONG_PARAM_COUNT;
+	}
+	
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
+
+	convert_to_long_ex(red);
+	convert_to_long_ex(green);
+	convert_to_long_ex(blue);
+	convert_to_long_ex(alpha);
+
+	RETURN_LONG(gdImageColorResolveAlpha(im, Z_LVAL_PP(red), Z_LVAL_PP(green), Z_LVAL_PP(blue), Z_LVAL_PP(alpha)));
+#else
+	zend_error(E_ERROR, "%s(): requires GD 2.0 or later", get_active_function_name());
+#endif
+
+}
+/* }}} */
+
+/* {{{ proto int imagecolorclosestalpha(resource im, int red, int green, int blue, int alpha)
+	Find the closest matching colour with alpha transparency */
+PHP_FUNCTION(imagecolorclosestalpha)
+{
+#if HAVE_LIBGD20
+	zval **IM, ** red, **green, **blue, **alpha;
+	gdImagePtr im;
+	GDLS_FETCH();
+
+	if (ZEND_NUM_ARGS() != 5 || zend_get_parameters_ex(5, &IM, &red, &green, &blue, &alpha) == FAILURE) 
+	{
+		WRONG_PARAM_COUNT;
+	}
+	
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
+
+	convert_to_long_ex(red);
+	convert_to_long_ex(green);
+	convert_to_long_ex(blue);
+	convert_to_long_ex(alpha);
+
+	RETURN_LONG(gdImageColorClosestAlpha(im, Z_LVAL_PP(red), Z_LVAL_PP(green), Z_LVAL_PP(blue), Z_LVAL_PP(alpha)));
+#else
+	zend_error(E_ERROR, "%s(): requires GD 2.0 or later", get_active_function_name());
+#endif
+}
+/* }}} */
+
+/* {{{ proto int imagecolorexactalpha(resource im, int red, int green, int blue, int alpha)
+	Find exact match for colour with transparency */
+PHP_FUNCTION(imagecolorexactalpha)
+{
+#if HAVE_LIBGD20
+	zval **IM, **red, **green, **blue, **alpha;
+	gdImagePtr im;
+	GDLS_FETCH();
+
+	if (ZEND_NUM_ARGS() != 5 || zend_get_parameters_ex(5, &IM, &red, &green, &blue, &alpha) == FAILURE) 
+	{
+		WRONG_PARAM_COUNT;
+	}
+	
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
+
+	convert_to_long_ex(red);
+	convert_to_long_ex(green);
+	convert_to_long_ex(blue);
+	convert_to_long_ex(alpha);
+	
+	RETURN_LONG(gdImageColorExactAlpha(im, Z_LVAL_PP(red), Z_LVAL_PP(green), Z_LVAL_PP(blue), Z_LVAL_PP(alpha)));
+#else
+	zend_error(E_ERROR, "%s(): requires GD 2.0 or later", get_active_function_name());
+#endif
+}
+/* }}} */
+
+/* {{{ proto int imagecopyresampled(int dst_im, int src_im, int dst_x, int dst_y, int src_x, int src_y, int dst_w, int dst_h, int src_w, int src_h)
+   Copy and resize part of an image using resampling to help ensure clarity */
+PHP_FUNCTION(imagecopyresampled)
+{
+#if HAVE_LIBGD20
+	zval **SIM, **DIM, **SX, **SY, **SW, **SH, **DX, **DY, **DW, **DH;
+	gdImagePtr im_dst, im_src;
+	int srcH, srcW, dstH, dstW, srcY, srcX, dstY, dstX;
+	GDLS_FETCH();
+
+	if (ZEND_NUM_ARGS() != 10 ||
+		zend_get_parameters_ex(10, &DIM, &SIM, &DX, &DY, &SX, &SY, &DW, &DH, &SW, &SH) == FAILURE) 
+	{
+		WRONG_PARAM_COUNT;
+	}
+
+	ZEND_FETCH_RESOURCE(im_dst, gdImagePtr, DIM, -1, "Image", le_gd);
+	ZEND_FETCH_RESOURCE(im_src, gdImagePtr, SIM, -1, "Image", le_gd);
+
+	convert_to_long_ex(SX);
+	convert_to_long_ex(SY);
+	convert_to_long_ex(SW);
+	convert_to_long_ex(SH);
+	convert_to_long_ex(DX);
+	convert_to_long_ex(DY);
+	convert_to_long_ex(DW);
+	convert_to_long_ex(DH);
+
+	srcX = Z_LVAL_PP(SX);
+	srcY = Z_LVAL_PP(SY);
+	srcH = Z_LVAL_PP(SH);
+	srcW = Z_LVAL_PP(SW);
+	dstX = Z_LVAL_PP(DX);
+	dstY = Z_LVAL_PP(DY);
+	dstH = Z_LVAL_PP(DH);
+	dstW = Z_LVAL_PP(DW);
+
+	gdImageCopyResampled(im_dst, im_src, dstX, dstY, srcX, srcY, dstW, dstH, srcW, srcH);
+	RETURN_TRUE;
+#else
+	zend_error(E_ERROR, "%s(): requires GD 2.0 or later", get_active_function_name());
+#endif
+}
+/* }}} */	
+
+/* {{{ proto int imagesettile(resource image, resource tile)
+	Set the tile image to $tile when filling $image with the "IMG_COLOR_TILED" color */
+PHP_FUNCTION(imagesettile)
+{
+#if HAVE_GD_IMAGESETTILE
+	zval **IM, **TILE;
+	gdImagePtr im, tile;
+	GDLS_FETCH();
+
+	if (ZEND_NUM_ARGS() != 2 ||	zend_get_parameters_ex(2, &IM, &TILE) == FAILURE) 
+	{
+		WRONG_PARAM_COUNT;
+	}
+
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
+	ZEND_FETCH_RESOURCE(tile, gdImagePtr, TILE, -1, "Image", le_gd);
+
+	gdImageSetTile(im,tile);
+
+	RETURN_TRUE;
+#else
+	zend_error(E_ERROR, "%s(): requires a more recent version of GD", get_active_function_name());
+#endif
+}
+/* }}} */
+
+/* {{{ proto int imagesetbrush(resource image, resource brush)
+	Set the brush image to $brush when filling $image with the "IMG_COLOR_BRUSHED" color */
+PHP_FUNCTION(imagesetbrush)
+{
+#if HAVE_GD_IMAGESETBRUSH
+	zval **IM, **TILE;
+	gdImagePtr im, tile;
+	GDLS_FETCH();
+
+	if (ZEND_NUM_ARGS() != 2 ||	zend_get_parameters_ex(2, &IM, &TILE) == FAILURE) 
+	{
+		WRONG_PARAM_COUNT;
+	}
+
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
+	ZEND_FETCH_RESOURCE(tile, gdImagePtr, TILE, -1, "Image", le_gd);
+
+	gdImageSetBrush(im,tile);
+
+	RETURN_TRUE;
+#else
+	zend_error(E_ERROR, "%s(): requires a more recent version of GD", get_active_function_name());
+#endif
+}
+/* }}} */
+
 
 /* {{{ proto int imagecreate(int x_size, int y_size)
    Create a new image */
@@ -1987,6 +2456,52 @@ PHP_FUNCTION(imagecopymerge)
 }
 /* }}} */
 
+/* {{{ proto int imagecopymergegray(int src_im, int dst_im, int dst_x, int dst_y, int src_x, int src_y, int src_w, int src_h, int pct)
+   Merge one part of an image with another */
+PHP_FUNCTION(imagecopymergegray)
+{
+#if HAVE_LIBGD15
+	zval **SIM, **DIM, **SX, **SY, **SW, **SH, **DX, **DY, **PCT;
+	gdImagePtr im_dst, im_src;
+	int srcH, srcW, srcY, srcX, dstY, dstX, pct;
+	GDLS_FETCH();
+
+	if (ZEND_NUM_ARGS() != 9 ||
+		zend_get_parameters_ex(9, &DIM, &SIM, &DX, &DY, &SX, &SY, &SW, &SH, &PCT) == FAILURE) 
+	{
+		WRONG_PARAM_COUNT;
+	}
+
+	ZEND_FETCH_RESOURCE(im_src, gdImagePtr, SIM, -1, "Image", le_gd);
+	ZEND_FETCH_RESOURCE(im_dst, gdImagePtr, DIM, -1, "Image", le_gd);
+
+	convert_to_long_ex(SX);
+	convert_to_long_ex(SY);
+	convert_to_long_ex(SW);
+	convert_to_long_ex(SH);
+	convert_to_long_ex(DX);
+	convert_to_long_ex(DY);
+	convert_to_long_ex(PCT);
+
+	srcX = Z_LVAL_PP(SX);
+	srcY = Z_LVAL_PP(SY);
+	srcH = Z_LVAL_PP(SH);
+	srcW = Z_LVAL_PP(SW);
+	dstX = Z_LVAL_PP(DX);
+	dstY = Z_LVAL_PP(DY);
+	pct  = Z_LVAL_PP(PCT);
+
+	gdImageCopyMergeGray(im_dst, im_src, dstX, dstY, srcX, srcY, srcW, srcH, pct);
+	RETURN_TRUE;
+#else
+	php_error(E_WARNING, "%s(): was introduced in GD version 1.5", get_active_function_name());
+	RETURN_FALSE;
+#endif
+}
+/* }}} */
+
+
+
 /* {{{ proto int imagecopyresized(int dst_im, int src_im, int dst_x, int dst_y, int src_x, int src_y, int dst_w, int dst_h, int src_w, int src_h)
    Copy and resize part of an image */
 PHP_FUNCTION(imagecopyresized)
@@ -2143,7 +2658,11 @@ void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	fontname = (unsigned char *) Z_STRVAL_PP(FONTNAME);
 
 #ifdef USE_GD_IMGSTRTTF
+# if HAVE_LIBGD20 & HAVE_LIBFREETYPE
+	error = gdImageStringFT(im, brect, col, fontname, ptsize, angle, x, y, str);
+# else
 	error = gdImageStringTTF(im, brect, col, fontname, ptsize, angle, x, y, str);
+# endif
 #else
 	error = gdttf(im, brect, col, fontname, ptsize, angle, x, y, str);
 #endif
