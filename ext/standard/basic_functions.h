@@ -148,7 +148,9 @@ typedef struct {
 	ulong strtok_len;
 	char str_ebuf[40];
 	zval **array_walk_func_name;
+	zend_function *array_walk_func_ptr;
 	zval **user_compare_func_name;
+	zend_function *user_compare_func_ptr;
 	zend_llist *user_tick_functions;
 
 	zval *active_ini_file_section;

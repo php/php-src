@@ -530,7 +530,7 @@ static int array_user_compare(const void *a, const void *b TSRMLS_DC)
 	args[0] = (zval **) f->pData;
 	args[1] = (zval **) s->pData;
 
-	if (call_user_function_ex(EG(function_table), NULL, *BG(user_compare_func_name), &retval_ptr, 2, args, 0, NULL TSRMLS_CC)==SUCCESS
+	if (fast_call_user_function(EG(function_table), NULL, *BG(user_compare_func_name), &retval_ptr, 2, args, 0, NULL, &BG(user_compare_func_ptr) TSRMLS_CC) == SUCCESS
 		&& retval_ptr) {
 		long retval;
 
@@ -552,6 +552,8 @@ PHP_FUNCTION(usort)
 	HashTable *target_hash;
 
 	old_compare_func = BG(user_compare_func_name);
+	BG(user_compare_func_ptr) = NULL;
+
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &array, &BG(user_compare_func_name)) == FAILURE) {
 		BG(user_compare_func_name) = old_compare_func;
 		WRONG_PARAM_COUNT;
@@ -580,6 +582,7 @@ PHP_FUNCTION(uasort)
 	HashTable *target_hash;
 
 	old_compare_func = BG(user_compare_func_name);
+	BG(user_compare_func_ptr) = NULL;
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &array, &BG(user_compare_func_name)) == FAILURE) {
 		BG(user_compare_func_name) = old_compare_func;
 		WRONG_PARAM_COUNT;
@@ -984,8 +987,8 @@ static int php_array_walk(HashTable *target_hash, zval **userdata, int recursive
 			}
 		
 			/* Call the userland function */
-			if (call_user_function_ex(EG(function_table), NULL, *BG(array_walk_func_name),
-							   &retval_ptr, userdata ? 3 : 2, args, 0, NULL TSRMLS_CC) == SUCCESS) {
+			if (fast_call_user_function(EG(function_table), NULL, *BG(array_walk_func_name),
+							   &retval_ptr, userdata ? 3 : 2, args, 0, NULL, &BG(array_walk_func_ptr) TSRMLS_CC) == SUCCESS) {
 		
 				zval_ptr_dtor(&retval_ptr);
 			} else {
@@ -1020,6 +1023,7 @@ PHP_FUNCTION(array_walk)
 	HashTable *target_hash;
 
 	argc = ZEND_NUM_ARGS();
+	BG(array_walk_func_ptr) = NULL;
 	old_walk_func_name = BG(array_walk_func_name);
 	if (argc < 2 || argc > 3 ||
 		zend_get_parameters_ex(argc, &array, &BG(array_walk_func_name), &userdata) == FAILURE) {
@@ -3325,6 +3329,7 @@ PHP_FUNCTION(array_reduce)
 	zval **operand;
 	zval *result = NULL;
 	zval *retval;
+	zend_function *func_ptr = NULL;
 	char *callback_name;
 	HashPosition pos;
 	HashTable *htbl;
@@ -3370,7 +3375,7 @@ PHP_FUNCTION(array_reduce)
 		if (result) {
 			args[0] = &result;
 			args[1] = operand;
-			if (call_user_function_ex(EG(function_table), NULL, *callback, &retval, 2, args, 0, NULL TSRMLS_CC) == SUCCESS && retval) {
+			if (fast_call_user_function(EG(function_table), NULL, *callback, &retval, 2, args, 0, NULL, &func_ptr TSRMLS_CC) == SUCCESS && retval) {
 				zval_ptr_dtor(&result);
 				result = retval;
 			} else {
@@ -3402,6 +3407,7 @@ PHP_FUNCTION(array_filter)
 	zval *retval = NULL;
 	char *callback_name;
 	char *string_key;
+	zend_function *func_ptr = NULL;
 	uint string_key_len;
 	ulong num_key;
 	HashPosition pos;
@@ -3436,7 +3442,7 @@ PHP_FUNCTION(array_filter)
 
 		if (callback) {
 			args[0] = operand;
-			if (call_user_function_ex(EG(function_table), NULL, *callback, &retval, 1, args, 0, NULL TSRMLS_CC) == SUCCESS && retval) {
+			if (fast_call_user_function(EG(function_table), NULL, *callback, &retval, 1, args, 0, NULL, &func_ptr TSRMLS_CC) == SUCCESS && retval) {
 				if (!zend_is_true(retval)) {
 					zval_ptr_dtor(&retval);
 					continue;
@@ -3477,6 +3483,7 @@ PHP_FUNCTION(array_map)
 	HashPosition *array_pos;
 	zval **args;
 	char *callback_name;
+	zend_function *func_ptr = NULL;
 	int i, k, maxlen = 0;
 	int *array_len;
 
@@ -3586,7 +3593,7 @@ PHP_FUNCTION(array_map)
 		}
 
 		if (Z_TYPE_P(callback) != IS_NULL) {
-			if (!call_user_function_ex(EG(function_table), NULL, callback, &result, ZEND_NUM_ARGS() - 1, &params[1], 0, NULL TSRMLS_CC) == SUCCESS && result) {
+			if (!fast_call_user_function(EG(function_table), NULL, callback, &result, ZEND_NUM_ARGS() - 1, &params[1], 0, NULL, &func_ptr TSRMLS_CC) == SUCCESS && result) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "An error occurred while invoking the map callback");
 				efree(array_len);
 				efree(args);
