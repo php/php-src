@@ -1,3 +1,23 @@
+2001-10-25  Martin Jansen  <mail@martin-jansen.de>
+
+    * pear/HTML/Form.php:
+    * Improvements to Form.php (by Hakan Kuecuekyilmaz <hakubw00@fht-esslingen.de>)
+
+2001-10-25  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/DB/mssql.php:
+    fix bug in numRows and 0 rows and drop the debug stuff in the error
+    reporting
+
+2001-10-25  Thies C. Arntzen  <thies@thieso.net>
+
+    * ext/xmlrpc/xmlrpc-epi-php.c: fix compile
+
+    * ext/xmlrpc/libxmlrpc/xml_element.h
+      ext/xmlrpc/libxmlrpc/xmlrpc.h
+      ext/xmlrpc/xmlrpc-epi-php.c:
+    make it compile again and nuke most warnings
+
 2001-10-24  Rasmus Lerdorf  <rasmus@php.net>
 
     * main/SAPI.c: Let's suppress this warning if always_populate is enabled
