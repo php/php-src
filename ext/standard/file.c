@@ -1547,7 +1547,7 @@ PHP_FUNCTION(rmdir)
 /* }}} */
 /* {{{ php_passthru_fd */
 
-static size_t php_passthru_fd(int socketd, FILE *fp, int issock)
+static size_t php_passthru_fd(int socketd, FILE *fp, int issock TSRMLS_DC)
 {
 	size_t bcount = 0;
 	int ready = 0;
@@ -1651,7 +1651,7 @@ PHP_FUNCTION(readfile)
 		rsrc_id = ZEND_REGISTER_RESOURCE(NULL,fp,php_file_le_fopen());
 	}
 
-	size = php_passthru_fd(socketd, fp, issock);
+	size = php_passthru_fd(socketd, fp, issock TSRMLS_CC);
 
 	zend_list_delete(rsrc_id);
 
@@ -1710,7 +1710,7 @@ PHP_FUNCTION(fpassthru)
 		socketd=*(int*)what;
 	}
 
-	size = php_passthru_fd(socketd, (FILE*) what, issock);
+	size = php_passthru_fd(socketd, (FILE*) what, issock TSRMLS_CC);
 
 	zend_list_delete((*arg1)->value.lval);
 

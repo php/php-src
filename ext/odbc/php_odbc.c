@@ -234,6 +234,7 @@ static void _close_odbc_pconn(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 static PHP_INI_DISP(display_link_nums)
 {
 	char *value;
+	TSRMLS_FETCH();
 
 	if (type == PHP_INI_DISPLAY_ORIG && ini_entry->modified) {
 		value = ini_entry->orig_value;
@@ -255,6 +256,7 @@ static PHP_INI_DISP(display_link_nums)
 static PHP_INI_DISP(display_defPW)
 {
 	char *value;
+	TSRMLS_FETCH();
 
 	if (type == PHP_INI_DISPLAY_ORIG && ini_entry->modified) {
 		value = ini_entry->orig_value;
@@ -278,6 +280,7 @@ static PHP_INI_DISP(display_defPW)
 static PHP_INI_DISP(display_binmode)
 {
 	char *value;
+	TSRMLS_FETCH();
 	
     if (type == PHP_INI_DISPLAY_ORIG && ini_entry->modified) {
 		value = ini_entry->orig_value;
@@ -305,6 +308,7 @@ static PHP_INI_DISP(display_binmode)
 static PHP_INI_DISP(display_lrl)
 {
 	char *value;
+	TSRMLS_FETCH();
 
 	if (type == PHP_INI_DISPLAY_ORIG && ini_entry->modified) {
 		value = ini_entry->orig_value;

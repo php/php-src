@@ -28,6 +28,8 @@
  */
 PHPAPI void php_print_credits(int flag)
 {
+	TSRMLS_FETCH();
+
 	if (flag & PHP_CREDITS_FULLPAGE) {
 		PUTS("<html><head><title>PHP Credits</title></head><body>\n");
 	}

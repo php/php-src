@@ -103,6 +103,7 @@ ZEND_GET_MODULE(mssql)
 static PHP_INI_DISP(display_text_size)
 {
 	char *value;
+	TSRMLS_FETCH();
 	
     if (type == PHP_INI_DISPLAY_ORIG && ini_entry->modified) {
 		value = ini_entry->orig_value;

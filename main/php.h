@@ -274,12 +274,12 @@ PHPAPI int cfg_get_string(char *varname, char **result);
 
 /* Output support */
 #include "main/php_output.h"
-#define PHPWRITE(str, str_len)		php_body_write((str), (str_len))
-#define PUTS(str)					php_body_write((str), strlen((str)))
-#define PUTC(c)						(php_body_write(&(c), 1), (c))
-#define PHPWRITE_H(str, str_len)	php_header_write((str), (str_len))
-#define PUTS_H(str)					php_header_write((str), strlen((str)))
-#define PUTC_H(c)					(php_header_write(&(c), 1), (c))
+#define PHPWRITE(str, str_len)		php_body_write((str), (str_len) TSRMLS_CC)
+#define PUTS(str)					php_body_write((str), strlen((str)) TSRMLS_CC)
+#define PUTC(c)						(php_body_write(&(c), 1 TSRMLS_CC), (c))
+#define PHPWRITE_H(str, str_len)	php_header_write((str), (str_len) TSRMLS_CC)
+#define PUTS_H(str)					php_header_write((str), strlen((str)) TSRMLS_CC)
+#define PUTC_H(c)					(php_header_write(&(c), 1 TSRMLS_CC), (c))
 
 #ifdef ZTS
 #define VIRTUAL_DIR
