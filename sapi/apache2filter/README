@@ -70,4 +70,3 @@ TODO
     PHP functions like apache_sub_req (see php_functions.c)
     Protocol handlers
     Passing script data to engine without temporary file
-    Syntax Highlighter (relies on files as well)
