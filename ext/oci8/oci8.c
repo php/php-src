@@ -1314,7 +1314,6 @@ oci_execute(oci_statement *statement, char *func,ub4 mode)
 	int dtype;
 	dvoid *buf;
 	oci_descriptor *descr;
-	OCILS_FETCH();
 
 	statement->error = 
 		oci_error(statement->pError,
@@ -4337,6 +4336,7 @@ PHP_FUNCTION(ocicollappend)
     int inx;
 	double ndx;
     ub4 loblen;
+	OCILS_FETCH();
 
     if ((id = getThis()) != 0) {
         if ((inx = _oci_get_ocicoll(id,&coll)) == 0) {
@@ -4445,6 +4445,7 @@ PHP_FUNCTION(ocicolldategetelem)
 	int  ocifmt_len;
 	char *ocilang;
 	int ocilang_len;
+	OCILS_FETCH();
 
     if ((id = getThis()) != 0) {
         if ((inx = _oci_get_ocicoll(id,&coll)) == 0) {
@@ -4538,6 +4539,7 @@ PHP_FUNCTION(ocicolldateassignelem)
 	int  ocifmt_len;
 	char *ocilang;
 	int ocilang_len;
+	OCILS_FETCH();
 
     if ((id = getThis()) != 0) {
         if ((inx = _oci_get_ocicoll(id,&coll)) == 0) {
@@ -4637,6 +4639,7 @@ PHP_FUNCTION(ocicolldateappendelem)
 	int  ocifmt_len;
 	char *ocilang;
 	int ocilang_len;
+	OCILS_FETCH();
 
     if ((id = getThis()) != 0) {
         if ((inx = _oci_get_ocicoll(id,&coll)) == 0) {
@@ -4724,6 +4727,7 @@ PHP_FUNCTION(ocicollgetelem)
     char buff[1024];
 	int len;
 	double         dnum;
+	OCILS_FETCH();
 
     if ((id = getThis()) != 0) {
         if ((inx = _oci_get_ocicoll(id,&coll)) == 0) {
@@ -4809,6 +4813,7 @@ PHP_FUNCTION(ocicollassign)
     text *str;
     char buff[1024];
 	double         dnum;
+	OCILS_FETCH();
 
     if ((id = getThis()) != 0) {
         if ((inx = _oci_get_ocicoll(id,&coll)) == 0) {
@@ -4858,6 +4863,7 @@ PHP_FUNCTION(ocicollassignelem)
     text *str;
     char buff[1024];
 	double         dnum;
+	OCILS_FETCH();
 
     if ((id = getThis()) != 0) {
         if ((inx = _oci_get_ocicoll(id,&coll)) == 0) {
@@ -4964,6 +4970,7 @@ PHP_FUNCTION(ocicollsize)
     oci_collection *coll;
 	sb4 sz;
     int inx;
+	OCILS_FETCH();
 
     if ((id = getThis()) != 0) {
         if ((inx = _oci_get_ocicoll(id,&coll)) == 0) {
@@ -4986,6 +4993,7 @@ PHP_FUNCTION(ocicollmax)
     oci_collection *coll;
 	sb4 sz;
     int inx;
+	OCILS_FETCH();
 
     if ((id = getThis()) != 0) {
         if ((inx = _oci_get_ocicoll(id,&coll)) == 0) {
@@ -5008,6 +5016,7 @@ PHP_FUNCTION(ocicolltrim)
     oci_collection *coll;
 	sb4 sz;
     int inx;
+	OCILS_FETCH();
 
     if ((id = getThis()) != 0) {
         if ((inx = _oci_get_ocicoll(id,&coll)) == 0) {
@@ -5041,8 +5050,8 @@ PHP_FUNCTION(ocinewcollection)
     oci_connection *connection;
     oci_collection *coll;
     OCISvcCtx *svchp = 0;
-
     int dtype;
+	OCILS_FETCH();
 
     dtype = OCI_DTYPE_LOB;
 
