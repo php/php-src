@@ -150,8 +150,7 @@ PHP_FUNCTION(dom_characterdata_substring_data)
 
 	if (offset < 0 || count < 0 || offset > length) {
 		xmlFree(cur);
-		php_dom_throw_error(INDEX_SIZE_ERR, &return_value TSRMLS_CC);
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Index Size Error");
+		php_dom_throw_error(INDEX_SIZE_ERR, dom_get_strict_error(intern->document) TSRMLS_CC);
 		RETURN_FALSE;
 	}
 
@@ -226,8 +225,7 @@ PHP_FUNCTION(dom_characterdata_insert_data)
 
 	if (offset < 0 || offset > length) {
 		xmlFree(cur);
-		php_dom_throw_error(INDEX_SIZE_ERR, &return_value TSRMLS_CC);
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Index Size Error");
+		php_dom_throw_error(INDEX_SIZE_ERR, dom_get_strict_error(intern->document) TSRMLS_CC);
 		RETURN_FALSE;
 	}
 
@@ -274,8 +272,7 @@ PHP_FUNCTION(dom_characterdata_delete_data)
 
 	if (offset < 0 || count < 0 || offset > length) {
 		xmlFree(cur);
-		php_dom_throw_error(INDEX_SIZE_ERR, &return_value TSRMLS_CC);
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Index Size Error");
+		php_dom_throw_error(INDEX_SIZE_ERR, dom_get_strict_error(intern->document) TSRMLS_CC);
 		RETURN_FALSE;
 	}
 
@@ -331,8 +328,7 @@ PHP_FUNCTION(dom_characterdata_replace_data)
 
 	if (offset < 0 || count < 0 || offset > length) {
 		xmlFree(cur);
-		php_dom_throw_error(INDEX_SIZE_ERR, &return_value TSRMLS_CC);
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Index Size Error");
+		php_dom_throw_error(INDEX_SIZE_ERR, dom_get_strict_error(intern->document) TSRMLS_CC);
 		RETURN_FALSE;
 	}
 

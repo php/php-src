@@ -98,8 +98,7 @@ PHP_FUNCTION(dom_domimplementation_create_document_type)
 	if (uri->opaque != NULL) {
 		localname = xmlStrdup(uri->opaque);
 		if (xmlStrchr(localname, (xmlChar) ':') != NULL) {
-			php_dom_throw_error(NAMESPACE_ERR, &return_value TSRMLS_CC);
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid Namespace");
+			php_dom_throw_error(NAMESPACE_ERR, 1 TSRMLS_CC);
 			xmlFreeURI(uri);
 			xmlFree(localname);
 			RETURN_FALSE;
@@ -149,8 +148,7 @@ PHP_FUNCTION(dom_domimplementation_create_document)
 			RETURN_FALSE;
 		}
 		if (doctype->doc != NULL) {
-			php_dom_throw_error(WRONG_DOCUMENT_ERR, &return_value TSRMLS_CC);
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "DocumentType: Wrong Document");
+			php_dom_throw_error(WRONG_DOCUMENT_ERR, 1 TSRMLS_CC);
 			RETURN_FALSE;
 		}
 	} else {
@@ -172,8 +170,7 @@ PHP_FUNCTION(dom_domimplementation_create_document)
 		if (localname != NULL) {
 			xmlFree(localname);
 		}
-		php_dom_throw_error(errorcode, &return_value TSRMLS_CC);
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid Namespace");
+		php_dom_throw_error(errorcode, 1 TSRMLS_CC);
 		RETURN_FALSE;
 	}
 
@@ -207,7 +204,7 @@ PHP_FUNCTION(dom_domimplementation_create_document)
 			xmlFreeDoc(docp);
 			xmlFree(localname);
 			/* Need some type of error here */
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unexpected Error");
+			php_error(E_WARNING, "Unexpected Error");
 			RETURN_FALSE;
 		}
 

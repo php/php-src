@@ -185,7 +185,7 @@ PHP_FUNCTION(dom_element_set_attribute)
 	}
 
 	if (dom_node_is_read_only(nodep) == SUCCESS) {
-		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, &return_value TSRMLS_CC);
+		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, dom_get_strict_error(intern->document) TSRMLS_CC);
 		RETURN_FALSE;
 	}
 
@@ -207,7 +207,7 @@ PHP_FUNCTION(dom_element_set_attribute)
 
 /* {{{ proto dom_void dom_element_remove_attribute(string name);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-6D6AC0F9
-Since: 
+Since:
 */
 PHP_FUNCTION(dom_element_remove_attribute)
 {
@@ -225,7 +225,7 @@ PHP_FUNCTION(dom_element_remove_attribute)
 	}
 
 	if (dom_node_is_read_only(nodep) == SUCCESS) {
-		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, &return_value TSRMLS_CC);
+		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, dom_get_strict_error(intern->document) TSRMLS_CC);
 		RETURN_FALSE;
 	}
 
@@ -296,7 +296,7 @@ PHP_FUNCTION(dom_element_set_attribute_node)
 	}
 
 	if (dom_node_is_read_only(nodep) == SUCCESS) {
-		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, &return_value TSRMLS_CC);
+		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, dom_get_strict_error(intern->document) TSRMLS_CC);
 		RETURN_FALSE;
 	}
 
@@ -357,7 +357,7 @@ PHP_FUNCTION(dom_element_remove_attribute_node)
 	}
 
 	if (dom_node_is_read_only(nodep) == SUCCESS) {
-		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, &return_value TSRMLS_CC);
+		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, dom_get_strict_error(intern->document) TSRMLS_CC);
 		RETURN_FALSE;
 	}
 
@@ -500,7 +500,7 @@ PHP_FUNCTION(dom_element_set_attribute_ns)
 	char *uri, *name;
 	char *localname = NULL, *prefix = NULL;
 	dom_object *intern;
-	int errorcode = 0;
+	int errorcode = 0, stricterror;
 
 	DOM_GET_THIS_OBJ(elemp, id, xmlNodePtr, intern);
 
@@ -508,8 +508,10 @@ PHP_FUNCTION(dom_element_set_attribute_ns)
 		return;
 	}
 
+	stricterror = dom_get_strict_error(intern->document);
+
 	if (dom_node_is_read_only(elemp) == SUCCESS) {
-		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, &return_value TSRMLS_CC);
+		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, stricterror TSRMLS_CC);
 		RETURN_FALSE;
 	}
 
@@ -543,8 +545,7 @@ PHP_FUNCTION(dom_element_set_attribute_ns)
 	}
 
 	if (errorcode != 0) {
-		php_dom_throw_error(errorcode, &return_value TSRMLS_CC);
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid Namespace");
+		php_dom_throw_error(errorcode, stricterror TSRMLS_CC);
 		RETURN_FALSE;
 	}
 
@@ -577,7 +578,7 @@ PHP_FUNCTION(dom_element_remove_attribute_ns)
 	}
 
 	if (dom_node_is_read_only(nodep) == SUCCESS) {
-		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, &return_value TSRMLS_CC);
+		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, dom_get_strict_error(intern->document) TSRMLS_CC);
 		RETURN_FALSE;
 	}
 
@@ -664,7 +665,7 @@ PHP_FUNCTION(dom_element_set_attribute_node_ns)
 	}
 
 	if (dom_node_is_read_only(nodep) == SUCCESS) {
-		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, &return_value TSRMLS_CC);
+		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, dom_get_strict_error(intern->document) TSRMLS_CC);
 		RETURN_FALSE;
 	}
 
