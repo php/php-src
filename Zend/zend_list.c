@@ -153,7 +153,10 @@ ZEND_API void *zend_fetch_resource_ex(zval *passed_id, int default_id, char *res
 	int i;
 
 	if (default_id==-1) { /* use id */
-		if (passed_id->type != IS_RESOURCE) {
+		if (!passed_id) {
+			zend_error(E_WARNING, "No %s resource supplied", resource_type_name);
+			return NULL;
+		} else if (passed_id->type != IS_RESOURCE) {
 			zend_error(E_WARNING, "Supplied argument is not a valid %s resource", resource_type_name);
 			return NULL;
 		}
