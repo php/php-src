@@ -1555,7 +1555,7 @@ PHP_FUNCTION(pg_loimport)
 }
 /* }}} */
 
-/* {{{ proto int pg_loexport(int objoid, string filename [, resource connection])
+/* {{{ proto bool pg_loexport(int objoid, string filename [, resource connection])
    Export large object direct to filesystem */
 PHP_FUNCTION(pg_loexport)
 {
