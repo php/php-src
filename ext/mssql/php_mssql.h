@@ -31,19 +31,9 @@
 #endif
 
 
-#if MSSQL65
-#define MSSQL_VERSION "6.5"
-#include "../../../php_build/mssql-65/include/sqlfront.h"
-#include "../../../php_build/mssql-65/include/sqldb.h"
-#elif MSSQL70
 #define MSSQL_VERSION "7.0"
-//#include "../../../php_build/mssql-70/include/sqlfront.h"
-//#include "../../../php_build/mssql-70/include/sqldb.h"
 #include "sqlfront.h"
 #include "sqldb.h"
-#else
-#define MSSQL_VERSION "Unknown"
-#endif
 
 #define coltype(j) dbcoltype(mssql_ptr->link,j)
 #define intcol(i) ((int) *(DBINT *) dbdata(mssql_ptr->link,i))
@@ -53,11 +43,7 @@
 #define charcol(i) ((DBCHAR *) dbdata(mssql_ptr->link,i))
 #define floatcol(i) ((float) *(DBFLT8 *) dbdata(mssql_ptr->link,i))
 
-#ifndef DLEXPORT
-#define DLEXPORT
-#endif
-
-#ifdef __ZTS
+#ifdef ZTS
 #include "TSRM.h"
 #endif
 
@@ -100,7 +86,7 @@ typedef struct mssql_link {
 	int valid;
 } mssql_link;
 
-typedef struct {
+ZEND_BEGIN_MODULE_GLOBALS(mssql)
 	long default_link;
 	long num_links,num_persistent;
 	long max_links,max_persistent;
@@ -113,7 +99,7 @@ typedef struct {
 	void (*get_column_content)(mssql_link *mssql_ptr,int offset,pval *result,int column_type);
 	long textsize, textlimit, batchsize;
 	HashTable *resource_list, *resource_plist;
-} php_mssql_globals;
+ZEND_END_MODULE_GLOBALS(mssql)
 
 #define MSSQL_ROWS_BLOCK 128
 
@@ -136,12 +122,12 @@ typedef struct mssql_result {
 
 
 #ifdef ZTS
-# define MSSQLLS_D		php_mssql_globals *mssql_globals
+# define MSSQLLS_D		zend_mssql_globals *mssql_globals
 # define MSSQLLS_DC		, MSSQLLS_D
 # define MSSQLLS_C		mssql_globals
 # define MSSQLLS_CC		, MSSQLLS_C
 # define MS_SQL_G(v)	(mssql_globals->v)
-# define MSSQLLS_FETCH()	php_mssql_globals *mssql_globals = ts_resource(mssql_globals_id)
+# define MSSQLLS_FETCH()	zend_mssql_globals *mssql_globals = ts_resource(mssql_globals_id)
 #else
 # define MSSQLLS_D
 # define MSSQLLS_DC
@@ -149,7 +135,6 @@ typedef struct mssql_result {
 # define MSSQLLS_CC
 # define MS_SQL_G(v)	(mssql_globals.v)
 # define MSSQLLS_FETCH()
-extern PHP_MSSQL_API php_mssql_globals mssql_globals;
 #endif
 
 #else
