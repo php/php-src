@@ -179,5 +179,13 @@ SOURCE=..\sapi\cgi\libfcgi\fcgiapp.c
 SOURCE=..\sapi\cgi\libfcgi\os_win32.c
 # End Source File
 # End Group
+# Begin Source File
+
+SOURCE=.\php4ts.rc
+# End Source File
+# Begin Source File
+
+SOURCE=.\php4ts.rc2
+# End Source File
 # End Target
 # End Project
