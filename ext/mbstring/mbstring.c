@@ -2284,7 +2284,7 @@ PHP_FUNCTION(mb_substr)
 {
 	pval **arg1, **arg2, **arg3, **arg4;
 	int argc, from, len, mblen;
-	mbfl_string string, result, *ret;
+	mbfl_string string, result, *ret = NULL;
 
 	mbfl_string_init(&string);
 	string.no_language = MBSTRG(current_language);
@@ -3726,7 +3726,7 @@ MBSTRING_API int php_mb_gpc_encoding_converter(char **str, int *len, int num, co
 		TSRMLS_DC)
 {
 	int i;
-	mbfl_string string, result, *ret;
+	mbfl_string string, result, *ret = NULL;
 	enum mbfl_no_encoding from_encoding, to_encoding;
 	mbfl_buffer_converter *convd;
 
