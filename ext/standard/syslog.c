@@ -19,6 +19,8 @@
 /* $Id$ */
 
 #include "php.h"
+
+#ifdef HAVE_SYSLOG_H
 #include "php_ini.h"
 #include "zend_globals.h"
 
@@ -261,6 +263,8 @@ PHP_FUNCTION(syslog)
 	RETURN_TRUE;
 }
 /* }}} */
+
+#endif
 
 /*
  * Local variables:

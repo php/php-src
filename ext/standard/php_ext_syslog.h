@@ -25,9 +25,9 @@
 
 #include "php_syslog.h"
 
-extern PHP_MINIT_FUNCTION(syslog);
-extern PHP_RINIT_FUNCTION(syslog);
-extern PHP_RSHUTDOWN_FUNCTION(syslog);
+PHP_MINIT_FUNCTION(syslog);
+PHP_RINIT_FUNCTION(syslog);
+PHP_RSHUTDOWN_FUNCTION(syslog);
 
 PHP_FUNCTION(openlog);
 PHP_FUNCTION(syslog);
