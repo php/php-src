@@ -63,14 +63,14 @@ function_entry session_functions[] = {
 };
 
 PHP_INI_BEGIN()
-	PHP_INI_ENTRY("session_save_path", "/tmp", PHP_INI_ALL, NULL)
-	PHP_INI_ENTRY("session_name", "PHPSESSID", PHP_INI_ALL, NULL)
-	PHP_INI_ENTRY("session_module_name", "files", PHP_INI_ALL, NULL)
-	PHP_INI_ENTRY("session_auto_start", "0", PHP_INI_ALL, NULL)
-	PHP_INI_ENTRY("session_gc_probability", "1", PHP_INI_ALL, NULL)
-	PHP_INI_ENTRY("session_gc_maxlifetime", "1440", PHP_INI_ALL, NULL)
-	PHP_INI_ENTRY("session_lifetime", "0", PHP_INI_ALL, NULL)
-	PHP_INI_ENTRY("session_serializer", "php", PHP_INI_ALL, NULL)
+	PHP_INI_ENTRY("session.save_path", "/tmp", PHP_INI_ALL, NULL)
+	PHP_INI_ENTRY("session.name", "PHPSESSID", PHP_INI_ALL, NULL)
+	PHP_INI_ENTRY("session.save_handler", "files", PHP_INI_ALL, NULL)
+	PHP_INI_ENTRY("session.auto_start", "0", PHP_INI_ALL, NULL)
+	PHP_INI_ENTRY("session.gc_probability", "1", PHP_INI_ALL, NULL)
+	PHP_INI_ENTRY("session.gc_maxlifetime", "1440", PHP_INI_ALL, NULL)
+	PHP_INI_ENTRY("session.lifetime", "0", PHP_INI_ALL, NULL)
+	PHP_INI_ENTRY("session.serialize_handler", "php", PHP_INI_ALL, NULL)
 PHP_INI_END()
 
 PS_SERIALIZER_FUNCS(php);
@@ -614,17 +614,17 @@ PHP_FUNCTION(session_destroy)
 
 static void php_rinit_session_globals(PSLS_D)
 {
-	PS(mod) = _php_find_ps_module(INI_STR("session_module_name") PSLS_CC);
+	PS(mod) = _php_find_ps_module(INI_STR("session.save_handler") PSLS_CC);
 	PS(serializer) = \
-		_php_find_ps_serializer(INI_STR("session_serializer") PSLS_CC);
+		_php_find_ps_serializer(INI_STR("session.serialize_handler") PSLS_CC);
 		
 	zend_hash_init(&PS(vars), 0, NULL, NULL, 0);
-	PS(save_path) = estrdup(INI_STR("session_save_path"));
-	PS(session_name) = estrdup(INI_STR("session_name"));
-	PS(gc_probability) = INI_INT("session_gc_probability");
-	PS(gc_maxlifetime) = INI_INT("session_gc_maxlifetime");
+	PS(save_path) = estrdup(INI_STR("session.save_path"));
+	PS(session_name) = estrdup(INI_STR("session.name"));
+	PS(gc_probability) = INI_INT("session.gc_probability");
+	PS(gc_maxlifetime) = INI_INT("session.gc_maxlifetime");
 	PS(id) = NULL;
-	PS(lifetime) = INI_INT("session_lifetime");
+	PS(lifetime) = INI_INT("session.lifetime");
 	PS(nr_open_sessions) = 0;
 	PS(mod_data) = NULL;
 }
