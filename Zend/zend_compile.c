@@ -1807,6 +1807,9 @@ void zend_do_add_static_array_element(znode *result, znode *offset, znode *expr)
 	if (offset) {
 		switch (offset->u.constant.type) {
 			case IS_CONSTANT:
+				/* Ugly hack to denote that this value has a constant index */
+				element->type |= IS_CONSTANT_INDEX;
+				/* break missing intentionally */
 			case IS_STRING:
 				zend_hash_update(result->u.constant.value.ht, offset->u.constant.value.str.val, offset->u.constant.value.str.len+1, &element, sizeof(zval *), NULL);
 				zval_dtor(&offset->u.constant);
