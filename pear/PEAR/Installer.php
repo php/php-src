@@ -254,12 +254,25 @@ class PEAR_Installer extends PEAR_Common
         }
         $pkgdir = substr($file, 0, $pos);
 */
-        $dp = opendir($tmpdir);
-        do {
-            $pkgdir = readdir($dp);
-        } while ($pkgdir{0} == '.');
 
-        $descfile = $tmpdir . DIRECTORY_SEPARATOR . $pkgdir . DIRECTORY_SEPARATOR . 'package.xml';
+        // ----- Look for existing package file
+        $descfile = $tmpdir . DIRECTORY_SEPARATOR . 'package.xml';
+
+        //  ==> XXX This part should be removed later on
+        $flag_old_format = false;
+        if (!is_file($descfile)) {
+          // ----- Look for old package .tgz archive format
+          // In this format the package.xml file was inside the package directory name
+          $dp = opendir($tmpdir);
+          do {
+              $pkgdir = readdir($dp);
+          } while ($pkgdir{0} == '.');
+
+          $descfile = $tmpdir . DIRECTORY_SEPARATOR . $pkgdir . DIRECTORY_SEPARATOR . 'package.xml';
+          $flag_old_format = true;
+          $this->log(0, "warning : you are using an archive with an old format");
+        }
+        // <== XXX This part should be removed later on
 
         if (!is_file($descfile)) {
             chdir($oldcwd);
@@ -316,7 +329,18 @@ class PEAR_Installer extends PEAR_Common
                 return $this->raiseError("no script destination directory\n",
                                          null, PEAR_ERROR_DIE);
             }
-            $tmp_path = dirname($descfile);
+
+            // don't want strange characters
+            $pkgname    = ereg_replace ('[^a-zA-Z0-9._]', '_', $pkginfo['package']);
+            $pkgversion = ereg_replace ('[^a-zA-Z0-9._\-]', '_', $pkginfo['version']);
+            $tmp_path = dirname($descfile) . DIRECTORY_SEPARATOR . $pkgname . '-' . $pkgversion;
+
+            //  ==> XXX This part should be removed later on
+            if ($flag_old_format) {
+                $tmp_path = dirname($descfile);
+            }
+            // <== XXX This part should be removed later on
+
             foreach ($pkginfo['filelist'] as $file => $atts) {
                 $this->_installFile($file, $atts, $tmp_path);
             }

@@ -132,9 +132,6 @@ class PEAR_Packager extends PEAR_Common
         $filelist = array();
         $i = 0;
 
-        // ----- Add the package XML file
-        $filelist[$i++] = $pkgfile;
-
         // Copy files -----------------------------------------------
         foreach ($pkginfo['filelist'] as $fname => $atts) {
             if (!file_exists($fname)) {
@@ -149,9 +146,15 @@ class PEAR_Packager extends PEAR_Common
         $dest_package = $this->orig_pwd . DIRECTORY_SEPARATOR . "{$pkgver}.tgz";
         $tar = new Archive_Tar($dest_package, true);
         $tar->setErrorHandling(PEAR_ERROR_PRINT);
-        if (!$tar->createModify($filelist, $pkgver)) {
+        // ----- Creates with the package.xml file
+        if (!$tar->create($pkgfile)) {
             return $this->raiseError('an error ocurred during package creation');
         }
+        // ----- Add the content of the package
+        if (!$tar->addModify($filelist, $pkgver)) {
+            return $this->raiseError('an error ocurred during package creation');
+        }
+
         $this->log(1, "Package $dest_package done");
         return $dest_package;
     }
