@@ -42,6 +42,21 @@ Package=<4>
 
 ###############################################################################
 
+Project: "php4aolserver"=..\sapi\aolserver\php4aolserver.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name php4dllts
+    End Project Dependency
+}}}
+
+###############################################################################
+
 Project: "php4apache"=..\sapi\apache\php4apache.dsp - Package Owner=<4>
 
 Package=<5>
