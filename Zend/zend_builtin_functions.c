@@ -1253,7 +1253,7 @@ static int add_constant_info(zend_constant *constant, void *arg TSRMLS_DC)
 ZEND_FUNCTION(get_loaded_extensions)
 {
 	if (ZEND_NUM_ARGS() != 0) {
-		WRONG_PARAM_COUNT;
+		ZEND_WRONG_PARAM_COUNT();
 	}
 
 	array_init(return_value);
@@ -1267,7 +1267,7 @@ ZEND_FUNCTION(get_loaded_extensions)
 ZEND_FUNCTION(get_defined_constants)
 {
 	if (ZEND_NUM_ARGS() != 0) {
-		WRONG_PARAM_COUNT;
+		ZEND_WRONG_PARAM_COUNT();
 	}
 
 	array_init(return_value);
@@ -1314,7 +1314,7 @@ ZEND_FUNCTION(debug_backtrace)
 	int frames_on_stack = 0;
 
 	if (ZEND_NUM_ARGS()) {
-		WRONG_PARAM_COUNT;
+		ZEND_WRONG_PARAM_COUNT();
 	}
 
 	while (--args >= EG(argument_stack).elements) {
@@ -1446,7 +1446,7 @@ ZEND_FUNCTION(extension_loaded)
 	zval **extension_name;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &extension_name)) {
-		WRONG_PARAM_COUNT;
+		ZEND_WRONG_PARAM_COUNT();
 	}
 
 	convert_to_string_ex(extension_name);
@@ -1468,7 +1468,7 @@ ZEND_FUNCTION(get_extension_funcs)
 	zend_function_entry *func;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &extension_name)) {
-		WRONG_PARAM_COUNT;
+		ZEND_WRONG_PARAM_COUNT();
 	}
 
 	convert_to_string_ex(extension_name);
