@@ -7,7 +7,7 @@ Bug #20240 (order of destructor calls)
 
 class test
 {
-    var $member;
+    public $member;
 
     function test() {
         $this->member = 1;
