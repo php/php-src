@@ -37,6 +37,10 @@ PHP_FUNCTION(openssl_sign);
 PHP_FUNCTION(openssl_verify);
 PHP_FUNCTION(openssl_seal);
 PHP_FUNCTION(openssl_open);
+PHP_FUNCTION(openssl_private_encrypt);
+PHP_FUNCTION(openssl_private_decrypt);
+PHP_FUNCTION(openssl_public_encrypt);
+PHP_FUNCTION(openssl_public_decrypt);
 
 PHP_FUNCTION(openssl_pkcs7_verify);
 PHP_FUNCTION(openssl_pkcs7_decrypt);

@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
    | Authors: Stig Venaas <venaas@php.net>                                |
    | Wez Furlong <wez@thebrainroom.com>                                   |
+   | Assymetric en/decryption code by Sascha Kettler <kettler@gmx.net>    |
    +----------------------------------------------------------------------+
  */
 
@@ -62,7 +63,11 @@ function_entry openssl_functions[] = {
 	PHP_FE(openssl_pkcs7_sign,			  NULL)
 	PHP_FE(openssl_pkcs7_encrypt,		  NULL)
 
-/* useful to figure out whats going on! */
+ 	PHP_FE(openssl_private_encrypt,    arg2of3_force_ref)
+ 	PHP_FE(openssl_private_decrypt,    arg2of3_force_ref)
+ 	PHP_FE(openssl_public_encrypt,     arg2of3_force_ref)
+ 	PHP_FE(openssl_public_decrypt,     arg2of3_force_ref)
+
 	PHP_FE(openssl_error_string, NULL)
 	{NULL, NULL, NULL}
 };
@@ -127,6 +132,19 @@ PHP_MINIT_FUNCTION(openssl)
 	REGISTER_LONG_CONSTANT("PKCS7_NOATTR", PKCS7_NOATTR, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PKCS7_BINARY", PKCS7_BINARY, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PKCS7_NOSIGS", PKCS7_NOSIGS, CONST_CS|CONST_PERSISTENT);
+
+ 	REGISTER_LONG_CONSTANT("OPENSSL_PKCS1_PADDING", 
+ 			       RSA_PKCS1_PADDING,
+ 			       CONST_CS|CONST_PERSISTENT);
+ 	REGISTER_LONG_CONSTANT("OPENSSL_SSLV23_PADDING", 
+ 			       RSA_SSLV23_PADDING,
+ 			       CONST_CS|CONST_PERSISTENT);
+ 	REGISTER_LONG_CONSTANT("OPENSSL_NO_PADDING", 
+ 			       RSA_NO_PADDING,
+ 			       CONST_CS|CONST_PERSISTENT);
+ 	REGISTER_LONG_CONSTANT("OPENSSL_PKCS1_OAEP_PADDING", 
+ 			       RSA_PKCS1_OAEP_PADDING,
+ 			       CONST_CS|CONST_PERSISTENT);
 
 	return SUCCESS;
 }
@@ -332,6 +350,304 @@ static EVP_PKEY * php_openssl_evp_from_zval(zval ** val, int public_key, char * 
 	return key;
 }
 
+/* {{{ proto bool openssl_private_encrypt(string data, string crypted, mixed key [, int padding])
+   Encrypt data with private key */
+PHP_FUNCTION(openssl_private_encrypt)
+{
+	zval **key, **data, **crypted, **pad;
+	EVP_PKEY *pkey;
+	int cryptedlen;
+	unsigned char *cryptedbuf = NULL;
+	int successful = 0;
+	int padding;
+	long keyresource = -1;
+
+	switch (ZEND_NUM_ARGS()) {
+	case 3:
+		if (zend_get_parameters_ex(3, &data, &crypted, &key) == FAILURE) {
+			WRONG_PARAM_COUNT;
+		}
+		padding = RSA_PKCS1_PADDING;
+		break;
+	case 4:
+		if (zend_get_parameters_ex(4, &data, &crypted, &key, &pad) == FAILURE) {
+			WRONG_PARAM_COUNT;
+		}
+		convert_to_long_ex(pad);
+		padding = Z_LVAL_PP(pad);
+		break;
+	default:
+		WRONG_PARAM_COUNT;
+	}
+
+	RETVAL_FALSE;
+	
+	convert_to_string_ex(data);
+
+	pkey = php_openssl_evp_from_zval(key, 0, "", 0, &keyresource);
+
+	if (pkey == NULL)	{
+		zend_error(E_WARNING, "%s(): key param is not a valid private key", get_active_function_name());
+		RETURN_FALSE;
+	}
+	
+	cryptedlen = EVP_PKEY_size(pkey);
+	cryptedbuf = emalloc(cryptedlen + 1);
+
+	switch (pkey->type) {
+		case EVP_PKEY_RSA:
+		case EVP_PKEY_RSA2:
+			successful =  (RSA_private_encrypt(Z_STRLEN_PP(data), 
+						Z_STRVAL_PP(data), 
+						cryptedbuf, 
+						pkey->pkey.rsa, 
+						padding) == cryptedlen);
+			break;
+		default:
+			zend_error(E_WARNING, "%s(): key type not supported in this PHP build!");
+	}
+
+	if (successful) {
+		zval_dtor(*crypted);
+		cryptedbuf[cryptedlen] = '\0';
+		ZVAL_STRINGL(*crypted, cryptedbuf, cryptedlen, 0);
+		cryptedbuf = NULL;
+		RETVAL_TRUE;
+	}
+	if (cryptedbuf)
+		efree(cryptedbuf);
+	if (keyresource == -1)
+		EVP_PKEY_free(pkey);
+}
+/* }}} */
+
+/* {{{ proto bool openssl_private_decrypt(string data, string crypted, mixed key [, int padding])
+   Decrypt data with private key */
+PHP_FUNCTION(openssl_private_decrypt)
+{
+	zval **key, **data, **crypted, **pad;
+	EVP_PKEY *pkey;
+	int cryptedlen;
+	unsigned char *cryptedbuf;
+	unsigned char *crypttemp;
+	int successful = 0;
+	int padding;
+	long keyresource = -1;
+
+	switch (ZEND_NUM_ARGS()) {
+	case 3:
+		if (zend_get_parameters_ex(3, &data, &crypted, &key) == FAILURE) {
+			WRONG_PARAM_COUNT;
+		}
+		padding = RSA_PKCS1_PADDING;
+		break;
+	case 4:
+		if (zend_get_parameters_ex(4, &data, &crypted, &key, &pad) == FAILURE) {
+			WRONG_PARAM_COUNT;
+		}
+		convert_to_long_ex(pad);
+		padding = Z_LVAL_PP(pad);
+		break;
+	default:
+		WRONG_PARAM_COUNT;
+	}
+	convert_to_string_ex(data);
+
+	RETVAL_FALSE;
+	
+	pkey = php_openssl_evp_from_zval(key, 0, "", 0, &keyresource);
+	if (pkey == NULL)	{
+		zend_error(E_WARNING, "%s(): key param is not a valid private key", get_active_function_name());
+		RETURN_FALSE;
+	}
+	
+	cryptedlen = EVP_PKEY_size(pkey);
+	crypttemp = emalloc(cryptedlen + 1);
+
+	switch (pkey->type) {
+		case EVP_PKEY_RSA:
+		case EVP_PKEY_RSA2:
+			cryptedlen = RSA_private_decrypt(Z_STRLEN_PP(data), 
+					Z_STRVAL_PP(data), 
+					crypttemp, 
+					pkey->pkey.rsa, 
+					padding);
+			if (cryptedlen != -1) {
+				cryptedbuf = emalloc(cryptedlen + 1);
+				memcpy(cryptedbuf, crypttemp, cryptedlen);
+				successful = 1;
+			}
+			break;
+		default:
+			zend_error(E_WARNING, "%s(): key type not supported in this PHP build!");
+	}
+
+	efree(crypttemp);
+
+	if (successful) {
+		zval_dtor(*crypted);
+		cryptedbuf[cryptedlen] = '\0';
+		ZVAL_STRINGL(*crypted, cryptedbuf, cryptedlen, 0);
+		cryptedbuf = NULL;
+		RETVAL_TRUE;
+	}
+
+	if (keyresource == -1)
+		EVP_PKEY_free(pkey);
+	if (cryptedbuf)
+		efree(cryptedbuf);
+}
+/* }}} */
+
+/* {{{ proto bool openssl_public_encrypt(string data, string crypted, mixed key [, int padding])
+   Encrypt data with public key */
+PHP_FUNCTION(openssl_public_encrypt)
+{
+	zval **key, **data, **crypted, **pad;
+	EVP_PKEY *pkey;
+	int cryptedlen;
+	unsigned char *cryptedbuf;
+	int successful = 0;
+	long keyresource = -1;
+	int padding;
+
+	switch (ZEND_NUM_ARGS()) {
+	case 3:
+		if (zend_get_parameters_ex(3, &data, &crypted, &key) == FAILURE) {
+			WRONG_PARAM_COUNT;
+		}
+		padding = RSA_PKCS1_PADDING;
+		break;
+	case 4:
+		if (zend_get_parameters_ex(4, &data, &crypted, &key, &pad) == FAILURE) {
+			WRONG_PARAM_COUNT;
+		}
+		convert_to_long_ex(pad);
+		padding = Z_LVAL_PP(pad);
+		break;
+	default:
+		WRONG_PARAM_COUNT;
+	}
+	convert_to_string_ex(data);
+
+	RETVAL_FALSE;
+	
+	pkey = php_openssl_evp_from_zval(key, 1, NULL, 0, &keyresource);
+	if (pkey == NULL)	{
+		zend_error(E_WARNING, "%s(): key param is not a valid public key", get_active_function_name());
+		RETURN_FALSE;
+	}
+
+	cryptedlen = EVP_PKEY_size(pkey);
+	cryptedbuf = emalloc(cryptedlen + 1);
+
+	switch (pkey->type) {
+		case EVP_PKEY_RSA:
+		case EVP_PKEY_RSA2:
+			successful = (RSA_public_encrypt(Z_STRLEN_PP(data), 
+						Z_STRVAL_PP(data), 
+						cryptedbuf, 
+						pkey->pkey.rsa, 
+						padding) == cryptedlen);
+			break;
+		default:
+			zend_error(E_WARNING, "%s(): key type not supported in this PHP build!");
+
+	}
+
+	if (successful) {
+		zval_dtor(*crypted);
+		cryptedbuf[cryptedlen] = '\0';
+		ZVAL_STRINGL(*crypted, cryptedbuf, cryptedlen, 0);
+		cryptedbuf = NULL;
+		RETVAL_TRUE;
+	}
+	if (keyresource == -1)
+		EVP_PKEY_free(pkey);
+	if (cryptedbuf)
+		efree(cryptedbuf);
+}
+/* }}} */
+
+/* {{{ proto bool openssl_public_decrypt(string data, string crypted, resource key [, int padding])
+   Decrypt data with public key */
+PHP_FUNCTION(openssl_public_decrypt)
+{
+	zval **key, **data, **crypted, **pad;
+	EVP_PKEY *pkey;
+	int cryptedlen;
+	unsigned char *cryptedbuf;
+	unsigned char *crypttemp;
+	int successful = 0;
+	long keyresource = -1;
+	int padding;
+
+	switch (ZEND_NUM_ARGS()) {
+	case 3:
+		if (zend_get_parameters_ex(3, &data, &crypted, &key) == FAILURE) {
+			WRONG_PARAM_COUNT;
+		}
+		padding = RSA_PKCS1_PADDING;
+		break;
+	case 4:
+		if (zend_get_parameters_ex(4, &data, &crypted, &key, &pad) == FAILURE) {
+			WRONG_PARAM_COUNT;
+		}
+		convert_to_long_ex(pad);
+		padding = Z_LVAL_PP(pad);
+		break;
+	default:
+		WRONG_PARAM_COUNT;
+	}
+	convert_to_string_ex(data);
+	RETVAL_FALSE;
+	
+	pkey = php_openssl_evp_from_zval(key, 1, NULL, 0, &keyresource);
+	if (pkey == NULL)	{
+		zend_error(E_WARNING, "%s(): key param is not a valid public key", get_active_function_name());
+		RETURN_FALSE;
+	}
+
+	cryptedlen = EVP_PKEY_size(pkey);
+	crypttemp = emalloc(cryptedlen + 1);
+
+	switch (pkey->type) {
+		case EVP_PKEY_RSA:
+		case EVP_PKEY_RSA2:
+			cryptedlen = RSA_public_decrypt(Z_STRLEN_PP(data), 
+					Z_STRVAL_PP(data), 
+					crypttemp, 
+					pkey->pkey.rsa, 
+					padding);
+			if (cryptedlen != -1) {
+				cryptedbuf = emalloc(cryptedlen + 1);
+				memcpy(cryptedbuf, crypttemp, cryptedlen);
+				successful = 1;
+			}
+			break;
+			
+		default:
+			zend_error(E_WARNING, "%s(): key type not supported in this PHP build!");
+		 
+	}
+
+	efree(crypttemp);
+
+	if (successful) {
+		zval_dtor(*crypted);
+		cryptedbuf[cryptedlen] = '\0';
+		ZVAL_STRINGL(*crypted, cryptedbuf, cryptedlen, 0);
+		cryptedbuf = NULL;
+		RETVAL_TRUE;
+	}
+
+	if (cryptedbuf)
+		efree(cryptedbuf);
+	if (keyresource == -1)
+		EVP_PKEY_free(pkey);
+}
+/* }}} */
+
 
 /* {{{ proto int openssl_get_privatekey(string key [, string passphrase])
    Get private key */
@@ -360,6 +676,9 @@ PHP_FUNCTION(openssl_get_privatekey)
 	}
 }
 /* }}} */
+
+
+/* {{{ openssl -> PHP "bridging" */
 
 static void add_assoc_name_entry(zval * val, char * key, X509_NAME * name, int shortname)
 {
@@ -464,8 +783,9 @@ static time_t asn1_time_to_time_t(ASN1_UTCTIME * timestr)
 
 	return ret;
 }
+/* }}} */
 
-/* proto array openssl_x509_parse(mixed x509[, bool shortnames=true])
+/* {{{ proto array openssl_x509_parse(mixed x509[, bool shortnames=true])
 	returns an array of the fields/values of the cert */
 PHP_FUNCTION(openssl_x509_parse)
 {
@@ -554,7 +874,7 @@ PHP_FUNCTION(openssl_x509_parse)
 }
 /* }}} */
 
-
+/* {{{ load_all_certs_from_file */
 static STACK_OF(X509) * load_all_certs_from_file(char *certfile)
 {
    STACK_OF(X509_INFO) *sk=NULL;
@@ -601,7 +921,9 @@ end:
 
 	return ret;
 }
+/* }}} */
 
+/* {{{ check_cert */
 static int check_cert(X509_STORE *ctx, X509 *x, STACK_OF(X509) *untrustedchain, int purpose)
 {
 	int ret=0;
@@ -623,7 +945,7 @@ static int check_cert(X509_STORE *ctx, X509 *x, STACK_OF(X509) *untrustedchain, 
 
 	return ret;
 }
-
+/* }}} */
 
 /* {{{ proto int openssl_x509_checkpurpose(mixed x509cert, int purpose, array cainfo[, string untrustedfile])
 	check the cert to see if it can be used for the purpose in purpose. cainfo holds information about trusted CAs */
@@ -751,9 +1073,9 @@ PHP_FUNCTION(openssl_x509_free)
 }
 /* }}} */
 
-/* calist is an array containing file and directory names.
-	create a certificate store and add those certs to it for
-	use in verification.
+/* 
+ * calist is an array containing file and directory names.  create a
+ * certificate store and add those certs to it for use in verification.
 */
 static X509_STORE * setup_verify(zval * calist)
 {
@@ -1182,10 +1504,6 @@ clean_exit:
 }
 /* }}} */
 
-
-
-
-
 /* {{{ proto bool openssl_pkcs7_decrypt(string infilename, string outfilename, mixed recipcert[, mixed recipkey])
 	decrypt the S/MIME message in the file name infilename and output the results to the file name outfilename.  recipcert is a cert for one of the recipients. recipkey specifies the private key matching recipcert, if recipcert does not include the key */
 
@@ -1542,4 +1860,5 @@ static void _php_x509_free(zend_rsrc_list_entry *rsrc)
  * tab-width: 8
  * c-basic-offset: 8
  * End:
+ * vim: sw=4 ts=4 tw=78
  */
