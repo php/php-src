@@ -60,6 +60,9 @@ static int le_ps_font, le_ps_enc;
 #include <gdfontmb.h> /* 3 Medium bold font */
 #include <gdfontl.h>  /* 4 Large font */
 #include <gdfontg.h>  /* 5 Giant font */
+#ifdef HAVE_GD_WBMP
+#include <wbmp.h>
+#endif
 #ifdef ENABLE_GD_TTF
 # include "gdttf.h"
 #endif
@@ -104,6 +107,7 @@ static void _php_image_bw_convert(gdImagePtr im_org, gdIOCtx *out, int threshold
  */
 function_entry gd_functions[] = {
 	PHP_FE(imagearc,								NULL)
+	PHP_FE(imageellipse,							NULL)
 	PHP_FE(imagechar,								NULL)
 	PHP_FE(imagecharup,								NULL)
 	PHP_FE(imagecolorallocate,						NULL)
@@ -140,10 +144,6 @@ function_entry gd_functions[] = {
 	PHP_FE(imagecolorclosestalpha,					NULL)
 	PHP_FE(imagecolorexactalpha,					NULL)
 	PHP_FE(imagecopyresampled,						NULL)
-#endif
-
-#if HAVE_GD_IMAGEELLIPSE
-	PHP_FE(imageellipse,							NULL)
 #endif
 
 #if HAVE_GD_IMAGESETTILE
@@ -648,7 +648,6 @@ PHP_FUNCTION(imagesetthickness)
 }
 /* }}} */
 
-#ifdef HAVE_GD_IMAGEELLIPSE  /* this function is missing from GD 2.0.1 */
 /* {{{ proto void imageellipse(resource im, int cx, int cy, int w, int h, int color)
    Draw an ellipse */
 PHP_FUNCTION(imageellipse)
@@ -668,12 +667,15 @@ PHP_FUNCTION(imageellipse)
 	convert_to_long_ex(h);
 	convert_to_long_ex(color);
 
+#ifdef HAVE_GD_IMAGEELLIPSE  /* this function is missing from GD 2.0.1 */
 	gdImageEllipse(im, Z_LVAL_PP(cx), Z_LVAL_PP(cy), Z_LVAL_PP(w), Z_LVAL_PP(h), Z_LVAL_PP(color));
+#else
+	gdImageArc(im, Z_LVAL_PP(cx), Z_LVAL_PP(cy), Z_LVAL_PP(w), Z_LVAL_PP(h), 0, 360, Z_LVAL_PP(color));
+#endif
 
 	RETURN_TRUE;
 }
 /* }}} */
-#endif
 
 /* {{{ proto void imagefilledellipse(resource im, int cx, int cy, int w, int h, int color)
    Draw an ellipse */
@@ -979,7 +981,7 @@ static int _php_image_type (char data[8])
 		gdIOCtx *io_ctx;
 		io_ctx = gdNewDynamicCtx (8, data);
 		if (io_ctx) {
-			if (getmbi(gdGetC, io_ctx) == 0 && skipheader(gdGetC, io_ctx) == 0 ) {
+			if (getmbi((int(*)(void*))gdGetC, io_ctx) == 0 && skipheader((int(*)(void*))gdGetC, io_ctx) == 0 ) {
 				io_ctx->free(io_ctx);
 				return PHP_GDIMG_TYPE_WBM;
 			} else
