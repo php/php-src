@@ -221,18 +221,12 @@ PHP_FUNCTION(file_register_wrapper)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &protocol, &protocol_len, &classname, &classname_len) == FAILURE) {
 		RETURN_FALSE;
 	}
-
-	if (!PG(allow_url_fopen)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "fopen wrappers have been disabled");
-		RETURN_FALSE;
-	}
 	
 	uwrap = (struct php_user_stream_wrapper *)ecalloc(1, sizeof(*uwrap));
 	uwrap->protoname = estrndup(protocol, protocol_len);
 	uwrap->classname = estrndup(classname, classname_len);
 	uwrap->wrapper.wops = &user_stream_wops;
 	uwrap->wrapper.abstract = uwrap;
-	uwrap->wrapper.is_url = 1; /* allow safe_mode to disallow this wrapper if enabled */
 
 	zend_str_tolower(uwrap->classname, classname_len);
 	rsrc_id = ZEND_REGISTER_RESOURCE(NULL, uwrap, le_protocols);
