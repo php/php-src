@@ -466,12 +466,14 @@ void zend_deactivate(CLS_D ELS_DC)
 }
 
 
+BEGIN_EXTERN_C()
 ZEND_API void zend_message_dispatcher(long message, void *data)
 {
 	if (zend_message_dispatcher_p) {
 		zend_message_dispatcher_p(message, data);
 	}
 }
+END_EXTERN_C()
 
 
 ZEND_API int zend_get_ini_entry(char *name, uint name_length, zval *contents)

@@ -298,7 +298,10 @@ END_EXTERN_C()
 #define HANDLE_BLOCK_INTERRUPTIONS()		if (zend_block_interruptions) { zend_block_interruptions(); }
 #define HANDLE_UNBLOCK_INTERRUPTIONS()		if (zend_unblock_interruptions) { zend_unblock_interruptions(); }
 
+BEGIN_EXTERN_C()
 ZEND_API void zend_message_dispatcher(long message, void *data);
+END_EXTERN_C()
+
 ZEND_API int zend_get_ini_entry(char *name, uint name_length, zval *contents);
 
 
