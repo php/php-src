@@ -217,9 +217,9 @@ extern void xslt_call_function(char *name,
                                zval **user_args, 
                                zval **retval)
 {
-	zval   ***argv;   /* Argument container, maps around for call_user_function_ex() */
-	int       error;  /* Error container */
-	int       idx;    /* Idx, when looping through and free'ing the arguments */
+	zval   ***argv;      /* Argument container, maps around for call_user_function_ex() */
+	int       error;     /* Error container */
+	int       idx;       /* Idx, when looping through and free'ing the arguments */
 	TSRMLS_FETCH();      /* For TS mode, fetch the executor globals */
 
 	argv = emalloc(argc * sizeof(zval **));
