@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
    | Authors: Stig Sæther Bakken <ssb@fast.no>                            |
    |          Thies C. Arntzen <thies@thieso.net>                         |
+   |          Maxim Maletsky <maxim@maxim.cx>                             |
    |                                                                      |
    | Collection support by Andy Sautins <asautins@veripost.net>           |
    | Temporary LOB support by David Benson <dbenson@mancala.com>          |
