@@ -25,7 +25,7 @@
 /* You should tweak config.m4 so this symbol (or some else suitable)
    gets defined.
 */
-#ifdef HAVE_EXTNAME
+#if HAVE_EXTNAME
 
 #ifdef ZTS
 int extname_globals_id;
