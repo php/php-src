@@ -23,6 +23,31 @@ AC_DEFUN(PHP_GD_JPEG,[
         ]) 
 ])
 
+AC_DEFUN(PHP_GD_PNG,[
+        AC_MSG_CHECKING([for libpng (needed by gd-2.0)])
+        AC_ARG_WITH(png-dir,
+        [  --with-png-dir[=DIR]   GD: png dir for gd-2.0+],[
+          AC_MSG_RESULT(yes)
+          if test "$withval" = "yes"; then
+            withval="/usr/local"
+          fi
+          jold_LIBS=$LIBS
+          LIBS="$LIBS -L$withval/lib"
+          AC_CHECK_LIB(png,png_info_init, [LIBS="$LIBS -lpng"],[AC_MSG_RESULT(no)],)
+          LIBS=$jold_LIBS
+          if test "$shared" = "yes"; then
+            GD_LIBS="$GD_LIBS -lpng"
+            GD_LFLAGS="$GD_LFLAGS -L$withval/lib"
+          else
+            PHP_ADD_LIBRARY_WITH_PATH(png, $withval/lib)
+          fi
+          LIBS="$LIBS -L$withval/lib -lpng"
+        ],[
+          AC_MSG_RESULT(no)
+          AC_MSG_WARN(If configure fails try --with-png-dir=<DIR>)
+        ]) 
+])
+
 
 AC_DEFUN(PHP_GD_XPM,[
         AC_MSG_CHECKING([for libXpm (needed by gd-1.8+)])
@@ -45,7 +70,30 @@ AC_DEFUN(PHP_GD_XPM,[
         ]) 
 ])
 
-
+AC_DEFUN(PHP_GD_FREETYPE,[
+		AC_MSG_CHECKING([for freetype(2) (needed by gd 2.0+)])
+		AC_ARG_WITH(freetype-dir,
+		[  --with-freetype-dir[=DIR]    GD: freetype 2 dir for gd 2.0+],[
+			for i in /usr /usr/local "$CHECK_FREETYPE" ; do
+			if test -f "$i/include/freetype2/freetype/freetype.h"; then
+				FREETYPE2_DIR="$i"
+				FREETYPE2_INC_DIR="$i/include/freetype/freetype2"
+			fi
+			done
+			if test -n "$FREETYPE2_DIR" ; then
+				AC_DEFINE(HAVE_LIBFREETYPE,1,[ ])
+				PHP_ADD_LIBRARY_WITH_PATH(freetype, $FREETYPE2_DIR/lib)
+				PHP_ADD_INCLUDE($FREETYPE2_INC_DIR)
+				AC_MSG_RESULT(yes)
+			else
+				AC_MSG_RESULT(no (freetype2 not found))
+			fi
+		],[
+			AC_MSG_RESULT(no)
+			AC_MSG_RESULT(If configure fails, try --with-freetype2-dir=<DIR>)
+	   ])
+])
+ 
 AC_DEFUN(PHP_GD_CHECK_VERSION,[
         AC_CHECK_LIB(z,  compress,      LIBS="-lz $LIBS",,)
         AC_CHECK_LIB(png,png_info_init, LIBS="-lpng $LIBS",,)
@@ -58,6 +106,9 @@ AC_DEFUN(PHP_GD_CHECK_VERSION,[
         AC_CHECK_LIB(gd, gdImageWBMP,            [AC_DEFINE(HAVE_GD_WBMP, 1, [ ])])
         AC_CHECK_LIB(gd, gdImageCreateFromJpeg,  [AC_DEFINE(HAVE_GD_JPG, 1, [ ])])
         AC_CHECK_LIB(gd, gdImageCreateFromXpm,   [AC_DEFINE(HAVE_GD_XPM, 1, [ ])])
+        AC_CHECK_LIB(gd, gdImageCreateTrueColor,   [AC_DEFINE(HAVE_LIBGD20, 1, [ ])])
+        AC_CHECK_LIB(gd, gdImageSetTile,   			[AC_DEFINE(HAVE_GD_IMAGESETTILE, 1, [ ])])
+        AC_CHECK_LIB(gd, gdImageSetBrush,   			[AC_DEFINE(HAVE_GD_IMAGESETBRUSH, 1, [ ])])
 ])
 
 
@@ -84,7 +135,9 @@ AC_ARG_WITH(gd,
   PHP_WITH_SHARED
   old_withval=$withval
   PHP_GD_JPEG
+  PHP_GD_PNG
   PHP_GD_XPM
+  PHP_GD_FREETYPE
   withval=$old_withval
 
   AC_MSG_CHECKING(whether to include GD support)
@@ -183,6 +236,8 @@ dnl Check the capabilities of GD lib...
 
 if test "$with_gd" != "no" && test "$ac_cv_lib_gd_gdImageLine" = "yes"; then
   CHECK_TTF="yes"
+
+ 
   AC_ARG_WITH(ttf,
   [  --with-ttf[=DIR]        GD: Include FreeType 1.x support],[
     if test $withval = "no" ; then
@@ -191,7 +246,7 @@ if test "$with_gd" != "no" && test "$ac_cv_lib_gd_gdImageLine" = "yes"; then
       CHECK_TTF="$withval"
     fi
   ])
-
+ 
   AC_MSG_CHECKING(whether to include FreeType 1.x support)
   if test -n "$CHECK_TTF" ; then
     for i in /usr /usr/local "$CHECK_TTF" ; do
