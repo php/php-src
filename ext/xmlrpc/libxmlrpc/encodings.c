@@ -34,7 +34,13 @@
 static const char rcsid[] = "#(@) $Id$";
 
 #include <errno.h>
+
+#ifdef HAVE_GICONV_H
+#include <giconv.h>
+#else
 #include <iconv.h>
+#endif
+
 #include "encodings.h"
 
 static char* convert(const char* src, int src_len, int *new_len, const char* from_enc, const char* to_enc) {
