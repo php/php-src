@@ -28,6 +28,8 @@ PHP 4                                                                      NEWS
   --enable-memory-limit. (Andrey)
 - Added improved JPEG 2000 support for getimagesize(). (Marcus, Adam Wright)
 - Added XBM and WBMP support for getimagesize(). (Marcus)
+- Added KOI8-R, CP866, and CP1251 support for htmlentities().
+  (Antony Dovgal <tony2001 at phpclub dot net>, Moriyoshi)
 - Fixed a bug in GD's truecolor TTF handling. (Derick)
 - Fixed several 64-bit problems. (Dave)
 - Fixed several errors in hwapi extension. Objects weren't handled properly. (Uwe)
