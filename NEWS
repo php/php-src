@@ -50,7 +50,6 @@ PHP                                                                        NEWS
 - Added stream_copy_to_stream() function. (Wez)
 - Added memory mapping support under win32 to improve performance of
   readfile(), fpassthru() and some internal streams operations. (Wez)
-- Added DBA handler 'inifile' to support ini files. (Marcus)
 - Added input filter support. See README.input_filter. (Rasmus)
 - Added "session.hash_function" and "session.hash_bits_per_character". (Sascha)
 - Added lightweight streaming input abstraction to the Zend Engine scanners
