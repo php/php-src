@@ -146,7 +146,9 @@ ZEND_API void _efree(void *ptr)
 	ALS_FETCH();
 
 #if ZEND_DEBUG
-	_mem_block_check(ptr, 1, filename, lineno);
+	if (!_mem_block_check(ptr, 1, filename, lineno)) {
+		return;
+	}
 	memset(ptr, 0x5a, p->size);
 #endif
 
@@ -364,6 +366,23 @@ ZEND_API void shutdown_memory_manager(int silent, int clean_cache)
 
 
 #if ZEND_DEBUG
+void zend_debug_alloc_output(char *format, ...)
+{
+	char output_buf[256];
+	va_list args;
+
+	va_start(args, format);
+	vsprintf(output_buf, format, args);
+	va_end(args);
+
+#if WIN32||WINNT
+	OutputDebugString(output_buf);
+#else
+	fprintf(stderr, output_buf);
+#endif
+}
+
+
 ZEND_API int _mem_block_check(void *ptr, int silent, char *filename, int lineno)
 {
 	mem_header *p = (mem_header *) ((char *)ptr - sizeof(mem_header) - PLATFORM_PADDING);
@@ -380,20 +399,20 @@ ZEND_API int _mem_block_check(void *ptr, int silent, char *filename, int lineno)
 		no_cache_notice=1;
 	}
 	if (!silent) {
-		fprintf(stderr,"---------------------------------------\n");
-		fprintf(stderr,"Block 0x%0.8lX status at %s:%d:\n", (long) p, filename, lineno);
-		fprintf(stderr,"%10s\t","Beginning:  ");
+		zend_debug_alloc_output("---------------------------------------\n");
+		zend_debug_alloc_output("Block 0x%0.8lX status at %s:%d:\n", (long) p, filename, lineno);
+		zend_debug_alloc_output("%10s\t","Beginning:  ");
 	}
 
 	switch (p->magic) {
 		case MEM_BLOCK_START_MAGIC:
 			if (!silent) {
-				fprintf(stderr, "OK (allocated on %s:%d, %d bytes)\n", p->filename, p->lineno, p->size);
+				zend_debug_alloc_output("OK (allocated on %s:%d, %d bytes)\n", p->filename, p->lineno, p->size);
 			}
 			break; /* ok */
 		case MEM_BLOCK_FREED_MAGIC:
 			if (!silent) {
-				fprintf(stderr,"Freed\n");
+				zend_debug_alloc_output("Freed\n");
 				had_problems=1;
 			} else {
 				return _mem_block_check(ptr, 0, filename, lineno);
@@ -402,7 +421,7 @@ ZEND_API int _mem_block_check(void *ptr, int silent, char *filename, int lineno)
 		case MEM_BLOCK_CACHED_MAGIC:
 			if (!silent) {
 				if (!no_cache_notice) {
-					fprintf(stderr,"Cached (allocated on %s:%d, %d bytes)\n", p->filename, p->lineno, p->size);
+					zend_debug_alloc_output("Cached (allocated on %s:%d, %d bytes)\n", p->filename, p->lineno, p->size);
 					had_problems=1;
 				}
 			} else {
@@ -413,7 +432,7 @@ ZEND_API int _mem_block_check(void *ptr, int silent, char *filename, int lineno)
 			break;
 		default:
 			if (!silent) {
-				fprintf(stderr,"Overrun (magic=0x%0.8lX, expected=0x%0.8lX)\n", p->magic, MEM_BLOCK_START_MAGIC);
+				zend_debug_alloc_output("Overrun (magic=0x%0.8lX, expected=0x%0.8lX)\n", p->magic, MEM_BLOCK_START_MAGIC);
 			} else {
 				return _mem_block_check(ptr, 0, filename, lineno);
 			}
@@ -442,21 +461,21 @@ ZEND_API int _mem_block_check(void *ptr, int silent, char *filename, int lineno)
 			}
 		}
 
-		fprintf(stderr,"%10s\t", "End:");
-		fprintf(stderr,"Overflown (magic=0x%0.8lX instead of 0x%0.8lX)\n", 
+		zend_debug_alloc_output("%10s\t", "End:");
+		zend_debug_alloc_output("Overflown (magic=0x%0.8lX instead of 0x%0.8lX)\n", 
 				*((long *)(((char *) p) + sizeof(mem_header)+p->size+PLATFORM_PADDING+END_ALIGNMENT(p->size))), MEM_BLOCK_END_MAGIC);
-		fprintf(stderr,"%10s\t","");
+		zend_debug_alloc_output("%10s\t","");
 		if (overflows>=sizeof(long)) {
-			fprintf(stderr, "At least %d bytes overflown\n", sizeof(long));
+			zend_debug_alloc_output("At least %d bytes overflown\n", sizeof(long));
 		} else {
-			fprintf(stderr, "%d byte(s) overflown\n", overflows);
+			zend_debug_alloc_output("%d byte(s) overflown\n", overflows);
 		}
 	} else if (!silent) {
-		fprintf(stderr,"%10s\t", "End:");
+		zend_debug_alloc_output("%10s\t", "End:");
 		if (valid_beginning) {
-			fprintf(stderr,"OK\n");
+			zend_debug_alloc_output("OK\n");
 		} else {
-			fprintf(stderr,"Unknown\n");
+			zend_debug_alloc_output("Unknown\n");
 		}
 	}
 
@@ -467,7 +486,7 @@ ZEND_API int _mem_block_check(void *ptr, int silent, char *filename, int lineno)
 	}
 		
 	if (!silent) {
-		fprintf(stderr,"---------------------------------------\n");
+		zend_debug_alloc_output("---------------------------------------\n");
 	}
 	return ((!had_problems) ? 1 : 0);
 }
@@ -482,8 +501,8 @@ ZEND_API void _full_mem_check(int silent, char *filename, uint lineno)
 	p = AG(head);
 	
 
-	fprintf(stderr,"------------------------------------------------\n");
-	fprintf(stderr,"Full Memory Check at %s:%d\n", filename, lineno);
+	zend_debug_alloc_output("------------------------------------------------\n");
+	zend_debug_alloc_output("Full Memory Check at %s:%d\n", filename, lineno);
 
 	while (p) {
 		if (!_mem_block_check((void *)((char *)p + sizeof(mem_header) + PLATFORM_PADDING), (silent?2:3), filename, lineno)) {
@@ -491,8 +510,8 @@ ZEND_API void _full_mem_check(int silent, char *filename, uint lineno)
 		}
 		p = p->pNext;
 	}
-	fprintf(stderr,"End of full memory check %s:%d (%d errors)\n", filename, lineno, errors);
-	fprintf(stderr,"------------------------------------------------\n");
+	zend_debug_alloc_output("End of full memory check %s:%d (%d errors)\n", filename, lineno, errors);
+	zend_debug_alloc_output("------------------------------------------------\n");
 }
 #endif
 
