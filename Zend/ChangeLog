@@ -1,3 +1,36 @@
+2003-06-09  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * zend_execute_API.c:
+      Fix for Bug #23951
+
+2003-06-09  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_execute.c:
+      remove NS leftover
+
+2003-06-09  Zeev Suraski  <zeev@zend.com>
+
+    * zend_compile.c
+      zend_compile.h
+      zend_language_parser.y:
+      Fix bogus implicit declarations of properties (squash bug #23671)
+
+2003-06-09  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_API.c
+      zend_execute_API.c:
+      Support 'self' and 'parent' in call_user_func()
+
+2003-06-09  Zeev Suraski  <zeev@zend.com>
+
+    * zend_execute.c:
+      Fix indirect reference calls to bogus function names
+
+2003-06-09  Jani Taskinen  <sniper@iki.fi>
+
+    * zend_builtin_functions.c:
+      ws
+
 2003-06-08  Zeev Suraski  <zeev@zend.com>
 
     * zend_object_handlers.c:
