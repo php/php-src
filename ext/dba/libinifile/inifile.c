@@ -192,7 +192,6 @@ static int inifile_read(inifile *dba, line_type *ln TSRMLS_DC) {
 					efree(fline);
 					return 1;
 				} else {
-					php_error_docref(NULL TSRMLS_CC, E_NOTICE, "The following group was started with '[' but not ended with ']': '%s'", fline+1);
 					efree(fline);
 					continue;
 				}
@@ -377,7 +376,6 @@ static int inifile_find_group(inifile *dba, const key_type *key, size_t *pos_grp
 		res = 1;
 		while(inifile_read(dba, &ln TSRMLS_CC)) {
 			if ((res=inifile_key_cmp(&ln.key, key TSRMLS_CC)) < 2) {
-php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Found group: %d", *pos_grp_start);
 				ret = SUCCESS;
 				break;
 			}
@@ -408,7 +406,6 @@ static int inifile_next_group(inifile *dba, const key_type *key, size_t *pos_grp
 	ln.key.group = estrdup(key->group);
 	while(inifile_read(dba, &ln TSRMLS_CC)) {
 		if (inifile_key_cmp(&ln.key, key TSRMLS_CC) == 2) {
-php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Found next group: %d", *pos_grp_start);
 			ret = SUCCESS;
 			break;
 		}
