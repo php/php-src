@@ -96,7 +96,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("session.auto_start",		"0",			PHP_INI_ALL, OnUpdateBool,			auto_start,			php_ps_globals,	ps_globals)
 	STD_PHP_INI_ENTRY("session.gc_probability",		"1",			PHP_INI_ALL, OnUpdateInt,			gc_probability,		php_ps_globals,	ps_globals)
 	STD_PHP_INI_ENTRY("session.gc_maxlifetime",		"1440",			PHP_INI_ALL, OnUpdateInt,			gc_maxlifetime,		php_ps_globals,	ps_globals)
-	PHP_INI_ENTRY("session.serialize_handler",		"php",			PHP_INI_ALL, OnUpdateSerializer)
+	PHP_INI_ENTRY("session.serialize_handler",		"wddx",			PHP_INI_ALL, OnUpdateSerializer)
 	STD_PHP_INI_ENTRY("session.cookie_lifetime",	"0",			PHP_INI_ALL, OnUpdateInt,			cookie_lifetime,	php_ps_globals,	ps_globals)
 	STD_PHP_INI_ENTRY("session.cookie_path",		"/",			PHP_INI_ALL, OnUpdateString,		cookie_path,		php_ps_globals,	ps_globals)
 	STD_PHP_INI_ENTRY("session.cookie_domain",		"",				PHP_INI_ALL, OnUpdateString,		cookie_domain,		php_ps_globals,	ps_globals)
@@ -132,6 +132,7 @@ PHP_MINFO_FUNCTION(session);
 
 static void php_rinit_session_globals(PSLS_D);
 static void php_rshutdown_session_globals(PSLS_D);
+static void _php_session_destroy(PSLS_D);
 
 zend_module_entry session_module_entry = {
 	"session",
@@ -335,13 +336,21 @@ PS_SERIALIZER_DECODE_FUNC(wddx)
 	ulong idx;
 	int hash_type;
 	int dofree = 1;
+	int ret = SUCCESS;
 
 	if (vallen == 0) 
-		return FAILURE;
+		return SUCCESS;
 	
 	MAKE_STD_ZVAL(retval);
 
+	retval->type = IS_NULL;
+
 	php_wddx_deserialize_ex((char *)val, vallen, retval);
+
+	if (retval->type == IS_NULL) {
+		ret = FAILURE;
+		goto cleanup;
+	}
 
 	for (zend_hash_internal_pointer_reset(retval->value.ht);
 			zend_hash_get_current_data(retval->value.ht, (void **) &ent) == SUCCESS;
@@ -362,10 +371,11 @@ PS_SERIALIZER_DECODE_FUNC(wddx)
 		}
 	}
 
+cleanup:
 	zval_dtor(retval);
 	efree(retval);
 
-	return SUCCESS;
+	return ret;
 }
 
 #endif
@@ -400,7 +410,10 @@ static void _php_session_decode(const char *val, int vallen PSLS_DC)
 
 	if (PG(track_vars))
 		php_session_track_init();
-	PS(serializer)->decode(val, vallen PSLS_CC);
+	if (PS(serializer)->decode(val, vallen PSLS_CC) == FAILURE) {
+		_php_session_destroy(PSLS_C);
+		php_error(E_WARNING, "Failed to decode session object. Session has been destroyed now.");
+	}
 }
 
 static char *_php_create_id(int *newlen PSLS_DC)
