@@ -345,7 +345,7 @@ inline static unsigned short get_next_char(enum entity_charset charset,
 	
 	MB_WRITE((unsigned char)this_char);
 	
-	switch (charset)	{
+	switch (charset) {
 		case cs_utf_8:
 			{
 				unsigned long utf = 0;
@@ -634,8 +634,8 @@ det_charset:
 		int found = 0;
 		
 		/* now walk the charset map and look for the codeset */
-		for (i = 0; charset_map[i].codeset; i++)	{
-			if (strncasecmp(charset_hint, charset_map[i].codeset, len) == 0)	{
+		for (i = 0; charset_map[i].codeset; i++) {
+			if (strncasecmp(charset_hint, charset_map[i].codeset, len) == 0) {
 				charset = charset_map[i].charset;
 				found = 1;
 				break;
@@ -668,7 +668,7 @@ PHPAPI char *php_unescape_html_entities(unsigned char *old, int oldlen, int *new
 	
 	if (all) {
 		/* look for a match in the maps for this charset */
-		for (j = 0; entity_map[j].charset != cs_terminator; j++)	{
+		for (j = 0; entity_map[j].charset != cs_terminator; j++) {
 			if (entity_map[j].charset != charset)
 				continue;
 
@@ -701,7 +701,7 @@ PHPAPI char *php_unescape_html_entities(unsigned char *old, int oldlen, int *new
 		}
 	}
 
-	for (j = 0; basic_entities[j].charcode != 0; j++)	{
+	for (j = 0; basic_entities[j].charcode != 0; j++) {
 
 		if (basic_entities[j].flags && (quote_style & basic_entities[j].flags) == 0)
 			continue;
@@ -756,8 +756,7 @@ PHPAPI char *php_escape_html_entities(unsigned char *old, int oldlen, int *newle
 			for (j = 0; entity_map[j].charset != cs_terminator; j++) {
 				if (entity_map[j].charset == charset
 						&& this_char >= entity_map[j].basechar
-						&& this_char <= entity_map[j].endchar)
-				{
+						&& this_char <= entity_map[j].endchar) {
 					rep = (unsigned char*)entity_map[j].table[this_char - entity_map[j].basechar];
 					if (rep == NULL) {
 						/* there is no entity for this position; fall through and
