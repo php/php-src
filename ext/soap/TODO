@@ -9,7 +9,6 @@ General
 
 SOAP
 ----
-- SOAP message MUST NOT contain Processing Instructions <?xml-stylesheet ... ?> (XML_PI_NODE)
 - support for SOAP headers
   - actor attribute
   - mustUnderstend attribute

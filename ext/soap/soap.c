@@ -1205,22 +1205,51 @@ PHP_METHOD(soapserver, handle)
 	SOAP_SERVER_END_CODE();
 }
 
+static void soap_server_fault(char* code, char* string, char *actor, zval* details)
+{
+	int soap_version;
+	xmlChar *buf, cont_len[30];
+	int size;
+	zval ret;
+	xmlDocPtr doc_return;
+	TSRMLS_FETCH();
+
+	soap_version = SOAP_GLOBAL(soap_version);
+
+	INIT_ZVAL(ret);
+
+	set_soap_fault(&ret, code, string, actor, details TSRMLS_CC);
+
+	doc_return = seralize_response_call(NULL, NULL, NULL, &ret, soap_version TSRMLS_CC);
+
+	xmlDocDumpMemory(doc_return, &buf, &size);
+
+	/*
+	   Want to return HTTP 500 but apache wants to over write
+	   our fault code with their own handling... Figure this out later
+	*/
+	sapi_add_header("HTTP/1.1 500 Internal Service Error", sizeof("HTTP/1.1 500 Internal Service Error"), 1);
+	sprintf(cont_len,"Content-Length: %d", size);
+	sapi_add_header(cont_len, strlen(cont_len) + 1, 1);
+	if (soap_version == SOAP_1_2) {
+		sapi_add_header("Content-Type: application/soap+xml; charset=\"utf-8\"", sizeof("Content-Type: application/soap+xml; charset=\"utf-8\""), 1);
+	} else {
+		sapi_add_header("Content-Type: text/xml; charset=\"utf-8\"", sizeof("Content-Type: text/xml; charset=\"utf-8\""), 1);
+	}
+	php_write(buf, size TSRMLS_CC);
+
+	xmlFreeDoc(doc_return);
+	xmlFree(buf);
+	zend_bailout();
+}
+
 static void soap_error_handler(int error_num, const char *error_filename, const uint error_lineno, const char *format, va_list args)
 {
-	char buffer[1024];
-	int buffer_len;
-	int soap_version;
 	TSRMLS_FETCH();
 
 	if (!SOAP_GLOBAL(use_soap_error_handler)) {
 		old_error_handler(error_num, error_filename, error_lineno, format, args);
 		return;
-	}
-	soap_version = SOAP_GLOBAL(soap_version);
-	buffer_len = vsnprintf(buffer, sizeof(buffer)-1, format, args);
-	buffer[sizeof(buffer)-1]=0;
-	if (buffer_len > sizeof(buffer) - 1 || buffer_len < 0) {
-		buffer_len = sizeof(buffer) - 1;
 	}
 
 	/*
@@ -1230,14 +1259,19 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 	 */
 	if (error_num == E_USER_ERROR || error_num == E_COMPILE_ERROR || error_num == E_CORE_ERROR ||
 		error_num == E_ERROR || error_num == E_PARSE) {
-		zval outbuf, outbuflen, ret;
-		xmlChar *buf, cont_len[30];
-		int size;
-		xmlDocPtr doc_return;
+
+		char buffer[1024];
+		int buffer_len;
+		zval outbuf, outbuflen;
 
 		INIT_ZVAL(outbuf);
 		INIT_ZVAL(outbuflen);
-		INIT_ZVAL(ret);
+
+		buffer_len = vsnprintf(buffer, sizeof(buffer)-1, format, args);
+		buffer[sizeof(buffer)-1]=0;
+		if (buffer_len > sizeof(buffer) - 1 || buffer_len < 0) {
+			buffer_len = sizeof(buffer) - 1;
+		}
 
 		/* Get output buffer and send as fault detials */
 		if (php_ob_get_length(&outbuflen TSRMLS_CC) != FAILURE && Z_LVAL(outbuflen) != 0) {
@@ -1245,37 +1279,7 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 		}
 		php_end_ob_buffer(0, 0 TSRMLS_CC);
 
-		set_soap_fault(&ret, "Server", buffer, NULL, &outbuf TSRMLS_CC);
-		doc_return = seralize_response_call(NULL, NULL, NULL, &ret, soap_version TSRMLS_CC);
-
-		/*
-		  xmlDocDumpMemoryEnc(doc_return, &buf, &size, XML_CHAR_ENCODING_UTF8);
-		*/
-		xmlDocDumpMemory(doc_return, &buf, &size);
-
-		/*
-		   Want to return HTTP 500 but apache wants to over write
-		   our fault code with their own handling... Figure this out later
-		*/
-		sapi_add_header("HTTP/1.1 500 Internal Service Error", sizeof("HTTP/1.1 500 Internal Service Error"), 1);
-		sprintf(cont_len,"Content-Length: %d", size);
-		sapi_add_header(cont_len, strlen(cont_len) + 1, 1);
-		if (soap_version == SOAP_1_2) {
-			sapi_add_header("Content-Type: application/soap+xml; charset=\"utf-8\"", sizeof("Content-Type: application/soap+xml; charset=\"utf-8\""), 1);
-		} else {
-			sapi_add_header("Content-Type: text/xml; charset=\"utf-8\"", sizeof("Content-Type: text/xml; charset=\"utf-8\""), 1);
-		}
-		php_write(buf, size TSRMLS_CC);
-
-		xmlFreeDoc(doc_return);
-		xmlFree(buf);
-
-		zval_dtor(&outbuf);
-		zval_dtor(&outbuflen);
-/* ???
-		zval_dtor(&ret);
-*/
-		zend_bailout();
+		soap_server_fault("Server", buffer, NULL, &outbuf TSRMLS_CC);
 	}
 }
 
@@ -1727,6 +1731,9 @@ static void set_soap_fault(zval *obj, char *fault_code, char *fault_string, char
 			} else if (strcmp(fault_code,"Server") == 0) {
 				smart_str_appendl(&code, SOAP_1_1_ENV_NS_PREFIX, sizeof(SOAP_1_1_ENV_NS_PREFIX)-1);
 				smart_str_appendc(&code, ':');
+			} else if (strcmp(fault_code,"VersionMismatch") == 0) {
+				smart_str_appendl(&code, SOAP_1_1_ENV_NS_PREFIX, sizeof(SOAP_1_1_ENV_NS_PREFIX)-1);
+				smart_str_appendc(&code, ':');
 			}
 			smart_str_appends(&code,fault_code);
 		} else if (soap_version == SOAP_1_2) {
@@ -1738,6 +1745,9 @@ static void set_soap_fault(zval *obj, char *fault_code, char *fault_string, char
 				smart_str_appendl(&code, SOAP_1_2_ENV_NS_PREFIX, sizeof(SOAP_1_2_ENV_NS_PREFIX)-1);
 				smart_str_appendc(&code, ':');
 				smart_str_appendl(&code,"Receiver",sizeof("Receiver")-1);
+			} else if (strcmp(fault_code,"VersionMismatch") == 0) {
+				smart_str_appendl(&code, SOAP_1_2_ENV_NS_PREFIX, sizeof(SOAP_1_2_ENV_NS_PREFIX)-1);
+				smart_str_appendc(&code, ':');
 			} else {
 				smart_str_appends(&code,fault_code);
 			}
@@ -1758,6 +1768,7 @@ static void deseralize_function_call(sdlPtr sdl, xmlDocPtr request, zval *functi
 {
 	char* envelope_ns = NULL;
 	xmlNodePtr trav,env,head,body,func;
+	xmlAttrPtr attr;
 	int cur_param = 0,num_of_params = 0;
 	zval tmp_function_name, **tmp_parameters = NULL;
 	sdlFunctionPtr function;
@@ -1780,13 +1791,23 @@ static void deseralize_function_call(sdlPtr sdl, xmlDocPtr request, zval *functi
 				envelope_ns = SOAP_1_2_ENV_NAMESPACE;
 				SOAP_GLOBAL(soap_version) = SOAP_1_2;
 			} else {
-				php_error(E_ERROR,"looks like we got bad SOAP request\n");
+				soap_server_fault("VersionMismatch","Wrong Version", NULL, NULL);
 			}
 		}
 		trav = trav->next;
 	}
 	if (env == NULL) {
-		php_error(E_ERROR,"looks like we got XML without \"Envelope\" element\n");
+		php_error(E_ERROR,"looks like we got XML without \"Envelope\" element");
+	}
+
+	attr = env->properties;
+	while (attr != NULL) {
+		if (attr->ns == NULL) {
+			php_error(E_ERROR,"A SOAP Envelope element cannot have non Namespace qualified attributes");
+		} else if (*version == SOAP_1_2 && attr_is_equal_ex(attr,"encodingStyle",SOAP_1_2_ENV_NAMESPACE)) {
+			php_error(E_ERROR,"encodingStyle cannot be specified on the Envelope");
+		}
+		attr = attr->next;
 	}
 
 	/* Get <Header> element */
@@ -1802,18 +1823,26 @@ static void deseralize_function_call(sdlPtr sdl, xmlDocPtr request, zval *functi
 
 	/* Get <Body> element */
 	body = NULL;
-	while (trav != NULL) {
-		if (trav->type == XML_ELEMENT_NODE) {
-			if (body == NULL && node_is_equal_ex(trav,"Body",envelope_ns)) {
-				body = trav;
-			} else {
-				php_error(E_ERROR,"looks like we got bad SOAP request\n");
-			}
-		}
+	while (trav != NULL && trav->type != XML_ELEMENT_NODE) {
+		trav = trav->next;
+	}
+	if (trav != NULL && node_is_equal_ex(trav,"Body",envelope_ns)) {
+		body = trav;
+		trav = trav->next;
+	}
+	while (trav != NULL && trav->type != XML_ELEMENT_NODE) {
 		trav = trav->next;
 	}
 	if (body == NULL) {
-		php_error(E_ERROR,"looks like we got \"Envelope\" without \"Body\" element\n");
+		php_error(E_ERROR,"Body must be present in a SOAP envelope");
+	}
+	attr = get_attribute_ex(body->properties,"encodingStyle",SOAP_1_2_ENV_NAMESPACE);
+	if (attr && *version == SOAP_1_2) {
+		php_error(E_ERROR,"encodingStyle cannot be specified on the Body");
+	}
+
+	if (trav != NULL && *version == SOAP_1_2) {
+		php_error(E_ERROR,"A SOAP 1.2 envelope can contain only Header and Body");
 	}
 
 	func = NULL;
@@ -1821,19 +1850,23 @@ static void deseralize_function_call(sdlPtr sdl, xmlDocPtr request, zval *functi
 	while (trav != NULL) {
 		if (trav->type == XML_ELEMENT_NODE) {
 			if (func != NULL) {
-				php_error(E_ERROR,"looks like we got \"Body\" with several functions call\n");
+				php_error(E_ERROR,"looks like we got \"Body\" with several functions call");
 			}
 			func = trav;
 		}
 		trav = trav->next;
 	}
 	if (func == NULL) {
-		php_error(E_ERROR,"looks like we got \"Body\" without function call\n");
+		php_error(E_ERROR,"looks like we got \"Body\" without function call");
 	}
 
 	function = get_function(sdl, func->name);
 	if (sdl != NULL && function == NULL) {
-		php_error(E_ERROR, "Error function \"%s\" doesn't exists for this service", func->name);
+		if (*version == SOAP_1_2) {
+			soap_server_fault("rpc:ProcedureNotPresent","Procedure not present", NULL, NULL);
+		} else {
+			php_error(E_ERROR, "Procedure '%s' not present", func->name);
+		}
 	}
 
 	INIT_ZVAL(tmp_function_name);
@@ -2047,10 +2080,13 @@ static xmlDocPtr seralize_response_call(sdlFunctionPtr function, char *function_
 			parameter = get_param(function, NULL, 0, TRUE);
 
 			if (style == SOAP_RPC) {
-				param = seralize_parameter(parameter, ret, 0, "return", use, method TSRMLS_CC);
+			  xmlNode *rpc_result;
 				if (version == SOAP_1_2) {
 					xmlNs *rpc_ns = xmlNewNs(body, RPC_SOAP12_NAMESPACE, RPC_SOAP12_NS_PREFIX);
-					xmlNode *rpc_result = xmlNewChild(method, rpc_ns, "result", NULL);
+					rpc_result = xmlNewChild(method, rpc_ns, "result", NULL);
+				}
+				param = seralize_parameter(parameter, ret, 0, "return", use, method TSRMLS_CC);
+				if (version == SOAP_1_2) {
 					xmlNodeSetContent(rpc_result,param->name);
 				}
 			} else {

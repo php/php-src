@@ -90,7 +90,7 @@ static php_stream* http_connect(zval* this_ptr, php_url *phpurl, int use_ssl, in
 #endif
 	int port;
 	int old_error_reporting;
-	
+
 	if (zend_hash_find(Z_OBJPROP_P(this_ptr), "_proxy_host", sizeof("_proxy_host"), (void **) &proxy_host) == SUCCESS &&
 	    Z_TYPE_PP(proxy_host) == IS_STRING &&
 	    zend_hash_find(Z_OBJPROP_P(this_ptr), "_proxy_port", sizeof("_proxy_port"), (void **) &proxy_port) == SUCCESS &&
@@ -134,14 +134,14 @@ static php_stream* http_connect(zval* this_ptr, php_url *phpurl, int use_ssl, in
 		smart_str_append_const(&soap_headers, "\r\n");
 		if (php_stream_write(stream, soap_headers.c, soap_headers.len) != soap_headers.len) {
 			php_stream_close(stream);
-			stream = NULL;						
+			stream = NULL;
 		}
  	 	smart_str_free(&soap_headers);
 
  	 	if (stream) {
 			if (!get_http_headers(stream, &http_headers, &http_header_size TSRMLS_CC) || http_headers == NULL) {
 				php_stream_close(stream);
-				stream = NULL;						
+				stream = NULL;
 			}
 			efree(http_headers);
 		}
@@ -222,7 +222,15 @@ int send_http_soap_request(zval *this_ptr, xmlDoc *doc, char *location, char *so
 		return FALSE;
 	}
 
-	use_ssl = strcmp(phpurl->scheme, "https") == 0;
+	use_ssl = 0;
+	if (strcmp(phpurl->scheme, "https") == 0) {
+		use_ssl = 1;
+	} else if (strcmp(phpurl->scheme, "http") != 0) {
+		xmlFree(buf);
+		php_url_free(phpurl);
+		add_soap_fault(this_ptr, "HTTP", "Unknown protocol. Only http and https are allowed.", NULL, NULL TSRMLS_CC);
+		return FALSE;
+	}
 #ifdef ZEND_ENGINE_2
 	if (use_ssl && php_stream_locate_url_wrapper("https://", NULL, STREAM_LOCATE_WRAPPERS_ONLY TSRMLS_CC) == NULL) {
 		xmlFree(buf);
@@ -257,7 +265,7 @@ int send_http_soap_request(zval *this_ptr, xmlDoc *doc, char *location, char *so
 			add_soap_fault(this_ptr, "HTTP", "Could not connect to host", NULL, NULL TSRMLS_CC);
 			return FALSE;
 		}
-	} 
+	}
 
 	if (stream) {
 		zval **cookies, **login, **password;

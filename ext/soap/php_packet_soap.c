@@ -27,6 +27,7 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 	char* envelope_ns = NULL;
 	xmlDocPtr response;
 	xmlNodePtr trav, env, head, body, resp, cur, fault;
+	xmlAttrPtr attr;
 	int param_count = 0;
 	int old_error_reporting;
 	int soap_version;
@@ -48,6 +49,7 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 	}
 	if (xmlGetIntSubset(response) != NULL) {
 		add_soap_fault(this_ptr, "Client", "DTD are not supported by SOAP", NULL, NULL TSRMLS_CC);
+		xmlFreeDoc(response);
 		return FALSE;
 	}
 
@@ -65,7 +67,7 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 				envelope_ns = SOAP_1_2_ENV_NAMESPACE;
 				soap_version = SOAP_1_2;
 			} else {
-				add_soap_fault(this_ptr, "Client", "looks like we got bad SOAP response\n", NULL, NULL TSRMLS_CC);
+				add_soap_fault(this_ptr, "VersionMismatch", "Wrong Version", NULL, NULL TSRMLS_CC);
 				xmlFreeDoc(response);
 				return FALSE;
 			}
@@ -73,9 +75,23 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 		trav = trav->next;
 	}
 	if (env == NULL) {
-		add_soap_fault(this_ptr, "Client", "looks like we got XML without \"Envelope\" element\n", NULL, NULL TSRMLS_CC);
+		add_soap_fault(this_ptr, "Client", "looks like we got XML without \"Envelope\" element", NULL, NULL TSRMLS_CC);
 		xmlFreeDoc(response);
 		return FALSE;
+	}
+
+	attr = env->properties;
+	while (attr != NULL) {
+		if (attr->ns == NULL) {
+			add_soap_fault(this_ptr, "Client", "A SOAP Envelope element cannot have non Namespace qualified attributes", NULL, NULL TSRMLS_CC);
+			xmlFreeDoc(response);
+			return FALSE;
+		} else if (soap_version == SOAP_1_2 && attr_is_equal_ex(attr,"encodingStyle",SOAP_1_2_ENV_NAMESPACE)) {
+			add_soap_fault(this_ptr, "Client", "encodingStyle cannot be specified on the Envelope", NULL, NULL TSRMLS_CC);
+			xmlFreeDoc(response);
+			return FALSE;
+		}
+		attr = attr->next;
 	}
 
 	/* Get <Header> element */
@@ -91,20 +107,29 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 
 	/* Get <Body> element */
 	body = NULL;
-	while (trav != NULL) {
-		if (trav->type == XML_ELEMENT_NODE) {
-			if (body == NULL && node_is_equal_ex(trav,"Body",envelope_ns)) {
-				body = trav;
-			} else {
-				add_soap_fault(this_ptr, "Client", "looks like we got bad SOAP response\n", NULL, NULL TSRMLS_CC);
-				xmlFreeDoc(response);
-				return FALSE;
-			}
-		}
+	while (trav != NULL && trav->type != XML_ELEMENT_NODE) {
+		trav = trav->next;
+	}
+	if (trav != NULL && node_is_equal_ex(trav,"Body",envelope_ns)) {
+		body = trav;
+		trav = trav->next;
+	}
+	while (trav != NULL && trav->type != XML_ELEMENT_NODE) {
 		trav = trav->next;
 	}
 	if (body == NULL) {
-		add_soap_fault(this_ptr, "Client", "looks like we got \"Envelope\" without \"Body\" element\n", NULL, NULL TSRMLS_CC);
+		add_soap_fault(this_ptr, "Client", "Body must be present in a SOAP envelope", NULL, NULL TSRMLS_CC);
+		xmlFreeDoc(response);
+		return FALSE;
+	}
+	attr = get_attribute_ex(body->properties,"encodingStyle",SOAP_1_2_ENV_NAMESPACE);
+	if (attr && soap_version == SOAP_1_2) {
+		add_soap_fault(this_ptr, "Client", "encodingStyle cannot be specified on the Body", NULL, NULL TSRMLS_CC);
+		xmlFreeDoc(response);
+		return FALSE;
+	}
+	if (trav != NULL && soap_version == SOAP_1_2) {
+		add_soap_fault(this_ptr, "Client", "A SOAP 1.2 envelope can contain only Header and Body", NULL, NULL TSRMLS_CC);
 		xmlFreeDoc(response);
 		return FALSE;
 	}

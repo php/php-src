@@ -2321,19 +2321,20 @@ static xmlNodePtr check_and_resolve_href(xmlNodePtr data)
 		/* SOAP 1.2 enc:id enc:ref */
 		href = get_attribute_ex(data->properties, "ref", SOAP_1_2_ENC_NAMESPACE);
 		if (href) {
-			/*  Internal href try and find node */
+			char* id;
+
 			if (href->children->content[0] == '#') {
-				xmlNodePtr ret = get_node_with_attribute_recursive_ex(data->doc->children, NULL, NULL, "id", &href->children->content[1], SOAP_1_2_ENC_NAMESPACE);
-				if (!ret) {
-					php_error(E_ERROR,"SOAP-ERROR: Encoding: Unresolved reference '%s'",href->children->content);
-				} else if (ret == data) {
-					php_error(E_ERROR,"SOAP-ERROR: Encoding: Violation of id and ref information items '%s'",href->children->content);
-				}
-				return ret;
+				id = href->children->content+1;
 			} else {
-				/*  TODO: External href....? */
-				php_error(E_ERROR,"SOAP-ERROR: Encoding: External reference '%s'",href->children->content);
+				id = href->children->content;
 			}
+			xmlNodePtr ret = get_node_with_attribute_recursive_ex(data->doc->children, NULL, NULL, "id", id, SOAP_1_2_ENC_NAMESPACE);
+			if (!ret) {
+				php_error(E_ERROR,"SOAP-ERROR: Encoding: Unresolved reference '%s'",href->children->content);
+			} else if (ret == data) {
+				php_error(E_ERROR,"SOAP-ERROR: Encoding: Violation of id and ref information items '%s'",href->children->content);
+			}
+			return ret;
 		}
 	}
 	return data;
@@ -2513,13 +2514,13 @@ static void get_array_type(xmlNodePtr node, zval *array, smart_str *type TSRMLS_
 			} else {
 			  cur_stype = NULL;
 			}
-			
+
 			if (zend_hash_find(Z_OBJPROP_PP(tmp), "enc_ns", sizeof("enc_ns"), (void **)&ztype) == SUCCESS) {
 			  cur_ns = Z_STRVAL_PP(ztype);
 			} else {
 			  cur_ns = NULL;
 			}
-				
+
 		} else if (Z_TYPE_PP(tmp) == IS_ARRAY && is_map(*tmp)) {
 			cur_type = APACHE_MAP;
 		  cur_stype = NULL;
