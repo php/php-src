@@ -249,7 +249,6 @@ static void ps_mm_destroy(ps_mm *data)
 
 PHP_MINIT_FUNCTION(ps_mm)
 {
-	int save_path_len = strlen(PS(save_path));
 	int mod_name_len = strlen(sapi_module.name);
 	char *ps_mm_path, euid[30];
 	int ret;
@@ -257,20 +256,18 @@ PHP_MINIT_FUNCTION(ps_mm)
 	ps_mm_instance = calloc(sizeof(*ps_mm_instance), 1);
    	if (!ps_mm_instance) {
 		php_error(E_WARNING,"mm session save handler cannot allocate shared memory");
+		return FAILURE;
 	}
 
 	if (!sprintf(euid,"%d", geteuid())) {
 		php_error(E_WARNING,"mm session save handler cannot get effecitve UID");
+		return FAILURE;
 	}
 		
-    /* Directory + '/' + File + Module Name + Effective UID + \0 */	
-	ps_mm_path = do_alloca(save_path_len+1+sizeof(PS_MM_FILE)+mod_name_len+strlen(euid)+1);
+    /* '/tmp/' + File + Module Name + Effective UID + \0 */	
+	ps_mm_path = do_alloca(5+sizeof(PS_MM_FILE)+mod_name_len+strlen(euid)+1);
 	
-	memcpy(ps_mm_path, PS(save_path), save_path_len + 1);
-	if (save_path_len > 0 && ps_mm_path[save_path_len - 1] != DEFAULT_SLASH) {
-		ps_mm_path[save_path_len] = DEFAULT_SLASH;
-		ps_mm_path[save_path_len+1] = '\0';
-	}
+	memcpy(ps_mm_path, "/tmp/", 5);
 	strcat(ps_mm_path, PS_MM_FILE);
 	strcat(ps_mm_path, sapi_module.name);
 	strcat(ps_mm_path, euid);
@@ -283,6 +280,7 @@ PHP_MINIT_FUNCTION(ps_mm)
 		free(ps_mm_instance);
 		ps_mm_instance = NULL;
 		php_error(E_NOTICE,"mm session save handler failed to initialize. Check your save_path.");
+		return FAILURE;
 	}
 	
 	php_session_register_module(&ps_mod_mm);
