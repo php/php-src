@@ -201,9 +201,6 @@ char *strerror(int);
 # ifdef PHP_WIN32
 #include "win32/pwd.h"
 #include "win32/param.h"
-#elif defined(NETWARE)
-#include <sys/param.h>
-#include "NetWare/pwd.h"
 # else
 #include <pwd.h>
 #include <sys/param.h>
