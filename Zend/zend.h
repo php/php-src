@@ -298,7 +298,7 @@ struct _zend_class_entry {
 	HashTable default_properties;
 	HashTable class_table;
 	HashTable static_members;
-	HashTable constants;
+	HashTable constants_table;
 	zend_function_entry *builtin_functions;
 
 	union _zend_function *constructor;
