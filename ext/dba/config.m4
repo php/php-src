@@ -390,6 +390,24 @@ AC_ARG_WITH(cdb,
 ])
 AC_DBA_STD_RESULT(cdb)
 
+AC_DEFUN(PHP_DBA_BUILTIN_INI,[
+  AC_DEFINE(DBA_INIFILE, 1, [ ])
+  ini_sources="libinifile/inifile.c"
+  THIS_RESULT="builtin"
+])
+
+AC_ARG_WITH(inifile,
+[  --with-inifile            DBA: Include INI support],[
+  if test "$withval" != "no"; then
+    PHP_DBA_BUILTIN_INI
+  fi
+],[
+  if test "$PHP_DBA" != "no" -o "$HAVE_DBA" = "1"; then
+    PHP_DBA_BUILTIN_INI
+  fi
+])
+AC_DBA_STD_RESULT(inifile,INI File)
+
 AC_DEFUN(PHP_DBA_BUILTIN_FLATFILE,[
   AC_DEFINE(DBA_FLATFILE, 1, [ ])
   flat_sources="libflatfile/flatfile.c"
@@ -415,7 +433,8 @@ AC_MSG_CHECKING(whether to enable DBA interface)
 if test "$HAVE_DBA" = "1"; then
   AC_MSG_RESULT(yes)
   AC_DEFINE(HAVE_DBA, 1, [ ])
-  PHP_NEW_EXTENSION(dba, dba.c dba_cdb.c dba_db2.c dba_dbm.c dba_gdbm.c dba_ndbm.c dba_db3.c dba_db4.c dba_flatfile.c $cdb_sources $flat_sources, $ext_shared)
+  PHP_NEW_EXTENSION(dba, dba.c dba_cdb.c dba_db2.c dba_dbm.c dba_gdbm.c dba_ndbm.c dba_db3.c dba_db4.c dba_flatfile.c dba_inifile.c $cdb_sources $flat_sources $ini_sources, $ext_shared)
+  PHP_ADD_BUILD_DIR($ext_builddir/libinifile)
   PHP_ADD_BUILD_DIR($ext_builddir/libcdb)
   PHP_ADD_BUILD_DIR($ext_builddir/libflatfile)
   PHP_SUBST(DBA_SHARED_LIBADD)

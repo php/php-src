@@ -87,10 +87,6 @@ inifile * inifile_alloc(php_stream *fp, int readonly, int persistent TSRMLS_DC)
 	int fd = 0;
 
 	if (!readonly) {
-		if (!php_stream_truncate_supported(fp)) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can't truncate this stream");
-			return NULL;
-		}
 		if (SUCCESS != php_stream_cast(fp, PHP_STREAM_AS_FD, (void*)&fd, 1)) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not cast stream");
 			return NULL;
@@ -320,7 +316,8 @@ static int inifile_truncate(inifile *dba, size_t size TSRMLS_DC)
 {
 	int res;
 
-	if ((res=php_stream_truncate_set_size(dba->fp, size)) != 0) {
+	php_stream_flush(dba->fp);
+	if ((res=ftruncate(dba->fd, size)) != 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error in ftruncate: %d", res);
 		return FAILURE;
 	}
