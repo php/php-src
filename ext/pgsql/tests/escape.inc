@@ -32,25 +32,28 @@ else {
 }
 
 // Test using database
-$fp = fopen(FILE_NAME,'r');
+$fp   = fopen(FILE_NAME,'r');
 $data = fread($fp, filesize(FILE_NAME));
+$db   = pg_connect($conn_str);
 
-$db = pg_connect($conn_str);
+// Insert binary to DB
 $escaped_data = pg_escape_bytea($data);
-//$out = fopen('php.gif_escaped','w');
-//fwrite($out, $escaped_data);
-//exit;
-pg_query("DELETE FROM ".$table_name." WHERE num = -2;");
-$sql = "INSERT INTO ".$table_name." (num, bin) VALUES (-2, '".$escaped_data."');";
+pg_query("DELETE FROM ".$table_name." WHERE num = -9999;");
+$sql = "INSERT INTO ".$table_name." (num, bin) VALUES (-9999, CAST ('".$escaped_data."' AS BYTEA));";
 pg_query($db, $sql);
-$sql = "SELECT * FROM ".$table_name." WHERE num = -2";
+
+// Retrieve binary from DB
+$sql = "SELECT bin::bytea FROM ".$table_name." WHERE num = -9999";
 $result = pg_query($db, $sql);
-$row = pg_fetch_row($result, 0);
-if ($data === $row['bin']) {
-	echo "pg_escape_bytea() actually works with databse\n";
-}
-else {
-	echo "pg_escape_bytea() is broken\n";
-}
+$row = pg_fetch_array($result, 0, PGSQL_ASSOC);
+
+// Compare
+// Need to wait PostgreSQL 7.3.x for PQunescapeBytea()
+// if ($data === pg_unescape_bytea($row['bin'])) {
+// 	echo "pg_escape_bytea() actually works with databse\n";
+// }
+// else {
+// 	echo "pg_escape_bytea() is broken\n";
+// }
 
 ?>
