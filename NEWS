@@ -5,6 +5,7 @@ PHP 4                                                                      NEWS
   (Edin)
 - Added support for --program-prefix and --program-suffix configure options.
   (Jani)
+- Added warning when unable to create temp stream for ftp_(n)list(). (Sara)
 - Fixed header handler in NSAPI SAPI module (header->replace was ignored,
   send_default_content_type now sends value from php.ini). (Uwe Schindler)
 - Fixed bug #26635 (fixed look up for fonts in the current directory w/ZTS).

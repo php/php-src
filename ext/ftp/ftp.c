@@ -1460,8 +1460,10 @@ ftp_genlist(ftpbuf_t *ftp, const char *cmd, const char *path TSRMLS_DC)
 	char		**entry;
 	char		*text;
 
-	if ((tmpfp = tmpfile()) == NULL)
+	if ((tmpfp = tmpfile()) == NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to create temporary file.  Check permissions in temporary files directory.");
 		return NULL;
+	}
 
 	if (!ftp_type(ftp, FTPTYPE_ASCII))
 		goto bail;
