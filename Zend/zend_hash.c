@@ -1025,6 +1025,21 @@ ZEND_API int zend_hash_get_current_key(HashTable *ht, char **str_index, ulong *n
 }
 
 
+ZEND_API int zend_hash_get_current_key_type(HashTable *ht)
+{
+	Bucket *p = ht->pInternalPointer;
+
+	if (p) {
+		if (p->nKeyLength) {
+			return HASH_KEY_IS_STRING;
+		} else {
+			return HASH_KEY_IS_LONG;
+		}
+	}
+	return HASH_KEY_NON_EXISTANT;
+}
+
+
 ZEND_API int zend_hash_get_current_data(HashTable *ht, void **pData)
 {
 	Bucket *p = ht->pInternalPointer;
