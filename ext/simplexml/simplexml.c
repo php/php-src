@@ -430,6 +430,7 @@ sxe_properties_get(zval *object TSRMLS_DC)
 				MAKE_STD_ZVAL(newptr);
 				array_init(newptr);
 
+				zval_add_ref(data_ptr);
 				zend_hash_next_index_insert(Z_ARRVAL_P(newptr), data_ptr, sizeof(zval *), NULL);
 				zend_hash_next_index_insert(Z_ARRVAL_P(newptr), &value, sizeof(zval *), NULL);
 
