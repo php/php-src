@@ -102,7 +102,7 @@ ZEND_BEGIN_MODULE_GLOBALS(ibase)
 	char *cfg_dateformat;
 	char *timeformat;
 	char *cfg_timeformat;
-	char *errmsg;
+	char errmsg[MAX_ERRMSG];
 ZEND_END_MODULE_GLOBALS(ibase)
 
 typedef struct {
