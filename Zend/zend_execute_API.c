@@ -138,6 +138,7 @@ void init_executor(TSRMLS_D)
 	EG(class_table) = CG(class_table);
 
 	EG(in_execution) = 0;
+	EG(in_autoload) = 0;
 
 	zend_ptr_stack_init(&EG(argument_stack));
 
@@ -791,6 +792,12 @@ ZEND_API int zend_lookup_class(char *name, int name_length, zend_class_entry ***
 		return SUCCESS;
 	}
 
+	if (EG(in_autoload)) {
+		free_alloca(lc_name);
+		return FAILURE;
+	}
+	EG(in_autoload) = 1;
+
 	ZVAL_STRINGL(&autoload_function, "__autoload", sizeof("__autoload")-1,  0);
 
 	INIT_PZVAL(class_name_ptr);
@@ -801,6 +808,8 @@ ZEND_API int zend_lookup_class(char *name, int name_length, zend_class_entry ***
 	exception = EG(exception);
 	EG(exception) = NULL;
 	retval = call_user_function_ex(EG(function_table), NULL, &autoload_function, &retval_ptr, 1, args, 0, NULL TSRMLS_CC);
+
+	EG(in_autoload) = 0;
 
 	if (retval == FAILURE) {
 		EG(exception) = exception;
