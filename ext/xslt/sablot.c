@@ -193,6 +193,7 @@ PHP_FUNCTION(xslt_set_sax_handlers)
 	php_xslt    *handle;           /* Pointer to a php_xslt handle */
 	char        *string_key;       /* String key for the hash */
 	ulong        num_key;          /* (unused) hash's numerical key */
+	int          key_type;         /* The type of the current hash key */
 
 	if (ZEND_NUM_ARGS() != 2 ||
 	    zend_get_parameters_ex(2, &processor_p, &sax_handlers_p) == FAILURE) {
@@ -204,7 +205,7 @@ PHP_FUNCTION(xslt_set_sax_handlers)
 	sax_handlers = HASH_OF(*sax_handlers_p);
 	if (!sax_handlers) {
 		php_error(E_WARNING, "Expecting an array as the second argument to xslt_set_sax_handlers()");
-		RETURN_NULL();
+		return;
 	}
 
 	/* Loop through the HashTable containing the SAX handlers */
@@ -215,7 +216,13 @@ PHP_FUNCTION(xslt_set_sax_handlers)
 		/* Allocate the handler */
 		SEPARATE_ZVAL(handler);
 
-		zend_hash_get_current_key(sax_handlers, &string_key, &num_key, 0);
+		key_type = zend_hash_get_current_key(sax_handlers, &string_key, &num_key, 0);
+		if (key_type == HASH_KEY_IS_LONG) {
+			convert_to_string_ex(handler);
+			php_error(E_NOTICE, "Skipping numerical index %d (with value %s) in xslt_set_sax_handlers()",
+			          num_key, Z_STRVAL_PP(handler));
+			continue;
+		}
 
 		/* Document handlers (document start, document end) */
 		if (strcasecmp(string_key, "document") == 0) {
@@ -268,6 +275,7 @@ PHP_FUNCTION(xslt_set_scheme_handlers)
 	php_xslt                *handle;            /* php->sablotron handle */
 	char                    *string_key;        /* Hash key (string) */
 	ulong                    num_key;           /* (unused) Hash key (number) */
+	int                      key_type;          /* The type of the current key */
 
 	if (ZEND_NUM_ARGS() != 2 ||
 	    zend_get_parameters_ex(2, &processor_p, &scheme_handlers_p) == FAILURE) {
@@ -275,13 +283,26 @@ PHP_FUNCTION(xslt_set_scheme_handlers)
 	}
 	ZEND_FETCH_RESOURCE(handle, php_xslt *, processor_p, -1, le_xslt_name, le_xslt);
 
+	scheme_handlers = HASH_OF(*scheme_handlers_p);
+	if (!scheme_handlers) {
+		php_error(E_WARNING, "2nd argument to xslt_set_scheme_handlers() must be an array");
+		return;
+	}
+
 	/* Loop through the scheme handlers array, setting the given
 	   scheme handlers */
 	for (zend_hash_internal_pointer_reset(scheme_handlers);
 	     zend_hash_get_current_data(scheme_handlers, (void **) &handler) == SUCCESS;
 	     zend_hash_move_forward(scheme_handlers)) {
 
-		zend_hash_get_current_key(scheme_handlers, &string_key, &num_key, 0);
+		SEPARATE_ZVAL(handler);
+
+		key_type = zend_hash_get_current_key(scheme_handlers, &string_key, &num_key, 0);
+		if (key_type == HASH_KEY_IS_LONG) {
+			php_error(E_NOTICE, "Numerical key %d (with value %s) being ignored in xslt_set_scheme_handlers()",
+					  num_key, Z_STRVAL_PP(handler));
+			continue;
+		}
 
 		/* Open the URI and return the whole string */
 		if (strcasecmp(string_key, "get_all") == 0) {
@@ -451,12 +472,7 @@ PHP_FUNCTION(xslt_process)
 
 	/* Translate a PHP array into a Sablotron array */
 	if (argc > 4) {
-		char **p;
 		xslt_make_array(args_p,   &args);
-		
-		for (p = args; *p != NULL; p += 2) {
-			php_printf("%s: %s\n\n\n", *p, *(p + 1));
-		}
 	}
 	
 	if (argc > 5) {
