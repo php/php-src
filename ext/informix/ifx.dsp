@@ -42,7 +42,7 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /YX /FD /c
-# ADD CPP /nologo /MT /W3 /GX /O2 /I "..\.." /I "..\..\Zend" /I "..\..\TSRM" /D "NDEBUG" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "COMPILE_DL" /D HAVE_IFX=1 /D HAVE_IUS=1 /D "ZTS" /D ZEND_WIN32=1 /D PHP_WIN32=1 /D IFX_VERSION=920 /YX /FD /I /php/php3" /I /php/php3/functions" /I /informix/incl/esql" /I /php/php3" /I /php/php3/functions" /I /informix/incl/esql" " " " " " " /c
+# ADD CPP /nologo /MT /W3 /GX /O2 /I "..\.." /I "..\..\Zend" /I "..\..\TSRM" /D "NDEBUG" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "COMPILE_DL_INFORMIX" /D HAVE_IFX=1 /D HAVE_IUS=1 /D "ZTS" /D ZEND_WIN32=1 /D PHP_WIN32=1 /D IFX_VERSION=920 /YX /FD /I /php/php3" /I /php/php3/functions" /I /informix/incl/esql" /I /php/php3" /I /php/php3/functions" /I /informix/incl/esql" " " " " " " /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /o NUL /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /o NUL /win32
 # ADD BASE RSC /l 0x406 /d "NDEBUG"
@@ -68,7 +68,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MTd /W3 /Gm /GX /Zi /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /YX /FD /c
-# ADD CPP /nologo /MTd /W3 /Gm /GX /Zi /Od /I "..\.." /I "..\..\Zend" /I "..\..\TSRM" /D "_DEBUG" /D ZEND_DEBUG=1 /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "COMPILE_DL" /D HAVE_IFX=1 /D HAVE_IUS=1 /D "ZTS" /D ZEND_WIN32=1 /D PHP_WIN32=1 /D IFX_VERSION=920 /YX /FD /c
+# ADD CPP /nologo /MTd /W3 /Gm /GX /Zi /Od /I "..\.." /I "..\..\Zend" /I "..\..\TSRM" /D "_DEBUG" /D ZEND_DEBUG=1 /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "COMPILE_DL_INFORMIX" /D HAVE_IFX=1 /D HAVE_IUS=1 /D "ZTS" /D ZEND_WIN32=1 /D PHP_WIN32=1 /D IFX_VERSION=920 /YX /FD /c
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /o NUL /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /o NUL /win32
 # ADD BASE RSC /l 0x406 /d "_DEBUG"
