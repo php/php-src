@@ -140,7 +140,6 @@ PHP                                                                        NEWS
 - Fixed bug #28699 (Reflection api bugs). (Marcus)
 - Fixed bug #28694 (ReflectionExtension::getFunctions() crashes PHP). (Marcus)
 - Fixed bug #28512 (Allocate enough space to store MSSQL data). (Frank)
-- Fixed bug #28325 (Circular references not properly serialised). (Moriyoshi)
 - Fixed strip_tags() to correctly handle '\0' characters. (Stefan)
 
 7 Jun 2004, PHP 5 Release Candidate 3
@@ -225,7 +224,6 @@ PHP                                                                        NEWS
 - Fixed bug #27619 (filters not applied to pre-buffered stream data). (Sara)
 - Fixed bug #27519 (Reflection_Function constructor crashes with non-existant 
   function's name). (Marcus)
-- Fixed bug #27469 (serialize() objects of incomplete class). (Dmitry)
 - Fixed bug #27457 (handling of numeric indexes in strtr()). (Dmitry)
 - Fixed bug #27397 (debug_backtrace() not showing function arguments). (Zeev)
 - Fixed bug #27283 (The last catch statement was sometimes skipped). (Andi)
