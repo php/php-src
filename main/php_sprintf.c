@@ -33,7 +33,7 @@ PHPAPI int
 php_sprintf (char*s, const char* format, ...)
 {
   va_list args;
-  char *ret;
+  int ret;
 
   va_start (args, format);
   s[0] = '\0';
