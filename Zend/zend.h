@@ -117,6 +117,7 @@
 typedef unsigned char zend_bool;
 typedef unsigned char zend_uchar;
 typedef unsigned int zend_uint;
+typedef unsigned short zend_ushort;
 
 #undef SUCCESS
 #undef FAILURE
@@ -155,9 +156,9 @@ typedef union _zvalue_value {
 struct _zval_struct {
 	/* Variable information */
 	zvalue_value value;		/* value */
-	unsigned char type;	/* active type */
-	unsigned char is_ref;
-	short refcount;
+	zend_uchar type;	/* active type */
+	zend_uchar is_ref;
+	zend_ushort refcount;
 };
 
 
