@@ -51,6 +51,7 @@
 
 #ifdef ZTS
 # include <fstream.h>
+# include <stdiostr.h>
 # if WIN32||WINNT
 #  include <strstrea.h>
 # else
@@ -170,7 +171,7 @@ BEGIN_EXTERN_C()
 ZEND_API void zend_open_file_dtor(void *f)
 {
 #ifdef ZTS
-	delete *((ifstream **) f);
+	delete *((istream **) f);
 #else
 	fclose(*((FILE **) f));
 #endif
@@ -219,35 +220,21 @@ ZEND_API inline int open_file_for_scanning(zend_file_handle *file_handle CLS_DC)
 			break;
 		case ZEND_HANDLE_FILENAME:
 			{
-#if (WIN32|WINNT)
-				int fd;
 				file_handle->handle.fp = zend_fopen(file_handle->filename);
 				if (!file_handle->handle.fp) {
 					return FAILURE;
 				}
-				fd = fileno(file_handle->handle.fp);
-				file_handle->handle.is = new istream(new filebuf(fd));
-#else
-				file_handle->handle.is = new ifstream(file_handle->filename, ios::nocreate|ios::in|ios::binary);
-#endif
+				file_handle->handle.is = new stdiostream(file_handle->handle.fp);
 				break;
 			}
 		case ZEND_HANDLE_FP:
 			if (file_handle->handle.fp==stdin) {
 				file_handle->handle.is = (ifstream *) &cin;
 			} else {
-#if (WIN32|WINNT)
-				int fd;
-
 				if (!file_handle->handle.fp) {
 					return FAILURE;
 				}
-				fd = fileno(file_handle->handle.fp);
-				file_handle->handle.is = new istream(new filebuf(fd));
-#else
-				fclose(file_handle->handle.fp);
-				file_handle->handle.is = new ifstream(file_handle->filename, ios::nocreate|ios::in|ios::binary);
-#endif
+				file_handle->handle.is = new stdiostream(file_handle->handle.fp);
 			}	
 			break;
 	}
