@@ -89,35 +89,35 @@ static void _default_exception_get_entry(zval *object, char *name, int name_len,
 	zval_copy_ctor(return_value);
 }
 
-ZEND_METHOD(exception, getfile)
+ZEND_METHOD(exception, getFile)
 {
 	DEFAULT_0_PARAMS;
 
 	_default_exception_get_entry(getThis(), "file", sizeof("file")-1, return_value TSRMLS_CC);
 }
 
-ZEND_METHOD(exception, getline)
+ZEND_METHOD(exception, getLine)
 {
 	DEFAULT_0_PARAMS;
 
 	_default_exception_get_entry(getThis(), "line", sizeof("line")-1, return_value TSRMLS_CC);
 }
 
-ZEND_METHOD(exception, getmessage)
+ZEND_METHOD(exception, getMessage)
 {
 	DEFAULT_0_PARAMS;
 
 	_default_exception_get_entry(getThis(), "message", sizeof("message")-1, return_value TSRMLS_CC);
 }
 
-ZEND_METHOD(exception, getcode)
+ZEND_METHOD(exception, getCode)
 {
 	DEFAULT_0_PARAMS;
 
 	_default_exception_get_entry(getThis(), "code", sizeof("code")-1, return_value TSRMLS_CC);
 }
 
-ZEND_METHOD(exception, gettrace)
+ZEND_METHOD(exception, getTrace)
 {
 	DEFAULT_0_PARAMS;
 
@@ -276,7 +276,7 @@ static int _build_trace_string(zval **frame, int num_args, va_list args, zend_ha
 	return ZEND_HASH_APPLY_KEEP;
 }
 
-ZEND_METHOD(exception, gettraceasstring)
+ZEND_METHOD(exception, getTraceAsString)
 {
 	zval *trace;
 	char *res = estrdup(""), **str = &res, *s_tmp;
@@ -295,7 +295,7 @@ ZEND_METHOD(exception, gettraceasstring)
 }
 /* }}} */
 
-ZEND_METHOD(exception, tostring)
+ZEND_METHOD(exception, toString)
 {
 	zval *message, *file, *line, *trace;
 	char *str;
@@ -348,13 +348,13 @@ ZEND_METHOD(exception, tostring)
  */
 static zend_function_entry default_exception_functions[] = {
 	ZEND_ME(exception, __construct, NULL, 0)
-	ZEND_ME(exception, getmessage, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
-	ZEND_ME(exception, getcode, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
-	ZEND_ME(exception, getfile, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
-	ZEND_ME(exception, getline, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
-	ZEND_ME(exception, gettrace, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
-	ZEND_ME(exception, gettraceasstring, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
-	ZEND_ME(exception, tostring, NULL, 0)
+	ZEND_ME(exception, getMessage, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
+	ZEND_ME(exception, getCode, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
+	ZEND_ME(exception, getFile, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
+	ZEND_ME(exception, getLine, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
+	ZEND_ME(exception, getTrace, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
+	ZEND_ME(exception, getTraceAsString, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
+	ZEND_ME(exception, toString, NULL, 0)
 	{NULL, NULL, NULL}
 };
 
