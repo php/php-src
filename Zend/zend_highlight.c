@@ -190,7 +190,7 @@ ZEND_API void zend_strip(TSRMLS_D)
 		switch (token_type) {
 			case T_COMMENT:
 				token.type = 0;
-				break;
+				continue;
 
 			case T_WHITESPACE:
 				if (token.type) {
