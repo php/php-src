@@ -22,11 +22,12 @@
 
 #ifdef TRANS_SID
 
+#include "php_globals.h"
+
 #include <sys/types.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "php.h"
 #include "basic_functions.h"
 #include "url_scanner.h"
 
