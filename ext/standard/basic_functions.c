@@ -1402,6 +1402,9 @@ PHP_FUNCTION(putenv)
 			RETURN_FALSE;
 		}
 	}
+
+	php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid parameter syntax.");
+	RETURN_FALSE;
 }
 /* }}} */
 #endif
