@@ -664,11 +664,12 @@ void php_request_shutdown(void *dummy)
 
 	php_call_shutdown_functions();
 	
-	php_ini_rshutdown();
-
 	if (PG(modules_activated)) {
 		zend_deactivate_modules();
 	}
+	
+	php_ini_rshutdown();
+	
 	zend_deactivate(CLS_C ELS_CC);
 	sapi_deactivate(SLS_C);
 
