@@ -2,7 +2,7 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 200?, Version 5.0.0
 
-? ? ??? 2003, PHP 5 Beta 1
+? ? ??? 2003, PHP 5 Beta 1 
 
 - Switch to using Zend Engine 2, which includes numerous engine level 
   improvements.  A full list is available at 
