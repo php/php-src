@@ -13,7 +13,7 @@ AC_DEFUN(MYSQL_LIB_CHK, [
 ])
 
 PHP_ARG_WITH(pdo-mysql, for MySQL support,
-[  --with-pdo-smysql[=DIR]       Include MySQL support. DIR is the MySQL base directory.])
+[  --with-pdo-mysql[=DIR]       Include MySQL support. DIR is the MySQL base directory.])
 
 if test "$PHP_PDO_MYSQL" != "no"; then
   AC_DEFINE(HAVE_MYSQL, 1, [Whether you have MySQL])
