@@ -241,7 +241,7 @@ extern char **environ;
 void phperror(char *error);
 PHPAPI int php_write(void *buf, uint size);
 PHPAPI int php_printf(const char *format, ...);
-void php_log_err(char *log_message);
+PHPAPI void php_log_err(char *log_message);
 int Debug(char *format, ...);
 int cfgparse(void);
 

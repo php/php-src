@@ -162,6 +162,7 @@ _notice_handler(void *arg, const char *message)
 static int _rollback_transactions(zend_rsrc_list_entry *rsrc)
 {
 	PGconn *link = (PGconn *)rsrc->ptr;
+	PGLS_FETCH();
 
 	PGG(ignore_notices) = 1;
 	PQexec(link,"BEGIN;ROLLBACK;");

@@ -251,7 +251,7 @@ PHP_INI_END()
 /* True global (no need for thread safety */
 static int module_initialized = 0;
 
-void php_log_err(char *log_message)
+PHPAPI void php_log_err(char *log_message)
 {
 	FILE *log_file;
 	char error_time_str[128];
