@@ -1,3 +1,67 @@
+2002-08-04  Shane Caraveo  <shane@pb1.pair.com>
+
+    * ext/standard/var_unserializer.c
+      ext/standard/var_unserializer.re
+      ext/standard/php_var.h:
+    need to export var_replace and var_destroy for win32
+
+2002-08-04  helly  <helly@pb1.pair.com>
+
+    * ext/mbstring/mbstring.dsp: move html_entities.c to proper place
+
+    * ext/standard/info.c:
+    -Send charset US-ASCII or ini setting default_charset.
+
+2002-08-04  sniper  <sniper@pb1.pair.com>
+
+    * ext/mhash/mhash.c
+      ext/mhash/php_mhash.h: Add PHP_MINFO_*
+
+2002-08-04  helly  <helly@pb1.pair.com>
+
+    * ext/mbstring/mbfilter.c:
+    -Correct mime_name for HTML-ENTITIES encoding is of cause US-ASCII
+    -Full list of ASCII aliases
+
+2002-08-04  sander  <sander@pb1.pair.com>
+
+    * pear/Console/Getopt.php: Nuke notice (thanks to Arnaud Limbourg)
+
+2002-08-04  helly  <helly@pb1.pair.com>
+
+    * ext/mbstring/mbregex.c
+      ext/mbstring/mbstring.c: -Fix warnings (fixed all?)
+
+2002-08-04  georg  <georg@pb1.pair.com>
+
+    * ext/standard/info.c: ups.. :)
+
+2002-08-04  gluke  <gluke@pb1.pair.com>
+
+    * ext/mnogosearch/php_mnogo.c:
+    - a small fix to mnogosearch extension (affecting UDM_BROWSER_CHARSET)
+
+2002-08-04  georg  <georg@pb1.pair.com>
+
+    * ext/standard/info.c: added meta tag (w3c compliance)
+    Thx to Ilia Alshanetsky (ilia@prohost.org)
+
+2002-08-04  helly  <helly@pb1.pair.com>
+
+    * ext/mbstring/mbstring.dsp: -Add new file to windows build
+
+    * ext/mbstring/config.m4
+      ext/mbstring/html_entities.c
+      ext/mbstring/mbfilter.c
+      ext/mbstring/mbfilter.h
+      ext/mbstring/tests/020.phpt: -New encoding/decoding HTML-ENTITIES.
+
+    * ext/mbstring/mbstring.c:
+    -Allow double quotes for encoding lists (if used in ini for example)
+    -New parameter 'L' for mb_http_input() to retieve input encoding as
+     comma separated string.
+     comma separated string. (marcus)
+
 2002-08-03  jflemer  <jflemer@pb1.pair.com>
 
     * ext/standard/tests/general_functions/proc_open.phpt:
