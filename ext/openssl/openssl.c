@@ -48,6 +48,8 @@
 
 #define DEBUG_SMIME	0
 
+static unsigned char arg2of2_force_ref[] =
+                       { 2, BYREF_NONE, BYREF_FORCE };
 static unsigned char arg2of3_force_ref[] =
                        { 3, BYREF_NONE, BYREF_FORCE, BYREF_NONE };
 static unsigned char arg2of4_force_ref[] =
@@ -68,7 +70,7 @@ function_entry openssl_functions[] = {
 /* public/private key functions */
 	PHP_FE(openssl_pkey_free,			NULL)
 	PHP_FE(openssl_pkey_new,			NULL)
-	PHP_FE(openssl_pkey_export,			second_arg_force_ref)
+	PHP_FE(openssl_pkey_export,			arg2of2_force_ref)
 	PHP_FE(openssl_pkey_export_to_file,	NULL)
 	PHP_FE(openssl_pkey_get_private,	NULL)
 	PHP_FE(openssl_pkey_get_public,		NULL)
@@ -83,12 +85,12 @@ function_entry openssl_functions[] = {
 	PHP_FE(openssl_x509_parse,			 	NULL)
 	PHP_FE(openssl_x509_checkpurpose,		NULL)
 	PHP_FE(openssl_x509_check_private_key,	NULL)
-	PHP_FE(openssl_x509_export,				second_arg_force_ref)
+	PHP_FE(openssl_x509_export,				arg2of2_force_ref)
 	PHP_FE(openssl_x509_export_to_file,		NULL)
 
 /* CSR funcs */
-	PHP_FE(openssl_csr_new,				second_arg_force_ref)
-	PHP_FE(openssl_csr_export,			second_arg_force_ref)
+	PHP_FE(openssl_csr_new,				arg2of2_force_ref)
+	PHP_FE(openssl_csr_export,			arg2of2_force_ref)
 	PHP_FE(openssl_csr_export_to_file,	NULL)
 	PHP_FE(openssl_csr_sign,			NULL)
 
@@ -158,7 +160,7 @@ static void php_csr_free(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 
 /* {{{ openssl -> PHP "bridging" */
 /* true global; readonly after module startup */
-static char default_ssl_conf_filename[PATH_MAX];
+static char default_ssl_conf_filename[MAXPATHLEN];
 
 struct php_x509_request {
 	LHASH * global_config;	/* Global SSL config */
@@ -461,7 +463,7 @@ static void php_openssl_dispose_config(struct php_x509_request * req TSRMLS_DC)
 
 static int php_openssl_load_rand_file(const char * file, int *egdsocket, int *seeded)
 {
-	char buffer[PATH_MAX];
+	char buffer[MAXPATHLEN];
 
 	*egdsocket = 0;
 	*seeded = 0;
@@ -490,7 +492,7 @@ static int php_openssl_load_rand_file(const char * file, int *egdsocket, int *se
 
 static int php_openssl_write_rand_file(const char * file, int egdsocket, int seeded)
 {
-	char buffer[PATH_MAX];
+	char buffer[MAXPATHLEN];
 	if (egdsocket || !seeded)	{
 		/* if we did not manage to read the seed file, we should not write
 		 * a low-entropy seed file back */
