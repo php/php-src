@@ -4,6 +4,43 @@ dnl This file contains local autoconf functions.
 
 sinclude(dynlib.m4)
 
+dnl PHP_EVAL_LIBLINE(LINE, SHARED-LIBADD)
+dnl
+dnl Use this macro, if you need to add libraries and or library search
+dnl paths to the PHP build system which are only given in compiler
+dnl notation.
+dnl
+AC_DEFUN(PHP_EVAL_LIBLINE,[
+  for ac_i in $1; do
+    case "$ac_i" in
+    -l*)
+      ac_ii=`echo $ac_i|cut -c 3-`
+      AC_ADD_LIBRARY($ac_ii,$2)
+    ;;
+    -L*)
+      ac_ii=`echo $ac_i|cut -c 3-`
+      AC_ADD_LIBPATH($ac_ii,,$2)
+    ;;
+    esac
+  done
+])
+
+dnl PHP_EVAL_INCLINE(LINE)
+dnl
+dnl Use this macro, if you need to add header search paths to the PHP
+dnl build system which are only given in compiler notation.
+dnl
+AC_DEFUN(PHP_EVAL_INCLINE,[
+  for ac_i in $1; do
+    case "$ac_i" in
+    -I*)
+      ac_ii=`echo $ac_i|cut -c 3-`
+      AC_ADD_INCLUDE($ac_ii)
+    ;;
+    esac
+  done
+])
+	
 AC_DEFUN(PHP_READDIR_R_TYPE,[
   dnl HAVE_READDIR_R is also defined by libmysql
   AC_CHECK_FUNC(readdir_r,ac_cv_func_readdir_r=yes,ac_cv_func_readdir=no)
