@@ -1875,7 +1875,7 @@ void gdImageFill(gdImagePtr im, int x, int y, int nc)
 	int oc;   /* old pixel value */
 	int wx2,wy2;
 	/* stack of filled segments */
-	//struct seg stack[FILL_MAX],*sp = stack;;
+	/* struct seg stack[FILL_MAX],*sp = stack;; */
 	struct seg *stack;
 	struct seg *sp;
 
