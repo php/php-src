@@ -238,7 +238,7 @@ fprintf(stderr, "stream_alloc: %s:%p persistent=%s\n", ops->label, ret, persiste
 }
 /* }}} */
 
-int _php_stream_free_persistend(list_entry *le, void *pStream TSRMLS_DC)
+int _php_stream_free_persistent(list_entry *le, void *pStream TSRMLS_DC)
 {
 	return le->ptr == pStream;
 }
@@ -371,7 +371,7 @@ fprintf(stderr, "stream_free: %s:%p[%s] preserve_handle=%d release_cast=%d remov
 #endif
 		if (stream->is_persistent) {
 			/* we don't work with *stream but need its value for comparison */
-			zend_hash_apply_with_argument(&EG(persistent_list), (apply_func_arg_t) _php_stream_free_persistend, stream TSRMLS_CC);
+			zend_hash_apply_with_argument(&EG(persistent_list), (apply_func_arg_t) _php_stream_free_persistent, stream TSRMLS_CC);
 		}
 	}
 
