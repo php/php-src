@@ -1,3 +1,16 @@
+2003-07-16  Zeev Suraski  <zeev@zend.com>
+
+    * zend_compile.c:
+      Fix bug in the verification of interface-function implementation
+
+    * zend_compile.c
+      zend_compile.h
+      zend_execute.c:
+      More cleanup for assign-op handling of objects
+
+    * zend_alloc.c:
+      Fix warning
+
 2003-07-12  Andi Gutmans  <andi@zend.com>
 
     * zend_API.c:
