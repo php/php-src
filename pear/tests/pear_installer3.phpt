@@ -1,5 +1,5 @@
 --TEST--
-PEAR_Installer test #2
+PEAR_Installer test #3 File Transactions
 --SKIPIF--
 skip
 --FILE--
