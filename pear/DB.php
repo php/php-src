@@ -124,6 +124,12 @@ define('DB_FETCHMODE_ORDERED', 1);
 define('DB_FETCHMODE_ASSOC', 2);
 
 /**
+* Column data as object properties
+*/
+
+define('DB_FETCHMODE_OBJECT', 3);
+
+/**
  * For multi-dimensional results: normally the first level of arrays
  * is the row number, and the second level indexed by column number or name.
  * DB_FETCHMODE_FLIPPED switches this order, so the first level of arrays
@@ -612,40 +618,58 @@ class DB_result
     }
 
     /**
-     * Fetch and return a row of data (it uses fetchInto for that)
-     * @param   $fetchmode  format of fetched row array
-     * @param   $rownum     the absolute row number to fetch
+     * Fetch and return a row of data (it uses backend->fetchInto for that)
+     * @param   $fetchmode  format of fetched row
+     * @param   $rownum     the row number to fetch
      *
-     * @return  array   a row of data, or false on error
+     * @return  array   a row of data, NULL on no more rows or PEAR_Error on error
      */
     function fetchRow($fetchmode = DB_FETCHMODE_DEFAULT, $rownum=null)
     {
         if ($fetchmode === DB_FETCHMODE_DEFAULT) {
             $fetchmode = $this->dbh->fetchmode;
         }
-
+        if ($fetchmode === DB_FETCHMODE_OBJECT) {
+            $fetchmode = DB_FETCHMODE_ASSOC;
+            $return_object = true;
+        }
         $res = $this->dbh->fetchInto($this->result, $arr, $fetchmode, $rownum);
         if ($res !== DB_OK) {
             return $res;
+        }
+        if (isset($return_object)) {
+            $class = $this->dbh->fetchmode_object_class;
+            $ret =& new $class($arr);
+            return $ret;
         }
         return $arr;
     }
 
     /**
-     * Fetch a row of data into an existing array.
+     * Fetch a row of data into an existing variable.
      *
-     * @param   $arr                reference to data array
-     * @param   $fetchmode  format of fetched row array
-     * @param   $rownum     the absolute row number to fetch
+     * @param   $arr        reference to data containing the row
+     * @param   $fetchmode  format of fetched row
+     * @param   $rownum     the row number to fetch
      *
-     * @return  int     error code
+     * @return  mixed  DB_OK on success, NULL on no more rows or
+     *                 a DB_Error object on errors
      */
     function fetchInto(&$arr, $fetchmode = DB_FETCHMODE_DEFAULT, $rownum=null)
     {
         if ($fetchmode === DB_FETCHMODE_DEFAULT) {
             $fetchmode = $this->dbh->fetchmode;
         }
-        return $this->dbh->fetchInto($this->result, $arr, $fetchmode, $rownum);
+        if ($fetchmode === DB_FETCHMODE_OBJECT) {
+            $fetchmode = DB_FETCHMODE_ASSOC;
+            $return_object = true;
+        }
+        $res = $this->dbh->fetchInto($this->result, $arr, $fetchmode, $rownum);
+        if (($res === DB_OK) && isset($return_object)) {
+            $class = $this->dbh->fetchmode_object_class;
+            $arr = new $class($arr);
+        }
+        return $res;
     }
 
     /**
@@ -685,6 +709,16 @@ class DB_result
     function tableInfo($mode = null)
     {
         return $this->dbh->tableInfo($this->result, $mode);
+    }
+}
+
+class DB_row
+{
+    function DB_row(&$arr)
+    {
+        for (reset($arr); $key = key($arr); next($arr)) {
+            $this->$key = &$arr[$key];
+        }
     }
 }
 
