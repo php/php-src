@@ -67,6 +67,9 @@ DLEXPORT PHP_FUNCTION(udm_find);
 DLEXPORT PHP_FUNCTION(udm_get_res_field);
 DLEXPORT PHP_FUNCTION(udm_get_res_param);
 
+DLEXPORT PHP_FUNCTION(udm_cat_list);
+DLEXPORT PHP_FUNCTION(udm_cat_path);
+
 DLEXPORT PHP_FUNCTION(udm_free_res);
 DLEXPORT PHP_FUNCTION(udm_free_agent);
 
