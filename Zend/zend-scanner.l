@@ -389,9 +389,6 @@ ZEND_API zend_op_array *v_compile_files(int mark_as_ref CLS_DC, int file_count, 
 		if (compiled_files>0) {
 			CG(active_op_array) = original_active_op_array;
 			pass_two(op_array);
-			if (mark_as_ref) {
-				pass_include_eval(op_array);
-			}
 		} else {
 			CG(active_op_array) = original_active_op_array;
 			destroy_op_array(op_array);
