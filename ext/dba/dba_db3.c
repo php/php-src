@@ -66,7 +66,7 @@ DBA_OPEN_FUNC(db3)
 		info->mode == DBA_TRUNC ? DB_CREATE | DB_TRUNCATE : -1;
 
 	if (gmode == -1)
-		return FAILURE;
+		return FAILURE; /* not possible */
 
 	if (info->argc > 0) {
 		convert_to_long_ex(info->argv[0]);
@@ -78,6 +78,10 @@ DBA_OPEN_FUNC(db3)
 		dba_db3_data *data;
 
 		data = emalloc(sizeof(*data));
+		if (!data) {
+			*error = "Out of memory";
+			return FAILURE;
+		}
 		data->dbp = dbp;
 		data->cursor = NULL;
 		info->dbf = data;

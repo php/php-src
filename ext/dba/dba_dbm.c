@@ -79,6 +79,10 @@ DBA_OPEN_FUNC(dbm)
 	}
 
 	info->dbf = ecalloc(sizeof(dba_dbm_data), 1);
+	if (!info->dbf) {
+		*error = "Out of memory";
+		return FAILURE;
+	}
 	return SUCCESS;
 }
 

@@ -49,7 +49,7 @@ DBA_OPEN_FUNC(gdbm)
 		info->mode == DBA_TRUNC ? GDBM_NEWDB : -1;
 		
 	if(gmode == -1) 
-		return FAILURE;
+		return FAILURE; /* not possible */
 
 	if(info->argc > 0) {
 		convert_to_long_ex(info->argv[0]);
@@ -63,6 +63,7 @@ DBA_OPEN_FUNC(gdbm)
 		((dba_gdbm_data *) info->dbf)->dbf = dbf;
 		return SUCCESS;
 	}
+	*error = "Out of memory";
 	return FAILURE;
 }
 

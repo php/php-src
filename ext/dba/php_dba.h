@@ -48,7 +48,7 @@ extern zend_module_entry dba_module_entry;
 /* common prototypes which must be supplied by modules */
 
 #define DBA_OPEN_FUNC(x) \
-	int dba_open_##x(dba_info *info TSRMLS_DC)
+	int dba_open_##x(dba_info *info, char **error TSRMLS_DC)
 #define DBA_CLOSE_FUNC(x) \
 	void dba_close_##x(dba_info *info TSRMLS_DC)
 #define DBA_FETCH_FUNC(x) \
