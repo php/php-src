@@ -1673,10 +1673,9 @@ PHP_FUNCTION(ibase_query)
 /* }}} */
 
 /* {{{ _php_ibase_var_pval() */
-static int _php_ibase_var_pval(pval *val, void *data, int type, int len, int scale, int flag)
+static int _php_ibase_var_pval(pval *val, void *data, int type, int len, int scale, int flag TSRMLS_DC)
 {
 	char string_data[255];
-	TSRMLS_FETCH();
 	
 	switch(type & ~1) {
 		case SQL_VARYING:
@@ -1688,7 +1687,7 @@ static int _php_ibase_var_pval(pval *val, void *data, int type, int len, int sca
 			memcpy(val->value.str.val, data, len);
 			val->value.str.val[len] = '\0';
 			if (PG(magic_quotes_runtime)) {
-				val->value.str.val = php_addslashes(val->value.str.val, len, &len, 1);
+				val->value.str.val = php_addslashes(val->value.str.val, len, &len, 1 TSRMLS_CC);
             }
 			val->type = IS_STRING;
 			val->value.str.len = len;
@@ -1811,7 +1810,7 @@ static int _php_ibase_var_pval(pval *val, void *data, int type, int len, int sca
 /* {{{ _php_ibase_arr_pval() */
 /* create multidimension array - resursion function
  (*datap) argument changed */
-static int _php_ibase_arr_pval(pval *ar_pval, char **datap, ibase_array *ib_array, int dim, int flag)
+static int _php_ibase_arr_pval(pval *ar_pval, char **datap, ibase_array *ib_array, int dim, int flag TSRMLS_DC)
 {
 	pval tmp;
 	int i, dim_len, l_bound, u_bound;
@@ -1829,7 +1828,7 @@ static int _php_ibase_arr_pval(pval *ar_pval, char **datap, ibase_array *ib_arra
 	if (dim < ib_array->ar_desc.array_desc_dimensions - 1) { /* array again */
 		for (i = 0; i < dim_len; i++) {
 			/* recursion here */
-			if (_php_ibase_arr_pval(ar_pval, datap, ib_array, dim+1, flag) == FAILURE) {
+			if (_php_ibase_arr_pval(ar_pval, datap, ib_array, dim+1, flag TSRMLS_CC) == FAILURE) {
 				return FAILURE;
 			}
 		}
@@ -1841,7 +1840,7 @@ static int _php_ibase_arr_pval(pval *ar_pval, char **datap, ibase_array *ib_arra
 			if (_php_ibase_var_pval(&tmp, *datap, ib_array->el_type,
 									ib_array->ar_desc.array_desc_length,
 									ib_array->ar_desc.array_desc_scale,
-									flag) == FAILURE){
+									flag TSRMLS_CC) == FAILURE){
 				return FAILURE;
 			}
 			/* FIXME ??? */
@@ -1937,7 +1936,7 @@ static void _php_ibase_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int fetch_type)
 				case SQL_TYPE_DATE:
 				case SQL_TYPE_TIME:
 #endif
-					_php_ibase_var_pval(tmp, var->sqldata, var->sqltype, var->sqllen, var->sqlscale, flag);
+					_php_ibase_var_pval(tmp, var->sqldata, var->sqltype, var->sqllen, var->sqlscale, flag TSRMLS_CC);
 					break;
 				case SQL_BLOB:
 					if (flag & PHP_IBASE_TEXT) { /* text ? */
@@ -2030,7 +2029,7 @@ static void _php_ibase_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int fetch_type)
 					}
 					
 					tmp_ptr = ar_data; /* avoid changes in _arr_pval */
-					if (_php_ibase_arr_pval(tmp, &tmp_ptr, ib_array, 0, flag) == FAILURE) {
+					if (_php_ibase_arr_pval(tmp, &tmp_ptr, ib_array, 0, flag TSRMLS_CC) == FAILURE) {
 						RETURN_FALSE;
 					}
 					efree(ar_data);

@@ -569,7 +569,7 @@ static int preg_do_repl_func(zval *function, char *subject, int *offsets, int co
 /* {{{ preg_do_eval
  */
 static int preg_do_eval(char *eval_str, int eval_str_len, char *subject,
-						int *offsets, int count, char **result)
+						int *offsets, int count, char **result TSRMLS_DC)
 {
 	zval		 retval;			/* Return value from evaluation */
 	char		*eval_str_end,		/* End of eval string */
@@ -584,7 +584,6 @@ static int preg_do_eval(char *eval_str, int eval_str_len, char *subject,
 	int			 backref;			/* Current backref */
 	char        *compiled_string_description;
 	smart_str    code = {0};
-	TSRMLS_FETCH();
 	
 	eval_str_end = eval_str + eval_str_len;
 	walk = segment = eval_str;
@@ -608,7 +607,7 @@ static int preg_do_eval(char *eval_str, int eval_str_len, char *subject,
 					match = subject + offsets[backref<<1];
 					match_len = offsets[(backref<<1)+1] - offsets[backref<<1];
 					if (match_len)
-						esc_match = php_addslashes(match, match_len, &esc_match_len, 0);
+						esc_match = php_addslashes(match, match_len, &esc_match_len, 0 TSRMLS_CC);
 					else {
 						esc_match = match;
 						esc_match_len = 0;
@@ -663,7 +662,7 @@ static int preg_do_eval(char *eval_str, int eval_str_len, char *subject,
 char *php_pcre_replace(char *regex,   int regex_len,
 					   char *subject, int subject_len,
 					   zval *replace_val, int is_callable_replace,
-					   int *result_len, int limit)
+					   int *result_len, int limit TSRMLS_DC)
 {
 	pcre			*re = NULL;			/* Compiled regular expression */
 	pcre_extra		*extra = NULL;		/* Holds results of studying */
@@ -745,7 +744,7 @@ char *php_pcre_replace(char *regex,   int regex_len,
 			/* If evaluating, do it and add the return string's length */
 			if (eval) {
 				eval_result_len = preg_do_eval(replace, replace_len, subject,
-											   offsets, count, &eval_result);
+											   offsets, count, &eval_result TSRMLS_CC);
 				new_len += eval_result_len;
 			} else if (is_callable_replace) {
 				/* Use custom function to get replacement string and its length. */
@@ -871,7 +870,7 @@ char *php_pcre_replace(char *regex,   int regex_len,
 
 /* {{{ php_replace_in_subject
  */
-static char *php_replace_in_subject(zval *regex, zval *replace, zval **subject, int *result_len, int limit, zend_bool is_callable_replace)
+static char *php_replace_in_subject(zval *regex, zval *replace, zval **subject, int *result_len, int limit, zend_bool is_callable_replace TSRMLS_DC)
 {
 	zval		**regex_entry,
 				**replace_entry = NULL,
@@ -924,7 +923,7 @@ static char *php_replace_in_subject(zval *regex, zval *replace, zval **subject, 
 										   replace_value,
 										   is_callable_replace,
 										   result_len,
-										   limit)) != NULL) {
+										   limit TSRMLS_CC)) != NULL) {
 				efree(subject_value);
 				subject_value = result;
 				subject_len = *result_len;
@@ -942,7 +941,7 @@ static char *php_replace_in_subject(zval *regex, zval *replace, zval **subject, 
 								  replace,
 								  is_callable_replace,
 								  result_len,
-								  limit);
+								  limit TSRMLS_CC);
 		return result;
 	}
 }
@@ -1004,7 +1003,7 @@ static void preg_replace_impl(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_callabl
 		/* For each subject entry, convert it to string, then perform replacement
 		   and add the result to the return_value array. */
 		while (zend_hash_get_current_data(Z_ARRVAL_PP(subject), (void **)&subject_entry) == SUCCESS) {
-			if ((result = php_replace_in_subject(*regex, *replace, subject_entry, &result_len, limit_val, is_callable_replace)) != NULL) {
+			if ((result = php_replace_in_subject(*regex, *replace, subject_entry, &result_len, limit_val, is_callable_replace TSRMLS_CC)) != NULL) {
 				/* Add to return array */
 				switch(zend_hash_get_current_key(Z_ARRVAL_PP(subject), &string_key, &num_key, 0))
 				{
@@ -1022,7 +1021,7 @@ static void preg_replace_impl(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_callabl
 		}
 	}
 	else {	/* if subject is not an array */
-		if ((result = php_replace_in_subject(*regex, *replace, subject, &result_len, limit_val, is_callable_replace)) != NULL) {
+		if ((result = php_replace_in_subject(*regex, *replace, subject, &result_len, limit_val, is_callable_replace TSRMLS_CC)) != NULL) {
 			RETVAL_STRINGL(result, result_len, 0);
 		}
 	}	

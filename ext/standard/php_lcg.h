@@ -28,7 +28,7 @@ typedef struct {
 	php_int32 s2;
 } php_lcg_globals;
 
-double php_combined_lcg(void);
+double php_combined_lcg(TSRMLS_D);
 PHP_FUNCTION(lcg_value);
 
 #ifdef ZTS

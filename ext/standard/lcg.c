@@ -46,11 +46,10 @@ static int php_lcg_initialized = 0;
 
 #define MODMULT(a,b,c,m,s) q = s/a;s=b*(s-a*q)-c*q;if(s<0)s+=m
 
-double php_combined_lcg(void)
+double php_combined_lcg(TSRMLS_D)
 {
 	php_int32 q;
 	php_int32 z;
-	TSRMLS_FETCH();
 
 	MODMULT(53668,40014,12211,2147483563L, LCG(s1));
 	MODMULT(52774,40692,3791, 2147483399L, LCG(s2));
@@ -94,7 +93,7 @@ PHP_RINIT_FUNCTION(lcg)
    Returns a value from the combined linear congruential generator */
 PHP_FUNCTION(lcg_value)
 {
-	RETURN_DOUBLE(php_combined_lcg());
+	RETURN_DOUBLE(php_combined_lcg(TSRMLS_C));
 }
 /* }}} */
 

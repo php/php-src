@@ -785,7 +785,7 @@ PHP_FUNCTION(sybase_query)
 
 				convert_to_string(cur_value);
 				if (PG(magic_quotes_runtime)) {
-					cur_value->value.str.val = php_addslashes(cur_value->value.str.val, cur_value->value.str.len, &cur_value->value.str.len,0);
+					cur_value->value.str.val = php_addslashes(cur_value->value.str.val, cur_value->value.str.len, &cur_value->value.str.len,0 TSRMLS_CC);
 				}
 			}
 		}

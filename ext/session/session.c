@@ -471,7 +471,7 @@ static char *_php_create_id(int *newlen TSRMLS_DC)
 	gettimeofday(&tv, NULL);
 	PHP_MD5Init(&context);
 	
-	sprintf(buf, "%ld%ld%0.8f", tv.tv_sec, tv.tv_usec, php_combined_lcg() * 10);
+	sprintf(buf, "%ld%ld%0.8f", tv.tv_sec, tv.tv_usec, php_combined_lcg(TSRMLS_C) * 10);
 	PHP_MD5Update(&context, buf, strlen(buf));
 
 	if (PS(entropy_length) > 0) {
@@ -888,7 +888,7 @@ static void php_session_start(TSRMLS_D)
 	if (PS(mod_data) && PS(gc_probability) > 0) {
 		int nrdels = -1;
 
-		nrand = (int) (100.0*php_combined_lcg());
+		nrand = (int) (100.0*php_combined_lcg(TSRMLS_C));
 		if (nrand < PS(gc_probability)) {
 			PS(mod)->gc(&PS(mod_data), PS(gc_maxlifetime), &nrdels);
 #if 0

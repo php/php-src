@@ -54,7 +54,7 @@ typedef struct dbm_info {
 dbm_info *php_find_dbm(pval *id);
 int php_dbm_close(zend_rsrc_list_entry *rsrc TSRMLS_DC);
 dbm_info *php_dbm_open(char *filename, char *mode);
-int php_dbm_insert(dbm_info *info, char *key, char *value);
+int php_dbm_insert(dbm_info *info, char *key, char *value TSRMLS_DC);
 char *php_dbm_fetch(dbm_info *info, char *key);
 int php_dbm_replace(dbm_info *info, char *key, char *value);
 int php_dbm_exists(dbm_info *info, char *key);

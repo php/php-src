@@ -1208,7 +1208,7 @@ static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 				int should_copy=0;
 
 				if (PG(magic_quotes_runtime)) {
-					data = php_addslashes(element, element_len, &data_len, 0);
+					data = php_addslashes(element, element_len, &data_len, 0 TSRMLS_CC);
 				} else {
 					data = safe_estrndup(element, element_len);
 					data_len = element_len;
