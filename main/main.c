@@ -1001,22 +1001,22 @@ static int php_hash_environment(ELS_D SLS_DC PLS_DC)
 	}
 
 	if (PG(http_globals).post) {
-		zend_hash_add_ptr(&EG(symbol_table), "HTTP_POST_VARS", sizeof("HTTP_POST_VARS"), PG(http_globals).post, sizeof(zval *), NULL);
+		zend_hash_update_ptr(&EG(symbol_table), "HTTP_POST_VARS", sizeof("HTTP_POST_VARS"), PG(http_globals).post, sizeof(zval *), NULL);
 	}
 	if (PG(http_globals).get) {
-		zend_hash_add_ptr(&EG(symbol_table), "HTTP_GET_VARS", sizeof("HTTP_GET_VARS"), PG(http_globals).get, sizeof(zval *), NULL);
+		zend_hash_update_ptr(&EG(symbol_table), "HTTP_GET_VARS", sizeof("HTTP_GET_VARS"), PG(http_globals).get, sizeof(zval *), NULL);
 	}
 	if (PG(http_globals).cookie) {
-		zend_hash_add_ptr(&EG(symbol_table), "HTTP_COOKIE_VARS", sizeof("HTTP_COOKIE_VARS"), PG(http_globals).cookie, sizeof(zval *), NULL);
+		zend_hash_update_ptr(&EG(symbol_table), "HTTP_COOKIE_VARS", sizeof("HTTP_COOKIE_VARS"), PG(http_globals).cookie, sizeof(zval *), NULL);
 	}
 	if (PG(http_globals).server) {
-		zend_hash_add_ptr(&EG(symbol_table), "HTTP_SERVER_VARS", sizeof("HTTP_SERVER_VARS"), PG(http_globals).server, sizeof(zval *), NULL);
+		zend_hash_update_ptr(&EG(symbol_table), "HTTP_SERVER_VARS", sizeof("HTTP_SERVER_VARS"), PG(http_globals).server, sizeof(zval *), NULL);
 	}
 	if (PG(http_globals).environment) {
-		zend_hash_add_ptr(&EG(symbol_table), "HTTP_ENV_VARS", sizeof("HTTP_ENV_VARS"), PG(http_globals).environment, sizeof(zval *), NULL);
+		zend_hash_update_ptr(&EG(symbol_table), "HTTP_ENV_VARS", sizeof("HTTP_ENV_VARS"), PG(http_globals).environment, sizeof(zval *), NULL);
 	}
 	if (PG(http_globals).post_files) {
-		zend_hash_add_ptr(&EG(symbol_table), "HTTP_POST_FILES", sizeof("HTTP_POST_FILES"), PG(http_globals).post_files, sizeof(zval *),NULL);
+		zend_hash_update_ptr(&EG(symbol_table), "HTTP_POST_FILES", sizeof("HTTP_POST_FILES"), PG(http_globals).post_files, sizeof(zval *),NULL);
 	}
 
 	return SUCCESS;
