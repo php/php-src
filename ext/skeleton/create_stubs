@@ -178,13 +178,12 @@ END {
 			"     <funcprototype>\n" \
 			"      <funcdef>" types[i] " <function>" funcs[i] "</function></funcdef>\n"
 
-		fetchargs = "\tif (zend_parse_parameters("
-		if (spec_opts[i]) {
+		if (maxargs[i]>0) {
+			fetchargs = "\tif (zend_parse_parameters("
 			ints = ints "\tint argc = ZEND_NUM_ARGS();\n"
-			fetchargs = fetchargs "argc"
+			fetchargs = fetchargs "argc, " specs[i]
 		} else
-			fetchargs = fetchargs "ZEND_NUM_ARGS()"
-		fetchargs = fetchargs ", " specs[i]
+			fetchargs = fetchargs "\tif (ZEND_NUM_ARGS() != 0) {\n\t\tWRONG_PARAM_COUNT;\n\t}"
 
 		for (j = 0; j < maxargs[i]; j++) {
 
@@ -219,7 +218,9 @@ END {
 		}
 
 		proto = proto closeopts ")\n   " fcomments[i] " */\nPHP_FUNCTION(" funcs[i] ")\n{"
-		fetchargs = fetchargs ") == FAILURE)" closefetch " \n\t\treturn;\n"
+		if (maxargs[i]>0) {
+			fetchargs = fetchargs ") == FAILURE)" closefetch " \n\t\treturn;\n"
+		}
 		funcvals = strings ints longs doubles bools zvals
 		xmlstr = xmlstr xmlparams \
 			"     </funcprototype>\n" \
