@@ -163,6 +163,21 @@ struct PHPFBLink
 #define FBSQL_LOB_DIRECT 0				/* default */
 #define FBSQL_LOB_HANDLE 1				/* default */
 
+int mdOk(PHPFBLink* link, FBCMetaData* md, char* sql);
+char *DigestPassword(char *user, char *password)
+{
+	char *digest = NULL;
+
+	if (user && strlen(user) && password && strlen(password)) {
+		char *user_upper = estrdup(user);
+		digest = emalloc(17);
+		digest[0] = '\0';
+		(void)fbcDigestPassword(php_strtoupper(user_upper, strlen(user_upper)), password, digest);
+		efree(user_upper);
+	}
+
+	return digest;
+}
 
 /* {{{ fbsql_functions[]
  */
@@ -225,6 +240,7 @@ function_entry fbsql_functions[] = {
 	PHP_FE(fbsql_username,		NULL)
 	PHP_FE(fbsql_password,		NULL)
 	PHP_FE(fbsql_warnings,		NULL)
+	PHP_FE(fbsql_set_password,		NULL)
 
 	PHP_FE(fbsql_get_autostart_info,	NULL)
 /*	PHP_FE(fbsql_set_autostart_info,	NULL) */
@@ -1318,6 +1334,48 @@ PHP_FUNCTION(fbsql_password)
 	RETURN_STRING(phpLink->userPassword, 1);
 }
 /* }}} */
+
+/* {{{ proto bool fbsql_set_password(resource link_identifier, string user, string password, string old_password)
+   Change the password for a given user */
+PHP_FUNCTION(fbsql_set_password)
+{
+	PHPFBLink* phpLink = NULL;
+	zval **fbsql_link_index = NULL, **user, **password, **old_password;
+	char *digest_password, *digest_old_password;
+	FBCMetaData *md;
+	
+	switch (ZEND_NUM_ARGS()) {
+		case 4:
+			if (zend_get_parameters_ex(4, &fbsql_link_index, &user, &password, &old_password)==FAILURE) {
+				RETURN_FALSE;
+			}
+			break;
+		default:
+			WRONG_PARAM_COUNT;
+			break;
+	}
+	ZEND_FETCH_RESOURCE2(phpLink, PHPFBLink *, fbsql_link_index, -1, "FrontBase-Link", le_link, le_plink);
+
+	convert_to_string_ex(user);
+	convert_to_string_ex(password);
+	convert_to_string_ex(old_password);
+
+	digest_password = DigestPassword(Z_STRVAL_PP(user), Z_STRVAL_PP(password));
+	digest_old_password = DigestPassword(Z_STRVAL_PP(user), Z_STRVAL_PP(old_password));
+
+	md = fbcdcSetPasswordForUser(phpLink->connection, Z_STRVAL_PP(user), digest_password, digest_old_password);
+	if (mdOk(phpLink, md, "Change password")) {
+		ZVAL_BOOL(return_value, 1);
+	}
+	else {
+		ZVAL_BOOL(return_value, 0);
+	}	
+	fbcmdRelease(md);
+	if (digest_old_password) efree(digest_old_password);
+	if (digest_password) efree(digest_password);
+}
+/* }}} */
+
 
 /* {{{ proto bool fbsql_select_db([string database_name [, resource link_identifier]])
    Select the database to open */
