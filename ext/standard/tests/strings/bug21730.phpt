@@ -16,7 +16,7 @@ $res_b = sscanf($foo, $fmt);
 var_dump($res_a);
 var_dump($res_b);
 ?>
---EXPECTS--
+--EXPECT--
 array(3) {
   [0]=>
   string(3) "ABC"
