@@ -1326,8 +1326,6 @@ overloaded_function_call_cont:
 						}
 						FREE_OP(&opline->op1, free_op1);
 					}
-					
-					calling_symbol_table = EG(active_symbol_table);
 					zend_ptr_stack_push(&EG(argument_stack), (void *) opline->extended_value);
 					if (function_state.function->type==ZEND_INTERNAL_FUNCTION) {
 						var_uninit(&Ts[opline->result.u.var].tmp_var);
@@ -1341,6 +1339,7 @@ overloaded_function_call_cont:
 							zend_hash_init(function_state.function_symbol_table, 0, NULL, PVAL_PTR_DTOR, 0);
 							//printf("Cache miss!  Initialized %x\n", function_state.function_symbol_table);
 						}
+						calling_symbol_table = EG(active_symbol_table);
 						EG(active_symbol_table) = function_state.function_symbol_table;
 						if (object_ptr && function_being_called && function_being_called->type!=ZEND_OVERLOADED_FUNCTION) {
 							zval *dummy = (zval *) emalloc(sizeof(zval)), **this_ptr;
@@ -1367,12 +1366,12 @@ overloaded_function_call_cont:
 							*(++EG(symtable_cache_ptr)) = function_state.function_symbol_table;
 							zend_hash_clean(*EG(symtable_cache_ptr));
 						}
+						EG(active_symbol_table) = calling_symbol_table;
 					} else { /* ZEND_OVERLOADED_FUNCTION */
 						call_overloaded_function(opline->extended_value, &Ts[opline->result.u.var].tmp_var, &EG(regular_list), &EG(persistent_list));
 						efree(function_being_called);
 					}
 					function_state.function = (zend_function *) op_array;
-					EG(active_symbol_table) = calling_symbol_table;
 					EG(function_state_ptr) = &function_state;
 					zend_ptr_stack_clear_multiple(ELS_C);
 				}
