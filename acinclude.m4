@@ -1191,4 +1191,54 @@ AC_DEFUN(PHP_CHECK_LIBRARY, [
 ])
 
 
+dnl 
+dnl PHP_SETUP_ICONV(shared-add [, action-found [, action-not-found]])
+dnl
+dnl Common setup macro for iconv
+dnl
+AC_DEFUN(PHP_SETUP_ICONV, [
+  found_iconv=no
+  
+  AC_CHECK_LIB(c, iconv_open, [
+    AC_DEFINE(HAVE_ICONV, 1, [ ])
+    found_iconv=yes
+  ], [
 
+    iconv_lib_name=iconv
+    for i in $PHP_ICONV /usr/local /usr; do
+      if test -r $i/include/giconv.h || test -r $i/include/iconv.h; then
+        ICONV_DIR=$i
+        if test -r $i/include/giconv.h; then
+          iconv_lib_name=giconv
+        fi
+        break
+      fi
+    done
+
+    if test -z "$ICONV_DIR"; then
+      AC_MSG_ERROR(Please specify the location of iconv with --with-iconv)
+    fi
+  
+    if test -f $ICONV_DIR/lib/lib${iconv_lib_name}.a ||
+       test -f $ICONV_DIR/lib/lib${iconv_lib_name}.$SHLIB_SUFFIX_NAME
+    then
+      PHP_CHECK_LIBRARY($iconv_lib_name, libiconv_open, [
+        found_iconv=yes
+        PHP_ADD_LIBRARY_WITH_PATH($iconv_lib_name, $ICONV_DIR/lib, $1)
+        AC_DEFINE(HAVE_ICONV, 1, [ ])
+        AC_DEFINE(HAVE_LIBICONV, 1, [ ])
+      ], [
+        found_iconv=no
+      ], [
+        -L$ICONV_DIR/lib
+      ])
+    fi
+  ])
+
+  if test "$found_iconv" = "no"; then
+    $3
+  else
+    $2
+    PHP_ADD_INCLUDE($ICONV_DIR/include)
+  fi
+])
