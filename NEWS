@@ -1,7 +1,10 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2002, Version 4.3.0
--- bogus entry --
+- New build system that, among other improvements, replaces the slow recursive
+  make with one global Makefile and eases the integration of proper
+  dependencies. automake is no longer required to uild PHP.
+  The build process is now faster and smarter. (Sascha)
 
 ?? ??? 2002, Version 4.2.0
 - read_exif_data is now an alias for exif_read_data
