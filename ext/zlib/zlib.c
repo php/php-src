@@ -476,7 +476,7 @@ PHP_FUNCTION(gzgetc) {
 /* }}} */
 
 /* Strip any HTML tags while reading */
-/* {{{ proto string gzgetss(int zp, int length)
+/* {{{ proto string gzgetss(int zp, int length [, string allowable_tags])
 Get a line from file pointer and strip HTML tags */
 PHP_FUNCTION(gzgetss)
 {
@@ -519,7 +519,7 @@ PHP_FUNCTION(gzgetss)
 	}
 
 	/* strlen() can be used here since we are doing it on the return of an fgets() anyway */
-	_php3_strip_tags(buf, strlen, ZLIBG(gzgetss_state), allow?allow->value.str.val:NULL);
+	_php3_strip_tags(buf, strlen(buf), ZLIBG(gzgetss_state), allow?allow->value.str.val:NULL);
 	RETURN_STRING(buf, 0);
 	
 }
