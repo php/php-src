@@ -627,7 +627,6 @@ static inline void zend_fetch_dimension_address(znode *result, znode *op1, znode
 		zend_overloaded_element overloaded_element;
 
 		if (Ts[op1->u.var].EA.type == IS_STRING_OFFSET) {
-			zval_ptr_dtor(&Ts[op1->u.var].EA.str);
 			switch (type) {
 				case BP_VAR_R:
 				case BP_VAR_IS:
@@ -665,7 +664,8 @@ static inline void zend_fetch_dimension_address(znode *result, znode *op1, znode
 		return;
 	}
 
-	if (container->type == IS_NULL) {
+	if (container->type==IS_NULL
+		|| (container->type==IS_STRING && container->value.str.len==0)) {
 		switch (type) {
 			case BP_VAR_RW:
 			case BP_VAR_W:
