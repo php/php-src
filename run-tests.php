@@ -197,7 +197,12 @@ echo "
 
 $test_files = array();
 $test_results = array();
-$GLOBALS['__PHP_FAILED_TESTS__'] = array();
+$PHP_FAILED_TESTS = array();
+
+if (!ini_get('register_globals')) {
+	$argc = $_SERVER['argc'];
+	$argv = $_SERVER['argv'];
+}
 
 // If parameters given assume they represent selected tests to run.
 if (isset($argc) && $argc > 1) {
@@ -342,13 +347,13 @@ Time taken      : " . sprintf("%4d seconds", $end_time - $start_time) . "
 echo $summary;
 
 $failed_test_summary = '';
-if (count($GLOBALS['__PHP_FAILED_TESTS__'])) {
+if (count($PHP_FAILED_TESTS)) {
 	$failed_test_summary .= "
 =====================================================================
 FAILED TEST SUMMARY
 ---------------------------------------------------------------------
 ";
-	foreach ($GLOBALS['__PHP_FAILED_TESTS__'] as $failed_test_data) {
+	foreach ($PHP_FAILED_TESTS as $failed_test_data) {
 		$failed_test_summary .=  $failed_test_data['test_name'] . "\n";
 	}
 	$failed_test_summary .=  "=====================================================================\n";
@@ -395,7 +400,7 @@ if (!getenv('NO_INTERACTION')) {
 		$failed_tests_data .= $summary . "\n";
 
 		if ($sum_results['FAILED']) {
-			foreach ($GLOBALS['__PHP_FAILED_TESTS__'] as $test_info) {
+			foreach ($PHP_FAILED_TESTS as $test_info) {
 				$failed_tests_data .= $sep . $test_info['name'];
 				$failed_tests_data .= $sep . file_get_contents(realpath($test_info['output']));
 				$failed_tests_data .= $sep . file_get_contents(realpath($test_info['diff']));
@@ -575,7 +580,7 @@ function system_with_timeout($commandline)
 
 function run_test($php,$file)
 {
-	global $log_format, $info_params, $ini_overwrites, $cwd;
+	global $log_format, $info_params, $ini_overwrites, $cwd, $PHP_FAILED_TESTS;
 
 	if (DETAILED) echo "
 =================
@@ -773,7 +778,7 @@ COMMAND $cmd
 	// Test failed so we need to report details.
 	echo "FAIL $tested\n";
 
-	$GLOBALS['__PHP_FAILED_TESTS__'][] = array(
+	$PHP_FAILED_TESTS[] = array(
 						'name' => $file,
 						'test_name' => $tested,
 						'output' => ereg_replace('\.phpt$','.log', $file),
