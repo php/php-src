@@ -1207,11 +1207,12 @@ PHP_FUNCTION(dom_document_document)
 static xmlDocPtr dom_document_parser(zval *id, int mode, char *source TSRMLS_DC) {
     xmlDocPtr ret;
     xmlParserCtxtPtr ctxt;
-	char *directory = NULL;
 	dom_doc_props *doc_props;
 	dom_object *intern;
 	dom_ref_obj *document = NULL;
 	int validate, resolve_externals, keep_blanks, substitute_ent;
+	int resolved_path_len;
+	char *directory=NULL, resolved_path[MAXPATHLEN];
 
 	if (id != NULL) {
 		intern = (dom_object *)zend_object_store_get_object(id TSRMLS_CC);
@@ -1231,7 +1232,8 @@ static xmlDocPtr dom_document_parser(zval *id, int mode, char *source TSRMLS_DC)
 	xmlInitParser();
 
 	if (mode == DOM_LOAD_FILE) {
-		ctxt = xmlCreateFileParserCtxt(source);
+		expand_filepath(source, resolved_path TSRMLS_CC);
+		ctxt = xmlCreateFileParserCtxt(resolved_path);
 	} else {
 		ctxt = xmlCreateDocParserCtxt(source);
 	}
@@ -1240,11 +1242,24 @@ static xmlDocPtr dom_document_parser(zval *id, int mode, char *source TSRMLS_DC)
 		return(NULL);
 	}
 
-	if (mode == DOM_LOAD_FILE) {
-		if ((ctxt->directory == NULL) && (directory == NULL))
-			directory = xmlParserGetDirectory(source);
-		if ((ctxt->directory == NULL) && (directory != NULL))
-			ctxt->directory = (char *) xmlStrdup((xmlChar *) directory);
+	/* If loading from memory, we need to set the base directory for the document */
+	if (mode != DOM_LOAD_FILE) {
+		#if HAVE_GETCWD
+			directory = VCWD_GETCWD(resolved_path, MAXPATHLEN);
+		#elif HAVE_GETWD
+			directory = VCWD_GETWD(resolved_path);
+		#endif
+		if (directory) {
+			if(ctxt->directory != NULL) {
+				xmlFree((char *) ctxt->directory);
+			}
+			resolved_path_len = strlen(resolved_path);
+			if (resolved_path[resolved_path_len - 1] != DEFAULT_SLASH) {
+				resolved_path[resolved_path_len] = DEFAULT_SLASH;
+				resolved_path[++resolved_path_len] = '\0';
+			}
+			ctxt->directory = (char *) xmlCanonicPath((const xmlChar *) resolved_path);
+		}
 	}
 
 	ctxt->recovery = 0;
@@ -1261,9 +1276,13 @@ static xmlDocPtr dom_document_parser(zval *id, int mode, char *source TSRMLS_DC)
 
 	xmlParseDocument(ctxt);
 
-	if (ctxt->wellFormed)
+	if (ctxt->wellFormed) {
 		ret = ctxt->myDoc;
-	else {
+		/* If loading from memory, set the base reference uri for the document */
+		if (ret->URL == NULL && ctxt->directory != NULL) {
+			ret->URL = xmlStrdup(ctxt->directory);
+		}
+	} else {
 		ret = NULL;
 		xmlFreeDoc(ctxt->myDoc);
 		ctxt->myDoc = NULL;
