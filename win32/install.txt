@@ -276,7 +276,7 @@ Web server configuration
   finally configure Apache to load the PHP4 module. Just add the
   following lines to your httpd.conf:
 
-   LoadModule php4_module c:/php/sapi/php4apache.dll
+   LoadModule php5_module c:/php/sapi/php4apache.dll
    AddModule mod_php4.c
    AddType application/x-httpd-php .php
 
@@ -329,15 +329,15 @@ Web server configuration
   On Win-Apache, path names can contain either forward- or backslashes.
   Example:
 
-    LoadModule php4_module C:\php\sapi\php4apache.dll
+    LoadModule php5_module C:\php\sapi\php4apache.dll
 
   works as good as 
 
-    LoadModule php4_module C:/php/sapi/php4apache.dll
+    LoadModule php5_module C:/php/sapi/php4apache.dll
 
   You even can mix the slash-style:
 
-    LoadModule php4_module C:\php/sapi\php4apache.dll
+    LoadModule php5_module C:\php/sapi\php4apache.dll
 
 ----------------------------------------------------------
 
