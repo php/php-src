@@ -374,16 +374,23 @@ PHPAPI php_stream_dirent *_php_stream_readdir(php_stream *dirstream, php_stream_
 PHPAPI int _php_stream_set_option(php_stream *stream, int option, int value, void *ptrparam TSRMLS_DC);
 #define php_stream_set_option(stream, option, value, ptrvalue)	_php_stream_set_option((stream), (option), (value), (ptrvalue) TSRMLS_CC)
 
+#define php_stream_set_chunk_size(stream, size) php_stream_set_option((stream), PHP_STREAM_OPTION_SET_CHUNK_SIZE, (size), NULL TSRMLS_CC)
+
 /* change the blocking mode of stream: value == 1 => blocking, value == 0 => non-blocking. */
 #define PHP_STREAM_OPTION_BLOCKING	1
 
 /* change the buffering mode of stream. value is a PHP_STREAM_BUFFER_XXXX value, ptrparam is a ptr to a size_t holding
  * the required buffer size */
-#define PHP_STREAM_OPTION_BUFFER	2
+#define PHP_STREAM_OPTION_READ_BUFFER	2
+#define PHP_STREAM_OPTION_WRITE_BUFFER	3
 
 #define PHP_STREAM_BUFFER_NONE	0	/* unbuffered */
 #define PHP_STREAM_BUFFER_LINE	1	/* line buffered */
 #define PHP_STREAM_BUFFER_FULL	2	/* fully buffered */
+
+/* set the timeout duration for reads on the stream. ptrparam is a pointer to a struct timeval * */
+#define PHP_STREAM_OPTION_READ_TIMEOUT	4
+#define PHP_STREAM_OPTION_SET_CHUNK_SIZE	5
 
 #define PHP_STREAM_OPTION_RETURN_OK			 0 /* option set OK */
 #define PHP_STREAM_OPTION_RETURN_ERR 		-1 /* problem setting option */

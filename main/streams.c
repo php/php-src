@@ -799,7 +799,12 @@ PHPAPI int _php_stream_set_option(php_stream *stream, int option, int value, voi
 	
 	if (ret == PHP_STREAM_OPTION_RETURN_NOTIMPL) {
 		switch(option) {
-			case PHP_STREAM_OPTION_BUFFER:
+			case PHP_STREAM_OPTION_SET_CHUNK_SIZE:
+				ret = stream->chunk_size;
+				stream->chunk_size = value;
+				return ret;
+
+			case PHP_STREAM_OPTION_READ_BUFFER:
 				/* try to match the buffer mode as best we can */
 				if (value == PHP_STREAM_BUFFER_NONE) {
 					stream->flags |= PHP_STREAM_FLAG_NO_BUFFER;
@@ -1291,7 +1296,7 @@ static int php_stdiop_set_option(php_stream *stream, int option, int value, void
 			return -1; /* not yet implemented */
 #endif
 			
-		case PHP_STREAM_OPTION_BUFFER:
+		case PHP_STREAM_OPTION_WRITE_BUFFER:
 			if (ptrparam)
 				size = *(size_t *)ptrparam;
 			else
