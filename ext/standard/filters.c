@@ -1016,14 +1016,9 @@ static php_conv_err_t php_conv_qprint_decode_ctor(php_conv_qprint_decode *inst, 
 /* }}} */
 
 typedef struct _php_convert_filter {
-	php_conv *write_cd;
-	php_conv *read_cd;
+	php_conv *cd;
 	int persistent;
 	char *filtername;
-
-	/* ring buffer for read operation */
-	char read_buf[4096];
-	size_t read_buf_left;
 } php_convert_filter;
 
 #define PHP_CONV_BASE64_ENCODE 1
@@ -1303,40 +1298,22 @@ out_failure:
 #undef GET_BOOL_PROP
 
 static int php_convert_filter_ctor(php_convert_filter *inst,
-	int write_conv_mode, HashTable *write_conv_opts,
-	int read_conv_mode, HashTable *read_conv_opts,
+	int conv_mode, HashTable *conv_opts,
 	const char *filtername, int persistent)
 {
-	php_conv *write_cd = NULL;
-	php_conv *read_cd = NULL;
-
 	inst->persistent = persistent;
-
 	inst->filtername = pestrdup(filtername, persistent);
 
-	if ((write_cd = php_conv_open(write_conv_mode, write_conv_opts, persistent)) == NULL) {
+	if ((inst->cd = php_conv_open(conv_mode, conv_opts, persistent)) == NULL) {
 		goto out_failure;
 	}
-
-	if ((read_cd = php_conv_open(read_conv_mode, read_conv_opts, persistent)) == NULL) {
-		goto out_failure;
-	}
-
-	inst->write_cd = write_cd;
-	inst->read_cd = read_cd;
-
-	inst->read_buf_left = 0;
 
 	return SUCCESS;
 
 out_failure:
-	if (write_cd != NULL) {
-		php_conv_dtor(write_cd);
-		pefree(write_cd, persistent);
-	}
-	if (read_cd != NULL) {
-		php_conv_dtor(read_cd);
-		pefree(read_cd, persistent);
+	if (inst->cd != NULL) {
+		php_conv_dtor(inst->cd);
+		pefree(inst->cd, persistent);
 	}
 	if (inst->filtername != NULL) {
 		pefree(inst->filtername, persistent);
@@ -1346,14 +1323,9 @@ out_failure:
 
 static void php_convert_filter_dtor(php_convert_filter *inst)
 {
-	if (inst->write_cd != NULL) {
-		php_conv_dtor(inst->write_cd);
-		pefree(inst->write_cd, inst->persistent);
-	}
-
-	if (inst->read_cd != NULL) {
-		php_conv_dtor(inst->read_cd);
-		pefree(inst->read_cd, inst->persistent);
+	if (inst->cd != NULL) {
+		php_conv_dtor(inst->cd);
+		pefree(inst->cd, inst->persistent);
 	}
 
 	if (inst->filtername != NULL) {
@@ -1370,32 +1342,154 @@ static php_stream_filter_status_t strfilter_convert_filter(
 	int flags
 	TSRMLS_DC)
 {
-	php_stream_bucket *bucket;
+	php_stream_bucket *bucket, *new_bucket;
 	size_t consumed = 0;
 	php_conv_err_t err;
 	php_convert_filter *inst = (php_convert_filter *)thisfilter->abstract;
+	char *out_buf;
+	size_t out_buf_size;
+	char *pd;
+	size_t ocnt;
 
-	while (thisfilter->buffer.head || buckets_in->head) {
-		/* take head off buffer first, then input brigade */
-		bucket = thisfilter->buffer.head ? thisfilter->buffer.head : buckets_in->head;
-		php_stream_bucket_unlink(bucket TSRMLS_CC);
+	if (buckets_in->head == NULL && buckets_in->tail == NULL) {
+		/* flush operation */
 
-#if 0
-		err = php_conv_convert(inst->write_cd, ... )
+		out_buf_size = 64;
+		out_buf = pemalloc(out_buf_size, inst->persistent);
+		ocnt = out_buf_size;
+		pd = out_buf;
 
-		/* update consumed by the number of bytes just used */
-			
+		/* trying hard to reduce the number of buckets to hand to the
+		 * next filter */ 
+
+		for (;;) {
+			err = php_conv_convert(inst->cd, NULL, NULL, &pd, &ocnt);
+
+			switch (err) {
+				case PHP_CONV_ERR_UNKNOWN:
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "stream filter (%s): unknown error", inst->filtername, err);
+					return PSFS_ERR_FATAL; 
+
+				case PHP_CONV_ERR_INVALID_SEQ:
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "stream filter (%s): invalid base64 sequence", inst->filtername, err);
+					return PSFS_ERR_FATAL;
+
+				case PHP_CONV_ERR_UNEXPECTED_EOS:
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "stream filter (%s): unexpected end of stream", inst->filtername, err);
+					return PSFS_ERR_FATAL;
+
+				default:
+					break;
+			}
+
+			if (err != PHP_CONV_ERR_TOO_BIG) {
+				break;
+			} else {
+				char *new_out_buf;
+				size_t new_out_buf_size;
+
+				new_out_buf_size = out_buf_size << 1;
+
+				if (new_out_buf_size < out_buf_size) {
+					/* whoa! no bigger buckets are sold anywhere... */
+					new_bucket = php_stream_bucket_new(stream, out_buf, (out_buf_size - ocnt), 1, inst->persistent TSRMLS_CC);
+
+					php_stream_bucket_append(buckets_out, new_bucket TSRMLS_CC);
+
+					out_buf_size = bucket->buflen;
+					out_buf = pemalloc(out_buf_size, inst->persistent);
+					ocnt = out_buf_size;
+					pd = out_buf;
+				} else {
+					new_out_buf = perealloc(out_buf, new_out_buf_size, inst->persistent);
+					pd = new_out_buf + (pd - out_buf);
+					ocnt += (new_out_buf_size - out_buf_size);
+					out_buf = new_out_buf;
+					out_buf_size = new_out_buf_size;
+				}
+			}
+		}
 		/* give output bucket to next in chain */
-		php_stream_bucket_append(buckets_out, bucket TSRMLS_CC);
-			
- 		if (only used part of buffer) {
-			bucket *left, *right;
-			php_stream_buffer_split(bucket, &left, &right, used_len TSRMLS_CC);
-			php_stream_buffer_delref(left); /* delete the part we consumed */
-			php_stream_buffer_append(&filter->buffer, right TSRMLS_CC);
-			break;
- 		}
-#endif
+		if (out_buf_size - ocnt > 0) {
+			new_bucket = php_stream_bucket_new(stream, out_buf, (out_buf_size - ocnt), 1, inst->persistent TSRMLS_CC);
+			php_stream_bucket_append(buckets_out, new_bucket TSRMLS_CC);
+		}
+	} else {
+		while (buckets_in->head != NULL) {
+			const char *ps;
+			size_t icnt;
+
+			bucket = buckets_in->head;
+
+			php_stream_bucket_unlink(bucket TSRMLS_CC);
+			icnt = bucket->buflen;
+			ps = bucket->buf;
+
+			out_buf_size = bucket->buflen;
+			out_buf = pemalloc(out_buf_size, inst->persistent);
+			ocnt = out_buf_size;
+			pd = out_buf;
+
+			/* trying hard to reduce the number of buckets to hand to the
+			 * next filter */ 
+
+			while (icnt > 0) {
+				err = php_conv_convert(inst->cd, &ps, &icnt, &pd, &ocnt);
+
+				switch (err) {
+					case PHP_CONV_ERR_UNKNOWN:
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "stream filter (%s): unknown error", inst->filtername, err);
+						return PSFS_ERR_FATAL; 
+
+					case PHP_CONV_ERR_INVALID_SEQ:
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "stream filter (%s): invalid base64 sequence", inst->filtername, err);
+						return PSFS_ERR_FATAL;
+
+					case PHP_CONV_ERR_UNEXPECTED_EOS:
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "stream filter (%s): unexpected end of stream", inst->filtername, err);
+						return PSFS_ERR_FATAL;
+
+					default:
+						break;
+				}
+
+				if (err == PHP_CONV_ERR_TOO_BIG) {
+					char *new_out_buf;
+					size_t new_out_buf_size;
+
+					new_out_buf_size = out_buf_size << 1;
+
+					if (new_out_buf_size < out_buf_size) {
+						/* whoa! no bigger buckets are sold anywhere... */
+						new_bucket = php_stream_bucket_new(stream, out_buf, (out_buf_size - ocnt), 1, inst->persistent TSRMLS_CC);
+
+						php_stream_bucket_append(buckets_out, new_bucket TSRMLS_CC);
+
+						out_buf_size = bucket->buflen;
+						out_buf = pemalloc(out_buf_size, inst->persistent);
+						ocnt = out_buf_size;
+						pd = out_buf;
+					} else {
+						new_out_buf = perealloc(out_buf, new_out_buf_size, inst->persistent);
+						pd = new_out_buf + (pd - out_buf);
+						ocnt += (new_out_buf_size - out_buf_size);
+						out_buf = new_out_buf;
+						out_buf_size = new_out_buf_size;
+					}
+				}
+			}
+
+			/* update consumed by the number of bytes just used */
+			consumed = bucket->buflen - icnt;
+
+			/* give output bucket to next in chain */
+			if (out_buf_size - ocnt > 0) {
+				new_bucket = php_stream_bucket_new(stream, out_buf, (out_buf_size - ocnt), 1, inst->persistent TSRMLS_CC);
+				php_stream_bucket_append(buckets_out, new_bucket TSRMLS_CC);
+			}
+
+			php_stream_bucket_delref(bucket TSRMLS_CC);
+		}
 	}
 
 	if (bytes_consumed) {
@@ -1404,149 +1498,6 @@ static php_stream_filter_status_t strfilter_convert_filter(
 	
 	return PSFS_PASS_ON;
 }
-
-
-
-
-#if 0
-static size_t strfilter_convert_write(php_stream *stream, php_stream_filter *thisfilter,
-			const char *buf, size_t count TSRMLS_DC)
-{
-	php_convert_filter *inst = (php_convert_filter *)thisfilter->abstract;
-
-	if (inst->write_cd != NULL) {
-		char bucket_buf[2048];
-		size_t out_left, in_left;
-		const char *in_p;
-		char *out_p;
-
-		in_p = buf;
-		in_left = count;
-		out_p = bucket_buf;
-		out_left = sizeof(bucket_buf);
-
-		while (in_left > 0) {
-			php_conv_err_t err;
-
-			err = php_conv_convert(inst->write_cd, &in_p, &in_left, &out_p, &out_left);
-			switch (err) {
-				case PHP_CONV_ERR_TOO_BIG:
-					php_stream_filter_write_next(stream, thisfilter, bucket_buf, sizeof(bucket_buf) - out_left);
-					out_p = bucket_buf;
-					out_left = sizeof(bucket_buf);
-					break;
-
-				case PHP_CONV_ERR_UNKNOWN:
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "stream filter (%s): unknown error", inst->filtername, err);
-					return 0;
-
-				case PHP_CONV_ERR_INVALID_SEQ:
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "stream filter (%s): invalid base64 sequence", inst->filtername, err);
-					return 0;
-	
- 				case PHP_CONV_ERR_UNEXPECTED_EOS:
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "stream filter (%s): unexpected end of stream", inst->filtername, err);
-					return 0;
-
-				default:
-					break;
-			}
-		}
-		php_stream_filter_write_next(stream, thisfilter, bucket_buf, sizeof(bucket_buf) - out_left);
-		return (size_t)(count - in_left);
-	}	
-	return php_stream_filter_write_next(stream, thisfilter, buf, count);
-}
-
-static size_t strfilter_convert_read(php_stream *stream, php_stream_filter *thisfilter,
-			char *buf, size_t count TSRMLS_DC)
-{
-	php_convert_filter *inst = (php_convert_filter *)thisfilter->abstract;
-	size_t retval;
-
-	if (inst->read_cd != NULL) {
-		php_conv_err_t err = PHP_CONV_ERR_SUCCESS;
-		size_t out_left;
-		const char *in_p;
-		char *out_p;
-	
-		in_p = inst->read_buf + (sizeof(inst->read_buf) - inst->read_buf_left);
-		out_p = buf;
-		out_left = count;
-
-		while (out_left > 0 && err != PHP_CONV_ERR_TOO_BIG) {
-			if (inst->read_buf_left == 0) { 
-				inst->read_buf_left = php_stream_filter_read_next(stream, thisfilter, inst->read_buf, sizeof(inst->read_buf));
-				in_p = inst->read_buf;
-			}
-			if (inst->read_buf_left == 0) {			
-				/* reached end of stream */ 
-				err = php_conv_convert(inst->read_cd, NULL, NULL, &out_p, &out_left);
-				if (err == PHP_CONV_ERR_SUCCESS) {
-					break;
-				}
-			} else {
-				err = php_conv_convert(inst->read_cd, &in_p, &(inst->read_buf_left), &out_p, &out_left);
-			}
-
-			switch (err) {
-				case PHP_CONV_ERR_UNKNOWN:
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "stream filter (%s): unknown error", inst->filtername, err);
-					return 0;
-
-				case PHP_CONV_ERR_INVALID_SEQ:
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "stream filter (%s): invalid base64 sequence", inst->filtername, err);
-					return 0;
-
-				case PHP_CONV_ERR_UNEXPECTED_EOS:
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "stream filter (%s): unexpected end of stream", inst->filtername, err);
-					return 0;
-
-				default:
-					break;
-			}
-		}
-		retval = (size_t)(count - out_left);
-	} else {
-		retval = php_stream_filter_read_next(stream, thisfilter, buf, count);
-	}
-	return retval;
-}
-
-static int strfilter_convert_flush(php_stream *stream, php_stream_filter *thisfilter, int closing TSRMLS_DC)
-{
-	if (closing) {
-		php_convert_filter *inst = (php_convert_filter *)thisfilter->abstract;
-
-		if (inst->write_cd != NULL) {
-			php_conv_err_t err;
-			char bucket_buf[1024];
-			char *out_p;
-			size_t out_left;
-
-			out_p = bucket_buf;
-			out_left = sizeof(bucket_buf);
-
-			for (;;) {
-				err = php_conv_convert(inst->write_cd, NULL, NULL, &out_p, &out_left);
-				if (err == PHP_CONV_ERR_SUCCESS) {
-					break;
-				} else if (err == PHP_CONV_ERR_TOO_BIG) {
-					php_stream_filter_write_next(stream, thisfilter, bucket_buf, sizeof(bucket_buf) - out_left);
-					out_p = bucket_buf;
-					out_left = sizeof(bucket_buf);
-				} else {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "stream filter (%s): unknown error", inst->filtername);
-					return 0;
-				}
-			}
-
-			php_stream_filter_write_next(stream, thisfilter, bucket_buf, sizeof(bucket_buf) - out_left);
-		}
-	}
-	return php_stream_filter_flush_next(stream, thisfilter, closing);
-}
-#endif
 
 static void strfilter_convert_dtor(php_stream_filter *thisfilter TSRMLS_DC)
 {
@@ -1753,8 +1704,8 @@ static php_stream_filter *strfilter_convert_create(const char *filtername, const
 	php_convert_filter *inst;
 	php_stream_filter *retval = NULL;
 	char *dot;
-	zval *options = NULL, **tmp_zval_pp;
-	HashTable *write_conv_opts, *read_conv_opts;
+	zval *options = NULL;
+	int conv_mode;
 
 	if ((dot = strchr(filtername, '.')) == NULL) {
 		return NULL;
@@ -1770,79 +1721,23 @@ static php_stream_filter *strfilter_convert_create(const char *filtername, const
 		}
 	}
 
-	write_conv_opts = read_conv_opts = NULL;
-
 	if (strcasecmp(dot, "base64-encode") == 0) {
-		if (options != NULL &&
-			zend_hash_find(Z_ARRVAL_P(options), "base64-encode", sizeof("base64-encode"), (void **)&tmp_zval_pp) == SUCCESS &&
-			Z_TYPE_PP(tmp_zval_pp) == IS_ARRAY) {
-			write_conv_opts = Z_ARRVAL_PP(tmp_zval_pp);	
-		}
-		if (options != NULL &&
-			zend_hash_find(Z_ARRVAL_P(options), "base64-decode", sizeof("base64-decode"), (void **)&tmp_zval_pp) == SUCCESS &&
-			Z_TYPE_PP(tmp_zval_pp) == IS_ARRAY) {
-			read_conv_opts = Z_ARRVAL_PP(tmp_zval_pp);	
-		}
-		if (php_convert_filter_ctor(inst,
-				PHP_CONV_BASE64_ENCODE, write_conv_opts,
-				PHP_CONV_BASE64_DECODE, read_conv_opts,
-				filtername, persistent) != SUCCESS) {
-			goto out;
-		}	
-		retval = php_stream_filter_alloc(&strfilter_convert_ops, inst, persistent);
+		conv_mode = PHP_CONV_BASE64_ENCODE;
 	} else if (strcasecmp(dot, "base64-decode") == 0) {
-		if (options != NULL &&
-			zend_hash_find(Z_ARRVAL_P(options), "base64-decode", sizeof("base64-decode"), (void **)&tmp_zval_pp) == SUCCESS &&
-			Z_TYPE_PP(tmp_zval_pp) == IS_ARRAY) {
-			write_conv_opts = Z_ARRVAL_PP(tmp_zval_pp);	
-		}
-		if (options != NULL &&
-			zend_hash_find(Z_ARRVAL_P(options), "base64-encode", sizeof("base64-encode"), (void **)&tmp_zval_pp) == SUCCESS &&
-			Z_TYPE_PP(tmp_zval_pp) == IS_ARRAY) {
-			read_conv_opts = Z_ARRVAL_PP(tmp_zval_pp);	
-		}
-		if (php_convert_filter_ctor(inst,
-				PHP_CONV_BASE64_DECODE, write_conv_opts,
-				PHP_CONV_BASE64_ENCODE, read_conv_opts,
-				filtername, persistent) != SUCCESS) {
-			goto out;
-		}	
-		retval = php_stream_filter_alloc(&strfilter_convert_ops, inst, persistent);
+		conv_mode = PHP_CONV_BASE64_DECODE;
 	} else if (strcasecmp(dot, "quoted-printable-encode") == 0) {
-		if (options != NULL &&
-			zend_hash_find(Z_ARRVAL_P(options), "quoted-printable-encode", sizeof("quoted-printable-encode"), (void **)&tmp_zval_pp) == SUCCESS &&
-			Z_TYPE_PP(tmp_zval_pp) == IS_ARRAY) {
-			write_conv_opts = Z_ARRVAL_PP(tmp_zval_pp);	
-		}
-		if (options != NULL && zend_hash_find(Z_ARRVAL_P(options), "quoted-printable-decode", sizeof("quoted-printable-decode"), (void **)&tmp_zval_pp) == SUCCESS) {
-			read_conv_opts = Z_ARRVAL_PP(tmp_zval_pp);	
-		}
-		if (php_convert_filter_ctor(inst,
-				PHP_CONV_QPRINT_ENCODE, write_conv_opts,
-				PHP_CONV_QPRINT_DECODE, read_conv_opts,
-				filtername, persistent) != SUCCESS) {
-			goto out;
-		}	
-		retval = php_stream_filter_alloc(&strfilter_convert_ops, inst, persistent);
+		conv_mode = PHP_CONV_QPRINT_ENCODE;
 	} else if (strcasecmp(dot, "quoted-printable-decode") == 0) {
-		if (options != NULL &&
-			zend_hash_find(Z_ARRVAL_P(options), "quoted-printable-decode", sizeof("quoted-printable-decode"), (void **)&tmp_zval_pp) == SUCCESS &&
-			Z_TYPE_PP(tmp_zval_pp) == IS_ARRAY) {
-			write_conv_opts = Z_ARRVAL_PP(tmp_zval_pp);	
-		}
-		if (options != NULL &&
-			zend_hash_find(Z_ARRVAL_P(options), "quoted-printable-encode", sizeof("quoted-printable-encode"), (void **)&tmp_zval_pp) == SUCCESS &&
-			Z_TYPE_PP(tmp_zval_pp) == IS_ARRAY) {
-			read_conv_opts = Z_ARRVAL_PP(tmp_zval_pp);	
-		}
-		if (php_convert_filter_ctor(inst,
-				PHP_CONV_QPRINT_DECODE, write_conv_opts,
-				PHP_CONV_QPRINT_ENCODE, read_conv_opts,
-				filtername, persistent) != SUCCESS) {
-			goto out;
-		}	
-		retval = php_stream_filter_alloc(&strfilter_convert_ops, inst, persistent);
+		conv_mode = PHP_CONV_QPRINT_DECODE;
 	}
+	
+	if (php_convert_filter_ctor(inst, conv_mode,
+		(options != NULL ? Z_ARRVAL_P(options) : NULL),
+		filtername, persistent) != SUCCESS) {
+		goto out;
+	}	
+
+	retval = php_stream_filter_alloc(&strfilter_convert_ops, inst, persistent);
 out:
 	if (retval == NULL) {
 		pefree(inst, persistent);
