@@ -117,11 +117,11 @@ echo "Done\n";
 1=>1 - 0=>0
 1=>1 - 1=>1
 
-Notice: ArrayIterator::next(): Array was modified outside object and internal position is no longer valid in %sarray_iterator.php on line %d
+Notice: ArrayIterator::next(): Array was modified outside object and internal position is no longer valid in %sarray_004.php on line %d
 1=>1 - 0=>0
 1=>1 - 2=>2
 
-Notice: ArrayIterator::next(): Array was modified outside object and internal position is no longer valid in %sarray_iterator.php on line %d
+Notice: ArrayIterator::next(): Array was modified outside object and internal position is no longer valid in %sarray_004.php on line %d
 0=>0 - 0=>0
 0=>0 - 2=>2
 2=>2 - 0=>0
@@ -133,11 +133,11 @@ Notice: ArrayIterator::next(): Array was modified outside object and internal po
 1=>1 - 0=>0
 1=>1 - 1=>1
 
-Notice: ArrayIterator::next(): Array was modified outside object and is no longer an array in %sarray_iterator.php on line %d
+Notice: ArrayIterator::next(): Array was modified outside object and is no longer an array in %sarray_004.php on line %d
 
-Notice: ArrayIterator::valid(): Array was modified outside object and is no longer an array in %sarray_iterator.php on line %d
+Notice: ArrayIterator::valid(): Array was modified outside object and is no longer an array in %sarray_004.php on line %d
 
-Notice: ArrayIterator::next(): Array was modified outside object and is no longer an array in %sarray_iterator.php on line %d
+Notice: ArrayIterator::next(): Array was modified outside object and is no longer an array in %sarray_004.php on line %d
 
-Notice: ArrayIterator::valid(): Array was modified outside object and is no longer an array in %sarray_iterator.php on line %d
+Notice: ArrayIterator::valid(): Array was modified outside object and is no longer an array in %sarray_004.php on line %d
 Done

@@ -75,15 +75,15 @@ object(ArrayObject)#1 (5) {
 }
 int(0)
 
-Notice: Undefined offset:  6 in %sarray_object.php on line %d
+Notice: Undefined offset:  6 in %sarray_001.php on line %d
 NULL
 
-Notice: Undefined index:  b in %sarray_object.php on line %d
+Notice: Undefined index:  b in %sarray_001.php on line %d
 NULL
 
-Notice: Undefined offset:  7 in %sarray_object.php on line %d
+Notice: Undefined offset:  7 in %sarray_001.php on line %d
 
-Notice: Undefined index:  c in %sarray_object.php on line %d
+Notice: Undefined index:  c in %sarray_001.php on line %d
 object(ArrayObject)#1 (2) {
   [0]=>
   int(0)
