@@ -185,6 +185,12 @@ ZEND_API void *_emalloc(size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 #if MEMORY_LIMIT
 	CHECK_MEMORY_LIMIT(size, SIZE);
 #endif
+#if MEMORY_USAGE_INFO
+	AG(cur_allocated_memory) += SIZE;
+	if (AG(cur_allocated_memory) > AG(max_allocated_memory))
+		AG(max_allocated_memory) = AG(cur_allocated_memory);
+#endif
+
 	HANDLE_UNBLOCK_INTERRUPTIONS();
 	return (void *)((char *)p + sizeof(zend_mem_header) + MEM_HEADER_PADDING);
 }
@@ -227,6 +233,9 @@ ZEND_API void _efree(void *ptr ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 
 #if MEMORY_LIMIT
 	AG(allocated_memory) -= SIZE;
+#endif
+#if MEMORY_USAGE_INFO
+	AG(cur_allocated_memory) -= SIZE;
 #endif
 	
 	free(p);
@@ -305,6 +314,12 @@ ZEND_API void *_erealloc(void *ptr, size_t size, int allow_failure ZEND_FILE_LIN
 #if MEMORY_LIMIT
 	CHECK_MEMORY_LIMIT(size - p->size, SIZE - REAL_SIZE(p->size));
 #endif
+#if MEMORY_USAGE_INFO
+	AG(cur_allocated_memory) += SIZE - REAL_SIZE(p->size);
+	if (AG(cur_allocated_memory) > AG(max_allocated_memory))
+		AG(max_allocated_memory) = AG(cur_allocated_memory);
+#endif
+
 	p->size = size;
 
 	HANDLE_UNBLOCK_INTERRUPTIONS();
@@ -389,6 +404,10 @@ ZEND_API void start_memory_manager(ALS_D)
 	AG(memory_limit) = 1<<30;		/* rediculous limit, effectively no limit */
 	AG(allocated_memory) = 0;
 	AG(memory_exhausted) = 0;
+#endif
+#if MEMORY_USAGE_INFO
+	AG(cur_allocated_memory) = 0;
+	AG(max_allocated_memory) = 0;
 #endif
 
 	memset(AG(fast_cache_list_head), 0, sizeof(AG(fast_cache_list_head)));
@@ -487,6 +506,10 @@ ZEND_API void shutdown_memory_manager(int silent, int clean_cache)
 	}
 #if MEMORY_LIMIT
 	AG(memory_exhausted)=0;
+#endif
+#if MEMORY_USAGE_INFO
+	AG(cur_allocated_memory) = 0;
+	AG(max_allocated_memory) = 0;
 #endif
 
 #if (ZEND_DEBUG)
