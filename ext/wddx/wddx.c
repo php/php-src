@@ -767,19 +767,6 @@ PHP_FUNCTION(wddx_packet_end)
 		WRONG_PARAM_COUNT;
 	}
 
-/* 	if (packet_id->type != IS_RESOURCE)
-	   {
-		   zend_error(E_WARNING, "Invalid packet ID in call to wddx_packet_end");
-		   return;
-	   }
-	   id = packet_id->value.lval;
-	   packet = zend_list_find(id, &type);
-	   if (type!=le_wddx) {
-		   zend_error(E_WARNING, "%d is not a valid WDDX packet id", id);
-		   RETURN_FALSE;
-	   }
-    */
-	
 	ZEND_FETCH_RESOURCE(packet, wddx_packet *, packet_id, -1, "WDDX packet ID", le_wddx);
 			
 	_php_wddx_add_chunk(packet, WDDX_STRUCT_E);	
@@ -817,20 +804,6 @@ PHP_FUNCTION(wddx_add_vars)
 	}
 	
 	packet_id = args[0];
-
-	/*	
-	if (packet_id->type != IS_RESOURCE)
-	{
-		zend_error(E_WARNING, "Invalid packet ID in call to wddx_add_vars");
-		return;
-	}
-	id = packet_id->value.lval;
-	packet = zend_list_find(id, &type);
-	if (type!=le_wddx) {
-		zend_error(E_WARNING, "%d is not a valid WDDX packet id", id);
-		RETURN_FALSE;
-	}
-	*/
 
 	packet = (wddx_packet *)zend_fetch_resource(packet_id, -1, "WDDX packet ID", le_wddx);
 	if (!packet)
