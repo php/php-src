@@ -601,6 +601,8 @@ PHP_FUNCTION(ora_logoff)
 	ZEND_FETCH_RESOURCE2(conn, oraConnection *, arg, -1, "Oracle-Connection", le_conn, le_pconn);
 
 	zend_list_delete(Z_LVAL_PP(arg));
+
+	RETURN_TRUE;
 }
 /* }}} */
 
