@@ -1310,8 +1310,9 @@ static X509_REQ * php_openssl_csr_from_zval(zval ** val, int makeresource, long 
 			return (X509_REQ*)what;
 		}
 		return NULL;
+	} else if (Z_TYPE_PP(val) != IS_STRING) {
+		return NULL;
 	}
-	convert_to_string_ex(val);
 
 	if (Z_STRLEN_PP(val) > 7 && memcmp(Z_STRVAL_PP(val), "file://", 7) == 0)
 		filename = Z_STRVAL_PP(val) + 7;
