@@ -1,3 +1,119 @@
+2001-07-13  Boian Bonev  <boian@bonev.com>
+
+    * ext/vpopmail/php_vpopmail.c:
+    replaced add_index_string with add_next_index_string
+    made vpopmail_alias_get_all return sane result
+
+2001-07-13  James E. Flemer  <jflemer@acm.jhu.edu>
+
+    * ext/standard/dir.c
+      main/fopen_wrappers.c
+      main/main.c
+      main/php_globals.h
+      main/safe_mode.c
+      main/safe_mode.h
+      php.ini-dist
+      php.ini-optimized: o Fixed Bug #12121: chdir and safe_mode
+      - [ main/safe_mode.h ] added new checkuid mode:
+        CHECKUID_ALLOW_ONLY_FILE: skips directory check if file check
+    	fails
+
+      - [ ext/standard/dir.c ] changed php_checkuid() to use
+        CHECKUID_ALLOW_ONLY_FILE instead of CHECKUID_ALLOW_ONLY_DIR
+
+      - [ main/safe_mode.c ] added code for new checkuid mode
+
+    o Fixed Bug #12119: safe mode owner check can be bypassed with symlink
+      - [ main/safe_mode.c ] use VCWD_REALPATH to resolve destination
+        of symlink before trimming filename
+
+    o New Feature: safe_mode_include_dir (php.ini directive)
+      - Allows bypassing UID/GID checks when including files
+        from the directory in safe_mode_include_dir and its
+    	subdirectories. (safe_mode must be on, directory must
+    	also be in include_path or full path must be used when
+    	including)
+
+    o Fixed Feature: safe_mode_gid (php.ini directive)
+      - Correctly check (and report) UID/GID bits on directories
+
+    o Changed include() fall back to scripts cwd implementation
+      - CWD added to the (local) search path in php_fopen_with_path()
+        instead of seperate case. [ main/fopen_wrappers.c ]
+
+2001-07-13  Martin Jansen  <mail@martin-jansen.de>
+
+    * pear/File/Passwd.php:
+    * Applied patches by Alexander Merz <alexander.merz@t-online.de>
+      to Passwd.php.
+
+    * pear/XML/RPC.php: * tabs -> whitespace
+
+2001-07-13  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/pgsql/pgsql.c: Fix for #11941
+
+    * ext/fdf/fdf.c
+      ext/fdf/php_fdf.h
+      NEWS: Add fdf_set_encoding()
+
+2001-07-13  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/curl/curl.c: add missing break statements.
+
+2001-07-13  Sascha Schumann  <sascha@schumann.cx>
+
+    * main/php_globals.h
+      main/main.c: Fix xmlrpc_error:number handling
+
+2001-07-13  Thies C. Arntzen  <thies@thieso.net>
+
+    * ext/zlib/tests/003.phpt: change test-name
+
+    * ext/zlib/tests/001.phpt
+      ext/zlib/tests/002.phpt
+      ext/zlib/tests/003.phpt
+      ext/zlib/zlib.c: make sure all string from zlib are \0 terminated.
+    change one realloc to erealloc (though this code is never reached IMHO)
+    add regression tests
+
+    * ext/zlib/zlib.c: fixed #12091. added \0 bytes at EOS in a few cases.
+
+    * ext/standard/iptc.c:
+     - Fixed crash in iptcparse() if the supplied data was bogus. 
+
+    * NEWS: .
+
+    * ext/session/session.c
+      ext/session/tests/004.phpt:
+    make regession test of session work without the ugly hack in session.c
+    and removed that ugly hack.
+
+2001-07-13  Martin Jansen  <mail@martin-jansen.de>
+
+    * pear/XML/RPC.php:
+    * Fixed parse error (Submitted by: yavo <yavo@itena.com.cy>)
+
+2001-07-13  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/snmp/snmp.c: Fix for bug #12081
+
+    * ext/snmp/snmp.c: Add port support to snmp functions
+
+2001-07-13  Rui Hirokawa  <louis@cityfujisawa.ne.jp>
+
+    * ext/pcre/php_pcre.c: added an option to support utf-8 in pcre.
+
+2001-07-13  John Donagher  <john@webmeta.com>
+
+    * ext/pfpro/config.m4: Quote grep patterns to avoid shell interpretation
+
+2001-07-13  Harald Radi  <h.radi@nme.at>
+
+    * ext/com/TODO: New file.
+
+    * ext/com/TODO: no message
+
 2001-07-12  Harald Radi  <h.radi@nme.at>
 
     * ext/com/COM.c
