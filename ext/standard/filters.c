@@ -653,15 +653,42 @@ static php_conv_err_t php_conv_base64_decode_convert(php_conv_base64_decode *ins
 /* {{{ php_conv_qprint_encode */
 typedef struct _php_conv_qprint_encode {
 	php_conv _super;
+
+	int opts;
+	unsigned int line_ccnt;
+	unsigned int line_len;
+	const char *lbchars;
+	int lbchars_dup;
+	size_t lbchars_len;
+	int persistent;
+	unsigned int lb_ptr;
+	unsigned int lb_cnt;
 } php_conv_qprint_encode;
+
+#define PHP_CONV_QPRINT_OPT_BINARY 0x00000001
 
 static void php_conv_qprint_encode_dtor(php_conv_qprint_encode *inst);
 static php_conv_err_t php_conv_qprint_encode_convert(php_conv_qprint_encode *inst, const char **in_pp, size_t *in_left_p, char **out_pp, size_t *out_left_p);
 
 static void php_conv_qprint_encode_dtor(php_conv_qprint_encode *inst)
 {
-	/* do nothing */
+	assert(inst != NULL);
+	if (inst->lbchars_dup && inst->lbchars != NULL) {
+		pefree((void *)inst->lbchars, inst->persistent);
+	}
 }
+
+#define NEXT_CHAR(ps, icnt, lb_ptr, lb_cnt, lbchars) \
+	((lb_cnt) < (lb_ptr) ? (lbchars)[(lb_cnt)] : *(ps)) 
+
+#define CONSUME_CHAR(ps, icnt, lb_ptr, lb_cnt) \
+	if ((lb_cnt) < (lb_ptr)) { \
+		(lb_cnt)++; \
+	} else { \
+		(lb_cnt) = (lb_ptr) = 0; \
+		--(icnt); \
+		(ps)++; \
+	}
 
 static php_conv_err_t php_conv_qprint_encode_convert(php_conv_qprint_encode *inst, const char **in_pp, size_t *in_left_p, char **out_pp, size_t *out_left_p)
 {
@@ -669,6 +696,10 @@ static php_conv_err_t php_conv_qprint_encode_convert(php_conv_qprint_encode *ins
 	unsigned char *ps, *pd;
 	size_t icnt, ocnt;
 	unsigned int c;
+	unsigned int line_ccnt;
+	unsigned int lb_ptr;
+	unsigned int lb_cnt;
+	int opts;
 	static char qp_digits[] = "0123456789ABCDEF";
 
 	if (in_pp == NULL || in_left_p == NULL) {
@@ -679,18 +710,106 @@ static php_conv_err_t php_conv_qprint_encode_convert(php_conv_qprint_encode *ins
 	icnt = *in_left_p;
 	pd = (unsigned char *)(*out_pp);
 	ocnt = *out_left_p;
- 
-	for (; icnt > 0; icnt--, ps++) {
-		c = *ps;
+	line_ccnt = inst->line_ccnt;
+	opts = inst->opts;
+	lb_ptr = inst->lb_ptr;
+	lb_cnt = inst->lb_cnt;
 
-		if ((c >= 33 && c <= 60) || (c >= 62 && c <= 126)) { 
+	while (icnt > 0) {
+		if (!(opts & PHP_CONV_QPRINT_OPT_BINARY) && inst->lbchars != NULL && inst->lbchars_len > 0) {
+			/* look ahead for the line break chars to make a right decision
+			 * how to consume incoming characters */
+
+			if (*ps == inst->lbchars[lb_cnt]) {
+				ps++;
+				icnt--;
+				lb_cnt++;
+
+				if (lb_cnt >= inst->lbchars_len) {
+					unsigned int i;
+
+					if (ocnt < lb_cnt) {
+						lb_cnt--;
+						err = PHP_CONV_ERR_TOO_BIG;
+						break;
+					}
+
+					for (i = 0; i < lb_cnt; i++) {
+						*(pd++) = inst->lbchars[i];
+						ocnt--;
+					}
+					line_ccnt = inst->line_len;
+					lb_ptr = lb_cnt = 0;
+				}
+				continue;
+			}
+		}
+
+		c = NEXT_CHAR(ps, icnt, lb_ptr, lb_cnt, inst->lbchars);
+
+		if (!(opts & PHP_CONV_QPRINT_OPT_BINARY) && (c == '\t' || c == ' ')) {
+			if (line_ccnt < 2 && inst->lbchars != NULL) {
+				if (ocnt < inst->lbchars_len + 1) {
+					err = PHP_CONV_ERR_TOO_BIG;
+					break;
+				}
+
+				*(pd++) = '=';
+				ocnt--;
+				line_ccnt--;
+
+				memcpy(pd, inst->lbchars, inst->lbchars_len);
+				pd += inst->lbchars_len;
+				ocnt -= inst->lbchars_len;
+				line_ccnt = inst->line_len;
+			} else {
+				if (ocnt < 1) {
+					err = PHP_CONV_ERR_TOO_BIG;
+					break;
+				}
+				*(pd++) = c;
+				ocnt--;
+				line_ccnt--;
+				CONSUME_CHAR(ps, icnt, lb_ptr, lb_cnt);
+			}
+		} else if ((c >= 33 && c <= 60) || (c >= 62 && c <= 126)) { 
+			if (line_ccnt < 2) {
+				if (ocnt < inst->lbchars_len + 1) {
+					err = PHP_CONV_ERR_TOO_BIG;
+					break;
+				}
+				*(pd++) = '=';
+				ocnt--;
+				line_ccnt--;
+
+				memcpy(pd, inst->lbchars, inst->lbchars_len);
+				pd += inst->lbchars_len;
+				ocnt -= inst->lbchars_len;
+				line_ccnt = inst->line_len;
+			}
 			if (ocnt < 1) {
 				err = PHP_CONV_ERR_TOO_BIG;
 				break;
 			}
 			*(pd++) = c;
 			ocnt--;
+			line_ccnt--;
+			CONSUME_CHAR(ps, icnt, lb_ptr, lb_cnt);
 		} else {
+			if (line_ccnt < 4) {
+				if (ocnt < inst->lbchars_len + 1) {
+					err = PHP_CONV_ERR_TOO_BIG;
+					break;
+				}
+				*(pd++) = '=';
+				ocnt--;
+				line_ccnt--;
+
+				memcpy(pd, inst->lbchars, inst->lbchars_len);
+				pd += inst->lbchars_len;
+				ocnt -= inst->lbchars_len;
+				line_ccnt = inst->line_len;
+			}
 			if (ocnt < 3) {
 				err = PHP_CONV_ERR_TOO_BIG;
 				break;
@@ -699,6 +818,8 @@ static php_conv_err_t php_conv_qprint_encode_convert(php_conv_qprint_encode *ins
 			*(pd++) = qp_digits[(c >> 4)];
 			*(pd++) = qp_digits[(c & 0x0f)]; 
 			ocnt -= 3;
+			line_ccnt -= 3;
+			CONSUME_CHAR(ps, icnt, lb_ptr, lb_cnt);
 		}
 	}
 
@@ -706,14 +827,33 @@ static php_conv_err_t php_conv_qprint_encode_convert(php_conv_qprint_encode *ins
 	*in_left_p = icnt;
 	*out_pp = (char *)pd;
 	*out_left_p = ocnt; 
-
+	inst->line_ccnt = line_ccnt;
+	inst->lb_ptr = lb_ptr;
+	inst->lb_cnt = lb_cnt;
 	return err;
 }
+#undef NEXT_CHAR
+#undef CONSUME_CHAR
 
-static php_conv_err_t php_conv_qprint_encode_ctor(php_conv_qprint_encode *inst)
+static php_conv_err_t php_conv_qprint_encode_ctor(php_conv_qprint_encode *inst, unsigned int line_len, const char *lbchars, size_t lbchars_len, int lbchars_dup, int opts, int persistent)
 {
+	if (line_len < 4) {
+		return PHP_CONV_ERR_TOO_BIG;
+	}
 	inst->_super.convert_op = (php_conv_convert_func) php_conv_qprint_encode_convert;
 	inst->_super.dtor = (php_conv_dtor_func) php_conv_qprint_encode_dtor;
+	inst->line_ccnt = line_len;
+	inst->line_len = line_len;
+	if (lbchars != NULL) {
+		inst->lbchars = (lbchars_dup ? pestrdup(lbchars, persistent) : lbchars);
+		inst->lbchars_len = lbchars_len;
+	} else {
+		inst->lbchars = NULL;
+	}
+	inst->lbchars_dup = lbchars_dup;
+	inst->persistent = persistent;
+	inst->opts = opts;
+	inst->lb_cnt = inst->lb_ptr = 0;
 	return PHP_CONV_ERR_SUCCESS;
 }
 /* }}} */
@@ -913,6 +1053,29 @@ static php_conv_err_t php_conv_get_ulong_prop_ex(const HashTable *ht, unsigned l
 	return PHP_CONV_ERR_SUCCESS;
 }
 
+static php_conv_err_t php_conv_get_bool_prop_ex(const HashTable *ht, int *pretval, char *field_name, size_t field_name_len)
+{
+	zval **tmpval;
+
+	*pretval = 0;
+
+	if (zend_hash_find((HashTable *)ht, field_name, field_name_len, (void **)&tmpval) == SUCCESS) {
+		zval tmp, *ztval = *tmpval;
+
+		if (Z_TYPE_PP(tmpval) != IS_BOOL) {
+			tmp = *ztval;
+			zval_copy_ctor(&tmp);
+			convert_to_boolean(&tmp);
+			ztval = &tmp;
+		}
+		*pretval = Z_BVAL_P(ztval);
+	} else {
+		return PHP_CONV_ERR_NOT_FOUND;
+	} 
+	return PHP_CONV_ERR_SUCCESS;
+}
+
+
 static int php_conv_get_int_prop_ex(const HashTable *ht, int *pretval, char *field_name, size_t field_name_len)
 {
 	long l;
@@ -947,6 +1110,9 @@ static int php_conv_get_uint_prop_ex(const HashTable *ht, unsigned int *pretval,
 
 #define GET_UINT_PROP(ht, var, fldname) \
 	php_conv_get_uint_prop_ex(ht, &var, fldname, sizeof(fldname))
+
+#define GET_BOOL_PROP(ht, var, fldname) \
+	php_conv_get_bool_prop_ex(ht, &var, fldname, sizeof(fldname))
 
 static php_conv *php_conv_open(int conv_mode, const HashTable *options, int persistent)
 {
@@ -998,12 +1164,45 @@ static php_conv *php_conv_open(int conv_mode, const HashTable *options, int pers
 			}
 			break;
 
-		case PHP_CONV_QPRINT_ENCODE:
-			retval = pemalloc(sizeof(php_conv_qprint_encode), persistent);
-			if (php_conv_qprint_encode_ctor((php_conv_qprint_encode *)retval)) {
-				goto out_failure;
+		case PHP_CONV_QPRINT_ENCODE: {
+			unsigned int line_len = 0;
+			char *lbchars = NULL;
+			size_t lbchars_len;
+			int opts = 0;
+
+			if (options != NULL) {
+				int opt_binary = 0;
+
+				GET_STR_PROP(options, lbchars, lbchars_len, "line-break-chars", 0);
+				GET_UINT_PROP(options, line_len, "line-length");
+				GET_BOOL_PROP(options, opt_binary, "binary"); 
+
+				if (line_len < 4) {
+					if (lbchars != NULL) {
+						pefree(lbchars, 0);
+					}
+					lbchars = NULL;
+				} else {
+					if (lbchars == NULL) {
+						lbchars = pestrdup("\r\n", 0);
+						lbchars_len = 2;
+					}
+				}
+				opts |= (opt_binary ? PHP_CONV_QPRINT_OPT_BINARY : 0);
 			}
-			break;
+			retval = pemalloc(sizeof(php_conv_qprint_encode), persistent);
+			if (lbchars != NULL) {
+				if (php_conv_qprint_encode_ctor((php_conv_qprint_encode *)retval, line_len, lbchars, lbchars_len, 1, opts, persistent)) {
+					pefree(lbchars, 0);
+					goto out_failure;
+				}
+				pefree(lbchars, 0);
+			} else {
+				if (php_conv_qprint_encode_ctor((php_conv_qprint_encode *)retval, 0, NULL, 0, 0, opts, persistent)) {
+					goto out_failure;
+				}
+			}
+		} break;
 	
 		case PHP_CONV_QPRINT_DECODE:
 			retval = pemalloc(sizeof(php_conv_qprint_decode), persistent);
@@ -1028,6 +1227,7 @@ out_failure:
 #undef GET_STR_PROP
 #undef GET_INT_PROP
 #undef GET_UINT_PROP
+#undef GET_BOOL_PROP
 
 static int php_convert_filter_ctor(php_convert_filter *inst,
 	int write_conv_mode, HashTable *write_conv_opts,
