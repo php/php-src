@@ -801,7 +801,7 @@ AC_OUTPUT([php4.spec Zend/Makefile
 		   $PHP_OUTPUT_FILES
 		   ], [], [
 
-if test "\$CONFIG_FILES" = ""; then
+if test "$CONFIG_FILES" = ""; then
     PHP_GEN_MAKEFILES
 else
     for file in $PHP_FAST_OUTPUT_FILES; do
