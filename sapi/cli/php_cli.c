@@ -680,6 +680,7 @@ int main(int argc, char *argv[])
 
 			case 'a':	/* interactive mode */
 				printf("Interactive mode enabled\n\n");
+				fflush(stdout);
 				interactive=1;
 				break;
 
