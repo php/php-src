@@ -1,3 +1,16 @@
+2004-01-03  Derick Rethans  <php@derickrethans.nl>
+
+    * zend.c
+      zend_API.c
+      zend_compile.c
+      zend_compile.h
+      zend_execute.c
+      zend_object_handlers.c
+      zend_reflection_api.c:
+      - Fixed var_export() to show public, protected and private modifiers
+      properly.
+      - Exported (un)mangle_property_name.
+
 2004-01-02  Andrei Zmievski  <andrei@gravitonic.com>
 
     * zend_default_classes.c:
