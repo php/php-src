@@ -30,19 +30,113 @@
 #include "php_pdo_odbc.h"
 #include "php_pdo_odbc_int.h"
 
-void _odbc_error(pdo_dbh_t *dbh, char *what, PDO_ODBC_HSTMT stmt, const char *file, int line TSRMLS_DC) /* {{{ */
+static struct {
+	char state[6];
+	enum pdo_error err;
+} odbc_to_pdo_err_map[] = {
+	/* this table maps ODBC V3 SQLSTATE codes to PDO_ERR codes */
+	{ "42S01", PDO_ERR_ALREADY_EXISTS },
+	{ "42S11", PDO_ERR_ALREADY_EXISTS },
+	{ "42S21", PDO_ERR_ALREADY_EXISTS },
+	{ "IM001", PDO_ERR_NOT_IMPLEMENTED },
+	{ "42S22", PDO_ERR_NOT_FOUND },
+	{ "42S12", PDO_ERR_NOT_FOUND },
+	{ "42S02", PDO_ERR_NOT_FOUND },
+	{ "42000", PDO_ERR_SYNTAX },
+	{ "23000", PDO_ERR_CONSTRAINT },
+	{ "22025", PDO_ERR_SYNTAX },
+	{ "22019", PDO_ERR_SYNTAX },
+	{ "22018", PDO_ERR_SYNTAX },
+	{ "08S01", PDO_ERR_DISCONNECTED },
+	{ "01S07", PDO_ERR_TRUNCATED },
+	
+};
+
+static HashTable err_hash;
+
+void pdo_odbc_fini_error_table(void)
+{
+	zend_hash_destroy(&err_hash);
+}
+
+void pdo_odbc_init_error_table(void)
+{
+	int i;
+
+	zend_hash_init(&err_hash, 0, NULL, NULL, 1);
+
+	for (i = 0; i < sizeof(odbc_to_pdo_err_map)/sizeof(odbc_to_pdo_err_map[0]); i++) {
+		zend_hash_add(&err_hash, odbc_to_pdo_err_map[i].state, sizeof(odbc_to_pdo_err_map[i].state),
+				&odbc_to_pdo_err_map[i].err, sizeof(odbc_to_pdo_err_map[i].err), NULL);
+	}
+}
+
+static enum pdo_error pdo_odbc_map_error(char *state)
+{
+	enum pdo_error *p_err;
+	if (SUCCESS == zend_hash_find(&err_hash, state, sizeof(odbc_to_pdo_err_map[0].state), (void**)&p_err)) {
+		return *p_err;
+	}
+	return PDO_ERR_CANT_MAP;
+}
+
+static int pdo_odbc_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *info TSRMLS_DC)
+{
+	pdo_odbc_db_handle *H = (pdo_odbc_db_handle *)dbh->driver_data;
+	pdo_odbc_errinfo *einfo = &H->einfo;
+	pdo_odbc_stmt *S = NULL;
+	char *message = NULL;
+
+	if (stmt) {
+		S = (pdo_odbc_stmt*)stmt->driver_data;
+		einfo = &S->einfo;
+	}
+
+	spprintf(&message, 0, "%s: %d %s [SQL State %s] (%s:%d)",
+				einfo->what, einfo->last_error, einfo->last_err_msg, einfo->last_state, einfo->file, einfo->line);
+
+	add_next_index_long(info, einfo->last_error);
+	add_next_index_string(info, message, 0);
+	add_next_index_string(info, einfo->last_state, 1);
+
+	return 1;
+}
+
+
+void pdo_odbc_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, PDO_ODBC_HSTMT statement, char *what, const char *file, int line TSRMLS_DC) /* {{{ */
 {
 	RETCODE rc;
 	SWORD	errmsgsize;
 	pdo_odbc_db_handle *H = (pdo_odbc_db_handle*)dbh->driver_data;
+	pdo_odbc_errinfo *einfo = &H->einfo;
+	pdo_odbc_stmt *S = NULL;
+	enum pdo_error *pdo_err = &dbh->error_code;
 
-	rc = SQLError(H->env, H->dbc, stmt, H->last_state, &H->last_error,
-			H->last_err_msg, sizeof(H->last_err_msg)-1, &errmsgsize);
+	if (stmt) {
+		S = (pdo_odbc_stmt*)stmt->driver_data;
 
-	H->last_err_msg[errmsgsize] = '\0';
+		einfo = &S->einfo;
+		pdo_err = &stmt->error_code;
+	}
+
+	if (statement == SQL_NULL_HSTMT && S) {
+		statement = S->stmt;
+	}
 	
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "(%s:%d) %s: %d %s [SQL State %s]",
-			file, line, what, H->last_error, H->last_err_msg, H->last_state);
+	rc = SQLError(H->env, H->dbc, statement, einfo->last_state, &einfo->last_error,
+			einfo->last_err_msg, sizeof(einfo->last_err_msg)-1, &errmsgsize);
+
+	einfo->last_err_msg[errmsgsize] = '\0';
+	einfo->file = file;
+	einfo->line = line;
+	einfo->what = what;
+
+	*pdo_err = pdo_odbc_map_error(einfo->last_state);
+
+	if (!dbh->methods) {
+		zend_throw_exception_ex(php_pdo_get_exception(), *pdo_err TSRMLS_CC, "%s: %d %s [SQL State %s]",
+				what, einfo->last_error, einfo->last_err_msg, einfo->last_state);
+	}
 }
 /* }}} */
 
@@ -54,7 +148,7 @@ static int odbc_handle_closer(pdo_dbh_t *dbh TSRMLS_DC)
 		SQLEndTran(SQL_HANDLE_DBC, H->dbc, SQL_ROLLBACK);
 	}
 
-	SQLFreeHandle(SQL_HANDLE_STMT, H->dbc);
+	SQLFreeHandle(SQL_HANDLE_DBC, H->dbc);
 	SQLFreeHandle(SQL_HANDLE_ENV, H->env);
 	pefree(H, dbh->is_persistent);
 
@@ -73,14 +167,14 @@ static int odbc_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len, p
 
 	if (rc == SQL_INVALID_HANDLE || rc == SQL_ERROR) {
 		efree(S);
-		odbc_error(dbh, "SQLAllocStmt", SQL_NULL_HSTMT);
+		pdo_odbc_drv_error("SQLAllocStmt");
 		return 0;
 	}
 
 	rc = SQLPrepare(S->stmt, (char*)sql, SQL_NTS);
 
 	if (rc != SQL_SUCCESS) {
-		odbc_error(dbh, "SQLPrepare", S->stmt);
+		pdo_odbc_stmt_error("SQLPrepare");
 	}
 
 	if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
@@ -98,20 +192,29 @@ static long odbc_handle_doer(pdo_dbh_t *dbh, const char *sql, long sql_len TSRML
 {
 	pdo_odbc_db_handle *H = (pdo_odbc_db_handle *)dbh->driver_data;
 	RETCODE rc;
-	long row_count;
-
-	rc = SQLExecDirect(H->dbc, (char *)sql, sql_len);
-	if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
-		/* XXX error reporting needed */
-		return 0;
+	long row_count = -1;
+	PDO_ODBC_HSTMT	stmt;
+	
+	rc = SQLAllocHandle(SQL_HANDLE_STMT, H->dbc, &stmt);
+	if (rc != SQL_SUCCESS) {
+		pdo_odbc_drv_error("SQLAllocHandle: STMT");
+		return -1;
 	}
 
-	rc = SQLRowCount(H->dbc, &row_count);
+	rc = SQLExecDirect(stmt, (char *)sql, sql_len);
+
 	if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
-		/* XXX error reporting needed */
-		return 0;
+		pdo_odbc_doer_error("SQLExecDirect");
+		goto out;
 	}
 
+	rc = SQLRowCount(stmt, &row_count);
+	if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
+		pdo_odbc_doer_error("SQLRowCount");
+		goto out;
+	}
+out:
+	SQLFreeHandle(SQL_HANDLE_STMT, stmt);
 	return row_count;
 }
 
@@ -136,7 +239,7 @@ static int odbc_handle_commit(pdo_dbh_t *dbh TSRMLS_DC)
 	rc = SQLEndTran(SQL_HANDLE_DBC, H->dbc, SQL_COMMIT);
 
 	if (rc != SQL_SUCCESS) {
-		odbc_error(dbh, "SQLEndTran: Commit", SQL_NULL_HSTMT);
+		pdo_odbc_drv_error("SQLEndTran: Commit");
 
 		if (rc != SQL_SUCCESS_WITH_INFO) {
 			return 0;
@@ -153,7 +256,7 @@ static int odbc_handle_rollback(pdo_dbh_t *dbh TSRMLS_DC)
 	rc = SQLEndTran(SQL_HANDLE_DBC, H->dbc, SQL_ROLLBACK);
 
 	if (rc != SQL_SUCCESS) {
-		odbc_error(dbh, "SQLEndTran: Rollback", SQL_NULL_HSTMT);
+		pdo_odbc_drv_error("SQLEndTran: Rollback");
 
 		if (rc != SQL_SUCCESS_WITH_INFO) {
 			return 0;
@@ -173,6 +276,10 @@ static struct pdo_dbh_methods odbc_methods = {
 	odbc_handle_begin,
 	odbc_handle_commit,
 	odbc_handle_rollback,
+	NULL, 	/* set attr */
+	NULL,	/* last id */
+	pdo_odbc_fetch_error_func,
+	NULL,	/* get attr */
 };
 
 static int pdo_odbc_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_DC) /* {{{ */
@@ -189,14 +296,14 @@ static int pdo_odbc_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_D
 	rc = SQLSetEnvAttr(H->env, SQL_ATTR_ODBC_VERSION, (void*)SQL_OV_ODBC3, 0);
 
 	if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
-		odbc_error(dbh, "SQLSetEnvAttr: ODBC3", SQL_NULL_HSTMT);
+		pdo_odbc_drv_error("SQLSetEnvAttr: ODBC3");
 		odbc_handle_closer(dbh TSRMLS_CC);
 		return 0;
 	}
 	
 	rc = SQLAllocHandle(SQL_HANDLE_DBC, H->env, &H->dbc);
 	if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
-		odbc_error(dbh, "SQLAllocHandle (DBC)", SQL_NULL_HSTMT);
+		pdo_odbc_drv_error("SQLAllocHandle (DBC)");
 		odbc_handle_closer(dbh TSRMLS_CC);
 		return 0;
 	}
@@ -204,7 +311,7 @@ static int pdo_odbc_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_D
 	if (!dbh->auto_commit) {
 		rc = SQLSetConnectAttr(H->dbc, SQL_ATTR_AUTOCOMMIT, SQL_AUTOCOMMIT_OFF, SQL_IS_UINTEGER);
 		if (rc != SQL_SUCCESS) {
-			odbc_error(dbh, "SQLSetConnectAttr AUTOCOMMIT = OFF", SQL_NULL_HSTMT);
+			pdo_odbc_drv_error("SQLSetConnectAttr AUTOCOMMIT = OFF");
 			odbc_handle_closer(dbh TSRMLS_CC);
 			return 0;
 		}
@@ -232,7 +339,7 @@ static int pdo_odbc_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_D
 	}
 
 	if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
-		odbc_error(dbh, use_direct ? "SQLDriverConnect" : "SQLConnect", SQL_NULL_HSTMT);
+		pdo_odbc_drv_error(use_direct ? "SQLDriverConnect" : "SQLConnect");
 		odbc_handle_closer(dbh TSRMLS_CC);
 		return 0;
 	}

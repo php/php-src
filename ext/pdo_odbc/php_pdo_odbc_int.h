@@ -105,12 +105,17 @@
 /* }}} */
 
 typedef struct {
-	PDO_ODBC_HENV	env;
-	PDO_ODBC_HDBC	dbc;
-
 	char last_state[6];
 	char last_err_msg[SQL_MAX_MESSAGE_LENGTH];
 	SDWORD last_error;
+	const char *file, *what;
+	int line;
+} pdo_odbc_errinfo;
+
+typedef struct {
+	PDO_ODBC_HENV	env;
+	PDO_ODBC_HDBC	dbc;
+	pdo_odbc_errinfo einfo;
 } pdo_odbc_db_handle;
 
 typedef struct {
@@ -125,13 +130,19 @@ typedef struct {
 	PDO_ODBC_HSTMT	stmt;
 	pdo_odbc_column *cols;
 	pdo_odbc_db_handle *H;
+	pdo_odbc_errinfo einfo;
 } pdo_odbc_stmt;
 	
 extern pdo_driver_t pdo_odbc_driver;
 extern struct pdo_stmt_methods odbc_stmt_methods;
 
-void _odbc_error(pdo_dbh_t *dbh, char *what, PDO_ODBC_HSTMT stmt, const char *file, int line TSRMLS_DC);
-#define odbc_error(dbh, what, stmt)	_odbc_error(dbh, what, stmt, __FILE__, __LINE__ TSRMLS_CC)
+void pdo_odbc_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, PDO_ODBC_HSTMT statement, char *what, const char *file, int line TSRMLS_DC);
+#define pdo_odbc_drv_error(what)	pdo_odbc_error(dbh, NULL, SQL_NULL_HSTMT, what, __FILE__, __LINE__ TSRMLS_CC)
+#define pdo_odbc_stmt_error(what)	pdo_odbc_error(stmt->dbh, stmt, SQL_NULL_HSTMT, what, __FILE__, __LINE__ TSRMLS_CC)
+#define pdo_odbc_doer_error(what)	pdo_odbc_error(dbh, NULL, stmt, what, __FILE__, __LINE__ TSRMLS_CC)
+
+void pdo_odbc_init_error_table(void);
+void pdo_odbc_fini_error_table(void);
 
 /*
  * Local variables:
