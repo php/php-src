@@ -23,7 +23,7 @@
 
 #include <sys/wait.h>
 #include "php_signal.h"
-#include "zend_extensions.h"
+#include "php_ticks.h"
 extern zend_module_entry pcntl_module_entry;
 #define phpext_pcntl_ptr &pcntl_module_entry
 
@@ -52,13 +52,7 @@ PHP_FUNCTION(pcntl_signal);
 PHP_FUNCTION(pcntl_exec);
 
 static void pcntl_signal_handler(int);
-
-/* Zend extension prototypes */ 
-int pcntl_zend_extension_startup(zend_extension *extension);
-void pcntl_zend_extension_shutdown(zend_extension *extension);
-void pcntl_zend_extension_activate(void);
-void pcntl_zend_extension_deactivate(void);
-void pcntl_zend_extension_statement_handler(zend_op_array *op_array);
+static void pcntl_tick_handler();
 
 
 ZEND_BEGIN_MODULE_GLOBALS(pcntl)
