@@ -112,6 +112,14 @@ LIB32=link.exe -lib
 
 SOURCE=.\TSRM.c
 # End Source File
+# Begin Source File
+
+SOURCE=.\tsrm_strtok_r.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\tsrm_virtual_cwd.c
+# End Source File
 # End Group
 # Begin Group "Header Files"
 
@@ -119,6 +127,14 @@ SOURCE=.\TSRM.c
 # Begin Source File
 
 SOURCE=.\TSRM.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\tsrm_strtok_r.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\tsrm_virtual_cwd.h
 # End Source File
 # End Group
 # End Target
