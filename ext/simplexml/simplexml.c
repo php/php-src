@@ -844,7 +844,7 @@ SXE_METHOD(xpath)
 	xmlXPathFreeObject(retval);
 }
 
-SXE_METHOD(registerNamespace)
+SXE_METHOD(registerXPathNamespace)
 {
 	php_sxe_object    *sxe;
 	zval *id;
@@ -1627,7 +1627,7 @@ static zend_function_entry sxe_functions[] = {
 	SXE_ME(__construct,            NULL, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL) /* must be called */
 	SXE_ME(asXML,                  NULL, ZEND_ACC_PUBLIC)
 	SXE_ME(xpath,                  NULL, ZEND_ACC_PUBLIC)
-	SXE_ME(registerNamespace,      NULL, ZEND_ACC_PUBLIC)
+	SXE_ME(registerXPathNamespace,      NULL, ZEND_ACC_PUBLIC)
 	SXE_ME(attributes,             NULL, ZEND_ACC_PUBLIC)
 	SXE_ME(children,			   NULL, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}

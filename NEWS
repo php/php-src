@@ -13,7 +13,7 @@ PHP                                                                        NEWS
   . array_intersect_ukey() (Christiano Duarte)
   . stream_context_get_default()  (Wez)
   . stream_socket_enable_crypto()  (Wez)
-  . SimpleXMLElement->registerNamespace() (Christian)
+  . SimpleXMLElement->registerXPathNamespace() (Christian)
 - PHP will now respect extension dependencies when initializing.  (Wez)
 - Added Cursor support for MySQL 5.0.x in mysqli (Georg)
 - Added proxy support to ftp wrapper via http. (Sara)
