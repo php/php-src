@@ -2253,9 +2253,11 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, cha
 		/* If its bigger than 4 bytes, the dir entry contains an offset. */
 		value_ptr = offset_base+offset_val;
 		if (offset_val+byte_count > IFDlength || value_ptr < dir_entry) {
+			/*
 			// It is important to check for IMAGE_FILETYPE_TIFF
 			// JPEG does not use absolute pointers instead its pointers are relative to the start
 			// of the TIFF header in APP1 section.
+			*/
 			if (offset_val<0 || offset_val+byte_count>ImageInfo->FileSize || (ImageInfo->FileType!=IMAGE_FILETYPE_TIFF_II && ImageInfo->FileType!=IMAGE_FILETYPE_TIFF_MM)) {
 				if (value_ptr < dir_entry) {
 					/* we can read this if offset_val > 0 */
@@ -2269,7 +2271,7 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, cha
 				return TRUE;
 			}
 			if (byte_count>sizeof(cbuf)) {
-				// mark as outside range and get buffer
+				/* mark as outside range and get buffer */
 				value_ptr = emalloc(byte_count);
 				if (!value_ptr) {
 					EXIF_ERRLOG_EALLOC
@@ -2277,11 +2279,13 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, cha
 				}
 				outside = value_ptr;
 			} else {
+				/*
 				// in most cases we only access a small range so
 				// it is faster to use a static buffer there
 				// BUT it offers also the possibility to have
 				// pointers read without the need to free them
 				// explicitley before returning.
+				*/
 				value_ptr = cbuf;
 			}
 

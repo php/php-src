@@ -466,7 +466,7 @@ zend_module_entry domxml_module_entry = {
 	PHP_RINIT(domxml),
 	NULL,
 	PHP_MINFO(domxml),
-	DOMXML_API_VERSION, //Extension versionnumber
+	DOMXML_API_VERSION, /* Extension versionnumber */
 	STANDARD_MODULE_PROPERTIES
 };
 
@@ -2096,7 +2096,7 @@ PHP_FUNCTION(domxml_node_append_sibling)
 		RETURN_FALSE;
 	}
 
-	// FIXME reverted xmlAddChildList; crashes
+	/* FIXME reverted xmlAddChildList; crashes */
 	child = xmlAddSibling(nodep, new_child);
 
 	if (NULL == child) {
