@@ -52,6 +52,7 @@ PHP_FUNCTION(stream_context_get_options);
 PHP_FUNCTION(stream_context_get_default);
 PHP_FUNCTION(stream_filter_prepend);
 PHP_FUNCTION(stream_filter_append);
+PHP_FUNCTION(stream_filter_remove);
 PHP_FUNCTION(stream_socket_enable_crypto);
 
 /*

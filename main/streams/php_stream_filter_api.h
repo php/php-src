@@ -123,6 +123,7 @@ struct _php_stream_filter {
 BEGIN_EXTERN_C()
 PHPAPI void _php_stream_filter_prepend(php_stream_filter_chain *chain, php_stream_filter *filter TSRMLS_DC);
 PHPAPI void _php_stream_filter_append(php_stream_filter_chain *chain, php_stream_filter *filter TSRMLS_DC);
+PHPAPI int _php_stream_filter_flush(php_stream_filter *filter, int finish TSRMLS_DC);
 PHPAPI php_stream_filter *php_stream_filter_remove(php_stream_filter *filter, int call_dtor TSRMLS_DC);
 PHPAPI void php_stream_filter_free(php_stream_filter *filter TSRMLS_DC);
 PHPAPI php_stream_filter *_php_stream_filter_alloc(php_stream_filter_ops *fops, void *abstract, int persistent STREAMS_DC TSRMLS_DC);
@@ -131,6 +132,7 @@ END_EXTERN_C()
 #define php_stream_filter_alloc_rel(fops, thisptr, persistent) _php_stream_filter_alloc((fops), (thisptr), (persistent) STREAMS_REL_CC TSRMLS_CC)
 #define php_stream_filter_prepend(chain, filter) _php_stream_filter_prepend((chain), (filter) TSRMLS_CC)
 #define php_stream_filter_append(chain, filter) _php_stream_filter_append((chain), (filter) TSRMLS_CC)
+#define php_stream_filter_flush(filter, finish) _php_stream_filter_flush((filter), (finish) TSRMLS_CC)
 
 #define php_stream_is_filtered(stream)	((stream)->readfilters.head || (stream)->writefilters.head)
 

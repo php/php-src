@@ -38,6 +38,7 @@
 static HashTable url_stream_wrappers_hash;
 static int le_stream = FAILURE; /* true global */
 static int le_pstream = FAILURE; /* true global */
+static int le_stream_filter = FAILURE; /* true global */
 
 PHPAPI int php_file_le_stream(void)
 {
@@ -47,6 +48,11 @@ PHPAPI int php_file_le_stream(void)
 PHPAPI int php_file_le_pstream(void)
 {
 	return le_pstream;
+}
+
+PHPAPI int php_file_le_stream_filter(void)
+{
+	return le_stream_filter;
 }
 
 PHPAPI HashTable *_php_stream_get_url_stream_wrappers_hash(TSRMLS_D)
@@ -1369,6 +1375,9 @@ int php_init_stream_wrappers(int module_number TSRMLS_DC)
 {
 	le_stream = zend_register_list_destructors_ex(stream_resource_regular_dtor, NULL, "stream", module_number);
 	le_pstream = zend_register_list_destructors_ex(NULL, stream_resource_persistent_dtor, "persistent stream", module_number);
+
+	/* Filters are cleaned up by the streams they're attached to */
+	le_stream_filter = zend_register_list_destructors_ex(NULL, NULL, "stream filter", module_number);
 
 	return (
 			zend_hash_init(&url_stream_wrappers_hash, 0, NULL, NULL, 1) == SUCCESS

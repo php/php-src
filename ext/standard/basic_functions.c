@@ -600,6 +600,7 @@ function_entry basic_functions[] = {
 	PHP_FE(stream_context_get_default,										NULL)
 	PHP_FE(stream_filter_prepend,											NULL)
 	PHP_FE(stream_filter_append,											NULL)
+	PHP_FE(stream_filter_remove,											NULL)
 	PHP_FE(stream_socket_client,				 second_and_third_args_force_ref)
 	PHP_FE(stream_socket_server,				 second_and_third_args_force_ref)
 	PHP_FE(stream_socket_accept,				 		   third_arg_force_ref)

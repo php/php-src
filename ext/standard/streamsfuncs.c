@@ -987,7 +987,7 @@ static void apply_filter_to_stream(int append, INTERNAL_FUNCTION_PARAMETERS)
 	int filternamelen;
 	long read_write = 0;
 	zval *filterparams = NULL;
-	php_stream_filter *filter;
+	php_stream_filter *filter = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs|lz", &zstream,
 				&filtername, &filternamelen, &read_write, &filterparams) == FAILURE) {
@@ -1036,10 +1036,14 @@ static void apply_filter_to_stream(int append, INTERNAL_FUNCTION_PARAMETERS)
 		}
 	}
 
-	RETURN_TRUE;
+	if (filter) {
+		RETURN_RESOURCE(ZEND_REGISTER_RESOURCE(NULL, filter, php_file_le_stream_filter()));
+	} else {
+		RETURN_FALSE;
+	}
 }
 
-/* {{{ proto bool stream_filter_prepend(resource stream, string filtername[, int read_write[, string filterparams]])
+/* {{{ proto resource stream_filter_prepend(resource stream, string filtername[, int read_write[, string filterparams]])
    Prepend a filter to a stream */
 PHP_FUNCTION(stream_filter_prepend)
 {
@@ -1047,7 +1051,7 @@ PHP_FUNCTION(stream_filter_prepend)
 }
 /* }}} */
 
-/* {{{ proto bool stream_filter_append(resource stream, string filtername[, int read_write[, string filterparams]])
+/* {{{ proto resource stream_filter_append(resource stream, string filtername[, int read_write[, string filterparams]])
    Append a filter to a stream */
 PHP_FUNCTION(stream_filter_append)
 {
@@ -1055,6 +1059,36 @@ PHP_FUNCTION(stream_filter_append)
 }
 /* }}} */
 
+/* {{{ proto bool stream_filter_remove(resource stream_filter)
+	Flushes any data in the filter's internal buffer, removes it from the chain, and frees the resource */
+PHP_FUNCTION(stream_filter_remove)
+{
+	zval *zfilter;
+	php_stream_filter *filter;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &zfilter) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	filter = zend_fetch_resource(&zfilter TSRMLS_CC, -1, NULL, NULL, 1, php_file_le_stream_filter());
+	if (!filter) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid resource given, not a stream filter");
+		RETURN_FALSE;
+	}
+
+	if (php_stream_filter_flush(filter, 1) == FAILURE) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to flush filter, not removing");
+		RETURN_FALSE;
+	}
+
+	if (zend_list_delete(Z_LVAL_P(zfilter)) == FAILURE) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not invalidate filter, not removing");
+		RETURN_FALSE;
+	} else {
+		php_stream_filter_remove(filter, 1 TSRMLS_CC);
+		RETURN_TRUE;
+	}
+}
 /* }}} */
 
 /* {{{ proto string stream_get_line(resource stream, int maxlen, string ending)
