@@ -1,3 +1,45 @@
+2002-01-31  James Cox  <james@awpimajes.com>
+
+    * LICENSE: updating license to 2002 (hasn't been done since 2000)
+
+2002-01-31  Boian Bonev  <boian@bonev.com>
+
+    * ext/vpopmail/php_vpopmail.c: fix comment
+
+2002-01-31  Martin Jansen  <mail@martin-jansen.de>
+
+    * pear/HTTP.php: * Fix bug #15313
+
+2002-01-31  Bertrand Mansion  <bmansion@mamasam.com>
+
+    * pear/HTML/Table.php: Thanks to Arnaud Limbourg:
+    - phpDoc and cosmetic fixes
+
+2002-01-31  Derick Rethans  <derick@vl-srm.net>
+
+    * ext/standard/dl.c:
+    - Fix for bug 15311 (type mismatch of php_dl when #ifndef HAVE_LIBDL)
+
+2002-01-31  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * sapi/roxen/roxen.c: A fix for the bug number 13231 & 11699.
+    Makes the roxen support compile.  Patch by Lars Wilhelmsen <lars@sral.org>
+
+2002-01-31  Derick Rethans  <derick@vl-srm.net>
+
+    * ext/openssl/openssl.c: - Fix for openssl_pkcs7_sign segfaults
+      (patch by Christian Stocker <chregu@php.net>)
+
+2002-01-31  Stig Bakken  <ssb@fast.no>
+
+    * pear/scripts/pearize.in: * lowercase tags and attributes
+
+    * pear/Makefile.in: * remove broken rule for rebuilding Makefile
+
+2002-01-31  Edin Kadribasic  <edink@proventum.net>
+
+    * main/main.c: Ignore register_globals for $argc and $argv under CLI SAPI.
+
 2002-01-30  Edin Kadribasic  <edink@proventum.net>
 
     * acinclude.m4
