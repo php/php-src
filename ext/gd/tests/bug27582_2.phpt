@@ -1,5 +1,5 @@
 --TEST--
-Bug #24594 (Filling an area using tiles).
+Bug #27582 (Filling to border an area using tiles).
 --SKIPIF--
 <?php
 	if (!extension_loaded('gd')) {
@@ -11,7 +11,7 @@ Bug #24594 (Filling an area using tiles).
 ?>
 --FILE--
 <?php
-/* $id */
+/* $Id$ */
 /*
  * This test segfaults with the current imagefilltoborder
  * implementation. A rewrite of this function is required 
