@@ -4,6 +4,10 @@
 ARG_ENABLE('isapi', 'Build ISAPI version of PHP', 'no');
 
 if (PHP_ISAPI == "yes") {
+	if (PHP_ZTS == "no") {
+		ERROR("ISAPI module requires an --enable-zts build of PHP");
+	}
+
 	SAPI('isapi', 'php4isapi.c', 'php' + PHP_VERSION + 'isapi.dll', '/D PHP4ISAPI_EXPORTS');
 	ADD_FLAG('LDFLAGS_ISAPI', '/DEF:sapi\\isapi\\php4isapi.def');
 }

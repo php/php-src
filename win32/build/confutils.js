@@ -17,7 +17,7 @@
   +----------------------------------------------------------------------+
 */
 
-// $Id: confutils.js,v 1.16 2003-12-04 17:03:20 fmk Exp $
+// $Id: confutils.js,v 1.17 2003-12-05 02:41:00 wez Exp $
 
 var STDOUT = WScript.StdOut;
 var STDERR = WScript.StdErr;
@@ -362,33 +362,44 @@ function PATH_PROG(progname, def, additional_paths)
 	return place;
 }
 
-function CHECK_LIB(libname, target, path_to_check)
+function CHECK_LIB(libnames, target, path_to_check)
 {
 	if (path_to_check == null) {
 		path_to_check = php_usual_lib_suspects;
 	} else {
 		path_to_check += ";" + php_usual_lib_suspects;
 	}
-	
-	var p = search_paths(libname, path_to_check, "LIB");
 	var have = 0;
+	var p;
+	var i;
+	var libname;
 
-	if (typeof(p) == "string") {
-		ADD_FLAG("LDFLAGS_" + target.toUpperCase(), '/libpath:"' + p + '" ');
-		ADD_FLAG("LIBS_" + target.toUpperCase(), libname);
-		have = 1;
-	} else if (p == true) {
-		ADD_FLAG("LIBS_" + target.toUpperCase(), libname);
-		have = 1;
-	} else {
-		/* not found in the defaults or the explicit paths,
-		 * so check the general extra libs; if we find
-		 * it here, no need to add another /libpath: for it as we
-		 * already have it covered, but we need to add the lib
-		 * to LIBS_XXX */
-		if (false != search_paths(libname, PHP_EXTRA_LIBS, null)) {
+	libnames = libnames.split(';');
+	for (i = 0; i < libnames.length; i++) {
+		libname = libnames[i];
+		p = search_paths(libname, path_to_check, "LIB");
+
+		if (typeof(p) == "string") {
+			ADD_FLAG("LDFLAGS_" + target.toUpperCase(), '/libpath:"' + p + '" ');
 			ADD_FLAG("LIBS_" + target.toUpperCase(), libname);
 			have = 1;
+		} else if (p == true) {
+			ADD_FLAG("LIBS_" + target.toUpperCase(), libname);
+			have = 1;
+		} else {
+			/* not found in the defaults or the explicit paths,
+			 * so check the general extra libs; if we find
+			 * it here, no need to add another /libpath: for it as we
+			 * already have it covered, but we need to add the lib
+			 * to LIBS_XXX */
+			if (false != search_paths(libname, PHP_EXTRA_LIBS, null)) {
+				ADD_FLAG("LIBS_" + target.toUpperCase(), libname);
+				have = 1;
+			}
+		}
+
+		if (have) {
+			break;
 		}
 	}
 
