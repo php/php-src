@@ -133,10 +133,11 @@ void spl_add_interfaces(zval *list, zend_class_entry * pce, int allow, int ce_fl
 /* {{{ spl_add_classes */
 int spl_add_classes(zend_class_entry ** ppce, zval *list, int sub, int allow, int ce_flags TSRMLS_DC)
 {
+	zend_class_entry *pce = *ppce;
+
 	if (!ppce) {
 		return 0;
 	}
-	zend_class_entry *pce = *ppce;
 	spl_add_class_name(list, pce, allow, ce_flags TSRMLS_CC);
 	if (sub) {
 		spl_add_interfaces(list, pce, allow, ce_flags TSRMLS_CC);
