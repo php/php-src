@@ -968,7 +968,7 @@ PHP_FUNCTION(domxml_node)
 PHP_FUNCTION(domxml_node_name)
 {
 	zval *id;
-	xmlNode *n, *first;
+	xmlNode *n;
 	const char *str = NULL;
 	
 	id = getThis();
@@ -1173,7 +1173,6 @@ PHP_FUNCTION(domxml_node_has_child_nodes)
 {
 	zval *id;
 	xmlNode *nodep;
-	int ret;
 	
 	id = getThis();
 	if(NULL == (nodep = php_dom_get_object(id, le_domxmlnodep, 0)))
@@ -1193,7 +1192,6 @@ PHP_FUNCTION(domxml_node_has_attributes)
 {
 	zval *id;
 	xmlNode *nodep;
-	int ret;
 	
 	id = getThis();
 	if(NULL == (nodep = php_dom_get_object(id, le_domxmlnodep, 0)))
@@ -1260,9 +1258,8 @@ PHP_FUNCTION(domxml_node_parent)
    Returns list of children nodes */
 PHP_FUNCTION(domxml_node_children)
 {
-	zval *id, **tmp;
+	zval *id;
 	xmlNode *nodep, *last;
-	xmlDoc *docp;
 	int ret;
 	
 	id = getThis();
@@ -1296,9 +1293,8 @@ PHP_FUNCTION(domxml_node_children)
    Deletes node */
 PHP_FUNCTION(domxml_node_unlink_node)
 {
-	zval *id, **tmp;
-	xmlNode *nodep, *last;
-	int ret;
+	zval *id;
+	xmlNode *nodep;
 	
 	id = getThis();
 	nodep = php_dom_get_object(id, le_domxmlnodep, 0);
@@ -1393,7 +1389,7 @@ PHP_FUNCTION(domxml_node_insert_before)
    Sets name of a node */
 PHP_FUNCTION(domxml_node_set_name)
 {
-	zval *id, *name, **tmp;
+	zval *id, *name;
 	xmlNode *nodep;
 
 	if ((ZEND_NUM_ARGS() != 1) || getParameters(ht, 1, &name) == FAILURE) {
@@ -1415,7 +1411,7 @@ PHP_FUNCTION(domxml_node_set_name)
    Returns list of attributes of node */
 PHP_FUNCTION(domxml_node_attributes)
 {
-	zval *id, **tmp;
+	zval *id;
 	xmlNode *nodep;
 #ifdef oldstyle_for_libxml_1_8_7
 	xmlAttr *attr;
@@ -1449,7 +1445,7 @@ PHP_FUNCTION(domxml_node_attributes)
    Adds child node to parent node */
 PHP_FUNCTION(domxml_node_new_child)
 {
-	zval *id, *name, *content, **tmp, *rv;
+	zval *id, *name, *content, *rv;
 	xmlNodePtr child, nodep;
 	int ret;
 
@@ -1479,7 +1475,7 @@ PHP_FUNCTION(domxml_node_new_child)
    Set content of a node */
 PHP_FUNCTION(domxml_node_set_content)
 {
-	zval *id, *content, **tmp;
+	zval *id, *content;
 	xmlNode *nodep;
 
 	if ((ZEND_NUM_ARGS() != 1) || getParameters(ht, 1, &content) == FAILURE) {
@@ -1531,9 +1527,8 @@ PHP_FUNCTION(domxml_element)
    Returns tag name of element node */
 PHP_FUNCTION(domxml_elem_tagname)
 {
-	zval *id, *arg1, **tmp;
+	zval *id;
 	xmlNode *nodep;
-	char *value;
 	
 	id = getThis();
 	nodep = php_dom_get_object(id, le_domxmlelementp, 0);
@@ -1604,7 +1599,6 @@ PHP_FUNCTION(domxml_elem_remove_attribute)
 {
 	zval *id, *arg1;
 	xmlNode *nodep;
-	char *value;
 	
 	if ((ZEND_NUM_ARGS() == 1) && getParameters(ht, 1, &arg1) == SUCCESS) {
 		id = getThis();
@@ -1639,7 +1633,7 @@ PHP_FUNCTION(domxml_elem_get_attribute_node)
 
 	/* FIXME: not implemented */
 
-	RETURN_STRING(value, 1);
+	RETURN_TRUE;
 }
 /* }}} */
 
@@ -1671,7 +1665,6 @@ PHP_FUNCTION(domxml_elem_get_element_by_tagname)
 {
 	zval *id, *arg1;
 	xmlNode *nodep;
-	char *value;
 	
 	if ((ZEND_NUM_ARGS() == 1) && getParameters(ht, 1, &arg1) == SUCCESS) {
 		id = getThis();
@@ -1712,7 +1705,7 @@ PHP_FUNCTION(domxml_doctype_name)
    Returns DomDocumentType */
 PHP_FUNCTION(domxml_doc_doctype)
 {
-	zval *arg, *id, *rv;
+	zval *id, *rv;
 	xmlDtdPtr dtd;
 	xmlDocPtr docp;
 	int ret;
@@ -1733,10 +1726,8 @@ PHP_FUNCTION(domxml_doc_doctype)
    Returns DomeDOMImplementation */
 PHP_FUNCTION(domxml_doc_implementation)
 {
-	zval *arg, *id, *rv;
-	xmlNode *node;
+	zval *id;
 	xmlDocPtr docp;
-	int ret;
 	
 	id = getThis();
 	if(NULL == (docp = php_dom_get_object(id, le_domxmldocp, 0))) {
@@ -1877,7 +1868,7 @@ PHP_FUNCTION(domxml_doc_create_comment)
 PHP_FUNCTION(domxml_doc_create_attribute)
 {
 	zval *arg1, *arg2, *id, *rv;
-	xmlNode *node;
+	xmlAttrPtr node;
 	xmlDocPtr docp;
 	int ret;
 	
@@ -1898,7 +1889,7 @@ PHP_FUNCTION(domxml_doc_create_attribute)
 	}
   node->doc = docp;
 
-	rv = php_domobject_new(node, &ret);
+	rv = php_domobject_new((xmlNodePtr) node, &ret);
 	SEPARATE_ZVAL(&rv);
 	*return_value = *rv;
 }
@@ -1962,7 +1953,7 @@ PHP_FUNCTION(domxml_intdtd)
    Dumps document into string */
 PHP_FUNCTION(domxml_dumpmem)
 {
-	zval *id, **tmp;
+	zval *id;
 	xmlDoc *docp;
 	xmlChar *mem;
 	int size;
@@ -2054,7 +2045,7 @@ PHP_FUNCTION(xmldocfile)
    Add string tocontent of a node */
 PHP_FUNCTION(domxml_node_text_concat)
 {
-	zval *id, *content, **tmp;
+	zval *id, *content;
 	xmlNode *nodep;
 
 	if ((ZEND_NUM_ARGS() != 1) || getParameters(ht, 1, &content) == FAILURE) {
@@ -2079,7 +2070,6 @@ PHP_FUNCTION(domxml_add_root)
 	zval *id, *name, *rv;
 	xmlDoc *docp;
 	xmlNode *nodep;
-	xmlChar *content;
 	int ret;
 	
 	if (ZEND_NUM_ARGS() == 1 || getParameters(ht, 1, &name)) {
@@ -2167,7 +2157,6 @@ static int node_namespace(zval **attributes, xmlNode *nodep)
    Returns list of children nodes */
 static int node_attributes(zval **attributes, xmlNode *nodep)
 {
-	zval *children;
 	xmlAttr *attr;
 	int count = 0;
 
@@ -2188,14 +2177,14 @@ static int node_attributes(zval **attributes, xmlNode *nodep)
 
 	while(attr) {
 		zval *pattr;
-		int n, ret;
+		int ret;
 
 		pattr = php_domobject_new((xmlNodePtr) attr, &ret);
 //		if(0 <= (n = node_children(&children, attr->children))) {
 //			zend_hash_update(pattr->value.obj.properties, "children", sizeof("children"), (void *) &children, sizeof(zval *), NULL);
 //		}
-		add_property_string(pattr, "name", attr->name, 1);
-		add_property_string(pattr, "value", xmlNodeGetContent(attr), 1);
+		add_property_string(pattr, "name", (char *) (attr->name), 1);
+		add_property_string(pattr, "value", xmlNodeGetContent((xmlNodePtr) attr), 1);
 		zend_hash_next_index_insert((*attributes)->value.ht, &pattr, sizeof(zval *), NULL);
 		attr = attr->next;
 		count++;
@@ -2226,7 +2215,6 @@ static int node_children(zval **children, xmlNode *nodep)
 
 	while(last) {
 		zval *child;
-		xmlChar *content;
 		int ret;
 	
 		child = php_domobject_new(last, &ret);
@@ -2287,8 +2275,6 @@ PHP_FUNCTION(xmltree)
 	   Thanks to Paul DuBois for pointing me at this.
 	*/
 	if(0 <= node_children(&children, root)) {
-		int i, count;
-		HashTable *lht;
 		zend_hash_update(return_value->value.obj.properties, "children", sizeof("children"), (void *) &children, sizeof(zval *), NULL);
 
 	}
@@ -2403,7 +2389,6 @@ static void php_xpathptr_eval(INTERNAL_FUNCTION_PARAMETERS, int mode, int expr)
 			for(i = 0;i < nodesetp->nodeNr;i++) {
 				xmlNodePtr node = nodesetp->nodeTab[i];
 				zval *child;
-				xmlChar *content;
 				int retnode;
 
 				/* construct a node object */
