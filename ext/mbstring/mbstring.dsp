@@ -124,6 +124,10 @@ SOURCE=.\mbstring.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\php_mbregex.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\php_unicode.c
 
 !IF  "$(CFG)" == "mbstring - Win32 Release_TS MBSTRING"
@@ -170,6 +174,10 @@ SOURCE=.\mbstring.h
 
 !ENDIF 
 
+# End Source File
+# Begin Source File
+
+SOURCE=.\php_mbregex.h
 # End Source File
 # Begin Source File
 
@@ -478,7 +486,32 @@ SOURCE=.\libmbfl\nls\nls_zh.c
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=.\libmbfl\config.h
+SOURCE=.\libmbfl\config.h.vc6
+
+!IF  "$(CFG)" == "mbstring - Win32 Release_TS MBSTRING"
+
+# Begin Custom Build
+InputDir=.\libmbfl
+InputPath=.\libmbfl\config.h.vc6
+
+"$(InputDir)\config.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputDir)\config.h.vc6 "$(InputDir)\config.h"
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "mbstring - Win32 Debug_TS MBSTRING"
+
+# Begin Custom Build
+InputDir=.\libmbfl
+InputPath=.\libmbfl\config.h.vc6
+
+"$(InputDir)\config.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputDir)\config.h.vc6 "$(InputDir)\config.h"
+
+# End Custom Build
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
@@ -847,6 +880,91 @@ SOURCE=.\libmbfl\filters\unicode_table_koi8r.h
 # Begin Source File
 
 SOURCE=.\libmbfl\filters\unicode_table_uhc.h
+# End Source File
+# End Group
+# End Group
+# Begin Group "oniguruma"
+
+# PROP Default_Filter ""
+# Begin Group "Source Files No. 2"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=.\oniguruma\regcomp.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\oniguruma\regerror.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\oniguruma\regexec.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\oniguruma\reggnu.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\oniguruma\regparse.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\oniguruma\regposerr.c
+# End Source File
+# End Group
+# Begin Group "Header Files No. 2"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=.\oniguruma\win32\config.h
+
+!IF  "$(CFG)" == "mbstring - Win32 Release_TS MBSTRING"
+
+# Begin Custom Build
+InputDir=.\oniguruma\win32
+InputPath=.\oniguruma\win32\config.h
+
+"$(InputDir)\..\config.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputDir)\config.h "$(InputDir)\..\config.h"
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "mbstring - Win32 Debug_TS MBSTRING"
+
+# Begin Custom Build
+InputDir=.\oniguruma\win32
+InputPath=.\oniguruma\win32\config.h
+
+"$(InputDir)\..\config.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputDir)\config.h "$(InputDir)\..\config.h"
+
+# End Custom Build
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=.\oniguruma\onigposix.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\oniguruma\oniguruma.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\oniguruma\php_compat.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\oniguruma\regint.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\oniguruma\regparse.h
 # End Source File
 # End Group
 # End Group

@@ -45,12 +45,12 @@ typedef struct _mbfl_allocators {
 
 MBFLAPI extern mbfl_allocators *__mbfl_allocators; 
 
-#define mbfl_malloc __mbfl_allocators->malloc
-#define mbfl_realloc __mbfl_allocators->realloc
-#define mbfl_calloc __mbfl_allocators->calloc
-#define mbfl_free __mbfl_allocators->free
-#define mbfl_pmalloc __mbfl_allocators->pmalloc
-#define mbfl_prealloc __mbfl_allocators->preallloc
-#define mbfl_pfree __mbfl_allocators->pfree
+#define mbfl_malloc (__mbfl_allocators->malloc)
+#define mbfl_realloc (__mbfl_allocators->realloc)
+#define mbfl_calloc (__mbfl_allocators->calloc)
+#define mbfl_free (__mbfl_allocators->free)
+#define mbfl_pmalloc (__mbfl_allocators->pmalloc)
+#define mbfl_prealloc (__mbfl_allocators->preallloc)
+#define mbfl_pfree (__mbfl_allocators->pfree)
 
 #endif /* MBFL_ALLOCATORS_H */
