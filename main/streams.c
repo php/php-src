@@ -285,7 +285,7 @@ static COOKIE_IO_FUNCTIONS_T stream_cookie_functions =
 	stream_cookie_seeker, stream_cookie_closer
 };
 #else
-/* TODO: use socketpair() to emulate fopecookie, as suggested by Hartmut ? */
+/* TODO: use socketpair() to emulate fopencookie, as suggested by Hartmut ? */
 #endif
 
 PHPAPI int php_stream_cast(php_stream * stream, int castas, void ** ret, int show_err)
@@ -334,12 +334,12 @@ PHPAPI int php_stream_cast(php_stream * stream, int castas, void ** ret, int sho
 
 exit_fail:
 	if (show_err)	{
-		TSRMLS_FETCH();
-
 		/* these names depend on the values of the PHP_STREAM_AS_XXX defines in php_streams.h */
 		static const char * cast_names[3] = {
 			"STDIO FILE*", "File Descriptor", "Socket Descriptor"
 		};
+		TSRMLS_FETCH();
+
 		zend_error(E_WARNING, "%s(): cannot represent a stream of type %s as a %s",
 			get_active_function_name(TSRMLS_C),
 			stream->ops->label,
@@ -363,6 +363,6 @@ exit_success:
  * tab-width: 4
  * c-basic-offset: 4
  * End:
- * vim600: sw=4 ts=4 tw=78 fdm=marker
- * vim<600: sw=4 ts=4 tw=78
+ * vim600: noet sw=4 ts=4 tw=78 fdm=marker
+ * vim<600: noet sw=4 ts=4 tw=78
  */
