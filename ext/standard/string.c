@@ -1887,7 +1887,13 @@ PHP_FUNCTION(chunk_split)
 	}
 
 	if (chunklen > Z_STRLEN_PP(p_str)) {
-		RETURN_STRINGL(Z_STRVAL_PP(p_str), Z_STRLEN_PP(p_str), 1);	
+		/* to maintain BC, we must return original string + ending */
+		result_len = endlen + Z_STRLEN_PP(p_str);
+		result = emalloc(result_len + 1);
+		memcpy(result, Z_STRVAL_PP(p_str), Z_STRLEN_PP(p_str));
+		memcpy(result + Z_STRLEN_PP(p_str), end, endlen);
+		result[result_len] = '\0'; 
+		RETURN_STRINGL(result, result_len, 0);	
 	}
 
 	if (!Z_STRLEN_PP(p_str)) {
