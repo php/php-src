@@ -1377,7 +1377,7 @@ PHP_FUNCTION(getopt)
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s",
 							  &options, &options_len) == FAILURE) {
-		return;
+		RETURN_FALSE;
 	}
 
 	/*
@@ -2031,7 +2031,7 @@ PHP_FUNCTION(highlight_file)
 	zend_bool i = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|b", &filename, &i) == FAILURE) {
-		return;
+		RETURN_FALSE;
 	}
 	convert_to_string(filename);
 
@@ -2072,7 +2072,7 @@ PHP_FUNCTION(highlight_string)
 	zend_bool  i = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|b", &expr, &i) == FAILURE) {
-		return;
+		RETURN_FALSE;
 	}
 	convert_to_string(expr);
 
@@ -2170,7 +2170,7 @@ PHP_FUNCTION(ini_get_all)
 	zend_module_entry *module;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &extname, &extname_len) == FAILURE) {
-		return;
+		RETURN_FALSE;
 	}
 
 	zend_ini_sort_entries(TSRMLS_C);
@@ -2274,7 +2274,7 @@ PHP_FUNCTION(print_r)
 	zend_bool i = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|b", &var, &i) == FAILURE) {
-		return;
+		RETURN_FALSE;
 	}
 	
 	if (i) {
@@ -2409,7 +2409,7 @@ PHP_FUNCTION(getprotobyname)
 	if (ent == NULL) {
 		Z_LVAL_P(return_value) = -1;
 		Z_TYPE_P(return_value) = IS_LONG;
-		return;
+		RETURN_FALSE;
 	}
 
 	RETURN_LONG(ent->p_proto);
@@ -2696,7 +2696,7 @@ PHP_FUNCTION(parse_ini_file)
 	fh.handle.fp = VCWD_FOPEN(Z_STRVAL_PP(filename), "r");
 	if (!fh.handle.fp) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot open '%s' for reading", Z_STRVAL_PP(filename));
-		return;
+		RETURN_FALSE;
 	}
 	Z_TYPE(fh) = ZEND_HANDLE_FP;
 	fh.filename = Z_STRVAL_PP(filename);
