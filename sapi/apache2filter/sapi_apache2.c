@@ -163,8 +163,8 @@ php_apache_sapi_flush(void *server_context)
 	apr_bucket_brigade *bb;
 	apr_bucket *b;
 
-    if (!server_context)
-        return;
+	if (!server_context)
+		return;
     
 	/* Send a flush bucket down the filter chain. The current default
 	 * handler seems to act on the first flush bucket, but ignores
