@@ -367,13 +367,12 @@ _get_base_node_value(xmlNodePtr node, zval **value TSRMLS_DC)
 	if (node->children && node->children->type == XML_TEXT_NODE && !xmlIsBlankNode(node->children)) {
 		contents = xmlNodeListGetString(node->doc, node->children, 1);
 		if (contents) {
-			ZVAL_STRING(*value, contents, 1);
-			xmlFree(contents);
+			ZVAL_STRING(*value, contents, 0);
 		}
 	} else {
 		subnode = php_sxe_object_new(TSRMLS_C);
 		subnode->document = emalloc(sizeof(simplexml_ref_obj));
-		subnode->document->refcount = 2;
+		subnode->document->refcount = 1;
 		subnode->document->ptr = node->doc;
 		subnode->node = node;
 
@@ -613,6 +612,44 @@ simplexml_ce_register_ns(INTERNAL_FUNCTION_PARAMETERS)
 }
 /* }}} */
 
+/* {{{ simplexml_ce_to_xml_string()
+ */
+static void 
+simplexml_ce_to_xml_string(INTERNAL_FUNCTION_PARAMETERS)
+{
+	php_sxe_object *sxe;
+
+	if (ZEND_NUM_ARGS() != 0) {
+		RETURN_FALSE;
+	}
+
+	sxe = php_sxe_fetch_object(getThis() TSRMLS_CC);
+	xmlDocDumpMemory((xmlDocPtr) sxe->document->ptr, (xmlChar **) &Z_STRVAL_P(return_value), &Z_STRLEN_P(return_value));
+	Z_TYPE_P(return_value) = IS_STRING;
+	zval_add_ref(&return_value);
+}
+/* }}} */
+
+/* {{{ simplexml_ce_to_xml_file()
+ */
+static void
+simplexml_ce_to_xml_file(INTERNAL_FUNCTION_PARAMETERS)
+{
+	php_sxe_object *sxe;
+	char           *filename;
+	int             filename_len;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &filename, &filename_len) == FAILURE) {
+		return;
+	}
+
+	sxe = php_sxe_fetch_object(getThis() TSRMLS_CC);
+
+	xmlSaveFile(filename, (xmlDocPtr) sxe->document->ptr);
+
+	RETURN_TRUE;
+}
+/* }}} */
 
 /* {{{ sxe_call_method()
  */
@@ -627,6 +664,10 @@ sxe_call_method(char *method, INTERNAL_FUNCTION_PARAMETERS)
 		simplexml_ce_schema_validate(INTERNAL_FUNCTION_PARAM_PASSTHRU, SCHEMA_BLOB);
 	} else if (!strcmp(method, "register_ns")) {
 		simplexml_ce_register_ns(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	} else if (!strcmp(method, "to_xml")) {
+		simplexml_ce_to_xml_string(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	} else if (!strcmp(method, "to_xml_file")) {
+		simplexml_ce_to_xml_file(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 	} else {
 		return 0;
 	}
@@ -919,58 +960,9 @@ PHP_FUNCTION(simplexml_load_string)
 }
 /* }}} */
 
-/* {{{ proto bool simplexml_save_document_file(string filename, simplexml_element node)
-   Save a XML document to a file from a SimpleXML node */
-PHP_FUNCTION(simplexml_save_document_file)
-{
-	php_sxe_object *sxe;
-	zval           *element;
-	char           *filename;
-	int             filename_len;
-	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz", &filename, &filename_len, &element) == FAILURE) {
-		return;
-	}
-
-	sxe = php_sxe_fetch_object(element TSRMLS_CC);
-
-	xmlSaveFile(filename, (xmlDocPtr) sxe->document->ptr);
-
-	RETURN_TRUE;
-}
-/* }}} */
-
-/* {{{ proto bool simplexml_save_document_string(string &var, simplexml_element node)
-   Save a document to a variable from a SimpleXML node */
-PHP_FUNCTION(simplexml_save_document_string)
-{
-	php_sxe_object *sxe;
-	zval           *data;
-	zval           *element;
-	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zz", &data, &element) == FAILURE) {
-		return;
-	}
-
-	sxe = php_sxe_fetch_object(element TSRMLS_CC);
-	xmlDocDumpMemory((xmlDocPtr) sxe->document->ptr, (xmlChar **) &Z_STRVAL_P(data), &Z_STRLEN_P(data));
-	Z_TYPE_P(data) = IS_STRING;
-	zval_add_ref(&data);
-
-	RETURN_TRUE;
-}
-/* }}} */
-
-/* this is lame, first_arg_force_ref (and others) doesn't 
-   work through dll linkage on windows.  no other extension 
-   outside basic_functions uses first_arg_force_ref.  */
-unsigned char fix_first_arg_force_ref[] = { 1, BYREF_FORCE };
-
 function_entry simplexml_functions[] = {
 	PHP_FE(simplexml_load_file, NULL)
 	PHP_FE(simplexml_load_string, NULL)
-	PHP_FE(simplexml_save_document_file, NULL)
-	PHP_FE(simplexml_save_document_string, fix_first_arg_force_ref)
 	{NULL, NULL, NULL}
 };
 
