@@ -204,7 +204,7 @@ static void ps_mm_destroy(ps_mm *data)
 	mm_destroy(data->mm);
 }
 
-PHP_GINIT_FUNCTION(ps_mm)
+PHP_MINIT_FUNCTION(ps_mm)
 {
 	ps_mm_instance = calloc(sizeof(*ps_mm_instance), 1);
 	if (ps_mm_initialize(ps_mm_instance, PS_MM_PATH) != SUCCESS) {
@@ -215,7 +215,7 @@ PHP_GINIT_FUNCTION(ps_mm)
 	return SUCCESS;
 }
 
-PHP_GSHUTDOWN_FUNCTION(ps_mm)
+PHP_MSHUTDOWN_FUNCTION(ps_mm)
 {
 	if (ps_mm_instance) {
 		ps_mm_destroy(ps_mm_instance);
@@ -346,11 +346,10 @@ PS_GC_FUNC(mm)
 zend_module_entry php_session_mm_module = {
 	"Session MM",
 	NULL,
-	NULL, NULL,
+	PHP_MINIT(ps_mm), PHP_MSHUTDOWN(ps_mm),
 	NULL, NULL,
 	NULL,
-	PHP_GINIT(ps_mm), PHP_GSHUTDOWN(ps_mm),
-	STANDARD_MODULE_PROPERTIES_EX
+	STANDARD_MODULE_PROPERTIES
 };
 
 #endif
