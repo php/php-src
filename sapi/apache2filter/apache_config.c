@@ -18,6 +18,7 @@
 
 #include "php.h"
 #include "php_ini.h"
+#include "php_apache.h"
 
 #include "apr_strings.h"
 #include "ap_config.h"
@@ -82,6 +83,16 @@ static const char *php_apache_admin_value_handler(cmd_parms *cmd, void *dummy, c
 	return real_value_hnd(cmd, dummy, name, value, PHP_INI_SYSTEM);
 }
 
+static const char *php_apache_phpini_set(cmd_parms *cmd, void *mconfig, const char *arg)
+{
+	if (apache2_php_ini_path_override) {
+		return "PHPINIPath is not yet supported in vhost configurations";
+	}
+	apache2_php_ini_path_override = ap_server_root_relative(cmd->pool, arg);
+	return NULL;
+}
+
+
 void *merge_php_config(apr_pool_t *p, void *base_conf, void *new_conf)
 {
 	php_conf_rec *d = base_conf, *e = new_conf;
@@ -130,6 +141,8 @@ const command_rec php_dir_cmds[] =
                   "PHP Value Modifier"),
 	AP_INIT_TAKE2("php_admin_value", php_apache_admin_value_handler, NULL, OR_NONE,
                   "PHP Value Modifier"),
+	AP_INIT_TAKE1("PHPINIDir", php_apache_phpini_set, NULL, RSRC_CONF,
+                  "Directory containing the php.ini file"),
    {NULL}
 };
 
