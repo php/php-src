@@ -258,7 +258,9 @@ void php_add_session_var(char *name, size_t namelen TSRMLS_DC)
 		if (sym_global == NULL && sym_track == NULL) {
 			zval *empty_var;
 
-			ALLOC_INIT_ZVAL(empty_var);
+			ALLOC_INIT_ZVAL(empty_var); /* this sets refcount to 1 */
+			ZVAL_DELREF(empty_var); /* our module does not maintain a ref */
+			/* The next call will increase refcount by NR_OF_SYM_TABLES==2 */
 			zend_set_hash_symbol(empty_var, name, namelen, 1, 2, Z_ARRVAL_P(PS(http_session_vars)), &EG(symbol_table));
 		} else if (sym_global == NULL) {
 			zend_set_hash_symbol(*sym_track, name, namelen, 1, 1, &EG(symbol_table));
@@ -270,7 +272,7 @@ void php_add_session_var(char *name, size_t namelen TSRMLS_DC)
 			zval *empty_var;
 	
 			ALLOC_INIT_ZVAL(empty_var);
-			zend_set_hash_symbol(empty_var, name, namelen, 0, 1, Z_ARRVAL_P(PS(http_session_vars)));
+			ZEND_SET_SYMBOL_WITH_LENGTH(Z_ARRVAL_P(PS(http_session_vars)), name, namelen+1, empty_var, 1, 0);
 		}
 	}
 }
@@ -465,23 +467,16 @@ break_outer_loop:
 
 static void php_session_track_init(TSRMLS_D)
 {
-	zval **old_vars = NULL;
+	/* Unconditionally destroy existing arrays -- possible dirty data */
+	zend_hash_del(&EG(symbol_table), "HTTP_SESSION_VARS", 
+			sizeof("HTTP_SESSION_VARS"));
+	zend_hash_del(&EG(symbol_table), "_SESSION", sizeof("_SESSION"));
 
-	if (zend_hash_find(&EG(symbol_table), "HTTP_SESSION_VARS", sizeof("HTTP_SESSION_VARS"), (void **)&old_vars) == SUCCESS && Z_TYPE_PP(old_vars) == IS_ARRAY) {
-		PS(http_session_vars) = *old_vars;
-		zend_hash_clean(Z_ARRVAL_P(PS(http_session_vars)));
-	} else {
-		if(old_vars) {
-			zend_hash_del(&EG(symbol_table), "HTTP_SESSION_VARS", sizeof("HTTP_SESSION_VARS"));
-			zend_hash_del(&EG(symbol_table), "_SESSION", sizeof("_SESSION"));
-		}
-		MAKE_STD_ZVAL(PS(http_session_vars));
-		array_init(PS(http_session_vars));
-		PS(http_session_vars)->refcount = 2;
-		PS(http_session_vars)->is_ref = 1;
-		zend_hash_update(&EG(symbol_table), "HTTP_SESSION_VARS", sizeof("HTTP_SESSION_VARS"), &PS(http_session_vars), sizeof(zval *), NULL);
-		zend_hash_update(&EG(symbol_table), "_SESSION", sizeof("_SESSION"), &PS(http_session_vars), sizeof(zval *), NULL);
-	}
+	MAKE_STD_ZVAL(PS(http_session_vars));
+	array_init(PS(http_session_vars));
+		
+	ZEND_SET_GLOBAL_VAR("HTTP_SESSION_VARS", PS(http_session_vars));
+	ZEND_SET_GLOBAL_VAR("_SESSION", PS(http_session_vars));
 }
 
 static char *php_session_encode(int *newlen TSRMLS_DC)
