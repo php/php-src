@@ -18,7 +18,7 @@ if test "$PHP_PGSQL" != "no"; then
   done
   
   if test -z "$PGSQL_DIR"; then
-    AC_MSG_RESULT(Cannot find libpq-fe.h. Please specify the installation path of PostgreSQL)
+    AC_MSG_ERROR(Cannot find libpq-fe.h. Please specify the installation path of PostgreSQL)
   fi
 
   PGSQL_INCLUDE=-I$PGSQL_INCDIR
