@@ -18,4 +18,4 @@ configuration-scanner.c: $(srcdir)/configuration-scanner.l
 
 internal_functions.c: $(srcdir)/internal_functions.c.in $(top_builddir)/config.status
 	cd $(top_builddir) && \
-	CONFIG_FILES=main/internal_functions.c CONFIG_HEADERS= ./config.status
+	REDO_ALL=yes ./config.status
