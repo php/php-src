@@ -169,6 +169,7 @@ static pcre* _pcre_get_compiled_regex(char *regex, pcre_extra *extra, int *preg_
 	char				*pattern;
 	int				 	 regex_len;
 	int				 	 do_study = 0;
+	int					 poptions = 0;
 	pcre_cache_entry	*pce;
 	pcre_cache_entry	 new_entry;
 	PCRE_LS_FETCH();
@@ -178,6 +179,7 @@ static pcre* _pcre_get_compiled_regex(char *regex, pcre_extra *extra, int *preg_
 	regex_len = strlen(regex);
 	if (zend_hash_find(&PCRE_G(pcre_cache), regex, regex_len+1, (void **)&pce) == SUCCESS) {
 		extra = pce->extra;
+		*preg_options = pce->preg_options;
 		return pce->re;
 	}
 	
@@ -240,7 +242,7 @@ static pcre* _pcre_get_compiled_regex(char *regex, pcre_extra *extra, int *preg_
 			case 'X':	coptions |= PCRE_EXTRA;			break;
 
 			/* Custom preg options */
-			case 'e':	*preg_options |= PREG_REPLACE_EVAL; break;
+			case 'e':	poptions |= PREG_REPLACE_EVAL; break;
 			
 			case ' ':
 			case '\n':
@@ -275,11 +277,14 @@ static pcre* _pcre_get_compiled_regex(char *regex, pcre_extra *extra, int *preg_
 		}
 	}
 
+	*preg_options = poptions;
+	
 	efree(pattern);
 
 	/* Store the compiled pattern and extra info in the cache. */
 	new_entry.re = re;
 	new_entry.extra = extra;
+	new_entry.preg_options = poptions;
 	zend_hash_update(&PCRE_G(pcre_cache), regex, regex_len+1, (void *)&new_entry,
 						sizeof(pcre_cache_entry), NULL);
 
