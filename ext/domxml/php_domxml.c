@@ -2580,7 +2580,7 @@ PHP_FUNCTION(domxml_node_attributes)
 	DOMXML_PARAM_NONE(nodep, id, le_domxmlnodep);
 	ret = node_attributes(&attrs, nodep TSRMLS_CC);
 	if ( ret == -1) {
-		return NULL;
+		RETURN_NULL();
 	}
 
 	if ( ret > -1) {
