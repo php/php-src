@@ -2,8 +2,9 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.3-dev
-- XXX: Added the ability for CURLOPT_POSTFIELDS to accept an array of HTTP post
-- XXX: Added the CURLOPT_HTTPHEADER option that allows for the posting of HTTP
+- Added the ability for CURLOPT_POSTFIELDS to accept an associative array of 
+  HTTP POST variables and values. (Sterling)
+- Added the CURLOPT_HTTPHEADER option to curl_setopt(). (Sterling)
 - Add the curl_error() and curl_errno() functions. (Sterling)
 - Changed ext/db not to be enabled by default (Jani)
 - Fixed building Apache SAPI module on SCO UnixWare (Sascha)
