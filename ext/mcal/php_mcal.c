@@ -338,7 +338,7 @@ static void _php_make_event_object(zval *myzvalue, CALEVENT *event TSRMLS_DC)
 	}
 }
 
-/* {{{ proto int mcal_close(int stream_id [, int options])
+/* {{{ proto bool mcal_close(int stream_id [, int options])
    Close an MCAL stream */
 PHP_FUNCTION(mcal_close)
 {
@@ -384,7 +384,7 @@ PHP_FUNCTION(mcal_popen)
 	php_mcal_do_open(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 
-/* {{{ proto int mcal_reopen(int stream_id, string calendar [, int options])
+/* {{{ proto bool mcal_reopen(int stream_id, string calendar [, int options])
    Reopen MCAL stream to a new calendar */
 PHP_FUNCTION(mcal_reopen)
 {
@@ -422,7 +422,7 @@ PHP_FUNCTION(mcal_reopen)
 }
 /* }}} */
 
-/* {{{ proto int mcal_expunge(int stream_id)
+/* {{{ proto bool mcal_expunge(int stream_id)
    Delete all events marked for deletion */
 PHP_FUNCTION(mcal_expunge)
 {
@@ -449,7 +449,7 @@ PHP_FUNCTION(mcal_expunge)
 }
 /* }}} */
 
-/* {{{ proto int mcal_fetch_event(int stream_id, int eventid [, int options])
+/* {{{ proto object mcal_fetch_event(int stream_id, int eventid [, int options])
    Fetch an event */
 PHP_FUNCTION(mcal_fetch_event)
 {
@@ -562,7 +562,7 @@ PHP_FUNCTION(mcal_list_events)
 }
 /* }}} */
 
-/* {{{ proto string mcal_create_calendar(int stream_id, string calendar)
+/* {{{ proto bool mcal_create_calendar(int stream_id, string calendar)
    Create a new calendar */
 PHP_FUNCTION(mcal_create_calendar)
 {
@@ -596,7 +596,7 @@ PHP_FUNCTION(mcal_create_calendar)
 }
 /* }}} */
 
-/* {{{ proto string mcal_rename_calendar(int stream_id, string src_calendar, string dest_calendar)
+/* {{{ proto bool mcal_rename_calendar(int stream_id, string src_calendar, string dest_calendar)
    Rename a calendar */
 PHP_FUNCTION(mcal_rename_calendar)
 {
@@ -627,7 +627,7 @@ PHP_FUNCTION(mcal_rename_calendar)
 }
 /* }}} */
 
-/* {{{ proto bool mcal_list_alarms(int stream_id, int year, int month, int day, int hour, int min, int sec)
+/* {{{ proto array mcal_list_alarms(int stream_id, int year, int month, int day, int hour, int min, int sec)
    List alarms for a given time */
 PHP_FUNCTION(mcal_list_alarms)
 {
@@ -676,7 +676,7 @@ PHP_FUNCTION(mcal_list_alarms)
 }
 /* }}} */
 
-/* {{{ proto string mcal_delete_calendar(int stream_id, string calendar)
+/* {{{ proto bool mcal_delete_calendar(int stream_id, string calendar)
    Delete calendar */
 PHP_FUNCTION(mcal_delete_calendar)
 {
@@ -711,7 +711,7 @@ PHP_FUNCTION(mcal_delete_calendar)
 }
 /* }}} */
 
-/* {{{ proto string mcal_delete_event(int stream_id, int event_id)
+/* {{{ proto bool mcal_delete_event(int stream_id, int event_id)
    Delete an event */
 PHP_FUNCTION(mcal_delete_event)
 {
@@ -742,7 +742,7 @@ PHP_FUNCTION(mcal_delete_event)
 }
 /* }}} */
 
-/* {{{ proto string mcal_append_event(int stream_id)
+/* {{{ proto int mcal_append_event(int stream_id)
    Append a new event to the calendar stream */
 PHP_FUNCTION(mcal_append_event)
 {
@@ -773,7 +773,7 @@ PHP_FUNCTION(mcal_append_event)
 }
 /* }}} */
 
-/* {{{ proto string mcal_store_event(int stream_id)
+/* {{{ proto int mcal_store_event(int stream_id)
    Store changes to an event */
 PHP_FUNCTION(mcal_store_event)
 {
@@ -802,7 +802,7 @@ PHP_FUNCTION(mcal_store_event)
 }
 /* }}} */
 
-/* {{{ proto string mcal_snooze(int stream_id, int uid)
+/* {{{ proto bool mcal_snooze(int stream_id, int uid)
    Snooze an alarm */
 PHP_FUNCTION(mcal_snooze)
 {
@@ -834,7 +834,7 @@ PHP_FUNCTION(mcal_snooze)
 }
 /* }}} */
 
-/* {{{ proto string mcal_event_set_category(int stream_id, string category)
+/* {{{ proto void mcal_event_set_category(int stream_id, string category)
    Attach a category to an event */
 PHP_FUNCTION(mcal_event_set_category)
 {
@@ -861,7 +861,7 @@ PHP_FUNCTION(mcal_event_set_category)
 }
 /* }}} */
 
-/* {{{ proto string mcal_event_set_title(int stream_id, string title)
+/* {{{ proto void mcal_event_set_title(int stream_id, string title)
    Attach a title to an event */
 PHP_FUNCTION(mcal_event_set_title)
 {
@@ -888,7 +888,7 @@ PHP_FUNCTION(mcal_event_set_title)
 }
 /* }}} */
 
-/* {{{ proto string mcal_event_set_description(int stream_id, string description)
+/* {{{ proto void mcal_event_set_description(int stream_id, string description)
    Attach a description to an event */
 PHP_FUNCTION(mcal_event_set_description)
 {
@@ -915,7 +915,7 @@ PHP_FUNCTION(mcal_event_set_description)
 }
 /* }}} */
 
-/* {{{ proto string mcal_event_set_start(int stream_id, int year,int month, int day [[[, int hour], int min], int sec])
+/* {{{ proto void mcal_event_set_start(int stream_id, int year,int month, int day [[[, int hour], int min], int sec])
    Attach a start datetime to an event */
 PHP_FUNCTION(mcal_event_set_start)
 {
@@ -954,7 +954,7 @@ PHP_FUNCTION(mcal_event_set_start)
 }
 /* }}} */
 
-/* {{{ proto string mcal_event_set_end(int stream_id, int year,int month, int day [[[, int hour], int min], int sec])
+/* {{{ proto void mcal_event_set_end(int stream_id, int year,int month, int day [[[, int hour], int min], int sec])
    Attach an end datetime to an event */
 PHP_FUNCTION(mcal_event_set_end)
 {
@@ -995,7 +995,7 @@ PHP_FUNCTION(mcal_event_set_end)
 }
 /* }}} */
 
-/* {{{ proto int mcal_event_set_alarm(int stream_id, int alarm)
+/* {{{ proto void mcal_event_set_alarm(int stream_id, int alarm)
    Add an alarm to the streams global event */
 PHP_FUNCTION(mcal_event_set_alarm)
 {
@@ -1022,7 +1022,7 @@ PHP_FUNCTION(mcal_event_set_alarm)
 }
 /* }}} */
 
-/* {{{ proto int mcal_event_init(int stream_id)
+/* {{{ proto void mcal_event_init(int stream_id)
    Initialize a streams global event */
 PHP_FUNCTION(mcal_event_init)
 {
@@ -1048,7 +1048,7 @@ PHP_FUNCTION(mcal_event_init)
 }
 /* }}} */
 
-/* {{{ proto int mcal_event_set_class(int stream_id, int class)
+/* {{{ proto void mcal_event_set_class(int stream_id, int class)
    Add an class to the streams global event */
 PHP_FUNCTION(mcal_event_set_class)
 {
@@ -1076,7 +1076,7 @@ PHP_FUNCTION(mcal_event_set_class)
 }
 /* }}} */
 
-/* {{{ proto string mcal_event_add_attribute(int stream_id, string attribute, string value)
+/* {{{ proto bool mcal_event_add_attribute(int stream_id, string attribute, string value)
    Add an attribute and value to an event */
 PHP_FUNCTION(mcal_event_add_attribute)
 {
@@ -1382,7 +1382,7 @@ PHP_FUNCTION(mcal_next_recurrence)
 }
 /* }}} */
 
-/* {{{ proto string mcal_event_set_recur_none(int stream_id)
+/* {{{ proto void mcal_event_set_recur_none(int stream_id)
    Create a daily recurrence */
 PHP_FUNCTION(mcal_event_set_recur_none)
 {
@@ -1409,7 +1409,7 @@ PHP_FUNCTION(mcal_event_set_recur_none)
 }
 /* }}} */
 
-/* {{{ proto string mcal_event_set_recur_daily(int stream_id, int year, int month, int day, int interval)
+/* {{{ proto void mcal_event_set_recur_daily(int stream_id, int year, int month, int day, int interval)
    Create a daily recurrence */
 PHP_FUNCTION(mcal_event_set_recur_daily)
 {
@@ -1442,7 +1442,7 @@ PHP_FUNCTION(mcal_event_set_recur_daily)
 }
 /* }}} */
 
-/* {{{ proto string mcal_event_set_recur_weekly(int stream_id, int year, int month, int day, int interval, int weekdays)
+/* {{{ proto void mcal_event_set_recur_weekly(int stream_id, int year, int month, int day, int interval, int weekdays)
    Create a weekly recurrence */
 PHP_FUNCTION(mcal_event_set_recur_weekly)
 {
@@ -1476,7 +1476,7 @@ PHP_FUNCTION(mcal_event_set_recur_weekly)
 }
 /* }}} */
 
-/* {{{ proto string mcal_event_set_recur_monthly_mday(int stream_id, int year, int month, int day, int interval)
+/* {{{ proto void mcal_event_set_recur_monthly_mday(int stream_id, int year, int month, int day, int interval)
    Create a monthly by day recurrence */
 PHP_FUNCTION(mcal_event_set_recur_monthly_mday)
 {
@@ -1509,7 +1509,7 @@ PHP_FUNCTION(mcal_event_set_recur_monthly_mday)
 }
 /* }}} */
 
-/* {{{ proto string mcal_event_set_recur_monthly_wday(int stream_id, int year, int month, int day, int interval)
+/* {{{ proto void mcal_event_set_recur_monthly_wday(int stream_id, int year, int month, int day, int interval)
    Create a monthly by week recurrence */
 PHP_FUNCTION(mcal_event_set_recur_monthly_wday)
 {
@@ -1542,7 +1542,7 @@ PHP_FUNCTION(mcal_event_set_recur_monthly_wday)
 }
 /* }}} */
 
-/* {{{ proto string mcal_event_set_recur_yearly(int stream_id, int year, int month, int day, int interval)
+/* {{{ proto void mcal_event_set_recur_yearly(int stream_id, int year, int month, int day, int interval)
    Create a yearly recurrence */
 PHP_FUNCTION(mcal_event_set_recur_yearly)
 {
