@@ -32,8 +32,8 @@
 /* Enable / Disable CALENDAR extension (default: enabled) */
 #define HAVE_CALENDAR 1
 
-/* Enable / Disable COM extension (default: enabled) */
-#define HAVE_COM 1
+/* Enable / Disable RPC extension (default: enabled) */
+#define HAVE_RPC 1
 
 /* Enable / Disable CTYPE extension (default: enabled) */
 #define HAVE_CTYPE 1
@@ -55,9 +55,6 @@
 
 /* Enable / Disable ODBC extension (default: enabled) */
 #define HAVE_UODBC 1
-
-/* Enable / Disable OVERLOAD extension (default: enabled) */
-#define HAVE_OVERLOAD 1
 
 /* Enable / Disable PCRE extension (default: enabled) */
 #define HAVE_BUNDLED_PCRE	1

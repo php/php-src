@@ -54,8 +54,8 @@
 #if HAVE_CTYPE
 #include "ext/ctype/php_ctype.h"
 #endif
-#if HAVE_COM
-#include "ext/com/php_COM.h"
+#if HAVE_RPC
+#include "ext/rpc/php_rpc.h"
 #endif
 #if HAVE_FTP
 #include "ext/ftp/php_ftp.h"
@@ -82,11 +82,6 @@
 #if HAVE_MBSTRING
 #include "ext/mbstring/mbstring.h"
 #endif
-#ifndef ZEND_ENGINE_2
-#if HAVE_OVERLOAD
-#include "ext/overload/php_overload.h"
-#endif
-#endif
 #if HAVE_TOKENIZER
 #include "ext/tokenizer/php_tokenizer.h"
 #endif
@@ -108,8 +103,8 @@ zend_module_entry *php_builtin_extensions[] = {
 #if HAVE_CTYPE
 	,phpext_ctype_ptr
 #endif
-#if HAVE_COM
-	,phpext_com_ptr
+#if HAVE_RPC
+	,phpext_rpc_ptr
 #endif
 #if HAVE_FTP
 	,phpext_ftp_ptr
@@ -122,11 +117,6 @@ zend_module_entry *php_builtin_extensions[] = {
 #endif
 #if HAVE_UODBC
 	,phpext_odbc_ptr
-#endif
-#ifndef ZEND_ENGINE_2
-#if HAVE_OVERLOAD
-  ,phpext_overload_ptr
-#endif
 #endif
 #if HAVE_PCRE || HAVE_BUNDLED_PCRE
 	,phpext_pcre_ptr
