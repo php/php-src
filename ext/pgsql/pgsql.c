@@ -340,7 +340,7 @@ PHP_MINIT_FUNCTION(pgsql)
 	REGISTER_LONG_CONSTANT("PGSQL_ESCAPE_BYTEA", PGSQL_ESCAPE_BYTEA, CONST_CS | CONST_PERSISTENT);
 	
 	REGISTER_LONG_CONSTANT("PGSQL_EMPTY_QUERY", PGRES_EMPTY_QUERY, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PSQL_COMMAND_OK", PGRES_COMMAND_OK, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PGSQL_COMMAND_OK", PGRES_COMMAND_OK, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PGSQL_TUPLES_OK", PGRES_TUPLES_OK, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PGSQL_COPY_OUT", PGRES_COPY_OUT, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PGSQL_COPY_IN", PGRES_COPY_IN, CONST_CS | CONST_PERSISTENT);
@@ -2103,8 +2103,8 @@ PHP_FUNCTION(pg_put_line)
 }
 /* }}} */
 
-/* {{{ proto int pg_copy_to(int connection, string table_name [, string delimiter [, string null_as]])
-   Send null-terminated string to backend server*/
+/* {{{ proto array pg_copy_to(int connection, string table_name [, string delimiter [, string null_as]])
+   Copy table to array */
 PHP_FUNCTION(pg_copy_to)
 {
 	zval *pgsql_link;
@@ -2221,8 +2221,8 @@ PHP_FUNCTION(pg_copy_to)
 }
 /* }}} */
 
-/* {{{ proto int pg_copy_from(int connection, string table_name , array rows [, string delimiter [, string null_as]])
-   */
+/* {{{ proto bool pg_copy_from(int connection, string table_name , array rows [, string delimiter [, string null_as]])
+   Copy table from array */
 PHP_FUNCTION(pg_copy_from)
 {
 	zval *pgsql_link = NULL, *pg_rows;
