@@ -1,3 +1,21 @@
+2004-07-04  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/interbase/ibase_query.c:
+      Eliminate potentially dangerous alloca().
+
+    * (PHP_4_3)
+      NEWS
+      ext/imap/php_imap.c:
+      MFH: Fixed bug #28963 (Missing space for \0 in address allocation).
+
+    * ext/imap/php_imap.c:
+      Fixed bug #28963 (Missing space for \0 in address allocation).
+
+2004-07-04  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/standard/var.c:
+      Fix TSRM build
+
 2004-07-03  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
 
     * NEWS:
