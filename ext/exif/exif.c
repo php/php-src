@@ -57,6 +57,11 @@
 
 #if HAVE_EXIF
 
+/* When EXIF_DEBUG is defined the module generates a lot of debug messages
+ * that help understanding what is going on. This can and should be used
+ * while extending the module as it shows if you are at the right position.
+ * You are always considered to have a copy of TIFF6.0 and EXIF 2.10 standard.
+ */
 #define EXIF_DEBUG
 
 #include "php_exif.h"
@@ -292,10 +297,10 @@ PHP_MINFO_FUNCTION(exif)
 
 /* }}} */
 
-/* {{{ exif_get16m
+/* {{{ php_ifd_get16m
    Get 16 bits motorola order (always) for jpeg header stuff.
 */
-static int exif_get16m(void *Short)
+static int php_ifd_get16m(void *Short)
 {
 	return (((uchar *)Short)[0] << 8) | ((uchar *)Short)[1];
 }
@@ -353,8 +358,8 @@ static void exif_process_SOFn (image_info_type *ImageInfo, uchar *Data, int mark
 	const char *process;
 
 	data_precision = Data[2];
-	ImageInfo->Height = exif_get16m(Data+3);
-	ImageInfo->Width = exif_get16m(Data+5);
+	ImageInfo->Height = php_ifd_get16m(Data+3);
+	ImageInfo->Width = php_ifd_get16m(Data+5);
 	num_components = Data[7];
 
 	if (num_components == 3) {
@@ -385,7 +390,7 @@ static void exif_process_SOFn (image_info_type *ImageInfo, uchar *Data, int mark
 /* {{{ format description defines
    Describes format descriptor
 */
-static int ExifBytesPerFormat[] = {0, 1, 1, 2, 4, 8, 1, 1, 2, 4, 8, 4, 8};
+static int php_tiff_bytes_per_format[] = {0, 1, 1, 2, 4, 8, 1, 1, 2, 4, 8, 4, 8};
 #define NUM_FORMATS 12
 
 #define FMT_BYTE       1
@@ -704,9 +709,9 @@ PHP_FUNCTION(exif_headername)
 }
 /* }}} */
 
-/* {{{ exif_get16u
+/* {{{ php_ifd_get16u
  * Convert a 16 bit unsigned value from file's native byte order */
-static int exif_get16u(void *Short, int MotorolaOrder)
+static int php_ifd_get16u(void *Short, int MotorolaOrder)
 {
 	if (MotorolaOrder) {
 		return (((uchar *)Short)[0] << 8) | ((uchar *)Short)[1];
@@ -716,9 +721,9 @@ static int exif_get16u(void *Short, int MotorolaOrder)
 }
 /* }}} */
 
-/* {{{ exif_get32s
+/* {{{ php_ifd_getexif_get32s
  * Convert a 32 bit signed value from file's native byte order */
-static int exif_get32s(void *Long, int MotorolaOrder)
+static int php_ifd_getexif_get32s(void *Long, int MotorolaOrder)
 {
 	if (MotorolaOrder) {
 		return  ((( char *)Long)[0] << 24) | (((uchar *)Long)[1] << 16)
@@ -730,11 +735,11 @@ static int exif_get32s(void *Long, int MotorolaOrder)
 }
 /* }}} */
 
-/* {{{ exif_get32u
+/* {{{ php_ifd_getexif_get32u
  * Convert a 32 bit unsigned value from file's native byte order */
-static unsigned exif_get32u(void *Long, int MotorolaOrder)
+static unsigned php_ifd_getexif_get32u(void *Long, int MotorolaOrder)
 {
-	return (unsigned)exif_get32s(Long, MotorolaOrder) & 0xffffffff;
+	return (unsigned)php_ifd_getexif_get32s(Long, MotorolaOrder) & 0xffffffff;
 }
 /* }}} */
 
@@ -749,16 +754,16 @@ static double exif_convert_any_format(void *ValuePtr, int Format, int MotorolaOr
 		case FMT_SBYTE:     Value = *(signed char *)ValuePtr;  break;
 		case FMT_BYTE:      Value = *(uchar *)ValuePtr;        break;
 
-		case FMT_USHORT:    Value = exif_get16u(ValuePtr, MotorolaOrder);          break;
-		case FMT_ULONG:     Value = exif_get32u(ValuePtr, MotorolaOrder);          break;
+		case FMT_USHORT:    Value = php_ifd_get16u(ValuePtr, MotorolaOrder);          break;
+		case FMT_ULONG:     Value = php_ifd_getexif_get32u(ValuePtr, MotorolaOrder);          break;
 
 		case FMT_URATIONAL:
 		case FMT_SRATIONAL:
 			{
 				int Num, Den;
 
-				Num = exif_get32s(ValuePtr, MotorolaOrder);
-				Den = exif_get32s(4+(char *)ValuePtr, MotorolaOrder);
+				Num = php_ifd_getexif_get32s(ValuePtr, MotorolaOrder);
+				Den = php_ifd_getexif_get32s(4+(char *)ValuePtr, MotorolaOrder);
 				if (Den == 0) {
 					Value = 0;
 				} else {
@@ -767,8 +772,8 @@ static double exif_convert_any_format(void *ValuePtr, int Format, int MotorolaOr
 				break;
 			}
 
-		case FMT_SSHORT:    Value = (signed short)exif_get16u(ValuePtr, MotorolaOrder);  break;
-		case FMT_SLONG:     Value = exif_get32s(ValuePtr, MotorolaOrder);                break;
+		case FMT_SSHORT:    Value = (signed short)php_ifd_get16u(ValuePtr, MotorolaOrder);  break;
+		case FMT_SLONG:     Value = php_ifd_getexif_get32s(ValuePtr, MotorolaOrder);                break;
 
 		/* Not sure if this is correct (never seen float used in Exif format) */
 		case FMT_SINGLE:    Value = (double)*(float *)ValuePtr;      break;
@@ -939,9 +944,9 @@ static void exif_process_IFD_TAG(image_info_type *ImageInfo, char *DirEntry, cha
 	size_t ByteCount;
 	unsigned OffsetVal;
 
-	Tag = exif_get16u(DirEntry, ImageInfo->MotorolaOrder);
-	Format = exif_get16u(DirEntry+2, ImageInfo->MotorolaOrder);
-	Components = exif_get32u(DirEntry+4, ImageInfo->MotorolaOrder);
+	Tag = php_ifd_get16u(DirEntry, ImageInfo->MotorolaOrder);
+	Format = php_ifd_get16u(DirEntry+2, ImageInfo->MotorolaOrder);
+	Components = php_ifd_getexif_get32u(DirEntry+4, ImageInfo->MotorolaOrder);
 
 	if ((Format-1) >= NUM_FORMATS) {
 		/* (-1) catches illegal zero case as unsigned underflows to positive large. */
@@ -949,10 +954,10 @@ static void exif_process_IFD_TAG(image_info_type *ImageInfo, char *DirEntry, cha
 		return;
 	}
 
-	ByteCount = Components * ExifBytesPerFormat[Format];
+	ByteCount = Components * php_tiff_bytes_per_format[Format];
 
 	if (ByteCount > 4) {
-		OffsetVal = exif_get32u(DirEntry+8, ImageInfo->MotorolaOrder);
+		OffsetVal = php_ifd_getexif_get32u(DirEntry+8, ImageInfo->MotorolaOrder);
 		/* If its bigger than 4 bytes, the dir entry contains an offset. */
 		if (OffsetVal+ByteCount > IFDlength) {
 			/* Bogus pointer offset and / or bytecount value */
@@ -1182,7 +1187,7 @@ static void exif_process_IFD_TAG(image_info_type *ImageInfo, char *DirEntry, cha
 						ImageInfo->sections_found |= FOUND_INTEROP;
 						break;
 				}
-				SubdirStart = OffsetBase + exif_get32u(ValuePtr, ImageInfo->MotorolaOrder);
+				SubdirStart = OffsetBase + php_ifd_getexif_get32u(ValuePtr, ImageInfo->MotorolaOrder);
 				if (SubdirStart < OffsetBase || SubdirStart > OffsetBase+IFDlength) {
 					php_error(E_WARNING, "Illegal IFD Pointer");
 					return;
@@ -1209,7 +1214,7 @@ static void exif_process_IFD_in_JPEG(image_info_type *ImageInfo, char *DirStart,
 
 	ImageInfo->sections_found |= FOUND_IFD0;
 
-	NumDirEntries = exif_get16u(DirStart, ImageInfo->MotorolaOrder);
+	NumDirEntries = php_ifd_get16u(DirStart, ImageInfo->MotorolaOrder);
 
 	if ((DirStart+2+NumDirEntries*12) > (OffsetBase+IFDlength)) {
 		php_error(E_WARNING, "Illegally sized directory");
@@ -1224,7 +1229,7 @@ static void exif_process_IFD_in_JPEG(image_info_type *ImageInfo, char *DirStart,
 	 * Hack to make it process IDF1 I hope
 	 * There are 2 IDFs, the second one holds the keys (0x0201 and 0x0202) to the thumbnail
 	 */
-	NextDirOffset = exif_get32u(DirStart+2+12*de, ImageInfo->MotorolaOrder);
+	NextDirOffset = php_ifd_getexif_get32u(DirStart+2+12*de, ImageInfo->MotorolaOrder);
 	if (NextDirOffset) {
 		if (OffsetBase + NextDirOffset < OffsetBase || OffsetBase + NextDirOffset > OffsetBase+IFDlength) {
 			php_error(E_WARNING, "Illegal directory offset");
@@ -1260,8 +1265,8 @@ static void exif_process_TIFF_in_JPEG(image_info_type *ImageInfo, char *CharBuf,
 	}
 
 	/* Check the next two values for correctness. */
-	if (exif_get16u(CharBuf+2, ImageInfo->MotorolaOrder) != 0x2a
-	  || exif_get32u(CharBuf+4, ImageInfo->MotorolaOrder) != 0x08) {
+	if (php_ifd_get16u(CharBuf+2, ImageInfo->MotorolaOrder) != 0x2a
+	  || php_ifd_getexif_get32u(CharBuf+4, ImageInfo->MotorolaOrder) != 0x08) {
 		php_error(E_WARNING, "Invalid TIFF start (1)");
 		return;
 	}
@@ -1507,7 +1512,7 @@ static int exif_process_IFD_in_TIFF(image_info_type *ImageInfo, FILE *infile, si
 		ImageInfo->sections[sn].Data = emalloc(ImageInfo->sections[sn].Size);
 		fseek(infile,dir_offset,SEEK_SET); /* we do not know the order of sections */
 		fread(ImageInfo->sections[sn].Data, 1, 2, infile);
-	    num_entries = exif_get16u(ImageInfo->sections[sn].Data, ImageInfo->MotorolaOrder);
+	    num_entries = php_ifd_get16u(ImageInfo->sections[sn].Data, ImageInfo->MotorolaOrder);
 		dir_size = 2/*num dir entries*/ +12/*length of entry*/*num_entries +4/* offset to next ifd (points to thumbnail or NULL)*/;
 		#ifdef EXIF_DEBUG
 		php_error(E_NOTICE,"Read from TIFF: filesize(x%04X), IFD dir(x%04X + x%04X), IFD entries(%d)", ImageInfo->FileSize, dir_offset, dir_size, num_entries);
@@ -1516,7 +1521,7 @@ static int exif_process_IFD_in_TIFF(image_info_type *ImageInfo, FILE *infile, si
 			ImageInfo->sections[sn].Size = dir_size;
 			ImageInfo->sections[sn].Data = erealloc(ImageInfo->sections[sn].Data,ImageInfo->sections[sn].Size);
 			fread(ImageInfo->sections[sn].Data+2, 1, dir_size-2, infile);
-			next_offset = exif_get32u(ImageInfo->sections[sn].Data + dir_size - 4, ImageInfo->MotorolaOrder);
+			next_offset = php_ifd_getexif_get32u(ImageInfo->sections[sn].Data + dir_size - 4, ImageInfo->MotorolaOrder);
 			#ifdef EXIF_DEBUG
 			php_error(E_NOTICE,"Read in TIFF done, next offset x%04X", next_offset);
 			#endif
@@ -1524,16 +1529,44 @@ static int exif_process_IFD_in_TIFF(image_info_type *ImageInfo, FILE *infile, si
 			ifd_size = dir_size;
 			for(i=0;i<num_entries;i++) {
 				dir_entry 	 = ImageInfo->sections[sn].Data+2+i*12;
-				entry_tag    = exif_get16u(dir_entry+0, ImageInfo->MotorolaOrder);
-				entry_type   = exif_get16u(dir_entry+2, ImageInfo->MotorolaOrder);
+				entry_tag    = php_ifd_get16u(dir_entry+0, ImageInfo->MotorolaOrder);
+				entry_type   = php_ifd_get16u(dir_entry+2, ImageInfo->MotorolaOrder);
 				if ( entry_type > NUM_FORMATS) {
 					php_error(E_WARNING,"Error in TIFF: Illegal format, suppose bytes");
 					entry_type = FMT_BYTE;
 				}
-				entry_length = exif_get32u(dir_entry+4, ImageInfo->MotorolaOrder) * ExifBytesPerFormat[entry_type];
+				entry_length = php_ifd_get32u(dir_entry+4, motorola_intel) * php_tiff_bytes_per_format[entry_type];
+				entry_length = php_ifd_getexif_get32u(dir_entry+4, ImageInfo->MotorolaOrder) * php_tiff_bytes_per_format[entry_type];
 				if ( entry_length > 4) {
-					entry_offset = exif_get32u(dir_entry+8, ImageInfo->MotorolaOrder);
+					entry_offset = php_ifd_getexif_get32u(dir_entry+8, ImageInfo->MotorolaOrder);
 					if ( entry_offset + entry_length > ifd_size) ifd_size = entry_offset + entry_length;
+				} else {
+					switch(entry_type) {
+						case TAG_FMT_USHORT:
+							entry_value  = php_ifd_get16u(dir_entry+8, ImageInfo->MotorolaOrder);
+							break;
+						case TAG_FMT_SSHORT:
+							entry_value  = php_ifd_get16s(dir_entry+8, ImageInfo->MotorolaOrder);
+							break;
+						case TAG_FMT_ULONG:
+							entry_value  = php_ifd_get32u(dir_entry+8, ImageInfo->MotorolaOrder);
+							break;
+						case TAG_FMT_SLONG:
+							entry_value  = php_ifd_get32s(dir_entry+8, ImageInfo->MotorolaOrder);
+							break;
+						default:
+						    continue;
+					}
+					switch(entry_tag) {
+						case TAG_IMAGEWIDTH:
+						case TAG_COMP_IMAGEWIDTH:
+							ImageInfo->Width  = entry_value;
+							break;
+						case TAG_IMAGEHEIGHT:
+						case TAG_COMP_IMAGEHEIGHT:
+							ImageInfo->Height = entry_value;
+							break;
+					}
 				}
 			}
 			ImageInfo->sections[sn].Size = ifd_size;
@@ -1557,9 +1590,9 @@ static int exif_process_IFD_in_TIFF(image_info_type *ImageInfo, FILE *infile, si
 				ImageInfo->sections_found |= FOUND_ANY_TAG;
 				for(i=0;i<num_entries;i++) {
 					dir_entry 	 = ImageInfo->sections[sn].Data+2+i*12;
-					entry_tag    = exif_get16u(dir_entry+0, ImageInfo->MotorolaOrder);
-					/*entry_type   = exif_get16u(dir_entry+2, ImageInfo->MotorolaOrder);*/
-					/*entry_length = exif_get32u(dir_entry+4, ImageInfo->MotorolaOrder);*/
+					entry_tag    = php_ifd_get16u(dir_entry+0, ImageInfo->MotorolaOrder);
+					/*entry_type   = php_ifd_get16u(dir_entry+2, ImageInfo->MotorolaOrder);*/
+					/*entry_length = php_ifd_getexif_get32u(dir_entry+4, ImageInfo->MotorolaOrder);*/
 					if (entry_tag == TAG_EXIF_IFD_POINTER ||
 					    entry_tag == TAG_INTEROP_IFD_POINTER ||
 					    entry_tag == TAG_GPS_IFD_POINTER
@@ -1576,7 +1609,7 @@ static int exif_process_IFD_in_TIFF(image_info_type *ImageInfo, FILE *infile, si
 								ImageInfo->sections_found |= FOUND_INTEROP;
 								break;
 						}
-						entry_offset = exif_get32u(dir_entry+8, ImageInfo->MotorolaOrder);
+						entry_offset = php_ifd_getexif_get32u(dir_entry+8, ImageInfo->MotorolaOrder);
 						#ifdef EXIF_DEBUG
 						php_error(E_NOTICE,"Found other IFD: %s at x%04X", exif_get_headername(entry_tag), entry_offset);
 						#endif
@@ -1874,14 +1907,14 @@ PHP_FUNCTION(read_exif_data)
 	add_assoc_string(return_value, "FileName", ImageInfo.FileName, 1);
 	add_assoc_long(return_value, "FileDateTime", ImageInfo.FileDateTime);
 	add_assoc_long(return_value, "FileSize", ImageInfo.FileSize);
+	add_assoc_string(return_value, "SectionsFound", sections_str, 1);
+	/* ifd0/comment/exif/gps/interop information */
 	if (ImageInfo.Width>0 &&  ImageInfo.Height>0) {
 		sprintf(tmp, "width=\"%d\" height=\"%d\"", ImageInfo.Width, ImageInfo.Height);
 		add_assoc_string(return_value, "html", tmp, 1);
+		add_assoc_long(return_value, "Height", ImageInfo.Height);
+		add_assoc_long(return_value, "Width", ImageInfo.Width);
 	}
-	add_assoc_string(return_value, "SectionsFound", sections_str, 1);
-	/* ifd0/comment/exif/gps/interop information */
-	add_assoc_long(return_value, "Height", ImageInfo.Height);
-	add_assoc_long(return_value, "Width", ImageInfo.Width);
 	add_assoc_long(return_value, "IsColor", ImageInfo.IsColor);
 	if (ImageInfo.CameraMake && ImageInfo.CameraMake[0]) {
 		add_assoc_string(return_value, "CameraMake", ImageInfo.CameraMake, 1);
