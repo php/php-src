@@ -416,16 +416,22 @@ static void filter_item_dtor(struct php_user_filter_data *fdat)
 PHP_FUNCTION(stream_get_filters)
 {
 	char *filter_name;
-	int filter_name_len = 0;
+	int key_flags, filter_name_len = 0;
+
+	if (ZEND_NUM_ARGS() != 0) {
+		WRONG_PARAM_COUNT;
+	}
 
 	array_init(return_value);
 
 	if (BG(user_filter_map)) {
 		for(zend_hash_internal_pointer_reset(BG(user_filter_map));
-			zend_hash_get_current_key_ex(BG(user_filter_map), &filter_name, &filter_name_len, NULL, 0, NULL) == HASH_KEY_IS_STRING;
+			(key_flags = zend_hash_get_current_key_ex(BG(user_filter_map), &filter_name, &filter_name_len, NULL, 0, NULL)) != HASH_KEY_NON_EXISTANT;
 			zend_hash_move_forward(BG(user_filter_map)))
-				add_next_index_string(return_value, filter_name, 1);
+				if (key_flags == HASH_KEY_IS_STRING)
+					add_next_index_stringl(return_value, filter_name, filter_name_len, 1);
 	}
+	/* It's okay to return an empty array if no filters are registered */
 }
 /* }}} */	
 

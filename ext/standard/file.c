@@ -633,7 +633,7 @@ PHP_FUNCTION(stream_get_wrappers)
 {
 	HashTable *url_stream_wrappers_hash;
 	char *stream_protocol;
-	int stream_protocol_len = 0;
+	int key_flags, stream_protocol_len = 0;
 
 	if (ZEND_NUM_ARGS() != 0) {
 		WRONG_PARAM_COUNT;
@@ -642,9 +642,10 @@ PHP_FUNCTION(stream_get_wrappers)
 	if (url_stream_wrappers_hash = php_stream_get_url_stream_wrappers_hash()) {
 		array_init(return_value);
 		for(zend_hash_internal_pointer_reset(url_stream_wrappers_hash);
-			zend_hash_get_current_key_ex(url_stream_wrappers_hash, &stream_protocol, &stream_protocol_len, NULL, 0, NULL) == HASH_KEY_IS_STRING;
+			(key_flags = zend_hash_get_current_key_ex(url_stream_wrappers_hash, &stream_protocol, &stream_protocol_len, NULL, 0, NULL)) != HASH_KEY_NON_EXISTANT;
 			zend_hash_move_forward(url_stream_wrappers_hash)) 
-				add_next_index_string(return_value,stream_protocol,1);
+				if (key_flags == HASH_KEY_IS_STRING)
+					add_next_index_stringl(return_value, stream_protocol, stream_protocol_len, 1);
 	} else {
 		RETURN_FALSE;
 	}
