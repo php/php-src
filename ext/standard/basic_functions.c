@@ -275,6 +275,7 @@ void test_class_startup(void)
 }
 #endif
 
+#undef sprintf
 
 function_entry basic_functions[] = {
 	PHP_FE(constant,														NULL)
