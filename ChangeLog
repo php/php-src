@@ -1,3 +1,75 @@
+2002-01-20  Edin Kadribasic  <edink@proventum.net>
+
+    * sapi/cgi/cgi_main.c:
+    Fixed bug #9041 and others in the same class (patch by pete.lee@ubs.com)
+
+2002-01-20  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * ext/standard/datetime.c:
+    - Fix crash with invalid localtime on Win32 systems.
+
+2002-01-20  Doug MacEachern  <dougm@covalent.net>
+
+    * sapi/apache2filter/sapi_apache2.c:
+    adjust to ap_get_brigade and input filter api changes
+
+2002-01-20  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * pear/Cache.php
+      pear/Cache.xml
+      pear/Makefile.in: Move Cache to /pear.
+
+    * pear/Makefile.in: Move Payment_Verisign to /pear.
+
+    * pear/Makefile.in
+      pear/Log.php:
+    Move Benchmark, Math, Numbers to /pear. Remove Log, it was already in /pear.
+
+2002-01-20  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/fbsql/php_fbsql.c: cut&paste errors in protos fixed
+
+    * ext/domxml/php_domxml.c: proto fix
+
+2002-01-20  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * TODO: Fixed by Sean Bright's commit.
+
+2002-01-20  Sean Bright  <elixer@erols.com>
+
+    * ext/db/db.c: Forgot to remove the return from a void function
+
+    * ext/db/db.c
+      ext/db/php_db.h:
+    These PHP3_* macros aren't defined in the code, so these haven't been doing
+    anything for some time now (at least since 4.0 was released).  So let's go
+    ahead and remove those.
+
+2002-01-20  Edin Kadribasic  <edink@proventum.net>
+
+    * TODO-4.2.txt: Removed entry implemented in cli sapi.
+
+    * main/.cvsignore
+      main/Makefile.in
+      sapi/cli/Makefile.in
+      acinclude.m4
+      configure.in
+      ext/ncurses/config.m4
+      ext/pcntl/config.m4
+      ext/readline/config.m4:
+    Modified the build system to make certain extensions (pcntl, ncurses,
+    pcntl) only with cgi/cli sapi's. This was done by adding 3rd optional
+    parameter to PHP_EXTENSION macro which should be set to "cli" if
+    the extension only makes sense for that class of api's.
+
+    * ext/readline/.cvsignore: Added missing entry to .cvsignore
+
+2002-01-20  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * header: Get rid of needless spaces
+
+    * README.CVS-RULES: Revert my last commit
+
 2002-01-19  Edin Kadribasic  <edink@proventum.net>
 
     * TODO: Removed two issues resolved by the introduction of sapi/cli.
