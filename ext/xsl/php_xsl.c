@@ -262,8 +262,7 @@ static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int t
 			obj = (dom_object *)zend_object_store_get_object(retval TSRMLS_CC);
 			nodep = dom_object_get_node(obj);
 			valuePush(ctxt, xmlXPathNewNodeSet(nodep));
-		}
-		else if (retval->type == IS_BOOL) {
+		} else if (retval->type == IS_BOOL) {
 			valuePush(ctxt, xmlXPathNewBoolean(retval->value.lval));
 		} else {
 			convert_to_string_ex(&retval);
@@ -278,14 +277,12 @@ static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int t
 	efree(args);
 }
 
-static void
-xsl_ext_function_string_php(xmlXPathParserContextPtr ctxt, int nargs)
+static void xsl_ext_function_string_php(xmlXPathParserContextPtr ctxt, int nargs)
 {
 	xsl_ext_function_php(ctxt, nargs, 1);
 }
 
-static void
-xsl_ext_function_object_php(xmlXPathParserContextPtr ctxt, int nargs)
+static void xsl_ext_function_object_php(xmlXPathParserContextPtr ctxt, int nargs)
 {
 	xsl_ext_function_php(ctxt, nargs, 2);
 }
@@ -369,7 +366,6 @@ PHP_MSHUTDOWN_FUNCTION(xsl)
 	UNREGISTER_INI_ENTRIES();
 	*/
 	xsltCleanupGlobals();
-	//xmlMemoryDump();
 
 	return SUCCESS;
 }
