@@ -392,7 +392,7 @@ static void php_sybase_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 				passwd = Z_STRVAL_PP(yypasswd);
 				charset = Z_STRVAL_PP(yycharset);
 				appname = Z_STRVAL_PP(yyappname);
-				hashed_details_length = Z_STRLEN_PP(yyhost)+Z_STRLEN_PP(yyuser)+Z_STRLEN_PP(yypasswd)+Z_STRLEN_P(yycharset)+Z_STRLEN_PP(yyappname)+6+5;
+				hashed_details_length = Z_STRLEN_PP(yyhost)+Z_STRLEN_PP(yyuser)+Z_STRLEN_PP(yypasswd)+Z_STRLEN_PP(yycharset)+Z_STRLEN_PP(yyappname)+6+5;
 				hashed_details = (char *) emalloc(hashed_details_length+1);
 				sprintf(hashed_details,"sybase_%s_%s_%s_%s_%s",Z_STRVAL_PP(yyhost),Z_STRVAL_PP(yyuser),Z_STRVAL_PP(yypasswd),Z_STRVAL_PP(yycharset),Z_STRVAL_PP(yyappname)); /* SAFE */
 			}
@@ -652,7 +652,7 @@ PHP_FUNCTION(sybase_select_db)
 		RETURN_FALSE;
 	}
 	
-	convert_to_string(db);
+	convert_to_string_ex(db);
 	
 	if (dbuse(sybase_ptr->link,Z_STRVAL_PP(db))==FAIL) {
 		/*php_error_docref(NULL TSRMLS_CC, E_WARNING,"Sybase:  Unable to select database:  %s",sybase_error(sybase));*/
@@ -950,7 +950,7 @@ PHP_FUNCTION(sybase_free_result)
 		WRONG_PARAM_COUNT;
 	}
 	
-	convert_to_long_ex(sybase_result_index);~
+	convert_to_long_ex(sybase_result_index);
 	if (Z_LVAL_PP(sybase_result_index)==0) {
 		RETURN_FALSE;
 	}
@@ -1323,7 +1323,7 @@ PHP_FUNCTION(sybase_result)
 			int i;
 
 			for (i=0; i<result->num_fields; i++) {
-				if (!strcasecmp(result->fields[i].name,Z_STRVAL_P(field))) {
+				if (!strcasecmp(result->fields[i].name,Z_STRVAL_PP(field))) {
 					field_offset = i;
 					break;
 				}
@@ -1354,7 +1354,7 @@ PHP_FUNCTION(sybase_result)
     Get number of affected rows in last query */
 PHP_FUNCTION(sybase_affected_rows)
 {
-	zval *sybase_link_index = NULL;
+	zval **sybase_link_index = NULL;
 	sybase_link *sybase_ptr = NULL;
 	int id                  = 0;
 	int type                = 0;
@@ -1364,7 +1364,7 @@ PHP_FUNCTION(sybase_affected_rows)
 			id = php_sybase_module.default_link;
 			break;
 		case 1:
-			if (zend_get_parameters_ex(ht, 1, &sybase_link_index) == FAILURE) {
+			if (zend_get_parameters_ex(1, &sybase_link_index) == FAILURE) {
 				RETURN_FALSE;
 			}
 			convert_to_long_ex(sybase_link_index);
