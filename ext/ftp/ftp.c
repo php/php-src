@@ -158,6 +158,8 @@ ftp_close(ftpbuf_t *ftp)
 		return NULL;
 	if (ftp->fd != -1)
 		closesocket(ftp->fd);
+	if (ftp->data) 
+		data_close(ftp->data);
 	ftp_gc(ftp);
 	free(ftp);
 	return NULL;
