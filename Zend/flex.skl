@@ -388,9 +388,14 @@ static int input YY_PROTO(( TSRMLS_D ));
 #endif
 
 #if YY_STACK_USED
+#define yy_start_stack_ptr SCNG(yy_start_stack_ptr)
+#define yy_start_stack_depth SCNG(yy_start_stack_depth)
+#define yy_start_stack SCNG(yy_start_stack)
+/*
 static int yy_start_stack_ptr = 0;
 static int yy_start_stack_depth = 0;
 static int *yy_start_stack = 0;
+*/
 #ifndef YY_NO_PUSH_STATE
 static void yy_push_state YY_PROTO(( int new_state TSRMLS_DC ));
 #endif
@@ -398,7 +403,7 @@ static void yy_push_state YY_PROTO(( int new_state TSRMLS_DC ));
 static void yy_pop_state YY_PROTO(( TSRMLS_D ));
 #endif
 #ifndef YY_NO_TOP_STATE
-static int yy_top_state YY_PROTO(( void ));
+static int yy_top_state YY_PROTO(( TSRMLS_D ));
 #endif
 
 #else
@@ -1495,7 +1500,7 @@ void yyFlexLexer::yy_pop_state(TSRMLS_D)
 
 #ifndef YY_NO_TOP_STATE
 %-
-static int yy_top_state()
+static int yy_top_state(TSRMLS_D)
 %+
 int yyFlexLexer::yy_top_state()
 %*

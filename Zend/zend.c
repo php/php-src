@@ -380,7 +380,9 @@ static void scanner_globals_ctor(zend_scanner_globals *scanner_globals_p TSRMLS_
 	scanner_globals_p->yy_out = NULL;
 	scanner_globals_p->_yy_more_flag = 0;
 	scanner_globals_p->_yy_more_len = 0;
-
+	scanner_globals_p->yy_start_stack_ptr = 0;
+	scanner_globals_p->yy_start_stack_depth = 0;
+	scanner_globals_p->yy_start_stack = 0;
 }
 
 
