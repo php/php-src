@@ -590,21 +590,21 @@ static void php_session_save_current_state(PSLS_D)
 {
 	char *val;
 	int vallen;
-	int ret;
+	int ret = FAILURE;
 	char *variable;
 	ulong num_key;
 	PLS_FETCH();
 	
 	if (!PG(register_globals)) {
-	  if(!PS(http_session_vars)) {
-		return;
-	  }
+		if (!PS(http_session_vars)) {
+			return;
+		}
 
-	  for (zend_hash_internal_pointer_reset(Z_ARRVAL_P(PS(http_session_vars)));
-		   zend_hash_get_current_key(Z_ARRVAL_P(PS(http_session_vars)), &variable, &num_key) == HASH_KEY_IS_STRING;
-		   zend_hash_move_forward(Z_ARRVAL_P(PS(http_session_vars)))) {
-		PS_ADD_VAR(variable);
-	  }
+		for (zend_hash_internal_pointer_reset(Z_ARRVAL_P(PS(http_session_vars)));
+				zend_hash_get_current_key(Z_ARRVAL_P(PS(http_session_vars)), &variable, &num_key) == HASH_KEY_IS_STRING;
+				zend_hash_move_forward(Z_ARRVAL_P(PS(http_session_vars)))) {
+			PS_ADD_VAR(variable);
+		}
 	}
 
 	if (PS(mod_data)) {
