@@ -3513,6 +3513,7 @@ again:
 void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify_handlers TSRMLS_DC)
 {
 	zend_bool persistent_hashes = (ce->type == ZEND_INTERNAL_CLASS) ? 1 : 0;
+	dtor_func_t zval_ptr_dtor_func = ((persistent_hashes) ? ZVAL_INTERNAL_PTR_DTOR : ZVAL_PTR_DTOR);
 
 	ce->refcount = 1;
 	ce->constants_updated = 0;
@@ -3521,7 +3522,7 @@ void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify_handlers
 	ce->doc_comment = NULL;
 	ce->doc_comment_len = 0;
 
-	zend_hash_init_ex(&ce->default_properties, 0, NULL, persistent_hashes ? ZVAL_INTERNAL_PTR_DTOR : ZVAL_PTR_DTOR, persistent_hashes, 0);
+	zend_hash_init_ex(&ce->default_properties, 0, NULL, zval_ptr_dtor_func, persistent_hashes, 0);
 	zend_hash_init_ex(&ce->properties_info, 0, NULL, (dtor_func_t) (persistent_hashes ? zend_destroy_property_info_internal : zend_destroy_property_info), persistent_hashes, 0);
 
 	if (persistent_hashes) {
@@ -3529,8 +3530,9 @@ void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify_handlers
 	} else {
 		ALLOC_HASHTABLE(ce->static_members);
 	}
-	zend_hash_init_ex(ce->static_members, 0, NULL, ZVAL_PTR_DTOR, persistent_hashes, 0);
-	zend_hash_init_ex(&ce->constants_table, 0, NULL, ZVAL_PTR_DTOR, persistent_hashes, 0);
+
+	zend_hash_init_ex(ce->static_members, 0, NULL, zval_ptr_dtor_func, persistent_hashes, 0);
+	zend_hash_init_ex(&ce->constants_table, 0, NULL, zval_ptr_dtor_func, persistent_hashes, 0);
 	zend_hash_init_ex(&ce->function_table, 0, NULL, ZEND_FUNCTION_DTOR, persistent_hashes, 0);
 
 	if (nullify_handlers) {
