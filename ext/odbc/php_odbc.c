@@ -1612,7 +1612,7 @@ PHP_FUNCTION(odbc_fetch_into)
 				if (rc == SQL_SUCCESS_WITH_INFO) {
 					Z_STRLEN_P(tmp) = result->longreadlen;
 				} else if (result->values[i].vallen == SQL_NULL_DATA) {
-					Z_STRVAL_P(tmp) = empty_string;
+					Z_STRVAL_P(tmp) = IS_NULL;
 					break;
 				} else {
 					Z_STRLEN_P(tmp) = result->values[i].vallen;
@@ -1622,7 +1622,7 @@ PHP_FUNCTION(odbc_fetch_into)
 
 			default:
 				if (result->values[i].vallen == SQL_NULL_DATA) {
-					Z_STRVAL_P(tmp) = empty_string;
+					Z_STRVAL_P(tmp) = IS_NULL;
 					break;
 				}
 				Z_STRLEN_P(tmp) = result->values[i].vallen;
