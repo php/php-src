@@ -566,6 +566,39 @@ static PHP_METHOD(PDOStatement, rowCount)
 }
 /* }}} */
 
+/* {{{ proto int PDOStatement::errorCode()
+   Fetch the error code associated with the last operation on the statement handle */
+static PHP_METHOD(PDOStatement, errorCode)
+{
+	pdo_stmt_t *stmt = (pdo_stmt_t*)zend_object_store_get_object(getThis() TSRMLS_CC);
+
+	if (ZEND_NUM_ARGS()) {
+		RETURN_FALSE;
+	}
+
+	RETURN_LONG(stmt->error_code);
+}
+/* }}} */
+
+/* {{{ proto int PDOStatement::errorInfo()
+   Fetch extended error information associated with the last operation on the statement handle */
+static PHP_METHOD(PDOStatement, errorInfo)
+{
+	pdo_stmt_t *stmt = (pdo_stmt_t*)zend_object_store_get_object(getThis() TSRMLS_CC);
+
+	if (ZEND_NUM_ARGS()) {
+		RETURN_FALSE;
+	}
+
+	array_init(return_value);
+	add_next_index_long(return_value, stmt->error_code);
+
+	if (stmt->dbh->methods->fetch_err) {
+		stmt->dbh->methods->fetch_err(stmt->dbh, stmt, return_value TSRMLS_CC);
+	}
+}
+/* }}} */
+
 
 
 function_entry pdo_dbstmt_functions[] = {
@@ -576,6 +609,8 @@ function_entry pdo_dbstmt_functions[] = {
 	PHP_ME(PDOStatement, rowCount,		NULL,					ZEND_ACC_PUBLIC)
 	PHP_ME(PDOStatement, fetchSingle,		NULL,					ZEND_ACC_PUBLIC)
 	PHP_ME(PDOStatement, fetchAll,		NULL,					ZEND_ACC_PUBLIC)
+	PHP_ME(PDOStatement, errorCode,		NULL,					ZEND_ACC_PUBLIC)
+	PHP_ME(PDOStatement, errorInfo,		NULL,					ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 
