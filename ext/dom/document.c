@@ -700,7 +700,7 @@ PHP_FUNCTION(dom_document_get_elements_by_tag_name)
 	ctxp = xmlXPathNewContext(docp);
 
 	ctxp->node = NULL;
-	str = (char*) emalloc((name_len+3) * sizeof(char)) ;
+	str = (char*) safe_emalloc((name_len+3), sizeof(char), 0) ;
 	sprintf(str ,"//%s",name);
 
 	xpathobjp = xmlXPathEval(str, ctxp);

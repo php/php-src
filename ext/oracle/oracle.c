@@ -1650,7 +1650,7 @@ ora_describe_define(oraCursor * cursor)
 	}
 
 	if (cursor->ncols > 0){
-		cursor->columns = (oraColumn *) emalloc(sizeof(oraColumn) * cursor->ncols);
+		cursor->columns = (oraColumn *) safe_emalloc(sizeof(oraColumn), cursor->ncols, 0);
 		memset(cursor->columns,0,sizeof(oraColumn) * cursor->ncols);
 	}
 

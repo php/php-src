@@ -827,13 +827,13 @@ PHP_FUNCTION(sybase_query)
 		RETURN_TRUE;
 	}
 	
-	column_types = (int *) emalloc(sizeof(int) * num_fields);
+	column_types = (int *) safe_emalloc(sizeof(int), num_fields, 0);
 	for (i=0; i<num_fields; i++) {
 		column_types[i] = coltype(i+1);
 	}
 	
 	result = (sybase_result *) emalloc(sizeof(sybase_result));
-	result->data = (pval ***) emalloc(sizeof(pval **)*SYBASE_ROWS_BLOCK);
+	result->data = (pval ***) safe_emalloc(sizeof(pval **), SYBASE_ROWS_BLOCK, 0);
 	result->sybase_ptr = sybase_ptr;
 	result->cur_field=result->cur_row=result->num_rows=0;
 	result->num_fields = num_fields;
@@ -844,7 +844,7 @@ PHP_FUNCTION(sybase_query)
 		if (result->num_rows > blocks_initialized*SYBASE_ROWS_BLOCK) {
 			result->data = (pval ***) erealloc(result->data,sizeof(pval **)*SYBASE_ROWS_BLOCK*(++blocks_initialized));
 		}
-		result->data[i] = (pval **) emalloc(sizeof(pval *)*num_fields);
+		result->data[i] = (pval **) safe_emalloc(sizeof(pval *), num_fields, 0);
 		for (j=1; j<=num_fields; j++) {
 			php_sybase_get_column_content(sybase_ptr, j, &result->data[i][j-1], column_types[j-1]);
 			if (!php_sybase_module.compatability_mode) {
@@ -862,7 +862,7 @@ PHP_FUNCTION(sybase_query)
 	}
 	result->num_rows = DBCOUNT(sybase_ptr->link);
 	
-	result->fields = (sybase_field *) emalloc(sizeof(sybase_field)*num_fields);
+	result->fields = (sybase_field *) safe_emalloc(sizeof(sybase_field), num_fields, 0);
 	j=0;
 	for (i=0; i<num_fields; i++) {
 		char *fname = dbcolname(sybase_ptr->link,i+1);

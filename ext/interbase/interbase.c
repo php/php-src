@@ -799,7 +799,7 @@ static void _php_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		WRONG_PARAM_COUNT;
 	}
 	
-	args = (zval ***) emalloc(sizeof(zval **) * ZEND_NUM_ARGS());
+	args = (zval ***) safe_emalloc(sizeof(zval **), ZEND_NUM_ARGS());
 	if (zend_get_parameters_array_ex(ZEND_NUM_ARGS(), args) == FAILURE) {
 		efree(args);
 		RETURN_FALSE;
@@ -1084,7 +1084,7 @@ static int _php_ibase_alloc_array(ibase_array **ib_arrayp, int *array_cntp, XSQL
 
 	if (ar_cnt) {	  /* have  arrays ? */
 		*array_cntp = ar_cnt;
-		IB_ARRAY = emalloc(sizeof(ibase_array)*ar_cnt);
+		IB_ARRAY = safe_emalloc(sizeof(ibase_array), ar_cnt, 0);
 		ar_cnt = 0;
 		var = sqlda->sqlvar;
 		for (i = 0; i < sqlda->sqld; i++, var++) {
@@ -1471,10 +1471,10 @@ static void _php_ibase_alloc_xsqlda(XSQLDA *sqlda)
 	for (i = 0; i < sqlda->sqld; i++, var++) {
 		switch (var->sqltype & ~1) {
 			case SQL_TEXT:
-				var->sqldata = emalloc(sizeof(char) * (var->sqllen));
+				var->sqldata = safe_emalloc(sizeof(char), (var->sqllen), 0);
 				break;
 			case SQL_VARYING:
-				var->sqldata = emalloc(sizeof(char) * (var->sqllen + sizeof(short)));
+				var->sqldata = safe_emalloc(sizeof(char), (var->sqllen + sizeof(short)), 0);
 				break;
 			case SQL_SHORT:
 				var->sqldata = emalloc(sizeof(short));
@@ -1549,7 +1549,7 @@ static int _php_ibase_exec(ibase_result **ib_resultp, ibase_query *ib_query, int
 		_php_ibase_alloc_xsqlda(out_sqlda);
 
 		if (ib_query->out_array) {
-			IB_RESULT->out_array = emalloc(sizeof(ibase_array) * ib_query->out_array_cnt);
+			IB_RESULT->out_array = safe_emalloc(sizeof(ibase_array), ib_query->out_array_cnt, 0);
 			memcpy(IB_RESULT->out_array, ib_query->out_array, sizeof(ibase_array) * ib_query->out_array_cnt);
 		} else {
 			IB_RESULT->out_array = NULL;
@@ -1564,7 +1564,7 @@ static int _php_ibase_exec(ibase_result **ib_resultp, ibase_query *ib_query, int
 		}
 		in_sqlda = emalloc(XSQLDA_LENGTH(ib_query->in_sqlda->sqld));
 		memcpy(in_sqlda, ib_query->in_sqlda, XSQLDA_LENGTH(ib_query->in_sqlda->sqld));
-		bind_buf = emalloc(sizeof(BIND_BUF) * ib_query->in_sqlda->sqld);
+		bind_buf = safe_emalloc(sizeof(BIND_BUF), ib_query->in_sqlda->sqld, 0);
 		if (_php_ibase_bind(in_sqlda, args, bind_buf, ib_query TSRMLS_CC) == FAILURE) {
 			IBDEBUG("Could not bind input XSQLDA");
 			goto _php_ibase_exec_error;
@@ -1720,7 +1720,7 @@ PHP_FUNCTION(ibase_trans)
 	}
 
 	/* register the transaction in our own data structures */
-	ib_trans = (ibase_trans *) emalloc(sizeof(ibase_trans) + (link_cnt-1)*sizeof(ibase_db_link *));
+	ib_trans = (ibase_trans *) safe_emalloc((link_cnt-1), sizeof(ibase_db_link *), sizeof(ibase_trans));
 	ib_trans->handle = tr_handle;
 	ib_trans->link_cnt = link_cnt;
 	ib_trans->affected_rows = 0;
@@ -2261,7 +2261,7 @@ static int _php_ibase_var_zval(zval *val, void *data, int type, int len, int sca
 			data = ((IBASE_VCHAR *) data)->var_str;
 			/* fallout */
 		case SQL_TEXT:
-			Z_STRVAL_P(val) = (char *) emalloc(sizeof(char) * (len + 1));
+			Z_STRVAL_P(val) = (char *) safe_emalloc(sizeof(char), (len + 1), 0);
 			memcpy(Z_STRVAL_P(val), data, len);
 			Z_STRVAL_P(val)[len] = '\0';
 			if (PG(magic_quotes_runtime)) {
@@ -2894,7 +2894,7 @@ PHP_FUNCTION(ibase_timefmt)
 		WRONG_PARAM_COUNT;
 	}
 	
-	args = (zval ***) emalloc(sizeof(zval **) * ZEND_NUM_ARGS());
+	args = (zval ***) safe_emalloc(sizeof(zval **), ZEND_NUM_ARGS(), 0);
 	if (zend_get_parameters_array_ex(ZEND_NUM_ARGS(), args) == FAILURE) {
 		efree(args);
 		RETURN_FALSE;

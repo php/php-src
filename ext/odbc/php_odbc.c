@@ -634,7 +634,7 @@ int odbc_bindcols(odbc_result *result TSRMLS_DC)
 	SWORD       colnamelen; /* Not used */
 	SDWORD      displaysize;
 
-	result->values = (odbc_result_value *) emalloc(sizeof(odbc_result_value)*result->numcols);
+	result->values = (odbc_result_value *) safe_emalloc(sizeof(odbc_result_value), result->numcols, 0);
 
 	result->longreadlen = ODBCG(defaultlrl);
 	result->binmode = ODBCG(defaultbinmode);
@@ -969,7 +969,7 @@ PHP_FUNCTION(odbc_execute)
 		}
 
 		zend_hash_internal_pointer_reset(Z_ARRVAL_PP(pv_param_arr));
-		params = (params_t *)emalloc(sizeof(params_t) * result->numparams);
+		params = (params_t *)safe_emalloc(sizeof(params_t), result->numparams, 0);
 		
 		for(i = 1; i <= result->numparams; i++) {
 			if (zend_hash_get_current_data(Z_ARRVAL_PP(pv_param_arr), (void **) &tmp) == FAILURE) {

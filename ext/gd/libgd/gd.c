@@ -1873,7 +1873,7 @@ void gdImageFill(gdImagePtr im, int x, int y, int nc)
 	oc = gdImageGetPixel(im, x, y);
 	if (oc==nc || x<0 || x>wx2 || y<0 || y>wy2) return;
 
-	stack = (struct seg *)emalloc(sizeof(struct seg) * ((int)(im->sy*im->sx)/4)+1);
+	stack = (struct seg *)safe_emalloc(sizeof(struct seg), ((int)(im->sy*im->sx)/4), 1);
 	sp = stack;
 
 	/* required! */
@@ -1938,7 +1938,7 @@ void _gdImageFillTiled(gdImagePtr im, int x, int y, int nc)
 		pts[i] = (int *) ecalloc(im->sx, sizeof(int));
 	}
 
-	stack = (struct seg *)emalloc(sizeof(struct seg) * ((int)(im->sy*im->sx)/4)+1);
+	stack = (struct seg *)safe_emalloc(sizeof(struct seg), ((int)(im->sy*im->sx)/4), 1);
 	sp = stack;
 
 	oc = gdImageGetPixel(im, x, y);

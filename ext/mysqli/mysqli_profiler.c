@@ -104,8 +104,8 @@ int php_mysqli_profiler_explain(PR_EXPLAIN *explain, PR_HEADER *header, MYSQL *m
 
 	explain->columns = mysql_num_fields(res);
 
-	explain->row = (PR_ROW *)emalloc(sizeof(PR_ROW) * explain->exp_cnt);
-	explain->fields = (char **)emalloc(sizeof(char *) * explain->columns);
+	explain->row = (PR_ROW *)safe_emalloc(sizeof(PR_ROW), explain->exp_cnt, 0);
+	explain->fields = (char **)safe_emalloc(sizeof(char *), explain->columns, 0);
 
 	fields = mysql_fetch_fields(res);
 
@@ -114,7 +114,7 @@ int php_mysqli_profiler_explain(PR_EXPLAIN *explain, PR_HEADER *header, MYSQL *m
 	}
 
 	for (i=0; i < explain->exp_cnt; i++) {
-		explain->row[i].value = (char **)emalloc(sizeof(char *) * explain->columns);
+		explain->row[i].value = (char **)safe_emalloc(sizeof(char *), explain->columns, 0);
 		row = mysql_fetch_row(res);
 		for (j=0; j < explain->columns; j++) {
 			explain->row[i].value[j] = my_estrdup(row[j]); 

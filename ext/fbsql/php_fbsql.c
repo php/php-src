@@ -2349,7 +2349,7 @@ void phpfbColumnAsString(PHPFBResult* result, int column, void* data , int* leng
 				*length = l*2+3+1;
 				if (value)
 				{
-					char*        r = emalloc(l*2+3+1);
+					char*        r = safe_emalloc(l, 2, 4);
 					r[0] = 'X';
 					r[1] = '\'';
 					for (i = 0; i < nBits / 8; i++)
@@ -2371,7 +2371,7 @@ void phpfbColumnAsString(PHPFBResult* result, int column, void* data , int* leng
 				*length = l*2+3+1;
 				if (value)
 				{
-					char*        r = emalloc(l*2+3+1);
+					char*        r = safe_emalloc(l, 2, 1);
 					r[0] = 'B';
 					r[1] = '\'';
 					for (i = 0; i < nBits; i++)

@@ -1635,7 +1635,7 @@ ftp_genlist(ftpbuf_t *ftp, const char *cmd, const char *path TSRMLS_DC)
 
 	rewind(tmpfp);
 
-	ret = emalloc((lines + 1) * sizeof(char**) + size * sizeof(char*));
+	ret = safe_emalloc((lines + 1), sizeof(char**), size * sizeof(char*));
 
 	entry = ret;
 	text = (char*) (ret + lines + 1);

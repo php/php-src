@@ -50,7 +50,7 @@ PHPAPI int php_select(php_socket_t max_fd, fd_set *rfds, fd_set *wfds, fd_set *e
 		return 0;
 	}
 
-	handles = (HANDLE*)emalloc((fd_count + sock_count) * sizeof(HANDLE));
+	handles = (HANDLE*)safe_emalloc((fd_count + sock_count), sizeof(HANDLE), 0);
 
 	/* populate the events and handles arrays */
 	f = 0;

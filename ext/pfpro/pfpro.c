@@ -208,7 +208,7 @@ PHP_FUNCTION(pfpro_process_raw)
 		WRONG_PARAM_COUNT;
 	}
 
-	args = (zval ***) emalloc(sizeof(zval **) * ZEND_NUM_ARGS());
+	args = (zval ***) safe_emalloc(sizeof(zval **), ZEND_NUM_ARGS(), 0);
 
 	if (zend_get_parameters_array_ex(ZEND_NUM_ARGS(), args) == FAILURE) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to read parameters in pfpro_process_raw()");
@@ -325,7 +325,7 @@ PHP_FUNCTION(pfpro_process)
 		WRONG_PARAM_COUNT;
 	}
 
-	args = (zval ***) emalloc(sizeof(zval **) * ZEND_NUM_ARGS());
+	args = (zval ***) safe_emalloc(sizeof(zval **), ZEND_NUM_ARGS(), 0);
 
 	if (zend_get_parameters_array_ex(ZEND_NUM_ARGS(), args) == FAILURE) {
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Unable to read parameters in pfpro_process()");

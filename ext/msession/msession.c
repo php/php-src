@@ -918,7 +918,7 @@ PHP_FUNCTION(msession_set_array)
 
 	countpair = zend_hash_num_elements(htTuples);
 
-	pairs = (char **)emalloc(sizeof(char *) * countpair * 2);
+	pairs = (char **)safe_emalloc(sizeof(char *), countpair * 2, 0);
 
 	ELOG("have pairs");
 

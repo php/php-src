@@ -407,7 +407,7 @@ PHP_FUNCTION(dom_element_get_elements_by_tag_name)
 	ctxp = xmlXPathNewContext(docp);
 
 	ctxp->node = nodep;
-	str = (char*) emalloc((name_len+13) * sizeof(char)) ;
+	str = (char*) safe_emalloc((name_len+13), sizeof(char), 0) ;
 	sprintf(str ,"descendant::%s",name);
 
 	xpathobjp = xmlXPathEval(str, ctxp);
