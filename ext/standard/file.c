@@ -219,13 +219,13 @@ static int flock_values[] = { LOCK_SH, LOCK_EX, LOCK_UN };
 
 PHP_FUNCTION(flock)
 {
-    zval **arg1, **arg2, **arg3;
-    int fd, act, ret, arg_count = ZEND_NUM_ARGS();
+	zval **arg1, **arg2, **arg3;
+	int fd, act, ret, arg_count = ZEND_NUM_ARGS();
 	php_stream *stream;
 
-    if (arg_count < 2 || arg_count > 3 || zend_get_parameters_ex(arg_count, &arg1, &arg2, &arg3) == FAILURE) {
-        WRONG_PARAM_COUNT;
-    }
+	if (arg_count < 2 || arg_count > 3 || zend_get_parameters_ex(arg_count, &arg1, &arg2, &arg3) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
 
 	php_stream_from_zval(stream, arg1);
 
@@ -235,22 +235,22 @@ PHP_FUNCTION(flock)
 
 	convert_to_long_ex(arg2);
 
-    act = Z_LVAL_PP(arg2) & 3;
-    if (act < 1 || act > 3) {
+	act = Z_LVAL_PP(arg2) & 3;
+	if (act < 1 || act > 3) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Illegal operation argument");
 		RETURN_FALSE;
-    }
+	}
 
-    /* flock_values contains all possible actions
-       if (arg2 & 4) we won't block on the lock */
-    act = flock_values[act - 1] | (Z_LVAL_PP(arg2) & 4 ? LOCK_NB : 0);
-    if ((ret=flock(fd, act)) == -1) {
-        RETURN_FALSE;
-    }
+	/* flock_values contains all possible actions
+	   if (arg2 & 4) we won't block on the lock */
+	act = flock_values[act - 1] | (Z_LVAL_PP(arg2) & 4 ? LOCK_NB : 0);
+	if ((ret=flock(fd, act)) == -1) {
+		RETURN_FALSE;
+	}
 	if(ret == -1 && errno == EWOULDBLOCK && arg_count == 3) {
 		ZVAL_LONG(*arg3, 1);
 	}
-    RETURN_TRUE;
+	RETURN_TRUE;
 }
 
 /* }}} */
@@ -584,7 +584,7 @@ PHP_NAMED_FUNCTION(php_if_tmpfile)
 /* }}} */
 
 /* {{{ proto resource stream_get_meta_data(resource fp)
-    Retrieves header/meta data from streams/file pointers */
+   Retrieves header/meta data from streams/file pointers */
 PHP_FUNCTION(stream_get_meta_data)
 {
 	zval **arg1;
@@ -1435,10 +1435,10 @@ PHPAPI PHP_FUNCTION(fgetss)
 
 	convert_to_long_ex(bytes);
 	len = Z_LVAL_PP(bytes);
-    if (len < 0) {
+	if (len < 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length parameter may not be negative");
 		RETURN_FALSE;
-    }
+	}
 
 	buf = safe_emalloc(sizeof(char), (len + 1), 0);
 	/*needed because recv doesnt set null char at end*/
@@ -1675,7 +1675,7 @@ PHPAPI PHP_FUNCTION(fseek)
 	php_stream *stream;
 
 	if (argcount < 2 || argcount > 3 ||
-	    zend_get_parameters_ex(argcount, &arg1, &arg2, &arg3) == FAILURE) {
+		zend_get_parameters_ex(argcount, &arg1, &arg2, &arg3) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -1954,7 +1954,7 @@ PHP_NAMED_FUNCTION(php_if_fstat)
 	php_stream_statbuf stat_ssb;
 	
 	char *stat_sb_names[13]={"dev", "ino", "mode", "nlink", "uid", "gid", "rdev",
-			      "size", "atime", "mtime", "ctime", "blksize", "blocks"};
+				  "size", "atime", "mtime", "ctime", "blksize", "blocks"};
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &fp) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -2100,10 +2100,10 @@ PHPAPI PHP_FUNCTION(fread)
 
 	convert_to_long_ex(arg2);
 	len = Z_LVAL_PP(arg2);
-    if (len < 0) {
+	if (len < 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length parameter may not be negative");
 		RETURN_FALSE;
-    }
+	}
 
 	Z_STRVAL_P(return_value) = emalloc(len + 1);
 	Z_STRLEN_P(return_value) = php_stream_read(stream, Z_STRVAL_P(return_value), len);
@@ -2378,24 +2378,24 @@ php_meta_tags_token php_next_meta_token(php_meta_tags_data *md TSRMLS_DC)
 			md->ulc = 0;
 		}
 
-        switch (ch) {
-        case '<':
-            return TOK_OPENTAG;
-            break;
-        case '>':
-            return TOK_CLOSETAG;
-            break;
-        case '=':
-            return TOK_EQUAL;
-            break;
-        case '/':
-            return TOK_SLASH;
-            break;
-        case '\'':
-        case '"':
-            compliment = ch;
-            md->token_len = 0;
-            while (!php_stream_eof(md->stream) &&
+		switch (ch) {
+		case '<':
+			return TOK_OPENTAG;
+			break;
+		case '>':
+			return TOK_CLOSETAG;
+			break;
+		case '=':
+			return TOK_EQUAL;
+			break;
+		case '/':
+			return TOK_SLASH;
+			break;
+		case '\'':
+		case '"':
+			compliment = ch;
+			md->token_len = 0;
+			while (!php_stream_eof(md->stream) &&
 				   (ch = php_stream_getc(md->stream)) &&
 				   ch != compliment && ch != '<' && ch != '>') {
 
@@ -2424,12 +2424,12 @@ php_meta_tags_token php_next_meta_token(php_meta_tags_data *md TSRMLS_DC)
 		case '\t':
 			break;
 		case ' ':
-            return TOK_SPACE;
-            break;
-        default:
-            if (isalnum(ch)) {
-                md->token_len = 0;
-                buff[(md->token_len)++] = ch;
+			return TOK_SPACE;
+			break;
+		default:
+			if (isalnum(ch)) {
+				md->token_len = 0;
+				buff[(md->token_len)++] = ch;
 				while (!php_stream_eof(md->stream) &&
 					   (ch = php_stream_getc(md->stream)) &&
 					   (isalnum(ch) || strchr(PHP_META_HTML401_CHARS, ch))) {
@@ -2441,13 +2441,13 @@ php_meta_tags_token php_next_meta_token(php_meta_tags_data *md TSRMLS_DC)
 				}
 
 				/* This is ugly, but we have to replace ungetc */
-                if (!isalpha(ch) && ch != '-') {
+				if (!isalpha(ch) && ch != '-') {
 					md->ulc = 1;
 					md->lc  = ch;
 				}
 
-                md->token_data = (char *) emalloc(md->token_len + 1);
-                memcpy(md->token_data, buff, md->token_len+1);
+				md->token_data = (char *) emalloc(md->token_len + 1);
+				memcpy(md->token_data, buff, md->token_len+1);
 
 				return TOK_ID;
 			} else {
