@@ -256,7 +256,6 @@ EXTENSION:           mcrypt
 PRIMARY MAINTAINER:  Sascha Schumann <sascha@schumann.cx>
 MAINTENANCE:         Maintained
 STATUS:              Working
-COMMENT:             Currently working only with libmcrypt 2.7.7 and earlier
 -------------------------------------------------------------------------------
 EXTENSION:           mhash
 PRIMARY MAINTAINER:  Sascha Schumann <sascha@schumann.cx>
