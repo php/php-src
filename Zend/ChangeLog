@@ -1,3 +1,32 @@
+2002-09-15  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * zend_highlight.c: Make zend actually strip comments. Bug #18151
+
+    * zend.c:
+    Make zend return a proper exit error code when it encounters a parse error.
+
+2002-09-15  Andi Gutmans  <andi@zend.com>
+
+    * zend_compile.c:
+    - Hopefully fix problem with __autoload not working well with inherited classes.
+    - There might still be some weird situations I haven't thought of.
+
+    * zend_list.c
+      zend_execute.c: - WS fix - "while (" instead of "while("
+
+    * zend_execute_API.c
+      zend_ini.c
+      zend_list.c
+      zend_object_handlers.c
+      zend_objects_API.c
+      zend_operators.c
+      zend_API.c
+      zend_builtin_functions.c
+      zend_compile.c
+      zend_execute.c: - WS - Always use "if (" and not "if("
+
+    * zend_execute_API.c: - WS
+
 2002-09-10  Stanislav Malyshev  <stas@zend.com>
 
     * zend_execute_API.c

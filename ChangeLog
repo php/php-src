@@ -1,3 +1,27 @@
+2002-09-15  Tal Peer  <tal@kaktos.co.il>
+
+    * ext/fribidi/fribidi.c:
+    * More work on returning errors properly and freeing resources
+
+2002-09-15  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * win32/php4dllts.dsp: For a change, Sebastian makes Andi happy. :-)
+
+2002-09-15  Tal Peer  <tal@kaktos.co.il>
+
+    * ext/fribidi/config.m4
+      ext/fribidi/fribidi.c
+      ext/fribidi/php_fribidi.h:
+    *Fixed compilation errors and enhanced the code
+
+2002-09-15  Jon Parise  <jon@csh.rit.edu>
+
+    * ext/qtdom/config.m4: Line up the 'configure --help' output.
+
+2002-09-15  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * NEWS: PCRE news
+
 2002-09-14  Wez Furlong  <wez.php@thebrainroom.net>
 
     * ext/pcre/pcrelib/doc/pcregrep.txt
