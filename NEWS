@@ -2,6 +2,8 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.0 Release
+- NULL values are now preserved in the return value of mysql_fetch_array()
+- and mysql_fetch_object(). (Andrei)
 - InterBase module finally ported from PHP3 to PHP4. Full support for
   InterBase 6. (Jouni)
 - Add swf_definepoly for drawing polygons to the SWF functions. (Sterling)
