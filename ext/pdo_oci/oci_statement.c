@@ -32,17 +32,15 @@
 
 #define STMT_CALL(name, params)	\
 	S->last_err = name params; \
-	S->last_err = _oci_error(S->err, #name, S->last_err, __FILE__, __LINE__ TSRMLS_CC); \
+	S->last_err = _oci_error(S->err, stmt->dbh, stmt, #name, S->last_err, __FILE__, __LINE__ TSRMLS_CC); \
 	if (S->last_err) { \
-		oci_handle_error(stmt->dbh, S->H, S->last_err); \
 		return 0; \
 	}
 
 #define STMT_CALL_MSG(name, msg, params)	\
 	S->last_err = name params; \
-	S->last_err = _oci_error(S->err, #name ": " #msg, S->last_err, __FILE__, __LINE__ TSRMLS_CC); \
+	S->last_err = _oci_error(S->err, stmt->dbh, stmt, #name ": " #msg, S->last_err, __FILE__, __LINE__ TSRMLS_CC); \
 	if (S->last_err) { \
-		oci_handle_error(stmt->dbh, S->H, S->last_err); \
 		return 0; \
 	}
 
@@ -97,7 +95,7 @@ static int oci_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 
 	STMT_CALL(OCIStmtExecute, (S->H->svc, S->stmt, S->err,
 				S->stmt_type == OCI_STMT_SELECT ? 0 : 1, 0, NULL, NULL,
-				(stmt->dbh->auto_commit & !stmt->dbh->in_txn) ? OCI_COMMIT_ON_SUCCESS : OCI_DEFAULT));
+				(stmt->dbh->auto_commit && !stmt->dbh->in_txn) ? OCI_COMMIT_ON_SUCCESS : OCI_DEFAULT));
 
 	if (!stmt->executed) {
 		ub4 colcount;
@@ -276,7 +274,7 @@ static int oci_stmt_fetch(pdo_stmt_t *stmt TSRMLS_DC)
 	}
 
 	if (S->last_err == OCI_NEED_DATA) {
-		oci_error(S->err, "OCI_NEED_DATA", S->last_err);
+		oci_stmt_error("OCI_NEED_DATA");
 		return 0;
 	}
 
@@ -284,8 +282,7 @@ static int oci_stmt_fetch(pdo_stmt_t *stmt TSRMLS_DC)
 		return 1;
 	}
 	
-	oci_error(S->err, "OCIStmtFetch", S->last_err);
-	oci_handle_error(stmt->dbh, S->H, S->last_err);
+	oci_stmt_error("OCIStmtFetch");
 
 	return 0;
 }

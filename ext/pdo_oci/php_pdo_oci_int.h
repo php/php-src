@@ -20,6 +20,13 @@
 
 #include <oci.h>
 
+typedef struct {
+	const char *file;
+	int line;
+	sb4 errcode;
+	char *errmsg;
+} pdo_oci_error_info;
+
 /* stuff we use in an OCI database handle */
 typedef struct {
 	OCIServer	*server;
@@ -33,6 +40,8 @@ typedef struct {
 
 	unsigned attached:1;
 	unsigned _reserved:31;
+
+	pdo_oci_error_info einfo;
 } pdo_oci_db_handle;
 
 typedef struct {
@@ -54,6 +63,7 @@ typedef struct {
 	ub2			stmt_type;
 
 	pdo_oci_column *cols;
+	pdo_oci_error_info einfo;
 } pdo_oci_stmt;
 
 typedef struct {
@@ -71,10 +81,9 @@ extern const ub4 PDO_OCI_INIT_MODE;
 extern pdo_driver_t pdo_oci_driver;
 extern OCIEnv *pdo_oci_Env;
 
-ub4 _oci_error(OCIError *err, char *what, sword status, const char *file, int line TSRMLS_DC);
-#define oci_error(e, w, s)	_oci_error(e, w, s, __FILE__, __LINE__ TSRMLS_CC)
-
-ub4 oci_handle_error(pdo_dbh_t *dbh, pdo_oci_db_handle *H, ub4 errcode);
+ub4 _oci_error(OCIError *err, pdo_dbh_t *dbh, pdo_stmt_t *stmt, char *what, sword status, const char *file, int line TSRMLS_DC);
+#define oci_drv_error(w)	_oci_error(H->err, dbh, NULL, w, H->last_err, __FILE__, __LINE__ TSRMLS_CC)
+#define oci_stmt_error(w)	_oci_error(S->err, stmt->dbh, stmt, w, S->last_err, __FILE__, __LINE__ TSRMLS_CC)
 
 extern struct pdo_stmt_methods oci_stmt_methods;
 
