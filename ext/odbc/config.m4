@@ -80,27 +80,6 @@ AC_DEFUN(AC_FIND_EMPRESS_LIBS,[
   AC_MSG_RESULT(`echo $ODBC_LIBS | sed -e 's!.*/!!'`)
 ])
 
-dnl
-dnl Figure out the path where the newest DBMaker is installed.
-dnl
-AC_DEFUN(AC_FIND_DBMAKER_PATH,[
-  AC_MSG_CHECKING([DBMaker version])
-  if [ test -d "$1/4.0" ]; then
-    DBMAKER_PATH=$1/4.0
-  elif [ test -d "$1/3.6" ]; then
-    DBMAKER_PATH=$1/3.6
-  elif [ test -d "$1/3.5" ]; then
-    DBMAKER_PATH=$1/3.5
-  elif [ test -d "$1/3.01" ]; then
-    DBMAKER_PATH=$1/3.01
-  elif [ test -d "$1/3.0" ]; then
-    DBMAKER_PATH=$1/3.0
-  else
-    DBMAKER_PATH=$1
-  fi
-  AC_MSG_RESULT(`echo $DBMAKER_PATH | sed -e 's!.*/!!'`)
-])
-
 if test -z "$ODBC_TYPE"; then
 AC_MSG_CHECKING(for Adabas support)
 AC_ARG_WITH(adabas,
@@ -396,12 +375,32 @@ AC_ARG_WITH(dbmaker,
                           version of DBMaker is installed (such as
                           /home/dbmaker/3.6).],
 [
+  PHP_WITH_SHARED
   if test "$withval" = "yes"; then
     # find dbmaker's home directory
     DBMAKER_HOME=`grep "^dbmaker:" /etc/passwd | awk -F: '{print $6}'`
-    AC_FIND_DBMAKER_PATH($DBMAKER_HOME)
+
+    # check DBMaker version (from 5.0 to 2.0)
+    DBMAKER_VERSION=5.0
+
+    while [ test ! -d $DBMAKER_HOME/$DBMAKER_VERSION -a \
+                 "$DBMAKER_VERSION" != "2.9" ]; do
+        DM_VER=`echo $DBMAKER_VERSION | sed -e 's/\.//' | awk '{ print $1-1;}'`
+        MAJOR_V=`echo $DM_VER | awk '{ print $1/10; }' \
+                 | awk  -F. '{ print $1; }'`
+        MINOR_V=`echo $DM_VER | awk '{ print $1%10; }'`
+        DBMAKER_VERSION=$MAJOR_V.$MINOR_V
+    done
+
+    if [ "$DBMAKER_VERSION" = "2.9" ]; then
+        withval=$DBMAKER_HOME
+    else
+        DBMAKER_PATH=$DBMAKER_HOME/$DBMAKER_VERSION
+    fi
+
     withval=$DBMAKER_PATH
   fi
+
   if test "$withval" != "no"; then
     ODBC_INCDIR=$withval/include
     ODBC_LIBDIR=$withval/lib
@@ -410,7 +409,21 @@ AC_ARG_WITH(dbmaker,
     ODBC_INCLUDE=-I$ODBC_INCDIR
     ODBC_LIBS="-ldmapic -lc"
     ODBC_TYPE=dbmaker
-    AC_DEFINE(HAVE_DBMAKER,1,[ ])
+
+    AC_DEFINE(HAVE_DBMAKER,1,[Whether you want DBMaker])
+
+    if test "$shared" = "yes"; then
+        AC_MSG_RESULT(yes (shared))
+        ODBC_LFLAGS="-L$withval/driver/JDBC"
+        ODBC_LIBS="-ldmjdbc -lc -lm"
+        ODBC_SHARED="odbc.la"
+    else
+        AC_MSG_RESULT(yes (static))
+        AC_ADD_LIBRARY_WITH_PATH(dmapic, $ODBC_LIBDIR)
+        AC_ADD_INCLUDE($ODBC_INCDIR)
+        ODBC_STATIC="libphpext_odbc.la"
+    fi
+
     AC_MSG_RESULT(yes)
   else
     AC_MSG_RESULT(no)
@@ -422,7 +435,9 @@ fi
 
 if test -n "$ODBC_TYPE"; then
   INCLUDES="$INCLUDES $ODBC_INCLUDE"
-  EXTRA_LIBS="$EXTRA_LIBS $ODBC_LFLAGS $ODBC_LIBS"
+  if test "$ODBC_TYPE" != "dbmaker"; then
+    EXTRA_LIBS="$EXTRA_LIBS $ODBC_LFLAGS $ODBC_LIBS"
+  fi
   AC_DEFINE(HAVE_UODBC,1,[ ])
   PHP_SUBST(ODBC_INCDIR)
   PHP_SUBST(ODBC_INCLUDE)
@@ -430,5 +445,5 @@ if test -n "$ODBC_TYPE"; then
   PHP_SUBST(ODBC_LIBS)
   PHP_SUBST(ODBC_LFLAGS)
   PHP_SUBST(ODBC_TYPE)
-  PHP_EXTENSION(odbc)
+  PHP_EXTENSION(odbc, $shared)
 fi
