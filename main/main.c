@@ -1314,6 +1314,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	tsrm_ls = ts_resource(0);
 #endif
 
+	module_shutdown = 0;
 	sapi_initialize_empty_request(TSRMLS_C);
 	sapi_activate(TSRMLS_C);
 
