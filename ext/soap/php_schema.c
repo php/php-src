@@ -135,7 +135,6 @@ static void schema_load_file(sdlCtx *ctx, xmlAttrPtr ns, xmlChar *location, xmlA
 			new_tns = get_attribute(schema->properties, "targetNamespace");
 			if (new_tns == NULL) {
 				if (tns != NULL) {
-					xmlFreeDoc(doc);
 					xmlSetProp(schema, "targetNamespace", tns->children->content);
 				}
 			} else if (tns != NULL && strcmp(tns->children->content,new_tns->children->content) != 0) {
