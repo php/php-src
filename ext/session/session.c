@@ -1336,8 +1336,7 @@ PHP_FUNCTION(session_module_name)
 
 		if (PS(mod) && PS(mod)->s_name) {
 			RETVAL_STRING(safe_estrdup(PS(mod)->s_name), 0);
-		}
-		else {
+		} else {
 			RETVAL_EMPTY_STRING();
 		}
 		
@@ -1345,8 +1344,7 @@ PHP_FUNCTION(session_module_name)
 	} else {
 		if (PS(mod) && PS(mod)->s_name) {
 			RETURN_STRING(safe_estrdup(PS(mod)->s_name), 0);
-		}
-		else {
+		} else {
 			RETURN_EMPTY_STRING();
 		}
 	}
