@@ -186,7 +186,7 @@ PHP_FUNCTION(pcntl_fork)
 
 	id = fork();
 	if (id == -1) {
-		php_error(E_ERROR, "Error %d in %s", errno, get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Error %d", errno);
 	}
 	
 	RETURN_LONG((long) id);
@@ -435,8 +435,7 @@ PHP_FUNCTION(pcntl_exec)
 	}
 	
 	if (execve(path, argv, envp) == -1) {
-		php_error(E_WARNING, "Error has occured in %s: (errno %d) %s",
-				  get_active_function_name(TSRMLS_C), errno, strerror(errno));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error has occured: (errno %d) %s", errno, strerror(errno));
 	}
 	
 	/* Cleanup */
@@ -467,17 +466,17 @@ PHP_FUNCTION(pcntl_signal)
 	/* Special long value case for SIG_DFL and SIG_IGN */
 	if (Z_TYPE_P(handle)==IS_LONG) {
 		if (Z_LVAL_P(handle)!= (long) SIG_DFL && Z_LVAL_P(handle) != (long) SIG_IGN) {
-			php_error(E_WARNING, "Invalid value for handle argument specifEied in %s", get_active_function_name(TSRMLS_C));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid value for handle argument specifEied");
 		}
 		if (php_signal(signo, (Sigfunc *) Z_LVAL_P(handle), (int) restart_syscalls) == SIG_ERR) {
-			php_error(E_WARNING, "Error assigning singal in %s", get_active_function_name(TSRMLS_C));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error assigning singal");
 			RETURN_FALSE;
 		}
 		RETURN_TRUE;
 	}
 	
 	if (!zend_is_callable(handle, 0, &func_name)) {
-		php_error(E_WARNING, "%s: %s is not a callable function name error", get_active_function_name(TSRMLS_C), func_name);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s is not a callable function name error", func_name);
 		efree(func_name);
 		RETURN_FALSE;
 	}
@@ -488,7 +487,7 @@ PHP_FUNCTION(pcntl_signal)
 	if (dest_handle) zval_add_ref(dest_handle);
 	
 	if (php_signal(signo, pcntl_signal_handler, (int) restart_syscalls) == SIG_ERR) {
-		php_error(E_WARNING, "Error assigning singal in %s", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error assigning singal");
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
