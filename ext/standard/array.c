@@ -522,7 +522,7 @@ static int array_user_compare(const void *a, const void *b)
 	args[0] = (pval **) f->pData;
 	args[1] = (pval **) s->pData;
 
-	if (call_user_function_ex(CG(function_table), NULL, *BG(user_compare_func_name), &retval_ptr, 2, args, 0)==SUCCESS
+	if (call_user_function_ex(CG(function_table), NULL, *BG(user_compare_func_name), &retval_ptr, 2, args, 0, NULL)==SUCCESS
 		&& retval_ptr) {
 		long retval;
 
@@ -976,7 +976,7 @@ static int php_array_walk(HashTable *target_hash, zval **userdata)
 		
 		/* Call the userland function */
 		if (call_user_function_ex(CG(function_table), NULL, *BG(array_walk_func_name),
-						   &retval_ptr, userdata ? 3 : 2, args, 0) == SUCCESS) {
+						   &retval_ptr, userdata ? 3 : 2, args, 0, NULL) == SUCCESS) {
 		
 			zval_ptr_dtor(&retval_ptr);
 		} else
