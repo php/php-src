@@ -94,6 +94,100 @@ ZEND_API int add_property_stringl(zval *arg, char *key, char *str, uint length, 
 
 #define add_method(arg,key,method)	add_assoc_function((arg),(key),(method))
 
+#define RETVAL_LONG(l) {				\
+		return_value->type = IS_LONG;	\
+		return_value->value.lval = l;	\
+	}
+#define RETVAL_DOUBLE(d) {				\
+		return_value->type = IS_DOUBLE;	\
+		return_value->value.dval = d;	\
+	}
+#define RETVAL_STRING(s,duplicate) {	\
+		char *__s=(s);					\
+		return_value->value.str.len = strlen(__s);	\
+		return_value->value.str.val = (duplicate?estrndup(__s,return_value->value.str.len):__s);	\
+		return_value->type = IS_STRING;	\
+	}
+#define RETVAL_STRINGL(s,l,duplicate) {		\
+		char *__s=(s); int __l=l;			\
+		return_value->value.str.len = __l;	\
+		return_value->value.str.val = (duplicate?estrndup(__s,__l):__s);	\
+		return_value->type = IS_STRING;		\
+	}
+
+#define RETVAL_FALSE  { return_value->value.lval = 0;  return_value->type = IS_BOOL; }
+#define RETVAL_TRUE   { return_value->value.lval = 1;  return_value->type = IS_BOOL; }
+
+#define RETURN_LONG(l) {				\
+		return_value->type = IS_LONG;	\
+		return_value->value.lval = l;	\
+		return;							\
+	}
+#define RETURN_DOUBLE(d) {				\
+		return_value->type = IS_DOUBLE;	\
+		return_value->value.dval = d;	\
+		return;							\
+	}
+#define RETURN_STRING(s,duplicate) {	\
+		char *__s=(s);					\
+		return_value->value.str.len = strlen(__s);	\
+		return_value->value.str.val = (duplicate?estrndup(__s,return_value->value.str.len):__s);	\
+		return_value->type = IS_STRING;	\
+		return;							\
+	}
+#define RETURN_STRINGL(s,l,duplicate) {		\
+		char *__s=(s); int __l=l;			\
+		return_value->value.str.len = __l;	\
+		return_value->value.str.val = (duplicate?estrndup(__s,__l):__s);	\
+      	return_value->type = IS_STRING;		\
+		return;								\
+	}
+
+#define RETURN_FALSE  { RETVAL_FALSE; return; }
+#define RETURN_TRUE   { RETVAL_TRUE; return; }
+
+#define SET_VAR_STRING(n,v)	{ \
+								{ \
+									zval *var = (zval *) emalloc(sizeof(zval)); \
+									\
+									char *str=v; /* prevent 'v' from being evaluated more than once */ \
+									var->value.str.val = (str); \
+									var->value.str.len = strlen((str)); \
+									var->type = IS_STRING; \
+									zend_hash_update(&EG(symbol_table), (n), strlen((n))+1, &var, sizeof(zval *), NULL); \
+								} \
+							}
+#define SET_VAR_STRINGL(n,v,l)	{ \
+									{ \
+										zval *var = (zval *) emalloc(sizeof(zval)); \
+										\
+										char *name=(n); \
+										var->value.str.val = (v); \
+										var->value.str.len = (l); \
+										var->type = IS_STRING; \
+										zend_hash_update(&EG(symbol_table), name, strlen(name)+1, &var, sizeof(zval *), NULL); \
+									} \
+								}
+#define SET_VAR_LONG(n,v)	{ \
+								{ \
+									zval *var = (zval *) emalloc(sizeof(zval)); \
+									\
+									var->value.lval = (v); \
+									var->type = IS_LONG; \
+									zend_hash_update(&EG(symbol_table), (n), strlen((n))+1, &var, sizeof(zval *), NULL); \
+								} \
+							}
+#define SET_VAR_DOUBLE(n,v)	{ \
+								{ \
+									zval *var = (zval *) emalloc(sizeof(zval)); \
+									\
+									var->value.dval = (v); \
+									var->type = IS_DOUBLE; \
+									zend_hash_update(&EG(symbol_table)), (n), strlen((n))+1, &var, sizeof(zval *), NULL); \
+								} \
+							}
+
+
 #endif							/* _ZEND_API_H */
 
 /*
