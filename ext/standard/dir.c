@@ -290,7 +290,7 @@ PHP_FUNCTION(readdir)
 	pval **id, **tmp, *myself;
 	php_dir *dirp;
 	char entry[sizeof(struct dirent)+MAXPATHLEN+1];
-	struct dirent *result;
+	struct dirent *result = (struct dirent *)&entry; /* patch for libc5 readdir problems */
 	DIRLS_FETCH();
 
 	FETCH_DIRP();
