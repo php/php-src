@@ -15,8 +15,8 @@
 #define SOAP_LITERAL 2
 
 struct _sdl {
-	xmlDocPtr doc;			/* pointer to the parsed xml file */
-	HashTable *types;		/* array of sdlTypesPtr */
+	HashTable	docs;				/* pointer to the parsed xml file */
+	HashTable *types;			/* array of sdlTypesPtr */
 	HashTable *encoders;	/* array of encodePtr */
 	HashTable *bindings;	/* array of sdlBindings (key'd by name) */
 	char *target_ns;
@@ -129,7 +129,7 @@ struct _sdlAttribute {
 };
 
 sdlPtr get_sdl(char *uri);
-sdlPtr load_wsdl(char *struri, sdlPtr parent);
+sdlPtr load_wsdl(char *struri);
 int load_sdl(char *struri, int force_load);
 int load_ms_sdl(char *struri, int force_load);
 
