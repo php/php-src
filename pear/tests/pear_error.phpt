@@ -2,18 +2,38 @@
 PEAR_Error test
 --SKIPIF--
 --FILE--
-<?php // -*- C++ -*-
+<?php // -*- PHP -*-
 
 // Test for: PEAR.php
 // Parts tested: - PEAR_Error class
 //               - PEAR::isError static method
-// testing PEAR_Error
 
 require_once "../PEAR.php";
 
-error_reporting(4095);
+function test_error_handler($errno, $errmsg, $file, $line, $vars) {
+	$errortype = array (
+		1   =>  "Error",
+		2   =>  "Warning",
+		4   =>  "Parsing Error",
+		8   =>  "Notice",
+		16  =>  "Core Error",
+		32  =>  "Core Warning",
+		64  =>  "Compile Error",
+		128 =>  "Compile Warning",
+		256 =>  "User Error",
+		512 =>  "User Warning",
+		1024=>  "User Notice"
+	);
+	$prefix = $errortype[$errno];
+	$file = basename($file);
+	print "\n$prefix: $errmsg in $file on line $line\n";
+}
 
-class Foo_Error extends PEAR_Error {
+error_reporting(E_ALL);
+set_error_handler("test_error_handler");
+
+class Foo_Error extends PEAR_Error
+{
     function Foo_Error($message = "unknown error", $code = null,
                        $mode = null, $options = null, $userinfo = null)
     {
@@ -37,7 +57,7 @@ function errorhandler(&$obj) {
 
 class errorclass {
     function errorhandler(&$obj) {
-	print "errorhandler method called, obj=".$obj->toString()."\n";
+		print "errorhandler method called, obj=".$obj->toString()."\n";
     }
 }
 
@@ -98,6 +118,28 @@ print "mode=trigger,level=error: ";
 $err = new PEAR_Error("test error", -42, PEAR_ERROR_TRIGGER, E_USER_ERROR);
 print $err->toString() . "\n";
 
+print "testing expectError:\n";
+$obj =& new PEAR;
+$obj->setErrorHandling(PEAR_ERROR_PRINT, "*** ERROR: %s\n");
+print "expecting syntax/invalid\n";
+$obj->expectError(array("syntax", "invalid"));
+print "raising already_exists\n";
+$err = $obj->raiseError("already_exists");
+print "raising syntax\n";
+$err = $obj->raiseError("syntax");
+print "expecting syntax only\n";
+$obj->expectError(array("syntax"));
+print "raising invalid\n";
+$err = $obj->raiseError("invalid");
+print "popping\n";
+var_dump($obj->popExpect());
+print "raising invalid\n";
+$err = $obj->raiseError("invalid");
+print "popping\n";
+var_dump($obj->popExpect());
+print "raising invalid\n";
+$err = $obj->raiseError("invalid");
+
 ?>
 --GET--
 --POST--
@@ -112,17 +154,43 @@ different message,code: [pear_error: message="test error" code=-42 mode=return l
 mode=print: test error[pear_error: message="test error" code=-42 mode=print level=notice prefix="" prepend="" append="" info=""]
 mode=callback(function): errorhandler function called, obj=[pear_error: message="test error" code=-42 mode=callback callback=errorhandler prefix="" prepend="" append="" info=""]
 mode=callback(method): errorhandler method called, obj=[pear_error: message="test error" code=-42 mode=callback callback=errorclass::errorhandler prefix="" prepend="" append="" info=""]
-mode=print&trigger: test error<br>
-<b>Notice</b>:  test error in <b>/home/ssb/cvs/php/php4/pear/PEAR.php</b> on line <b>567</b><br>
+mode=print&trigger: test error
+User Notice: test error in PEAR.php on line 591
 [pear_error: message="test error" code=-42 mode=print|trigger level=notice prefix="" prepend="" append="" info=""]
-mode=trigger: <br>
-<b>Notice</b>:  test error in <b>/home/ssb/cvs/php/php4/pear/PEAR.php</b> on line <b>567</b><br>
+mode=trigger: 
+User Notice: test error in PEAR.php on line 591
 [pear_error: message="test error" code=-42 mode=trigger level=notice prefix="" prepend="" append="" info=""]
-mode=trigger,level=notice: <br>
-<b>Notice</b>:  test error in <b>/home/ssb/cvs/php/php4/pear/PEAR.php</b> on line <b>567</b><br>
+mode=trigger,level=notice: 
+User Notice: test error in PEAR.php on line 591
 [pear_error: message="test error" code=-42 mode=trigger level=notice prefix="" prepend="" append="" info=""]
-mode=trigger,level=warning: <br>
-<b>Warning</b>:  test error in <b>/home/ssb/cvs/php/php4/pear/PEAR.php</b> on line <b>567</b><br>
+mode=trigger,level=warning: 
+User Warning: test error in PEAR.php on line 591
 [pear_error: message="test error" code=-42 mode=trigger level=warning prefix="" prepend="" append="" info=""]
-mode=trigger,level=error: <br>
-<b>Fatal error</b>:  test error in <b>/home/ssb/cvs/php/php4/pear/PEAR.php</b> on line <b>567</b><br>
+mode=trigger,level=error: 
+User Error: test error in PEAR.php on line 591
+[pear_error: message="test error" code=-42 mode=trigger level=error prefix="" prepend="" append="" info=""]
+testing expectError:
+expecting syntax/invalid
+raising already_exists
+*** ERROR: already_exists
+raising syntax
+*** ERROR: syntax
+expecting syntax only
+raising invalid
+*** ERROR: invalid
+popping
+array(1) {
+  [0]=>
+  string(6) "syntax"
+}
+raising invalid
+*** ERROR: invalid
+popping
+array(2) {
+  [0]=>
+  string(6) "syntax"
+  [1]=>
+  string(7) "invalid"
+}
+raising invalid
+*** ERROR: invalid
