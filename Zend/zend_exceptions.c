@@ -12,8 +12,10 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@zend.com so we can mail you a copy immediately.              |
    +----------------------------------------------------------------------+
-   | Authors: Sterling Hughes <sterling@php.net>                          |
+   | Authors: Andi Gutmans <andi@zend.com>                                |
    |          Marcus Boerger <helly@php.net>                              |
+   |          Sterling Hughes <sterling@php.net>                          |
+   |          Zeev Suraski <zeev@zend.com>                                |
    +----------------------------------------------------------------------+
 */
 
@@ -28,6 +30,44 @@
 zend_class_entry *default_exception_ce;
 static zend_object_handlers default_exception_handlers;
 ZEND_API void zend_throw_exception(zend_class_entry *exception_ce, char *message, long code TSRMLS_DC);
+
+
+void zend_throw_exception_internal(zval *exception TSRMLS_DC)
+{
+	if (exception != NULL) {
+		if (EG(exception)) {
+			/* FIXME:  bail out? */
+			return;
+		}
+		EG(exception) = exception;
+	}
+	if (!EG(current_execute_data)) {
+		zend_error(E_ERROR, "Exception thrown without a stack frame");
+	}
+
+	if ((EG(current_execute_data)->opline+1)->opcode == ZEND_HANDLE_EXCEPTION) {
+		/* no need to rethrow the exception */
+		return;
+	}
+	EG(opline_before_exception) = EG(current_execute_data)->opline;
+	EG(current_execute_data)->opline = &EG(active_op_array)->opcodes[EG(active_op_array)->last-1-1];
+}
+
+
+
+
+ZEND_API void zend_clear_exception(TSRMLS_D)
+{
+	if (!EG(exception)) {
+		return;
+	}
+	zval_ptr_dtor(&EG(exception));
+	EG(exception) = NULL;
+	EG(current_execute_data)->opline = EG(opline_before_exception);
+#if ZEND_DEBUG
+	EG(opline_before_exception) = NULL;
+#endif
+}
 
 static zend_object_value zend_default_exception_new(zend_class_entry *class_type TSRMLS_DC)
 {
@@ -395,7 +435,7 @@ static zend_function_entry default_exception_functions[] = {
 	{NULL, NULL, NULL}
 };
 
-static void zend_register_default_exception(TSRMLS_D)
+void zend_register_default_exception(TSRMLS_D)
 {
 	zend_class_entry ce;
 
@@ -526,15 +566,6 @@ ZEND_API void zend_throw_exception_object(zval *exception TSRMLS_DC)
 		zend_error(E_ERROR, "Exceptions must valid objects that are derived from class Exception");
 	}
 	zend_throw_exception_internal(exception TSRMLS_CC);
-}
-
-
-ZEND_API void zend_register_default_classes(TSRMLS_D)
-{
-	zend_register_interfaces(TSRMLS_C);
-	zend_register_default_exception(TSRMLS_C);
-	zend_register_reflection_api(TSRMLS_C);
-	zend_register_iterator_wrapper(TSRMLS_C);
 }
 
 /*

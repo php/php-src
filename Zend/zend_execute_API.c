@@ -29,7 +29,7 @@
 #include "zend_ptr_stack.h"
 #include "zend_constants.h"
 #include "zend_extensions.h"
-#include "zend_default_classes.h"
+#include "zend_exceptions.h"
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
 #endif
@@ -1200,42 +1200,6 @@ check_fetch_type:
 	return *pce;
 }
 
-void zend_throw_exception_internal(zval *exception TSRMLS_DC)
-{
-	if (exception != NULL) {
-		if (EG(exception)) {
-			/* FIXME:  bail out? */
-			return;
-		}
-		EG(exception) = exception;
-	}
-	if (!EG(current_execute_data)) {
-		zend_error(E_ERROR, "Exception thrown without a stack frame");
-	}
-
-	if ((EG(current_execute_data)->opline+1)->opcode == ZEND_HANDLE_EXCEPTION) {
-		/* no need to rethrow the exception */
-		return;
-	}
-	EG(opline_before_exception) = EG(current_execute_data)->opline;
-	EG(current_execute_data)->opline = &EG(active_op_array)->opcodes[EG(active_op_array)->last-1-1];
-}
-
-
-
-
-ZEND_API void zend_clear_exception(TSRMLS_D)
-{
-	if (!EG(exception)) {
-		return;
-	}
-	zval_ptr_dtor(&EG(exception));
-	EG(exception) = NULL;
-	EG(current_execute_data)->opline = EG(opline_before_exception);
-#if ZEND_DEBUG
-	EG(opline_before_exception) = NULL;
-#endif
-}
 
 
 #define MAX_ABSTRACT_INFO_CNT 3

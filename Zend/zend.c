@@ -25,7 +25,7 @@
 #include "zend_constants.h"
 #include "zend_list.h"
 #include "zend_API.h"
-#include "zend_default_classes.h"
+#include "zend_exceptions.h"
 #include "zend_builtin_functions.h"
 #include "zend_ini.h"
 

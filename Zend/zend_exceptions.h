@@ -12,17 +12,23 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@zend.com so we can mail you a copy immediately.              |
    +----------------------------------------------------------------------+
-   | Authors: Sterling Hughes <sterling@php.net>                          |
+   | Authors: Andi Gutmans <andi@zend.com>                                |
    |          Marcus Boerger <helly@php.net>                              |
+   |          Sterling Hughes <sterling@php.net>                          |
+   |          Zeev Suraski <zeev@zend.com>                                |
    +----------------------------------------------------------------------+
 */
 
 /* $Id$ */
 
-#ifndef ZEND_DEFAULT_CLASSES_H
-#define ZEND_DEFAULT_CLASSES_H
+#ifndef ZEND_EXCEPTIONS_H
+#define ZEND_EXCEPTIONS_H
 
 BEGIN_EXTERN_C()
+
+void zend_throw_exception_internal(zval *exception TSRMLS_DC);
+
+void zend_register_default_exception(TSRMLS_D);
 
 ZEND_API zend_class_entry *zend_exception_get_default(void);
 ZEND_API void zend_register_default_classes(TSRMLS_D);
@@ -32,6 +38,7 @@ ZEND_API void zend_register_default_classes(TSRMLS_D);
 ZEND_API void zend_throw_exception(zend_class_entry *exception_ce, char *message, long code TSRMLS_DC);
 ZEND_API void zend_throw_exception_ex(zend_class_entry *exception_ce, long code TSRMLS_DC, char *format, ...);
 ZEND_API void zend_throw_exception_object(zval *exception TSRMLS_DC);
+ZEND_API void zend_clear_exception(TSRMLS_D);
 
 /* show an exception using zend_error(E_ERROR,...) */
 ZEND_API void zend_exception_error(zval *exception TSRMLS_DC);

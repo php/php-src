@@ -160,11 +160,11 @@ SOURCE=.\zend_default_classes.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\zend_interfaces.c
+SOURCE=.\zend_dynamic_array.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\zend_dynamic_array.c
+SOURCE=.\zend_exceptions.c
 # End Source File
 # Begin Source File
 
@@ -201,6 +201,10 @@ SOURCE=.\zend_ini_parser.c
 # Begin Source File
 
 SOURCE=.\zend_ini_scanner.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\zend_interfaces.c
 # End Source File
 # Begin Source File
 
@@ -320,15 +324,15 @@ SOURCE=.\zend_default_classes.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\zend_interfaces.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\zend_dynamic_array.h
 # End Source File
 # Begin Source File
 
 SOURCE=.\zend_errors.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\zend_exceptions.h
 # End Source File
 # Begin Source File
 
@@ -373,6 +377,10 @@ SOURCE=.\zend_ini_parser.h
 # Begin Source File
 
 SOURCE=.\zend_ini_scanner.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\zend_interfaces.h
 # End Source File
 # Begin Source File
 
