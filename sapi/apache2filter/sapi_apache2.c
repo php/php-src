@@ -42,6 +42,9 @@
 #include "http_core.h"                         
 
 #include "php_apache.h"
+ 
+/* A way to specify the location of the php.ini dir in an apache directive */
+char *apache2_php_ini_path_override = NULL;
 
 static int
 php_apache_sapi_ub_write(const char *str, uint str_length TSRMLS_DC)
@@ -248,14 +251,13 @@ static sapi_module_struct apache2_sapi_module = {
 	php_apache_sapi_register_variables,
 	php_apache_sapi_log_message,			/* Log message */
 
+    NULL,									/* php_ini_path_override */
+
 	NULL,									/* Block interruptions */
 	NULL,									/* Unblock interruptions */
 
 	STANDARD_SAPI_MODULE_PROPERTIES
 };
-
-
-AP_MODULE_DECLARE_DATA module php4_module;
 
 static int php_input_filter(ap_filter_t *f, apr_bucket_brigade *bb, 
 		ap_input_mode_t mode, apr_read_type_e block, apr_off_t readbytes)
@@ -433,10 +435,23 @@ static void php_apache_add_version(apr_pool_t *p)
 	}
 }
 
+static int php_pre_config(apr_pool_t *pconf, apr_pool_t *plog, apr_pool_t *ptemp)
+{
+    /* When this is NULL, apache won't override the hard-coded default
+     * php.ini path setting. */
+    apache2_php_ini_path_override = NULL;
+    return OK;
+}
+
 static int
 php_apache_server_startup(apr_pool_t *pconf, apr_pool_t *plog,
                           apr_pool_t *ptemp, server_rec *s)
 {
+	/* Set up our overridden path. */
+	if (apache2_php_ini_path_override) {
+		apache2_sapi_module.php_ini_path_override = apache2_php_ini_path_override;
+	}
+
 	tsrm_startup(1, 1, 0, NULL);
 	sapi_startup(&apache2_sapi_module);
 	apache2_sapi_module.startup(&apache2_sapi_module);
@@ -510,6 +525,7 @@ static int php_post_read_request(request_rec *r)
 
 static void php_register_hook(apr_pool_t *p)
 {
+	ap_hook_pre_config(php_pre_config, NULL, NULL, APR_HOOK_MIDDLE);
 	ap_hook_post_config(php_apache_server_startup, NULL, NULL, APR_HOOK_MIDDLE);
 	ap_hook_insert_filter(php_insert_filter, NULL, NULL, APR_HOOK_MIDDLE);
 	ap_hook_post_read_request(php_post_read_request, NULL, NULL, APR_HOOK_MIDDLE);
