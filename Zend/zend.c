@@ -154,6 +154,8 @@ static void register_standard_class()
 	standard_class.handle_function_call = NULL;
 	standard_class.handle_property_get = NULL;
 	standard_class.handle_property_set = NULL;
+	standard_class.refcount = (int *) malloc(sizeof(int));
+	*standard_class.refcount = 1;
 	zend_hash_add(CG(class_table), "stdClass", sizeof("stdClass"), &standard_class, sizeof(zend_class_entry), NULL);
 }
 
@@ -206,7 +208,7 @@ void zend_shutdown()
 	free(CG(function_table));
 	zend_hash_destroy(CG(class_table));
 	free(CG(class_table));
-	zend_llist_destroy(&zend_extensions);
+	zend_shutdown_extensions();
 	free(zend_version_info);
 	zend_shutdown_constants();
 }

@@ -70,19 +70,10 @@ if test -d /usr/pkg/include -a -d /usr/pkg/lib ; then
        LDFLAGS="$LDFLAGS -L/usr/pkg/lib"
 fi
 
-AC_CHECK_LIB(nsl, gethostname, [
-  LIBS="-lnsl $LIBS"
-  AC_DEFINE(HAVE_LIBNSL) ], [])
-
 AC_CHECK_LIB(c, socket, [:], [
  AC_CHECK_LIB(socket, socket, [
   LIBS="-lsocket $LIBS"
   AC_DEFINE(HAVE_LIBSOCKET) ], []) ])
-
-AC_CHECK_LIB(c, gethostbyaddr, [:], [
- AC_CHECK_LIB(nsl, gethostbyaddr, [
-  LIBS="-lnsl $LIBS"
-  AC_DEFINE(HAVE_LIBNSL) ], []) ])
 
 AC_CHECK_LIB(c, dlopen, [
  # fake it
@@ -95,24 +86,6 @@ dnl The sin may be in a library which need not be specifed
 dnl as well as res_search resides in libsocket
 AC_CHECK_LIB(c, sin, [:], [
  AC_CHECK_LIB(m, sin) ])
-
-dnl The res_search may be in libsocket as well, and if it is
-dnl make sure to check for dn_skipname in libresolv, or if res_search
-dnl is in neither of these libs, still check for dn_skipname in libresolv
-AC_CHECK_LIB(socket, res_search, [
- AC_CHECK_LIB(resolv, dn_skipname)
- AC_CHECK_LIB(resolv, __dn_skipname)
- LIBS="$LIBS -lsocket"
- AC_DEFINE(HAVE_LIBSOCKET) 
-], [
- AC_CHECK_LIB(resolv, res_search, [
-  LIBS="$LIBS -lresolv"
-  AC_DEFINE(HAVE_LIBRESOLV) 
- ], [
-  AC_CHECK_LIB(resolv, dn_skipname)
-  AC_CHECK_LIB(resolv, __dn_skipname)
- ]) 
-])
 
 dnl Checks for header files.
 AC_HEADER_STDC

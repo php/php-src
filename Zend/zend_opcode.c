@@ -111,6 +111,9 @@ ZEND_API void destroy_zend_function(zend_function *function)
 
 ZEND_API void destroy_zend_class(zend_class_entry *ce)
 {
+	if (--(*ce->refcount)>0) {
+		return;
+	}
 	switch (ce->type) {
 		case ZEND_USER_CLASS:
 			efree(ce->name);

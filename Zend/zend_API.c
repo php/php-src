@@ -592,9 +592,9 @@ ZEND_API int _register_list_destructors(void (*list_destructor)(void *), void (*
 
 
 /* registers all functions in *library_functions in the function hash */
-int register_functions(function_entry *functions)
+int register_functions(zend_function_entry *functions)
 {
-	function_entry *ptr = functions;
+	zend_function_entry *ptr = functions;
 	zend_internal_function internal_function;
 	int count=0,unload=0;
 	CLS_FETCH();
@@ -633,9 +633,9 @@ int register_functions(function_entry *functions)
 /* count=-1 means erase all functions, otherwise, 
  * erase the first count functions
  */
-void unregister_functions(function_entry *functions,int count)
+void unregister_functions(zend_function_entry *functions,int count)
 {
-	function_entry *ptr = functions;
+	zend_function_entry *ptr = functions;
 	int i=0;
 	CLS_FETCH();
 
@@ -753,6 +753,8 @@ zend_class_entry *register_internal_class(zend_class_entry *class_entry)
 
 	class_entry->type = ZEND_INTERNAL_CLASS;
 	class_entry->parent = NULL;
+	class_entry->refcount = (int *) malloc(sizeof(int));
+	*class_entry->refcount = 1;
 	zend_hash_init(&class_entry->default_properties, 0, NULL, PVAL_PTR_DTOR, 1);
 	zend_hash_init(&class_entry->function_table, 0, NULL, (void (*)(void *)) destroy_zend_function, 1);
 

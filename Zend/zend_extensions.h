@@ -86,5 +86,6 @@ void zend_extension_dtor(zend_extension *extension);
 int zend_load_extension(char *path);
 int zend_load_extensions(char **extension_paths);
 void zend_append_version_info(zend_extension *extension);
+void zend_shutdown_extensions();
 
 #endif /* _ZEND_EXTENSIONS_H */

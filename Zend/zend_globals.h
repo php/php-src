@@ -187,6 +187,7 @@ struct _zend_executor_globals {
 
 	zend_ptr_stack argument_stack;
 
+	void *reserved[4];
 #if SUPPORT_INTERACTIVE
 	int interactive;
 #endif
