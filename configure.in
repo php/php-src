@@ -641,13 +641,15 @@ test -n "$auto_cflags" && test -n "$GCC" && CFLAGS="$CFLAGS -O2"
 
 AC_MSG_CHECKING(whether to build PHP thread-safe)
 
+CPPFLAGS="$CPPFLAGS -D_POSIX_PTHREAD_SEMANTICS"
+export CPPFLAGS
+
 if test "$enable_thread_safety" = "yes"; then
   TSRM_LIB='TSRM/libtsrm.la'
   TSRM_DIR=TSRM
   AC_DEFINE(ZTS)
+  CPPFLAGS="$CPPFLAGS -D_REENTRANT"
   INCLUDES="$INCLUDES -I\$(top_builddir)/TSRM -I\$(top_srcdir)/TSRM"
-  CPPFLAGS="$CPPFLAGS -D_REENTRANT -D_POSIX_PTHREAD_SEMANTICS"
-  export CPPFLAGS
 else 
   enable_thread_safety=no
 fi
