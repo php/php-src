@@ -387,6 +387,9 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 			Z_TYPE_P(http_response) = IS_STRING;
 			zend_hash_next_index_insert(Z_ARRVAL_PP(response_header), &http_response, sizeof(zval *), NULL);
 		}
+	} else {
+		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "HTTP request failed, unexpected end of socket.!");
+		goto out;
 	}
 	
 	/* read past HTTP headers */
