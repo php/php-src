@@ -66,7 +66,7 @@ int spl_fetch_dimension_address(znode *result, znode *op1, znode *op2, temp_vari
 		zval *dim = spl_get_zval_ptr(op2, Ts, &EG(free_op2) TSRMLS_CC);
 		zval *exists;
 
-		spl_begin_method_call_arg_ex1(obj, obj_ce, NULL, "exists", sizeof("exists")-1, &exists, dim);
+		spl_call_method_1(obj, obj_ce, NULL, "exists", sizeof("exists")-1, &exists, dim);
 		if (!i_zend_is_true(exists)) {
 			if (type == BP_VAR_R || type == BP_VAR_RW) {
 				SEPARATE_ZVAL(&dim);
@@ -85,7 +85,7 @@ int spl_fetch_dimension_address(znode *result, znode *op1, znode *op2, temp_vari
 		}
 		DELETE_RET_ZVAL(exists);
 		if (type == BP_VAR_R || type == BP_VAR_IS) {
-			spl_begin_method_call_arg_ex1(obj, obj_ce, NULL, "get", sizeof("get")-1, retval, dim);
+			spl_call_method_1(obj, obj_ce, NULL, "get", sizeof("get")-1, retval, dim);
 		}
 		FREE_OP(Ts, op2, EG(free_op2));
 		return 0;
@@ -210,7 +210,7 @@ ZEND_EXECUTE_HOOK_FUNCTION(ZEND_ASSIGN_DIM)
 			value->refcount = 0;
 		}
 
-		spl_begin_method_call_arg_ex2(obj, obj_ce, NULL, "set", sizeof("set")-1, &retval, index, value);
+		spl_call_method_2(obj, obj_ce, NULL, "set", sizeof("set")-1, &retval, index, value);
 
 		if (index == &tmp) {
 			zval_dtor(index);
@@ -284,7 +284,7 @@ ZEND_EXECUTE_HOOK_FUNCTION(ZEND_UNSET_DIM_OBJ)
 				break;
 		}
 
-		spl_begin_method_call_arg_ex1(obj, obj_ce, NULL, "del", sizeof("del")-1, &retval, index);
+		spl_call_method_1(obj, obj_ce, NULL, "del", sizeof("del")-1, &retval, index);
 
 		if (index == &tmp) {
 			zval_dtor(index);

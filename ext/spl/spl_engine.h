@@ -49,40 +49,13 @@ static inline zend_class_entry *spl_get_class_entry(zval *obj TSRMLS_DC)
 }
 /* }}} */
 
-/* {{{ spl_begin_method_call_arg */
-static inline int spl_begin_method_call_arg(zval **obj, zend_class_entry *obj_ce, zend_function **fn_proxy, char *function_name, int fname_len, zval *retval, zval *arg1 TSRMLS_DC)
-{
-	zval *local_retval;
-	int ret = spl_call_method(obj, obj_ce, fn_proxy, function_name, fname_len, &local_retval, 1, arg1, NULL TSRMLS_CC);
-	if (local_retval) {
-		COPY_PZVAL_TO_ZVAL(*retval, local_retval);
-	} else {
-		INIT_ZVAL(*retval);
-	}
-	return ret;
-}
-/* }}} */
-
-/* {{{ spl_begin_method_call_no_retval */
-static inline int spl_begin_method_call_no_retval(zval **obj, zend_class_entry *obj_ce, zend_function **fn_proxy, char *function_name, int fname_len TSRMLS_DC)
-{
-	zval *retval;
-	int ret = spl_call_method(obj, obj_ce, fn_proxy, function_name, fname_len, &retval, 0, NULL, NULL TSRMLS_CC);
-	if (retval) {
-		zval_dtor(retval);
-		FREE_ZVAL(retval);
-	}
-	return ret;
-}
-/* }}} */
-
-#define spl_begin_method_call_ex(obj, obj_ce, fn_proxy, function_name, fname_len, retval) \
+#define spl_call_method_0(obj, obj_ce, fn_proxy, function_name, fname_len, retval) \
 	spl_call_method(obj, obj_ce, fn_proxy, function_name, fname_len, retval, 0, NULL, NULL TSRMLS_CC)
 
-#define spl_begin_method_call_arg_ex1(obj, obj_ce, fn_proxy, function_name, fname_len, retval, arg1) \
+#define spl_call_method_1(obj, obj_ce, fn_proxy, function_name, fname_len, retval, arg1) \
 	spl_call_method(obj, obj_ce, fn_proxy, function_name, fname_len, retval, 1, arg1, NULL TSRMLS_CC)
 
-#define spl_begin_method_call_arg_ex2(obj, obj_ce, fn_proxy, function_name, fname_len, retval, arg1, arg2) \
+#define spl_call_method_2(obj, obj_ce, fn_proxy, function_name, fname_len, retval, arg1, arg2) \
 	spl_call_method(obj, obj_ce, fn_proxy, function_name, fname_len, retval, 2, arg1, arg2 TSRMLS_CC)
 
 void spl_instanciate(zend_class_entry *pce, zval **object TSRMLS_DC);
