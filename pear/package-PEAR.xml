@@ -33,8 +33,9 @@
   <release>
     <version>0.91-dev</version>
     <state>beta</state>
-    <date>YYYY-MM-DD</date>
+    <date>2002-06-15</date>
     <notes>
+* fix for XML-RPC bug that made some remote commands fail
 </notes>
     <filelist>
       <file role="data" name="package.dtd"/>
@@ -73,6 +74,7 @@
         <file baseinstalldir="/" role="script" install-as="pear" name="pear.in">
           <replace from="@prefix@/bin" to="PHP_BINDIR" type="php-const"/>
           <replace from="@pear_version@" to="version" type="package-info"/>
+          <replace from="@include_path@" to="php_dir" type="pear-config"/>
         </file>
         <file baseinstalldir="/" role="script" platform="windows" name="pear.bat"></file>
       </dir>

@@ -1,4 +1,4 @@
-#!@prefix@/bin/php -Cq
+#!@prefix@/bin/php -Cqd include_path=@include_path@
 <?php // -*- PHP -*-
 //
 // +----------------------------------------------------------------------+
