@@ -1,3 +1,68 @@
+2001-03-29  Ulf Wendel  <ulf.wendel@phpdoc.de>
+
+    * pear/package.dtd: - uuups, modified the package.dtd, undo
+
+    * pear/IT[X].xml
+      pear/package.dtd: - Added a package xml file for IT[X] templates
+
+    * pear/HTML/IT.php
+      pear/HTML/ITX.php
+      pear/HTML/IT_Error.php: - Pearified the error handling
+
+    * pear/Experimental/XML/fo2pdf.php
+      pear/Experimental/XML/sql2xml.php
+      pear/Experimental/XML/sql2xml_ext.php: - added basic phpdoc doc comments
+    - lots of whitespaces
+    - renamed functions from get_xy to the PEAR getXY
+
+    Chregu, sorry for this commit in case it breaks your code, I don't like all of the coding guides myself but we should follow them, even if they break the code in our companies.
+
+    * pear/Experimental/HTML/Menu_Browser.php:
+    - Added an optional prefix for menu entries
+
+2001-03-29  Chuck Hagenbuch  <chuck@horde.org>
+
+    * pear/Mail/RFC822.php: indentation
+
+    * pear/PEAR.php.in:
+    Fix a couple of warnings when calling PEAR::raiseError() statically.
+
+2001-03-29  Ulf Wendel  <ulf.wendel@phpdoc.de>
+
+    * pear/Cache.xml: - package XML for the Cache
+
+    I'm not sure how to use the package.dtd to document packages and if at all the Cache can be it's own package, but one has to start with it... Sterling, Stig can you give me a hint?
+
+2001-03-29  James Moore  <James@phpuk.org>
+
+    * run-tests.php: Output php version at end of tests.
+
+2001-03-29  Alexander Bokovoy  <ab@avilink.net>
+
+    * ext/midgard/config.m4
+      ext/midgard/config.m4.session: - Typo fixed
+    - config.m4.session updated to config.m4
+
+2001-03-29  Christian Stocker  <chregu@nomad.ch>
+
+    * pear/Experimental/XML/fo2pdf.php:
+    MSIE needs a Content-Length: Header to display pdfs correctly. so here it
+    is..
+
+2001-03-29  Wez Furlong  <wez.php@thebrainroom.com>
+
+    * ext/iconv/iconv.c:
+    Fixed leak in php_iconv_string. Also returns FAILURE on failure,
+    rather than -1
+
+2001-03-29  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * pear/Experimental/Image/color_helper.php: Added web-safe colors list.
+
+2001-03-29  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/domxml/php_domxml.c: Fixed bug: #10040.
+
 2001-03-28  Thomas V.V.Cox  <cox@idecnet.com>
 
     * pear/DB.php
