@@ -20,7 +20,7 @@ libphp4.la: $(PHP_GLOBAL_OBJS) $(PHP_SAPI_OBJS)
 libs/libphp4.bundle: $(PHP_GLOBAL_OBJS) $(PHP_SAPI_OBJS)
 	$(CC) $(MH_BUNDLE_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) $(PHP_GLOBAL_OBJS:.lo=.o) $(PHP_SAPI_OBJS:.lo=.o) $(PHP_FRAMEWORKS) $(EXTRA_LIBS) $(ZEND_EXTRA_LIBS) -o $@ && cp $@ libs/libphp4.so
 
-install: $(install_targets)
+install: $(all_targets) $(install_targets)
 
 install-sapi: libphp4.la
 	@echo "Installing PHP SAPI module"
