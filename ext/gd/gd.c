@@ -2043,7 +2043,11 @@ void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	l = strlen(str);
 	fontname = (unsigned char *) (*FONTNAME)->value.str.val;
 
+#ifdef USE_GD_IMGSTRTTF
+	error = gdImageStringTTF(im, brect, col, fontname, ptsize, angle, x, y, str);
+#else
 	error = gdttf(im, brect, col, fontname, ptsize, angle, x, y, str);
+#endif
 
 	if (error) {
 		php_error(E_WARNING, error);

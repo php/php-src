@@ -9,7 +9,7 @@
 #else
 #include "php_config.h"
 #endif
-#if HAVE_LIBTTF
+#if HAVE_LIBTTF && !defined(USE_GD_IMGSTRTTF)
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

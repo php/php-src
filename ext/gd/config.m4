@@ -42,6 +42,18 @@ AC_DEFUN(PHP_GD_XPM,[
         AC_CHECK_LIB(gd, gdImageCreateFromXpm, [AC_DEFINE(HAVE_GD_XPM, 1, [ ])])
 ])
 
+AC_MSG_CHECKING(whether to enable truetype string function in gd)
+AC_ARG_ENABLE(gd-native-ttf,
+[  --enable-gd-imgstrttf  Enable TrueType string function in gd],[
+  if test "$enableval" = "yes" ; then
+    AC_DEFINE(USE_GD_IMGSTRTTF, 1, [ ])
+    AC_MSG_RESULT(yes)
+  else
+    AC_MSG_RESULT(no)
+  fi
+],[
+  AC_MSG_RESULT(no)
+])
 
 shared=no
 AC_MSG_CHECKING(whether to include GD support)
