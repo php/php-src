@@ -144,19 +144,18 @@ static PHP_INI_MH(OnUpdateErrorReporting)
 }
 
 
-static PHP_INI_MH(OnDisableFunctions)
+static void php_disable_functions()
 {
 	char *func;
-	char *new_value_dup = zend_strndup(new_value, new_value_length);	/* This is an intentional leak,
-																		 * it's not a big deal as it's process-wide
-																		 */
+	char *new_value_dup = strdup(INI_STR("disable_functions"));	/* This is an intentional leak,
+																 * it's not a big deal as it's process-wide
+																 */
 
 	func = strtok(new_value_dup, ", ");
 	while (func) {
 		zend_disable_function(func, strlen(func));
 		func = strtok(NULL, ", ");
 	}
-	return SUCCESS;
 }
 
 
@@ -257,7 +256,7 @@ PHP_INI_BEGIN()
 	PHP_INI_ENTRY("sendmail_from",				NULL,		PHP_INI_ALL,		NULL)
 	PHP_INI_ENTRY("sendmail_path",	DEFAULT_SENDMAIL_PATH,	PHP_INI_SYSTEM,		NULL)
 
-	PHP_INI_ENTRY("disable_functions",			"",			PHP_INI_SYSTEM,		OnDisableFunctions)
+	PHP_INI_ENTRY("disable_functions",			"",			PHP_INI_SYSTEM,		NULL)
 PHP_INI_END()
 
 
@@ -876,6 +875,7 @@ int php_module_startup(sapi_module_struct *sf)
 		php_printf("Unable to start builtin modules\n");
 		return FAILURE;
 	}
+	php_disable_functions();
 	module_initialized = 1;
 	sapi_deactivate(SLS_C);
 	return SUCCESS;
