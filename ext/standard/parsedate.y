@@ -856,7 +856,7 @@ static int date_lex(void)
 
 time_t parsedate(char *p, TIMEINFO *now)
 {
-	extern int date_parse (YYPARSE_PARAM_ARG);
+	extern int date_parse(void);
     struct tm		*tm, tmbuf;
     TIMEINFO		ti;
     time_t		Start;
@@ -887,7 +887,7 @@ time_t parsedate(char *p, TIMEINFO *now)
     yyHaveRel = 0;
     yyHaveTime = 0;
 
-    if (date_parse(YYPARSE_PARAM_ARG) || yyHaveTime > 1 || yyHaveDate > 1)
+    if (date_parse() || yyHaveTime > 1 || yyHaveDate > 1)
 	return -1;
 
     if (yyHaveDate || yyHaveTime) {
