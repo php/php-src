@@ -5,7 +5,7 @@ dnl vim:et:sw=2:ts=2:
 if test "$PHP_PDO" != "no"; then
 
 PHP_ARG_WITH(pdo-sqlite, for sqlite 3 driver for PDO,
-[  --with-pdo-sqlite[=DIR]       Include PDO sqlite 3 support.],yes)
+[  --with-pdo-sqlite             Include PDO sqlite 3 support],yes)
 
 if test "$PHP_PDO_SQLITE" != "no"; then
 
@@ -83,14 +83,21 @@ if test "$PHP_PDO_SQLITE" != "no"; then
 
       PHP_ADD_BUILD_DIR($ext_builddir/sqlite)
       PHP_ADD_BUILD_DIR($ext_builddir/sqlite/src)
-      PHP_ADD_BUILD_DIR($ext_builddir/sqlite/tool)
-      PHP_ADD_MAKEFILE_FRAGMENT
-
       AC_CHECK_SIZEOF(char *,4)
       AC_DEFINE(SQLITE_PTR_SZ, SIZEOF_CHAR_P, [Size of a pointer])
       PDO_SQLITE_VERSION=`cat $ext_srcdir/sqlite/VERSION`
       PDO_SQLITE_VERSION_NUMBER=`echo $PDO_SQLITE_VERSION | awk -F. '{printf("%d%03d%03d", $1, $2, $3)}'`
       sed -e s/--VERS--/$PDO_SQLITE_VERSION/ -e s/--VERSION-NUMBER--/$PDO_SQLITE_VERSION_NUMBER/ $ext_srcdir/sqlite/src/sqlite.h.in > $ext_srcdir/sqlite3.h
+      if ! test -f $ext_srcdir/sqlite/src/parse.h ; then
+        $CC -o $ext_srcdir/sqlite/tool/lemon $ext_srcdir/sqlite/tool/lemon.c
+        $ext_srcdir/sqlite/tool/lemon $ext_srcdir/sqlite/src/parse.y
+	      cat $ext_srcdir/sqlite/src/parse.h $ext_srcdir/sqlite/src/vdbe.c | awk -f $ext_srcdir/sqlite/mkopcodeh.awk > $ext_srcdir/sqlite/src/opcodes.h
+        sort -n +2 $ext_srcdir/sqlite/src/opcodes.h | awk -f $ext_srcdir/sqlite/mkopcodec.awk > $ext_srcdir/sqlite/src/opcodes.c
+        $CC -o $ext_srcdir/sqlite/tool/mkkeywordhash $ext_srcdir/sqlite/tool/mkkeywordhash.c
+        $ext_srcdir/sqlite/tool/mkkeywordhash > $ext_srcdir/sqlite/src/keywordhash.h
+      else
+        touch $ext_srcdir/sqlite/src/parse.c $ext_srcdir/sqlite/src/parse.y
+      fi
 
       if test "$ext_shared" = "no" -o "$ext_srcdir" != "$abs_srcdir"; then
         echo '#include "php_config.h"' > $ext_srcdir/sqlite/src/config.h
