@@ -56,8 +56,12 @@ function_entry pcntl_functions[] = {
 	PHP_FE(pcntl_wstopsig,		NULL)
 	PHP_FE(pcntl_exec,			NULL)
 	PHP_FE(pcntl_alarm,			NULL)
+#ifdef HAVE_GETPRIORITY
 	PHP_FE(pcntl_getpriority,	NULL)
+#endif
+#ifdef HAVE_SETPRIORITY
 	PHP_FE(pcntl_setpriority,	NULL)
+#endif
 	{NULL, NULL, NULL}	
 };
 
