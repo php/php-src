@@ -3,7 +3,7 @@ dnl $Id$
 dnl
 
 PHP_ARG_WITH(zlib-dir,if the location of ZLIB install directory is defined,
-[  --with-zlib-dir=<DIR>]  Define the location of zlib install directory])
+[  --with-zlib-dir[=DIR]   Define the location of zlib install directory])
 
 PHP_ARG_WITH(zlib,whether to include ZLIB support,
 [  --with-zlib[=DIR]       Include zlib support (requires zlib >= 1.0.9).

@@ -210,9 +210,9 @@ if test -z "$ODBC_TYPE"; then
 AC_MSG_CHECKING(for Empress support)
 AC_ARG_WITH(empress,
 [  --with-empress[=DIR]    Include Empress support.  DIR is the Empress base
-                           install directory, defaults to \$EMPRESSPATH.
-                           From PHP4, this option only supports Empress Version
-                           8.60 and above],
+                          install directory, defaults to \$EMPRESSPATH.
+                          From PHP4, this option only supports Empress Version
+                          8.60 and above],
 [
   PHP_WITH_SHARED
   if test "$withval" != "no"; then
@@ -240,10 +240,11 @@ fi
 if test -z "$ODBC_TYPE"; then
 AC_MSG_CHECKING(for Empress local access support)
 AC_ARG_WITH(empress-bcs,
-[  --with-empress-bcs[=DIR]Include Empress Local Access support.  DIR is the 
-                           Empress base install directory, defaults to \$EMPRESSPATH.
-                           From PHP4, this option only supports Empress Version
-                           8.60 and above],
+[  --with-empress-bcs[=DIR]
+                          Include Empress Local Access support.  DIR is the 
+                          Empress base install directory, defaults to 
+                          \$EMPRESSPATH.  From PHP4, this option only supports
+                          Empress Version 8.60 and above.],
 [
   PHP_WITH_SHARED
   if test "$withval" != "no"; then

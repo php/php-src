@@ -17,7 +17,8 @@ AC_DEFUN(PHP_LDAP_CHECKS, [
 ])
                           
 PHP_ARG_WITH(ldap,whether to include LDAP support,
-[  --with-ldap[=DIR]       Include LDAP support.  DIR is the LDAP base install directory.])
+[  --with-ldap[=DIR]       Include LDAP support.  DIR is the LDAP base 
+                          install directory.])
 
 if test "$PHP_LDAP" != "no"; then
 
