@@ -1039,23 +1039,19 @@ function generate_array_diff($ar1,$ar2,$is_reg,$w)
 		if ($k1 == $l1+1 || $k2 === NULL) {
 			$l1 = $k1;
 			$diff[] = current($old1);
-			next($old1);
-			$k1 = key($old1);
+			$k1 = next($old1) ? key($old1) : NULL;
 		} else if ($k2 == $l2+1 || $k1 === NULL) {
 			$l2 = $k2;
 			$diff[] = current($old2);
-			next($old2);
-			$k2 = key($old2);
+			$k2 = next($old2) ? key($old2) : NULL;
 		} else if ($k1 < $k2) {
 			$l1 = $k1;
 			$diff[] = current($old1);
-			next($old1);
-			$k1 = key($old1);
+			$k1 = next($old1) ? key($old1) : NULL;
 		} else {
 			$l2 = $k2;
 			$diff[] = current($old2);
-			next($old2);
-			$k2 = key($old2);
+			$k2 = next($old2) ? key($old2) : NULL;
 		}
 	}
 	while ($idx1 < $cnt1) {
