@@ -16,6 +16,14 @@
    +----------------------------------------------------------------------+
  */
 
+#define PCNTL_DEBUG 0
+
+#if PCNTL_DEBUG
+#define DEBUG_OUT printf("DEBUG: ");printf
+#else
+#define DEBUG_OUT  
+#endif
+
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -23,10 +31,12 @@
 #include "php.h"
 #include "php_ini.h"
 #include "php_pcntl.h"
+#include "zend_extensions.h"
 
 ZEND_DECLARE_MODULE_GLOBALS(pcntl)
 
 static int le_pcntl;
+static int pcntl_zend_extension_active;
 
 function_entry pcntl_functions[] = {
 	PHP_FE(pcntl_fork,	NULL)	
@@ -47,8 +57,33 @@ zend_module_entry pcntl_module_entry = {
 
 #ifdef COMPILE_DL_PCNTL
 ZEND_GET_MODULE(pcntl)
+#define PCNTL_ZEND_EXT  ZEND_DLEXPORT
+#else
+#define PCNTL_ZEND_EXT
 #endif
+  
+PCNTL_ZEND_EXT zend_extension pcntl_extension_entry = {
+	"pcntl",
+	 "1.0",
+ 	"Jason Greene",
+	"http://www.php.net",
+	"2001",
+ 	pcntl_zend_extension_startup,
+ 	pcntl_zend_extension_shutdown,
+	pcntl_zend_extension_activate,
+	pcntl_zend_extension_deactivate,
+        NULL,
+ 	NULL,
+	pcntl_zend_extension_statement_handler,
+        NULL,
+ 	NULL,
+	NULL,
+	NULL,
+	NULL
+};
 
+
+  
 void php_register_signal_constants(INIT_FUNC_ARGS)
 {
 	REGISTER_LONG_CONSTANT("SIG_IGN",  (long) SIG_IGN, CONST_CS | CONST_PERSISTENT);
@@ -95,22 +130,30 @@ void php_register_signal_constants(INIT_FUNC_ARGS)
 	REGISTER_LONG_CONSTANT("SIGPWR",   (long) SIGPWR, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SIGSYS",   (long) SIGSYS, CONST_CS | CONST_PERSISTENT);
 }
-   
-  
+
 PHP_MINIT_FUNCTION(pcntl)
 {
  	PCNTL_LS_FETCH();
 
    	php_register_signal_constants(INIT_FUNC_ARGS_PASSTHRU);
 	zend_hash_init(&PCNTL_G(php_signal_table), 16, NULL, NULL, 1);
+
+	/* Just in case ... */
+	memset(&PCNTL_G(php_signal_queue),0,sizeof(PCNTL_G(php_signal_queue)));
+   
+	zend_llist_init(&PCNTL_G(php_signal_queue), sizeof (long),  NULL, 1);
+	PCNTL_G(signal_queue_ready)=0;
+	PCNTL_G(processing_signal_queue)=0;
+	if (zend_register_extension(&pcntl_extension_entry, 0)==FAILURE) 
+		return FAILURE;
 	return SUCCESS;
 }
-
 PHP_MSHUTDOWN_FUNCTION(pcntl)
 {
 	PCNTL_LS_FETCH();
    
 	zend_hash_destroy(&PCNTL_G(php_signal_table));
+	zend_llist_destroy(&PCNTL_G(php_signal_queue));
 	return SUCCESS;
 }
 
@@ -212,19 +255,20 @@ PHP_FUNCTION(pcntl_signal)
 }
 /* }}} */
 
+/* Note Old */
 /* Our custom signal handler that calls the appropriate php_function */
-static void pcntl_signal_handler(int signo)
+static void old_pcntl_signal_handler(int signo)
 {
 	char *func_name;
 	zval *param, *call_name, *retval;
    
 	PCNTL_LS_FETCH();
-	/* printf("Caught signal: %d\n", signo); */
-        if (zend_hash_index_find(&PCNTL_G(php_signal_table), (long) signo, (void *) &func_name)==FAILURE) {
-		/* printf("Signl handler not fount"); */
+        DEBUG_OUT("Caught signal: %d\n", signo); 
+	if (zend_hash_index_find(&PCNTL_G(php_signal_table), (long) signo, (void *) &func_name)==FAILURE) {
+		DEBUG_OUT("Signl handler not fount"); 
 		return;
 	}
-	/* printf("Signal handler found, Calling %s\n", func_name); */
+	/* DEBUG_OUT("Signal handler found, Calling %s\n", func_name); */	
 	MAKE_STD_ZVAL(param);
 	MAKE_STD_ZVAL(call_name);
 	MAKE_STD_ZVAL(retval);
@@ -236,9 +280,109 @@ static void pcntl_signal_handler(int signo)
 	
  	zval_dtor(call_name);
 	efree(call_name);
-	efree(param);
+	efree(param);  
+	efree(retval);
 
 	return;
+}
+
+
+static void pcntl_signal_handler(int signo)
+{
+	long signal_num=signo;
+	PCNTL_LS_FETCH();
+ 
+	DEBUG_OUT("Caught signo %d\n", signo); 
+	if (! PCNTL_G(processing_signal_queue) && pcntl_zend_extension_active ) {
+		zend_llist_add_element(&PCNTL_G(php_signal_queue), &signal_num);
+		PCNTL_G(signal_queue_ready)=1;
+		DEBUG_OUT("Added queue entry\n"); 
+	}
+	return;
+}
+   
+
+/* Pcntl Zend Extension Hooks */
+
+int pcntl_zend_extension_startup(zend_extension *extension)
+{
+	DEBUG_OUT("Statup Called\n");
+	pcntl_zend_extension_active=1;
+	CG(extended_info) = 1;
+	return SUCCESS;
+}
+
+void pcntl_zend_extension_shutdown(zend_extension *extension)
+{
+	DEBUG_OUT("Shutdown Called\n");
+	return;
+}
+
+void pcntl_zend_extension_activate(void)
+{
+	DEBUG_OUT("Activate Called\n");
+	pcntl_zend_extension_active=1;
+	CG(extended_info) = 1;
+	return;
+}
+
+void pcntl_zend_extension_deactivate(void)
+{
+	DEBUG_OUT("Deactivate Called\n");
+   	pcntl_zend_extension_active=0;
+	return;
+}
+
+/* Custom hook to ensure signals only get called at a safe poing in Zend's execute process */
+void pcntl_zend_extension_statement_handler(zend_op_array *op_array) {
+	zend_llist_element *element;
+        zval *param, *call_name, *retval;
+	char *func_name;
+	PCNTL_LS_FETCH();
+
+	/* Bail if the queue is empty or if we are already playing the queue*/
+	if (! PCNTL_G(signal_queue_ready) || PCNTL_G(processing_signal_queue))
+		return;
+
+   	/* Mark our queue empty */
+	PCNTL_G(signal_queue_ready)=0;
+   
+	/* If for some reason our signal queue is empty then return */
+	if (zend_llist_count(&PCNTL_G(php_signal_queue)) <= 0) {
+		return;
+	}
+       
+	/* Disable queue so this function is not infinate */
+	PCNTL_G(processing_signal_queue)=1;	
+   
+	/* Allocate */
+	MAKE_STD_ZVAL(param);
+	MAKE_STD_ZVAL(call_name);
+	MAKE_STD_ZVAL(retval);
+
+	/* Traverse through our signal queue and call the appropriate php functions */
+	for (element=(&PCNTL_G(php_signal_queue))->head; element; element=element->next) {
+		if (zend_hash_index_find(&PCNTL_G(php_signal_table), (long) *element->data, (void *) &func_name)==FAILURE) {
+			continue;
+		}
+		convert_to_long_ex(&param);
+		convert_to_string_ex(&call_name);
+		ZVAL_LONG(param, (long) *element->data);
+		ZVAL_STRING(call_name, func_name, 0);
+	   
+		/* Call php singal handler - Note that we do not report errors, and we ignore the return value */ 
+		call_user_function(EG(function_table), NULL, call_name, retval, 1, &param);
+	}
+	/* Clear */
+	zend_llist_clean(&PCNTL_G(php_signal_queue));
+
+	/* Re-enable queue */
+	PCNTL_G(processing_signal_queue)=0;
+
+	/* Clean up */
+	efree(param);
+	efree(call_name);
+	efree(retval);
 }
 
 /*
