@@ -1,5 +1,5 @@
-#ifndef _INCLUDED_IMAP_H
-#define _INCLUDED_IMAP_H
+#ifndef PHP_IMAP_H
+#define PHP_IMAP_H
 
 
 #ifndef PHP_WIN32

@@ -30,8 +30,8 @@
 
 /* $Id$ */
 
-#ifndef _PHP_SYBASE_H
-#define _PHP_SYBASE_H
+#ifndef PHP_SYBASE_DB_H
+#define PHP_SYBASE_DB_H
 
 #if HAVE_SYBASE
 
@@ -135,4 +135,4 @@ extern sybase_module php_sybase_module;
 
 #define phpext_sybase_ptr sybase_module_ptr
 
-#endif /* _PHP_SYBASE_H */
+#endif /* PHP_SYBASE_DB_H */

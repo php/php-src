@@ -1,7 +1,7 @@
 /* $Id$ */
 
-#ifndef _INCLUDED_MCAL_H
-#define _INCLUDED_MCAL_H
+#ifndef PHP_MCAL_H
+#define PHP_MCAL_H
 
 #if HAVE_MCAL
 

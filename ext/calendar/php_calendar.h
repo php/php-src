@@ -1,5 +1,5 @@
-#ifndef _INCLUDED_CALENDAR_H
-#define _INCLUDED_CALENDAR_H
+#ifndef PHP_CALENDAR_H
+#define PHP_CALENDAR_H
 
 
 

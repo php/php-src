@@ -31,8 +31,8 @@
 
 /* $Id$ */
 
-#ifndef _PHPMATH_H
-#define _PHPMATH_H
+#ifndef PHP_MATH_H
+#define PHP_MATH_H
 PHP_FUNCTION(sin);
 PHP_FUNCTION(cos);
 PHP_FUNCTION(tan);
@@ -121,4 +121,4 @@ PHP_FUNCTION(rad2deg);
 #define M_SQRT1_2      0.70710678118654752440  /* 1/sqrt(2) */
 #endif
 
-#endif /* _PHPMATH_H */
+#endif /* PHP_MATH_H */

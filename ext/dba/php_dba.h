@@ -29,8 +29,8 @@
 
 /* $Id$ */
 
-#ifndef _DBA_H
-#define _DBA_H
+#ifndef PHP_DBA_H
+#define PHP_DBA_H
 
 #if HAVE_DBA
 

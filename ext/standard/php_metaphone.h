@@ -18,8 +18,8 @@
  
 /* $Id$ */
 
-#ifndef _php_metaphone_h
-#define _php_metaphone_h
+#ifndef PHP_METAPHONE_H
+#define PHP_METAPHONE_H
 
 PHP_FUNCTION(metaphone);
 

@@ -26,8 +26,8 @@
    | Authors: Rasmus Lerdorf <rasmus@lerdorf.on.ca>                       |
    +----------------------------------------------------------------------+
  */
-#ifndef _md5_h
-#define _md5_h
+#ifndef MD5_H
+#define MD5_H
 /* MD5.H - header file for MD5C.C
  */
 

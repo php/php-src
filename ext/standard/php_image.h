@@ -18,9 +18,9 @@
 
 /* $Id$ */
 
-#ifndef _IMAGE_H
-#define _IMAGE_H
+#ifndef PHP_IMAGE_H
+#define PHP_IMAGE_H
 
 PHP_FUNCTION(getimagesize);
 
-#endif /* _IMAGE_H */
+#endif /* PHP_IMAGE_H */

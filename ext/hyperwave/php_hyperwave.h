@@ -25,8 +25,8 @@
 
 /* $Id$ */
 
-#ifndef _HW_H
-#define _HW_H
+#ifndef PHP_HYPERWAVE_H
+#define PHP_HYPERWAVE_H
 
 #ifdef PHP_WIN32
 #define PHP_HW_API __declspec(dllexport)
@@ -155,5 +155,5 @@ PHP_FUNCTION(hw_mapid);
 #define hw_module_ptr NULL
 #endif /* HYPERWAVE */
 #define phpext_hyperwave_ptr hw_module_ptr
-#endif /* _HW_H */
+#endif /* PHP_HYPERWAVE_H */
 

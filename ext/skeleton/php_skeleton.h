@@ -1,7 +1,7 @@
 /* __header_here__ */
 
-#ifndef _PHP_EXTNAME_H
-#define _PHP_EXTNAME_H
+#ifndef PHP_EXTNAME_H
+#define PHP_EXTNAME_H
 
 /* You should tweak config.m4 so this symbol (or some else suitable)
    gets defined.
@@ -59,6 +59,6 @@ typedef struct {
 
 #endif
 
-#endif	/* _PHP_EXTNAME_H */
+#endif	/* PHP_EXTNAME_H */
 
 /* __footer_here__ */

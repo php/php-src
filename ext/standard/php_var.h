@@ -28,8 +28,8 @@
  */
 
 
-#ifndef _PHPVAR_H
-#define _PHPVAR_H
+#ifndef PHP_VAR_H
+#define PHP_VAR_H
 
 PHP_FUNCTION(var_dump);
 PHP_FUNCTION(serialize);
@@ -41,4 +41,4 @@ int php_var_unserialize(pval **rval, const char **p, const char *max);
 
 PHPAPI zend_class_entry *php_create_empty_class(char *class_name,int len);
 
-#endif /* _PHPVAR_H */
+#endif /* PHP_VAR_H */

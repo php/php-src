@@ -29,8 +29,8 @@
 
 /* $Id$ */
 
-#ifndef _WDDX_H
-#define _WDDX_H
+#ifndef PHP_WDDX_H
+#define PHP_WDDX_H
 
 #if HAVE_WDDX
 
@@ -56,4 +56,4 @@ PHP_FUNCTION(wddx_deserialize);
 
 #define phpext_wddx_ptr wddx_module_ptr
 
-#endif /* !_WDDX_H */
+#endif /* !PHP_WDDX_H */

@@ -1,7 +1,7 @@
 /* $Id$ */
 
-#ifndef _INCLUDED_ICAP_H
-#define _INCLUDED_ICAP_H
+#ifndef PHP_ICAP_H
+#define PHP_ICAP_H
 
 #if HAVE_ICAP
 
