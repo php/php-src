@@ -118,7 +118,7 @@ static void php_reg_eprint(int err, regex_t *re) {
 	/* get the length of the message */
 	buf_len = regerror(REG_ITOA | err, re, NULL, 0);
 	if (buf_len) {
-		buf = (char *)emalloc(buf_len * sizeof(char));
+		buf = (char *)safe_emalloc(buf_len, sizeof(char), 0);
 		if (!buf) return; /* fail silently */
 		/* finally, get the error message */
 		regerror(REG_ITOA | err, re, buf, buf_len);
@@ -130,7 +130,7 @@ static void php_reg_eprint(int err, regex_t *re) {
 	if (len) {
 		TSRMLS_FETCH();
 
-		message = (char *)emalloc((buf_len + len + 2) * sizeof(char));
+		message = (char *)safe_emalloc((buf_len + len + 2), sizeof(char), 0);
 		if (!message) {
 			return; /* fail silently */
 		}
@@ -298,7 +298,7 @@ PHPAPI char *php_reg_replace(const char *pattern, const char *replace, const cha
 	/* start with a buffer that is twice the size of the stringo
 	   we're doing replacements in */
 	buf_len = 2 * string_len + 1;
-	buf = emalloc(buf_len * sizeof(char));
+	buf = safe_emalloc(buf_len, sizeof(char), 0);
 
 	err = pos = 0;
 	buf[0] = '\0';
@@ -373,7 +373,7 @@ PHPAPI char *php_reg_replace(const char *pattern, const char *replace, const cha
 				new_l = strlen (buf) + 1;
 				if (new_l + 1 > buf_len) {
 					buf_len = 1 + buf_len + 2 * new_l;
-					nbuf = emalloc(buf_len * sizeof(char));
+					nbuf = safe_emalloc(buf_len, sizeof(char), 0);
 					strcpy(nbuf, buf);
 					efree(buf);
 					buf = nbuf;
@@ -388,7 +388,7 @@ PHPAPI char *php_reg_replace(const char *pattern, const char *replace, const cha
 			new_l = strlen(buf) + strlen(&string[pos]);
 			if (new_l + 1 > buf_len) {
 				buf_len = new_l + 1; /* now we know exactly how long it is */
-				nbuf = emalloc(buf_len * sizeof(char));
+				nbuf = safe_emalloc(buf_len, sizeof(char), 0);
 				strcpy(nbuf, buf);
 				efree(buf);
 				buf = nbuf;
@@ -607,7 +607,7 @@ PHPAPI PHP_FUNCTION(sql_regcase)
 	}	
 	convert_to_string_ex(string);
 	
-	tmp = emalloc((Z_STRLEN_PP(string) * 4) + 1);
+	tmp = safe_emalloc(Z_STRLEN_PP(string), 4, 1);
 	
 	for (i = j = 0; i < Z_STRLEN_PP(string); i++) {
 		c = (unsigned char) Z_STRVAL_PP(string)[i];

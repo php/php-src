@@ -118,7 +118,7 @@ static char *php_bin2hex(const unsigned char *old, const size_t oldlen, size_t *
 	register unsigned char *result = NULL;
 	size_t i, j;
 
-	result = (char *) emalloc(oldlen * 2 * sizeof(char) + 1);
+	result = (char *) safe_emalloc(oldlen * 2, sizeof(char), 1);
 	
 	for (i = j = 0; i < oldlen; i++) {
 		result[j++] = hexconvtab[old[i] >> 4];
@@ -1707,7 +1707,7 @@ static char *php_chunk_split(char *src, int srclen, char *end, int endlen, int c
 	chunks = srclen / chunklen;
 	restlen = srclen - chunks * chunklen; /* srclen % chunklen */
 
-	dest = emalloc((srclen + (chunks + 1) * endlen + 1) * sizeof(char));
+	dest = safe_emalloc((srclen + (chunks + 1) * endlen + 1), sizeof(char), 0);
 
 	for (p = src, q = dest; p < (src + srclen - chunklen + 1); ) {
 		memcpy(q, p, chunklen);
@@ -2100,7 +2100,7 @@ PHP_FUNCTION(quotemeta)
 		RETURN_FALSE;
 	}
 	
-	str = emalloc(2 * Z_STRLEN_PP(arg) + 1);
+	str = safe_emalloc(2, Z_STRLEN_PP(arg), 1);
 	
 	for (p = old, q = str; p != old_end; p++) {
 		c = *p;
@@ -2727,7 +2727,7 @@ PHPAPI void php_stripcslashes(char *str, int *len)
 PHPAPI char *php_addcslashes(char *str, int length, int *new_length, int should_free, char *what, int wlength TSRMLS_DC)
 {
 	char flags[256];
-	char *new_str = emalloc((length?length:(length=strlen(str)))*4+1); 
+	char *new_str = safe_emalloc(4, (length?length:(length=strlen(str))), 1);
 	char *source, *target;
 	char *end;
 	char c;
@@ -2795,7 +2795,7 @@ PHPAPI char *php_addslashes(char *str, int length, int *new_length, int should_f
 		*new_length = 0;
 		return str;
 	}
-	new_str = (char *) emalloc((length ? length : (length = strlen(str))) * 2 + 1);
+	new_str = (char *) safe_emalloc(2, (length ? length : (length = strlen(str))), 1);
 	source = str;
 	end = source + length;
 	target = new_str;
@@ -2948,7 +2948,7 @@ PHPAPI char *php_str_to_str_ex(char *haystack, int length,
 			if (str_len < needle_len) {
 				new_str = emalloc(length + 1);
 			} else {
-				new_str = emalloc((length / needle_len + 1) * str_len);
+				new_str = safe_emalloc((length / needle_len + 1), str_len, 0);
 			}
 
 			e = s = new_str;
@@ -3553,7 +3553,7 @@ PHP_FUNCTION(strip_tags)
    Set locale information */
 PHP_FUNCTION(setlocale)
 {
-	pval ***args = (pval ***) emalloc(sizeof(pval **)*ZEND_NUM_ARGS());
+	pval ***args = (pval ***) safe_emalloc(sizeof(pval **), ZEND_NUM_ARGS(), 0);
 	zval **pcategory, **plocale;
 	int i, cat, n_args=ZEND_NUM_ARGS();
 	char *loc, *retval;
@@ -4409,7 +4409,7 @@ PHP_FUNCTION(sscanf)
 		WRONG_PARAM_COUNT;
 	}
 
-	args = (zval ***) emalloc(argc * sizeof(zval **));
+	args = (zval ***) safe_emalloc(argc, sizeof(zval **), 0);
 	if (zend_get_parameters_array_ex(argc, args) == FAILURE) {
 		efree(args);
 		WRONG_PARAM_COUNT;

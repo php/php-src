@@ -471,7 +471,7 @@ php_formatted_print(int ht, int *len, int use_array, int format_offset TSRMLS_DC
 			|| (!use_array && argc < (1 + format_offset))) {
 		WRONG_PARAM_COUNT_WITH_RETVAL(NULL);
 	}
-	args = (zval ***)emalloc(argc * sizeof(zval *));
+	args = (zval ***)safe_emalloc(argc, sizeof(zval *), 0);
 
 	if (zend_get_parameters_array_ex(argc, args) == FAILURE) {
 		efree(args);
@@ -490,7 +490,7 @@ php_formatted_print(int ht, int *len, int use_array, int format_offset TSRMLS_DC
 		convert_to_array_ex(array);
 		
 		argc = 1 + zend_hash_num_elements(Z_ARRVAL_PP(array));
-		newargs = (zval ***)emalloc(argc * sizeof(zval *));
+		newargs = (zval ***)safe_emalloc(argc, sizeof(zval *), 0);
 		newargs[0] = z_format;
 		
 		for (zend_hash_internal_pointer_reset(Z_ARRVAL_PP(array));

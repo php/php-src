@@ -263,7 +263,7 @@ char *php_escape_shell_cmd(char *str) {
 	char *p = NULL;
 
 	l = strlen(str);
-	cmd = emalloc(2 * l + 1);
+	cmd = safe_emalloc(2, l, 1);
 	
 	for (x = 0, y = 0; x < l; x++) {
 		switch (str[x]) {
@@ -320,7 +320,7 @@ char *php_escape_shell_arg(char *str) {
 	y = 0;
 	l = strlen(str);
 	
-	cmd = emalloc(4 * l + 3); /* worst case */
+	cmd = safe_emalloc(4, l, 3); /* worst case */
 	
 	cmd[y++] = '\'';
 	

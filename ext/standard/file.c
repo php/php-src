@@ -953,7 +953,7 @@ PHPAPI PHP_FUNCTION(fgetc)
 
 	php_stream_from_zval(stream, arg1);
 
-	buf = emalloc(2 * sizeof(char));
+	buf = safe_emalloc(2, sizeof(char), 0);
 
 	result = php_stream_getc(stream);
 
@@ -1019,7 +1019,7 @@ PHPAPI PHP_FUNCTION(fgetss)
 		}
 
 		len = (size_t) Z_LVAL_PP(bytes);
-		buf = emalloc(sizeof(char) * (len + 1));
+		buf = safe_emalloc(sizeof(char), (len + 1), 0);
 		/*needed because recv doesnt set null char at end*/
 		memset(buf, 0, len + 1);
 	}
@@ -1055,7 +1055,7 @@ PHP_FUNCTION(fscanf)
 	if (argCount < 2) {
 		WRONG_PARAM_COUNT;
 	}
-	args = (zval ***)emalloc(argCount * sizeof(zval **));
+	args = (zval ***)safe_emalloc(argCount, sizeof(zval **), 0);
 	if (zend_get_parameters_array_ex(argCount, args) == FAILURE) {
 		efree( args );
 		WRONG_PARAM_COUNT;
