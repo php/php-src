@@ -122,7 +122,7 @@ void init_executor(CLS_D ELS_DC)
 
 void shutdown_executor(ELS_D)
 {
-	zval_dtor(EG(return_value));
+	zval_dtor(&EG(global_return_value));
 	zend_ptr_stack_destroy(&EG(arg_types_stack));
 	zend_stack_destroy(&EG(overloaded_objects_stack));
 			
