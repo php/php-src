@@ -28,6 +28,7 @@ Open:
     chunk_split                 (3)
     socket_select               (4)
     php_imagepolygon		(5)
+    imagesetstyle		(6)
 	
 (1) heap corruption, mostly visible in malloc-related calls.  Whether you see 
     this or not might depend on your libc/compiler.  Hard to track down,
@@ -79,6 +80,10 @@ Methodology
 (5) integer overflow inside php_imagepolygon and possible subsequent 
     integer overflows inside gdlib's gdImageFilledPolygon().
 
+(6) integer overflow if the number of elements in the array passed as
+    second argument * sizeof(int) result in an overflow.
+    gdImageSetStyle function called by this php wrapper can die for the
+    same reason.  
 
 Ammendment 1.
 
