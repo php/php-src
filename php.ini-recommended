@@ -665,8 +665,10 @@ mysql.default_password =
 ; Maximum time (in secondes) for connect timeout. -1 means no limimt
 mysql.connect_timeout = -1
 
-; Trace mode.
+; Trace mode. When trace_mode is active (=On), warnings for table/index scans and
+; SQL-Erros will be displayed.
 mysql.trace_mode = Off
+
 [mSQL]
 ; Allow or prevent persistent links.
 msql.allow_persistent = On
