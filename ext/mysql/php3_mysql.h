@@ -116,4 +116,6 @@ extern ZEND_API php_mysql_globals mysql_globals;
 
 #endif
 
+#define phpext_mysql_ptr mysql_module_ptr
+
 #endif /* _PHP3_MYSQL_H */
