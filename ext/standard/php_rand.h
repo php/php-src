@@ -36,4 +36,26 @@
 #define PHP_RAND_MAX RAND_MAX
 #endif
 
+/* Define rand Function wrapper */
+#ifdef HAVE_RANDOM
+#define php_rand() random()
+#else
+#ifdef HAVE_LRAND48
+#define php_rand() lrand48()
+#else
+#define php_rand() rand()
+#endif
+#endif
+
+/* Define srand Function wrapper */
+#ifdef HAVE_SRANDOM
+#define php_srand(seed) srandom((unsigned int)seed)
+#else
+#ifdef HAVE_SRAND48
+#define php_srand(seed) srand48((long)seed)
+#else
+#define php_srand(seed) srand((unsigned int)seed)
+#endif
+#endif
+
 #endif	/* PHP_RAND_H */

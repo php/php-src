@@ -85,13 +85,9 @@ extern char *crypt(char *__key,char *__salt);
 #define PHP_STD_DES_CRYPT 1
 #endif
 
-#if HAVE_RANDOM
-#define PHP_CRYPT_RAND random()
-#elif HAVE_LRAND48
-#define PHP_CRYPT_RAND lrand48()
-#else
-#define PHP_CRYPT_RAND rand()
-#endif
+
+#define PHP_CRYPT_RAND php_rand()
+
 
 PHP_MINIT_FUNCTION(crypt)
 {
@@ -105,13 +101,7 @@ PHP_MINIT_FUNCTION(crypt)
     REGISTER_LONG_CONSTANT("CRYPT_MD5", PHP_MD5_CRYPT, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CRYPT_BLOWFISH", PHP_BLOWFISH_CRYPT, CONST_CS | CONST_PERSISTENT);
 
-#if HAVE_SRANDOM
-	srandom((unsigned int) time(0) * getpid() * (php_combined_lcg() * 10000.0));
-#elif HAVE_SRAND48
-	srand48((long) time(0) * (long) getpid() * (long) (php_combined_lcg() * 10000.0));
-#else
-	srand((unsigned int) time(0) * getpid() * (php_combined_lcg() * 10000.0));
-#endif
+	php_srand(time(0) * getpid() * (php_combined_lcg() * 10000.0));
 
     return SUCCESS;
 }

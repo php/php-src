@@ -1364,18 +1364,7 @@ PHP_FUNCTION(range)
 
 
 static int array_data_shuffle(const void *a, const void*b) {
-	return (
-	/* This is just a little messy. */
-#ifdef HAVE_RANDOM
-        random()
-#else
-#ifdef HAVE_LRAND48
-        lrand48()
-#else
-        rand()
-#endif
-#endif
-	% 2) ? 1 : -1;
+	return (php_rand() % 2) ? 1 : -1;
 }
 
 
