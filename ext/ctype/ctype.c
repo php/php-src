@@ -99,7 +99,7 @@ PHP_MINFO_FUNCTION(ctype)
 	case IS_LONG: \
 		if (Z_LVAL_P(c) <= 255 && Z_LVAL_P(c) >= 0) { \
 			RETURN_BOOL(iswhat(Z_LVAL_P(c))); \
-		} else if (Z_LVAL_P(c) >= -128) { \
+		} else if (Z_LVAL_P(c) >= -128 && Z_LVAL_P(c) < 0) { \
 			RETURN_BOOL(iswhat(Z_LVAL_P(c) + 256)); \
 		} \
 		SEPARATE_ZVAL(&c);	\
