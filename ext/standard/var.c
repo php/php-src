@@ -51,7 +51,7 @@ static int php_array_element_dump(zval **zv, int num_args, va_list args, zend_ha
 		php_printf("%*c[%ld]=>\n", level + 1, ' ', hash_key->h);
 	} else { /* string key */
 		if (va_arg(args, int) && hash_key->arKey[0] == '\0') { 
-			/* XXX: perphaps when we are inside the class we should permit access to 
+			/* XXX: perhaps when we are inside the class we should permit access to 
 			 * private & protected values
 			 */
 			return 0;
