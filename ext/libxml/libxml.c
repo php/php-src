@@ -50,6 +50,12 @@
 /* a true global for initialization */
 int _php_libxml_initialized = 0;
 
+typedef struct _php_libxml_func_handler {
+	php_libxml_export_node export_func;
+} php_libxml_func_handler;
+
+static HashTable php_libxml_exports;
+
 #ifdef ZTS
 int libxml_globals_id;
 #else
@@ -397,6 +403,8 @@ PHP_LIBXML_API void php_libxml_initialize() {
 		/* report errors via handler rather than stderr */
 		xmlSetGenericErrorFunc(NULL, php_libxml_error_handler);
 
+		zend_hash_init(&php_libxml_exports, 0, NULL, NULL, 1);
+
 		_php_libxml_initialized = 1;
 	}
 }
@@ -406,6 +414,7 @@ PHP_LIBXML_API void php_libxml_shutdown() {
 		/* reset libxml generic error handling */
 		xmlSetGenericErrorFunc(NULL, NULL);
 		xmlCleanupParser();
+		zend_hash_destroy(&php_libxml_exports);
 		_php_libxml_initialized = 0;
 	}
 }
@@ -434,6 +443,7 @@ PHP_RINIT_FUNCTION(libxml)
 PHP_MSHUTDOWN_FUNCTION(libxml)
 {
 	php_libxml_shutdown();
+
 	return SUCCESS;
 }
 
@@ -474,7 +484,39 @@ PHP_FUNCTION(libxml_set_streams_context)
 }
 /* }}} */
 
+
 /* {{{ Common functions shared by extensions */
+int php_libxml_register_export(zend_class_entry *ce, php_libxml_export_node export_function)
+{
+	php_libxml_func_handler export_hnd;
+	
+	/* Initialize in case this module hasnt been loaded yet */
+	php_libxml_initialize();
+	export_hnd.export_func = export_function;
+
+    return zend_hash_add(&php_libxml_exports, ce->name, ce->name_length + 1, &export_hnd, sizeof(export_hnd), NULL);
+}
+
+PHP_LIBXML_API xmlNodePtr php_libxml_import_node(zval *object TSRMLS_DC)
+{
+	zend_class_entry *ce = NULL;
+	xmlNodePtr node = NULL;
+	php_libxml_func_handler *export_hnd;
+
+	if (object->type == IS_OBJECT) {
+		ce = Z_OBJCE_P(object);
+		while (ce->parent != NULL) {
+			ce = ce->parent;
+		}
+		if (zend_hash_find(&php_libxml_exports, ce->name, ce->name_length + 1, (void **) &export_hnd)  == SUCCESS) {
+			node = export_hnd->export_func(object TSRMLS_CC);
+		}
+    }
+
+	return node;
+
+}
+
 int php_libxml_increment_node_ptr(php_libxml_node_object *object, xmlNodePtr node, void *private_data TSRMLS_DC)
 {
 	int ret_refcount = -1;

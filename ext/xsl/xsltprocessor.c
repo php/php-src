@@ -296,19 +296,24 @@ PHP_FUNCTION(xsl_xsltprocessor_import_stylesheet)
 	xmlDoc *doc = NULL, *newdoc = NULL;
 	xsltStylesheetPtr sheetp, oldsheetp;
 	xsl_object *intern;
-	php_libxml_node_object *docobj;
 	int prevSubstValue, prevExtDtdValue, clone_docu = 0;
-	xmlNode *nodep;
+	xmlNode *nodep = NULL;
 	zend_object_handlers *std_hnd;
 	zval *cloneDocu, *member;
-
-	DOM_GET_THIS(id);
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o", &docp) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oo", &id, xsl_xsltprocessor_class_entry, &docp) == FAILURE) {
 		RETURN_FALSE;
 	}
 
-	DOC_GET_OBJ(doc, docp, xmlDocPtr, docobj);
+	nodep = php_libxml_import_node(docp TSRMLS_CC);
+	
+	if (nodep) {
+		doc = nodep->doc;
+	}
+	if (doc == NULL) {
+		php_error(E_WARNING, "Invalid Document");
+		RETURN_NULL();
+	}
 
 	/* libxslt uses _private, so we must copy the imported 
 	stylesheet document otherwise the node proxies will be a mess */

@@ -1490,6 +1490,16 @@ static void php_sxe_iterator_rewind(zend_object_iterator *iter TSRMLS_DC)
 }
 
 
+void *simplexml_export_node(zval *object TSRMLS_DC)
+{
+	php_sxe_object *sxe;
+	xmlNodePtr node;
+
+	sxe = php_sxe_fetch_object(object TSRMLS_CC);
+	GET_NODE(sxe, node);
+	return php_sxe_get_first_node(sxe, node TSRMLS_CC);	
+}
+
 #ifdef HAVE_DOM
 /* {{{ proto simplemxml_element simplexml_import_dom(domNode node [, string class_name])
    Get a simplexml_element object from dom to allow for processing */
@@ -1509,8 +1519,9 @@ PHP_FUNCTION(simplexml_import_dom)
 
 	object = (php_libxml_node_object *)zend_object_store_get_object(node TSRMLS_CC);
 
-	if (object->node && object->node->node) {
-		nodep = object->node->node;
+	nodep = php_libxml_import_node(node TSRMLS_CC);
+
+	if (nodep) {
 		if (nodep->doc == NULL) {
 			php_error(E_WARNING, "Imported Node must have associated Document");
 			RETURN_NULL();
@@ -1602,6 +1613,8 @@ PHP_MINIT_FUNCTION(simplexml)
 		PHP_MINIT(spl_sxe)(INIT_FUNC_ARGS_PASSTHRU);
 	}
 #endif /* HAVE_SPL */
+
+	php_libxml_register_export(sxe_class_entry, simplexml_export_node);
 
 	return SUCCESS;
 }
