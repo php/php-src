@@ -1,3 +1,130 @@
+2001-09-03  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/standard/pack.c: - update to php4 api
+    - expand case statements, ie:
+
+    case 1: case 2: case 3:
+
+    to
+
+    case 1:
+    case 2:
+    case 3:
+
+    - Remove un-necessary brackets and parentheses (only when it takes away from
+    readability, I know this is quite arbitrary, but I did my best :)
+
+    * ext/sablot/sablot.c: fix compile on sun forte cc
+
+2001-09-03  Andi Gutmans  <andi@zend.com>
+
+    * ext/standard/array.c: - Fix thread safe mode.
+    - Please don't use Java style function braces.
+
+2001-09-03  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/HTML/Menu.php: trailing ws
+
+2001-09-03  Rasmus Lerdorf  <rasmus@php.net>
+
+    * main/php_ini.c: MFH
+
+    * main/php_ini.c:
+    This is a list of char *'s, not zvals (caught by Nick - see bug #13107)
+
+2001-09-03  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/php_rand.h
+      ext/standard/rand.c: - Fix broken build
+
+2001-09-03  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/standard/math.c: Add _php_math_zvaltobase and _php_math_basetozval
+    This allows to use bindec, etc. functions to convert numbers longer
+    than fits in long, using floats instead.
+    Note: the functions like decbin still don't use the zval-ed functions,
+    so they work only on longs yet.
+
+2001-09-03  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/HTML/Menu_Browser.php: some style/ws
+
+2001-09-03  Jeroen van Wolffelaar  <jeroen@A-Eskwadraat.nl>
+
+    * ext/standard/php_rand.h:
+    Removed outdated comment until I've got a better one
+
+    * ext/standard/php_rand.h
+      ext/standard/rand.c:
+    Kill some warnings/errors (reported by Sebastian, more to come, but
+    could take some time. Update of ZTS-builderrors is welcome)
+
+2001-09-03  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/standard/reg.c: should be this
+
+    * ext/standard/reg.c: - Update to the PHP4 API (newer macros)
+    - Improve error reporting from split()
+    - Some minor speed improvements
+
+    * ext/standard/string.c: stray tabs
+
+    * ext/standard/string.c:
+    cleanup sscanf() just a tiny bit, just so it looks like the rest of the code
+    in the string.c file.
+
+2001-09-03  Jani Taskinen  <sniper@iki.fi>
+
+    * main/SAPI.c
+      main/php_content_types.c
+      main/rfc1867.c: First step for chunkifying the HTTP uploads.
+
+2001-09-03  Richard Heyes  <richard.heyes@heyes-computing.net>
+
+    * pear/Mail/mimeDecode.php:
+    Added initial release of mime decoding class. Currently somewhat experimental,
+    but is functional.
+
+2001-09-03  Jeroen van Wolffelaar  <jeroen@A-Eskwadraat.nl>
+
+    * ext/standard/array.c:
+    Fix array_rand and array_suffle to use php_rand correctly
+
+    * ext/standard/array.c: Fix prototype
+
+    * NEWS:
+    Added RAND_REDESIGN change to NEWS (could be more elaborate, but IMHO
+    that should be in the manual?)
+
+    * ext/standard/rand.c:
+    Fix SIGSEGV because HAS_SRAND didn't check wether the entry existed at
+    all
+
+    * ext/standard/rand_mt.c
+      ext/standard/rand_sys.c: Add forgotten files to MAIN
+
+    * ext/standard/rand.c: Update credits
+
+    * ext/standard/Makefile.in
+      ext/standard/array.c
+      ext/standard/basic_functions.c
+      ext/standard/basic_functions.h
+      ext/standard/crypt.c
+      ext/standard/lcg.c
+      ext/standard/php_crypt.h
+      ext/standard/php_math.h
+      ext/standard/php_rand.h
+      ext/standard/php_standard.h
+      ext/standard/rand.c: Merge RAND_REDESIGN into MAIN
+
+    * ext/standard/rand.c
+      ext/standard/php_rand.h: Implement the proposal v2
+
+    Added PHPAPI php_drand, which returns a double in the range [0,1)
+
+    RAND_REDESIGN completed, prohibited some minor points. Ready to
+    be re-entered in MAIN branch
+
 2001-09-02  Jeroen van Wolffelaar  <jeroen@A-Eskwadraat.nl>
 
     * ext/standard/php_rand.h
