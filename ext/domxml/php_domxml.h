@@ -35,7 +35,7 @@
 #define _PHP_DOMXML_H
 
 #if HAVE_DOMXML
-#include <gnome-xml/parser.h>
+#include <libxml/parser.h>
 
 extern zend_module_entry php_domxml_module_entry;
 #define php_domxml_module_ptr &php_domxml_module_entry
