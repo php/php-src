@@ -534,8 +534,9 @@ int main(int argc, char *argv[])
 				break;
 
 			case 'l': /* syntax check mode */
-				if (behavior != PHP_MODE_STANDARD)
+				if (behavior != PHP_MODE_STANDARD) {
 					break;
+				}
 				no_headers = 1;
 				behavior=PHP_MODE_LINT;
 				break;
