@@ -199,12 +199,19 @@ time	: tUNUMBER tMERIDIAN {
 	/* | pgsqltime  ... shares a common spec with ISO8601 */
 	;
 
-iso8601time_colon: HMStime_with_colon sec_fraction_part iso8601zonepart {
+iso8601time_colon: HMStime_with_colon sec_fraction_part rel {
 	    ((struct date_yy *)parm)->yyMeridian = MER24;
 	}
-	|  HMtime_with_colon sec_fraction_part iso8601zonepart {
-	    ((struct date_yy *)parm)->yySeconds = 0;
+	| HMtime_with_colon sec_fraction_part rel {
 	    ((struct date_yy *)parm)->yyMeridian = MER24;
+	    ((struct date_yy *)parm)->yySeconds = 0;
+	}
+	| HMStime_with_colon sec_fraction_part iso8601zonepart {
+	    ((struct date_yy *)parm)->yyMeridian = MER24;
+	}
+	| HMtime_with_colon sec_fraction_part iso8601zonepart {
+	    ((struct date_yy *)parm)->yyMeridian = MER24;
+	    ((struct date_yy *)parm)->yySeconds = 0;
 	}
     ;
 
@@ -1071,7 +1078,7 @@ time_t php_parse_date(char *p, time_t *now)
   tm.tm_year = ToYear (date.yyYear) - TM_YEAR_ORIGIN + date.yyRelYear;
   tm.tm_mon = date.yyMonth - 1 + date.yyRelMonth;
   tm.tm_mday = date.yyDay + date.yyRelDay;
-  if (date.yyHaveTime || (date.yyHaveRel && !date.yyHaveDate && !date.yyHaveDay))
+  if (date.yyHaveTime /*|| (date.yyHaveRel && !date.yyHaveDate && !date.yyHaveDay) */)
     {
       tm.tm_hour = ToHour (date.yyHour, date.yyMeridian);
       if (tm.tm_hour < 0)
