@@ -196,14 +196,14 @@ typedef struct _zend_file_handle {
 
 BEGIN_EXTERN_C()
 
-void init_compiler(CLS_D ELS_DC);
+void init_compiler(CLS_D TSRMLS_DC);
 void shutdown_compiler(CLS_D);
 void zend_init_compiler_data_structures(CLS_D);
 
 extern ZEND_API zend_op_array *(*zend_compile_file)(zend_file_handle *file_handle, int type CLS_DC);
 
-void zend_activate(CLS_D ELS_DC);
-void zend_deactivate(CLS_D ELS_DC);
+void zend_activate(CLS_D TSRMLS_DC);
+void zend_deactivate(CLS_D TSRMLS_DC);
 void zend_activate_modules(void);
 void zend_deactivate_modules(void);
 
@@ -365,8 +365,8 @@ ZEND_API void function_add_ref(zend_function *function);
 /* helper functions in zend_language_scanner.l */
 ZEND_API zend_op_array *compile_file(zend_file_handle *file_handle, int type CLS_DC);
 ZEND_API zend_op_array *compile_string(zval *source_string, char *filename CLS_DC);	
-ZEND_API zend_op_array *compile_filename(int type, zval *filename CLS_DC ELS_DC);
-ZEND_API int zend_execute_scripts(int type CLS_DC ELS_DC, int file_count, ...);
+ZEND_API zend_op_array *compile_filename(int type, zval *filename CLS_DC TSRMLS_DC);
+ZEND_API int zend_execute_scripts(int type CLS_DC TSRMLS_DC, int file_count, ...);
 ZEND_API int open_file_for_scanning(zend_file_handle *file_handle CLS_DC);
 ZEND_API void init_op_array(zend_op_array *op_array, int type, int initial_ops_size CLS_DC);
 ZEND_API void destroy_op_array(zend_op_array *op_array);

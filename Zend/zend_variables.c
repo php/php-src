@@ -45,7 +45,7 @@ ZEND_API void _zval_dtor(zval *zvalue ZEND_FILE_LINE_DC)
 			break;
 		case IS_ARRAY:
 		case IS_CONSTANT_ARRAY: {
-				ELS_FETCH();
+				TSRMLS_FETCH();
 
 				if (zvalue->value.ht && (zvalue->value.ht != &EG(symbol_table))) {
 					zend_hash_destroy(zvalue->value.ht);
@@ -103,7 +103,7 @@ ZEND_API int _zval_copy_ctor(zval *zvalue ZEND_FILE_LINE_DC)
 		case IS_CONSTANT_ARRAY: {
 				zval *tmp;
 				HashTable *original_ht = zvalue->value.ht;
-				ELS_FETCH();
+				TSRMLS_FETCH();
 
 				if (zvalue->value.ht == &EG(symbol_table)) {
 					return SUCCESS; /* do nothing */

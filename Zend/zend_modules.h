@@ -23,8 +23,8 @@
 
 #include "zend.h"
 
-#define INIT_FUNC_ARGS		int type, int module_number ELS_DC
-#define INIT_FUNC_ARGS_PASSTHRU	type, module_number ELS_CC
+#define INIT_FUNC_ARGS		int type, int module_number TSRMLS_DC
+#define INIT_FUNC_ARGS_PASSTHRU	type, module_number TSRMLS_CC
 #define SHUTDOWN_FUNC_ARGS	int type, int module_number
 #define SHUTDOWN_FUNC_ARGS_PASSTHRU type, module_number
 #define ZEND_MODULE_INFO_FUNC_ARGS zend_module_entry *zend_module

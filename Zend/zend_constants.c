@@ -73,13 +73,13 @@ static int clean_module_constant(zend_constant *c, int *module_number)
 
 void clean_module_constants(int module_number)
 {
-	ELS_FETCH();
+	TSRMLS_FETCH();
 
 	zend_hash_apply_with_argument(EG(zend_constants), (int (*)(void *,void *)) clean_module_constant, (void *) &module_number);
 }
 
 
-int zend_startup_constants(ELS_D)
+int zend_startup_constants(TSRMLS_D)
 {
 #ifdef ZEND_WIN32
 	DWORD dwBuild=0;
@@ -98,7 +98,7 @@ int zend_startup_constants(ELS_D)
 
 
 
-void zend_register_standard_constants(ELS_D)
+void zend_register_standard_constants(TSRMLS_D)
 {
 	REGISTER_MAIN_LONG_CONSTANT("E_ERROR", E_ERROR, CONST_PERSISTENT | CONST_CS);
 	REGISTER_MAIN_LONG_CONSTANT("E_WARNING", E_WARNING, CONST_PERSISTENT | CONST_CS);
@@ -126,29 +126,29 @@ void zend_register_standard_constants(ELS_D)
 		c.name_len = sizeof("TRUE");
 		c.value.value.lval = 1;
 		c.value.type = IS_BOOL;
-		zend_register_constant(&c ELS_CC);
+		zend_register_constant(&c TSRMLS_CC);
 		
 		c.name = zend_strndup(ZEND_STRL("FALSE"));
 		c.name_len = sizeof("FALSE");
 		c.value.value.lval = 0;
 		c.value.type = IS_BOOL;
-		zend_register_constant(&c ELS_CC);
+		zend_register_constant(&c TSRMLS_CC);
 
 		c.name = zend_strndup(ZEND_STRL("ZEND_THREAD_SAFE"));
 		c.name_len = sizeof("ZEND_THREAD_SAFE");
 		c.value.value.lval = ZTS_V;
 		c.value.type = IS_BOOL;
-		zend_register_constant(&c ELS_CC);
+		zend_register_constant(&c TSRMLS_CC);
 
 		c.name = zend_strndup(ZEND_STRL("NULL"));
 		c.name_len = sizeof("NULL");
 		c.value.type = IS_NULL;
-		zend_register_constant(&c ELS_CC);
+		zend_register_constant(&c TSRMLS_CC);
 	}
 }
 
 
-int zend_shutdown_constants(ELS_D)
+int zend_shutdown_constants(TSRMLS_D)
 {
 	zend_hash_destroy(EG(zend_constants));
 	free(EG(zend_constants));
@@ -158,13 +158,13 @@ int zend_shutdown_constants(ELS_D)
 
 void clean_non_persistent_constants(void)
 {
-	ELS_FETCH();
+	TSRMLS_FETCH();
 
 	zend_hash_apply(EG(zend_constants), (int (*)(void *)) clean_non_persistent_constant);
 }
 
 
-ZEND_API void zend_register_long_constant(char *name, uint name_len, long lval, int flags, int module_number ELS_DC)
+ZEND_API void zend_register_long_constant(char *name, uint name_len, long lval, int flags, int module_number TSRMLS_DC)
 {
 	zend_constant c;
 	
@@ -174,11 +174,11 @@ ZEND_API void zend_register_long_constant(char *name, uint name_len, long lval, 
 	c.name = zend_strndup(name,name_len);
 	c.name_len = name_len;
 	c.module_number = module_number;
-	zend_register_constant(&c ELS_CC);
+	zend_register_constant(&c TSRMLS_CC);
 }
 
 
-ZEND_API void zend_register_double_constant(char *name, uint name_len, double dval, int flags, int module_number ELS_DC)
+ZEND_API void zend_register_double_constant(char *name, uint name_len, double dval, int flags, int module_number TSRMLS_DC)
 {
 	zend_constant c;
 	
@@ -188,11 +188,11 @@ ZEND_API void zend_register_double_constant(char *name, uint name_len, double dv
 	c.name = zend_strndup(name,name_len);
 	c.name_len = name_len;
 	c.module_number = module_number;
-	zend_register_constant(&c ELS_CC);
+	zend_register_constant(&c TSRMLS_CC);
 }
 
 
-ZEND_API void zend_register_stringl_constant(char *name, uint name_len, char *strval, uint strlen, int flags, int module_number ELS_DC)
+ZEND_API void zend_register_stringl_constant(char *name, uint name_len, char *strval, uint strlen, int flags, int module_number TSRMLS_DC)
 {
 	zend_constant c;
 	
@@ -203,13 +203,13 @@ ZEND_API void zend_register_stringl_constant(char *name, uint name_len, char *st
 	c.name = zend_strndup(name,name_len);
 	c.name_len = name_len;
 	c.module_number = module_number;
-	zend_register_constant(&c ELS_CC);
+	zend_register_constant(&c TSRMLS_CC);
 }
 
 
-ZEND_API void zend_register_string_constant(char *name, uint name_len, char *strval, int flags, int module_number ELS_DC)
+ZEND_API void zend_register_string_constant(char *name, uint name_len, char *strval, int flags, int module_number TSRMLS_DC)
 {
-	zend_register_stringl_constant(name, name_len, strval, strlen(strval), flags, module_number ELS_CC);
+	zend_register_stringl_constant(name, name_len, strval, strlen(strval), flags, module_number TSRMLS_CC);
 }
 
 
@@ -218,7 +218,7 @@ ZEND_API int zend_get_constant(char *name, uint name_len, zval *result)
 	zend_constant *c;
 	char *lookup_name = estrndup(name,name_len);
 	int retval;
-	ELS_FETCH();
+	TSRMLS_FETCH();
 
 	zend_str_tolower(lookup_name, name_len);
 
@@ -239,7 +239,7 @@ ZEND_API int zend_get_constant(char *name, uint name_len, zval *result)
 }
 
 
-ZEND_API int zend_register_constant(zend_constant *c ELS_DC)
+ZEND_API int zend_register_constant(zend_constant *c TSRMLS_DC)
 {
 	char *lowercase_name = zend_strndup(c->name, c->name_len);
 	int ret = SUCCESS;

@@ -68,7 +68,7 @@
 #define ZEND_EXTERN_MODULE_GLOBALS(module_name)								\
 	extern ts_rsrc_id module_name##_globals_id;
 #define ZEND_INIT_MODULE_GLOBALS(module_name, globals_ctor, globals_dtor)	\
-	module_name##_globals_id = ts_allocate_id(sizeof(zend_##module_name##_globals), (ts_allocate_ctor) globals_ctor, (ts_allocate_dtor) globals_dtor);
+	ts_allocate_id(&module_name##_globals_id, sizeof(zend_##module_name##_globals), (ts_allocate_ctor) globals_ctor, (ts_allocate_dtor) globals_dtor);
 
 #else
 

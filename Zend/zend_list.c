@@ -35,7 +35,7 @@ ZEND_API int zend_list_insert(void *ptr, int type)
 {
 	int index;
 	zend_rsrc_list_entry le;
-	ELS_FETCH();
+	TSRMLS_FETCH();
 
 	le.ptr=ptr;
 	le.type=type;
@@ -49,7 +49,7 @@ ZEND_API int zend_list_insert(void *ptr, int type)
 ZEND_API int zend_list_delete(int id)
 {
 	zend_rsrc_list_entry *le;
-	ELS_FETCH();
+	TSRMLS_FETCH();
 	
 	if (zend_hash_index_find(&EG(regular_list), id, (void **) &le)==SUCCESS) {
 /*		printf("del(%d): %d->%d\n", id, le->refcount, le->refcount-1); */
@@ -67,7 +67,7 @@ ZEND_API int zend_list_delete(int id)
 ZEND_API void *zend_list_find(int id, int *type)
 {
 	zend_rsrc_list_entry *le;
-	ELS_FETCH();
+	TSRMLS_FETCH();
 
 	if (zend_hash_index_find(&EG(regular_list), id, (void **) &le)==SUCCESS) {
 		*type = le->type;
@@ -82,7 +82,7 @@ ZEND_API void *zend_list_find(int id, int *type)
 ZEND_API int zend_list_addref(int id)
 {
 	zend_rsrc_list_entry *le;
-	ELS_FETCH();
+	TSRMLS_FETCH();
 	
 	if (zend_hash_index_find(&EG(regular_list), id, (void **) &le)==SUCCESS) {
 /*		printf("add(%d): %d->%d\n", id, le->refcount, le->refcount+1); */
@@ -212,7 +212,7 @@ void plist_entry_destructor(void *ptr)
 }
 
 
-int zend_init_rsrc_list(ELS_D)
+int zend_init_rsrc_list(TSRMLS_D)
 {
 	if (zend_hash_init(&EG(regular_list), 0, NULL, list_entry_destructor, 0)==SUCCESS) {
 		EG(regular_list).nNextFreeElement=1;	/* we don't want resource id 0 */
@@ -223,13 +223,13 @@ int zend_init_rsrc_list(ELS_D)
 }
 
 
-int zend_init_rsrc_plist(ELS_D)
+int zend_init_rsrc_plist(TSRMLS_D)
 {
 	return zend_hash_init_ex(&EG(persistent_list), 0, NULL, plist_entry_destructor, 1, 0);
 }
 
 
-void zend_destroy_rsrc_list(ELS_D)
+void zend_destroy_rsrc_list(TSRMLS_D)
 {
 	Bucket *p, *q;
 	HashTable *ht = &EG(regular_list);
@@ -260,7 +260,7 @@ void zend_destroy_rsrc_list(ELS_D)
 
 
 
-void zend_destroy_rsrc_plist(ELS_D)
+void zend_destroy_rsrc_plist(TSRMLS_D)
 {
 	zend_hash_reverse_destroy(&EG(persistent_list));
 }
@@ -279,7 +279,7 @@ static int clean_module_resource(zend_rsrc_list_entry *le, int *resource_id)
 static int zend_clean_module_rsrc_dtors_cb(zend_rsrc_list_dtors_entry *ld, int *module_number)
 {
 	if (ld->module_number == *module_number) {
-		ELS_FETCH();
+		TSRMLS_FETCH();
 
 		zend_hash_apply_with_argument(&EG(regular_list), (int (*)(void *,void *)) clean_module_resource, (void *) &(ld->resource_id));
 		zend_hash_apply_with_argument(&EG(persistent_list), (int (*)(void *,void *)) clean_module_resource, (void *) &(ld->resource_id));

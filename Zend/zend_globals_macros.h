@@ -50,19 +50,9 @@ int zendparse(void);
 
 /* Executor */
 #ifdef ZTS
-# define ELS_D	zend_executor_globals *executor_globals
-# define ELS_DC	, ELS_D
-# define ELS_C	executor_globals
-# define ELS_CC , ELS_C
-# define EG(v) (executor_globals->v)
-# define ELS_FETCH()	zend_executor_globals *executor_globals = (zend_executor_globals *) ts_resource(executor_globals_id)
+# define EG(v) TSRMG(executor_globals_id, zend_executor_globals *, v)
 #else
-# define ELS_D	void
-# define ELS_DC
-# define ELS_C
-# define ELS_CC
 # define EG(v) (executor_globals.v)
-# define ELS_FETCH()
 extern ZEND_API zend_executor_globals executor_globals;
 #endif
 

@@ -40,7 +40,7 @@ ZEND_API int zend_get_parameters(int ht, int param_count, ...)
 	int arg_count;
 	va_list ptr;
 	zval **param, *param_ptr;
-	ELS_FETCH();
+	TSRMLS_FETCH();
 
 	p = EG(argument_stack).top_element-2;
 	arg_count = (ulong) *p;
@@ -79,7 +79,7 @@ ZEND_API int zend_get_parameters_array(int ht, int param_count, zval **argument_
 	void **p;
 	int arg_count;
 	zval *param_ptr;
-	ELS_FETCH();
+	TSRMLS_FETCH();
 
 	p = EG(argument_stack).top_element-2;
 	arg_count = (ulong) *p;
@@ -119,7 +119,7 @@ ZEND_API int zend_get_parameters_ex(int param_count, ...)
 	int arg_count;
 	va_list ptr;
 	zval ***param;
-	ELS_FETCH();
+	TSRMLS_FETCH();
 
 	p = EG(argument_stack).top_element-2;
 	arg_count = (ulong) *p;
@@ -143,7 +143,7 @@ ZEND_API int zend_get_parameters_array_ex(int param_count, zval ***argument_arra
 {
 	void **p;
 	int arg_count;
-	ELS_FETCH();
+	TSRMLS_FETCH();
 
 	p = EG(argument_stack).top_element-2;
 	arg_count = (ulong) *p;
@@ -165,7 +165,7 @@ ZEND_API int ParameterPassedByReference(int ht, uint n)
 	void **p;
 	ulong arg_count;
 	zval *arg;
-	ELS_FETCH();
+	TSRMLS_FETCH();
 
 	p = EG(argument_stack).elements+EG(argument_stack).top-2;
 	arg_count = (ulong) *p;
@@ -479,7 +479,7 @@ static int zend_parse_va_args(int num_args, char *type_spec, va_list *va, int fl
 	void **p;
 	int arg_count;
 	int quiet = flags & ZEND_PARSE_PARAMS_QUIET;
-	ELS_FETCH();
+	TSRMLS_FETCH();
 
 	for (spec_walk = type_spec; *spec_walk; spec_walk++) {
 		c = *spec_walk;
@@ -1010,9 +1010,9 @@ ZEND_API int zend_startup_module(zend_module_entry *module)
 	if (module) {
 		module->module_number = zend_next_free_module();
 		if (module->module_startup_func) {
-			ELS_FETCH();
+			TSRMLS_FETCH();
 
-			if (module->module_startup_func(MODULE_PERSISTENT, module->module_number ELS_CC)==FAILURE) {
+			if (module->module_startup_func(MODULE_PERSISTENT, module->module_number TSRMLS_CC)==FAILURE) {
 				zend_error(E_CORE_ERROR,"Unable to start %s module",module->name);
 				return FAILURE;
 			}
@@ -1148,12 +1148,12 @@ void module_destructor(zend_module_entry *module)
 int module_registry_request_startup(zend_module_entry *module)
 {
 	if (module->request_startup_func) {
-		ELS_FETCH();
+		TSRMLS_FETCH();
 
 #if 0
 		zend_printf("%s:  Request startup\n",module->name);
 #endif
-		if (module->request_startup_func(module->type, module->module_number ELS_CC)==FAILURE) {
+		if (module->request_startup_func(module->type, module->module_number TSRMLS_CC)==FAILURE) {
 			zend_error(E_WARNING, "request_startup() for %s module failed", module->name);
 			exit(1);
 		}
@@ -1305,7 +1305,7 @@ zend_bool zend_is_callable(zval *callable, zend_bool syntax_only, char **callabl
 {
 	char *lcname;
 	int retval = 0;
-	ELS_FETCH();
+	TSRMLS_FETCH();
 
 	switch (Z_TYPE_P(callable)) {
 		case IS_STRING:

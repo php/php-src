@@ -33,7 +33,7 @@
 #endif
 
 
-ZEND_API void (*zend_execute)(zend_op_array *op_array ELS_DC);
+ZEND_API void (*zend_execute)(zend_op_array *op_array TSRMLS_DC);
 
 #ifdef ZEND_WIN32
 #include <process.h>
@@ -58,14 +58,14 @@ static void zend_handle_sigsegv(int dummy)
 		signal(SIGSEGV, SIG_DFL);
 	}
 	{
-		ELS_FETCH();
+		TSRMLS_FETCH();
 
 		fprintf(stderr, "SIGSEGV caught on opcode %d on opline %d of %s() at %s:%d\n\n",
 				active_opline->opcode,
 				active_opline-EG(active_op_array)->opcodes,
 				get_active_function_name(),
-				zend_get_executed_filename(ELS_C),
-				zend_get_executed_lineno(ELS_C));
+				zend_get_executed_filename(TSRMLS_C),
+				zend_get_executed_lineno(TSRMLS_C));
 	}
 	if (original_sigsegv_handler!=zend_handle_sigsegv) {
 		original_sigsegv_handler(dummy);
@@ -102,7 +102,7 @@ static int is_not_internal_class(zend_class_entry *ce)
 }
 
 
-void init_executor(CLS_D ELS_DC)
+void init_executor(CLS_D TSRMLS_DC)
 {
 	INIT_ZVAL(EG(uninitialized_zval));
 	INIT_ZVAL(EG(error_zval));
@@ -150,7 +150,7 @@ void init_executor(CLS_D ELS_DC)
 }
 
 
-void shutdown_executor(ELS_D)
+void shutdown_executor(TSRMLS_D)
 {
 	zend_try {
 		zend_ptr_stack_destroy(&EG(arg_types_stack));
@@ -177,7 +177,7 @@ void shutdown_executor(ELS_D)
 		zend_hash_apply(EG(class_table), (int (*)(void *)) is_not_internal_class);
 	} zend_end_try();
 
-	zend_destroy_rsrc_list(ELS_C); /* must be destroyed after the main symbol table and
+	zend_destroy_rsrc_list(TSRMLS_C); /* must be destroyed after the main symbol table and
 									* op arrays are destroyed.
 									*/
 
@@ -204,7 +204,7 @@ void shutdown_executor(ELS_D)
 
 ZEND_API char *get_active_function_name()
 {
-	ELS_FETCH();
+	TSRMLS_FETCH();
 
 	switch(EG(function_state_ptr)->function->type) {
 		case ZEND_USER_FUNCTION: {
@@ -226,7 +226,7 @@ ZEND_API char *get_active_function_name()
 }
 
 
-ZEND_API char *zend_get_executed_filename(ELS_D)
+ZEND_API char *zend_get_executed_filename(TSRMLS_D)
 {
 	if (EG(active_op_array)) {
 		return EG(active_op_array)->filename;
@@ -236,7 +236,7 @@ ZEND_API char *zend_get_executed_filename(ELS_D)
 }
 
 
-ZEND_API uint zend_get_executed_lineno(ELS_D)
+ZEND_API uint zend_get_executed_lineno(TSRMLS_D)
 {
 	if (EG(opline_ptr)) {
 		return active_opline->lineno;
@@ -248,7 +248,7 @@ ZEND_API uint zend_get_executed_lineno(ELS_D)
 
 ZEND_API zend_bool zend_is_executing()
 {
-	ELS_FETCH();
+	TSRMLS_FETCH();
 
 	return EG(in_execution);
 }
@@ -383,7 +383,7 @@ int call_user_function_ex(HashTable *function_table, zval **object_pp, zval *fun
 	int (*orig_unary_op)(zval *result, zval *op1);
 	int (*orig_binary_op)(zval *result, zval *op1, zval *op2);
 	zval function_name_copy;
-	ELS_FETCH();
+	TSRMLS_FETCH();
 
 	*retval_ptr_ptr = NULL;
 
@@ -493,7 +493,7 @@ int call_user_function_ex(HashTable *function_table, zval **object_pp, zval *fun
 			ALLOC_ZVAL(dummy);
 			INIT_ZVAL(*dummy);	
 			zend_hash_update(EG(active_symbol_table), "this", sizeof("this"), &dummy, sizeof(zval *), (void **) &this_ptr);
-			zend_assign_to_variable_reference(NULL, this_ptr, object_pp, NULL ELS_CC);
+			zend_assign_to_variable_reference(NULL, this_ptr, object_pp, NULL TSRMLS_CC);
 		}
 		original_return_value = EG(return_value_ptr_ptr);
 		original_op_array = EG(active_op_array);
@@ -504,7 +504,7 @@ int call_user_function_ex(HashTable *function_table, zval **object_pp, zval *fun
 		orig_free_op2 = EG(free_op2);
 		orig_unary_op = EG(unary_op);
 		orig_binary_op = EG(binary_op);
-		zend_execute(EG(active_op_array) ELS_CC);
+		zend_execute(EG(active_op_array) TSRMLS_CC);
 		if (!symbol_table) {
 			zend_hash_destroy(EG(active_symbol_table));
 			FREE_HASHTABLE(EG(active_symbol_table));
@@ -519,17 +519,17 @@ int call_user_function_ex(HashTable *function_table, zval **object_pp, zval *fun
 		EG(binary_op) = orig_binary_op;
 	} else {
 		ALLOC_INIT_ZVAL(*retval_ptr_ptr);
-		((zend_internal_function *) function_state.function)->handler(param_count, *retval_ptr_ptr, (object_pp?*object_pp:NULL), 1 ELS_CC);
+		((zend_internal_function *) function_state.function)->handler(param_count, *retval_ptr_ptr, (object_pp?*object_pp:NULL), 1 TSRMLS_CC);
 		INIT_PZVAL(*retval_ptr_ptr);
 	}
-	zend_ptr_stack_clear_multiple(ELS_C);
+	zend_ptr_stack_clear_multiple(TSRMLS_C);
 	EG(function_state_ptr) = original_function_state_ptr;
 
 	return SUCCESS;
 }
 
 
-ZEND_API int zend_eval_string(char *str, zval *retval_ptr, char *string_name CLS_DC ELS_DC)
+ZEND_API int zend_eval_string(char *str, zval *retval_ptr, char *string_name CLS_DC TSRMLS_DC)
 {
 	zval pv;
 	zend_op_array *new_op_array;
@@ -566,7 +566,7 @@ ZEND_API int zend_eval_string(char *str, zval *retval_ptr, char *string_name CLS
 		EG(active_op_array) = new_op_array;
 		EG(no_extensions)=1;
 
-		zend_execute(new_op_array ELS_CC);
+		zend_execute(new_op_array TSRMLS_CC);
 
 		if (local_retval_ptr) {
 			if (retval_ptr) {
@@ -600,7 +600,7 @@ void execute_new_code(CLS_D)
 {
     zend_op *opline, *end;
 	zend_op *ret_opline;
-	ELS_FETCH();
+	TSRMLS_FETCH();
 
 	if (!CG(interactive)
 		|| CG(active_op_array)->backpatch_count>0
@@ -635,7 +635,7 @@ void execute_new_code(CLS_D)
     }
 
 	EG(active_op_array) = CG(active_op_array);
-	zend_execute(CG(active_op_array) ELS_CC);
+	zend_execute(CG(active_op_array) TSRMLS_CC);
 	zval_ptr_dtor(EG(return_value_ptr_ptr));
 	CG(active_op_array)->last--;	/* get rid of that ZEND_RETURN */
 	CG(active_op_array)->start_op = CG(active_op_array)->opcodes+CG(active_op_array)->last;
@@ -644,7 +644,7 @@ void execute_new_code(CLS_D)
 
 ZEND_API void zend_timeout(int dummy)
 {
-	ELS_FETCH();
+	TSRMLS_FETCH();
 
 	/* is there any point in this?  we're terminating the request anyway...
 	PLS_FETCH();
@@ -686,7 +686,7 @@ static LRESULT CALLBACK zend_timeout_WndProc(HWND hWnd, UINT message, WPARAM wPa
 				}
 #endif
 				KillTimer(timeout_window, wParam);
-				EG(timed_out) = 1;
+				executor_globals->timed_out = 1;
 			}
 			break;
 		default:
@@ -753,7 +753,7 @@ void zend_shutdown_timeout_thread()
 
 void zend_set_timeout(long seconds)
 {
-	ELS_FETCH();
+	TSRMLS_FETCH();
 
 	EG(timeout_seconds) = seconds;
 #ifdef ZEND_WIN32
@@ -786,7 +786,7 @@ void zend_set_timeout(long seconds)
 
 void zend_unset_timeout(void)
 {
-	ELS_FETCH();
+	TSRMLS_FETCH();
 
 #ifdef ZEND_WIN32
 	PostThreadMessage(timeout_thread_id, WM_UNREGISTER_ZEND_TIMEOUT, (WPARAM) GetCurrentThreadId(), (LPARAM) 0);
