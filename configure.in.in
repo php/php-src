@@ -80,7 +80,7 @@ dnl   test -n "$GCC" || CFLAGS="-Ae $CFLAGS -D_HPUX_SOURCE"
 dnl fi
 
 dnl Checks for programs.
-AC_PROG_LIBTOOL
+AM_PROG_LIBTOOL
 AM_SET_LIBTOOL_VARIABLE([--silent])
 AC_PROG_YACC
 if test "$YACC" != "bison -y"; then
