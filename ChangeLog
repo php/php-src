@@ -1,3 +1,16 @@
+2004-10-29  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend_operators.c:
+      - For Ilia:
+      - MFH: Fixed bug #30572 (crash when comparing SimpleXML attribute to a
+      boolean).
+      - Hope this works well. I will MFH tomorrow if no one complains.
+
+    * ext/standard/file.c
+      ext/standard/file.c
+      ext/standard/file.c:
+      - [PATCH] Bug fix for #29770, but for PHP 4.3.9 (Vladimir Zidar)
+
 2004-10-28  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/standard/uniqid.c:
