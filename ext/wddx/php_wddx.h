@@ -36,8 +36,6 @@
 
 #include "xmlparse.h"
 
-extern int php_minit_wddx(INIT_FUNC_ARGS);
-
 extern zend_module_entry wddx_module_entry;
 #define wddx_module_ptr &wddx_module_entry
 
