@@ -32,6 +32,7 @@ ZEND_API void zend_objects_destroy_object(zend_object *object, zend_object_handl
 
 	if (destructor) {
 		zval zobj, *obj = &zobj;
+		zval *old_exception;
 		
 		if (destructor->op_array.fn_flags & (ZEND_ACC_PRIVATE|ZEND_ACC_PROTECTED)) {
 			if (destructor->op_array.fn_flags & ZEND_ACC_PRIVATE) {
@@ -68,15 +69,17 @@ ZEND_API void zend_objects_destroy_object(zend_object *object, zend_object_handl
 		zobj.value.obj.handlers = &std_object_handlers;
 		INIT_PZVAL(obj);
 
-		if (EG(exception)) {
-			zval_ptr_dtor(&EG(exception));
-			EG(exception) = NULL;
-		}
+		/* Make sure that destructors are protected from previously thrown exceptions.
+		 * For example, if an exception was thrown in a function and when the function's
+		 * local variable destruction results in a destructor being called.
+		 */
+		old_exception = EG(exception);
+		EG(exception) = NULL;
 		zend_call_method_with_0_params(&obj, object->ce, NULL, "__destruct", NULL);
 		if (EG(exception)) {
 			zval_ptr_dtor(&EG(exception));
-			EG(exception) = NULL;
 		}
+		EG(exception) = old_exception;
 	}
 }
 
