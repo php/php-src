@@ -338,6 +338,7 @@ ctime_r \
 cuserid \
 flock \
 gcvt \
+getaddrinfo \
 getlogin \
 gethostbyaddr \
 getrusage \
