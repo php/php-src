@@ -1172,6 +1172,7 @@ PHP_FUNCTION(com_propget)
 	obj = (comval *)zend_list_find(Z_LVAL_P(arg_comval), &type);
 	if (!obj || (type != IS_COM)) {
 		php_error(E_WARNING,"%d is not a COM object handler", Z_LVAL_P(arg_comval));
+		RETURN_FALSE;
 	}
 	convert_to_string_ex(&arg_property);
 
@@ -1205,6 +1206,7 @@ PHP_FUNCTION(com_propput)
 	obj = (comval *)zend_list_find(Z_LVAL_P(arg_comval), &type);
 	if (!obj || (type != IS_COM)) {
 		php_error(E_WARNING,"%d is not a COM object handler", Z_LVAL_P(arg_comval));
+		RETURN_FALSE;
 	}
 	convert_to_string_ex(&arg_property);
 
