@@ -323,9 +323,10 @@ PHP_FUNCTION(disk_free_space)
 
 /* {{{ proto bool chgrp(string filename, mixed group)
    Change file group */
+#ifndef NETWARE
 PHP_FUNCTION(chgrp)
 {
-#if !defined(WINDOWS) && !defined(NETWARE)  /* I guess 'chgrp' won't be available on NetWare */
+#if !defined(WINDOWS)
 	pval **filename, **group;
 	gid_t gid;
 	struct group *gr=NULL;
@@ -367,13 +368,15 @@ PHP_FUNCTION(chgrp)
 	RETURN_FALSE;
 #endif
 }
+#endif
 /* }}} */
 
 /* {{{ proto bool chown (string filename, mixed user)
    Change file owner */
+#ifndef NETWARE
 PHP_FUNCTION(chown)
 {
-#if !defined(WINDOWS) && !defined(NETWARE)  /* I guess 'chown' won't be available on NetWare */
+#if !defined(WINDOWS)
 	pval **filename, **user;
 	int ret;
 	uid_t uid;
@@ -413,6 +416,7 @@ PHP_FUNCTION(chown)
 #endif
 	RETURN_TRUE;
 }
+#endif
 /* }}} */
 
 /* {{{ proto bool chmod(string filename, int mode)
