@@ -1,3 +1,67 @@
+2001-10-08  Frank M. Kromann  <frank@frontbase.com>
+
+    * ext/fbsql/php_fbsql.c: use strdup to alloc memory refeed with free!
+
+    * ext/fbsql/php_fbsql.h: Oops. Removed too much code.
+
+2001-10-08  Jim Winstead  <jimw@php.net>
+
+    * ext/dbase/dbf_head.c:
+    handle dbase files with padded field headers. (patch from
+    Landon Bradshaw <landon@bradshaw.org>)
+
+    * ext/dbase/dbase.c:
+    handle 'I' field type, just another name for the 'N' field type (patch
+    from Landon Bradshaw <landon@bradshaw.org>)
+
+2001-10-08  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/gd/gd.c: Fixed some protos.
+
+2001-10-08  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/PEAR/Installer.php
+      pear/PEAR/Packager.php: some clean up
+
+2001-10-08  Sergey Kartashoff  <gluke@biosys.net>
+
+    * ext/mnogosearch/php_mnogo.c:
+    - Added support for word match mnogosearch-3.2 command and for stopfile
+      command. StopTable will not be supported by mnogosearch-3.2.x
+    - Added support for word match mnogosearch-3.2 command and for stopfile
+      command. StopTable will not be supported by mnogosearch-3.2.x
+
+2001-10-08  Frank M. Kromann  <frank@frontbase.com>
+
+    * ext/fbsql/fbsql.dsp
+      ext/fbsql/php_fbsql.c
+      ext/fbsql/php_fbsql.h: Fixing prototypes and removing unused code
+
+2001-10-08  Rainer Schaaf  <rjs@pdflib.com>
+
+    * ext/pdf/pdf.c: fixed PDF_get_value for parameters
+    - capheight
+    - ascender
+    - descender
+
+    had to ajust modifier by PDFLIB_FONT_OFFSET
+
+2001-10-08  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/mysql/php_mysql.c:
+    - Fix for bug #13592 (Patch by Markus Fischer <mfischer@guru.josefine.at>)
+
+2001-10-08  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/PEAR/Installer.php: more work on Windows support
+
+    * pear/PEAR/Common.php: added mkTempDir to create temporal directories
+
+    * pear/PEAR/Common.php: detect and report error
+
+    * pear/PEAR/Packager.php:
+    use Tar.php class and clean up some unused properties
+
 2001-10-07  Thomas V.V.Cox  <cox@idecnet.com>
 
     * pear/PEAR/Installer.php
