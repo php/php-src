@@ -474,6 +474,8 @@ DNUM	([0-9]*[\.][0-9]+)|([0-9]+[\.][0-9]*)
 EXPONENT_DNUM	(({LNUM}|{DNUM})[eE][+-]?{LNUM})
 HNUM	"0x"[0-9a-fA-F]+
 LABEL	[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*
+ENCAPSED_STRING ([a-zA-Z0-9_\x7f-\xff \t #'.:;,()|^&+/*=%!~<>?@]|"-"[^>])+
+ENCAPSED_STRING_WITH_NEWLINE ([a-zA-Z0-9_\x7f-\xff \t\n\r #'.:;,()|^&+/*=%!~<>?@]|"-"[^>])+
 WHITESPACE [ \n\r\t]+
 TABS_AND_SPACES [ \t]*
 TOKENS [;:,.\[\]()|^&+-/*=%!~$<>?@]
@@ -1076,6 +1078,13 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	return T_VARIABLE;
 }
 
+<ST_DOUBLE_QUOTES,ST_BACKQUOTE>{ENCAPSED_STRING_WITH_NEWLINE} {
+	HANDLE_NEWLINES(yytext, yyleng);
+	zendlval->value.str.val = (char *)estrndup(yytext, yyleng);
+	zendlval->value.str.len = yyleng;
+	zendlval->type = IS_STRING;
+	return T_STRING;
+}
 
 <ST_IN_SCRIPTING>{LABEL} {
 	zendlval->value.str.val = (char *)estrndup(yytext, yyleng);
@@ -1085,7 +1094,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 
-<ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>{LABEL} {
+<ST_HEREDOC>{LABEL} {
 	zendlval->value.str.val = (char *)estrndup(yytext, yyleng);
 	zendlval->value.str.len = yyleng;
 	zendlval->type = IS_STRING;
@@ -1374,7 +1383,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 
-<ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>{ESCAPED_AND_WHITESPACE} {
+<ST_HEREDOC>{ESCAPED_AND_WHITESPACE} {
 	HANDLE_NEWLINES(yytext, yyleng);
 	zendlval->value.str.val = (char *) estrndup(yytext, yyleng);
 	zendlval->value.str.len = yyleng;
