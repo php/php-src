@@ -1,0 +1,93 @@
+--TEST--
+dbx_connect
+--SKIPIF--
+<?php if (!extension_loaded("dbx")) print("skip"); ?>
+--POST--
+--GET--
+--FILE--
+<?php 
+include_once("ext/dbx/tests/dbx_test.p");
+$module_name="mysql";
+$nonexisting_database="nonexisting_database";
+$nonexisting_username="nonexisting_username";
+$nonexisting_password="nonexisting_password";
+$dlo = dbx_connect($module_name, $host, $database, $username, $password);
+if ($dlo!=0) {
+	print('connect using string ok'."\n");
+	dbx_close($dlo);
+	}
+$dlo = dbx_connect($module, $host, $database, $username, $password);
+if ($dlo!=0) {
+	print('connect using constant ok'."\n");
+	dbx_close($dlo);
+	}
+$dlo = @dbx_connect($module, $host, $nonexisting_database, $username, $password);
+if ($dlo==0) {
+	print('connect to non-existing database failed, so it\'s ok'."\n");
+	}
+else {
+    print_r($dlo);
+	dbx_close($dlo);
+    }
+$dlo = @dbx_connect($module, $host, $database, $nonexisting_username, $nonexisting_password);
+if ($dlo==0) {
+	print('connect with false username/password combi failed, so it\'s ok'."\n");
+	}
+else {
+    print_r($dlo);
+	dbx_close($dlo);
+    }
+$dlo = dbx_connect($module_name, $host, $database, $username, $password, DBX_PERSISTENT);
+if ($dlo!=0) {
+	print('persistent connect using string ok'."\n");
+	dbx_close($dlo);
+	}
+$dlo = dbx_connect($module, $host, $database, $username, $password, DBX_PERSISTENT);
+if ($dlo!=0) {
+	print('persistent connect using constant ok'."\n");
+	dbx_close($dlo);
+	}
+$dlo = @dbx_connect($module, $host, $nonexisting_database, $username, $password, DBX_PERSISTENT);
+if ($dlo==0) {
+	print('persistent connect to non-existing database failed, so it\'s ok'."\n");
+	}
+else {
+    print_r($dlo);
+	dbx_close($dlo);
+    }
+$dlo = @dbx_connect($module, $host, $database, $nonexisting_username, $nonexisting_password, DBX_PERSISTENT);
+if ($dlo==0) {
+	print('persistent connect with false username/password combi failed, so it\'s ok'."\n");
+	}
+else {
+    print_r($dlo);
+	dbx_close($dlo);
+    }
+$dlo = @dbx_connect($module, $host, $database, $username, $password, DBX_PERSISTENT, "12many");
+if ($dlo==0) {
+	print('too many parameters: connect failure works ok'."\n");
+	}
+else {
+    print_r($dlo);
+	dbx_close($dlo);
+    }
+$dlo = @dbx_connect($module, $host, $database, $username);
+if ($dlo==0) {
+	print('too few parameters: connect failure works ok'."\n");
+	}
+else {
+    print_r($dlo);
+	dbx_close($dlo);
+    }
+?>
+--EXPECT--
+connect using string ok
+connect using constant ok
+connect to non-existing database failed, so it's ok
+connect with false username/password combi failed, so it's ok
+persistent connect using string ok
+persistent connect using constant ok
+persistent connect to non-existing database failed, so it's ok
+persistent connect with false username/password combi failed, so it's ok
+too many parameters: connect failure works ok
+too few parameters: connect failure works ok
