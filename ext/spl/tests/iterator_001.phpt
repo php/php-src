@@ -47,7 +47,7 @@ class NumericArrayIterator implements Iterator
 		$this->i++;
 	}
 	
-	public function greaterThen($comp)
+	public function greaterThan($comp)
 	{
 		echo get_class($this) . '::' . __FUNCTION__ . '(' . $comp . ")\n";
 		return $this->current() > $comp;
@@ -69,7 +69,7 @@ $a = array(1, 2, 3, 4, 5);
 $it = new LimitIterator(new NumericArrayIterator($a), 1, 3);
 foreach ($it as $v)
 {
-	print $v . ' is ' . ($it->greaterThen(2) ? 'greater than 2' : 'less than or equal 2') . "\n";
+	print $v . ' is ' . ($it->greaterThan(2) ? 'greater than 2' : 'less than or equal 2') . "\n";
 }
 
 echo "===SEEKABLE===\n";
@@ -77,15 +77,16 @@ $a = array(1, 2, 3, 4, 5);
 $it = new LimitIterator(new SeekableNumericArrayIterator($a), 1, 3);
 foreach($it as $v)
 {
-	print $v . ' is ' . ($it->greaterThen(2) ? 'greater than 2' : 'less than or equal 2') . "\n";
+	print $v . ' is ' . ($it->greaterThan(2) ? 'greater than 2' : 'less than or equal 2') . "\n";
 }
 
 echo "===STACKED===\n";
+echo "Shows '2 is greater than 2' because the test is actually done with the current value which is 3.\n";
 $a = array(1, 2, 3, 4, 5);
 $it = new CachingIterator(new LimitIterator(new SeekableNumericArrayIterator($a), 1, 3));
 foreach($it as $v)
 {
-	print $v . ' is ' . ($it->greaterThen(2) ? 'greater than 2' : 'less than or equal 2') . "\n";
+	print $v . ' is ' . ($it->greaterThan(2) ? 'greater than 2' : 'less than or equal 2') . "\n";
 }
 
 ?>
@@ -100,19 +101,22 @@ NumericArrayIterator::valid(true)
 NumericArrayIterator::valid(true)
 NumericArrayIterator::current
 NumericArrayIterator::key
-LimitIterator::greaterThen(2)
+NumericArrayIterator::greaterThan(2)
+NumericArrayIterator::current
 2 is less than or equal 2
 NumericArrayIterator::next
 NumericArrayIterator::valid(true)
 NumericArrayIterator::current
 NumericArrayIterator::key
-LimitIterator::greaterThen(2)
+NumericArrayIterator::greaterThan(2)
+NumericArrayIterator::current
 3 is greater than 2
 NumericArrayIterator::next
 NumericArrayIterator::valid(true)
 NumericArrayIterator::current
 NumericArrayIterator::key
-LimitIterator::greaterThen(2)
+NumericArrayIterator::greaterThan(2)
+NumericArrayIterator::current
 4 is greater than 2
 NumericArrayIterator::next
 ===SEEKABLE===
@@ -122,22 +126,26 @@ SeekableNumericArrayIterator::seek(1)
 NumericArrayIterator::valid(true)
 NumericArrayIterator::current
 NumericArrayIterator::key
-LimitIterator::greaterThen(2)
+SeekableNumericArrayIterator::greaterThan(2)
+NumericArrayIterator::current
 2 is less than or equal 2
 NumericArrayIterator::next
 NumericArrayIterator::valid(true)
 NumericArrayIterator::current
 NumericArrayIterator::key
-LimitIterator::greaterThen(2)
+SeekableNumericArrayIterator::greaterThan(2)
+NumericArrayIterator::current
 3 is greater than 2
 NumericArrayIterator::next
 NumericArrayIterator::valid(true)
 NumericArrayIterator::current
 NumericArrayIterator::key
-LimitIterator::greaterThen(2)
+SeekableNumericArrayIterator::greaterThan(2)
+NumericArrayIterator::current
 4 is greater than 2
 NumericArrayIterator::next
 ===STACKED===
+Shows '2 is greater than 2' because the test is actually done with the current value which is 3.
 NumericArrayIterator::__construct
 NumericArrayIterator::rewind
 SeekableNumericArrayIterator::seek(1)
@@ -148,15 +156,18 @@ NumericArrayIterator::next
 NumericArrayIterator::valid(true)
 NumericArrayIterator::current
 NumericArrayIterator::key
-CachingIterator::greaterThen(2)
-2 is less than or equal 2
+SeekableNumericArrayIterator::greaterThan(2)
+NumericArrayIterator::current
+2 is greater than 2
 NumericArrayIterator::next
 NumericArrayIterator::valid(true)
 NumericArrayIterator::current
 NumericArrayIterator::key
-CachingIterator::greaterThen(2)
+SeekableNumericArrayIterator::greaterThan(2)
+NumericArrayIterator::current
 3 is greater than 2
 NumericArrayIterator::next
-CachingIterator::greaterThen(2)
+SeekableNumericArrayIterator::greaterThan(2)
+NumericArrayIterator::current
 4 is greater than 2
 ===DONE===

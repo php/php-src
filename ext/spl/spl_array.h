@@ -29,6 +29,8 @@ extern zend_class_entry *spl_ce_ArrayIterator;
 
 PHP_MINIT_FUNCTION(spl_array);
 
+extern void spl_array_iterator_append(zval *object, zval *append_value TSRMLS_DC);
+
 #endif /* SPL_ARRAY_H */
 
 /*

@@ -1,7 +1,7 @@
 <?php
 
 /** @file appenditerator.inc
- * @ingroup Examples
+ * @ingroup SPL
  * @brief class AppendIterator
  * @author  Marcus Boerger
  * @date    2003 - 2004
@@ -9,7 +9,7 @@
  * SPL - Standard PHP Library
  */
 
-/** @ingroup Examples
+/** @ingroup SPL
  * @brief   Iterator that iterates over several iterators one after the other
  * @author  Marcus Boerger
  * @version 1.0
@@ -28,6 +28,11 @@ class AppendIterator implements OuterIterator
 
 	/** Append an Iterator
 	 * @param $it Iterator to append
+	 *
+	 * If the current state is invalid but the appended iterator is valid
+	 * the the AppendIterator itself becomes valid. However there will be no
+	 * call to $it->rewind(). Also if the current state is invalid the inner
+	 * ArrayIterator will be rewound und forwarded to the appended element.
 	 */	
 	function append(Iterator $it)
 	{

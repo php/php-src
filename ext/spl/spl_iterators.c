@@ -33,6 +33,7 @@
 #include "spl_engine.h"
 #include "spl_iterators.h"
 #include "spl_directory.h"
+#include "spl_array.h"
 
 #define INLINE inline
 
@@ -49,6 +50,7 @@ zend_class_entry *spl_ce_IteratorIterator;
 zend_class_entry *spl_ce_NoRewindIterator;
 zend_class_entry *spl_ce_InfiniteIterator;
 zend_class_entry *spl_ce_EmptyIterator;
+zend_class_entry *spl_ce_AppendIterator;
 
 function_entry spl_funcs_RecursiveIterator[] = {
 	SPL_ABSTRACT_ME(RecursiveIterator, hasChildren,  NULL)
@@ -646,6 +648,12 @@ static INLINE spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAME
 			}
 			break;
 		}
+		case DIT_AppendIterator:
+			spl_instantiate(spl_ce_ArrayIterator, &intern->u.append.zarrayit, 1 TSRMLS_CC);
+			zend_call_method_with_0_params(&intern->u.append.zarrayit, spl_ce_ArrayIterator, &spl_ce_ArrayIterator->constructor, "__construct", NULL);
+			intern->u.append.iterator = spl_ce_ArrayIterator->get_iterator(spl_ce_ArrayIterator, intern->u.append.zarrayit TSRMLS_CC);
+			php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
+			return intern;
 		default:
 			if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "O", &zobject, ce_inner) == FAILURE) {
 				php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
@@ -698,7 +706,6 @@ static INLINE void spl_dual_it_require(spl_dual_it_object *intern TSRMLS_DC)
 
 static INLINE void spl_dual_it_free(spl_dual_it_object *intern TSRMLS_DC)
 {
-	spl_dual_it_require(intern TSRMLS_CC);
 	if (intern->inner.iterator && intern->inner.iterator->funcs->invalidate_current) {
 		intern->inner.iterator->funcs->invalidate_current(intern->inner.iterator TSRMLS_CC);
 	}
@@ -801,6 +808,7 @@ SPL_METHOD(dual_it, valid)
        proto mixed ParentIterator::key()
        proto mixed IteratorIterator::key()
        proto mixed NoRewindIterator::key()
+       proto mixed AppendIterator::key()
    Get the current key */
 SPL_METHOD(dual_it, key)
 {
@@ -824,6 +832,7 @@ SPL_METHOD(dual_it, key)
        proto mixed ParentIterator::current()
        proto mixed IteratorIterator::current()
        proto mixed NoRewindIterator::current()
+       proto mixed AppendIterator::current()
    Get the current element value */
 SPL_METHOD(dual_it, current)
 {
@@ -950,6 +959,11 @@ static INLINE void spl_dual_it_free_storage(void *_object TSRMLS_DC)
 
 	if (object->inner.zobject) {
 		zval_ptr_dtor(&object->inner.zobject);
+	}
+	
+	if (object->dit_type == DIT_AppendIterator) {
+		object->u.append.iterator->funcs->dtor(object->u.append.iterator TSRMLS_CC);
+		zval_ptr_dtor(&object->u.append.zarrayit);
 	}
 
 	zend_hash_destroy(object->std.properties);
@@ -1415,15 +1429,65 @@ SPL_METHOD(NoRewindIterator, __construct)
 	spl_dual_it_construct(INTERNAL_FUNCTION_PARAM_PASSTHRU, zend_ce_iterator, DIT_NoRewindIterator);
 } /* }}} */
 
-/* {{{ proto NoRewindIterator::rewind()
-   Prevent a call to inner iterators rewind() (internally the current data will be fetched if valid()) */
+/* {{{ proto void NoRewindIterator::rewind()
+   Prevent a call to inner iterators rewind() */
 SPL_METHOD(NoRewindIterator, rewind)
+{
+	/* nothing to do */
+} /* }}} */
+
+/* {{{ proto void NoRewindIterator::valid()
+   Return inner iterators valid() */
+SPL_METHOD(NoRewindIterator, valid)
+{
+	spl_dual_it_object   *intern;
+
+	intern = (spl_dual_it_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	RETURN_BOOL(intern->inner.iterator->funcs->valid(intern->inner.iterator TSRMLS_CC) == SUCCESS);
+} /* }}} */
+
+/* {{{ proto mixed NoRewindIterator::key()
+   Return inner iterators key() */
+SPL_METHOD(NoRewindIterator, key)
 {
 	spl_dual_it_object   *intern;
 
 	intern = (spl_dual_it_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 
-	spl_dual_it_fetch(intern, 1 TSRMLS_CC);
+	if (intern->inner.iterator->funcs->get_current_key) {
+		char *str_key;
+		uint str_key_len;
+		ulong int_key;
+		if (intern->inner.iterator->funcs->get_current_key(intern->inner.iterator, &str_key, &str_key_len, &int_key TSRMLS_CC) == HASH_KEY_IS_LONG) {
+			RETURN_LONG(int_key);
+		} else {
+			RETURN_STRINGL(str_key, str_key_len-1, 0);
+		}
+	} else {
+		RETURN_NULL();
+	}
+} /* }}} */
+
+/* {{{ proto mixed NoRewindIterator::current()
+   Return inner iterators current() */
+SPL_METHOD(NoRewindIterator, current)
+{
+	spl_dual_it_object   *intern;
+	zval **data;
+
+	intern = (spl_dual_it_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	intern->inner.iterator->funcs->get_current_data(intern->inner.iterator, &data TSRMLS_CC);
+	RETURN_ZVAL(*data, 1, 0);
+} /* }}} */
+
+/* {{{ proto void NoRewindIterator::next()
+   Return inner iterators next() */
+SPL_METHOD(NoRewindIterator, next)
+{
+	spl_dual_it_object   *intern;
+
+	intern = (spl_dual_it_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	intern->inner.iterator->funcs->move_forward(intern->inner.iterator TSRMLS_CC);
 } /* }}} */
 
 static
@@ -1434,10 +1498,10 @@ ZEND_END_ARG_INFO();
 static zend_function_entry spl_funcs_NoRewindIterator[] = {
 	SPL_ME(NoRewindIterator, __construct,      arginfo_norewind_it___construct, ZEND_ACC_PUBLIC)
 	SPL_ME(NoRewindIterator, rewind,           NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(dual_it,          valid,            NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(dual_it,          key,              NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(dual_it,          current,          NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(dual_it,          next,             NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(NoRewindIterator, valid,            NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(NoRewindIterator, key,              NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(NoRewindIterator, current,          NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(NoRewindIterator, next,             NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(dual_it,          getInnerIterator, NULL, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
@@ -1512,6 +1576,136 @@ static zend_function_entry spl_funcs_EmptyIterator[] = {
 	SPL_ME(EmptyIterator, key,              NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(EmptyIterator, current,          NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(EmptyIterator, next,             NULL, ZEND_ACC_PUBLIC)
+};
+
+int spl_append_it_next_iterator(spl_dual_it_object *intern TSRMLS_DC) /* {{{*/
+{
+	spl_dual_it_free(intern TSRMLS_CC);
+
+	if (intern->inner.zobject) {
+		zval_ptr_dtor(&intern->inner.zobject);
+		intern->inner.zobject = NULL;
+		intern->inner.ce = NULL;
+		intern->inner.object = NULL;
+		intern->inner.iterator = NULL;
+	}
+	if (intern->u.append.iterator->funcs->valid(intern->u.append.iterator TSRMLS_CC) == SUCCESS) {
+		zval **it;
+
+		intern->u.append.iterator->funcs->get_current_data(intern->u.append.iterator, &it TSRMLS_CC);
+		(*it)->refcount++;
+		intern->inner.zobject = *it;
+		intern->inner.ce = Z_OBJCE_PP(it);
+		intern->inner.object = zend_object_store_get_object(*it TSRMLS_CC);
+		intern->inner.iterator = intern->inner.ce->get_iterator(intern->inner.ce, *it TSRMLS_CC);
+		spl_dual_it_rewind(intern TSRMLS_CC);
+		intern->u.append.iterator->funcs->move_forward(intern->u.append.iterator TSRMLS_CC);
+		return SUCCESS;
+	} else {
+		return FAILURE;
+	}
+} /* }}} */
+
+void spl_append_it_fetch(spl_dual_it_object *intern TSRMLS_DC) /* {{{*/
+{
+	while (spl_dual_it_valid(intern TSRMLS_CC) != SUCCESS) {
+		if (spl_append_it_next_iterator(intern TSRMLS_CC) != SUCCESS) {
+			return;
+		}
+	}
+	spl_dual_it_fetch(intern, 0 TSRMLS_CC);
+} /* }}} */
+
+void spl_append_it_next(spl_dual_it_object *intern TSRMLS_DC) /* {{{ */
+{
+	if (spl_dual_it_valid(intern TSRMLS_CC) == SUCCESS) {
+		spl_dual_it_next(intern, 1 TSRMLS_CC);
+	}
+	spl_append_it_fetch(intern TSRMLS_CC);
+} /* }}} */
+
+/* {{{ proto AppendIterator::__construct()
+   Create an AppendIterator */
+SPL_METHOD(AppendIterator, __construct)
+{
+	spl_dual_it_construct(INTERNAL_FUNCTION_PARAM_PASSTHRU, zend_ce_iterator, DIT_AppendIterator);
+} /* }}} */
+
+/* {{{ proto void AppendIterator::append(Iterator it)
+   Append an iterator */
+SPL_METHOD(AppendIterator, append)
+{
+	spl_dual_it_object   *intern;
+	zval *it;
+
+	intern = (spl_dual_it_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o", &it, zend_ce_iterator) == FAILURE) {
+		return;
+	}
+	spl_array_iterator_append(intern->u.append.zarrayit, it TSRMLS_CC);
+
+	if (!intern->inner.iterator || spl_dual_it_valid(intern TSRMLS_CC) != SUCCESS) {
+		if (intern->u.append.iterator->funcs->valid(intern->u.append.iterator TSRMLS_CC) != SUCCESS) {
+			intern->u.append.iterator->funcs->rewind(intern->u.append.iterator TSRMLS_CC);
+		}
+		do {
+			spl_append_it_next_iterator(intern TSRMLS_CC);
+		} while (intern->inner.zobject != it);
+		spl_append_it_fetch(intern TSRMLS_CC);
+	}
+} /* }}} */
+
+/* {{{ proto void AppendIterator::rewind()
+   Rewind to the first iterator and rewind the first iterator, too */
+SPL_METHOD(AppendIterator, rewind)
+{
+	spl_dual_it_object   *intern;
+
+	intern = (spl_dual_it_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	
+	intern->u.append.iterator->funcs->rewind(intern->u.append.iterator TSRMLS_CC);
+	if (spl_append_it_next_iterator(intern TSRMLS_CC) == SUCCESS) {
+		spl_append_it_fetch(intern TSRMLS_CC);
+	}
+} /* }}} */
+
+/* {{{ proto boolean AppendIterator::valid()
+   Check if the current state is valid */
+SPL_METHOD(AppendIterator, valid)
+{
+	spl_dual_it_object   *intern;
+
+	intern = (spl_dual_it_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+
+	RETURN_BOOL(intern->current.data);
+} /* }}} */
+
+/* {{{ proto AppendIterator::next()
+   Forward to next element */
+SPL_METHOD(AppendIterator, next)
+{
+	spl_dual_it_object   *intern;
+
+	intern = (spl_dual_it_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	
+	spl_append_it_next(intern TSRMLS_CC);
+} /* }}} */
+
+static
+ZEND_BEGIN_ARG_INFO(arginfo_append_it_append, 0) 
+	ZEND_ARG_OBJ_INFO(0, iterator, Iterator, 0)
+ZEND_END_ARG_INFO();
+
+static zend_function_entry spl_funcs_AppendIterator[] = {
+	SPL_ME(AppendIterator, __construct,      NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(AppendIterator, append,           arginfo_append_it_append, ZEND_ACC_PUBLIC)
+	SPL_ME(AppendIterator, rewind,           NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(AppendIterator, valid,            NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(dual_it,        key,              NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(dual_it,        current,          NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(AppendIterator, next,             NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(dual_it,        getInnerIterator, NULL, ZEND_ACC_PUBLIC)
 };
 
 /* {{{ array iterator_to_array(IteratorAggregate it) 
@@ -1640,12 +1834,15 @@ PHP_MINIT_FUNCTION(spl_iterators)
 	REGISTER_SPL_INTERFACE(OuterIterator);
 	REGISTER_SPL_ITERATOR(OuterIterator);
 
+	REGISTER_SPL_STD_CLASS_EX(AppendIterator, spl_dual_it_new, spl_funcs_AppendIterator);
+
 	REGISTER_SPL_IMPLEMENTS(RecursiveIteratorIterator, OuterIterator);
 	REGISTER_SPL_IMPLEMENTS(CachingIterator, OuterIterator);
 	REGISTER_SPL_IMPLEMENTS(FilterIterator, OuterIterator);
 	REGISTER_SPL_IMPLEMENTS(LimitIterator, OuterIterator);
 	REGISTER_SPL_IMPLEMENTS(IteratorIterator, OuterIterator);
 	REGISTER_SPL_IMPLEMENTS(NoRewindIterator, OuterIterator);
+	REGISTER_SPL_IMPLEMENTS(AppendIterator, OuterIterator);
 
 	REGISTER_SPL_SUB_CLASS_EX(InfiniteIterator, IteratorIterator, spl_dual_it_new, spl_funcs_InfiniteIterator);
 	

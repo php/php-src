@@ -37,6 +37,7 @@ extern zend_class_entry *spl_ce_IteratorIterator;
 extern zend_class_entry *spl_ce_NoRewindIterator;
 extern zend_class_entry *spl_ce_InfiniteIterator;
 extern zend_class_entry *spl_ce_EmptyIterator;
+extern zend_class_entry *spl_ce_AppendIterator;
 
 PHP_MINIT_FUNCTION(spl_iterators);
 
@@ -51,6 +52,7 @@ typedef enum {
 	DIT_IteratorIterator,
 	DIT_NoRewindIterator,
 	DIT_InfiniteIterator,
+	DIT_AppendIterator,
 } dual_it_type;
 
 enum {
@@ -90,6 +92,10 @@ typedef struct _spl_dual_it_object {
 			zval             *zstr;
 			zval             *zchildren;
 		} caching;
+		struct {
+			zval                 *zarrayit;
+			zend_object_iterator *iterator;
+		} append;
 	} u;
 } spl_dual_it_object;
 
