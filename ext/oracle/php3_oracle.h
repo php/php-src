@@ -1,5 +1,7 @@
 /* $Id$ */
 
+/* synced with oracle.h,v 1.40 1999/06/01 08:11:04 thies Exp $ */
+
 #ifndef _PHP3_ORACLE_H
 #define _PHP3_ORACLE_H
 
@@ -95,6 +97,7 @@ typedef struct oraCursor {
 	int ncols;
 	int fetched;
 	oraConnection *conn_ptr;
+	int conn_id;
 } oraCursor;
 
 typedef struct {
@@ -107,37 +110,36 @@ typedef struct {
 	long num_persistent;
 	long num_links;
 	int le_conn, le_pconn, le_cursor;
-	HashTable *resource_list;
-	HashTable *resource_plist;
+	HashTable *conns;
 } oracle_module;
 
-PHP_FUNCTION(Ora_Bind);
-PHP_FUNCTION(Ora_Close);
-PHP_FUNCTION(Ora_Commit);
-PHP_FUNCTION(Ora_CommitOff);
-PHP_FUNCTION(Ora_CommitOn);
-PHP_FUNCTION(Ora_Do);
-PHP_FUNCTION(Ora_Error);
-PHP_FUNCTION(Ora_ErrorCode);
-PHP_FUNCTION(Ora_Exec);
-PHP_FUNCTION(Ora_Fetch);
-PHP_FUNCTION(Ora_FetchInto);
-PHP_FUNCTION(Ora_ColumnType);
-PHP_FUNCTION(Ora_ColumnName);
-PHP_FUNCTION(Ora_ColumnSize);
-PHP_FUNCTION(Ora_GetColumn);
-PHP_FUNCTION(Ora_NumCols);
-PHP_FUNCTION(Ora_NumRows);
-PHP_FUNCTION(Ora_Logoff);
-PHP_FUNCTION(Ora_Logon);
-PHP_FUNCTION(Ora_PLogon);
-PHP_FUNCTION(Ora_Open);
-PHP_FUNCTION(Ora_Parse);
-PHP_FUNCTION(Ora_Rollback);
+extern void php3_Ora_Bind(INTERNAL_FUNCTION_PARAMETERS);
+extern void php3_Ora_Close(INTERNAL_FUNCTION_PARAMETERS);
+extern void php3_Ora_Commit(INTERNAL_FUNCTION_PARAMETERS);
+extern void php3_Ora_CommitOff(INTERNAL_FUNCTION_PARAMETERS);
+extern void php3_Ora_CommitOn(INTERNAL_FUNCTION_PARAMETERS);
+extern void php3_Ora_Do(INTERNAL_FUNCTION_PARAMETERS);
+extern void php3_Ora_Error(INTERNAL_FUNCTION_PARAMETERS);
+extern void php3_Ora_ErrorCode(INTERNAL_FUNCTION_PARAMETERS);
+extern void php3_Ora_Exec(INTERNAL_FUNCTION_PARAMETERS);
+extern void php3_Ora_Fetch(INTERNAL_FUNCTION_PARAMETERS);
+extern void php3_Ora_FetchInto(INTERNAL_FUNCTION_PARAMETERS);
+extern void php3_Ora_ColumnType(INTERNAL_FUNCTION_PARAMETERS);
+extern void php3_Ora_ColumnName(INTERNAL_FUNCTION_PARAMETERS);
+extern void php3_Ora_ColumnSize(INTERNAL_FUNCTION_PARAMETERS);
+extern void php3_Ora_GetColumn(INTERNAL_FUNCTION_PARAMETERS);
+extern void php3_Ora_NumCols(INTERNAL_FUNCTION_PARAMETERS);
+extern void php3_Ora_NumRows(INTERNAL_FUNCTION_PARAMETERS);
+extern void php3_Ora_Logoff(INTERNAL_FUNCTION_PARAMETERS);
+extern void php3_Ora_Logon(INTERNAL_FUNCTION_PARAMETERS);
+extern void php3_Ora_PLogon(INTERNAL_FUNCTION_PARAMETERS);
+extern void php3_Ora_Open(INTERNAL_FUNCTION_PARAMETERS);
+extern void php3_Ora_Parse(INTERNAL_FUNCTION_PARAMETERS);
+extern void php3_Ora_Rollback(INTERNAL_FUNCTION_PARAMETERS);
 extern int php3_minit_oracle(INIT_FUNC_ARGS);
 extern int php3_mshutdown_oracle(SHUTDOWN_FUNC_ARGS);
 extern int php3_rshutdown_oracle(SHUTDOWN_FUNC_ARGS);
-void php3_info_oracle(ZEND_MODULE_INFO_FUNC_ARGS);
+extern void php3_info_oracle(ZEND_MODULE_INFO_FUNC_ARGS);
 extern int php3_rinit_oracle(INIT_FUNC_ARGS);
 
 #else
