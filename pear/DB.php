@@ -283,8 +283,9 @@ class DB
     }
 
     /**
-     * Tell whether a query is a data manipulation query (insert, update
-     * or delete).
+     * Tell whether a query is a data manipulation query (insert,
+     * update or delete) or a data definition query (create, drop,
+     * alter, grant, revoke).
      *
      * @access public
      *
@@ -294,7 +295,7 @@ class DB
      */
     function isManip($query)
     {
-        if (preg_match('/^\s*(INSERT|UPDATE|DELETE|REPLACE)\s+/i', $query)) {
+        if (preg_match('/^\s*"?(INSERT|UPDATE|DELETE|REPLACE|CREATE|DROP|ALTER|GRANT|REVOKE)\s+/i', $query)) {
             return true;
         }
         return false;
