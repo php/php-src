@@ -1,3 +1,18 @@
+2000-02-07  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/standard/var.c:
+2000-02-07  Hartmut Holzgraefe  <hholzgra@media-engineering.de>
+
+    * ext/imap/imap.c
+      ext/imap/imap.h: another re-sync with the PHP3 tree
+    imap_mail deactivated for win builds, as the files
+    win32/imap_sendmail.c  win32/imap_sendmail.h from
+    PHP3 are still missing
+
+2000-02-07  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/oci8/oci8.c: kill warning
+
 2000-02-06  Zeev Suraski  <zeev@php.net>
 
     * sapi/isapi/php4isapi.c: Fix buglet
