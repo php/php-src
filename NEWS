@@ -1,12 +1,12 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2002, Version 4.3.0
-- added domxml_doc_set_root to change the root node (Lukas Schroeder)
+- Added domxml_doc_set_root() to change the root node. (Lukas Schroeder)
 - Fix crash bug in stripslashes() when working in sybase mode (Rasmus)
 - Added experimental support for Simplified Chinese, Traditional Chinese and
   Korean encoding in mbstring. (Rui)
 - Misc. Win32 mail() enhancements: support 'From:' header (msisolak@yahoo.com),
-  Bcc headers and be case-insenstive, enhance error reporting. (Markus)
+  Bcc headers and be case-insensitive, enhanced error reporting. (Markus)
 - Improved IMAP extension performance. (adam.kauffman@mindspring.com,
   rjs3@andrew.cmu.edu, Jon)
 - Added optional 5th parameter to domxml_xslt_process(). When set, profiling
