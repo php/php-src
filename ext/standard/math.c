@@ -1011,10 +1011,14 @@ PHPAPI char *_php_math_number_format(double d, int dec, char dec_point, char tho
 
 	/* allow for thousand separators */
 	if (thousand_sep) {
-		integral += integral / 3;
+		integral += (integral-1) / 3;
 	}
 	
-	reslen = integral + 1 + dec;
+	reslen = integral;
+	
+	if (dec) {
+		reslen += 1 + dec;
+	}
 
 	/* add a byte for minus sign */
 	if (is_negative) {
@@ -1034,21 +1038,24 @@ PHPAPI char *_php_math_number_format(double d, int dec, char dec_point, char tho
 		int topad = declen > 0 ? dec - declen : 0;
 
 		/* pad with '0's */
+
 		while (topad--) {
 			*t-- = '0';
 		}
-			
-		/* now copy the chars after the point */
-		memcpy(t - declen + 1, dp + 1, declen);
 		
-		t -= declen;
-		s -= declen;
+		if (dp) {
+			/* now copy the chars after the point */
+			memcpy(t - declen + 1, dp + 1, declen);
+
+			t -= declen;
+			s -= declen;
+		}
 
 		/* add decimal point */
 		*t-- = dec_point;
 		s--;
 	}
-	
+
 	/* copy the numbers before the decimal place, adding thousand
 	 * separator every three digits */
 	while(s >= tmpbuf) {
@@ -1064,7 +1071,7 @@ PHPAPI char *_php_math_number_format(double d, int dec, char dec_point, char tho
 	}
 
 	efree(tmpbuf);
-
+	
 	return resbuf;
 }
 
