@@ -472,7 +472,6 @@ int main(int argc, char *argv[])
 				php_output_startup();
 				php_output_activate(TSRMLS_C);
 				SG(headers_sent) = 1;
-				php_printf("Running PHP %s\n%s\n", PHP_VERSION , get_zend_version());
 				php_printf("[PHP Modules]\n");
 				zend_hash_apply_with_argument(&module_registry, (apply_func_arg_t) _print_module_info, NULL TSRMLS_CC);
 				php_printf("\n[Zend Modules]\n");
@@ -523,7 +522,7 @@ int main(int argc, char *argv[])
 					SG(headers_sent) = 1;
 					SG(request_info).no_headers = 1;
 				}
-				php_printf("%s (%s)\n", PHP_VERSION, sapi_module.name);
+				php_printf("%s (%s)\n%s", PHP_VERSION, sapi_module.name, get_zend_version());
 				php_end_ob_buffers(1 TSRMLS_CC);
 				exit(1);
 				break;
