@@ -20,7 +20,7 @@ function convert(i, j, t)
 
 	if (type == "int" || type == "long") {
 		longs = longs "\tlong " name ";\n"
-	} else if (type == "bool") {
+	} else if (type == "bool" || (type == "boolean") {
 		bools = bools "\tzend_bool " name ";\n"
 	} else if (type == "double" || type == "float") {
 		doubles = doubles "\tdouble " name ";\n"
@@ -29,7 +29,7 @@ function convert(i, j, t)
 		ints = ints "\tint " name "_len;\n"
 	} else if (type == "array" || type == "object" || type == "mixed") {
 		zvals = zvals "\tzval *" name " = NULL;\n"
-	} else if (type == "resource") {
+	} else if (type == "resource" || type == "handle") {
 		zvals = zvals "\tzval *" name " = NULL;\n"
 		resources = resources "\tif (" name ") {\n" \
 			"\t\tZEND_FETCH_RESOURCE(???, ???, " name ", " name "_id, \"???\", ???_rsrc_id);\n\t}\n"
@@ -48,8 +48,8 @@ function comment(s)
 
 BEGIN {
 	name = "[_A-Za-z][_A-Za-z0-9]*"
-	type = "int|long|double|float|string|bool|array|object|resource|mixed|void"
-	spec = "l|l|d|d|s|b|a|o|r|z|"
+	type = "int|long|double|float|string|bool|boolean|array|object|resource|handle|mixed|void"
+	spec = "l|l|d|d|s|b|b|a|o|r|r|z|"
 	num_funcs = 0
 
 # create a map from type name to the spec
@@ -66,13 +66,16 @@ BEGIN {
 	}
 			
 
-	xmlhead = " <reference id=\"ref." extname "\">\n" \
+	xmlhead = "<?xml version='1.0' encoding='iso-8859-1'?>\n" \
+    "<!-- $Revision$ -->\n" \
+    " <reference id=\"ref." extname "\">\n" \
 		"  <title> functions</title>\n" \
 		"  <titleabbrev></titleabbrev>\n\n" \
 		"  <partintro>\n" \
-    		"   <para>\n" \
-    		"   </para>\n" \
-    		"  </partintro>\n\n";
+		"   &warn.experimental;\n" \
+    "   <para>\n" \
+    "   </para>\n" \
+    "  </partintro>\n\n";
 
 	xmlfoot = " </reference>\n\n" \
 		"<!-- Keep this comment at the end of the file\n" \
@@ -84,7 +87,7 @@ BEGIN {
 		"sgml-always-quote-attributes:t\n" \
 		"sgml-indent-step:1\n" \
 		"sgml-indent-data:t\n" \
-		"indent-tabs-mode:nil" \
+		"indent-tabs-mode:nil\n" \
 		"sgml-parent-document:nil\n" \
 		"sgml-default-dtd-file:\"../../manual.ced\"\n" \
 		"sgml-exposed-tags:nil\n" \
@@ -186,8 +189,10 @@ END {
 			fetchargs = "\tif (zend_parse_parameters("
 			ints = ints "\tint argc = ZEND_NUM_ARGS();\n"
 			fetchargs = fetchargs "argc TSRMLS_CC, " specs[i]
-		} else
+		} else {
 			fetchargs = fetchargs "\tif (ZEND_NUM_ARGS() != 0) {\n\t\tWRONG_PARAM_COUNT;\n\t}"
+	 		xmlparams = xmlparams "      <void/>\n"
+		}
 
 		for (j = 0; j < maxargs[i]; j++) {
 
@@ -198,16 +203,16 @@ END {
 				fetchargs = fetchargs ", &" argnames[i,j] "_len"
 			}
 
-			xmlparams = xmlparams "     <paramdef>" argtypes[i,j]
+			xmlparams = xmlparams "      <paramdef>" argtypes[i,j]
 			if (j > minargs[i]-1) {
 				if (!grouped_optional_param[i,j-1]) {
 					if (j > 0) proto = proto " "
 					proto = proto "["
 					closeopts = closeopts "]"
 				}
-				xmlparams = xmlparams "\n      <parameter><optional>" \
+				xmlparams = xmlparams "\n       <parameter><optional>" \
 					argnames[i,j] \
-					"</optional></parameter>\n     </paramdef>\n"
+					"</optional></parameter>\n      </paramdef>\n"
 			} else {
 				xmlparams = xmlparams \
 					" <parameter>" \
@@ -229,7 +234,9 @@ END {
 		xmlstr = xmlstr xmlparams \
 			"     </funcprototype>\n" \
 			"    </funcsynopsis>\n" \
+			"     &warn.experimental.func;\n" \
 			"    <para>\n" \
+			"     &warn.undocumented.func;\n" \
 			"    </para>\n" \
 			"   </refsect1>\n" \
 			"  </refentry>\n"
