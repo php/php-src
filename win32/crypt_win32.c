@@ -41,6 +41,7 @@
 #include <time.h>
 #include <string.h>
 #include <stdlib.h>
+#include "md5crypt.h"
 
 #define BS  64
 #define BS2 32
@@ -271,7 +272,7 @@ setkey (char *schl)
 }
 
 char *
-crypt (const char *wort, const char *salt)
+des_crypt (const char *wort, const char *salt)
 {
   static char retkey[14];
   char key[BS + 2];
@@ -343,4 +344,12 @@ crypt (const char *wort, const char *salt)
   return retkey;
 }
 
-
+char *
+crypt (const char *pw, const char *salt)
+{
+	if (strlen(salt)>MD5_MAGIC_LEN && strncmp(salt, MD5_MAGIC, MD5_MAGIC_LEN)==0) {
+		return md5_crypt(pw, salt);
+	} else {
+		return des_crypt(pw, salt);
+	}
+}

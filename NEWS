@@ -1,6 +1,7 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2002, Version 4.3.0
+- Added MD5 support for crypt() on Windows. (Edin)
 - Fixed resource bug in LDAP extension. (Stig Venaas)
 - Fixed output buffer crash when buffer is over written in callback. (Yasuo)
 - Added output_add_rewrite_var() and output_remove_rewrite_var() to inject
