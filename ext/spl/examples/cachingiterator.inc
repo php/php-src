@@ -8,14 +8,14 @@ class CachingIterator
 	protected $it;
 	protected $current;
 	protected $key;
-	protected $more;
+	protected $valid;
 	protected $strValue;
-	protected $getStrVal;
 
 	function __construct(Iterator $it, $flags = CIT_CALL_TOSTRING)
 	{
 		$this->it = $it;
 		$this->flags = $flags & (CIT_CALL_TOSTRING|CIT_CATCH_GET_CHILD);
+		$this->next();
 	}
 
 	function rewind()
@@ -26,7 +26,7 @@ class CachingIterator
 	
 	function next()
 	{
-		if ($this->more = $this->it->valid()) {
+		if ($this->valid = $this->it->valid()) {
 			$this->current = $this->it->current();
 			$this->key = $this->it->key();
 			if ($this->flags & CIT_CALL_TOSTRING) {
@@ -46,7 +46,7 @@ class CachingIterator
 	
 	function valid()
 	{
-		return $this->more;
+		return $this->valid;
 	}
 
 	function hasNext()

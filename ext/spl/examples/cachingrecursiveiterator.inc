@@ -4,13 +4,19 @@ class CachingRecursiveIterator extends CachingIterator implements RecursiveItera
 {
 	protected $hasChildren;
 	protected $getChildren;
-	protected $catch_get_child;
 
 	function __construct(RecursiveIterator $it, $flags = CIT_CALL_TOSTRING)
 	{
 		parent::__construct($it, $flags);
 	}
 	
+	function rewind();
+	{
+	   $this->hasChildren = false;
+	   $this->getChildren = NULL;
+	   parent::rewind();
+	}
+
 	function next()
 	{
 		if ($this->hasChildren = $this->it->hasChildren()) {
