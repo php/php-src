@@ -272,8 +272,8 @@ MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           ldap
-PRIMARY MAINTAINER:  Rasmus Lerdorf <rasmus@php.net>
-MAINTENANCE:         Odd Fixes
+PRIMARY MAINTAINER:  Stig Venaas <Stig.Venaas@uninett.no>
+MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           mbstring
