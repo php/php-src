@@ -1118,6 +1118,7 @@ PHP_FUNCTION(ob_gzhandler)
 	zval **data, **a_encoding;
 	zend_bool return_original=0;
 	zend_bool do_start, do_end;
+	ZLIBLS_FETCH();
 
 	if (ZEND_NUM_ARGS()!=2 || zend_get_parameters_ex(2, &zv_string, &zv_mode)==FAILURE) {
 		ZEND_WRONG_PARAM_COUNT();
@@ -1206,6 +1207,8 @@ static void php_gzip_output_handler(char *output, uint output_len, char **handle
 int php_enable_output_compression(int buffer_size)
 {
 	zval **a_encoding, **data;
+	ELS_FETCH();
+	ZLIBLS_FETCH();
 
 	if (zend_hash_find(&EG(symbol_table), "HTTP_SERVER_VARS", sizeof("HTTP_SERVER_VARS"), (void **) &data)==FAILURE
 		|| Z_TYPE_PP(data)!=IS_ARRAY
