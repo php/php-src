@@ -97,6 +97,7 @@ function_entry pgsql_functions[] = {
 	PHP_FE(pg_fetch_row,	NULL)
 	PHP_FE(pg_fetch_array,	NULL)
 	PHP_FE(pg_fetch_object,	NULL)
+	PHP_FE(pg_fetch_all,	NULL)
 	PHP_FE(pg_affected_rows,NULL)
 	PHP_FE(pg_get_result,	NULL)
 	PHP_FE(pg_result_status,NULL)
@@ -1352,6 +1353,30 @@ PHP_FUNCTION(pg_fetch_object)
 	php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, PGSQL_ASSOC);
 	if (Z_TYPE_P(return_value)==IS_ARRAY) {
 		object_and_properties_init(return_value, ZEND_STANDARD_CLASS_DEF_PTR, Z_ARRVAL_P(return_value));
+	}
+}
+/* }}} */
+
+/* {{{ proto array pg_fetch_all(resource result)
+   Fetch all rows into array */
+PHP_FUNCTION(pg_fetch_all)
+{
+	zval *result;
+	PGresult *pgsql_result;
+	pgsql_result_handle *pg_result;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r",
+							  &result) == FAILURE) {
+		return;
+	}
+
+	ZEND_FETCH_RESOURCE(pg_result, pgsql_result_handle *, &result, -1, "PostgreSQL result", le_result);
+
+	pgsql_result = pg_result->result;
+	array_init(return_value);
+	if (php_pgsql_result2array(pgsql_result, return_value TSRMLS_CC) == FAILURE) {
+		zval_dtor(return_value);
+		RETURN_FALSE;
 	}
 }
 /* }}} */
