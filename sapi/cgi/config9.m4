@@ -86,7 +86,14 @@ if test "$PHP_SAPI" = "default"; then
     AC_MSG_RESULT(yes)
 
     PHP_ADD_MAKEFILE_FRAGMENT($abs_srcdir/sapi/cgi/Makefile.frag)
-    SAPI_CGI_PATH=sapi/cgi/php-cgi
+    case $host_alias in
+      *cygwin* )
+        SAPI_CGI_PATH=sapi/cgi/php-cgi.exe
+        ;;
+      * )
+        SAPI_CGI_PATH=sapi/cgi/php-cgi
+        ;;
+    esac
     PHP_SUBST(SAPI_CGI_PATH)
 
     PHP_TEST_WRITE_STDOUT
