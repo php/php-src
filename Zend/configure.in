@@ -80,7 +80,7 @@ dnl This is required for QNX and may be some BSD derived systems
 AC_CHECK_TYPE( uint, unsigned int )
 AC_CHECK_TYPE( ulong, unsigned long )
 
-AC_CHECK_SIZEOF(int, 4)
+AC_CHECK_SIZEOF(long, 4)
 
 dnl Checks for library functions.
 AC_FUNC_VPRINTF
