@@ -1,5 +1,8 @@
+dnl This file becomes configure.in for self-contained extensions.
 
-AC_INIT(Makefile.in)
+AC_INIT(config.m4)
+
+PHP_INIT_BUILD_SYSTEM
 
 AC_DEFUN(PHP_WITH_PHP_CONFIG,[
   AC_ARG_WITH(php-config,
@@ -25,6 +28,7 @@ AC_DEFUN(PHP_WITH_PHP_CONFIG,[
 ])
 
 abs_srcdir=`(cd $srcdir && pwd)`
+abs_builddir=`pwd`
 
 php_always_shared=yes
 
@@ -35,6 +39,8 @@ AC_PROG_CC_C_O
 
 PHP_WITH_PHP_CONFIG
 
+PHP_BUILD_SHARED
+
 AC_PREFIX_DEFAULT()
 
 sinclude(config.m4)
@@ -44,13 +50,17 @@ enable_shared=yes
 
 AC_PROG_LIBTOOL
 
-SHARED_LIBTOOL='$(LIBTOOL)'
-PHP_COMPILE='$(LIBTOOL) --mode=compile $(COMPILE) -c $<'
+all_targets='$(PHP_MODULES)'
+install_targets=install-modules
 phplibdir="`pwd`/modules"
 CPPFLAGS="$CPPFLAGS -DHAVE_CONFIG_H"
 
 test "$prefix" = "NONE" && prefix="/usr/local"
 test "$exec_prefix" = "NONE" && exec_prefix='$(prefix)'
+
+PHP_SUBST(PHP_MODULES)
+PHP_SUBST(all_targets)
+PHP_SUBST(install_targets)
 
 PHP_SUBST(prefix)
 PHP_SUBST(exec_prefix)
@@ -76,10 +86,8 @@ PHP_SUBST(SHARED_LIBTOOL)
 PHP_SUBST(LIBTOOL)
 PHP_SUBST(SHELL)
 
-PHP_FAST_OUTPUT(Makefile)
-
-PHP_GEN_CONFIG_VARS
-PHP_GEN_MAKEFILES($PHP_FAST_OUTPUT_FILES)
+PHP_GEN_BUILD_DIRS
+PHP_GEN_GLOBAL_MAKEFILE
 
 test -d modules || mkdir modules
 touch .deps

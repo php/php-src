@@ -18,8 +18,7 @@ if test "$PHP_PI3WEB" != "no"; then
 	PHP_ADD_INCLUDE($PI3PATH/Pi2API)
 	PHP_ADD_INCLUDE($PI3PATH/Pi3API)
 	PHP_ADD_INCLUDE($PI3PATH/PHP4)
-	PHP_SAPI=pi3web
-	PHP_BUILD_SHARED
+	PHP_SELECT_SAPI(pi3web, shared, pi3web_sapi.c)
 	INSTALL_IT="\$(SHELL) \$(srcdir)/install-sh -m 0755 $SAPI_SHARED \$(INSTALL_ROOT)$PI3PATH/bin/"
 fi
 

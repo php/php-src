@@ -24,8 +24,7 @@ if test "$PHP_AOLSERVER" != "no"; then
   PHP_BUILD_THREAD_SAFE
   PHP_ADD_INCLUDE($PHP_AOLSERVER_SRC/include)
   AC_DEFINE(HAVE_AOLSERVER,1,[Whether you have AOLserver])
-  PHP_SAPI=aolserver
-  PHP_BUILD_SHARED
+  PHP_SELECT_SAPI(aolserver, shared, aolserver.c)
   INSTALL_IT="\$(INSTALL) -m 0755 $SAPI_SHARED \$(INSTALL_ROOT)$PHP_AOLSERVER/bin/"
 fi
 

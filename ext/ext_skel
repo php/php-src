@@ -156,31 +156,17 @@ if test "\$PHP_$EXTNAME" != "no"; then
   dnl
   dnl PHP_SUBST(${EXTNAME}_SHARED_LIBADD)
 
-  PHP_EXTENSION($extname, \$ext_shared)
+  PHP_NEW_EXTENSION($extname, $extname.c, \$ext_shared)
 fi
-eof
-
-$ECHO_N " Makefile.in$ECHO_C"
-cat >Makefile.in <<eof
-# \$Id\$
-
-LTLIBRARY_NAME          = lib$extname.la
-LTLIBRARY_SOURCES       = $extname.c
-LTLIBRARY_SHARED_NAME   = $extname.la
-LTLIBRARY_SHARED_LIBADD = \$(${EXTNAME}_SHARED_LIBADD)
-
-include \$(top_srcdir)/build/dynlib.mk
 eof
 
 
 $ECHO_N " .cvsignore$ECHO_C"
 cat >.cvsignore <<eof
 .deps
-Makefile
 *.lo
 *.la
 .libs
-libs.mk
 eof
 
 $ECHO_N " $extname.c$ECHO_C"

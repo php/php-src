@@ -31,7 +31,7 @@ main()
   fi
 ])
 
-if test "$PHP_SAPI" = "cgi"; then
+if test "$PHP_SAPI" = "default"; then
 
   PHP_TEST_WRITE_STDOUT
 
@@ -61,9 +61,6 @@ if test "$PHP_SAPI" = "cgi"; then
   fi
   AC_DEFINE_UNQUOTED(DISCARD_PATH, $DISCARD_PATH, [ ])
 
-fi
-
-if test "$PHP_SAPI" = "cgi" ; then
   INSTALL_IT="\$(INSTALL) -m 0755 $SAPI_PROGRAM \$(INSTALL_ROOT)\$(bindir)/php-cgi"
 fi
 

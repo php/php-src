@@ -39,7 +39,7 @@ AC_ARG_WITH(apxs,
     esac
   done
   PHP_ADD_INCLUDE($APXS_INCLUDEDIR)
-  PHP_SAPI=apache
+  PHP_SELECT_SAPI(apache, shared, sapi_apache.c mod_php4.c php_apache.c)
 
   # Test whether apxs support -S option
   $APXS -q -S CFLAGS="$APXS_CFLAGS" CFLAGS >/dev/null 2>&1
@@ -50,7 +50,6 @@ AC_ARG_WITH(apxs,
     APACHE_INSTALL="\$(mkinstalldirs) \"\$(INSTALL_ROOT)`$APXS -q LIBEXECDIR`\" && $APXS -S LIBEXECDIR=\"\$(INSTALL_ROOT)`$APXS -q LIBEXECDIR`\" -i -a -n php4 $SAPI_SHARED"
   fi
 
-  PHP_BUILD_SHARED
   if test -z "`$APXS -q LD_SHLIB`" || test "`$APXS -q LIBEXECDIR`" = "modules"; then
     PHP_APXS_BROKEN=yes
   fi
@@ -86,7 +85,7 @@ AC_ARG_WITH(apache,
     if test -f $withval/src/httpd.h; then 
       APACHE_INCLUDE=-I$withval/src
       APACHE_TARGET=$withval/src
-      PHP_SAPI=apache
+      PHP_SELECT_SAPI(apache, static, sapi_apache.c mod_php4.c php_apache.c)
       APACHE_INSTALL="mkdir -p $APACHE_TARGET; cp $SAPI_STATIC $APACHE_INSTALL_FILES $APACHE_TARGET"
       PHP_LIBS="-L. -lphp3"
       AC_MSG_RESULT(yes - Apache 1.2.x)
@@ -103,7 +102,7 @@ AC_ARG_WITH(apache,
       if test ! -d $APACHE_TARGET; then
         mkdir $APACHE_TARGET
       fi
-      PHP_SAPI=apache
+      PHP_SELECT_SAPI(apache, static, sapi_apache.c mod_php4.c php_apache.c)
       APACHE_INSTALL="mkdir -p $APACHE_TARGET; cp $SAPI_STATIC $APACHE_TARGET/libmodphp4.a; cp $APACHE_INSTALL_FILES $APACHE_TARGET; cp $srcdir/sapi/apache/apMakefile.tmpl $APACHE_TARGET/Makefile.tmpl; cp $srcdir/sapi/apache/apMakefile.libdir $APACHE_TARGET/Makefile.libdir"
       PHP_LIBS="-Lmodules/php4 -L../modules/php4 -L../../modules/php4 -lmodphp4"
       AC_MSG_RESULT(yes - Apache 2.0.X)
@@ -129,7 +128,7 @@ AC_ARG_WITH(apache,
       if test ! -d $APACHE_TARGET; then
         mkdir $APACHE_TARGET
       fi
-      PHP_SAPI=apache
+      PHP_SELECT_SAPI(apache, static, sapi_apache.c mod_php4.c php_apache.c)
       APACHE_INSTALL="mkdir -p $APACHE_TARGET; cp $SAPI_STATIC $APACHE_TARGET/libmodphp4.a; cp $APACHE_INSTALL_FILES $APACHE_TARGET; cp $srcdir/sapi/apache/apMakefile.tmpl $APACHE_TARGET/Makefile.tmpl; cp $srcdir/sapi/apache/apMakefile.libdir $APACHE_TARGET/Makefile.libdir"
       PHP_LIBS="-Lmodules/php4 -L../modules/php4 -L../../modules/php4 -lmodphp4"
       AC_MSG_RESULT(yes - Apache 1.3.x)
@@ -155,7 +154,7 @@ AC_ARG_WITH(apache,
       if test ! -d $APACHE_TARGET; then
         mkdir $APACHE_TARGET
       fi
-      PHP_SAPI=apache
+      PHP_SELECT_SAPI(apache, static, sapi_apache.c mod_php4.c php_apache.c)
       PHP_LIBS="-Lmodules/php4 -L../modules/php4 -L../../modules/php4 -lmodphp4"
       APACHE_INSTALL="mkdir -p $APACHE_TARGET; cp $SAPI_STATIC $APACHE_TARGET/libmodphp4.a; cp $APACHE_INSTALL_FILES $APACHE_TARGET; cp $srcdir/sapi/apache/apMakefile.tmpl $APACHE_TARGET/Makefile.tmpl; cp $srcdir/sapi/apache/apMakefile.libdir $APACHE_TARGET/Makefile.libdir"
       AC_MSG_RESULT(yes - Apache 1.3.x)
@@ -177,7 +176,7 @@ AC_ARG_WITH(apache,
     elif test -f $withval/apache/httpd.h; then
       APACHE_INCLUDE=-"I$withval/apache -I$withval/ssl/include"
       APACHE_TARGET=$withval/apache
-      PHP_SAPI=apache
+      PHP_SELECT_SAPI(apache, static, sapi_apache.c mod_php4.c php_apache.c)
       PHP_LIBS="-Lmodules/php4 -L../modules/php4 -L../../modules/php4 -lmodphp4"
       APACHE_INSTALL="mkdir -p $APACHE_TARGET; cp $SAPI_STATIC $APACHE_TARGET/libmodphp4.a; cp $APACHE_INSTALL_FILES $APACHE_TARGET"
       STRONGHOLD=-DSTRONGHOLD=1
@@ -235,7 +234,6 @@ if test -n "$APACHE_MODULE"; then
   PHP_TARGET_RDYNAMIC
   $php_shtool mkdir -p sapi/apache
   PHP_OUTPUT(sapi/apache/libphp4.module)
-  PHP_BUILD_STATIC
 fi
 
 if test -n "$APACHE_INSTALL"; then

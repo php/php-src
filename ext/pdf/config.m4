@@ -17,7 +17,8 @@ if test "$PHP_PDFLIB" != "no"; then
   dnl # libjpeg
     
   PHP_ARG_WITH(jpeg-dir, for the location of libjpeg, 
-  [  --with-jpeg-dir[=DIR]     PDFLIB: define libjpeg install directory. (OPTIONAL for PDFlib v4)])
+  [  --with-jpeg-dir[=DIR]     PDFLIB: define libjpeg install directory.
+                                    (OPTIONAL for PDFlib v4)])
 
   if test "$PHP_JPEG_DIR" != "no"; then
     PHP_CHECK_LIBRARY(jpeg,jpeg_read_header, 
@@ -35,7 +36,8 @@ if test "$PHP_PDFLIB" != "no"; then
   dnl # libpng
 
   PHP_ARG_WITH(png-dir, for the location of libpng, 
-  [  --with-png-dir[=DIR]      PDFLIB: define libpng install directory.  (OPTIONAL for PDFlib v4)])
+  [  --with-png-dir[=DIR]      PDFLIB: define libpng install directory.
+                                    (OPTIONAL for PDFlib v4)])
  
   if test "$PHP_PNG_DIR" != "no"; then
     PHP_CHECK_LIBRARY(png,png_create_info_struct, 
@@ -53,7 +55,8 @@ if test "$PHP_PDFLIB" != "no"; then
   dnl # libtiff
 
   PHP_ARG_WITH(tiff-dir, for the location of libtiff,
-  [  --with-tiff-dir[=DIR]     PDFLIB: define libtiff install directory. (OPTIONAL for PDFlib v4)])
+  [  --with-tiff-dir[=DIR]     PDFLIB: define libtiff install directory.
+                                    (OPTIONAL for PDFlib v4)])
 
   if test "$PHP_TIFF_DIR" != "no"; then
     PHP_CHECK_LIBRARY(tiff,TIFFOpen, 

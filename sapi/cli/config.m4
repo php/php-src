@@ -17,7 +17,8 @@ AC_ARG_ENABLE(cli,
 )
 
 if test "$PHP_SAPI_CLI" != "no"; then
-  INSTALL_IT="$INSTALL_IT; \$(INSTALL) -m 0755 sapi/cli/php \$(INSTALL_ROOT)\$(bindir)/php"
+  INSTALL_CLI="\$(INSTALL) -m 0755 sapi/cli/php \$(INSTALL_ROOT)\$(bindir)/php"
+  PHP_SUBST(INSTALL_CLI)
 else
   PHP_DISABLE_CLI
 fi

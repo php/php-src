@@ -7,7 +7,6 @@ HOW TO CREATE A SELF-CONTAINED PHP EXTENSION
   the PHP source. To create such an extension, three things are
   required:
 
-  - Makefile template (Makefile.in)
   - Configuration file (config.m4)
   - Source code for your module
 
@@ -74,27 +73,8 @@ DEFINING THE NEW EXTENSION
   need to specify anything).
 
 
-CREATING THE MAKEFILE TEMPLATE 
-  
-  The Makefile Template (Makefile.in) contains three lines:
-
-------------------------------------------------------------------------------
-LTLIBRARY_SHARED_NAME = foobar.la
-LTLIBRARY_SOURCES     = foo.c bar.c
-
-include $(top_srcdir)/build/dynlib.mk
-------------------------------------------------------------------------------
-
-  LTLIBRARY_SHARED_NAME specifies the name of the extension.
-  It must be of the form `ext-name.la'.
-
   LTLIBRARY_SOURCES specifies the names of the sources files. You can
   name an arbitrary number of source files here.
-
-  The final include directive includes the build rules (you usually
-  don't need to care about what happens there). rules.mk and other
-  files are installed by phpize which we will cover later.
-
 
 CREATING THE M4 CONFIGURATION FILE
 
@@ -107,13 +87,17 @@ PHP_ARG_ENABLE(foobar,whether to enable foobar,
 [  --enable-foobar            Enable foobar])
 
 if test "$PHP_FOOBAR" != "no"; then
-  PHP_EXTENSION(foobar, $ext_shared)
+  PHP_NEW_EXTENSION(foobar, foo.c bar.c, $ext_shared)
 fi
 ------------------------------------------------------------------------------
 
   PHP_ARG_ENABLE will automatically set the correct variables, so
-  that the extension will be enabled by PHP_EXTENSION in shared mode.
+  that the extension will be enabled by PHP_NEW_EXTENSION in shared mode.
 
+  The first argument of PHP_NEW_EXTENSION describes the name of the
+  extension.  The second names the source-code files.  The third passes
+  $ext_shared which is set by PHP_ARG_ENABLE/WITH to PHP_NEW_EXTENSION.
+  
   Please use always PHP_ARG_ENABLE or PHP_ARG_WITH. Even if you do not
   plan to distribute your module with PHP, these facilities allow you
   to integrate your module easily into the main PHP module framework.
@@ -131,8 +115,8 @@ CREATING SOURCE FILES
 
 CREATING THE SELF-CONTAINED EXTENSION
 
-  Put Makefile.in, config.m4 and the source files into one directory.
-  Then run phpize (this is installed during make install by PHP 4.0).
+  Put config.m4 and the source files into one directory. Afterwards,
+  run phpize (this is installed during make install by PHP 4.0).
   For example, if you configured PHP with --prefix=/php, you would run
 
      $ /php/bin/phpize
@@ -157,17 +141,13 @@ ADDING SHARED MODULE SUPPORT TO A MODULE
   support to an existing module called foo.
 
   1. In config.m4, use PHP_ARG_WITH/PHP_ARG_ENABLE. Then you will
-     automatically be able to use --with-foo=shared or
-     --enable-foo=shared.
+     automatically be able to use --with-foo=shared[,..] or
+     --enable-foo=shared[,..].
 
-  2. In config.m4, use PHP_EXTENSION(foo, $ext_shared) to enable
+  2. In config.m4, use PHP_NEW_EXTENSION(foo,.., $ext_shared) to enable
      building the extension.
 
-  3. Add the following line to Makefile.in:
-
-        LTLIBRARY_SHARED_NAME = foo.la
-
-  4. Add the following lines to your C source file:
+  3. Add the following lines to your C source file:
 
         #ifdef COMPILE_DL_FOO
         ZEND_GET_MODULE(foo)

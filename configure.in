@@ -36,10 +36,9 @@ for arg in $0 "$@"; do
 done
 
 AC_CANONICAL_HOST
-AM_INIT_AUTOMAKE(php, 4.3.0-dev, nodefine)
-AM_CONFIG_HEADER(main/php_config.h)
-AM_MAINTAINER_MODE
+AC_CONFIG_HEADER(main/php_config.h)
 
+VERSION=4.3.0-dev
 
 
 dnl Setting up the PHP version based on the information above.
@@ -109,6 +108,8 @@ dnl -------------------------------------------------------------------------
 
 cwd=`pwd`
 
+PHP_INIT_BUILD_SYSTEM
+
 php_shtool=$srcdir/build/shtool
 T_MD=`$php_shtool echo -n -e %B`
 T_ME=`$php_shtool echo -n -e %b`
@@ -130,16 +131,13 @@ dnl or the contents of libs.
 $php_shtool mkdir -p libs
 rm -f libs/*
 
-PHP_FAST_OUTPUT(sapi/Makefile ext/Makefile Makefile pear/Makefile main/Makefile sapi/cli/Makefile)
-
-
 dnl Checks for programs.
 dnl -------------------------------------------------------------------------
 
 AC_PROG_CC
 AC_PROG_CC_C_O
 dnl Change to AC_PROG_CC_STDC when we start requiring a post-2.13 autoconf
-AM_PROG_CC_STDC
+dnl AC_PROG_CC_STDC
 AC_PROG_CPP
 AC_PROG_CXX
 AC_PROG_CXXCPP
@@ -220,7 +218,7 @@ dnl -------------------------------------------------------------------------
 PTHREADS_CHECK
 PHP_HELP_SEPARATOR([SAPI modules:])
 PHP_SHLIB_SUFFIX_NAME
-PHP_SAPI=cgi
+PHP_SAPI=default
 PHP_BUILD_PROGRAM
 
 
@@ -238,6 +236,10 @@ PHP_CONFIGURE_PART(Configuring SAPI modules)
 
 esyscmd(./scripts/config-stubs sapi)
 
+if test "$PHP_SAPI" = "default"; then
+  PHP_SELECT_SAPI(cgi, program, cgi_main.c getopt.c)
+fi
+
 AC_MSG_CHECKING([for chosen SAPI module])
 AC_MSG_RESULT([$PHP_SAPI])
 
@@ -245,7 +247,6 @@ if test "$enable_experimental_zts" = "yes"; then
   PTHREADS_ASSIGN_VARS
   PTHREADS_FLAGS
 fi
-
 
 
 divert(3)
@@ -769,9 +770,6 @@ PHP_CONFIGURE_PART(Configuring extensions)
 # reading config stubs
 esyscmd(./scripts/config-stubs ext)
 
-PHP_FAST_OUTPUT(sapi/$PHP_SAPI/Makefile)
-
-
 
 dnl Other settings.
 dnl -------------------------------------------------------------------------
@@ -802,11 +800,9 @@ unset with_pic
 case $php_build_target in
 program|static)
     standard_libtool_flag='-prefer-non-pic -static'
-    if test "$lib_build_shared" != "yes"; then
+    if test -z "$PHP_MODULES"; then
         enable_shared=no
     fi
-    PHP_COMPILE='$(CC) $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS) -c $< && touch $@'
-    CXX_PHP_COMPILE='$(CXX) $(COMMON_FLAGS) $(CXXFLAGS_CLEAN) $(EXTRA_CXXFLAGS)  -c $< && touch $@'
 ;;
 shared)
     enable_static=no
@@ -814,15 +810,6 @@ shared)
     EXTRA_LDFLAGS="$EXTRA_LDFLAGS -avoid-version"
 ;;
 esac
-
-if test "$PHP_SAPI" = "cgi"; then
-  PHP_PROGRAM=php
-fi
-
-if test "$PHP_SAPI" = "fastcgi"; then
-  PHP_PROGRAM=php
-fi
-
 
 PHP_REGEX
 
@@ -960,20 +947,19 @@ AC_DEFINE_UNQUOTED(PHP_UNAME,"$PHP_UNAME",[uname -a output])
 PHP_OS=`uname`
 AC_DEFINE_UNQUOTED(PHP_OS,"$PHP_OS",[uname output])
 
-if test "$disable_cli" = "1"; then
-  CLI_DIR=
-else
-  CLI_DIR=sapi/cli
+if test "$disable_cli" != "1"; then
+  PHP_CLI_TARGET=sapi/cli/php
+  PHP_ADD_SOURCES(sapi/cli, php_cli.c getopt.c,, cli)
 fi
 
-PHP_SUBST(CLI_DIR)
+PHP_SUBST(PHP_CLI_TARGET)
+PHP_SUBST(PHP_SAPI_OBJS)
+PHP_SUBST(PHP_CLI_OBJS)
+PHP_SUBST(PHP_GLOBAL_OBJS)
 
-PHP_SUBST(EXT_SUBDIRS)
-PHP_SUBST(EXT_STATIC)
-PHP_SUBST(EXT_SHARED)
+PHP_SUBST(PHP_MODULES)
+
 PHP_SUBST(EXT_LIBS)
-PHP_SUBST(EXT_LTLIBS)
-PHP_SUBST(EXT_CLI_LTLIBS)
 
 PHP_SUBST_OLD(abs_builddir)
 PHP_SUBST_OLD(abs_srcdir)
@@ -1020,7 +1006,7 @@ PHP_SUBST(PHP_BUILD_DATE)
 PHP_SUBST(PHP_COMPILE)
 PHP_SUBST_OLD(PHP_LDFLAGS)
 PHP_SUBST_OLD(PHP_LIBS)
-PHP_SUBST(PHP_PROGRAM)
+PHP_SUBST(OVERALL_TARGET)
 PHP_SUBST(PHP_RPATHS)
 PHP_SUBST(PHP_SAPI)
 PHP_SUBST(PHP_VERSION)
@@ -1051,9 +1037,9 @@ if test "$PHP_THREAD_SAFETY" = "yes" && test "$PHP_MYSQL" = "yes"; then
   CPPFLAGS="$CPPFLAGS -DTHREAD=1"
 fi
 
-AM_PROG_LIBTOOL
+AC_PROG_LIBTOOL
 if test "$enable_debug" != "yes"; then
-  AM_SET_LIBTOOL_VARIABLE([--silent])
+  PHP_SET_LIBTOOL_VARIABLE([--silent])
 fi
 
 
@@ -1071,13 +1057,61 @@ CFLAGS="$CFLAGS $standard_libtool_flag"
 INLINE_CFLAGS="$INLINE_CFLAGS $standard_libtool_flag"
 CXXFLAGS="$CXXFLAGS $standard_libtool_flag"
 
-PHP_GEN_CONFIG_VARS
+all_targets='$(OVERALL_TARGET) $(PHP_MODULES) $(PHP_CLI_TARGET)'
+install_targets='install-sapi install-modules install-cli install-data-local install-headers install-build install-programs'
+PHP_SUBST(all_targets)
+PHP_SUBST(install_targets)
+
+PHP_ADD_SOURCES(TSRM, TSRM.c tsrm_strtok_r.c tsrm_virtual_cwd.c)
+
+PHP_ADD_SOURCES(main, main.c snprintf.c php_sprintf.c \
+       safe_mode.c fopen_wrappers.c alloca.c \
+       php_ini.c SAPI.c rfc1867.c php_content_types.c strlcpy.c \
+       strlcat.c mergesort.c reentrancy.c php_variables.c php_ticks.c \
+       streams.c network.c php_open_temporary_file.c php_logos.c \
+       output.c)
+PHP_ADD_SOURCES(/main, internal_functions.c,, sapi)
+PHP_ADD_SOURCES(/main, internal_functions_cli.c,, cli)
+
+PHP_ADD_SOURCES(/Zend,  zend_language_parser.c zend_language_scanner.c \
+    zend_ini_parser.c zend_ini_scanner.c)
+	
+PHP_ADD_SOURCES(Zend, \
+    zend_alloc.c zend_compile.c zend_constants.c zend_dynamic_array.c \
+    zend_execute_API.c zend_highlight.c zend_llist.c \
+    zend_opcode.c zend_operators.c zend_ptr_stack.c zend_stack.c \
+    zend_variables.c zend.c zend_API.c zend_extensions.c zend_hash.c \
+    zend_list.c zend_indent.c zend_builtin_functions.c zend_sprintf.c \
+    zend_ini.c zend_qsort.c)
+
+dnl Selectively disable optimization due to high RAM usage during
+dnl compiling the executor.
+if test -n "$GCC" && test "$ZEND_INLINE_OPTIMIZATION" != "yes"; then
+  flag=-O0
+else
+  flag=
+fi
+
+PHP_ADD_SOURCES_X(Zend, zend_execute.c,,PHP_GLOBAL_OBJS,,$flag)
+
+PHP_ADD_BUILD_DIR(main)
+PHP_ADD_BUILD_DIR(regex)
+PHP_ADD_BUILD_DIR(sapi/$PHP_SAPI sapi/cli)
+PHP_ADD_BUILD_DIR(TSRM)
+PHP_ADD_BUILD_DIR(Zend)
+
+
+PHP_ADD_MAKEFILE_FRAGMENT($abs_srcdir/pear/Makefile.frag,$abs_srcdir/pear,pear)
+PHP_ADD_MAKEFILE_FRAGMENT($abs_srcdir/Makefile.frag,$abs_srcdir/Zend,Zend)
+
+PHP_GEN_BUILD_DIRS
+PHP_GEN_GLOBAL_MAKEFILE
 
 $php_shtool mkdir -p pear/scripts
-ALL_OUTPUT_FILES="php4.spec Zend/Makefile main/build-defs.h \
+ALL_OUTPUT_FILES="php4.spec main/build-defs.h \
 pear/scripts/pear pear/scripts/phpize pear/scripts/php-config \
 pear/scripts/pearize pear/scripts/phptar pear/scripts/pear-get \
-TSRM/Makefile $PHP_OUTPUT_FILES"
+$PHP_OUTPUT_FILES"
 
 AC_OUTPUT($ALL_OUTPUT_FILES, [], [
 
@@ -1085,10 +1119,6 @@ if test "\$CONFIG_FILES" = "$ALL_OUTPUT_FILES" || test -z "\$CONFIG_FILES"; then
   REDO_ALL=yes
 fi
 
-if test -n "\$REDO_ALL"; then
-  PHP_GEN_MAKEFILES($PHP_FAST_OUTPUT_FILES)
-fi
-		   
 if test ! -f $srcdir/ext/bcmath/number.c; then
 	echo "creating number.c"
 	echo "/* Dummy File */" > $srcdir/ext/bcmath/number.c

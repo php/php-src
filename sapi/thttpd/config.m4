@@ -18,8 +18,7 @@ AC_ARG_WITH(thttpd,
     (cd $THTTPD && patch < $abs_srcdir/sapi/thttpd/thttpd_patch && touch php_patched)"
   PHP_THTTPD="yes, using $THTTPD"
   PHP_ADD_INCLUDE($THTTPD)
-  PHP_BUILD_STATIC
-  PHP_SAPI=thttpd
+  PHP_SELECT_SAPI(thttpd, static)
 ],[
   PHP_THTTPD=no
 ])

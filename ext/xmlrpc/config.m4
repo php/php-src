@@ -15,7 +15,6 @@ PHP_ARG_WITH(expat-dir, libexpat dir for XMLRPC-EPI,
 
 if test "$PHP_XMLRPC" != "no"; then
 
-  PHP_EXTENSION(xmlrpc, $ext_shared)
   PHP_SUBST(XMLRPC_SHARED_LIBADD)
   AC_DEFINE(HAVE_XMLRPC,1,[ ])
 
@@ -54,13 +53,14 @@ fi
 
 if test "$PHP_XMLRPC" = "yes"; then
   XMLRPC_CHECKS
-  XMLRPC_LIBADD=libxmlrpc/libxmlrpc.la
-  XMLRPC_SHARED_LIBADD=libxmlrpc/libxmlrpc.la
-  XMLRPC_SUBDIRS=libxmlrpc
-  PHP_SUBST(XMLRPC_LIBADD)
-  PHP_SUBST(XMLRPC_SUBDIRS)
-  LIB_BUILD($ext_builddir/libxmlrpc,$ext_shared,yes)
-  PHP_ADD_INCLUDE($ext_srcdir/libxmlrpc)
+  PHP_NEW_EXTENSION(xmlrpc,xmlrpc-epi-php.c libxmlrpc/base64.c \
+          libxmlrpc/simplestring.c libxmlrpc/xml_to_dandarpc.c \
+          libxmlrpc/xmlrpc_introspection.c libxmlrpc/encodings.c \
+          libxmlrpc/system_methods.c libxmlrpc/xml_to_xmlrpc.c \
+          libxmlrpc/queue.c libxmlrpc/xml_element.c libxmlrpc/xmlrpc.c \
+          libxmlrpc/xml_to_soap.c,$ext_shared,,
+          -I@ext_srcdir@/libxmlrpc -DVERSION="0.50")
+  PHP_ADD_BUILD_DIR($ext_builddir/libxmlrpc)
   XMLRPC_MODULE_TYPE=builtin
 
 elif test "$PHP_XMLRPC" != "no"; then

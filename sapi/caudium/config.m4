@@ -82,8 +82,7 @@ AC_ARG_WITH(caudium,
 	fi
     PIKE_VERSION=`$PIKE -e 'string v; int rel;sscanf(version(), "Pike v%s release %d", v, rel); write(v+"."+rel);'`   
 	AC_DEFINE(HAVE_CAUDIUM,1,[Whether to compile with Caudium support])
-	PHP_SAPI=caudium
-	PHP_BUILD_SHARED
+    PHP_SELECT_SAPI(caudium, shared, caudium.c)
 	INSTALL_IT="\$(INSTALL) -m 0755 $SAPI_SHARED $withval/lib/$PIKE_VERSION/PHP4.so"
 	RESULT="	*** Pike binary used:         $PIKE
 	*** Pike include dir(s) used: $PIKE_INCLUDE_DIR

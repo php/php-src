@@ -1,13 +1,13 @@
 #!/bin/sh
 ##
 ##  GNU shtool -- The GNU Portable Shell Tool
-##  Copyright (c) 1994-2000 Ralf S. Engelschall <rse@engelschall.com>
+##  Copyright (c) 1994-2001 Ralf S. Engelschall <rse@engelschall.com>
 ##
 ##  See http://www.gnu.org/software/shtool/ for more information.
 ##  See ftp://ftp.gnu.org/gnu/shtool/ for latest version.
 ##
-##  Version 1.4.9 (16-Apr-2000)
-##  Ingredients: 3/17 available modules
+##  Version:  1.5.4 (14-Jun-2001)
+##  Contents: 3/17 available modules
 ##
 
 ##
@@ -26,7 +26,7 @@
 ##  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
 ##  USA, or contact Ralf S. Engelschall <rse@engelschall.com>.
 ##
-##  Notice: Given that you include this file verbatim into your own
+##  NOTICE: Given that you include this file verbatim into your own
 ##  source tree, you are justified in saying that it remains separate
 ##  from your package, and that this way you are simply just using GNU
 ##  shtool. So, in this situation, there is no requirement that your
@@ -55,7 +55,7 @@
 ##    arx        Extended archive command
 ##    slo        Separate linker options by library class
 ##    scpp       Sharing C Pre-Processor
-##    version    Generate and maintain a version information file
+##    version    Maintain a version information file
 ##    path       Deal with program paths
 ##
 
@@ -65,21 +65,22 @@ if [ $# -eq 0 ]; then
     exit 1
 fi
 if [ ".$1" = ".-h" -o ".$1" = ".--help" ]; then
-    echo "This is GNU shtool, version 1.4.9 (16-Apr-2000)"
-    echo "Copyright (c) 1994-2000 Ralf S. Engelschall <rse@engelschall.com>"
+    echo "This is GNU shtool, version 1.5.4 (14-Jun-2001)"
+    echo "Copyright (c) 1994-2001 Ralf S. Engelschall <rse@engelschall.com>"
     echo "Report bugs to <bug-shtool@gnu.org>"
     echo ''
-    echo "Usage: shtool [<options>] [<cmd-name> [<cmd-options>] [<cmd-args>]]" 
+    echo "Usage: shtool [<options>] [<cmd-name> [<cmd-options>] [<cmd-args>]]"
     echo ''
     echo 'Available global <options>:'
     echo '  -v, --version   display shtool version information'
     echo '  -h, --help      display shtool usage help page (this one)'
     echo '  -d, --debug     display shell trace information'
+    echo '  -r, --recreate  recreate this shtool script via shtoolize'
     echo ''
     echo 'Available <cmd-name> [<cmd-options>] [<cmd-args>]:'
     echo '  echo     [-n] [-e] [<str> ...]'
     echo '  install  [-v] [-t] [-c] [-C] [-s] [-m<mode>] [-o<owner>] [-g<group>]'
-    echo '           [-e<ext>] <file> <path>'
+    echo '           [-e<sed-cmd>] <file> [<file> ...] <path>'
     echo '  mkdir    [-t] [-f] [-p] [-m<mode>] <dir> [<dir> ...]'
     echo ''
     echo 'Not available <cmd-name> (because module was not built-in):'
@@ -90,21 +91,25 @@ if [ ".$1" = ".-h" -o ".$1" = ".--help" ]; then
     echo '  mkln     [-t] [-f] [-s] <src-path> [<src-path> ...] <dst-path>'
     echo '  mkshadow [-v] [-t] [-a] <src-dir> <dst-dir>'
     echo '  fixperm  [-v] [-t] <path> [<path> ...]'
-    echo '  tarball  [-t] [-v] [-o <tarball>] [-c <prog>] [-d <dir>] [-u'
-    echo '           <user>] [-g <group>] [-e <pattern>] <path> [<path> ...]'
+    echo '  tarball  [-t] [-v] [-o<tarball>] [-c<prog>] [-d<dir>] [-u<user>]'
+    echo '           [-g<group>] [-e<pattern>] <path> [<path> ...]'
     echo '  guessos  '
     echo '  arx      [-t] [-C<cmd>] <op> <archive> [<file> ...]'
     echo '  slo      [-p<str>] -- -L<dir> -l<lib> [-L<dir> -l<lib> ...]'
     echo '  scpp     [-v] [-p] [-f<filter>] [-o<ofile>] [-t<tfile>] [-M<mark>]'
     echo '           [-D<dname>] [-C<cname>] <file> [<file> ...]'
-    echo '  version  [-l<lang>] [-n<name>] [-p<prefix>] [-s<version>] [-i<knob>]'
-    echo '           [-d<type>] <file>'
+    echo '  version  [-l<lang>] [-n<name>] [-p<prefix>] [-s<version>] [-e]'
+    echo '           [-i<knob>] [-d<type>] <file>'
     echo '  path     [-s] [-r] [-d] [-b] [-m] [-p<path>] <str> [<str> ...]'
     echo ''
     exit 0
 fi
 if [ ".$1" = ".-v" -o ".$1" = ."--version" ]; then
-    echo "GNU shtool 1.4.9 (16-Apr-2000)"
+    echo "GNU shtool 1.5.4 (14-Jun-2001)"
+    exit 0
+fi
+if [ ".$1" = ".-r" -o ".$1" = ."--recreate" ]; then
+    shtoolize -ofoo echo install mkdir
     exit 0
 fi
 if [ ".$1" = ".-d" -o ".$1" = ."--debug" ]; then
@@ -142,15 +147,15 @@ case $tool in
         ;;
     install )
         str_tool="install"
-        str_usage="[-v] [-t] [-c] [-C] [-s] [-m<mode>] [-o<owner>] [-g<group>] [-e<ext>] <file> <path>"
-        arg_spec="2="
-        opt_spec="v.t.c.C.s.m:o:g:e:"
+        str_usage="[-v] [-t] [-c] [-C] [-s] [-m<mode>] [-o<owner>] [-g<group>] [-e<sed-cmd>] <file> [<file> ...] <path>"
+        arg_spec="2+"
+        opt_spec="v.t.c.C.s.m:o:g:e+"
         opt_v=no
         opt_t=no
         opt_c=no
         opt_C=no
         opt_s=no
-        opt_m=""
+        opt_m="0755"
         opt_o=""
         opt_g=""
         opt_e=""
@@ -312,6 +317,7 @@ if [ ".$gen_tmpfile" = .yes ]; then
     tmpfile="$tmpdir/.shtool.$$"
     rm -f $tmpfile >/dev/null 2>&1
     touch $tmpfile
+    chmod 600 $tmpfile
 fi
 
 ##
@@ -323,7 +329,7 @@ case $tool in
 echo )
     ##
     ##  echo -- Print string with optional construct expansion
-    ##  Copyright (c) 1998-2000 Ralf S. Engelschall <rse@engelschall.com>
+    ##  Copyright (c) 1998-2001 Ralf S. Engelschall <rse@engelschall.com>
     ##  Originally written for WML as buildinfo
     ##
     
@@ -347,7 +353,7 @@ echo )
     fi
     
     #   determine terminal bold sequence
-    term_bold='' 
+    term_bold=''
     term_norm=''
     if [ ".$opt_e" = .yes -a ".`echo $text | egrep '%[Bb]'`" != . ]; then
         case $TERM in
@@ -398,7 +404,7 @@ echo )
     
     #   determine user name
     username=''
-    if [ ".$opt_e" = .yes -a ".`echo $text | egrep '%[uU]'`" != . ]; then
+    if [ ".$opt_e" = .yes -a ".`echo $text | egrep '%[uUgG]'`" != . ]; then
         username="$LOGNAME"
         if [ ".$username" = . ]; then
             username="$USER"
@@ -440,8 +446,38 @@ echo )
         fi
     fi
     
-    #   determine host name
+    #   determine (primary) group id
+    groupid=''
+    if [ ".$opt_e" = .yes -a ".`echo $text | egrep '%[gG]'`" != . ]; then
+        groupid=`egrep "^${username}:" /etc/passwd 2>/dev/null | \
+                 sed -e 's/[^:]*:[^:]*:[^:]*://' -e 's/:.*$//'`
+        if [ ".$groupid" = . ]; then
+            groupid=`(ypcat passwd) 2>/dev/null | egrep "^${username}:" | \
+                     sed -e 's/[^:]*:[^:]*:[^:]*://' -e 's/:.*$//'`
+            if [ ".$groupid" = . ]; then
+                groupid='?'
+            fi
+        fi
+    fi
+    
+    #   determine (primary) group name
+    groupname=''
+    if [ ".$opt_e" = .yes -a ".`echo $text | egrep '%g'`" != . ]; then
+        groupname=`egrep "^[^:]*:[^:]*:${groupid}:" /etc/group 2>/dev/null | \
+                   sed -e 's/:.*$//'`
+        if [ ".$groupname" = . ]; then
+            groupname=`(ypcat group) 2>/dev/null | \
+                       egrep "^[^:]*:[^:]*:${groupid}:" | \
+                       sed -e 's/:.*$//'`
+            if [ ".$groupname" = . ]; then
+                groupname='?'
+            fi
+        fi
+    fi
+    
+    #   determine host and domain name
     hostname=''
+    domainname=''
     if [ ".$opt_e" = .yes -a ".`echo $text | egrep '%h'`" != . ]; then
         hostname="`(uname -n) 2>/dev/null |\
                    awk '{ printf("%s", $1); }'`"
@@ -459,9 +495,6 @@ echo )
                 ;;
         esac
     fi
-    
-    #   determine domain name
-    domainname=''
     if [ ".$opt_e" = .yes -a ".`echo $text | egrep '%d'`" != . ]; then
         if [ ".$domainname" = . ]; then
             if [ -f /etc/resolv.conf ]; then
@@ -521,6 +554,8 @@ echo )
                   -e "s/%b/${term_norm}/g" \
                   -e "s/%u/${username}/g" \
                   -e "s/%U/${userid}/g" \
+                  -e "s/%g/${groupname}/g" \
+                  -e "s/%G/${groupid}/g" \
                   -e "s/%h/${hostname}/g" \
                   -e "s/%d/${domainname}/g" \
                   -e "s/%D/${time_day}/g" \
@@ -546,114 +581,144 @@ echo )
 install )
     ##
     ##  install -- Install a program, script or datafile
-    ##  Copyright (c) 1997-2000 Ralf S. Engelschall <rse@engelschall.com>
+    ##  Copyright (c) 1997-2001 Ralf S. Engelschall <rse@engelschall.com>
     ##  Originally written for shtool
     ##
     
-    src="$1"
-    dst="$2"
+    #   determine source(s) and destination
+    argc=$#
+    srcs=""
+    while [ $# -gt 1 ]; do
+        srcs="$srcs $1"
+        shift
+    done
+    dstpath="$1"
     
-    #  If destination is a directory, append the input filename
-    if [ -d $dst ]; then
-        dst=`echo "$dst" | sed -e 's:/$::'`
-        dstfile=`echo "$src" | sed -e 's;.*/\([^/]*\)$;\1;'`
-        dst="$dst/$dstfile"
+    #   type check for destination
+    dstisdir=0
+    if [ -d $dstpath ]; then
+        dstpath=`echo "$dstpath" | sed -e 's:/$::'`
+        dstisdir=1
     fi
     
-    #  Add a possible extension to src and dst
-    if [ ".$opt_e" != . ]; then
-        src="$src$opt_e"
-        dst="$dst$opt_e"
-    fi
-    
-    #  Check for correct arguments
-    if [ ".$src" = ".$dst" ]; then
-        echo "$msgprefix:Error: source and destination are the same" 1>&2
+    #   consistency check for destination
+    if [ $argc -gt 2 -a $dstisdir = 0 ]; then
+        echo "$msgprefix:Error: multiple sources require destination to be directory" 1>&2
         exit 1
     fi
     
-    #  Make a temp file name in the destination directory
-    dstdir=`echo $dst | sed -e 's;[^/]*$;;' -e 's;\(.\)/$;\1;' -e 's;^$;.;'`
-    dsttmp="$dstdir/#INST@$$#"
+    #   iterate over all source(s)
+    for src in $srcs; do
+        dst=$dstpath
     
-    #  Verbosity
-    if [ ".$opt_v" = .yes ]; then
-        echo "$src -> $dst" 1>&2
-    fi
+        #   if destination is a directory, append the input filename
+        if [ $dstisdir = 1 ]; then
+            dstfile=`echo "$src" | sed -e 's;.*/\([^/]*\)$;\1;'`
+            dst="$dst/$dstfile"
+        fi
     
-    #  Copy or move the file name to the temp name
-    #  (because we might be not allowed to change the source)
-    if [ ".$opt_C" = .yes ]; then
-        opt_c=yes
-    fi
-    if [ ".$opt_c" = .yes ]; then
-        if [ ".$opt_t" = .yes ]; then
-            echo "cp $src $dsttmp" 1>&2
+        #   check for correct arguments
+        if [ ".$src" = ".$dst" ]; then
+            echo "$msgprefix:Warning: source and destination are the same - skipped" 1>&2
+            continue
         fi
-        cp $src $dsttmp || exit $?
-    else
-        if [ ".$opt_t" = .yes ]; then
-            echo "mv $src $dsttmp" 1>&2
+        if [ -d "$src" ]; then
+            echo "$msgprefix:Warning: source \`$src' is a directory - skipped" 1>&2
+            continue
         fi
-        mv $src $dsttmp || exit $?
-    fi
     
-    #  Adjust the target file
-    #  (we do chmod last to preserve setuid bits)
-    if [ ".$opt_s" = .yes ]; then
-        if [ ".$opt_t" = .yes ]; then
-            echo "strip $dsttmp" 1>&2
-        fi
-        strip $dsttmp || exit $?
-    fi
-    if [ ".$opt_o" != . ]; then
-        if [ ".$opt_t" = .yes ]; then
-            echo "chown $opt_o $dsttmp" 1>&2
-        fi
-        chown $opt_o $dsttmp || exit $?
-    fi
-    if [ ".$opt_g" != . ]; then
-        if [ ".$opt_t" = .yes ]; then
-            echo "chgrp $opt_g $dsttmp" 1>&2
-        fi
-        chgrp $opt_g $dsttmp || exit $?
-    fi
-    if [ ".$opt_m" != . ]; then
-        if [ ".$opt_t" = .yes ]; then
-            echo "chmod $opt_m $dsttmp" 1>&2
-        fi
-        chmod $opt_m $dsttmp || exit $?
-    fi
+        #   make a temp file name in the destination directory
+        dsttmp=`echo $dst |\
+                sed -e 's;[^/]*$;;' -e 's;\(.\)/$;\1;' -e 's;^$;.;' \
+                    -e "s;\$;/#INST@$$#;"`
     
-    #   Determine whether to do a quick install
-    #   (has to be done _after_ the strip was already done)
-    quick=no
-    if [ ".$opt_C" = .yes ]; then
-        if [ -r $dst ]; then
-            if cmp -s $src $dst; then
-                quick=yes
+        #   verbosity
+        if [ ".$opt_v" = .yes ]; then
+            echo "$src -> $dst" 1>&2
+        fi
+    
+        #   copy or move the file name to the temp name
+        #   (because we might be not allowed to change the source)
+        if [ ".$opt_C" = .yes ]; then
+            opt_c=yes
+        fi
+        if [ ".$opt_c" = .yes ]; then
+            if [ ".$opt_t" = .yes ]; then
+                echo "cp $src $dsttmp" 1>&2
+            fi
+            cp $src $dsttmp || exit $?
+        else
+            if [ ".$opt_t" = .yes ]; then
+                echo "mv $src $dsttmp" 1>&2
+            fi
+            mv $src $dsttmp || exit $?
+        fi
+    
+        #   adjust the target file
+        if [ ".$opt_e" != . ]; then
+            sed='sed'
+            for e in $opt_e; do
+                sed="$sed -e '$e'"
+            done
+            cp $dsttmp $dsttmp.old
+            eval "$sed <$dsttmp.old >$dsttmp" || exit $?
+            rm -f $dsttmp.old
+        fi
+        if [ ".$opt_s" = .yes ]; then
+            if [ ".$opt_t" = .yes ]; then
+                echo "strip $dsttmp" 1>&2
+            fi
+            strip $dsttmp || exit $?
+        fi
+        if [ ".$opt_o" != . ]; then
+            if [ ".$opt_t" = .yes ]; then
+                echo "chown $opt_o $dsttmp" 1>&2
+            fi
+            chown $opt_o $dsttmp || exit $?
+        fi
+        if [ ".$opt_g" != . ]; then
+            if [ ".$opt_t" = .yes ]; then
+                echo "chgrp $opt_g $dsttmp" 1>&2
+            fi
+            chgrp $opt_g $dsttmp || exit $?
+        fi
+        if [ ".$opt_m" != ".-" ]; then
+            if [ ".$opt_t" = .yes ]; then
+                echo "chmod $opt_m $dsttmp" 1>&2
+            fi
+            chmod $opt_m $dsttmp || exit $?
+        fi
+    
+        #   determine whether to do a quick install
+        #   (has to be done _after_ the strip was already done)
+        quick=no
+        if [ ".$opt_C" = .yes ]; then
+            if [ -r $dst ]; then
+                if cmp -s $src $dst; then
+                    quick=yes
+                fi
             fi
         fi
-    fi
     
-    #   Finally install the file to the real destination
-    if [ $quick = yes ]; then
-        if [ ".$opt_t" = .yes ]; then
-            echo "rm -f $dsttmp" 1>&2
+        #   finally, install the file to the real destination
+        if [ $quick = yes ]; then
+            if [ ".$opt_t" = .yes ]; then
+                echo "rm -f $dsttmp" 1>&2
+            fi
+            rm -f $dsttmp
+        else
+            if [ ".$opt_t" = .yes ]; then
+                echo "rm -f $dst && mv $dsttmp $dst" 1>&2
+            fi
+            rm -f $dst && mv $dsttmp $dst
         fi
-        rm -f $dsttmp
-    else
-        if [ ".$opt_t" = .yes ]; then
-            echo "rm -f $dst && mv $dsttmp $dst" 1>&2
-        fi
-        rm -f $dst && mv $dsttmp $dst
-    fi
+    done
     ;;
 
 mkdir )
     ##
     ##  mkdir -- Make one or more directories
-    ##  Copyright (c) 1996-2000 Ralf S. Engelschall <rse@engelschall.com>
+    ##  Copyright (c) 1996-2001 Ralf S. Engelschall <rse@engelschall.com>
     ##  Originally written for public domain by Noah Friedman <friedman@prep.ai.mit.edu>
     ##  Cleaned up and enhanced for shtool
     ##
@@ -662,7 +727,7 @@ mkdir )
     for p in ${1+"$@"}; do
         #   if the directory already exists...
         if [ -d "$p" ]; then
-            if [ ".$opt_f" = .no ] && [ ".$opt_p" = .no ]; then
+            if [ ".$opt_f" = .no -a ".$opt_p" = .no ]; then
                 echo "$msgprefix:Error: directory already exists: $p" 1>&2
                 errstatus=1
                 break
@@ -676,6 +741,12 @@ mkdir )
                 echo "mkdir $p" 1>&2
             fi
             mkdir $p || errstatus=$?
+            if [ ".$opt_m" != . ]; then
+                if [ ".$opt_t" = .yes ]; then
+                    echo "chmod $opt_m $p" 1>&2
+                fi
+                chmod $opt_m $p || errstatus=$?
+            fi
         else
             #   the smart situation
             set fnord `echo ":$p" |\
