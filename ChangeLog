@@ -1,3 +1,63 @@
+2002-04-26  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * ext/standard/filestat.c
+      ext/standard/php_filestat.h
+      ext/standard/basic_functions.c: Fixed bug #16861.
+    touch sets wrong atime or mtime when they are not specified.
+    touch silently failed when HAVE_UTIME is not defined.
+    (This needs more consideration. Which platform does not support it?)
+
+2002-04-26  Jani Taskinen  <sniper@iki.fi>
+
+    * NEWS: - News entry about the change in php.ini-*
+
+
+    * php.ini-dist
+      php.ini-recommended:
+    Default setting for short_open_tag is better be Off.
+
+2002-04-26  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/session/session.c: three less strlen invocations
+
+    * sapi/apache2filter/config.m4
+      sapi/apache/config.m4: be a bit more verbose about what is wrong
+
+2002-04-26  Harald Radi  <h.radi@nme.at>
+
+    * ext/com/com.h:
+    this patch should fix a bug where intermediate comvals were not
+    released before they were freed. this caused outproc com server
+    to belive that they still referenced even when the php process
+    already terminated.
+
+2002-04-26  Dan Kalowsky  <dank@deadmime.org>
+
+    * ext/odbc/php_odbc.c:
+    bug fix for bug #15758, a double free'ing of an ODBC connection
+
+2002-04-26  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/apache/libphp4.module.in: Fix external builds
+
+    * configure.in: reuse known values
+
+    * ext/mbstring/mbstring.h
+      ext/mbstring/php_mbregex.c: Improve use of module_globals macros
+
+2002-04-26  Jani Taskinen  <sniper@iki.fi>
+
+    * sapi/apache2filter/config.m4
+      sapi/apache/config.m4:
+    MFH: fix bug: #16791 (more reliable version check)
+
+    * sapi/apache2filter/config.m4
+      sapi/apache/config.m4: - Fix for bug: #16791. (more reliable test)
+
+2002-04-26  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/DB/pgsql.php: E_ALL fix when DSN is given as an array
+
 2002-04-25  jim winstead  <jimw@apache.org>
 
     * ext/standard/url_scanner_ex.c: update generated file
