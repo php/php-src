@@ -84,6 +84,17 @@
 													} \
 													DOMXML_GET_OBJ(ret, zval, le);
 
+#define DOMXML_PARAM_ONE(ret, zval, le, s, p1)	if (NULL == (zval = getThis())) { \
+														if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o"s, &zval, p1) == FAILURE) { \
+															return; \
+														} \
+													} else { \
+														if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, s, p1) == FAILURE) { \
+															return; \
+														} \
+													} \
+													DOMXML_GET_OBJ(ret, zval, le);
+
 #define DOMXML_PARAM_TWO(ret, zval, le, s, p1, p2)	if (NULL == (zval = getThis())) { \
 														if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o"s, &zval, p1, p2) == FAILURE) { \
 															return; \
@@ -180,6 +191,7 @@ static zend_function_entry domxml_functions[] = {
 	PHP_FE(domxml_add_root,												NULL)
 	PHP_FE(domxml_dump_mem,												NULL)
 	PHP_FE(domxml_dump_mem_file,                                        NULL)
+	PHP_FE(domxml_dump_node,												NULL)    
 #if defined(LIBXML_HTML_ENABLED)
 	PHP_FE(domxml_html_dump_mem,												NULL)
 #endif
@@ -310,6 +322,7 @@ static zend_function_entry php_domxmlnode_class_functions[] = {
 	PHP_FALIAS(node_value,				domxml_node_value,				NULL)
 	PHP_FALIAS(clone_node,				domxml_clone_node,				NULL)
 	PHP_FALIAS(is_blank_node,				domxml_is_blank_node,				NULL)
+	PHP_FALIAS(dump_node,				domxml_dump_node,				NULL)        
 	{NULL, NULL, NULL}
 };
 
@@ -2631,6 +2644,48 @@ PHP_FUNCTION(domxml_dump_mem_file)
         RETURN_FALSE;
     }
 	RETURN_LONG(bytes);
+}
+/* }}} */
+
+/* {{{ proto string domxml_dump_node([object doc_handle],object node_handle)
+   Dumps node into string */
+PHP_FUNCTION(domxml_dump_node)
+{
+	zval *id, *nodep;
+	xmlDocPtr docp;
+	xmlNodePtr elementp;
+    xmlChar *mem ;
+    xmlBufferPtr buf;
+    int level = 0;
+    int format = 0;    
+    
+    DOMXML_PARAM_ONE(docp, id, le_domxmldocp,"o",&nodep);
+        
+	DOMXML_GET_OBJ(elementp, nodep, le_domxmlnodep);
+
+    if (Z_TYPE_P(elementp) == XML_DOCUMENT_NODE || Z_TYPE_P(elementp) == XML_HTML_DOCUMENT_NODE ) {
+        php_error(E_WARNING, "%s(): cannot dump element with a document node", get_active_function_name(TSRMLS_C)); 
+        RETURN_FALSE;
+    }
+    
+    buf = xmlBufferCreate();
+    if (!buf)
+    {
+        php_error(E_WARNING, "%s(): could fetch buffer", get_active_function_name(TSRMLS_C)); 
+        RETURN_FALSE;
+    }
+    
+    xmlNodeDump(buf, docp, elementp,level,format);
+	
+    mem = xmlBufferContent(buf);
+
+	if (!mem) {
+		RETURN_FALSE;
+	}
+	RETVAL_STRING(mem,  1);
+    
+    xmlBufferFree(buf);
+
 }
 /* }}} */
 

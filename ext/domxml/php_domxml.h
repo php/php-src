@@ -80,6 +80,7 @@ PHP_FUNCTION(domxml_add_root);
 PHP_FUNCTION(domxml_intdtd);
 PHP_FUNCTION(domxml_dump_mem);
 PHP_FUNCTION(domxml_dump_mem_file);
+PHP_FUNCTION(domxml_dump_node);
 
 #if defined(LIBXML_HTML_ENABLED)
 PHP_FUNCTION(domxml_html_dump_mem);
