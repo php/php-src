@@ -9,7 +9,7 @@ PHP 4                                                                      NEWS
 - Fixed FastCGI being unable to bind to a specific IP. (Sascha)
 - Fixed bug #25636 (SNMP Session not closed on success). (Ilia, 
   nesslage[at]mwsc[dot]edu)
-- Fixed bug #25635 (Make make tests to fail due to invalid include_path). (Ilia)
+- Fixed bug #25635 (Make "make tests" to fail due to invalid include_path). (Ilia)
 - Fixed bug #25604 (HAVE_SNMP_PARSE_OID undefined with phpize build). (Jani)
 - Fixed bug #25583 (Incorrect handling of paths starting with / on win32 
   inside glob() function). (Ilia)
