@@ -640,7 +640,7 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg TSRMLS_DC)
 							efree(lower_temp);
 						}
 					}
-					newlen = sizeof("WWW-Authenticate: ") + result_len;
+					newlen = sizeof("WWW-Authenticate: ") - 1  + result_len;
 					newheader = emalloc(newlen+1);
 					sprintf(newheader,"WWW-Authenticate: %s", result);
 					efree(header_line);
