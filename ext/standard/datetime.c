@@ -65,9 +65,8 @@ static int phpday_tab[2][12] =
 
 #define isleap(year) (((year%4) == 0 && (year%100)!=0) || (year%400)==0)
 
-#if !(WIN32|WINNT)
 extern PHPAPI time_t parsedate(char *p, struct timeval *now);
-#endif
+
 
 PHP_FUNCTION(time)
 {
@@ -558,7 +557,6 @@ PHP_FUNCTION(strftime)
 }
 #endif
 
-#if !(WIN32|WINNT)
 /* {{{ proto int strtotime(string time, int now) */
 PHP_FUNCTION(strtotime)
 {
@@ -582,7 +580,7 @@ PHP_FUNCTION(strtotime)
 		RETURN_LONG(parsedate(timep->value.str.val, NULL));
 	}
 }
-#endif
+
 /* }}} */
 
 /*
