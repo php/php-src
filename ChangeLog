@@ -1,3 +1,92 @@
+2002-08-11  helly  <helly@pb1.pair.com>
+
+    * ext/gd/libgd/gd.c: -quick hack to allow compilation under windows again
+    -correct solution to follow tomorrow
+
+2002-08-11  kalowsky  <kalowsky@pb1.pair.com>
+
+    * win32/php4dllts.dsp: Added the php_odbc_includes.h file
+
+    * ext/odbc/php_odbc.c
+      ext/odbc/php_odbc.h:
+    The start of adding odbc_data_source() functionality
+
+2002-08-11  helly  <helly@pb1.pair.com>
+
+    * ext/gd/libgd/gd_gd.c:
+    missed to commit this fix: correct since this is only a flag
+
+    * ext/gd/libgd/gd2copypal.c
+      ext/gd/libgd/gd_jpeg.c
+      ext/gd/libgd/gdft.c
+      ext/gd/libgd/gd.c: try even more to fix those warnings.....
+
+2002-08-11  wez  <wez@pb1.pair.com>
+
+    * ext/standard/http_fopen_wrapper.c: Missing word...
+
+2002-08-11  kalowsky  <kalowsky@pb1.pair.com>
+
+    * ext/java/config.m4:
+    The start of adding in MacOSX compatibility.  No objections on the
+    php-dev list from the sent patch for a week.  Test and fix.
+
+    * TODO: removing the TODOs done already.
+
+2002-08-11  wez  <wez@pb1.pair.com>
+
+    * ext/standard/ftp_fopen_wrapper.c
+      ext/standard/http_fopen_wrapper.c
+      main/php_streams.h:
+    Properly implement TSRM parameters to the new log_error
+    function... (Thanks Marcus!)
+    Add a convenience macro for importing a stream from a zval.
+
+2002-08-11  helly  <helly@pb1.pair.com>
+
+    * ext/gd/libgd/gd_topal.c: try to get this work ...
+
+    * ext/gd/libgd/gd.c
+      ext/gd/libgd/gd_gd.c
+      ext/gd/libgd/gd_gd2.c
+      ext/gd/libgd/gd_jpeg.c
+      ext/gd/libgd/gd_png.c
+      ext/gd/libgd/gd_topal.c
+      ext/gd/libgd/gd_wbmp.c
+      ext/gd/libgd/gdft.c
+      ext/gd/libgd/gdhelpers.c
+      ext/gd/libgd/wbmp.c: try to fix those warnings.....
+
+2002-08-11  wez  <wez@pb1.pair.com>
+
+    * main/network.c: More verbosity when activating SSL on a socket fails.
+
+    * README.STREAMS
+      ext/standard/ftp_fopen_wrapper.c
+      ext/standard/http_fopen_wrapper.c
+      main/php_streams.h
+      main/streams.c:
+    Introduce an error stack for wrappers, to help prevent multiple errors
+    and warnings (some of which are bogus) when there are problems opening
+    streams.
+    Implement sanity check on the mode used to open ftp and http connections.
+    This fixes Bug 12004.
+
+    * main/main.c: Minor fix for html_errors=on in php_error_docref.
+
+2002-08-11  yohgaki  <yohgaki@pb1.pair.com>
+
+    * ext/zlib/zlib.c
+      php.ini-dist
+      php.ini-recommended: Changed my mind.
+    Let users decided whether users want larger chunk size or not.
+      enable output_buffering also. (Marcus, Yasuo)
+
+    * ext/zlib/zlib.c:
+    Generally speaking, sending packets less than 1KB is not efficient.
+    We're better to take some benchmarks see if removing extra buffer
+    is actually a good idea or not.
+
 2002-08-10  helly  <helly@pb1.pair.com>
 
     * sapi/cli/php_cli.c:
