@@ -95,7 +95,7 @@ static int sapi_thttpd_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 	TG(hc)->bytes_sent += len;
 	n++;
 
-#define DEF_CONTENT_TYPE_LINE "Content-Type: text/html"
+#define DEF_CONTENT_TYPE_LINE "Content-Type: text/html\r\n"
 	if (SG(sapi_headers).send_default_content_type) {
 		vec[n].iov_base = DEF_CONTENT_TYPE_LINE;
 		vec[n].iov_len = sizeof(DEF_CONTENT_TYPE_LINE) - 1;
