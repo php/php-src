@@ -490,7 +490,6 @@ PHP_FUNCTION(touch)
 		newtime->modtime = newtime->actime = time(NULL);
 	} else if (ac == 2 && zend_get_parameters_ex(2, &filename, &filetime) != FAILURE) {
 		convert_to_long_ex(filetime);
-		newtime->actime = time(NULL);
 		newtime->modtime = newtime->actime = Z_LVAL_PP(filetime);
 	} else if (ac == 3 && zend_get_parameters_ex(3, &filename, &filetime, &fileatime) != FAILURE) {
 		convert_to_long_ex(fileatime);
