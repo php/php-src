@@ -26,13 +26,8 @@
 #include "zend_compile.h"
 #include "zend_indent.h"
 
-#ifndef ZTS
-extern char *zendtext;
-extern int zendleng;
-#else
 #define zendtext LANG_SCNG(yy_text)
 #define zendleng LANG_SCNG(yy_leng)
-#endif
 
 
 static void handle_whitespace(int *emit_whitespace)
@@ -68,13 +63,13 @@ ZEND_API void zend_indent()
 	while ((token_type=lex_scan(&token TSRMLS_CC))) {
 		switch (token_type) {
 			case T_INLINE_HTML:
-				zend_write(zendtext, zendleng);
+				zend_write(LANG_SCNG(yy_text), LANG_SCNG(yy_leng));
 				break;
 			case T_WHITESPACE: {
 					token.type = 0;
 					/* eat whitespace, emit newlines */
-					for (i=0; i<zendleng; i++) {
-						emit_whitespace[(unsigned char) zendtext[i]]++;
+					for (i=0; i<LANG_SCNG(yy_leng); i++) {
+						emit_whitespace[(unsigned char) LANG_SCNG(yy_text)[i]]++;
 					}
 					continue;
 				}
@@ -122,16 +117,16 @@ dflt_printout:
 							} else {
 								handle_whitespace(emit_whitespace);
 							}
-							zend_write(zendtext, zendleng);
+							zend_write(LANG_SCNG(yy_text), LANG_SCNG(yy_leng));
 							break;
 					}
 				} else {
 					handle_whitespace(emit_whitespace);
 					if (in_string) {
-						zend_write(zendtext, zendleng);
+						zend_write(LANG_SCNG(yy_text), LANG_SCNG(yy_leng));
 						/* a part of a string */
 					} else {
-						zend_write(zendtext, zendleng);
+						zend_write(LANG_SCNG(yy_text), LANG_SCNG(yy_leng));
 					}
 				}
 				break;
