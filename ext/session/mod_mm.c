@@ -117,7 +117,7 @@ static ps_sd *ps_sd_new(ps_mm *data, const char *key, const void *sdata, size_t 
 		sd->next->prev = sd;
 	sd->prev = NULL;
 	
-	ps_mm_debug("inserting %s(%x) into %d\n", key, sd, h);
+	ps_mm_debug("inserting %s(%p) into %d\n", key, sd, h);
 	
 	data->hash[h] = sd;
 
@@ -162,7 +162,7 @@ static ps_sd *ps_sd_lookup(ps_mm *data, const char *key, int rw)
 		ps_mm_debug("optimizing\n");
 	}
 
-	ps_mm_debug(stderr, "lookup(%s): ret=%x,h=%d\n", key, ret, h);
+	ps_mm_debug(stderr, "lookup(%s): ret=%p,h=%d\n", key, ret, h);
 	
 	return ret;
 }
@@ -213,7 +213,7 @@ PHP_GSHUTDOWN_FUNCTION(ps_mm)
 
 PS_OPEN_FUNC(mm)
 {
-	ps_mm_debug("open: ps_mm_instance=%x\n", ps_mm_instance);
+	ps_mm_debug("open: ps_mm_instance=%p\n", ps_mm_instance);
 	
 	if (!ps_mm_instance)
 		return FAILURE;
@@ -256,6 +256,8 @@ PS_WRITE_FUNC(mm)
 	PS_MM_DATA;
 	ps_sd *sd;
 
+	if (vallen == 0) return SUCCESS;
+	
 	mm_lock(data->mm, MM_LOCK_RW);
 
 	sd = ps_sd_lookup(data, key, 1);
