@@ -21,8 +21,6 @@ PHP 4                                                                      NEWS
 - Fixed bug #32340 (insert_before($node,NULL) does not return). (Rob) 
 - Fixed bug #32200 (Prevent using both --with-apxs2 and --with-apxs2filter).
   (Jani)
-- Fixed bug #32160 (file truncation in copy() when source & destination are
-  the same). (Ilia)
 - Fixed bug #32114 (DOM crashing when attribute appended to Document). (Rob)
 - Fixed bug #31960 (msql_fetch_row() and msql_fetch_array() dropping columns
   with NULL values). (Daniel Convissor)
