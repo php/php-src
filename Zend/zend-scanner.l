@@ -374,6 +374,8 @@ ZEND_API zend_op_array *v_compile_files(int mark_as_ref CLS_DC, int file_count, 
 			retval_znode.op_type = IS_CONST;
 			retval_znode.u.constant.type = IS_LONG;
 			retval_znode.u.constant.value.lval = 1;
+			retval_znode.u.constant.is_ref = 0;
+			retval_znode.u.constant.refcount = 1;
 			do_return(&retval_znode, 0 CLS_CC);
 			CG(active_op_array) = original_active_op_array;
 			pass_two(op_array);
