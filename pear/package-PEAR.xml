@@ -64,14 +64,15 @@ PEAR Installer:
   pear upgrade --alldeps, as installation is often necessary for new
   dependencies)
 * fixed pear.bat if PHP is installed in a path like C:\Program Files\php
-* Added ability to specify "pear install package-version" or
-  "pear install package-state". For example: "pear install DB-1.2",
-  or "pear install DB-stable"
+* Added ability to specify &quot;pear install package-version&quot; or
+  &quot;pear install package-state&quot;. For example: &quot;pear install DB-1.2&quot;,
+  or &quot;pear install DB-stable&quot;
 * Fix #25008 - unhelpful error message
 * Fixed optional dependencies in Dependency.php
 * Fix #25322 - bad md5sum should be fatal error
 * Package uninstall now also removes empty directories
 * Fixed locking problems for reading commands (pear list, pear info)
+* Fixed #45 preferred_state works incorrectly
 
 OS_Guess Class:
 
