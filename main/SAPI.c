@@ -626,7 +626,7 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg TSRMLS_DC)
 							/* If there is no realm string at all, append one */
 							if(!strstr(lower_temp,"realm")) {
 								efree(result);
-								conv_len = sprintf(conv_temp, sizeof(conv_temp), " realm=\"%ld\"",myuid);
+								conv_len = sprintf(conv_temp, " realm=\"%ld\"",myuid);
 								result = emalloc(ptr_len+conv_len+1);
 								result_len = ptr_len+conv_len;
 								memcpy(result, ptr, ptr_len);	
