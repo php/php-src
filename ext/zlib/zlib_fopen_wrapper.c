@@ -86,10 +86,9 @@ php_stream *php_stream_gzopen(char *path, char *mode, int options, char **opened
 	php_stream *stream = NULL;
 	
 	self = emalloc(sizeof(*self));
-	
-	while(*path != ':')
-		path++;
-	path++;
+
+	if (strncmp("zlib:", path, 5) == 0)
+		path += 5;
 	
 	self->stream = php_stream_open_wrapper(path, mode, options, opened_path TSRMLS_CC);
 	
