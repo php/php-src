@@ -952,7 +952,7 @@ static int user_wrapper_mkdir(php_stream_wrapper *wrapper, char *url, int mode, 
 static int user_wrapper_rmdir(php_stream_wrapper *wrapper, char *url, int options, php_stream_context *context TSRMLS_DC)
 {
 	struct php_user_stream_wrapper *uwrap = (struct php_user_stream_wrapper*)wrapper->abstract;
-	zval *zfilename, *zmode, *zoptions, *zfuncname, *zretval, *zcontext;
+	zval *zfilename, *zoptions, *zfuncname, *zretval, *zcontext;
 	zval **args[3];
 	int call_result;
 	zval *object;
