@@ -73,16 +73,28 @@ top_builddir = $(DEPTH)
 	$(LEX) $(LFLAGS) $< && mv $(LEX_OUTPUT_ROOT).c $@
 
 
-all: all-recursive $(targets)
+all: all-recursive
+install: install-recursive
 
 distclean-recursive depend-recursive clean-recursive all-recursive install-recursive:
-	@target=`echo $@|sed s/-recursive//`; \
-	if test '$(NO_RECURSION)' != "$$target"; then \
+	@otarget=`echo $@|sed s/-recursive//`; \
+	if test '$(NO_RECURSION)' != "$$otarget"; then \
 		list='$(SUBDIRS)'; for i in $$list; do \
+			target="$$otarget"; \
 			echo "Making $$target in $$i"; \
-			test "$$i" = "." || (cd $$i && $(MAKE) $$target) || exit 1; \
+			if test "$$i" = "."; then \
+				ok=yes; \
+				target="$$target-p"; \
+			fi; \
+			(cd $$i && $(MAKE) $$target) || exit 1; \
 		done; \
+		test "$otarget" = "all" && test -z '$(targets)' && ok=yes; \
+		test "$ok" = "yes" || $(MAKE) "$$otarget-p" || exit 1; \
 	fi; 
+
+all-p: $(targets)
+install-p: $(targets) $(install_targets)
+distclean-p depend-p clean-p:
 
 depend: depend-recursive
 	test "`echo *.c`" = '*.c' || perl $(top_srcdir)/build/mkdep.perl $(CPP) $(INCLUDES) *.c > .deps
@@ -96,8 +108,6 @@ clean-x:
 distclean: distclean-recursive clean-x
 	rm -f config.cache config.log config.status config_vars.mk libtool \
 	php_config.h stamp-h Makefile build-defs.h php4.spec libphp4.module
-	
-install: install-recursive $(targets) $(install_targets)
 
 install-modules:
 	@test -d modules && \
@@ -110,4 +120,5 @@ include $(srcdir)/.deps
 
 .PHONY: all-recursive clean-recursive install-recursive \
 $(install_targets) install all clean depend depend-recursive shared \
-distclean-recursive distclean clean-x
+distclean-recursive distclean clean-x all-p install-p distclean-p \
+depend-p clean-p
