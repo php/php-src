@@ -83,6 +83,7 @@ PHP                                                                        NEWS
 - Fixed serious security vulnerability in CGI SAPI. (Shane)
 
 27 Dec 2002, Version 4.3.0
+- Added sha1() and sha1_file() for US Secure Hash Algorithm 1. (Stefan Esser)
 - Make PHP_AUTH_* variables not available in safe mode under Apache when an
   external basic auth mechanism is used. (Philip)
 - Aliased dba_popen() to dba_open() until 4.3.2 when persistent STDIO streams
