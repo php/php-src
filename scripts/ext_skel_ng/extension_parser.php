@@ -5,7 +5,11 @@
 	require_once "php_constant.php";
 	require_once "php_function.php";
 	require_once "php_resource.php";
+	require_once "php_ini.php";
+	require_once "php_global.php";
 	require_once "php_logo.php";
+
+	require_once "license.php";
 
 	require_once "xml_stream_parser.php";
 	require_once "xml_stream_callback_parser.php";
@@ -16,10 +20,8 @@
 
 		// {{{ constructor
 
-	function extension_parser($stream) {
-		$this->template_dir = dirname(realpath(__FILE__))."/templates";
-		
-		$this->name = "foobar";
+	function __construct($stream) {
+		$this->name = "extension";
 
 		$this->release = array("version" => "unknown",
 													 "date"    => date("Y-m-d"),
@@ -41,23 +43,35 @@
 		$this->libs      = array();
 		$this->headers   = array();
 		$this->language  = "c";
+		$this->platform  = "all";
 
 		$this->files = array("c"=>array(), "h"=>array());
 		
-		parent::xml_stream_callback_parser($stream);
+		parent::__construct($stream);
 	}
 
 	// }}} 
 
-		// {{{ parsing
+	// {{{ helper methods
 
-	// {{{   general infos
 	  function _check_c_name($name, $msg) {
-			if(!ereg("^[[:alpha:]_][[:alnum:]_]*$", $name)) {
+			if (!ereg("^[[:alpha:]_][[:alnum:]_]*$", $name)) {
 				$this->error("$name is not a valid $msg");
 			}
     }
 
+    function _trimdata() {
+      $text = preg_replace('|^\s*\n|m','', $this->cdata);
+      $text = preg_replace('|\n\s*$|m',"\n", $text);
+      return $text;
+    }
+
+
+	// }}}
+
+		// {{{ parsing
+
+	// {{{   general infos
 		function handle_extension_name($attr) {
 			$this->name = trim($this->cdata);
 			$this->_check_c_name($this->name, "extension name");
@@ -72,7 +86,7 @@
 		}
 
 		function handle_extension_logo($attr) {
-			$this->logo = &new php_logo($this->name, $attr);
+			$this->logo = new php_logo($this->name, $attr);
 		}
 
 
@@ -86,6 +100,10 @@
 
 		function handle_release_license($attr) {
 			$this->release['license'] = trim($this->cdata);
+			$this->license = license::factory($this->release['license']);
+			if (is_object($this->license)) {
+				$this->license->write_license_file();
+			}
 		}
 
 	function handle_maintainers_maintainer_user($attr) {
@@ -117,10 +135,24 @@
 
   function handle_deps($attr) {
     if (isset($attr["language"])) $this->language = $attr["language"];
+		if (isset($attr['platform'])) {
+			if ($attr['platform'] != "all") {
+				$this->platform = split("[[:space:]]*,[[:space:]]*", trim($attr['platform']));
+			}
+		} else {
+			$this->platform = "all";
+		}
   }
 
 	function handle_deps_lib($attr) {
-		$this->libs[$attr['name']] = $attr; 
+		$this->libs[$attr['name']] = $attr;
+		if (isset($attr['platform'])) {
+			if ($attr['platform'] != "all") {
+				$this->libs[$attr['name']]['platform'] = split("[[:space:]]*,[[:space:]]*", trim($attr['platform']));
+			}
+		} else {
+			$this->libs[$attr['name']]['platform'] = "all";
+		}
 	}
 
 	function handle_deps_header($attr) {
@@ -135,33 +167,13 @@
 
 	// {{{   constants
 
-		function handle_constants_constant($attr) {
-
-			$name = $attr["name"];
-			$this->_check_c_name($name, "constant name");
-
-			$value= $attr["value"];
-			$type = isset($attr["type"]) ? $attr["type"] : "string";
-
-			switch($type) {
-			case "int":
-			case "integer":
-				$this->constants[] = &new php_constant($name, $value, "integer", trim($this->cdata)); 
-				break;
-				
-			case "float":
-			case "double":
-			case "real":
-				if (!is_numeric($value))   $this->error("invalid value for integer constant: '$value'"); 
-				$this->constants[] = &new php_constant($name, $value, "float", trim($this->cdata)); 
-				break;
-
-			case "string":
-			default:
-				$this->constants[] = &new php_constant($name, $value, "string", trim($this->cdata)); 
-				break;
-			}
+	function handle_constants_constant($attr) {
+		$constant = new php_constant($attr, $this->_trimdata);
+		if (isset($constant->error)) {
+			$this->error($constant->error);
 		}
+		$this->constants[$attr['name']] = $constant;
+	}
 
 		// }}} 
 
@@ -176,15 +188,16 @@
 	}
 
 	function handle_resources_resource($attr) {
-		$this->_check_c_name($attr['name'], "resource name");
+    $resource = new php_resource($attr,
+																 @$this->resource_destruct, 
+																 @$this->resource_description
+																 );
+		
+		if (isset($resource->error)) {
+			$this->error($resource->error);
+		}
 
-    $this->resources[$attr['name']] = new php_resource($attr['name'],
-                                                       @$attr['payload'],
-                                                       @$attr['alloc'],
-                                                       @$this->resource_destruct, 
-                                                       @$this->resource_description
-                                                       );
-
+		$this->resources[$attr['name']] = $resource;
 		unset($this->resource_description);
 		unset($this->resource_destruct);
 	}
@@ -196,12 +209,6 @@
 		function handle_functions_function_summary($attr) {
 			$this->func_summary = trim($this->cdata);
 		}
-
-    function _trimdata() {
-      $text = preg_replace('|^\s*\n|m','', $this->cdata);
-      $text = preg_replace('|\n\s*$|m',"\n", $text);
-      return $text;
-    }
 
 		function handle_functions_function_proto($attr) {
 			$this->func_proto = trim($this->cdata);
@@ -223,8 +230,14 @@
 			$this->_check_c_name($attr['name'], "function name");
 
 			$role = isset($attr['role']) ? $attr['role'] : "public";
-			$function = new php_function($attr['name'], @$this->func_summary, @$this->func_proto, @$this->func_desc, @$this->func_code, $role);
-			switch($role) {
+			$function = new php_function($attr['name'], 
+																	 @$this->func_summary, 
+																	 @$this->func_proto, 
+																	 @$this->func_desc, 
+																	 @$this->func_code, 
+																	 $role);
+
+			switch ($role) {
 			case "internal":
 				$this->internal_functions[$attr['name']] = $function;
 				break;
@@ -232,13 +245,14 @@
 				$this->private_functions[$attr['name']] = $function;
 				break;
 			case "public":
-				if(is_string($function->status)) $this->error($function->status." in prototype");
+				if (is_string($function->status)) $this->error($function->status." in prototype");
 				$this->functions[$attr['name']] = $function;
 				break;
 			default:
 				$this->error("function role must be either public, private or internal");
 				break;
 			}
+
 			unset($this->func_summary);
 			unset($this->func_proto);
 			unset($this->func_desc);
@@ -250,55 +264,28 @@
 	// {{{   globals and php.ini
 
 		function handle_globals_global($attr) {
-			$this->_check_c_name($attr['name'], "variable name");
-			if($attr["type"] == "string") $attr["type"] = "char*";
-			$this->globals[$attr["name"]] = $attr;
+			$this->globals[$attr["name"]] = new php_global($attr);
+			if (isset($this->globals[$attr["name"]]->error)) {
+				$this->error($this->globals[$attr["name"]]->error);
+			}
 		}
 
 		function handle_globals_phpini($attr) {
-			$this->_check_c_name($attr['name'], "php.ini directice name");
-			$ini = array("name" => $attr["name"],
-									 "type" => $attr["type"],
-									 "value"=> $attr["value"],
-									 "desc" => trim($this->cdata)
-									 );
-			switch($attr["access"]) {
-			case "system":
-				$ini["access"] = "PHP_INI_SYSTEM";
-				break;
-			case "perdir":
-				$ini["access"] = "PHP_INI_PERDIR";
-				break;
-			case "user":
-				$ini["access"] = "PHP_INI_USER";
-				break;
-			case "all":
-			default:
-				$ini["access"] = "PHP_INI_ALL";
-				break;
+			$attr["desc"] = $this->_trimdata();
+
+			$ini = new php_ini($attr);
+			if (isset($ini->error)) {
+				$this->error($ini->error);
 			}
-			if(isset($attr["onupdate"])) {
-				$ini["onupdate"] = $attr["onupdate"];
-			} else {
-				switch($attr["type"]) {
-				case "int":
-				case "long":
-					$ini["onupdate"] = "OnUpdateLong";
-					break;
-				case "float":
-				case "double":
-					$ini["onupdate"] = "OnUpdateFloat";
-					break;
-				case "string":
-					$ini["type"] = "char*";
-					// fallthru
-				case "char*":
-					$ini["onupdate"] = "OnUpdateString";
-					break;
-				}
+			$this->phpini[$attr['name']] = $ini;
+			
+			// php.ini settings are stored in modul-global variables
+			$attr['type'] = $ini->c_type;
+			$global = new php_global($attr);
+			$this->globals[$attr["name"]] = $global;
+			if (isset($global->error)) {
+				$this->error($global->error);
 			}
-			$this->phpini[$attr["name"]] = $ini;
-			$this->handle_globals_global($attr);
 		}
 
 	// }}} 
@@ -347,36 +334,14 @@
     &reftitle.runtime;
 ");
 
-   	if(empty($this->phpini)) {
+   	if (empty($this->phpini)) {
 			fputs($fp, "    &no.config;\n");
 		} else {
-			fputs($fp, 
-"    <table>
-     <title>$id_name runtime configuration</title>
-			<tgroup cols='3'>
-			 <thead>
-        <row>
-         <entry>directive</entry>
-         <entry>default value</entry>
-         <entry>descrpition</entry>
-        </row>
-       </thead>
-      <tbody>
-");
-			foreach($this->phpini as $directive) {
-				fputs($fp, 
-"    <row>
-     <entry>$directive[name]</entry>
-     <entry>$directive[value]</entry>
-     <entry>$directive[desc]</entry>
-    </row>
-");
+			fputs($fp, php_ini::docbook_xml_header($this->name)); 
+			foreach ($this->phpini as $phpini) {
+				fputs($fp, $phpini->docbook_xml());
 			}
-			fputs($fp, 
-"     </tbody>
-    </tgroup>
-   </table>
-");
+			fputs($fp, php_ini::docbook_xml_footer()); 
 		}
 
 		fputs($fp,
@@ -401,30 +366,17 @@
    <section id='$id_name.constants'>
     &reftitle.constants;
 ");
-  if(empty($this->constants)) {
+
+  if (empty($this->constants)) {
     fputs($fp, "    &no.constants;\n");
   } else {
-    fputs($fp, 
-"    <table>
-     <title>$id_name constants</title>
-      <tgroup cols='3'>
-       <thead>
-        <row>
-         <entry>name</entry>
-         <entry>value</entry>
-         <entry>descrpition</entry>
-        </row>
-       </thead>
-      <tbody>
-");
-    foreach($this->constants as $constant) {
+    fputs($fp, php_constant::docbook_xml_header($id_name));
+
+    foreach ($this->constants as $constant) {
       fputs($fp, $constant->docbook_xml($this->name));
     }
-    fputs($fp, 
-"     </tbody>
-    </tgroup>
-   </table>
-");
+
+    fputs($fp, php_constant::docbook_xml_footer());
   }
   fputs($fp,
 "   </section>
@@ -440,7 +392,7 @@
 			fclose($fp);
 
 			mkdir("$docdir/functions");
-			foreach($this->functions as $name => $function) {
+			foreach ($this->functions as $name => $function) {
 				$filename = $docdir . "/functions/" . strtolower(str_replace("_", "-", $name)) . ".xml";
 				$funcfile = fopen($filename, "w");
 				fputs($funcfile, $function->docbook_xml());
@@ -486,46 +438,32 @@ ZEND_GET_MODULE('.$this->name.')
 			$code = "ZEND_DECLARE_MODULE_GLOBALS({$this->name})\n\n";
 			
 			if (!empty($this->phpini)) {
-				$code .= "PHP_INI_BEGIN()\n";
-				foreach ($this->phpini as $name => $ini) {
-					$code .= "  STD_PHP_INI_ENTRY(\"{$this->name}.$name\", \"$ini[value]\", $ini[access], $ini[onupdate], $name, zend_{$this->name}_globals, {$this->name}_globals)\n";
+				$code .= php_ini::c_code_header($this->name);
+				foreach ($this->phpini as $phpini) {
+          $code .= $phpini->c_code($this->name);
 				}
-				$code .= "PHP_INI_END()\n\n";			
-				$code .= "static void php_{$this->name}_init_globals(zend_{$this->name}_globals *{$this->name}_globals)\n";
-				$code .= "{\n";
-				foreach ($this->globals as $name => $ini) {
-					$code .= "  {$this->name}_globals->$name = ";
-					if (strstr($ini["type"],"*")) {
-						$code .= "NULL;\n";
-					} else {
-						$code .= "0;\n";
-					}
-				}
-				$code .= "}\n\n";
-				return $code;
+				$code .= php_ini::c_code_footer();
 			}
+
+			if (!empty($this->globals)) {
+				$code .= php_global::c_code_header($this->name);
+				foreach ($this->globals as $global) {
+          $code .= $global->c_code($this->name);
+				}
+				$code .= php_global::c_code_footer();
+			}
+
+			return $code;
 		}
 		
 	  function generate_globals_h() {
 			if (empty($this->globals)) return "";
 			
-			$code = "ZEND_BEGIN_MODULE_GLOBALS({$this->name})\n";
-			foreach($this->globals as $name => $global) {
-				$code .= "  $global[type] $name;\n";
+			$code = php_global::h_code_header($this->name);
+			foreach ($this->globals as $global) {
+        $code .= $global->h_code($this->name);
 			}
-			$code.= "ZEND_END_MODULE_GLOBALS({$this->name})\n";
-			
-			$upname = strtoupper($this->name);
-			
-			$code.= "
-
-#ifdef ZTS
-#define {$upname}_G(v) TSRMG({$this->name}_globals_id, zend_{$this->name}_globals *, v)
-#else
-#define {$upname}_G(v) ({$this->name}_globals.v)
-#endif
-
-";
+			$code .= php_global::h_code_footer($this->name);
 			
 			return $code;
 		}
@@ -535,37 +473,19 @@ ZEND_GET_MODULE('.$this->name.')
 	// {{{ license and authoers
 
 	  function get_license() {
+
 			$code = "/*\n";
-			switch($this->release['license']) {
-			case "php":
-				$code.=
-'   +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2003 The PHP Group                                |
-   +----------------------------------------------------------------------+
-   | This source file is subject to version 2.02 of the PHP license,      |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available at through the world-wide-web at                           |
-   | http://www.php.net/license/2_02.txt.                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
-';
-				break;
-			
-			default:
-				$code.= 
-"   +----------------------------------------------------------------------+
-   | unkown license: '{$this->release['license']}'                                                        |
-   +----------------------------------------------------------------------+
-";
-				break;
+			$code.= "   +----------------------------------------------------------------------+\n";
+
+      if (is_object($this->license)) {
+        $code.= $this->license->license_comment();
+      } else {
+        $code.= sprintf("   | unkown license: %-52s |\n", $this->release['license']);
 			}
 
 			$code.= "   +----------------------------------------------------------------------+\n";
 			$prefix = "Authors: ";
-			foreach($this->users as $name => $user) {
+			foreach ($this->users as $name => $user) {
 				$code .= sprintf("   | $prefix %-58s |\n", "$user[name] <$user[email]>");
 				$prefix = str_repeat(" ",strlen($prefix));
 			}
@@ -612,8 +532,8 @@ ZEND_GET_MODULE('.$this->name.')
 
 			fputs($fp, "#ifndef PHP_HAVE_{$upname}\n\n");
 
-			if(isset($this->headers)) {
-				foreach($this->headers as $header) {
+			if (isset($this->headers)) {
+				foreach ($this->headers as $header) {
 					if (@$header["prepend"] === "yes") {
 						fputs($fp, "#include <$header[name]>\n");
 					}
@@ -632,16 +552,16 @@ ZEND_GET_MODULE('.$this->name.')
 
 ');
 
-			if(isset($this->headers)) {
-				foreach($this->headers as $header) {
+			if (isset($this->headers)) {
+				foreach ($this->headers as $header) {
 					if (@$header["prepend"] !== "yes") {
 						fputs($fp, "#include <$header[name]>\n");
 					}
 				}
 			}
 
-			if(isset($this->code["header"])) {
-				foreach($this->code["header"] as $code) {
+			if (isset($this->code["header"])) {
+				foreach ($this->code["header"] as $code) {
 					fputs($fp, $code);
 				}
 			}
@@ -672,7 +592,7 @@ PHP_MINFO_FUNCTION({$this->name});
 
 			fputs($fp, "\n");
 
-			foreach($this->functions as $name => $function) {
+			foreach ($this->functions as $name => $function) {
 				fputs($fp, "PHP_FUNCTION($name);\n");
 			}
 			
@@ -729,9 +649,9 @@ PHP_MINIT_FUNCTION({$this->name})
     }
 
 		if (isset($this->internal_functions['MINIT'])) {
-      if($need_block) $code .= "\n\t{\n";
+      if ($need_block) $code .= "\n\t{\n";
 			$code .= $this->internal_functions['MINIT']->code;
-      if($need_block) $code .= "\n\t}\n";
+      if ($need_block) $code .= "\n\t}\n";
 		} else {
 			$code .="\n\t/* add your stuff here */\n";
 		}
@@ -748,14 +668,14 @@ PHP_MSHUTDOWN_FUNCTION({$this->name})
 {
 ";
 
-		if(count($this->phpini)) {
+		if (count($this->phpini)) {
 			$code .= "\tUNREGISTER_INI_ENTRIES();\n";
 		}
 
-		if(isset($this->internal_functions['MSHUTDOWN'])) {
-      if(count($this->phpini)) $code .= "\n\t{\n";
+		if (isset($this->internal_functions['MSHUTDOWN'])) {
+      if (count($this->phpini)) $code .= "\n\t{\n";
 			$code .= $this->internal_functions['MSHUTDOWN']->code;
-      if(count($this->phpini)) $code .= "\n\t}\n";
+      if (count($this->phpini)) $code .= "\n\t}\n";
 		} else {
 		  $code .="\n\t/* add your stuff here */\n";
     }
@@ -773,7 +693,7 @@ PHP_RINIT_FUNCTION({$this->name})
 {
 ";
 
-		if(isset($this->internal_functions['RINIT'])) {
+		if (isset($this->internal_functions['RINIT'])) {
 			$code .= $this->internal_functions['RINIT']->code;
 		} else {
        $code .= "  /* add your stuff here */\n";
@@ -792,7 +712,7 @@ PHP_RSHUTDOWN_FUNCTION({$this->name})
 {
 ";
 
-		if(isset($this->internal_functions['RSHUTDOWN'])) {
+		if (isset($this->internal_functions['RSHUTDOWN'])) {
 			$code .= $this->internal_functions['RSHUTDOWN']->code;
 		} else {
        $code .= "  /* add your stuff here */\n";
@@ -812,7 +732,7 @@ PHP_MINFO_FUNCTION({$this->name})
 	php_info_print_box_start(0);
 ";
 
-   if(isset($this->logo))
+   if (isset($this->logo))
    {
      $code.= "
 	php_printf(\"<img src='\");
@@ -825,16 +745,16 @@ PHP_MINFO_FUNCTION({$this->name})
 "; 
     }
 
-   if(isset($this->summary)) {
+   if (isset($this->summary)) {
      $code .= "  php_printf(\"<p>{$this->summary}</p>\\n\");\n";
    }
-   if(isset($this->release)) {
+   if (isset($this->release)) {
      $code .= "  php_printf(\"<p>Version {$this->release['version']}{$this->release['state']} ({$this->release['date']})</p>\\n\");\n";
    }
 
-   if(count($this->users)) {
+   if (count($this->users)) {
      $code .= "  php_printf(\"<p><b>Authors:</b></p>\\n\");\n";
-     foreach($this->users as $user) {
+     foreach ($this->users as $user) {
        $code .= "  php_printf(\"<p>$user[name] &lt;$user[email]&gt; ($user[role])</p>\\n\");\n";
      }
    }
@@ -843,7 +763,7 @@ PHP_MINFO_FUNCTION({$this->name})
 "	php_info_print_box_end();
 ";
 
-		if(isset($this->internal_functions['MINFO'])) {
+		if (isset($this->internal_functions['MINFO'])) {
       $code .= "\n\t{\n";
 			$code .= $this->internal_functions['MINFO']->code;
       $code .= "\n\t}\n";
@@ -852,7 +772,7 @@ PHP_MINFO_FUNCTION({$this->name})
     }
 
 
-if(count($this->phpini)) {
+if (count($this->phpini)) {
 	$code .= "\n\tDISPLAY_INI_ENTRIES();";
 }
 $code .= "
@@ -882,7 +802,7 @@ $code .= "
 	function public_functions_c() {
 		$code = "";
 
-    foreach($this->functions as $function) {
+    foreach ($this->functions as $function) {
       $code .= $function->c_code(&$this);
     }
 		
@@ -924,7 +844,7 @@ $code .= "
 
 			fputs($fp, "/* {{{ {$this->name}_functions[] */\n");
 			fputs($fp, "function_entry {$this->name}_functions[] = {\n");
-			foreach($this->functions as $name => $function) {
+			foreach ($this->functions as $name => $function) {
 				fputs($fp, sprintf("\tPHP_FE(%-20s, NULL)\n",$name));
 			}
 			fputs($fp, "\t{ NULL, NULL, NULL }\n");
@@ -959,7 +879,7 @@ dnl $ Id: $
 dnl
 ';
 		
-		if(isset($this->with)) {
+		if (isset($this->with)) {
 			echo " 
 PHP_ARG_WITH({$this->name}, whether to enable {$this->name} functions,
 [  --with-{$this->name}[=DIR]      With {$this->name} support], yes)
@@ -983,26 +903,46 @@ fi
 PHP_ADD_INCLUDE(\$PHP_{$upname}_DIR/include)
 ";
 
-		if (count($this->libs)) {
-      echo "PHP_SUBST({$upname}_SHARED_LIBADD)\n";
-
-			foreach ($this->libs as $lib) {
-        echo "PHP_ADD_LIBRARY_WITH_PATH($lib[name], \$PHP_{$upname}_DIR/lib, {$upname}_SHARED_LIBADD)\n";
-			  if(isset($lib['function'])) {
-           echo "AC_CHECK_LIB($lib[name], $lib[function], [AC_DEFINE(HAVE_".strtoupper($lib['name']).",1,[ ])], [AC_MSG_ERROR($lib[name] library not found or wrong version)],)\n";
-        }
-			}
-    }
-
 		} else {
-		echo "
+		  echo "
 PHP_ARG_ENABLE({$this->name} , whether to enable {$this->name} functions,
 [  --disable-{$this->name}         Disable {$this->name} support], yes)
 ";
 		}
 
+    echo "\n";
+
+
+		if (count($this->libs)) {
+      $first = true;
+
+			foreach ($this->libs as $lib) {
+				if (is_array($lib['platform']) && !in_array("unix", $lib['platform'])) {
+					continue;
+				}
+
+        if ($first) {
+          echo "PHP_SUBST({$upname}_SHARED_LIBADD)\n\n";
+          $first = false;
+        }
+
+		    if (isset($this->with)) {
+          echo "PHP_ADD_LIBRARY_WITH_PATH($lib[name], \$PHP_{$upname}_DIR/lib, {$upname}_SHARED_LIBADD)\n";
+        } else {
+          echo "PHP_ADD_LIBRARY($lib[name],, {$upname}_SHARED_LIBADD)\n";
+        }
+
+			  if (isset($lib['function'])) {
+           echo "AC_CHECK_LIB($lib[name], $lib[function], [AC_DEFINE(HAVE_".strtoupper($lib['name']).",1,[ ])], [AC_MSG_ERROR($lib[name] library not found or wrong version)],)\n";
+        }
+			}
+    }
+
+    echo "\n";
+
 		if ($this->language === "cpp") {
 			echo "PHP_REQUIRE_CXX\n";
+			echo "PHP_ADD_LIBRARY(stdc++)\n";
 		}
 
 		echo "
@@ -1010,11 +950,8 @@ if test \"\$PHP_$upname\" != \"no\"; then
   AC_DEFINE(HAVE_$upname, 1, [ ])
   PHP_NEW_EXTENSION({$this->name}, ".join(" ", $this->files['c'])." , \$ext_shared)
 fi
-";
 
-		if ($this->language === "cpp") {
-			echo "  PHP_ADD_LIBRARY(stdc++)\n";
-		}
+";
 
 		$fp = fopen("{$this->name}/config.m4", "w");
 		fputs($fp, ob_get_contents());
@@ -1027,8 +964,22 @@ fi
 	// {{{ M$ dev studio project file
 
 	function write_ms_devstudio_dsp() {
-    // TODO files should come from external list
     ob_start();
+
+    // these system libraries are always needed?
+    // (list taken from sample *.dsp files in php ext tree...)
+    $winlibs = "kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib ";
+    $winlibs.= "shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib";
+
+    // add libraries from <deps> section
+    if (count($this->libs)) {
+      foreach ($this->libs as $lib) {
+				if (is_array($lib['platform']) && !in_array("win32", $lib['platform'])) {
+					continue;
+				}
+        $winlibs .= " $lib[name].lib";
+      }
+    }
 
 		echo
 '# Microsoft Developer Studio Project File - Name="'.$this->name.'" - Package Owner=<4>
@@ -1085,8 +1036,8 @@ BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /machine:I386
-# ADD LINK32 php4ts.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /machine:I386 /out:"..\..\Release_TS/php_'.$this->name.'.dll" /libpath:"..\..\Release_TS" /libpath:"..\..\Release_TS_Inline"
+# ADD BASE LINK32 '.$winlibs.' /nologo /dll /machine:I386
+# ADD LINK32 php4ts.lib '.$winlibs.' /nologo /dll /machine:I386 /out:"..\..\Release_TS\php_'.$this->name.'.dll" /libpath:"..\..\Release_TS" /libpath:"..\..\Release_TS_Inline"
 
 !ELSEIF  "$(CFG)" == "'.$this->name.' - Win32 Debug_TS"
 
@@ -1111,8 +1062,8 @@ BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 php4ts_debug.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /debug /machine:I386 /out:"..\..\Debug_TS/php_'.$this->name.'.dll" /pdbtype:sept /libpath:"..\..\Debug_TS"
+# ADD BASE LINK32 '.$winlibs.' /nologo /dll /debug /machine:I386 /pdbtype:sept
+# ADD LINK32 php4ts_debug.lib '.$winlibs.' /nologo /dll /debug /machine:I386 /out:"..\..\Debug_TS\php_'.$this->name.'.dll" /pdbtype:sept /libpath:"..\..\Debug_TS"
 
 !ENDIF 
 
@@ -1129,8 +1080,8 @@ LINK32=link.exe
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 ';
 
-		foreach($this->files['c'] as $filename) {
-			if($filename{0}!='/' && $filename{0}!='.') {
+		foreach ($this->files['c'] as $filename) {
+			if ($filename{0}!='/' && $filename{0}!='.') {
 				$filename = "./$filename";
 			}
 			$filename = str_replace("/","\\",$filename);
@@ -1156,8 +1107,8 @@ echo '
 # PROP Default_Filter "h;hpp;hxx;hm;inl"
 ';
 
-		foreach($this->files['h'] as $filename) {
-			if($filename{0}!='/' && $filename{0}!='.') {
+		foreach ($this->files['h'] as $filename) {
+			if ($filename{0}!='/' && $filename{0}!='.') {
 				$filename = "./$filename";
 			}
 			$filename = str_replace("/","\\",$filename);
