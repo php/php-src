@@ -475,7 +475,7 @@ php_formatted_print(int ht, int *len, int use_array TSRMLS_DC)
 			if (currarg >= argc && format[inpos + 1] != '%') {
 				efree(result);
 				efree(args);
-				php_error(E_WARNING, "%s(): too few arguments", get_active_function_name(TSRMLS_C));
+				php_error(E_WARNING, "%s(): Too few arguments", get_active_function_name(TSRMLS_C));
 				return NULL;
 			}
 			/* starting a new format specifier, reset variables */
@@ -496,7 +496,7 @@ php_formatted_print(int ht, int *len, int use_array TSRMLS_DC)
 					if (argnum == 0) {
 						efree(result);
 						efree(args);
-						php_error(E_WARNING, "%s(): zero is not a valid argument number", get_active_function_name(TSRMLS_C));
+						php_error(E_WARNING, "%s(): Zero is not a valid argument number", get_active_function_name(TSRMLS_C));
 						return NULL;
 					}
 	
@@ -507,7 +507,7 @@ php_formatted_print(int ht, int *len, int use_array TSRMLS_DC)
 				if (argnum >= argc) {
 					efree(result);
 					efree(args);
-					php_error(E_WARNING, "%s(): too few arguments", get_active_function_name(TSRMLS_C));
+					php_error(E_WARNING, "%s(): Too few arguments", get_active_function_name(TSRMLS_C));
 					return NULL;
 				}
 

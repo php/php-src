@@ -75,7 +75,7 @@ static zend_class_entry *dir_class_entry_ptr;
 		myself = getThis(); \
 		if (myself) { \
 			if (zend_hash_find(Z_OBJPROP_P(myself), "handle", sizeof("handle"), (void **)&tmp) == FAILURE) { \
-				php_error(E_WARNING, "unable to find my handle property"); \
+				php_error(E_WARNING, "%s(): Unable to find my handle property", get_active_function_name(TSRMLS_C)); \
 				RETURN_FALSE; \
 			} \
 			ZEND_FETCH_RESOURCE(dirp, php_stream *, tmp, -1, "Directory", php_file_le_stream()); \
@@ -218,14 +218,14 @@ PHP_FUNCTION(chroot)
     ret = chroot(str);
 	
 	if (ret != 0) {
-		php_error(E_WARNING, "chroot: %s (errno %d)", strerror(errno), errno);
+		php_error(E_WARNING, "%s(): %s (errno %d)", get_active_function_name(TSRMLS_C), strerror(errno), errno);
 		RETURN_FALSE;
 	}
 
 	ret = chdir("/");
 	
 	if (ret != 0) {
-		php_error(E_WARNING, "chdir: %s (errno %d)", strerror(errno), errno);
+		php_error(E_WARNING, "%s(): %s (errno %d)", get_active_function_name(TSRMLS_C), strerror(errno), errno);
 		RETURN_FALSE;
 	}
 
@@ -253,7 +253,7 @@ PHP_FUNCTION(chdir)
 	ret = VCWD_CHDIR(str);
 	
 	if (ret != 0) {
-		php_error(E_WARNING, "ChDir: %s (errno %d)", strerror(errno), errno);
+		php_error(E_WARNING, "%s(): %s (errno %d)", get_active_function_name(TSRMLS_C), strerror(errno), errno);
 		RETURN_FALSE;
 	}
 
@@ -337,7 +337,7 @@ PHP_FUNCTION(glob)
 	int n, ret;
 
 	if (PG(safe_mode)) {
-		php_error(E_WARNING, "%s() SAFE MODE Restriction in effect, function is disabled",
+		php_error(E_WARNING, "%s(): Safe Mode restriction in effect, function is disabled",
 				  get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
 	}

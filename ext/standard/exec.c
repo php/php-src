@@ -124,7 +124,7 @@ int php_Exec(int type, char *cmd, pval *array, pval *return_value TSRMLS_DC)
 
 	buf = (char *) emalloc(EXEC_INPUT_BUF);
 	if (!buf) {
-		php_error(E_WARNING, "Unable to emalloc %d bytes for exec buffer", EXEC_INPUT_BUF);
+		php_error(E_WARNING, "%s(): Unable to emalloc %d bytes for exec buffer", get_active_function_name(TSRMLS_C), EXEC_INPUT_BUF);
 		return -1;
 	}
 	buflen = EXEC_INPUT_BUF;
@@ -137,7 +137,7 @@ int php_Exec(int type, char *cmd, pval *array, pval *return_value TSRMLS_DC)
 		c = strchr(cmd, ' ');
 		if (c) *c = '\0';
 		if (strstr(cmd, "..")) {
-			php_error(E_WARNING, "No '..' components allowed in path");
+			php_error(E_WARNING, "%s(): No '..' components allowed in path", get_active_function_name(TSRMLS_C));
 			efree(buf);
 			return -1;
 		}
@@ -169,7 +169,7 @@ int php_Exec(int type, char *cmd, pval *array, pval *return_value TSRMLS_DC)
 		fp = VCWD_POPEN(d, "r");
 #endif
 		if (!fp) {
-			php_error(E_WARNING, "Unable to fork [%s]", d);
+			php_error(E_WARNING, "%s(): Unable to fork [%s]", get_active_function_name(TSRMLS_C), d);
 			efree(d);
 			efree(buf);
 #if PHP_SIGCHILD
@@ -188,7 +188,7 @@ int php_Exec(int type, char *cmd, pval *array, pval *return_value TSRMLS_DC)
 		fp = VCWD_POPEN(cmd, "r");
 #endif
 		if (!fp) {
-			php_error(E_WARNING, "Unable to fork [%s]", cmd);
+			php_error(E_WARNING, "%s(): Unable to fork [%s]", get_active_function_name(TSRMLS_C), cmd);
 			efree(buf);
 #if PHP_SIGCHILD
 			signal (SIGCHLD, sig_handler);
@@ -219,7 +219,7 @@ int php_Exec(int type, char *cmd, pval *array, pval *return_value TSRMLS_DC)
 				if ( buflen <= (l+1) ) {
 					buf = erealloc(buf, buflen + EXEC_INPUT_BUF);
 					if ( buf == NULL ) {
-						php_error(E_WARNING, "Unable to erealloc %d bytes for exec buffer", 
+						php_error(E_WARNING, "%s(): Unable to erealloc %d bytes for exec buffer", get_active_function_name(TSRMLS_C), 
 								buflen + EXEC_INPUT_BUF);
 #if PHP_SIGCHILD
 						signal (SIGCHLD, sig_handler);
@@ -514,7 +514,7 @@ PHP_FUNCTION(shell_exec)
 	}
 	
 	if (PG(safe_mode)) {
-		php_error(E_WARNING, "Cannot execute using backquotes in safe mode");
+		php_error(E_WARNING, "%s(): Cannot execute using backquotes in Safe Mode", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
 	}
 
@@ -524,7 +524,7 @@ PHP_FUNCTION(shell_exec)
 #else
 	if ((in=VCWD_POPEN(Z_STRVAL_PP(cmd), "r"))==NULL) {
 #endif
-		php_error(E_WARNING, "Unable to execute '%s'", Z_STRVAL_PP(cmd));
+		php_error(E_WARNING, "%s(): Unable to execute '%s'", get_active_function_name(TSRMLS_C), Z_STRVAL_PP(cmd));
 		RETURN_FALSE;
 	}
 	allocated_space = EXEC_INPUT_BUF;
@@ -742,7 +742,7 @@ PHP_FUNCTION(proc_open)
 			descriptors[ndesc].mode = DESC_FILE;
 
 		} else if (Z_TYPE_PP(descitem) != IS_ARRAY) {
-			zend_error(E_WARNING, "%s(): descriptor item must be either an array or a File-Handle",
+			php_error(E_WARNING, "%s(): Descriptor item must be either an array or a File-Handle",
 					get_active_function_name(TSRMLS_C));
 			goto exit_fail;
 		} else {
@@ -750,7 +750,7 @@ PHP_FUNCTION(proc_open)
 			if (zend_hash_index_find(Z_ARRVAL_PP(descitem), 0, (void **)&ztype) == SUCCESS) {
 				convert_to_string_ex(ztype);
 			} else {
-				php_error (E_WARNING, "%s():  Missing handle qualifier in array",
+				php_error (E_WARNING, "%s(): Missing handle qualifier in array",
 					get_active_function_name(TSRMLS_C), Z_STRVAL_PP(ztype));
 				goto exit_fail;
 			}
@@ -762,7 +762,7 @@ PHP_FUNCTION(proc_open)
 				if (zend_hash_index_find(Z_ARRVAL_PP(descitem), 1, (void **)&zmode) == SUCCESS) {
 					convert_to_string_ex(zmode);
 				} else {
-					php_error (E_WARNING, "%s():  Missing mode parameter for 'pipe'",
+					php_error (E_WARNING, "%s(): Missing mode parameter for 'pipe'",
 						get_active_function_name(TSRMLS_C), Z_STRVAL_PP(ztype));
 					goto exit_fail;
 				}
@@ -806,7 +806,7 @@ PHP_FUNCTION(proc_open)
 				if (zend_hash_index_find(Z_ARRVAL_PP(descitem), 1, (void **)&zfile) == SUCCESS) {
 					convert_to_string_ex(zfile);
 				} else {
-					php_error (E_WARNING, "%s():  Missing file name parameter for 'file'",
+					php_error (E_WARNING, "%s(): Missing file name parameter for 'file'",
 						get_active_function_name(TSRMLS_C), Z_STRVAL_PP(ztype));
 					goto exit_fail;
 				}
@@ -814,7 +814,7 @@ PHP_FUNCTION(proc_open)
 				if (zend_hash_index_find(Z_ARRVAL_PP(descitem), 2, (void **)&zmode) == SUCCESS) {
 					convert_to_string_ex(zmode);
 				} else {
-					php_error (E_WARNING, "%s():  Missing mode parameter for 'file'",
+					php_error (E_WARNING, "%s(): Missing mode parameter for 'file'",
 						get_active_function_name(TSRMLS_C), Z_STRVAL_PP(ztype));
 					goto exit_fail;
 				}

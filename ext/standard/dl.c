@@ -59,7 +59,7 @@ PHP_FUNCTION(dl)
 
 #ifdef ZTS
 	if ((strcmp(sapi_module.name, "cgi")!=0) && (strcmp(sapi_module.name, "cli")!=0)) {
-		php_error(E_ERROR, "dl() is not supported in multithreaded Web servers - use extension statements in your php.ini");
+		php_error(E_ERROR, "%s(): Not supported in multithreaded Web servers - use extension statements in your php.ini", get_active_function_name(TSRMLS_C));
 	}
 #endif
 
@@ -71,9 +71,9 @@ PHP_FUNCTION(dl)
 	convert_to_string_ex(file);
 
 	if (!PG(enable_dl)) {
-		php_error(E_ERROR, "Dynamically loaded extentions aren't enabled.");
+		php_error(E_ERROR, "%s(): Dynamically loaded extentions aren't enabled", get_active_function_name(TSRMLS_C));
 	} else if (PG(safe_mode)) {
-		php_error(E_ERROR, "Dynamically loaded extensions aren't allowed when running in SAFE MODE.");
+		php_error(E_ERROR, "%s(): Dynamically loaded extensions aren't allowed when running in Safe Mode", get_active_function_name(TSRMLS_C));
 	} else {
 		php_dl(*file, MODULE_TEMPORARY, return_value TSRMLS_CC);
 		EG(full_tables_cleanup) = 1;
@@ -134,7 +134,7 @@ void php_dl(pval *file, int type, pval *return_value TSRMLS_DC)
 	/* load dynamic symbol */
 	handle = DL_LOAD(libpath);
 	if (!handle) {
-		php_error(error_type, "Unable to load dynamic library '%s' - %s", libpath, GET_DL_ERROR());
+		php_error(error_type, "%s(): Unable to load dynamic library '%s' - %s", get_active_function_name(TSRMLS_C), libpath, GET_DL_ERROR());
 		efree(libpath);
 		RETURN_FALSE;
 	}
@@ -155,7 +155,7 @@ void php_dl(pval *file, int type, pval *return_value TSRMLS_DC)
 
 	if (!get_module) {
 		DL_UNLOAD(handle);
-		php_error(error_type, "Invalid library (maybe not a PHP library) '%s' ", Z_STRVAL_P(file));
+		php_error(error_type, "%s(): Invalid library (maybe not a PHP library) '%s' ", get_active_function_name(TSRMLS_C), Z_STRVAL_P(file));
 		RETURN_FALSE;
 	}
 	module_entry = get_module();
@@ -213,7 +213,7 @@ void php_dl(pval *file, int type, pval *return_value TSRMLS_DC)
 	module_entry->module_number = zend_next_free_module();
 	if (module_entry->module_startup_func) {
 		if (module_entry->module_startup_func(type, module_entry->module_number TSRMLS_CC)==FAILURE) {
-			php_error(error_type, "%s:  Unable to initialize module", module_entry->name);
+			php_error(error_type, "%s(): Unable to initialize module '%s'", get_active_function_name(TSRMLS_C), module_entry->name);
 			DL_UNLOAD(handle);
 			RETURN_FALSE;
 		}
@@ -222,7 +222,7 @@ void php_dl(pval *file, int type, pval *return_value TSRMLS_DC)
 
 	if ((type == MODULE_TEMPORARY) && module_entry->request_startup_func) {
 		if (module_entry->request_startup_func(type, module_entry->module_number TSRMLS_CC)) {
-			php_error(error_type, "%s:  Unable to initialize module", module_entry->name);
+			php_error(error_type, "%s(): Unable to initialize module '%s'", get_active_function_name(TSRMLS_C), module_entry->name);
 			DL_UNLOAD(handle);
 			RETURN_FALSE;
 		}
@@ -230,7 +230,7 @@ void php_dl(pval *file, int type, pval *return_value TSRMLS_DC)
 	
 	/* update the .request_started property... */
 	if (zend_hash_find(&module_registry, module_entry->name, strlen(module_entry->name)+1, (void **) &tmp)==FAILURE) {
-		php_error(error_type, "%s:  Loaded module got lost", module_entry->name);
+		php_error(error_type, "%s(): Loaded module '%s' got lost", get_active_function_name(TSRMLS_C), module_entry->name);
 		RETURN_FALSE;
 	}
 	tmp->handle = handle;
@@ -248,7 +248,7 @@ PHP_MINFO_FUNCTION(dl)
 
 void php_dl(pval *file, int type, pval *return_value TSRMLS_DC)
 {
-	php_error(E_WARNING, "Cannot dynamically load %s - dynamic modules are not supported", Z_STRVAL_P(file));
+	php_error(E_WARNING, "%s(): Cannot dynamically load %s - dynamic modules are not supported", get_active_function_name(TSRMLS_C), Z_STRVAL_P(file));
 	RETURN_FALSE;
 }
 

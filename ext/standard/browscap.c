@@ -149,7 +149,7 @@ PHP_MINIT_FUNCTION(browscap)
 
 		fh.handle.fp = VCWD_FOPEN(browscap, "r");
 		if (!fh.handle.fp) {
-			php_error(E_CORE_WARNING, "Cannot open '%s' for reading", browscap);
+			php_error(E_CORE_WARNING, "%s(): Cannot open '%s' for reading", get_active_function_name(TSRMLS_C), browscap);
 			return FAILURE;
 		}
 		fh.filename = browscap;
