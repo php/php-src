@@ -1,3 +1,8 @@
+2003-05-22  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_execute.c:
+      No need to copy here unless implicit_clone is active (noticed by rob)
+
 2003-05-21  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_API.c
