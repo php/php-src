@@ -135,7 +135,7 @@ version of DB is 1.2, the downloaded file will be DB-1.2.tgz.',
     
         $this->ui->outputData($info, $command);
         
-        return false; // coming soon
+        return true; // coming soon
     }
 
     // }}}
