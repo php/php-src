@@ -92,6 +92,9 @@ SAPI_API void sapi_startup(sapi_module_struct *sf)
 SAPI_API void sapi_shutdown(void)
 {
 	reentrancy_shutdown();
+#ifdef VIRTUAL_DIR
+	virtual_cwd_shutdown();
+#endif
 	php_global_shutdown_internal_extensions();
 	zend_hash_destroy(&known_post_content_types);
 }
