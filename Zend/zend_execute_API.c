@@ -361,6 +361,9 @@ int call_user_function_ex(HashTable *function_table, zval **object_pp, zval *fun
 		(*object_pp)->is_ref = 1;
 	}
 
+	if (object_pp && !*object_pp) {
+		object_pp = NULL;
+	}
 	if (object_pp) {
 		if (Z_TYPE_PP(object_pp) != IS_OBJECT) {
 			return FAILURE;
