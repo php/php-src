@@ -3,3 +3,6 @@ LTLIBRARY_NAME    = libyp.la
 LTLIBRARY_SOURCES = yp.c
 
 include $(top_srcdir)/build/dynlib.mk
+
+
+

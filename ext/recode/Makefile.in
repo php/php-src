@@ -3,3 +3,6 @@ LTLIBRARY_NAME    = librecode.la
 LTLIBRARY_SOURCES = recode.c
 
 include $(top_srcdir)/build/dynlib.mk
+
+
+

@@ -3,3 +3,6 @@ LTLIBRARY_NAME    = liboracle.la
 LTLIBRARY_SOURCES = oracle.c
 
 include $(top_srcdir)/build/dynlib.mk
+
+
+

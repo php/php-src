@@ -3,3 +3,6 @@ LTLIBRARY_NAME    = libsysvshm.la
 LTLIBRARY_SOURCES = sysvshm.c
 
 include $(top_srcdir)/build/dynlib.mk
+
+
+
