@@ -584,24 +584,6 @@ try_again:
 					goto try_again;
 				}
 			}
-/*
-		} else if (http_status == 400) {
-			add_soap_fault(this_ptr, "HTTP", "Bad Request", NULL, NULL TSRMLS_CC);
-		} else if (http_status == 401) {
-			add_soap_fault(this_ptr, "HTTP", "Unauthorized Request", NULL, NULL TSRMLS_CC);
-		} else if (http_status == 405) {
-			add_soap_fault(this_ptr, "HTTP", "Method not allowed", NULL, NULL TSRMLS_CC);
-		} else if (http_status == 415) {
-			add_soap_fault(this_ptr, "HTTP", "Unsupported Media Type", NULL, NULL TSRMLS_CC);
-		} else if (http_status >= 400 && http_status < 500) {
-			add_soap_fault(this_ptr, "HTTP", "Client Error", NULL, NULL TSRMLS_CC);
-		} else if (http_status == 500) {
-			add_soap_fault(this_ptr, "HTTP", "Internal Server Error", NULL, NULL TSRMLS_CC);
-		} else if (http_status >= 500 && http_status < 600) {
-			add_soap_fault(this_ptr, "HTTP", "Server Error", NULL, NULL TSRMLS_CC);
-		} else {
-			add_soap_fault(this_ptr, "HTTP", "Unsupported HTTP status code", NULL, NULL TSRMLS_CC);
-*/
 		}
 
 		/* Try and get headers again */
@@ -819,6 +801,46 @@ try_again:
 	}
 
 	efree(http_headers);
+
+	if (http_status >= 400) {
+		int error = 0;
+
+		if (*buffer_len == 0) {
+			error = 1;
+		} else if (*buffer_len > 0) {
+			char *s = *buffer;
+
+			while (*s != '\0' && *s < ' ') {
+			  s++;
+			}
+			if (strncmp(s, "<?xml", 5)) {
+			  error = 1;
+			}
+		}
+
+		if (error) {
+			efree(*buffer);
+			if (http_status == 400) {
+				add_soap_fault(this_ptr, "HTTP", "Bad Request", NULL, NULL TSRMLS_CC);
+			} else if (http_status == 401) {
+				add_soap_fault(this_ptr, "HTTP", "Unauthorized Request", NULL, NULL TSRMLS_CC);
+			} else if (http_status == 405) {
+				add_soap_fault(this_ptr, "HTTP", "Method not allowed", NULL, NULL TSRMLS_CC);
+			} else if (http_status == 415) {
+				add_soap_fault(this_ptr, "HTTP", "Unsupported Media Type", NULL, NULL TSRMLS_CC);
+			} else if (http_status >= 400 && http_status < 500) {
+				add_soap_fault(this_ptr, "HTTP", "Client Error", NULL, NULL TSRMLS_CC);
+			} else if (http_status == 500) {
+				add_soap_fault(this_ptr, "HTTP", "Internal Server Error", NULL, NULL TSRMLS_CC);
+			} else if (http_status >= 500 && http_status < 600) {
+				add_soap_fault(this_ptr, "HTTP", "Server Error", NULL, NULL TSRMLS_CC);
+			} else {
+				add_soap_fault(this_ptr, "HTTP", "Unsupported HTTP status code", NULL, NULL TSRMLS_CC);
+			}
+			return FALSE;
+		}
+	}
+
 	return TRUE;
 }
 
