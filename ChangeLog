@@ -1,3 +1,45 @@
+2001-02-27  Andi Gutmans  <andi@zend.com>
+
+    * ext/readline/readline.c
+      ext/sablot/sablot.c
+      ext/session/mod_user.c
+      ext/standard/assert.c
+      ext/xml/xml.c
+      ext/oci8/oci8.c:
+    - Pointed out by Andrei. zval_ptr_dtor() should be used instead of the
+      zval_del_ref() function which should be nuked.
+
+2001-02-27  Ben Mansell  <ben@zeus.com>
+
+    * sapi/isapi/php4isapi.c:
+    Added PHP_AUTH_USER, PHP_AUTH_PW and PHP_AUTH_TYPE environment variables
+    for Zeus/ISAPI, so basic authenication works.
+
+    Submitted by: daniel@zeus.com
+
+2001-02-27  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * TODO:
+    PHP3_TLS_*() macros are no longer used in ext/dav/dav.c, ext/ldap/ldap.c.
+
+2001-02-27  Stanislav Malyshev  <stas@zend.com>
+
+    * TODO: ws fix
+
+2001-02-27  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * TODO:
+    Daniel told me he is working on this one, and he is pretty close to finishing the job.
+
+2001-02-27  Stanislav Malyshev  <stas@zend.com>
+
+    * TODO: Add UNC in the "todo" list
+
+2001-02-27  Zeev Suraski  <zeev@zend.com>
+
+    * ext/standard/output.c
+      ext/standard/php_output.h: Fix chunked output buffering support
+
 2001-02-26  Sascha Schumann  <sascha@schumann.cx>
 
     * ext/ircg/ircg.c
