@@ -164,7 +164,7 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 					php_stream_to_zval(stream, return_value);
 				} else {
 					/* it died; we need to replace it */
-					php_stream_close(stream);
+					php_stream_pclose(stream);
 					break;
 				}
 				
