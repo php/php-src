@@ -169,6 +169,10 @@ SOURCE="..\main\fopen_wrappers.c"
 # End Source File
 # Begin Source File
 
+SOURCE=.\globals.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\main\internal_functions_win32.c
 # End Source File
 # Begin Source File
