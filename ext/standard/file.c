@@ -539,10 +539,10 @@ PHP_FUNCTION(file)
  		if (!(p = php_stream_locate_eol(stream, target_buf, target_len TSRMLS_CC))) {
  			p = e;
  			goto parse_eol;
-  		}
-  		
+		}
+
  		if (stream->flags & PHP_STREAM_FLAG_EOL_MAC) {
-  			eol_marker = '\r';
+			eol_marker = '\r';
  		}	
 
 		/* for performance reasons the code is duplicated, so that the if (include_new_line) 
@@ -558,7 +558,7 @@ parse_eol:
  					add_index_stringl(return_value, i++, slashed, len, 0);
  				} else {
  					add_index_stringl(return_value, i++, estrndup(s, p-s), p-s, 0);
-  				}
+				}
  				s = p;
 	 		} while ((p = memchr(p, eol_marker, (e-p))));
 	 	} else {
@@ -573,7 +573,7 @@ parse_eol:
  					add_index_stringl(return_value, i++, slashed, len, 0);
  				} else {
  					add_index_stringl(return_value, i++, estrndup(s, p-s), p-s, 0);
-  				}
+				}
  				s = ++p;
 	 		} while ((p = memchr(p, eol_marker, (e-p))));
 	 	}
@@ -582,8 +582,8 @@ parse_eol:
  		if (s != e) {
  			p = e;
  			goto parse_eol;
-  		}
-  	}
+		}
+	}
 
  	if (target_buf) {
  		efree(target_buf);
@@ -637,10 +637,9 @@ PHP_NAMED_FUNCTION(php_if_tmpfile)
 
 	stream = php_stream_fopen_tmpfile();
 
-	if (stream)	{
+	if (stream) {
 		php_stream_to_zval(stream, return_value);
-	}
-	else	{
+	} else {
 		RETURN_FALSE;
 	}
 }
@@ -665,9 +664,7 @@ PHP_NAMED_FUNCTION(php_if_fopen)
 		ZEND_FETCH_RESOURCE(context, php_stream_context*, &zcontext, -1, "stream-context", le_stream_context);
 	}
 	
-	stream = php_stream_open_wrapper_ex(filename, mode,
-				(use_include_path ? USE_PATH : 0) | ENFORCE_SAFE_MODE | REPORT_ERRORS,
-				NULL, context);
+	stream = php_stream_open_wrapper_ex(filename, mode, (use_include_path ? USE_PATH : 0) | ENFORCE_SAFE_MODE | REPORT_ERRORS, NULL, context);
 
 	if (stream == NULL) {
 		RETURN_FALSE;
@@ -822,8 +819,9 @@ PHPAPI PHP_FUNCTION(fgets)
 	if (argc == 1) {
 		/* ask streams to give us a buffer of an appropriate size */
 		buf = php_stream_get_line(stream, NULL, 0, &line_len);
-		if (buf == NULL)
+		if (buf == NULL) {
 			goto exit_failed;
+		}
 	} else if (argc > 1) {
 		convert_to_long_ex(arg2);
 		len = Z_LVAL_PP(arg2);
@@ -834,8 +832,9 @@ PHPAPI PHP_FUNCTION(fgets)
 		}
 
 		buf = ecalloc(len + 1, sizeof(char));
-		if (php_stream_get_line(stream, buf, len, &line_len) == NULL)
+		if (php_stream_get_line(stream, buf, len, &line_len) == NULL) {
 			goto exit_failed;
+		}
 	}
 	
 	if (PG(magic_quotes_runtime)) {
@@ -853,8 +852,9 @@ PHPAPI PHP_FUNCTION(fgets)
 
 exit_failed:
 	RETVAL_FALSE;
-	if (buf)
+	if (buf) {
 		efree(buf);
+	}
 }
 /* }}} */
 
@@ -902,28 +902,31 @@ PHPAPI PHP_FUNCTION(fgetss)
 	int allowed_tags_len=0;
 
 	switch(ZEND_NUM_ARGS()) {
-	case 1:
-		if (zend_get_parameters_ex(1, &fd) == FAILURE) {
-			RETURN_FALSE;
-		}
-		break;
-	case 2:
-		if (zend_get_parameters_ex(2, &fd, &bytes) == FAILURE) {
-			RETURN_FALSE;
-		}
-		break;
-	case 3:
-		if (zend_get_parameters_ex(3, &fd, &bytes, &allow) == FAILURE) {
-			RETURN_FALSE;
-		}
-		convert_to_string_ex(allow);
-		allowed_tags = Z_STRVAL_PP(allow);
-		allowed_tags_len = Z_STRLEN_PP(allow);
-		break;
-	default:
-		WRONG_PARAM_COUNT;
-		/* NOTREACHED */
-		break;
+		case 1:
+			if (zend_get_parameters_ex(1, &fd) == FAILURE) {
+				RETURN_FALSE;
+			}
+			break;
+
+		case 2:
+			if (zend_get_parameters_ex(2, &fd, &bytes) == FAILURE) {
+				RETURN_FALSE;
+			}
+			break;
+
+		case 3:
+			if (zend_get_parameters_ex(3, &fd, &bytes, &allow) == FAILURE) {
+				RETURN_FALSE;
+			}
+			convert_to_string_ex(allow);
+			allowed_tags = Z_STRVAL_PP(allow);
+			allowed_tags_len = Z_STRLEN_PP(allow);
+			break;
+
+		default:
+			WRONG_PARAM_COUNT;
+			/* NOTREACHED */
+			break;
 	}
 
 	php_stream_from_zval(stream, fd);
@@ -1026,25 +1029,27 @@ PHPAPI PHP_FUNCTION(fwrite)
 	php_stream *stream;
 
 	switch (ZEND_NUM_ARGS()) {
-	case 2:
-		if (zend_get_parameters_ex(2, &arg1, &arg2)==FAILURE) {
-			RETURN_FALSE;
-		}
-		convert_to_string_ex(arg2);
-		num_bytes = Z_STRLEN_PP(arg2);
-		break;
-	case 3:
-		if (zend_get_parameters_ex(3, &arg1, &arg2, &arg3)==FAILURE) {
-			RETURN_FALSE;
-		}
-		convert_to_string_ex(arg2);
-		convert_to_long_ex(arg3);
-		num_bytes = MIN(Z_LVAL_PP(arg3), Z_STRLEN_PP(arg2));
-		break;
-	default:
-		WRONG_PARAM_COUNT;
-		/* NOTREACHED */
-		break;
+		case 2:
+			if (zend_get_parameters_ex(2, &arg1, &arg2)==FAILURE) {
+				RETURN_FALSE;
+			}
+			convert_to_string_ex(arg2);
+			num_bytes = Z_STRLEN_PP(arg2);
+			break;
+
+		case 3:
+			if (zend_get_parameters_ex(3, &arg1, &arg2, &arg3)==FAILURE) {
+				RETURN_FALSE;
+			}
+			convert_to_string_ex(arg2);
+			convert_to_long_ex(arg3);
+			num_bytes = MIN(Z_LVAL_PP(arg3), Z_STRLEN_PP(arg2));
+			break;
+
+		default:
+			WRONG_PARAM_COUNT;
+			/* NOTREACHED */
+			break;
 	}
 
 	php_stream_from_zval(stream, arg1);
@@ -1135,8 +1140,7 @@ PHPAPI PHP_FUNCTION(fseek)
 	int argcount = ZEND_NUM_ARGS(), whence = SEEK_SET;
 	php_stream *stream;
 
-	if (argcount < 2 || argcount > 3 ||
-	    zend_get_parameters_ex(argcount, &arg1, &arg2, &arg3) == FAILURE) {
+	if (argcount < 2 || argcount > 3 || zend_get_parameters_ex(argcount, &arg1, &arg2, &arg3) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -1277,27 +1281,27 @@ PHP_FUNCTION(readfile)
 	
 	/* check args */
 	switch (ZEND_NUM_ARGS()) {
-	case 1:
-		if (zend_get_parameters_ex(1, &arg1) == FAILURE) {
+		case 1:
+			if (zend_get_parameters_ex(1, &arg1) == FAILURE) {
+				WRONG_PARAM_COUNT;
+			}
+			break;
+
+		case 2:
+			if (zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
+				WRONG_PARAM_COUNT;
+			}
+			convert_to_long_ex(arg2);
+			use_include_path = Z_LVAL_PP(arg2);
+			break;
+
+		default:
 			WRONG_PARAM_COUNT;
-		}
-		break;
-	case 2:
-		if (zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
-			WRONG_PARAM_COUNT;
-		}
-		convert_to_long_ex(arg2);
-		use_include_path = Z_LVAL_PP(arg2);
-		break;
-	default:
-		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(arg1);
 
-	stream = php_stream_open_wrapper(Z_STRVAL_PP(arg1), "rb",
-			(use_include_path ? USE_PATH : 0) | ENFORCE_SAFE_MODE | REPORT_ERRORS,
-			NULL);
-	if (stream)	{
+	stream = php_stream_open_wrapper(Z_STRVAL_PP(arg1), "rb", (use_include_path ? USE_PATH : 0) | ENFORCE_SAFE_MODE | REPORT_ERRORS, NULL);
+	if (stream) {
 		size = php_stream_passthru(stream);
 		php_stream_close(stream);
 		RETURN_LONG(size);
@@ -1335,7 +1339,6 @@ PHP_FUNCTION(umask)
 
 /* {{{ proto int fpassthru(resource fp)
    Output all remaining data from a file pointer */
-
 PHPAPI PHP_FUNCTION(fpassthru)
 {
 	zval **arg1;
@@ -1456,7 +1459,7 @@ PHP_NAMED_FUNCTION(php_if_fstat)
 	php_stream_statbuf stat_ssb;
 	
 	char *stat_sb_names[13]={"dev", "ino", "mode", "nlink", "uid", "gid", "rdev",
-			      "size", "atime", "mtime", "ctime", "blksize", "blocks"};
+				 "size", "atime", "mtime", "ctime", "blksize", "blocks"};
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &fp) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1570,17 +1573,13 @@ PHPAPI int php_copy_file(char *src, char *dest TSRMLS_DC)
 	php_stream *srcstream = NULL, *deststream = NULL;
 	int ret = FAILURE;
 
-	srcstream = php_stream_open_wrapper(src, "rb", 
-				STREAM_DISABLE_OPEN_BASEDIR | REPORT_ERRORS,
-				NULL);
+	srcstream = php_stream_open_wrapper(src, "rb", STREAM_DISABLE_OPEN_BASEDIR | REPORT_ERRORS, NULL);
 	
 	if (!srcstream) {
 		return ret;
 	}
 
-	deststream = php_stream_open_wrapper(dest, "wb", 
-				ENFORCE_SAFE_MODE | REPORT_ERRORS,
-				NULL);
+	deststream = php_stream_open_wrapper(dest, "wb", ENFORCE_SAFE_MODE | REPORT_ERRORS, NULL);
 
 	if (srcstream && deststream) {
 		ret = php_stream_copy_to_stream(srcstream, deststream, PHP_STREAM_COPY_ALL) == 0 ? FAILURE : SUCCESS;
@@ -1646,49 +1645,48 @@ PHP_FUNCTION(fgetcsv)
 	php_stream *stream;
 
 	switch(ZEND_NUM_ARGS()) {
-	case 2:
-		if (zend_get_parameters_ex(2, &fd, &bytes) == FAILURE) {
+		case 2:
+			if (zend_get_parameters_ex(2, &fd, &bytes) == FAILURE) {
+				WRONG_PARAM_COUNT;
+			}
+			break;
+
+		case 3:
+			if (zend_get_parameters_ex(3, &fd, &bytes, &p_delim) == FAILURE) {
+				WRONG_PARAM_COUNT;
+			}
+			convert_to_string_ex(p_delim);
+			/* Make sure that there is at least one character in string */
+			if (Z_STRLEN_PP(p_delim) < 1) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Third parameter must be a character");
+				return;
+			}
+			/* use first character from string */
+			delimiter = Z_STRVAL_PP(p_delim)[0];
+			break;
+
+		case 4:
+			if (zend_get_parameters_ex(4, &fd, &bytes, &p_delim, &p_enclosure) == FAILURE) {
+				WRONG_PARAM_COUNT;
+			}
+			convert_to_string_ex(p_delim);
+			/* Make sure that there is at least one character in string */
+			if (Z_STRLEN_PP(p_delim) < 1) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Third parameter must be a character");
+				return;
+			}
+			/* use first character from string */
+			delimiter = Z_STRVAL_PP(p_delim)[0];
+
+			convert_to_string_ex(p_enclosure);
+			/* use first character from string */
+			enclosure = Z_STRVAL_PP(p_enclosure)[0];
+			break;
+
+		default:
 			WRONG_PARAM_COUNT;
-		}
-		break;
-
-	case 3:
-		if (zend_get_parameters_ex(3, &fd, &bytes, &p_delim) == FAILURE) {
-			WRONG_PARAM_COUNT;
-		}
-		convert_to_string_ex(p_delim);
-		/* Make sure that there is at least one character in string */
-		if (Z_STRLEN_PP(p_delim) < 1) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Third parameter must be a character");
-			return;
-		}
-		/* use first character from string */
-		delimiter = Z_STRVAL_PP(p_delim)[0];
-		break;
-
-	case 4:
-		if (zend_get_parameters_ex(4, &fd, &bytes, &p_delim, &p_enclosure) == FAILURE) {
-			WRONG_PARAM_COUNT;
-		}
-		convert_to_string_ex(p_delim);
-		/* Make sure that there is at least one character in string */
-		if (Z_STRLEN_PP(p_delim) < 1) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Third parameter must be a character");
-			return;
-		}
-		/* use first character from string */
-		delimiter = Z_STRVAL_PP(p_delim)[0];
-
-		convert_to_string_ex(p_enclosure);
-		/* use first character from string */
-		enclosure = Z_STRVAL_PP(p_enclosure)[0];
-		
-		break;
-
-	default:
-		WRONG_PARAM_COUNT;
-		/* NOTREACHED */
-		break;
+			/* NOTREACHED */
+			break;
 	}
 
 	php_stream_from_zval(stream, fd);
@@ -1777,9 +1775,9 @@ normal_char:
 				/* normal character */
 					*tptr++ = *bptr++;
 
-					if (*bptr == 0) {       /* embedded line end? */
-						*(tptr-1)=0;            /* remove space character added on reading line */
-						strcat(temp, lineEnd);   /* add the embedded line end to the field */
+					if (*bptr == 0) {		/* embedded line end? */
+						*(tptr-1)=0;		/* remove space character added on reading line */
+						strcat(temp, lineEnd);	/* add the embedded line end to the field */
 
 						/* read a new line from input, as at start of routine */
 						memset(buf, 0, len+1);
@@ -1803,33 +1801,38 @@ normal_char:
 						temp = erealloc(temp, temp_len+1);
 						bptr = buf;
 						tptr = buf + strlen(buf) -1;
-						while (isspace((int)*(unsigned char *)tptr) && (*tptr!=delimiter) && (tptr > bptr)) 
+						while (isspace((int)*(unsigned char *)tptr) && (*tptr!=delimiter) && (tptr > bptr)) {
 							tptr--;
+						}
 						tptr++; 
 						strcpy(lineEnd, tptr);
-						*tptr++ = ' ';  
+						*tptr++ = ' ';
 						*tptr = 0;
 
-						tptr = temp;      /* reset temp pointer to end of field as read so far */
-						while (*tptr) 
+						tptr = temp;	/* reset temp pointer to end of field as read so far */
+						while (*tptr) {
 							tptr++;
+						}
 					}
 				}
 			}
 		} else {
 			/* 2B. Handle non-enclosure field */
-			while ((*bptr != delimiter) && *bptr) 
+			while ((*bptr != delimiter) && *bptr) {
 				*tptr++ = *bptr++;
+			}
 			*tptr=0;	/* terminate temporary string */
 
 			if (strlen(temp)) {
 				tptr--;
-				while (isspace((int)*(unsigned char *)tptr) && (*tptr!=delimiter)) 
+				while (isspace((int)*(unsigned char *)tptr) && (*tptr!=delimiter)) {
 					*tptr-- = 0;	/* strip any trailing spaces */
+				}
 			}
 			
-			if (*bptr == delimiter) 
+			if (*bptr == delimiter) {
 				bptr++;
+			}
 		}
 
 		/* 3. Now pass our field back to php */
@@ -1879,90 +1882,93 @@ php_meta_tags_token php_next_meta_token(php_meta_tags_data *md TSRMLS_DC)
 	memset((void *)buff, 0, META_DEF_BUFSIZE + 1);
 
 	while (md->ulc || (!php_stream_eof(md->stream) && (ch = php_stream_getc(md->stream)))) {
-		if(php_stream_eof(md->stream))
+		if(php_stream_eof(md->stream)) {
 			break;
+		}
 
 		if (md->ulc) {
 			ch = md->lc;
 			md->ulc = 0;
 		}
 
-        switch (ch) {
-        case '<':
-            return TOK_OPENTAG;
-            break;
-        case '>':
-            return TOK_CLOSETAG;
-            break;
-        case '=':
-            return TOK_EQUAL;
-            break;
-        case '/':
-            return TOK_SLASH;
-            break;
-        case '\'':
-        case '"':
-            compliment = ch;
-            md->token_len = 0;
-            while (!php_stream_eof(md->stream) &&
-				   (ch = php_stream_getc(md->stream)) &&
-				   ch != compliment && ch != '<' && ch != '>') {
+		switch (ch) {
+			case '<':
+				return TOK_OPENTAG;
+				break;
 
-				buff[(md->token_len)++] = ch;
+			case '>':
+				return TOK_CLOSETAG;
+				break;
 
-				if (md->token_len == META_DEF_BUFSIZE)
-					break;
-			}
+			case '=':
+				return TOK_EQUAL;
+				break;
+			case '/':
+        	    		return TOK_SLASH;
+				break;
 
-			if (ch == '<' || ch == '>') {
-				/* Was just an apostrohpe */
-				md->ulc = 1;
-				md->lc  = ch;
-			}
-
-			/* We don't need to alloc unless we are in a meta tag */
-			if (md->in_meta) {
-				md->token_data = (char *) emalloc(md->token_len + 1);
-				memcpy(md->token_data, buff, md->token_len+1);
-			}
-
-			return TOK_STRING;
-			break;
-		case '\n':
-		case '\r':
-		case '\t':
-			break;
-		case ' ':
-            return TOK_SPACE;
-            break;
-        default:
-            if (isalnum(ch)) {
-                md->token_len = 0;
-                buff[(md->token_len)++] = ch;
-				while (!php_stream_eof(md->stream) &&
-					   (ch = php_stream_getc(md->stream)) &&
-					   (isalnum(ch) || strchr(PHP_META_HTML401_CHARS, ch))) {
-
+		        case '\'':
+			case '"':
+				compliment = ch;
+				md->token_len = 0;
+				while (!php_stream_eof(md->stream) && (ch = php_stream_getc(md->stream)) && ch != compliment && ch != '<' && ch != '>') {
 					buff[(md->token_len)++] = ch;
 
-					if (md->token_len == META_DEF_BUFSIZE)
+					if (md->token_len == META_DEF_BUFSIZE) {
 						break;
+					}
 				}
 
-				/* This is ugly, but we have to replace ungetc */
-                if (!isalpha(ch) && ch != '-') {
+				if (ch == '<' || ch == '>') {
+					/* Was just an apostrohpe */
 					md->ulc = 1;
 					md->lc  = ch;
 				}
 
-                md->token_data = (char *) emalloc(md->token_len + 1);
-                memcpy(md->token_data, buff, md->token_len+1);
+				/* We don't need to alloc unless we are in a meta tag */
+				if (md->in_meta) {
+					md->token_data = (char *) emalloc(md->token_len + 1);
+					memcpy(md->token_data, buff, md->token_len+1);
+				}
 
-				return TOK_ID;
-			} else {
-				return TOK_OTHER;
-			}
-			break;
+				return TOK_STRING;
+				break;
+
+			case '\n':
+			case '\r':
+			case '\t':
+				break;
+
+			case ' ':
+				return TOK_SPACE;
+				break;
+
+			default:
+				if (isalnum(ch)) {
+					md->token_len = 0;
+					buff[(md->token_len)++] = ch;
+					while (!php_stream_eof(md->stream) && (ch = php_stream_getc(md->stream)) && (isalnum(ch) || strchr(PHP_META_HTML401_CHARS, ch))) {
+						buff[(md->token_len)++] = ch;
+
+						if (md->token_len == META_DEF_BUFSIZE) {
+							break;
+						}
+					}
+
+					/* This is ugly, but we have to replace ungetc */
+					if (!isalpha(ch) && ch != '-') {
+						md->ulc = 1;
+						md->lc  = ch;
+					}
+
+					md->token_data = (char *) emalloc(md->token_len + 1);
+					memcpy(md->token_data, buff, md->token_len+1);
+
+					return TOK_ID;
+				} else {
+					return TOK_OTHER;
+				}
+				break;
 		}
 	}
 
