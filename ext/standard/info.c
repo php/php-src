@@ -592,7 +592,7 @@ PHP_FUNCTION(phpversion)
 /* }}} */
 
 
-/* {{{ proto void phpcredits(int)
+/* {{{ proto void phpcredits([int flag])
    Prints the list of people who've contributed to the PHP project */
 PHP_FUNCTION(phpcredits)
 {
