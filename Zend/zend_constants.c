@@ -167,7 +167,7 @@ ZEND_API void zend_register_long_constant(char *name, uint name_len, long lval, 
 	c.value.type = IS_LONG;
 	c.value.value.lval = lval;
 	c.flags = flags;
-	c.name = zend_strndup(name, name_len);
+	c.name = zend_strndup(name, name_len-1);
 	c.name_len = name_len;
 	c.module_number = module_number;
 	zend_register_constant(&c TSRMLS_CC);
@@ -181,7 +181,7 @@ ZEND_API void zend_register_double_constant(char *name, uint name_len, double dv
 	c.value.type = IS_DOUBLE;
 	c.value.value.dval = dval;
 	c.flags = flags;
-	c.name = zend_strndup(name, name_len);
+	c.name = zend_strndup(name, name_len-1);
 	c.name_len = name_len;
 	c.module_number = module_number;
 	zend_register_constant(&c TSRMLS_CC);
@@ -196,7 +196,7 @@ ZEND_API void zend_register_stringl_constant(char *name, uint name_len, char *st
 	c.value.value.str.val = strval;
 	c.value.value.str.len = strlen;
 	c.flags = flags;
-	c.name = zend_strndup(name, name_len);
+	c.name = zend_strndup(name, name_len-1);
 	c.name_len = name_len;
 	c.module_number = module_number;
 	zend_register_constant(&c TSRMLS_CC);
