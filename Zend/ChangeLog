@@ -1,3 +1,11 @@
+2003-12-04  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * zend_execute.c:
+      Revert crap.
+
+    * zend_execute.c:
+      Raise error in case dereference is performed on a scalar value.
+
 2003-12-03  Ilia Alshanetsky  <ilia@prohost.org>
 
     * tests/bug24773.phpt:

@@ -1,3 +1,223 @@
+2003-12-04  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/iconv/iconv.c:
+      Type-punning is evil.
+
+    * NEWS:
+      NFN
+
+    * ext/iconv/iconv.c:
+      Add iconv stream filter.
+      
+
+    * ext/mbstring/config.m4:
+      This part is accidentially left on the previous commit.
+
+    * (PHP_4_3)
+      ext/mbstring/config.m4:
+      MFH: it'd be a bad idea to make subpackages dependent on the php build
+      system.
+
+    * ext/mbstring/config.m4:
+      It'd be a bad idea to make subpackages dependent on the php build system.
+
+2003-12-04  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/standard/basic_functions.c:
+      Work around a bug in putenv() in the VS.Net C run time library (MSVCRT71)
+      where it will double free a string.
+
+2003-12-04  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ZendEngine2/zend_execute.c:
+      Revert crap.
+
+2003-12-04  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/sqlite/tests/sqlite_spl_001.phpt:
+      No longer needed
+
+2003-12-04  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * TSRM/tsrm_virtual_cwd.c:
+      Fix Andi's GetLongPathName code so that virtual_file_ex doesn't
+      fail if the file does not exist.
+
+2003-12-04  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      Makefile.global
+      acinclude.m4
+      configure.in:
+      MFH: Only add 'install-modules' into install targets when there are such
+           modules to install
+
+    * Makefile.global
+      acinclude.m4
+      configure.in:
+      - Only add 'install-modules' into install targets when there are such
+        modules to install.
+
+2003-12-04  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/pgsql/config.w32:
+      Make this build using new build system
+
+2003-12-04  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * win32/php4dllts.dsp
+      win32/php4dllts.dsp:
+      - remove non-existing files
+
+    * EXTENSIONS
+      ext/standard/credits_ext.h:
+      - Update after moving extensions to PECL
+
+    * win32/php_modules.dsw:
+      - remove non-existing modules
+
+2003-12-04  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_4_3)
+      Zend/zend_execute.c:
+      MFZE2(r-1.559): Raise error in case dereference is performed on a scalar
+      value.
+
+2003-12-04  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      configure.in:
+      MFH: Fix for "make install" with empty INSTALL_IT
+
+    * configure.in:
+      - Fixed "make install" when INSTALL_IT is empty, like when configured
+        with "./configure --disable-cgi" (CLI has it's own build target)
+
+2003-12-04  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * sapi/apache/config.w32
+      sapi/isapi/config.w32:
+      Fix libxml to use static lib if found.
+      Disable apache and isapi by default.
+      Add some smarts so that we can really build extensions and SAPI found in
+      php-src/pecl and/or php-src/../pecl.
+      Only include a logo in the resources if we are building an .exe.
+
+2003-12-04  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ZendEngine2/zend_execute.c:
+      Raise error in case dereference is performed on a scalar value.
+
+2003-12-04  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/xsl/config.w32:
+      test for dom extension
+
+    * ext/xsl/config.w32:
+      correct test
+
+    * ext/xsl/config.w32:
+      Add xsl config for new win build
+
+2003-12-04  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * NEWS
+      php.ini-dist
+      php.ini-recommended
+      ext/crack/.cvsignore
+      ext/crack/CREDITS
+      ext/crack/EXPERIMENTAL
+      ext/crack/config.m4
+      ext/crack/config.w32
+      ext/crack/crack.c
+      ext/crack/crack.dsp
+      ext/crack/php_crack.h
+      ext/crack/tests/.cvsignore
+      ext/crack/tests/001.phpt
+      ext/mcal/.cvsignore
+      ext/mcal/CREDITS
+      ext/mcal/config.m4
+      ext/mcal/php_mcal.c
+      ext/mcal/php_mcal.h:
+      - Moved ext/crack and ext/mcal to PECL.
+
+2003-12-04  Uwe Schindler  <uwe@thetaphi.de>
+
+    * ext/standard/browscap.c:
+      MFB
+
+    * (PHP_4_3)
+      NEWS
+      ext/standard/browscap.c:
+      Fix bug #25916: get_browser() -> PHP Fatal error: Nesting level too deep -
+      recursive dependency?
+
+2003-12-04  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * NEWS:
+      stylepolizei
+
+    * (PHP_4_3)
+      NEWS:
+      BFN
+
+2003-12-04  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/cpdf/config.w32
+      ext/crack/config.w32
+      ext/curl/config.w32:
+      allow these extensions to build with new system
+
+    * ext/bz2/config.w32
+      ext/bz2/php_bz2.h:
+      Fixup bz2 extension so it builds as shared and static under win32
+
+2003-12-04  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/package-PEAR.xml
+      pear/PEAR/Installer.php
+      pear/PEAR/Command/Install.php:
+      merge downloader code into HEAD - it works
+      fix bug found in uninstall
+
+    * pear/tests/pear_downloader_new.phpt:
+      unit test for new code - proves it works
+
+    * pear/PEAR/Downloader.php:
+      add helper methods needed - now it is 100% unit tested
+
+2003-12-04  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * main/config.w32.h:
+      default install path is c:/php5 for PHP 5
+
+2003-12-04  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/PEAR/Downloader.php:
+      fixed minor bug
+
+    * pear/tests/pear_downloader_old.phpt:
+      finished unit test
+
+    * pear/PEAR/Downloader.php:
+      fix bugs found in unit-testing, one BC issue also
+
+    * pear/PEAR/Remote.php:
+      fix notice
+
+    * pear/tests/pear_downloader_old.phpt:
+      another segment working
+
+2003-12-04  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/fbsql/config.w32:
+      add error message when libs and headers are missing
+
+2003-12-04  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/url.c:
+      Fixed typo (thanks Frank)
+
 2003-12-03  Greg Beaver  <greg@chiaraquartet.net>
 
     * pear/tests/pear_downloader_old.phpt:
