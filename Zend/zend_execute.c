@@ -3567,10 +3567,16 @@ int zend_exit_handler(ZEND_OPCODE_HANDLER_ARGS)
 
 int zend_begin_silence_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
-	EX(Ts)[EX(opline)->result.u.var].tmp_var.value.lval = EG(error_reporting);
-	EX(Ts)[EX(opline)->result.u.var].tmp_var.type = IS_LONG;  /* shouldn't be necessary */
+	EX_T(EX(opline)->result.u.var).tmp_var.value.lval = EG(error_reporting);
+	EX_T(EX(opline)->result.u.var).tmp_var.type = IS_LONG;  /* shouldn't be necessary */
 	zend_alter_ini_entry("error_reporting", sizeof("error_reporting"), "0", 1, ZEND_INI_USER, ZEND_INI_STAGE_RUNTIME);
 	NEXT_OPCODE();
+}
+
+int zend_raise_abstract_error_handler(ZEND_OPCODE_HANDLER_ARGS)
+{
+	zend_error(E_ERROR, "Cannot call abstract method");
+	NEXT_OPCODE(); /* Never reached */
 }
 
 int zend_end_silence_handler(ZEND_OPCODE_HANDLER_ARGS)
@@ -3578,10 +3584,11 @@ int zend_end_silence_handler(ZEND_OPCODE_HANDLER_ARGS)
 	zval restored_error_reporting;
 	
 	restored_error_reporting.type = IS_LONG;
-	restored_error_reporting.value.lval = EX(Ts)[EX(opline)->op1.u.var].tmp_var.value.lval;
+	restored_error_reporting.value.lval = EX_T(EX(opline)->op1.u.var).tmp_var.value.lval;
 	convert_to_string(&restored_error_reporting);
 	zend_alter_ini_entry("error_reporting", sizeof("error_reporting"), Z_STRVAL(restored_error_reporting), Z_STRLEN(restored_error_reporting), ZEND_INI_USER, ZEND_INI_STAGE_RUNTIME);
 	zendi_zval_dtor(restored_error_reporting);
+	NEXT_OPCODE();
 }
 
 int zend_qm_assign_handler(ZEND_OPCODE_HANDLER_ARGS)
@@ -3839,4 +3846,6 @@ void zend_init_opcodes_handlers()
 	zend_opcode_handlers[ZEND_DECLARE_CLASS] = zend_declare_class_handler;
 	zend_opcode_handlers[ZEND_DECLARE_INHERITED_CLASS] = zend_declare_inherited_class_handler;
 	zend_opcode_handlers[ZEND_DECLARE_FUNCTION] = zend_declare_function_handler;
+
+	zend_opcode_handlers[ZEND_RAISE_ABSTRACT_ERROR] = zend_raise_abstract_error_handler;
 }

@@ -378,6 +378,15 @@ void zend_do_echo(znode *arg TSRMLS_DC)
 	SET_UNUSED(opline->op2);
 }
 
+void zend_do_abstract_method(TSRMLS_D)
+{
+	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+
+	opline->opcode = ZEND_RAISE_ABSTRACT_ERROR;
+	SET_UNUSED(opline->op1);
+	SET_UNUSED(opline->op2);
+}
+
 
 void zend_do_assign(znode *result, znode *variable, znode *value TSRMLS_DC)
 {
