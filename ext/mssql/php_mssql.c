@@ -137,6 +137,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY_EX("mssql.batchsize",   			"0",	PHP_INI_ALL,	OnUpdateInt,	batchsize,					zend_mssql_globals,		mssql_globals,	display_link_numbers)
 	STD_PHP_INI_BOOLEAN("mssql.datetimeconvert",  		"1",	PHP_INI_ALL,	OnUpdateBool,	datetimeconvert,			zend_mssql_globals,		mssql_globals)
 	STD_PHP_INI_BOOLEAN("mssql.secure_connection",		"0",	PHP_INI_SYSTEM, OnUpdateBool,	secure_connection,			zend_mssql_globals,		mssql_globals)
+	STD_PHP_INI_ENTRY_EX("mssql.max_procs",				"25",	PHP_INI_ALL,	OnUpdateInt,	max_procs,					zend_mssql_globals,		mssql_globals,	display_link_numbers)
 PHP_INI_END()
 
 /* error handler */
@@ -330,6 +331,7 @@ PHP_RINIT_FUNCTION(mssql)
 	dbsetlogintime(MS_SQL_G(connect_timeout));
 	if (MS_SQL_G(timeout) < 0) MS_SQL_G(timeout) = 60;
 	dbsettime(MS_SQL_G(timeout));
+	dbsetmaxprocs((SHORT)MS_SQL_G(max_procs));
 
 	return SUCCESS;
 }

@@ -121,6 +121,7 @@ ZEND_BEGIN_MODULE_GLOBALS(mssql)
 	long datetimeconvert;
 	HashTable *resource_list, *resource_plist;
 	long secure_connection;
+	long max_procs;
 ZEND_END_MODULE_GLOBALS(mssql)
 
 #define MSSQL_ROWS_BLOCK 128
