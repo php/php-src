@@ -238,7 +238,6 @@ enable_dl		= On				; Whether or not to enable the dl() function.
 
 
 ;Windows Extensions
-;extension=php_mysql.dll
 ;extension=php_nsmail.dll
 ;extension=php_calendar.dll
 ;extension=php_dbase.dll
@@ -253,6 +252,7 @@ enable_dl		= On				; Whether or not to enable the dl() function.
 ;extension=php_crypt.dll
 ;extension=php_msql2.dll
 ;extension=php_odbc.dll
+; Note that MySQL support is now built in, so no dll is needed for it.
 
 ;;;;;;;;;;;;;;;;;;;
 ; Module Settings ;
