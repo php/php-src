@@ -440,18 +440,18 @@ int php_sock_array_to_fd_set(zval *sock_array, fd_set *fds, SOCKET *max_fd TSRML
 	php_socket	*php_sock;
 	
 	if (Z_TYPE_P(sock_array) != IS_ARRAY) return 0;
-   
+
 	for (zend_hash_internal_pointer_reset(Z_ARRVAL_P(sock_array));
 	     zend_hash_get_current_data(Z_ARRVAL_P(sock_array), (void **) &element) == SUCCESS;
 	     zend_hash_move_forward(Z_ARRVAL_P(sock_array))) {
-	   
+
 		php_sock = (php_socket*) zend_fetch_resource(element TSRMLS_CC, -1, le_socket_name, NULL, 1, le_socket);
- 		if (!php_sock) continue; /* If element is not a resource, skip it */
+		if (!php_sock) continue; /* If element is not a resource, skip it */
 
 		FD_SET(php_sock->bsd_socket, fds);
-  	        if (php_sock->bsd_socket > *max_fd) *max_fd=php_sock->bsd_socket;
+		if (php_sock->bsd_socket > *max_fd) *max_fd=php_sock->bsd_socket;
 	}
-   
+
 	return 1;
 }
 
@@ -461,33 +461,33 @@ int php_sock_array_from_fd_set(zval *sock_array, fd_set *fds TSRMLS_DC) {
 	php_socket	*php_sock;
 	HashTable	*new_hash;
 	if (Z_TYPE_P(sock_array) != IS_ARRAY) return 0;
-   
+
 	ALLOC_HASHTABLE(new_hash);
 	zend_hash_init(new_hash, 0, NULL, ZVAL_PTR_DTOR, 0);
 	for (zend_hash_internal_pointer_reset(Z_ARRVAL_P(sock_array));
 	     zend_hash_get_current_data(Z_ARRVAL_P(sock_array), (void **) &element) == SUCCESS;
 	     zend_hash_move_forward(Z_ARRVAL_P(sock_array))) {
-	   
+
 		php_sock = (php_socket*) zend_fetch_resource(element TSRMLS_CC, -1, le_socket_name, NULL, 1, le_socket);
- 		if (!php_sock) continue; /* If element is not a resource, skip it */
-	   
+		if (!php_sock) continue; /* If element is not a resource, skip it */
+
 		if (FD_ISSET(php_sock->bsd_socket, fds)) {
-		       /* Add fd to new array */	
-		       zend_hash_next_index_insert(new_hash, (void *)element, sizeof(zval *), (void **)&dest_element);
-		       if (dest_element) zval_add_ref(dest_element);
+			/* Add fd to new array */	
+			zend_hash_next_index_insert(new_hash, (void *)element, sizeof(zval *), (void **)&dest_element);
+			if (dest_element) zval_add_ref(dest_element);
 		}
 	}
 
 	/* Destroy old array, add new one */
 	zend_hash_destroy(Z_ARRVAL_P(sock_array));
-   
+
 	zend_hash_internal_pointer_reset(new_hash);
 	Z_ARRVAL_P(sock_array) = new_hash;
-   
+
 	return 1;
 }
-   
-   
+
+
 /* {{{ proto int socket_select(array &read_fds, array &write_fds, &array except_fds, int tv_sec[, int tv_usec])
    Runs the select() system call on the sets mentioned with a timeout specified by tv_sec and tv_usec */
 PHP_FUNCTION(socket_select)
@@ -501,15 +501,15 @@ PHP_FUNCTION(socket_select)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a!a!a!z!|l", &r_array, &w_array, &e_array, &sec, &usec) == FAILURE)
 		return;
-	
- 	FD_ZERO(&rfds);  
- 	FD_ZERO(&wfds);  
-   	FD_ZERO(&efds);  
-   
+
+	FD_ZERO(&rfds);  
+	FD_ZERO(&wfds);  
+	FD_ZERO(&efds);  
+
 	if (r_array != NULL) sets += php_sock_array_to_fd_set(r_array, &rfds, &max_fd TSRMLS_CC);
 	if (w_array != NULL) sets += php_sock_array_to_fd_set(w_array, &wfds, &max_fd TSRMLS_CC);
-   	if (e_array != NULL) sets += php_sock_array_to_fd_set(e_array, &efds, &max_fd TSRMLS_CC);
-   
+	if (e_array != NULL) sets += php_sock_array_to_fd_set(e_array, &efds, &max_fd TSRMLS_CC);
+
 	if (!sets) {
 		php_error(E_WARNING, "%s() no resource arrays were passed to select", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
@@ -521,19 +521,19 @@ PHP_FUNCTION(socket_select)
 		tv.tv_sec = Z_LVAL_P(sec);
 		tv.tv_usec = usec;
 		tv_p=&tv;
-	} 
-   
-   	retval = select(max_fd+1, &rfds, &wfds, &efds, tv_p);
+	}
+
+	retval = select(max_fd+1, &rfds, &wfds, &efds, tv_p);
 
 	if (retval == -1) {
 		php_error(E_WARNING, "%s() %s [%d]: %s", get_active_function_name(TSRMLS_C), "unable to select", errno, php_strerror(errno));
 		RETURN_FALSE;
 	}
-   
+
 	if (r_array != NULL) php_sock_array_from_fd_set(r_array, &rfds TSRMLS_CC);
 	if (w_array != NULL) php_sock_array_from_fd_set(w_array, &wfds TSRMLS_CC);
 	if (e_array != NULL) php_sock_array_from_fd_set(e_array, &efds TSRMLS_CC);   
-   
+
 	RETURN_LONG(retval);
 }
 /* }}} */
