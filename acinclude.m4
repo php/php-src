@@ -33,6 +33,7 @@ AC_DEFUN(PHP_TARGET_RDYNAMIC,[
   fi
 ])
 
+dnl {{{ PHP_REMOVE_USR_LIB
 AC_DEFUN(PHP_REMOVE_USR_LIB,[
   unset ac_new_flags
   for i in [$]$1; do
@@ -42,8 +43,11 @@ AC_DEFUN(PHP_REMOVE_USR_LIB,[
     esac
   done
   $1=[$]ac_new_flags
+
 ])
-    
+
+dnl }}}    
+
 AC_DEFUN(PHP_SETUP_OPENSSL,[
   if test "$PHP_OPENSSL" = "no"; then
     PHP_OPENSSL="/usr/local/ssl /usr/local /usr /usr/local/openssl"
