@@ -33,7 +33,7 @@ foreach($it as $val=>$key)
 
 ?>
 ===DONE===
-<?php exit(0);
+<?php exit(0); ?>
 --EXPECTF--
 ===EmptyIterator===
 ===InfiniteIterator===
