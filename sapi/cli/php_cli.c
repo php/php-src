@@ -148,6 +148,8 @@ static void sapi_cli_flush(void *server_context)
 	}
 }
 
+static char *php_self = "";
+static char *script_filename = "";
 
 static void sapi_cli_register_variables(zval *track_vars_array TSRMLS_DC)
 {
@@ -157,7 +159,13 @@ static void sapi_cli_register_variables(zval *track_vars_array TSRMLS_DC)
 	php_import_environment_variables(track_vars_array TSRMLS_CC);
 
 	/* Build the special-case PHP_SELF variable for the CLI version */
-	/*	php_register_variable("PHP_SELF", SG(request_info).argv[0], track_vars_array TSRMLS_CC);*/
+	php_register_variable("PHP_SELF", php_self, track_vars_array TSRMLS_CC);
+	php_register_variable("SCRIPT_NAME", php_self, track_vars_array TSRMLS_CC);
+	/* filenames are empty for stdin */
+	php_register_variable("SCRIPT_FILENAME", script_filename, track_vars_array TSRMLS_CC);
+	php_register_variable("PATH_TRANSLATED", script_filename, track_vars_array TSRMLS_CC);
+	/* just make it available */
+	php_register_variable("DOCUMENT_ROOT", "", track_vars_array TSRMLS_CC);
 }
 
 
@@ -610,40 +618,15 @@ int main(int argc, char *argv[])
 			script_file=argv[ap_php_optind];
 			ap_php_optind++;
 		}
-		/* before registering argv to modulule exchange the *new* argv[0] */
-		/* we can achieve this without allocating more memory */
-		SG(request_info).argc=argc-ap_php_optind+1;
-		arg_excp = argv+ap_php_optind-1;
-		arg_free = argv[ap_php_optind-1];
-		if (script_file) {
-			SG(request_info).path_translated = script_file;
-			argv[ap_php_optind-1] = script_file;
-		} else {
-			argv[ap_php_optind-1] = "-"; /* should be stdin */
-		}
-		SG(request_info).argv=argv+ap_php_optind-1;
-
-		if (php_request_startup(TSRMLS_C)==FAILURE) {
-			php_module_shutdown(TSRMLS_C);
-			*arg_excp = arg_free;
-			return FAILURE;
-		}
-		*arg_excp = arg_free; /* reconstuct argv */
-		if (no_headers) {
-			SG(headers_sent) = 1;
-			SG(request_info).no_headers = 1;
-		}
 		if (script_file) {
 			if (!(file_handle.handle.fp = VCWD_FOPEN(script_file, "rb"))) {
 				SG(headers_sent) = 1;
 				SG(request_info).no_headers = 1;
 				PUTS("Could not open input file.\n");
-				php_request_shutdown((void *) 0);
-				php_module_shutdown(TSRMLS_C);
 				return FAILURE;
 			}
-			php_register_variable("PHP_SELF", script_file, NULL TSRMLS_CC);
 			file_handle.filename = script_file;
+			script_filename = script_file;
 			/* #!php support */
 			c = fgetc(file_handle.handle.fp);
 			if (c == '#') {
@@ -655,13 +638,38 @@ int main(int argc, char *argv[])
 				rewind(file_handle.handle.fp);
 			}
 		} else {
-			php_register_variable("PHP_SELF", "-", NULL TSRMLS_CC);
 			file_handle.filename = "-";
 			file_handle.handle.fp = stdin;
 		}
 		file_handle.type = ZEND_HANDLE_FP;
 		file_handle.opened_path = NULL;
 		file_handle.free_filename = 0;
+		php_self = file_handle.filename;
+
+		/* before registering argv to modulule exchange the *new* argv[0] */
+		/* we can achieve this without allocating more memory */
+		SG(request_info).argc=argc-ap_php_optind+1;
+		arg_excp = argv+ap_php_optind-1;
+		arg_free = argv[ap_php_optind-1];
+		SG(request_info).path_translated = file_handle.filename;
+		argv[ap_php_optind-1] = file_handle.filename;
+		SG(request_info).argv=argv+ap_php_optind-1;
+
+		if (php_request_startup(TSRMLS_C)==FAILURE) {
+			*arg_excp = arg_free;
+			fclose(file_handle.handle.fp);
+			SG(headers_sent) = 1;
+			SG(request_info).no_headers = 1;
+			php_request_shutdown((void *) 0);
+			php_module_shutdown(TSRMLS_C);
+			PUTS("Could not startup.\n");
+			return FAILURE;
+		}
+		*arg_excp = arg_free; /* reconstuct argv */
+		if (no_headers) {
+			SG(headers_sent) = 1;
+			SG(request_info).no_headers = 1;
+		}
 
 		/* This actually destructs the elements of the list - ugly hack */
 		zend_llist_apply(&global_vars, (llist_apply_func_t) php_register_command_line_global_vars TSRMLS_CC);
