@@ -41,7 +41,7 @@
 
 DBA_OPEN_FUNC(flatfile)
 {
-	info->dbf = emalloc(sizeof(flatfile));
+	info->dbf = pemalloc(sizeof(flatfile), info->flags&DBA_PERSISTENT);
 	memset(info->dbf, 0, sizeof(flatfile));
 
 	((flatfile*)info->dbf)->fp = info->fp;
@@ -55,7 +55,7 @@ DBA_CLOSE_FUNC(flatfile)
 
 	if (dba->nextkey.dptr)
 		efree(dba->nextkey.dptr);
-	efree(dba);
+	pefree(dba, info->flags&DBA_PERSISTENT);
 }
 
 DBA_FETCH_FUNC(flatfile)
