@@ -2,6 +2,8 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? ????, Version 4.0 Beta 4
+- Added check to see if a persistent connection is still valid with the
+  ODBC interface before reusing (nick@easysoft.com)
 - Added DBMaker support (patch by Pax Tsai <paxtsai@lion.syscom.com.tw>)
 - Renamed "PECL" to "PEAR" (PHP Extension and Add-on Repository) (Stig)
 - buildconf now uses build.mk (Stig)

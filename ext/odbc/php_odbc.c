@@ -301,6 +301,8 @@ PHP_INI_BEGIN()
 			defaultlrl, php_odbc_globals, odbc_globals, display_lrl)
 	STD_PHP_INI_ENTRY_EX("odbc.defaultbinmode", "1", PHP_INI_ALL, OnUpdateInt,
 			defaultbinmode, php_odbc_globals, odbc_globals, display_binmode)
+	STD_PHP_INI_BOOLEAN("odbc.check_persistent", "1", PHP_INI_SYSTEM, OnUpdateInt,
+		check_persistent, php_odbc_globals, odbc_globals)
 PHP_INI_END()
 
 #ifdef ZTS
@@ -1718,6 +1720,8 @@ void odbc_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	 * no matter if it is to be persistent or not
 	 */
 
+try_and_get_another_connection:
+
 	if (persistent) {
 		list_entry *le;
 		
@@ -1755,8 +1759,30 @@ void odbc_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			if (le->type != le_pconn) {
 				RETURN_FALSE;
 			}
-			/* XXX we should ensure that the connection is still available */
+			/*
+			 * check to see if the connection is still valid
+			 */
 			db_conn = (odbc_connection *)le->ptr;
+
+			/*
+			 * check to see if the connection is still in place (lurcher)
+			 */
+			if (ODBCG(check_persistent)) {
+				SQLRETURN ret;
+				SQLCHAR d_name[ 32 ];
+				SQLSMALLINT len;
+
+				ret = SQLGetInfo( db_conn -> hdbc, 
+					SQL_DATA_SOURCE_READ_ONLY, 
+					d_name, sizeof( d_name ), &len );
+
+				if ( ret != SQL_SUCCESS )
+				{
+					zend_hash_del(plist, hashed_details, hashed_len + 1);					     SQLDisconnect( db_conn -> hdbc );
+					SQLFreeConnect( db_conn -> hdbc );
+					goto try_and_get_another_connection;
+				}
+			}
 		}
 		ZEND_REGISTER_RESOURCE(return_value, db_conn, le_pconn);
 	} else { /* non persistent */
