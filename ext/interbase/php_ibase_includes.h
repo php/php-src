@@ -20,8 +20,8 @@
 
 /* $Id$ */
 
-#ifndef INTERBASE_H
-#define INTERBASE_H
+#ifndef PHP_IBASE_INCLUDES_H
+#define PHP_IBASE_INCLUDES_H
 
 #include <ibase.h>
 
@@ -42,7 +42,7 @@ typedef unsigned long long ISC_UINT64;
 #endif /* PHP_WIN32 */
 #endif /* SQL_DIALECT_CURRENT */
 
-#define RESET_ERRMSG { IBG(errmsg)[0] = '\0'; IBG(sql_code) = 0; }
+#define RESET_ERRMSG do { IBG(errmsg)[0] = '\0'; IBG(sql_code) = 0; } while (0)
 
 #define IB_STATUS (IBG(status))
 
@@ -197,16 +197,16 @@ int _php_ibase_blob_add(zval **string_arg, ibase_blob *ib_blob TSRMLS_DC);
 
 void _php_ibase_error(TSRMLS_D);
 void _php_ibase_module_error(char * TSRMLS_DC, ...) 
-	PHP_ATTRIBUTE_FORMAT(printf,1,PHP_ATTR_FMT_OFFSET +2);
+	PHP_ATTRIBUTE_FORMAT(printf,1,PHP_ATTR_FMT_OFFSET +2);	
 
 /* determine if a resource is a link or transaction handle */
-#define PHP_IBASE_LINK_TRANS(pzval, lh, th) \
-	do { if (!pzval) { \
-			ZEND_FETCH_RESOURCE2(lh, ibase_db_link *, NULL, IBG(default_link), \
-				"InterBase link", le_link, le_plink) } \
-		else \
-			_php_ibase_get_link_trans(INTERNAL_FUNCTION_PARAM_PASSTHRU, &pzval, &lh, &th); \
-		if (SUCCESS != _php_ibase_def_trans(lh, &th TSRMLS_CC)) { RETURN_FALSE; } \
+#define PHP_IBASE_LINK_TRANS(pzval, lh, th)													\
+	do { if (!pzval) {																		\
+			ZEND_FETCH_RESOURCE2(lh, ibase_db_link *, NULL, IBG(default_link),				\
+				"InterBase link", le_link, le_plink) }										\
+		else																				\
+			_php_ibase_get_link_trans(INTERNAL_FUNCTION_PARAM_PASSTHRU, &pzval, &lh, &th);	\
+		if (SUCCESS != _php_ibase_def_trans(lh, &th TSRMLS_CC)) { RETURN_FALSE; }			\
 	} while (0)
 	
 int _php_ibase_def_trans(ibase_db_link *ib_link, ibase_trans **trans TSRMLS_DC);
@@ -219,7 +219,7 @@ void _php_ibase_event_free(char *event_buf, char *result_buf);
 #define max(a,b) ((a)>(b)?(a):(b))
 #endif
 
-#endif /* INTERBASE_H */
+#endif /* PHP_IBASE_INCLUDES_H */
 
 /*
  * Local variables:
