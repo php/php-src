@@ -196,8 +196,9 @@ STATUS:              Working
 SINCE:               4.0.3
 -------------------------------------------------------------------------------
 EXTENSION:           calendar
-MAINTENANCE:         Unknown
-STATUS:              Unknown
+PRIMARY MAINTAINER:  Hartmut Holzgraefe <hartmut@six.de>
+MAINTENANCE:         Odd Fixes
+STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           com
 PRIMARY MAINTAINER:  Harald Radi <h.radi@nme.at>
