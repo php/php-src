@@ -1,3 +1,74 @@
+2000-07-09  Sascha Schumann  <sascha@schumann.cx>
+
+    * acinclude.m4
+      build/library.mk
+      build/rules.mk
+      configure.in
+      dynlib.m4: Add support for building C++ sources.
+
+    In your extension's config.m4, you need to use the m4 macro
+
+        PHP_REQUIRE_CXX
+
+    This shall be called only, if your extension is enabled.
+
+    C++ source files shall not be put into the LTLIBRARY_SOURCES macro.
+    Instead, the filename of the object shall be put into
+    LTLIBRARY_OBJECTS_X. I.e. if your extension foo consists of foo.cxx, use
+
+        LTLIBRARY_OBJECTS_X = foo.lo
+
+2000-07-09  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/standard/string.c: Fixed other protos.
+
+    * ext/standard/pack.c: Fixed a proto.
+
+    * ext/standard/math.c: Corrected a mispelled word.
+
+2000-07-09  Sascha Schumann  <sascha@schumann.cx>
+
+    * NEWS: .
+
+    * main/main.c: Restore INI entries after the request shutdown of modules.
+
+    This fixes the problems users of the session module encountered when
+    using a save handler other than files.
+
+2000-07-09  Andreas Karajannis  <Andreas.Karajannis@gmd.de>
+
+    * sapi/apache/mod_php4.c: Fixed module / global shutdown for apache.
+    GSHUTDOWN functions are now executed and MSHUTDOWN functions are executed on child process exit
+
+2000-07-09  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/session/session.c: Fix stupid bug.
+
+2000-07-09  Jouni Ahto  <jah@mork.net>
+
+    * ext/interbase/interbase.c:
+    - Left debugging accidentally on...
+
+    * ext/interbase/interbase.c:
+    (ibase_blob_import) It's good to have link handle available, if you want to
+                        use it...
+    (_php_ibase_exec)   On error situations, only xsqlda was freed, not its
+                        contents.
+
+    * ext/interbase/interbase.c:
+    - I must be getting demented. Forgot to add and register list destructor
+      function when creating new list entry type. Several other modifications
+      too related to this. Blobs still not working.
+
+2000-07-09  Sam Ruby  <rubys@us.ibm.com>
+
+    * ext/java/README
+      ext/java/java.c
+      ext/java/reflect.java: Reentrancy fixes
+
+    * sapi/servlet/reqparams.php: Fix for JDK1.2.2/Tomcat3.2
+    (can't find beanInfo for interfaces which extend other interfaces)
+
 2000-07-08  Egon Schmid  <eschmid@s.netic.de>
 
     * ext/standard/string.c: Eliminated a typo.
