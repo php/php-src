@@ -535,8 +535,8 @@ void zend_do_for_end(znode *second_semicolon_token TSRMLS_DC)
 void zend_do_pre_incdec(znode *result, znode *op1, zend_uchar op TSRMLS_DC)
 {
 	int last_op_number = get_next_op_number(CG(active_op_array))-1;
-	zend_op *last_op = &CG(active_op_array)->opcodes[last_op_number];
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+	zend_op *last_op = &CG(active_op_array)->opcodes[last_op_number];
 
 	if (last_op->opcode == ZEND_FETCH_OBJ_RW) {
 		opline->opcode = (op==ZEND_PRE_INC)?ZEND_PRE_INC_OBJ:ZEND_PRE_DEC_OBJ;
@@ -560,8 +560,8 @@ void zend_do_pre_incdec(znode *result, znode *op1, zend_uchar op TSRMLS_DC)
 void zend_do_post_incdec(znode *result, znode *op1, zend_uchar op TSRMLS_DC)
 {
 	int last_op_number = get_next_op_number(CG(active_op_array))-1;
-	zend_op *last_op = &CG(active_op_array)->opcodes[last_op_number];
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+	zend_op *last_op = &CG(active_op_array)->opcodes[last_op_number];
 
 	if (last_op->opcode == ZEND_FETCH_OBJ_RW) {
 		opline->opcode = (op==ZEND_POST_INC)?ZEND_POST_INC_OBJ:ZEND_POST_DEC_OBJ;
