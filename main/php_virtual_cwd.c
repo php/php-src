@@ -11,9 +11,14 @@
 #include <unistd.h>
 #endif
 
+#ifndef S_ISDIR
+#define S_ISDIR(mode) ((mode) & _S_IFDIR)
+#endif
+
 typedef unsigned int uint;
 
 #ifdef PHP_WIN32
+#define strtok_r(a,b,c) strtok((a),(b))
 #define IS_SLASH(c)	((c) == '/' || (c) == '\\')
 #define DEFAULT_SLASH '\\'
 #define TOKENIZER_STRING "/\\"
@@ -21,6 +26,8 @@ typedef unsigned int uint;
 #define IS_ABSOLUTE_PATH(path, len) \
 	(len >= 2 && isalpha(path[0]) && path[1] == ':')
 
+#define COPY_WHEN_ABSOLUTE 2
+	
 static int php_check_dots(const char *element, uint n) 
 {
 	while (n-- > 0) if (element[n] != '.') break;
@@ -34,7 +41,6 @@ static int php_check_dots(const char *element, uint n)
 #define IS_DIRECTORY_CURRENT(element, len) \
 	(len == 1 && ptr[0] == '.')
 
-#define strtok_r(a, b, c) strtok((a), (b)) /* Temporary fix for Windows */
 
 #else
 #define IS_SLASH(c)	((c) == '/')
@@ -60,7 +66,11 @@ static int php_check_dots(const char *element, uint n)
 	(len == 1 && ptr[0] == '.')
 #endif
 
-/* for now */
+#ifndef COPY_WHEN_ABSOLUTE
+#define COPY_WHEN_ABSOLUTE 0
+#endif
+
+/* define this to check semantics */
 #define IS_DIR_OK(s) (1)
 	
 #ifndef IS_DIR_OK
@@ -72,10 +82,6 @@ typedef struct _cwd_state {
 	uint cwd_length;
 } cwd_state;
 
-#ifndef S_ISDIR
-#define S_ISDIR(mode) ((mode) & _S_IFDIR)
-#endif
-
 static int php_is_dir_ok(const cwd_state *state) 
 {
 	struct stat buf;
@@ -85,7 +91,6 @@ static int php_is_dir_ok(const cwd_state *state)
 
 	return (1);
 }
-
 
 
 char *virtual_getcwd(cwd_state *state, uint *length)
@@ -125,6 +130,8 @@ int virtual_chdir(cwd_state *state, char *path)
 	char *tok = NULL;
 	uint ptr_length;
 	cwd_state *old_state;
+	int ret = 0;
+	uint copy_amount = -1;
 
 	if (path_length == 0) 
 		return (0);
@@ -132,18 +139,22 @@ int virtual_chdir(cwd_state *state, char *path)
 	old_state = (cwd_state *) malloc(sizeof(*old_state));
 	old_state->cwd = strdup(state->cwd);
 	old_state->cwd_length = state->cwd_length;
-	
+
 	if (IS_ABSOLUTE_PATH(path, path_length)) {
-		state->cwd = (char *) malloc(1);
-		state->cwd[0] = '\0';
-		state->cwd_length = 0;
+		copy_amount = COPY_WHEN_ABSOLUTE;
 #ifdef PHP_WIN32
 	} else if(IS_SLASH(path[0])) {
-		state->cwd = (char *) malloc(3);
-		memcpy(state->cwd, old_state->cwd, 2);
-		state->cwd[2] = '\0';
-		state->cwd_length = 2;
+		copy_amount = 2;
 #endif
+	}
+
+	if (copy_amount != -1) {
+		state->cwd = realloc(state->cwd, copy_amount + 1);
+		if (copy_amount)
+			memcpy(state->cwd, old_state->cwd, copy_amount);
+		state->cwd[copy_amount] = '\0';
+		state->cwd_length = copy_amount;
+		path += copy_amount;
 	}
 
 
@@ -151,11 +162,10 @@ int virtual_chdir(cwd_state *state, char *path)
 	while (ptr) {
 		ptr_length = strlen(ptr);
 
-		
 		if (IS_DIRECTORY_UP(ptr, ptr_length)) {
 			char save;
 
-			save = '\0';
+			save = DEFAULT_SLASH;
 
 #define PREVIOUS state->cwd[state->cwd_length - 1]
 
@@ -185,17 +195,15 @@ int virtual_chdir(cwd_state *state, char *path)
 	if (!IS_DIR_OK(state)) {
 		free(state->cwd);
 
-		state->cwd = old_state->cwd;
-		state->cwd_length = old_state->cwd_length;
+		*state = *old_state;
 
-		free(old_state);
-
-		return (1);
-	}
+		ret = 1;
+	} else
+		free(old_state->cwd);
 	
-	free(old_state->cwd);
 	free(old_state);
-	return (0);
+	
+	return (ret);
 }
 
 void main(void)
@@ -211,22 +219,26 @@ void main(void)
 		state.cwd_length <<= 1;
 		state.cwd = realloc(state.cwd, state.cwd_length + 1);
 	}
+	state.cwd_length = strlen(state.cwd);
 #else
 	state.cwd = strdup("d:\\foo\\bar");
 	state.cwd_length = strlen(state.cwd);
 #endif
 
-	printf("%s\n", virtual_getcwd(&state, &length));
-	virtual_chdir(&state, strdup("/foo/barbara"));
-	printf("%s\n", virtual_getcwd(&state, &length));
-	virtual_chdir(&state, strdup("../andi"));
-	printf("%s\n", virtual_getcwd(&state, &length));
-	virtual_chdir(&state, strdup("../../..../.././.../foo/...../"));
-	printf("%s\n", virtual_getcwd(&state, &length));
-	virtual_chdir(&state, strdup("/////andi"));
-	printf("%s\n", virtual_getcwd(&state, &length));
-	virtual_chdir(&state, strdup("andi/././././././////bar"));
-	printf("%s\n", virtual_getcwd(&state, &length));
-	virtual_chdir(&state, strdup("../andi/../bar"));
-	printf("%s\n", virtual_getcwd(&state, &length));
+#define T(a) \
+	printf("[%s] $ cd %s\n", virtual_getcwd(&state, &length), a); \
+	virtual_chdir(&state, strdup(a)); \
+	printf("new path is %s\n", virtual_getcwd(&state, &length));
+	
+	T("..")
+	T("...")
+	T("foo")
+	T("../bar")
+	T(".../slash/../dot")
+	T("//baz")
+	T("andi/././././././///bar")
+	T("../andi/../bar")
+	T("...foo")
+	T("D:/flash/zone")
+	T("../foo/bar/../baz")
 }
