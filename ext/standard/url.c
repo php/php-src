@@ -148,18 +148,18 @@ url *url_parse(char *string)
    Parse a URL and return its components */
 PHP_FUNCTION(parse_url)
 {
-	pval *string;
+	pval **string;
 	url *resource;
 
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &string) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &string) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_string(string);
+	convert_to_string_ex(string);
 
-	resource = url_parse(string->value.str.val);
+	resource = url_parse((*string)->value.str.val);
 
 	if (resource == NULL) {
-		php_error(E_WARNING, "unable to parse url (%s)", string->value.str.val);
+		php_error(E_WARNING, "unable to parse url (%s)", (*string)->value.str.val);
 		RETURN_FALSE;
 	}
 	/* allocate an array for return */
@@ -256,19 +256,19 @@ char *_php3_urlencode(char *s, int len)
    URL-encodes string */
 PHP_FUNCTION(urlencode)
 {
-	pval *arg;
+	pval **arg;
 	char *str;
 
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_string(arg);
+	convert_to_string_ex(arg);
 
-	if (!arg->value.str.len) {
+	if (!(*arg)->value.str.len) {
 		var_reset(return_value);
 		return;
 	}
-	str = _php3_urlencode(arg->value.str.val, arg->value.str.len);
+	str = _php3_urlencode((*arg)->value.str.val, (*arg)->value.str.len);
 	RETVAL_STRING(str, 1);
 	efree(str);
 }
@@ -278,21 +278,21 @@ PHP_FUNCTION(urlencode)
    Decodes URL-encoded string */
 PHP_FUNCTION(urldecode)
 {
-	pval *arg;
+	pval **arg;
 	int len;
 
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_string(arg);
+	convert_to_string_ex(arg);
 
-	if (!arg->value.str.len) {
+	if (!(*arg)->value.str.len) {
 		var_reset(return_value);
 		return;
 	}
-	len = _php3_urldecode(arg->value.str.val, arg->value.str.len);
+	len = _php3_urldecode((*arg)->value.str.val, (*arg)->value.str.len);
 
-	RETVAL_STRINGL(arg->value.str.val, len, 1);
+	RETVAL_STRINGL((*arg)->value.str.val, len, 1);
 }
 /* }}} */
 
@@ -353,18 +353,18 @@ char *_php3_rawurlencode(char *s, int len)
    URL-encodes string */
 PHP_FUNCTION(rawurlencode)
 {
-	pval *arg;
+	pval **arg;
 	char *str;
 
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_string(arg);
+	convert_to_string_ex(arg);
 
-	if (!arg->value.str.len) {
+	if (!(*arg)->value.str.len) {
 		RETURN_FALSE;
 	}
-	str = _php3_rawurlencode(arg->value.str.val, arg->value.str.len);
+	str = _php3_rawurlencode((*arg)->value.str.val, (*arg)->value.str.len);
 	RETVAL_STRING(str, 1);
 	efree(str);
 }
@@ -374,20 +374,20 @@ PHP_FUNCTION(rawurlencode)
    Decodes URL-encodes string */
 PHP_FUNCTION(rawurldecode)
 {
-	pval *arg;
+	pval **arg;
 	int len;
 
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_string(arg);
+	convert_to_string_ex(arg);
 
-	if (!arg->value.str.len) {
+	if (!(*arg)->value.str.len) {
 		RETURN_FALSE;
 	}
-	len = _php3_rawurldecode(arg->value.str.val, arg->value.str.len);
+	len = _php3_rawurldecode((*arg)->value.str.val, (*arg)->value.str.len);
 
-	RETVAL_STRINGL(arg->value.str.val, len, 1);
+	RETVAL_STRINGL((*arg)->value.str.val, len, 1);
 }
 /* }}} */
 

@@ -93,13 +93,13 @@ PHP_FUNCTION(getrusage)
 #if HAVE_GETRUSAGE
 	struct rusage usg;
 	int ac = ARG_COUNT(ht);
-	pval *pwho;
+	pval **pwho;
 	int who = RUSAGE_SELF;
 
 	if(ac == 1 &&
-		getParameters(ht, ac, &pwho) != FAILURE) {
-		convert_to_long(pwho);
-		if(pwho->value.lval == 1)
+		getParametersEx(ac, &pwho) != FAILURE) {
+		convert_to_long_ex(pwho);
+		if((*pwho)->value.lval == 1)
 			who = RUSAGE_CHILDREN;
 	}
 
