@@ -51,6 +51,8 @@ static int browser_reg_compare(zval **browser)
 	return 0;
 }
 
+/* {{{ proto object get_browser(string agent_name)
+   ??? */
 PHP_FUNCTION(get_browser)
 {
 	pval **agent_name,**agent, tmp;
@@ -104,7 +106,7 @@ PHP_FUNCTION(get_browser)
 		zend_hash_merge(return_value->value.obj.properties,(*agent)->value.obj.properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp_copy, sizeof(pval *), 0);
 	}
 }
-
+/* }}} */
 
 /*
  * Local variables:
