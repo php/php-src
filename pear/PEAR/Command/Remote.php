@@ -95,13 +95,20 @@ class PEAR_Command_Remote extends PEAR_Command_Common
                 if (!extension_loaded("zlib")) {
                     $pkgfile .= '?uncompress=yes';
                 }
-                include_once 'HTTP.php';
-                $headers = HTTP::head($pkgfile);
-                if (PEAR::isError($headers)|| !isset($headers['Content-disposition'])) {
-                    return $this->raiseError("Could not retrieve remote file information");
+                if (!@include_once 'HTTP.php') {
+                    return $this->raiseError('The "download" command needs HTTP.php to be installed');
                 }
-                preg_match('|filename="(.*)"$|', $headers['Content-disposition'], $matches);
-                $fname = $matches[1];
+                $headers = HTTP::head($pkgfile);
+                if (PEAR::isError($headers)) {
+                    $msg = $headers->getMessage();
+                    return $this->raiseError("Could not retrieve remote file information ($msg)");
+                }
+                if (isset($headers['Content-disposition'])) {
+                    preg_match('|filename="(.*)"$|', $headers['Content-disposition'], $matches);
+                    $fname = $matches[1];
+                } else {
+                    $fname = basename($pkgfile);
+                }
                 if (!$wp = @fopen($pkgfile, 'wb')) {
                     $failmsg = "Could not download $pkgfile"; break;
                 }
