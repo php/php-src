@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2004, PHP 5.0.3
+- Fixed bug #30057 (did not detect IPV6 on FreeBSD 4.1). (Wez)
 
 23 Sep 2004, PHP 5.0.2
 - Added new boolean (fourth) parameter to array_slice() that turns on the
