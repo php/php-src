@@ -151,6 +151,11 @@ PHP_MINIT_FUNCTION(ldap)
 	REGISTER_MAIN_LONG_CONSTANT("LDAP_DEREF_SEARCHING", LDAP_DEREF_SEARCHING, CONST_PERSISTENT | CONST_CS);
 	REGISTER_MAIN_LONG_CONSTANT("LDAP_DEREF_FINDING", LDAP_DEREF_FINDING, CONST_PERSISTENT | CONST_CS);
 	REGISTER_MAIN_LONG_CONSTANT("LDAP_DEREF_ALWAYS", LDAP_DEREF_ALWAYS, CONST_PERSISTENT | CONST_CS);
+#ifdef ORALDAP
+	REGISTER_MAIN_LONG_CONSTANT("GSLC_SSL_NO_AUTH", GSLC_SSL_NO_AUTH, CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_LONG_CONSTANT("GSLC_SSL_ONEWAY_AUTH", GSLC_SSL_ONEWAY_AUTH, CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_LONG_CONSTANT("GSLC_SSL_TWOWAY_AUTH", GSLC_SSL_TWOWAY_AUTH, CONST_PERSISTENT | CONST_CS);
+#endif
 
 	le_result = register_list_destructors(_free_ldap_result, NULL);
 	le_link = register_list_destructors(_close_ldap_link, NULL);
@@ -236,6 +241,11 @@ PHP_FUNCTION(ldap_connect)
 {
 	char *host;
 	int port;
+#ifdef HAVE_ORALDAP
+	char *wallet, *walletpasswd;
+	int authmode;
+	int ssl=0;
+#endif
 	/*	char *hashed_details;
 	int hashed_details_length;*/
 	LDAP *ldap;
@@ -284,6 +294,34 @@ PHP_FUNCTION(ldap_connect)
 				sprintf(hashed_details, "ldap_%s", yyhost->value.str.val);*/ 
 			}
 			break;
+#ifdef HAVE_ORALDAP
+
+		case 5: {
+			pval **yyhost, **yyport, **yywallet,
+			     **yywalletpasswd, **yyauthmode;
+
+				if (zend_get_parameters_ex(5, &yyhost, &yyport,
+							   &yywallet,
+							   &yywalletpasswd,
+							   &yyauthmode)
+				    == FAILURE) {
+					RETURN_FALSE;
+				}
+
+				convert_to_string_ex(yyhost);
+				host = (*yyhost)->value.str.val;
+				convert_to_long_ex(yyport);
+				port = (*yyport)->value.lval;
+				convert_to_string_ex(yywallet);
+				wallet = (*yywallet)->value.str.val;
+				convert_to_string_ex(yywalletpasswd);
+				walletpasswd = (*yywalletpasswd)->value.str.val;
+				convert_to_long_ex(yyauthmode);
+				authmode = (*yyauthmode)->value.lval;
+				ssl = 1;
+			}
+			break;
+#endif
 
 		default:
 			WRONG_PARAM_COUNT;
@@ -299,6 +337,15 @@ PHP_FUNCTION(ldap_connect)
 	if ( ldap == NULL ) {
 		RETURN_FALSE;
 	} else {
+#ifdef HAVE_ORALDAP
+		if (ssl) {
+			if (ldap_init_SSL(&ldap->ld_sb, wallet, walletpasswd,
+					  authmode)) {
+				php_error(E_WARNING, "LDAP: SSL init failed");
+				RETURN_FALSE;
+			}
+		}			
+#endif
 		RETURN_LONG(zend_list_insert((void*)ldap,le_link));
 	}
 
