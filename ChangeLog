@@ -1,3 +1,75 @@
+2002-04-14  Sterling Hughes  <sterling@bumblebury.com>
+
+    * NEWS: this news entry reports a new mailparse addition
+    a later news entry reports that mailparse has been moved to pecl
+    1+1 = 2
+
+2002-04-14  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/exif/exif.c: support for WinXP tags (thanks to Rui Carmo)
+
+2002-04-14  Thies C. Arntzen  <thies@thieso.net>
+
+    * ext/oci8/oci8.c: fix crash bug introduced by last commit (damncvs diff!)
+
+    * ext/oci8/oci8.c: fix crash bug introduced by last commit
+
+2002-04-14  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * main/php_version.h
+      configure.in: - Swap back version numbers after tagging
+
+    * configure.in
+      main/php_version.h: - Go with RC4
+
+2002-04-14  Jani Taskinen  <sniper@iki.fi>
+
+    * sapi/apache/config.m4:
+    Make the configure fail if someone tries to use --with-apache with Apache2
+
+2002-04-14  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * pear/PEAR/Frontend/CLI.php:
+    - Do not try to draw a table if there are not elements.
+
+
+2002-04-14  Jani Taskinen  <sniper@iki.fi>
+
+    * NEWS: Fixed some entries..
+
+    * sapi/apache2filter/sapi_apache2.c: ws fixes
+
+2002-04-14  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/zip/zip.c: - MFH: Fix NULL-termination issue
+
+    * ext/zip/zip.c: - Fix null-termination problem
+
+2002-04-14  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * ext/mbstring/mbstring.c:
+    fixed error output handler when 'pass' is choosed as output encoding.
+
+2002-04-14  Jani Taskinen  <sniper@iki.fi>
+
+    * sapi/cli/config.m4: Make it possible to actually disable the CLI..
+
+    * sapi/cli/config.m4: This is experimental still
+
+    * sapi/cli/config.m4: Make this work as it was supposed to work.
+
+2002-04-14  Frank M. Kromann  <frank@frontbase.com>
+
+    * ext/fbsql/config.m4: /usr/lib is the default install dir on Mandrake
+
+2002-04-14  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/java/Makefile.in
+      ext/java/config.m4: MFH (use of correct javac/jar binaries)
+
+    * ext/java/Makefile.frag
+      ext/java/config.m4: - Use the correct javac/jar binaries.
+
 2002-04-13  Thies C. Arntzen  <thies@thieso.net>
 
     * ext/oci8/oci8.c: MFH: ocibind: avoid warning in debug mode
