@@ -1081,10 +1081,24 @@ static php_stream *php_stream_open_url(char *path, char *mode, int options, char
 
 	if ((*p == ':') && (n > 1) && !strncmp("://", p, 3)) {
 		protocol = path;
+	} else if (strncasecmp(path, "zlib:", 5) == 0) {
+		/* BC with older php scripts and zlib wrapper */
+		protocol = path;
+		n = 4;
+		zend_error(E_NOTICE, "Use of \"zlib:\" wrapper is deprecated; please use \"zlib://\" instead.");
 	}
 
 	if (protocol)	{
 		if (FAILURE == zend_hash_find(&url_stream_wrappers_hash, (char*)protocol, n, (void**)&wrapper))	{
+			char wrapper_name[32];
+
+			if (n >= sizeof(wrapper_name))
+				n = sizeof(wrapper_name) - 1;
+			PHP_STRLCPY(wrapper_name, protocol, sizeof(wrapper_name), n);
+			
+			zend_error(E_NOTICE, "Unable to find the wrapper \"%s\" - did you forget to enable it when you configured PHP?",
+					wrapper_name);
+
 			wrapper = NULL;
 			protocol = NULL;
 		}

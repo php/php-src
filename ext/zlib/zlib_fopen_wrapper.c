@@ -102,6 +102,8 @@ php_stream *php_stream_gzopen(php_stream_wrapper *wrapper, char *path, char *mod
 
 	if (strncasecmp("zlib://", path, 7) == 0)
 		path += 7;
+	else if (strncasecmp("zlib:", path, 5) == 0)
+		path += 5;
 	
 	self->stream = php_stream_open_wrapper(path, mode, STREAM_MUST_SEEK|options, opened_path);
 	
