@@ -1161,7 +1161,9 @@ static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type,
 
 	/* try and avoid allocating a FILE* if the stream is not naturally a FILE* */
 	if (php_stream_is(stream, PHP_STREAM_IS_STDIO))	{
-		php_stream_cast(stream, PHP_STREAM_AS_STDIO, (void**)&fp, REPORT_ERRORS);
+		if (FAILURE == php_stream_cast(stream, PHP_STREAM_AS_STDIO, (void**)&fp, REPORT_ERRORS)) {
+			goto out_err;
+		}
 	}
 	else if (ioctx_func_p)	{
 #ifdef USE_GD_IOCTX

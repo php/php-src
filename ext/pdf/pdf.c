@@ -479,7 +479,7 @@ PHP_FUNCTION(pdf_open)
 		what = zend_fetch_resource(file TSRMLS_CC, -1, "File-Handle", &type, 1, php_file_le_stream());
 		ZEND_VERIFY_RESOURCE(what);
 		
-		if (!php_stream_cast((php_stream*)what, PHP_STREAM_AS_STDIO, (void*)&fp, 1) == FAILURE)	{
+		if (php_stream_cast((php_stream*)what, PHP_STREAM_AS_STDIO, (void*)&fp, 1) == FAILURE)	{
 			RETURN_FALSE;
 		}
 		/* XXX should do a zend_list_addref for <fp> here! */
