@@ -285,7 +285,9 @@ static void php_apache_log_message(char *message)
 static void php_apache_request_shutdown(void *dummy)
 {
 	SLS_FETCH();
+	APLS_FETCH();
 
+	AP(in_request)=0;
 	SG(server_context) = NULL; /* The server context (request) is invalid by the time run_cleanups() is called */
 	php_request_shutdown(dummy);
 }
@@ -446,7 +448,7 @@ static int send_php(request_rec *r, int display_source_mode, char *filename)
 	PLS_FETCH();
 	APLS_FETCH();
 
-	if (r->assbackwards && r->protocol && !strcmp(r->protocol, "INCLUDED")) {
+	if (AP(in_request)) {
 		zend_file_handle fh;
 
 		fh.filename = r->filename;
@@ -456,6 +458,7 @@ static int send_php(request_rec *r, int display_source_mode, char *filename)
 		zend_execute_scripts(ZEND_INCLUDE CLS_CC ELS_CC, 1, &fh);
 		return OK;
 	}
+	AP(in_request)=1;
 
 	if (setjmp(EG(bailout))!=0) {
 		return OK;
