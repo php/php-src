@@ -73,7 +73,27 @@ class PEAR_Remote extends PEAR
             $response .= $chunk;
         }
         fclose($fp);
-        return xmlrpc_decode($response);
+        $ret = xmlrpc_decode($response);
+        if (is_array($ret) && isset($ret['__PEAR_TYPE__'])) {
+            if ($ret['__PEAR_TYPE__'] == 'error') {
+                if (isset($ret['__PEAR_CLASS__'])) {
+                    $class = $ret['__PEAR_CLASS__'];
+                } else {
+                    $class = "PEAR_Error";
+                }
+                if ($ret['code']     === '') $ret['code']     = null;
+                if ($ret['message']  === '') $ret['message']  = null;
+                if ($ret['userinfo'] === '') $ret['userinfo'] = null;
+                if (strtolower($class) == 'db_error') {
+                    return $this->raiseError(DB::errorMessage($ret['code']),
+                                             $ret['code'], null, null,
+                                             $ret['userinfo']);
+                } else {
+                    return $this->raiseError($ret['message'], $ret['code'],
+                                             null, null, $ret['userinfo']);
+                }
+            }
+        }
     }
 
     // }}}
