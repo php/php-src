@@ -957,7 +957,7 @@ PHP_FUNCTION(sybase_free_result)
 	result = (sybase_result *) zend_list_find(Z_LVAL_PP(sybase_result_index),&type);
 	
 	if (type!=php_sybase_module.le_result) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING,"%d is not a Sybase result index",Z_LVAL_PP(sybase_result_index));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING,"%ld is not a Sybase result index", Z_LVAL_PP(sybase_result_index));
 		RETURN_FALSE;
 	}
 	zend_list_delete(Z_LVAL_PP(sybase_result_index));
@@ -1078,7 +1078,7 @@ static void php_sybase_fetch_hash(INTERNAL_FUNCTION_PARAMETERS)
 	result = (sybase_result *) zend_list_find(Z_LVAL_PP(sybase_result_index),&type);
 	
 	if (type!=php_sybase_module.le_result) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING,"%d is not a Sybase result index",Z_LVAL_PP(sybase_result_index));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING,"%ld is not a Sybase result index", Z_LVAL_PP(sybase_result_index));
 		RETURN_FALSE;
 	}
 	
@@ -1314,7 +1314,7 @@ PHP_FUNCTION(sybase_result)
 	
 	convert_to_long_ex(row);
 	if (Z_LVAL_PP(row)<0 || Z_LVAL_PP(row)>=result->num_rows) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING,"Sybase:  Bad row offset (%d)",Z_LVAL_PP(row));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING,"Sybase:  Bad row offset (%ld)", Z_LVAL_PP(row));
 		RETURN_FALSE;
 	}
 
