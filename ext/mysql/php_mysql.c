@@ -431,8 +431,8 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	int hashed_details_length, port = MYSQL_PORT;
 	php_mysql_conn *mysql=NULL;
 	void (*handler) (int);
-	zval **z_host=NULL, **z_user=NULL, **z_passwd=NULL;
-	zend_bool free_host=0;
+	zval **z_host=NULL, **z_user=NULL, **z_passwd=NULL, **z_new_link=NULL;
+	zend_bool free_host=0, new_link=0;
 
 	socket = MySG(default_socket);
 
@@ -475,6 +475,17 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 					convert_to_string_ex(z_passwd);
 					user = Z_STRVAL_PP(z_user);
 					passwd = Z_STRVAL_PP(z_passwd);
+				}
+				break;
+			case 4: {
+					if (zend_get_parameters_ex(4, &z_host, &z_user, &z_passwd, &z_new_link) == FAILURE) {
+						MYSQL_DO_CONNECT_RETURN_FALSE();
+					}
+					convert_to_string_ex(z_user);
+					convert_to_string_ex(z_passwd);
+					user = Z_STRVAL_PP(z_user);
+					passwd = Z_STRVAL_PP(z_passwd);
+					new_link = Z_BVAL_PP(z_new_link);
 				}
 				break;
 			default:
@@ -532,7 +543,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		list_entry *le;
 		
 		/* try to find if we already have this link in our persistent list */
-		if (zend_hash_find(&EG(persistent_list), hashed_details, hashed_details_length+1, (void **) &le)==FAILURE) {  /* we don't */
+		if (new_link || zend_hash_find(&EG(persistent_list), hashed_details, hashed_details_length+1, (void **) &le)==FAILURE) {  /* we don't */
 			list_entry new_le;
 
 			if (MySG(max_links)!=-1 && MySG(num_links)>=MySG(max_links)) {
@@ -612,7 +623,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		 * if it doesn't, open a new mysql link, add it to the resource list,
 		 * and add a pointer to it with hashed_details as the key.
 		 */
-		if (zend_hash_find(&EG(regular_list), hashed_details, hashed_details_length+1,(void **) &index_ptr)==SUCCESS) {
+		if (!new_link && zend_hash_find(&EG(regular_list), hashed_details, hashed_details_length+1,(void **) &index_ptr)==SUCCESS) {
 			int type, link;
 			void *ptr;
 
