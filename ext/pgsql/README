@@ -1,0 +1,85 @@
+==== Note For PostgreSQL 7.2 beta ====
+Current CVS version (probably 4.0.6 or later) compiles without
+modefication.
+
+==== Function Name Change ====
+Function names are going to be changed. MySQL module has been done
+this already. Function names will be changed as follows.
+
+pg_errormessage -> pg_error_message
+pg_cmdtuples -> pg_affected_rows
+pg_fieldnum -> pg_field_num
+and so on. Except pg_cmdtuples, under scores('_') will be added to 
+names. 
+
+Older names will become aliases of new functions for backward
+compatibility.
+
+Manual will be updated when this change is done in CVS source.
+
+==== TODO ===
+Add pg_result_error_message() to get error messages associated with 
+result resource.
+Add pg_lotell(), pg_lolseek().
+Add pg_escape(). This function requires PostgreSQL 7.2 or later.
+Add pg_copy_to() and pg_copy_from() for easier use of copy command.
+
+==== Async Functions =====
+Async query can improve application performance
+*significantly*. Please test and report any failure to
+yohgaki@php.net There are cases that async query does not work
+as expected. Refer to libpq manual for details. I also implemented
+functions that I need.
+
+Please refer to libpq manual or source for details.
+These functions are not supposed to be documented, yet.
+API may be changed.
+
+** Functions ** 
+
+bool pg_send_query(resource connection, string query) 
+
+Send async query to backend. Result may be retrieved with
+pg_get_result(). It does not accept multiple query, but it accepts
+multiple queries at once. Each result may be retrieved separately by
+pg_get_result().
+
+bool pg_request_cancel(resource connection) 
+
+Cancel currently executing async query already sent to PostgreSQL
+server. This function is useful when user request time consuming query
+to server. It cannot cancel query executed by pg_exec(), since
+pg_exec() is a blocking function.
+
+resource pg_get_result(resource conn) 
+Get pgsql query result resource. Returned value can be fed to
+pg_result()/pg_fetch_*(). pg_get_result() may block, use pg_is_busy()
+to check result are ready to be retrieved. If multiple query is sent
+to backend, it may be retrieved one by one using pg_get_result(). If
+there is no result left in connection, it returns false.
+
+bool pg_is_busy(resource connection)
+Returns connections is executing query or not. 
+
+
+** Misc functions **
+int pg_status(resource connection)
+Get connection status. It return PGSQL_CONNECTION_OK or
+PGSQL_CONNECTION_BAD.
+
+bool pg_reset(resource connection)
+Reset communication port to Postgresql server using the same
+connection parameter. It's useful for error recovery.
+
+Note: There are some cases that async functions blocks process. Even
+if process was blocked, functions are work as expected. (except it
+blocks process) These are common cases that process is blocked. Refer
+to libpq manual for details.
+ - If libpq is compile with USE_SSL, some async functions are 
+   blocked.
+ - If libpq under Win32 is *NOT* compiled with 
+   WIN32_NON_BLOCKING_CONNECTIONS, non-blocking connection will block. 
+
+Garbages are cleaned when resource is cleaned up. There is no need to
+clean up query result if it is not needed.
+
