@@ -176,13 +176,32 @@ PHP_MINIT_FUNCTION(gd)
 PHP_MINFO_FUNCTION(gd)
 {
 	/* need to use a PHPAPI function here because it is external module in windows */
-#if HAVE_LIBGD13
-	php_printf("Version 1.3");
+#if HAVE_GDIMAGECOLORRESOLVE
+	php_printf("Version 1.6.2 or higher");
+#elif HAVE_LIBGD13
+	php_printf("Version between 1.3 and 1.6.1");
 #else
 	php_printf("Version 1.2");
 #endif
+
 #ifdef ENABLE_GD_TTF
 	php_printf(" with FreeType support");
+#if HAVE_LIBFREETYPE
+	php_printf(" (linked with freetype)");
+#elif HAVE_LIBTTF
+	php_printf(" (linked with ttf library)");
+#else
+	php_printf(" (linked with unknown library)");
+#endif
+#endif
+
+   php_printf(" which supports:");
+   
+#ifdef HAVE_GD_GIF
+	php_printf(" GIF");
+#endif
+#ifdef HAVE_GD_PNG
+	php_printf(" PNG");
 #endif
 }
 
