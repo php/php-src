@@ -4,6 +4,7 @@ PHP 4.0                                                                    NEWS
 ???, Version 4.0 Release Candidate 1
 - Added get_class_methods(string classname) function. (Andrei)
 - Don't default to iso-8859-1 since this confuses some browsers (Rasmus)
+- stristr() no longer modifies it's arguments. (Thies)
 - Make it possible to specify both a port and a socket in
   mysql_[p]connect (Rasmus)
 - Added --disable-pic for disabling generating PIC for shared objects
