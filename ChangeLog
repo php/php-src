@@ -1,3 +1,64 @@
+2003-09-10  Stefan Roehrich  <stefan@roehri.ch>
+
+    * (PHP_4_3)
+      NEWS
+      main/SAPI.c:
+      MFH: Fix for bug #23488 zlib.output_compression overrides vary header.
+      It was already fixed for ob_gzhandler (#24827).
+
+    * main/SAPI.c:
+      Fix for bug #23488 zlib.output_compression overrides vary header.
+      It was already fixed for ob_gzhandler (#24827).
+
+2003-09-10  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/PEAR/Installer.php:
+      phpdoc correction (kind of serious error :)
+
+2003-09-10  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      NEWS:
+      buf -> bug
+
+    * (PHP_4_3)
+      NEWS
+      ext/zlib/zlib.c:
+      - Fixed bug #25385 (ob_gzhandler(): typo in sapi_add_header_ex() call)
+
+2003-09-10  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/file.c:
+      Cleanup previous patch.
+
+    * (PHP_4_3)
+      ext/standard/file.c:
+      
+
+    * (PHP_4_3)
+      NEWS
+      main/streams.c:
+      MFH: Fixed bug #25429 (fix copying of stdin using copy() function)
+
+    * main/streams/streams.c:
+      Fixed bug #25429 (fix copying of stdin using copy() function)
+
+    * (PHP_4_3)
+      NEWS
+      ext/standard/file.c:
+      MFH: Fixed bug #14049 (realpath() w/ZTS returns invalid results for
+      non-existent
+      paths)
+
+    * ext/standard/file.c:
+      Fixed bug #14049 (realpath() w/ZTS returns invalid results for non-existent
+      paths)
+
+2003-09-10  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/tests/pear_installer1.phpt:
+      test for checkDeps
+
 2003-09-09  Greg Beaver  <greg@chiaraquartet.net>
 
     * pear/tests/pear_installer1.phpt:
