@@ -56,6 +56,7 @@ function_entry sybase_functions[] = {
 	PHP_FE(sybase_fetch_field,		NULL)
 	PHP_FE(sybase_field_seek,		NULL)
 	PHP_FE(sybase_result,			NULL)
+	PHP_FE(sybase_affected_rows,		NULL)
 	PHP_FE(sybase_min_error_severity,	NULL)
 	PHP_FE(sybase_min_message_severity,	NULL)
 	PHP_FALIAS(mssql_connect,		sybase_connect,			NULL)
@@ -74,6 +75,7 @@ function_entry sybase_functions[] = {
 	PHP_FALIAS(mssql_fetch_field,	sybase_fetch_field,		NULL)
 	PHP_FALIAS(mssql_field_seek,	sybase_field_seek,		NULL)
 	PHP_FALIAS(mssql_result,		sybase_result,			NULL)
+	PHP_FALIAS(mssql_affected_rows,		sybase_affected_rows,			NULL)
 	PHP_FALIAS(mssql_min_error_severity,	sybase_min_error_severity,		NULL)
 	PHP_FALIAS(mssql_min_message_severity,	sybase_min_message_severity,	NULL)
 	{NULL, NULL, NULL}
@@ -1247,6 +1249,56 @@ PHP_FUNCTION(sybase_result)
 	pval_copy_constructor(return_value);
 }
 /* }}} */
+
+
+/* {{{ proto int sybase_affected_rows([int link_id])
+    Get number of affected rows in last query */
+PHP_FUNCTION(sybase_affected_rows)
+{
+   pval *sybase_link_index = NULL;
+   sybase_link *sybase_ptr = NULL;
+   int id                  = 0;
+   int type                = 0;
+
+   switch(ZEND_NUM_ARGS())
+   {
+      case 0:
+      {
+         id = php_sybase_module.default_link;
+      }
+      break;
+
+      case 1:
+      {
+         if (getParameters(ht, 1, &sybase_link_index)==FAILURE)
+         {
+            RETURN_FALSE;
+         }
+
+         convert_to_long(sybase_link_index);
+         id = sybase_link_index->value.lval;
+      }
+      break;
+
+      default:
+      {
+         WRONG_PARAM_COUNT;
+      }
+      break;
+   }
+	
+   sybase_ptr = (sybase_link *)zend_list_find(id, &type);
+
+   if(type!=php_sybase_module.le_link && type!=php_sybase_module.le_plink)
+   {
+      php_error(E_WARNING,"%d is not a Sybase link index",id);
+      RETURN_FALSE;
+   }
+
+   return_value->value.lval = DBCOUNT(sybase_ptr->link);
+   return_value->type       = IS_LONG;
+}
+ 
 
 PHP_MINFO_FUNCTION(sybase)
 {

@@ -44,6 +44,7 @@ PHP_FUNCTION(sybase_fetch_row);
 PHP_FUNCTION(sybase_fetch_array);
 PHP_FUNCTION(sybase_fetch_object);
 PHP_FUNCTION(sybase_data_seek);
+PHP_FUNCTION(sybase_affected_rows);
 PHP_FUNCTION(sybase_result);
 PHP_FUNCTION(sybase_field_seek);
 PHP_FUNCTION(sybase_min_error_severity);
