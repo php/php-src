@@ -334,14 +334,9 @@ char *url_adapt_ext(const char *src, size_t srclen, const char *name, const char
 	mainloop(ctx, src, srclen);
 
 	*newlen = ctx->result.len;
-	if (ctx->result.len == 0) {
-		return strdup("");
-	}
 	smart_str_0(&ctx->result);
-	ret = malloc(ctx->result.len + 1);
-	memcpy(ret, ctx->result.c, ctx->result.len + 1);
 	ctx->result.len = 0;
-	return ret;
+	return ctx->result.c;
 }
 
 PHP_RINIT_FUNCTION(url_scanner)
