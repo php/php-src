@@ -211,7 +211,7 @@ zend_op *get_next_op(zend_op_array *op_array CLS_DC)
 			zend_bailout();
 		}
 #endif
-		op_array->size *= 2;
+		op_array->size *= 4;
 		op_array_alloc_ops(op_array);
 	}
 	
@@ -302,6 +302,8 @@ int pass_two(zend_op_array *op_array)
 		}
 		opline++;
 	}
+	op_array->opcodes = (zend_op *) erealloc(op_array->opcodes, sizeof(zend_op)*op_array->last);
+	op_array->size = op_array->last;
 	op_array->done_pass_two = 1;
 	return 0;
 }
