@@ -451,16 +451,16 @@ PHP_FUNCTION(dom_document_create_element)
 	xmlNode *node;
 	xmlDocPtr docp;
 	dom_object *intern;
-	int ret, name_len;
-	char *name;
+	int ret, name_len, value_len;
+	char *name, *value = NULL;
 
 	DOM_GET_THIS_OBJ(docp, id, xmlDocPtr, intern);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|s", &name, &name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|s", &name, &name_len, &value, &value_len) == FAILURE) {
 		return;
 	}
 
-	node = xmlNewDocNode(docp, NULL, name, NULL);
+	node = xmlNewDocNode(docp, NULL, name, value);
 	if (!node) {
 		RETURN_FALSE;
 	}
