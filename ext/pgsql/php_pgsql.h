@@ -119,6 +119,7 @@ typedef struct {
 	long max_links,max_persistent;
 	long allow_persistent;
 	int le_lofp,le_string;
+	int ignore_notices;
 } php_pgsql_globals;
 
 
