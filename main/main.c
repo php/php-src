@@ -679,9 +679,15 @@ static void php_start_post_request_startup(void *data)
 	ptr->func(ptr->userdata);
 }
 
-static void php_finish_post_request_startup(PLS_D)
+static void php_execute_post_request_startup(PLS_D)
 {
 	zend_llist_apply(&PG(ll_post_request_startup), php_start_post_request_startup);
+}
+
+static void php_destroy_post_request_startup(void)
+{
+	PLS_FETCH();
+
 	zend_llist_destroy(&PG(ll_post_request_startup));
 }
 
@@ -765,8 +771,6 @@ int php_request_startup(CLS_D ELS_DC PLS_DC SLS_DC)
 
 		zend_hash_update(&EG(symbol_table), "PHP_AUTH_PW", sizeof("PHP_AUTH_PW"), &auth_password, sizeof(zval *), NULL);
 	}
-
-	php_finish_post_request_startup(PLS_C);
 	
 	return SUCCESS;
 }
@@ -792,6 +796,7 @@ void php_request_shutdown(void *dummy)
 	ELS_FETCH();
 	SLS_FETCH();
 
+	php_destroy_post_request_startup();
 	sapi_send_headers();
 	php_end_ob_buffering(SG(request_info).headers_only?0:1);
 
@@ -1273,6 +1278,7 @@ PHPAPI void php_execute_script(zend_file_handle *primary_file CLS_DC ELS_DC PLS_
 	if (EG(main_op_array)) {
 		zend_hash_environment(PLS_C ELS_CC SLS_CC);
 		EG(active_op_array) = EG(main_op_array);
+		php_execute_post_request_startup(PLS_C);
 		zend_execute(EG(main_op_array) ELS_CC);
 	}
 }
