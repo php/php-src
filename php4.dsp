@@ -337,6 +337,10 @@ SOURCE=.\functions\number.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\ext\odbc\odbc.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\ext\standard\pack.c
 # End Source File
 # Begin Source File
@@ -370,10 +374,6 @@ SOURCE=.\ext\standard\syslog.c
 # Begin Source File
 
 SOURCE=.\ext\standard\type.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\functions\unified_odbc.c
 # End Source File
 # Begin Source File
 
@@ -470,6 +470,10 @@ SOURCE=.\functions\php3_ldap.h
 # Begin Source File
 
 SOURCE=.\ext\standard\php3_mail.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\ext\odbc\php3_odbc.h
 # End Source File
 # Begin Source File
 
