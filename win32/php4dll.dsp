@@ -836,84 +836,6 @@ SOURCE=..\ext\xml\xml.c
 SOURCE=..\ext\xml\php_xml.h
 # End Source File
 # End Group
-# Begin Group "expat"
-
-# PROP Default_Filter ""
-# Begin Group "Source Files No. 5"
-
-# PROP Default_Filter ".c"
-# Begin Source File
-
-SOURCE=..\ext\xml\expat\xmlparse\hashtable.c
-# ADD CPP /I "..\ext\xml\expat\xmltok" /I "..\ext\xml\expat\xmlparse"
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\xml\expat\xmlparse\xmlparse.c
-# ADD CPP /I "..\ext\xml\expat\xmltok" /I "..\ext\xml\expat\xmlparse"
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\xml\expat\xmltok\xmlrole.c
-# ADD CPP /I "..\ext\xml\expat\xmltok" /I "..\ext\xml\expat\xmlparse"
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\xml\expat\xmltok\xmltok.c
-# ADD CPP /I "..\ext\xml\expat\xmltok" /I "..\ext\xml\expat\xmlparse"
-# End Source File
-# End Group
-# Begin Group "Header Files No. 5"
-
-# PROP Default_Filter ".h"
-# Begin Source File
-
-SOURCE=..\ext\xml\expat\xmltok\asciitab.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\xml\expat\xmltok\iasciitab.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\xml\expat\xmltok\latin1tab.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\xml\expat\xmltok\nametab.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\xml\expat\xmltok\utf8tab.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\xml\expat\xmltok\xmldef.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\xml\expat\xmltok\xmlrole.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\xml\expat\xmltok\xmltok.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\xml\expat\xmltok\xmltok_impl.c
-# PROP Exclude_From_Build 1
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\xml\expat\xmltok\xmltok_impl.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\xml\expat\xmltok\xmltok_ns.c
-# PROP Exclude_From_Build 1
-# End Source File
-# End Group
-# End Group
 # End Group
 # Begin Group "FTP"
 
@@ -1686,6 +1608,77 @@ SOURCE=..\ChangeLog
 
 SOURCE=..\LICENSE
 # End Source File
+# End Group
+# Begin Group "Support"
+
+# PROP Default_Filter ""
+# Begin Group "Source Files No. 5"
+
+# PROP Default_Filter ".c"
+# Begin Source File
+
+SOURCE=..\ext\xml\expat\xmlparse.c
+# ADD CPP /I "..\ext\mysql\libmysql" /D "COMPILED_FROM_DSP"
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\xml\expat\xmlrole.c
+# ADD CPP /I "..\ext\mysql\libmysql" /D "COMPILED_FROM_DSP"
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\xml\expat\xmltok.c
+# ADD CPP /I "..\ext\mysql\libmysql" /D "COMPILED_FROM_DSP"
+# End Source File
+# End Group
+# Begin Group "Header Files No. 5"
+
+# PROP Default_Filter ".h"
+# Begin Source File
+
+SOURCE=..\ext\xml\expat\ascii.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\xml\expat\asciitab.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\xml\expat\expat.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\xml\expat\iasciitab.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\xml\expat\latin1tab.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\xml\expat\nametab.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\xml\expat\utf8tab.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\xml\expat\winconfig.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\xml\expat\xmlrole.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\xml\expat\xmltok.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\xml\expat\xmltok_impl.h
+# End Source File
+# End Group
 # End Group
 # End Target
 # End Project
