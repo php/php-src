@@ -152,6 +152,10 @@ static php_stream *user_wrapper_factory(char *filename, char *mode, int options,
 		if (Z_TYPE_P(zopened) == IS_STRING && opened_path) {
 			*opened_path = estrndup(Z_STRVAL_P(zopened), Z_STRLEN_P(zopened));
 		}
+
+		/* set wrapper data to be a reference to our object */
+		stream->wrapperdata = us->object;
+		zval_add_ref(&stream->wrapperdata);
 	} else {
 		/* destroy the object */
 		zval_ptr_dtor(&us->object);
