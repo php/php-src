@@ -1,0 +1,3 @@
+/* define if you want to use the readline extension */
+
+#undef HAVE_LIBREADLINE
