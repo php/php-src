@@ -1,3 +1,80 @@
+2001-01-13  Zeev Suraski  <zeev@zend.com>
+
+    * ext/standard/basic_functions.c
+      ext/standard/file.c
+      ext/standard/file.h
+      ext/standard/fsock.c
+      ext/standard/fsock.h:
+    Both thread-safe and thread-unsafe builds should be ok now
+
+    * ext/sybase_ct/php_sybase_ct.c:
+    Add sybase_get_last_message() from Jan Fedak <J.Fedak@sh.cvut.cz>
+
+2001-01-13  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/fsock.c: - Removed a stale var that broke the build
+
+    * ext/standard/exec.c:
+    - There was one ret left, changed it to FG(pclose_ret), this fixes the
+      build
+
+2001-01-13  Colin Viebrock  <colin@easydns.com>
+
+    * ext/mcrypt/mcrypt.c:
+    Support for perl-compatible blowfish encryption (in libmcrypt CVS and
+    versions later than 2.4.8)
+
+    * pear/Crypt/CBC.php: Credit
+
+    * pear/Crypt/CBC.php: Cre
+    PR:
+    Submitted by:
+    Reviewed by:
+    Obtained from:
+
+2001-01-13  Zeev Suraski  <zeev@zend.com>
+
+    * ext/standard/exec.c
+      ext/standard/file.c
+      ext/standard/file.h
+      ext/standard/fsock.c
+      ext/standard/fsock.h: - Fix exec() bug
+    - Merge fsock and file globals
+
+    * main/main.c: cleanup time...
+
+    * main/main.c: Remove some more useless code
+
+    * main/main.c
+      main/php_ini.c: Remove stale code
+
+    * ext/standard/http_fopen_wrapper.c
+      main/network.c: Fix Windows & thread-safe build
+
+2001-01-13  Stig Venaas  <venaas@uninett.no>
+
+    * configure.in
+      main/network.c:
+    Simplified code a bit, added detailed error reporting, and fixed a bug
+    when getaddrinfo returned a non-IP family before IP families
+
+2001-01-13  Sascha Schumann  <sascha@schumann.cx>
+
+    * main/rfc1867.c:
+    arr_index errorneusly included the trailing ']' character, so that
+    variable names like Data_name[Image]] were passed to the register functions.
+
+    * pear/Makefile.in: Fix make install in VPATH builds
+
+2001-01-13  Stig Venaas  <venaas@uninett.no>
+
+    * ext/ldap/ldap.c:
+    Fixed memory leaks that could happen in some error situations. Also removed
+    some unnecessary code in ldap_set_option()
+
+    * ext/openssl/openssl.c:
+    Realized that emalloc() never returns NULL, simplified code
+
 2001-01-12  Sean Grimes  <metallic@noworlater.net>
 
     * pear/XML/Render.php:
