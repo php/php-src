@@ -182,51 +182,79 @@ ZEND_API int add_property_stringl(zval *arg, char *key, char *str, uint length, 
 #define RETURN_FALSE  { RETVAL_FALSE; return; }
 #define RETURN_TRUE   { RETVAL_TRUE; return; }
 
-#define SET_VAR_STRING(n,v)	{ \
-								{ \
-									zval *var = (zval *) emalloc(sizeof(zval)); \
-									\
-									char *str=v; /* prevent 'v' from being evaluated more than once */ \
-									var->value.str.val = (str); \
-									var->value.str.len = strlen((str)); \
-									var->type = IS_STRING; \
-									INIT_PZVAL(var); \
-									zend_hash_update(&EG(symbol_table), (n), strlen((n))+1, &var, sizeof(zval *), NULL); \
-								} \
-							}
-#define SET_VAR_STRINGL(n,v,l)	{ \
-									{ \
-										zval *var = (zval *) emalloc(sizeof(zval)); \
-										\
-										char *name=(n); \
-										var->value.str.val = (v); \
-										var->value.str.len = (l); \
-										var->type = IS_STRING; \
-										INIT_PZVAL(var); \
-										zend_hash_update(&EG(symbol_table), name, strlen(name)+1, &var, sizeof(zval *), NULL); \
-									} \
-								}
-#define SET_VAR_LONG(n,v)	{ \
-								{ \
-									zval *var = (zval *) emalloc(sizeof(zval)); \
-									\
-									var->value.lval = (v); \
-									var->type = IS_LONG; \
-									INIT_PZVAL(var); \
-									zend_hash_update(&EG(symbol_table), (n), strlen((n))+1, &var, sizeof(zval *), NULL); \
-								} \
-							}
-#define SET_VAR_DOUBLE(n,v)	{ \
-								{ \
-									zval *var = (zval *) emalloc(sizeof(zval)); \
-									\
-									var->value.dval = (v); \
-									var->type = IS_DOUBLE; \
-									INIT_PZVAL(var); \
-									zend_hash_update(&EG(symbol_table)), (n), strlen((n))+1, &var, sizeof(zval *), NULL); \
-								} \
+#define SET_VAR_STRING(n,v)	{																				\
+								{																			\
+									zval *var = (zval *) emalloc(sizeof(zval));								\
+									char *str=(v); /* prevent 'v' from being evaluated more than once */	\
+																											\
+									var->value.str.val = (str);												\
+									var->value.str.len = strlen((str));										\
+									var->type = IS_STRING;													\
+									ZEND_SET_GLOBAL_VAR(name, var);											\
+								}																			\
 							}
 
+#define SET_VAR_STRINGL(n,v,l)	{														\
+									{													\
+										zval *var = (zval *) emalloc(sizeof(zval));		\
+																						\
+										var->value.str.val = (v);						\
+										var->value.str.len = (l);						\
+										var->type = IS_STRING;							\
+										ZEND_SET_GLOBAL_VAR(n, var);					\
+									}													\
+								}
+
+#define SET_VAR_LONG(n,v)	{															\
+								{														\
+									zval *var = (zval *) emalloc(sizeof(zval));			\
+																						\
+									var->value.lval = (v);								\
+									var->type = IS_LONG;								\
+									ZEND_SET_GLOBAL_VAR(n, var);						\
+								}														\
+							}
+
+#define SET_VAR_DOUBLE(n,v)	{															\
+								{														\
+									zval *var = (zval *) emalloc(sizeof(zval));			\
+																						\
+									var->value.dval = (v);								\
+									var->type = IS_DOUBLE;								\
+									ZEND_SET_GLOBAL_VAR(n, var);						\
+								}														\
+							}
+
+
+#define ZEND_SET_GLOBAL_VAR(name, var)									\
+	{																	\
+		char *_name = (name);											\
+																		\
+		ZEND_SET_GLOBAL_VAR_WITH_LENGTH(_name, strlen(_name)+1, var);	\
+	}
+
+
+#define ZEND_SET_GLOBAL_VAR_WITH_LENGTH(name, name_length, var)														\
+	{																									\
+		zval **orig_var;																				\
+																										\
+		if (zend_hash_find(&EG(symbol_table), (name), (name_length), (void **) &orig_var)==SUCCESS		\
+			&& PZVAL_IS_REF(*orig_var)) {																\
+			int locks = (*orig_var)->EA.locks;															\
+			int refcount = (*orig_var)->refcount;														\
+																										\
+			var->refcount = (*orig_var)->refcount;														\
+			var->EA.locks = (*orig_var)->EA.locks;														\
+			var->EA.is_ref = 1;																			\
+																										\
+			zval_dtor(*orig_var);																		\
+			**orig_var = *var;																			\
+			efree(var);																					\
+		} else {																						\
+			INIT_PZVAL(var);																			\
+			zend_hash_update(&EG(symbol_table), (name), (name_length), &var, sizeof(zval *), NULL);		\
+		}																								\
+	}
 
 #endif							/* _ZEND_API_H */
 
