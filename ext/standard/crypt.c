@@ -71,7 +71,7 @@ extern char *crypt(char *__key,char *__salt);
 
 #if PHP_BLOWFISH_CRYPT
 #undef PHP_MAX_SALT_LEN
-#define PHP_MAX_SALT_LEN 17
+#define PHP_MAX_SALT_LEN 60
 #endif
 
  /*
