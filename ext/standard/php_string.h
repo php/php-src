@@ -92,7 +92,7 @@ extern PHPAPI char *php_addcslashes(char *string, int length, int *new_length, i
 extern PHPAPI void php_stripslashes(char *string, int *len);
 extern PHPAPI void php_stripcslashes(char *string, int *len);
 extern PHPAPI void php_dirname(char *str, int len);
-extern PHPAPI char *php_stristr(unsigned char *s, unsigned char *t);
+extern PHPAPI char *php_stristr(unsigned char *s, unsigned char *t, size_t s_len, size_t t_len);
 extern PHPAPI char *php_str_to_str(char *haystack, int length, char *needle,
 		int needle_len, char *str, int str_len, int *_new_length);
 extern PHPAPI void php_trim(pval *str, pval *return_value, int mode);
@@ -102,5 +102,6 @@ extern PHPAPI void php_char_to_str(char *str, uint len, char from, char *to, int
 
 extern PHPAPI void php_implode(pval *delim, pval *arr, pval *return_value);
 extern PHPAPI void php_explode(pval *delim, pval *str, pval *return_value);
+PHPAPI inline char *php_memnstr(char *haystack, char *needle, int needle_len, char *end);
 
 #endif /* _PHPSTRING_H */

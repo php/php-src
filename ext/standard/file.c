@@ -386,6 +386,7 @@ PHP_FUNCTION(get_meta_tags)
 	pval **filename, **arg2;
 	FILE *fp;
 	char buf[8192];
+	char buf_lcase[8192];
 	int use_include_path = 0;
 	int issock=0, socketd=0;
 	int len, var_namelen;
@@ -432,14 +433,19 @@ PHP_FUNCTION(get_meta_tags)
 	}
 	/* Now loop through the file and do the magic quotes thing if needed */
 	memset(buf, 0, 8191);
-	while((FP_FGETS(buf,8191,socketd,fp,issock) != NULL)
-		  && !php_stristr(buf,"</head>")) {
-		if(php_stristr(buf,"<meta")) {
+	while((FP_FGETS(buf,8191,socketd,fp,issock) != NULL)) {
+	   	memcpy(buf_lcase, buf, 8191);
+		php_strtolower(buf_lcase, 8191);
+		if (php_memnstr(buf_lcase, "</head>", sizeof("</head>")-1, buf_lcase + 8191))
+			break;
+
+		if(php_memnstr(buf_lcase, "<meta", sizeof("<meta")-1, buf_lcase + 8191)) {
 
 			memset(var_name,0,50);
 			/* get the variable name from the name attribute of the meta tag */
-			tmp=php_stristr(buf,"name=\"");
+			tmp = php_memnstr(buf_lcase, "name=\"", sizeof("name=\"")-1, buf_lcase + 8191);
 			if(tmp) {
+				tmp = &buf[tmp - buf_lcase];
 				tmp+=6;
 				end=strstr(tmp,"\"");
 				if(end) {
@@ -473,8 +479,9 @@ PHP_FUNCTION(get_meta_tags)
 				}
 
 				/* get the variable value from the content attribute of the meta tag */
-				tmp=php_stristr(buf,"content=\"");
+				tmp = php_memnstr(buf_lcase, "content=\"", sizeof("content=\"")-1, buf_lcase + 8191);
 				if(tmp) {
+					tmp = &buf[tmp - buf_lcase];
 					tmp+=9;
 					end=strstr(tmp,"\"");
 					if(end) {
