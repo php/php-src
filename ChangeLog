@@ -1,3 +1,22 @@
+1999-11-04  Andrei Zmievski  <zmievski@ispi.net>
+
+    * ext/standard/basic_functions.c:
+    (PHP multisort) More work, not yet done though.
+
+1999-11-04  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/dba/config.m4: Try to avoid IBM/Berkeley DB2 confusion
+
+1999-11-04  Stig Bakken  <ssb@fast.no>
+
+    * makedist
+      configure.in
+      php_version.h
+      buildconf:
+1999-11-04  changelog  <changelog@www>
+
+    * ChangeLog: ChangeLog update
+
 1999-11-03  Andrei Zmievski  <zmievski@ispi.net>
 
     * TODO: *** empty log message ***
