@@ -100,9 +100,9 @@ function_entry pgsql_functions[] = {
 	PHP_FE(pg_fetch_array,	NULL)
 	PHP_FE(pg_fetch_object,	NULL)
 	PHP_FE(pg_fetch_all,	NULL)
-	PHP_FE(pg_data_seek,	NULL)
 	PHP_FE(pg_affected_rows,NULL)
 	PHP_FE(pg_get_result,	NULL)
+	PHP_FE(pg_result_seek,	NULL)
 	PHP_FE(pg_result_status,NULL)
 	PHP_FE(pg_free_result,	NULL)
 	PHP_FE(pg_last_oid,	    NULL)
@@ -1417,9 +1417,9 @@ PHP_FUNCTION(pg_fetch_all)
 }
 /* }}} */
 
-/* {{{ proto mixed pg_data_seek(resource result, int offset)
+/* {{{ proto mixed pg_result_seek(resource result, int offset)
    Set internal row offset */
-PHP_FUNCTION(pg_data_seek)
+PHP_FUNCTION(pg_result_seek)
 {
 	zval *result;
 	int row;
