@@ -1,3 +1,370 @@
+2002-10-03  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/session/tests/019.phpt: remove trans_sid=1
+
+    * ext/session/tests/020.phpt
+      ext/session/tests/021.phpt:
+    20: rewriter uses arg_seperator.output for modifying URLs
+    21: rewriter handles <form> and <fieldset> correctly
+
+    * ext/session/tests/018.phpt
+      ext/session/tests/019.phpt:
+    19: serializing references test case using globals
+    18: rewriter correctly handles attribute names which contain dashes
+
+2002-10-03  Jani Taskinen  <sniper@iki.fi>
+
+    * NEWS: sigh..is this so hard?
+
+2002-10-03  Andrei Zmievski  <andrei@php.net>
+
+    * ext/wddx/php_wddx.h
+      ext/wddx/php_wddx_api.h
+      ext/wddx/wddx.c:
+    Revert the patch for now. We'll be branching on Saturday the way it's
+    implemented is a bit half-baked. We can always merge it into the branch
+    at a later point.
+
+2002-10-03  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * run-tests.php: $val not in first param to sprintf
+
+2002-10-03  Andrey Hristov  <andrey@webgate.bg>
+
+    * ext/standard/string.c: ws fixes.
+
+2002-10-03  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/session/tests/017.phpt: code from ancient bug #5271
+
+    setting $_SESSION before session_start() should not cause segfault
+
+    * ext/session/tests/016.phpt:
+    invalid session.save_path should not cause a segfault
+
+    * ext/session/tests/015.phpt: use_trans_sid should not affect SID
+
+    * ext/session/tests/004.phpt
+      ext/session/tests/005.phpt
+      ext/session/tests/006.phpt
+      ext/session/tests/007.phpt
+      ext/session/tests/008.phpt
+      ext/session/tests/009.phpt
+      ext/session/tests/010.phpt
+      ext/session/tests/011.phpt
+      ext/session/tests/012.phpt
+      ext/session/tests/013.phpt
+      ext/session/tests/014.phpt
+      ext/session/tests/001.phpt
+      ext/session/tests/002.phpt
+      ext/session/tests/003.phpt: editing
+
+2002-10-03  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * main/streams.c: fix position handling
+
+2002-10-03  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/session/tests/014.phpt:
+    A script should not be able to modify session.use_trans_sid
+
+    * ext/session/tests/013.phpt:
+    There should not be any warning with regard to redefining SID
+
+    * ext/session/tests/012.phpt: Registering _SESSION should not segfault.
+
+    * ext/session/tests/010.phpt
+      ext/session/tests/011.phpt: Mini test cases for fixed segfaults
+
+    * ext/session/session.c: session_decode should not segfault
+
+    * ext/session/tests/004.phpt
+      ext/session/tests/005.phpt
+      ext/session/tests/006.phpt
+      ext/session/tests/007.phpt
+      ext/session/tests/008.phpt: Remove ob_start()
+
+    * ext/session/tests/009.phpt:
+    Add test for unset($_SESSION["x"]); behaviour
+
+    * ext/session/tests/003.phpt
+      ext/session/tests/004.phpt
+      ext/session/tests/005.phpt
+      ext/session/tests/006.phpt
+      ext/session/tests/007.phpt
+      ext/session/tests/008.phpt
+      ext/session/tests/skipif.inc
+      ext/session/tests/001.phpt: make tests work with CLI
+
+    * ext/session/session.c: Don't emit warning, if there is nothing to send
+
+2002-10-03  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/string.c:
+    Optimized str_repeat() function, it is now 10x faster on 1 byte multipliers
+    and 5-6x faster on multi-byte multipliers.
+
+2002-10-03  Yasuo Ohgaki  <yohgaki@ohgaki.net>
+
+    * main/output.c
+      ext/standard/var.c
+      ext/standard/basic_functions.c: Fixed broken code by Derick.
+    ob_implicit_flush() and ob_flush_all() are stopped working.
+    var_dump() and hightlisht_string() outputs buffer contents wrongly
+    with ob_implicit_flush().
+
+    Everyone should be happy now.
+    It was only OG(implicit_flush) interpretation issue after all.
+
+2002-10-03  Andrey Hristov  <andrey@webgate.bg>
+
+    * php.ini-recommended: colon written instead of semi-colon.
+
+2002-10-03  Stefan Esser  <s.esser@e-matters.de>
+
+    * ext/ftp/ftp.c
+      ext/ftp/ftp.h: swapped conditions to correct the logic
+
+2002-10-03  Andrey Hristov  <andrey@webgate.bg>
+
+    * ext/standard/html.c: few ws fixes.
+
+2002-10-03  James Moore  <James@phpuk.org>
+
+    * main/output.c: Keep comments and code in sync.
+
+2002-10-03  Stefan Esser  <s.esser@e-matters.de>
+
+    * EXTENSIONS: Tell everyone that I am the ext/ftp maintainer...
+
+    * NEWS: Added news entry about ftp_ssl_connect()
+
+    * ext/ftp/ftp.c
+      ext/ftp/ftp.h
+      ext/ftp/php_ftp.c
+      ext/ftp/php_ftp.h: Added ftp_ssl_connect() for FTP over SSL.
+
+2002-10-03  Zeev Suraski  <zeev@zend.com>
+
+    * main/main.c: Guys, please keep K&R.
+
+2002-10-03  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * main/output.c: Fix warnings.
+
+2002-10-03  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * tests/func/008.phpt
+      tests/func/009.phpt: - Fix descriptions
+
+    * tests/strings/004.phpt: - Add highlight_string buffering test
+
+2002-10-03  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/exif/exif.c: typing
+
+2002-10-03  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * tests/func/008.phpt
+      tests/func/009.phpt: - Add tests
+
+2002-10-03  Andrey Hristov  <andrey@webgate.bg>
+
+    * ext/standard/basic_functions.c: ws fixes.
+
+2002-10-03  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/basic_functions.c
+      ext/standard/var.c
+      sapi/cli/php_cli.c
+      main/output.c:
+    - Revert changed to implicit_flush behavior. The new behavior was not
+      intended in the first place.
+
+2002-10-03  Andrey Hristov  <andrey@webgate.bg>
+
+    * NEWS:
+    Added some info about new functions and changed functionality in old ones.
+
+2002-10-03  Yasuo Ohgaki  <yohgaki@ohgaki.net>
+
+    * sapi/cli/php_cli.c: Shouldn't enable implicit_flush like this.
+    Most problems are fixed. If you find internal function that does
+    not follow my comment, please fix it or let me know.
+
+    * ext/standard/basic_functions.c: Fixed broken higlight_string()
+
+2002-10-03  Stefan Esser  <s.esser@e-matters.de>
+
+    * ext/ftp/ftp.h
+      ext/ftp/php_ftp.c
+      ext/ftp/php_ftp.h
+      ext/ftp/ftp.c: renamed ftp_async_* into ftp_nb_*
+
+2002-10-03  Jan Lehnardt  <jan@dasmoped.net>
+
+    * ext/wddx/php_wddx_api.h
+      ext/wddx/wddx.c
+      ext/wddx/php_wddx.h:
+     - Added wddx_serialize_type(). Allows users to cast values to WDDX types
+
+2002-10-03  Yasuo Ohgaki  <yohgaki@ohgaki.net>
+
+    * ext/standard/var.c: Prevent unwanted fluhsing.
+
+    * main/output.c: Added comment for php_output_set_status().
+    Please use this function if you would like to prevent unwanted flush
+    by implicit_flush=On or ob_implicit_flush().
+
+2002-10-03  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/session/tests/001.phpt
+      ext/session/tests/003.phpt
+      ext/session/tests/004.phpt
+      ext/session/tests/005.phpt
+      ext/session/tests/006.phpt
+      ext/session/tests/007.phpt
+      ext/session/tests/008.phpt:
+    Purge ini_set calls and replace through INI sections.
+
+2002-10-03  Andi Gutmans  <andi@zend.com>
+
+    * ext/session/session.c: - Fix ZTS build
+
+2002-10-03  Yasuo Ohgaki  <yohgaki@ohgaki.net>
+
+    * ext/mbstring/tests/007.phpt: Update test
+
+    * main/php_output.h
+      main/output.c
+      ext/mbstring/tests/007.inc
+      ext/standard/basic_functions.c:
+    Added ob_flush_all() that flushes bufferred contents until it actually
+    sent/printed.
+
+2002-10-03  Sascha Schumann  <sascha@schumann.cx>
+
+    * php.ini-dist: move gc_maxlifetime one up
+
+    * php.ini-recommended:
+    Add recommened entries, including disabling the session bug/feature
+
+    * php.ini-dist: Add new session options
+
+    * ext/session/php_session.h
+      ext/session/session.c:
+    Make the interpretation of gc_probability configurable by adding
+    session.gc_dividend. The probability of running gc on each request is then
+    gc_probability/gc_dividend.
+
+    * ext/session/tests/008.phpt:
+    Reenable E_WARNING and test session.bug_compat_warn in addition.
+
+    * ext/session/tests/007.phpt:
+    session_destroy resets the sid, so we need to set it again here
+
+    * ext/session/tests/008.phpt:
+    Verify PHP 4.2 compatibility: global is used albeit register_globals=0
+
+    * ext/session/session.c:
+    Use ZEND_SET_SYMBOL_WITH_LENGTH correctly (hopefully)
+
+    It strikes me as awkward that a Zend API user needs to take care of
+    doing the engine's reference counting.
+
+    This fixes a memory overrun in a testcase.  All ZEND_SET_* calls
+    should be correct now.
+
+    * ext/session/session.c:
+    (track_init) Use is_ref/refcount parameters of SET_SYMBOL macros
+
+    (save_current_state) Prevent a possible deadlock which occurs when
+    the track vars are inaccessible
+
+    * ext/session/tests/007.phpt:
+    Verify PHP 4.2 compatibility: unset($c) with enabled register_globals
+
+2002-10-03  Yasuo Ohgaki  <yohgaki@ohgaki.net>
+
+    * ext/standard/string.c: Forgot 1 byte for \0
+
+    * ext/standard/string.c: Save memory
+
+2002-10-03  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/session/session.c:
+    Align behaviour with 4.2 with regard to register_globals=1
+
+    session_register("c");
+    unset($c);
+    $c = time();
+
+    If a user unsets a global session variable, it is not a reference
+    to a $_SESSION slot anymore.
+
+    During serialization, PHP 4.2 will not find the respective entry in
+    $_SESSION and fall back to the global sym table.
+
+2002-10-03  Yasuo Ohgaki  <yohgaki@ohgaki.net>
+
+    * main/output.c: Added missing proto and foldings.
+
+    * ext/zlib/zlib.c
+      main/output.c
+      main/php_output.h:
+    Move wrong output buffer usage check to ob_gzhandler init.
+    Export some output buffer functions.
+
+2002-10-03  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/session/php_session.h
+      ext/session/session.c:
+    Nuke PS(vars), we keep the state of registered session variables now
+    completely in PS(http_session_vars). This avoids bugs which are caused
+    by a lack of synchronization between the two hashes. We also don't need
+    to worry about prioritizing one of them.
+
+    Add session.bug_compat_42 and session.bug_compat_warn which are enabled
+    by default. The logic behind bug_compat_42:
+
+    IF bug_compat_42 is on, and
+    IF register_globals is off, and
+    IF any value of $_SESSION["key"] is NULL, and
+    IF there is a global variable $key, then
+    $_SESSION["key"] is set to $key.
+
+    The extension emits this warning once per script, unless told otherwise.
+
+    "Your script possibly relies on a session side-effect which existed until
+    PHP 4.2.3. Please be advised that the session extension does not consider
+    global variables as a source of data, unless register_globals is enabled.
+    You can disable this functionality and this warning by setting
+    session.bug_compat_42 or session.bug_compat_warn.
+
+2002-10-03  Yasuo Ohgaki  <yohgaki@ohgaki.net>
+
+    * main/output.c: Made some functions inline.
+    Added static for unexported functions.
+
+    * NEWS: Rename pg_data_seek() to pg_result_seek().
+    Give a correct credit for Marcus and Wez.
+
+    * ext/mysql/php_mysql.c
+      ext/pgsql/pgsql.c
+      ext/pgsql/php_pgsql.h: Rename pg_data_seek() to pg_result_seek().
+    Added mysql_result_seek() which is alias of mysql_data_seek().
+
+    * main/output.c
+      main/php_output.h
+      ext/standard/basic_functions.c:
+    Added ob_get_clean() and  ob_get_flush().
+    Someone requested this feature before.
+
+2002-10-03  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * sapi/apache2filter/php_functions.c:
+    Added missing TSRMLS_DC to php_apache_lookup_uri()
+
 2002-10-02  David Reid  <dreid@jetnet.co.uk>
 
     * ext/standard/file.c: Add more BeOS support...
