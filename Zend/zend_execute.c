@@ -1011,7 +1011,6 @@ binary_assign_op_addr: {
 			case ZEND_POST_DEC: {
 					int (*incdec_op)(zval *op);
 					zval **var_ptr = get_zval_ptr_ptr(&opline->op1, Ts, BP_VAR_RW);
-					int previous_lock_count;
 
 					if (!var_ptr) {
 						zend_error(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
@@ -1044,7 +1043,6 @@ binary_assign_op_addr: {
 							(*var_ptr)->EA.locks = 0;
 						}
 					}
-					previous_lock_count = (*var_ptr)->EA.locks;
 					incdec_op(*var_ptr);
 					switch (opline->opcode) {
 						case ZEND_PRE_INC:
@@ -1053,7 +1051,6 @@ binary_assign_op_addr: {
 							SELECTIVE_PZVAL_LOCK(*var_ptr, &opline->result);
 							break;
 					}
-					(*var_ptr)->EA.locks = previous_lock_count;
 				}
 				break;
 			case ZEND_PRINT:
