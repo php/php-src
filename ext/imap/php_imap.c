@@ -52,6 +52,7 @@
 
 #ifdef PHP_WIN32
 #include "winsock.h"
+#include "win32/imap_sendmail.h"
 MAILSTREAM DEFAULTPROTO;
 #endif
 
@@ -135,11 +136,7 @@ function_entry imap_functions[] = {
  	PHP_FE(imap_setacl,								NULL)
 #endif
 
-#ifndef PHP_WIN32
 	PHP_FE(imap_mail,								NULL)
-#else
-	PHP_FALIAS(imap_mail, warn_not_available,		NULL)
-#endif
 
 	PHP_FALIAS(imap_header, 		imap_headerinfo,	NULL)
 	PHP_FALIAS(imap_listmailbox, 	imap_list,			NULL)
@@ -3216,7 +3213,6 @@ PHP_FUNCTION(imap_mail_compose)
 /* }}} */
 
 
-#ifndef PHP_WIN32
 /* {{{ _php_imap_mail
  */
 int _php_imap_mail(char *to, char *subject, char *message, char *headers, char *cc, char *bcc, char* rpath)
@@ -3229,8 +3225,8 @@ int _php_imap_mail(char *to, char *subject, char *message, char *headers, char *
 #endif
 
 #ifdef PHP_WIN32
-	if (imap_TSendMail(INI_STR("smtp"), &tsm_err, headers, subject, to, message, cc, bcc, rpath) != SUCCESS) {
-		php_error(E_WARNING, GetSMErrorText(tsm_err));
+	if (imap_TSendMail(INI_STR("SMTP"), &tsm_err, headers, subject, to, message, cc, bcc, rpath) != SUCCESS) {
+		php_error(E_WARNING, "%s", GetSMErrorText(tsm_err));
 		return 0;
 	}
 #else
@@ -3262,9 +3258,7 @@ int _php_imap_mail(char *to, char *subject, char *message, char *headers, char *
 	return 1;
 }
 /* }}} */
-#endif
 
-#ifndef PHP_WIN32
 /* {{{ proto int imap_mail(string to, string subject, string message [, string additional_headers [, string cc [, string bcc [, string rpath]]]])
    Send an email message */
 PHP_FUNCTION(imap_mail)
@@ -3336,7 +3330,6 @@ PHP_FUNCTION(imap_mail)
 	}
 }
 /* }}} */
-#endif
 
 /* {{{ proto array imap_search(int stream_id, string criteria [, long flags])
    Return a list of messages matching the given criteria */
