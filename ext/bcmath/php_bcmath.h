@@ -30,6 +30,8 @@ extern zend_module_entry bcmath_module_entry;
 
 PHP_MINIT_FUNCTION(bcmath);
 PHP_MSHUTDOWN_FUNCTION(bcmath);
+PHP_RINIT_FUNCTION(bcmath);
+PHP_RSHUTDOWN_FUNCTION(bcmath);
 PHP_MINFO_FUNCTION(bcmath);
 
 PHP_FUNCTION(bcadd);
