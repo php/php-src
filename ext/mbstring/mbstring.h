@@ -55,6 +55,10 @@
 
 #include "mbfilter.h"
 
+#if HAVE_MBREGEX
+#include "mbregex.h"
+#endif
+
 extern zend_module_entry mbstring_module_entry;
 #define mbstring_module_ptr &mbstring_module_entry
 
@@ -91,6 +95,27 @@ PHP_FUNCTION(mb_encode_numericentity);
 PHP_FUNCTION(mb_decode_numericentity);
 PHP_FUNCTION(mb_send_mail);
 PHP_FUNCTION(mb_get_info);
+#if HAVE_MBREGEX
+PHP_FUNCTION(mb_regex_encoding);
+PHP_FUNCTION(mb_ereg);
+PHP_FUNCTION(mb_eregi);
+PHP_FUNCTION(mb_ereg_replace);
+PHP_FUNCTION(mb_eregi_replace);
+PHP_FUNCTION(mb_split);
+PHP_FUNCTION(mb_ereg_match);
+PHP_FUNCTION(mb_ereg_search);
+PHP_FUNCTION(mb_ereg_search_pos);
+PHP_FUNCTION(mb_ereg_search_regs);
+PHP_FUNCTION(mb_ereg_search_init);
+PHP_FUNCTION(mb_ereg_search_getregs);
+PHP_FUNCTION(mb_ereg_search_getpos);
+PHP_FUNCTION(mb_ereg_search_setpos);
+#endif
+
+#if HAVE_MBREGEX
+#define PHP_MBREGEX_MAXCACHE 50
+int php_mbregex_name2mbctype(const char *pname);
+#endif
 
 ZEND_BEGIN_MODULE_GLOBALS(mbstring)
 	int language;
@@ -116,10 +141,21 @@ ZEND_BEGIN_MODULE_GLOBALS(mbstring)
 	int current_filter_illegal_substchar;
 	int func_overload;
 	mbfl_buffer_converter *outconv;
+#if HAVE_MBREGEX
+	int default_mbctype;
+	int current_mbctype;
+	HashTable ht_rc;
+	zval **search_str;
+	zval *search_str_val;
+	unsigned int search_pos;
+	mb_regex_t *search_re;
+	struct mbre_registers *search_regs;
+#endif
 ZEND_END_MODULE_GLOBALS(mbstring);
 
 #define MB_OVERLOAD_MAIL 1
 #define MB_OVERLOAD_STRING 2
+#define MB_OVERLOAD_REGEX 4
 
 struct mb_overload_def {
 	int type;
