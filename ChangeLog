@@ -1,3 +1,65 @@
+2000-08-04  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * main/main.c
+      php.ini-dist
+      php.ini-optimized:
+    changed default sendmail flags from '-t' to '-t -i' (bugid#5374)
+
+2000-08-04  Sam Ruby  <rubys@us.ibm.com>
+
+    * ext/java/java.c:
+    Fix for bug 5911 - ANSI C violation: lvalues are not assignable
+
+    * ext/java/java.c:
+    Restore the ability to clean compile in non-multithreaded environments
+
+2000-08-04  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/posix/posix.c: fixed ZTS compile
+
+2000-08-04  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/ldap/ldap.c: - This should fix bug #5964
+
+2000-08-04  Rasmus Lerdorf  <rasmus@php.net>
+
+    * sapi/apache/mod_php4.c: Fix typo
+
+2000-08-04  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/standard/url_scanner.h:
+2000-08-04  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/standard/reg.c: Sorry only the *_replaceparameters are wrong.
+
+    * ext/standard/reg.c: Wrong parameters found by Martin Buchholz @ six.de.
+
+2000-08-04  Stig Bakken  <ssb@fast.no>
+
+    * pear/DB/mysql.php: Removed debug output from DB_mysql::execute.
+
+2000-08-04  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/standard/array.c: ooops - theese new parameters are optional
+
+    * ext/standard/array.c:
+    added new second parameter to osrt functions in the protos
+
+    * ext/standard/url_scanner.re: no longer needed
+
+    * ext/standard/url_scanner.c: do not rewrite absolute urls
+    (should be more clever and identify itself though)
+
+2000-08-04  Joey Smith  <joey@joeysmith.com>
+
+    * win32/sendmail.c: Geez, you'd think English wasn' tmy native tongue.
+
+    * win32/sendmail.c: Outdated URL, link to the master site instead.
+
+2000-08-04  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/ext_skel: Small portability fix
+
 2000-08-03  Hartmut Holzgraefe  <hartmut@six.de>
 
     * ext/standard/mail.c:
