@@ -18,6 +18,7 @@
    |          Kaj-Michael Lang    <milang@tal.org>                        |
    |          Antoni Pamies Olive <toni@readysoft.net>                    |
    |          Rasmus Lerdorf      <rasmus@lerdorf.on.ca>                  |
+   |          Chuck Hagenbuch     <chuck@horde.org>                       |
    | PHP 4.0 updates:  Zeev Suraski <zeev@zend.com>                       |
    +----------------------------------------------------------------------+
  */
