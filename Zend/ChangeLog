@@ -1,3 +1,18 @@
+2002-06-11  Andi Gutmans  <andi@zend.com>
+
+    * zend_builtin_functions.c:
+    - Don't show debug_backtrace() in the trace itself.
+    - This patch is a bit ugly because the whole code itself is pretty complex
+    - and hard to re-order.
+
+    * zend_execute.c
+      zend_language_parser.y:
+    - Fix problem with assigning functions by reference.
+
+2002-06-11  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * RFCs/004.txt: Add __delegate().
+
 2002-06-10  Harald Radi  <harald.radi@nme.at>
 
     * zend_ts_hash.h
