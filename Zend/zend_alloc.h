@@ -58,40 +58,35 @@ ZEND_API char *zend_strndup(const char *s, unsigned int length);
 
 BEGIN_EXTERN_C()
 
-#if ZEND_DEBUG
-ZEND_API void *_emalloc(size_t size, char *filename, uint lineno);
-ZEND_API void _efree(void *ptr, char *filename, uint lineno);
-ZEND_API void *_ecalloc(size_t nmemb, size_t size, char *filename, uint lineno);
-ZEND_API void *_erealloc(void *ptr, size_t size, int allow_failure, char *filename, uint lineno);
-ZEND_API char *_estrdup(const char *s, char *filename, uint lineno);
-ZEND_API char *_estrndup(const char *s, unsigned int length, char *filename, uint lineno);
-ZEND_API void _persist_alloc(void *ptr, char *filename, uint lineno);
-#define emalloc(size)					_emalloc((size),__FILE__,__LINE__)
-#define efree(ptr)						_efree((ptr),__FILE__,__LINE__)
-#define ecalloc(nmemb,size)				_ecalloc((nmemb),(size),__FILE__,__LINE__)
-#define erealloc(ptr,size)				_erealloc((ptr),(size),0,__FILE__,__LINE__)
-#define erealloc_recoverable(ptr,size)	_erealloc((ptr),(size),1,__FILE__,__LINE__)
-#define estrdup(s)						_estrdup((s),__FILE__,__LINE__)
-#define estrndup(s,length)				_estrndup((s),(length),__FILE__,__LINE__)
-#define persist_alloc(p)				_persist_alloc((p),__FILE__,__LINE__)
-#else
-ZEND_API void *_emalloc(size_t size);
-ZEND_API void _efree(void *ptr);
-ZEND_API void *_ecalloc(size_t nmemb, size_t size);
-ZEND_API void *_erealloc(void *ptr, size_t size, int allow_failure);
-ZEND_API char *_estrdup(const char *s);
-ZEND_API char *_estrndup(const char *s, unsigned int length);
-ZEND_API void _persist_alloc(void *ptr);
-#define emalloc(size)						_emalloc((size))
-#define efree(ptr)							_efree((ptr))
-#define ecalloc(nmemb,size)					_ecalloc((nmemb),(size))
-#define erealloc(ptr,size)					_erealloc((ptr),(size),0)
-#define erealloc_recoverable(ptr,size)		_erealloc((ptr),(size),1)
-#define estrdup(s)							_estrdup((s))
-#define estrndup(s,length)					_estrndup((s),(length))
-#define persist_alloc(p)					_persist_alloc((p))
-#endif
+ZEND_API void *_emalloc(size_t size ZEND_FILE_LINE_DC);
+ZEND_API void _efree(void *ptr ZEND_FILE_LINE_DC);
+ZEND_API void *_ecalloc(size_t nmemb, size_t size ZEND_FILE_LINE_DC);
+ZEND_API void *_erealloc(void *ptr, size_t size, int allow_failure ZEND_FILE_LINE_DC);
+ZEND_API char *_estrdup(const char *s ZEND_FILE_LINE_DC);
+ZEND_API char *_estrndup(const char *s, unsigned int length ZEND_FILE_LINE_DC);
+ZEND_API void _persist_alloc(void *ptr ZEND_FILE_LINE_DC);
 
+/* Standard wrapper macros */
+#define emalloc(size)					_emalloc((size) ZEND_FILE_LINE_CC)
+#define efree(ptr)						_efree((ptr) ZEND_FILE_LINE_CC)
+#define ecalloc(nmemb,size)				_ecalloc((nmemb),(size) ZEND_FILE_LINE_CC)
+#define erealloc(ptr,size)				_erealloc((ptr),(size),0 ZEND_FILE_LINE_CC)
+#define erealloc_recoverable(ptr,size)	_erealloc((ptr),(size),1 ZEND_FILE_LINE_CC)
+#define estrdup(s)						_estrdup((s) ZEND_FILE_LINE_CC)
+#define estrndup(s,length)				_estrndup((s),(length) ZEND_FILE_LINE_CC)
+#define persist_alloc(p)				_persist_alloc((p) ZEND_FILE_LINE_CC)
+
+/* Relay wrapper macros */
+#define emalloc_rel(size)					_emalloc((size) ZEND_FILE_LINE_RELAY_CC)
+#define efree_rel(ptr)						_efree((ptr) ZEND_FILE_LINE_RELAY_CC)
+#define ecalloc_rel(nmemb, size)			_ecalloc((nmemb), (size) ZEND_FILE_LINE_RELAY_CC)
+#define erealloc_rel(ptr, size)				_erealloc((ptr), (size), 0 ZEND_FILE_LINE_RELAY_CC)
+#define erealloc_recoverable_rel(ptr, size)	_erealloc((ptr), (size), 1 ZEND_FILE_LINE_RELAY_CC)
+#define estrdup_rel(s)						_estrdup((s) ZEND_FILE_LINE_RELAY_CC)
+#define estrndup_rel(s, length)				_estrndup((s) ZEND_FILE_LINE_RELAY_CC)
+#define persist_alloc_rel(p)				_persist_alloc((p) ZEND_FILE_LINE_RELAY_CC)
+
+/* Selective persistent/non persistent allocation macros */
 #define pemalloc(size,persistent) ((persistent)?malloc(size):emalloc(size))
 #define pefree(ptr,persistent)  ((persistent)?free(ptr):efree(ptr))
 #define pecalloc(nmemb,size,persistent) ((persistent)?calloc((nmemb),(size)):ecalloc((nmemb),(size)))
@@ -108,11 +103,11 @@ ZEND_API void start_memory_manager(void);
 ZEND_API void shutdown_memory_manager(int silent, int clean_cache);
 
 #if ZEND_DEBUG
-ZEND_API int _mem_block_check(void *ptr, int silent, char *filename, int lineno);
-ZEND_API void _full_mem_check(int silent, char *filename, uint lineno);
-#define mem_block_check(ptr, silent) _mem_block_check(ptr, silent, __FILE__, __LINE__)
-#define mem_block_check(ptr, silent) _mem_block_check(ptr, silent, __FILE__, __LINE__)
-#define full_mem_check(silent) _full_mem_check(silent, __FILE__, __LINE__)
+ZEND_API int _mem_block_check(void *ptr, int silent ZEND_FILE_LINE_DC);
+ZEND_API void _full_mem_check(int silent ZEND_FILE_LINE_DC);
+#define mem_block_check(ptr, silent) _mem_block_check(ptr, silent ZEND_FILE_LINE_CC)
+#define mem_block_check(ptr, silent) _mem_block_check(ptr, silent ZEND_FILE_LINE_CC)
+#define full_mem_check(silent) _full_mem_check(silent ZEND_FILE_LINE_CC)
 #else
 #define mem_block_check(type, ptr, silent)
 #define full_mem_check(silent)

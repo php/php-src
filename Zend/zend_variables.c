@@ -51,7 +51,7 @@ ZEND_API inline void var_uninit(zval *var)
 }
 		
 
-ZEND_API int zval_dtor(zval *zvalue)
+ZEND_API int _zval_dtor(zval *zvalue ZEND_FILE_LINE_DC)
 {
 	if (zvalue->type==IS_LONG) {
 		return 1;
@@ -59,20 +59,20 @@ ZEND_API int zval_dtor(zval *zvalue)
 	switch(zvalue->type) {
 		case IS_STRING:
 		case IS_CONSTANT:
-			STR_FREE(zvalue->value.str.val);
+			STR_FREE_REL(zvalue->value.str.val);
 			break;
 		case IS_ARRAY: {
 				ELS_FETCH();
 
 				if (zvalue->value.ht && (zvalue->value.ht != &EG(symbol_table))) {
 					zend_hash_destroy(zvalue->value.ht);
-					efree(zvalue->value.ht);
+					efree_rel(zvalue->value.ht);
 				}
 			}
 			break;
 		case IS_OBJECT:
 			zend_hash_destroy(zvalue->value.obj.properties);
-			efree(zvalue->value.obj.properties);
+			efree_rel(zvalue->value.obj.properties);
 			break;
 		case IS_RESOURCE:
 			/* destroy resource */
@@ -97,7 +97,7 @@ void zval_add_ref(zval **p)
 
 
 
-ZEND_API int zval_copy_ctor(zval *zvalue)
+ZEND_API int _zval_copy_ctor(zval *zvalue ZEND_FILE_LINE_DC)
 {
 	switch (zvalue->type) {
 		case IS_RESOURCE:
@@ -151,6 +151,27 @@ ZEND_API int zend_print_variable(zval *var)
 {
 	return zend_print_zval(var, 0);
 }
+
+
+#ifdef ZEND_DEBUG
+ZEND_API int _zval_copy_ctor_wrapper(zval *zvalue)
+{
+	return zval_copy_ctor(zvalue);
+}
+
+
+ZEND_API int _zval_dtor_wrapper(zval *zvalue)
+{
+	return zval_dtor(zvalue);
+}
+
+
+
+ZEND_API int _zval_ptr_dtor_wrapper(zval **zval_ptr)
+{
+	return zval_ptr_dtor(zval_ptr);
+}
+#endif
 
 
 /*

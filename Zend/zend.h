@@ -47,6 +47,23 @@
 #include "config.unix.h"
 #endif
 
+#ifdef ZEND_DEBUG
+#define ZEND_FILE_LINE_D			char *__zend_filename, uint __zend_lineno
+#define ZEND_FILE_LINE_DC			, char *__zend_filename, uint __zend_lineno
+#define ZEND_FILE_LINE_RELAY_C		__zend_filename, __zend_lineno
+#define ZEND_FILE_LINE_RELAY_CC		, __zend_filename, __zend_lineno
+#define ZEND_FILE_LINE_C			__FILE__, __LINE__
+#define ZEND_FILE_LINE_CC			, __FILE__, __LINE__
+#else
+#define ZEND_FILE_LINE_D
+#define ZEND_FILE_LINE_DC
+#define ZEND_FILE_LINE_RELAY_C
+#define ZEND_FILE_LINE_RELAY_CC
+#define ZEND_FILE_LINE_C
+#define ZEND_FILE_LINE_CC
+#endif	/* ZEND_DEBUG */
+
+
 #include "zend_errors.h"
 #include "zend_alloc.h"
 
@@ -192,7 +209,7 @@ ZEND_API extern char *empty_string;
 ZEND_API extern char *undefined_variable_string;
 
 #define STR_FREE(ptr) if (ptr && ptr!=empty_string && ptr!=undefined_variable_string) { efree(ptr); }
-
+#define STR_FREE_REL(ptr) if (ptr && ptr!=empty_string && ptr!=undefined_variable_string) { efree_rel(ptr); }
 
 /* output support */
 #define ZEND_WRITE(str, str_len)		zend_write((str), (str_len))

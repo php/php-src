@@ -203,7 +203,7 @@ ZEND_API inline void safe_free_zval_ptr(zval *p)
 }
 
 
-ZEND_API int zval_ptr_dtor(zval **zval_ptr)
+ZEND_API int _zval_ptr_dtor(zval **zval_ptr ZEND_FILE_LINE_DC)
 {
 	int locked = (*zval_ptr)->EA.locks;
 

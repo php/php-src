@@ -111,7 +111,7 @@ PHP_FUNCTION(get_browser)
 		if (zend_hash_find(&browser_hash, agent_name->value.str.val, agent_name->value.str.len+1, (void **) &agent)==FAILURE) {
 			break;
 		}
-		zend_hash_merge(return_value->value.ht,agent->value.ht,(void (*)(void *pData)) pval_copy_constructor, (void *) &tmp, sizeof(pval), 0);
+		zend_hash_merge(return_value->value.ht, agent->value.ht, PVAL_COPY_CTOR, (void *) &tmp, sizeof(pval), 0);
 	}
 }
 
