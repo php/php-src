@@ -7,4 +7,5 @@
   - classes
   - requirements (see also confing.m4)  
 - protos
-  - object type specification
+  - object type specification (as in resources)
+  - pass by reference
