@@ -188,6 +188,11 @@ typedef struct {
 	/* url_scanner_ex.re */
 	url_adapt_state_ex_t url_adapt_state_ex;
 #endif
+
+#ifdef HAVE_MMAP
+	void *mmap_file;
+	size_t mmap_len;
+#endif
 } php_basic_globals;
 
 #ifdef ZTS
