@@ -1,6 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2002, Version 4.3.0
+- Added STDIN, STDOUT and STDERR constants for CLI sapi reflecting opened
+  streams to their respective I/O counterparts. (Edin)
 - Added pctnl_alarm() function. (Edin)
 - Fixed array_rand() on thread-safe platforms such as Windows. (Edin)
 - If zlib.output_compression is enabled and a page is compressed 
