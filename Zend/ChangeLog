@@ -1,3 +1,15 @@
+2004-04-14  Andi Gutmans  <andi@zend.com>
+
+    * zend_extensions.h:
+      - Add comment
+
+    * zend.h:
+      - RC2-dev
+
+    * (php_5_0_0RC2RC1)
+      zend.h:
+      - RC2RC1
+
 2004-04-13  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_exceptions.c:
