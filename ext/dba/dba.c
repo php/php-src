@@ -27,6 +27,7 @@
 
 #if HAVE_DBA
 
+#include "php_ini.h"
 #include "ext/standard/flock_compat.h" 
 #include <stdio.h> 
 #include <fcntl.h>
@@ -71,6 +72,7 @@ function_entry dba_functions[] = {
 /* }}} */
 
 PHP_MINIT_FUNCTION(dba);
+PHP_MSHUTDOWN_FUNCTION(dba);
 PHP_MINFO_FUNCTION(dba);
 
 zend_module_entry dba_module_entry = {
@@ -78,7 +80,7 @@ zend_module_entry dba_module_entry = {
 	"dba",
 	dba_functions, 
 	PHP_MINIT(dba), 
-	NULL,
+	PHP_MSHUTDOWN(dba),
 	NULL,
 	NULL,
 	PHP_MINFO(dba),
@@ -208,6 +210,37 @@ static dba_handler handler[] = {
 	{ NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL }
 };
 
+#if DBA_FLATFILE
+#define DBA_DEFAULT "flatfile"
+#elif DBA_DB4
+#define DBA_DEFAULT "db4"
+#elif DBA_DB3
+#define DBA_DEFAULT "db3"
+#elif DBA_DB2
+#define DBA_DEFAULT "db2"
+#elif DBA_GDBM
+#define DBA_DEFAULT "gdbm"
+#elif DBA_NBBM
+#define DBA_DEFAULT "ndbm"
+#elif DBA_DBM
+#define DBA_DEFAULT "dbm"
+#else
+#define DBA_DEFAULT ""
+#endif
+
+ZEND_BEGIN_MODULE_GLOBALS(dba)
+	char *default_handler;
+	dba_handler *default_hptr;
+ZEND_END_MODULE_GLOBALS(dba) 
+
+ZEND_DECLARE_MODULE_GLOBALS(dba)
+
+#ifdef ZTS
+#define DBA_G(v) TSRMG(dba_globals_id, zend_dba_globals *, v)
+#else
+#define DBA_G(v) (dba_globals.v)
+#endif 
+
 static int le_db;
 static int le_pdb;
 /* }}} */
@@ -240,10 +273,47 @@ static void dba_close_rsrc(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 }
 /* }}} */
 
+/* {{{ PHP_INI
+ */
+ZEND_API ZEND_INI_MH(OnUpdateDefaultHandler)
+{
+	dba_handler *hptr;
+
+	if (!strlen(new_value)) {
+		DBA_G(default_hptr) = NULL;
+		return OnUpdateString(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
+	}
+
+	for (hptr = handler; hptr->name && strcasecmp(hptr->name, new_value); hptr++);
+
+	if (!hptr->name) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "No such handler: %s", new_value);
+		return FAILURE;
+	}
+	DBA_G(default_hptr) = hptr;
+	return OnUpdateString(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
+}
+
+PHP_INI_BEGIN()
+    STD_PHP_INI_ENTRY("dba.default_handler", DBA_DEFAULT, PHP_INI_ALL, OnUpdateDefaultHandler, default_handler,    zend_dba_globals, dba_globals)
+PHP_INI_END()
+/* }}} */
+ 
+/* {{{ php_dba_init_globals
+ */
+static void php_dba_init_globals(zend_dba_globals *dba_globals)
+{
+	dba_globals->default_handler = "";
+	dba_globals->default_hptr    = NULL;
+}
+/* }}} */
+
 /* {{{ PHP_MINIT_FUNCTION
  */
 PHP_MINIT_FUNCTION(dba)
 {
+	ZEND_INIT_MODULE_GLOBALS(dba, php_dba_init_globals, NULL);
+	REGISTER_INI_ENTRIES();
 	le_db = zend_register_list_destructors_ex(dba_close_rsrc, NULL, "dba", module_number);
 	le_pdb = zend_register_list_destructors_ex(NULL, dba_close_rsrc, "dba persistent", module_number);
 	return SUCCESS;
@@ -254,6 +324,7 @@ PHP_MINIT_FUNCTION(dba)
  */
 PHP_MSHUTDOWN_FUNCTION(dba)
 {
+	UNREGISTER_INI_ENTRIES();
 	return SUCCESS;
 }
 /* }}} */
@@ -361,9 +432,9 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	int i;
 	int lock_mode, lock_flag, lock_dbf = 0;
 	char *file_mode;
-	char mode[4], *pmode, *lock_file_mode;
+	char mode[4], *pmode, *lock_file_mode = NULL;
 	
-	if(ac < 3) {
+	if(ac < 2) {
 		WRONG_PARAM_COUNT;
 	}
 	
@@ -407,7 +478,16 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		}
 	}
 	
-	for (hptr = handler; hptr->name && strcasecmp(hptr->name, Z_STRVAL_PP(args[2])); hptr++);
+	if (ac==2) {
+		hptr = DBA_G(default_hptr);
+		if (!hptr) {
+			php_error_docref2(NULL TSRMLS_CC, Z_STRVAL_PP(args[0]), Z_STRVAL_PP(args[1]), E_WARNING, "No default handler selected");
+			FREENOW;
+			RETURN_FALSE;
+		}
+	} else {
+		for (hptr = handler; hptr->name && strcasecmp(hptr->name, Z_STRVAL_PP(args[2])); hptr++);
+	}
 
 	if (!hptr->name) {
 		php_error_docref2(NULL TSRMLS_CC, Z_STRVAL_PP(args[0]), Z_STRVAL_PP(args[1]), E_WARNING, "No such handler: %s", Z_STRVAL_PP(args[2]));
@@ -587,7 +667,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 
 	if (error || hptr->open(info, &error TSRMLS_CC) != SUCCESS) {
 		dba_close(info TSRMLS_CC);
-		php_error_docref2(NULL TSRMLS_CC, Z_STRVAL_PP(args[0]), Z_STRVAL_PP(args[1]), E_WARNING, "Driver initialization failed for handler: %s%s%s", Z_STRVAL_PP(args[2]), error?": ":"", error?error:"");
+		php_error_docref2(NULL TSRMLS_CC, Z_STRVAL_PP(args[0]), Z_STRVAL_PP(args[1]), E_WARNING, "Driver initialization failed for handler: %s%s%s", hptr->name, error?": ":"", error?error:"");
 		FREENOW;
 		RETURN_FALSE;
 	}
@@ -613,7 +693,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 /* }}} */
 #undef FREENOW
 
-/* {{{ proto int dba_popen(string path, string mode, string handlername [, string ...])
+/* {{{ proto int dba_popen(string path [, string mode, string handlername, string ...])
    Opens path using the specified handler in mode persistently */
 PHP_FUNCTION(dba_popen)
 {
@@ -621,7 +701,7 @@ PHP_FUNCTION(dba_popen)
 }
 /* }}} */
 
-/* {{{ proto int dba_open(string path, string mode, string handlername [, string ...])
+/* {{{ proto int dba_open(string path, string mode [, string handlername, string ...])
    Opens path using the specified handler in mode*/
 PHP_FUNCTION(dba_open)
 {
@@ -811,7 +891,7 @@ PHP_FUNCTION(dba_list)
 }
 /* }}} */
 
-#endif
+#endif /* HAVE_DBA */
 
 /*
  * Local variables:
