@@ -1,3 +1,29 @@
+2004-10-12  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * NEWS
+      ext/standard/streamsfuncs.c:
+      MFH: Added optional offset parameter to stream_get_contents().
+
+2004-10-12  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_0)
+      NEWS
+      NEWS:
+      BFN
+
+    * ZendEngine2/zend_builtin_functions.c:
+      Bug #30381 Strange results with get_class_vars()
+
+    * (PHP_5_0)
+      ZendEngine2/zend_builtin_functions.c:
+      MFH Fix visibility of get_class_vars() and get_class_methods()
+
+    * ZendEngine2/zend_builtin_functions.c:
+      - Fix visibility in get_class_vars() and get_class_methods()
+
+    * ZendEngine2/zend_builtin_functions.c:
+      - Fix set_exception_handler
+
 2004-10-11  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_0)
