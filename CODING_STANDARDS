@@ -97,9 +97,9 @@ Exceptions:
     try avoiding it.
 
 [7] Use PHP_* macros in the PHP source, and ZEND_* macros in the Zend
-	part of the source. Although the PHP_* macro's are mostly aliased to the
-	ZEND_* macros it gives a better understanding on what kind of macro you're
-	calling.
+    part of the source. Although the PHP_* macro's are mostly aliased to the
+    ZEND_* macros it gives a better understanding on what kind of macro you're
+    calling.
 
 [8] Use assert(). assert.h is included in php.h if it is available.  Not only
     does good assertion catch bugs, but it also helps with code readability.
@@ -200,13 +200,13 @@ Syntax and indentation
     
 [3] Be generous with whitespace and braces.  Always prefer:
 
-	if (foo) {
-		bar;
-	}
+    if (foo) {
+        bar;
+    }
 
-	to:
+    to:
 
-	if(foo)bar;
+    if(foo)bar;
 
     Keep one empty line between the variable declaration section and
     the statements in a block, as well as between logical statement
