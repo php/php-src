@@ -298,7 +298,10 @@ void _pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global)
 	int				 i;
 	int				 subpats_order_val;	/* Integer value of subpats_order */
 	const char	   **stringlist;		/* Used to hold list of subpatterns */
-	int				 subject_offset;	/* Current position in the subject string */
+	char			*match,				/* The current match */
+					*piece,				/* The current piece of subject */
+					*subject_end;		/* Points to the end of the subject */
+	
 	
 	/* Get function parameters and do error-checking. */
 	switch(ARG_COUNT(ht)) {
@@ -374,14 +377,16 @@ void _pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global)
 	}
 
 	/* Start from the beginning of the string */
-	subject_offset = 0;
+	piece = subject->value.str.val;
+	subject_end = piece + subject->value.str.len;
+	match = NULL;
 	
 	do {
 		/* Execute the regular expression. */
-		count = pcre_exec(re, extra, &subject->value.str.val[subject_offset],
-						  subject->value.str.len-subject_offset, subject->value.str.val,
-						  (subject_offset ? exoptions|PCRE_NOTBOL : exoptions),
-						  offsets, size_offsets, 0);
+		count = pcre_exec(re, extra, piece,
+						  subject_end-piece, subject->value.str.val,
+						  (piece==subject->value.str.val ? exoptions : exoptions|PCRE_NOTBOL),
+						  offsets, size_offsets, (piece == match));
 
 		/* Check for too many substrings condition. */	
 		if (count == 0) {
@@ -392,12 +397,12 @@ void _pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global)
 		/* If something has matched */
 		if (count >= 0) {
 			matched = 1;
+			match = piece + offsets[0];
 
 			/* If subpatters array has been passed, fill it in with values. */
 			if (subpats != NULL) {
 				/* Try to get the list of substrings and display a warning if failed. */
-				if (pcre_get_substring_list(&subject->value.str.val[subject_offset],
-						offsets, count, &stringlist) < 0) {
+				if (pcre_get_substring_list(piece, offsets, count, &stringlist) < 0) {
 					efree(offsets);
 					efree(re);
 					zend_error(E_WARNING, "Get subpatterns list failed");
@@ -437,7 +442,7 @@ void _pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global)
 				php_pcre_free(stringlist);
 				
 				/* Advance to the position right after the last full match */
-				subject_offset += offsets[1];
+				piece += offsets[1];
 			}
 		}
 		/* If nothing matched */
