@@ -98,33 +98,10 @@ peardir=$(PEAR_INSTALLDIR)
 PEARCMD=$(top_builddir)/sapi/cli/php -d include_path=$(top_srcdir)/pear pear/scripts/pear.in
 
 install-pear-installer: $(top_builddir)/sapi/cli/php
-	@for descfile in $(srcdir)/package-*.xml; do \
-	    tmp="$${descfile%.xml}"; \
-	    pkgname="$${tmp#*-}"; \
-	    pkgver=`grep '<version>' $$descfile|head -1|cut -d\> -f2|cut -d\< -f1`; \
-	    if $(PEARCMD) shell-test $$pkgname; then \
-	    	if ! $(PEARCMD) shell-test $$pkgname $$pkgver; then \
-	    	    $(PEARCMD) -q upgrade $$descfile | sed -e "s/^/$$pkgname $$pkgver: /"; \
-	    	fi; \
-	    else \
-		$(PEARCMD) -q install $$descfile | sed -e "s/^/$$pkgname $$pkgver: /"; \
-	    fi; \
-	done
+	$(top_builddir)/sapi/cli/php $(srcdir)/install-pear.php $(srcdir)/package-*.xml
 
-install-pear-packages: # requires cli installed
-	@/bin/ls -1 $(srcdir)/packages | while read package; do \
-	    case $$package in \
-		*.tgz) pkg=$${package%.tgz};; \
-		*.tar) pkg=$${package%.tar};; \
-		*) continue;; \
-	    esac; \
-	    pkgname="$${pkg%-*}"; pkgver="$${pkg#*-}"; \
-	    if $(INSTALL_ROOT)$(bindir)/pear -d php_dir=$(INSTALL_ROOT)$(PEAR_INSTALLDIR) shell-test $$pkgname $$pkgver; then \
-		echo "$$pkgname $$pkgver: already installed"; \
-	    else \
-		$(INSTALL_ROOT)$(bindir)/pear -q -d php_dir=$(INSTALL_ROOT)$(PEAR_INSTALLDIR) -d bin_dir=$(INSTALL_ROOT)$(bindir) -d doc_dir=$(INSTALL_ROOT)$(datadir)/doc/pear -d ext_dir=$(INSTALL_ROOT)$(EXTENSION_DIR) install $(srcdir)/packages/$$package 2>&1 | sed -e "s/^/$$pkgname $$pkgver: /"; \
-	    fi; \
-	done
+install-pear-packages: $(top_builddir)/sapi/cli/php
+	$(top_builddir)/sapi/cli/php $(srcdir)/install-pear.php $(srcdir)/packages/*.tar
 
 install-pear:
 	@if $(mkinstalldirs) $(INSTALL_ROOT)$(peardir); then \
