@@ -1,4 +1,4 @@
 
-SUBDIRS = $(PHP_SAPI)
+SUBDIRS = $(CGI_DIR) $(PHP_SAPI)
 
 include $(top_srcdir)/build/rules.mk
