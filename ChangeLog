@@ -1,3 +1,93 @@
+1999-12-19  Zeev Suraski  <zeev@php.net>
+
+    * ext/pgsql/pgsql.c
+      ext/pgsql/php_pgsql.h: Fix PostgreSQL build
+
+    * php4.dsw
+      php4dll.dsp: Win32 updates
+
+    * sapi/servlet/Makefile.am
+      sapi/servlet/servlet.dsp
+      sapi/apache/Makefile.am
+      sapi/apache/libphp4.module.in
+      sapi/isapi/php4isapi.dsp
+      ext/xml/Makefile.am
+      ext/pgsql/pgsql.dsp
+      ext/snmp/Makefile.am
+      ext/pgsql/Makefile.am
+      ext/mysql/Makefile.am
+      ext/mysql/mysql.dsp
+      ext/mssql/mssql.dsp
+      ext/informix/ifx.dsp
+      ext/java/Makefile.am
+      ext/java/java.dsp
+      ext/bcmath/Makefile.am
+      dl/setup
+      Makefile.am
+      build.mk
+      build2.mk
+      configure.in
+      dlist.c
+      genfiles
+      main.c
+      makedist
+      php4.dsp
+      php4.dsw
+      php4dll.dsp
+      php4dllts.dsp
+      php4ts.dsp
+      php4ts.dsw
+      php_modules.dsw: libzend -> Zend
+
+1999-12-19  Sascha Schumann  <sascha@schumann.cx>
+
+    * acconfig.h.in
+      configure.in: Fix broken sprintf handling in PHP
+
+1999-12-19  Danny Heijl  <Danny.Heijl@cevi.be>
+
+    * ext/informix/ifx.ec:
+    (ext/informix) function name changes: zend_get_parameters_ex (danny)
+
+1999-12-19  Zeev Suraski  <zeev@php.net>
+
+    * ext/standard/array.c
+      ext/standard/basic_functions.c:
+    Support the latest update to call_user_function_ex()
+
+1999-12-19  Hartmut Holzgraefe  <hholzgra@media-engineering.de>
+
+    * ext/imap/imap.c:
+    replaced PHP_FE by PHP_FALIAS in imap_functions[] where appropriate
+
+1999-12-19  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/string.c
+      acconfig.h.in
+      ext/session/mod_files.c:
+    Use zend_sprintf by default (which is defined to sprintf, if the system's
+    sprintf is useable).
+
+    * reentrancy.c: Fix for missing RAND_MAX on SunOS 4.1
+
+    * configure.in:
+    Refine PEAR option. Since it does not reference anything external, it should be
+    AC_ARG_ENABLE instead of AC_ARG_WITH.
+
+1999-12-19  Evan Klinger  <evan715@sirius.com>
+
+    * ext/dav/dav.c: DAV extension now compiles.
+
+1999-12-19  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/session/mod_files.c
+      ext/standard/string.c:
+    Use workaround function for sprintf, if the return value of sprintf is needed
+
+1999-12-19  Evan Klinger  <evan715@sirius.com>
+
+    * SAPI.c: Fix for #2994
+
 1999-12-17  Zeev Suraski  <zeev@php.net>
 
     * win32/winutil.c
