@@ -1147,7 +1147,7 @@ PHP_FUNCTION(sqlite_open)
 		}
 	}
 
-	php_sqlite_open(fullpath?fullpath:filename, mode, NULL, return_value, errmsg, object TSRMLS_CC);
+	php_sqlite_open(fullpath ? fullpath : filename, mode, NULL, return_value, errmsg, object TSRMLS_CC);
 
 	if (fullpath) {
 		efree(fullpath);
