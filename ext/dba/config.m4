@@ -26,10 +26,10 @@ dnl Standard check
 AC_DEFUN(PHP_DBA_STD_CHECK,[
   THIS_RESULT="yes"
   if test -z "$THIS_INCLUDE"; then
-    AC_MSG_ERROR(cannot find necessary header file(s))
+    AC_MSG_ERROR([DBA: Could not find necessary header file(s).])
   fi
   if test -z "$THIS_LIBS"; then
-    AC_MSG_ERROR(cannot find necessary library)
+    AC_MSG_ERROR([DBA: Could not find necessary library.])
   fi
 ])
 
@@ -79,13 +79,11 @@ AC_ARG_WITH(gdbm,
 
     if test -n "$THIS_INCLUDE"; then
       unset ac_cv_lib_gdbm_gdbm_open
-      PHP_TEMP_LDFLAGS(-L$THIS_PREFIX/lib,[
-        AC_CHECK_LIB(gdbm, gdbm_open, [
-          AC_DEFINE_UNQUOTED(GDBM_INCLUDE_FILE, "$THIS_INCLUDE", [ ])
-          AC_DEFINE(DBA_GDBM, 1, [ ]) 
-          THIS_LIBS=gdbm
-        ])
-      ])
+      PHP_CHECK_LIBRARY(gdbm, gdbm_open, [
+        AC_DEFINE_UNQUOTED(GDBM_INCLUDE_FILE, "$THIS_INCLUDE", [ ])
+        AC_DEFINE(DBA_GDBM, 1, [ ]) 
+        THIS_LIBS=gdbm
+      ], [], [-L$THIS_PREFIX/lib])
     fi
     
     PHP_DBA_STD_ASSIGN
@@ -113,14 +111,14 @@ AC_ARG_WITH(ndbm,
     
     if test -n "$THIS_INCLUDE"; then
       for LIB in ndbm db1 c; do
-        PHP_TEMP_LDFLAGS(-L$THIS_PREFIX/lib,[
-          AC_CHECK_LIB($LIB, dbm_open, [
-            AC_DEFINE_UNQUOTED(NDBM_INCLUDE_FILE, "$THIS_INCLUDE", [ ])
-            AC_DEFINE(DBA_NDBM,1, [ ]) 
-            THIS_LIBS=$LIB
-            break
-          ])
-        ])
+        PHP_CHECK_LIBRARY($LIB, dbm_open, [
+          AC_DEFINE_UNQUOTED(NDBM_INCLUDE_FILE, "$THIS_INCLUDE", [ ])
+          AC_DEFINE(DBA_NDBM, 1, [ ]) 
+          THIS_LIBS=$LIB
+        ], [], [-L$THIS_PREFIX/lib])
+        if test -n "$THIS_LIBS"; then
+          break
+        fi
       done
     fi
 
@@ -316,24 +314,22 @@ AC_ARG_WITH(dbm,
 
     if test -n "$THIS_INCLUDE"; then
       for LIB in dbm c gdbm; do
-        PHP_TEMP_LDFLAGS(-L$THIS_PREFIX/lib,[
-          AC_CHECK_LIB($LIB, dbminit, [
-            AC_MSG_CHECKING(for DBM using GDBM)
-            AC_DEFINE_UNQUOTED(DBM_INCLUDE_FILE, "$THIS_INCLUDE", [ ])
-            if test "$LIB" = "gdbm"; then
-              AC_DEFINE_UNQUOTED(DBM_VERSION, "GDBM", [ ])
-              AC_MSG_RESULT(yes)
-            else
-              AC_DEFINE_UNQUOTED(DBM_VERSION, "DBM", [ ])
-              AC_MSG_RESULT(no)
-            fi
-            AC_DEFINE(DBA_DBM,1,[ ]) 
-            THIS_LIBS=$LIB
-          ])
-          if test -n "$THIS_LIBS"; then
-            break
+        PHP_CHECK_LIBRARY($LIB, dbminit, [
+          AC_MSG_CHECKING(for DBM using GDBM)
+          AC_DEFINE_UNQUOTED(DBM_INCLUDE_FILE, "$THIS_INCLUDE", [ ])
+          if test "$LIB" = "gdbm"; then
+            AC_DEFINE_UNQUOTED(DBM_VERSION, "GDBM", [ ])
+            AC_MSG_RESULT(yes)
+          else
+            AC_DEFINE_UNQUOTED(DBM_VERSION, "DBM", [ ])
+            AC_MSG_RESULT(no)
           fi
-        ])
+          AC_DEFINE(DBA_DBM, 1, [ ]) 
+          THIS_LIBS=$LIB
+        ], [], [-L$THIS_PREFIX/lib])
+        if test -n "$THIS_LIBS"; then
+          break
+        fi
       done
     fi
     
@@ -368,14 +364,14 @@ AC_ARG_WITH(cdb,
 
     if test -n "$THIS_INCLUDE"; then
       for LIB in cdb c; do
-        PHP_TEMP_LDFLAGS(-L$THIS_PREFIX/lib,[
-          AC_CHECK_LIB($LIB, cdb_read, [
-            AC_DEFINE_UNQUOTED(CDB_INCLUDE_FILE, "$THIS_INCLUDE", [ ])
-            AC_DEFINE(DBA_CDB,1,[ ]) 
-            THIS_LIBS=$LIB
-            break
-          ])
-        ])
+        PHP_CHECK_LIBRARY($LIB, cdb_read, [
+          AC_DEFINE_UNQUOTED(CDB_INCLUDE_FILE, "$THIS_INCLUDE", [ ])
+          AC_DEFINE(DBA_CDB, 1, [ ]) 
+          THIS_LIBS=$LIB
+        ], [], [-L$THIS_PREFIX/lib])
+        if test -n "$THIS_LIBS"; then
+          break
+        fi
       done
     fi
     
