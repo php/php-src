@@ -621,7 +621,7 @@ PHP_FUNCTION(sybase_close)
    Select Sybase database */
 PHP_FUNCTION(sybase_select_db)
 {
-	zval *db, **sybase_link_index;
+	zval **db, **sybase_link_index;
 	int id,type;
 	sybase_link  *sybase_ptr;
 	
@@ -960,7 +960,7 @@ PHP_FUNCTION(sybase_free_result)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING,"%d is not a Sybase result index",Z_LVAL_PP(sybase_result_index));
 		RETURN_FALSE;
 	}
-	zend_list_delete(Z_LVAL_P(sybase_result_index));
+	zend_list_delete(Z_LVAL_PP(sybase_result_index));
 	RETURN_TRUE;
 }
 /* }}} */
