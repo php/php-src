@@ -341,8 +341,8 @@ retry:
 						add_assoc_string(return_value,buf2,buf,1);
 					}
 					if (st >= 2 && st != 11) {
-						if (Z_TYPE_P(vars) != SNMP_ENDOFMIBVIEW && 
-							Z_TYPE_P(vars) != SNMP_NOSUCHOBJECT && Z_TYPE_P(vars) != SNMP_NOSUCHINSTANCE) {
+						if (vars->type != SNMP_ENDOFMIBVIEW && 
+							vars->type != SNMP_NOSUCHOBJECT && vars->type != SNMP_NOSUCHINSTANCE) {
 							memmove((char *)name, (char *)vars->name,vars->name_length * sizeof(oid));
 							name_length = vars->name_length;
 							keepwalking = 1;
