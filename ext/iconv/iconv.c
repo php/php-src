@@ -331,7 +331,7 @@ PHP_FUNCTION(ob_iconv_handler)
 PHP_FUNCTION(iconv_set_encoding)
 {
 	zval **type, **charset;
-	int argc = ZEND_NUM_ARGS();
+	int argc = ZEND_NUM_ARGS(), retval;
 
 	if (argc != 2 || zend_get_parameters_ex(2, &type, &charset) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -341,25 +341,20 @@ PHP_FUNCTION(iconv_set_encoding)
 	convert_to_string_ex(charset);
 
 	if(!strcasecmp("input_encoding", Z_STRVAL_PP(type))) {
-		if (ICONVG(input_encoding)) {
-			free(ICONVG(input_encoding));
-		}
-		ICONVG(input_encoding) = estrndup(Z_STRVAL_PP(charset), Z_STRLEN_PP(charset));
+		retval = zend_alter_ini_entry("iconv.input_encoding", sizeof("iconv.input_encoding"), Z_STRVAL_PP(charset), Z_STRLEN_PP(charset), PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
 	} else if(!strcasecmp("output_encoding", Z_STRVAL_PP(type))) {
-		if (ICONVG(output_encoding)) {
-			free(ICONVG(output_encoding));
-		}
-		ICONVG(output_encoding) = estrndup(Z_STRVAL_PP(charset), Z_STRLEN_PP(charset));
+		retval = zend_alter_ini_entry("iconv.output_encoding", sizeof("iconv.output_encoding"), Z_STRVAL_PP(charset), Z_STRLEN_PP(charset), PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
 	} else if(!strcasecmp("internal_encoding", Z_STRVAL_PP(type))) {
-		if (ICONVG(internal_encoding)) {
-			free(ICONVG(internal_encoding));
-		}
-		ICONVG(internal_encoding) = estrndup(Z_STRVAL_PP(charset), Z_STRLEN_PP(charset));
+		retval = zend_alter_ini_entry("iconv.internal_encoding", sizeof("iconv.internal_encoding"), Z_STRVAL_PP(charset), Z_STRLEN_PP(charset), PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
 	} else {
 		RETURN_FALSE;
 	}
 
-	RETURN_TRUE;
+	if (retval == SUCCESS) {
+		RETURN_TRUE;
+	} else {
+		RETURN_FALSE;
+	}
 }
 /* }}} */
 
