@@ -1733,7 +1733,14 @@ PHP_FUNCTION(sleep)
 	}
 
 	convert_to_long_ex(num);
-	php_sleep(Z_LVAL_PP(num));
+#ifdef PHP_SLEEP_NON_VOID
+	RETURN_LONG(
+#endif
+	php_sleep(Z_LVAL_PP(num))
+#ifdef PHP_SLEEP_NON_VOID
+	)
+#endif
+	;
 }
 /* }}} */
 
