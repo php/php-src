@@ -1283,25 +1283,35 @@ PHP_FUNCTION(mb_preferred_mime_name)
 }
 /* }}} */
 
-/* {{{ static void php_mbstr_encoding_handler() */
-static void
-php_mbstr_encoding_handler(zval *arg, char *res, char *separator TSRMLS_DC)
+/* {{{ static int php_mbstr_encoding_handler_ex() */
+static int
+php_mbstr_encoding_handler_ex(zval *arg, char *res, char *separator, int force_register_globals, int report_errors TSRMLS_DC)
 {
 	char *var, *val, *s1, *s2;
-	char *strtok_buf = NULL, **val_list;
+	char *strtok_buf = NULL, **val_list = NULL;
 	zval *array_ptr = (zval *) arg;
-	int n, num, val_len, *len_list, *elist, elistsz;
+	int n, num, val_len, *len_list = NULL, *elist, elistsz;
 	enum mbfl_no_encoding from_encoding, to_encoding;
 	mbfl_string string, resvar, resval;
 	mbfl_encoding_detector *identd = NULL; 
 	mbfl_buffer_converter *convd = NULL;
+	int prev_rg_state = 0;
+	int retval = 0;
 
 	mbfl_string_init_set(&string, MBSTRG(current_language), MBSTRG(current_internal_encoding));
 	mbfl_string_init_set(&resvar, MBSTRG(current_language), MBSTRG(current_internal_encoding));
 	mbfl_string_init_set(&resval, MBSTRG(current_language), MBSTRG(current_internal_encoding));
 
+	/* register_globals stuff
+	 * XXX: this feature is going to be deprecated? */
+
+	if (force_register_globals) {
+		prev_rg_state = PG(register_globals);
+		PG(register_globals) = 1;
+	}
+
 	if (!res || *res == '\0') {
-		return;
+		goto out;
 	}
 	
 	/* count the variables(separators) contained in the "res".
@@ -1374,9 +1384,13 @@ php_mbstr_encoding_handler(zval *arg, char *res, char *separator TSRMLS_DC)
 			mbfl_encoding_detector_delete(identd TSRMLS_CC);
 		}
 		if (from_encoding == mbfl_no_encoding_invalid) {
+			if (report_errors) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to detect encoding");
+			}
 			from_encoding = mbfl_no_encoding_pass;
 		}
 	}
+
 	convd = NULL;
 	if (from_encoding != mbfl_no_encoding_pass) {
 		convd = mbfl_buffer_converter_new(from_encoding, to_encoding, 0 TSRMLS_CC);
@@ -1384,7 +1398,10 @@ php_mbstr_encoding_handler(zval *arg, char *res, char *separator TSRMLS_DC)
 			mbfl_buffer_converter_illegal_mode(convd, MBSTRG(current_filter_illegal_mode) TSRMLS_CC);
 			mbfl_buffer_converter_illegal_substchar(convd, MBSTRG(current_filter_illegal_substchar) TSRMLS_CC);
 		} else {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to create converter");
+			if (report_errors) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to create converter");
+			}
+			goto out;
 		}
 	}
 
@@ -1418,7 +1435,15 @@ php_mbstr_encoding_handler(zval *arg, char *res, char *separator TSRMLS_DC)
 			mbfl_string_clear(&resval);
 		}
 	}
+
 	MBSTRG(http_input_identify) = from_encoding;
+	retval = 1;
+
+out:
+	/* register_global stuff */
+	if (force_register_globals) {
+		PG(register_globals) = prev_rg_state;
+	}
 
 	if (convd != NULL) {
 		mbfl_buffer_converter_delete(convd TSRMLS_CC);
@@ -1430,6 +1455,7 @@ php_mbstr_encoding_handler(zval *arg, char *res, char *separator TSRMLS_DC)
 		efree((void *)len_list);
 	}
 
+	return retval;
 }
 /* }}} */
 
@@ -1438,7 +1464,7 @@ SAPI_POST_HANDLER_FUNC(php_mbstr_post_handler)
 {
 	MBSTRG(http_input_identify_post) = mbfl_no_encoding_invalid;
 
-	php_mbstr_encoding_handler(arg, SG(request_info).post_data, "&" TSRMLS_CC);
+	php_mbstr_encoding_handler_ex(arg, SG(request_info).post_data, "&", 0, 0 TSRMLS_CC);
 
 	if (MBSTRG(http_input_identify) != mbfl_no_encoding_invalid) {
 		MBSTRG(http_input_identify_post) = MBSTRG(http_input_identify);
@@ -1538,7 +1564,7 @@ MBSTRING_API SAPI_TREAT_DATA_FUNC(mbstr_treat_data)
 		break;
 	}
 
-	php_mbstr_encoding_handler(array_ptr, res, separator TSRMLS_CC);
+	php_mbstr_encoding_handler_ex(array_ptr, res, separator, 0, 0 TSRMLS_CC);
 
 	if (MBSTRG(http_input_identify) != mbfl_no_encoding_invalid) {
 		switch(arg){
@@ -1572,12 +1598,8 @@ MBSTRING_API SAPI_TREAT_DATA_FUNC(mbstr_treat_data)
 PHP_FUNCTION(mb_parse_str)
 {
 	pval **arg_str, **arg_array, *track_vars_array;
-	char *var, *val, *encstr, *strtok_buf, **str_list, *separator;
-	int n, num, val_len, *len_list, *elist, elistsz, old_rg, argc;
-	enum mbfl_no_encoding from_encoding, to_encoding;
-	mbfl_string string, resvar, resval;
-	mbfl_encoding_detector *identd;
-	mbfl_buffer_converter *convd;
+	char *encstr = NULL, *separator = NULL;
+	int argc;
 
 	track_vars_array = NULL;
 	argc = ZEND_NUM_ARGS();
@@ -1598,159 +1620,19 @@ PHP_FUNCTION(mb_parse_str)
 	}
 	separator = (char *)estrdup(PG(arg_separator).input);
 	if (separator == NULL) {
-		RETURN_FALSE;
+		RETVAL_FALSE;
+		goto out;
 	}
 	convert_to_string_ex(arg_str);
 	encstr = estrndup(Z_STRVAL_PP(arg_str), Z_STRLEN_PP(arg_str));
 	if (encstr == NULL) {
-		efree((void *)separator);
-		RETURN_FALSE;
+		RETVAL_FALSE;
+		goto out;
 	}
-	mbfl_string_init_set(&string, MBSTRG(current_language), MBSTRG(current_internal_encoding));
-	mbfl_string_init_set(&resvar, MBSTRG(current_language), MBSTRG(current_internal_encoding));
-	mbfl_string_init_set(&resval, MBSTRG(current_language), MBSTRG(current_internal_encoding));
-
-	/* count the variables contained in the query */
-	num = 1;
-	var = encstr;
-	n = Z_STRLEN_PP(arg_str);
-	while (n > 0) {
-		if (*var == *separator) {
-			num++;
-		}
-		var++;
-		n--;
-	}
-	num *= 2;
-	str_list = (char **)ecalloc(num, sizeof(char *));
-	if (str_list == NULL) {
-		efree((void *)separator);
-		efree((void *)encstr);
-		RETURN_FALSE;
-	}
-	len_list = (int *)ecalloc(num, sizeof(int));
-	if (len_list == NULL) {
-		efree((void *)separator);
-		efree((void *)encstr);
-		efree((void *)str_list);
-		RETURN_FALSE;
-	}
-
-	/* split and decode the query */
-	n = 0;
-	strtok_buf = NULL;
-	var = php_strtok_r(encstr, separator, &strtok_buf);
-	while (var && n < num) {
-		val = strchr(var, '=');
-		if (val) { /* have a value */
-			str_list[n] = var;
-			len_list[n] = php_url_decode(var, strlen(var));
-			n++;
-
-			*val++ = '\0';
-			str_list[n] = val;
-			len_list[n] = php_url_decode(val, strlen(val));
-		} else {
-			str_list[n] = var;
-			len_list[n] = php_url_decode(var, strlen(var));
-			n++;
-
-			str_list[n] = "";
-			len_list[n] = 0;
-		}
-		n++;
-		var = php_strtok_r(NULL, separator, &strtok_buf);
-	}
-	num = n;
-
-	/* initialize converter */
-	to_encoding = MBSTRG(current_internal_encoding);
-	elist = MBSTRG(http_input_list);
-	elistsz = MBSTRG(http_input_list_size);
-	if (elistsz <= 0) {
-		from_encoding = mbfl_no_encoding_pass;
-	} else if (elistsz == 1) {
-		from_encoding = *elist;
-	} else {
-		/* auto detect */
-		from_encoding = mbfl_no_encoding_invalid;
-		identd = mbfl_encoding_detector_new(elist, elistsz TSRMLS_CC);
-		if (identd != NULL) {
-			n = 0;
-			while (n < num) {
-				string.val = (unsigned char *)str_list[n];
-				string.len = len_list[n];
-				if (mbfl_encoding_detector_feed(identd, &string TSRMLS_CC)) {
-					break;
-				}
-				n++;
-			}
-			from_encoding = mbfl_encoding_detector_judge(identd TSRMLS_CC);
-			mbfl_encoding_detector_delete(identd TSRMLS_CC);
-		}
-		if (from_encoding == mbfl_no_encoding_invalid) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to detect encoding");
-			from_encoding = mbfl_no_encoding_pass;
-		}
-	}
-	convd = NULL;
-	if (from_encoding != mbfl_no_encoding_pass) {
-		convd = mbfl_buffer_converter_new(from_encoding, to_encoding, 0 TSRMLS_CC);
-		if (convd != NULL) {
-			mbfl_buffer_converter_illegal_mode(convd, MBSTRG(current_filter_illegal_mode) TSRMLS_CC);
-			mbfl_buffer_converter_illegal_substchar(convd, MBSTRG(current_filter_illegal_substchar) TSRMLS_CC);
-		} else {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to create converter");
-		}
-	}
-
-	/* convert encoding */
-	string.no_encoding = from_encoding;
-	old_rg = PG(register_globals);
-	if (argc == 1) {
-		PG(register_globals) = 1;
-	} else {
-		PG(register_globals) = 0;
-	}
-	n = 0;
-	while (n < num) {
-		/* convert variable name */
-		string.val = str_list[n];
-		string.len = len_list[n];
-		if (convd != NULL && mbfl_buffer_converter_feed_result(convd, &string, &resvar TSRMLS_CC) != NULL) {
-			var = (char *)resvar.val;
-		} else {
-			var = str_list[n];
-		}
-		n++;
-		/* convert value */
-		string.val = str_list[n];
-		string.len = len_list[n];
-		if (convd != NULL && mbfl_buffer_converter_feed_result(convd, &string, &resval TSRMLS_CC) != NULL) {
-			val = resval.val;
-			val_len = resval.len;
-		} else {
-			val = str_list[n];
-			val_len = len_list[n];
-		}
-		n++;
-		/* add variable to symbol table */
-		php_register_variable_safe(var, val, val_len, track_vars_array TSRMLS_CC);
-		mbfl_string_clear(&resvar);
-		mbfl_string_clear(&resval);
-	}
-	PG(register_globals) = old_rg;
-
-	if (convd != NULL) {
-		mbfl_buffer_converter_delete(convd TSRMLS_CC);
-	}
-	efree((void *)str_list);
-	efree((void *)len_list);
-	efree((void *)encstr);
-	efree((void *)separator);
-	MBSTRG(http_input_identify) = from_encoding;
-	MBSTRG(http_input_identify_string) = from_encoding;
-	RETURN_TRUE;
+	RETVAL_BOOL(php_mbstr_encoding_handler_ex(track_vars_array, encstr, separator, (argc == 1), 1 TSRMLS_CC));
+out:
+	if (encstr != NULL) efree(encstr);
+	if (separator != NULL) efree(separator);
 }
 /* }}} */
 
