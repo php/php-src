@@ -30,6 +30,8 @@
 # include <pth.h>
 #elif defined(PTHREADS)
 # include <pthread.h>
+#elif defined(TSRM_ST)
+# include <st.h>
 #endif
 
 typedef int ts_rsrc_id;
@@ -61,6 +63,9 @@ typedef int ts_rsrc_id;
 #elif defined(PI3WEB)
 # define THREAD_T PIThread *
 # define MUTEX_T PISync *
+#elif defined(TSRM_ST)
+# define THREAD_T st_thread_t
+# define MUTEX_T st_mutex_t
 #endif
 
 typedef void (*ts_allocate_ctor)(void *);
