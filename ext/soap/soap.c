@@ -2210,8 +2210,6 @@ static xmlNodePtr seralize_parameter(sdlParamPtr param, zval *param_val, int ind
 
 	xmlParam = seralize_zval(param_val, param, paramName, style TSRMLS_CC);
 
-	efree(paramName);
-
 	return xmlParam;
 }
 
