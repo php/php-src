@@ -281,7 +281,9 @@ while (list($v,$n) = each($sum_results)) {
 
 echo "
 =====================================================================
-TIME END " . date('Y-m-d H:i:s', $end_time) . "
+TIME END " . date('Y-m-d H:i:s', $end_time);
+
+$summary = "
 =====================================================================
 TEST RESULT SUMMARY
 ---------------------------------------------------------------------
@@ -296,19 +298,19 @@ Tests passed    : " . sprintf("%4d (%2.1f%%)",$sum_results['PASSED'],$percent_re
 Time taken      : " . sprintf("%4d seconds", $end_time - $start_time) . "
 =====================================================================
 ";
+echo $summary;
 
 $failed_test_summary = '';
 if (count($GLOBALS['__PHP_FAILED_TESTS__'])) {
-$failed_test_summary .= "
+	$failed_test_summary .= "
 =====================================================================
 FAILED TEST SUMMARY
 ---------------------------------------------------------------------
 ";
-foreach ($GLOBALS['__PHP_FAILED_TESTS__'] as $failed_test_data) {
-$failed_test_summary .=  $failed_test_data['test_name'] . "\n";
-}
-$failed_test_summary .=  "=====================================================================
-";
+	foreach ($GLOBALS['__PHP_FAILED_TESTS__'] as $failed_test_data) {
+		$failed_test_summary .=  $failed_test_data['test_name'] . "\n";
+	}
+	$failed_test_summary .=  "=====================================================================\n";
 }
 
 if ($failed_test_summary && !getenv('NO_PHPTEST_SUMMARY')) {
@@ -319,9 +321,10 @@ define('PHP_QA_EMAIL', 'php-qa@lists.php.net');
 define('QA_SUBMISSION_PAGE', 'http://qa.php.net/buildtest-process.php');
 
 /* We got failed Tests, offer the user to send and e-mail to QA team, unless NO_INTERACTION is set */
-if ($sum_results['FAILED'] && !getenv('NO_INTERACTION')) {
+if (!getenv('NO_INTERACTION')) {
 	$fp = fopen("php://stdin", "r+");
-	echo "Some tests have failed, would you like to send the\nreport to PHP's QA team\n";
+	echo "\nPlease allow this report to be send to the PHP QA\nteam. This will give us a better understanding in how\n";
+	echo "PHP's test cases are doing.\n";
 	echo "(choose \"s\" to just save the results to a file)? [Yns]: ";
 	flush();
 	$user_input = fgets($fp, 10);
@@ -337,7 +340,7 @@ if ($sum_results['FAILED'] && !getenv('NO_INTERACTION')) {
 		
 		/* Ask the user to provide an email address, so that QA team can contact the user */
 		if (!strncasecmp($user_input, 'y', 1) || strlen(trim($user_input)) == 0) {
-			echo "Please enter your email address: ";
+			echo "\nPlease enter your email address.\n(You address will be mangled so that it will not go out on any\nmailinglist in plain text): ";
 			flush();
 			$fp = fopen("php://stdin", "r+");
 			$user_email = trim(fgets($fp, 1024));
@@ -348,17 +351,24 @@ if ($sum_results['FAILED'] && !getenv('NO_INTERACTION')) {
 		$sep = "\n" . str_repeat('=', 80) . "\n";
 		
 		$failed_tests_data .= $failed_test_summary . "\n";
-		
-		foreach ($GLOBALS['__PHP_FAILED_TESTS__'] as $test_info) {
-			$failed_tests_data .= $sep . $test_info['name'];
-			$failed_tests_data .= $sep . file_get_contents(realpath($test_info['output']));
-			$failed_tests_data .= $sep . file_get_contents(realpath($test_info['diff']));
-			$failed_tests_data .= $sep . "\n\n";
+		$failed_tests_data .= $summary . "\n";
+
+		if ($sum_results['FAILED']) {
+			foreach ($GLOBALS['__PHP_FAILED_TESTS__'] as $test_info) {
+				$failed_tests_data .= $sep . $test_info['name'];
+				$failed_tests_data .= $sep . file_get_contents(realpath($test_info['output']));
+				$failed_tests_data .= $sep . file_get_contents(realpath($test_info['diff']));
+				$failed_tests_data .= $sep . "\n\n";
+			}
+			$status = "failed";
+		} else {
+			$status = "success";
 		}
 		
 		$failed_tests_data .= "\n" . $sep . 'BUILD ENVIRONMENT' . $sep;
 		$failed_tests_data .= "OS:\n". PHP_OS. "\n\n";
 		$automake = $autoconf = $libtool = $compiler = 'N/A';
+
 		if (substr(PHP_OS, 0, 3) != "WIN") {
 			$automake = shell_exec('automake --version');
 			$autoconf = shell_exec('autoconf --version');
@@ -390,7 +400,7 @@ if ($sum_results['FAILED'] && !getenv('NO_INTERACTION')) {
 		
 		$compression = 0;
 		
-		if ($just_save_results || !mail_qa_team($failed_tests_data, $compression)) {
+		if ($just_save_results || !mail_qa_team($failed_tests_data, $compression, $status)) {
 			$output_file = 'php_test_results_' . date('Ymd') . ( $compression ? '.txt.gz' : '.txt' );
 			$fp = fopen($output_file, "w");
 			fwrite($fp, $failed_tests_data);
@@ -414,7 +424,7 @@ if(getenv('REPORT_EXIT_STATUS') == 1 and $sum_results['FAILED']) {
 // Send Email to QA Team
 //
 
-function mail_qa_team($data, $compression)
+function mail_qa_team($data, $compression, $status = FALSE)
 {
 	$url_bits = parse_url(QA_SUBMISSION_PAGE);
 	if (empty($url_bits['port'])) $url_bits['port'] = 80;
@@ -427,8 +437,8 @@ function mail_qa_team($data, $compression)
 		return FALSE;
 	}
 
-	echo "Posting to {$url_bits['host']} {$url_bits['path']}\n";
-	fwrite($fs, "POST ".$url_bits['path']." HTTP/1.1\r\n");
+	echo "\nPosting to {$url_bits['host']} {$url_bits['path']}\n";
+	fwrite($fs, "POST ".$url_bits['path']."?status=$status HTTP/1.1\r\n");
 	fwrite($fs, "Host: ".$url_bits['host']."\r\n");
 	fwrite($fs, "User-Agent: QA Browser 0.1\r\n");
 	fwrite($fs, "Content-Type: application/x-www-form-urlencoded\r\n");
