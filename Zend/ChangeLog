@@ -1,3 +1,20 @@
+2004-08-03  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZEND_CHANGES:
+      Update
+
+    * (PHP_5_0)
+      zend_builtin_functions.c
+      tests/bug29505.phpt:
+      - MFH Bug #29505 get_class_vars() severely broken when used with arrays
+
+    * tests/bug29505.phpt:
+      
+      Add new test
+
+    * zend_builtin_functions.c:
+      - Fixed Bug #29505 get_class_vars() severely broken when used with arrays
+
 2004-08-02  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_reflection_api.c:
