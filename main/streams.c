@@ -250,21 +250,13 @@ PHPAPI char *_php_stream_gets(php_stream *stream, char *buf, size_t maxlen TSRML
 		return NULL;
 	} else {
 		/* unbuffered fgets - poor performance ! */
-		size_t n = 1;
 		char *c = buf;
 
 		/* TODO: look at error returns? */
 
-		while(n < maxlen && stream->ops->read(stream, c, 1 TSRMLS_CC) > 0) {
-			n++;
-			if (*c == '\n')	{
-				c++;
-				break;
-			}
-			c++;
-		}
-		*c = 0;
-		return buf;
+		while (--maxlen > 0 && stream->ops->read(stream, buf, 1 TSRMLS_CC) == 1 && *buf++ != '\n');
+		*buf = '\0';
+		return c == buf && maxlen > 0 ? NULL : c;
 	}
 }
 
