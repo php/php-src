@@ -3652,6 +3652,8 @@ static void _php_imap_parse_address (ADDRESS *addresslist, char **fulladdress, z
 		tmpstr[0] = '\0';
 		rfc822_write_address(tmpstr, addresstmp);
 		*fulladdress = tmpstr;
+	} else {
+		*fulladdress = NULL;
 	}
 	
 	addresstmp = addresslist;
