@@ -42,7 +42,7 @@ PHP_FUNCTION(openssl_open);
 
 #else
 
-#define phpext_extname_ptr NULL
+#define phpext_openssl_ptr NULL
 
 #endif
 
