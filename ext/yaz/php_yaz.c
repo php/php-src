@@ -1492,6 +1492,7 @@ PHP_INI_END()
 PHP_MINIT_FUNCTION(yaz)
 {
 	int i;
+	const char *fname;
 	nmem_init();
 #ifdef ZTS
 	yaz_mutex = tsrm_mutex_alloc();
@@ -1501,12 +1502,14 @@ PHP_MINIT_FUNCTION(yaz)
 
 	REGISTER_INI_ENTRIES();
 
-	if (YAZSG(log_file)) {
+	fname = YAZSG(log_file);
+	if (fname && *fname)
+	{
+		yaz_log_init_file(fname);
 		yaz_log_init_level(LOG_ALL);
-		yaz_log_init_file(YAZSG(log_file));
-	} else {
-		yaz_log_init_level(0);
 	}
+	else
+		yaz_log_init_level(0);
 
 	le_link = zend_register_list_destructors_ex (yaz_close_link, 0, "YAZ link", module_number);
 
