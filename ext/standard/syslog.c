@@ -31,11 +31,10 @@
 #include <errno.h>
 
 #include <stdio.h>
-#include "php_syslog.h"
+#include "basic_functions.h"
+#include "php_ext_syslog.h"
 
-static int syslog_started;
-static char *syslog_device;
-static void start_syslog(void);
+static void start_syslog(BLS_D);
 
 PHP_MINIT_FUNCTION(syslog)
 {
@@ -99,26 +98,30 @@ PHP_MINIT_FUNCTION(syslog)
 
 PHP_RINIT_FUNCTION(syslog)
 {
+	BLS_FETCH();
+
 	if (INI_INT("define_syslog_variables")) {
-		start_syslog();
+		start_syslog(BLS_C);
 	} else {
-		syslog_started=0;
+		BG(syslog_started)=0;
 	}
-	syslog_device=NULL;
+	BG(syslog_device)=NULL;
 	return SUCCESS;
 }
 
 
 PHP_RSHUTDOWN_FUNCTION(syslog)
 {
-	if (syslog_device) {
-		efree(syslog_device);
+	BLS_FETCH();
+	
+	if (BG(syslog_device)) {
+		efree(BG(syslog_device));
 	}
 	return SUCCESS;
 }
 
 
-static void start_syslog(void)
+static void start_syslog(BLS_D)
 {
 	ELS_FETCH();
 	
@@ -176,15 +179,17 @@ static void start_syslog(void)
 	SET_VAR_LONG("LOG_PERROR", LOG_PERROR); /*log to stderr*/
 #endif
 
-	syslog_started=1;
+	BG(syslog_started)=1;
 }
 
 /* {{{ proto void define_syslog_variables(void)
    Initializes all syslog-related variables */
 PHP_FUNCTION(define_syslog_variables)
 {
-	if (!syslog_started) {
-		start_syslog();
+	BLS_FETCH();
+
+	if (!BG(syslog_started)) {
+		start_syslog(BLS_C);
 	}
 }
 
@@ -198,17 +203,19 @@ PHP_FUNCTION(define_syslog_variables)
 PHP_FUNCTION(openlog)
 {
 	pval **ident, **option, **facility;
+	BLS_FETCH();
+
 	if (ARG_COUNT(ht) != 3 || zend_get_parameters_ex(3, &ident, &option, &facility) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(ident);
 	convert_to_long_ex(option);
 	convert_to_long_ex(facility);
-	if (syslog_device) {
-		efree(syslog_device);
+	if (BG(syslog_device)) {
+		efree(BG(syslog_device));
 	}
-	syslog_device = estrndup((*ident)->value.str.val,(*ident)->value.str.len);
-	openlog(syslog_device, (*option)->value.lval, (*facility)->value.lval);
+	BG(syslog_device) = estrndup((*ident)->value.str.val,(*ident)->value.str.len);
+	openlog(BG(syslog_device), (*option)->value.lval, (*facility)->value.lval);
 	RETURN_TRUE;
 }
 /* }}} */
@@ -217,10 +224,12 @@ PHP_FUNCTION(openlog)
    Close connection to system logger */
 PHP_FUNCTION(closelog)
 {
+	BLS_FETCH();
+
 	closelog();
-	if (syslog_device) {
-		efree(syslog_device);
-		syslog_device=NULL;
+	if (BG(syslog_device)) {
+		efree(BG(syslog_device));
+		BG(syslog_device)=NULL;
 	}
 	RETURN_TRUE;
 }
