@@ -306,7 +306,7 @@ PHP_FUNCTION(explode)
    Join array elements placing glue string between items and return one string */
 PHP_FUNCTION(implode)
 {
-	pval *arg1, *arg2, *delim, *tmp, *arr;
+	pval *arg1, *arg2, *delim, **tmp, *arr;
 	int len = 0, count = 0;
 	
 	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
@@ -329,9 +329,9 @@ PHP_FUNCTION(implode)
 	/* convert everything to strings, and calculate length */
 	_php3_hash_internal_pointer_reset(arr->value.ht);
 	while (_php3_hash_get_current_data(arr->value.ht, (void **) &tmp) == SUCCESS) {
-		convert_to_string(tmp);
-		if (tmp->type == IS_STRING) {
-			len += tmp->value.str.len;
+		convert_to_string(*tmp);
+		if ((*tmp)->type == IS_STRING) {
+			len += (*tmp)->value.str.len;
 			if (count>0) {
 				len += delim->value.str.len;
 			}
@@ -346,9 +346,9 @@ PHP_FUNCTION(implode)
 	return_value->value.str.val[len] = '\0';
 	_php3_hash_internal_pointer_reset(arr->value.ht);
 	while (_php3_hash_get_current_data(arr->value.ht, (void **) &tmp) == SUCCESS) {
-		if (tmp->type == IS_STRING) {
+		if ((*tmp)->type == IS_STRING) {
 			count--;
-			strcat(return_value->value.str.val, tmp->value.str.val);
+			strcat(return_value->value.str.val, (*tmp)->value.str.val);
 			if (count > 0) {
 				strcat(return_value->value.str.val, delim->value.str.val);
 			}
@@ -356,6 +356,8 @@ PHP_FUNCTION(implode)
 		_php3_hash_move_forward(arr->value.ht);
 	}
 	return_value->type = IS_STRING;
+	return_value->refcount = 1;
+	return_value->is_ref = 0;
 	return_value->value.str.len = len;
 }
 /* }}} */
