@@ -375,6 +375,10 @@ SOURCE=.\ext\session\mod_files.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\ext\session\mod_user.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\ext\bcmath\number.c
 # End Source File
 # Begin Source File
@@ -400,17 +404,7 @@ SOURCE=.\ext\odbc\php_odbc.c
 # Begin Source File
 
 SOURCE=.\ext\pcre\php_pcre.c
-
-!IF  "$(CFG)" == "php4dllts - Win32 Debug_TS"
-
 # ADD CPP /D "STATIC"
-
-!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS"
-
-# ADD CPP /D "STATIC"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
@@ -518,6 +512,10 @@ SOURCE=.\ext\standard\md5.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\ext\session\mod_user.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\ext\bcmath\number.h
 # End Source File
 # Begin Source File
@@ -610,77 +608,27 @@ SOURCE=.\ext\standard\url.h
 # Begin Source File
 
 SOURCE=.\ext\pcre\pcrelib\chartables.c
-
-!IF  "$(CFG)" == "php4dllts - Win32 Debug_TS"
-
 # ADD CPP /D "STATIC"
-
-!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS"
-
-# ADD CPP /D "STATIC"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=.\ext\pcre\pcrelib\get.c
-
-!IF  "$(CFG)" == "php4dllts - Win32 Debug_TS"
-
 # ADD CPP /D "STATIC"
-
-!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS"
-
-# ADD CPP /D "STATIC"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=.\ext\pcre\pcrelib\maketables.c
-
-!IF  "$(CFG)" == "php4dllts - Win32 Debug_TS"
-
 # ADD CPP /D "STATIC"
-
-!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS"
-
-# ADD CPP /D "STATIC"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=.\ext\pcre\pcrelib\pcre.c
-
-!IF  "$(CFG)" == "php4dllts - Win32 Debug_TS"
-
 # ADD CPP /D "STATIC"
-
-!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS"
-
-# ADD CPP /D "STATIC"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=.\ext\pcre\pcrelib\study.c
-
-!IF  "$(CFG)" == "php4dllts - Win32 Debug_TS"
-
 # ADD CPP /D "STATIC"
-
-!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS"
-
-# ADD CPP /D "STATIC"
-
-!ENDIF 
-
 # End Source File
 # End Group
 # Begin Group "Header Files No. 3"

@@ -4,6 +4,7 @@
 
 #define NEEDRDH 1
 #include "readdir.h"
+#include "php.h"
 
 /**********************************************************************
  * Implement dirent-style opendir/readdir/closedir on Window 95/NT
@@ -62,7 +63,7 @@ struct dirent *readdir(DIR * dp)
 	}
 	dp->offset++;
 
-	strncpy(dp->dent.d_name, dp->fileinfo.name, _MAX_FNAME);
+	strlcpy(dp->dent.d_name, dp->fileinfo.name, _MAX_FNAME+1);
 	dp->dent.d_ino = 1;
 	dp->dent.d_reclen = strlen(dp->dent.d_name);
 	dp->dent.d_off = dp->offset;
