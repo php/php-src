@@ -1,3 +1,37 @@
+2000-08-13  Sterling Hughes  <stirling@bestweb.net>
+
+    * ext/curl/curl.c
+      ext/curl/php_curl.h: - Fix spacing.
+    - Add error constants.
+
+2000-08-13  Stanislav Malyshev  <stas@zend.com>
+
+    * sapi/apache/sapi_apache.c: Fix opened_path init
+
+    * sapi/roxen/roxen.c
+      sapi/thttpd/thttpd.c
+      sapi/isapi/php4isapi.c
+      sapi/nsapi/nsapi.c
+      sapi/cgi/cgi_main.c
+      main/main.c: Fix zend_fiel_handle handling. Should fix URL include
+    and various opened_path inconsistencies.
+
+2000-08-13  Sterling Hughes  <stirling@bestweb.net>
+
+    * ext/dbase/dbase.c:  Fixed dbase_add_record. 
+
+2000-08-13  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * NEWS
+      ext/mcrypt/mcrypt.c
+      ext/mcrypt/php_mcrypt.h:
+    - Now using the better way of using INI directives
+    - Changed some warning/error messages to be more clear
+
+2000-08-13  Andi Gutmans  <andi@php.net>
+
+    * NEWS: *** empty log message ***
+
 2000-08-12  Egon Schmid  <eschmid@s.netic.de>
 
     * ext/sysvshm/sysvshm.c: Some protos corrected.
