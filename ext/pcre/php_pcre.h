@@ -54,25 +54,14 @@ typedef struct {
 #endif
 } pcre_cache_entry;
 
-typedef struct {
+ZEND_BEGIN_MODULE_GLOBALS(pcre)
 	HashTable pcre_cache;
-} php_pcre_globals;
+ZEND_END_MODULE_GLOBALS(pcre)
 
 #ifdef ZTS
-# define PCRE_LS_D 	php_pcre_globals *pcre_globals
-# define PCRE_LS_DC , PCRE_LS_D
-# define PCRE_LS_C	pcre_globals
-# define PCRE_LS_CC	, PCRE_LS_C
-# define PCRE_G(v) 	(pcre_globals->v)
-# define PCRE_LS_FETCH() php_pcre_globals *pcre_globals = ts_resource(pcre_globals_id);
+# define PCRE_G(v) TSRMG(pcre_globals_id, zend_pcre_globals *, v)
 #else
-# define PCRE_LS_D
-# define PCRE_LS_DC
-# define PCRE_LS_C
-# define PCRE_LS_CC
 # define PCRE_G(v)	(pcre_globals.v)
-# define PCRE_LS_FETCH()
-extern ZEND_API php_pcre_globals pcre_globals;
 #endif
 
 #else

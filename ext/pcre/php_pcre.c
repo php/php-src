@@ -40,11 +40,8 @@
 
 #define PREG_REPLACE_EVAL			(1<<0)
 
-#ifdef ZTS
-int pcre_globals_id;
-#else
-php_pcre_globals pcre_globals;
-#endif
+
+ZEND_DECLARE_MODULE_GLOBALS(pcre)
 
 
 static void *php_pcre_malloc(size_t size)
@@ -69,16 +66,15 @@ static void php_free_pcre_cache(void *data)
 }
 
 
-#ifdef ZTS
-static void php_pcre_init_globals(php_pcre_globals *pcre_globals TSRMLS_DC)
+static void php_pcre_init_globals(zend_pcre_globals *pcre_globals TSRMLS_DC)
 {
-	zend_hash_init(&PCRE_G(pcre_cache), 0, NULL, php_free_pcre_cache, 1);
+	zend_hash_init(&pcre_globals->pcre_cache, 0, NULL, php_free_pcre_cache, 1);
 }
 
-
-static void php_pcre_shutdown_globals(php_pcre_globals *pcre_globals TSRMLS_DC)
+#ifdef ZTS
+static void php_pcre_shutdown_globals(zend_pcre_globals *pcre_globals TSRMLS_DC)
 {
-	zend_hash_destroy(&PCRE_G(pcre_cache));
+	zend_hash_destroy(&pcre_globals->pcre_cache);
 }
 #endif
 
@@ -96,15 +92,7 @@ PHP_MINFO_FUNCTION(pcre)
 /* {{{ PHP_MINIT_FUNCTION(pcre) */
 static PHP_MINIT_FUNCTION(pcre)
 {
-#ifdef ZTS
-	ts_allocate_id(
-					&pcre_globals_id,
-					sizeof(php_pcre_globals),
-					(ts_allocate_ctor) php_pcre_init_globals,
-					(ts_allocate_dtor) php_pcre_shutdown_globals);
-#else
-	zend_hash_init(&PCRE_G(pcre_cache), 0, NULL, php_free_pcre_cache, 1);
-#endif
+	ZEND_INIT_MODULE_GLOBALS(pcre, php_pcre_init_globals, php_pcre_shutdown_globals);
 	
 	REGISTER_LONG_CONSTANT("PREG_PATTERN_ORDER", PREG_PATTERN_ORDER, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PREG_SET_ORDER", PREG_SET_ORDER, CONST_CS | CONST_PERSISTENT);
@@ -117,11 +105,6 @@ static PHP_MINIT_FUNCTION(pcre)
 /* {{{ PHP_MSHUTDOWN_FUNCTION(pcre) */
 static PHP_MSHUTDOWN_FUNCTION(pcre)
 {
-#ifndef ZTS
-	zend_hash_destroy(&PCRE_G(pcre_cache));
-#else
-	ts_free_id(pcre_globals_id);
-#endif
 	return SUCCESS;
 }
 /* }}} */
@@ -158,7 +141,7 @@ static pcre* pcre_get_compiled_regex(char *regex, pcre_extra *extra, int *preg_o
 #endif
 	pcre_cache_entry	*pce;
 	pcre_cache_entry	 new_entry;
-	PCRE_LS_FETCH();
+	TSRMLS_FETCH();
 
 	/* Try to lookup the cached regex entry, and if successful, just pass
 	   back the compiled pattern, otherwise go on and compile it. */
