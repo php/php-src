@@ -386,6 +386,9 @@ ZEND_API ZEND_FUNCTION(display_disabled_class);
 			zval_copy_ctor(z);          \
 	    }                               \
 		if (dtor) {                     \
+			if (!copy) {                \
+				ZVAL_NULL(zv);          \
+			}                           \
 			zval_ptr_dtor(&zv);         \
 	    }                               \
 		(z)->is_ref = is_ref;           \
