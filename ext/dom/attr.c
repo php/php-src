@@ -52,7 +52,8 @@ PHP_FUNCTION(dom_attr_attr)
 	int name_len, value_len;
 
 	id = getThis();
-	
+	intern = (dom_object *)zend_object_store_get_object(id TSRMLS_CC);
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|s", &name, &name_len, &value, &value_len) == FAILURE) {
 		return;
 	}
@@ -67,13 +68,12 @@ PHP_FUNCTION(dom_attr_attr)
 	if (!nodep)
 		RETURN_FALSE;
 
-	intern = (dom_object *)zend_object_store_get_object(id TSRMLS_CC);
 	if (intern != NULL) {
 		oldnode = (xmlNodePtr)intern->ptr;
 		if (oldnode != NULL) {
 			node_free_resource(oldnode  TSRMLS_CC);
 		}
-		php_dom_set_object(id, (xmlNodePtr) nodep TSRMLS_CC);
+		php_dom_set_object(intern, (xmlNodePtr) nodep TSRMLS_CC);
 	}
 }
 
@@ -169,8 +169,6 @@ Since: DOM Level 2
 */
 int dom_attr_owner_element_read(dom_object *obj, zval **retval TSRMLS_DC)
 {
-
-	zval *wrapper;
 	xmlNodePtr nodep, nodeparent;
 	int ret;
 
@@ -181,11 +179,9 @@ int dom_attr_owner_element_read(dom_object *obj, zval **retval TSRMLS_DC)
 		return FAILURE;
 	}
 
-	wrapper = dom_object_get_data(nodeparent);
-	if (wrapper == NULL) {
-		ALLOC_ZVAL(*retval);
-	}
-	if (NULL == (*retval = php_dom_create_object(nodeparent, &ret, wrapper, *retval TSRMLS_CC))) {
+	ALLOC_ZVAL(*retval);
+
+	if (NULL == (*retval = php_dom_create_object(nodeparent, &ret, NULL, *retval, obj TSRMLS_CC))) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot create required DOM object");
 		return FAILURE;
 	}

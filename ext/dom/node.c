@@ -217,7 +217,6 @@ Since:
 */
 int dom_node_parent_node_read(dom_object *obj, zval **retval TSRMLS_DC)
 {
-	zval *wrapper;
 	xmlNode *nodep, *nodeparent;
 	int ret;
 
@@ -228,11 +227,9 @@ int dom_node_parent_node_read(dom_object *obj, zval **retval TSRMLS_DC)
 		return FAILURE;
 	}
 
-	wrapper = dom_object_get_data(nodeparent);
-	if (wrapper == NULL) {
-		ALLOC_ZVAL(*retval);
-	}
-	if (NULL == (*retval = php_dom_create_object(nodeparent, &ret, wrapper, *retval TSRMLS_CC))) {
+	ALLOC_ZVAL(*retval);
+
+	if (NULL == (*retval = php_dom_create_object(nodeparent, &ret, NULL, *retval, obj TSRMLS_CC))) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot create required DOM object");
 		return FAILURE;
 	}
@@ -264,13 +261,9 @@ int dom_node_child_nodes_read(dom_object *obj, zval **retval TSRMLS_DC)
 	
 	if (last) {
 		while (last) {
-			zval *child = NULL;
-			zval *wrapper;
-			wrapper = dom_object_get_data(last);
-			if (wrapper == NULL) {
-				MAKE_STD_ZVAL(child);
-			}
-			child = php_dom_create_object(last, &ret, wrapper, child TSRMLS_CC);
+			zval *child;
+			MAKE_STD_ZVAL(child);
+			child = php_dom_create_object(last, &ret, NULL, child, obj TSRMLS_CC);
 			add_next_index_zval(*retval, child);
 			last = last->next;
 		}
@@ -289,7 +282,6 @@ Since:
 */
 int dom_node_first_child_read(dom_object *obj, zval **retval TSRMLS_DC)
 {
-	zval *wrapper;
 	xmlNode *nodep, *first;
 	int ret;
 
@@ -301,11 +293,9 @@ int dom_node_first_child_read(dom_object *obj, zval **retval TSRMLS_DC)
 		return FAILURE;
 	}
 
-	wrapper = dom_object_get_data(first);
-	if (wrapper == NULL) {
-		ALLOC_ZVAL(*retval);
-	}
-	if (NULL == (*retval = php_dom_create_object(first, &ret, wrapper, *retval TSRMLS_CC))) {
+	ALLOC_ZVAL(*retval);
+
+	if (NULL == (*retval = php_dom_create_object(first, &ret, NULL, *retval, obj TSRMLS_CC))) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot create required DOM object");
 		return FAILURE;
 	}
@@ -323,7 +313,6 @@ Since:
 */
 int dom_node_last_child_read(dom_object *obj, zval **retval TSRMLS_DC)
 {
-	zval *wrapper;
 	xmlNode *nodep, *last;
 	int ret;
 
@@ -334,11 +323,9 @@ int dom_node_last_child_read(dom_object *obj, zval **retval TSRMLS_DC)
 		return FAILURE;
 	}
 
-	wrapper = dom_object_get_data(last);
-	if (wrapper == NULL) {
-		ALLOC_ZVAL(*retval);
-	}
-	if (NULL == (*retval = php_dom_create_object(last, &ret, wrapper, *retval TSRMLS_CC))) {
+	ALLOC_ZVAL(*retval);
+
+	if (NULL == (*retval = php_dom_create_object(last, &ret, NULL, *retval, obj TSRMLS_CC))) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot create required DOM object");
 		return FAILURE;
 	}
@@ -356,7 +343,6 @@ Since:
 */
 int dom_node_previous_sibling_read(dom_object *obj, zval **retval TSRMLS_DC)
 {
-	zval *wrapper;
 	xmlNode *nodep, *prevsib;
 	int ret;
 
@@ -367,11 +353,9 @@ int dom_node_previous_sibling_read(dom_object *obj, zval **retval TSRMLS_DC)
 		return FAILURE;
 	}
 
-	wrapper = dom_object_get_data(prevsib);
-	if (wrapper == NULL) {
-		ALLOC_ZVAL(*retval);
-	}
-	if (NULL == (*retval = php_dom_create_object(prevsib, &ret, wrapper, *retval TSRMLS_CC))) {
+	ALLOC_ZVAL(*retval);
+
+	if (NULL == (*retval = php_dom_create_object(prevsib, &ret, NULL, *retval, obj TSRMLS_CC))) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot create required DOM object");
 		return FAILURE;
 	}
@@ -389,7 +373,6 @@ Since:
 */
 int dom_node_next_sibling_read(dom_object *obj, zval **retval TSRMLS_DC)
 {
-	zval *wrapper;
 	xmlNode *nodep, *nextsib;
 	int ret;
 
@@ -400,11 +383,9 @@ int dom_node_next_sibling_read(dom_object *obj, zval **retval TSRMLS_DC)
 		return FAILURE;
 	}
 
-	wrapper = dom_object_get_data(nextsib);
-	if (wrapper == NULL) {
-		ALLOC_ZVAL(*retval);
-	}
-	if (NULL == (*retval = php_dom_create_object(nextsib, &ret, wrapper, *retval TSRMLS_CC))) {
+	ALLOC_ZVAL(*retval);
+
+	if (NULL == (*retval = php_dom_create_object(nextsib, &ret, NULL, *retval, obj TSRMLS_CC))) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot create required DOM object");
 		return FAILURE;
 	}
@@ -435,13 +416,9 @@ int dom_node_attributes_read(dom_object *obj, zval **retval TSRMLS_DC)
 		array_init(*retval);
 	
 		while (attr) {
-			zval *curattr = NULL;
-			zval *wrapper;
-			wrapper = dom_object_get_data((xmlNodePtr) attr);
-			if (wrapper == NULL) {
-				MAKE_STD_ZVAL(curattr);
-			}
-			curattr = php_dom_create_object((xmlNodePtr) attr, &ret, wrapper, curattr TSRMLS_CC);
+			zval *curattr;
+			MAKE_STD_ZVAL(curattr);
+			curattr = php_dom_create_object((xmlNodePtr) attr, &ret, NULL, curattr, obj TSRMLS_CC);
 			add_assoc_zval(*retval, (char *) attr->name, curattr);
 			attr = attr->next;
 		}
@@ -463,7 +440,6 @@ Since:
 */
 int dom_node_owner_document_read(dom_object *obj, zval **retval TSRMLS_DC)
 {
-	zval *wrapper;
 	xmlNode *nodep;
 	xmlDocPtr docp;
 	int ret;
@@ -481,11 +457,9 @@ int dom_node_owner_document_read(dom_object *obj, zval **retval TSRMLS_DC)
 		return FAILURE;
 	}
 
-	wrapper = dom_object_get_data((xmlNodePtr) docp);
-	if (wrapper == NULL) {
-		ALLOC_ZVAL(*retval);
-	}
-	if (NULL == (*retval = php_dom_create_object((xmlNodePtr) docp, &ret, wrapper, *retval TSRMLS_CC))) {
+	ALLOC_ZVAL(*retval);
+
+	if (NULL == (*retval = php_dom_create_object((xmlNodePtr) docp, &ret, NULL, *retval, obj TSRMLS_CC))) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot create required DOM object");
 		return FAILURE;
 	}
@@ -721,31 +695,38 @@ PHP_FUNCTION(dom_node_insert_before)
 {
 	zval *id, *node, *ref, *rv = NULL;
 	xmlNodePtr child, new_child, parentp, refp;
+	dom_object *intern, *childobj, *refpobj;
 	int ret;
 
-	DOM_GET_THIS_OBJ(parentp, id, xmlNodePtr);
+	DOM_GET_THIS_OBJ(parentp, id, xmlNodePtr, intern);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "oo!", &node, &ref) == FAILURE) {
 		return;
 	}
 
-	DOM_GET_OBJ(child, node, xmlNodePtr);
+	DOM_GET_OBJ(child, node, xmlNodePtr, childobj);
 
 	new_child = NULL;
 
 	if (dom_hierarchy(parentp, child) == FAILURE) {
 		php_dom_throw_error(HIERARCHY_REQUEST_ERR, &return_value TSRMLS_CC);
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Hierarchy Request Error");
+		RETURN_FALSE;
 	}
-	
+
 	if (child->doc != parentp->doc && child->doc != NULL) {
 		php_dom_throw_error(WRONG_DOCUMENT_ERR, &return_value TSRMLS_CC);
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Couldn't add newnode as it was created from a different document");
 		RETURN_FALSE;
 	}
 
+	if (child->doc == NULL && parentp->doc != NULL) {
+		childobj->document = intern->document;
+		increment_document_reference(childobj, NULL TSRMLS_CC);
+	}
+
 	if (ref != NULL) {
-		DOM_GET_OBJ(refp, ref, xmlNodePtr);
+		DOM_GET_OBJ(refp, ref, xmlNodePtr, refpobj);
 		if (refp->parent != parentp) {
 			php_dom_throw_error(NOT_FOUND_ERR, &return_value TSRMLS_CC);
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Couldn't add newnode as refnode is not child of node");
@@ -765,14 +746,14 @@ PHP_FUNCTION(dom_node_insert_before)
 				xmlNodeSetContent(refp, tmp);
 				xmlFree(tmp);
 				node_free_resource(child TSRMLS_CC);
-				DOM_RET_OBJ(rv, refp, &ret);
+				DOM_RET_OBJ(rv, refp, &ret, intern);
 				return;
 			}
 			if ((refp->prev != NULL) && (refp->prev->type == XML_TEXT_NODE)
 				&& (refp->name == refp->prev->name)) {
 				xmlNodeAddContent(refp->prev, child->content);
 				node_free_resource(child TSRMLS_CC);
-				DOM_RET_OBJ(rv, refp->prev, &ret);
+				DOM_RET_OBJ(rv, refp->prev, &ret, intern);
 				return;
 			}
 		} else if (child->type == XML_ATTRIBUTE_NODE) {
@@ -788,7 +769,7 @@ PHP_FUNCTION(dom_node_insert_before)
 					node_free_resource((xmlNodePtr) lastattr TSRMLS_CC);
 					xmlFreeProp(lastattr);
 				} else {
-					DOM_RET_OBJ(rv, child, &ret);
+					DOM_RET_OBJ(rv, child, &ret, intern);
 					return;
 				}
 			}
@@ -805,7 +786,7 @@ PHP_FUNCTION(dom_node_insert_before)
 			(parentp != child)) {
 				xmlNodeAddContent(parentp, child->content);
 				node_free_resource(child TSRMLS_CC);
-				DOM_RET_OBJ(rv, parentp, &ret);
+				DOM_RET_OBJ(rv, parentp, &ret, intern);
 				return;
 			}
 			if ((parentp->last != NULL) && (parentp->last->type == XML_TEXT_NODE) &&
@@ -813,7 +794,7 @@ PHP_FUNCTION(dom_node_insert_before)
 			(parentp->last != child)) {
 				xmlNodeAddContent(parentp->last, child->content);
 				node_free_resource(child TSRMLS_CC);
-				DOM_RET_OBJ(rv, parentp->last, &ret);
+				DOM_RET_OBJ(rv, parentp->last, &ret, intern);
 				return;
 			}
 		} else 	if (child->type == XML_ATTRIBUTE_NODE) {
@@ -829,7 +810,7 @@ PHP_FUNCTION(dom_node_insert_before)
 					node_free_resource((xmlNodePtr) lastattr TSRMLS_CC);
 					xmlFreeProp(lastattr);
 				} else {
-					DOM_RET_OBJ(rv, child, &ret);
+					DOM_RET_OBJ(rv, child, &ret, intern);
 					return;
 				}
 			}
@@ -838,8 +819,8 @@ PHP_FUNCTION(dom_node_insert_before)
 			if (new_child != NULL) {
 				child->children = NULL;
 			}
-			dom_add_to_list(child, (xmlDocPtr) child->doc TSRMLS_CC);
-			DOM_RET_OBJ(rv, new_child, &ret);
+			dom_add_to_list(child, intern TSRMLS_CC);
+			DOM_RET_OBJ(rv, new_child, &ret, intern);
 			return;
 		}
 		new_child = xmlAddChild(parentp, child);
@@ -850,9 +831,9 @@ PHP_FUNCTION(dom_node_insert_before)
 		RETURN_FALSE;
 	}
 
-	dom_del_from_list(child, (xmlDocPtr) child->doc TSRMLS_CC);
+	dom_del_from_list(child, intern TSRMLS_CC);
 
-	DOM_RET_OBJ(rv, new_child, &ret);
+	DOM_RET_OBJ(rv, new_child, &ret, intern);
 
 }
 /* }}} end dom_node_insert_before */
@@ -866,17 +847,19 @@ PHP_FUNCTION(dom_node_replace_child)
 {
 	zval *id, *newnode, *oldnode;
 	xmlNodePtr children, newchild, oldchild, nodep;
+	dom_object *intern, *newchildobj, *oldchildobj;
 	int foundoldchild = 0;
+
 	int ret;
 
-	DOM_GET_THIS_OBJ(nodep, id, xmlNodePtr);
+	DOM_GET_THIS_OBJ(nodep, id, xmlNodePtr, intern);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "oo", &newnode, &oldnode) == FAILURE) {
 		return;
 	}
 
-	DOM_GET_OBJ(newchild, newnode, xmlNodePtr);
-	DOM_GET_OBJ(oldchild, oldnode, xmlNodePtr);
+	DOM_GET_OBJ(newchild, newnode, xmlNodePtr, newchildobj);
+	DOM_GET_OBJ(oldchild, oldnode, xmlNodePtr, oldchildobj);
 
 	children = nodep->children;
 	if (!children) {
@@ -892,6 +875,7 @@ PHP_FUNCTION(dom_node_replace_child)
 	if (dom_hierarchy(nodep, newchild) == FAILURE) {
 		php_dom_throw_error(HIERARCHY_REQUEST_ERR, &return_value TSRMLS_CC);
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Hierarchy Request Error");
+		RETURN_FALSE;
 	}
 
 	/* check for the old child and wether the new child is already a child */
@@ -908,13 +892,17 @@ PHP_FUNCTION(dom_node_replace_child)
 		if (oldchild != newchild) {
 			xmlNodePtr node;
 			if (newchild->parent == NULL && newchild->doc != NULL) {
-				dom_del_from_list(newchild, (xmlDocPtr) newchild->doc TSRMLS_CC);
+				dom_del_from_list(newchild, intern TSRMLS_CC);
+			}
+			if (newchild->doc == NULL && nodep->doc != NULL) {
+				newchildobj->document = intern->document;
+				increment_document_reference(newchildobj, NULL TSRMLS_CC);
 			}
 			if((node = xmlReplaceNode(oldchild, newchild)) != NULL) {
-				dom_add_to_list(node, (xmlDocPtr) node->doc TSRMLS_CC);
+				dom_add_to_list(node, intern TSRMLS_CC);
 			}
 		}
-		DOM_RET_OBJ(rv, oldchild, &ret);
+		DOM_RET_OBJ(rv, oldchild, &ret, intern);
 		return;
 	} else {
 		php_dom_throw_error(NOT_FOUND_ERR, &return_value TSRMLS_CC);
@@ -933,15 +921,16 @@ PHP_FUNCTION(dom_node_remove_child)
 {
 	zval *id, *node;
 	xmlNodePtr children, child, nodep;
+	dom_object *intern, *childobj;
 	int ret;
 
-	DOM_GET_THIS_OBJ(nodep, id, xmlNodePtr);
+	DOM_GET_THIS_OBJ(nodep, id, xmlNodePtr, intern);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o", &node) == FAILURE) {
 		return;
 	}
 
-	DOM_GET_OBJ(child, node, xmlNodePtr);
+	DOM_GET_OBJ(child, node, xmlNodePtr, childobj);
 
 	children = nodep->children;
 	if (!children) {
@@ -953,8 +942,8 @@ PHP_FUNCTION(dom_node_remove_child)
 		if (children == child) {
 			zval *rv = NULL;
 			xmlUnlinkNode(child);
-			dom_add_to_list(child, (xmlDocPtr) child->doc TSRMLS_CC);
-			DOM_RET_OBJ(rv, child, &ret);
+			dom_add_to_list(child, intern TSRMLS_CC);
+			DOM_RET_OBJ(rv, child, &ret, intern);
 			return;
 		}
 		children = children->next;
@@ -974,29 +963,32 @@ PHP_FUNCTION(dom_node_append_child)
 {
 	zval *id, *node, *rv = NULL;
 	xmlNodePtr child, nodep, new_child = NULL;
+	dom_object *intern, *childobj;
 	int ret;
 
-	DOM_GET_THIS_OBJ(nodep, id, xmlNodePtr);
+	DOM_GET_THIS_OBJ(nodep, id, xmlNodePtr, intern);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o", &node) == FAILURE) {
 		return;
 	}
 
-	if (!PZVAL_IS_REF(node)) {
-		zval_add_ref(&node);
-	}
-	
-	DOM_GET_OBJ(child, node, xmlNodePtr);
+	DOM_GET_OBJ(child, node, xmlNodePtr, childobj);
 
 	if (dom_hierarchy(nodep, child) == FAILURE) {
 		php_dom_throw_error(HIERARCHY_REQUEST_ERR, &return_value TSRMLS_CC);
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Hierarchy Request Error");
+		RETURN_FALSE;
 	}
 
 	if (!(child->doc == NULL || child->doc == nodep->doc)) {
 		php_dom_throw_error(WRONG_DOCUMENT_ERR, &return_value TSRMLS_CC);
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can't append node, which is in a different document than the parent node");
 		RETURN_FALSE;
+	}
+
+	if (child->doc == NULL && nodep->doc != NULL) {
+		childobj->document = intern->document;
+		increment_document_reference(childobj, NULL TSRMLS_CC);
 	}
 
 	if (child->parent != NULL){
@@ -1008,14 +1000,14 @@ PHP_FUNCTION(dom_node_append_child)
 		(nodep->content != NULL)) {
 			xmlNodeAddContent(nodep, child->content);
 			node_free_resource(child TSRMLS_CC);
-			DOM_RET_OBJ(rv, nodep, &ret);
+			DOM_RET_OBJ(rv, nodep, &ret, intern);
 			return;
 		}
 		if ((nodep->last != NULL) && (nodep->last->type == XML_TEXT_NODE) &&
 		(nodep->last->name == child->name)) {
 			xmlNodeAddContent(nodep->last, child->content);
 			node_free_resource(child TSRMLS_CC);
-			DOM_RET_OBJ(rv, nodep->last, &ret);
+			DOM_RET_OBJ(rv, nodep->last, &ret, intern);
 			return;
 		}
 	} else 	if (child->type == XML_ATTRIBUTE_NODE) {
@@ -1037,22 +1029,21 @@ PHP_FUNCTION(dom_node_append_child)
 		if (new_child != NULL) {
 			child->children = NULL;
 		}
-		dom_add_to_list(child, (xmlDocPtr) child->doc TSRMLS_CC);
-		DOM_RET_OBJ(rv, new_child, &ret);
+		dom_add_to_list(child, intern TSRMLS_CC);
+		DOM_RET_OBJ(rv, new_child, &ret, intern);
 		return;
 	}
 
 	new_child = xmlAddChild(nodep, child);
 
 	if (new_child == NULL) {
-		dom_add_to_list(child, (xmlDocPtr) child->doc TSRMLS_CC);
+		dom_add_to_list(child, intern TSRMLS_CC);
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Couldn't append node");
 		RETURN_FALSE;
 	}
 
-	dom_del_from_list(child, (xmlDocPtr) child->doc TSRMLS_CC);
-
-	DOM_RET_OBJ(rv, new_child, &ret);
+	dom_del_from_list(child, intern TSRMLS_CC);
+	DOM_RET_OBJ(rv, new_child, &ret, intern);
 }
 /* }}} end dom_node_append_child */
 
@@ -1065,8 +1056,9 @@ PHP_FUNCTION(dom_node_has_child_nodes)
 {
 	zval *id;
 	xmlNode *nodep;
+	dom_object *intern;
 
-	DOM_GET_THIS_OBJ(nodep, id, xmlNodePtr);
+	DOM_GET_THIS_OBJ(nodep, id, xmlNodePtr, intern);
 
 	DOM_NO_ARGS();
 
@@ -1088,10 +1080,11 @@ PHP_FUNCTION(dom_node_clone_node)
 	zval *rv = NULL;
 	zval *id;
 	xmlNode *n, *node;
-	int ret; 
+	int ret;
+	dom_object *intern;
 	long recursive = 0;
 
-	DOM_GET_THIS_OBJ(n, id, xmlNodePtr);
+	DOM_GET_THIS_OBJ(n, id, xmlNodePtr, intern);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &recursive) == FAILURE) {
 		return;
@@ -1101,9 +1094,9 @@ PHP_FUNCTION(dom_node_clone_node)
 	if (!node) {
 		RETURN_FALSE;
 	}
-	dom_add_to_list(node, (xmlDocPtr) node->doc TSRMLS_CC);
+	dom_add_to_list(node, intern TSRMLS_CC);
 
-	DOM_RET_OBJ(rv, node, &ret);
+	DOM_RET_OBJ(rv, node, &ret, intern);
 }
 /* }}} end dom_node_clone_node */
 
@@ -1117,8 +1110,9 @@ PHP_FUNCTION(dom_node_normalize)
 {
 	zval *id;
 	xmlNode *nodep;
+	dom_object *intern;
 
-	DOM_GET_THIS_OBJ(nodep, id, xmlNodePtr);
+	DOM_GET_THIS_OBJ(nodep, id, xmlNodePtr, intern);
 
 	DOM_NO_ARGS();
 
@@ -1147,8 +1141,9 @@ PHP_FUNCTION(dom_node_has_attributes)
 {
 	zval *id;
 	xmlNode *nodep;
+	dom_object *intern;
 
-	DOM_GET_THIS_OBJ(nodep, id, xmlNodePtr);
+	DOM_GET_THIS_OBJ(nodep, id, xmlNodePtr, intern);
 
 	DOM_NO_ARGS();
 
@@ -1183,14 +1178,15 @@ PHP_FUNCTION(dom_node_is_same_node)
 {
 	zval *id, *node;
 	xmlNodePtr nodeotherp, nodep;
+	dom_object *intern, *nodeotherobj;
 
-	DOM_GET_THIS_OBJ(nodep, id, xmlNodePtr);
+	DOM_GET_THIS_OBJ(nodep, id, xmlNodePtr, intern);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o", &node) == FAILURE) {
 		return;
 	}
 
-	DOM_GET_OBJ(nodeotherp, node, xmlNodePtr);
+	DOM_GET_OBJ(nodeotherp, node, xmlNodePtr, nodeotherobj);
 
 	if (nodep == nodeotherp) {
 		RETURN_TRUE;

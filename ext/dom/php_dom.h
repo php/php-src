@@ -56,18 +56,21 @@ extern zend_module_entry dom_module_entry;
 
 #include "dom_fe.h"
 
-void php_dom_set_object(zval *wrapper, void *obj TSRMLS_DC);
-zval *dom_object_get_data(xmlNodePtr obj);
+void php_dom_set_object(dom_object *wrapper, void *obj TSRMLS_DC);
+dom_object *dom_object_get_data(xmlNodePtr obj);
 void php_dom_throw_error(int error_code, zval **retval TSRMLS_DC);
 void node_free_resource(xmlNodePtr node TSRMLS_DC);
 void node_list_unlink(xmlNodePtr node TSRMLS_DC);
-void dom_del_from_list(xmlNodePtr nodep, xmlDocPtr docp TSRMLS_DC);
-void dom_add_to_list(xmlNodePtr nodep, xmlDocPtr docp TSRMLS_DC);
+void dom_del_from_list(xmlNodePtr nodep, dom_object *intern TSRMLS_DC);
+void dom_add_to_list(xmlNodePtr nodep, dom_object *intern TSRMLS_DC);
+void dom_clean_nodes(dom_object *object TSRMLS_DC);
+int increment_document_reference(dom_object *object, xmlDocPtr docp TSRMLS_DC);
+int decrement_document_reference(dom_object *object TSRMLS_DC);
 xmlNsPtr dom_get_ns(char *uri, char *qName, int uri_len, int qName_len, int *errorcode, char **localname);
 void dom_set_old_ns(xmlDoc *doc, xmlNs *ns);
 xmlNsPtr dom_get_nsdecl(xmlNode *node, xmlChar *localName);
 void dom_normalize (xmlNodePtr nodep TSRMLS_DC);
-void dom_get_elements_by_tag_name_ns_raw(xmlNodePtr nodep, char *ns, char *local, zval **retval  TSRMLS_DC);
+void dom_get_elements_by_tag_name_ns_raw(xmlNodePtr nodep, char *ns, char *local, zval **retval, dom_object *intern  TSRMLS_DC);
 void php_dom_create_implementation(zval **retval  TSRMLS_DC);
 int dom_hierarchy(xmlNodePtr parent, xmlNodePtr child);
 
