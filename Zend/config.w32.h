@@ -13,6 +13,9 @@ typedef unsigned int uint;
 
 #define HAVE_DIRENT_H 0
 
+#define HAVE_KILL	0
+#define HAVE_GETPID	1
+
 #ifdef inline
 #undef inline
 #endif
