@@ -2849,7 +2849,7 @@ static void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode, int 
 	int col, x, y, l=0, i, brect[8];
 	double ptsize, angle;
 	unsigned char *str = NULL, *fontname = NULL;
-	char *error;
+	char *error = NULL;
 	int argc;
 #if HAVE_GD_STRINGFTEX
 	gdFTStringExtra strex;
