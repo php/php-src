@@ -57,9 +57,12 @@ dlfcn.h)
 AC_TYPE_SIZE_T
 AC_TYPE_SIGNAL
 
+AC_DEFUN(LIBZEND_LIBDL_CHECKS,[
 AC_CHECK_LIB(dl, dlopen, [LIBS="-ldl $LIBS"])
 AC_CHECK_FUNC(dlopen,[AC_DEFINE(HAVE_LIBDL, 1,[ ])])
+])
 
+AC_DEFUN(LIBZEND_DLSYM_CHECK,[
 dnl
 dnl Ugly hack to check if dlsym() requires a leading underscore in symbol name.
 dnl
@@ -72,6 +75,7 @@ _LT_AC_TRY_DLOPEN_SELF([
 ], [
   AC_MSG_RESULT(no)
 ], [])
+])
 
 dnl This is required for QNX and may be some BSD derived systems
 AC_CHECK_TYPE( uint, unsigned int )

@@ -17,6 +17,8 @@ test -z "$CFLAGS" && auto_cflags=1
 sinclude(Zend.m4)
 
 LIBZEND_BASIC_CHECKS
+LIBZEND_LIBDL_CHECKS
+LIBZEND_DLSYM_CHECK
 
 AM_PROG_LIBTOOL
 if test "$enable_debug" != "yes"; then
