@@ -115,6 +115,10 @@ php_file_globals file_globals;
 #include <fnmatch.h>
 #endif
 
+#ifdef __BEOS__
+#define realpath(x,y) strcpy(y,x)
+#endif
+
 /* }}} */
 /* {{{ ZTS-stuff / Globals / Prototypes */
 
