@@ -58,6 +58,19 @@ typedef unsigned short mode_t;
 #define IS_UNC_PATH(path, len) \
 	(len >= 2 && IS_SLASH(path[0]) && IS_SLASH(path[1]))
 
+#elif defined(NETWARE)
+#ifdef HAVE_DIRENT_H
+#include <dirent.h>
+#endif
+
+#define DEFAULT_SLASH '/'
+#define DEFAULT_DIR_SEPARATOR	';'
+#define IS_SLASH(c)	((c) == '/' || (c) == '\\')
+#define COPY_WHEN_ABSOLUTE(path) \
+    (strchr(path, ':') - path + 1)  /* Take the volume name which ends with a colon */
+#define IS_ABSOLUTE_PATH(path, len) \
+    (strchr(path, ':') != NULL) /* Colon indicates volume name */
+
 #else
 #ifdef HAVE_DIRENT_H
 #include <dirent.h>
@@ -120,8 +133,12 @@ CWD_API FILE *virtual_fopen(const char *path, const char *mode TSRMLS_DC);
 CWD_API int virtual_open(const char *path TSRMLS_DC, int flags, ...);
 CWD_API int virtual_creat(const char *path, mode_t mode TSRMLS_DC);
 CWD_API int virtual_rename(char *oldname, char *newname TSRMLS_DC);
+#if !(defined(NETWARE) && defined(CLIB_STAT_PATCH))
 CWD_API int virtual_stat(const char *path, struct stat *buf TSRMLS_DC);
-#ifndef TSRM_WIN32
+#else
+CWD_API int virtual_stat(const char *path, struct stat_libc *buf TSRMLS_DC);
+#endif
+#if !defined(TSRM_WIN32) && !defined(NETWARE)
 CWD_API int virtual_lstat(const char *path, struct stat *buf TSRMLS_DC);
 #endif
 CWD_API int virtual_unlink(const char *path TSRMLS_DC);
@@ -133,7 +150,7 @@ CWD_API FILE *virtual_popen(const char *command, const char *type TSRMLS_DC);
 CWD_API int virtual_utime(const char *filename, struct utimbuf *buf TSRMLS_DC);
 #endif
 CWD_API int virtual_chmod(const char *filename, mode_t mode TSRMLS_DC);
-#ifndef TSRM_WIN32
+#if !defined(TSRM_WIN32) && !defined(NETWARE)
 CWD_API int virtual_chown(const char *filename, uid_t owner, gid_t group TSRMLS_DC);
 #endif
 
@@ -168,7 +185,7 @@ typedef struct _virtual_cwd_globals {
 #define VCWD_REALPATH(path, real_path) virtual_realpath(path, real_path TSRMLS_CC)
 #define VCWD_RENAME(oldname, newname) virtual_rename(oldname, newname TSRMLS_CC)
 #define VCWD_STAT(path, buff) virtual_stat(path, buff TSRMLS_CC)
-#ifdef TSRM_WIN32
+#if !defined(TSRM_WIN32) && !defined(NETWARE)
 #define VCWD_LSTAT(path, buff) virtual_stat(path, buff TSRMLS_CC)
 #else
 #define VCWD_LSTAT(path, buff) virtual_lstat(path, buff TSRMLS_CC)
@@ -182,7 +199,7 @@ typedef struct _virtual_cwd_globals {
 #define VCWD_UTIME(path, time) virtual_utime(path, time TSRMLS_CC)
 #endif
 #define VCWD_CHMOD(path, mode) virtual_chmod(path, mode TSRMLS_CC)
-#ifndef TSRM_WIN32
+#if !defined(TSRM_WIN32) && !defined(NETWARE)
 #define VCWD_CHOWN(path, owner, group) virtual_chown(path, owner, group TSRMLS_CC)
 #endif
 
@@ -205,7 +222,7 @@ typedef struct _virtual_cwd_globals {
 #define VCWD_OPENDIR(pathname) opendir(pathname)
 #define VCWD_POPEN(command, type) popen(command, type)
 
-#ifndef TSRM_WIN32
+#if !defined(TSRM_WIN32) && !defined(NETWARE)
 #define VCWD_REALPATH(path, real_path) realpath(path, real_path)
 #else
 #define VCWD_REALPATH(path, real_path) strcpy(real_path, path)
@@ -215,7 +232,7 @@ typedef struct _virtual_cwd_globals {
 #define VCWD_UTIME(path, time) utime(path, time)
 #endif
 #define VCWD_CHMOD(path, mode) chmod(path, mode)
-#ifndef TSRM_WIN32
+#if !defined(TSRM_WIN32) && !defined(NETWARE)
 #define VCWD_CHOWN(path, owner, group) chown(path, owner, group)
 #endif
 
