@@ -153,7 +153,6 @@ typedef struct _php_stream_ops  {
 	int (*cast)(php_stream *stream, int castas, void **ret TSRMLS_DC);
 	int (*stat)(php_stream *stream, php_stream_statbuf *ssb TSRMLS_DC);
 	int (*set_option)(php_stream *stream, int option, int value, void *ptrparam TSRMLS_DC);
-	int dont_block;
 } php_stream_ops;
 
 typedef struct _php_stream_wrapper_ops {
@@ -225,6 +224,12 @@ struct _php_stream_filter {
 #define PHP_STREAM_FLAG_EOL_UNIX					0 /* also includes DOS */
 #define PHP_STREAM_FLAG_DETECT_EOL					4
 #define PHP_STREAM_FLAG_EOL_MAC						8
+
+/* set this when the stream might represent "interactive" data.
+ * When set, the read buffer will avoid certain operations that
+ * might otherwise cause the read to block for much longer than
+ * is strictly required. */
+#define PHP_STREAM_FLAG_AVOID_BLOCKING				16
 	
 struct _php_stream  {
 	php_stream_ops *ops;
