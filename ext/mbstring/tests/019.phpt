@@ -1,5 +1,5 @@
 --TEST--
-strlen()
+mb_strlen()
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --POST--
