@@ -26,4 +26,4 @@ xml_parser_free($xml_parser);
 ?>
 --EXPECT--
 <DATA> at line 2
-</DATA> at line 4
+</DATA> at line 9
