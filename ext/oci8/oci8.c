@@ -55,6 +55,7 @@
 #include "php.h"
 
 #include "ext/standard/head.h"
+#include "ext/standard/info.h"
 
 #if HAVE_OCI8
 
@@ -490,12 +491,16 @@ PHP_RSHUTDOWN_FUNCTION(oci)
 
 PHP_MINFO_FUNCTION(oci)
 {
+
+	php_info_print_table_start();
+	php_info_print_table_row(2, "OCI8 Support", "enabled");
 #if !(WIN32|WINNT)
-	php_printf("Oracle version: %s<br>\n"
-			    "Compile-time ORACLE_HOME: %s<br>\n"
-			    "Libraries used: %s",
-			    PHP_ORACLE_VERSION, PHP_ORACLE_HOME, PHP_ORACLE_LIBS);
+	php_info_print_table_row(2, "Oracle Version", PHP_ORACLE_VERSION );
+	php_info_print_table_row(2, "Compile-time ORACLE_HOME", PHP_ORACLE_HOME );
+	php_info_print_table_row(2, "Libraries Used", PHP_ORACLE_LIBS );
 #endif
+	php_info_print_table_end();
+
 }
 
 /* }}} */

@@ -26,6 +26,7 @@
 #include "php.h"
 #include "php_globals.h"
 #include "ext/standard/php_standard.h"
+#include "ext/standard/info.h"
 #include "php_mssql.h"
 #include "php_ini.h"
 
@@ -271,10 +272,8 @@ PHP_MINFO_FUNCTION(mssql)
 	char buf[32];
 	MSSQLLS_FETCH();
 
-	DISPLAY_INI_ENTRIES();
-
-	php_printf("<table border=5 width=\"600\">");
-	php_info_print_table_header(2, "Key", "Value");
+	php_info_print_table_start();
+	php_info_print_table_header(2, "MSSQL Support", "enabled");
 
 	sprintf(buf, "%ld", MS_SQL_G(num_persistent));
 	php_info_print_table_row(2, "Active Persistent Links", buf);
@@ -282,7 +281,10 @@ PHP_MINFO_FUNCTION(mssql)
 	php_info_print_table_row(2, "Active Links", buf);
 
 	php_info_print_table_row(2, "Library version", MSSQL_VERSION);
-	php_printf("</table>\n");
+	php_info_print_table_end();
+
+	DISPLAY_INI_ENTRIES();
+
 }
 
 void php_mssql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)

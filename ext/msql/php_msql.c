@@ -25,6 +25,7 @@
 #endif
 #include "php_msql.h"
 #include "ext/standard/php_standard.h"
+#include "ext/standard/info.h"
 #include "php_globals.h"
 
 #if HAVE_MSQL
@@ -186,28 +187,29 @@ DLEXPORT PHP_RINIT_FUNCTION(msql)
 
 DLEXPORT PHP_MINFO_FUNCTION(msql)
 {
-	char maxp[16],maxl[16];
+	char maxp[32],maxl[32];
 
 	if (msql_globals.max_persistent==-1) {
-		strcpy(maxp,"Unlimited");
+		snprintf(maxp, 31, "%d/unlimited", msql_globals.num_persistent );
 	} else {
-		snprintf(maxp,15,"%ld",msql_globals.max_persistent);
-		maxp[15]=0;
+		snprintf(maxp, 31, "%d/%ld", msql_globals.num_persistent, msql_globals.max_persistent);
 	}
+	maxp[31]=0;
+
 	if (msql_globals.max_links==-1) {
-		strcpy(maxl,"Unlimited");
+		snprintf(maxl, 15, "%d/unlimited", msql_globals.num_links );
 	} else {
-		snprintf(maxl,15,"%ld",msql_globals.max_links);
-		maxl[15]=0;
+		snprintf(maxl, 15, "%d/%ld", msql_globals.num_links, msql_globals.max_links);
 	}
-	php_printf("<table>"
-				"<tr><td>Allow persistent links:</td><td>%s</td></tr>\n"
-				"<tr><td>Persistent links:</td><td>%d/%s</td></tr>\n"
-				"<tr><td>Total links:</td><td>%d/%s</td></tr>\n"
-				"</table>\n",
-				(msql_globals.allow_persistent?"Yes":"No"),
-				msql_globals.num_persistent,maxp,
-				msql_globals.num_links,maxl);
+	maxl[31]=0;
+
+	php_info_print_table_start();
+	php_info_print_table_row(2, "MSQL Support", "enabled" );
+	php_info_print_table_row(2, "Allow Persistent Links", (msql_globals.allow_persistent?"yes":"no") );
+	php_info_print_table_row(2, "Persistent Links", maxp );
+	php_info_print_table_row(2, "Total Links", maxl );
+	php_info_print_table_end();
+
 }
 
 

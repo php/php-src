@@ -26,6 +26,7 @@
 #include "php.h"
 #include "php_sybase.h"
 #include "ext/standard/php_standard.h"
+#include "ext/standard/info.h"
 #include "php_globals.h"
 
 #if HAVE_SYBASE
@@ -1185,32 +1186,31 @@ PHP_FUNCTION(sybase_result)
 
 PHP_MINFO_FUNCTION(sybase)
 {
-	char maxp[16],maxl[16];
+	char maxp[32],maxl[32];
 	
 	if (php_sybase_module.max_persistent==-1) {
-		strcpy(maxp,"Unlimited");
+		snprintf(maxp, 31, "%d/unlimited", php_sybase_module.num_persistent )
 	} else {
-		snprintf(maxp,15,"%ld",php_sybase_module.max_persistent);
-		maxp[15]=0;
+		snprintf(maxp, 31, "%d/%ld", php_sybase_module.num_persistent, php_sybase_module.max_persistent);
 	}
+	maxp[31]=0;
+
 	if (php_sybase_module.max_links==-1) {
-		strcpy(maxl,"Unlimited");
+		snprintf(maxl, 31, "%d/unlimited", php_sybase_module.num_links );
 	} else {
-		snprintf(maxl,15,"%ld",php_sybase_module.max_links);
-		maxl[15]=0;
+		snprintf(maxl, 31, "%d/%ld", php_sybase_module.num_links, php_sybase_module.max_links);
 	}
-	php_printf("<table cellpadding=5>"
-				"<tr><td>Allow persistent links:</td><td>%s</td></tr>\n"
-				"<tr><td>Persistent links:</td><td>%d/%s</td></tr>\n"
-				"<tr><td>Total links:</td><td>%d/%s</td></tr>\n"
-				"<tr><td>Application name:</td><td>%s</td></tr>\n"
-				"<tr><td valign=\"top\" width=\"20%%\">Client API information:</td><td><pre>%s</pre></td></tr>\n"
-				"</table>\n",
-				(php_sybase_module.allow_persistent?"Yes":"No"),
-				php_sybase_module.num_persistent,maxp,
-				php_sybase_module.num_links,maxl,
-				php_sybase_module.appname,
-				dbversion());
+	maxl[31]=0;
+
+	php_info_print_table_start();
+	php_info_print_table_row(2, "Sybase Support", "enabled");
+	php_info_print_table_row(2, "Allow Persistent Links", (php_sybase_module.allow_persistent?"Yes":"No") );
+	php_info_print_table_row(2, "Persistent Links", maxp);
+	php_info_print_table_row(2, "Total Links", maxl);
+	php_info_print_table_row(2, "Application Name", php_sybase_module.appname );
+	php_info_print_table_row(2, "Client API Version", dbversion() );
+	php_info_print_table_end();
+
 }
 
 

@@ -38,6 +38,7 @@
 #include "ext/standard/url_scanner.h"
 #include "ext/standard/php_output.h"
 #include "ext/standard/php_rand.h"                   /* for RAND_MAX */
+#include "ext/standard/info.h"
 
 #ifdef ZTS
 int ps_globals_id;
@@ -1321,5 +1322,10 @@ PHP_MSHUTDOWN_FUNCTION(session)
 
 PHP_MINFO_FUNCTION(session)
 {
+
+	php_info_print_table_start();
+	php_info_print_table_row(2, "Session Support", "enabled" );
+	php_info_print_table_end();
+
 	DISPLAY_INI_ENTRIES();
 }

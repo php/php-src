@@ -291,10 +291,8 @@ PHP_MINFO_FUNCTION(mysql)
 	char buf[32];
 	MySLS_FETCH();
 
-	DISPLAY_INI_ENTRIES();
-
 	php_info_print_table_start();
-	php_info_print_table_header(2, "Key", "Value");
+	php_info_print_table_header(2, "MySQL Support", "enabled");
 	sprintf(buf, "%ld", MySG(num_persistent));
 	php_info_print_table_row(2, "Active Persistent Links", buf);
 	sprintf(buf, "%ld", MySG(num_links));
@@ -306,6 +304,9 @@ PHP_MINFO_FUNCTION(mysql)
 	php_info_print_table_row(2, "MYSQL_LIBS", PHP_MYSQL_LIBS);
 #endif
 	php_info_print_table_end();
+
+	DISPLAY_INI_ENTRIES();
+
 }
 
 

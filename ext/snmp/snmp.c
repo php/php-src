@@ -20,6 +20,7 @@
 /* $Id$ */
 
 #include "php.h"
+#include "ext/standard/info.h"
 #if defined(COMPILE_DL)
 #include "dl/phpdl.h"
 #endif
@@ -105,7 +106,9 @@ PHP_MINIT_FUNCTION(snmp)
 
 PHP_MINFO_FUNCTION(snmp)
 {
-	php_printf("ucd-snmp");
+	php_info_print_table_start();
+	php_info_print_table_row(2, "UCD-SNMP Support", "enabled");
+	php_info_print_table_end();
 }
 
 
