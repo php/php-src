@@ -265,14 +265,15 @@ void php_set_session_var(char *name, size_t namelen, zval *state_val,HashTable *
 
 int php_get_session_var(char *name, size_t namelen, zval ***state_var TSRMLS_DC)
 {
-	HashTable *ht = &EG(symbol_table);
-
-	if (!PG(register_globals))
-		ht = PS(http_session_vars) ? Z_ARRVAL_P(PS(http_session_vars)) : NULL;
-
-	if (!ht) return HASH_KEY_NON_EXISTANT;
-	
-	return zend_hash_find(ht, name, namelen + 1, (void **)state_var);
+	if (PS(http_session_vars)) {
+		if (zend_hash_find(Z_ARRVAL_P(PS(http_session_vars)), name, namelen+1, (void **) state_var)==SUCCESS) {
+			return SUCCESS;
+		}
+	} else if (!PG(register_globals)) {
+		/* register_globals is disabled, but we don't have http_session_vars */
+		return HASH_KEY_NON_EXISTANT;
+	}	
+	return zend_hash_find(&EG(symbol_table), name, namelen+1, (void **) state_var);
 }
 
 #define PS_BIN_NR_OF_BITS 8
@@ -534,12 +535,12 @@ static void php_session_save_current_state(TSRMLS_D)
 	uint variable_len;
 	ulong num_key;
 	HashPosition pos;
-	
-	if (!PG(register_globals)) {
-		if (!PS(http_session_vars)) {
-			return;
-		}
-		
+
+	if (!PG(register_globals) && !PS(http_session_vars)) {
+		return;
+	}
+
+	if (PS(http_session_vars)) {
 		for (zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(PS(http_session_vars)), &pos);
 				zend_hash_get_current_key_ex(Z_ARRVAL_P(PS(http_session_vars)), &variable, &variable_len, &num_key, 0, &pos) == HASH_KEY_IS_STRING;
 				zend_hash_move_forward_ex(Z_ARRVAL_P(PS(http_session_vars)),&pos)) {
