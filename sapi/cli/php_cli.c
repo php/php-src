@@ -901,7 +901,7 @@ int main(int argc, char *argv[])
 			
 		case PHP_MODE_PROCESS_STDIN:
 			{
-				char input[4096];
+				char *input;
 				size_t len, index = 0;
 				php_stream_context *sc_in = php_stream_context_alloc();
 				php_stream *s_in = php_stream_open_wrapper_ex("php://stdin", "rb", 0, NULL, sc_in);
@@ -915,7 +915,7 @@ int main(int argc, char *argv[])
 				Z_LVAL_P(argi) = index;
 				INIT_PZVAL(argi);
 				zend_hash_update(&EG(symbol_table), "argi", sizeof("argi"), &argi, sizeof(pval *), NULL);
-				while (exit_status == SUCCESS && php_stream_gets(s_in, input, sizeof(input))) {
+				while (exit_status == SUCCESS && (input=php_stream_gets(s_in, NULL, 0)) != NULL) {
 					len = strlen(input);
 					while (len-- && (input[len]=='\n' || input[len]=='\r')) {
 						input[len] = '\0';
@@ -942,6 +942,7 @@ int main(int argc, char *argv[])
 							}
 						}
 					}
+					efree(input);
 				}
 				if (exec_end && zend_eval_string(exec_end, NULL, "Command line end code" TSRMLS_CC) == FAILURE) {
 					exit_status=254;
