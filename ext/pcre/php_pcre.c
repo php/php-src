@@ -1350,7 +1350,7 @@ PHP_FUNCTION(preg_grep)
 	}
 	
 	if (Z_TYPE_PP(input) != IS_ARRAY) {
-		zend_error(E_WARNING, "Secong argument to preg_grep() should be an array");
+		zend_error(E_WARNING, "Second argument to preg_grep() should be an array");
 		return;
 	}
 
@@ -1389,7 +1389,7 @@ PHP_FUNCTION(preg_grep)
 
 		/* Check for too many substrings condition. */
 		if (count == 0) {
-			zend_error(E_NOTICE, "Matched, but too many substrings\n");
+			zend_error(E_NOTICE, "Matched, but too many substrings");
 			count = size_offsets/3;
 		}
 
