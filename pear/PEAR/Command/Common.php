@@ -210,7 +210,9 @@ class PEAR_Command_Common extends PEAR
                 } else {
                     $help .= "  --$k$lapp\n";
                 }
-                $help .= "        $v[doc]\n";
+                $p = "        ";
+                $doc = rtrim(str_replace("\n", "\n$p", $v['doc']));
+                $help .= "        $doc\n";
             }
             return $help;
         }
