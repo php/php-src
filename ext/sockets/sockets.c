@@ -747,7 +747,7 @@ PHP_FUNCTION(socket_write)
 
 	ZEND_FETCH_RESOURCE(php_sock, php_socket *, &arg1, -1, le_socket_name, le_socket);
 
-	if (ZEND_NUM_ARGS() < 4) {
+	if (ZEND_NUM_ARGS() < 3) {
 		length = str_len;
 	}
 
