@@ -41,7 +41,7 @@
 #include <strings.h>
 #endif
 
-#if MSVC5
+#if PHP_WIN32
 #include <process.h>
 extern char *crypt(char *__key,char *__salt);
 #endif

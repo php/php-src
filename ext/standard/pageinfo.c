@@ -24,7 +24,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #if HAVE_PWD_H
-#if MSVC5
+#if PHP_WIN32
 #include "win32/pwd.h"
 #else
 #include <pwd.h>
@@ -34,7 +34,7 @@
 #include <unistd.h>
 #endif
 #include <sys/stat.h>
-#if MSVC5
+#if PHP_WIN32
 #include <process.h>
 #endif
 

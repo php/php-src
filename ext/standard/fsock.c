@@ -43,14 +43,14 @@
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
-#ifdef WIN32
+#if PHP_WIN32
 #include <winsock.h>
 #else
 #include <netinet/in.h>
 #include <netdb.h>
 #include <arpa/inet.h>
 #endif
-#ifdef WIN32
+#if PHP_WIN32
 #undef AF_UNIX
 #endif
 #if defined(AF_UNIX)
@@ -89,7 +89,7 @@ extern int le_fp;
 #define SEARCHCR() \
 	p = memchr(READPTR(sock), '\n', MIN(TOREAD(sock), maxlen));
 
-#if WIN32|WINNT
+#if PHP_WIN32
 #define EWOULDBLOCK WSAEWOULDBLOCK
 #else
 #include "build-defs.h"
@@ -158,7 +158,7 @@ PHPAPI int connect_nonb(int sockfd,
 						struct timeval *timeout)
 {
 /* probably won't work on Win32, someone else might try it (read: fix it ;) */
-#if !defined(WIN32) && (defined(O_NONBLOCK) || defined(O_NDELAY))
+#if !PHP_WIN32 && (defined(O_NONBLOCK) || defined(O_NDELAY))
 
 #ifndef O_NONBLOCK
 #define O_NONBLOCK O_NDELAY
@@ -216,7 +216,7 @@ PHPAPI int connect_nonb(int sockfd,
 		ret = -1;
 	}
 	return ret;
-#else /* !defined(WIN32) && ... */
+#else /* !PHP_WIN32 && ... */
       return connect(sockfd, addr, addrlen);
 #endif
 }
@@ -483,7 +483,7 @@ int php_sockdestroy(int socket)
 	return ret;
 }
 
-#if !defined(WIN32) && !defined(WINNT)
+#if !PHP_WIN32
 #undef closesocket
 #define closesocket close
 #endif

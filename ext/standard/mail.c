@@ -22,14 +22,14 @@
 #include <ctype.h>
 #include <stdio.h>
 #include "php.h"
-#ifndef MSVC5
+#if !PHP_WIN32
 #include "build-defs.h"
 #endif
 #include "php_mail.h"
 #include "php_ini.h"
 
 #if HAVE_SENDMAIL
-#if MSVC5
+#if PHP_WIN32
 #include "win32/sendmail.h"
 #endif
 
@@ -102,7 +102,7 @@ PHP_FUNCTION(mail)
 
 int php_mail(char *to, char *subject, char *message, char *headers)
 {
-#if MSVC5
+#if PHP_WIN32
 	int tsm_err;
 #else
 	FILE *sendmail;
@@ -110,7 +110,7 @@ int php_mail(char *to, char *subject, char *message, char *headers)
 	char *sendmail_path = INI_STR("sendmail_path");
 #endif
 
-#if MSVC5
+#if PHP_WIN32
 	if (TSendMail(INI_STR("SMTP"), &tsm_err, headers, subject, to, message) != SUCCESS){
 		php_error(E_WARNING, GetSMErrorText(tsm_err));
 		return 0;
@@ -144,7 +144,7 @@ int php_mail(char *to, char *subject, char *message, char *headers)
 
 PHP_MINFO_FUNCTION(mail)
 {
-#if MSVC5
+#if PHP_WIN32
 	PUTS("Internal Sendmail support for Windows 4");
 #else
 	php_printf("Path to sendmail: <tt>%s</tt>", INI_STR("sendmail_path"));

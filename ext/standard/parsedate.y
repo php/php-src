@@ -21,7 +21,7 @@
 
 #include "php.h"
 
-#if WIN32||WINNT
+#if PHP_WIN32
 #include <malloc.h>
 #endif
 
@@ -36,7 +36,7 @@
 #ifdef HAVE_SYS_TIME_H
 # include <sys/time.h>
 #endif
-#ifdef WIN32
+#if PHP_WIN32
 # include "win32/time.h"
 #endif
 

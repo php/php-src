@@ -31,7 +31,7 @@
 
 #include <stdio.h>
 #ifdef HAVE_GETTIMEOFDAY
-#if MSVC5
+#if PHP_WIN32
 #include "win32/time.h"
 #else
 #include <sys/time.h>

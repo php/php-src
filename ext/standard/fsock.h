@@ -34,7 +34,7 @@
 #ifndef _FSOCK_H
 #define _FSOCK_H
 
-#if WIN32|WINNT
+#if PHP_WIN32
 # ifndef WINNT
 #  define WINNT 1
 # endif

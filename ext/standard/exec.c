@@ -86,7 +86,7 @@ static int _Exec(int type, char *cmd, pval *array, pval *return_value)
 		tmp = php_escape_shell_cmd(d);
 		efree(d);
 		d = tmp;
-#if WIN32|WINNT
+#if PHP_WIN32
 		fp = popen(d, "rb");
 #else
 		fp = popen(d, "r");
@@ -98,7 +98,7 @@ static int _Exec(int type, char *cmd, pval *array, pval *return_value)
 			return -1;
 		}
 	} else { /* not safe_mode */
-#if WIN32|WINNT
+#if PHP_WIN32
 		fp = popen(cmd, "rb");
 #else
 		fp = popen(cmd, "r");
@@ -363,7 +363,7 @@ PHP_FUNCTION(shell_exec)
 	}
 
 	convert_to_string_ex(cmd);
-#if WIN32|WINNT
+#if PHP_WIN32
 	if ((in=popen((*cmd)->value.str.val,"rt"))==NULL) {
 #else
 	if ((in=popen((*cmd)->value.str.val,"r"))==NULL) {

@@ -107,7 +107,7 @@ PHP_FUNCTION(get_loaded_extensions);
 PHP_FUNCTION(extension_loaded);
 PHP_FUNCTION(get_extension_funcs);
 
-#if MSVC5
+#if PHP_WIN32
 typedef unsigned int php_stat_len;
 #else
 typedef int php_stat_len;

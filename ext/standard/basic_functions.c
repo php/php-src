@@ -42,7 +42,7 @@
 #include <locale.h>
 #endif
 #include "safe_mode.h"
-#if WIN32|WINNT
+#if PHP_WIN32
 #include "win32/unistd.h"
 #endif
 #include "zend_globals.h"
@@ -194,7 +194,7 @@ function_entry basic_functions[] = {
 	PHP_FE(gethostbyaddr,							NULL)
 	PHP_FE(gethostbyname,							NULL)
 	PHP_FE(gethostbynamel,							NULL)
-#if !(WIN32|WINNT)||HAVE_BINDLIB
+#if !(PHP_WIN32)||HAVE_BINDLIB
 	PHP_FE(checkdnsrr,								NULL)
 	PHP_FE(getmxrr,									second_and_third_args_force_ref)
 #endif
