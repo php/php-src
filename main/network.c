@@ -55,7 +55,7 @@ int		 inet_aton(const char *, struct in_addr *);
 
 #include "php_network.h"
 
-#ifdef PHP_WIN32
+#if defined(PHP_WIN32) || defined(__riscos__)
 #undef AF_UNIX
 #endif
 
