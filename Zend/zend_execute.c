@@ -178,7 +178,7 @@ static inline void zend_fetch_property_address_inner(zval *object, znode *op2, z
 		}
 		T(result->u.var).var.ptr_ptr = ptr_ptr;
 	} else if (Z_OBJ_HT_P(object)->read_property) {
-		T(result->u.var).var.ptr = Z_OBJ_HT_P(object)->read_property(object, prop_ptr, 0 TSRMLS_CC);
+		T(result->u.var).var.ptr = Z_OBJ_HT_P(object)->read_property(object, prop_ptr, BP_VAR_W TSRMLS_CC);
 		T(result->u.var).var.ptr_ptr = &T(result->u.var).var.ptr;
 	} else {
 		zend_error(E_WARNING, "This object doesn't support property references");
@@ -1100,7 +1100,7 @@ static void zend_fetch_property_address_read(znode *result, znode *op1, znode *o
 		}
 
 		/* here we are sure we are dealing with an object */
-		*retval = Z_OBJ_HT_P(container)->read_property(container, offset, (zend_bool) ((type==BP_VAR_IS) ? 1 : 0) TSRMLS_CC);
+		*retval = Z_OBJ_HT_P(container)->read_property(container, offset, type TSRMLS_CC);
 		if (offset == &tmp) {
 			zval_dtor(offset);
 		}
@@ -1151,7 +1151,7 @@ static void zend_pre_incdec_property(znode *result, znode *op1, znode *op2, temp
 	}
 
 	if (!have_get_ptr) {
-		zval *z = Z_OBJ_HT_P(object)->read_property(object, property, 0 TSRMLS_CC);
+		zval *z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_RW TSRMLS_CC);
 
 		if (z->type == IS_OBJECT && Z_OBJ_HT_P(z)->get) {
 			zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
@@ -1209,7 +1209,7 @@ static void zend_post_incdec_property(znode *result, znode *op1, znode *op2, tem
 	}
 
 	if (!have_get_ptr) {
-		zval *z = Z_OBJ_HT_P(object)->read_property(object, property, 0 TSRMLS_CC);
+		zval *z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_RW TSRMLS_CC);
 
 		if (z->type == IS_OBJECT && Z_OBJ_HT_P(object)->get) {
 			zval *value = Z_OBJ_HT_P(object)->get(z TSRMLS_CC);
@@ -1624,10 +1624,10 @@ static inline int zend_binary_assign_op_obj_helper(int (*binary_op)(zval *result
 			
 			switch (opline->extended_value) {
 				case ZEND_ASSIGN_OBJ:
-					z = Z_OBJ_HT_P(object)->read_property(object, property, 0 TSRMLS_CC);
+					z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_RW TSRMLS_CC);
 					break;
 				case ZEND_ASSIGN_DIM:
-					z = Z_OBJ_HT_P(object)->read_dimension(object, property, BP_VAR_W TSRMLS_CC);
+					z = Z_OBJ_HT_P(object)->read_dimension(object, property, BP_VAR_RW TSRMLS_CC);
 					break;
 			}
 			if (z->type == IS_OBJECT && Z_OBJ_HT_P(z)->get) {
