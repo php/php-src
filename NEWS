@@ -6,6 +6,8 @@ PHP 4                                                                      NEWS
   for doing performance stats without warnings in server-log. (Uwe Schindler)
 - Fixed bug #29369 (Uploaded files with ' or " in their names get their names
   truncated at those characters). (Ilia)
+- Fixed bug #29349 (imagecreatefromstring() crashes with external GD library).
+  (Ilia, adconrad at debian dot org)
 - Fixed bug #29333 (output_buffering+trans_sess_id can corrupt output). (Ilia)
 - Fixed bug #29226 (ctype_* functions missing validation of numeric string 
   representations). (Ilia)
