@@ -1539,8 +1539,7 @@ PHP_FUNCTION(mb_output_handler)
  			MBSTRG(outconv) = NULL;
   		}
 		if (encoding == mbfl_no_encoding_pass) {
-			RETVAL_STRING(arg_string, 1);
-			return;
+			RETURN_STRINGL(arg_string, arg_string_len, 1);
 		}
  		/* if content-type is not yet set, set it and activate the converter */
  		if (SG(sapi_headers).send_default_content_type ) {
@@ -1563,9 +1562,7 @@ PHP_FUNCTION(mb_output_handler)
 
  	/* just return if the converter is not activated. */
  	if (MBSTRG(outconv) == NULL) {
-		zval_dtor(return_value);
-		Z_STRVAL_P(return_value) = arg_string;
-		zval_copy_ctor(return_value);
+		RETURN_STRINGL(arg_string, arg_string_len, 1);
 		return;
 	}
 
