@@ -3777,6 +3777,7 @@ PHP_FUNCTION(xmldoc)
 	int mode = 0, prevSubstValue;
 	int oldvalue =  xmlDoValidityCheckingDefaultValue;
 	int oldvalue_keepblanks;
+ 	int prevLoadExtDtdValue = xmlLoadExtDtdDefaultValue;
 	zval *errors ;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|lz", &buffer, &buffer_len, &mode, &errors) == FAILURE) {
@@ -3831,6 +3832,7 @@ PHP_FUNCTION(xmldoc)
 	}
 	xmlSubstituteEntitiesDefault (prevSubstValue);
 	xmlDoValidityCheckingDefaultValue = oldvalue;
+	xmlLoadExtDtdDefaultValue = prevLoadExtDtdValue;
 	xmlKeepBlanksDefault(oldvalue_keepblanks);
 
 	if (!docp)
@@ -4955,12 +4957,20 @@ PHP_FUNCTION(domxml_xslt_stylesheet)
 	int ret;
 	char *buffer;
 	int buffer_len;
+	int prevSubstValue, prevExtDtdValue;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &buffer, &buffer_len) == FAILURE) {
 		RETURN_FALSE;
 	}
 
+	prevSubstValue = xmlSubstituteEntitiesDefault (1);
+	prevExtDtdValue = xmlLoadExtDtdDefaultValue;
+	xmlLoadExtDtdDefaultValue = XML_DETECT_IDS | XML_COMPLETE_ATTRS;
+
 	docp = xmlParseDoc(buffer);
+
+	xmlSubstituteEntitiesDefault (prevSubstValue);
+	xmlLoadExtDtdDefaultValue = prevExtDtdValue;
 
 	if (!docp)
 		RETURN_FALSE;
@@ -5014,12 +5024,20 @@ PHP_FUNCTION(domxml_xslt_stylesheet_file)
 	xsltStylesheetPtr sheetp;
 	int ret, file_len;
 	char *file;
+	int prevSubstValue, prevExtDtdValue;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &file, &file_len) == FAILURE) {
 		RETURN_FALSE;
 	}
 
+	prevSubstValue = xmlSubstituteEntitiesDefault (1);
+	prevExtDtdValue = xmlLoadExtDtdDefaultValue;
+	xmlLoadExtDtdDefaultValue = XML_DETECT_IDS | XML_COMPLETE_ATTRS;
+
 	sheetp = xsltParseStylesheetFile(file);
+
+	xmlSubstituteEntitiesDefault (prevSubstValue);
+	xmlLoadExtDtdDefaultValue = prevExtDtdValue;
 
 	if (!sheetp)
 		RETURN_FALSE;
