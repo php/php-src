@@ -230,6 +230,12 @@ ZEND_API void zend_make_printable_zval(zval *expr, zval *expr_copy, int *use_cop
 				if (expr->value.obj.handlers->cast_object(expr, expr_copy, IS_STRING, 0 TSRMLS_CC) == SUCCESS) {
 					break;
 				}
+				if (EG(exception)) {
+					zval_dtor(expr_copy);
+					expr_copy->value.str.len = 0;
+					expr_copy->value.str.val = empty_string;
+					break;
+				}
 			}
 			expr_copy->value.str.val = (char *) emalloc(sizeof("Object id #")-1 + MAX_LENGTH_OF_LONG);
 			expr_copy->value.str.len = sprintf(expr_copy->value.str.val, "Object id #%ld", (long)expr->value.obj.handle);

@@ -445,7 +445,6 @@ ZEND_API void _convert_to_string(zval *op ZEND_FILE_LINE_DC)
 {
 	long lval;
 	double dval;
-	TSRMLS_FETCH();
 
 	switch (op->type) {
 		case IS_NULL:
@@ -465,6 +464,7 @@ ZEND_API void _convert_to_string(zval *op ZEND_FILE_LINE_DC)
 			break;
 		case IS_RESOURCE: {
 			long tmp = op->value.lval;
+			TSRMLS_FETCH();
 
 			zend_list_delete(op->value.lval);
 			op->value.str.val = (char *) emalloc(sizeof("Resource id #")-1 + MAX_LENGTH_OF_LONG);
@@ -478,6 +478,7 @@ ZEND_API void _convert_to_string(zval *op ZEND_FILE_LINE_DC)
 			op->value.str.len = zend_sprintf(op->value.str.val, "%ld", lval);  /* SAFE */
 			break;
 		case IS_DOUBLE: {
+			TSRMLS_FETCH();
 			dval = op->value.dval;
 			op->value.str.val = (char *) emalloc_rel(MAX_LENGTH_OF_DOUBLE + EG(precision) + 1);
 			op->value.str.len = zend_sprintf(op->value.str.val, "%.*G", (int) EG(precision), dval);  /* SAFE */
@@ -490,11 +491,11 @@ ZEND_API void _convert_to_string(zval *op ZEND_FILE_LINE_DC)
 			op->value.str.val = estrndup_rel("Array", sizeof("Array")-1);
 			op->value.str.len = sizeof("Array")-1;
 			break;
-		case IS_OBJECT:
+		case IS_OBJECT: {
+			TSRMLS_FETCH();
 			if (op->value.obj.handlers->cast_object) {
 				zval tmp;
-				TSRMLS_FETCH();
-				if (op->value.obj.handlers->cast_object(op, &tmp, IS_STRING, 1 TSRMLS_CC) == SUCCESS) {
+				if (op->value.obj.handlers->cast_object(op, &tmp, IS_STRING, 1 TSRMLS_CC) == SUCCESS && tmp.type == IS_STRING) {
 					zval_dtor(op);
 					*op = tmp;
 					break;
@@ -507,6 +508,7 @@ ZEND_API void _convert_to_string(zval *op ZEND_FILE_LINE_DC)
 			op->value.str.val = estrndup_rel("Object", sizeof("Object")-1);
 			op->value.str.len = sizeof("Object")-1;
 			break;
+		}
 		default:
 			zval_dtor(op);
 			ZVAL_BOOL(op, 0);

@@ -869,8 +869,13 @@ int zend_std_cast_object(zval *readobj, zval *writeobj, int type, int should_fre
 	case IS_STRING:
 		ZVAL_STRING(&fname, "__tostring", 0);
 		if (call_user_function_ex(NULL, &readobj, &fname, &retval, 0, NULL, 0, NULL TSRMLS_CC) == SUCCESS) {
-			if (Z_TYPE_P(retval) != IS_STRING) {
-				zend_error(E_ERROR, "Method %s::__toString() must return a string value", Z_OBJCE_P(readobj)->name);
+			if (retval) {
+				if (Z_TYPE_P(retval) != IS_STRING) {
+					zend_error(E_ERROR, "Method %s::__toString() must return a string value", Z_OBJCE_P(readobj)->name);
+				}
+			} else {
+				MAKE_STD_ZVAL(retval);
+				ZVAL_STRINGL(retval, empty_string, 0, 0);
 			}
 			REPLACE_ZVAL_VALUE(&writeobj, retval, 0);
 			return SUCCESS;
