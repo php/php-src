@@ -179,14 +179,14 @@ ZEND_FUNCTION(strlen)
    Binary safe string comparison */
 ZEND_FUNCTION(strcmp)
 {
-	zval *s1,*s2;
+	zval **s1, **s2;
 	
-	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &s1, &s2) == FAILURE) {
+	if (ARG_COUNT(ht) != 2 || getParametersEx(2, &s1, &s2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_string(s1);
-	convert_to_string(s2);
-	RETURN_LONG(zend_binary_strcmp(s1,s2));
+	convert_to_string_ex(s1);
+	convert_to_string_ex(s2);
+	RETURN_LONG(zend_binary_strcmp(*s1,*s2));
 }
 /* }}} */
 
@@ -194,29 +194,29 @@ ZEND_FUNCTION(strcmp)
    Binary safe case-insensitive string comparison */
 ZEND_FUNCTION(strcasecmp)
 {
-	zval *s1,*s2;
+	zval **s1, **s2;
 	
-	if (ARG_COUNT(ht)!=2 || getParameters(ht, 2, &s1, &s2) == FAILURE) {
+	if (ARG_COUNT(ht)!=2 || getParametersEx(2, &s1, &s2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_string(s1);
-	convert_to_string(s2);
-	RETURN_LONG(zend_binary_strcasecmp(s1, s2));
+	convert_to_string_ex(s1);
+	convert_to_string_ex(s2);
+	RETURN_LONG(zend_binary_strcasecmp(*s1, *s2));
 }
 /* }}} */
 
 ZEND_FUNCTION(each)
 {
-	zval *array,*entry,**entry_ptr, *tmp;
+	zval **array,*entry,**entry_ptr, *tmp;
 	char *string_key;
 	ulong num_key;
 	zval **inserted_pointer;
 	HashTable *target_hash;
 	
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &array) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &array) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	target_hash = HASH_OF(array);
+	target_hash = HASH_OF(*array);
 	if (!target_hash) {
 		zend_error(E_WARNING,"Variable passed to each() is not an array or object");
 		return;
@@ -257,7 +257,7 @@ ZEND_FUNCTION(each)
 
 ZEND_FUNCTION(error_reporting)
 {
-	zval *arg;
+	zval **arg;
 	int old_error_reporting;
 	ELS_FETCH();
 
@@ -266,11 +266,11 @@ ZEND_FUNCTION(error_reporting)
 		case 0:
 			break;
 		case 1:
-			if (getParameters(ht,1,&arg) == FAILURE) {
+			if (getParametersEx(1,&arg) == FAILURE) {
 				RETURN_FALSE;
 			}
-			convert_to_long(arg);
-			EG(error_reporting)=arg->value.lval;
+			convert_to_long_ex(arg);
+			EG(error_reporting)=(*arg)->value.lval;
 			break;
 		default:
 			WRONG_PARAM_COUNT;
@@ -282,24 +282,24 @@ ZEND_FUNCTION(error_reporting)
 
 ZEND_FUNCTION(define)
 {
-	zval *var, *val, *non_cs;
+	zval **var, **val, **non_cs;
 	int case_sensitive;
 	zend_constant c;
 	ELS_FETCH();
 	
 	switch(ARG_COUNT(ht)) {
 		case 2:
-			if (getParameters(ht, 2, &var, &val)==FAILURE) {
+			if (getParametersEx(2, &var, &val)==FAILURE) {
 				RETURN_FALSE;
 			}
 			case_sensitive = CONST_CS;
 			break;
 		case 3:
-			if (getParameters(ht, 3, &var, &val, &non_cs)==FAILURE) {
+			if (getParametersEx(3, &var, &val, &non_cs)==FAILURE) {
 				RETURN_FALSE;
 			}
-			convert_to_long(non_cs);
-			if (non_cs->value.lval) {
+			convert_to_long_ex(non_cs);
+			if ((*non_cs)->value.lval) {
 				case_sensitive = 0;
 			} else {
 				case_sensitive = CONST_CS;
@@ -309,7 +309,7 @@ ZEND_FUNCTION(define)
 			WRONG_PARAM_COUNT;
 			break;
 	}
-	switch(val->type) {
+	switch((*val)->type) {
 		case IS_LONG:
 		case IS_DOUBLE:
 		case IS_STRING:
@@ -321,13 +321,13 @@ ZEND_FUNCTION(define)
 			RETURN_FALSE;
 			break;
 	}
-	convert_to_string(var);
+	convert_to_string_ex(var);
 	
-	c.value = *val;
+	c.value = **val;
 	zval_copy_ctor(&c.value);
 	c.flags = case_sensitive | ~CONST_PERSISTENT; /* non persistent */
-	c.name = zend_strndup(var->value.str.val, var->value.str.len);
-	c.name_len = var->value.str.len+1;
+	c.name = zend_strndup((*var)->value.str.val, (*var)->value.str.len);
+	c.name_len = (*var)->value.str.len+1;
 	zend_register_constant(&c ELS_CC);
 	RETURN_TRUE;
 }
@@ -335,15 +335,15 @@ ZEND_FUNCTION(define)
 
 ZEND_FUNCTION(defined)
 {
-	zval *var;
+	zval **var;
 	zval c;
 		
-	if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &var)==FAILURE) {
+	if (ARG_COUNT(ht)!=1 || getParametersEx(1, &var)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
-	convert_to_string(var);
-	if (zend_get_constant(var->value.str.val, var->value.str.len, &c)) {
+	convert_to_string_ex(var);
+	if (zend_get_constant((*var)->value.str.val, (*var)->value.str.len, &c)) {
 		zval_dtor(&c);
 		RETURN_LONG(1);
 	} else {
@@ -356,15 +356,15 @@ ZEND_FUNCTION(defined)
 */
 ZEND_FUNCTION(get_class)
 {
-	zval *arg;
+	zval **arg;
 	
-	if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &arg)==FAILURE) {
+	if (ARG_COUNT(ht)!=1 || getParametersEx(1, &arg)==FAILURE) {
 		RETURN_FALSE;
 	}
-	if (arg->type != IS_OBJECT) {
+	if ((*arg)->type != IS_OBJECT) {
 		RETURN_FALSE;
 	}
-	RETURN_STRINGL(arg->value.obj.ce->name,	arg->value.obj.ce->name_length, 1);
+	RETURN_STRINGL((*arg)->value.obj.ce->name,	(*arg)->value.obj.ce->name_length, 1);
 }
 /* }}} */
 
@@ -373,15 +373,15 @@ ZEND_FUNCTION(get_class)
 */
 ZEND_FUNCTION(get_parent_class)
 {
-	zval *arg;
+	zval **arg;
 	
-	if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &arg)==FAILURE) {
+	if (ARG_COUNT(ht)!=1 || getParametersEx(1, &arg)==FAILURE) {
 		RETURN_FALSE;
 	}
-	if ((arg->type != IS_OBJECT) || !arg->value.obj.ce->parent) {
+	if (((*arg)->type != IS_OBJECT) || !(*arg)->value.obj.ce->parent) {
 		RETURN_FALSE;
 	}
-	RETURN_STRINGL(arg->value.obj.ce->parent->name,	arg->value.obj.ce->parent->name_length, 1);
+	RETURN_STRINGL((*arg)->value.obj.ce->parent->name,	(*arg)->value.obj.ce->parent->name_length, 1);
 }
 /* }}} */
 
@@ -390,16 +390,16 @@ ZEND_FUNCTION(get_parent_class)
 */
 ZEND_FUNCTION(method_exists)
 {
-	zval *arg1, *arg2;
+	zval **arg1, **arg2;
 	
-	if (ARG_COUNT(ht)!=2 || getParameters(ht, 2, &arg1, &arg2)==FAILURE) {
+	if (ARG_COUNT(ht)!=2 || getParametersEx(2, &arg1, &arg2)==FAILURE) {
 		RETURN_FALSE;
 	}
-	if (arg1->type != IS_OBJECT) {
+	if ((*arg1)->type != IS_OBJECT) {
 		RETURN_FALSE;
 	}
-	convert_to_string(arg2);
-	if(zend_hash_exists(&arg1->value.obj.ce->function_table, arg2->value.str.val, arg2->value.str.len+1)) {
+	convert_to_string_ex(arg2);
+	if(zend_hash_exists(&(*arg1)->value.obj.ce->function_table, (*arg2)->value.str.val, (*arg2)->value.str.len+1)) {
 		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;
@@ -410,12 +410,12 @@ ZEND_FUNCTION(method_exists)
 ZEND_FUNCTION(leak)
 {
 	int leakbytes=3;
-	zval *leak;
+	zval **leak;
 
 	if (ARG_COUNT(ht)>=1) {
-		if (getParameters(ht, 1, &leak)==SUCCESS) {
-			convert_to_long(leak);
-			leakbytes = leak->value.lval;
+		if (getParametersEx(1, &leak)==SUCCESS) {
+			convert_to_long_ex(leak);
+			leakbytes = (*leak)->value.lval;
 		}
 	}
 	
