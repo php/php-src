@@ -1,7 +1,11 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
+?? ??? 2000, Version 4.0.5
+- Empty entry. Enjoy
+
 ?? ??? 2000, Version 4.0.4
+- Fixed bad mod_perl interaction which caused segfaults when using LFS (Sascha)
 - const CONSTNAME now gets recognized. Before the patch only @const CONSTNAME description was recognized.
 - Added extension for the cracklib library. (Alexander Feldman)
 - Added the is_null() function that will return true if a variable is of
