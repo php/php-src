@@ -1,3 +1,107 @@
+2003-08-24  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_API.c:
+      Add missing check
+
+    * zend_API.c:
+      Fix memory source of string duplication for non internal properties
+
+    * zend_API.c
+      zend_API.h
+      zend_compile.c
+      zend_default_classes.c
+      zend_execute_API.c
+      zend_variables.c
+      zend_variables.h:
+      - Provide appropriate way to destroy internal zval's.
+      - Allow internal zval's of type string and disallow complex types.
+      - Define the default string for extensions at class level instead of ctor.
+
+    * zend_API.h
+      zend_compile.h
+      zend_reflection_api.c:
+      Don't identify alias'ed functions
+
+2003-08-24  Zeev Suraski  <zeev@zend.com>
+
+    * zend_API.c:
+      Use ""'s if you want empty strings.  We want to crash on errors.
+
+    * zend_compile.c:
+      Use pemalloc()
+
+2003-08-24  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_API.c:
+      Allow NULL, too
+
+2003-08-24  Zeev Suraski  <zeev@zend.com>
+
+    * zend_API.c:
+      Get rid of more ^M's - Marcus, please check your CVS client!
+
+    * zend_default_classes.c:
+      Get rid of more ^M's
+
+    * zend_compile.c:
+      line endings fix
+
+    * zend_execute.c:
+      Never, ever, overwrite the refcount element of a connected zval!
+
+2003-08-24  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_reflection_api.c:
+      Add dedicated reflection_exception
+
+    * zend_default_classes.c
+      zend_default_classes.h:
+      Allow to throw instances of classes derived from exception
+
+    * zend.c
+      zend_default_classes.c
+      zend_default_classes.h
+      zend_execute.h
+      zend_execute_API.c:
+      - Provide a unified way to display uncaught exceptions, which shows
+        file/line/message info if possible.
+      - Add zend_eval_string_ex() to be able to handle exceptions in eval'd
+      code.
+      - Use above function to fix memleaks in CLI.
+
+    * zend_reflection_api.c:
+      Make invoke() work
+
+    * zend_reflection_api.c:
+      zend_parse_parameters 'O' works the way we need here
+
+    * zend_reflection_api.c:
+      Not needed
+
+    * zend_default_classes.c:
+      Make use method macros
+
+    * zend_API.h:
+      One of PPP is needed, too
+
+    * zend_reflection_api.c:
+      - Add Reflection_Function::isAlias
+      - Use ZEND_ME/ZEND_METHOD
+      - Fix static entries
+
+    * zend_API.h
+      zend_compile.h:
+      - Add fn_flag ZEND_ACC_ALIAS
+      - Unify way of function_entry generation by new macro ZEND_FENTRY
+
+    * zend_API.c:
+      Fix fn_flags handling
+
+    * zend_API.c
+      zend_API.h
+      zend_default_classes.c:
+      Add property read code and use that in default exception class
+
 2003-08-23  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_default_classes.c
