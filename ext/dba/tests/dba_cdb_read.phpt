@@ -33,8 +33,8 @@ DBA CDB handler test (read only)
 		echo "\n#";
 		echo dba_fetch(1, $db_file);
 		echo dba_fetch(1, $db_file);
-		echo dba_fetch(1, $db_file);
-		echo dba_fetch(1, $db_file);
+		echo dba_fetch(2, $db_file);
+		echo dba_fetch(2, $db_file);
 		echo "\n?".$keys;
 		// with skip = 0 dba_fetch must fetch the first result
 		echo "\n#";
@@ -59,7 +59,7 @@ DBA CDB handler test (read only)
 database handler: cdb
 7YYYYNNN
 =1234
-#1111
+#1122
 ?1212314
 #1212314
 =1231324
