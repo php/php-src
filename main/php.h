@@ -248,12 +248,7 @@ extern void php_log_err(char *log_message);
 extern int Debug(char *format, ...);
 extern int cfgparse(void);
 
-#if ZEND_NEW_ERROR_HANDLING
 #define php_error zend_error
-#else
-extern PHPAPI void php_error_cb(int type, const char *format, ...);
-#define php_error php_error_cb
-#endif
 
 
 #define zenderror phperror
