@@ -53,7 +53,7 @@ char *day_short_names[] =
 	"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"
 };
 
-#if !defined(HAVE_TM_ZONE) && !defined(_TIMEZONE) && !(WIN32||WINNT)
+#if !defined(HAVE_TM_ZONE) && !defined(_TIMEZONE) && !defined(HAVE_DECLARED_TIMEZONE)
 extern time_t timezone;
 #endif
 

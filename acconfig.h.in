@@ -1,7 +1,5 @@
 /* This is the default configuration file to read -*- C -*- */
 
-#undef socklen_t
-
 /* these are defined by automake */
 #undef PACKAGE
 #undef VERSION

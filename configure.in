@@ -335,6 +335,7 @@ AC_REPLACE_FUNCS(strlcat strlcpy getopt)
 AC_FUNC_UTIME_NULL
 AC_FUNC_ALLOCA
 AC_BROKEN_SPRINTF
+PHP_DECLARED_TIMEZONE
 
 dnl AIX keeps in_addr_t in /usr/include/netinet/in.h
 dnl AC_MSG_CHECKING(for in_addr_t)
