@@ -37,7 +37,11 @@ modules, but which are not relevant to the outside. */
 
 /* Get the definitions provided by running "configure" */
 
+#ifdef PHP_WIN32
+#include "config.w32.h"
+#else
 #include "php_config.h"
+#endif
 
 /* To cope with SunOS4 and other systems that lack memmove() but have bcopy(),
 define a macro for memmove() if HAVE_MEMMOVE is false. */
