@@ -6,11 +6,12 @@ mode, the default, uses a process global PHP lock in the Roxen
 module. This means that all PHP-requests are serialized (ie only one
 script is executed at any one time). The second option is using ZTS
 (Zend Thread Safe mode). Unless --enable-roxen-zts is specified, this
-won't be used. For now this uses a global lock in the PHP interpreter
-so the end result is the same (only one concurrent script). In the
-future this might change though, but for now you are better off using
-the non-ZendThreadSafe version (which works fine with Roxen and
-threads).
+won't be used.
+
+This solution now works fine and is recommended. Multiple PHP4
+requests will be run in parallell. The maximum number of parallell
+PHP4-execution is limited to the number of handle threads Roxen is
+started with.
 
 - The Author, David Hedbor <neotron@php.net>
 
