@@ -228,6 +228,8 @@ gdImagePtr gdImageCreateFromGd2PartCtx(gdIOCtxPtr in, int srcx, int srcy, int w,
 
 gdImagePtr gdImageCreateFromXbm(FILE *fd);
 
+gdImagePtr gdImageCreateFromXpm (char *filename);
+
 void gdImageDestroy(gdImagePtr im);
 
 /* Replaces or blends with the background depending on the
