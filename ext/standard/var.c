@@ -349,7 +349,6 @@ PHP_FUNCTION(var_export)
 	}
 	
 	if (return_output) {
-		php_output_set_status(0 TSRMLS_CC);
 		php_start_ob_buffer (NULL, 0, 1 TSRMLS_CC);
 	}
 	
@@ -358,7 +357,6 @@ PHP_FUNCTION(var_export)
 	if (return_output) {
 		php_ob_get_buffer (return_value TSRMLS_CC);
 		php_end_ob_buffer (0, 0 TSRMLS_CC);
-		php_output_set_status(1 TSRMLS_CC);
 	}
 }
 /* }}} */
