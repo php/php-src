@@ -585,15 +585,16 @@ static void php_var_serialize_intern(smart_str *buf, zval **struc, HashTable *va
 				/* fall-through */
 			}
 		case IS_ARRAY:
-			myht = HASH_OF(*struc);
 			if (Z_TYPE_PP(struc) == IS_ARRAY) {
 				smart_str_appendl(buf, "a:", 2);
+				myht = HASH_OF(*struc);
 			} else {
 				php_var_serialize_class_name(buf, struc TSRMLS_CC);
+				myht = Z_OBJPROP_PP(struc);
 			}
 			/* count after serializing name, since php_var_serialize_class_name
 			   changes the count if the variable is incomplete class */
-			i = zend_hash_num_elements(myht);
+			i = myht ? zend_hash_num_elements(myht) : 0;
 			smart_str_append_long(buf, i);
 			smart_str_appendl(buf, ":{", 2);
 			if (i > 0) {
