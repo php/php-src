@@ -29,7 +29,7 @@ void UpdateIniFromRegistry(char *path)
 			char drive_letter;
 
 			/* get current working directory and prepend it to the path */
-			if (!getcwd(tmp_buf, MAXPATHLEN)) {
+			if (!PHP_GETCWD(tmp_buf, MAXPATHLEN)) {
 				efree(orig_path);
 				return;
 			}
