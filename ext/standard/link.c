@@ -58,24 +58,22 @@ PHP_FUNCTION(readlink)
 {
 	zval **filename;
 	char buff[MAXPATHLEN];
-	char *p;
 	int ret;
-	        
+
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &filename) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(filename);
 
-	p = virtual_link(Z_STRVAL_PP(filename), Z_STRLEN_PP(filename) TSRMLS_CC);
+	ret = readlink(Z_STRVAL_PP(filename), buff, MAXPATHLEN-1);
 
-	ret = readlink(p, buff, MAXPATHLEN-1);
 	if (ret == -1) {
 		php_error(E_WARNING, "readlink failed (%s)", strerror(errno));
 		RETURN_FALSE;
 	}
 	/* Append NULL to the end of the string */
 	buff[ret] = '\0';
-	
+
 	RETURN_STRING(buff, 1);
 }
 /* }}} */

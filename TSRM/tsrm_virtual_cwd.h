@@ -54,7 +54,7 @@ typedef unsigned short mode_t;
         (*(c) == '\\' && !IsDBCSLeadByte(*(c-1))))
 
 /* COPY_WHEN_ABSOLUTE also takes path as argument because netware needs it
-/* to account for volume name that is unique to NetWare absolute paths
+ * to account for volume name that is unique to NetWare absolute paths
  */
 #define COPY_WHEN_ABSOLUTE(path) 2
 #define IS_ABSOLUTE_PATH(path, len) \
@@ -144,7 +144,6 @@ CWD_API int virtual_stat(const char *path, struct stat_libc *buf TSRMLS_DC);
 #endif
 #if !defined(TSRM_WIN32) && !defined(NETWARE)
 CWD_API int virtual_lstat(const char *path, struct stat *buf TSRMLS_DC);
-CWD_API char *virtual_link(char *buf, size_t size TSRMLS_DC);
 #endif
 CWD_API int virtual_unlink(const char *path TSRMLS_DC);
 CWD_API int virtual_mkdir(const char *pathname, mode_t mode TSRMLS_DC);
