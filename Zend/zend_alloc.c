@@ -233,7 +233,7 @@ ZEND_API void *_safe_emalloc(size_t nmemb, size_t size, size_t offset ZEND_FILE_
 		}
 	}
 
-	zend_error(E_ERROR, "Possible integer overflow in memory allocation (%ld * %ld + %ld)", nmemb, size, offset);
+	zend_error(E_ERROR, "Possible integer overflow in memory allocation (%zd * %zd + %zd)", nmemb, size, offset);
 	return 0;
 }
 
