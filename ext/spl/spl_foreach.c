@@ -75,7 +75,7 @@ ZEND_EXECUTE_HOOK_FUNCTION(ZEND_FE_RESET)
 		instance_ce = spl_get_class_entry(retval TSRMLS_CC);
 		is_a = spl_implements(instance_ce);
 		if (!(is_a & SPL_IS_A_FORWARD)) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Objects created by new_iterator() must implement spl::forward");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Objects created by new_iterator() must implement spl_forward");
 			ZEND_EXECUTE_HOOK_ORIGINAL(ZEND_FE_RESET);
 		}
 		PZVAL_LOCK(retval);

@@ -209,7 +209,7 @@ int spl_fetch_dimension_address(znode *result, znode *op1, znode *op2, temp_vari
 			writer->idx = dim;            writer->idx->refcount++;
 			SELECTIVE_PZVAL_LOCK(*retval, result);
 		} else {
-			zend_error(E_ERROR, "Object must implement spl::array_access for write access");
+			zend_error(E_ERROR, "Object must implement spl_array_access for write access");
 			retval = &EG(error_zval_ptr);
 		}
 		SELECTIVE_PZVAL_LOCK(*retval, result);
@@ -282,7 +282,7 @@ ZEND_EXECUTE_HOOK_FUNCTION(ZEND_ASSIGN)
 
 	if (writer && *writer && Z_TYPE_PP(writer) == IS_OBJECT) {
 		/* optimization: do pre checks and only test for handlers in case of
-		 * spl::array_writer_default, for spl::array_writer we must use the 
+		 * spl_array_writer_default, for spl_array_writer we must use the 
 		 * long way of calling spl_instance
 		 * if (spl_is_instance_of(writer, spl_ce_array_writer_default TSRMLS_CC))
 		 */
