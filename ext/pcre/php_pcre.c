@@ -739,6 +739,7 @@ char *php_pcre_replace(char *regex,   int regex_len,
 				/* stick that last bit of string on our output */
 				memcpy(&result[*result_len], piece, subject_len - start_offset);
 				*result_len += subject_len - start_offset;
+				result[*result_len] = '\0';
 				break;
 			}
 		}
