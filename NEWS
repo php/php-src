@@ -2,6 +2,9 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.4
+- Modified preg_replace() to ignore backreferences that refer to
+  non-existing subpatterns. (Andrei)
+- Fixed column-title buffer-overflow in OCIFetchStatement(). (Thies)
 - Added 'output_handler' INI directive (Zeev)
 - Fixed some buglets in the output buffering mechanism (Zeev)
 - Added transparent gzip compression support (Jade Nicoletti, Zeev)
