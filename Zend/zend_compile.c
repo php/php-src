@@ -81,7 +81,7 @@ void zend_init_compiler_data_structures(TSRMLS_D)
 	CG(in_compilation) = 0;
 	init_compiler_declarables(TSRMLS_C);
 	CG(throw_list) = NULL;
-	zend_register_auto_global("GLOBALS", sizeof("GLOBALS")-1 TSRMLS_CC);
+ 	zend_register_auto_global("GLOBALS", sizeof("GLOBALS")-1 TSRMLS_CC);
 	CG(in_clone_method) = 0;
 }
 
