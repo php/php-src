@@ -23,7 +23,7 @@
 
 #if HAVE_LIBREADLINE
 #ifdef ZTS 
-#error Readline module will *NEVER* be thread-safe
+#warning Readline module will *NEVER* be thread-safe
 #endif
 
 #ifndef CGI_BINARY

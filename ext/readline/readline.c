@@ -365,7 +365,7 @@ static char **_readline_completion_cb(char *text, int start, int end)
 	zval *params[4];
 	int i;
 	char **matches = NULL;
-	ELS_FETCH();
+	CLS_FETCH();
 
 	params[0]=_readline_string_zval(_readline_completion);
 	params[1]=_readline_string_zval(text);

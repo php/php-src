@@ -96,6 +96,9 @@ int php3_minit_ftp(INIT_FUNC_ARGS)
 PHP_MINIT_FUNCTION(ftp)
 #endif
 {
+
+	ELS_FETCH();
+
 	le_ftpbuf = register_list_destructors(ftp_destructor_ftpbuf, NULL);
 	REGISTER_MAIN_LONG_CONSTANT("FTP_ASCII", FTPTYPE_ASCII,
 		CONST_PERSISTENT | CONST_CS);
