@@ -1094,7 +1094,15 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 				s = tmp;
 			}
 #endif
+			
 			if (!is_anonymous) {
+				if (PG(magic_quotes_gpc)) {
+					s = s ? s : filename;
+					tmp = strrchr(s, '\'');
+					s = tmp > s ? tmp : s;
+					tmp = strrchr(s, '"');
+					s = tmp > s ? tmp : s;
+				}
 				if (s && s > filename) {
 					safe_php_register_variable(lbuf, s+1, NULL, 0 TSRMLS_CC);
 				} else {
