@@ -146,8 +146,9 @@ void print_msg(hg_msg *msg, char *str, int txt);
 
 void _close_hw_link(zend_rsrc_list_entry *rsrc)
 {
-/*	HwSLS_FETCH(); */
 	hw_connection *conn = (hw_connection *)rsrc->ptr;
+	HwSLS_FETCH();
+
 	if(conn->hostname)
 		free(conn->hostname);
 	if(conn->username)
@@ -159,8 +160,9 @@ void _close_hw_link(zend_rsrc_list_entry *rsrc)
 
 void _close_hw_plink(zend_rsrc_list_entry *rsrc)
 {
-/*	HwSLS_FETCH(); */
 	hw_connection *conn = (hw_connection *)rsrc->ptr;
+	HwSLS_FETCH();
+
 	if(conn->hostname)
 		free(conn->hostname);
 	if(conn->username)
