@@ -1764,3 +1764,21 @@ ZEND_API void zend_compare_objects(zval *result, zval *o1, zval *o2 TSRMLS_DC)
 		result->value.lval = Z_OBJ_HT_P(o1)->compare_objects(o1, o2 TSRMLS_CC);
 	}
 }
+
+ZEND_API void zend_locale_sprintf_double(zval *op ZEND_FILE_LINE_DC)
+{
+	double dval = op->value.dval;
+	
+	TSRMLS_FETCH();
+	
+	op->value.str.val = (char *) emalloc_rel(MAX_LENGTH_OF_DOUBLE + EG(precision) + 1);
+	sprintf(op->value.str.val, "%.*G", (int) EG(precision), dval);
+	op->value.str.len = strlen(op->value.str.val);
+
+	if (EG(float_separator)[0] != '.') { 
+		char *p = op->value.str.val;
+		if ((p = strchr(p, '.'))) {
+			*p = EG(float_separator)[0];
+		}	
+	}
+}

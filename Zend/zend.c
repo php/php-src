@@ -156,6 +156,11 @@ ZEND_API void zend_make_printable_zval(zval *expr, zval *expr_copy, int *use_cop
 			expr_copy->value.str.val = estrndup("Object", expr_copy->value.str.len);
 #endif
 			break;
+		case IS_DOUBLE:
+			*expr_copy = *expr;
+			zval_copy_ctor(expr_copy);
+			zend_locale_sprintf_double(expr_copy ZEND_FILE_LINE_CC);
+			break;
 		default:
 			*expr_copy = *expr;
 			zval_copy_ctor(expr_copy);

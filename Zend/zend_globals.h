@@ -209,6 +209,9 @@ struct _zend_executor_globals {
 
 	struct _zend_execute_data *current_execute_data;
 
+	/* locale stuff */
+	char float_separator[1];
+
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
 };
 
