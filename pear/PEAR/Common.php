@@ -23,6 +23,13 @@ require_once 'PEAR.php';
 require_once 'Archive/Tar.php';
 require_once 'System.php';
 
+/**
+ * List of temporary files and directories registered by
+ * PEAR_Common::addTempFile().
+ * @var array
+ */
+$GLOBALS['_PEAR_Common_tempfiles'] = array();
+
 /*
  * TODO:
  *   - check in inforFromDescFile that the minimal data needed is present
@@ -45,9 +52,6 @@ class PEAR_Common extends PEAR
 
     /** array of attributes of the currently parsed XML element */
     var $current_attributes = array();
-
-    /** list of temporary files created by this object */
-    var $_tempfiles = array();
 
     /** assoc with information about a package */
     var $pkginfo = array();
@@ -75,8 +79,6 @@ class PEAR_Common extends PEAR
      */
     function PEAR_Common()
     {
-        $GLOBALS['_PEAR_Common_tempfiles'] = array();
-        $this->_tempfiles =& $GLOBALS['_PEAR_Common_tempfiles'];
         $this->PEAR();
     }
 
@@ -93,9 +95,7 @@ class PEAR_Common extends PEAR
         // doesn't work due to bug #14744
         //$tempfiles = $this->_tempfiles;
         $tempfiles =& $GLOBALS['_PEAR_Common_tempfiles'];
-        while (is_array($tempfiles) &&
-               $file = array_shift($tempfiles))
-        {
+        while ($file = array_shift($tempfiles)) {
             if (@is_dir($file)) {
                 System::rm("-rf $file");
             } elseif (file_exists($file)) {
@@ -120,7 +120,7 @@ class PEAR_Common extends PEAR
      */
     function addTempFile($file)
     {
-        $this->_tempfiles[] = $file;
+        $GLOBALS['_PEAR_Common_tempfiles'][] = $file;
     }
 
     // }}}
