@@ -38,7 +38,24 @@ AC_ARG_WITH(apxs2,
     -D*) CPPFLAGS="$CPPFLAGS $flag";;
     esac
   done
-  
+
+  case $host_alias in
+  *aix*)
+    APXS_SBINDIR=`$APXS -q SBINDIR`
+    EXTRA_LDFLAGS="$EXTRA_LDFLAGS -Wl,-bI:$APXS_SBINDIR/httpd.exp"
+    PHP_SELECT_SAPI(apache2filter, shared, sapi_apache2.c apache_config.c php_functions.c) 
+    ;;
+  *darwin*)
+    APXS_HTTPD=`$APXS -q SBINDIR`/`$APXS -q TARGET`
+    MH_BUNDLE_FLAGS="-bundle -bundle_loader $APXS_HTTPD"
+    PHP_SUBST(MH_BUNDLE_FLAGS)
+    PHP_SELECT_SAPI(apache2filter, bundle, sapi_apache2.c apache_config.c php_functions.c) 
+    ;;
+  *)
+    PHP_SELECT_SAPI(apache2filter, shared, sapi_apache2.c apache_config.c php_functions.c) 
+    ;;
+  esac
+    
   # Test that we're trying to configure with apache 2.x
   if test ! -f "$APXS_INCLUDEDIR/ap_mpm.h"; then
     AC_MSG_ERROR([Use --with-apxs with Apache 1.3.x!])
@@ -47,14 +64,7 @@ AC_ARG_WITH(apxs2,
   PHP_ADD_INCLUDE($APXS_INCLUDEDIR)
   INSTALL_IT="$APXS -i -a -n php4 $SAPI_LIBTOOL"
   PHP_BUILD_THREAD_SAFE
-  PHP_SELECT_SAPI(apache2filter, shared, sapi_apache2.c apache_config.c php_functions.c) 
   AC_MSG_RESULT(yes)
-  case $host_alias in
-  *aix*)
-    APXS_SBINDIR=`$APXS -q SBINDIR`
-    EXTRA_LDFLAGS="$EXTRA_LDFLAGS -Wl,-bI:$APXS_SBINDIR/httpd.exp"
-    ;;
-  esac
 ],[
   AC_MSG_RESULT(no)
 ])
