@@ -481,7 +481,7 @@ static int send_php(request_rec *r, int display_source_mode, char *filename)
 		fh.type = ZEND_HANDLE_FILENAME;
 
 #if defined(ZEND_MULTIBYTE) && defined(HAVE_MBSTRING)
-		php_mbstring_set_zend_encoding(TSRMLS_C);
+		php_mb_set_zend_encoding(TSRMLS_C);
 #endif /* defined(ZEND_MULTIBYTE) && defined(HAVE_MBSTRING) */
 
 		zend_execute_scripts(ZEND_INCLUDE TSRMLS_CC, NULL, 1, &fh);
