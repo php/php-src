@@ -537,6 +537,20 @@ int main(int argc, char *argv[])
 	void ***tsrm_ls;
 #endif
 
+#if defined(PHP_WIN32) && defined(_DEBUG) && defined(PHP_WIN32_DEBUG_HEAP)
+	{
+		int tmp_flag;
+		
+		_CrtSetReportMode(_CRT_ERROR, _CRTDBG_MODE_FILE);
+		_CrtSetReportFile(_CRT_ERROR, _CRTDBG_FILE_STDERR);
+
+		tmp_flag = _CrtSetDbgFlag(_CRTDBG_REPORT_FLAG);
+		tmp_flag |= _CRTDBG_DELAY_FREE_MEM_DF;
+		tmp_flag |= _CRTDBG_LEAK_CHECK_DF;
+
+		_CrtSetDbgFlag(tmp_flag);
+	}
+#endif
 
 #ifdef HAVE_SIGNAL_H
 #if defined(SIGPIPE) && defined(SIG_IGN)
