@@ -182,15 +182,6 @@ PHP_FUNCTION(unlink)
 }
 /* }}} */
 
-function_entry link_functions[] = {
-	PHP_FE(readlink,								NULL)
-	PHP_FE(linkinfo,								NULL)
-	PHP_FE(symlink,									NULL)
-	PHP_FE(link,									NULL)
-	PHP_FE(unlink,									NULL)
-	{NULL, NULL, NULL}
-};
-
 
 /*
  * Local variables:

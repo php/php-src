@@ -275,6 +275,7 @@ extern char **environ;
 
 extern void phperror(char *error);
 extern PHPAPI void php3_error(int type, const char *format,...);
+extern PHPAPI int php3_write(void *buf, int size);
 extern PHPAPI int php3_printf(const char *format,...);
 extern void php3_log_err(char *log_message);
 extern int Debug(char *format,...);
