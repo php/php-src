@@ -1,3 +1,8 @@
+2004-09-13  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_execute.c:
+      Antony Dovgal's error message improvement - #27290
+
 2004-09-11  Derick Rethans  <php@derickrethans.nl>
 
     * zend_operators.c
