@@ -1,3 +1,462 @@
+2000-01-30  Zeev Suraski  <zeev@php.net>
+
+    * ext/standard/basic_functions.h: Fix typo
+
+    * ext/standard/basic_functions.c
+      ext/standard/basic_functions.h
+      php.ini-dist:    - Finished work, more or less
+
+    * ext/standard/basic_functions.c
+      ext/standard/basic_functions.h:
+    Some more work, I'll finish this when I get home
+
+2000-01-30  Sam Ruby  <rubys@us.ibm.com>
+
+    * sapi/servlet/Makefile.in
+      sapi/servlet/servlet.java:
+    PHP can install and run as a servlet again on Unix.
+    Still todo: allow access to ext/java functionality from within servlet.
+
+2000-01-30  Zeev Suraski  <zeev@php.net>
+
+    * ext/standard/basic_functions.c
+      ext/standard/basic_functions.h
+      configuration-parser.y
+      main.c: Initial work on the protected env vars stuff
+
+2000-01-30  Sam Ruby  <rubys@us.ibm.com>
+
+    * sapi/servlet/config.m4: add installation
+
+2000-01-29  Zeev Suraski  <zeev@php.net>
+
+    * ext/standard/string.c:
+2000-01-29  Sam Ruby  <rubys@us.ibm.com>
+
+    * ext/java/config.m4
+      sapi/servlet/Makefile.in:
+    Progress: sapi/servlet now builds again on Unix
+
+    * sapi/servlet/Makefile.in
+      sapi/servlet/README: First steps towards restoring sapi/servlet on Unix.
+    Cosmetic improvements to allow README to be read on systems with tabstop=8
+
+2000-01-29  Zeev Suraski  <zeev@php.net>
+
+    * main.c: Fix buglets in the argv/argc code
+
+2000-01-29  Rasmus Lerdorf  <rasmus@php.net>
+
+    * sapi/apache/mod_php4.c: No comment - will explain next week
+
+2000-01-29  Zeev Suraski  <zeev@php.net>
+
+    * sapi/cgi/cgi_main.c
+      sapi/isapi/php4isapi.c
+      main.c
+      php_variables.c
+      php_variables.h
+      rfc1867.c
+      sapi/apache/mod_php4.c:
+    - Change the argument order of php_register_variable() to something more
+      intuitive.
+    - Make the authentication variables be a part of the HTTP_SERVER_VARS[] array
+
+2000-01-28  Zeev Suraski  <zeev@php.net>
+
+    * NEWS
+      ext/session/session.c
+      main.c
+      php.ini-dist
+      php_globals.h
+      php_variables.c
+      sapi/cgi/cgi_main.c: - A few fixes
+    - Added register_argv_argc directive to allow disabling of argv/argc
+
+    * main.c: Rename gpc_globals to register_globals
+
+    * sapi/apache/mod_php4.c: Apache module compile fixes
+
+2000-01-28  Andrei Zmievski  <andrei@ispi.net>
+
+    * TODO
+      main.c: Use sizeof on the proper string.
+
+2000-01-28  Zeev Suraski  <zeev@php.net>
+
+    * sapi/servlet/servlet.c
+      sapi/thttpd/thttpd.c
+      sapi/phttpd/phttpd.c
+      sapi/roxen/roxen.c
+      sapi/cgi/cgi_main.c
+      sapi/isapi/php4isapi.c
+      ext/apache/apache.c
+      ext/standard/string.c
+      sapi/aolserver/aolserver.c
+      sapi/apache/mod_php4.c
+      Makefile.in
+      NEWS
+      SAPI.h
+      main.c
+      php.ini-dist
+      php4dll.dsp
+      php4dllts.dsp
+      php_globals.h
+      php_gpce.c
+      php_gpce.h
+      php_variables.c
+      php_variables.h
+      rfc1867.c:
+    Tried to centralize global variable registration as much as possible:
+
+    - Added $HTTP_ENV_VARS[] and $HTTP_SERVER_VARS[] support, which similarly
+      to $HTTP_GET_VARS[], contain environment and server variables.  Setting
+      register_globals to Off will now also prevent registration of the
+      environment and server variables into the global scope (Zeev)
+    - Renamed gpc_globals to register_globals (Zeev)
+    - Introduced variables_order that deprecates gpc_order, and allows control
+      over the server and environment variables, in addition to GET/POST/Cookies
+      (Zeev)
+
+    * php_gpce.c
+      php_gpce.h
+      rfc1867.c: Use a more general and descriptive name
+
+    * php4dll.dsp
+      php4dllts.dsp: dsp updates
+
+2000-01-28  Andi Gutmans  <andi@php.net>
+
+    * php4dllts.dsp: - Make Win32 compile again
+
+2000-01-28  Zeev Suraski  <zeev@php.net>
+
+    * ext/standard/Makefile.in
+      ext/standard/fsock.c
+      ext/standard/head.c
+      ext/standard/php_standard.h
+      ext/standard/post.c
+      ext/standard/post.h
+      ext/standard/string.c
+      Makefile.in
+      main.c
+      php_gpce.c
+      php_gpce.h
+      rfc1867.c:
+    post.c really had nothing to do with POST anymore, and it belongs to the top level directory
+
+    * ext/standard/post.c
+      ext/standard/post.h
+      rfc1867.c: Get rid of the old implementation
+
+2000-01-28  Sam Ruby  <rubys@us.ibm.com>
+
+    * ext/java/config.m4:
+    accomodate old versions of kaffe which don't support jar
+
+    * ext/java/java.c: Shutdown cleanly (prevents Kaffe from trapping on exit)
+
+2000-01-27  Charles Hagenbuch  <chagenbu@wso.williams.edu>
+
+    * ext/mcal/php_mcal.c:
+    Mcal cleanup, stage 1: it compiles again (the php3 syntax to php4/zend
+    syntax conversion left a lot of: PHP_FUNCTION void ... definitions, giving
+    two types to every function).
+
+    However, it's still segfaulting. I'll look into that next.
+
+2000-01-27  Sam Ruby  <rubys@us.ibm.com>
+
+    * ext/java/Makefile.in:
+    PHP now starts up in CGI mode with Kaffe on RedHat Linux 6.1.
+    status: segfault atexit, npe in jawt - but otherwise both samples work!
+    Installation needs more work
+
+    * ext/java/Makefile.in
+      ext/java/config.m4: Forward progress, thanks to Sascha Schumann.
+    libphp_java.so is now built again - it just refuses to load.
+    At least I now have something I can debug!
+
+2000-01-26  Sascha Schumann  <sascha@schumann.cx>
+
+    * build/rules.mk: Allow shared libraries to be built everywhere
+
+2000-01-26  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * tests/testdom: - add another comment to the script
+
+    * tests/testdom: - test script for domxml
+
+2000-01-25  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/domxml/domxml.c
+      ext/domxml/php_domxml.h:
+    - resumed work on domxml and found a way to circumwent a segm fault
+      (see the source). No solution to fix it, yet. Probably needs some
+      understanding of zend, which I don't have.
+    - added more functions
+
+2000-01-24  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/gd/gd.c: Proper indentation here also.
+
+2000-01-24  Zeev Suraski  <zeev@php.net>
+
+    * main.c: NULL out the ticks callback until Stig implements it
+
+2000-01-19  Andreas Karajannis  <Andreas.Karajannis@gmd.de>
+
+    * ext/odbc/config.m4: Fix for wrong library ordering with adabas
+
+2000-01-19  Sam Ruby  <rubys@us.ibm.com>
+
+    * configure.in
+      ext/java/Makefile.in
+      ext/java/config.m4
+      sapi/servlet/Makefile.in:
+    First step to restoring the ability to build Java support on Unix:
+    1) Restore the ability to build CGI as a shared library
+    2) Correct make dependency rule so that the jar files are included
+    3) Search for jar executable, and use it, if found
+
+    Left TODO: actually build the shared libraries
+
+2000-01-19  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/oracle/oracle.c:
+    RETURN_NULL -> RETURN_NULL() // we don't want macros without an argumnet
+
+2000-01-18  Zeev Suraski  <zeev@php.net>
+
+    * ext/standard/output.c:
+    This doesn't seem to be necessary, and causes a leak in case of output_buffering=on
+
+    * main.c: Make the phpinfo() images work properly again
+
+2000-01-18  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/oracle/oracle.c:    also changed return-type for list-dtor
+
+2000-01-17  Zeev Suraski  <zeev@php.net>
+
+    * ext/mssql/php_mssql.c
+      ext/session/session.c: - MS-SQL fix
+    - Fix a crash bug in session_register()
+
+    * sapi/apache/mod_php4.c
+      ext/standard/fsock.c
+      ext/standard/fsock.h
+      ext/standard/reg.c
+      configuration-parser.y
+      ext/pcre/php_pcre.c
+      ext/standard/basic_functions.c:
+    Destructors no longer return ints, the low level problem it was intended to solve is long gone now...
+
+2000-01-16  Zeev Suraski  <zeev@php.net>
+
+    * ext/session/session.c
+      ext/odbc/php_odbc.c
+      main.c
+      php_globals.h:
+    - Remove the pre-request-shutdown hooks, they should no longer be necessary.
+    The session module may not work due to an unknown (and until now, IMO, misdiagnosed) problem,
+    if it does, please report it!
+
+    * ext/session/session.c: Fix
+
+    * ext/session/session.c
+      php_globals.h
+      main.c
+      php.h:
+    Remove the post-startup callback support.  Modules are now started only after
+    the entire engine is started.  People - please make sure that the session module
+    works properly for you.
+
+2000-01-16  Thies C. Arntzen  <thies@digicol.de>
+
+    * main.c:
+    move call to php_execute_pre_request_shutdown() into php_request_shutdown()
+    so it will be called when script terminated due to call to exit().
+
+    * ext/oci8/oci8.c
+      ext/oci8/php_oci8.h:    lots of cleanup - all invisible to the user (i hope;-)
+    - full refcounting of connections & statements
+    - cleanup of the descriptor-code (descriptors are now real resources)
+    - we now use SQLT_CHR instead of SQLT_STR (no trailing \0) - smarter & faster
+    - ocifetchinto(OCI_BOTH) will use references.
+
+    * main.c: fixes #3220, #3221 finally
+
+    * main.c: nother go on #3220, #3221
+
+    * main.c: hopfully fixes #3220, #3221
+
+2000-01-15  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/wddx/wddx.c:
+    (wddx_stack_destroy) Properly free the dangling varname.
+    (php_wddx_deserialize_ex) There should be only 1 value on the stack after
+                              parser is done.
+
+    * ext/pcre/php_pcre.c: Another idea I had today.
+
+    * ext/standard/fsock.c:
+    (php_sockwait_for_data) timeout is not assigned yet, so check the right one.
+
+2000-01-15  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/fsock.c: (php_sockwait_for_data) clean up
+
+2000-01-15  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/standard/file.c: Fix prototype.
+
+    * ext/standard/file.c
+      ext/standard/fsock.c
+      ext/standard/fsock.h:
+    Added ability to set timeout on socket read operations. New function
+    set_socket_timeout(socket, seconds, microseconds) sets the timeout.
+
+2000-01-15  Zeev Suraski  <zeev@php.net>
+
+    * ext/standard/output.c: Fix logic
+
+2000-01-15  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/output.c: Initialize flag correctly
+
+2000-01-15  Zeev Suraski  <zeev@php.net>
+
+    * ext/session/session.c: Compile fixes for ZTS
+
+2000-01-15  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/sybase/sybase.c
+      ext/sybase_ct/php_sybase_ct.c:
+    just add a remark. zend_hash_apply can & will cause problems here unless
+
+    * ext/odbc/php_odbc.c:
+    in an rshutdown function we should not access the regular_list like this.
+
+2000-01-15  Sascha Schumann  <sascha@schumann.cx>
+
+    * main.c
+      php_globals.h: Initialize/destroy hook lists implicitly.
+
+    * ext/session/session.c:
+    Be more verbose, if headers were already sent and remove RSHUTDOWN handler
+
+2000-01-15  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/session/php_session.h
+      ext/session/session.c:
+    sessions are now written via a _php_session_shutdown which is registered
+    via php_register_pre_request_shutdown().
+
+    * main.c
+      php.h
+      php_globals.h:
+    - don't set php_errormsg on errors that will cause a zend_bailout().
+      using zend_hash_update() can make things worse in this situation.
+    - new function php_register_pre_request_shutdown(). this way modules
+      can register callbacks that will be called as soon as execution of
+      the script is done but *before* any cleanup (global symbol_table etc)
+      has taken place.
+
+2000-01-15  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/session/session.c: Complain verbosely, if a destroy failed
+
+2000-01-13  Zeev Suraski  <zeev@php.net>
+
+    * main.c
+      php.ini-dist
+      php_globals.h:
+    * ext/standard/output.c:
+    Woops, forgot to commit the right version of the file...
+
+    * sapi/thttpd/thttpd.c
+      sapi/servlet/servlet.c
+      sapi/phttpd/phttpd.c
+      sapi/roxen/roxen.c
+      sapi/apache/mod_php4.c
+      sapi/cgi/cgi_main.c
+      sapi/isapi/php4isapi.c
+      SAPI.c
+      SAPI.h
+      ext/session/php_session.h
+      ext/standard/basic_functions.c
+      ext/standard/head.c
+      ext/standard/output.c
+      ext/standard/php_output.h
+      sapi/aolserver/aolserver.c: - Added flush() support to SAPI
+    - Got rid of the old flush() implemenetation in favour of the new one
+    - Added implicit_flush() support to the output buffering layer.
+
+2000-01-12  Sascha Schumann  <sascha@schumann.cx>
+
+    * configure.in: Only suppress including dlfcn.h when we are in PHP.
+
+    * configure.in:
+    Avoid including dlfcn.h, if we are compiling as an Apache module.
+
+    * .cvsignore
+      acconfig.h
+      acconfig.h.in
+      build/build2.mk:
+    Full gear backwards. We still need acconfig.h.in for additional acconfig.h
+    files (from TSRM/Zend).
+
+    * ext/bcmath/config.m4: Add description for AC_DEFINEs
+
+    * build/build2.mk
+      .cvsignore
+      acconfig.h
+      acconfig.h.in:
+    acconfig.h.in became superflicious when we removed the config.h.stubs.
+    Let's get rid of it.
+
+    * ext/sysvshm/sysvshm.c: Fix compile on AIX, #2071
+
+    * build/build.mk: Make cvsclean work on AIX
+
+2000-01-10  Zeev Suraski  <zeev@php.net>
+
+    * ext/standard/fsock.c:
+2000-01-10  Andrei Zmievski  <andrei@ispi.net>
+
+    * NEWS: *** empty log message ***
+
+2000-01-10  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * NEWS
+      ext/cpdf/cpdf.c
+      ext/cpdf/php_cpdf.h:
+    - changed cpdf_global_set_document_settings() to cpdf_global_set_document_limits()
+
+    * ext/cpdf/cpdf.c
+      ext/cpdf/php_cpdf.h: - added cpdf_global_set_document_limits()
+
+2000-01-09  Zeev Suraski  <zeev@php.net>
+
+    * ext/standard/info.c:    phpinfo() now ensures that HTTP_*_VARS[] are actually arrays before it tries
+    to access them...
+
+2000-01-08  Rasmus Lerdorf  <rasmus@php.net>
+
+    * safe_mode.c:
+2000-01-07  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/readline/config.m4: fix solaris compile
+
+2000-01-07  Sascha Schumann  <sascha@schumann.cx>
+
+    * TODO: Add another point
+
+    * ltconfig: Recognize UnixWare 7
+
+    Patch submitted by: opoplawski@cqg.com
+
 2000-01-06  Thies C. Arntzen  <thies@digicol.de>
 
     * ext/standard/file.c:
