@@ -376,7 +376,7 @@ static void php_mssql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		case 0: /* defaults */
 			host=user=passwd=NULL;
 			hashed_details_length=5+3;
-			hashed_details = (char *) emalloc(hashed_details_length);
+			hashed_details = (char *) emalloc(hashed_details_length+1);
 			strcpy(hashed_details,"mssql___");
 			break;
 		case 1: {
@@ -389,7 +389,7 @@ static void php_mssql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 				host = Z_STRVAL_PP(yyhost);
 				user=passwd=NULL;
 				hashed_details_length = Z_STRLEN_PP(yyhost)+5+3;
-				hashed_details = (char *) emalloc(hashed_details_length);
+				hashed_details = (char *) emalloc(hashed_details_length+1);
 				sprintf(hashed_details,"mssql_%s__",Z_STRVAL_PP(yyhost));
 			}
 			break;
@@ -405,7 +405,7 @@ static void php_mssql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 				user = Z_STRVAL_PP(yyuser);
 				passwd=NULL;
 				hashed_details_length = Z_STRLEN_PP(yyhost)+Z_STRLEN_PP(yyuser)+5+3;
-				hashed_details = (char *) emalloc(hashed_details_length);
+				hashed_details = (char *) emalloc(hashed_details_length+1);
 				sprintf(hashed_details,"mssql_%s_%s_",Z_STRVAL_PP(yyhost),Z_STRVAL_PP(yyuser));
 			}
 			break;
@@ -422,7 +422,7 @@ static void php_mssql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 				user = Z_STRVAL_PP(yyuser);
 				passwd = Z_STRVAL_PP(yypasswd);
 				hashed_details_length = Z_STRLEN_PP(yyhost)+Z_STRLEN_PP(yyuser)+Z_STRLEN_PP(yypasswd)+5+3;
-				hashed_details = (char *) emalloc(hashed_details_length);
+				hashed_details = (char *) emalloc(hashed_details_length+1);
 				sprintf(hashed_details,"mssql_%s_%s_%s",Z_STRVAL_PP(yyhost),Z_STRVAL_PP(yyuser),Z_STRVAL_PP(yypasswd)); /* SAFE */
 			}
 			break;
@@ -796,7 +796,7 @@ static void php_mssql_get_column_content_with_type(mssql_link *mssql_ptr,int off
 			unsigned char *res_buf;
 			int res_length = dbdatlen(mssql_ptr->link, offset);
 
-			res_buf = (unsigned char *) emalloc(res_length);
+			res_buf = (unsigned char *) emalloc(res_length+1);
 			bin = ((DBBINARY *)dbdata(mssql_ptr->link, offset));
 			memcpy(res_buf,bin,res_length);
 			res_buf[res_length] = '\0';
@@ -817,13 +817,13 @@ static void php_mssql_get_column_content_with_type(mssql_link *mssql_ptr,int off
 					if (column_type == SQLDATETIM4) res_length += 14;
 					if (column_type == SQLDATETIME) res_length += 10;
 			
-					res_buf = (unsigned char *) emalloc(res_length);
+					res_buf = (unsigned char *) emalloc(res_length+1);
 					res_length = dbconvert(NULL,coltype(offset),dbdata(mssql_ptr->link,offset), res_length, SQLCHAR,res_buf,-1);
 				} else {
 					dbdatecrack(mssql_ptr->link, &dateinfo, (DBDATETIME *) dbdata(mssql_ptr->link,offset));
 			
 					res_length = 19;
-					res_buf = (unsigned char *) emalloc(res_length);
+					res_buf = (unsigned char *) emalloc(res_length+1);
 					sprintf(res_buf, "%d-%02d-%02d %02d:%02d:%02d" , dateinfo.year, dateinfo.month, dateinfo.day, dateinfo.hour, dateinfo.minute, dateinfo.second);
 				}
 		
@@ -852,7 +852,7 @@ static void php_mssql_get_column_content_without_type(mssql_link *mssql_ptr,int 
 		unsigned char *res_buf;
 		int res_length = dbdatlen(mssql_ptr->link, offset);
 
-		res_buf = (unsigned char *) emalloc(res_length);
+		res_buf = (unsigned char *) emalloc(res_length+1);
 		bin = ((DBBINARY *)dbdata(mssql_ptr->link, offset));
 		memcpy(res_buf, bin, res_length);
 		res_buf[res_length] = '\0';
@@ -870,14 +870,14 @@ static void php_mssql_get_column_content_without_type(mssql_link *mssql_ptr,int 
 			if (column_type == SQLDATETIM4) res_length += 14;
 			if (column_type == SQLDATETIME) res_length += 10;
 			
-			res_buf = (unsigned char *) emalloc(res_length);
+			res_buf = (unsigned char *) emalloc(res_length+1);
 			res_length = dbconvert(NULL,coltype(offset),dbdata(mssql_ptr->link,offset), res_length, SQLCHAR, res_buf, -1);
 
 		} else {
 			dbdatecrack(mssql_ptr->link, &dateinfo, (DBDATETIME *) dbdata(mssql_ptr->link,offset));
 			
 			res_length = 19;
-			res_buf = (unsigned char *) emalloc(res_length);
+			res_buf = (unsigned char *) emalloc(res_length+1);
 			sprintf(res_buf, "%d-%02d-%02d %02d:%02d:%02d" , dateinfo.year, dateinfo.month, dateinfo.day, dateinfo.hour, dateinfo.minute, dateinfo.second);
 		}
 
@@ -1049,14 +1049,13 @@ PHP_FUNCTION(mssql_query)
 	 * 1)  Being able to fire up another query without explicitly reading all rows
 	 * 2)  Having numrows accessible
 	 */
-	retvalue=dbnextrow(mssql_ptr->link);
-	
-	if (retvalue==FAIL) {
-		RETURN_FALSE;
-	}
-
 	if ((num_fields = dbnumcols(mssql_ptr->link)) <= 0 && !dbdataready(mssql_ptr->link)) {
 		RETURN_TRUE;
+	}
+
+	retvalue=dbnextrow(mssql_ptr->link);	
+	if (retvalue==FAIL) {
+		RETURN_FALSE;
 	}
 
 	result = (mssql_result *) emalloc(sizeof(mssql_result));
@@ -1073,6 +1072,8 @@ PHP_FUNCTION(mssql_query)
 		result->fields = (mssql_field *) emalloc(sizeof(mssql_field)*result->num_fields);
 		result->num_rows = _mssql_fetch_batch(mssql_ptr, result, retvalue TSRMLS_CC);
 	}
+	else
+		result->fields = NULL;
 	
 	ZEND_REGISTER_RESOURCE(return_value, result, le_result);
 }
