@@ -111,9 +111,11 @@ class PEAR_Dependency
             case 'ge':
             case 'gt':
                 $version = $this->registry->packageInfo($name, 'version');
-                if (!version_compare($version, $req, $relation)) {
+                if (!$this->registry->packageExists($name)
+                    || !version_compare($version, $req, $relation))
+                {
                     return "requires package `$name' " .
-                        $this->signOperator($relation) . " $req";
+                           $this->signOperator($relation) . " $req";
                 }
         }
         return "Relation '$relation' with requirement '$req' is not supported (name=$name)";
