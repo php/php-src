@@ -82,7 +82,6 @@ for($i = 0; $i < 5; $i++)
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECT--
 NumericArrayIterator::__construct
 NumericArrayIterator::rewind
