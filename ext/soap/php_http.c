@@ -309,6 +309,10 @@ int send_http_soap_request(zval *this_ptr, char *buf, int buf_size, char *locati
 			smart_str_append_unsigned(&soap_headers, phpurl->port);
 		}
 		smart_str_appends(&soap_headers, phpurl->path);
+		if (phpurl->query) {
+			smart_str_appendc(&soap_headers, '?');
+			smart_str_appends(&soap_headers, phpurl->query);
+		}
 		smart_str_append_const(&soap_headers, " HTTP/1.1\r\n"
 			"Host: ");
 		smart_str_appends(&soap_headers, phpurl->host);

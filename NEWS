@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Jul 2004, PHP 5.0.0
+- Fixed bug #28702 (SOAP does not parse WSDL service address correctly). (Dmitry)
 - Fixed bug #28694 (ReflectionExtension::getFunctions() crashes PHP). (Marcus)
 
 7 Jun 2004, PHP 5 Release Candidate 3
