@@ -262,7 +262,7 @@ void zend_do_fetch_global_or_static_variable(znode *varname, znode *static_assig
 void fetch_array_begin(znode *result, znode *varname, znode *first_dim TSRMLS_DC);
 void fetch_array_dim(znode *result, znode *parent, znode *dim TSRMLS_DC);
 void fetch_string_offset(znode *result, znode *parent, znode *offset TSRMLS_DC);
-void zend_do_fetch_static_member(znode *class TSRMLS_DC);
+void zend_do_fetch_static_member(znode *class_znode TSRMLS_DC);
 void zend_do_print(znode *result, znode *arg TSRMLS_DC);
 void zend_do_echo(znode *arg TSRMLS_DC);
 typedef int (*unary_op_type)(zval *, zval *);
@@ -371,7 +371,7 @@ void zend_do_include_or_eval(int type, znode *result, znode *op1 TSRMLS_DC);
 void zend_do_unset(znode *variable TSRMLS_DC);
 void zend_do_isset_or_isempty(int type, znode *result, znode *variable TSRMLS_DC);
 
-void zend_do_is_class(znode *result, znode *expr, znode *class, int type TSRMLS_DC);
+void zend_do_is_class(znode *result, znode *expr, znode *class_znode, int type TSRMLS_DC);
 
 void zend_do_foreach_begin(znode *foreach_token, znode *array, znode *open_brackets_token, znode *as_token, int variable TSRMLS_DC);
 void zend_do_foreach_cont(znode *value, znode *key, znode *as_token TSRMLS_DC);

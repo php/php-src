@@ -304,7 +304,7 @@ void fetch_simple_variable(znode *result, znode *varname, int bp TSRMLS_DC)
 	fetch_simple_variable_ex(result, varname, bp, ZEND_FETCH_W TSRMLS_CC);
 }
 
-void zend_do_fetch_static_member(znode *class TSRMLS_DC)
+void zend_do_fetch_static_member(znode *class_znode TSRMLS_DC)
 {
 	zend_llist *fetch_list_ptr;
 	zend_llist_element *le;
@@ -314,7 +314,7 @@ void zend_do_fetch_static_member(znode *class TSRMLS_DC)
 	le = fetch_list_ptr->head;
 
 	opline_ptr = (zend_op *)le->data;
-	opline_ptr->op2 = *class;
+	opline_ptr->op2 = *class_znode;
 	opline_ptr->op2.u.EA.type = ZEND_FETCH_STATIC_MEMBER;
 }
 
@@ -2692,7 +2692,7 @@ void zend_do_isset_or_isempty(int type, znode *result, znode *variable TSRMLS_DC
 }
 
 
-void zend_do_is_class(znode *result, znode *expr, znode *class, int type TSRMLS_DC)
+void zend_do_is_class(znode *result, znode *expr, znode *class_znode, int type TSRMLS_DC)
 {
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
@@ -2701,7 +2701,7 @@ void zend_do_is_class(znode *result, znode *expr, znode *class, int type TSRMLS_
 	opline->result.u.var = get_temporary_variable(CG(active_op_array));
 	opline->op1 = *expr;
 
-	opline->op2 = *class;
+	opline->op2 = *class_znode;
 
 	*result = opline->result;
 }
