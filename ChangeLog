@@ -1,3 +1,32 @@
+2002-01-16  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * ext/session/session.c: Export php_session_register_module/serializer
+
+2002-01-16  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/snmp/config.m4: Fix typo
+
+2002-01-16  Marc Boeren  <M.Boeren@guidance.nl>
+
+    * ext/dbx/dbx_mysql.c:
+    mysql_db_query is deprecated, fixed by using mysql_select_db and
+    mysql_query (Mc).
+
+2002-01-16  Bertrand Mansion  <bmansion@mamasam.com>
+
+    * pear/HTML/Table.php: Changes by René Jensen :
+    - Remove duplicate test
+    - Nicer html output for nested table level comment.
+
+2002-01-16  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * ext/session/php_session.h:
+    Export php_session_register_module/serializer.
+
+2002-01-16  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/DB/tests/driver/15quote.phpt: add quote data test
+
 2002-01-15  Andrei Zmievski  <andrei@ispi.net>
 
     * ext/pcre/php_pcre.c
