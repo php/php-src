@@ -1562,7 +1562,7 @@ static inline int zend_binary_assign_op_obj_helper(int (*binary_op)(zval *result
 }
 
 
-inline int zend_binary_assign_op_helper(int (*binary_op)(zval *result, zval *op1, zval *op2 TSRMLS_DC), ZEND_OPCODE_HANDLER_ARGS)
+static inline int zend_binary_assign_op_helper(int (*binary_op)(zval *result, zval *op1, zval *op2 TSRMLS_DC), ZEND_OPCODE_HANDLER_ARGS)
 {
 	zval **var_ptr;
 	zval *value;
@@ -1722,7 +1722,7 @@ int zend_post_dec_obj_handler(ZEND_OPCODE_HANDLER_ARGS)
 }
 
 
-inline int zend_incdec_op_helper(void *incdec_op_arg, ZEND_OPCODE_HANDLER_ARGS)
+static inline int zend_incdec_op_helper(void *incdec_op_arg, ZEND_OPCODE_HANDLER_ARGS)
 {
 	zval **var_ptr = get_zval_ptr_ptr(&EX(opline)->op1, EX(Ts), BP_VAR_RW);
 	int (*incdec_op)(zval *op1) = incdec_op_arg;
@@ -2779,7 +2779,7 @@ int zend_send_val_handler(ZEND_OPCODE_HANDLER_ARGS)
 }
 
 
-inline int zend_send_by_var_helper(ZEND_OPCODE_HANDLER_ARGS)
+static inline int zend_send_by_var_helper(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zval *varptr;
 	varptr = get_zval_ptr(&EX(opline)->op1, EX(Ts), &EG(free_op1), BP_VAR_R);
@@ -2934,7 +2934,7 @@ int zend_bool_handler(ZEND_OPCODE_HANDLER_ARGS)
 }
 
 
-inline int zend_brk_cont_helper(ZEND_OPCODE_HANDLER_ARGS)
+static inline int zend_brk_cont_helper(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zval *nest_levels_zval = get_zval_ptr(&EX(opline)->op2, EX(Ts), &EG(free_op2), BP_VAR_R);
 	zval tmp;
@@ -3152,7 +3152,7 @@ int zend_fetch_constant_handler(ZEND_OPCODE_HANDLER_ARGS)
 }
 
 
-inline int zend_init_add_array_helper(ZEND_OPCODE_HANDLER_ARGS)
+static inline int zend_init_add_array_helper(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zval *array_ptr = &EX_T(EX(opline)->result.u.var).tmp_var;
 	zval *expr_ptr, **expr_ptr_ptr = NULL;
