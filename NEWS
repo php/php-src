@@ -32,6 +32,7 @@ PHP 4                                                                      NEWS
   (tom@gksystems.com, Ilia)
 - Fixed bug #24060 (ncurses_del_panel() causes segfault). (Georg)
 - Fixed bug #24054 (Integer overflow failure with GCC/x86 for *=). (Sascha)
+- Fixed bug #24007 (Problem with register_globals & arrays). (Ilia)
 - Fixed bug #23951 (constants in static initializers clobbered by inheritance).
   (Wez, Zend Engine)
 - Fixed bug #23913 (make rename() work across partitions on *nix). (Ilia)
