@@ -90,6 +90,7 @@ struct _zend_compiler_globals {
 
 	zend_bool short_tags;
 	zend_bool asp_tags;
+	zend_bool allow_call_time_pass_reference;
 
 	/* For extensions support */
 	zend_bool extended_info;	/* generate extension information for debugger/profiler */
@@ -110,6 +111,7 @@ struct _zend_compiler_globals {
 
 struct _zend_executor_globals {
 	zval *return_value;
+	zval **return_value_ptr_ptr;
 
 	zval uninitialized_zval;
 	zval *uninitialized_zval_ptr;
@@ -160,6 +162,7 @@ struct _zend_executor_globals {
 
 	zval *garbage[4];
 	int garbage_ptr;
+	zend_bool suspend_garbage;
 
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
 #if SUPPORT_INTERACTIVE
