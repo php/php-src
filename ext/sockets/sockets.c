@@ -276,7 +276,8 @@ int accept_connect(php_socket *in_sock, php_socket **new_sock, struct sockaddr *
 /* {{{ php_read -- wrapper around read() so that it only reads to a \r or \n. */
 int php_read(int bsd_socket, void *buf, size_t maxlen, int flags)
 {
-	int m = 0, n = 0;
+	int m = 0;
+	size_t n = 0;
 	int no_read = 0;
 	int nonblock = 0;
 	char *t = (char *) buf;
