@@ -74,6 +74,8 @@ PHPAPI char *expand_filepath(const char *filepath, char *real_path TSRMLS_DC);
 PHPAPI int php_check_open_basedir(char *path TSRMLS_DC);
 PHPAPI int php_check_specific_open_basedir(char *basedir, char *path TSRMLS_DC);
 
+PHPAPI int php_check_safe_mode_include_dir(char *path TSRMLS_DC);
+
 PHPAPI FILE *php_fopen_with_path(char *filename, char *mode, char *path, char **opened_path TSRMLS_DC);
 
 PHPAPI int php_is_url(char *path);
