@@ -536,10 +536,12 @@ static int preg_do_eval(char *eval_str, int eval_str_len, char *subject,
 				*code,				/* PHP code string */
 				*new_code,			/* Code as result of substitution */
 				*match,				/* Current match for a backref */
+				*esc_match,			/* Quote-escaped match */
 				*walk;				/* Used to walk the code string */
 	int			 code_len;			/* Length of the code string */
 	int			 new_code_len;		/* Length of the substituted code string */
 	int			 match_len;			/* Length of the match */
+	int			 esc_match_len;		/* Length of the quote-escaped match */
 	int			 result_len;		/* Length of the result of the evaluation */
 	int			 backref;			/* Current backref */
 	CLS_FETCH();
@@ -557,15 +559,17 @@ static int preg_do_eval(char *eval_str, int eval_str_len, char *subject,
 			   in instead of the backref */
 			match = subject + offsets[backref<<1];
 			match_len = offsets[(backref<<1)+1] - offsets[backref<<1];
+			esc_match = php_addslashes(match, match_len, &esc_match_len, 0);
 			sprintf(backref_buf, "\\%d", backref);
 			new_code = php_str_to_str(code, code_len,
 									  backref_buf, (backref > 9) ? 3 : 2,
-									  match, match_len, &new_code_len);
+									  esc_match, esc_match_len, &new_code_len);
 			
 			/* Adjust the walk pointer */
 			walk = new_code + (walk - code) + match_len;
 			
 			/* Clean up and reassign */
+			efree(esc_match);
 			efree(code);
 			code = new_code;
 			code_len = new_code_len;
