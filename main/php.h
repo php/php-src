@@ -186,7 +186,11 @@ char *strerror(int);
 #include "win32/pwd.h"
 #include "win32/param.h"
 #elif defined(NETWARE)
+#ifdef NEW_LIBC
 #include <sys/param.h>
+#else
+#include "NetWare/param.h"
+#endif
 #include "NetWare/pwd.h"
 # else
 #include <pwd.h>
@@ -234,8 +238,19 @@ char *strerror(int);
 /* global variables */
 extern pval *data;
 #if !defined(PHP_WIN32)
+#ifdef NETWARE
+#ifdef NEW_LIBC
+/*#undef environ*/  /* For now, so that our 'environ' implementation is used */
+#define php_sleep sleep
+#else
+#define php_sleep   delay   /* sleep() and usleep() are not available */
+#define usleep      delay
+#endif
+extern char **environ;
+#else
 extern char **environ;
 #define php_sleep sleep
+#endif
 #endif
 
 #ifdef PHP_PWRITE_64
