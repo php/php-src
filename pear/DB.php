@@ -94,31 +94,32 @@ define("DB_BINMODE_RETURN",         2);
 define("DB_BINMODE_CONVERT",        3);
 
 
+
+/**
+ * This is a special constant that tells DB the user hasn't specified
+ * any particular get mode, so the default should be used.
+ */
+define('DB_FETCHMODE_DEFAULT', 0);
 /**
  * Column data indexed by numbers, ordered from 0 and up
  */
-define('DB_GETMODE_ORDERED', 1);
+define('DB_FETCHMODE_ORDERED', 1);
 /**
  * Column data indexed by column names
  */
-define('DB_GETMODE_ASSOC',   2);
+define('DB_FETCHMODE_ASSOC',   2);
 /**
  * For multi-dimensional results: normally the first level of arrays
  * is the row number, and the second level indexed by column number or name.
- * DB_GETMODE_FLIPPED switches this order, so the first level of arrays
+ * DB_FETCHMODE_FLIPPED switches this order, so the first level of arrays
  * is the column name, and the second level the row number.
  */
-define('DB_GETMODE_FLIPPED', 4);
+define('DB_FETCHMODE_FLIPPED', 4);
 
-
-/**
- * This constant DB's default get mode.  It is possible to override by
- * defining in your scripts before including DB.
- */
-if (!defined('DB_GETMODE_DEFAULT')) {
-	define('DB_GETMODE_DEFAULT', DB_GETMODE_ORDERED);
-}
-
+/* for compatibility */
+define('DB_GETMODE_ORDERED', DB_FETCHMODE_ORDERED);
+define('DB_GETMODE_ASSOC',   DB_FETCHMODE_ASSOC);
+define('DB_GETMODE_FLIPPED', DB_FETCHMODE_FLIPPED);
 
 /**
  * The main "DB" class is simply a container class with some static
@@ -141,7 +142,7 @@ if (!defined('DB_GETMODE_DEFAULT')) {
  *              connections, the object returned is an instance of this
  *              class.
  *
- * @version  1.00
+ * @version  2
  * @author   Stig Bakken <ssb@fast.no>
  * @since    PHP 4.0
  */
@@ -199,7 +200,7 @@ class DB {
 	 * @return int the DB API version number
 	 */
     function apiVersion() {
-		return 1;
+		return 2;
     }
 
 	/**
@@ -405,8 +406,11 @@ class DB_result {
 	 * Fetch and return a row of data.
 	 * @return  array   a row of data, or false on error
 	 */
-    function fetchRow($getmode = DB_GETMODE_DEFAULT) {
-		return $this->dbh->fetchRow($this->result, $getmode);
+    function fetchRow($fetchmode = DB_FETCHMODE_DEFAULT) {
+		if ($fetchmode == DB_FETCHMODE_DEFAULT) {
+			$fetchmode = $this->dbh->fetchmode;
+		}
+		return $this->dbh->fetchRow($this->result, $fetchmode);
     }
 
     /**
@@ -415,8 +419,11 @@ class DB_result {
 	 * @param   $arr    reference to data array
 	 * @return  int     error code
 	 */
-    function fetchInto(&$arr, $getmode = DB_GETMODE_DEFAULT) {
-		return $this->dbh->fetchInto($this->result, $arr, $getmode);
+    function fetchInto(&$arr, $fetchmode = DB_FETCHMODE_DEFAULT) {
+		if ($fetchmode == DB_FETCHMODE_DEFAULT) {
+			$fetchmode = $this->dbh->fetchmode;
+		}
+		return $this->dbh->fetchInto($this->result, $arr, $fetchmode);
     }
 
 	/**
@@ -441,6 +448,14 @@ class DB_result {
 		return true;
     }
 }
+
+/*
+ * DB_Error TODO:
+ * 
+ * - needs a way of storing queries (useful for debugging query syntax
+ *   errors)
+ *
+ */
 
 /**
  * DB_Error implements a class for reporting portable database error

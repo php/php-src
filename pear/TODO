@@ -15,5 +15,6 @@ W ssb     build tools for installing packages from the net
 
 Bundled PEAR packages:
 
--         make regression tests for DB
+W ssb     make regression tests for DB
+-         make DB_Error store queries
 W uw      implement Javadoc -> phpdoc/DocBook conversion
