@@ -3809,6 +3809,10 @@ PHP_FUNCTION(domxml_dump_mem_file)
 
 	DOMXML_PARAM_FOUR(docp, id, le_domxmldocp, "s|ll", &file, &file_len, &compressmode, &format);
 
+	if ((PG(safe_mode) && (!php_checkuid(file, NULL, CHECKUID_CHECK_FILE_AND_DIR))) || php_check_open_basedir(file TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+
 	xmlSetCompressMode(compressmode);
 
 	if (format) {
@@ -5432,6 +5436,9 @@ PHP_FUNCTION(domxml_xslt_result_dump_file)
 	}
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "os|l", &idxml, &filename, &filename_len, &compression) == FAILURE) {
+		RETURN_FALSE;
+	}
+	if ((PG(safe_mode) && (!php_checkuid(filename, NULL, CHECKUID_CHECK_FILE_AND_DIR))) || php_check_open_basedir(filename TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
 
