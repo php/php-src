@@ -22,7 +22,7 @@
 #include <stdarg.h>
 #include "php_config.h"
 
-#if BROKEN_SPRINTF
+#if PHP_BROKEN_SPRINTF
 
 int
 php_sprintf (char*s, const char* format, ...)
