@@ -16,7 +16,7 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id: buildconf.js,v 1.6 2003-12-19 12:50:11 wez Exp $ */
+/* $Id: buildconf.js,v 1.7 2003-12-22 15:01:05 wez Exp $ */
 // This generates a configure script for win32 build
 
 WScript.StdOut.WriteLine("Rebuilding configure.js");
@@ -90,6 +90,8 @@ C.Write(file_get_contents("win32/build/confutils.js"));
 
 // Pull in code from sapi and extensions
 modules = file_get_contents("win32/build/config.w32");
+// Pick up confs from TSRM and Zend if present
+find_config_w32(".");
 find_config_w32("sapi");
 find_config_w32("ext");
 find_config_w32("pecl");

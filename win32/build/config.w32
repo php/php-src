@@ -166,7 +166,6 @@ STDOUT.WriteBlankLines(1);
 STDOUT.WriteLine("Build dir: " + get_define('BUILD_DIR'));
 STDOUT.WriteLine("PHP Core:  " + get_define('PHPDLL') + " and " + get_define('PHPLIB'));
 
-ADD_SOURCES("TSRM", "TSRM.c tsrm_strtok_r.c tsrm_virtual_cwd.c tsrm_win32.c");
 ADD_SOURCES("Zend", "zend_language_parser.c zend_language_scanner.c \
 	zend_ini_parser.c zend_ini_scanner.c zend_alloc.c zend_compile.c \
 	zend_constants.c zend_dynamic_array.c zend_execute_API.c zend_highlight.c \
