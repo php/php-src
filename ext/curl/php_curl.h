@@ -68,8 +68,8 @@ typedef struct {
 
 typedef struct {
 	php_curl_write *write;
+	php_curl_write *write_header;
 	php_curl_read  *read;
-	zval           *write_header;
 	zval           *passwd;
 } php_curl_handlers;
 
