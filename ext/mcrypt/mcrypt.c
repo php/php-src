@@ -84,7 +84,7 @@ function_entry mcrypt_functions[] = {
 
 	PHP_FE(mcrypt_module_close, NULL)
 #endif
-	{0},
+	{NULL, NULL, NULL}
 };
 
 static PHP_MINFO_FUNCTION(mcrypt);

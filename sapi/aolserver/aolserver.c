@@ -242,7 +242,7 @@ PHP_FUNCTION(getallheaders);
 
 static function_entry aolserver_functions[] = {
 	PHP_FE(getallheaders, NULL)
-	{0}
+	{NULL, NULL, NULL}
 };
 
 static zend_module_entry php_aolserver_module = {

@@ -34,11 +34,11 @@
 
 function_entry mhash_functions[] = {
 	PHP_FE(mhash_get_block_size, NULL)
-	    PHP_FE(mhash_get_hash_name, NULL)
-	    PHP_FE(mhash_keygen_s2k, NULL)
-	    PHP_FE(mhash_count, NULL)
-	PHP_FE(mhash, NULL) {0}
-	,
+	PHP_FE(mhash_get_hash_name, NULL)
+	PHP_FE(mhash_keygen_s2k, NULL)
+	PHP_FE(mhash_count, NULL)
+	PHP_FE(mhash, NULL)
+	{NULL, NULL, NULL}
 };
 
 static PHP_MINIT_FUNCTION(mhash);

@@ -140,7 +140,7 @@ static function_entry apache_functions[] = {
 	PHP_FE(apache_lookup_uri, NULL)
 	PHP_FE(virtual, NULL)
 	PHP_FE(getallheaders, NULL)
-	{0}
+	{NULL, NULL, NULL}
 };
 
 static zend_module_entry php_apache_module = {
