@@ -135,7 +135,7 @@ sxe_property_read(zval *object, zval *member, zend_bool silent TSRMLS_DC)
 			
 			MAKE_STD_ZVAL(value);
 			contents = xmlNodeListGetString((xmlDocPtr) sxe->document->ptr, attr->children, 1);
-			ZVAL_STRING(value, contents, 0);
+			ZVAL_STRING(value, contents, 1);
 			APPEND_CUR_ELEMENT(counter, value);
 		}
 		attr = attr->next;
