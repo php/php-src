@@ -185,8 +185,6 @@ main() {
   AC_DEFINE_UNQUOTED(PHP_BLOWFISH_CRYPT, $ac_result, [Whether the system supports BlowFish salt])
 ])
 
-AC_CHECK_FUNC(dlopen, [AC_DEFINE(HAVE_LIBDL,1,[ ])])
-
 dnl AC_CHECK_LIB(pam, pam_start, [
 dnl   EXTRA_LIBS="$EXTRA_LIBS -lpam"
 dnl   AC_DEFINE(HAVE_LIBPAM,1,[ ]) ], []) 
