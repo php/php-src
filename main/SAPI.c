@@ -100,7 +100,7 @@ SAPI_API int sapi_add_header(const char *header_line, uint header_line_len)
 SAPI_API int sapi_send_headers()
 {
 	int retval;
-	sapi_header_struct default_header = { DEFAULT_CONTENT_TYPE, sizeof(DEFAULT_CONTENT_TYPE)-1 };
+	sapi_header_struct default_header = { SAPI_DEFAULT_CONTENT_TYPE, sizeof(SAPI_DEFAULT_CONTENT_TYPE)-1 };
 	SLS_FETCH();
 
 	if (SG(headers_sent)) {

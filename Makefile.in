@@ -89,7 +89,7 @@ php: all-recursive $(OBJS) @REGEX_LIB@ @FHTTPD_LIB@ @TSRM_LIB@
 # Apache modules
 libphp3.a libmodphp3.a: all-recursive $(OBJS)
 	$(AR) $@.tmp $(OBJS)
-	$(srcdir)/scripts/armerge $@ $@.tmp ext/libphpext.a libzend/libzend.a @TSRM_LIB@
+	$(srcdir)/scripts/armerge $@ $@.tmp ext/libphpext.a $(srcdir)/libzend/libzend.a @TSRM_LIB@
 	@rm -f $@.tmp
 	$(RANLIB) $(BINNAME)
 
