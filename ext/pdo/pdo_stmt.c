@@ -529,7 +529,7 @@ function_entry pdo_dbstmt_functions[] = {
 static zval *dbstmt_prop_read(zval *object, zval *member, int type TSRMLS_DC)
 {
 	zval *return_value;
-	pdo_stmt_t * stmt = (pdo_stmt_t *) zend_object_store_get_object(object);
+	pdo_stmt_t * stmt = (pdo_stmt_t *) zend_object_store_get_object(object TSRMLS_CC);
 	zval tmp_zv;
 
 	convert_to_string(member);
