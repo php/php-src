@@ -1678,13 +1678,13 @@ ZEND_API int do_bind_inherited_class(zend_op *opline, HashTable *function_table,
 		ce = *pce;
 	}
 
-	ce->refcount++;
-
 	zend_do_inheritance(ce, parent_ce);
 
 	if (strchr(opline->op2.u.constant.value.str.val, ':')) {
 		return create_nested_class(class_table, opline->op2.u.constant.value.str.val, ce);
 	}
+
+	ce->refcount++;
 
 	/* Register the derived class */
 	if (zend_hash_add(class_table, opline->op2.u.constant.value.str.val, opline->op2.u.constant.value.str.len+1, pce, sizeof(zend_class_entry *), NULL)==FAILURE) {
