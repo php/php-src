@@ -57,7 +57,6 @@
 #include <zlib.h>
 
 #ifdef COMPILE_DL_ZLIB
-#include "dl/phpdl.h"
 #ifndef PUTS
 #define PUTS(a) php_printf("%s",a)
 #endif

@@ -19,13 +19,6 @@
 /* $Id$ */
 
 #define IS_EXT_MODULE
-#ifdef COMPILE_DL_DAV
-# if PHP_31
-#  include "../phpdl.h"
-# else
-#  include "dl/phpdl.h"
-# endif
-#endif
 #include "php.h"
 #include "php_dav.h"
 

@@ -159,7 +159,6 @@ zend_module_entry cpdf_module_entry = {
 };
 
 #ifdef COMPILE_DL_CPDF
-#include "dl/phpdl.h"
 ZEND_GET_MODULE(cpdf)
 #endif
 

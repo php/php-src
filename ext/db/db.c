@@ -19,9 +19,6 @@
 
 /* $Id$ */
 #define IS_EXT_MODULE
-#ifdef COMPILE_DL_DB
-# include "dl/phpdl.h"
-#endif
 
 #if 1
 

@@ -109,7 +109,6 @@ zend_module_entry ibase_module_entry =
 };
 
 #ifdef COMPILE_DL_INTERBASE
-#include "dl/phpdl.h"
 ZEND_GET_MODULE(ibase)
 
 #define DL_MALLOC(size) malloc(size)

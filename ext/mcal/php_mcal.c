@@ -36,10 +36,6 @@
 
 #include "php.h"
 
-#ifdef COMPILE_DL_MCAL
-#include "dl/phpdl.h"
-#endif
-
 #if HAVE_MCAL
 
 #include <time.h>

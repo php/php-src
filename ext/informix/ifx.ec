@@ -33,10 +33,6 @@
  */
 
 
-#ifdef COMPILE_DL_INFORMIX
-#include "dl/phpdl.h"
-#endif
-
 /* prevent mod_ssl.h's header file from being included. */
 #define AP_HOOK_H
 

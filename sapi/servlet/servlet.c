@@ -18,7 +18,6 @@
 
 #include <jni.h>
 
-#include "dl/phpdl.h"
 #include "php.h"
 #include "php_globals.h"
 

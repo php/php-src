@@ -25,10 +25,6 @@
  
 #define HAS_OLOG 1
 
-#ifdef COMPILE_DL_ORACLE
-# include "dl/phpdl.h"
-#endif
-
 #include "php.h"
 
 #include "zend_globals.h"
