@@ -30,10 +30,15 @@ static void aggregation_info_dtor(aggregation_info *info)
 	/* FIXME: This is here to make it compile with Engine 2 but part of this module will need rewriting */
 #ifndef ZEND_ENGINE_2
 	destroy_zend_class(info->new_ce);
-#else
-	destroy_zend_class(&info->new_ce);
-#endif
 	efree(info->new_ce);
+#else
+	/* FIXME: In ZE2, this dtor is called prior to deleting the objects,
+	 * which causes this new_ce to be destroyed twice (which is bad news).
+	 * Skipping deleting it here will prevent a segfault but will leak
+	 * the class name, the static_members hash and the ce itself */
+
+	/*	destroy_zend_class(&info->new_ce); */
+#endif
 	zval_ptr_dtor(&info->aggr_members);
 
 }
@@ -316,6 +321,9 @@ static void aggregate(INTERNAL_FUNCTION_PARAMETERS, int aggr_what, int aggr_type
 		efree(class_name_lc);
 		return;
 	}
+#ifdef ZEND_ENGINE_2
+	ce = *(zend_class_entry**)ce;
+#endif
 
 	/*
 	 * And God said, Let there be light; and there was light. But only once.
@@ -351,6 +359,23 @@ static void aggregate(INTERNAL_FUNCTION_PARAMETERS, int aggr_what, int aggr_type
 		zend_hash_init(&new_ce->default_properties, 10, NULL, ZVAL_PTR_DTOR, 0);
 		zend_hash_copy(&new_ce->function_table, &Z_OBJCE_P(obj)->function_table, (copy_ctor_func_t) function_add_ref, &tmp_zend_function, sizeof(zend_function));
 		zend_hash_copy(&new_ce->default_properties, &Z_OBJCE_P(obj)->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
+
+#ifdef ZEND_ENGINE_2
+		ALLOC_HASHTABLE(new_ce->static_members);
+		zend_hash_init(new_ce->static_members, 10, NULL, ZVAL_PTR_DTOR, 0);
+		zend_hash_copy(new_ce->static_members, Z_OBJCE_P(obj)->static_members, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
+		zend_hash_init(&new_ce->constants_table, 10, NULL, ZVAL_PTR_DTOR, 0);
+		zend_hash_copy(&new_ce->constants_table, &Z_OBJCE_P(obj)->constants_table, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
+		zend_hash_init(&new_ce->class_table, 10, NULL, ZVAL_PTR_DTOR, 0);
+		zend_hash_copy(&new_ce->class_table, &Z_OBJCE_P(obj)->class_table, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
+
+		zend_hash_init(&new_ce->private_properties, 10, NULL, ZVAL_PTR_DTOR, 0);
+		zend_hash_copy(&new_ce->private_properties, &Z_OBJCE_P(obj)->private_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
+
+		new_ce->constructor = Z_OBJCE_P(obj)->constructor;
+		new_ce->destructor = Z_OBJCE_P(obj)->destructor;
+		new_ce->clone = Z_OBJCE_P(obj)->clone;
+#endif
 		new_ce->builtin_functions = Z_OBJCE_P(obj)->builtin_functions;
 		new_ce->handle_function_call = Z_OBJCE_P(obj)->handle_function_call;
 		new_ce->handle_property_get  = Z_OBJCE_P(obj)->handle_property_get;
