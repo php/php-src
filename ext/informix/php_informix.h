@@ -65,10 +65,10 @@ extern php3_module_entry ifx_module_entry;
 #include "sqltypes.h"
 
 /* user functions */
-extern int php3_minit_ifx(INIT_FUNC_ARGS);
-extern int php3_rinit_ifx(INIT_FUNC_ARGS);
-extern int php3_mshutdown_ifx(SHUTDOWN_FUNC_ARGS);
-void php3_info_ifx(ZEND_MODULE_INFO_FUNC_ARGS);
+PHP_MINIT_FUNCTION(ifx);
+PHP_RINIT_FUNCTION(ifx);
+PHP_MSHUTDOWN_FUNCTION(ifx);
+PHP_MINFO_FUNCTION(ifx);
 /* functions common to all Informix versions */
 PHP_FUNCTION(ifx_connect);
 PHP_FUNCTION(ifx_pconnect);

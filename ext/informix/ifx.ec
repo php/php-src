@@ -114,61 +114,61 @@ typedef char IFX[128];
 #define SAFE_STRING(s) ((s)?(s):"")
 
 function_entry ifx_functions[] = {
-    {"ifx_connect",        php3_ifx_connect,            NULL},
-    {"ifx_pconnect",       php3_ifx_pconnect,           NULL},
-    {"ifx_close",          php3_ifx_close,              NULL},
-    {"ifx_query",          php3_ifx_query,              NULL},
-    {"ifx_prepare",        php3_ifx_prepare,            NULL},
-    {"ifx_do",             php3_ifx_do,                 NULL},
-    {"ifx_error",          php3_ifx_error,              NULL},
-    {"ifx_errormsg",       php3_ifx_errormsg,           NULL},
-    {"ifx_affected_rows",  php3_ifx_affected_rows,      NULL},
-    {"ifx_num_rows",       php3_ifx_num_rows,           NULL},
-    {"ifx_num_fields",     php3_ifx_num_fields,         NULL},
-    {"ifx_fetch_row",      php3_ifx_fetch_row,          NULL},
-    {"ifx_free_result",    php3_ifx_free_result,        NULL},
-    {"ifx_htmltbl_result", php3_ifx_htmltbl_result,     NULL},
-    {"ifx_fieldtypes",     php3_ifx_fieldtypes,         NULL},
-    {"ifx_fieldproperties",php3_ifx_fieldproperties,    NULL},
-    {"ifx_getsqlca",       php3_ifx_getsqlca,           NULL},
+    PHP_FE(ifx_connect,            NULL)
+    PHP_FE(ifx_pconnect,           NULL)
+    PHP_FE(ifx_close,              NULL)
+    PHP_FE(ifx_query,              NULL)
+    PHP_FE(ifx_prepare,            NULL)
+    PHP_FE(ifx_do,                 NULL)
+    PHP_FE(ifx_error,              NULL)
+    PHP_FE(ifx_errormsg,           NULL)
+    PHP_FE(ifx_affected_rows,      NULL)
+    PHP_FE(ifx_num_rows,           NULL)
+    PHP_FE(ifx_num_fields,         NULL)
+    PHP_FE(ifx_fetch_row,          NULL)
+    PHP_FE(ifx_free_result,        NULL)
+    PHP_FE(ifx_htmltbl_result,     NULL)
+    PHP_FE(ifx_fieldtypes,         NULL)
+    PHP_FE(ifx_fieldproperties,    NULL)
+    PHP_FE(ifx_getsqlca,           NULL)
 
-    {"ifx_create_blob",    php3_ifx_create_blob,        NULL},
-    {"ifx_free_blob",      php3_ifx_free_blob,          NULL},
-    {"ifx_get_blob",       php3_ifx_get_blob,           NULL},
-    {"ifx_update_blob",    php3_ifx_update_blob,        NULL},
-    {"ifx_copy_blob"      ,php3_ifx_copy_blob,          NULL},
-    {"ifx_textasvarchar"  ,php3_ifx_textasvarchar,      NULL},
-    {"ifx_byteasvarchar"  ,php3_ifx_byteasvarchar,      NULL},
-    {"ifx_nullformat"     ,php3_ifx_nullformat,         NULL},
-    {"ifx_blobinfile_mode",php3_ifx_blobinfile_mode,    NULL},
+    PHP_FE(ifx_create_blob,        NULL)
+    PHP_FE(ifx_free_blob,          NULL)
+    PHP_FE(ifx_get_blob,           NULL)
+    PHP_FE(ifx_update_blob,        NULL)
+    PHP_FE(ifx_copy_blob,          NULL)
+    PHP_FE(ifx_textasvarchar,      NULL)
+    PHP_FE(ifx_byteasvarchar,      NULL)
+    PHP_FE(ifx_nullformat,         NULL)
+    PHP_FE(ifx_blobinfile_mode,    NULL)
 
-    {"ifx_create_char",    php3_ifx_create_char,        NULL},
-    {"ifx_free_char",      php3_ifx_free_char,          NULL},
-    {"ifx_get_char",       php3_ifx_get_char,           NULL},
-    {"ifx_update_char",    php3_ifx_update_char,        NULL},
+    PHP_FE(ifx_create_char,        NULL)
+    PHP_FE(ifx_free_char,          NULL)
+    PHP_FE(ifx_get_char,           NULL)
+    PHP_FE(ifx_update_char,        NULL)
 
 $ifdef HAVE_IFX_IUS;
-    {"ifxus_create_slob",  php3_ifxus_create_slob,      NULL},
-    {"ifxus_close_slob",   php3_ifxus_close_slob,       NULL},
-    {"ifxus_open_slob",    php3_ifxus_open_slob,        NULL},
-    {"ifxus_free_slob",    php3_ifxus_free_slob,        NULL},
-    {"ifxus_read_slob",    php3_ifxus_read_slob,        NULL},
-    {"ifxus_write_slob",   php3_ifxus_write_slob,       NULL},
-    {"ifxus_seek_slob",    php3_ifxus_seek_slob,        NULL},
-    {"ifxus_tell_slob",    php3_ifxus_tell_slob,        NULL},
+    PHP_FE(ifxus_create_slob,      NULL)
+    PHP_FE(ifxus_close_slob,       NULL)
+    PHP_FE(ifxus_open_slob,        NULL)
+    PHP_FE(ifxus_free_slob,        NULL)
+    PHP_FE(ifxus_read_slob,        NULL)
+    PHP_FE(ifxus_write_slob,       NULL)
+    PHP_FE(ifxus_seek_slob,        NULL)
+    PHP_FE(ifxus_tell_slob,        NULL)
 $endif;
     
-    {NULL,                 NULL,                        NULL}
+    {NULL,  NULL,                  NULL}
 };
 
 php3_module_entry ifx_module_entry = {
     "Informix", 
     ifx_functions, 
-    php3_minit_ifx, 
-    php3_mshutdown_ifx, 
-    php3_rinit_ifx, 
+    PHP_MINIT(ifx), 
+    PHP_MSHUTDOWN(ifx), 
+    PHP_RINIT(ifx), 
     NULL, 
-    php3_info_ifx, 
+    PHP_MINFO(ifx),
     STANDARD_MODULE_PROPERTIES
 };
 
@@ -341,7 +341,7 @@ PHP_INI_BEGIN()
                        OnUpdateInt, nullformat, php_ifx_globals, ifx_globals)
 PHP_INI_END()
 
-int php3_minit_ifx(INIT_FUNC_ARGS)
+PHP_MINIT_FUNCTION(ifx)
 {
 #ifdef ZTS
     ifx_globals_id = ts_allocate_id(sizeof(php_ifx_globals), php_ifx_init_globals, NULL);
@@ -388,14 +388,15 @@ $endif;
 }
 
 
-int php3_mshutdown_ifx(SHUTDOWN_FUNC_ARGS){
+PHP_MSHUTDOWN_FUNCTION(ifx) 
+{
 
     UNREGISTER_INI_ENTRIES();
     return SUCCESS;
     
 }
 
-int php3_rinit_ifx(INIT_FUNC_ARGS)
+PHP_RINIT_FUNCTION(ifx) 
 {
     IFXLS_FETCH();
 
@@ -405,7 +406,7 @@ int php3_rinit_ifx(INIT_FUNC_ARGS)
     return SUCCESS;
 }
 
-void php3_info_ifx(ZEND_MODULE_INFO_FUNC_ARGS)
+PHP_MINFO_FUNCTION(ifx)
 {
     char maxp[16],maxl[16];
     IFXLS_FETCH();
