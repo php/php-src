@@ -2572,8 +2572,6 @@ static void _phpi_pop(INTERNAL_FUNCTION_PARAMETERS, int off_the_end)
 	zval		*stack,			/* Input stack */
 			   **val;			/* Value to be popped */
 	HashTable	*new_hash;		/* New stack */
-	char		*string_key;	
-	ulong		 num_key;
 	
 	/* Get the arguments and do error-checking */
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &stack) == FAILURE) {

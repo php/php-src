@@ -48,6 +48,7 @@ function_entry pcre_functions[] = {
 	PHP_FE(preg_replace,	NULL)
 	PHP_FE(preg_split,		NULL)
 	PHP_FE(preg_quote,		NULL)
+	PHP_FE(preg_grep,		NULL)
 	{NULL, 		NULL, 		NULL}
 };
 
@@ -277,7 +278,7 @@ static pcre* _pcre_get_compiled_regex(char *regex, pcre_extra *extra) {
 
 
 /* {{{ void _pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global) */
-void _pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global)
+static void _pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global)
 {
 	zval			*regex,				/* Regular expression */
 					*subject,			/* String to match against */
@@ -904,6 +905,93 @@ PHP_FUNCTION(preg_quote)
 	
 	/* Reallocate string and return it */
 	RETVAL_STRING(erealloc(out_str, q - out_str + 1), 0);
+}
+/* }}} */
+
+
+/* {{{ proto array preg_grep(string regex, array input)
+   Searches array and returns entries which match regex */
+PHP_FUNCTION(preg_grep)
+{
+	zval			*regex,				/* Regular expression */
+					*input,				/* Input array */
+			   	   **entry;				/* An entry in the input array */
+	pcre			*re = NULL;			/* Compiled regular expression */
+	pcre_extra		*extra = NULL;		/* Holds results of studying */
+	int			 	*offsets;			/* Array of subpattern offsets */
+	int			 	 size_offsets;		/* Size of the offsets array */
+	int			 	 count = 0;			/* Count of matched subpatterns */
+	char			*string_key;
+	ulong			 num_key;
+	
+	/* Get arguments and do error checking */
+	
+	if (ARG_COUNT(ht) != 2 || getParameters(ht, ARG_COUNT(ht), &regex, &input) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	
+	if (input->type != IS_ARRAY) {
+		zend_error(E_WARNING, "Secong argument to preg_grep() should be an array");
+		return;
+	}
+	
+	/* Make sure regex is a string */
+	convert_to_string(regex);
+	
+	/* Compile regex or get it from cache. */
+	if ((re = _pcre_get_compiled_regex(regex->value.str.val, extra)) == NULL) {
+		RETURN_FALSE;
+	}
+
+	/* Calculate the size of the offsets array, and allocate memory for it. */
+	size_offsets = (pcre_info(re, NULL, NULL) + 1) * 3;
+	offsets = (int *)emalloc(size_offsets * sizeof(int));
+	
+	/* Initialize return array */
+	array_init(return_value);
+	
+	/* Go through the input array */
+	zend_hash_internal_pointer_reset(input->value.ht);
+	while(zend_hash_get_current_data(input->value.ht, (void **)&entry) == SUCCESS) {
+
+		/* Only match against strings */
+		if ((*entry)->type == IS_STRING) {
+			/* Perform the match */
+			count = pcre_exec(re, extra, (*entry)->value.str.val,
+							  (*entry)->value.str.len, (*entry)->value.str.val,
+							  0, offsets, size_offsets, 0);
+
+			/* Check for too many substrings condition. */
+			if (count == 0) {
+				zend_error(E_NOTICE, "Matched, but too many substrings\n");
+				count = size_offsets/3;
+			}
+
+			/* If something matched */
+			if (count > 0) {
+				(*entry)->refcount++;
+				
+				/* Add to return array */
+				switch(zend_hash_get_current_key(input->value.ht, &string_key, &num_key))
+				{
+					case HASH_KEY_IS_STRING:
+						zend_hash_update(return_value->value.ht, string_key,
+										 strlen(string_key)+1, entry, sizeof(zval *), NULL);
+						efree(string_key);
+						break;
+					
+					case HASH_KEY_IS_LONG:
+						zend_hash_next_index_insert(return_value->value.ht, entry,
+													sizeof(zval *), NULL);
+						break;
+				}
+			}
+		}
+		
+		zend_hash_move_forward(input->value.ht);
+	}
+	
+	efree(offsets);
 }
 /* }}} */
 

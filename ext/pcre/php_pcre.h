@@ -46,6 +46,7 @@ PHP_FUNCTION(preg_match_all);
 PHP_FUNCTION(preg_replace);
 PHP_FUNCTION(preg_split);
 PHP_FUNCTION(preg_quote);
+PHP_FUNCTION(preg_grep);
 
 extern zend_module_entry pcre_module_entry;
 #define pcre_module_ptr &pcre_module_entry
