@@ -199,6 +199,12 @@
 								."  }\n";
 						}
 						break;
+					case "stream":
+						$arg_string .= "r";
+						$code .= "  zval * _z$name = NULL; \n";
+						$code .= "  php_stream * $name = NULL:\n";
+						$res_fetch.= "  php_stream_from_zval($name, &_z$name);\n"; 
+						break;
 					case "mixed":
 					case "callback":
 						$arg_string.="z";
@@ -255,6 +261,10 @@
 					} else {
 						$code .= "  /* RETURN_RESOURCE(...); /*\n";
 					}
+					break;
+
+				case "stream":
+					$code .= "  /* php_stream_to_zval(stream, return_value); */\n";
 					break;
 				
 				case "mixed":
