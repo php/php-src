@@ -1026,9 +1026,11 @@ ZEND_API int zend_execute_scripts(int type TSRMLS_DC, zval **retval, int file_co
 #if 1 /* support set_exception_handler() */
 				if (EG(user_exception_handler)) {
 					zval *orig_user_exception_handler;
-					zval ***params, *retval2;
+					zval ***params, *retval2, *old_exception;
 					params = (zval ***)emalloc(sizeof(zval **));
-					params[0] = &EG(exception);
+					old_exception = EG(exception);
+					EG(exception) = NULL;
+					params[0] = &old_exception;
 					orig_user_exception_handler = EG(user_exception_handler);
 					if (call_user_function_ex(CG(function_table), NULL, orig_user_exception_handler, &retval2, 1, params, 1, NULL TSRMLS_CC) == SUCCESS) {
 						if (retval2 != NULL) {
@@ -1040,8 +1042,11 @@ ZEND_API int zend_execute_scripts(int type TSRMLS_DC, zval **retval, int file_co
 						zend_error(E_ERROR, "Uncaught exception '%s'!", ex_class_name);
 					}
 					efree(params);
-					zval_ptr_dtor(&EG(exception));
-					EG(exception) = NULL;
+					zval_ptr_dtor(&old_exception);
+					if(EG(exception)) {
+						zval_ptr_dtor(&EG(exception));
+						EG(exception) = NULL;
+					}
 				} else {
 					zval_ptr_dtor(&EG(exception));
 					EG(exception) = NULL;
