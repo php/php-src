@@ -2,6 +2,7 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? ????, Version 4.0 Beta 4
+- Fixed -c support in the standalone CGI binary (Zeev)
 - Increased PHP's performance by 5-15% using a new memory cache (Andi & Zeev,
   Zend library)
 - Improved the php.ini reader to support constants and bitwise operators (Zeev)
