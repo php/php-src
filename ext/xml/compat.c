@@ -211,12 +211,12 @@ _notation_decl_handler(void *user, const xmlChar *notation, const xmlChar *sys_i
 static void
 _build_comment(const xmlChar *data, int data_len, xmlChar **comment, int *comment_len)
 {
-	*comment_len = data_len + 6;
+	*comment_len = data_len + 7;
 	
 	*comment = xmlMalloc(*comment_len + 1);
-	memcpy(*comment, "<--", 3);
-	memcpy(*comment + 3, data, data_len);
-	memcpy(*comment + 3 + data_len, "-->", 3);
+	memcpy(*comment, "<!--", 4);
+	memcpy(*comment + 4, data, data_len);
+	memcpy(*comment + 4 + data_len, "-->", 3);
 
 	(*comment)[*comment_len] = '\0';
 }
@@ -359,6 +359,12 @@ XML_ParserCreate_MM(const XML_Char *encoding, const XML_Memory_Handling_Suite *m
 		parser->parser->sax2 = 1;
 #endif
 		parser->_ns_seperator = xmlStrdup(sep);
+#if LIBXML_VERSION >= 20600
+	} else {
+		/* Reset flag as XML_SAX2_MAGIC is needed for xmlCreatePushParserCtxt 
+		so must be set in the handlers */
+		parser->parser->sax->initialized = 1;
+#endif
 	}
 	return parser;
 }
