@@ -1,3 +1,46 @@
+2004-11-17  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      ext/dio/dio.c
+      ext/dio/dio.c:
+      MFH: Gracefully handle allocation failure.
+
+    * ext/dio/dio.c:
+      Gracefully handle allocation failure.
+
+2004-11-17  Pierre-Alain Joye  <pierre@dotgeek.org>
+
+    * ext/gd/libgd/gd.c:
+      - Really fix imagefill, part of my previous (old) fix was not applied
+        (blame me), bak the alphablending and restore it on exit
+
+    * ext/gd/libgd/gd.c:
+      - MFB: fix #30739, imagefill did not set back alphablending mode
+
+    * (PHP_4_3)
+      NEWS
+      ext/gd/libgd/gd.c:
+      - Fix #30739, imagefill does not set back the alphablending mode
+
+2004-11-17  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_5_0)
+      ZendEngine2/zend_execute_API.c:
+      fix #30543
+
+    * ZendEngine2/zend_execute_API.c:
+      fix crash
+
+2004-11-17  Edin Kadribasic  <edink@emini.dk>
+
+    * (PHP_5_0)
+      win32/php5dllts.dsp:
+      Fix build here too
+
+    * (PHP_4_3)
+      win32/php4dllts.dsp:
+      Fix windows build
+
 2004-11-16  Dmitry Stogov  <dmitry@zend.com>
 
     * (PHP_5_0)
