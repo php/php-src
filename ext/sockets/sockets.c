@@ -180,7 +180,7 @@ ZEND_GET_MODULE(sockets)
 /* inet_ntop should be used instead of inet_ntoa */
 int inet_ntoa_lock = 0;
 
-static void destroy_iovec(zend_rsrc_list_entry *rsrc TSRMLS_DC)
+static void php_destroy_iovec(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	unsigned int i;
 	php_iovec_t *iov = (php_iovec_t *) rsrc->ptr;
@@ -195,7 +195,7 @@ static void destroy_iovec(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 	}
 }
 
-static void destroy_socket(zend_rsrc_list_entry *rsrc TSRMLS_DC)
+static void php_destroy_socket(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	php_socket *php_sock = (php_socket *) rsrc->ptr;
 
@@ -203,9 +203,7 @@ static void destroy_socket(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 	efree(php_sock);
 }
 
-static char *php_strerror(int error TSRMLS_DC);
-
-int open_listen_sock(php_socket **php_sock, int port, int backlog TSRMLS_DC)
+static int php_open_listen_sock(php_socket **php_sock, int port, int backlog TSRMLS_DC)
 {
 	struct sockaddr_in  la;
 	struct hostent		*hp;
@@ -253,7 +251,7 @@ int open_listen_sock(php_socket **php_sock, int port, int backlog TSRMLS_DC)
 	return 1;
 }
 
-int accept_connect(php_socket *in_sock, php_socket **new_sock, struct sockaddr *la TSRMLS_DC)
+static int php_accept_connect(php_socket *in_sock, php_socket **new_sock, struct sockaddr *la TSRMLS_DC)
 {
 	socklen_t	salen;
 	php_socket	*out_sock = (php_socket*)emalloc(sizeof(php_socket));
@@ -273,7 +271,7 @@ int accept_connect(php_socket *in_sock, php_socket **new_sock, struct sockaddr *
 }
 
 /* {{{ php_read -- wrapper around read() so that it only reads to a \r or \n. */
-int php_read(int bsd_socket, void *buf, size_t maxlen, int flags)
+static int php_read(int bsd_socket, void *buf, size_t maxlen, int flags)
 {
 	int m = 0;
 	size_t n = 0;
@@ -334,7 +332,8 @@ int php_read(int bsd_socket, void *buf, size_t maxlen, int flags)
 }
 /* }}} */
 
-static char *php_strerror(int error TSRMLS_DC) {
+static char *php_strerror(int error TSRMLS_DC)
+{
 	const char *buf;
 
 #ifndef PHP_WIN32
@@ -372,7 +371,8 @@ static char *php_strerror(int error TSRMLS_DC) {
 
 #ifdef HAVE_IPV6
 /* Sets addr by hostname, or by ip in string form (AF_INET6) */
-int php_set_inet6_addr(struct sockaddr_in6 *sin6, char *string, php_socket *php_sock  TSRMLS_DC) {
+static int php_set_inet6_addr(struct sockaddr_in6 *sin6, char *string, php_socket *php_sock TSRMLS_DC)
+{
 	struct in6_addr tmp;
 	struct hostent *host_entry;
 
@@ -399,7 +399,8 @@ int php_set_inet6_addr(struct sockaddr_in6 *sin6, char *string, php_socket *php_
 #endif
 
 /* Sets addr by hostname, or by ip in string form (AF_INET)  */
-int php_set_inet_addr(struct sockaddr_in *sin, char *string, php_socket *php_sock  TSRMLS_DC) {
+static int php_set_inet_addr(struct sockaddr_in *sin, char *string, php_socket *php_sock TSRMLS_DC)
+{
 	struct in_addr tmp;
 	struct hostent *host_entry;
 
@@ -425,7 +426,6 @@ int php_set_inet_addr(struct sockaddr_in *sin, char *string, php_socket *php_soc
 	return 1;
 }
 
-
 static void php_sockets_init_globals(zend_sockets_globals *sockets_globals TSRMLS_DC)
 {
 	sockets_globals->last_error = 0;
@@ -440,8 +440,8 @@ PHP_MINIT_FUNCTION(sockets)
 
 	ZEND_INIT_MODULE_GLOBALS(sockets, php_sockets_init_globals, NULL);
 
-	le_socket	= zend_register_list_destructors_ex(destroy_socket,	NULL, le_socket_name, module_number);
-	le_iov		= zend_register_list_destructors_ex(destroy_iovec,	NULL, le_iov_name, module_number);
+	le_socket = zend_register_list_destructors_ex(php_destroy_socket, NULL, le_socket_name, module_number);
+	le_iov    = zend_register_list_destructors_ex(php_destroy_iovec, NULL, le_iov_name, module_number);
 
 	REGISTER_LONG_CONSTANT("AF_UNIX",		AF_UNIX,		CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("AF_INET",		AF_INET,		CONST_CS | CONST_PERSISTENT);
@@ -522,8 +522,9 @@ PHP_RSHUTDOWN_FUNCTION(sockets)
 	return SUCCESS;
 }
 /* }}} */
-		
-int php_sock_array_to_fd_set(zval *sock_array, fd_set *fds, SOCKET *max_fd TSRMLS_DC) {
+
+static int php_sock_array_to_fd_set(zval *sock_array, fd_set *fds, SOCKET *max_fd TSRMLS_DC)
+{
 	zval		**element;
 	php_socket	*php_sock;
 	
@@ -545,11 +546,13 @@ int php_sock_array_to_fd_set(zval *sock_array, fd_set *fds, SOCKET *max_fd TSRML
 	return 1;
 }
 
-int php_sock_array_from_fd_set(zval *sock_array, fd_set *fds TSRMLS_DC) {
+static int php_sock_array_from_fd_set(zval *sock_array, fd_set *fds TSRMLS_DC)
+{
 	zval		**element;
 	zval		**dest_element;
 	php_socket	*php_sock;
 	HashTable	*new_hash;
+
 	if (Z_TYPE_P(sock_array) != IS_ARRAY) return 0;
 
 	ALLOC_HASHTABLE(new_hash);
@@ -577,7 +580,6 @@ int php_sock_array_from_fd_set(zval *sock_array, fd_set *fds TSRMLS_DC) {
 
 	return 1;
 }
-
 
 /* {{{ proto int socket_select(array &read_fds, array &write_fds, &array except_fds, int tv_sec[, int tv_usec])
    Runs the select() system call on the sets mentioned with a timeout specified by tv_sec and tv_usec */
@@ -652,7 +654,7 @@ PHP_FUNCTION(socket_create_listen)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l|l", &port, &backlog) == FAILURE)
 		return;
 
-	if (!open_listen_sock(&php_sock, port, backlog TSRMLS_CC)) {
+	if (!php_open_listen_sock(&php_sock, port, backlog TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
 
@@ -673,7 +675,7 @@ PHP_FUNCTION(socket_accept)
 
 	ZEND_FETCH_RESOURCE(php_sock, php_socket *, &arg1, -1, le_socket_name, le_socket);
 	
-	if (!accept_connect(php_sock, &new_sock, (struct sockaddr *) &sa TSRMLS_CC)) {
+	if (!php_accept_connect(php_sock, &new_sock, (struct sockaddr *) &sa TSRMLS_CC)) {
 		PHP_SOCKET_ERROR(new_sock, "unable to accept socket connection", errno);
 		RETURN_FALSE;
 	}
@@ -1070,8 +1072,8 @@ PHP_FUNCTION(socket_connect)
 				RETURN_FALSE;
 			}
 
-			sin6.sin6_family	= AF_INET6;
-			sin6.sin6_port	= htons((unsigned short int)port);
+			sin6.sin6_family = AF_INET6;
+			sin6.sin6_port   = htons((unsigned short int)port);
 
 			if (! php_set_inet6_addr(&sin6, addr, php_sock TSRMLS_CC)) {
 				RETURN_FALSE;
@@ -1086,8 +1088,8 @@ PHP_FUNCTION(socket_connect)
 				RETURN_FALSE;
 			}
 
-			sin.sin_family	= AF_INET;
-			sin.sin_port	= htons((unsigned short int)port);
+			sin.sin_family = AF_INET;
+			sin.sin_port   = htons((unsigned short int)port);
 			
 			if (! php_set_inet_addr(&sin, addr, php_sock TSRMLS_CC)) {
 				RETURN_FALSE;
