@@ -1,3 +1,44 @@
+2001-01-24  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ext/mysql/libmysql/libmysql.dsp
+      ext/mysql/libmysql/my_winthread.c:
+    Added my_winthread.c. Thanks to Thimble Smith.
+
+2001-01-24  Andrei Zmievski  <andrei@ispi.net>
+
+    * TODO: Already done.
+
+2001-01-24  Ben Mansell  <ben@zeus.com>
+
+    * README.Zeus: Added 'you must use gcc' comment to build instructions.
+
+2001-01-24  MySQL Team  <mysql-all@mysql.com>
+
+    * ext/mysql/libmysql/config-win.h
+      ext/mysql/libmysql/update_sources:
+    Don't #define HAVE_COMPRESS on windows.
+
+2001-01-24  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * pear/HTML/ITX.php: Forgot to include IT.php.
+
+2001-01-24  Stig Bakken  <ssb@fast.no>
+
+    * pear/HTML/Form.php: typo
+
+2001-01-24  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/gd/gd.c: Protos fixed.
+
+2001-01-24  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/gd/gd.c
+      ext/gd/php_gd.h:
+    - Commited a patch that adds support for converting Images to WBMP format.
+      (Thanx to Denis Gasparin <denis@editnet.it>)
+    - Added support for converting images from JPG/PNG on the fly with the GD
+      extension, which is usefull for creating dynamic WAP-sites 
+
 2001-01-23  Boian Bonev  <boian@bonev.com>
 
     * ext/vpopmail/CREDITS
