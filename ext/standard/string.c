@@ -36,6 +36,17 @@
 #include "php_globals.h"
 #include "basic_functions.h"
 
+#define STR_PAD_LEFT	0
+#define STR_PAD_RIGHT	1
+#define STR_PAD_BOTH	2
+
+void register_string_constants(INIT_FUNC_ARGS)
+{
+	REGISTER_LONG_CONSTANT("STR_PAD_LEFT", STR_PAD_LEFT, CONST_PERSISTENT|CONST_CS);
+	REGISTER_LONG_CONSTANT("STR_PAD_RIGHT", STR_PAD_RIGHT, CONST_PERSISTENT|CONST_CS);
+	REGISTER_LONG_CONSTANT("STR_PAD_BOTH", STR_PAD_BOTH, CONST_PERSISTENT|CONST_CS);
+}
+
 int php_tag_find(char *tag, int len, char *set);
 
 /* this is read-only, so it's ok */
@@ -2571,22 +2582,28 @@ PHP_FUNCTION(substr_count)
 /* }}} */	
 
 
-/* {{{ proto string str_pad(string input, int pad_length [, string pad_string])
+/* {{{ proto string str_pad(string input, int pad_length [, string pad_string [, int pad_type ]])
    Returns input string padded on the left or right to specified length with pad_string */
 PHP_FUNCTION(str_pad)
 {
+	/* Input arguments */
 	zval **input,				/* Input string */
-		 **pad_length,			/* Length to pad to (positive/negative) */
-		 **pad_string;			/* Padding string */
-	int	   pad_length_abs;		/* Absolute padding length */
+		 **pad_length,			/* Length to pad to */
+		 **pad_string,			/* Padding string */
+		 **pad_type;			/* Padding type (left/right/both) */
+	
+	/* Helper variables */
+	int	   num_pad_chars;		/* Number of padding characters (total - input size) */
 	char  *result = NULL;		/* Resulting string */
 	int	   result_len = 0;		/* Length of the resulting string */
 	char  *pad_str_val = " ";	/* Pointer to padding string */
 	int    pad_str_len = 1;		/* Length of the padding string */
-	int	   i;
+	int	   pad_type_val = STR_PAD_RIGHT; /* The padding type value */
+	int	   i, left_pad, right_pad;
 
-	if (ZEND_NUM_ARGS() < 2 || ZEND_NUM_ARGS() > 3 ||
-		zend_get_parameters_ex(ZEND_NUM_ARGS(), &input, &pad_length, &pad_string) == FAILURE) {
+
+	if (ZEND_NUM_ARGS() < 2 || ZEND_NUM_ARGS() > 4 ||
+		zend_get_parameters_ex(ZEND_NUM_ARGS(), &input, &pad_length, &pad_string, &pad_type) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -2594,11 +2611,11 @@ PHP_FUNCTION(str_pad)
 	convert_to_string_ex(input);
 	convert_to_long_ex(pad_length);
 
-	pad_length_abs = abs(Z_LVAL_PP(pad_length));
+	num_pad_chars = Z_LVAL_PP(pad_length) - Z_STRLEN_PP(input);
 
 	/* If resulting string turns out to be shorter than input string,
 	   we simply copy the input and return. */
-	if (pad_length_abs <= Z_STRLEN_PP(input)) {
+	if (num_pad_chars < 0) {
 		*return_value = **input;
 		zval_copy_ctor(return_value);
 		return;
@@ -2614,26 +2631,49 @@ PHP_FUNCTION(str_pad)
 		}
 		pad_str_val = Z_STRVAL_PP(pad_string);
 		pad_str_len = Z_STRLEN_PP(pad_string);
+
+		if (ZEND_NUM_ARGS() > 3) {
+			convert_to_long_ex(pad_type);
+			pad_type_val = Z_LVAL_PP(pad_type);
+			if (pad_type_val < STR_PAD_LEFT || pad_type_val > STR_PAD_BOTH) {
+				php_error(E_WARNING, "Padding type has to be STR_PAD_LEFT, STR_PAD_RIGHT, or STR_PAD_BOTH in %s()", get_active_function_name());
+				return;
+			}
+		}
 	}
 
-	result = (char *)emalloc(pad_length_abs+1);
+	result = (char *)emalloc(Z_STRLEN_PP(input) + num_pad_chars + 1);
 
-	/* If positive, we pad on the right and copy the input now. */
-	if (Z_LVAL_PP(pad_length) > 0) {
-		memcpy(result, Z_STRVAL_PP(input), Z_STRLEN_PP(input));
-		result_len = Z_STRLEN_PP(input);
+	/* We need to figure out the left/right padding lengths. */
+	switch (pad_type_val) {
+		case STR_PAD_RIGHT:
+			left_pad = 0;
+			right_pad = num_pad_chars;
+			break;
+
+		case STR_PAD_LEFT:
+			left_pad = num_pad_chars;
+			right_pad = 0;
+			break;
+
+		case STR_PAD_BOTH:
+			left_pad = num_pad_chars / 2;
+			right_pad = num_pad_chars - left_pad;
+			break;
 	}
 
-	/* Loop through pad string, copying it into result. */
-	for (i = 0; i < pad_length_abs - Z_STRLEN_PP(input); i++) {
+	/* First we pad on the left. */
+	for (i = 0; i < left_pad; i++)
 		result[result_len++] = pad_str_val[i % pad_str_len];
-	}
 
-	/* If negative, we've padded on the left, and copy the input now. */
-	if (Z_LVAL_PP(pad_length) < 0) {
-		memcpy(result + result_len, Z_STRVAL_PP(input), Z_STRLEN_PP(input));
-		result_len += Z_STRLEN_PP(input);
-	}
+	/* Then we copy the input string. */
+	memcpy(result + result_len, Z_STRVAL_PP(input), Z_STRLEN_PP(input));
+	result_len += Z_STRLEN_PP(input);
+
+	/* Finally, we pad on the right. */
+	for (i = 0; i < right_pad; i++)
+		result[result_len++] = pad_str_val[i % pad_str_len];
+
 	result[result_len] = '\0';
 
 	RETURN_STRINGL(result, result_len, 0);

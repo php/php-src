@@ -123,4 +123,6 @@ PHPAPI char *php_strerror(int errnum);
 #define strerror php_strerror
 #endif
 
+void register_string_constants(INIT_FUNC_ARGS);
+
 #endif /* PHP_STRING_H */
