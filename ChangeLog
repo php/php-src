@@ -1,3 +1,115 @@
+2001-04-22  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/ccvs/ccvs.c: Fix bug #10447.
+
+2001-04-22  Christian Stocker  <chregu@nomad.ch>
+
+    * pear/Experimental/Cache/OutputCompression.php:
+    - connection_timeout() seems not to exist anymore in php 4.0.5 (where did
+    it go?
+    - some typos fixed
+
+2001-04-22  Ulf Wendel  <ulf.wendel@phpdoc.de>
+
+    * pear/Experimental/Cache/OutputCompression.php:
+    Added experimental class that deliveres compressed (gz) content to the client
+
+    Although this code seems to be working Christian and I are not 100% satisfied
+    with it. We're wondering if there's another API that requires less overriden
+    methods, so we decided to put it into the Experimental directory requesting
+    comments.
+
+2001-04-22  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/pcre/php_pcre.c: Fix freeing of a NULL pointer
+
+2001-04-22  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/DB/ifx.php
+      pear/DB/msql.php:
+    * msql.php
+    - Added fetch row numbers
+    - Fix fetchInto
+    - Some other updates
+
+    * ifx.php
+    small clean up
+
+2001-04-22  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/config.m4
+      ext/ircg/ircg.c
+      ext/ircg/php_ircg.h:
+    MFH allocation-related and thttpd-independence changes
+
+    * sapi/thttpd/thttpd_patch: remove Only.* lines from patch
+
+    * sapi/thttpd/thttpd.c
+      sapi/thttpd/thttpd_patch:
+    Merge thttpd-2.21-related changes into 4.0.5 branch
+
+    * sapi/thttpd/thttpd.c:
+    bytes in the conn structure was renamed to bytes_sent.
+
+    * sapi/thttpd/thttpd_patch: Update patch to thttpd-2.21
+
+2001-04-22  Harald Radi  <h.radi@nme.at>
+
+    * win32/php4dllts.dsp: added ext/com/com.h to PHP_4_0_5 branch
+
+    * php.ini-dist
+      php.ini-optimized: merged [com] section from main branch
+
+    * ext/com/COM.c
+      ext/com/com.h
+      ext/com/php_COM.h
+      ext/com/typedef_VARIANT.c:
+    merging changes from main branch to fix a memory leak
+
+2001-04-22  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Common.php
+      pear/PEAR/Uploader.php: * fixed PEAR_Common::infoFromDescriptionFile
+
+    * configure.in:
+    * don't override $libdir and $datadir if they are specified on the
+      commandline
+
+    * pear/DB/tests/db_error.phpt
+      pear/DB/tests/db_error2.phpt
+      pear/DB/tests/db_parsedsn.phpt
+      pear/PEAR/Common.php
+      pear/PEAR/Installer.php
+      pear/PEAR/Uploader.php
+      pear/XML/tests/002.phpt
+      pear/XML/tests/003.phpt
+      pear/XML/tests/005.phpt
+      pear/tests/pear_error.phpt
+      ext/standard/info.c
+      main/build-defs.h.in
+      main/main.c
+      main/php_ini.c
+      pear/.cvsignore
+      pear/Makefile.in
+      pear/PEAR.php
+      pear/PEAR.php.in
+      Makefile.in
+      configure.in
+      footer:
+    * expanded the following constants and made them available in PHP:
+      DEFAULT_INCLUDE_PATH
+      PEAR_INSTALL_DIR
+      PHP_EXTENSION_DIR
+      PHP_BINDIR
+      PHP_LIBDIR
+      PHP_DATADIR
+      PHP_SYSCONFDIR
+      PHP_LOCALSTATEDIR
+      PHP_CONFIG_FILE_PATH
+    * no longer generating pear/PEAR.php
+    * fixed some tests
+    * some more installer work
+
 2001-04-21  Andi Gutmans  <andi@zend.com>
 
     * main/php_ini.c: - Get rid of warning.
