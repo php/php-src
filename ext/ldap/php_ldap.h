@@ -38,7 +38,7 @@ PHP_MINFO_FUNCTION(ldap);
 
 PHP_FUNCTION(ldap_connect);
 PHP_FUNCTION(ldap_bind);
-#ifdef HAVE_LDAP_SASL_INTERACTIVE_BIND_S
+#ifdef HAVE_LDAP_SASL
 PHP_FUNCTION(ldap_sasl_bind);
 #endif
 PHP_FUNCTION(ldap_unbind);

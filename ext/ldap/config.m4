@@ -18,8 +18,55 @@ AC_DEFUN(PHP_LDAP_CHECKS, [
   fi
 ])
 
+AC_DEFUN(PHP_LDAP_SASL_CHECKS, [
+  if test "$1" = "yes"; then
+    SEARCH_DIRS="/usr/local /usr"
+  else
+    SEARCH_DIRS=$1
+  fi
+
+  for i in $SEARCH_DIRS; do
+    if test -f $i/include/sasl/sasl.h; then
+      LDAP_SASL_DIR=$i
+      AC_DEFINE(HAVE_LDAP_SASL_SASL_H,1,[ ])
+      break
+    elif test -f $i/include/sasl.h; then
+      LDAP_SASL_DIR=$i
+      AC_DEFINE(HAVE_LDAP_SASL_H,1,[ ])
+      break
+    fi
+  done
+  
+  if test "$LDAP_SASL_DIR"; then
+    LDAP_SASL_INCDIR=$LDAP_SASL_DIR/include
+    LDAP_SASL_LIBDIR=$LDAP_SASL_DIR/lib
+  else
+    AC_MSG_ERROR([sasl.h not found!])
+  fi
+
+  if test "$PHP_LDAP_SASL" = "yes"; then
+    SASL_LIB="-lsasl2"
+  else
+    SASL_LIB="-L$LDAP_SASL_LIBDIR -lsasl2"
+  fi
+  
+  PHP_CHECK_LIBRARY(ldap, sasl_version,
+  [
+    PHP_ADD_INCLUDE($LDAP_SASL_INCDIR)
+    PHP_ADD_LIBRARY_WITH_PATH(sasl2, $LDAP_SASL_LIBDIR, LDAP_SHARED_LIBADD)
+    AC_DEFINE(HAVE_LDAP_SASL, 1, [LDAP SASL support])
+  ], [
+    AC_MSG_ERROR([LDAP SASL check failed. Please check config.log for more information.])
+  ], [
+    $LDAP_SHARED_LIBADD $SASL_LIB
+  ])
+])
+
 PHP_ARG_WITH(ldap,for LDAP support,
 [  --with-ldap[=DIR]       Include LDAP support.])
+
+PHP_ARG_WITH(ldap-sasl,for LDAP Cyrus SASL support,
+[  --with-ldap-sasl[=DIR]    LDAP: Include Cyrus SASL support.], no, no)
 
 if test "$PHP_LDAP" != "no"; then
 
@@ -121,5 +168,19 @@ if test "$PHP_LDAP" != "no"; then
 
   dnl Solaris 2.8 claims to be 2004 API, but doesn't have
   dnl ldap_parse_reference() nor ldap_start_tls_s()
-  AC_CHECK_FUNCS([ldap_parse_reference ldap_start_tls_s ldap_sasl_interactive_bind_s])
+  AC_CHECK_FUNCS([ldap_parse_reference ldap_start_tls_s])
+
+  dnl
+  dnl SASL check
+  dnl
+  if test "$PHP_LDAP_SASL" != "no"; then
+    PHP_LDAP_SASL_CHECKS([$PHP_LDAP_SASL])
+  fi
+
+  dnl
+  dnl Sanity check
+  dnl 
+  AC_CHECK_FUNC(ldap_bind_s, [], [
+    AC_MSG_ERROR([LDAP build check failed. Please check config.log for more information.]) 
+  ])
 fi 

@@ -59,6 +59,12 @@
 #include "ext/standard/php_string.h"
 #include "ext/standard/info.h"
 
+#ifdef HAVE_LDAP_SASL_H
+#include <sasl.h>
+#elif defined(HAVE_LDAP_SASL_SASL_H)
+#include <sasl/sasl.h>
+#endif
+
 typedef struct {
 	LDAP *link;
 #if defined(LDAP_API_FEATURE_X_OPENLDAP) && defined(HAVE_3ARG_SETREBINDPROC)
@@ -88,7 +94,7 @@ function_entry ldap_functions[] = {
 	PHP_FE(ldap_connect,								NULL)
 	PHP_FALIAS(ldap_close,		ldap_unbind,			NULL)
 	PHP_FE(ldap_bind,									NULL)
-#ifdef HAVE_LDAP_SASL_INTERACTIVE_BIND_S
+#ifdef HAVE_LDAP_SASL
 	PHP_FE(ldap_sasl_bind,								NULL)
 #endif
 	PHP_FE(ldap_unbind,									NULL)
@@ -335,6 +341,10 @@ PHP_MINFO_FUNCTION(ldap)
 	php_info_print_table_row(2, "Level of Encryption", tmp);
 #endif
 
+#ifdef HAVE_LDAP_SASL
+	php_info_print_table_row(2, "SASL Support", "Enabled");
+#endif
+
 	php_info_print_table_end();
 }
 /* }}} */
@@ -466,7 +476,7 @@ PHP_FUNCTION(ldap_bind)
 }
 /* }}} */
 
-#ifdef HAVE_LDAP_SASL_INTERACTIVE_BIND_S
+#ifdef HAVE_LDAP_SASL
 /* {{{ _php_sasl_interact
    Interact function for SASL */
 static int _php_sasl_interact(LDAP *ld, unsigned flags, void *defaults, void *in)
@@ -505,7 +515,7 @@ PHP_FUNCTION(ldap_sasl_bind)
 	}
 }
 /* }}} */
-#endif /* HAVE_LDAP_SASL_INTERACTIVE_BIND_S */
+#endif /* HAVE_LDAP_SASL */
 
 /* {{{ proto bool ldap_unbind(resource link)
    Unbind from LDAP directory */
