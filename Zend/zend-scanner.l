@@ -488,7 +488,7 @@ int use_filename(char *filename, zend_bool unique CLS_DC)
 	char *newfile;
 
 	filenamelen = strlen(filename);
-	newfile = emalloc(filenamelen + 5);
+	newfile = (char *) emalloc(filenamelen + 5);
 	strcpy(newfile, filename);
 	strcpy(newfile+filenamelen, ".php");
 	newfile[filenamelen+4] = '\0';
