@@ -201,7 +201,7 @@ void zend_activate_modules(TSRMLS_D);
 void zend_deactivate_modules(TSRMLS_D);
 
 
-int lex_scan(zval *zendlval TSRMLS_DC);
+ZEND_API int lex_scan(zval *zendlval TSRMLS_DC);
 void startup_scanner(TSRMLS_D);
 void shutdown_scanner(TSRMLS_D);
 
