@@ -197,6 +197,9 @@ PHP_FUNCTION(dom_xpath_query)
 		ctxp->nsNr = 0;
 	}
 
+	if (! xpathobjp) {
+		RETURN_FALSE;
+	}
 	if (xpathobjp->type ==  XPATH_NODESET) {
 		int i;
 		xmlNodeSetPtr nodesetp;
