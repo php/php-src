@@ -377,19 +377,113 @@ PHP_FUNCTION(pi)
 }
 
 /* }}} */
-/* {{{ proto double pow(double base, double exponent)
-   Returns base raised to the power of exponent */
+
+/* {{{ proto number pow(number lbase, number lexponent)
+   Returns lbase raised to the power of lexponent. Returns
+   integer result when possible. */
 
 PHP_FUNCTION(pow)
 {
-	zval **num1, **num2;
+	/* FIXME: What is our policy on float-overflow? With pow, it's 
+	 * extremely easy to request results that won't fit in any double.
+	 */
 	
-	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2,&num1,&num2) == FAILURE) {
+	zval **zbase, **zexp;
+	long lbase,lexp;
+	double dval,dbase,pos_result;
+	long result = 1;
+	
+	if (ZEND_NUM_ARGS() != 2) {
 		WRONG_PARAM_COUNT;
+	} 
+	zend_get_parameters_ex(ZEND_NUM_ARGS(),&zbase,&zexp);
+	convert_scalar_to_number_ex(zbase);
+	convert_scalar_to_number_ex(zexp);
+	if (Z_TYPE_PP(zbase) != IS_LONG && Z_TYPE_PP(zbase) != IS_DOUBLE ||
+		Z_TYPE_PP(zexp ) != IS_LONG && Z_TYPE_PP(zexp ) != IS_DOUBLE) {
+		php_error(E_WARNING,"Invalid argument(s) passed to pow()");
+		RETURN_FALSE;
 	}
-	convert_to_double_ex(num1);
-	convert_to_double_ex(num2);
-	RETURN_DOUBLE(pow((*num1)->value.dval, (*num2)->value.dval));
+	
+	if (Z_TYPE_PP(zexp) == IS_DOUBLE) {
+		/* pow(?,float), this is the ^^ case */
+		dbase = Z_TYPE_PP(zbase) == IS_LONG ? (double) Z_LVAL_PP(zbase)
+											:          Z_DVAL_PP(zbase);
+		if ( dbase <= 0.0 ) {
+			/* Note that with the old behaviour, php pow() returned bogus
+			   results. Try pow(-1,2.5) in PHP <= 4.0.6 ... */
+			php_error(E_WARNING,"Trying to raise a nonpositive value to a broken power");
+			RETURN_FALSE;
+		}
+		RETURN_DOUBLE(exp(log(dbase) * Z_DVAL_PP(zexp)));
+	}
+
+	/* pow(?,int), this is the ** case */
+
+	lexp = Z_LVAL_PP(zexp);
+
+
+	if (Z_TYPE_PP(zbase) == IS_DOUBLE) {
+		/* pow(float,int) */
+		if (lexp == 0) {
+			RETURN_DOUBLE(1.0);
+		}
+		if (Z_DVAL_PP(zbase) > 0.0) {
+			RETURN_DOUBLE(exp(log(Z_DVAL_PP(zbase)) * lexp));
+		} else if (Z_DVAL_PP(zbase) == 0.0) {
+			if (lexp < 0) {
+				php_error(E_WARNING,
+					"Division by zero: pow(0.0,<negative integer>)");
+				RETURN_FALSE;
+			} else {
+				RETURN_DOUBLE(0.0);
+			}
+		} else { /* lbase < 0.0 */
+			pos_result = exp(log(-Z_DVAL_PP(zbase)) * (double)lexp);
+			RETURN_DOUBLE(lexp & 1 ? -pos_result : pos_result);
+		}
+			
+	}
+	
+	/* pow(int,int) */
+	if (lexp == 0) {
+		RETURN_LONG(1);
+	}
+
+	lbase = Z_LVAL_PP(zbase);
+
+	switch (lbase) {
+		case -1:
+			RETURN_LONG( lexp & 1 ? -1 : 1 ); /* if lexp=odd ... */
+		case 0:
+			if (lexp < 0) {
+				php_error(E_WARNING,
+					"Division by zero: pow(0,<negative integer>)");
+				RETURN_FALSE;
+			} else {
+				RETURN_LONG(0);
+			}
+		case 1:
+			RETURN_LONG(1);
+		default:
+			/* abs(lbase) > 1 */
+			dval = exp(log((double) (lbase>0?lbase:-lbase)) * 
+								  (double) lexp);
+			/* long result = 1; */
+			if (lexp < 0 || dval > (double) LONG_MAX) {
+				/* 1/n ( abs(n) > 1 ) || overflow */
+				RETURN_DOUBLE(((lexp & 1) && lbase<0) ? -dval : dval);
+			}
+
+			/* loop runs at most log(log(LONG_MAX)) times, i.e. ~ 5 */
+			while (lexp > 0) { 
+				if (lexp & 1) /* odd */
+					result *= lbase;
+				lexp >>= 1;
+				lbase *= lbase;
+			}
+			RETURN_LONG(result);
+	}
 }
 
 /* }}} */
