@@ -148,6 +148,7 @@ typedef union _date_ll {
 #define YYSTYPE date_ll
 #define YYLTYPE void
 
+static int yylex (YYSTYPE *lvalp, void *parm);
 %}
 
 /* This grammar has 22 shift/reduce conflicts. */
