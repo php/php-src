@@ -15,7 +15,9 @@
 #define S_ISDIR(mode) ((mode) & _S_IFDIR)
 #endif
 
-typedef unsigned int uint;
+#ifndef S_ISREG
+#define S_ISREG(mode) ((mode) & _S_IFREG)
+#endif
 
 #ifdef PHP_WIN32
 #define strtok_r(a,b,c) strtok((a),(b))
@@ -82,11 +84,23 @@ typedef struct _cwd_state {
 	uint cwd_length;
 } cwd_state;
 
+typedef int (*verify_path_func)(const cwd_state *);
+
 static int php_is_dir_ok(const cwd_state *state) 
 {
 	struct stat buf;
 
 	if (stat(state->cwd, &buf) == 0 && S_ISDIR(buf.st_mode))
+		return (0);
+
+	return (1);
+}
+
+static int php_is_file_ok(const cwd_state *state) 
+{
+	struct stat buf;
+
+	if (stat(state->cwd, &buf) == 0 && S_ISREG(buf.st_mode))
 		return (0);
 
 	return (1);
@@ -123,7 +137,7 @@ char *virtual_getcwd(cwd_state *state, uint *length)
 }
 
 /* returns 0 for ok, 1 for error */
-int virtual_chdir(cwd_state *state, char *path)
+int virtual_chdir(cwd_state *state, char *path, verify_path_func verify_path)
 {
 	uint path_length = strlen(path);
 	char *ptr = path;
@@ -192,7 +206,7 @@ int virtual_chdir(cwd_state *state, char *path)
 		ptr = strtok_r(NULL, TOKENIZER_STRING, &tok);
 	}
 
-	if (!IS_DIR_OK(state)) {
+	if (verify_path && !verify_path(state)) {
 		free(state->cwd);
 
 		*state = *old_state;
@@ -206,7 +220,7 @@ int virtual_chdir(cwd_state *state, char *path)
 	return (ret);
 }
 
-void main(void)
+main(void)
 {
 	cwd_state state;
 	uint length;
@@ -226,7 +240,7 @@ void main(void)
 
 #define T(a) \
 	printf("[%s] $ cd %s\n", virtual_getcwd(&state, &length), a); \
-	virtual_chdir(&state, strdup(a)); \
+	virtual_chdir(&state, strdup(a), NULL); \
 	printf("new path is %s\n", virtual_getcwd(&state, &length));
 	
 	T("..")
@@ -240,4 +254,6 @@ void main(void)
 	T("...foo")
 	T("D:/flash/zone")
 	T("../foo/bar/../baz")
+
+	return 0;
 }
