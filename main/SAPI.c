@@ -157,10 +157,15 @@ static void sapi_read_post_data(TSRMLS_D)
 	if (oldchar) {
 		*(p-1) = oldchar;
 	}
-	post_reader_func(TSRMLS_C);
+
 	SG(request_info).content_type_dup = content_type;
-	if(PG(always_populate_raw_post_data) && sapi_module.default_post_reader) {
-		sapi_module.default_post_reader(TSRMLS_C);
+
+	if(post_reader_func) {
+		post_reader_func(TSRMLS_C);
+
+		if(PG(always_populate_raw_post_data) && sapi_module.default_post_reader) {
+			sapi_module.default_post_reader(TSRMLS_C);
+		}
 	}
 }
 
