@@ -24,6 +24,10 @@ require_once 'PEAR/Config.php';
 /**
  * This is a class for doing remote operations against the central
  * PEAR database.
+ *
+ * @nodep XML_RPC_Value
+ * @nodep XML_RPC_Message
+ * @nodep XML_RPC_Client
  */
 class PEAR_Remote extends PEAR
 {
@@ -198,7 +202,7 @@ class PEAR_Remote extends PEAR
         global $XML_RPC_String, $XML_RPC_Array, $XML_RPC_Struct;
 
         $type = gettype($php_val);
-        $xmlrpcval = new XML_RPC_value;
+        $xmlrpcval = new XML_RPC_Value;
 
         switch($type) {
             case "array":
