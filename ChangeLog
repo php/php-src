@@ -1,3 +1,36 @@
+2005-04-02  Greg Beaver  <greg@chiaraquartet.net>
+
+    * (PHP_4_3)
+      pear/go-pear.bat:
+      allow local install, remove -n switch
+
+    * (PHP_5_0)
+      pear/go-pear.bat:
+      remove -n switch
+
+    * pear/go-pear.bat:
+      update to support local install, remove -n switch
+
+2005-04-02  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * pear/package-Archive_Tar.xml
+      pear/package-Console_Getopt.xml
+      pear/package-PEAR.xml:
+      Fix the name (and thus make sure PEAR will not install atm)
+
+    * pear/package-Archive_Tar.xml:
+      Fixed: [PEAR] Archive_Tar: XML error: not well-formed (invalid token) at
+      line 22
+
+    * php.ini-dist
+      php.ini-recommended:
+      Make sure php_mbstring.dll is first to getting loaded..(bug #32552)
+
+    * (PHP_4_3)
+      NEWS
+      ext/swf/swf.c:
+      - Fixed bug #32538 (ext/swf/swf.c does not compile with gcc-3.4.x or newer)
+
 2005-04-01  Greg Beaver  <greg@chiaraquartet.net>
 
     * pear/PEAR/RunTest.php
