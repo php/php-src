@@ -405,7 +405,7 @@ void ora_do_logon(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		list_entry *le;
 		
 		/* try to find if we already have this link in our persistent list */
-		if (zend_hash_find(plist, hashed_details, hashed_details_length+1, (void **) &le)==FAILURE) {  /* we don't */
+		if (zend_hash_find(&EG(persistent_list), hashed_details, hashed_details_length+1, (void **) &le)==FAILURE) {  /* we don't */
 			list_entry new_le;
 			
 			if (ORA(max_links)!=-1 && ORA(num_links)>=ORA(max_links)) {
@@ -445,7 +445,7 @@ void ora_do_logon(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			/* hash it up */
 			new_le.type = le_pconn;
 			new_le.ptr = db_conn;
-			if (zend_hash_update(plist, hashed_details, hashed_details_length+1, (void *) &new_le, sizeof(list_entry), NULL)==FAILURE) {
+			if (zend_hash_update(&EG(persistent_list), hashed_details, hashed_details_length+1, (void *) &new_le, sizeof(list_entry), NULL)==FAILURE) {
 				free(db_conn);
 				efree(hashed_details);
 				RETURN_FALSE;
@@ -471,7 +471,7 @@ void ora_do_logon(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 #endif
 					) {
 					php_error(E_WARNING, "Oracle: Link to server lost, unable to reconnect",ora_error(&db_conn->lda));
-					zend_hash_del(plist, hashed_details, hashed_details_length+1);
+					zend_hash_del(&EG(persistent_list), hashed_details, hashed_details_length+1);
 					efree(hashed_details);
 					RETURN_FALSE;
 				}
@@ -486,7 +486,7 @@ void ora_do_logon(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		 * if it doesn't, open a new mysql link, add it to the resource list,
 		 * and add a pointer to it with hashed_details as the key.
 		 */
-		if (zend_hash_find(list,hashed_details,hashed_details_length+1,(void **) &index_ptr)==SUCCESS) {
+		if (zend_hash_find(&EG(regular_list),hashed_details,hashed_details_length+1,(void **) &index_ptr)==SUCCESS) {
 			int type,link;
 			void *ptr;
 
@@ -502,7 +502,7 @@ void ora_do_logon(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 				efree(hashed_details);
 				return;
 			} else {
-				zend_hash_del(list,hashed_details,hashed_details_length+1);
+				zend_hash_del(&EG(regular_list),hashed_details,hashed_details_length+1);
 			}
 		}
 		if (ORA(max_links)!=-1 && ORA(num_links)>=ORA(max_links)) {
@@ -534,7 +534,7 @@ void ora_do_logon(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		/* add it to the hash */
 		new_index_ptr.ptr = (void *) return_value->value.lval;
 		new_index_ptr.type = le_index_ptr;
-		if (zend_hash_update(list,hashed_details,hashed_details_length+1,(void *) &new_index_ptr, sizeof(list_entry), NULL)==FAILURE) {
+		if (zend_hash_update(&EG(regular_list),hashed_details,hashed_details_length+1,(void *) &new_index_ptr, sizeof(list_entry), NULL)==FAILURE) {
 			efree(hashed_details);
 			RETURN_FALSE;
 		}
@@ -728,7 +728,7 @@ PHP_FUNCTION(ora_parse)
 		RETURN_FALSE;
 	}
 
-	if (!(cursor = ora_get_cursor(list,curs))){
+	if (!(cursor = ora_get_cursor(&EG(regular_list),curs))){
 		efree(query);
 		RETURN_FALSE;
 	}
@@ -778,7 +778,7 @@ PHP_FUNCTION(ora_bind)
 		WRONG_PARAM_COUNT;
 	}
 
-	cursor = ora_get_cursor(list, curs);
+	cursor = ora_get_cursor(&EG(regular_list), curs);
 	if (cursor == NULL) {
 		RETURN_FALSE;
 	}
@@ -868,7 +868,7 @@ PHP_FUNCTION(ora_exec)
 	if (zend_get_parameters_ex(1, &arg) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-	if ((cursor = ora_get_cursor(list, arg)) == NULL) {
+	if ((cursor = ora_get_cursor(&EG(regular_list), arg)) == NULL) {
 		RETURN_FALSE;
 	}
 
@@ -910,7 +910,7 @@ PHP_FUNCTION(ora_numcols)
 	if (zend_get_parameters_ex(1, &arg) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-	if ((cursor = ora_get_cursor(list, arg)) == NULL) {
+	if ((cursor = ora_get_cursor(&EG(regular_list), arg)) == NULL) {
 		RETURN_FALSE;
 	}
 
@@ -928,7 +928,7 @@ PHP_FUNCTION(ora_numrows)
 	if(zend_get_parameters_ex(1, &arg) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-	if((cursor = ora_get_cursor(list, arg)) == NULL) {
+	if((cursor = ora_get_cursor(&EG(regular_list), arg)) == NULL) {
 		RETURN_FALSE;
 	}
 
@@ -1026,7 +1026,7 @@ PHP_FUNCTION(ora_fetch)
 		WRONG_PARAM_COUNT;
 	}
 
-	if ((cursor = ora_get_cursor(list, arg)) == NULL) {
+	if ((cursor = ora_get_cursor(&EG(regular_list), arg)) == NULL) {
 		RETURN_FALSE;
 	}
 
@@ -1079,7 +1079,7 @@ PHP_FUNCTION(ora_fetch_into)
 	}
 	
 	/* Find the cursor */
-	if ((cursor = ora_get_cursor(list, curs)) == NULL) {
+	if ((cursor = ora_get_cursor(&EG(regular_list), curs)) == NULL) {
 		RETURN_FALSE;
 	}
 
@@ -1201,7 +1201,7 @@ PHP_FUNCTION(ora_columnname)
 		WRONG_PARAM_COUNT;
 	}
 
-	if ((cursor = ora_get_cursor(list, curs)) == NULL) {
+	if ((cursor = ora_get_cursor(&EG(regular_list), curs)) == NULL) {
 		RETURN_FALSE;
 	}
 
@@ -1239,7 +1239,7 @@ PHP_FUNCTION(ora_columntype)
 		WRONG_PARAM_COUNT;
 	}
 
-	if ((cursor = ora_get_cursor(list, curs)) == NULL) {
+	if ((cursor = ora_get_cursor(&EG(regular_list), curs)) == NULL) {
 		RETURN_FALSE;
 	}
 
@@ -1307,7 +1307,7 @@ PHP_FUNCTION(ora_columnsize)
 		WRONG_PARAM_COUNT;
 	}
 	/* Find the cursor */
-	if ((cursor = ora_get_cursor(list, curs)) == NULL) {
+	if ((cursor = ora_get_cursor(&EG(regular_list), curs)) == NULL) {
 		RETURN_FALSE;
 	}
 
@@ -1347,7 +1347,7 @@ PHP_FUNCTION(ora_getcolumn)
 		WRONG_PARAM_COUNT;
 	}
 
-	if ((cursor = ora_get_cursor(list, curs)) == NULL) {
+	if ((cursor = ora_get_cursor(&EG(regular_list), curs)) == NULL) {
 		RETURN_FALSE;
 	}
 
