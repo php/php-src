@@ -385,50 +385,143 @@ static PHP_FUNCTION(dbh_constructor)
 }
 /* }}} */
 
-/* {{{ proto object PDO::prepare(string statment [, array driver_options])
+static zval * pdo_instanciate_stmt(zval *object, zend_class_entry *dbstmt_ce, zval *ctor_args TSRMLS_DC) /* {{{ */
+{
+	if (ctor_args) {
+		if (Z_TYPE_P(ctor_args) != IS_ARRAY) {
+			zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC, "Parameter ctor_args must be an array");
+			return NULL;
+		}
+		if (!dbstmt_ce->constructor) {
+			zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC, "Statement object's constructor does not take any arguments", dbstmt_ce->name);
+			return NULL;
+		}
+	}
+
+	Z_TYPE_P(object) = IS_OBJECT;
+	object_init_ex(object, dbstmt_ce);
+	object->refcount = 1;
+	object->is_ref = 1;
+	
+	if (dbstmt_ce->constructor) {
+		zend_fcall_info fci;
+		zend_fcall_info_cache fcc;
+		zval *retval;
+
+		fci.size = sizeof(zend_fcall_info);
+		fci.function_table = &dbstmt_ce->function_table;
+		fci.function_name = NULL;
+		fci.object_pp = &object;
+		fci.symbol_table = NULL;
+		fci.retval_ptr_ptr = &retval;
+		if (ctor_args) {
+			HashTable *ht = Z_ARRVAL_P(ctor_args);
+			Bucket *p;
+
+			fci.param_count = 0;
+			fci.params = safe_emalloc(sizeof(zval*), ht->nNumOfElements, 0);
+			p = ht->pListHead;
+			while (p != NULL) {
+				fci.params[fci.param_count++] = (zval**)p->pData;
+				p = p->pListNext;
+			}
+		} else {
+			fci.param_count = 0;
+			fci.params = NULL;
+		}
+		fci.no_separation = 1;
+
+		fcc.initialized = 1;
+		fcc.function_handler = dbstmt_ce->constructor;
+		fcc.calling_scope = EG(scope);
+		fcc.object_pp = &object;
+
+		if (zend_call_function(&fci, &fcc TSRMLS_CC) == FAILURE) {
+			zval_dtor(object);
+			ZVAL_NULL(object);
+			object = NULL; /* marks failure */
+		} else {
+			zval_ptr_dtor(&retval);
+		}
+			
+		if (fci.params) {
+			efree(fci.params);
+		}
+	}
+
+	return object;
+}
+/* }}} */
+
+/* {{{ proto object PDO::prepare(string statment [, array driver_options [, string classname ]])
    Prepares a statement for execution and returns a statement object */
 static PHP_METHOD(PDO, prepare)
 {
 	pdo_dbh_t *dbh = zend_object_store_get_object(getThis() TSRMLS_CC);
 	pdo_stmt_t *stmt;
-	char *statement;
-	int statement_len;
-	zval *driver_options = NULL;
+	char *statement, *class_name = NULL;
+	int statement_len, class_name_len;
+	zval *driver_options = NULL, *ctor_args = NULL;
+	zend_class_entry *dbstmt_ce, **pce;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|a", &statement,
-			&statement_len, &driver_options)) {
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|asz", &statement,
+			&statement_len, &driver_options, &class_name, &class_name_len, &ctor_args)) {
 		RETURN_FALSE;
 	}
 	
 	PDO_DBH_CLEAR_ERR();
-	stmt = ecalloc(1, sizeof(*stmt));
+
+	switch(ZEND_NUM_ARGS()) {
+	case 4:
+	case 3:
+		if (zend_lookup_class(class_name, class_name_len, &pce TSRMLS_CC) == FAILURE) {
+			RETURN_FALSE;
+		}
+		if (!instanceof_function(*pce, pdo_dbstmt_ce TSRMLS_CC)) {
+			zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC, "The provided statement class must be derived from %s", pdo_dbstmt_ce->name);
+			RETURN_FALSE;
+		}
+		dbstmt_ce = *pce;
+		if (dbstmt_ce->constructor && !(dbstmt_ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
+			zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC, "The provided statement class %s must not have a protected or public constructor", dbstmt_ce->name);
+			RETURN_FALSE;
+		}
+		break;
+
+	case 2:
+	case 1:
+	case 0:
+		dbstmt_ce = pdo_dbstmt_ce;
+		break;
+	}
+	
+	if (!pdo_instanciate_stmt(return_value, dbstmt_ce, ctor_args TSRMLS_CC)) {
+		zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC, "Failed to instanciate statement class %s", dbstmt_ce->name);
+		return;
+	}
+	stmt = (pdo_stmt_t*)zend_object_store_get_object(return_value TSRMLS_CC);
+	
 	/* unconditionally keep this for later reference */
 	stmt->query_string = estrndup(statement, statement_len);
 	stmt->query_stringlen = statement_len;
 	stmt->default_fetch_type = PDO_FETCH_BOTH;
 	stmt->dbh = dbh;
+	/* give it a reference to me */
+	zend_objects_store_add_ref(getThis() TSRMLS_CC);
+	stmt->database_object_handle = *getThis();
+	/* we haven't created a lazy object yet */
+	ZVAL_NULL(&stmt->lazy_object_ref);
 
 	if (dbh->methods->preparer(dbh, statement, statement_len, stmt, driver_options TSRMLS_CC)) {
-		/* prepared; create a statement object for PHP land to access it */
-		Z_TYPE_P(return_value) = IS_OBJECT;
-		Z_OBJ_HANDLE_P(return_value) = zend_objects_store_put(stmt, NULL, pdo_dbstmt_free_storage, NULL TSRMLS_CC);
-		Z_OBJ_HT_P(return_value) = &pdo_dbstmt_object_handlers;
 
-		/* give it a reference to me */
-		stmt->database_object_handle = *getThis();
-		zend_objects_store_add_ref(getThis() TSRMLS_CC);
-		stmt->dbh = dbh;
-
-		/* we haven't created a lazy object yet */
-		ZVAL_NULL(&stmt->lazy_object_ref);
-
-		stmt->refcount = 1;
 		return;
 	}
 
-	efree(stmt->query_string);
-	efree(stmt);
 	PDO_HANDLE_DBH_ERR();
+
+	/* kill the object handle for the stmt here */
+	zval_dtor(return_value);
+
 	RETURN_FALSE;
 }
 /* }}} */
@@ -718,33 +811,28 @@ static PHP_METHOD(PDO, query)
 	}
 	
 	PDO_DBH_CLEAR_ERR();
-	stmt = ecalloc(1, sizeof(*stmt));
+
+	if (!pdo_instanciate_stmt(return_value, pdo_dbstmt_ce, NULL TSRMLS_CC)) {
+		zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC, "Failed to instanciate statement class %s", pdo_dbstmt_ce->name);
+		return;
+	}
+	stmt = (pdo_stmt_t*)zend_object_store_get_object(return_value TSRMLS_CC);
+	
 	/* unconditionally keep this for later reference */
 	stmt->query_string = estrndup(statement, statement_len);
 	stmt->query_stringlen = statement_len;
 	stmt->default_fetch_type = PDO_FETCH_BOTH;
 	stmt->active_query_string = stmt->query_string;
 	stmt->active_query_stringlen = statement_len;
+	stmt->dbh = dbh;
+	/* give it a reference to me */
+	zend_objects_store_add_ref(getThis() TSRMLS_CC);
+	stmt->database_object_handle = *getThis();
+	/* we haven't created a lazy object yet */
+	ZVAL_NULL(&stmt->lazy_object_ref);
 
 	if (dbh->methods->preparer(dbh, statement, statement_len, stmt, driver_options TSRMLS_CC)) {
-		/* prepared; create a statement object for PHP land to access it */
-		Z_TYPE_P(return_value) = IS_OBJECT;
-		Z_OBJ_HANDLE_P(return_value) = zend_objects_store_put(stmt, NULL, pdo_dbstmt_free_storage, NULL TSRMLS_CC);
-		Z_OBJ_HT_P(return_value) = &pdo_dbstmt_object_handlers;
-
-		/* give it a reference to me */
-		stmt->database_object_handle = *getThis();
-		zend_objects_store_add_ref(getThis() TSRMLS_CC);
-		stmt->dbh = dbh;
-
-		/* we haven't created a lazy object yet */
-		ZVAL_NULL(&stmt->lazy_object_ref);
-
-		stmt->refcount = 1;
-
-		if (ZEND_NUM_ARGS() == 1 ||
-				SUCCESS == pdo_stmt_setup_fetch_mode(INTERNAL_FUNCTION_PARAM_PASSTHRU,
-				stmt, 1)) {
+		if (1) {//ZEND_NUM_ARGS() > 1 || SUCCESS == pdo_stmt_setup_fetch_mode(INTERNAL_FUNCTION_PARAM_PASSTHRU, stmt, 1)) {
 			PDO_STMT_CLEAR_ERR();
 
 			/* now execute the statement */
@@ -763,14 +851,13 @@ static PHP_METHOD(PDO, query)
 			}
 		}
 		/* something broke */
-		PDO_HANDLE_STMT_ERR();
-		
-		/* TODO: kill the object handle for the stmt here */
-	} else {
-		efree(stmt->query_string);
-		efree(stmt);
-		PDO_HANDLE_DBH_ERR();
 	}
+
+	PDO_HANDLE_STMT_ERR();
+		
+	/* kill the object handle for the stmt here */
+	zval_dtor(return_value);
+
 	RETURN_FALSE;
 }
 /* }}} */
@@ -1060,7 +1147,7 @@ static void dbh_free(pdo_dbh_t *dbh TSRMLS_DC)
 	pefree(dbh, dbh->is_persistent);
 }
 
-static void pdo_dbh_free_storage(zend_object *object TSRMLS_DC)
+static void pdo_dbh_free_storage(void *object TSRMLS_DC)
 {
 	pdo_dbh_t *dbh = (pdo_dbh_t*)object;
 	if (!dbh) {

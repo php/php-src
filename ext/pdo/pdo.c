@@ -237,6 +237,7 @@ PHP_MINIT_FUNCTION(pdo)
 	REGISTER_LONG_CONSTANT("PDO_FETCH_COLUMN",(long)PDO_FETCH_COLUMN,	CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PDO_FETCH_CLASS",(long)PDO_FETCH_CLASS,	CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PDO_FETCH_INTO", (long)PDO_FETCH_INTO,	CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PDO_FETCH_FUNC", (long)PDO_FETCH_FUNC,	CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PDO_FETCH_GROUP",(long)PDO_FETCH_GROUP, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PDO_FETCH_UNIQUE",(long)PDO_FETCH_UNIQUE, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PDO_FETCH_CLASSTYPE",(long)PDO_FETCH_CLASSTYPE, CONST_CS|CONST_PERSISTENT);
@@ -297,17 +298,17 @@ PHP_MINIT_FUNCTION(pdo)
 	zend_declare_property_null(pdo_exception_ce, "errorInfo", sizeof("errorInfo")-1, ZEND_ACC_PUBLIC TSRMLS_CC);
 
 	INIT_CLASS_ENTRY(ce, "PDO", pdo_dbh_functions);
-	ce.create_object = pdo_dbh_new;
 	pdo_dbh_ce = zend_register_internal_class(&ce TSRMLS_CC);
+	pdo_dbh_ce->create_object = pdo_dbh_new;
 
 	INIT_CLASS_ENTRY(ce, "PDOStatement", pdo_dbstmt_functions);
-	ce.create_object = pdo_dbstmt_new;
 	pdo_dbstmt_ce = zend_register_internal_class(&ce TSRMLS_CC);
 	pdo_dbstmt_ce->get_iterator = pdo_stmt_iter_get;
+	pdo_dbstmt_ce->create_object = pdo_dbstmt_new;
 
 	INIT_CLASS_ENTRY(ce, "PDORow", pdo_row_functions);
-	ce.create_object = pdo_row_new;
 	pdo_row_ce = zend_register_internal_class(&ce TSRMLS_CC);
+	pdo_row_ce->create_object = pdo_row_new;
 
 	return SUCCESS;
 }
