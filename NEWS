@@ -1,6 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 200?, Version 5.0.0
+- Input Filter support added. See  README.input_filter. (Rasmus)
+- Updated IFX_VERSION entry to work with new Version output of ESQL/C (Corne')
 - Moved extensions to PECL (http://pear.php.net/): (James, Tal)
   . ext/fribidi
 - Fixed bug #21985 and #22064 (various mb_send_mail() issues). (Moriyoshi)
