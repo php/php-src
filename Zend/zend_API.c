@@ -1158,25 +1158,55 @@ ZEND_API int add_property_zval_ex(zval *arg, char *key, uint key_len, zval *valu
 	return SUCCESS;
 }
 
+ZEND_API int zend_register_module_ex(zend_module_entry *module TSRMLS_DC)
+{
+	int name_len;
+	char *lcname;
+	
+	if (!module) {
+		return FAILURE;
+	}
+
+#if 0
+	zend_printf("%s:  Registering module %d\n", module->name, module->module_number);
+#endif
+	name_len = strlen(module->name);
+	lcname = zend_str_tolower_dup(module->name, name_len);
+
+	if (zend_hash_add(&module_registry, lcname, name_len+1, (void *)module, sizeof(zend_module_entry), NULL)==FAILURE) {
+		zend_error(E_CORE_WARNING, "Module '%s' already loaded", module->name);
+		efree(lcname);
+		return FAILURE;
+	}
+	efree(lcname);
+
+	if (module->functions && zend_register_functions(NULL, module->functions, NULL, module->type TSRMLS_CC)==FAILURE) {
+		zend_error(E_CORE_WARNING,"%s:  Unable to register functions, unable to load", module->name);
+		return FAILURE;
+	}
+
+	if (!module->module_started && module->module_startup_func) {
+		EG(current_module) = module;
+		if (module->module_startup_func(MODULE_PERSISTENT, module->module_number TSRMLS_CC)==FAILURE) {
+			zend_error(E_CORE_ERROR,"Unable to start %s module", module->name);
+			EG(current_module) = NULL;
+			return FAILURE;
+		}
+		EG(current_module) = NULL;
+	}
+
+	module->module_started=1;
+
+	return SUCCESS;
+}
+
 ZEND_API int zend_startup_module(zend_module_entry *module)
 {
-	if (module) {
-		module->module_number = zend_next_free_module();
-		if (module->module_startup_func) {
-			TSRMLS_FETCH();
+	TSRMLS_FETCH();
 
-			EG(current_module) = module;
-			if (module->module_startup_func(MODULE_PERSISTENT, module->module_number TSRMLS_CC)==FAILURE) {
-				zend_error(E_CORE_ERROR,"Unable to start %s module", module->name);
-				EG(current_module) = NULL;
-				return FAILURE;
-			}
-			EG(current_module) = NULL;
-		}
-		module->type = MODULE_PERSISTENT;
-		zend_register_module(module);
-	}
-	return SUCCESS;
+	module->module_number = zend_next_free_module();
+	module->type = MODULE_PERSISTENT;
+	return zend_register_module_ex(module TSRMLS_CC);
 }
 
 
@@ -1357,23 +1387,9 @@ ZEND_API void zend_unregister_functions(zend_function_entry *functions, int coun
 
 ZEND_API int zend_register_module(zend_module_entry *module)
 {
-	int retval, name_len;
-	char *lcname;
 	TSRMLS_FETCH();
-
-#if 0
-	zend_printf("%s:  Registering module %d\n", module->name, module->module_number);
-#endif
-	if (module->functions && zend_register_functions(NULL, module->functions, NULL, module->type TSRMLS_CC)==FAILURE) {
-		zend_error(E_CORE_WARNING,"%s:  Unable to register functions, unable to load", module->name);
-		return FAILURE;
-	}
-	module->module_started=1;
-	name_len = strlen(module->name);
-	lcname = zend_str_tolower_dup(module->name, name_len);
-	retval = zend_hash_add(&module_registry, lcname, name_len+1, (void *)module, sizeof(zend_module_entry), NULL);
-	efree(lcname);
-	return retval;
+	
+	return zend_register_module_ex(module TSRMLS_CC);
 }
 
 
