@@ -46,7 +46,7 @@ if (PHP_PDO_MSSQL != "no") {
 					pdo_mssql_locations[i] + "\\DevTools\\Include",
 					null, null, true)) {
 				if (pdo_mssql_locations[i] == 'yes') {
-					PDO_DBLIB_FLAVOUR = 'UNKNOWN';
+					PDO_DBLIB_FLAVOUR = 70;
 				} else {
 					pdo_mssql_locations[i].match(new RegExp("(\\d)"));
 					PDO_DBLIB_FLAVOUR = RegExp.$1 + 0;
