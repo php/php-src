@@ -3172,6 +3172,8 @@ PHP_FUNCTION(array_map)
 	}		
 }
 
+/* }}} */
+
 /*
  * Local variables:
  * tab-width: 4
