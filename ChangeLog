@@ -1,3 +1,56 @@
+2004-01-02  Edin Kadribasic  <edink@emini.dk>
+
+    * sapi/cli/php_cli.c:
+      Disable output buffering in CLI overriding php.ini setting.
+      Fixes #26755.
+
+2004-01-02  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ZendEngine2/zend_default_classes.c:
+      Do not show exception message if it's empty.
+      
+
+2004-01-02  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * ext/oci8/oci8.c
+      ext/oci8/php_oci8.h:
+      ws + cs
+
+    * ext/oci8/oci8.c:
+      another ZTS fix
+
+2004-01-02  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * NEWS:
+      BFN
+
+    * ext/standard/var_unserializer.c
+      ext/standard/var_unserializer.re:
+      Bugfix #26762 unserialize() produces lowercase classnames
+
+    * ext/standard/tests/serialize/bug26762.phpt:
+      Add new test
+
+2004-01-02  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * NEWS:
+      dotdotdot..
+
+    * ext/oci8/oci8.c:
+      fix ZTS build
+
+2004-01-02  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      ext/standard/file.c:
+      MFH: Fixed bug #26752 (Silent unterminated loop when length parameter for
+      fgets(), fread() and fgetss() is 0).
+
+    * ext/standard/file.c:
+      Fixed bug #26752 (Silent unterminated loop when length parameter for
+      fgets(), fread() and fgetss() is 0).
+
 2004-01-01  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ext/recode/recode.c:
