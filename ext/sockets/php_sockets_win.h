@@ -43,41 +43,12 @@
 #define set_errno(a) WSASetLastError(a)
 #define set_h_errno(a) WSASetLastError(a)
 #define close(a) closesocket(a)
-#define CMSG_DATA(cmsg) ((cmsg)->cmsg_data)
-
-typedef int ssize_t;
 
 struct	sockaddr_un {
 	short	sun_family;
 	char	sun_path[108];
 };
 
-struct iovec {
-	char *  iov_base;
-	int 	iov_len;
-};
-
-struct msghdr {
-	void*			msg_name;
-	socklen_t		msg_namelen;
-	struct iovec*	msg_iov;
-	int				msg_iovlen;
-	void*			msg_control;
-	socklen_t		msg_controllen;
-	int				msg_flags;
-};
-
-struct cmsghdr {
-	socklen_t	cmsg_len;
-	int			cmsg_level;
-	int			cmsg_type;
-	unsigned char      cmsg_data[];
-};
-
-ssize_t readv(SOCKET sock, const struct iovec *iov, int iovcnt);
-ssize_t writev(SOCKET sock, const struct iovec *iov, int iovcnt);
-ssize_t recvmsg(SOCKET sock, struct msghdr *msg, int flags);
-ssize_t sendmsg(SOCKET sock, struct msghdr *msg, int flags);
 int socketpair(int domain, int type, int protocol, SOCKET sock[2]);
 int inet_aton(const char *cp, struct in_addr *inp);
 int	fcntl(int fd, int cmd, ...);
