@@ -7,12 +7,12 @@
  Introduction
  -------------------------------------------------------------------------------
      Truth be told, at this point in time there are about a zillion and two 
- different XSLT libraries, each with there unique merits and faults.  If you 
+ different XSLT libraries, each with their own unique merits and faults.  If you 
  provide a Sablotron extension, people will clamor for a Xalan extension, if you
  provide a Xalan extension people will clamor for a libxslt extension.
  
      In order to be as user friendly as possible, we try and provide the most
- amount of options to the user.  At the same time we must try to keep a level of
+ options to the user.  At the same time we must try to keep a level of 
  consistency, so the user does not need to remember 15 different syntaxes, etc.
  for each XSLT extension, and when switching from XSLT backends, no changes in 
  the PHP code should be necessary (akin to the concept of a database independent
@@ -23,7 +23,7 @@
  user-defined handlers, omitting debug messages, etc.  In the interests of
  laziness, we must also try to make these as minimal as possible.
  
-    Therefore, I've create a processor independent api for XSLT, aka, the XSLT
+    Therefore, I've created a processor independent api for XSLT, aka, the XSLT
  extension (but doesn't "A processor independent API for XSLT" sound cooler?).
  It defines a set of functions which every XSLT backend must provide, as well
  as a syntax which those functions must adhere to.  Furthermore, the underlying
@@ -185,7 +185,7 @@
  "arguments", which correspond to the XML and XSLT data in the argument buffers.
  
  This concept is a bit foreign to some people, however, I find it the best way
- to handle processing xsl data.  If your still having trouble with this, try 
+ to handle processing xsl data.  If you're still having trouble with this, try 
  playing around with the sablotron backend a bit, you should be able to catch on
  pretty quickly.
  
@@ -257,9 +257,9 @@
  Config.m4
  -------------------------------------------------------------------------------
  
- The XSLT extensions "magic" really occurs in the config.m4 file.  Here you must
- add a couple of things in order for your backend to be enabled.  Its a bit too
- complex to describe (but easy to implement and understand).  Take a look at 
+ The XSLT extension's "magic" really occurs in the config.m4 file.  Here you 
+ must add a couple of things in order for your backend to be enabled.  Its a bit
+ too complex to describe (but easy to implement and understand).  Take a look at 
  config.m4 (which is well commented) to see what is necessary.
  
  
@@ -274,7 +274,7 @@
  -------------------------------------------------------------------------------
  
  Nobody's perfect, I'm sure I've made some mistakes while thinking this whole 
- thing through and I would be glad to here from any of you who think I'm a 
+ thing through and I would be glad to hear from any of you who think I'm a 
  colossal moron and think you have a better way to do it.  Please e-mail at 
  sterling@php.net, this extension will only get better with feedback.
  
