@@ -863,7 +863,8 @@ static int netsnmp_session_gen_sec_key(struct snmp_session *s, u_char *pass TSRM
 * st=11  snmp3_set() - query an agent and set a single value
 *
 */
-void php_snmpv3(INTERNAL_FUNCTION_PARAMETERS, int st) {
+static void php_snmpv3(INTERNAL_FUNCTION_PARAMETERS, int st)
+{
 	zval **a1, **a2, **a3, **a4, **a5, **a6, **a7, **a8, **a9, **a10, **a11, **a12;
 	struct snmp_session session;
 	long timeout=SNMP_DEFAULT_TIMEOUT;
@@ -977,7 +978,6 @@ PHP_FUNCTION(snmp3_get)
 	php_snmpv3(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 /* }}} */
-
 
 /* {{{ proto int snmp3_walk(string host, string sec_name, string sec_level, string auth_protocol, string auth_passphrase, string priv_protocol, string priv_passphrase, string object_id [, int timeout [, int retries]])
    Fetch the value of a SNMP object */
