@@ -1363,7 +1363,11 @@ PHPAPI PHP_FUNCTION(fgets)
 		WRONG_PARAM_COUNT;
 	}
 
-	php_stream_from_zval(stream, arg1);
+	php_stream_from_zval_no_verify(stream, arg1);
+	if (stream == NULL) {
+		/* want a false return value here */
+		goto exit_failed;
+	}
 
 	if (argc == 1) {
 		/* ask streams to give us a buffer of an appropriate size */
