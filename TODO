@@ -24,7 +24,6 @@ global
       they should print a warning or be not even defined!
     * implement javadoc based function docs template system
     * use thread-safe resolver functions (either require BIND 8 or adns)
-    * check for incorrect *_r (time related) on HPSUX
     * provide optional IPv6 support
     * make SAPI conform to CGI/1.1. Currently, all SAPI modules
       define REMOTE_ADDR etc. themselves and reach only various level
@@ -63,10 +62,10 @@ ext/oci8
 --------
     * all OCIFetch*() functions should return 0 for no more data and false on error.
 
-ext/snmp
---------
-    * port to latest UCD-SNMP 4.1 (even doesn't compile)
-    
+ext/mcrypt
+----------
+    * port to mcrypt-2.6 or later
+
 ext/standard
 ------------
     * add a version number to data serialized via serialize().
