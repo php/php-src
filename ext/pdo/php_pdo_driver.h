@@ -419,7 +419,7 @@ struct _pdo_dbh_t {
 	unsigned int refcount;
 
 	/* driver specific "class" methods for the dbh and stmt */
-	HashTable *cls_methods[PDO_DBH_DRIVER_METHOD_KIND__MAX-1];
+	HashTable *cls_methods[PDO_DBH_DRIVER_METHOD_KIND__MAX];
 };
 
 /* describes a column */
