@@ -295,7 +295,7 @@ zend_module_entry tidy_module_entry = {
 	"tidy",
 	tidy_functions,
 	PHP_MINIT(tidy),
-	PHP_MSHUTDOWN(tidy),
+	NULL,
 	PHP_RINIT(tidy),
 	NULL,
 	PHP_MINFO(tidy),
@@ -926,12 +926,6 @@ PHP_MINIT_FUNCTION(tidy)
 	_php_tidy_register_tags(INIT_FUNC_ARGS_PASSTHRU);
 	_php_tidy_register_nodetypes(INIT_FUNC_ARGS_PASSTHRU);
 
-	return SUCCESS;
-}
-
-
-PHP_MSHUTDOWN_FUNCTION(tidy)
-{
 	return SUCCESS;
 }
 
