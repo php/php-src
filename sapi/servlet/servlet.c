@@ -300,8 +300,8 @@ JNIEXPORT jlong JNICALL Java_net_php_servlet_define
 {
 	pval *pzval;
 	jlong addr = 0;
-	ELS_FETCH();
 	const char *nameAsUTF = (*jenv)->GetStringUTFChars(jenv, name, 0);
+	ELS_FETCH();
 
 	MAKE_STD_ZVAL(pzval);
 	(pval*)(long)addr = pzval;
