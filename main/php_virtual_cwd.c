@@ -13,7 +13,7 @@
 #endif
 
 #include "php_virtual_cwd.h"
-#include "php_reentrancy.h" /* for strtok_r */
+#include "php_reentrancy.h" /* for php_strtok_r */
 
 #define VIRTUAL_CWD_DEBUG 0
 
@@ -40,7 +40,7 @@ cwd_state main_cwd_state; /* True global */
 #endif
 
 #ifdef ZEND_WIN32
-#define strtok_r(a,b,c) strtok((a),(b))
+#define php_strtok_r(a,b,c) strtok((a),(b))
 #define IS_SLASH(c)	((c) == '/' || (c) == '\\')
 #define DEFAULT_SLASH '\\'
 #define TOKENIZER_STRING "/\\"
@@ -275,7 +275,7 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 	}
 
 
-	ptr = strtok_r(path_copy, TOKENIZER_STRING, &tok);
+	ptr = php_strtok_r(path_copy, TOKENIZER_STRING, &tok);
 	while (ptr) {
 		ptr_length = strlen(ptr);
 
@@ -306,7 +306,7 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 			memcpy(&state->cwd[state->cwd_length+1], ptr, ptr_length+1);
 			state->cwd_length += (ptr_length+1);
 		}
-		ptr = strtok_r(NULL, TOKENIZER_STRING, &tok);
+		ptr = php_strtok_r(NULL, TOKENIZER_STRING, &tok);
 	}
 
 	if (verify_path && verify_path(state)) {
