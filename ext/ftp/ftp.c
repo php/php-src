@@ -44,6 +44,10 @@
 #include <sys/time.h>
 #endif
 
+#ifdef HAVE_SYS_SELECT_H
+#include <sys/select.h>
+#endif
+
 #include "ftp.h"
 #include "ext/standard/fsock.h"
 
