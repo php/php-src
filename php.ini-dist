@@ -104,11 +104,11 @@ output_buffering = Off
 ; Valid values for this option are 'off', 'on', or a specific buffer size
 ; to be used for compression (default is 4KB)
 ; Note: Resulting chunk size may vary due to nature of compression. PHP 
-;       outputs chunks that are few handreds bytes each as a result of compression. 
-;       If you want larger chunk size for better performence, enable output_buffering 
-;       also. 
-; Note: output_handler must be empty if this is set 'On' !!!!
-;       Instead you must use zlib.output_handler.
+;       outputs chunks that are few hundreds bytes each as a result of 
+;       compression. If you prefer a larger chunk size for better 
+;       performance, enable output_buffering in addition.
+; Note: You need to use zlib.output_handler instead of the standard
+;       output_handler, or otherwise the output will be corrupted.
 zlib.output_compression = Off
 
 ; You cannot specify additional output handlers if zlib.output_compression
@@ -836,7 +836,7 @@ session.cache_expire = 180
 ;   always using URL stored in browser's history or bookmarks.
 session.use_trans_sid = 0
 
-url_rewriter.tags = "a=href,area=href,frame=src,input=src,form=fakeentry"
+url_rewriter.tags = "a=href,area=href,frame=src,input=src,form=,fieldset="
 
 [MSSQL]
 ; Allow or prevent persistent links.
