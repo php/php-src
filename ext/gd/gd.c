@@ -963,7 +963,7 @@ static int _php_image_type (char data[8])
 #ifdef HAVE_LIBGD15
 	/* Based on ext/standard/images.c */
 
-	if (data == NULL)
+	if (data == NULL || strlen(data) <= 0)
 		return -1;
 
 	if (!memcmp(data, php_sig_gd2, 3))
