@@ -2378,7 +2378,7 @@ PHP_FUNCTION(domxml_doc_get_element_by_id)
 	xmlXPathObjectPtr xpathobjp;
 	xmlNode *contextnodep;
 	int name_len;
-	char *str,*name;
+	char *str, *name;
 
 	contextnode = NULL;
 	contextnodep = NULL;
@@ -2423,9 +2423,10 @@ PHP_FUNCTION(domxml_doc_get_element_by_id)
 				xmlNodePtr node = nodesetp->nodeTab[0];
 				int retnode;
 				rv = php_domobject_new(node, &retnode TSRMLS_CC);
+				SEPARATE_ZVAL(&rv);
 			}
 			else {
-				/*return false array, if no nodes were found */
+				/*return false, if no nodes were found */
 				RETURN_FALSE;
 			}
 
