@@ -276,7 +276,7 @@ class PEAR_Registry extends PEAR
             }
             $open_mode = 'w';
             // XXX People reported problems with LOCK_SH and 'w'
-            if ($mode === LOCK_SH) {
+            if ($mode === LOCK_SH || $mode === LOCK_UN) {
                 if (@!is_file($this->lockfile)) {
                     touch($this->lockfile);
                 }
