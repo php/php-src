@@ -248,19 +248,15 @@ int init_resource_plist(ELS_D)
 }
 
 
-void destroy_resource_list(void)
+void destroy_resource_list(ELS_D)
 {
-	ELS_FETCH();
-
-	zend_hash_destroy(&EG(regular_list));
+	zend_hash_graceful_destroy(&EG(regular_list));
 }
 
 
-void destroy_resource_plist(void)
+void destroy_resource_plist(ELS_D)
 {
-	ELS_FETCH();
-
-	zend_hash_destroy(&EG(persistent_list));
+	zend_hash_graceful_destroy(&EG(persistent_list));
 }
 
 

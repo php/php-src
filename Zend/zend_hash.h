@@ -118,6 +118,7 @@ ZEND_API int zend_hash_pointer_index_update_or_next_insert(HashTable *ht, ulong 
 		zend_hash_pointer_index_update_or_next_insert(ht,h,pData,HASH_UPDATE)
 #define zend_hash_next_index_pointer_insert(ht,pData) \
         zend_hash_pointer_index_update_or_next_insert(ht,0,pData,HASH_NEXT_INSERT)
+ZEND_API void zend_hash_graceful_destroy(HashTable *ht);
 ZEND_API void zend_hash_apply(HashTable *ht,int (*destruct)(void *));
 ZEND_API void zend_hash_apply_with_argument(HashTable *ht,int (*destruct)(void *, void *), void *);
 ZEND_API void zend_hash_apply_with_arguments(HashTable *ht, ZEND_STD_HASH_APPLIER, int, ...);
