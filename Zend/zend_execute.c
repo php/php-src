@@ -169,16 +169,15 @@ static inline zval *_get_object_zval_ptr(znode *node, temp_variable *Ts, int *sh
 
 static inline zval **_get_zval_ptr_ptr(znode *node, temp_variable *Ts ELS_DC)
 {
-	switch(node->op_type) {
-		case IS_VAR:
-			if (Ts[node->u.var].var.ptr_ptr) {
-				PZVAL_UNLOCK(*Ts[node->u.var].var.ptr_ptr);
-			} else if (Ts[node->u.var].EA.type==IS_STRING_OFFSET) {
-				PZVAL_UNLOCK(Ts[node->u.var].EA.str);
-			}
-			return Ts[node->u.var].var.ptr_ptr;
-			break;
-		EMPTY_SWITCH_DEFAULT_CASE()
+	if (node->op_type==IS_VAR) {
+		if (Ts[node->u.var].var.ptr_ptr) {
+			PZVAL_UNLOCK(*Ts[node->u.var].var.ptr_ptr);
+		} else if (Ts[node->u.var].EA.type==IS_STRING_OFFSET) {
+			PZVAL_UNLOCK(Ts[node->u.var].EA.str);
+		}
+		return Ts[node->u.var].var.ptr_ptr;
+	} else {
+		return NULL;
 	}
 }
 
