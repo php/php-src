@@ -158,6 +158,8 @@ void init_executor(TSRMLS_D)
 #endif
 
 	EG(exception) = NULL;
+
+	EG(namespace) = NULL;
 }
 
 

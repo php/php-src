@@ -158,6 +158,8 @@ struct _zend_executor_globals {
 	HashTable *class_table;		/* class table */
 	HashTable *zend_constants;	/* constants table */
 
+	zend_class_entry *namespace;
+
 	long precision;
 
 	int ticks_count;

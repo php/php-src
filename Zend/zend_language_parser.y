@@ -210,6 +210,7 @@ unticked_statement:
 	|	T_THROW expr ';' { zend_do_throw(&$2 TSRMLS_CC); }
 	|	T_DELETE cvar	';' { zend_do_end_variable_parse(BP_VAR_UNSET, 0 TSRMLS_CC); zend_do_unset(&$1, ZEND_UNSET_OBJ TSRMLS_CC); }
 	|	T_NAMESPACE namespace_class_entry { do_namespace(&$2 TSRMLS_CC); }
+	|	T_NAMESPACE ';' { do_namespace(NULL TSRMLS_CC); }
 ;
 
 unset_variables:

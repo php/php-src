@@ -2448,7 +2448,11 @@ void do_namespace(znode *namespace TSRMLS_DC)
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
 	opline->opcode = ZEND_NAMESPACE;
-	opline->op1 = *namespace;
+	if (namespace) {
+		opline->op1 = *namespace;
+	} else {
+		SET_UNUSED(opline->op1);
+	}
 	SET_UNUSED(opline->op2);
 }
 
