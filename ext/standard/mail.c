@@ -171,9 +171,9 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 		if (ret == -1)
 #else
 #if defined(EX_TEMPFAIL)
-		if ((ret != EX_OK)&&(ret != EX_TEMPFAIL)) 
+		if ((ret != EX_OK)&&(ret != EX_TEMPFAIL))
 #else
-		if (ret != EX_OK) 
+		if (ret != EX_OK)
 #endif
 #endif
 		{
@@ -187,7 +187,7 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 		return 0;
 	}
 
-	return 1;	/* never reached */
+	return 1; /* never reached */
 }
 /* }}} */
 
@@ -199,12 +199,12 @@ PHP_MINFO_FUNCTION(mail)
 
 #ifdef PHP_WIN32
 	if (!sendmail_path) {
-        php_info_print_table_row(2, "Internal Sendmail Support for Windows", "enabled");
+		php_info_print_table_row(2, "Internal Sendmail Support for Windows", "enabled");
 	} else {
-        php_info_print_table_row(2, "Path to sendmail", sendmail_path);
+		php_info_print_table_row(2, "Path to sendmail", sendmail_path);
 	}
 #else
-    php_info_print_table_row(2, "Path to sendmail", sendmail_path);
+	php_info_print_table_row(2, "Path to sendmail", sendmail_path);
 #endif
 }
 /* }}} */
