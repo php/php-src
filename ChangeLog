@@ -1,3 +1,59 @@
+2001-12-18  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * ext/pgsql/pgsql.c: More proper error message.
+    Remove old lines that aren't needed.
+
+    * ext/pgsql/config.m4: Get rid of useless path from seach path
+
+2001-12-18  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/pcre/php_pcre.c:
+    - Added flags parameter to preg_grep(). The only flag currently is
+      PREG_GREP_INVERT that will make the function return entries that
+      did not match. 
+
+2001-12-18  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/ircg.c:
+    Let the first connection id be a function of the time to avoid
+    problems with restarting IRCG and stale sessions.
+
+2001-12-18  Frank M. Kromann  <frank@frontbase.com>
+
+    * ext/fbsql/fbsql.dsp:
+    Adding missing define, needed to build with FrontBase 3.4 and later
+
+2001-12-18  Martin Jansen  <mail@martin-jansen.de>
+
+    * pear/System.php: * Change $Version$ to $Revision$.
+
+2001-12-18  Colin Viebrock  <colin@easydns.com>
+
+    * pear/Crypt/CBC.php: merge into head
+
+2001-12-18  Joao Prado Maia  <jpm@phpbrasil.com>
+
+    * pear/Crypt/CBC.php: Fixing indentation and missing ?> tag
+
+2001-12-18  Colin Viebrock  <colin@easydns.com>
+
+    * pear/Crypt/CBC.php:
+    Remove support for buggy 2.2.x libmcrypt, and add some better error handling
+
+2001-12-18  Martin Jansen  <mail@martin-jansen.de>
+
+    * pear/HTTP.php: * Convert tabs to spaces.
+
+2001-12-18  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/skeleton/create_stubs: typo fix
+
+2001-12-18  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/scripts/pear.in: that makes more sense
+
+    * pear/scripts/pear.in: quick fix for the "pear info" command
+
 2001-12-17  Frank M. Kromann  <frank@frontbase.com>
 
     * ext/isxfunc/.cvsignore
