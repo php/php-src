@@ -26,4 +26,4 @@ echo "Done\n"; // shouldn't be displayed of cause
 --EXPECTF--
 Call to function show()
 
-Fatal error: Cannot instanciate abstract class fail in %s on line %d
+Fatal error: Cannot instantiate abstract class fail in %s on line %d
