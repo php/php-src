@@ -536,6 +536,9 @@ static int php_stdiop_seek(php_stream *stream, off_t offset, int whence)
 
 	assert(data != NULL);
 
+	if (offset == 0 && whence == SEEK_CUR)
+		return ftell(data->file);
+	
 	return fseek(data->file, offset, whence);
 }
 
