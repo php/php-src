@@ -326,7 +326,7 @@ if test "$ac_cv_atof_accept_inf" = "yes"; then
   AC_DEFINE([HAVE_ATOF_ACCEPTS_INF], 1, [whether atof() accepts INF])
 fi
 
-AC_CACHE_CHECK(whether HUGE_VAL + -HUGEVAL = NAN, ac_cv_huge_val_nan,[
+AC_CACHE_CHECK(whether HUGE_VAL + -HUGEVAL == NAN, ac_cv_huge_val_nan,[
   AC_TRY_RUN([
 #include <math.h>
 #include <stdlib.h>
@@ -350,9 +350,16 @@ AC_CACHE_CHECK(whether HUGE_VAL + -HUGEVAL = NAN, ac_cv_huge_val_nan,[
 #define zend_isnan(a) 0
 #endif
 
+double hv(int i)
+{
+	/* avoid inlining */
+	if (i) return hv(i-1);
+	else return HUGE_VAL;
+}
+
 int main(int argc, char** argv)
 {
-	return zend_isinf(HUGE_VAL) && zend_isnan(HUGE_VAL + -HUGE_VAL) ? 0 : 1;
+	return zend_isinf(hv(3)) && zend_isnan(HUGE_VAL + -HUGE_VAL) ? 0 : 1;
 }
   ],[
       ac_cv_huge_val_nan=yes
@@ -364,7 +371,7 @@ int main(int argc, char** argv)
 ])
 dnl This is the most probable fallback so we assume yes in case of cross compile.
 if test "$ac_cv_huge_val_nan" = "yes"; then
-  AC_DEFINE([HAVE_HUGE_VAL_NAN], 1, [whether HUGE_VAL + -HUGEVAL = NAN])
+  AC_DEFINE([HAVE_HUGE_VAL_NAN], 1, [whether HUGE_VAL + -HUGEVAL == NAN])
 fi
 
 PHP_NEW_EXTENSION(standard, array.c base64.c basic_functions.c browscap.c crc32.c crypt.c \
