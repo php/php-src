@@ -115,7 +115,6 @@ struct _zend_compiler_globals {
 
 	zend_llist open_files;
 
-	zend_llist *throw_list;
 	long catch_begin;
 
 	struct _zend_ini_parser_param *ini_parser_param;
@@ -229,8 +228,10 @@ struct _zend_executor_globals {
 	HashTable *ini_directives;
 	zend_objects_store objects_store;
 	zval *exception;
+	zend_op *opline_before_exception;
 
 	struct _zend_execute_data *current_execute_data;
+
 
 	zend_property_info std_property_info;
 

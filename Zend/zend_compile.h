@@ -52,7 +52,6 @@ typedef struct _zend_op zend_op;
 
 typedef struct _znode {
 	int op_type;
-	zend_llist *throw_list; /* Try and save this space later on */
 	union {
 		zval constant;
 
@@ -69,8 +68,8 @@ typedef struct _znode {
 
 typedef struct _zend_execute_data zend_execute_data;
 
-#define ZEND_OPCODE_HANDLER_ARGS zend_execute_data *execute_data, zend_op_array *op_array TSRMLS_DC
-#define ZEND_OPCODE_HANDLER_ARGS_PASSTHRU execute_data, op_array TSRMLS_CC
+#define ZEND_OPCODE_HANDLER_ARGS zend_execute_data *execute_data, zend_op *opline, zend_op_array *op_array TSRMLS_DC
+#define ZEND_OPCODE_HANDLER_ARGS_PASSTHRU execute_data, opline, op_array TSRMLS_CC
 
 typedef int (*opcode_handler_t) (ZEND_OPCODE_HANDLER_ARGS);
 
@@ -92,6 +91,12 @@ typedef struct _zend_brk_cont_element {
 	int brk;
 	int parent;
 } zend_brk_cont_element;
+
+
+typedef struct _zend_try_catch_element {
+	zend_uint try_op;
+	zend_uint catch_op;  /* ketchup! */
+} zend_try_catch_element;
 
 
 #define ZEND_ACC_STATIC			0x01
@@ -159,6 +164,9 @@ struct _zend_op_array {
 	zend_brk_cont_element *brk_cont_array;
 	zend_uint last_brk_cont;
 	zend_uint current_brk_cont;
+
+	zend_try_catch_element *try_catch_array;
+	int last_try_catch;
 
 	/* static variables support */
 	HashTable *static_variables;
@@ -352,6 +360,7 @@ void zend_do_fetch_class_name(znode *result, znode *class_entry, znode *class_na
 void zend_do_begin_class_member_function_call(TSRMLS_D);
 void zend_do_end_function_call(znode *function_name, znode *result, znode *argument_list, int is_method, int is_dynamic_fcall TSRMLS_DC);
 void zend_do_return(znode *expr, int do_end_vparse TSRMLS_DC);
+void zend_do_handle_exception(TSRMLS_D);
 
 void zend_do_try(znode *try_token TSRMLS_DC);
 void zend_do_begin_catch(znode *try_token, znode *catch_class, znode *catch_var, zend_bool first_catch TSRMLS_DC);
@@ -483,6 +492,9 @@ int print_class(zend_class_entry *class_entry TSRMLS_DC);
 void print_op_array(zend_op_array *op_array, int optimizations);
 int pass_two(zend_op_array *op_array TSRMLS_DC);
 zend_brk_cont_element *get_next_brk_cont_element(zend_op_array *op_array);
+void zend_do_first_catch(znode *open_parentheses TSRMLS_DC);
+void zend_initialize_try_catch_element(znode *try_token TSRMLS_DC);
+void zend_do_mark_last_catch(znode *first_catch, znode *last_additional_catch TSRMLS_DC);
 ZEND_API zend_bool zend_is_compiling(TSRMLS_D);
 ZEND_API char *zend_make_compiled_string_description(char *name TSRMLS_DC);
 ZEND_API void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify_handlers TSRMLS_DC);
@@ -679,6 +691,8 @@ int zendlex(znode *zendlval TSRMLS_DC);
 #define ZEND_ASSIGN_DIM				147
 
 #define ZEND_ISSET_ISEMPTY_PROP_OBJ	148
+
+#define ZEND_HANDLE_EXCEPTION		149
 
 /* end of block */
 /* END: OPCODES */

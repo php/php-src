@@ -83,10 +83,12 @@ void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_siz
 	op_array->scope = NULL;
 
 	op_array->brk_cont_array = NULL;
+	op_array->try_catch_array = NULL;
 	op_array->last_brk_cont = 0;
 	op_array->current_brk_cont = -1;
 
 	op_array->static_variables = NULL;
+	op_array->last_try_catch = 0;
 
 	op_array->return_reference = 0;
 	op_array->done_pass_two = 0;
@@ -228,6 +230,9 @@ ZEND_API void destroy_op_array(zend_op_array *op_array TSRMLS_DC)
     }
 	if (op_array->brk_cont_array) {
 		efree(op_array->brk_cont_array);
+	}
+	if (op_array->try_catch_array) {
+		efree(op_array->try_catch_array);
 	}
 	if (op_array->done_pass_two) {
 		zend_llist_apply_with_argument(&zend_extensions, (llist_apply_with_arg_func_t) zend_extension_op_array_dtor_handler, op_array TSRMLS_CC);
