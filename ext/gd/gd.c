@@ -306,6 +306,7 @@ function_entry gd_functions[] = {
 #if HAVE_GD_BUNDLED
 	PHP_FE(imagelayereffect,						NULL)
 	PHP_FE(imagecolormatch,							NULL)
+	PHP_FE(imagexbm,                                NULL)
 #endif
 /* gd filters */
 #ifdef HAVE_GD_BUNDLED
@@ -1780,6 +1781,16 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
 	}
 	RETURN_TRUE;
 }
+/* }}} */
+
+/* {{{ proto int imagexbm(int im, string filename [, int foreground])
+   Output XBM image to browser or file */
+#if HAVE_GD_BUNDLED
+PHP_FUNCTION(imagexbm)
+{
+	_php_image_output_ctx(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_XBM, "XBM", gdImageXbmCtx);
+}
+#endif
 /* }}} */
 
 #ifdef HAVE_GD_GIF_CREATE
