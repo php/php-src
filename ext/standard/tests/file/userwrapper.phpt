@@ -27,7 +27,7 @@ class test {
         return array('dev'=>1, 'ino'=>2, 'mode'=>0644, 'nlink'=>3,
                      'uid'=>100, 'gid'=>1000, 'rdev'=>-1, 'size'=>31337,
                      'atime'=>1234567890, 'mtime'=>1231231231, 'ctime'=>1234564564,
-                     'blksize'=>4096, 'blocks'=>8);
+                     'blksize'=>-1, 'blocks'=>-1);
     }
 }
 
