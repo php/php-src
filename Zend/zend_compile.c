@@ -1194,9 +1194,16 @@ void zend_do_begin_method_call(znode *left_bracket TSRMLS_DC)
 		return;
 	}
 
-	last_op->opcode = ZEND_INIT_METHOD_CALL;
-
-	left_bracket->u.constant.value.lval = ZEND_INIT_FCALL_BY_NAME;
+	if (last_op->opcode == ZEND_FETCH_OBJ_R) {
+		last_op->opcode = ZEND_INIT_METHOD_CALL;
+		left_bracket->u.constant.value.lval = ZEND_INIT_FCALL_BY_NAME;
+	} else {
+		zend_op* opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+		opline->opcode = ZEND_INIT_FCALL_BY_NAME;
+		opline->op2 = *left_bracket;
+		opline->extended_value = 0;
+		SET_UNUSED(opline->op1);
+	}
 
 	zend_stack_push(&CG(function_call_stack), (void *) &ptr, sizeof(zend_function *));
 	zend_do_extended_fcall_begin(TSRMLS_C); 
