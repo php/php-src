@@ -168,7 +168,7 @@ Example 5: Regular object method using both local and global functions
 		
 		function length_of_hello_world()
 		{
-			$str = get_hello_world();
+			$str = $this->get_hello_world();
 			return strlen($str);
 		}	
 	}
