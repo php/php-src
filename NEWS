@@ -57,7 +57,6 @@ PHP 4.0                                                                    NEWS
 - Added EscapeShellArg() function (Rasmus)
 - Added a php.ini option session.use_trans_sid to enable/disable trans-sid.
   (Sterling)
-- Quick-fix for the file upload security alert (Rasmus)
 - Added the Sablotron extension for XSL parsing. (Sterling)
 - Fixed a bug in checkdate() which caused < 1 years to be valid (Jani)
 - Added support for an optional output handler function for output
