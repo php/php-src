@@ -13,7 +13,7 @@ $r = sqlite_query("SELECT * from foo", $db);
 var_dump(sqlite_fetch_array($r));
 ?>
 --EXPECT--
-array(4) {
+array(6) {
   [0]=>
   string(10) "2002-01-02"
   ["c1"]=>
