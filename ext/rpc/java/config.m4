@@ -21,7 +21,7 @@ AC_DEFUN(JAVA_FIND_JAR, [
   dnl we have a custom path defined so use it
   dnl
     if test -d $PHP_JAVA/bin; then
-      JAVA_JAR=$PHP_JAVA/bin/javac
+      JAVA_JAR="$PHP_JAVA/bin/javac cf"
     else
       AC_MSG_ERROR([Unable to locate $PHP_JAVA/bin])
     fi
@@ -54,7 +54,7 @@ e.g. --with-java=/java expecting /java/bin/ to contain the binaries])
   fi
 
   PHP_SUBST(JAVA_C)
-  AC_MSG_RESULT(`echo $JAVA_C`)
+  AC_MSG_RESULT([$JAVA_C])
 ])
 
 AC_DEFUN(JAVA_CHECK_LIB, [
@@ -90,6 +90,10 @@ AC_DEFUN(JAVA_CHECK_LIB, [
    for i in $PHP_JAVA/include/*; do
      test -f $i/jni_md.h && JAVA_INCLUDE="$JAVA_INCLUDE $i"
    done
+dnl
+dnl sample JDK v 1.3 path
+dnl /usr/java/j2sdk1.4.0_01/jre/lib/i386/libjava.so
+dnl
  else
    dnl
    dnl We have to find everything
@@ -138,7 +142,6 @@ if test "$PHP_JAVA" != "no"; then
     HP-UX) java_libext=libjava.sl ;;
     Darwin) java_libext=libjava.jnilib ;;
   esac  
-
   JAVA_FIND_JAR()
   JAVA_FIND_C()
 
@@ -149,19 +152,6 @@ if test "$PHP_JAVA" != "no"; then
     PHP_CHECK_FRAMEWORK("JavaVM", JNI_CreateJavaVM,[AC_DEFINE(HAVE_JAVA,1,[ ])])
     PHP_ADD_FRAMEWORK("JavaVM")
   else
-    dnl 
-    dnl it can't be no, and now we test to make sure it can't be yes
-    dnl if it isn't 'yes' well, we just have to build a path using which
-    dnl if it is 'yes' we have a path provided to us, now run free!
-    dnl
-    if test "$PHP_JAVA" = "yes"; then
-      dnl
-      dnl Give us the basepath for where javac is!
-      dnl
-      PHP_JAVA=`cd \`dirname \\\`which javac\\\`\`/..;pwd`
-    else
-      test -x $PHP_JAVA/bin/jar && JAVA_JAR="$PHP_JAVA/bin/jar cf"
-    fi
     JAVA_CHECK_LIB()
     AC_DEFINE(HAVE_JAVA,1,[ ])
 
