@@ -1298,6 +1298,7 @@ PHPAPI php_stream *_php_stream_fopen_tmpfile(int dummy STREAMS_DC TSRMLS_DC)
 PHPAPI php_stream *_php_stream_fopen_from_file(FILE *file, const char *mode STREAMS_DC TSRMLS_DC)
 {
 	php_stdio_stream_data *self;
+	php_stream *stream;
 	
 	self = emalloc_rel_orig(sizeof(*self));
 	self->file = file;
@@ -1314,7 +1315,13 @@ PHPAPI php_stream *_php_stream_fopen_from_file(FILE *file, const char *mode STRE
 	}
 #endif
 	
-	return php_stream_alloc_rel(&php_stream_stdio_ops, self, 0, mode);
+	stream = php_stream_alloc_rel(&php_stream_stdio_ops, self, 0, mode);
+
+	if (stream && self->is_pipe) {
+		stream->flags |= PHP_STREAM_FLAG_NO_SEEK;
+	}
+
+	return stream;
 }
 
 PHPAPI php_stream *_php_stream_fopen_from_pipe(FILE *file, const char *mode STREAMS_DC TSRMLS_DC)
