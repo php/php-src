@@ -1208,7 +1208,10 @@ PHP_FUNCTION(ldap_explode_dn)
 	convert_to_string_ex(dn);
 	convert_to_long_ex(with_attrib);
 
-	ldap_value = ldap_explode_dn(Z_STRVAL_PP(dn), Z_LVAL_PP(with_attrib));
+	if (!(ldap_value = ldap_explode_dn(Z_STRVAL_PP(dn), Z_LVAL_PP(with_attrib)))) {
+		/* Invalid parameters were passed to ldap_explode_dn */
+		RETURN_FALSE;
+	}
 
 	i=0;
 	while(ldap_value[i] != NULL) i++;
