@@ -1,3 +1,90 @@
+1999-11-23  David Hedbor  <david@hedbor.org>
+
+    * acconfig.h.in: Added HAVE_ROXEN for the Roxen sapi module
+
+    * sapi/roxen/Makefile
+      sapi/roxen/README
+      sapi/roxen/config.m4
+      sapi/roxen/phpmod.pike
+      sapi/roxen/roxen.c:
+    First version of Pike/Roxen module for embedding PHP.
+
+1999-11-23  Andrei Zmievski  <zmievski@ispi.net>
+
+    * TODO: *** empty log message ***
+
+    * TODO: Re-arranging a bit.
+
+1999-11-23  Zeev Suraski  <zeev@php.net>
+
+    * ext/standard/output.c: Use the unified notation...
+
+    * ext/standard/basic_functions.c: Cosmetic changes
+
+1999-11-23  Sascha Schumann  <sascha@schumann.cx>
+
+    * TODO: add some points
+
+1999-11-23  Andrei Zmievski  <zmievski@ispi.net>
+
+    * sapi/cgi/cgi_main.c:
+    (main) In this special case, free path_translated. Fix for #2795.
+
+1999-11-23  Sascha Schumann  <sascha@schumann.cx>
+
+    * acinclude.m4
+      configure.in:
+    Only create regex/Makefile, if we use the bundled regex library
+
+    * sapi/cgi/cgi_main.c:
+    (main) Remove redundant statement, this is part of the initialization
+    function.
+
+1999-11-23  Thies C. Arntzen  <thies@digicol.de>
+
+    * TODO: *** empty log message ***
+
+1999-11-23  Sascha Schumann  <sascha@schumann.cx>
+
+    * pecl/Makefile.am:
+    Don't bail out, if PECL cannot be installed. PHP is often only an
+    intermediate step of the installation, so it is often not performed
+    by root.
+
+1999-11-23  Thies C. Arntzen  <thies@digicol.de>
+
+    * sapi/isapi/Makefile.am
+      sapi/isapi/config.m4
+      sapi/isapi/php.sym:
+    Getting Zeus-Support in place - i can already see phpinfo()!
+
+1999-11-23  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * NEWS: - inform everybody about cpdf support
+
+    * tests/testcpdf: - extended test script for cpdf by GD image insertion
+
+1999-11-23  Evan Klinger  <evan715@sirius.com>
+
+    * ext/apache/apache.c
+      ext/aspell/aspell.c
+      ext/standard/formatted_print.c: Convert to Ex API
+
+1999-11-23  Sam Ruby  <rubys@us.ibm.com>
+
+    * ext/standard/output.c
+      main.c: errors during startup trap server
+
+1999-11-23  Andrei Zmievski  <zmievski@ispi.net>
+
+    * NEWS: Formatting.
+
+    * ext/cpdf/.cvsignore: Add .cvsignore.
+
+1999-11-23  changelog  <changelog@www>
+
+    * NEWS: NEWS update
+
 1999-11-22  Zeev Suraski  <zeev@php.net>
 
     * ext/standard/output.c
