@@ -2,8 +2,6 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? March 2004, PHP 5 Release Candidate 1
 - Upgraded bundled oniguruma library to version 2.2.2. (Rui, Moriyoshi)
-- Fixed bug #26677 (mbstring compile errors with IRIX compiler).
-  (K.Kosako, Rui, Moriyoshi)
 - Renamed php.ini option "zend2.implicit_clone" to 
   "zend.ze1_compatibility_mode" as it doesn't only affect implicit cloning.
   (Andi, Zeev)
@@ -18,6 +16,8 @@ PHP                                                                        NEWS
 - Fixed bug #27237 (Working with simplexml crashes apache2). (Rob)
 - Fixed bug #27227 (Mixed case class names causes Fatal Error in Constructor 
   call). (Marcus)
+- Fixed bug #26677 (mbstring compile errors with IRIX compiler).
+  (K.Kosako <kosako at sofnec dot co dot jp>, Rui, Moriyoshi)
 
 12 Feb 2004, PHP 5 Beta 4
 - Changed exceptions so that they must now inherit from the built-in Exception
