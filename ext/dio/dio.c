@@ -34,14 +34,14 @@
 static int le_fd;
 
 function_entry dio_functions[] = {
-    PHP_FE(dio_open,      NULL)
-    PHP_FE(dio_truncate,  NULL)
-    PHP_FE(dio_stat,      NULL)
+	PHP_FE(dio_open,      NULL)
+	PHP_FE(dio_truncate,  NULL)
+	PHP_FE(dio_stat,      NULL)
 	PHP_FE(dio_seek,      NULL)
 	PHP_FE(dio_fcntl,     NULL)
 	PHP_FE(dio_read,      NULL)
-    PHP_FE(dio_write,     NULL)
-    PHP_FE(dio_close,     NULL)
+	PHP_FE(dio_write,     NULL)
+	PHP_FE(dio_close,     NULL)
 	{NULL, NULL, NULL}
 };
 
@@ -55,7 +55,7 @@ zend_module_entry dio_module_entry = {
 	NULL,	
 	NULL,
 	PHP_MINFO(dio),
-    "0.1",
+	"0.1",
 	STANDARD_MODULE_PROPERTIES
 };
 
@@ -78,7 +78,7 @@ static void _dio_close_fd(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 
 PHP_MINIT_FUNCTION(dio)
 {
-    le_fd = zend_register_list_destructors_ex(_dio_close_fd, NULL, le_fd_name, module_number);
+	le_fd = zend_register_list_destructors_ex(_dio_close_fd, NULL, le_fd_name, module_number);
 
 	RDIOC(O_RDONLY);
 	RDIOC(O_WRONLY);
