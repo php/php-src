@@ -21,7 +21,7 @@
 
 #include "zend_ini.h"
 
-int php_init_config(char *php_ini_path_override);
+int php_init_config();
 int php_shutdown_config(void);
 void php_ini_delayed_modules_startup(TSRMLS_D);
 zval *cfg_get_entry(char *name, uint name_length);

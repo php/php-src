@@ -565,6 +565,8 @@ int main(int argc, char *argv[])
 	tsrm_ls = ts_resource(0);
 #endif
 
+	cgi_sapi_module.executable_location = argv[0];
+
 	/* startup after we get the above ini override se we get things right */
 	if (php_module_startup(&cgi_sapi_module)==FAILURE) {
 #ifdef ZTS
