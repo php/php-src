@@ -1860,7 +1860,7 @@ ZEND_API zend_class_entry *do_bind_inherited_class(zend_op *opline, HashTable *f
 	found_ce = zend_hash_find(class_table, opline->op1.u.constant.value.str.val, opline->op1.u.constant.value.str.len, (void **) &pce);
 
 	if (found_ce == FAILURE) {
-		zend_error(E_COMPILE_ERROR, "Cannot redeclare class %s", (*pce)->name);
+		zend_error(E_COMPILE_ERROR, "Cannot redeclare class %s", opline->op2.u.constant.value.str.val);
 		return NULL;
 	} else {
 		ce = *pce;
