@@ -37,8 +37,6 @@
 #define HAVE_POSIX 1
 #endif
 
-#define HAVE_POSIX 1
-
 #if HAVE_POSIX
 #ifndef DLEXPORT
 #define DLEXPORT
