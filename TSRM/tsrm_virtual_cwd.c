@@ -364,10 +364,14 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 			}
 		} else if (!IS_DIRECTORY_CURRENT(ptr, ptr_length)) {
 			state->cwd = (char *) realloc(state->cwd, state->cwd_length+ptr_length+1+1);
-			state->cwd[state->cwd_length] = DEFAULT_SLASH;
-			memcpy(&state->cwd[state->cwd_length+1], ptr, ptr_length+1);
-			state->cwd_length += (ptr_length+1);
-		}
+#ifdef TSRM_WIN32
+			/* Windows 9x will consider C:\\Foo as a network path. Avoid it. */
+			if (state->cwd[state->cwd_length-1]!=DEFAULT_SLASH) {
+				state->cwd[state->cwd_length++] = DEFAULT_SLASH;
+			}
+#endif
+			memcpy(&state->cwd[state->cwd_length], ptr, ptr_length+1);
+			state->cwd_length += ptr_length;		}
 		ptr = tsrm_strtok_r(NULL, TOKENIZER_STRING, &tok);
 	}
 
