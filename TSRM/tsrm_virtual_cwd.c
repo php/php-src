@@ -140,12 +140,12 @@ static int php_is_file_ok(const cwd_state *state)
 	return (1);
 }
 
-static void cwd_globals_ctor(virtual_cwd_globals *cwd_globals)
+static void cwd_globals_ctor(virtual_cwd_globals *cwd_globals TSRMLS_DC)
 {
 	CWD_STATE_COPY(&cwd_globals->cwd, &main_cwd_state);
 }
 
-static void cwd_globals_dtor(virtual_cwd_globals *cwd_globals)
+static void cwd_globals_dtor(virtual_cwd_globals *cwd_globals TSRMLS_DC)
 {
 	CWD_STATE_FREE(&cwd_globals->cwd);
 }
@@ -178,9 +178,9 @@ CWD_API void virtual_cwd_startup(void)
 	main_cwd_state.cwd_length = strlen(cwd);
 
 #ifdef ZTS
-	cwd_globals_id = ts_allocate_id(sizeof(virtual_cwd_globals), (ts_allocate_ctor) cwd_globals_ctor, (ts_allocate_dtor) cwd_globals_dtor);
+	ts_allocate_id(&cwd_globals_id, sizeof(virtual_cwd_globals), (ts_allocate_ctor) cwd_globals_ctor, (ts_allocate_dtor) cwd_globals_dtor);
 #else
-	cwd_globals_ctor(&cwd_globals);
+	cwd_globals_ctor(&cwd_globals TSRMLS_CC);
 #endif
 
 #if defined(TSRM_WIN32) && defined(ZTS)
@@ -191,7 +191,7 @@ CWD_API void virtual_cwd_startup(void)
 CWD_API void virtual_cwd_shutdown(void)
 {
 #ifndef ZTS
-	cwd_globals_dtor(&cwd_globals);
+	cwd_globals_dtor(&cwd_globals TSRMLS_CC);
 #endif
 #if defined(TSRM_WIN32) && defined(ZTS)
 	tsrm_mutex_free(cwd_mutex);

@@ -36,14 +36,14 @@ static ts_rsrc_id win32_globals_id;
 static tsrm_win32_globals win32_globals;
 #endif
 
-static void tsrm_win32_ctor(tsrm_win32_globals *globals)
+static void tsrm_win32_ctor(tsrm_win32_globals *globals TSRMLS_DC)
 {
 	globals->process = NULL;
 	globals->process_size = 0;
 	globals->comspec = _strdup((GetVersion()<0x80000000)?"cmd.exe":"command.com");
 }
 
-static void tsrm_win32_dtor(tsrm_win32_globals *globals)
+static void tsrm_win32_dtor(tsrm_win32_globals *globals TSRMLS_DC)
 {
 	if (globals->process != NULL) {
 		free(globals->process);
@@ -54,16 +54,16 @@ static void tsrm_win32_dtor(tsrm_win32_globals *globals)
 TSRM_API void tsrm_win32_startup(void)
 {
 #ifdef ZTS
-	win32_globals_id = ts_allocate_id(sizeof(tsrm_win32_globals), (ts_allocate_ctor)tsrm_win32_ctor, (ts_allocate_ctor)tsrm_win32_dtor);
+	ts_allocate_id(&win32_globals_id, sizeof(tsrm_win32_globals), (ts_allocate_ctor)tsrm_win32_ctor, (ts_allocate_ctor)tsrm_win32_dtor);
 #else
-	tsrm_win32_ctor(&win32_globals);
+	tsrm_win32_ctor(&win32_globals TSRMLS_CC);
 #endif
 }
 
 TSRM_API void tsrm_win32_shutdown(void)
 {
 #ifndef ZTS
-	tsrm_win32_dtor(&win32_globals);
+	tsrm_win32_dtor(&win32_globals TSRMLS_CC);
 #endif
 }
 
