@@ -33,7 +33,7 @@ PHP                                                                        NEWS
 - Fixed problems with longlong values in mysqli. (Georg)
 - Fixed class name case preserving of user defined classes. (Marcus)
 - Fixed bug #27145 (Unmangle private/protected property names before printing
-  then inside error messages). (Ilia)
+  them inside error messages). (Ilia)
 - Fixed bug #27103 (preg_split('//u') incorrectly splits UTF-8 strings into
   octets). (Moriyoshi)
 - Fixed bug #27042 (SPL: SeekableIterator seek() broken). (Marcus)
