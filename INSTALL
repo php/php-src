@@ -94,7 +94,8 @@ $ ./configure --prefix=/www --activate-module=src/modules/php4/libphp4.a
  (The above line is correct!  Yes, we know libphp4.a does not exist at this
   stage.  It isn't supposed to.  It will be created.)
 $ make
- (you should now have an httpd binary which you can copy to your Apache bin dir)
+ (you should now have an httpd binary which you can copy to your Apache bin dir if
+  is is your first install then you need to "make install" as well)
 $ cd ../php-4.0.x
 $ cp php.ini-dist /usr/local/lib/php.ini
 You can edit /usr/local/lib/php.ini file to set PHP options.
