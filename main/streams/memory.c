@@ -215,7 +215,6 @@ PHPAPI php_stream *_php_stream_memory_create(int mode STREAMS_DC TSRMLS_DC)
 	php_stream *stream;
 
 	self = emalloc(sizeof(*self));
-	assert(self != NULL);
 	self->data = NULL;
 	self->fpos = 0;
 	self->fsize = 0;
@@ -432,7 +431,6 @@ PHPAPI php_stream *_php_stream_temp_create(int mode, size_t max_memory_usage STR
 	php_stream *stream;
 
 	self = ecalloc(1, sizeof(*self));
-	assert(self != NULL);
 	self->smax = max_memory_usage;
 	self->mode = mode;
 	stream = php_stream_alloc(&php_stream_temp_ops, self, 0, "r+b");
