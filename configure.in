@@ -556,7 +556,7 @@ dnl ## In diversion 4 we check user-configurable general settings.
 
 dnl General settings.
 dnl -------------------------------------------------------------------------
-
+PHP_CONFIGURE_PART(General settings)
 
 PHP_HELP_SEPARATOR([General settings:])
 
@@ -613,7 +613,7 @@ fi
 
 PHP_ARG_WITH(pear, [whether to install PEAR, and where],
 [  --with-pear=DIR         Install PEAR in DIR (default PREFIX/lib/php)
-  --without-pear          Do not install PEAR], DEFAULT, no)
+  --without-pear          Do not install PEAR], DEFAULT, yes)
 
 if test "$PHP_PEAR" != "no" && test "$PHP_SAPI_CLI" != "no"; then
   install_pear="install-pear"
