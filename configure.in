@@ -290,6 +290,7 @@ crypt.h \
 fcntl.h \
 grp.h \
 ieeefp.h \
+langinfo.h \
 limits.h \
 locale.h \
 netinet/in.h \
@@ -388,6 +389,7 @@ memcpy \
 memmove \
 mkstemp \
 mmap \
+nl_langinfo \
 putenv \
 random \
 rand_r \
