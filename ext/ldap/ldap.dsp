@@ -42,6 +42,7 @@ RSC=rc.exe
 # PROP Use_Debug_Libraries 0
 # PROP Output_Dir "Release"
 # PROP Intermediate_Dir "Release"
+# PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "LDAP_EXPORTS" /YX /FD /c
 # ADD CPP /nologo /MD /W3 /GX /O2 /I "..\.." /I "..\..\Zend" /I "..\..\..\bindlib_w32" /I "..\..\TSRM" /I "..\..\..\php_build\openldap\include" /D "NDEBUG" /D ZEND_DEBUG=0 /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "LDAP_EXPORTS" /D "ZEND_WIN32" /D "PHP_WIN32" /D HAVE_LDAP=1 /D "COMPILE_DL_LDAP" /YX /FD /c
@@ -54,7 +55,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /machine:I386
-# ADD LINK32 oldap32.lib olber32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib wsock32.lib php4nts.lib /nologo /dll /machine:I386 /libpath:"..\..\Release" /libpath:"..\..\..\php_build\openldap\libraries\Release"
+# ADD LINK32 oldap32.lib olber32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib wsock32.lib php4nts.lib /nologo /dll /machine:I386 /out:"Release/php_ldap.dll" /libpath:"..\..\Release" /libpath:"..\..\..\php_build\openldap\libraries\Release"
 
 !ELSEIF  "$(CFG)" == "ldap - Win32 Debug"
 
@@ -80,7 +81,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 oldap32.lib olber32.lib php4nts_debug.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib wsock32.lib /nologo /dll /debug /machine:I386 /pdbtype:sept /libpath:"..\..\Debug" /libpath:"..\..\..\php_build\openldap\libraries\Debug"
+# ADD LINK32 oldap32.lib olber32.lib php4nts_debug.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib wsock32.lib /nologo /dll /debug /machine:I386 /out:"Debug/php_ldap.dll" /pdbtype:sept /libpath:"..\..\Debug" /libpath:"..\..\..\php_build\openldap\libraries\Debug"
 
 !ELSEIF  "$(CFG)" == "ldap - Win32 Debug_TS"
 
@@ -107,7 +108,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 oldap32.lib olber32.lib php4nts_debug.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib wsock32.lib /nologo /dll /debug /machine:I386 /pdbtype:sept /libpath:"..\..\..\openldap\libraries\Debug" /libpath:"..\..\Debug"
-# ADD LINK32 oldap32.lib olber32.lib php4ts_debug.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib wsock32.lib /nologo /dll /debug /machine:I386 /pdbtype:sept /libpath:"..\..\Debug_TS" /libpath:"..\..\..\php_build\openldap\libraries\Debug"
+# ADD LINK32 oldap32.lib olber32.lib php4ts_debug.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib wsock32.lib /nologo /dll /debug /machine:I386 /out:"Debug_TS/php_ldap.dll" /pdbtype:sept /libpath:"..\..\Debug_TS" /libpath:"..\..\..\php_build\openldap\libraries\Debug"
 
 !ELSEIF  "$(CFG)" == "ldap - Win32 Release_TS"
 
@@ -133,7 +134,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 oldap32.lib olber32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib wsock32.lib php4nts.lib /nologo /dll /machine:I386 /libpath:"..\..\..\openldap\libraries\Release" /libpath:"..\..\Release"
-# ADD LINK32 oldap32.lib olber32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib wsock32.lib php4ts.lib /nologo /dll /machine:I386 /libpath:"..\..\Release_TS" /libpath:"..\..\..\php_build\openldap\libraries\Release"
+# ADD LINK32 oldap32.lib olber32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib wsock32.lib php4ts.lib /nologo /dll /machine:I386 /out:"Release_TS/php_ldap.dll" /libpath:"..\..\Release_TS" /libpath:"..\..\..\php_build\openldap\libraries\Release"
 
 !ENDIF 
 
