@@ -34,6 +34,10 @@
 #include "SAPI.h"
 #include "php_main.h"
 
+#ifndef S_ISREG
+#define S_ISREG(mode)   (((mode) & S_IFMT) == S_IFREG)
+#endif
+
 typedef struct _php_extension_lists {
 	zend_llist engine;
 	zend_llist functions;
@@ -44,6 +48,7 @@ typedef struct _php_extension_lists {
 static HashTable configuration_hash;
 PHPAPI char *php_ini_opened_path=NULL;
 static php_extension_lists extension_lists;
+PHPAPI char *php_ini_scanned_files=NULL;
 
 /* {{{ php_ini_displayer_cb
  */
@@ -228,6 +233,14 @@ int php_init_config()
 	char *open_basedir;
 	int free_ini_search_path=0;
 	zend_file_handle fh;
+	DIR *dirp = NULL;
+	struct dirent *dir_entry;
+	struct stat sb;
+	char ini_file[MAXPATHLEN];
+	char *p;
+	zend_llist scanned_ini_list;
+	int l, total_l=0;
+	zend_llist_element *element;
 	TSRMLS_FETCH();
 
 	if (zend_hash_init(&configuration_hash, 0, NULL, (dtor_func_t) pvalue_config_destructor, 1)==FAILURE) {
@@ -236,6 +249,7 @@ int php_init_config()
 
 	zend_llist_init(&extension_lists.engine, sizeof(char *), (llist_dtor_func_t) free_estring, 1);
 	zend_llist_init(&extension_lists.functions, sizeof(zval), (llist_dtor_func_t)  ZVAL_DESTRUCTOR, 1);
+	zend_llist_init(&scanned_ini_list, sizeof(char *), (llist_dtor_func_t) free_estring, 1);
 	
 	safe_mode_state = PG(safe_mode);
 	open_basedir = PG(open_basedir);
@@ -363,25 +377,62 @@ int php_init_config()
 	PG(safe_mode) = safe_mode_state;
 	PG(open_basedir) = open_basedir;
 
-	if (!fh.handle.fp) {
-		return SUCCESS;  /* having no configuration file is ok */
-	}
-	fh.type = ZEND_HANDLE_FP;
+	if (fh.handle.fp) {
+		fh.type = ZEND_HANDLE_FP;
 
-	zend_parse_ini_file(&fh, 1, php_config_ini_parser_cb, &extension_lists);
+		zend_parse_ini_file(&fh, 1, php_config_ini_parser_cb, &extension_lists);
 	
-	{
-		zval tmp;
+		{
+			zval tmp;
 		
-		Z_STRLEN(tmp) = strlen(fh.filename);
-		Z_STRVAL(tmp) = zend_strndup(fh.filename, Z_STRLEN(tmp));
-		Z_TYPE(tmp) = IS_STRING;
-		zend_hash_update(&configuration_hash, "cfg_file_path", sizeof("cfg_file_path"), (void *) &tmp, sizeof(zval), NULL);
-		if(php_ini_opened_path) 
-			efree(php_ini_opened_path);
-		php_ini_opened_path = zend_strndup(Z_STRVAL(tmp), Z_STRLEN(tmp));
+			Z_STRLEN(tmp) = strlen(fh.filename);
+			Z_STRVAL(tmp) = zend_strndup(fh.filename, Z_STRLEN(tmp));
+			Z_TYPE(tmp) = IS_STRING;
+			zend_hash_update(&configuration_hash, "cfg_file_path", sizeof("cfg_file_path"), (void *) &tmp, sizeof(zval), NULL);
+			if(php_ini_opened_path) 
+				efree(php_ini_opened_path);
+			php_ini_opened_path = zend_strndup(Z_STRVAL(tmp), Z_STRLEN(tmp));
+		}
+	}	
+
+	/* If the config_file_scan_dir is set at compile-time, go and scan this directory and
+	 * parse any .ini files found in this directory. */
+	if(strlen(PHP_CONFIG_FILE_SCAN_DIR)) {
+		dirp = VCWD_OPENDIR(PHP_CONFIG_FILE_SCAN_DIR);
+		if (dirp) {
+			fh.type = ZEND_HANDLE_FP;
+			while ((dir_entry = readdir(dirp)) != NULL) {
+				/* check for a .ini extension */
+				if ((p = strrchr(dir_entry->d_name,'.')) && strcmp(p,".ini")) continue;
+				snprintf(ini_file, MAXPATHLEN, "%s%c%s", PHP_CONFIG_FILE_SCAN_DIR, DEFAULT_SLASH, dir_entry->d_name);
+				if (VCWD_STAT(ini_file, &sb) == 0) {
+					if (S_ISREG(sb.st_mode)) {
+						if ((fh.handle.fp = VCWD_FOPEN(ini_file, "r"))) {
+							fh.filename = ini_file;
+							zend_parse_ini_file(&fh, 1, php_config_ini_parser_cb, &extension_lists);
+							/* Here, add it to the list of ini files read */
+							l = strlen(ini_file);
+							total_l += l+2;
+							p = estrndup(ini_file,l); 
+							zend_llist_add_element(&scanned_ini_list, &p);
+						}
+					}
+				}
+			}
+			closedir(dirp);
+			/* 
+			 * Don't need an extra byte for the \0 in this malloc as the last
+			 * element will not get a trailing , which gives us the byte for the \0
+			 */
+			php_ini_scanned_files = (char *)malloc(total_l);
+			*php_ini_scanned_files = '\0';
+			for (element=scanned_ini_list.head; element; element=element->next) {
+				strcat(php_ini_scanned_files,*(char **)element->data);		
+				strcat(php_ini_scanned_files,element->next ? ",\n":"\n");
+			}	
+			zend_llist_destroy(&scanned_ini_list);
+		}
 	}
-	
 	return SUCCESS;
 }
 /* }}} */
@@ -393,6 +444,9 @@ int php_shutdown_config(void)
 	zend_hash_destroy(&configuration_hash);
 	if (php_ini_opened_path) {
 		free(php_ini_opened_path);
+	}
+	if (php_ini_scanned_files) {
+		free(php_ini_scanned_files);
 	}
 	return SUCCESS;
 }

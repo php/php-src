@@ -570,6 +570,12 @@ if test "$PHP_CONFIG_FILE_PATH" = "DEFAULT"; then
   esac
 fi
 
+PHP_ARG_WITH(config-file-scan-dir,[directory to be scanned for configuration files],
+[  --with-config-file-scan-dir=PATH ], DEFAULT, no) 
+if test "$PHP_CONFIG_FILE_SCAN_DIR" = "DEFAULT"; then
+	PHP_CONFIG_FILE_SCAN_DIR=""
+fi
+
 # compatibility
 if test -z "$with_pear" && test "$enable_pear" = "no"; then
   with_pear=no
@@ -890,6 +896,7 @@ EXPANDED_LIBDIR=$libdir
 EXPANDED_SYSCONFDIR=`eval echo $sysconfdir`
 EXPANDED_DATADIR=$datadir
 EXPANDED_PHP_CONFIG_FILE_PATH=`eval echo "$PHP_CONFIG_FILE_PATH"`
+EXPANDED_PHP_CONFIG_FILE_SCAN_DIR=`eval echo "$PHP_CONFIG_FILE_SCAN_DIR"`
 INCLUDE_PATH=.:$EXPANDED_PEAR_INSTALLDIR
 
 exec_prefix=$old_exec_prefix
@@ -905,6 +912,7 @@ AC_SUBST(EXPANDED_DATADIR)
 AC_SUBST(EXPANDED_SYSCONFDIR)
 AC_SUBST(EXPANDED_LOCALSTATEDIR)
 AC_SUBST(EXPANDED_PHP_CONFIG_FILE_PATH)
+AC_SUBST(EXPANDED_PHP_CONFIG_FILE_SCAN_DIR)
 
 PHP_UTILIZE_RPATHS
 
