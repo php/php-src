@@ -302,10 +302,10 @@ static void php_apache_request_shutdown(void *dummy)
 		php_request_shutdown(dummy);
 	}
 	SG(server_context) = NULL; 
-    /* 
-     * The server context (request) is NOT invalid by the time 
-     * run_cleanups() is called 
-     */
+	/* 
+	* The server context (request) is NOT invalid by the time 
+	* run_cleanups() is called 
+	*/
 }
 /* }}} */
 
