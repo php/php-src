@@ -422,7 +422,7 @@ static inline void zend_fetch_var_address(znode *result, znode *op1, znode *op2,
 	zval tmp_varname;
 	HashTable *target_symbol_table;
 
-	switch (op2->u.constant.value.lval) {
+	switch (op2->u.fetch_type) {
 		case ZEND_FETCH_LOCAL:
 		default: /* just to shut gcc up */
 			target_symbol_table = EG(active_symbol_table);
@@ -468,9 +468,9 @@ static inline void zend_fetch_var_address(znode *result, znode *op1, znode *op2,
 				break;
 		}
 	}
-	if (op2->u.constant.value.lval == ZEND_FETCH_LOCAL) {
+	if (op2->u.fetch_type == ZEND_FETCH_LOCAL) {
 		FREE_OP(op1, free_op1);
-	} else if (op2->u.constant.value.lval == ZEND_FETCH_STATIC) {
+	} else if (op2->u.fetch_type == ZEND_FETCH_STATIC) {
 		zval_update_constant(*retval);
 	}
 

@@ -186,7 +186,7 @@ void fetch_simple_variable(znode *result, znode *varname, int bp CLS_DC)
 	opline->op1 = *varname;
 	*result = opline->result;
 	SET_UNUSED(opline->op2);
-	opline->op2.u.constant.value.lval = ZEND_FETCH_LOCAL;
+	opline->op2.u.fetch_type = ZEND_FETCH_LOCAL;
 
 	if (bp) {
 		zend_stack_top(&CG(bp_stack), (void **) &fetch_list_ptr);
@@ -1681,7 +1681,7 @@ void do_fetch_global_or_static_variable(znode *varname, znode *static_assignment
 	opline->result.u.var = get_temporary_variable(CG(active_op_array));
 	opline->op1 = *varname;
 	SET_UNUSED(opline->op2);
-	opline->op2.u.constant.value.lval = fetch_type;
+	opline->op2.u.fetch_type = fetch_type;
 
 	if (varname->op_type == IS_CONST) {
 		zval_copy_ctor(&varname->u.constant);
