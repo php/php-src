@@ -145,26 +145,32 @@ void zend_objects_delete_obj(zend_object_handle handle)
 
 }
 
+#define ZEND_OBJECTS_ADD_TO_FREE_LIST()																\
+			EG(objects).object_buckets[handle].bucket.free_list.next = EG(objects).free_list_head;	\
+			EG(objects).free_list_head = handle;													\
+			EG(objects).object_buckets[handle].valid = 0;
+
 void zend_objects_del_ref(zend_object_handle handle)
 {
 	TSRMLS_FETCH();
 
 	if (--EG(objects).object_buckets[handle].bucket.obj.refcount == 0) {
 		zend_object *object;
-
-		if (EG(objects).object_buckets[handle].valid) {
-			if (!EG(objects).object_buckets[handle].constructor_called) {
-				object = &EG(objects).object_buckets[handle].bucket.obj.object;
-				EG(objects).object_buckets[handle].constructor_called = 1;
-				zend_objects_destroy_object(object, handle TSRMLS_CC);
+		do {
+			if (EG(objects).object_buckets[handle].valid) {
+				if (!EG(objects).object_buckets[handle].constructor_called) {
+					object = &EG(objects).object_buckets[handle].bucket.obj.object;
+					EG(objects).object_buckets[handle].constructor_called = 1;
+					zend_objects_destroy_object(object, handle TSRMLS_CC);
+					if (EG(objects).object_buckets[handle].bucket.obj.refcount == 0) {
+						ZEND_OBJECTS_ADD_TO_FREE_LIST();
+					}
+					break;
+				}			
 			}
-		}
-		/* FIXME: Optimizer this so that only if the constructor was called we recheck the refcount */
-		if (EG(objects).object_buckets[handle].bucket.obj.refcount == 0) {
-			EG(objects).object_buckets[handle].bucket.free_list.next = EG(objects).free_list_head;
-			EG(objects).free_list_head = handle;
-			EG(objects).object_buckets[handle].valid = 0;
-		}
+			ZEND_OBJECTS_ADD_TO_FREE_LIST();
+		} while (0);
+		
 #if ZEND_DEBUG_OBJECTS
 		fprintf(stderr, "Deallocated object id #%d\n", handle);
 #endif
