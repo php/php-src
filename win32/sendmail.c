@@ -88,7 +88,7 @@ static char *ErrorMessages[] =
 	{"Bad Message Return Path"},
 	{"Bad Mail Host"},
 	{"Bad Message File"},
-	{"\"sendmail_from\" NOT set in php.ini"},
+	{"\"sendmail_from\" not set in php.ini"},
 	{"Mailserver rejected our \"sendmail_from\" setting"} /* 20 */
 };
 
@@ -125,11 +125,37 @@ int TSendMail(char *host, int *error,
 		strcpy(MailHost, host);
 	}
 
-	if (INI_STR("sendmail_from")){
-		RPath = estrdup(INI_STR("sendmail_from"));
+	/* use from address as return path (if specified in headers) */
+	if (headers) {
+		char *pos = NULL;
+		/* Try to match 'From:' only at start of the string or after following a \r\n */
+		if (strstr(headers, "\r\nFrom:")) {
+			pos = strstr(headers, "\r\nFrom:") + 7;
+		} else if (!strncmp(headers, "From:", 5)) {
+			pos = headers + 5;
+		}
+		if (pos) {
+			char *pos_end;
+			/* Ignore any whitespaces */
+			while (pos && ((*pos == ' ' || *pos == '\t')))
+				pos++;
+			/* Match until \r\n or end of header string */
+			if (pos_end = strstr(pos, "\r\n")) {
+				RPath = estrndup(pos, pos_end - pos);
+			} else {
+				RPath = estrndup(pos, strlen(pos));
+			}
+		}
+	}
+ 
+	/* Fall back to sendmail_from php.ini setting */
+ 	if (!RPath) {
+		if (INI_STR("sendmail_from")) {
+			RPath = estrdup(INI_STR("sendmail_from"));
 		} else {
 			*error = W32_SM_SENDMAIL_FROM_NOT_SET;
 			return FAILURE;
+		}
 	}
 
 	/* attempt to connect with mail host */
