@@ -185,7 +185,7 @@ class PEAR
     * @access public
     * @param  string $class  The calling classname, to prevent clashes
     * @param  string $var    The variable to retrieve.
-    * @return mixed   A reference to the variable. If not set it will be 
+    * @return mixed   A reference to the variable. If not set it will be
     *                 auto initialised to NULL.
     */
     function &getStaticProperty($class, $var)
@@ -352,22 +352,22 @@ class PEAR
 
     /**
      * This method checks unsets an error code if available
-     * 
+     *
      * @param mixed error code
      * @return bool true if the error code was unset, false otherwise
      * @access private
      * @since PHP 4.3.0
      */
     function _checkDelExpect($error_code)
-    {   
+    {
         $deleted = false;
-        
+
         foreach ($this->_expected_errors AS $key => $error_array) {
             if (in_array($error_code, $error_array)) {
                 unset($this->_expected_errors[$key][array_search($error_code, $error_array)]);
                 $deleted = true;
             }
-            
+
             // clean up empty arrays
             if (0 == count($this->_expected_errors[$key])) {
                 unset($this->_expected_errors[$key]);
@@ -380,7 +380,7 @@ class PEAR
     // {{{ delExpect()
 
     /**
-     * This method deletes all occurences of the specified element from 
+     * This method deletes all occurences of the specified element from
      * the expected error codes stack.
      *
      * @param  mixed $error_code error code that should be deleted
@@ -391,23 +391,23 @@ class PEAR
     function delExpect($error_code)
     {
         $deleted = false;
-        
+
         if ((is_array($error_code) && (0 != count($error_code)))) {
             // $error_code is a non-empty array here;
             // we walk through it trying to unset all
             // values
             foreach($error_code AS $key => $error) {
                 if ($this->_checkDelExpect($error)) {
-                    $deleted =  true;    
+                    $deleted =  true;
                 } else {
                     $deleted = false;
-                }   
+                }
             }
             return $deleted ? true : PEAR::raiseError("The expected error you submitted does not exist"); // IMPROVE ME
         } elseif (!empty($error_code)) {
             // $error_code comes alone, trying to unset it
             if ($this->_checkDelExpect($error_code)) {
-                return true;    
+                return true;
             } else {
                 return PEAR::raiseError("The expected error you submitted does not exist"); // IMPROVE ME
             }
@@ -594,7 +594,7 @@ function _PEAR_call_destructors()
         // not called more than once.
         $_PEAR_destructor_object_list = array();
     }
-    
+
     // Now call the shutdown functions
     if (is_array($GLOBALS['_PEAR_shutdown_funcs']) AND !empty($GLOBALS['_PEAR_shutdown_funcs'])) {
         foreach ($GLOBALS['_PEAR_shutdown_funcs'] as $value) {
