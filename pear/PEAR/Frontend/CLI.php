@@ -351,7 +351,7 @@ class PEAR_Frontend_CLI extends PEAR
     // }}}
     // {{{ outputData()
 
-    function outputData($data, $command)
+    function outputData($data, $command = '_default')
     {
         switch ($command)
         {
