@@ -27,6 +27,7 @@ PHP 4                                                                      NEWS
 - Moved extensions to PECL (http://pear.php.net/): (James, Derick)
   . ext/vpopmail
   . ext/cybermut
+- Fixed bug #20927 (wordwrap crash). (Ilia)
 - Fixed bug #20796 (when register_globals is on & arrays with same names are 
   passed via get/post/cookie the data inside $_GET/$_POST/$_COOKIE can would be
   corrupted). (Ilia)
