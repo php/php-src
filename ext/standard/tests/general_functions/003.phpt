@@ -47,6 +47,12 @@ $n += test_me("bug #6562", 1,    "ddebug",    "debug");
 $n += test_me("bug #6562", 2,   "debbbug",    "debug");
 $n += test_me("bug #6562", 1, "debugging", "debuging");
 
+$n += test_me("bug #16473", 2, "a", "bc");
+$n += test_me("bug #16473", 2, "xa", "xbc");
+$n += test_me("bug #16473", 2, "xax", "xbcx");
+$n += test_me("bug #16473", 2, "ax", "bcx");
+
+
 echo ($n==0)?"all passed\n":"$n failed\n";
 
 ?>

@@ -40,33 +40,31 @@ static int reference_levdist(const char *s1, int l1,
 	if((l1>LEVENSHTEIN_MAX_LENTH)||(l2>LEVENSHTEIN_MAX_LENTH))
 		return -1;
 
-	if(!(p1=emalloc(l2*sizeof(int)))) {
+	if(!(p1=emalloc((l2+1)*sizeof(int)))) {
 		return -2;
 	}
-	if(!(p2=emalloc(l2*sizeof(int)))) {
+	if(!(p2=emalloc((l2+1)*sizeof(int)))) {
 		free(p1);
 		return -2;
 	}
 
-	p1[0]=(s1[0]==s2[0])?0:cost_rep;
+	for(i2=0;i2<=l2;i2++)
+		p1[i2] = i2*cost_ins;
 
-	for(i2=1;i2<l2;i2++)
-		p1[i2]=i2*cost_ins;
-
-	for(i1=1;i1<l1;i1++)
+	for(i1=0;i1<l1;i1++)
 		{
-			p2[0]=i1*cost_del;
-			for(i2=1;i2<l2;i2++)
+			p2[0]=p1[0]+cost_del;
+			for(i2=0;i2<l2;i2++)
 				{
-					c0=p1[i2-1]+((s1[i1]==s2[i2])?0:cost_rep);
-					c1=p1[i2]+cost_del; if(c1<c0) c0=c1;
-					c2=p2[i2-1]+cost_ins; if(c2<c0) c0=c2;				
-					p2[i2]=c0;
+					c0=p1[i2]+((s1[i1]==s2[i2])?0:cost_rep);
+					c1=p1[i2+1]+cost_del; if(c1<c0) c0=c1;
+					c2=p2[i2]+cost_ins; if(c2<c0) c0=c2;				
+					p2[i2+1]=c0;
 				}
 			tmp=p1; p1=p2; p2=tmp;
 		}
 
-	c0=p1[l2-1];
+	c0=p1[l2];
 
 	efree(p1);
 	efree(p2);
