@@ -88,7 +88,7 @@ INI=" . realpath(get_cfg_var("cfg_file_path")) . "
 SCANNED_INI=" . (function_exists(\'php_ini_scanned_files\') ?
 					str_replace("\n","", php_ini_scanned_files()) :
 					"** not determined **") . "
-SERVER_SOFTWARE=" . $_ENV[\'SERVER_SOFTWARE\'];
+SERVER_SOFTWARE=" . (isset($_ENV[\'SERVER_SOFTWARE\']) ? $_ENV[\'SERVER_SOFTWARE\'] : \'UNKNOWN\');
 ?>');
 
 define('PHP_EXTENSIONS_SCRIPT','<?php print join(get_loaded_extensions(),":"); ?>');
@@ -145,8 +145,8 @@ function generate_diff($wanted,$output)
 	return implode("\r\n", $diff);
 }
 
-function mkpath($path,$mode = 0700) {
-	$dirs = split('[\\|/]',realpath($path));
+function mkpath($path,$mode = 0777) {
+	$dirs = split('[\\/]',$path);
 	$path = $dirs[0];
 	for($i = 1;$i < count($dirs);$i++) {
 		$path .= '/'.$dirs[$i];
@@ -157,8 +157,9 @@ function mkpath($path,$mode = 0700) {
 function copyfiles($src,$new) {
 	$d = dir($src);
 	while (($entry = $d->read())) {
-		if (is_file("$src/$entry"))
-			copy("$src/$entry","$new/$entry");
+		if (is_file("$src/$entry")) {
+			copy("$src/$entry", "$new/$entry");
+		}
 	}
 	$d->close();
 }
@@ -245,19 +246,19 @@ function executeCode($php, $ini_overwrites, $code, $remove_headers=true, $cwd=NU
 
 class HTTPRequest
 {
-    var $headers = array();
-    var $timeout = 4;
-    var $urlparts = NULL;
-    var $url = '';
-    var $userAgent = 'PHP-Test-Harness';
-    var $options = array();
-    var $postdata = NULL;
-    var $errmsg = '';
-    var $errno = 0;
-    var $response;
-    var $response_headers;
-    var $outgoing_payload;
-    var $incoming_payload = '';
+    public $headers = array();
+    public $timeout = 4;
+    public $urlparts = NULL;
+    public $url = '';
+    public $userAgent = 'PHP-Test-Harness';
+    public $options = array();
+    public $postdata = NULL;
+    public $errmsg = '';
+    public $errno = 0;
+    public $response;
+    public $response_headers;
+    public $outgoing_payload;
+    public $incoming_payload = '';
 
     /*
     URL is the full url
@@ -416,8 +417,8 @@ class HTTPRequest
  */
 
 class testHarness {
-	var $cwd;
-	var $xargs = array(
+	public $cwd;
+	public $xargs = array(
 		#arg         env var                value        default   description
 		'c' => array(''                    ,'file'       ,NULL    ,'configuration file, see run-tests-config.php for example'),
 		'd' => array('TEST_PATHS'          ,'paths'      ,NULL    ,'colon seperate path list'),
@@ -438,28 +439,28 @@ class testHarness {
 		'x' => array('TEST_WEB_EXT'        ,'file ext'   ,'php'   ,'http file extension to use')
 		);
 	
-	var $conf = array();
-	var $test_to_run = array();
-	var $test_files = array();
-	var $test_results = array();
-	var $failed_tests = array();
-	var $exts_to_test;
-	var $exts_tested = 0;
-	var $exts_skipped = 0;
-	var $ignored_by_ext = 0;
-	var $test_dirs = array('tests', 'pear', 'ext', 'sapi');
-	var $start_time;
-	var $end_time;
-	var $exec_info;
-	var $test_executable_iscgi = false;
-	var $inisettings; // the test executables settings, used for web tests
-	var $iswin32 = false;
+	public $conf = array();
+	public $test_to_run = array();
+	public $test_files = array();
+	public $test_results = array();
+	public $failed_tests = array();
+	public $exts_to_test;
+	public $exts_tested = 0;
+	public $exts_skipped = 0;
+	public $ignored_by_ext = 0;
+	public $test_dirs = array('tests', 'pear', 'ext', 'sapi');
+	public $start_time;
+	public $end_time;
+	public $exec_info;
+	public $test_executable_iscgi = false;
+	public $inisettings; // the test executables settings, used for web tests
+	public $iswin32 = false;
 	
-	var $ddash = "=====================================================================";
-	var $sdash = "---------------------------------------------------------------------";
+	public $ddash = "=====================================================================";
+	public $sdash = "---------------------------------------------------------------------";
 
 	// Default ini settings
-	var $ini_overwrites = array(
+	public $ini_overwrites = array(
 			'output_handler'=>'',
 			'zlib.output_compression'=>'Off',
 			'open_basedir'=>'',
@@ -481,8 +482,8 @@ class testHarness {
 			'auto_append_file'=>'',
 			'magic_quotes_runtime'=>'0',
 		);	
-	var $env = array();
-	var $info_params = array();
+	public $env = array();
+	public $info_params = array();
 
 	function testHarness() {
 		$this->iswin32 = substr(PHP_OS, 0, 3) == "WIN";
@@ -498,7 +499,7 @@ class testHarness {
 			@chdir($this->conf['TEST_PHP_SRCDIR']);
 		}
 		$this->cwd = getcwd();
-		
+
 		if (!$this->conf['TEST_PHP_SRCDIR'])
 			$this->conf['TEST_PHP_SRCDIR'] = $this->cwd;
 		if (!$this->conf['TEST_BASE_PATH'] && $this->conf['TEST_PHP_SRCDIR'])
@@ -572,11 +573,11 @@ class testHarness {
 	function runscript($script,$removeheaders=false,$cwd=NULL)
 	{
 		if ($this->conf['TEST_WEB']) {
-			$pi = "/testscript.{$this->conf['TEST_WEB_EXT']}";
+			$pi = '/testscript.' . $this->conf['TEST_WEB_EXT'];
 			if (!$cwd) $cwd = $this->conf['TEST_BASE_PATH'];
 			$tmp_file = "$cwd$pi";
-			$pi = substr($cwd,strlen($this->conf['TEST_BASE_PATH'])).$pi;
-			$url = "{$this->conf['TEST_WEB_BASE_URL']}$pi";
+			$pi = substr($cwd,strlen($this->conf['TEST_BASE_PATH'])) . $pi;
+			$url = $this->conf['TEST_WEB_BASE_URL'] . $pi;
 			save_to_file($tmp_file,$script);
 			$fd = fopen($url, "rb");
 			$out = '';
@@ -586,8 +587,8 @@ class testHarness {
 				fclose($fd);
 			}
 			unlink($tmp_file);
-			if ($removeheaders &&
-				preg_match("/^(.*?)\r?\n\r?\n(.*)/s", $this->incoming_payload, $match)) {
+			if (0 && $removeheaders &&
+				preg_match("/^(.*?)\r?\n\r?\n(.*)/s", $out, $match)) {
 					return $match[2];
 			}
 			return $out;
@@ -748,10 +749,11 @@ class testHarness {
 			$this->writemsg(REQ_PHP_VERSION);
 			exit;
 		}
-		if (!file_exists("/tmp")) {
-			$this->writemsg(TMP_MISSING);
-			exit;
-		}
+// We might want to check another server so we won't see that server's /tmp
+//		if (!file_exists("/tmp")) {
+//			$this->writemsg(TMP_MISSING);
+//			exit;
+//		}
 		if (!function_exists("proc_open")) {
 			$this->writemsg(PROC_OPEN_MISSING);
 			exit;
