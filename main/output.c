@@ -540,7 +540,16 @@ PHP_FUNCTION(ob_start)
 			break;
 	}
 	if (php_start_ob_buffer(output_handler, chunk_size)==FAILURE) {
-		php_error(E_WARNING, "Cannot use output buffering in output buffering display handlers");
+		SLS_FETCH();
+		OLS_FETCH();
+
+		if (SG(headers_sent) && !SG(request_info).headers_only) {
+			OG(php_body_write) = php_ub_body_write_no_header;
+		} else {
+			OG(php_body_write) = php_ub_body_write;
+		}
+		OG(nesting_level) = 0;
+		php_error(E_ERROR, "Cannot use output buffering in output buffering display handlers");
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
