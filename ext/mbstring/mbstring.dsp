@@ -183,5 +183,7 @@ SOURCE=.\unicode_table_kr.h
 SOURCE=.\unicode_table_tw.h
 # End Source File
 # End Group
+
+SOURCE=.\html_entities.c
 # End Target
 # End Project
