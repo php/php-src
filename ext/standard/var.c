@@ -214,14 +214,14 @@ PHP_FUNCTION(var_export)
 	}
 	
 	if (i) {
-		php_start_ob_buffer (NULL, 0);
+		php_start_ob_buffer (NULL, 0 TSRMLS_CC);
 	}
 	
 	php_var_export(&var, 1 TSRMLS_CC);
 
 	if (i) {
-		php_ob_get_buffer (return_value);
-		php_end_ob_buffer (0, 0);
+		php_ob_get_buffer (return_value TSRMLS_CC);
+		php_end_ob_buffer (0, 0 TSRMLS_CC);
 	}
 }
 /* }}} */
