@@ -154,8 +154,9 @@ ftp_open(const char *host, short port, long timeout_sec TSRMLS_DC)
 	return ftp;
 
 bail:
-	if (ftp->fd != -1)
+	if (ftp->fd != -1) {
 		closesocket(ftp->fd);
+	}
 	efree(ftp);
 	return NULL;
 }
@@ -191,9 +192,9 @@ ftp_close(ftpbuf_t *ftp)
 void
 ftp_gc(ftpbuf_t *ftp)
 {
-	if (ftp == NULL)
+	if (ftp == NULL) {
 		return;
-
+	}
 	if (ftp->pwd) {
 		efree(ftp->pwd);
 	}
@@ -208,13 +209,16 @@ ftp_gc(ftpbuf_t *ftp)
 int
 ftp_quit(ftpbuf_t *ftp)
 {
-	if (ftp == NULL)
+	if (ftp == NULL) {
 		return 0;
+	}
 
-	if (!ftp_putcmd(ftp, "QUIT", NULL))
+	if (!ftp_putcmd(ftp, "QUIT", NULL)) {
 		return 0;
-	if (!ftp_getresp(ftp) || ftp->resp != 221)
+	}
+	if (!ftp_getresp(ftp) || ftp->resp != 221) {
 		return 0;
+	}
 
 	if (ftp->pwd) {
 		efree(ftp->pwd);
@@ -265,13 +269,13 @@ ftp_login(ftpbuf_t *ftp, const char *user, const char *pass TSRMLS_DC)
 		if (ftp->use_ssl) {
 			ctx = SSL_CTX_new(SSLv23_client_method());
 			if (ctx == NULL) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "ftp_login: failed to create the SSL context");
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed to create the SSL context");
 				return 0;
 			}
 			
 			ftp->ssl_handle = SSL_new(ctx);
 			if (ftp->ssl_handle == NULL) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "ftp_login: failed to create the SSL handle");
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed to create the SSL handle");
 				SSL_CTX_free(ctx);
 				return 0;
 			}
@@ -279,7 +283,7 @@ ftp_login(ftpbuf_t *ftp, const char *user, const char *pass TSRMLS_DC)
 			SSL_set_fd(ftp->ssl_handle, ftp->fd);
 			
 			if (SSL_connect(ftp->ssl_handle) <= 0) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "ftp_login: SSL/TLS handshake failed");
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "SSL/TLS handshake failed");
 				SSL_shutdown(ftp->ssl_handle);
 				return 0;
 			}
@@ -361,10 +365,11 @@ ftp_reinit(ftpbuf_t *ftp)
 const char*
 ftp_syst(ftpbuf_t *ftp)
 {
-	char		*syst, *end;
+	char *syst, *end;
 
-	if (ftp == NULL)
+	if (ftp == NULL) {
 		return NULL;
+	}
 
 	/* default to cached value */
 	if (ftp->syst) {
@@ -393,7 +398,7 @@ ftp_syst(ftpbuf_t *ftp)
 const char*
 ftp_pwd(ftpbuf_t *ftp)
 {
-	char		*pwd, *end;
+	char *pwd, *end;
 
 	if (ftp == NULL) {
 		return NULL;
@@ -473,8 +478,9 @@ ftp_chdir(ftpbuf_t *ftp, const char *dir)
 		return 0;
 	}
 
-	if (ftp->pwd)
+	if (ftp->pwd) {
 		efree(ftp->pwd);
+	}
 
 	if (!ftp_putcmd(ftp, "CWD", dir)) {
 		return 0;
@@ -495,8 +501,9 @@ ftp_cdup(ftpbuf_t *ftp)
 		return 0;
 	}
 
-	if (ftp->pwd)
+	if (ftp->pwd) {
 		efree(ftp->pwd);
+	}
 
 	if (!ftp_putcmd(ftp, "CDUP", NULL)) {
 		return 0;
@@ -513,7 +520,7 @@ ftp_cdup(ftpbuf_t *ftp)
 char*
 ftp_mkdir(ftpbuf_t *ftp, const char *dir)
 {
-	char		*mkd, *end;
+	char *mkd, *end;
 
 	if (ftp == NULL) {
 		return NULL;
@@ -614,7 +621,7 @@ ftp_list(ftpbuf_t *ftp, const char *path, int recursive TSRMLS_DC)
 int
 ftp_type(ftpbuf_t *ftp, ftptype_t type)
 {
-	char		typechar[2] = "?";
+	char typechar[2] = "?";
 
 	if (ftp == NULL) {
 		return 0;
@@ -797,12 +804,13 @@ ftp_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, ftptype_t type, 
 				lastch = *ptr;
 			}
 		} else if (rcvd != php_stream_write(outstream, data->buf, rcvd)) {
-				goto bail;
+			goto bail;
 		}
 	}
 
-	if (type == FTPTYPE_ASCII && lastch == '\r')
+	if (type == FTPTYPE_ASCII && lastch == '\r') {
 		php_stream_putc(outstream, '\r');
+	}
 
 	data = data_close(ftp, data);
 	ftp->data = NULL;
@@ -855,21 +863,24 @@ ftp_put(ftpbuf_t *ftp, const char *path, php_stream *instream, ftptype_t type, i
 		}
 	}
 
-	if (!ftp_putcmd(ftp, "STOR", path))
+	if (!ftp_putcmd(ftp, "STOR", path)) {
 		goto bail;
-	if (!ftp_getresp(ftp) || (ftp->resp != 150 && ftp->resp != 125))
+	}
+	if (!ftp_getresp(ftp) || (ftp->resp != 150 && ftp->resp != 125)) {
 		goto bail;
-
-	if ((data = data_accept(data, ftp)) == NULL)
+	}
+	if ((data = data_accept(data, ftp)) == NULL) {
 		goto bail;
+	}
 
 	size = 0;
 	ptr = data->buf;
 	while (!php_stream_eof(instream) && (ch = php_stream_getc(instream))!=EOF) {
 		/* flush if necessary */
 		if (FTP_BUFSIZE - size < 2) {
-			if (my_send(ftp, data->fd, data->buf, size) != size)
+			if (my_send(ftp, data->fd, data->buf, size) != size) {
 				goto bail;
+			}
 			ptr = data->buf;
 			size = 0;
 		}
@@ -1119,7 +1130,9 @@ ftp_getresp(ftpbuf_t *ftp)
 {
 	char *buf;
 
-	if (ftp == NULL) return 0;
+	if (ftp == NULL) {
+		return 0;
+	}
 	buf = ftp->inbuf;
 	ftp->resp = 0;
 
