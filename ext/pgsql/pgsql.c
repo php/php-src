@@ -142,10 +142,9 @@ static void php_pgsql_set_default_link(int id)
 
 /* {{{ _close_pgsql_link
  */
-static void _close_pgsql_link(zend_rsrc_list_entry *rsrc)
+static void _close_pgsql_link(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	PGconn *link = (PGconn *)rsrc->ptr;
-	TSRMLS_FETCH();
 
 	PQfinish(link);
 	PGG(num_links)--;
@@ -154,10 +153,9 @@ static void _close_pgsql_link(zend_rsrc_list_entry *rsrc)
 
 /* {{{ _close_pgsql_plink
  */
-static void _close_pgsql_plink(zend_rsrc_list_entry *rsrc)
+static void _close_pgsql_plink(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	PGconn *link = (PGconn *)rsrc->ptr;
-	TSRMLS_FETCH();
 
 	PQfinish(link);
 	PGG(num_persistent)--;
@@ -206,7 +204,7 @@ static int _rollback_transactions(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 
 /* {{{ _free_ptr
  */
-static void _free_ptr(zend_rsrc_list_entry *rsrc)
+static void _free_ptr(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	pgLofp *lofp = (pgLofp *)rsrc->ptr;
 	efree(lofp);
@@ -215,9 +213,10 @@ static void _free_ptr(zend_rsrc_list_entry *rsrc)
 
 /* {{{ _free_result
  */
-static void _free_result(zend_rsrc_list_entry *rsrc)
+static void _free_result(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	pgsql_result_handle *pg_result = (pgsql_result_handle *)rsrc->ptr;
+
 	PQclear(pg_result->result);
 	efree(pg_result);
 }

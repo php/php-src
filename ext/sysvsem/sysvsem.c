@@ -102,7 +102,7 @@ THREAD_LS sysvsem_module php_sysvsem_module;
 
 /* {{{ release_sysvsem_sem
  */
-static void release_sysvsem_sem(zend_rsrc_list_entry *rsrc)
+static void release_sysvsem_sem(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	sysvsem_sem *sem_ptr = (sysvsem_sem *)rsrc->ptr;
 	struct sembuf sop[2];

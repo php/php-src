@@ -183,9 +183,10 @@ static void dba_close(dba_info *info)
 
 /* {{{ dba_close_rsrc
  */
-static void dba_close_rsrc(zend_rsrc_list_entry *rsrc)
+static void dba_close_rsrc(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	dba_info *info = (dba_info *)rsrc->ptr;
+
 	dba_close(info);
 }
 /* }}} */

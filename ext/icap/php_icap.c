@@ -110,10 +110,11 @@ int le_picap;
 char icap_user[80]="";
 char icap_password[80]="";
 
-CALSTREAM *cal_close_it (zend_rsrc_list_entry *rsrc)
+CALSTREAM *cal_close_it (zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	pils *icap_le_struct = (pils *)rsrc->ptr;
 	CALSTREAM *ret;
+
 	ret = cal_close (icap_le_struct->icap_stream,0);
 	efree(icap_le_struct);
 	return ret;

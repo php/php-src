@@ -160,13 +160,15 @@ zend_module_entry mnogosearch_module_entry = {
 ZEND_GET_MODULE(mnogosearch)
 #endif
 
-static void _free_udm_agent(zend_rsrc_list_entry *rsrc){
+static void _free_udm_agent(zend_rsrc_list_entry *rsrc TSRMLS_DC)
+{
 	UDM_AGENT * Agent = (UDM_AGENT *)rsrc->ptr;
 	UdmFreeEnv(Agent->Conf);
 	UdmFreeAgent(Agent);
 }
 
-static void _free_udm_res(zend_rsrc_list_entry *rsrc){
+static void _free_udm_res(zend_rsrc_list_entry *rsrc TSRMLS_DC)
+{
 	UDM_RESULT * Res = (UDM_RESULT *)rsrc->ptr;
 	UdmFreeResult(Res);	
 }

@@ -38,7 +38,7 @@
 static int          le_sablot;
 
 /* Functions related to PHP's list handling */
-static void _php_sablot_free_processor(zend_rsrc_list_entry *rsrc);
+static void _php_sablot_free_processor(zend_rsrc_list_entry *rsrc TSRMLS_DC);
 
 /* SAX Handlers */
 static void _php_sablot_handler_pair(php_sablot *, zval **, zval **, zval **);
@@ -1570,9 +1570,10 @@ static int _php_sablot_sh_close(void *userData, SablotHandle p, int handle)
 
 /* {{{ _php_sablot_free_processor()
    Free a Sablot handle */
-static void _php_sablot_free_processor(zend_rsrc_list_entry *rsrc)
+static void _php_sablot_free_processor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
     php_sablot *handle = (php_sablot *)rsrc->ptr;
+
     if (handle->p) {
         SablotUnregHandler(handle->p, HLR_MESSAGE, NULL, NULL);
         SablotUnregHandler(handle->p, HLR_SAX, NULL, NULL);

@@ -236,14 +236,13 @@ ZEND_GET_MODULE(fbsql)
 
 #define CHECK_LINK(link) { if (link==-1) { php_error(E_WARNING,"FrontBase:  A link to the server could not be established"); RETURN_FALSE; } }
 
-static void phpfbReleaseResult (zend_rsrc_list_entry *rsrc);
-static void phpfbReleaseLink (zend_rsrc_list_entry *rsrc);
-static void phpfbReleasePLink (zend_rsrc_list_entry *rsrc);
+static void phpfbReleaseResult (zend_rsrc_list_entry *rsrc TSRMLS_DC);
+static void phpfbReleaseLink (zend_rsrc_list_entry *rsrc TSRMLS_DC);
+static void phpfbReleasePLink (zend_rsrc_list_entry *rsrc TSRMLS_DC);
 
-static void phpfbReleaseResult(zend_rsrc_list_entry *rsrc)
+static void phpfbReleaseResult(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	PHPFBResult* result = (PHPFBResult *)rsrc->ptr;
-	TSRMLS_FETCH();
 
 	if (result)
 	{
@@ -260,10 +259,9 @@ static void phpfbReleaseResult(zend_rsrc_list_entry *rsrc)
 }
 
 
-static void phpfbReleaseLink(zend_rsrc_list_entry *rsrc)
+static void phpfbReleaseLink(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	PHPFBLink* link = (PHPFBLink *)rsrc->ptr;
-	TSRMLS_FETCH();
 
 	if (link)
 	{
@@ -283,10 +281,9 @@ static void phpfbReleaseLink(zend_rsrc_list_entry *rsrc)
 	}
 }
 
-static void phpfbReleasePLink(zend_rsrc_list_entry *rsrc)
+static void phpfbReleasePLink(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	PHPFBLink* link = (PHPFBLink *)rsrc->ptr;
-	TSRMLS_FETCH();
 
 	if (link)
 	{

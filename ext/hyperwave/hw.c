@@ -148,10 +148,9 @@ ZEND_GET_MODULE(hw)
 
 void print_msg(hg_msg *msg, char *str, int txt);
 
-void _close_hw_link(zend_rsrc_list_entry *rsrc)
+void _close_hw_link(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	hw_connection *conn = (hw_connection *)rsrc->ptr;
-	TSRMLS_FETCH();
 
 	if(conn->hostname)
 		free(conn->hostname);
@@ -162,10 +161,9 @@ void _close_hw_link(zend_rsrc_list_entry *rsrc)
 	HwSG(num_links)--;
 }
 
-void _close_hw_plink(zend_rsrc_list_entry *rsrc)
+void _close_hw_plink(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	hw_connection *conn = (hw_connection *)rsrc->ptr;
-	TSRMLS_FETCH();
 
 	if(conn->hostname)
 		free(conn->hostname);
@@ -177,7 +175,7 @@ void _close_hw_plink(zend_rsrc_list_entry *rsrc)
 	HwSG(num_persistent)--;
 }
 
-void _free_hw_document(zend_rsrc_list_entry *rsrc)
+void _free_hw_document(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	hw_document *doc = (hw_document *)rsrc->ptr;
 	if(doc->data)

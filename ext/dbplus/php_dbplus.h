@@ -114,8 +114,8 @@ ZEND_END_MODULE_GLOBALS(dbplus)
 int le_dbplus_relation;
 int le_dbplus_tuple;
 
-void dbplus_destruct_relation(zend_rsrc_list_entry *rsrc);
-void dbplus_destruct_tupel(zend_rsrc_list_entry *rsrc);
+void dbplus_destruct_relation(zend_rsrc_list_entry *rsrc TSRMLS_DC);
+void dbplus_destruct_tupel(zend_rsrc_list_entry *rsrc TSRMLS_DC);
 
 
 #endif	/* PHP_DBPLUS_H */

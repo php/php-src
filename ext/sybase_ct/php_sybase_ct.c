@@ -133,17 +133,17 @@ static void _free_sybase_result(sybase_result *result)
 	efree(result);
 }
 
-static void php_free_sybase_result(zend_rsrc_list_entry *rsrc)
+static void php_free_sybase_result(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	sybase_result *result = (sybase_result *)rsrc->ptr;
+
 	_free_sybase_result(result);
 }
 
-static void _close_sybase_link(zend_rsrc_list_entry *rsrc)
+static void _close_sybase_link(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	sybase_link *sybase_ptr = (sybase_link *)rsrc->ptr;
 	CS_INT con_status;
-	TSRMLS_FETCH();
 
 	sybase_ptr->valid = 0;
 
@@ -171,11 +171,10 @@ static void _close_sybase_link(zend_rsrc_list_entry *rsrc)
 }
 
 
-static void _close_sybase_plink(zend_rsrc_list_entry *rsrc)
+static void _close_sybase_plink(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	sybase_link *sybase_ptr = (sybase_link *)rsrc->ptr;
 	CS_INT con_status;
-	TSRMLS_FETCH();
 
 	/* Persistent connections may have been closed before a failed
 	 * reopen attempt.

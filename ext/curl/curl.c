@@ -44,7 +44,7 @@
 static int  le_curl;
 #define le_curl_name "cURL handle"
 
-static void _php_curl_close(zend_rsrc_list_entry *rsrc);
+static void _php_curl_close(zend_rsrc_list_entry *rsrc TSRMLS_DC);
 
 #define SAVE_CURL_ERROR(__handle, __err) (__handle)->err.no = (int) __err;
 
@@ -995,7 +995,7 @@ PHP_FUNCTION(curl_close)
 
 /* {{{ _php_curl_close()
    List destructor for curl handles */
-static void _php_curl_close(zend_rsrc_list_entry *rsrc)
+static void _php_curl_close(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	php_curl *ch = (php_curl *) rsrc->ptr;
 

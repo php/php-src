@@ -36,12 +36,16 @@ ZEND_GET_MODULE(dbplus)
 int le_dbplus_relation;
 int le_dbplus_tupel;
 
-void dbplus_destruct_relation(zend_rsrc_list_entry *rsrc) {
+void dbplus_destruct_relation(zend_rsrc_list_entry *rsrc TSRMLS_DC)
+{
 	relf *conn = (relf *)(rsrc->ptr);
+
 	cdb_close(conn);
 }
 
-void dbplus_destruct_tupel(zend_rsrc_list_entry *rsrc) {
+
+void dbplus_destruct_tupel(zend_rsrc_list_entry *rsrc TSRMLS_DC)
+{
 	tuple *t = (tuple *)(rsrc->ptr);
 
 	efree(t);

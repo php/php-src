@@ -45,7 +45,7 @@
 #include "winsock.h"
 #endif
 
-void cal_close_it(zend_rsrc_list_entry *rsrc);
+void cal_close_it(zend_rsrc_list_entry *rsrc TSRMLS_DC);
 
 typedef struct _php_mcal_le_struct {
 	CALSTREAM *mcal_stream;
@@ -127,10 +127,11 @@ int le_mcal;
 char *mcal_user;
 char *mcal_password;
 
-void cal_close_it (zend_rsrc_list_entry *rsrc)
+void cal_close_it (zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	pils *mcal_le_struct = (pils *)rsrc->ptr;
-	cal_close (mcal_le_struct->mcal_stream,0);
+
+	cal_close(mcal_le_struct->mcal_stream,0);
 	efree(mcal_le_struct);
 }
 

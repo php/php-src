@@ -253,7 +253,7 @@ ZEND_GET_MODULE(pdf)
 
 /* {{{ _free_pdf_doc
  */
-static void _free_pdf_doc(zend_rsrc_list_entry *rsrc)
+static void _free_pdf_doc(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	/* RJS: TODO:
 	PDF *pdf = (PDF *)rsrc->ptr;

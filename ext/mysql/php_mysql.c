@@ -201,7 +201,7 @@ void timeout(int sig);
  * This wrapper is required since mysql_free_result() returns an integer, and
  * thus, cannot be used directly
  */
-static void _free_mysql_result(zend_rsrc_list_entry *rsrc)
+static void _free_mysql_result(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	MYSQL_RES *mysql_result = (MYSQL_RES *)rsrc->ptr;
 
@@ -223,11 +223,10 @@ static void php_mysql_set_default_link(int id TSRMLS_DC)
 
 /* {{{ _close_mysql_link
  */
-static void _close_mysql_link(zend_rsrc_list_entry *rsrc)
+static void _close_mysql_link(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	php_mysql_conn *link = (php_mysql_conn *)rsrc->ptr;
 	void (*handler) (int);   
-	TSRMLS_FETCH();
 
 	handler = signal(SIGPIPE, SIG_IGN);
 	mysql_close(&link->conn);
@@ -239,11 +238,10 @@ static void _close_mysql_link(zend_rsrc_list_entry *rsrc)
 
 /* {{{ _close_mysql_plink
  */
-static void _close_mysql_plink(zend_rsrc_list_entry *rsrc)
+static void _close_mysql_plink(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	php_mysql_conn *link = (php_mysql_conn *)rsrc->ptr;
 	void (*handler) (int);
-	TSRMLS_FETCH();
 
 	handler = signal(SIGPIPE, SIG_IGN);
 	mysql_close(&link->conn);

@@ -348,7 +348,7 @@ static inline void node_list_wrapper_dtor(xmlNodePtr node)
 	}
 }
 
-static void php_free_xml_doc(zend_rsrc_list_entry *rsrc)
+static void php_free_xml_doc(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	xmlDoc *doc = (xmlDoc *)rsrc->ptr;
 
@@ -360,7 +360,8 @@ static void php_free_xml_doc(zend_rsrc_list_entry *rsrc)
 	}
 }
 
-static void php_free_xml_node(zend_rsrc_list_entry *rsrc) {
+static void php_free_xml_node(zend_rsrc_list_entry *rsrc TSRMLS_DC)
+{
 	xmlNodePtr node = (xmlNodePtr) rsrc->ptr;
 	
 	if (node) {
@@ -371,16 +372,17 @@ static void php_free_xml_node(zend_rsrc_list_entry *rsrc) {
 }
 
 #if defined(LIBXML_XPATH_ENABLED)
-static void php_free_xpath_context(zend_rsrc_list_entry *rsrc)
+static void php_free_xpath_context(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	xmlXPathContextPtr ctx = (xmlXPathContextPtr)rsrc->ptr;
 	if(ctx)
 		xmlXPathFreeContext(ctx);
 }
 
-static void php_free_xpath_object(zend_rsrc_list_entry *rsrc)
+static void php_free_xpath_object(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	xmlXPathObjectPtr obj = (xmlXPathObjectPtr)rsrc->ptr;
+
 	if(obj)
 		xmlXPathFreeObject(obj);
 }

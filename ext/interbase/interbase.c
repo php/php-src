@@ -328,17 +328,17 @@ static void _php_ibase_commit_link(ibase_db_link *link)
 }
 /* }}} */
 
-static void php_ibase_commit_link_rsrc(zend_rsrc_list_entry *rsrc)
+static void php_ibase_commit_link_rsrc(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	ibase_db_link *link = (ibase_db_link *)rsrc->ptr;
+
 	_php_ibase_commit_link(link);
 }
 
 /* {{{ _php_ibase_close_link() */
-static void _php_ibase_close_link(zend_rsrc_list_entry *rsrc)
+static void _php_ibase_close_link(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	ibase_db_link *link = (ibase_db_link *)rsrc->ptr;
-	TSRMLS_FETCH();
 
 	_php_ibase_commit_link(link);
 	IBDEBUG("Closing normal link...");
@@ -349,10 +349,9 @@ static void _php_ibase_close_link(zend_rsrc_list_entry *rsrc)
 /* }}} */
 
 /* {{{ _php_ibase_close_plink() */
-static void _php_ibase_close_plink(zend_rsrc_list_entry *rsrc)
+static void _php_ibase_close_plink(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	ibase_db_link *link = (ibase_db_link *)rsrc->ptr;
-	TSRMLS_FETCH();
 
 	_php_ibase_commit_link(link);
 	IBDEBUG("Closing permanent link...");
@@ -364,10 +363,9 @@ static void _php_ibase_close_plink(zend_rsrc_list_entry *rsrc)
 /* }}} */
 
 /* {{{ _php_ibase_free_result() */
-static void _php_ibase_free_result(zend_rsrc_list_entry *rsrc)
+static void _php_ibase_free_result(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	ibase_result *ib_result = (ibase_result *)rsrc->ptr;
-	TSRMLS_FETCH();
 
 	IBDEBUG("Freeing result...");
 	if (ib_result){
@@ -427,17 +425,17 @@ static void _php_ibase_free_query(ibase_query *ib_query)
 }
 /* }}} */
 
-static void php_ibase_free_query_rsrc(zend_rsrc_list_entry *rsrc)
+static void php_ibase_free_query_rsrc(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	ibase_query *query = (ibase_query *)rsrc->ptr;
+
 	_php_ibase_free_query(query);
 }
 
 /* {{{ _php_ibase_free_blob()	*/
-static void _php_ibase_free_blob(zend_rsrc_list_entry *rsrc)
+static void _php_ibase_free_blob(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	ibase_blob_handle *ib_blob = (ibase_blob_handle *)rsrc->ptr;
-	TSRMLS_FETCH();
 
 	if (ib_blob->bl_handle != NULL) { /* blob open*/
 		if (isc_cancel_blob(IB_STATUS, &ib_blob->bl_handle)) {
@@ -449,11 +447,10 @@ static void _php_ibase_free_blob(zend_rsrc_list_entry *rsrc)
 /* }}} */
 
 /* {{{ _php_ibase_free_trans()	*/
-static void _php_ibase_free_trans(zend_rsrc_list_entry *rsrc)
+static void _php_ibase_free_trans(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	ibase_tr_link *ib_trans = (ibase_tr_link *)rsrc->ptr;
 	ibase_db_link *ib_link;
-	TSRMLS_FETCH();
 
 	ib_link = (ibase_db_link *) zend_fetch_resource(NULL TSRMLS_CC, ib_trans->link_rsrc, "InterBase link", NULL, 2, le_link, le_plink);
 	

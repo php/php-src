@@ -42,7 +42,7 @@ void php_VARIANT_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_proper
 pval php_VARIANT_get_property_handler(zend_property_reference *property_reference);
 static int do_VARIANT_propset(VARIANT *var_arg, pval *arg_property, pval *value);
 void php_register_VARIANT_class();
-static void php_variant_destructor(zend_rsrc_list_entry *rsrc);
+static void php_variant_destructor(zend_rsrc_list_entry *rsrc TSRMLS_DC);
 void php_register_VARIANT_class();
 
 static int le_variant;
@@ -423,7 +423,7 @@ static int do_VARIANT_propset(VARIANT *var_arg, pval *arg_property, pval *value)
 	return SUCCESS;
 }
 
-static void php_variant_destructor(zend_rsrc_list_entry *rsrc)
+static void php_variant_destructor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	efree(rsrc);
 }

@@ -162,13 +162,14 @@ zend_module_entry cpdf_module_entry = {
 ZEND_GET_MODULE(cpdf)
 #endif
 
-static void _free_outline(zend_rsrc_list_entry *rsrc)
+static void _free_outline(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 }
 
-static void _free_doc(zend_rsrc_list_entry *rsrc)
+static void _free_doc(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	CPDFdoc *pdf = (CPDFdoc *)rsrc->ptr;
+
 	cpdf_close(pdf);
 }
 

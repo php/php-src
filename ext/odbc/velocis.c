@@ -77,17 +77,19 @@ ZEND_GET_MODULE(velocis)
 THREAD_LS velocis_module php_velocis_module;
 THREAD_LS static HENV henv;
 
-static void _close_velocis_link(zend_rsrc_list_entry *rsrc)
+static void _close_velocis_link(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	VConn *conn = (VConn *)rsrc->ptr;
+
 	if ( conn ) {
 		efree(conn);
 	}
 }
 
-static void _free_velocis_result(zend_rsrc_list_entry *rsrc)
+static void _free_velocis_result(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	Vresult *res = (Vresult *)rsrc->ptr;
+
 	if ( res && res->values ) {
 		register int i;
 		for ( i=0; i < res->numcols; i++ ) {

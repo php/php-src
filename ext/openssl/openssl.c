@@ -97,10 +97,10 @@ zend_module_entry openssl_module_entry = {
 ZEND_GET_MODULE(openssl)
 #endif
 
-static void _php_pkey_free(zend_rsrc_list_entry *rsrc);
+static void _php_pkey_free(zend_rsrc_list_entry *rsrc TSRMLS_DC);
 static int le_key;
 
-static void _php_x509_free(zend_rsrc_list_entry *rsrc);
+static void _php_x509_free(zend_rsrc_list_entry *rsrc TSRMLS_DC);
 static int le_x509;
 
 static X509 * php_openssl_x509_from_zval(zval ** val, int makeresource, long * resourceval);
@@ -1856,7 +1856,7 @@ PHP_FUNCTION(openssl_open)
 /* }}} */
 
 /* {{{ _php_pkey_free() */
-static void _php_pkey_free(zend_rsrc_list_entry *rsrc)
+static void _php_pkey_free(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	EVP_PKEY *pkey = (EVP_PKEY *)rsrc->ptr;
 	EVP_PKEY_free(pkey);
@@ -1864,7 +1864,7 @@ static void _php_pkey_free(zend_rsrc_list_entry *rsrc)
 /* }}} */
 
 /* {{{ _php_x509_free() */
-static void _php_x509_free(zend_rsrc_list_entry *rsrc)
+static void _php_x509_free(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	X509 *x509 = (X509 *)rsrc->ptr;
 	X509_free(x509);

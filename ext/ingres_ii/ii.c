@@ -167,19 +167,19 @@ static void _close_ii_link(II_LINK *link)
    and releasing associated resources after rolling back the
    active transaction (if any)
 */
-static void php_close_ii_link(zend_rsrc_list_entry *rsrc)
+static void php_close_ii_link(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	II_LINK *link = (II_LINK *)rsrc->ptr;
+
 	_close_ii_link(link);
 }
 
 
 /* closes the given persistent link, see _close_ii_link
 */
-static void _close_ii_plink(zend_rsrc_list_entry *rsrc)
+static void _close_ii_plink(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	II_LINK *link = (II_LINK *)rsrc->ptr;
-	TSRMLS_FETCH();
 	
 	_close_ii_link(link);
 	IIG(num_persistent)--;
@@ -189,7 +189,7 @@ static void _close_ii_plink(zend_rsrc_list_entry *rsrc)
    used when the request ends to 'refresh' the link for use
    by the next request
 */
-static void _clean_ii_plink(zend_rsrc_list_entry *rsrc)
+static void _clean_ii_plink(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
   II_LINK *link = (II_LINK *)rsrc->ptr;
   IIAPI_AUTOPARM autoParm;

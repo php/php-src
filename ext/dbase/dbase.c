@@ -61,9 +61,10 @@ static int le_dbhead;
 #include <errno.h>
 
 
-static void _close_dbase(zend_rsrc_list_entry *rsrc)
+static void _close_dbase(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	dbhead_t *dbhead = (dbhead_t *)rsrc->ptr;
+
 	close(dbhead->db_fd);
 	free_dbf_head(dbhead);
 }

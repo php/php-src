@@ -83,9 +83,10 @@ ZEND_GET_MODULE(fdf)
 #endif
 
 
-static void phpi_FDFClose(zend_rsrc_list_entry *rsrc)
+static void phpi_FDFClose(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	FDFDoc fdf = (FDFDoc)rsrc->ptr;
+
 	(void) FDFClose(fdf);
 }
 

@@ -133,9 +133,10 @@ PHP_INI_END()
 
 /* {{{ phpi_destructor_gzclose
  */
-static void phpi_destructor_gzclose(zend_rsrc_list_entry *rsrc)
+static void phpi_destructor_gzclose(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	gzFile *zp = (gzFile *)rsrc->ptr;
+
 	(void)gzclose(zp);
 }
 /* }}} */
