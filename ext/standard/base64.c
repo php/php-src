@@ -53,7 +53,7 @@ static const short base64_reverse_table[256] = {
 /* }}} */
 
 /* {{{ */
-unsigned char *php_base64_encode(const unsigned char *str, int length, int *ret_length)
+PHPAPI unsigned char *php_base64_encode(const unsigned char *str, int length, int *ret_length)
 {
 	const unsigned char *current = str;
 	int i = 0;
@@ -127,7 +127,7 @@ void php_base64_init()
 
 /* {{{ */
 /* as above, but backwards. :) */
-unsigned char *php_base64_decode(const unsigned char *str, int length, int *ret_length)
+PHPAPI unsigned char *php_base64_decode(const unsigned char *str, int length, int *ret_length)
 {
 	const unsigned char *current = str;
 	int ch, i = 0, j = 0, k;
