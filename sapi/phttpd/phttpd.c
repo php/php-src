@@ -69,7 +69,9 @@ php_phttpd_sapi_ub_write(const char *str, uint str_length)
 
 	sent_bytes = fd_write(PHG(cip)->fd,str,str_length);
 
-	if (sent_bytes == -1) perror("fd_write\n");
+	if (sent_bytes == -1) {
+		php_handle_aborted_connection();
+	}
 
     return sent_bytes;
 }

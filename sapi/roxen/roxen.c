@@ -233,8 +233,7 @@ php_roxen_low_ub_write(const char *str, uint str_length) {
   pop_stack();
   if(sent_bytes != str_length) {
     /* This means the connection is closed. Dead. Gone. *sniff*  */
-    PG(connection_status) = PHP_CONNECTION_ABORTED;
-    zend_bailout();
+    php_handle_aborted_connection();
   }
   return sent_bytes;
 }

@@ -151,7 +151,7 @@ static int sapi_isapi_ub_write(const char *str, uint str_length)
 	
 	ecb = (LPEXTENSION_CONTROL_BLOCK) SG(server_context);
 	if (ecb->WriteClient(ecb->ConnID, (char *) str, &num_bytes, HSE_IO_SYNC ) == FALSE) {
-		zend_bailout();
+		php_handle_aborted_connection();
 	}
 	return num_bytes;
 }

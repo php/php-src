@@ -145,6 +145,9 @@ static int zend_pi3web_ub_write(const char *str, uint str_length)
 
 	if ( !IWasLoaded ) return 0;
 	cb->WriteClient(cb->ConnID, (char *) str, &num_bytes, 0 );
+
+	if (num_bytes != str_length)
+		php_handle_aborted_connection();
 	return num_bytes;
 }
 
