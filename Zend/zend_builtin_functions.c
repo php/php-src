@@ -1372,7 +1372,8 @@ bad_module_id:
 /* }}} */
 
 
-static zval *debug_backtrace_get_args(void ***curpos TSRMLS_DC) {
+static zval *debug_backtrace_get_args(void ***curpos TSRMLS_DC)
+{
 	void **p = *curpos - 2;
 	zval *arg_array, **arg;
 	int arg_count = (ulong) *p;
@@ -1564,8 +1565,8 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last TSRML
 
 	ptr = EG(current_execute_data);
 
-		/* skip debug_backtrace() */
-		ptr = ptr->prev_execute_data;
+	/* skip debug_backtrace() */
+	ptr = ptr->prev_execute_data;
 	if (skip_last) {
 		cur_arg_pos -= 2;
 		frames_on_stack--;
