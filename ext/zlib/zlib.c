@@ -892,7 +892,7 @@ PHP_FUNCTION(gzencode)
 
 /* {{{ php_ob_gzhandler_check
  */
-int php_ob_gzhandler_check(TSRMLS_DC)
+int php_ob_gzhandler_check(TSRMLS_D)
 {
 	/* check for wrong usages */
 	if (OG(ob_nesting_level>0)) {
